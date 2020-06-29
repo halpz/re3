@@ -11,7 +11,7 @@ public:
 	bool m_isMuddy;
 	uintptr m_id;
 	int16 m_last;
-	uint32 m_lastUpdate;;
+	uint32 m_lastUpdate;
 	uint32 m_fadeStart;
 	uint32 m_fadeEnd;
 	CVector m_pos[SKIDMARK_LENGTH];

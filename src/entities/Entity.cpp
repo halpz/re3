@@ -683,7 +683,7 @@ CEntity::ProcessLightsForEntity(void)
 				lightOn = true;
 			break;
 		case LIGHT_FLICKER_NIGHT:
-			if(CClock::GetHours() > 18 || CClock::GetHours() < 7){
+			if(CClock::GetHours() > 18 || CClock::GetHours() < 7 || CWeather::WetRoads > 0.5f){
 				if((CTimer::GetTimeInMilliseconds() ^ m_randomSeed) & 0x60)
 					lightOn = true;
 				else
@@ -803,12 +803,12 @@ CEntity::ProcessLightsForEntity(void)
 		}
 
 		// Light shadow
-		if(effect->light.shadowRange != 0.0f){
+		if(effect->light.shadowSize != 0.0f){
 			if(lightOn){
 				CShadows::StoreStaticShadow((uintptr)this + i, SHADOWTYPE_ADDITIVE,
 					effect->light.shadow, &pos,
-					effect->light.shadowRange, 0.0f,
-					0.0f, -effect->light.shadowRange,
+					effect->light.shadowSize, 0.0f,
+					0.0f, -effect->light.shadowSize,
 					128,
 					effect->col.r*CTimeCycle::GetSpriteBrightness()*effect->light.shadowIntensity/255.0f,
 					effect->col.g*CTimeCycle::GetSpriteBrightness()*effect->light.shadowIntensity/255.0f,
@@ -817,8 +817,8 @@ CEntity::ProcessLightsForEntity(void)
 			}else if(lightFlickering){
 				CShadows::StoreStaticShadow((uintptr)this + i, SHADOWTYPE_ADDITIVE,
 					effect->light.shadow, &pos,
-					effect->light.shadowRange, 0.0f,
-					0.0f, -effect->light.shadowRange,
+					effect->light.shadowSize, 0.0f,
+					0.0f, -effect->light.shadowSize,
 					0, 0.0f, 0.0f, 0.0f,
 					15.0f, 1.0f, 40.0f, false, 0.0f);
 			}

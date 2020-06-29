@@ -157,6 +157,13 @@ CSimpleModelInfo::SetupBigBuilding(void)
 		if(related)
 			m_lodDistances[2] = related->GetLargestLodDistance()/TheCamera.LODDistMultiplier;
 		else
+#ifdef FIX_BUGS
+		if(toupper(m_name[0]) == 'L' && toupper(m_name[1]) == 'O' && toupper(m_name[2]) == 'D')
 			m_lodDistances[2] = 100.0f;
+		else
+			m_lodDistances[2] = 0.0f;
+#else
+			m_lodDistances[2] = 100.0f;
+#endif
 	}
 }

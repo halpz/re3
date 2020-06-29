@@ -174,7 +174,7 @@ CPlayerInfo::MakePlayerSafe(bool toggle)
 		CTheScripts::ResetCountdownToMakePlayerUnsafe();
 		m_pPed->m_pWanted->m_bIgnoredByEveryone = true;
 		CWorld::StopAllLawEnforcersInTheirTracks();
-		CPad::GetPad(0)->DisablePlayerControls |= PLAYERCONTROL_DISABLED_20;
+		CPad::GetPad(0)->SetDisablePlayerControls(PLAYERCONTROL_PLAYERINFO);
 		CPad::StopPadsShaking();
 		m_pPed->bBulletProof = true;
 		m_pPed->bFireProof = true;
@@ -194,7 +194,7 @@ CPlayerInfo::MakePlayerSafe(bool toggle)
 
 	} else if (!CGame::playingIntro && !CTheScripts::IsCountdownToMakePlayerUnsafeOn()) {
 		m_pPed->m_pWanted->m_bIgnoredByEveryone = false;
-		CPad::GetPad(0)->DisablePlayerControls &= ~PLAYERCONTROL_DISABLED_20;
+		CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_PLAYERINFO);
 		m_pPed->bBulletProof = false;
 		m_pPed->bFireProof = false;
 		m_pPed->bCollisionProof = false;
@@ -397,7 +397,7 @@ CPlayerInfo::Process(void)
 	else
 		enterOrExitVeh = CPad::GetPad(0)->GetExitVehicle();
 
-	if (enterOrExitVeh && m_pPed->m_nPedState != PED_SNIPER_MODE && m_pPed->m_nPedState != PED_ROCKET_ODE) {
+	if (enterOrExitVeh && m_pPed->m_nPedState != PED_SNIPER_MODE && m_pPed->m_nPedState != PED_ROCKET_MODE) {
 		if (m_pPed->bInVehicle) {
 			if (!m_pRemoteVehicle) {
 				CEntity *surfaceBelowVeh = m_pPed->m_pMyVehicle->m_pCurGroundEntity;

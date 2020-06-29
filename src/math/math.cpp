@@ -60,6 +60,12 @@ CMatrix::RotateX(float x)
 }
 
 void
+CMatrix::RotateY(float y)
+{
+	Rotate(0.0f, y, 0.0f);
+}
+
+void
 CMatrix::RotateZ(float z)
 {
 	Rotate(0.0f, 0.0f, z);
@@ -175,6 +181,17 @@ CQuaternion::Slerp(const CQuaternion &q1, const CQuaternion &q2, float theta, fl
 		}
 		*this = w1*q1 + w2*q2;
 	}
+}
+
+void
+CQuaternion::Set(RwV3d *axis, float angle)
+{
+	float halfCos = Cos(angle*0.5f);
+	float halfSin = Sin(angle*0.5f);
+	x = axis->x*halfSin;
+	y = axis->y*halfSin;
+	z = axis->z*halfSin;
+	w = halfCos;
 }
 
 void

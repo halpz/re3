@@ -21,16 +21,19 @@ CPedModelInfo::DeleteRwObject(void)
 		frame = RpAtomicGetFrame(m_head);
 		RpAtomicDestroy(m_head);
 		RwFrameDestroy(frame);
+		m_head = nil;
 	}
 	if(m_lhand){
 		frame = RpAtomicGetFrame(m_lhand);
 		RpAtomicDestroy(m_lhand);
 		RwFrameDestroy(frame);
+		m_lhand = nil;
 	}
 	if(m_rhand){
 		frame = RpAtomicGetFrame(m_rhand);
 		RpAtomicDestroy(m_rhand);
 		RwFrameDestroy(frame);
+		m_rhand = nil;
 	}
 #endif
 	CClumpModelInfo::DeleteRwObject();	// PC calls this first
@@ -248,7 +251,7 @@ CPedModelInfo::CreateHitColModel(void)
 			center.x = mat->pos.x + m_pColNodeInfos[i].x;
 			center.y = mat->pos.y + 0.0f;
 			center.z = mat->pos.z + m_pColNodeInfos[i].z;
-			spheres[i].Set(radius, center, SURFACE_FLESH, m_pColNodeInfos[i].pieceType);
+			spheres[i].Set(radius, center, SURFACE_PED, m_pColNodeInfos[i].pieceType);
 		}
 	}
 	RwMatrixDestroy(mat);
@@ -332,7 +335,7 @@ CPedModelInfo::CreateHitColModelSkinned(RpClump *clump)
 		center.x = pos.x + m_pColNodeInfos[i].x;
 		center.y = pos.y + 0.0f;
 		center.z = pos.z + m_pColNodeInfos[i].z;
-		spheres[i].Set(m_pColNodeInfos[i].radius, center, SURFACE_FLESH, m_pColNodeInfos[i].pieceType);
+		spheres[i].Set(m_pColNodeInfos[i].radius, center, SURFACE_PED, m_pColNodeInfos[i].pieceType);
 	}
 	RwMatrixDestroy(invmat);
 	RwMatrixDestroy(mat);

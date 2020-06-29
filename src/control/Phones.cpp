@@ -12,6 +12,7 @@
 #include "AudioScriptObject.h"
 #include "RpAnimBlend.h"
 #include "AnimBlendAssociation.h"
+#include "soundlist.h"
 #ifdef FIX_BUGS
 #include "Replay.h"
 #endif
@@ -65,7 +66,7 @@ CPhoneInfo::Update(void)
 			endAssoc->flags &= ~ASSOC_DELETEFADEDOUT;
 			endAssoc->SetFinishCallback(PhonePutDownCB, player);
 		} else {
-			CPad::GetPad(0)->DisablePlayerControls &= ~PLAYERCONTROL_DISABLED_40;
+			CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_PHONE);
 			if (player->m_nPedState == PED_MAKE_CALL)
 				player->m_nPedState = PED_IDLE;
 		}
@@ -97,7 +98,7 @@ CPhoneInfo::Update(void)
 					if (scratchTheCabinet) {
 						m_aPhones[phoneId].m_pEntity->GetUp().z = (CGeneral::GetRandomNumber() % 1024) / 16000.0f + 1.0f;
 						if (!phoneRings)
-							PlayOneShotScriptObject(_SCRSOUND_PHONE_RING, m_aPhones[phoneId].m_pEntity->GetPosition());
+						    PlayOneShotScriptObject(SCRIPT_SOUND_PAYPHONE_RINGING, m_aPhones[phoneId].m_pEntity->GetPosition());
 					} else {
 						m_aPhones[phoneId].m_pEntity->GetUp().z = 1.0f;
 					}
@@ -115,7 +116,7 @@ CPhoneInfo::Update(void)
 								player->m_fRotationDest = angleToFace;
 								player->SetHeading(angleToFace);
 								player->m_nPedState = PED_MAKE_CALL;
-								CPad::GetPad(0)->DisablePlayerControls |= PLAYERCONTROL_DISABLED_40;
+								CPad::GetPad(0)->SetDisablePlayerControls(PLAYERCONTROL_PHONE);
 								TheCamera.SetWideScreenOn();
 								playerInfo->MakePlayerSafe(true);
 								CAnimBlendAssociation *phonePickAssoc = CAnimManager::BlendAnimation(player->GetClump(), ASSOCGRP_STD, ANIM_PHONE_IN, 4.0f);
@@ -136,7 +137,7 @@ CPhoneInfo::Update(void)
 					if (scratchTheCabinet) {
 						m_aPhones[phoneId].m_pEntity->GetUp().z = (CGeneral::GetRandomNumber() % 1024) / 16000.0f + 1.0f;
 						if (!phoneRings)
-							PlayOneShotScriptObject(_SCRSOUND_PHONE_RING, m_aPhones[phoneId].m_pEntity->GetPosition());
+						    PlayOneShotScriptObject(SCRIPT_SOUND_PAYPHONE_RINGING, m_aPhones[phoneId].m_pEntity->GetPosition());
 					} else {
 						m_aPhones[phoneId].m_pEntity->GetUp().z = 1.0f;
 					}
@@ -339,7 +340,7 @@ PhonePutDownCB(CAnimBlendAssociation *assoc, void *arg)
 {
 	assoc->flags |= ASSOC_DELETEFADEDOUT;
 	assoc->blendDelta = -1000.0f;
-	CPad::GetPad(0)->DisablePlayerControls &= ~PLAYERCONTROL_DISABLED_40;
+	CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_PHONE);
 	CPed *ped = (CPed*)arg;
 
 	if (assoc->blendAmount > 0.5f)

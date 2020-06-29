@@ -25,8 +25,8 @@ enum {
 };
 
 enum {
-	ATTRACTORFLAG_ICECREAM,
-	ATTRACTORFLAG_STARE
+	ATTRACTORTYPE_ICECREAM,
+	ATTRACTORTYPE_STARE
 };
 
 enum {
@@ -44,7 +44,7 @@ public:
 		float dist;
 		float range;	// of pointlight
 		float size;
-		float shadowRange;
+		float shadowSize;
 		uint8 lightType;	// LIGHT_
 		uint8 roadReflection;
 		uint8 flareType;
@@ -60,7 +60,7 @@ public:
 	};
 	struct Attractor {
 		CVector dir;
-		uint8 flags;
+		int8 type;
 		uint8 probability;
 	};
 

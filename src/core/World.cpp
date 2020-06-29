@@ -33,22 +33,22 @@
 
 CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];
 
-CPtrList CWorld::ms_bigBuildingsList[4];// = (CPtrList*)0x6FAB60;
-CPtrList CWorld::ms_listMovingEntityPtrs;// = *(CPtrList*)0x8F433C;
-CSector CWorld::ms_aSectors[NUMSECTORS_Y][NUMSECTORS_X];// = (CSector (*)[NUMSECTORS_Y])0x665608;
-uint16 CWorld::ms_nCurrentScanCode;// = *(uint16*)0x95CC64;
+CPtrList CWorld::ms_bigBuildingsList[4];
+CPtrList CWorld::ms_listMovingEntityPtrs;
+CSector CWorld::ms_aSectors[NUMSECTORS_Y][NUMSECTORS_X];
+uint16 CWorld::ms_nCurrentScanCode;
 
-uint8 CWorld::PlayerInFocus;// = *(uint8 *)0x95CD61;
+uint8 CWorld::PlayerInFocus;
 CPlayerInfo CWorld::Players[NUMPLAYERS];
-bool CWorld::bNoMoreCollisionTorque;// = *(bool*)0x95CDCC;
-CEntity *CWorld::pIgnoreEntity;//	= *(CEntity**)0x8F6494;
-bool CWorld::bIncludeDeadPeds;// = *(bool*)0x95CD8F;
-bool CWorld::bSecondShift;// = *(bool*)0x95CD54;
-bool CWorld::bForceProcessControl;// = *(bool*)0x95CD6C;
-bool CWorld::bProcessCutsceneOnly;// = *(bool*)0x95CD8B;
+bool CWorld::bNoMoreCollisionTorque;
+CEntity *CWorld::pIgnoreEntity;
+bool CWorld::bIncludeDeadPeds;
+bool CWorld::bSecondShift;
+bool CWorld::bForceProcessControl;
+bool CWorld::bProcessCutsceneOnly;
 
-bool CWorld::bDoingCarCollisions;// = *(bool*)0x95CD8C;
-bool CWorld::bIncludeCarTyres;// = *(bool*)0x95CDAA;
+bool CWorld::bDoingCarCollisions;
+bool CWorld::bIncludeCarTyres;
 
 void
 CWorld::Initialise()
@@ -120,14 +120,14 @@ CWorld::ClearExcitingStuffFromArea(const CVector &pos, float radius, bool bRemov
 	for(int32 i = 0; i < pedPool->GetSize(); i++) {
 		CPed *pPed = pedPool->GetSlot(i);
 		if(pPed && !pPed->IsPlayer() && pPed->CanBeDeleted() &&
-		   CVector2D(pPed->GetPosition() - pos).MagnitudeSqr() < radius) {
+		   CVector2D(pPed->GetPosition() - pos).MagnitudeSqr() < SQR(radius)) {
 			CPopulation::RemovePed(pPed);
 		}
 	}
 	CVehiclePool *VehiclePool = CPools::GetVehiclePool();
 	for(int32 i = 0; i < VehiclePool->GetSize(); i++) {
 		CVehicle *pVehicle = VehiclePool->GetSlot(i);
-		if(pVehicle && CVector2D(pVehicle->GetPosition() - pos).MagnitudeSqr() < radius &&
+		if(pVehicle && CVector2D(pVehicle->GetPosition() - pos).MagnitudeSqr() < SQR(radius) &&
 		   !pVehicle->bIsLocked && pVehicle->CanBeDeleted()) {
 			if(pVehicle->pDriver) {
 				CPopulation::RemovePed(pVehicle->pDriver);
@@ -659,8 +659,8 @@ CWorld::GetIsLineOfSightSectorListClear(CPtrList &list, const CColLine &line, bo
 }
 
 void
-CWorld::FindObjectsInRangeSectorList(CPtrList &list, Const CVector &centre, float radius, bool ignoreZ, short *nextObject,
-                                     short lastObject, CEntity **objects)
+CWorld::FindObjectsInRangeSectorList(CPtrList &list, Const CVector &centre, float radius, bool ignoreZ, int16 *numObjects,
+                                     int16 lastObject, CEntity **objects)
 {
 	float radiusSqr = radius * radius;
 	float objDistSqr;
@@ -676,16 +676,16 @@ CWorld::FindObjectsInRangeSectorList(CPtrList &list, Const CVector &centre, floa
 			else
 				objDistSqr = diff.MagnitudeSqr();
 
-			if(objDistSqr < radiusSqr && *nextObject < lastObject) {
-				if(objects) { objects[*nextObject] = object; }
-				(*nextObject)++;
+			if(objDistSqr < radiusSqr && *numObjects < lastObject) {
+				if(objects) { objects[*numObjects] = object; }
+				(*numObjects)++;
 			}
 		}
 	}
 }
 
 void
-CWorld::FindObjectsInRange(Const CVector &centre, float radius, bool ignoreZ, short *nextObject, short lastObject,
+CWorld::FindObjectsInRange(Const CVector &centre, float radius, bool ignoreZ, int16 *numObjects, int16 lastObject,
                            CEntity **objects, bool checkBuildings, bool checkVehicles, bool checkPeds,
                            bool checkObjects, bool checkDummies)
 {
@@ -711,39 +711,39 @@ CWorld::FindObjectsInRange(Const CVector &centre, float radius, bool ignoreZ, sh
 
 	AdvanceCurrentScanCode();
 
-	*nextObject = 0;
+	*numObjects = 0;
 	for(int curY = minY; curY <= maxY; curY++) {
 		for(int curX = minX; curX <= maxX; curX++) {
 			CSector *sector = GetSector(curX, curY);
 			if(checkBuildings) {
 				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_BUILDINGS], centre, radius,
-				                             ignoreZ, nextObject, lastObject, objects);
+				                             ignoreZ, numObjects, lastObject, objects);
 				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], centre,
-				                             radius, ignoreZ, nextObject, lastObject, objects);
+				                             radius, ignoreZ, numObjects, lastObject, objects);
 			}
 			if(checkVehicles) {
 				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_VEHICLES], centre, radius,
-				                             ignoreZ, nextObject, lastObject, objects);
+				                             ignoreZ, numObjects, lastObject, objects);
 				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_VEHICLES_OVERLAP], centre,
-				                             radius, ignoreZ, nextObject, lastObject, objects);
+				                             radius, ignoreZ, numObjects, lastObject, objects);
 			}
 			if(checkPeds) {
 				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_PEDS], centre, radius, ignoreZ,
-				                             nextObject, lastObject, objects);
+				                             numObjects, lastObject, objects);
 				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_PEDS_OVERLAP], centre, radius,
-				                             ignoreZ, nextObject, lastObject, objects);
+				                             ignoreZ, numObjects, lastObject, objects);
 			}
 			if(checkObjects) {
 				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_OBJECTS], centre, radius,
-				                             ignoreZ, nextObject, lastObject, objects);
+				                             ignoreZ, numObjects, lastObject, objects);
 				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_OBJECTS_OVERLAP], centre,
-				                             radius, ignoreZ, nextObject, lastObject, objects);
+				                             radius, ignoreZ, numObjects, lastObject, objects);
 			}
 			if(checkDummies) {
 				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_DUMMIES], centre, radius,
-				                             ignoreZ, nextObject, lastObject, objects);
+				                             ignoreZ, numObjects, lastObject, objects);
 				FindObjectsInRangeSectorList(sector->m_lists[ENTITYLIST_DUMMIES_OVERLAP], centre,
-				                             radius, ignoreZ, nextObject, lastObject, objects);
+				                             radius, ignoreZ, numObjects, lastObject, objects);
 			}
 		}
 	}
@@ -949,7 +949,11 @@ CWorld::TestSphereAgainstSectorList(CPtrList &list, CVector spherePos, float rad
 
 			if(e != entityToIgnore && e->bUsesCollision &&
 			   !(ignoreSomeObjects && CameraToIgnoreThisObject(e))) {
+#ifdef FIX_BUGS
+				CVector diff = spherePos - e->GetBoundCentre();
+#else
 				CVector diff = spherePos - e->GetPosition();
+#endif
 				float distance = diff.Magnitude();
 
 				if(e->GetBoundRadius() + radius > distance) {
@@ -1823,7 +1827,7 @@ void
 CWorld::RepositionOneObject(CEntity *pEntity)
 {
 	int16 modelId = pEntity->GetModelIndex();
-	if (IsTrafficLight(modelId) || IsTreeModel(modelId) || modelId == MI_PARKINGMETER ||
+	if (IsStreetLight(modelId) || IsTreeModel(modelId) || modelId == MI_PARKINGMETER ||
 	   modelId == MI_PHONEBOOTH1 || modelId == MI_WASTEBIN || modelId == MI_BIN || modelId == MI_POSTBOX1 ||
 	   modelId == MI_NEWSSTAND || modelId == MI_TRAFFICCONE || modelId == MI_DUMP1 ||
 	   modelId == MI_ROADWORKBARRIER1 || modelId == MI_BUSSIGN1 || modelId == MI_NOPARKINGSIGN1 ||

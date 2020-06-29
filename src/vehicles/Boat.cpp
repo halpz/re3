@@ -79,7 +79,7 @@ CBoat::CBoat(int mi, uint8 owner) : CVehicle(owner)
 
 	bIsInWater = true;
 
-	unk1 = 0.0f;
+	m_phys_unused1 = 0.0f;
 	m_bIsAnchored = true;
 	m_fOrientation = INVALID_ORIENTATION;
 	bTouchingWater = true;
@@ -904,6 +904,8 @@ CBoat::AddWakePoint(CVector point)
 			}
 			m_avec2dWakePoints[0] = point;
 			m_afWakePointLifeTime[0] = 400.0f;
+			if(m_nNumWakePoints < ARRAY_SIZE(m_afWakePointLifeTime))
+				m_nNumWakePoints++;
 		}
 	}else{
 		m_avec2dWakePoints[0] = point;

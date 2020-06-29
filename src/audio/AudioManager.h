@@ -75,7 +75,18 @@ public:
 	uint8 m_nCommentsInBank[NUM_PED_COMMENTS_BANKS];
 	uint8 m_nActiveBank;
 
-	cPedComments();
+	cPedComments()
+	{
+		for (int i = 0; i < NUM_PED_COMMENTS_SLOTS; i++)
+			for (int j = 0; j < NUM_PED_COMMENTS_BANKS; j++) {
+				m_asPedComments[j][i].m_nProcess = -1;
+				m_nIndexMap[j][i] = NUM_PED_COMMENTS_SLOTS;
+			}
+
+		for (int i = 0; i < NUM_PED_COMMENTS_BANKS; i++)
+			m_nCommentsInBank[i] = 0;
+		m_nActiveBank = 0;
+	}
 	void Add(tPedComment *com);
 	void Process();
 };
@@ -202,11 +213,11 @@ public:
 	float GetReflectionsDistance(int32 idx) const { return m_afReflectionsDistances[idx]; }
 	int32 GetRandomNumber(int32 idx) const { return m_anRandomTable[idx]; }
 	int32 GetRandomNumberInRange(int32 idx, int32 low, int32 high) const { return (m_anRandomTable[idx] % (high - low + 1)) + low; }
-	bool IsMissionAudioPlaying() const { return m_sMissionAudio.m_nPlayStatus == 1; }
+	bool IsMissionAudioSamplePlaying() const { return m_sMissionAudio.m_nPlayStatus == 1; }
 
 	// "Should" be in alphabetic order, except "getXTalkSfx"
 	void AddDetailsToRequestedOrderList(uint8 sample);
-	void AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sample, uint8 unk1,
+	void AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sample, uint8 bank,
 	                        uint8 counter, bool notLooping);
 	void AddReflectionsToRequestedQueue();
 	void AddReleasingSounds();
@@ -222,11 +233,10 @@ public:
 	                                      float speedMultiplier) const;
 	int32 ComputePan(float, CVector *);
 	uint8 ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance) const;
-	int32 CreateEntity(int32 type, void *entity);
+	int32 CreateEntity(eAudioType type, void *entity);
 
 	void DestroyAllGameCreatedEntities();
 	void DestroyEntity(int32 id);
-	void DoJumboVolOffset() const;
 	void DoPoliceRadioCrackle();
 
 	// functions returning talk sfx,
@@ -318,7 +328,7 @@ public:
 	float GetCollisionRatio(float a, float b, float c, float d) const;
 	float GetDistanceSquared(const CVector &v) const;
 	int32 GetJumboTaxiFreq() const;
-	bool GetMissionAudioLoadingStatus() const;
+	uint8 GetMissionAudioLoadingStatus() const;
 	int8 GetMissionScriptPoliceAudioPlayingStatus() const;
 	uint8 GetNum3DProvidersAvailable() const;
 	int32 GetPedCommentSfx(CPed *ped, int32 sound);
@@ -348,7 +358,7 @@ public:
 	void PostInitialiseGameSpecificSetup();
 	void PostTerminateGameSpecificShutdown();
 	void PreInitialiseGameSpecificSetup() const;
-	void PreloadMissionAudio(const char *name);
+	void PreloadMissionAudio(Const char *name);
 	void PreTerminateGameSpecificShutdown();
 	/// processX - main logic of adding new sounds
 	void ProcessActiveQueues();
@@ -410,7 +420,7 @@ public:
 	void ProcessVehicleOneShots(cVehicleParams *params);
 	bool ProcessVehicleReverseWarning(cVehicleParams *params);
 	bool ProcessVehicleRoadNoise(cVehicleParams *params);
-	void ProcessVehicleSirenOrAlarm(cVehicleParams *params);
+	bool ProcessVehicleSirenOrAlarm(cVehicleParams *params);
 	void ProcessVehicleSkidding(cVehicleParams *params);
 	void ProcessWaterCannon(int32);
 	void ProcessWeather(int32 id);
@@ -464,11 +474,11 @@ public:
 	bool UsesSiren(int32 model) const;
 	bool UsesSirenSwitching(int32 model) const;
 
+#ifdef GTA_PC
 	// only used in pc
 	void AdjustSamplesVolume();
 	uint8 ComputeEmittingVolume(uint8 emittingVolume, float intensity, float dist);
-
-	void DebugShit();
+#endif
 };
 
 #ifdef AUDIO_MSS

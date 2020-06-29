@@ -36,7 +36,14 @@ public:
 
 	static RwObjectNameIdAssocation m_pPedIds[PED_NODE_MAX];
 
-	CPedModelInfo(void) : CClumpModelInfo(MITYPE_PED) { m_hitColModel = nil; }
+	CPedModelInfo(void) : CClumpModelInfo(MITYPE_PED) {
+		m_hitColModel = nil;
+#ifdef PED_SKIN
+		m_head = nil;
+		m_lhand = nil;
+		m_rhand = nil;
+#endif
+	}
 	~CPedModelInfo(void) { delete m_hitColModel; }
 	void DeleteRwObject(void);
 	void SetClump(RpClump *);

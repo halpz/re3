@@ -59,6 +59,16 @@ void FlushObrsPrintfs()
 void *
 RwMallocAlign(RwUInt32 size, RwUInt32 align)
 {
+#ifdef FIX_BUGS
+	uintptr ptralign = align-1;
+	void *mem = (void *)malloc(size + sizeof(uintptr) + ptralign);
+
+	ASSERT(mem != nil);
+
+	void *addr = (void *)((((uintptr)mem) + sizeof(uintptr) + ptralign) & ~ptralign);
+
+	ASSERT(addr != nil);
+#else
 	void *mem = (void *)malloc(size + align);
 
 	ASSERT(mem != nil);
@@ -66,6 +76,7 @@ RwMallocAlign(RwUInt32 size, RwUInt32 align)
 	void *addr = (void *)((((uintptr)mem) + align) & ~(align - 1));
 
 	ASSERT(addr != nil);
+#endif
 
 	*(((void **)addr) - 1) = mem;
 
@@ -308,14 +319,20 @@ HAnimAnimationCreateForHierarchy(RpHAnimHierarchy *hier)
 	RpHAnimAnimation *anim = RpHAnimAnimationCreate(rpHANIMSTDKEYFRAMETYPEID, numNodes, 0, 0.0f);
 	if(anim == nil)
 		return nil;
-	RpHAnimStdKeyFrame *frame = (RpHAnimStdKeyFrame*)HANIMFRAMES(anim);
+	RpHAnimStdKeyFrame *frame;
 	for(i = 0; i < numNodes; i++){
+		frame = (RpHAnimStdKeyFrame*)HANIMFRAME(anim, i);	// games uses struct size here, not safe
 		frame->q.real = 1.0f;
 		frame->q.imag.x = frame->q.imag.y = frame->q.imag.z = 0.0f;
 		frame->t.x = frame->t.y = frame->t.z = 0.0f;
+#ifdef FIX_BUGS
+		// times are subtracted and divided giving NaNs
+		// so they can't both be 0
+		frame->time = i/hier->numNodes;
+#else
 		frame->time = 0.0f;
+#endif
 		frame->prevFrame = nil;
-		frame++;
 	}
 	return anim;
 }

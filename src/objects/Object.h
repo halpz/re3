@@ -55,14 +55,7 @@ public:
 	uint8 m_nCollisionDamageEffect;
 	uint8 m_nSpecialCollisionResponseCases;
 	bool m_bCameraToAvoidThisObject;
-
-	// this batch is unused
-	int8 field_17B;
-	int8 field_17C;
-	int8 field_17D;
-	int8 field_17E;
-	int8 field_17F;
-
+	uint32 m_obj_unused1;
 	uint32 m_nEndOfLifeTime;
 	int16 m_nRefModelIndex;
 	CEntity *m_pCurSurface;

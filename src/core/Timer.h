@@ -18,7 +18,7 @@ public:
 	static const float &GetTimeStep(void) { return ms_fTimeStep; }
 	static void SetTimeStep(float ts) { ms_fTimeStep = ts; }
 	static float GetTimeStepInSeconds() { return ms_fTimeStep / 50.0f; }
-	static float GetTimeStepInMilliseconds() { return ms_fTimeStep / 50.0f * 1000.0f; }
+	static uint32 GetTimeStepInMilliseconds() { return ms_fTimeStep / 50.0f * 1000.0f; }
 	static const float &GetTimeStepNonClipped(void) { return ms_fTimeStepNonClipped; }
 	static float GetTimeStepNonClippedInSeconds(void) { return ms_fTimeStepNonClipped / 50.0f; }
 	static float GetTimeStepNonClippedInMilliseconds(void) { return ms_fTimeStepNonClipped / 50.0f * 1000.0f; }
@@ -59,7 +59,7 @@ public:
 	friend class CMemoryCard;
 
 #ifdef FIX_BUGS
-	static float GetDefaultTimeStep(void) { return 5.0f / 3.0f; }
+	static float GetDefaultTimeStep(void) { return 50.0f / 30.0f; }
 	static float GetTimeStepFix(void) { return GetTimeStep() / GetDefaultTimeStep(); }
 #endif
 };

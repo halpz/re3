@@ -21,8 +21,6 @@ int32 gNumRetunePresses;
 int32 gRetuneCounter;
 bool bHasStarted;
 
-const int maxVolume = 127;
-
 cMusicManager::cMusicManager()
 {
 	m_bIsInitialised = false;
@@ -303,14 +301,14 @@ cMusicManager::GetRadioInCar(void)
 		CVehicle *veh = FindPlayerVehicle();
 		if (veh != nil){
 			if (UsesPoliceRadio(veh)) {
-				if (m_nRadioInCar == NO_STREAMED_SOUND || CReplay::IsPlayingBack() && AudioManager.m_nUserPause)
+				if (m_nRadioInCar == NO_STREAMED_SOUND || (CReplay::IsPlayingBack() && AudioManager.m_nUserPause == 0))
 					return POLICE_RADIO;
 				return m_nRadioInCar;
 			} else return veh->m_nRadioStation;
 		}
 	}
 
-	if (m_nRadioInCar == NO_STREAMED_SOUND || CReplay::IsPlayingBack() && AudioManager.m_nUserPause)
+	if (m_nRadioInCar == NO_STREAMED_SOUND || (CReplay::IsPlayingBack() && AudioManager.m_nUserPause == 0))
 		return RADIO_OFF;
 	return m_nRadioInCar;
 }
@@ -375,7 +373,7 @@ cMusicManager::Service()
 	if (!m_bIsInitialised || m_bDisabled) return;
 
 	if (m_nMusicMode == MUSICMODE_CUTSCENE) {
-		SampleManager.SetStreamedVolumeAndPan(maxVolume, 63, 1, 0);
+		SampleManager.SetStreamedVolumeAndPan(MAX_VOLUME, 63, 1, 0);
 		return;
 	}
 
@@ -528,7 +526,7 @@ cMusicManager::ServiceGameMode()
 					} else if (dist >= 100.0f) {
 						int8 volume = ((45.0f - (Sqrt(dist) - 10.0f)) / 45.0f * 100.0f);
 						int8 pan;
-						if (AudioManager.IsMissionAudioPlaying())
+						if (AudioManager.IsMissionAudioSamplePlaying())
 							volume /= 4;
 						if (volume != 0) {
 							CVector trVec;
@@ -540,7 +538,7 @@ cMusicManager::ServiceGameMode()
 						if (gRetuneCounter)
 							volume /= 4;
 						SampleManager.SetStreamedVolumeAndPan(volume, pan, 0, 0);
-					} else if (AudioManager.IsMissionAudioPlaying()) {
+					} else if (AudioManager.IsMissionAudioSamplePlaying()) {
 						SampleManager.SetStreamedVolumeAndPan(25, 63, 0, 0);
 					} else if (gRetuneCounter) {
 						SampleManager.SetStreamedVolumeAndPan(25, 63, 0, 0);
@@ -548,7 +546,7 @@ cMusicManager::ServiceGameMode()
 						SampleManager.SetStreamedVolumeAndPan(100, 63, 0, 0);
 					}
 				}
-			} else if (AudioManager.IsMissionAudioPlaying()) {
+			} else if (AudioManager.IsMissionAudioSamplePlaying()) {
 				SampleManager.SetStreamedVolumeAndPan(25, 63, 0, 0);
 				nFramesSinceCutsceneEnded = 0;
 			} else {
@@ -676,7 +674,7 @@ cMusicManager::PreloadCutSceneMusic(uint8 track)
 		while (SampleManager.IsStreamPlaying(0))
 			SampleManager.StopStreamedFile(0);
 		SampleManager.PreloadStreamedFile(track, 0);
-		SampleManager.SetStreamedVolumeAndPan(maxVolume, 63, 1, 0);
+		SampleManager.SetStreamedVolumeAndPan(MAX_VOLUME, 63, 1, 0);
 		m_nCurrentStreamedSound = track;
 	}
 }
@@ -834,7 +832,7 @@ cMusicManager::ServiceAnnouncement()
 
 		SampleManager.SetStreamedVolumeAndPan(0, 63, 0, 0);
 		if (SampleManager.StartStreamedFile(m_nAnnouncement, 0, 0)) {
-			SampleManager.SetStreamedVolumeAndPan(AudioManager.IsMissionAudioPlaying() ? 25 : 100, 63, 0, 0);
+			SampleManager.SetStreamedVolumeAndPan(AudioManager.IsMissionAudioSamplePlaying() ? 25 : 100, 63, 0, 0);
 			m_bAnnouncementInProgress = true;
 			m_nPreviousStreamedSound = m_nCurrentStreamedSound;
 			m_nCurrentStreamedSound = m_nAnnouncement;
@@ -907,7 +905,7 @@ cMusicManager::ChangeRadioChannel()
 			return false;
 		if (!SampleManager.StartStreamedFile(m_nCurrentStreamedSound, GetTrackStartPos(m_nCurrentStreamedSound), 0))
 			return false;
-		SampleManager.SetStreamedVolumeAndPan(AudioManager.IsMissionAudioPlaying() ? 25 : 100, 63, 0, 0);
+		SampleManager.SetStreamedVolumeAndPan(AudioManager.IsMissionAudioSamplePlaying() ? 25 : 100, 63, 0, 0);
 	}
 	return true;
 }

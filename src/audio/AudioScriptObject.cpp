@@ -7,7 +7,7 @@
 void
 cAudioScriptObject::Reset()
 {
-	AudioId = SCRSOUND_INVALID;
+	AudioId = SCRIPT_SOUND_INVALID;
 	Posn = CVector(0.0f, 0.0f, 0.0f);
 	AudioEntity = AEHANDLE_NONE;
 }

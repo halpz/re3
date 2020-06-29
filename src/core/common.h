@@ -29,14 +29,14 @@
 #define STREAMFILE(str) (((rw::StreamFile*)(str))->file)
 #define HIERNODEINFO(hier) ((hier)->nodeInfo)
 #define HIERNODEID(hier, i) ((hier)->nodeInfo[i].id)
-#define HANIMFRAMES(anim) ((anim)->keyframes)
+#define HANIMFRAME(anim, i) ((RwUInt8*)(anim)->keyframes + (i)*(anim)->interpInfo->animKeyFrameSize)
 #else
 #define RWHALFPIXEL	// always d3d
 #define STREAMPOS(str) ((str)->Type.memory.position)
 #define STREAMFILE(str) ((str)->Type.file.fpFile)
 #define HIERNODEINFO(hier) ((hier)->pNodeInfo)
 #define HIERNODEID(hier, i) ((hier)->pNodeInfo[i].nodeID)
-#define HANIMFRAMES(anim) ((anim)->pFrames)
+#define HANIMFRAME(anim, i) ((RwUInt8*)(anim)->pFrames + (i)*(anim)->interpInfo->keyFrameSize)
 #endif
 
 #ifdef RWHALFPIXEL
@@ -113,7 +113,7 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 #define SCREEN_WIDTH ((float)RsGlobal.width)
 #define SCREEN_HEIGHT ((float)RsGlobal.height)
 #define SCREEN_ASPECT_RATIO (CDraw::GetAspectRatio())
-#define SCREEN_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetFOV() * 0.5f)))
+#define SCREEN_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetScaledFOV() * 0.5f)))
 
 // This scales from PS2 pixel coordinates to the real resolution
 #define SCREEN_STRETCH_X(a)   ((a) * (float) SCREEN_WIDTH / DEFAULT_SCREEN_WIDTH)
@@ -416,7 +416,7 @@ inline T *WriteSaveBuf(uint8 *&buf, const T &value)
 	WriteSaveBuf(buf, b);\
 	WriteSaveBuf(buf, c);\
 	WriteSaveBuf(buf, d);\
-	WriteSaveBuf(buf, size);
+	WriteSaveBuf<uint32>(buf, size);
 
 #define CheckSaveHeader(buf,a,b,c,d,size)\
 	assert(ReadSaveBuf<char>(buf) == a);\

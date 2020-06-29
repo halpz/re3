@@ -5,6 +5,7 @@
 #include "World.h"
 #include "Vehicle.h"
 #include "Automobile.h"
+#include "Boat.h"
 #include "Ped.h"
 #include "PlayerPed.h"
 #include "CopPed.h"
@@ -29,7 +30,7 @@ bool PrintDebugCode = false;
 int16 DebugCamMode;
 
 #ifdef FREE_CAM
-bool CCamera::bFreeCam = true;
+bool CCamera::bFreeCam;
 int nPreviousMode = -1;
 #endif
 
@@ -39,11 +40,11 @@ CCam::Init(void)
 	Mode = MODE_FOLLOWPED;
 	Front = CVector(0.0f, 0.0f, -1.0f);
 	Up = CVector(0.0f, 0.0f, 1.0f);
-	Rotating = 0;
+	Rotating = false;
 	m_iDoCollisionChecksOnFrameNum = 1;
 	m_iDoCollisionCheckEveryNumOfFrames = 9;
 	m_iFrameNumWereAt = 0;
-	m_bCollisionChecksOn = 1;
+	m_bCollisionChecksOn = false;
 	m_fRealGroundDist = 0.0f;
 	BetaSpeed = 0.0f;
 	AlphaSpeed = 0.0f;
@@ -51,21 +52,21 @@ CCam::Init(void)
 	f_max_role_angle = DEGTORAD(5.0f);
 	Distance = 30.0f;
 	DistanceSpeed = 0.0f;
-	m_pLastCarEntered = 0;
-	m_pLastPedLookedAt = 0;
-	ResetStatics = 1;
+	m_pLastCarEntered = nil;
+	m_pLastPedLookedAt = nil;
+	ResetStatics = true;
 	Beta = 0.0f;
-	m_bFixingBeta = 0;
+	m_bFixingBeta = false;
 	CA_MIN_DISTANCE = 0.0f;
 	CA_MAX_DISTANCE = 0.0f;
-	LookingBehind = 0;
-	LookingLeft = 0;
-	LookingRight = 0;
+	LookingBehind = false;
+	LookingLeft = false;
+	LookingRight = false;
 	m_fPlayerInFrontSyphonAngleOffSet = DEGTORAD(20.0f);
 	m_fSyphonModeTargetZOffSet = 0.5f;
 	m_fRadiusForDead = 1.5f;
 	DirectionWasLooking = LOOKING_FORWARD;
-	LookBehindCamWasInFront = 0;
+	LookBehindCamWasInFront = false;
 	f_Roll = 0.0f;
 	f_rollSpeed = 0.0f;
 	m_fCloseInPedHeightOffset = 0.0f;
@@ -110,7 +111,11 @@ CCam::Process(void)
 		Fwd.x = CamTargetEntity->GetForward().x;
 		Fwd.y = CamTargetEntity->GetForward().y;
 		Fwd.Normalise();
-		// Game normalizes again here manually. useless, so skipped
+		float FwdLength = Fwd.Magnitude2D();
+		if(FwdLength != 0.0f){
+			Fwd.x /= FwdLength;
+			Fwd.y /= FwdLength;
+		}
 
 		float FwdSpeedX = ((CVehicle*)CamTargetEntity)->GetMoveSpeed().x * Fwd.x;
 		float FwdSpeedY = ((CVehicle*)CamTargetEntity)->GetMoveSpeed().y * Fwd.y;
@@ -162,7 +167,9 @@ CCam::Process(void)
 	case MODE_MODELVIEW:
 		Process_ModelView(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
-//	case MODE_BILL:
+	case MODE_BILL:
+		Process_Bill(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+		break;
 	case MODE_SYPHON:
 		Process_Syphon(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
@@ -210,10 +217,18 @@ CCam::Process(void)
 	case MODE_PLAYER_FALLEN_WATER:
 		Process_Player_Fallen_Water(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
-//	case MODE_CAM_ON_TRAIN_ROOF:
-//	case MODE_CAM_RUNNING_SIDE_TRAIN:
-//	case MODE_BLOOD_ON_THE_TRACKS:
-//	case MODE_IM_THE_PASSENGER_WOOWOO:
+	case MODE_CAM_ON_TRAIN_ROOF:
+		Process_Cam_On_Train_Roof(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+		break;
+	case MODE_CAM_RUNNING_SIDE_TRAIN:
+		Process_Cam_Running_Side_Train(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+		break;
+	case MODE_BLOOD_ON_THE_TRACKS:
+		Process_Blood_On_The_Tracks(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+		break;
+	case MODE_IM_THE_PASSENGER_WOOWOO:
+		Process_Im_The_Passenger_Woo_Woo(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+		break;
 	case MODE_SYPHON_CRIM_IN_FRONT:
 		Process_Syphon_Crim_In_Front(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
@@ -263,7 +278,7 @@ CCam::Process(void)
 	CVector TargetToCam = Source - m_cvecTargetCoorsForFudgeInter;
 	float DistOnGround = TargetToCam.Magnitude2D();
 	m_fTrueBeta = CGeneral::GetATanOfXY(TargetToCam.x, TargetToCam.y);
-	m_fTrueAlpha = CGeneral::GetATanOfXY(TargetToCam.z, DistOnGround);
+	m_fTrueAlpha = CGeneral::GetATanOfXY(DistOnGround, TargetToCam.z);
 	if(TheCamera.m_uiTransitionState == 0)
 		KeepTrackOfTheSpeed(Source, m_cvecTargetCoorsForFudgeInter, Up, m_fTrueAlpha, m_fTrueBeta, FOV);
 
@@ -419,11 +434,11 @@ CCam::ProcessSpecialHeightRoutines(void)
 					float DistScale = (2.1f - dist)/2.1f;
 					if(Mode == MODE_FOLLOWPED){
 						if(TheCamera.PedZoomIndicator == CAM_ZOOM_1)
-							Offset = 0.45*DistScale + PedZDist;
+							Offset = 0.45f*DistScale + PedZDist;
 						if(TheCamera.PedZoomIndicator == CAM_ZOOM_2)
-							Offset = 0.35*DistScale + PedZDist;
+							Offset = 0.35f*DistScale + PedZDist;
 						if(TheCamera.PedZoomIndicator == CAM_ZOOM_3)
-							Offset = 0.25*DistScale + PedZDist;
+							Offset = 0.25f*DistScale + PedZDist;
 						if(Abs(CGeneral::GetRadianAngleBetweenPoints(CamToPed.x, CamToPed.y, CamToTarget.x, CamToTarget.y)) > HALFPI)
 							Offset += 0.3f;
 						m_fPedBetweenCameraHeightOffset = Offset + 1.3f;
@@ -504,11 +519,11 @@ CCam::ProcessSpecialHeightRoutines(void)
 
 			switch(((CPhysical*)CamTargetEntity)->m_nSurfaceTouched)
 			case SURFACE_GRASS:
-			case SURFACE_DIRT:
-			case SURFACE_DIRTTRACK:
-			case SURFACE_STEEL:
-			case SURFACE_TIRE:
-			case SURFACE_STONE:
+			case SURFACE_GRAVEL:
+			case SURFACE_MUD_DRY:
+			case SURFACE_THICK_METAL_PLATE:
+			case SURFACE_RUBBER:
+			case SURFACE_STEEP_CLIFF:
 				OnRoad = true;
 
 			if(CCullZones::PlayerNoRain())
@@ -565,9 +580,9 @@ CCam::ProcessSpecialHeightRoutines(void)
 		if(PreviouslyFailedRoadHeightCheck && m_fCloseInPedHeightOffset < 0.0001f){
 			if(colPoint.surfaceB != SURFACE_TARMAC &&
 			   colPoint.surfaceB != SURFACE_GRASS &&
-			   colPoint.surfaceB != SURFACE_DIRT &&
-			   colPoint.surfaceB != SURFACE_DIRTTRACK &&
-			   colPoint.surfaceB != SURFACE_STONE){
+			   colPoint.surfaceB != SURFACE_GRAVEL &&
+			   colPoint.surfaceB != SURFACE_MUD_DRY &&
+			   colPoint.surfaceB != SURFACE_STEEP_CLIFF){
 				if(m_fRoadOffSet > 1.4f)
 					m_fRoadOffSet = 1.4f;
 			}else{
@@ -795,7 +810,7 @@ CCam::ClipIfPedInFrontOfPlayer(void)
 		while(DeltaAngle >= PI) DeltaAngle -= 2*PI;
 		while(DeltaAngle < -PI) DeltaAngle += 2*PI;
 		if(Abs(DeltaAngle) < HALFPI){
-			fDist = Sqrt(SQR(vDist.x) + SQR(vDist.y));
+			fDist = vDist.Magnitude2D();
 			if(fDist < 1.25f){
 				Near = DEFAULT_NEAR - (1.25f - fDist);
 				if(Near < 0.05f)
@@ -822,9 +837,9 @@ CCam::KeepTrackOfTheSpeed(const CVector &source, const CVector &target, const CV
 		PreviousUp = up;
 	}
 
-	m_cvecSourceSpeedOverOneFrame = PreviousSource - source;
-	m_cvecTargetSpeedOverOneFrame = PreviousTarget - target;
-	m_cvecUpOverOneFrame = PreviousUp - up;
+	m_cvecSourceSpeedOverOneFrame = source - PreviousSource;
+	m_cvecTargetSpeedOverOneFrame = target - PreviousTarget;
+	m_cvecUpOverOneFrame = up - PreviousUp;
 	m_fFovSpeedOverOneFrame = fov - PreviousFov;
 	m_fBetaSpeedOverOneFrame = beta - PreviousBeta;
 	MakeAngleLessThan180(m_fBetaSpeedOverOneFrame);
@@ -846,17 +861,13 @@ CCam::Using3rdPersonMouseCam(void)
 		(Mode == MODE_FOLLOWPED ||
 			TheCamera.m_bPlayerIsInGarage &&
 			FindPlayerPed() && FindPlayerPed()->m_nPedState != PED_DRIVING &&
-			Mode != MODE_TOPDOWN && this->CamTargetEntity == FindPlayerPed());
+			Mode != MODE_TOPDOWN && CamTargetEntity == FindPlayerPed());
 }
 
 bool
 CCam::GetWeaponFirstPersonOn(void)
 {
-	CEntity *target = this->CamTargetEntity;
-	if (target && target->IsPed())
-		return ((CPed*)target)->GetWeapon()->m_bAddRotOffset;
-	
-	return false;
+	return CamTargetEntity && CamTargetEntity->IsPed() && ((CPed*)CamTargetEntity)->GetWeapon()->m_bAddRotOffset;
 }
 
 bool
@@ -992,12 +1003,15 @@ CCam::GetPedBetaAngleForClearView(const CVector &Target, float Dist, float BetaO
 	return 0.0f;
 }
 
-static float DefaultAcceleration = 0.045f;
-static float DefaultMaxStep = 0.15f;
+float DefaultAcceleration = 0.045f;
+float DefaultMaxStep = 0.15f;
 
 void
 CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, float, float)
 {
+	if(!CamTargetEntity->IsPed())
+		return;
+
 	const float GroundDist = 1.85f;
 
 	CVector TargetCoors, Dist, IdealSource;
@@ -1014,7 +1028,7 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	bool GoingBehind = false;
 	bool Obscured = false;
 	bool BuildingCheckObscured = false;
-	bool HackPlayerOnStoppingTrain = false;
+	bool StandingInTrain = false;
 	static int TimeIndicatedWantedToGoDown = 0;
 	static bool StartedCountingForGoDown = false;
 	float DeltaBeta;
@@ -1022,12 +1036,6 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	m_bFixingBeta = false;
 	bBelowMinDist = false;
 	bBehindPlayerDesired = false;
-
-#ifdef FIX_BUGS
-	if(!CamTargetEntity->IsPed())
-		return;
-#endif
-	assert(CamTargetEntity->IsPed());
 
 	// CenterDist should be > LateralDist because we don't have an angle for safety in this case
 	float CenterDist, LateralDist;
@@ -1094,7 +1102,7 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 
 	if(FindPlayerVehicle())
 		if(FindPlayerVehicle()->m_vehType == VEHICLE_TYPE_TRAIN)
-			HackPlayerOnStoppingTrain = true;
+			StandingInTrain = true;
 
 	if(TheCamera.m_bCamDirectlyInFront){
 		 m_bCollisionChecksOn = true;
@@ -1347,7 +1355,7 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 
 
 	if(TheCamera.m_bCamDirectlyBehind || TheCamera.m_bCamDirectlyInFront ||
-	   HackPlayerOnStoppingTrain || Rotating){
+	   StandingInTrain || Rotating){
 		if(TheCamera.m_bCamDirectlyBehind){
 			Beta = TargetOrientation + PI;
 			Source.x = TargetCoors.x + RotDistance * Cos(Beta);
@@ -1358,7 +1366,7 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 			Source.x = TargetCoors.x + RotDistance * Cos(Beta);
 			Source.y = TargetCoors.y + RotDistance * Sin(Beta);
 		}
-		if(HackPlayerOnStoppingTrain){
+		if(StandingInTrain){
 			Beta = TargetOrientation + PI;
 			Source.x = TargetCoors.x + RotDistance * Cos(Beta);
 			Source.y = TargetCoors.y + RotDistance * Sin(Beta);
@@ -1408,11 +1416,11 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 			bool foo = false;
 			switch(((CPhysical*)CamTargetEntity)->m_nSurfaceTouched)
 			case SURFACE_GRASS:
-			case SURFACE_DIRT:
+			case SURFACE_GRAVEL:
 			case SURFACE_PAVEMENT:
-			case SURFACE_STEEL:
-			case SURFACE_TIRE:
-			case SURFACE_STONE:
+			case SURFACE_THICK_METAL_PLATE:
+			case SURFACE_RUBBER:
+			case SURFACE_STEEP_CLIFF:
 				foo = true;
 			if(foo)
 				WellBufferMe(TargetHeight, &m_fCamBufferedHeight, &m_fCamBufferedHeightSpeed, 0.4f, 0.05f, false);
@@ -1467,14 +1475,14 @@ CCam::Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, fl
 	ResetStatics = false;
 }
 
-static float fBaseDist = 1.7f;
-static float fAngleDist = 2.0f;
-static float fFalloff = 3.0f;
-static float fStickSens = 0.01f;
-static float fTweakFOV = 1.05f;
-static float fTranslateCamUp = 0.8f;
-static int16 nFadeControlThreshhold = 45;
-static float fDefaultAlphaOrient = -0.22f;
+float fBaseDist = 1.7f;
+float fAngleDist = 2.0f;
+float fFalloff = 3.0f;
+float fStickSens = 0.01f;
+float fTweakFOV = 1.05f;
+float fTranslateCamUp = 0.8f;
+int16 nFadeControlThreshhold = 45;
+float fDefaultAlphaOrient = -0.22f;
 
 void
 CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrientation, float, float)
@@ -1516,8 +1524,8 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 		BetaOffset = LookLeftRight * TheCamera.m_fMouseAccelHorzntl * FOV/80.0f;
 		AlphaOffset = LookUpDown * TheCamera.m_fMouseAccelVertical * FOV/80.0f;
 	}else{
-		BetaOffset = LookLeftRight * fStickSens * (0.5f/7.0f) * FOV/80.0f * CTimer::GetTimeStep();
-		AlphaOffset = LookUpDown * fStickSens * (0.3f/7.0f) * FOV/80.0f * CTimer::GetTimeStep();
+		BetaOffset = LookLeftRight * fStickSens * (1.0f/14.0f) * FOV/80.0f * CTimer::GetTimeStep();
+		AlphaOffset = LookUpDown * fStickSens * (0.6f/14.0f) * FOV/80.0f * CTimer::GetTimeStep();
 	}
 
 	if(TheCamera.GetFading() && TheCamera.GetFadingDirection() == FADE_IN && nFadeControlThreshhold < CDraw::FadeValue ||
@@ -1539,7 +1547,7 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 	while(Beta >= PI) Beta -= 2*PI;
 	while(Beta < -PI) Beta += 2*PI;
 	if(Alpha > DEGTORAD(45.0f)) Alpha = DEGTORAD(45.0f);
-	if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
+	else if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
 
 	TargetCoors = CameraTarget;
 	TargetCoors.z += fTranslateCamUp;
@@ -1577,7 +1585,7 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 	if(CWorld::ProcessLineOfSight(TargetCoors, Source, colPoint, entity, true, true, true, true, false, false, true)){
 		float PedColDist = (TargetCoors - colPoint.point).Magnitude();
 		float ColCamDist = CamDist - PedColDist;
-		if(entity->IsPed() && ColCamDist > 1.0f){
+		if(entity->IsPed() && ColCamDist > DEFAULT_NEAR + 0.1f){
 			// Ped in the way but not clipping through
 			if(CWorld::ProcessLineOfSight(colPoint.point, Source, colPoint, entity, true, true, true, true, false, false, true)){
 				PedColDist = (TargetCoors - colPoint.point).Magnitude();
@@ -1615,9 +1623,12 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 		if(dist == 0.1f)
 			Source += (TargetCoors - Source)*0.3f;
 
+		Near = RwCameraGetNearClipPlane(Scene.camera);
 #ifndef FIX_BUGS
 		// this is totally wrong...
 		radius = Tan(FOV / 2.0f) * Near;
+#else
+		radius = ViewPlaneWidth*Near;
 #endif
 		// Keep testing
 		entity = CWorld::TestSphereAgainstWorld(Source + Front*Near, radius, nil, true, true, false, true, false, false);
@@ -1656,6 +1667,8 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 	}
 }
 
+float fBillsBetaOffset;	// made up name, actually in CCam
+
 void
 CCam::Process_BehindCar(const CVector &CameraTarget, float TargetOrientation, float, float)
 {
@@ -1675,6 +1688,15 @@ CCam::Process_BehindCar(const CVector &CameraTarget, float TargetOrientation, fl
 	if(Length < 0.002f)
 		Length = 0.002f;
 	Beta = CGeneral::GetATanOfXY(TargetCoors.x - Source.x, TargetCoors.y - Source.y);
+#ifdef TOGGLEABLE_BETA_FEATURES
+	// This is completely made up but Bill's cam manipulates an angle before calling this
+	// and otherwise calculating Beta doesn't make much sense.
+	Beta += fBillsBetaOffset;
+	fBillsBetaOffset = 0.0f;
+	Dist.x = -Length*Cos(Beta);
+	Dist.y = -Length*Sin(Beta);
+	Source = TargetCoors + Dist;
+#endif
 	if(Length > CA_MAX_DISTANCE){
 		Source.x = TargetCoors.x + Dist.x/Length * CA_MAX_DISTANCE;
 		Source.y = TargetCoors.y + Dist.y/Length * CA_MAX_DISTANCE;
@@ -1764,8 +1786,13 @@ CCam::WorkOutCamHeightWeeCar(CVector &TargetCoors, float TargetOrientation)
 	else
 		WellBufferMe(TargetZOffSet, &RoadHeightFix, &RoadHeightFixSpeed, 0.27f, 0.1f, false);
 
-	if((colpoint.surfaceB == SURFACE_DEFAULT || colpoint.surfaceB >= SURFACE_METAL6) &&
-	   colpoint.surfaceB != SURFACE_STEEL && colpoint.surfaceB != SURFACE_STONE &&
+	if(colpoint.surfaceB != SURFACE_TARMAC &&
+	   colpoint.surfaceB != SURFACE_GRASS &&
+	   colpoint.surfaceB != SURFACE_GRAVEL &&
+	   colpoint.surfaceB != SURFACE_MUD_DRY &&
+	   colpoint.surfaceB != SURFACE_PAVEMENT &&
+	   colpoint.surfaceB != SURFACE_THICK_METAL_PLATE &&
+	   colpoint.surfaceB != SURFACE_STEEP_CLIFF &&
 	   RoadHeightFix > 1.4f)
 		RoadHeightFix = 1.4f;
 
@@ -1775,13 +1802,13 @@ CCam::WorkOutCamHeightWeeCar(CVector &TargetCoors, float TargetOrientation)
 void
 CCam::WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, float TargetHeight)
 {
+	float AlphaOffset = 0.0f;
+	bool CamClear = true;
+
 	static float LastTargetAlphaWithCollisionOn = 0.0f;
 	static float LastTopAlphaSpeed = 0.0f;
 	static float LastAlphaSpeedStep = 0.0f;
 	static bool PreviousNearCheckNearClipSmall = false;
-
-	bool CamClear = true;
-	float ModeAlpha = 0.0f;
 
 	if(ResetStatics){
 		LastTargetAlphaWithCollisionOn = 0.0f;
@@ -1797,17 +1824,16 @@ CCam::WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, floa
 	if(zoomvalue < 0.1f)
 		zoomvalue = 0.1f;
 	if(TheCamera.CarZoomIndicator == CAM_ZOOM_1)
-		ModeAlpha = CGeneral::GetATanOfXY(23.0f, zoomvalue);	// near
+		AlphaOffset = CGeneral::GetATanOfXY(23.0f, zoomvalue);	// near
 	else if(TheCamera.CarZoomIndicator == CAM_ZOOM_2)
-		ModeAlpha = CGeneral::GetATanOfXY(10.8f, zoomvalue);	// mid
+		AlphaOffset = CGeneral::GetATanOfXY(10.8f, zoomvalue);	// mid
 	else if(TheCamera.CarZoomIndicator == CAM_ZOOM_3)
-		ModeAlpha = CGeneral::GetATanOfXY(7.0f, zoomvalue);	// far
+		AlphaOffset = CGeneral::GetATanOfXY(7.0f, zoomvalue);	// far
 
 
 	float Length = (Source - TargetCoors).Magnitude2D();
 	if(m_bCollisionChecksOn){	// there's another variable (on PC) but it's uninitialised
-		CVector Forward = CamTargetEntity->GetForward();
-		float CarAlpha = CGeneral::GetATanOfXY(Forward.Magnitude2D(), Forward.z);
+		float CarAlpha = CGeneral::GetATanOfXY(CamTargetEntity->GetForward().Magnitude2D(), CamTargetEntity->GetForward().z);
 		// this shouldn't be necessary....
 		while(CarAlpha >= PI) CarAlpha -= 2*PI;
 		while(CarAlpha < -PI) CarAlpha += 2*PI;
@@ -1815,11 +1841,11 @@ CCam::WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, floa
 		while(Beta >= PI) Beta -= 2*PI;
 		while(Beta < -PI) Beta += 2*PI;
 
-		float deltaBeta = Beta - TargetOrientation;
-		while(deltaBeta >= PI) deltaBeta -= 2*PI;
-		while(deltaBeta < -PI) deltaBeta += 2*PI;
+		float DeltaBeta = Beta - TargetOrientation;
+		while(DeltaBeta >= PI) DeltaBeta -= 2*PI;
+		while(DeltaBeta < -PI) DeltaBeta += 2*PI;
 
-		float BehindCarNess = Cos(deltaBeta);	// 1 if behind car, 0 if side, -1 if in front
+		float BehindCarNess = Cos(DeltaBeta);	// 1 if behind car, 0 if side, -1 if in front
 		CarAlpha = -CarAlpha * BehindCarNess;
 		if(CarAlpha < -0.01f)
 			CarAlpha = -0.01f;
@@ -1829,10 +1855,10 @@ CCam::WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, floa
 		while(DeltaAlpha < -PI) DeltaAlpha += 2*PI;
 		// What's this?? wouldn't it make more sense to clamp?
 		float AngleLimit = DEGTORAD(1.8f);
-		if(DeltaAlpha < -AngleLimit)
-			DeltaAlpha += AngleLimit;
-		else if(DeltaAlpha > AngleLimit)
+		if(DeltaAlpha > AngleLimit)
 			DeltaAlpha -= AngleLimit;
+		else if(DeltaAlpha < -AngleLimit)
+			DeltaAlpha += AngleLimit;
 		else
 			DeltaAlpha = 0.0f;
 
@@ -1851,7 +1877,7 @@ CCam::WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, floa
 		float CarRoof = CWorld::FindRoofZFor3DCoord(TargetCoors.x, TargetCoors.y, CarBottom, &FoundRoofCenter);
 
 		// Check sides of the car
-		Forward = CamTargetEntity->GetForward();	// we actually still have that...
+		CVector Forward = CamTargetEntity->GetForward();
 		Forward.Normalise();	// shouldn't be necessary
 		float CarSideAngle = CGeneral::GetATanOfXY(Forward.x, Forward.y) + PI/2.0f;
 		float SideX = 2.5f * Cos(CarSideAngle);
@@ -1860,7 +1886,7 @@ CCam::WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, floa
 		CWorld::FindRoofZFor3DCoord(TargetCoors.x - SideX, TargetCoors.y - SideY, CarBottom, &FoundRoofSide2);
 
 		// Now find out at what height we'd like to place the camera
-		float CamGround = CWorld::FindGroundZFor3DCoord(Source.x, Source.y, TargetCoors.z + Length*Sin(Alpha + ModeAlpha) + m_fCloseInCarHeightOffset, &FoundCamGround);
+		float CamGround = CWorld::FindGroundZFor3DCoord(Source.x, Source.y, TargetCoors.z + Length*Sin(Alpha + AlphaOffset) + m_fCloseInCarHeightOffset, &FoundCamGround);
 		float CamTargetZ = 0.0f;
 		if(FoundCamGround){
 			// This is the normal case
@@ -1890,15 +1916,15 @@ CCam::WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, floa
 			TargetAlpha = DEGTORAD(-7.0f);
 
 		// huh?
-		if(TargetAlpha > ModeAlpha)
+		if(TargetAlpha > AlphaOffset)
 			CamClear = true;
-		// Camera is contrained by collision in some way
+		// Camera is constrained by collision in some way
 		PreviousNearCheckNearClipSmall = false;
 		if(!CamClear){
 			PreviousNearCheckNearClipSmall = true;
 			RwCameraSetNearClipPlane(Scene.camera, DEFAULT_NEAR);
 
-			DeltaAlpha = TargetAlpha - (Alpha + ModeAlpha);
+			DeltaAlpha = TargetAlpha - (Alpha + AlphaOffset);
 			while(DeltaAlpha >= PI) DeltaAlpha -= 2*PI;
 			while(DeltaAlpha < -PI) DeltaAlpha += 2*PI;
 
@@ -1907,43 +1933,42 @@ CCam::WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, floa
 		}
 
 		// Now do things if CamClear...but what is that anyway?
-		float CamZ = TargetCoors.z + Length*Sin(Alpha + DeltaAlpha + ModeAlpha) + m_fCloseInCarHeightOffset;
+		float CamZ = TargetCoors.z + Length*Sin(Alpha + DeltaAlpha + AlphaOffset) + m_fCloseInCarHeightOffset;
 		bool FoundGround, FoundRoof;
 		float CamGround2 = CWorld::FindGroundZFor3DCoord(Source.x, Source.y, CamZ, &FoundGround);
-		if(FoundGround){
-			if(CamClear)
-				if(CamZ - CamGround2 < 1.5f){
-					PreviousNearCheckNearClipSmall = true;
-					RwCameraSetNearClipPlane(Scene.camera, DEFAULT_NEAR);
+		if(FoundGround && CamClear){
+			if(CamZ - CamGround2 < 1.5f){
+				PreviousNearCheckNearClipSmall = true;
+				RwCameraSetNearClipPlane(Scene.camera, DEFAULT_NEAR);
 
-					float a;
-					if(Length == 0.0f || CamGround2 + 1.5f - TargetCoors.z == 0.0f)
-						a = Alpha;
-					else
-						a = CGeneral::GetATanOfXY(Length, CamGround2 + 1.5f - TargetCoors.z);
-					while(a > PI) a -= 2*PI;
-					while(a < -PI) a += 2*PI;
-					DeltaAlpha = a - Alpha;
-				}
-		}else{
-			if(CamClear){
-				float CamRoof2 = CWorld::FindRoofZFor3DCoord(Source.x, Source.y, CamZ, &FoundRoof);
-				if(FoundRoof && CamZ - CamRoof2 < 1.5f){
-					PreviousNearCheckNearClipSmall = true;
-					RwCameraSetNearClipPlane(Scene.camera, DEFAULT_NEAR);
+				float dz = CamGround2 + 1.5f - TargetCoors.z;
+				float a;
+				if(Length == 0.0f || dz == 0.0f)
+					a = Alpha;
+				else
+					a = CGeneral::GetATanOfXY(Length, dz);
+				while(a > PI) a -= 2*PI;
+				while(a < -PI) a += 2*PI;
+				DeltaAlpha = a - Alpha;
+			}
+		}else if(CamClear){
+			float CamRoof2 = CWorld::FindRoofZFor3DCoord(Source.x, Source.y, CamZ, &FoundRoof);
+			if(FoundRoof && CamZ - CamRoof2 < 1.5f){
+				PreviousNearCheckNearClipSmall = true;
+				RwCameraSetNearClipPlane(Scene.camera, DEFAULT_NEAR);
 
-					if(CamRoof2 > TargetCoors.z + 3.5f)
-						CamRoof2 = TargetCoors.z + 3.5f;
+				if(CamRoof2 > TargetCoors.z + 3.5f)
+					CamRoof2 = TargetCoors.z + 3.5f;
 
-					float a;
-					if(Length == 0.0f || CamRoof2 + 1.5f - TargetCoors.z == 0.0f)
-						a = Alpha;
-					else
-						a = CGeneral::GetATanOfXY(Length, CamRoof2 + 1.5f - TargetCoors.z);
-					while(a > PI) a -= 2*PI;
-					while(a < -PI) a += 2*PI;
-					DeltaAlpha = a - Alpha;
-				}
+				float dz = CamRoof2 + 1.5f - TargetCoors.z;
+				float a;
+				if(Length == 0.0f || dz == 0.0f)
+					a = Alpha;
+				else
+					a = CGeneral::GetATanOfXY(Length, dz);
+				while(a > PI) a -= 2*PI;
+				while(a < -PI) a += 2*PI;
+				DeltaAlpha = a - Alpha;
 			}
 		}
 
@@ -1957,7 +1982,7 @@ CCam::WorkOutCamHeight(const CVector &TargetCoors, float TargetOrientation, floa
 
 	WellBufferMe(LastTargetAlphaWithCollisionOn, &Alpha, &AlphaSpeed, LastTopAlphaSpeed, LastAlphaSpeedStep, true);
 
-	Source.z = TargetCoors.z + Sin(Alpha + ModeAlpha)*Length + m_fCloseInCarHeightOffset;
+	Source.z = TargetCoors.z + Sin(Alpha + AlphaOffset)*Length + m_fCloseInCarHeightOffset;
 }
 
 // Rotate cam behind the car when the car is moving forward
@@ -2107,9 +2132,9 @@ CCam::Process_Cam_On_A_String(const CVector &CameraTarget, float TargetOrientati
 
 	CBaseModelInfo *mi = CModelInfo::GetModelInfo(CamTargetEntity->GetModelIndex());
 	CVector Dimensions = mi->GetColModel()->boundingBox.max - mi->GetColModel()->boundingBox.min;
+	CVector TargetCoors = CameraTarget;
 	float BaseDist = Dimensions.Magnitude2D();
 
-	CVector TargetCoors = CameraTarget;
 	TargetCoors.z += Dimensions.z - 0.1f;	// final
 	Beta = CGeneral::GetATanOfXY(TargetCoors.x - Source.x, TargetCoors.y - Source.y);
 	while(Alpha >= PI) Alpha -= 2*PI;
@@ -2144,6 +2169,8 @@ CCam::Cam_On_A_String_Unobscured(const CVector &TargetCoors, float BaseDist)
 	if(ResetStatics)
 		Source = TargetCoors + Dist*(CA_MAX_DISTANCE + 1.0f);
 
+	Dist = Source - TargetCoors;
+
 	float Length = Dist.Magnitude2D();
 	if(Length < 0.001f){
 		// This probably shouldn't happen. reset view
@@ -2171,7 +2198,7 @@ CCam::FixCamWhenObscuredByVehicle(const CVector &TargetCoors)
 	static float HeightFixerCarsObscuring = 0.0f;
 	static float HeightFixerCarsObscuringSpeed = 0.0f;
 	CColPoint colPoint;
-	CEntity *entity;
+	CEntity *entity = nil;
 
 	float HeightTarget = 0.0f;
 	if(CWorld::ProcessLineOfSight(TargetCoors, Source, colPoint, entity, false, true, false, false, false, false, false)){
@@ -2468,8 +2495,8 @@ CCam::Process_Rocket(const CVector &CameraTarget, float, float, float)
 	}else{
 		float xdir = LookLeftRight < 0.0f ? -1.0f : 1.0f;
 		float ydir = LookUpDown < 0.0f ? -1.0f : 1.0f;
-		Beta += SQR(LookLeftRight/100.0f)*xdir/17.5 * FOV/80.0f * CTimer::GetTimeStep();
-		Alpha += SQR(LookUpDown/150.0f)*ydir/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+		Beta += SQR(LookLeftRight/100.0f)*xdir*0.8f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+		Alpha += SQR(LookUpDown/150.0f)*ydir*1.0f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
 	}
 	while(Beta >= PI) Beta -= 2*PI;
 	while(Beta < -PI) Beta += 2*PI;
@@ -2570,13 +2597,13 @@ CCam::Process_M16_1stPerson(const CVector &CameraTarget, float, float, float)
 	}else{
 		float xdir = LookLeftRight < 0.0f ? -1.0f : 1.0f;
 		float ydir = LookUpDown < 0.0f ? -1.0f : 1.0f;
-		Beta += SQR(LookLeftRight/100.0f)*xdir/17.5 * FOV/80.0f * CTimer::GetTimeStep();
-		Alpha += SQR(LookUpDown/150.0f)*ydir/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+		Beta += SQR(LookLeftRight/100.0f)*xdir*0.8f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+		Alpha += SQR(LookUpDown/150.0f)*ydir*1.0f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
 	}
 	while(Beta >= PI) Beta -= 2*PI;
 	while(Beta < -PI) Beta += 2*PI;
 	if(Alpha > DEGTORAD(60.0f)) Alpha = DEGTORAD(60.0f);
-	if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
+	else if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
 
 #ifdef GTA3_1_1_PATCH
 	HeadPos.x = 0.0f;
@@ -2682,12 +2709,12 @@ CCam::Process_1stPerson(const CVector &CameraTarget, float TargetOrientation, fl
 		LookUpDown = CPad::GetPad(0)->LookAroundUpDown();
 		float xdir = LookLeftRight < 0.0f ? -1.0f : 1.0f;
 		float ydir = LookUpDown < 0.0f ? -1.0f : 1.0f;
-		Beta += SQR(LookLeftRight/100.0f)*xdir/17.5 * FOV/80.0f * CTimer::GetTimeStep();
-		Alpha += SQR(LookUpDown/150.0f)*ydir/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+		Beta += SQR(LookLeftRight/100.0f)*xdir*0.8f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+		Alpha += SQR(LookUpDown/150.0f)*ydir*1.0f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
 		while(Beta >= PI) Beta -= 2*PI;
 		while(Beta < -PI) Beta += 2*PI;
 		if(Alpha > DEGTORAD(60.0f)) Alpha = DEGTORAD(60.0f);
-		if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
+		else if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
 
 		TargetCoors.x = 3.0f * Cos(Alpha) * Cos(Beta) + Source.x;
 		TargetCoors.y = 3.0f * Cos(Alpha) * Sin(Beta) + Source.y;
@@ -2732,9 +2759,9 @@ CCam::Process_1stPerson(const CVector &CameraTarget, float TargetOrientation, fl
 	}else{
 		assert(CamTargetEntity->IsVehicle());
 		CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(CamTargetEntity->GetModelIndex());
-		CVector CamPos = mi->m_vehicleType == VEHICLE_TYPE_BOAT ? mi->m_positions[BOAT_POS_FRONTSEAT] : mi->m_positions[CAR_POS_FRONTSEAT];
+		CVector CamPos = mi->GetFrontSeatPosn();
 		CamPos.x = 0.0f;
-		CamPos.y += -0.08f;
+		CamPos.y += 0.08f;
 		CamPos.z += 0.62f;
 		FOV = 60.0f;
 		Source = Multiply3x3(CamTargetEntity->GetMatrix(), CamPos);
@@ -2833,7 +2860,7 @@ CCam::Process_1rstPersonPedOnPC(const CVector&, float TargetOrientation, float, 
 			CVector Fwd = CamTargetEntity->GetForward();
 			Fwd.z = 0.0f;
 			Fwd.Normalise();
-			HeadPos = (HeadDelta*1.23f*Fwd + CamTargetEntity->GetPosition());
+			HeadPos = HeadDelta*1.23f*Fwd + CamTargetEntity->GetPosition();
 			HeadPos.z += 0.59f;
 		}
 		Source = HeadPos;
@@ -2861,13 +2888,13 @@ CCam::Process_1rstPersonPedOnPC(const CVector&, float TargetOrientation, float, 
 		}else{
 			float xdir = LookLeftRight < 0.0f ? -1.0f : 1.0f;
 			float ydir = LookUpDown < 0.0f ? -1.0f : 1.0f;
-			Beta += SQR(LookLeftRight/100.0f)*xdir/17.5 * FOV/80.0f * CTimer::GetTimeStep();
-			Alpha += SQR(LookUpDown/150.0f)*ydir/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+			Beta += SQR(LookLeftRight/100.0f)*xdir*0.8f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+			Alpha += SQR(LookUpDown/150.0f)*ydir*1.0f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
 		}
 		while(Beta >= PI) Beta -= 2*PI;
 		while(Beta < -PI) Beta += 2*PI;
 		if(Alpha > DEGTORAD(60.0f)) Alpha = DEGTORAD(60.0f);
-		if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
+		else if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
 
 		TargetCoors.x = 3.0f * Cos(Alpha) * Cos(Beta) + Source.x;
 		TargetCoors.y = 3.0f * Cos(Alpha) * Sin(Beta) + Source.y;
@@ -2911,13 +2938,8 @@ CCam::Process_1rstPersonPedOnPC(const CVector&, float TargetOrientation, float, 
 void
 CCam::Process_Sniper(const CVector &CameraTarget, float TargetOrientation, float, float)
 {
-	if(CamTargetEntity->m_rwObject == nil)
-		return;
-
-#ifdef FIX_BUGS
 	if(!CamTargetEntity->IsPed())
 		return;
-#endif
 
 	static bool FailedTestTwelveFramesAgo = false;
 	RwV3d HeadPos;
@@ -2927,9 +2949,9 @@ CCam::Process_Sniper(const CVector &CameraTarget, float TargetOrientation, float
 	static float TargetFOV = 0.0f;
 
 	if(ResetStatics){
-		Beta = TargetOrientation;
+		Beta = ((CPed*)CamTargetEntity)->m_fRotationCur + HALFPI;
 		Alpha = 0.0f;
-		m_fInitialPlayerOrientation = TargetOrientation;
+		m_fInitialPlayerOrientation = ((CPed*)CamTargetEntity)->m_fRotationCur + HALFPI;
 		FailedTestTwelveFramesAgo = false;
 		// static DPadVertical unused
 		// static DPadHorizontal unused
@@ -2964,13 +2986,13 @@ CCam::Process_Sniper(const CVector &CameraTarget, float TargetOrientation, float
 	}else{
 		float xdir = LookLeftRight < 0.0f ? -1.0f : 1.0f;
 		float ydir = LookUpDown < 0.0f ? -1.0f : 1.0f;
-		Beta += SQR(LookLeftRight/100.0f)*xdir/17.5 * FOV/80.0f * CTimer::GetTimeStep();
-		Alpha += SQR(LookUpDown/150.0f)*ydir/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+		Beta += SQR(LookLeftRight/100.0f)*xdir*0.8f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
+		Alpha += SQR(LookUpDown/150.0f)*ydir*1.0f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
 	}
 	while(Beta >= PI) Beta -= 2*PI;
 	while(Beta < -PI) Beta += 2*PI;
 	if(Alpha > DEGTORAD(60.0f)) Alpha = DEGTORAD(60.0f);
-	if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
+	else if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
 
 	TargetCoors.x = 3.0f * Cos(Alpha) * Cos(Beta) + Source.x;
 	TargetCoors.y = 3.0f * Cos(Alpha) * Sin(Beta) + Source.y;
@@ -3174,6 +3196,12 @@ CCam::Process_Syphon_Crim_In_Front(const CVector &CameraTarget, float, float, fl
 	AimingAngle = CGeneral::GetATanOfXY(TheCamera.m_cvecAimingTargetCoors.x - TargetCoors.x, TheCamera.m_cvecAimingTargetCoors.y - TargetCoors.y);
 	while(AimingAngle >= PI) AimingAngle -= 2*PI;
 	while(AimingAngle < -PI) AimingAngle += 2*PI;
+
+	if(ResetStatics){
+		if(AimingAngle > 0.0f)
+			m_fPlayerInFrontSyphonAngleOffSet = -m_fPlayerInFrontSyphonAngleOffSet;
+		ResetStatics = false;
+	}
 
 	if(TheCamera.PlayerWeaponMode.Mode == MODE_SYPHON)
 		Beta = AimingAngle + m_fPlayerInFrontSyphonAngleOffSet;
@@ -3569,8 +3597,7 @@ CCam::Process_FlyBy(const CVector&, float, float, float)
 		CVector Left = CrossProduct(Up, Front);
 		Up = CrossProduct(Front, Left);
 		Up.Normalise();
-		FOV = PsuedoFOV;
-	}else{
+	}else if(uiTime >= uiFinishTime){
 		// end
 		ArrayMarkerSource = (TheCamera.m_arrPathArray[2].m_arr_PathData[0] - 1)*10 + 1;
 		ArrayMarkerFront = (TheCamera.m_arrPathArray[3].m_arr_PathData[0] - 1)*10 + 1;
@@ -3597,8 +3624,8 @@ CCam::Process_FlyBy(const CVector&, float, float, float)
 		CVector Left = CrossProduct(Up, Front);
 		Up = CrossProduct(Front, Left);
 		Up.Normalise();
-		FOV = PsuedoFOV;
 	}
+	FOV = PsuedoFOV;
 }
 
 void
@@ -3618,12 +3645,13 @@ CCam::Process_WheelCam(const CVector&, float, float, float)
 	}
 
 	CVector NewUp(0.0f, 0.0f, 1.0f);
-	CVector Left = CrossProduct(Front, NewUp);
-	Left.Normalise();
-	NewUp = CrossProduct(Left, Front);
+	CVector Right = CrossProduct(Front, NewUp);
+	Right.Normalise();
+	NewUp = CrossProduct(Right, Front);
+	NewUp.Normalise();
 
 	float Roll = Cos((CTimer::GetTimeInMilliseconds()&0x1FFFF)/(float)0x1FFFF * TWOPI);
-	Up = Cos(Roll*0.4f)*NewUp + Sin(Roll*0.4f)*Left;
+	Up = Cos(Roll*0.4f)*NewUp + Sin(Roll*0.4f)*Right;
 }
 
 void
@@ -3733,18 +3761,18 @@ CCam::Process_Debug(const CVector&, float, float, float)
 	RwCameraSetNearClipPlane(Scene.camera, DEFAULT_NEAR);
 	FOV = DefaultFOV;
 	Alpha += DEGTORAD(CPad::GetPad(1)->GetLeftStickY()) / 50.0f;
-	Beta  += DEGTORAD(CPad::GetPad(1)->GetLeftStickX())*1.5f / 19.0f;
+	Beta  += DEGTORAD(CPad::GetPad(1)->GetLeftStickX()*1.5f) / 19.0f;
 	if(CPad::GetPad(0)->GetLeftMouse()){
 		Alpha += DEGTORAD(CPad::GetPad(0)->GetMouseY()/2.0f);
-		Beta -= DEGTORAD(CPad::GetPad(0)->GetMouseX()/2.0f);
+		Beta += DEGTORAD(CPad::GetPad(0)->GetMouseX()/2.0f);
 	}
 
-	TargetCoors.x = Source.x + Cos(Alpha) * Cos(Beta) * 3.0f;
-	TargetCoors.y = Source.y + Cos(Alpha) * Sin(Beta) * 3.0f;
+	TargetCoors.x = Source.x + Cos(Alpha) * Sin(Beta) * 7.0f;
+	TargetCoors.y = Source.y + Cos(Alpha) * Cos(Beta) * 7.0f;
 	TargetCoors.z = Source.z + Sin(Alpha) * 3.0f;
 
 	if(Alpha > DEGTORAD(89.5f)) Alpha = DEGTORAD(89.5f);
-	if(Alpha < DEGTORAD(-89.5f)) Alpha = DEGTORAD(-89.5f);
+	else if(Alpha < DEGTORAD(-89.5f)) Alpha = DEGTORAD(-89.5f);
 
 	if(CPad::GetPad(1)->GetSquare() || KEYDOWN('W'))
 		Speed += 0.1f;
@@ -3792,7 +3820,7 @@ CCam::Process_Debug(const CVector&, float, float, float)
 		if(FindPlayerVehicle())
 			FindPlayerVehicle()->Teleport(Source);
 		else
-			CWorld::Players[CWorld::PlayerInFocus].m_pPed->SetPosition(Source);	
+			CWorld::Players[CWorld::PlayerInFocus].m_pPed->SetPosition(Source);
 	}
 
 	// stay inside sectors
@@ -3806,7 +3834,11 @@ CCam::Process_Debug(const CVector&, float, float, float)
 		Source.y += 1.0f;
 	GetVectorsReadyForRW();
 
-	CPad::GetPad(0)->DisablePlayerControls = PLAYERCONTROL_DISABLED_1;
+#ifdef FIX_BUGS
+	CPad::GetPad(0)->SetDisablePlayerControls(PLAYERCONTROL_CAMERA);
+#else
+	CPad::GetPad(0)->DisablePlayerControls = PLAYERCONTROL_CAMERA;
+#endif
 
 	if(CPad::GetPad(1)->GetLeftShockJustDown() && gbBigWhiteDebugLightSwitchedOn)
 		CShadows::StoreShadowToBeRendered(SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &Source,
@@ -3830,14 +3862,14 @@ CCam::Process_Debug(const CVector&, float, float, float)
 	RwCameraSetNearClipPlane(Scene.camera, DEFAULT_NEAR);
 	FOV = DefaultFOV;
 	Alpha += DEGTORAD(CPad::GetPad(1)->GetLeftStickY()) / 50.0f;
-	Beta  += DEGTORAD(CPad::GetPad(1)->GetLeftStickX())*1.5f / 19.0f;
+	Beta  += DEGTORAD(CPad::GetPad(1)->GetLeftStickX()*1.5f) / 19.0f;
 
-	TargetCoors.x = Source.x + Cos(Alpha) * Cos(Beta) * 3.0f;
-	TargetCoors.y = Source.y + Cos(Alpha) * Sin(Beta) * 3.0f;
+	TargetCoors.x = Source.x + Cos(Alpha) * Sin(Beta) * 7.0f;
+	TargetCoors.y = Source.y + Cos(Alpha) * Cos(Beta) * 7.0f;
 	TargetCoors.z = Source.z + Sin(Alpha) * 3.0f;
 
 	if(Alpha > DEGTORAD(89.5f)) Alpha = DEGTORAD(89.5f);
-	if(Alpha < DEGTORAD(-89.5f)) Alpha = DEGTORAD(-89.5f);
+	else if(Alpha < DEGTORAD(-89.5f)) Alpha = DEGTORAD(-89.5f);
 
 	if(CPad::GetPad(1)->GetSquare() || CPad::GetPad(1)->GetLeftMouse())
 		Speed += 0.1f;
@@ -3859,8 +3891,7 @@ CCam::Process_Debug(const CVector&, float, float, float)
 		if(FindPlayerVehicle())
 			FindPlayerVehicle()->Teleport(Source);
 		else
-			CWorld::Players[CWorld::PlayerInFocus].m_pPed->GetPosition() = Source;
-			
+			CWorld::Players[CWorld::PlayerInFocus].m_pPed->SetPosition(Source);
 	}
 
 	// stay inside sectors
@@ -3903,13 +3934,13 @@ CCam::Process_Editor(const CVector&, float, float, float)
 	RwCameraSetNearClipPlane(Scene.camera, DEFAULT_NEAR);
 	FOV = DefaultFOV;
 	Alpha += DEGTORAD(CPad::GetPad(1)->GetLeftStickY()) / 50.0f;
-	Beta  += DEGTORAD(CPad::GetPad(1)->GetLeftStickX())*1.5f / 19.0f;
+	Beta  += DEGTORAD(CPad::GetPad(1)->GetLeftStickX()*1.5f) / 19.0f;
 
 	if(CamTargetEntity && CSceneEdit::m_bCameraFollowActor){
 		TargetCoors = CamTargetEntity->GetPosition();
 	}else if(CSceneEdit::m_bRecording){
-		TargetCoors.x = Source.x + Cos(Alpha) * Cos(Beta) * 7.0f;
-		TargetCoors.y = Source.y + Cos(Alpha) * Sin(Beta) * 7.0f;
+		TargetCoors.x = Source.x + Cos(Alpha) * Sin(Beta) * 7.0f;
+		TargetCoors.y = Source.y + Cos(Alpha) * Cos(Beta) * 7.0f;
 		TargetCoors.z = Source.z + Sin(Alpha) * 7.0f;
 	}else
 		TargetCoors = CSceneEdit::m_vecCamHeading + Source;
@@ -3917,7 +3948,7 @@ CCam::Process_Editor(const CVector&, float, float, float)
 	CSceneEdit::m_vecCamHeading = TargetCoors - Source;
 
 	if(Alpha > DEGTORAD(89.5f)) Alpha = DEGTORAD(89.5f);
-	if(Alpha < DEGTORAD(-89.5f)) Alpha = DEGTORAD(-89.5f);
+	else if(Alpha < DEGTORAD(-89.5f)) Alpha = DEGTORAD(-89.5f);
 
 	if(CPad::GetPad(1)->GetSquare() || CPad::GetPad(1)->GetLeftMouse())
 		Speed += 0.1f;
@@ -4048,11 +4079,11 @@ bool
 CCam::ProcessArrestCamOne(void)
 {
 	FOV = 45.0f;
-	if(ResetStatics)
+	if(!ResetStatics)
 		return true;
 
 #ifdef FIX_BUGS
-	if(!CamTargetEntity->IsPed())
+	if(!CamTargetEntity->IsPed() || ((CPlayerPed*)TheCamera.pTargetEntity)->m_pArrestingCop == nil)
 		return true;
 #endif
 
@@ -4107,18 +4138,18 @@ CCam::ProcessArrestCamTwo(void)
 	CVector TargetCoors, ToCamera;
 	float BetaOffset;
 	float SourceX, SourceY;
-	CCam *ActiveCam = &TheCamera.Cams[TheCamera.ActiveCam];
-	if(&ActiveCam[1] == this){
+	if(&TheCamera.Cams[TheCamera.ActiveCam] == this){
 		SourceX = TheCamera.Cams[(TheCamera.ActiveCam + 1) % 2].Source.x;
 		SourceY = TheCamera.Cams[(TheCamera.ActiveCam + 1) % 2].Source.y;
 	}else{
-		SourceX = ActiveCam[1].Source.x;
-		SourceY = ActiveCam[1].Source.y;
+		SourceX = TheCamera.Cams[TheCamera.ActiveCam].Source.x;
+		SourceY = TheCamera.Cams[TheCamera.ActiveCam].Source.y;
 	}
 
 	for(int i = 0; i <= 1; i++){
 		int Dir = i == 0 ? 1 : -1;
 
+		FOV = 60.0f;
 		TargetCoors = player->GetPosition();
 		Beta = CGeneral::GetATanOfXY(TargetCoors.x-SourceX, TargetCoors.y-SourceY);
 		BetaOffset = DEGTORAD(Dir*80);
@@ -4412,6 +4443,106 @@ CCam::Process_FollowPed_WithBinding(const CVector &CameraTarget, float TargetOri
 	GetVectorsReadyForRW();
 }
 
+void
+CCam::Process_Bill(const CVector &CameraTarget, float TargetOrientation, float SpeedVar, float TargetSpeedVar)
+{
+#ifdef FIX_BUGS
+	fBillsBetaOffset += CPad::GetPad(0)->GetRightStickX()/1000.0f;
+#else
+	// just wtf is this? this code must be ancient
+	if(CPad::GetPad(0)->GetStart())
+		fBillsBetaOffset += CPad::GetPad(0)->GetLeftStickX()/1000.0f;
+#endif
+	while(fBillsBetaOffset > TWOPI) fBillsBetaOffset -= TWOPI;
+	while(fBillsBetaOffset < 0.0f) fBillsBetaOffset += TWOPI;
+	TargetOrientation += fBillsBetaOffset;
+	while(TargetOrientation > TWOPI) TargetOrientation -= TWOPI;
+	while(TargetOrientation < 0.0f) TargetOrientation += TWOPI;
+	Process_BehindCar(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
+}
+
+void
+CCam::Process_Im_The_Passenger_Woo_Woo(const CVector &CameraTarget, float TargetOrientation, float, float)
+{
+	FOV = 50.0f;
+
+	Source = CamTargetEntity->GetPosition();
+	Source.z += 2.5f;
+	Front = CamTargetEntity->GetForward();
+	Front.Normalise();
+	Source += 1.35f*Front;
+	float heading = CGeneral::GetATanOfXY(Front.x, Front.y) + DEGTORAD(45.0f);
+	Front.x = Cos(heading);
+	Front.y = Sin(heading);
+	Up = CamTargetEntity->GetUp();
+
+	GetVectorsReadyForRW();
+}
+
+void
+CCam::Process_Blood_On_The_Tracks(const CVector &CameraTarget, float TargetOrientation, float, float)
+{
+	FOV = 50.0f;
+
+	Source = CamTargetEntity->GetPosition();
+	Source.z += 5.45f;
+
+	static CVector Test = -CamTargetEntity->GetForward();
+#ifdef FIX_BUGS
+	if(ResetStatics){
+		Test = -CamTargetEntity->GetForward();
+		ResetStatics = false;
+	}
+#endif
+
+	Source.x += 19.45*Test.x;
+	Source.y += 19.45*Test.y;
+	Front = Test;
+	Front.Normalise();
+	Up = CamTargetEntity->GetUp();
+
+	GetVectorsReadyForRW();
+}
+
+void
+CCam::Process_Cam_Running_Side_Train(const CVector &CameraTarget, float TargetOrientation, float, float)
+{
+	FOV = 60.0f;
+
+	Source = CamTargetEntity->GetPosition();
+	Source.z += 4.0f;
+	CVector fwd = CamTargetEntity->GetForward();
+	float heading = CGeneral::GetATanOfXY(fwd.x, fwd.y) - DEGTORAD(15.0f);
+	Source.x -= Cos(heading)*10.0f;
+	Source.y -= Sin(heading)*10.0f;
+	heading -= DEGTORAD(5.0f);
+	Front = fwd;
+	Front.x += Cos(heading);
+	Front.y += Sin(heading);
+	Front.z -= 0.056f;
+	Front.Normalise();
+	Up = CamTargetEntity->GetUp();
+
+	GetVectorsReadyForRW();
+}
+
+void
+CCam::Process_Cam_On_Train_Roof(const CVector &CameraTarget, float TargetOrientation, float, float)
+{
+	static float RoofMultiplier = 1.5f;
+
+	Source = CamTargetEntity->GetPosition();
+	Source.z += 4.8f;
+	Front = CamTargetEntity->GetForward();
+	Front.Normalise();
+	Source += Front*RoofMultiplier;
+	Up = CamTargetEntity->GetUp();
+	Up.Normalise();
+
+	GetVectorsReadyForRW();
+}
+
+
 #ifdef FREE_CAM
 void
 CCam::Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrientation, float, float)
@@ -4494,8 +4625,8 @@ CCam::Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrient
 		BetaOffset = LookLeftRight * TheCamera.m_fMouseAccelHorzntl * FOV/80.0f;
 		AlphaOffset = LookUpDown * TheCamera.m_fMouseAccelVertical * FOV/80.0f;
 	}else{
-		BetaOffset = LookLeftRight * fStickSens * (0.5f/10.0f) * FOV/80.0f * CTimer::GetTimeStep();
-		AlphaOffset = LookUpDown * fStickSens * (0.3f/10.0f) * FOV/80.0f * CTimer::GetTimeStep();
+		BetaOffset = LookLeftRight * fStickSens * (1.0f/20.0f) * FOV/80.0f * CTimer::GetTimeStep();
+		AlphaOffset = LookUpDown * fStickSens * (0.6f/20.0f) * FOV/80.0f * CTimer::GetTimeStep();
 	}
 
 	// Stop centering once stick has been touched
@@ -4507,7 +4638,7 @@ CCam::Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrient
 	while(Beta >= PI) Beta -= 2.0f*PI;
 	while(Beta < -PI) Beta += 2.0f*PI;
 	if(Alpha > DEGTORAD(45.0f)) Alpha = DEGTORAD(45.0f);
-	if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
+	else if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
 
 
 	float BetaDiff = TargetOrientation+PI - Beta;
@@ -4567,7 +4698,7 @@ CCam::Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrient
 	if(CWorld::ProcessLineOfSight(TargetCoors, Source, colPoint, entity, true, true, true, true, false, false, true)){
 		float PedColDist = (TargetCoors - colPoint.point).Magnitude();
 		float ColCamDist = CamDist - PedColDist;
-		if(entity->IsPed() && ColCamDist > 1.0f){
+		if(entity->IsPed() && ColCamDist > DEFAULT_NEAR + 0.1f){
 			// Ped in the way but not clipping through
 			if(CWorld::ProcessLineOfSight(colPoint.point, Source, colPoint, entity, true, true, true, true, false, false, true)){
 				PedColDist = (TargetCoors - colPoint.point).Magnitude();
@@ -4606,6 +4737,8 @@ CCam::Process_FollowPed_Rotation(const CVector &CameraTarget, float TargetOrient
 			Source += (TargetCoors - Source)*0.3f;
 
 		// Keep testing
+		Near = RwCameraGetNearClipPlane(Scene.camera);
+		radius = ViewPlaneWidth*Near;
 		entity = CWorld::TestSphereAgainstWorld(Source + Front*Near, radius, nil, true, true, false, true, false, false);
 
 		i++;

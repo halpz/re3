@@ -404,11 +404,10 @@ CPathFind::PreparePathData(void)
 			maxX = 0.0f;
 			maxY = 0.0f;
 			for(j = 0; j < 12; j++){
-				k = i*12 + j;
+				k = m_mapObjects[i]->GetModelIndex()*12 + j;
 				if(InfoForTileCars[k].type == NodeTypeExtern){
 					numExtern++;
-					if(InfoForTileCars[k].numLeftLanes + InfoForTileCars[k].numRightLanes > numLanes)
-						numLanes = InfoForTileCars[k].numLeftLanes + InfoForTileCars[k].numRightLanes;
+					numLanes = Max(numLanes, InfoForTileCars[k].numLeftLanes + InfoForTileCars[k].numRightLanes);
 					maxX = Max(maxX, Abs(InfoForTileCars[k].x));
 					maxY = Max(maxY, Abs(InfoForTileCars[k].y));
 				}else if(InfoForTileCars[k].type == NodeTypeIntern)
@@ -417,7 +416,7 @@ CPathFind::PreparePathData(void)
 
 			if(numIntern == 1 && numExtern == 2){
 				if(numLanes < 4){
-					if((i & 7) == 4){		// WHAT?
+					if((i & 7) == 4){		// 1/8 probability
 						m_objectFlags[i] |= UseInRoadBlock;
 						if(maxX > maxY)
 							m_objectFlags[i] |= ObjectEastWest;

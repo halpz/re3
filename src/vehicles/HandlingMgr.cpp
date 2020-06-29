@@ -78,7 +78,7 @@ cHandlingDataMgr::Initialise(void)
 {
 	LoadHandlingData();
 	field_0 = 0.1f;
-	field_4 = 0.9f;
+	fWheelFriction = 0.9f;
 	field_8 = 1.0f;
 	field_C = 0.8f;
 	field_10 = 0.98f;

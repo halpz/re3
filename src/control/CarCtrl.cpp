@@ -463,10 +463,6 @@ CCarCtrl::GenerateOneRandomCar()
 		directionNextLinkY = pNextLink->GetDirY() * pVehicle->AutoPilot.m_nNextDirection;
 	}
 #else
-	float currentPathLinkForwardX = pVehicle->AutoPilot.m_nCurrentDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo].GetDirX();
-	float currentPathLinkForwardY = pVehicle->AutoPilot.m_nCurrentDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo].GetDirY();
-	float nextPathLinkForwardX = pVehicle->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo].GetDirX();
-	float nextPathLinkForwardY = pVehicle->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo].GetDirY();
 
 	CCarPathLink* pCurrentLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo];
 	CCarPathLink* pNextLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo];
@@ -988,13 +984,15 @@ void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList& lst, CVehicle* pVehicle, f
 					if (pVehicle->GetModelIndex() == MI_RCBANDIT){
 						if (dotVelocity * GAME_SPEED_TO_METERS_PER_SECOND / 2 > distanceUntilHit)
 							pPed->SetEvasiveStep(pVehicle, 0);
-					}else if (dotVelocity > 0.3f){
-						if (sideLength - 0.5f < sidewaysDistance)
+					}
+					else if (dotVelocity > 0.3f) {
+						if (sideLength + 0.1f < sidewaysDistance)
 							pPed->SetEvasiveStep(pVehicle, 0);
 						else
 							pPed->SetEvasiveDive(pVehicle, 0);
-					}else{
-						if (sideLength + 0.1f < sidewaysDistance)
+					}
+					else if (dotVelocity > 0.1f) {
+						if (sideLength - 0.5f < sidewaysDistance)
 							pPed->SetEvasiveStep(pVehicle, 0);
 						else
 							pPed->SetEvasiveDive(pVehicle, 0);
@@ -1023,7 +1021,7 @@ void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList& lst, CVehicle* pVehicle, f
 						CPlayerPed* pPlayerPed = (CPlayerPed*)pPed;
 						if (pPlayerPed->IsPlayer() && dotDirection < frontSafe &&
 						  pPlayerPed->IsPedInControl() &&
-						  pPlayerPed->m_fMoveSpeed < 0.1f && pPlayerPed->bIsLooking &&
+						  pPlayerPed->m_fMoveSpeed < 1.0f && !pPlayerPed->bIsLooking &&
 						  CTimer::GetTimeInMilliseconds() > pPlayerPed->m_lookTimer) {
 							pPlayerPed->AnnoyPlayerPed(false);
 							pPlayerPed->SetLookFlag(pVehicle, true);
@@ -1647,12 +1645,18 @@ void CCarCtrl::PickNextNodeRandomly(CVehicle* pVehicle)
 	if (pVehicle->AutoPilot.m_bStayInFastLane)
 		pVehicle->AutoPilot.m_nNextLane = 0;
 	CVector positionOnCurrentLinkIncludingLane(
-		pCurLink->GetX() + ((pVehicle->AutoPilot.m_nCurrentLane + pCurLink->OneWayLaneOffset()) * LANE_WIDTH) * currentPathLinkForwardY,
-		pCurLink->GetY() - ((pVehicle->AutoPilot.m_nCurrentLane + pCurLink->OneWayLaneOffset()) * LANE_WIDTH) * currentPathLinkForwardX,
+		pCurLink->GetX() + ((pVehicle->AutoPilot.m_nCurrentLane + pCurLink->OneWayLaneOffset()) * LANE_WIDTH)
+#ifdef FIX_BUGS
+		* currentPathLinkForwardY
+#endif
+		,pCurLink->GetY() - ((pVehicle->AutoPilot.m_nCurrentLane + pCurLink->OneWayLaneOffset()) * LANE_WIDTH) * currentPathLinkForwardX,
 		0.0f);
 	CVector positionOnNextLinkIncludingLane(
-		pNextLink->GetX() + ((pVehicle->AutoPilot.m_nNextLane + pNextLink->OneWayLaneOffset()) * LANE_WIDTH) * nextPathLinkForwardY,
-		pNextLink->GetY() - ((pVehicle->AutoPilot.m_nNextLane + pNextLink->OneWayLaneOffset()) * LANE_WIDTH) * nextPathLinkForwardX,
+		pNextLink->GetX() + ((pVehicle->AutoPilot.m_nNextLane + pNextLink->OneWayLaneOffset()) * LANE_WIDTH)
+#ifdef FIX_BUGS
+		* nextPathLinkForwardY
+#endif
+		,pNextLink->GetY() - ((pVehicle->AutoPilot.m_nNextLane + pNextLink->OneWayLaneOffset()) * LANE_WIDTH) * nextPathLinkForwardX,
 		0.0f);
 	float directionCurrentLinkX = pCurLink->GetDirX() * pVehicle->AutoPilot.m_nCurrentDirection;
 	float directionCurrentLinkY = pCurLink->GetDirY() * pVehicle->AutoPilot.m_nCurrentDirection;

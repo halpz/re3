@@ -20,7 +20,7 @@ public:
 	void Terminate(void);
 	void Service(void);
 	
-	int32 CreateEntity(int32 type, void *UID);
+	int32 CreateEntity(eAudioType type, void *UID);
 	void DestroyEntity(int32 audioEntity);
 	void SetEntityStatus(int32 audioEntity, uint8 status);
 	void PlayOneShot(int32 audioEntity, uint16 oneShot, float volume);
@@ -77,7 +77,7 @@ public:
 	void PlayPreloadedCutSceneMusic(void);
 	void StopCutSceneMusic(void);
 	
-	void PreloadMissionAudio(char *missionAudio);
+	void PreloadMissionAudio(Const char *missionAudio);
 	uint8 GetMissionAudioLoadingStatus(void);
 	void SetMissionAudioLocation(float x, float y, float z);
 	void PlayLoadedMissionAudio(void);

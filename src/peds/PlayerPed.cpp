@@ -35,6 +35,9 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 {
 	m_fMoveSpeed = 0.0f;
 	SetModelIndex(MI_PLAYER);
+#ifdef FIX_BUGS
+	m_fCurrentStamina = m_fMaxStamina = 150.0f;
+#endif
 	SetInitialState();
 
 	m_pWanted = new CWanted();
@@ -46,8 +49,9 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 	m_bSpeedTimerFlag = false;
 	m_pPointGunAt = nil;
 	m_nPedState = PED_IDLE;
-	m_fMaxStamina = 150.0f;
-	m_fCurrentStamina = m_fMaxStamina;
+#ifndef FIX_BUGS
+	m_fCurrentStamina = m_fMaxStamina = 150.0f;
+#endif
 	m_fStaminaProgress = 0.0f;
 	m_nEvadeAmount = 0;
 	field_1367 = 0;
@@ -227,7 +231,7 @@ CPlayerPed::SetInitialState(void)
 {
 	m_bAdrenalineActive = false;
 	m_nAdrenalineTime = 0;
-	CTimer::SetTimeStep(1.0f);
+	CTimer::SetTimeScale(1.0f);
 	m_pSeekTarget = nil;
 	m_vecSeekPos = { 0.0f, 0.0f, 0.0f };
 	m_fleeFromPosX = 0.0f;
@@ -1058,6 +1062,9 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 	}
 
 #ifdef FREE_CAM
+	static int8 changedHeadingRate = 0;
+	if (changedHeadingRate == 2) changedHeadingRate = 1;
+
 	// Rotate player/arm when shooting. We don't have auto-rotation anymore
 	if (CCamera::m_bUseMouse3rdPerson && CCamera::bFreeCam &&
 		m_nSelectedWepSlot == m_currentWeapon && m_nMoveState != PEDMOVE_SPRINT) {
@@ -1081,6 +1088,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 #endif
 				} else {
 					m_fRotationDest = limitedCam;
+					changedHeadingRate = 2;
 					m_headingRate = 50.0f;
 
 					// Anim. fix for shotgun, ak47 and m16 (we must finish rot. it quickly)
@@ -1099,9 +1107,11 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 				}
 			} else if (weaponInfo->m_bCanAimWithArm)
 				ClearPointGunAt();
-			else
-				RestoreHeadingRate();
 		}
+	}
+	if (changedHeadingRate == 1) {
+		changedHeadingRate = 0;
+		RestoreHeadingRate();
 	}
 #endif
 
@@ -1347,7 +1357,7 @@ CPlayerPed::ProcessControl(void)
 		case PED_WANDER_PATH:
 		case PED_PURSUE:
 		case PED_FOLLOW_PATH:
-		case PED_ROCKET_ODE:
+		case PED_ROCKET_MODE:
 		case PED_DUMMY:
 		case PED_PAUSE:
 		case PED_FACE_PHONE:

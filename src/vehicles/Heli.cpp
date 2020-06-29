@@ -570,7 +570,7 @@ CHeli::PreRender(void)
 	i = 0;
 	for(angle = 0.0f; angle < TWOPI; angle += TWOPI/32){
 		CVector pos(radius*Cos(angle), radius*Sin(angle), 0.0f);
-		CVector dir = pos*0.01f;
+		CVector dir = CVector(pos.x, pos.y, 1.0f)*0.01f;
 		pos += GetPosition();
 
 		if(CWorld::ProcessVerticalLine(pos, testLowZ, point, entity, true, false, false, false, true, false, nil))
@@ -590,12 +590,12 @@ CHeli::PreRender(void)
 			g = 6;
 			b = 3;
 			break;
-		case SURFACE_DIRT:
+		case SURFACE_GRAVEL:
 			r = 10;
 			g = 8;
 			b = 7;
 			break;
-		case SURFACE_DIRTTRACK:
+		case SURFACE_MUD_DRY:
 			r = 10;
 			g = 6;
 			b = 3;

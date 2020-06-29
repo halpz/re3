@@ -23,6 +23,22 @@ else
 	Librw = os.getenv("LIBRW") or "librw"
 end
 
+function getsys(a)
+	if a == 'windows' then
+		return 'win'
+	end
+	return a
+end
+
+function getarch(a)
+	if a == 'x86_64' then
+		return 'amd64'
+	elseif a == 'ARM' then
+		return 'arm'
+	end
+	return a
+end
+
 workspace "re3"
 	language "C++"
 	configurations { "Debug", "Release" }
@@ -35,11 +51,16 @@ workspace "re3"
 			"win-x86-RW33_d3d8-mss",
 			"win-x86-librw_d3d9-mss",
 			"win-x86-librw_gl3_glfw-mss",
+			"win-x86-RW33_d3d8-oal",
+			"win-x86-librw_d3d9-oal",
+			"win-x86-librw_gl3_glfw-oal",
 		}
 
 	filter { "system:linux" }
 		platforms {
 			"linux-x86-librw_gl3_glfw-oal",
+			"linux-amd64-librw_gl3_glfw-oal",
+			"linux-arm-librw_gl3_glfw-oal",
 		}
 
 	filter "configurations:Debug"
@@ -58,6 +79,12 @@ workspace "re3"
 	filter { "platforms:*x86*" }
 		architecture "x86"
 		
+	filter { "platforms:*amd64*" }
+		architecture "amd64"
+
+	filter { "platforms:*arm*" }
+		architecture "ARM"
+
 	filter { "platforms:*librw_d3d9*" }
 		defines { "RW_D3D9" }
 		if(not _OPTIONS["with-librw"]) then
@@ -68,17 +95,12 @@ workspace "re3"
 		defines { "RW_GL3" }
 		includedirs { path.join(_OPTIONS["glfwdir"], "include") }
 		includedirs { path.join(_OPTIONS["glewdir"], "include") }
+		if(not _OPTIONS["with-librw"]) then
+			libdirs { path.join(Librw, "lib/%{getsys(cfg.system)}-%{getarch(cfg.architecture)}-gl3/%{cfg.buildcfg}") }
+		end
 
 	filter "platforms:win*librw_gl3_glfw*"
 		defines { "GLEW_STATIC" }
-		if(not _OPTIONS["with-librw"]) then
-			libdirs { path.join(Librw, "lib/win-x86-gl3/%{cfg.buildcfg}") }
-		end
-
-	filter "platforms:linux*librw_gl3_glfw*"
-		if(not _OPTIONS["with-librw"]) then
-			libdirs { path.join(Librw, "lib/linux-x86-gl3/%{cfg.buildcfg}") }
-		end
 
 	filter  {}
 		
@@ -163,12 +185,16 @@ project "re3"
 	includedirs { "src/weapons" }
 	includedirs { "src/extras" }
 	includedirs { "eax" }
-
-	includedirs { "milessdk/include" }
-	includedirs { "eax" }
-
-	libdirs { "milessdk/lib" }
 	
+	filter "platforms:*mss"
+		defines { "AUDIO_MSS" }
+		includedirs { "milessdk/include" }
+		libdirs { "milessdk/lib" }
+		
+	filter "platforms:*oal"
+		defines { "AUDIO_OAL" }
+	
+	filter {}
 	if(os.getenv("GTA_III_RE_DIR")) then
 		setpaths("$(GTA_III_RE_DIR)/", "%(cfg.buildtarget.name)", "")
 	end
@@ -180,9 +206,15 @@ project "re3"
 		characterset ("MBCS")
 		targetextension ".exe"
 
-	filter "platforms:linux*"
-		targetextension ".elf"
-		defines { "OPENAL" }
+	filter "platforms:win*oal"
+		includedirs { "openal-soft/include" }
+		includedirs { "libsndfile/include" }
+		includedirs { "mpg123/include" }
+		libdirs { "openal-soft/libs/Win32" }
+		libdirs { "libsndfile/lib" }
+		libdirs { "mpg123/lib" }
+
+	filter "platforms:linux*oal"
 		links { "openal", "mpg123", "sndfile", "pthread" }
 
 	filter "platforms:*RW33*"

@@ -231,7 +231,7 @@ enum PedState
 	PED_PURSUE,
 	PED_FOLLOW_PATH,
 	PED_SNIPER_MODE,
-	PED_ROCKET_ODE,
+	PED_ROCKET_MODE,
 	PED_DUMMY,
 	PED_PAUSE,
 	PED_ATTACK,
@@ -468,7 +468,7 @@ public:
 	CEntity *m_pCollidingEntity;
 	uint8 m_stateUnused;
 	uint32 m_timerUnused;
-	CVector2D *m_wanderRangeBounds;	// array with 2 CVector2D (actually unused CRange2D class) - unused
+	class CRange2D *m_wanderRangeBounds;
 	CWeapon m_weapons[WEAPONTYPE_TOTAL_INVENTORY_WEAPONS];
 	eWeaponType m_storedWeapon;
 	uint8 m_currentWeapon;			// eWeaponType
@@ -879,8 +879,21 @@ public:
 
 #ifndef MASTER
 	// Mobile things
+	void DebugDrawPedDestination(CPed *, int, int);
+	void DebugDrawPedDesiredHeading(CPed *, int, int);
+	void DebugDrawCollisionRadius(float, float, float, float, int);
+	void DebugDrawVisionRange(CVector, float);
+	void DebugDrawVisionSimple(CVector, float);
+	void DebugDrawLook();
+	void DebugDrawPedPsyche();
+	void DebugDrawDebugLines();
+
 	static void SwitchDebugDisplay(void);
+	static int GetDebugDisplay(void);
+
+	void DebugDrawLookAtPoints();
 	void DebugRenderOnePedText(void);
+	void DebugRenderClosePedText();
 #endif
 
 #ifdef PED_SKIN

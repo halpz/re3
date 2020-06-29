@@ -122,7 +122,7 @@ public:
 	static float GetSpriteSize(void) { return m_fCurrentSpriteSize; }
 	static int GetShadowStrength(void) { return m_nCurrentShadowStrength; }
 	static int GetLightShadowStrength(void) { return m_nCurrentLightShadowStrength; }
-	static int GetLightOnGroundBrightness(void) { return m_fCurrentLightsOnGroundBrightness; }
+	static float GetLightOnGroundBrightness(void) { return m_fCurrentLightsOnGroundBrightness; }
 	static float GetFarClip(void) { return m_fCurrentFarClip; }
 	static float GetFogStart(void) { return m_fCurrentFogStart; }
 
@@ -142,7 +142,7 @@ public:
 
 	static void Initialise(void);
 	static void Update(void);
-	static CVector &GetSunPosition(void) { return m_VectorToSun[m_CurrentStoredValue]; }
+	static CVector &GetSunDirection(void) { return m_VectorToSun[m_CurrentStoredValue]; }
 	static float GetShadowFrontX(void) { return m_fShadowFrontX[m_CurrentStoredValue]; }
 	static float GetShadowFrontY(void) { return m_fShadowFrontY[m_CurrentStoredValue]; }
 	static float GetShadowSideX(void) { return m_fShadowSideX[m_CurrentStoredValue]; }

@@ -2,14 +2,14 @@
 
 enum {
 	PLAYERCONTROL_ENABLED = 0,
-	PLAYERCONTROL_DISABLED_1 = 1,	// used by first person camera
-	PLAYERCONTROL_DISABLED_2 = 2,
+	PLAYERCONTROL_CAMERA = 1,
+	PLAYERCONTROL_UNK2 = 2,
 	PLAYERCONTROL_GARAGE = 4,
-	PLAYERCONTROL_DISABLED_8 = 8,
-	PLAYERCONTROL_DISABLED_10 = 16,
-	PLAYERCONTROL_DISABLED_20 = 32, // used on CPlayerInfo::MakePlayerSafe
-	PLAYERCONTROL_DISABLED_40 = 64, // used on phone calls
-	PLAYERCONTROL_DISABLED_80 = 128,// used on cutscenes
+	PLAYERCONTROL_UNK8 = 8,
+	PLAYERCONTROL_UNK10 = 16,
+	PLAYERCONTROL_PLAYERINFO = 32,
+	PLAYERCONTROL_PHONE = 64,
+	PLAYERCONTROL_CUTSCENE = 128,
 };
 
 class CControllerState
@@ -442,6 +442,7 @@ public:
 	bool GetLeftShoulder2(void)  { return !!NewState.LeftShoulder2; }
 	bool GetRightShoulder1(void) { return !!NewState.RightShoulder1; }
 	bool GetRightShoulder2(void) { return !!NewState.RightShoulder2; }
+	bool GetStart()              { return !!NewState.Start; }
 	int16 GetLeftStickX(void)    { return NewState.LeftStickX; }
 	int16 GetLeftStickY(void)    { return NewState.LeftStickY; }
 	int16 GetRightStickX(void)    { return NewState.RightStickX; }

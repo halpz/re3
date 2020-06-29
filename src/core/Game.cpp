@@ -86,8 +86,7 @@
 #include "ZoneCull.h"
 #include "Zones.h"
 #include "debugmenu.h"
-
-
+#include "frontendoption.h"
 
 eLevelName CGame::currLevel;
 bool CGame::bDemoMode = true;
@@ -272,6 +271,9 @@ bool CGame::InitialiseOnceAfterRW(void)
 	DMAudio.SetMusicFadeVol(127);
 	CWorld::Players[0].SetPlayerSkin(CMenuManager::m_PrefsSkinFile);
 
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	CustomFrontendOptionsPopulate();
+#endif
 	return true;
 }
 

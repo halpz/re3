@@ -142,11 +142,11 @@ void CMovingThings::Init()
 void CMovingThings::Shutdown()
 {
 	int i;
-	for (i = 0; i < 11; ++i)
+	for (i = 0; i < ARRAY_SIZE(aScrollBars); ++i)
 		aScrollBars[i].SetVisibility(false);
-	for (i = 0; i < 2; ++i)
+	for (i = 0; i < ARRAY_SIZE(aTowerClocks); ++i)
 		aTowerClocks[i].SetVisibility(false);
-	for (i = 0; i < 3; ++i)
+	for (i = 0; i < ARRAY_SIZE(aDigitalClocks); ++i)
 		aDigitalClocks[i].SetVisibility(false);
 }
 
@@ -168,17 +168,17 @@ void CMovingThings::Update()
 			aMovingThings[i].Update();
 	}
 
-	for (i = 0; i < 11; ++i)
+	for (i = 0; i < ARRAY_SIZE(aScrollBars); ++i)
 	{
 		if (aScrollBars[i].IsVisible() || (CTimer::GetFrameCounter() + i) % 8 == 0)
 			aScrollBars[i].Update();
 	}
-	for (i = 0; i < 2; ++i)
+	for (i = 0; i < ARRAY_SIZE(aTowerClocks); ++i)
 	{
 		if (aTowerClocks[i].IsVisible() || (CTimer::GetFrameCounter() + i) % 8 == 0)
 			aTowerClocks[i].Update();
 	}
-	for (i = 0; i < 3; ++i)
+	for (i = 0; i < ARRAY_SIZE(aDigitalClocks); ++i)
 	{
 		if (aDigitalClocks[i].IsVisible() || (CTimer::GetFrameCounter() + i) % 8 == 0)
 			aDigitalClocks[i].Update();
@@ -188,17 +188,17 @@ void CMovingThings::Update()
 void CMovingThings::Render()
 {
 	int i;
-	for (i = 0; i < 11; ++i)
+	for (i = 0; i < ARRAY_SIZE(aScrollBars); ++i)
 	{
 		if (aScrollBars[i].IsVisible())
 			aScrollBars[i].Render();
 	}
-	for (i = 0; i < 2; ++i)
+	for (i = 0; i < ARRAY_SIZE(aTowerClocks); ++i)
 	{
 		if (aTowerClocks[i].IsVisible())
 			aTowerClocks[i].Render();
 	}
-	for (i = 0; i < 3; ++i)
+	for (i = 0; i < ARRAY_SIZE(aDigitalClocks); ++i)
 	{
 		if (aDigitalClocks[i].IsVisible())
 			aDigitalClocks[i].Render();
@@ -297,7 +297,8 @@ const char* FindDigitalClockMessage()
 	}
 	else
 	{
-		int temperature = 13.0f - 6.0f * Cos((CClock::GetMinutes() + 60.0f * CClock::GetHours()) * 0.0043611112f - 1.0f);
+		// they didn't use rad2deg here because of 3.14
+		int temperature = 13.0f - 6.0f * Cos((CClock::GetMinutes() + 60.0f * CClock::GetHours()) / (4.0f * 180.0f / 3.14f) - 1.0f);
 		String_DigitalClock[0] = '0' + temperature / 10;
 		if (String_DigitalClock[0] == '0')
 			String_DigitalClock[0] = ' ';
@@ -312,7 +313,7 @@ const char* FindDigitalClockMessage()
 // ---------- CScrollBar ----------
 void CScrollBar::Init(CVector position, uint8 type, float sizeX, float sizeY, float sizeZ, uint8 red, uint8 green, uint8 blue, float scale)
 {
-	for (int i = 0; i < 40; ++i)
+	for (int i = 0; i < ARRAY_SIZE(m_MessageBar); ++i)
 		m_MessageBar[i] = 0;
 
 	m_pMessage = ". ";
@@ -618,16 +619,16 @@ void CScrollBar::Update()
 	}
 
 	// Scroll
-	for (int i = 0; i < 39; i++)
+	for (int i = 0; i < ARRAY_SIZE(m_MessageBar)-1; i++)
 		m_MessageBar[i] = m_MessageBar[i + 1];
-	m_MessageBar[39] = m_Counter < 5 ? ScrollCharSet[m_pMessage[m_MessageCurrentChar] - ' '][m_Counter] : 0;
+	m_MessageBar[ARRAY_SIZE(m_MessageBar)-1] = m_Counter < 5 ? ScrollCharSet[m_pMessage[m_MessageCurrentChar] - ' '][m_Counter] : 0;
 
 	// Introduce some random displaying glitches; signs aren't supposed to be perfect :P
 	switch (CGeneral::GetRandomNumber() & 0xFF)
 	{
-	case 0x0D: m_MessageBar[39] = 0;                 break;
-	case 0xE3: m_MessageBar[39] = 0xE3;              break;
-	case 0x64: m_MessageBar[39] = ~m_MessageBar[39]; break;
+	case 0x0D: m_MessageBar[ARRAY_SIZE(m_MessageBar)-1] = 0;                 break;
+	case 0xE3: m_MessageBar[ARRAY_SIZE(m_MessageBar)-1] = 0xE3;              break;
+	case 0x64: m_MessageBar[ARRAY_SIZE(m_MessageBar)-1] = ~m_MessageBar[ARRAY_SIZE(m_MessageBar)-1]; break;
 	}
 }
 
@@ -654,7 +655,7 @@ void CScrollBar::Render()
 
 	CVector coronaCoord, screenCoord;
 	float   screenW, screenH;
-	for (int i = 1; i < 40; ++i)
+	for (int i = 1; i < ARRAY_SIZE(m_MessageBar); ++i)
 	{
 		for (int j = 0; j < 5; ++j)
 		{

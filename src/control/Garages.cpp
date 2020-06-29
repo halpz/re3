@@ -1853,7 +1853,14 @@ CVehicle* CStoredCar::RestoreCar()
 	CStreaming::RequestModel(m_nModelIndex, STREAMFLAGS_DEPENDENCY);
 	if (!CStreaming::HasModelLoaded(m_nModelIndex))
 		return nil;
-	CVehicleModelInfo::SetComponentsToUse(m_nVariationA, m_nVariationB);
+#ifdef FIX_BUGS
+	CVehicleModelInfo* pModelInfo = (CVehicleModelInfo*)CModelInfo::GetModelInfo(m_nModelIndex);
+	assert(pModelInfo);
+	if (pModelInfo->m_numComps != 0)
+#endif
+	{
+		CVehicleModelInfo::SetComponentsToUse(m_nVariationA, m_nVariationB);
+	}
 #ifdef FIX_BUGS
 	CVehicle* pVehicle;
 	if (CModelInfo::IsBoatModel(m_nModelIndex))

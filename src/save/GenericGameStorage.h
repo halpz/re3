@@ -41,3 +41,9 @@ extern uint32 TimeToStayFadedBeforeFadeOut;
 extern char SaveFileNameJustSaved[260]; // 8F2570
 
 const char TopLineEmptyFile[] = "THIS FILE IS NOT VALID YET";
+
+#ifdef MISSION_REPLAY
+extern int8 IsQuickSave; // originally int
+
+bool SaveGameForPause(int);
+#endif

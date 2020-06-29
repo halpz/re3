@@ -11,7 +11,11 @@ void TextCopy(wchar *dst, const wchar *src);
 
 struct CKeyEntry
 {
+#ifdef FIX_BUGS
+	uint32 valueOffset;
+#else
 	wchar *value;
+#endif
 	char key[8];
 };
 
@@ -30,7 +34,11 @@ public:
 	void Unload(void);
 	void Update(wchar *chars);
 	CKeyEntry *BinarySearch(const char *key, CKeyEntry *entries, int16 low, int16 high);
+#ifdef FIX_BUGS
+	wchar *Search(const char *key, wchar *data);
+#else
 	wchar *Search(const char *key);
+#endif
 };
 
 class CData

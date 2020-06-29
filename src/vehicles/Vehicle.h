@@ -28,12 +28,6 @@ enum eCarLock {
 	CARLOCK_SKIP_SHUT_DOORS
 };
 
-
-enum
-{
-	BOAT_POS_FRONTSEAT
-};
-
 enum eDoors
 {
 	DOOR_BONNET = 0,
@@ -86,8 +80,8 @@ enum
 	CAR_PIECE_WING_LR,
 	CAR_PIECE_WING_RR,
 	CAR_PIECE_WHEEL_LF,
-	CAR_PIECE_WHEEL_LR,
 	CAR_PIECE_WHEEL_RF,
+	CAR_PIECE_WHEEL_LR,
 	CAR_PIECE_WHEEL_RR,
 	CAR_PIECE_WINDSCREEN,
 };
@@ -108,9 +102,6 @@ enum eFlightModel
 	FLIGHT_MODEL_HELI,
 	FLIGHT_MODEL_SEAPLANE
 };
-
-// Or Weapon.h?
-void FireOneInstantHitRound(CVector *shotSource, CVector *shotTarget, int32 damage);
 
 class CVehicle : public CPhysical
 {
@@ -197,7 +188,7 @@ public:
 	bool m_bSirenOrAlarm;
 	int8 m_comedyControlState;
 	CStoredCollPoly m_aCollPolys[2];     // poly which is under front/rear part of car
-	float m_fSteerRatio;
+	float m_fSteerInput;
 	eVehicleType m_vehType;
 
 	static void *operator new(size_t);
@@ -274,8 +265,11 @@ public:
 	void InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage);
 	void DoFixedMachineGuns(void);
 
-
+#ifdef FIX_BUGS
+	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1 && GetStatus() != STATUS_WRECKED; }
+#else
 	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1; }
+#endif
 	CVehicleModelInfo* GetModelInfo() { return (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()); }
 	bool IsTaxi(void) { return GetModelIndex() == MI_TAXI || GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_BORGNINE; }
 	AnimationId GetDriverAnim(void) { return IsCar() && bLowVehicle ? ANIM_CAR_LSIT : (IsBoat() && GetModelIndex() != MI_SPEEDER ? ANIM_DRIVE_BOAT : ANIM_CAR_SIT); }

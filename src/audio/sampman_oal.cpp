@@ -174,10 +174,10 @@ add_providers()
 			}
 			
 			if ( alGetEnumValue("AL_EFFECT_EAXREVERB") != 0
-				|| pDeviceList->IsExtensionSupported(i, "EAX2.0")
-				|| pDeviceList->IsExtensionSupported(i, "EAX3.0") 
-				|| pDeviceList->IsExtensionSupported(i, "EAX4.0")
-				|| pDeviceList->IsExtensionSupported(i, "EAX5.0") )
+				|| pDeviceList->IsExtensionSupported(i, ADEXT_EAX2)
+				|| pDeviceList->IsExtensionSupported(i, ADEXT_EAX3) 
+				|| pDeviceList->IsExtensionSupported(i, ADEXT_EAX4)
+				|| pDeviceList->IsExtensionSupported(i, ADEXT_EAX5) )
 			{
 				if ( n < MAXPROVIDERS )
 				{
@@ -775,7 +775,7 @@ cSampleManager::IsPedCommentLoaded(uint32 nComment)
 {
 	ASSERT( nComment < TOTAL_AUDIO_SAMPLES );
 	
-	uint8 slot;
+	int8 slot;
 
 	for ( int32 i = 0; i < _TODOCONST(3); i++ )
 	{
@@ -795,11 +795,15 @@ cSampleManager::IsPedCommentLoaded(uint32 nComment)
 int32
 cSampleManager::_GetPedCommentSlot(uint32 nComment)
 {
-	uint8 slot;
+	int8 slot;
 
 	for (int32 i = 0; i < _TODOCONST(3); i++)
 	{
 		slot = nCurrentPedSlot - i - 1;
+#ifdef FIX_BUGS
+		if (slot < 0)
+			slot += ARRAY_SIZE(nPedSlotSfx);
+#endif
 		if (nComment == nPedSlotSfx[slot])
 			return slot;
 	}
