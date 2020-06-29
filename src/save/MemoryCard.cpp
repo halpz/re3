@@ -1616,7 +1616,7 @@ CMemoryCard::WritetoMemCard(int32 file, void *buff, int32 size)
 #endif
 }
 
-inline void
+static inline void
 MakeSpaceForSizeInBufferPointer(uint8 *&presize, uint8 *&buf, uint8 *&postsize)
 {
 	presize = buf;
@@ -1624,7 +1624,7 @@ MakeSpaceForSizeInBufferPointer(uint8 *&presize, uint8 *&buf, uint8 *&postsize)
 	postsize = buf;
 }
 
-inline void
+static inline void
 CopySizeAndPreparePointer(uint8 *&buf, uint8 *&postbuf, uint8 *&postbuf2, uint32 &unused, uint32 &size)
 {
 	memcpy(buf, &size, sizeof(size));
