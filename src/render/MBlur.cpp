@@ -52,11 +52,13 @@ CMBlur::MotionBlurOpen(RwCamera *cam)
 	if(pFrontBuffer)
 		MotionBlurClose();
 	
-	extern void _GetVideoMemInfo(LPDWORD total, LPDWORD avaible);
 	DWORD total, avaible;
+#ifdef _WIN32
+	extern void _GetVideoMemInfo(LPDWORD total, LPDWORD avaible);
 	
 	_GetVideoMemInfo(&total, &avaible);
 	debug("Available video memory %d\n", avaible);
+#endif
 		
 	if(BlurOn)
 	{
@@ -102,9 +104,11 @@ CMBlur::MotionBlurOpen(RwCamera *cam)
 			rect.h = RwRasterGetHeight(RwCameraGetRaster(cam));
 		}
 		
+#ifdef _WIN32
 		_GetVideoMemInfo(&total, &avaible);
 		debug("Available video memory %d\n", avaible);
 		CreateImmediateModeData(cam, &rect);
+#endif
 	}
 	else
 	{
