@@ -380,7 +380,7 @@ private:
 
 
 enum {
-	MAX_STACK_DEPTH = 6,
+	MAX_STACK_DEPTH = 6, // 4 PS2
 	NUM_LOCAL_VARS = 16,
 	NUM_TIMERS = 2
 };

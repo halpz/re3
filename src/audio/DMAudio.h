@@ -26,6 +26,7 @@ public:
 	void PlayOneShot(int32 audioEntity, uint16 oneShot, float volume);
 	void DestroyAllGameCreatedEntities(void);
 	
+	void SetMonoMode(uint8 mono);
 	void SetEffectsMasterVolume(uint8 volume);
 	void SetMusicMasterVolume(uint8 volume);
 	void SetEffectsFadeVol(uint8 volume);

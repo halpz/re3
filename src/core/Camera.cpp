@@ -30,6 +30,7 @@
 #include "Pools.h"
 #include "Debug.h"
 #include "GenericGameStorage.h"
+#include "MemoryCard.h"
 #include "Camera.h"
 
 enum
@@ -91,17 +92,28 @@ CCamera::Init(void)
 	float fMouseAccelHorzntl = m_fMouseAccelHorzntl;
 	float fMouseAccelVertical = m_fMouseAccelVertical;
 #endif
-#ifdef FIX_BUGS
-	static const CCamera DummyCamera = CCamera(0.f);
-	*this = DummyCamera;
-#else
-	memset(this, 0, sizeof(CCamera));	// getting rid of vtable, eh?
+
+#ifdef PS2_MENU
+	if ( !TheMemoryCard.m_bWantToLoad && !FrontEndMenuManager.m_bWantToRestart ) {
 #endif
-#ifdef GTA3_1_1_PATCH
-	m_fMouseAccelHorzntl = fMouseAccelHorzntl;
-	m_fMouseAccelVertical = fMouseAccelVertical;
+	
+	#ifdef FIX_BUGS
+		static const CCamera DummyCamera = CCamera(0.f);
+		*this = DummyCamera;
+	#else
+		memset(this, 0, sizeof(CCamera));	// getting rid of vtable, eh?
+	#endif
+	
+	#ifdef GTA3_1_1_PATCH
+		m_fMouseAccelHorzntl = fMouseAccelHorzntl;
+		m_fMouseAccelVertical = fMouseAccelVertical;
+	#endif
+		m_pRwCamera = nil;
+	
+#ifdef PS2_MENU
+	}
 #endif
-	m_pRwCamera = nil;
+	
 	m_1rstPersonRunCloseToAWall = false;
 	m_fPositionAlongSpline = 0.0f;
 	m_bCameraJustRestored = false;
@@ -168,7 +180,12 @@ CCamera::Init(void)
 	PlayerExhaustion = 1.0f;
 	DebugCamMode = CCam::MODE_NONE;
 	m_PedOrientForBehindOrInFront = 0.0f;
-	if(!FrontEndMenuManager.m_bWantToRestart){
+#ifdef PS2_MENU
+	if ( !TheMemoryCard.m_bWantToLoad && !FrontEndMenuManager.m_bWantToRestart )
+#else
+	if(!FrontEndMenuManager.m_bWantToRestart)
+#endif
+	{
 		m_bFading = false;
 		CDraw::FadeValue = 0;
 		m_fFLOATingFade = 0.0f;
@@ -177,7 +194,11 @@ CCamera::Init(void)
 		m_fFLOATingFadeMusic = 0.0f;
 	}
 	m_bMoveCamToAvoidGeom = false;
+#ifdef PS2_MENU
+	if ( TheMemoryCard.m_bWantToLoad || FrontEndMenuManager.m_bWantToRestart )
+#else
 	if(FrontEndMenuManager.m_bWantToRestart)
+#endif
 		m_bMoveCamToAvoidGeom = true;
 	m_bStartingSpline = false;
 	m_iTypeOfSwitch = INTERPOLATION;
@@ -645,10 +666,10 @@ CCamera::Process(void)
 	GetMatrix().GetPosition().y += shakeOffset * (((shakeRand & 0xF0) >> 4) - 7);
 	GetMatrix().GetPosition().z += shakeOffset * (((shakeRand & 0xF00) >> 8) - 7);
 
-	if(shakeOffset > 0.0f && m_BlurType != MBLUR_SNIPER)
+	if(shakeOffset > 0.0f && m_BlurType != MOTION_BLUR_SNIPER)
 		SetMotionBlurAlpha(Min((int)(shakeStrength*255.0f) + 25, 150));
 	if(Cams[ActiveCam].Mode == CCam::MODE_1STPERSON && FindPlayerVehicle() && FindPlayerVehicle()->GetUp().z < 0.2f)
-		SetMotionBlur(230, 230, 230, 215, MBLUR_NORMAL);
+		SetMotionBlur(230, 230, 230, 215, MOTION_BLUR_LIGHT_SCENE);
 
 	CalculateDerivedValues();
 	CDraw::SetFOV(FOV);
@@ -2446,7 +2467,7 @@ CCamera::ProcessWideScreenOn(void)
 void
 CCamera::DrawBordersForWideScreen(void)
 {
-	if(m_BlurType == MBLUR_NONE || m_BlurType == MBLUR_NORMAL)
+	if(m_BlurType == MOTION_BLUR_NONE || m_BlurType == MOTION_BLUR_LIGHT_SCENE)
 		SetMotionBlurAlpha(80);
 
 	CSprite2d::DrawRect(
@@ -3341,7 +3362,11 @@ CCamera::ProcessMusicFade(void)
 			if(m_fTimeToFadeMusic == 0.0f)
 				m_fTimeToFadeMusic = 1.0f;
 
+#ifdef PS2_MENU
+			if(m_bMoveCamToAvoidGeom || TheMemoryCard.StillToFadeOut){
+#else
 			if(m_bMoveCamToAvoidGeom || StillToFadeOut){
+#endif
 				m_fFLOATingFadeMusic = 256.0f;
 				m_bMoveCamToAvoidGeom = false;
 			}else

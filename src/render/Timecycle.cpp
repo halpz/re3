@@ -286,8 +286,8 @@ CTimeCycle::Update(void)
 	m_fCurrentBlurBlue = INTERP(m_fBlurBlue);
 	m_fCurrentBlurAlpha = INTERP(m_fBlurAlpha);
 
-	if(TheCamera.m_BlurType == MBLUR_NONE || TheCamera.m_BlurType == MBLUR_NORMAL)
-		TheCamera.SetMotionBlur(m_fCurrentBlurRed, m_fCurrentBlurGreen, m_fCurrentBlurBlue, m_fCurrentBlurAlpha, MBLUR_NORMAL);
+	if(TheCamera.m_BlurType == MOTION_BLUR_NONE || TheCamera.m_BlurType == MOTION_BLUR_LIGHT_SCENE)
+		TheCamera.SetMotionBlur(m_fCurrentBlurRed, m_fCurrentBlurGreen, m_fCurrentBlurBlue, m_fCurrentBlurAlpha, MOTION_BLUR_LIGHT_SCENE);
 
 	if(m_FogReduction != 0)
 		m_fCurrentFarClip = Max(m_fCurrentFarClip, m_FogReduction/64.0f * 650.0f);

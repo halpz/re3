@@ -1,15 +1,13 @@
 #include "common.h"
 #include "main.h"
 #include "Timer.h"
-#include "Pad.h"
-#include "ControllerConfig.h"
-#include "VisibilityPlugins.h"
 #include "Sprite2d.h"
 #include "Text.h"
 #include "Font.h"
-#include "Frontend.h"
 #include "FrontEndControls.h"
 
+#define X SCREEN_SCALE_X
+#define Y(x) SCREEN_SCALE_Y(float(x)*(float(DEFAULT_SCREEN_HEIGHT)/float(DEFAULT_SCREEN_HEIGHT_PAL)))
 
 void
 CPlaceableShText::Draw(float x, float y)
@@ -490,7 +488,7 @@ void
 CMenuMultiChoiceTriggered::SelectCurrentOptionUnderCursor(void)
 {
 	CMenuMultiChoice::SelectCurrentOptionUnderCursor();
-	if(m_cursor != -1)
+	if(m_cursor != -1 && m_triggers[m_cursor] != nil )
 		m_triggers[m_cursor](this);
 }
 
@@ -581,7 +579,10 @@ CMenuMultiChoicePictured::Draw(const CRGBA &optionHighlight, const CRGBA &titleH
 		for(i = 0; i < m_numOptions; i++)
 			if(i == m_cursor){
 				if(m_bHasSprite[i])
-					m_sprites[i].Draw(CRGBA(255, 255, 255, 255), m_position.x+x, m_position.y+y);
+				{
+					uint8 color = Max(Max(optionHighlight.r, optionHighlight.g), optionHighlight.b);
+					m_sprites[i].Draw(CRGBA(color, color, color, optionHighlight.a), m_position.x+x, m_position.y+y);
+				}
 			}else{
 				if(m_bHasSprite[i]){
 					if(m_options[i].m_bSelected)
@@ -1210,10 +1211,10 @@ CMenuSlider::Draw(const CRGBA &optionHighlight, const CRGBA &titleHighlight, flo
 {
 	if(m_bActive){
 		CRGBA selectionCol = m_colors[0];
-		if(selectionCol.red == SELECTED_TEXT_COLOR_0.red &&
-		   selectionCol.green == SELECTED_TEXT_COLOR_0.green &&
-		   selectionCol.blue == SELECTED_TEXT_COLOR_0.blue &&
-		   selectionCol.alpha == SELECTED_TEXT_COLOR_0.alpha)
+		if(optionHighlight.red == SELECTED_TEXT_COLOR_0.red &&
+		   optionHighlight.green == SELECTED_TEXT_COLOR_0.green &&
+		   optionHighlight.blue == SELECTED_TEXT_COLOR_0.blue &&
+		   optionHighlight.alpha == SELECTED_TEXT_COLOR_0.alpha)
 			selectionCol = m_colors[1];
 
 		if(m_style == 1){
@@ -1223,10 +1224,10 @@ CMenuSlider::Draw(const CRGBA &optionHighlight, const CRGBA &titleHighlight, flo
 			CVector2D boxPos = m_box.m_position + m_position + CVector2D(x,y);
 			if(m_box.m_bDropShadow)
 				CSprite2d::DrawRect(
-					CRect(boxPos.x + m_box.m_shadowOffset.x,
-					      boxPos.y + m_box.m_shadowOffset.y,
-					      boxPos.x + m_box.m_shadowOffset.x + m_size[0].x,
-					      boxPos.y + m_box.m_shadowOffset.y + m_size[0].y),
+					CRect(boxPos.x + X(m_box.m_shadowOffset.x),
+					      boxPos.y + Y(m_box.m_shadowOffset.y),
+					      boxPos.x + X(m_box.m_shadowOffset.x) + m_size[0].x,
+					      boxPos.y + Y(m_box.m_shadowOffset.y) + m_size[0].y),
 					shadowCol);
 			CSprite2d::DrawRect(
 				CRect(boxPos.x, boxPos.y,
@@ -1266,10 +1267,10 @@ CMenuSlider::DrawNormal(float x, float y)
 		CVector2D boxPos = m_box.m_position + m_position + CVector2D(x,y);
 		if(m_box.m_bDropShadow)
 			CSprite2d::DrawRect(
-				CRect(boxPos.x + m_box.m_shadowOffset.x,
-				      boxPos.y + m_box.m_shadowOffset.y,
-				      boxPos.x + m_box.m_shadowOffset.x + m_size[0].x,
-				      boxPos.y + m_box.m_shadowOffset.y + m_size[0].y),
+				CRect(boxPos.x + X(m_box.m_shadowOffset.x),
+				      boxPos.y + Y(m_box.m_shadowOffset.y),
+				      boxPos.x + X(m_box.m_shadowOffset.x) + m_size[0].x,
+				      boxPos.y + Y(m_box.m_shadowOffset.y) + m_size[0].y),
 				shadowCol);
 		CSprite2d::DrawRect(
 			CRect(boxPos.x, boxPos.y,
@@ -1312,10 +1313,10 @@ CMenuSlider::DrawHighlighted(const CRGBA &titleHighlight, float x, float y)
 		CVector2D boxPos = m_box.m_position + m_position + CVector2D(x,y);
 		if(m_box.m_bDropShadow)
 			CSprite2d::DrawRect(
-				CRect(boxPos.x + m_box.m_shadowOffset.x,
-				      boxPos.y + m_box.m_shadowOffset.y,
-				      boxPos.x + m_box.m_shadowOffset.x + m_size[0].x,
-				      boxPos.y + m_box.m_shadowOffset.y + m_size[0].y),
+				CRect(boxPos.x + X(m_box.m_shadowOffset.x),
+				      boxPos.y + Y(m_box.m_shadowOffset.y),
+				      boxPos.x + X(m_box.m_shadowOffset.x) + m_size[0].x,
+				      boxPos.y + Y(m_box.m_shadowOffset.y) + m_size[0].y),
 				shadowCol);
 		CSprite2d::DrawRect(
 			CRect(boxPos.x, boxPos.y,
@@ -1345,20 +1346,20 @@ void
 CMenuSlider::DrawTicks(const CVector2D &position, const CVector2D &size, float heightRight, float level, const CRGBA &leftCol, const CRGBA &selCol, const CRGBA &rightCol, bool bShadow, const CVector2D &shadowOffset, const CRGBA &shadowColor)
 {
 	int i;
-	int numTicks = size.x / 8.0f;
+	int numTicks = size.x / X(8.0f);
 	float dy = heightRight - size.y;
 	float stepy = dy / numTicks;
 	int left = level*numTicks;
 	int drewSelection = 0;
 	for(i = 0; i < numTicks; i++){
-		CRect rect(position.x + 8.0f*i, position.y + dy - stepy*i,
-		           position.x + 8.0f*i + 4.0f, position.y + dy + size.y);
+		CRect rect(position.x + X(8.0f)*i, position.y + dy - stepy*i,
+		           position.x + X(8.0f)*i + X(4.0f), position.y + dy + size.y);
 		if(bShadow){
 			CRect shadowRect = rect;
-			shadowRect.left += shadowOffset.x;
-			shadowRect.right += shadowOffset.x;
-			shadowRect.top += shadowOffset.y;
-			shadowRect.bottom += shadowOffset.y;
+			shadowRect.left += X(shadowOffset.x);
+			shadowRect.right += X(shadowOffset.x);
+			shadowRect.top += Y(shadowOffset.y);
+			shadowRect.bottom += Y(shadowOffset.y);
 			CSprite2d::DrawRect(shadowRect, shadowColor);
 		}
 		if(i < left)
@@ -1375,19 +1376,19 @@ void
 CMenuSlider::DrawTicks(const CVector2D &position, const CVector2D &size, float heightRight, float level, const CRGBA &leftCol, const CRGBA &rightCol, bool bShadow, const CVector2D &shadowOffset, const CRGBA &shadowColor)
 {
 	int i;
-	int numTicks = size.x / 8.0f;
+	int numTicks = size.x / X(8.0f);
 	float dy = heightRight - size.y;
 	float stepy = dy / numTicks;
 	int left = level*numTicks;
 	for(i = 0; i < numTicks; i++){
-		CRect rect(position.x + 8.0f*i, position.y + dy - stepy*i,
-		           position.x + 8.0f*i + 4.0f, position.y + dy + size.y);
+		CRect rect(position.x + X(8.0f)*i, position.y + dy - stepy*i,
+		           position.x + X(8.0f)*i + X(4.0f), position.y + dy + size.y);
 		if(bShadow){
 			CRect shadowRect = rect;
-			shadowRect.left += shadowOffset.x;
-			shadowRect.right += shadowOffset.x;
-			shadowRect.top += shadowOffset.y;
-			shadowRect.bottom += shadowOffset.y;
+			shadowRect.left += X(shadowOffset.x);
+			shadowRect.right += X(shadowOffset.x);
+			shadowRect.top += Y(shadowOffset.y);
+			shadowRect.bottom += Y(shadowOffset.y);
 			CSprite2d::DrawRect(shadowRect, shadowColor);
 		}
 		if(i < left)
@@ -1553,7 +1554,7 @@ CMenuLineLister::Draw(const CRGBA &optionHighlight, const CRGBA &titleHighlight,
 	for(; i < n; i++){
 		CVector2D linePos = m_linesLeft[i].m_position;
 
-		if(linePos.y+m_position.y - (m_scrollPosition+m_position.y) < 64.0f)
+		if(linePos.y+m_position.y - (m_scrollPosition+m_position.y) < Y(64.0f))
 			m_lineFade[i] = -4.0f*Abs(m_scrollSpeed);
 		else
 			m_lineFade[i] = 4.0f*Abs(m_scrollSpeed);
@@ -1652,7 +1653,12 @@ CMenuPage::ActiveMenuTwoState_SelectNextPosition(void)
 	if(sel == 1)
 		m_pCurrentControl->SelectCurrentOptionUnderCursor();
 	else if(sel == 0){
-		m_pCurrentControl->GoNext();
+		if ( m_pCurrentControl )
+		{
+			if ( !m_pCurrentControl->GoNext() )
+				m_pCurrentControl->GoFirst();
+		}
+
 		m_pCurrentControl->SelectCurrentOptionUnderCursor();
 	}
 }

@@ -8125,12 +8125,12 @@ cAudioManager::ProcessFrontEnd()
 			stereo = true;
 			frontendBank = true;
 			break;
-		case SOUND_9A:
+		case SOUND_FRONTEND_STEREO:
 			m_sQueueSample.m_nSampleIndex = SFX_STEREO_LEFT;
 			stereo = true;
 			frontendBank = true;
 			break;
-		case SOUND_9B:
+		case SOUND_FRONTEND_MONO:
 			m_sQueueSample.m_nSampleIndex = SFX_MONO;
 			frontendBank = true;
 			break;

@@ -58,6 +58,7 @@
 #include "Console.h"
 #include "timebars.h"
 #include "GenericGameStorage.h"
+#include "MemoryCard.h"
 #include "SceneEdit.h"
 #include "debugmenu.h"
 
@@ -191,14 +192,27 @@ DoFade(void)
 	if(CTimer::GetIsPaused())
 		return;
 
+#ifdef PS2_MENU
+	if(TheMemoryCard.JustLoadedDontFadeInYet){
+		TheMemoryCard.JustLoadedDontFadeInYet = false;
+		TheMemoryCard.TimeStartedCountingForFade = CTimer::GetTimeInMilliseconds();
+	}
+#else
 	if(JustLoadedDontFadeInYet){
 		JustLoadedDontFadeInYet = false;
 		TimeStartedCountingForFade = CTimer::GetTimeInMilliseconds();
 	}
+#endif
 
+#ifdef PS2_MENU
+	if(TheMemoryCard.StillToFadeOut){
+		if(CTimer::GetTimeInMilliseconds() - TheMemoryCard.TimeStartedCountingForFade > TheMemoryCard.TimeToStayFadedBeforeFadeOut){
+			TheMemoryCard.StillToFadeOut = false;
+#else
 	if(StillToFadeOut){
 		if(CTimer::GetTimeInMilliseconds() - TimeStartedCountingForFade > TimeToStayFadedBeforeFadeOut){
 			StillToFadeOut = false;
+#endif
 			TheCamera.Fade(3.0f, FADE_IN);
 			TheCamera.ProcessFade();
 			TheCamera.ProcessMusicFade();
@@ -898,17 +912,16 @@ Render2dStuff(void)
 void
 RenderMenus(void)
 {
-#ifdef PS2
-	if (FrontEndMenuManager.m_bWantToDraw)
+	if (FrontEndMenuManager.m_bMenuActive)
 	{
+#ifdef PS2
 		gMainHeap.PushMemId(_TODOCONST(17));
-		FrontEndMenuManager.DrawFrontEnd();
-		gMainHeap.PopMemId();
-	}
-#else
-	if(FrontEndMenuManager.m_bMenuActive)
-		FrontEndMenuManager.DrawFrontEnd();
 #endif
+		FrontEndMenuManager.DrawFrontEnd();
+#ifdef PS2
+		gMainHeap.PopMemId();
+#endif
+	}
 }
 
 void
@@ -985,14 +998,25 @@ Idle(void *arg)
 #endif
 
 	if(CGame::bDemoMode && CTimer::GetTimeInMilliseconds() > (3*60 + 30)*1000 && !CCutsceneMgr::IsCutsceneProcessing()){
+#ifdef PS2_MENU
+		TheMemoryCard.m_bWantToLoad = false;
+		FrontEndMenuManager.m_bWantToRestart = true;
+#else
 		FrontEndMenuManager.m_bWantToRestart = true;
 		FrontEndMenuManager.m_bWantToLoad = false;
+#endif
 		return;
 	}
 
+#ifdef PS2_MENU
+	if ( FrontEndMenuManager.m_bWantToRestart || TheMemoryCard.b_FoundRecentSavedGameWantToLoad )
+#else
 	if(FrontEndMenuManager.m_bWantToRestart || b_FoundRecentSavedGameWantToLoad)
+#endif
+	{
 		return;
-
+	}
+	
 	SetLightsWithTimeOfDayColour(Scene.world);
 
 	if(arg == nil)
@@ -1052,7 +1076,7 @@ Idle(void *arg)
 #ifdef TIMEBARS
 		tbStartTimer(0, "RenderMotionBlur");
 #endif
-		if((TheCamera.m_BlurType == MBLUR_NONE || TheCamera.m_BlurType == MBLUR_NORMAL) &&
+		if((TheCamera.m_BlurType == MOTION_BLUR_NONE || TheCamera.m_BlurType == MOTION_BLUR_LIGHT_SCENE) &&
 		   TheCamera.m_ScreenReductionPercentage > 0.0f)
 		        TheCamera.SetMotionBlurAlpha(150);
 		TheCamera.RenderMotionBlur();
@@ -1087,6 +1111,11 @@ Idle(void *arg)
 #ifdef TIMEBARS
 	tbEndTimer("RenderMenus");
 	tbStartTimer(0, "DoFade");
+#endif
+
+#ifdef PS2_MENU
+	if ( TheMemoryCard.m_bWantToLoad )
+		return;
 #endif
 	DoFade();
 #ifdef TIMEBARS
@@ -1274,6 +1303,7 @@ TheModelViewer(void)
 }
 #endif
 
+#ifdef PS2
 void TheGame(void)
 {
 	printf("Into TheGame!!!\n");
@@ -1295,12 +1325,12 @@ void TheGame(void)
 	LoadingScreen("Starting Game", NULL, splash);
 
 #ifdef GTA_PS2
-	if (   TheMemoryCard.CheckCardInserted(_TODOCONST(0)) == _TODOCONST(26)
-		&& TheMemoryCard.ChangeDirectory(_TODOCONST(0), TheMemoryCard.field154)
-		&& TheMemoryCard.FindMostRecentFileName(_TODOCONST(0), TheMemoryCard.field37) == 1
-		&& TheMemoryCard.CheckDataNotCorrupt(TheMemoryCard.field37))
+	if (   TheMemoryCard.CheckCardInserted(CARD_ONE) == CMemoryCard::NO_ERR_SUCCESS
+		&& TheMemoryCard.ChangeDirectory(CARD_ONE, TheMemoryCard.Cards[CARD_ONE].dir)
+		&& TheMemoryCard.FindMostRecentFileName(CARD_ONE, TheMemoryCard.MostRecentFile) == true
+		&& TheMemoryCard.CheckDataNotCorrupt(TheMemoryCard.MostRecentFile))
 	{
-		strcpy(TheMemoryCard.LoadFileName, TheMemoryCard.field37);
+		strcpy(TheMemoryCard.LoadFileName, TheMemoryCard.MostRecentFile);
 		TheMemoryCard.b_FoundRecentSavedGameWantToLoad = true;
 
 		if (CMenuManager::m_PrefsLanguage != TheMemoryCard.GetLanguageToLoad())
@@ -1403,7 +1433,7 @@ void TheGame(void)
 				RenderDebugShit();
 				RenderEffects();
 
-				if ((TheCamera.m_BlurType == MBLUR_NONE || TheCamera.m_BlurType == MBLUR_NORMAL) && TheCamera.m_ScreenReductionPercentage > 0.0f)
+				if ((TheCamera.m_BlurType == MOTION_BLUR_NONE || TheCamera.m_BlurType == MOTION_BLUR_LIGHT_SCENE) && TheCamera.m_ScreenReductionPercentage > 0.0f)
 					TheCamera.SetMotionBlurAlpha(150);
 				TheCamera.RenderMotionBlur();
 
@@ -1785,8 +1815,6 @@ void GameInit()
 	}
 }
 
-// Not used anyway. PS2 main() port
-#ifdef _WIN32
 int
 main(int argc, char *argv[])
 {
@@ -1797,9 +1825,10 @@ main(int argc, char *argv[])
 	SystemInit();
 	
 #ifdef PS2
-	int32 state = TheMemoryCard.CheckCardStateAtGameStartUp(_TODOCONST(0));
+	int32 r = TheMemoryCard.CheckCardStateAtGameStartUp(CARD_ONE);
 		
-	if ( state == _TODOCONST(2) || state == _TODOCONST(1) && state != _TODOCONST(3) && state != _TODOCONST(0) )
+	if (   r == CMemoryCard::ERR_DIRNOENTRY  || r == CMemoryCard::ERR_NOFORMAT
+		&& r != CMemoryCard::ERR_OPENNOENTRY && r != CMemoryCard::ERR_NONE )
 	{
 		GameInit();
 		

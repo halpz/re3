@@ -235,6 +235,12 @@ cAudioManager::SetEffectsFadeVol(uint8 volume) const
 }
 
 void
+cAudioManager::SetMonoMode(uint8 mono)
+{
+	SampleManager.SetMonoMode(mono);
+}
+
+void
 cAudioManager::SetMusicFadeVol(uint8 volume) const
 {
 	SampleManager.SetMusicFadeVolume(volume);
@@ -384,9 +390,9 @@ cAudioManager::ReacquireDigitalHandle() const
 }
 
 void
-cAudioManager::SetDynamicAcousticModelingStatus(bool status)
+cAudioManager::SetDynamicAcousticModelingStatus(uint8 status)
 {
-	m_bDynamicAcousticModelingStatus = status;
+	m_bDynamicAcousticModelingStatus = status!=0;
 }
 
 bool

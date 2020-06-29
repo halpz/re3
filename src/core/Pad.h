@@ -29,9 +29,7 @@ public:
 	float GetRightStickX(void) { return RightStickX/32767.0f; };
 	float GetRightStickY(void) { return RightStickY/32767.0f; };
 
-#ifdef DETECT_PAD_INPUT_SWITCH
 	bool IsAnyButtonPressed();
-#endif
 	void Clear(void);
 };
 VALIDATE_SIZE(CControllerState, 0x2A);
@@ -199,13 +197,13 @@ public:
 
 	static void UpdatePads(void);
 	void ProcessPCSpecificStuff(void);
-	void Update(int16 unk);
+	void Update(int16 pad);
 	
 	static void DoCheats(void);
 	void DoCheats(int16 unk);
 	
 	static void StopPadsShaking(void);
-	void StopShaking(int16 unk);
+	void StopShaking(int16 pad);
 	
 	static CPad *GetPad(int32 pad);
 	
@@ -454,6 +452,11 @@ public:
 	void SetDisablePlayerControls(uint8 who) { DisablePlayerControls |= who; }
 	void SetEnablePlayerControls(uint8 who) { DisablePlayerControls &= ~who; }
 	bool IsPlayerControlsDisabledBy(uint8 who) { return DisablePlayerControls & who; }
+	
+	int16 GetMode() { return Mode; }
+	void SetMode(int16 mode) { Mode = mode; }
+	
+	static bool IsNoOrObsolete() { return bDisplayNoControllerMessage || bObsoleteControllerMessage; }
 };
 
 VALIDATE_SIZE(CPad, 0xFC);

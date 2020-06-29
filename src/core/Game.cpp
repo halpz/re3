@@ -43,6 +43,7 @@
 #include "Lights.h"
 #include "MBlur.h"
 #include "Messages.h"
+#include "MemoryCard.h"
 #include "Pad.h"
 #include "Particle.h"
 #include "ParticleObject.h"
@@ -101,6 +102,43 @@ bool CGame::japaneseGame = false;
 #endif
 
 int gameTxdSlot;
+
+
+bool DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha);
+void DoRWStuffEndOfFrame(void);
+void MessageScreen(char *msg)
+{
+	//TODO: stretch_screen
+	
+	CRect rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	CRGBA color(255, 255, 255, 255);
+
+	DoRWStuffStartOfFrame(50, 50, 50, 0, 0, 0, 255);
+	
+	CSprite2d::InitPerFrame();
+	CFont::InitPerFrame();
+	DefinedState();
+
+	CSprite2d *splash = LoadSplash(NULL);
+	splash->Draw(rect, color, color, color, color);
+	splash->DrawRect(CRect(SCREEN_SCALE_X(20.0f), SCREEN_SCALE_Y(110.0f), SCREEN_SCALE_X(620.0f), SCREEN_SCALE_Y(300.0f)), CRGBA(50, 50, 50, 192));
+	
+	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetBackgroundOff();
+	CFont::SetWrapx(SCREEN_SCALE_FROM_RIGHT(190.0f)); // 450.0f
+	CFont::SetScale(SCREEN_SCALE_X(1.0f), SCREEN_SCALE_Y(1.0f));
+	CFont::SetCentreOn();
+	CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(190.0f)); // 450.0f
+	CFont::SetJustifyOff();
+	CFont::SetColor(CRGBA(255, 255, 255, 255));
+	CFont::SetDropColor(CRGBA(32, 32, 32, 255));
+	CFont::SetDropShadowPosition(3);
+	CFont::SetPropOn();
+	CFont::PrintString(SCREEN_SCALE_X(320.0f), SCREEN_SCALE_Y(130.0f), TheText.Get(msg));
+	CFont::DrawFonts();
+	
+	DoRWStuffEndOfFrame();
+}
 
 bool
 CGame::InitialiseOnceBeforeRW(void)
@@ -274,6 +312,9 @@ bool CGame::Initialise(const char* datFile)
 	CWeather::Init();
 	CCullZones::Init();
 	CCollision::Init();
+#ifdef PS2_MENU
+	TheText.Load();
+#endif
 	CTheZones::Init();
 	CUserDisplay::Init();
 	CMessages::Init();
@@ -282,6 +323,11 @@ bool CGame::Initialise(const char* datFile)
 	CRestart::Initialise();
 	CWorld::Initialise();
 	CParticle::Initialise();
+#ifdef PS2
+	gStartX = -180.0f;
+	gStartY = 180.0f;
+	gStartZ = 14.0f;
+#endif
 	CAnimManager::Initialise();
 	CCutsceneMgr::Initialise();
 	CCarCtrl::Init();
@@ -365,10 +411,16 @@ bool CGame::Initialise(const char* datFile)
 	CCredits::Init();
 	CRecordDataForChase::Init();
 	CReplay::Init();
-	LoadingScreen("Loading the Game", "Start script", nil);
+#ifdef PS2_MENU
+	if ( !TheMemoryCard.m_bWantToLoad )
+	{
+#endif
 	CTheScripts::StartTestScript();
 	CTheScripts::Process();
 	TheCamera.Process();
+#ifdef PS2_MENU
+	}
+#endif
 	LoadingScreen("Loading the Game", "Load scene", nil);
 	CModelInfo::RemoveColModelsFromOtherLevels(currLevel);
 	CCollision::ms_collisionInMemory = currLevel;
@@ -433,8 +485,15 @@ bool CGame::ShutDown(void)
 void CGame::ReInitGameObjectVariables(void)
 {
 	CGameLogic::InitAtStartOfGame();
-	TheCamera.CCamera::Init();
+#ifdef PS2_MENU
+	if ( !TheMemoryCard.m_bWantToLoad )
+	{
+#endif
+	TheCamera.Init();
 	TheCamera.SetRwCamera(Scene.camera);
+#ifdef PS2_MENU
+	}
+#endif
 	CDebug::DebugInitTextBuffer();
 	CWeather::Init();
 	CUserDisplay::Init();
@@ -443,6 +502,11 @@ void CGame::ReInitGameObjectVariables(void)
 	CWorld::bDoingCarCollisions = false;
 	CHud::ReInitialise();
 	CRadar::Initialise();
+#ifdef PS2
+	gStartX = -180.0f;
+	gStartY = 180.0f;
+	gStartZ = 14.0f;
+#endif
 	CCarCtrl::ReInit();
 	CTimeCycle::Initialise();
 	CDraw::SetFOV(120.0f);
@@ -458,6 +522,10 @@ void CGame::ReInitGameObjectVariables(void)
 		CWorld::Players[i].Clear();
 	
 	CWorld::PlayerInFocus = 0;
+#ifdef PS2
+	CWeaponEffects::Init();
+	CSkidmarks::Init();
+#endif
 	CAntennas::Init();
 	CGlass::Init();
 	gPhoneInfo.Initialise();
@@ -473,12 +541,20 @@ void CGame::ReInitGameObjectVariables(void)
 	CPickups::Init();
 	CPacManPickups::Init();
 	CGarages::Init();
+#ifdef PS2
+	CClouds::Init();
+	CRemote::Init();
+#endif
 	CSpecialFX::Init();
 	CWaterCannons::Init();
 	CParticle::ReloadConfig();
 	CCullZones::ResolveVisibilities();
 
+#ifdef PS2_MENU
+	if ( !TheMemoryCard.m_bWantToLoad )
+#else
 	if ( !FrontEndMenuManager.m_bWantToLoad )
+#endif
 	{
 		CCranes::InitCranes();
 		CTheScripts::StartTestScript();
@@ -535,8 +611,10 @@ void CGame::ShutDownForRestart(void)
 	CRadar::RemoveRadarSections();
 	FrontEndMenuManager.UnloadTextures();
 	CParticleObject::RemoveAllParticleObjects();
+#ifndef PS2
 	CPedType::Shutdown();
 	CSpecialFX::Shutdown();
+#endif
 	TidyUpMemory(true, false);
 }
 
@@ -547,19 +625,102 @@ void CGame::InitialiseWhenRestarting(void)
 	
 	CTimer::Initialise();
 	CSprite2d::SetRecipNearClip();
+
+#ifdef PS2_MENU
+	if ( TheMemoryCard.b_FoundRecentSavedGameWantToLoad == true || TheMemoryCard.m_bWantToLoad == false )
+	{
+		if ( TheMemoryCard.m_bWantToLoad == true )
+			MessageScreen("MCLOAD");  // Loading Data. Please do not remove the Memory Card (PS2) in MEMORY CARD slot 1, reset or switch off the console.
+		else
+			MessageScreen("RESTART"); // Starting new game
+	}
+#endif
 	
+#ifdef PS2_MENU
+	TheMemoryCard.b_FoundRecentSavedGameWantToLoad = false;
+#else
 	b_FoundRecentSavedGameWantToLoad = false;
+#endif
 	
 	TheCamera.Init();
 	
+#ifdef PS2_MENU
+	if ( TheMemoryCard.m_bWantToLoad == true )
+	{
+		TheMemoryCard.RestoreForStartLoad();
+		CStreaming::LoadScene(TheCamera.GetPosition());
+	}
+#else
 	if ( FrontEndMenuManager.m_bWantToLoad == true )
 	{
 		RestoreForStartLoad();
 		CStreaming::LoadScene(TheCamera.GetPosition());
 	}
+#endif
 	
 	ReInitGameObjectVariables();
 	
+#ifdef PS2_MENU
+	if ( TheMemoryCard.m_bWantToLoad == true )
+	{
+		if ( TheMemoryCard.LoadSavedGame() == CMemoryCard::RES_SUCCESS )
+		{
+			for ( int32 i = 0; i < 35; i++ )
+			{
+				MessageScreen("FESZ_LS"); // Load Successful.
+			}
+			
+			DMAudio.ResetTimers(CTimer::GetTimeInMilliseconds());
+			CTrain::InitTrains();
+			CPlane::InitPlanes();
+		}
+		else
+		{
+			for ( int32 i = 0; i < 50; i++ )
+			{				
+				DoRWStuffStartOfFrame(50, 50, 50, 0, 0, 0, 255);
+				
+				CSprite2d::InitPerFrame();
+				CFont::InitPerFrame();
+				DefinedState();
+				
+				CSprite2d *splash = LoadSplash(NULL);
+				splash->Draw(rect, color, color, color, color);
+				splash->DrawRect(CRect(SCREEN_SCALE_X(20.0f), SCREEN_SCALE_Y(110.0f), SCREEN_SCALE_X(620.0f), SCREEN_SCALE_Y(300.0f)), CRGBA(50, 50, 50, 192));
+				
+				//CFont::SetFontStyle(?);
+				CFont::SetBackgroundOff();
+				CFont::SetWrapx(SCREEN_SCALE_FROM_RIGHT(160.0f)); // 480.0f
+				CFont::SetScale(SCREEN_SCALE_X(1.0f), SCREEN_SCALE_Y(1.0f));
+				CFont::SetCentreOn();
+				CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(160.0f)); // 480.0f
+				CFont::SetJustifyOff();
+				CFont::SetColor(CRGBA(255, 255, 255, 255));
+				CFont::SetBackGroundOnlyTextOff();
+				CFont::SetDropColor(CRGBA(32, 32, 32, 255));
+				CFont::SetDropShadowPosition(3);
+				CFont::SetPropOn();
+				CFont::PrintString(SCREEN_SCALE_X(320.0f), SCREEN_SCALE_Y(130.0f), TheText.Get("MC_LDFL")); // Load Failed!
+				CFont::PrintString(SCREEN_SCALE_X(320.0f), SCREEN_SCALE_Y(170.0f), TheText.Get("FES_NOC")); // No Memory Card (PS2) in MEMORY CARD slot 1.
+				CFont::PrintString(SCREEN_SCALE_X(320.0f), SCREEN_SCALE_Y(240.0f), TheText.Get("MC_NWRE")); // Now Restarting Game.
+				CFont::DrawFonts();
+				
+				DoRWStuffEndOfFrame();
+			}
+			
+			ShutDownForRestart();
+			CTimer::Stop();
+			CTimer::Initialise();
+			TheMemoryCard.m_bWantToLoad = false;
+			ReInitGameObjectVariables();
+			currLevel = LEVEL_INDUSTRIAL;
+			CCollision::SortOutCollisionAfterLoad();
+			
+			FrontEndMenuManager.SetSoundLevelsForMusicMenu();
+			FrontEndMenuManager.InitialiseMenuContentsAfterLoadingGame();
+		}
+	}
+#else
 	if ( FrontEndMenuManager.m_bWantToLoad == true )
 	{
 		if ( GenericLoad() == true )
@@ -585,6 +746,7 @@ void CGame::InitialiseWhenRestarting(void)
 			CCollision::SortOutCollisionAfterLoad();
 		}
 	}
+#endif
 	
 	CTimer::Update();
 	
@@ -598,8 +760,8 @@ void CGame::Process(void)
 	ProcessTidyUpMemory();
 #endif
 	TheCamera.SetMotionBlurAlpha(0);
-	if (TheCamera.m_BlurType == MBLUR_NONE || TheCamera.m_BlurType == MBLUR_SNIPER || TheCamera.m_BlurType == MBLUR_NORMAL)
-		TheCamera.SetMotionBlur(0, 0, 0, 0, MBLUR_NONE);
+	if (TheCamera.m_BlurType == MOTION_BLUR_NONE || TheCamera.m_BlurType == MOTION_BLUR_SNIPER || TheCamera.m_BlurType == MOTION_BLUR_LIGHT_SCENE)
+		TheCamera.SetMotionBlur(0, 0, 0, 0, MOTION_BLUR_NONE);
 #ifdef DEBUGMENU
 	DebugMenuProcess();
 #endif
@@ -668,6 +830,9 @@ void CGame::Process(void)
 			CCarCtrl::RemoveDistantCars();
 		}
 	}
+#ifdef PS2
+	CMemCheck::DoTest();
+#endif
 }
 
 void CGame::DrasticTidyUpMemory(bool)

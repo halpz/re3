@@ -2922,7 +2922,7 @@ CCam::Process_1rstPersonPedOnPC(const CVector&, float TargetOrientation, float, 
 					FOV /= (255.0f*CTimer::GetTimeStep() + 10000.0f) / 10000.0f;
 			}
 
-			TheCamera.SetMotionBlur(180, 255, 180, 120, MBLUR_SNIPER);
+			TheCamera.SetMotionBlur(180, 255, 180, 120, MOTION_BLUR_SNIPER);
 
 			if(FOV > DefaultFOV)
 				FOV = DefaultFOV;
@@ -3031,7 +3031,7 @@ CCam::Process_Sniper(const CVector &CameraTarget, float TargetOrientation, float
 			FOVSpeed = 0.0f;
 	}
 
-	TheCamera.SetMotionBlur(180, 255, 180, 120, MBLUR_SNIPER);
+	TheCamera.SetMotionBlur(180, 255, 180, 120, MOTION_BLUR_SNIPER);
 
 	if(FOV > DefaultFOV)
 		FOV = DefaultFOV;
