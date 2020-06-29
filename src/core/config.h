@@ -284,6 +284,5 @@ enum Config {
 #define CANCELLABLE_CAR_ENTER
 
 // Camera
-//#define PS2_CAM_TRANSITION	// old way of transitioning between cam modes
 #define IMPROVED_CAMERA		// Better Debug cam, and maybe more in the future
 #define FREE_CAM		// Rotating cam
