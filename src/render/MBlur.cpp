@@ -188,31 +188,31 @@ CMBlur::CreateImmediateModeData(RwCamera *cam, RwRect *rect)
 }
 
 void
-CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blur, int32 type, uint32 addalpha)
+CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blur, int32 type, uint32 bluralpha)
 {
 	RwRGBA color = { (RwUInt8)red, (RwUInt8)green, (RwUInt8)blue, (RwUInt8)blur };
 #ifdef GTA_PS2
 	if( pFrontBuffer )
-		OverlayRender(cam, pFrontBuffer, color, type, addalpha);
+		OverlayRender(cam, pFrontBuffer, color, type, bluralpha);
 #else
 	if(BlurOn){
 		if(pFrontBuffer){
 			if(ms_bJustInitialised)
 				ms_bJustInitialised = false;
 			else
-				OverlayRender(cam, pFrontBuffer, color, type, addalpha);
+				OverlayRender(cam, pFrontBuffer, color, type, bluralpha);
 		}
 		RwRasterPushContext(pFrontBuffer);
 		RwRasterRenderFast(RwCameraGetRaster(cam), 0, 0);
 		RwRasterPopContext();
 	}else{
-		OverlayRender(cam, nil, color, type, addalpha);
+		OverlayRender(cam, nil, color, type, bluralpha);
 	}
 #endif
 }
 
 void
-CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type, uint32 addalpha)
+CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type, int32 bluralpha)
 {
 	int r, g, b, a;
 
@@ -281,7 +281,7 @@ CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type,
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 	RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, Vertex, 4, Index, 6);
 
-	a = addalpha/2;
+	a = bluralpha/2;
 	if(a < 30)
 		a = 30;
 
