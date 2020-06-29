@@ -1083,27 +1083,27 @@ void InitialiseLanguage()
 	{
 		case LANG_GERMAN:
 		{
-			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_GERMAN;
+			FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_GERMAN;
 			break;
 		}
 		case LANG_SPANISH:
 		{
-			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_SPANISH;
+			FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_SPANISH;
 			break;
 		}
 		case LANG_FRENCH:
 		{
-			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_FRENCH;
+			FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_FRENCH;
 			break;
 		}
 		case LANG_ITALIAN:
 		{
-			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_ITALIAN;
+			FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_ITALIAN;
 			break;
 		}
 		default:
 		{
-			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_AMERICAN;
+			FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_AMERICAN;
 			break;
 		}
 	}
