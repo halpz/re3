@@ -2431,10 +2431,10 @@ CMenuManager::ProcessDPadLeftJustDown(void)
 				if ( MenuSaveZoneSSL_1.m_numOptions < 2 )
 					;
 				else
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 			}
 			else
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 		}
 	}
 	else
@@ -2453,7 +2453,7 @@ CMenuManager::ProcessDPadLeftJustDown(void)
 						m_nPageRightTimer  = 0;
 						m_nChangePageTimer = CTimer::GetTimeInMillisecondsPauseMode() + 250;
 						field_18 = m_newPage;
-						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
+						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
 					}
 				}
 
@@ -2465,7 +2465,7 @@ CMenuManager::ProcessDPadLeftJustDown(void)
 				if ( pActiveMenuPage )
 					pActiveMenuPage->GoLeftMenuOnPage();
 
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 
 				break;
 			}
@@ -2483,14 +2483,14 @@ CMenuManager::ProcessDPadLeftJustDown(void)
 						else if ( pActiveMenuPage->m_pCurrentControl == &MenuAudio_2 )
 							;
 						else
-							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 					}
 					else if ( m_currentPage == PAGE_DISPLAY)
 					{
 						if ( pActiveMenuPage->m_pCurrentControl == &MenuDisplay_1 )
 							;
 						else
-							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 					}
 					else
 					{
@@ -2499,17 +2499,17 @@ CMenuManager::ProcessDPadLeftJustDown(void)
 							if ( MenuSaveDG_2.m_numOptions < 2 )
 								;
 							else
-								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 						}
 						else if ( pActiveMenuPage->m_pCurrentControl == &MenuSaveLG_2 )
 						{
 							if ( MenuSaveLG_2.m_numOptions < 2 )
 								;
 							else
-								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 						}
 						else
-							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 					}
 				}
 
@@ -2533,10 +2533,10 @@ CMenuManager::ProcessDPadRightJustDown(void)
 				if ( MenuSaveZoneSSL_1.m_numOptions < 2 )
 					;
 				else
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 			}
 			else
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 		}
 	}
 	else
@@ -2555,7 +2555,7 @@ CMenuManager::ProcessDPadRightJustDown(void)
 						m_nPageRightTimer  = CTimer::GetTimeInMillisecondsPauseMode() + 300;
 						m_nChangePageTimer = CTimer::GetTimeInMillisecondsPauseMode() + 250;
 						field_18 = m_newPage;
-						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
+						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
 					}
 				}
 
@@ -2567,7 +2567,7 @@ CMenuManager::ProcessDPadRightJustDown(void)
 				if ( pActiveMenuPage )
 					pActiveMenuPage->GoRightMenuOnPage();
 
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 
 				break;
 			}
@@ -2585,14 +2585,14 @@ CMenuManager::ProcessDPadRightJustDown(void)
 						else if ( pActiveMenuPage->m_pCurrentControl == &MenuAudio_2 )
 							;
 						else
-							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 					}
 					else if ( m_currentPage == PAGE_DISPLAY)
 					{
 						if ( pActiveMenuPage->m_pCurrentControl == &MenuDisplay_1 )
 							;
 						else
-							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 					}
 					else
 					{
@@ -2601,17 +2601,17 @@ CMenuManager::ProcessDPadRightJustDown(void)
 							if ( MenuSaveDG_2.m_numOptions < 2 )
 								;
 							else
-								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 						}
 						else if ( pActiveMenuPage->m_pCurrentControl == &MenuSaveLG_2 )
 						{
 							if ( MenuSaveLG_2.m_numOptions < 2 )
 								;
 							else
-								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 						}
 						else
-							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 					}
 				}
 
@@ -2635,10 +2635,10 @@ CMenuManager::ProcessDPadUpJustDown(void)
 				if ( MenuSaveZoneSSL_1.m_numOptions < 2 )
 					;
 				else
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 			}
 			else
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 		}
 	}
 	else
@@ -2653,7 +2653,7 @@ CMenuManager::ProcessDPadUpJustDown(void)
 				if ( pActiveMenuPage )
 					pActiveMenuPage->GoUpMenuOnPage();
 
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 				break;
 			}
 
@@ -2668,17 +2668,17 @@ CMenuManager::ProcessDPadUpJustDown(void)
 						if ( MenuSaveDG_2.m_numOptions < 2 )
 							;
 						else
-							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 					}
 					else if ( pActiveMenuPage->m_pCurrentControl == &MenuSaveLG_2 )
 					{
 						if ( MenuSaveLG_2.m_numOptions < 2 )
 							;
 						else
-							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 					}
 					else
-						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 				}
 
 				break;
@@ -2701,10 +2701,10 @@ CMenuManager::ProcessDPadDownJustDown(void)
 				if ( MenuSaveZoneSSL_1.m_numOptions < 2 )
 					;
 				else
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 			}
 			else
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 		}
 	}
 	else
@@ -2719,7 +2719,7 @@ CMenuManager::ProcessDPadDownJustDown(void)
 				if ( pActiveMenuPage )
 					pActiveMenuPage->GoDownMenuOnPage();
 
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 
 				break;
 			}
@@ -2735,17 +2735,17 @@ CMenuManager::ProcessDPadDownJustDown(void)
 						if ( MenuSaveDG_2.m_numOptions < 2 )
 							;
 						else
-							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 					}
 					else if ( pActiveMenuPage->m_pCurrentControl == &MenuSaveLG_2 )
 					{
 						if ( MenuSaveLG_2.m_numOptions < 2 )
 							;
 						else
-							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 					}
 					else
-						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_DENIED, 0);
+						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 				}
 				break;
 			}
@@ -2765,9 +2765,9 @@ CMenuManager::ProcessDPadTriangleJustDown(void)
 			if ( bIgnoreTriangleButton )
 			{
 				if ( m_bInSaveZone )
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_EXIT, 0);
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_BACK, 0);
 				else if ( pActiveMenuPage->m_pCurrentControl == &MenuSaveDG_2 || pActiveMenuPage->m_pCurrentControl == &MenuSaveLG_2 )
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_EXIT, 0);
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_BACK, 0);
 			}
 			else if ( !bIgnoreTriangleButton )
 			{
@@ -2779,7 +2779,7 @@ CMenuManager::ProcessDPadTriangleJustDown(void)
 
 					case PAGESTATE_HIGHLIGHTED:
 						m_pageState = PAGESTATE_NORMAL;
-						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
+						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
 						break;
 
 					case PAGESTATE_SELECTED:
@@ -2790,10 +2790,10 @@ CMenuManager::ProcessDPadTriangleJustDown(void)
 							if ( pActiveMenuPage->m_numControls == 1 )
 							{
 								m_pageState = PAGESTATE_NORMAL;
-								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
+								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
 							}
 							else
-								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_EXIT, 0);
+								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_BACK, 0);
 						}
 						break;
 					}
@@ -2813,7 +2813,7 @@ CMenuManager::ProcessDPadTriangleJustDown(void)
 
 				case PAGESTATE_HIGHLIGHTED:
 					m_pageState = PAGESTATE_NORMAL;
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
 					break;
 
 				case PAGESTATE_SELECTED:
@@ -2824,10 +2824,10 @@ CMenuManager::ProcessDPadTriangleJustDown(void)
 						if ( pActiveMenuPage->m_numControls == 1 )
 						{
 							m_pageState = PAGESTATE_NORMAL;
-							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_COMPLETED, 0);
+							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
 						}
 						else
-							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_EXIT, 0);
+							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_BACK, 0);
 					}
 					break;
 				}
@@ -2844,7 +2844,7 @@ CMenuManager::ProcessDPadCrossJustDown(void)
 		if ( pActiveMenuPage )
 			pActiveMenuPage->SelectCurrentOptionUnderCursor();
 
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
+		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 	}
 	else
 	{
@@ -2885,7 +2885,7 @@ CMenuManager::ProcessDPadCrossJustDown(void)
 						}
 					}
 
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 					break;
 				}
 
@@ -2907,14 +2907,14 @@ CMenuManager::ProcessDPadCrossJustDown(void)
 						case PAGE_AUDIO:
 						{
 							if ( pActiveMenuPage->m_pCurrentControl != &MenuAudio_4 )
-								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
+								DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 
 							break;
 						}
 
 						default:
 						{
-							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
+							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 							DMAudio.StopFrontEndTrack();
 							gMusicPlaying = false;
 							break;
@@ -2948,7 +2948,7 @@ CMenuManager::ProcessDPadCrossJustDown(void)
 						}
 					}
 
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SUCCESS, 0);
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 					break;
 				}
 			}

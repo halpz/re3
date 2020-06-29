@@ -1,5 +1,6 @@
 #include "common.h"
 #include "Frontend.h"
+#ifdef PC_MENU
 
 // If you want to add new options, please don't do that here and see CustomFrontendOptionsPopulate in re3.cpp.
 
@@ -446,3 +447,5 @@ CMenuScreen aScreens[] = {
    },
 #endif
 };
+
+#endif

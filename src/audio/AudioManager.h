@@ -444,14 +444,14 @@ public:
 	void ServiceSoundEffects();
 	int8 SetCurrent3DProvider(uint8 which);
 	void SetDynamicAcousticModelingStatus(uint8 status);
-	void SetEffectsFadeVolume(uint8 volume) const;
+	void SetEffectsFadeVol(uint8 volume) const;
 	void SetEffectsMasterVolume(uint8 volume) const;
 	void SetEntityStatus(int32 id, uint8 status);
 	uint32 SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollision &audioCollision);
 	void SetMissionAudioLocation(float x, float y, float z);
 	void SetMissionScriptPoliceAudio(int32 sfx) const;
 	void SetMonoMode(uint8 mono);
-	void SetMusicFadeVolume(uint8 volume) const;
+	void SetMusicFadeVol(uint8 volume) const;
 	void SetMusicMasterVolume(uint8 volume) const;
 	void SetSpeakerConfig(int32 conf) const;
 	void SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 counter);

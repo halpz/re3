@@ -216,22 +216,31 @@ enum Config {
 #define REGISTER_START_BUTTON
 
 // Hud, frontend and radar
-#define TRIANGULAR_BLIPS	// height indicating triangular radar blips, as in VC
-#define PS2_SAVE_DIALOG		// PS2 style save dialog with transparent black box
-// #define PS2_LIKE_MENU	// An effort to recreate PS2 menu, cycling through tabs, different bg etc.
-#define MENU_MAP			// VC-like menu map. Make sure you have new menu.txd
-#define SCROLLABLE_STATS_PAGE	// only draggable by mouse atm
-#define TRIANGLE_BACK_BUTTON
-// #define CIRCLE_BACK_BUTTON
 #define HUD_ENHANCEMENTS	// Adjusts some aspects to make the HUD look/behave a little bit better.
 #define BETA_SLIDING_TEXT
-#define CUSTOM_FRONTEND_OPTIONS
+#define TRIANGULAR_BLIPS	// height indicating triangular radar blips, as in VC
+#define PC_MENU
+
+#ifndef PC_MENU
+#	define PS2_MENU
+//#	define PS2_MENU_USEALLPAGEICONS
+#else
+#	define PS2_SAVE_DIALOG		// PS2 style save dialog with transparent black box
+//#	define PS2_LIKE_MENU	// An effort to recreate PS2 menu, cycling through tabs, different bg etc.
+#	define MENU_MAP			// VC-like menu map. Make sure you have new menu.txd
+#	define SCROLLABLE_STATS_PAGE	// only draggable by mouse atm
+#	define TRIANGLE_BACK_BUTTON
+//#	define CIRCLE_BACK_BUTTON
+#	define CUSTOM_FRONTEND_OPTIONS
+#endif
 
 // Script
 #define USE_DEBUG_SCRIPT_LOADER	// Loads main.scm by default. Hold R for main_freeroam.scm and D for main_d.scm
 #define USE_MEASUREMENTS_IN_METERS // makes game use meters instead of feet in script
 #define USE_PRECISE_MEASUREMENT_CONVERTION // makes game convert feet to meeters more precisely
-#define MISSION_REPLAY // mobile feature
+#ifdef PC_MENU
+#	define MISSION_REPLAY // mobile feature
+#endif
 //#define SIMPLIER_MISSIONS // apply simplifications from mobile
 #define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #define SCRIPT_LOG_FILE_LEVEL 1 // 0 == no log, 1 == overwrite every frame, 2 == full log
