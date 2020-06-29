@@ -85,7 +85,7 @@ void ReloadFrontendOptions(void)
 void LangPolSelect(int8 action)
 {
 	if (action == FEOPTION_ACTION_SELECT) {
-		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_POLISH;
+		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_POLISH;
 		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
 		FrontEndMenuManager.InitialiseChangedLanguageSettings();
 		FrontEndMenuManager.SaveSettings();
@@ -95,7 +95,7 @@ void LangPolSelect(int8 action)
 void LangRusSelect(int8 action)
 {
 	if (action == FEOPTION_ACTION_SELECT) {
-		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_RUSSIAN;
+		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_RUSSIAN;
 		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
 		FrontEndMenuManager.InitialiseChangedLanguageSettings();
 		FrontEndMenuManager.SaveSettings();
@@ -105,7 +105,7 @@ void LangRusSelect(int8 action)
 void LangJapSelect(int8 action)
 {
 	if (action == FEOPTION_ACTION_SELECT) {
-		FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_JAPANESE;
+		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_JAPANESE;
 		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
 		FrontEndMenuManager.InitialiseChangedLanguageSettings();
 		FrontEndMenuManager.SaveSettings();

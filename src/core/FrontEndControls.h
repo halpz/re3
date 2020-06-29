@@ -8,6 +8,41 @@ enum {
 	NUM_PAGE_WIDGETS = 10,
 };
 
+class CTriggerCaller
+{
+	bool bHasTrigger;
+	void *pTrigger;
+	void (*pFunc)(void *);
+	int field_C;
+public:
+	
+	CTriggerCaller() : bHasTrigger(false), pFunc(nil)
+	{}
+	
+	void SetTrigger(void *func, void *trigger)
+	{
+		if ( !bHasTrigger )
+		{
+			pFunc = (void (*)(void *))func;
+			pTrigger = trigger;
+			bHasTrigger = true;
+		}
+	}
+	
+	void CallTrigger(void)
+	{
+		if ( bHasTrigger && pFunc != nil )
+			pFunc(pTrigger);
+		
+		bHasTrigger = false;
+		pFunc = nil;
+	}
+	
+	bool CanCall()
+	{
+		return bHasTrigger;
+	}
+};
 
 class CPlaceableText
 {
@@ -17,7 +52,7 @@ public:
 	wchar *m_text;
 
 	CPlaceableText(void)
-	 : m_position(0.0f, 0.0f), m_color(255, 255, 255, 255) {}
+	 : m_position(0.0f, 0.0f), m_color(255, 255, 255, 255), m_text(nil) {}
 	void SetPosition(float x, float y) { m_position.x = x; m_position.y = y; }
 	void SetColor(const CRGBA &color) { m_color = color; }
 	CRGBA GetColor(void) { return m_color; }
@@ -553,11 +588,14 @@ public:
 	static wchar Buf16[8];
 
 	CMenuSlider(void)
-	 : m_value(0), m_bDrawPercentage(false), m_bActive(false), m_style(0) {}
+	 : m_value(0), m_bDrawPercentage(false), m_bActive(false), m_style(0)
+	{
+		AddTickBox(0.0f, 0.0f, 100.0f, 10.0f, 10.0f); //todo
+	}
 
 	void SetColors(const CRGBA &title, const CRGBA &percentage, const CRGBA &left, const CRGBA &right);
 	void DrawTicks(const CVector2D &position, const CVector2D &size, float heightRight, float level, const CRGBA &leftCol, const CRGBA &selCol, const CRGBA &rightCol, bool bShadow, const CVector2D &shadowOffset, const CRGBA &shadowColor);
-	void DrawTicks(const CVector2D &position, const CVector2D &size, float heightRight, float level, const CRGBA &leftCol, const CRGBA &rightCol, bool bShadow, const CVector2D &shadowOffset, const CRGBA &shadowColor);
+	void DrawTicks(const CVector2D &position, const CVector2D &size, float heightRight, float level, const CRGBA &leftCol, const CRGBA &rightCol,                      bool bShadow, const CVector2D &shadowOffset, const CRGBA &shadowColor);
 	void AddTickBox(float positionX, float positionY, float width, float heigthLeft, float heightRight);
 	void AddTitle(wchar *text, float positionX, float positionY);
 

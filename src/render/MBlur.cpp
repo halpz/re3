@@ -1,3 +1,4 @@
+#define WITHWINDOWS
 #include "common.h"
 
 #include "RwHelper.h"
@@ -9,6 +10,7 @@
 
 RwRaster *CMBlur::pFrontBuffer;
 bool CMBlur::ms_bJustInitialised;
+bool CMBlur::ms_bScaledBlur;
 bool CMBlur::BlurOn;
 float CMBlur::Drunkness;
 
@@ -16,43 +18,123 @@ static RwIm2DVertex Vertex[4];
 static RwIm2DVertex Vertex2[4];
 static RwImVertexIndex Index[6] = { 0, 1, 2, 0, 2, 3 };
 
-void
+RwBool
 CMBlur::MotionBlurOpen(RwCamera *cam)
 {
-	// TODO. this is simplified
-
+#ifdef GTA_PS2
+	RwRect rect = {0, 0, 0, 0};
+	
+	if (pFrontBuffer)
+		return TRUE;
+	
+	BlurOn = true;
+	
+	rect.w = RwRasterGetWidth(RwCameraGetRaster(cam));
+	rect.h = RwRasterGetHeight(RwCameraGetRaster(cam));
+	
+	pFrontBuffer = RwRasterCreate(0, 0, 0, rwRASTERDONTALLOCATE|rwRASTERTYPECAMERATEXTURE);
+	if (!pFrontBuffer)
+	{
+		printf("Error creating raster\n");
+		return FALSE;
+	}
+	
+	RwRaster *raster = RwRasterSubRaster(pFrontBuffer, RwCameraGetRaster(cam), &rect);
+	if (!raster)
+	{
+		RwRasterDestroy(pFrontBuffer);
+		pFrontBuffer = NULL;
+		printf("Error subrastering\n");
+		return FALSE;
+	}
+	
+	CreateImmediateModeData(cam, &rect);
+#else
 	RwRect rect = { 0, 0, 0, 0 };
 
 	if(pFrontBuffer)
 		MotionBlurClose();
-
-	if(BlurOn){
-		for(rect.w = 1; rect.w < RwRasterGetWidth(RwCameraGetRaster(cam)); rect.w *= 2);
-		for(rect.h = 1; rect.h < RwRasterGetHeight(RwCameraGetRaster(cam)); rect.h *= 2);
-		pFrontBuffer = RwRasterCreate(rect.w, rect.h, RwRasterGetDepth(RwCameraGetRaster(cam)), rwRASTERTYPECAMERATEXTURE);
-		if(pFrontBuffer)
-			ms_bJustInitialised = true;
-		else{
-			debug("MBlurOpen can't create raster.");
+	
+#ifndef LIBRW
+	extern void _GetVideoMemInfo(LPDWORD total, LPDWORD avaible);
+	DWORD total, avaible;
+	
+	_GetVideoMemInfo(&total, &avaible);
+	debug("Available video memory %d\n", avaible);
+#endif
+		
+	if(BlurOn)
+	{
+		int32 width  = Pow(2.0f, int32(log2(RwRasterGetWidth (RwCameraGetRaster(cam))))+1);
+		int32 height = Pow(2.0f, int32(log2(RwRasterGetHeight(RwCameraGetRaster(cam))))+1);
+		int32 depth  = RwRasterGetDepth(RwCameraGetRaster(cam));
+		
+#ifndef LIBRW
+		extern D3DCAPS8 _RwD3D8DeviceCaps;
+		extern DWORD _dwMemTotalVideo;
+		if ( _RwD3D8DeviceCaps.MaxTextureWidth >= width && _RwD3D8DeviceCaps.MaxTextureHeight >= height )
+		{
+			total = _dwMemTotalVideo - 3 *
+				( RwRasterGetDepth(RwCameraGetRaster(cam))
+				* RwRasterGetHeight(RwCameraGetRaster(cam))
+				* RwRasterGetWidth(RwCameraGetRaster(cam)) / 8 );
+			BlurOn = total >= height*width*(depth/8) + (12*1024*1024) /*12 MB*/;
+		}
+		else
 			BlurOn = false;
+#endif
+		
+		if ( BlurOn )
+		{
+			ms_bScaledBlur = false;
+			rect.w = width;
+			rect.h = height;
+			
+			pFrontBuffer = RwRasterCreate(rect.w, rect.h, depth, rwRASTERTYPECAMERATEXTURE);
+			if ( !pFrontBuffer )
+			{
+				debug("MBlurOpen can't create raster.");
+				BlurOn = false;
+				rect.w = RwRasterGetWidth(RwCameraGetRaster(cam));
+				rect.h = RwRasterGetHeight(RwCameraGetRaster(cam));
+			}
+			else
+				ms_bJustInitialised = true;
+		}
+		else
+		{
 			rect.w = RwRasterGetWidth(RwCameraGetRaster(cam));
 			rect.h = RwRasterGetHeight(RwCameraGetRaster(cam));
 		}
+		
+#ifndef LIBRW
+		_GetVideoMemInfo(&total, &avaible);
+		debug("Available video memory %d\n", avaible);
+#endif
 		CreateImmediateModeData(cam, &rect);
-	}else{
+	}
+	else
+	{
 		rect.w = RwRasterGetWidth(RwCameraGetRaster(cam));
 		rect.h = RwRasterGetHeight(RwCameraGetRaster(cam));
 		CreateImmediateModeData(cam, &rect);
 	}
+	
+	return TRUE;
+#endif
 }
 
-void
+RwBool
 CMBlur::MotionBlurClose(void)
 {
 	if(pFrontBuffer){
 		RwRasterDestroy(pFrontBuffer);
 		pFrontBuffer = nil;
+		
+		return TRUE;
 	}
+	
+	return FALSE;
 }
 
 void
@@ -149,6 +231,10 @@ void
 CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blur, int32 type, uint32 alpha)
 {
 	RwRGBA color = { (RwUInt8)red, (RwUInt8)green, (RwUInt8)blue, (RwUInt8)blur };
+#ifdef GTA_PS2
+	if( pFrontBuffer )
+		OverlayRender(cam, pFrontBuffer, color, type, addalpha);
+#else
 	if(ms_bJustInitialised)
 		ms_bJustInitialised = false;
 	else
@@ -158,6 +244,7 @@ CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, u
 		RwRasterRenderFast(RwCameraGetRaster(cam), 0, 0);
 		RwRasterPopContext();
 	}
+#endif
 }
 
 void
@@ -172,32 +259,33 @@ CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type,
 
 	DefinedState();
 
-	switch(type){
-	case MBLUR_INTRO1:
+	switch(type)
+	{
+	case MOTION_BLUR_SECURITY_CAM:
 		r = 0;
 		g = 255;
 		b = 0;
 		a = 128;
 		break;
-	case MBLUR_INTRO3:
+	case MOTION_BLUR_INTRO:
 		r = 100;
 		g = 220;
 		b = 230;
 		a = 158;
 		break;
-	case MBLUR_INTRO4:
+	case MOTION_BLUR_INTRO2:
 		r = 80;
 		g = 255;
 		b = 230;
 		a = 138;
 		break;
-	case MBLUR_INTRO6:
+	case MOTION_BLUR_INTRO3:
 		r = 255;
 		g = 60;
 		b = 60;
 		a = 200;
 		break;
-	case MBLUR_UNUSED:
+	case MOTION_BLUR_INTRO4:
 		r = 255;
 		g = 180;
 		b = 180;
@@ -210,7 +298,7 @@ CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type,
 		int ovR = r * 0.6f;
 		int ovG = g * 0.6f;
 		int ovB = b * 0.6f;
-		int ovA = type == MBLUR_SNIPER ? a : a*0.6f;
+		int ovA = type == MOTION_BLUR_SNIPER ? a : a*0.6f;
 		RwIm2DVertexSetIntRGBA(&Vertex[0], ovR, ovG, ovB, ovA);
 		RwIm2DVertexSetIntRGBA(&Vertex[1], ovR, ovG, ovB, ovA);
 		RwIm2DVertexSetIntRGBA(&Vertex[2], ovR, ovG, ovB, ovA);
@@ -237,7 +325,7 @@ CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type,
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
 
 	if(BlurOn){
-		if(type == MBLUR_SNIPER){
+		if(type == MOTION_BLUR_SNIPER){
 			RwIm2DVertexSetIntRGBA(&Vertex2[0], r, g, b, 80);
 			RwIm2DVertexSetIntRGBA(&Vertex2[1], r, g, b, 80);
 			RwIm2DVertexSetIntRGBA(&Vertex2[2], r, g, b, 80);

@@ -180,7 +180,7 @@ CPlayerInfo::MakePlayerSafe(bool toggle)
 	if (toggle) {
 		m_pPed->m_pWanted->m_bIgnoredByEveryone = true;
 		CWorld::StopAllLawEnforcersInTheirTracks();
-		CPad::GetPad(0)->DisablePlayerControls |= PLAYERCONTROL_DISABLED_20;
+		CPad::GetPad(0)->SetDisablePlayerControls(PLAYERCONTROL_PLAYERINFO);
 		CPad::StopPadsShaking();
 		m_pPed->bBulletProof = true;
 		m_pPed->bFireProof = true;
@@ -201,7 +201,7 @@ CPlayerInfo::MakePlayerSafe(bool toggle)
 	}
 	else {
 		m_pPed->m_pWanted->m_bIgnoredByEveryone = false;
-		CPad::GetPad(0)->DisablePlayerControls &= ~PLAYERCONTROL_DISABLED_20;
+		CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_PLAYERINFO);
 		m_pPed->bBulletProof = false;
 		m_pPed->bFireProof = false;
 		m_pPed->bCollisionProof = false;

@@ -59,6 +59,12 @@ cDMAudio::DestroyAllGameCreatedEntities(void)
 }
 
 void
+cDMAudio::SetMonoMode(uint8 mono)
+{
+	AudioManager.SetMonoMode(mono);
+}
+
+void
 cDMAudio::SetEffectsMasterVolume(uint8 volume)
 {
 	uint8 vol = volume;

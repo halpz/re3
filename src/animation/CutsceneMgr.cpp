@@ -231,7 +231,7 @@ CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
 	pPlayerPed->m_pWanted->ClearQdCrimes();
 	pPlayerPed->bIsVisible = false;
 	pPlayerPed->m_fCurrentStamina = pPlayerPed->m_fMaxStamina;
-	CPad::GetPad(0)->DisablePlayerControls |= PLAYERCONTROL_DISABLED_80;
+	CPad::GetPad(0)->SetDisablePlayerControls(PLAYERCONTROL_CUTSCENE);
 	CWorld::Players[CWorld::PlayerInFocus].MakePlayerSafe(true);
 
 	CTimer::Resume();
@@ -369,7 +369,7 @@ CCutsceneMgr::DeleteCutsceneData(void)
 	ms_loaded = false;
 
 	FindPlayerPed()->bIsVisible = true;
-	CPad::GetPad(0)->DisablePlayerControls &= ~PLAYERCONTROL_DISABLED_80;
+	CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_CUTSCENE);
 	CWorld::Players[CWorld::PlayerInFocus].MakePlayerSafe(false);
 
 	if (CGeneral::faststricmp(ms_cutsceneName, "end")) {

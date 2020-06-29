@@ -549,15 +549,15 @@ CCamera::Process(void)
 	GetMatrix().GetPosition().y += shakeOffset * (((shakeRand & 0xF0) >> 4) - 7);
 	GetMatrix().GetPosition().z += shakeOffset * (((shakeRand & 0xF00) >> 8) - 7);
 
-	if(shakeOffset > 0.0f && m_BlurType != MBLUR_SNIPER)
+	if(shakeOffset > 0.0f && m_BlurType != MOTION_BLUR_SNIPER)
 		SetMotionBlurAlpha(Min((int)(shakeStrength*255.0f) + 25, 150));
 
 	static bool bExtra1stPrsBlur = false;
 	if(Cams[ActiveCam].Mode == CCam::MODE_1STPERSON && FindPlayerVehicle() && FindPlayerVehicle()->GetUp().z < 0.2f){
-		SetMotionBlur(230, 230, 230, 215, MBLUR_NORMAL);
+		SetMotionBlur(230, 230, 230, 215, MOTION_BLUR_LIGHT_SCENE);
 		bExtra1stPrsBlur = true;
 	}else if(bExtra1stPrsBlur){
-		SetMotionBlur(CTimeCycle::GetBlurRed(), CTimeCycle::GetBlurGreen(), CTimeCycle::GetBlurBlue(), m_motionBlur, MBLUR_NORMAL);
+		SetMotionBlur(CTimeCycle::GetBlurRed(), CTimeCycle::GetBlurGreen(), CTimeCycle::GetBlurBlue(), m_motionBlur, MOTION_BLUR_LIGHT_SCENE);
 		bExtra1stPrsBlur = false;
 	}
 
@@ -694,7 +694,7 @@ CCamera::CamControl(void)
 		m_bFailedCullZoneTestPreviously = CCullZones::CamCloseInForPlayer();
 
 	if(m_bLookingAtPlayer){
-		CPad::GetPad(0)->DisablePlayerControls &= ~PLAYERCONTROL_DISABLED_1;
+		CPad::GetPad(0)->DisablePlayerControls &= ~PLAYERCONTROL_CAMERA;
 		FindPlayerPed()->bIsVisible = true;
 	}
 
@@ -1029,7 +1029,7 @@ CCamera::CamControl(void)
 				m_bFirstPersonBeingUsed = false;
 			if(m_bFirstPersonBeingUsed){
 				ReqMode = CCam::MODE_1STPERSON;
-				CPad::GetPad(0)->DisablePlayerControls |= PLAYERCONTROL_DISABLED_1;
+				CPad::GetPad(0)->DisablePlayerControls |= PLAYERCONTROL_CAMERA;
 			}
 
 			// Zoom value
@@ -1679,7 +1679,7 @@ CCamera::CamControl(void)
 			}else if(Cams[ActiveCam].Mode != m_iModeToGoTo){
 				m_bStartInterScript = true;
 				m_iTypeOfSwitch = JUMP_CUT;
-				CPad::GetPad(0)->DisablePlayerControls &= ~PLAYERCONTROL_DISABLED_1;
+				CPad::GetPad(0)->DisablePlayerControls &= ~PLAYERCONTROL_CAMERA;
 			}
 		}
 
@@ -2548,7 +2548,7 @@ CCamera::DrawBordersForWideScreen(void)
 		bottom = SCREEN_HEIGHT;
 	}
 
-	if(m_BlurType == MBLUR_NONE || m_BlurType == MBLUR_NORMAL)
+	if(m_BlurType == MOTION_BLUR_NONE || m_BlurType == MOTION_BLUR_LIGHT_SCENE)
 		SetMotionBlurAlpha(80);
 
 	// top border
@@ -3913,7 +3913,7 @@ CCamera::SetCameraDirectlyInFrontForFollowPed_CamOnAString(void)
 void
 CCamera::SetNewPlayerWeaponMode(int16 mode, int16 minZoom, int16 maxZoom)
 {
-	SetMotionBlur(CTimeCycle::GetBlurRed(), CTimeCycle::GetBlurGreen(), CTimeCycle::GetBlurBlue(), m_motionBlur, MBLUR_NORMAL);
+	SetMotionBlur(CTimeCycle::GetBlurRed(), CTimeCycle::GetBlurGreen(), CTimeCycle::GetBlurBlue(), m_motionBlur, MOTION_BLUR_LIGHT_SCENE);
 	PlayerWeaponMode.Mode = mode;
 	PlayerWeaponMode.MaxZoom = maxZoom;
 	PlayerWeaponMode.MinZoom = minZoom;
@@ -3923,7 +3923,7 @@ CCamera::SetNewPlayerWeaponMode(int16 mode, int16 minZoom, int16 maxZoom)
 void
 CCamera::ClearPlayerWeaponMode(void)
 {
-	SetMotionBlur(CTimeCycle::GetBlurRed(), CTimeCycle::GetBlurGreen(), CTimeCycle::GetBlurBlue(), m_motionBlur, MBLUR_NORMAL);
+	SetMotionBlur(CTimeCycle::GetBlurRed(), CTimeCycle::GetBlurGreen(), CTimeCycle::GetBlurBlue(), m_motionBlur, MOTION_BLUR_LIGHT_SCENE);
 	PlayerWeaponMode.Mode = 0;
 	PlayerWeaponMode.MaxZoom = 1;
 	PlayerWeaponMode.MinZoom = -1;

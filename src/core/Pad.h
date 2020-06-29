@@ -2,14 +2,14 @@
 
 enum {
 	PLAYERCONTROL_ENABLED = 0,
-	PLAYERCONTROL_DISABLED_1 = 1,	// used by first person camera
-	PLAYERCONTROL_DISABLED_2 = 2,
+	PLAYERCONTROL_CAMERA = 1,
+	PLAYERCONTROL_UNK2 = 2,
 	PLAYERCONTROL_GARAGE = 4,
-	PLAYERCONTROL_DISABLED_8 = 8,
-	PLAYERCONTROL_DISABLED_10 = 16,
-	PLAYERCONTROL_DISABLED_20 = 32, // used on CPlayerInfo::MakePlayerSafe
-	PLAYERCONTROL_DISABLED_40 = 64, // used on phone calls
-	PLAYERCONTROL_DISABLED_80 = 128,// used on cutscenes
+	PLAYERCONTROL_UNK8 = 8,
+	PLAYERCONTROL_UNK10 = 16,
+	PLAYERCONTROL_PLAYERINFO = 32,
+	PLAYERCONTROL_PHONE = 64,
+	PLAYERCONTROL_CUTSCENE = 128,
 	PLAYERCONTROL_SHORTCUT_TAXI = 256,
 };
 
@@ -198,13 +198,13 @@ public:
 
 	static void UpdatePads(void);
 	void ProcessPCSpecificStuff(void);
-	void Update(int16 unk);
+	void Update(int16 pad);
 	
 	static void DoCheats(void);
 	void DoCheats(int16 unk);
 	
 	static void StopPadsShaking(void);
-	void StopShaking(int16 unk);
+	void StopShaking(int16 pad);
 	
 	static CPad *GetPad(int32 pad);
 	
@@ -455,6 +455,11 @@ public:
 	void SetDisablePlayerControls(uint16 who) { DisablePlayerControls |= who; }
 	void SetEnablePlayerControls(uint16 who) { DisablePlayerControls &= ~who; }
 	bool IsPlayerControlsDisabledBy(uint16 who) { return DisablePlayerControls & who; }
+	
+	int16 GetMode() { return Mode; }
+	void SetMode(int16 mode) { Mode = mode; }
+	
+	static bool IsNoOrObsolete() { return bDisplayNoControllerMessage || bObsoleteControllerMessage; }
 };
 
 VALIDATE_SIZE(CPad, 0xFC);

@@ -103,6 +103,8 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 
 #define DEFAULT_SCREEN_WIDTH (640)
 #define DEFAULT_SCREEN_HEIGHT (448)
+#define DEFAULT_SCREEN_HEIGHT_PAL (512)
+#define DEFAULT_SCREEN_HEIGHT_NTSC (448)
 #define DEFAULT_ASPECT_RATIO (4.0f/3.0f)
 #define DEFAULT_VIEWWINDOW (0.7f)
 
@@ -152,6 +154,16 @@ public:
 	
 	CRGBA(void) { }
 	CRGBA(uint8 r, uint8 g, uint8 b, uint8 a) : r(r), g(g), b(b), a(a) { }
+	
+	bool operator ==(const CRGBA &right)
+	{
+		return this->r == right.r && this->g == right.g && this->b == right.b && this->a == right.a;
+	}
+	
+	bool operator !=(const CRGBA &right)
+	{
+		return !(*this == right);
+	}
 	
 	CRGBA &operator =(const CRGBA &right)
 	{

@@ -1,4 +1,7 @@
 #pragma once
+#ifdef PS2_MENU
+#include "Frontend_PS2.h"
+#else
 
 #include "Sprite2d.h"
 
@@ -93,20 +96,6 @@
 #define CONTSETUP_BACK_RIGHT 35.0f
 #define CONTSETUP_BACK_BOTTOM 122.0f
 #define CONTSETUP_BACK_HEIGHT 25.0f
-
-enum eLanguages
-{
-	LANGUAGE_AMERICAN,
-	LANGUAGE_FRENCH,
-	LANGUAGE_GERMAN,
-	LANGUAGE_ITALIAN,
-	LANGUAGE_SPANISH,
-#ifdef MORE_LANGUAGES
-	LANGUAGE_POLISH,
-	LANGUAGE_RUSSIAN,
-	LANGUAGE_JAPANESE,
-#endif
-};
 
 enum
 {
@@ -591,6 +580,19 @@ public:
 	int32 m_nSelectedScreenMode;
 #endif
 
+	enum LANGUAGE
+	{
+		LANGUAGE_AMERICAN,
+		LANGUAGE_FRENCH,
+		LANGUAGE_GERMAN,
+		LANGUAGE_ITALIAN,
+		LANGUAGE_SPANISH,
+#ifdef MORE_LANGUAGES
+		LANGUAGE_POLISH,
+		LANGUAGE_RUSSIAN,
+		LANGUAGE_JAPANESE,
+#endif
+	};
 	bool GetIsMenuActive() {return !!m_bMenuActive;}
 
 	static uint8 m_PrefsStereoMono;
@@ -666,3 +668,6 @@ VALIDATE_SIZE(CMenuManager, 0x688);
 #endif
 
 extern CMenuManager FrontEndMenuManager;
+
+
+#endif

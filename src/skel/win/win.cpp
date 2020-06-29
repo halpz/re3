@@ -87,8 +87,10 @@ static psGlobalType PsGlobal;
 #include "Frontend.h"
 #include "Game.h"
 #include "PCSave.h"
+#include "MemoryCard.h"
 #include "Sprite2d.h"
 #include "AnimViewer.h"
+#include "Font.h"
 
 VALIDATE_SIZE(psGlobalType, 0x28);
 
@@ -598,12 +600,49 @@ psInitialize(void)
 	PsGlobal.joy2	= nil;
 
 	CFileMgr::Initialise();
+
+#ifdef PS2_MENU
+	CPad::Initialise();
+	CPad::GetPad(0)->Mode = 0;
 	
+	CGame::frenchGame = false;
+	CGame::germanGame = false;
+	CGame::nastyGame = true;
+	CMenuManager::m_PrefsAllowNastyGame = true;
+	
+	WORD lang	= PRIMARYLANGID(GetSystemDefaultLCID());
+	if ( lang  == LANG_ITALIAN )
+		CMenuManager::m_PrefsLanguage = CMenuManager::LANGUAGE_ITALIAN;
+	else if ( lang  == LANG_SPANISH )
+		CMenuManager::m_PrefsLanguage = CMenuManager::LANGUAGE_SPANISH;
+	else if ( lang  == LANG_GERMAN )
+	{
+		CGame::germanGame = true;
+		CGame::nastyGame = false;
+		CMenuManager::m_PrefsAllowNastyGame = false;
+		CMenuManager::m_PrefsLanguage = CMenuManager::LANGUAGE_GERMAN;
+	}
+	else if ( lang  == LANG_FRENCH )
+	{
+		CGame::frenchGame = true;
+		CGame::nastyGame = false;
+		CMenuManager::m_PrefsAllowNastyGame = false;
+		CMenuManager::m_PrefsLanguage = CMenuManager::LANGUAGE_FRENCH;
+	}
+	else
+		CMenuManager::m_PrefsLanguage = CMenuManager::LANGUAGE_AMERICAN;
+	
+	FrontEndMenuManager.InitialiseMenuContentsAfterLoadingGame();
+	
+	TheMemoryCard.Init();
+#else
 	C_PcSave::SetSaveDirectory(_psGetUserFilesFolder());
 	
 	InitialiseLanguage();
 #ifndef GTA3_1_1_PATCH
 	FrontEndMenuManager.LoadSettings();
+#endif
+
 #endif
 	
 	gGameState = GS_START_UP;
@@ -650,8 +689,12 @@ psInitialize(void)
 		}
 	}
 
+#ifndef PS2_MENU
+
 #ifdef GTA3_1_1_PATCH
 	FrontEndMenuManager.LoadSettings();
+#endif
+
 #endif
 
 	dwDXVersion = GetDXVersion();
@@ -1447,7 +1490,9 @@ psSelectDevice()
 	FrontEndMenuManager.m_nPrefsDepth = vm.depth;
 #endif
 
+#ifndef PS2_MENU
 	FrontEndMenuManager.m_nCurrOption = 0;
+#endif
 	
 	/* Set up the video mode and set the apps window
 	* dimensions to match */
@@ -1725,27 +1770,27 @@ void InitialiseLanguage()
 	{
 		case LANG_GERMAN:
 		{
-			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_GERMAN;
+			FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_GERMAN;
 			break;
 		}
 		case LANG_SPANISH:
 		{
-			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_SPANISH;
+			FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_SPANISH;
 			break;
 		}
 		case LANG_FRENCH:
 		{
-			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_FRENCH;
+			FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_FRENCH;
 			break;
 		}
 		case LANG_ITALIAN:
 		{
-			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_ITALIAN;
+			FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_ITALIAN;
 			break;
 		}
 		default:
 		{
-			FrontEndMenuManager.m_PrefsLanguage = LANGUAGE_AMERICAN;
+			FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_AMERICAN;
 			break;
 		}
 	}
@@ -2041,24 +2086,35 @@ WinMain(HINSTANCE instance,
 	
 	SetErrorMode(SEM_FAILCRITICALERRORS);
 
-	if (!TurnOnAnimViewer) {
-#ifdef NO_MOVIES
-		gGameState = GS_INIT_FRONTEND;
-		TRACE("gGameState = GS_INIT_FRONTEND");
-
+			
+#ifdef PS2_MENU
+	int32 r = TheMemoryCard.CheckCardStateAtGameStartUp(CARD_ONE);
+	if (   r == CMemoryCard::ERR_DIRNOENTRY  || r == CMemoryCard::ERR_NOFORMAT
+		&& r != CMemoryCard::ERR_OPENNOENTRY && r != CMemoryCard::ERR_NONE )
+	{
 		LoadingScreen(nil, nil, "loadsc0");
-		if (!CGame::InitialiseOnceAfterRW())
-			RsGlobal.quit = TRUE;
+		
+		TheText.Unload();
+		TheText.Load();
+		
+		CFont::Initialise();
+		
+		FrontEndMenuManager.DrawMemoryCardStartUpMenus();
+	}
 #endif
-	} else {
+
+	if (TurnOnAnimViewer)
+	{
 #ifndef MASTER
 		CAnimViewer::Initialise();
+#ifndef PS2_MENU
 		FrontEndMenuManager.m_bGameNotLoaded = false;
+#endif
 		gGameState = GS_ANIMVIEWER;
 		TurnOnAnimViewer = false;
 #endif
 	}
-	
+
 	while ( TRUE )
 	{
 		RwInitialised = TRUE;
@@ -2077,8 +2133,18 @@ WinMain(HINSTANCE instance,
 		/*
 		* Enter the message processing loop...
 		*/
-
+#ifdef PS2_MENU
+		if (TheMemoryCard.m_bWantToLoad)
+			LoadSplash(GetLevelSplashScreen(CGame::currLevel));
+		
+		TheMemoryCard.m_bWantToLoad = false;
+		
+		CTimer::Update();
+		
+		while( !RsGlobal.quit && !(FrontEndMenuManager.m_bWantToRestart || TheMemoryCard.b_FoundRecentSavedGameWantToLoad) )
+#else
 		while( !RsGlobal.quit && !FrontEndMenuManager.m_bWantToRestart )
+#endif
 		{
 			if( PeekMessage(&message, nil, 0U, 0U, PM_REMOVE|PM_NOYIELD) )
 			{
@@ -2098,7 +2164,11 @@ WinMain(HINSTANCE instance,
 				{
 					case GS_START_UP:
 					{
+#ifdef NO_MOVIES
+						gGameState = GS_INIT_ONCE;
+#else
 						gGameState = GS_INIT_LOGO_MPEG;
+#endif
 						TRACE("gGameState = GS_INIT_LOGO_MPEG");
 						break;
 					}
@@ -2173,16 +2243,30 @@ WinMain(HINSTANCE instance,
 						CloseClip();
 						CoUninitialize();
 						
-						LoadingScreen(nil, nil, "loadsc0");
+#ifdef PS2_MENU
+						extern char version_name[64];
+						if ( CGame::frenchGame || CGame::germanGame )
+							LoadingScreen(NULL, version_name, "loadsc24");
+						else
+							LoadingScreen(NULL, version_name, "loadsc0");
 						
+						printf("Into TheGame!!!\n");
+#else				
+						LoadingScreen(nil, nil, "loadsc0");
+#endif
 						if ( !CGame::InitialiseOnceAfterRW() )
 							RsGlobal.quit = TRUE;
-						
+				
+#ifdef PS2_MENU
+						gGameState = GS_INIT_PLAYING_GAME;
+#else
 						gGameState = GS_INIT_FRONTEND;
 						TRACE("gGameState = GS_INIT_FRONTEND;");
+#endif
 						break;
 					}
 					
+#ifndef PS2_MENU
 					case GS_INIT_FRONTEND:
 					{
 						LoadingScreen(nil, nil, "loadsc0");
@@ -2210,13 +2294,21 @@ WinMain(HINSTANCE instance,
 						if (wp.showCmd != SW_SHOWMINIMIZED)
 							RsEventHandler(rsFRONTENDIDLE, nil);
 
+#ifdef PS2_MENU
+						if ( !FrontEndMenuManager.m_bMenuActive || TheMemoryCard.m_bWantToLoad )
+#else
 						if ( !FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bWantToLoad )
+#endif
 						{
 							gGameState = GS_INIT_PLAYING_GAME;
 							TRACE("gGameState = GS_INIT_PLAYING_GAME;");
 						}
 
+#ifdef PS2_MENU
+						if (TheMemoryCard.m_bWantToLoad )
+#else
 						if ( FrontEndMenuManager.m_bWantToLoad )
+#endif
 						{
 							InitialiseGame();
 							FrontEndMenuManager.m_bGameNotLoaded = false;
@@ -2225,11 +2317,37 @@ WinMain(HINSTANCE instance,
 						}
 						break;
 					}
+#endif
 					
 					case GS_INIT_PLAYING_GAME:
 					{
+#ifdef PS2_MENU
+						CGame::Initialise("DATA\\GTA3.DAT");
+						
+						//LoadingScreen("Starting Game", NULL, GetRandomSplashScreen());
+					
+						if (   TheMemoryCard.CheckCardInserted(CARD_ONE) == CMemoryCard::NO_ERR_SUCCESS
+							&& TheMemoryCard.ChangeDirectory(CARD_ONE, TheMemoryCard.Cards[CARD_ONE].dir)
+							&& TheMemoryCard.FindMostRecentFileName(CARD_ONE, TheMemoryCard.MostRecentFile) == true
+							&& TheMemoryCard.CheckDataNotCorrupt(TheMemoryCard.MostRecentFile))
+						{
+							strcpy(TheMemoryCard.LoadFileName, TheMemoryCard.MostRecentFile);
+							TheMemoryCard.b_FoundRecentSavedGameWantToLoad = true;
+					
+							if (CMenuManager::m_PrefsLanguage != TheMemoryCard.GetLanguageToLoad())
+							{
+								CMenuManager::m_PrefsLanguage = TheMemoryCard.GetLanguageToLoad();
+								TheText.Unload();
+								TheText.Load();
+							}
+					
+							CGame::currLevel = (eLevelName)TheMemoryCard.GetLevelToLoad();
+						}
+#else
 						InitialiseGame();
+
 						FrontEndMenuManager.m_bGameNotLoaded = false;
+#endif
 						gGameState = GS_PLAYING_GAME;
 						TRACE("gGameState = GS_PLAYING_GAME;");
 						break;
@@ -2279,16 +2397,45 @@ WinMain(HINSTANCE instance,
 		RwInitialised = FALSE;
 		
 		FrontEndMenuManager.UnloadTextures();
+#ifdef PS2_MENU	
+		if ( !(FrontEndMenuManager.m_bWantToRestart || TheMemoryCard.b_FoundRecentSavedGameWantToLoad))
+			break;
+#else
 		if ( !FrontEndMenuManager.m_bWantToRestart )
 			break;
+#endif
 		
 		CPad::ResetCheats();
 		CPad::StopPadsShaking();
 		
 		DMAudio.ChangeMusicMode(MUSICMODE_DISABLE);
 		
+#ifdef PS2_MENU
+		CGame::ShutDownForRestart();
+#endif
 		CTimer::Stop();
 		
+#ifdef PS2_MENU
+		if (FrontEndMenuManager.m_bWantToRestart || TheMemoryCard.b_FoundRecentSavedGameWantToLoad)
+		{
+			if (TheMemoryCard.b_FoundRecentSavedGameWantToLoad)
+			{
+				FrontEndMenuManager.m_bWantToRestart = true;
+				TheMemoryCard.m_bWantToLoad = true;
+			}
+
+			CGame::InitialiseWhenRestarting();
+			DMAudio.ChangeMusicMode(MUSICMODE_GAME);
+			FrontEndMenuManager.m_bWantToRestart = false;
+			
+			continue;
+		}
+		
+		CGame::ShutDown();	
+		CTimer::Stop();
+		
+		break;
+#else
 		if ( FrontEndMenuManager.m_bWantToLoad )
 		{
 			CGame::ShutDownForRestart();
@@ -2320,6 +2467,7 @@ WinMain(HINSTANCE instance,
 		
 		FrontEndMenuManager.m_bFirstTime = false;
 		FrontEndMenuManager.m_bWantToRestart = false;
+#endif
 	}
 	
 

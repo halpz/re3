@@ -162,7 +162,7 @@ CGameLogic::Update()
 			AfterDeathArrestSetUpShortCutTaxi();
 			SortOutStreamingAndMemory(pPlayerInfo.GetPos());
 			TheCamera.m_fCamShakeForce = 0.0f;
-			TheCamera.SetMotionBlur(0, 0, 0, 0, MBLUR_NONE);
+			TheCamera.SetMotionBlur(0, 0, 0, 0, MOTION_BLUR_NONE);
 			CPad::GetPad(0)->StopShaking(0);
 			CReferences::RemoveReferencesToPlayer();
 			CPopulation::m_CountDownToPedsAtStart = 10;
@@ -269,7 +269,7 @@ CGameLogic::Update()
 			pPlayerInfo.m_pPed->ClearWeapons();
 			SortOutStreamingAndMemory(pPlayerInfo.GetPos());
 			TheCamera.m_fCamShakeForce = 0.0f;
-			TheCamera.SetMotionBlur(0, 0, 0, 0, MBLUR_NONE);
+			TheCamera.SetMotionBlur(0, 0, 0, 0, MOTION_BLUR_NONE);
 			CPad::GetPad(0)->StopShaking(0);
 			CReferences::RemoveReferencesToPlayer();
 			CPopulation::m_CountDownToPedsAtStart = 10;
@@ -318,7 +318,7 @@ CGameLogic::Update()
 			RestorePlayerStuffDuringResurrection(pPlayerInfo.m_pPed, vecRestartPos, fRestartFloat);
 			SortOutStreamingAndMemory(pPlayerInfo.GetPos());
 			TheCamera.m_fCamShakeForce = 0.0f;
-			TheCamera.SetMotionBlur(0, 0, 0, 0, MBLUR_NONE);
+			TheCamera.SetMotionBlur(0, 0, 0, 0, MOTION_BLUR_NONE);
 			CPad::GetPad(0)->StopShaking(0);
 			CReferences::RemoveReferencesToPlayer();
 			CPopulation::m_CountDownToPedsAtStart = 10;

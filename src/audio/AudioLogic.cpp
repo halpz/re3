@@ -4775,8 +4775,8 @@ cAudioManager::ProcessFrontEnd()
 			m_sQueueSample.m_nSampleIndex = SFX_FE_SELECT_LEFT;
 			stereo = true;
 			frontendBank = true;
-			frontendBank = true;
-			frontendBank = true;
+
+
 			break;
 		//case SOUND_FRONTEND_EXIT:
 		//	m_sQueueSample.m_nSampleIndex = SFX_SUB_MENU_BACK_LEFT;

@@ -354,6 +354,7 @@ private:
 	static bool IsPlayerStopped(CPlayerInfo*);
 	static bool IsVehicleStopped(CVehicle*);
 
+	static void PrintListSizes();
 	static void ReadObjectNamesFromScript();
 	static void UpdateObjectIndices();
 	static void ReadMultiScriptFileOffsetsFromScript();
@@ -391,7 +392,7 @@ public:
 
 
 enum {
-	MAX_STACK_DEPTH = 6,
+	MAX_STACK_DEPTH = 6, // 4 PS2
 	NUM_LOCAL_VARS = 16,
 	NUM_TIMERS = 2
 };
@@ -501,6 +502,11 @@ private:
 
 #ifdef MISSION_REPLAY
 	bool CanAllowMissionReplay();
+#endif
+
+#ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+	int CollectParameterForDebug(char* buf, bool& var);
+	void GetStoredParameterForDebug(char* buf);
 #endif
 
 	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }

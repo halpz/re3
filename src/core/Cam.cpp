@@ -1366,7 +1366,7 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 	TargetCoors.z += fTranslateCamUp;
 
 	float AlphaOffset, BetaOffset;
-	if(CPad::GetPad(0)->IsPlayerControlsDisabledBy(PLAYERCONTROL_DISABLED_20)){
+	if(CPad::GetPad(0)->IsPlayerControlsDisabledBy(PLAYERCONTROL_PLAYERINFO)){
 		CVector ToCam = Source - TargetCoors;
 		ToCam.Normalise();
 		if(ToCam.z < -0.9f)
@@ -1400,7 +1400,7 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 
 	if(TheCamera.GetFading() && TheCamera.GetFadingDirection() == FADE_IN && nFadeControlThreshhold < CDraw::FadeValue ||
 	   CDraw::FadeValue > 200 ||
-	   CPad::GetPad(0)->IsPlayerControlsDisabledBy(PLAYERCONTROL_DISABLED_20)){
+	   CPad::GetPad(0)->IsPlayerControlsDisabledBy(PLAYERCONTROL_PLAYERINFO)){
 		if(Alpha < fDefaultAlphaOrient-0.05f)
 			AlphaOffset = 0.05f;
 		else if(Alpha < fDefaultAlphaOrient)
@@ -1525,7 +1525,7 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 
 	if(((CPed*)CamTargetEntity)->CanStrafeOrMouseControl() && CDraw::FadeValue < 250 &&
 	   (TheCamera.GetFadingDirection() != FADE_OUT || CDraw::FadeValue <= 100) &&
-	   !CPad::GetPad(0)->IsPlayerControlsDisabledBy(PLAYERCONTROL_DISABLED_20)){
+	   !CPad::GetPad(0)->IsPlayerControlsDisabledBy(PLAYERCONTROL_PLAYERINFO)){
 		float Heading = Front.Heading();
 		((CPed*)TheCamera.pTargetEntity)->m_fRotationCur = Heading;
 		((CPed*)TheCamera.pTargetEntity)->m_fRotationDest = Heading;
@@ -1533,6 +1533,8 @@ CCam::Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrient
 		TheCamera.pTargetEntity->GetMatrix().UpdateRW();
 	}
 }
+
+float fBillsBetaOffset;	// made up name, actually in CCam
 
 void
 CCam::Process_BehindCar(const CVector &CameraTarget, float TargetOrientation, float, float)
@@ -1553,6 +1555,15 @@ CCam::Process_BehindCar(const CVector &CameraTarget, float TargetOrientation, fl
 	if(Length < 0.002f)
 		Length = 0.002f;
 	Beta = CGeneral::GetATanOfXY(TargetCoors.x - Source.x, TargetCoors.y - Source.y);
+#ifdef TOGGLEABLE_BETA_FEATURES
+	// This is completely made up but Bill's cam manipulates an angle before calling this
+	// and otherwise calculating Beta doesn't make much sense.
+	Beta += fBillsBetaOffset;
+	fBillsBetaOffset = 0.0f;
+	Dist.x = -Length*Cos(Beta);
+	Dist.y = -Length*Sin(Beta);
+	Source = TargetCoors + Dist;
+#endif
 	if(Length > CA_MAX_DISTANCE){
 		Source.x = TargetCoors.x + Dist.x/Length * CA_MAX_DISTANCE;
 		Source.y = TargetCoors.y + Dist.y/Length * CA_MAX_DISTANCE;
@@ -2815,7 +2826,7 @@ CCam::Process_1rstPersonPedOnPC(const CVector&, float TargetOrientation, float, 
 					FOV /= (255.0f*CTimer::GetTimeStep() + 10000.0f) / 10000.0f;
 			}
 
-			TheCamera.SetMotionBlur(180, 255, 180, 120, MBLUR_SNIPER);
+			TheCamera.SetMotionBlur(180, 255, 180, 120, MOTION_BLUR_SNIPER);
 
 			if(FOV > DefaultFOV)
 				FOV = DefaultFOV;
@@ -2939,7 +2950,7 @@ CCam::Process_Sniper(const CVector &CameraTarget, float TargetOrientation, float
 			FOVSpeed = 0.0f;
 	}
 
-	TheCamera.SetMotionBlur(180, 255, 180, 120, MBLUR_SNIPER);
+	TheCamera.SetMotionBlur(180, 255, 180, 120, MOTION_BLUR_SNIPER);
 
 	if(FOV > DefaultFOV)
 		FOV = DefaultFOV;
@@ -3715,11 +3726,11 @@ CCam::Process_Fixed(const CVector &CameraTarget, float, float, float)
 			float f = BOAT_UNDERWATER_CAM_COLORMAG_LIMIT/WaterLum;
 			TheCamera.SetMotionBlur(CTimeCycle::GetWaterRed()*f,
 				CTimeCycle::GetWaterGreen()*f,
-				CTimeCycle::GetWaterBlue()*f, BOAT_UNDERWATER_CAM_BLUR, MBLUR_NORMAL);
+				CTimeCycle::GetWaterBlue()*f, BOAT_UNDERWATER_CAM_BLUR, MOTION_BLUR_LIGHT_SCENE);
 		}else{
 			TheCamera.SetMotionBlur(CTimeCycle::GetWaterRed(),
 				CTimeCycle::GetWaterGreen(),
-				CTimeCycle::GetWaterBlue(), BOAT_UNDERWATER_CAM_BLUR, MBLUR_NORMAL);
+				CTimeCycle::GetWaterBlue(), BOAT_UNDERWATER_CAM_BLUR, MOTION_BLUR_LIGHT_SCENE);
 		}
 	}
 
@@ -3938,7 +3949,11 @@ CCam::Process_Debug(const CVector&, float, float, float)
 		Source.y += 1.0f;
 	GetVectorsReadyForRW();
 
-	CPad::GetPad(0)->DisablePlayerControls = PLAYERCONTROL_DISABLED_1;
+#ifdef FIX_BUGS
+	CPad::GetPad(0)->SetDisablePlayerControls(PLAYERCONTROL_CAMERA);
+#else
+	CPad::GetPad(0)->DisablePlayerControls = PLAYERCONTROL_CAMERA;
+#endif
 
 	if(CPad::GetPad(1)->GetLeftShockJustDown() && gbBigWhiteDebugLightSwitchedOn)
 		CShadows::StoreShadowToBeRendered(SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &Source,

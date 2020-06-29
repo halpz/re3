@@ -1437,4 +1437,35 @@ enum {
 	COMMAND_REGISTER_FIRE_LEVEL,
 	COMMAND_IS_AUSTRALIAN_GAME,
 	COMMAND_DISARM_CAR_BOMB,
+#ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+	LAST_SCRIPT_COMMAND
+#endif
 };
+
+#ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+
+enum eScriptArgument
+{
+	ARGTYPE_NONE = 0,
+	ARGTYPE_INT,
+	ARGTYPE_FLOAT,
+	ARGTYPE_STRING,
+	ARGTYPE_LABEL,
+	ARGTYPE_BOOL,
+	ARGTYPE_PED_HANDLE,
+	ARGTYPE_VEHICLE_HANDLE,
+	ARGTYPE_OBJECT_HANDLE,
+	ARGTYPE_ANDOR
+};
+
+struct tScriptCommandData
+{
+	int id;
+	const char name[64];
+	eScriptArgument input[18];
+	eScriptArgument output[18];
+	bool cond;
+	int position;
+	const char name_override[8];
+};
+#endif
