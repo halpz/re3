@@ -52,9 +52,9 @@ CMBlur::MotionBlurOpen(RwCamera *cam)
 	if(pFrontBuffer)
 		MotionBlurClose();
 	
-	DWORD total, avaible;
 #ifdef _WIN32
 	extern void _GetVideoMemInfo(LPDWORD total, LPDWORD avaible);
+	DWORD total, avaible;
 	
 	_GetVideoMemInfo(&total, &avaible);
 	debug("Available video memory %d\n", avaible);
