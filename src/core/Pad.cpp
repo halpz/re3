@@ -344,15 +344,14 @@ void AltDodoCheat(void)
 #endif
 
 bool
-CControllerState::IsAnyButtonPressed(void)
+CControllerState::CheckForInput(void)
 {
 	return !!RightStickX || !!RightStickY || !!LeftStickX || !!LeftStickY
 		|| !!DPadUp || !!DPadDown || !!DPadLeft || !!DPadRight
 		|| !!Triangle || !!Cross || !!Circle || !!Square
 		|| !!Start || !!Select
 		|| !!LeftShoulder1 || !!LeftShoulder2 || !!RightShoulder1 || !!RightShoulder2
-		|| !!LeftShock || !!RightShock
-		|| !!NetworkTalk;
+		|| !!LeftShock || !!RightShock;
 }
 
 void
@@ -1074,7 +1073,7 @@ void CPad::UpdatePads(void)
 	CapturePad(0);
 #endif
 #ifdef DETECT_PAD_INPUT_SWITCH
-	if (GetPad(0)->PCTempJoyState.IsAnyButtonPressed())
+	if (GetPad(0)->PCTempJoyState.CheckForInput())
 		IsAffectedByController = true;
 	else {
 #endif
@@ -1084,7 +1083,7 @@ void CPad::UpdatePads(void)
 
 #ifdef DETECT_PAD_INPUT_SWITCH
 	}
-	if (IsAffectedByController && (GetPad(0)->PCTempKeyState.IsAnyButtonPressed() || GetPad(0)->PCTempMouseState.IsAnyButtonPressed()))
+	if (IsAffectedByController && (GetPad(0)->PCTempKeyState.CheckForInput() || GetPad(0)->PCTempMouseState.CheckForInput()))
 		IsAffectedByController = false;
 #endif
 

@@ -29,7 +29,7 @@ public:
 	float GetRightStickX(void) { return RightStickX/32767.0f; };
 	float GetRightStickY(void) { return RightStickY/32767.0f; };
 
-	bool IsAnyButtonPressed();
+	bool CheckForInput();
 	void Clear(void);
 };
 VALIDATE_SIZE(CControllerState, 0x2A);
