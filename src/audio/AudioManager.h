@@ -108,7 +108,7 @@ public:
 	int32 m_nSampleIndex[MISSION_AUDIO_SLOTS];
 	uint8 m_nLoadingStatus[MISSION_AUDIO_SLOTS];
 	uint8 m_nPlayStatus[MISSION_AUDIO_SLOTS];
-	uint8 field_22[MISSION_AUDIO_SLOTS]; // todo find a name
+	bool m_bIsPlaying[MISSION_AUDIO_SLOTS];
 	int32 m_nMissionAudioCounter[MISSION_AUDIO_SLOTS];
 	bool m_bIsPlayed[MISSION_AUDIO_SLOTS];
 	bool m_bIsMobile[MISSION_AUDIO_SLOTS];
