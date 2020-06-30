@@ -1,5 +1,9 @@
 #define WITHWINDOWS
+#define WITHD3D
 #include "common.h"
+#ifndef LIBRW
+#include <d3d8caps.h>
+#endif
 
 #include "RwHelper.h"
 #include "Camera.h"
@@ -18,6 +22,9 @@ static RwIm2DVertex Vertex[4];
 static RwIm2DVertex Vertex2[4];
 static RwImVertexIndex Index[6] = { 0, 1, 2, 0, 2, 3 };
 
+#ifndef LIBRW
+extern "C" D3DCAPS8 _RwD3D8DeviceCaps;
+#endif
 RwBool
 CMBlur::MotionBlurOpen(RwCamera *cam)
 {
@@ -65,12 +72,11 @@ CMBlur::MotionBlurOpen(RwCamera *cam)
 		
 	if(BlurOn)
 	{
-		int32 width  = Pow(2.0f, int32(log2(RwRasterGetWidth (RwCameraGetRaster(cam))))+1);
-		int32 height = Pow(2.0f, int32(log2(RwRasterGetHeight(RwCameraGetRaster(cam))))+1);
-		int32 depth  = RwRasterGetDepth(RwCameraGetRaster(cam));
+		uint32 width  = Pow(2.0f, int32(log2(RwRasterGetWidth (RwCameraGetRaster(cam))))+1);
+		uint32 height = Pow(2.0f, int32(log2(RwRasterGetHeight(RwCameraGetRaster(cam))))+1);
+		uint32 depth  = RwRasterGetDepth(RwCameraGetRaster(cam));
 		
 #ifndef LIBRW
-		extern D3DCAPS8 _RwD3D8DeviceCaps;
 		extern DWORD _dwMemTotalVideo;
 		if ( _RwD3D8DeviceCaps.MaxTextureWidth >= width && _RwD3D8DeviceCaps.MaxTextureHeight >= height )
 		{
