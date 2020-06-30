@@ -316,7 +316,6 @@ bool CGame::Initialise(const char* datFile)
 	COcclusion::Init();
 	CCollision::Init();
 	CSetPieces::Init();
-	TheText.Load();
 	CTheZones::Init();
 	CUserDisplay::Init();
 	CMessages::Init();
