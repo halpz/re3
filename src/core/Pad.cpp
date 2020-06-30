@@ -518,9 +518,12 @@ void FlyingFishCheat(void)
 bool
 CControllerState::CheckForInput(void)
 {
-	return !!LeftStickX || !!LeftStickY || !!RightStickX || !!RightStickY || !!LeftShoulder1 || !!LeftShoulder2 || !!RightShoulder1 || !!RightShoulder2 ||
-		!!DPadUp || !!DPadDown || !!DPadLeft || !!DPadRight || !!Start || !!Select || !!Square || !!Triangle || !!Cross || !!Circle || !!LeftShock ||
-		!!RightShock;
+	return !!RightStickX || !!RightStickY || !!LeftStickX || !!LeftStickY
+		|| !!DPadUp || !!DPadDown || !!DPadLeft || !!DPadRight
+		|| !!Triangle || !!Cross || !!Circle || !!Square
+		|| !!Start || !!Select
+		|| !!LeftShoulder1 || !!LeftShoulder2 || !!RightShoulder1 || !!RightShoulder2
+		|| !!LeftShock || !!RightShock;
 }
 
 void
