@@ -1,5 +1,7 @@
 #define WITHWINDOWS
+#ifndef LIBRW
 #define WITHD3D
+#endif
 #include "common.h"
 #ifndef LIBRW
 #include <d3d8caps.h>
