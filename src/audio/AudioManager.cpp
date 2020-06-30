@@ -436,7 +436,7 @@ cAudioManager::ServiceSoundEffects()
 		}
 		ClearActiveSamples();
 	}
-	m_nActiveSampleQueue = m_nActiveSampleQueue != 1;
+	m_nActiveSampleQueue = m_nActiveSampleQueue == 1 ? 0 : 1;
 	ProcessReverb();
 	ProcessSpecial();
 	ClearRequestedQueue();
@@ -686,7 +686,7 @@ cAudioManager::AddReleasingSounds()
 {
 	bool toProcess[44]; // why not 27?
 
-	int8 queue = m_nActiveSampleQueue == 0;
+	int8 queue = m_nActiveSampleQueue == 0 ? 1 : 0;
 
 	for (int32 i = 0; i < m_SampleRequestQueuesStatus[queue]; i++) {
 		tSound &sample = m_asSamples[queue][m_abSampleQueueIndexTable[queue][i]];

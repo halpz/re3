@@ -157,7 +157,7 @@ cAudioManager::PostInitialiseGameSpecificSetup()
 	m_sMissionAudio.m_nSampleIndex = NO_SAMPLE;
 	m_sMissionAudio.m_nLoadingStatus = LOADING_STATUS_NOT_LOADED;
 	m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_STOPPED;
-	m_sMissionAudio.field_22 = 0;
+	m_sMissionAudio.m_bIsPlaying = false;
 	m_sMissionAudio.m_bIsPlayed = false;
 	m_sMissionAudio.m_bPredefinedProperties = true;
 	m_sMissionAudio.m_nMissionAudioCounter = 0;
@@ -961,15 +961,15 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
 							}
 							break;
 						case 'F':
-							if (automobile->m_aWheelState[VEHWHEEL_FRONT_LEFT] == WHEEL_STATE_SPINNING)
+							if (automobile->m_aWheelState[CARWHEEL_FRONT_LEFT] == WHEEL_STATE_SPINNING)
 								traction += 0.1f;
-							if (automobile->m_aWheelState[VEHWHEEL_REAR_LEFT] == WHEEL_STATE_SPINNING)
+							if (automobile->m_aWheelState[CARWHEEL_FRONT_RIGHT] == WHEEL_STATE_SPINNING)
 								traction += 0.1f;
 							break;
 						case 'R':
-							if (automobile->m_aWheelState[VEHWHEEL_FRONT_RIGHT] == WHEEL_STATE_SPINNING)
+							if (automobile->m_aWheelState[CARWHEEL_REAR_LEFT] == WHEEL_STATE_SPINNING)
 								traction += 0.1f;
-							if (automobile->m_aWheelState[VEHWHEEL_REAR_RIGHT] == WHEEL_STATE_SPINNING)
+							if (automobile->m_aWheelState[CARWHEEL_REAR_RIGHT] == WHEEL_STATE_SPINNING)
 								traction += 0.1f;
 							break;
 						}
@@ -1250,12 +1250,12 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *
 			lostTraction = true;
 		break;
 	case 'F':
-		if ((automobile->m_aWheelState[VEHWHEEL_FRONT_LEFT] != WHEEL_STATE_NORMAL || automobile->m_aWheelState[VEHWHEEL_REAR_LEFT] != WHEEL_STATE_NORMAL) &&
-		    (automobile->m_aWheelState[VEHWHEEL_FRONT_RIGHT] != WHEEL_STATE_NORMAL || automobile->m_aWheelState[VEHWHEEL_REAR_RIGHT] != WHEEL_STATE_NORMAL))
+		if ((automobile->m_aWheelState[CARWHEEL_FRONT_LEFT] != WHEEL_STATE_NORMAL || automobile->m_aWheelState[CARWHEEL_FRONT_RIGHT] != WHEEL_STATE_NORMAL) &&
+		    (automobile->m_aWheelState[CARWHEEL_REAR_LEFT] != WHEEL_STATE_NORMAL || automobile->m_aWheelState[CARWHEEL_REAR_RIGHT] != WHEEL_STATE_NORMAL))
 			lostTraction = true;
 		break;
 	case 'R':
-		if ((automobile->m_aWheelState[VEHWHEEL_FRONT_RIGHT] != WHEEL_STATE_NORMAL) || (automobile->m_aWheelState[VEHWHEEL_REAR_RIGHT] != WHEEL_STATE_NORMAL))
+		if ((automobile->m_aWheelState[CARWHEEL_REAR_LEFT] != WHEEL_STATE_NORMAL) || (automobile->m_aWheelState[CARWHEEL_REAR_RIGHT] != WHEEL_STATE_NORMAL))
 			lostTraction = true;
 		break;
 	}
@@ -2426,10 +2426,7 @@ cAudioManager::ProcessBoatEngine(cVehicleParams *params)
 				AddSampleToRequestedQueue();
 			}
 			if (FindPlayerVehicle() == params->m_pVehicle) {
-				if (Pads[0].GetAccelerate() <= Pads[0].GetBrake())
-					padAccelerate = Pads[0].GetBrake();
-				else
-					padAccelerate = Pads[0].GetAccelerate();
+				padAccelerate = Max(Pads[0].GetAccelerate(), Pads[0].GetBrake());
 				padRelativeAccerate = padAccelerate / 255;
 				emittingVol = (100.f * padRelativeAccerate) + 15;
 				m_sQueueSample.m_nFrequency = (3000.f * padRelativeAccerate) + 6000;
@@ -2468,10 +2465,7 @@ cAudioManager::ProcessBoatEngine(cVehicleParams *params)
 			m_sQueueSample.m_bRequireReflection = false;
 		} else {
 			if (FindPlayerVehicle() == params->m_pVehicle) {
-				if (Pads[0].GetAccelerate() <= Pads[0].GetBrake())
-					padAccelerate = Pads[0].GetBrake();
-				else
-					padAccelerate = Pads[0].GetAccelerate();
+				padAccelerate = Max(Pads[0].GetAccelerate(), Pads[0].GetBrake());
 				if (padAccelerate <= 20) {
 					emittingVol = 45 - 45 * padAccelerate / 40;
 					m_sQueueSample.m_nFrequency = 100 * padAccelerate + 11025;
@@ -8672,11 +8666,11 @@ cAudioManager::PreloadMissionAudio(Const char *name)
 			m_sMissionAudio.m_nSampleIndex = missionAudioSfx;
 			m_sMissionAudio.m_nLoadingStatus = LOADING_STATUS_NOT_LOADED;
 			m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_STOPPED;
-			m_sMissionAudio.field_22 = 0;
+			m_sMissionAudio.m_bIsPlaying = false;
 			m_sMissionAudio.m_nMissionAudioCounter = m_nTimeSpent * SampleManager.GetStreamedFileLength(missionAudioSfx) / 1000;
 			m_sMissionAudio.m_nMissionAudioCounter *= 4;
 			m_sMissionAudio.m_bIsPlayed = false;
-			m_sMissionAudio.m_bPredefinedProperties = 1;
+			m_sMissionAudio.m_bPredefinedProperties = true;
 			g_bMissionAudioLoadFailed = false;
 		}
 	}
@@ -8726,7 +8720,7 @@ cAudioManager::ClearMissionAudio()
 		m_sMissionAudio.m_nSampleIndex = NO_SAMPLE;
 		m_sMissionAudio.m_nLoadingStatus = LOADING_STATUS_NOT_LOADED;
 		m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_STOPPED;
-		m_sMissionAudio.field_22 = 0;
+		m_sMissionAudio.m_bIsPlaying = false;
 		m_sMissionAudio.m_bIsPlayed = false;
 		m_sMissionAudio.m_bPredefinedProperties = true;
 		m_sMissionAudio.m_nMissionAudioCounter = 0;
@@ -8819,7 +8813,7 @@ cAudioManager::ProcessMissionAudio()
 						m_sMissionAudio.m_nMissionAudioCounter = 0;
 					}
 				}
-			} else if (m_sMissionAudio.field_22) {
+			} else if (m_sMissionAudio.m_bIsPlaying) {
 				if (SampleManager.IsStreamPlaying(1) || m_nUserPause || m_nPreviousUserPause) {
 					if (m_nUserPause)
 						SampleManager.PauseStream(1, 1);
@@ -8839,7 +8833,7 @@ cAudioManager::ProcessMissionAudio()
 						break;
 					nCheckPlayingDelay = 0;
 				}
-				m_sMissionAudio.field_22 = 1;
+				m_sMissionAudio.m_bIsPlaying = true;
 			}
 			break;
 		default:
