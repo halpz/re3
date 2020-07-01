@@ -1989,7 +1989,7 @@ void
 CBike::DoDriveByShootings(void)
 {
 	CAnimBlendAssociation *anim;
-	CPlayerInfo* playerInfo = ((CPlayerPed*)this)->GetPlayerInfoForThisPlayerPed();
+	CPlayerInfo* playerInfo = ((CPlayerPed*)pDriver)->GetPlayerInfoForThisPlayerPed();
 	if (playerInfo && !playerInfo->m_bDriveByAllowed)
 		return;
 

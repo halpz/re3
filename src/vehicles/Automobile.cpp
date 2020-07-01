@@ -3796,7 +3796,7 @@ void
 CAutomobile::DoDriveByShootings(void)
 {
 	CAnimBlendAssociation *anim = nil;
-	CPlayerInfo* playerInfo = ((CPlayerPed*)this)->GetPlayerInfoForThisPlayerPed();
+	CPlayerInfo* playerInfo = ((CPlayerPed*)pDriver)->GetPlayerInfoForThisPlayerPed();
 	if (playerInfo && !playerInfo->m_bDriveByAllowed)
 		return;
 
