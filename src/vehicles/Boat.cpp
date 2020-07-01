@@ -47,7 +47,7 @@ CBoat::CBoat(int mi, uint8 owner) : CVehicle(owner)
 	m_fBrake = 0.0f;
 	m_fSteeringLeftRight = 0.0f;
 	m_nPadID = 0;
-	m_fMovingHiRotation = 0.0f;
+	m_fMovingRotation = 0.0f;
 	SetModelIndex(mi);
 
 	pHandling = mod_HandlingManager.GetHandlingData((eHandlingId)minfo->m_handlingId);
@@ -63,11 +63,11 @@ CBoat::CBoat(int mi, uint8 owner) : CVehicle(owner)
 	m_fGasPedal = 0.0f;
 	m_fBrakePedal = 0.0f;
 
-	m_fPropellerZ = 0.25f;
-	m_fPropellerY = 0.35f;
-	m_waterMoveDrag = CVector(0.7f, 0.998f, 0.999f);
-	m_waterTurnDrag = CVector(0.85f, 0.96f, 0.96f);
-	_unk2 = false;
+	m_fThrustZ = 0.25f;
+	m_fThrustY = 0.35f;
+	m_vecMoveRes = CVector(0.7f, 0.998f, 0.999f);
+	m_vecTurnRes = CVector(0.85f, 0.96f, 0.96f);
+	m_boat_unused3 = false;
 
 	m_fVolumeUnderWater = 7.0f;
 	m_fPrevVolumeUnderWater = 7.0f;
@@ -79,7 +79,7 @@ CBoat::CBoat(int mi, uint8 owner) : CVehicle(owner)
 
 	bIsInWater = true;
 
-	m_phys_unused1 = 0.0f;
+	m_boat_unused2 = 0;
 	m_bIsAnchored = true;
 	m_fOrientation = INVALID_ORIENTATION;
 	bTouchingWater = true;
@@ -290,7 +290,7 @@ CBoat::ProcessControl(void)
 		}
 
 		// Handle boat moving forward
-		if(Abs(m_fGasPedal) > 0.05f || m_vecMoveSpeed.Magnitude() > 0.01f){
+		if(Abs(m_fGasPedal) > 0.05f || m_vecMoveSpeed.Magnitude2D() > 0.01f){
 			if(bBoatInWater)
 				AddWakePoint(GetPosition());
 
@@ -299,7 +299,7 @@ CBoat::ProcessControl(void)
 				steerFactor = 1.0f - DotProduct(m_vecMoveSpeed, GetForward())*0.3f;
 			if(steerFactor < 0.0f) steerFactor = 0.0f;
 
-			CVector propeller(0.0f, -pHandling->Dimension.y*m_fPropellerY, -pHandling->Dimension.z*m_fPropellerZ);
+			CVector propeller(0.0f, -pHandling->Dimension.y*m_fThrustY, -pHandling->Dimension.z*m_fThrustZ);
 			propeller = Multiply3x3(GetMatrix(), propeller);
 			CVector propellerWorld = GetPosition() + propeller;
 
@@ -396,7 +396,7 @@ CBoat::ProcessControl(void)
 					}
 				}else if(!onLand){
 					float force = 50.0f*DotProduct(m_vecMoveSpeed, GetForward());
-					if(force > 10.0f) force = 10.0f;
+					force = Min(force, 10.0f);
 					CVector propellerForce = propellerDepth * Multiply3x3(GetMatrix(), force*CVector(-steerSin, 0.0f, 0.0f));
 					ApplyMoveForce(propellerForce * CTimer::GetTimeStep()*0.5f);
 					ApplyTurnForce(propellerForce * CTimer::GetTimeStep()*0.5f, propeller);
@@ -415,9 +415,9 @@ CBoat::ProcessControl(void)
 			ApplyWaterResistance();
 
 		// No idea what exactly is going on here besides drag in YZ
-		float fx = Pow(m_waterTurnDrag.x, CTimer::GetTimeStep());
-		float fy = Pow(m_waterTurnDrag.y, CTimer::GetTimeStep());
-		float fz = Pow(m_waterTurnDrag.z, CTimer::GetTimeStep());
+		float fx = Pow(m_vecTurnRes.x, CTimer::GetTimeStep());
+		float fy = Pow(m_vecTurnRes.y, CTimer::GetTimeStep());
+		float fz = Pow(m_vecTurnRes.z, CTimer::GetTimeStep());
 		m_vecTurnSpeed = Multiply3x3(m_vecTurnSpeed, GetMatrix());	// invert - to local space
 		// TODO: figure this out
 		float magic = 1.0f/(1000.0f * SQR(m_vecTurnSpeed.x) + 1.0f) * fx;
@@ -525,7 +525,7 @@ CBoat::ProcessControl(void)
 			// is this some inlined CPlaceable method?
 			CVector pos = GetPosition();
 			GetMatrix().RotateZ(m_fOrientation - GetForward().Heading());
-			GetMatrix().GetPosition() = pos;
+			GetMatrix().SetTranslateOnly(pos);
 		}
 	}
 
@@ -562,12 +562,12 @@ CBoat::ApplyWaterResistance(void)
 {
 	float fwdSpeed = DotProduct(GetMoveSpeed(), GetForward());
 	// TODO: figure out how this works
-	float magic = (SQR(fwdSpeed) + 0.05f) * (0.001f * SQR(m_fVolumeUnderWater) * m_fMass) + 1.0f;
+	float resistance = 0.001f * SQR(m_fVolumeUnderWater) * m_fMass;
+	float magic = (SQR(fwdSpeed) + 0.05f) * resistance + 1.0f;
 	magic = Abs(magic);
-	// FRAMETIME
-	float fx = Pow(m_waterMoveDrag.x/magic, 0.5f*CTimer::GetTimeStep());
-	float fy = Pow(m_waterMoveDrag.y/magic, 0.5f*CTimer::GetTimeStep());
-	float fz = Pow(m_waterMoveDrag.z/magic, 0.5f*CTimer::GetTimeStep());
+	float fx = Pow(m_vecMoveRes.x/magic, 0.5f*CTimer::GetTimeStep());
+	float fy = Pow(m_vecMoveRes.y/magic, 0.5f*CTimer::GetTimeStep());
+	float fz = Pow(m_vecMoveRes.z/magic, 0.5f*CTimer::GetTimeStep());
 
 	m_vecMoveSpeed = Multiply3x3(m_vecMoveSpeed, GetMatrix());	// invert - to local space
 	m_vecMoveSpeed.x *= fx;
@@ -685,7 +685,7 @@ CBoat::BlowUpCar(CEntity *culprit)
 	dist.Normalise();
 	if(GetUp().z > 0.0f)
 		dist += GetUp();
-	obj->GetMatrix().GetPosition() += GetUp();
+	obj->GetMatrix().GetPosition() += dist;
 
 	CWorld::Add(obj);
 
@@ -707,7 +707,7 @@ CBoat::Render()
 		matrix.Attach(RwFrameGetMatrix(m_aBoatNodes[BOAT_MOVING]));
 
 		CVector pos = matrix.GetPosition();
-		matrix.SetRotateZ(m_fMovingHiRotation);
+		matrix.SetRotateZ(m_fMovingRotation);
 		matrix.Translate(pos);
 
 		matrix.UpdateRW();
@@ -715,20 +715,20 @@ CBoat::Render()
 			RpAtomicRender((RpAtomic*)GetFirstObject(m_aBoatNodes[BOAT_MOVING]));
 		}
 	}
-	m_fMovingHiRotation += 0.05f;
+	m_fMovingRotation += 0.05f;
 	((CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()))->SetVehicleColour(m_currentColour1, m_currentColour2);
 	if (!CVehicle::bWheelsOnlyCheat)
 		CEntity::Render();
-	RwIm3DVertexSetRGBA(&KeepWaterOutVertices[0], 255, 255, 255, 255);
 	KeepWaterOutIndices[0] = 0;
-	RwIm3DVertexSetRGBA(&KeepWaterOutVertices[1], 255, 255, 255, 255);
 	KeepWaterOutIndices[1] = 2;
-	RwIm3DVertexSetRGBA(&KeepWaterOutVertices[2], 255, 255, 255, 255);
 	KeepWaterOutIndices[2] = 1;
-	RwIm3DVertexSetRGBA(&KeepWaterOutVertices[3], 255, 255, 255, 255);
 	KeepWaterOutIndices[3] = 1;
 	KeepWaterOutIndices[4] = 2;
 	KeepWaterOutIndices[5] = 3;
+	RwIm3DVertexSetRGBA(&KeepWaterOutVertices[0], 255, 255, 255, 255);
+	RwIm3DVertexSetRGBA(&KeepWaterOutVertices[1], 255, 255, 255, 255);
+	RwIm3DVertexSetRGBA(&KeepWaterOutVertices[2], 255, 255, 255, 255);
+	RwIm3DVertexSetRGBA(&KeepWaterOutVertices[3], 255, 255, 255, 255);
 	switch (GetModelIndex()) {
 	case MI_SPEEDER:
 		RwIm3DVertexSetPos(&KeepWaterOutVertices[0], -1.15f, 3.61f, 1.03f);
