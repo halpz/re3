@@ -1354,7 +1354,6 @@ static void PrintToLog(const char* format, ...)
 #endif
 	va_end(va);
 
-	printf("%s", tmp);
 #if SCRIPT_LOG_FILE_LEVEL == 1 || SCRIPT_LOG_FILE_LEVEL == 2
 	if (dbg_log)
 		fwrite(tmp, 1, strlen(tmp), dbg_log);
