@@ -1217,8 +1217,10 @@ CMenuManager::Draw()
 							rightText = option.drawFunc(&isOptionDisabled);
 						}
 					}
-				} else
+				} else {
+					debug("screen:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu, option.screen, option.screenOptionOrder);
 					assert(0 && "Custom frontend options is borked");
+				}
 
 				break;
 #endif
@@ -4775,8 +4777,10 @@ CMenuManager::ProcessButtonPresses(void)
 						} else if (option.type == FEOPTION_GOBACK) {
 							goBack = true;
 						}
-					} else
+					} else {
+						debug("screen:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, option.screen, option.screenOptionOrder);
 						assert(0 && "Custom frontend options are borked");
+					}
 
 					break;
 #endif
@@ -4998,8 +5002,10 @@ CMenuManager::ProcessButtonPresses(void)
 					}
 					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 				}
-				else
+				else {
+					debug("screen:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, option.screen, option.screenOptionOrder);
 					assert(0 && "Custom frontend options are borked");
+				}
 
 				break;
 #endif
