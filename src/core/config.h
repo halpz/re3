@@ -257,7 +257,7 @@ enum Config {
 //#define MISSION_REPLAY // mobile feature
 #endif
 //#define SIMPLIER_MISSIONS // apply simplifications from mobile
-//#define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+#define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #define SCRIPT_LOG_FILE_LEVEL 1 // 0 == no log, 1 == overwrite every frame, 2 == full log
 
 #ifndef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
