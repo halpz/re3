@@ -1356,7 +1356,8 @@ static void PrintToLog(const char* format, ...)
 
 	printf("%s", tmp);
 #if SCRIPT_LOG_FILE_LEVEL == 1 || SCRIPT_LOG_FILE_LEVEL == 2
-	fwrite(tmp, 1, strlen(tmp), dbg_log);
+	if (dbg_log)
+		fwrite(tmp, 1, strlen(tmp), dbg_log);
 #endif
 }
 
