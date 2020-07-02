@@ -686,15 +686,12 @@ CEntity::AddSteamsFromGround(CVector *unused)
 		case 4:
 			CParticleObject::AddObject(POBJECT_DARK_SMOKE, pos, effect->particle.dir, effect->particle.scale, false);
 			break;
-// TODO(MIAMI): enable this once we have the particle objects
-/*
 		case 5:
 			CParticleObject::AddObject(POBJECT_WATER_FOUNTAIN_VERT, pos, effect->particle.dir, effect->particle.scale, false);
 			break;
 		case 6:
 			CParticleObject::AddObject(POBJECT_WATER_FOUNTAIN_HORIZ, pos, effect->particle.dir, effect->particle.scale, false);
 			break;
-*/
 		}
 	}
 }

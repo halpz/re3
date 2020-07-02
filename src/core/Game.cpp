@@ -591,7 +591,8 @@ void CGame::ShutDownForRestart(void)
 	CStreaming::ms_disableStreaming = false;
 	CRadar::RemoveRadarSections();
 	FrontEndMenuManager.UnloadTextures();
-	CParticleObject::RemoveAllParticleObjects();
+	CParticleObject::RemoveAllExpireableParticleObjects();
+	//CWaterCreatures::RemoveAll(); //TODO VC
 	CSetPieces::Init();
 	CPedType::Shutdown();
 	CSpecialFX::Shutdown();
