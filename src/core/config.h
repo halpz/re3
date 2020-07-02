@@ -263,7 +263,7 @@ enum Config {
 // Peds
 #define PED_SKIN		// support for skinned geometry on peds
 #define ANIMATE_PED_COL_MODEL
-#define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
+// #define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
 // #define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward
 #define CANCELLABLE_CAR_ENTER
 //#define PEDS_REPORT_CRIMES_ON_PHONE

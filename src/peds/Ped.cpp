@@ -570,9 +570,12 @@ CPed::AddWeaponModel(int id)
 
 	if (id != -1) {
 #ifdef PED_SKIN
-		if(IsClumpSkinned(GetClump()))
+		if (IsClumpSkinned(GetClump())) {
+			if (m_pWeaponModel)
+				RemoveWeaponModel(-1);
+
 			m_pWeaponModel = (RpAtomic*)CModelInfo::GetModelInfo(id)->CreateInstance();
-		else
+		} else
 #endif
 		{
 			atm = (RpAtomic*)CModelInfo::GetModelInfo(id)->CreateInstance();
@@ -834,7 +837,7 @@ CPed::ClearAimFlag(void)
 		bIsAimingGun = false;
 		bIsRestoringGun = true;
 		m_pedIK.m_flags &= ~CPedIK::AIMS_WITH_ARM;
-#ifdef VC_PED_PORTS
+#if defined VC_PED_PORTS || defined FIX_BUGS
 		m_lookTimer = 0;
 #endif
 	}
@@ -2243,11 +2246,6 @@ CPed::CalculateNewVelocity(void)
 	CAnimBlendAssociation *idleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_STANCE);
 	CAnimBlendAssociation *fightAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_IDLE);
 #ifdef VC_PED_PORTS
-	if(!fightAssoc)
-		fightAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_TIRED);
-
-	// There is one more anim in VC.
-
 	if ((!idleAssoc || idleAssoc->blendAmount < 0.5f) && !fightAssoc && !bIsDucking) {
 #else
 	if ((!idleAssoc || idleAssoc->blendAmount < 0.5f) && !fightAssoc) {
@@ -2486,7 +2484,7 @@ CPed::RestorePreviousObjective(void)
 		return;
 
 	if (m_objective != OBJECTIVE_LEAVE_VEHICLE && m_objective != OBJECTIVE_ENTER_CAR_AS_PASSENGER && m_objective != OBJECTIVE_ENTER_CAR_AS_DRIVER
-#ifdef VC_PED_PORTS
+#if defined VC_PED_PORTS || defined FIX_BUGS
 		&& m_nPedState != PED_CARJACK
 #endif
 		)
@@ -4208,7 +4206,7 @@ CPed::ClearObjective(void)
 		if (m_nPedState == PED_DRIVING && m_pMyVehicle) {
 
 			if (m_pMyVehicle->pDriver != this) {
-#ifdef VC_PED_PORTS
+#if defined VC_PED_PORTS || defined FIX_BUGS
 				if(!IsPlayer())
 #endif
 					bWanderPathAfterExitingCar = true;
@@ -5850,7 +5848,7 @@ CPed::SetChat(CEntity *chatWith, uint32 time)
 
 	m_nPedState = PED_CHAT;
 	SetMoveState(PEDMOVE_STILL);
-#ifdef VC_PED_PORTS
+#if defined VC_PED_PORTS || defined FIX_BUGS
 	m_lookTimer = 0;
 #endif
 	SetLookFlag(chatWith, true);
@@ -10225,18 +10223,21 @@ CPed::ProcessControl(void)
 
 					int vehAnim = m_pVehicleAnim->animId;
 
+					static bool cancelQuickJack = false;
 					int16 padWalkX = pad->GetPedWalkLeftRight();
 					int16 padWalkY = pad->GetPedWalkUpDown();
 					if (Abs(padWalkX) > 0.0f || Abs(padWalkY) > 0.0f) {
 						if (vehAnim == ANIM_CAR_OPEN_LHS || vehAnim == ANIM_CAR_OPEN_RHS || vehAnim == ANIM_COACH_OPEN_L || vehAnim == ANIM_COACH_OPEN_R ||
 							vehAnim == ANIM_VAN_OPEN_L || vehAnim == ANIM_VAN_OPEN) {
 							bCancelEnteringCar = true;
-						} else if (vehAnim == ANIM_CAR_QJACK) {
-							if (m_pVehicleAnim->GetTimeLeft() > 0.69f && m_pVehicleAnim->GetTimeLeft() < 0.72f) {
-								QuitEnteringCar();
-								RestorePreviousObjective();
-							}
+						} else if (vehAnim == ANIM_CAR_QJACK && m_pVehicleAnim->GetTimeLeft() > 0.75f) {
+							cancelQuickJack = true;
 						}
+					}
+					if (cancelQuickJack && vehAnim == ANIM_CAR_QJACK && m_pVehicleAnim->GetTimeLeft() > 0.75f && m_pVehicleAnim->GetTimeLeft() < 0.78f) {
+						cancelQuickJack = false;
+						QuitEnteringCar();
+						RestorePreviousObjective();
 					}
 #endif
 					break;
@@ -10580,7 +10581,7 @@ CPed::PedAnimDoorCloseCB(CAnimBlendAssociation *animAssoc, void *arg)
 							|| !veh->IsRoomForPedToLeaveCar(CAR_DOOR_LF, nil))))) {
 
 			if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER
-#ifdef VC_PED_PORTS
+#if defined VC_PED_PORTS || defined FIX_BUGS
 				|| ped->m_nPedState == PED_CARJACK
 #endif
 				)
@@ -10827,7 +10828,7 @@ void
 CPed::SetJump(void)
 {
 	if (!bInVehicle &&
-#ifdef VC_PED_PORTS
+#if defined VC_PED_PORTS || defined FIX_BUGS
 		m_nPedState != PED_JUMP && !RpAnimBlendClumpGetAssociation(GetClump(), ANIM_JUMP_LAUNCH) &&
 #endif
 		(m_nSurfaceTouched != SURFACE_STEEP_CLIFF || DotProduct(GetForward(), m_vecDamageNormal) >= 0.0f)) {
@@ -11457,7 +11458,7 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 		}
 	}
 	if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER
-#ifdef VC_PED_PORTS
+#if defined VC_PED_PORTS || defined FIX_BUGS
 		|| ped->m_nPedState == PED_CARJACK
 #endif
 		)
@@ -11471,7 +11472,7 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 
 	if (veh->IsBoat()) {
 		if (ped->IsPlayer()) {
-#if defined(FIX_BUGS) || defined(VC_PED_PORTS)
+#if defined VC_PED_PORTS || defined FIX_BUGS
 			CCarCtrl::RegisterVehicleOfInterest(veh);
 #endif
 			if (veh->GetStatus() == STATUS_SIMPLE) {
@@ -11526,7 +11527,7 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 		}
 	}
 	// This shouldn't happen at all. Passengers can't enter with PED_CARJACK. Even though they did, we shouldn't call AddPassenger in here and SetDriver in below.
-#ifndef VC_PED_PORTS
+#if !defined VC_PED_PORTS && !defined FIX_BUGS
 	else if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER) {
 		if (ped->m_nPedState == PED_CARJACK) {
 			veh->AddPassenger(ped, 0);
@@ -12042,7 +12043,7 @@ CPed::ReplaceWeaponWhenExitingVehicle(void)
 
 	// If it's Uzi, we may have stored weapon. Uzi is the only gun we can use in car.
 	if (IsPlayer() && weaponType == WEAPONTYPE_UZI) {
-		if (m_storedWeapon != WEAPONTYPE_UNIDENTIFIED) {
+		if (/*IsPlayer() && */ m_storedWeapon != WEAPONTYPE_UNIDENTIFIED) {
 			SetCurrentWeapon(m_storedWeapon);
 			m_storedWeapon = WEAPONTYPE_UNIDENTIFIED;
 		}
@@ -13799,7 +13800,7 @@ void
 CPed::SetSeekBoatPosition(CVehicle *boat)
 {
 	if (m_nPedState == PED_SEEK_IN_BOAT || boat->pDriver
-#ifdef VC_PED_PORTS
+#if defined VC_PED_PORTS || defined FIX_BUGS
 		|| !IsPedInControl()
 #endif
 		)
@@ -14566,8 +14567,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 								m_vecDamageNormal = intersectionPoint.normal;
 							}
 						}
-						// VC code is working perfectly, but we don't want mega jumps to damage us significantly :shrug:
-#if 0 // #ifdef VC_PED_PORTS
+#ifdef VC_PED_PORTS
 						float upperSpeedLimit = 0.33f;
 						float lowerSpeedLimit = -0.25f;
 						float speed = m_vecMoveSpeed.Magnitude2D();
@@ -14575,7 +14575,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 							upperSpeedLimit *= 2.0f;
 							lowerSpeedLimit *= 1.5f;
 						}
-						if (!m_ped_flagA2) {
+						if (!bWasStanding) {
 							if ((speed <= upperSpeedLimit /* || (bfFlagsL >> 5) & 1 */) && m_vecMoveSpeed.z >= lowerSpeedLimit
 								|| m_pCollidingEntity == collidingEnt) {
 

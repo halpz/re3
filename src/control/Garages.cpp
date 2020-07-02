@@ -390,7 +390,7 @@ void CGarage::Update()
 					bTakeMoney = true;
 				FindPlayerPed()->m_pWanted->Reset();
 				CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_GARAGE);
-				FindPlayerPed()->m_pWanted->m_bIgnoredByCops = true;
+				FindPlayerPed()->m_pWanted->m_bIgnoredByCops = false;
 #ifdef FIX_BUGS
 				bool bChangedColour = false;
 #else
