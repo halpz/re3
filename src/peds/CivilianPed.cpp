@@ -263,7 +263,7 @@ CCivilianPed::ProcessControl(void)
 				if ((m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT || m_objective == OBJECTIVE_RUN_TO_AREA) && m_pNextPathNode) {
 					m_pNextPathNode = nil;
 #ifdef PEDS_REPORT_CRIMES_ON_PHONE
-				} else if (bRunningToPhone && m_objective < OBJECTIVE_FLEE_TILL_SAFE) {
+				} else if (bRunningToPhone && m_objective < OBJECTIVE_FLEE_ON_FOOT_TILL_SAFE) {
 					if (!isPhoneAvailable(m_phoneId)) {
 						RestorePreviousState();
 						if (crimeReporters[m_phoneId] == this)
@@ -287,7 +287,7 @@ CCivilianPed::ProcessControl(void)
 					}
 #endif
 				} else if (m_objective != OBJECTIVE_KILL_CHAR_ANY_MEANS && m_objective != OBJECTIVE_KILL_CHAR_ON_FOOT) {
-					if (m_objective == OBJECTIVE_FOLLOW_PED_IN_FORMATION) {
+					if (m_objective == OBJECTIVE_FOLLOW_CHAR_IN_FORMATION) {
 						if (m_moved.Magnitude() == 0.0f) {
 							if (m_pedInObjective->m_nMoveState == PEDMOVE_STILL)
 								m_fRotationDest = m_pedInObjective->m_fRotationCur;
@@ -377,13 +377,13 @@ CCivilianPed::ProcessControl(void)
 							} else {
 								bWanderPathAfterExitingCar = true;
 								CWorld::Players[CWorld::PlayerInFocus].m_pHooker = nil;
-								SetObjective(OBJECTIVE_LEAVE_VEHICLE, m_pMyVehicle);
+								SetObjective(OBJECTIVE_LEAVE_CAR, m_pMyVehicle);
 							}
 						} else {
 							bWanderPathAfterExitingCar = true;
 							CWorld::Players[CWorld::PlayerInFocus].m_pHooker = nil;
 							m_pMyVehicle->pDriver->m_fHealth = 125.0f;
-							SetObjective(OBJECTIVE_LEAVE_VEHICLE, m_pMyVehicle);
+							SetObjective(OBJECTIVE_LEAVE_CAR, m_pMyVehicle);
 						}
 					} else {
 						CWorld::Players[CWorld::PlayerInFocus].m_nNextSexFrequencyUpdateTime = CTimer::GetTimeInMilliseconds() + 3000;
@@ -396,7 +396,7 @@ CCivilianPed::ProcessControl(void)
 				} else {
 					bWanderPathAfterExitingCar = true;
 					CWorld::Players[CWorld::PlayerInFocus].m_pHooker = nil;
-					SetObjective(OBJECTIVE_LEAVE_VEHICLE, m_pMyVehicle);
+					SetObjective(OBJECTIVE_LEAVE_CAR, m_pMyVehicle);
 				}
 			}
 

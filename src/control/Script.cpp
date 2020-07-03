@@ -3326,7 +3326,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		CPed* ped = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		script_assert(ped);
 		ped->bScriptObjectiveCompleted = false;
-		ped->SetObjective(OBJECTIVE_IDLE);
+		ped->SetObjective(OBJECTIVE_WAIT_ON_FOOT);
 		return 0;
 	}
 	case COMMAND_GET_CHAR_COORDINATES:
@@ -5128,7 +5128,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		script_assert(pPed);
 		pPed->bScriptObjectiveCompleted = false;
-		pPed->SetObjective(OBJECTIVE_IDLE);
+		pPed->SetObjective(OBJECTIVE_WAIT_ON_FOOT);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_OBJ_FLEE_ON_FOOT_TILL_SAFE:
@@ -5620,7 +5620,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		script_assert(pPed);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
 		pPed->bScriptObjectiveCompleted = false;
-		pPed->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pVehicle);
+		pPed->SetObjective(OBJECTIVE_LEAVE_CAR, pVehicle);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_OBJ_ENTER_CAR_AS_PASSENGER:
@@ -7823,7 +7823,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		script_assert(pPed);
 		CPed* pTargetPed = CPools::GetPedPool()->GetAt(ScriptParams[1]);
 		pPed->bScriptObjectiveCompleted = false;
-		pPed->SetObjective(OBJECTIVE_FOLLOW_PED_IN_FORMATION, pTargetPed);
+		pPed->SetObjective(OBJECTIVE_FOLLOW_CHAR_IN_FORMATION, pTargetPed);
 		pPed->SetFormation((eFormation)ScriptParams[2]);
 		return 0;
 	}
@@ -10870,13 +10870,13 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		script_assert(pVehicle);
 		if (pVehicle->pDriver) {
 			pVehicle->pDriver->bScriptObjectiveCompleted = false;
-			pVehicle->pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pVehicle);
+			pVehicle->pDriver->SetObjective(OBJECTIVE_LEAVE_CAR, pVehicle);
 		}
 		for (int i = 0; i < ARRAY_SIZE(pVehicle->pPassengers); i++)
 		{
 			if (pVehicle->pPassengers[i]) {
 				pVehicle->pPassengers[i]->bScriptObjectiveCompleted = false;
-				pVehicle->pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pVehicle);
+				pVehicle->pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_CAR, pVehicle);
 			}
 		}
 		return 0;
@@ -13100,7 +13100,7 @@ void CTheScripts::CleanUpThisPed(CPed* pPed)
 		}
 		else {
 			if (pPed->m_pMyVehicle->m_vehType == VEHICLE_TYPE_CAR) {
-				pPed->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pPed->m_pMyVehicle);
+				pPed->SetObjective(OBJECTIVE_LEAVE_CAR, pPed->m_pMyVehicle);
 				pPed->bWanderPathAfterExitingCar = true;
 			}
 		}

@@ -409,7 +409,7 @@ CPlayerInfo::Process(void)
 						if (veh->m_vehType != VEHICLE_TYPE_BIKE || veh->m_nDoorLock == CARLOCK_LOCKED_PLAYER_INSIDE) {
 							if (veh->GetStatus() != STATUS_WRECKED && veh->GetStatus() != STATUS_TRAIN_MOVING && veh->m_nDoorLock != CARLOCK_LOCKED_PLAYER_INSIDE) {
 								if (veh->m_vecMoveSpeed.Magnitude() < 0.17f && CTimer::GetTimeScale() >= 0.5f && !veh->bIsInWater) {
-									m_pPed->SetObjective(OBJECTIVE_LEAVE_VEHICLE, veh);
+									m_pPed->SetObjective(OBJECTIVE_LEAVE_CAR, veh);
 								}
 							}
 						} else {

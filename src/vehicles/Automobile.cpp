@@ -283,7 +283,7 @@ CAutomobile::ProcessControl(void)
 			if(!pDriver->IsPlayer() &&
 			   !(pDriver->m_leader && pDriver->m_leader->bInVehicle) &&
 			   pDriver->CharCreatedBy != MISSION_CHAR)
-				pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+				pDriver->SetObjective(OBJECTIVE_LEAVE_CAR, this);
 		}
 	}else
 		bDriverLastFrame = false;
@@ -295,7 +295,7 @@ CAutomobile::ProcessControl(void)
 				if(!pPassengers[i]->IsPlayer() &&
 				   !(pPassengers[i]->m_leader && pPassengers[i]->m_leader->bInVehicle) &&
 				   pPassengers[i]->CharCreatedBy != MISSION_CHAR)
-					pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+					pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_CAR, this);
 	}
 
 	CRubbish::StirUp(this);

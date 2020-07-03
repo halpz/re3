@@ -43,10 +43,13 @@ GetNumberOfMenuOptions(int screen)
 	return Rows;
 }
 
-// Used before reloading in InitialiseChangedLanguageSettings and debugmenu
+// Used before populating options, but effective in InitialiseChangedLanguageSettings and debugmenu
 void
 RemoveCustomFrontendOptions()
 {
+	if (numCustomFrontendOptions == 0)
+		return;
+
 	for (int i = 0; i < MENUPAGES; i++) {
 		for (int j = 0; j < NUM_MENUROWS; j++) {
 			if (aScreens[i].m_aEntries[j].m_Action == MENUACTION_TRIGGERFUNC) {

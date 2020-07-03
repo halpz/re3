@@ -3068,7 +3068,6 @@ CMenuManager::InitialiseChangedLanguageSettings()
 		}
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
-		RemoveCustomFrontendOptions();
 		CustomFrontendOptionsPopulate();
 #endif
 	}

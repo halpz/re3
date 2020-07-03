@@ -5060,7 +5060,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 		// This is not working on cars as SA
 		// Because III/VC doesn't have any buttons tied to LeftStick if you're not in Classic Configuration, using Dodo or using GInput/Pad, so :shrug:
 		if (Abs(pad->GetSteeringUpDown()) > 120.0f) {
-			if (car->pDriver && car->pDriver->m_objective != OBJECTIVE_LEAVE_VEHICLE) {
+			if (car->pDriver && car->pDriver->m_objective != OBJECTIVE_LEAVE_CAR) {
 				yMovement += Abs(pad->GetSteeringUpDown()) * (FOV / 80.0f * 3.f / 70.f) * pad->GetSteeringUpDown() * 0.007f * 0.007f * 0.5;
 			}
 		}

@@ -75,7 +75,6 @@ mysrand(unsigned int seed)
 
 void ReloadFrontendOptions(void)
 {
-	RemoveCustomFrontendOptions();
 	CustomFrontendOptionsPopulate();
 }
 
@@ -137,6 +136,8 @@ void ToggleFreeCam(int8 action)
 void
 CustomFrontendOptionsPopulate(void)
 {
+	RemoveCustomFrontendOptions(); // if exist
+
 #ifdef MORE_LANGUAGES
 	FrontendOptionSetPosition(MENUPAGE_LANGUAGE_SETTINGS);
 	FrontendOptionAddDynamic(TheText.Get("FEL_POL"), nil, LangPolSelect, nil);

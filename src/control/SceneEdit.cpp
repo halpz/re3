@@ -631,7 +631,7 @@ void CSceneEdit::ProcessCommand(void)
 		SelectActor();
 		if (m_bActorSelected) {
 			if (pActors[m_nActor]->bInVehicle) {
-				pActors[m_nActor]->SetObjective(OBJECTIVE_LEAVE_VEHICLE);
+				pActors[m_nActor]->SetObjective(OBJECTIVE_LEAVE_CAR);
 				Movie[m_nNumMovieCommands].m_nCommandId = MOVIE_GET_OUT_CAR;
 				Movie[m_nNumMovieCommands++].m_nActorId = m_nActor;
 			}
@@ -695,7 +695,7 @@ void CSceneEdit::ProcessCommand(void)
 	case MOVIE_WAIT:
 		SelectActor();
 		if (m_bActorSelected) {
-			pActors[m_nActor]->SetObjective(OBJECTIVE_IDLE);
+			pActors[m_nActor]->SetObjective(OBJECTIVE_WAIT_ON_FOOT);
 			Movie[m_nNumMovieCommands].m_nCommandId = MOVIE_WAIT;
 			Movie[m_nNumMovieCommands++].m_nActorId = m_nActor;
 		}
@@ -876,7 +876,7 @@ void CSceneEdit::PlayBack(void)
 	case MOVIE_GET_OUT_CAR:
 		m_nActor = Movie[m_nCurrentMovieCommand].m_nActorId;
 		if (pActors[m_nActor]->bInVehicle)
-			pActors[m_nActor]->SetObjective(OBJECTIVE_LEAVE_VEHICLE);
+			pActors[m_nActor]->SetObjective(OBJECTIVE_LEAVE_CAR);
 		else
 			++m_nCurrentMovieCommand;
 		break;
@@ -895,7 +895,7 @@ void CSceneEdit::PlayBack(void)
 		break;
 	case MOVIE_WAIT:
 		m_nActor = Movie[m_nCurrentMovieCommand].m_nActorId;
-		pActors[m_nActor]->SetObjective(OBJECTIVE_IDLE);
+		pActors[m_nActor]->SetObjective(OBJECTIVE_WAIT_ON_FOOT);
 		++m_nCurrentMovieCommand;
 		break;
 	case MOVIE_POSITION_CAMERA:
