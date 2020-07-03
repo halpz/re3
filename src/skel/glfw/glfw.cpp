@@ -1366,6 +1366,12 @@ WinMain(HINSTANCE instance,
 	RwInt32 argc;
 	RwChar** argv;
 	SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, nil, SPIF_SENDCHANGE);
+
+	// TODO: make this an option somewhere
+	AllocConsole();
+	freopen("CONIN$", "r", stdin);
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
 #else
 int
 main(int argc, char *argv[])

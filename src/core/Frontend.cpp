@@ -1218,7 +1218,7 @@ CMenuManager::Draw()
 						}
 					}
 				} else {
-					debug("screen:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu, option.screen, option.screenOptionOrder);
+					debug("A- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, i, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu, option.screen, option.screenOptionOrder);
 					assert(0 && "Custom frontend options is borked");
 				}
 
@@ -4778,7 +4778,7 @@ CMenuManager::ProcessButtonPresses(void)
 							goBack = true;
 						}
 					} else {
-						debug("screen:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, option.screen, option.screenOptionOrder);
+						debug("B- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, m_nCurrOption, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, option.screen, option.screenOptionOrder);
 						assert(0 && "Custom frontend options are borked");
 					}
 
@@ -5003,7 +5003,7 @@ CMenuManager::ProcessButtonPresses(void)
 					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 				}
 				else {
-					debug("screen:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, option.screen, option.screenOptionOrder);
+					debug("C- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, m_nCurrOption, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, option.screen, option.screenOptionOrder);
 					assert(0 && "Custom frontend options are borked");
 				}
 
