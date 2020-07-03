@@ -1636,7 +1636,8 @@ static void PrintToLog(const char* format, ...)
 	va_end(va);
 
 #if SCRIPT_LOG_FILE_LEVEL == 1 || SCRIPT_LOG_FILE_LEVEL == 2
-	fwrite(tmp, 1, strlen(tmp), dbg_log);
+	if (dbg_log)
+		fwrite(tmp, 1, strlen(tmp), dbg_log);
 #endif
 }
 
@@ -13605,10 +13606,14 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		ScriptParams[0] = 0;
 		if (pPed->m_objective == OBJECTIVE_NONE && !pPed->bHasAlreadyUsedAttractor) {
 			C2dEffect* pEffect = (C2dEffect*)GetPedAttractorManager()->GetEffectForIceCreamVan(pVehicle, pPed->GetPosition()); // has to be casted, because inner methods are const
-			if ((pPed->GetPosition() - pEffect->pos).MagnitudeSqr() < SQR(20.0f)) {
-				if (GetPedAttractorManager()->HasEmptySlot(pEffect) && GetPedAttractorManager()->IsApproachable(pEffect, pVehicle->GetMatrix(), 0, pPed)) {
-					if (GetPedAttractorManager()->RegisterPedWithAttractor(pPed, pEffect, pVehicle->GetMatrix()))
-						ScriptParams[0] = 1;
+			if (pEffect) {
+				CVector pos;
+				CPedAttractorManager::ComputeEffectPos(pEffect, pVehicle->GetMatrix(), pos);
+				if ((pPed->GetPosition() - pos).MagnitudeSqr() < SQR(20.0f)) {
+					if (GetPedAttractorManager()->HasEmptySlot(pEffect) && GetPedAttractorManager()->IsApproachable(pEffect, pVehicle->GetMatrix(), 0, pPed)) {
+						if (GetPedAttractorManager()->RegisterPedWithAttractor(pPed, pEffect, pVehicle->GetMatrix()))
+							ScriptParams[0] = 1;
+					}
 				}
 			}
 		}
@@ -13735,11 +13740,57 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		return 0;
 	}
 	case COMMAND_GET_RANDOM_ICE_CREAM_CUSTOMER_IN_AREA:
+	{
 		CollectParameters(&m_nIp, 7);
-		debug("GET_RANDOM_ICE_CREAM_CUSTOMER_IN_AREA not implemented\n"); // TODO(MIAMI)
-		ScriptParams[0] = -1;
+		int ped_handle = -1;
+		CVector pos = FindPlayerCoors();
+		float x1 = *(float*)&ScriptParams[0];
+		float y1 = *(float*)&ScriptParams[1];
+		float x2 = *(float*)&ScriptParams[2];
+		float y2 = *(float*)&ScriptParams[3];
+		int i = CPools::GetPedPool()->GetSize();
+		while (--i && ped_handle == -1) {
+			CPed* pPed = CPools::GetPedPool()->GetSlot(i);
+			if (!pPed)
+				continue;
+			if (CTheScripts::LastRandomPedId == CPools::GetPedPool()->GetIndex(pPed))
+				continue;
+			if (pPed->CharCreatedBy != RANDOM_CHAR)
+				continue;
+			if (!pPed->IsPedInControl())
+				continue;
+			if (pPed->bRemoveFromWorld)
+				continue;
+			if (pPed->bFadeOut)
+				continue;
+			if (pPed->m_nWaitState != WAITSTATE_FALSE)
+				continue;
+			if (pPed->bHasAlreadyUsedAttractor)
+				continue;
+			if (pPed->m_attractor)
+				continue;
+			if (!ThisIsAValidRandomPed(pPed->m_nPedType, ScriptParams[4], ScriptParams[5], ScriptParams[6]))
+				continue;
+			if (pPed->bIsLeader || pPed->m_leader)
+				continue;
+			if (!pPed->IsWithinArea(x1, y1, x2, y2))
+				continue;
+			if (pos.z - PED_FIND_Z_OFFSET > pPed->GetPosition().z)
+				continue;
+			if (pos.z + PED_FIND_Z_OFFSET < pPed->GetPosition().z)
+				continue;
+			ped_handle = CPools::GetPedPool()->GetIndex(pPed);
+			CTheScripts::LastRandomPedId = ped_handle;
+			pPed->CharCreatedBy = MISSION_CHAR;
+			pPed->bRespondsToThreats = false;
+			++CPopulation::ms_nTotalMissionPeds;
+			if (m_bIsMissionScript)
+				CTheScripts::MissionCleanup.AddEntityToList(ped_handle, CLEANUP_CHAR);
+		}
+		ScriptParams[0] = ped_handle;
 		StoreParameters(&m_nIp, 1);
 		return 0;
+	}
 	//case COMMAND_GET_RANDOM_ICE_CREAM_CUSTOMER_IN_ZONE:
 	case COMMAND_UNLOCK_ALL_CAR_DOORS_IN_AREA:
 		CollectParameters(&m_nIp, 4);
