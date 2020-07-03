@@ -102,7 +102,7 @@ public:
 	
 	CAudioHydrant() : 
 		AudioEntity(AEHANDLE_NONE),
-		pParticleObject(NULL)
+		pParticleObject(nil)
 	{ }
 	
 	static bool Add   (CParticleObject *particleobject);
