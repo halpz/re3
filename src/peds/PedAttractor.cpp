@@ -71,15 +71,15 @@ const C2dEffect* CVehicleToEffect::ChooseEffect(const CVector& pos) const
 		return nil;
 	if (DotProduct(pos - m_pVehicle->GetPosition(), m_pVehicle->GetRight()) > 0.0f) {
 		if (DotProduct(pos - m_pVehicle->GetPosition(), m_pVehicle->GetForward()) > 0.0f)
-			return &m_effects[0];
-		else
-			return &m_effects[2];
-	}
-	else {
-		if (DotProduct(pos - m_pVehicle->GetPosition(), m_pVehicle->GetForward()) > 0.0f)
 			return &m_effects[1];
 		else
 			return &m_effects[3];
+	}
+	else {
+		if (DotProduct(pos - m_pVehicle->GetPosition(), m_pVehicle->GetForward()) > 0.0f)
+			return &m_effects[0];
+		else
+			return &m_effects[2];
 	}
 }
 

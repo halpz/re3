@@ -403,6 +403,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 
 	bReachedAttractorHeadingTarget = false;
 	bTurnedAroundOnAttractor = false;
+	bHasAlreadyUsedAttractor = false;
 	bCarPassenger = false;
 	bMiamiViceCop = false;
 	bMoneyHasBeenGivenByScript = false;
@@ -8209,6 +8210,10 @@ CPed::Wait(void)
 					animAssoc->blendDelta = -4.0f;
 					animAssoc->flags |= ASSOC_DELETEFADEDOUT;
 				}
+				if (m_attractor && m_objective == OBJECTIVE_WAIT_ON_FOOT_AT_ICE_CREAM_VAN) {
+					GetPedAttractorManager()->BroadcastDeparture(this, m_attractor);
+					bBoughtIceCream = true;
+				}
 				ClearWaitState();
 			}
 #ifdef VC_PED_PORTS
@@ -15064,6 +15069,38 @@ CPed::ProcessObjective(void)
 					}
 				}
 				break;
+			case OBJECTIVE_WAIT_ON_FOOT_AT_ICE_CREAM_VAN:
+			{
+				SetIdle();
+				CVehicle* pIceCreamVan = GetPedAttractorManager()->GetIceCreamVanForEffect(m_attractor->GetEffect());
+				if (m_attractor && m_nWaitState != WAITSTATE_PLAYANIM_CHAT && pIceCreamVan && pIceCreamVan->pDriver && pIceCreamVan->pDriver->IsPlayer()) {
+					int time = 5000;
+					SetWaitState(WAITSTATE_PLAYANIM_CHAT, &time);
+					break;
+				}
+				if (!m_attractor)
+					break;
+				CVehicle* pVan = GetPedAttractorManager()->GetIceCreamVanForEffect(m_attractor->GetEffect());
+				if (!pVan)
+					break;
+				if (0.01f * CTimer::GetTimeStep() * 5.0f < pVan->m_fDistanceTravelled) {
+					GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+					break;
+				}
+				if (!pVan->pDriver || !pVan->pDriver->IsPlayer() || pVan->pDriver->GetPedState() == PED_ARRESTED || pVan->pDriver->GetPedState() == PED_DEAD) {
+					GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+					break;
+				}
+				if (!pVan->m_bSirenOrAlarm) {
+					GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+					return; // ???
+				}
+				if (pVan->GetStatus() == STATUS_WRECKED) {
+					GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
+					return; // ???
+				}
+				break;
+			}
 #endif
 		}
 		if (bObjectiveCompleted
@@ -18714,28 +18751,28 @@ CPed::SetObjective(eObjective newObj, CVector dest)
 			m_nextRoutePointPos = dest;
 			m_vecSeekPos = m_nextRoutePointPos;
 			m_distanceToCountSeekDone = 0.5f;
-			if (m_objective == OBJECTIVE_GOTO_ATM_ON_FOOT) {
+			if (newObj == OBJECTIVE_GOTO_ATM_ON_FOOT) {
 				m_distanceToCountSeekDone = m_attractor->GetDistanceToCountSeekDone();
 				m_acceptableHeadingOffset = m_attractor->GetAcceptableHeading();
 			}
-			if (m_objective == OBJECTIVE_GOTO_SEAT_ON_FOOT) {
+			if (newObj == OBJECTIVE_GOTO_SEAT_ON_FOOT) {
 				m_distanceToCountSeekDone = m_attractor->GetDistanceToCountSeekDone();
 				m_acceptableHeadingOffset = m_attractor->GetAcceptableHeading();
 			}
-			if (m_objective == OBJECTIVE_GOTO_BUS_STOP_ON_FOOT) {
+			if (newObj == OBJECTIVE_GOTO_BUS_STOP_ON_FOOT) {
 				m_distanceToCountSeekDone = m_attractor->GetDistanceToCountSeekDone();
 				m_acceptableHeadingOffset = m_attractor->GetAcceptableHeading();
 			}
-			if (m_objective == OBJECTIVE_GOTO_PIZZA_ON_FOOT) {
+			if (newObj == OBJECTIVE_GOTO_PIZZA_ON_FOOT) {
 				m_distanceToCountSeekDone = m_attractor->GetDistanceToCountSeekDone();
 				m_acceptableHeadingOffset = m_attractor->GetAcceptableHeading();
 			}
-			if (m_objective == OBJECTIVE_GOTO_SHELTER_ON_FOOT) {
+			if (newObj == OBJECTIVE_GOTO_SHELTER_ON_FOOT) {
 				bIsRunning = true;
 				m_distanceToCountSeekDone = m_attractor->GetDistanceToCountSeekDone();
 				m_acceptableHeadingOffset = m_attractor->GetAcceptableHeading();
 			}
-			if (m_objective == OBJECTIVE_GOTO_ICE_CREAM_VAN_ON_FOOT) {
+			if (newObj == OBJECTIVE_GOTO_ICE_CREAM_VAN_ON_FOOT) {
 				bIsRunning = true;
 				m_distanceToCountSeekDone = m_attractor->GetDistanceToCountSeekDone();
 				m_acceptableHeadingOffset = m_attractor->GetAcceptableHeading();

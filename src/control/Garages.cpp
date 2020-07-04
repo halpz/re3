@@ -347,7 +347,7 @@ void CGarage::Update()
 						FindPlayerPed()->m_pWanted->m_bIgnoredByCops = true;
 					}
 					else {
-						CGarages::TriggerMessage("GA_3", -1, 4000, -1); // No more freebies. $1000 to respray!
+						CGarages::TriggerMessage("GA_3", -1, 4000, -1); // No more freebies. $100 to respray!
 						m_eGarageState = GS_OPENEDCONTAINSCAR;
 						DMAudio.PlayFrontEndSound(SOUND_GARAGE_NO_MONEY, 1);
 					}
@@ -1096,7 +1096,7 @@ bool CGarage::IsStaticPlayerCarEntirelyInside()
 {
 	if (!FindPlayerVehicle())
 		return false;
-	if (!FindPlayerVehicle()->IsCar())
+	if (!FindPlayerVehicle()->IsCar() && !FindPlayerVehicle()->IsBike())
 		return false;
 	if (FindPlayerPed()->GetPedState() != PED_DRIVING)
 		return false;
