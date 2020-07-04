@@ -4359,7 +4359,7 @@ CPed::RestorePreviousState(void)
 			case PED_WANDER_PATH:
 				m_nPedState = PED_WANDER_PATH;
 				bIsRunning = false;
-				if (!bFindNewNodeAfterStateRestore) {
+				if (bFindNewNodeAfterStateRestore) {
 					if (m_pNextPathNode) {
 						CVector diff = m_pNextPathNode->GetPosition() - GetPosition();
 						if (diff.MagnitudeSqr() < sq(7.0f)) {
