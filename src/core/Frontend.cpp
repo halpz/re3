@@ -38,6 +38,9 @@
 #include "Messages.h"
 #include "FileLoader.h"
 
+// TODO(Miami): Remove that!! That was my map implementation for III, instead use MAP_ENHACEMENTS on some places
+#define CUSTOM_MAP
+
 // TODO(Miami): This is -3 on VC but still -1 on AudioManager?!? What the hell?
 #define INVALID_AUDIO_PROVIDER -1
 
@@ -52,7 +55,6 @@ CRGBA HEADER_COLOR(255, 150, 255, 255);
 CRGBA DARKMENUOPTION_COLOR(195, 90, 165, 255);
 CRGBA SLIDERON_COLOR(97, 194, 247, 255);
 CRGBA SLIDEROFF_COLOR(27, 89, 130, 255);
-CRGBA MAPINFOBOX_COLOR(255, 150, 225, 150);
 
 #define TIDY_UP_PBP // ProcessButtonPresses
 #define MAX_VISIBLE_LIST_ROW 30
@@ -117,9 +119,10 @@ MenuTrapezoid menuBg(CGeneral::GetRandomNumber() % 40 + 65, CGeneral::GetRandomN
 
 MenuTrapezoid menuOptionHighlight(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-// TODO(Miami): TEMPORARY
+#ifdef CUSTOM_MAP
 bool bMapLoaded = false;
 bool bMapMouseShownOnce = false;
+#endif
 
 #ifndef MASTER
 bool CMenuManager::m_PrefsMarketing = false;
@@ -664,11 +667,25 @@ CMenuManager::CheckSliderMovement(int value)
 }
 
 void
-CMenuManager::DisplayHelperText()
+CMenuManager::DisplayHelperText(char *text)
 {
+	if (m_nMenuFadeAlpha != 255)
+		return;
+
 	// there was a unused static bool
 	static PauseModeTime LastFlash = 0;
-	int32 alpha;
+	int32 alpha = 255;
+
+	CFont::SetRightJustifyOn();
+	CFont::SetScale(SCREEN_SCALE_X(SMALLESTTEXT_X_SCALE), SCREEN_SCALE_Y(SMALLESTTEXT_Y_SCALE));
+	CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
+	CFont::SetDropShadowPosition(0);
+
+	if (text) {
+		CFont::SetColor(CRGBA(255, 255, 255, 255));
+		CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(10.f), SCREEN_SCALE_FROM_BOTTOM(18.f), TheText.Get(text));
+		return;
+	}
 
 	if (m_nHelperTextMsgId != 0 && m_nHelperTextMsgId != 1) {
 		if (CTimer::GetTimeInMillisecondsPauseMode() - LastFlash > 10) {
@@ -682,41 +699,67 @@ CMenuManager::DisplayHelperText()
 		alpha = m_nHelperTextAlpha > 255 ? 255 : m_nHelperTextAlpha;
 	}
 
-	CFont::SetCentreOn();
-	CFont::SetScale(SCREEN_SCALE_X(SMALLESTTEXT_X_SCALE), SCREEN_SCALE_Y(SMALLESTTEXT_Y_SCALE));
-	CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
-
+	CFont::SetColor(CRGBA(255, 255, 255, alpha));
 	// TODO: name this cases?
 	switch (m_nHelperTextMsgId) {
-		case 0:
-		{
-			int action = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action;
-			if (action != MENUACTION_CHANGEMENU && action != MENUACTION_KEYBOARDCTRLS && action != MENUACTION_RESTOREDEF) {
-				CFont::SetColor(CRGBA(255, 255, 255, 255));
-				CFont::PrintString(MENU_X_LEFT_ALIGNED(320.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), TheText.Get("FET_MIG"));
-			}
-			break;
-		}
 		case 1:
-			CFont::SetColor(CRGBA(255, 255, 255, 255));
-			CFont::PrintString(MENU_X_LEFT_ALIGNED(320.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), TheText.Get("FET_APP"));
+			CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(10.f), SCREEN_SCALE_FROM_BOTTOM(18.f), TheText.Get("FET_APP"));
 			break;
 		case 2:
-			CFont::SetColor(CRGBA(255, 255, 255, alpha));
-			CFont::PrintString(MENU_X_LEFT_ALIGNED(320.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), TheText.Get("FET_HRD"));
+			CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(10.f), SCREEN_SCALE_FROM_BOTTOM(18.f), TheText.Get("FET_HRD"));
 			break;
 		case 3:
-			CFont::SetColor(CRGBA(255, 255, 255, alpha));
-			CFont::PrintString(MENU_X_LEFT_ALIGNED(320.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), TheText.Get("FET_RSO"));
+			CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(10.f), SCREEN_SCALE_FROM_BOTTOM(18.f), TheText.Get("FET_RSO"));
 			break;
 		case 4:
-			CFont::SetColor(CRGBA(255, 255, 255, alpha));
-			CFont::PrintString(MENU_X_LEFT_ALIGNED(320.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), TheText.Get("FET_RSC"));
+			CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(10.f), SCREEN_SCALE_FROM_BOTTOM(18.f), TheText.Get("FET_STS"));
+			break;
+		case 5:
+			CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(10.f), SCREEN_SCALE_FROM_BOTTOM(18.f), TheText.Get("FET_RSC"));
 			break;
 		default:
+			if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_NO)
+				return;
+
+			if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_MUSICVOLUME ||
+				aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_SFXVOLUME) {
+
+				CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(10.f), SCREEN_SCALE_FROM_BOTTOM(18.f),
+					m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER ? TheText.Get("FEH_NA") : TheText.Get("FET_MIG"));
+				return;
+			}
+
+			if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_KEYBOARDCTRLS)
+				return;
+
+			if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_SCREENRES) {
+				CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(10.f), SCREEN_SCALE_FROM_BOTTOM(18.f),
+					m_bGameNotLoaded ? TheText.Get("FET_MIG") : TheText.Get("FEH_NA"));
+				return;
+			}
+
+			if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_AUDIOHW ||
+				aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_SPEAKERCONF) {
+
+				CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(10.f), SCREEN_SCALE_FROM_BOTTOM(18.f),
+					m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER ? TheText.Get("FEH_NA") : TheText.Get("FET_MIG"));
+				return;
+			}
+
+			if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_RESTOREDEF)
+				return;
+
+			if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_MP3VOLUMEBOOST) {
+				CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(10.f), SCREEN_SCALE_FROM_BOTTOM(18.f),
+					m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER ? TheText.Get("FEH_NA") : TheText.Get("FET_MIG"));
+				return;
+			}
+
+			CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(10.f), SCREEN_SCALE_FROM_BOTTOM(18.f),
+				m_nCurrScreen != MENUPAGE_STATS ? TheText.Get("FET_MIG") : TheText.Get("FEH_SSA"));
+
 			break;
 	}
-	CFont::SetRightJustifyOff();
 }
 
 // --MIAMI: Done
@@ -879,28 +922,6 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 	bool foundTheHoveringItem = false;
 	wchar unicodeTemp[64];
 	char asciiTemp[32];
-
-#ifdef MENU_MAP
-	if (m_nCurrScreen == MENUPAGE_MAP) {
-		// Back button
-		wchar *backTx = TheText.Get("FEDS_TB");
-		CFont::SetDropShadowPosition(1);
-		CFont::SetDropColor(CRGBA(0, 0, 0, 255));
-		CFont::SetScale(MENU_X(BIGTEXT_X_SCALE), MENU_Y(BIGTEXT_Y_SCALE));
-		CFont::SetRightJustifyOff();
-		CFont::SetCentreOn();
-		CFont::PrintString(MENU_X(60.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), backTx);
-		CFont::SetDropShadowPosition(0);
-		if (!CheckHover(MENU_X(30.0f), MENU_X(30.0f) + CFont::GetStringWidth(backTx), SCREEN_SCALE_FROM_BOTTOM(125.0f), SCREEN_SCALE_FROM_BOTTOM(105.0f))) {
-			m_nHoverOption = HOVEROPTION_NOT_HOVERING;
-			m_nCurrOption = m_nPrevOption = 0;
-		} else {
-			m_nHoverOption = HOVEROPTION_RANDOM_ITEM;
-			m_nCurrOption = m_nPrevOption = 1;
-		}
-		return;
-	}
-#endif
 
 	bool weHaveLabel = aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL;
 	uint8 section = 0; // 0: highlight trapezoid  1: texts
@@ -1356,8 +1377,6 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 		section++;
 	}
 
-	// TODO(Miami)
-	/*
 	switch (m_nCurrScreen) {
 		case MENUPAGE_STATS:
 		case MENUPAGE_CONTROLLER_PC:
@@ -1371,7 +1390,6 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 				DisplayHelperText("FEA_NAH");
 			break;
 	}
-	*/
 
 	if (m_nCurrScreen == MENUPAGE_DELETING_IN_PROGRESS) {
 		SmallMessageScreen("FEDL_WR");
@@ -4344,8 +4362,7 @@ CMenuManager::ProcessButtonPresses(void)
 				case MENUACTION_YES:
 				case MENUACTION_NO:
 				{
-					// TODO(Miami): TEMP
-#ifdef MENU_MAP
+#ifdef CUSTOM_MAP
 					if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu == MENUPAGE_MAP) {
 						bMapLoaded = false;
 					}
@@ -4411,12 +4428,11 @@ CMenuManager::ProcessButtonPresses(void)
 					if (m_nDisplayVideoMode != m_nPrefsVideoMode) {
 						m_nPrefsVideoMode = m_nDisplayVideoMode;
 						_psSelectScreenVM(m_nPrefsVideoMode);
-						SetHelperText(0); // TODO(Miami): Remove that
 						DMAudio.ChangeMusicMode(MUSICMODE_FRONTEND);
 						DMAudio.Service();
 						CentreMousePointer();
 						m_bShowMouse = true;
-						// m_nCurrOption = 5; // Why?
+						// m_nCurrOption = 5; // Why? TODO(Miami)
 						m_nOptionHighlightTransitionBlend = 0;
 						SaveSettings();
 					}
@@ -4426,7 +4442,6 @@ CMenuManager::ProcessButtonPresses(void)
 					if (m_nSelectedScreenMode != m_nPrefsWindowed) {
 						m_nPrefsWindowed = m_nSelectedScreenMode;
 						_psSelectScreenVM(m_nPrefsVideoMode); // apply same resolution
-						SetHelperText(0);
 						SaveSettings();
 					}
 					break;
@@ -4435,13 +4450,11 @@ CMenuManager::ProcessButtonPresses(void)
 				{
 					int selectedProvider = m_nPrefsAudio3DProviderIndex;
 					if (selectedProvider != INVALID_AUDIO_PROVIDER) {
+						if (selectedProvider == -1)
+							selectedProvider = m_nPrefsAudio3DProviderIndex = DMAudio.AutoDetect3DProviders();
 						m_nPrefsAudio3DProviderIndex = DMAudio.SetCurrent3DProvider(m_nPrefsAudio3DProviderIndex);
-						if (selectedProvider == m_nPrefsAudio3DProviderIndex) {
-							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-							SetHelperText(0);
-						} else {
-							DMAudio.PlayFrontEndSound(SOUND_FRONTEND_FAIL, 0);
-							SetHelperText(4);
+						if (selectedProvider != m_nPrefsAudio3DProviderIndex) {
+							SetHelperText(5);
 						}
 						SaveSettings();
 					}
@@ -5163,7 +5176,7 @@ CMenuManager::DrawQuitGameScreen(void)
 	m_AllowNavigation = false;
 }
 
-#ifdef MENU_MAP
+#ifdef CUSTOM_MAP
 
 #define ZOOM(x, y, in) \
 	do { \
@@ -5177,15 +5190,17 @@ CMenuManager::DrawQuitGameScreen(void)
 			break; \
 		\
 		m_fMapSize *= z2; \
-	} while(0) \
+	} while(0)
+
+#endif
 
 void
 CMenuManager::PrintMap(void)
 {
-	CFont::SetJustifyOn();
 	m_bMenuMapActive = true;
 	CRadar::InitFrontEndMap();
 
+#ifdef CUSTOM_MAP
 	// Just entered to map
 	if (!bMapLoaded) {
 		m_fMapSize = SCREEN_HEIGHT * 2.0f;
@@ -5207,14 +5222,10 @@ CMenuManager::PrintMap(void)
 			return;
 		}
 	}
+#endif
 
 	// Because m_fMapSize is half of the map length, and map consists of 3x3 tiles.
 	float halfTile = m_fMapSize / 3.0f;
-
-	// Darken background a bit
-	CSprite2d::DrawRect(CRect(0, 0,
-		SCREEN_WIDTH, SCREEN_HEIGHT),
-		CRGBA(0, 0, 0, FadeIn(128)));
 
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
 
@@ -5265,6 +5276,7 @@ CMenuManager::PrintMap(void)
 
 	CRadar::DrawBlips();
 
+#ifdef CUSTOM_MAP
 	CVector2D mapPoint;
 	mapPoint.x = m_nMousePosX;
 	mapPoint.y = m_nMousePosY;
@@ -5338,56 +5350,15 @@ CMenuManager::PrintMap(void)
 	
 	if (m_fMapCenterY - m_fMapSize > SCREEN_HEIGHT / 2)
 		m_fMapCenterY = SCREEN_HEIGHT / 2 + m_fMapSize;
-
+#endif
 	m_bMenuMapActive = false;
 
-	// CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(5.0f)); // From VC
-	// CFont::SetRightJustifyWrap(10.0f);
-
-	CSprite2d::DrawRect(CRect(MENU_X(14.0f), SCREEN_STRETCH_FROM_BOTTOM(95.0f),
-		SCREEN_STRETCH_FROM_RIGHT(11.0f), SCREEN_STRETCH_FROM_BOTTOM(59.0f)),
-		CRGBA(MAPINFOBOX_COLOR.r, MAPINFOBOX_COLOR.g, MAPINFOBOX_COLOR.b, MAPINFOBOX_COLOR.a));
-
-	CFont::SetScale(MENU_X(0.4f), MENU_Y(0.7f));
-	CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
-	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255)));
-
-	float nextX = MENU_X(30.0f), nextY = 95.0f;
-	wchar *text;
-#ifdef MORE_LANGUAGES
-#define TEXT_PIECE(key,extraSpace) \
-	text = TheText.Get(key);\
-	CFont::PrintString(nextX, SCREEN_SCALE_FROM_BOTTOM(nextY), text);\
-	if (CFont::IsJapanese())\
-		nextX += CFont::GetStringWidth_Jap(text) + MENU_X(extraSpace);\
-	else\
-		nextX += CFont::GetStringWidth(text, true) + MENU_X(extraSpace);
-#else
-#define TEXT_PIECE(key,extraSpace) \
-	text = TheText.Get(key); CFont::PrintString(nextX, SCREEN_SCALE_FROM_BOTTOM(nextY), text); nextX += CFont::GetStringWidth(text, true) + MENU_X(extraSpace);
-#endif
-
-	TEXT_PIECE("FEC_MWF", 3.0f);
-	TEXT_PIECE("FEC_PGU", 1.0f);
-	TEXT_PIECE("FEC_IBT", 1.0f);
-	TEXT_PIECE("FEC_ZIN", 20.0f);
-	TEXT_PIECE("FEC_MWB", 3.0f);
-	TEXT_PIECE("FEC_PGD", 1.0f);
-	TEXT_PIECE("FEC_IBT", 1.0f);
-	CFont::PrintString(nextX, SCREEN_SCALE_FROM_BOTTOM(nextY), TheText.Get("FEC_ZOT")); nextX = MENU_X(30.0f); nextY -= 11.0f;
-	TEXT_PIECE("FEC_UPA", 2.0f);
-	TEXT_PIECE("FEC_DWA", 2.0f);
-	TEXT_PIECE("FEC_LFA", 2.0f);
-	TEXT_PIECE("FEC_RFA", 2.0f);
-	TEXT_PIECE("FEC_MSL", 1.0f);
-	TEXT_PIECE("FEC_IBT", 1.0f);
-	CFont::PrintString(nextX, SCREEN_SCALE_FROM_BOTTOM(nextY), TheText.Get("FEC_MOV")); nextX = MENU_X(30.0f); nextY -= 11.0f;
-	TEXT_PIECE("FEC_MSR", 2.0f);
-	TEXT_PIECE("FEC_IBT", 1.0f);
-	CFont::PrintString(nextX, SCREEN_SCALE_FROM_BOTTOM(nextY), TheText.Get("FEC_TAR"));
-#undef TEXT_PIECE
+	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(5.0f));
+	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(10.0f));
+	DisplayHelperText("FEH_MPH");
 }
 
+#ifdef CUSTOM_MAP
 #undef ZOOM
 #endif
 

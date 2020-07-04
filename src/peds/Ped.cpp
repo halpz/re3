@@ -11356,18 +11356,33 @@ CPed::ProcessControl(void)
 
 					int vehAnim = m_pVehicleAnim->animId;
 
+					static bool cancelJack = false;
 					int16 padWalkX = pad->GetPedWalkLeftRight();
 					int16 padWalkY = pad->GetPedWalkUpDown();
 					if (Abs(padWalkX) > 0.0f || Abs(padWalkY) > 0.0f) {
 						if (vehAnim == ANIM_CAR_OPEN_LHS || vehAnim == ANIM_CAR_OPEN_RHS || vehAnim == ANIM_COACH_OPEN_L || vehAnim == ANIM_COACH_OPEN_R ||
 							vehAnim == ANIM_VAN_OPEN_L || vehAnim == ANIM_VAN_OPEN) {
+
+							if (!m_pMyVehicle->pDriver) {
+								cancelJack = false;
+								bCancelEnteringCar = true;
+							} else
+								cancelJack = true;
+						} else if (vehAnim == ANIM_CAR_QJACK && m_pVehicleAnim->GetTimeLeft() > 0.75f) {
+							cancelJack = true;
+						} else if (vehAnim == ANIM_CAR_PULLOUT_LHS || vehAnim == ANIM_CAR_PULLOUT_LOW_LHS || vehAnim == ANIM_CAR_PULLOUT_LOW_RHS || vehAnim == ANIM_CAR_PULLOUT_RHS) {
 							bCancelEnteringCar = true;
-						} else if (vehAnim == ANIM_CAR_QJACK) {
-							if (m_pVehicleAnim->GetTimeLeft() > 0.69f && m_pVehicleAnim->GetTimeLeft() < 0.72f) {
-								QuitEnteringCar();
-								RestorePreviousObjective();
-							}
+							cancelJack = false;
 						}
+					}
+					if (cancelJack && vehAnim == ANIM_CAR_QJACK && m_pVehicleAnim->GetTimeLeft() > 0.75f && m_pVehicleAnim->GetTimeLeft() < 0.78f) {
+						cancelJack = false;
+						QuitEnteringCar();
+						RestorePreviousObjective();
+					}
+					if (cancelJack && (vehAnim == ANIM_CAR_PULLOUT_LHS || vehAnim == ANIM_CAR_PULLOUT_LOW_LHS || vehAnim == ANIM_CAR_PULLOUT_LOW_RHS || vehAnim == ANIM_CAR_PULLOUT_RHS)) {
+						cancelJack = false;
+						bCancelEnteringCar = true;
 					}
 #endif
 					break;
@@ -12162,6 +12177,15 @@ CPed::PedAnimPullPedOutCB(CAnimBlendAssociation* animAssoc, void* arg)
 	if (ped->EnteringCar()) {
 		if (!ped->IsNotInWreckedVehicle())
 			return;
+
+#ifdef CANCELLABLE_CAR_ENTER
+		if (ped->bCancelEnteringCar) {
+			ped->QuitEnteringCar();
+			ped->RestorePreviousObjective();
+			ped->bCancelEnteringCar = false;
+			return;
+		}
+#endif
 
 		bool isLow = !!veh->bLowVehicle;
 

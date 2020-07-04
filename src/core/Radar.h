@@ -21,6 +21,8 @@
 #define COORDBLIP_MARKER_COLOR_B 242
 #define COORDBLIP_MARKER_COLOR_A 255
 
+#define NUM_MAP_LEGENDS 75
+
 #define MENU_MAP_LENGTH_UNIT 1190.0f // in game unit
 #define MENU_MAP_WIDTH_SCALE 1.112f // in game unit (originally 1.112494151260504f)
 #define MENU_MAP_HEIGHT_SCALE 1.119f // in game unit (originally 1.118714268907563f)
@@ -48,10 +50,8 @@ enum eBlipDisplay
 
 enum eRadarSprite
 {
-#ifdef MENU_MAP
 	RADAR_SPRITE_ENTITY_BLIP = -2,
 	RADAR_SPRITE_COORD_BLIP = -1,
-#endif
 	RADAR_SPRITE_NONE = 0,
 	RADAR_SPRITE_CENTRE,
 	RADAR_SPRITE_MAP_HERE,
@@ -173,17 +173,19 @@ public:
 	static CSprite2d *RadarSprites[RADAR_SPRITE_COUNT];
 	static float cachedCos;
 	static float cachedSin;
-#ifdef MENU_MAP
-#define NUM_MAP_LEGENDS 75
 	static CRGBA ArrowBlipColour1;
 	static CRGBA ArrowBlipColour2;
 	static int16 MapLegendList[NUM_MAP_LEGENDS];
 	static uint16 MapLegendCounter;
+
+#ifdef MAP_ENHANCEMENTS
 	static int TargetMarkerId;
 	static CVector TargetMarkerPos;
+#endif
 
 	static void InitFrontEndMap();
 	static void DrawYouAreHereSprite(float, float);
+#ifdef MAP_ENHANCEMENTS
 	static void ToggleTargetMarker(float, float);
 #endif
 	static uint8 CalculateBlipAlpha(float dist);

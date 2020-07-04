@@ -242,7 +242,7 @@ enum Config {
 //#	define PS2_MENU_USEALLPAGEICONS
 #else
 //#	define PS2_LIKE_MENU	// An effort to recreate PS2 menu, cycling through tabs, different bg etc.
-#	define MENU_MAP			// VC-like menu map. Make sure you have new menu.txd
+#	define MAP_ENHANCEMENTS			// Adding waypoint etc.
 #	define SCROLLABLE_STATS_PAGE	// only draggable by mouse atm
 #	define TRIANGLE_BACK_BUTTON
 //#	define CIRCLE_BACK_BUTTON

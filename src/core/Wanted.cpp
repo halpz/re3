@@ -182,7 +182,7 @@ CWanted::RegisterCrime(eCrimeType type, const CVector &coors, uint32 id, bool po
 void
 CWanted::RegisterCrime_Immediately(eCrimeType type, const CVector &coors, uint32 id, bool policeDoesntCare)
 {
-#ifdef FIX_BUGS
+#ifdef FIX_SIGNIFICANT_BUGS
 	if(!AddCrimeToQ(type, id, coors, true, policeDoesntCare))
 #else
 	if(!AddCrimeToQ(type, id, coors, false, policeDoesntCare))

@@ -77,7 +77,6 @@ mysrand(unsigned int seed)
 
 void ReloadFrontendOptions(void)
 {
-	RemoveCustomFrontendOptions();
 	CustomFrontendOptionsPopulate();
 }
 
@@ -139,6 +138,8 @@ void ToggleFreeCam(int8 action)
 void
 CustomFrontendOptionsPopulate(void)
 {
+	RemoveCustomFrontendOptions(); // if exist
+
 #ifdef MORE_LANGUAGES
 	FrontendOptionSetPosition(MENUPAGE_LANGUAGE_SETTINGS);
 	FrontendOptionAddDynamic(TheText.Get("FEL_POL"), nil, LangPolSelect, nil);
@@ -150,11 +151,6 @@ CustomFrontendOptionsPopulate(void)
 	static const wchar *screenModes[] = { (wchar*)L"FULLSCREEN", (wchar*)L"WINDOWED" };
 	FrontendOptionSetPosition(MENUPAGE_GRAPHICS_SETTINGS, 8);
 	FrontendOptionAddSelect(TheText.Get("SCRFOR"), screenModes, 2, (int8*)&FrontEndMenuManager.m_nPrefsWindowed, true, ScreenModeChange, nil);
-#endif
-
-#ifdef MENU_MAP
-	FrontendOptionSetPosition(MENUPAGE_PAUSE_MENU, 2);
-	FrontendOptionAddRedirect(TheText.Get("FEG_MAP"), MENUPAGE_MAP);
 #endif
 
 #ifdef FREE_CAM
@@ -252,7 +248,7 @@ FixCar(void)
 	}
 }
 
-#ifdef MENU_MAP
+#ifdef MAP_ENHANCEMENTS
 static void
 TeleportToWaypoint(void)
 {
@@ -499,7 +495,7 @@ DebugMenuPopulate(void)
 
 		DebugMenuAddVarBool8("Debug", "pad 1 -> pad 2", &CPad::m_bMapPadOneToPadTwo, nil);
 		DebugMenuAddVarBool8("Debug", "Edit on", &CSceneEdit::m_bEditOn, nil);
-#ifdef MENU_MAP
+#ifdef MAP_ENHANCEMENTS
 		DebugMenuAddCmd("Debug", "Teleport to map waypoint", TeleportToWaypoint);
 #endif
 		DebugMenuAddCmd("Debug", "Switch car collision", SwitchCarCollision);

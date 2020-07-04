@@ -613,7 +613,7 @@ public:
 	void CheckCodesForControls(int);
 	bool CheckHover(int x1, int x2, int y1, int y2);
 	void CheckSliderMovement(int);
-	void DisplayHelperText();
+	void DisplayHelperText(char*);
 	int DisplaySlider(float, float, float, float, float, float, float);
 	void DoSettingsBeforeStartingAGame();
 	void DrawStandardMenus(bool);
