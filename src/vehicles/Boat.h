@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vehicle.h"
+#include "Door.h"
 
 enum eBoatNodes
 {
@@ -10,33 +11,34 @@ enum eBoatNodes
 	BOAT_FLAP_LEFT,
 	BOAT_FLAP_RIGHT,
 	BOAT_REARFLAP_LEFT,
-	BOAT_REARFLAP_RIGHT
+	BOAT_REARFLAP_RIGHT,
+	NUM_BOAT_NODES
 };
 
 class CBoat : public CVehicle
 {
 public:
-	// 0x288
-	float m_fPropellerZ;
-	float m_fPropellerY;
-	CVector m_waterMoveDrag;
-	CVector m_waterTurnDrag;
-	float m_fMovingHiRotation;
-	int32 _unk0;
-	RwFrame *m_aBoatNodes[4];
+	float m_fMovingRotation;
+	float m_fMovingSpeed;
+	int32 m_boat_unused1;
+	RwFrame *m_aBoatNodes[NUM_BOAT_NODES];
+	CDoor m_boom;
+	tBoatHandlingData *pBoatHandling;
 	uint8 bBoatInWater : 1;
 	uint8 bPropellerInWater : 1;
 	bool m_bIsAnchored;
 	float m_fOrientation;
-	int32 _unk1;
+	uint32 m_nPoliceShoutTimer;
+	int32 m_boat_unused2;
 	float m_fDamage;
 	CEntity *m_pSetOnFireEntity;
-	bool _unk2;
+	float m_skimmerThingTimer;
+	bool m_boat_unused3;
 	float m_fAccelerate;
 	float m_fBrake;
 	float m_fSteeringLeftRight;
 	uint8 m_nPadID;
-	int32 _unk3;
+	int32 m_boat_unused4;
 	float m_fVolumeUnderWater;
 	CVector m_vecBuoyancePoint;
 	float m_fPrevVolumeUnderWater;
@@ -54,7 +56,7 @@ public:
 	virtual void SetModelIndex(uint32 id);
 	virtual void ProcessControl();
 	virtual void Teleport(CVector v);
-	virtual void PreRender(void) {};
+	virtual void PreRender(void);
 	virtual void Render(void);
 	virtual void ProcessControlInputs(uint8);
 	virtual void GetComponentWorldPosition(int32 component, CVector &pos);

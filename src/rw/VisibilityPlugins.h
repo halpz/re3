@@ -83,6 +83,7 @@ public:
 	static bool VehicleVisibilityCB(RpClump *clump);
 	static bool VehicleVisibilityCB_BigVehicle(RpClump *clump);
 
+	static float GetDistanceSquaredFromCamera(RwV3d *pos);
 	static float GetDistanceSquaredFromCamera(RwFrame *frame);
 	static float GetDotProductWithCameraVector(RwMatrix *atomicMat, RwMatrix *clumpMat, uint32 flags);
 

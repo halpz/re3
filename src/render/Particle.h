@@ -98,5 +98,6 @@ public:
 };
 
 extern bool clearWaterDrop;
+extern int32 numWaterDropOnScreen;
 
 VALIDATE_SIZE(CParticle, 0x58);

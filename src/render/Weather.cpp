@@ -279,7 +279,7 @@ void CWeather::Update(void)
 	}
 
 	Wind = InterpolationValue * Windiness[NewWeatherType] + (1.0f - InterpolationValue) * Windiness[OldWeatherType];
-	WindClipped = Max(1.0f, Wind);
+	WindClipped = Min(1.0f, Wind);
 
 	if (CClock::GetHours() == 20)
 		TrafficLightBrightness = CClock::GetMinutes() / 60.0f;

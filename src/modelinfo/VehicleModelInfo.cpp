@@ -89,7 +89,17 @@ RwObjectNameIdAssocation boatIds[] = {
 	{ "boat_flap_right",	BOAT_FLAP_RIGHT,	0 },
 	{ "boat_rearflap_left",	BOAT_REARFLAP_LEFT,	0 },
 	{ "boat_rearflap_right",	BOAT_REARFLAP_RIGHT,	0 },
+#ifdef FIX_BUGS
+	// let's just accept both
+	{ "windscreen",		BOAT_WINDSCREEN,	VEHICLE_FLAG_WINDSCREEN | VEHICLE_FLAG_DRAWLAST },
 	{ "windscreen_hi_ok",		BOAT_WINDSCREEN,	VEHICLE_FLAG_WINDSCREEN | VEHICLE_FLAG_DRAWLAST },
+#else
+#ifdef GTA_PS2
+	{ "windscreen",		BOAT_WINDSCREEN,	VEHICLE_FLAG_WINDSCREEN | VEHICLE_FLAG_DRAWLAST },
+#else
+	{ "windscreen_hi_ok",		BOAT_WINDSCREEN,	VEHICLE_FLAG_WINDSCREEN | VEHICLE_FLAG_DRAWLAST },
+#endif
+#endif
 	{ "ped_frontseat",	BOAT_POS_FRONTSEAT,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
 	{ nil, 0, 0 }
 };

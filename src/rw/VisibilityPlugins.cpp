@@ -626,6 +626,14 @@ CVisibilityPlugins::RenderPedCB(RpAtomic *atomic)
 }
 
 float
+CVisibilityPlugins::GetDistanceSquaredFromCamera(RwV3d *pos)
+{
+	RwV3d dist;
+	RwV3dSub(&dist, pos, ms_pCameraPosn);
+	return RwV3dDotProduct(&dist, &dist);
+}
+
+float
 CVisibilityPlugins::GetDistanceSquaredFromCamera(RwFrame *frame)
 {
 	RwMatrix *m;
