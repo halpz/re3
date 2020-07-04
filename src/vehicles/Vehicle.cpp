@@ -232,7 +232,7 @@ CVehicle::SetupLighting(void)
 	}else{
 		CVector coors = GetPosition();
 		float lighting = CPointLights::GenerateLightsAffectingObject(&coors);
-		if(!bHasBlip && lighting != 1.0f){
+		if(lighting != 1.0f){
 			SetAmbientAndDirectionalColours(lighting);
 			return true;
 		}

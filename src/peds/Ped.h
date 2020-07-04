@@ -459,9 +459,7 @@ public:
 	//uint32 b156_4
 	uint32 b156_8 : 1;
 	uint32 bIsPlayerFriend : 1;
-#ifdef VC_PED_PORTS
 	uint32 bHeadStuckInCollision : 1;
-#endif
 	uint32 bDeadPedInFrontOfCar : 1;
 	uint32 bStayInCarOnJack : 1;
 
@@ -469,8 +467,8 @@ public:
 	uint32 bDoomAim : 1;
 	uint32 bCanBeShotInVehicle : 1;
 	//uint32 b157_8
-	//uint32 b157_10
-	//uint32 b157_20
+	uint32 b157_10 : 1;
+	uint32 bPushedAlongByCar : 1;
 	uint32 b157_40 : 1;
 	uint32 bIgnoreThreatsBehindObjects : 1;
 
@@ -480,7 +478,7 @@ public:
 	//uint32 b158_8
 	uint32 b158_10 : 1;
 	uint32 bBoughtIceCream : 1;
-	//uint32 b158_40
+	uint32 b158_40 : 1;
 	//uint32 b158_80
 
 	// our own flags
@@ -631,8 +629,8 @@ public:
 	uint32 m_threatFlags;
 	uint32 m_threatCheck;
 	uint32 m_lastThreatCheck;
-	uint32 m_sayType;
-	uint32 m_sayTimer;
+	uint32 m_delayedSoundID;
+	uint32 m_delayedSoundTimer;
 	uint32 m_lastSoundStart;
 	uint32 m_soundStart;
 	uint16 m_lastQueuedSound;
@@ -664,6 +662,7 @@ public:
 	void AimGun(void);
 	void KillPedWithCar(CVehicle *veh, float impulse);
 	void Say(uint16 audio);
+	void Say(uint16 audio, int32 time);
 	void SetLookFlag(CEntity* target, bool keepTryingToLook, bool cancelPrevious = false);
 	void SetLookFlag(float direction, bool keepTryingToLook, bool cancelPrevious = false);
 	void SetLookTimer(int time);

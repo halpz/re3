@@ -25,6 +25,7 @@ public:
 	bool m_bZoneDisabled;
 	float m_fAbseilPos;
 	eCopType m_nCopType;
+	int32 field_624;
 	int8 field_628;
 
 	CCopPed(eCopType, int32 modifier = 0);

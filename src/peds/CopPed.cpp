@@ -86,6 +86,7 @@ CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 	m_fAbseilPos = 0.0f;
 	m_bBeatingSuspect = false;
 	m_pPointGunAt = nil;
+	field_624 = 0;
 }
 
 CCopPed::~CCopPed()
