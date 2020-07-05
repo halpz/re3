@@ -31,6 +31,7 @@
 #include "Ped.h"
 #include "Dummy.h"
 #include "WindModifiers.h"
+#include "Occlusion.h"
 
 //--MIAMI: file almost done (see TODO)
 
@@ -1155,5 +1156,39 @@ bool IsEntityPointerValid(CEntity* pEntity)
 	case ENTITY_TYPE_OBJECT: return IsObjectPointerValid((CObject*)pEntity);
 	case ENTITY_TYPE_DUMMY: return IsDummyPointerValid((CDummy*)pEntity);
 	}
+	return false;
+}
+
+bool CEntity::IsEntityOccluded(void) {
+	return false;
+
+	CVector coors;
+	float width, height;
+
+	if (!COcclusion::NumActiveOccluders || !CalcScreenCoors(GetBoundCentre(), &coors, &width, &height))
+		return false;
+
+	float area = Max(width, height) * GetBoundRadius() * 0.9f;
+
+	for (int i = 0; i < COcclusion::NumActiveOccluders; i++) {
+		if (coors.z - (GetBoundRadius() * 0.85f) > COcclusion::aActiveOccluders[i].radius) {
+			if (COcclusion::aActiveOccluders[i].IsPointWithinOcclusionArea(coors.x, coors.y, area)) {
+				return true;
+			}
+
+			if (COcclusion::aActiveOccluders[i].IsPointWithinOcclusionArea(coors.x, coors.y, 0.0f)) {
+				CVector min = m_matrix * CModelInfo::GetModelInfo(GetModelIndex())->GetColModel()->boundingBox.min;
+				CVector max = m_matrix * CModelInfo::GetModelInfo(GetModelIndex())->GetColModel()->boundingBox.max;
+
+				if (CalcScreenCoors(min, &coors) && !COcclusion::aActiveOccluders[i].IsPointWithinOcclusionArea(coors.x, coors.y, 0.0f)) continue;
+				if (CalcScreenCoors(CVector(max.x, max.y, min.z), &coors) && !COcclusion::aActiveOccluders[i].IsPointWithinOcclusionArea(coors.x, coors.y, 0.0f)) continue;
+				if (CalcScreenCoors(CVector(max.x, min.y, max.z), &coors) && !COcclusion::aActiveOccluders[i].IsPointWithinOcclusionArea(coors.x, coors.y, 0.0f)) continue;
+				if (CalcScreenCoors(CVector(min.x, max.y, max.z), &coors) && !COcclusion::aActiveOccluders[i].IsPointWithinOcclusionArea(coors.x, coors.y, 0.0f)) continue;
+
+				return true;
+			}
+		}
+	}
+
 	return false;
 }
