@@ -178,7 +178,11 @@ psCameraBeginUpdate(RwCamera *camera)
 void
 psCameraShowRaster(RwCamera *camera)
 {
-	if (FrontEndMenuManager.m_PrefsVsync)
+#ifdef LEGACY_MENU_OPTIONS
+	if (FrontEndMenuManager.m_PrefsVsync || FrontEndMenuManager.m_bMenuActive)
+#else
+	if (FrontEndMenuManager.m_PrefsFrameLimiter || FrontEndMenuManager.m_bMenuActive)
+#endif
 		RwCameraShowRaster(camera, PSGLOBAL(window), rwRASTERFLIPWAITVSYNC);
 	else
 		RwCameraShowRaster(camera, PSGLOBAL(window), rwRASTERFLIPDONTWAIT);
@@ -1488,7 +1492,7 @@ main(int argc, char *argv[])
 	{
 		CFileMgr::SetDirMyDocuments();
 		
-		int32 gta3set = CFileMgr::OpenFile("gta3.set", "r");
+		int32 gta3set = CFileMgr::OpenFile("gta_vc.set", "r");
 		
 		if ( gta3set )
 		{

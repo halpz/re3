@@ -39,7 +39,7 @@ extern float fRangePlayerRadius;
 extern float fCloseNearClipLimit;
 
 #ifdef FREE_CAM
-bool CCamera::bFreeCam;
+bool CCamera::bFreeCam = false;
 int nPreviousMode = -1;
 #endif
 
