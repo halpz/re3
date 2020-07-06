@@ -41,9 +41,6 @@
 // TODO(Miami): Remove that!! That was my map implementation for III, instead use MAP_ENHACEMENTS on some places
 #define CUSTOM_MAP
 
-// TODO(Miami): This is -3 on VC but still -1 on AudioManager?!? What the hell?
-#define INVALID_AUDIO_PROVIDER -1
-
 // Similar story to Hud.cpp:
 // Game has colors inlined in code.
 // For easier modification we collect them here:
@@ -355,7 +352,7 @@ CMenuManager::ThingsToDoBeforeLeavingPage()
 	if ((m_nCurrScreen == MENUPAGE_SKIN_SELECT) && strcmp(m_aSkinName, m_PrefsSkinFile) != 0) {
 		CWorld::Players[0].SetPlayerSkin(m_PrefsSkinFile);
 	} else if (m_nCurrScreen == MENUPAGE_SOUND_SETTINGS) {
-		if (m_nPrefsAudio3DProviderIndex != INVALID_AUDIO_PROVIDER)
+		if (m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER)
 			m_nPrefsAudio3DProviderIndex = DMAudio.GetCurrent3DProviderIndex();
 #ifdef TIDY_UP_PBP
 		DMAudio.StopFrontEndTrack();
@@ -388,7 +385,7 @@ CMenuManager::CMenuManager()
 	m_PrefsRadioStation = 0;
 	m_PrefsStereoMono = 1;
 	m_PrefsBrightness = 256;
-	m_PrefsLOD = 1.2f;
+	m_PrefsLOD = CRenderer::ms_lodDistScale;
 	m_KeyPressedCode = -1;
 	m_bFrontEnd_ReloadObrTxtGxt = false;
 	m_PrefsMP3BoostVolume = 0;
@@ -421,7 +418,7 @@ CMenuManager::CMenuManager()
 	m_nScrollbarTopMargin = 0.0f;
 	m_nSelectedListRow = 0;
 	m_nSkinsTotal = 0;
-	m_nPrefsAudio3DProviderIndex = -99;
+	m_nPrefsAudio3DProviderIndex = AUDIO_PROVIDER_NOT_DETERMINED;
 	m_bGameNotLoaded = true;
 	m_nMousePosX = m_nMouseTempPosX;
 	m_nMousePosY = m_nMouseTempPosY;
@@ -643,7 +640,6 @@ CMenuManager::CheckSliderMovement(int value)
 	case MENUACTION_MUSICVOLUME:
 		m_PrefsMusicVolume += value * (128/32);
 		m_PrefsMusicVolume = clamp(m_PrefsMusicVolume, 0, 65);
-		printf("%d\n", m_PrefsMusicVolume);
 		DMAudio.SetMusicMasterVolume(m_PrefsMusicVolume);
 		break;
 	case MENUACTION_SFXVOLUME:
@@ -721,7 +717,7 @@ CMenuManager::DisplayHelperText(char *text)
 				aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_SFXVOLUME) {
 
 				CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(10.f), SCREEN_SCALE_FROM_BOTTOM(18.f),
-					m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER ? TheText.Get("FEH_NA") : TheText.Get("FET_MIG"));
+					m_nPrefsAudio3DProviderIndex == NO_AUDIO_PROVIDER ? TheText.Get("FEH_NA") : TheText.Get("FET_MIG"));
 				return;
 			}
 
@@ -738,7 +734,7 @@ CMenuManager::DisplayHelperText(char *text)
 				aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_SPEAKERCONF) {
 
 				CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(10.f), SCREEN_SCALE_FROM_BOTTOM(18.f),
-					m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER ? TheText.Get("FEH_NA") : TheText.Get("FET_MIG"));
+					m_nPrefsAudio3DProviderIndex == NO_AUDIO_PROVIDER ? TheText.Get("FEH_NA") : TheText.Get("FET_MIG"));
 				return;
 			}
 
@@ -747,7 +743,7 @@ CMenuManager::DisplayHelperText(char *text)
 
 			if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_MP3VOLUMEBOOST) {
 				CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(10.f), SCREEN_SCALE_FROM_BOTTOM(18.f),
-					m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER ? TheText.Get("FEH_NA") : TheText.Get("FET_MIG"));
+					m_nPrefsAudio3DProviderIndex == NO_AUDIO_PROVIDER ? TheText.Get("FEH_NA") : TheText.Get("FET_MIG"));
 				return;
 			}
 
@@ -979,7 +975,7 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 					leftText = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName);
 				}
 
-				if (m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER) {
+				if (m_nPrefsAudio3DProviderIndex == NO_AUDIO_PROVIDER) {
 					if (strncmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FEO_AUD", 8) == 0) {
 						CFont::SetColor(CRGBA(DARKMENUOPTION_COLOR.r, DARKMENUOPTION_COLOR.g, DARKMENUOPTION_COLOR.b, FadeIn(255)));
 					}
@@ -1045,7 +1041,7 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 
 				case MENUACTION_MUSICVOLUME:
 				case MENUACTION_SFXVOLUME:
-					if (m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER)
+					if (m_nPrefsAudio3DProviderIndex == NO_AUDIO_PROVIDER)
 						rightText = TheText.Get("FEA_NAH");
 
 					break;
@@ -1112,7 +1108,7 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 					break;
 #endif
 				case MENUACTION_AUDIOHW:
-					if (m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER)
+					if (m_nPrefsAudio3DProviderIndex == NO_AUDIO_PROVIDER)
 						rightText = TheText.Get("FEA_NAH");
 					else if (m_nPrefsAudio3DProviderIndex == -1)
 						rightText = TheText.Get("FEA_ADP");
@@ -1130,7 +1126,7 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 					}
 					break;
 				case MENUACTION_SPEAKERCONF: {
-					if (m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER)
+					if (m_nPrefsAudio3DProviderIndex == NO_AUDIO_PROVIDER)
 						rightText = TheText.Get("FEA_NAH");
 					else {
 						switch (m_PrefsSpeakers) {
@@ -1305,7 +1301,7 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 					}
 					if (m_nPrefsAudio3DProviderIndex != DMAudio.GetCurrent3DProviderIndex()) {
 						if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEA_3DH") != 0
-							&& m_nCurrScreen == MENUPAGE_SOUND_SETTINGS && m_nPrefsAudio3DProviderIndex != INVALID_AUDIO_PROVIDER) {
+							&& m_nCurrScreen == MENUPAGE_SOUND_SETTINGS && m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER) {
 
 							m_nPrefsAudio3DProviderIndex = DMAudio.GetCurrent3DProviderIndex();
 							SetHelperText(3);
@@ -1338,11 +1334,11 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 						ProcessSlider((m_PrefsLOD - 0.925f) / 0.875f, 99.0f, HOVEROPTION_INCREASE_DRAWDIST, HOVEROPTION_DECREASE_DRAWDIST, MENU_X_LEFT_ALIGNED(170.0f), SCREEN_WIDTH);
 						break;
 					case MENUACTION_MUSICVOLUME:
-						if(m_nPrefsAudio3DProviderIndex != INVALID_AUDIO_PROVIDER)
+						if(m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER)
 							ProcessSlider(m_PrefsMusicVolume / 64.0f, 70.0f, HOVEROPTION_INCREASE_MUSICVOLUME, HOVEROPTION_DECREASE_MUSICVOLUME, MENU_X_LEFT_ALIGNED(170.0f), SCREEN_WIDTH);
 						break;
 					case MENUACTION_SFXVOLUME:
-						if (m_nPrefsAudio3DProviderIndex != INVALID_AUDIO_PROVIDER)
+						if (m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER)
 							ProcessSlider(m_PrefsSfxVolume / 64.0f, 99.0f, HOVEROPTION_INCREASE_SFXVOLUME, HOVEROPTION_DECREASE_SFXVOLUME, MENU_X_LEFT_ALIGNED(170.0f), SCREEN_WIDTH);
 						break;
 					case MENUACTION_MOUSESENS:
@@ -1387,7 +1383,7 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 			DisplayHelperText(nil);
 			break;
 		case MENUPAGE_OPTIONS:
-			if (m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER && aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_LOADRADIO)
+			if (m_nPrefsAudio3DProviderIndex == NO_AUDIO_PROVIDER && aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_LOADRADIO)
 				DisplayHelperText("FEA_NAH");
 			break;
 	}
@@ -3182,7 +3178,7 @@ CMenuManager::LoadSettings()
 #endif
 	CRenderer::ms_lodDistScale = m_PrefsLOD;
 
-	if (m_nPrefsAudio3DProviderIndex == INVALID_AUDIO_PROVIDER)
+	if (m_nPrefsAudio3DProviderIndex == NO_AUDIO_PROVIDER)
 		m_nPrefsAudio3DProviderIndex = -2;
 
 	m_lastWorking3DAudioProvider = m_nPrefsAudio3DProviderIndex;
@@ -4469,7 +4465,7 @@ CMenuManager::ProcessButtonPresses(void)
 				case MENUACTION_AUDIOHW:
 				{
 					int selectedProvider = m_nPrefsAudio3DProviderIndex;
-					if (selectedProvider != INVALID_AUDIO_PROVIDER) {
+					if (selectedProvider != NO_AUDIO_PROVIDER) {
 						if (selectedProvider == -1)
 							selectedProvider = m_nPrefsAudio3DProviderIndex = DMAudio.AutoDetect3DProviders();
 						m_nPrefsAudio3DProviderIndex = DMAudio.SetCurrent3DProvider(m_nPrefsAudio3DProviderIndex);
@@ -4482,7 +4478,7 @@ CMenuManager::ProcessButtonPresses(void)
 				}
 				case MENUACTION_SPEAKERCONF:
 #ifndef TIDY_UP_PBP
-					if (m_nPrefsAudio3DProviderIndex != INVALID_AUDIO_PROVIDER) {
+					if (m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER) {
 						if (--m_PrefsSpeakers < 0)
 							m_PrefsSpeakers = 2;
 						DMAudio.SetSpeakerConfig(m_PrefsSpeakers);
@@ -4770,14 +4766,14 @@ CMenuManager::ProcessButtonPresses(void)
 				break;
 #endif
 			case MENUACTION_AUDIOHW:
-				if (m_nPrefsAudio3DProviderIndex != INVALID_AUDIO_PROVIDER) {
+				if (m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER) {
 					m_nPrefsAudio3DProviderIndex += changeValueBy;
 					m_nPrefsAudio3DProviderIndex = clamp(m_nPrefsAudio3DProviderIndex, 0, DMAudio.GetNum3DProvidersAvailable() - 1);
 				}
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
 				break;
 			case MENUACTION_SPEAKERCONF:
-				if (m_nPrefsAudio3DProviderIndex != INVALID_AUDIO_PROVIDER) {
+				if (m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER) {
 					m_PrefsSpeakers -= changeValueBy;
 					m_PrefsSpeakers = clamp(m_PrefsSpeakers, 0, 2);
 					DMAudio.SetSpeakerConfig(m_PrefsSpeakers);
@@ -5451,13 +5447,9 @@ CMenuManager::ConstructStatLine(int rowIdx)
 	if (CStats::Record4x4Mayhem > 0) {
 		STAT_LINE("FEST_RM", &CStats::Record4x4Mayhem, false, nil);
 	}
-	if (CStats::LongestFlightInDodo > 0) {
-		STAT_LINE("FEST_LF", &CStats::LongestFlightInDodo, false, nil);
-	}
 	if (CStats::TimeTakenDefuseMission > 0) {
 		STAT_LINE("FEST_BD", &CStats::TimeTakenDefuseMission, false, nil);
 	}
-	STAT_LINE("CAR_CRU", &CStats::CarsCrushed, false, nil);
 
 	if (CStats::HighestScores[0] > 0) {
 		STAT_LINE("FEST_BB", nil, false, nil);
@@ -5485,7 +5477,6 @@ CMenuManager::ConstructStatLine(int rowIdx)
 			float fTemp;
 			STAT_LINE("FEST_DF", &(fTemp = CStats::DistanceTravelledOnFoot * MILES_IN_METER), true, nil);
 			STAT_LINE("FEST_DC", &(fTemp = CStats::DistanceTravelledInVehicle * MILES_IN_METER), true, nil);
-			STAT_LINE("MMRAIN", &CStats::mmRain, false, nil);
 			STAT_LINE("MXCARD", &(fTemp = CStats::MaximumJumpDistance * FEET_IN_METER), true, nil);
 			STAT_LINE("MXCARJ", &(fTemp = CStats::MaximumJumpHeight * FEET_IN_METER), true, nil);
 			break;
@@ -5501,7 +5492,6 @@ CMenuManager::ConstructStatLine(int rowIdx)
 #endif
 			STAT_LINE("FESTDFM", &CStats::DistanceTravelledOnFoot, true, nil);
 			STAT_LINE("FESTDCM", &CStats::DistanceTravelledInVehicle, true, nil);
-			STAT_LINE("MMRAIN", &CStats::mmRain, false, nil);
 			STAT_LINE("MXCARDM", &CStats::MaximumJumpDistance, true, nil);
 			STAT_LINE("MXCARJM", &CStats::MaximumJumpHeight, true, nil);
 			break;

@@ -245,23 +245,20 @@ void CGame::ShutdownRenderWare(void)
 bool CGame::InitialiseOnceAfterRW(void)
 {
 	TheText.Load();
-	DMAudio.Initialise();
 	CTimer::Initialise();
 	CTempColModels::Initialise();
 	mod_HandlingManager.Initialise();
 	CSurfaceTable::Initialise("DATA\\SURFACE.DAT");
 	CPedStats::Initialise();
 	CTimeCycle::Initialise();
-
+	DMAudio.Initialise();
 	if ( DMAudio.GetNum3DProvidersAvailable() == 0 )
-		FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = -1;
+		FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = NO_AUDIO_PROVIDER;
 
-	if ( FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -99 || FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -2 )
+	if ( FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == AUDIO_PROVIDER_NOT_DETERMINED || FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -2 )
 	{
 		FrontEndMenuManager.m_PrefsSpeakers = 0;
-		int8 provider = DMAudio.AutoDetect3DProviders();
-		if ( provider != -1 )
-			FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = provider;
+		FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = DMAudio.AutoDetect3DProviders();
 	}
 
 	DMAudio.SetCurrent3DProvider(FrontEndMenuManager.m_nPrefsAudio3DProviderIndex);

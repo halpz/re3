@@ -7,6 +7,9 @@
 #define AEHANDLE_IS_FAILED(h) ((h)<0)
 #define AEHANDLE_IS_OK(h)     ((h)>=0)
 
+#define NO_AUDIO_PROVIDER -3
+#define AUDIO_PROVIDER_NOT_DETERMINED -99
+
 class cAudioScriptObject;
 class CEntity;
 

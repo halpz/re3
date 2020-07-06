@@ -131,6 +131,7 @@ void CControllerConfigManager::SaveSettings(int32 file)
 void CControllerConfigManager::LoadSettings(int32 file)
 {
 	bool bValid = true;
+	int nVersion = 0;
 
 	if (file)
 	{
@@ -139,11 +140,13 @@ void CControllerConfigManager::LoadSettings(int32 file)
 
 		if (!strncmp(buff, TopLineEmptyFile, sizeof(TopLineEmptyFile)-1))
 			bValid = false;
-		else
+		else {
 			CFileMgr::Seek(file, 0, 0);
+			CFileMgr::Read(file, (char*)&nVersion, sizeof(nVersion));
+		}
 	}
 
-	if (bValid)
+	if (bValid && nVersion >= 3)
 	{
 		ControlsManager.MakeControllerActionsBlank();
 
