@@ -1512,7 +1512,7 @@ CVehicle::MakeNonDraggedPedsLeaveVehicle(CPed *ped1, CPed *ped2, CPlayerPed *&pl
 		for(i = 0; i < numPeds2; i++)
 			if(peds2[i]->IsFemale() || CGeneral::GetRandomTrueFalse()){
 				peds2[i]->m_leaveCarTimer = CTimer::GetTimeInMilliseconds() + 10000;
-				peds2[i]->b156_8 = true;
+				peds2[i]->bHeldHostageInCar = true;
 				peds2[i]->bFleeAfterExitingCar = true;
 			}
 }
@@ -1557,9 +1557,9 @@ CVehicle::IsLawEnforcementVehicle(void)
 }
 
 bool
-CVehicle::UsesSiren(uint32 id)
+CVehicle::UsesSiren(void)
 {
-	switch(id){
+	switch(GetModelIndex()){
 	case MI_FIRETRUCK:
 	case MI_AMBULAN:
 	case MI_FBICAR:

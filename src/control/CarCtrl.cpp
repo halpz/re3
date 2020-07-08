@@ -366,7 +366,7 @@ CCarCtrl::GenerateOneRandomCar()
 			pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
 			pVehicle->AutoPilot.m_nCarMission = MISSION_CRUISE;
 		}
-		if (carModel == MI_FBICAR){
+		if (carModel == MI_FBIRANCH){
 			pVehicle->m_currentColour1 = 0;
 			pVehicle->m_currentColour2 = 0;
 		}
@@ -874,9 +874,9 @@ CCarCtrl::ChoosePoliceCarModel(void)
 		CStreaming::HasModelLoaded(MI_POLICE))
 		return ((CGeneral::GetRandomNumber() & 0xF) == 0) ? MI_ENFORCER : MI_POLICE;
 	if (FindPlayerPed()->m_pWanted->AreFbiRequired() &&
-		CStreaming::HasModelLoaded(MI_FBICAR) &&
+		CStreaming::HasModelLoaded(MI_FBIRANCH) &&
 		CStreaming::HasModelLoaded(MI_FBI))
-		return MI_FBICAR;
+		return MI_FBIRANCH;
 	if (FindPlayerPed()->m_pWanted->AreArmyRequired() &&
 		CStreaming::HasModelLoaded(MI_RHINO) &&
 		CStreaming::HasModelLoaded(MI_BARRACKS) &&

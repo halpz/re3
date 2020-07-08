@@ -70,6 +70,7 @@ bool CHud::m_Wants_To_Draw_Hud;
 bool CHud::m_Wants_To_Draw_3dMarkers;
 wchar CHud::m_BigMessage[6][128];
 int16 CHud::m_ItemToFlash;
+bool CHud::m_HideRadar;
 
 // These aren't really in CHud
 float CHud::BigMessageInUse[6];
@@ -902,20 +903,25 @@ void CHud::Draw()
 		/*
 			DrawRadar
 		*/
-		if (m_ItemToFlash == ITEM_RADAR && CTimer::GetFrameCounter() & 8 || m_ItemToFlash != ITEM_RADAR) {
+		if (FrontEndMenuManager.m_PrefsRadarMode != 2 &&
+			!m_HideRadar && (m_ItemToFlash == ITEM_RADAR && CTimer::GetFrameCounter() & 8 || m_ItemToFlash != ITEM_RADAR)) {
+
+			RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERNEAREST);
 			CRadar::DrawMap();
-			CRect rect(0.0f, 0.0f, SCREEN_SCALE_X(RADAR_WIDTH), SCREEN_SCALE_Y(RADAR_HEIGHT));
+			if (FrontEndMenuManager.m_PrefsRadarMode != 1) {
+				CRect rect(0.0f, 0.0f, SCREEN_SCALE_X(RADAR_WIDTH), SCREEN_SCALE_Y(RADAR_HEIGHT));
 #ifdef FIX_BUGS
-			rect.Translate(SCREEN_SCALE_X(RADAR_LEFT), SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
+				rect.Translate(SCREEN_SCALE_X(RADAR_LEFT), SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
 #else
-			rect.Translate(RADAR_LEFT, SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
+				rect.Translate(RADAR_LEFT, SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
 #endif
 
-			rect.Grow(6.0f);
-			rect.Translate(0.0f, 2.0f);
-			Sprites[HUD_RADARDISC].Draw(rect, CRGBA(0, 0, 0, 255));
-			rect.Translate(0.0f, -2.0f);
-			Sprites[HUD_RADARDISC].Draw(rect, RADARDISC_COLOR);
+				rect.Grow(6.0f);
+				rect.Translate(0.0f, 2.0f);
+				Sprites[HUD_RADARDISC].Draw(rect, CRGBA(0, 0, 0, 255));
+				rect.Translate(0.0f, -2.0f);
+				Sprites[HUD_RADARDISC].Draw(rect, RADARDISC_COLOR);
+			}
 			CRadar::DrawBlips();
 		}
 	}
@@ -1570,6 +1576,7 @@ void CHud::Initialise()
 	m_WeaponFadeTimer = 0;
 	m_WeaponTimer = 0;
 
+	m_HideRadar = false;
 	m_LastDisplayScore = CWorld::Players[CWorld::PlayerInFocus].m_nVisibleMoney;
 	m_LastWanted = 0;
 
@@ -1617,6 +1624,7 @@ void CHud::ReInitialise() {
 	m_WeaponFadeTimer = 0;
 	m_WeaponTimer = 0;
 
+	m_HideRadar = false;
 	m_LastDisplayScore = CWorld::Players[CWorld::PlayerInFocus].m_nVisibleMoney;
 	m_LastWanted = 0;
 }

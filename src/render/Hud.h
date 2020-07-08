@@ -85,6 +85,7 @@ public:
 	static bool m_Wants_To_Draw_3dMarkers;
 	static wchar m_BigMessage[6][128];
 	static int16 m_ItemToFlash;
+	static bool m_HideRadar;
 
 	// These aren't really in CHud
 	static float BigMessageInUse[6];

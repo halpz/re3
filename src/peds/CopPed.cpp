@@ -82,6 +82,7 @@ CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 	m_bZoneDisabled = false;
 	field_628 = -1;
 	m_nRoadblockNode = -1; // TODO(Miami): this will be nil
+	m_bThrowsSpikeTrap = false;
 	field_5FF = 0;
 	m_fAbseilPos = 0.0f;
 	m_bBeatingSuspect = false;

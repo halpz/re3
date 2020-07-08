@@ -559,16 +559,23 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 	CZoneInfo zoneInfo;
 	CPed *gangLeader = nil;
 	bool addCop = false;
+	bool forceAddingCop = false;
 	CPlayerInfo *playerInfo = &CWorld::Players[CWorld::PlayerInFocus];
 	CVector playerCentreOfWorld = FindPlayerCentreOfWorld(CWorld::PlayerInFocus);
 	CTheZones::GetZoneInfoForTimeOfDay(&playerCentreOfWorld, &zoneInfo);
 	CWanted *wantedInfo = playerInfo->m_pPed->m_pWanted;
+
 	if (wantedInfo->m_nWantedLevel > 2) {
-		if (ms_nNumCop < wantedInfo->m_MaxCops && !playerInfo->m_pPed->bInVehicle
-			&& (CCarCtrl::NumLawEnforcerCars >= wantedInfo->m_MaximumLawEnforcerVehicles
+		if (!CGame::IsInInterior() && (CGeneral::GetRandomNumber() % 32 == 0) && FindPlayerVehicle())
+			forceAddingCop = true;
+
+		uint32 maxCops = CGame::IsInInterior() ? wantedInfo->m_MaxCops * 1.6f : wantedInfo->m_MaxCops;
+		if ((ms_nNumCop < maxCops || forceAddingCop) &&
+			(!playerInfo->m_pPed->bInVehicle &&
+				(CCarCtrl::NumLawEnforcerCars >= wantedInfo->m_MaximumLawEnforcerVehicles
 				|| CCarCtrl::NumRandomCars >= playerInfo->m_nTrafficMultiplier * CCarCtrl::CarDensityMultiplier
 				|| CCarCtrl::NumFiretrucksOnDuty + CCarCtrl::NumAmbulancesOnDuty + CCarCtrl::NumParkedCars
-				+ CCarCtrl::NumMissionCars + CCarCtrl::NumLawEnforcerCars + CCarCtrl::NumRandomCars >= CCarCtrl::MaxNumberOfCarsInUse)) {
+				+ CCarCtrl::NumMissionCars + CCarCtrl::NumLawEnforcerCars + CCarCtrl::NumRandomCars >= CCarCtrl::MaxNumberOfCarsInUse) || forceAddingCop)) {
 			addCop = true;
 			minDist = PedCreationDistMultiplier() * MIN_CREATION_DIST;
 			maxDist = PedCreationDistMultiplier() * (MIN_CREATION_DIST + CREATION_RANGE);
@@ -693,6 +700,9 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 			if (!farEnoughToAdd)
 				break;
 			CPed *newPed = AddPed((ePedType)pedTypeToAdd, modelToAdd, generatedCoors);
+			if (forceAddingCop && newPed->m_nPedType == PEDTYPE_COP)
+				((CCopPed*)newPed)->m_bThrowsSpikeTrap = true;
+
 			newPed->SetWanderPath(CGeneral::GetRandomNumberInRange(0, 8));
 
 			if (i != 0) {
@@ -721,10 +731,11 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 	}
 }
 
+// TODO(Miami)
 CPed*
 CPopulation::AddPedInCar(CVehicle* car, bool isDriver)
 {
-	int defaultModel = MI_MALE01;
+	const int defaultModel = MI_MALE01;
 	int miamiViceIndex = 0;
 	bool imSureThatModelIsLoaded = true;
 	CVector coors = FindPlayerCoors();
@@ -744,10 +755,6 @@ CPopulation::AddPedInCar(CVehicle* car, bool isDriver)
 			preferredModel = 0;
 			pedType = PEDTYPE_EMERGENCY;
 			break;
-		case MI_FBICAR:
-			preferredModel = COP_FBI;
-			pedType = PEDTYPE_COP;
-			break;
 		case MI_POLICE:
 		case MI_PREDATOR:
 			preferredModel = COP_STREET;
@@ -762,24 +769,24 @@ CPopulation::AddPedInCar(CVehicle* car, bool isDriver)
 			preferredModel = COP_ARMY;
 			pedType = PEDTYPE_COP;
 			break;
-		case MI_VICECHEE: // TODO(MIAMI): figure out new structure of the function
-			preferredModel = COP_MIAMIVICE;
+		case MI_FBIRANCH:
+			preferredModel = COP_FBI;
 			pedType = PEDTYPE_COP;
-			miamiViceIndex = (isDriver ? 2 * CCarCtrl::MiamiViceCycle : 2 * CCarCtrl::MiamiViceCycle + 1);
 			break;
-		case MI_TAXI:
-		case MI_CABBIE:
-		case MI_ZEBRA:
-		case MI_KAUFMAN:
-			if (CGeneral::GetRandomTrueFalse()) {
-				pedType = PEDTYPE_CIVMALE;
-				preferredModel = MI_TAXI_D;
+		default:
+			if (car->GetModelIndex() == MI_TAXI || car->GetModelIndex() == MI_CABBIE || car->GetModelIndex() == MI_ZEBRA || car->GetModelIndex() == MI_KAUFMAN) {
+				if (isDriver) {
+					pedType = PEDTYPE_CIVMALE;
+					preferredModel = MI_TAXI_D;
+					break;
+				}
+			} else if (car->GetModelIndex() == MI_VICECHEE && car->bIsLawEnforcer) {
+				preferredModel = COP_MIAMIVICE;
+				pedType = PEDTYPE_COP;
+				miamiViceIndex = (isDriver ? 2 * CCarCtrl::MiamiViceCycle : 2 * CCarCtrl::MiamiViceCycle + 1);
 				break;
 			}
-			defaultModel = MI_TAXI_D;
 
-			// fall through
-		default:
 			int gangOfPed = 0;
 			imSureThatModelIsLoaded = false;
 
@@ -798,8 +805,12 @@ CPopulation::AddPedInCar(CVehicle* car, bool isDriver)
 					if (preferredModel == -1)
 						preferredModel = defaultModel;
 
-					if (((CPedModelInfo*)CModelInfo::GetModelInfo(preferredModel))->m_carsCanDrive & (1 << carModelInfo->m_vehicleClass))
-						break;
+					if (((CPedModelInfo*)CModelInfo::GetModelInfo(preferredModel))->GetRwObject()) {
+						if (!car->IsPassenger(preferredModel) && !car->IsDriver(preferredModel)) {
+							if (((CPedModelInfo*)CModelInfo::GetModelInfo(preferredModel))->m_carsCanDrive & (1 << carModelInfo->m_vehicleClass))
+								break;
+						}
+					}
 				}
 				if (i == -1)
 					preferredModel = defaultModel;

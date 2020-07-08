@@ -345,7 +345,7 @@ public:
 	int FindTyreNearestPoint(float x, float y);
 	bool IsLawEnforcementVehicle(void);
 	void ChangeLawEnforcerState(uint8 enable);
-	bool UsesSiren(uint32 id);
+	bool UsesSiren(void);
 	bool IsVehicleNormal(void);
 	bool CarHasRoof(void);
 	bool IsUpsideDown(void);

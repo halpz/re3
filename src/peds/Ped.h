@@ -98,7 +98,6 @@ enum PedFightMoves
 	FIGHTMOVE_PUNCHHOOK,
 	FIGHTMOVE_PUNCHJAB,
 	FIGHTMOVE_PUNCH,
-	FIGHTMOVE_BODYBLOW = FIGHTMOVE_PUNCH,
 	FIGHTMOVE_LONGKICK,
 	FIGHTMOVE_ROUNDHOUSE,
 	// Directionals
@@ -457,7 +456,7 @@ public:
 	uint32 bIsDrowning : 1;
 	uint32 bDrownsInWater : 1;
 	//uint32 b156_4
-	uint32 b156_8 : 1;
+	uint32 bHeldHostageInCar : 1;
 	uint32 bIsPlayerFriend : 1;
 	uint32 bHeadStuckInCollision : 1;
 	uint32 bDeadPedInFrontOfCar : 1;
@@ -467,7 +466,7 @@ public:
 	uint32 bDoomAim : 1;
 	uint32 bCanBeShotInVehicle : 1;
 	//uint32 b157_8
-	uint32 b157_10 : 1;
+	uint32 bMakeFleeScream : 1;
 	uint32 bPushedAlongByCar : 1;
 	uint32 b157_40 : 1;
 	uint32 bIgnoreThreatsBehindObjects : 1;
@@ -482,7 +481,6 @@ public:
 	//uint32 b158_80
 
 	// our own flags
-	uint32 m_ped_flagI40 : 1; // bMakePedsRunToPhonesToReportCrimes makes use of this as runover by car indicator
 	uint32 m_ped_flagI80 : 1; // KANGAROO_CHEAT define makes use of this as cheat toggle 
 
 	uint8 m_gangFlags;
@@ -590,8 +588,8 @@ public:
 	uint8 m_wepAccuracy;
 	CEntity *m_pPointGunAt;
 	CVector m_vecHitLastPos;
+	uint32 m_curFightMove;
 	uint32 m_lastFightMove;
-	uint32 m_lastHitState; // TODO(Miami): What's this?
 	uint8 m_fightButtonPressure;
 	FightState m_fightState;
 	bool m_takeAStepAfterAttack;
@@ -757,6 +755,8 @@ public:
 	void SetWaitState(eWaitState, void*);
 	bool FightStrike(CVector&, bool);
 	void FightHitPed(CPed*, CVector&, CVector&, int16);
+	int32 ChooseAttackPlayer(uint8, bool);
+	int32 ChooseAttackAI(uint8, bool);
 	int GetLocalDirection(const CVector2D &);
 	void StartFightDefend(uint8, uint8, uint8);
 	void PlayHitSound(CPed*);
@@ -960,6 +960,7 @@ public:
 	bool Dying(void) { return m_nPedState == PED_DIE; }
 	bool DyingOrDead(void) { return m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
 	bool OnGround(void) { return m_nPedState == PED_FALL || m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
+	bool OnGroundOrGettingUp(void) { return OnGround() || m_nPedState == PED_GETUP; }
 	
 	bool Driving(void) { return m_nPedState == PED_DRIVING; }
 	bool InVehicle(void) { return bInVehicle && m_pMyVehicle; } // True when ped is sitting/standing in vehicle, not in enter/exit state.
@@ -1025,6 +1026,20 @@ public:
 	static AnimationId GetFightIdleWithMeleeAnim(CWeaponInfo* weapon) {
 		if (!!weapon->m_bFightMode)
 			return ANIM_MELEE_IDLE_FIGHTMODE;
+		else
+			return (AnimationId)0;
+	}
+
+	static AnimationId GetFinishingAttackAnim(CWeaponInfo* weapon) {
+		if (!!weapon->m_bFinish3rd)
+			return ANIM_MELEE_ATTACK_FINISH;
+		else
+			return (AnimationId)0;
+	}
+
+	static AnimationId GetSecondFireAnim(CWeaponInfo* weapon) {
+		if (!!weapon->m_bUse2nd)
+			return ANIM_WEAPON_FIRE_2ND; // or ANIM_MELEE_ATTACK_2ND
 		else
 			return (AnimationId)0;
 	}

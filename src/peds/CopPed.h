@@ -25,6 +25,7 @@ public:
 	bool m_bZoneDisabled;
 	float m_fAbseilPos;
 	eCopType m_nCopType;
+	bool m_bThrowsSpikeTrap;
 	int32 field_624;
 	int8 field_628;
 

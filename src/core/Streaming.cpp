@@ -1380,11 +1380,11 @@ CStreaming::StreamVehiclesAndPeds(void)
 	}
 
 	if(FindPlayerPed()->m_pWanted->AreFbiRequired()){
-		RequestModel(MI_FBICAR, STREAMFLAGS_DONT_REMOVE);
+		RequestModel(MI_FBIRANCH, STREAMFLAGS_DONT_REMOVE);
 		RequestModel(MI_FBI, STREAMFLAGS_DONT_REMOVE);
 	}else{
-		SetModelIsDeletable(MI_FBICAR);
-		if(!HasModelLoaded(MI_FBICAR))
+		SetModelIsDeletable(MI_FBIRANCH);
+		if(!HasModelLoaded(MI_FBIRANCH))
 			SetModelIsDeletable(MI_FBI);
 	}
 
