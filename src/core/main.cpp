@@ -467,12 +467,15 @@ ResetLoadingScreenBar()
 	NumberOfChunksLoaded = 0.0f;
 }
 
-// TODO: compare with PS2
 void
 LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 {
-#ifndef DISABLE_LOADING_SCREEN
 	CSprite2d *splash;
+
+#ifdef DISABLE_LOADING_SCREEN
+	if (str1 && str2)
+		return;
+#endif
 
 #ifndef RANDOMSPLASH
 	if(CGame::frenchGame || CGame::germanGame || !CGame::nastyGame)
@@ -535,7 +538,6 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 		CFont::DrawFonts();
  		DoRWStuffEndOfFrame();
 	}
-#endif
 }
 
 void
