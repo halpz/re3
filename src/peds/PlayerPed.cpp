@@ -784,6 +784,7 @@ CPlayerPed::PlayerControlM16(CPad *padUsed)
 	GetWeapon()->Update(m_audioEntityId, nil);
 }
 
+// --MIAMI: Done
 void
 CPlayerPed::PlayerControlFighter(CPad *padUsed)
 {
@@ -809,6 +810,7 @@ CPlayerPed::PlayerControlFighter(CPad *padUsed)
 	}
 }
 
+// --MIAMI: Done
 void
 CPlayerPed::PlayerControl1stPersonRunAround(CPad *padUsed)
 {

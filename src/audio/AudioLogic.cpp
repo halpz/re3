@@ -5724,6 +5724,8 @@ cAudioManager::ClearMissionAudio(uint8 slot)
 		m_sMissionAudio.m_bIsPlayed[slot] = false;
 		m_sMissionAudio.m_bPredefinedProperties[slot] = true;
 		m_sMissionAudio.m_nMissionAudioCounter[slot] = 0;
+		m_sMissionAudio.m_bIsMobile[slot] = false;
+		SampleManager.StopStreamedFile(slot + 1);
 	}
 }
 

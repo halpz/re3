@@ -80,7 +80,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 			if (FindSwitchDistanceClose(pVehicle) > (FindPlayerCoors() - pVehicle->GetPosition()).Magnitude2D() ||
 				pVehicle->AutoPilot.m_bIgnorePathfinding) {
 				pVehicle->AutoPilot.m_nCarMission = MISSION_RAMPLAYER_CLOSE;
-				if (pVehicle->UsesSiren(pVehicle->GetModelIndex()))
+				if (pVehicle->UsesSiren())
 					pVehicle->m_bSirenOrAlarm = true;
 			}
 			BackToCruisingIfNoWantedLevel(pVehicle);
@@ -136,7 +136,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 			if (FindSwitchDistanceClose(pVehicle) > (FindPlayerCoors() - pVehicle->GetPosition()).Magnitude2D() ||
 				pVehicle->AutoPilot.m_bIgnorePathfinding) {
 				pVehicle->AutoPilot.m_nCarMission = MISSION_BLOCKPLAYER_CLOSE;
-				if (pVehicle->UsesSiren(pVehicle->GetModelIndex()))
+				if (pVehicle->UsesSiren())
 					pVehicle->m_bSirenOrAlarm = true;
 			}
 			BackToCruisingIfNoWantedLevel(pVehicle);
@@ -294,7 +294,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 				if ((pVehicle->AutoPilot.m_pTargetCar->GetPosition() - pVehicle->GetPosition()).Magnitude2D() < FindSwitchDistanceClose(pVehicle) ||
 				  pVehicle->AutoPilot.m_bIgnorePathfinding){
 					pVehicle->AutoPilot.m_nCarMission = MISSION_BLOCKCAR_CLOSE;
-					if (pVehicle->UsesSiren(pVehicle->GetModelIndex()))
+					if (pVehicle->UsesSiren())
 						pVehicle->m_bSirenOrAlarm = true;
 				}
 			}else{
@@ -540,7 +540,7 @@ void CCarAI::AddPoliceCarOccupants(CVehicle* pVehicle)
 		return;
 	pVehicle->bOccupantsHaveBeenGenerated = true;
 	switch (pVehicle->GetModelIndex()){
-	case MI_FBICAR:
+	case MI_FBIRANCH:
 	case MI_ENFORCER:
 		pVehicle->SetUpDriver();
 		for (int i = 0; i < 3; i++)

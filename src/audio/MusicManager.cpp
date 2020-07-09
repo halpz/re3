@@ -714,15 +714,17 @@ cMusicManager::UsesPoliceRadio(CVehicle *veh)
 {
 	switch (veh->GetModelIndex())
 	{
-	case MI_FBICAR:
-	case MI_POLICE:
-	case MI_ENFORCER:
-	case MI_PREDATOR:
+	case MI_VCNMAV:
+	case MI_POLMAV:
+	case MI_COASTG:
 	case MI_RHINO:
 	case MI_BARRACKS:
 		return true;
+	case MI_MRWHOOP:
+	case MI_HUNTER:
+		return false;
 	}
-	return false;
+	return veh->UsesSiren();
 }
 
 void

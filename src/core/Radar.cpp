@@ -766,7 +766,8 @@ void CRadar::DrawMap()
 			m_radarRange = RADAR_MIN_RANGE;
 
 		vec2DRadarOrigin = CVector2D(FindPlayerCentreOfWorld_NoSniperShift());
-		DrawRadarMap();
+		if (FrontEndMenuManager.m_PrefsRadarMode != 1)
+			DrawRadarMap();
 	}
 }
 

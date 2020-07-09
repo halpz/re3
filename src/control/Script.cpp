@@ -3806,9 +3806,8 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, x2, y2));
 		else
 			UpdateCompareFlag(ped->IsWithinArea(x1, y1, x2, y2));
-		if (!ScriptParams[5])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		if (ScriptParams[5])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -3833,9 +3832,8 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
 		else
 			UpdateCompareFlag(ped->IsWithinArea(x1, y1, z1, x2, y2, z2));
-		if (!ScriptParams[7])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
+		if (ScriptParams[7])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugCube(x1, y1, z1, x2, y2, z2);
 		return 0;
@@ -10722,12 +10720,9 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		UpdateCompareFlag(CGame::germanGame);
 		return 0;
 	case COMMAND_CLEAR_MISSION_AUDIO:
-	{
 		CollectParameters(&m_nIp, 1);
-		debug("CLEAR_MISSION_AUDIO not implemented\n");
-		//DMAudio.ClearMissionAudio(ScriptParams[0]);
+		DMAudio.ClearMissionAudio(ScriptParams[0] - 1);
 		return 0;
-	}
 	/*
 	case COMMAND_SET_FADE_IN_AFTER_NEXT_ARREST:
 		CollectParameters(&m_nIp, 1);
@@ -13565,12 +13560,8 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		break;
 	case COMMAND_WANTED_STARS_ARE_FLASHING:
 	{
-		static bool bShowed = false;
-		if (!bShowed) {
-			debug("WANTED_STARS_ARE_FLASHING not implemented, default to FALSE\n");
-			bShowed = true;
-		}
-		UpdateCompareFlag(false);
+		CWanted *pWanted = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted;
+		UpdateCompareFlag(pWanted->m_nMinWantedLevel - pWanted->m_nWantedLevel > 0);
 		return 0;
 	}
 	case COMMAND_SET_ALLOW_HURRICANES:
@@ -13622,7 +13613,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	}
 	case COMMAND_DISPLAY_RADAR:
 		CollectParameters(&m_nIp, 1);
-		debug("DISPLAY_RADAR not implemented\n");
+		CHud::m_HideRadar = ScriptParams[0] == 0;
 		return 0;
 	case COMMAND_REGISTER_BEST_POSITION:
 		CollectParameters(&m_nIp, 2);
@@ -14421,7 +14412,7 @@ void CRunningScript::LocateCharCommand(int32 command, uint32* pIp)
 	CollectParameters(pIp, b3D ? 8 : 6);
 	CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 	script_assert(pPed);
-	CVector pos = pPed->bInVehicle ? pPed->m_pMyVehicle->GetPosition() : pPed->GetPosition();
+	CVector pos = pPed->InVehicle() ? pPed->m_pMyVehicle->GetPosition() : pPed->GetPosition();
 	switch (command) {
 	case COMMAND_LOCATE_STOPPED_CHAR_ANY_MEANS_2D:
 	case COMMAND_LOCATE_STOPPED_CHAR_ANY_MEANS_3D:
@@ -15181,7 +15172,7 @@ void CRunningScript::CharInAreaCheckCommand(int32 command, uint32* pIp)
 	CollectParameters(pIp, b3D ? 8 : 6);
 	CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 	script_assert(pPed);
-	CVector pos = pPed->bInVehicle ? pPed->m_pMyVehicle->GetPosition() : pPed->GetPosition();
+	CVector pos = pPed->InVehicle() ? pPed->m_pMyVehicle->GetPosition() : pPed->GetPosition();
 	switch (command) {
 	case COMMAND_IS_CHAR_STOPPED_IN_AREA_3D:
 	case COMMAND_IS_CHAR_STOPPED_IN_AREA_ON_FOOT_3D:
@@ -15466,7 +15457,7 @@ void CRunningScript::DoDeatharrestCheck()
 	if (!CTheScripts::IsPlayerOnAMission())
 		return;
 	CPlayerInfo* pPlayer = &CWorld::Players[CWorld::PlayerInFocus];
-	if (!pPlayer->IsRestartingAfterDeath() && !pPlayer->IsRestartingAfterArrest() && !CTheScripts::UpsideDownCars.AreAnyCarsUpsideDown())
+	if (!pPlayer->IsRestartingAfterDeath() && !pPlayer->IsRestartingAfterArrest())
 		return;
 #ifdef MISSION_REPLAY
 	if (AllowMissionReplay != 0)
@@ -15478,6 +15469,7 @@ void CRunningScript::DoDeatharrestCheck()
 	while (m_nStackPointer > 1)
 		--m_nStackPointer;
 	m_nIp = m_anStack[--m_nStackPointer];
+	CMessages::ClearSmallMessagesOnly();
 	*(int32*)&CTheScripts::ScriptSpace[CTheScripts::OnAMissionFlag] = 0;
 	m_bDeatharrestExecuted = true;
 	m_nWakeTime = 0;
@@ -15914,22 +15906,24 @@ void CTheScripts::HighlightImportantAngledArea(uint32 id, float x1, float y1, fl
 
 bool CTheScripts::IsPedStopped(CPed* pPed)
 {
-	if (pPed->bInVehicle)
+	if (pPed->InVehicle())
 		return IsVehicleStopped(pPed->m_pMyVehicle);
-	return pPed->m_nMoveState == eMoveState::PEDMOVE_NONE || pPed->m_nMoveState == eMoveState::PEDMOVE_STILL;
+	return (pPed->m_nMoveState == eMoveState::PEDMOVE_NONE || pPed->m_nMoveState == eMoveState::PEDMOVE_STILL) &&
+		!pPed->bIsInTheAir && !pPed->bIsLanding && pPed->bIsStanding && pPed->m_vecAnimMoveDelta.x == 0.0f && pPed->m_vecAnimMoveDelta.y == 0.0f;
 }
 
 bool CTheScripts::IsPlayerStopped(CPlayerInfo* pPlayer)
 {
 	CPed* pPed = pPlayer->m_pPed;
-	if (pPed->bInVehicle)
+	if (pPed->InVehicle())
 		return IsVehicleStopped(pPed->m_pMyVehicle);
 	if (RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_RUN_STOP) ||
 		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_RUN_STOP_R) ||
 		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_JUMP_LAUNCH) ||
 		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_JUMP_GLIDE))
 		return false;
-	return pPed->m_nMoveState == eMoveState::PEDMOVE_NONE || pPed->m_nMoveState == eMoveState::PEDMOVE_STILL;
+	return (pPed->m_nMoveState == eMoveState::PEDMOVE_NONE || pPed->m_nMoveState == eMoveState::PEDMOVE_STILL) &&
+		!pPed->bIsInTheAir && !pPed->bIsLanding && pPed->bIsStanding && pPed->m_vecAnimMoveDelta.x == 0.0f && pPed->m_vecAnimMoveDelta.y == 0.0f;
 }
 
 bool CTheScripts::IsVehicleStopped(CVehicle* pVehicle)
