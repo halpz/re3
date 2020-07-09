@@ -700,8 +700,16 @@ CRenderer::ScanWorld(void)
 				poly[2].y = CWorld::GetSectorY(vectors[CORNER_LOD_RIGHT].y);
 			}
 			ScanSectorPoly(poly, 3, ScanSectorList);
-
+#ifdef NO_ISLAND_LOADING
+			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_INDUSTRIAL));
+			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_COMMERCIAL));
+			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_SUBURBAN));
+#else
+	#ifdef FIX_BUGS
+			if (CCollision::ms_collisionInMemory != LEVEL_NONE)
+	#endif
 			ScanBigBuildingList(CWorld::GetBigBuildingList(CCollision::ms_collisionInMemory));
+#endif
 			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_NONE));
 		}
 	}

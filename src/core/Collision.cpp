@@ -180,12 +180,16 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 
 	if(level == CGame::currLevel || forceChange){
 		CTimer::Stop();
+#ifndef NO_ISLAND_LOADING
 		DMAudio.SetEffectsFadeVol(0);
 		CPad::StopPadsShaking();
 		LoadCollisionScreen(CGame::currLevel);
 		DMAudio.Service();
+#endif
 
 		CPopulation::DealWithZoneChange(ms_collisionInMemory, CGame::currLevel, false);
+
+#ifndef NO_ISLAND_LOADING
 		CStreaming::RemoveIslandsNotUsed(LEVEL_INDUSTRIAL);
 		CStreaming::RemoveIslandsNotUsed(LEVEL_COMMERCIAL);
 		CStreaming::RemoveIslandsNotUsed(LEVEL_SUBURBAN);
@@ -196,19 +200,27 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 		CStreaming::RemoveUnusedModelsInLoadedList();
 		CGame::TidyUpMemory(true, true);
 		CFileLoader::LoadCollisionFromDatFile(CGame::currLevel);
+#endif
+
 		ms_collisionInMemory = CGame::currLevel;
 		CReplay::EmptyReplayBuffer();
+#ifndef NO_ISLAND_LOADING
 		if(CGame::currLevel != LEVEL_NONE)
 			LoadSplash(GetLevelSplashScreen(CGame::currLevel));
 		CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
 		CStreaming::RemoveUnusedBuildings(CGame::currLevel);
 		CStreaming::RequestBigBuildings(CGame::currLevel);
+#endif
 		CStreaming::LoadAllRequestedModels(true);
+#ifndef NO_ISLAND_LOADING
 		CStreaming::HaveAllBigBuildingsLoaded(CGame::currLevel);
 
 		CGame::TidyUpMemory(true, true);
+#endif
 		CTimer::Update();
+#ifndef NO_ISLAND_LOADING
 		DMAudio.SetEffectsFadeVol(127);
+#endif
 	}
 }
 
@@ -217,10 +229,23 @@ CCollision::SortOutCollisionAfterLoad(void)
 {
 	if(ms_collisionInMemory == CGame::currLevel)
 		return;
-
+#ifndef NO_ISLAND_LOADING
 	CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
-	if(CGame::currLevel != LEVEL_NONE){
+#endif
+	if (CGame::currLevel != LEVEL_NONE) {
+#ifdef NO_ISLAND_LOADING
+		static bool bAlreadyLoaded = false;
+		if (bAlreadyLoaded) {
+			ms_collisionInMemory = CGame::currLevel;
+			return;
+		}
+		bAlreadyLoaded = true;
+		CFileLoader::LoadCollisionFromDatFile(LEVEL_INDUSTRIAL);
+		CFileLoader::LoadCollisionFromDatFile(LEVEL_COMMERCIAL);
+		CFileLoader::LoadCollisionFromDatFile(LEVEL_SUBURBAN);
+#else
 		CFileLoader::LoadCollisionFromDatFile(CGame::currLevel);
+#endif
 		if(!CGame::playingIntro)
 			LoadSplash(GetLevelSplashScreen(CGame::currLevel));
 	}

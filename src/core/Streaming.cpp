@@ -725,7 +725,11 @@ CStreaming::RequestBigBuildings(eLevelName level)
 	n = CPools::GetBuildingPool()->GetSize()-1;
 	for(i = n; i >= 0; i--){
 		b = CPools::GetBuildingPool()->GetSlot(i);
-		if(b && b->bIsBIGBuilding && b->m_level == level)
+		if(b && b->bIsBIGBuilding
+#ifndef NO_ISLAND_LOADING
+		    && b->m_level == level
+#endif
+		)
 			RequestModel(b->GetModelIndex(), BIGBUILDINGFLAGS);
 	}
 	RequestIslands(level);
@@ -735,6 +739,7 @@ CStreaming::RequestBigBuildings(eLevelName level)
 void
 CStreaming::RequestIslands(eLevelName level)
 {
+#ifndef NO_ISLAND_LOADING
 	switch(level){
 	case LEVEL_INDUSTRIAL:
 		RequestModel(islandLODcomInd, BIGBUILDINGFLAGS);
@@ -750,6 +755,7 @@ CStreaming::RequestIslands(eLevelName level)
 		break;
 	default: break;
 	}
+#endif
 }
 
 void
@@ -935,12 +941,14 @@ CStreaming::RemoveBuildings(eLevelName level)
 void
 CStreaming::RemoveUnusedBigBuildings(eLevelName level)
 {
+#ifndef NO_ISLAND_LOADING
 	if(level != LEVEL_INDUSTRIAL)
 		RemoveBigBuildings(LEVEL_INDUSTRIAL);
 	if(level != LEVEL_COMMERCIAL)
 		RemoveBigBuildings(LEVEL_COMMERCIAL);
 	if(level != LEVEL_SUBURBAN)
 		RemoveBigBuildings(LEVEL_SUBURBAN);
+#endif
 	RemoveIslandsNotUsed(level);
 }
 
@@ -960,6 +968,7 @@ DeleteIsland(CEntity *island)
 void
 CStreaming::RemoveIslandsNotUsed(eLevelName level)
 {
+#ifndef NO_ISLAND_LOADING
 	switch(level){
 	case LEVEL_INDUSTRIAL:
 		DeleteIsland(pIslandLODindustEntity);
@@ -977,13 +986,16 @@ CStreaming::RemoveIslandsNotUsed(eLevelName level)
 		DeleteIsland(pIslandLODcomIndEntity);
 		break;
 	default:
+#endif // !NO_ISLAND_LOADING
 		DeleteIsland(pIslandLODindustEntity);
 		DeleteIsland(pIslandLODcomIndEntity);
 		DeleteIsland(pIslandLODcomSubEntity);
 		DeleteIsland(pIslandLODsubIndEntity);
 		DeleteIsland(pIslandLODsubComEntity);
+#ifndef NO_ISLAND_LOADING
 		break;
 	}
+#endif // !NO_ISLAND_LOADING
 }
 
 void

@@ -198,6 +198,7 @@ enum Config {
 #define DEFAULT_NATIVE_RESOLUTION	// Set default video mode to your native resolution (fixes Windows 10 launch)
 #define USE_TXD_CDIMAGE		// generate and load textures from txd.img
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
+#define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU 
 //#define USE_TEXTURE_POOL
 
 // Particle
