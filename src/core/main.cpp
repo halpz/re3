@@ -471,6 +471,7 @@ ResetLoadingScreenBar()
 void
 LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 {
+#ifndef DISABLE_LOADING_SCREEN
 	CSprite2d *splash;
 
 #ifndef RANDOMSPLASH
@@ -534,6 +535,7 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 		CFont::DrawFonts();
  		DoRWStuffEndOfFrame();
 	}
+#endif
 }
 
 void
