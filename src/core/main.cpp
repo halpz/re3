@@ -254,7 +254,11 @@ DoFade(void)
 			fadeColor.a = alpha;
 		}
 
-		if(TheCamera.m_WideScreenOn){
+		if(TheCamera.m_WideScreenOn
+#ifdef CUTSCENE_BORDERS_SWITCH
+			&& CMenuManager::m_PrefsCutsceneBorders
+#endif
+			){
 			// what's this?
 			float y = SCREEN_HEIGHT/2 * TheCamera.m_ScreenReductionPercentage/100.0f;
 			rect.left = 0.0f;
@@ -862,7 +866,11 @@ Render2dStuff(void)
 	CReplay::Display();
 	CPickups::RenderPickUpText();
 
-	if(TheCamera.m_WideScreenOn)
+	if(TheCamera.m_WideScreenOn
+#ifdef CUTSCENE_BORDERS_SWITCH
+		&& CMenuManager::m_PrefsCutsceneBorders
+#endif
+		)
 		TheCamera.DrawBordersForWideScreen();
 
 	CPed *player = FindPlayerPed();

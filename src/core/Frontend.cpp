@@ -112,6 +112,10 @@ int8 CMenuManager::m_bFrontEnd_ReloadObrTxtGxt;
 int32 CMenuManager::m_PrefsMusicVolume = 102;
 int32 CMenuManager::m_PrefsSfxVolume = 102;
 
+#ifdef CUTSCENE_BORDERS_SWITCH
+bool CMenuManager::m_PrefsCutsceneBorders = true;
+#endif
+
 char CMenuManager::m_PrefsSkinFile[256] = DEFAULT_SKIN_NAME;
 
 int32 CMenuManager::m_KeyPressedCode = -1;
@@ -3218,6 +3222,9 @@ CMenuManager::LoadSettings()
 #ifdef FREE_CAM
 			CFileMgr::Read(fileHandle, (char*)&TheCamera.bFreeCam, 1);
 #endif
+#ifdef CUTSCENE_BORDERS_SWITCH
+			CFileMgr::Read(fileHandle, (char *)&CMenuManager::m_PrefsCutsceneBorders, 1);
+#endif
 		}
 	}
 
@@ -3310,6 +3317,9 @@ CMenuManager::SaveSettings()
 		CFileMgr::Write(fileHandle, (char*)&m_PrefsLanguage, 1);
 #ifdef FREE_CAM
 		CFileMgr::Write(fileHandle, (char*)&TheCamera.bFreeCam, 1);
+#endif
+#ifdef CUTSCENE_BORDERS_SWITCH
+		CFileMgr::Write(fileHandle, (char *)&CMenuManager::m_PrefsCutsceneBorders, 1);
 #endif
 	}
 

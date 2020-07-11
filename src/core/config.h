@@ -201,6 +201,7 @@ enum Config {
 #define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
 //#define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
 //#define USE_TEXTURE_POOL
+#define CUTSCENE_BORDERS_SWITCH
 
 // Particle
 //#define PC_PARTICLE

@@ -582,6 +582,10 @@ public:
 	static uint8 m_PrefsPlayerGreen;
 	static uint8 m_PrefsPlayerBlue;
 
+#ifdef CUTSCENE_BORDERS_SWITCH
+	static bool m_PrefsCutsceneBorders;
+#endif
+
 #ifndef MASTER
 	static bool m_PrefsMarketing;
 	static bool m_PrefsDisableTutorials;
