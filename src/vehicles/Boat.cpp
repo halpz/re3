@@ -109,7 +109,7 @@ CBoat::GetComponentWorldPosition(int32 component, CVector &pos)
 void
 CBoat::ProcessControl(void)
 {
-	if(m_nZoneLevel > LEVEL_NONE && m_nZoneLevel != CCollision::ms_collisionInMemory)
+	if(m_nZoneLevel > LEVEL_GENERIC && m_nZoneLevel != CCollision::ms_collisionInMemory)
 		return;
 
 	bool onLand = m_fDamageImpulse > 0.0f && m_vecDamageNormal.z > 0.1f;

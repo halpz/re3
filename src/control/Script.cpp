@@ -8708,7 +8708,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CEntity* apEntities[16];
 		CWorld::FindObjectsOfTypeInRange(mi, pos, range, true, &total, 16, apEntities, true, false, false, true, true);
 		if (total == 0)
-			CWorld::FindObjectsOfTypeInRangeSectorList(mi, CWorld::GetBigBuildingList(LEVEL_NONE), pos, range, true, &total, 16, apEntities);
+			CWorld::FindObjectsOfTypeInRangeSectorList(mi, CWorld::GetBigBuildingList(LEVEL_GENERIC), pos, range, true, &total, 16, apEntities);
 		if (total == 0)
 			CWorld::FindObjectsOfTypeInRangeSectorList(mi, CWorld::GetBigBuildingList(CTheZones::FindZoneForPoint(pos)), pos, range, true, &total, 16, apEntities);
 		CEntity* pClosestEntity = nil;
@@ -9460,7 +9460,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CEntity* apEntities[16];
 		CWorld::FindObjectsOfTypeInRange(mi1, pos, radius, true, &total, 16, apEntities, true, false, false, false, false);
 		if (total == 0)
-			CWorld::FindObjectsOfTypeInRangeSectorList(mi1, CWorld::GetBigBuildingList(LEVEL_NONE), pos, radius, true, &total, 16, apEntities);
+			CWorld::FindObjectsOfTypeInRangeSectorList(mi1, CWorld::GetBigBuildingList(LEVEL_GENERIC), pos, radius, true, &total, 16, apEntities);
 		if (total == 0)
 			CWorld::FindObjectsOfTypeInRangeSectorList(mi1, CWorld::GetBigBuildingList(CTheZones::FindZoneForPoint(pos)), pos, radius, true, &total, 16, apEntities);
 		CEntity* pClosestEntity = nil;
@@ -10062,7 +10062,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		if (ScriptParams[1])
 			pVehicle->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pVehicle->GetPosition());
 		else
-			pVehicle->m_nZoneLevel = LEVEL_NONE;
+			pVehicle->m_nZoneLevel = LEVEL_GENERIC;
 		return 0;
 	}
 	case COMMAND_SET_CHAR_STAYS_IN_CURRENT_LEVEL:
@@ -10073,7 +10073,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		if (ScriptParams[1])
 			pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pPed->GetPosition());
 		else
-			pPed->m_nZoneLevel = LEVEL_NONE;
+			pPed->m_nZoneLevel = LEVEL_GENERIC;
 		return 0;
 	}
 	case COMMAND_REGISTER_4X4_ONE_TIME:

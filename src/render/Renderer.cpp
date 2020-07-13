@@ -706,11 +706,11 @@ CRenderer::ScanWorld(void)
 			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_SUBURBAN));
 #else
 	#ifdef FIX_BUGS
-			if (CCollision::ms_collisionInMemory != LEVEL_NONE)
+			if (CCollision::ms_collisionInMemory != LEVEL_GENERIC)
 	#endif
 			ScanBigBuildingList(CWorld::GetBigBuildingList(CCollision::ms_collisionInMemory));
 #endif
-			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_NONE));
+			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_GENERIC));
 		}
 	}
 }

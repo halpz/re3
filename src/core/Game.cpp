@@ -357,7 +357,7 @@ bool CGame::Initialise(const char* datFile)
 	CStreaming::Init();
 	CStreaming::LoadInitialVehicles();
 	CStreaming::LoadInitialPeds();
-	CStreaming::RequestBigBuildings(LEVEL_NONE);
+	CStreaming::RequestBigBuildings(LEVEL_GENERIC);
 	CStreaming::LoadAllRequestedModels(false);
 	printf("Streaming uses %dK of its memory", CStreaming::ms_memoryUsed / 1024);
 	LoadingScreen("Loading the Game", "Load animations", GetRandomSplashScreen());
@@ -511,7 +511,7 @@ void CGame::ReInitGameObjectVariables(void)
 	CTimeCycle::Initialise();
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;
-	CStreaming::RequestBigBuildings(LEVEL_NONE);
+	CStreaming::RequestBigBuildings(LEVEL_GENERIC);
 	CStreaming::LoadAllRequestedModels(false);
 	CPed::Initialise();
 	CEventList::Initialise();

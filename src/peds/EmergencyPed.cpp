@@ -44,7 +44,7 @@ CEmergencyPed::InRange(CPed *victim)
 void
 CEmergencyPed::ProcessControl(void)
 {
-	if (m_nZoneLevel > LEVEL_NONE && m_nZoneLevel != CCollision::ms_collisionInMemory)
+	if (m_nZoneLevel > LEVEL_GENERIC && m_nZoneLevel != CCollision::ms_collisionInMemory)
 		return;
 
 	CPed::ProcessControl();

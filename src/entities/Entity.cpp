@@ -332,14 +332,14 @@ CEntity::SetupBigBuilding(void)
 	bStreamingDontDelete = true;
 	bUsesCollision = false;
 	m_level = CTheZones::GetLevelFromPosition(&GetPosition());
-	if(m_level == LEVEL_NONE){
+	if(m_level == LEVEL_GENERIC){
 		if(mi->GetTxdSlot() != CTxdStore::FindTxdSlot("generic")){
 			mi->SetTexDictionary("generic");
 			printf("%d:%s txd has been set to generic\n", m_modelIndex, mi->GetName());
 		}
 	}
 	if(mi->m_lodDistances[0] > 2000.0f)
-		m_level = LEVEL_NONE;
+		m_level = LEVEL_GENERIC;
 }
 
 CRect

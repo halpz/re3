@@ -38,7 +38,7 @@ void
 CCollision::Init(void)
 {
 	ms_colModelCache.Init(NUMCOLCACHELINKS);
-	ms_collisionInMemory = LEVEL_NONE;
+	ms_collisionInMemory = LEVEL_GENERIC;
 }
 
 void
@@ -59,7 +59,7 @@ CCollision::Update(void)
 		return;
 
 	// hardcode a level if there are no zones
-	if(level == LEVEL_NONE){
+	if(level == LEVEL_GENERIC){
 		if(CGame::currLevel == LEVEL_INDUSTRIAL &&
 		   playerCoors.x < 400.0f){
 			level = LEVEL_COMMERCIAL;
@@ -78,7 +78,7 @@ CCollision::Update(void)
 			}
 		}
 	}
-	if(level != LEVEL_NONE && level != CGame::currLevel)
+	if(level != LEVEL_GENERIC && level != CGame::currLevel)
 		CGame::currLevel = level;
 	if(ms_collisionInMemory != CGame::currLevel)
 		LoadCollisionWhenINeedIt(forceLevelChange);
@@ -95,10 +95,10 @@ GetCollisionInSectorList(CPtrList &list)
 	for(node = list.first; node; node = node->next){
 		e = (CEntity*)node->item;
 		level = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel()->level;
-		if(level != LEVEL_NONE)
+		if(level != LEVEL_GENERIC)
 			return (eLevelName)level;
 	}
-	return LEVEL_NONE;
+	return LEVEL_GENERIC;
 }
 
 // Get a level this sector is in based on collision models
@@ -108,15 +108,15 @@ GetCollisionInSector(CSector &sect)
 	int level;
 
 	level = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_BUILDINGS]);
-	if(level == LEVEL_NONE)
+	if(level == LEVEL_GENERIC)
 		level = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_BUILDINGS_OVERLAP]);
-	if(level == LEVEL_NONE)
+	if(level == LEVEL_GENERIC)
 		level = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_OBJECTS]);
-	if(level == LEVEL_NONE)
+	if(level == LEVEL_GENERIC)
 		level = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_OBJECTS_OVERLAP]);
-	if(level == LEVEL_NONE)
+	if(level == LEVEL_GENERIC)
 		level = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_DUMMIES]);
-	if(level == LEVEL_NONE)
+	if(level == LEVEL_GENERIC)
 		level = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_DUMMIES_OVERLAP]);
 	return (eLevelName)level;
 }
@@ -133,7 +133,7 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 	int xmin, xmax, ymin, ymax;
 	int x, y;
 
-	level = LEVEL_NONE;
+	level = LEVEL_GENERIC;
 
 	playerCoors = FindPlayerCoors();
 	sx = CWorld::GetSectorIndexX(playerCoors.x);
@@ -161,8 +161,8 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 			for(x = xmin; x <= xmax; x++)
 				for(y = ymin; y <= ymax; y++){
 					l = GetCollisionInSector(*CWorld::GetSector(x, y));
-					if(l != LEVEL_NONE){
-						if(level == LEVEL_NONE)
+					if(l != LEVEL_GENERIC){
+						if(level == LEVEL_GENERIC)
 							level = l;
 						if(level != l)
 							multipleLevels = true;
@@ -173,7 +173,7 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 		if(multipleLevels && veh && veh->IsBoat())
 			for(ei = veh->m_entryInfoList.first; ei; ei = ei->next){
 				level = GetCollisionInSector(*ei->sector);
-				if(level != LEVEL_NONE)
+				if(level != LEVEL_GENERIC)
 					break;
 			}
 	}
@@ -205,7 +205,7 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 		ms_collisionInMemory = CGame::currLevel;
 		CReplay::EmptyReplayBuffer();
 #ifndef NO_ISLAND_LOADING
-		if(CGame::currLevel != LEVEL_NONE)
+		if(CGame::currLevel != LEVEL_GENERIC)
 			LoadSplash(GetLevelSplashScreen(CGame::currLevel));
 		CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
 		CStreaming::RemoveUnusedBuildings(CGame::currLevel);
@@ -232,7 +232,7 @@ CCollision::SortOutCollisionAfterLoad(void)
 #ifndef NO_ISLAND_LOADING
 	CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
 #endif
-	if (CGame::currLevel != LEVEL_NONE) {
+	if (CGame::currLevel != LEVEL_GENERIC) {
 #ifdef NO_ISLAND_LOADING
 		static bool bAlreadyLoaded = false;
 		if (bAlreadyLoaded) {

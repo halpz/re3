@@ -9177,7 +9177,7 @@ CPed::ProcessControl(void)
 	CColPoint foundCol;
 	CEntity *foundEnt = nil;
 
-	if (m_nZoneLevel > LEVEL_NONE && m_nZoneLevel != CCollision::ms_collisionInMemory)
+	if (m_nZoneLevel > LEVEL_GENERIC && m_nZoneLevel != CCollision::ms_collisionInMemory)
 		return;
 
 	int alpha = CVisibilityPlugins::GetClumpAlpha(GetClump());

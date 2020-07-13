@@ -226,7 +226,7 @@ CModelInfo::RemoveColModelsFromOtherLevels(eLevelName level)
 		mi = GetModelInfo(i);
 		if(mi){
 			colmodel = mi->GetColModel();
-			if(colmodel && colmodel->level != LEVEL_NONE && colmodel->level != level)
+			if(colmodel && colmodel->level != LEVEL_GENERIC && colmodel->level != level)
 				colmodel->RemoveCollisionVolumes();
 		}
 	}

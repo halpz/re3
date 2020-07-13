@@ -230,7 +230,7 @@ CAutomobile::ProcessControl(void)
 	bWarnedPeds = false;
 
 	// skip if the collision isn't for the current level
-	if(colModel->level > LEVEL_NONE && colModel->level != CCollision::ms_collisionInMemory)
+	if(colModel->level > LEVEL_GENERIC && colModel->level != CCollision::ms_collisionInMemory)
 		return;
 
 	// Improve grip of vehicles in certain cases
