@@ -359,8 +359,8 @@ CEntity::SetupBigBuilding(void)
 	if(mi->m_lodDistances[0] <= 2000.0f)
 		bStreamBIGBuilding = true;
 	if(mi->m_lodDistances[0] > 2500.0f || mi->m_ignoreDrawDist)
-		m_level = LEVEL_NONE;
-	else if(m_level == LEVEL_NONE)
+		m_level = LEVEL_GENERIC;
+	else if(m_level == LEVEL_GENERIC)
 		printf("%s isn't in a level\n", mi->GetName());
 }
 

@@ -83,7 +83,7 @@ CPlane::CPlane(int32 id, uint8 CreatedBy)
 
 	SetStatus(STATUS_PLANE);
 	bIsBIGBuilding = true;
-	m_level = LEVEL_NONE;
+	m_level = LEVEL_GENERIC;
 
 #ifdef FIX_BUGS
 	m_isFarAway = true;

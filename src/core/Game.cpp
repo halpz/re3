@@ -354,7 +354,7 @@ bool CGame::Initialise(const char* datFile)
 	LoadingScreen("Loading the Game", "Setup streaming", nil);
 	CStreaming::LoadInitialVehicles();
 	CStreaming::LoadInitialPeds();
-	CStreaming::RequestBigBuildings(LEVEL_NONE);
+	CStreaming::RequestBigBuildings(LEVEL_GENERIC);
 	CStreaming::LoadAllRequestedModels(false);
 	printf("Streaming uses %dK of its memory", CStreaming::ms_memoryUsed / 1024);
 	LoadingScreen("Loading the Game", "Load animations", GetRandomSplashScreen());
@@ -505,7 +505,7 @@ void CGame::ReInitGameObjectVariables(void)
 	CTimeCycle::Initialise();
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;
-	CStreaming::RequestBigBuildings(LEVEL_NONE);
+	CStreaming::RequestBigBuildings(LEVEL_GENERIC);
 	CStreaming::LoadAllRequestedModels(false);
 	CPed::Initialise();
 	CEventList::Initialise();
@@ -643,7 +643,7 @@ void CGame::InitialiseWhenRestarting(void)
 			CTimer::Initialise();
 			FrontEndMenuManager.m_bWantToLoad = false;
 			ReInitGameObjectVariables();
-			currLevel = LEVEL_NONE;
+			currLevel = LEVEL_GENERIC;
 			CCollision::SortOutCollisionAfterLoad();
 		}
 	}

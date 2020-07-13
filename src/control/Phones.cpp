@@ -284,6 +284,7 @@ CPhoneInfo::Initialise(void)
 		CBuilding *building = pool->GetSlot(i);
 		if (building) {
 			if (building->GetModelIndex() == MI_PHONEBOOTH1) {
+				assert(m_nMax < ARRAY_SIZE(m_aPhones) && "NUMPHONES should be increased");
 				CPhone *maxPhone = &m_aPhones[m_nMax];
 				maxPhone->m_nState = PHONE_STATE_FREE;
 				maxPhone->m_vecPos = building->GetPosition();

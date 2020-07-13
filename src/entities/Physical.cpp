@@ -75,7 +75,7 @@ CPhysical::CPhysical(void)
 #ifdef FIX_BUGS
 	m_nSurfaceTouched = SURFACE_DEFAULT;
 #endif
-	m_nZoneLevel = LEVEL_NONE;
+	m_nZoneLevel = LEVEL_GENERIC;
 
 	bIsFrozen = false;
 	bDontLoadCollision = false;

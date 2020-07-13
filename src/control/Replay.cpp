@@ -170,7 +170,7 @@ static void ApplyPanelDamageToCar(uint32 panels, CAutomobile* vehicle, bool flyi
 
 void PrintElementsInPtrList(void) 
 {
-	for (CPtrNode* node = CWorld::GetBigBuildingList(LEVEL_NONE).first; node; node = node->next) {
+	for (CPtrNode* node = CWorld::GetBigBuildingList(LEVEL_GENERIC).first; node; node = node->next) {
 		/* Most likely debug print was present here */
 	}
 }
@@ -1143,7 +1143,7 @@ void CReplay::StoreStuffInMem(void)
 	pWorld1 = new uint8[sizeof(CSector) * NUMSECTORS_X * NUMSECTORS_Y];
 	memcpy(pWorld1, CWorld::GetSector(0, 0), NUMSECTORS_X * NUMSECTORS_Y * sizeof(CSector));
 	WorldPtrList = CWorld::GetMovingEntityList().first; // why
-	BigBuildingPtrList = CWorld::GetBigBuildingList(LEVEL_NONE).first;
+	BigBuildingPtrList = CWorld::GetBigBuildingList(LEVEL_GENERIC).first;
 	pPickups = new uint8[sizeof(CPickup) * NUMPICKUPS];
 	memcpy(pPickups, CPickups::aPickUps, NUMPICKUPS * sizeof(CPickup));
 	pReferences = new uint8[(sizeof(CReference) * NUMREFERENCES)];
@@ -1189,7 +1189,7 @@ void CReplay::RestoreStuffFromMem(void)
 	delete[] pWorld1;
 	pWorld1 = nil;
 	CWorld::GetMovingEntityList().first = WorldPtrList;
-	CWorld::GetBigBuildingList(LEVEL_NONE).first = BigBuildingPtrList;
+	CWorld::GetBigBuildingList(LEVEL_GENERIC).first = BigBuildingPtrList;
 	memcpy(CPickups::aPickUps, pPickups, sizeof(CPickup) * NUMPICKUPS);
 	delete[] pPickups;
 	pPickups = nil;

@@ -723,7 +723,11 @@ CStreaming::RequestBigBuildings(eLevelName level, const CVector &pos)
 	n = CPools::GetBuildingPool()->GetSize()-1;
 	for(i = n; i >= 0; i--){
 		b = CPools::GetBuildingPool()->GetSlot(i);
-		if(b && b->bIsBIGBuilding && b->m_level == level)
+		if(b && b->bIsBIGBuilding
+#ifndef NO_ISLAND_LOADING
+		    && b->m_level == level
+#endif
+		)
 			if(b->bStreamBIGBuilding){
 				if(CRenderer::ShouldModelBeStreamed(b, pos))
 					RequestModel(b->GetModelIndex(), 0);
@@ -795,6 +799,7 @@ CStreaming::InstanceLoadedModels(const CVector &pos)
 void
 CStreaming::RequestIslands(eLevelName level)
 {
+#ifndef NO_ISLAND_LOADING
 	switch(level){
 	case LEVEL_MAINLAND:
 		if(islandLODbeach != -1)
@@ -806,6 +811,7 @@ CStreaming::RequestIslands(eLevelName level)
 		break;
 	default: break;
 	}
+#endif
 }
 
 //--MIAMI: TODO
@@ -1010,10 +1016,12 @@ CStreaming::RemoveBuildings(eLevelName level)
 void
 CStreaming::RemoveUnusedBigBuildings(eLevelName level)
 {
+#ifndef NO_ISLAND_LOADING
 	if(level != LEVEL_BEACH)
 		RemoveBigBuildings(LEVEL_BEACH);
 	if(level != LEVEL_MAINLAND)
 		RemoveBigBuildings(LEVEL_MAINLAND);
+#endif
 	RemoveIslandsNotUsed(level);
 }
 
@@ -1035,6 +1043,7 @@ DeleteIsland(CEntity *island)
 void
 CStreaming::RemoveIslandsNotUsed(eLevelName level)
 {
+#ifndef NO_ISLAND_LOADING
 	int i;
 	if(pIslandLODmainlandEntity == nil)
 	for(i = CPools::GetBuildingPool()->GetSize()-1; i >= 0; i--){
@@ -1053,8 +1062,10 @@ CStreaming::RemoveIslandsNotUsed(eLevelName level)
 		break;
 	case LEVEL_BEACH:
 		DeleteIsland(pIslandLODbeachEntity);
+
 		break;
 	}
+#endif // !NO_ISLAND_LOADING
 }
 
 //--MIAMI: done
@@ -1594,7 +1605,7 @@ CStreaming::LoadBigBuildingsWhenNeeded(void)
 	if(CCutsceneMgr::IsCutsceneProcessing())
 		return;
 
-	if(CTheZones::m_CurrLevel == LEVEL_NONE || 
+	if(CTheZones::m_CurrLevel == LEVEL_GENERIC || 
 	   CTheZones::m_CurrLevel == CGame::currLevel)
 		return;
 
@@ -1612,7 +1623,7 @@ CStreaming::LoadBigBuildingsWhenNeeded(void)
 	CGame::TidyUpMemory(true, true);
 
 	CReplay::EmptyReplayBuffer();
-	if(CGame::currLevel != LEVEL_NONE)
+	if(CGame::currLevel != LEVEL_GENERIC)
 		LoadSplash(GetLevelSplashScreen(CGame::currLevel));
 
 	CStreaming::RequestBigBuildings(CGame::currLevel, TheCamera.GetPosition());
@@ -2620,16 +2631,16 @@ CStreaming::LoadScene(const CVector &pos)
 	}
 	CRenderer::m_loadingPriority = false;
 	DeleteAllRwObjects();
-	if(level == LEVEL_NONE)
+	if(level == LEVEL_GENERIC)
 		level = CGame::currLevel;
 	CGame::currLevel = level;
 	RemoveUnusedBigBuildings(level);
 	RequestBigBuildings(level, pos);
-	RequestBigBuildings(LEVEL_NONE, pos);
+	RequestBigBuildings(LEVEL_GENERIC, pos);
 	RemoveIslandsNotUsed(level);
 	LoadAllRequestedModels(false);
 	InstanceBigBuildings(level, pos);
-	InstanceBigBuildings(LEVEL_NONE, pos);
+	InstanceBigBuildings(LEVEL_GENERIC, pos);
 	AddModelsToRequestList(pos);
 	CRadar::StreamRadarSections(pos);
 

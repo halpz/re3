@@ -41,7 +41,7 @@ void
 CCollision::Init(void)
 {
 	ms_colModelCache.Init(NUMCOLCACHELINKS);
-	ms_collisionInMemory = LEVEL_NONE;
+	ms_collisionInMemory = LEVEL_GENERIC;
 	CColStore::Initialise();
 }
 
@@ -70,10 +70,10 @@ GetCollisionInSectorList(CPtrList &list)
 	for(node = list.first; node; node = node->next){
 		e = (CEntity*)node->item;
 		level = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel()->level;
-		if(level != LEVEL_NONE)
+		if(level != LEVEL_GENERIC)
 			return (eLevelName)level;
 	}
-	return LEVEL_NONE;
+	return LEVEL_GENERIC;
 }
 
 //--MIAMI: unused
@@ -84,15 +84,15 @@ GetCollisionInSector(CSector &sect)
 	int level;
 
 	level = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_BUILDINGS]);
-	if(level == LEVEL_NONE)
+	if(level == LEVEL_GENERIC)
 		level = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_BUILDINGS_OVERLAP]);
-	if(level == LEVEL_NONE)
+	if(level == LEVEL_GENERIC)
 		level = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_OBJECTS]);
-	if(level == LEVEL_NONE)
+	if(level == LEVEL_GENERIC)
 		level = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_OBJECTS_OVERLAP]);
-	if(level == LEVEL_NONE)
+	if(level == LEVEL_GENERIC)
 		level = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_DUMMIES]);
-	if(level == LEVEL_NONE)
+	if(level == LEVEL_GENERIC)
 		level = GetCollisionInSectorList(sect.m_lists[ENTITYLIST_DUMMIES_OVERLAP]);
 	return (eLevelName)level;
 }

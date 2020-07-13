@@ -37,19 +37,19 @@ CTempColModels::Initialise(void)
 #define SET_COLMODEL_SPHERES(colmodel, sphrs)\
 	colmodel.numSpheres = ARRAY_SIZE(sphrs);\
 	colmodel.spheres = sphrs;\
-	colmodel.level = LEVEL_NONE;\
+	colmodel.level = LEVEL_GENERIC;\
 	colmodel.ownsCollisionVolumes = false;\
 
 	int i;
 
 	ms_colModelBBox.boundingSphere.Set(2.0f, CVector(0.0f, 0.0f, 0.0f));
 	ms_colModelBBox.boundingBox.Set(CVector(-2.0f, -2.0f, -2.0f), CVector(2.0f, 2.0f, 2.0f));
-	ms_colModelBBox.level = LEVEL_NONE;
+	ms_colModelBBox.level = LEVEL_GENERIC;
 
 	for (i = 0; i < ARRAY_SIZE(ms_colModelCutObj); i++) {
 		ms_colModelCutObj[i].boundingSphere.Set(2.0f, CVector(0.0f, 0.0f, 0.0f));
 		ms_colModelCutObj[i].boundingBox.Set(CVector(-2.0f, -2.0f, -2.0f), CVector(2.0f, 2.0f, 2.0f));
-		ms_colModelCutObj[i].level = LEVEL_NONE;
+		ms_colModelCutObj[i].level = LEVEL_GENERIC;
 	}
 
 	// Ped Spheres

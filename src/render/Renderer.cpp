@@ -779,7 +779,7 @@ CRenderer::ScanWorld(void)
 			ScanSectorPoly(poly, 3, ScanSectorList);
 
 			ScanBigBuildingList(CWorld::GetBigBuildingList(CGame::currLevel));
-			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_NONE));
+			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_GENERIC));
 		}
 	}
 }

@@ -91,6 +91,10 @@ int curBottomBarOption = -1;
 int hoveredBottomBarOption = -1;
 #endif
 
+#ifdef CUTSCENE_BORDERS_SWITCH
+bool CMenuManager::m_PrefsCutsceneBorders = true;
+#endif
+
 // Originally that was PS2 option color, they forget it here and used in PrintBriefs once(but didn't use the output anyway)
 #ifdef PS2_LIKE_MENU
 const CRGBA TEXT_COLOR = CRGBA(150, 110, 30, 255);
@@ -3166,6 +3170,9 @@ CMenuManager::LoadSettings()
 			CFileMgr::Read(fileHandle, (char*)&m_PrefsShowHud, 1);
 			CFileMgr::Read(fileHandle, (char*)&m_PrefsRadarMode, 1);
 			CFileMgr::Read(fileHandle, (char*)&m_PrefsShowLegends, 1);
+#ifdef CUTSCENE_BORDERS_SWITCH
+			CFileMgr::Read(fileHandle, (char *)&CMenuManager::m_PrefsCutsceneBorders, 1);
+#endif
 		}
 	}
 
@@ -3275,6 +3282,9 @@ CMenuManager::SaveSettings()
 		CFileMgr::Write(fileHandle, (char*)&m_PrefsShowHud, 1);
 		CFileMgr::Write(fileHandle, (char*)&m_PrefsRadarMode, 1);
 		CFileMgr::Write(fileHandle, (char*)&m_PrefsShowLegends, 1);
+#ifdef CUTSCENE_BORDERS_SWITCH
+		CFileMgr::Write(fileHandle, (char *)&CMenuManager::m_PrefsCutsceneBorders, 1);
+#endif
 	}
 	m_lastWorking3DAudioProvider = m_nPrefsAudio3DProviderIndex;
 

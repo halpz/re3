@@ -598,6 +598,10 @@ public:
 	};
 	bool GetIsMenuActive() {return !!m_bMenuActive;}
 
+#ifdef CUTSCENE_BORDERS_SWITCH
+	static bool m_PrefsCutsceneBorders;
+#endif
+
 #ifndef MASTER
 	static bool m_PrefsMarketing;
 	static bool m_PrefsDisableTutorials;

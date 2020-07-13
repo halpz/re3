@@ -155,8 +155,8 @@ CGameLogic::Update()
 			CCarCtrl::ClearInterestingVehicleList();
 			CWorld::ClearExcitingStuffFromArea(pPlayerInfo.GetPos(), 4000.0f, 1);
 			CRestart::FindClosestHospitalRestartPoint(pPlayerInfo.GetPos(), &vecRestartPos, &fRestartFloat);
-			CRestart::OverrideHospitalLevel = LEVEL_NONE;
-			CRestart::OverridePoliceStationLevel = LEVEL_NONE;
+			CRestart::OverrideHospitalLevel = LEVEL_GENERIC;
+			CRestart::OverridePoliceStationLevel = LEVEL_GENERIC;
 			PassTime(720);
 			RestorePlayerStuffDuringResurrection(pPlayerInfo.m_pPed, vecRestartPos, fRestartFloat);
 			AfterDeathArrestSetUpShortCutTaxi();
@@ -261,8 +261,8 @@ CGameLogic::Update()
 			CCarCtrl::ClearInterestingVehicleList();
 			CWorld::ClearExcitingStuffFromArea(pPlayerInfo.GetPos(), 4000.0f, 1);
 			CRestart::FindClosestPoliceRestartPoint(pPlayerInfo.GetPos(), &vecRestartPos, &fRestartFloat);
-			CRestart::OverrideHospitalLevel = LEVEL_NONE;
-			CRestart::OverridePoliceStationLevel = LEVEL_NONE;
+			CRestart::OverrideHospitalLevel = LEVEL_GENERIC;
+			CRestart::OverridePoliceStationLevel = LEVEL_GENERIC;
 			PassTime(720);
 			RestorePlayerStuffDuringResurrection(pPlayerInfo.m_pPed, vecRestartPos, fRestartFloat);
 			AfterDeathArrestSetUpShortCutTaxi();
@@ -313,8 +313,8 @@ CGameLogic::Update()
 			CCarCtrl::ClearInterestingVehicleList();
 			CWorld::ClearExcitingStuffFromArea(pPlayerInfo.GetPos(), 4000.0f, 1);
 			CRestart::FindClosestPoliceRestartPoint(pPlayerInfo.GetPos(), &vecRestartPos, &fRestartFloat);
-			CRestart::OverridePoliceStationLevel = LEVEL_NONE;
-			CRestart::OverrideHospitalLevel = LEVEL_NONE;
+			CRestart::OverridePoliceStationLevel = LEVEL_GENERIC;
+			CRestart::OverrideHospitalLevel = LEVEL_GENERIC;
 			RestorePlayerStuffDuringResurrection(pPlayerInfo.m_pPed, vecRestartPos, fRestartFloat);
 			SortOutStreamingAndMemory(pPlayerInfo.GetPos());
 			TheCamera.m_fCamShakeForce = 0.0f;

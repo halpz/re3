@@ -353,7 +353,7 @@ CPopulation::FindCollisionZoneForCoors(CVector *coors, int *safeZoneOut, eLevelN
 	}
 	// Then it's transition area
 	if (*safeZoneOut >= 0)
-		*levelOut = LEVEL_NONE;
+		*levelOut = LEVEL_GENERIC;
 	else
 		*levelOut = CTheZones::GetLevelFromPosition(coors);
 }

@@ -25,8 +25,8 @@ public:
 	static int32 TimesDied;
 	static int32 TimesArrested;
 	static int32 KillsSinceLastCheckpoint;
-	static int32 DistanceTravelledInVehicle;
-	static int32 DistanceTravelledOnFoot;
+	static float DistanceTravelledInVehicle;
+	static float DistanceTravelledOnFoot;
 	static int32 CarsExploded;
 	static int32 PeopleKilledByPlayer;
 	static int32 ProgressMade;
