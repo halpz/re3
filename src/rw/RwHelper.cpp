@@ -202,7 +202,7 @@ isSkinnedCb(RpAtomic *atomic, void *data)
 	RpAtomic **pAtomic = (RpAtomic**)data;
 	if(*pAtomic)
 		return nil;	// already found one
-	if(RpSkinGeometryGetSkin(atomic->geometry))
+	if(RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic)))
 		*pAtomic = atomic;	// we could just return nil here directly...
 	return atomic;
 }
