@@ -55,3 +55,5 @@ RwCamera *CameraCreate(RwInt32 width,
 					   
 void _TexturePoolsInitialise();
 void _TexturePoolsShutdown();
+
+RpAtomic *ConvertPlatformAtomic(RpAtomic *atomic, void *data);

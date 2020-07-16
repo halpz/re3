@@ -1091,7 +1091,7 @@ CVehicleModelInfo::SetEnvironmentMapCB(RpAtomic *atomic, void *data)
 	RpGeometry *geo;
 
 	geo = RpAtomicGetGeometry(atomic);
-	fx = 0;
+	fx = rpMATFXEFFECTNULL;
 	RpGeometryForAllMaterials(geo, GetMatFXEffectMaterialCB, &fx);
 	if(fx != rpMATFXEFFECTNULL){
 		RpMatFXAtomicEnableEffects(atomic);
