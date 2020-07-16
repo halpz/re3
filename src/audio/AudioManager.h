@@ -421,7 +421,7 @@ public:
 	bool ProcessVehicleReverseWarning(cVehicleParams *params);
 	bool ProcessVehicleRoadNoise(cVehicleParams *params);
 	bool ProcessVehicleSirenOrAlarm(cVehicleParams *params);
-	void ProcessVehicleSkidding(cVehicleParams *params);
+	bool ProcessVehicleSkidding(cVehicleParams *params);
 	void ProcessWaterCannon(int32);
 	void ProcessWeather(int32 id);
 	bool ProcessWetRoadNoise(cVehicleParams *params);
