@@ -2247,6 +2247,11 @@ WinMain(HINSTANCE instance,
 						CloseClip();
 						CoUninitialize();
 						
+#ifdef FIX_BUGS
+						// draw one frame because otherwise we'll end up looking at black screen for a while if vsync is on
+						RsCameraShowRaster(Scene.camera);
+#endif
+
 #ifdef PS2_MENU
 						extern char version_name[64];
 						if ( CGame::frenchGame || CGame::germanGame )
