@@ -1012,6 +1012,15 @@ cSampleManager::Initialise(void)
 		
 	}
 	
+#ifdef AUDIO_CACHE
+	TRACE("cache");
+	FILE *cacheFile = fopen("audio\\sound.cache", "rb");
+	if (cacheFile) {
+		fread(nStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
+		fclose(cacheFile);
+		m_bInitialised = true;
+	}else {
+#endif
 	TRACE("cdrom");
 	
 	S32 tatalms;
@@ -1168,7 +1177,13 @@ cSampleManager::Initialise(void)
 			_bUseHDDAudio = false;
 	}
 #endif
-	
+#ifdef AUDIO_CACHE
+	cacheFile = fopen("audio\\sound.cache", "wb");
+	fwrite(nStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
+	fclose(cacheFile);
+	}
+#endif
+
 	TRACE("stream");
 	{
 		for ( int32 i = 0; i < MAX_STREAMS; i++ )

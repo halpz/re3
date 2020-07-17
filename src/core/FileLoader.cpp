@@ -106,7 +106,9 @@ CFileLoader::LoadLevel(const char *filename)
 			LoadingScreenLoadingFile(line + 4);
 			LoadScene(line + 4);
 		}else if(strncmp(line, "SPLASH", 6) == 0){
+#ifndef DISABLE_LOADING_SCREEN
 			LoadSplash(GetRandomSplashScreen());
+#endif
 		}else if(strncmp(line, "CDIMAGE", 7) == 0){
 			CdStreamAddImage(line + 8);
 		}

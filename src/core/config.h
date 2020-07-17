@@ -289,3 +289,6 @@ enum Config {
 // Camera
 #define IMPROVED_CAMERA		// Better Debug cam, and maybe more in the future
 #define FREE_CAM		// Rotating cam
+
+// Audio
+#define AUDIO_CACHE // cache sound lengths to speed up the cold boot
