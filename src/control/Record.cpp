@@ -439,8 +439,10 @@ void CRecordDataForChase::StartChaseScene(float startTime)
 	Status = STATE_PLAYBACK;
 	AnimTime = startTime;
 	AnimStartTime = CTimer::GetTimeInMilliseconds();
+#ifndef NO_ISLAND_LOADING
 	RemoveUnusedCollision();
 	CStreaming::RemoveIslandsNotUsed(LEVEL_SUBURBAN);
+#endif
 	CGame::TidyUpMemory(true, true);
 	CStreaming::ImGonnaUseStreamingMemory();
 	CFileMgr::SetDir("data\\paths");
