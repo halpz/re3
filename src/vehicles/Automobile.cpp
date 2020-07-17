@@ -3588,7 +3588,7 @@ CAutomobile::AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed)
 			)
 		{
 			CParticle::AddParticle(
-#ifdef FIX_BUGS
+#if defined(FIX_BUGS) && !defined(PC_PARTICLE) // looks wrong on PC particles
 				PARTICLE_WHEEL_WATER,
 #else
 				PARTICLE_WATERSPRAY,
