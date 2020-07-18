@@ -2292,7 +2292,7 @@ void CTheScripts::Init()
 	dbg_log = fopen("SCRDBG.LOG", "w");
 	static const char* init_msg = "Starting debug script log\n\n";
 	PrintToLog(init_msg);
-	CFileMgr::SetDir("\\");
+	CFileMgr::SetDir("");
 #endif
 }
 
@@ -2401,7 +2401,7 @@ void CTheScripts::Process()
 	dbg_log = fopen("SCRDBG.LOG", "w");
 	static const char* init_msg = "Starting debug script log\n\n";
 	PrintToLog(init_msg);
-	CFileMgr::SetDir("\\");
+	CFileMgr::SetDir("");
 #endif
 	PrintToLog("------------------------\n");
 	PrintToLog("CTheScripts::Process started, CTimer::GetTimeInMilliseconds == %u\n", CTimer::GetTimeInMilliseconds());
