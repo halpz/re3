@@ -1507,7 +1507,7 @@ cAudioManager::GetVehicleDriveWheelSkidValue(uint8 wheel, CAutomobile *automobil
 	{
 	case WHEEL_STATE_SPINNING:
 		if (gasPedalAudio > 0.4f)
-			relativeVelChange = (gasPedalAudio - 0.4f) * 1.6666666f * 0.75f;
+			relativeVelChange = (gasPedalAudio - 0.4f) * (5.0f / 3.0f) / (4.0f / 3.0f);
 		break;
 	case WHEEL_STATE_SKIDDING:
 		relativeVelChange = Min(1.0f, Abs(velocityChange) / transmission->fMaxVelocity);
@@ -1515,7 +1515,7 @@ cAudioManager::GetVehicleDriveWheelSkidValue(uint8 wheel, CAutomobile *automobil
 	case WHEEL_STATE_FIXED:
 		relativeVel = gasPedalAudio;
 		if (relativeVel > 0.4f)
-			relativeVel = (gasPedalAudio - 0.4f) * 1.6666666f;
+			relativeVel = (gasPedalAudio - 0.4f) * (5.0f / 3.0f);
 
 		velChange = Abs(velocityChange);
 		if (velChange > 0.04f)
@@ -2659,7 +2659,7 @@ cAudioManager::ProcessJumbo(cVehicleParams *params)
 		DoJumboVolOffset();
 		position = PlanePathPosition[plane->m_nPlaneId];
 		if (position <= TakeOffPoint) {
-			if (plane->m_fSpeed <= 0.10334f) {
+			if (plane->m_fSpeed <= 0.103344f) {
 				ProcessJumboTaxi();
 				return;
 			}
@@ -2671,7 +2671,7 @@ cAudioManager::ProcessJumbo(cVehicleParams *params)
 			ProcessJumboFlying();
 		} else {
 			if (position > LandingPoint) {
-				if (plane->m_fSpeed > 0.10334f) {
+				if (plane->m_fSpeed > 0.103344f) {
 					ProcessJumboDecel(plane);
 					return;
 				}
@@ -2701,7 +2701,7 @@ cAudioManager::ProcessJumboAccel(CPlane *plane)
 	float modificator;
 
 	if (SetupJumboFlySound(20)) {
-		modificator = (plane->m_fSpeed - 0.10334f) * 1.676f;
+		modificator = (plane->m_fSpeed - 0.103344f) * 1.6760077f;
 		if (modificator > 1.0f)
 			modificator = 1.0f;
 		if (SetupJumboRumbleSound(MAX_VOLUME * modificator) && SetupJumboTaxiSound((1.0f - modificator) * 75.f)) {
@@ -2754,7 +2754,7 @@ void
 cAudioManager::ProcessJumboDecel(CPlane *plane)
 {
 	if (SetupJumboFlySound(20) && SetupJumboTaxiSound(75)) {
-		const float modificator = Min(1.f, (plane->m_fSpeed - 0.10334f) * 1.676f);
+		const float modificator = Min(1.f, (plane->m_fSpeed - 0.103344f) * 1.6760077f);
 		SetupJumboEngineSound(MAX_VOLUME * modificator, 6050.f * modificator + 16000);
 		SetupJumboWhineSound(18, 29500);
 	}
