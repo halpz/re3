@@ -19,6 +19,18 @@
 #include "World.h"
 
 
+void
+CPlaneTrails::RegisterPoint(CVector pos, uint32 id)
+{
+	// TODO
+}
+
+void
+CPlaneBanners::RegisterPoint(CVector pos, uint32 id)
+{
+	// TODO
+}
+
 bool CSmokeTrails::CigOn = false;
 CSmokeTrail CSmokeTrails::aSmoke[3];
 

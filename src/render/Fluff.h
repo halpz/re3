@@ -2,6 +2,56 @@
 #include "common.h"
 #include "Vector.h"
 
+// TODO
+class CScriptPath
+{
+public:
+};
+
+// TODO
+class CScriptPaths
+{
+public:
+};
+
+// TODO
+class CPlaneTrail
+{
+public:
+};
+
+// TODO
+class CPlaneTrails
+{
+public:
+	static void RegisterPoint(CVector pos, uint32 id);
+};
+
+// TODO
+class CPlaneBanner
+{
+public:
+};
+
+// TODO
+class CPlaneBanners
+{
+public:
+	static void RegisterPoint(CVector pos, uint32 id);
+};
+
+// TODO
+class CEscalators
+{
+public:
+};
+
+// TODO
+class CEscalator
+{
+public:
+};
+
 class CMovingThing
 {
 public:

@@ -170,6 +170,7 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 		break;
 	case EXPLOSION_CAR:
 	case EXPLOSION_CAR_QUICK:
+	case EXPLOSION_BOAT:
 		explosion.m_fRadius = 9.0f;
 		explosion.m_fPower = 300.0f;
 		explosion.m_fStopTime = lifetime + CTimer::GetTimeInMilliseconds() + 4250;
@@ -205,6 +206,7 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 		}
 		break;
 	case EXPLOSION_HELI:
+	case EXPLOSION_HELI2:
 		explosion.m_fRadius = 6.0f;
 		explosion.m_fPower = 300.0f;
 		explosion.m_fStopTime = lifetime + CTimer::GetTimeInMilliseconds() + 750;
