@@ -698,7 +698,7 @@ CPlane::InitPlanes(void)
 		aPlaneLineBits[1].time = time;
 		aPlaneLineBits[1].position = position;
 		aPlaneLineBits[1].speed = TAXI_SPEED;
-		aPlaneLineBits[1].acceleration = 33.0f/32.0f;
+		aPlaneLineBits[1].acceleration = 618.75f/600.0f;
 		time += 600.0f/((CRUISE_SPEED+TAXI_SPEED)/2.0f);
 		position += 600.0f;
 
@@ -717,7 +717,7 @@ CPlane::InitPlanes(void)
 		aPlaneLineBits[3].time = time;
 		aPlaneLineBits[3].position = position;
 		aPlaneLineBits[3].speed = CRUISE_SPEED;
-		aPlaneLineBits[3].acceleration = -33.0f/32.0f;
+		aPlaneLineBits[3].acceleration = -618.75f/600.0f;
 		time += 600.0f/((CRUISE_SPEED+TAXI_SPEED)/2.0f);
 		position += 600.0f;
 
