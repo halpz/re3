@@ -14,7 +14,7 @@
 
 /**
  * \defgroup rtworld RtWorld
- * \ingroup rttool
+ * \ingroup basicgeometry
  *
  * World Import Toolkit for RenderWare.
  */

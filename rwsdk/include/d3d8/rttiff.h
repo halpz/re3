@@ -11,7 +11,7 @@
 
 /**
  * \defgroup rttiff RtTIFF
- * \ingroup rttool
+ * \ingroup imageconversiontools
  *
  * TIFF/Tag Image File Format Image Format Toolkit for RenderWare.
  *

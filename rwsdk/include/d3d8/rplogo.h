@@ -33,7 +33,7 @@
 
 /**
  * \defgroup rplogo RpLogo
- * \ingroup rpplugin
+ * \ingroup 2dtools
  *
  * Logo Plugin for RenderWare Graphics.
  */

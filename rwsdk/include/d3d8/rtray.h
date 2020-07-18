@@ -11,7 +11,7 @@
 
 /**
  * \defgroup rtray RtRay
- * \ingroup rttool
+ * \ingroup mathtools
  *
  * Line Toolkit for RenderWare. 
  */
@@ -46,7 +46,9 @@ extern "C"
 /* Line intersections */
 extern RwReal RtLineTriangleIntersectionTest(RwLine *line, RwV3d *normal,
                                              RwV3d *v0, RwV3d *v1, RwV3d *v2);
-extern RwReal RtLineSphereIntersectionTest(RwLine *line, RwSphere *sphere);
+extern RwBool RtLineSphereIntersectionTest(RwLine *line, 
+                                           RwSphere *sphere, 
+                                           RwReal *centerDist);
 
 /* Line clipping */
 extern RwLine *RtLineClipPlane(RwLine *line, RwPlane *plane);

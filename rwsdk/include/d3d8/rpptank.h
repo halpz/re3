@@ -13,12 +13,13 @@
 
 /**
  * \defgroup rpptank RpPTank
- * \ingroup rpplugin
+ * \ingroup particles
  *
  * PTank Plugin for RenderWare.
  */
 
 /*--- Include files ---*/
+
 #include <string.h>
 
 #include "rwcore.h"
@@ -139,7 +140,7 @@ enum RpPTankInstanceFlags
     rpPTANKIFLAGCENTER           = ((int)0x01000000),    /**<Center position changed*/
 /*    free                       = ((int)0x04000000),    */
 /*    free                       = ((int)0x08000000),    */
-/*    free                       = ((int)0x10000000),    */
+    rpPTANKIFLAGALPHABLENDING    = ((int)0x10000000),    /**<Internal Use*/
     rpPTANKIFLAGALL              = ((int)0xFFFFFFFF),
 
     RPPTANKINSTANCEFLAGSFORCEENUMSIZEINT = RWFORCEENUMSIZEINT
@@ -244,20 +245,22 @@ extern const RwInt32 datasize[];
 
 /**
  * \ingroup rpptank
- * \typedef rpptankAllocCallBack
+ * \ref RpPTankAllocCallBack
+ *
  * ...
  */
-typedef void *(* rpPTankAllocCallBack)(RpPTankData *ptankGlobal,
+typedef void *(* RpPTankAllocCallBack)(RpPTankData *ptankGlobal,
                                         RwInt32 maxPCount,
                                         RwUInt32 dataFlags,
                                         RwUInt32 platFlags);
 
 /**
  * \ingroup rpptank
- * \typedef rpPTankCreateCallBack
+ * \ref RpPTankCreateCallBack
+ *
  * ...
  */
-typedef RwBool (* rpPTankCreateCallBack)(RpAtomic *atomic,
+typedef RwBool (* RpPTankCreateCallBack)(RpAtomic *atomic,
                                         RpPTankData *ptankGlobal,
                                         RwInt32 maxPCount,
                                         RwUInt32 dataFlags,
@@ -265,37 +268,37 @@ typedef RwBool (* rpPTankCreateCallBack)(RpAtomic *atomic,
 
 /**
  * \ingroup rpptank
- * \typedef rpPTankInstanceCallBack
+ * \ref RpPTankInstanceCallBack
  * ...
  */
-typedef RwBool (* rpPTankInstanceCallBack)(RpAtomic *atomic,
+typedef RwBool (* RpPTankInstanceCallBack)(RpAtomic *atomic,
                                             RpPTankData *ptankGlobal,
                                             RwInt32 actPCount,
                                             RwUInt32 instFlags);
 
 /**
  * \ingroup rpptank
- * \typedef rpPTankRenderCallBack
+ * \ref RpPTankRenderCallBack
  * ...
  */
-typedef RwBool (* rpPTankRenderCallBack)(RpAtomic *atomic,
+typedef RwBool (* RpPTankRenderCallBack)(RpAtomic *atomic,
                                             RpPTankData *ptankGlobal,
                                             RwInt32 actPCount);
 
-typedef struct rpPTankCallBacks rpPTankCallBacks;
+typedef struct RpPTankCallBacks RpPTankCallBacks;
 
-struct rpPTankCallBacks
+struct RpPTankCallBacks
 {
-    rpPTankAllocCallBack        alloc;
-    rpPTankCreateCallBack       create;
-    rpPTankInstanceCallBack        instance;
-    rpPTankRenderCallBack        render;
+    RpPTankAllocCallBack        alloc;
+    RpPTankCreateCallBack       create;
+    RpPTankInstanceCallBack        instance;
+    RpPTankRenderCallBack        render;
 };
 
 /* private typedefs */
-typedef struct rpPTANKInstanceSetupData rpPTANKInstanceSetupData;
+typedef struct RpPTANKInstanceSetupData RpPTANKInstanceSetupData;
 
-struct rpPTANKInstanceSetupData
+struct RpPTANKInstanceSetupData
 {
     RwBool instancePositions;
     RwBool instanceUVs;
@@ -312,27 +315,27 @@ struct rpPTANKInstanceSetupData
 
 };
 
-typedef void (* rpPTankGENInstancePosCallback)(
+typedef void (* RpPTankGENInstancePosCallback)(
     RpPTankLockStruct *dstCluster,
     RwV3d *right,
     RwV3d *up,
     RwInt32 pCount,
     RpPTankData *ptankGlobal);
 
-typedef void (* rpPTankGENInstanceCallback)(
+typedef void (* RpPTankGENInstanceCallback)(
     RpPTankLockStruct *dstCluster,
     RwInt32 pCount,
     RpPTankData *ptankGlobal);
 
-typedef void (* rpPTankGENInstanceSetupCallback)(
-    rpPTANKInstanceSetupData *data,
+typedef void (* RpPTankGENInstanceSetupCallback)(
+    RpPTANKInstanceSetupData *data,
     RpAtomic *atomic,
     RpPTankData *ptankGlobal,
     RwInt32 actPCount,
     RwUInt32 instFlags);
 
-typedef void (* rpPTankGENInstanceEndingCallback)(
-    rpPTANKInstanceSetupData *data,
+typedef void (* RpPTankGENInstanceEndingCallback)(
+    RpPTANKInstanceSetupData *data,
     RpAtomic *atomic,
     RpPTankData *ptankGlobal,
     RwInt32 actPCount,
@@ -351,15 +354,15 @@ struct RpPTankAtomicExtPrv
     /* Rendering callback */
     RpAtomicCallBackRender defaultRenderCB;
 
-    rpPTankCallBacks       ptankCallBacks;
+    RpPTankCallBacks       ptankCallBacks;
     
     /* Instancing CallBacks */
-    rpPTankGENInstanceSetupCallback     insSetupCB;
-    rpPTankGENInstancePosCallback       insPosCB;
-    rpPTankGENInstanceCallback          insUVCB;
-    rpPTankGENInstanceCallback          insColorsCB;
-    rpPTankGENInstanceCallback          insNormalsCB;
-    rpPTankGENInstanceEndingCallback    insEndingCB;
+    RpPTankGENInstanceSetupCallback     insSetupCB;
+    RpPTankGENInstancePosCallback       insPosCB;
+    RpPTankGENInstanceCallback          insUVCB;
+    RpPTankGENInstanceCallback          insColorsCB;
+    RpPTankGENInstanceCallback          insNormalsCB;
+    RpPTankGENInstanceEndingCallback    insEndingCB;
 
     RwUInt32 lockFlags;
     RwUInt32 instFlags;
@@ -388,7 +391,6 @@ extern RwInt32 _rpPTankGlobalsOffset; /* Offset in RwEngine */
     (*RWPLUGINOFFSET(void *, RwEngineInstance, _rpPTankGlobalsOffset))
 
 #endif
-
 
 
 extern RwBool
@@ -523,7 +525,7 @@ MACRO_START\
     RPATOMICPTANKPLUGINDATA(atm_)->publicData.cColor = *col_;\
     if( RpGeometryGetMaterial(RpAtomicGetGeometry(atm_),0) )\
     {\
-        RpMaterialSetColor(\
+        (void)RpMaterialSetColor(\
         RpGeometryGetMaterial(RpAtomicGetGeometry(atm_),0),\
         &RPATOMICPTANKPLUGINDATA(atm_)->publicData.cColor);\
     }\
@@ -759,6 +761,14 @@ extern RpAtomic *
 RpPTankAtomicUnlock(RpAtomic *atomic);
 
 
+/*
+ * Stealth functions *********************************************************
+ */
+RpAtomic*
+_rpPTankAtomicCreateCustom(RwInt32 maxParticleNum,
+                RwUInt32 dataFlags, RwUInt32 platFlags, 
+                RpPTankCallBacks *callbacks);
+
 #ifdef    __cplusplus
 }
 #endif                          /* __cplusplus */
@@ -767,12 +777,49 @@ RpPTankAtomicUnlock(RpAtomic *atomic);
 
 /*---- start: c:/daily/rwsdk/plugin/ptank/d3d8/ptankplatform.h----*/
 
+/**
+ * \defgroup rpptankd3d8 D3D8
+ * \ingroup rpptank
+ *
+ * D3D8 specific documentation.
+ */
+
+/**
+ * \ingroup rpptankd3d8
+ * \par D3D8 specific data flags
+ *
+ * <ul>
+ * <li> rpPTANKD3D8FLAGSUSEPOINTSPRITES selects the D3D8 optimized pipeline. At the 
+ * moment, this pipeline use point sprites when the hardware supports them,
+ * which don't allow use of all the PTank flags. Only the following flags are
+ * supported when using the D3D8 optimized pipes:
+ *
+ * <ul>
+ * <li> rpPTANKDFLAGPOSITION
+ * <li> rpPTANKDFLAGNORMAL
+ * <li> rpPTANKDFLAGSIZE (if the hardware supports the D3DFVF_PSIZE vertex format flag)
+ * <li> rpPTANKDFLAGCOLOR
+ * <li> rpPTANKDFLAGUSECENTER
+ * <li> rpPTANKDFLAGARRAY
+ * <li> rpPTANKDFLAGSTRUCTURE
+ * </ul>
+ *
+ * The texture coordinates are generated by the hardware and can't be specified.
+ * </ul>
+ *
+ * If the hardware does not support point sprites, the default pipeline is used
+ * instead.
+ * 
+ */
+
 enum RpPTankD3D8Flags
 {
     rpPTANKD3D8FLAGSUSEPOINTSPRITES = 0x00000001,
 
     rpPTANKD3D8FLAGFORCEENUMSIZEINT = RWFORCEENUMSIZEINT
 };
+
+typedef enum RpPTankD3D8Flags RpPTankD3D8Flags;
 
 /*---- end: c:/daily/rwsdk/plugin/ptank/d3d8/ptankplatform.h----*/
 

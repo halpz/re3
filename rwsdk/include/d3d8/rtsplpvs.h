@@ -12,7 +12,7 @@
 
 /**
  * \defgroup rtsplinepvs RtSplinePVS
- * \ingroup rttool
+ * \ingroup pvs
  * 
  * Spline PVS Toolkit for RenderWare.
  */

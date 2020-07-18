@@ -31,7 +31,7 @@
 #include <rwcore.h>
 #include <rpdbgerr.h>
 
-static const char rcsid[] __RWUNUSED__ = "@@(#)$Id: //RenderWare/RW33Active/dev/rwsdk/src/plcore/rpdbgerr.c#1 $";
+static const char rcsid[] __RWUNUSED__ = "@@(#)$Id: rpdbgerr.c,v 1.2 2004/08/31 17:40:34 gtristram Exp $";
 
 #ifdef RWDEBUG
 

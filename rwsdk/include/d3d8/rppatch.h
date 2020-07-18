@@ -4,7 +4,7 @@
 
 /**
  * \defgroup rppatch RpPatch
- * \ingroup rpplugin
+ * \ingroup bezierpatches
  *
  * Bezier patch library
  *
@@ -124,7 +124,7 @@
  * \ingroup rppatch
  * \ref RpPatchMeshFlag
  * When creating a \ref RpPatchMesh, these flags can be OR'ed together to
- * specify the format along with the \ref rpPATCHMESHTEXCOORDSETS (n) macro
+ * specify the format along with the \ref rpPATCHMESHTEXCOORDSETS(num) macro
  * to specify the number of texture coordinate sets required.
  *
  * \see RpPatchMeshCreate
@@ -220,7 +220,7 @@ typedef struct RpPatchMesh RpPatchMesh;
  * The patch mesh should be unlocked with \ref RpPatchMeshUnlock before it is
  * added to an \ref RpAtomic with \ref RpPatchAtomicSetPatchMesh.
  *
- * \see RpPatchMesDefinition
+ * \see RpPatchMeshDefinition
  */
 struct RpPatchMesh
 {
@@ -278,7 +278,7 @@ struct RpPatchLODRange
 
 /**
  * \ingroup rppatch
- * \typedef RpPatchLODUserData
+ * \ref RpPatchLODUserData
  * typedef for the user data passed to the \ref RpPatchLODCallBack
  * function which calculates the atomics' LOD.
  *
@@ -289,8 +289,13 @@ typedef void *RpPatchLODUserData;
 
 /**
  * \ingroup rppatch
- * \typedef RpPatchLODCallBack
+ * \ref RpPatchLODCallBack
  * typedef for the patch atomic LOD calculation function.
+ *
+ * \param atomic
+ * \param userData
+ *
+ * \return
  *
  * \see RpPatchAtomicSetPatchLODCallBack
  * \see RpPatchAtomicGetPatchLODCallBack
@@ -309,6 +314,13 @@ extern "C"
 /*---------------------------------------------------------------------------*
  *-   Plugin functions                                                      -*
  *---------------------------------------------------------------------------*/
+extern void
+RpPatchGeometrySetFreeListCreateParams( RwInt32 blockSize, RwInt32 numBlocksToPrealloc );
+
+extern void
+RpPatchAtomicSetFreeListCreateParams( RwInt32 blockSize, RwInt32 numBlocksToPrealloc );
+
+
 extern RwBool
 RpPatchPluginAttach(void);
 

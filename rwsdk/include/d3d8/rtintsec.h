@@ -10,8 +10,8 @@
 #define RTINTSEC_H
 
 /**
- * \defgroup rtintersect RtIntersection
- * \ingroup rttool
+ * \defgroup rtintersection RtIntersection
+ * \ingroup mathtools
  *
  * Object Intersection Toolkit for RenderWare.
  */

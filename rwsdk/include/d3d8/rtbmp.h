@@ -12,7 +12,7 @@
 
 /**
  * \defgroup rtbmp RtBMP
- * \ingroup rttool
+ * \ingroup imageconversiontools
  *
  * BMP Image Format Toolkit for RenderWare.
  *

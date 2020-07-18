@@ -18,7 +18,7 @@
 
 /**
  * \defgroup rtslerp RtSlerp
- * \ingroup rttool
+ * \ingroup mathtools
  *
  * Slerp/Spherical Linear Interpolations Toolkit for RenderWare.
  *

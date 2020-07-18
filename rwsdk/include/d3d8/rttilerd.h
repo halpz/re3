@@ -11,7 +11,7 @@
 
 /**
  * \defgroup rttilerender RtTileRender
- * \ingroup rttool
+ * \ingroup cameras
  *
  * Tile renderer - e.g. grabbing screen shots -  Toolkit for RenderWare.
  */

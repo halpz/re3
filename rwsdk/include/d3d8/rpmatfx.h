@@ -17,7 +17,7 @@
 
 /**
  * \defgroup rpmatfx RpMatFX
- * \ingroup rpplugin
+ * \ingroup materials
  *
  * Material Effects Plugin for RenderWare Graphics.
  */
@@ -58,6 +58,10 @@ extern "C"
 #endif /* __cplusplus */
 
 /*--- Plugin functions ------------------------------------------------------*/
+extern void
+RpMatFXMaterialDataSetFreeListCreateParams( RwInt32 blockSize,
+                                        RwInt32 numBlocksToPrealloc );
+
 extern RwBool
 RpMatFXPluginAttach( void );
 

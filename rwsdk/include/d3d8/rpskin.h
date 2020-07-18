@@ -4,7 +4,7 @@
 
 /**
  * \defgroup rpskin RpSkin
- * \ingroup rpplugin
+ * \ingroup skinning
  *
  * Skin Plugin for RenderWare Graphics.
  */
@@ -48,7 +48,7 @@ struct RwMatrixWeights
 
 /**
  * \ingroup rpskin
- * \typedef RpSkin
+ * \struct RpSkin
  *
  * Skin object. This should be considered an opaque type.
  * Use the RpSkin API functions to access.
@@ -69,6 +69,9 @@ extern "C"
 /*---------------------------------------------------------------------------*
  *-   Plugin functions                                                      -*
  *---------------------------------------------------------------------------*/
+extern void RpSkinSetFreeListCreateParams(
+      RwInt32 blockSize, RwInt32 numBlocksToPrealloc );
+
 extern RwBool
 RpSkinPluginAttach(void);
 
@@ -114,6 +117,9 @@ RpSkinGetVertexBoneIndices( RpSkin *skin );
 extern const RwMatrix *
 RpSkinGetSkinToBoneMatrices( RpSkin *skin );
 
+extern RwBool
+RpSkinIsSplit( RpSkin *skin );
+
 /*---------------------------------------------------------------------------*
  *-   Skin pipeline                                                         -*
  *---------------------------------------------------------------------------*/
@@ -131,7 +137,6 @@ enum RpSkinType
     rpSKINTYPEGENERIC   = 1, /**<Generic skin rendering.          */
     rpSKINTYPEMATFX     = 2, /**<Material effects skin rendering. */
     rpSKINTYPETOON      = 3, /**<Toon skin rendering.             */
-    rpSKINTYPEMATFXTOON = 4, /**<Note Toon + MatFX on same object NOT currently supported */
     rpSKINTYPEFORCEENUMSIZEINT = RWFORCEENUMSIZEINT
 };
 typedef enum RpSkinType RpSkinType;
@@ -142,6 +147,32 @@ RpSkinAtomicSetType( RpAtomic *atomic,
 
 extern RpSkinType
 RpSkinAtomicGetType( RpAtomic *atomic );
+
+/*---------------------------------------------------------------------------*
+ *-   Internal API                                                          -*
+ *---------------------------------------------------------------------------*/
+extern RpGeometry *
+_rpSkinInitialize(RpGeometry *geometry);
+
+extern RpGeometry *
+_rpSkinDeinitialize(RpGeometry *geometry);
+
+extern RwUInt8 *
+_rpSkinGetMeshBoneRemapIndices( RpSkin *skin );
+
+extern RwUInt8 *
+_rpSkinGetMeshBoneRLECount( RpSkin *skin );
+
+extern RwUInt8 *
+_rpSkinGetMeshBoneRLE( RpSkin *skin );
+
+extern RpSkin *
+_rpSkinSplitDataCreate( RpSkin *skin, RwUInt32 boneLimit,
+                        RwUInt32 numMatrices, RwUInt32 numMeshes,
+                        RwUInt32 numRLE );
+
+extern RwBool
+_rpSkinSplitDataDestroy( RpSkin *skin );
 
 /*---------------------------------------------------------------------------*/
 
@@ -165,6 +196,29 @@ RpSkinAtomicGetType( RpAtomic *atomic );
  * \ingroup rpskin
  *
  * D3D8 skin pipeline extension.
+ */
+
+/**
+ * \defgroup rpskind3d8features Features
+ * \ingroup rpskind3d8
+ *
+ * D3D8 skin pipeline features.
+ */
+
+/**
+ * \defgroup rpskind3d8restrictions Restrictions
+ * \ingroup rpskind3d8
+ *
+ * D3D8 skin pipeline restrictions.
+ */
+
+/**
+ * \defgroup rpskinbonelimit Bone limit
+ * \ingroup rpskind3d8restrictions
+ *
+ * \par Bone limit
+ * The bone limit is 256 as skinning is performed on the CPU.
+ *
  */
 
 

@@ -10,15 +10,15 @@
 #define RTIMPORT_H
 
 /**
- * \defgroup rtimport RtWorldImport
- * \ingroup rttool
+ * \defgroup rtworldimport RtWorldImport
+ * \ingroup basicgeometry
  *
- * World Import Toolkit for Renderware.
+ * World Import Toolkit for RenderWare.
  */
 
 /**
  * \defgroup selectors RtWorldImportPartitionSelectors
- * \ingroup rtimport
+ * \ingroup rtworldimport
  *
  * The set of provided RtWorldImportPartitionSelectors:
  * Selects a good partition by calling one of the
@@ -29,7 +29,7 @@
 
 /**
  * \defgroup iterators RtWorldImportPartitionIterators
- * \ingroup rtimport
+ * \ingroup rtworldimport
  *
  * The set of provided RtWorldImportPartitionIterators:
  * Iterates through a set of candidate partitions, possibly
@@ -39,7 +39,7 @@
 
 /**
  * \defgroup evaluators RtWorldImportPartitionEvaluators
- * \ingroup rtimport
+ * \ingroup rtworldimport
  *
  * The set of provided RtWorldImportPartitionEvaluators:
  * Uses a combination of statistics, build sector, build status, and 
@@ -51,7 +51,7 @@
 
 /**
  * \defgroup terminators RtWorldImportPartitionTerminators
- * \ingroup rtimport
+ * \ingroup rtworldimport
  *
  * The set of provided RtWorldImportPartitionTerminators:
  * Checks given criteria about the statistics, build sector, build status, and
@@ -61,7 +61,7 @@
 
 /**
  * \defgroup kd RtWorldImportGuideKD
- * \ingroup rtimport
+ * \ingroup rtworldimport
  *
  * Tools to manipulate the \ref RtWorldImportGuideKDTree that is used to
  * manually build the sectors of a world.
@@ -69,7 +69,7 @@
 
 /**
  * \defgroup hints RtWorldImportHints
- * \ingroup rtimport
+ * \ingroup rtworldimport
  *
  * Tools to aid the build process by giving hints as to what geometry should
  * not be split, and what geometry makes for a good partitioning guide.
@@ -96,7 +96,7 @@
 #define rtWORLDIMPORTPROGRESSBSPCOMPRESSEND     5
 
 /**
- * \ingroup rtimport
+ * \ingroup rtworldimport
  * \def rtWORLDIMPORTINVALIDPARTITION
  *
  * This value means that no partition was found, or that the partition was
@@ -104,51 +104,61 @@
  */
 #define rtWORLDIMPORTINVALIDPARTITION  RwRealMAXVAL
 
+/*  maintained in Bin-tree  */
+#define CONGRUENTVERTEXCHILDREN 2
+
+/*  maintained in Quad-tree  */
+#define WELDVERTEXCHILDREN 4
+
 /****************************************************************************
  Global types
  */
-
-/**
- * Internal use only
- */
-typedef union RtWorldImportVertexState RtWorldImportVertexState;
-
-
-/**
- * \ingroup rtimport
- * \typedef RtWorldImportVertex
- *
- * typedef for struct \ref RtWorldImportVertex
- */
+#if (!defined(DOXYGEN))
 typedef struct RtWorldImportVertex RtWorldImportVertex;
 
-/**
- * \ingroup rtimport
- * \typedef RtWorldImportWeldVertex
- *
- * typedef for struct \ref RtWorldImportWeldVertex
- */
 typedef struct RtWorldImportWeldVertex RtWorldImportWeldVertex;
 
-/**
- * \ingroup rtimport
- * \typedef RtWorldImportBuildVertex
- *
- * typedef for struct \ref RtWorldImportBuildVertex
- */
 typedef struct RtWorldImportBuildVertex RtWorldImportBuildVertex;
 
+/* Internal use only */
+typedef union RtWorldImportVertexState RtWorldImportVertexState;
 
+/* Internal use only */
+union RtWorldImportVertexState
+{
+    /* clipFlags, two types, first is based on partition only, 2nd is
+     * also based on partition, but takes overlaps into consideration. i.e.
+     * number splits is usually higher in clipFlags[0] than [1] */
+    RwInt32                    clipFlags[2];       /* Internal use only */
+    RwInt32                    forwardingAddress;  /* Internal use only */
+    RtWorldImportVertex       *vpVert;             /* Internal use only */
+    RtWorldImportWeldVertex   *vpWeldVert;         /* Internal use only */
+    RtWorldImportBuildVertex  *vpBuildVert;        /* Internal use only */
+    RwSList                   *slist;              /* Internal use only */
+};
+#endif /* (!defined(DOXYGEN)) */
 
 /**
- * \ingroup rtimport
- * \typedef RtWorldImportBuildPolyInfo
+ * \ingroup rtworldimport
+ * \struct RtWorldImportVertex
+ * Holds data for each vertex in the import world.
  *
- * typedef for struct \ref RtWorldImportBuildPolyInfo
  */
+struct RtWorldImportVertex
+{
+    RwV3d           OC;         /**< World space vertex position */
+    RwV3d           normal;     /**< World space vertex normal */
+    RwRGBA          preLitCol;  /**< Vertex Prelight color */
+    RwTexCoords     texCoords[rwMAXTEXTURECOORDS];  
+                                /**< Vertex texture coordinates */
+    RtWorldImportVertexState state;  /**< Internal use only */
+    RwInt32         matIndex;   /**< Vertex material index */
+    void           *pUserdata;  /**< Pointer to unspecified per vertex user data */
+};
+
 typedef struct RtWorldImportBuildPolyInfo RtWorldImportBuildPolyInfo;
 /**
- * \ingroup rtimport
+ * \ingroup rtworldimport
  * \struct RtWorldImportBuildPolyInfo
  *
  * Information about a polygon
@@ -167,7 +177,7 @@ struct RtWorldImportBuildPolyInfo
 
 typedef union RtWorldImportBuildVertexMode RtWorldImportBuildVertexMode;
 /**
- * \ingroup rtimport
+ * \ingroup rtworldimport
  * \struct RtWorldImportBuildVertexMode
  *
  * Mode of the vertex.
@@ -182,7 +192,7 @@ union RtWorldImportBuildVertexMode
 };
 
 /**
- * \ingroup rtimport
+ * \ingroup rtworldimport
  * \struct RtWorldImportBuildVertex
  *
  * A list of polygons as a list of vertices where the end of poly boundary
@@ -198,30 +208,16 @@ struct RtWorldImportBuildVertex
     /**< we store some poly info in the end marker of a boundary */
 };
 
-
-
-/**
- * \ingroup rtimport
- * \typedef RtWorldImportGuideKDTree
- *
- * typedef for struct \ref RtWorldImportGuideKDTree
- */
-typedef struct RtWorldImportGuideKDTree RtWorldImportGuideKDTree;
-
 /* NB Merged RtWorldImportPartition with RtWorldImportBuildClipStatistics because
  * there was a unique one-to-one relationship between them, and it made things easier
  * just updating one stucture, without having to update both in sequence...
  */
 
-/**
- * \ingroup rtimport
- * \typedef RtWorldImportBuildClipStatistics
- *
- * typedef for struct \ref RtWorldImportBuildClipStatistics
- */
+
 typedef struct RtWorldImportBuildClipStatistics RtWorldImportBuildClipStatistics;
+
 /**
- * \ingroup rtimport
+ * \ingroup rtworldimport
  * \struct RtWorldImportBuildClipStatistics
  *
  * Holds statistics about a partition or candidate partition during
@@ -231,15 +227,15 @@ struct RtWorldImportBuildClipStatistics
 {
     RwInt32 numPotentialSplit;
     /**< The number of polygons split by the partition,
-     *   disgregarding overlaps */
+     *   disregarding overlaps */
 
     RwInt32 numPotentialLeft;
     /**< The number of potential polygons and fragments on the
-     *   left of the partition, disgregarding overlaps */
+     *   left of the partition, disregarding overlaps */
 
     RwInt32 numPotentialRight;
     /**< The number of potential polygons and fragments on the
-     *   right of the partition, disgregarding overlaps */
+     *   right of the partition, disregarding overlaps */
 
 
     RwInt32 numActualSplit;
@@ -276,15 +272,13 @@ struct RtWorldImportBuildClipStatistics
     /**< The actual, relative size of the overlap on the right of the partition */
 };
 
-/**
- * \ingroup rtimport
- * \typedef RtWorldImportPartition
- *
- * typedef for struct \ref RtWorldImportPartition
+/*
+ * typedef for struct RtWorldImportPartition
  */
 typedef struct RtWorldImportPartition RtWorldImportPartition;
+
 /**
- * \ingroup rtimport
+ * \ingroup rtworldimport
  * \struct RtWorldImportPartition
  *
  * A partitioning plane.
@@ -311,8 +305,14 @@ struct RtWorldImportPartition
     /**< The statistics for the partition */
 };
 
+/*
+ * typedef for struct \ref RtWorldImportGuideKDTree
+ */
+typedef struct RtWorldImportGuideKDTree RtWorldImportGuideKDTree;
+
+
 /**
- * \ingroup rtimport
+ * \ingroup rtworldimport
  * \struct RtWorldImportGuideKDTree
  * Represents the structure of a binary tree with
  * no contents per se. It is used to build a BSP in a user specified
@@ -342,6 +342,7 @@ struct RtWorldImportGuideKDTree
 
 typedef struct _rtWorldImportGuideKDStackElement _rtWorldImportGuideKDStackElement;
 
+#if (!defined(DOXYGEN))
 struct _rtWorldImportGuideKDStackElement
 {
     RwBool terminal;
@@ -357,16 +358,15 @@ struct _rtWorldImportGuideKDStack
     _rtWorldImportGuideKDStackElement *current;
     _rtWorldImportGuideKDStackElement *bottom;
 };
+#endif /* (!defined(DOXYGEN)) */
 
-/**
- * \ingroup rtimport
- * \typedef RtWorldImportBuildSector
- *
- * typedef for struct \ref RtWorldImportBuildSector
+/*
+ * typedef for struct RtWorldImportBuildSector
  */
 typedef struct RtWorldImportBuildSector RtWorldImportBuildSector;
+
 /**
- * \ingroup rtimport
+ * \ingroup rtworldimport
  * \struct RtWorldImportBuildSector
  *
  * Holds information about the sector that is being subdivided
@@ -401,15 +401,13 @@ struct RtWorldImportBuildSector
     /**< Maximum number of materials in the in the world */
 };
 
-/**
- * \ingroup rtimport
- * \typedef RtWorldImportBuildStatus
- *
- * typedef for struct \ref RtWorldImportBuildStatus
+/*
+ * typedef for struct RtWorldImportBuildStatus
  */
 typedef struct RtWorldImportBuildStatus RtWorldImportBuildStatus;
+
 /**
- * \ingroup rtimport
+ * \ingroup rtworldimport
  * \struct RtWorldImportBuildStatus
  * World Import Build Status Structure
  * Used to store the current tree's build status
@@ -419,50 +417,41 @@ struct RtWorldImportBuildStatus
     RwInt32 depth; /**< current depth in the tree */
 };
 
-/**
- * Internal use only
- */
-union RtWorldImportVertexState
+typedef struct RwRGBAUInt32 RwRGBAUInt32;
+
+#if (!defined(DOXYGEN))
+struct RwRGBAUInt32
 {
-    /* clipFlags, two types, first is based on partition only, 2nd is
-     * also based on partition, but takes overlaps into consideration. i.e.
-     * number splits is usually higher in clipFlags[0] than [1] */
-    RwInt32                    clipFlags[2];       /**< Internal use only */
-    RwInt32                    forwardingAddress;  /**< Internal use only */
-    RtWorldImportVertex       *vpVert;             /**< Internal use only */
-    RtWorldImportWeldVertex   *vpWeldVert;         /**< Internal use only */
-    RtWorldImportBuildVertex  *vpBuildVert;        /**< Internal use only */
-    RwSList                   *slist;              /**< Internal use only */
+    RwUInt32            red, green, blue, alpha;
 };
 
-/**
- * \ingroup rtimport
- * \struct RtWorldImportVertex
- * Holds data for each vertex in the import world.
- *
- */
-struct RtWorldImportVertex
+typedef struct RtWorldImportCongruentVertex RtWorldImportCongruentVertex;
+
+struct RtWorldImportCongruentVertex
 {
-    RwV3d           OC;         /**< World space vertex position */
-    RwV3d           normal;     /**< World space vertex normal */
-    RwRGBA          preLitCol;  /**< Vertex Prelight color */
-    RwTexCoords     texCoords[rwMAXTEXTURECOORDS];  
-                                /**< Vertex texture coordinates */
-    RtWorldImportVertexState state;  /**< Internal use only */
-    RwInt32         matIndex;   /**< Vertex material index */
-    void           *pUserdata;  /**< Pointer to unspecified per vertex user data */
+    RwInt32             destIdx;
+    RtWorldImportVertex vertex;
+    RtWorldImportVertex Mean;
+    RwRGBAUInt32        preLitMean;
+    RwInt32             refCount;
+    RtWorldImportCongruentVertex *child[CONGRUENTVERTEXCHILDREN];
 };
 
-/**
- * \ingroup rtimport
- * \typedef RtWorldImportTriangle 
+struct RtWorldImportWeldVertex
+{
+    RtWorldImportVertex *sourcePtr;
+    RtWorldImportCongruentVertex *CongruentVertex;
+    RtWorldImportWeldVertex *child[WELDVERTEXCHILDREN];
+};
+#endif /* (!defined(DOXYGEN)) */
+
+/*
  * Holds data for each triangle in the import world.
- *
- * \see RtWorldImportTriangle
  */
 typedef struct RtWorldImportTriangle RtWorldImportTriangle;
+
 /**
- * \ingroup rtimport
+ * \ingroup rtworldimport
  * \struct RtWorldImportTriangle
  * Holds data for each triangle in the import world.
  *
@@ -476,38 +465,69 @@ struct RtWorldImportTriangle
 };
 
 
+
+
+/*
+ * typedef for struct RtWorldImportBBoxHintDesc
+ */
+typedef struct RtWorldImportBBoxHintDesc RtWorldImportBBoxHintDesc;
 /**
- * \ingroup rtimport
- * \typedef RtWorldImportHints
- *
- * typedef for struct \ref RtWorldImportHints
+ * \ingroup rtworldimport
+ * \struct RtWorldImportBBoxHintDesc
+ * Bounding box hints and (priority) values used to control the world
+ * sectorization process.
+ */
+struct RtWorldImportBBoxHintDesc
+{
+    RwBBox bBox;        /**< The (necessarily orthogonal) bounding box */
+    RwReal value;       /**< The value or priority of the hint (highest is most important) */
+};
+
+/*
+ * typedef for struct RtWorldImportHints
  */
 typedef struct RtWorldImportHints RtWorldImportHints;
 
 /**
- * \ingroup rtimport
+ * \ingroup rtworldimport
  * \struct RtWorldImportHints
  * Bounding box hints used to control the world sectorization process.
  * \see RtWorldImportHintsSet
  */
 struct RtWorldImportHints
 {    
-    /** The bounding box hints */
-    RwBBox *boundingBoxes;   
-    /** The number of bounding box hints */
-    RwInt32 numBoundingBoxes;
+    RtWorldImportBBoxHintDesc *boundingBoxes;      /**< The bounding box hints */
+    RwInt32 numBoundingBoxes;   /**< The number of bounding box hints */
 };
 
+
 /**
- * \ingroup rtimport
- * \typedef RtWorldImportParameters
+ * \ingroup rtworldimport
+ * \ref RtWorldImportHintGroup
  *
+ * An enumeration that can be passed to
+ * \ref RtWorldImportHintsSetGroup and \ref RtWorldImportHintsGetGroup to determine
+ * whether hints will contribute towards the shield hint group or partition hint group
+ */
+typedef enum 
+{
+    rtWORLDIMPORTSHIELDHINT = 0,
+    rtWORLDIMPORTPARTITIONHINT,
+
+    rtWORLDIMPORTFORCEENUMSIZEINT = RWFORCEENUMSIZEINT
+}
+RtWorldImportHintGroup;
+
+
+
+
+/*
  * typedef for struct \ref RtWorldImportParameters
  */
 typedef struct RtWorldImportParameters RtWorldImportParameters;
 
 /**
- * \ingroup rtimport
+ * \ingroup rtworldimport
  * \struct RtWorldImportParameters
  * Parameters used with \ref RtWorldImportCreateWorld.
  * They are initialized to default values using \ref RtWorldImportParametersInit.
@@ -563,15 +583,13 @@ struct RtWorldImportParameters
     /**< If TRUE the world will be checked for validity during the build process. */
 };
 
-/**
- * \ingroup rtimport
- * \typedef RtWorldImport
- *
- * typedef for struct \ref RtWorldImport
+/*
+ * typedef for struct RtWorldImport
  */
 typedef struct RtWorldImport RtWorldImport;
+
 /**
- * \ingroup rtimport
+ * \ingroup rtworldimport
  * \struct RtWorldImport
  * World Import State Structure
  */
@@ -583,14 +601,10 @@ struct RtWorldImport
 
     RtWorldImportTriangle *polygons; /**< Triangle array */
     RwInt32             numPolygons; /**< Triangle count */
-
-    
-    RwSurfaceProperties surfaceProps; /**< The world's surface 
-                                           lighting properties */
 };
 
 /**
- * \ingroup rtimport
+ * \ingroup rtworldimport
  * \ref RtWorldImportProgressCallBack is the type for the callback function supplied to
  * \ref RtWorldImportSetProgressCallBack.
  *
@@ -626,65 +640,102 @@ struct RtWorldImport
 typedef RwBool (*RtWorldImportProgressCallBack)(RwInt32 msg, RwReal value);
 
 /**
- * \ingroup rtimport
- * \typedef RtWorldImportDestroyVertexUserdataCallBack
+ * \ingroup rtworldimport
+ * \ref RtWorldImportDestroyVertexUserdataCallBack
  *
  * A pointer to the CallBack function that will be called during
  * vertex destruction.
+ *
+ * \param pUserdata
+ *
+ * \return 
  */
 typedef RwBool (*RtWorldImportDestroyVertexUserdataCallBack)(void **pUserdata);
 
 /**
- * \ingroup rtimport
- * \typedef RtWorldImportCloneVertexUserdataCallBack
+ * \ingroup rtworldimport
+ * \ref RtWorldImportCloneVertexUserdataCallBack
  *
  * A pointer to the CallBack function that will be called during
  * vertex cloning.
+ *
+ * \param pUserdataDst
+ * \param pUserdataSrc
+ *
+ * \return
  */
 typedef RwBool (*RtWorldImportCloneVertexUserdataCallBack)(void **pUserdataDst, void **pUserdataSrc);
 
 /**
- * \ingroup rtimport
- * \typedef RtWorldImportInterpVertexUserdataCallBack
+ * \ingroup rtworldimport
+ * \ref RtWorldImportInterpVertexUserdataCallBack
  *
  * A pointer to the CallBack function that will be called during
  * vertex interpolation.
+ *
+ * \param pUserdataDst
+ * \param pUserdata1
+ * \param pUserdata2
+ * \param delta
+ *
+ * \return
  */
 typedef RwBool (*RtWorldImportInterpVertexUserdataCallBack)(void **pUserdataDst, void **pUserdata1, void **pUserdata2, RwReal delta);
 
 /**
- * \ingroup rtimport
- * \typedef RtWorldImportDestroyPolygonUserdataCallBack
+ * \ingroup rtworldimport
+ * \ref RtWorldImportDestroyPolygonUserdataCallBack
  *
  * A pointer to the CallBack function that will be called during
  * polygon destruction.
+ *
+ * \param pUserdata
+ *
+ * \return
  */
 typedef RwBool (*RtWorldImportDestroyPolygonUserdataCallBack)(void **pUserdata);
 
 /**
- * \ingroup rtimport
- * \typedef RtWorldImportSplitPolygonUserdataCallBack
+ * \ingroup rtworldimport
+ * \ref RtWorldImportSplitPolygonUserdataCallBack
  *
  * A pointer to the CallBack function that will be called during
  * polygon division.
+ *
+ * \param pUserdataDst
+ * \param pUserdataSrc
+ *
+ * \return
  */
 typedef RwBool (*RtWorldImportSplitPolygonUserdataCallBack)(void **pUserdataDst, void **pUserdataSrc);
 
 /**
- * \ingroup rtimport
- * \typedef RtWorldImportSectorSetVertexUserdataCallBack
+ * \ingroup rtworldimport
+ * \ref RtWorldImportSectorSetVertexUserdataCallBack
  *
  * A pointer to the CallBack function that will be called during
  * the setting of the vertex user data.
+ *
+ * \param pUserdata
+ * \param sector
+ * \param index
+ *
+ * \return
  */
 typedef RwBool (*RtWorldImportSectorSetVertexUserdataCallBack)(void **pUserdata, RpWorldSector *sector, RwInt32 index);
 
 /**
- * \ingroup rtimport
- * \typedef RtWorldImportSectorSetPolygonUserdataCallBack
+ * \ingroup rtworldimport
+ * \ref RtWorldImportSectorSetPolygonUserdataCallBack
  *
  * A pointer to the CallBack function that will be called during
  * the setting of the polygon user data.
+ *
+ * \param pUserdata
+ * \param sector
+ * \param index
+ *
+ * \return
  */
 typedef RwBool (*RtWorldImportSectorSetPolygonUserdataCallBack)(void **pUserdata, RpWorldSector *sector, RwInt32 index);
 
@@ -692,12 +743,18 @@ typedef RwBool (*RtWorldImportSectorSetPolygonUserdataCallBack)(void **pUserdata
 
 
 /**
- * \ingroup rtimport
- * \typedef RtWorldImportTerminationBuildCallBack
+ * \ingroup rtworldimport
+ * \ref RtWorldImportTerminationBuildCallBack
  *
  * A pointer to the function that will be called during the
  * build process to determine whether the current sector should
  * be subdivided further, or terminated.
+ *
+ * \param buildSector
+ * \param buildStatus
+ * \param pData
+ *
+ * \return
  */
 typedef RwBool (*RtWorldImportTerminationBuildCallBack)
                (RtWorldImportBuildSector *buildSector,
@@ -705,11 +762,17 @@ typedef RwBool (*RtWorldImportTerminationBuildCallBack)
                 void *pData);
 
 /**
- * \ingroup rtimport
- * \typedef RtWorldImportPartitionBuildCallBack
+ * \ingroup rtworldimport
+ * \ref RtWorldImportPartitionBuildCallBack
  *
  * A pointer to the function that will be called during the
  * build process to select a suitable sector partition.
+ *
+ * \param buildSector
+ * \param buildStatus
+ * \param partition
+ *
+ * \return
  */
 typedef RwReal (*RtWorldImportPartitionBuildCallBack)
              (RtWorldImportBuildSector *buildSector,
@@ -717,15 +780,13 @@ typedef RwReal (*RtWorldImportPartitionBuildCallBack)
               RtWorldImportPartition *partition,
               void *pData);
 
-/**
- * \ingroup rtimport
- * \typedef RtWorldImportBuildCallBacks
- *
+/*
  * typedef for struct \ref RtWorldImportBuildCallBacks
  */
 typedef struct RtWorldImportBuildCallBacks RtWorldImportBuildCallBacks; /* MAYBE: rename to SectorCallBacks ?*/
+
 /**
- * \ingroup rtimport
+ * \ingroup rtworldimport
  * \struct RtWorldImportBuildCallBacks
  * Sectorization callbacks
  */
@@ -741,15 +802,13 @@ struct RtWorldImportBuildCallBacks
     /**< Termination callback user data */    
 };
 
-/**
- * \ingroup rtimport
- * \typedef RtWorldImportUserdataCallBacks
- *
+/*
  * typedef for struct \ref RtWorldImportUserdataCallBacks
  */
 typedef struct RtWorldImportUserdataCallBacks RtWorldImportUserdataCallBacks;
+
 /**
- * \ingroup rtimport
+ * \ingroup rtworldimport
  * \struct RtWorldImportUserdataCallBacks
  * Bundle of callbacks
  */
@@ -772,8 +831,8 @@ struct RtWorldImportUserdataCallBacks
 };
 
 /**
- * \ingroup rtimport
- * \typedef RtWorldImportBuildPartitionSelector
+ * \ingroup rtworldimport
+ * \ref RtWorldImportBuildPartitionSelector
  *
  * An enumeration that can be passed to
  * \ref RtWorldImportSetStandardBuildPartitionSelector to determine
@@ -821,8 +880,6 @@ extern              "C"
 extern RwBool
 _rtImportBuildSectorFindBBox(RtWorldImportBuildSector *buildSector, RwBBox *bbpOut);
 
-/* TODO: decide where these scheme functions are going and which ones are public and 
-    whether _rt or RT should be used */
 extern void
     _rtWorldImportGuideKDCopy(RtWorldImportGuideKDTree *KD, RpSector *spSector, RwInt32 depth);
 extern void _rtWorldImportGuideKDStackDestroy(_rtWorldImportGuideKDStack *stack);
@@ -862,6 +919,12 @@ RtWorldImportMaterialSeparatePartitionSelector(RtWorldImportBuildSector *buildSe
                                     RtWorldImportBuildStatus *buildStatus,
                                     RtWorldImportPartition *partition,
                                     void *userData);
+extern RwReal
+RtWorldImportPartitionHintPartitionSelector(RtWorldImportBuildSector *buildSector,
+                                    RtWorldImportBuildStatus *buildStatus,
+                                    RtWorldImportPartition *partition,
+                                    void * __RWUNUSED__ userData);
+
 
 extern RwReal
 RtWorldImportMaximumOccluderPartitionSelector(RtWorldImportBuildSector *buildSector,
@@ -1109,14 +1172,13 @@ RtWorldImportSectorAspectSizePartitionTerminator(RtWorldImportBuildSector * buil
 
 
 
-/* END TODO */
 
 /* WorldImport hints */
 extern void
-RtWorldImportHintsSet(RtWorldImportHints *hints);
+RtWorldImportHintsSetGroup(RtWorldImportHints *hints, RtWorldImportHintGroup group);
 
 extern RtWorldImportHints *
-RtWorldImportHintsGet(void);
+RtWorldImportHintsGetGroup(RtWorldImportHintGroup group);
 
 extern RtWorldImportHints *
 RtWorldImportHintsCreate(void);
@@ -1175,14 +1237,6 @@ extern RwInt32 RtWorldImportGetNumTriangles(RtWorldImport * nohsworld);
 extern RtWorldImportTriangle *
 RtWorldImportGetTriangles(RtWorldImport * nohsworld);
 
-/* Surface lighting characteristics */
-extern RtWorldImport *
-RtWorldImportSetSurfaceProperties(RtWorldImport * world,
-                                  RwSurfaceProperties *
-                                  surface);
-
-extern RwSurfaceProperties *
-RtWorldImportGetSurfaceProperties(RtWorldImport * world);
 
 /* Progress callbacks */
 extern void
@@ -1254,6 +1308,12 @@ RtWorldImportSetStandardBuildPartitionSelector(RtWorldImportBuildPartitionSelect
 #define RtWorldImportParametersInitialize(_paramsPtr) \
     *(_paramsPtr) = *RtWorldImportParametersInit();
 
+/* Back compatibility with former hints which only permitted type zero (shield) hints... */
+#define RtWorldImportHintsSet(_hints) \
+RtWorldImportHintsSetGroup(_hints, rtWORLDIMPORTSHIELDHINT);
+
+#define RtWorldImportHintsGet() \
+RtWorldImportHintsGetGroup(rtWORLDIMPORTSHIELDHINT);
 
 
 #endif                          /* RTIMPORT_H */

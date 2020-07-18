@@ -303,7 +303,12 @@ PluginAttach(void)
 		
 		return FALSE;
 	}
-	
+#ifndef LIBRW
+	if (!RtAnimInitialize())
+	{
+		return FALSE;
+	}
+#endif
 	if( !RpHAnimPluginAttach() )
 	{
 		printf("Couldn't attach RpHAnim plugin\n");

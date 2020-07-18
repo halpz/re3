@@ -28,7 +28,7 @@
 
 /**
  * \defgroup rprandom RpRandom
- * \ingroup rpplugin
+ * \ingroup mathtools
  *
  * Random Number Generation Plugin for RenderWare Graphics.
  */

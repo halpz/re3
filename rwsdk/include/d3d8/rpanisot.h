@@ -7,7 +7,7 @@
 
 /**
  * \defgroup rpanisot RpAnisot
- * \ingroup rpplugin
+ * \ingroup mipmapping
  *
  * Anisotropic Texture Sampling Plugin for RenderWare Graphics.
  */
@@ -22,7 +22,7 @@
  * \li \b Plugin \b attachments: \ref RpWorldPluginAttach, \ref RpAnisotPluginAttach
  *
  * \subsection anisotoverview Overview
- * The RpAnisot plugin is used to extend an RwTexture with a maximum
+ * The RpAnisot plugin is used to extend an \ref RwTexture with a maximum
  * anisotropy value that will be used when a particular texture is drawn.
  * When textured polygons are viewed nearly edge on, for example when looking
  * dowm a road or a football pitch, distant pixels are not sampled very well

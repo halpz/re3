@@ -48,10 +48,10 @@ workspace "reVC"
 
 	filter { "system:windows" }
 		platforms {
-			"win-x86-RW33_d3d8-mss",
+			"win-x86-RW34_d3d8-mss",
 			"win-x86-librw_d3d9-mss",
 			"win-x86-librw_gl3_glfw-mss",
-			"win-x86-RW33_d3d8-oal",
+			"win-x86-RW34_d3d8-oal",
 			"win-x86-librw_d3d9-oal",
 			"win-x86-librw_gl3_glfw-oal",
 		}
@@ -128,7 +128,7 @@ project "librw"
 	targetdir "lib/%{cfg.platform}/%{cfg.buildcfg}"
 	files { path.join(Librw, "src/*.*") }
 	files { path.join(Librw, "src/*/*.*") }
-	filter "platforms:*RW33*"
+	filter "platforms:*RW34*"
 		flags { "ExcludeFromBuild" }
 	filter  {}
 end
@@ -218,11 +218,11 @@ project "reVC"
 	filter "platforms:linux*oal"
 		links { "openal", "mpg123", "sndfile", "pthread" }
 
-	filter "platforms:*RW33*"
+	filter "platforms:*RW34*"
 		staticruntime "on"
 		includedirs { "rwsdk/include/d3d8" }
 		libdirs { "rwsdk/lib/d3d8/release" }
-		links { "rwcore", "rpworld", "rpmatfx", "rpskin", "rphanim", "rtbmp", "rtquat", "rtcharse" }
+		links { "rwcore", "rpworld", "rpmatfx", "rpskin", "rphanim", "rtbmp", "rtquat", "rtanim", "rtcharse", "rpanisot" }
 		defines { "RWLIBS" }
 		linkoptions "/SECTION:_rwcseg,ER!W /MERGE:_rwcseg=.text"
 	

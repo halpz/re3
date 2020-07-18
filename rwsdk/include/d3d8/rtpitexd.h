@@ -11,7 +11,7 @@
 
 /**
  * \defgroup rtpitexd RtPITexD
- * \ingroup rttool
+ * \ingroup texturedictionaries
  *
  * Platform Independent Texture Dictionaries
  *

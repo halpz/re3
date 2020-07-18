@@ -108,7 +108,7 @@ DefinedState(void)
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
-	RwRenderStateSet(rwRENDERSTATEALPHAPRIMITIVEBUFFER, (void*)FALSE);
+	//RwRenderStateSet(rwRENDERSTATEALPHAPRIMITIVEBUFFER, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEBORDERCOLOR, (void*)RWRGBALONG(0, 0, 0, 255));
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEFOGCOLOR,
@@ -358,9 +358,9 @@ AtomicRemoveAnimFromSkinCB(RpAtomic *atomic, void *data)
 			hier->interpolator->currentAnim = nil;
 		}
 #else
-		if(hier && hier->pCurrentAnim){
-			RpHAnimAnimationDestroy(hier->pCurrentAnim);
-			hier->pCurrentAnim = nil;
+		if(hier && hier->currentAnim){
+			RpHAnimAnimationDestroy(hier->currentAnim->pCurrentAnim);
+			hier->currentAnim = nil;
 		}
 #endif
 	}

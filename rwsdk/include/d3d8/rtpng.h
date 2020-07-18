@@ -12,7 +12,7 @@
 
 /**
  * \defgroup rtpng RtPNG
- * \ingroup rttool
+ * \ingroup imageconversiontools
  *
  * PNG/Portable Network Graphics Image Format Toolkit for RenderWare.
  *

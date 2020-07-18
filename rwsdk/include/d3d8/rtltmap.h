@@ -1,7 +1,7 @@
 
 /**
  * \defgroup rtltmap RtLtMap
- * \ingroup rttool
+ * \ingroup lighting
  *
  * Lightmap Generation Toolkit for RenderWare.
  */
@@ -21,7 +21,6 @@
 
 /**
  * \ingroup rtltmap
- * \typedef RtLtMapIlluminateSampleCallBack
  * \ref RtLtMapIlluminateSampleCallBack is the callback to be called, from
  * within \ref RtLtMapIlluminate, for groups of samples in the objects
  * currently being illuminated.
@@ -32,7 +31,7 @@
  *
  * This callback will receive an array of color values to fill in, each
  * representing one sample in the current object - this may correspond to
- * a texel in the current object's lightmap or the prelight colour of a
+ * a texel in the current object's lightmap or the prelight color of a
  * vertex, depending on whether the object is lightmapped and/or vertex-lit.
  * It will receive positions (in world-space) for each sample and the normal
  * vector (again, in world-space) of each sample (normals are interpolated
@@ -44,7 +43,7 @@
  * The barycentric coordinates may be used, for example, to allow a callback
  * to easily import existing lighting data (e.g from previously generated
  * lightmaps in a different format, or from an art package with lighting
- * functionality). 
+ * functionality).
  *
  * NOTE: The alpha channel of the RwRGBA results array must NOT be modified.
  * These values are used internally and their modification may result in
@@ -82,7 +81,6 @@ typedef RwRGBA *(*RtLtMapIlluminateSampleCallBack)(RwRGBA        *results,
 
 /**
  * \ingroup rtltmap
- * \typedef RtLtMapIlluminateVisCallBack
  * \ref RtLtMapIlluminateVisCallBack is the callback to be called, from
  * within \ref RtLtMapIlluminate, to determine the visibility between a
  * sample and a light.
@@ -94,7 +92,7 @@ typedef RwRGBA *(*RtLtMapIlluminateSampleCallBack)(RwRGBA        *results,
  * Each sample may represent a texel in the current object's lightmap
  * or the prelight color of a vertex, depending on whether the object
  * is lightmapped and/or vertex-lit (see \ref RtLtMapObjectFlags).
- * 
+ *
  * The callback will receive a pointer to the world of the current
  * \ref RtLtMapLightingSession (this may be used to perform intersection
  * tests), the world-space position of the sample, the world-space
@@ -111,15 +109,15 @@ typedef RwRGBA *(*RtLtMapIlluminateSampleCallBack)(RwRGBA        *results,
  * expressed by modifying the RwRGBAReal value. This defaults to bright
  * white but may be reduced to signify that the light from the light
  * source should be attenuated. This could be used to take into account
- * light-filtering objects in the scene (such as coloured glass or fog).
+ * light-filtering objects in the scene (such as colored glass or fog).
  *
  * The default RtLtMapIlluminateVisCallBack supplied with RtLtMap is
  * \ref RtLtMapDefaultVisCallBack. This callback performs visibility
- * tests using the line-intersection tests from \ref rtintersect. It tests
+ * tests using the line-intersection tests from \ref rtintersection. It tests
  * for occlusion by RpWorldSectors and RpAtomics and it respects the
  * relevant \ref RtLtMapObjectFlags and \ref RtLtMapMaterialFlags but it
  * does not filter light; visibility is determined to be either one or zero.
- * 
+ *
  * \param  world      The world of the current RtLtMapLightingSession
  * \param  result     An RwRGBAReal value to attentuate this light's
  *                    contribution to the current sample
@@ -141,7 +139,6 @@ typedef RwBool (*RtLtMapIlluminateVisCallBack)(RpWorld    *world,
 
 /**
  * \ingroup rtltmap
- * \typedef RtLtMapIlluminateProgressCallBack
  * \ref RtLtMapIlluminateProgressCallBack is the callback to be called, from
  * within \ref RtLtMapIlluminate, to allow a user to track lighting progress.
  *
@@ -214,17 +211,17 @@ typedef enum RtLtMapProgressMessage RtLtMapProgressMessage;
 typedef struct RtLtMapLightingSession RtLtMapLightingSession;
 /**
  * \ingroup rtltmap
- * \typedef RtLtMapLightingSession
- * The \ref RtLtMapLightingSession structure holds information to be passed to
+ * \struct RtLtMapLightingSession
+ * The RtLtMapLightingSession structure holds information to be passed to
  * \ref RtLtMapIlluminate. It is used to parameterize the lighting process.
  *
- * The \ref RtLtMapLightingSession structure encapsulates a set of objects and
+ * The RtLtMapLightingSession structure encapsulates a set of objects and
  * keeps track of the proportion of samples, within that set, that have already
  * been lit by calls to \ref RtLtMapIlluminate. Each call performs lighting for
  * one 'slice' of the whole 'session'. If the camera member is non-NULL, it is
  * important that the camera is not moved between lighting slices.
  *
- * The \ref RtLtMapLightingSession is also passed to
+ * The RtLtMapLightingSession is also passed to
  * \ref RtLtMapLightMapsCreate, \ref RtLtMapLightMapsClear,
  * \ref RtLtMapLightMapsDestroy and \ref RtLtMapAreaLightGroupCreate,
  * though not all of the session structure's member will be used in
@@ -327,7 +324,7 @@ typedef enum RtLtMapMaterialFlags RtLtMapMaterialFlags;
 
 /**
  * \ingroup rtltmap
- * \ref RtLtMapObjectFlags is an enumerated type specifying the different
+ * RtLtMapObjectFlags is an enumerated type specifying the different
  * lightmap-related flags which may be applied to world sectors and
  * atomics. These values will be taken into consideration within
  * \ref RtLtMapLightMapsCreate and \ref RtLtMapIlluminate.
@@ -345,11 +342,11 @@ enum RtLtMapObjectFlags
     rtLTMAPOBJECTNAFLAG = 0,
 
     rtLTMAPOBJECTLIGHTMAP    = 1, /**< This object is to be lightmapped */
-    rtLTMAPOBJECTVERTEXLIGHT = 2, /**< This object's vertex prelight colours should
-                                   *   be lit within \ref RtLtMapIlluminate. */
+    rtLTMAPOBJECTVERTEXLIGHT = 2, /**< This object's vertex prelight colors should
+                                       be lit within \ref RtLtMapIlluminate. */
     rtLTMAPOBJECTNOSHADOW    = 4, /**< This object does not cast shadows (useful, for
-                                   *   example, for moving objects for which dynamic
-                                   *   shadows are to be rendered - such as doors) */
+                                       example, for moving objects for which dynamic
+                                       shadows are to be rendered - such as doors) */
 
     rtLTMAPOBJECTFLAGFORCEENUMSIZEINT = 0x7FFFFFFF
 };
@@ -358,10 +355,13 @@ typedef enum RtLtMapObjectFlags RtLtMapObjectFlags;
 /* Area-lighting stuff:*
  ***********************/
 
+
+typedef struct RtLtMapAreaLightGroup RtLtMapAreaLightGroup;
+
 /**
  * \ingroup rtltmap
- * \typedef RtLtMapAreaLightGroup
- * \ref RtLtMapAreaLightGroup is a structure which acts as a container
+ * \struct RtLtMapAreaLightGroup
+ * RtLtMapAreaLightGroup is a structure which acts as a container
  * for area lights created by a call to \ref RtLtMapAreaLightGroupCreate.
  * The containers may be chained and passed to \ref RtLtMapIlluminate.
  * Each container has an optional pointer to a RwFrame which is used to
@@ -376,7 +376,6 @@ typedef enum RtLtMapObjectFlags RtLtMapObjectFlags;
  * \see RtLtMapIlluminate
  * \see RtLtMapIlluminateVisCallBack
  */
-typedef struct RtLtMapAreaLightGroup RtLtMapAreaLightGroup;
 struct RtLtMapAreaLightGroup
 {
     RwSList *meshes; /**< A list of hierarchically-grouped area lights */
@@ -388,13 +387,15 @@ struct RtLtMapAreaLightGroup
 
 /* Area light triangles are grouped by source mesh (this may change) */
 typedef struct LtMapAreaLightMesh LtMapAreaLightMesh;
+
+#if (!defined(DOXYGEN))
 struct LtMapAreaLightMesh
 {
     RwUInt32        flags;      /* To hold hierarchical visibility culling flags,
                                  * relevant to the object/triangle *currently* being lit. */
-    RpMaterial     *material;   /* The emitter material, containing colour, etc */
+    RpMaterial     *material;   /* The emitter material, containing color, etc */
     RwSphere        sphere;     /* Each mesh has an associated center and radius */
-    RwReal          ROI;        /* Centred on the above sphere, the R.O.I. of the
+    RwReal          ROI;        /* Centered on the above sphere, the R.O.I. of the
                                  * samples in this mesh (a conservative estimate) */
     RwSList        *triangles;  /* A list of the area light triangles in this mesh */
 };
@@ -412,6 +413,37 @@ struct LtMapAreaLight
                              * not worth storing 3 points, coarse culling is fine) */
     RwV3d   *lights;        /* Array of area light sample positions (in world-space) */
 };
+#endif /* (!defined(DOXYGEN)) */
+
+#if (defined(SKY2_DRVMODEL_H) || defined(NULLSKY_DRVMODEL_H))
+
+/**
+ * \ingroup rtltmapps2
+ * \ref RtLtMapSkyLumCalcCallBack is the callback to be called, from
+ * within \ref RtLtMapSkyBaseTextureProcess, to allow a user to select the
+ * function to process the textures for rendering on the PlayStation 2.
+ *
+ * The function is called for each span of a full color image, or for the
+ * CLUT in a palettised image, to compute the luminance and stores it in
+ * the alpha component of the texel.
+ *
+ * \param  scanline  A pointer to a scanline of \ref RwRGBA data.
+ * \param  width     Width of the scanline, in pixels.
+ *
+ * \return A pointer to the scanline on success, NULL otherwise.
+ *
+ * \see RtLtMapSkyBaseTextureProcess
+ * \see RtLtMapSkyLightingSessionBaseTexturesProcess
+ * \see RtLtMapSkyLightMapMakeDarkMap
+ * \see RtLtMapSkyLumCalcMaxCallBack
+ * \see RtLtMapSkyLumCalcSigmaCallBack
+ * \see RtLtMapSkySetLumCalcCallBack
+ * \see RtLtMapSkyGetLumCalcCallBack
+ */
+typedef RwRGBA *(*RtLtMapSkyLumCalcCallBack)(RwRGBA *scanline,
+                                             RwUInt32 width );
+
+#endif /* (defined(SKY2_DRVMODEL_H) || defined(NULLSKY_DRVMODEL_H)) */
 
 
 #ifdef __cplusplus
@@ -486,6 +518,12 @@ RtLtMapDefaultVisCallBack(RpWorld    *world,
                           RwV3d      *samplePos,
                           RwV3d      *lightPos,
                           RpLight __RWUNUSED__ *light);
+
+extern void
+RtLtMapSetVisCallBackCollisionScalar(RwReal scalar);
+
+extern RwReal
+RtLtMapGetVisCallBackCollisionScalar(void);
 
 extern RtLtMapLightingSession *
 RtLtMapLightingSessionInitialize(RtLtMapLightingSession *session,
@@ -562,7 +600,6 @@ extern RwBool
 RtLtMapSetAreaLightErrorCutoff(RwReal tolerance);
 
 
-
 /* Texture-saving functionality: */
 extern RwTexDictionary *
 RtLtMapTexDictionaryCreate(RtLtMapLightingSession *session);
@@ -588,7 +625,13 @@ extern RpAtomic  *RtLtMapSkyAtomicBaseTexturesProcess(RpAtomic *atomic);
 extern RpWorldSector *
 RtLtMapSkyWorldSectorBaseTexturesProcess(RpWorldSector *sector);
 extern RtLtMapLightingSession *
-RtLtMapSkyBaseTexturesProcess(RtLtMapLightingSession *session);
+RtLtMapSkyLightingSessionBaseTexturesProcess(RtLtMapLightingSession *session);
+
+extern RwRGBA *RtLtMapSkyLumCalcMaxCallBack( RwRGBA *scanline, RwUInt32 width );
+extern RwRGBA *RtLtMapSkyLumCalcSigmaCallBack( RwRGBA *scanline, RwUInt32 width );
+
+extern RwBool RtLtMapSkySetLumCalcCallBack(RtLtMapSkyLumCalcCallBack cback);
+extern RtLtMapSkyLumCalcCallBack RtLtMapSkyGetLumCalcCallBack( void );
 
 #endif /* (defined(SKY2_DRVMODEL_H) || defined(NULLSKY_DRVMODEL_H)) */
 

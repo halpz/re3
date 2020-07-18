@@ -1,7 +1,7 @@
 
 /**
  * \defgroup rpltmap RpLtMap
- * \ingroup rpplugin
+ * \ingroup lighting
  *
  * Lightmap Plugin for RenderWare Graphics.
  */
@@ -16,6 +16,15 @@
 #include "rwcore.h"
 #include "rpworld.h"
 
+
+/* Used during lightmap illumination (sliver triangles are skipped
+ * (their texels should be filled by dilate()), because their normals
+ * can't be accurately calculated) */
+#define rpLTMAPDEFAULTSLIVERAREATHRESHOLD (0.001f)
+
+/* Used during lightmap UV calculation (polySets may be
+ * joined on the basis of vertices with equal positions) */
+#define rpLTMAPDEFAULTVERTEXWELDTHRESHOLD (0.1f)
 
 #define rpLTMAPDEFAULTLIGHTMAPSIZE 128
 #define rpLTMAPMINLIGHTMAPSIZE     16
