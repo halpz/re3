@@ -449,7 +449,7 @@ CSprite2d::AddToBuffer(const CRect &r, const CRGBA &c, float u0, float v0, float
 bool
 CSprite2d::IsVertexBufferFull()
 {
-	return (nextBufferVertex > TEMPBUFFERINDEXSIZE-128-4 || nextBufferIndex > ARRAY_SIZE(TempBufferRenderIndexList)-6);
+	return (nextBufferVertex > TEMPBUFFERVERTSIZE-128-4 || nextBufferIndex > ARRAY_SIZE(TempBufferRenderIndexList)-6);
 }
 
 void
