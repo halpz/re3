@@ -14,6 +14,6 @@ public:
 
 extern int32 TempBufferVerticesStored;
 extern int32 TempBufferIndicesStored;
-extern RwIm2DVertex TempVertexBuffer[TEMPBUFFERVERTSIZE];
-extern RwIm3DVertex *TempBufferRenderVertices;
+extern RwIm2DVertex *TempVertexBuffer;
+extern RwIm3DVertex TempBufferRenderVertices[TEMPBUFFERVERTSIZE];
 extern RwImVertexIndex TempBufferRenderIndexList[TEMPBUFFERINDEXSIZE];
