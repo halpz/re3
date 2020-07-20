@@ -1279,7 +1279,7 @@ CFileLoader::LoadOcclusionVolume(const char *line)
 		&x, &y, &z,
 		&width, &length, &height,
 		&angle);
-	COcclusion::AddOne(x, y, z, width, length, z + height/2.0f, angle);
+	COcclusion::AddOne(x, y, z + height/2.0f, width, length, height, angle);
 }
 
 

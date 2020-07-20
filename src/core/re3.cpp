@@ -4,6 +4,7 @@
 #include "crossplatform.h"
 #include "patcher.h"
 #include "Renderer.h"
+#include "Occlusion.h"
 #include "Credits.h"
 #include "Camera.h"
 #include "Weather.h"
@@ -495,6 +496,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Render", "Frame limiter", &FrontEndMenuManager.m_PrefsFrameLimiter, nil);
 		DebugMenuAddVarBool8("Render", "VSynch", &FrontEndMenuManager.m_PrefsVsync, nil);
 		DebugMenuAddVar("Render", "Max FPS", &RsGlobal.maxFPS, nil, 1, 1, 1000, nil);
+		DebugMenuAddVarBool8("Render", "Occlusion debug", &bDisplayOccDebugStuff, nil);
 		DebugMenuAddVarBool8("Render", "Show Ped Paths", &gbShowPedPaths, nil);
 		DebugMenuAddVarBool8("Render", "Show Car Paths", &gbShowCarPaths, nil);
 		DebugMenuAddVarBool8("Render", "Show Car Path Links", &gbShowCarPathsLinks, nil);

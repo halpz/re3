@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include "main.h"
 #include "Occlusion.h"
 #include "Game.h"
 #include "Camera.h"
@@ -28,7 +29,7 @@ bool gOccluderCoorsValid[8];
 CVector gOccluderCoorsOnScreen[8];
 CVector gOccluderCoors[8];
 
-bool bDisplayOccDebugStuff = false;
+bool bDisplayOccDebugStuff;
 
 void
 COcclusion::Init(void)
@@ -55,7 +56,7 @@ COcclusion::AddOne(float x, float y, float z, float width, float length, float h
 	aOccluders[NumOccludersOnMap].height = height;
 	while(angle < 0.0f) angle += 360.0f;
 	while(angle > 360.0f) angle -= 360.0f;
-	aOccluders[NumOccludersOnMap].angle = angle * UINT16_MAX/360.0f;
+	aOccluders[NumOccludersOnMap].angle = angle/360.0f * UINT16_MAX;
 	aOccluders[NumOccludersOnMap].listIndex = FarAwayList;
 	FarAwayList = NumOccludersOnMap++;
 }
@@ -68,19 +69,19 @@ COccluder::NearCamera() {
 bool
 DoesInfiniteLineCrossFiniteLine(float p1X, float p1Y, float p2X, float p2Y, float lineX, float lineY, float lineDX, float lineDY)
 {
-	float side1 = (p1X - lineX) * lineDX - (p1Y - lineY) * lineDY;
-	float side2 = (p2X - lineX) * lineDX - (p2Y - lineY) * lineDY;
+	float side1 = (p1X - lineX) * lineDY - (p1Y - lineY) * lineDX;
+	float side2 = (p2X - lineX) * lineDY - (p2Y - lineY) * lineDX;
 	return side1 * side2 < 0.0f;    // if points lie on opposite sides of the infinte line, the line between them crosses it
 }
 
-bool DoesInfiniteLineTouchScreen(float p1X, float p1Y, float p2X, float p2Y) {
-	if (p1X > 0.0f && p1Y > 0.0f && SCREEN_WIDTH > p1X && SCREEN_HEIGHT > p1Y)
+bool DoesInfiniteLineTouchScreen(float lineX, float lineY, float lineDX, float lineDY) {
+	if (lineX > 0.0f && lineY > 0.0f && SCREEN_WIDTH > lineX && SCREEN_HEIGHT > lineY)
 		return true;
 
-	return (DoesInfiniteLineCrossFiniteLine(0.0f, 0.0f, SCREEN_WIDTH, 0.0f, p1X, p1Y, p2X, p2Y) ||
-		DoesInfiniteLineCrossFiniteLine(0.0f, 0.0f, 0.0f, SCREEN_HEIGHT, p1X, p1Y, p2X, p2Y) ||
-		DoesInfiniteLineCrossFiniteLine(SCREEN_WIDTH, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT, p1X, p1Y, p2X, p2Y) ||
-		DoesInfiniteLineCrossFiniteLine(0.0f, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT, p1X, p1Y, p2X, p2Y));
+	return (DoesInfiniteLineCrossFiniteLine(0.0f, 0.0f, SCREEN_WIDTH, 0.0f, lineX, lineY, lineDX, lineDY) ||
+		DoesInfiniteLineCrossFiniteLine(0.0f, 0.0f, 0.0f, SCREEN_HEIGHT, lineX, lineY, lineDX, lineDY) ||
+		DoesInfiniteLineCrossFiniteLine(SCREEN_WIDTH, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT, lineX, lineY, lineDX, lineDY) ||
+		DoesInfiniteLineCrossFiniteLine(0.0f, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT, lineX, lineY, lineDX, lineDY));
 }
 
 bool IsPointInsideLine(float lineX, float lineY, float lineDX, float lineDY, float pX, float pY, float area = 0.0f) {
@@ -123,18 +124,18 @@ COccluder::ProcessLineSegment(int corner1, int corner2, CActiveOccluder *occl) {
 
 	float x1, y1, x2, y2;
 
-	CVector origin3d, direction3d;
+	CVector p1, p2;
 	if (!gOccluderCoorsValid[corner1]) {
 		float clipDist1 = Abs((TheCamera.m_viewMatrix * gOccluderCoors[corner1]).z - 1.1f);
 		float clipDist2 = Abs((TheCamera.m_viewMatrix * gOccluderCoors[corner2]).z - 1.1f);
 		float ratio = clipDist2 / (clipDist1 + clipDist2);
 		CVector clippedCoors = (1.0f - ratio) * gOccluderCoors[corner2] + ratio * gOccluderCoors[corner1];
 
-		if (!CalcScreenCoors(clippedCoors, &origin3d, &x1, &y1))
+		if (!CalcScreenCoors(clippedCoors, &p1, &x1, &y1))
 			return true;
 	}
 	else {
-		origin3d = gOccluderCoorsOnScreen[corner1];
+		p1 = gOccluderCoorsOnScreen[corner1];
 	}
 
 	if (!gOccluderCoorsValid[corner2]) {
@@ -143,21 +144,22 @@ COccluder::ProcessLineSegment(int corner1, int corner2, CActiveOccluder *occl) {
 		float ratio = clipDist1 / (clipDist1 + clipDist2);
 		CVector clippedCoors = (1.0f - ratio) * gOccluderCoors[corner2] + ratio * gOccluderCoors[corner1];
 
-		if (!CalcScreenCoors(clippedCoors, &direction3d, &x2, &y2))
+		if (!CalcScreenCoors(clippedCoors, &p2, &x2, &y2))
 			return true;
 	}
 	else {
-		direction3d = gOccluderCoorsOnScreen[corner2];
+		p2 = gOccluderCoorsOnScreen[corner2];
 	}
 
-	gMinXInOccluder = Min(Min(gMinXInOccluder, origin3d.x), direction3d.x);
-	gMaxXInOccluder = Max(Max(gMaxXInOccluder, origin3d.x), direction3d.x);
-	gMinYInOccluder = Min(Min(gMinYInOccluder, origin3d.y), direction3d.y);
-	gMaxYInOccluder = Max(Max(gMaxYInOccluder, origin3d.y), direction3d.y);
+	gMinXInOccluder = Min(Min(gMinXInOccluder, p1.x), p2.x);
+	gMaxXInOccluder = Max(Max(gMaxXInOccluder, p1.x), p2.x);
+	gMinYInOccluder = Min(Min(gMinYInOccluder, p1.y), p2.y);
+	gMaxYInOccluder = Max(Max(gMaxYInOccluder, p1.y), p2.y);
 
-	CVector2D origin = (CVector2D)origin3d;
-	CVector2D direction = (CVector2D)direction3d - origin;
+	CVector2D origin = p1;
+	CVector2D direction = p2 - p1;
 
+	// Make sure lines are counter-clockwise around center
 	if (!IsPointInsideLine(origin.x, origin.y, direction.x, direction.y, gCenterOnScreen.x, gCenterOnScreen.y, 0.0f)) {
 		origin += direction;
 		direction *= -1.0f;
@@ -192,22 +194,23 @@ COccluder::ProcessOneOccluder(CActiveOccluder *occl) {
 
 	CVector vec[3];
 	
-	vec[0].x = width / 2.0f * Sin(angle / 63556.0f*TWOPI);
-	vec[0].y = -width / 2.0f * Cos(angle / 63556.0f*TWOPI);
+	vec[0].x = length / 2.0f * Sin(GetAngle());
+	vec[0].y = -length / 2.0f * Cos(GetAngle());
 	vec[0].z = 0.0f;
 
-	vec[1].x = length / 2.0f * Cos(angle / 63556.0f*TWOPI);
-	vec[1].y = length / 2.0f * Sin(angle / 63556.0f*TWOPI);
+	vec[1].x = width / 2.0f * Cos(GetAngle());
+	vec[1].y = width / 2.0f * Sin(GetAngle());
 	vec[1].z = 0.0f;
 
 	vec[2].x = 0.0f;
 	vec[2].y = 0.0f;
 	vec[2].z = height / 2.0f;
 
-	bool aChecks[6]; int counter = -1;
+	// Figure out if we see the front or back of a face
+	bool bFrontFace[6];
 	for (int i = 0; i < 3; i++) {
-		aChecks[++counter] = DotProduct((pos + vec[i] - TheCamera.GetPosition()), vec[i]) < 0.0f;
-		aChecks[++counter] = DotProduct((pos - vec[i] - TheCamera.GetPosition()), -vec[i]) < 0.0f;
+		bFrontFace[i*2+0] = DotProduct((pos + vec[i] - TheCamera.GetPosition()), vec[i]) < 0.0f;
+		bFrontFace[i*2+1] = DotProduct((pos - vec[i] - TheCamera.GetPosition()), -vec[i]) < 0.0f;
 	}
 
 	//calculating vertices of a box
@@ -228,31 +231,32 @@ COccluder::ProcessOneOccluder(CActiveOccluder *occl) {
 	gMaxYInOccluder = -999999.875f;
 	gMaxXInOccluder = -999999.875f;
 
-	if (aChecks[2] != aChecks[0] && ProcessLineSegment(0, 4, occl))
+	// Between two differently facing sides we see an edge, so process those
+	if (bFrontFace[2] != bFrontFace[0] && ProcessLineSegment(0, 4, occl))
 		return false;
-	if (aChecks[3] != aChecks[0] && ProcessLineSegment(2, 6, occl))
+	if (bFrontFace[3] != bFrontFace[0] && ProcessLineSegment(2, 6, occl))
 		return false;
-	if (aChecks[4] != aChecks[0] && ProcessLineSegment(0, 2, occl))
+	if (bFrontFace[4] != bFrontFace[0] && ProcessLineSegment(0, 2, occl))
 		return false;
-	if (aChecks[5] != aChecks[0] && ProcessLineSegment(4, 6, occl))
+	if (bFrontFace[5] != bFrontFace[0] && ProcessLineSegment(4, 6, occl))
 		return false;
-	if (aChecks[2] != aChecks[1] && ProcessLineSegment(1, 5, occl))
+	if (bFrontFace[2] != bFrontFace[1] && ProcessLineSegment(1, 5, occl))
 		return false;
-	if (aChecks[3] != aChecks[1] && ProcessLineSegment(3, 7, occl))
+	if (bFrontFace[3] != bFrontFace[1] && ProcessLineSegment(3, 7, occl))
 		return false;
-	if (aChecks[4] != aChecks[1] && ProcessLineSegment(1, 3, occl))
+	if (bFrontFace[4] != bFrontFace[1] && ProcessLineSegment(1, 3, occl))
 		return false;
-	if (aChecks[5] != aChecks[1] && ProcessLineSegment(5, 7, occl))
+	if (bFrontFace[5] != bFrontFace[1] && ProcessLineSegment(5, 7, occl))
 		return false;
-	if (aChecks[4] != aChecks[2] && ProcessLineSegment(0, 1, occl))
+	if (bFrontFace[4] != bFrontFace[2] && ProcessLineSegment(0, 1, occl))
 		return false;
-	if (aChecks[3] != aChecks[4] && ProcessLineSegment(2, 3, occl))
+	if (bFrontFace[3] != bFrontFace[4] && ProcessLineSegment(2, 3, occl))
 		return false;
-	if (aChecks[5] != aChecks[3] && ProcessLineSegment(6, 7, occl))
+	if (bFrontFace[5] != bFrontFace[3] && ProcessLineSegment(6, 7, occl))
 		return false;
-	if (aChecks[2] != aChecks[5] && ProcessLineSegment(4, 5, occl))
+	if (bFrontFace[2] != bFrontFace[5] && ProcessLineSegment(4, 5, occl))
 		return false;
-		
+
 	if (gMaxXInOccluder - gMinXInOccluder < SCREEN_WIDTH * 0.1f ||
 		gMaxYInOccluder - gMinYInOccluder < SCREEN_HEIGHT * 0.07f)
 		return false;
@@ -346,18 +350,18 @@ COcclusion::ProcessBeforeRendering(void)
 		}
 	}
 
-	//printf("NumActiveOccluders = %d\n", NumActiveOccluders);
-
 	for (i = 0; i < NumActiveOccluders; i++) {
 		for (int j = 0; j < NumActiveOccluders; j++) {
-			if (i != j || aActiveOccluders[j].radius < aActiveOccluders[i].radius) {
+			if (i != j && aActiveOccluders[j].radius < aActiveOccluders[i].radius) {
 				if (OccluderHidesBehind(&aActiveOccluders[i], &aActiveOccluders[j])) {
 					for (int k = i; k < NumActiveOccluders - 1; k++) {
-						for (int l = 0; l < aActiveOccluders[k].linesCount; l++)
+						for (int l = 0; l < aActiveOccluders[k + 1].linesCount; l++)
 							aActiveOccluders[k].lines[l] = aActiveOccluders[k + 1].lines[l];
 						aActiveOccluders[k].linesCount = aActiveOccluders[k + 1].linesCount;
 						aActiveOccluders[k].radius = aActiveOccluders[k + 1].radius;
 					}
+					NumActiveOccluders--;
+					i--;
 				}
 			}
 		}
@@ -374,7 +378,6 @@ bool CActiveOccluder::IsPointWithinOcclusionArea(float pX, float pY, float area)
 }
 
 bool COcclusion::IsAABoxOccluded(CVector pos, float width, float length, float height) {
-	return false;
 
 	CVector coors;
 	float outW, outH;
@@ -415,7 +418,6 @@ bool COcclusion::IsAABoxOccluded(CVector pos, float width, float length, float h
 }
 
 bool COcclusion::IsPositionOccluded(CVector pos, float side) {
-	return false;
 
 	CVector coors;
 	float width, height;
@@ -434,6 +436,10 @@ bool COcclusion::IsPositionOccluded(CVector pos, float side) {
 	return false;
 }
 
+#include "Lines.h"
+
+RwIm2DVertex vertexbufferT[2];
+
 void COcclusion::Render() {
 	if (!bDisplayOccDebugStuff || !(CTimer::GetTimeInMilliseconds() & 0x200))
 		return;
@@ -445,15 +451,23 @@ void COcclusion::Render() {
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, FALSE);
 
+	float recipz = 1.0f/RwCameraGetNearClipPlane(Scene.camera);
 	for (int i = 0; i < NumActiveOccluders; i++) {
 		for (int j = 0; j < aActiveOccluders[i].linesCount; j++) {
-			RwIm2DVertex vertexbufferT[2];
 			RwIm2DVertexSetScreenX(&vertexbufferT[0], aActiveOccluders[i].lines[j].origin.x);
 			RwIm2DVertexSetScreenY(&vertexbufferT[0], aActiveOccluders[i].lines[j].origin.y);
-			RwIm2DVertexSetScreenX(&vertexbufferT[1], 
+			RwIm2DVertexSetScreenZ(&vertexbufferT[0], RwIm2DGetNearScreenZ());
+			RwIm2DVertexSetCameraZ(&vertexbufferT[0], RwCameraGetNearClipPlane(Scene.camera));
+			RwIm2DVertexSetRecipCameraZ(&vertexbufferT[0], recipz);
+
+			RwIm2DVertexSetScreenX(&vertexbufferT[1],
 				aActiveOccluders[i].lines[j].origin.x + aActiveOccluders[i].lines[j].direction.x * aActiveOccluders[i].lines[j].length);
-			RwIm2DVertexSetScreenY(&vertexbufferT[1], 
+			RwIm2DVertexSetScreenY(&vertexbufferT[1],
 				aActiveOccluders[i].lines[j].origin.y + aActiveOccluders[i].lines[j].direction.y * aActiveOccluders[i].lines[j].length);
+			RwIm2DVertexSetScreenZ(&vertexbufferT[1], RwIm2DGetNearScreenZ());
+			RwIm2DVertexSetCameraZ(&vertexbufferT[1], RwCameraGetNearClipPlane(Scene.camera));
+			RwIm2DVertexSetRecipCameraZ(&vertexbufferT[1], recipz);
+
 			RwIm2DVertexSetIntRGBA(&vertexbufferT[0], 255, 255, 0, 255);
 			RwIm2DVertexSetIntRGBA(&vertexbufferT[1], 255, 255, 0, 255);
 			RwIm2DRenderLine(vertexbufferT, 2, 0, 1);

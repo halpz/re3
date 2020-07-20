@@ -1160,12 +1160,11 @@ bool IsEntityPointerValid(CEntity* pEntity)
 }
 
 bool CEntity::IsEntityOccluded(void) {
-	return false;
 
 	CVector coors;
 	float width, height;
 
-	if (!COcclusion::NumActiveOccluders || !CalcScreenCoors(GetBoundCentre(), &coors, &width, &height))
+	if (COcclusion::NumActiveOccluders == 0 || !CalcScreenCoors(GetBoundCentre(), &coors, &width, &height))
 		return false;
 
 	float area = Max(width, height) * GetBoundRadius() * 0.9f;

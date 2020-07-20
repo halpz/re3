@@ -19,7 +19,7 @@ public:
 class COccluder
 {
 public:
-	int16 width, length, height;
+	int16 length, width, height;
 	int16 x, y, z;
 	uint16 angle;
 	int16 listIndex;
@@ -27,6 +27,7 @@ public:
 	bool NearCamera();
 	bool ProcessOneOccluder(CActiveOccluder *occl);
 	bool ProcessLineSegment(int corner1, int corner2, CActiveOccluder* occl);
+	float GetAngle(void) { return angle*TWOPI/UINT16_MAX; }
 };
 
 class COcclusion
@@ -53,3 +54,5 @@ public:
 
 bool CalcScreenCoors(CVector const &in, CVector *out, float *outw, float *outh);
 bool CalcScreenCoors(CVector const &in, CVector *out);
+
+extern bool bDisplayOccDebugStuff;
