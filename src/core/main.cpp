@@ -61,6 +61,7 @@
 #include "MemoryCard.h"
 #include "SceneEdit.h"
 #include "debugmenu.h"
+#include "Occlusion.h"
 
 GlobalScene Scene;
 
@@ -948,6 +949,7 @@ Render2dStuff(void)
 	CGarages::PrintMessages();
 	CPad::PrintErrorMessage();
 	CFont::DrawFonts();
+	COcclusion::Render();
 
 #ifdef DEBUGMENU
 	DebugMenuRender();
