@@ -851,7 +851,7 @@ CBoat::BlowUpCar(CEntity *culprit)
 	bLightsOn = false;
 	ChangeLawEnforcerState(false);
 
-	CExplosion::AddExplosion(this, culprit, EXPLOSION_HELI, GetPosition(), 0);
+	CExplosion::AddExplosion(this, culprit, EXPLOSION_BOAT, GetPosition(), 0);
 	CDarkel::RegisterCarBlownUpByPlayer(this);
 	if(m_aBoatNodes[BOAT_MOVING] == nil)
 		return;

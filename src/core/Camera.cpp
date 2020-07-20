@@ -4031,7 +4031,7 @@ bool
 CCamera::IsPointVisible(const CVector &center, const CMatrix *mat)
 {
 	RwV3d c;
-	c = *(RwV3d*)&center;
+	c = center;
 	RwV3dTransformPoints(&c, &c, 1, &mat->m_matrix);
 	if(c.y < CDraw::GetNearClipZ()) return false;
 	if(c.y > CDraw::GetFarClipZ()) return false;
@@ -4046,7 +4046,7 @@ bool
 CCamera::IsSphereVisible(const CVector &center, float radius, const CMatrix *mat)
 {
 	RwV3d c;
-	c = *(RwV3d*)&center;
+	c = center;
 	RwV3dTransformPoints(&c, &c, 1, &mat->m_matrix);
 	if(c.y + radius < CDraw::GetNearClipZ()) return false;
 	if(c.y - radius > CDraw::GetFarClipZ()) return false;
