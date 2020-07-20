@@ -14,29 +14,43 @@ class CScriptPaths
 public:
 };
 
-// TODO
 class CPlaneTrail
 {
+	CVector m_pos[16];
+	int32 m_time[16];
 public:
+	void Init(void);
+	void Render(float visibility);
+	void RegisterPoint(CVector pos);
 };
 
-// TODO
 class CPlaneTrails
 {
+	static CPlaneTrail aArray[6];	// NB: 3 CPlanes and 3 hardcoded far away ones
 public:
+	static void Init(void);
+	static void Update(void);
+	static void Render(void);
 	static void RegisterPoint(CVector pos, uint32 id);
 };
 
-// TODO
 class CPlaneBanner
 {
+	CVector m_pos[8];
 public:
+	void Init(void);
+	void Update(void);
+	void Render(void);
+	void RegisterPoint(CVector pos);
 };
 
-// TODO
 class CPlaneBanners
 {
+	static CPlaneBanner aArray[5];
 public:
+	static void Init(void);
+	static void Update(void);
+	static void Render(void);
 	static void RegisterPoint(CVector pos, uint32 id);
 };
 

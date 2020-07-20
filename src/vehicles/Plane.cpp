@@ -126,9 +126,10 @@ CPlane::ProcessControl(void)
 	if(CReplay::IsPlayingBack())
 		return;
 
-	if(GetModelIndex() == MI_AIRTRAIN)
-		CPlaneTrails::RegisterPoint(GetPosition(), m_nPlaneId);
-	else if(GetModelIndex() == MI_DEADDODO)
+	if(GetModelIndex() == MI_AIRTRAIN){
+		if(GetPosition().z > 100.0f)
+			CPlaneTrails::RegisterPoint(GetPosition(), m_nPlaneId);
+	}else if(GetModelIndex() == MI_DEADDODO)
 		CPlaneBanners::RegisterPoint(GetPosition(), m_nPlaneId);
 
 	// Explosion
@@ -742,6 +743,7 @@ CPlane::InitPlanes(void)
 	CStreaming::RequestModel(MI_AIRTRAIN, 0);
 	CStreaming::LoadAllRequestedModels(false);
 
+	// NB: 3 hardcoded also in CPlaneTrails
 	for(i = 0; i < 3; i++){
 		CPlane *plane = new CPlane(MI_AIRTRAIN, PERMANENT_VEHICLE);
 		plane->GetMatrix().SetTranslate(0.0f, 0.0f, 0.0f);
