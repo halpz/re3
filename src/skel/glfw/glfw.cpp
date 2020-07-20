@@ -64,10 +64,6 @@ static psGlobalType PsGlobal;
 #undef MAKEPOINTS
 #define MAKEPOINTS(l)		(*((POINTS /*FAR*/ *)&(l)))
 
-#define SAFE_RELEASE(x) { if (x) x->Release(); x = NULL; }
-#define JIF(x) if (FAILED(hr=(x))) \
-	{debug(TEXT("FAILED(hr=0x%x) in ") TEXT(#x) TEXT("\n"), hr); return;}
-
 unsigned long _dwMemAvailPhys;
 RwUInt32 gGameState;
 

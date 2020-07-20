@@ -2823,9 +2823,8 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 			UpdateCompareFlag(ped->IsWithinArea(x1, y1, x2, y2));
 		else
 			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, x2, y2));
-		if (!ScriptParams[5])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		if (ScriptParams[5])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -2844,9 +2843,8 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
 		else
 			UpdateCompareFlag(ped->IsWithinArea(x1, y1, z1, x2, y2, z2));
-		if (!ScriptParams[7])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
+		if (ScriptParams[7])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugCube(x1, y1, z1, x2, y2, z2);
 		return 0;
@@ -3425,9 +3423,8 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, x2, y2));
 		else
 			UpdateCompareFlag(ped->IsWithinArea(x1, y1, x2, y2));
-		if (!ScriptParams[5])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		if (ScriptParams[5])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -3452,9 +3449,8 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
 		else
 			UpdateCompareFlag(ped->IsWithinArea(x1, y1, z1, x2, y2, z2));
-		if (!ScriptParams[7])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
+		if (ScriptParams[7])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugCube(x1, y1, z1, x2, y2, z2);
 		return 0;
@@ -3671,9 +3667,8 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		float x2 = *(float*)&ScriptParams[3];
 		float y2 = *(float*)&ScriptParams[4];
 		UpdateCompareFlag(vehicle->IsWithinArea(x1, y1, x2, y2));
-		if (!ScriptParams[5])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		if (ScriptParams[5])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -3690,9 +3685,8 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		float y2 = *(float*)&ScriptParams[5];
 		float z2 = *(float*)&ScriptParams[6];
 		UpdateCompareFlag(vehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
-		if (!ScriptParams[7])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
+		if (ScriptParams[7])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugCube(x1, y1, z1, x2, y2, z2);
 		return 0;
@@ -4429,9 +4423,8 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		float y2 = *(float*)&ScriptParams[4];
 		UpdateCompareFlag(pVehicle->GetStatus() == STATUS_WRECKED &&
 			pVehicle->IsWithinArea(x1, y1, x2, y2));
-		if (!ScriptParams[5])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		if (ScriptParams[5])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -4449,9 +4442,8 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		float z2 = *(float*)&ScriptParams[6];
 		UpdateCompareFlag(pVehicle->GetStatus() == STATUS_WRECKED &&
 			pVehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
-		if (!ScriptParams[7])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
+		if (ScriptParams[7])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugCube(x1, y1, z1, x2, y2, z2);
 		return 0;
@@ -7279,9 +7271,8 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		float x2 = *(float*)&ScriptParams[3];
 		float y2 = *(float*)&ScriptParams[4];
 		UpdateCompareFlag(pPed->bIsShooting && pPed->IsWithinArea(x1, y1, x2, y2));
-		if (!ScriptParams[5])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		if (ScriptParams[5])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -7296,9 +7287,8 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		float x2 = *(float*)&ScriptParams[3];
 		float y2 = *(float*)&ScriptParams[4];
 		UpdateCompareFlag(pPed->bIsShooting && pPed->IsWithinArea(x1, y1, x2, y2));
-		if (!ScriptParams[5])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		if (ScriptParams[5])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;

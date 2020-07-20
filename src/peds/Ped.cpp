@@ -383,7 +383,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 		weapon.m_nTimer = 0;
 	}
 
-	m_lastFightMove = FIGHTMOVE_NULL;
+	m_curFightMove = FIGHTMOVE_NULL;
 	GiveWeapon(WEAPONTYPE_UNARMED, 0);
 	m_wepAccuracy = 60;
 	m_lastWepDam = -1;
@@ -471,7 +471,7 @@ CheckForPedsOnGroundToAttack(CPed *attacker, CPed **pedOnGround)
 
 			currentPedState = currentPed->m_nPedState;
 
-			if (currentPedState == PED_FALL || currentPedState == PED_GETUP || currentPedState == PED_DIE || currentPedState == PED_DEAD) {
+			if (currentPed->OnGroundOrGettingUp()) {
 				if (distance < 2.0f && angleDiff < DEGTORAD(65.0f)) {
 					if (currentPedState == PED_DEAD) {
 						foundDead = 1;
@@ -1821,7 +1821,7 @@ void
 CPed::PlayFootSteps(void)
 {
 	if (bDoBloodyFootprints) {
-		if (m_bloodyFootprintCountOrDeathTime > 0 && m_bloodyFootprintCountOrDeathTime < 300) {
+		if (m_bloodyFootprintCountOrDeathTime != 0 && m_bloodyFootprintCountOrDeathTime < 300) {
 			m_bloodyFootprintCountOrDeathTime--;
 
 			if (m_bloodyFootprintCountOrDeathTime == 0)
@@ -2716,7 +2716,7 @@ CPed::SetObjective(eObjective newObj)
 
 		}
 		*/
-		m_objective = newObj;
+		m_objective = OBJECTIVE_NONE;
 		m_prevObjective = OBJECTIVE_NONE;
 	} else if (m_prevObjective != newObj || m_prevObjective == OBJECTIVE_NONE) {
 		SetObjectiveTimer(0);
@@ -3364,9 +3364,7 @@ CPed::CheckForPointBlankPeds(CPed *pedToVerify)
 				if (neededTurn > PI)
 					neededTurn = 2*PI - neededTurn;
 
-				PedState nearPedState = nearPed->m_nPedState;
-
-				if (nearPedState == PED_FALL || nearPedState == PED_GETUP || nearPedState == PED_DIE || nearPedState == PED_DEAD || nearPedState == PED_DIVE_AWAY)
+				if (nearPed->OnGroundOrGettingUp() || nearPed->m_nPedState == PED_DIVE_AWAY)
 					return NO_POINT_BLANK_PED;
 
 				if (neededTurn < CAN_SEE_ENTITY_ANGLE_THRESHOLD) {
@@ -3652,56 +3650,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 			case WEAPONTYPE_BASEBALLBAT:
 				if (bMeleeProof)
 					return false;
-#ifdef VC_PED_PORTS
-				if (/*method != WEAPONTYPE_KATANA || */
-					damagedBy != FindPlayerPed()
-					|| FindPlayerPed()->m_nPedState != PED_FIGHT
-					/*|| FindPlayerPed()->m_lastFightMove != 28 && FindPlayerPed()->m_lastFightMove != 29 */
-					|| CGeneral::GetRandomNumber() & 3) {
 
-					if (m_nPedState == PED_FALL) {
-						if (IsPedHeadAbovePos(-0.3f)) {
-							dieAnim = NUM_ANIMS;
-						} else {
-							if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FRONTAL))
-								dieAnim = ANIM_FLOOR_HIT_F;
-							else
-								dieAnim = ANIM_FLOOR_HIT;
-							dieDelta = dieDelta * 2.0f;
-							dieSpeed = 0.5f;
-						}
-					} else if (damagedBy != FindPlayerPed()) { // || FindPlayerPed()->m_lastFightMove != 29)
-						//if (damagedBy != FindPlayerPed() || FindPlayerPed()->m_lastFightMove != 30) {
-							switch (direction) {
-								case 0:
-									dieAnim = ANIM_KO_SKID_FRONT;
-									break;
-								case 1:
-									dieAnim = ANIM_KO_SPIN_R;
-									break;
-								case 2:
-									dieAnim = ANIM_KO_SKID_BACK;
-									break;
-								case 3:
-									dieAnim = ANIM_KO_SPIN_L;
-									break;
-								default:
-									break;
-							}
-						//} else {
-						//	dieAnim = ANIM_KO_SHOT_STOM;
-						//}
-					} else {
-						dieAnim = ANIM_KO_SHOT_FACE;
-					}
-				} else {
-					dieAnim = ANIM_KO_SHOT_FACE;
-					// SpawnFlyingComponent in VC
-					RemoveBodyPart(PED_HEAD, direction);
-					headShot = true;
-					willLinger = true;
-				}
-#else
 				if (m_nPedState == PED_FALL) {
 					if (IsPedHeadAbovePos(-0.3f)) {
 						dieAnim = NUM_ANIMS;
@@ -3731,7 +3680,6 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 							break;
 					}
 				}
-#endif
 				break;
 			case WEAPONTYPE_COLT45:
 			case WEAPONTYPE_UZI:
@@ -4853,11 +4801,11 @@ CPed::StartFightAttack(uint8 buttonPressure)
 
 	CPed *pedOnGround = nil;
 	if (IsPlayer() && CheckForPedsOnGroundToAttack(this, &pedOnGround) > PED_IN_FRONT_OF_ATTACKER) {
-		m_lastFightMove = FIGHTMOVE_GROUNDKICK;
+		m_curFightMove = FIGHTMOVE_GROUNDKICK;
 	} else if (m_pedStats->m_flags & STAT_SHOPPING_BAGS) {
-		m_lastFightMove = FIGHTMOVE_ROUNDHOUSE;
+		m_curFightMove = FIGHTMOVE_ROUNDHOUSE;
 	} else {
-		m_lastFightMove = FIGHTMOVE_STDPUNCH;
+		m_curFightMove = FIGHTMOVE_STDPUNCH;
 	}
 
 	if (pedOnGround && IsPlayer()) {
@@ -4871,7 +4819,7 @@ CPed::StartFightAttack(uint8 buttonPressure)
 		SetLookFlag(pedOnGround, true);
 		SetLookTimer(1500);
 	}
-	animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, tFightMoves[m_lastFightMove].animId, 4.0f);
+	animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, tFightMoves[m_curFightMove].animId, 4.0f);
 	animAssoc->SetFinishCallback(FinishFightMoveCB, this);
 	m_fightState = FIGHTSTATE_NO_MOVE;
 	m_takeAStepAfterAttack = false;
@@ -4999,9 +4947,9 @@ CPed::FightStrike(CVector &touchedNodePos)
 	for (int i = 0; i < m_numNearPeds; i++) {
 		nearPed = m_nearPeds[i];
 		if (GetWeapon()->m_eWeaponType != WEAPONTYPE_UNARMED)
-			maxDistanceToBeBeaten = nearPed->GetBoundRadius() + tFightMoves[m_lastFightMove].strikeRadius + 0.1f;
+			maxDistanceToBeBeaten = nearPed->GetBoundRadius() + tFightMoves[m_curFightMove].strikeRadius + 0.1f;
 		else
-			maxDistanceToBeBeaten = nearPed->GetBoundRadius() + tFightMoves[m_lastFightMove].strikeRadius;
+			maxDistanceToBeBeaten = nearPed->GetBoundRadius() + tFightMoves[m_curFightMove].strikeRadius;
 
 		if (nearPed->bUsesCollision || nearPed->m_nPedState == PED_DEAD) {
 			CVector nearPedCentre;
@@ -5017,9 +4965,7 @@ CPed::FightStrike(CVector &touchedNodePos)
 					ourCol = ((CPedModelInfo *)CModelInfo::GetModelInfo(GetModelIndex()))->AnimatePedColModelSkinned(GetClump());
 				else
 #endif
-				if (nearPed->m_nPedState == PED_FALL
-					|| nearPed->m_nPedState == PED_DEAD || nearPed->m_nPedState == PED_DIE
-					|| !nearPed->IsPedHeadAbovePos(-0.3f)) {
+				if (nearPed->OnGround() || !nearPed->IsPedHeadAbovePos(-0.3f)) {
 					ourCol = &CTempColModels::ms_colModelPedGroundHit;
 				} else {
 #ifdef ANIMATE_PED_COL_MODEL
@@ -5034,7 +4980,7 @@ CPed::FightStrike(CVector &touchedNodePos)
 					attackDistance = nearPed->GetPosition() + ourCol->spheres[j].center;
 					attackDistance -= touchedNodePos;
 					CColSphere *ourPieces = ourCol->spheres;
-					float maxDistanceToBeat = ourPieces[j].radius + tFightMoves[m_lastFightMove].strikeRadius;
+					float maxDistanceToBeat = ourPieces[j].radius + tFightMoves[m_curFightMove].strikeRadius;
 
 					// We can beat him too
 					if (sq(maxDistanceToBeat) > attackDistance.MagnitudeSqr()) {
@@ -5055,7 +5001,7 @@ CPed::FightStrike(CVector &touchedNodePos)
 
 		float oldVictimHealth = nearPed->m_fHealth;
 		CVector bloodPos = 0.5f * attackDistance + touchedNodePos;
-		int damageMult = tFightMoves[m_lastFightMove].damage * ((CGeneral::GetRandomNumber() & 1) + 2) + 1;
+		int damageMult = tFightMoves[m_curFightMove].damage * ((CGeneral::GetRandomNumber() & 1) + 2) + 1;
 
 		CVector2D diff (GetPosition() - nearPed->GetPosition());
 		int direction = nearPed->GetLocalDirection(diff);
@@ -5067,7 +5013,7 @@ CPed::FightStrike(CVector &touchedNodePos)
 		}
 
 		// Change direction if we used kick.
-		if (m_lastFightMove == FIGHTMOVE_KICK) {
+		if (m_curFightMove == FIGHTMOVE_KICK) {
 			if (CGeneral::GetRandomNumber() & 1) {
 				direction++;
 				if (direction > 3)
@@ -5083,16 +5029,16 @@ CPed::FightStrike(CVector &touchedNodePos)
 		else
 			unk2 = damageMult;
 
-		nearPed->StartFightDefend(direction, tFightMoves[m_lastFightMove].hitLevel, unk2);
+		nearPed->StartFightDefend(direction, tFightMoves[m_curFightMove].hitLevel, unk2);
 		PlayHitSound(nearPed);
 		m_fightState = FIGHTSTATE_JUST_ATTACKED;
-		RpAnimBlendClumpGetAssociation(GetClump(), tFightMoves[m_lastFightMove].animId)->speed = 0.6f;
+		RpAnimBlendClumpGetAssociation(GetClump(), tFightMoves[m_curFightMove].animId)->speed = 0.6f;
 		if (!nearPed->DyingOrDead()) {
 			nearPed->InflictDamage(this, WEAPONTYPE_UNARMED, damageMult * 3.0f, closestPedPiece, direction);
 		}
 
 		if (CGame::nastyGame
-			&& tFightMoves[m_lastFightMove].hitLevel > HITLEVEL_MEDIUM
+			&& tFightMoves[m_curFightMove].hitLevel > HITLEVEL_MEDIUM
 			&& nearPed->m_nPedState == PED_DIE
 			&& nearPed->GetIsOnScreen()) {
 
@@ -5102,7 +5048,7 @@ CPed::FightStrike(CVector &touchedNodePos)
 				CParticle::AddParticle(PARTICLE_BLOOD, bloodPos, attackDistance, nil, 0.0f, 0, 0, 0, 0);
 			}
 		}
-		if (nearPed->m_nPedState != PED_FALL && nearPed->m_nPedState != PED_DIE && nearPed->m_nPedState != PED_DEAD) {
+		if (!nearPed->OnGround()) {
 			float curVictimHealth = nearPed->m_fHealth;
 			if (curVictimHealth > 0.0f
 				&& (curVictimHealth < 40.0f && oldVictimHealth > 40.0f && !nearPed->IsPlayer()
@@ -5122,7 +5068,7 @@ CPed::FightStrike(CVector &touchedNodePos)
 			nearPed->bIsStanding = false;
 
 			float moveMult;
-			if (m_lastFightMove == FIGHTMOVE_GROUNDKICK) {
+			if (m_curFightMove == FIGHTMOVE_GROUNDKICK) {
 				moveMult = Min(damageMult * 0.6f, 4.0f);
 			} else {
 				if (nearPed->m_nPedState != PED_DIE || damageMult >= 20) {
@@ -5434,21 +5380,21 @@ CPed::PlayHitSound(CPed *hitTo)
 	};
 
 	// This is why first dimension is between FightMove 1 and 12.
-	if (m_lastFightMove == FIGHTMOVE_NULL || m_lastFightMove >= FIGHTMOVE_HITFRONT)
+	if (m_curFightMove == FIGHTMOVE_NULL || m_curFightMove >= FIGHTMOVE_HITFRONT)
 		return;
 
 	uint16 soundId;
 
 	// And this is why second dimension is between 13 and 22.
-	if (hitTo->m_lastFightMove <= FIGHTMOVE_GROUNDKICK || hitTo->m_lastFightMove >= FIGHTMOVE_IDLE2NORM) {
+	if (hitTo->m_curFightMove > FIGHTMOVE_GROUNDKICK && hitTo->m_curFightMove < FIGHTMOVE_IDLE2NORM) {
+		soundId = hitSoundsByFightMoves[m_curFightMove - FIGHTMOVE_STDPUNCH][hitTo->m_curFightMove - FIGHTMOVE_HITFRONT];
 
-		if (hitTo->m_nPedState == PED_DEAD || hitTo->UseGroundColModel()) {	
-			soundId = hitSoundsByFightMoves[m_lastFightMove - FIGHTMOVE_STDPUNCH][FIGHTMOVE_HITONFLOOR - FIGHTMOVE_HITFRONT];
-		} else {
-			soundId = hitSoundsByFightMoves[m_lastFightMove - FIGHTMOVE_STDPUNCH][FIGHTMOVE_HITFRONT - FIGHTMOVE_HITFRONT];
-		}
 	} else {
-		soundId = hitSoundsByFightMoves[m_lastFightMove - FIGHTMOVE_STDPUNCH][hitTo->m_lastFightMove - FIGHTMOVE_HITFRONT];
+		if (hitTo->m_nPedState == PED_DEAD || hitTo->UseGroundColModel()) {	
+			soundId = hitSoundsByFightMoves[m_curFightMove - FIGHTMOVE_STDPUNCH][FIGHTMOVE_HITONFLOOR - FIGHTMOVE_HITFRONT];
+		} else {
+			soundId = hitSoundsByFightMoves[m_curFightMove - FIGHTMOVE_STDPUNCH][FIGHTMOVE_HITFRONT - FIGHTMOVE_HITFRONT];
+		}
 	}
 
 	if (soundId != NO_SND)
@@ -6124,7 +6070,7 @@ CPed::EndFight(uint8 endType)
 	if (m_nPedState != PED_FIGHT)
 		return;
 
-	m_lastFightMove = FIGHTMOVE_NULL;
+	m_curFightMove = FIGHTMOVE_NULL;
 	RestorePreviousState();
 	CAnimBlendAssociation *animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_IDLE);
 	if (animAssoc)
@@ -6353,24 +6299,27 @@ CPed::Fall(void)
 void
 CPed::Fight(void)
 {
-	CAnimBlendAssociation *currentAssoc = nil, *animAssoc;
+	CAnimBlendAssociation *currentAssoc, *animAssoc;
 	bool hasShoppingBags, punchOnly, canKick, canKneeHead, canRoundhouse;
 	float angleToFace, nextAngle;
 	bool goForward = false;
 	int nextFightMove;
 
-	switch (m_lastFightMove) {
+	switch (m_curFightMove) {
 		case FIGHTMOVE_NULL:
 			return;
 		case FIGHTMOVE_IDLE2NORM:
-			m_lastFightMove = FIGHTMOVE_NULL;
+			m_curFightMove = FIGHTMOVE_NULL;
 			RestorePreviousState();
+
+			// FIX: Uninitialized
+			currentAssoc = nil;
 			break;
 		case FIGHTMOVE_IDLE:
-			// currentAssoc = nil;
+			currentAssoc = nil;
 			break;
 		default:
-			currentAssoc = RpAnimBlendClumpGetAssociation(GetClump(), tFightMoves[m_lastFightMove].animId);
+			currentAssoc = RpAnimBlendClumpGetAssociation(GetClump(), tFightMoves[m_curFightMove].animId);
 			break;
 	}
 
@@ -6387,12 +6336,12 @@ CPed::Fight(void)
 
 	} else if (currentAssoc && m_fightState > FIGHTSTATE_MOVE_FINISHED) {
 		float animTime = currentAssoc->currentTime;
-		FightMove &curMove = tFightMoves[m_lastFightMove];
+		FightMove &curMove = tFightMoves[m_curFightMove];
 		if (curMove.hitLevel != HITLEVEL_NULL && animTime > curMove.startFireTime && animTime <= curMove.endFireTime && m_fightState >= FIGHTSTATE_NO_MOVE) {
 
 			CVector touchingNodePos(0.0f, 0.0f, 0.0f);
 
-			switch (m_lastFightMove) {
+			switch (m_curFightMove) {
 				case FIGHTMOVE_STDPUNCH:
 				case FIGHTMOVE_PUNCHHOOK:
 				case FIGHTMOVE_BODYBLOW:
@@ -6418,9 +6367,9 @@ CPed::Fight(void)
 					break;
 			}
 
-			if (m_lastFightMove == FIGHTMOVE_PUNCHJAB) {
+			if (m_curFightMove == FIGHTMOVE_PUNCHJAB) {
 				touchingNodePos += 0.1f * GetForward();
-			} else if (m_lastFightMove == FIGHTMOVE_PUNCHHOOK) {
+			} else if (m_curFightMove == FIGHTMOVE_PUNCHHOOK) {
 				touchingNodePos += 0.22f * GetForward();
 			}
 			FightStrike(touchingNodePos);
@@ -6440,7 +6389,7 @@ CPed::Fight(void)
 				if (curMove.comboFollowOnTime > 0.0f && m_fightButtonPressure != 0 && animTime > curMove.comboFollowOnTime) {
 
 					// Notice that it increases fight move index, because we're in combo!
-					animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, tFightMoves[++m_lastFightMove].animId, 8.0f);
+					animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, tFightMoves[++m_curFightMove].animId, 8.0f);
 					animAssoc->SetFinishCallback(FinishFightMoveCB, this);
 					animAssoc->SetCurrentTime(0.1f * animAssoc->hierarchy->totalLength);
 					m_fightButtonPressure = 0;
@@ -6448,7 +6397,7 @@ CPed::Fight(void)
 				}
 			}
 		} else {
-			if (curMove.startFireTime > 0.0f && m_lastFightMove != FIGHTMOVE_SHUFFLE_F && animTime > curMove.startFireTime) {
+			if (curMove.startFireTime > 0.0f && m_curFightMove != FIGHTMOVE_SHUFFLE_F && animTime > curMove.startFireTime) {
 				if (IsPlayer())
 					currentAssoc->speed = 1.3f;
 				else
@@ -6504,8 +6453,7 @@ CPed::Fight(void)
 					if (neededTurn > PI)
 						neededTurn = TWOPI - neededTurn;
 
-					PedState nearPedState = nearPed->m_nPedState;
-					if (nearPedState != PED_FALL && nearPedState != PED_GETUP && nearPedState != PED_DIE && nearPedState != PED_DEAD) {
+					if (!nearPed->OnGroundOrGettingUp()) {
 
 						if (nearPedDist < 0.8f && neededTurn < DEGTORAD(75.0f) && canKneeHead) {
 							canAffectMultiplePeople = false;
@@ -6546,7 +6494,7 @@ CPed::Fight(void)
 							goForward = true;
 						}
 
-					} else if (nearPedState != PED_DEAD || pedOnGround) {
+					} else if (nearPed->m_nPedState != PED_DEAD || pedOnGround) {
 						if (!nearPed->IsPedHeadAbovePos(-0.3f)) {
 							canAffectMultiplePeople = false;
 							nextFightMove = FIGHTMOVE_GROUNDKICK;
@@ -6600,8 +6548,7 @@ CPed::Fight(void)
 				nextAngle = CGeneral::LimitRadianAngle(angleToFace);
 				m_fRotationDest = nextAngle;
 				m_fRotationCur = m_fRotationDest;
-				PedState fightingPedState = m_pedInObjective->m_nPedState;
-				if (fightingPedState != PED_FALL && fightingPedState != PED_GETUP && fightingPedState != PED_DIE && fightingPedState != PED_DEAD) {
+				if (!m_pedInObjective->OnGroundOrGettingUp()) {
 
 					if (fightingPedDist >= 0.8f || !canKneeHead) {
 
@@ -6650,8 +6597,8 @@ CPed::Fight(void)
 		}
 
 		if (nextFightMove != FIGHTMOVE_IDLE) {
-			m_lastFightMove = nextFightMove;
-			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, tFightMoves[m_lastFightMove].animId, 4.0f);
+			m_curFightMove = nextFightMove;
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, tFightMoves[m_curFightMove].animId, 4.0f);
 
 			animAssoc->SetFinishCallback(FinishFightMoveCB, this);
 			if (m_fightState == FIGHTSTATE_MOVE_FINISHED && animAssoc->currentTime != 0.0f) {
@@ -6661,21 +6608,21 @@ CPed::Fight(void)
 			m_fightButtonPressure = 0;
 		}
 		m_fightState = FIGHTSTATE_NO_MOVE;
-	} else if (m_takeAStepAfterAttack && m_lastFightMove != FIGHTMOVE_SHUFFLE_F
+	} else if (m_takeAStepAfterAttack && m_curFightMove != FIGHTMOVE_SHUFFLE_F
 #ifndef FIX_BUGS
 		&& CheckForPedsOnGroundToAttack(this, nil) == 4) {
 #else
 		&& CheckForPedsOnGroundToAttack(this, nil) == PED_IN_FRONT_OF_ATTACKER) {
 #endif
-		m_lastFightMove = FIGHTMOVE_SHUFFLE_F;
-		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), tFightMoves[m_lastFightMove].animId);
+		m_curFightMove = FIGHTMOVE_SHUFFLE_F;
+		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), tFightMoves[m_curFightMove].animId);
 
 		if (animAssoc) {
 			animAssoc->SetCurrentTime(0.0f);
 			animAssoc->blendDelta = 4.0f;
 			animAssoc->SetRun();
 		} else {
-			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, tFightMoves[m_lastFightMove].animId, 32.0f);
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, tFightMoves[m_curFightMove].animId, 32.0f);
 		}
 		animAssoc->SetFinishCallback(FinishFightMoveCB, this);
 		m_fightState = FIGHTSTATE_NO_MOVE;
@@ -6685,13 +6632,13 @@ CPed::Fight(void)
 	} else if (m_takeAStepAfterAttack) {
 		EndFight(ENDFIGHT_FAST);
 
-	} else if (m_lastFightMove == FIGHTMOVE_IDLE) {
+	} else if (m_curFightMove == FIGHTMOVE_IDLE) {
 		if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
 			EndFight(ENDFIGHT_NORMAL);
 		}
 
 	} else {
-		m_lastFightMove = FIGHTMOVE_IDLE;
+		m_curFightMove = FIGHTMOVE_IDLE;
 		if (IsPlayer())
 			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 500;
 		else
@@ -6781,7 +6728,7 @@ CPed::FinishFightMoveCB(CAnimBlendAssociation *animAssoc, void *arg)
 {
 	CPed *ped = (CPed*)arg;
 
-	if (tFightMoves[ped->m_lastFightMove].animId == animAssoc->animId) {
+	if (tFightMoves[ped->m_curFightMove].animId == animAssoc->animId) {
 		ped->m_fightState = FIGHTSTATE_MOVE_FINISHED;
 		animAssoc->blendDelta = -1000.0f;
 	}
@@ -7527,9 +7474,9 @@ CPed::Flee(void)
 	if (!m_collidingEntityWhileFleeing)
 		return;
 
-	double damagingThingPriorityMult = (double)(m_collidingThingTimer - CTimer::GetTimeInMilliseconds()) * 2.0 / 2500;
+	double collidingThingPriorityMult = (double)(m_collidingThingTimer - CTimer::GetTimeInMilliseconds()) * 2.0 / 2500;
 
-	if (damagingThingPriorityMult <= 1.5) {
+	if (collidingThingPriorityMult <= 1.5) {
 
 		double angleToFleeEntity = CGeneral::GetRadianAngleBetweenPoints(
 			GetPosition().x,
@@ -7538,35 +7485,34 @@ CPed::Flee(void)
 			m_collidingEntityWhileFleeing->GetPosition().y);
 		angleToFleeEntity = CGeneral::LimitRadianAngle(angleToFleeEntity);
 
-		// It includes projectiles, but is everything collides with us included?
-		double angleToFleeDamagingThing = CGeneral::GetRadianAngleBetweenPoints(
+		double angleToFleeCollidingThing = CGeneral::GetRadianAngleBetweenPoints(
 			m_vecDamageNormal.x,
 			m_vecDamageNormal.y,
 			0.0f,
 			0.0f);
-		angleToFleeDamagingThing = CGeneral::LimitRadianAngle(angleToFleeDamagingThing);
+		angleToFleeCollidingThing = CGeneral::LimitRadianAngle(angleToFleeCollidingThing);
 
-		if (angleToFleeEntity - PI > angleToFleeDamagingThing)
-			angleToFleeDamagingThing += TWOPI;
-		else if (PI + angleToFleeEntity < angleToFleeDamagingThing)
-			angleToFleeDamagingThing -= TWOPI;
+		if (angleToFleeEntity - PI > angleToFleeCollidingThing)
+			angleToFleeCollidingThing += TWOPI;
+		else if (PI + angleToFleeEntity < angleToFleeCollidingThing)
+			angleToFleeCollidingThing -= TWOPI;
 
-		if (damagingThingPriorityMult <= 1.0f) {
+		if (collidingThingPriorityMult <= 1.0f) {
 			// Range [0.0, 1.0]
 
-			float angleToFleeBoth = (angleToFleeDamagingThing + angleToFleeEntity) * 0.5f;
+			float angleToFleeBoth = (angleToFleeCollidingThing + angleToFleeEntity) * 0.5f;
 
 			if (m_fRotationDest - PI > angleToFleeBoth)
 				angleToFleeBoth += TWOPI;
 			else if (PI + m_fRotationDest < angleToFleeBoth)
 				angleToFleeBoth -= TWOPI;
 	
-			m_fRotationDest = (1.0f - damagingThingPriorityMult) * m_fRotationDest + damagingThingPriorityMult * angleToFleeBoth;
+			m_fRotationDest = (1.0f - collidingThingPriorityMult) * m_fRotationDest + collidingThingPriorityMult * angleToFleeBoth;
 		} else {
 			// Range (1.0, 1.5]
 
-			double adjustedMult = (damagingThingPriorityMult - 1.0f) * 2.0f;
-			m_fRotationDest = angleToFleeEntity * (1.0 - adjustedMult) + adjustedMult * angleToFleeDamagingThing;
+			double adjustedMult = (collidingThingPriorityMult - 1.0f) * 2.0f;
+			m_fRotationDest = angleToFleeEntity * (1.0 - adjustedMult) + adjustedMult * angleToFleeCollidingThing;
 		}
 	} else {
 		m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(
@@ -8564,8 +8510,7 @@ CPed::KillPedWithCar(CVehicle *car, float impulse)
 		CPed::InflictDamage(car, WEAPONTYPE_RAMMEDBYCAR, damage, PEDPIECE_TORSO, fallDirection);
 		CPed::SetFall(1000, (AnimationId)(fallDirection + ANIM_KO_SKID_FRONT), true);
 
-		if ((m_nPedState == PED_FALL || m_nPedState == PED_DIE || m_nPedState == PED_DEAD)
-			&& !m_pCollidingEntity &&
+		if (OnGround() && !m_pCollidingEntity &&
 		    (!IsPlayer() || bHasHitWall || car->GetModelIndex() == MI_TRAIN || m_vecDamageNormal.z < -0.8f)) {
 
 			m_pCollidingEntity = car;
@@ -14992,7 +14937,7 @@ CPed::PreRender(void)
 			CVector speed = FindPlayerSpeed();
 
 			if (Abs(speed.x) <= 0.05f && Abs(speed.y) <= 0.05f) {
-				if (m_nPedState != PED_FALL && !DyingOrDead() && m_nPedState != PED_ATTACK && m_nPedState != PED_FIGHT) {
+				if (!OnGround() && m_nPedState != PED_ATTACK && m_nPedState != PED_FIGHT) {
 					if (!IsPedHeadAbovePos(0.3f) || RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_TIRED)) {
 						doSplashUp = false;
 					}
@@ -16201,7 +16146,7 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 			Say(SOUND_PED_DEFEND);
 			switch (hitLevel) {
 				case HITLEVEL_GROUND:
-					m_lastFightMove = FIGHTMOVE_HITONFLOOR;
+					m_curFightMove = FIGHTMOVE_HITONFLOOR;
 					break;
 				case HITLEVEL_LOW:
 #ifndef VC_PED_PORTS
@@ -16218,52 +16163,52 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 						return;
 					}	
 #endif
-					m_lastFightMove = FIGHTMOVE_HITBODY;
+					m_curFightMove = FIGHTMOVE_HITBODY;
 					break;
 				case HITLEVEL_HIGH:
 					switch (direction) {
 						case 1:
-							m_lastFightMove = FIGHTMOVE_HITLEFT;
+							m_curFightMove = FIGHTMOVE_HITLEFT;
 							break;
 						case 2:
-							m_lastFightMove = FIGHTMOVE_HITBACK;
+							m_curFightMove = FIGHTMOVE_HITBACK;
 							break;
 						case 3:
-							m_lastFightMove = FIGHTMOVE_HITRIGHT;
+							m_curFightMove = FIGHTMOVE_HITRIGHT;
 							break;
 						default:
 							if (unk <= 5)
-								m_lastFightMove = FIGHTMOVE_HITHEAD;
+								m_curFightMove = FIGHTMOVE_HITHEAD;
 							else
-								m_lastFightMove = FIGHTMOVE_HITBIGSTEP;
+								m_curFightMove = FIGHTMOVE_HITBIGSTEP;
 							break;
 					}
 					break;
 				default:
 					switch (direction) {
 						case 1:
-							m_lastFightMove = FIGHTMOVE_HITLEFT;
+							m_curFightMove = FIGHTMOVE_HITLEFT;
 							break;
 						case 2:
-							m_lastFightMove = FIGHTMOVE_HITBACK;
+							m_curFightMove = FIGHTMOVE_HITBACK;
 							break;
 						case 3:
-							m_lastFightMove = FIGHTMOVE_HITRIGHT;
+							m_curFightMove = FIGHTMOVE_HITRIGHT;
 							break;
 						default:
 							if (unk <= 5)
-								m_lastFightMove = FIGHTMOVE_HITCHEST;
+								m_curFightMove = FIGHTMOVE_HITCHEST;
 							else
-								m_lastFightMove = FIGHTMOVE_HITBIGSTEP;
+								m_curFightMove = FIGHTMOVE_HITBIGSTEP;
 							break;
 					}
 					break;
 			}
 			if (m_nPedState == PED_GETUP && !IsPedHeadAbovePos(0.0f))
-				m_lastFightMove = FIGHTMOVE_HITONFLOOR;
+				m_curFightMove = FIGHTMOVE_HITONFLOOR;
 
 			if (m_nPedState == PED_FIGHT) {
-				CAnimBlendAssociation *moveAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, tFightMoves[m_lastFightMove].animId, 8.0f);
+				CAnimBlendAssociation *moveAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, tFightMoves[m_curFightMove].animId, 8.0f);
 				moveAssoc->SetCurrentTime(0.0f);
 				moveAssoc->SetFinishCallback(FinishFightMoveCB, this);
 				if (IsPlayer())
@@ -16272,7 +16217,7 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 				m_takeAStepAfterAttack = 0;
 				m_fightButtonPressure = 0;
 			} else if (IsPlayer() && m_currentWeapon != WEAPONTYPE_UNARMED) {
-				CAnimBlendAssociation *moveAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, tFightMoves[m_lastFightMove].animId, 4.0f);
+				CAnimBlendAssociation *moveAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, tFightMoves[m_curFightMove].animId, 4.0f);
 				moveAssoc->SetCurrentTime(0.0f);
 				moveAssoc->speed = 1.3f;
 			} else {
@@ -16302,7 +16247,7 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 				SetMoveState(PEDMOVE_NONE);
 				m_nStoredMoveState = PEDMOVE_NONE;
 				CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_FIGHT_IDLE)->blendAmount = 1.0f;
-				CAnimBlendAssociation *moveAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, tFightMoves[m_lastFightMove].animId, 8.0f);
+				CAnimBlendAssociation *moveAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, tFightMoves[m_curFightMove].animId, 8.0f);
 				moveAssoc->SetFinishCallback(FinishFightMoveCB, this);
 				m_fightState = FIGHTSTATE_NO_MOVE;
 				m_takeAStepAfterAttack = false;

@@ -480,7 +480,7 @@ public:
 	uint8 m_wepAccuracy;
 	CEntity *m_pPointGunAt;
 	CVector m_vecHitLastPos;
-	uint32 m_lastFightMove;
+	uint32 m_curFightMove;
 	uint8 m_fightButtonPressure;
 	FightState m_fightState;
 	bool m_takeAStepAfterAttack;
@@ -802,6 +802,7 @@ public:
 	bool Dying(void) { return m_nPedState == PED_DIE; }
 	bool DyingOrDead(void) { return m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
 	bool OnGround(void) { return m_nPedState == PED_FALL || m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
+	bool OnGroundOrGettingUp(void) { return OnGround() || m_nPedState == PED_GETUP; }
 	
 	bool Driving(void) { return m_nPedState == PED_DRIVING; }
 	bool InVehicle(void) { return bInVehicle && m_pMyVehicle; } // True when ped is sitting/standing in vehicle, not in enter/exit state.

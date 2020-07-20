@@ -956,10 +956,10 @@ CMenuManager::Draw()
 		CFont::SetDropShadowPosition(0);
 		if (!CheckHover(MENU_X(30.0f), MENU_X(30.0f) + CFont::GetStringWidth(backTx), SCREEN_SCALE_FROM_BOTTOM(125.0f), SCREEN_SCALE_FROM_BOTTOM(105.0f))) {
 			m_nHoverOption = HOVEROPTION_NOT_HOVERING;
-			m_nCurrOption = m_nPrevOption = 0;
+			m_nCurrOption = m_nOptionMouseHovering = 0;
 		} else {
 			m_nHoverOption = HOVEROPTION_RANDOM_ITEM;
-			m_nCurrOption = m_nPrevOption = 1;
+			m_nCurrOption = m_nOptionMouseHovering = 1;
 		}
 		return;
 	}
@@ -1256,7 +1256,7 @@ CMenuManager::Draw()
 						static int oldOption = -99;
 						static int oldScreen = m_nCurrScreen;
 
-						m_nPrevOption = rowToCheck;
+						m_nOptionMouseHovering = rowToCheck;
 						if (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY) {
 							m_nCurrOption = rowToCheck;
 							m_bShowMouse = true;
@@ -1980,10 +1980,10 @@ CMenuManager::DrawControllerSetupScreen()
 
 			float curOptY = i * rowHeight + yStart;
 			if (m_nMousePosY > MENU_Y(curOptY) && m_nMousePosY < MENU_Y(rowHeight + curOptY)) {
-					if (m_nPrevOption != i && m_nCurrExLayer == HOVEROPTION_LIST)
+					if (m_nOptionMouseHovering != i && m_nCurrExLayer == HOVEROPTION_LIST)
 						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 
-					m_nPrevOption = i;
+					m_nOptionMouseHovering = i;
 					if (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY) {
 						m_nCurrExLayer = HOVEROPTION_LIST;
 						m_nSelectedListRow = i;
@@ -2694,7 +2694,7 @@ CMenuManager::DrawPlayerSetupScreen()
 
 			if (m_nMousePosX > MENU_X_LEFT_ALIGNED(PLAYERSETUP_LIST_LEFT) && m_nMousePosX < MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT)) {
 				if (m_nMousePosY > MENU_Y(rowStartY) && m_nMousePosY < MENU_Y(rowEndY)) {
-					m_nPrevOption = rowIdx;
+					m_nOptionMouseHovering = rowIdx;
 					if (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY) {
 						m_nCurrExLayer = HOVEROPTION_LIST;
 					}
@@ -4025,7 +4025,7 @@ CMenuManager::ProcessButtonPresses(void)
 			if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_RESUME &&
 #endif
 				(m_nHoverOption == HOVEROPTION_RANDOM_ITEM)) {
-				m_nCurrOption = m_nPrevOption;
+				m_nCurrOption = m_nOptionMouseHovering;
 				optionSelected = true;
 			}
 		} else if (CPad::GetPad(0)->GetLeftMouseJustDown()) {
@@ -4039,7 +4039,7 @@ CMenuManager::ProcessButtonPresses(void)
 				OutputDebugString("FRONTEND RADIO STATION CHANGED");
 			} else if (m_nHoverOption == HOVEROPTION_RANDOM_ITEM
 				&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_RESUME) {
-				m_nCurrOption = m_nPrevOption;
+				m_nCurrOption = m_nOptionMouseHovering;
 				optionSelected = true;
 			}
 #else
@@ -4126,7 +4126,7 @@ CMenuManager::ProcessButtonPresses(void)
 				break;
 			case HOVEROPTION_RANDOM_ITEM:
 				if (((m_nCurrOption != 0) || (m_nCurrScreen != MENUPAGE_PAUSE_MENU)) {
-					m_nCurrOption = m_nPrevOption;
+					m_nCurrOption = m_nOptionMouseHovering;
 						optionSelected = true;
 				}
 				break;
