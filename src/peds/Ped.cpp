@@ -1946,7 +1946,7 @@ CPed::PlayFootSteps(void)
 			CVector particlePos = GetPosition() + GetForward() * 0.3f;
 			particlePos.z -= 1.2f;
 
-			CVector particleDir = m_vecMoveSpeed * 0.75f;
+			CVector particleDir = m_vecMoveSpeed * -0.75f;
 
 			particleDir.z = CGeneral::GetRandomNumberInRange(0.01f, 0.03f);
 			CParticle::AddParticle(PARTICLE_PED_SPLASH, particlePos, particleDir, nil, 0.8f * particleSize, CRGBA(155,155,185,128), 0, 0, 0, 0);
