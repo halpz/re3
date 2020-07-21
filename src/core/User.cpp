@@ -74,6 +74,14 @@ CPlaceName::Display()
 	CHud::SetZoneName(text);
 }
 
+void
+CPlaceName::ProcessAfterFrontEndShutDown(void)
+{
+	CHud::m_pLastZoneName = nil;
+	CHud::m_ZoneState = 0;
+	m_nAdditionalTimer = 250;
+}
+
 CCurrentVehicle::CCurrentVehicle()
 {
 	Init();

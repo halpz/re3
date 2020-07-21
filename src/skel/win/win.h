@@ -88,13 +88,14 @@ extern LRESULT      CALLBACK
 MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam);
 
 HRESULT _InputInitialise();
-HRESULT _InputInitialiseMouse();
 HRESULT CapturePad(RwInt32 padID);
 void _InputInitialiseJoys();
 void _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num);
 HRESULT _InputAddJoys();
 HRESULT _InputGetMouseState(DIMOUSESTATE2 *state);
 void _InputShutdown();
+void _InputShutdownMouse();
+BOOL _InputMouseNeedsExclusive();
 BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* pContext );
 BOOL _InputTranslateKey(RsKeyCodes *rs, UINT flag, UINT key);
 BOOL _InputTranslateShiftKey(RsKeyCodes *rs, UINT key, BOOLEAN bDown);

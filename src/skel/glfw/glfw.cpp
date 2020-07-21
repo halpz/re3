@@ -64,10 +64,6 @@ static psGlobalType PsGlobal;
 #undef MAKEPOINTS
 #define MAKEPOINTS(l)		(*((POINTS /*FAR*/ *)&(l)))
 
-#define SAFE_RELEASE(x) { if (x) x->Release(); x = NULL; }
-#define JIF(x) if (FAILED(hr=(x))) \
-	{debug(TEXT("FAILED(hr=0x%x) in ") TEXT(#x) TEXT("\n"), hr); return;}
-
 unsigned long _dwMemAvailPhys;
 RwUInt32 gGameState;
 
@@ -830,9 +826,10 @@ void _InputInitialiseJoys()
 	}
 }
 
-void _InputInitialiseMouse()
+long _InputInitialiseMouse(bool exclusive)
 {
 	glfwSetInputMode(PSGLOBAL(window), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	return 0;
 }
 
 void psPostRWinit(void)
@@ -847,7 +844,7 @@ void psPostRWinit(void)
 	glfwSetJoystickCallback(joysChangeCB);
 
 	_InputInitialiseJoys();
-	_InputInitialiseMouse();
+	_InputInitialiseMouse(false);
 
 	if(!(vm.flags & rwVIDEOMODEEXCLUSIVE))
 		glfwSetWindowSize(PSGLOBAL(window), RsGlobal.maximumWidth, RsGlobal.maximumHeight);

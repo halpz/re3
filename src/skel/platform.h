@@ -35,6 +35,7 @@ extern RwBool psInstallFileSystem(void);
 extern RwBool psNativeTextureSupport(void);
 
 extern void _InputTranslateShiftKeyUpDown(RsKeyCodes* rs);
+extern long _InputInitialiseMouse(bool exclusive); // returns HRESULT on Windows actually
 
 extern void HandleExit();
 

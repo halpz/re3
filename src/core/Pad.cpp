@@ -39,6 +39,7 @@
 #include "General.h"
 #include "Fluff.h"
 #include "Gangs.h"
+#include "platform.h"
 
 #ifdef GTA_PS2
 #include "eetypes.h"
@@ -671,7 +672,7 @@ CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()
 
 #if defined RW_D3D9 || defined RWLIBS
 	if ( PSGLOBAL(mouse) == nil )
-		_InputInitialiseMouse();
+		_InputInitialiseMouse(!FrontEndMenuManager.m_bMenuActive && _InputMouseNeedsExclusive());
 
 	if ( PSGLOBAL(mouse) != nil )
 	{
@@ -725,7 +726,7 @@ void CPad::UpdateMouse()
 	{
 #if defined RW_D3D9 || defined RWLIBS
 		if ( PSGLOBAL(mouse) == nil )
-			_InputInitialiseMouse();
+			_InputInitialiseMouse(!FrontEndMenuManager.m_bMenuActive && _InputMouseNeedsExclusive());
 
 		DIMOUSESTATE2 state;
 

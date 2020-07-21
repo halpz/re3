@@ -2523,7 +2523,7 @@ CAutomobile::PreRender(void)
 		if(GetModelIndex() == MI_RCGOBLIN || GetModelIndex() == MI_RCRAIDER)
 			radius = 3.0f;
 		if(GetPosition().z - groundZ < radius)
-			HeliDustGenerate(this, radius-(GetPosition().z - groundZ), groundZ, ceilf(rnd));
+			HeliDustGenerate(this, radius-(GetPosition().z - groundZ), groundZ, Ceil(rnd));
 	}
 
 	CMatrix mat;

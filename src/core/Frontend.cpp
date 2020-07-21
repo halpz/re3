@@ -24,7 +24,6 @@
 #include "GenericGameStorage.h"
 #include "Script.h"
 #include "Camera.h"
-#include "MenuScreens.h"
 #include "ControllerConfig.h"
 #include "Vehicle.h"
 #include "MBlur.h"
@@ -214,75 +213,6 @@ ScaleAndCenterX(float x)
 
 // --- Functions not in the game/inlined starts
 
-bool DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha);
-void DoRWStuffEndOfFrame(void);
-
-#ifdef PS2_LIKE_MENU
-void
-CMenuManager::SwitchToNewScreen(int8 screen)
-{
-	if (reverseAlpha) {
-			m_nPrevScreen = m_nCurrScreen;
-			m_nCurrScreen = pendingScreen;
-			m_nCurrOption = pendingOption;
-			reverseAlpha = false;
-			if (updateDelay)
-				m_LastScreenSwitch = CTimer::GetTimeInMillisecondsPauseMode();
-	}
-	if (withReverseAlpha) {
-		pendingOption = option;
-		pendingScreen = screen;
-		reverseAlpha = true;
-	} else {
-		m_nPrevScreen = m_nCurrScreen;
-		m_nCurrScreen = screen;
-		m_nCurrOption = option;
-		if (updateDelay)
-			m_LastScreenSwitch = CTimer::GetTimeInMillisecondsPauseMode();
-	}
-	m_nMenuFadeAlpha = 255;
-}
-#else
-
-// --MIAMI: Done except using VC's gMenuPages
-void
-CMenuManager::SwitchToNewScreen(int8 screen)
-{
-	bMenuChangeOngoing = true;
-	DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
-	DrawBackground(true);
-	DoRWStuffEndOfFrame();
-	DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
-	DrawBackground(true);
-	DoRWStuffEndOfFrame();
-	m_nPrevScreen = m_nCurrScreen;
-	m_ShowEmptyBindingError = false;
-	ResetHelperText();
-
-	ThingsToDoBeforeLeavingPage();
-
-	if (screen == -2) {
-		int oldScreen = aScreens[m_nCurrScreen].m_PreviousPage;
-		int oldOption = (m_nCurrScreen == MENUPAGE_NEW_GAME ? 0 : (m_nCurrScreen == MENUPAGE_OPTIONS ? 1 : (m_nCurrScreen == MENUPAGE_EXIT ? 2 : aScreens[m_nCurrScreen].m_ParentEntry)));
-
-		m_nCurrOption = oldOption;
-		m_nCurrScreen = oldScreen;
-	} else if (screen == 0) {
-		m_nCurrScreen = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu;
-		m_nCurrOption = 0;
-	} else {
-		m_nCurrOption = 0;
-		m_nCurrScreen = screen;
-	}
-
-	if (m_nCurrScreen == MENUPAGE_CHOOSE_SAVE_SLOT)
-		m_nCurrOption = 8;
-	m_nMenuFadeAlpha = 0;
-	m_nOptionHighlightTransitionBlend = 0;
-	m_LastScreenSwitch = CTimer::GetTimeInMillisecondsPauseMode();
-}
-#endif
-
 inline void
 CMenuManager::ScrollUpListByOne() 
 {
@@ -349,7 +279,6 @@ CMenuManager::PageDownList(bool playSoundOnSuccess)
 	}
 }
 
-// TODO(Miami)
 inline void
 CMenuManager::ThingsToDoBeforeLeavingPage()
 {
@@ -373,12 +302,122 @@ CMenuManager::ThingsToDoBeforeLeavingPage()
 		CPlayerSkin::EndFrontendSkinEdit();
 	}
 
-	if ((m_nCurrScreen == MENUPAGE_SKIN_SELECT) || (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS)) {
-		m_nTotalListRow = 0;
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	for (int i = 0; i < numCustomFrontendOptions; i++) {
+		FrontendOption& option = customFrontendOptions[i];
+		if (option.type != FEOPTION_REDIRECT && option.type != FEOPTION_GOBACK && m_nCurrScreen == option.screen) {
+			if (option.returnPrevPageFunc)
+				option.returnPrevPageFunc();
+
+			if (m_nCurrOption == option.screenOptionOrder && option.type == FEOPTION_DYNAMIC)
+				option.buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
+
+			if (option.onlyApplyOnEnter)
+				option.displayedValue = *option.value;
+		}
 	}
+#endif
+}
+
+int8
+CMenuManager::GetPreviousPageOption()
+{
+#ifndef CUSTOM_FRONTEND_OPTIONS
+	return (!m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_ParentEntry :
+		(m_nCurrScreen == MENUPAGE_NEW_GAME ? 0 : (m_nCurrScreen == MENUPAGE_OPTIONS ? 1 : (m_nCurrScreen == MENUPAGE_EXIT ? 2 : aScreens[m_nCurrScreen].m_ParentEntry))));
+#else
+	int8 prevPage = aScreens[m_nCurrScreen].m_PreviousPage;
+
+	if (prevPage == -1) // Game also does same
+		return 0;
+
+	prevPage = prevPage == MENUPAGE_NONE ? (!m_bGameNotLoaded ? MENUPAGE_PAUSE_MENU : MENUPAGE_START_MENU) : prevPage;
+
+	for (int i = 0; i < NUM_MENUROWS; i++) {
+		if (aScreens[prevPage].m_aEntries[i].m_TargetMenu == m_nCurrScreen) {
+			return i;
+		}
+	}
+
+	// Couldn't find current screen option on previous page, use default behaviour (maybe save-related screen?)
+	return (!m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_ParentEntry :
+		(m_nCurrScreen == MENUPAGE_NEW_GAME ? 0 : (m_nCurrScreen == MENUPAGE_OPTIONS ? 1 : (m_nCurrScreen == MENUPAGE_EXIT ? 2 : aScreens[m_nCurrScreen].m_ParentEntry))));
+#endif
 }
 
 // ------ Functions not in the game/inlined ends
+
+bool DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha);
+void DoRWStuffEndOfFrame(void);
+
+#ifdef PS2_LIKE_MENU
+void
+CMenuManager::SwitchToNewScreen(int8 screen)
+{
+	if (reverseAlpha) {
+			m_nPrevScreen = m_nCurrScreen;
+			m_nCurrScreen = pendingScreen;
+			m_nCurrOption = pendingOption;
+			reverseAlpha = false;
+			if (updateDelay)
+				m_LastScreenSwitch = CTimer::GetTimeInMillisecondsPauseMode();
+	}
+	if (withReverseAlpha) {
+		pendingOption = option;
+		pendingScreen = screen;
+		reverseAlpha = true;
+	} else {
+		m_nPrevScreen = m_nCurrScreen;
+		m_nCurrScreen = screen;
+		m_nCurrOption = option;
+		if (updateDelay)
+			m_LastScreenSwitch = CTimer::GetTimeInMillisecondsPauseMode();
+	}
+	m_nMenuFadeAlpha = 255;
+}
+#else
+
+// --MIAMI: Done
+void
+CMenuManager::SwitchToNewScreen(int8 screen)
+{
+	bMenuChangeOngoing = true;
+	DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
+	DrawBackground(true);
+	DoRWStuffEndOfFrame();
+	DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
+	DrawBackground(true);
+	DoRWStuffEndOfFrame();
+	m_nPrevScreen = m_nCurrScreen;
+	m_ShowEmptyBindingError = false;
+	ResetHelperText();
+
+	ThingsToDoBeforeLeavingPage();
+
+	if (screen == -2) {
+		int oldScreen = aScreens[m_nCurrScreen].m_PreviousPage;
+		int oldOption = GetPreviousPageOption();
+
+		m_nCurrOption = oldOption;
+		m_nCurrScreen = oldScreen;
+	} else if (screen == 0) {
+		m_nCurrScreen = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu;
+		m_nCurrOption = 0;
+	} else {
+		m_nCurrOption = 0;
+		m_nCurrScreen = screen;
+	}
+
+	if (m_nPrevScreen == MENUPAGE_SKIN_SELECT || m_nPrevScreen == MENUPAGE_KEYBOARD_CONTROLS)
+		m_nTotalListRow = 0;
+
+	if (m_nCurrScreen == MENUPAGE_CHOOSE_SAVE_SLOT)
+		m_nCurrOption = 8;
+	m_nMenuFadeAlpha = 0;
+	m_nOptionHighlightTransitionBlend = 0;
+	m_LastScreenSwitch = CTimer::GetTimeInMillisecondsPauseMode();
+}
+#endif
 
 CMenuManager::CMenuManager()
 {
@@ -463,7 +502,7 @@ CMenuManager::Initialise(void)
 	DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
 	DoRWStuffEndOfFrame();
 	m_AllowNavigation = false;
-	m_menuTransitionProgress = -50;
+	m_menuTransitionProgress = -50; // to start from black
 	m_nMenuFadeAlpha = 0;
 	m_nCurrOption = 0;
 	m_nOptionHighlightTransitionBlend = 0;
@@ -1172,6 +1211,32 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 						rightText = TheText.Get("FEA_NM3");
 					}
 					break;
+#ifdef CUSTOM_FRONTEND_OPTIONS
+				case MENUACTION_TRIGGERFUNC:
+					FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
+					if (m_nCurrScreen == option.screen && i == option.screenOptionOrder) {
+						leftText = (wchar*)option.leftText;
+						if (option.type == FEOPTION_SELECT) {
+							if (option.displayedValue >= option.numRightTexts || option.displayedValue < 0)
+								option.displayedValue = 0;
+
+							rightText = (wchar*)option.rightTexts[option.displayedValue];
+
+						} else if (option.type == FEOPTION_DYNAMIC) {
+							if (option.drawFunc) {
+								bool isOptionDisabled = false;
+								rightText = option.drawFunc(&isOptionDisabled);
+								if (isOptionDisabled)
+									CFont::SetColor(CRGBA(DARKMENUOPTION_COLOR.r, DARKMENUOPTION_COLOR.g, DARKMENUOPTION_COLOR.b, FadeIn(255)));
+							}
+						}
+					} else {
+						debug("A- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, i, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu, option.screen, option.screenOptionOrder);
+						assert(0 && "Custom frontend options is borked");
+					}
+
+					break;
+#endif
 				}
 
 				// Highlight trapezoid
@@ -1325,6 +1390,24 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 							m_nSelectedScreenMode = m_nPrefsWindowed;
 						}
 					}
+#endif
+#ifdef CUSTOM_FRONTEND_OPTIONS
+					static int lastOption = m_nCurrOption;
+
+					if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action == MENUACTION_TRIGGERFUNC) {
+						FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
+						if (option.onlyApplyOnEnter && m_nCurrOption != i)
+							option.displayedValue = *option.value;
+
+						if (m_nCurrOption != lastOption && lastOption == i) {
+							FrontendOption& oldOption = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[lastOption].m_TargetMenu];
+							if (oldOption.type == FEOPTION_DYNAMIC)
+								oldOption.buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
+						}
+					}
+
+					if (i == MAX_MENUROWS - 1 || aScreens[m_nCurrScreen].m_aEntries[i + 1].m_EntryName[0] == '\0')
+						lastOption = m_nCurrOption;
 #endif
 
 					// TODO(Miami): check
@@ -1955,10 +2038,10 @@ CMenuManager::DrawControllerSetupScreen()
 
 			float curOptY = i * rowHeight + yStart;
 			if (m_nMousePosY > MENU_Y(curOptY) && m_nMousePosY < MENU_Y(rowHeight + curOptY)) {
-					if (m_nPrevOption != i && m_nCurrExLayer == HOVEROPTION_LIST)
+					if (m_nOptionMouseHovering != i && m_nCurrExLayer == HOVEROPTION_LIST)
 						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
 
-					m_nPrevOption = i;
+					m_nOptionMouseHovering = i;
 					if (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY) {
 						m_nCurrExLayer = HOVEROPTION_LIST;
 						m_nSelectedListRow = i;
@@ -2660,7 +2743,7 @@ CMenuManager::DrawPlayerSetupScreen()
 
 			if (m_nMousePosX > MENU_X_LEFT_ALIGNED(PLAYERSETUP_LIST_LEFT) && m_nMousePosX < MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT)) {
 				if (m_nMousePosY > MENU_Y(rowStartY) && m_nMousePosY < MENU_Y(rowEndY)) {
-					m_nPrevOption = rowIdx;
+					m_nOptionMouseHovering = rowIdx;
 					if (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY) {
 						m_nCurrExLayer = HOVEROPTION_LIST;
 					}
@@ -3023,6 +3106,10 @@ CMenuManager::InitialiseChangedLanguageSettings()
 		default:
 			break;
 		}
+
+#ifdef CUSTOM_FRONTEND_OPTIONS
+		CustomFrontendOptionsPopulate();
+#endif
 	}
 }
 
@@ -3618,7 +3705,7 @@ CMenuManager::ProcessButtonPresses(void)
 			m_nMousePosY < MENU_Y(aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Y + MENU_DEFAULT_LINE_HEIGHT)) {
 			static int oldScreen = m_nCurrScreen;
 
-			m_nPrevOption = rowToCheck;
+			m_nOptionMouseHovering = rowToCheck;
 			if (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY) {
 				m_nCurrOption = rowToCheck;
 				m_bShowMouse = true;
@@ -3632,7 +3719,7 @@ CMenuManager::ProcessButtonPresses(void)
 			break;
 		}
 		if (m_bShowMouse && m_nMenuFadeAlpha == 255) {
-			m_nPrevOption = oldOption;
+			m_nOptionMouseHovering = oldOption;
 			m_nCurrOption = oldOption;
 		}
 	}
@@ -3641,7 +3728,7 @@ CMenuManager::ProcessButtonPresses(void)
 		if (oldOption != m_nCurrOption) {
 			if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_LABEL) {
 				++m_nCurrOption;
-				++m_nPrevOption;
+				++m_nOptionMouseHovering;
 			}
 			m_nOptionHighlightTransitionBlend = 0;
 			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
@@ -3923,7 +4010,7 @@ CMenuManager::ProcessButtonPresses(void)
 			if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_RESUME &&
 #endif
 				(m_nHoverOption == HOVEROPTION_RANDOM_ITEM)) {
-				m_nCurrOption = m_nPrevOption;
+				m_nCurrOption = m_nOptionMouseHovering;
 				optionSelected = true;
 			}
 		} else if (CPad::GetPad(0)->GetLeftMouseJustDown()) {
@@ -3937,7 +4024,7 @@ CMenuManager::ProcessButtonPresses(void)
 				OutputDebugString("FRONTEND RADIO STATION CHANGED");
 			} else if (m_nHoverOption == HOVEROPTION_RANDOM_ITEM
 				&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_RESUME) {
-				m_nCurrOption = m_nPrevOption;
+				m_nCurrOption = m_nOptionMouseHovering;
 				optionSelected = true;
 			}
 #else
@@ -4024,7 +4111,7 @@ CMenuManager::ProcessButtonPresses(void)
 				break;
 			case HOVEROPTION_RANDOM_ITEM:
 				if (((m_nCurrOption != 0) || (m_nCurrScreen != MENUPAGE_PAUSE_MENU)) {
-					m_nCurrOption = m_nPrevOption;
+					m_nCurrOption = m_nOptionMouseHovering;
 						optionSelected = true;
 				}
 				break;
@@ -4358,26 +4445,6 @@ CMenuManager::ProcessButtonPresses(void)
 					InitialiseChangedLanguageSettings();
 					SaveSettings();
 					break;
-#ifdef MORE_LANGUAGES
-				case MENUACTION_LANG_PL:
-					m_PrefsLanguage = LANGUAGE_POLISH;
-					m_bFrontEnd_ReloadObrTxtGxt = true;
-					InitialiseChangedLanguageSettings();
-					SaveSettings();
-					break;
-				case MENUACTION_LANG_RUS:
-					m_PrefsLanguage = LANGUAGE_RUSSIAN;
-					m_bFrontEnd_ReloadObrTxtGxt = true;
-					CMenuManager::InitialiseChangedLanguageSettings();
-					SaveSettings();
-					break;
-				case MENUACTION_LANG_JAP:
-					m_PrefsLanguage = LANGUAGE_JAPANESE;
-					m_bFrontEnd_ReloadObrTxtGxt = true;
-					InitialiseChangedLanguageSettings();
-					SaveSettings();
-					break;
-#endif
 				case MENUACTION_POPULATESLOTS_CHANGEMENU:
 					PcSaveHelper.PopulateSlotInfo();
 
@@ -4540,7 +4607,6 @@ CMenuManager::ProcessButtonPresses(void)
 					} else if (m_nCurrScreen == MENUPAGE_CONTROLLER_PC) {
 						ControlsManager.MakeControllerActionsBlank();
 						ControlsManager.InitDefaultControlConfiguration();
-						MousePointerStateHelper.GetMouseSetUp();
 						ControlsManager.InitDefaultControlConfigMouse(MousePointerStateHelper.GetMouseSetUp());
 #if !defined RW_GL3
 						if (AllValidWinJoys.m_aJoys[JOYSTICK1].m_bInitialised) {
@@ -4595,6 +4661,33 @@ CMenuManager::ProcessButtonPresses(void)
 					}
 					break;
 				}
+#ifdef CUSTOM_FRONTEND_OPTIONS
+				case MENUACTION_TRIGGERFUNC:
+					FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu];
+					if (m_nCurrScreen == option.screen && m_nCurrOption == option.screenOptionOrder) {
+						if (option.type == FEOPTION_SELECT) {
+							if (!option.onlyApplyOnEnter) {
+								option.displayedValue++;
+								if (option.displayedValue >= option.numRightTexts || option.displayedValue < 0)
+									option.displayedValue = 0;
+							}
+							option.changeFunc(option.displayedValue);
+							*option.value = option.displayedValue;
+
+						} else if (option.type == FEOPTION_DYNAMIC) {
+							option.buttonPressFunc(FEOPTION_ACTION_SELECT);
+						} else if (option.type == FEOPTION_REDIRECT) {
+							ChangeScreen(option.to, option.option, true, option.fadeIn);
+						} else if (option.type == FEOPTION_GOBACK) {
+							goBack = true;
+						}
+					} else {
+						debug("B- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, m_nCurrOption, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, option.screen, option.screenOptionOrder);
+						assert(0 && "Custom frontend options are borked");
+					}
+
+					break;
+#endif
 			}
 		}
 		ProcessOnOffMenuOptions();
@@ -4641,6 +4734,9 @@ CMenuManager::ProcessButtonPresses(void)
 
 		if (oldScreen != -1) {
 			ThingsToDoBeforeLeavingPage();
+			if ((m_nCurrScreen == MENUPAGE_SKIN_SELECT) || (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS)) {
+				m_nTotalListRow = 0;
+			}
 
 #ifdef PS2_LIKE_MENU
 			if (!bottomBarActive &&
@@ -4797,6 +4893,36 @@ CMenuManager::ProcessButtonPresses(void)
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 				SaveSettings();
 				break;
+#ifdef CUSTOM_FRONTEND_OPTIONS
+			case MENUACTION_TRIGGERFUNC:
+				FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu];
+				if (m_nCurrScreen == option.screen && m_nCurrOption == option.screenOptionOrder) {
+					if (option.type == FEOPTION_SELECT) {
+						if (changeValueBy > 0) {
+							option.displayedValue++;
+							if (option.displayedValue >= option.numRightTexts)
+								option.displayedValue = 0;
+						} else {
+							option.displayedValue--;
+							if (option.displayedValue < 0)
+								option.displayedValue = option.numRightTexts - 1;
+						}
+						if (!option.onlyApplyOnEnter) {
+							option.changeFunc(option.displayedValue);
+							*option.value = option.displayedValue;
+						}
+					} else if (option.type == FEOPTION_DYNAMIC) {
+						option.buttonPressFunc(changeValueBy > 0 ? FEOPTION_ACTION_RIGHT : FEOPTION_ACTION_LEFT);
+					}
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
+				}
+				else {
+					debug("C- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, m_nCurrOption, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, option.screen, option.screenOptionOrder);
+					assert(0 && "Custom frontend options are borked");
+				}
+
+				break;
+#endif
 		}
 		ProcessOnOffMenuOptions();
 		if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
@@ -4890,13 +5016,6 @@ CMenuManager::ProcessOnOffMenuOptions()
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		SaveSettings();
 		break;
-#ifdef FREE_CAM
-	case MENUACTION_FREECAM:
-		TheCamera.bFreeCam = !TheCamera.bFreeCam;
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-		SaveSettings();
-		break;
-#endif
 	}
 }
 
@@ -5010,7 +5129,7 @@ CMenuManager::ProcessFileActions()
 	}
 }
 
-// --MIAMI: Done except DxInput things, are they even needed?
+// --MIAMI: Done
 void
 CMenuManager::SwitchMenuOnAndOff()
 {
@@ -5036,7 +5155,12 @@ CMenuManager::SwitchMenuOnAndOff()
 				m_bMenuActive = !m_bMenuActive;
 
 			if (m_bMenuActive) {
-				// TODO(Miami): DxInput??
+#if defined RW_D3D9 || defined RWLIBS
+				if (_InputMouseNeedsExclusive()) {
+					_InputShutdownMouse();
+					_InputInitialiseMouse(false);
+				}
+#endif
 
 				Initialise();
 				LoadAllTextures();
@@ -5049,8 +5173,12 @@ CMenuManager::SwitchMenuOnAndOff()
 				DoRWStuffEndOfFrame();
 				DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
 				DoRWStuffEndOfFrame();
-
-				// TODO(Miami): DxInput??
+#if defined RW_D3D9 || defined RWLIBS
+				if (_InputMouseNeedsExclusive()) {
+					_InputShutdownMouse();
+					_InputInitialiseMouse(true);
+				}
+#endif
 
 #ifdef PS2_LIKE_MENU
 				bottomBarActive = false;
@@ -5095,7 +5223,12 @@ CMenuManager::SwitchMenuOnAndOff()
 		m_bMenuActive = true;
 		m_OnlySaveMenu = true;
 
-		// TODO(Miami): DxInput??
+#if defined RW_D3D9 || defined RWLIBS
+		if (_InputMouseNeedsExclusive()) {
+			_InputShutdownMouse();
+			_InputInitialiseMouse(false);
+		}
+#endif
 
 		Initialise();
 		LoadAllTextures();

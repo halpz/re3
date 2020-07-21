@@ -922,9 +922,9 @@ CRenderer::ScanSectorPoly(RwV2d *poly, int32 numVertices, void (*scanfunc)(CPtrL
 
 	// prestep x1 and x2 to next integer y
 	deltaA = CalcNewDelta(&poly[a1], &poly[a2]);
-	xA = deltaA * (ceilf(poly[a1].y) - poly[a1].y) + poly[a1].x;
+	xA = deltaA * (Ceil(poly[a1].y) - poly[a1].y) + poly[a1].x;
 	deltaB = CalcNewDelta(&poly[b1], &poly[b2]);
-	xB = deltaB * (ceilf(poly[b1].y) - poly[b1].y) + poly[b1].x;
+	xB = deltaB * (Ceil(poly[b1].y) - poly[b1].y) + poly[b1].x;
 
 	if(y != yend){
 		if(deltaB < 0.0f && (int)xB < xstart)
@@ -969,7 +969,7 @@ CRenderer::ScanSectorPoly(RwV2d *poly, int32 numVertices, void (*scanfunc)(CPtrL
 						xstart = poly[b1].x;
 				}while(y == (int)poly[b2].y);
 				deltaB = CalcNewDelta(&poly[b1], &poly[b2]);
-				xB = deltaB * (ceilf(poly[b1].y) - poly[b1].y) + poly[b1].x;
+				xB = deltaB * (Ceil(poly[b1].y) - poly[b1].y) + poly[b1].x;
 				if(deltaB < 0.0f && (int)xB < xstart)
 					xstart = xB;
 			}
@@ -1005,7 +1005,7 @@ CRenderer::ScanSectorPoly(RwV2d *poly, int32 numVertices, void (*scanfunc)(CPtrL
 						xend = poly[a1].x;
 				}while(y == (int)poly[a2].y);
 				deltaA = CalcNewDelta(&poly[a1], &poly[a2]);
-				xA = deltaA * (ceilf(poly[a1].y) - poly[a1].y) + poly[a1].x;
+				xA = deltaA * (Ceil(poly[a1].y) - poly[a1].y) + poly[a1].x;
 				if(deltaA >= 0.0f && (int)xA > xend)
 					xend = xA;
 			}

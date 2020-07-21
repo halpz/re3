@@ -620,6 +620,23 @@ CEntity::PruneReferences(void)
 	}
 }
 
+// Clean up the reference from *pent -> 'this'
+void
+CEntity::CleanUpOldReference(CEntity **pent)
+{
+	CReference* ref, ** lastnextp;
+	lastnextp = &m_pFirstReference;
+	for (ref = m_pFirstReference; ref; ref = ref->next) {
+		if (ref->pentity == pent) {
+			*lastnextp = ref->next;
+			ref->next = CReferences::pEmptyList;
+			CReferences::pEmptyList = ref;
+			break;
+		}
+		lastnextp = &ref->next;
+	}
+}
+
 void
 CEntity::UpdateRpHAnim(void)
 {

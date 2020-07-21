@@ -1602,7 +1602,6 @@ RwBool _psSetVideoMode(RwInt32 subSystem, RwInt32 videoMode)
 	return TRUE;
 }
  
- 
 /*
  *****************************************************************************
  */
@@ -2003,7 +2002,7 @@ WinMain(HINSTANCE instance,
 	
 	if ( _InputInitialise() == S_OK )
 	{
-		_InputInitialiseMouse();
+		_InputInitialiseMouse(false);
 		_InputInitialiseJoys();
 	}
 	
@@ -2542,7 +2541,7 @@ HRESULT _InputInitialise()
 	return S_OK;
 }
 
-HRESULT _InputInitialiseMouse()
+HRESULT _InputInitialiseMouse(bool exclusive)
 {
 	HRESULT hr;
 
@@ -2560,7 +2559,7 @@ HRESULT _InputInitialiseMouse()
 	if( FAILED( hr = PSGLOBAL(mouse)->SetDataFormat( &c_dfDIMouse2 ) ) )
 		return hr;
 	
-	if( FAILED( hr = PSGLOBAL(mouse)->SetCooperativeLevel( PSGLOBAL(window), DISCL_NONEXCLUSIVE | DISCL_FOREGROUND ) ) )
+	if( FAILED( hr = PSGLOBAL(mouse)->SetCooperativeLevel( PSGLOBAL(window), (exclusive ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE) | DISCL_FOREGROUND ) ) )
 		return hr;
 	
 	// Acquire the newly created device
@@ -2846,6 +2845,23 @@ HRESULT _InputGetMouseState(DIMOUSESTATE2 *state)
 void _InputShutdown()
 {
 	SAFE_RELEASE(PSGLOBAL(dinterface));
+}
+
+void _InputShutdownMouse()
+{
+	if (PSGLOBAL(mouse) == nil)
+		return;
+
+	PSGLOBAL(mouse)->Unacquire();
+	SAFE_RELEASE(PSGLOBAL(mouse));
+}
+
+BOOL _InputMouseNeedsExclusive(void)
+{
+	RwVideoMode vm;
+	RwEngineGetVideoModeInfo(&vm, GcurSelVM);
+
+	return vm.flags & rwVIDEOMODEEXCLUSIVE;
 }
 
 BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* pContext )

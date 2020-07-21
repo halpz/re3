@@ -104,7 +104,7 @@ CTheZones::Init(void)
 	NavigationZoneArray[0].maxy =  2000.0f;
 	NavigationZoneArray[0].maxz =  500.0f;
 	NavigationZoneArray[0].level = LEVEL_GENERIC;
-	NavigationZoneArray[0].type = ZONE_NAVIG;
+	NavigationZoneArray[0].type = ZONE_DEFAULT;
 
 	m_CurrLevel = LEVEL_GENERIC;
 
