@@ -1821,7 +1821,7 @@ void
 CPed::PlayFootSteps(void)
 {
 	if (bDoBloodyFootprints) {
-		if (m_bloodyFootprintCountOrDeathTime != 0 && m_bloodyFootprintCountOrDeathTime < 300) {
+		if (m_bloodyFootprintCountOrDeathTime > 0 && m_bloodyFootprintCountOrDeathTime < 300) {
 			m_bloodyFootprintCountOrDeathTime--;
 
 			if (m_bloodyFootprintCountOrDeathTime == 0)
@@ -9823,7 +9823,7 @@ CPed::ProcessControl(void)
 				|| (!bIsStanding && !bWasStanding && m_nPedState == PED_FALL)
 #endif		
 			) {
-				if (m_nPedStateTimer <= 1000 && m_nPedStateTimer) {
+				if (m_nPedStateTimer > 0 && m_nPedStateTimer <= 1000) {
 					forceDir = GetPosition() - m_vecHitLastPos;
 				} else {
 					m_nPedStateTimer = 0;
@@ -13712,7 +13712,7 @@ CPed::ProcessObjective(void)
 #endif
 		}
 		if (bObjectiveCompleted
-			|| m_objectiveTimer != 0 && CTimer::GetTimeInMilliseconds() > m_objectiveTimer) {
+			|| m_objectiveTimer > 0 && CTimer::GetTimeInMilliseconds() > m_objectiveTimer) {
 			RestorePreviousObjective();
 			if (m_objectiveTimer > CTimer::GetTimeInMilliseconds() || !m_objectiveTimer)
 				m_objectiveTimer = CTimer::GetTimeInMilliseconds() - 1;
