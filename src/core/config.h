@@ -273,7 +273,7 @@ enum Config {
 
 // Vehicles
 #define EXPLODING_AIRTRAIN	// can blow up jumbo jet with rocket launcher
-//#define REMOVE_TREADABLE_PATHFIND
+#define CPLANE_ROTORS		// make the rotors of the NPC police heli rotate
 
 // Pickups
 //#define MONEY_MESSAGES

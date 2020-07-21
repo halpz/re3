@@ -16,6 +16,7 @@
 #include "Fluff.h"
 #include "World.h"
 #include "HandlingMgr.h"
+#include "Heli.h"
 #include "Plane.h"
 
 //--MIAMI: file done
@@ -88,6 +89,9 @@ CPlane::CPlane(int32 id, uint8 CreatedBy)
 	m_level = LEVEL_GENERIC;
 
 	m_isFarAway = false;
+#ifdef CPLANE_ROTORS
+	m_fRotorRotation = 0.0f;
+#endif
 }
 
 CPlane::~CPlane()
@@ -99,6 +103,21 @@ void
 CPlane::SetModelIndex(uint32 id)
 {
 	CVehicle::SetModelIndex(id);
+#ifdef CPLANE_ROTORS
+	int i;
+	for(i = 0; i < NUM_PLANE_NODES; i++)
+		m_aPlaneNodes[i] = nil;
+	if(GetModelIndex() == MI_CHOPPER){
+		// This is surprisingly annoying...
+		RwFrame *heliNodes[NUM_HELI_NODES];
+		for(i = 0; i < NUM_HELI_NODES; i++)
+			heliNodes[i] = nil;
+		CClumpModelInfo::FillFrameArray(GetClump(), heliNodes);
+		m_aPlaneNodes[PLANE_TOPROTOR] = heliNodes[HELI_TOPROTOR];
+		m_aPlaneNodes[PLANE_BACKROTOR] = heliNodes[HELI_BACKROTOR];
+	}else
+		CClumpModelInfo::FillFrameArray(GetClump(), m_aPlaneNodes);
+#endif
 }
 
 void
@@ -629,6 +648,29 @@ CPlane::PreRender(void)
 			CCoronas::TYPE_NORMAL, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
 			CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, 0.0f);
 	}
+
+#ifdef CPLANE_ROTORS
+	CMatrix mat;
+	CVector pos;
+	m_fRotorRotation += 3.14f/6.5f;
+	if(m_fRotorRotation > 6.28f)
+		m_fRotorRotation -= 6.28f;
+
+	if(m_aPlaneNodes[PLANE_TOPROTOR]){
+		mat.Attach(RwFrameGetMatrix(m_aPlaneNodes[PLANE_TOPROTOR]));
+		pos = mat.GetPosition();
+		mat.SetRotateZ(m_fRotorRotation);
+		mat.Translate(pos);
+		mat.UpdateRW();
+	}
+	if(m_aPlaneNodes[PLANE_BACKROTOR]){
+		mat.Attach(RwFrameGetMatrix(m_aPlaneNodes[PLANE_BACKROTOR]));
+		pos = mat.GetPosition();
+		mat.SetRotateX(m_fRotorRotation);
+		mat.Translate(pos);
+		mat.UpdateRW();
+	}
+#endif
 }
 
 void
