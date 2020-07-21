@@ -317,7 +317,11 @@ enum Visbility
 	VIS_STREAMME
 };
 
+#ifdef FIX_BUGS
+#define LOD_DISTANCE (300.0f*TheCamera.LODDistMultiplier)
+#else
 #define LOD_DISTANCE 300.0f
+#endif
 #define FADE_DISTANCE 20.0f
 #define STREAM_DISTANCE 30.0f
 
@@ -419,6 +423,8 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 	// whose draw dist is > LOD_DISTANCE-FADE_DISTANCE, i.e. 280
 	// because decreasing dist here makes the object visible above LOD_DISTANCE
 	// before fading normally once below LOD_DISTANCE.
+	// aha! this must be a workaround for the fact that we're not taking
+	// the LOD multiplier into account here anywhere
 	if(LOD_DISTANCE < dist && dist < mi->GetLargestLodDistance() + FADE_DISTANCE)
 		dist += mi->GetLargestLodDistance() - LOD_DISTANCE;
 #endif
@@ -751,14 +757,7 @@ CRenderer::ScanWorld(void)
 		}else
 #endif
 		{
-			if(f <= LOD_DISTANCE){
-				poly[0].x = CWorld::GetSectorX(vectors[CORNER_CAM].x);
-				poly[0].y = CWorld::GetSectorY(vectors[CORNER_CAM].y);
-				poly[1].x = CWorld::GetSectorX(vectors[CORNER_FAR_TOPLEFT].x);
-				poly[1].y = CWorld::GetSectorY(vectors[CORNER_FAR_TOPLEFT].y);
-				poly[2].x = CWorld::GetSectorX(vectors[CORNER_FAR_TOPRIGHT].x);
-				poly[2].y = CWorld::GetSectorY(vectors[CORNER_FAR_TOPRIGHT].y);
-			}else{
+			if(f > LOD_DISTANCE){
 				// priority
 				poly[0].x = CWorld::GetSectorX(vectors[CORNER_CAM].x);
 				poly[0].y = CWorld::GetSectorY(vectors[CORNER_CAM].y);
@@ -775,8 +774,16 @@ CRenderer::ScanWorld(void)
 				poly[1].y = CWorld::GetSectorY(vectors[CORNER_LOD_LEFT].y);
 				poly[2].x = CWorld::GetSectorX(vectors[CORNER_LOD_RIGHT].x);
 				poly[2].y = CWorld::GetSectorY(vectors[CORNER_LOD_RIGHT].y);
+				ScanSectorPoly(poly, 3, ScanSectorList);
+			}else{
+				poly[0].x = CWorld::GetSectorX(vectors[CORNER_CAM].x);
+				poly[0].y = CWorld::GetSectorY(vectors[CORNER_CAM].y);
+				poly[1].x = CWorld::GetSectorX(vectors[CORNER_FAR_TOPLEFT].x);
+				poly[1].y = CWorld::GetSectorY(vectors[CORNER_FAR_TOPLEFT].y);
+				poly[2].x = CWorld::GetSectorX(vectors[CORNER_FAR_TOPRIGHT].x);
+				poly[2].y = CWorld::GetSectorY(vectors[CORNER_FAR_TOPRIGHT].y);
+				ScanSectorPoly(poly, 3, ScanSectorList);
 			}
-			ScanSectorPoly(poly, 3, ScanSectorList);
 
 			ScanBigBuildingList(CWorld::GetBigBuildingList(CGame::currLevel));
 			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_GENERIC));
