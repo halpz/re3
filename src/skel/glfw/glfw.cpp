@@ -16,7 +16,6 @@
 #include "platform.h"
 #include "crossplatform.h"
 
-#include "patcher.h"
 #include "main.h"
 #include "FileMgr.h"
 #include "Text.h"
@@ -1378,7 +1377,6 @@ main(int argc, char *argv[])
 #endif
 	RwV2d pos;
 	RwInt32 i;
-//	StaticPatcher::Apply();
 
 #ifndef _WIN32
 	struct sigaction act;

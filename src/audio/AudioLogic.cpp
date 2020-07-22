@@ -2538,7 +2538,7 @@ cAudioManager::ProcessBoatMovingOverWater(cVehicleParams *params)
 		return true;
 
 	velocityChange = Min(0.75f, velocityChange);
-	multiplier = (velocityChange - 0.0005f) * 1.3342229f;
+	multiplier = (velocityChange - 0.0005f) / (1499.0f / 2000.0f);
 	CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 	vol = (30.f * multiplier);
 	m_sQueueSample.m_nVolume = ComputeVolume(vol, 50.f, m_sQueueSample.m_fDistance);

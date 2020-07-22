@@ -149,6 +149,10 @@ CGame::InitialiseOnceBeforeRW(void)
 	return true;
 }
 
+#if !defined(LIBRW) && defined(PS2_MATFX)
+void ReplaceMatFxCallback();
+#endif
+
 bool
 CGame::InitialiseRenderWare(void)
 {
@@ -199,6 +203,8 @@ CGame::InitialiseRenderWare(void)
 #else
 	rw::MatFX::modulateEnvMap = false;
 #endif
+#elif defined(PS2_MATFX)
+	ReplaceMatFxCallback();
 #endif
 	
 	CFont::Initialise();
