@@ -9349,7 +9349,7 @@ CPed::ProcessControl(void)
 								m_collidingEntityWhileFleeing = collidingEnt;
 								m_collidingEntityWhileFleeing->RegisterReference((CEntity **) &m_collidingEntityWhileFleeing);
 
-								uint8 currentDir = floorf((PI + m_fRotationCur) / DEGTORAD(45.0f));
+								uint8 currentDir = Floor((PI + m_fRotationCur) / DEGTORAD(45.0f));
 								uint8 nextDir;
 								ThePaths.FindNextNodeWandering(PATH_PED, GetPosition(), &m_pLastPathNode, &m_pNextPathNode, currentDir, &nextDir);
 
