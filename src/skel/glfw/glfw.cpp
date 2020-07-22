@@ -63,7 +63,7 @@ static psGlobalType PsGlobal;
 #undef MAKEPOINTS
 #define MAKEPOINTS(l)		(*((POINTS /*FAR*/ *)&(l)))
 
-unsigned long _dwMemAvailPhys;
+size_t _dwMemAvailPhys;
 RwUInt32 gGameState;
 
 #ifdef _WIN32

@@ -9,8 +9,12 @@
 #endif /* (!defined(RSREGSETBREAKALLOC)) */
 
 #ifndef _INC_WINDOWS
-#define _X86_
-#include <windef.h>
+	#ifdef _WIN64
+		#define _AMD64_
+	#else
+		#define _X86_
+	#endif
+	#include <windef.h>
 #endif
 
 enum eWinVersion
