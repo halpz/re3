@@ -43,7 +43,7 @@ CPedType::LoadPedData(void)
 	char *buf;
 	char line[256];
 	char word[32];
-	int bp, buflen;
+	size_t bp, buflen;
 	int lp, linelen;
 	int type;
 	uint32 flags;

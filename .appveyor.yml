@@ -24,7 +24,7 @@ install:
 - cmd: >-
     git submodule update --init --recursive
 
-    premake5 vs2019 --with-librw --glewdir=%APPVEYOR_BUILD_FOLDER%/%GLEW_BASE% --glfwdir=%APPVEYOR_BUILD_FOLDER%/%GLFW_BASE%
+    premake5 vs2019 --with-librw --glewdir=%APPVEYOR_BUILD_FOLDER%/%GLEW_BASE% --glfwdir32=%APPVEYOR_BUILD_FOLDER%/%GLFW_BASE%
 
 build:
   project: build/re3.sln

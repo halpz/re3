@@ -4,7 +4,7 @@
 // Functions that's different on glfw and win but have same signature, should be located on platform.h.
 
 #ifdef _WIN32
-// This only has <windef.h> as Win header.
+// This only has <windef.h> as Windows header, which is lighter (as long as WITHWINDOWS isn't defined / <Windows.h> isn't included).
 #include "win.h"
 extern DWORD _dwOperatingSystemVersion;
 #else

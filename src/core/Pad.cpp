@@ -2634,7 +2634,7 @@ void CPad::ResetCheats(void)
 
 char *CPad::EditString(char *pStr, int32 nSize)
 {
-	int32 pos = strlen(pStr);
+	int32 pos = (int32)strlen(pStr);
 
 	// letters
 	for ( int32 i = 0; i < ('Z' - 'A' + 1); i++ )

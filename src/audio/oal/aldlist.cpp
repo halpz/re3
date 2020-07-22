@@ -27,6 +27,7 @@
 #ifndef _WIN32
 #define _stricmp strcasecmp
 #define _strnicmp strncasecmp
+#define _strdup strdup
 #endif
 
 #ifdef AUDIO_OAL
@@ -71,7 +72,7 @@ ALDeviceList::ALDeviceList()
 					if ((bNewName) && (actualDeviceName != NULL) && (strlen(actualDeviceName) > 0)) {
 						ALDEVICEINFO ALDeviceInfo;
 						ALDeviceInfo.bSelected = true;
-						ALDeviceInfo.strDeviceName = actualDeviceName;
+						ALDeviceInfo.strDeviceName = _strdup(actualDeviceName);
 						alcGetIntegerv(device, ALC_MAJOR_VERSION, sizeof(int), &ALDeviceInfo.iMajorVersion);
 						alcGetIntegerv(device, ALC_MINOR_VERSION, sizeof(int), &ALDeviceInfo.iMinorVersion);
 
