@@ -778,8 +778,8 @@ void CRadar::DrawRadarMap()
 	DrawRadarMask();
 
 	// top left ist (0, 0)
-	int x = floorf((vec2DRadarOrigin.x - RADAR_MIN_X) / RADAR_TILE_SIZE);
-	int y = ceilf((RADAR_NUM_TILES - 1) - (vec2DRadarOrigin.y - RADAR_MIN_Y) / RADAR_TILE_SIZE);
+	int x = Floor((vec2DRadarOrigin.x - RADAR_MIN_X) / RADAR_TILE_SIZE);
+	int y = Ceil((RADAR_NUM_TILES - 1) - (vec2DRadarOrigin.y - RADAR_MIN_Y) / RADAR_TILE_SIZE);
 	StreamRadarSections(x, y);
 
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
@@ -1332,7 +1332,7 @@ void CRadar::Shutdown()
 
 void CRadar::StreamRadarSections(const CVector &posn)
 {
-	StreamRadarSections(floorf((2000.0f + posn.x) / 500.0f), ceilf(7.0f - (2000.0f + posn.y) / 500.0f));
+	StreamRadarSections(Floor((2000.0f + posn.x) / 500.0f), Ceil(7.0f - (2000.0f + posn.y) / 500.0f));
 }
 
 void CRadar::StreamRadarSections(int32 x, int32 y)

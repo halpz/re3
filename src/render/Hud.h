@@ -86,6 +86,7 @@ public:
 	static wchar m_BigMessage[6][128];
 	static int16 m_ItemToFlash;
 	static bool m_HideRadar;
+	static int32 m_DrawClock;
 
 	// These aren't really in CHud
 	static float BigMessageInUse[6];

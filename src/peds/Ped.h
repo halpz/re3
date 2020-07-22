@@ -30,6 +30,13 @@ struct PedAudioData
 	int m_nMaxRandomDelayTime;
 };
 
+enum
+{
+	ATTACK_IN_PROGRESS,
+	CANT_ATTACK,
+	WATCH_UNTIL_HE_DISAPPEARS,
+};
+
 enum eFormation
 {
 	FORMATION_UNDEFINED,
@@ -474,7 +481,7 @@ public:
 	uint32 bNeverEverTargetThisPed : 1;
 	uint32 bCrouchWhenScared : 1;
 	uint32 bKnockedOffBike : 1;
-	//uint32 b158_8
+	uint32 b158_8 : 1;
 	uint32 b158_10 : 1;
 	uint32 bBoughtIceCream : 1;
 	uint32 b158_40 : 1;
@@ -944,6 +951,8 @@ public:
 	void ClearWaitState(void);
 	void Undress(const char*);
 	void Dress(void);
+	int32 KillCharOnFootMelee(CVector&, CVector&, CVector&);
+	int32 KillCharOnFootArmed(CVector&, CVector&, CVector&);
 
 	bool HasWeaponSlot(uint8 slot) { return m_weapons[slot].m_eWeaponType != WEAPONTYPE_UNARMED; }
 	CWeapon& GetWeapon(uint8 slot) { return m_weapons[slot]; }

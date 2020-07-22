@@ -285,7 +285,6 @@ enum Config {
 #define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
 // #define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward
 #define CANCELLABLE_CAR_ENTER
-//#define PEDS_REPORT_CRIMES_ON_PHONE
 
 // Camera
 #define IMPROVED_CAMERA		// Better Debug cam, and maybe more in the future

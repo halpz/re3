@@ -15,3 +15,5 @@ inline float Sqrt(float x) { return sqrtf(x); }
 inline float RecipSqrt(float x, float y) { return x/Sqrt(y); }
 inline float RecipSqrt(float x) { return RecipSqrt(1.0f, x); }
 inline float Pow(float x, float y) { return powf(x, y); }
+inline float Floor(float x) { return floorf(x); }
+inline float Ceil(float x) { return ceilf(x); }

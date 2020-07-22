@@ -35,7 +35,7 @@ CPlayerPed::~CPlayerPed()
 	delete m_pWanted;
 }
 
-// --MIAMI: Done except commented out things
+// --MIAMI: Done
 CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 {
 	m_fMoveSpeed = 0.0f;
@@ -53,10 +53,8 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 	m_nSpeedTimer = 0;
 	m_bSpeedTimerFlag = false;
 
-	// TODO(Miami)
-	// if (pPointGunAt)
-	//	m_pPointGunAt->CleanUpOldReference(&m_pPointGunAt);
-
+	if (m_pPointGunAt)
+		m_pPointGunAt->CleanUpOldReference(&m_pPointGunAt);
 	m_pPointGunAt = nil;
 	SetPedState(PED_IDLE);
 #ifndef FIX_BUGS
@@ -69,13 +67,14 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 	m_fAttackButtonCounter = 0.0f;
 	m_bHaveTargetSelected = false;
 	m_bHasLockOnTarget = false;
-	m_bDrunkVisualsWearOff = true;
 	m_bCanBeDamaged = true;
+	m_bDrunkVisualsWearOff = false;
 	m_fWalkAngle = 0.0f;
 	m_fFPSMoveHeading = 0.0f;
 	m_pMinigunTopAtomic = nil;
 	m_fGunSpinSpeed = 0.0;
 	m_fGunSpinAngle = 0.0;
+	m_nPadDownPressedInMilliseconds = 0;
 	m_nTargettableObjects[0] = m_nTargettableObjects[1] = m_nTargettableObjects[2] = m_nTargettableObjects[3] = -1;
 	unused1 = false;
 	for (int i = 0; i < 6; i++) {
@@ -85,17 +84,16 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 	}
 	m_nCheckPlayersIndex = 0;
 	m_nPadUpPressedInMilliseconds = 0;
-	m_nPadDownPressedInMilliseconds = 0;
 	idleAnimBlockIndex = CAnimManager::GetAnimationBlockIndex("playidles");
 }
 
-void CPlayerPed::ClearWeaponTarget()
+// --MIAMI: Done
+void
+CPlayerPed::ClearWeaponTarget()
 {
 	if (m_nPedType == PEDTYPE_PLAYER1) {
-
-		// TODO(Miami)
-		// if (m_pPointGunAt)
-		//	m_pPointGunAt->CleanUpOldReference(&m_pPointGunAt);
+		if (m_pPointGunAt)
+			m_pPointGunAt->CleanUpOldReference(&m_pPointGunAt);
 
 		m_pPointGunAt = nil;
 		TheCamera.ClearPlayerWeaponMode();
@@ -1816,6 +1814,7 @@ CPlayerPed::PlayIdleAnimations(CPad *padUsed)
 	}
 }
 
+// --MIAMI: Done
 void
 CPlayerPed::RemovePedFromMeleeList(CPed *ped)
 {
@@ -1826,6 +1825,100 @@ CPlayerPed::RemovePedFromMeleeList(CPed *ped)
 	}
 	m_pMeleeList[i] = nil;
 	ped->m_attackTimer = 0;
+}
+
+// --MIAMI: Done
+void
+CPlayerPed::GetMeleeAttackCoords(CVector& coords, int8 dir, float dist)
+{
+	coords = GetPosition();
+	switch (dir) {
+		case 0:
+			coords.y += dist;
+			break;
+		case 1:
+			coords.x += Sqrt(3.f / 4.f) * dist;
+			coords.y += 0.5f * dist;
+			break;
+		case 2:
+			coords.x += Sqrt(3.f / 4.f) * dist;
+			coords.y -= 0.5f * dist;
+			break;
+		case 3:
+			coords.y -= dist;
+			break;
+		case 4:
+			coords.x -= Sqrt(3.f / 4.f) * dist;
+			coords.y -= 0.5f * dist;
+			break;
+		case 5:
+			coords.x -= Sqrt(3.f / 4.f) * dist;
+			coords.y += 0.5f * dist;
+			break;
+		default:
+			break;
+	}
+}
+
+// --MIAMI: Done
+int32
+CPlayerPed::FindMeleeAttackPoint(CPed *victim, CVector &dist, uint32 &endOfAttackOut)
+{
+	endOfAttackOut = 0;
+	bool thereIsAnEmptySlot = false;
+	int dirToAttack = -1;
+	for (int i = 0; i < ARRAY_SIZE(m_pMeleeList); i++) {
+		CPed* pedAtThisDir = m_pMeleeList[i];
+		if (pedAtThisDir) {
+			if (pedAtThisDir == victim) {
+				dirToAttack = i;
+			} else {
+				if (pedAtThisDir->m_attackTimer > endOfAttackOut)
+					endOfAttackOut = pedAtThisDir->m_attackTimer;
+			}
+		} else {
+			thereIsAnEmptySlot = true;
+		}
+	}
+
+	// We don't have victim ped in our melee list
+	if (dirToAttack == -1 && thereIsAnEmptySlot) {
+		float angle = Atan2(-dist.x, -dist.y);
+		float adjustedAngle = angle + DEGTORAD(30.0f);
+		if (adjustedAngle < 0.f)
+			adjustedAngle += TWOPI;
+
+		int wantedDir = Floor(adjustedAngle / DEGTORAD(60.0f));
+
+		// And we have another ped at the direction of victim ped, so store victim to next empty direction to it's real direction. (Bollocks)
+		if (m_pMeleeList[wantedDir]) {
+			int closestDirToPreferred = -99;
+			int preferredDir = wantedDir;
+
+			for (int i = 0; i < ARRAY_SIZE(m_pMeleeList); i++) {
+				if (!m_pMeleeList[i]) {
+					if (Abs(i - preferredDir) < Abs(closestDirToPreferred - preferredDir))
+						closestDirToPreferred = i;
+				}
+			}
+			if (closestDirToPreferred > 0)
+				dirToAttack = closestDirToPreferred;
+		} else {
+
+			// Luckily the direction of victim ped is already empty, good
+			dirToAttack = wantedDir;
+		}
+
+		if (dirToAttack != -1) {
+			m_pMeleeList[dirToAttack] = victim;
+			victim->RegisterReference((CEntity**) &m_pMeleeList[dirToAttack]);
+			if (endOfAttackOut > CTimer::GetTimeInMilliseconds())
+				victim->m_attackTimer = endOfAttackOut + CGeneral::GetRandomNumberInRange(1000, 2000);
+			else
+				victim->m_attackTimer = CTimer::GetTimeInMilliseconds() + CGeneral::GetRandomNumberInRange(500, 1000);
+		}
+	}
+	return dirToAttack;
 }
 
 #ifdef COMPATIBLE_SAVES

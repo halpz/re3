@@ -265,16 +265,8 @@ enum eMenuAction
 	MENUACTION_DYNAMICACOUSTIC,
 	MENUACTION_MOUSESTEER,
 	MENUACTION_UNK110,
-#ifdef MORE_LANGUAGES
-	MENUACTION_LANG_PL,
-	MENUACTION_LANG_RUS,
-	MENUACTION_LANG_JAP,
-#endif
 #ifdef IMPROVED_VIDEOMODE
 	MENUACTION_SCREENMODE,
-#endif
-#ifdef FREE_CAM
-	MENUACTION_FREECAM,
 #endif
 #ifdef LEGACY_MENU_OPTIONS
 	MENUACTION_CTRLVIBRATION,
@@ -547,7 +539,7 @@ public:
 	int32 m_nMouseOldPosY;
 	int32 m_nHoverOption;
 	bool m_bShowMouse;
-	int32 m_nPrevOption;
+	int32 m_nOptionMouseHovering;
 	bool m_bStartWaitingForKeyBind;
 	bool m_bWaitingForNewKeyBind;
 	bool m_bKeyChangeNotProcessed;
@@ -664,6 +656,7 @@ public:
 	void ScrollDownListByOne();
 	void PageUpList(bool);
 	void PageDownList(bool);
+	int8 GetPreviousPageOption();
 	
 	// uint8 GetNumberOfMenuOptions();
 };
@@ -673,6 +666,6 @@ VALIDATE_SIZE(CMenuManager, 0x688);
 #endif
 
 extern CMenuManager FrontEndMenuManager;
-
+extern CMenuScreen aScreens[];
 
 #endif

@@ -168,6 +168,7 @@ public:
 	void RegisterReference(CEntity **pent);
 	void ResolveReferences(void);
 	void PruneReferences(void);
+	void CleanUpOldReference(CEntity **pent);
 
 #ifdef PED_SKIN
 	void UpdateRpHAnim(void);
