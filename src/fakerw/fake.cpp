@@ -307,7 +307,7 @@ ConvertTexRaster(rw::Raster *ras)
 
 	Image *img = ras->toImage();
 	ras->destroy();
-	img->unindex();
+	img->unpalettize();
 	ras = Raster::createFromImage(img);
 	img->destroy();
 	return ras;
