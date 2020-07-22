@@ -26,11 +26,11 @@ class CKeyArray
 {
 public:
 	CKeyEntry *entries;
-	int numEntries;
+	int numEntries;	// You can make this size_t if you want to exceed 32-bit boundaries, everything else should be ready.
 
 	CKeyArray(void) : entries(nil), numEntries(0) {}
 	~CKeyArray(void) { Unload(); }
-	void Load(uint32 length, uint8 *data, int *offset);
+	void Load(size_t length, uint8 *data, intptr_t *offset);
 	void Unload(void);
 	void Update(wchar *chars);
 	CKeyEntry *BinarySearch(const char *key, CKeyEntry *entries, int16 low, int16 high);
@@ -45,11 +45,11 @@ class CData
 {
 public:
 	wchar *chars;
-	int numChars;
+	int numChars; // You can make this size_t if you want to exceed 32-bit boundaries, everything else should be ready.
 
 	CData(void) : chars(nil), numChars(0) {}
 	~CData(void) { Unload(); }
-	void Load(uint32 length, uint8 *data, int *offset);
+	void Load(size_t length, uint8 *data, intptr_t *offset);
 	void Unload(void);
 };
 

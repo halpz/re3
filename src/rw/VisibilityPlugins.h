@@ -103,10 +103,10 @@ public:
 	struct FrameExt
 	{
 		// BUG: this is abused to hold a pointer by SetClumpModelInfo
-		int32 id;
+		uintptr id;
 	};
-	static void SetFrameHierarchyId(RwFrame *frame, int32 id);
-	static int32 GetFrameHierarchyId(RwFrame *frame);
+	static void SetFrameHierarchyId(RwFrame *frame, uintptr id);
+	static uintptr GetFrameHierarchyId(RwFrame *frame);
 
 	static void *FrameConstructor(void *object, int32 offset, int32 len);
 	static void *FrameDestructor(void *object, int32 offset, int32 len);
