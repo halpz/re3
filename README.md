@@ -21,8 +21,6 @@ such that we have a working game at all times.
 
 ## Preparing the environment for building
 
-Currently only building on VS2015/2017/2019 (Windows) and GCC (Linux) is tested.
-
 - Clone the repo.
 - Run `git submodule init` and `git submodule update`.
 - Point GTA_III_RE_DIR environment variable to GTA3 root folder.

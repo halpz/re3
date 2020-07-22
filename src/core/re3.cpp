@@ -2,7 +2,6 @@
 #define WITHWINDOWS
 #include "common.h"
 #include "crossplatform.h"
-#include "patcher.h"
 #include "Renderer.h"
 #include "Occlusion.h"
 #include "Credits.h"
