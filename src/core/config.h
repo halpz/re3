@@ -278,3 +278,4 @@ enum Config {
 
 // Audio
 #define AUDIO_CACHE // cache sound lengths to speed up the cold boot
+//#define PS2_AUDIO   // changes audio paths for cutscenes and radio to PS2 paths, needs vbdec to support VB with MSS

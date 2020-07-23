@@ -51,9 +51,9 @@ extern "C" {
 	extern int MatFXAtomicDataOffset;
 
 	void _rpMatFXD3D8AtomicMatFXEnvRender(RxD3D8InstanceData* inst, int flags, int sel, RwTexture* texture, RwTexture* envMap);
-    void _rpMatFXD3D8AtomicMatFXRenderBlack(RxD3D8InstanceData *inst);
-    void _rpMatFXD3D8AtomicMatFXBumpMapRender(RxD3D8InstanceData *inst, int flags, RwTexture *texture, RwTexture *bumpMap, RwTexture *envMap);
-    void _rpMatFXD3D8AtomicMatFXDualPassRender(RxD3D8InstanceData *inst, int flags, RwTexture *texture, RwTexture *dualTexture);
+	void _rpMatFXD3D8AtomicMatFXRenderBlack(RxD3D8InstanceData *inst);
+	void _rpMatFXD3D8AtomicMatFXBumpMapRender(RxD3D8InstanceData *inst, int flags, RwTexture *texture, RwTexture *bumpMap, RwTexture *envMap);
+	void _rpMatFXD3D8AtomicMatFXDualPassRender(RxD3D8InstanceData *inst, int flags, RwTexture *texture, RwTexture *dualTexture);
 }
 
 
