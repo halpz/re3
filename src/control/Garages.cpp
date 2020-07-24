@@ -141,6 +141,9 @@ void CGarages::Init(void)
 	MessageStartTime = 0;
 	PlayerInGarage = false;
 	BombsAreFree = false;
+#ifdef FIX_BUGS
+	RespraysAreFree = false;
+#endif
 	CarsCollected = 0;
 	BankVansCollected = 0;
 	PoliceCarsCollected = 0;

@@ -8,6 +8,7 @@
 
 #include "common.h"
 #include "crossplatform.h"
+#include "platform.h"
 #ifdef XINPUT
 #include <xinput.h>
 #pragma comment( lib, "Xinput9_1_0.lib" )
@@ -544,9 +545,9 @@ CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()
 
 void CPad::UpdateMouse()
 {
+#if defined RW_D3D9 || defined RWLIBS
 	if ( IsForegroundApp() )
 	{
-#if defined RW_D3D9 || defined RWLIBS
 		if ( PSGLOBAL(mouse) == nil )
 			_InputInitialiseMouse();
 
@@ -583,7 +584,10 @@ void CPad::UpdateMouse()
 			OldMouseControllerState = NewMouseControllerState;
 			NewMouseControllerState = PCTempMouseControllerState;
 		}
+	}
 #else
+	if ( IsForegroundApp() && PSGLOBAL(cursorIsInWindow) )
+	{
 		double xpos = 1.0f, ypos;
 		glfwGetCursorPos(PSGLOBAL(window), &xpos, &ypos);
 		if (xpos == 0.f)
@@ -621,8 +625,8 @@ void CPad::UpdateMouse()
 
 		OldMouseControllerState = NewMouseControllerState;
 		NewMouseControllerState = PCTempMouseControllerState;
-#endif
 	}
+#endif
 }
 
 CControllerState CPad::ReconcileTwoControllersInput(CControllerState const &State1, CControllerState const &State2)
@@ -1072,6 +1076,13 @@ void CPad::UpdatePads(void)
 #else
 	CapturePad(0);
 #endif
+
+	// Improve keyboard input latency part 1
+#ifdef FIX_BUGS
+	OldKeyState = NewKeyState;
+	NewKeyState = TempKeyState;
+#endif
+
 #ifdef DETECT_PAD_INPUT_SWITCH
 	if (GetPad(0)->PCTempJoyState.CheckForInput())
 		IsAffectedByController = true;
@@ -1101,8 +1112,11 @@ void CPad::UpdatePads(void)
 	GetPad(1)->OldState.Clear();
 #endif
 
+	// Improve keyboard input latency part 2
+#ifndef FIX_BUGS
 	OldKeyState = NewKeyState;
 	NewKeyState = TempKeyState;
+#endif
 }
 
 void CPad::ProcessPCSpecificStuff(void)

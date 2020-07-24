@@ -210,11 +210,7 @@ CStreaming::Init2(void)
 	desiredNumVehiclesLoaded = (int32)((ms_memoryAvailable / MB - 50) / 3 + 12);
 	if(desiredNumVehiclesLoaded > MAXVEHICLESLOADED)
 		desiredNumVehiclesLoaded = MAXVEHICLESLOADED;
-#if defined(__LP64__) || defined(_WIN64)
-	debug("Memory allocated to Streaming is %lluMB", ms_memoryAvailable/MB);
-#else
-	debug("Memory allocated to Streaming is %dMB", ms_memoryAvailable/MB);
-#endif
+	debug("Memory allocated to Streaming is %zuMB", ms_memoryAvailable/MB); // original modifier was %d
 #undef MB
 #endif
 
@@ -2497,11 +2493,7 @@ CStreaming::UpdateForAnimViewer(void)
 	if (CStreaming::ms_channelError == -1) {
 		CStreaming::AddModelsToRequestList(CVector(0.0f, 0.0f, 0.0f));
 		CStreaming::LoadRequestedModels();
-#if defined(__LP64__) || defined(_WIN64)
-		sprintf(gString, "Requested %d, memory size %lluK\n", CStreaming::ms_numModelsRequested, 2 * CStreaming::ms_memoryUsed);
-#else
-		sprintf(gString, "Requested %d, memory size %dK\n", CStreaming::ms_numModelsRequested, 2 * CStreaming::ms_memoryUsed);
-#endif
+		sprintf(gString, "Requested %d, memory size %zuK\n", CStreaming::ms_numModelsRequested, 2 * CStreaming::ms_memoryUsed); // original modifier was %d
 	}
 	else {
 		CStreaming::RetryLoadFile(CStreaming::ms_channelError);
