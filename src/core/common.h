@@ -17,7 +17,11 @@
 
 #if defined _WIN32 && defined WITHD3D
 #include <windows.h>
+#ifndef USE_D3D9
 #include <d3d8types.h>
+#else
+#include <d3d9types.h>
+#endif
 #endif
 
 #include <rwcore.h>

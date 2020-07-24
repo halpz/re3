@@ -114,7 +114,7 @@ CWeaponInfo::LoadWeaponData(void)
 	char line[256], weaponName[32], fireType[32];
 	char animToPlay[32];
 
-	int bp, buflen;
+	size_t bp, buflen;
 	int lp, linelen;
 		
 	CFileMgr::SetDir("DATA");

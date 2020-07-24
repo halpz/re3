@@ -108,8 +108,8 @@ public:
 	float ComputeDeltaHeading() const;
 	float ComputeDeltaPos() const;
 	void ComputeAttractTime(int32 id, bool, float& time) const;
-	int32 GetNoOfRegisteredPeds() const { return vWaitingQueue.size() + vApproachingQueue.size(); }
-	int32 ComputeFreeSlot() const { return vWaitingQueue.size(); }
+	int32 GetNoOfRegisteredPeds() const { return (int32)(vWaitingQueue.size() + vApproachingQueue.size()); }
+	int32 ComputeFreeSlot() const { return (int32)vWaitingQueue.size(); }
 	bool IsInQueue(CPed*) const;
 	bool RegisterPed(CPed*);
 	bool BroadcastArrival(CPed*);

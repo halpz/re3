@@ -2653,7 +2653,7 @@ CMenuManager::DrawPlayerSetupScreen()
 		char nameTemp[256];
 		for (m_pSelectedSkin = m_pSkinListHead.nextSkin; m_pSelectedSkin; m_pSelectedSkin = m_pSelectedSkin->nextSkin) {
 			// Drop extension
-			int oldLength = strlen(m_pSelectedSkin->skinNameDisplayed);
+			int oldLength = (int)strlen(m_pSelectedSkin->skinNameDisplayed);
 			m_pSelectedSkin->skinNameDisplayed[oldLength - 4] = '\0';
 			m_pSelectedSkin->skinNameOriginal[oldLength - 4] = '\0';
 

@@ -61,7 +61,7 @@ public:
 	static bool GetEvent(eEventType type, int32 *event);
 	static void ClearEvent(int32 event);
 	static bool FindClosestEvent(eEventType type, CVector posn, int32 *event);
-	static void ReportCrimeForEvent(eEventType type, int32, bool);
+	static void ReportCrimeForEvent(eEventType type, size_t, bool);
 };
 
 extern CEvent gaEvent[NUMEVENTS];

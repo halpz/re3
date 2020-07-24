@@ -922,7 +922,7 @@ void CScrollBar::Update()
 			break;
 		}
 
-		m_MessageLength = strlen(m_pMessage);
+		m_MessageLength = (uint32)strlen(m_pMessage);
 		m_MessageCurrentChar = 0;
 	}
 

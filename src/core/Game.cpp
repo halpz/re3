@@ -362,7 +362,7 @@ bool CGame::Initialise(const char* datFile)
 	CStreaming::LoadInitialPeds();
 	CStreaming::RequestBigBuildings(LEVEL_GENERIC);
 	CStreaming::LoadAllRequestedModels(false);
-	printf("Streaming uses %dK of its memory", CStreaming::ms_memoryUsed / 1024);
+	printf("Streaming uses %zuK of its memory", CStreaming::ms_memoryUsed / 1024); // original modifier was %d
 	LoadingScreen("Loading the Game", "Load animations", GetRandomSplashScreen());
 	CAnimManager::LoadAnimFiles();
 	CStreaming::LoadInitialWeapons();

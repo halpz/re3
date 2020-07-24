@@ -5637,7 +5637,7 @@ CPed::LoadFightData(void)
 
 	CAnimBlendAssociation *animAssoc;
 
-	int bp, buflen;
+	size_t bp, buflen;
 	int lp, linelen;
 
 	buflen = CFileMgr::LoadFile("DATA\\fistfite.dat", work_buff, sizeof(work_buff), "r");

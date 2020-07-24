@@ -89,7 +89,7 @@ public:
 	static int32 ms_oldSectorY;
 	static int32 ms_streamingBufferSize;
 	static int8 *ms_pStreamingBuffer[2];
-	static int32 ms_memoryUsed;
+	static size_t ms_memoryUsed;
 	static CStreamingChannel ms_channel[2];
 	static int32 ms_channelError;
 	static int32 ms_numVehiclesLoaded;
@@ -106,7 +106,7 @@ public:
 	static int32 ms_imageOffsets[NUMCDIMAGES];
 	static int32 ms_lastImageRead;
 	static int32 ms_imageSize;
-	static uint32 ms_memoryAvailable;
+	static size_t ms_memoryAvailable;
 
 	static void Init(void);
 	static void Init2(void);
@@ -193,11 +193,11 @@ public:
 	static void DeleteFarAwayRwObjects(const CVector &pos);
 	static void DeleteAllRwObjects(void);
 	static void DeleteRwObjectsAfterDeath(const CVector &pos);
-	static void DeleteRwObjectsBehindCamera(int32 mem);
+	static void DeleteRwObjectsBehindCamera(size_t mem);
 	static void DeleteRwObjectsInSectorList(CPtrList &list);
 	static void DeleteRwObjectsInOverlapSectorList(CPtrList &list, int32 x, int32 y);
-	static bool DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, int32 mem);
-	static bool DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, int32 mem);
+	static bool DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, size_t mem);
+	static bool DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, size_t mem);
 
 	static void LoadScene(const CVector &pos);
 	static void LoadSceneCollision(const CVector &pos);

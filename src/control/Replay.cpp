@@ -1483,7 +1483,7 @@ void CReplay::StreamAllNecessaryCarsAndPeds(void)
 	for (int slot = 0; slot < NUM_REPLAYBUFFERS; slot++) {
 		if (BufferStatus[slot] == REPLAYBUFFER_UNUSED)
 			continue;
-		for (int offset = 0; Buffers[slot][offset] != REPLAYPACKET_END; offset += FindSizeOfPacket(Buffers[slot][offset])) {
+		for (size_t offset = 0; Buffers[slot][offset] != REPLAYPACKET_END; offset += FindSizeOfPacket(Buffers[slot][offset])) {
 			switch (Buffers[slot][offset]) {
 			case REPLAYPACKET_VEHICLE:
 				CStreaming::RequestModel(((tVehicleUpdatePacket*)&Buffers[slot][offset])->mi, 0);
@@ -1505,7 +1505,7 @@ void CReplay::FindFirstFocusCoordinate(CVector *coord)
 	for (int slot = 0; slot < NUM_REPLAYBUFFERS; slot++) {
 		if (BufferStatus[slot] == REPLAYBUFFER_UNUSED)
 			continue;
-		for (int offset = 0; Buffers[slot][offset] != REPLAYPACKET_END; offset += FindSizeOfPacket(Buffers[slot][offset])) {
+		for (size_t offset = 0; Buffers[slot][offset] != REPLAYPACKET_END; offset += FindSizeOfPacket(Buffers[slot][offset])) {
 			if (Buffers[slot][offset] == REPLAYPACKET_GENERAL) {
 				*coord = ((tGeneralPacket*)&Buffers[slot][offset])->player_pos;
 				return;

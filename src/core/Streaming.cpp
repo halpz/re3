@@ -44,7 +44,7 @@ int32 CStreaming::ms_oldSectorX;
 int32 CStreaming::ms_oldSectorY;
 int32 CStreaming::ms_streamingBufferSize;
 int8 *CStreaming::ms_pStreamingBuffer[2];
-int32 CStreaming::ms_memoryUsed;
+size_t CStreaming::ms_memoryUsed;
 CStreamingChannel CStreaming::ms_channel[2];
 int32 CStreaming::ms_channelError;
 int32 CStreaming::ms_numVehiclesLoaded;
@@ -61,7 +61,7 @@ uint16 CStreaming::ms_loadedGangCars;
 int32 CStreaming::ms_imageOffsets[NUMCDIMAGES];
 int32 CStreaming::ms_lastImageRead;
 int32 CStreaming::ms_imageSize;
-uint32 CStreaming::ms_memoryAvailable;
+size_t CStreaming::ms_memoryAvailable;
 
 int32 desiredNumVehiclesLoaded = 12;
 
@@ -200,9 +200,9 @@ CStreaming::Init2(void)
 	debug("Streaming buffer size is %d sectors", ms_streamingBufferSize);
 
 #define MB (1024*1024)
-	ms_memoryAvailable = 65*MB;
+	ms_memoryAvailable = 65 * MB;
 	desiredNumVehiclesLoaded = 25;
-	debug("Memory allocated to Streaming is %dMB", ms_memoryAvailable/MB);
+	debug("Memory allocated to Streaming is %dMB", ms_memoryAvailable / MB);
 #undef MB
 
 	// find island LODs
@@ -2385,7 +2385,7 @@ CStreaming::DeleteRwObjectsAfterDeath(const CVector &pos)
 }
 
 void
-CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
+CStreaming::DeleteRwObjectsBehindCamera(size_t mem)
 {
 	int ix, iy;
 	int x, y;
@@ -2560,7 +2560,7 @@ CStreaming::DeleteRwObjectsInOverlapSectorList(CPtrList &list, int32 x, int32 y)
 }
 
 bool
-CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, int32 mem)
+CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, size_t mem)
 {
 	CPtrNode *node;
 	CEntity *e;
@@ -2581,7 +2581,7 @@ CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, int32 mem)
 }
 
 bool
-CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, int32 mem)
+CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, size_t mem)
 {
 	CPtrNode *node;
 	CEntity *e;
@@ -2608,7 +2608,7 @@ CStreaming::MakeSpaceFor(int32 size)
 	// the code still happens to work in that case because ms_memoryAvailable is unsigned
 	// but it's not nice....
 
-	while((uint32)ms_memoryUsed >= ms_memoryAvailable - size)
+	while(ms_memoryUsed >= ms_memoryAvailable - size)
 		if(!RemoveLeastUsedModel(STREAMFLAGS_20)){
 			DeleteRwObjectsBehindCamera(ms_memoryAvailable - size);
 			return;
@@ -2699,7 +2699,8 @@ CStreaming::UpdateForAnimViewer(void)
 	if (CStreaming::ms_channelError == -1) {
 		CStreaming::AddModelsToRequestList(CVector(0.0f, 0.0f, 0.0f));
 		CStreaming::LoadRequestedModels();
-		sprintf(gString, "Requested %d, memory size %dK\n", CStreaming::ms_numModelsRequested, 2 * CStreaming::ms_memoryUsed);
+		// original modifier was %d
+		sprintf(gString, "Requested %d, memory size %zuK\n", CStreaming::ms_numModelsRequested, 2 * CStreaming::ms_memoryUsed);
 	}
 	else {
 		CStreaming::RetryLoadFile(CStreaming::ms_channelError);

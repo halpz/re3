@@ -163,7 +163,7 @@ myfgets(char *buf, int len, int fd)
 	return buf;
 }
 
-static int
+static size_t
 myfread(void *buf, size_t elt, size_t n, int fd)
 {
 	if(myfiles[fd].isText){
@@ -184,7 +184,7 @@ myfread(void *buf, size_t elt, size_t n, int fd)
 	return fread(buf, elt, n, myfiles[fd].file);
 }
 
-static int
+static size_t
 myfwrite(void *buf, size_t elt, size_t n, int fd)
 {
 	if(myfiles[fd].isText){
@@ -265,11 +265,11 @@ CFileMgr::SetDirMyDocuments(void)
 	mychdir(_psGetUserFilesFolder());
 }
 
-int
+size_t
 CFileMgr::LoadFile(const char *file, uint8 *buf, int unused, const char *mode)
 {
 	int fd;
-	int n, len;
+	size_t n, len;
 
 	fd = myfopen(file, mode);
 	if(fd == 0)
@@ -298,14 +298,14 @@ CFileMgr::OpenFileForWriting(const char *file)
 	return OpenFile(file, "wb");
 }
 
-int
-CFileMgr::Read(int fd, const char *buf, int len)
+size_t
+CFileMgr::Read(int fd, const char *buf, size_t len)
 {
 	return myfread((void*)buf, 1, len, fd);
 }
 
-int
-CFileMgr::Write(int fd, const char *buf, int len)
+size_t
+CFileMgr::Write(int fd, const char *buf, size_t len)
 {
 	return myfwrite((void*)buf, 1, len, fd);
 }

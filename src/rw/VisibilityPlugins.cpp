@@ -843,12 +843,12 @@ CVisibilityPlugins::FrameCopyConstructor(void *dst, const void *src, int32, int3
 }
 
 void
-CVisibilityPlugins::SetFrameHierarchyId(RwFrame *frame, int32 id)
+CVisibilityPlugins::SetFrameHierarchyId(RwFrame *frame, uintptr id)
 {
 	FRAMEEXT(frame)->id = id;
 }
 
-int32
+uintptr
 CVisibilityPlugins::GetFrameHierarchyId(RwFrame *frame)
 {
 	return FRAMEEXT(frame)->id;

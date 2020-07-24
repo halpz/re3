@@ -3376,15 +3376,15 @@ CCamera::LoadTrainCamNodes(char const *name)
 	char token[16] = { 0 };
 	char filename[16] = { 0 };
 	uint8 *buf;
-	int bufpos = 0;
+	size_t bufpos = 0;
 	int field = 0;
 	int tokpos = 0;
 	char c;
 	int i;
-	int len;
+	size_t len;
 
 	strcpy(filename, name);
-	len = strlen(filename);
+	len = (int)strlen(filename);
 	filename[len] = '.';
 	filename[len+1] = 'd';
 	filename[len+2] = 'a';
