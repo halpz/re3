@@ -5155,13 +5155,10 @@ CMenuManager::SwitchMenuOnAndOff()
 				m_bMenuActive = !m_bMenuActive;
 
 			if (m_bMenuActive) {
-#if defined RW_D3D9 || defined RWLIBS
 				if (_InputMouseNeedsExclusive()) {
 					_InputShutdownMouse();
 					_InputInitialiseMouse(false);
 				}
-#endif
-
 				Initialise();
 				LoadAllTextures();
 			} else {
@@ -5173,12 +5170,10 @@ CMenuManager::SwitchMenuOnAndOff()
 				DoRWStuffEndOfFrame();
 				DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
 				DoRWStuffEndOfFrame();
-#if defined RW_D3D9 || defined RWLIBS
 				if (_InputMouseNeedsExclusive()) {
 					_InputShutdownMouse();
 					_InputInitialiseMouse(true);
 				}
-#endif
 
 #ifdef PS2_LIKE_MENU
 				bottomBarActive = false;
@@ -5223,12 +5218,10 @@ CMenuManager::SwitchMenuOnAndOff()
 		m_bMenuActive = true;
 		m_OnlySaveMenu = true;
 
-#if defined RW_D3D9 || defined RWLIBS
 		if (_InputMouseNeedsExclusive()) {
 			_InputShutdownMouse();
 			_InputInitialiseMouse(false);
 		}
-#endif
 
 		Initialise();
 		LoadAllTextures();

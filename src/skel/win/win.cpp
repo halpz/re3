@@ -2883,8 +2883,13 @@ void _InputShutdownMouse()
 	SAFE_RELEASE(PSGLOBAL(mouse));
 }
 
-BOOL _InputMouseNeedsExclusive(void)
+bool _InputMouseNeedsExclusive(void)
 {
+	// FIX: I don't know why R* needed that, but it causes infamous mouse bug on modern systems.
+	//		Probably DirectInput bug, since Acquire() and GetDeviceState() reports everything A-OK.
+#ifdef FIX_BUGS
+	return false;
+#endif
 	RwVideoMode vm;
 	RwEngineGetVideoModeInfo(&vm, GcurSelVM);
 

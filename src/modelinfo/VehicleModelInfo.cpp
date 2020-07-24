@@ -689,7 +689,11 @@ ChooseComponent(int32 rule, int32 comps)
 			return COMPRULE_COMPN(comps, n-1);
 		return -1;
 	case 4:
+#ifdef FIX_BUGS
+		return CGeneral::GetRandomNumberInRange(0, 6);
+#else
 		return CGeneral::GetRandomNumberInRange(0, 5);
+#endif
 	}
 	return -1;
 }
