@@ -137,8 +137,8 @@ void CPedAttractorManager::RemoveIceCreamVanEffects(C2dEffect* pEffect)
 	for (std::vector<CVehicleToEffect>::const_iterator assoc = vVehicleToEffect.cbegin(); assoc != vVehicleToEffect.cend();) {
 		if (assoc->GetVehicle() != pVehicle)
 			return;
-		int total = 0;
-		for (int j = 0; j < NUM_ATTRACTORS_FOR_ICECREAM_VAN; j++) {
+		uint32 total = 0;
+		for (uint32 j = 0; j < NUM_ATTRACTORS_FOR_ICECREAM_VAN; j++) {
 			if (FindAssociatedAttractor(assoc->GetEffect(j), vIceCreamAttractors))
 				total++;
 		}
@@ -355,13 +355,13 @@ bool CPedAttractor::BroadcastArrival(CPed* pPed)
 bool CPedAttractor::BroadcastDeparture(CPed* pPed)
 {
 	int qid = -1;
-	for (int i = 0; i < vWaitingQueue.size(); i++){
+	for (uint32 i = 0; i < vWaitingQueue.size(); i++){
 		if (vWaitingQueue[i] == pPed)
 			qid = i;
 	}
 	if (qid < 0)
 		return false;
-	for (int i = qid + 1; i < vWaitingQueue.size(); i++) {
+	for (uint32 i = qid + 1; i < vWaitingQueue.size(); i++) {
 		CVector pos;
 		float heading;
 		float time;
@@ -401,7 +401,7 @@ bool CPedAttractor::BroadcastDeparture(CPed* pPed)
 bool CPedShelterAttractor::BroadcastDeparture(CPed* pPed)
 {
 	int qid = -1;
-	for (int i = 0; i < vWaitingQueue.size(); i++) {
+	for (uint32 i = 0; i < vWaitingQueue.size(); i++) {
 		if (vWaitingQueue[i] == pPed)
 			qid = i;
 	}

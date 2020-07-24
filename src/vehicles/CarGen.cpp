@@ -32,7 +32,7 @@ void CCarGenerator::SwitchOff()
 
 void CCarGenerator::SwitchOn()
 {
-	m_nUsesRemaining = -1;
+	m_nUsesRemaining = 255;
 	m_nTimer = CalcNextGen();
 	++CTheCarGenerators::CurrentActiveCount;
 }
@@ -141,8 +141,14 @@ void CCarGenerator::DoInternalProcessing()
 	}
 	CVisibilityPlugins::SetClumpAlpha(pVehicle->GetClump(), 0);
 	m_nVehicleHandle = CPools::GetVehiclePool()->GetIndex(pVehicle);
-	if (m_nUsesRemaining < -1) /* I don't think this is a correct comparasion */
+	/* I don't think this is a correct comparasion */
+#ifdef FIX_BUGS
+	if (m_nUsesRemaining != 0) 
 		--m_nUsesRemaining;
+#else
+	if (m_nUsesRemaining < -1)
+		--m_nUsesRemaining;
+#endif
 	m_nTimer = CalcNextGen();
 	if (m_nUsesRemaining == 0)
 		--CTheCarGenerators::CurrentActiveCount;

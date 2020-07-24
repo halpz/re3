@@ -1,5 +1,5 @@
 
-// DON'T include directly. crossplatform.h includes this if you're on Windows.
+// DON'T include directly. crossplatform.h includes this if you're using D3D9 backend(win.cpp).
 
 #if (!defined(_PLATFORM_WIN_H))
 #define _PLATFORM_WIN_H
@@ -7,25 +7,6 @@
 #if (!defined(RSREGSETBREAKALLOC))
 #define RSREGSETBREAKALLOC(_name) /* No op */
 #endif /* (!defined(RSREGSETBREAKALLOC)) */
-
-#ifndef _INC_WINDOWS
-	#ifdef _WIN64
-		#define _AMD64_
-	#else
-		#define _X86_
-	#endif
-	#include <windef.h>
-#endif
-
-enum eWinVersion
-{
-	OS_WIN95 = 0,
-	OS_WIN98,
-	OS_WINNT,
-	OS_WIN2000,
-	OS_WINXP,
-};
-
 
 #ifdef __DINPUT_INCLUDED__
 /* platform specfic global data */
@@ -87,19 +68,16 @@ extern "C"
 {
 #endif                          /* __cplusplus */
 
-#ifdef __DINPUT_INCLUDED__
 extern LRESULT      CALLBACK
 MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam);
 
+#ifdef __DINPUT_INCLUDED__
 HRESULT _InputInitialise();
 HRESULT CapturePad(RwInt32 padID);
-void _InputInitialiseJoys();
 void _InputAddJoyStick(LPDIRECTINPUTDEVICE8 lpDevice, INT num);
 HRESULT _InputAddJoys();
 HRESULT _InputGetMouseState(DIMOUSESTATE2 *state);
 void _InputShutdown();
-void _InputShutdownMouse();
-BOOL _InputMouseNeedsExclusive();
 BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* pContext );
 BOOL _InputTranslateKey(RsKeyCodes *rs, UINT flag, UINT key);
 BOOL _InputTranslateShiftKey(RsKeyCodes *rs, UINT key, BOOLEAN bDown);

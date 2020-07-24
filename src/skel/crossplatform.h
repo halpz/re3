@@ -3,19 +3,34 @@
 // This is the common include for platform/renderer specific skeletons(glfw.cpp, win.cpp etc.) and using cross platform things (like Windows directories wrapper, platform specific global arrays etc.) 
 // Functions that's different on glfw and win but have same signature, should be located on platform.h.
 
+enum eWinVersion
+{
+    OS_WIN95 = 0,
+    OS_WIN98,
+    OS_WINNT,
+    OS_WIN2000,
+    OS_WINXP,
+};
+
 #ifdef _WIN32
-// This only has <windef.h> as Windows header, which is lighter (as long as WITHWINDOWS isn't defined / <Windows.h> isn't included).
+
+// As long as WITHWINDOWS isn't defined / <Windows.h> isn't included, include <windef.h>, which is lighter.
+#ifndef _INC_WINDOWS
+    #ifdef _WIN64
+        #define _ARM64_
+    #else
+        #define _X86_
+    #endif
+    #include <windef.h>
+#endif
+#if defined RW_D3D9 || defined RWLIBS
 #include "win.h"
+#endif
 extern DWORD _dwOperatingSystemVersion;
+
 #else
 char *strupr(char *str);
 char *strlwr(char *str);
-enum {
-	OS_WIN98,
-	OS_WIN2000,
-	OS_WINNT,
-	OS_WINXP,
-};
 
 enum {
 	LANG_OTHER,
@@ -42,6 +57,7 @@ typedef struct
     RwBool		fullScreen;
     RwV2d		lastMousePos;
     double      mouseWheel; // glfw doesn't cache it
+    bool        cursorIsInWindow;
     RwInt8        joy1id;
     RwInt8        joy2id;
 }

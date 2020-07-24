@@ -1133,7 +1133,11 @@ CFont::ParseToken(wchar *s)
 		case 'r': SetColor(CRGBA(255, 150, 225, 255)); Details.anonymous_23 = true; break;
 		case 't': SetColor(CRGBA(86, 212, 146, 255)); Details.anonymous_23 = true; break;
 		case 'w': SetColor(CRGBA(175, 175, 175, 255)); Details.anonymous_23 = true; break;
+#ifdef FIX_BUGS
+		case 'x': SetColor(CRGBA(0, 255, 255, 255)); Details.anonymous_23 = true; break;
+#else
 		case 'x': SetColor(CRGBA(132, 146, 197, 255)); Details.anonymous_23 = true; break;
+#endif
 		case 'y': SetColor(CRGBA(255, 227, 79, 255)); Details.anonymous_23 = true; break;
 		}
 	while(*s != '~') s++;
@@ -1208,11 +1212,19 @@ CFont::ParseToken(wchar* str, CRGBA &color, bool &flash, bool &bold)
 			color.g = 175;
 			color.b = 175;
 			break;
+#ifdef FIX_BUGS
+		case 'x':
+			color.r = 0;
+			color.g = 255;
+			color.b = 255;
+			break;
+#else
 		case 'x':
 			color.r = 132;
 			color.g = 146;
 			color.b = 197;
 			break;
+#endif
 		case 'y':
 			color.r = 255;
 			color.g = 227;
