@@ -17,7 +17,15 @@ struct RpHAnimStdKeyFrame
 	RtQuat           q;
 	RwV3d            t;
 };
-
+// same story, this one only exists in later RW versions
+// but we need it for 64 bit builds because offset and size differs!
+struct RpHAnimStdInterpFrame
+{
+	RpHAnimStdKeyFrame *keyFrame1;
+	RpHAnimStdKeyFrame *keyFrame2;
+	RtQuat           q;
+	RwV3d            t;
+};
 
 enum RpHAnimHierarchyFlag
 {
@@ -56,7 +64,7 @@ RwBool RpHAnimHierarchyUpdateMatrices(RpHAnimHierarchy *hierarchy);
 #define rpHANIMHIERARCHYGETINTERPFRAME( hierarchy, nodeIndex )    \
         ( (void *)( ( (RwUInt8 *)&(hierarchy->interpolator[1]) +                \
                       ((nodeIndex) *                               \
-                       hierarchy->interpolator->currentAnimKeyFrameSize) ) ) )
+                       hierarchy->interpolator->currentInterpKeyFrameSize) ) ) )
 
 
 RpHAnimAnimation *RpHAnimAnimationCreate(RwInt32 typeID, RwInt32 numFrames, RwInt32 flags, RwReal duration);

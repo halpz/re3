@@ -170,7 +170,7 @@ RpAnimBlendClumpInitSkinned(RpClump *clump)
 	for(i = 0; i < numBones; i++){
 		frames[i].nodeID = HIERNODEID(hier, i);
 		frames[i].resetPos = boneTab[i];
-		frames[i].hanimFrame = (RpHAnimStdKeyFrame*)rpHANIMHIERARCHYGETINTERPFRAME(hier, i);
+		frames[i].hanimFrame = (RpHAnimStdInterpFrame*)rpHANIMHIERARCHYGETINTERPFRAME(hier, i);
 	}
 	clumpData->ForAllFrames(FrameInitCBskin, nil);
 	clumpData->frames[0].flag |= AnimBlendFrameData::VELOCITY_EXTRACTION;

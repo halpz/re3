@@ -41,6 +41,7 @@
 #define HIERNODEINFO(hier) ((hier)->pNodeInfo)
 #define HIERNODEID(hier, i) ((hier)->pNodeInfo[i].nodeID)
 #define HANIMFRAME(anim, i) ((RwUInt8*)(anim)->pFrames + (i)*(anim)->interpInfo->keyFrameSize)
+#define RpHAnimStdInterpFrame RpHAnimStdKeyFrame
 #endif
 
 #ifdef RWHALFPIXEL
