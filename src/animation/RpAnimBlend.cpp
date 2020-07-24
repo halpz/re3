@@ -170,9 +170,9 @@ RpAnimBlendClumpInitSkinned(RpClump *clump)
 		frames[i].nodeID = HIERNODEID(hier, i);
 		frames[i].resetPos = boneTab[i];
 #ifdef LIBRW
-		frames[i].hanimFrame = (RpHAnimStdKeyFrame*)rpHANIMHIERARCHYGETINTERPFRAME(hier, i);
+		frames[i].hanimFrame = (RpHAnimStdInterpFrame*)rpHANIMHIERARCHYGETINTERPFRAME(hier, i);
 #else
-		frames[i].hanimFrame = (RpHAnimStdKeyFrame*)rtANIMGETINTERPFRAME(hier->currentAnim, i);
+		frames[i].hanimFrame = (RpHAnimStdInterpFrame*)rtANIMGETINTERPFRAME(hier->currentAnim, i);
 #endif
 	}
 	clumpData->ForAllFrames(FrameInitCBskin, nil);

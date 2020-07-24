@@ -19,7 +19,7 @@ struct AnimBlendFrameData
 #ifdef PED_SKIN
 	union {
 		RwFrame *frame;
-		RpHAnimStdKeyFrame *hanimFrame;
+		RpHAnimStdInterpFrame *hanimFrame;
 	};
 	int32 nodeID;
 #else

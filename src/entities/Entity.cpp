@@ -648,7 +648,7 @@ CEntity::UpdateRpHAnim(void)
 	char buf[256];
 	if(this == (CEntity*)FindPlayerPed())
 	for(i = 0; i < hier->numNodes; i++){
-		RpHAnimStdKeyFrame *kf = (RpHAnimStdKeyFrame*)rpHANIMHIERARCHYGETINTERPFRAME(hier, i);
+		RpHAnimStdInterpFrame *kf = (RpHAnimStdInterpFrame*)rpHANIMHIERARCHYGETINTERPFRAME(hier, i);
 		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f  %6.3f %6.3f %6.3f  %d %s",
 			kf->q.imag.x, kf->q.imag.y, kf->q.imag.z, kf->q.real,
 			kf->t.x, kf->t.y, kf->t.z,
