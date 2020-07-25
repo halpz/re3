@@ -855,12 +855,23 @@ RpSkin *RpSkinGeometryGetSkin( RpGeometry *geometry ) { return Skin::get(geometr
 RpAtomic *RpSkinAtomicSetHAnimHierarchy( RpAtomic *atomic, RpHAnimHierarchy *hierarchy ) { Skin::setHierarchy(atomic, hierarchy); return atomic; }
 RpHAnimHierarchy *RpSkinAtomicGetHAnimHierarchy( const RpAtomic *atomic ) { return Skin::getHierarchy(atomic); }
 
-
-
-
-
-RwImage *RtBMPImageWrite(RwImage * image, const RwChar * imageName) { rw::writeBMP(image, imageName); return image; }
-RwImage *RtBMPImageRead(const RwChar * imageName) { return rw::readBMP(imageName); }
+RwImage *
+RtBMPImageWrite(RwImage *image, const RwChar *imageName)
+{
+	char *r = (char *)alloca(strlen((char *)imageName) + 2);
+	// Use default path(and pass error handling to librw) if we can't find any match
+	if(!casepath((char *)imageName, r)) r = (char *)imageName;
+	rw::writeBMP(image, r);
+	return image;
+}
+RwImage *
+RtBMPImageRead(const RwChar *imageName)
+{
+	char *r = (char *)alloca(strlen((char *)imageName) + 2);
+	// Use default path(and pass error handling to librw) if we can't find any match
+	if(!casepath((char *)imageName, r)) r = (char *)imageName;
+	return rw::readBMP(r);
+}
 
 #include "rtquat.h"
 
