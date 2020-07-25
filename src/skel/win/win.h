@@ -68,9 +68,6 @@ extern "C"
 {
 #endif                          /* __cplusplus */
 
-extern LRESULT      CALLBACK
-MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam);
-
 #ifdef __DINPUT_INCLUDED__
 HRESULT _InputInitialise();
 HRESULT CapturePad(RwInt32 padID);
