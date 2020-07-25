@@ -277,5 +277,7 @@ enum Config {
 #define FREE_CAM		// Rotating cam
 
 // Audio
+#ifndef AUDIO_OAL // is not working yet for openal
 #define AUDIO_CACHE // cache sound lengths to speed up the cold boot
+#endif
 //#define PS2_AUDIO   // changes audio paths for cutscenes and radio to PS2 paths, needs vbdec to support VB with MSS
