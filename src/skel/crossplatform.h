@@ -14,14 +14,10 @@ enum eWinVersion
 
 #ifdef _WIN32
 
-// As long as WITHWINDOWS isn't defined / <Windows.h> isn't included, include <windef.h>, which is lighter.
+// As long as WITHWINDOWS isn't defined / <Windows.h> isn't included, we only need type definitions so let's include <IntSafe.h>.
+// NOTE: It's perfectly fine to include <Windows.h> here, but it can increase build size and time in *some* conditions, and maybe substantially in future if we'll use crossplatform.h more.
 #ifndef _INC_WINDOWS
-    #ifdef _WIN64
-        #define _ARM64_
-    #else
-        #define _X86_
-    #endif
-    #include <windef.h>
+    #include <IntSafe.h>
 #endif
 #if defined RW_D3D9 || defined RWLIBS
 #include "win.h"
