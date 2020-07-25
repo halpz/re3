@@ -189,7 +189,7 @@ GetGTA3ImgSize(void)
     realpath(gImgNames[0], path);
     if (stat(path, &statbuf) == -1) {
 		// Try case-insensitivity
-		char *r = (char*)alloca(strlen(gImgNames[0]) + 2);
+		char *r = (char*)alloca(strlen(gImgNames[0]) + 4);
 		if (casepath(gImgNames[0], r))
 		{
 			realpath(r, path);
@@ -460,7 +460,7 @@ CdStreamAddImage(char const *path)
 
 	// Fix case sensitivity and backslashes.
 	if (gImgFiles[gNumImages] == -1) {
-		char *r = (char*)alloca(strlen(path) + 2);
+		char *r = (char*)alloca(strlen(path) + 4);
 		if (casepath(path, r))
 		{
 		    gImgFiles[gNumImages] = open(r, _gdwCdStreamFlags);

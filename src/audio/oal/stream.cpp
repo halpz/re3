@@ -205,7 +205,7 @@ CStream::CStream(char *filename, ALuint &source, ALuint (&buffers)[NUM_STREAMBUF
 #if !defined(_WIN32)
 	FILE *test = fopen(filename, "r");
 	if (!test) {
-		char *r = (char*)alloca(strlen(filename) + 2);
+		char *r = (char*)alloca(strlen(filename) + 4);
 		if (casepath(filename, r))
 		{
 		    strcpy(m_aFilename, r);

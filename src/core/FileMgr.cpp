@@ -37,7 +37,7 @@ static myFILE myfiles[NUMFILES];
 // Case-insensitivity on linux (from https://github.com/OneSadCookie/fcaseopen)
 void mychdir(char const *path)
 {
-    char *r = (char*)alloca(strlen(path) + 2);
+    char *r = (char*)alloca(strlen(path) + 4);
     if (casepath(path, r))
     {
         chdir(r);
@@ -88,7 +88,7 @@ found:
 // Be case-insensitive on linux (from https://github.com/OneSadCookie/fcaseopen/)
 #if !defined(_WIN32)
 	if (!myfiles[fd].file) {
-		char *r = (char*)alloca(strlen(newPath) + 2);
+		char *r = (char*)alloca(strlen(newPath) + 4);
 		if (casepath(newPath, r))
 		{
 		    myfiles[fd].file = fopen(r, realmode);

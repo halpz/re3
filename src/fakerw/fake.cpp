@@ -379,7 +379,7 @@ RwStream *RwStreamOpen(RwStreamType type, RwStreamAccessType accessType, const v
 		FILE* first = fopen((char*)pData, "r");
 		char *r;
 		if (!first) {
-			r = (char*)alloca(strlen((char*)pData) + 2);
+			r = (char*)alloca(strlen((char*)pData) + 4);
 			// Use default path(and pass error handling to librw) if we can't find any match
 			if (!casepath((char*)pData, r))
 				r = (char*)pData;
@@ -862,7 +862,7 @@ RtBMPImageWrite(RwImage *image, const RwChar *imageName)
 	char *r = nil;
 	FILE *valid = fopen((char *)imageName, "r");
 	if(!valid) {
-		char *r = (char *)alloca(strlen((char *)imageName) + 2);
+		char *r = (char *)alloca(strlen((char *)imageName) + 4);
 		// Use default path(and pass error handling to librw) if we can't find any match
 		if(!casepath((char *)imageName, r)) r = (char *)imageName;
 	} else
@@ -880,7 +880,7 @@ RtBMPImageRead(const RwChar *imageName)
 	char *r = nil;
 	FILE *valid = fopen((char *)imageName, "r");
 	if(!valid) {
-		r = (char *)alloca(strlen((char *)imageName) + 2);
+		r = (char *)alloca(strlen((char *)imageName) + 4);
 		// Use default path(and pass error handling to librw) if we can't find any match
 		if(!casepath((char *)imageName, r)) r = (char *)imageName;
 	} else
