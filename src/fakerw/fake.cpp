@@ -858,19 +858,37 @@ RpHAnimHierarchy *RpSkinAtomicGetHAnimHierarchy( const RpAtomic *atomic ) { retu
 RwImage *
 RtBMPImageWrite(RwImage *image, const RwChar *imageName)
 {
-	char *r = (char *)alloca(strlen((char *)imageName) + 2);
-	// Use default path(and pass error handling to librw) if we can't find any match
-	if(!casepath((char *)imageName, r)) r = (char *)imageName;
+#ifndef _WIN32
+	char *r = nil;
+	FILE *valid = fopen((char *)imageName, "r");
+	if(!valid) {
+		char *r = (char *)alloca(strlen((char *)imageName) + 2);
+		// Use default path(and pass error handling to librw) if we can't find any match
+		if(!casepath((char *)imageName, r)) r = (char *)imageName;
+	} else
+		fclose(valid);
 	rw::writeBMP(image, r);
+#else
+	rw::writeBMP(image, imageName);
+#endif
 	return image;
 }
 RwImage *
 RtBMPImageRead(const RwChar *imageName)
 {
-	char *r = (char *)alloca(strlen((char *)imageName) + 2);
-	// Use default path(and pass error handling to librw) if we can't find any match
-	if(!casepath((char *)imageName, r)) r = (char *)imageName;
+#ifndef _WIN32
+	char *r = nil;
+	FILE *valid = fopen((char *)imageName, "r");
+	if(!valid) {
+		r = (char *)alloca(strlen((char *)imageName) + 2);
+		// Use default path(and pass error handling to librw) if we can't find any match
+		if(!casepath((char *)imageName, r)) r = (char *)imageName;
+	} else
+		fclose(valid);
 	return rw::readBMP(r);
+#else
+	return rw::readBMP(imageName);
+#endif
 }
 
 #include "rtquat.h"
