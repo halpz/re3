@@ -26,6 +26,8 @@ public:
 	float m_fAbseilPos;
 	eCopType m_nCopType;
 	bool m_bThrowsSpikeTrap;
+	CEntity *m_pRopeEntity;	// CHeli or 1
+	uintptr m_nRopeID;
 	int32 field_624;
 	int8 field_628;
 

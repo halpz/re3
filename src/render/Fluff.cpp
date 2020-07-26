@@ -65,7 +65,7 @@ CPlaneTrail::Render(float visibility)
 		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
 
-		if(RwIm3DTransform(TempBufferRenderVertices, numVerts, nil, rwIM3D_VERTEXXYZ|rwIM3D_VERTEXUV)){
+		if(RwIm3DTransform(TempBufferRenderVertices, numVerts, nil, rwIM3D_VERTEXXYZ|rwIM3D_VERTEXRGBA)){
 			RwIm3DRenderIndexedPrimitive(rwPRIMTYPELINELIST, TrailIndices, (numVerts-1)*2);
 			RwIm3DEnd();
 		}
@@ -238,7 +238,7 @@ CPlaneBanner::Render(void)
 			RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpRubbishTexture[2]));
 
 #ifdef FIX_BUGS
-			if(RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStored, nil, rwIM3D_VERTEXXYZ|rwIM3D_VERTEXUV)){
+			if(RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStored, nil, rwIM3D_VERTEXXYZ|rwIM3D_VERTEXUV|rwIM3D_VERTEXRGBA)){
 #else
 			if(RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStored, nil, 0)){
 #endif
