@@ -203,15 +203,11 @@ CStream::CStream(char *filename, ALuint &source, ALuint (&buffers)[NUM_STREAMBUF
 {
 // Be case-insensitive on linux (from https://github.com/OneSadCookie/fcaseopen/)
 #if !defined(_WIN32)
-	FILE *test = fopen(filename, "r");
-	if (!test) {
-		char *r = (char*)alloca(strlen(filename) + 4);
-		if (casepath(filename, r))
-		{
-		    strcpy(m_aFilename, r);
-		}
+	char *real = casepath(filename);
+	if (real) {
+		strcpy(m_aFilename, real);
+		free(real);
 	} else {
-		fclose(test);
 #else
 	{
 #endif
