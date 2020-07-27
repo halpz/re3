@@ -62,6 +62,7 @@
 #include "SceneEdit.h"
 #include "debugmenu.h"
 #include "Occlusion.h"
+#include "Ropes.h"
 
 GlobalScene Scene;
 
@@ -873,6 +874,7 @@ RenderEffects(void)
 	CGlass::Render();
 	CWaterCannons::Render();
 	CSpecialFX::Render();
+	CRopes::Render();
 	CShadows::RenderStaticShadows();
 	CShadows::RenderStoredShadows();
 	CSkidmarks::Render();

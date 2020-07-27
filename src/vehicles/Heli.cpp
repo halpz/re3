@@ -731,12 +731,12 @@ CHeli::SendDownSwat(void)
 
 	float groundZ = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z, nil);
 	if(Abs(FindPlayerCoors().z - groundZ) < 2.5f && CRopes::RegisterRope((uintptr)this + m_numSwat-1, pos, false)){
-		CCopPed *swat = (CCopPed*)CPopulation::AddPed(PEDTYPE_COP, COP_ARMY, pos);
+		CCopPed *swat = (CCopPed*)CPopulation::AddPed(PEDTYPE_COP, COP_HELI_SWAT, pos);
 		swat->bUsesCollision = false;
 		swat->m_pRopeEntity = this;
 		RegisterReference(&swat->m_pRopeEntity);
 		m_numSwat--;
-		swat->m_nRopeID = m_numSwat;
+		swat->m_nRopeID = (uintptr)this + m_numSwat;
 		m_aSwatState[m_numSwat] = 255;
 		CAnimManager::BlendAnimation(swat->GetClump(), ASSOCGRP_STD, ANIM_ABSEIL, 4.0f);
 		return true;

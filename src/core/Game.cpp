@@ -88,6 +88,7 @@
 #include "Zones.h"
 #include "Occlusion.h"
 #include "debugmenu.h"
+#include "Ropes.h"
 
 eLevelName CGame::currLevel;
 int32 CGame::currArea;
@@ -403,9 +404,11 @@ bool CGame::Initialise(const char* datFile)
 	CRubbish::Init();
 	CClouds::Init();
 	CSpecialFX::Init();
+	CRopes::Init();
 	CWaterCannons::Init();
 	CBridge::Init();
 	CGarages::Init();
+	LoadingScreen("Loading the Game", "Position dynamic objects", nil);
 	LoadingScreen("Loading the Game", "Initialise vehicle paths", nil);
 	CTrain::InitTrains();
 	CPlane::InitPlanes();
@@ -416,6 +419,7 @@ bool CGame::Initialise(const char* datFile)
 	if ( !TheMemoryCard.m_bWantToLoad )
 	{
 #endif
+	LoadingScreen("Loading the Game", "Start script", nil);
 	CTheScripts::StartTestScript();
 	CTheScripts::Process();
 	TheCamera.Process();
@@ -426,6 +430,9 @@ bool CGame::Initialise(const char* datFile)
 	CCollision::ms_collisionInMemory = currLevel;
 	for (int i = 0; i < MAX_PADS; i++)
 		CPad::GetPad(i)->Clear(true);
+	// TODO(Miami)
+	// DMAudio.SetStartingTrackPositions(1);
+	DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 	return true;
 }
 
@@ -546,6 +553,7 @@ void CGame::ReInitGameObjectVariables(void)
 	CRemote::Init();
 #endif
 	CSpecialFX::Init();
+	CRopes::Init();
 	CWaterCannons::Init();
 	CParticle::ReloadConfig();
 
@@ -718,6 +726,7 @@ void CGame::Process(void)
 		CGarages::Update();
 		CRubbish::Update();
 		CSpecialFX::Update();
+		CRopes::Update();
 		CTimeCycle::Update();
 		if (CReplay::ShouldStandardCameraBeProcessed())
 			TheCamera.Process();
