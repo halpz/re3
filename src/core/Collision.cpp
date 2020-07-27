@@ -23,6 +23,8 @@
 #include "Camera.h"
 #include "ColStore.h"
 
+//--MIAMI: file done
+
 enum Direction
 {
 	DIR_X_POS,
@@ -36,7 +38,6 @@ enum Direction
 eLevelName CCollision::ms_collisionInMemory;
 CLinkList<CColModel*> CCollision::ms_colModelCache;
 
-//--MIAMI: done
 void
 CCollision::Init(void)
 {
@@ -45,7 +46,6 @@ CCollision::Init(void)
 	CColStore::Initialise();
 }
 
-//--MIAMI: done
 void
 CCollision::Shutdown(void)
 {
@@ -53,7 +53,6 @@ CCollision::Shutdown(void)
 	CColStore::Shutdown();
 }
 
-//--MIAMI: done
 void
 CCollision::Update(void)
 {
@@ -97,13 +96,11 @@ GetCollisionInSector(CSector &sect)
 	return (eLevelName)level;
 }
 
-//--MIAMI: done
 void
 CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 {
 }
 
-//--MIAMI: done
 void
 CCollision::SortOutCollisionAfterLoad(void)
 {
@@ -111,7 +108,6 @@ CCollision::SortOutCollisionAfterLoad(void)
 	CStreaming::LoadAllRequestedModels(false);
 }
 
-//--MIAMI: done
 void
 CCollision::LoadCollisionScreen(eLevelName level)
 {
@@ -426,7 +422,6 @@ CCollision::TestSphereTriangle(const CColSphere &sphere,
 	return dist < sphere.radius;
 }
 
-//--MIAMI: DONE
 bool
 CCollision::TestLineOfSight(const CColLine &line, const CMatrix &matrix, CColModel &model, bool ignoreSeeThrough, bool ignoreShootThrough)
 {
@@ -1075,7 +1070,6 @@ CCollision::ProcessSphereTriangle(const CColSphere &sphere,
 	return true;
 }
 
-//--MIAMI: TODO
 bool
 CCollision::ProcessLineOfSight(const CColLine &line,
 	const CMatrix &matrix, CColModel &model,
@@ -1121,7 +1115,6 @@ CCollision::ProcessLineOfSight(const CColLine &line,
 	return false;
 }
 
-//--MIAMI: TODO
 bool
 CCollision::ProcessVerticalLine(const CColLine &line,
 	const CMatrix &matrix, CColModel &model,
