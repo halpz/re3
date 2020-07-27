@@ -158,6 +158,7 @@ enum Config {
 #if defined GTA_PS2
 #	define GTA_PS2_STUFF
 #	define RANDOMSPLASH
+#	define COMPRESSED_COL_VECTORS
 #elif defined GTA_PC
 #	define GTA3_1_1_PATCH
 //#	define GTA3_STEAM_PATCH
