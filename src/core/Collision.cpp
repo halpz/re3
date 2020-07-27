@@ -107,8 +107,11 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 void
 CCollision::SortOutCollisionAfterLoad(void)
 {
+	CColStore::LoadCollision(TheCamera.GetPosition());
+	CStreaming::LoadAllRequestedModels(false);
 }
 
+//--MIAMI: done
 void
 CCollision::LoadCollisionScreen(eLevelName level)
 {
@@ -251,7 +254,7 @@ CCollision::TestVerticalLineBox(const CColLine &line, const CBox &box)
 }
 
 bool
-CCollision::TestLineTriangle(const CColLine &line, const CVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane)
+CCollision::TestLineTriangle(const CColLine &line, const CompressedVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane)
 {
 	float t;
 	CVector normal;
@@ -266,9 +269,9 @@ CCollision::TestLineTriangle(const CColLine &line, const CVector *verts, const C
 	// find point of intersection
 	CVector p = line.p0 + (line.p1-line.p0)*t;
 
-	const CVector &va = verts[tri.a];
-	const CVector &vb = verts[tri.b];
-	const CVector &vc = verts[tri.c];
+	const CVector &va = verts[tri.a].Get();
+	const CVector &vb = verts[tri.b].Get();
+	const CVector &vc = verts[tri.c].Get();
 	CVector2D vec1, vec2, vec3, vect;
 
 	// We do the test in 2D. With the plane direction we
@@ -361,15 +364,16 @@ CCollision::TestLineSphere(const CColLine &line, const CColSphere &sph)
 
 bool
 CCollision::TestSphereTriangle(const CColSphere &sphere,
-	const CVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane)
+	const CompressedVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane)
 {
 	// If sphere and plane don't intersect, no collision
-	if(Abs(plane.CalcPoint(sphere.center)) > sphere.radius)
+	float planedist = plane.CalcPoint(sphere.center);
+	if(Abs(planedist) > sphere.radius)
 		return false;
 
-	const CVector &va = verts[tri.a];
-	const CVector &vb = verts[tri.b];
-	const CVector &vc = verts[tri.c];
+	const CVector &va = verts[tri.a].Get();
+	const CVector &vb = verts[tri.b].Get();
+	const CVector &vc = verts[tri.c].Get();
 
 	// calculate two orthogonal basis vectors for the triangle
 	CVector vec2 = vb - va;
@@ -393,28 +397,36 @@ CCollision::TestSphereTriangle(const CColSphere &sphere,
 
 	int testcase = insideAB + insideAC + insideBC;
 	float dist = 0.0f;
-	if(testcase == 1){
+	switch(testcase){
+	case 0:
+		return false;	// shouldn't happen
+	case 1:
 		// closest to a vertex
 		if(insideAB) dist = (sphere.center - vc).Magnitude();
 		else if(insideAC) dist = (sphere.center - vb).Magnitude();
 		else if(insideBC) dist = (sphere.center - va).Magnitude();
 		else assert(0);
-	}else if(testcase == 2){
+		break;
+	case 2:
 		// closest to an edge
+		// looks like original game as DistToLine manually inlined
 		if(!insideAB) dist = DistToLine(&va, &vb, &sphere.center);
 		else if(!insideAC) dist = DistToLine(&va, &vc, &sphere.center);
 		else if(!insideBC) dist = DistToLine(&vb, &vc, &sphere.center);
 		else assert(0);
-	}else if(testcase == 3){
+		break;
+	case 3:
 		// center is in triangle
-		return true;
-	}else
-		assert(0);	// front fell off
+		dist = Abs(planedist);
+		break;
+	default:
+		assert(0);
+	}
 
 	return dist < sphere.radius;
 }
 
-//--MIAMI: TODO
+//--MIAMI: DONE
 bool
 CCollision::TestLineOfSight(const CColLine &line, const CMatrix &matrix, CColModel &model, bool ignoreSeeThrough, bool ignoreShootThrough)
 {
@@ -429,25 +441,32 @@ CCollision::TestLineOfSight(const CColLine &line, const CMatrix &matrix, CColMod
 	if(!TestLineBox(newline, model.boundingBox))
 		return false;
 
-	for(i = 0; i < model.numSpheres; i++)
-		if(!ignoreSeeThrough || model.spheres[i].surface != SURFACE_GLASS && model.spheres[i].surface != SURFACE_TRANSPARENT_CLOTH)
-			if(TestLineSphere(newline, model.spheres[i]))
-				return true;
+	for(i = 0; i < model.numSpheres; i++){
+		if(ignoreSeeThrough && IsSeeThrough(model.spheres[i].surface)) continue;
+		if(ignoreShootThrough && IsShootThrough(model.spheres[i].surface)) continue;
+		if(TestLineSphere(newline, model.spheres[i]))
+			return true;
+	}
 
-	for(i = 0; i < model.numBoxes; i++)
-		if(!ignoreSeeThrough || model.boxes[i].surface != SURFACE_GLASS && model.boxes[i].surface != SURFACE_TRANSPARENT_CLOTH)
-			if(TestLineBox(newline, model.boxes[i]))
-				return true;
+	for(i = 0; i < model.numBoxes; i++){
+		if(ignoreSeeThrough && IsSeeThrough(model.boxes[i].surface)) continue;
+		if(ignoreShootThrough && IsShootThrough(model.boxes[i].surface)) continue;
+		if(TestLineBox(newline, model.boxes[i]))
+			return true;
+	}
 
 	CalculateTrianglePlanes(&model);
-	for(i = 0; i < model.numTriangles; i++)
-		if(!ignoreSeeThrough || model.triangles[i].surface != SURFACE_GLASS && model.triangles[i].surface != SURFACE_TRANSPARENT_CLOTH)
-			if(TestLineTriangle(newline, model.vertices, model.triangles[i], model.trianglePlanes[i]))
-				return true;
+	for(i = 0; i < model.numTriangles; i++){
+		if(ignoreSeeThrough && IsSeeThrough(model.triangles[i].surface)) continue;
+		if(ignoreShootThrough && IsShootThrough(model.triangles[i].surface)) continue;
+		if(TestLineTriangle(newline, model.vertices, model.triangles[i], model.trianglePlanes[i]))
+			return true;
+	}
 
 	return false;
 }
 
+// TODO: TestPillWithSpheresInColModel, but only called from overloaded CWeapon::FireMelee which isn't used
 
 //
 // Process
@@ -716,18 +735,19 @@ CCollision::ProcessLineSphere(const CColLine &line, const CColSphere &sphere, CC
 	return true;
 }
 
+//--MIAMI: unused
 bool
 CCollision::ProcessVerticalLineTriangle(const CColLine &line,
-	const CVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane,
+	const CompressedVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane,
 	CColPoint &point, float &mindist, CStoredCollPoly *poly)
 {
 	float t;
 	CVector normal;
 
 	const CVector &p0 = line.p0;
-	const CVector &va = verts[tri.a];
-	const CVector &vb = verts[tri.b];
-	const CVector &vc = verts[tri.c];
+	const CVector &va = verts[tri.a].Get();
+	const CVector &vb = verts[tri.b].Get();
+	const CVector &vc = verts[tri.c].Get();
 
 	// early out bound rect test
 	if(p0.x < va.x && p0.x < vb.x && p0.x < vc.x) return false;
@@ -792,6 +812,7 @@ CCollision::ProcessVerticalLineTriangle(const CColLine &line,
 	if(CrossProduct2D(vec2-vec1, vect-vec1) < 0.0f) return false;
 	if(CrossProduct2D(vec3-vec1, vect-vec1) > 0.0f) return false;
 	if(CrossProduct2D(vec3-vec2, vect-vec2) < 0.0f) return false;
+	if(t >= mindist) return false;
 	point.point = p;
 	point.normal = normal;
 	point.surfaceA = 0;
@@ -817,16 +838,12 @@ CCollision::IsStoredPolyStillValidVerticalLine(const CVector &pos, float z, CCol
 		return false;
 
 	// maybe inlined?
-	CColTriangle tri;
-	tri.a = 0;
-	tri.b = 1;
-	tri.c = 2;
 	CColTrianglePlane plane;
-	plane.Set(poly->verts, tri);
+	plane.Set(poly->verts[0], poly->verts[1], poly->verts[2]);
 
-	const CVector &va = poly->verts[tri.a];
-	const CVector &vb = poly->verts[tri.b];
-	const CVector &vc = poly->verts[tri.c];
+	const CVector &va = poly->verts[0];
+	const CVector &vb = poly->verts[1];
+	const CVector &vc = poly->verts[2];
 	CVector p0 = pos;
 	CVector p1(pos.x, pos.y, z);
 
@@ -891,8 +908,8 @@ CCollision::IsStoredPolyStillValidVerticalLine(const CVector &pos, float z, CCol
 
 bool
 CCollision::ProcessLineTriangle(const CColLine &line ,
-	const CVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane,
-	CColPoint &point, float &mindist)
+	const CompressedVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane,
+	CColPoint &point, float &mindist, CStoredCollPoly *poly)
 {
 	float t;
 	CVector normal;
@@ -910,9 +927,9 @@ CCollision::ProcessLineTriangle(const CColLine &line ,
 	// find point of intersection
 	CVector p = line.p0 + (line.p1-line.p0)*t;
 
-	const CVector &va = verts[tri.a];
-	const CVector &vb = verts[tri.b];
-	const CVector &vc = verts[tri.c];
+	const CVector &va = verts[tri.a].Get();
+	const CVector &vb = verts[tri.b].Get();
+	const CVector &vc = verts[tri.c].Get();
 	CVector2D vec1, vec2, vec3, vect;
 
 	switch(plane.dir){
@@ -958,19 +975,26 @@ CCollision::ProcessLineTriangle(const CColLine &line ,
 	if(CrossProduct2D(vec2-vec1, vect-vec1) < 0.0f) return false;
 	if(CrossProduct2D(vec3-vec1, vect-vec1) > 0.0f) return false;
 	if(CrossProduct2D(vec3-vec2, vect-vec2) < 0.0f) return false;
+	if(t >= mindist) return false;
 	point.point = p;
 	point.normal = normal;
 	point.surfaceA = 0;
 	point.pieceA = 0;
 	point.surfaceB = tri.surface;
 	point.pieceB = 0;
+	if(poly){
+		poly->verts[0] = va;
+		poly->verts[1] = vb;
+		poly->verts[2] = vc;
+		poly->valid = true;
+	}
 	mindist = t;
 	return true;
 }
 
 bool
 CCollision::ProcessSphereTriangle(const CColSphere &sphere,
-	const CVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane,
+	const CompressedVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane,
 	CColPoint &point, float &mindistsq)
 {
 	// If sphere and plane don't intersect, no collision
@@ -979,9 +1003,9 @@ CCollision::ProcessSphereTriangle(const CColSphere &sphere,
 	if(Abs(planedist) > sphere.radius || distsq > mindistsq)
 		return false;
 
-	const CVector &va = verts[tri.a];
-	const CVector &vb = verts[tri.b];
-	const CVector &vc = verts[tri.c];
+	const CVector &va = verts[tri.a].Get();
+	const CVector &vb = verts[tri.b].Get();
+	const CVector &vc = verts[tri.c].Get();
 
 	// calculate two orthogonal basis vectors for the triangle
 	CVector normal;
@@ -1008,25 +1032,33 @@ CCollision::ProcessSphereTriangle(const CColSphere &sphere,
 	int testcase = insideAB + insideAC + insideBC;
 	float dist = 0.0f;
 	CVector p;
-	if(testcase == 1){
+	switch(testcase){
+	case 0:
+		return false;	// shouldn't happen
+	case 1:
 		// closest to a vertex
 		if(insideAB) p = vc;
 		else if(insideAC) p = vb;
 		else if(insideBC) p = va;
 		else assert(0);
 		dist = (sphere.center - p).Magnitude();
-	}else if(testcase == 2){
+		break;
+	case 2:
 		// closest to an edge
+		// looks like original game as DistToLine manually inlined
 		if(!insideAB) dist = DistToLine(&va, &vb, &sphere.center, p);
 		else if(!insideAC) dist = DistToLine(&va, &vc, &sphere.center, p);
 		else if(!insideBC) dist = DistToLine(&vb, &vc, &sphere.center, p);
 		else assert(0);
-	}else if(testcase == 3){
+		break;
+	case 3:
 		// center is in triangle
 		dist = Abs(planedist);
 		p = sphere.center - normal*planedist;
-	}else
-		assert(0);	// front fell off
+		break;
+	default:
+		assert(0);
+	}
 
 	if(dist >= sphere.radius || dist*dist >= mindistsq)
 		return false;
@@ -1061,18 +1093,24 @@ CCollision::ProcessLineOfSight(const CColLine &line,
 		return false;
 
 	float coldist = mindist;
-	for(i = 0; i < model.numSpheres; i++)
-		if(!ignoreSeeThrough || model.spheres[i].surface != SURFACE_GLASS && model.spheres[i].surface != SURFACE_TRANSPARENT_CLOTH)
-			ProcessLineSphere(newline, model.spheres[i], point, coldist);
+	for(i = 0; i < model.numSpheres; i++){
+		if(ignoreSeeThrough && IsSeeThrough(model.spheres[i].surface)) continue;
+		if(ignoreShootThrough && IsShootThrough(model.spheres[i].surface)) continue;
+		ProcessLineSphere(newline, model.spheres[i], point, coldist);
+	}
 
-	for(i = 0; i < model.numBoxes; i++)
-		if(!ignoreSeeThrough || model.boxes[i].surface != SURFACE_GLASS && model.boxes[i].surface != SURFACE_TRANSPARENT_CLOTH)
-			ProcessLineBox(newline, model.boxes[i], point, coldist);
+	for(i = 0; i < model.numBoxes; i++){
+		if(ignoreSeeThrough && IsSeeThrough(model.boxes[i].surface)) continue;
+		if(ignoreShootThrough && IsShootThrough(model.boxes[i].surface)) continue;
+		ProcessLineBox(newline, model.boxes[i], point, coldist);
+	}
 
 	CalculateTrianglePlanes(&model);
-	for(i = 0; i < model.numTriangles; i++)
-		if(!ignoreSeeThrough || model.triangles[i].surface != SURFACE_GLASS && model.triangles[i].surface != SURFACE_TRANSPARENT_CLOTH)
-			ProcessLineTriangle(newline, model.vertices, model.triangles[i], model.trianglePlanes[i], point, coldist);
+	for(i = 0; i < model.numTriangles; i++){
+		if(ignoreSeeThrough && IsSeeThrough(model.triangles[i].surface)) continue;
+		if(ignoreShootThrough && IsShootThrough(model.triangles[i].surface)) continue;
+		ProcessLineTriangle(newline, model.vertices, model.triangles[i], model.trianglePlanes[i], point, coldist);
+	}
 
 	if(coldist < mindist){
 		point.point = matrix * point.point;
@@ -1095,31 +1133,33 @@ CCollision::ProcessVerticalLine(const CColLine &line,
 	// transform line to model space
 	// Why does the game seem to do this differently than above?
 	CColLine newline(MultiplyInverse(matrix, line.p0), MultiplyInverse(matrix, line.p1));
-	newline.p1.x = newline.p0.x;
-	newline.p1.y = newline.p0.y;
 
-	if(!TestVerticalLineBox(newline, model.boundingBox))
+	if(!TestLineBox(newline, model.boundingBox))
 		return false;
 
+	// BUG? is IsSeeThroughVertical really the right thing? also not checking shoot through
 	float coldist = mindist;
-	for(i = 0; i < model.numSpheres; i++)
-		if(!ignoreSeeThrough || model.spheres[i].surface != SURFACE_GLASS && model.spheres[i].surface != SURFACE_TRANSPARENT_CLOTH)
-			ProcessLineSphere(newline, model.spheres[i], point, coldist);
+	for(i = 0; i < model.numSpheres; i++){
+		if(ignoreSeeThrough && IsSeeThroughVertical(model.spheres[i].surface)) continue;
+		ProcessLineSphere(newline, model.spheres[i], point, coldist);
+	}
 
-	for(i = 0; i < model.numBoxes; i++)
-		if(!ignoreSeeThrough || model.boxes[i].surface != SURFACE_GLASS && model.boxes[i].surface != SURFACE_TRANSPARENT_CLOTH)
-			ProcessLineBox(newline, model.boxes[i], point, coldist);
+	for(i = 0; i < model.numBoxes; i++){
+		if(ignoreSeeThrough && IsSeeThroughVertical(model.boxes[i].surface)) continue;
+		ProcessLineBox(newline, model.boxes[i], point, coldist);
+	}
 
 	CalculateTrianglePlanes(&model);
 	TempStoredPoly.valid = false;
-	for(i = 0; i < model.numTriangles; i++)
-		if(!ignoreSeeThrough || model.triangles[i].surface != SURFACE_GLASS && model.triangles[i].surface != SURFACE_TRANSPARENT_CLOTH)
-			ProcessVerticalLineTriangle(newline, model.vertices, model.triangles[i], model.trianglePlanes[i], point, coldist, &TempStoredPoly);
+	for(i = 0; i < model.numTriangles; i++){
+		if(ignoreSeeThrough && IsSeeThroughVertical(model.triangles[i].surface)) continue;
+		ProcessLineTriangle(newline, model.vertices, model.triangles[i], model.trianglePlanes[i], point, coldist, &TempStoredPoly);
+	}
 
 	if(coldist < mindist){
 		point.point = matrix * point.point;
 		point.normal = Multiply3x3(matrix, point.normal);
-		if(poly && TempStoredPoly.valid){
+		if(TempStoredPoly.valid && poly){
 			*poly = TempStoredPoly;
 			poly->verts[0] = matrix * poly->verts[0];
 			poly->verts[1] = matrix * poly->verts[1];
@@ -1354,6 +1394,15 @@ CCollision::CalculateTrianglePlanes(CColModel *model)
 }
 
 void
+CCollision::RemoveTrianglePlanes(CColModel *model)
+{
+	if(model->trianglePlanes){
+		ms_colModelCache.Remove(model->GetLinkPtr());
+		model->RemoveTrianglePlanes();
+	}
+}
+
+void
 CCollision::DrawColModel(const CMatrix &mat, const CColModel &colModel)
 {
 	int i;
@@ -1575,15 +1624,75 @@ CCollision::DrawColModel(const CMatrix &mat, const CColModel &colModel)
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
 }
 
+static void
+GetSurfaceColor(uint8 surf, uint8 &r, uint8 &g, uint8 &b)
+{
+	// game doesn't do this
+	r = 255;
+	g = 128;
+	b = 0;
+
+	switch(CSurfaceTable::GetAdhesionGroup(surf)){
+	case ADHESIVE_RUBBER:
+		r = 255;
+		g = 0;
+		b = 0;
+		break;
+	case ADHESIVE_HARD:
+		r = 255;
+		g = 255;
+		b = 128;
+		break;
+	case ADHESIVE_ROAD:
+		r = 128;
+		g = 128;
+		b = 128;
+		break;
+	case ADHESIVE_LOOSE:
+		r = 0;
+		g = 255;
+		b = 0;
+		break;
+	case ADHESIVE_SAND:
+		r = 255;
+		g = 128;
+		b = 128;
+		break;
+	case ADHESIVE_WET:
+		r = 0;
+		g = 0;
+		b = 255;
+		break;
+	}
+
+	if(surf == SURFACE_SAND || surf == SURFACE_SAND_BEACH){
+		r = 255;
+		g = 255;
+		b = 0;
+	}
+
+	float f = (surf & 0xF)/32.0f + 0.5f;
+	r *= f;
+	g *= f;
+	b *= f;
+
+	if(surf == SURFACE_TRANSPARENT_CLOTH || surf == SURFACE_METAL_CHAIN_FENCE ||
+	   surf == SURFACE_TRANSPARENT_STONE || surf == SURFACE_SCAFFOLD_POLE)
+		if(CTimer::GetFrameCounter() & 1){
+			r = 0;
+			g = 0;
+			b = 0;
+		}
+}
+
 void
 CCollision::DrawColModel_Coloured(const CMatrix &mat, const CColModel &colModel, int32 id)
 {
 	int i;
 	int s;
-	float f;
 	CVector verts[8];
 	CVector min, max;
-	int r, g, b;
+	uint8 r, g, b;
 	RwImVertexIndex *iptr;
 	RwIm3DVertex *vptr;
 
@@ -1602,53 +1711,8 @@ CCollision::DrawColModel_Coloured(const CMatrix &mat, const CColModel &colModel,
 		verts[1] = mat * verts[1];
 		verts[2] = mat * verts[2];
 
-		// game doesn't do this
-		r = 255;
-		g = 128;
-		b = 0;
-
 		s = colModel.triangles[i].surface;
-		f = (s & 0xF)/32.0f + 0.5f;
-		switch(CSurfaceTable::GetAdhesionGroup(s)){
-		case ADHESIVE_RUBBER:
-			r = f * 255.0f;
-			g = 0;
-			b = 0;
-			break;
-		case ADHESIVE_HARD:
-			r = f*255.0f;
-			g = f*255.0f;
-			b = f*128.0f;
-			break;
-		case ADHESIVE_ROAD:
-			r = f*128.0f;
-			g = f*128.0f;
-			b = f*128.0f;
-			break;
-		case ADHESIVE_LOOSE:
-			r = 0;
-			g = f * 255.0f;
-			b = 0;
-			break;
-		case ADHESIVE_WET:
-			r = 0;
-			g = 0;
-			b = f * 255.0f;
-			break;
-		default:
-			// this doesn't make much sense
-			r *= f;
-			g *= f;
-			b *= f;
-		}
-
-		if(s == SURFACE_TRANSPARENT_CLOTH || s == SURFACE_METAL_CHAIN_FENCE ||
-		   s == SURFACE_TRANSPARENT_STONE || s == SURFACE_SCAFFOLD_POLE)
-			if(CTimer::GetFrameCounter() & 1){
-				r = 0;
-				g = 0;
-				b = 0;
-			}
+		GetSurfaceColor(s, r, g, b);
 
 		if(s > SURFACE_METAL_GATE){
 			r = CGeneral::GetRandomNumber();
@@ -1689,47 +1753,7 @@ CCollision::DrawColModel_Coloured(const CMatrix &mat, const CColModel &colModel,
 		verts[7] = mat * CVector(max.x, max.y, max.z);
 
 		s = colModel.boxes[i].surface;
-		f = (s & 0xF)/32.0f + 0.5f;
-		switch(CSurfaceTable::GetAdhesionGroup(s)){
-		case ADHESIVE_RUBBER:
-			r = f * 255.0f;
-			g = 0;
-			b = 0;
-			break;
-		case ADHESIVE_HARD:
-			r = f*255.0f;
-			g = f*255.0f;
-			b = f*128.0f;
-			break;
-		case ADHESIVE_ROAD:
-			r = f*128.0f;
-			g = f*128.0f;
-			b = f*128.0f;
-			break;
-		case ADHESIVE_LOOSE:
-			r = 0;
-			g = f * 255.0f;
-			b = 0;
-			break;
-		case ADHESIVE_WET:
-			r = 0;
-			g = 0;
-			b = f * 255.0f;
-			break;
-		default:
-			// this doesn't make much sense
-			r *= f;
-			g *= f;
-			b *= f;
-		}
-
-		if(s == SURFACE_TRANSPARENT_CLOTH || s == SURFACE_METAL_CHAIN_FENCE ||
-		   s == SURFACE_TRANSPARENT_STONE || s == SURFACE_SCAFFOLD_POLE)
-			if(CTimer::GetFrameCounter() & 1){
-				r = 0;
-				g = 0;
-				b = 0;
-			}
+		GetSurfaceColor(s, r, g, b);
 
 		RenderBuffer::StartStoring(36, 8, &iptr, &vptr);
 		RwIm3DVertexSetRGBA(&vptr[0], r, g, b, 255);
@@ -1833,7 +1857,7 @@ CColLine::Set(const CVector &p0, const CVector &p1)
 }
 
 void
-CColTriangle::Set(const CVector *, int a, int b, int c, uint8 surf, uint8 piece)
+CColTriangle::Set(const CompressedVector *, int a, int b, int c, uint8 surf, uint8 piece)
 {
 	this->a = a;
 	this->b = b;
@@ -1842,12 +1866,8 @@ CColTriangle::Set(const CVector *, int a, int b, int c, uint8 surf, uint8 piece)
 }
 
 void
-CColTrianglePlane::Set(const CVector *v, CColTriangle &tri)
+CColTrianglePlane::Set(const CVector &va, const CVector &vb, const CVector &vc)
 {
-	const CVector &va = v[tri.a];
-	const CVector &vb = v[tri.b];
-	const CVector &vc = v[tri.c];
-
 	normal = CrossProduct(vc-va, vb-va);
 	normal.Normalise();
 	dist = DotProduct(normal, va);
@@ -1905,6 +1925,7 @@ CColModel::RemoveCollisionVolumes(void)
 		RwFree(boxes);
 		RwFree(vertices);
 		RwFree(triangles);
+		CCollision::RemoveTrianglePlanes(this);
 	}
 	numSpheres = 0;
 	numLines = 0;
@@ -1950,7 +1971,7 @@ CColModel::GetLinkPtr(void)
 void
 CColModel::GetTrianglePoint(CVector &v, int i) const
 {
-	v = vertices[i];
+	v = vertices[i].Get();
 }
 
 CColModel&
@@ -2029,7 +2050,7 @@ CColModel::operator=(const CColModel &other)
 		if(vertices)
 			RwFree(vertices);
 		if(numVerts){
-			vertices = (CVector*)RwMalloc(numVerts*sizeof(CVector));
+			vertices = (CompressedVector*)RwMalloc(numVerts*sizeof(CompressedVector));
 			for(i = 0; i < numVerts; i++)
 				vertices[i] = other.vertices[i];
 		}
