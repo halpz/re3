@@ -4,6 +4,7 @@
 #include <direct.h>
 #endif
 #include "common.h"
+#include "crossplatform.h"
 
 #include "FileMgr.h"
 
@@ -31,19 +32,16 @@ static myFILE myfiles[NUMFILES];
 #include <dirent.h>
 #include <errno.h>
 #include <unistd.h>
-#include "crossplatform.h"
 #define _getcwd getcwd
 
 // Case-insensitivity on linux (from https://github.com/OneSadCookie/fcaseopen)
 void mychdir(char const *path)
 {
-    char *r = (char*)alloca(strlen(path) + 2);
-    if (casepath(path, r))
-    {
+	char* r = casepath(path, false);
+    if (r) {
         chdir(r);
-    }
-    else
-    {
+		free(r);
+    } else {
         errno = ENOENT;
     }
 }
@@ -73,30 +71,7 @@ found:
 	*p++ = 'b';
 	*p = '\0';
 	
-#if !defined(_WIN32)
-	char *newPath = strdup(filename);
-	// Normally casepath() fixes backslashes, but if the mode is sth other than r/rb it will create new file with backslashes on linux, so fix backslashes here
-	char *nextBs;
-	while(nextBs = strstr(newPath, "\\")){
-		*nextBs = '/';
-	}
-#else
-	const char *newPath = filename;
-#endif
-
-	myfiles[fd].file = fopen(newPath, realmode);
-// Be case-insensitive on linux (from https://github.com/OneSadCookie/fcaseopen/)
-#if !defined(_WIN32)
-	if (!myfiles[fd].file) {
-		char *r = (char*)alloca(strlen(newPath) + 2);
-		if (casepath(newPath, r))
-		{
-		    myfiles[fd].file = fopen(r, realmode);
-		}
-	}
-
-	free(newPath);
-#endif
+	myfiles[fd].file = fcaseopen(filename, realmode);
 	if(myfiles[fd].file == nil)
 		return 0;
 	return fd;
