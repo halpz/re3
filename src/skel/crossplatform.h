@@ -23,7 +23,7 @@ enum eWinVersion
 #include "win.h"
 #endif
 extern DWORD _dwOperatingSystemVersion;
-
+#define fcaseopen fopen
 #else
 char *strupr(char *str);
 char *strlwr(char *str);
@@ -43,7 +43,9 @@ enum {
 };
 
 extern long _dwOperatingSystemVersion;
-int casepath(char const *path, char *r);
+char *casepath(char const *path, bool checkPathFirst = true);
+FILE *_fcaseopen(char const *filename, char const *mode);
+#define fcaseopen _fcaseopen
 #endif
 
 #ifdef RW_GL3

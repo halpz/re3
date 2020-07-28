@@ -375,23 +375,19 @@ RwStream *RwStreamOpen(RwStreamType type, RwStreamAccessType accessType, const v
 		file = rwNewT(StreamFile, 1, 0);
 		memcpy(file, &fakefile, sizeof(StreamFile));
 #ifndef _WIN32
-		// Be case-insensitive and fix backslashes (from https://github.com/OneSadCookie/fcaseopen/)
-		FILE* first = fopen((char*)pData, "r");
-		char *r;
-		if (!first) {
-			r = (char*)alloca(strlen((char*)pData) + 4);
-			// Use default path(and pass error handling to librw) if we can't find any match
-			if (!casepath((char*)pData, r))
-				r = (char*)pData;
+		char *r = casepath((char*)pData);
+		if (r) {
+			if (file->open((char*)r, mode)) {
+				free(r);
+				return file;
+			}
+			free(r);
 		} else
-			fclose(first);
-
-		if(file->open((char*)r, mode))
-			return file;
-#else
-		if(file->open((char*)pData, mode))
-			return file;
 #endif
+		{
+			if (file->open((char*)pData, mode))
+				return file;
+		}
 		rwFree(file);
 		return nil;
 	}
@@ -859,15 +855,14 @@ RwImage *
 RtBMPImageWrite(RwImage *image, const RwChar *imageName)
 {
 #ifndef _WIN32
-	char *r = nil;
-	FILE *valid = fopen((char *)imageName, "r");
-	if(!valid) {
-		char *r = (char *)alloca(strlen((char *)imageName) + 4);
-		// Use default path(and pass error handling to librw) if we can't find any match
-		if(!casepath((char *)imageName, r)) r = (char *)imageName;
-	} else
-		fclose(valid);
-	rw::writeBMP(image, r);
+	char *r = casepath(imageName);
+	if (r) {
+		rw::writeBMP(image, r);
+		free(r);
+	} else {
+		rw::writeBMP(image, imageName);
+	}
+	
 #else
 	rw::writeBMP(image, imageName);
 #endif
@@ -877,15 +872,16 @@ RwImage *
 RtBMPImageRead(const RwChar *imageName)
 {
 #ifndef _WIN32
-	char *r = nil;
-	FILE *valid = fopen((char *)imageName, "r");
-	if(!valid) {
-		r = (char *)alloca(strlen((char *)imageName) + 4);
-		// Use default path(and pass error handling to librw) if we can't find any match
-		if(!casepath((char *)imageName, r)) r = (char *)imageName;
-	} else
-		fclose(valid);
-	return rw::readBMP(r);
+	RwImage *image;
+	char *r = casepath(imageName);
+	if (r) {
+		image = rw::readBMP(r);
+		free(r);
+	} else {
+		image = rw::readBMP(imageName);
+	}
+	return image;
+
 #else
 	return rw::readBMP(imageName);
 #endif
