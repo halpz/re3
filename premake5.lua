@@ -24,6 +24,11 @@ newoption {
 	description = "Build and use librw from this solution"
 }
 
+newoption {
+	trigger     = "with-opus",
+	description = "Build with opus"
+}
+
 if(_OPTIONS["with-librw"]) then
 	Librw = "librw"
 else
@@ -200,10 +205,25 @@ project "re3"
 	includedirs { "src/extras" }
 	includedirs { "eax" }
 	
+	if _OPTIONS["with-opus"] then
+		includedirs { "ogg/include" }
+		includedirs { "opus/include" }
+		includedirs { "opusfile/include" }
+	end
+
 	filter "platforms:*mss"
 		defines { "AUDIO_MSS" }
 		includedirs { "milessdk/include" }
 		libdirs { "milessdk/lib" }
+	
+	if _OPTIONS["with-opus"] then
+		filter "platforms:win*"
+			libdirs { "ogg/win32/VS2015/Win32/%{cfg.buildcfg}" }
+			libdirs { "opus/win32/VS2015/Win32/%{cfg.buildcfg}" }
+			libdirs { "opusfile/win32/VS2015/Win32/Release-NoHTTP" }
+		filter {}
+		defines { "AUDIO_OPUS" }
+	end
 		
 	filter "platforms:*oal"
 		defines { "AUDIO_OAL" }
@@ -238,6 +258,13 @@ project "re3"
 
 	filter "platforms:linux*oal"
 		links { "openal", "mpg123", "sndfile", "pthread" }
+	
+	if _OPTIONS["with-opus"] then
+		filter {}
+		links { "libogg" }
+		links { "opus" }
+		links { "opusfile" }
+	end
 
 	filter "platforms:*RW33*"
 		staticruntime "on"

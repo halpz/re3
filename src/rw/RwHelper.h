@@ -53,3 +53,11 @@ RwCamera *CameraCreate(RwInt32 width,
 					   
 void _TexturePoolsInitialise();
 void _TexturePoolsShutdown();
+
+#if defined(FIX_BUGS) && defined (GTA_PC)
+void SetAlphaTest(RwUInt32 alpharef);
+void RestoreAlphaTest();
+#else
+#define SetAlphaTest(a) (0)
+#define RestoreAlphaTest() (0)
+#endif
