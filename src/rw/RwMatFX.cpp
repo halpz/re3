@@ -2,7 +2,6 @@
 
 #define WITHD3D
 #include "common.h"
-#include "rwcore.h"
 #include "rpmatfx.h"
 
 struct MatFXNothing { int pad[5]; int effect; };
@@ -305,7 +304,8 @@ ReplaceMatFxCallback()
 {
 	RxD3D8AllInOneSetRenderCallBack(
 	    RxPipelineFindNodeByName(RpMatFXGetD3D8Pipeline(rpMATFXD3D8ATOMICPIPELINE), RxNodeDefinitionGetD3D8AtomicAllInOne()->name, nil, nil),
-		_rwD3D8AtomicMatFXRenderCallback);
+	    _rwD3D8AtomicMatFXRenderCallback);
+	
 }
 #endif // PS2_MATFX
 

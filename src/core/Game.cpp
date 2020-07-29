@@ -149,9 +149,14 @@ CGame::InitialiseOnceBeforeRW(void)
 	return true;
 }
 
-#if !defined(LIBRW) && defined(PS2_MATFX)
+#ifndef LIBRW
+#ifdef PS2_MATFX
 void ReplaceMatFxCallback();
-#endif
+#endif // PS2_MATFX
+#ifdef DUAL_PASS_RENDERING
+void ReplaceAtomicPipeCallback();
+#endif // DUAL_PASS_RENDERING
+#endif // !LIBRW
 
 bool
 CGame::InitialiseRenderWare(void)
@@ -203,9 +208,14 @@ CGame::InitialiseRenderWare(void)
 #else
 	rw::MatFX::modulateEnvMap = false;
 #endif
-#elif defined(PS2_MATFX)
+#else
+#ifdef PS2_MATFX
 	ReplaceMatFxCallback();
-#endif
+#endif // PS2_MATFX
+#ifdef DUAL_PASS_RENDERING
+	ReplaceAtomicPipeCallback();
+#endif // DUAL_PASS_RENDERING
+#endif // LIBRW
 	
 	CFont::Initialise();
 	CHud::Initialise();

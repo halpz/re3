@@ -11,7 +11,11 @@
 RtCharset *debugCharset;
 #endif
 
-bool gPS2alphaTest = 1;
+#ifdef DUAL_PASS_RENDERING
+bool gPS2alphaTest = true;
+#else
+bool gPS2alphaTest = false;
+#endif
 
 #ifndef FINAL
 static bool charsetOpen;
