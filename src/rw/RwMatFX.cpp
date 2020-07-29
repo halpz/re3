@@ -2,7 +2,6 @@
 
 #define WITHD3D
 #include "common.h"
-#include "rwcore.h"
 #include "rpmatfx.h"
 
 struct MatFXNothing { int pad[5]; int effect; };
@@ -51,9 +50,9 @@ extern "C" {
 	extern int MatFXAtomicDataOffset;
 
 	void _rpMatFXD3D8AtomicMatFXEnvRender(RxD3D8InstanceData* inst, int flags, int sel, RwTexture* texture, RwTexture* envMap);
-    void _rpMatFXD3D8AtomicMatFXRenderBlack(RxD3D8InstanceData *inst);
-    void _rpMatFXD3D8AtomicMatFXBumpMapRender(RxD3D8InstanceData *inst, int flags, RwTexture *texture, RwTexture *bumpMap, RwTexture *envMap);
-    void _rpMatFXD3D8AtomicMatFXDualPassRender(RxD3D8InstanceData *inst, int flags, RwTexture *texture, RwTexture *dualTexture);
+	void _rpMatFXD3D8AtomicMatFXRenderBlack(RxD3D8InstanceData *inst);
+	void _rpMatFXD3D8AtomicMatFXBumpMapRender(RxD3D8InstanceData *inst, int flags, RwTexture *texture, RwTexture *bumpMap, RwTexture *envMap);
+	void _rpMatFXD3D8AtomicMatFXDualPassRender(RxD3D8InstanceData *inst, int flags, RwTexture *texture, RwTexture *dualTexture);
 }
 
 
@@ -305,7 +304,8 @@ ReplaceMatFxCallback()
 {
 	RxD3D8AllInOneSetRenderCallBack(
 	    RxPipelineFindNodeByName(RpMatFXGetD3D8Pipeline(rpMATFXD3D8ATOMICPIPELINE), RxNodeDefinitionGetD3D8AtomicAllInOne()->name, nil, nil),
-		_rwD3D8AtomicMatFXRenderCallback);
+	    _rwD3D8AtomicMatFXRenderCallback);
+	
 }
 #endif // PS2_MATFX
 

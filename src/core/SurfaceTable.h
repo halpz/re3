@@ -88,6 +88,16 @@ IsShootThrough(uint8 surfType)
 	return false;
 }
 
+inline bool
+IsSeeThrough(uint8 surfType)
+{
+	switch(surfType)
+	case SURFACE_GLASS:
+	case SURFACE_TRANSPARENT_CLOTH:
+		return true;
+	return false;
+}
+
 class CSurfaceTable
 {
 	static float ms_aAdhesiveLimitTable[NUMADHESIVEGROUPS][NUMADHESIVEGROUPS];

@@ -57,3 +57,11 @@ void _TexturePoolsInitialise();
 void _TexturePoolsShutdown();
 
 RpAtomic *ConvertPlatformAtomic(RpAtomic *atomic, void *data);
+
+#if defined(FIX_BUGS) && defined (GTA_PC)
+void SetAlphaTest(RwUInt32 alpharef);
+void RestoreAlphaTest();
+#else
+#define SetAlphaTest(a) (0)
+#define RestoreAlphaTest() (0)
+#endif

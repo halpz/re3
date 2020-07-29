@@ -720,15 +720,9 @@ CPickups::DoPickUpEffects(CEntity *entity)
 		const CVector& pos = entity->GetPosition();
 		if (doOuterGlow) {
 			float colorModifier = ((CGeneral::GetRandomNumber() & 0x1F) * 0.015f + 1.0f) * modifiedSin * 0.15f;
-			CShadows::StoreStaticShadow(
-				(uintptr)entity,
-				SHADOWTYPE_ADDITIVE,
-				gpShadowExplosionTex,
-				&pos,
-				2.0f, 0.0f, 0.0f, -2.0f,
-				255,                                        // this is 0 on PC which results in no shadow
-				aWeaponReds[colorId] * colorModifier, aWeaponGreens[colorId] * colorModifier, aWeaponBlues[colorId] * colorModifier,
-				4.0f, 1.0f, 40.0f, false, 0.0f);
+			CShadows::StoreStaticShadow((uintptr)entity, SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &pos, 2.0f, 0.0f, 0.0f, -2.0f, 0,
+		                            aWeaponReds[colorId] * colorModifier, aWeaponGreens[colorId] * colorModifier, aWeaponBlues[colorId] * colorModifier, 4.0f,
+		                            1.0f, 40.0f, false, 0.0f);
 
 			float radius = (CGeneral::GetRandomNumber() & 0xF) * 0.1f + 3.0f;
 			CPointLights::AddLight(CPointLights::LIGHT_POINT, pos, CVector(0.0f, 0.0f, 0.0f), radius, aWeaponReds[colorId] * modifiedSin / 256.0f, aWeaponGreens[colorId] * modifiedSin / 256.0f, aWeaponBlues[colorId] * modifiedSin / 256.0f, CPointLights::FOG_NONE, true);
@@ -792,11 +786,8 @@ CPickups::DoMineEffects(CEntity *entity)
 		float s = Sin((float)((CTimer::GetTimeInMilliseconds() + (uintptr)entity) & 0x1FF) * DEGTORAD(360.0f / 0x200));
 
 		int32 red = (MAXDIST - dist) * (0.5f * s + 0.5f) / MAXDIST * 64.0f;
-		CShadows::StoreStaticShadow((uintptr)entity, SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &pos,
-			2.0f, 0.0f, 0.0f, -2.0f,
-			255,                                        // this is 0 on PC which results in no shadow
-			red, 0, 0,
-			4.0f, 1.0f, 40.0f, false, 0.0f);
+		CShadows::StoreStaticShadow((uintptr)entity, SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &pos, 2.0f, 0.0f, 0.0f, -2.0f, 0, red, 0, 0, 4.0f, 1.0f, 40.0f,
+		                            false, 0.0f);
 		CCoronas::RegisterCorona((uintptr)entity, red, 0, 0, 255, pos, 0.6f, 60.0f, CCoronas::TYPE_RING, CCoronas::FLARE_NONE, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
 	}
 
@@ -814,11 +805,8 @@ CPickups::DoMoneyEffects(CEntity *entity)
 		float s = Sin((float)((CTimer::GetTimeInMilliseconds() + (uintptr)entity) & 0x3FF) * DEGTORAD(360.0f / 0x400));
 
 		int32 green = (MAXDIST - dist) * (0.2f * s + 0.3f) / MAXDIST * 64.0f;
-		CShadows::StoreStaticShadow((uintptr)entity, SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &pos,
-			2.0f, 0.0f, 0.0f, -2.0f,
-			255,                                        // this is 0 on PC which results in no shadow
-			0, green, 0,
-			4.0f, 1.0f, 40.0f, false, 0.0f);
+		CShadows::StoreStaticShadow((uintptr)entity, SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &pos, 2.0f, 0.0f, 0.0f, -2.0f, 0, 0, green, 0, 4.0f, 1.0f,
+		                            40.0f, false, 0.0f);
 		CCoronas::RegisterCorona((uintptr)entity, 0, green, 0, 255, pos, 0.4f, 40.0f, CCoronas::TYPE_RING, CCoronas::FLARE_NONE, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
 	}
 
@@ -836,11 +824,8 @@ CPickups::DoCollectableEffects(CEntity *entity)
 		float s = Sin((float)((CTimer::GetTimeInMilliseconds() + (uintptr)entity) & 0x7FF) * DEGTORAD(360.0f / 0x800));
 
 		int32 color = (MAXDIST - dist) * (0.5f * s + 0.5f) / MAXDIST * 255.0f;
-		CShadows::StoreStaticShadow((uintptr)entity, SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &pos,
-			2.0f, 0.0f, 0.0f, -2.0f,
-			255,                                        // this is 0 on PC which results in no shadow
-			color, color, color,
-			4.0f, 1.0f, 40.0f, false, 0.0f);
+		CShadows::StoreStaticShadow((uintptr)entity, SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &pos, 2.0f, 0.0f, 0.0f, -2.0f, 0, color, color, color, 4.0f,
+		                            1.0f, 40.0f, false, 0.0f);
 		CCoronas::RegisterCorona((uintptr)entity, color, color, color, 255, pos, 0.6f, 40.0f, CCoronas::TYPE_RING, CCoronas::FLARE_NONE, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
 	}
 

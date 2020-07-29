@@ -11,7 +11,11 @@
 RtCharset *debugCharset;
 #endif
 
-bool gPS2alphaTest = 1;
+#ifdef DUAL_PASS_RENDERING
+bool gPS2alphaTest = true;
+#else
+bool gPS2alphaTest = false;
+#endif
 bool gBackfaceCulling;
 
 #ifndef FINAL
@@ -686,5 +690,39 @@ ConvertPlatformAtomic(RpAtomic *atomic, void *data)
 		atomic->pipeline = origPipe;
 	}
 	return atomic;
+}
+#endif
+
+#if defined(FIX_BUGS) && defined(GTA_PC)
+RwUInt32 saved_alphafunc, saved_alpharef;
+
+void
+SetAlphaTest(RwUInt32 alpharef)
+{
+#ifdef LIBRW
+	saved_alphafunc = rw::GetRenderState(rw::ALPHATESTFUNC);
+	saved_alpharef = rw::GetRenderState(rw::ALPHATESTREF);
+
+	rw::SetRenderState(rw::ALPHATESTFUNC, rw::ALPHAGREATEREQUAL);
+	rw::SetRenderState(rw::ALPHATESTREF, 0);
+#else
+	RwD3D8GetRenderState(D3DRS_ALPHAFUNC, &saved_alphafunc);
+	RwD3D8GetRenderState(D3DRS_ALPHAREF, &saved_alpharef);
+	
+	RwD3D8SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
+	RwD3D8SetRenderState(D3DRS_ALPHAREF, alpharef);
+#endif
+}
+
+void
+RestoreAlphaTest()
+{
+#ifdef LIBRW
+	rw::SetRenderState(rw::ALPHATESTFUNC, saved_alphafunc);
+	rw::SetRenderState(rw::ALPHATESTREF, saved_alpharef);
+#else
+	RwD3D8SetRenderState(D3DRS_ALPHAFUNC, saved_alphafunc);
+	RwD3D8SetRenderState(D3DRS_ALPHAREF, saved_alpharef);
+#endif
 }
 #endif
