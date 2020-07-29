@@ -74,6 +74,9 @@ struct CColTrianglePlane
 
 	void Set(const CVector *v, CColTriangle &tri);
 	void GetNormal(CVector &n) const { n = normal; }
+	float GetNormalX() const { return normal.x; }
+	float GetNormalY() const { return normal.y; }
+	float GetNormalZ() const { return normal.z; }
 	float CalcPoint(const CVector &v) const { return DotProduct(normal, v) - dist; };
 };
 

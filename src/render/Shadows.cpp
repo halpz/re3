@@ -7,6 +7,7 @@
 #include "Timecycle.h"
 #include "CutsceneMgr.h"
 #include "Automobile.h"
+#include "Bike.h"
 #include "Ped.h"
 #include "PlayerPed.h"
 #include "World.h"
@@ -19,7 +20,11 @@
 #include "PointLights.h"
 #include "SpecialFX.h"
 #include "Script.h"
+#include "TimeStep.h"
 #include "Shadows.h"
+#include "CutsceneObject.h"
+#include "CutsceneShadow.h"
+#include "Clock.h"
 
 #ifdef DEBUGMENU
 SETTWEAKPATH("Shadows");
@@ -31,6 +36,8 @@ RwImVertexIndex ShadowIndexList[24];
 RwTexture *gpShadowCarTex;
 RwTexture *gpShadowPedTex;
 RwTexture *gpShadowHeliTex;
+RwTexture *gpShadowBikeTex;
+RwTexture *gpShadowBaronTex;
 RwTexture *gpShadowExplosionTex;
 RwTexture *gpShadowHeadLightsTex;
 RwTexture *gpOutline1Tex;
@@ -38,7 +45,6 @@ RwTexture *gpOutline2Tex;
 RwTexture *gpOutline3Tex;
 RwTexture *gpBloodPoolTex;
 RwTexture *gpReflectionTex;
-RwTexture *gpGoalMarkerTex;
 RwTexture *gpWalkDontTex;
 RwTexture *gpCrackedGlassTex;
 RwTexture *gpPostShadowTex;
@@ -63,6 +69,8 @@ CShadows::Init(void)
 	gpShadowCarTex        = RwTextureRead("shad_car",     NULL);
 	gpShadowPedTex        = RwTextureRead("shad_ped",     NULL);
 	gpShadowHeliTex       = RwTextureRead("shad_heli",    NULL);
+	gpShadowBikeTex       = RwTextureRead("shad_bike",    NULL);
+	gpShadowBaronTex      = RwTextureRead("shad_rcbaron", NULL);
 	gpShadowExplosionTex  = RwTextureRead("shad_exp",     NULL);
 	gpShadowHeadLightsTex = RwTextureRead("headlight",    NULL);
 	gpOutline1Tex         = RwTextureRead("outline_64",   NULL);
@@ -70,7 +78,6 @@ CShadows::Init(void)
 	gpOutline3Tex         = RwTextureRead("outline3_64",  NULL);
 	gpBloodPoolTex        = RwTextureRead("bloodpool_64", NULL);
 	gpReflectionTex       = RwTextureRead("reflection01", NULL);
-	gpGoalMarkerTex       = RwTextureRead("goal",         NULL);
 	gpWalkDontTex         = RwTextureRead("walk_dont",    NULL);
 	gpCrackedGlassTex     = RwTextureRead("wincrack_32",  NULL);
 	gpPostShadowTex       = RwTextureRead("lamp_shad_64", NULL);
@@ -80,6 +87,8 @@ CShadows::Init(void)
 	ASSERT(gpShadowCarTex != NULL);
 	ASSERT(gpShadowPedTex != NULL);
 	ASSERT(gpShadowHeliTex != NULL);
+	ASSERT(gpShadowBikeTex != NULL);
+	ASSERT(gpShadowBaronTex != NULL);
 	ASSERT(gpShadowExplosionTex != NULL);
 	ASSERT(gpShadowHeadLightsTex != NULL);
 	ASSERT(gpOutline1Tex != NULL);
@@ -87,7 +96,6 @@ CShadows::Init(void)
 	ASSERT(gpOutline3Tex != NULL);
 	ASSERT(gpBloodPoolTex != NULL);
 	ASSERT(gpReflectionTex != NULL);
-	ASSERT(gpGoalMarkerTex != NULL);
 	ASSERT(gpWalkDontTex != NULL);
 	ASSERT(gpCrackedGlassTex != NULL);
 	ASSERT(gpPostShadowTex != NULL);
@@ -154,6 +162,8 @@ CShadows::Shutdown(void)
 	ASSERT(gpShadowCarTex != NULL);
 	ASSERT(gpShadowPedTex != NULL);
 	ASSERT(gpShadowHeliTex != NULL);
+	ASSERT(gpShadowBikeTex != NULL);
+	ASSERT(gpShadowBaronTex != NULL);
 	ASSERT(gpShadowExplosionTex != NULL);
 	ASSERT(gpShadowHeadLightsTex != NULL);
 	ASSERT(gpOutline1Tex != NULL);
@@ -161,7 +171,6 @@ CShadows::Shutdown(void)
 	ASSERT(gpOutline3Tex != NULL);
 	ASSERT(gpBloodPoolTex != NULL);
 	ASSERT(gpReflectionTex != NULL);
-	ASSERT(gpGoalMarkerTex != NULL);
 	ASSERT(gpWalkDontTex != NULL);
 	ASSERT(gpCrackedGlassTex != NULL);
 	ASSERT(gpPostShadowTex != NULL);
@@ -169,6 +178,8 @@ CShadows::Shutdown(void)
 	RwTextureDestroy(gpShadowCarTex);
 	RwTextureDestroy(gpShadowPedTex);
 	RwTextureDestroy(gpShadowHeliTex);
+	RwTextureDestroy(gpShadowBikeTex);
+	RwTextureDestroy(gpShadowBaronTex);
 	RwTextureDestroy(gpShadowExplosionTex);
 	RwTextureDestroy(gpShadowHeadLightsTex);
 	RwTextureDestroy(gpOutline1Tex);
@@ -176,7 +187,6 @@ CShadows::Shutdown(void)
 	RwTextureDestroy(gpOutline3Tex);
 	RwTextureDestroy(gpBloodPoolTex);
 	RwTextureDestroy(gpReflectionTex);
-	RwTextureDestroy(gpGoalMarkerTex);
 	RwTextureDestroy(gpWalkDontTex);
 	RwTextureDestroy(gpCrackedGlassTex);
 	RwTextureDestroy(gpPostShadowTex);
@@ -216,7 +226,7 @@ CShadows::AddPermanentShadow(uint8 ShadowType, RwTexture *pTexture, CVector *pPo
 	}
 }
 
-void
+bool
 CShadows::StoreStaticShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, Const CVector *pPosn,
 							float fFrontX, float fFrontY, float fSideX, float fSideY,
 							int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue,
@@ -226,20 +236,23 @@ CShadows::StoreStaticShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, C
 
 	float fDistToCamSqr = (*pPosn - TheCamera.GetPosition()).MagnitudeSqr2D();
 
-	if ( SQR(fDrawDistance) > fDistToCamSqr)
+	if ( SQR(fDrawDistance) > fDistToCamSqr || fDistToCamSqr == 0.0f )
 	{
-		float fDistToCam = Sqrt(fDistToCamSqr);
-
-		if ( fDistToCam >= (fDrawDistance*(1.0f-(1.0f/4.0f))) )
+		if ( fDistToCamSqr != 0.0f )
 		{
-			//fDistToCam == 0             -> 4
-			//fDistToCam == fDrawDistance -> 0
-			float fMult = 1.0f - (4.0f / fDrawDistance) * (fDistToCam - (fDrawDistance*(1.0f-(1.0f/4.0f))));
+			float fDistToCam = Sqrt(fDistToCamSqr);
 
-			nIntensity = (int32)(nIntensity * fMult);
-			nRed       = (int32)(nRed       * fMult);
-			nGreen     = (int32)(nGreen     * fMult);
-			nBlue      = (int32)(nBlue      * fMult);
+			if ( fDistToCam >= (fDrawDistance*(1.0f-(1.0f/4.0f))) )
+			{
+				//fDistToCam == 0             -> 4
+				//fDistToCam == fDrawDistance -> 0
+				float fMult = 1.0f - (4.0f / fDrawDistance) * (fDistToCam - (fDrawDistance*(1.0f-(1.0f/4.0f))));
+
+				nIntensity = (int32)(nIntensity * fMult);
+				nRed       = (int32)(nRed       * fMult);
+				nGreen     = (int32)(nGreen     * fMult);
+				nBlue      = (int32)(nBlue      * fMult);
+			}
 		}
 
 		int32 nSlot;
@@ -285,6 +298,8 @@ CShadows::StoreStaticShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, C
 				aStaticShadows[nSlot].m_fScale           = fScale;
 				aStaticShadows[nSlot].m_bTemp            = bTempShadow;
 				aStaticShadows[nSlot].m_nTimeCreated     = CTimer::GetTimeInMilliseconds();
+				
+				return false;
 			}
 			else
 			{
@@ -309,6 +324,8 @@ CShadows::StoreStaticShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, C
 				aStaticShadows[nSlot].m_nTimeCreated     = CTimer::GetTimeInMilliseconds();
 
 				GeneratePolysForStaticShadow(nSlot);
+				
+				return aStaticShadows[nSlot].m_pPolyBunch != NULL;
 			}
 		}
 		else
@@ -338,9 +355,13 @@ CShadows::StoreStaticShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, C
 				aStaticShadows[nSlot].m_nTimeCreated     = CTimer::GetTimeInMilliseconds();
 
 				GeneratePolysForStaticShadow(nSlot);
+				
+				return aStaticShadows[nSlot].m_pPolyBunch != NULL;
 			}
 		}
 	}
+	
+	return true;
 }
 
 void
@@ -362,7 +383,7 @@ CShadows::StoreShadowToBeRendered(uint8 ShadowTexture, CVector *pPosn,
 			StoreShadowToBeRendered(SHADOWTYPE_DARK, gpShadowCarTex, pPosn,
 					fFrontX, fFrontY, fSideX, fSideY,
 					nIntensity, nRed, nGreen, nBlue,
-					15.0f, false, 1.0f);
+					15.0f, false, 1.0f, NULL, false);
 
 			break;
 		}
@@ -372,7 +393,7 @@ CShadows::StoreShadowToBeRendered(uint8 ShadowTexture, CVector *pPosn,
 			StoreShadowToBeRendered(SHADOWTYPE_DARK, gpShadowPedTex, pPosn,
 					fFrontX, fFrontY, fSideX, fSideY,
 					nIntensity, nRed, nGreen, nBlue,
-					15.0f, false, 1.0f);
+					15.0f, false, 1.0f, NULL, false);
 
 			break;
 		}
@@ -382,7 +403,7 @@ CShadows::StoreShadowToBeRendered(uint8 ShadowTexture, CVector *pPosn,
 			StoreShadowToBeRendered(SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, pPosn,
 					fFrontX, fFrontY, fSideX, fSideY,
 					nIntensity, nRed, nGreen, nBlue,
-					15.0f, false, 1.0f);
+					15.0f, false, 1.0f, NULL, false);
 
 			break;
 		}
@@ -392,7 +413,7 @@ CShadows::StoreShadowToBeRendered(uint8 ShadowTexture, CVector *pPosn,
 			StoreShadowToBeRendered(SHADOWTYPE_DARK, gpShadowHeliTex, pPosn,
 					fFrontX, fFrontY, fSideX, fSideY,
 					nIntensity, nRed, nGreen, nBlue,
-					15.0f, false, 1.0f);
+					15.0f, false, 1.0f, NULL, false);
 
 			break;
 		}
@@ -402,7 +423,7 @@ CShadows::StoreShadowToBeRendered(uint8 ShadowTexture, CVector *pPosn,
 			StoreShadowToBeRendered(SHADOWTYPE_ADDITIVE, gpShadowHeadLightsTex, pPosn,
 					fFrontX, fFrontY, fSideX, fSideY,
 					nIntensity, nRed, nGreen, nBlue,
-					15.0f, false, 1.0f);
+					15.0f, false, 1.0f, NULL, false);
 
 			break;
 		}
@@ -411,8 +432,8 @@ CShadows::StoreShadowToBeRendered(uint8 ShadowTexture, CVector *pPosn,
 		{
 			StoreShadowToBeRendered(SHADOWTYPE_DARK, gpBloodPoolTex, pPosn,
 					fFrontX, fFrontY, fSideX, fSideY,
-					nIntensity, nRed, nGreen, nBlue,
-					15.0f, false, 1.0f);
+					nIntensity, nRed, 150, 0,
+					15.0f, false, 1.0f, NULL, false);
 
 			break;
 		}
@@ -425,46 +446,64 @@ void
 CShadows::StoreShadowToBeRendered(uint8 ShadowType, RwTexture *pTexture, CVector *pPosn,
 								float fFrontX, float fFrontY, float fSideX, float fSideY,
 								int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue,
-								float fZDistance, bool bDrawOnWater, float fScale)
+								float fZDistance, bool bDrawOnWater, float fScale, CCutsceneShadow *pShadow, bool bDrawOnBuildings)
 {
 	ASSERT(pTexture != NULL);
 	ASSERT(pPosn != NULL);
 
 	if ( ShadowsStoredToBeRendered < MAX_STOREDSHADOWS )
 	{
-		asShadowsStored[ShadowsStoredToBeRendered].m_ShadowType          = ShadowType;
-		asShadowsStored[ShadowsStoredToBeRendered].m_pTexture            = pTexture;
-		asShadowsStored[ShadowsStoredToBeRendered].m_vecPos              = *pPosn;
-		asShadowsStored[ShadowsStoredToBeRendered].m_vecFront.x          = fFrontX;
-		asShadowsStored[ShadowsStoredToBeRendered].m_vecFront.y          = fFrontY;
-		asShadowsStored[ShadowsStoredToBeRendered].m_vecSide.x           = fSideX;
-		asShadowsStored[ShadowsStoredToBeRendered].m_vecSide.y           = fSideY;
-		asShadowsStored[ShadowsStoredToBeRendered].m_nIntensity          = nIntensity;
-		asShadowsStored[ShadowsStoredToBeRendered].m_nRed                = nRed;
-		asShadowsStored[ShadowsStoredToBeRendered].m_nGreen              = nGreen;
-		asShadowsStored[ShadowsStoredToBeRendered].m_nBlue               = nBlue;
-		asShadowsStored[ShadowsStoredToBeRendered].m_fZDistance          = fZDistance;
-		asShadowsStored[ShadowsStoredToBeRendered].m_nFlags.bDrawOnWater = bDrawOnWater;
-		asShadowsStored[ShadowsStoredToBeRendered].m_fScale              = fScale;
+		asShadowsStored[ShadowsStoredToBeRendered].m_ShadowType              = ShadowType;
+		asShadowsStored[ShadowsStoredToBeRendered].m_pTexture                = pTexture;
+		asShadowsStored[ShadowsStoredToBeRendered].m_vecPos                  = *pPosn;
+		asShadowsStored[ShadowsStoredToBeRendered].m_vecFront.x              = fFrontX;
+		asShadowsStored[ShadowsStoredToBeRendered].m_vecFront.y              = fFrontY;
+		asShadowsStored[ShadowsStoredToBeRendered].m_vecSide.x               = fSideX;
+		asShadowsStored[ShadowsStoredToBeRendered].m_vecSide.y               = fSideY;
+		asShadowsStored[ShadowsStoredToBeRendered].m_nIntensity              = nIntensity;
+		asShadowsStored[ShadowsStoredToBeRendered].m_nRed                    = nRed;
+		asShadowsStored[ShadowsStoredToBeRendered].m_nGreen                  = nGreen;
+		asShadowsStored[ShadowsStoredToBeRendered].m_nBlue                   = nBlue;
+		asShadowsStored[ShadowsStoredToBeRendered].m_fZDistance              = fZDistance;
+		asShadowsStored[ShadowsStoredToBeRendered].m_nFlags.bDrawOnWater     = bDrawOnWater;
+		asShadowsStored[ShadowsStoredToBeRendered].m_nFlags.bDrawOnBuildings = bDrawOnBuildings;
+		asShadowsStored[ShadowsStoredToBeRendered].m_fScale                  = fScale;
+		asShadowsStored[ShadowsStoredToBeRendered].m_pCutsceneShadow         = pShadow;
 
 		ShadowsStoredToBeRendered++;
 	}
 }
 
+
 void
-CShadows::StoreShadowForCar(CAutomobile *pCar)
+CShadows::StoreShadowForVehicle(CVehicle *pCar, VEH_SHD_TYPE type)
 {
 	ASSERT(pCar != NULL);
 
 	if ( CTimeCycle::GetShadowStrength() != 0 )
 	{
 		CVector CarPos = pCar->GetPosition();
-		float fDistToCamSqr = (CarPos - TheCamera.GetPosition()).MagnitudeSqr();
+		float fDistToCamSqr = (CarPos - TheCamera.GetPosition()).MagnitudeSqr2D();
 
 		if ( CCutsceneMgr::IsRunning() )
 			fDistToCamSqr /= SQR(TheCamera.LODDistMultiplier) * 4.0f;
 
-		float fDrawDistance = 18.0f;
+		float fDrawDistance;
+		switch ( type )
+		{
+			case VEH_SHD_TYPE_SEAPLANE:
+			case VEH_SHD_TYPE_RCPLANE:
+				fDrawDistance = 144.0f;
+				break;
+				
+			case VEH_SHD_TYPE_HELI:
+				fDrawDistance = 144.0f;
+				break;
+				
+			default:
+				fDrawDistance = 18.0f;
+				break;
+		}
 
 		if ( fDistToCamSqr < SQR(fDrawDistance) )
 		{
@@ -472,46 +511,202 @@ CShadows::StoreShadowForCar(CAutomobile *pCar)
 			
 			//fDistToCam == 0             -> 4
 			//fDistToCam == fDrawDistance -> 0
-			float fMult = 1.0f - (4.0f / fDrawDistance) * (fDistToCam - (fDrawDistance*(1.0f-(1.0f/4.0f))) );
+			float fMult = 1.0f - (fDistToCam - (fDrawDistance*(1.0f-(1.0f/4.0f)))) / (fDrawDistance*(1.0f/4.0f));
 
 			int32 nColorStrength;
 
 			if ( fDistToCam >= (fDrawDistance*(1.0f-(1.0f/4.0f))) )
-				nColorStrength = (int32)(CTimeCycle::GetShadowStrength() * fMult);
+				nColorStrength = (int32)(fMult * CTimeCycle::GetShadowStrength());
 			else
 				nColorStrength = CTimeCycle::GetShadowStrength();
-
+			
+			
 			float fVehicleHeight  = pCar->GetColModel()->boundingBox.GetSize().y;
 			float fVehicleWidth   = pCar->GetColModel()->boundingBox.GetSize().x;
-
-			if ( pCar->GetModelIndex() == MI_DODO )
+			
+			float size = 1.0f;
+			
+			if ( pCar->GetModelIndex() == MI_HUNTER )
+			{
+				fVehicleWidth  *= 3.0f;
+				fVehicleHeight *= 1.4f;
+				size *= 0.5f;
+			}
+			else if ( pCar->GetModelIndex() == MI_ANGEL )
+			{
+				fVehicleHeight = fVehicleHeight * 1.5;
+				size = 0.03f;
+			}
+			else if ( pCar->GetModelIndex() == MI_SEASPAR )
+			{
+				fVehicleWidth  *= 3.0f;
+				fVehicleHeight *= 1.4f;
+				size *= 0.5f;
+			}
+			else if ( pCar->GetModelIndex() == MI_PIZZABOY || pCar->GetModelIndex() == MI_PCJ600 || pCar->GetModelIndex() == MI_FAGGIO )
+			{
+				fVehicleHeight *= 1.2f;
+				size = 0.05f;
+			}
+			else if ( pCar->GetModelIndex() == MI_FREEWAY )
+			{
+				fVehicleHeight *= 1.5f;
+				size = 0.03f;
+			}
+			else if ( pCar->GetModelIndex() == MI_RCRAIDER )
+			{
+				fVehicleHeight *= 1.5f;
+				fVehicleWidth  *= 2.0f;
+				size = 0.2f;
+			}
+			else if ( pCar->GetModelIndex() == MI_SANCHEZ )
+			{
+				fVehicleHeight *= 1.5f;
+				size = 0.03f;
+			}
+			else if ( pCar->GetModelIndex() == MI_SPARROW || pCar->GetModelIndex() == MI_MAVERICK || pCar->GetModelIndex() == MI_VCNMAV || pCar->GetModelIndex() == MI_POLMAV )
+			{
+				fVehicleWidth  *= 3.0f;
+				fVehicleHeight *= 1.4f;
+				size *= 0.5f;
+			}
+			else if ( pCar->GetModelIndex() == MI_RCGOBLIN )
+			{
+				fVehicleHeight *= 1.5f;
+				fVehicleWidth  *= 2.0f;
+				size = 0.2f;
+			}
+			else if ( pCar->GetModelIndex() == MI_DODO )
 			{
 				fVehicleHeight *= 0.9f;
 				fVehicleWidth  *= 0.4f;
 			}
-
-			CarPos.x -= pCar->GetForward().x * ((fVehicleHeight / 2) - pCar->GetColModel()->boundingBox.max.y);
-			CarPos.y -= pCar->GetForward().y * ((fVehicleHeight / 2) - pCar->GetColModel()->boundingBox.max.y);
-
-			if ( pCar->GetUp().z > 0.0f )
+			
+			CarPos.x -= pCar->GetForward().x * (((fVehicleHeight/2) - pCar->GetColModel()->boundingBox.max.y)*size);
+			CarPos.y -= pCar->GetForward().y * (((fVehicleHeight/2) - pCar->GetColModel()->boundingBox.max.y)*size);
+			
+			RwTexture *tex;
+			switch ( type )
 			{
-				StoreShadowToBeRendered(SHADOWTYPE_DARK, gpShadowCarTex, &CarPos,
-					pCar->GetForward().x * (fVehicleHeight / 2),
-					pCar->GetForward().y * (fVehicleHeight / 2),
-					pCar->GetRight().x   * (fVehicleWidth  / 2),
-					pCar->GetRight().y   * (fVehicleWidth  / 2),
-					nColorStrength, nColorStrength, nColorStrength, nColorStrength,
-					4.5f, false, 1.0f);
+				case VEH_SHD_TYPE_BIKE:
+				{
+					float wheelZ = Abs(((CBike*)pCar)->m_fLeanLRAngle);
+					float mul = 5.092958f * wheelZ + 1.0f;
+					if (pCar->GetStatus() == STATUS_PHYSICS)
+					{
+						float z = pCar->GetRight().z;
+						if (z > 0.6f)
+							mul += 4.0f * z;
+					}
+					fVehicleWidth *= mul;
+					tex = gpShadowBikeTex;
+					break;
+				}
+				
+				case VEH_SHD_TYPE_HELI:
+					tex = gpShadowHeliTex;
+					break;
+				
+				case VEH_SHD_TYPE_SEAPLANE:
+					nColorStrength = CTimeCycle::GetShadowStrength();
+					tex = gpShadowBaronTex;
+					break;
+				
+				case VEH_SHD_TYPE_RCPLANE:
+					tex = gpShadowBaronTex;
+					fVehicleHeight *= 1.5f;
+					fVehicleWidth  *= 2.2f;
+					break;
+				
+				case VEH_SHD_TYPE_CAR:
+					tex = gpShadowCarTex;
+					break;
+			}
+			
+			float frontx = pCar->GetForward().x;
+			float fronty = pCar->GetForward().y;
+			float sidex = pCar->GetRight().x;
+			float sidey = pCar->GetRight().y;
+			
+			switch ( type )
+			{
+				case VEH_SHD_TYPE_BIKE:
+					if ( Abs(pCar->GetRight().z) > 0.6f )
+					{
+						sidex = pCar->GetUp().x;
+						sidey = pCar->GetUp().y;
+					}
+					break;
+					
+				case VEH_SHD_TYPE_HELI:
+					if ( Abs(pCar->GetRight().z) > 0.57f )
+					{
+						sidex = pCar->GetUp().x;
+						sidey = pCar->GetUp().y;
+					}
+					if ( Abs(pCar->GetForward().z) > 0.57f )
+					{
+						frontx = pCar->GetUp().x;
+						fronty = pCar->GetUp().y;
+					}
+					break;
+			}
+
+			bool bDrawOnBuildings = false;
+			if (   pCar->GetModelIndex() == MI_RCBANDIT
+				|| pCar->GetModelIndex() == MI_RCBARON
+				|| pCar->GetModelIndex() == MI_RCRAIDER
+				|| pCar->GetModelIndex() == MI_RCGOBLIN
+				|| pCar == FindPlayerVehicle() )
+			{
+				bDrawOnBuildings = true;
+			}
+			
+			if ( pCar->m_vecMoveSpeed.Magnitude() * CTimeStep::ms_fTimeStep > 0.1f || bDrawOnBuildings )
+			{
+				if ( pCar->GetUp().z > 0.0f )
+				{
+					StoreShadowToBeRendered(SHADOWTYPE_DARK, tex, &CarPos,
+						frontx * (fVehicleHeight / 2),
+						fronty * (fVehicleHeight / 2),
+						sidex  * (fVehicleWidth  / 2),
+						sidey  * (fVehicleWidth  / 2),
+						nColorStrength, nColorStrength, nColorStrength, nColorStrength,
+						4.5f, false, 1.0f, NULL, bDrawOnBuildings);
+				}
+				else
+				{
+					StoreShadowToBeRendered(SHADOWTYPE_DARK, tex, &CarPos,
+						frontx * (fVehicleHeight / 2),
+						fronty * (fVehicleHeight / 2),
+						-sidex * (fVehicleWidth  / 2),
+						-sidey * (fVehicleWidth  / 2),
+						nColorStrength, nColorStrength, nColorStrength, nColorStrength,
+						4.5f, false, 1.0f, NULL, bDrawOnBuildings);
+				}
 			}
 			else
 			{
-				StoreShadowToBeRendered(SHADOWTYPE_DARK, gpShadowCarTex, &CarPos,
-					pCar->GetForward().x * (fVehicleHeight / 2),
-					pCar->GetForward().y * (fVehicleHeight / 2),
-					-pCar->GetRight().x  * (fVehicleWidth  / 2),
-					-pCar->GetRight().y  * (fVehicleWidth  / 2),
-					nColorStrength, nColorStrength, nColorStrength, nColorStrength,
-					4.5f, false, 1.0f);
+				if ( pCar->GetUp().z > 0.0f )
+				{
+					StoreStaticShadow((uintptr)pCar + 1, SHADOWTYPE_DARK, tex, &CarPos,
+						frontx * (fVehicleHeight / 2),
+						fronty * (fVehicleHeight / 2),
+						sidex  * (fVehicleWidth  / 2),
+						sidey  * (fVehicleWidth  / 2),
+						nColorStrength, nColorStrength, nColorStrength, nColorStrength,
+						4.5f, 1.0f, 0.0f, false, 0.1f);
+				}
+				else
+				{
+					StoreStaticShadow((uintptr)pCar + 1, SHADOWTYPE_DARK, tex, &CarPos,
+						frontx * (fVehicleHeight / 2),
+						fronty * (fVehicleHeight / 2),
+						-sidex * (fVehicleWidth  / 2),
+						-sidey * (fVehicleWidth  / 2),
+						nColorStrength, nColorStrength, nColorStrength, nColorStrength,
+						4.5f, 1.0f, 0.0f, false, 0.1f);
+				}
 			}
 		}
 	}
@@ -551,12 +746,24 @@ CShadows::StoreCarLightShadow(CAutomobile *pCar, int32 nID, RwTexture *pTexture,
 				nBlue  = (int32)(nBlue  * fMult);
 			}
 
-			StoreShadowToBeRendered(SHADOWTYPE_ADDITIVE, pTexture, pPosn,
-					fFrontX, fFrontY,
-					fSideX, fSideY,
-					128, nRed, nGreen, nBlue,
-					6.0f, false, 1.0f);
-
+			if ( pCar->m_vecMoveSpeed.Magnitude() * CTimeStep::ms_fTimeStep > 0.4f || pCar == FindPlayerVehicle() )
+			{
+				StoreShadowToBeRendered(SHADOWTYPE_ADDITIVE, pTexture, pPosn,
+						fFrontX, fFrontY,
+						fSideX, fSideY,
+						128, nRed, nGreen, nBlue,
+						6.0f, false, 1.0f,
+						NULL, pCar == FindPlayerVehicle());
+			}
+			else
+			{
+				StoreStaticShadow((uintptr)pCar + nID, SHADOWTYPE_ADDITIVE, pTexture, pPosn,
+						fFrontX, fFrontY,
+						fSideX, fSideY,
+						128, nRed, nGreen, nBlue,
+						6.0f, 1.0f, 27.0f,
+						false, 0.4f);
+			}
 		}
 	}
 }
@@ -580,10 +787,94 @@ CShadows::StoreShadowForPed(CPed *pPed, float fDisplacementX, float fDisplacemen
 	}
 }
 
+#if 1
+void
+StoreShadowForCutscenePedObject(CPed *pObject, float fDisplacementX, float fDisplacementY,
+								float fFrontX, float fFrontY, float fSideX, float fSideY)
+{
+	ASSERT(pObject != NULL);
+	
+	CCutsceneShadow *shadow = pObject->m_pRTShadow;
+	
+	if ( shadow == NULL )
+		return;
+	
+	if ( !shadow->IsInitialized() )
+		return;
+	
+	CVector pos = pObject->GetPosition();
+	
+	float fDistToCamSqr = (pos - TheCamera.GetPosition()).MagnitudeSqr2D();
+	
+	float fDrawDistance = 100.0f;
+	
+	if ( fDistToCamSqr < SQR(fDrawDistance*0.5f) )
+	{
+		if ( (CEntity*)pObject == FindPlayerPed() || TheCamera.IsSphereVisible(pos, 2.0f) )
+		{
+			float fDistToCam = Sqrt(fDistToCamSqr);
+			
+			float fMult = 1.0f - (4.0f / fDrawDistance) * (fDistToCam - (fDrawDistance*(1.0f/4.0f)));
+			int32 nColorStrength;
+
+			if ( fDistToCam >= (fDrawDistance*(1.0f/4.0f)) )
+				nColorStrength = (int32)(CTimeCycle::GetShadowStrength() * fMult);
+			else
+				nColorStrength = CTimeCycle::GetShadowStrength();
+
+			int32 color = int32(nColorStrength * 0.8f);
+			
+			pos.x += fDisplacementX;
+			pos.y += fDisplacementY;
+			
+			RwTexture *texture = shadow->GetShadowRwTexture();
+			ASSERT(texture);
+			RwRGBA bordercolor = {0, 0, 0, 0};
+			shadow->DrawBorderAroundTexture(bordercolor);
+			
+			pos.x -= fDisplacementX;
+			pos.y -= fDisplacementY;
+			
+			float angleY = 360.0f - RADTODEG((CClock::ms_nGameClockMinutes+60*
+					CClock::ms_nGameClockHours+CClock::ms_nGameClockSeconds/60)*(HALFPI/360.0f));
+			 
+			RwFrame *frame = shadow->SetLightProperties(angleY, -85.0f, true);
+			ASSERT(frame);
+			CVector at(RwFrameGetMatrix(frame)->at);
+			at.Normalise();
+			
+			CShadows::CalcPedShadowValues(at, &fFrontX, &fFrontY, &fSideX, &fSideY, &fDisplacementX, &fDisplacementY);
+			
+			pos.x -= 2.5f * fDisplacementX;
+			pos.y -= 2.5f * fDisplacementY;
+			
+			CShadows::StoreShadowToBeRendered(SHADOWTYPE_INVCOLOR, texture, &pos,
+				fFrontX * 1.5f, fFrontY * 1.5f,
+				fSideX  * 1.5f, fSideY  * 1.5f,
+				color, color, color, color,
+				4.0f, false, 1.0f, shadow, false);
+		}
+	}
+}
+#endif
+
 void
 CShadows::StoreShadowForPedObject(CEntity *pPedObject, float fDisplacementX, float fDisplacementY,
 								float fFrontX, float fFrontY, float fSideX, float fSideY)
 {
+#if 1
+	CPed *ped = (CPed*)pPedObject;
+	CCutsceneShadow *pShadow = ped->m_pRTShadow;
+
+	if (pShadow)
+	{
+		if (pShadow->IsInitialized())
+			pShadow->UpdateForCutscene();
+		::StoreShadowForCutscenePedObject(ped, fDisplacementX, fDisplacementY, fFrontX, fFrontY, fSideX, fSideY);
+		return;
+	}
+#endif
+	
 	ASSERT(pPedObject != NULL);
 
 	CVector PedPos = pPedObject->GetPosition();
@@ -592,7 +883,7 @@ CShadows::StoreShadowForPedObject(CEntity *pPedObject, float fDisplacementX, flo
 
 	float fDrawDistance = 26.0f;
 
-	if ( fDistToCamSqr < SQR(fDrawDistance*0.5f)/*?*/ )
+	if ( fDistToCamSqr < SQR(fDrawDistance*0.5f) )
 	{
 		if ( pPedObject == FindPlayerPed() || TheCamera.IsSphereVisible(PedPos, 2.0f) != false )
 		{
@@ -615,7 +906,77 @@ CShadows::StoreShadowForPedObject(CEntity *pPedObject, float fDisplacementX, flo
 					fFrontX, fFrontY,
 					fSideX, fSideY,
 					nColorStrength, nColorStrength, nColorStrength, nColorStrength,
-					4.0f, false, 1.0f);
+					4.0f, false, 1.0f, NULL, pPedObject == FindPlayerPed());
+		}
+	}
+}
+
+
+void
+CShadows::StoreShadowForCutscenePedObject(CCutsceneObject *pObject, float fDisplacementX, float fDisplacementY,
+								float fFrontX, float fFrontY, float fSideX, float fSideY)
+{
+	ASSERT(pObject != NULL);
+	
+	CCutsceneShadow *shadow = pObject->m_pShadow;
+	
+	if ( shadow == NULL )
+		return;
+	
+	if ( !shadow->IsInitialized() )
+		return;
+	
+	CVector pos = pObject->GetPosition();
+	
+	float fDistToCamSqr = (pos - TheCamera.GetPosition()).MagnitudeSqr2D();
+	
+	float fDrawDistance = 100.0f;
+	
+	if ( fDistToCamSqr < SQR(fDrawDistance*0.5f) )
+	{
+		if ( (CEntity*)pObject == FindPlayerPed() || TheCamera.IsSphereVisible(pos, 2.0f) )
+		{
+			float fDistToCam = Sqrt(fDistToCamSqr);
+			
+			float fMult = 1.0f - (4.0f / fDrawDistance) * (fDistToCam - (fDrawDistance*(1.0f/4.0f)));
+			int32 nColorStrength;
+
+			if ( fDistToCam >= (fDrawDistance*(1.0f/4.0f)) )
+				nColorStrength = (int32)(CTimeCycle::GetShadowStrength() * fMult);
+			else
+				nColorStrength = CTimeCycle::GetShadowStrength();
+
+			int32 color = int32(nColorStrength * 0.8f);
+			
+			pos.x += fDisplacementX;
+			pos.y += fDisplacementY;
+			
+			RwTexture *texture = shadow->GetShadowRwTexture();
+			ASSERT(texture);
+			RwRGBA bordercolor = {0, 0, 0, 0};
+			shadow->DrawBorderAroundTexture(bordercolor);
+			
+			pos.x -= fDisplacementX;
+			pos.y -= fDisplacementY;
+			
+			float angleY = 360.0f - RADTODEG((CClock::ms_nGameClockMinutes+60*
+					CClock::ms_nGameClockHours+CClock::ms_nGameClockSeconds/60)*(HALFPI/360.0f));
+			 
+			RwFrame *frame = shadow->SetLightProperties(angleY, -85.0f, true);
+			ASSERT(frame);
+			CVector at(RwFrameGetMatrix(frame)->at);
+			at.Normalise();
+			
+			CalcPedShadowValues(at, &fFrontX, &fFrontY, &fSideX, &fSideY, &fDisplacementX, &fDisplacementY);
+			
+			pos.x -= 2.5f * fDisplacementX;
+			pos.y -= 2.5f * fDisplacementY;
+			
+			StoreShadowToBeRendered(SHADOWTYPE_INVCOLOR, texture, &pos,
+				fFrontX * 1.5f, fFrontY * 1.5f,
+				fSideX  * 1.5f, fSideY  * 1.5f,
+				color, color, color, color,
+				4.0f, false, 1.0f, shadow, false);
 		}
 	}
 }
@@ -625,6 +986,7 @@ CShadows::StoreShadowForTree(CEntity *pTree)
 {
 	ASSERT(pTree != NULL);
 }
+
 
 void
 CShadows::StoreShadowForPole(CEntity *pPole, float fOffsetX, float fOffsetY, float fOffsetZ,
@@ -685,6 +1047,7 @@ CShadows::SetRenderModeForShadowType(uint8 ShadowType)
 	}
 }
 
+
 void
 CShadows::RenderStoredShadows(void)
 {
@@ -693,9 +1056,12 @@ CShadows::RenderStoredShadows(void)
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void *)FALSE);
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void *)TRUE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);
+	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,    (void *)rwTEXTUREADDRESSCLAMP);
+
 
 	for ( int32 i = 0; i < ShadowsStoredToBeRendered; i++ )
 		asShadowsStored[i].m_nFlags.bRendered = false;
+
 
 	for ( int32 i = 0; i < ShadowsStoredToBeRendered; i++ )
 	{
@@ -736,38 +1102,111 @@ CShadows::RenderStoredShadows(void)
 							CSector *pCurSector = CWorld::GetSector(x, y);
 
 							ASSERT(pCurSector != NULL);
-
-							CastShadowSectorList(pCurSector->m_lists[ENTITYLIST_BUILDINGS],
-									fStartX, fStartY,
-									fEndX, fEndY,
-									&shadowPos,
-									asShadowsStored[j].m_vecFront.x,
-									asShadowsStored[j].m_vecFront.y,
-									asShadowsStored[j].m_vecSide.x,
-									asShadowsStored[j].m_vecSide.y,
-									asShadowsStored[j].m_nIntensity,
-									asShadowsStored[j].m_nRed,
-									asShadowsStored[j].m_nGreen,
-									asShadowsStored[j].m_nBlue,
-									asShadowsStored[j].m_fZDistance,
-									asShadowsStored[j].m_fScale,
-									NULL);
-
-							CastShadowSectorList(pCurSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP],
-									fStartX, fStartY,
-									fEndX, fEndY,
-									&shadowPos,
-									asShadowsStored[j].m_vecFront.x,
-									asShadowsStored[j].m_vecFront.y,
-									asShadowsStored[j].m_vecSide.x,
-									asShadowsStored[j].m_vecSide.y,
-									asShadowsStored[j].m_nIntensity,
-									asShadowsStored[j].m_nRed,
-									asShadowsStored[j].m_nGreen,
-									asShadowsStored[j].m_nBlue,
-									asShadowsStored[j].m_fZDistance,
-									asShadowsStored[j].m_fScale,
-									NULL);
+							
+							if ( asShadowsStored[j].m_pCutsceneShadow )
+							{
+								CastCutsceneShadowSectorList(pCurSector->m_lists[ENTITYLIST_BUILDINGS],
+										fStartX, fStartY,
+										fEndX, fEndY,
+										&shadowPos,
+										asShadowsStored[j].m_vecFront.x,
+										asShadowsStored[j].m_vecFront.y,
+										asShadowsStored[j].m_vecSide.x,
+										asShadowsStored[j].m_vecSide.y,
+										asShadowsStored[j].m_nIntensity,
+										asShadowsStored[j].m_nRed,
+										asShadowsStored[j].m_nGreen,
+										asShadowsStored[j].m_nBlue,
+										asShadowsStored[j].m_fZDistance,
+										asShadowsStored[j].m_fScale,
+										NULL,
+										asShadowsStored[j].m_pCutsceneShadow);
+	
+								CastCutsceneShadowSectorList(pCurSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP],
+										fStartX, fStartY,
+										fEndX, fEndY,
+										&shadowPos,
+										asShadowsStored[j].m_vecFront.x,
+										asShadowsStored[j].m_vecFront.y,
+										asShadowsStored[j].m_vecSide.x,
+										asShadowsStored[j].m_vecSide.y,
+										asShadowsStored[j].m_nIntensity,
+										asShadowsStored[j].m_nRed,
+										asShadowsStored[j].m_nGreen,
+										asShadowsStored[j].m_nBlue,
+										asShadowsStored[j].m_fZDistance,
+										asShadowsStored[j].m_fScale,
+										NULL,
+										asShadowsStored[j].m_pCutsceneShadow);
+							}
+							else if ( asShadowsStored[j].m_nFlags.bDrawOnBuildings )
+							{
+								CastPlayerShadowSectorList(pCurSector->m_lists[ENTITYLIST_BUILDINGS],
+										fStartX, fStartY,
+										fEndX, fEndY,
+										&shadowPos,
+										asShadowsStored[j].m_vecFront.x,
+										asShadowsStored[j].m_vecFront.y,
+										asShadowsStored[j].m_vecSide.x,
+										asShadowsStored[j].m_vecSide.y,
+										asShadowsStored[j].m_nIntensity,
+										asShadowsStored[j].m_nRed,
+										asShadowsStored[j].m_nGreen,
+										asShadowsStored[j].m_nBlue,
+										asShadowsStored[j].m_fZDistance,
+										asShadowsStored[j].m_fScale,
+										NULL);
+	
+								CastPlayerShadowSectorList(pCurSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP],
+										fStartX, fStartY,
+										fEndX, fEndY,
+										&shadowPos,
+										asShadowsStored[j].m_vecFront.x,
+										asShadowsStored[j].m_vecFront.y,
+										asShadowsStored[j].m_vecSide.x,
+										asShadowsStored[j].m_vecSide.y,
+										asShadowsStored[j].m_nIntensity,
+										asShadowsStored[j].m_nRed,
+										asShadowsStored[j].m_nGreen,
+										asShadowsStored[j].m_nBlue,
+										asShadowsStored[j].m_fZDistance,
+										asShadowsStored[j].m_fScale,
+										NULL);
+							}
+							else
+							{
+								CastShadowSectorList(pCurSector->m_lists[ENTITYLIST_BUILDINGS],
+										fStartX, fStartY,
+										fEndX, fEndY,
+										&shadowPos,
+										asShadowsStored[j].m_vecFront.x,
+										asShadowsStored[j].m_vecFront.y,
+										asShadowsStored[j].m_vecSide.x,
+										asShadowsStored[j].m_vecSide.y,
+										asShadowsStored[j].m_nIntensity,
+										asShadowsStored[j].m_nRed,
+										asShadowsStored[j].m_nGreen,
+										asShadowsStored[j].m_nBlue,
+										asShadowsStored[j].m_fZDistance,
+										asShadowsStored[j].m_fScale,
+										NULL);
+	
+								CastShadowSectorList(pCurSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP],
+										fStartX, fStartY,
+										fEndX, fEndY,
+										&shadowPos,
+										asShadowsStored[j].m_vecFront.x,
+										asShadowsStored[j].m_vecFront.y,
+										asShadowsStored[j].m_vecSide.x,
+										asShadowsStored[j].m_vecSide.y,
+										asShadowsStored[j].m_nIntensity,
+										asShadowsStored[j].m_nRed,
+										asShadowsStored[j].m_nGreen,
+										asShadowsStored[j].m_nBlue,
+										asShadowsStored[j].m_fZDistance,
+										asShadowsStored[j].m_fScale,
+										NULL);
+							}
 						}
 					}
 
@@ -777,15 +1216,16 @@ CShadows::RenderStoredShadows(void)
 
 			RenderBuffer::RenderStuffInBuffer();
 		}
-
 	}
 
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)FALSE);
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void *)TRUE);
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void *)TRUE);
+	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,    (void *)rwTEXTUREADDRESSWRAP);
 
 	ShadowsStoredToBeRendered = 0;
 }
+
 
 void
 CShadows::RenderStaticShadows(void)
@@ -855,6 +1295,7 @@ CShadows::RenderStaticShadows(void)
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void *)TRUE);
 }
 
+
 void
 CShadows::GeneratePolysForStaticShadow(int16 nStaticShadowID)
 {
@@ -912,6 +1353,7 @@ CShadows::GeneratePolysForStaticShadow(int16 nStaticShadowID)
 	}
 }
 
+
 void
 CShadows::CastShadowSectorList(CPtrList &PtrList, float fStartX, float fStartY, float fEndX, float fEndY, CVector *pPosn,
 								float fFrontX, float fFrontY, float fSideX, float fSideY,
@@ -934,28 +1376,139 @@ CShadows::CastShadowSectorList(CPtrList &PtrList, float fStartX, float fStartY, 
 
 		if ( nScanCode != CWorld::GetCurrentScanCode() )
 		{
-			if ( pEntity->bUsesCollision && pEntity->IsBuilding() )
+			pEntity->m_scanCode = CWorld::GetCurrentScanCode();
+			
+			if ( pEntity->bUsesCollision && !pEntity->m_flagE2 )
 			{
-				pEntity->m_scanCode = CWorld::GetCurrentScanCode();
-
-				Bound = pEntity->GetBoundRect();
-
-				if ( fStartX < Bound.right
-					&& fEndX > Bound.left
-					&& fStartY < Bound.bottom
-					&& fEndY > Bound.top )
+				if ( IsAreaVisible(pEntity->m_area) )
 				{
-					if ( pPosn->z - fZDistance < pEntity->GetPosition().z + pEntity->GetColModel()->boundingBox.max.z
-						&& pEntity->GetPosition().z + pEntity->GetColModel()->boundingBox.min.z < pPosn->z )
+					Bound = pEntity->GetBoundRect();
+	
+					if ( fStartX < Bound.right
+						&& fEndX > Bound.left
+						&& fStartY < Bound.bottom
+						&& fEndY > Bound.top )
 					{
-						CastShadowEntity(pEntity,
-							fStartX, fStartY,
-							fEndX, fEndY,
-							pPosn,
-							fFrontX, fFrontY,
-							fSideX, fSideY,
-							nIntensity, nRed, nGreen, nBlue,
-							fZDistance, fScale, ppPolyBunch);
+						if ( pPosn->z - fZDistance < pEntity->GetPosition().z + pEntity->GetColModel()->boundingBox.max.z
+							&& pEntity->GetPosition().z + pEntity->GetColModel()->boundingBox.min.z < pPosn->z )
+						{
+							CastShadowEntityXY(pEntity,
+								fStartX, fStartY,
+								fEndX, fEndY,
+								pPosn,
+								fFrontX, fFrontY,
+								fSideX, fSideY,
+								nIntensity, nRed, nGreen, nBlue,
+								fZDistance, fScale, ppPolyBunch);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+void
+CShadows::CastPlayerShadowSectorList(CPtrList &PtrList, float fStartX, float fStartY, float fEndX, float fEndY, CVector *pPosn,
+								float fFrontX, float fFrontY, float fSideX, float fSideY,
+								int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue,
+								float fZDistance, float fScale, CPolyBunch **ppPolyBunch)
+{
+	ASSERT(pPosn != NULL);
+
+	CPtrNode *pNode = PtrList.first;
+
+	CRect Bound;
+
+	while ( pNode != NULL )
+	{
+		CEntity *pEntity = (CEntity *)pNode->item;
+		uint16 nScanCode = pEntity->m_scanCode;
+		pNode = pNode->next;
+
+		ASSERT( pEntity != NULL );
+
+		if ( nScanCode != CWorld::GetCurrentScanCode() )
+		{
+			pEntity->m_scanCode = CWorld::GetCurrentScanCode();
+			
+			if ( pEntity->bUsesCollision )
+			{
+				if ( IsAreaVisible(pEntity->m_area) )
+				{
+					Bound = pEntity->GetBoundRect();
+	
+					if ( fStartX < Bound.right
+						&& fEndX > Bound.left
+						&& fStartY < Bound.bottom
+						&& fEndY > Bound.top )
+					{
+						if ( pPosn->z - fZDistance < pEntity->GetPosition().z + pEntity->GetColModel()->boundingBox.max.z
+							&& pEntity->GetPosition().z + pEntity->GetColModel()->boundingBox.min.z < pPosn->z )
+						{
+							CastShadowEntityXY(pEntity,
+								fStartX, fStartY,
+								fEndX, fEndY,
+								pPosn,
+								fFrontX, fFrontY,
+								fSideX, fSideY,
+								nIntensity, nRed, nGreen, nBlue,
+								fZDistance, fScale, ppPolyBunch);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+void
+CShadows::CastCutsceneShadowSectorList(CPtrList &PtrList, float fStartX, float fStartY, float fEndX, float fEndY, CVector *pPosn,
+								float fFrontX, float fFrontY, float fSideX, float fSideY,
+								int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue,
+								float fZDistance, float fScale, CPolyBunch **ppPolyBunch, CCutsceneShadow *pShadow)
+{
+	ASSERT(pPosn != NULL);
+	ASSERT(pShadow != NULL);
+	
+	CPtrNode *pNode = PtrList.first;
+
+	CRect Bound;
+
+	while ( pNode != NULL )
+	{
+		CEntity *pEntity = (CEntity *)pNode->item;
+		uint16 nScanCode = pEntity->m_scanCode;
+		pNode = pNode->next;
+
+		ASSERT( pEntity != NULL );
+
+		if ( nScanCode != CWorld::GetCurrentScanCode() )
+		{
+			pEntity->m_scanCode = CWorld::GetCurrentScanCode();
+			
+			if ( pEntity->bUsesCollision )
+			{
+				if ( IsAreaVisible(pEntity->m_area) )
+				{
+					Bound = pEntity->GetBoundRect();
+	
+					if ( fStartX < Bound.right
+						&& fEndX > Bound.left
+						&& fStartY < Bound.bottom
+						&& fEndY > Bound.top )
+					{
+						if ( pPosn->z - fZDistance < pEntity->GetPosition().z + pEntity->GetColModel()->boundingBox.max.z
+							&& pEntity->GetPosition().z + pEntity->GetColModel()->boundingBox.min.z < pPosn->z )
+						{
+							CastShadowEntityXYZ(pEntity, pPosn,
+								fFrontX, fFrontY,
+								fSideX, fSideY,
+								nIntensity, nRed, nGreen, nBlue,
+								fZDistance, fScale, ppPolyBunch, pShadow);
+						}
 					}
 				}
 			}
@@ -964,11 +1517,11 @@ CShadows::CastShadowSectorList(CPtrList &PtrList, float fStartX, float fStartY, 
 }
 
 void
-CShadows::CastShadowEntity(CEntity *pEntity,  float fStartX, float fStartY, float fEndX, float fEndY, CVector *pPosn,
+CShadows::CastShadowEntityXY(CEntity *pEntity,  float fStartX, float fStartY, float fEndX, float fEndY, CVector *pPosn,
 							float fFrontX, float fFrontY, float fSideX, float fSideY,
 							int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue,
 							float fZDistance, float fScale, CPolyBunch **ppPolyBunch)
-{	
+{
 	ASSERT(pEntity != NULL);
 	ASSERT(pPosn != NULL);
 
@@ -1483,6 +2036,216 @@ CShadows::CastShadowEntity(CEntity *pEntity,  float fStartX, float fStartY, floa
 	}
 }
 
+
+typedef struct _ProjectionParam
+{
+	RwV3d               at;     /* Camera at vector */
+	RwMatrix            invMatrix; /* Transforms to shadow camera space */
+	RwUInt8             shadowValue; /* Shadow opacity value */
+	RwBool              fade;   /* Shadow fades with distance */
+	RwUInt32            numIm3DBatch; /* Number of buffer flushes */
+	RwMatrix            entityMatrix;
+}
+ProjectionParam;
+
+RwV3d *ShadowRenderTriangleCB(RwV3d *points, RwV3d *normal, ProjectionParam *param)
+{
+	RwV3d vIn[3];
+	RwV3d vShad[3];
+	
+	RwV3dTransformPoints(&vIn[0], points, 3, &param->entityMatrix);
+	
+	/*
+	 *  Reject backfacing triangles
+	 *  This reject the triangles parallel to the light as well 
+	 */
+	if (RwV3dDotProduct(normal, &param->at) > 0.0f)
+	{
+		return points;
+	}
+	
+	RwV3dTransformPoints(&vShad[0], &vIn[0], 3, &param->invMatrix);
+	
+	/*
+	 *  Reject triangles behind the camera (z test). Note that any world 
+	 *  triangles lying in front of the camera but before the object may 
+	 *  have a shadow applied. To minimize such artefacts, this test could 
+	 *  be modified to use a specific value rather than 0.0f, perhaps
+	 *  to reject triangles behind the center plane of the object.
+	 *
+	 *  Reject triangles that lie entirely outside the shadow texture range
+	 *  (x,y test).
+	 */
+	if (((vShad[0].z < 0.0f) && (vShad[1].z < 0.0f)
+		&& (vShad[2].z < 0.0f)) || ((vShad[0].x < 0.0f)
+									&& (vShad[1].x < 0.0f)
+									&& (vShad[2].x < 0.0f))
+		|| ((vShad[0].x > 1.0f) && (vShad[1].x > 1.0f)
+			&& (vShad[2].x > 1.0f)) || ((vShad[0].y < 0.0f)
+										&& (vShad[1].y < 0.0f)
+										&& (vShad[2].y < 0.0f))
+		|| ((vShad[0].y > 1.0f) && (vShad[1].y > 1.0f)
+			&& (vShad[2].y > 1.0f)))
+	{
+		return points;
+	}
+	
+	RwIm3DVertex *imv = NULL;
+	RwImVertexIndex *imi = NULL;
+	
+	RenderBuffer::StartStoring(3, 3, &imi, &imv);
+	
+	/*
+	 *  Set the immediate mode vertices for this triangle
+	 */
+	
+	RwIm3DVertexSetPos(imv, vIn[0].x, vIn[0].y, vIn[0].z);
+	RwIm3DVertexSetPos(imv + 1, vIn[1].x, vIn[1].y, vIn[1].z);
+	RwIm3DVertexSetPos(imv + 2, vIn[2].x, vIn[2].y, vIn[2].z);
+	
+	RwIm3DVertexSetU(imv, vShad[0].x);
+	RwIm3DVertexSetU(imv + 1, vShad[1].x);
+	RwIm3DVertexSetU(imv + 2, vShad[2].x);
+	
+	RwIm3DVertexSetV(imv, vShad[0].y);
+	RwIm3DVertexSetV(imv + 1, vShad[1].y);
+	RwIm3DVertexSetV(imv + 2, vShad[2].y);
+	
+	/*
+	 *  Do we fade out the shadow with distance?
+	 */
+	if (param->fade)
+	{
+		RwReal              fadeVal;
+		RwUInt8             val;
+		
+		fadeVal = 1.0f - vShad[0].z * vShad[0].z;
+		val =
+			(fadeVal <
+			0.0f) ? 0 : (RwUInt8) (fadeVal * param->shadowValue);
+		RwIm3DVertexSetRGBA(imv, val, val, val, val);
+		
+		fadeVal = 1.0f - vShad[1].z * vShad[1].z;
+		val =
+			(fadeVal <
+			0.0f) ? 0 : (RwUInt8) (fadeVal * param->shadowValue);
+		RwIm3DVertexSetRGBA(imv + 1, val, val, val, val);
+		
+		fadeVal = 1.0f - vShad[2].z * vShad[2].z;
+		val =
+			(fadeVal <
+			0.0f) ? 0 : (RwUInt8) (fadeVal * param->shadowValue);
+		RwIm3DVertexSetRGBA(imv + 2, val, val, val, val);
+	}
+	else
+	{
+		RwUInt8             val = param->shadowValue;
+		
+		RwIm3DVertexSetRGBA(imv, val, val, val, val);
+		RwIm3DVertexSetRGBA(imv + 1, val, val, val, val);
+		RwIm3DVertexSetRGBA(imv + 2, val, val, val, val);
+	}
+
+	/*
+	 *  Update buffer position 
+	 */
+	imi[0] = 0;
+	imi[1] = 1;
+	imi[2] = 2;
+	
+	RenderBuffer::StopStoring();
+	
+	return points;
+}
+
+void
+CShadows::CastShadowEntityXYZ(CEntity *pEntity, CVector *pPosn,
+								float fFrontX, float fFrontY, float fSideX, float fSideY,
+								int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue,
+								float fZDistance, float fScale, CPolyBunch **ppPolyBunch, CCutsceneShadow *pShadow)
+{
+	ASSERT(pEntity != NULL);
+	ASSERT(pPosn != NULL);
+	
+	if ( pShadow )
+	{
+		ProjectionParam proj;
+		RwV3d scl;
+		RwV3d tr;
+		
+		CShadowCamera *shadow = pShadow->GetShadowCamera();
+		CColModel *collision  = pEntity->GetColModel();
+		
+		CCollision::CalculateTrianglePlanes(collision);
+		
+		RwMatrix mat;
+		mat = *RwFrameGetMatrix(RwCameraGetFrame(shadow->GetRwCamera()));
+		
+		RwV3d        Xaxis = { 1.0f, 0.0f, 0.0f };
+
+		RwMatrixRotate(&mat, &Xaxis, -45.0f, rwCOMBINEPRECONCAT);
+		
+		proj.at = mat.at;
+		pEntity->GetMatrix().CopyToRwMatrix(&proj.entityMatrix);
+
+		RwMatrixInvert(&proj.invMatrix, &mat);		
+		RwReal radius = RwCameraGetViewWindow(shadow->GetRwCamera())->x;
+		
+		scl.x = scl.y = -0.5f / (radius*0.9f);
+		scl.z = 1.0f / (radius*0.8f);
+		RwMatrixScale(&proj.invMatrix, &scl, rwCOMBINEPOSTCONCAT);
+		
+		tr.x = tr.y = 0.5f;
+		tr.z = 0.0f;
+		RwMatrixTranslate(&proj.invMatrix, &tr, rwCOMBINEPOSTCONCAT);
+		
+		proj.shadowValue = nIntensity;
+		proj.numIm3DBatch = 0;
+		
+		RwMatrix matrix;
+		pEntity->GetMatrix().CopyToRwMatrix(&matrix);
+		RwMatrix invMatrix;
+		RwMatrixInvert(&invMatrix, &matrix);
+		
+
+		CVector center(pShadow->GetBaseSphere().center);
+		center += CVector(-fFrontX * 1.1f, -fFrontY * 1.1f, -0.5f);
+		
+		CSphere sphere;
+		sphere.Set(2.0f, center);
+
+		RwV3d point;
+		RwV3dTransformPoints(&point, center, 1, &invMatrix);
+		
+		CColSphere colSphere;
+		colSphere.Set(2.0f, CVector(point), 0, 0);
+		
+		int i = 0;
+		while ( i < collision->numTriangles )
+        {
+			CVector p[3];
+
+			collision->GetTrianglePoint(p[0], collision->triangles[i].a);
+			collision->GetTrianglePoint(p[1], collision->triangles[i].b);
+			collision->GetTrianglePoint(p[2], collision->triangles[i].c);
+			
+			if ( CCollision::TestSphereTriangle(colSphere, collision->vertices, collision->triangles[i], collision->trianglePlanes[i]) )
+			{
+				CVector n(collision->trianglePlanes[i].GetNormalX(), collision->trianglePlanes[i].GetNormalY(), collision->trianglePlanes[i].GetNormalZ());
+				CVector offset = n * 0.028f;
+				
+				p[0] += offset;
+				p[1] += offset;
+				p[2] += offset;
+
+				if ( !ShadowRenderTriangleCB((RwV3d *)p, n, &proj) )
+					break;
+			}
+			i++;
+		}
+	}
+}
+
 void
 CShadows::UpdateStaticShadows(void)
 {
@@ -1511,13 +2274,14 @@ CShadows::UpdatePermanentShadows(void)
 				aPermanentShadows[i].m_nType = SHADOWTYPE_NONE;
 			else
 			{
+				bool bOk;
 				if ( timePassed >= (aPermanentShadows[i].m_nLifeTime * 3 / 4) )
 				{
 					// timePassed == 0                                -> 4
 					// timePassed == aPermanentShadows[i].m_nLifeTime -> 0
 					float fMult = 1.0f - float(timePassed - (aPermanentShadows[i].m_nLifeTime * 3 / 4)) / (aPermanentShadows[i].m_nLifeTime / 4);
 
-					StoreStaticShadow((uintptr)&aPermanentShadows[i],
+					bOk = StoreStaticShadow((uintptr)&aPermanentShadows[i],
 						aPermanentShadows[i].m_nType,
 						aPermanentShadows[i].m_pTexture,
 						&aPermanentShadows[i].m_vecPos,
@@ -1534,7 +2298,7 @@ CShadows::UpdatePermanentShadows(void)
 				}
 				else
 				{
-					StoreStaticShadow((uintptr)&aPermanentShadows[i],
+					bOk = StoreStaticShadow((uintptr)&aPermanentShadows[i],
 						aPermanentShadows[i].m_nType,
 						aPermanentShadows[i].m_pTexture,
 						&aPermanentShadows[i].m_vecPos,
@@ -1549,6 +2313,9 @@ CShadows::UpdatePermanentShadows(void)
 						aPermanentShadows[i].m_fZDistance,
 						1.0f, 40.0f, false, 0.0f);
 				}
+				
+				if ( !bOk )
+					aPermanentShadows[i].m_nType = SHADOWTYPE_NONE;
 			}
 		}
 	}
@@ -1612,6 +2379,7 @@ CShadows::CalcPedShadowValues(CVector vecLightDir,
 	*pfSideY /= 2;
 }
 
+
 void
 CShadows::RenderExtraPlayerShadows(void)
 {
@@ -1622,64 +2390,13 @@ CShadows::RenderExtraPlayerShadows(void)
 	if ( CTimeCycle::GetLightShadowStrength() != 0 )
 	{
 		CVehicle *pCar = FindPlayerVehicle();
-
 		if ( pCar == NULL )
-		{
-			for ( int32 i = 0; i < CPointLights::NumLights; i++ )
-			{
-				if (   0.0f != CPointLights::aLights[i].red
-					|| 0.0f != CPointLights::aLights[i].green
-					|| 0.0f != CPointLights::aLights[i].blue )
-				{
-					if ( CPointLights::aLights[i].castExtraShadows )
-					{
-						CVector vecLight = CPointLights::aLights[i].coors - FindPlayerCoors();
-						float fLightDist = vecLight.Magnitude();
-						float fRadius = CPointLights::aLights[i].radius;
-
-						if ( fLightDist < fRadius )
-						{
-							// fLightDist == fRadius -> 2.0f
-							// fLightDist == 0       -> 0.0f
-							float fMult = (1.0f - (2.0f * fLightDist - fRadius) / fRadius);
-
-							int32 nColorStrength;
-							if ( fLightDist < fRadius*0.5f )
-								nColorStrength = (5*CTimeCycle::GetLightShadowStrength()/8);
-							else
-								nColorStrength = int32((5*CTimeCycle::GetLightShadowStrength()/8) * fMult);
-
-							float fInv = 1.0f / fLightDist;
-							vecLight.x *= fInv;
-							vecLight.y *= fInv;
-							vecLight.z *= fInv;
-
-							float fDisplacementX, fDisplacementY, fFrontX, fFrontY, fSideX, fSideY;
-
-							CalcPedShadowValues(vecLight,
-														&fDisplacementX, &fDisplacementY,
-														&fFrontX, &fFrontY,
-														&fSideX, &fSideY);
-
-							CVector shadowPos = FindPlayerCoors();
-
-							shadowPos.x += fSideX;
-							shadowPos.y += fSideY;
-
-
-							StoreShadowToBeRendered(SHADOWTYPE_DARK, gpShadowPedTex, &shadowPos,
-									fDisplacementX, fDisplacementY,
-									fFrontX, fFrontY,
-									nColorStrength, 0, 0, 0,
-									4.0f, false, 1.0f);
-						}
-					}
-				}
-			}
-		}
+			; // R* cut it out for playerped
 		else
 		{
-			if ( pCar->GetModelIndex() != MI_RCBANDIT )
+			if ( pCar->GetModelIndex() != MI_RCBANDIT 
+				&& pCar->GetVehicleAppearance() != VEHICLE_APPEARANCE_BIKE
+				&& !pCar->IsBike() && !pCar->IsPlane() && !pCar->IsBoat() )
 			{
 				for ( int32 i = 0; i < CPointLights::NumLights; i++ )
 				{
@@ -1732,7 +2449,7 @@ CShadows::RenderExtraPlayerShadows(void)
 									pCar->GetRight().x   * (fVehicleWidth/3),
 									pCar->GetRight().y   * (fVehicleWidth/3),
 									nColorStrength, 0, 0, 0,
-									4.5f, false, 1.0f);
+									4.5f, false, 1.0f, NULL, false);
 							}
 							else
 							{
@@ -1742,7 +2459,7 @@ CShadows::RenderExtraPlayerShadows(void)
 									-pCar->GetRight().x  * (fVehicleWidth/2),
 									-pCar->GetRight().y  * (fVehicleWidth/2),
 									nColorStrength, 0, 0, 0,
-									4.5f, false, 1.0f);
+									4.5f, false, 1.0f, NULL, false);
 							}
 						}
 					}
@@ -1766,7 +2483,7 @@ CShadows::RenderIndicatorShadow(uint32 nID, uint8 ShadowType, RwTexture *pTextur
 {
 	ASSERT(pPosn != NULL);
 
-	C3dMarkers::PlaceMarkerSet(nID, _TODOCONST(4), *pPosn, Max(fFrontX, -fSideY),
+	C3dMarkers::PlaceMarkerSet(nID, MARKERTYPE_CYLINDER, *pPosn, Max(fFrontX, -fSideY),
 		SPHERE_MARKER_R, SPHERE_MARKER_G, SPHERE_MARKER_B,
 		SPHERE_MARKER_A, SPHERE_MARKER_PULSE_PERIOD, 0.2f, 0);
 }

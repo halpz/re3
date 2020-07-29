@@ -63,6 +63,7 @@
 #include "Debug.h"
 #include "GameLogic.h"
 #include "Bike.h"
+#include "CutsceneShadow.h"
 
 #define CAN_SEE_ENTITY_ANGLE_THRESHOLD	DEGTORAD(60.0f)
 
@@ -146,6 +147,9 @@ void CPed::operator delete(void *p, int handle) { CPools::GetPedPool()->Delete((
 // --MIAMI: Done
 CPed::~CPed(void)
 {
+#if 1
+	if ( m_pRTShadow ) delete m_pRTShadow;
+#endif
 	CWorld::Remove(this);
 	if (m_attractor)
 		GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
@@ -203,6 +207,9 @@ CPed::FlagToDestroyWhenNextProcessed(void)
 
 CPed::CPed(uint32 pedType) : m_pedIK(this)
 {
+#if 1
+	m_pRTShadow = NULL;
+#endif
 	m_type = ENTITY_TYPE_PED;
 	bPedPhysics = true;
 	bUseCollisionRecords = true;
@@ -2671,6 +2678,13 @@ CPed::SetModelIndex(uint32 mi)
 
 	if (IsClumpSkinned(GetClump())) // condition isn't there in VC
 		UpdateRpHAnim();
+#endif
+#if 1
+	if (!m_pRTShadow)
+	{
+		m_pRTShadow = new CCutsceneShadow;
+		m_pRTShadow->Create(m_rwObject, 10, 1, 1, 1);
+	}
 #endif
 }
 
