@@ -35,9 +35,9 @@ RwReal RwV3dLength(const RwV3d * in) { return length(*in); }
 //void RwV3dAssign(RwV3d * out, const RwV3d * ina);
 void RwV3dAdd(RwV3d * out, const RwV3d * ina, const RwV3d * inb) { *out = add(*ina, *inb); }
 void RwV3dSub(RwV3d * out, const RwV3d * ina, const RwV3d * inb) { *out = sub(*ina, *inb); }
-//void RwV3dScale(RwV3d * out, const RwV3d * in, RwReal scalar);
-//void RwV3dIncrementScaled(RwV3d * out,  const RwV3d * in, RwReal scalar);
-//void RwV3dNegate(RwV3d * out, const RwV3d * in);
+void RwV3dScale(RwV3d * out, const RwV3d * in, RwReal scalar) { *out = scale(*in, scalar); }
+void RwV3dIncrementScaled(RwV3d * out,  const RwV3d * in, RwReal scalar) { *out = add(*out, scale(*in, scalar)); }
+void RwV3dNegate(RwV3d * out, const RwV3d * in) { *out = neg(*in); }
 RwReal RwV3dDotProduct(const RwV3d * ina, const RwV3d * inb) { return dot(*ina, *inb); }
 //void RwV3dCrossProduct(RwV3d * out, const RwV3d * ina, const RwV3d * inb);
 RwV3d *RwV3dTransformPoints(RwV3d * pointsOut, const RwV3d * pointsIn, RwInt32 numPoints, const RwMatrix * matrix)
@@ -83,7 +83,8 @@ RwFrame *RwFrameTranslate(RwFrame * frame, const RwV3d * v, RwOpCombineType comb
 RwFrame *RwFrameRotate(RwFrame * frame, const RwV3d * axis, RwReal angle, RwOpCombineType combine) { frame->rotate(axis, angle, (CombineOp)combine); return frame; }
 RwFrame *RwFrameScale(RwFrame * frame, const RwV3d * v, RwOpCombineType combine) { frame->scale(v, (CombineOp)combine); return frame; }
 RwFrame *RwFrameTransform(RwFrame * frame, const RwMatrix * m, RwOpCombineType combine) { frame->transform(m, (CombineOp)combine); return frame; }
-//RwFrame *RwFrameOrthoNormalize(RwFrame * frame);
+//TODO: actually implement this!
+RwFrame *RwFrameOrthoNormalize(RwFrame * frame) { return frame; }
 RwFrame *RwFrameSetIdentity(RwFrame * frame) { frame->matrix.setIdentity(); frame->updateObjects(); return frame; }
 //RwFrame *RwFrameCloneHierarchy(RwFrame * root);
 //RwBool RwFrameDestroyHierarchy(RwFrame * frame);
@@ -136,7 +137,7 @@ RwCamera    *RwCameraCreate(void) { return rw::Camera::create(); }
 RwCamera    *RwCameraClone(RwCamera * camera) { return camera->clone(); }
 RwCamera    *RwCameraSetViewOffset(RwCamera *camera, const RwV2d *offset) { camera->setViewOffset(offset); return camera; }
 RwCamera    *RwCameraSetViewWindow(RwCamera *camera, const RwV2d *viewWindow) { camera->setViewWindow(viewWindow); return camera; }
-RwCamera    *RwCameraSetProjection(RwCamera *camera, RwCameraProjection projection);
+RwCamera    *RwCameraSetProjection(RwCamera *camera, RwCameraProjection projection) { camera->projection = projection; return camera; }
 RwCamera    *RwCameraSetNearClipPlane(RwCamera *camera, RwReal nearClip) { camera->setNearPlane(nearClip); return camera; }
 RwCamera    *RwCameraSetFarClipPlane(RwCamera *camera, RwReal farClip) { camera->setFarPlane(farClip); return camera; }
 RwInt32      RwCameraRegisterPlugin(RwInt32 size, RwUInt32 pluginID, RwPluginObjectConstructor constructCB, RwPluginObjectDestructor destructCB, RwPluginObjectCopy copyCB);
