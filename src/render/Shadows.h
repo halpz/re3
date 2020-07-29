@@ -186,7 +186,7 @@ public:
 								
 	static void UpdateStaticShadows            (void);
 	static void UpdatePermanentShadows         (void);
-	static void CalcPedShadowValues            (CVector vecLightDir, float *pfDisplacementX, float *pfDisplacementY, float *pfFrontX, float *pfFrontY, float *pfSideX, float *pfSideY);
+	static void CalcPedShadowValues            (CVector vecLightDir, float *pfFrontX, float *pfFrontY, float *pfSideX, float *pfSideY, float *pfDisplacementX, float *pfDisplacementY);
 	static void RenderExtraPlayerShadows       (void);
 	static void TidyUpShadows                  (void);
 	static void RenderIndicatorShadow          (uint32 nID, uint8 ShadowType, RwTexture *pTexture,  CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, int16 nIntensity);

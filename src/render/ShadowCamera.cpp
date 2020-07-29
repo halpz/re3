@@ -144,12 +144,10 @@ CShadowCamera::SetLight(RpLight *light)
 	RwMatrix *lightMatrix = RwFrameGetMatrix(lightFrame);
 
 	*RwMatrixGetRight(camMatrix) = *RwMatrixGetRight(lightMatrix);
-	*RwMatrixGetUp(camMatrix) = *RwMatrixGetUp(lightMatrix);
-	*RwMatrixGetAt(camMatrix) = *RwMatrixGetAt(lightMatrix);
+	*RwMatrixGetUp(camMatrix)    = *RwMatrixGetUp(lightMatrix);
+	*RwMatrixGetAt(camMatrix)    = *RwMatrixGetAt(lightMatrix);
 	
-	//RwMatrixCopy(RwFrameGetMatrix(camFrame), RwFrameGetMatrix(lightFrame));
-
-	RwMatrixUpdate(RwFrameGetMatrix(camFrame));
+	RwMatrixUpdate(camMatrix);
 	RwFrameUpdateObjects(camFrame);
 
 	return m_pCamera;

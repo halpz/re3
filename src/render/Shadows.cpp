@@ -768,24 +768,6 @@ CShadows::StoreCarLightShadow(CAutomobile *pCar, int32 nID, RwTexture *pTexture,
 	}
 }
 
-void
-CShadows::StoreShadowForPed(CPed *pPed, float fDisplacementX, float fDisplacementY,
-							float fFrontX, float fFrontY, float fSideX, float fSideY)
-{
-	ASSERT(pPed != NULL);
-
-	if ( pPed->bIsVisible )
-	{
-		if ( !(pPed->bInVehicle && pPed->m_nPedState != PED_DRAG_FROM_CAR && pPed->m_nPedState != PED_EXIT_CAR) )
-		{
-			if ( CTimeCycle::GetShadowStrength() != 0 )
-				StoreShadowForPedObject(pPed,
-					fDisplacementX, fDisplacementY,
-					fFrontX, fFrontY,
-					fSideX, fSideY);
-		}
-	}
-}
 
 #if 1
 void
@@ -835,8 +817,8 @@ StoreShadowForCutscenePedObject(CPed *pObject, float fDisplacementX, float fDisp
 			pos.x -= fDisplacementX;
 			pos.y -= fDisplacementY;
 			
-			float angleY = 360.0f - RADTODEG((CClock::ms_nGameClockMinutes+60*
-					CClock::ms_nGameClockHours+CClock::ms_nGameClockSeconds/60)*(HALFPI/360.0f));
+			float angleY = 360.0f - RADTODEG((CClock::ms_nGameClockMinutes
+					+60*CClock::ms_nGameClockHours+CClock::ms_nGameClockSeconds/60)*(HALFPI/360.0f));
 			 
 			RwFrame *frame = shadow->SetLightProperties(angleY, -85.0f, true);
 			ASSERT(frame);
@@ -858,23 +840,45 @@ StoreShadowForCutscenePedObject(CPed *pObject, float fDisplacementX, float fDisp
 }
 #endif
 
+
+void
+CShadows::StoreShadowForPed(CPed *pPed, float fDisplacementX, float fDisplacementY,
+							float fFrontX, float fFrontY, float fSideX, float fSideY)
+{
+	ASSERT(pPed != NULL);
+
+	if ( pPed->bIsVisible )
+	{
+		if ( !(pPed->bInVehicle && pPed->m_nPedState != PED_DRAG_FROM_CAR && pPed->m_nPedState != PED_EXIT_CAR) )
+		{
+			if ( CTimeCycle::GetShadowStrength() != 0 )
+			{
+				#if 1
+					CCutsceneShadow *pShadow = pPed->m_pRTShadow;
+				
+					if (pShadow)
+					{
+						if (pShadow->IsInitialized())
+							pShadow->UpdateForCutscene();
+						::StoreShadowForCutscenePedObject(pPed, fDisplacementX, fDisplacementY, fFrontX, fFrontY, fSideX, fSideY);
+					}
+					
+					return;
+				#endif
+
+				StoreShadowForPedObject(pPed,
+					fDisplacementX, fDisplacementY,
+					fFrontX, fFrontY,
+					fSideX, fSideY);
+			}
+		}
+	}
+}
+
 void
 CShadows::StoreShadowForPedObject(CEntity *pPedObject, float fDisplacementX, float fDisplacementY,
 								float fFrontX, float fFrontY, float fSideX, float fSideY)
-{
-#if 1
-	CPed *ped = (CPed*)pPedObject;
-	CCutsceneShadow *pShadow = ped->m_pRTShadow;
-
-	if (pShadow)
-	{
-		if (pShadow->IsInitialized())
-			pShadow->UpdateForCutscene();
-		::StoreShadowForCutscenePedObject(ped, fDisplacementX, fDisplacementY, fFrontX, fFrontY, fSideX, fSideY);
-		return;
-	}
-#endif
-	
+{	
 	ASSERT(pPedObject != NULL);
 
 	CVector PedPos = pPedObject->GetPosition();
@@ -2195,12 +2199,12 @@ CShadows::CastShadowEntityXYZ(CEntity *pEntity, CVector *pPosn,
 		scl.z = 1.0f / (radius*0.8f);
 		RwMatrixScale(&proj.invMatrix, &scl, rwCOMBINEPOSTCONCAT);
 		
-		tr.x = tr.y = 0.5f;
-		tr.z = 0.0f;
+		tr.x = 0.5f;
+		tr.y = tr.z = 0.0f;
 		RwMatrixTranslate(&proj.invMatrix, &tr, rwCOMBINEPOSTCONCAT);
 		
 		proj.shadowValue = nIntensity;
-		proj.numIm3DBatch = 0;
+		proj.fade = 0;
 		
 		RwMatrix matrix;
 		pEntity->GetMatrix().CopyToRwMatrix(&matrix);
@@ -2343,40 +2347,41 @@ CStaticShadow::Free(void)
 
 void
 CShadows::CalcPedShadowValues(CVector vecLightDir,
-							float *pfDisplacementX, float *pfDisplacementY,
 							float *pfFrontX, float *pfFrontY,
-							float *pfSideX, float *pfSideY)
+							float *pfSideX, float *pfSideY,
+							float *pfDisplacementX, float *pfDisplacementY)
 {
-	ASSERT(pfDisplacementX != NULL);
-	ASSERT(pfDisplacementY != NULL);
 	ASSERT(pfFrontX != NULL);
 	ASSERT(pfFrontY != NULL);
 	ASSERT(pfSideX != NULL);
 	ASSERT(pfSideY != NULL);
+	ASSERT(pfDisplacementX != NULL);
+	ASSERT(pfDisplacementY != NULL);
+
+	*pfFrontX = -vecLightDir.x;
+	*pfFrontY = -vecLightDir.y;
+
+	float fDist = Sqrt(*pfFrontY * *pfFrontY + *pfFrontX * *pfFrontX);
+	float fMult = (fDist + 1.0f) / fDist;
+
+	*pfFrontX *= fMult;
+	*pfFrontY *= fMult;
+
+	*pfSideX = -vecLightDir.y / fDist;
+	*pfSideY =  vecLightDir.x / fDist;
 
 	*pfDisplacementX = -vecLightDir.x;
 	*pfDisplacementY = -vecLightDir.y;
-
-	float fDist = Sqrt(*pfDisplacementY * *pfDisplacementY + *pfDisplacementX * *pfDisplacementX);
-	float fMult = (fDist + 1.0f) / fDist;
-
-	*pfDisplacementX *= fMult;
-	*pfDisplacementY *= fMult;
-
-	*pfFrontX = -vecLightDir.y / fDist;
-	*pfFrontY =  vecLightDir.x / fDist;
-
-	*pfSideX = -vecLightDir.x;
-	*pfSideY = -vecLightDir.y;
-
-	*pfDisplacementX /= 2;
-	*pfDisplacementY /= 2;
 
 	*pfFrontX /= 2;
 	*pfFrontY /= 2;
 
 	*pfSideX /= 2;
 	*pfSideY /= 2;
+
+	*pfDisplacementX /= 2;
+	*pfDisplacementY /= 2;
+	
 }
 
 

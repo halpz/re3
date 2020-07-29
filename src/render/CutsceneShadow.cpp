@@ -26,6 +26,8 @@ CCutsceneShadow::~CCutsceneShadow()
 bool
 CCutsceneShadow::Create(RwObject *object, int32 rasterSize, bool resample, int32 blurPasses, bool gradient)
 {
+	ASSERT(object != NULL);
+	
 	RwRGBAReal color;
 	RwFrame *frame;
 
@@ -33,6 +35,7 @@ CCutsceneShadow::Create(RwObject *object, int32 rasterSize, bool resample, int32
 		return false;
 
 	m_pLight = RpLightCreate(rpLIGHTDIRECTIONAL);
+	ASSERT(m_pLight != NULL);
 	
 	if (!m_pLight)
 		return false;
@@ -43,6 +46,8 @@ CCutsceneShadow::Create(RwObject *object, int32 rasterSize, bool resample, int32
 	RpLightSetColor(m_pLight, &color);
 	
 	frame = RwFrameCreate();
+	ASSERT(frame != NULL);
+	
 	RpLightSetFrame(m_pLight, frame);
 	
 	SetLightProperties(180.0f, 90.0f, false);
@@ -132,11 +137,15 @@ CCutsceneShadow::Create(RwObject *object, int32 rasterSize, bool resample, int32
 RwFrame *
 CCutsceneShadow::SetLightProperties(float angleY, float angleX, bool setLight)
 {
+	ASSERT(m_pLight != NULL);
+	
 	RwFrame *frame;
 	static RwV3d        Xaxis = { 1.0f, 0.0f, 0.0f };
 	static RwV3d        Yaxis = { 0.0f, 1.0f, 0.0f };
 
 	frame = RpLightGetFrame(m_pLight);
+	ASSERT(frame != NULL);
+	
 	if ( !frame )
 		return NULL;
 	
@@ -183,10 +192,12 @@ CCutsceneShadow::Update()
 	switch ( m_nRwObjectType )
 	{
 		case rpCLUMP:
+			ASSERT(m_pClump != NULL);
 			RwV3dTransformPoints(&m_BaseSphere.center, &m_BoundingSphere.center, 1, RwFrameGetMatrix(RpClumpGetFrame(m_pClump)));
 			break;
 
 		case rpATOMIC:
+			ASSERT(m_pAtomic != NULL);
 			RwV3dTransformPoints(&m_BaseSphere.center, &m_BoundingSphere.center, 1, RwFrameGetMatrix(RpAtomicGetFrame(m_pAtomic)));
 			break;
 	}
@@ -205,6 +216,7 @@ CCutsceneShadow::Update()
 	}
 	
 	RwRaster *raster = m_Camera.GetRwRenderRaster();
+	ASSERT(raster != NULL);
 
 	if ( m_bResample )
 		return m_ResampleCamera.RasterResample(raster);
@@ -230,22 +242,12 @@ CCutsceneShadow::GetShadowCamera(int32 camType)
 {
 	switch ( camType )
 	{
-		case RESAMPLE:
-			return &m_ResampleCamera;
-			break;
-    
-		case BLUR:
-			return &m_BlurCamera;
-			break;
-			
-		case GRADIENT:
-			return &m_GradientCamera;
-			break;
-		
-		default:
-			return &m_Camera;
-			break;
+		case RESAMPLE: return &m_ResampleCamera; break;
+		case BLUR:     return &m_BlurCamera;     break;
+		case GRADIENT: return &m_GradientCamera; break;
 	}
+	
+	return &m_Camera;
 }
 
 RwTexture *
