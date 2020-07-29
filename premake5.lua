@@ -211,10 +211,11 @@ project "re3"
 		includedirs { "opusfile/include" }
 	end
 
-		libdirs { "milessdk/lib" }
-	libdirs { "openal-soft/libs/Win32" }
-	libdirs { "mpg123/lib" }
-	libdirs { "libsndfile/lib" }
+	filter "platforms:*mss"
+		defines { "AUDIO_MSS" }
+		includedirs { "milessdk/include" }
+		libdirs { "sdk/milessdk/lib" }
+	
 	if _OPTIONS["with-opus"] then
 		filter "platforms:win*"
 			libdirs { "ogg/win32/VS2015/Win32/%{cfg.buildcfg}" }
