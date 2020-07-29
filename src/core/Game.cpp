@@ -153,9 +153,9 @@ CGame::InitialiseOnceBeforeRW(void)
 #ifdef PS2_MATFX
 void ReplaceMatFxCallback();
 #endif // PS2_MATFX
-#ifdef DUAL_PASS_RENDERING
+#ifdef PS2_ALPHA_TEST
 void ReplaceAtomicPipeCallback();
-#endif // DUAL_PASS_RENDERING
+#endif // PS2_ALPHA_TEST
 #endif // !LIBRW
 
 bool
@@ -212,9 +212,9 @@ CGame::InitialiseRenderWare(void)
 #ifdef PS2_MATFX
 	ReplaceMatFxCallback();
 #endif // PS2_MATFX
-#ifdef DUAL_PASS_RENDERING
+#ifdef PS2_ALPHA_TEST
 	ReplaceAtomicPipeCallback();
-#endif // DUAL_PASS_RENDERING
+#endif // PS2_ALPHA_TEST
 #endif // LIBRW
 	
 	CFont::Initialise();

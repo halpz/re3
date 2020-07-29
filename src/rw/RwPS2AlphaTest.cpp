@@ -2,7 +2,7 @@
 
 #define WITHD3D
 #include "common.h"
-#ifdef DUAL_PASS_RENDERING
+#ifdef PS2_ALPHA_TEST
 #include "rwcore.h"
 
 extern "C" {
@@ -242,6 +242,6 @@ ReplaceAtomicPipeCallback()
 	                                _rxD3D8DualPassRenderCallback);
 }
 
-#endif // DUAL_PASS_RENDERING
+#endif // PS2_ALPHA_TEST
 
 #endif // !LIBRW
