@@ -1308,34 +1308,6 @@ InitApplication(HANDLE instance)
 /*
  *****************************************************************************
  */
-static BOOL
-InitApplication(HANDLE instance)
-{
-	/*
-	 * Perform any necessary MS Windows application initialization. Basically,
-	 * this means registering the window class for this application.
-	 */
-
-	WNDCLASS windowClass;
-
-	windowClass.style = CS_BYTEALIGNWINDOW;
-	windowClass.lpfnWndProc = (WNDPROC)MainWndProc;
-	windowClass.cbClsExtra = 0;
-	windowClass.cbWndExtra = 0;
-	windowClass.hInstance = (HINSTANCE)instance;
-	windowClass.hIcon = nil;
-	windowClass.hCursor = LoadCursor(nil, IDC_ARROW);
-	windowClass.hbrBackground = nil;
-	windowClass.lpszMenuName = NULL;
-	windowClass.lpszClassName = AppClassName;
-
-	return RegisterClass(&windowClass);
-}
-
-
-/*
- *****************************************************************************
- */
 
 RwBool IsForegroundApp()
 {

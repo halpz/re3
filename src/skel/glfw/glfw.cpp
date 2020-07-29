@@ -1371,11 +1371,6 @@ cursorEnterCB(GLFWwindow* window, int entered) {
 	PSGLOBAL(cursorIsInWindow) = !!entered;
 }
 
-void
-cursorEnterCB(GLFWwindow* window, int entered) {
-	PSGLOBAL(cursorIsInWindow) = !!entered;
-}
-
 /*
  *****************************************************************************
  */
