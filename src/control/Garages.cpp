@@ -137,6 +137,9 @@ void CGarages::Init(void)
 	MessageStartTime = 0;
 	PlayerInGarage = false;
 	BombsAreFree = false;
+#ifdef FIX_BUGS
+	RespraysAreFree = false;
+#endif
 	CarsCollected = 0;
 	BankVansCollected = 0;
 	PoliceCarsCollected = 0;
@@ -347,7 +350,7 @@ void CGarage::Update()
 						FindPlayerPed()->m_pWanted->m_bIgnoredByCops = true;
 					}
 					else {
-						CGarages::TriggerMessage("GA_3", -1, 4000, -1); // No more freebies. $1000 to respray!
+						CGarages::TriggerMessage("GA_3", -1, 4000, -1); // No more freebies. $100 to respray!
 						m_eGarageState = GS_OPENEDCONTAINSCAR;
 						DMAudio.PlayFrontEndSound(SOUND_GARAGE_NO_MONEY, 1);
 					}
@@ -400,7 +403,7 @@ void CGarage::Update()
 					FindPlayerPed()->m_pWanted->Suspend();
 				}
 				CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_GARAGE);
-				FindPlayerPed()->m_pWanted->m_bIgnoredByCops = true;
+				FindPlayerPed()->m_pWanted->m_bIgnoredByCops = false;
 #ifdef FIX_BUGS
 				bool bChangedColour = false;
 #else
@@ -1096,7 +1099,7 @@ bool CGarage::IsStaticPlayerCarEntirelyInside()
 {
 	if (!FindPlayerVehicle())
 		return false;
-	if (!FindPlayerVehicle()->IsCar())
+	if (!FindPlayerVehicle()->IsCar() && !FindPlayerVehicle()->IsBike())
 		return false;
 	if (FindPlayerPed()->GetPedState() != PED_DRIVING)
 		return false;
@@ -1386,6 +1389,7 @@ bool CGarages::IsCarSprayable(CVehicle * pVehicle)
 	case MI_BARRACKS:
 	case MI_DODO:
 	case MI_COACH:
+	case MI_FBIRANCH:
 		return false;
 	default:
 		break;

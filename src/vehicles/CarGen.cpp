@@ -16,6 +16,7 @@
 #include "VisibilityPlugins.h"
 #include "World.h"
 #include "Zones.h"
+#include "Occlusion.h"
 
 uint8 CTheCarGenerators::ProcessCounter;
 uint32 CTheCarGenerators::NumOfCarGenerators;
@@ -31,7 +32,7 @@ void CCarGenerator::SwitchOff()
 
 void CCarGenerator::SwitchOn()
 {
-	m_nUsesRemaining = -1;
+	m_nUsesRemaining = 255;
 	m_nTimer = CalcNextGen();
 	++CTheCarGenerators::CurrentActiveCount;
 }
@@ -140,8 +141,14 @@ void CCarGenerator::DoInternalProcessing()
 	}
 	CVisibilityPlugins::SetClumpAlpha(pVehicle->GetClump(), 0);
 	m_nVehicleHandle = CPools::GetVehiclePool()->GetIndex(pVehicle);
-	if (m_nUsesRemaining < -1) /* I don't think this is a correct comparasion */
+	/* I don't think this is a correct comparasion */
+#ifdef FIX_BUGS
+	if (m_nUsesRemaining != 0) 
 		--m_nUsesRemaining;
+#else
+	if (m_nUsesRemaining < -1)
+		--m_nUsesRemaining;
+#endif
 	m_nTimer = CalcNextGen();
 	if (m_nUsesRemaining == 0)
 		--CTheCarGenerators::CurrentActiveCount;
@@ -151,7 +158,7 @@ void CCarGenerator::Process()
 {
 	if (m_nVehicleHandle == -1 && 
 		(CTheCarGenerators::GenerateEvenIfPlayerIsCloseCounter || CTimer::GetTimeInMilliseconds() >= m_nTimer) &&
-		m_nUsesRemaining != 0 && CheckIfWithinRangeOfAnyPlayer())
+		m_nUsesRemaining != 0 && CheckIfWithinRangeOfAnyPlayers())
 		DoInternalProcessing();
 	if (m_nVehicleHandle == -1)
 		return;
@@ -203,14 +210,14 @@ bool CCarGenerator::CheckForBlockage(int32 mi)
 	return false;
 }
 
-bool CCarGenerator::CheckIfWithinRangeOfAnyPlayer()
+bool CCarGenerator::CheckIfWithinRangeOfAnyPlayers()
 {
 	CVector2D direction = FindPlayerCentreOfWorld(CWorld::PlayerInFocus) - m_vecPos;
 	float distance = direction.Magnitude();
 	float farclip = 110.0f * TheCamera.GenerationDistMultiplier;
 	float nearclip = farclip - 20.0f;
 	bool canBeRemoved = (m_nModelIndex > 0 && CModelInfo::IsBoatModel(m_nModelIndex) && 165.0f * TheCamera.GenerationDistMultiplier > distance &&
-		TheCamera.IsSphereVisible(m_vecPos, 0.0f)); // TODO(MIAMI) COcclision::IsPositionOccluded(m_vecPos, 0.0f)
+		TheCamera.IsSphereVisible(m_vecPos, 0.0f) && COcclusion::IsPositionOccluded(m_vecPos, 0.0f)); 
 	if (distance >= farclip || canBeRemoved){
 		if (m_bIsBlocking)
 			m_bIsBlocking = false;

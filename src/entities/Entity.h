@@ -156,8 +156,7 @@ public:
 	bool GetIsOnScreenComplex(void);
 	bool IsVisible(void) { return m_rwObject && bIsVisible && GetIsOnScreen(); }
 	bool IsVisibleComplex(void) { return m_rwObject && bIsVisible && GetIsOnScreenComplex(); }
-// TODO(MIAMI):
-	bool IsEntityOccluded(void) { return false; }
+	bool IsEntityOccluded(void);
 	int16 GetModelIndex(void) const { return m_modelIndex; }
 	void UpdateRwFrame(void);
 	void SetupBigBuilding(void);
@@ -169,6 +168,7 @@ public:
 	void RegisterReference(CEntity **pent);
 	void ResolveReferences(void);
 	void PruneReferences(void);
+	void CleanUpOldReference(CEntity **pent);
 
 #ifdef PED_SKIN
 	void UpdateRpHAnim(void);

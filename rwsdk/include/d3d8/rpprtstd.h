@@ -28,7 +28,7 @@
 
 /**
  * \defgroup rpprtstd RpPrtStd
- * \ingroup rpplugin
+ * \ingroup particles
  *
  * Particle Animation Plugin for RenderWare Graphics.
  */
@@ -52,7 +52,7 @@
 
 
 
-#define PRTSTD_RSRAND2(_seed)               (((RwReal)((RwReal) (_seed) * PRTSTD_SRAND_IMAX) * \
+#define PRTSTD_2RSRAND2(_seed)               (((RwReal)((RwReal) (_seed) * PRTSTD_SRAND_IMAX) * \
                                             (RwReal)1.0))
 
 /**
@@ -84,6 +84,8 @@ enum RpPrtStdEmitterFlags
     rpPRTSTDEMITTERFLAGUPDATEPARTICLE       = 0x00000020, /**< This indicated if the emitter's particles are updated. */
     rpPRTSTDEMITTERFLAGRENDER               = 0x00000040, /**< This indicates if the emitter is rendered. */
     rpPRTSTDEMITTERFLAGRENDERPARTICLE       = 0x00000080, /**< This indicates if the emitter's particles are rendered. */
+    rpPRTSTDEMITTERFLAGNOBUFFERSWAP         = 0x00000100, /**< Internal usage */
+    rpPRTSTDEMITTERFLAGSTREAMREAD           = 0x00000200, /**< Internal usage */
     rpPRTSTDEMITTERFLAGFORCEENUMSIZEINT     = RWFORCEENUMSIZEINT
 };
 
@@ -109,15 +111,12 @@ enum RpPrtStdParticleCallBackCode
     rpPRTSTDPARTICLECALLBACKRENDER,                  /**< Particle render callback */
     rpPRTSTDPARTICLECALLBACKCREATE,                  /**< Particle create callback */
     rpPRTSTDPARTICLECALLBACKDESTROY,                 /**< Particle destroy callback */
-    rpPRTSTDPARTICLECALLBACKSTREAMREAD,              /**< Particle stream input callback */
-    rpPRTSTDPARTICLECALLBACKSTREAMWRITE,             /**< Particle stream outout callback */
-    rpPRTSTDPARTICLECALLBACKSTREAMGETSIZE,           /**< Particle stream get size callback */
     rpPRTSTDPARTICLECALLBACKFORCEENUMSIZEINT    = RWFORCEENUMSIZEINT
 };
 
 typedef enum RpPrtStdParticleCallBackCode RpPrtStdParticleCallBackCode;
 
-#define rpPRTSTDEMITTERCALLBACKMAX              10
+#define rpPRTSTDEMITTERCALLBACKMAX              11
 
 /**
  * \ingroup rpprtstd
@@ -137,6 +136,7 @@ enum RpPrtStdEmitterCallBackCode
     rpPRTSTDEMITTERCALLBACKSTREAMREAD,               /**< Emitter stream input callback */
     rpPRTSTDEMITTERCALLBACKSTREAMWRITE,              /**< Emitter stream output callback */
     rpPRTSTDEMITTERCALLBACKSTREAMGETSIZE,            /**< Emitter stream get size callback */
+    rpPRTSTDEMITTERCALLBACKCLONE,                    /**< Emitter clone  callback */
     rpPRTSTDEMITTERCALLBACKFORCEENUMSIZEINT     = RWFORCEENUMSIZEINT
 };
 
@@ -154,7 +154,7 @@ typedef struct RpPrtStdEmitter RWALIGN(RpPrtStdEmitter, rwMATRIXALIGNMENT);
 
 /**
  * \ingroup rpprtstd
- * \typedef RpPrtStdEmitterCallBack
+ * \ref RpPrtStdEmitterCallBack
  * \ref RpPrtStdEmitterCallBack represents the function called for processing
  * a \ref RpPrtStdEmitter. There can several types of the functions, each performing a
  * specific task defined by \ref RpPrtStdEmitterCallBackCode.
@@ -172,7 +172,6 @@ typedef RpPrtStdEmitter *
 typedef struct RpPrtStdParticleBatch RWALIGN(RpPrtStdParticleBatch, rwMATRIXALIGNMENT);
 /**
  * \ingroup rpprtstd
- * \typedef RpPrtStdParticleCallBack
  * \ref RpPrtStdParticleCallBack represents the function called for processing
  * a \ref RpPrtStdParticleBatch. There can be several types of the functions, each
  * performing a specific task defined by \ref RpPrtStdParticleCallBackCode.
@@ -189,7 +188,6 @@ typedef RpPrtStdParticleBatch *
 
 /**
  * \ingroup rpprtstd
- * \typedef RpPrtStdEmitterCallBackArray
  * \ref RpPrtStdEmitterCallBackArray represents a set of callback functions for
  * processing a \ref RpPrtStdEmitter. All the functions are of the type \ref
  * RpPrtStdEmitterCallBack.
@@ -201,7 +199,6 @@ typedef RpPrtStdEmitterCallBack
 
 /**
  * \ingroup rpprtstd
- * \typedef RpPrtStdParticleCallBackArray
  * \ref RpPrtStdParticleCallBackArray represents a set of callback functions for
  * processing a \ref RpPrtStdParticleBatch. All the functions are of the type \ref
  * RpPrtStdParticleCallBack.
@@ -221,7 +218,6 @@ typedef RpPrtStdParticleCallBack
 typedef struct RpPrtStdEmitterClass RpPrtStdEmitterClass;
 /**
  * \ingroup rpprtstd
- * \typedef RpPrtStdEClassSetupCallBack
  * \ref RpPrtStdEClassSetupCallBack represents the function called for setting up an
  * emitter class's set of callback function. The callback function is called
  * after an emitter class is streamed in.
@@ -237,7 +233,6 @@ typedef RpPrtStdEmitterClass *
 typedef struct RpPrtStdParticleClass RpPrtStdParticleClass;
 /**
  * \ingroup rpprtstd
- * \typedef RpPrtStdPClassSetupCallBack
  * \ref RpPrtStdPClassSetupCallBack represents the function called for setting up an
  * emitter class's set of callback function. The callback function is called
  * after an emitter class is streamed in.
@@ -273,6 +268,7 @@ struct RpPrtStdPropertyTable
     RpPrtStdPropertyTable           *next;          /**< Internal usage */
 
     RwInt32                         id;             /**< Property table's id */
+    RwInt32                         refCount;       /**< Reference count. Internal usage */
 
     RwInt32                         numProp;        /**< Number of properties in the table */
     RwInt32                         maxProp;        /**< Internal usage */
@@ -295,6 +291,7 @@ struct RpPrtStdEmitterClass
     RpPrtStdEmitterClass                    *next;          /**< Internal usage */
 
     RwInt32                                 id;             /**< Emitter class's id */
+    RwInt32                                 refCount;       /**< Reference count. Internal usage */
 
     RwInt32                                 objSize;        /**< Size of the emitter */
     RpPrtStdPropertyTable                   *propTab;       /**< Reference to a table of emitter properties */
@@ -316,6 +313,7 @@ struct RpPrtStdParticleClass
     RpPrtStdParticleClass                   *next;          /**< Internal usage */
 
     RwInt32                                 id;             /**< Particle class's id */
+    RwInt32                                 refCount;       /**< Reference count. Internal usage */
 
     RwInt32                                 objSize;        /**< Size of a particle */
     RpPrtStdPropertyTable                   *propTab;       /**< Reference to a table of particle properties */
@@ -403,7 +401,6 @@ struct RpPrtStdEmitter
 #define rpPRTSTDPROPERTYCODEEMITTERSTANDARD                         1
 #define rpPRTSTDPROPERTYCODEEMITTERPRTCOLOR                         2
 #define rpPRTSTDPROPERTYCODEEMITTERPRTTEXCOORDS                     3
-#define rpPRTSTDPROPERTYCODEEMITTERPRTANIMFRAME                     4
 #define rpPRTSTDPROPERTYCODEEMITTERPRTSIZE                          5
 #define rpPRTSTDPROPERTYCODEEMITTERPTANK                            6
 #define rpPRTSTDPROPERTYCODEEMITTERPRTVELOCITY                      7
@@ -414,7 +411,6 @@ struct RpPrtStdEmitter
 #define rpPRTSTDEMITTERDATAFLAGSTANDARD                     0x00000001
 #define rpPRTSTDEMITTERDATAFLAGPRTCOLOR                     0x00000002
 #define rpPRTSTDEMITTERDATAFLAGPRTTEXCOORDS                 0x00000004
-#define rpPRTSTDEMITTERDATAFLAGPRTANIMFRAME                 0x00000008
 #define rpPRTSTDEMITTERDATAFLAGPRTSIZE                      0x00000010
 #define rpPRTSTDEMITTERDATAFLAGPTANK                        0x00000020
 #define rpPRTSTDEMITTERDATAFLAGPRTMATRIX                    0x00000040
@@ -436,7 +432,7 @@ typedef struct RpPrtStdEmitterStandard RpPrtStdEmitterStandard;
  * particles. Once an emitter has reached its maximum number of particles, no further particles are
  * emitted until some of the existing particles have died.
  *
- * Most properties have a bias value to vary the property value. This uses the seed field
+ * Most properties have a bias value to vary the property's value. This uses the seed field
  * to give a degreee of randomness.
  */
 struct RpPrtStdEmitterStandard
@@ -522,15 +518,6 @@ struct RpPrtStdEmitterPrtTexCoords
                                 prtEndUV1Bias;                      /**< Particle end bottom right texcoords bias */
 };
 
-typedef struct RpPrtStdEmitterPrtAnimFrame RpPrtStdEmitterPrtAnimFrame;
-
-struct RpPrtStdEmitterPrtAnimFrame
-{
-    RwInt32                     prtNumFrames;
-
-    RwTexCoords                 *prtAnimFrameTexCoords;
-};
-
 typedef struct RpPrtStdEmitterPrtSize RpPrtStdEmitterPrtSize;
 
 /**
@@ -550,18 +537,47 @@ struct RpPrtStdEmitterPrtSize
                                 prtEndSizeBias;                     /**< Particle end size bias */
 };
 
+
+/**
+ * \ingroup rpprtstd
+ * A set of flag settings for use in the \ref RpPrtStdEmitterPrtMatrix flag
+ */
+enum RpPrtStdEmitterPrtMatrixFlags
+{
+    rpPRTSTDEMITTERPRTMTXFLAGSCNSMTX = 0x00000001,                  /**< Apply the prtCnsMtx matrix to
+                                                                     * each particle if set */
+    RPPRTSTDEMITTERPRTMTXFLAGSFORCEENUMSIZEINT = RWFORCEENUMSIZEINT
+};
+
+typedef enum RpPrtStdEmitterPrtMatrixFlags RpPrtStdEmitterPrtMatrixFlags;
+
 typedef struct RpPrtStdEmitterPrtMatrix RWALIGN(RpPrtStdEmitterPrtMatrix, rwMATRIXALIGNMENT);
 
+/**
+ * \ingroup rpprtstd
+ * \struct RpPrtStdEmitterPrtMatrix
+ *
+ * An optional structure to construct a matrix for each particle during emissions. A particle
+ * can be represented as a single matrix. This gives the particles an orientation rather than
+ * just a simple position.
+ *
+ * This allows transformation to be applied to the particles, such as rotation. If
+ * \ref rpPRTSTDEMITTERPRTMTXFLAGSCNSMTX is set in the flag, then the prtCnsMatrix is applied to each
+ * particle during particle update.
+ *
+ * If this structure is not present, then it assumes the  particles will have just a position
+ * property.
+ */
 struct RpPrtStdEmitterPrtMatrix
 {
-    RwMatrix                    prtCnsMtx;
+    RwMatrix                    prtCnsMtx;       /**< Transformation matrix to be applied to each particle */
 
-    RwV3d                       prtPosMtxAt,
-                                prtPosMtxAtBias;
-    RwV3d                       prtPosMtxUp,
-                                prtPosMtxUpBias;
+    RwV3d                       prtPosMtxAt,     /**< Particle initial look at vector */
+                                prtPosMtxAtBias; /**< Particle initial look at vector bias */
+    RwV3d                       prtPosMtxUp,     /**< Particle initial up vector. */
+                                prtPosMtxUpBias; /**< Particle initial up vector bias */
 
-    RwInt32                     flags;
+    RwInt32                     flags;           /**< Particle matrix flag. See \ref RpPrtStdEmitterPrtMatrixFlags */
 };
 
 /************************************************************************
@@ -584,18 +600,42 @@ enum RpPrtStdPTankPropertyCode
 typedef enum RpPrtStdPTankPropertyCode RpPrtStdPTankPropertyCode;
 
 typedef struct RpPrtStdEmitterPTank RpPrtStdEmitterPTank;
+
+/**
+ * \ingroup rpprtstd
+ * \struct RpPrtStdEmitterPTank
+ *
+ * A structure for storing the data required to create a RpPTank for use
+ * with the emitter. The structure allows the user to create a RpPTank
+ * manually.
+ */
 struct RpPrtStdEmitterPTank
 {
-    RwUInt32                    dataFlags,
-                                platFlags,
-                                numPrt,
-                                maxPrt,
-                                updateFlags,
-                                emitFlags;
-    RpAtomic                    *pTank;
-    RwChar                      **dataInPtrs,
-                                **dataOutPtrs;
-    RwInt32                     *dataStride;
+    RwUInt32                    dataFlags,      /**< Data flag used in RpPTank creation. See
+                                                 * \ref RpPTankAtomicCreate  */
+                                platFlags,      /**< Platform flag used in RpPTank creation. See
+                                                 * \ref RpPTankAtomicCreate */
+                                numPrt,         /**< An integer representing the current number of active
+                                                 * particles */
+                                maxPrt,         /**< An integer representing the maxiumum number of particles
+                                                 * stored in the RpPTank */
+                                updateFlags,    /**< A flag representing the properties to be updated by
+                                                 * the particle emiiter during update. A user may select to
+                                                 * update some properties manually by unsetting the relevant
+                                                 * bits in the flag.
+                                                 * The flag settings are the same as \ref RpPTankDataFlags */
+                                emitFlags;      /**< A flag representing the properties to be initialised
+                                                 * by the particle emitter during particles emission. A user
+                                                 * may select to initialise some properties manually by
+                                                 * unsetting the relevant bits in the flag.
+                                                 * The flag settings are the same as \ref RpPTankDataFlags */
+    RpAtomic                    *pTank;         /**< Pointer to the RpPTank */
+    RwChar                      **dataInPtrs,   /**< Internal usage */
+                                **dataOutPtrs;  /**< Internal usage */
+    RwInt32                     *dataStride;    /**< Internal usage */
+    RwUInt32                    strSrcBlend;    /**< Internal usage */
+    RwUInt32                    strDstBlend;    /**< Internal usage */
+    RwBool                      strVtxABlend;   /**< Internal usage */
 };
 
 /************************************************************************
@@ -608,7 +648,6 @@ struct RpPrtStdEmitterPTank
 #define rpPRTSTDPROPERTYCODEPARTICLEPOSITION                1
 #define rpPRTSTDPROPERTYCODEPARTICLECOLOR                   2
 #define rpPRTSTDPROPERTYCODEPARTICLETEXCOORDS               3
-#define rpPRTSTDPROPERTYCODEPARTICLEANIMFRAME               4
 #define rpPRTSTDPROPERTYCODEPARTICLESIZE                    5
 #define rpPRTSTDPROPERTYCODEPARTICLEVELOCITY                6
 #define rpPRTSTDPROPERTYCODEPARTICLEMATRIX                  7
@@ -619,7 +658,6 @@ struct RpPrtStdEmitterPTank
 #define rpPRTSTDPARTICLEDATAFLAGPOSITION                    0x00000002
 #define rpPRTSTDPARTICLEDATAFLAGCOLOR                       0x00000004
 #define rpPRTSTDPARTICLEDATAFLAGTEXCOORDS                   0x00000008
-#define rpPRTSTDPARTICLEDATAFLAGANIMFRAME                   0x00000010
 #define rpPRTSTDPARTICLEDATAFLAGSIZE                        0x00000020
 #define rpPRTSTDPARTICLEDATAFLAGVELOCITY                    0x00000040
 #define rpPRTSTDPARTICLEDATAFLAGMATRIX                      0x00000080
@@ -675,15 +713,6 @@ struct RpPrtStdParticleTexCoords
                                 deltaUV1;                           /**< Particle's bottom right texcoords rate of change */
 };
 
-typedef struct RpPrtStdParticleAnimFrame RpPrtStdParticleAnimFrame;
-
-struct RpPrtStdParticleAnimFrame
-{
-    RwInt32                     frame;
-
-    RwReal                      delta;
-};
-
 typedef struct RpPrtStdParticleSize RpPrtStdParticleSize;
 
 /**
@@ -714,9 +743,12 @@ extern "C"
 /************************************************************************/
 
 extern RwBool
-RpParticleStandardPluginAttach( void );
+RpPrtStdPluginAttach( void );
 
 /************************************************************************/
+
+extern RwBool
+RpAtomicIsParticleEmitter(RpAtomic *atomic);
 
 extern RpAtomic *
 RpPrtStdAtomicCreate(RpPrtStdEmitterClass *eClass, void *data);
@@ -748,6 +780,9 @@ RpPrtStdEmitterCreate(RpPrtStdEmitterClass *eClass);
 
 extern RwBool
 RpPrtStdEmitterDestroy(RpPrtStdEmitter *emt);
+
+extern RpPrtStdEmitter *
+RpPrtStdEmitterClone(RpPrtStdEmitter *emt);
 
 extern RpPrtStdEmitter *
 RpPrtStdEmitterForAllParticleBatch(RpPrtStdEmitter *emt,
@@ -835,7 +870,6 @@ RpPrtStdPropTabStreamWrite(RpPrtStdPropertyTable *eClass,
 
 extern RwInt32
 RpPrtStdPropTabStreamGetSize(RpPrtStdPropertyTable *eClass);
-
 /************************************************************************/
 
 extern RwBool
@@ -941,6 +975,11 @@ RpPrtStdGlobalDataStreamWrite(RwStream *stream);
 extern RwInt32
 RpPrtStdGlobalDataStreamGetSize( void );
 
+extern void
+RpPrtStdGlobalDataSetStreamEmbedded( RwBool embedded );
+
+extern RwBool
+RpPrtStdGlobalDataGetStreamEmbedded( void );
 
 /************************************************************************/
 
@@ -964,7 +1003,15 @@ RpPrtStdEmitterStdEmitCB(RpAtomic *atomic,
                               RpPrtStdEmitter *emt, void *data);
 
 extern RpPrtStdEmitter *
+RpPrtStdEmitterStdCloneCB(RpAtomic *atomic,
+                                RpPrtStdEmitter *emt, void *data);
+
+extern RpPrtStdEmitter *
 RpPrtStdEmitterStdCreateCB(RpAtomic *atomic,
+                                RpPrtStdEmitter *emt, void *data);
+
+extern RpPrtStdEmitter *
+RpPrtStdEmitterStdDestroyCB(RpAtomic *atomic,
                                 RpPrtStdEmitter *emt, void *data);
 
 extern RpPrtStdEmitter *

@@ -54,7 +54,7 @@ enum Config {
 	NUMBOATALPHALIST = 20,
 	NUMALPHAENTITYLIST = 200,
 	NUMALPHAUNTERWATERENTITYLIST = 30,
-	NUMCOLCACHELINKS = 200,
+	NUMCOLCACHELINKS = 50,
 	NUMREFERENCES = 800,
 
 	// Zones
@@ -67,6 +67,7 @@ enum Config {
 	NUMATTRIBZONES = 704,
 
 	NUMOCCLUSIONVOLUMES = 350,
+	NUMACTIVEOCCLUDERS = 48,
 
 	PATHNODESIZE = 4500,
 
@@ -165,6 +166,7 @@ enum Config {
 #if defined GTA_PS2
 #	define GTA_PS2_STUFF
 #	define RANDOMSPLASH
+#	define COMPRESSED_COL_VECTORS
 #elif defined GTA_PC
 #	define GTA3_1_1_PATCH
 //#	define GTA3_STEAM_PATCH
@@ -213,7 +215,10 @@ enum Config {
 #define DEFAULT_NATIVE_RESOLUTION	// Set default video mode to your native resolution (fixes Windows 10 launch)
 #define USE_TXD_CDIMAGE		// generate and load textures from txd.img
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
+//#define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
+//#define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
 //#define USE_TEXTURE_POOL
+#define CUTSCENE_BORDERS_SWITCH
 
 // Water & Particle
 #define PC_PARTICLE
@@ -242,8 +247,7 @@ enum Config {
 //#	define PS2_MENU_USEALLPAGEICONS
 #else
 //#	define PS2_LIKE_MENU	// An effort to recreate PS2 menu, cycling through tabs, different bg etc.
-#	define MENU_MAP			// VC-like menu map. Make sure you have new menu.txd
-#	define SCROLLABLE_STATS_PAGE	// only draggable by mouse atm
+#	define MAP_ENHANCEMENTS			// Adding waypoint etc.
 #	define TRIANGLE_BACK_BUTTON
 //#	define CIRCLE_BACK_BUTTON
 //#define CUSTOM_FRONTEND_OPTIONS
@@ -257,7 +261,7 @@ enum Config {
 //#define MISSION_REPLAY // mobile feature
 #endif
 //#define SIMPLIER_MISSIONS // apply simplifications from mobile
-//#define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+#define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #define SCRIPT_LOG_FILE_LEVEL 1 // 0 == no log, 1 == overwrite every frame, 2 == full log
 
 #ifndef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
@@ -270,7 +274,7 @@ enum Config {
 
 // Vehicles
 #define EXPLODING_AIRTRAIN	// can blow up jumbo jet with rocket launcher
-//#define REMOVE_TREADABLE_PATHFIND
+#define CPLANE_ROTORS		// make the rotors of the NPC police heli rotate
 
 // Pickups
 //#define MONEY_MESSAGES
@@ -286,3 +290,6 @@ enum Config {
 // Camera
 #define IMPROVED_CAMERA		// Better Debug cam, and maybe more in the future
 #define FREE_CAM		// Rotating cam
+
+// Audio
+#define AUDIO_CACHE // cache sound lengths to speed up the cold boot

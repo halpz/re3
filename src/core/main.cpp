@@ -61,6 +61,8 @@
 #include "MemoryCard.h"
 #include "SceneEdit.h"
 #include "debugmenu.h"
+#include "Occlusion.h"
+#include "Ropes.h"
 
 GlobalScene Scene;
 
@@ -249,7 +251,11 @@ DoFade(void)
 		}
 
 		// This is CCamera::GetScreenRect in VC
-		if(TheCamera.m_WideScreenOn){
+		if(TheCamera.m_WideScreenOn
+#ifdef CUTSCENE_BORDERS_SWITCH
+			&& CMenuManager::m_PrefsCutsceneBorders
+#endif
+			){
 			float y = SCREEN_HEIGHT/2 * TheCamera.m_ScreenReductionPercentage/100.0f;
 			rect.left = 0.0f;
 			rect.right = SCREEN_WIDTH;
@@ -299,7 +305,12 @@ PluginAttach(void)
 		
 		return FALSE;
 	}
-	
+#ifndef LIBRW
+	if (!RtAnimInitialize())
+	{
+		return FALSE;
+	}
+#endif
 	if( !RpHAnimPluginAttach() )
 	{
 		printf("Couldn't attach RpHAnim plugin\n");
@@ -463,6 +474,11 @@ void
 LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 {
 	CSprite2d *splash;
+
+#ifdef DISABLE_LOADING_SCREEN
+	if (str1 && str2)
+		return;
+#endif
 
 #ifndef RANDOMSPLASH
 	splashscreen = "LOADSC0";
@@ -858,6 +874,7 @@ RenderEffects(void)
 	CGlass::Render();
 	CWaterCannons::Render();
 	CSpecialFX::Render();
+	CRopes::Render();
 	CShadows::RenderStaticShadows();
 	CShadows::RenderStoredShadows();
 	CSkidmarks::Render();
@@ -885,7 +902,11 @@ Render2dStuff(void)
 	CReplay::Display();
 	CPickups::RenderPickUpText();
 
-	if(TheCamera.m_WideScreenOn)
+	if(TheCamera.m_WideScreenOn
+#ifdef CUTSCENE_BORDERS_SWITCH
+		&& CMenuManager::m_PrefsCutsceneBorders
+#endif
+		)
 		TheCamera.DrawBordersForWideScreen();
 
 	CPed *player = FindPlayerPed();
@@ -930,6 +951,7 @@ Render2dStuff(void)
 	CGarages::PrintMessages();
 	CPad::PrintErrorMessage();
 	CFont::DrawFonts();
+	COcclusion::Render();
 
 #ifdef DEBUGMENU
 	DebugMenuRender();

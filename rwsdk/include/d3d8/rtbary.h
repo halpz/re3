@@ -11,7 +11,7 @@
 
 /**
  * \defgroup rtbary RtBary
- * \ingroup rttool
+ * \ingroup mathtools
  *
  * Barycentric Toolkit for RenderWare.
  */
@@ -32,7 +32,7 @@
 
 /**
  * \ingroup rtbary
- * \typedef RtBaryV4d
+ * \ref RtBaryV4d
  * typedef for the 4 element homogeneous row of a transform matrix mapping 
  * a point from Cartesian space to the barycentric space defined by a triangle.
  */
@@ -40,7 +40,7 @@ typedef RwReal      RtBaryV4d[4];
 
 /**
  * \ingroup rtbary
- * \typedef RtBaryTransform
+ * \ref RtBaryTransform
  * typedef for the 4x4 homogeneous transform matrix mapping a point
  * from Cartesian space to the barycentric space defined by a triangle.
  */

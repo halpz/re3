@@ -604,7 +604,13 @@ cSampleManager::Initialise(void)
 			return false;
 		}
 	}
-	
+#ifdef AUDIO_CACHE
+	FILE *cacheFile = fopen("audio\\sound.cache", "rb");
+	if (cacheFile) {
+		fread(nStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
+		fclose(cacheFile);
+	} else
+#endif
 	{
 	
 		for ( int32 i = 0; i < TOTAL_STREAMED_SOUNDS; i++ )
@@ -622,6 +628,11 @@ cSampleManager::Initialise(void)
 			else
 				USERERROR("Can't open '%s'\n", StreamedNameTable[i]);
 		}
+#ifdef AUDIO_CACHE
+		cacheFile = fopen("audio\\sound.cache", "wb");
+		fwrite(nStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
+		fclose(cacheFile);
+#endif
 	}
 		
 	LoadSampleBank(SAMPLEBANK_MAIN);

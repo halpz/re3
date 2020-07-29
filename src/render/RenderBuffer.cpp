@@ -5,8 +5,7 @@
 int32 TempBufferVerticesStored;
 int32 TempBufferIndicesStored;
 
-RwIm2DVertex TempVertexBuffer[TEMPBUFFERVERTSIZE];
-RwIm3DVertex *TempBufferRenderVertices = (RwIm3DVertex * )TempVertexBuffer;
+VertexBufferUnion TempVertexBuffer;
 RwImVertexIndex TempBufferRenderIndexList[TEMPBUFFERINDEXSIZE];
 
 int RenderBuffer::VerticesToBeStored;

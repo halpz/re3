@@ -560,7 +560,7 @@ CPlayerInfo::Process(void)
 		veh->m_nZoneLevel = LEVEL_IGNORE;
 		for (int i = 0; i < ARRAY_SIZE(veh->pPassengers); i++) {
 			if (veh->pPassengers[i])
-				veh->pPassengers[i]->m_nZoneLevel = LEVEL_NONE;
+				veh->pPassengers[i]->m_nZoneLevel = LEVEL_GENERIC;
 		}
 		CStats::DistanceTravelledInVehicle += veh->m_fDistanceTravelled;
 	} else {

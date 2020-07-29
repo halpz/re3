@@ -93,7 +93,7 @@ CTheZones::Init(void)
 	InfoZoneArray[0].maxx =  1600.0f;
 	InfoZoneArray[0].maxy =  2000.0f;
 	InfoZoneArray[0].maxz =  500.0f;
-	InfoZoneArray[0].level = LEVEL_NONE;
+	InfoZoneArray[0].level = LEVEL_GENERIC;
 	InfoZoneArray[0].type = ZONE_INFO;
 
 	strcpy(NavigationZoneArray[0].name, "VICE_C");
@@ -103,10 +103,10 @@ CTheZones::Init(void)
 	NavigationZoneArray[0].maxx =  1600.0f;
 	NavigationZoneArray[0].maxy =  2000.0f;
 	NavigationZoneArray[0].maxz =  500.0f;
-	NavigationZoneArray[0].level = LEVEL_NONE;
-	NavigationZoneArray[0].type = ZONE_NAVIG;
+	NavigationZoneArray[0].level = LEVEL_GENERIC;
+	NavigationZoneArray[0].type = ZONE_DEFAULT;
 
-	m_CurrLevel = LEVEL_NONE;
+	m_CurrLevel = LEVEL_GENERIC;
 
 	for(i = 0; i < NUMMAPZONES; i++){
 		memset(&MapZoneArray[i], 0, sizeof(CZone));
@@ -120,7 +120,7 @@ CTheZones::Init(void)
 	MapZoneArray[0].maxx =  1600.0f;
 	MapZoneArray[0].maxy =  2000.0f;
 	MapZoneArray[0].maxz =  500.0f;
-	MapZoneArray[0].level = LEVEL_NONE;
+	MapZoneArray[0].level = LEVEL_GENERIC;
 }
 
 //--MIAMI: done

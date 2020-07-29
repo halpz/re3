@@ -34,7 +34,7 @@ public:
 	bool m_bDrunkVisualsWearOff; // TODO(Miami): That may be something else
 	CVector m_vecSafePos[6]; // safe places from the player, for example behind a tree
 	CPed *m_pPedAtSafePos[6];
-	CPlayerPed* m_pMeleeList[6];
+	CPed *m_pMeleeList[6]; // reachable peds at each direction(6)
 	char unused1;
 	int16 m_nCheckPlayersIndex;
 	float m_fWalkAngle; //angle between heading and walking direction
@@ -85,6 +85,8 @@ public:
 	bool DoesPlayerWantNewWeapon(eWeaponType, bool);
 	void PlayIdleAnimations(CPad*);
 	void RemovePedFromMeleeList(CPed*);
+	void GetMeleeAttackCoords(CVector&, int8, float);
+	int32 FindMeleeAttackPoint(CPed*, CVector&, uint32&);
 
 	static void SetupPlayerPed(int32);
 	static void DeactivatePlayerPed(int32);

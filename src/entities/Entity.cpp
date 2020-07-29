@@ -31,6 +31,7 @@
 #include "Ped.h"
 #include "Dummy.h"
 #include "WindModifiers.h"
+#include "Occlusion.h"
 
 //--MIAMI: file almost done (see TODO)
 
@@ -359,8 +360,8 @@ CEntity::SetupBigBuilding(void)
 	if(mi->m_lodDistances[0] <= 2000.0f)
 		bStreamBIGBuilding = true;
 	if(mi->m_lodDistances[0] > 2500.0f || mi->m_ignoreDrawDist)
-		m_level = LEVEL_NONE;
-	else if(m_level == LEVEL_NONE)
+		m_level = LEVEL_GENERIC;
+	else if(m_level == LEVEL_GENERIC)
 		printf("%s isn't in a level\n", mi->GetName());
 }
 
@@ -619,6 +620,23 @@ CEntity::PruneReferences(void)
 	}
 }
 
+// Clean up the reference from *pent -> 'this'
+void
+CEntity::CleanUpOldReference(CEntity **pent)
+{
+	CReference* ref, ** lastnextp;
+	lastnextp = &m_pFirstReference;
+	for (ref = m_pFirstReference; ref; ref = ref->next) {
+		if (ref->pentity == pent) {
+			*lastnextp = ref->next;
+			ref->next = CReferences::pEmptyList;
+			CReferences::pEmptyList = ref;
+			break;
+		}
+		lastnextp = &ref->next;
+	}
+}
+
 void
 CEntity::UpdateRpHAnim(void)
 {
@@ -630,7 +648,7 @@ CEntity::UpdateRpHAnim(void)
 	char buf[256];
 	if(this == (CEntity*)FindPlayerPed())
 	for(i = 0; i < hier->numNodes; i++){
-		RpHAnimStdKeyFrame *kf = (RpHAnimStdKeyFrame*)rpHANIMHIERARCHYGETINTERPFRAME(hier, i);
+		RpHAnimStdInterpFrame *kf = (RpHAnimStdInterpFrame*)rpHANIMHIERARCHYGETINTERPFRAME(hier, i);
 		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f  %6.3f %6.3f %6.3f  %d %s",
 			kf->q.imag.x, kf->q.imag.y, kf->q.imag.z, kf->q.real,
 			kf->t.x, kf->t.y, kf->t.z,
@@ -1155,5 +1173,38 @@ bool IsEntityPointerValid(CEntity* pEntity)
 	case ENTITY_TYPE_OBJECT: return IsObjectPointerValid((CObject*)pEntity);
 	case ENTITY_TYPE_DUMMY: return IsDummyPointerValid((CDummy*)pEntity);
 	}
+	return false;
+}
+
+bool CEntity::IsEntityOccluded(void) {
+
+	CVector coors;
+	float width, height;
+
+	if (COcclusion::NumActiveOccluders == 0 || !CalcScreenCoors(GetBoundCentre(), &coors, &width, &height))
+		return false;
+
+	float area = Max(width, height) * GetBoundRadius() * 0.9f;
+
+	for (int i = 0; i < COcclusion::NumActiveOccluders; i++) {
+		if (coors.z - (GetBoundRadius() * 0.85f) > COcclusion::aActiveOccluders[i].radius) {
+			if (COcclusion::aActiveOccluders[i].IsPointWithinOcclusionArea(coors.x, coors.y, area)) {
+				return true;
+			}
+
+			if (COcclusion::aActiveOccluders[i].IsPointWithinOcclusionArea(coors.x, coors.y, 0.0f)) {
+				CVector min = m_matrix * CModelInfo::GetModelInfo(GetModelIndex())->GetColModel()->boundingBox.min;
+				CVector max = m_matrix * CModelInfo::GetModelInfo(GetModelIndex())->GetColModel()->boundingBox.max;
+
+				if (CalcScreenCoors(min, &coors) && !COcclusion::aActiveOccluders[i].IsPointWithinOcclusionArea(coors.x, coors.y, 0.0f)) continue;
+				if (CalcScreenCoors(CVector(max.x, max.y, min.z), &coors) && !COcclusion::aActiveOccluders[i].IsPointWithinOcclusionArea(coors.x, coors.y, 0.0f)) continue;
+				if (CalcScreenCoors(CVector(max.x, min.y, max.z), &coors) && !COcclusion::aActiveOccluders[i].IsPointWithinOcclusionArea(coors.x, coors.y, 0.0f)) continue;
+				if (CalcScreenCoors(CVector(min.x, max.y, max.z), &coors) && !COcclusion::aActiveOccluders[i].IsPointWithinOcclusionArea(coors.x, coors.y, 0.0f)) continue;
+
+				return true;
+			}
+		}
+	}
+
 	return false;
 }

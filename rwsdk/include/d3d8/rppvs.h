@@ -32,7 +32,7 @@
 
 /**
  * \defgroup rppvs RpPVS
- * \ingroup rpplugin
+ * \ingroup pvs
  *
  * Geometric Potentially Visible Set Plugin for RenderWare Graphics.
  */
@@ -122,11 +122,14 @@ typedef RpWorldSector *(*RpPVSCallBack) (RpWorldSector * worldSector,
 #define RpPVSCallback                   RpPVSCallBack
 
 typedef struct _RpPVSCallBack _RpPVSCallBack;
+
+#if (!defined(DOXYGEN))
 struct _RpPVSCallBack
 {
     RpPVSCallBack      callback;
     void               *data;
 };
+#endif /* (!defined(DOXYGEN)) */
 
 enum _rpPVSPartitionId
 {
@@ -145,6 +148,7 @@ typedef struct _rpPVSPolyList *_rpPVSPolyListPtr;
 typedef struct _rpPVSPoly _rpPVSPoly;
 typedef struct _rpPVSPoly *_rpPVSPolyPtr;
 
+#if (!defined(DOXYGEN))
 typedef struct _rpPVSPlaneEq _rpPVSPlaneEq;
 struct _rpPVSPlaneEq
 {
@@ -158,12 +162,13 @@ struct _rpPVSPlaneEq
     _rpPVSPartitionId         lastresult; /* temp: stores result of last polygon wrt this plane */
 };
 
-typedef struct
+typedef struct RwV3i RwV3i;
+struct RwV3i
 {
     RwInt32 x;
     RwInt32 y;
     RwInt32 z;
-}RwV3i;
+};
 
 typedef struct _rpPVSPolyRecord _rpPVSPolyRecord;
 struct _rpPVSPolyRecord
@@ -205,47 +210,45 @@ struct _rpPVSPolyList
 };
 
 typedef struct RpPVS RpPVS;
+
 struct RpPVS
 {
-    RwInt32             sectorID;       /* Id of the sector */
-    RwInt32             vismaplength;   /* Length of vismap */
-    RwInt32             sampleKey;      /* Currently unused, for future use */
+    RwInt32             sectorID;
+    RwInt32             vismaplength;
+    RwInt32             sampleKey;
 
     RpPVSVisMap        *vismap;
 
-    _rpPVSPolyListPtr         sectailpoly;    /* Pointer to last polygon in polygons list that is in this sector */
+    _rpPVSPolyListPtr         sectailpoly; 
+    _rpPVSPartitionId         potential;
 
-    _rpPVSPartitionId         potential;      /* temp: is sector in out or split from current shadow volume  - for heirarchical clip */
     RwUInt32            numpols;
-    RwBBox              sbox;           /* Bounding box of the sector */
-    RwBBox              gbox;           /* Bounding box of the geometry of the sector */
-    RwReal              diagonal;       /* Diagonal size of bounding box of the sector */
-    RwV3d               centre;         /* Centre of the sector */
-    RwInt32             axessig[3];     /* sampling significance of the axes of the gbox */
+    RwBBox              sbox;
+    RwBBox              gbox;
+    RwReal              diagonal;
+    RwV3d               centre;
+    RwInt32             axessig[3];
 };
 
 typedef struct RpPVSCache RpPVSCache;
 struct RpPVSCache
 {
-    RwBool              processed; /* flag to indicate exisiting PVS data for the world */
-    RwBool              formatted; /* flag to indicate exisiting intermediate polygonal data for PVS generation */
+    RwBool              processed;
+    RwBool              formatted;
+    RwInt32             NumWorldSectors;
 
-    /* stats collection */
     RwInt32             ptotal;
     RwInt32             paccept;
 
-    /* pipeline hooking */
     RwBool              hooked;
 
-    /* used during vismap allocation */
     RwUInt32            nextID;
 
     RwInt32             viscount;
 
-    /* Used during construction */
     RpPVSProgressCallBack progressCallBack;
 
-    _rpPVSPolyListPtr         polygons; /* A copy of the input data set of all world polygons */
+    _rpPVSPolyListPtr         polygons;
 
     RpWorldSectorCallBackRender     renderCallBack;
 };
@@ -255,23 +258,23 @@ struct RpPVSGlobalVars
 {
     RpWorld            *World;
 
-    RwInt32             worldOffset; /* Offset into global data */
-    RwInt32             sectorOffset; /* Offset into global data */
+    RwInt32             worldOffset;
+    RwInt32             sectorOffset;
 
-    RwBool              collis; /* Collision detection */
-    RwBool              bfc; /* Backface culling */
+    RwBool              collis;
+    RwBool              bfc;
 
-    RwInt32             NumWorldSectors;
 
     RwInt32             progress_count;
     RwReal              diagonal;
 
     RwReal              gran;
 
-    RwInt32             InSector; /* Current sector id */
-    RwV3d               ViewPos; /* Current view pos */
-    RpPVS             *CurrPVS; /* Current PVS sector */
+    RwInt32             InSector;
+    RwV3d               ViewPos;
+    RpPVS             *CurrPVS;
 };
+#endif /* (!defined(DOXYGEN)) */
 
 
 /****************************************************************************

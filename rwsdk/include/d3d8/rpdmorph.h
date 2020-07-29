@@ -28,7 +28,7 @@
 
 /**
  * \defgroup rpdmorph RpDMorph
- * \ingroup rpplugin
+ * \ingroup deltamorphing
  * \file rpdmorph.h
  *
  * Delta Morphing Plugin for RenderWare Graphics.
@@ -153,7 +153,7 @@ RpDMorphTargetGetFlags( RpDMorphTarget *dMorphTarget );
  * These functions work at the DMorphAtomic level.
  */
 extern RpAtomic *
-RpDMorphAtomicInitalize( RpAtomic *atomic );
+RpDMorphAtomicInitialize( RpAtomic *atomic );
 
 extern RwReal *
 RpDMorphAtomicGetDMorphValues( RpAtomic *atomic );

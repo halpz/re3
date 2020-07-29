@@ -3,7 +3,7 @@
 
 /**
  * \defgroup rpuserdata RpUserData
- * \ingroup rpplugin
+ * \ingroup scenemanagement
  *
  * User Data Plugin for RenderWare Graphics.
  */

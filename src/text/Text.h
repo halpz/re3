@@ -26,11 +26,11 @@ class CKeyArray
 {
 public:
 	CKeyEntry *entries;
-	int numEntries;
+	int numEntries;	// You can make this size_t if you want to exceed 32-bit boundaries, everything else should be ready.
 
 	CKeyArray(void) : entries(nil), numEntries(0) {}
 	~CKeyArray(void) { Unload(); }
-	void Load(uint32 length, int file, uint32 *offset);
+	void Load(size_t length, int file, size_t *offset);
 	void Unload(void);
 	void Update(wchar *chars);
 	CKeyEntry *BinarySearch(const char *key, CKeyEntry *entries, int16 low, int16 high);
@@ -45,11 +45,11 @@ class CData
 {
 public:
 	wchar *chars;
-	int numChars;
+	int numChars; // You can make this size_t if you want to exceed 32-bit boundaries, everything else should be ready.
 
 	CData(void) : chars(nil), numChars(0) {}
 	~CData(void) { Unload(); }
-	void Load(uint32 length, int file, uint32 *offset);
+	void Load(size_t length, int file, size_t* offset);
 	void Unload(void);
 };
 
@@ -65,10 +65,10 @@ public:
 	enum {MAX_MISSION_TEXTS = 90}; // beware that LCS has more
 
 	Entry data[MAX_MISSION_TEXTS];
-	uint16 size;
+	uint16 size; // You can make this size_t if you want to exceed 32-bit boundaries, everything else should be ready.
 
 	CMissionTextOffsets(void) : size(0) {}
-	void Load(uint32 table_size, int file, uint32* bytes_read, int);
+	void Load(size_t table_size, int file, size_t* bytes_read, int);
 };
 
 struct ChunkHeader
@@ -96,7 +96,7 @@ public:
 	wchar GetUpperCase(wchar c);
 	void UpperCase(wchar *s);
 	void GetNameOfLoadedMissionText(char *outName);
-	void ReadChunkHeader(ChunkHeader *buf, int32 file, uint32 *bytes_read);
+	void ReadChunkHeader(ChunkHeader *buf, int32 file, size_t *bytes_read);
 	void LoadMissionText(char *MissionTableName);
 };
 

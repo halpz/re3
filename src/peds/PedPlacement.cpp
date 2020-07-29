@@ -4,7 +4,8 @@
 #include "PedPlacement.h"
 #include "World.h"
 
-void
+// --MIAMI: Done
+bool
 CPedPlacement::FindZCoorForPed(CVector* pos)
 {
 	float zForPed;
@@ -32,8 +33,11 @@ CPedPlacement::FindZCoorForPed(CVector* pos)
 
 	zForPed = Max(foundColZ, foundColZ2);
 
-	if (zForPed > -99.0f)
+	if (zForPed > -99.0f) {
 		pos->z = FEET_OFFSET + zForPed;
+		return true;
+	}
+	return false;
 }
 
 CEntity*

@@ -2,8 +2,8 @@
 #define WITHWINDOWS
 #include "common.h"
 #include "crossplatform.h"
-#include "patcher.h"
 #include "Renderer.h"
+#include "Occlusion.h"
 #include "Credits.h"
 #include "Camera.h"
 #include "Weather.h"
@@ -77,7 +77,6 @@ mysrand(unsigned int seed)
 
 void ReloadFrontendOptions(void)
 {
-	RemoveCustomFrontendOptions();
 	CustomFrontendOptionsPopulate();
 }
 
@@ -135,10 +134,20 @@ void ToggleFreeCam(int8 action)
 }
 #endif
 
+#ifdef CUTSCENE_BORDERS_SWITCH
+void BorderModeChange(int8 displayedValue)
+{
+	CMenuManager::m_PrefsCutsceneBorders = !!displayedValue;
+	FrontEndMenuManager.SaveSettings();
+}
+#endif
+
 // Reloaded on language change, so you can use hardcoded wchar* and TheText.Get with peace of mind
 void
 CustomFrontendOptionsPopulate(void)
 {
+	RemoveCustomFrontendOptions(); // if exist
+
 #ifdef MORE_LANGUAGES
 	FrontendOptionSetPosition(MENUPAGE_LANGUAGE_SETTINGS);
 	FrontendOptionAddDynamic(TheText.Get("FEL_POL"), nil, LangPolSelect, nil);
@@ -152,15 +161,16 @@ CustomFrontendOptionsPopulate(void)
 	FrontendOptionAddSelect(TheText.Get("SCRFOR"), screenModes, 2, (int8*)&FrontEndMenuManager.m_nPrefsWindowed, true, ScreenModeChange, nil);
 #endif
 
-#ifdef MENU_MAP
-	FrontendOptionSetPosition(MENUPAGE_PAUSE_MENU, 2);
-	FrontendOptionAddRedirect(TheText.Get("FEG_MAP"), MENUPAGE_MAP);
-#endif
-
 #ifdef FREE_CAM
 	static const wchar *text = (wchar*)L"TOGGLE FREE CAM";
 	FrontendOptionSetPosition(MENUPAGE_CONTROLLER_PC, 1);
 	FrontendOptionAddDynamic(text, nil, ToggleFreeCam, nil);
+#endif
+
+#ifdef CUTSCENE_BORDERS_SWITCH
+	static const wchar *off_on[] = { TheText.Get("FEM_OFF"), TheText.Get("FEM_ON") };
+	FrontendOptionSetPosition(MENUPAGE_GRAPHICS_SETTINGS, 9);
+	FrontendOptionAddSelect((const wchar *)L"CUTSCENE BORDERS", off_on, 2, (int8 *)&CMenuManager::m_PrefsCutsceneBorders, false, BorderModeChange, nil);
 #endif
 }
 #endif
@@ -252,7 +262,7 @@ FixCar(void)
 	}
 }
 
-#ifdef MENU_MAP
+#ifdef MAP_ENHANCEMENTS
 static void
 TeleportToWaypoint(void)
 {
@@ -474,6 +484,8 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Spawn", "Spawn PCJ 600", [](){ SpawnCar(MI_PCJ600); });
 		DebugMenuAddCmd("Spawn", "Spawn Faggio", [](){ SpawnCar(MI_FAGGIO); });
 		DebugMenuAddCmd("Spawn", "Spawn Freeway", [](){ SpawnCar(MI_FREEWAY); });
+		DebugMenuAddCmd("Spawn", "Spawn Squalo", [](){ SpawnCar(MI_SQUALO); });
+		DebugMenuAddCmd("Spawn", "Spawn Skimmer", [](){ SpawnCar(MI_SKIMMER); });
 
 		DebugMenuAddVarBool8("Render", "Draw hud", &CHud::m_Wants_To_Draw_Hud, nil);
 		DebugMenuAddVarBool8("Render", "Backface Culling", &gBackfaceCulling, nil);
@@ -483,6 +495,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Render", "Frame limiter", &FrontEndMenuManager.m_PrefsFrameLimiter, nil);
 		DebugMenuAddVarBool8("Render", "VSynch", &FrontEndMenuManager.m_PrefsVsync, nil);
 		DebugMenuAddVar("Render", "Max FPS", &RsGlobal.maxFPS, nil, 1, 1, 1000, nil);
+		DebugMenuAddVarBool8("Render", "Occlusion debug", &bDisplayOccDebugStuff, nil);
 		DebugMenuAddVarBool8("Render", "Show Ped Paths", &gbShowPedPaths, nil);
 		DebugMenuAddVarBool8("Render", "Show Car Paths", &gbShowCarPaths, nil);
 		DebugMenuAddVarBool8("Render", "Show Car Path Links", &gbShowCarPathsLinks, nil);
@@ -497,7 +510,7 @@ DebugMenuPopulate(void)
 
 		DebugMenuAddVarBool8("Debug", "pad 1 -> pad 2", &CPad::m_bMapPadOneToPadTwo, nil);
 		DebugMenuAddVarBool8("Debug", "Edit on", &CSceneEdit::m_bEditOn, nil);
-#ifdef MENU_MAP
+#ifdef MAP_ENHANCEMENTS
 		DebugMenuAddCmd("Debug", "Teleport to map waypoint", TeleportToWaypoint);
 #endif
 		DebugMenuAddCmd("Debug", "Switch car collision", SwitchCarCollision);

@@ -31,7 +31,7 @@
 
 /**
  * \defgroup rpcollis RpCollision
- * \ingroup rpplugin
+ * \ingroup collisiondetection
  *
  * Collision Plugin for RenderWare Graphics.
  */
@@ -67,12 +67,12 @@ enum RpIntersectType
 };
 typedef enum RpIntersectType RpIntersectType;
 
+typedef union RpIntersectData RpIntersectData;
 /**
  * \ingroup rpcollis
  * RpIntersectData, this union type is used to specify the parameters
  * for an intersection primitive of the desired type (\ref RpIntersectType)
  */
-typedef union RpIntersectData RpIntersectData;
 union RpIntersectData
 {
     RwLine              line;       /**<For type rpINTERSECTLINE */
@@ -144,13 +144,16 @@ struct RpCollisionBuildParam
 
 /**
  * \ingroup rpcollis
- * \typedef RpIntersectionCallBackWorldTriangle
  * \ref RpIntersectionCallBackWorldTriangle represents the function called
  * from \ref RpCollisionWorldForAllIntersections for all intersections between
  * the specified primitive and the static geometry in a given world. This
  * function should return a pointer to the current collision triangle to
  * indicate success. The callback may return NULL to terminate further
  * callbacks on the world.
+ *
+ * \note The memory pointed to by collTriangle is stored on the stack. 
+ * This memory should be considered volatile. To use this data outside
+ * of the iterator, copy the contents.
  *
  * \param  intersection   Pointer to the intersection primitive.
  * \param  sector   Pointer to the world sector containing the triangle.
@@ -181,7 +184,6 @@ typedef RpCollisionTriangle *(*RpIntersectionCallBackWorldTriangle)
 
 /**
  * \ingroup rpcollis
- * \typedef RpIntersectionCallBackAtomic
  * \ref RpIntersectionCallBackAtomic represents the function called from
  * \ref RpWorldForAllAtomicIntersections for all intersections between the
  * specified primitive and collision atomics in a given world. This function
@@ -215,7 +217,6 @@ typedef RpAtomic   *(*RpIntersectionCallBackAtomic)
 
 /**
  * \ingroup rpcollis
- * \typedef RpIntersectionCallBackWorldSector
  * \ref RpIntersectionCallBackWorldSector represents the function called from
  * \ref RpWorldForAllWorldSectorIntersections for all intersections between the
  * specified primitive and world sectors in a given world. This function should
@@ -234,7 +235,6 @@ typedef RpWorldSector *(*RpIntersectionCallBackWorldSector)
 
 /**
  * \ingroup rpcollis
- * \typedef RpIntersectionCallBackGeometryTriangle
  * \ref RpIntersectionCallBackGeometryTriangle represents the function called
  * from \ref RpAtomicForAllIntersections and
  * \ref RpCollisionGeometryForAllIntersections

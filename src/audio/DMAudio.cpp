@@ -112,25 +112,69 @@ cDMAudio::Get3DProviderName(uint8 id)
 	return AudioManager.Get3DProviderName(id);
 }
 
+// TODO(Miami): Content of this moved to cSampleManager or cAudioManager
 int8 cDMAudio::AutoDetect3DProviders(void)
 {
+	if (!AudioManager.IsAudioInitialised())
+		return -1;
+
+	int eax = -1, eax2 = -1, eax3 = -1, ds3dh = -1, ds3ds = -1;
+
 	for ( int32 i = 0; i < GetNum3DProvidersAvailable(); i++ )
 	{
-		wchar buff[64];
-		
-		char *name = Get3DProviderName(i);
-		AsciiToUnicode(name, buff);
-		char *providername = UnicodeToAscii(buff);
+		char *providername = Get3DProviderName(i);
 		strupr(providername);
-#if defined(AUDIO_MSS)
-		if ( !strcmp(providername, "MILES FAST 2D POSITIONAL AUDIO") )
-			return i;
-#elif defined(AUDIO_OAL)
-		if ( !strcmp(providername, "OPENAL SOFT") )
-			return i;
+
+#if defined(AUDIO_OAL)
+		if (!strcmp(providername, "OPENAL SOFT")) {
+			SetCurrent3DProvider(i);
+			if (GetCurrent3DProviderIndex() == i)
+				return i;
+		}
+#else
+		if (!strcmp(providername, "CREATIVE LABS EAX 3 (TM)")) {
+			SetCurrent3DProvider(i);
+			if (GetCurrent3DProviderIndex() == i) {
+				eax3 = i;
+			}
+		}
+
+		if (!strcmp(providername, "CREATIVE LABS EAX 2 (TM)")) {
+			SetCurrent3DProvider(i);
+			if (GetCurrent3DProviderIndex() == i)
+				eax2 = i;
+		}
+
+		if (!strcmp(providername, "CREATIVE LABS EAX (TM)")) {
+			SetCurrent3DProvider(i);
+			if (GetCurrent3DProviderIndex() == i)
+				eax = i;
+		}
+
+		if (!strcmp(providername, "DIRECTSOUND3D HARDWARE SUPPORT")) {
+			SetCurrent3DProvider(i);
+			if (GetCurrent3DProviderIndex() == i)
+				ds3dh = i;
+		}
+
+		if (!strcmp(providername, "DIRECTSOUND3D SOFTWARE EMULATION")) {
+			SetCurrent3DProvider(i);
+			if (GetCurrent3DProviderIndex() == i)
+				ds3ds = i;
+		}
 #endif
 	}
 
+	if (eax3 != -1)
+		return eax3;
+	if (eax2 != -1)
+		return eax2;
+	if (eax != -1)
+		return eax;
+	if (ds3dh != -1)
+		return ds3dh;
+	if (ds3ds != -1)
+		return ds3ds;
 	return -1;
 }
 

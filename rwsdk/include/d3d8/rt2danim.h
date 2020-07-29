@@ -10,8 +10,8 @@
 #define RT2DANIM_H
 
 /**
- * \defgroup rt2danim Rt2dAnim
- * \ingroup rttool
+ * \defgroup rt2danim Rt2dAnim (inc. Maestro)
+ * \ingroup 2dtools
  *
  * A toolkit to coordinate the display, storage and manipulation of 2D
  * animations.
@@ -166,101 +166,132 @@ typedef enum Rt2dStringLabelType Rt2dStringLabelType;
 
 /**
  * \ingroup rt2danimsub
- * \typedef Rt2dAnimProps
- * typedef for a structure describing the current state of a scene (opaque)
+ * \struct Rt2dAnimProps
+ * Structure describing the current state of a scene.
+ * This should be considered an opaque type. Use the 
+ * Rt2dAnim API functions to access.
  */
 typedef struct Rt2dAnimProps Rt2dAnimProps;
 
 /**
  * \ingroup rt2danimsub
- * \typedef Rt2dKeyFrameList
- * typedef for a structure describing a list of keyframes
+ * \struct Rt2dKeyFrameList
+ * Structure describing an entire list of keyframes
+ * This should be considered an opaque type. Use the 
+ * Rt2dKeyFrameList API functions to access.
  */
 typedef struct Rt2dKeyFrameList Rt2dKeyFrameList;
 
 /**
  * \ingroup rt2danimsub
- * \typedef Rt2dAnimObjectUpdate
- * typedef for a structure describing a set of changes to a 2d object (opaque)
+ * \struct Rt2dKeyFrameSet
+ *  structure describing a set of keyframe actions to be applied to a 2D object.
+ * This should be considered an opaque type. Use the 
+ * Rt2dAnim API functions to access.
+ */
+typedef struct Rt2dKeyFrameSet Rt2dKeyFrameSet;
+
+/**
+ * \ingroup rt2danimsub
+ * \struct Rt2dAnimObjectUpdate
+ * Structure describing an unoptimized update to an object
+ * This should be considered an opaque type. Use the 
+ * Rt2dAnim API functions to access.
  */
 typedef struct Rt2dAnimObjectUpdate Rt2dAnimObjectUpdate;
 
 /**
  * \ingroup rt2danimsub
- * \typedef Rt2dKeyFrameTransform
- * typedef for a structure describing a transform change to a 2d object (opaque)
+ * \struct Rt2dKeyFrameTransform
+ * Structure describing a transform change to a 2d object.
+ * This should be considered an opaque type. Use the 
+ * Rt2dAnim API functions to access.
  */
 typedef struct Rt2dKeyFrameTransform Rt2dKeyFrameTransform;
 
-/**
- * \ingroup rt2danimsub
- * \typedef Rt2dKeyFrameColor
- * typedef for a structure describing a color change to a 2d object (opaque)
+/*
+ * Typedef for struct Rt2dKeyFrameColor describing a color 
+ * change to a 2d object.
  */
 typedef struct Rt2dKeyFrameColor Rt2dKeyFrameColor;
 
-/**
- * \ingroup rt2danimsub
- * \typedef Rt2dKeyFrameShow
- * typedef for a structure describing a displayable or depth change to a 2d object (opaque)
+/*
+ * Structure describing a displayable or depth change to a 2d object.
  */
 typedef struct Rt2dKeyFrameShow Rt2dKeyFrameShow;
 
-/**
- * \ingroup rt2danimsub
- * \typedef Rt2dKeyFrameMorph
- * typedef for a structure describing a morph change to a 2d object (opaque)
+/*
+ * Structure describing a morph change to a 2d object.
  */
 typedef struct Rt2dKeyFrameMorph Rt2dKeyFrameMorph;
 
 /**
  * \ingroup rt2danimsub
- * \typedef Rt2dAnim
- * typedef for a structure describing a 2d animation (opaque)
+ * \struct Rt2dAnim
+ * Structure describing a 2d animation.
+ * This should be considered an opaque type. Use the 
+ * Rt2dAnim API functions to access.
  */
 typedef struct Rt2dAnim Rt2dAnim;
 
 /**
  * \ingroup rt2dbutton
- * \typedef Rt2dButton
- * typedef for a structure describing a button (opaque)
+ * \struct Rt2dButton
+ * Structure describing a button.
+ * This should be considered an opaque type. Use the 
+ * Rt2dButton API functions to access.
  */
 typedef struct Rt2dButton Rt2dButton;
 
 /**
  * \ingroup rt2dcel
- * \typedef Rt2dCel
- * typedef for a structure describing a cel (opaque)
+ * \struct Rt2dCel
+ * Structure describing a cel.
+ * This should be considered an opaque type. Use the 
+ * Rt2dCel API functions to access.
  */
 typedef struct Rt2dCel Rt2dCel;
 
 /**
  * \ingroup rt2dcel
- * \typedef Rt2dCelList
- * typedef for a structure describing a cel list (opaque)
+ * \struct Rt2dCelList
+ * Structure describing a cel list.
+ * This should be considered an opaque type. Use the 
+ * Rt2dCel API functions to access.
  */
 typedef struct Rt2dCelList Rt2dCelList;
 
 /**
  * \ingroup rt2dmaestro
- * \typedef Rt2dMaestro
- * typedef for a structure describing a maestro (opaque)
+ * \struct Rt2dMaestro
+ * Structure describing a maestro.
+ * This should be considered an opaque type. Use the 
+ * Rt2dMaestro API functions to access.
  */
 typedef struct Rt2dMaestro Rt2dMaestro;
 
-/**
- * \ingroup rt2dmessage
- * \typedef Rt2dMessage
- * typedef for a structure describing a message (opaque)
+/*
+ * Structure describing a message.
  */
 typedef struct Rt2dMessage Rt2dMessage;
 
+/**
+ * \ingroup rt2dmessage
+ * \struct Rt2dMessageList
+ * Structure describing a message.
+ * This should be considered an opaque type. Use the 
+ * Rt2dMessage API functions to access.
+ */
 typedef struct Rt2dMessageList Rt2dMessageList;
 
 /**
  * \ingroup rt2dstringlabel
- * \typedef Rt2dStringLabel
- * typedef for a structure describing a string label (opaque)
+ * \struct Rt2dStringLabel
+ * Structure used to store and access named data, either internal or user. 
+ * A type and a name may be used to access internal and user data.
+ *
+ * This should be considered an opaque type. Use the 
+ * Rt2dStringLabel API functions to access.
  */
 typedef struct Rt2dStringLabel Rt2dStringLabel;
 
@@ -277,7 +308,8 @@ struct Rt2dKeyFrameTransform
 /**
  * \ingroup rt2danimsub
  * \struct Rt2dKeyFrameColor
- *  structure describing a color setting action
+ * Structure describing a color 
+ * change to a 2d object.
  */
 struct Rt2dKeyFrameColor
 {
@@ -287,7 +319,7 @@ struct Rt2dKeyFrameColor
 /**
  * \ingroup rt2danimsub
  * \struct Rt2dKeyFrameShow
- *  structure describing a show/hide action
+ * Structure describing a show/hide change and a depth change to a 2d object.
  */
 struct Rt2dKeyFrameShow
 {
@@ -299,7 +331,7 @@ struct Rt2dKeyFrameShow
 /**
  * \ingroup rt2danimsub
  * \struct Rt2dKeyFrameMorph
- *  structure describing a morph action
+ * Structure describing a morph change to a 2d object.
  */
 struct Rt2dKeyFrameMorph
 {
@@ -355,68 +387,72 @@ MACRO_START \
 } \
 MACRO_STOP
 
-/**
- * \ingroup rt2dstringlabel
- * \struct Rt2dStringLabel
- * structure containing label information. The enitityType identifies the type
+/*
+ * structure containing label information. The entityType identifies the type
  * of the label. The label's name is stored as an index
  * in common storage area. The entityType and name of the label are used as keys
  * during a search. Additional internal and user data can be stored with the
  * label.
  */
+
+#if (!defined(DOXYGEN))
 struct Rt2dStringLabel
 {
-    RwUInt32                entityType;  /**< type of the label
-                                              (\ref Rt2dStringLabelType) */
-    RwInt32                 nameIndex;   /**< index of name in internal data 
+    RwUInt32                entityType;  /* type of the label
+                                              (see Rt2dStringLabelType) */
+    RwInt32                 nameIndex;   /* index of name in internal data 
                                               area */
-    void                    *internalData; /**< internal data */
-    void                    *userData;     /**< customizable data */
+    void                    *internalData; /* internal data */
+    void                    *userData;     /* customizable data */
     
 };
 
+#endif /* (!defined(DOXYGEN)) */
+
 #define _rt2dStringLabelGetStringLabelTypeMacro(_strLabel) \
-    ((_strLabel)->entityType);
+    ((_strLabel)->entityType)
 
 #define _rt2dStringLabelSetStringLabelTypeMacro(_strLabel, _entityType) \
-    ((_strLabel)->entityType = (_entityType));
+    ((_strLabel)->entityType = (_entityType))
 
 #define _rt2dStringLabelGetNameIndexMacro(_strLabel) \
-    ((_strLabel)->nameIndex);
+    ((_strLabel)->nameIndex)
 
 #define _rt2dStringLabelSetNameIndexMacro(_strLabel, _index) \
-    ((_strLabel)->nameIndex = (_index));
+    ((_strLabel)->nameIndex = (_index))
 
 #define _rt2dStringLabelGetInternalDataMacro(_strLabel) \
-    ((_strLabel)->internalData);
+    ((_strLabel)->internalData)
 
 #define _rt2dStringLabelSetInternalDataMacro(_strLabel, _internalData) \
-    ((_strLabel)->internalData = (_internalData));
+    ((_strLabel)->internalData = (_internalData))
 
 #define _rt2dStringLabelGetUserDataMacro(_strLabel) \
-    ((_strLabel)->userData);
+    ((_strLabel)->userData)
 
 #define _rt2dStringLabelSetUserDataMacro(_strLabel, _userData) \
-    ((_strLabel)->userData = (_userData));
+    ((_strLabel)->userData = (_userData))
 
-/**
- * \ingroup rt2dcel
- * \struct Rt2dCel
+/*
  *  structure containing cel information. The name of the cel is stored as an
  * index into a label table. The buttons in the cel are stored as indices. These
- * reference a list of buttons  held by the cel's parent maestro. Any messages
+ * reference a list of buttons held by the cel's parent maestro. Any messages
  * to be process when the cel is active is stored as index into the parent's
  * maestro's message storage area.
  */
+
+#if (!defined(DOXYGEN))
 struct Rt2dCel
 {
-    RwInt32                 strLabelIndex;      /**< Frame label */
-    RwInt32                 celIndex;           /**< Frame number */
-    RwSList                 *buttonIndices;     /**< List of buttons active in 
-                                                     this frame */
-    RwInt32                 messageListIndex;   /**< Messages to be posted after
-                                                     displaying this frame */
+    RwInt32                 strLabelIndex;      /* Frame label */
+    RwInt32                 celIndex;           /* Frame number */
+    RwSList                 *buttonIndices;     /* List of buttons active in 
+                                                   this frame */
+    RwInt32                 messageListIndex;   /* Messages to be posted after
+                                                   displaying this frame */
 };
+
+#endif /* (!defined(DOXYGEN)) */
 
 #define _rt2dCelGetStringLabelIndexMacro(_cel) \
     ((_cel)->strLabelIndex);
@@ -443,14 +479,16 @@ typedef Rt2dAnim *(*Rt2dAnimCallBack)(Rt2dAnim *object,
 					                         void *data);
 /**
  * \ingroup rt2danimsub
- * \typedef Rt2dKeyFrameListCallBack
+ * \ref Rt2dKeyFrameListCallBack
  * This typedef defines a callback function to apply to a frame list.
  *
- * \param anim Pointer to the animation
- * \param props Pointer to the props that the animation acts upon
- * \param keyframeList The key frame list
+ * \param anim             Pointer to the animation
+ * \param props            Pointer to the props that the animation acts upon
+ * \param keyframeList     The key frame list
  * \param keyframeListTime The key frame list time
- * \param data User defined data
+ * \param data             User defined data
+ *
+ * \return return value is ignored
  */
 typedef Rt2dKeyFrameList *(Rt2dKeyFrameListCallBack)(
                                            Rt2dAnim *anim,
@@ -461,12 +499,14 @@ typedef Rt2dKeyFrameList *(Rt2dKeyFrameListCallBack)(
 
 /**
  * \ingroup rt2danimsub
- * \typedef Rt2dAnimOnEndReachedCallBack
+ * \ref Rt2dAnimOnEndReachedCallBack
  * This typedef defines a callback function called at the end of an animation.
  *
- * \param anim Pointer to the animation ending
- * \param props Pointer to the props that the animation acts upon
+ * \param anim               Pointer to the animation ending
+ * \param props              Pointer to the props that the animation acts upon
  * \param remainingDeltaTime Remaining time
+ *
+ * \return return value is ignored
  */
 typedef Rt2dAnim *(*Rt2dAnimOnEndReachedCallBack)(Rt2dAnim *anim,
                                                  Rt2dAnimProps *props,
@@ -474,14 +514,14 @@ typedef Rt2dAnim *(*Rt2dAnimOnEndReachedCallBack)(Rt2dAnim *anim,
 
 /**
  * \ingroup rt2dmaestro
- * \typedef Rt2dMaestroAnimationsCallBack
+ * \ref Rt2dMaestroAnimationsCallBack
  * \ref Rt2dMaestroAnimationsCallBack represents the function called from
  * \ref Rt2dMaestroForAllAnimations for all animations in the maestro.
  * This function
  * should return the current maestro to indicate success. The callback may
  * return NULL to terminate further callbacks on the maestro.
  *
- * \param maestro          Pointer to parent maestro.
+ * \param maestro           Pointer to parent maestro.
  * \param anim              Pointer to the animation.
  * \param props             Pointer to the anim's props.
  * \param pData             Pointer to private data.
@@ -494,7 +534,6 @@ typedef Rt2dMaestro *(*Rt2dMaestroAnimationsCallBack)
 
 /**
  * \ingroup rt2dmessage
- * \typedef Rt2dMessageHandlerCallBack
  * \ref Rt2dMessageHandlerCallBack represents the function called from
  * \ref Rt2dMaestroProcessMessages for all messages in the maestro's
  * process message queue. The maestro does not filter any messages. The
@@ -504,7 +543,7 @@ typedef Rt2dMaestro *(*Rt2dMaestroAnimationsCallBack)
  * callback may return NULL to terminate further callbacks on the maestro.
  *
  * \param maestro          Pointer to parent maestro.
- * \param message           Pointer to the message.
+ * \param message          Pointer to the message.
  *
  * \return Pointer to the message.
  */
@@ -530,6 +569,18 @@ typedef Rt2dMessage *
  * Data access macros.
  */
 
+/*
+ * Toolkit-level initialization / finalization
+ */
+/*
+ * INITIALIZE
+ */
+extern void
+Rt2dAnimOpen(void);
+
+extern void
+Rt2dAnimClose(void);
+ 
 /*
  * Rt2dAnim
  */
@@ -747,7 +798,7 @@ Rt2dMaestroAddButton(Rt2dMaestro *maestro, RwInt32 strLabelIdx, RwInt32 objectId
 
 extern Rt2dCel *
 Rt2dCelCreate(Rt2dMaestro *maestro,
-              RwChar *name,
+              const RwChar *name,
               RwInt32 celIndex, RwInt32 messageListIndex);
 
 extern Rt2dCelList *
@@ -966,7 +1017,7 @@ Rt2dMessageHandlerDefaultCallBack(Rt2dMaestro *maestro, Rt2dMessage *message);
  */
 extern Rt2dStringLabel *
 Rt2dMaestroFindStringLabel(Rt2dMaestro *maestro,
-                            Rt2dStringLabelType entityType, RwChar *lookupName,
+                            Rt2dStringLabelType entityType, const RwChar *lookupName,
                             RwInt32 *index);
 
 extern Rt2dStringLabel *
@@ -974,7 +1025,7 @@ Rt2dMaestroGetStringLabelByIndex(Rt2dMaestro *maestro, RwInt32 index);
 
 extern Rt2dMaestro *
 Rt2dMaestroAddStringLabel(Rt2dMaestro *maestro,
-                           Rt2dStringLabelType entityType, RwChar *name,
+                           Rt2dStringLabelType entityType, const RwChar *name,
                            void *internalData, RwInt32 *index);
 
 extern const RwChar *
@@ -985,28 +1036,28 @@ Rt2dMaestroGetStringLabelName(Rt2dMaestro *maestro,
 #if !(defined(RWDEBUG) || defined(RWSUPPRESSINLINE))
 
 #define Rt2dStringLabelGetStringLabelType(_strLabel) \
-    _rt2dStringLabelGetStringLabelTypeMacro((_strLabel));
+    _rt2dStringLabelGetStringLabelTypeMacro((_strLabel))
 
 #define Rt2dStringLabelSetStringLabelType(_strLabel, _entityType) \
-    _rt2dStringLabelSetStringLabelTypeMacro((_strLabel), (_entityType));
+    _rt2dStringLabelSetStringLabelTypeMacro((_strLabel), (_entityType))
 
 #define Rt2dStringLabelGetNameIndex(_strLabel) \
-    _rt2dStringLabelGetNameIndexMacro((_strLabel));
+    _rt2dStringLabelGetNameIndexMacro((_strLabel))
 
 #define Rt2dStringLabelSetNameIndex(_strLabel, _index) \
-    _rt2dStringLabelSetNameIndexMacro((_strLabel), (_index));
+    _rt2dStringLabelSetNameIndexMacro((_strLabel), (_index))
 
 #define Rt2dStringLabelGetInternalData(_strLabel) \
-    _rt2dStringLabelGetInternalDataMacro((_strLabel));
+    _rt2dStringLabelGetInternalDataMacro((_strLabel))
 
 #define Rt2dStringLabelSetInternalData(_strLabel, _internalData) \
-    _rt2dStringLabelSetInternalDataMacro((_strLabel), (_internalData));
+    _rt2dStringLabelSetInternalDataMacro((_strLabel), (_internalData))
 
 #define Rt2dStringLabelGetUserData(_strLabel) \
-    _rt2dStringLabelGetUserDataMacro((_strLabel));
+    _rt2dStringLabelGetUserDataMacro((_strLabel))
 
 #define Rt2dStringLabelSetUserData(_strLabel, _userData) \
-    _rt2dStringLabelSetUserDataMacro((_strLabel), (_userData));
+    _rt2dStringLabelSetUserDataMacro((_strLabel), (_userData))
 
 #else /* !(defined(RWDEBUG) || defined(RWSUPPRESSINLINE)) */
 

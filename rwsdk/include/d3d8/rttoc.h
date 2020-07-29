@@ -1,37 +1,38 @@
-/***************************************************************************
- *                                                                         *
- * Module  : rttoc.h                                                       *
- *                                                                         *
- * Purpose : Table Of Contents (TOC)                                       *
- *                                                                         *
- **************************************************************************/
+/******************************************************************************
+ *                                                                            *
+ * Module  : rttoc.h                                                          *
+ *                                                                            *
+ * Purpose : Table Of Contents (TOC)                                          *
+ *                                                                            *
+ ******************************************************************************/
 
 #ifndef RTTOC_H
 #define RTTOC_H
 
 /**
  * \defgroup rttoc RtTOC
- * \ingroup rttool
+ * \ingroup streaming
  *
- * Table Of Contents (TOC) - e.g. creating a TOC for a RwStream.
+ * Table Of Contents (TOC) -  creating a TOC for a stream.
  */
 
-/****************************************************************************
+/******************************************************************************
  Includes
  */
 #include "rwcore.h"
 
 #include "rpcriter.h"
 
-/****************************************************************************
+/******************************************************************************
  Defines
  */
 
-/****************************************************************************
+/******************************************************************************
  Global Types
  */
 
 typedef struct _rtTOCGUID _rtTOCGUID;
+#if (!defined(DOXYGEN))
 struct _rtTOCGUID
 {
     RwUInt32        data1;
@@ -39,20 +40,22 @@ struct _rtTOCGUID
     RwUInt16        data3;
     RwUInt8         data4[8];
 };
+#endif /* (!defined(DOXYGEN)) */
 
 typedef struct RtTOCEntry RtTOCEntry;
 /**
  * \ingroup rttoc
  * \struct RtTOCEntry
  * 
- * BLAH
+ * A Table Of Contents (TOC) entry structure.
  */
 struct RtTOCEntry
 {  
-    RwCorePluginID  id;    /**< Chunk ID */
-    RwUInt32        offset;/**< Offset of chunk from the start of the file 
-                            *   including TOC */
-    _rtTOCGUID      guid;  /**< GUID */
+    RwCorePluginID  id;     /**< Chunk ID */
+    RwUInt32        gid;    /**< Game ID */
+    RwUInt32        offset; /**< Offset of chunk from the start of the file
+                               including TOC */
+    _rtTOCGUID      guid;   /**< GUID */
 };
 
 typedef struct RtTOC RtTOC;
@@ -60,16 +63,16 @@ typedef struct RtTOC RtTOC;
 /**
  * \ingroup rttoc
  * \struct RtTOC
- *
- * BLAH
+ * 
+ *  Table Of Contents (TOC) structure.
  */
 struct RtTOC
 {
-    RwInt32         numEntries; /**< Number of entries*/
-    RtTOCEntry      entry[1];   /**< Entry*/
+    RwInt32         numEntries; /**< Number of entries */
+    RtTOCEntry      entry[1];   /**< Entry */
 };
 
-/****************************************************************************
+/******************************************************************************
  Function prototypes
  */
 

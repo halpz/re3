@@ -169,11 +169,11 @@ cAudioManager::SetEntityStatus(int32 id, uint8 status)
 void
 cAudioManager::PlayOneShot(int32 index, int16 sound, float vol)
 {
-	static const uint8 OneShotPriority[] = {3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 3, 5, 2, 2, 1, 1, 3, 1, 3, 3, 1, 1, 1, 4, 4, 3, 1, 1,
-	                                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 3, 2, 2, 2, 2, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	                                        1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 3, 1, 1, 1, 9,
-	                                        2, 2, 0, 0, 0, 0, 3, 3, 5, 1, 1, 1, 1, 3, 4, 7, 6, 6, 6, 6, 1, 3, 4, 3, 4, 2, 1, 3, 5, 4, 6, 6, 1, 3,
-	                                        1, 1, 1, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	static const uint8 OneShotPriority[] = { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 4, 2, 5, 5, 3, 5, 2, 2, 1, 1, 3, 1, 3, 3, 1, 1, 1, 1, 4, 4, 4, 3, 1, 1, 1, 1, 1,
+											1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 3, 4, 2, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0, 0,
+											0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 3, 1, 1, 1, 9, 0, 0, 0, 1, 2, 2, 0, 0, 2, 3, 3, 3, 5, 1, 1,
+											1, 1, 1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 4, 7, 1, 4, 3, 4, 2, 2, 2, 3, 1, 2, 1, 3, 5, 3, 4, 6, 4, 6, 3, 0, 0, 0, 0, 0,
+											0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 3, 1, 1, 2, 1, 1, 0, 0, 0, 0, 0, 3, 3, 1, 0 };
 
 	if (m_bIsInitialised) {
 		if (index >= 0 && index < NUM_AUDIOENTITIES) {
@@ -437,7 +437,7 @@ cAudioManager::ServiceSoundEffects()
 		}
 		ClearActiveSamples();
 	}
-	m_nActiveSampleQueue = m_nActiveSampleQueue != 1;
+	m_nActiveSampleQueue = m_nActiveSampleQueue == 1 ? 0 : 1;
 	ProcessReverb();
 	ProcessSpecial();
 	ClearRequestedQueue();
@@ -687,7 +687,7 @@ cAudioManager::AddReleasingSounds()
 {
 	bool toProcess[44]; // why not 27?
 
-	int8 queue = m_nActiveSampleQueue == 0;
+	int8 queue = m_nActiveSampleQueue == 0 ? 1 : 0;
 
 	for (int32 i = 0; i < m_SampleRequestQueuesStatus[queue]; i++) {
 		tSound &sample = m_asSamples[queue][m_abSampleQueueIndexTable[queue][i]];

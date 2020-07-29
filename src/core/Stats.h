@@ -25,8 +25,8 @@ public:
 	static int32 TimesDied;
 	static int32 TimesArrested;
 	static int32 KillsSinceLastCheckpoint;
-	static int32 DistanceTravelledInVehicle;
-	static int32 DistanceTravelledOnFoot;
+	static float DistanceTravelledInVehicle;
+	static float DistanceTravelledOnFoot;
 	static int32 CarsExploded;
 	static int32 PeopleKilledByPlayer;
 	static int32 ProgressMade;
@@ -53,7 +53,6 @@ public:
 	static int32 CriminalsCaught;
 	static int32 HighestLevelAmbulanceMission;
 	static int32 FiresExtinguished;
-	static int32 LongestFlightInDodo;
 	static int32 TimeTakenDefuseMission;
 	static int32 TotalNumberKillFrenzies;
 	static int32 TotalNumberMissions;
@@ -62,8 +61,6 @@ public:
 	static int32 InstantHitsFiredByPlayer;
 	static int32 InstantHitsHitByPlayer;
 	static int32 BestTimeBombDefusal;
-	static int32 mmRain;
-	static int32 CarsCrushed;
 	static int32 FastestTimes[TOTAL_FASTEST_TIMES];
 	static int32 HighestScores[TOTAL_HIGHEST_SCORES];
 	static int32 BestPositions[TOTAL_BEST_POSITIONS];
@@ -90,7 +87,6 @@ public:
 	static void RegisterLevelAmbulanceMission(int32);
 	static void AnotherFireExtinguished();
 	static wchar *FindCriminalRatingString();
-	static void RegisterLongestFlightInDodo(int32);
 	static void RegisterTimeTakenDefuseMission(int32);
 	static void AnotherKillFrenzyPassed();
 	static void SetTotalNumberKillFrenzies(int32);

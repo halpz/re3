@@ -19,7 +19,12 @@
 
 #pragma warning( push )
 #pragma warning( disable : 4005)
+
+#ifdef USE_D3D9
+#include <d3d9.h>
+#else
 #include <d3d8.h>
+#endif
 #include <ddraw.h>
 #include <dinput.h>
 #include <DShow.h>
@@ -27,7 +32,9 @@
 
 #define WM_GRAPHNOTIFY	WM_USER+13
 
+#ifndef USE_D3D9
 #pragma comment( lib, "d3d8.lib" )
+#endif
 #pragma comment( lib, "ddraw.lib" )
 #pragma comment( lib, "Winmm.lib" )
 #pragma comment( lib, "dxguid.lib" )
@@ -76,7 +83,6 @@ static psGlobalType PsGlobal;
 	{debug(TEXT("FAILED(hr=0x%x) in ") TEXT(#x) TEXT("\n"), hr); return;}
 
 #include "common.h"
-#include "patcher.h"
 #include "main.h"
 #include "FileMgr.h"
 #include "Text.h"
@@ -103,7 +109,7 @@ IMediaSeeking *pMS = nil;
 
 DWORD dwDXVersion;
 SIZE_T _dwMemTotalPhys;
-SIZE_T _dwMemAvailPhys;
+size_t _dwMemAvailPhys;
 SIZE_T _dwMemTotalVirtual;
 SIZE_T _dwMemAvailVirtual;
 DWORD _dwMemTotalVideo;
@@ -223,7 +229,11 @@ psCameraBeginUpdate(RwCamera *camera)
 void
 psCameraShowRaster(RwCamera *camera)
 {
-	if (FrontEndMenuManager.m_PrefsVsync)
+#ifdef LEGACY_MENU_OPTIONS
+	if (FrontEndMenuManager.m_PrefsVsync || FrontEndMenuManager.m_bMenuActive)
+#else
+	if (FrontEndMenuManager.m_PrefsFrameLimiter || FrontEndMenuManager.m_bMenuActive)
+#endif
 		RwCameraShowRaster(camera, PSGLOBAL(window), rwRASTERFLIPWAITVSYNC);
 	else
 		RwCameraShowRaster(camera, PSGLOBAL(window), rwRASTERFLIPDONTWAIT);
@@ -302,34 +312,6 @@ psNativeTextureSupport(void)
 {
 	return RwD3D8DeviceSupportsDXTTexture();
 }
-
-/*
- *****************************************************************************
- */
-static BOOL
-InitApplication(HANDLE instance)
-{
-	/*
-	 * Perform any necessary MS Windows application initialization. Basically,
-	 * this means registering the window class for this application.
-	 */
-
-	WNDCLASS windowClass;
-
-	windowClass.style = CS_BYTEALIGNWINDOW;
-	windowClass.lpfnWndProc = (WNDPROC) MainWndProc;
-	windowClass.cbClsExtra = 0;
-	windowClass.cbWndExtra = 0;
-	windowClass.hInstance = (HINSTANCE)instance;
-	windowClass.hIcon = nil;
-	windowClass.hCursor = LoadCursor(nil, IDC_ARROW);
-	windowClass.hbrBackground = nil;
-	windowClass.lpszMenuName = NULL;
-	windowClass.lpszClassName = AppClassName;
-
-	return RegisterClass(&windowClass);
-}
-
 
 /*
  *****************************************************************************
@@ -450,6 +432,16 @@ DWORD GetDXVersion()
 	dwDXVersion = 0x700;
 	pDD7->Release();
 
+#ifdef USE_D3D9
+	HINSTANCE hD3D9DLL = LoadLibrary("D3D9.DLL");
+	if (hD3D9DLL != nil) {
+		FreeLibrary(hDDrawDLL);
+		FreeLibrary(hD3D9DLL);
+
+		dwDXVersion = 0x900;
+		return dwDXVersion;
+	}
+#endif
 
 	//-------------------------------------------------------------------------
 	// DirectX 8.0 Checks
@@ -499,6 +491,7 @@ DWORD GetDXVersion()
 /*
  *****************************************************************************
  */
+#ifndef _WIN64
 static char cpuvendor[16] = "UnknownVendr";
 __declspec(naked)  const char * _psGetCpuVendr()
 {
@@ -572,6 +565,7 @@ void _psPrintCpuInfo()
 	if ( FeaturesEx & 0x80000000 )
 		debug("with 3DNow");
 }
+#endif
 
 /*
  *****************************************************************************
@@ -647,9 +641,9 @@ psInitialize(void)
 	
 	gGameState = GS_START_UP;
 	TRACE("gGameState = GS_START_UP");
-	
+#ifndef _WIN64
 	_psPrintCpuInfo();
-	
+#endif
 	OSVERSIONINFO verInfo;
 	verInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 	
@@ -1283,6 +1277,33 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(window, message, wParam, lParam);
 }
 
+/*
+ *****************************************************************************
+ */
+static BOOL
+InitApplication(HANDLE instance)
+{
+	/*
+	 * Perform any necessary MS Windows application initialization. Basically,
+	 * this means registering the window class for this application.
+	 */
+
+	WNDCLASS windowClass;
+
+	windowClass.style = CS_BYTEALIGNWINDOW;
+	windowClass.lpfnWndProc = (WNDPROC)MainWndProc;
+	windowClass.cbClsExtra = 0;
+	windowClass.cbWndExtra = 0;
+	windowClass.hInstance = (HINSTANCE)instance;
+	windowClass.hIcon = nil;
+	windowClass.hCursor = LoadCursor(nil, IDC_ARROW);
+	windowClass.hbrBackground = nil;
+	windowClass.lpszMenuName = NULL;
+	windowClass.lpszClassName = AppClassName;
+
+	return RegisterClass(&windowClass);
+}
+
 
 /*
  *****************************************************************************
@@ -1295,8 +1316,11 @@ RwBool IsForegroundApp()
 
 UINT GetBestRefreshRate(UINT width, UINT height, UINT depth)
 {
+#ifdef USE_D3D9
+	LPDIRECT3D9 d3d = Direct3DCreate9(D3D_SDK_VERSION);
+#else
 	LPDIRECT3D8 d3d = Direct3DCreate8(D3D_SDK_VERSION);
-	
+#endif
 	ASSERT(d3d != nil);
 	
 	UINT refreshRate = INT_MAX;
@@ -1309,14 +1333,21 @@ UINT GetBestRefreshRate(UINT width, UINT height, UINT depth)
 	else
 		format = D3DFMT_R5G6B5;
 	
+#ifdef USE_D3D9
+	UINT modeCount = d3d->GetAdapterModeCount(GcurSel, format);
+#else
 	UINT modeCount = d3d->GetAdapterModeCount(GcurSel);
-	
+#endif
+
 	for ( UINT i = 0; i < modeCount; i++ )
 	{
 		D3DDISPLAYMODE mode;
 		
+#ifdef USE_D3D9
+		d3d->EnumAdapterModes(GcurSel, format, i, &mode);
+#else
 		d3d->EnumAdapterModes(GcurSel, i, &mode);
-		
+#endif	
 		if ( mode.Width == width && mode.Height == height && mode.Format == format )
 		{
 			if ( mode.RefreshRate == 0 )
@@ -1598,7 +1629,6 @@ RwBool _psSetVideoMode(RwInt32 subSystem, RwInt32 videoMode)
 	return TRUE;
 }
  
- 
 /*
  *****************************************************************************
  */
@@ -1610,7 +1640,7 @@ CommandLineToArgv(RwChar *cmdLine, RwInt32 *argCount)
 	RwInt32 i, len;
 	RwChar *res, *str, **aptr;
 
-	len = strlen(cmdLine);
+	len = (int)strlen(cmdLine);
 
 	/* 
 	 * Count the number of arguments...
@@ -1698,11 +1728,11 @@ void InitialiseLanguage()
 {
 	WORD primUserLCID	= PRIMARYLANGID(GetSystemDefaultLCID());
 	WORD primSystemLCID = PRIMARYLANGID(GetUserDefaultLCID());
-	WORD primLayout		= PRIMARYLANGID((DWORD)GetKeyboardLayout(0));
+	WORD primLayout		= PRIMARYLANGID((DWORD_PTR)GetKeyboardLayout(0));
 	
 	WORD subUserLCID	= SUBLANGID(GetSystemDefaultLCID());
 	WORD subSystemLCID	= SUBLANGID(GetUserDefaultLCID());
-	WORD subLayout		= SUBLANGID((DWORD)GetKeyboardLayout(0));
+	WORD subLayout		= SUBLANGID((DWORD_PTR)GetKeyboardLayout(0));
 	
 	if (   primUserLCID	  == LANG_GERMAN
 		|| primSystemLCID == LANG_GERMAN
@@ -1936,7 +1966,6 @@ WinMain(HINSTANCE instance,
 	RwV2d pos;
 	RwInt32 argc, i;
 	RwChar **argv;
-	StaticPatcher::Apply();
 	SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, nil, SPIF_SENDCHANGE);
 
 	// TODO: make this an option somewhere
@@ -1999,7 +2028,7 @@ WinMain(HINSTANCE instance,
 	
 	if ( _InputInitialise() == S_OK )
 	{
-		_InputInitialiseMouse();
+		_InputInitialiseMouse(false);
 		_InputInitialiseJoys();
 	}
 	
@@ -2073,7 +2102,7 @@ WinMain(HINSTANCE instance,
 	{
 		CFileMgr::SetDirMyDocuments();
 		
-		int32 gta3set = CFileMgr::OpenFile("gta3.set", "r");
+		int32 gta3set = CFileMgr::OpenFile("gta_vc.set", "r");
 		
 		if ( gta3set )
 		{
@@ -2243,6 +2272,11 @@ WinMain(HINSTANCE instance,
 						CloseClip();
 						CoUninitialize();
 						
+#ifdef FIX_BUGS
+						// draw one frame because otherwise we'll end up looking at black screen for a while if vsync is on
+						RsCameraShowRaster(Scene.camera);
+#endif
+
 #ifdef PS2_MENU
 						extern char version_name[64];
 						if ( CGame::frenchGame || CGame::germanGame )
@@ -2533,7 +2567,7 @@ HRESULT _InputInitialise()
 	return S_OK;
 }
 
-HRESULT _InputInitialiseMouse()
+HRESULT _InputInitialiseMouse(bool exclusive)
 {
 	HRESULT hr;
 
@@ -2551,7 +2585,7 @@ HRESULT _InputInitialiseMouse()
 	if( FAILED( hr = PSGLOBAL(mouse)->SetDataFormat( &c_dfDIMouse2 ) ) )
 		return hr;
 	
-	if( FAILED( hr = PSGLOBAL(mouse)->SetCooperativeLevel( PSGLOBAL(window), DISCL_NONEXCLUSIVE | DISCL_FOREGROUND ) ) )
+	if( FAILED( hr = PSGLOBAL(mouse)->SetCooperativeLevel( PSGLOBAL(window), (exclusive ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE) | DISCL_FOREGROUND ) ) )
 		return hr;
 	
 	// Acquire the newly created device
@@ -2837,6 +2871,28 @@ HRESULT _InputGetMouseState(DIMOUSESTATE2 *state)
 void _InputShutdown()
 {
 	SAFE_RELEASE(PSGLOBAL(dinterface));
+}
+
+void _InputShutdownMouse()
+{
+	if (PSGLOBAL(mouse) == nil)
+		return;
+
+	PSGLOBAL(mouse)->Unacquire();
+	SAFE_RELEASE(PSGLOBAL(mouse));
+}
+
+bool _InputMouseNeedsExclusive(void)
+{
+	// FIX: I don't know why R* needed that, but it causes infamous mouse bug on modern systems.
+	//		Probably DirectInput bug, since Acquire() and GetDeviceState() reports everything A-OK.
+#ifdef FIX_BUGS
+	return false;
+#endif
+	RwVideoMode vm;
+	RwEngineGetVideoModeInfo(&vm, GcurSelVM);
+
+	return vm.flags & rwVIDEOMODEEXCLUSIVE;
 }
 
 BOOL CALLBACK _InputEnumDevicesCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* pContext )

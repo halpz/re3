@@ -4,6 +4,11 @@
 
 enum ePlaneNodes
 {
+#ifdef CPLANE_ROTORS
+	// for heli
+	PLANE_TOPROTOR,
+	PLANE_BACKROTOR,
+#endif
 	PLANE_WHEEL_FRONT = 2,
 	PLANE_WHEEL_READ,
 	NUM_PLANE_NODES
@@ -29,7 +34,10 @@ struct CPlaneInterpolationLine
 class CPlane : public CVehicle
 {
 public:
-	// 0x288
+#ifdef CPLANE_ROTORS
+	RwFrame *m_aPlaneNodes[NUM_PLANE_NODES];
+	float m_fRotorRotation;
+#endif
 	int16 m_nPlaneId;
 	int16 m_isFarAway;
 	int16 m_nCurPathNode;
@@ -38,6 +46,7 @@ public:
 	bool m_bHasBeenHit;
 	bool m_bIsDrugRunCesna;
 	bool m_bIsDropOffCesna;
+	bool m_bTempPlane;
 
 	CPlane(int32 id, uint8 CreatedBy);
 	~CPlane(void);
@@ -53,6 +62,7 @@ public:
 	static void InitPlanes(void);
 	static void Shutdown(void);
 	static CPlaneNode *LoadPath(char const *filename, int32 &numNodes, float &totalLength, bool loop);
+	static void RemoveTemporaryPlanes(void);
 	static void UpdatePlanes(void);
 	static bool TestRocketCollision(CVector *rocketPos);
 	static void CreateIncomingCesna(void);
@@ -62,6 +72,8 @@ public:
 	static bool HasCesnaLanded(void);
 	static bool HasCesnaBeenDestroyed(void);
 	static bool HasDropOffCesnaBeenShotDown(void);
+	static void Load(void);
+	static void Save(void);
 };
 
 extern float LandingPoint;

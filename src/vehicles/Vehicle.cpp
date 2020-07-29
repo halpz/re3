@@ -232,7 +232,7 @@ CVehicle::SetupLighting(void)
 	}else{
 		CVector coors = GetPosition();
 		float lighting = CPointLights::GenerateLightsAffectingObject(&coors);
-		if(!bHasBlip && lighting != 1.0f){
+		if(lighting != 1.0f){
 			SetAmbientAndDirectionalColours(lighting);
 			return true;
 		}
@@ -1512,7 +1512,7 @@ CVehicle::MakeNonDraggedPedsLeaveVehicle(CPed *ped1, CPed *ped2, CPlayerPed *&pl
 		for(i = 0; i < numPeds2; i++)
 			if(peds2[i]->IsFemale() || CGeneral::GetRandomTrueFalse()){
 				peds2[i]->m_leaveCarTimer = CTimer::GetTimeInMilliseconds() + 10000;
-				peds2[i]->b156_8 = true;
+				peds2[i]->bHeldHostageInCar = true;
 				peds2[i]->bFleeAfterExitingCar = true;
 			}
 }
@@ -1557,9 +1557,9 @@ CVehicle::IsLawEnforcementVehicle(void)
 }
 
 bool
-CVehicle::UsesSiren(uint32 id)
+CVehicle::UsesSiren(void)
 {
-	switch(id){
+	switch(GetModelIndex()){
 	case MI_FIRETRUCK:
 	case MI_AMBULAN:
 	case MI_FBICAR:
@@ -2239,7 +2239,7 @@ CVehicle::DoSunGlare(void)
 		int a2 = colmodel->triangles[i+1].a;
 		int b2 = colmodel->triangles[i+1].b;
 		int c2 = colmodel->triangles[i+1].c;
-		CVector vert1 = colmodel->vertices[a1];
+		CVector vert1 = colmodel->vertices[a1].Get();
 		CVector vert4;
 		// Need an upward surface
 		if(vert1.z <= 0.0f)
@@ -2250,23 +2250,23 @@ CVehicle::DoSunGlare(void)
 		if(a2 != a1 && a2 != b1 && a2 != c1){
 			// a2 is not in tri1
 			numTri2Verts++;
-			vert4 = colmodel->vertices[a2];
+			vert4 = colmodel->vertices[a2].Get();
 		}
 		if(b2 != a1 && b2 != b1 && b2 != c1){
 			// b2 is not in tri1
 			numTri2Verts++;
-			vert4 = colmodel->vertices[b2];
+			vert4 = colmodel->vertices[b2].Get();
 		}
 		if(c2 != a1 && c2 != b1 && c2 != c1){
 			// c2 is not in tri1
 			numTri2Verts++;
-			vert4 = colmodel->vertices[c2];
+			vert4 = colmodel->vertices[c2].Get();
 		}
 		// Need exactly one vertex from tri2 for a quad with tri1
 		if(numTri2Verts != 1)
 			continue;
 
-		CVector mid = (vert1 + colmodel->vertices[b1] + colmodel->vertices[c1] + vert4)/4.0f;
+		CVector mid = (vert1 + colmodel->vertices[b1].Get() + colmodel->vertices[c1].Get() + vert4)/4.0f;
 		float dy = mid.y - vert1.y;
 		float dx = mid.x - vert1.x;
 		float dist = 1.4f * Min(Abs(dx), Abs(dy));

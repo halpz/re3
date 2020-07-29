@@ -1,11 +1,14 @@
 #include "common.h"
 #include "main.h"
 
+#include "RenderBuffer.h"
 #include "Entity.h"
 #include "Fluff.h"
 #include "Camera.h"
 #include "Sprite.h"
 #include "Coronas.h"
+#include "Rubbish.h"
+#include "Timecycle.h"
 #include "General.h"
 #include "Timer.h"
 #include "Clock.h"
@@ -18,6 +21,277 @@
 #include "Bones.h"
 #include "World.h"
 
+CPlaneTrail CPlaneTrails::aArray[6];
+RwImVertexIndex TrailIndices[32] = {
+	0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9,
+	10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16
+};
+
+void
+CPlaneTrail::Init(void)
+{
+	int i;
+	for(i = 0; i < ARRAY_SIZE(m_time); i++)
+		m_time[i] = 0;
+}
+
+void
+CPlaneTrail::Render(float visibility)
+{
+	int i;
+	int numVerts = 0;
+	if(!TheCamera.IsSphereVisible(m_pos[0], 1000.0f))
+		return;
+
+	int alpha = visibility*110.0f;
+	if(alpha == 0)
+		return;
+
+	for(i = 0; i < ARRAY_SIZE(m_pos); i++){
+		int32 time = CTimer::GetTimeInMilliseconds() - m_time[i];
+		if(time > 30000)
+			m_time[i] = 0;
+		if(m_time[i] != 0){
+			float fade = (30000.0f - time) / 10000.0f;
+			fade = Min(fade, 1.0f);
+			RwIm3DVertexSetRGBA(&TempBufferRenderVertices[numVerts], 255, 255, 255, (int)(alpha*fade));
+			RwIm3DVertexSetPos(&TempBufferRenderVertices[numVerts], m_pos[i].x, m_pos[i].y, m_pos[i].z);
+			numVerts++;
+		}
+	}
+	if(numVerts > 1){
+		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
+
+		if(RwIm3DTransform(TempBufferRenderVertices, numVerts, nil, rwIM3D_VERTEXXYZ|rwIM3D_VERTEXRGBA)){
+			RwIm3DRenderIndexedPrimitive(rwPRIMTYPELINELIST, TrailIndices, (numVerts-1)*2);
+			RwIm3DEnd();
+		}
+	}
+}
+
+void
+CPlaneTrail::RegisterPoint(CVector pos)
+{
+	int i;
+	bool bNewPoint = false;
+	if(m_time[0] != 0 && CTimer::GetTimeInMilliseconds() - m_time[0] > 2000){
+		bNewPoint = true;
+		for(i = ARRAY_SIZE(m_pos)-1; i > 0; i--){
+			m_pos[i] = m_pos[i-1];
+			m_time[i] = m_time[i-1];
+		}
+	}
+	m_pos[0] = pos;
+	if(bNewPoint || m_time[0] == 0)
+		m_time[0] = CTimer::GetTimeInMilliseconds();
+}
+
+void
+CPlaneTrails::Init(void)
+{
+	int i;
+	for(i = 0; i < ARRAY_SIZE(aArray); i++)
+		aArray[i].Init();
+}
+
+void
+CPlaneTrails::Update(void)
+{
+	CVector planePos;
+
+	planePos.x = 1590.0f * Sin((float)(CTimer::GetTimeInMilliseconds() & 0x1FFFF)/0x20000 * TWOPI);
+	planePos.y = 1200.0f * Cos((float)(CTimer::GetTimeInMilliseconds() & 0x1FFFF)/0x20000 * TWOPI);
+	planePos.z = 550.0f;
+	RegisterPoint(planePos, 3);
+	if(CClock::GetHours() > 22 || CClock::GetHours() < 7){
+		if(CTimer::GetTimeInMilliseconds() & 0x200)
+			CCoronas::RegisterCorona(101, 255, 0, 0, 255, planePos, 5.0f, 2000.0f,
+				CCoronas::TYPE_NORMAL, CCoronas::FLARE_NONE, CCoronas::REFLECTION_OFF,
+				CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
+		else
+			CCoronas::UpdateCoronaCoors(101, planePos, 2000.0f, 0.0f);
+	}
+
+	planePos.x = 1000.0f * Sin((float)(CTimer::GetTimeInMilliseconds() & 0x1FFFF)/0x20000 * TWOPI);
+	planePos.y = -1600.0f * Cos((float)(CTimer::GetTimeInMilliseconds() & 0x1FFFF)/0x20000 * TWOPI);
+	planePos.z = 500.0f;
+	RegisterPoint(planePos, 4);
+	if(CClock::GetHours() > 22 || CClock::GetHours() < 7){
+		if(CTimer::GetTimeInMilliseconds() & 0x200)
+			CCoronas::RegisterCorona(102, 255, 0, 0, 255, planePos, 5.0f, 2000.0f,
+				CCoronas::TYPE_NORMAL, CCoronas::FLARE_NONE, CCoronas::REFLECTION_OFF,
+				CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
+		else
+			CCoronas::UpdateCoronaCoors(102, planePos, 2000.0f, 0.0f);
+	}
+
+	planePos.x = 1100.0f * Cos((float)(CTimer::GetTimeInMilliseconds() & 0x1FFFF)/0x20000 * TWOPI);
+	planePos.y = 700.0f * Sin((float)(CTimer::GetTimeInMilliseconds() & 0x1FFFF)/0x20000 * TWOPI);
+	planePos.z = 600.0f;
+	RegisterPoint(planePos, 5);
+	if(CClock::GetHours() > 22 || CClock::GetHours() < 7){
+		if(CTimer::GetTimeInMilliseconds() & 0x200)
+			CCoronas::RegisterCorona(103, 255, 0, 0, 255, planePos, 5.0f, 2000.0f,
+				CCoronas::TYPE_NORMAL, CCoronas::FLARE_NONE, CCoronas::REFLECTION_OFF,
+				CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
+		else
+			CCoronas::UpdateCoronaCoors(103, planePos, 2000.0f, 0.0f);
+	}
+}
+
+void
+CPlaneTrails::Render(void)
+{
+	int i;
+	float visibility = Min(1.0f-CWeather::Foggyness, 1.0f-CWeather::CloudCoverage);
+	visibility = Min(visibility, 1.0f-CWeather::Rain);
+	visibility = Min(Max(Max(CTimeCycle::GetSkyTopRed(), CTimeCycle::GetSkyTopGreen()), CTimeCycle::GetSkyTopBlue())/256.0f, visibility);
+	if(visibility > 0.0001f)
+		for(i = 0; i < ARRAY_SIZE(aArray); i++)
+			aArray[i].Render(visibility);
+}
+
+void
+CPlaneTrails::RegisterPoint(CVector pos, uint32 id)
+{
+	aArray[id].RegisterPoint(pos);
+}
+
+
+
+CPlaneBanner CPlaneBanners::aArray[5];
+
+void
+CPlaneBanner::Init(void)
+{
+	int i;
+	for(i = 0; i < ARRAY_SIZE(m_pos); i++){
+		m_pos[i].x = i;
+		m_pos[i].y = 0.0f;
+		m_pos[i].z = -60.0f;
+	}
+}
+
+void
+CPlaneBanner::Update(void)
+{
+	int i;
+	if(m_pos[0].z > -50.0f){
+		m_pos[0].z -= 0.05f*CTimer::GetTimeStep();
+		m_pos[0].z = Max(m_pos[0].z, -100.0f);
+		for(i = 1; i < ARRAY_SIZE(m_pos); i++){
+			CVector dist = m_pos[i] - m_pos[i-1];
+			float len = dist.Magnitude();
+			if(len > 8.0f)
+				m_pos[i] = m_pos[i-1] + dist/len*8.0f;
+		}
+	}
+}
+
+void
+CPlaneBanner::Render(void)
+{
+	int i;
+	if(m_pos[0].z > -50.0f){
+		float camDist = (TheCamera.GetPosition() - m_pos[0]).Magnitude();
+		if(TheCamera.IsSphereVisible(m_pos[4], 32.0f) && camDist < 300.0f){
+			TempBufferVerticesStored = 0;
+			TempBufferIndicesStored = 0;
+			int alpha = camDist < 250.0f ? 160 : (300.0f-camDist)/(300.0f-250.0f)*160;
+
+			TempBufferVerticesStored += 2;
+			RwIm3DVertexSetRGBA(&TempBufferRenderVertices[0], 255, 255, 255, alpha);
+			RwIm3DVertexSetRGBA(&TempBufferRenderVertices[1], 255, 255, 255, alpha);
+			RwIm3DVertexSetPos(&TempBufferRenderVertices[0], m_pos[2].x, m_pos[2].y, m_pos[2].z);
+			RwIm3DVertexSetPos(&TempBufferRenderVertices[1], m_pos[2].x, m_pos[2].y, m_pos[2].z - 4.0f);
+			RwIm3DVertexSetU(&TempBufferRenderVertices[0], 0.0f);
+			RwIm3DVertexSetV(&TempBufferRenderVertices[0], 0.0f);
+			RwIm3DVertexSetU(&TempBufferRenderVertices[1], 0.0f);
+			RwIm3DVertexSetV(&TempBufferRenderVertices[1], 1.0f);
+			for(i = 2; i < 8; i++){
+				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored+0], 255, 255, 255, alpha);
+				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored+1], 255, 255, 255, alpha);
+				RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored+0], m_pos[i].x, m_pos[i].y, m_pos[i].z);
+				RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored+1], m_pos[i].x, m_pos[i].y, m_pos[i].z - 4.0f);
+				RwIm3DVertexSetU(&TempBufferRenderVertices[TempBufferVerticesStored+0], (i-2)/5.0f);
+				RwIm3DVertexSetV(&TempBufferRenderVertices[TempBufferVerticesStored+0], 0.0f);
+				RwIm3DVertexSetU(&TempBufferRenderVertices[TempBufferVerticesStored+1], (i-2)/5.0f);
+				RwIm3DVertexSetV(&TempBufferRenderVertices[TempBufferVerticesStored+1], 1.0f);
+				TempBufferRenderIndexList[TempBufferIndicesStored+0] = TempBufferVerticesStored-2;
+				TempBufferRenderIndexList[TempBufferIndicesStored+1] = TempBufferVerticesStored-1;
+				TempBufferRenderIndexList[TempBufferIndicesStored+2] = TempBufferVerticesStored+1;
+				TempBufferRenderIndexList[TempBufferIndicesStored+3] = TempBufferVerticesStored-2;
+				TempBufferRenderIndexList[TempBufferIndicesStored+4] = TempBufferVerticesStored+1;
+				TempBufferRenderIndexList[TempBufferIndicesStored+5] = TempBufferVerticesStored;
+				TempBufferVerticesStored += 2;
+				TempBufferIndicesStored += 6;
+			}
+			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
+			RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+			RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
+			RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+			RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+			RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+			RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpRubbishTexture[2]));
+
+#ifdef FIX_BUGS
+			if(RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStored, nil, rwIM3D_VERTEXXYZ|rwIM3D_VERTEXUV|rwIM3D_VERTEXRGBA)){
+#else
+			if(RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStored, nil, 0)){
+#endif
+				RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TempBufferRenderIndexList, TempBufferIndicesStored);
+				RwIm3DEnd();
+			}
+
+			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+			RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+			RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
+			RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+
+			TempBufferVerticesStored = 0;
+			TempBufferIndicesStored = 0;
+		}
+	}
+}
+
+void
+CPlaneBanner::RegisterPoint(CVector pos)
+{
+	m_pos[0] = pos;
+}
+
+void
+CPlaneBanners::Init(void)
+{
+	int i;
+	for(i = 0; i < ARRAY_SIZE(aArray); i++)
+		aArray[i].Init();
+}
+
+void
+CPlaneBanners::Update(void)
+{
+	int i;
+	for(i = 0; i < ARRAY_SIZE(aArray); i++)
+		aArray[i].Update();
+}
+
+void
+CPlaneBanners::Render(void)
+{
+	int i;
+	for(i = 0; i < ARRAY_SIZE(aArray); i++)
+		aArray[i].Render();
+}
+
+void
+CPlaneBanners::RegisterPoint(CVector pos, uint32 id)
+{
+	aArray[id].RegisterPoint(pos);
+}
 
 bool CSmokeTrails::CigOn = false;
 CSmokeTrail CSmokeTrails::aSmoke[3];
@@ -113,7 +387,9 @@ CMovingThing CMovingThings::aMovingThings[NUMMOVINGTHINGS];
  
 void CMovingThings::Init()
 {
+	CPlaneTrails::Init();
 	CSmokeTrails::Init();
+	CPlaneBanners::Init();
 
 	StartCloseList.m_pNext = &CMovingThings::EndCloseList;
 	StartCloseList.m_pPrev = nil;
@@ -162,14 +438,19 @@ void CMovingThings::Shutdown()
 	int i;
 	for (i = 0; i < ARRAY_SIZE(aScrollBars); ++i)
 		aScrollBars[i].SetVisibility(false);
+/*
 	for (i = 0; i < ARRAY_SIZE(aTowerClocks); ++i)
 		aTowerClocks[i].SetVisibility(false);
 	for (i = 0; i < ARRAY_SIZE(aDigitalClocks); ++i)
 		aDigitalClocks[i].SetVisibility(false);
+*/
 }
 
 void CMovingThings::Update()
 {
+	CPlaneBanners::Update();
+	CPlaneTrails::Update();
+
 	const int TIME_SPAN = 64; // frames to process all aMovingThings
 
 	int16 i;
@@ -214,6 +495,7 @@ void CMovingThings::Render()
 		if (aScrollBars[i].IsVisible())
 			aScrollBars[i].Render();
 	}
+/*
 	for (i = 0; i < ARRAY_SIZE(aTowerClocks); ++i)
 	{
 		if (aTowerClocks[i].IsVisible())
@@ -224,8 +506,11 @@ void CMovingThings::Render()
 		if (aDigitalClocks[i].IsVisible())
 			aDigitalClocks[i].Render();
 	}
+*/
 
+	CPlaneTrails::Render();
 	CSmokeTrails::Render();
+	CPlaneBanners::Render();
 }
 
 // ---------- CMovingThing ----------
@@ -637,7 +922,7 @@ void CScrollBar::Update()
 			break;
 		}
 
-		m_MessageLength = strlen(m_pMessage);
+		m_MessageLength = (uint32)strlen(m_pMessage);
 		m_MessageCurrentChar = 0;
 	}
 
@@ -934,7 +1219,6 @@ CSmokeTrails::Render(void) {
 void
 CSmokeTrail::Render(void) {
 	int numVerts = 0;
-	RwIm3DVertex TempVertexBuffer[16];
 
 	if (TheCamera.IsSphereVisible(m_pos[0], 10.0f)) {
 		for (int32 i = 0; i < 16; i++) {
@@ -949,8 +1233,8 @@ CSmokeTrail::Render(void) {
 				float posX = (m_pos[i].x + timeSinceSpawned * RandomSmoke[(i - m_seed) & 0xF] * 0.00001f) - offset;
 				float posY = (m_pos[i].y + timeSinceSpawned * RandomSmoke[(i - m_seed + 5) & 0xF] * 0.00001f) - offset;
 				float posZ = m_pos[i].z + timeSinceSpawned * 0.0004f;
-				RwIm3DVertexSetRGBA(&TempVertexBuffer[i], 200, 200, 200, alpha);
-				RwIm3DVertexSetPos(&TempVertexBuffer[i], posX, posY, posZ);
+				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[i], 200, 200, 200, alpha);
+				RwIm3DVertexSetPos(&TempBufferRenderVertices[i], posX, posY, posZ);
 				numVerts++;
 			}
 		}
@@ -962,7 +1246,7 @@ CSmokeTrail::Render(void) {
 		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
 
-		if (RwIm3DTransform(TempVertexBuffer, numVerts, nil, rwIM3D_VERTEXXYZ | rwIM3D_VERTEXRGBA)) {
+		if (RwIm3DTransform(TempBufferRenderVertices, numVerts, nil, rwIM3D_VERTEXXYZ | rwIM3D_VERTEXRGBA)) {
 			RwIm3DRenderIndexedPrimitive(rwPRIMTYPEPOLYLINE, SmokeTrailIndices, 2 * (numVerts - 1));
 			RwIm3DEnd();
 		}
@@ -994,13 +1278,12 @@ CSmokeTrails::Update(void) {
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
 
-	RwIm3DVertex TempVertexBuffer[2];
-	RwIm3DVertexSetRGBA(&TempVertexBuffer[0], 255, 255, 255, 255);
-	RwIm3DVertexSetPos(&TempVertexBuffer[0], startPos.x, startPos.y, startPos.z);
-	RwIm3DVertexSetRGBA(&TempVertexBuffer[1], 255, 255, 255, 255);
-	RwIm3DVertexSetPos(&TempVertexBuffer[1], endPos.x, endPos.y, endPos.z);
+	RwIm3DVertexSetRGBA(&TempBufferRenderVertices[0], 255, 255, 255, 255);
+	RwIm3DVertexSetPos(&TempBufferRenderVertices[0], startPos.x, startPos.y, startPos.z);
+	RwIm3DVertexSetRGBA(&TempBufferRenderVertices[1], 255, 255, 255, 255);
+	RwIm3DVertexSetPos(&TempBufferRenderVertices[1], endPos.x, endPos.y, endPos.z);
 
-	if (RwIm3DTransform(TempVertexBuffer, 2, nil, rwIM3D_VERTEXXYZ | rwIM3D_VERTEXRGBA)) {
+	if (RwIm3DTransform(TempBufferRenderVertices, 2, nil, rwIM3D_VERTEXXYZ | rwIM3D_VERTEXRGBA)) {
 		RwIm3DRenderIndexedPrimitive(rwPRIMTYPEPOLYLINE, SmokeTrailIndices, 2);
 		RwIm3DEnd();
 	}

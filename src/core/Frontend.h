@@ -66,20 +66,23 @@
 #define PLAYERSETUP_LIST_BODY_TOP 47
 #define PLAYERSETUP_ROW_HEIGHT 9
 
-#define STATS_SLIDE_Y_PER_SECOND 30.0f
-#define STATS_ROW_HEIGHT 20.0f
-#define STATS_ROW_X_MARGIN 50.0f
-#define STATS_BOTTOM_MARGIN 135.0f
-#define STATS_TOP_MARGIN 40.0f
-#define STATS_TOP_DIMMING_AREA_LENGTH (93.0f - STATS_TOP_MARGIN)
-#define STATS_BOTTOM_DIMMING_AREA_LENGTH 55.0f
-#define STATS_PUT_BACK_TO_BOTTOM_Y 50.0f
-#define STATS_RATING_X 24.0f
-#define STATS_RATING_Y 20.0f
+#define STATS_ROW_HEIGHT 17.0f
+#define STATS_ROW_LEFT_MARGIN 110.0f
+#define STATS_ROW_RIGHT_MARGIN 113.0f
+#define STATS_TOP_Y 135.0f // Just faded in
+#define STATS_BOTTOM_Y 300.0f // Starts to fade out after that
+#define STATS_FADING_AREA_LENGTH 50.0f
+#define STATS_VISIBLE_START_Y (STATS_TOP_Y - 10.f)
+#define STATS_VISIBLE_END_Y (STATS_BOTTOM_Y + 21.f)
+#define STATS_RATING_X 320.0f
+#define STATS_RATING_Y_1 85.0f
+#define STATS_RATING_Y_2 110.0f
 
-#define BRIEFS_TOP_MARGIN 40.0f
-#define BRIEFS_LINE_X 50.0f
-#define BRIEFS_LINE_HEIGHT 60.0f
+#define BRIEFS_TOP_MARGIN 140.0f
+#define BRIEFS_BOTTOM_MARGIN 280.0f
+#define BRIEFS_LINE_X 100.0f
+#define BRIEFS_LINE_HEIGHT 20.0f
+#define BRIEFS_LINE_SPACING 10.0f
 
 #define CONTSETUP_STANDARD_ROW_HEIGHT 10.7f
 #define CONTSETUP_CLASSIC_ROW_HEIGHT 9.0f
@@ -262,16 +265,8 @@ enum eMenuAction
 	MENUACTION_DYNAMICACOUSTIC,
 	MENUACTION_MOUSESTEER,
 	MENUACTION_UNK110,
-#ifdef MORE_LANGUAGES
-	MENUACTION_LANG_PL,
-	MENUACTION_LANG_RUS,
-	MENUACTION_LANG_JAP,
-#endif
 #ifdef IMPROVED_VIDEOMODE
 	MENUACTION_SCREENMODE,
-#endif
-#ifdef FREE_CAM
-	MENUACTION_FREECAM,
 #endif
 #ifdef LEGACY_MENU_OPTIONS
 	MENUACTION_CTRLVIBRATION,
@@ -477,10 +472,10 @@ public:
 	int8 m_nPrefsAudio3DProviderIndex;
 	int8 m_PrefsSpeakers;
 	int8 m_PrefsDMA;
-	uint8 m_PrefsSfxVolume;
-	uint8 m_PrefsMusicVolume;
+	int8 m_PrefsSfxVolume;
+	int8 m_PrefsMusicVolume;
 	uint8 m_PrefsRadioStation;
-	uint8 field_2C;
+	uint8 m_PrefsStereoMono; // unused except restore settings
 	int32 m_nCurrOption;
 	bool m_bQuitGameNoCD;
 	bool m_bMenuMapActive;
@@ -544,7 +539,7 @@ public:
 	int32 m_nMouseOldPosY;
 	int32 m_nHoverOption;
 	bool m_bShowMouse;
-	int32 m_nPrevOption;
+	int32 m_nOptionMouseHovering;
 	bool m_bStartWaitingForKeyBind;
 	bool m_bWaitingForNewKeyBind;
 	bool m_bKeyChangeNotProcessed;
@@ -595,7 +590,9 @@ public:
 	};
 	bool GetIsMenuActive() {return !!m_bMenuActive;}
 
-	static uint8 m_PrefsStereoMono;
+#ifdef CUTSCENE_BORDERS_SWITCH
+	static bool m_PrefsCutsceneBorders;
+#endif
 
 #ifndef MASTER
 	static bool m_PrefsMarketing;
@@ -613,7 +610,7 @@ public:
 	void CheckCodesForControls(int);
 	bool CheckHover(int x1, int x2, int y1, int y2);
 	void CheckSliderMovement(int);
-	void DisplayHelperText();
+	void DisplayHelperText(char*);
 	int DisplaySlider(float, float, float, float, float, float, float);
 	void DoSettingsBeforeStartingAGame();
 	void DrawStandardMenus(bool);
@@ -625,7 +622,7 @@ public:
 	void DrawBackground(bool transitionCall);
 	void DrawPlayerSetupScreen();
 	int FadeIn(int alpha);
-	void FilterOutColorMarkersFromString(wchar*, CRGBA &);
+	void FilterOutColorMarkersFromString(wchar*);
 	int GetStartOptionsCntrlConfigScreens();
 	void InitialiseChangedLanguageSettings();
 	void LoadAllTextures();
@@ -659,6 +656,7 @@ public:
 	void ScrollDownListByOne();
 	void PageUpList(bool);
 	void PageDownList(bool);
+	int8 GetPreviousPageOption();
 	
 	// uint8 GetNumberOfMenuOptions();
 };
@@ -668,6 +666,6 @@ VALIDATE_SIZE(CMenuManager, 0x688);
 #endif
 
 extern CMenuManager FrontEndMenuManager;
-
+extern CMenuScreen aScreens[];
 
 #endif

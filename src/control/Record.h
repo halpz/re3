@@ -17,13 +17,13 @@ public:
 	int8 forwardY;
 	int8 forwardZ;
 	int8 wheel;
-	uint8 gas;
-	uint8 brake;
+	int8 gas;
+	int8 brake;
 	bool handbrake;
 	CVector pos;
 };
 
-extern char gString[256];;
+extern char gString[256];
 
 class CRecordDataForChase
 {

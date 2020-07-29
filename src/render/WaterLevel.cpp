@@ -1167,8 +1167,8 @@ CWaterLevel::RenderTransparentWater(void)
 		{
 			if (m_nRenderWaterLayers != 1 && m_nRenderWaterLayers != 6)
 			{
-				float fMaskX = floorf(fCamX / 2.0f) * 2.0f;
-				float fMaskY = floorf(fCamY / 2.0f) * 2.0f;
+				float fMaskX = Floor(fCamX / 2.0f) * 2.0f;
+				float fMaskY = Floor(fCamY / 2.0f) * 2.0f;
 				float fWaterZ = CWaterLevel::ms_aWaterZs[nBlock];
 				float fSectorX = WATER_FROM_SMALL_SECTOR_X(BlockX) - 400.0f;
 				float fSectorY = WATER_FROM_SMALL_SECTOR_Y(BlockY);
@@ -1519,8 +1519,8 @@ CWaterLevel::RenderWavyMask(float fX, float fY, float fZ,
 		return;
 
 #ifndef PC_WATER
-	float fUOffset = fX - (MAX_LARGE_SECTORS * (int32)floorf(fX / MAX_LARGE_SECTORS));
-	float fVOffset = fY - (MAX_LARGE_SECTORS * (int32)floorf(fY / MAX_LARGE_SECTORS));
+	float fUOffset = fX - (MAX_LARGE_SECTORS * (int32)Floor(fX / MAX_LARGE_SECTORS));
+	float fVOffset = fY - (MAX_LARGE_SECTORS * (int32)Floor(fY / MAX_LARGE_SECTORS));
 
 	int32 nSecsX = (int32)((fX - fSectorX) / 2.0f);
 	int32 nSecsY = (int32)((fY - fSectorY) / 2.0f);
@@ -1870,8 +1870,8 @@ CWaterLevel::PreCalcWaterGeometry(void)
 	
 	if ( _IsColideWithBlock(BlockX, BlockY, nBlock) )
 	{
-		float fMaskX = floorf(fCamX / 2.0f) * 2.0f;
-		float fMaskY = floorf(fCamY / 2.0f) * 2.0f;
+		float fMaskX = Floor(fCamX / 2.0f) * 2.0f;
+		float fMaskY = Floor(fCamY / 2.0f) * 2.0f;
 
 		float fSectorX = WATER_FROM_SMALL_SECTOR_X(BlockX) - WATER_X_OFFSET;
 		float fSectorY = WATER_FROM_SMALL_SECTOR_Y(BlockY);
@@ -1994,8 +1994,8 @@ CWaterLevel::PreCalcWavyMask(float fX, float fY, float fZ,
 	if ( COcclusion::IsAABoxOccluded(vecSectorPos, MAX_LARGE_SECTORS, MAX_LARGE_SECTORS, 4.0f) )
 		return false;
 	
-	floorf(fX / MAX_LARGE_SECTORS);
-	floorf(fY / MAX_LARGE_SECTORS);
+	Floor(fX / MAX_LARGE_SECTORS);
+	Floor(fY / MAX_LARGE_SECTORS);
 	
 	RpGeometry    *wavyGeometry  = RpAtomicGetGeometry(ms_pWavyAtomic);
 	RpMorphTarget *wavyMorph     = RpGeometryGetMorphTarget(wavyGeometry, 0);
@@ -2335,7 +2335,7 @@ _GetWindedWave(float fX, float fY)
 	float y = WATER_HUGE_Y(fY);
 	
 	float fWindFactor (CWeather::WindClipped * 0.4f + 0.2f);
-	float fWave = Sin(( (x - floorf(x)) + (y - floorf(y)) ) * TWOPI + fAngle);
+	float fWave = Sin(( (x - Floor(x)) + (y - Floor(y)) ) * TWOPI + fAngle);
 
 	return fWindFactor * fWave;
 }
@@ -2380,8 +2380,8 @@ CWaterLevel::RenderWakeSegment(CVector2D &vecA, CVector2D &vecB, CVector2D &vecC
 		float fVD = (PosD.y / 4) + _TEXTURE_WAKE_ADDV;
 		
 #define MIN4(a, b, c, d) (Min((a), Min((b), Min((c), (d)))))
-		float fMinU = floorf(MIN4(fUA, fUB, fUC, fUD));
-		float fMinV = floorf(MIN4(fVA, fVB, fVC, fVD));
+		float fMinU = Floor(MIN4(fUA, fUB, fUC, fUD));
+		float fMinV = Floor(MIN4(fVA, fVB, fVC, fVD));
 #undef MIN4
 
 		float fZA = _GetWindedWave(PosA.x, PosA.y) + fWakeZ;

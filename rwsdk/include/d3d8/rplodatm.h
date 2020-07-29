@@ -34,7 +34,7 @@
 
 /**
  * \defgroup rplodatm RpLODAtomic
- * \ingroup rpplugin
+ * \ingroup scenemanagement
  *
  * Level of Detail Management Plugin for RenderWare Graphics.
  */
@@ -71,6 +71,9 @@ typedef RwInt32 (*RpLODAtomicLODCallBack)( RpAtomic *atomic );
 extern              "C"
 {
 #endif                          /* __cplusplus */
+
+    extern void
+        RpLODAtomicCacheSetFreeListCreateParams( RwInt32 blockSize, RwInt32 numBlocksToPrealloc );
 
     extern RwBool
         RpLODAtomicPluginAttach( void );

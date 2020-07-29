@@ -38,7 +38,7 @@
 
 /**
  * \defgroup rpmorph RpMorph
- * \ingroup rpplugin
+ * \ingroup morphing
  *
  * Morphing Plugin for RenderWare Graphics.
  */
@@ -76,7 +76,6 @@ struct RpMorphInterpolator
 
 /**
  * \ingroup rpmorph
- * \typedef RpMorphGeometryCallBack
  * This is the callback function supplied to \ref RpMorphGeometrySetCallBack 
  * and returned from \ref RpMorphGeometryGetCallBack.
  * The supplied function will be passed a pointer to the geometry's parent atomic,

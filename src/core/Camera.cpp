@@ -193,8 +193,8 @@ CCamera::Init(void)
 		m_bMusicFading = false;
 		m_fTimeToFadeMusic = 0.0f;
 		m_fFLOATingFadeMusic = 0.0f;
-		m_fMouseAccelHorzntl = 0.003f;
-		m_fMouseAccelVertical = 0.0025f;
+		m_fMouseAccelVertical = 0.003f;
+		m_fMouseAccelHorzntl = 0.0025f;
 	}
 	if(FrontEndMenuManager.m_bWantToRestart)
 		m_fTimeToFadeMusic = 0.0f;
@@ -3376,15 +3376,15 @@ CCamera::LoadTrainCamNodes(char const *name)
 	char token[16] = { 0 };
 	char filename[16] = { 0 };
 	uint8 *buf;
-	int bufpos = 0;
+	size_t bufpos = 0;
 	int field = 0;
 	int tokpos = 0;
 	char c;
 	int i;
-	int len;
+	size_t len;
 
 	strcpy(filename, name);
-	len = strlen(filename);
+	len = (int)strlen(filename);
 	filename[len] = '.';
 	filename[len+1] = 'd';
 	filename[len+2] = 'a';
@@ -4031,7 +4031,7 @@ bool
 CCamera::IsPointVisible(const CVector &center, const CMatrix *mat)
 {
 	RwV3d c;
-	c = *(RwV3d*)&center;
+	c = center;
 	RwV3dTransformPoints(&c, &c, 1, &mat->m_matrix);
 	if(c.y < CDraw::GetNearClipZ()) return false;
 	if(c.y > CDraw::GetFarClipZ()) return false;
@@ -4046,7 +4046,7 @@ bool
 CCamera::IsSphereVisible(const CVector &center, float radius, const CMatrix *mat)
 {
 	RwV3d c;
-	c = *(RwV3d*)&center;
+	c = center;
 	RwV3dTransformPoints(&c, &c, 1, &mat->m_matrix);
 	if(c.y + radius < CDraw::GetNearClipZ()) return false;
 	if(c.y - radius > CDraw::GetFarClipZ()) return false;

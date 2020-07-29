@@ -28,7 +28,7 @@ void
 CText::Load(void)
 {
 	char filename[32];
-	uint32 offset;
+	size_t offset;
 	int file;
 	bool tkey_loaded = false, tdat_loaded = false;
 	ChunkHeader m_ChunkHeader;
@@ -209,7 +209,7 @@ CText::GetNameOfLoadedMissionText(char *outName)
 
 //--MIAMI: DONE
 void
-CText::ReadChunkHeader(ChunkHeader *buf, int32 file, uint32 *offset)
+CText::ReadChunkHeader(ChunkHeader *buf, int32 file, size_t *offset)
 {
 	// original code loops 8 times to read 1 byte with CFileMgr::Read, that's retarded
 	CFileMgr::Read(file, (char*)buf, sizeof(ChunkHeader));
@@ -281,15 +281,15 @@ CText::LoadMissionText(char *MissionTableName)
 	bool tkey_loaded = false, tdat_loaded = false;
 	ChunkHeader m_ChunkHeader;
 	while (!tkey_loaded || !tdat_loaded) {
-		uint32 bytes_read = 0;
+		size_t bytes_read = 0;
 		ReadChunkHeader(&m_ChunkHeader, file, &bytes_read);
 		if (m_ChunkHeader.size != 0) {
 			if (strncmp(m_ChunkHeader.magic, "TKEY", 4) == 0) {
-				uint32 bytes_read = 0;
+				size_t bytes_read = 0;
 				mission_keyArray.Load(m_ChunkHeader.size, file, &bytes_read);
 				tkey_loaded = true;
 			} else if (strncmp(m_ChunkHeader.magic, "TDAT", 4) == 0) {
-				uint32 bytes_read = 0;
+				size_t bytes_read = 0;
 				mission_data.Load(m_ChunkHeader.size, file, &bytes_read);
 				tdat_loaded = true;
 			} else
@@ -308,11 +308,12 @@ CText::LoadMissionText(char *MissionTableName)
 
 //--MIAMI: DONE
 void
-CKeyArray::Load(uint32 length, int file, uint32 *offset)
+CKeyArray::Load(size_t length, int file, size_t* offset)
 {
 	char *rawbytes;
 
-	numEntries = length / sizeof(CKeyEntry);
+	// You can make numEntries size_t if you want to exceed 32-bit boundaries, everything else should be ready.
+	numEntries = (int)(length / sizeof(CKeyEntry));
 	entries = new CKeyEntry[numEntries];
 	rawbytes = (char*)entries;
 
@@ -403,11 +404,12 @@ CKeyArray::Search(const char *key, uint8 *result)
 
 //--MIAMI: DONE
 void
-CData::Load(uint32 length, int file, uint32 *offset)
+CData::Load(size_t length, int file, size_t * offset)
 {
 	char *rawbytes;
 
-	numChars = length / sizeof(wchar);
+	// You can make numChars size_t if you want to exceed 32-bit boundaries, everything else should be ready.
+	numChars = (int)(length / sizeof(wchar));
 	chars = new wchar[numChars];
 	rawbytes = (char*)chars;
 
@@ -430,10 +432,12 @@ CData::Unload(void)
 
 //--MIAMI: DONE
 void
-CMissionTextOffsets::Load(uint32 table_size, int file, uint32 *offset, int)
+CMissionTextOffsets::Load(size_t table_size, int file, size_t *offset, int)
 {
 	// not exact VC code but smaller and better :P
-	size = table_size / sizeof(CMissionTextOffsets::Entry);
+
+	// You can make this size_t if you want to exceed 32-bit boundaries, everything else should be ready.
+	size = (uint16) (table_size / sizeof(CMissionTextOffsets::Entry));
 	CFileMgr::Read(file, (char*)data, sizeof(CMissionTextOffsets::Entry) * size);
 	*offset += sizeof(CMissionTextOffsets::Entry) * size;
 }

@@ -6,10 +6,17 @@ newoption {
 }
 
 newoption {
-	trigger     = "glfwdir",
+	trigger     = "glfwdir64",
 	value       = "PATH",
 	description = "Directory of glfw",
-	default     = "glfw-3.3.2.bin.WIN32"
+	default     = "glfw-3.3.2.bin.WIN64",
+}
+
+newoption {
+	trigger     = "glfwdir32",
+	value       = "PATH",
+	description = "Directory of glfw",
+	default     = "glfw-3.3.2.bin.WIN32",
 }
 
 newoption {
@@ -48,12 +55,14 @@ workspace "reVC"
 
 	filter { "system:windows" }
 		platforms {
-			"win-x86-RW33_d3d8-mss",
+			"win-x86-RW34_d3d8-mss",
 			"win-x86-librw_d3d9-mss",
 			"win-x86-librw_gl3_glfw-mss",
-			"win-x86-RW33_d3d8-oal",
+			"win-x86-RW34_d3d8-oal",
 			"win-x86-librw_d3d9-oal",
 			"win-x86-librw_gl3_glfw-oal",
+			"win-amd64-librw_d3d9-oal",
+			"win-amd64-librw_gl3_glfw-oal",
 		}
 
 	filter { "system:linux" }
@@ -88,16 +97,21 @@ workspace "reVC"
 	filter { "platforms:*librw_d3d9*" }
 		defines { "RW_D3D9" }
 		if(not _OPTIONS["with-librw"]) then
-			libdirs { path.join(Librw, "lib/win-x86-d3d9/%{cfg.buildcfg}") }
+			libdirs { path.join(Librw, "lib/win-%{getarch(cfg.architecture)}-d3d9/%{cfg.buildcfg}") }
 		end
 		
 	filter "platforms:*librw_gl3_glfw*"
 		defines { "RW_GL3" }
-		includedirs { path.join(_OPTIONS["glfwdir"], "include") }
 		includedirs { path.join(_OPTIONS["glewdir"], "include") }
 		if(not _OPTIONS["with-librw"]) then
 			libdirs { path.join(Librw, "lib/%{getsys(cfg.system)}-%{getarch(cfg.architecture)}-gl3/%{cfg.buildcfg}") }
 		end
+		
+	filter "platforms:*x86-librw_gl3_glfw*"
+		includedirs { path.join(_OPTIONS["glfwdir32"], "include") }
+		
+	filter "platforms:*amd64-librw_gl3_glfw*"
+		includedirs { path.join(_OPTIONS["glfwdir64"], "include") }
 
 	filter "platforms:win*librw_gl3_glfw*"
 		defines { "GLEW_STATIC" }
@@ -128,7 +142,7 @@ project "librw"
 	targetdir "lib/%{cfg.platform}/%{cfg.buildcfg}"
 	files { path.join(Librw, "src/*.*") }
 	files { path.join(Librw, "src/*/*.*") }
-	filter "platforms:*RW33*"
+	filter "platforms:*RW34*"
 		flags { "ExcludeFromBuild" }
 	filter  {}
 end
@@ -206,23 +220,31 @@ project "reVC"
 		linkoptions "/SAFESEH:NO"
 		characterset ("MBCS")
 		targetextension ".exe"
-
-	filter "platforms:win*oal"
+		
+	filter "platforms:win-x86*oal"
 		includedirs { "openal-soft/include" }
-		includedirs { "libsndfile/include" }
-		includedirs { "mpg123/include" }
+		includedirs { "libsndfile.32/include" }
+		includedirs { "mpg123.32/include" }
+		libdirs { "mpg123.32/lib" }
+		libdirs { "libsndfile32/lib" }
 		libdirs { "openal-soft/libs/Win32" }
-		libdirs { "libsndfile/lib" }
-		libdirs { "mpg123/lib" }
+		
+	filter "platforms:win-amd64*oal"
+		includedirs { "openal-soft/include" }
+		includedirs { "libsndfile.64/include" }
+		includedirs { "mpg123.64/include" }
+		libdirs { "mpg123.64/lib" }
+		libdirs { "libsndfile.64/lib" }
+		libdirs { "openal-soft/libs/Win64" }
 
 	filter "platforms:linux*oal"
 		links { "openal", "mpg123", "sndfile", "pthread" }
 
-	filter "platforms:*RW33*"
+	filter "platforms:*RW34*"
 		staticruntime "on"
 		includedirs { "rwsdk/include/d3d8" }
 		libdirs { "rwsdk/lib/d3d8/release" }
-		links { "rwcore", "rpworld", "rpmatfx", "rpskin", "rphanim", "rtbmp", "rtquat", "rtcharse" }
+		links { "rwcore", "rpworld", "rpmatfx", "rpskin", "rphanim", "rtbmp", "rtquat", "rtanim", "rtcharse", "rpanisot" }
 		defines { "RWLIBS" }
 		linkoptions "/SECTION:_rwcseg,ER!W /MERGE:_rwcseg=.text"
 	
@@ -236,16 +258,24 @@ project "reVC"
 		end
 		links { "rw" }
 
-	filter "platforms:*d3d*"
-		includedirs { "dxsdk/include" }
-		libdirs { "dxsdk/lib" }
-
 	filter "platforms:*d3d9*"
 		links { "d3d9" }
 		
-	filter "platforms:win*gl3_glfw*"
+	filter "platforms:*x86*d3d*"
+		includedirs { "dxsdk/include" }
+		libdirs { "dxsdk/lib" }
+
+	filter "platforms:*amd64*d3d9*"
+		defines { "USE_D3D9" }
+		
+	filter "platforms:win-x86*gl3_glfw*"
 		libdirs { path.join(_OPTIONS["glewdir"], "lib/Release/Win32") }
-		libdirs { path.join(_OPTIONS["glfwdir"], "lib-" .. string.gsub(_ACTION or '', "vs", "vc")) }
+		libdirs { path.join(_OPTIONS["glfwdir32"], "lib-" .. string.gsub(_ACTION or '', "vs", "vc")) }
+		links { "opengl32", "glew32s", "glfw3" }
+		
+	filter "platforms:win-amd64*gl3_glfw*"
+		libdirs { path.join(_OPTIONS["glewdir"], "lib/Release/x64") }
+		libdirs { path.join(_OPTIONS["glfwdir64"], "lib-" .. string.gsub(_ACTION or '', "vs", "vc")) }
 		links { "opengl32", "glew32s", "glfw3" }
 
 	filter "platforms:linux*gl3_glfw*"

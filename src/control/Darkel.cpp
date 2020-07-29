@@ -27,6 +27,7 @@ int32 CDarkel::KillsNeeded;
 int8 CDarkel::InterruptedWeapon;
 
 /*
+ * TODO: Collect timer/kill counter RGBA colors on top like in Hud/Frontend.
  * bStandardSoundAndMessages is a completely beta thing,
  * makes game handle sounds & messages instead of SCM (just like in GTA2)
  * but it's never been used in the game. Has unused sliding text when frenzy completed etc.
@@ -102,7 +103,7 @@ CDarkel::DrawMessages()
 				if (timeLeft > 4000 || CTimer::GetFrameCounter() & 1) {
 					CFont::SetColor(CRGBA(0, 0, 0, 255));
 					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(35.0f), SCREEN_SCALE_Y(109.0f), gUString);
-					CFont::SetColor(CRGBA(150, 100, 255, 255));
+					CFont::SetColor(CRGBA(0, 207, 133, 255));
 					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(34.0f), SCREEN_SCALE_Y(108.0f), gUString);
 				}
 			}
@@ -110,7 +111,7 @@ CDarkel::DrawMessages()
 			AsciiToUnicode(gString, gUString);
 			CFont::SetColor(CRGBA(0, 0, 0, 255));
 			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(35.0f), SCREEN_SCALE_Y(144.0f), gUString);
-			CFont::SetColor(CRGBA(255, 128, 128, 255));
+			CFont::SetColor(CRGBA(156, 91, 40, 255));
 			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(34.0f), SCREEN_SCALE_Y(143.0f), gUString);
 			break;
 		}

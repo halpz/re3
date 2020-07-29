@@ -11,7 +11,7 @@
 
 /**
  * \defgroup rtpick RtPick
- * \ingroup rttool
+ * \ingroup collisiondetection
  *
  * Picking Toolkit for RenderWare.
  */

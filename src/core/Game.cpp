@@ -88,6 +88,7 @@
 #include "Zones.h"
 #include "Occlusion.h"
 #include "debugmenu.h"
+#include "Ropes.h"
 
 eLevelName CGame::currLevel;
 int32 CGame::currArea;
@@ -151,6 +152,10 @@ CGame::InitialiseOnceBeforeRW(void)
 	return true;
 }
 
+#if !defined(LIBRW) && defined(PS2_MATFX)
+void ReplaceMatFxCallback();
+#endif
+
 bool
 CGame::InitialiseRenderWare(void)
 {
@@ -201,6 +206,8 @@ CGame::InitialiseRenderWare(void)
 #else
 	rw::MatFX::modulateEnvMap = false;
 #endif
+#elif defined(PS2_MATFX)
+	ReplaceMatFxCallback();
 #endif
 	
 	CFont::Initialise();
@@ -245,23 +252,20 @@ void CGame::ShutdownRenderWare(void)
 bool CGame::InitialiseOnceAfterRW(void)
 {
 	TheText.Load();
-	DMAudio.Initialise();
 	CTimer::Initialise();
 	CTempColModels::Initialise();
 	mod_HandlingManager.Initialise();
 	CSurfaceTable::Initialise("DATA\\SURFACE.DAT");
 	CPedStats::Initialise();
 	CTimeCycle::Initialise();
-
+	DMAudio.Initialise();
 	if ( DMAudio.GetNum3DProvidersAvailable() == 0 )
-		FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = -1;
+		FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = NO_AUDIO_PROVIDER;
 
-	if ( FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -99 || FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -2 )
+	if ( FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == AUDIO_PROVIDER_NOT_DETERMINED || FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -2 )
 	{
 		FrontEndMenuManager.m_PrefsSpeakers = 0;
-		int8 provider = DMAudio.AutoDetect3DProviders();
-		if ( provider != -1 )
-			FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = provider;
+		FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = DMAudio.AutoDetect3DProviders();
 	}
 
 	DMAudio.SetCurrent3DProvider(FrontEndMenuManager.m_nPrefsAudio3DProviderIndex);
@@ -316,7 +320,6 @@ bool CGame::Initialise(const char* datFile)
 	COcclusion::Init();
 	CCollision::Init();
 	CSetPieces::Init();
-	TheText.Load();
 	CTheZones::Init();
 	CUserDisplay::Init();
 	CMessages::Init();
@@ -358,9 +361,9 @@ bool CGame::Initialise(const char* datFile)
 	LoadingScreen("Loading the Game", "Setup streaming", nil);
 	CStreaming::LoadInitialVehicles();
 	CStreaming::LoadInitialPeds();
-	CStreaming::RequestBigBuildings(LEVEL_NONE);
+	CStreaming::RequestBigBuildings(LEVEL_GENERIC);
 	CStreaming::LoadAllRequestedModels(false);
-	printf("Streaming uses %dK of its memory", CStreaming::ms_memoryUsed / 1024);
+	printf("Streaming uses %zuK of its memory", CStreaming::ms_memoryUsed / 1024); // original modifier was %d
 	LoadingScreen("Loading the Game", "Load animations", GetRandomSplashScreen());
 	CAnimManager::LoadAnimFiles();
 	CStreaming::LoadInitialWeapons();
@@ -401,9 +404,11 @@ bool CGame::Initialise(const char* datFile)
 	CRubbish::Init();
 	CClouds::Init();
 	CSpecialFX::Init();
+	CRopes::Init();
 	CWaterCannons::Init();
 	CBridge::Init();
 	CGarages::Init();
+	LoadingScreen("Loading the Game", "Position dynamic objects", nil);
 	LoadingScreen("Loading the Game", "Initialise vehicle paths", nil);
 	CTrain::InitTrains();
 	CPlane::InitPlanes();
@@ -414,6 +419,7 @@ bool CGame::Initialise(const char* datFile)
 	if ( !TheMemoryCard.m_bWantToLoad )
 	{
 #endif
+	LoadingScreen("Loading the Game", "Start script", nil);
 	CTheScripts::StartTestScript();
 	CTheScripts::Process();
 	TheCamera.Process();
@@ -424,6 +430,9 @@ bool CGame::Initialise(const char* datFile)
 	CCollision::ms_collisionInMemory = currLevel;
 	for (int i = 0; i < MAX_PADS; i++)
 		CPad::GetPad(i)->Clear(true);
+	// TODO(Miami)
+	// DMAudio.SetStartingTrackPositions(1);
+	DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 	return true;
 }
 
@@ -509,7 +518,7 @@ void CGame::ReInitGameObjectVariables(void)
 	CTimeCycle::Initialise();
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;
-	CStreaming::RequestBigBuildings(LEVEL_NONE);
+	CStreaming::RequestBigBuildings(LEVEL_GENERIC);
 	CStreaming::LoadAllRequestedModels(false);
 	CPed::Initialise();
 	CEventList::Initialise();
@@ -544,6 +553,7 @@ void CGame::ReInitGameObjectVariables(void)
 	CRemote::Init();
 #endif
 	CSpecialFX::Init();
+	CRopes::Init();
 	CWaterCannons::Init();
 	CParticle::ReloadConfig();
 
@@ -647,7 +657,7 @@ void CGame::InitialiseWhenRestarting(void)
 			CTimer::Initialise();
 			FrontEndMenuManager.m_bWantToLoad = false;
 			ReInitGameObjectVariables();
-			currLevel = LEVEL_NONE;
+			currLevel = LEVEL_GENERIC;
 			CCollision::SortOutCollisionAfterLoad();
 		}
 	}
@@ -716,6 +726,7 @@ void CGame::Process(void)
 		CGarages::Update();
 		CRubbish::Update();
 		CSpecialFX::Update();
+		CRopes::Update();
 		CTimeCycle::Update();
 		if (CReplay::ShouldStandardCameraBeProcessed())
 			TheCamera.Process();

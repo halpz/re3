@@ -7,10 +7,11 @@
 #include "Sprite.h"
 #include "Text.h"
 
-
+// TODO(Miami)
 static char ObjectiveText[][28] = {
 	"No Obj",
 	"Wait on Foot",
+	"Wait on Foot For Cop",
 	"Flee on Foot Till Safe",
 	"Guard Spot",
 	"Guard Area",
@@ -21,6 +22,8 @@ static char ObjectiveText[][28] = {
 	"Flee Char on Foot Till Safe",
 	"Flee Char on Foot Always",
 	"GoTo Char on Foot",
+	"GoTo Char on Foot Walking",
+	"Hassle Char",
 	"Follow Char in Formation",
 	"Leave Car",
 	"Enter Car as Passenger",
@@ -42,10 +45,9 @@ static char ObjectiveText[][28] = {
 	"Catch Train",
 	"Buy IceCream",
 	"Steal Any Car",
+	"Steal Any Mission Car",
 	"Mug Char",
-#ifdef VC_PED_PORTS
-	"Leave Car and Die"
-#endif
+	"Leave Car and Die",
 };
 
 static char StateText[][18] = {
@@ -82,8 +84,14 @@ static char StateText[][18] = {
 	"Investigate",
 	"Step away",
 	"On Fire",
+	"Sun Bathe",
+	"Flash",
+	"Jog",
+	"Answer Mobile",
 	"Unknown",
 	"STATES_NO_AI",
+	"Abseil",
+	"Sit",
 	"Jump",
 	"Fall",
 	"GetUp",
@@ -106,6 +114,7 @@ static char StateText[][18] = {
 	"Exit Car",
 	"Hands Up",
 	"Arrested",
+	"Deploying Stinger"
 };
 
 static char PersonalityTypeText[][18] = {
@@ -283,7 +292,7 @@ CPed::DebugRenderOnePedText(void)
 			CFont::SetJustifyOff();
 			CFont::SetColor(CRGBA(255, 255, 0, 255));
 			CFont::SetBackGroundOnlyTextOn();
-			CFont::SetFontStyle(0);
+			CFont::SetFontStyle(1);
 			AsciiToUnicode(StateText[m_nPedState], gUString);
 			CFont::PrintString(screenCoords.x, screenCoords.y, gUString);
 			AsciiToUnicode(ObjectiveText[m_objective], gUString);

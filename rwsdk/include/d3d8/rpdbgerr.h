@@ -16,8 +16,6 @@
 /* Pick up _ASSERTE macro */
 #ifdef _XBOX
 #include <xtl.h>
-#else /* _XBOX */
-#include <windows.h>
 #endif /* _XBOX */
 #if (defined(RWMEMDEBUG) && !defined(_CRTDBG_MAP_ALLOC))
 #define _CRTDBG_MAP_ALLOC
@@ -235,6 +233,22 @@ do                                                      \
 }                                                       \
 while (0)
 
+#define RWASSERTM(condition, messageArgs)               \
+do                                                      \
+{                                                       \
+    if (!(condition))                                   \
+    {                                                   \
+        RwDebugSendMessage(rwDEBUGASSERT,               \
+                             __dbFunctionName,          \
+                           RWSTRING(#condition));       \
+        RwDebugSendMessage(rwDEBUGMESSAGE,              \
+                             __dbFunctionName,          \
+                           _rwdbsprintf messageArgs);   \
+    }                                                   \
+    RWASSERTE(condition);                               \
+}                                                       \
+while (0)
+
 #else /* RWDEBUG */
 
 #define RWRETURN(value) return(value)
@@ -253,6 +267,7 @@ while (0)
 #define RWFUNCTION(name)
 #define RWAPIFUNCTION(name)
 #define RWASSERT(condition)
+#define RWASSERTM(condition, messageArgs)
 #define RWMESSAGE(args)
 
 #endif

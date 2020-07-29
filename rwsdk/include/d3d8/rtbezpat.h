@@ -8,17 +8,12 @@
 
 /**
  * \defgroup rtbezpatch RtBezPat
- * \ingroup rttool
+ * \ingroup mathtools
  *
  * The Bezier Patch Toolkit is a group of functions that support the way
  * RenderWare processes patches.
  */
 
-/**
- * \ingroup rtbezpatch
- * \typedef RtBezierV4d
- * typedef for struct RtBezierV4d.
- */
 typedef struct RtBezierV4d RtBezierV4d;
 
 /**
@@ -42,7 +37,7 @@ struct RtBezierV4d
 
 /**
  * \ingroup rtbezpatch
- * \typedef RtBezierRow
+ * \ref RtBezierRow
  *  typedef for a row of vectors.
  * RtBezierRow is an  array of 4 vectors
  */
@@ -50,7 +45,7 @@ typedef RtBezierV4d RtBezierRow[4];
 
 /**
  * \ingroup rtbezpatch
- * \typedef RtBezierMatrix
+ * \ref RtBezierMatrix
  *  typedef for a matrix of 4*4 vectors.
  *  RtBezierMatrix is an array of 4 rows.
  */

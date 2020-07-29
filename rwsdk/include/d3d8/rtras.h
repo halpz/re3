@@ -11,7 +11,7 @@
 
 /**
  * \defgroup rtras RtRAS
- * \ingroup rttool
+ * \ingroup imageconversiontools
  *
  * RAS/Sun Raster Fule Format Image Format Toolkit for RenderWare.
  *

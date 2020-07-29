@@ -15,9 +15,9 @@
 
 /**
  * \defgroup rtmipk RtMipmapK
- * \ingroup rttool
+ * \ingroup mipmapping
  *
- * Ps2/Mipmap K Value Toolkit for RenderWare.
+ * PlayStation 2 / Mipmap K Value Toolkit for RenderWare.
  */
 
 /****************************************************************************

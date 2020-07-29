@@ -106,7 +106,9 @@ CFileLoader::LoadLevel(const char *filename)
 			LoadingScreenLoadingFile(line + 4);
 			LoadScene(line + 4);
 		}else if(strncmp(line, "SPLASH", 6) == 0){
+#ifndef DISABLE_LOADING_SCREEN
 			LoadSplash(GetRandomSplashScreen());
+#endif
 		}else if(strncmp(line, "CDIMAGE", 7) == 0){
 			CdStreamAddImage(line + 8);
 		}
@@ -324,13 +326,13 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	int32 numVertices = *(int16*)buf;
 	buf += 4;
 	if(numVertices > 0){
-		model.vertices = (CVector*)RwMalloc(numVertices*sizeof(CVector));
+		model.vertices = (CompressedVector*)RwMalloc(numVertices*sizeof(CompressedVector));
 		for(i = 0; i < numVertices; i++){
-			model.vertices[i] = *(CVector*)buf;
+			model.vertices[i].Set(*(float*)buf, *(float*)(buf+4), *(float*)(buf+8));
 #if 0
-			if(Abs(model.vertices[i].x) >= 256.0f ||
-			   Abs(model.vertices[i].y) >= 256.0f ||
-			   Abs(model.vertices[i].z) >= 256.0f)
+			if(Abs(*(float*)buf) >= 256.0f ||
+			   Abs(*(float*)(buf+4)) >= 256.0f ||
+			   Abs(*(float*)(buf+8)) >= 256.0f)
 				printf("%s:Collision volume too big\n", modelname);
 #endif
 			buf += 12;
@@ -393,6 +395,16 @@ CFileLoader::FindRelatedModelInfoCB(RpAtomic *atomic, void *data)
 	return atomic;
 }
 
+#ifdef LIBRW
+void
+InitClump(RpClump *clump)
+{
+	RpClumpForAllAtomics(clump, ConvertPlatformAtomic, nil);
+}
+#else
+#define InitClump(clump)
+#endif
+
 void
 CFileLoader::LoadModelFile(const char *filename)
 {
@@ -404,6 +416,7 @@ CFileLoader::LoadModelFile(const char *filename)
 	if(RwStreamFindChunk(stream, rwID_CLUMP, nil, nil)){
 		clump = RpClumpStreamRead(stream);
 		if(clump){
+			InitClump(clump);
 			RpClumpForAllAtomics(clump, FindRelatedModelInfoCB, clump);
 			RpClumpDestroy(clump);
 		}
@@ -429,6 +442,7 @@ CFileLoader::LoadClumpFile(const char *filename)
 			GetNameAndLOD(nodename, name, &n);
 			mi = (CClumpModelInfo*)CModelInfo::GetModelInfo(name, nil);
 			if(mi){
+				InitClump(clump);
 				assert(mi->IsClump());
 				mi->SetClump(clump);
 			}else
@@ -449,6 +463,7 @@ CFileLoader::LoadClumpFile(RwStream *stream, uint32 id)
 	clump = RpClumpStreamRead(stream);
 	if(clump == nil)
 		return false;
+	InitClump(clump);
 	mi = (CClumpModelInfo*)CModelInfo::GetModelInfo(id);
 	mi->SetClump(clump);
 	return true;
@@ -476,6 +491,7 @@ CFileLoader::FinishLoadClumpFile(RwStream *stream, uint32 id)
 	clump = RpClumpGtaStreamRead2(stream);
 
 	if(clump){
+		InitClump(clump);
 		mi = (CClumpModelInfo*)CModelInfo::GetModelInfo(id);
 		mi->SetClump(clump);
 		return true;
@@ -496,6 +512,7 @@ CFileLoader::LoadAtomicFile(RwStream *stream, uint32 id)
 		clump = RpClumpStreamRead(stream);
 		if(clump == nil)
 			return false;
+		InitClump(clump);
 		gpRelatedModelInfo = (CSimpleModelInfo*)CModelInfo::GetModelInfo(id);
 		RpClumpForAllAtomics(clump, SetRelatedModelInfoCB, clump);
 		RpClumpDestroy(clump);
@@ -531,6 +548,8 @@ CFileLoader::LoadAtomicFile2Return(const char *filename)
 	stream = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, filename);
 	if(RwStreamFindChunk(stream, rwID_CLUMP, nil, nil))
 		clump = RpClumpStreamRead(stream);
+	if(clump)
+		InitClump(clump);
 	RwStreamClose(stream, nil);
 	return clump;
 }
@@ -1260,7 +1279,7 @@ CFileLoader::LoadOcclusionVolume(const char *line)
 		&x, &y, &z,
 		&width, &length, &height,
 		&angle);
-	COcclusion::AddOne(x, y, z, width, length, z + height/2.0f, angle);
+	COcclusion::AddOne(x, y, z + height/2.0f, width, length, height, angle);
 }
 
 

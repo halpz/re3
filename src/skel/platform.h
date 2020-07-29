@@ -1,6 +1,8 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
+// Functions that's different on glfw/win etc. but have same signature (but if a function only used in win.cpp you can keep in win.h)
+
 #include "rwcore.h"
 #include "skeleton.h"
 
@@ -35,6 +37,10 @@ extern RwBool psInstallFileSystem(void);
 extern RwBool psNativeTextureSupport(void);
 
 extern void _InputTranslateShiftKeyUpDown(RsKeyCodes* rs);
+extern long _InputInitialiseMouse(bool exclusive); // returns HRESULT on Windows actually
+extern void _InputShutdownMouse();
+extern bool _InputMouseNeedsExclusive();
+extern void _InputInitialiseJoys();
 
 extern void HandleExit();
 

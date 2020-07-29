@@ -30,6 +30,13 @@ struct PedAudioData
 	int m_nMaxRandomDelayTime;
 };
 
+enum
+{
+	ATTACK_IN_PROGRESS,
+	CANT_ATTACK,
+	WATCH_UNTIL_HE_DISAPPEARS,
+};
+
 enum eFormation
 {
 	FORMATION_UNDEFINED,
@@ -98,7 +105,6 @@ enum PedFightMoves
 	FIGHTMOVE_PUNCHHOOK,
 	FIGHTMOVE_PUNCHJAB,
 	FIGHTMOVE_PUNCH,
-	FIGHTMOVE_BODYBLOW = FIGHTMOVE_PUNCH,
 	FIGHTMOVE_LONGKICK,
 	FIGHTMOVE_ROUNDHOUSE,
 	// Directionals
@@ -460,11 +466,9 @@ public:
 	uint32 bIsDrowning : 1;
 	uint32 bDrownsInWater : 1;
 	//uint32 b156_4
-	uint32 b156_8 : 1;
+	uint32 bHeldHostageInCar : 1;
 	uint32 bIsPlayerFriend : 1;
-#ifdef VC_PED_PORTS
 	uint32 bHeadStuckInCollision : 1;
-#endif
 	uint32 bDeadPedInFrontOfCar : 1;
 	uint32 bStayInCarOnJack : 1;
 
@@ -472,22 +476,21 @@ public:
 	uint32 bDoomAim : 1;
 	uint32 bCanBeShotInVehicle : 1;
 	//uint32 b157_8
-	//uint32 b157_10
-	//uint32 b157_20
+	uint32 bMakeFleeScream : 1;
+	uint32 bPushedAlongByCar : 1;
 	uint32 b157_40 : 1;
 	uint32 bIgnoreThreatsBehindObjects : 1;
 
 	uint32 bNeverEverTargetThisPed : 1;
 	uint32 bCrouchWhenScared : 1;
 	uint32 bKnockedOffBike : 1;
-	//uint32 b158_8
+	uint32 b158_8 : 1;
 	uint32 b158_10 : 1;
 	uint32 bBoughtIceCream : 1;
-	//uint32 b158_40
+	uint32 b158_40 : 1;
 	//uint32 b158_80
 
 	// our own flags
-	uint32 m_ped_flagI40 : 1; // bMakePedsRunToPhonesToReportCrimes makes use of this as runover by car indicator
 	uint32 m_ped_flagI80 : 1; // KANGAROO_CHEAT define makes use of this as cheat toggle 
 
 	uint8 m_gangFlags;
@@ -595,8 +598,8 @@ public:
 	uint8 m_wepAccuracy;
 	CEntity *m_pPointGunAt;
 	CVector m_vecHitLastPos;
+	uint32 m_curFightMove;
 	uint32 m_lastFightMove;
-	uint32 m_lastHitState; // TODO(Miami): What's this?
 	uint8 m_fightButtonPressure;
 	FightState m_fightState;
 	bool m_takeAStepAfterAttack;
@@ -634,8 +637,8 @@ public:
 	uint32 m_threatFlags;
 	uint32 m_threatCheck;
 	uint32 m_lastThreatCheck;
-	uint32 m_sayType;
-	uint32 m_sayTimer;
+	uint32 m_delayedSoundID;
+	uint32 m_delayedSoundTimer;
 	uint32 m_lastSoundStart;
 	uint32 m_soundStart;
 	uint16 m_lastQueuedSound;
@@ -667,6 +670,7 @@ public:
 	void AimGun(void);
 	void KillPedWithCar(CVehicle *veh, float impulse);
 	void Say(uint16 audio);
+	void Say(uint16 audio, int32 time);
 	void SetLookFlag(CEntity* target, bool keepTryingToLook, bool cancelPrevious = false);
 	void SetLookFlag(float direction, bool keepTryingToLook, bool cancelPrevious = false);
 	void SetLookTimer(int time);
@@ -761,6 +765,8 @@ public:
 	void SetWaitState(eWaitState, void*);
 	bool FightStrike(CVector&, bool);
 	void FightHitPed(CPed*, CVector&, CVector&, int16);
+	int32 ChooseAttackPlayer(uint8, bool);
+	int32 ChooseAttackAI(uint8, bool);
 	int GetLocalDirection(const CVector2D &);
 	void StartFightDefend(uint8, uint8, uint8);
 	void PlayHitSound(CPed*);
@@ -948,6 +954,8 @@ public:
 	void ClearWaitState(void);
 	void Undress(const char*);
 	void Dress(void);
+	int32 KillCharOnFootMelee(CVector&, CVector&, CVector&);
+	int32 KillCharOnFootArmed(CVector&, CVector&, CVector&);
 
 	bool HasWeaponSlot(uint8 slot) { return m_weapons[slot].m_eWeaponType != WEAPONTYPE_UNARMED; }
 	CWeapon& GetWeapon(uint8 slot) { return m_weapons[slot]; }
@@ -964,6 +972,7 @@ public:
 	bool Dying(void) { return m_nPedState == PED_DIE; }
 	bool DyingOrDead(void) { return m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
 	bool OnGround(void) { return m_nPedState == PED_FALL || m_nPedState == PED_DIE || m_nPedState == PED_DEAD; }
+	bool OnGroundOrGettingUp(void) { return OnGround() || m_nPedState == PED_GETUP; }
 	
 	bool Driving(void) { return m_nPedState == PED_DRIVING; }
 	bool InVehicle(void) { return bInVehicle && m_pMyVehicle; } // True when ped is sitting/standing in vehicle, not in enter/exit state.
@@ -1029,6 +1038,20 @@ public:
 	static AnimationId GetFightIdleWithMeleeAnim(CWeaponInfo* weapon) {
 		if (!!weapon->m_bFightMode)
 			return ANIM_MELEE_IDLE_FIGHTMODE;
+		else
+			return (AnimationId)0;
+	}
+
+	static AnimationId GetFinishingAttackAnim(CWeaponInfo* weapon) {
+		if (!!weapon->m_bFinish3rd)
+			return ANIM_MELEE_ATTACK_FINISH;
+		else
+			return (AnimationId)0;
+	}
+
+	static AnimationId GetSecondFireAnim(CWeaponInfo* weapon) {
+		if (!!weapon->m_bUse2nd)
+			return ANIM_WEAPON_FIRE_2ND; // or ANIM_MELEE_ATTACK_2ND
 		else
 			return (AnimationId)0;
 	}

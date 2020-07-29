@@ -67,7 +67,7 @@ CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType
 		eCopType copType = COP_STREET;
 		switch (pVehicle->GetModelIndex())
 		{
-		case MI_FBICAR:
+		case MI_FBIRANCH:
 			modelInfoId = MI_FBI;
 			copType = COP_FBI;
 			break;
@@ -236,7 +236,7 @@ CRoadBlocks::CreateRoadBlockBetween2Points(CVector point1, CVector point2)
 			pVehicle->AutoPilot.m_nNextLane = pVehicle->AutoPilot.m_nCurrentLane = 0;
 			pVehicle->AutoPilot.m_nCruiseSpeed = pVehicle->AutoPilot.m_fMaxTrafficSpeed = 0;
 			pVehicle->bExtendedRange = true;
-			if (pVehicle->UsesSiren(pVehicle->GetModelIndex()) && CGeneral::GetRandomNumber() & 1)
+			if (pVehicle->UsesSiren() && CGeneral::GetRandomNumber() & 1)
 				pVehicle->m_bSirenOrAlarm = true;
 			if (pVehicle->GetUp().z > 0.94f) {
 				CVisibilityPlugins::SetClumpAlpha(pVehicle->GetClump(), 0);

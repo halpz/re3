@@ -22,7 +22,7 @@
 /*************************************************************************
  *
  * Filename: <C:/daily/rwsdk/include/d3d8/rpworld.h>
- * Automatically Generated on: Wed Jul 10 10:45:01 2002
+ * Automatically Generated on: Thu Jan 23 11:06:24 2003
  *
  ************************************************************************/
 
@@ -75,135 +75,32 @@ extern RxNodeDefinition *RxNodeDefinitionGetD3D8AtomicAllInOne(void);
 extern "C"
 {
 #endif /* __cplusplus */
+
+extern void RwD3D8VertexBufferManagerChangeDefaultSize(RwUInt32 defaultSize);
+
+extern RwBool _rxD3D8VertexBufferManagerCreate(RwUInt32 fvf,
+                                               RwUInt32 size,
+                                               void **vertexBuffer,
+                                               RwUInt32 *baseIndex);
+
+extern void _rxD3D8VertexBufferManagerDestroy(RwUInt32 fvf,
+                                              RwUInt32 size,
+                                              void *vertexBuffer,
+                                              RwUInt32 baseIndex);
+
+extern RwBool _rxD3D8VertexBufferManagerCreateNoFVF(RwUInt32 stride,
+                                               RwUInt32 size,
+                                               void **vertexBuffer,
+                                               RwUInt32 *baseIndex);
+
+extern void _rxD3D8VertexBufferManagerDestroyNoFVF(RwUInt32 stride,
+                                              RwUInt32 size,
+                                              void *vertexBuffer,
+                                              RwUInt32 baseIndex);
+
 #ifdef    __cplusplus
 }
 #endif /* __cplusplus */
-
-/*--- Automatically derived from: C:/daily/rwsdk/world/pipe/p2/nodeWorldSectorInstance.h ---*/
-
-#ifdef    __cplusplus
-extern "C"
-{
-#endif                          /* __cplusplus */
-
-extern RxNodeDefinition *RxNodeDefinitionGetWorldSectorInstance(void);
-
-#ifdef    __cplusplus
-}
-#endif                          /* __cplusplus */
-
-
-/*--- Automatically derived from: C:/daily/rwsdk/world/pipe/p2/nodeWorldSectorEnumerateLights.h ---*/
-
-#ifdef    __cplusplus
-extern "C"
-{
-#endif                          /* __cplusplus */
-
-extern RxNodeDefinition *RxNodeDefinitionGetWorldSectorEnumerateLights(void);
-
-#ifdef    __cplusplus
-}
-#endif                          /* __cplusplus */
-
-
-/*--- Automatically derived from: C:/daily/rwsdk/world/pipe/p2/nodePreLight.h ---*/
-
-#ifdef    __cplusplus
-extern "C"
-{
-#endif                          /* __cplusplus */
-
-extern RxNodeDefinition *RxNodeDefinitionGetPreLight(void);
-
-#ifdef    __cplusplus
-}
-#endif                          /* __cplusplus */
-
-
-/*--- Automatically derived from: C:/daily/rwsdk/world/pipe/p2/nodePostLight.h ---*/
-
-#ifdef    __cplusplus
-extern "C"
-{
-#endif                          /* __cplusplus */
-
-extern RxNodeDefinition *RxNodeDefinitionGetPostLight(void);
-
-#ifdef    __cplusplus
-}
-#endif                          /* __cplusplus */
-
-
-/*--- Automatically derived from: C:/daily/rwsdk/world/pipe/p2/nodeMaterialScatter.h ---*/
-
-#ifdef    __cplusplus
-extern "C"
-{
-#endif                          /* __cplusplus */
-
-extern RxNodeDefinition *RxNodeDefinitionGetMaterialScatter(void);
-
-#ifdef    __cplusplus
-}
-#endif                          /* __cplusplus */
-
-
-/*--- Automatically derived from: C:/daily/rwsdk/world/pipe/p2/nodeLight.h ---*/
-
-#ifdef    __cplusplus
-extern "C"
-{
-#endif                          /* __cplusplus */
-
-extern RxNodeDefinition *RxNodeDefinitionGetLight(void);
-
-#ifdef    __cplusplus
-}
-#endif                          /* __cplusplus */
-
-
-/*--- Automatically derived from: C:/daily/rwsdk/world/pipe/p2/nodeFastPathSplitter.h ---*/
-
-#ifdef    __cplusplus
-extern "C"
-{
-#endif                          /* __cplusplus */
-
-extern RxNodeDefinition *RxNodeDefinitionGetFastPathSplitter(void);
-
-#ifdef    __cplusplus
-}
-#endif                          /* __cplusplus */
-
-
-/*--- Automatically derived from: C:/daily/rwsdk/world/pipe/p2/nodeAtomicInstance.h ---*/
-
-#ifdef    __cplusplus
-extern "C"
-{
-#endif                          /* __cplusplus */
-
-extern RxNodeDefinition *RxNodeDefinitionGetAtomicInstance(void);
-
-#ifdef    __cplusplus
-}
-#endif                          /* __cplusplus */
-
-
-/*--- Automatically derived from: C:/daily/rwsdk/world/pipe/p2/nodeAtomicEnumerateLights.h ---*/
-
-#ifdef    __cplusplus
-extern "C"
-{
-#endif                          /* __cplusplus */
-
-extern RxNodeDefinition *RxNodeDefinitionGetAtomicEnumerateLights(void);
-
-#ifdef    __cplusplus
-}
-#endif                          /* __cplusplus */
-
 
 /*--- Automatically derived from: c:/daily/rwsdk/world/bamateri.h ---*/
 
@@ -222,15 +119,17 @@ extern RxNodeDefinition *RxNodeDefinitionGetAtomicEnumerateLights(void);
 typedef struct RpMaterialChunkInfo RpMaterialChunkInfo;
 typedef struct RpMaterialChunkInfo _rpMaterial;
 
+#if (!defined(DOXYGEN))
 struct RpMaterialChunkInfo
 {
-    RwInt32             flags;  /**<  Material flags - unused currently - 
-                                   for future expansion */
-    RwRGBA              color;  /**<  Colour of material. */
-    RwInt32             unused;  /**<  Not used */
-    RwBool              textured;  /**<  Are we textured? */
-    RwSurfaceProperties surfaceProps;   /**<  Surface properties */
+    RwInt32             flags;       /* Material flags - unused currently - 
+                                      * for future expansion */
+    RwRGBA              color;       /* Color of material. */
+    RwInt32             unused;      /* Not used */
+    RwBool              textured;    /* Are we textured? */
+    RwSurfaceProperties surfaceProps;/* Surface properties */
 };
+#endif /* (!defined(DOXYGEN)) */
 
 #if (!defined(RwMaterialAssign))
 #define RwMaterialAssign(_target, _source)             \
@@ -238,8 +137,8 @@ struct RpMaterialChunkInfo
 #endif /* (!defined(RwMaterialAssign)) */
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpMaterial 
+ * \ingroup rpmaterial
+ * \struct RpMaterial 
  * Material object. This should be 
  * considered an opaque type. Use the RpMaterial API functions to access.
  */
@@ -258,9 +157,8 @@ struct RpMaterial
 #endif /* (!defined(DOXYGEN)) */
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpMaterialCallBack
- \ref RpMaterialCallBack 
+ * \ingroup rpmaterial
+ * \ref RpMaterialCallBack 
  * represents the function called from \ref RpGeometryForAllMaterials and 
  * \ref RpWorldForAllMaterials for all materials referenced by polygons in a 
  * given geometry. This function should return a pointer to the current 
@@ -268,7 +166,7 @@ struct RpMaterial
  * further callbacks on the materials.
  * 
  * \param  material   Pointer to the current material
- * \param  data  Pointer to developer-defined data structure.
+ * \param  data       Pointer to developer-defined data structure.
  * 
  * \return Pointer to the current material.
  */
@@ -346,6 +244,9 @@ extern "C"
 #endif                          /* __cplusplus */
 
 
+extern void RpMaterialSetFreeListCreateParams( RwInt32 blockSize,
+                                               RwInt32 numBlocksToPrealloc );
+
 /* Creating, destroying and referencing materials */
 extern RpMaterial *RpMaterialCreate(void);
 extern RwBool RpMaterialDestroy(RpMaterial *material);
@@ -388,6 +289,8 @@ extern RwInt32 RpMaterialRegisterPluginStream(RwUInt32 pluginID,
 extern RwInt32 RpMaterialSetStreamAlwaysCallBack(
                         RwUInt32 pluginID,
                         RwPluginDataChunkAlwaysCallBack alwaysCB);
+extern RwInt32 RpMaterialSetStreamRightsCallBack(RwUInt32 pluginID,
+                                  RwPluginDataChunkRightsCallBack rightsCB);
 extern RwInt32 RpMaterialGetPluginOffset(RwUInt32 pluginID);
 extern RwBool RpMaterialValidatePlugins(const RpMaterial *material);
 
@@ -414,12 +317,15 @@ _rpMaterialChunkInfoRead(RwStream *stream,
  */
 
 typedef struct RpMaterialList RpMaterialList;
+
+#if (!defined(DOXYGEN))
 struct RpMaterialList
 {
     RpMaterial     **materials;
     RwInt32        numMaterials;
     RwInt32        space;
 };
+#endif /* (!defined(DOXYGEN)) */
 
 /****************************************************************************
  Function prototypes
@@ -531,16 +437,14 @@ extern RwModuleInfo meshModule;
  Global types
  */
 
-/**
- * \ingroup rpworlddatatypes
- * \typedef RpMeshHeader
+/*
  * typedef for header structure listing all meshes
  * constituting a single RpGeometry or RpWorldSector
  */
 typedef struct RpMeshHeader RpMeshHeader;
 
 /**
- * \ingroup rpworlddatatypes
+ * \ingroup rpmesh
  * \ref RpMeshHeaderFlags
  * represents the different types of mesh.
  * \see RpMeshHeader
@@ -549,18 +453,18 @@ enum RpMeshHeaderFlags
 {
     /* NOTE: trilists are denoted by absence of any other
      *       primtype flags, so be careful that you test:
-     *        (triListFlag == flags&triListFlag)
+     *        (triListFlag == (flags&triListFlag))
      *       or:
-     *        (0 == flags&rpMESHHEADERPRIMMASK)
+     *        (0 == (flags&rpMESHHEADERPRIMMASK))
      *       and not:
      *        (flags&triListFlag)
      */
     rpMESHHEADERTRISTRIP  = 0x0001, /**< Render as tristrips */
-    rpMESHHEADERTRIFAN    = 0x0002, /**< On PS2 these will be converted to trilists */
+    rpMESHHEADERTRIFAN    = 0x0002, /**< On PlayStation 2 these will be converted to trilists */
     rpMESHHEADERLINELIST  = 0x0004, /**< Render as linelists */
-    rpMESHHEADERPOLYLINE  = 0x0008, /**< On PS2 these will be converted to linelists */
+    rpMESHHEADERPOLYLINE  = 0x0008, /**< On PlayStation 2 these will be converted to linelists */
     rpMESHHEADERPOINTLIST = 0x0010, /**< Pointlists are supported only if rendered by
-                                     *   custom pipelines; there is no default RenderWare 
+                                     *   custom pipelines; there is no default RenderWare
                                      *   way to render pointlists. */
 
     rpMESHHEADERPRIMMASK  = 0x00FF, /**< All bits reserved for specifying primitive type */
@@ -576,6 +480,8 @@ enum RpMeshHeaderFlags
 typedef enum RpMeshHeaderFlags RpMeshHeaderFlags;
 
 typedef struct rpMeshGlobals rpMeshGlobals;
+
+#if (!defined(DOXYGEN))
 struct rpMeshGlobals
 {
     RwInt16             nextSerialNum;
@@ -583,11 +489,12 @@ struct rpMeshGlobals
     RwUInt8             meshFlagsToPrimType[rpMESHHEADERPRIMTYPEOR];
     RwUInt8             primTypeToMeshFlags[rwPRIMTYPEOR];
 };
+#endif /* (!defined(DOXYGEN)) */
 
 typedef struct RpBuildMeshTriangle RpBuildMeshTriangle;
 
 /**
- * \ingroup rpworlddatatypes
+ * \ingroup rpmesh
  * \struct RpBuildMeshTriangle
  * This type represents an array of indices into
  * the object vertex array. Used during the construction
@@ -613,7 +520,7 @@ struct RpBuildMeshTriangle
 typedef struct RpBuildMesh RpBuildMesh;
 
 /**
- * \ingroup rpworlddatatypes
+ * \ingroup rpmesh
  * \struct RpBuildMesh
  * This type represents a mesh ready for tri stripping.
  *
@@ -640,7 +547,7 @@ struct RpBuildMesh
 typedef struct RpMesh RpMesh;
 
 /**
- * \ingroup rpworlddatatypes
+ * \ingroup rpmesh
  * \struct RpMesh
  * This type represents a single polygon mesh.
  * A mesh is defined as a collection of triangles derived from an RpGeometry
@@ -659,7 +566,7 @@ struct RpMesh
 };
 
 /**
- * \ingroup rpworlddatatypes
+ * \ingroup rpmesh
  * \struct RpMeshHeader
  * Header for all meshes that constitute a single RpGeometry or RpWorldSector
  */
@@ -679,9 +586,8 @@ struct RpMeshHeader
 };
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpMeshCallBack
- *  \ref RpMeshCallBack is the callback
+ * \ingroup rpmesh
+ * \ref RpMeshCallBack is the callback
  * function supplied to \ref RpGeometryForAllMeshes and
  * \ref RpWorldSectorForAllMeshes for all meshes in a given geometry.
  *
@@ -689,14 +595,13 @@ struct RpMeshHeader
  * success. The callback may return NULL to terminate further callbacks
  * on the meshes.
  *
- * \param  mesh   Pointer to the current mesh, supplied by
- * iterator.
- * \param  meshHeader   Pointer to the meshes header
- * \param  data  Pointer to developer-defined data structure.
+ * \param  mesh        Pointer to the current mesh, supplied by
+ *                     iterator.
+ * \param  meshHeader  Pointer to the meshes header
+ * \param  data        Pointer to developer-defined data structure.
  *
- * \return
- * Returns a pointer to the current mesh if successful or NULL if an error
- * occurred.
+ * \return Returns a pointer to the current mesh if successful or NULL 
+ * if an error occurred.
  */
 typedef RpMesh     *(*RpMeshCallBack) (RpMesh * mesh,
                                        RpMeshHeader * meshHeader,
@@ -823,29 +728,29 @@ extern RpMeshHeader * _rpMeshHeaderCreate(RwUInt32 size);
         naTmp[1] = RwRealToFixed((v).y);        \
         naTmp[2] = RwRealToFixed((v).z);        \
                                                 \
-        if (naTmp[0] >= RwFixedCast(1))         \
+        if (naTmp[0] >= RwIntToFixed(1))        \
         {                                       \
-            naTmp[0] = RwFixedCast(1)-1;        \
+            naTmp[0] = RwIntToFixed(1)-1;       \
         }                                       \
-        if (naTmp[0] <= RwFixedCast(-1))        \
+        if (naTmp[0] <= RwIntToFixed(-1))       \
         {                                       \
-            naTmp[0] = RwFixedCast(-1)+1;       \
+            naTmp[0] = RwIntToFixed(-1)+1;      \
         }                                       \
-        if (naTmp[1] >= RwFixedCast(1))         \
+        if (naTmp[1] >= RwIntToFixed(1))        \
         {                                       \
-            naTmp[1] = RwFixedCast(1)-1;        \
+            naTmp[1] = RwIntToFixed(1)-1;       \
         }                                       \
-        if (naTmp[1] <= RwFixedCast(-1))        \
+        if (naTmp[1] <= RwIntToFixed(-1))       \
         {                                       \
-            naTmp[1] = RwFixedCast(-1)+1;       \
+            naTmp[1] = RwIntToFixed(-1)+1;      \
         }                                       \
-        if (naTmp[2] >= RwFixedCast(1))         \
+        if (naTmp[2] >= RwIntToFixed(1))        \
         {                                       \
-            naTmp[2] = RwFixedCast(1)-1;        \
+            naTmp[2] = RwIntToFixed(1)-1;       \
         }                                       \
-        if (naTmp[2] <= RwFixedCast(-1))        \
+        if (naTmp[2] <= RwIntToFixed(-1))       \
         {                                       \
-            naTmp[2] = RwFixedCast(-1)+1;       \
+            naTmp[2] = RwIntToFixed(-1)+1;      \
         }                                       \
                                                 \
         (n).x = (RwInt8)(naTmp[0]>>9);          \
@@ -853,37 +758,13 @@ extern RpMeshHeader * _rpMeshHeaderCreate(RwUInt32 size);
         (n).z = (RwInt8)(naTmp[2]>>9);          \
     }
 
-/* RpCollSector access macros - for pre v304 data */
-#define RWCOLLSECTORGETTYPE(sect) \
-    ((sect).cType&0x80)
-
-#define RWCOLLSECTORGETPLANE(sect) \
-    ((((sect).cType)>>3)&0xc)
-
-#define RWCOLLSECTORGETON(sect) \
-    (((sect).cType)&0x1f)
-
-#define RWCOLLSECTORGETVERTEX(sect) \
-    (sect).vertex
-
-#define RWCOLLSECTORGETSTART(sect) \
-    (sect).start
-
-#define RWCOLLSECTORGETNOPOLYS(sect) \
-    (sect).cType
-
-#define RWCOLLSECTORSETPOLYGONS(sect,no,st) \
-    (sect).cType = (RwUInt8)(no); \
-    (sect).start = (RwUInt8)(st)
-
-#define rwMAXCOLLISIONCUTS 7
-
 /****************************************************************************
  Global types
  */
 
 typedef struct RpVertexNormal RpVertexNormal;
 
+#if (!defined(DOXYGEN))
 struct RpVertexNormal
 {
     RwInt8          x;
@@ -899,28 +780,11 @@ struct RpPolygon
     RwUInt16        matIndex;
     RwUInt16        vertIndex[3];
 };
-
-/* RpCollSector - for pre v304 data */
-#define RWCOLLSECTORSETPLANE(sect,plane,vert,no,st) \
-    (sect).cType = (RwUInt8)(0x80|((plane)<<3)|(no)); \
-    (sect).vertex = (RwUInt8)(vert); \
-    (sect).start = (RwUInt8)(st)
-
-typedef struct RpCollSector RpCollSector;
-
-struct RpCollSector
-{
-    RwUInt8 cType;    /* Bit 7   - 1 plane */
-                      /*           0 polygons */
-                      /* Bit 6-5 - plane */
-                      /* Bit 4-0 - amount ON plane */
-    RwUInt8 vertex;   /* Vertex index used for the split */
-    RwUInt8 start;    /* Starting polygon */
-};
+#endif /* (!defined(DOXYGEN)) */
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpWorldSector
+ * \ingroup rpworldsector
+ * \struct RpWorldSector
  * World Sector object. This should be
  * considered an opaque type. Use the RpWorldSector API functions to access.
  */
@@ -958,9 +822,6 @@ struct RpWorldSector
     /* Bounding box tightly enclosing geometry */
     RwBBox                  tightBoundingBox;
 
-    /* The root of the bsp collision tree for pre v304 data */
-    RpCollSector            *colSectorRoot;
-
     /* The mesh which groups same material polygons together */
     RpMeshHeader            *mesh;
 
@@ -981,9 +842,8 @@ struct RpWorldSector
 #endif /* (!defined(DOXYGEN)) */
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpWorldSectorCallBack
- \ref RpWorldSectorCallBack
+ * \ingroup rpworldsector
+ * \ref RpWorldSectorCallBack
  * represents the function called from \ref RpWorldForAllWorldSectors,
  * \ref RpAtomicForAllWorldSectors and \ref RpLightForAllWorldSectors for all
  * world sectors in a given world or world sectors a given atomic or light lies
@@ -991,15 +851,17 @@ struct RpWorldSector
  * indicate success. The callback may return NULL to terminate further
  * callbacks on the atomic or light.
  *
+ * \param  sector   Pointer to the current world sector
+ * \param  data     Pointer to developer-defined data structure.
+ *
  * \return Pointer to the current world sector.
  *
- * \param  sector   Pointer to the current world sector
- * \param  data  Pointer to developer-defined data structure.
  */
 typedef RpWorldSector *(*RpWorldSectorCallBack)(RpWorldSector *worldSector, void *data);
 
 typedef struct RpSector RpSector;
 
+#if (!defined(DOXYGEN))
 struct RpSector
 {
     RwInt32                 type;
@@ -1022,7 +884,7 @@ struct RpPlaneSector
     RwReal                  leftValue;
     RwReal                  rightValue;
 };
-
+#endif /* (!defined(DOXYGEN)) */
 
 #ifdef    __cplusplus
 extern "C"
@@ -1101,15 +963,16 @@ extern RwBool RpWorldSectorValidatePlugins(const RpWorldSector *sector);
  Defines
  */
 
+#define RPTRISTRIPPOLYGONMAXEDGES 3
+
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpTriStripMeshCallBack
+ * \ingroup rpmesh
  * \ref RpTriStripMeshCallBack is the callback to generate triangle strips
  * when the triangle stripped geometries or world sectors are unlocked.
  *
  * \param buildMesh pointer to the mesh which the triangle strip will be
- * generated from.
- * \param data  pointer to user-supplied data to pass to the callback
+ *                  generated from.
+ * \param data      pointer to user-supplied data to pass to the callback
  * function.
  *
  * \return a pointer to the constructed mesh header.
@@ -1119,9 +982,155 @@ typedef RpMeshHeader *
 (*RpTriStripMeshCallBack) (RpBuildMesh *buildMesh, void *data);
 
 
+
 /****************************************************************************
  Global types
  */
+
+typedef struct RpTriStripEdge RpTriStripEdge;
+
+typedef struct RpTriStripPolygon RpTriStripPolygon;
+/**
+ * \ingroup rpmesh
+ * \struct RpTriStripPolygon
+ * This type represents a polygon.
+ *
+ * \see RpTriStripPolygonFollowStrip
+ * \see RpBuildMeshGenerateTriStrip
+ * \see RpTriStripMeshTunnel
+ */
+struct RpTriStripPolygon
+{
+    RwLLLink inEndLink;     /**< link for list of polygons joined by fewer than
+                                 2 strip edges */
+    RwLLLink inUsedLink;    /**< link for list of used polygons */
+    RwLLLink inFreeLink;    /**< link for list of free polygons */
+    RwUInt32 numEdges;      /**< number of edges */
+    RpTriStripEdge *edges[RPTRISTRIPPOLYGONMAXEDGES];   /**< polygon edges */
+    RxVertexIndex vertIndex[RPTRISTRIPPOLYGONMAXEDGES]; /**< polygon vertex 
+                                                             indices */
+    RwUInt32 testFrame;     /**< used to prevent a tri-strip being counted by
+                                 the cost function more than once */
+};
+
+/**
+ * \ingroup rpmesh
+ * \struct RpTriStripEdge
+ * This type represents a polygon edge which may be part of a tri-strip.
+ *
+ * \see RpTriStripPolygonFollowStrip
+ * \see RpBuildMeshGenerateTriStrip
+ * \see RpTriStripMeshTunnel
+ */
+struct RpTriStripEdge
+{
+    RwLLLink inUsedLink;        /**< link for list of used edges */      
+    RwLLLink inFreeLink;        /**< link for list of free edges */
+    RpTriStripPolygon *poly1;   /**< first polygon including this edge */
+    RpTriStripPolygon *poly2;   /**< second polygon including this edge or NULL
+                                     if this edge is only included in one */
+    RxVertexIndex vert1;        /**< index of first vertex of edge */
+    RxVertexIndex vert2;        /**< index of second vertex of edge */
+    RwBool strip;               /**< TRUE if the edge is part of a tri-strip */
+};
+
+typedef struct RpTriStripMesh RpTriStripMesh;
+/**
+ * \ingroup rpmesh
+ * \struct RpTriStripMesh
+ * This type represents a mesh and the tri-strips it contains.
+ *
+ * \see RpBuildMeshGenerateTriStrip
+ * \see RpTriStripMeshTunnel
+ */
+struct RpTriStripMesh
+{
+    RwUInt32 numPolygons;       /**< the number of polygons in the mesh */
+    RwLinkList polygonEndList;  /**< linked list of polygons joined by fewer 
+                                     than 2 strip edges. */
+    RwLinkList polygonUsedList; /**< linked list of used polygons */
+    RwLinkList polygonFreeList; /**< linked list of free polygons */
+    RwLinkList edgeUsedList;    /**< linked list of used edges */
+    RwLinkList edgeFreeList;    /**< linked list of free edges */
+};
+
+/**
+ * \ingroup rpmesh
+ * \ref RpTriStripMeshStripCallBack represents the callback function to
+ * tri-strip a mesh.
+ * 
+ * \param  mesh Pointer to the mesh to tri-strip.
+ * \param  data Pointer to user-supplied data.
+ *
+ * \return Returns a pointer to the current mesh if successful or NULL if an
+ *         error occurred. 
+ */
+typedef RpTriStripMesh *
+(*RpTriStripMeshStripCallBack) (RpTriStripMesh *mesh, void *data);
+
+typedef struct RpTriStripData RpTriStripData;
+/**
+ * \ingroup rpmesh
+ * \struct RpTriStripData
+ * This type represents the data required by the 
+ * \ref RpBuildMeshGenerateTriStrip function to tri-strip a mesh. This data must
+ * be the user-supplied data passed into RpMeshSetTriStripMethod when using
+ * \ref RpBuildMeshGenerateTriStrip.
+ *
+ * \see RpMeshGetTriStripMethod
+ * \see RpMeshSetTriStripMethod
+ * \see RpBuildMeshGenerateTriStrip
+ * \see RpTriStripMeshTunnel
+ */
+struct RpTriStripData
+{
+    RwBool ignoreWinding;                /**< TRUE to ignore winding order */
+    RpTriStripMeshStripCallBack stripCB; /**< callback to tri-strip mesh */
+    void *data;                          /**< data to supply to callback */
+};
+
+/**
+ * \ingroup rpmesh
+ * \ref RpTriStripCostCallBack represents the callback function used by the
+ * tunnelling tri-stripper to determine the cost of a tri-strip.
+ * 
+ * \param  startPolygon Pointer to polygon at the start of the tri-strip.
+ * \param  testFrame    Value that must be written to the testFrame of all 
+ *                      polygons in the tri-strip
+ * \param  data         Pointer to user-supplied data.
+ *
+ * \return Returns the cost of the tri-strip.
+ */
+typedef RwUInt32
+(*RpTriStripCostCallBack) (RpTriStripPolygon *startPolygon, RwUInt32 testFrame, void *data);
+
+typedef struct RpTriStripTunnelData RpTriStripTunnelData;
+/**
+ * \ingroup rpmesh
+ * \struct RpTriStripTunnelData
+ * This type represents the data required by the 
+ * \ref RpTriStripMeshTunnel function to tri-strip a mesh. This data must
+ * be the user-supplied data in the RpTriStripData structure passed into
+ * \ref RpMeshSetTriStripMethod as the user-supplied data when using
+ * \ref RpTriStripMeshTunnel.
+ *
+ * \see RpMeshGetTriStripMethod
+ * \see RpMeshSetTriStripMethod
+ * \see RpBuildMeshGenerateTriStrip
+ * \see RpTriStripMeshTunnel
+ * \see RpTriStripDefaultCost
+ */
+struct RpTriStripTunnelData
+{
+    RwReal quality;                /**< the higher the value the better the
+                                        output but the longer it will take;
+                                        values greater than 1 are unlikely to
+                                        be useful */
+    RwUInt32 lengthLimit;          /**< the maximum tunnel length to use */
+    RpTriStripCostCallBack costCB; /**< callback to determine tri-strip cost */
+    void *data;                    /**< data to supply to callbacks */
+};
+
 
 
 /****************************************************************************
@@ -1138,8 +1147,27 @@ extern "C"
 {
 #endif                          /* __cplusplus */
 
+/* Tri-strip manipulating functions */
+extern RpTriStripPolygon *
+RpTriStripPolygonFollowStrip(RpTriStripPolygon *curr, RpTriStripPolygon *prev);
 
-/* Callback mesh generating functions */
+/* Callback strip costing functions */
+extern RwUInt32
+RpTriStripDefaultCost(RpTriStripPolygon *startPolygon, RwUInt32 testFrame, 
+                      void *data);
+
+/* Callback mesh stripping functions */
+extern RpTriStripMesh *
+RpTriStripMeshTunnel(RpTriStripMesh *mesh, void *data);
+
+extern RpTriStripMesh *
+RpTriStripMeshQuick(RpTriStripMesh *mesh, void *data);
+
+/* New callback mesh generating function */
+extern RpMeshHeader *
+RpBuildMeshGenerateTriStrip(RpBuildMesh *buildMesh, void *data);
+
+/* Old callback mesh generating functions. Probably obsolete */
 extern RpMeshHeader *
 RpBuildMeshGenerateTrivialTriStrip(RpBuildMesh *buildMesh, void *data);
 
@@ -1164,7 +1192,7 @@ extern RpMeshHeader *
 RpBuildMeshGenerateExhaustiveIgnoreWindingTriStrip(RpBuildMesh *buildmesh, 
                                                    void *data);
 
-/* Functions to set and get the global mesh tristrip algorithm */
+/* Functions to set and get the global mesh tri-strip algorithm */
 extern RwBool
 RpMeshSetTriStripMethod(RpTriStripMeshCallBack callback, void *data);
 
@@ -1225,6 +1253,7 @@ _rpMeshOptimise(RpBuildMesh *buildmesh, RwUInt32 flags);
 typedef struct RpLightChunkInfo RpLightChunkInfo;
 typedef struct RpLightChunkInfo _rpLight;
 
+#if (!defined(DOXYGEN))
 struct RpLightChunkInfo
 {
         RwReal              radius; /**< radius */
@@ -1234,6 +1263,7 @@ struct RpLightChunkInfo
         RwReal              minusCosAngle; /**< minusCosAngle */
         RwUInt32            typeAndFlags; /**< typeAndFlags */
 };
+#endif /* (!defined(DOXYGEN)) */
 
 /* Type ID */
 #define rpLIGHT 3
@@ -1242,7 +1272,7 @@ struct RpLightChunkInfo
 #define rpLIGHTPOSITIONINGSTART 0x80
 
 /**
- * \ingroup rpworlddatatypes
+ * \ingroup rplight
  * \ref RpLightType are
  * light sub types.  This type represents the different 
  * types of light source that can be created using the API function \ref RpLightCreate.  
@@ -1265,12 +1295,17 @@ enum RpLightType
 typedef enum RpLightType RpLightType;
 
 #define rpLIGHTMINCONEANGLE ((RwReal)0.0f)
-#if ((defined(XBOX_DRVMODEL_H)) || (defined(OPENGL_DRVMODEL_H)) || (defined(GCN_DRVMODEL_H)))
-/* XBox has Micro$oft-penned drivers, no wonder it crashes... */
-/* OpenGL and GCN clamp to 90 internally, so we mirror that behaviour */
-#define rpLIGHTMAXCONEANGLE ((RwReal)89.9999f)
+
+#if (defined(XBOX_DRVMODEL_H))
+#define rpLIGHTMAXCONEANGLE (rwPIOVER2)
+#elif (defined(OPENGL_DRVMODEL_H))
+#define rpLIGHTMAXCONEANGLE (rwPIOVER2)
+#elif (defined(GCN_DRVMODEL_H))
+#define rpLIGHTMAXCONEANGLE (rwPIOVER2)
+#elif (defined(D3D8_DRVMODEL_H))
+#define rpLIGHTMAXCONEANGLE (rwPIOVER2)
 #else
-#define rpLIGHTMAXCONEANGLE ((RwReal)180.0f)
+#define rpLIGHTMAXCONEANGLE (rwPI)
 #endif
 
 /*************/
@@ -1280,7 +1315,7 @@ typedef enum RpLightType RpLightType;
 /*************/
 
 /**
- * \ingroup rpworlddatatypes
+ * \ingroup rplight
  * \ref RpLightFlag defines what geometry is influenced by the light. 
  * The bit-field RpLightFlag specifies the options available for controlling the scope 
  * of a light source (see API function \ref RpLightSetFlags):*/
@@ -1327,10 +1362,10 @@ MACRO_STOP
 
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpLight 
- * Light. This should be 
- * considered an opaque type. User the RpLight API functions to access.
+ * \ingroup rplight
+ * \struct RpLight 
+ * Light object. This should be 
+ * considered an opaque type. Use the RpLight API functions to access.
  */
 typedef struct RpLight RpLight;
 
@@ -1349,8 +1384,7 @@ struct RpLight
 #endif /* (!defined(DOXYGEN)) */
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpLightCallBack
+ * \ingroup rplight
  * \ref RpLightCallBack 
  * represents the function called from \ref RpWorldForAllLights and 
  * \ref RpWorld SectorForAllLights for all lights in a given world or world 
@@ -1358,25 +1392,34 @@ struct RpLight
  * indicate success. The callback may return NULL to terminate further 
  * callbacks on the world sector.
  *
+ * \param  light  Pointer to the current light in the world 
+ *                sector.
+ * \param  data   Pointer to developer-defined data structure.
+ *
  * \return Pointer to the current light.
- * 
- * \param  light   Pointer to the current light in the world 
- * sector.
- * \param  data  Pointer to developer-defined data structure.
  */
 typedef RpLight    *(*RpLightCallBack) (RpLight * light, void *data);
 
 typedef struct RpLightTie RpLightTie;
 
+/**
+ * \ingroup rplight
+ * \struct RpLightTie
+ *
+ * RpLightTie is a linked list of lights inside world sectors. These are
+ * created when frame hierarchies are updated as part of an \ref RwCameraBeginUpdate.
+ * This is used for determining which lights influence a world sector and the atomics inside it.
+ * Creation and destruction of RpLightTies is internal to the world plugin.
+ */
 struct RpLightTie
 {
     /* Information for an atomic sector */
-    RwLLLink            lightInWorldSector; /* Lights IN this ATOMIC SECTOR */
-    RpLight            *light;
+    RwLLLink            lightInWorldSector; /**< Lights IN this ATOMIC SECTOR */
+    RpLight            *light;              /**< A pointer to a light */
 
     /* Information for a atomic */
-    RwLLLink            WorldSectorInLight; /* Atomic sectors HOLDING this Light */
-    RpWorldSector      *sect;
+    RwLLLink            WorldSectorInLight; /**< Atomic sectors HOLDING this Light */
+    RpWorldSector      *sect;               /**< A pointer to a world sector */
 };
 
 
@@ -1453,6 +1496,7 @@ extern RwUInt32 RpLightGetFlags(const RpLight *light);
 #endif /* (defined(RWDEBUG) || defined(RWSUPPRESSINLINE)) */
 
 /* API Functions */
+extern void RpLightSetFreeListCreateParams( RwInt32 blockSize, RwInt32 numBlocksToPrealloc );
 extern RpLight *RpLightCreate(RwInt32 type);
 extern RwBool RpLightDestroy(RpLight *light);
 extern RpLight *RpLightSetRadius(RpLight *light, RwReal radius);
@@ -1491,9 +1535,7 @@ extern RwBool RpLightValidatePlugins(const RpLight * light);
 
 
 /*--- Automatically derived from: C:/daily/rwsdk/world/pipe/p2/d3d8/D3D8lights.h ---*/
-/**
- * \ingroup rplightd3d8
- * \typedef RpD3D8AttenuationParams
+/*
  * typedef for struct RpD3D8AttenuationParams
  */
 typedef struct RpD3D8AttenuationParams RpD3D8AttenuationParams;
@@ -1546,21 +1588,6 @@ _rwD3D8LightsClose(void);
 #endif /* __cplusplus */
 
 
-/*--- Automatically derived from: C:/daily/rwsdk/world/pipe/p2/p2stdclsw.h ---*/
-typedef RpLight *RxLight;
-#ifdef    __cplusplus
-extern "C"
-{
-#endif                          /* __cplusplus */
-
-extern RxClusterDefinition RxClLights; /* Uses the RxLight type (see above) */
-
-#ifdef    __cplusplus
-}
-#endif                          /* __cplusplus */
-
-
-
 /*--- Automatically derived from: c:/daily/rwsdk/world/bageomet.h ---*/
 
 /*
@@ -1579,7 +1606,7 @@ extern RxClusterDefinition RxClLights; /* Uses the RxLight type (see above) */
 #define rpGEOMETRY 8
 
 /**
- * \ingroup rpworlddatatypes
+ * \ingroup rpgeometry
  * RpGeometryFlag
  * Geometry type flags 
  *
@@ -1630,7 +1657,7 @@ typedef enum RpGeometryFlag RpGeometryFlag;
 #define rpGEOMETRYTEXCOORDSETS(_num) ((_num & 0xff) << 16)
 
 /**
- * \ingroup rpworlddatatypes
+ * \ingroup rpgeometry
  * RpGeometryLockMode
  * Geometry lock flags 
  */
@@ -1665,22 +1692,25 @@ typedef enum RpGeometryLockMode RpGeometryLockMode;
  */
 
 typedef struct rpGeometryGlobals rpGeometryGlobals;
+
+#if (!defined(DOXYGEN))
 struct rpGeometryGlobals
 {
         RwFreeList         *geomFreeList;
 };
+#endif /* (!defined(DOXYGEN)) */
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpGeometry 
+ * \ingroup rpgeometry
+ * \struct RpGeometry 
  * Geometry object. This should be considered an opaque type. 
  * Use the RpGeometry API functions to access.
  */
 typedef struct RpGeometry RpGeometry;
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpMorphTarget 
+ * \ingroup rpmorphtarget
+ * \struct RpMorphTarget 
  * Morph target -- vertex positions and normals. 
  * This should be considered an opaque type. 
  * Use RpMorphTarget API functions to access.
@@ -1700,7 +1730,7 @@ struct RpMorphTarget
 typedef struct RpTriangle RpTriangle;
 
 /**
- * \ingroup rpworlddatatypes
+ * \ingroup rpgeometry
  * \struct RpTriangle 
  * This type represents a triangle in a geometry specified 
  * by three indices into the geometry's vertex list (vertIndex)
@@ -1736,18 +1766,12 @@ struct RpGeometry
 
     RwTexCoords        *texCoords[rwMAXTEXTURECOORDS]; /* Texture coordinates */
 
-    RwSurfaceProperties ignoredSurfaceProps; /* Not used in pp rendering, but present
-                                              * so if pipe1 files are read and written these
-                                              * values are not lost
-                                              */
-
     RpMeshHeader       *mesh;   /* The mesh - groups polys of the same material */
 
     RwResEntry         *repEntry;       /* Information for an instance */
 
     RpMorphTarget      *morphTarget;    /* The Morph Target */
 };
-#endif /* (!defined(DOXYGEN)) */
 
 typedef struct RpGeometryChunkInfo RpGeometryChunkInfo;
 typedef struct RpGeometryChunkInfo _rpGeometry;
@@ -1760,27 +1784,27 @@ struct RpGeometryChunkInfo
     RwInt32             numVertices;
 
     RwInt32             numMorphTargets;
-
-    RwSurfaceProperties ignoredSurfaceProps;
 };
+#endif /* (!defined(DOXYGEN)) */
 
 /* Callbacks */
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpGeometryCallBack 
+ * \ingroup rpgeometry
  * \ref RpGeometryCallBack represents the simple callback function for the \ref RpGeometry object.
  * The callback may return NULL to terminate further callbacks on 
  * the geometry.
  * 
  * \param  geometry   Pointer to the current geometry, supplied by iterator.
- * \param  data  Pointer to developer-defined data structure.
+ * \param  data       Pointer to developer-defined data structure.
+ *
+ * \return
  */
 typedef RpGeometry *(*RpGeometryCallBack)(RpGeometry *geometry, void *data);
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpGeometrySortByMaterialCallBack 
+ * \ingroup rpgeometry
+ * \ref RpGeometrySortByMaterialCallBack 
  * \ref RpGeometrySortByMaterialCallBack is used by
  * \ref RpGeometrySortByMaterial in order to preserve the validity of plugin
  * data when the vertices in an \ref RpGeometry are sorted (and some possibly
@@ -1790,11 +1814,11 @@ typedef RpGeometry *(*RpGeometryCallBack)(RpGeometry *geometry, void *data);
  * vertex in the new geometry, the index of the corresponding vertex in the
  * original geometry.
  *
- * \param  oldGeom   Pointer to the source geometry.
- * \param  newGeom   Pointer to the new, sorted geometry.
- * \param  remapTable   pointer to the vertex map table
+ * \param  oldGeom           Pointer to the source geometry.
+ * \param  newGeom           Pointer to the new, sorted geometry.
+ * \param  remapTable        Pointer to the vertex map table
  * \param  numberOfEntries   Number of vertices in the new 
- * geometry (size of the map table)
+ *                           geometry (size of the map table)
  */
 typedef void (*RpGeometrySortByMaterialCallBack)(const RpGeometry *oldGeom,
                                                  RpGeometry *newGeom,
@@ -2106,24 +2130,9 @@ RpGeometrySetFlags(RpGeometry *geometry,
 
 #endif
 
-/* Lighting characteristics */
-
-extern const RwSurfaceProperties *
-_rpGeometryGetSurfaceProperties(const RpGeometry *geometry);
-
-extern RpGeometry *
-_rpGeometrySetSurfaceProperties(RpGeometry *geometry,
-                                const RwSurfaceProperties *surfaceProperties);
-
 #ifdef    __cplusplus
 }
 #endif                          /* __cplusplus */
-
-#define RpGeometryGetSurfaceProperties(_geometry) \
-    _rpGeometryGetSurfaceProperties(_geometry)
-
-#define RpGeometrySetSurfaceProperties(_geometry, _surfaceProperties) \
-    _rpGeometrySetSurfaceProperties(_geometry, _surfaceProperties)
 
 #define rpGeometryAddRef(_geometry) \
     _rpGeometryAddRef(_geometry) 
@@ -2164,7 +2173,7 @@ enum RpInterpolatorFlag
 typedef enum RpInterpolatorFlag rpInterpolatorFlag;
 
 /**
- * \ingroup rpworlddatatypes
+ * \ingroup rpatomic
  * The bit-field type RpAtomicFlag specifies the options available for
  * controlling the behavior of atomics. See API function \ref RpAtomicSetFlags.
  *
@@ -2188,7 +2197,7 @@ enum RpAtomicFlag
 typedef enum RpAtomicFlag RpAtomicFlag;
 
 /**
- * \ingroup rpworlddatatypes
+ * \ingroup rpatomic
  * \ref RpAtomicSetGeomFlag defines how an atomic references a new geometry
  *
  * \see RpAtomicSetGeometry
@@ -2214,16 +2223,16 @@ typedef enum RpAtomicPrivateFlag rpAtomicPrivateFlag;
 
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpAtomic
+ * \ingroup rpatomic
+ * \struct RpAtomic
  * Atomic Geometry object. This should be
  * considered an opaque type. Use the RpAtomic API functions to access.
  */
 typedef struct RpAtomic RpAtomic;
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpInterpolator
+ * \ingroup rpinterpolator
+ * \struct RpInterpolator
  * Morph Target Interpolator.
  * This should be considered an opaque type.
  * Use the RpInterpolator API functions to access.
@@ -2245,16 +2254,15 @@ struct RpInterpolator
 /* More callbacks */
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpClump
+ * \ingroup rpclump
+ * \struct RpClump
  * Clump Geometry object. This should be
  * considered an opaque type. Use the RpClump API functions to access.
  */
 typedef struct RpClump RpClump;
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpClumpCallBack
+ * \ingroup rpclump
  * \ref RpClumpCallBack represents the
  * function called from \ref RwCameraForAllClumpsInFrustum and
  * \ref RwCameraForAllClumpsNotInFrustum when a clump lies inside the current camera's
@@ -2263,8 +2271,8 @@ typedef struct RpClump RpClump;
  * NULL to terminate further callbacks on the clumps.
  *
  * \param  clump   Pointer to the current clump, supplied by
- * iterator.
- * \param  data  Pointer to developer-defined data structure.
+ *                 iterator.
+ * \param  data    Pointer to developer-defined data structure.
  *
  * \return Pointer to the current clump.
  *
@@ -2303,8 +2311,7 @@ struct RpClump
 #endif /* (!defined(DOXYGEN)) */
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpAtomicCallBackRender
+ * \ingroup rpatomic
  * \ref RpAtomicCallBackRender represents the function called from
  * \ref RpAtomicRender when the specified atomic
  * lies inside the current camera's view frustum. The default callback
@@ -2312,10 +2319,13 @@ struct RpClump
  * return a pointer to the atomic to indicate success.
  *
  * \param  atomic   Pointer to the current atomic, supplied by
- * iterator.
+ *                  iterator.
+ *
+ * \return Returns a pointer to the atomic to indicate success.
  *
  * \see RpAtomicRender
  */
+
 typedef RpAtomic   *(*RpAtomicCallBackRender) (RpAtomic * atomic);
 
 #if (!defined(DOXYGEN))
@@ -2356,8 +2366,7 @@ struct RpAtomic
 #endif /* (!defined(DOXYGEN)) */
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpAtomicCallBack
+ * \ingroup rpatomic
  * \ref RpAtomicCallBack represents the function called from \ref RpWorldSectorForAllAtomics and
  * \ref RpClumpForAllAtomics for all atomics in a given world sector or clump.
  * This function should return a pointer to the current atomic to indicate
@@ -2365,28 +2374,40 @@ struct RpAtomic
  * the world sector.
  *
  * \param  atomic   Pointer to the current atomic, supplied by
- * iterator.
- * \param  data  Pointer to developer-defined data structure.
+ *                  iterator.
+ * \param  data     Pointer to developer-defined data structure.
+ *
+ * \return Returns a pointer to the current atomic
  */
 typedef RpAtomic   *(*RpAtomicCallBack) (RpAtomic * atomic, void *data);
 
 typedef struct RpTie RpTie;
 
+/**
+ * \ingroup rpatomic
+ * \struct RpTie
+ *
+ * RpTie is a linked list of atomics inside world sectors. These are
+ * created when frame hierarchies are updated as part of an \ref RwCameraBeginUpdate.
+ * This is used for frustum culling atomics by world sector.
+ * Creation and destruction of RpTies is internal to the world plugin.
+ */
 struct RpTie
 {
     /* Information for an atomic sector */
-    RwLLLink            lAtomicInWorldSector; /* Atomics IN this ATOMIC SECTOR */
-    RpAtomic           *apAtom;
+    RwLLLink            lAtomicInWorldSector; /**< Atomics IN this ATOMIC SECTOR */
+    RpAtomic           *apAtom;               /**< An atomic */
 
     /* Information for a atomic */
-    RwLLLink            lWorldSectorInAtomic; /* Atomic sectors HOLDING this atomic */
-    RpWorldSector      *worldSector;
+    RwLLLink            lWorldSectorInAtomic; /**< Atomic sectors HOLDING this atomic */
+    RpWorldSector      *worldSector;          /**< A world sector */
 };
 
 typedef struct RpClumpChunkInfo RpClumpChunkInfo;
 typedef struct RpClumpChunkInfo _rpClump;
 typedef struct RpClumpChunkInfo33000 _rpClump33000;
 
+#if (!defined(DOXYGEN))
 struct RpClumpChunkInfo
 {
     RwInt32             numAtomics;
@@ -2398,6 +2419,7 @@ struct RpClumpChunkInfo33000
 {
     RwInt32             numAtomics;
 };
+#endif /* (!defined(DOXYGEN)) */
 
 /****************************************************************************
  <macro/inline functionality
@@ -2607,6 +2629,12 @@ extern              "C"
 {
 #endif                          /* __cplusplus */
 
+
+extern void
+RpAtomicSetFreeListCreateParams( RwInt32 blockSize, RwInt32 numBlocksToPrealloc );
+
+extern void
+RpClumpSetFreeListCreateParams( RwInt32 blockSize, RwInt32 numBlocksToPrealloc );
 
 /* Macro version of RpAtomicSetRenderCallBack needs this */
 extern RpAtomic *
@@ -2918,7 +2946,7 @@ enum RpWorldPrivateFlag
 typedef enum RpWorldPrivateFlag RpWorldPrivateFlag;
 
 /**
- * \ingroup rpworlddatatypes
+ * \ingroup rpworldsub
  * The bit-field type \ref RpWorldFlag specifies the options available
  * for creating the static geometry component of a world (see API function \ref RpWorldSetFlags):
  */
@@ -3027,7 +3055,7 @@ typedef enum RpWorldFlag RpWorldFlag;
 
 
 /**
- * \ingroup rpworlddatatypes
+ * \ingroup rpworldsub
  * \ref RpWorldRenderOrder
  * represents the options available for
  * the rendering order of world sectors in the camera's view frustum (see
@@ -3043,25 +3071,25 @@ enum RpWorldRenderOrder
 typedef enum RpWorldRenderOrder RpWorldRenderOrder;
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpWorldSectorCallBackRender
+ * \ingroup rpworldsector
  * \ref RpWorldSectorCallBackRender represents the function called from
  * \ref RpWorldSectorRender when the specified world sector lies inside the
  * current camera's view frustum. The default callback initiates execution of
  * the world sector rendering pipeline. This function should return a pointer
  * to the world sector to indicate success
  *
+ * \param  worldSector   Pointer to the world sector to be
+ *                       rendered
+ *
  * \return Pointer to the world sector.
  *
- * \param  worldSector   Pointer to the world sector to be
- * rendered
  */
 typedef RpWorldSector *(*RpWorldSectorCallBackRender) (RpWorldSector *
                                                        worldSector);
 
 /**
- * \ingroup rpworlddatatypes
- * \typedef RpWorld
+ * \ingroup rpworldsub
+ * \struct RpWorld
  * World object. This should be considered an opaque type.
  * Use the RpWorld API functions to access.
  */
@@ -3103,9 +3131,6 @@ struct RpWorld
 
     /* Bounding box around the whole world */
     RwBBox              boundingBox;
-
-    /* Surface properties */
-    RwSurfaceProperties surfaceProps;
 
     /* The callbacks functions */
     RpWorldSectorCallBackRender renderCallBack;
@@ -3191,13 +3216,6 @@ extern RwBool       RpWorldDestroy(RpWorld * world);
 extern RpWorld     *RpWorldCreate(RwBBox * boundingBox);
 extern RwBool       RpWorldInstance(RpWorld *world);
 
-/* Getting/setting */
-extern RpWorld     *_rpWorldSetSurfaceProperties(RpWorld * world,
-                                                const RwSurfaceProperties
-                                                * surface);
-extern const RwSurfaceProperties *
-   _rpWorldGetSurfaceProperties(const RpWorld *world);
-
 /* Sector callbacks */
 extern RpWorld     *RpWorldSetSectorRenderCallBack(RpWorld * world,
                                                    RpWorldSectorCallBackRender
@@ -3260,12 +3278,6 @@ extern RwUInt32 RpWorldGetFlags(const RpWorld *world);
 }
 #endif                          /* __cplusplus */
 
-#define RpWorldSetSurfaceProperties(_world, _surface) \
-    _rpWorldSetSurfaceProperties(_world, _surface)
-
-#define RpWorldGetSurfaceProperties(_world) \
-    _rpWorldGetSurfaceProperties(_world)
-
 #define rpWorldFindBBox(_world, _boundingBox) \
     _rpWorldFindBBox(_world, _boundingBox)
 
@@ -3292,7 +3304,7 @@ extern RwUInt32 RpWorldGetFlags(const RpWorld *world);
 
 typedef struct RxD3D8ResEntryHeader RxD3D8ResEntryHeader;
 /**
- * \ingroup rpworldd3d8
+ * \ingroup worldextensionsd3d8
  * \struct RxD3D8ResEntryHeader
  * This structure contains D3D8 resource specific components.
  */
@@ -3305,7 +3317,7 @@ struct RxD3D8ResEntryHeader
 /* This is what I keep in memory as part of the instance data setup */
 typedef struct RxD3D8InstanceData RxD3D8InstanceData;
 /**
- * \ingroup rpworldd3d8
+ * \ingroup worldextensionsd3d8
  * \struct RxD3D8InstanceData
  * This structure contains D3D8 resource specific components.
  */
@@ -3337,7 +3349,7 @@ struct RxD3D8InstanceData
 };
 
 /**
- * \ingroup rpworldd3d8
+ * \ingroup worldextensionsd3d8
  * \ref RxD3D8AllInOneInstanceCallBack callback function.
  * 
  * \param object Pointer to the object.
@@ -3354,7 +3366,7 @@ typedef RwBool (*RxD3D8AllInOneInstanceCallBack)(void *object,
                                                  RwBool reinstance);
 
 /**
- * \ingroup rpworldd3d8
+ * \ingroup worldextensionsd3d8
  * \ref RxD3D8AllInOneReinstanceCallBack callback function.
  * 
  * \param object Pointer to the object.
@@ -3373,7 +3385,7 @@ typedef RwBool (*RxD3D8AllInOneReinstanceCallBack)(void *object,
                                                    RxD3D8AllInOneInstanceCallBack instanceCallback);
 
 /**
- * \ingroup rpworldd3d8
+ * \ingroup worldextensionsd3d8
  * \ref RxD3D8AllInOneLightingCallBack callback function.
  * 
  * \param object Void pointer to the object.
@@ -3386,7 +3398,7 @@ typedef RwBool (*RxD3D8AllInOneReinstanceCallBack)(void *object,
 typedef void (*RxD3D8AllInOneLightingCallBack)(void *object);
 
 /**
- * \ingroup rpworldd3d8
+ * \ingroup worldextensionsd3d8
  * \ref RxD3D8AllInOneRenderCallBack callback function.
  * 
  * \param repEntry Pointer to a resource entry.
@@ -3443,9 +3455,6 @@ RxD3D8AllInOneGetRenderCallBack(RxPipelineNode *node);
 
 /*--- Automatically derived from: C:/daily/rwsdk/world/pipe/p2/bapipew.h ---*/
 
-#define RpWorldGetGenericSectorPipelineMacro() \
-    (RXPIPELINEGLOBAL(genericWorldSectorPipeline))
-
 #define RpWorldGetDefaultSectorPipelineMacro() \
     (RXPIPELINEGLOBAL(currentWorldSectorPipeline))
 
@@ -3461,9 +3470,6 @@ RxD3D8AllInOneGetRenderCallBack(RxPipelineNode *node);
 #define RpWorldSectorGetPipelineMacro(_sector, _pipeline) \
     ( (*(_pipeline) = (_sector)->pipeline), _sector )
 
-#define RpAtomicGetGenericPipelineMacro() \
-    (RXPIPELINEGLOBAL(genericAtomicPipeline))
-
 #define RpAtomicGetDefaultPipelineMacro() \
     (RXPIPELINEGLOBAL(currentAtomicPipeline))
 
@@ -3472,9 +3478,6 @@ RxD3D8AllInOneGetRenderCallBack(RxPipelineNode *node);
 
 #define RpAtomicGetPipelineMacro(_atomic, _pipeline) \
     ( (*(_pipeline) = (_atomic)->pipeline), _atomic )
-
-#define RpMaterialGetGenericPipelineMacro() \
-    (RXPIPELINEGLOBAL(genericMaterialPipeline))
 
 #define RpMaterialGetDefaultPipelineMacro() \
     (RXPIPELINEGLOBAL(currentMaterialPipeline))
@@ -3488,19 +3491,16 @@ RxD3D8AllInOneGetRenderCallBack(RxPipelineNode *node);
 
 #if !(defined(RWDEBUG) || defined(RWSUPPRESSINLINE))
 
-#define RpWorldGetGenericSectorPipeline RpWorldGetGenericSectorPipelineMacro
 #define RpWorldGetDefaultSectorPipeline RpWorldGetDefaultSectorPipelineMacro
 #define RpWorldSetSectorPipeline        RpWorldSetSectorPipelineMacro
 #define RpWorldGetSectorPipeline        RpWorldGetSectorPipelineMacro
 #define RpWorldSectorSetPipeline        RpWorldSectorSetPipelineMacro
 #define RpWorldSectorGetPipeline        RpWorldSectorGetPipelineMacro
 
-#define RpAtomicGetGenericPipeline      RpAtomicGetGenericPipelineMacro
 #define RpAtomicGetDefaultPipeline      RpAtomicGetDefaultPipelineMacro
 #define RpAtomicSetPipeline             RpAtomicSetPipelineMacro
 #define RpAtomicGetPipeline             RpAtomicGetPipelineMacro
 
-#define RpMaterialGetGenericPipeline    RpMaterialGetGenericPipelineMacro
 #define RpMaterialGetDefaultPipeline    RpMaterialGetDefaultPipelineMacro
 #define RpMaterialSetPipeline           RpMaterialSetPipelineMacro
 #define RpMaterialGetPipeline           RpMaterialGetPipelineMacro
@@ -3556,7 +3556,6 @@ extern RpGeometry       *RpGeometrySortByMaterial(const RpGeometry * geometry,
 #endif /* __cplusplus */
 
 /* LEGACY-SUPPORT macros */
-#define RpWorldGetGenericSectorInstancePipeline RpWorldGetGenericSectorPipeline
 #define RpWorldSetDefaultSectorInstancePipeline RpWorldSetDefaultSectorPipeline
 #define RpWorldGetDefaultSectorInstancePipeline RpWorldGetDefaultSectorPipeline
 #define RpWorldSetSectorInstancePipeline        RpWorldSetSectorPipeline
@@ -3564,13 +3563,11 @@ extern RpGeometry       *RpGeometrySortByMaterial(const RpGeometry * geometry,
 #define RpWorldSectorSetInstancePipeline        RpWorldSectorSetPipeline
 #define RpWorldSectorGetInstancePipeline        RpWorldSectorGetPipeline
 
-#define RpAtomicGetGenericInstancePipeline      RpAtomicGetGenericPipeline
 #define RpAtomicGetDefaultInstancePipeline      RpAtomicGetDefaultPipeline
 #define RpAtomicSetDefaultInstancePipeline      RpAtomicSetDefaultPipeline
 #define RpAtomicSetInstancePipeline             RpAtomicSetPipeline
 #define RpAtomicGetInstancePipeline             RpAtomicGetPipeline
 
-#define RpMaterialGetGenericRenderPipeline      RpMaterialGetGenericPipeline
 #define RpMaterialSetDefaultRenderPipeline      RpMaterialSetDefaultPipeline
 #define RpMaterialGetDefaultRenderPipeline      RpMaterialGetDefaultPipeline
 #define RpMaterialSetRenderPipeline             RpMaterialSetPipeline
@@ -3586,6 +3583,9 @@ extern RpGeometry       *RpGeometrySortByMaterial(const RpGeometry * geometry,
 extern "C"
 {
 #endif                          /* __cplusplus */
+
+extern void RpTieSetFreeListCreateParams( RwInt32 blockSize, RwInt32 numBlocksToPrealloc );
+extern void RpLightTieSetFreeListCreateParams( RwInt32 blockSize, RwInt32 numBlocksToPrealloc );
 
 /* Adding and removing cameras to/from the world */
 extern RpWorld *RpWorldRemoveCamera(RpWorld *world, RwCamera *camera);
@@ -3648,6 +3648,7 @@ extern RpWorldSector *RpWorldSectorForAllLights(RpWorldSector *sector,
 typedef struct RpWorldChunkInfoSector RpWorldSectorChunkInfo;
 typedef struct RpWorldChunkInfoSector _rpWorldSector;
 
+#if (!defined(DOXYGEN))
 struct RpWorldChunkInfoSector
 {
     RwInt32 matListWindowBase;
@@ -3655,9 +3656,10 @@ struct RpWorldChunkInfoSector
     RwInt32 numVertices;
     RwV3d inf;
     RwV3d sup;
-    RwBool collSectorPresent;
+    RwBool collSectorPresent;   /* unused but retains same struct size */
     RwBool unused;
 };
+
 
 typedef struct RpPlaneSectorChunkInfo RpPlaneSectorChunkInfo;
 typedef struct RpPlaneSectorChunkInfo _rpPlaneSector;
@@ -3681,6 +3683,26 @@ struct RpWorldChunkInfo
 
     RwV3d invWorldOrigin;
 
+    RwInt32 numPolygons;
+    RwInt32 numVertices;
+    RwInt32 numPlaneSectors;
+    RwInt32 numWorldSectors;
+    RwInt32 colSectorSize;    
+
+    RwInt32 format;  /* Flags about the world */
+
+    /* Added in 34003 */
+    RwBBox  boundingBox;
+};
+
+typedef struct rpWorldChunkInfo34000 rpWorldChunkInfo34000;
+
+struct rpWorldChunkInfo34000
+{
+    RwBool rootIsWorldSector;
+
+    RwV3d invWorldOrigin;
+
     RwSurfaceProperties surfaceProps;
 
     RwInt32 numPolygons;
@@ -3691,6 +3713,7 @@ struct RpWorldChunkInfo
 
     RwInt32 format;  /* Flags about the world */
 };
+#endif /* (!defined(DOXYGEN)) */
 
 /****************************************************************************
  Function prototypes

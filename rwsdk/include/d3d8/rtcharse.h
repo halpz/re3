@@ -16,7 +16,7 @@
 
 /**
  * \defgroup rtcharset RtCharset
- * \ingroup rttool
+ * \ingroup 2dtools
  *
  * Character Set/Foot Toolkit for RenderWare.
  */
@@ -61,7 +61,7 @@ struct RtCharsetDesc
 
 /**
  * \ingroup rtcharset
- * \typedef RtCharset
+ * \ref RtCharset
  * typedef for a structure defining a character set (opaque).
  * \see RtCharsetCreate
  */

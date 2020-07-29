@@ -131,6 +131,7 @@ void CControllerConfigManager::SaveSettings(int32 file)
 void CControllerConfigManager::LoadSettings(int32 file)
 {
 	bool bValid = true;
+	int nVersion = 0;
 
 	if (file)
 	{
@@ -139,11 +140,13 @@ void CControllerConfigManager::LoadSettings(int32 file)
 
 		if (!strncmp(buff, TopLineEmptyFile, sizeof(TopLineEmptyFile)-1))
 			bValid = false;
-		else
+		else {
 			CFileMgr::Seek(file, 0, 0);
+			CFileMgr::Read(file, (char*)&nVersion, sizeof(nVersion));
+		}
 	}
 
-	if (bValid)
+	if (bValid && nVersion >= 3)
 	{
 		ControlsManager.MakeControllerActionsBlank();
 
@@ -202,6 +205,8 @@ void CControllerConfigManager::InitDefaultControlConfiguration()
 																		          
 	SetControllerKeyAssociatedWithAction    (GO_BACK,                             rsDOWN,     KEYBOARD);
 	SetControllerKeyAssociatedWithAction    (GO_BACK,                             'S',        OPTIONAL_EXTRA);
+
+	SetControllerKeyAssociatedWithAction    (NETWORK_TALK,                        'T',        KEYBOARD);
 																		          
 	SetControllerKeyAssociatedWithAction    (PED_LOOKBEHIND,                      rsPADEND,   KEYBOARD);
 	SetControllerKeyAssociatedWithAction    (PED_LOOKBEHIND,                      rsCAPSLK,   OPTIONAL_EXTRA);
@@ -436,6 +441,7 @@ void CControllerConfigManager::InitialiseControllerActionNameArray()
 	SETACTIONNAME(PED_SPRINT);
 	SETACTIONNAME(PED_CYCLE_TARGET_LEFT);
 	SETACTIONNAME(PED_CYCLE_TARGET_RIGHT);
+	SETACTIONNAME(PED_LOCK_TARGET); // duplicate
 	SETACTIONNAME(PED_CENTER_CAMERA_BEHIND_PLAYER);
 	SETACTIONNAME(VEHICLE_LOOKBEHIND);
 	SETACTIONNAME(PED_DUCK);
@@ -1808,23 +1814,23 @@ e_ControllerActionType CControllerConfigManager::GetActionType(e_ControllerActio
 {
 	switch (action)
 	{
-	case CAMERA_CHANGE_VIEW_ALL_SITUATIONS:
 	case PED_FIREWEAPON:
 	case GO_LEFT:
 	case GO_RIGHT:
+	case CAMERA_CHANGE_VIEW_ALL_SITUATIONS:
 	case NETWORK_TALK:
-	case SWITCH_DEBUG_CAM_ON:
 	case TOGGLE_DPAD:
+	case SWITCH_DEBUG_CAM_ON:
 	case TAKE_SCREEN_SHOT:
 	case SHOW_MOUSE_POINTER_TOGGLE:
 		return ACTIONTYPE_COMMON;
 		break;
 
-	case PED_LOOKBEHIND:
-	case PED_CYCLE_WEAPON_LEFT:
 	case PED_CYCLE_WEAPON_RIGHT:
+	case PED_CYCLE_WEAPON_LEFT:
 	case PED_JUMPING:
 	case PED_SPRINT:
+	case PED_LOOKBEHIND:
 	case PED_DUCK:
 	case PED_ANSWER_PHONE:
 	case PED_CYCLE_TARGET_LEFT:
@@ -1853,13 +1859,13 @@ e_ControllerActionType CControllerConfigManager::GetActionType(e_ControllerActio
 		return ACTIONTYPE_VEHICLE_3RDPERSON;
 		break;
 
-	case PED_LOCK_TARGET:
 	case GO_FORWARD:
 	case GO_BACK:
 	case PED_1RST_PERSON_LOOK_LEFT:
 	case PED_1RST_PERSON_LOOK_RIGHT:
-	case PED_1RST_PERSON_LOOK_DOWN:
+	case PED_LOCK_TARGET:
 	case PED_1RST_PERSON_LOOK_UP:
+	case PED_1RST_PERSON_LOOK_DOWN:
 		return ACTIONTYPE_1RST3RDPERSON;
 		break;
 

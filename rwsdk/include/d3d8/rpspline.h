@@ -39,7 +39,7 @@
 
 /**
  * \defgroup rpspline RpSpline
- * \ingroup rpplugin
+ * \ingroup mathtools
  *
  * Spline Plugin for RenderWare Graphics.
  */

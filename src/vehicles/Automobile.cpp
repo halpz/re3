@@ -1349,7 +1349,7 @@ CAutomobile::ProcessControl(void)
 			if(!IsAlarmOn())
 				ReduceHornCounter();
 		}else{
-			if(UsesSiren(GetModelIndex())){
+			if(UsesSiren()){
 				if(Pads[0].bHornHistory[Pads[0].iCurrHornHistory]){
 					if(Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+4) % 5] &&
 					   Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+3) % 5])
@@ -1559,7 +1559,7 @@ CAutomobile::ProcessControl(void)
 
 
 	if(m_bSirenOrAlarm && (CTimer::GetFrameCounter()&7) == 5 &&
-	   UsesSiren(GetModelIndex()) && GetModelIndex() != MI_MRWHOOP)
+	   UsesSiren() && GetModelIndex() != MI_MRWHOOP)
 		CCarAI::MakeWayForCarWithSiren(this);
 
 
@@ -2527,7 +2527,7 @@ CAutomobile::PreRender(void)
 		if(GetModelIndex() == MI_RCGOBLIN || GetModelIndex() == MI_RCRAIDER)
 			radius = 3.0f;
 		if(GetPosition().z - groundZ < radius)
-			HeliDustGenerate(this, radius-(GetPosition().z - groundZ), groundZ, ceilf(rnd));
+			HeliDustGenerate(this, radius-(GetPosition().z - groundZ), groundZ, Ceil(rnd));
 	}
 
 	CMatrix mat;
@@ -3800,7 +3800,7 @@ void
 CAutomobile::DoDriveByShootings(void)
 {
 	CAnimBlendAssociation *anim = nil;
-	CPlayerInfo* playerInfo = ((CPlayerPed*)this)->GetPlayerInfoForThisPlayerPed();
+	CPlayerInfo* playerInfo = ((CPlayerPed*)pDriver)->GetPlayerInfoForThisPlayerPed();
 	if (playerInfo && !playerInfo->m_bDriveByAllowed)
 		return;
 

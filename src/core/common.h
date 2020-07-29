@@ -17,7 +17,11 @@
 
 #if defined _WIN32 && defined WITHD3D
 #include <windows.h>
+#ifndef USE_D3D9
 #include <d3d8types.h>
+#else
+#include <d3d9types.h>
+#endif
 #endif
 
 #include <rwcore.h>
@@ -37,6 +41,7 @@
 #define HIERNODEINFO(hier) ((hier)->pNodeInfo)
 #define HIERNODEID(hier, i) ((hier)->pNodeInfo[i].nodeID)
 #define HANIMFRAME(anim, i) ((RwUInt8*)(anim)->pFrames + (i)*(anim)->interpInfo->keyFrameSize)
+#define RpHAnimStdInterpFrame RpHAnimStdKeyFrame
 #endif
 
 #ifdef RWHALFPIXEL

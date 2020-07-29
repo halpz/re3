@@ -5,7 +5,11 @@
 #include "sampman.h"
 
 #ifdef _WIN32
+
+// TODO: This is due to version difference of 32-bit libmpg123 and 64-bit libmpg123, fix it
+#ifndef _WIN64
 typedef long ssize_t;
+#endif
 #pragma comment( lib, "libsndfile-1.lib" )
 #pragma comment( lib, "libmpg123.lib" )
 #else
@@ -173,8 +177,11 @@ public:
 		
 		size_t size;
 		int err = mpg123_read(m_pMH, (unsigned char *)buffer, GetBufferSize(), &size);
+#if defined(__LP64__) || defined(_WIN64)
+		assert("We can't handle audio files more then 2 GB yet :shrug:" && (size < UINT32_MAX));
+#endif
 		if (err != MPG123_OK && err != MPG123_DONE) return 0;
-		return size;
+		return (uint32)size;
 	}
 };
 
@@ -248,15 +255,11 @@ CStream::CStream(char *filename, ALuint &source, ALuint (&buffers)[NUM_STREAMBUF
 {
 // Be case-insensitive on linux (from https://github.com/OneSadCookie/fcaseopen/)
 #if !defined(_WIN32)
-	FILE *test = fopen(filename, "r");
-	if (!test) {
-		char *r = (char*)alloca(strlen(filename) + 2);
-		if (casepath(filename, r))
-		{
-		    strcpy(m_aFilename, r);
-		}
+	char *real = casepath(filename);
+	if (real) {
+		strcpy(m_aFilename, real);
+		free(real);
 	} else {
-		fclose(test);
 #else
 	{
 #endif

@@ -47,7 +47,7 @@ CPedStats::LoadPedStats(void)
 	char *buf;
 	char line[256];
 	char name[32];
-	int bp, buflen;
+	size_t bp, buflen;
 	int lp, linelen;
 	int type;
 	float fleeDist, headingChangeRate, attackStrength, defendWeakness;

@@ -170,9 +170,13 @@ CCivilianPed::CivilianAI(void)
 	}
 }
 
+// --MIAMI: Done except comments
 void
 CCivilianPed::ProcessControl(void)
 {
+	if (CharCreatedBy == TODO_CHAR)
+		return;
+
 	CPed::ProcessControl();
 
 	if (bWasPostponed)
@@ -198,7 +202,8 @@ CCivilianPed::ProcessControl(void)
 			// fall through
 		case PED_SEEK_POS:
 			if (Seek()) {
-				if ((m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT || m_objective == OBJECTIVE_RUN_TO_AREA || IsUseAttractorObjective(m_objective)) && m_pNextPathNode) {
+				if ((m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT || m_objective == OBJECTIVE_RUN_TO_AREA || m_objective == OBJECTIVE_SPRINT_TO_AREA ||
+					IsUseAttractorObjective(m_objective)) && m_pNextPathNode) {
 					m_pNextPathNode = nil;
 
 				} else if (bRunningToPhone) {
@@ -207,10 +212,10 @@ CCivilianPed::ProcessControl(void)
 						m_phoneId = -1;
 					} else {
 						gPhoneInfo.m_aPhones[m_phoneId].m_nState = PHONE_STATE_REPORTING_CRIME;
-						m_nPedState = PED_FACE_PHONE;
+						SetPedState(PED_FACE_PHONE);
 					}
 				} else if (m_objective != OBJECTIVE_KILL_CHAR_ANY_MEANS && m_objective != OBJECTIVE_KILL_CHAR_ON_FOOT) {
-					if (m_objective == OBJECTIVE_FOLLOW_CHAR_IN_FORMATION) {
+					if (m_pedInObjective && m_objective == OBJECTIVE_FOLLOW_CHAR_IN_FORMATION) {
 						if (m_moved.Magnitude() == 0.0f) {
 							if (m_pedInObjective->m_nMoveState == PEDMOVE_STILL)
 								m_fRotationDest = m_pedInObjective->m_fRotationCur;
@@ -218,7 +223,8 @@ CCivilianPed::ProcessControl(void)
 					} else if (m_objective == OBJECTIVE_GOTO_CHAR_ON_FOOT
 						&& m_pedInObjective && m_pedInObjective->m_nMoveState != PEDMOVE_STILL) {
 						SetMoveState(m_pedInObjective->m_nMoveState);
-					} else if (m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT || m_objective == OBJECTIVE_RUN_TO_AREA || IsUseAttractorObjective(m_objective)) {
+					} else if (m_objective == OBJECTIVE_GOTO_AREA_ON_FOOT || m_objective == OBJECTIVE_RUN_TO_AREA || m_objective == OBJECTIVE_SPRINT_TO_AREA ||
+						IsUseAttractorObjective(m_objective)) {
 						SetIdle();
 					} else {
 						RestorePreviousState();
@@ -228,7 +234,7 @@ CCivilianPed::ProcessControl(void)
 			break;
 		case PED_FACE_PHONE:
 			if (FacePhone())
-				m_nPedState = PED_MAKE_CALL;
+				SetPedState(PED_MAKE_CALL);
 			break;
 		case PED_MAKE_CALL:
 			if (MakePhonecall())
@@ -284,6 +290,8 @@ CCivilianPed::ProcessControl(void)
 								GetPosition().x - m_pMyVehicle->GetPosition().x, GetPosition().y - m_pMyVehicle->GetPosition().y, 0.0f);
 
 							DMAudio.PlayOneShot(m_pMyVehicle->m_audioEntityId, SOUND_CAR_JERK, 0.0f);
+							m_pMyVehicle->pDriver->Say(SOUND_PED_PLAYER_BEFORESEX);
+							Say(SOUND_PED_PLAYER_BEFORESEX);
 
 							int playerSexFrequency = CWorld::Players[CWorld::PlayerInFocus].m_nSexFrequency;
 							if (CWorld::Players[CWorld::PlayerInFocus].m_nMoney >= 10 && playerSexFrequency > 250) {
@@ -300,13 +308,17 @@ CCivilianPed::ProcessControl(void)
 							} else {
 								bWanderPathAfterExitingCar = true;
 								CWorld::Players[CWorld::PlayerInFocus].m_pHooker = nil;
+								ClearLeader();
 								SetObjective(OBJECTIVE_LEAVE_CAR, m_pMyVehicle);
+								m_pMyVehicle->pDriver->Say(SOUND_PED_PLAYER_AFTERSEX);
 							}
 						} else {
 							bWanderPathAfterExitingCar = true;
 							CWorld::Players[CWorld::PlayerInFocus].m_pHooker = nil;
 							m_pMyVehicle->pDriver->m_fHealth = CWorld::Players[0].m_nMaxHealth + 25.0f;
+							ClearLeader();
 							SetObjective(OBJECTIVE_LEAVE_CAR, m_pMyVehicle);
+							m_pMyVehicle->pDriver->Say(SOUND_PED_PLAYER_AFTERSEX);
 						}
 					} else {
 						CWorld::Players[CWorld::PlayerInFocus].m_nNextSexFrequencyUpdateTime = CTimer::GetTimeInMilliseconds() + 3000;
@@ -319,6 +331,7 @@ CCivilianPed::ProcessControl(void)
 				} else {
 					bWanderPathAfterExitingCar = true;
 					CWorld::Players[CWorld::PlayerInFocus].m_pHooker = nil;
+					ClearLeader();
 					SetObjective(OBJECTIVE_LEAVE_CAR, m_pMyVehicle);
 				}
 			}
@@ -340,6 +353,7 @@ CCivilianPed::ProcessControl(void)
 		CivilianAI();
 
 	if (CharCreatedBy == RANDOM_CHAR) {
+		// TODO(Miami): EnterVacantNearbyCars();
 		UseNearbyAttractors();
 	}
 

@@ -39,6 +39,7 @@
 #include "General.h"
 #include "Fluff.h"
 #include "Gangs.h"
+#include "platform.h"
 
 #ifdef GTA_PS2
 #include "eetypes.h"
@@ -518,9 +519,12 @@ void FlyingFishCheat(void)
 bool
 CControllerState::CheckForInput(void)
 {
-	return !!LeftStickX || !!LeftStickY || !!RightStickX || !!RightStickY || !!LeftShoulder1 || !!LeftShoulder2 || !!RightShoulder1 || !!RightShoulder2 ||
-		!!DPadUp || !!DPadDown || !!DPadLeft || !!DPadRight || !!Start || !!Select || !!Square || !!Triangle || !!Cross || !!Circle || !!LeftShock ||
-		!!RightShock;
+	return !!RightStickX || !!RightStickY || !!LeftStickX || !!LeftStickY
+		|| !!DPadUp || !!DPadDown || !!DPadLeft || !!DPadRight
+		|| !!Triangle || !!Cross || !!Circle || !!Square
+		|| !!Start || !!Select
+		|| !!LeftShoulder1 || !!LeftShoulder2 || !!RightShoulder1 || !!RightShoulder2
+		|| !!LeftShock || !!RightShock;
 }
 
 void
@@ -668,7 +672,7 @@ CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()
 
 #if defined RW_D3D9 || defined RWLIBS
 	if ( PSGLOBAL(mouse) == nil )
-		_InputInitialiseMouse();
+		_InputInitialiseMouse(!FrontEndMenuManager.m_bMenuActive && _InputMouseNeedsExclusive());
 
 	if ( PSGLOBAL(mouse) != nil )
 	{
@@ -718,11 +722,11 @@ CMouseControllerState CMousePointerStateHelper::GetMouseSetUp()
 
 void CPad::UpdateMouse()
 {
+#if defined RW_D3D9 || defined RWLIBS
 	if ( IsForegroundApp() )
 	{
-#if defined RW_D3D9 || defined RWLIBS
 		if ( PSGLOBAL(mouse) == nil )
-			_InputInitialiseMouse();
+			_InputInitialiseMouse(!FrontEndMenuManager.m_bMenuActive && _InputMouseNeedsExclusive());
 
 		DIMOUSESTATE2 state;
 
@@ -757,7 +761,10 @@ void CPad::UpdateMouse()
 			OldMouseControllerState = NewMouseControllerState;
 			NewMouseControllerState = PCTempMouseControllerState;
 		}
+	}
 #else
+	if ( IsForegroundApp() && PSGLOBAL(cursorIsInWindow) )
+	{
 		double xpos = 1.0f, ypos;
 		glfwGetCursorPos(PSGLOBAL(window), &xpos, &ypos);
 		if (xpos == 0.f)
@@ -795,8 +802,8 @@ void CPad::UpdateMouse()
 
 		OldMouseControllerState = NewMouseControllerState;
 		NewMouseControllerState = PCTempMouseControllerState;
-#endif
 	}
+#endif
 }
 
 CControllerState CPad::ReconcileTwoControllersInput(CControllerState const &State1, CControllerState const &State2)
@@ -1447,6 +1454,13 @@ void CPad::UpdatePads(void)
 #else
 	CapturePad(0);
 #endif
+
+	// Improve keyboard input latency part 1
+#ifdef FIX_BUGS
+	OldKeyState = NewKeyState;
+	NewKeyState = TempKeyState;
+#endif
+
 #ifdef DETECT_PAD_INPUT_SWITCH
 	if (GetPad(0)->PCTempJoyState.CheckForInput())
 		IsAffectedByController = true;
@@ -1468,7 +1482,7 @@ void CPad::UpdatePads(void)
 	if ( bUpdate )
 	{
 		GetPad(0)->Update(0);
-		GetPad(1)->Update(0);
+		// GetPad(1)->Update(0); // not in VC
 	}
 
 #if defined(MASTER) && !defined(XINPUT)
@@ -1476,8 +1490,11 @@ void CPad::UpdatePads(void)
 	GetPad(1)->OldState.Clear();
 #endif
 
+	// Improve keyboard input latency part 2
+#ifndef FIX_BUGS
 	OldKeyState = NewKeyState;
 	NewKeyState = TempKeyState;
+#endif
 }
 
 void CPad::ProcessPCSpecificStuff(void)
@@ -3024,7 +3041,7 @@ void CPad::ResetCheats(void)
 
 char *CPad::EditString(char *pStr, int32 nSize)
 {
-	int32 pos = strlen(pStr);
+	int32 pos = (int32)strlen(pStr);
 
 	// letters
 	for ( int32 i = 0; i < ('Z' - 'A' + 1); i++ )

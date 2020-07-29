@@ -189,7 +189,7 @@ CEventList::FindClosestEvent(eEventType type, CVector posn, int32 *event)
 
 // --MIAMI: Done
 void
-CEventList::ReportCrimeForEvent(eEventType type, int32 crimeId, bool copsDontCare)
+CEventList::ReportCrimeForEvent(eEventType type, size_t crimeId, bool copsDontCare)
 {
 	eCrimeType crime;
 	switch(type){
@@ -227,10 +227,10 @@ CEventList::ReportCrimeForEvent(eEventType type, int32 crimeId, bool copsDontCar
 
 	if(CWanted::WorkOutPolicePresence(playerCoors, 14.0f) != 0 ||
 		CGame::germanGame && (crime == CRIME_SHOOT_PED || crime == CRIME_SHOOT_COP || crime == CRIME_COP_BURNED || crime == CRIME_VEHICLE_BURNED)){
-		FindPlayerPed()->m_pWanted->RegisterCrime_Immediately(crime, playerPedCoors, crimeId, copsDontCare);
+		FindPlayerPed()->m_pWanted->RegisterCrime_Immediately(crime, playerPedCoors, (uint32)crimeId, copsDontCare);
 		FindPlayerPed()->m_pWanted->SetWantedLevelNoDrop(1);
 	}else
-		FindPlayerPed()->m_pWanted->RegisterCrime(crime, playerPedCoors, crimeId, copsDontCare);
+		FindPlayerPed()->m_pWanted->RegisterCrime(crime, playerPedCoors, (uint32)crimeId, copsDontCare);
 
 	if(type == EVENT_ASSAULT_POLICE)
 		FindPlayerPed()->SetWantedLevelNoDrop(1);

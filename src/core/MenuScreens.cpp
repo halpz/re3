@@ -1,10 +1,12 @@
-#pragma once
+#include "common.h"
+#include "Frontend.h"
+#ifdef PC_MENU
 
-// --MIAMI: Done except commented things
+// If you want to add new options, please don't do that here and see CustomFrontendOptionsPopulate in re3.cpp.
 
 CMenuScreen aScreens[] = {
 	// MENUPAGE_STATS = 0
-	{ "FET_STA", MENUPAGE_NONE, 3,
+	{ "FEH_STA", MENUPAGE_NONE, 3,
 		MENUACTION_GOBACK, "FEDS_TB", SAVESLOT_NONE, MENUPAGE_NONE, 190, 320, MENUALIGN_RIGHT,
 	},
 
@@ -79,11 +81,9 @@ CMenuScreen aScreens[] = {
 		MENUACTION_GOBACK,		"FEDS_TB", SAVESLOT_NONE, MENUPAGE_NONE, 0, 0, MENUALIGN_CENTER,
 	},
 
-	// TODO(Miami): This is still my implementation
 	// MENUPAGE_MAP = 6
 	{ "FEH_MAP", MENUPAGE_NONE, 2,
-		 MENUACTION_UNK110,	"", SAVESLOT_NONE, 0,  0, 0, 0, // to prevent cross/enter to go back
-		 MENUACTION_GOBACK,	"FEDS_TB", SAVESLOT_NONE, MENUPAGE_NONE, 0, 0, 0,
+		 MENUACTION_GOBACK,	"FEDS_TB", SAVESLOT_NONE, MENUPAGE_NONE, 70, 380, MENUALIGN_CENTER,
 	},
 
 	// MENUPAGE_NEW_GAME_RELOAD = 7
@@ -343,3 +343,5 @@ CMenuScreen aScreens[] = {
 	},
 #endif
 };
+
+#endif

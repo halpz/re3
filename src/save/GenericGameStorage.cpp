@@ -497,7 +497,7 @@ CheckDataNotCorrupt(int32 slot, char *name)
 	char filename[100];
 
 	int32 blocknum = 0;
-	eLevelName level = LEVEL_NONE;
+	eLevelName level = LEVEL_GENERIC;
 	CheckSum = 0;
 	uint32 bytes_processed = 0;
 	sprintf(filename, "%s%i%s", DefaultPCSaveFileName, slot + 1, ".b");

@@ -626,6 +626,14 @@ CVisibilityPlugins::RenderPedCB(RpAtomic *atomic)
 }
 
 float
+CVisibilityPlugins::GetDistanceSquaredFromCamera(RwV3d *pos)
+{
+	RwV3d dist;
+	RwV3dSub(&dist, pos, ms_pCameraPosn);
+	return RwV3dDotProduct(&dist, &dist);
+}
+
+float
 CVisibilityPlugins::GetDistanceSquaredFromCamera(RwFrame *frame)
 {
 	RwMatrix *m;
@@ -835,12 +843,12 @@ CVisibilityPlugins::FrameCopyConstructor(void *dst, const void *src, int32, int3
 }
 
 void
-CVisibilityPlugins::SetFrameHierarchyId(RwFrame *frame, int32 id)
+CVisibilityPlugins::SetFrameHierarchyId(RwFrame *frame, uintptr id)
 {
 	FRAMEEXT(frame)->id = id;
 }
 
-int32
+uintptr
 CVisibilityPlugins::GetFrameHierarchyId(RwFrame *frame)
 {
 	return FRAMEEXT(frame)->id;

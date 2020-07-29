@@ -16,7 +16,6 @@
 #include "platform.h"
 #include "crossplatform.h"
 
-#include "patcher.h"
 #include "main.h"
 #include "FileMgr.h"
 #include "Text.h"
@@ -64,11 +63,7 @@ static psGlobalType PsGlobal;
 #undef MAKEPOINTS
 #define MAKEPOINTS(l)		(*((POINTS /*FAR*/ *)&(l)))
 
-#define SAFE_RELEASE(x) { if (x) x->Release(); x = NULL; }
-#define JIF(x) if (FAILED(hr=(x))) \
-	{debug(TEXT("FAILED(hr=0x%x) in ") TEXT(#x) TEXT("\n"), hr); return;}
-
-unsigned long _dwMemAvailPhys;
+size_t _dwMemAvailPhys;
 RwUInt32 gGameState;
 
 #ifdef _WIN32
@@ -178,7 +173,11 @@ psCameraBeginUpdate(RwCamera *camera)
 void
 psCameraShowRaster(RwCamera *camera)
 {
-	if (FrontEndMenuManager.m_PrefsVsync)
+#ifdef LEGACY_MENU_OPTIONS
+	if (FrontEndMenuManager.m_PrefsVsync || FrontEndMenuManager.m_bMenuActive)
+#else
+	if (FrontEndMenuManager.m_PrefsFrameLimiter || FrontEndMenuManager.m_bMenuActive)
+#endif
 		RwCameraShowRaster(camera, PSGLOBAL(window), rwRASTERFLIPWAITVSYNC);
 	else
 		RwCameraShowRaster(camera, PSGLOBAL(window), rwRASTERFLIPDONTWAIT);
@@ -283,6 +282,7 @@ psInitialize(void)
 	RsGlobal.ps = &PsGlobal;
 	
 	PsGlobal.fullScreen = FALSE;
+	PsGlobal.cursorIsInWindow = TRUE;
 	
 	PsGlobal.joy1id	= -1;
 	PsGlobal.joy2id	= -1;
@@ -791,6 +791,7 @@ void keypressCB(GLFWwindow* window, int key, int scancode, int action, int mods)
 void resizeCB(GLFWwindow* window, int width, int height);
 void scrollCB(GLFWwindow* window, double xoffset, double yoffset);
 void cursorCB(GLFWwindow* window, double xpos, double ypos);
+void cursorEnterCB(GLFWwindow* window, int entered);
 void joysChangeCB(int jid, int event);
 
 bool IsThisJoystickBlacklisted(int i)
@@ -826,9 +827,21 @@ void _InputInitialiseJoys()
 	}
 }
 
-void _InputInitialiseMouse()
+long _InputInitialiseMouse(bool exclusive)
 {
 	glfwSetInputMode(PSGLOBAL(window), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	return 0;
+}
+
+void _InputShutdownMouse()
+{
+	// Not needed
+}
+
+bool _InputMouseNeedsExclusive()
+{
+	// That was the cause of infamous mouse bug on Win. Not supported on glfw anyway
+	return false;
 }
 
 void psPostRWinit(void)
@@ -840,10 +853,11 @@ void psPostRWinit(void)
 	glfwSetWindowSizeCallback(PSGLOBAL(window), resizeCB);
 	glfwSetScrollCallback(PSGLOBAL(window), scrollCB);
 	glfwSetCursorPosCallback(PSGLOBAL(window), cursorCB);
+	glfwSetCursorEnterCallback(PSGLOBAL(window), cursorEnterCB);
 	glfwSetJoystickCallback(joysChangeCB);
 
 	_InputInitialiseJoys();
-	_InputInitialiseMouse();
+	_InputInitialiseMouse(false);
 
 	if(!(vm.flags & rwVIDEOMODEEXCLUSIVE))
 		glfwSetWindowSize(PSGLOBAL(window), RsGlobal.maximumWidth, RsGlobal.maximumHeight);
@@ -1345,11 +1359,16 @@ _InputTranslateShiftKeyUpDown(RsKeyCodes *rs) {
 	RsKeyboardEventHandler(rshiftStatus ? rsKEYDOWN : rsKEYUP, &(*rs = rsRSHIFT));
 }
 
-// TODO this only works in frontend(and luckily only frontend use this), maybe because of glfw knows that mouse pos is > 32000 in game??
+// TODO this only works in frontend(and luckily only frontend use this). Fun fact: if I get pos manually in game, glfw reports that it's > 32000
 void
 cursorCB(GLFWwindow* window, double xpos, double ypos) {
 	FrontEndMenuManager.m_nMouseTempPosX = xpos;
 	FrontEndMenuManager.m_nMouseTempPosY = ypos;
+}
+
+void
+cursorEnterCB(GLFWwindow* window, int entered) {
+	PSGLOBAL(cursorIsInWindow) = !!entered;
 }
 
 /*
@@ -1366,6 +1385,15 @@ WinMain(HINSTANCE instance,
 	RwInt32 argc;
 	RwChar** argv;
 	SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, nil, SPIF_SENDCHANGE);
+
+#if 0
+	// TODO: make this an option somewhere
+	AllocConsole();
+	freopen("CONIN$", "r", stdin);
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
+#endif
+
 #else
 int
 main(int argc, char *argv[])
@@ -1373,7 +1401,6 @@ main(int argc, char *argv[])
 #endif
 	RwV2d pos;
 	RwInt32 i;
-//	StaticPatcher::Apply();
 
 #ifndef _WIN32
 	struct sigaction act;
@@ -1488,7 +1515,7 @@ main(int argc, char *argv[])
 	{
 		CFileMgr::SetDirMyDocuments();
 		
-		int32 gta3set = CFileMgr::OpenFile("gta3.set", "r");
+		int32 gta3set = CFileMgr::OpenFile("gta_vc.set", "r");
 		
 		if ( gta3set )
 		{

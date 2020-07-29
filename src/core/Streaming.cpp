@@ -44,7 +44,7 @@ int32 CStreaming::ms_oldSectorX;
 int32 CStreaming::ms_oldSectorY;
 int32 CStreaming::ms_streamingBufferSize;
 int8 *CStreaming::ms_pStreamingBuffer[2];
-int32 CStreaming::ms_memoryUsed;
+size_t CStreaming::ms_memoryUsed;
 CStreamingChannel CStreaming::ms_channel[2];
 int32 CStreaming::ms_channelError;
 int32 CStreaming::ms_numVehiclesLoaded;
@@ -61,7 +61,7 @@ uint16 CStreaming::ms_loadedGangCars;
 int32 CStreaming::ms_imageOffsets[NUMCDIMAGES];
 int32 CStreaming::ms_lastImageRead;
 int32 CStreaming::ms_imageSize;
-uint32 CStreaming::ms_memoryAvailable;
+size_t CStreaming::ms_memoryAvailable;
 
 int32 desiredNumVehiclesLoaded = 12;
 
@@ -200,9 +200,9 @@ CStreaming::Init2(void)
 	debug("Streaming buffer size is %d sectors", ms_streamingBufferSize);
 
 #define MB (1024*1024)
-	ms_memoryAvailable = 65*MB;
+	ms_memoryAvailable = 65 * MB;
 	desiredNumVehiclesLoaded = 25;
-	debug("Memory allocated to Streaming is %dMB", ms_memoryAvailable/MB);
+	debug("Memory allocated to Streaming is %dMB", ms_memoryAvailable / MB);
 #undef MB
 
 	// find island LODs
@@ -723,7 +723,11 @@ CStreaming::RequestBigBuildings(eLevelName level, const CVector &pos)
 	n = CPools::GetBuildingPool()->GetSize()-1;
 	for(i = n; i >= 0; i--){
 		b = CPools::GetBuildingPool()->GetSlot(i);
-		if(b && b->bIsBIGBuilding && b->m_level == level)
+		if(b && b->bIsBIGBuilding
+#ifndef NO_ISLAND_LOADING
+		    && b->m_level == level
+#endif
+		)
 			if(b->bStreamBIGBuilding){
 				if(CRenderer::ShouldModelBeStreamed(b, pos))
 					RequestModel(b->GetModelIndex(), 0);
@@ -795,6 +799,7 @@ CStreaming::InstanceLoadedModels(const CVector &pos)
 void
 CStreaming::RequestIslands(eLevelName level)
 {
+#ifndef NO_ISLAND_LOADING
 	switch(level){
 	case LEVEL_MAINLAND:
 		if(islandLODbeach != -1)
@@ -806,6 +811,7 @@ CStreaming::RequestIslands(eLevelName level)
 		break;
 	default: break;
 	}
+#endif
 }
 
 //--MIAMI: TODO
@@ -1010,10 +1016,12 @@ CStreaming::RemoveBuildings(eLevelName level)
 void
 CStreaming::RemoveUnusedBigBuildings(eLevelName level)
 {
+#ifndef NO_ISLAND_LOADING
 	if(level != LEVEL_BEACH)
 		RemoveBigBuildings(LEVEL_BEACH);
 	if(level != LEVEL_MAINLAND)
 		RemoveBigBuildings(LEVEL_MAINLAND);
+#endif
 	RemoveIslandsNotUsed(level);
 }
 
@@ -1035,6 +1043,7 @@ DeleteIsland(CEntity *island)
 void
 CStreaming::RemoveIslandsNotUsed(eLevelName level)
 {
+#ifndef NO_ISLAND_LOADING
 	int i;
 	if(pIslandLODmainlandEntity == nil)
 	for(i = CPools::GetBuildingPool()->GetSize()-1; i >= 0; i--){
@@ -1053,8 +1062,10 @@ CStreaming::RemoveIslandsNotUsed(eLevelName level)
 		break;
 	case LEVEL_BEACH:
 		DeleteIsland(pIslandLODbeachEntity);
+
 		break;
 	}
+#endif // !NO_ISLAND_LOADING
 }
 
 //--MIAMI: done
@@ -1380,11 +1391,11 @@ CStreaming::StreamVehiclesAndPeds(void)
 	}
 
 	if(FindPlayerPed()->m_pWanted->AreFbiRequired()){
-		RequestModel(MI_FBICAR, STREAMFLAGS_DONT_REMOVE);
+		RequestModel(MI_FBIRANCH, STREAMFLAGS_DONT_REMOVE);
 		RequestModel(MI_FBI, STREAMFLAGS_DONT_REMOVE);
 	}else{
-		SetModelIsDeletable(MI_FBICAR);
-		if(!HasModelLoaded(MI_FBICAR))
+		SetModelIsDeletable(MI_FBIRANCH);
+		if(!HasModelLoaded(MI_FBIRANCH))
 			SetModelIsDeletable(MI_FBI);
 	}
 
@@ -1594,7 +1605,7 @@ CStreaming::LoadBigBuildingsWhenNeeded(void)
 	if(CCutsceneMgr::IsCutsceneProcessing())
 		return;
 
-	if(CTheZones::m_CurrLevel == LEVEL_NONE || 
+	if(CTheZones::m_CurrLevel == LEVEL_GENERIC || 
 	   CTheZones::m_CurrLevel == CGame::currLevel)
 		return;
 
@@ -1612,7 +1623,7 @@ CStreaming::LoadBigBuildingsWhenNeeded(void)
 	CGame::TidyUpMemory(true, true);
 
 	CReplay::EmptyReplayBuffer();
-	if(CGame::currLevel != LEVEL_NONE)
+	if(CGame::currLevel != LEVEL_GENERIC)
 		LoadSplash(GetLevelSplashScreen(CGame::currLevel));
 
 	CStreaming::RequestBigBuildings(CGame::currLevel, TheCamera.GetPosition());
@@ -2374,7 +2385,7 @@ CStreaming::DeleteRwObjectsAfterDeath(const CVector &pos)
 }
 
 void
-CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
+CStreaming::DeleteRwObjectsBehindCamera(size_t mem)
 {
 	int ix, iy;
 	int x, y;
@@ -2549,7 +2560,7 @@ CStreaming::DeleteRwObjectsInOverlapSectorList(CPtrList &list, int32 x, int32 y)
 }
 
 bool
-CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, int32 mem)
+CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, size_t mem)
 {
 	CPtrNode *node;
 	CEntity *e;
@@ -2570,7 +2581,7 @@ CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, int32 mem)
 }
 
 bool
-CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, int32 mem)
+CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, size_t mem)
 {
 	CPtrNode *node;
 	CEntity *e;
@@ -2597,7 +2608,7 @@ CStreaming::MakeSpaceFor(int32 size)
 	// the code still happens to work in that case because ms_memoryAvailable is unsigned
 	// but it's not nice....
 
-	while((uint32)ms_memoryUsed >= ms_memoryAvailable - size)
+	while(ms_memoryUsed >= ms_memoryAvailable - size)
 		if(!RemoveLeastUsedModel(STREAMFLAGS_20)){
 			DeleteRwObjectsBehindCamera(ms_memoryAvailable - size);
 			return;
@@ -2620,16 +2631,16 @@ CStreaming::LoadScene(const CVector &pos)
 	}
 	CRenderer::m_loadingPriority = false;
 	DeleteAllRwObjects();
-	if(level == LEVEL_NONE)
+	if(level == LEVEL_GENERIC)
 		level = CGame::currLevel;
 	CGame::currLevel = level;
 	RemoveUnusedBigBuildings(level);
 	RequestBigBuildings(level, pos);
-	RequestBigBuildings(LEVEL_NONE, pos);
+	RequestBigBuildings(LEVEL_GENERIC, pos);
 	RemoveIslandsNotUsed(level);
 	LoadAllRequestedModels(false);
 	InstanceBigBuildings(level, pos);
-	InstanceBigBuildings(LEVEL_NONE, pos);
+	InstanceBigBuildings(LEVEL_GENERIC, pos);
 	AddModelsToRequestList(pos);
 	CRadar::StreamRadarSections(pos);
 
@@ -2688,7 +2699,8 @@ CStreaming::UpdateForAnimViewer(void)
 	if (CStreaming::ms_channelError == -1) {
 		CStreaming::AddModelsToRequestList(CVector(0.0f, 0.0f, 0.0f));
 		CStreaming::LoadRequestedModels();
-		sprintf(gString, "Requested %d, memory size %dK\n", CStreaming::ms_numModelsRequested, 2 * CStreaming::ms_memoryUsed);
+		// original modifier was %d
+		sprintf(gString, "Requested %d, memory size %zuK\n", CStreaming::ms_numModelsRequested, 2 * CStreaming::ms_memoryUsed);
 	}
 	else {
 		CStreaming::RetryLoadFile(CStreaming::ms_channelError);

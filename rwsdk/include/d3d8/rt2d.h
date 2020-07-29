@@ -17,7 +17,7 @@
 
 /**
  * \defgroup rt2d Rt2d
- * \ingroup rttool
+ * \ingroup 2dtools
  *
  * 2D Rendering Toolkit for RenderWare.
  */
@@ -117,6 +117,7 @@
  Includes
  */
 
+#include "rpworld.h"
 #include "rt2d.rpe"            /* automatically generated header file */
 
 /****************************************************************************
@@ -131,6 +132,13 @@
 
 #define Rt2dCTMReadMacro(_result)                                       \
     (RwMatrixCopy((_result), _rt2dCTMGet()), (_result))
+
+#if defined (GCN_DRVMODEL_H)
+    #define VERTEXCACHESIZE 64
+#else
+    #define VERTEXCACHESIZE 256
+#endif
+
 
 /****************************************************************************
  Global Types
@@ -152,16 +160,21 @@ typedef struct rt2dShadeParameters rt2dShadeParameters;
  * rt2dShadeParameters
  * describes Shade Parameters
  */
+
+#if (!defined(DOXYGEN))
 struct rt2dShadeParameters
 {
     RwRGBAReal          col;    /* col */
     RwV2d               uv;     /* uv */
 };
+#endif /* (!defined(DOXYGEN)) */
 
 /**
  * \ingroup rt2ddatatypes
- * \typedef Rt2dBrush
- * typedef for a structure describing a Brush (opaque)
+ * \struct Rt2dBrush
+ * Brush object.
+ * This should be considered an opaque type.
+ * Use Rt2dBrush API functions to access.
  */
 typedef struct Rt2dBrush Rt2dBrush;
 
@@ -169,35 +182,37 @@ typedef struct Rt2dBrush Rt2dBrush;
  * Rt2dBrush
  * structure describing a Brush
  */
-#if defined (GCN_DRVMODEL_H)
-    #define VERTEXCACHESIZE 64
-#else
-    #define VERTEXCACHESIZE 256
-#endif
-
+#if (!defined(DOXYGEN))
 struct Rt2dBrush
 {
-    RWIM3DVERTEX        vertex[VERTEXCACHESIZE];
     rt2dShadeParameters top;
     rt2dShadeParameters dtop;
     rt2dShadeParameters bottom;
     rt2dShadeParameters dbottom;
-    RwInt32             calcFields;
+    RwRGBA              colorCache;
+    RwInt32             flag;
     RwTexture          *texture;
+    RpMaterial         *material;
     RwReal              halfwidth;
+    RwInt32             refCount;
 };
+#endif /* (!defined(DOXYGEN)) */
 
 /**
  * \ingroup rt2ddatatypes
- * \typedef Rt2dPath
- * typedef for a structure describing a Path (opaque)
+ * \struct Rt2dPath
+ * Path object.
+ * This should be considered an opaque type.
+ * Use Rt2dPath API functions to access.
  */
 typedef struct Rt2dPath Rt2dPath;
 
 /**
  * \ingroup rt2ddatatypes
- * \typedef Rt2dFont
- * typedef for a structure describing a Font (opaque)
+ * \struct Rt2dFont
+ * Font object.
+ * This should be considered an opaque type.
+ * Use Rt2dFont API functions to access.
  */
 typedef struct Rt2dFont Rt2dFont;
 
@@ -206,11 +221,6 @@ typedef struct Rt2dFont Rt2dFont;
  */
 typedef struct _rt2dFontDictionaryNode _rt2dFontDictionaryNode;
 
-/**
- * \ingroup rt2ddatatypes
- * \typedef Rt2dBBox
- * typedef for a structure describing a Bounding Box
- */
 
 typedef struct Rt2dBBox Rt2dBBox;
 /**
@@ -228,8 +238,8 @@ struct Rt2dBBox
 
 /**
   * \ingroup rt2ddatatypes
-  * \typedef Rt2dObject
-  * typedef for a structure describing a 2d Object
+  * \struct Rt2dObject
+  * Structure describing a 2d Object
   * This should be considered an opaque type.
   * Use Rt2dObject, Rt2dScene, Rt2dShape, Rt2dPickRegion or Rt2dObjectString
   * API functions to access.
@@ -246,6 +256,7 @@ typedef struct _rt2dScene _rt2dScene;
  */
 typedef struct _rt2dDepthOfObject _rt2dDepthOfObject;
 
+#if (!defined(DOXYGEN))
 /*
  * typedef for a structure describing the depth of an object
  */
@@ -265,15 +276,47 @@ struct _rt2dScene
     RwSList  *depths;        /* depths for depthsort */
     RwBool    isDirtyDepths; /* depthsort needs updating */
 };
+#endif /* (!defined(DOXYGEN)) */
 
 /*
  * typedef for a structure describing a shape (opaque)
  */
 typedef struct _rt2dShape _rt2dShape;
 
+#if (!defined(DOXYGEN))
+typedef struct _rt2dShapeRep _rt2dShapeRep;
+struct _rt2dShapeRep
+{
+    RwSList     *nodes;         /* individual stroked/filled regions of the shape */
+    RwUInt32     refCount;      /* number of shapes referencing this rep */
+    RpGeometry  *geometry;      /* Shareable geometry */
+};
+
+extern _rt2dShapeRep *
+ _rt2dShapeRepCreate();
+
+extern RwBool
+_rt2dShapeRepDestroy(_rt2dShapeRep *);
+
+extern RwUInt32
+_rt2dShapeRepAddRef(_rt2dShapeRep *);
+
+typedef struct _rt2dSceneResourcePool _rt2dSceneResourcePool;
+struct _rt2dSceneResourcePool
+{
+    _rt2dShapeRep **shapeReps;
+    RwUInt32        numShapeReps;
+};
+
+extern RwBool
+_rt2dSceneResourcePoolFindShapeRep(const _rt2dSceneResourcePool * pool,
+                              const _rt2dShapeRep * rep, RwInt32 * npIndex);
+
 struct _rt2dShape
 {
-    RwSList  *nodes;     /* individual stroked/filled regions of the shape */
+    _rt2dShapeRep *rep;
+    RwRGBA        *colorCache;    /* Shape's color cache */
+    RpAtomic      *atomic;        /* Atomic repn */
 };
 
 /*
@@ -295,6 +338,7 @@ struct _rt2dPickRegion
 /*
  * structure describing a renderable text string
  */
+
 struct _rt2dObjectString
 {
     RwChar    *textString; /* Text string to be rendered */
@@ -303,6 +347,7 @@ struct _rt2dObjectString
     RwReal    height;      /* Font rendering Height */
     _rt2dFontDictionaryNode *font; /* Dictionary node identifying font to be used */
 };
+#endif /* (!defined(DOXYGEN)) */
 
 /*
  * typedef for a renderable string
@@ -324,6 +369,7 @@ enum Rt2dObjectTypeEnum {
 
 typedef union _rt2dObjectdata _rt2dObjectdata;
 
+#if (!defined(DOXYGEN))
 union _rt2dObjectdata
 {
     _rt2dShape shape;
@@ -335,11 +381,13 @@ union _rt2dObjectdata
 /*
  * A base structure for forming a hierarchy of 2D shapes
  */
-#if (!defined(DOXYGEN))
 
-#define Rt2dObjectIsLocked  0x00000001
-#define Rt2dObjectDirtyLTM  0x00000002
-#define Rt2dObjectVisible   0x00000004
+#define Rt2dObjectIsLocked          0x00000001
+#define Rt2dObjectDirtyLTM          0x00000002
+#define Rt2dObjectVisible           0x00000004
+#define Rt2dObjectDirtyColor        0x00000008
+
+#define Rt2dObjectStringGotNoFonts  0x01000000
 
 struct Rt2dObject
 {
@@ -357,10 +405,34 @@ struct Rt2dObject
 
 /**
  * \ingroup rt2ddatatypes
- * \typedef Rt2dObjectCallBack
- * typedef for a callback on an object
+ * \ref Rt2dObjectCallBack
+ * typedef for a callback on an object in a collection
+ *
+ * \param object is a specific object
+ * \param parent is the containing scene
+ * \param data is user data
+ *
+ * \return return value is ignored
  */
 typedef Rt2dObject *(* Rt2dObjectCallBack)(Rt2dObject *object, Rt2dObject *parent, void *data);
+
+/**
+ * \ingroup rt2ddatatypes
+ * \ref Rt2dFontCallBackRead
+ * Rt2dFontCallBackRead represents the function used by Rt2dFontRead to read
+ * the specified font from a disk file. This function should return a
+ * pointer to the font to indicate success. The returned font is owned by
+ * the Rt2d internal font dictionary, and is destroyed on calling
+ * \ref Rt2dClose
+ *
+ * \param name is the name of the font to read
+ *
+ * \return return the font if successful, NULL otherwise
+ *
+ * \see Rt2dFontSetReadCallBack
+ * \see Rt2dFontGetReadCallBack
+ */
+typedef Rt2dFont*(* Rt2dFontCallBackRead)(const RwChar *name);  
 
 /**
  * \ingroup rt2ddatatypes
@@ -381,6 +453,20 @@ enum Rt2dJustificationType
  */
 typedef enum Rt2dJustificationType Rt2dJustificationType;
 
+/**
+ * \ingroup rt2ddatatypes
+ * \ref Rt2dShapeNodeFlag
+ * Passed to \ref Rt2dShapeAddNode, these flags specify
+ * the type and properties of the path.
+ */
+enum Rt2dShapeNodeFlag
+{
+    rt2dSHAPENODEFLAGNONE                   = 0x0000,
+    rt2dSHAPENODEFLAGSOLID                  = 0x0001,     /**< Shape's node is a solid, not outline */
+    rt2dSHAPENODEFLAGFORCEENUMSIZEINT       = RWFORCEENUMSIZEINT /* Ensure sizeof(enum) == sizeof(RwInt32) */
+};
+
+
 #if (! ( defined(RWDEBUG) || defined(RWSUPPRESSINLINE) ))
 
 #define Rt2dBrushSetWidth(_brush, _width)                               \
@@ -397,7 +483,20 @@ typedef enum Rt2dJustificationType Rt2dJustificationType;
 /****************************************************************************
  Function prototypes
  */
+extern void
+Rt2dBrushSetFreeListCreateParams( RwInt32 blockSize, RwInt32 numBlocksToPrealloc );
 
+extern void
+Rt2dFontSetFreeListCreateParams( RwInt32 blockSize, RwInt32 numBlocksToPrealloc );
+
+extern void
+Rt2dFontDictNodeSetFreeListCreateParams( RwInt32 blockSize, RwInt32 numBlocksToPrealloc );
+
+extern void
+Rt2dObjectSetFreeListCreateParams( RwInt32 blockSize, RwInt32 numBlocksToPrealloc );
+
+extern void
+Rt2dPathSetFreeListCreateParams( RwInt32 blockSize, RwInt32 numBlocksToPrealloc );
 
 /*
  * INITIALIZE
@@ -407,6 +506,13 @@ Rt2dOpen(RwCamera *cam);
 
 extern void
 Rt2dClose(void);
+
+extern void
+Rt2dTriVertSetFreeListCreateParams( RwInt32 blockSize, RwInt32 numBlocksToPrealloc );
+
+extern void
+Rt2dTriPolySetFreeListCreateParams( RwInt32 blockSize, RwInt32 numBlocksToPrealloc );
+
 /*
  * PATHS
  */
@@ -517,6 +623,12 @@ Rt2dFontSetPath(const RwChar *path);
 
 extern Rt2dFont *
 Rt2dFontRead(const RwChar *name);
+
+extern RwBool
+Rt2dFontSetReadCallBack(Rt2dFontCallBackRead fpCallBack);
+ 
+extern Rt2dFontCallBackRead
+Rt2dFontGetReadCallBack (void); 
 
 extern RwUInt32
 _rt2dFontStreamGetSize(Rt2dFont *font);
@@ -695,6 +807,10 @@ Rt2dObjectIsObjectString(Rt2dObject *object);
 extern Rt2dObject *
 Rt2dObjectCopy(Rt2dObject *dst, Rt2dObject *src);
 
+/* in-place dst version, destruction not req */
+extern Rt2dObject *
+_rt2dObjectCopy(Rt2dObject *dst, Rt2dObject *src);
+
 /*
  * HIERARCHICAL SCENE FUNCTIONS - SCENE
  */
@@ -766,14 +882,8 @@ Rt2dShapeCreate(void);
 extern RwBool
 Rt2dShapeDestroy(Rt2dObject * shape);
 
-extern Rt2dBrush *
-Rt2dShapeGetNewBrush(Rt2dObject *shape);
-
-extern Rt2dPath *
-Rt2dShapeGetNewPath(Rt2dObject *shape);
-
 extern Rt2dObject *
-Rt2dShapeAddNode(Rt2dObject *shape, Rt2dPath *path, Rt2dBrush *fill, Rt2dBrush *stroke );
+Rt2dShapeAddNode(Rt2dObject *shape, RwUInt32 flag, Rt2dPath *path, Rt2dBrush *brush );
 
 extern RwInt32
 Rt2dShapeGetNodeCount(Rt2dObject *shape);
@@ -792,9 +902,15 @@ Rt2dShapeRender(Rt2dObject *object);
 
 extern Rt2dObject *
 Rt2dShapeMorph(Rt2dObject *result,
-                Rt2dObject *source,
-                Rt2dObject *destination,
-                RwReal alpha);
+               Rt2dObject *source,
+               Rt2dObject *destination,
+               RwReal alpha);
+
+extern Rt2dObject *
+Rt2dShapeLock(Rt2dObject * shape);
+
+extern Rt2dObject *
+Rt2dShapeUnlock(Rt2dObject * shape);
 
 /*
  * HIERARCHICAL SCENE FUNCTIONS - PICK REGION
@@ -894,6 +1010,7 @@ extern RwMatrix *
 Rt2dCTMRead(RwMatrix * result);
 
 #endif       /* ( defined(RWDEBUG) || defined(RWSUPPRESSINLINE) ) */
+
 
 #ifdef    __cplusplus
 }

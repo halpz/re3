@@ -10,7 +10,7 @@
 
 /**
  * \defgroup rtquat RtQuat
- * \ingroup rttool
+ * \ingroup mathtools
  *
  * Quaternion Toolkit for RenderWare.
  *
@@ -392,7 +392,7 @@ MACRO_START                                                                \
                                                                            \
     /* Matrix is orthogonal */                                             \
     rwMatrixSetFlags((mpMatrix),                                           \
-                      (rwMATRIXTYPEORTHOGANAL  &                           \
+                      (rwMATRIXTYPEORTHOGONAL  &                           \
                        ~rwMATRIXINTERNALIDENTITY) );                       \
                                                                            \
 }                                                                          \

@@ -16,6 +16,7 @@ public:
 	void Init();
 	void Process();
 	void Display();
+	void ProcessAfterFrontEndShutDown();
 };
 
 class CCurrentVehicle

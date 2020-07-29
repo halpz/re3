@@ -71,15 +71,15 @@ const C2dEffect* CVehicleToEffect::ChooseEffect(const CVector& pos) const
 		return nil;
 	if (DotProduct(pos - m_pVehicle->GetPosition(), m_pVehicle->GetRight()) > 0.0f) {
 		if (DotProduct(pos - m_pVehicle->GetPosition(), m_pVehicle->GetForward()) > 0.0f)
-			return &m_effects[0];
-		else
-			return &m_effects[2];
-	}
-	else {
-		if (DotProduct(pos - m_pVehicle->GetPosition(), m_pVehicle->GetForward()) > 0.0f)
 			return &m_effects[1];
 		else
 			return &m_effects[3];
+	}
+	else {
+		if (DotProduct(pos - m_pVehicle->GetPosition(), m_pVehicle->GetForward()) > 0.0f)
+			return &m_effects[0];
+		else
+			return &m_effects[2];
 	}
 }
 
@@ -137,8 +137,8 @@ void CPedAttractorManager::RemoveIceCreamVanEffects(C2dEffect* pEffect)
 	for (std::vector<CVehicleToEffect>::const_iterator assoc = vVehicleToEffect.cbegin(); assoc != vVehicleToEffect.cend();) {
 		if (assoc->GetVehicle() != pVehicle)
 			return;
-		size_t total = 0;
-		for (size_t j = 0; j < NUM_ATTRACTORS_FOR_ICECREAM_VAN; j++) {
+		uint32 total = 0;
+		for (uint32 j = 0; j < NUM_ATTRACTORS_FOR_ICECREAM_VAN; j++) {
 			if (FindAssociatedAttractor(assoc->GetEffect(j), vIceCreamAttractors))
 				total++;
 		}
@@ -355,13 +355,13 @@ bool CPedAttractor::BroadcastArrival(CPed* pPed)
 bool CPedAttractor::BroadcastDeparture(CPed* pPed)
 {
 	int qid = -1;
-	for (size_t i = 0; i < vWaitingQueue.size(); i++){
+	for (uint32 i = 0; i < vWaitingQueue.size(); i++){
 		if (vWaitingQueue[i] == pPed)
 			qid = i;
 	}
 	if (qid < 0)
 		return false;
-	for (size_t i = qid + 1; i < vWaitingQueue.size(); i++) {
+	for (uint32 i = qid + 1; i < vWaitingQueue.size(); i++) {
 		CVector pos;
 		float heading;
 		float time;
@@ -401,7 +401,7 @@ bool CPedAttractor::BroadcastDeparture(CPed* pPed)
 bool CPedShelterAttractor::BroadcastDeparture(CPed* pPed)
 {
 	int qid = -1;
-	for (size_t i = 0; i < vWaitingQueue.size(); i++) {
+	for (uint32 i = 0; i < vWaitingQueue.size(); i++) {
 		if (vWaitingQueue[i] == pPed)
 			qid = i;
 	}

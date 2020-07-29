@@ -35,9 +35,9 @@ RwReal RwV3dLength(const RwV3d * in) { return length(*in); }
 //void RwV3dAssign(RwV3d * out, const RwV3d * ina);
 void RwV3dAdd(RwV3d * out, const RwV3d * ina, const RwV3d * inb) { *out = add(*ina, *inb); }
 void RwV3dSub(RwV3d * out, const RwV3d * ina, const RwV3d * inb) { *out = sub(*ina, *inb); }
-//void RwV3dScale(RwV3d * out, const RwV3d * in, RwReal scalar);
-//void RwV3dIncrementScaled(RwV3d * out,  const RwV3d * in, RwReal scalar);
-//void RwV3dNegate(RwV3d * out, const RwV3d * in);
+void RwV3dScale(RwV3d * out, const RwV3d * in, RwReal scalar) { *out = scale(*in, scalar); }
+void RwV3dIncrementScaled(RwV3d * out,  const RwV3d * in, RwReal scalar) { *out = add(*out, scale(*in, scalar)); }
+void RwV3dNegate(RwV3d * out, const RwV3d * in) { *out = neg(*in); }
 RwReal RwV3dDotProduct(const RwV3d * ina, const RwV3d * inb) { return dot(*ina, *inb); }
 //void RwV3dCrossProduct(RwV3d * out, const RwV3d * ina, const RwV3d * inb);
 RwV3d *RwV3dTransformPoints(RwV3d * pointsOut, const RwV3d * pointsIn, RwInt32 numPoints, const RwMatrix * matrix)
@@ -137,7 +137,7 @@ RwCamera    *RwCameraCreate(void) { return rw::Camera::create(); }
 RwCamera    *RwCameraClone(RwCamera * camera) { return camera->clone(); }
 RwCamera    *RwCameraSetViewOffset(RwCamera *camera, const RwV2d *offset) { camera->setViewOffset(offset); return camera; }
 RwCamera    *RwCameraSetViewWindow(RwCamera *camera, const RwV2d *viewWindow) { camera->setViewWindow(viewWindow); return camera; }
-RwCamera    *RwCameraSetProjection(RwCamera *camera, RwCameraProjection projection);
+RwCamera    *RwCameraSetProjection(RwCamera *camera, RwCameraProjection projection) { camera->projection = projection; return camera; }
 RwCamera    *RwCameraSetNearClipPlane(RwCamera *camera, RwReal nearClip) { camera->setNearPlane(nearClip); return camera; }
 RwCamera    *RwCameraSetFarClipPlane(RwCamera *camera, RwReal farClip) { camera->setFarPlane(farClip); return camera; }
 RwInt32      RwCameraRegisterPlugin(RwInt32 size, RwUInt32 pluginID, RwPluginObjectConstructor constructCB, RwPluginObjectDestructor destructCB, RwPluginObjectCopy copyCB);
@@ -308,7 +308,7 @@ ConvertTexRaster(rw::Raster *ras)
 
 	Image *img = ras->toImage();
 	ras->destroy();
-	img->unindex();
+	img->unpalettize();
 	ras = Raster::createFromImage(img);
 	img->destroy();
 	return ras;
@@ -376,23 +376,19 @@ RwStream *RwStreamOpen(RwStreamType type, RwStreamAccessType accessType, const v
 		file = rwNewT(StreamFile, 1, 0);
 		memcpy(file, &fakefile, sizeof(StreamFile));
 #ifndef _WIN32
-		// Be case-insensitive and fix backslashes (from https://github.com/OneSadCookie/fcaseopen/)
-		FILE* first = fopen((char*)pData, "r");
-		char *r;
-		if (!first) {
-			r = (char*)alloca(strlen((char*)pData) + 2);
-			// Use default path(and pass error handling to librw) if we can't find any match
-			if (!casepath((char*)pData, r))
-				r = (char*)pData;
+		char *r = casepath((char*)pData);
+		if (r) {
+			if (file->open((char*)r, mode)) {
+				free(r);
+				return file;
+			}
+			free(r);
 		} else
-			fclose(first);
-
-		if(file->open((char*)r, mode))
-			return file;
-#else
-		if(file->open((char*)pData, mode))
-			return file;
 #endif
+		{
+			if (file->open((char*)pData, mode))
+				return file;
+		}
 		rwFree(file);
 		return nil;
 	}
@@ -856,12 +852,41 @@ RpSkin *RpSkinGeometryGetSkin( RpGeometry *geometry ) { return Skin::get(geometr
 RpAtomic *RpSkinAtomicSetHAnimHierarchy( RpAtomic *atomic, RpHAnimHierarchy *hierarchy ) { Skin::setHierarchy(atomic, hierarchy); return atomic; }
 RpHAnimHierarchy *RpSkinAtomicGetHAnimHierarchy( const RpAtomic *atomic ) { return Skin::getHierarchy(atomic); }
 
+RwImage *
+RtBMPImageWrite(RwImage *image, const RwChar *imageName)
+{
+#ifndef _WIN32
+	char *r = casepath(imageName);
+	if (r) {
+		rw::writeBMP(image, r);
+		free(r);
+	} else {
+		rw::writeBMP(image, imageName);
+	}
+	
+#else
+	rw::writeBMP(image, imageName);
+#endif
+	return image;
+}
+RwImage *
+RtBMPImageRead(const RwChar *imageName)
+{
+#ifndef _WIN32
+	RwImage *image;
+	char *r = casepath(imageName);
+	if (r) {
+		image = rw::readBMP(r);
+		free(r);
+	} else {
+		image = rw::readBMP(imageName);
+	}
+	return image;
 
-
-
-
-RwImage *RtBMPImageWrite(RwImage * image, const RwChar * imageName) { rw::writeBMP(image, imageName); return image; }
-RwImage *RtBMPImageRead(const RwChar * imageName) { return rw::readBMP(imageName); }
+#else
+	return rw::readBMP(imageName);
+#endif
+}
 
 #include "rtquat.h"
 
