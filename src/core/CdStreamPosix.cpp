@@ -189,10 +189,11 @@ GetGTA3ImgSize(void)
     realpath(gImgNames[0], path);
     if (stat(path, &statbuf) == -1) {
 		// Try case-insensitivity
-		char *r = (char*)alloca(strlen(gImgNames[0]) + 2);
-		if (casepath(gImgNames[0], r))
+		char* real = casepath(gImgNames[0], false);
+		if (real)
 		{
-			realpath(r, path);
+			realpath(real, path);
+			free(real);
     		if (stat(path, &statbuf) != -1)
 				goto ok;
 		}
@@ -210,7 +211,6 @@ CdStreamShutdown(void)
 {
     // Destroying semaphores and free(gpReadInfo) will be done at threads
 #ifndef ONE_THREAD_PER_CHANNEL
-    free(gChannelRequestQ.items);
     gCdStreamThreadStatus = 2;
     sem_post(&gCdStreamSema);
 #endif
@@ -442,6 +442,7 @@ void *CdStreamThread(void *param)
         sem_destroy(&gpReadInfo[i].pDoneSemaphore);
     }
     sem_destroy(&gCdStreamSema);
+	free(gChannelRequestQ.items);
 #else
     sem_destroy(&gpReadInfo[channel].pStartSemaphore);
     sem_destroy(&gpReadInfo[channel].pDoneSemaphore);
@@ -460,10 +461,11 @@ CdStreamAddImage(char const *path)
 
 	// Fix case sensitivity and backslashes.
 	if (gImgFiles[gNumImages] == -1) {
-		char *r = (char*)alloca(strlen(path) + 2);
-		if (casepath(path, r))
+		char* real = casepath(path, false);
+		if (real)
 		{
-		    gImgFiles[gNumImages] = open(r, _gdwCdStreamFlags);
+		    gImgFiles[gNumImages] = open(real, _gdwCdStreamFlags);
+			free(real);
 		}
 	}
 

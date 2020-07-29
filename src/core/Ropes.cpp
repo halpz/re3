@@ -31,14 +31,14 @@ CRope::Update(void)
 	for(i = 1; i < ARRAY_SIZE(m_pos); i++){
 		CVector prevPos = m_pos[i];
 		m_pos[i] += m_speed[i]*step*CTimer::GetTimeStep();
-		m_pos[0].z -= 0.05f*CTimer::GetTimeStep();
+		m_pos[i].z -= 0.05f*CTimer::GetTimeStep();
 		CVector dist = m_pos[i] - m_pos[i-1];
-		m_pos[i] = m_pos[i-1] + dist/dist.Magnitude()*0.625f;
+		m_pos[i] = m_pos[i-1] + (0.625f/dist.Magnitude())*dist;
 		m_speed[i] = (m_pos[i] - prevPos)/CTimer::GetTimeStep();
 	}
 	if(!m_bWasRegistered && m_pos[0].z < 0.0f)
 		m_bActive = false;
-	m_bWasRegistered = true;
+	m_bWasRegistered = false;
 }
 
 void
@@ -60,7 +60,11 @@ CRope::Render(void)
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
 
 	if(RwIm3DTransform(TempBufferRenderVertices, ARRAY_SIZE(m_pos), nil, rwIM3D_VERTEXXYZ|rwIM3D_VERTEXRGBA)){
+#ifdef FIX_BUGS
 		RwIm3DRenderIndexedPrimitive(rwPRIMTYPELINELIST, RopeIndices, 2*(ARRAY_SIZE(m_pos)-1));
+#else
+		RwIm3DRenderIndexedPrimitive(rwPRIMTYPEPOLYLINE, RopeIndices, 2*(ARRAY_SIZE(m_pos)-1));
+#endif
 		RwIm3DEnd();
 	}
 }
@@ -159,7 +163,7 @@ CRopes::CreateRopeWithSwatComingDown(CVector pos)
 
 	if(!CStreaming::HasModelLoaded(MI_SWAT) || !RegisterRope(ropeId+100, pos, true))
 		return false;
-	CCopPed *swat = (CCopPed*)CPopulation::AddPed(PEDTYPE_COP, COP_ARMY, pos);
+	CCopPed *swat = (CCopPed*)CPopulation::AddPed(PEDTYPE_COP, COP_HELI_SWAT, pos);
 	swat->bUsesCollision = false;
 	swat->m_pRopeEntity = (CEntity*)1;
 	swat->m_nRopeID = 100 + ropeId;
