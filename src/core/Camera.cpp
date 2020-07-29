@@ -3587,8 +3587,8 @@ CCamera::CalculateDerivedValues(void)
 	m_cameraMatrix = Invert(m_matrix);
 
 	float hfov = DEGTORAD(CDraw::GetScaledFOV()/2.0f);
-	float c = cos(hfov);
-	float s = sin(hfov);
+	float c = Cos(hfov);
+	float s = Sin(hfov);
 
 	// right plane
 	m_vecFrustumNormals[0] = CVector(c, -s, 0.0f);
