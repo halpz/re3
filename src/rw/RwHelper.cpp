@@ -509,7 +509,7 @@ RpClump *RpClumpGetBoundingSphere(RpClump *clump, RwSphere *sphere, bool useLTM)
 	
 	RwV3dTransformPoints(&result.center, &result.center, 1, &matrix);
 
-	RwSphereAssign(sphere, &result);
+	*sphere = result;
 	
 	return clump;
 }
