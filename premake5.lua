@@ -226,7 +226,7 @@ project "reVC"
 		includedirs { "libsndfile.32/include" }
 		includedirs { "mpg123.32/include" }
 		libdirs { "mpg123.32/lib" }
-		libdirs { "libsndfile32/lib" }
+		libdirs { "libsndfile.32/lib" }
 		libdirs { "openal-soft/libs/Win32" }
 		
 	filter "platforms:win-amd64*oal"
