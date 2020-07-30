@@ -1,6 +1,7 @@
 #pragma once
 #include "common.h"
 #include "Vector.h"
+#include "Object.h"
 
 // TODO
 class CScriptPath
@@ -54,16 +55,37 @@ public:
 	static void RegisterPoint(CVector pos, uint32 id);
 };
 
-// TODO
-class CEscalators
-{
-public:
-};
-
-// TODO
 class CEscalator
 {
+	CVector m_pos0;
+	CVector m_pos1;
+	CVector m_pos2;
+	CVector m_pos3;
+	CMatrix m_matrix;
+	bool m_bIsActive;
+	bool m_bIsMovingDown;
+	int32 m_stepsCount;
+	float m_lowerEnd; 
+	float m_upperEnd; 
+	CVector m_midPoint;
+	float m_radius;
+	CObject *m_pSteps[24];
 public:
+	CEscalator();
+	void Update(void);
+	void SwitchOff(void);
+	void AddThisOne(CVector pos0, CVector pos1, CVector pos2, CVector pos3, bool b_isMovingDown);
+};
+
+class CEscalators
+{
+	static CEscalator aEscalators[NUM_ESCALATORS];
+public:
+	static int32 NumEscalators;
+	static void Init(void);
+	static void Update(void);
+	static void AddOne(CVector pos0, CVector pos1, CVector pos2, CVector pos3, bool b_isMovingDown);
+	static void Shutdown(void);
 };
 
 class CMovingThing

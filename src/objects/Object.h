@@ -8,6 +8,7 @@ enum {
 	MISSION_OBJECT = 2,
 	TEMP_OBJECT = 3,
 	CUTSCENE_OBJECT = 4,
+	ESCALATOR_OBJECT = 5,
 };
 
 enum CollisionSpecialResponseCase
