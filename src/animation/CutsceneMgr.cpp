@@ -119,7 +119,10 @@ int32 CCutsceneMgr::ms_numCutsceneObjs;
 bool CCutsceneMgr::ms_loaded;
 bool CCutsceneMgr::ms_animLoaded;
 bool CCutsceneMgr::ms_useLodMultiplier;
+bool CCutsceneMgr::ms_camLoaded;
 char CCutsceneMgr::ms_cutsceneName[CUTSCENENAMESIZE];
+char CCutsceneMgr::ms_uncompressedAnims[8][32];
+uint32 CCutsceneMgr::ms_numUncompressedAnims;
 CAnimBlendAssocGroup CCutsceneMgr::ms_cutsceneAssociations;
 CVector CCutsceneMgr::ms_cutsceneOffset;
 float CCutsceneMgr::ms_cutsceneTimer;
@@ -154,6 +157,9 @@ CCutsceneMgr::Initialise(void)
 
 	ms_pCutsceneDir = new CDirectory(CUTSCENEDIRSIZE);
 	ms_pCutsceneDir->ReadDirFile("ANIM\\CUTS.DIR");
+
+	ms_numUncompressedAnims = 0;
+	ms_uncompressedAnims[0][0] = '\0';
 }
 
 void
@@ -194,7 +200,7 @@ CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
 		CStreaming::MakeSpaceFor(size << 11);
 		CStreaming::ImGonnaUseStreamingMemory();
 		RwStreamSkip(stream,  offset << 11);
-		CAnimManager::LoadAnimFile(stream, false);
+		CAnimManager::LoadAnimFile(stream, true, ms_uncompressedAnims);
 		ms_cutsceneAssociations.CreateAssociations(szCutsceneName);
 		CStreaming::IHaveUsedStreamingMemory();
 		ms_animLoaded = true;
@@ -207,13 +213,18 @@ CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
 	file = CFileMgr::OpenFile("ANIM\\CUTS.IMG", "rb");
 	sprintf(gString, "%s.DAT", szCutsceneName);
 	if (ms_pCutsceneDir->FindItem(gString, offset, size)) {
+		CStreaming::ImGonnaUseStreamingMemory();
 		CFileMgr::Seek(file, offset << 11, SEEK_SET);
 		TheCamera.LoadPathSplines(file);
+		CStreaming::IHaveUsedStreamingMemory();
+		ms_camLoaded = true;
+	} else {
+		ms_camLoaded = false;
 	}
 
 	CFileMgr::CloseFile(file);
 
-	if (CGeneral::faststricmp(ms_cutsceneName, "end")) {
+	if (CGeneral::faststricmp(ms_cutsceneName, "finale")) {
 		DMAudio.ChangeMusicMode(MUSICMODE_CUTSCENE);
 		int trackId = FindCutsceneAudioTrackId(szCutsceneName);
 		if (trackId != -1) {
@@ -241,8 +252,10 @@ void
 CCutsceneMgr::FinishCutscene()
 {
 	ms_wasCutsceneSkipped = true;
-	CCutsceneMgr::ms_cutsceneTimer = TheCamera.GetCutSceneFinishTime() * 0.001f;
-	TheCamera.FinishCutscene();
+	if (ms_camLoaded) {
+		CCutsceneMgr::ms_cutsceneTimer = TheCamera.GetCutSceneFinishTime() * 0.001f;
+		TheCamera.FinishCutscene();
+	}
 
 	FindPlayerPed()->bIsVisible = true;
 	CWorld::Players[CWorld::PlayerInFocus].MakePlayerSafe(false);
@@ -251,9 +264,11 @@ CCutsceneMgr::FinishCutscene()
 void
 CCutsceneMgr::SetupCutsceneToStart(void)
 {
-	TheCamera.SetCamCutSceneOffSet(ms_cutsceneOffset);
-	TheCamera.TakeControlWithSpline(JUMP_CUT);
-	TheCamera.SetWideScreenOn();
+	if (ms_camLoaded) {
+		TheCamera.SetCamCutSceneOffSet(ms_cutsceneOffset);
+		TheCamera.TakeControlWithSpline(JUMP_CUT);
+		TheCamera.SetWideScreenOn();
+	}
 
 	ms_cutsceneOffset.z++;
 
@@ -363,8 +378,14 @@ CCutsceneMgr::DeleteCutsceneData(void)
 		CAnimManager::RemoveLastAnimFile();
 
 	ms_animLoaded = false;
-	TheCamera.RestoreWithJumpCut();
-	TheCamera.SetWideScreenOff();
+	ms_numUncompressedAnims = 0;
+	ms_uncompressedAnims[0][0] = '\0';
+
+	if (ms_camLoaded) {
+		TheCamera.RestoreWithJumpCut();
+		TheCamera.SetWideScreenOff();
+		TheCamera.DeleteCutSceneCamDataMemory();
+	}
 	ms_running = false;
 	ms_loaded = false;
 
@@ -372,12 +393,14 @@ CCutsceneMgr::DeleteCutsceneData(void)
 	CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_CUTSCENE);
 	CWorld::Players[CWorld::PlayerInFocus].MakePlayerSafe(false);
 
-	if (CGeneral::faststricmp(ms_cutsceneName, "end")) {
+	if (CGeneral::faststricmp(ms_cutsceneName, "finale")) {
 		DMAudio.StopCutSceneMusic();
-		if (CGeneral::faststricmp(ms_cutsceneName, "bet"))
-			DMAudio.ChangeMusicMode(MUSICMODE_GAME);
+		DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 	}
-	CGame::DrasticTidyUpMemory(TheCamera.GetScreenFadeStatus() == 2);
+	
+	if(ms_camLoaded)
+		CGame::DrasticTidyUpMemory(TheCamera.GetScreenFadeStatus() == 2);
+	
 	CTimer::Resume();
 }
 
@@ -395,7 +418,7 @@ CCutsceneMgr::Update(void)
 	switch (ms_cutsceneLoadStatus) {
 	case CUTSCENE_LOADING_AUDIO:
 		SetupCutsceneToStart();
-		if (CGeneral::faststricmp(ms_cutsceneName, "end"))
+		if (CGeneral::faststricmp(ms_cutsceneName, "finale"))
 			DMAudio.PlayPreloadedCutSceneMusic();
 		ms_cutsceneLoadStatus++;
 		break;
@@ -413,15 +436,27 @@ CCutsceneMgr::Update(void)
 	if (!ms_running) return;
 
 	ms_cutsceneTimer += CTimer::GetTimeStepNonClippedInSeconds();
-	if (CGeneral::faststricmp(ms_cutsceneName, "end") && TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FLYBY && ms_cutsceneLoadStatus == CUTSCENE_LOADING_0) {
-		if (CPad::GetPad(0)->GetCrossJustDown()
-			|| (CGame::playingIntro && CPad::GetPad(0)->GetStartJustDown())
-			|| CPad::GetPad(0)->GetLeftMouseJustDown()
-			|| CPad::GetPad(0)->GetEnterJustDown()
-			|| CPad::GetPad(0)->GetCharJustDown(' '))
-			FinishCutscene();
-	}
+
+	if (ms_camLoaded)
+		if (CGeneral::faststricmp(ms_cutsceneName, "finale") && TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FLYBY && ms_cutsceneLoadStatus == CUTSCENE_LOADING_0) {
+			if (CPad::GetPad(0)->GetCrossJustDown()
+				|| (CGame::playingIntro && CPad::GetPad(0)->GetStartJustDown())
+				|| CPad::GetPad(0)->GetLeftMouseJustDown()
+				|| CPad::GetPad(0)->GetEnterJustDown()
+				|| CPad::GetPad(0)->GetCharJustDown(' '))
+				FinishCutscene();
+		}
 }
 
-bool CCutsceneMgr::HasCutsceneFinished(void) { return TheCamera.GetPositionAlongSpline() == 1.0f; }
+bool CCutsceneMgr::HasCutsceneFinished(void) { return !ms_camLoaded || TheCamera.GetPositionAlongSpline() == 1.0f; }
 
+void
+CCutsceneMgr::LoadAnimationUncompressed(char const* name)
+{
+	strcpy(ms_uncompressedAnims[ms_numUncompressedAnims], name);
+	
+	// Because that's how CAnimManager knows the end of array
+	++ms_numUncompressedAnims;
+	assert(ms_numUncompressedAnims < ARRAY_SIZE(ms_uncompressedAnims));
+	ms_uncompressedAnims[ms_numUncompressedAnims][0] = '\0';
+}

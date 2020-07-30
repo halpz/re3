@@ -33,14 +33,19 @@ class CPlayerPed;
 class CPickup
 {
 public:
-	ePickupType m_eType;
-	bool m_bRemoved;
-	uint16 m_nQuantity;
+	CVector m_vecPos;
+	uint32 m_nRevenue;
 	CObject *m_pObject;
+	CObject *m_pExtraObject;
+	uint16 m_nQuantity;
 	uint32 m_nTimer;
+	int16 m_nMoneySpeed;
 	int16 m_eModelIndex;
 	uint16 m_nIndex;
-	CVector m_vecPos;
+	char m_sTextKey[8];
+	ePickupType m_eType;
+	bool m_bRemoved;
+	uint8 m_effects;
 
 	CObject *GiveUsAPickUpObject(int32 handle);
 	bool Update(CPlayerPed *player, CVehicle *vehicle, int playerId);
@@ -71,6 +76,7 @@ class CPickups
 	static tPickupMessage aMessages[NUMPICKUPMESSAGES];
 public:
 	static int32 PlayerOnWeaponPickup;
+	static int32 CollectPickupBuffer;
 
 	static void Init();
 	static void Update();
@@ -79,7 +85,7 @@ public:
 	static void DoMoneyEffects(CEntity *ent);
 	static void DoMineEffects(CEntity *ent);
 	static void DoPickUpEffects(CEntity *ent);
-	static int32 GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quantity, uint32 rate = 0, bool highPriority = false, wchar* pText = nil);
+	static int32 GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quantity, uint32 rate = 0, bool highPriority = false, char* pText = nil);
 	static int32 GenerateNewOne_WeaponType(CVector pos, eWeaponType weaponType, uint8 type, uint32 quantity);
 	static void RemovePickUp(int32 pickupIndex);
 	static void RemoveAllFloatingPickups();

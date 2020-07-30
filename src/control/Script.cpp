@@ -80,6 +80,8 @@
 #include "World.h"
 #include "Zones.h"
 #include "main.h"
+#include "Ropes.h"
+#include "MBlur.h"
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #include <stdarg.h>
 #endif
@@ -12110,6 +12112,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		CVector pos = *(CVector*)&ScriptParams[0];
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + PICKUP_PLACEMENT_OFFSET;
+		CPickups::GetActualPickupIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
 		ScriptParams[0] = CPickups::GenerateNewOne(pos, MI_PICKUP_REVENUE, PICKUP_ASSET_REVENUE, ScriptParams[3], ScriptParams[4]);
 		StoreParameters(&m_nIp, 1);
 		return 0;
@@ -12790,7 +12793,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_CREATE_SWAT_ROPE:
 	{
 		CollectParameters(&m_nIp, 3);
-		debug("CREATE_SWAT_ROPE is not implemented\n");
+		CRopes::CreateRopeWithSwatComingDown(*(CVector*)&ScriptParams[0]);
 		return 0;
 	}
 	//case COMMAND_SET_FIRST_PERSON_CONTROL_CAMERA:
@@ -12902,10 +12905,12 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		CVector pos = *(CVector*)&ScriptParams[0];
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + PICKUP_PLACEMENT_OFFSET;
-		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
-		// TODO(MIAMI) - add text
+		char key[KEY_LENGTH_IN_SCRIPT];
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
+		// TheText.Get(key);
 		CPickups::GetActualPickupIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
-		ScriptParams[0] = CPickups::GenerateNewOne(pos, MI_PICKUP_PROPERTY, PICKUP_PROPERTY_LOCKED, 0, 0, false, text);
+		ScriptParams[0] = CPickups::GenerateNewOne(pos, MI_PICKUP_PROPERTY, PICKUP_PROPERTY_LOCKED, 0, 0, false, key);
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
@@ -12915,10 +12920,12 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		CVector pos = *(CVector*)&ScriptParams[0];
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + PICKUP_PLACEMENT_OFFSET;
-		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
-		// TODO(MIAMI) - add text
+		char key[KEY_LENGTH_IN_SCRIPT];
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
+		// TheText.Get(key);
 		CPickups::GetActualPickupIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
-		ScriptParams[0] = CPickups::GenerateNewOne(pos, MI_PICKUP_PROPERTY_FORSALE, PICKUP_PROPERTY_FORSALE, ScriptParams[3], 0, false, text);
+		ScriptParams[0] = CPickups::GenerateNewOne(pos, MI_PICKUP_PROPERTY_FORSALE, PICKUP_PROPERTY_FORSALE, ScriptParams[3], 0, false, key);
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
@@ -13021,7 +13028,11 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_SET_PLAYER_DRUNKENNESS:
 	{
 		CollectParameters(&m_nIp, 2);
-		debug("SET_PLAYER_DRUNKENNESS not implemented\n"); // TODO(MIAMI)
+		CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
+		pPlayerInfo->m_pPed->m_nDrunkenness = ScriptParams[1];
+		pPlayerInfo->m_pPed->m_nFadeDrunkenness = 0;
+		if (pPlayerInfo->m_pPed->m_nDrunkenness == 0)
+			CMBlur::ClearDrunkBlur();
 		return 0;
 	}
 	//case COMMAND_GET_PLAYER_DRUNKENNESS:
@@ -13421,7 +13432,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		char key[KEY_LENGTH_IN_SCRIPT];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
-		debug("LOAD_UNCOMPRESSED_ANIM not implemented\n"); // TODO(MIAMI)
+		CCutsceneMgr::LoadAnimationUncompressed(key);
 		return 0;
 	}
 	case COMMAND_WAS_CUTSCENE_SKIPPED:
@@ -13624,15 +13635,13 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_IS_PLAYER_IN_INFO_ZONE:
 	{
 		CollectParameters(&m_nIp, 1);
+		CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
 		char key[KEY_LENGTH_IN_SCRIPT];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
-		static bool bShowed = false;
-		if (!bShowed) {
-			debug("IS_PLAYER_IN_INFO_ZONE not implemented, default to FALSE\n");
-			bShowed = true;
-		}
-		UpdateCompareFlag(false);
+		CVector pos = pPlayerInfo->GetPos();
+		CZone *infoZone = CTheZones::FindInformationZoneForPosition(&pos);
+		UpdateCompareFlag(strncmp(key, infoZone->name, 8) == 0);
 		return 0;
 	}
 	case COMMAND_CLEAR_CHAR_ICE_CREAM_PURCHASE:
@@ -13828,7 +13837,19 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_CREATE_DUST_EFFECT_FOR_CUTSCENE_HELI:
 	{
 		CollectParameters(&m_nIp, 3);
-		debug("CREATE_DUST_EFFECT_FOR_CUTSCENE_HELI not implemented\n"); // TODO(MIAMI)
+		CObject *pHeli = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		bool found = false;
+		float waterLevel = -1000.0f;
+		CVector pos = pHeli->GetPosition();
+		float radius = *(float*)&ScriptParams[1];
+		float ground = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z, &found);
+		if (!CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, &waterLevel, false))
+			waterLevel = 0.0f;
+		if (waterLevel > ground)
+			ground = waterLevel;
+		if (ScriptParams[2] > 8)
+			ScriptParams[2] = 8;
+		CVehicle::HeliDustGenerate(pHeli, (pos.z - ground - 1.0f - radius) * 0.3 + radius, ground, ScriptParams[2]);
 		return 0;
 	}
 	case COMMAND_REGISTER_FIRE_LEVEL:

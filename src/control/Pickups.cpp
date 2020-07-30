@@ -30,6 +30,8 @@
 #include "Timer.h"
 #include "WaterLevel.h"
 #include "World.h"
+#include "Hud.h"
+#include "Messages.h"
 
 CPickup CPickups::aPickUps[NUMPICKUPS];
 int16 CPickups::NumMessages;
@@ -37,6 +39,7 @@ int32 CPickups::aPickUpsCollected[NUMCOLLECTEDPICKUPS];
 int16 CPickups::CollectedPickUpIndex;
 
 int32 CPickups::PlayerOnWeaponPickup;
+int32 CPickups::CollectPickupBuffer;
 
 // unused
 bool CPickups::bPickUpcamActivated;
@@ -70,6 +73,32 @@ uint8 aWeaponBlues[] = { 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
 0, 0, 255, 0, 255, 255, 0, 128, 255, 0, 255,
 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
 0, 128, 255, 0, 0 };
+
+void
+ModifyStringLabelForControlSetting(char *str)
+{
+	int len = (int)strlen(str);
+	if (len <= 2)
+		return;
+
+	if (str[len - 2] != '_')
+		return;
+
+	switch (CPad::GetPad(0)->Mode) {
+		case 0:
+		case 1:
+			str[len - 1] = 'L';
+			break;
+		case 2:
+			str[len - 1] = 'T';
+			break;
+		case 3:
+			str[len - 1] = 'C';
+			break;
+		default:
+			return;
+	}
+}
 
 void
 CPickup::RemoveKeepType()
@@ -162,6 +191,31 @@ bool
 CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 {
 	float waterLevel;
+
+	if (m_pObject) {
+		m_pObject->SetPosition(m_vecPos);
+		// TODO(Miami): Extra object
+	}
+	if (m_eType == PICKUP_ASSET_REVENUE) {
+		uint32 oldTimer = m_nTimer;
+		m_nTimer = CTimer::GetTimeInMilliseconds();
+		float calculatedRevenue;
+		if ((FindPlayerCoors() - m_vecPos).Magnitude() > 10.0) {
+			uint32 timePassed = CTimer::GetTimeInMilliseconds() - oldTimer;
+			calculatedRevenue = m_nRevenue + (timePassed * m_nMoneySpeed) * sq(1.f / 1200.f);
+		} else {
+			calculatedRevenue = m_nRevenue;
+		}
+		m_nRevenue = Min(calculatedRevenue, m_nQuantity);
+		// TODO(Miami): For pickup glow effect?
+		/*
+		if (calculatedRevenue < 10.0) {
+			m_pObject->m_nCostValue = 0;
+		} else {
+			m_pObject->m_nCostValue = calculatedRevenue;
+		}
+		*/
+	}
 
 	if (m_bRemoved) {
 		if (CTimer::GetTimeInMilliseconds() > m_nTimer) {
@@ -290,6 +344,32 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 				Remove();
 				DMAudio.PlayFrontEndSound(SOUND_PICKUP_MONEY, 0);
 				return true;
+			case PICKUP_ASSET_REVENUE:
+				CWorld::Players[CWorld::PlayerInFocus].m_nMoney += m_nRevenue;
+				m_nRevenue = 0;
+				DMAudio.PlayFrontEndSound(SOUND_PICKUP_MONEY, 0);
+				return false;
+			// TODO(Miami): Control flow
+			case PICKUP_PROPERTY_FORSALE:
+				ModifyStringLabelForControlSetting(m_sTextKey);
+				CMessages::InsertNumberInString(TheText.Get(m_sTextKey), m_nQuantity,
+					0, 0, 0, 0, 0, gUString);
+				if (!CHud::IsHelpMessageBeingDisplayed())
+					CHud::SetHelpMessage(gUString, false); // 0, 0, 0);
+				if (CPickups::CollectPickupBuffer == 0)
+					return false;
+				if (CTheScripts::IsPlayerOnAMission()) {
+					CHud::SetHelpMessage(TheText.Get("PROP_2"), true); // , false);
+				} else {
+					if (CWorld::Players[CWorld::PlayerInFocus].m_nMoney >= m_nQuantity) {
+						CWorld::Players[CWorld::PlayerInFocus].m_nMoney -= m_nQuantity;
+						CHud::SetHelpMessage(nil, true); //, false);
+						Remove();
+						return true;
+					}
+					CHud::SetHelpMessage(TheText.Get("PROP_1"), true); //, false);
+				}
+				return false;
 			default:
 				break;
 			}
@@ -528,12 +608,12 @@ CPickups::RemovePickUp(int32 pickupIndex)
 }
 
 int32
-CPickups::GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quantity, uint32 rate, bool highPriority, wchar* pText)
+CPickups::GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quantity, uint32 rate, bool highPriority, char* pText)
 {
 	bool bFreeFound = false;
 	int32 slot = 0;
 
-	if (type == PICKUP_FLOATINGPACKAGE || type == PICKUP_NAUTICAL_MINE_INACTIVE) {
+	if (type == PICKUP_FLOATINGPACKAGE || type == PICKUP_NAUTICAL_MINE_INACTIVE || highPriority) {
 		for (slot = NUMPICKUPS-1; slot >= 0; slot--) {
 			if (aPickUps[slot].m_eType == PICKUP_NONE) {
 				bFreeFound = true;
@@ -556,7 +636,7 @@ CPickups::GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quan
 
 		if (slot >= NUMGENERALPICKUPS) {
 			for (slot = 0; slot < NUMGENERALPICKUPS; slot++) {
-				if (aPickUps[slot].m_eType == PICKUP_ONCE_TIMEOUT) break;
+				if (aPickUps[slot].m_eType == PICKUP_ONCE_TIMEOUT || aPickUps[slot].m_eType == PICKUP_ONCE_TIMEOUT_SLOW) break;
 			}
 
 			if (slot >= NUMGENERALPICKUPS) return -1;
@@ -568,8 +648,13 @@ CPickups::GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quan
 	aPickUps[slot].m_eType = (ePickupType)type;
 	aPickUps[slot].m_bRemoved = false;
 	aPickUps[slot].m_nQuantity = quantity;
+	aPickUps[slot].m_nMoneySpeed = rate;
+	aPickUps[slot].m_nRevenue = 0;
+	aPickUps[slot].m_nTimer = CTimer::GetTimeInMilliseconds();
 	if (type == PICKUP_ONCE_TIMEOUT)
 		aPickUps[slot].m_nTimer = CTimer::GetTimeInMilliseconds() + 20000;
+	else if (type == PICKUP_ONCE_TIMEOUT_SLOW)
+		aPickUps[slot].m_nTimer = CTimer::GetTimeInMilliseconds() + 120000;
 	else if (type == PICKUP_MONEY)
 		aPickUps[slot].m_nTimer = CTimer::GetTimeInMilliseconds() + 30000;
 	else if (type == PICKUP_MINE_INACTIVE || type == PICKUP_MINE_ARMED) {
@@ -580,6 +665,11 @@ CPickups::GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quan
 		aPickUps[slot].m_nTimer = CTimer::GetTimeInMilliseconds() + 1500;
 	}
 	aPickUps[slot].m_eModelIndex = modelIndex;
+	if (pText)
+		strncpy(aPickUps[slot].m_sTextKey, pText, 8);
+	else
+		aPickUps[slot].m_sTextKey[0] = '\0';
+
 	aPickUps[slot].m_vecPos = pos;
 	aPickUps[slot].m_pObject = aPickUps[slot].GiveUsAPickUpObject(-1);
 	if (aPickUps[slot].m_pObject)
@@ -664,6 +754,16 @@ CPickups::Update()
 		}
 	}
 #endif
+	if (CPad::GetPad(0)->CollectPickupJustDown()) {
+		CollectPickupBuffer = 6;
+	} else {
+		CollectPickupBuffer = Max(0, CollectPickupBuffer - 1);
+	}
+
+	if (PlayerOnWeaponPickup) {
+		PlayerOnWeaponPickup = Max(0, PlayerOnWeaponPickup - 1);
+	}
+
 #define PICKUPS_FRAME_SPAN (6)
 #ifdef FIX_BUGS
 	for (uint32 i = NUMGENERALPICKUPS * (CTimer::GetFrameCounter() % PICKUPS_FRAME_SPAN) / PICKUPS_FRAME_SPAN; i < NUMGENERALPICKUPS * (CTimer::GetFrameCounter() % PICKUPS_FRAME_SPAN + 1) / PICKUPS_FRAME_SPAN; i++) {

@@ -2644,6 +2644,38 @@ bool CPad::TargetJustDown(void)
 	return false;
 }
 
+bool CPad::CollectPickupJustDown(void)
+{
+	if ( ArePlayerControlsDisabled() )
+		return false;
+
+	switch (CURMODE)
+	{
+		case 0:
+		case 1:
+		{
+			return !!(NewState.LeftShoulder1 && !OldState.LeftShoulder1);
+
+			break;
+		}
+		case 2:
+		{
+			return !!(NewState.Triangle && !OldState.Triangle);
+
+			break;
+		}
+
+		case 3:
+		{
+			return !!(NewState.Circle && !OldState.Circle);
+
+			break;
+		}
+	}
+
+	return false;
+}
+
 bool CPad::DuckJustDown(void)
 {
 	if (ArePlayerControlsDisabled())

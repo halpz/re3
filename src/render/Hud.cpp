@@ -1708,6 +1708,12 @@ void CHud::SetHelpMessage(wchar *message, bool quick)
 	}
 }
 
+bool CHud::IsHelpMessageBeingDisplayed(void)
+{
+	return m_HelpMessageState != 0;
+}
+
+
 void CHud::SetMessage(wchar *message)
 {
 	int i = 0;

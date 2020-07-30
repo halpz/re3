@@ -12,7 +12,7 @@
 #include "AnimManager.h"
 #include "Streaming.h"
 
-//--MIAMI: code done (except for pointless TODO)
+//--MIAMI: file done
 
 CAnimBlock CAnimManager::ms_aAnimBlocks[NUMANIMBLOCKS];
 CAnimBlendHierarchy CAnimManager::ms_aAnimations[NUMANIMATIONS];
@@ -1276,7 +1276,7 @@ CAnimManager::LoadAnimFile(const char *filename)
 	RwStreamClose(stream, nil);
 }
 
-//--MIAMI: done (except maybe implement some unimplemented compression?)
+//--MIAMI: done
 void
 CAnimManager::LoadAnimFile(RwStream *stream, bool compress, char (*somename)[32])
 {
@@ -1323,7 +1323,14 @@ CAnimManager::LoadAnimFile(RwStream *stream, bool compress, char (*somename)[32]
 		RwStreamRead(stream, buf, name.size);
 		hier->SetName(buf);
 
-		// TODO(MIAMI)? some unused crap here
+		// Unimplemented uncompressed anim thing
+		if (somename) {
+			for (int i = 0; somename[i][0]; i++) {
+				if (!CGeneral::faststricmp(somename[i], hier->name))
+					debug("Loading %s uncompressed\n", hier->name);
+			}
+		}
+
 		hier->compressed = false;
 		hier->compressed2 = false;
 
@@ -1357,6 +1364,9 @@ CAnimManager::LoadAnimFile(RwStream *stream, bool compress, char (*somename)[32]
 			if(strncmp(info.ident, "KR00", 4) == 0){
 				seq->SetNumFrames(numFrames, false, false);
 				KeyFrame *kf = seq->GetKeyFrame(0);
+				if (strstr(seq->name, "L Toe"))
+					debug("anim %s has toe keyframes\n", hier->name); // , seq->name);
+
 				for(l = 0; l < numFrames; l++, kf++){
 					RwStreamRead(stream, buf, 0x14);
 					kf->rotation.x = -fbuf[0];
@@ -1368,6 +1378,9 @@ CAnimManager::LoadAnimFile(RwStream *stream, bool compress, char (*somename)[32]
 			}else if(strncmp(info.ident, "KRT0", 4) == 0){
 				seq->SetNumFrames(numFrames, true, false);
 				KeyFrameTrans *kf = (KeyFrameTrans*)seq->GetKeyFrame(0);
+				if (strstr(seq->name, "L Toe"))
+					debug("anim %s has toe keyframes\n", hier->name); // , seq->name);
+
 				for(l = 0; l < numFrames; l++, kf++){
 					RwStreamRead(stream, buf, 0x20);
 					kf->rotation.x = -fbuf[0];
@@ -1382,6 +1395,9 @@ CAnimManager::LoadAnimFile(RwStream *stream, bool compress, char (*somename)[32]
 			}else if(strncmp(info.ident, "KRTS", 4) == 0){
 				seq->SetNumFrames(numFrames, true, false);
 				KeyFrameTrans *kf = (KeyFrameTrans*)seq->GetKeyFrame(0);
+				if (strstr(seq->name, "L Toe"))
+					debug("anim %s has toe keyframes\n", hier->name); // , seq->name);
+
 				for(l = 0; l < numFrames; l++, kf++){
 					RwStreamRead(stream, buf, 0x2C);
 					kf->rotation.x = -fbuf[0];

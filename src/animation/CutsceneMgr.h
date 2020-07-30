@@ -17,7 +17,10 @@ class CCutsceneMgr
 	static bool ms_animLoaded;
 	static bool ms_useLodMultiplier;
 
+	static bool ms_camLoaded;
 	static char ms_cutsceneName[CUTSCENENAMESIZE];
+	static char ms_uncompressedAnims[8][32];
+	static uint32 ms_numUncompressedAnims;
 	static CAnimBlendAssocGroup ms_cutsceneAssociations;
 	static CVector ms_cutsceneOffset;
 	static float ms_cutsceneTimer;
@@ -49,5 +52,6 @@ public:
 	static CCutsceneHead *AddCutsceneHead(CObject *pObject, int modelId);
 	static CCutsceneObject *CreateCutsceneObject(int modelId);
 	static void DeleteCutsceneData(void);
+	static void LoadAnimationUncompressed(char const*);
 	static void Update(void);
 };
