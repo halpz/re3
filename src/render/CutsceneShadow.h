@@ -14,12 +14,10 @@ public:
 
 	CShadowCamera m_Camera;
 	bool          m_bResample;
-	char _pad0[3];
 	CShadowCamera m_ResampleCamera;
 	int32         m_nBlurPasses;
 	CShadowCamera m_BlurCamera;
 	bool          m_bGradient;
-	char _pad1[3];
 	CShadowCamera m_GradientCamera;
 	
 	union
@@ -29,7 +27,7 @@ public:
 		RpClump  *m_pClump;
 	};
 	
-	int      m_nRwObjectType;
+	int32    m_nRwObjectType;
 	RpLight *m_pLight;
 	RwSphere m_BoundingSphere;
 	RwSphere m_BaseSphere;
