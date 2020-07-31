@@ -66,39 +66,39 @@ CShadows::Init(void)
 	int32 slut = CTxdStore::FindTxdSlot("particle");
 	CTxdStore::SetCurrentTxd(slut);
 
-	gpShadowCarTex        = RwTextureRead("shad_car",     NULL);
-	gpShadowPedTex        = RwTextureRead("shad_ped",     NULL);
-	gpShadowHeliTex       = RwTextureRead("shad_heli",    NULL);
-	gpShadowBikeTex       = RwTextureRead("shad_bike",    NULL);
-	gpShadowBaronTex      = RwTextureRead("shad_rcbaron", NULL);
-	gpShadowExplosionTex  = RwTextureRead("shad_exp",     NULL);
-	gpShadowHeadLightsTex = RwTextureRead("headlight",    NULL);
-	gpOutline1Tex         = RwTextureRead("outline_64",   NULL);
-	gpOutline2Tex         = RwTextureRead("outline2_64",  NULL);
-	gpOutline3Tex         = RwTextureRead("outline3_64",  NULL);
-	gpBloodPoolTex        = RwTextureRead("bloodpool_64", NULL);
-	gpReflectionTex       = RwTextureRead("reflection01", NULL);
-	gpWalkDontTex         = RwTextureRead("walk_dont",    NULL);
-	gpCrackedGlassTex     = RwTextureRead("wincrack_32",  NULL);
-	gpPostShadowTex       = RwTextureRead("lamp_shad_64", NULL);
+	gpShadowCarTex        = RwTextureRead("shad_car",     nil);
+	gpShadowPedTex        = RwTextureRead("shad_ped",     nil);
+	gpShadowHeliTex       = RwTextureRead("shad_heli",    nil);
+	gpShadowBikeTex       = RwTextureRead("shad_bike",    nil);
+	gpShadowBaronTex      = RwTextureRead("shad_rcbaron", nil);
+	gpShadowExplosionTex  = RwTextureRead("shad_exp",     nil);
+	gpShadowHeadLightsTex = RwTextureRead("headlight",    nil);
+	gpOutline1Tex         = RwTextureRead("outline_64",   nil);
+	gpOutline2Tex         = RwTextureRead("outline2_64",  nil);
+	gpOutline3Tex         = RwTextureRead("outline3_64",  nil);
+	gpBloodPoolTex        = RwTextureRead("bloodpool_64", nil);
+	gpReflectionTex       = RwTextureRead("reflection01", nil);
+	gpWalkDontTex         = RwTextureRead("walk_dont",    nil);
+	gpCrackedGlassTex     = RwTextureRead("wincrack_32",  nil);
+	gpPostShadowTex       = RwTextureRead("lamp_shad_64", nil);
 
 	CTxdStore::PopCurrentTxd();
 
-	ASSERT(gpShadowCarTex != NULL);
-	ASSERT(gpShadowPedTex != NULL);
-	ASSERT(gpShadowHeliTex != NULL);
-	ASSERT(gpShadowBikeTex != NULL);
-	ASSERT(gpShadowBaronTex != NULL);
-	ASSERT(gpShadowExplosionTex != NULL);
-	ASSERT(gpShadowHeadLightsTex != NULL);
-	ASSERT(gpOutline1Tex != NULL);
-	ASSERT(gpOutline2Tex != NULL);
-	ASSERT(gpOutline3Tex != NULL);
-	ASSERT(gpBloodPoolTex != NULL);
-	ASSERT(gpReflectionTex != NULL);
-	ASSERT(gpWalkDontTex != NULL);
-	ASSERT(gpCrackedGlassTex != NULL);
-	ASSERT(gpPostShadowTex != NULL);
+	ASSERT(gpShadowCarTex != nil);
+	ASSERT(gpShadowPedTex != nil);
+	ASSERT(gpShadowHeliTex != nil);
+	ASSERT(gpShadowBikeTex != nil);
+	ASSERT(gpShadowBaronTex != nil);
+	ASSERT(gpShadowExplosionTex != nil);
+	ASSERT(gpShadowHeadLightsTex != nil);
+	ASSERT(gpOutline1Tex != nil);
+	ASSERT(gpOutline2Tex != nil);
+	ASSERT(gpOutline3Tex != nil);
+	ASSERT(gpBloodPoolTex != nil);
+	ASSERT(gpReflectionTex != nil);
+	ASSERT(gpWalkDontTex != nil);
+	ASSERT(gpCrackedGlassTex != nil);
+	ASSERT(gpPostShadowTex != nil);
 
 
 	ShadowIndexList[0] = 0;
@@ -137,7 +137,7 @@ CShadows::Init(void)
 	for ( int32 i = 0; i < MAX_STATICSHADOWS; i++ )
 	{
 		aStaticShadows[i].m_nId = 0;
-		aStaticShadows[i].m_pPolyBunch = NULL;
+		aStaticShadows[i].m_pPolyBunch = nil;
 	}
 
 	pEmptyBunchList = &aPolyBunches[0];
@@ -145,7 +145,7 @@ CShadows::Init(void)
 	for ( int32 i = 0; i < MAX_POLYBUNCHES; i++ )
 	{
 		if ( i == MAX_POLYBUNCHES - 1 )
-			aPolyBunches[i].m_pNext = NULL;
+			aPolyBunches[i].m_pNext = nil;
 		else
 			aPolyBunches[i].m_pNext = &aPolyBunches[i + 1];
 	}
@@ -159,21 +159,21 @@ CShadows::Init(void)
 void
 CShadows::Shutdown(void)
 {
-	ASSERT(gpShadowCarTex != NULL);
-	ASSERT(gpShadowPedTex != NULL);
-	ASSERT(gpShadowHeliTex != NULL);
-	ASSERT(gpShadowBikeTex != NULL);
-	ASSERT(gpShadowBaronTex != NULL);
-	ASSERT(gpShadowExplosionTex != NULL);
-	ASSERT(gpShadowHeadLightsTex != NULL);
-	ASSERT(gpOutline1Tex != NULL);
-	ASSERT(gpOutline2Tex != NULL);
-	ASSERT(gpOutline3Tex != NULL);
-	ASSERT(gpBloodPoolTex != NULL);
-	ASSERT(gpReflectionTex != NULL);
-	ASSERT(gpWalkDontTex != NULL);
-	ASSERT(gpCrackedGlassTex != NULL);
-	ASSERT(gpPostShadowTex != NULL);
+	ASSERT(gpShadowCarTex != nil);
+	ASSERT(gpShadowPedTex != nil);
+	ASSERT(gpShadowHeliTex != nil);
+	ASSERT(gpShadowBikeTex != nil);
+	ASSERT(gpShadowBaronTex != nil);
+	ASSERT(gpShadowExplosionTex != nil);
+	ASSERT(gpShadowHeadLightsTex != nil);
+	ASSERT(gpOutline1Tex != nil);
+	ASSERT(gpOutline2Tex != nil);
+	ASSERT(gpOutline3Tex != nil);
+	ASSERT(gpBloodPoolTex != nil);
+	ASSERT(gpReflectionTex != nil);
+	ASSERT(gpWalkDontTex != nil);
+	ASSERT(gpCrackedGlassTex != nil);
+	ASSERT(gpPostShadowTex != nil);
 
 	RwTextureDestroy(gpShadowCarTex);
 	RwTextureDestroy(gpShadowPedTex);
@@ -198,8 +198,8 @@ CShadows::AddPermanentShadow(uint8 ShadowType, RwTexture *pTexture, CVector *pPo
 							int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue,
 							float fZDistance, uint32 nTime, float fScale)
 {
-	ASSERT(pTexture != NULL);
-	ASSERT(pPosn != NULL);
+	ASSERT(pTexture != nil);
+	ASSERT(pPosn != nil);
 
 
 	// find free slot
@@ -232,7 +232,7 @@ CShadows::StoreStaticShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, C
 							int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue,
 							float fZDistance, float fScale, float fDrawDistance, bool bTempShadow, float fUpDistance)
 {
-	ASSERT(pPosn != NULL);
+	ASSERT(pPosn != nil);
 
 	float fDistToCamSqr = (*pPosn - TheCamera.GetPosition()).MagnitudeSqr2D();
 
@@ -258,7 +258,7 @@ CShadows::StoreStaticShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, C
 		int32 nSlot;
 
 		nSlot = 0;
-		while ( nSlot < MAX_STATICSHADOWS && !(nID == aStaticShadows[nSlot].m_nId && aStaticShadows[nSlot].m_pPolyBunch != NULL) )
+		while ( nSlot < MAX_STATICSHADOWS && !(nID == aStaticShadows[nSlot].m_nId && aStaticShadows[nSlot].m_pPolyBunch != nil) )
 			nSlot++;
 
 		if ( nSlot < MAX_STATICSHADOWS )
@@ -325,13 +325,13 @@ CShadows::StoreStaticShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, C
 
 				GeneratePolysForStaticShadow(nSlot);
 				
-				return aStaticShadows[nSlot].m_pPolyBunch != NULL;
+				return aStaticShadows[nSlot].m_pPolyBunch != nil;
 			}
 		}
 		else
 		{
 			nSlot = 0;
-			while ( nSlot < MAX_STATICSHADOWS && aStaticShadows[nSlot].m_pPolyBunch != NULL )
+			while ( nSlot < MAX_STATICSHADOWS && aStaticShadows[nSlot].m_pPolyBunch != nil )
 				nSlot++;
 
 			if ( nSlot != MAX_STATICSHADOWS )
@@ -356,7 +356,7 @@ CShadows::StoreStaticShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, C
 
 				GeneratePolysForStaticShadow(nSlot);
 				
-				return aStaticShadows[nSlot].m_pPolyBunch != NULL;
+				return aStaticShadows[nSlot].m_pPolyBunch != nil;
 			}
 		}
 	}
@@ -369,7 +369,7 @@ CShadows::StoreShadowToBeRendered(uint8 ShadowTexture, CVector *pPosn,
 								float fFrontX, float fFrontY, float fSideX, float fSideY,
 								int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue)
 {
-	ASSERT(pPosn != NULL);
+	ASSERT(pPosn != nil);
 
 	switch ( ShadowTexture )
 	{
@@ -383,7 +383,7 @@ CShadows::StoreShadowToBeRendered(uint8 ShadowTexture, CVector *pPosn,
 			StoreShadowToBeRendered(SHADOWTYPE_DARK, gpShadowCarTex, pPosn,
 					fFrontX, fFrontY, fSideX, fSideY,
 					nIntensity, nRed, nGreen, nBlue,
-					15.0f, false, 1.0f, NULL, false);
+					15.0f, false, 1.0f, nil, false);
 
 			break;
 		}
@@ -393,7 +393,7 @@ CShadows::StoreShadowToBeRendered(uint8 ShadowTexture, CVector *pPosn,
 			StoreShadowToBeRendered(SHADOWTYPE_DARK, gpShadowPedTex, pPosn,
 					fFrontX, fFrontY, fSideX, fSideY,
 					nIntensity, nRed, nGreen, nBlue,
-					15.0f, false, 1.0f, NULL, false);
+					15.0f, false, 1.0f, nil, false);
 
 			break;
 		}
@@ -403,7 +403,7 @@ CShadows::StoreShadowToBeRendered(uint8 ShadowTexture, CVector *pPosn,
 			StoreShadowToBeRendered(SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, pPosn,
 					fFrontX, fFrontY, fSideX, fSideY,
 					nIntensity, nRed, nGreen, nBlue,
-					15.0f, false, 1.0f, NULL, false);
+					15.0f, false, 1.0f, nil, false);
 
 			break;
 		}
@@ -413,7 +413,7 @@ CShadows::StoreShadowToBeRendered(uint8 ShadowTexture, CVector *pPosn,
 			StoreShadowToBeRendered(SHADOWTYPE_DARK, gpShadowHeliTex, pPosn,
 					fFrontX, fFrontY, fSideX, fSideY,
 					nIntensity, nRed, nGreen, nBlue,
-					15.0f, false, 1.0f, NULL, false);
+					15.0f, false, 1.0f, nil, false);
 
 			break;
 		}
@@ -423,7 +423,7 @@ CShadows::StoreShadowToBeRendered(uint8 ShadowTexture, CVector *pPosn,
 			StoreShadowToBeRendered(SHADOWTYPE_ADDITIVE, gpShadowHeadLightsTex, pPosn,
 					fFrontX, fFrontY, fSideX, fSideY,
 					nIntensity, nRed, nGreen, nBlue,
-					15.0f, false, 1.0f, NULL, false);
+					15.0f, false, 1.0f, nil, false);
 
 			break;
 		}
@@ -433,7 +433,7 @@ CShadows::StoreShadowToBeRendered(uint8 ShadowTexture, CVector *pPosn,
 			StoreShadowToBeRendered(SHADOWTYPE_DARK, gpBloodPoolTex, pPosn,
 					fFrontX, fFrontY, fSideX, fSideY,
 					nIntensity, nRed, 150, 0,
-					15.0f, false, 1.0f, NULL, false);
+					15.0f, false, 1.0f, nil, false);
 
 			break;
 		}
@@ -448,8 +448,8 @@ CShadows::StoreShadowToBeRendered(uint8 ShadowType, RwTexture *pTexture, CVector
 								int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue,
 								float fZDistance, bool bDrawOnWater, float fScale, CCutsceneShadow *pShadow, bool bDrawOnBuildings)
 {
-	ASSERT(pTexture != NULL);
-	ASSERT(pPosn != NULL);
+	ASSERT(pTexture != nil);
+	ASSERT(pPosn != nil);
 
 	if ( ShadowsStoredToBeRendered < MAX_STOREDSHADOWS )
 	{
@@ -478,7 +478,7 @@ CShadows::StoreShadowToBeRendered(uint8 ShadowType, RwTexture *pTexture, CVector
 void
 CShadows::StoreShadowForVehicle(CVehicle *pCar, VEH_SHD_TYPE type)
 {
-	ASSERT(pCar != NULL);
+	ASSERT(pCar != nil);
 
 	if ( CTimeCycle::GetShadowStrength() != 0 )
 	{
@@ -672,7 +672,7 @@ CShadows::StoreShadowForVehicle(CVehicle *pCar, VEH_SHD_TYPE type)
 						sidex  * (fVehicleWidth  / 2),
 						sidey  * (fVehicleWidth  / 2),
 						nColorStrength, nColorStrength, nColorStrength, nColorStrength,
-						4.5f, false, 1.0f, NULL, bDrawOnBuildings);
+						4.5f, false, 1.0f, nil, bDrawOnBuildings);
 				}
 				else
 				{
@@ -682,7 +682,7 @@ CShadows::StoreShadowForVehicle(CVehicle *pCar, VEH_SHD_TYPE type)
 						-sidex * (fVehicleWidth  / 2),
 						-sidey * (fVehicleWidth  / 2),
 						nColorStrength, nColorStrength, nColorStrength, nColorStrength,
-						4.5f, false, 1.0f, NULL, bDrawOnBuildings);
+						4.5f, false, 1.0f, nil, bDrawOnBuildings);
 				}
 			}
 			else
@@ -717,8 +717,8 @@ CShadows::StoreCarLightShadow(CAutomobile *pCar, int32 nID, RwTexture *pTexture,
 							float fFrontX, float fFrontY, float fSideX, float fSideY, uint8 nRed, uint8 nGreen, uint8 nBlue,
 							float fMaxViewAngle)
 {
-	ASSERT(pCar != NULL);
-	ASSERT(pPosn != NULL);
+	ASSERT(pCar != nil);
+	ASSERT(pPosn != nil);
 
 	float fDistToCamSqr = (*pPosn - TheCamera.GetPosition()).MagnitudeSqr2D();
 
@@ -753,7 +753,7 @@ CShadows::StoreCarLightShadow(CAutomobile *pCar, int32 nID, RwTexture *pTexture,
 						fSideX, fSideY,
 						128, nRed, nGreen, nBlue,
 						6.0f, false, 1.0f,
-						NULL, pCar == FindPlayerVehicle());
+						nil, pCar == FindPlayerVehicle());
 			}
 			else
 			{
@@ -774,11 +774,11 @@ void
 StoreShadowForCutscenePedObject(CPed *pObject, float fDisplacementX, float fDisplacementY,
 								float fFrontX, float fFrontY, float fSideX, float fSideY)
 {
-	ASSERT(pObject != NULL);
+	ASSERT(pObject != nil);
 	
 	CCutsceneShadow *shadow = pObject->m_pRTShadow;
 	
-	if ( shadow == NULL )
+	if ( shadow == nil )
 		return;
 	
 	if ( !shadow->IsInitialized() )
@@ -845,7 +845,7 @@ void
 CShadows::StoreShadowForPed(CPed *pPed, float fDisplacementX, float fDisplacementY,
 							float fFrontX, float fFrontY, float fSideX, float fSideY)
 {
-	ASSERT(pPed != NULL);
+	ASSERT(pPed != nil);
 
 	if ( pPed->bIsVisible )
 	{
@@ -879,7 +879,7 @@ void
 CShadows::StoreShadowForPedObject(CEntity *pPedObject, float fDisplacementX, float fDisplacementY,
 								float fFrontX, float fFrontY, float fSideX, float fSideY)
 {	
-	ASSERT(pPedObject != NULL);
+	ASSERT(pPedObject != nil);
 
 	CVector PedPos = pPedObject->GetPosition();
 
@@ -910,7 +910,7 @@ CShadows::StoreShadowForPedObject(CEntity *pPedObject, float fDisplacementX, flo
 					fFrontX, fFrontY,
 					fSideX, fSideY,
 					nColorStrength, nColorStrength, nColorStrength, nColorStrength,
-					4.0f, false, 1.0f, NULL, pPedObject == FindPlayerPed());
+					4.0f, false, 1.0f, nil, pPedObject == FindPlayerPed());
 		}
 	}
 }
@@ -920,11 +920,11 @@ void
 CShadows::StoreShadowForCutscenePedObject(CCutsceneObject *pObject, float fDisplacementX, float fDisplacementY,
 								float fFrontX, float fFrontY, float fSideX, float fSideY)
 {
-	ASSERT(pObject != NULL);
+	ASSERT(pObject != nil);
 	
 	CCutsceneShadow *shadow = pObject->m_pShadow;
 	
-	if ( shadow == NULL )
+	if ( shadow == nil )
 		return;
 	
 	if ( !shadow->IsInitialized() )
@@ -988,7 +988,7 @@ CShadows::StoreShadowForCutscenePedObject(CCutsceneObject *pObject, float fDispl
 void
 CShadows::StoreShadowForTree(CEntity *pTree)
 {
-	ASSERT(pTree != NULL);
+	ASSERT(pTree != nil);
 }
 
 
@@ -996,7 +996,7 @@ void
 CShadows::StoreShadowForPole(CEntity *pPole, float fOffsetX, float fOffsetY, float fOffsetZ,
 								float fPoleHeight, float fPoleWidth, uint32 nID)
 {
-	ASSERT(pPole != NULL);
+	ASSERT(pPole != nil);
 
 	if ( CTimeCycle::GetShadowStrength() != 0 )
 	{
@@ -1073,7 +1073,7 @@ CShadows::RenderStoredShadows(void)
 		{
 			SetRenderModeForShadowType(asShadowsStored[i].m_ShadowType);
 
-			ASSERT(asShadowsStored[i].m_pTexture != NULL);
+			ASSERT(asShadowsStored[i].m_pTexture != nil);
 
 			RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(asShadowsStored[i].m_pTexture));
 
@@ -1105,7 +1105,7 @@ CShadows::RenderStoredShadows(void)
 						{
 							CSector *pCurSector = CWorld::GetSector(x, y);
 
-							ASSERT(pCurSector != NULL);
+							ASSERT(pCurSector != nil);
 							
 							if ( asShadowsStored[j].m_pCutsceneShadow )
 							{
@@ -1123,7 +1123,7 @@ CShadows::RenderStoredShadows(void)
 										asShadowsStored[j].m_nBlue,
 										asShadowsStored[j].m_fZDistance,
 										asShadowsStored[j].m_fScale,
-										NULL,
+										nil,
 										asShadowsStored[j].m_pCutsceneShadow);
 	
 								CastCutsceneShadowSectorList(pCurSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP],
@@ -1140,7 +1140,7 @@ CShadows::RenderStoredShadows(void)
 										asShadowsStored[j].m_nBlue,
 										asShadowsStored[j].m_fZDistance,
 										asShadowsStored[j].m_fScale,
-										NULL,
+										nil,
 										asShadowsStored[j].m_pCutsceneShadow);
 							}
 							else if ( asShadowsStored[j].m_nFlags.bDrawOnBuildings )
@@ -1159,7 +1159,7 @@ CShadows::RenderStoredShadows(void)
 										asShadowsStored[j].m_nBlue,
 										asShadowsStored[j].m_fZDistance,
 										asShadowsStored[j].m_fScale,
-										NULL);
+										nil);
 	
 								CastPlayerShadowSectorList(pCurSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP],
 										fStartX, fStartY,
@@ -1175,7 +1175,7 @@ CShadows::RenderStoredShadows(void)
 										asShadowsStored[j].m_nBlue,
 										asShadowsStored[j].m_fZDistance,
 										asShadowsStored[j].m_fScale,
-										NULL);
+										nil);
 							}
 							else
 							{
@@ -1193,7 +1193,7 @@ CShadows::RenderStoredShadows(void)
 										asShadowsStored[j].m_nBlue,
 										asShadowsStored[j].m_fZDistance,
 										asShadowsStored[j].m_fScale,
-										NULL);
+										nil);
 	
 								CastShadowSectorList(pCurSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP],
 										fStartX, fStartY,
@@ -1209,7 +1209,7 @@ CShadows::RenderStoredShadows(void)
 										asShadowsStored[j].m_nBlue,
 										asShadowsStored[j].m_fZDistance,
 										asShadowsStored[j].m_fScale,
-										NULL);
+										nil);
 							}
 						}
 					}
@@ -1254,19 +1254,19 @@ CShadows::RenderStaticShadows(void)
 			// optimization trick, render all shadows with same renderstate and texture
 			for ( int32 j = i; j < MAX_STATICSHADOWS; j++ )
 			{
-				if ( aStaticShadows[j].m_pPolyBunch != NULL
+				if ( aStaticShadows[j].m_pPolyBunch != nil
 						&& aStaticShadows[i].m_nType    == aStaticShadows[j].m_nType
 						&& aStaticShadows[i].m_pTexture == aStaticShadows[j].m_pTexture )
 				{
-					for ( CPolyBunch *bunch = aStaticShadows[j].m_pPolyBunch; bunch != NULL; bunch = bunch->m_pNext )
+					for ( CPolyBunch *bunch = aStaticShadows[j].m_pPolyBunch; bunch != nil; bunch = bunch->m_pNext )
 					{
 						RwImVertexIndex *pIndexes;
 						RwIm3DVertex *pVerts;
 
 						RenderBuffer::StartStoring(3 * (bunch->m_nNumVerts - 2), bunch->m_nNumVerts, &pIndexes, &pVerts);
 
-						ASSERT(pIndexes != NULL);
-						ASSERT(pVerts != NULL);
+						ASSERT(pIndexes != nil);
+						ASSERT(pVerts != nil);
 
 						for ( int32 k = 0; k < bunch->m_nNumVerts; k++ )
 						{
@@ -1326,7 +1326,7 @@ CShadows::GeneratePolysForStaticShadow(int16 nStaticShadowID)
 		{
 			CSector *pCurSector = CWorld::GetSector(x, y);
 
-			ASSERT(pCurSector != NULL);
+			ASSERT(pCurSector != nil);
 
 			CastShadowSectorList(pCurSector->m_lists[ENTITYLIST_BUILDINGS],
 					fStartX, fStartY,
@@ -1364,19 +1364,19 @@ CShadows::CastShadowSectorList(CPtrList &PtrList, float fStartX, float fStartY, 
 								int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue,
 								float fZDistance, float fScale, CPolyBunch **ppPolyBunch)
 {
-	ASSERT(pPosn != NULL);
+	ASSERT(pPosn != nil);
 
 	CPtrNode *pNode = PtrList.first;
 
 	CRect Bound;
 
-	while ( pNode != NULL )
+	while ( pNode != nil )
 	{
 		CEntity *pEntity = (CEntity *)pNode->item;
 		uint16 nScanCode = pEntity->m_scanCode;
 		pNode = pNode->next;
 
-		ASSERT( pEntity != NULL );
+		ASSERT( pEntity != nil );
 
 		if ( nScanCode != CWorld::GetCurrentScanCode() )
 		{
@@ -1419,19 +1419,19 @@ CShadows::CastPlayerShadowSectorList(CPtrList &PtrList, float fStartX, float fSt
 								int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue,
 								float fZDistance, float fScale, CPolyBunch **ppPolyBunch)
 {
-	ASSERT(pPosn != NULL);
+	ASSERT(pPosn != nil);
 
 	CPtrNode *pNode = PtrList.first;
 
 	CRect Bound;
 
-	while ( pNode != NULL )
+	while ( pNode != nil )
 	{
 		CEntity *pEntity = (CEntity *)pNode->item;
 		uint16 nScanCode = pEntity->m_scanCode;
 		pNode = pNode->next;
 
-		ASSERT( pEntity != NULL );
+		ASSERT( pEntity != nil );
 
 		if ( nScanCode != CWorld::GetCurrentScanCode() )
 		{
@@ -1474,20 +1474,20 @@ CShadows::CastCutsceneShadowSectorList(CPtrList &PtrList, float fStartX, float f
 								int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue,
 								float fZDistance, float fScale, CPolyBunch **ppPolyBunch, CCutsceneShadow *pShadow)
 {
-	ASSERT(pPosn != NULL);
-	ASSERT(pShadow != NULL);
+	ASSERT(pPosn != nil);
+	ASSERT(pShadow != nil);
 	
 	CPtrNode *pNode = PtrList.first;
 
 	CRect Bound;
 
-	while ( pNode != NULL )
+	while ( pNode != nil )
 	{
 		CEntity *pEntity = (CEntity *)pNode->item;
 		uint16 nScanCode = pEntity->m_scanCode;
 		pNode = pNode->next;
 
-		ASSERT( pEntity != NULL );
+		ASSERT( pEntity != nil );
 
 		if ( nScanCode != CWorld::GetCurrentScanCode() )
 		{
@@ -1526,15 +1526,15 @@ CShadows::CastShadowEntityXY(CEntity *pEntity,  float fStartX, float fStartY, fl
 							int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue,
 							float fZDistance, float fScale, CPolyBunch **ppPolyBunch)
 {
-	ASSERT(pEntity != NULL);
-	ASSERT(pPosn != NULL);
+	ASSERT(pEntity != nil);
+	ASSERT(pPosn != nil);
 
 	static CVector List   [20];
 	static CVector Texture[20];
 	static CVector Points [4];
 
 	CColModel *pCol = pEntity->GetColModel();
-	ASSERT(pCol != NULL);
+	ASSERT(pCol != nil);
 
 #ifndef MASTER
 	if ( gbPrintShite )
@@ -1580,12 +1580,12 @@ CShadows::CastShadowEntityXY(CEntity *pEntity,  float fStartX, float fStartY, fl
 	for ( int32 i = 0; i < pCol->numTriangles; i++ )
 	{
 		CColTrianglePlane *pColTriPlanes = pCol->trianglePlanes;
-		ASSERT(pColTriPlanes != NULL);
+		ASSERT(pColTriPlanes != nil);
 
 		if ( Abs(pColTriPlanes[i].normal.z) > 0.1f )
 		{
 			CColTriangle *pColTri = pCol->triangles;
-			ASSERT(pColTri != NULL);
+			ASSERT(pColTri != nil);
 
 			CVector PointA, PointB, PointC;
 
@@ -1985,12 +1985,12 @@ CShadows::CastShadowEntityXY(CEntity *pEntity,  float fStartX, float fStartY, fl
 					}
 
 					
-					if ( ppPolyBunch != NULL )
+					if ( ppPolyBunch != nil )
 					{
-						if ( pEmptyBunchList != NULL )
+						if ( pEmptyBunchList != nil )
 						{
 							CPolyBunch *pBunch = pEmptyBunchList;
-							ASSERT(pBunch != NULL);
+							ASSERT(pBunch != nil);
 							pEmptyBunchList = pEmptyBunchList->m_pNext;
 							pBunch->m_pNext = *ppPolyBunch;
 							*ppPolyBunch = pBunch;
@@ -2015,8 +2015,8 @@ CShadows::CastShadowEntityXY(CEntity *pEntity,  float fStartX, float fStartY, fl
 
 						RenderBuffer::StartStoring(3 * (numVerts3 - 2), numVerts3, &pIndexes, &pVerts);
 
-						ASSERT(pIndexes != NULL);
-						ASSERT(pVerts != NULL);
+						ASSERT(pIndexes != nil);
+						ASSERT(pVerts != nil);
 
 
 						for ( int32 j = 0; j < numVerts3; j++ )
@@ -2094,8 +2094,8 @@ RwV3d *ShadowRenderTriangleCB(RwV3d *points, RwV3d *normal, ProjectionParam *par
 		return points;
 	}
 	
-	RwIm3DVertex *imv = NULL;
-	RwImVertexIndex *imi = NULL;
+	RwIm3DVertex *imv = nil;
+	RwImVertexIndex *imi = nil;
 	
 	RenderBuffer::StartStoring(3, 3, &imi, &imv);
 	
@@ -2168,8 +2168,8 @@ CShadows::CastShadowEntityXYZ(CEntity *pEntity, CVector *pPosn,
 								int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue,
 								float fZDistance, float fScale, CPolyBunch **ppPolyBunch, CCutsceneShadow *pShadow)
 {
-	ASSERT(pEntity != NULL);
-	ASSERT(pPosn != NULL);
+	ASSERT(pEntity != nil);
+	ASSERT(pPosn != nil);
 	
 	if ( pShadow )
 	{
@@ -2255,7 +2255,7 @@ CShadows::UpdateStaticShadows(void)
 {
 	for ( int32 i = 0; i < MAX_STATICSHADOWS; i++ )
 	{
-		if ( aStaticShadows[i].m_pPolyBunch != NULL && !aStaticShadows[i].m_bJustCreated
+		if ( aStaticShadows[i].m_pPolyBunch != nil && !aStaticShadows[i].m_bJustCreated
 			&& (!aStaticShadows[i].m_bTemp || CTimer::GetTimeInMilliseconds() > aStaticShadows[i].m_nTimeCreated + 5000) )
 		{
 			aStaticShadows[i].Free();
@@ -2328,19 +2328,19 @@ CShadows::UpdatePermanentShadows(void)
 void
 CStaticShadow::Free(void)
 {
-	if ( m_pPolyBunch != NULL )
+	if ( m_pPolyBunch != nil )
 	{
 		CPolyBunch *pFree = CShadows::pEmptyBunchList;
 		CShadows::pEmptyBunchList = m_pPolyBunch;
 
 		CPolyBunch *pUsed = m_pPolyBunch;
-		while (pUsed->m_pNext != NULL)
+		while (pUsed->m_pNext != nil)
 			pUsed = pUsed->m_pNext;
 
 			pUsed->m_pNext = pFree;
 	}
 
-	m_pPolyBunch = NULL;
+	m_pPolyBunch = nil;
 
 	m_nId = 0;
 }
@@ -2351,12 +2351,12 @@ CShadows::CalcPedShadowValues(CVector vecLightDir,
 							float *pfSideX, float *pfSideY,
 							float *pfDisplacementX, float *pfDisplacementY)
 {
-	ASSERT(pfFrontX != NULL);
-	ASSERT(pfFrontY != NULL);
-	ASSERT(pfSideX != NULL);
-	ASSERT(pfSideY != NULL);
-	ASSERT(pfDisplacementX != NULL);
-	ASSERT(pfDisplacementY != NULL);
+	ASSERT(pfFrontX != nil);
+	ASSERT(pfFrontY != nil);
+	ASSERT(pfSideX != nil);
+	ASSERT(pfSideY != nil);
+	ASSERT(pfDisplacementX != nil);
+	ASSERT(pfDisplacementY != nil);
 
 	*pfFrontX = -vecLightDir.x;
 	*pfFrontY = -vecLightDir.y;
@@ -2395,7 +2395,7 @@ CShadows::RenderExtraPlayerShadows(void)
 	if ( CTimeCycle::GetLightShadowStrength() != 0 )
 	{
 		CVehicle *pCar = FindPlayerVehicle();
-		if ( pCar == NULL )
+		if ( pCar == nil )
 			; // R* cut it out for playerped
 		else
 		{
@@ -2454,7 +2454,7 @@ CShadows::RenderExtraPlayerShadows(void)
 									pCar->GetRight().x   * (fVehicleWidth/3),
 									pCar->GetRight().y   * (fVehicleWidth/3),
 									nColorStrength, 0, 0, 0,
-									4.5f, false, 1.0f, NULL, false);
+									4.5f, false, 1.0f, nil, false);
 							}
 							else
 							{
@@ -2464,7 +2464,7 @@ CShadows::RenderExtraPlayerShadows(void)
 									-pCar->GetRight().x  * (fVehicleWidth/2),
 									-pCar->GetRight().y  * (fVehicleWidth/2),
 									nColorStrength, 0, 0, 0,
-									4.5f, false, 1.0f, NULL, false);
+									4.5f, false, 1.0f, nil, false);
 							}
 						}
 					}
@@ -2486,7 +2486,7 @@ CShadows::RenderIndicatorShadow(uint32 nID, uint8 ShadowType, RwTexture *pTextur
 								float fFrontX, float fFrontY, float fSideX, float fSideY,
 								int16 nIntensity)
 {
-	ASSERT(pPosn != NULL);
+	ASSERT(pPosn != nil);
 
 	C3dMarkers::PlaceMarkerSet(nID, MARKERTYPE_CYLINDER, *pPosn, Max(fFrontX, -fSideY),
 		SPHERE_MARKER_R, SPHERE_MARKER_G, SPHERE_MARKER_B,

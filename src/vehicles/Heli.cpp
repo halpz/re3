@@ -593,7 +593,7 @@ CHeli::PreRenderAlways(void)
 		CShadows::StoreShadowToBeRendered(SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &shadowPos,
 			6.0f, 0.0f, 0.0f, -6.0f,
 			80*m_fSearchLightIntensity, 80*m_fSearchLightIntensity, 80*m_fSearchLightIntensity, 80*m_fSearchLightIntensity,
-			50.0f, true, 1.0f, NULL, false);
+			50.0f, true, 1.0f, nil, false);
 
 		CVector front = GetMatrix() * CVector(0.0f, 7.0f, 0.0f);
 		CVector toPlayer = FindPlayerCoors() - front;

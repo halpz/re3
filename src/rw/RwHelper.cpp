@@ -484,8 +484,8 @@ RpClump *RpClumpGetBoundingSphere(RpClump *clump, RwSphere *sphere, bool useLTM)
 	
 	b_cbsUseLTM = useLTM;
  
-	if ( clump == NULL || sphere == NULL )
-		return NULL;
+	if ( clump == nil || sphere == nil )
+		return nil;
   
 	sphere->radius = 0.0f;
 	sphere->center.x = 0.0f;
@@ -494,7 +494,7 @@ RpClump *RpClumpGetBoundingSphere(RpClump *clump, RwSphere *sphere, bool useLTM)
     
 	RwInt32 numAtomics = RpClumpGetNumAtomics(clump);
 	if ( numAtomics < 1.0f )
-		return NULL;
+		return nil;
 	
 	RpClumpForAllAtomics(clump, cbsCalcMeanBSphereCenterCB, &result);
 	

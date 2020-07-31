@@ -10,9 +10,9 @@
 
 CCutsceneShadow::CCutsceneShadow()
 {	
-	m_pAtomic = NULL;
+	m_pAtomic = nil;
 	m_nRwObjectType = -1;
-	m_pLight = NULL;
+	m_pLight = nil;
 	m_nBlurPasses = 0;
 	m_bResample = false;
 	m_bGradient = false;
@@ -26,7 +26,7 @@ CCutsceneShadow::~CCutsceneShadow()
 bool
 CCutsceneShadow::Create(RwObject *object, int32 rasterSize, bool resample, int32 blurPasses, bool gradient)
 {
-	ASSERT(object != NULL);
+	ASSERT(object != nil);
 	
 	RwRGBAReal color;
 	RwFrame *frame;
@@ -35,7 +35,7 @@ CCutsceneShadow::Create(RwObject *object, int32 rasterSize, bool resample, int32
 		return false;
 
 	m_pLight = RpLightCreate(rpLIGHTDIRECTIONAL);
-	ASSERT(m_pLight != NULL);
+	ASSERT(m_pLight != nil);
 	
 	if (!m_pLight)
 		return false;
@@ -46,7 +46,7 @@ CCutsceneShadow::Create(RwObject *object, int32 rasterSize, bool resample, int32
 	RpLightSetColor(m_pLight, &color);
 	
 	frame = RwFrameCreate();
-	ASSERT(frame != NULL);
+	ASSERT(frame != nil);
 	
 	RpLightSetFrame(m_pLight, frame);
 	
@@ -137,17 +137,17 @@ CCutsceneShadow::Create(RwObject *object, int32 rasterSize, bool resample, int32
 RwFrame *
 CCutsceneShadow::SetLightProperties(float angleY, float angleX, bool setLight)
 {
-	ASSERT(m_pLight != NULL);
+	ASSERT(m_pLight != nil);
 	
 	RwFrame *frame;
 	static RwV3d        Xaxis = { 1.0f, 0.0f, 0.0f };
 	static RwV3d        Yaxis = { 0.0f, 1.0f, 0.0f };
 
 	frame = RpLightGetFrame(m_pLight);
-	ASSERT(frame != NULL);
+	ASSERT(frame != nil);
 	
 	if ( !frame )
-		return NULL;
+		return nil;
 	
 	RwFrameRotate(frame, &Yaxis, angleY, rwCOMBINEREPLACE);
 	RwFrameRotate(frame, &Xaxis, angleX, rwCOMBINEPOSTCONCAT);
@@ -161,7 +161,7 @@ CCutsceneShadow::SetLightProperties(float angleY, float angleX, bool setLight)
 bool
 CCutsceneShadow::IsInitialized()
 {
-	return m_pObject != NULL;
+	return m_pObject != nil;
 }
 
 void
@@ -172,17 +172,17 @@ CCutsceneShadow::Destroy()
 	m_BlurCamera.Destroy();
 	m_GradientCamera.Destroy();
 	
-	m_pAtomic = NULL;
+	m_pAtomic = nil;
 	
 	m_nRwObjectType = -1;
   
 	if (m_pLight)
 	{
 		RwFrame *frame = RpLightGetFrame(m_pLight);
-		RpLightSetFrame(m_pLight, NULL);
+		RpLightSetFrame(m_pLight, nil);
 		RwFrameDestroy(frame);
 		RpLightDestroy(m_pLight);
-		m_pLight = NULL;
+		m_pLight = nil;
 	}
 }
 
@@ -192,12 +192,12 @@ CCutsceneShadow::Update()
 	switch ( m_nRwObjectType )
 	{
 		case rpCLUMP:
-			ASSERT(m_pClump != NULL);
+			ASSERT(m_pClump != nil);
 			RwV3dTransformPoints(&m_BaseSphere.center, &m_BoundingSphere.center, 1, RwFrameGetMatrix(RpClumpGetFrame(m_pClump)));
 			break;
 
 		case rpATOMIC:
-			ASSERT(m_pAtomic != NULL);
+			ASSERT(m_pAtomic != nil);
 			RwV3dTransformPoints(&m_BaseSphere.center, &m_BoundingSphere.center, 1, RwFrameGetMatrix(RpAtomicGetFrame(m_pAtomic)));
 			break;
 	}
@@ -216,7 +216,7 @@ CCutsceneShadow::Update()
 	}
 	
 	RwRaster *raster = m_Camera.GetRwRenderRaster();
-	ASSERT(raster != NULL);
+	ASSERT(raster != nil);
 
 	if ( m_bResample )
 		return m_ResampleCamera.RasterResample(raster);

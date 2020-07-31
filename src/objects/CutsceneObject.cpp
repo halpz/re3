@@ -26,9 +26,9 @@ CCutsceneObject::CCutsceneObject(void)
 	m_fMass = 1.0f;
 	m_fTurnMass = 1.0f;
 	
-	m_pAttachTo = NULL;
-	m_pAttachmentObject = NULL;
-	m_pShadow = NULL;
+	m_pAttachTo = nil;
+	m_pAttachmentObject = nil;
+	m_pShadow = nil;
 }
 
 CCutsceneObject::~CCutsceneObject(void)
@@ -36,7 +36,7 @@ CCutsceneObject::~CCutsceneObject(void)
 	if ( m_pShadow )
 	{
 		delete m_pShadow;
-		m_pShadow = NULL;
+		m_pShadow = nil;
 	}
 }
 
@@ -116,7 +116,7 @@ CCutsceneObject::PreRender(void)
 	
 	if(IsPedModel(GetModelIndex()))
 	{
-		if ( m_pShadow == NULL )
+		if ( m_pShadow == nil )
 		{
 			CShadows::StoreShadowForPedObject(this,
 				CTimeCycle::m_fShadowDisplacementX[CTimeCycle::m_CurrentStoredValue],

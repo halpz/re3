@@ -16,8 +16,8 @@ RpAtomic *ShadowRenderCallBack(RpAtomic *atomic, void *data)
 
 CShadowCamera::CShadowCamera()
 {
-	m_pCamera  = NULL;
-	m_pTexture = NULL;
+	m_pCamera  = nil;
+	m_pTexture = nil;
 }
 
 CShadowCamera::~CShadowCamera()
@@ -37,33 +37,33 @@ CShadowCamera::Destroy()
 	
 		if ( frame )
 		{
-			RwCameraSetFrame(m_pCamera, NULL);
+			RwCameraSetFrame(m_pCamera, nil);
 			RwFrameDestroy(frame);
 		}
 	
 		raster = RwCameraGetZRaster(m_pCamera);
 		if ( raster )
 		{
-			RwCameraSetZRaster(m_pCamera, NULL);
+			RwCameraSetZRaster(m_pCamera, nil);
 			RwRasterDestroy(raster);
 		}
 
 		raster = RwCameraGetRaster(m_pCamera);
 		if ( raster )
 		{
-			RwCameraSetRaster(m_pCamera, NULL);
+			RwCameraSetRaster(m_pCamera, nil);
 			RwRasterDestroy(raster);
 		}
 		
 		if ( m_pTexture )
 		{
-			RwTextureSetRaster(m_pTexture, NULL);
+			RwTextureSetRaster(m_pTexture, nil);
 			RwTextureDestroy(m_pTexture);
-			m_pTexture = NULL;
+			m_pTexture = nil;
 		}
 		
 		RwCameraDestroy(m_pCamera);
-		m_pCamera = NULL;
+		m_pCamera = nil;
 	}
     return;
 }
@@ -74,7 +74,7 @@ CShadowCamera::Create(int32 rasterSize)
 	int32 size = 1 << rasterSize;
 	
 	m_pCamera = RwCameraCreate();
-	ASSERT(m_pCamera != NULL);
+	ASSERT(m_pCamera != nil);
 	
 	if ( m_pCamera )
 	{
@@ -83,20 +83,20 @@ CShadowCamera::Create(int32 rasterSize)
 		if( RwCameraGetFrame(m_pCamera) )
 		{
 			RwRaster *zRaster = RwRasterCreate(size, size, 0, rwRASTERTYPEZBUFFER);
-			ASSERT(zRaster != NULL);
+			ASSERT(zRaster != nil);
 			
 			if ( zRaster )
 			{
 				RwCameraSetZRaster(m_pCamera, zRaster);
 
 				RwRaster *raster = RwRasterCreate(size, size, 0, rwRASTERTYPECAMERATEXTURE);
-				ASSERT(raster != NULL);
+				ASSERT(raster != nil);
 
 				if ( raster )
 				{
 					RwCameraSetRaster(m_pCamera, raster);
 					m_pTexture = RwTextureCreate(raster);
-					ASSERT(m_pTexture != NULL);
+					ASSERT(m_pTexture != nil);
 					
 					if ( m_pTexture )
 					{
@@ -112,13 +112,13 @@ CShadowCamera::Create(int32 rasterSize)
 
 	Destroy();
 
-	return (NULL);
+	return (nil);
 }
 
 RwCamera *
 CShadowCamera::SetFrustum(float objectRadius)
 {
-	ASSERT(m_pCamera != NULL);
+	ASSERT(m_pCamera != nil);
 	
 	RwV2d vw;
 
@@ -135,8 +135,8 @@ CShadowCamera::SetFrustum(float objectRadius)
 RwCamera *
 CShadowCamera::SetLight(RpLight *light)
 {
-	ASSERT(light != NULL);
-	ASSERT(m_pCamera != NULL);
+	ASSERT(light != nil);
+	ASSERT(m_pCamera != nil);
 	
 	RwFrame  *camFrame = RwCameraGetFrame(m_pCamera);
 	RwMatrix *camMatrix = RwFrameGetMatrix(camFrame);
@@ -156,8 +156,8 @@ CShadowCamera::SetLight(RpLight *light)
 RwCamera *
 CShadowCamera::SetCenter(RwV3d *center)
 {
-	ASSERT(center != NULL);
-	ASSERT(m_pCamera != NULL);
+	ASSERT(center != nil);
+	ASSERT(m_pCamera != nil);
 	
 	RwFrame            *camFrame = RwCameraGetFrame(m_pCamera);
     RwMatrix           *camMatrix = RwFrameGetMatrix(camFrame);
@@ -176,8 +176,8 @@ CShadowCamera::SetCenter(RwV3d *center)
 RwCamera *
 CShadowCamera::Update(RpClump *clump)
 {
-	ASSERT(clump != NULL);
-	ASSERT(m_pCamera != NULL);
+	ASSERT(clump != nil);
+	ASSERT(m_pCamera != nil);
 	
 	RwUInt32 flags;
 	RpGeometry *geometry;
@@ -189,14 +189,14 @@ CShadowCamera::Update(RpClump *clump)
 	if ( RwCameraBeginUpdate(m_pCamera) )
 	{
 		geometry = GetFirstAtomic(clump)->geometry;
-		ASSERT(geometry != NULL);
+		ASSERT(geometry != nil);
 		
 		flags = RpGeometryGetFlags(geometry);
 
 		RpGeometrySetFlags(geometry, flags & ~(rpGEOMETRYPRELIT|rpGEOMETRYLIGHT
 				|rpGEOMETRYTEXTURED|rpGEOMETRYTEXTURED2|rpGEOMETRYMODULATEMATERIALCOLOR));
 		
-		RpClumpForAllAtomics(clump, ShadowRenderCallBack, NULL);				
+		RpClumpForAllAtomics(clump, ShadowRenderCallBack, nil);				
 		
 		RpGeometrySetFlags(geometry, flags);
 		
@@ -210,8 +210,8 @@ CShadowCamera::Update(RpClump *clump)
 RwCamera *
 CShadowCamera::Update(RpAtomic *atomic)
 {
-	ASSERT(atomic != NULL);
-	ASSERT(m_pCamera != NULL);
+	ASSERT(atomic != nil);
+	ASSERT(m_pCamera != nil);
 	
 	RwUInt32 flags;
 	RpGeometry *geometry;
@@ -223,13 +223,13 @@ CShadowCamera::Update(RpAtomic *atomic)
 	if ( RwCameraBeginUpdate(m_pCamera) )
 	{
 		geometry = RpAtomicGetGeometry(atomic);	
-		ASSERT(geometry != NULL);
+		ASSERT(geometry != nil);
 		flags = RpGeometryGetFlags(geometry);
 		
 		RpGeometrySetFlags(geometry, flags & ~(rpGEOMETRYPRELIT|rpGEOMETRYLIGHT
 				|rpGEOMETRYTEXTURED|rpGEOMETRYTEXTURED2|rpGEOMETRYMODULATEMATERIALCOLOR|rpGEOMETRYNORMALS));
 		
-		ShadowRenderCallBack(atomic, NULL);
+		ShadowRenderCallBack(atomic, nil);
 		
 		RpGeometrySetFlags(geometry, flags);
 
@@ -243,7 +243,7 @@ CShadowCamera::Update(RpAtomic *atomic)
 void
 CShadowCamera::InvertRaster()
 {
-	ASSERT(m_pCamera != NULL);
+	ASSERT(m_pCamera != nil);
 	
 	RwIm2DVertex vx[4];
 	float crw, crh;
@@ -251,7 +251,7 @@ CShadowCamera::InvertRaster()
 	float recipZ;
   
 	raster = RwCameraGetRaster(m_pCamera);
-	ASSERT(raster != NULL);
+	ASSERT(raster != nil);
 	
 	crw = (float)RwRasterGetWidth(raster);
 	crh = (float)RwRasterGetHeight(raster);
@@ -284,7 +284,7 @@ CShadowCamera::InvertRaster()
 
 
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void *)FALSE);
-	RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void *)NULL);
+	RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void *)nil);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);
 	RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void *)rwBLENDINVDESTCOLOR);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void *)rwBLENDZERO);
@@ -299,23 +299,23 @@ CShadowCamera::InvertRaster()
 RwRaster *
 CShadowCamera::MakeGradientRaster()
 {
-	ASSERT(m_pCamera != NULL);
+	ASSERT(m_pCamera != nil);
 	
 	RwIm2DVertex vx[2];
 
 	if ( !m_pCamera )
-		return NULL;
+		return nil;
 
 	float recipCamZ = 1.0f / RwCameraGetNearClipPlane(m_pCamera);
 
 	RwRaster *raster = RwCameraGetRaster(m_pCamera);
-	ASSERT(raster != NULL);
+	ASSERT(raster != nil);
 	
 	float width = (float)RwRasterGetWidth(raster);
 	float height = (float)RwRasterGetHeight(raster);
 
 	if ( height < 1 )
-		return NULL;
+		return nil;
       
 	if ( RwCameraBeginUpdate(m_pCamera) )
 	{
@@ -362,14 +362,14 @@ CShadowCamera::MakeGradientRaster()
 RwRaster *
 CShadowCamera::RasterResample(RwRaster *dstRaster)
 {
-	ASSERT(dstRaster != NULL);
-	ASSERT(m_pCamera != NULL);
+	ASSERT(dstRaster != nil);
+	ASSERT(m_pCamera != nil);
 	
 	if ( !m_pCamera )
-		return NULL;
+		return nil;
 
 	RwRaster *raster = RwCameraGetRaster(m_pCamera);
-	ASSERT(raster != NULL);
+	ASSERT(raster != nil);
 	
 	float size = (float) RwRasterGetWidth(raster);
 	float uvOffset = TEXELOFFSET / size;
@@ -398,14 +398,14 @@ CShadowCamera::RasterResample(RwRaster *dstRaster)
 RwRaster *
 CShadowCamera::RasterBlur(RwRaster *dstRaster, int32 numPasses)
 {
-	ASSERT(dstRaster != NULL);
-	ASSERT(m_pCamera != NULL);
+	ASSERT(dstRaster != nil);
+	ASSERT(m_pCamera != nil);
 	
 	if ( !m_pCamera )
-		return NULL;
+		return nil;
 
 	RwRaster *raster = RwCameraGetRaster(m_pCamera);
-	ASSERT(raster != NULL);
+	ASSERT(raster != nil);
 	
 	float size = (float) RwRasterGetWidth(dstRaster);
 	float recipCamZ = 1.0f / RwCameraGetNearClipPlane(m_pCamera);
@@ -455,11 +455,11 @@ CShadowCamera::RasterBlur(RwRaster *dstRaster, int32 numPasses)
 RwRaster *
 CShadowCamera::RasterGradient(RwRaster *dstRaster)
 {
-	ASSERT(dstRaster != NULL);
-	ASSERT(m_pCamera != NULL);
+	ASSERT(dstRaster != nil);
+	ASSERT(m_pCamera != nil);
 	
 	RwRaster *raster = RwCameraGetRaster(m_pCamera);
-	ASSERT(raster != NULL);
+	ASSERT(raster != nil);
 	
 	float size = (float)RwRasterGetWidth(dstRaster);
 	float recipCamZ = 1.0f / RwCameraGetNearClipPlane(m_pCamera);
@@ -490,13 +490,13 @@ CShadowCamera::RasterGradient(RwRaster *dstRaster)
 
 RwRaster *CShadowCamera::DrawOutlineBorder(RwRGBA const& color)
 {
-	ASSERT(m_pCamera != NULL);
+	ASSERT(m_pCamera != nil);
 	
 	RwIm2DVertex vx[4];
 	RwImVertexIndex ix[5];
 
 	RwRaster *raster = RwCameraGetRaster(m_pCamera);
-	ASSERT(raster != NULL);
+	ASSERT(raster != nil);
 
 	float size = (float)RwRasterGetWidth(raster) - 1.0f;
 	float recipCamZ = 1.0f / RwCameraGetNearClipPlane(m_pCamera);
@@ -535,7 +535,7 @@ RwRaster *CShadowCamera::DrawOutlineBorder(RwRGBA const& color)
 	{
 		RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void *)FALSE);
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)FALSE);
-		RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void *)NULL);
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void *)nil);
 		
 		RwIm2DRenderIndexedPrimitive(rwPRIMTYPEPOLYLINE, vx, 4, ix, 5);
 		
