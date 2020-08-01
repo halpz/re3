@@ -3409,9 +3409,9 @@ CMenuManager::SmallMessageScreen(const char* text)
 	CFont::SetPropOn();
 	CFont::SetJustifyOn();
 	CFont::SetBackGroundOnlyTextOn();
-	CSprite2d::DrawRect(CRect(SCREEN_SCALE_X(95.0f), SCREEN_SCALE_FROM_BOTTOM(165.0f), SCREEN_SCALE_FROM_RIGHT(95.0f), SCREEN_SCALE_Y(115.0f)), CRGBA(50, 50, 50, FadeIn(210)));
+	CSprite2d::DrawRect(CRect(SCREEN_STRETCH_X(95.0f), SCREEN_SCALE_FROM_BOTTOM(165.0f), SCREEN_STRETCH_FROM_RIGHT(95.0f), SCREEN_SCALE_Y(115.0f)), CRGBA(50, 50, 50, FadeIn(210)));
 	CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
-	CFont::SetCentreSize(SCREEN_SCALE_X(430.0f));
+	CFont::SetCentreSize(SCREEN_STRETCH_X(430.0f));
 	CFont::SetCentreOn();
 	CFont::SetColor(CRGBA(LABEL_COLOR.r, LABEL_COLOR.g, LABEL_COLOR.b, FadeIn(255)));
 	CFont::SetDropShadowPosition(2);

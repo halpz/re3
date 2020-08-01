@@ -238,6 +238,7 @@ public:
 	bool GetTarget(void);
 	bool TargetJustDown(void);
 	bool DuckJustDown(void);
+	bool CollectPickupJustDown(void);
 	bool JumpJustDown(void);
 	bool GetSprint(void);
 	bool ShiftTargetLeftJustDown(void);

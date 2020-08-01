@@ -133,6 +133,7 @@ public:
 	static void ReInitialise();
 	static void SetBigMessage(wchar *message, int16 style);
 	static void SetHelpMessage(wchar *message, bool quick);
+	static bool IsHelpMessageBeingDisplayed(void);
 	static void SetMessage(wchar *message);
 	static void SetPagerMessage(wchar *message);
 	static void SetVehicleName(wchar *name);

@@ -5577,7 +5577,7 @@ CAutomobile::TellHeliToGoToCoors(float x, float y, float z, uint8 speed)
 void
 CAutomobile::TellPlaneToGoToCoors(float x, float y, float z, uint8 speed)
 {
-	AutoPilot.m_nCarMission = MISSION_HELI_FLYTOCOORS;
+	AutoPilot.m_nCarMission = MISSION_PLANE_FLYTOCOORS;
 	AutoPilot.m_vecDestinationCoors.x = x;
 	AutoPilot.m_vecDestinationCoors.y = y;
 	AutoPilot.m_vecDestinationCoors.z = z;
