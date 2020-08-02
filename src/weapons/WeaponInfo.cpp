@@ -64,7 +64,7 @@ CWeaponInfo::LoadWeaponData(void)
 	CAnimBlendAssociation *animAssoc;
 	AnimationId animId;
 
-	int bp, buflen;
+	size_t bp, buflen;
 	int lp, linelen;
 		
 	CFileMgr::SetDir("DATA");

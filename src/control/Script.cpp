@@ -348,8 +348,8 @@ const tScriptCommandData commands[] = {
 	REGISTER_COMMAND(COMMAND_SET_CAR_CRUISE_SPEED, INPUT_ARGUMENTS(ARGTYPE_VEHICLE_HANDLE, ARGTYPE_INT,), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_SET_CAR_DRIVING_STYLE, INPUT_ARGUMENTS(ARGTYPE_VEHICLE_HANDLE, ARGTYPE_INT,), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_SET_CAR_MISSION, INPUT_ARGUMENTS(ARGTYPE_VEHICLE_HANDLE, ARGTYPE_INT,), OUTPUT_ARGUMENTS(), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_IS_CHAR_IN_AREA_2D, INPUT_ARGUMENTS(ARGTYPE_VEHICLE_HANDLE, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_BOOL,), OUTPUT_ARGUMENTS(), true, -1, ""),
-	REGISTER_COMMAND(COMMAND_IS_CHAR_IN_AREA_3D, INPUT_ARGUMENTS(ARGTYPE_VEHICLE_HANDLE, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_BOOL,), OUTPUT_ARGUMENTS(), true, -1, ""),
+	REGISTER_COMMAND(COMMAND_IS_CAR_IN_AREA_2D, INPUT_ARGUMENTS(ARGTYPE_VEHICLE_HANDLE, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_BOOL,), OUTPUT_ARGUMENTS(), true, -1, ""),
+	REGISTER_COMMAND(COMMAND_IS_CAR_IN_AREA_3D, INPUT_ARGUMENTS(ARGTYPE_VEHICLE_HANDLE, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_BOOL,), OUTPUT_ARGUMENTS(), true, -1, ""),
 	REGISTER_COMMAND(COMMAND_SPECIAL_0, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_SPECIAL_1, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_SPECIAL_2, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
@@ -1354,9 +1354,9 @@ static void PrintToLog(const char* format, ...)
 #endif
 	va_end(va);
 
-	printf("%s", tmp);
 #if SCRIPT_LOG_FILE_LEVEL == 1 || SCRIPT_LOG_FILE_LEVEL == 2
-	fwrite(tmp, 1, strlen(tmp), dbg_log);
+	if (dbg_log)
+		fwrite(tmp, 1, strlen(tmp), dbg_log);
 #endif
 }
 
@@ -1925,7 +1925,7 @@ void CTheScripts::Init()
 	dbg_log = fopen("SCRDBG.LOG", "w");
 	static const char* init_msg = "Starting debug script log\n\n";
 	PrintToLog(init_msg);
-	CFileMgr::SetDir("\\");
+	CFileMgr::SetDir("");
 #endif
 }
 
@@ -2028,7 +2028,7 @@ void CTheScripts::Process()
 	dbg_log = fopen("SCRDBG.LOG", "w");
 	static const char* init_msg = "Starting debug script log\n\n";
 	PrintToLog(init_msg);
-	CFileMgr::SetDir("\\");
+	CFileMgr::SetDir("");
 #endif
 	PrintToLog("------------------------\n");
 	PrintToLog("CTheScripts::Process started, CTimer::GetTimeInMilliseconds == %u\n", CTimer::GetTimeInMilliseconds());
@@ -2823,9 +2823,8 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 			UpdateCompareFlag(ped->IsWithinArea(x1, y1, x2, y2));
 		else
 			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, x2, y2));
-		if (!ScriptParams[5])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		if (ScriptParams[5])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -2844,9 +2843,8 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
 		else
 			UpdateCompareFlag(ped->IsWithinArea(x1, y1, z1, x2, y2, z2));
-		if (!ScriptParams[7])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
+		if (ScriptParams[7])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugCube(x1, y1, z1, x2, y2, z2);
 		return 0;
@@ -3296,7 +3294,12 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		ped->ClearAll();
 		int8 path = ScriptParams[1];
 		if (ScriptParams[1] < 0 || ScriptParams[1] > 7)
+			// Max number GetRandomNumberInRange returns is max-1
+#ifdef FIX_BUGS
+			path = CGeneral::GetRandomNumberInRange(0, 8);
+#else
 			path = CGeneral::GetRandomNumberInRange(0, 7);
+#endif
 		ped->SetWanderPath(path);
 		return 0;
 	}
@@ -3321,7 +3324,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		CPed* ped = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		script_assert(ped);
 		ped->bScriptObjectiveCompleted = false;
-		ped->SetObjective(OBJECTIVE_IDLE);
+		ped->SetObjective(OBJECTIVE_WAIT_ON_FOOT);
 		return 0;
 	}
 	case COMMAND_GET_CHAR_COORDINATES:
@@ -3420,9 +3423,8 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, x2, y2));
 		else
 			UpdateCompareFlag(ped->IsWithinArea(x1, y1, x2, y2));
-		if (!ScriptParams[5])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		if (ScriptParams[5])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -3447,9 +3449,8 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			UpdateCompareFlag(ped->m_pMyVehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
 		else
 			UpdateCompareFlag(ped->IsWithinArea(x1, y1, z1, x2, y2, z2));
-		if (!ScriptParams[7])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
+		if (ScriptParams[7])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugCube(x1, y1, z1, x2, y2, z2);
 		return 0;
@@ -3666,9 +3667,8 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		float x2 = *(float*)&ScriptParams[3];
 		float y2 = *(float*)&ScriptParams[4];
 		UpdateCompareFlag(vehicle->IsWithinArea(x1, y1, x2, y2));
-		if (!ScriptParams[5])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		if (ScriptParams[5])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -3685,9 +3685,8 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		float y2 = *(float*)&ScriptParams[5];
 		float z2 = *(float*)&ScriptParams[6];
 		UpdateCompareFlag(vehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
-		if (!ScriptParams[7])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
+		if (ScriptParams[7])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugCube(x1, y1, z1, x2, y2, z2);
 		return 0;
@@ -4424,9 +4423,8 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		float y2 = *(float*)&ScriptParams[4];
 		UpdateCompareFlag(pVehicle->GetStatus() == STATUS_WRECKED &&
 			pVehicle->IsWithinArea(x1, y1, x2, y2));
-		if (!ScriptParams[5])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		if (ScriptParams[5])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -4444,9 +4442,8 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		float z2 = *(float*)&ScriptParams[6];
 		UpdateCompareFlag(pVehicle->GetStatus() == STATUS_WRECKED &&
 			pVehicle->IsWithinArea(x1, y1, z1, x2, y2, z2));
-		if (!ScriptParams[7])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
+		if (ScriptParams[7])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, (z1 + z2) / 2);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugCube(x1, y1, z1, x2, y2, z2);
 		return 0;
@@ -5123,7 +5120,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		script_assert(pPed);
 		pPed->bScriptObjectiveCompleted = false;
-		pPed->SetObjective(OBJECTIVE_IDLE);
+		pPed->SetObjective(OBJECTIVE_WAIT_ON_FOOT);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_OBJ_FLEE_ON_FOOT_TILL_SAFE:
@@ -5615,7 +5612,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		script_assert(pPed);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
 		pPed->bScriptObjectiveCompleted = false;
-		pPed->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pVehicle);
+		pPed->SetObjective(OBJECTIVE_LEAVE_CAR, pVehicle);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_OBJ_ENTER_CAR_AS_PASSENGER:
@@ -7274,9 +7271,8 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		float x2 = *(float*)&ScriptParams[3];
 		float y2 = *(float*)&ScriptParams[4];
 		UpdateCompareFlag(pPed->bIsShooting && pPed->IsWithinArea(x1, y1, x2, y2));
-		if (!ScriptParams[5])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		if (ScriptParams[5])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -7291,9 +7287,8 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		float x2 = *(float*)&ScriptParams[3];
 		float y2 = *(float*)&ScriptParams[4];
 		UpdateCompareFlag(pPed->bIsShooting && pPed->IsWithinArea(x1, y1, x2, y2));
-		if (!ScriptParams[5])
-			return 0;
-		CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		if (ScriptParams[5])
+			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
 		return 0;
@@ -7818,7 +7813,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		script_assert(pPed);
 		CPed* pTargetPed = CPools::GetPedPool()->GetAt(ScriptParams[1]);
 		pPed->bScriptObjectiveCompleted = false;
-		pPed->SetObjective(OBJECTIVE_FOLLOW_PED_IN_FORMATION, pTargetPed);
+		pPed->SetObjective(OBJECTIVE_FOLLOW_CHAR_IN_FORMATION, pTargetPed);
 		pPed->SetFormation((eFormation)ScriptParams[2]);
 		return 0;
 	}
@@ -8703,7 +8698,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CEntity* apEntities[16];
 		CWorld::FindObjectsOfTypeInRange(mi, pos, range, true, &total, 16, apEntities, true, false, false, true, true);
 		if (total == 0)
-			CWorld::FindObjectsOfTypeInRangeSectorList(mi, CWorld::GetBigBuildingList(LEVEL_NONE), pos, range, true, &total, 16, apEntities);
+			CWorld::FindObjectsOfTypeInRangeSectorList(mi, CWorld::GetBigBuildingList(LEVEL_GENERIC), pos, range, true, &total, 16, apEntities);
 		if (total == 0)
 			CWorld::FindObjectsOfTypeInRangeSectorList(mi, CWorld::GetBigBuildingList(CTheZones::FindZoneForPoint(pos)), pos, range, true, &total, 16, apEntities);
 		CEntity* pClosestEntity = nil;
@@ -9455,7 +9450,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CEntity* apEntities[16];
 		CWorld::FindObjectsOfTypeInRange(mi1, pos, radius, true, &total, 16, apEntities, true, false, false, false, false);
 		if (total == 0)
-			CWorld::FindObjectsOfTypeInRangeSectorList(mi1, CWorld::GetBigBuildingList(LEVEL_NONE), pos, radius, true, &total, 16, apEntities);
+			CWorld::FindObjectsOfTypeInRangeSectorList(mi1, CWorld::GetBigBuildingList(LEVEL_GENERIC), pos, radius, true, &total, 16, apEntities);
 		if (total == 0)
 			CWorld::FindObjectsOfTypeInRangeSectorList(mi1, CWorld::GetBigBuildingList(CTheZones::FindZoneForPoint(pos)), pos, radius, true, &total, 16, apEntities);
 		CEntity* pClosestEntity = nil;
@@ -10022,11 +10017,15 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CTimer::Stop();
 		CGame::currLevel = (eLevelName)ScriptParams[0];
+#ifndef NO_ISLAND_LOADING
 		CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
 		CStreaming::RemoveUnusedBuildings(CGame::currLevel);
+#endif
 		CCollision::SortOutCollisionAfterLoad();
+#ifndef NO_ISLAND_LOADING
 		CStreaming::RequestIslands(CGame::currLevel);
 		CStreaming::LoadAllRequestedModels(true);
+#endif
 		CTimer::Update();
 		return 0;
 	}
@@ -10053,7 +10052,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		if (ScriptParams[1])
 			pVehicle->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pVehicle->GetPosition());
 		else
-			pVehicle->m_nZoneLevel = LEVEL_NONE;
+			pVehicle->m_nZoneLevel = LEVEL_GENERIC;
 		return 0;
 	}
 	case COMMAND_SET_CHAR_STAYS_IN_CURRENT_LEVEL:
@@ -10064,7 +10063,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		if (ScriptParams[1])
 			pPed->m_nZoneLevel = CTheZones::GetLevelFromPosition(&pPed->GetPosition());
 		else
-			pPed->m_nZoneLevel = LEVEL_NONE;
+			pPed->m_nZoneLevel = LEVEL_GENERIC;
 		return 0;
 	}
 	case COMMAND_REGISTER_4X4_ONE_TIME:
@@ -10642,18 +10641,24 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		CTimer::Stop();
 		CGame::currLevel = (eLevelName)ScriptParams[0];
 		if (CGame::currLevel != CCollision::ms_collisionInMemory) {
+#ifndef NO_ISLAND_LOADING
 			DMAudio.SetEffectsFadeVol(0);
 			CPad::StopPadsShaking();
 			CCollision::LoadCollisionScreen(CGame::currLevel);
 			DMAudio.Service();
+#endif
 			CPopulation::DealWithZoneChange(CCollision::ms_collisionInMemory, CGame::currLevel, false);
+#ifndef NO_ISLAND_LOADING
 			CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
 			CStreaming::RemoveUnusedBuildings(CGame::currLevel);
+#endif
 			CCollision::SortOutCollisionAfterLoad();
+#ifndef NO_ISLAND_LOADING
 			CStreaming::RequestIslands(CGame::currLevel);
 			CStreaming::RequestBigBuildings(CGame::currLevel);
 			CStreaming::LoadAllRequestedModels(true);
 			DMAudio.SetEffectsFadeVol(127);
+#endif
 		}
 		CTimer::Update();
 		return 0;
@@ -10865,13 +10870,13 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		script_assert(pVehicle);
 		if (pVehicle->pDriver) {
 			pVehicle->pDriver->bScriptObjectiveCompleted = false;
-			pVehicle->pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pVehicle);
+			pVehicle->pDriver->SetObjective(OBJECTIVE_LEAVE_CAR, pVehicle);
 		}
 		for (int i = 0; i < ARRAY_SIZE(pVehicle->pPassengers); i++)
 		{
 			if (pVehicle->pPassengers[i]) {
 				pVehicle->pPassengers[i]->bScriptObjectiveCompleted = false;
-				pVehicle->pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pVehicle);
+				pVehicle->pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_CAR, pVehicle);
 			}
 		}
 		return 0;
@@ -13095,7 +13100,7 @@ void CTheScripts::CleanUpThisPed(CPed* pPed)
 		}
 		else {
 			if (pPed->m_pMyVehicle->m_vehType == VEHICLE_TYPE_CAR) {
-				pPed->SetObjective(OBJECTIVE_LEAVE_VEHICLE, pPed->m_pMyVehicle);
+				pPed->SetObjective(OBJECTIVE_LEAVE_CAR, pPed->m_pMyVehicle);
 				pPed->bWanderPathAfterExitingCar = true;
 			}
 		}

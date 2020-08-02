@@ -9,10 +9,10 @@
 
 cBuoyancy mod_Buoyancy;
 
-static float fVolMultiplier = 1.0f;
+float fVolMultiplier = 1.0f;
 // amount of boat volume in bounding box
 // 1.0-volume is the empty space in the bbox
-static float fBoatVolumeDistribution[9] = {
+float fBoatVolumeDistribution[9] = {
 	// rear
 	0.75f, 0.9f, 0.75f,
 	0.95f, 1.0f, 0.95f,

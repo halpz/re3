@@ -394,7 +394,7 @@ CPopulation::FindCollisionZoneForCoors(CVector *coors, int *safeZoneOut, eLevelN
 	}
 	// Then it's transition area
 	if (*safeZoneOut >= 0)
-		*levelOut = LEVEL_NONE;
+		*levelOut = LEVEL_GENERIC;
 	else
 		*levelOut = CTheZones::GetLevelFromPosition(coors);
 }
@@ -867,7 +867,7 @@ CPopulation::MoveCarsAndPedsOutOfAbandonedZones()
 		for (int poolIndex = poolSize - 1; poolIndex >= 0; poolIndex--) {
 
 			CVehicle* veh = CPools::GetVehiclePool()->GetSlot(poolIndex);
-			if (veh && veh->m_nZoneLevel == LEVEL_NONE && veh->IsCar()) {
+			if (veh && veh->m_nZoneLevel == LEVEL_GENERIC && veh->IsCar()) {
 
 				if(veh->GetStatus() != STATUS_ABANDONED && veh->GetStatus() != STATUS_WRECKED && veh->GetStatus() != STATUS_PLAYER &&
 					veh->GetStatus() != STATUS_PLAYER_REMOTE) {
@@ -876,7 +876,7 @@ CPopulation::MoveCarsAndPedsOutOfAbandonedZones()
 					CPopulation::FindCollisionZoneForCoors(&vehPos, &zone, &level);
 
 					// Level 0 is transition zones, and we don't wanna touch cars on transition zones.
-					if (level != LEVEL_NONE && level != CCollision::ms_collisionInMemory && vehPos.z > -4.0f) {
+					if (level != LEVEL_GENERIC && level != CCollision::ms_collisionInMemory && vehPos.z > -4.0f) {
 						if (veh->bIsLocked || !veh->CanBeDeleted()) {
 							switch (movedVehicleCount & 3) {
 								case 0:
@@ -913,13 +913,13 @@ CPopulation::MoveCarsAndPedsOutOfAbandonedZones()
 		for (int poolIndex = poolSize - 1; poolIndex >= 0; poolIndex--) {
 
 			CPed *ped = CPools::GetPedPool()->GetSlot(poolIndex);
-			if (ped && ped->m_nZoneLevel == LEVEL_NONE && !ped->bInVehicle) {
+			if (ped && ped->m_nZoneLevel == LEVEL_GENERIC && !ped->bInVehicle) {
 
 				CVector pedPos(ped->GetPosition());
 				CPopulation::FindCollisionZoneForCoors(&pedPos, &zone, &level);
 
 				// Level 0 is transition zones, and we don't wanna touch peds on transition zones.
-				if (level != LEVEL_NONE && level != CCollision::ms_collisionInMemory && pedPos.z > -4.0f) {
+				if (level != LEVEL_GENERIC && level != CCollision::ms_collisionInMemory && pedPos.z > -4.0f) {
 					if (ped->CanBeDeleted()) {
 						CWorld::Remove(ped);
 						delete ped;

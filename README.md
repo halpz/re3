@@ -21,8 +21,6 @@ such that we have a working game at all times.
 
 ## Preparing the environment for building
 
-Currently only building on VS2015/2017/2019 (Windows) and GCC (Linux) is tested.
-
 - Clone the repo.
 - Run `git submodule init` and `git submodule update`.
 - Point GTA_III_RE_DIR environment variable to GTA3 root folder.
@@ -30,8 +28,12 @@ Currently only building on VS2015/2017/2019 (Windows) and GCC (Linux) is tested.
 	- On Windows: one of the `premake-vsXXXX.cmd` variants on root folder
 	- On Linux: proceed to [Building on Linux](https://github.com/GTAmodding/re3/wiki/Building-on-Linux).
 - There are various settings at the very bottom of [config.h](https://github.com/GTAmodding/re3/tree/master/src/core/config.h), you may want to take a look there. i.e. FIX_BUGS define fixes the bugs we've come across.
+- **If you use 64-bit D3D9**: We don't ship 64-bit Dx9 SDK. You need to download it from Microsoft if you don't have it(although it should come pre-installed after some Windows version)
 
-> :information_source: **Rendering engine** re3 uses completely homebrew RenderWare-replacement rendering engine; [librw](https://github.com/aap/librw/). librw comes as submodule of re3, but you also can use LIBRW enviorenment variable to specify path to your own librw.
+
+> :information_source: **If you choose OpenAL on Windows** You must read [Running OpenAL build on Windows](https://github.com/GTAmodding/re3/wiki/Running-OpenAL-build-on-Windows).
+
+> :information_source: **Did you notice librw?** re3 uses completely homebrew RenderWare-replacement rendering engine; [librw](https://github.com/aap/librw/). librw comes as submodule of re3, but you also can use LIBRW enviorenment variable to specify path to your own librw.
 
 ## Contributing
 

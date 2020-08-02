@@ -44,7 +44,7 @@ CEmergencyPed::InRange(CPed *victim)
 void
 CEmergencyPed::ProcessControl(void)
 {
-	if (m_nZoneLevel > LEVEL_NONE && m_nZoneLevel != CCollision::ms_collisionInMemory)
+	if (m_nZoneLevel > LEVEL_GENERIC && m_nZoneLevel != CCollision::ms_collisionInMemory)
 		return;
 
 	CPed::ProcessControl();
@@ -188,12 +188,12 @@ CEmergencyPed::MedicAI(void)
 	}
 
 	if (InVehicle()) {
-		if (m_pMyVehicle->IsCar() && m_objective != OBJECTIVE_LEAVE_VEHICLE) {
+		if (m_pMyVehicle->IsCar() && m_objective != OBJECTIVE_LEAVE_CAR) {
 			if (gAccidentManager.FindNearestAccident(m_pMyVehicle->GetPosition(), &distToEmergency)
 				&& distToEmergency < 25.0f && m_pMyVehicle->m_vecMoveSpeed.Magnitude() < 0.01f) {
 
 				m_pMyVehicle->AutoPilot.m_nCarMission = MISSION_NONE;
-				SetObjective(OBJECTIVE_LEAVE_VEHICLE, m_pMyVehicle);
+				SetObjective(OBJECTIVE_LEAVE_CAR, m_pMyVehicle);
 				Say(SOUND_PED_LEAVE_VEHICLE);
 			} else if (m_pMyVehicle->pDriver == this && m_nPedState == PED_DRIVING
 				&& m_pMyVehicle->AutoPilot.m_nCarMission == MISSION_NONE && !(CGeneral::GetRandomNumber() & 31)) {

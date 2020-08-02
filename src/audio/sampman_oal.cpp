@@ -27,6 +27,9 @@
 #include "MusicManager.h"
 #include "Frontend.h"
 #include "Timer.h"
+#ifdef AUDIO_OPUS
+#include <opusfile.h>
+#endif
 
 //TODO: fix eax3 reverb
 //TODO: max channals
@@ -69,7 +72,11 @@ char SampleBankDescFilename[] = "audio/sfx.SDT";
 char SampleBankDataFilename[] = "audio/sfx.RAW";
 
 FILE *fpSampleDescHandle;
+#ifdef AUDIO_OPUS
+OggOpusFile *fpSampleDataHandle;
+#else
 FILE *fpSampleDataHandle;
+#endif
 bool  bSampleBankLoaded            [MAX_SAMPLEBANKS];
 int32 nSampleBankDiscStartOffset   [MAX_SAMPLEBANKS];
 int32 nSampleBankSize              [MAX_SAMPLEBANKS];
@@ -444,6 +451,8 @@ int8 cSampleManager::GetCurrent3DProviderIndex(void)
 int8 cSampleManager::SetCurrent3DProvider(uint8 nProvider)
 {
 	ASSERT( nProvider < m_nNumberOfProviders );
+	if (nProvider >= m_nNumberOfProviders)
+		nProvider = 0;
 	int savedprovider = curprovider;
 	
 	if ( nProvider < m_nNumberOfProviders )
@@ -604,7 +613,13 @@ cSampleManager::Initialise(void)
 			return false;
 		}
 	}
-	
+#ifdef AUDIO_CACHE
+	FILE *cacheFile = fopen("audio\\sound.cache", "rb");
+	if (cacheFile) {
+		fread(nStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
+		fclose(cacheFile);
+	} else
+#endif
 	{
 	
 		for ( int32 i = 0; i < TOTAL_STREAMED_SOUNDS; i++ )
@@ -622,6 +637,11 @@ cSampleManager::Initialise(void)
 			else
 				USERERROR("Can't open '%s'\n", StreamedNameTable[i]);
 		}
+#ifdef AUDIO_CACHE
+		cacheFile = fopen("audio\\sound.cache", "wb");
+		fwrite(nStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
+		fclose(cacheFile);
+#endif
 	}
 		
 	LoadSampleBank(SAMPLEBANK_MAIN);
@@ -743,12 +763,27 @@ cSampleManager::LoadSampleBank(uint8 nBank)
 		return false;
 	}
 	
+#ifdef AUDIO_OPUS
+	int samplesRead = 0;
+	int samplesSize = nSampleBankSize[nBank] / 2;
+	op_pcm_seek(fpSampleDataHandle, 0);
+	while (samplesSize > 0) {
+		int size = op_read(fpSampleDataHandle, (opus_int16 *)(nSampleBankMemoryStartAddress[nBank] + samplesRead), samplesSize, NULL);
+		if (size <= 0) {
+			// huh?
+			//assert(0);
+			break;
+		}
+		samplesRead += size*2;
+		samplesSize -= size;
+	}
+#else
 	if ( fseek(fpSampleDataHandle, nSampleBankDiscStartOffset[nBank], SEEK_SET) != 0 )
 		return false;
 	
 	if ( fread((void *)nSampleBankMemoryStartAddress[nBank], 1, nSampleBankSize[nBank], fpSampleDataHandle) != nSampleBankSize[nBank] )
 		return false;
-	
+#endif
 	bSampleBankLoaded[nBank] = true;
 	
 	return true;
@@ -840,13 +875,28 @@ cSampleManager::LoadPedComment(uint32 nComment)
 			}
 		}
 	}
-	
+
+#ifdef AUDIO_OPUS
+	int samplesRead = 0;
+	int samplesSize = m_aSamples[nComment].nSize / 2;
+	op_pcm_seek(fpSampleDataHandle, m_aSamples[nComment].nOffset / 2);
+	while (samplesSize > 0) {
+		int size = op_read(fpSampleDataHandle, (opus_int16 *)(nSampleBankMemoryStartAddress[SAMPLEBANK_PED] + PED_BLOCKSIZE * nCurrentPedSlot + samplesRead),
+		                   samplesSize, NULL);
+		if (size <= 0) {
+			return false;
+		}
+		samplesRead += size * 2;
+		samplesSize -= size;
+	}
+#else
 	if ( fseek(fpSampleDataHandle, m_aSamples[nComment].nOffset, SEEK_SET) != 0 )
 		return false;
 	
 	if ( fread((void *)(nSampleBankMemoryStartAddress[SAMPLEBANK_PED] + PED_BLOCKSIZE*nCurrentPedSlot), 1, m_aSamples[nComment].nSize, fpSampleDataHandle) != m_aSamples[nComment].nSize )
 		return false;
-	
+
+#endif
 	nPedSlotSfx[nCurrentPedSlot] = nComment;
 	
 	alBufferData(pedBuffers[nCurrentPedSlot],
@@ -1376,7 +1426,7 @@ cSampleManager::InitialiseSampleBanks(void)
 	fpSampleDescHandle = fopen(SampleBankDescFilename, "rb");
 	if ( fpSampleDescHandle == NULL )
 		return false;
-	
+#ifndef AUDIO_OPUS
 	fpSampleDataHandle = fopen(SampleBankDataFilename, "rb");
 	if ( fpSampleDataHandle == NULL )
 	{
@@ -1389,9 +1439,14 @@ cSampleManager::InitialiseSampleBanks(void)
 	fseek(fpSampleDataHandle, 0, SEEK_END);
 	int32 _nSampleDataEndOffset = ftell(fpSampleDataHandle);
 	rewind(fpSampleDataHandle);
-	
+#else
+	int e;
+	fpSampleDataHandle = op_open_file(SampleBankDataFilename, &e);
+#endif
 	fread(m_aSamples, sizeof(tSample), TOTAL_AUDIO_SAMPLES, fpSampleDescHandle);
-	
+#ifdef AUDIO_OPUS
+	int32 _nSampleDataEndOffset = m_aSamples[TOTAL_AUDIO_SAMPLES - 1].nOffset + m_aSamples[TOTAL_AUDIO_SAMPLES - 1].nSize;
+#endif
 	fclose(fpSampleDescHandle);
 	fpSampleDescHandle = NULL;
 	
@@ -1409,7 +1464,7 @@ cSampleManager::InitialiseSampleBanks(void)
 
 	nSampleBankSize[SAMPLEBANK_MAIN] = nSampleBankDiscStartOffset[SAMPLEBANK_PED] - nSampleBankDiscStartOffset[SAMPLEBANK_MAIN];
 	nSampleBankSize[SAMPLEBANK_PED]  = _nSampleDataEndOffset                      - nSampleBankDiscStartOffset[SAMPLEBANK_PED];
-	
+
 	return true;
 }
 

@@ -332,14 +332,14 @@ CEntity::SetupBigBuilding(void)
 	bStreamingDontDelete = true;
 	bUsesCollision = false;
 	m_level = CTheZones::GetLevelFromPosition(&GetPosition());
-	if(m_level == LEVEL_NONE){
+	if(m_level == LEVEL_GENERIC){
 		if(mi->GetTxdSlot() != CTxdStore::FindTxdSlot("generic")){
 			mi->SetTexDictionary("generic");
 			printf("%d:%s txd has been set to generic\n", m_modelIndex, mi->GetName());
 		}
 	}
 	if(mi->m_lodDistances[0] > 2000.0f)
-		m_level = LEVEL_NONE;
+		m_level = LEVEL_GENERIC;
 }
 
 CRect
@@ -579,7 +579,7 @@ CEntity::UpdateRpHAnim(void)
 	char buf[256];
 	if(this == (CEntity*)FindPlayerPed())
 	for(i = 0; i < hier->numNodes; i++){
-		RpHAnimStdKeyFrame *kf = (RpHAnimStdKeyFrame*)rpHANIMHIERARCHYGETINTERPFRAME(hier, i);
+		RpHAnimStdInterpFrame *kf = (RpHAnimStdInterpFrame*)rpHANIMHIERARCHYGETINTERPFRAME(hier, i);
 		sprintf(buf, "%6.3f %6.3f %6.3f %6.3f  %6.3f %6.3f %6.3f  %d %s",
 			kf->q.imag.x, kf->q.imag.y, kf->q.imag.z, kf->q.real,
 			kf->t.x, kf->t.y, kf->t.z,

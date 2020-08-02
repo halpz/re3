@@ -30,7 +30,8 @@ CDirectory::ReadDirFile(const char *filename)
 bool
 CDirectory::WriteDirFile(const char *filename)
 {
-	int fd, n;
+	int fd;
+	size_t n;
 	fd = CFileMgr::OpenFileForWriting(filename);
 	n = CFileMgr::Write(fd, (char*)entries, numEntries*sizeof(DirectoryInfo));
 	CFileMgr::CloseFile(fd);

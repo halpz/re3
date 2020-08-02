@@ -236,7 +236,7 @@ FrameUpdateCallBackSkinned(AnimBlendFrameData *frame, void *arg)
 	CVector vec, pos(0.0f, 0.0f, 0.0f);
 	CQuaternion q, rot(0.0f, 0.0f, 0.0f, 0.0f);
 	float totalBlendAmount = 0.0f;
-	RpHAnimStdKeyFrame *xform = frame->hanimFrame;
+	RpHAnimStdInterpFrame *xform = frame->hanimFrame;
 	CAnimBlendNode **node;
 	AnimBlendFrameUpdateData *updateData = (AnimBlendFrameUpdateData*)arg;
 
@@ -297,7 +297,7 @@ FrameUpdateCallBackWithVelocityExtractionSkinned(AnimBlendFrameData *frame, void
 	float curx = 0.0f, cury = 0.0f;
 	float endx = 0.0f, endy = 0.0f;
 	bool looped = false;
-	RpHAnimStdKeyFrame *xform = frame->hanimFrame;
+	RpHAnimStdInterpFrame *xform = frame->hanimFrame;
 	CAnimBlendNode **node;
 	AnimBlendFrameUpdateData *updateData = (AnimBlendFrameUpdateData*)arg;
 
@@ -383,7 +383,7 @@ FrameUpdateCallBackWith3dVelocityExtractionSkinned(AnimBlendFrameData *frame, vo
 	CVector cur(0.0f, 0.0f, 0.0f);
 	CVector end(0.0f, 0.0f, 0.0f);
 	bool looped = false;
-	RpHAnimStdKeyFrame *xform = frame->hanimFrame;
+	RpHAnimStdInterpFrame *xform = frame->hanimFrame;
 	CAnimBlendNode **node;
 	AnimBlendFrameUpdateData *updateData = (AnimBlendFrameUpdateData*)arg;
 

@@ -11,7 +11,11 @@
 RtCharset *debugCharset;
 #endif
 
-bool gPS2alphaTest = 1;
+#ifdef PS2_ALPHA_TEST
+bool gPS2alphaTest = true;
+#else
+bool gPS2alphaTest = false;
+#endif
 
 #ifndef FINAL
 static bool charsetOpen;
@@ -202,7 +206,7 @@ isSkinnedCb(RpAtomic *atomic, void *data)
 	RpAtomic **pAtomic = (RpAtomic**)data;
 	if(*pAtomic)
 		return nil;	// already found one
-	if(RpSkinGeometryGetSkin(atomic->geometry))
+	if(RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic)))
 		*pAtomic = atomic;	// we could just return nil here directly...
 	return atomic;
 }
@@ -610,4 +614,38 @@ CameraCreate(RwInt32 width, RwInt32 height, RwBool zBuffer)
 #ifdef USE_TEXTURE_POOL
 WRAPPER void _TexturePoolsInitialise() { EAXJMP(0x598B10); }
 WRAPPER void _TexturePoolsShutdown() { EAXJMP(0x598B30); }
+#endif
+
+#if defined(FIX_BUGS) && defined(GTA_PC)
+RwUInt32 saved_alphafunc, saved_alpharef;
+
+void
+SetAlphaTest(RwUInt32 alpharef)
+{
+#ifdef LIBRW
+	saved_alphafunc = rw::GetRenderState(rw::ALPHATESTFUNC);
+	saved_alpharef = rw::GetRenderState(rw::ALPHATESTREF);
+
+	rw::SetRenderState(rw::ALPHATESTFUNC, rw::ALPHAGREATEREQUAL);
+	rw::SetRenderState(rw::ALPHATESTREF, 0);
+#else
+	RwD3D8GetRenderState(D3DRS_ALPHAFUNC, &saved_alphafunc);
+	RwD3D8GetRenderState(D3DRS_ALPHAREF, &saved_alpharef);
+	
+	RwD3D8SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
+	RwD3D8SetRenderState(D3DRS_ALPHAREF, alpharef);
+#endif
+}
+
+void
+RestoreAlphaTest()
+{
+#ifdef LIBRW
+	rw::SetRenderState(rw::ALPHATESTFUNC, saved_alphafunc);
+	rw::SetRenderState(rw::ALPHATESTREF, saved_alpharef);
+#else
+	RwD3D8SetRenderState(D3DRS_ALPHAFUNC, saved_alphafunc);
+	RwD3D8SetRenderState(D3DRS_ALPHAREF, saved_alpharef);
+#endif
+}
 #endif

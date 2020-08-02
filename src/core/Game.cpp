@@ -149,6 +149,15 @@ CGame::InitialiseOnceBeforeRW(void)
 	return true;
 }
 
+#ifndef LIBRW
+#ifdef PS2_MATFX
+void ReplaceMatFxCallback();
+#endif // PS2_MATFX
+#ifdef PS2_ALPHA_TEST
+void ReplaceAtomicPipeCallback();
+#endif // PS2_ALPHA_TEST
+#endif // !LIBRW
+
 bool
 CGame::InitialiseRenderWare(void)
 {
@@ -199,7 +208,14 @@ CGame::InitialiseRenderWare(void)
 #else
 	rw::MatFX::modulateEnvMap = false;
 #endif
-#endif
+#else
+#ifdef PS2_MATFX
+	ReplaceMatFxCallback();
+#endif // PS2_MATFX
+#ifdef PS2_ALPHA_TEST
+	ReplaceAtomicPipeCallback();
+#endif // PS2_ALPHA_TEST
+#endif // LIBRW
 	
 	CFont::Initialise();
 	CHud::Initialise();
@@ -357,9 +373,9 @@ bool CGame::Initialise(const char* datFile)
 	CStreaming::Init();
 	CStreaming::LoadInitialVehicles();
 	CStreaming::LoadInitialPeds();
-	CStreaming::RequestBigBuildings(LEVEL_NONE);
+	CStreaming::RequestBigBuildings(LEVEL_GENERIC);
 	CStreaming::LoadAllRequestedModels(false);
-	printf("Streaming uses %dK of its memory", CStreaming::ms_memoryUsed / 1024);
+	printf("Streaming uses %zuK of its memory", CStreaming::ms_memoryUsed / 1024); // original modifier was %d
 	LoadingScreen("Loading the Game", "Load animations", GetRandomSplashScreen());
 	CAnimManager::LoadAnimFiles();
 	CPed::Initialise();
@@ -511,7 +527,7 @@ void CGame::ReInitGameObjectVariables(void)
 	CTimeCycle::Initialise();
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;
-	CStreaming::RequestBigBuildings(LEVEL_NONE);
+	CStreaming::RequestBigBuildings(LEVEL_GENERIC);
 	CStreaming::LoadAllRequestedModels(false);
 	CPed::Initialise();
 	CEventList::Initialise();

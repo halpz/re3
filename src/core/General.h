@@ -108,7 +108,7 @@ public:
 		if (angle >= TWOPI)
 			angle -= TWOPI;
 
-		return (int)floorf(angle / DEGTORAD(45.0f));
+		return (int)Floor(angle / DEGTORAD(45.0f));
 	}
 
 	// Unlike usual string comparison functions, these don't care about greater or lesser

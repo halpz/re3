@@ -426,8 +426,8 @@ void RemoveUnusedCollision(void)
 		"com_rvroads52", "com_roadsrv", "com_roadkb23", "com_roadkb22"
 	};
 	for (int i = 0; i < ARRAY_SIZE(dontDeleteArray); i++)
-		CModelInfo::GetModelInfo(dontDeleteArray[i], nil)->GetColModel()->level = LEVEL_NONE;
-	CModelInfo::RemoveColModelsFromOtherLevels(LEVEL_NONE);
+		CModelInfo::GetModelInfo(dontDeleteArray[i], nil)->GetColModel()->level = LEVEL_GENERIC;
+	CModelInfo::RemoveColModelsFromOtherLevels(LEVEL_GENERIC);
 	for (int i = 0; i < ARRAY_SIZE(dontDeleteArray); i++)
 		CModelInfo::GetModelInfo(dontDeleteArray[i], nil)->GetColModel()->level = LEVEL_COMMERCIAL;
 }
@@ -439,8 +439,10 @@ void CRecordDataForChase::StartChaseScene(float startTime)
 	Status = STATE_PLAYBACK;
 	AnimTime = startTime;
 	AnimStartTime = CTimer::GetTimeInMilliseconds();
+#ifndef NO_ISLAND_LOADING
 	RemoveUnusedCollision();
 	CStreaming::RemoveIslandsNotUsed(LEVEL_SUBURBAN);
+#endif
 	CGame::TidyUpMemory(true, true);
 	CStreaming::ImGonnaUseStreamingMemory();
 	CFileMgr::SetDir("data\\paths");

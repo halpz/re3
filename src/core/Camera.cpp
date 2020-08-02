@@ -2978,15 +2978,15 @@ CCamera::LoadTrainCamNodes(char const *name)
 	char token[16] = { 0 };
 	char filename[16] = { 0 };
 	uint8 *buf;
-	int bufpos = 0;
+	size_t bufpos = 0;
 	int field = 0;
 	int tokpos = 0;
 	char c;
 	int i;
-	int len;
+	size_t len;
 
 	strcpy(filename, name);
-	len = strlen(filename);
+	len = (int)strlen(filename);
 	filename[len] = '.';
 	filename[len+1] = 'd';
 	filename[len+2] = 'a';
@@ -3587,8 +3587,8 @@ CCamera::CalculateDerivedValues(void)
 	m_cameraMatrix = Invert(m_matrix);
 
 	float hfov = DEGTORAD(CDraw::GetScaledFOV()/2.0f);
-	float c = cos(hfov);
-	float s = sin(hfov);
+	float c = Cos(hfov);
+	float s = Sin(hfov);
 
 	// right plane
 	m_vecFrustumNormals[0] = CVector(c, -s, 0.0f);
@@ -3622,7 +3622,7 @@ bool
 CCamera::IsPointVisible(const CVector &center, const CMatrix *mat)
 {
 	RwV3d c;
-	c = *(RwV3d*)&center;
+	c = center;
 	RwV3dTransformPoints(&c, &c, 1, &mat->m_matrix);
 	if(c.y < CDraw::GetNearClipZ()) return false;
 	if(c.y > CDraw::GetFarClipZ()) return false;
@@ -3637,7 +3637,7 @@ bool
 CCamera::IsSphereVisible(const CVector &center, float radius, const CMatrix *mat)
 {
 	RwV3d c;
-	c = *(RwV3d*)&center;
+	c = center;
 	RwV3dTransformPoints(&c, &c, 1, &mat->m_matrix);
 	if(c.y + radius < CDraw::GetNearClipZ()) return false;
 	if(c.y - radius > CDraw::GetFarClipZ()) return false;

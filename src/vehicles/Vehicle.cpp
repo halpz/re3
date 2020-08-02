@@ -669,12 +669,12 @@ CVehicle::InflictDamage(CEntity* damagedBy, eWeaponType weaponType, float damage
 					if (pDriver) {
 						SetStatus(STATUS_ABANDONED);
 						pDriver->bFleeAfterExitingCar = true;
-						pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+						pDriver->SetObjective(OBJECTIVE_LEAVE_CAR, this);
 					}
 					for (int i = 0; i < m_nNumMaxPassengers; i++) {
 						if (pPassengers[i]) {
 							pPassengers[i]->bFleeAfterExitingCar = true;
-							pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+							pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_CAR, this);
 						}
 					}
 					break;

@@ -23,8 +23,8 @@ CText::Load(void)
 {
 	uint8 *filedata;
 	char filename[32], type[4];
-	int length;
-	int offset, sectlen;
+	intptr_t offset, length;
+	size_t sectlen;
 
 	Unload();
 	filedata = new uint8[0x40000];
@@ -176,12 +176,13 @@ CText::UpperCase(wchar *s)
 
 
 void
-CKeyArray::Load(uint32 length, uint8 *data, int *offset)
+CKeyArray::Load(size_t length, uint8 *data, intptr_t *offset)
 {
-	uint32 i;
+	size_t i;
 	uint8 *rawbytes;
 
-	numEntries = length / sizeof(CKeyEntry);
+	// You can make numEntries size_t if you want to exceed 32-bit boundaries, everything else should be ready.
+	numEntries = (int)(length / sizeof(CKeyEntry));
 	entries = new CKeyEntry[numEntries];
 	rawbytes = (uint8*)entries;
 
@@ -255,12 +256,13 @@ CKeyArray::Search(const char *key)
 
 
 void
-CData::Load(uint32 length, uint8 *data, int *offset)
+CData::Load(size_t length, uint8 *data, intptr_t *offset)
 {
-	uint32 i;
+	size_t i;
 	uint8 *rawbytes;
 
-	numChars = length / sizeof(wchar);
+	// You can make numChars size_t if you want to exceed 32-bit boundaries, everything else should be ready.
+	numChars = (int)(length / sizeof(wchar));
 	chars = new wchar[numChars];
 	rawbytes = (uint8*)chars;
 

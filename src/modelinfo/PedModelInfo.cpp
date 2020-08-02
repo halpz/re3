@@ -265,7 +265,7 @@ CPedModelInfo::CreateHitColModel(void)
 	max.x = max.y = 0.5f;
 	max.z = 1.2f;
 	colmodel->boundingBox.Set(min, max, 0, 0);
-	colmodel->level = LEVEL_NONE;
+	colmodel->level = LEVEL_GENERIC;
 	m_hitColModel = colmodel;
 }
 
@@ -349,7 +349,7 @@ CPedModelInfo::CreateHitColModelSkinned(RpClump *clump)
 	max.x = max.y = 0.5f;
 	max.z = 1.2f;
 	colmodel->boundingBox.Set(min, max, 0, 0);
-	colmodel->level = LEVEL_NONE;
+	colmodel->level = LEVEL_GENERIC;
 	m_hitColModel = colmodel;
 }
 

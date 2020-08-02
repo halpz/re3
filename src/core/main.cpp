@@ -254,7 +254,11 @@ DoFade(void)
 			fadeColor.a = alpha;
 		}
 
-		if(TheCamera.m_WideScreenOn){
+		if(TheCamera.m_WideScreenOn
+#ifdef CUTSCENE_BORDERS_SWITCH
+			&& CMenuManager::m_PrefsCutsceneBorders
+#endif
+			){
 			// what's this?
 			float y = SCREEN_HEIGHT/2 * TheCamera.m_ScreenReductionPercentage/100.0f;
 			rect.left = 0.0f;
@@ -467,11 +471,15 @@ ResetLoadingScreenBar()
 	NumberOfChunksLoaded = 0.0f;
 }
 
-// TODO: compare with PS2
 void
 LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 {
 	CSprite2d *splash;
+
+#ifdef DISABLE_LOADING_SCREEN
+	if (str1 && str2)
+		return;
+#endif
 
 #ifndef RANDOMSPLASH
 	if(CGame::frenchGame || CGame::germanGame || !CGame::nastyGame)
@@ -858,7 +866,11 @@ Render2dStuff(void)
 	CReplay::Display();
 	CPickups::RenderPickUpText();
 
-	if(TheCamera.m_WideScreenOn)
+	if(TheCamera.m_WideScreenOn
+#ifdef CUTSCENE_BORDERS_SWITCH
+		&& CMenuManager::m_PrefsCutsceneBorders
+#endif
+		)
 		TheCamera.DrawBordersForWideScreen();
 
 	CPed *player = FindPlayerPed();

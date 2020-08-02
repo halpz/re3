@@ -266,7 +266,9 @@ CHeli::ProcessControl(void)
 		if(fTargetDist > targetHeight)
 			m_heliStatus = HELI_STATUS_CHASE_PLAYER;
 		}
-		// fall through, BUG?
+#ifdef FIX_BUGS
+		break;
+#endif
 	case HELI_STATUS_CHASE_PLAYER:{
 		float targetHeight;
 		if(m_heliType == HELI_TYPE_CATALINA)
@@ -457,7 +459,7 @@ CHeli::ProcessControl(void)
 		else if (searchLightDist < 40.0f)
 			m_fSearchLightIntensity = 1.0f;
 		else
-			m_fSearchLightIntensity = 1.0f - (40.0f - searchLightDist) / 40.0f;
+			m_fSearchLightIntensity = 1.0f - (40.0f - searchLightDist) / (60.0f-40.0f);
 
 		if (m_fSearchLightIntensity < 0.9f || sq(FindPlayerCoors().x - m_fSearchLightX) + sq(FindPlayerCoors().y - m_fSearchLightY) > sq(7.0f))
 			m_nShootTimer = CTimer::GetTimeInMilliseconds();
@@ -796,11 +798,11 @@ GenerateHeli(bool catalina)
 		heliPos = CVector(-224.0f, 201.0f, 83.0f);
 	else{
 		heliPos = FindPlayerCoors();
-		float angle = (float)(CGeneral::GetRandomNumber() & 0xFF)/0xFF * 6.28f;
+		float angle = (float)(CGeneral::GetRandomNumber() & 0xFF)/0x100 * 6.28f;
 		heliPos.x += 250.0f*Sin(angle);
 		heliPos.y += 250.0f*Cos(angle);
 		if(heliPos.x < -2000.0f || heliPos.x > 2000.0f || heliPos.y < -2000.0f || heliPos.y > 2000.0f){
-			// directly above player
+			heliPos = FindPlayerCoors();
 			heliPos.x -= 250.0f*Sin(angle);
 			heliPos.y -= 250.0f*Cos(angle);
 		}
@@ -811,6 +813,7 @@ GenerateHeli(bool catalina)
 		heli->GetMatrix().SetRotateZOnly(DEGTORAD(270.0f));	// game actually uses 3.14 here
 
 	heli->SetStatus(STATUS_ABANDONED);
+	heli->bIsLocked = true;
 
 	int id = -1;
 	bool found = false;
@@ -938,7 +941,7 @@ CHeli::UpdateHelis(void)
 				CatalinaHasBeenShotDown = true;
 
 			CStats::HelisDestroyed++;
-			CStats::PeopleKilledByOthers += 2;
+			CStats::PeopleKilledByPlayer += 2;
 			CStats::PedsKilledOfThisType[PEDTYPE_COP] += 2;
 			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 250;
 			pos = CWorld::Players[CWorld::PlayerInFocus].m_pPed->GetPosition();
@@ -956,7 +959,7 @@ CHeli::UpdateHelis(void)
 
 				TheCamera.CamShake(0.4f, pHelis[i]->GetPosition().x, pHelis[i]->GetPosition().y, pHelis[i]->GetPosition().z);
 
-				CVector pos = pHelis[i]->GetPosition() - 2.5f*pHelis[i]->GetUp();
+				CVector pos = pHelis[i]->GetPosition() - 2.5f*pHelis[i]->GetForward();
 				CExplosion::AddExplosion(nil, nil, EXPLOSION_HELI, pos, 0);
 			}else
 				pHelis[i]->m_fAngularSpeed *= 1.03f;
@@ -972,7 +975,7 @@ CHeli::UpdateHelis(void)
 				pHelis[i]->m_heliStatus = HELI_STATUS_FLY_AWAY;
 		}
 
-	// Remove all helis if in a tunnel
+	// Remove all helis if in a tunnel or under water
 	if(FindPlayerCoors().z < - 2.0f)
 		for(i = 0; i < NUM_HELIS; i++)
 			if(pHelis[i] && pHelis[i]->m_heliStatus != HELI_STATUS_SHOT_DOWN)
@@ -1017,7 +1020,7 @@ CHeli::TestBulletCollision(CVector *line0, CVector *line1, CVector *bulletPos, i
 			float distToHeli = (pHelis[i]->GetPosition() - *line0).Magnitude();
 			CVector line = (*line1 - *line0);
 			float lineLength = line.Magnitude();
-			*bulletPos = *line0 + line*Max(1.0f, distToHeli-5.0f);
+			*bulletPos = *line0 + line*Max(1.0f, distToHeli-5.0f)/lineLength;
 
 			pHelis[i]->m_nBulletDamage += damage;
 

@@ -103,7 +103,7 @@ public:
 	int32 m_nSampleIndex;
 	uint8 m_nLoadingStatus;
 	uint8 m_nPlayStatus;
-	uint8 field_22; // todo find a name
+	bool m_bIsPlaying;
 	int32 m_nMissionAudioCounter;
 	bool m_bIsPlayed;
 };
@@ -421,7 +421,7 @@ public:
 	bool ProcessVehicleReverseWarning(cVehicleParams *params);
 	bool ProcessVehicleRoadNoise(cVehicleParams *params);
 	bool ProcessVehicleSirenOrAlarm(cVehicleParams *params);
-	void ProcessVehicleSkidding(cVehicleParams *params);
+	bool ProcessVehicleSkidding(cVehicleParams *params);
 	void ProcessWaterCannon(int32);
 	void ProcessWeather(int32 id);
 	bool ProcessWetRoadNoise(cVehicleParams *params);

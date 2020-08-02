@@ -141,6 +141,9 @@ void CGarages::Init(void)
 	MessageStartTime = 0;
 	PlayerInGarage = false;
 	BombsAreFree = false;
+#ifdef FIX_BUGS
+	RespraysAreFree = false;
+#endif
 	CarsCollected = 0;
 	BankVansCollected = 0;
 	PoliceCarsCollected = 0;
@@ -390,7 +393,7 @@ void CGarage::Update()
 					bTakeMoney = true;
 				FindPlayerPed()->m_pWanted->Reset();
 				CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_GARAGE);
-				FindPlayerPed()->m_pWanted->m_bIgnoredByCops = true;
+				FindPlayerPed()->m_pWanted->m_bIgnoredByCops = false;
 #ifdef FIX_BUGS
 				bool bChangedColour = false;
 #else
@@ -1175,7 +1178,7 @@ bool CGarage::IsStaticPlayerCarEntirelyInside()
 		return false;
 	if (FindPlayerPed()->GetPedState() != PED_DRIVING)
 		return false;
-	if (FindPlayerPed()->m_objective == OBJECTIVE_LEAVE_VEHICLE)
+	if (FindPlayerPed()->m_objective == OBJECTIVE_LEAVE_CAR)
 		return false;
 	CVehicle* pVehicle = FindPlayerVehicle();
 	if (pVehicle->GetPosition().x < m_fX1 || pVehicle->GetPosition().x > m_fX2 ||

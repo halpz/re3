@@ -230,7 +230,7 @@ CAutomobile::ProcessControl(void)
 	bWarnedPeds = false;
 
 	// skip if the collision isn't for the current level
-	if(colModel->level > LEVEL_NONE && colModel->level != CCollision::ms_collisionInMemory)
+	if(colModel->level > LEVEL_GENERIC && colModel->level != CCollision::ms_collisionInMemory)
 		return;
 
 	// Improve grip of vehicles in certain cases
@@ -283,7 +283,7 @@ CAutomobile::ProcessControl(void)
 			if(!pDriver->IsPlayer() &&
 			   !(pDriver->m_leader && pDriver->m_leader->bInVehicle) &&
 			   pDriver->CharCreatedBy != MISSION_CHAR)
-				pDriver->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+				pDriver->SetObjective(OBJECTIVE_LEAVE_CAR, this);
 		}
 	}else
 		bDriverLastFrame = false;
@@ -295,7 +295,7 @@ CAutomobile::ProcessControl(void)
 				if(!pPassengers[i]->IsPlayer() &&
 				   !(pPassengers[i]->m_leader && pPassengers[i]->m_leader->bInVehicle) &&
 				   pPassengers[i]->CharCreatedBy != MISSION_CHAR)
-					pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_VEHICLE, this);
+					pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_CAR, this);
 	}
 
 	CRubbish::StirUp(this);
@@ -3588,7 +3588,7 @@ CAutomobile::AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed)
 			)
 		{
 			CParticle::AddParticle(
-#ifdef FIX_BUGS
+#if defined(FIX_BUGS) && !defined(PC_PARTICLE) // looks wrong on PC particles
 				PARTICLE_WHEEL_WATER,
 #else
 				PARTICLE_WATERSPRAY,

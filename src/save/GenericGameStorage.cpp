@@ -489,7 +489,7 @@ CheckDataNotCorrupt(int32 slot, char *name)
 	char filename[100];
 
 	int32 blocknum = 0;
-	eLevelName level = LEVEL_NONE;
+	eLevelName level = LEVEL_GENERIC;
 	CheckSum = 0;
 	uint32 bytes_processed = 0;
 	sprintf(filename, "%s%i%s", DefaultPCSaveFileName, slot + 1, ".b");
@@ -562,14 +562,17 @@ RestoreForStartLoad()
 		ReadDataFromBufferPointer(_buf, TheCamera.GetMatrix().GetPosition().x);
 		ReadDataFromBufferPointer(_buf, TheCamera.GetMatrix().GetPosition().y);
 		ReadDataFromBufferPointer(_buf, TheCamera.GetMatrix().GetPosition().z);
+#ifndef NO_ISLAND_LOADING
 		CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
 		CStreaming::RemoveUnusedBuildings(CGame::currLevel);
+#endif
 		CCollision::SortOutCollisionAfterLoad();
+#ifndef NO_ISLAND_LOADING
 		CStreaming::RequestBigBuildings(CGame::currLevel);
 		CStreaming::LoadAllRequestedModels(false);
 		CStreaming::HaveAllBigBuildingsLoaded(CGame::currLevel);
 		CGame::TidyUpMemory(true, false);
-
+#endif
 		if (CloseFile(file)) {
 			return true;
 		} else {

@@ -137,7 +137,7 @@ public:
 	void SetVehicleComponentFlags(RwFrame *frame, uint32 flags);
 	void PreprocessHierarchy(void);
 	void GetWheelPosn(int32 n, CVector &pos);
-	CVector &GetFrontSeatPosn(void) { return m_positions[m_vehicleType == VEHICLE_TYPE_BOAT ? BOAT_POS_FRONTSEAT : CAR_POS_FRONTSEAT]; };
+	const CVector &GetFrontSeatPosn(void) { return m_vehicleType == VEHICLE_TYPE_BOAT ? m_positions[BOAT_POS_FRONTSEAT] : m_positions[CAR_POS_FRONTSEAT]; }
 
 	int32 ChooseComponent(void);
 	int32 ChooseSecondComponent(void);

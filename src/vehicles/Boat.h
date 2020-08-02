@@ -6,33 +6,34 @@ enum eBoatNodes
 {
 	BOAT_MOVING = 1,
 	BOAT_RUDDER,
-	BOAT_WINDSCREEN
+	BOAT_WINDSCREEN,
+	NUM_BOAT_NODES
 };
 
 class CBoat : public CVehicle
 {
 public:
 	// 0x288
-	float m_fPropellerZ;
-	float m_fPropellerY;
-	CVector m_waterMoveDrag;
-	CVector m_waterTurnDrag;
-	float m_fMovingHiRotation;
-	int32 _unk0;
-	RwFrame *m_aBoatNodes[4];
+	float m_fThrustZ;
+	float m_fThrustY;
+	CVector m_vecMoveRes;
+	CVector m_vecTurnRes;
+	float m_fMovingRotation;
+	int32 m_boat_unused1;
+	RwFrame *m_aBoatNodes[NUM_BOAT_NODES];
 	uint8 bBoatInWater : 1;
 	uint8 bPropellerInWater : 1;
 	bool m_bIsAnchored;
 	float m_fOrientation;
-	int32 _unk1;
+	int32 m_boat_unused2;
 	float m_fDamage;
 	CEntity *m_pSetOnFireEntity;
-	bool _unk2;
+	bool m_boat_unused3;
 	float m_fAccelerate;
 	float m_fBrake;
 	float m_fSteeringLeftRight;
 	uint8 m_nPadID;
-	int32 _unk3;
+	int32 m_boat_unused4;
 	float m_fVolumeUnderWater;
 	CVector m_vecBuoyancePoint;
 	float m_fPrevVolumeUnderWater;

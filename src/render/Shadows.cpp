@@ -796,6 +796,8 @@ CShadows::RenderStaticShadows(void)
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void *)FALSE);
 
+	SetAlphaTest(0);
+
 	for ( int32 i = 0; i < MAX_STATICSHADOWS; i++ )
 		aStaticShadows[i].m_bRendered = false;
 
@@ -849,6 +851,7 @@ CShadows::RenderStaticShadows(void)
 			RenderBuffer::RenderStuffInBuffer();
 		}
 	}
+	RestoreAlphaTest();
 
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)FALSE);
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void *)TRUE);

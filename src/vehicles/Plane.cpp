@@ -83,10 +83,10 @@ CPlane::CPlane(int32 id, uint8 CreatedBy)
 
 	SetStatus(STATUS_PLANE);
 	bIsBIGBuilding = true;
-	m_level = LEVEL_NONE;
+	m_level = LEVEL_GENERIC;
 
 #ifdef FIX_BUGS
-	m_isFarAway = true;
+	m_isFarAway = false;
 #endif
 }
 
@@ -154,7 +154,7 @@ CPlane::ProcessControl(void)
 					int f = ++nFrameGen & 3;
 					CParticle::AddParticle(PARTICLE_HELI_DEBRIS, GetMatrix() * CVector(0.0f, 0.0f, 0.0f), dir,
 						nil, CGeneral::GetRandomNumberInRange(0.1f, 1.0f),
-						colors[nFrameGen], rotSpeed, 0, f, 0);
+						colors[nFrameGen&7], rotSpeed, 0, f, 0);
 				}
 			}
 			if(frm >= 40 && frm <= 80 && frm & 1){
@@ -197,17 +197,18 @@ CPlane::ProcessControl(void)
 				colors[6] = CRGBA(0, 0, 0, 255);
 				colors[7] = CRGBA(252, 66, 66, 255);
 
+				CVector dir;
 				for(i = 0; i < 40; i++){
+					dir.x = CGeneral::GetRandomNumberInRange(-2.0f, 2.0f);
+					dir.y = CGeneral::GetRandomNumberInRange(-2.0f, 2.0f);
+					dir.z = CGeneral::GetRandomNumberInRange(0.0f, 2.0f);
 					int rotSpeed = CGeneral::GetRandomNumberInRange(30.0f, 20.0f);
 					if(CGeneral::GetRandomNumber() & 1)
 						rotSpeed = -rotSpeed;
 					int f = ++nFrameGen & 3;
-					CParticle::AddParticle(PARTICLE_HELI_DEBRIS, GetMatrix() * CVector(0.0f, 0.0f, 0.0f),
-						CVector(CGeneral::GetRandomNumberInRange(-2.0f, 2.0f),
-						        CGeneral::GetRandomNumberInRange(-2.0f, 2.0f),
-						        CGeneral::GetRandomNumberInRange(0.0f, 2.0f)),
+					CParticle::AddParticle(PARTICLE_HELI_DEBRIS, GetMatrix() * CVector(0.0f, 0.0f, 0.0f), dir,
 						nil, CGeneral::GetRandomNumberInRange(0.1f, 1.0f),
-						colors[nFrameGen], rotSpeed, 0, f, 0);
+						colors[nFrameGen&7], rotSpeed, 0, f, 0);
 				}
 			}
 			if(frm >= 40 && frm <= 60 && frm & 1){
@@ -226,7 +227,7 @@ CPlane::ProcessControl(void)
 			}
 			if(frm == 30)
 				bRenderScorched = true;
-			if(frm == 61){
+			if(frm == 62){
 				TheCamera.SetFadeColour(200, 200, 200);
 				TheCamera.Fade(0.0f, FADE_OUT);
 				TheCamera.ProcessFade();
@@ -363,7 +364,7 @@ CPlane::ProcessControl(void)
 			CVector posFront2 = (1.0f - f)*pPathNodes[curPathNodeFront2].p + f*pPathNodes[nextPathNodeFront2].p;
 
 			// Now set matrix
-			GetMatrix().GetPosition() = (posRear + posFront) / 2.0f;
+			GetMatrix().SetTranslateOnly((posRear + posFront) / 2.0f);
 			GetMatrix().GetPosition().z += 4.3f;
 			CVector fwd = posFront - posRear;
 			fwd.Normalise();
@@ -388,7 +389,7 @@ CPlane::ProcessControl(void)
 			m_fSpeed = PlanePathSpeed[m_nPlaneId]/60.0f;
 			m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
 
-			m_isFarAway = !((posFront - TheCamera.GetPosition()).Magnitude2D() < sq(300.0f));
+			m_isFarAway = !((posFront - TheCamera.GetPosition()).MagnitudeSqr2D() < sq(300.0f));
 		}else{
 			float planePathPosition;
 			float totalLengthOfFlightPath;
@@ -484,7 +485,7 @@ CPlane::ProcessControl(void)
 			f = (pathPositionFront - pathNodes[curPathNodeFront].t)/dist;
 			CVector posFront = (1.0f - f)*pathNodes[curPathNodeFront].p + f*pathNodes[nextPathNodeFront].p;
 
-			// And for another point 60 units in front of the plane, used to calculate roll
+			// And for another point 30 units in front of the plane, used to calculate roll
 			float pathPositionFront2 = pathPositionFront + 30.0f;
 			if(pathPositionFront2 > totalLengthOfFlightPath)
 				pathPositionFront2 -= totalLengthOfFlightPath;
@@ -515,7 +516,7 @@ CPlane::ProcessControl(void)
 			CVector posFront2 = (1.0f - f)*pathNodes[curPathNodeFront2].p + f*pathNodes[nextPathNodeFront2].p;
 
 			// Now set matrix
-			GetMatrix().GetPosition() = (posRear + posFront) / 2.0f;
+			GetMatrix().SetTranslateOnly((posRear + posFront) / 2.0f);
 			GetMatrix().GetPosition().z += 1.0f;
 			CVector fwd = posFront - posRear;
 			fwd.Normalise();
@@ -535,7 +536,7 @@ CPlane::ProcessControl(void)
 			m_fSpeed = planePathSpeed/60.0f;
 			m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
 
-			m_isFarAway = !((posFront - TheCamera.GetPosition()).Magnitude2D() < sq(300.0f));
+			m_isFarAway = !((posFront - TheCamera.GetPosition()).MagnitudeSqr2D() < sq(300.0f));
 		}
 	}
 
@@ -697,7 +698,7 @@ CPlane::InitPlanes(void)
 		aPlaneLineBits[1].time = time;
 		aPlaneLineBits[1].position = position;
 		aPlaneLineBits[1].speed = TAXI_SPEED;
-		aPlaneLineBits[1].acceleration = 33.0f/32.0f;
+		aPlaneLineBits[1].acceleration = 618.75f/600.0f;
 		time += 600.0f/((CRUISE_SPEED+TAXI_SPEED)/2.0f);
 		position += 600.0f;
 
@@ -716,7 +717,7 @@ CPlane::InitPlanes(void)
 		aPlaneLineBits[3].time = time;
 		aPlaneLineBits[3].position = position;
 		aPlaneLineBits[3].speed = CRUISE_SPEED;
-		aPlaneLineBits[3].acceleration = -33.0f/32.0f;
+		aPlaneLineBits[3].acceleration = -618.75f/600.0f;
 		time += 600.0f/((CRUISE_SPEED+TAXI_SPEED)/2.0f);
 		position += 600.0f;
 

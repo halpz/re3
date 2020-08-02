@@ -112,6 +112,10 @@ int8 CMenuManager::m_bFrontEnd_ReloadObrTxtGxt;
 int32 CMenuManager::m_PrefsMusicVolume = 102;
 int32 CMenuManager::m_PrefsSfxVolume = 102;
 
+#ifdef CUTSCENE_BORDERS_SWITCH
+bool CMenuManager::m_PrefsCutsceneBorders = true;
+#endif
+
 char CMenuManager::m_PrefsSkinFile[256] = DEFAULT_SKIN_NAME;
 
 int32 CMenuManager::m_KeyPressedCode = -1;
@@ -952,10 +956,10 @@ CMenuManager::Draw()
 		CFont::SetDropShadowPosition(0);
 		if (!CheckHover(MENU_X(30.0f), MENU_X(30.0f) + CFont::GetStringWidth(backTx), SCREEN_SCALE_FROM_BOTTOM(125.0f), SCREEN_SCALE_FROM_BOTTOM(105.0f))) {
 			m_nHoverOption = HOVEROPTION_NOT_HOVERING;
-			m_nCurrOption = m_nPrevOption = 0;
+			m_nCurrOption = m_nOptionMouseHovering = 0;
 		} else {
 			m_nHoverOption = HOVEROPTION_RANDOM_ITEM;
-			m_nCurrOption = m_nPrevOption = 1;
+			m_nCurrOption = m_nOptionMouseHovering = 1;
 		}
 		return;
 	}
@@ -1217,8 +1221,10 @@ CMenuManager::Draw()
 							rightText = option.drawFunc(&isOptionDisabled);
 						}
 					}
-				} else
+				} else {
+					debug("A- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, i, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu, option.screen, option.screenOptionOrder);
 					assert(0 && "Custom frontend options is borked");
+				}
 
 				break;
 #endif
@@ -1250,7 +1256,7 @@ CMenuManager::Draw()
 						static int oldOption = -99;
 						static int oldScreen = m_nCurrScreen;
 
-						m_nPrevOption = rowToCheck;
+						m_nOptionMouseHovering = rowToCheck;
 						if (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY) {
 							m_nCurrOption = rowToCheck;
 							m_bShowMouse = true;
@@ -1974,10 +1980,10 @@ CMenuManager::DrawControllerSetupScreen()
 
 			float curOptY = i * rowHeight + yStart;
 			if (m_nMousePosY > MENU_Y(curOptY) && m_nMousePosY < MENU_Y(rowHeight + curOptY)) {
-					if (m_nPrevOption != i && m_nCurrExLayer == HOVEROPTION_LIST)
+					if (m_nOptionMouseHovering != i && m_nCurrExLayer == HOVEROPTION_LIST)
 						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 
-					m_nPrevOption = i;
+					m_nOptionMouseHovering = i;
 					if (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY) {
 						m_nCurrExLayer = HOVEROPTION_LIST;
 						m_nSelectedListRow = i;
@@ -2598,7 +2604,7 @@ CMenuManager::DrawPlayerSetupScreen()
 		char nameTemp[256];
 		for (m_pSelectedSkin = m_pSkinListHead.nextSkin; m_pSelectedSkin; m_pSelectedSkin = m_pSelectedSkin->nextSkin) {
 			// Drop extension
-			int oldLength = strlen(m_pSelectedSkin->skinNameDisplayed);
+			int oldLength = (int)strlen(m_pSelectedSkin->skinNameDisplayed);
 			m_pSelectedSkin->skinNameDisplayed[oldLength - 4] = '\0';
 			m_pSelectedSkin->skinNameOriginal[oldLength - 4] = '\0';
 
@@ -2688,7 +2694,7 @@ CMenuManager::DrawPlayerSetupScreen()
 
 			if (m_nMousePosX > MENU_X_LEFT_ALIGNED(PLAYERSETUP_LIST_LEFT) && m_nMousePosX < MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT)) {
 				if (m_nMousePosY > MENU_Y(rowStartY) && m_nMousePosY < MENU_Y(rowEndY)) {
-					m_nPrevOption = rowIdx;
+					m_nOptionMouseHovering = rowIdx;
 					if (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY) {
 						m_nCurrExLayer = HOVEROPTION_LIST;
 					}
@@ -3066,7 +3072,6 @@ CMenuManager::InitialiseChangedLanguageSettings()
 		}
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
-		RemoveCustomFrontendOptions();
 		CustomFrontendOptionsPopulate();
 #endif
 	}
@@ -3217,6 +3222,9 @@ CMenuManager::LoadSettings()
 #ifdef FREE_CAM
 			CFileMgr::Read(fileHandle, (char*)&TheCamera.bFreeCam, 1);
 #endif
+#ifdef CUTSCENE_BORDERS_SWITCH
+			CFileMgr::Read(fileHandle, (char *)&CMenuManager::m_PrefsCutsceneBorders, 1);
+#endif
 		}
 	}
 
@@ -3309,6 +3317,9 @@ CMenuManager::SaveSettings()
 		CFileMgr::Write(fileHandle, (char*)&m_PrefsLanguage, 1);
 #ifdef FREE_CAM
 		CFileMgr::Write(fileHandle, (char*)&TheCamera.bFreeCam, 1);
+#endif
+#ifdef CUTSCENE_BORDERS_SWITCH
+		CFileMgr::Write(fileHandle, (char *)&CMenuManager::m_PrefsCutsceneBorders, 1);
 #endif
 	}
 
@@ -4014,7 +4025,7 @@ CMenuManager::ProcessButtonPresses(void)
 			if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_RESUME &&
 #endif
 				(m_nHoverOption == HOVEROPTION_RANDOM_ITEM)) {
-				m_nCurrOption = m_nPrevOption;
+				m_nCurrOption = m_nOptionMouseHovering;
 				optionSelected = true;
 			}
 		} else if (CPad::GetPad(0)->GetLeftMouseJustDown()) {
@@ -4028,7 +4039,7 @@ CMenuManager::ProcessButtonPresses(void)
 				OutputDebugString("FRONTEND RADIO STATION CHANGED");
 			} else if (m_nHoverOption == HOVEROPTION_RANDOM_ITEM
 				&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_RESUME) {
-				m_nCurrOption = m_nPrevOption;
+				m_nCurrOption = m_nOptionMouseHovering;
 				optionSelected = true;
 			}
 #else
@@ -4115,7 +4126,7 @@ CMenuManager::ProcessButtonPresses(void)
 				break;
 			case HOVEROPTION_RANDOM_ITEM:
 				if (((m_nCurrOption != 0) || (m_nCurrScreen != MENUPAGE_PAUSE_MENU)) {
-					m_nCurrOption = m_nPrevOption;
+					m_nCurrOption = m_nOptionMouseHovering;
 						optionSelected = true;
 				}
 				break;
@@ -4775,8 +4786,10 @@ CMenuManager::ProcessButtonPresses(void)
 						} else if (option.type == FEOPTION_GOBACK) {
 							goBack = true;
 						}
-					} else
+					} else {
+						debug("B- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, m_nCurrOption, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, option.screen, option.screenOptionOrder);
 						assert(0 && "Custom frontend options are borked");
+					}
 
 					break;
 #endif
@@ -4998,8 +5011,10 @@ CMenuManager::ProcessButtonPresses(void)
 					}
 					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 				}
-				else
+				else {
+					debug("C- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, m_nCurrOption, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, option.screen, option.screenOptionOrder);
 					assert(0 && "Custom frontend options are borked");
+				}
 
 				break;
 #endif

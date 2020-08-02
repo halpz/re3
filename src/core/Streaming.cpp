@@ -45,7 +45,7 @@ int32 CStreaming::ms_oldSectorX;
 int32 CStreaming::ms_oldSectorY;
 int32 CStreaming::ms_streamingBufferSize;
 int8 *CStreaming::ms_pStreamingBuffer[2];
-int32 CStreaming::ms_memoryUsed;
+size_t CStreaming::ms_memoryUsed;
 CStreamingChannel CStreaming::ms_channel[2];
 int32 CStreaming::ms_channelError;
 int32 CStreaming::ms_numVehiclesLoaded;
@@ -62,7 +62,7 @@ uint16 CStreaming::ms_loadedGangCars;
 int32 CStreaming::ms_imageOffsets[NUMCDIMAGES];
 int32 CStreaming::ms_lastImageRead;
 int32 CStreaming::ms_imageSize;
-uint32 CStreaming::ms_memoryAvailable;
+size_t CStreaming::ms_memoryAvailable;
 
 int32 desiredNumVehiclesLoaded = 12;
 
@@ -202,14 +202,15 @@ CStreaming::Init2(void)
 	// PC only, figure out how much memory we got
 #ifdef GTA_PC
 #define MB (1024*1024)
-	extern unsigned long _dwMemAvailPhys;
+
+	extern size_t _dwMemAvailPhys;
 	ms_memoryAvailable = (_dwMemAvailPhys - 10*MB)/2;
 	if(ms_memoryAvailable < 50*MB)
 		ms_memoryAvailable = 50*MB;
-	desiredNumVehiclesLoaded = (ms_memoryAvailable/MB - 50)/3 + 12;
+	desiredNumVehiclesLoaded = (int32)((ms_memoryAvailable / MB - 50) / 3 + 12);
 	if(desiredNumVehiclesLoaded > MAXVEHICLESLOADED)
 		desiredNumVehiclesLoaded = MAXVEHICLESLOADED;
-	debug("Memory allocated to Streaming is %dMB", ms_memoryAvailable/MB);
+	debug("Memory allocated to Streaming is %zuMB", ms_memoryAvailable/MB); // original modifier was %d
 #undef MB
 #endif
 
@@ -725,7 +726,11 @@ CStreaming::RequestBigBuildings(eLevelName level)
 	n = CPools::GetBuildingPool()->GetSize()-1;
 	for(i = n; i >= 0; i--){
 		b = CPools::GetBuildingPool()->GetSlot(i);
-		if(b && b->bIsBIGBuilding && b->m_level == level)
+		if(b && b->bIsBIGBuilding
+#ifndef NO_ISLAND_LOADING
+		    && b->m_level == level
+#endif
+		)
 			RequestModel(b->GetModelIndex(), BIGBUILDINGFLAGS);
 	}
 	RequestIslands(level);
@@ -735,6 +740,7 @@ CStreaming::RequestBigBuildings(eLevelName level)
 void
 CStreaming::RequestIslands(eLevelName level)
 {
+#ifndef NO_ISLAND_LOADING
 	switch(level){
 	case LEVEL_INDUSTRIAL:
 		RequestModel(islandLODcomInd, BIGBUILDINGFLAGS);
@@ -750,6 +756,7 @@ CStreaming::RequestIslands(eLevelName level)
 		break;
 	default: break;
 	}
+#endif
 }
 
 void
@@ -935,12 +942,14 @@ CStreaming::RemoveBuildings(eLevelName level)
 void
 CStreaming::RemoveUnusedBigBuildings(eLevelName level)
 {
+#ifndef NO_ISLAND_LOADING
 	if(level != LEVEL_INDUSTRIAL)
 		RemoveBigBuildings(LEVEL_INDUSTRIAL);
 	if(level != LEVEL_COMMERCIAL)
 		RemoveBigBuildings(LEVEL_COMMERCIAL);
 	if(level != LEVEL_SUBURBAN)
 		RemoveBigBuildings(LEVEL_SUBURBAN);
+#endif
 	RemoveIslandsNotUsed(level);
 }
 
@@ -960,6 +969,7 @@ DeleteIsland(CEntity *island)
 void
 CStreaming::RemoveIslandsNotUsed(eLevelName level)
 {
+#ifndef NO_ISLAND_LOADING
 	switch(level){
 	case LEVEL_INDUSTRIAL:
 		DeleteIsland(pIslandLODindustEntity);
@@ -977,13 +987,16 @@ CStreaming::RemoveIslandsNotUsed(eLevelName level)
 		DeleteIsland(pIslandLODcomIndEntity);
 		break;
 	default:
+#endif // !NO_ISLAND_LOADING
 		DeleteIsland(pIslandLODindustEntity);
 		DeleteIsland(pIslandLODcomIndEntity);
 		DeleteIsland(pIslandLODcomSubEntity);
 		DeleteIsland(pIslandLODsubIndEntity);
 		DeleteIsland(pIslandLODsubComEntity);
+#ifndef NO_ISLAND_LOADING
 		break;
 	}
+#endif // !NO_ISLAND_LOADING
 }
 
 void
@@ -1073,7 +1086,7 @@ CStreaming::RemoveAllUnusedModels(void)
 }
 
 bool
-CStreaming::RemoveReferencedTxds(int32 mem)
+CStreaming::RemoveReferencedTxds(size_t mem)
 {
 	CStreamingInfo *si;
 	int streamId;
@@ -2189,7 +2202,7 @@ CStreaming::DeleteRwObjectsAfterDeath(const CVector &pos)
 }
 
 void
-CStreaming::DeleteRwObjectsBehindCamera(int32 mem)
+CStreaming::DeleteRwObjectsBehindCamera(size_t mem)
 {
 	int ix, iy;
 	int x, y;
@@ -2370,7 +2383,7 @@ CStreaming::DeleteRwObjectsInOverlapSectorList(CPtrList &list, int32 x, int32 y)
 }
 
 bool
-CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, int32 mem)
+CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, size_t mem)
 {
 	CPtrNode *node;
 	CEntity *e;
@@ -2391,7 +2404,7 @@ CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, int32 mem)
 }
 
 bool
-CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, int32 mem)
+CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, size_t mem)
 {
 	CPtrNode *node;
 	CEntity *e;
@@ -2418,7 +2431,7 @@ CStreaming::MakeSpaceFor(int32 size)
 	// the code still happens to work in that case because ms_memoryAvailable is unsigned
 	// but it's not nice....
 
-	while((uint32)ms_memoryUsed >= ms_memoryAvailable - size)
+	while(ms_memoryUsed >= ms_memoryAvailable - size)
 		if(!RemoveLeastUsedModel()){
 			DeleteRwObjectsBehindCamera(ms_memoryAvailable - size);
 			return;
@@ -2480,7 +2493,7 @@ CStreaming::UpdateForAnimViewer(void)
 	if (CStreaming::ms_channelError == -1) {
 		CStreaming::AddModelsToRequestList(CVector(0.0f, 0.0f, 0.0f));
 		CStreaming::LoadRequestedModels();
-		sprintf(gString, "Requested %d, memory size %dK\n", CStreaming::ms_numModelsRequested, 2 * CStreaming::ms_memoryUsed);
+		sprintf(gString, "Requested %d, memory size %zuK\n", CStreaming::ms_numModelsRequested, 2 * CStreaming::ms_memoryUsed); // original modifier was %d
 	}
 	else {
 		CStreaming::RetryLoadFile(CStreaming::ms_channelError);

@@ -158,6 +158,7 @@ enum Config {
 #if defined GTA_PS2
 #	define GTA_PS2_STUFF
 #	define RANDOMSPLASH
+#	define COMPRESSED_COL_VECTORS
 #elif defined GTA_PC
 #	define GTA3_1_1_PATCH
 //#	define GTA3_STEAM_PATCH
@@ -190,7 +191,6 @@ enum Config {
 #endif
 
 #define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more
-#define TOGGLEABLE_BETA_FEATURES // toggleable from debug menu. not too many things
 #define MORE_LANGUAGES		// Add more translations to the game
 #define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
 
@@ -198,8 +198,12 @@ enum Config {
 #define ASPECT_RATIO_SCALE	// Not just makes everything scale with aspect ratio, also adds support for all aspect ratios
 #define DEFAULT_NATIVE_RESOLUTION	// Set default video mode to your native resolution (fixes Windows 10 launch)
 #define USE_TXD_CDIMAGE		// generate and load textures from txd.img
+#define PS2_ALPHA_TEST		// emulate ps2 alpha test 
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
+#define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
+//#define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
 //#define USE_TEXTURE_POOL
+#define CUTSCENE_BORDERS_SWITCH
 
 // Particle
 //#define PC_PARTICLE
@@ -264,11 +268,18 @@ enum Config {
 // Peds
 #define PED_SKIN		// support for skinned geometry on peds
 #define ANIMATE_PED_COL_MODEL
-#define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
+// #define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
 // #define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward
 #define CANCELLABLE_CAR_ENTER
+//#define PEDS_REPORT_CRIMES_ON_PHONE
 
 // Camera
 //#define PS2_CAM_TRANSITION	// old way of transitioning between cam modes
 #define IMPROVED_CAMERA		// Better Debug cam, and maybe more in the future
 #define FREE_CAM		// Rotating cam
+
+// Audio
+#ifndef AUDIO_OAL // is not working yet for openal
+#define AUDIO_CACHE // cache sound lengths to speed up the cold boot
+#endif
+//#define PS2_AUDIO   // changes audio paths for cutscenes and radio to PS2 paths, needs vbdec to support VB with MSS

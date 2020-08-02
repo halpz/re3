@@ -104,7 +104,9 @@ CFileLoader::LoadLevel(const char *filename)
 			LoadingScreenLoadingFile(line + 8);
 			LoadMapZones(line + 8);
 		}else if(strncmp(line, "SPLASH", 6) == 0){
+#ifndef DISABLE_LOADING_SCREEN
 			LoadSplash(GetRandomSplashScreen());
+#endif
 		}else if(strncmp(line, "CDIMAGE", 7) == 0){
 			CdStreamAddImage(line + 8);
 		}
@@ -262,12 +264,12 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	int32 numVertices = *(int16*)buf;
 	buf += 4;
 	if(numVertices > 0){
-		model.vertices = (CVector*)RwMalloc(numVertices*sizeof(CVector));
+		model.vertices = (CompressedVector*)RwMalloc(numVertices*sizeof(CompressedVector));
 		for(i = 0; i < numVertices; i++){
-			model.vertices[i] = *(CVector*)buf;
-			if(Abs(model.vertices[i].x) >= 256.0f ||
-			   Abs(model.vertices[i].y) >= 256.0f ||
-			   Abs(model.vertices[i].z) >= 256.0f)
+			model.vertices[i].Set(*(float*)buf, *(float*)(buf+4), *(float*)(buf+8));
+			if(Abs(*(float*)buf) >= 256.0f ||
+			   Abs(*(float*)(buf+4)) >= 256.0f ||
+			   Abs(*(float*)(buf+8)) >= 256.0f)
 				printf("%s:Collision volume too big\n", modelname);
 			buf += 12;
 		}

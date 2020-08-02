@@ -518,7 +518,7 @@ public:
 	int32 m_nHoverOption;
 	int32 m_nCurrScreen;
 	int32 m_nCurrOption;
-	int32 m_nPrevOption;
+	int32 m_nOptionMouseHovering;
 	int32 m_nPrevScreen;
  uint32 field_558;
 	int32 m_nCurrSaveSlot;
@@ -581,6 +581,10 @@ public:
 	static uint8 m_PrefsPlayerRed;
 	static uint8 m_PrefsPlayerGreen;
 	static uint8 m_PrefsPlayerBlue;
+
+#ifdef CUTSCENE_BORDERS_SWITCH
+	static bool m_PrefsCutsceneBorders;
+#endif
 
 #ifndef MASTER
 	static bool m_PrefsMarketing;

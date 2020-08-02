@@ -128,11 +128,8 @@ CFire::ProcessFire(void)
 		lightpos.z = m_vecPos.z + 5.0f;
 
 		if (!m_pEntity) {
-			CShadows::StoreStaticShadow((uintptr)this, SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &lightpos,
-				7.0f, 0.0f, 0.0f, -7.0f,
-				255,                                        // this is 0 on PC which results in no shadow
-				nRandNumber / 2, nRandNumber / 2, 0,
-				10.0f, 1.0f, 40.0f, 0, 0.0f);
+			CShadows::StoreStaticShadow((uintptr)this, SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &lightpos, 7.0f, 0.0f, 0.0f, -7.0f, 0, nRandNumber / 2,
+			                            nRandNumber / 2, 0, 10.0f, 1.0f, 40.0f, 0, 0.0f);
 		}
 		fGreen = nRandNumber / 128;
 		fRed = nRandNumber / 128;

@@ -217,6 +217,7 @@ CModelInfo::IsBikeModel(int32 id)
 void
 CModelInfo::RemoveColModelsFromOtherLevels(eLevelName level)
 {
+#ifndef NO_ISLAND_LOADING
 	int i;
 	CBaseModelInfo *mi;
 	CColModel *colmodel;
@@ -225,10 +226,11 @@ CModelInfo::RemoveColModelsFromOtherLevels(eLevelName level)
 		mi = GetModelInfo(i);
 		if(mi){
 			colmodel = mi->GetColModel();
-			if(colmodel && colmodel->level != LEVEL_NONE && colmodel->level != level)
+			if(colmodel && colmodel->level != LEVEL_GENERIC && colmodel->level != level)
 				colmodel->RemoveCollisionVolumes();
 		}
 	}
+#endif
 }
 
 void

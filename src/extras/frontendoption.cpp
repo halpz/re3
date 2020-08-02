@@ -43,10 +43,13 @@ GetNumberOfMenuOptions(int screen)
 	return Rows;
 }
 
-// Used before reloading in InitialiseChangedLanguageSettings and debugmenu
+// Used before populating options, but effective in InitialiseChangedLanguageSettings and debugmenu
 void
 RemoveCustomFrontendOptions()
 {
+	if (numCustomFrontendOptions == 0)
+		return;
+
 	for (int i = 0; i < MENUPAGES; i++) {
 		for (int j = 0; j < NUM_MENUROWS; j++) {
 			if (aScreens[i].m_aEntries[j].m_Action == MENUACTION_TRIGGERFUNC) {
@@ -68,9 +71,11 @@ int8 RegisterNewOption(int screen)
 {
 	numCustomFrontendOptions++;
 	if (numCustomFrontendOptions == 1)
-		customFrontendOptions = (FrontendOption*)malloc(numCustomFrontendOptions * sizeof(FrontendOption));
-	else
-		customFrontendOptions = (FrontendOption*)realloc(customFrontendOptions, numCustomFrontendOptions * sizeof(FrontendOption));
+		customFrontendOptions = (FrontendOption*)malloc(5 * sizeof(FrontendOption));
+	else if (numCustomFrontendOptions % 5 == 1)
+		customFrontendOptions = (FrontendOption*)realloc(customFrontendOptions, (numCustomFrontendOptions + 4) * sizeof(FrontendOption));
+
+	assert(customFrontendOptions != nil && "Custom frontend options can't be allocated");
 
 	uint8 nth = GetNumberOfMenuOptions(screen);
 	if (optionCursor < 0) {

@@ -311,7 +311,11 @@ enum Visbility
 	VIS_STREAMME
 };
 
+#ifdef FIX_BUGS
+#define LOD_DISTANCE (300.0f*TheCamera.LODDistMultiplier)
+#else
 #define LOD_DISTANCE 300.0f
+#endif
 #define FADE_DISTANCE 20.0f
 #define STREAM_DISTANCE 30.0f
 
@@ -674,14 +678,7 @@ CRenderer::ScanWorld(void)
 			poly[2].y = CWorld::GetSectorY(vectors[CORNER_LOD_RIGHT].y);
 			ScanSectorPoly(poly, 3, ScanSectorList_Subway);
 		}else{
-			if(f <= LOD_DISTANCE){
-				poly[0].x = CWorld::GetSectorX(vectors[CORNER_CAM].x);
-				poly[0].y = CWorld::GetSectorY(vectors[CORNER_CAM].y);
-				poly[1].x = CWorld::GetSectorX(vectors[CORNER_FAR_TOPLEFT].x);
-				poly[1].y = CWorld::GetSectorY(vectors[CORNER_FAR_TOPLEFT].y);
-				poly[2].x = CWorld::GetSectorX(vectors[CORNER_FAR_TOPRIGHT].x);
-				poly[2].y = CWorld::GetSectorY(vectors[CORNER_FAR_TOPRIGHT].y);
-			}else{
+			if(f > LOD_DISTANCE){
 				// priority
 				poly[0].x = CWorld::GetSectorX(vectors[CORNER_CAM].x);
 				poly[0].y = CWorld::GetSectorY(vectors[CORNER_CAM].y);
@@ -698,11 +695,27 @@ CRenderer::ScanWorld(void)
 				poly[1].y = CWorld::GetSectorY(vectors[CORNER_LOD_LEFT].y);
 				poly[2].x = CWorld::GetSectorX(vectors[CORNER_LOD_RIGHT].x);
 				poly[2].y = CWorld::GetSectorY(vectors[CORNER_LOD_RIGHT].y);
+				ScanSectorPoly(poly, 3, ScanSectorList);
+			}else{
+				poly[0].x = CWorld::GetSectorX(vectors[CORNER_CAM].x);
+				poly[0].y = CWorld::GetSectorY(vectors[CORNER_CAM].y);
+				poly[1].x = CWorld::GetSectorX(vectors[CORNER_FAR_TOPLEFT].x);
+				poly[1].y = CWorld::GetSectorY(vectors[CORNER_FAR_TOPLEFT].y);
+				poly[2].x = CWorld::GetSectorX(vectors[CORNER_FAR_TOPRIGHT].x);
+				poly[2].y = CWorld::GetSectorY(vectors[CORNER_FAR_TOPRIGHT].y);
+				ScanSectorPoly(poly, 3, ScanSectorList);
 			}
-			ScanSectorPoly(poly, 3, ScanSectorList);
-
+#ifdef NO_ISLAND_LOADING
+			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_INDUSTRIAL));
+			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_COMMERCIAL));
+			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_SUBURBAN));
+#else
+	#ifdef FIX_BUGS
+			if (CCollision::ms_collisionInMemory != LEVEL_GENERIC)
+	#endif
 			ScanBigBuildingList(CWorld::GetBigBuildingList(CCollision::ms_collisionInMemory));
-			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_NONE));
+#endif
+			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_GENERIC));
 		}
 	}
 }
@@ -844,9 +857,9 @@ CRenderer::ScanSectorPoly(RwV2d *poly, int32 numVertices, void (*scanfunc)(CPtrL
 
 	// prestep x1 and x2 to next integer y
 	deltaA = CalcNewDelta(&poly[a1], &poly[a2]);
-	xA = deltaA * (ceilf(poly[a1].y) - poly[a1].y) + poly[a1].x;
+	xA = deltaA * (Ceil(poly[a1].y) - poly[a1].y) + poly[a1].x;
 	deltaB = CalcNewDelta(&poly[b1], &poly[b2]);
-	xB = deltaB * (ceilf(poly[b1].y) - poly[b1].y) + poly[b1].x;
+	xB = deltaB * (Ceil(poly[b1].y) - poly[b1].y) + poly[b1].x;
 
 	if(y != yend){
 		if(deltaB < 0.0f && (int)xB < xstart)
@@ -891,7 +904,7 @@ CRenderer::ScanSectorPoly(RwV2d *poly, int32 numVertices, void (*scanfunc)(CPtrL
 						xstart = poly[b1].x;
 				}while(y == (int)poly[b2].y);
 				deltaB = CalcNewDelta(&poly[b1], &poly[b2]);
-				xB = deltaB * (ceilf(poly[b1].y) - poly[b1].y) + poly[b1].x;
+				xB = deltaB * (Ceil(poly[b1].y) - poly[b1].y) + poly[b1].x;
 				if(deltaB < 0.0f && (int)xB < xstart)
 					xstart = xB;
 			}
@@ -927,7 +940,7 @@ CRenderer::ScanSectorPoly(RwV2d *poly, int32 numVertices, void (*scanfunc)(CPtrL
 						xend = poly[a1].x;
 				}while(y == (int)poly[a2].y);
 				deltaA = CalcNewDelta(&poly[a1], &poly[a2]);
-				xA = deltaA * (ceilf(poly[a1].y) - poly[a1].y) + poly[a1].x;
+				xA = deltaA * (Ceil(poly[a1].y) - poly[a1].y) + poly[a1].x;
 				if(deltaA >= 0.0f && (int)xA > xend)
 					xend = xA;
 			}

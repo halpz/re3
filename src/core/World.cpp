@@ -1797,7 +1797,7 @@ CWorld::ClearForRestart(void)
 			CWorld::Remove(pEntity);
 			delete pEntity;
 		}
-		for(CPtrNode *pNode = GetBigBuildingList(LEVEL_NONE).first; pNode; pNode = pNode->next) {
+		for(CPtrNode *pNode = GetBigBuildingList(LEVEL_GENERIC).first; pNode; pNode = pNode->next) {
 			CVehicle *pVehicle = (CVehicle *)pNode->item;
 			if(pVehicle && pVehicle->IsVehicle() && pVehicle->IsPlane()) {
 				CWorld::Remove(pVehicle);

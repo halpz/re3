@@ -17,6 +17,6 @@ CBuilding::ReplaceWithNewModel(int32 id)
 	m_modelIndex = id;
 
 	if(bIsBIGBuilding)
-		if(m_level == LEVEL_NONE || m_level == CGame::currLevel)
+		if(m_level == LEVEL_GENERIC || m_level == CGame::currLevel)
 			CStreaming::RequestModel(id, STREAMFLAGS_DONT_REMOVE);
 }
