@@ -164,6 +164,7 @@ project "re3"
 	files { addSrcFiles("src") }
 	files { addSrcFiles("src/animation") }
 	files { addSrcFiles("src/audio") }
+	files { addSrcFiles("src/audio/eax") }
 	files { addSrcFiles("src/audio/oal") }
 	files { addSrcFiles("src/control") }
 	files { addSrcFiles("src/core") }
@@ -181,11 +182,11 @@ project "re3"
 	files { addSrcFiles("src/vehicles") }
 	files { addSrcFiles("src/weapons") }
 	files { addSrcFiles("src/extras") }
-	files { addSrcFiles("eax") }
 
 	includedirs { "src" }
 	includedirs { "src/animation" }
 	includedirs { "src/audio" }
+	includedirs { "src/audio/eax" }
 	includedirs { "src/audio/oal" }
 	includedirs { "src/control" }
 	includedirs { "src/core" }
@@ -203,7 +204,6 @@ project "re3"
 	includedirs { "src/vehicles" }
 	includedirs { "src/weapons" }
 	includedirs { "src/extras" }
-	includedirs { "eax" }
 	
 	if _OPTIONS["with-opus"] then
 		includedirs { "ogg/include" }
@@ -213,8 +213,8 @@ project "re3"
 
 	filter "platforms:*mss"
 		defines { "AUDIO_MSS" }
-		includedirs { "milessdk/include" }
-		libdirs { "milessdk/lib" }
+		includedirs { "sdk/milessdk/include" }
+		libdirs { "sdk/milessdk/lib" }
 	
 	if _OPTIONS["with-opus"] then
 		filter "platforms:win*"
@@ -268,8 +268,8 @@ project "re3"
 
 	filter "platforms:*RW33*"
 		staticruntime "on"
-		includedirs { "rwsdk/include/d3d8" }
-		libdirs { "rwsdk/lib/d3d8/release" }
+		includedirs { "sdk/rwsdk/include/d3d8" }
+		libdirs { "sdk/rwsdk/lib/d3d8/release" }
 		links { "rwcore", "rpworld", "rpmatfx", "rpskin", "rphanim", "rtbmp", "rtquat", "rtcharse" }
 		defines { "RWLIBS" }
 		linkoptions "/SECTION:_rwcseg,ER!W /MERGE:_rwcseg=.text"
@@ -288,8 +288,8 @@ project "re3"
 		links { "d3d9" }
 		
 	filter "platforms:*x86*d3d*"
-		includedirs { "dxsdk/include" }
-		libdirs { "dxsdk/lib" }
+		includedirs { "sdk/dx8sdk/include" }
+		libdirs { "sdk/dx8sdk/lib" }
 
 	filter "platforms:*amd64*d3d9*"
 		defines { "USE_D3D9" }
