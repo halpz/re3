@@ -24,6 +24,11 @@ newoption {
 	description = "Build and use librw from this solution"
 }
 
+newoption {
+	trigger     = "with-opus",
+	description = "Build with opus"
+}
+
 if(_OPTIONS["with-librw"]) then
 	Librw = "librw"
 else
@@ -160,6 +165,7 @@ project "reVC"
 	files { addSrcFiles("src") }
 	files { addSrcFiles("src/animation") }
 	files { addSrcFiles("src/audio") }
+	files { addSrcFiles("src/audio/eax") }
 	files { addSrcFiles("src/audio/oal") }
 	files { addSrcFiles("src/control") }
 	files { addSrcFiles("src/core") }
@@ -177,11 +183,11 @@ project "reVC"
 	files { addSrcFiles("src/vehicles") }
 	files { addSrcFiles("src/weapons") }
 	files { addSrcFiles("src/extras") }
-	files { addSrcFiles("eax") }
 
 	includedirs { "src" }
 	includedirs { "src/animation" }
 	includedirs { "src/audio" }
+	includedirs { "src/audio/eax" }
 	includedirs { "src/audio/oal" }
 	includedirs { "src/control" }
 	includedirs { "src/core" }
@@ -199,12 +205,26 @@ project "reVC"
 	includedirs { "src/vehicles" }
 	includedirs { "src/weapons" }
 	includedirs { "src/extras" }
-	includedirs { "eax" }
 	
+	if _OPTIONS["with-opus"] then
+		includedirs { "ogg/include" }
+		includedirs { "opus/include" }
+		includedirs { "opusfile/include" }
+	end
+
 	filter "platforms:*mss"
 		defines { "AUDIO_MSS" }
-		includedirs { "milessdk/include" }
-		libdirs { "milessdk/lib" }
+		includedirs { "sdk/milessdk/include" }
+		libdirs { "sdk/milessdk/lib" }
+	
+	if _OPTIONS["with-opus"] then
+		filter "platforms:win*"
+			libdirs { "ogg/win32/VS2015/Win32/%{cfg.buildcfg}" }
+			libdirs { "opus/win32/VS2015/Win32/%{cfg.buildcfg}" }
+			libdirs { "opusfile/win32/VS2015/Win32/Release-NoHTTP" }
+		filter {}
+		defines { "AUDIO_OPUS" }
+	end
 		
 	filter "platforms:*oal"
 		defines { "AUDIO_OAL" }
@@ -239,11 +259,18 @@ project "reVC"
 
 	filter "platforms:linux*oal"
 		links { "openal", "mpg123", "sndfile", "pthread" }
+	
+	if _OPTIONS["with-opus"] then
+		filter {}
+		links { "libogg" }
+		links { "opus" }
+		links { "opusfile" }
+	end
 
 	filter "platforms:*RW34*"
 		staticruntime "on"
-		includedirs { "rwsdk/include/d3d8" }
-		libdirs { "rwsdk/lib/d3d8/release" }
+		includedirs { "sdk/rwsdk/include/d3d8" }
+		libdirs { "sdk/rwsdk/lib/d3d8/release" }
 		links { "rwcore", "rpworld", "rpmatfx", "rpskin", "rphanim", "rtbmp", "rtquat", "rtanim", "rtcharse", "rpanisot" }
 		defines { "RWLIBS" }
 		linkoptions "/SECTION:_rwcseg,ER!W /MERGE:_rwcseg=.text"
@@ -262,8 +289,8 @@ project "reVC"
 		links { "d3d9" }
 		
 	filter "platforms:*x86*d3d*"
-		includedirs { "dxsdk/include" }
-		libdirs { "dxsdk/lib" }
+		includedirs { "sdk/dx8sdk/include" }
+		libdirs { "sdk/dx8sdk/lib" }
 
 	filter "platforms:*amd64*d3d9*"
 		defines { "USE_D3D9" }

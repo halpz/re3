@@ -218,6 +218,42 @@ public:
 extern cSampleManager SampleManager;
 extern uint32 BankStartOffset[MAX_SAMPLEBANKS];
 
+#ifdef AUDIO_OPUS
+static char StreamedNameTable[][25] = {
+    "AUDIO\\HEAD.OPUS",    "AUDIO\\CLASS.OPUS",   "AUDIO\\KJAH.OPUS",    "AUDIO\\RISE.OPUS",    "AUDIO\\LIPS.OPUS",    "AUDIO\\GAME.OPUS",
+    "AUDIO\\MSX.OPUS",     "AUDIO\\FLASH.OPUS",   "AUDIO\\CHAT.OPUS",    "AUDIO\\HEAD.OPUS",    "AUDIO\\POLICE.OPUS",  "AUDIO\\CITY.OPUS",
+    "AUDIO\\WATER.OPUS",   "AUDIO\\COMOPEN.OPUS", "AUDIO\\SUBOPEN.OPUS", "AUDIO\\JB.OPUS",      "AUDIO\\BET.OPUS",     "AUDIO\\L1_LG.OPUS",
+    "AUDIO\\L2_DSB.OPUS",  "AUDIO\\L3_DM.OPUS",   "AUDIO\\L4_PAP.OPUS",  "AUDIO\\L5_TFB.OPUS",  "AUDIO\\J0_DM2.OPUS",  "AUDIO\\J1_LFL.OPUS",
+    "AUDIO\\J2_KCL.OPUS",  "AUDIO\\J3_VH.OPUS",   "AUDIO\\J4_ETH.OPUS",  "AUDIO\\J5_DST.OPUS",  "AUDIO\\J6_TBJ.OPUS",  "AUDIO\\T1_TOL.OPUS",
+    "AUDIO\\T2_TPU.OPUS",  "AUDIO\\T3_MAS.OPUS",  "AUDIO\\T4_TAT.OPUS",  "AUDIO\\T5_BF.OPUS",   "AUDIO\\S0_MAS.OPUS",  "AUDIO\\S1_PF.OPUS",
+    "AUDIO\\S2_CTG.OPUS",  "AUDIO\\S3_RTC.OPUS",  "AUDIO\\S5_LRQ.OPUS",  "AUDIO\\S4_BDBA.OPUS", "AUDIO\\S4_BDBB.OPUS", "AUDIO\\S2_CTG2.OPUS",
+    "AUDIO\\S4_BDBD.OPUS", "AUDIO\\S5_LRQB.OPUS", "AUDIO\\S5_LRQC.OPUS", "AUDIO\\A1_SSO.OPUS",  "AUDIO\\A2_PP.OPUS",   "AUDIO\\A3_SS.OPUS",
+    "AUDIO\\A4_PDR.OPUS",  "AUDIO\\A5_K2FT.OPUS", "AUDIO\\K1_KBO.OPUS",  "AUDIO\\K2_GIS.OPUS",  "AUDIO\\K3_DS.OPUS",   "AUDIO\\K4_SHI.OPUS",
+    "AUDIO\\K5_SD.OPUS",   "AUDIO\\R0_PDR2.OPUS", "AUDIO\\R1_SW.OPUS",   "AUDIO\\R2_AP.OPUS",   "AUDIO\\R3_ED.OPUS",   "AUDIO\\R4_GF.OPUS",
+    "AUDIO\\R5_PB.OPUS",   "AUDIO\\R6_MM.OPUS",   "AUDIO\\D1_STOG.OPUS", "AUDIO\\D2_KK.OPUS",   "AUDIO\\D3_ADO.OPUS",  "AUDIO\\D5_ES.OPUS",
+    "AUDIO\\D7_MLD.OPUS",  "AUDIO\\D4_GTA.OPUS",  "AUDIO\\D4_GTA2.OPUS", "AUDIO\\D6_STS.OPUS",  "AUDIO\\A6_BAIT.OPUS", "AUDIO\\A7_ETG.OPUS",
+    "AUDIO\\A8_PS.OPUS",   "AUDIO\\A9_ASD.OPUS",  "AUDIO\\K4_SHI2.OPUS", "AUDIO\\C1_TEX.OPUS",  "AUDIO\\EL_PH1.OPUS",  "AUDIO\\EL_PH2.OPUS",
+    "AUDIO\\EL_PH3.OPUS",  "AUDIO\\EL_PH4.OPUS",  "AUDIO\\YD_PH1.OPUS",  "AUDIO\\YD_PH2.OPUS",  "AUDIO\\YD_PH3.OPUS",  "AUDIO\\YD_PH4.OPUS",
+    "AUDIO\\HD_PH1.OPUS",  "AUDIO\\HD_PH2.OPUS",  "AUDIO\\HD_PH3.OPUS",  "AUDIO\\HD_PH4.OPUS",  "AUDIO\\HD_PH5.OPUS",  "AUDIO\\MT_PH1.OPUS",
+    "AUDIO\\MT_PH2.OPUS",  "AUDIO\\MT_PH3.OPUS",  "AUDIO\\MT_PH4.OPUS",  "AUDIO\\MISCOM.OPUS",  "AUDIO\\END.OPUS",     "AUDIO\\lib_a1.OPUS",
+    "AUDIO\\lib_a2.OPUS",  "AUDIO\\lib_a.OPUS",   "AUDIO\\lib_b.OPUS",   "AUDIO\\lib_c.OPUS",   "AUDIO\\lib_d.OPUS",   "AUDIO\\l2_a.OPUS",
+    "AUDIO\\j4t_1.OPUS",   "AUDIO\\j4t_2.OPUS",   "AUDIO\\j4t_3.OPUS",   "AUDIO\\j4t_4.OPUS",   "AUDIO\\j4_a.OPUS",    "AUDIO\\j4_b.OPUS",
+    "AUDIO\\j4_c.OPUS",    "AUDIO\\j4_d.OPUS",    "AUDIO\\j4_e.OPUS",    "AUDIO\\j4_f.OPUS",    "AUDIO\\j6_1.OPUS",    "AUDIO\\j6_a.OPUS",
+    "AUDIO\\j6_b.OPUS",    "AUDIO\\j6_c.OPUS",    "AUDIO\\j6_d.OPUS",    "AUDIO\\t4_a.OPUS",    "AUDIO\\s1_a.OPUS",    "AUDIO\\s1_a1.OPUS",
+    "AUDIO\\s1_b.OPUS",    "AUDIO\\s1_c.OPUS",    "AUDIO\\s1_c1.OPUS",   "AUDIO\\s1_d.OPUS",    "AUDIO\\s1_e.OPUS",    "AUDIO\\s1_f.OPUS",
+    "AUDIO\\s1_g.OPUS",    "AUDIO\\s1_h.OPUS",    "AUDIO\\s1_i.OPUS",    "AUDIO\\s1_j.OPUS",    "AUDIO\\s1_k.OPUS",    "AUDIO\\s1_l.OPUS",
+    "AUDIO\\s3_a.OPUS",    "AUDIO\\s3_b.OPUS",    "AUDIO\\el3_a.OPUS",   "AUDIO\\mf1_a.OPUS",   "AUDIO\\mf2_a.OPUS",   "AUDIO\\mf3_a.OPUS",
+    "AUDIO\\mf3_b.OPUS",   "AUDIO\\mf3_b1.OPUS",  "AUDIO\\mf3_c.OPUS",   "AUDIO\\mf4_a.OPUS",   "AUDIO\\mf4_b.OPUS",   "AUDIO\\mf4_c.OPUS",
+    "AUDIO\\a1_a.OPUS",    "AUDIO\\a3_a.OPUS",    "AUDIO\\a5_a.OPUS",    "AUDIO\\a4_a.OPUS",    "AUDIO\\a4_b.OPUS",    "AUDIO\\a4_c.OPUS",
+    "AUDIO\\a4_d.OPUS",    "AUDIO\\k1_a.OPUS",    "AUDIO\\k3_a.OPUS",    "AUDIO\\r1_a.OPUS",    "AUDIO\\r2_a.OPUS",    "AUDIO\\r2_b.OPUS",
+    "AUDIO\\r2_c.OPUS",    "AUDIO\\r2_d.OPUS",    "AUDIO\\r2_e.OPUS",    "AUDIO\\r2_f.OPUS",    "AUDIO\\r2_g.OPUS",    "AUDIO\\r2_h.OPUS",
+    "AUDIO\\r5_a.OPUS",    "AUDIO\\r6_a.OPUS",    "AUDIO\\r6_a1.OPUS",   "AUDIO\\r6_b.OPUS",    "AUDIO\\lo2_a.OPUS",   "AUDIO\\lo6_a.OPUS",
+    "AUDIO\\yd2_a.OPUS",   "AUDIO\\yd2_b.OPUS",   "AUDIO\\yd2_c.OPUS",   "AUDIO\\yd2_c1.OPUS",  "AUDIO\\yd2_d.OPUS",   "AUDIO\\yd2_e.OPUS",
+    "AUDIO\\yd2_f.OPUS",   "AUDIO\\yd2_g.OPUS",   "AUDIO\\yd2_h.OPUS",   "AUDIO\\yd2_ass.OPUS", "AUDIO\\yd2_ok.OPUS",  "AUDIO\\h5_a.OPUS",
+    "AUDIO\\h5_b.OPUS",    "AUDIO\\h5_c.OPUS",    "AUDIO\\ammu_a.OPUS",  "AUDIO\\ammu_b.OPUS",  "AUDIO\\ammu_c.OPUS",  "AUDIO\\door_1.OPUS",
+    "AUDIO\\door_2.OPUS",  "AUDIO\\door_3.OPUS",  "AUDIO\\door_4.OPUS",  "AUDIO\\door_5.OPUS",  "AUDIO\\door_6.OPUS",  "AUDIO\\t3_a.OPUS",
+    "AUDIO\\t3_b.OPUS",    "AUDIO\\t3_c.OPUS",    "AUDIO\\k1_b.OPUS",    "AUDIO\\cat1.OPUS"};
+#else
 static char StreamedNameTable[][25]=
 {
 	"AUDIO\\WILD.ADF",
@@ -1445,3 +1481,4 @@ static char StreamedNameTable[][25]=
 	"AUDIO\\BUST_27.WAV",
 	"AUDIO\\BUST_28.WAV",
 };
+#endif

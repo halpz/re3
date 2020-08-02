@@ -31,7 +31,7 @@ such that we have a working game at all times.
 - **If you use 64-bit D3D9**: We don't ship 64-bit Dx9 SDK. You need to download it from Microsoft if you don't have it(although it should come pre-installed after some Windows version)
 
 
-> :information_source: **If you choose OpenAL(OAL) on Windows** You must read [Running OAL build on Windows](https://github.com/GTAmodding/re3/wiki/Running-OAL-build-on-Windows).
+> :information_source: **If you choose OpenAL on Windows** You must read [Running OpenAL build on Windows](https://github.com/GTAmodding/re3/wiki/Running-OpenAL-build-on-Windows).
 
 > :information_source: **Did you notice librw?** re3 uses completely homebrew RenderWare-replacement rendering engine; [librw](https://github.com/aap/librw/). librw comes as submodule of re3, but you also can use LIBRW enviorenment variable to specify path to your own librw.
 
