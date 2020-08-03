@@ -53,6 +53,10 @@ CAccidentManager::ReportAccident(CPed *ped)
 void
 CAccidentManager::Update()
 {
+#ifdef SQUEEZE_PERFORMANCE
+	// Handled after injury registered.
+	return;
+#endif
 	int32 e;
 	if (CEventList::GetEvent(EVENT_INJURED_PED, &e)) {
 		CPed *ped = CPools::GetPed(gaEvent[e].entityRef);

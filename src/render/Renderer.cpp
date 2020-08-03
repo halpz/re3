@@ -73,8 +73,12 @@ CRenderer::PreRender(void)
 	for(i = 0; i < ms_nNoOfVisibleEntities; i++)
 		ms_aVisibleEntityPtrs[i]->PreRender();
 
-	for(i = 0; i < ms_nNoOfInVisibleEntities; i++)
+	for (i = 0; i < ms_nNoOfInVisibleEntities; i++) {
+#ifdef SQUEEZE_PERFORMANCE
+		if (ms_aInVisibleEntityPtrs[i]->IsVehicle() && ((CVehicle*)ms_aInVisibleEntityPtrs[i])->IsHeli())
+#endif
 		ms_aInVisibleEntityPtrs[i]->PreRender();
+	}
 
 	for(node = CVisibilityPlugins::m_alphaEntityList.head.next;
 	    node != &CVisibilityPlugins::m_alphaEntityList.tail;

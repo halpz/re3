@@ -4,7 +4,7 @@
 #include "Game.h"	// for eLevelName
 
 // If you spawn many tanks at once, you will see that collisions of two entity exceeds 32.
-#ifdef FIX_BUGS
+#if defined(FIX_BUGS) && !defined(SQUEEZE_PERFORMANCE)
 #define MAX_COLLISION_POINTS 64
 #else
 #define MAX_COLLISION_POINTS 32

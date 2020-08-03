@@ -45,7 +45,7 @@ CCopPed::CCopPed(eCopType copType) : CPed(PEDTYPE_COP)
 		SetCurrentWeapon(WEAPONTYPE_UZI);
 		m_fArmour = 50.0f;
 		m_wepSkills = 32; /* TODO: what is this? seems unused */
-		m_wepAccuracy = 64;
+		m_wepAccuracy = 68;
 		break;
 	case COP_ARMY:
 		SetModelIndex(MI_ARMY);
@@ -479,7 +479,7 @@ CCopPed::CopAI(void)
 						SetAttack(playerOrHisVeh);
 						SetShootTimer(CGeneral::GetRandomNumberInRange(500, 1000));
 					}
-					SetAttackTimer(CGeneral::GetRandomNumberInRange(100, 300));
+					SetAttackTimer(CGeneral::GetRandomNumberInRange(200, 300));
 				}
 				SetMoveState(PEDMOVE_STILL);
 			}

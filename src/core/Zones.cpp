@@ -7,6 +7,7 @@
 #include "Clock.h"
 #include "Text.h"
 #include "World.h"
+#include "Timer.h"
 
 eLevelName CTheZones::m_CurrLevel;
 CZone *CTheZones::m_pPlayersZone;
@@ -122,6 +123,10 @@ CTheZones::Init(void)
 void
 CTheZones::Update(void)
 {
+#ifdef SQUEEZE_PERFORMANCE
+	if (CTimer::GetFrameCounter() % 5 != 0)
+		return;
+#endif
 	CVector pos;
 	pos = FindPlayerCoors();
 	m_pPlayersZone = FindSmallestZonePosition(&pos);

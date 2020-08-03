@@ -106,6 +106,7 @@ int gameTxdSlot;
 
 bool DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha);
 void DoRWStuffEndOfFrame(void);
+#ifdef PS2_MENU
 void MessageScreen(char *msg)
 {
 	//TODO: stretch_screen
@@ -139,6 +140,7 @@ void MessageScreen(char *msg)
 	
 	DoRWStuffEndOfFrame();
 }
+#endif
 
 bool
 CGame::InitialiseOnceBeforeRW(void)
@@ -431,6 +433,7 @@ bool CGame::Initialise(const char* datFile)
 	if ( !TheMemoryCard.m_bWantToLoad )
 	{
 #endif
+	LoadingScreen("Loading the Game", "Start script", nil);
 	CTheScripts::StartTestScript();
 	CTheScripts::Process();
 	TheCamera.Process();

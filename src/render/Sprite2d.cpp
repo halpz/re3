@@ -4,6 +4,7 @@
 #include "Draw.h"
 #include "Camera.h"
 #include "Sprite2d.h"
+#include "Font.h"
 
 RwIm2DVertex CSprite2d::maVertices[8];
 float CSprite2d::RecipNearClip;
@@ -27,14 +28,18 @@ CSprite2d::InitPerFrame(void)
 	mCurrentBank = 0;
 	for(i = 0; i < 10; i++)
 		mCurrentSprite[i] = 0;
+#ifndef SQUEEZE_PERFORMANCE
 	for(i = 0; i < 10; i++)
 		mpBankTextures[i] = nil;
+#endif
 }
 
 int32
 CSprite2d::GetBank(int32 n, RwTexture *tex)
 {
+#ifndef SQUEEZE_PERFORMANCE
 	mpBankTextures[mCurrentBank] = tex;
+#endif
 	mCurrentSprite[mCurrentBank] = 0;
 	mBankStart[mCurrentBank+1] = mBankStart[mCurrentBank] + n;
 	return mCurrentBank++;
@@ -59,8 +64,12 @@ CSprite2d::DrawBank(int32 bank)
 {
 	if(mCurrentSprite[bank] == 0)
 		return;
+#ifndef SQUEEZE_PERFORMANCE
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER,
 		mpBankTextures[bank] ? RwTextureGetRaster(mpBankTextures[bank]) : nil);
+#else
+	CFont::Sprite[bank].SetRenderState();
+#endif
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
 	RwIm2DRenderPrimitive(rwPRIMTYPETRILIST, &maBankVertices[6*mBankStart[bank]], 6*mCurrentSprite[bank]);
