@@ -158,7 +158,7 @@ enum Config {
 #if defined GTA_PS2
 #	define GTA_PS2_STUFF
 #	define RANDOMSPLASH
-#	define COMPRESSED_COL_VECTORS
+#	define VU_COLLISION
 #elif defined GTA_PC
 #	define GTA3_1_1_PATCH
 //#	define GTA3_STEAM_PATCH
@@ -168,6 +168,10 @@ enum Config {
 #		define PS2_MATFX
 #	endif
 #elif defined GTA_XBOX
+#endif
+
+#ifdef VU_COLLISION
+#define COMPRESSED_COL_VECTORS	// current need compressed vectors in this code
 #endif
 
 #ifdef MASTER

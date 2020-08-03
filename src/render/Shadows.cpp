@@ -1027,7 +1027,9 @@ CShadows::CastShadowEntity(CEntity *pEntity,  float fStartX, float fStartY, floa
 		CColTrianglePlane *pColTriPlanes = pCol->trianglePlanes;
 		ASSERT(pColTriPlanes != NULL);
 
-		if ( Abs(pColTriPlanes[i].normal.z) > 0.1f )
+		CVector normal;
+		pColTriPlanes[i].GetNormal(normal);
+		if ( Abs(normal.z) > 0.1f )
 		{
 			CColTriangle *pColTri = pCol->triangles;
 			ASSERT(pColTri != NULL);
