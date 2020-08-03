@@ -458,7 +458,7 @@ CShadows::StoreShadowForCar(CAutomobile *pCar)
 	if ( CTimeCycle::GetShadowStrength() != 0 )
 	{
 		CVector CarPos = pCar->GetPosition();
-		float fDistToCamSqr = (CarPos - TheCamera.GetPosition()).MagnitudeSqr();
+		float fDistToCamSqr = (CarPos - TheCamera.GetPosition()).MagnitudeSqr2D();
 
 		if ( CCutsceneMgr::IsRunning() )
 			fDistToCamSqr /= SQR(TheCamera.LODDistMultiplier) * 4.0f;
@@ -1578,40 +1578,41 @@ CStaticShadow::Free(void)
 
 void
 CShadows::CalcPedShadowValues(CVector vecLightDir,
-							float *pfDisplacementX, float *pfDisplacementY,
 							float *pfFrontX, float *pfFrontY,
-							float *pfSideX, float *pfSideY)
+							float *pfSideX, float *pfSideY,
+							float *pfDisplacementX, float *pfDisplacementY)
 {
-	ASSERT(pfDisplacementX != NULL);
-	ASSERT(pfDisplacementY != NULL);
-	ASSERT(pfFrontX != NULL);
-	ASSERT(pfFrontY != NULL);
-	ASSERT(pfSideX != NULL);
-	ASSERT(pfSideY != NULL);
+	ASSERT(pfFrontX != nil);
+	ASSERT(pfFrontY != nil);
+	ASSERT(pfSideX != nil);
+	ASSERT(pfSideY != nil);
+	ASSERT(pfDisplacementX != nil);
+	ASSERT(pfDisplacementY != nil);
+
+	*pfFrontX = -vecLightDir.x;
+	*pfFrontY = -vecLightDir.y;
+
+	float fDist = Sqrt(*pfFrontY * *pfFrontY + *pfFrontX * *pfFrontX);
+	float fMult = (fDist + 1.0f) / fDist;
+
+	*pfFrontX *= fMult;
+	*pfFrontY *= fMult;
+
+	*pfSideX = -vecLightDir.y / fDist;
+	*pfSideY =  vecLightDir.x / fDist;
 
 	*pfDisplacementX = -vecLightDir.x;
 	*pfDisplacementY = -vecLightDir.y;
-
-	float fDist = Sqrt(*pfDisplacementY * *pfDisplacementY + *pfDisplacementX * *pfDisplacementX);
-	float fMult = (fDist + 1.0f) / fDist;
-
-	*pfDisplacementX *= fMult;
-	*pfDisplacementY *= fMult;
-
-	*pfFrontX = -vecLightDir.y / fDist;
-	*pfFrontY =  vecLightDir.x / fDist;
-
-	*pfSideX = -vecLightDir.x;
-	*pfSideY = -vecLightDir.y;
-
-	*pfDisplacementX /= 2;
-	*pfDisplacementY /= 2;
 
 	*pfFrontX /= 2;
 	*pfFrontY /= 2;
 
 	*pfSideX /= 2;
 	*pfSideY /= 2;
+
+	*pfDisplacementX /= 2;
+	*pfDisplacementY /= 2;
+	
 }
 
 void
@@ -1656,22 +1657,22 @@ CShadows::RenderExtraPlayerShadows(void)
 							vecLight.y *= fInv;
 							vecLight.z *= fInv;
 
-							float fDisplacementX, fDisplacementY, fFrontX, fFrontY, fSideX, fSideY;
+							float fFrontX, fFrontY, fSideX, fSideY, fDisplacementX, fDisplacementY;
 
 							CalcPedShadowValues(vecLight,
-														&fDisplacementX, &fDisplacementY,
-														&fFrontX, &fFrontY,
-														&fSideX, &fSideY);
+												&fFrontX, &fFrontY,
+												&fSideX, &fSideY,
+												&fDisplacementX, &fDisplacementY);
 
 							CVector shadowPos = FindPlayerCoors();
 
-							shadowPos.x += fSideX;
-							shadowPos.y += fSideY;
+							shadowPos.x += fDisplacementX;
+							shadowPos.y += fDisplacementY;
 
 
 							StoreShadowToBeRendered(SHADOWTYPE_DARK, gpShadowPedTex, &shadowPos,
-									fDisplacementX, fDisplacementY,
 									fFrontX, fFrontY,
+									fSideX, fSideY,
 									nColorStrength, 0, 0, 0,
 									4.0f, false, 1.0f);
 						}
@@ -1768,7 +1769,7 @@ CShadows::RenderIndicatorShadow(uint32 nID, uint8 ShadowType, RwTexture *pTextur
 {
 	ASSERT(pPosn != NULL);
 
-	C3dMarkers::PlaceMarkerSet(nID, _TODOCONST(4), *pPosn, Max(fFrontX, -fSideY),
+	C3dMarkers::PlaceMarkerSet(nID, MARKERTYPE_CYLINDER, *pPosn, Max(fFrontX, -fSideY),
 			0, 128, 255, 128,
 			2048, 0.2f, 0);
 }
