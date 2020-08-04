@@ -20,6 +20,7 @@
 #include "PlayerPed.h"
 #include "Bones.h"
 #include "World.h"
+#include "Replay.h"
 
 CPlaneTrail CPlaneTrails::aArray[6];
 RwImVertexIndex TrailIndices[32] = {
@@ -390,6 +391,7 @@ void CMovingThings::Init()
 	CPlaneTrails::Init();
 	CSmokeTrails::Init();
 	CPlaneBanners::Init();
+	CEscalators::Init();
 
 	StartCloseList.m_pNext = &CMovingThings::EndCloseList;
 	StartCloseList.m_pPrev = nil;
@@ -444,12 +446,14 @@ void CMovingThings::Shutdown()
 	for (i = 0; i < ARRAY_SIZE(aDigitalClocks); ++i)
 		aDigitalClocks[i].SetVisibility(false);
 */
+	CEscalators::Shutdown();
 }
 
 void CMovingThings::Update()
 {
 	CPlaneBanners::Update();
 	CPlaneTrails::Update();
+	CEscalators::Update();
 
 	const int TIME_SPAN = 64; // frames to process all aMovingThings
 
@@ -1287,4 +1291,230 @@ CSmokeTrails::Update(void) {
 		RwIm3DRenderIndexedPrimitive(rwPRIMTYPEPOLYLINE, SmokeTrailIndices, 2);
 		RwIm3DEnd();
 	}
+}
+
+CEscalator CEscalators::aEscalators[NUM_ESCALATORS];
+int32 CEscalators::NumEscalators;
+
+CEscalator::CEscalator() {
+	m_bIsActive = false;
+
+	for (int i = 0; i < 24; i++) {
+		m_pSteps[i] = nil;
+	}
+}
+
+void
+CEscalator::AddThisOne(CVector pos0, CVector pos1, CVector pos2, CVector pos3, bool b_isMovingDown) {
+	m_pos0 = pos0;
+	m_pos1 = pos1;
+	m_pos2 = pos2;
+	m_pos3 = pos3;
+
+	float escalatorStepHeight = CModelInfo::GetModelInfo(MI_ESCALATORSTEP)->GetColModel()->boundingBox.max.z;
+	m_pos0.z -= escalatorStepHeight;
+	m_pos1.z -= escalatorStepHeight;
+	m_pos2.z -= escalatorStepHeight;
+	m_pos3.z -= escalatorStepHeight;
+
+	float magnitudes[3];
+	magnitudes[0] = (m_pos0 - m_pos1).Magnitude();
+	magnitudes[1] = (m_pos1 - m_pos2).Magnitude();
+	magnitudes[2] = (m_pos2 - m_pos3).Magnitude();
+
+	float length = magnitudes[0] + magnitudes[1] + magnitudes[2];
+
+	m_lowerEnd = magnitudes[0] / length;
+	m_upperEnd = (magnitudes[0] + magnitudes[1]) / length;
+
+	m_stepsCount = Max(24.0f, length / 0.6f);
+
+	CVector direction(m_pos0.x - m_pos1.x, m_pos0.y - m_pos1.y, 0.0f);
+	direction.Normalise();
+
+	m_matrix.GetUp() = CVector(0.0f, 0.0f, 1.0f);
+	m_matrix.GetForward() = CVector(direction.x, direction.y, 0.0f);
+	m_matrix.GetRight() = CVector(direction.y, -direction.x, 0.0f);
+	m_matrix.GetPosition() = CVector(0.0f, 0.0f, 0.0f);
+
+	m_bIsMovingDown = b_isMovingDown;
+
+	m_midPoint = (m_pos0 + m_pos3) / 2.0f;
+
+	m_radius = (m_pos0 - m_midPoint).Magnitude();
+}
+
+void
+CEscalator::Update(void) {
+	if (!m_bIsActive) {
+		if ((TheCamera.GetPosition() - m_midPoint).Magnitude() < 25.0f) {
+			if (TheCamera.IsSphereVisible(m_midPoint, m_radius) && (m_stepsCount + 10 < CPools::GetObjectPool()->GetNoOfFreeSpaces())) { 
+				m_bIsActive = true;
+				for (int i = 0; i < m_stepsCount; i++) {
+					m_pSteps[i] = new CObject(MI_ESCALATORSTEP, TRUE);
+					if (m_pSteps[i]) {
+						m_pSteps[i]->SetPosition(m_pos1);
+						CWorld::Add(m_pSteps[i]);
+						m_pSteps[i]->ObjectCreatedBy = ESCALATOR_OBJECT;
+					}
+				}
+			}
+		}
+	}
+
+	if (m_bIsActive) {
+		float time = (CTimer::GetTimeInMilliseconds() % 16384) / 16384.0f;
+		for (int i = 0; i < m_stepsCount; i++) {
+			if (m_pSteps[i]) {
+				float t = i / (float)m_stepsCount + time;
+
+				if (t > 1.0f)
+					t -= 1.0f;
+
+				if (m_bIsMovingDown)
+					t = 1.0f - t;
+
+				CVector oldPosition = m_pSteps[i]->GetPosition();
+				m_pSteps[i]->GetMatrix() = m_matrix;
+
+				CVector newPosition;
+				if (t < m_lowerEnd) {
+					float ratio = t / m_lowerEnd;
+					newPosition = (ratio * m_pos1) + ((1.0f - ratio) * m_pos0);
+				}
+				else if (t < m_upperEnd) {
+					float ratio = (t - m_lowerEnd) / (m_upperEnd - m_lowerEnd);
+					newPosition = (ratio * m_pos2) + ((1.0f - ratio) * m_pos1);
+				}
+				else {
+					float ratio = (t - m_upperEnd) / (1.0f - m_upperEnd);
+					newPosition = (ratio * m_pos3) + ((1.0f - ratio) * m_pos2);
+				}
+
+				m_pSteps[i]->SetPosition(newPosition);
+				m_pSteps[i]->m_vecMoveSpeed = (newPosition - oldPosition) / Max(CTimer::GetTimeStep(), 1.0f);
+				m_pSteps[i]->GetMatrix().UpdateRW();
+				m_pSteps[i]->UpdateRwFrame();
+			}
+			if ((TheCamera.GetPosition() - m_midPoint).Magnitude() > 28.0f || !TheCamera.IsSphereVisible(m_midPoint, m_radius))
+				SwitchOff();
+		}
+	}
+}
+
+bool deletingEscalator;
+
+void
+CEscalator::SwitchOff(void) {
+	if (m_bIsActive) {
+		for (int i = 0; i < m_stepsCount; i++) {
+			if (m_pSteps[i]) {
+				CWorld::Remove(m_pSteps[i]);
+				deletingEscalator = true;
+				delete m_pSteps[i];
+				m_pSteps[i] = nil;
+				deletingEscalator = false;
+			}
+		}
+		m_bIsActive = false;
+	}
+}
+
+void
+CEscalators::AddOne(CVector pos0, CVector pos1, CVector pos2, CVector pos3, bool b_isMovingDown) {
+	aEscalators[NumEscalators++].AddThisOne(pos0, pos1, pos2, pos3, b_isMovingDown);
+}
+
+void
+CEscalators::Init(void) {
+	Shutdown();
+	NumEscalators = 0;
+
+	AddOne(CVector(-9.82999f, -938.04498f, 9.4219f), CVector(-8.573f, -938.04498f, 9.4219f),
+		CVector(-0.747f, -938.045f, 15.065f), CVector(0.88f, -938.045f, 15.065f), TRUE);
+
+	AddOne(CVector(-9.83f, -939.966f, 9.422f), CVector(-8.573f, -939.966f, 9.422f),
+		CVector(-0.747f, -939.966f, 15.065f), CVector(0.880f, -939.966f, 15.065f), FALSE);
+
+	AddOne(CVector(408.116f, 1058.36f, 18.261f), CVector(408.094f, 1057.04f, 18.261f),
+		CVector(408.116f, 1048.0f, 24.765f), CVector(408.094f, 1046.57f, 24.799f), TRUE);
+
+	AddOne(CVector(406.195f, 1058.36f, 18.261f), CVector(406.173f, 1057.04f, 18.261f),
+		CVector(406.195f, 1048.0f, 24.729f), CVector(406.173f, 1046.57f, 24.79f), FALSE);
+
+	AddOne(CVector(421.729f, 1058.3789f, 18.075f), CVector(421.707f, 1057.052f, 18.099f),
+		CVector(421.729f, 1048.016f, 24.604f), CVector(421.707f, 1046.589f, 24.637f), TRUE);
+
+	AddOne(CVector(419.808f, 1058.378f, 18.099f), CVector(419.786f, 1057.052f, 18.099f),
+		CVector(419.808f, 1048.016f, 24.568f), CVector(419.786f, 1046.589f, 24.637f), FALSE);
+
+	AddOne(CVector(412.69901f, 1102.729f, 17.569f), CVector(412.72198f, 1104.057f, 17.57f),
+		CVector(412.69901f, 1113.092f, 24.073f), CVector(412.72198f, 1114.3201f, 24.108f), TRUE);
+
+	AddOne(CVector(414.62f, 1102.729f, 17.569f), CVector(414.64301f, 1104.057f, 17.57f),
+		CVector(414.62f, 1113.092f, 24.037001f), CVector(414.64301f, 1114.3201f, 24.099001f), FALSE);
+
+	AddOne(CVector(414.64301f, 1145.589f, 17.57f), CVector(414.62f, 1144.261f, 17.569f),
+		CVector(414.64301f, 1135.226f, 24.073999f), CVector(414.62f, 1133.798f, 24.107f), TRUE);
+
+	AddOne(CVector(412.72198f, 1145.589f, 17.57f), CVector(412.69901f, 1144.261f, 17.569f),
+		CVector(412.72198f, 1135.226f, 24.038f), CVector(412.69901f, 1133.798f, 24.098f), FALSE);
+
+	AddOne(CVector(406.05099f, 1193.4771f, 18.016001f), CVector(406.07401f, 1194.8051f, 18.017f),
+		CVector(406.05099f, 1203.84f, 24.52f), CVector(406.07401f, 1205.2679f, 24.555f), TRUE);
+
+	AddOne(CVector(407.97198f, 1193.4771f, 18.016001f), CVector(407.995f, 1194.8051f, 18.017f),
+		CVector(407.97198f, 1203.84f, 24.483999f), CVector(407.995f, 1205.2679f, 24.546f), FALSE);
+
+	AddOne(CVector(419.659f, 1193.479f, 17.979f), CVector(419.68201f, 1194.807f, 17.98f),
+		CVector(419.659f, 1203.842f, 24.483f), CVector(419.68201f, 1205.27f, 24.518f), TRUE);
+
+	AddOne(CVector(421.57999f, 1193.479f, 17.979f), CVector(421.603f, 1194.807f, 17.98f),
+		CVector(421.57999f, 1203.842f, 24.447001f), CVector(421.603f, 1205.27f, 24.509001f), FALSE);
+
+	AddOne(CVector(406.23199f, 1022.857f, 17.917f), CVector(406.23199f, 1024.1851f, 17.917f),
+		CVector(406.23199f, 1033.22f, 24.521f), CVector(406.23199f, 1034.647f, 24.555f), TRUE);
+
+	AddOne(CVector(408.15302f, 1022.857f, 17.917f), CVector(408.15302f, 1024.1851f, 17.916f),
+		CVector(408.15302f, 1033.22f, 24.486f), CVector(408.15302f, 1034.647f, 24.52f), FALSE);
+
+	AddOne(CVector(-1506.39f, -813.13f, 13.834f), CVector(-1506.177f, -814.51703f, 13.834f),
+		CVector(-1504.566f, -823.20898f, 19.836f), CVector(-1504.329f, -824.48499f, 19.837f), FALSE);
+
+	AddOne(CVector(-1481.951f, -859.05402f, 13.834f), CVector(-1482.7791f, -858.22498f, 13.834f),
+		CVector(-1489.03f, -851.974f, 19.836f), CVector(-1489.948f, -851.05701f, 19.837f), TRUE);
+
+	AddOne(CVector(-1461.743f, -871.35901f, 13.834f), CVector(-1460.62f, -871.69202f, 13.834f),
+		CVector(-1452.144f, -874.20203f, 19.836f), CVector(-1450.9f, -874.57098f, 19.837f), FALSE);
+
+	AddOne(CVector(-1409.889f, -871.41498f, 13.834f), CVector(-1411.0129f, -871.74701f, 13.834f),
+		CVector(-1419.489f, -874.258f, 19.836f), CVector(-1420.733f, -874.62701f, 19.837f), TRUE);
+
+	AddOne(CVector(-1389.577f, -858.89301f, 13.834f), CVector(-1388.7271f, -858.08698f, 13.834f),
+		CVector(-1382.314f, -852.00201f, 19.836f), CVector(-1381.373f, -851.10797f, 19.837f), FALSE);
+
+	AddOne(CVector(-1364.981f, -813.13f, 13.834f), CVector(-1365.204f, -814.28003f, 13.834f),
+		CVector(-1366.891f, -822.95801f, 19.83f), CVector(-1367.139f, -824.23199f, 19.837f), TRUE);
+
+	for (int i = 0; i < NUM_ESCALATORS; i++) {
+		aEscalators[i].SwitchOff();
+	}
+}
+
+void
+CEscalators::Update(void) {
+	if (CReplay::IsPlayingBack())
+		return;
+
+	for (int i = 0; i < NUM_ESCALATORS; i++) {
+		aEscalators[i].Update();
+	}
+}
+
+void
+CEscalators::Shutdown(void) {
+	for (int i = 0; i < NUM_ESCALATORS; i++) {
+		aEscalators[i].SwitchOff();
+	}
+	NumEscalators = 0;
 }
