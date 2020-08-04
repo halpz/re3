@@ -242,9 +242,9 @@ CCutsceneShadow::GetShadowCamera(int32 camType)
 {
 	switch ( camType )
 	{
-		case RESAMPLE: return &m_ResampleCamera; break;
-		case BLUR:     return &m_BlurCamera;     break;
-		case GRADIENT: return &m_GradientCamera; break;
+		case RESAMPLE: return &m_ResampleCamera;
+		case BLUR:     return &m_BlurCamera;    
+		case GRADIENT: return &m_GradientCamera;
 	}
 	
 	return &m_Camera;

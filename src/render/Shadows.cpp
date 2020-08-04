@@ -534,7 +534,7 @@ CShadows::StoreShadowForVehicle(CVehicle *pCar, VEH_SHD_TYPE type)
 			}
 			else if ( pCar->GetModelIndex() == MI_ANGEL )
 			{
-				fVehicleHeight = fVehicleHeight * 1.5;
+				fVehicleHeight = fVehicleHeight * 1.5f;
 				size = 0.03f;
 			}
 			else if ( pCar->GetModelIndex() == MI_SEASPAR )
