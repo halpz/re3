@@ -35,7 +35,7 @@ public:
 	CCutsceneShadow();
 	~CCutsceneShadow();
 	
-	RwSphere &GetBaseSphere()
+	RwSphere GetBaseSphere()
 	{
 		return m_BaseSphere;
 	}
