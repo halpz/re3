@@ -271,7 +271,7 @@ project "re3"
 	filter "platforms:linux*oal"
 		links { "openal", "mpg123", "sndfile", "pthread" }
 	
-	filter "platforms:linux*oal"
+	filter "platforms:bsd*oal"
 		links { "openal", "mpg123", "sndfile", "pthread" }
 
 	if _OPTIONS["with-opus"] then
