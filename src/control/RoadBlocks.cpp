@@ -105,6 +105,10 @@ CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType
 void 
 CRoadBlocks::GenerateRoadBlocks(void) 
 { 
+#ifdef SQUEEZE_PERFORMANCE
+	if (FindPlayerPed()->m_pWanted->m_RoadblockDensity == 0)
+		return;
+#endif
 	CMatrix offsetMatrix;
 	uint32 frame = CTimer::GetFrameCounter() & 0xF;
 	int16 nRoadblockNode = (int16)(NUMROADBLOCKS * frame) / 16;
