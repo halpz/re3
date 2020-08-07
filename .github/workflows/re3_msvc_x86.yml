@@ -1,4 +1,4 @@
-name: msvc_x86
+name: re3_msvc_x86
 
 on:
   pull_request:
