@@ -853,7 +853,7 @@ CShadows::StoreShadowForPed(CPed *pPed, float fDisplacementX, float fDisplacemen
 		{
 			if ( CTimeCycle::GetShadowStrength() != 0 )
 			{
-				#if 1
+				#ifndef LIBRW
 					CCutsceneShadow *pShadow = pPed->m_pRTShadow;
 				
 					if (pShadow)
