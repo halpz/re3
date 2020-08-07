@@ -152,7 +152,7 @@ CdStreamInit(int32 numChannels)
     }
 #ifdef __linux__
 	_gdwCdStreamFlags = O_RDONLY | O_NOATIME;
-#elif __FreeBSD__
+#else
 	_gdwCdStreamFlags = O_RDONLY;
 #endif
 	// People say it's slower
