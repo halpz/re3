@@ -7,6 +7,7 @@
 #include "Clock.h"
 #include "Text.h"
 #include "World.h"
+#include "Timer.h"
 
 eLevelName CTheZones::m_CurrLevel;
 int16 CTheZones::FindIndex;
@@ -127,6 +128,10 @@ CTheZones::Init(void)
 void
 CTheZones::Update(void)
 {
+#ifdef SQUEEZE_PERFORMANCE
+	if (CTimer::GetFrameCounter() % 5 != 0)
+		return;
+#endif
 	CVector pos;
 	pos = FindPlayerCoors();
 	m_CurrLevel = GetLevelFromPosition(&pos);

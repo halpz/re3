@@ -1,8 +1,123 @@
 #include "common.h"
 
 #include "Quaternion.h"
+#include "VuVector.h"
 
 // TODO: move more stuff into here
+
+
+void TransformPoint(CVuVector &out, const CMatrix &mat, const CVuVector &in)
+{
+#ifdef GTA_PS2
+	__asm__ __volatile__("\n\
+		lqc2    vf01,0x0(%2)\n\
+		lqc2    vf02,0x0(%1)\n\
+		lqc2    vf03,0x10(%1)\n\
+		lqc2    vf04,0x20(%1)\n\
+		lqc2    vf05,0x30(%1)\n\
+		vmulax.xyz	ACC,   vf02,vf01\n\
+		vmadday.xyz	ACC,   vf03,vf01\n\
+		vmaddaz.xyz	ACC,   vf04,vf01\n\
+		vmaddw.xyz	vf06,vf05,vf00\n\
+		sqc2    vf06,0x0(%0)\n\
+		": : "r" (&out) , "r" (&mat) ,"r" (&in): "memory");
+#else
+	out = mat * in;
+#endif
+}
+
+void TransformPoint(CVuVector &out, const CMatrix &mat, const RwV3d &in)
+{
+#ifdef GTA_PS2
+	__asm__ __volatile__("\n\
+		ldr	$8,0x0(%2)\n\
+		ldl	$8,0x7(%2)\n\
+		lw	$9,0x8(%2)\n\
+		pcpyld	$10,$9,$8\n\
+		qmtc2	$10,vf01\n\
+		lqc2    vf02,0x0(%1)\n\
+		lqc2    vf03,0x10(%1)\n\
+		lqc2    vf04,0x20(%1)\n\
+		lqc2    vf05,0x30(%1)\n\
+		vmulax.xyz	ACC,   vf02,vf01\n\
+		vmadday.xyz	ACC,   vf03,vf01\n\
+		vmaddaz.xyz	ACC,   vf04,vf01\n\
+		vmaddw.xyz	vf06,vf05,vf00\n\
+		sqc2    vf06,0x0(%0)\n\
+		": : "r" (&out) , "r" (&mat) ,"r" (&in): "memory");
+#else
+	out = mat * in;
+#endif
+}
+
+void TransformPoints(CVuVector *out, int n, const CMatrix &mat, const RwV3d *in, int stride)
+{
+#ifdef GTA_PS3
+	__asm__ __volatile__("\n\
+		paddub	$3,%4,$0\n\
+		lqc2    vf02,0x0(%2)\n\
+		lqc2    vf03,0x10(%2)\n\
+		lqc2    vf04,0x20(%2)\n\
+		lqc2    vf05,0x30(%2)\n\
+		ldr	$8,0x0(%3)\n\
+		ldl	$8,0x7(%3)\n\
+		lw	$9,0x8(%3)\n\
+		pcpyld	$10,$9,$8\n\
+		qmtc2	$10,vf01\n\
+	1:	vmulax.xyz	ACC,   vf02,vf01\n\
+		vmadday.xyz	ACC,   vf03,vf01\n\
+		vmaddaz.xyz	ACC,   vf04,vf01\n\
+		vmaddw.xyz	vf06,vf05,vf00\n\
+		add	%3,%3,$3\n\
+		ldr	$8,0x0(%3)\n\
+		ldl	$8,0x7(%3)\n\
+		lw	$9,0x8(%3)\n\
+		pcpyld	$10,$9,$8\n\
+		qmtc2	$10,vf01\n\
+		addi	%1,%1,-1\n\
+		addiu	%0,%0,0x10\n\
+		sqc2    vf06,-0x10(%0)\n\
+		bnez	%1,1b\n\
+		": : "r" (out) , "r" (n), "r" (&mat), "r" (in), "r" (stride): "memory");
+#else
+	while(n--){
+		*out = mat * *in;
+		in = (RwV3d*)((uint8*)in + stride);
+		out++;
+	}
+#endif
+}
+
+void TransformPoints(CVuVector *out, int n, const CMatrix &mat, const CVuVector *in)
+{
+#ifdef GTA_PS2
+	__asm__ __volatile__("\n\
+		lqc2    vf02,0x0(%2)\n\
+		lqc2    vf03,0x10(%2)\n\
+		lqc2    vf04,0x20(%2)\n\
+		lqc2    vf05,0x30(%2)\n\
+		lqc2    vf01,0x0(%3)\n\
+		nop\n\
+	1:	vmulax.xyz	ACC,   vf02,vf01\n\
+		vmadday.xyz	ACC,   vf03,vf01\n\
+		vmaddaz.xyz	ACC,   vf04,vf01\n\
+		vmaddw.xyz	vf06,vf05,vf00\n\
+		lqc2	vf01,0x10(%3)\n\
+		addiu	%3,%3,0x10\n\
+		addi	%1,%1,-1\n\
+		addiu	%0,%0,0x10\n\
+		sqc2    vf06,-0x10(%0)\n\
+		bnez	%1,1b\n\
+		": : "r" (out) , "r" (n), "r" (&mat) ,"r" (in): "memory");
+#else
+	while(n--){
+		*out = mat * *in;
+		in++;
+		out++;
+	}
+#endif
+}
+
 
 void
 CMatrix::SetRotate(float xAngle, float yAngle, float zAngle)
@@ -74,6 +189,7 @@ CMatrix::Reorthogonalise(void)
 CMatrix&
 Invert(const CMatrix &src, CMatrix &dst)
 {
+	// TODO: VU0 code
 	// GTA handles this as a raw 4x4 orthonormal matrix
 	// and trashes the RW flags, let's not do that
 	// actual copy of librw code:
@@ -104,6 +220,7 @@ Invert(const CMatrix &src, CMatrix &dst)
 CVector
 operator*(const CMatrix &mat, const CVector &vec)
 {
+	// TODO: VU0 code
 	return CVector(
 		mat.m_matrix.right.x * vec.x + mat.m_matrix.up.x * vec.y + mat.m_matrix.at.x * vec.z + mat.m_matrix.pos.x,
 		mat.m_matrix.right.y * vec.x + mat.m_matrix.up.y * vec.y + mat.m_matrix.at.y * vec.z + mat.m_matrix.pos.y,
@@ -113,6 +230,7 @@ operator*(const CMatrix &mat, const CVector &vec)
 CMatrix
 operator*(const CMatrix &m1, const CMatrix &m2)
 {
+	// TODO: VU0 code
 	CMatrix out;
 	RwMatrix *dst = &out.m_matrix;
 	const RwMatrix *src1 = &m1.m_matrix;
@@ -132,9 +250,18 @@ operator*(const CMatrix &m1, const CMatrix &m2)
 	return out;
 }
 
+CMatrix&
+CMatrix::operator*=(CMatrix const &rhs)
+{
+	// TODO: VU0 code
+	*this = *this * rhs;
+	return *this;
+}
+
 const CVector
 Multiply3x3(const CMatrix &mat, const CVector &vec)
 {
+	// TODO: VU0 code
 	return CVector(
 		mat.m_matrix.right.x * vec.x + mat.m_matrix.up.x * vec.y + mat.m_matrix.at.x * vec.z,
 		mat.m_matrix.right.y * vec.x + mat.m_matrix.up.y * vec.y + mat.m_matrix.at.y * vec.z,
@@ -166,6 +293,7 @@ CQuaternion::Slerp(const CQuaternion &q1, const CQuaternion &q2, float theta, fl
 			w1 = Sin((1.0f - t) * theta) * invSin;
 			w2 = Sin(t * theta) * invSin;
 		}
+		// TODO: VU0 code
 		*this = w1*q1 + w2*q2;
 	}
 }

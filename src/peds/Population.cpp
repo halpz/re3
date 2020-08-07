@@ -1004,7 +1004,11 @@ CPopulation::ManagePopulation(void)
 	}
 
 	int pedPoolSize = CPools::GetPedPool()->GetSize();
+#ifndef SQUEEZE_PERFORMANCE
 	for (int poolIndex = pedPoolSize-1; poolIndex >= 0; poolIndex--) {
+#else
+	for (int poolIndex = (pedPoolSize * (frameMod32 + 1) / 32) - 1; poolIndex >= pedPoolSize * frameMod32 / 32; poolIndex--) {
+#endif
 		CPed *ped = CPools::GetPedPool()->GetSlot(poolIndex);
 
 		if (ped && !ped->IsPlayer() && ped->CanBeDeleted() && !ped->bInVehicle) {
