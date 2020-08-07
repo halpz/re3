@@ -557,6 +557,7 @@ CHeli::PreRender(void)
 {
 	float radius = (GetPosition().z - FindPlayerCoors().z - 10.0f - 1.0f) * 0.3f + 10.0f;
 	HeliDustGenerate(this, radius, FindPlayerCoors().z, Max(16.0f - 4.0f*CTimer::GetTimeStep(), 2.0f));
+	CShadows::StoreShadowForVehicle(this, VEH_SHD_TYPE_HELI);
 }
 
 void
@@ -592,7 +593,7 @@ CHeli::PreRenderAlways(void)
 		CShadows::StoreShadowToBeRendered(SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &shadowPos,
 			6.0f, 0.0f, 0.0f, -6.0f,
 			80*m_fSearchLightIntensity, 80*m_fSearchLightIntensity, 80*m_fSearchLightIntensity, 80*m_fSearchLightIntensity,
-			50.0f, true, 1.0f);
+			50.0f, true, 1.0f, nil, false);
 
 		CVector front = GetMatrix() * CVector(0.0f, 7.0f, 0.0f);
 		CVector toPlayer = FindPlayerCoors() - front;

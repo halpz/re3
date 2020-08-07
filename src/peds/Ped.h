@@ -363,6 +363,9 @@ class CVehicle;
 class CPed : public CPhysical
 {
 public:
+#if 1
+	class CCutsceneShadow *m_pRTShadow;
+#endif
 	// 0x128
 	CStoredCollPoly m_collPoly;
 	float m_fCollisionSpeed;

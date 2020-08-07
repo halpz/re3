@@ -1546,7 +1546,7 @@ CBike::PreRender(void)
 	}
 
 	AddDamagedVehicleParticles();
-//TODO(MIAMI): StoreShadowForVehicle once we have it
+	CShadows::StoreShadowForVehicle(this, VEH_SHD_TYPE_BIKE);
 
 	CMatrix mat;
 	CVector pos;

@@ -399,6 +399,125 @@ RenderSkeleton(RpHAnimHierarchy *hier)
 }
 #endif
 
+
+RwBool Im2DRenderQuad(RwReal x1, RwReal y1, RwReal x2, RwReal y2, RwReal z, RwReal recipCamZ, RwReal uvOffset)
+{
+    RwIm2DVertex        vx[4];
+
+    /*
+     *  Render an opaque white 2D quad at the given coordinates and
+     *  spanning a whole texture.
+     */
+
+    RwIm2DVertexSetScreenX(&vx[0], x1);
+    RwIm2DVertexSetScreenY(&vx[0], y1);
+    RwIm2DVertexSetScreenZ(&vx[0], z);
+    RwIm2DVertexSetIntRGBA(&vx[0], 255, 255, 255, 255);
+    RwIm2DVertexSetRecipCameraZ(&vx[0], recipCamZ);
+    RwIm2DVertexSetU(&vx[0], uvOffset, recipCamZ);
+    RwIm2DVertexSetV(&vx[0], uvOffset, recipCamZ);
+
+    RwIm2DVertexSetScreenX(&vx[1], x1);
+    RwIm2DVertexSetScreenY(&vx[1], y2);
+    RwIm2DVertexSetScreenZ(&vx[1], z);
+    RwIm2DVertexSetIntRGBA(&vx[1], 255, 255, 255, 255);
+    RwIm2DVertexSetRecipCameraZ(&vx[1], recipCamZ);
+    RwIm2DVertexSetU(&vx[1], uvOffset, recipCamZ);
+    RwIm2DVertexSetV(&vx[1], 1.0f + uvOffset, recipCamZ);
+
+    RwIm2DVertexSetScreenX(&vx[2], x2);
+    RwIm2DVertexSetScreenY(&vx[2], y1);
+    RwIm2DVertexSetScreenZ(&vx[2], z);
+    RwIm2DVertexSetIntRGBA(&vx[2], 255, 255, 255, 255);
+    RwIm2DVertexSetRecipCameraZ(&vx[2], recipCamZ);
+    RwIm2DVertexSetU(&vx[2], 1.0f + uvOffset, recipCamZ);
+    RwIm2DVertexSetV(&vx[2], uvOffset, recipCamZ);
+
+    RwIm2DVertexSetScreenX(&vx[3], x2);
+    RwIm2DVertexSetScreenY(&vx[3], y2);
+    RwIm2DVertexSetScreenZ(&vx[3], z);
+    RwIm2DVertexSetIntRGBA(&vx[3], 255, 255, 255, 255);
+    RwIm2DVertexSetRecipCameraZ(&vx[3], recipCamZ);
+    RwIm2DVertexSetU(&vx[3], 1.0f + uvOffset, recipCamZ);
+    RwIm2DVertexSetV(&vx[3], 1.0f + uvOffset, recipCamZ);
+
+    RwIm2DRenderPrimitive(rwPRIMTYPETRISTRIP, vx, 4);
+
+    return TRUE;
+}
+
+bool b_cbsUseLTM = true;
+
+RpAtomic *cbsCalcMeanBSphereRadiusCB(RpAtomic *atomic, void *data)
+{
+	RwV3d atomicPos;
+
+	if ( b_cbsUseLTM )
+		RwV3dTransformPoints(&atomicPos, &RpAtomicGetBoundingSphere(atomic)->center, 1, RwFrameGetLTM(RpClumpGetFrame(atomic->clump)));
+	else
+		RwV3dTransformPoints(&atomicPos, &RpAtomicGetBoundingSphere(atomic)->center, 1, RwFrameGetMatrix(RpClumpGetFrame(atomic->clump)));
+
+	RwV3d temp;
+	RwV3dSub(&temp, &atomicPos, &((RwSphere *)data)->center);	
+	RwReal radius = RwV3dLength(&temp) + RpAtomicGetBoundingSphere(atomic)->radius;
+	
+	if ( ((RwSphere *)data)->radius < radius )
+		((RwSphere *)data)->radius = radius;
+
+	return atomic;
+}
+
+RpAtomic *cbsCalcMeanBSphereCenterCB(RpAtomic *atomic, void *data)
+{
+	RwV3d atomicPos;
+
+	if ( b_cbsUseLTM )
+		RwV3dTransformPoints(&atomicPos, &RpAtomicGetBoundingSphere(atomic)->center, 1, RwFrameGetLTM(RpClumpGetFrame(atomic->clump)));
+	else
+		RwV3dTransformPoints(&atomicPos, &RpAtomicGetBoundingSphere(atomic)->center, 1, RwFrameGetMatrix(RpClumpGetFrame(atomic->clump)));
+	
+	RwV3dAdd(&((RwSphere *)data)->center, &((RwSphere *)data)->center, &atomicPos);
+	
+	return atomic;
+}
+
+RpClump *RpClumpGetBoundingSphere(RpClump *clump, RwSphere *sphere, bool useLTM)
+{
+	RwMatrix matrix;
+	RwSphere result = { 0.0f, 0.0f, 0.0f, 0.0f };
+	
+	b_cbsUseLTM = useLTM;
+ 
+	if ( clump == nil || sphere == nil )
+		return nil;
+  
+	sphere->radius = 0.0f;
+	sphere->center.x = 0.0f;
+	sphere->center.y = 0.0f;
+	sphere->center.z = 0.0f;
+    
+	RwInt32 numAtomics = RpClumpGetNumAtomics(clump);
+	if ( numAtomics < 1.0f )
+		return nil;
+	
+	RpClumpForAllAtomics(clump, cbsCalcMeanBSphereCenterCB, &result);
+	
+	RwV3dScale(&result.center, &result.center, 1.0f/numAtomics);
+	
+	RpClumpForAllAtomics(clump, cbsCalcMeanBSphereRadiusCB, &result);
+	
+	if ( b_cbsUseLTM )
+		RwMatrixInvert(&matrix, RwFrameGetLTM(RpClumpGetFrame(clump)));
+	else
+		RwMatrixInvert(&matrix, RwFrameGetMatrix(RpClumpGetFrame(clump)));
+	
+	RwV3dTransformPoints(&result.center, &result.center, 1, &matrix);
+
+	*sphere = result;
+	
+	return clump;
+}
+
 void
 CameraSize(RwCamera * camera, RwRect * rect,
 		   RwReal viewWindow, RwReal aspectRatio)

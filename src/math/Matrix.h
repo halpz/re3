@@ -29,6 +29,15 @@ public:
 		if(m_hasRwMatrix && m_attachment)
 			RwMatrixDestroy(m_attachment);
 	}
+#ifdef RWCORE_H
+	operator RwMatrix (void) const {
+		return m_matrix;
+	}
+	
+	operator RwMatrix *(void) {
+		return &m_matrix;
+	}
+#endif
 	void Attach(RwMatrix *matrix, bool owner = false){
 #ifdef FIX_BUGS
 		if(m_attachment && m_hasRwMatrix)
@@ -240,6 +249,15 @@ public:
 	void CopyOnlyMatrix(CMatrix *other){
 		m_matrix = other->m_matrix;
 	}
+	void CopyRwMatrix(RwMatrix *matrix){
+		m_matrix = *matrix;
+	}
+	
+	void CopyToRwMatrix(RwMatrix *matrix){
+		*matrix = m_matrix;
+		RwMatrixUpdate(matrix);
+	}
+	
 	void SetUnity(void) {
 		m_matrix.right.x = 1.0f;
 		m_matrix.right.y = 0.0f;
