@@ -47,19 +47,19 @@ jobs:
         ./premake5 vs2019 --with-librw --glewdir=${{env.GLEW_BASE}} --glfwdir32=${{env.GLFW_BASE}}
     - name: Build
       run: |
-        msbuild -m build/re3.sln /property:Configuration=${{matrix.buildtype}} /property:Platform=${{matrix.platform}}
+        msbuild -m build/reVC.sln /property:Configuration=${{matrix.buildtype}} /property:Platform=${{matrix.platform}}
     - name: Pack artifacts
       run: |
-        7z a re3_${{matrix.buildtype}}_${{matrix.platform}}.zip ./bin/${{matrix.platform}}/${{matrix.buildtype}}/*
+        7z a reVC_${{matrix.buildtype}}_${{matrix.platform}}.zip ./bin/${{matrix.platform}}/${{matrix.buildtype}}/*
     - name: Upload artifact to actions
       uses: actions/upload-artifact@v2
       with:
-        name: re3_${{matrix.buildtype}}_${{matrix.platform}}
-        path: re3_${{matrix.buildtype}}_${{matrix.platform}}.zip
+        name: reVC_${{matrix.buildtype}}_${{matrix.platform}}
+        path: reVC_${{matrix.buildtype}}_${{matrix.platform}}.zip
 #    - name: Upload artifact to Bintray
 #      uses: hpcsc/upload-bintray-docker-action@v1
 #      with:
-#        repository: re3
+#        repository: reVC
 #        package: ${{matrix.buildtype}}_${{matrix.platform}}
 #        version:  1.0-$(echo ${GITHUB_SHA}
 #        sourcePath: ./bin/${{matrix.platform}}/${{matrix.buildtype}}
