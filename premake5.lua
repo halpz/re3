@@ -76,10 +76,6 @@ workspace "re3"
 			"linux-amd64-librw_gl3_glfw-oal",
 			"linux-arm-librw_gl3_glfw-oal",
 		}
-	filter { "system:bsd" }
-		platforms {
-			"bsd-amd64-librw_gl3_glfw-oal"
-		}
 
 	filter "configurations:Debug"
 		defines { "DEBUG" }
@@ -93,9 +89,6 @@ workspace "re3"
 
 	filter { "platforms:linux*" }
 		system "linux"
-	
-	filter { "platforms:bsd*" }
-		system "bsd"
 		
 	filter { "platforms:*x86*" }
 		architecture "x86"
@@ -154,11 +147,6 @@ project "librw"
 	targetdir "lib/%{cfg.platform}/%{cfg.buildcfg}"
 	files { path.join(Librw, "src/*.*") }
 	files { path.join(Librw, "src/*/*.*") }
-	
-	filter "platforms:bsd*"
-		includedirs { "/usr/local/include" }
-		libdirs { "/usr/local/lib" }
-	
 	filter "platforms:*RW33*"
 		flags { "ExcludeFromBuild" }
 	filter  {}
@@ -271,9 +259,6 @@ project "re3"
 	filter "platforms:linux*oal"
 		links { "openal", "mpg123", "sndfile", "pthread" }
 	
-	filter "platforms:bsd*oal"
-		links { "openal", "mpg123", "sndfile", "pthread" }
-
 	if _OPTIONS["with-opus"] then
 		filter {}
 		links { "libogg" }
@@ -321,8 +306,3 @@ project "re3"
 
 	filter "platforms:linux*gl3_glfw*"
 		links { "GL", "GLEW", "glfw" }
-
-	filter "platforms:bsd*gl3_glfw*"
-		links { "GL", "GLEW", "glfw", "sysinfo" }
-		includedirs { "/usr/local/include" }
-		libdirs { "/usr/local/lib" }
