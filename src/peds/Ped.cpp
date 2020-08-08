@@ -147,7 +147,7 @@ void CPed::operator delete(void *p, int handle) { CPools::GetPedPool()->Delete((
 // --MIAMI: Done
 CPed::~CPed(void)
 {
-#if 1
+#ifdef USE_CUTSCENE_SHADOW_FOR_PED
 	if ( m_pRTShadow ) delete m_pRTShadow;
 #endif
 	CWorld::Remove(this);
@@ -207,8 +207,8 @@ CPed::FlagToDestroyWhenNextProcessed(void)
 
 CPed::CPed(uint32 pedType) : m_pedIK(this)
 {
-#if 1
-	m_pRTShadow = NULL;
+#ifdef USE_CUTSCENE_SHADOW_FOR_PED
+	m_pRTShadow = nil;
 #endif
 	m_type = ENTITY_TYPE_PED;
 	bPedPhysics = true;
@@ -2788,14 +2788,11 @@ CPed::SetModelIndex(uint32 mi)
 	// This is a mistake by R*, velocity is CVector, whereas m_vecAnimMoveDelta is CVector2D. 
 	(*RPANIMBLENDCLUMPDATA(m_rwObject))->velocity = (CVector*) &m_vecAnimMoveDelta;
 
-#ifdef PED_SKIN
 	if(modelInfo->GetHitColModel() == nil)
 		modelInfo->CreateHitColModelSkinned(GetClump());
 
-	if (IsClumpSkinned(GetClump())) // condition isn't there in VC
-		UpdateRpHAnim();
-#endif
-#if 1
+	UpdateRpHAnim();
+#ifdef USE_CUTSCENE_SHADOW_FOR_PED
 	if (!m_pRTShadow)
 	{
 		m_pRTShadow = new CCutsceneShadow;
