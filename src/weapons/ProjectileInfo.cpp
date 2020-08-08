@@ -13,6 +13,10 @@
 #include "Weapon.h"
 #include "World.h"
 
+#ifdef SQUEEZE_PERFORMANCE
+uint32 projectileInUse;
+#endif
+
 CProjectileInfo gaProjectileInfo[NUM_PROJECTILES];
 CProjectile *CProjectileInfo::ms_apProjectile[NUM_PROJECTILES];
 
@@ -30,6 +34,10 @@ CProjectileInfo::Initialise()
 	}
 
 	debug("CProjectileInfo ready\n");
+
+#ifdef SQUEEZE_PERFORMANCE
+	projectileInUse = 0;
+#endif
 }
 
 void
@@ -154,6 +162,10 @@ CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos,
 	ms_apProjectile[i]->m_fElasticity = elasticity;
 	ms_apProjectile[i]->m_nSpecialCollisionResponseCases = SpecialCollisionResponseCase;
 
+#ifdef SQUEEZE_PERFORMANCE
+	projectileInUse++;
+#endif
+
 	gaProjectileInfo[i].m_bInUse = true;
 	CWorld::Add(ms_apProjectile[i]);
 
@@ -165,6 +177,9 @@ void
 CProjectileInfo::RemoveProjectile(CProjectileInfo *info, CProjectile *projectile)
 {
 	RemoveNotAdd(info->m_pSource, info->m_eWeaponType, projectile->GetPosition());
+#ifdef SQUEEZE_PERFORMANCE
+	projectileInUse--;
+#endif
 
 	info->m_bInUse = false;
 	CWorld::Remove(projectile);
@@ -192,6 +207,11 @@ CProjectileInfo::RemoveNotAdd(CEntity *entity, eWeaponType weaponType, CVector p
 void
 CProjectileInfo::Update()
 {
+#ifdef SQUEEZE_PERFORMANCE
+	if (projectileInUse == 0)
+		return;
+#endif
+
 	for (int i = 0; i < ARRAY_SIZE(gaProjectileInfo); i++) {
 		if (!gaProjectileInfo[i].m_bInUse) continue;
 
@@ -200,6 +220,10 @@ CProjectileInfo::Update()
 			gaProjectileInfo[i].m_pSource = nil;
 
 		if (ms_apProjectile[i] == nil) {
+#ifdef SQUEEZE_PERFORMANCE
+			projectileInUse--;
+#endif
+
 			gaProjectileInfo[i].m_bInUse = false;
 			continue;
 		}
@@ -252,6 +276,10 @@ CProjectileInfo::IsProjectileInRange(float x1, float x2, float y1, float y2, flo
 				if (pos.x >= x1 && pos.x <= x2 && pos.y >= y1 && pos.y <= y2 && pos.z >= z1 && pos.z <= z2) {
 					result = true;
 					if (remove) {
+#ifdef SQUEEZE_PERFORMANCE
+						projectileInUse--;
+#endif
+
 						gaProjectileInfo[i].m_bInUse = false;
 						CWorld::Remove(ms_apProjectile[i]);
 						delete ms_apProjectile[i];
@@ -266,8 +294,17 @@ CProjectileInfo::IsProjectileInRange(float x1, float x2, float y1, float y2, flo
 void
 CProjectileInfo::RemoveAllProjectiles()
 {
+#ifdef SQUEEZE_PERFORMANCE
+	if (projectileInUse == 0)
+		return;
+#endif
+
 	for (int i = 0; i < ARRAY_SIZE(ms_apProjectile); i++) {
 		if (gaProjectileInfo[i].m_bInUse) {
+#ifdef SQUEEZE_PERFORMANCE
+			projectileInUse--;
+#endif
+
 			gaProjectileInfo[i].m_bInUse = false;
 			CWorld::Remove(ms_apProjectile[i]);
 			delete ms_apProjectile[i];
@@ -278,11 +315,20 @@ CProjectileInfo::RemoveAllProjectiles()
 bool
 CProjectileInfo::RemoveIfThisIsAProjectile(CObject *object)
 {
+#ifdef SQUEEZE_PERFORMANCE
+	if (projectileInUse == 0)
+		return false;
+#endif
+
 	int i = 0;
 	while (ms_apProjectile[i++] != object) {
 		if (i >= ARRAY_SIZE(ms_apProjectile))
 			return false;
 	}
+
+#ifdef SQUEEZE_PERFORMANCE
+	projectileInUse--;
+#endif
 
 	gaProjectileInfo[i].m_bInUse = false;
 	CWorld::Remove(ms_apProjectile[i]);

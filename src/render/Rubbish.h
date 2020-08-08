@@ -4,7 +4,11 @@ class CVehicle;
 
 enum {
 	// NB: not all values are allowed, check the code
+#ifdef SQUEEZE_PERFORMANCE
+	NUM_RUBBISH_SHEETS = 32
+#else
 	NUM_RUBBISH_SHEETS = 64
+#endif
 };
 
 class COneSheet

@@ -60,6 +60,11 @@ IsSeeThrough(uint8 surfType)
 	switch(surfType)
 	case SURFACE_GLASS:
 	case SURFACE_TRANSPARENT_CLOTH:
+#if defined(FIX_BUGS) || defined(GTA_PS2)
+	case SURFACE_METAL_CHAIN_FENCE:
+	case SURFACE_TRANSPARENT_STONE:
+	case SURFACE_SCAFFOLD_POLE:
+#endif
 		return true;
 	return false;
 }

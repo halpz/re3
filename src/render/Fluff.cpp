@@ -152,9 +152,9 @@ void CMovingThings::Shutdown()
 
 void CMovingThings::Update()
 {
-	const int TIME_SPAN = 64; // frames to process all aMovingThings
-
 	int16 i;
+#ifndef SQUEEZE_PERFORMANCE
+	const int TIME_SPAN = 64; // frames to process all aMovingThings
 
 	int block = CTimer::GetFrameCounter() % TIME_SPAN;
 
@@ -167,6 +167,7 @@ void CMovingThings::Update()
 		if (aMovingThings[i].m_nHidden == 0)
 			aMovingThings[i].Update();
 	}
+#endif
 
 	for (i = 0; i < ARRAY_SIZE(aScrollBars); ++i)
 	{

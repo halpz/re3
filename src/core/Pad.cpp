@@ -1104,7 +1104,9 @@ void CPad::UpdatePads(void)
 	if ( bUpdate )
 	{
 		GetPad(0)->Update(0);
+#ifndef SQUEEZE_PERFORMANCE
 		GetPad(1)->Update(0);
+#endif
 	}
 
 #if defined(MASTER) && !defined(XINPUT)

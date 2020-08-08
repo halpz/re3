@@ -8,13 +8,8 @@
 #include <opusfile.h>
 #else
 #ifdef _WIN32
-
-// TODO: This is due to version difference of 32-bit libmpg123 and 64-bit libmpg123, fix it
-#ifndef _WIN64
-typedef long ssize_t;
-#endif
 #pragma comment( lib, "libsndfile-1.lib" )
-#pragma comment( lib, "libmpg123.lib" )
+#pragma comment( lib, "libmpg123-0.lib" )
 #else
 #include "crossplatform.h"
 #endif

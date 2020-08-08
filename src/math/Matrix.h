@@ -81,6 +81,7 @@ public:
 		m_matrix.pos.z += rhs.m_matrix.pos.z;
 		return *this;
 	}
+	CMatrix& operator*=(CMatrix const &rhs);
 
 	CVector &GetPosition(void){ return *(CVector*)&m_matrix.pos; }
 	CVector &GetRight(void) { return *(CVector*)&m_matrix.right; }

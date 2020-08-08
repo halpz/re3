@@ -816,7 +816,9 @@ RenderScene(void)
 	DefinedState();
 	CWaterLevel::RenderWater();
 	CRenderer::RenderFadingInEntities();
+#ifndef SQUEEZE_PERFORMANCE
 	CRenderer::RenderVehiclesButNotBoats();
+#endif
 	CWeather::RenderRainStreaks();
 }
 
