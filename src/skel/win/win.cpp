@@ -2227,10 +2227,9 @@ WinMain(HINSTANCE instance,
 					
 					case GS_INIT_INTRO_MPEG:
 					{
+#ifndef NO_MOVIES
 						CloseClip();
-						
-#ifndef FIX_BUGS
-						CoUninitialize(); // CoUninitialize should only be called at the shutdown of a program, and by then it doesn't matter
+						CoUninitialize();
 #endif
 						
 						if ( CMenuManager::OS_Language == LANG_FRENCH || CMenuManager::OS_Language == LANG_GERMAN )
@@ -2265,9 +2264,9 @@ WinMain(HINSTANCE instance,
 					
 					case GS_INIT_ONCE:
 					{
+#ifndef NO_MOVIES
 						CloseClip();
-#ifndef FIX_BUGS
-						CoUninitialize(); // CoUninitialize should only be called at the shutdown of a program, and by then it doesn't matter
+						CoUninitialize();
 #endif
 						
 #ifdef FIX_BUGS
