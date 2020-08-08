@@ -2788,13 +2788,10 @@ CPed::SetModelIndex(uint32 mi)
 	// This is a mistake by R*, velocity is CVector, whereas m_vecAnimMoveDelta is CVector2D. 
 	(*RPANIMBLENDCLUMPDATA(m_rwObject))->velocity = (CVector*) &m_vecAnimMoveDelta;
 
-#ifdef PED_SKIN
 	if(modelInfo->GetHitColModel() == nil)
 		modelInfo->CreateHitColModelSkinned(GetClump());
 
-	if (IsClumpSkinned(GetClump())) // condition isn't there in VC
-		UpdateRpHAnim();
-#endif
+	UpdateRpHAnim();
 #ifdef USE_CUTSCENE_SHADOW_FOR_PED
 	if (!m_pRTShadow)
 	{
