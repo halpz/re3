@@ -64,6 +64,7 @@
 #include "GameLogic.h"
 #include "Bike.h"
 #include "WindModifiers.h"
+#include "CutsceneShadow.h"
 
 #define CAN_SEE_ENTITY_ANGLE_THRESHOLD	DEGTORAD(60.0f)
 
@@ -147,6 +148,9 @@ void CPed::operator delete(void *p, int handle) { CPools::GetPedPool()->Delete((
 // --MIAMI: Done
 CPed::~CPed(void)
 {
+#ifdef USE_CUTSCENE_SHADOW_FOR_PED
+	if ( m_pRTShadow ) delete m_pRTShadow;
+#endif
 	CWorld::Remove(this);
 	if (m_attractor)
 		GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
@@ -204,6 +208,9 @@ CPed::FlagToDestroyWhenNextProcessed(void)
 
 CPed::CPed(uint32 pedType) : m_pedIK(this)
 {
+#ifdef USE_CUTSCENE_SHADOW_FOR_PED
+	m_pRTShadow = nil;
+#endif
 	m_type = ENTITY_TYPE_PED;
 	bPedPhysics = true;
 	bUseCollisionRecords = true;
@@ -2782,12 +2789,16 @@ CPed::SetModelIndex(uint32 mi)
 	// This is a mistake by R*, velocity is CVector, whereas m_vecAnimMoveDelta is CVector2D. 
 	(*RPANIMBLENDCLUMPDATA(m_rwObject))->velocity = (CVector*) &m_vecAnimMoveDelta;
 
-#ifdef PED_SKIN
 	if(modelInfo->GetHitColModel() == nil)
 		modelInfo->CreateHitColModelSkinned(GetClump());
 
-	if (IsClumpSkinned(GetClump())) // condition isn't there in VC
-		UpdateRpHAnim();
+	UpdateRpHAnim();
+#ifdef USE_CUTSCENE_SHADOW_FOR_PED
+	if (!m_pRTShadow)
+	{
+		m_pRTShadow = new CCutsceneShadow;
+		m_pRTShadow->Create(m_rwObject, 10, 1, 1, 1);
+	}
 #endif
 }
 
@@ -16421,16 +16432,16 @@ CPed::PreRender(void)
 		&& !CCullZones::PlayerNoRain() && GetPedState() != PED_DRIVING)
 		bIsWindModifierTurnedOn = true;
 
-	bool bIsPlayerDrivingBikeOrOpenTopCar = false;
+	bool bIsPedDrivingBikeOrOpenTopCar = false;
 	if (GetPedState() == PED_DRIVING && m_pMyVehicle) {
 		if (m_pMyVehicle->m_vehType == VEHICLE_TYPE_BIKE
 			|| (m_pMyVehicle->m_vehType == VEHICLE_TYPE_CAR && m_pMyVehicle->IsOpenTopCar()))
-			bIsPlayerDrivingBikeOrOpenTopCar = true;
+			bIsPedDrivingBikeOrOpenTopCar = true;
 	}
 
-	if (bIsWindModifierTurnedOn || bIsPlayerDrivingBikeOrOpenTopCar) {
+	if (bIsWindModifierTurnedOn || bIsPedDrivingBikeOrOpenTopCar) {
 		float fWindMult = 0.0f;
-		if (bIsPlayerDrivingBikeOrOpenTopCar) {
+		if (bIsPedDrivingBikeOrOpenTopCar) {
 			fWindMult = DotProduct(m_pMyVehicle->m_vecMoveSpeed, GetForward());
 			if (fWindMult > 0.4f) {
 				float volume = (fWindMult - 0.4f) / 0.6f;

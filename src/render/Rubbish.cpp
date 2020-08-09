@@ -8,17 +8,18 @@
 #include "World.h"
 #include "Vehicle.h"
 #include "ZoneCull.h"
+#include "Stats.h"
 #include "TxdStore.h"
 #include "RenderBuffer.h"
 #include "Rubbish.h"
 
-#define RUBBISH_MAX_DIST (18.0f)
-#define RUBBISH_FADE_DIST (16.5f)
+//--MIAMI: file done
+
+#define RUBBISH_MAX_DIST (23.0f)
+#define RUBBISH_FADE_DIST (20.0f)
 
 RwTexture *gpRubbishTexture[4];
 RwImVertexIndex RubbishIndexList[6];
-RwImVertexIndex RubbishIndexList2[6];	// unused
-RwIm3DVertex RubbishVertices[4];
 bool CRubbish::bRubbishInvisible;
 int CRubbish::RubbishVisibility;
 COneSheet CRubbish::aSheets[NUM_RUBBISH_SHEETS];
@@ -52,12 +53,16 @@ CRubbish::Render(void)
 {
 	int type;
 
+	if(RubbishVisibility == 0)
+		return;
+
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
 
 	for(type = 0; type < 4; type++){
-		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpRubbishTexture[type]));
+		if(type < 3 || CStats::PamphletMissionPassed)
+			RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpRubbishTexture[type]));
 
 		TempBufferIndicesStored = 0;
 		TempBufferVerticesStored = 0;
@@ -69,7 +74,7 @@ CRubbish::Render(void)
 			if(sheet->m_state == 0)
 				continue;
 
-			uint32 alpha = 128;
+			uint32 alpha = 100;
 			CVector pos;
 			if(sheet->m_state == 1){
 				pos = sheet->m_basePos;
@@ -82,7 +87,7 @@ CRubbish::Render(void)
 					float t = (float)(CTimer::GetTimeInMilliseconds() - sheet->m_moveStart)/sheet->m_moveDuration;
 					float f1 = sheet->m_isVisible ? 1.0f-t : 0.0f;
 					float f2 = sheet->m_targetIsVisible ? t : 0.0f;
-					alpha = 128 * (f1+f2);
+					alpha = 100 * (f1+f2);
 				}
 			}
 
@@ -92,17 +97,27 @@ CRubbish::Render(void)
 					alpha -= alpha*(camDist-RUBBISH_FADE_DIST)/(RUBBISH_MAX_DIST-RUBBISH_FADE_DIST);
 				alpha = (RubbishVisibility*alpha)/256;
 
-				float vx = Sin(sheet->m_angle) * 0.4f;
-				float vy = Cos(sheet->m_angle) * 0.4f;
+				float vx1, vy1, vx2, vy2;
+				if(type == 0 || type == 1){
+					vx1 = 0.9f*Sin(sheet->m_angle);
+					vy1 = 0.9f*Cos(sheet->m_angle);
+					vx2 = 0.3f*Cos(sheet->m_angle);
+					vy2 = -0.3f*Sin(sheet->m_angle);
+				}else{
+					vx1 = 0.3f*Sin(sheet->m_angle);
+					vy1 = 0.3f*Cos(sheet->m_angle);
+					vx2 = 0.3f*Cos(sheet->m_angle);
+					vy2 = -0.3f*Sin(sheet->m_angle);
+				}
 
 				int v = TempBufferVerticesStored;
-				RwIm3DVertexSetPos(&TempBufferRenderVertices[v+0], pos.x + vx, pos.y + vy, pos.z);
+				RwIm3DVertexSetPos(&TempBufferRenderVertices[v+0], pos.x + vx1 + vx2, pos.y + vy1 + vy2, pos.z);
+				RwIm3DVertexSetPos(&TempBufferRenderVertices[v+1], pos.x + vx1 - vx2, pos.y + vy1 - vy2, pos.z);
+				RwIm3DVertexSetPos(&TempBufferRenderVertices[v+2], pos.x - vx1 + vx2, pos.y - vy1 + vy2, pos.z);
+				RwIm3DVertexSetPos(&TempBufferRenderVertices[v+3], pos.x - vx1 - vx2, pos.y - vy1 - vy2, pos.z);
 				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[v+0], 255, 255, 255, alpha);
-				RwIm3DVertexSetPos(&TempBufferRenderVertices[v+1], pos.x - vy, pos.y + vx, pos.z);
 				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[v+1], 255, 255, 255, alpha);
-				RwIm3DVertexSetPos(&TempBufferRenderVertices[v+2], pos.x + vy, pos.y - vx, pos.z);
 				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[v+2], 255, 255, 255, alpha);
-				RwIm3DVertexSetPos(&TempBufferRenderVertices[v+3], pos.x - vx, pos.y - vy, pos.z);
 				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[v+3], 255, 255, 255, alpha);
 				RwIm3DVertexSetU(&TempBufferRenderVertices[v+0], 0.0f);
 				RwIm3DVertexSetV(&TempBufferRenderVertices[v+0], 0.0f);
@@ -373,24 +388,6 @@ CRubbish::Init(void)
 	EndMoversList.m_next = nil;
 	EndMoversList.m_prev = &StartMoversList;
 
-	// unused
-	RwIm3DVertexSetU(&RubbishVertices[0], 0.0f);
-	RwIm3DVertexSetV(&RubbishVertices[0], 0.0f);
-	RwIm3DVertexSetU(&RubbishVertices[1], 1.0f);
-	RwIm3DVertexSetV(&RubbishVertices[1], 0.0f);
-	RwIm3DVertexSetU(&RubbishVertices[2], 0.0f);
-	RwIm3DVertexSetV(&RubbishVertices[2], 1.0f);
-	RwIm3DVertexSetU(&RubbishVertices[3], 1.0f);
-	RwIm3DVertexSetV(&RubbishVertices[3], 1.0f);
-
-	// unused
-	RubbishIndexList2[0] = 0;
-	RubbishIndexList2[1] = 2;
-	RubbishIndexList2[2] = 1;
-	RubbishIndexList2[3] = 1;
-	RubbishIndexList2[4] = 2;
-	RubbishIndexList2[5] = 3;
-
 	RubbishIndexList[0] = 0;
 	RubbishIndexList[1] = 1;
 	RubbishIndexList[2] = 2;
@@ -414,19 +411,11 @@ void
 CRubbish::Shutdown(void)
 {
 	RwTextureDestroy(gpRubbishTexture[0]);
-#ifdef GTA3_1_1_PATCH
 	gpRubbishTexture[0] = nil;
-#endif
 	RwTextureDestroy(gpRubbishTexture[1]);
-#ifdef GTA3_1_1_PATCH
 	gpRubbishTexture[1] = nil;
-#endif
 	RwTextureDestroy(gpRubbishTexture[2]);
-#ifdef GTA3_1_1_PATCH
 	gpRubbishTexture[2] = nil;
-#endif
 	RwTextureDestroy(gpRubbishTexture[3]);
-#ifdef GTA3_1_1_PATCH
 	gpRubbishTexture[3] = nil;
-#endif
 }

@@ -2505,8 +2505,12 @@ CAutomobile::PreRender(void)
 	// end of lights
 	}
 
-//TODO(MIAMI): StoreShadowForVehicle once we have it
-	CShadows::StoreShadowForCar(this);
+	if (IsRealHeli())
+		CShadows::StoreShadowForVehicle(this, VEH_SHD_TYPE_HELI);
+	else if ( GetModelIndex() == MI_RCBARON)
+		CShadows::StoreShadowForVehicle(this, VEH_SHD_TYPE_RCPLANE);
+	else
+		CShadows::StoreShadowForVehicle(this, VEH_SHD_TYPE_CAR);
 
 	DoSunGlare();
 

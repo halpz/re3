@@ -12709,13 +12709,13 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_SET_EXTRA_COLOURS:
 	{
 		CollectParameters(&m_nIp, 2);
-		debug("SET_EXTRA_COLOURS not implemented, skipping\n");
+		CTimeCycle::StartExtraColour(ScriptParams[0]-1, ScriptParams[1] != 0);
 		return 0;
 	}
 	case COMMAND_CLEAR_EXTRA_COLOURS:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("CLEAR_EXTRA_COLOURS not implemented, skipping\n");
+		CTimeCycle::StopExtraColour(ScriptParams[0]);
 		return 0;
 	}
 	//case COMMAND_CLOSE_CAR_BOOT:

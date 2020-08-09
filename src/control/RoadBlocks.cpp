@@ -111,6 +111,10 @@ CRoadBlocks::GenerateRoadBlocks(void)
 { 
 	CMatrix tmp1, tmp2;
 	static int16 unk;
+#ifdef SQUEEZE_PERFORMANCE
+	if (FindPlayerPed()->m_pWanted->m_RoadblockDensity == 0)
+		return;
+#endif
 	uint32 frame = CTimer::GetFrameCounter() & 0xF;
 	int16 nRoadblockNode = (int16)(NUMROADBLOCKS * frame) / 16;
 	const int16 maxRoadBlocks = (int16)(NUMROADBLOCKS * (frame + 1)) / 16;

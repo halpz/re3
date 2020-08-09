@@ -13,6 +13,9 @@
 CShotInfo gaShotInfo[NUMSHOTINFOS];
 float CShotInfo::ms_afRandTable[20];
 
+#ifdef SQUEEZE_PERFORMANCE
+uint32 shotInfoInUse;
+#endif
 
 /*
 	Used for flamethrower. I don't know why it's name is CShotInfo.
@@ -41,6 +44,9 @@ CShotInfo::Initialise()
 		nextVal += 0.005f;
 	}
 	debug("CShotInfo ready\n");
+#ifdef SQUEEZE_PERFORMANCE
+	shotInfoInUse = 0;
+#endif
 }
 
 bool
@@ -53,6 +59,10 @@ CShotInfo::AddShot(CEntity *sourceEntity, eWeaponType weapon, CVector startPos, 
 
 	if (slot == ARRAY_SIZE(gaShotInfo))
 		return false;
+
+#ifdef SQUEEZE_PERFORMANCE
+	shotInfoInUse++;
+#endif
 
 	gaShotInfo[slot].m_inUse = true;
 	gaShotInfo[slot].m_weapon = weapon;
@@ -87,6 +97,10 @@ CShotInfo::Shutdown()
 void
 CShotInfo::Update()
 {
+#ifdef SQUEEZE_PERFORMANCE
+	if (shotInfoInUse == 0)
+		return;
+#endif
 	for (int slot = 0; slot < ARRAY_SIZE(gaShotInfo); slot++) {
 		CShotInfo &shot = gaShotInfo[slot];
 		if (shot.m_sourceEntity && shot.m_sourceEntity->IsPed() && !((CPed*)shot.m_sourceEntity)->IsPointerValid())
@@ -96,8 +110,12 @@ CShotInfo::Update()
 			continue;
 
 		CWeaponInfo *weaponInfo = CWeaponInfo::GetWeaponInfo(shot.m_weapon);
-		if (CTimer::GetTimeInMilliseconds() > shot.m_timeout)
+		if (CTimer::GetTimeInMilliseconds() > shot.m_timeout) {
+#ifdef SQUEEZE_PERFORMANCE
+			shotInfoInUse--;
+#endif
 			shot.m_inUse = false;
+		}
 
 		if (weaponInfo->m_bSlowsDown)
 			shot.m_areaAffected *= pow(0.96, CTimer::GetTimeStep()); // FRAMERATE

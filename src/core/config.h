@@ -167,7 +167,7 @@ enum Config {
 #if defined GTA_PS2
 #	define GTA_PS2_STUFF
 #	define RANDOMSPLASH
-#	define COMPRESSED_COL_VECTORS
+#	define VU_COLLISION
 #elif defined GTA_PC
 #	define GTA3_1_1_PATCH
 //#	define GTA3_STEAM_PATCH
@@ -178,6 +178,10 @@ enum Config {
 #		define PS2_MATFX
 #	endif
 #elif defined GTA_XBOX
+#endif
+
+#ifdef VU_COLLISION
+#define COMPRESSED_COL_VECTORS	// current need compressed vectors in this code
 #endif
 
 #ifdef MASTER
@@ -227,6 +231,9 @@ enum Config {
 //#define PS2_ALTERNATIVE_CARSPLASH // unused on PS2
 // #define PC_WATER
 #define WATER_CHEATS
+
+//#define USE_CUTSCENE_SHADOW_FOR_PED
+#define DISABLE_CUTSCENE_SHADOWS
 
 // Pad
 #if !defined(RW_GL3) && defined(_WIN32)
@@ -298,3 +305,12 @@ enum Config {
 #define AUDIO_CACHE // cache sound lengths to speed up the cold boot
 #endif
 //#define PS2_AUDIO   // changes audio paths for cutscenes and radio to PS2 paths, needs vbdec to support VB with MSS
+
+
+//#define SQUEEZE_PERFORMANCE
+#ifdef SQUEEZE_PERFORMANCE
+	#undef PS2_ALPHA_TEST
+	#undef NO_ISLAND_LOADING
+	#define PC_PARTICLE
+	#define VC_PED_PORTS // To not process collisions always. But should be tested if that's really beneficial
+#endif

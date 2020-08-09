@@ -445,7 +445,7 @@ CEntity::PreRender(void)
 				gpShadowExplosionTex, &pos,
 				8.0f, 0.0f, 0.0f, -8.0f,
 				255, 200.0f*flicker, 160.0f*flicker, 120.0f*flicker,
-				20.0f, false, 1.0f);
+				20.0f, false, 1.0f, nil, false);
 			CPointLights::AddLight(CPointLights::LIGHT_POINT,
 				pos, CVector(0.0f, 0.0f, 0.0f),
 				8.0f,
@@ -483,7 +483,7 @@ CEntity::PreRender(void)
 				CTimeCycle::GetShadowStrength(),
 				CTimeCycle::GetShadowStrength(),
 				CTimeCycle::GetShadowStrength(),
-				20.0f, false, 1.0f);
+				20.0f, false, 1.0f, nil, false);
 		}
 		// fall through
 	case ENTITY_TYPE_DUMMY:

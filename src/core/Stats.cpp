@@ -61,6 +61,7 @@ int32 CStats::FastestTimes[CStats::TOTAL_FASTEST_TIMES];
 int32 CStats::HighestScores[CStats::TOTAL_HIGHEST_SCORES];
 int32 CStats::BestPositions[CStats::TOTAL_BEST_POSITIONS];
 int32 CStats::PropertyDestroyed;
+int32 CStats::PamphletMissionPassed;
 
 int32 CStats::Sprayings;
 float CStats::AutoPaintingBudget;

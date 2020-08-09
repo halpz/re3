@@ -3958,7 +3958,7 @@ CCam::Process_Debug(const CVector&, float, float, float)
 	if(CPad::GetPad(1)->GetLeftShockJustDown() && gbBigWhiteDebugLightSwitchedOn)
 		CShadows::StoreShadowToBeRendered(SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &Source,
 			12.0f, 0.0f, 0.0f, -12.0f,
-			128, 128, 128, 128, 1000.0f, false, 1.0f);
+			128, 128, 128, 128, 1000.0f, false, 1.0f, nil, false);
 
 	if(CHud::m_Wants_To_Draw_Hud){
 		char str[256];
@@ -4103,7 +4103,7 @@ CCam::Process_Editor(const CVector&, float, float, float)
 	if(CPad::GetPad(1)->GetLeftShockJustDown() && gbBigWhiteDebugLightSwitchedOn)
 		CShadows::StoreShadowToBeRendered(SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &Source,
 			12.0f, 0.0f, 0.0f, -12.0f,
-			128, 128, 128, 128, 1000.0f, false, 1.0f);
+			128, 128, 128, 128, 1000.0f, false, 1.0f, nil, false);
 
 	if(CHud::m_Wants_To_Draw_Hud){
 		char str[256];

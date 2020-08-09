@@ -1933,6 +1933,11 @@ CWorld::Process(void)
 	} else {
 		for(CPtrNode *node = ms_listMovingEntityPtrs.first; node; node = node->next) {
 			CEntity *movingEnt = (CEntity *)node->item;
+#ifdef SQUEEZE_PERFORMANCE
+			if (movingEnt->bRemoveFromWorld) {
+				RemoveEntityInsteadOfProcessingIt(movingEnt);
+			} else
+#endif
 			if(movingEnt->m_rwObject && RwObjectGetType(movingEnt->m_rwObject) == rpCLUMP &&
 			   RpAnimBlendClumpGetFirstAssociation(movingEnt->GetClump())) {
 // TODO(MIAMI): doRender argument

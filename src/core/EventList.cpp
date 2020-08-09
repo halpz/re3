@@ -8,6 +8,7 @@
 #include "Messages.h"
 #include "Text.h"
 #include "main.h"
+#include "Accident.h"
 
 int32 CEventList::ms_nFirstFreeSlotIndex;
 CEvent gaEvent[NUMEVENTS];
@@ -62,6 +63,13 @@ CEventList::RegisterEvent(eEventType type, eEventEntity entityType, CEntity *ent
 	int i;
 	int ref;
 	bool copsDontCare;
+
+#ifdef SQUEEZE_PERFORMANCE
+	if (type == EVENT_INJURED_PED) {
+		gAccidentManager.ReportAccident((CPed*)ent);
+		return;
+	}
+#endif
 
 	copsDontCare = false;
 	switch(entityType){

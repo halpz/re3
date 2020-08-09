@@ -2,9 +2,12 @@
 
 #include "templates.h"
 #include "Game.h"	// for eLevelName
+#ifdef VU_COLLISION
+#include "VuVector.h"
+#endif
 
 // If you spawn many tanks at once, you will see that collisions of two entity exceeds 32.
-#ifdef FIX_BUGS
+#if defined(FIX_BUGS) && !defined(SQUEEZE_PERFORMANCE)
 #define MAX_COLLISION_POINTS 64
 #else
 #define MAX_COLLISION_POINTS 32
@@ -16,6 +19,28 @@ struct CompressedVector
 	int16 x, y, z;
 	CVector Get(void) const { return CVector(x, y, z)/128.0f; };
 	void Set(float x, float y, float z) { this->x = x*128.0f; this->y = y*128.0f; this->z = z*128.0f; };
+#ifdef GTA_PS2
+	void Unpack(uint128 &qword) const {
+		__asm__ volatile (
+			"lh      $8, 0(%1)\n"
+			"lh      $9, 2(%1)\n"
+			"lh      $10, 4(%1)\n"
+			"pextlw  $10, $8\n"
+			"pextlw  $2, $9, $10\n"
+			"sq      $2, %0\n"
+			: "=m" (qword)
+			: "r" (this)
+			: "$8", "$9", "$10", "$2"
+		);
+	}
+#else
+	void Unpack(int32 *qword) const {
+		qword[0] = x;
+		qword[1] = y;
+		qword[2] = z;
+		qword[3] = 0;	// junk
+	}
+#endif
 #else
 	float x, y, z;
 	CVector Get(void) const { return CVector(x, y, z); };
@@ -25,6 +50,7 @@ struct CompressedVector
 
 struct CSphere
 {
+	// NB: this has to be compatible with a CVuVector
 	CVector center;
 	float radius;
 	void Set(float radius, const CVector &center) { this->center = center; this->radius = radius; }
@@ -59,6 +85,7 @@ struct CColBox : public CBox
 
 struct CColLine
 {
+	// NB: this has to be compatible with two CVuVectors
 	CVector p0;
 	int pad0;
 	CVector p1;
@@ -81,6 +108,39 @@ struct CColTriangle
 
 struct CColTrianglePlane
 {
+#ifdef VU_COLLISION
+	CompressedVector normal;
+	int16 dist;
+
+	void Set(const CVector &va, const CVector &vb, const CVector &vc);
+	void Set(const CompressedVector *v, CColTriangle &tri) { Set(v[tri.a].Get(), v[tri.b].Get(), v[tri.c].Get()); }
+	void GetNormal(CVector &n) const { n.x = normal.x/4096.0f; n.y = normal.y/4096.0f; n.z = normal.z/4096.0f; }
+	float CalcPoint(const CVector &v) const { CVector n; GetNormal(n); return DotProduct(n, v) - dist/128.0f; };
+#ifdef GTA_PS2
+	void Unpack(uint128 &qword) const {
+		__asm__ volatile (
+			"lh      $8, 0(%1)\n"
+			"lh      $9, 2(%1)\n"
+			"lh      $10, 4(%1)\n"
+			"lh      $11, 6(%1)\n"
+			"pextlw  $10, $8\n"
+			"pextlw  $11, $9\n"
+			"pextlw  $2, $11, $10\n"
+			"sq      $2, %0\n"
+			: "=m" (qword)
+			: "r" (this)
+			: "$8", "$9", "$10", "$11", "$2"
+		);
+	}
+#else
+	void Unpack(int32 *qword) const {
+		qword[0] = normal.x;
+		qword[1] = normal.y;
+		qword[2] = normal.z;
+		qword[3] = dist;
+	}
+#endif
+#else
 	CVector normal;
 	float dist;
 	uint8 dir;
@@ -88,7 +148,11 @@ struct CColTrianglePlane
 	void Set(const CVector &va, const CVector &vb, const CVector &vc);
 	void Set(const CompressedVector *v, CColTriangle &tri) { Set(v[tri.a].Get(), v[tri.b].Get(), v[tri.c].Get()); }
 	void GetNormal(CVector &n) const { n = normal; }
+	float GetNormalX() const { return normal.x; }
+	float GetNormalY() const { return normal.y; }
+	float GetNormalZ() const { return normal.z; }
 	float CalcPoint(const CVector &v) const { return DotProduct(normal, v) - dist; };
+#endif
 };
 
 struct CColPoint
@@ -109,7 +173,11 @@ struct CColPoint
 
 struct CStoredCollPoly
 {
+#ifdef VU_COLLISION
+	CVuVector verts[3];
+#else
 	CVector verts[3];
+#endif
 	bool valid;
 };
 

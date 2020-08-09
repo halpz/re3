@@ -29,6 +29,9 @@ RpAtomic *AtomicRemoveAnimFromSkinCB(RpAtomic *atomic, void *data);
 void RenderSkeleton(RpHAnimHierarchy *hier);
 #endif
 
+RwBool Im2DRenderQuad(RwReal x1, RwReal y1, RwReal x2, RwReal y2, RwReal z, RwReal recipCamZ, RwReal uvOffset);
+RpClump *RpClumpGetBoundingSphere(RpClump *clump, RwSphere *sphere, bool useLTM);
+
 RwTexDictionary *RwTexDictionaryGtaStreamRead(RwStream *stream);
 RwTexDictionary *RwTexDictionaryGtaStreamRead1(RwStream *stream);
 RwTexDictionary *RwTexDictionaryGtaStreamRead2(RwStream *stream, RwTexDictionary *texDict);

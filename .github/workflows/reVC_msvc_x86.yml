@@ -1,0 +1,68 @@
+name: reVC_msvc_x86
+
+on:
+  pull_request:
+  push:
+  release:
+    types: published
+env:
+  GLEW_VER: "2.1.0"
+  GLFW_VER: "3.3.2"
+  GLEW_BASE: "glew-2.1.0"
+  GLFW_BASE: "glfw-3.3.2.bin.WIN32"
+  GLEW_FILE: "glew-2.1.0-win32.zip"
+  GLFW_FILE: "glfw-3.3.2.bin.WIN32.zip"
+  GLEW_URL: "https://github.com/nigels-com/glew/releases/download/glew-2.1.0/glew-2.1.0-win32.zip"
+  GLFW_URL: "https://github.com/glfw/glfw/releases/download/3.3.2/glfw-3.3.2.bin.WIN32.zip"
+jobs:
+  build:
+    runs-on: windows-2019
+    strategy:
+      matrix:
+        platform: [win-x86-librw_d3d9-mss, win-x86-librw_gl3_glfw-mss, win-x86-librw_d3d9-oal, win-x86-librw_gl3_glfw-oal]
+        buildtype: [Debug, Release]
+    steps:
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.1
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'true'
+    - if: ${{ matrix.platform }} == "win-x86-librw_gl3_glfw-mss"
+      name: Download glew
+      uses: carlosperate/download-file-action@v1.0.3
+      with:
+        file-url: ${{env.GLEW_URL}}
+    - if: ${{ matrix.platform }} == "win-x86-librw_gl3_glfw-mss"
+      name: Download glfw
+      uses: carlosperate/download-file-action@v1.0.3
+      with:
+        file-url: ${{env.GLFW_URL}}
+    - if: ${{ matrix.platform }} == "win-x86-librw_gl3_glfw-mss"
+      name: Unpack archives
+      run: |
+          7z x ${{env.GLEW_FILE}}
+          7z x ${{env.GLFW_FILE}}
+    - name: Configure build
+      run: |
+        ./premake5 vs2019 --with-librw --glewdir=${{env.GLEW_BASE}} --glfwdir32=${{env.GLFW_BASE}}
+    - name: Build
+      run: |
+        msbuild -m build/reVC.sln /property:Configuration=${{matrix.buildtype}} /property:Platform=${{matrix.platform}}
+    - name: Pack artifacts
+      run: |
+        7z a reVC_${{matrix.buildtype}}_${{matrix.platform}}.zip ./bin/${{matrix.platform}}/${{matrix.buildtype}}/*
+    - name: Upload artifact to actions
+      uses: actions/upload-artifact@v2
+      with:
+        name: reVC_${{matrix.buildtype}}_${{matrix.platform}}
+        path: reVC_${{matrix.buildtype}}_${{matrix.platform}}.zip
+#    - name: Upload artifact to Bintray
+#      uses: hpcsc/upload-bintray-docker-action@v1
+#      with:
+#        repository: reVC
+#        package: ${{matrix.buildtype}}_${{matrix.platform}}
+#        version:  1.0-$(echo ${GITHUB_SHA}
+#        sourcePath: ./bin/${{matrix.platform}}/${{matrix.buildtype}}
+#        username: gtamodding
+#        apiKey: ${{secrets.BINTRAY_API_KEY}}
+

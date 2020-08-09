@@ -89,6 +89,16 @@ typedef uint16_t wchar;
 #include <rpskin.h>
 #endif
 
+#ifdef __GNUC__
+#define TYPEALIGN(n) __attribute__ ((aligned (n)))
+#else
+#ifdef _MSC_VER
+#define TYPEALIGN(n) __declspec(align(n))
+#else
+#define TYPEALIGN(n)	// unknown compiler...ignore
+#endif
+#endif
+
 #define ALIGNPTR(p) (void*)((((uintptr)(void*)p) + sizeof(void*)-1) & ~(sizeof(void*)-1))
 
 // PDP-10 like byte functions
