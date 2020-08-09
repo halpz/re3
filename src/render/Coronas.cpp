@@ -255,7 +255,10 @@ CCoronas::Render(void)
 
 		CVector spriteCoors;
 		float spritew, spriteh;
-		if(CSprite::CalcScreenCoors(aCoronas[i].coors, spriteCoors, &spritew, &spriteh, true)){
+		if(!CSprite::CalcScreenCoors(aCoronas[i].coors, spriteCoors, &spritew, &spriteh, true)){
+			aCoronas[i].offScreen = true;
+			aCoronas[i].sightClear = false;
+		}else{
 			aCoronas[i].offScreen = false;
 
 			if(spriteCoors.x < 0.0f || spriteCoors.y < 0.0f ||
@@ -289,10 +292,7 @@ CCoronas::Render(void)
 			}
 
 
-			if(aCoronas[i].fadeAlpha == 0)
-				continue;
-
-			if(spriteCoors.z < aCoronas[i].drawDist){
+			if(aCoronas[i].fadeAlpha && spriteCoors.z < aCoronas[i].drawDist){
 				float recipz = 1.0f/spriteCoors.z;
 				float fadeDistance = aCoronas[i].drawDist / 2.0f;
 				float distanceFade = spriteCoors.z < fadeDistance ? 1.0f : 1.0f - (spriteCoors.z - fadeDistance)/fadeDistance;
@@ -367,9 +367,6 @@ CCoronas::Render(void)
 							recipz, 255);
 					}
 				}
-			}else{
-				aCoronas[i].offScreen = true;
-				aCoronas[i].sightClear = false;
 			}
 		}
 	}
@@ -390,23 +387,24 @@ CCoronas::Render(void)
 			if(!aCoronas[i].hasValue[j] || !aCoronas[i].hasValue[j+1])
 				continue;
 
-			int mod1 = (float)(6 - j) / 6 * 128;
-			int mod2 = (float)(6 - (j+1)) / 6 * 128;
+			int alpha1 = (float)(6 - j) / 6 * 128;
+			int alpha2 = (float)(6 - (j+1)) / 6 * 128;
 
 			RwIm2DVertexSetScreenX(&vertexbufferX[0], aCoronas[i].prevX[j]);
 			RwIm2DVertexSetScreenY(&vertexbufferX[0], aCoronas[i].prevY[j]);
-			RwIm2DVertexSetIntRGBA(&vertexbufferX[0], aCoronas[i].prevRed[j] * mod1 / 256, aCoronas[i].prevGreen[j] * mod1 / 256, aCoronas[i].prevBlue[j] * mod1 / 256, 255);
+			RwIm2DVertexSetIntRGBA(&vertexbufferX[0], aCoronas[i].prevRed[j] * alpha1 / 256, aCoronas[i].prevGreen[j] * alpha1 / 256, aCoronas[i].prevBlue[j] * alpha1 / 256, 255);
 			RwIm2DVertexSetScreenX(&vertexbufferX[1], aCoronas[i].prevX[j+1]);
 			RwIm2DVertexSetScreenY(&vertexbufferX[1], aCoronas[i].prevY[j+1]);
-			RwIm2DVertexSetIntRGBA(&vertexbufferX[1], aCoronas[i].prevRed[j+1] * mod2 / 256, aCoronas[i].prevGreen[j+1] * mod2 / 256, aCoronas[i].prevBlue[j+1] * mod2 / 256, 255);
+			RwIm2DVertexSetIntRGBA(&vertexbufferX[1], aCoronas[i].prevRed[j+1] * alpha2 / 256, aCoronas[i].prevGreen[j+1] * alpha2 / 256, aCoronas[i].prevBlue[j+1] * alpha2 / 256, 255);
 
-			// BUG: game doesn't do this
+#ifdef FIX_BUGS
 			RwIm2DVertexSetScreenZ(&vertexbufferX[0], RwIm2DGetNearScreenZ());
 			RwIm2DVertexSetCameraZ(&vertexbufferX[0], RwCameraGetNearClipPlane(Scene.camera));
 			RwIm2DVertexSetRecipCameraZ(&vertexbufferX[0], 1.0f/RwCameraGetNearClipPlane(Scene.camera));
 			RwIm2DVertexSetScreenZ(&vertexbufferX[1], RwIm2DGetNearScreenZ());
 			RwIm2DVertexSetCameraZ(&vertexbufferX[1], RwCameraGetNearClipPlane(Scene.camera));
 			RwIm2DVertexSetRecipCameraZ(&vertexbufferX[1], 1.0f/RwCameraGetNearClipPlane(Scene.camera));
+#endif
 
 			RwIm2DRenderLine(vertexbufferX, 2, 0, 1);
 		}
@@ -425,6 +423,10 @@ CCoronas::RenderReflections(void)
 	CEntity *entity;
 
 	if(CWeather::WetRoads > 0.0f){
+#ifdef FIX_BUGS
+		CSprite::InitSpriteBuffer();
+#endif
+
 		RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
 		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 		RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
@@ -435,7 +437,8 @@ CCoronas::RenderReflections(void)
 
 		for(i = 0; i < NUMCORONAS; i++){
 			if(aCoronas[i].id == 0 ||
-			   aCoronas[i].fadeAlpha == 0 && aCoronas[i].alpha == 0)
+			   aCoronas[i].fadeAlpha == 0 && aCoronas[i].alpha == 0 ||
+			   aCoronas[i].reflection == 0)
 				continue;
 
 			// check if we want a reflection on this corona
@@ -450,11 +453,8 @@ CCoronas::RenderReflections(void)
 				}
 			}
 
-			if(!aCoronas[i].renderReflection)
-				continue;
-
 			// Don't draw if reflection is too high
-			if(aCoronas[i].heightAboveRoad < 20.0f){
+			if(aCoronas[i].renderReflection && aCoronas[i].heightAboveRoad < 20.0f){
 				// don't draw if camera is below road
 				if(CCoronas::aCoronas[i].coors.z - aCoronas[i].heightAboveRoad > TheCamera.GetPosition().z)
 					continue;
@@ -466,13 +466,14 @@ CCoronas::RenderReflections(void)
 				float spritew, spriteh;
 				if(CSprite::CalcScreenCoors(coors, spriteCoors, &spritew, &spriteh, true)){
 					float drawDist = 0.75f * aCoronas[i].drawDist;
-					drawDist = Min(drawDist, 50.0f);
+					drawDist = Min(drawDist, 55.0f);
 					if(spriteCoors.z < drawDist){
 						float fadeDistance = drawDist / 2.0f;
 						float distanceFade = spriteCoors.z < fadeDistance ? 1.0f : 1.0f - (spriteCoors.z - fadeDistance)/fadeDistance;
 						distanceFade = clamp(distanceFade, 0.0f, 1.0f);
 						float recipz = 1.0f/RwCameraGetNearClipPlane(Scene.camera);
-						int intensity = (20.0f - aCoronas[i].heightAboveRoad) * 230.0 * distanceFade*CWeather::WetRoads * 0.05f;
+						float heightFade = (20.0f - aCoronas[i].heightAboveRoad)/20.0f;
+						int intensity = distanceFade*heightFade * 230.0 * CWeather::WetRoads;
 
 						CSprite::RenderBufferedOneXLUSprite(
 							spriteCoors.x, spriteCoors.y, RwIm2DGetNearScreenZ(),
