@@ -852,7 +852,7 @@ RenderScene(void)
 	CRenderer::RenderFadingInEntities();
 	RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
 	CWeather::RenderRainStreaks();
-	// CCoronas::RenderSunReflection
+	CCoronas::RenderSunReflection();
 }
 
 void
