@@ -7,6 +7,7 @@
 #include "Credits.h"
 #include "Camera.h"
 #include "Weather.h"
+#include "Timecycle.h"
 #include "Clock.h"
 #include "World.h"
 #include "Vehicle.h"
@@ -406,6 +407,26 @@ DebugMenuPopulate(void)
 		static const char *weathers[] = {
 			"Sunny", "Cloudy", "Rainy", "Foggy", "Extrasunny", "Stormy"
 		};
+		static const char *extracols[] = {
+			"1 - Malibu club",
+			"2 - Strib club",
+			"3 - Hotel",
+			"4 - Bank",
+			"5 - Police HQ",
+			"6 - Mall",
+			"7 - Rifle Range",
+			"8 - Mansion",
+			"9 - Dirt ring",
+			"10 - Blood ring",
+			"11 - Hot ring",
+			"12 - Concert hall",
+			"13 - Auntie Poulets",
+			"14 - Intro at docks",
+			"15 - Biker bar",
+			"16 - Intro cafe",
+			"17 - Studio",
+			"18", "19", "20", "21", "22", "23", "24"
+		};
 		DebugMenuEntry *e;
 		e = DebugMenuAddVar("Time & Weather", "Current Hour", &CClock::GetHoursRef(), nil, 1, 0, 23, nil);
 		DebugMenuEntrySetWrap(e, true);
@@ -416,7 +437,8 @@ DebugMenuPopulate(void)
 		DebugMenuEntrySetWrap(e, true);
 		e = DebugMenuAddVar("Time & Weather", "New Weather", (int16*)&CWeather::NewWeatherType, nil, 1, 0, 5, weathers);
 		DebugMenuEntrySetWrap(e, true);
-		DebugMenuAddVar("Time & Weather", "Wind", (float*)&CWeather::Wind, nil, 0.1f, 0.0f, 1.0f);
+		DebugMenuAddVarBool8("Time & Weather", "Extracolours On", &CTimeCycle::m_bExtraColourOn, nil);
+		DebugMenuAddVar("Time & Weather", "Extracolour", &CTimeCycle::m_ExtraColour, nil, 1, 0, 23, extracols);
 		DebugMenuAddVar("Time & Weather", "Time scale", (float*)&CTimer::GetTimeScale(), nil, 0.1f, 0.0f, 10.0f);
 
 		DebugMenuAddCmd("Cheats", "Weapon set 1", WeaponCheat1);
