@@ -65,6 +65,7 @@ public:
 	static int32 HighestScores[TOTAL_HIGHEST_SCORES];
 	static int32 BestPositions[TOTAL_BEST_POSITIONS];
 	static int32 PropertyDestroyed;
+	static int32 PamphletMissionPassed;
 	static int32 Sprayings;
 	static float AutoPaintingBudget;
 	static int32 NoMoreHurricanes;
