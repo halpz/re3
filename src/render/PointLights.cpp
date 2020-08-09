@@ -86,12 +86,11 @@ CPointLights::GenerateLightsAffectingObject(Const CVector *objCoors)
 					ret *= distNorm;
 				}else{
 					float intensity;
+					// distance fade
 					if(distNorm < 0.5f)
-						// near enough
 						intensity = 1.0f;
 					else
-						// attenuate
-						intensity = 1.0f - (distNorm - 0.5f)*2.0f;
+						intensity = 1.0f - (distNorm - 0.5f)/(1.0f - 0.5f);
 
 					if(distance != 0.0f){
 						CVector dir = dist / distance;
@@ -153,7 +152,7 @@ CPointLights::RenderFogEffect(void)
 		if(aLights[i].fogType != FOG_NORMAL && aLights[i].fogType != FOG_ALWAYS)
 			continue;
 
-		fogginess = aLights[i].fogType == FOG_ALWAYS ? 1.0f : CWeather::Foggyness;
+		fogginess = aLights[i].fogType == FOG_NORMAL ? CWeather::Foggyness : 1.0f;
 		if(fogginess == 0.0f)
 			continue;
 
@@ -198,7 +197,7 @@ CPointLights::RenderFogEffect(void)
 					float distsq = sq(dx) + sq(dy);
 					float linedistsq = distsq - sq(dot);
 					if(dot > 0.0f && dot < FOG_AREA_LENGTH && linedistsq < sq(FOG_AREA_WIDTH)){
-						CVector fogcoors(xi, yi, aLights[i].coors.z + 1.0f);
+						CVector fogcoors(xi, yi, aLights[i].coors.z + 10.0f);
 						if(CWorld::ProcessVerticalLine(fogcoors, fogcoors.z - 20.0f,
 								point, entity, true, false, false, false, true, false, nil)){
 							// Now same check again in xyz
@@ -220,7 +219,7 @@ CPointLights::RenderFogEffect(void)
 								intensity *= 1.0f - sq(Sqrt(linedistsq) / FOG_AREA_WIDTH);
 
 								if(CSprite::CalcScreenCoors(fogcoors, spriteCoors, &spritew, &spriteh, true)){
-									float rotation = (CTimer::GetTimeInMilliseconds()&0x1FFF) * 2*3.14f / 0x1FFF;
+									float rotation = (CTimer::GetTimeInMilliseconds()&0x1FFF) * 2*3.14f / 0x2000;
 									float size = FogSizes[r>>1];
 									CSprite::RenderOneXLUSprite_Rotate_Aspect(spriteCoors.x, spriteCoors.y, spriteCoors.z,
 										spritew * size, spriteh * size,
@@ -269,7 +268,7 @@ CPointLights::RenderFogEffect(void)
 
 								CVector fogcoors(xi, yi, point.point.z + 1.6f);
 								if(CSprite::CalcScreenCoors(fogcoors, spriteCoors, &spritew, &spriteh, true)){
-									float rotation = (CTimer::GetTimeInMilliseconds()&0x3FFF) * 2*3.14f / 0x3FFF;
+									float rotation = (CTimer::GetTimeInMilliseconds()&0x3FFF) * 2*3.14f / 0x4000;
 									float size = FogSizes[r>>1];
 									CSprite::RenderOneXLUSprite_Rotate_Aspect(spriteCoors.x, spriteCoors.y, spriteCoors.z,
 										spritew * size, spriteh * size,
