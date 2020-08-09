@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "Sprite.h"
 #include "Coronas.h"
+#include "PointLights.h"
 #include "Rubbish.h"
 #include "Timecycle.h"
 #include "General.h"
@@ -391,13 +392,15 @@ void CMovingThings::Init()
 	CPlaneTrails::Init();
 	CSmokeTrails::Init();
 	CPlaneBanners::Init();
-	CEscalators::Init();
+	CPointLights::Init();
 
 	StartCloseList.m_pNext = &CMovingThings::EndCloseList;
 	StartCloseList.m_pPrev = nil;
 	EndCloseList.m_pNext = nil;
 	EndCloseList.m_pPrev = &CMovingThings::StartCloseList;
 	Num = 0;
+
+	CEscalators::Init();
 
 #ifndef MIAMI	// something is still used here actually
 	// Initialize scroll bars
