@@ -213,7 +213,11 @@ double
 psTimer(void)
 {
 	struct timespec start; 
+#ifdef __linux__
 	clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+#else
+	clock_gettime(CLOCK_MONOTONIC, &start);
+#endif
 	return start.tv_sec * 1000.0 + start.tv_nsec/1000000.0;
 }
 #endif       
