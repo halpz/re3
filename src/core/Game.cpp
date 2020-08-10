@@ -89,6 +89,7 @@
 #include "Occlusion.h"
 #include "debugmenu.h"
 #include "Ropes.h"
+#include "WindModifiers.h"
 
 eLevelName CGame::currLevel;
 int32 CGame::currArea;
@@ -695,6 +696,7 @@ void CGame::Process(void)
 	if (!CCutsceneMgr::IsCutsceneProcessing() && !CTimer::GetIsCodePaused())
 		FrontEndMenuManager.Process();
 	CStreaming::Update();
+	CWindModifiers::Number = 0;
 	if (!CTimer::GetIsPaused())
 	{
 		CTheZones::Update();
