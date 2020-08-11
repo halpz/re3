@@ -150,11 +150,6 @@ CPostFX::Open(RwCamera *cam)
 #endif
 #ifdef RW_OPENGL
 	using namespace rw::gl3;
-//	AllocConsole();
-//	freopen("CONIN$", "r", stdin);
-//	freopen("CONOUT$", "w", stdout);
-//	freopen("CONOUT$", "w", stderr);
-
 
 	{
 #ifdef RW_GLES2
@@ -309,25 +304,6 @@ CPostFX::RenderOverlayShader(RwCamera *cam, int32 r, int32 g, int32 b, int32 a)
 		blurcolors[3] = 30/255.0f;
 #ifdef RW_D3D9
 		rw::d3d::d3ddevice->SetPixelShaderConstantF(10, blurcolors, 1);
-
-/*
-		float blurcolors[NUMAVERAGE*4];
-		int j = Next;
-		for(int i = NUMAVERAGE-1; i >= 0; i--){
-			j = (j+NUMAVERAGE-1)%NUMAVERAGE;
-//			blurcolors[i*4+0] = PrevRed[j]/255.0f;
-//			blurcolors[i*4+1] = PrevGreen[j]/255.0f;
-//			blurcolors[i*4+2] = PrevBlue[j]/255.0f;
-//			blurcolors[i*4+3] = Intensity/255.0f;
-
-			blurcolors[i*4+0] = r/255.0f;
-			blurcolors[i*4+1] = g/255.0f;
-			blurcolors[i*4+2] = b/255.0f;
-			blurcolors[i*4+3] = Intensity/255.0f;
-		}
-		rw::d3d::d3ddevice->SetPixelShaderConstantF(15, blurcolors, NUMAVERAGE);
-*/
-
 		rw::d3d::im2dOverridePS = colourfilterVC_PS;
 #endif
 #ifdef RW_OPENGL
