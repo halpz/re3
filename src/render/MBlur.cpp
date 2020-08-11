@@ -11,6 +11,7 @@
 #include "Camera.h"
 #include "MBlur.h"
 #include "Timer.h"
+#include "postfx.h"
 
 // Originally taken from RW example 'mblur'
 
@@ -30,6 +31,10 @@ extern "C" D3DCAPS8 _RwD3D8DeviceCaps;
 RwBool
 CMBlur::MotionBlurOpen(RwCamera *cam)
 {
+#ifdef EXTENDED_COLOURFILTER
+	CPostFX::Open(cam);
+	return TRUE;
+#else
 #ifdef GTA_PS2
 	RwRect rect = {0, 0, 0, 0};
 	
@@ -130,18 +135,22 @@ CMBlur::MotionBlurOpen(RwCamera *cam)
 	
 	return TRUE;
 #endif
+#endif
 }
 
 RwBool
 CMBlur::MotionBlurClose(void)
 {
+#ifdef EXTENDED_COLOURFILTER
+	CPostFX::Close();
+#else
 	if(pFrontBuffer){
 		RwRasterDestroy(pFrontBuffer);
 		pFrontBuffer = nil;
 		
 		return TRUE;
 	}
-	
+#endif
 	return FALSE;
 }
 
@@ -197,8 +206,8 @@ CMBlur::CreateImmediateModeData(RwCamera *cam, RwRect *rect)
 	RwIm2DVertexSetIntRGBA(&Vertex[3], 255, 255, 255, 255);
 
 
-	RwIm2DVertexSetScreenX(&Vertex2[0], zero);
-	RwIm2DVertexSetScreenY(&Vertex2[0], zero);
+	RwIm2DVertexSetScreenX(&Vertex2[0], zero + 2.0f);
+	RwIm2DVertexSetScreenY(&Vertex2[0], zero + 2.0f);
 	RwIm2DVertexSetScreenZ(&Vertex2[0], RwIm2DGetNearScreenZ());
 	RwIm2DVertexSetCameraZ(&Vertex2[0], RwCameraGetNearClipPlane(cam));
 	RwIm2DVertexSetRecipCameraZ(&Vertex2[0], 1.0f/RwCameraGetNearClipPlane(cam));
@@ -206,8 +215,8 @@ CMBlur::CreateImmediateModeData(RwCamera *cam, RwRect *rect)
 	RwIm2DVertexSetV(&Vertex2[0], 0.0f, 1.0f/RwCameraGetNearClipPlane(cam));
 	RwIm2DVertexSetIntRGBA(&Vertex2[0], 255, 255, 255, 255);
 
-	RwIm2DVertexSetScreenX(&Vertex2[1], zero);
-	RwIm2DVertexSetScreenY(&Vertex2[1], ymax);
+	RwIm2DVertexSetScreenX(&Vertex2[1], 2.0f);
+	RwIm2DVertexSetScreenY(&Vertex2[1], ymax + 2.0f);
 	RwIm2DVertexSetScreenZ(&Vertex2[1], RwIm2DGetNearScreenZ());
 	RwIm2DVertexSetCameraZ(&Vertex2[1], RwCameraGetNearClipPlane(cam));
 	RwIm2DVertexSetRecipCameraZ(&Vertex2[1], 1.0f/RwCameraGetNearClipPlane(cam));
@@ -215,8 +224,8 @@ CMBlur::CreateImmediateModeData(RwCamera *cam, RwRect *rect)
 	RwIm2DVertexSetV(&Vertex2[1], 1.0f, 1.0f/RwCameraGetNearClipPlane(cam));
 	RwIm2DVertexSetIntRGBA(&Vertex2[1], 255, 255, 255, 255);
 
-	RwIm2DVertexSetScreenX(&Vertex2[2], xmax);
-	RwIm2DVertexSetScreenY(&Vertex2[2], ymax);
+	RwIm2DVertexSetScreenX(&Vertex2[2], xmax + 2.0f);
+	RwIm2DVertexSetScreenY(&Vertex2[2], ymax + 2.0f);
 	RwIm2DVertexSetScreenZ(&Vertex2[2], RwIm2DGetNearScreenZ());
 	RwIm2DVertexSetCameraZ(&Vertex2[2], RwCameraGetNearClipPlane(cam));
 	RwIm2DVertexSetRecipCameraZ(&Vertex2[2], 1.0f/RwCameraGetNearClipPlane(cam));
@@ -224,20 +233,22 @@ CMBlur::CreateImmediateModeData(RwCamera *cam, RwRect *rect)
 	RwIm2DVertexSetV(&Vertex2[2], 1.0f, 1.0f/RwCameraGetNearClipPlane(cam));
 	RwIm2DVertexSetIntRGBA(&Vertex2[2], 255, 255, 255, 255);
 
-	RwIm2DVertexSetScreenX(&Vertex2[3], xmax);
-	RwIm2DVertexSetScreenY(&Vertex2[3], zero);
+	RwIm2DVertexSetScreenX(&Vertex2[3], xmax + 2.0f);
+	RwIm2DVertexSetScreenY(&Vertex2[3], zero + 2.0f);
 	RwIm2DVertexSetScreenZ(&Vertex2[3], RwIm2DGetNearScreenZ());
 	RwIm2DVertexSetCameraZ(&Vertex2[3], RwCameraGetNearClipPlane(cam));
 	RwIm2DVertexSetRecipCameraZ(&Vertex2[3], 1.0f/RwCameraGetNearClipPlane(cam));
 	RwIm2DVertexSetU(&Vertex2[3], 1.0f, 1.0f/RwCameraGetNearClipPlane(cam));
 	RwIm2DVertexSetV(&Vertex2[3], 0.0f, 1.0f/RwCameraGetNearClipPlane(cam));
 	RwIm2DVertexSetIntRGBA(&Vertex2[3], 255, 255, 255, 255);
-
 }
 
 void
 CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blur, int32 type, uint32 bluralpha)
 {
+#ifdef EXTENDED_COLOURFILTER
+	CPostFX::Render(cam, red, green, blue, blur, type, bluralpha);
+#else
 	RwRGBA color = { (RwUInt8)red, (RwUInt8)green, (RwUInt8)blue, (RwUInt8)blur };
 #ifdef GTA_PS2
 	if( pFrontBuffer )
@@ -252,6 +263,7 @@ CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, u
 		RwRasterRenderFast(RwCameraGetRaster(cam), 0, 0);
 		RwRasterPopContext();
 	}
+#endif
 #endif
 }
 

@@ -514,7 +514,12 @@ CCamera::Process(void)
 
 		int tableIndex = (int)(DEGTORAD(DrunkAngle)/TWOPI * CParticle::SIN_COS_TABLE_SIZE) & CParticle::SIN_COS_TABLE_SIZE-1;
 		DrunkAngle += 5.0f;
+#ifndef FIX_BUGS
+		// This just messes up interpolation, probably not what they intended
+		// and multiplying the interpolated FOV is also a bit extreme
+		// so let's not do any of this nonsense
 		Cams[ActiveCam].FOV *= (1.0f + CMBlur::Drunkness);
+#endif
 
 		CamSource.x += -0.02f*CMBlur::Drunkness * CParticle::m_CosTable[tableIndex];
 		CamSource.y += -0.02f*CMBlur::Drunkness * CParticle::m_SinTable[tableIndex];

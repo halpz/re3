@@ -2798,6 +2798,7 @@ CPed::SetModelIndex(uint32 mi)
 	{
 		m_pRTShadow = new CCutsceneShadow;
 		m_pRTShadow->Create(m_rwObject, 10, 1, 1, 1);
+		//m_pRTShadow->Create(m_rwObject, 8, 0, 0, 0);
 	}
 #endif
 }
