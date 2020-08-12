@@ -604,8 +604,8 @@ CCoronas::RenderSunReflection(void)
 
 				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored+1], r, g, b, 255);
 				RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored+1],
-					sunPos.x + fwdLen*sunDir.x - sideLen*sunDir.x,
-					sunPos.y + fwdLen*sunDir.y + sideLen*sunDir.y,
+					sunPos.x + fwdLen*sunDir.x - sideLen*sunDir.y,
+					sunPos.y + fwdLen*sunDir.y + sideLen*sunDir.x,
 					sunPos.z);
 
 				RwIm3DVertexSetU(&TempBufferRenderVertices[TempBufferVerticesStored+0], 0.0f);
