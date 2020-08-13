@@ -4,6 +4,7 @@ class CSprite2d
 {
 	static float RecipNearClip;
 	static float NearScreenZ;
+	static float NearCamZ;	// not original
 	static int nextBufferVertex;
 	static int nextBufferIndex;
 	static RwIm2DVertex maVertices[8];
@@ -27,7 +28,7 @@ public:
 	void Draw(const CRect &rect, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3);
 	void Draw(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA &col);
 
-	static void SetVertices(const CRect &r, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3, uint32 far);
+	static void SetVertices(const CRect &r, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3);
 	static void SetVertices(const CRect &r, const CRGBA &c0, const CRGBA &c1, const CRGBA &c2, const CRGBA &c3,
 		float u0, float v0, float u1, float v1, float u3, float v3, float u2, float v2);
 	static void SetVertices(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4,
