@@ -87,6 +87,7 @@
 #include "Zones.h"
 #include "debugmenu.h"
 #include "frontendoption.h"
+#include "postfx.h"
 
 eLevelName CGame::currLevel;
 bool CGame::bDemoMode = true;
@@ -148,6 +149,9 @@ CGame::InitialiseOnceBeforeRW(void)
 	CFileMgr::Initialise();
 	CdStreamInit(MAX_CDCHANNELS);
 	ValidateVersion();
+#ifdef EXTENDED_COLOURFILTER
+	CPostFX::InitOnce();
+#endif
 	return true;
 }
 
