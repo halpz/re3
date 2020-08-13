@@ -171,6 +171,7 @@ public:
 	static bool bObsoleteControllerMessage;
 	static bool bOldDisplayNoControllerMessage;
 	static bool m_bMapPadOneToPadTwo;
+	static bool bHasPlayerCheated;
 	
 	static CKeyboardState OldKeyState;
 	static CKeyboardState NewKeyState;

@@ -4730,9 +4730,11 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 		} else {
 			CDarkel::RegisterKillNotByPlayer(this, method);
 		}
-		if (method == WEAPONTYPE_DROWNING)
+		if (method == WEAPONTYPE_DROWNING) {
 			bIsInTheAir = false;
-		// TODO(Miami): timesDrowned
+			if (FindPlayerPed() == this)
+				CStats::TimesDrowned++;
+		}
 
 		return true;
 	}

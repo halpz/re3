@@ -37,9 +37,10 @@
 #include "Weather.h"
 #include "World.h"
 #include "Zones.h"
+#include "Timecycle.h"
 
 #define BLOCK_COUNT 20
-#define SIZE_OF_SIMPLEVARS 0xBC
+#define SIZE_OF_SIMPLEVARS 0xD4
 
 const uint32 SIZE_OF_ONE_GAME_IN_BYTES = 201729;
 
@@ -187,6 +188,14 @@ GenericSave(int file)
 	WriteDataToBufferPointer(buf, TheCamera.CarZoomIndicator);
 	WriteDataToBufferPointer(buf, TheCamera.PedZoomIndicator);
 #endif
+	WriteDataToBufferPointer(buf, CGame::currArea);
+	WriteDataToBufferPointer(buf, CVehicle::bAllTaxisHaveNitro);
+	// TODO(Miami): Pad invert Y
+	bool invertY = 0;
+	WriteDataToBufferPointer(buf, invertY);
+	WriteDataToBufferPointer(buf, CTimeCycle::m_ExtraColour);
+	WriteDataToBufferPointer(buf, CTimeCycle::m_bExtraColourOn);
+	WriteDataToBufferPointer(buf, CTimeCycle::m_ExtraColourInter);
 	assert(buf - work_buff == SIZE_OF_SIMPLEVARS);
 
 	// Save scripts, block is nested within the same block as simple vars for some reason
@@ -315,6 +324,14 @@ GenericLoad()
 	ReadDataFromBufferPointer(buf, TheCamera.CarZoomIndicator);
 	ReadDataFromBufferPointer(buf, TheCamera.PedZoomIndicator);
 #endif
+	ReadDataFromBufferPointer(buf, CGame::currArea);
+	ReadDataFromBufferPointer(buf, CVehicle::bAllTaxisHaveNitro);
+	// TODO(Miami): Pad invert Y
+	bool invertY = 0;
+	ReadDataFromBufferPointer(buf, invertY);
+	ReadDataFromBufferPointer(buf, CTimeCycle::m_ExtraColour);
+	ReadDataFromBufferPointer(buf, CTimeCycle::m_bExtraColourOn);
+	ReadDataFromBufferPointer(buf, CTimeCycle::m_ExtraColourInter);
 	assert(buf - work_buff == SIZE_OF_SIMPLEVARS);
 #ifdef MISSION_REPLAY
 	WaitForSave = 0;

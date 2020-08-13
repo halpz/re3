@@ -1806,7 +1806,7 @@ void CMissionCleanup::Process()
 	// TODO(MIAMI)
 	//CSpecialFX::bLiftCam = false;
 	//CSpecialFX::bVideoCam = false;
-	//CTimeCycle::StopExtraColour(0);
+	CTimeCycle::StopExtraColour(0);
 	for (int i = 0; i < MISSION_AUDIO_SLOTS; i++)
 		DMAudio.ClearMissionAudio(i);
 	CWeather::ReleaseWeather();
@@ -1822,8 +1822,11 @@ void CMissionCleanup::Process()
 	CWorld::Players[0].m_pPed->m_pWanted->m_bIgnoredByCops = false;
 	CWorld::Players[0].m_pPed->m_pWanted->m_bIgnoredByEveryone = false;
 	CWorld::Players[0].MakePlayerSafe(false);
-	//TODO(MIAMI): drunkenness, enable drive by
-	//DMAudio::ShutUpPlayerTalking(0);
+	CWorld::Players[0].m_pPed->m_nFadeDrunkenness = 1;
+	CWorld::Players[0].m_pPed->m_nDrunkCountdown = 0;
+	// CPad::GetPad(0)->SetDrunkInputDelay(0); // TODO(Miami)
+	CWorld::Players[0].m_bDriveByAllowed = true;
+	// DMAudio::ShutUpPlayerTalking(0); // TODO(Miami)
 	CVehicle::bDisableRemoteDetonation = false;
 	CVehicle::bDisableRemoteDetonationOnContact = false;
 	CGameLogic::ClearShortCut();
@@ -5353,7 +5356,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		CRadar::GetActualBlipArrayIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
-		int handle = CRadar::SetCoordBlip(BLIP_COORD, pos, 2, BLIP_DISPLAY_BOTH);
+		int handle = CRadar::SetCoordBlip(BLIP_CONTACT_POINT, pos, 2, BLIP_DISPLAY_BOTH);
 		CRadar::ChangeBlipScale(handle, 3);
 		ScriptParams[0] = handle;
 		StoreParameters(&m_nIp, 1);
@@ -9792,7 +9795,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CVector pos = *(CVector*)&ScriptParams[0];
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		C3dMarkers::PlaceMarkerSet((uintptr)this + m_nIp, 4, pos, *(float*)&ScriptParams[3],
+		C3dMarkers::PlaceMarkerSet((uintptr)this + m_nIp, MARKERTYPE_CYLINDER, pos, *(float*)&ScriptParams[3],
 			SPHERE_MARKER_R, SPHERE_MARKER_G, SPHERE_MARKER_B, SPHERE_MARKER_A,
 			SPHERE_MARKER_PULSE_PERIOD, SPHERE_MARKER_PULSE_FRACTION, 0);
 		return 0;
@@ -13008,11 +13011,11 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	//case COMMAND_IS_MISSION_AUDIO_LOADING:
 	case COMMAND_ADD_MONEY_SPENT_ON_WEAPONS:
 		CollectParameters(&m_nIp, 1);
-		debug("ADD_MONEY_SPENT_ON_WEAPON not implemented\n"); // TODO(MIAMI)
+		CStats::MoneySpentOnWeapons(ScriptParams[0]);
 		return 0;
 	case COMMAND_ADD_MONEY_SPENT_ON_PROPERTY:
 		CollectParameters(&m_nIp, 1);
-		debug("ADD_MONEY_SPENT_ON_PROPERTY not implemented\n"); // TODO(MIAMI)
+		CStats::MoneySpentOnProperty(ScriptParams[0]);
 		return 0;
 	//case COMMAND_ADD_MONEY_SPENT_ON_AUTO_PAINTING:
 	case COMMAND_SET_CHAR_ANSWERING_MOBILE:
@@ -13041,21 +13044,21 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	//case COMMAND_ADD_LOAN_SHARK_VISITS:
 	case COMMAND_ADD_STORES_KNOCKED_OFF:
 		CollectParameters(&m_nIp, 1);
-		debug("ADD_STORES_KNOCKED_OFF not implemented\n"); // TODO(MIAMI)
+		CStats::NumOfStoresKnockedOff(ScriptParams[0]);
 		return 0;
 	//case COMMAND_ADD_MOVIE_STUNTS:
 	case COMMAND_ADD_NUMBER_OF_ASSASSINATIONS:
 		CollectParameters(&m_nIp, 1);
-		debug("ADD_NUMBER_OF_ASSASSINATIONS not implemented\n"); // TODO(MIAMI)
+		CStats::NumOfAssassinations(ScriptParams[0]);
 		return 0;
 	case COMMAND_ADD_PIZZAS_DELIVERED:
 		CollectParameters(&m_nIp, 1);
-		debug("ADD_PIZZAS_DELIVERED not implemented\n"); // TODO(MIAMI)
+		CStats::NumOfPizzasDelivered(ScriptParams[0]);
 		return 0;
 	//case COMMAND_ADD_GARBAGE_PICKUPS:
 	case COMMAND_ADD_ICE_CREAMS_SOLD:
 		CollectParameters(&m_nIp, 1);
-		debug("ADD_ICE_CREAMS_SOLD not implemented\n"); // TODO(MIAMI)
+		CStats::NumOfIceCreamSold(ScriptParams[0]);
 		return 0;
 	//case COMMAND_SET_TOP_SHOOTING_RANGE_SCORE:
 	//case COMMAND_ADD_SHOOTING_RANGE_RANK:
@@ -13137,15 +13140,15 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	}
 	case COMMAND_SET_PROPERTY_AS_OWNED:
 		CollectParameters(&m_nIp, 1);
-		debug("SET_PROPERTY_AS_OWNED not implemented\n"); // TODO(MIAMI)
+		CStats::AddPropertyAsOwned(ScriptParams[0]);
 		return 0;
 	case COMMAND_ADD_BLOOD_RING_KILLS:
 		CollectParameters(&m_nIp, 1);
-		debug("ADD_BLOOD_RING_KILLS not implemented\n"); // TODO(MIAMI)
+		CStats::AddNumBloodRingKills(ScriptParams[0]);
 		return 0;
 	case COMMAND_SET_LONGEST_TIME_IN_BLOOD_RING:
 		CollectParameters(&m_nIp, 1);
-		debug("SET_LONGEST_TIME_IN_BLOOD_RING not implemented\n"); // TODO(MIAMI)
+		CStats::LongestTimeInBloodRing(ScriptParams[0]);
 		return 0;
 	case COMMAND_REMOVE_EVERYTHING_FOR_HUGE_CUTSCENE:
 	{
@@ -13271,7 +13274,8 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	//case COMMAND_SET_CHAR_OBJ_GOTO_CAR_ON_FOOT:
 	//case COMMAND_GET_CLOSEST_WATER_NODE:
 	case COMMAND_ADD_PORN_LEAFLET_TO_RUBBISH:
-		debug("ADD_PORN_LEAFLET_TO_RUBBISH is not implemented\n"); // TODO(MIAMI)
+		CollectParameters(&m_nIp, 1);
+		CStats::PamphletMissionPassed = ScriptParams[0];
 		return 0;
 	case COMMAND_CREATE_CLOTHES_PICKUP:
 	{
@@ -13541,7 +13545,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	switch (command) {
 	case COMMAND_REGISTER_VIGILANTE_LEVEL:
 		CollectParameters(&m_nIp, 1);
-		debug("REGISTER_VIGILANTE_LEVEL not implemented\n"); // TODO(MIAMI)
+		CStats::RegisterLevelVigilanteMission(ScriptParams[0]);
 		return 0;
 	case COMMAND_CLEAR_ALL_CHAR_ANIMS:
 	{
@@ -13854,7 +13858,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	}
 	case COMMAND_REGISTER_FIRE_LEVEL:
 		CollectParameters(&m_nIp, 1);
-		debug("REGISTER_FIRE_LEVEL not implemented\n"); // TODO(MIAMI)
+		CStats::RegisterLevelFireMission(ScriptParams[0]);
 		return 0;
 	case COMMAND_IS_AUSTRALIAN_GAME:
 		UpdateCompareFlag(false); // should we make some check?
@@ -14007,7 +14011,7 @@ void CTheScripts::DrawScriptSpheres()
 {
 	for (int i = 0; i < MAX_NUM_SCRIPT_SPHERES; i++) {
 		if (ScriptSphereArray[i].m_bInUse)
-			C3dMarkers::PlaceMarkerSet(ScriptSphereArray[i].m_Id, 4, ScriptSphereArray[i].m_vecCenter, ScriptSphereArray[i].m_fRadius,
+			C3dMarkers::PlaceMarkerSet(ScriptSphereArray[i].m_Id, MARKERTYPE_CYLINDER, ScriptSphereArray[i].m_vecCenter, ScriptSphereArray[i].m_fRadius,
 				SPHERE_MARKER_R, SPHERE_MARKER_G, SPHERE_MARKER_B, SPHERE_MARKER_A, SPHERE_MARKER_PULSE_PERIOD, SPHERE_MARKER_PULSE_FRACTION, 0);
 	}
 }

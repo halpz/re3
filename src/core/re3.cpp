@@ -439,7 +439,7 @@ DebugMenuPopulate(void)
 		DebugMenuEntrySetWrap(e, true);
 		e = DebugMenuAddVar("Time & Weather", "New Weather", (int16*)&CWeather::NewWeatherType, nil, 1, 0, 5, weathers);
 		DebugMenuEntrySetWrap(e, true);
-		DebugMenuAddVarBool8("Time & Weather", "Extracolours On", &CTimeCycle::m_bExtraColourOn, nil);
+		DebugMenuAddVarBool32("Time & Weather", "Extracolours On", &CTimeCycle::m_bExtraColourOn, nil);
 		DebugMenuAddVar("Time & Weather", "Extracolour", &CTimeCycle::m_ExtraColour, nil, 1, 0, 23, extracols);
 		DebugMenuAddVar("Time & Weather", "Time scale", (float*)&CTimer::GetTimeScale(), nil, 0.1f, 0.0f, 10.0f);
 

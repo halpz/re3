@@ -36,6 +36,7 @@
 #include "Stats.h"
 #include "Messages.h"
 #include "FileLoader.h"
+#include "User.h"
 
 // TODO(Miami): Remove that!! That was my map implementation for III, instead use MAP_ENHACEMENTS on some places
 #define CUSTOM_MAP
@@ -5226,9 +5227,13 @@ CMenuManager::SwitchMenuOnAndOff()
 		Initialise();
 		LoadAllTextures();
 
-		// TODO(Miami): Cheat warning
-		m_nCurrScreen = MENUPAGE_CHOOSE_SAVE_SLOT;
-		m_nCurrOption = 8;
+		if (CPad::bHasPlayerCheated) {
+			m_nCurrScreen = MENUPAGE_SAVE_CHEAT_WARNING;
+			m_nCurrOption = 0;
+		} else {
+			m_nCurrScreen = MENUPAGE_CHOOSE_SAVE_SLOT;
+			m_nCurrOption = 8;
+		}
 	}
 
 	m_bStartUpFrontEndRequested = false;
@@ -5262,7 +5267,7 @@ CMenuManager::UnloadTextures()
 		m_bSpritesLoaded = false;
 	}
 	m_OnlySaveMenu = false;
-	// TODO(Miami): Place name thing
+	CUserDisplay::PlaceName.ProcessAfterFrontEndShutDown();
 }
 
 void
@@ -5565,27 +5570,6 @@ CMenuManager::ConstructStatLine(int rowIdx)
 	STAT_LINE("DED_CRI", &(nTemp = CStats::PedsKilledOfThisType[PEDTYPE_CRIMINAL]), false, nil);
 	STAT_LINE("HEL_DST", &CStats::HelisDestroyed, false, nil);
 	STAT_LINE("KGS_EXP", &CStats::KgsOfExplosivesUsed, false, nil);
-	STAT_LINE("ACCURA", &(nTemp = (CStats::InstantHitsFiredByPlayer == 0 ? 0 :
-			CStats::InstantHitsHitByPlayer * 100.0f / CStats::InstantHitsFiredByPlayer)), false, nil);
-	
-	if (CStats::ElBurroTime > 0) {
-		STAT_LINE("ELBURRO", &CStats::ElBurroTime, false, nil);
-	}
-	if (CStats::Record4x4One > 0) {
-		STAT_LINE("FEST_R1", &CStats::Record4x4One, false, nil);
-	}
-	if (CStats::Record4x4Two > 0) {
-		STAT_LINE("FEST_R2", &CStats::Record4x4Two, false, nil);
-	}
-	if (CStats::Record4x4Three > 0) {
-		STAT_LINE("FEST_R3", &CStats::Record4x4Three, false, nil);
-	}
-	if (CStats::Record4x4Mayhem > 0) {
-		STAT_LINE("FEST_RM", &CStats::Record4x4Mayhem, false, nil);
-	}
-	if (CStats::TimeTakenDefuseMission > 0) {
-		STAT_LINE("FEST_BD", &CStats::TimeTakenDefuseMission, false, nil);
-	}
 
 	if (CStats::HighestScores[0] > 0) {
 		STAT_LINE("FEST_BB", nil, false, nil);
@@ -5612,7 +5596,11 @@ CMenuManager::ConstructStatLine(int rowIdx)
 #ifndef USE_MEASUREMENTS_IN_METERS
 			float fTemp;
 			STAT_LINE("FEST_DF", &(fTemp = CStats::DistanceTravelledOnFoot * MILES_IN_METER), true, nil);
-			STAT_LINE("FEST_DC", &(fTemp = CStats::DistanceTravelledInVehicle * MILES_IN_METER), true, nil);
+			STAT_LINE("FEST_DC", &(fTemp = CStats::DistanceTravelledByCar * MILES_IN_METER), true, nil);
+			STAT_LINE("DISTBIK", &(fTemp = CStats::DistanceTravelledByBike * MILES_IN_METER), true, nil);
+			STAT_LINE("DISTBOA", &(fTemp = CStats::DistanceTravelledByBoat * MILES_IN_METER), true, nil);
+			STAT_LINE("DISTGOL", &(fTemp = CStats::DistanceTravelledByGolfCart * MILES_IN_METER), true, nil);
+			STAT_LINE("DISTHEL", &(fTemp = CStats::DistanceTravelledByHelicoptor * MILES_IN_METER), true, nil);
 			STAT_LINE("MXCARD", &(fTemp = CStats::MaximumJumpDistance * FEET_IN_METER), true, nil);
 			STAT_LINE("MXCARJ", &(fTemp = CStats::MaximumJumpHeight * FEET_IN_METER), true, nil);
 			break;
@@ -5627,7 +5615,11 @@ CMenuManager::ConstructStatLine(int rowIdx)
 		case LANGUAGE_JAPANESE:
 #endif
 			STAT_LINE("FESTDFM", &CStats::DistanceTravelledOnFoot, true, nil);
-			STAT_LINE("FESTDCM", &CStats::DistanceTravelledInVehicle, true, nil);
+			STAT_LINE("FESTDCM", &CStats::DistanceTravelledByCar, true, nil);
+			STAT_LINE("DISTBIM", &CStats::DistanceTravelledByBike, true, nil);
+			STAT_LINE("DISTBOM", &CStats::DistanceTravelledByBoat, true, nil);
+			STAT_LINE("DISTGOM", &CStats::DistanceTravelledByGolfCart, true, nil);
+			STAT_LINE("DISTHEM", &CStats::DistanceTravelledByHelicoptor, true, nil);
 			STAT_LINE("MXCARDM", &CStats::MaximumJumpDistance, true, nil);
 			STAT_LINE("MXCARJM", &CStats::MaximumJumpHeight, true, nil);
 			break;

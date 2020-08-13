@@ -114,7 +114,7 @@ class CTimeCycle
 	static int32 m_FogReduction;
 
 public:
-	static bool m_bExtraColourOn;
+	static int32 m_bExtraColourOn;
 	static int32 m_ExtraColour;
 	static float m_ExtraColourInter;
 	static int32 m_CurrentStoredValue;
