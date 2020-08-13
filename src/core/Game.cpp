@@ -90,6 +90,7 @@
 #include "debugmenu.h"
 #include "Ropes.h"
 #include "WindModifiers.h"
+#include "postfx.h"
 
 eLevelName CGame::currLevel;
 int32 CGame::currArea;
@@ -152,6 +153,9 @@ CGame::InitialiseOnceBeforeRW(void)
 	CFileMgr::Initialise();
 	CdStreamInit(MAX_CDCHANNELS);
 	ValidateVersion();
+#ifdef EXTENDED_COLOURFILTER
+	CPostFX::InitOnce();
+#endif
 	return true;
 }
 
