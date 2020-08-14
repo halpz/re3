@@ -1466,20 +1466,20 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 			}
 			case ENTITY_TYPE_VEHICLE:
 			{
-				CStats::InstantHitsHitByPlayer++;
+				CStats::BulletsThatHit++;
 				DMAudio.PlayOneShot(((CPhysical*)victim)->m_audioEntityId, SOUND_WEAPON_HIT_VEHICLE, 1.0f);
 				break;
 			}
 			case ENTITY_TYPE_PED:
 			{
-				CStats::InstantHitsHitByPlayer++;
+				CStats::BulletsThatHit++;
 				DMAudio.PlayOneShot(((CPhysical*)victim)->m_audioEntityId, SOUND_WEAPON_HIT_PED, 1.0f);
 				((CPed*)victim)->Say(SOUND_PED_BULLET_HIT);
 				break;
 			}
 			case ENTITY_TYPE_OBJECT:
 			{
-				CStats::InstantHitsHitByPlayer++;
+				CStats::BulletsThatHit++;
 				PlayOneShotScriptObject(SCRIPT_SOUND_BULLET_HIT_GROUND_2, point->point);
 				break;
 			}
@@ -1862,7 +1862,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				case ENTITY_TYPE_VEHICLE:
 				{
 					if (!statUpdated) {
-						CStats::InstantHitsHitByPlayer++;
+						CStats::BulletsThatHit++;
 						statUpdated = true;
 					}
 					DMAudio.PlayOneShot(((CPhysical*)victim)->m_audioEntityId, SOUND_WEAPON_HIT_VEHICLE, 1.0f);
@@ -1871,7 +1871,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				case ENTITY_TYPE_PED:
 				{
 					if (!statUpdated) {
-						CStats::InstantHitsHitByPlayer++;
+						CStats::BulletsThatHit++;
 						statUpdated = true;
 					}
 					DMAudio.PlayOneShot(((CPhysical*)victim)->m_audioEntityId, SOUND_WEAPON_HIT_PED, 1.0f);
@@ -1881,7 +1881,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				case ENTITY_TYPE_OBJECT:
 				{
 					if (!statUpdated) {
-						CStats::InstantHitsHitByPlayer++;
+						CStats::BulletsThatHit++;
 						statUpdated = true;
 					}
 					PlayOneShotScriptObject(SCRIPT_SOUND_BULLET_HIT_GROUND_2, point.point);
@@ -2069,9 +2069,6 @@ CWeapon::FireSniper(CEntity *shooter)
 	dir *= 16.0f;
 
 	CBulletInfo::AddBullet(shooter, m_eWeaponType, source, dir);
-
-	if ( shooter == FindPlayerPed() )
-		CStats::InstantHitsFiredByPlayer++;
 
 	if ( shooter == FindPlayerPed() )
 	{

@@ -41,6 +41,7 @@
 #include "Fluff.h"
 #include "Gangs.h"
 #include "platform.h"
+#include "Stats.h"
 
 #ifdef GTA_PS2
 #include "eetypes.h"
@@ -59,6 +60,7 @@ bool CPad::bDisplayNoControllerMessage;
 bool CPad::bObsoleteControllerMessage;
 bool CPad::bOldDisplayNoControllerMessage;
 bool CPad::m_bMapPadOneToPadTwo;
+bool CPad::bHasPlayerCheated;
 #ifdef GTA_PS2
 unsigned char act_direct[6];
 unsigned char act_align[6];
@@ -228,6 +230,8 @@ void VehicleCheat(bool something, int model)
 			CWorld::Add(vehicle);
 		}
 	}
+	CStats::CheatedCount += 1000;
+	CPad::bHasPlayerCheated = true;
 }
 
 void BlowUpCarsCheat()
@@ -287,6 +291,8 @@ void MayhemCheat()
 			PED_FLAG_GANG2 | PED_FLAG_GANG3 | PED_FLAG_GANG4 | PED_FLAG_GANG5 |
 			PED_FLAG_GANG6 | PED_FLAG_GANG7 | PED_FLAG_GANG8 | PED_FLAG_GANG9 |
 			PED_FLAG_EMERGENCY | PED_FLAG_PROSTITUTE | PED_FLAG_CRIMINAL | PED_FLAG_SPECIAL );
+	CStats::CheatedCount += 1000;
+	CPad::bHasPlayerCheated = true;
 }
 
 void EverybodyAttacksPlayerCheat()
@@ -294,12 +300,17 @@ void EverybodyAttacksPlayerCheat()
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
 	for (int i = PEDTYPE_CIVMALE; i < PEDTYPE_SPECIAL; i++)
 		CPedType::AddThreat(i, PED_FLAG_PLAYER1);
+
+	CStats::CheatedCount += 1000;
+	CPad::bHasPlayerCheated = true;
 }
 
 void WeaponsForAllCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
 	CPopulation::ms_bGivePedsWeapons = !CPopulation::ms_bGivePedsWeapons;
+	CStats::CheatedCount += 1000;
+	CPad::bHasPlayerCheated = true;
 }
 
 void FastTimeCheat()
@@ -380,19 +391,24 @@ void OnlyRenderWheelsCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
 	CVehicle::bWheelsOnlyCheat = !CVehicle::bWheelsOnlyCheat;
+	CStats::CheatedCount += 1000;
+	CPad::bHasPlayerCheated = true;
 }
-
 
 void ChittyChittyBangBangCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
 	CVehicle::bAllDodosCheat = !CVehicle::bAllDodosCheat;
+	CStats::CheatedCount += 1000;
+	CPad::bHasPlayerCheated = true;
 }
 
 void StrongGripCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
 	CVehicle::bCheat3 = !CVehicle::bCheat3;
+	CStats::CheatedCount += 1000;
+	CPad::bHasPlayerCheated = true;
 }
 
 void NastyLimbsCheat()
@@ -404,6 +420,7 @@ void FannyMagnetCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
 	CPed::bFannyMagnetCheat = !CPed::bFannyMagnetCheat;
+	CPad::bHasPlayerCheated = true;
 }
 
 void BlackCarsCheat()
@@ -437,6 +454,7 @@ void BackToTheFuture(void)
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
 	CVehicle::bHoverCheat = !CVehicle::bHoverCheat;
+	CPad::bHasPlayerCheated = true;
 }
 
 void SuicideCheat(void) {
@@ -453,6 +471,8 @@ void DoChicksWithGunsCheat(void) {
 	CStreaming::RemoveCurrentZonesModels();
 	CGangs::SetGangPedModels(GANG_PLAYER, MI_HFYBE, MI_WFYBE);
 	CGangs::SetGangWeapons(GANG_PLAYER, WEAPONTYPE_M4, WEAPONTYPE_M4);
+	CStats::CheatedCount += 1000;
+	CPad::bHasPlayerCheated = true;
 }
 
 //////////////////////////////////////////////////////////////////////////

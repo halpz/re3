@@ -1179,29 +1179,8 @@ CMenuManager::InitialiseMenuContents(void)
 
 		STAT_LINE("KGS_EXP", &CStats::KgsOfExplosivesUsed, 0, nil);
 
-		nTemp = (CStats::InstantHitsFiredByPlayer == 0 ? 0 : CStats::InstantHitsHitByPlayer * 100.0f / CStats::InstantHitsFiredByPlayer);
-		STAT_LINE("ACCURA", &nTemp, 0, nil);
-
-		if (CStats::ElBurroTime > 0)
-			STAT_LINE("ELBURRO", &CStats::ElBurroTime, 0, nil);
-
-		if (CStats::Record4x4One > 0)
-			STAT_LINE("FEST_R1", &CStats::Record4x4One, 0, nil);
-
-		if (CStats::Record4x4Two > 0)
-			STAT_LINE("FEST_R2", &CStats::Record4x4Two, 0, nil);
-
-		if (CStats::Record4x4Three > 0)
-			STAT_LINE("FEST_R3", &CStats::Record4x4Three, 0, nil);
-
-		if (CStats::Record4x4Mayhem > 0)
-			STAT_LINE("FEST_RM", &CStats::Record4x4Mayhem, 0, nil);
-
 		if (CStats::LongestFlightInDodo > 0)
 			STAT_LINE("FEST_LF", &CStats::LongestFlightInDodo, 0, nil);
-
-		if (CStats::TimeTakenDefuseMission > 0)
-			STAT_LINE("FEST_BD", &CStats::TimeTakenDefuseMission, 0, nil);
 
 		STAT_LINE("CAR_CRU", &CStats::CarsCrushed, 0, nil);
 
@@ -1231,7 +1210,11 @@ CMenuManager::InitialiseMenuContents(void)
 			STAT_LINE("FEST_H4", &CStats::HighestScores[4], 0, nil);
 
 		STAT_LINE("FESTDFM", &CStats::DistanceTravelledOnFoot, 0, nil);
-		STAT_LINE("FESTDCM", &CStats::DistanceTravelledInVehicle, 0, nil);
+		STAT_LINE("FESTDCM", &CStats::DistanceTravelledByCar, 0, nil);
+		STAT_LINE("DISTBIM", &CStats::DistanceTravelledByBike, 0, nil);
+		STAT_LINE("DISTBOM", &CStats::DistanceTravelledByBoat, 0, nil);
+		STAT_LINE("DISTGOM", &CStats::DistanceTravelledByGolfCart, 0, nil);
+		STAT_LINE("DISTHEM", &CStats::DistanceTravelledByHelicoptor, 0, nil);
 		STAT_LINE("MMRAIN", &CStats::mmRain, 0, nil);
 		nTemp = (int32)CStats::MaximumJumpDistance;
 		STAT_LINE("MXCARDM", &nTemp, 0, nil);

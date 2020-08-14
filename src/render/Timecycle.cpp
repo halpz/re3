@@ -123,7 +123,7 @@ int32 CTimeCycle::m_nCurrentFogColourGreen;
 int32 CTimeCycle::m_nCurrentFogColourBlue;
 
 int32 CTimeCycle::m_FogReduction;
-bool CTimeCycle::m_bExtraColourOn;
+int32 CTimeCycle::m_bExtraColourOn;
 int32 CTimeCycle::m_ExtraColour;
 float CTimeCycle::m_ExtraColourInter;
 

@@ -3160,6 +3160,8 @@ CPed::SetStoredObjective(void)
 		case OBJECTIVE_GOTO_CHAR_ON_FOOT:
 		case OBJECTIVE_GOTO_CHAR_ON_FOOT_WALKING:
 		case OBJECTIVE_HASSLE_CHAR:
+		case OBJECTIVE_FOLLOW_CHAR_IN_FORMATION:
+		case OBJECTIVE_LEAVE_CAR:
 		case OBJECTIVE_ENTER_CAR_AS_PASSENGER:
 		case OBJECTIVE_ENTER_CAR_AS_DRIVER:
 		case OBJECTIVE_GOTO_AREA_ON_FOOT:
@@ -4730,9 +4732,11 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 		} else {
 			CDarkel::RegisterKillNotByPlayer(this, method);
 		}
-		if (method == WEAPONTYPE_DROWNING)
+		if (method == WEAPONTYPE_DROWNING) {
 			bIsInTheAir = false;
-		// TODO(Miami): timesDrowned
+			if (FindPlayerPed() == this)
+				CStats::TimesDrowned++;
+		}
 
 		return true;
 	}

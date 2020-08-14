@@ -21,6 +21,9 @@
 #include "Camera.h"
 #include "Shadows.h"
 #include "main.h"
+#include "ColStore.h"
+#include "Coronas.h"
+#include "Script.h"
 
 RwIm3DVertex StreakVertices[4];
 RwImVertexIndex StreakIndexList[12];
@@ -370,6 +373,8 @@ MarkerAtomicCB(RpAtomic *atomic, void *data)
 	return atomic;
 }
 
+// --MIAMI: C3dMarker and C3dMarkers done
+
 bool
 C3dMarker::AddMarker(uint32 identifier, uint16 type, float fSize, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate)
 {
@@ -414,6 +419,7 @@ C3dMarker::DeleteMarkerObject()
 	m_nIdentifier = 0;
 	m_nStartTime = 0;
 	m_bIsUsed = false;
+	m_bFindZOnNextPlacement = false;
 	m_nType = MARKERTYPE_INVALID;
 
 	frame = RpAtomicGetFrame(m_pAtomic);
@@ -457,6 +463,7 @@ C3dMarkers::Init()
 		m_aMarkerArray[i].m_pAtomic = nil;
 		m_aMarkerArray[i].m_nType = MARKERTYPE_INVALID;
 		m_aMarkerArray[i].m_bIsUsed = false;
+		m_aMarkerArray[i].m_bFindZOnNextPlacement = false;
 		m_aMarkerArray[i].m_nIdentifier = 0;
 		m_aMarkerArray[i].m_Color.red = 255;
 		m_aMarkerArray[i].m_Color.green = 255;
@@ -502,8 +509,15 @@ C3dMarkers::Render()
 	ActivateDirectional();
 	for (int i = 0; i < NUM3DMARKERS; i++) {
 		if (m_aMarkerArray[i].m_bIsUsed) {
-			if (m_aMarkerArray[i].m_fCameraRange < 120.0f)
+			if (m_aMarkerArray[i].m_fCameraRange < 150.0f) {
 				m_aMarkerArray[i].Render();
+				if (m_aMarkerArray[i].m_nType == MARKERTYPE_ARROW) {
+					CCoronas::RegisterCorona((uintptr)&m_aMarkerArray[i],
+						SPHERE_MARKER_R, SPHERE_MARKER_G, SPHERE_MARKER_B, 192,
+						m_aMarkerArray[i].m_Matrix.GetPosition(), 1.2f * m_aMarkerArray[i].m_fSize, 50.0f * TheCamera.LODDistMultiplier,
+						CCoronas::TYPE_STAR, CCoronas::FLARE_NONE, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, 0.0f, false);
+				}
+			}
 			NumActiveMarkers++;
 			m_aMarkerArray[i].m_bIsUsed = false;
 		} else if (m_aMarkerArray[i].m_pAtomic != nil) {
@@ -516,9 +530,9 @@ C3dMarker *
 C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate)
 {
 	C3dMarker *pMarker;
-
+	CVector2D playerPos = FindPlayerCentreOfWorld(0);
 	pMarker = nil;
-	float dist = Sqrt((pos.x - FindPlayerCentreOfWorld(0).x) * (pos.x - FindPlayerCentreOfWorld(0).x) + (pos.y - FindPlayerCentreOfWorld(0).y) * (pos.y - FindPlayerCentreOfWorld(0).y));
+	float dist = ((CVector2D)pos - playerPos).Magnitude();
 
 	if (type != MARKERTYPE_ARROW && type != MARKERTYPE_CYLINDER) return nil;
 
@@ -591,6 +605,15 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 		}
 		if (type == MARKERTYPE_ARROW)
 			pMarker->m_Matrix.GetPosition() = pos;
+
+		if (pMarker->m_bFindZOnNextPlacement) {
+			if ((playerPos - pos).MagnitudeSqr() < sq(100.f) && CColStore::HasCollisionLoaded(CVector2D(pos))) {
+				float z = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z + 1.0f, nil);
+				if (z != 0.0f)
+					pMarker->m_Matrix.GetPosition().z = z - 0.05f * size;
+				pMarker->m_bFindZOnNextPlacement = false;
+			}
+		}
 		pMarker->m_bIsUsed = true;
 		return pMarker;
 	}
@@ -600,9 +623,14 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 
 	pMarker->AddMarker(identifier, type, size, r, g, b, a, pulsePeriod, pulseFraction, rotateRate);
 	if (type == MARKERTYPE_CYLINDER || type == MARKERTYPE_0 || type == MARKERTYPE_2) {
-		float z = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z + 1.0f, nil);
-		if (z != 0.0f)
-			pos.z = z - 0.05f * size;
+		if ((playerPos - pos).MagnitudeSqr() < sq(100.f) && CColStore::HasCollisionLoaded(CVector2D(pos))) {
+			float z = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z + 1.0f, nil);
+			if (z != 0.0f)
+				pos.z = z - 0.05f * size;
+			pMarker->m_bFindZOnNextPlacement = false;
+		} else {
+			pMarker->m_bFindZOnNextPlacement = true;
+		}
 	}
 	pMarker->m_Matrix.SetTranslate(pos.x, pos.y, pos.z);
 	if (type == MARKERTYPE_2) {
