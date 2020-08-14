@@ -160,12 +160,12 @@ CPlayerInfo::Clear(void)
 	m_nTimeSpentOnStoppie = 0;
 	m_nDistanceTravelledOnStoppie = 0.0f;
 	m_nCancelWheelStuntTimer = 0;
-	m_nPrevTimeCarSpentOnTwoWheels = 0;
-	m_nPrevDistanceCarTravelledOnTwoWheels = 0;
-	m_nPrevTimeSpentOnWheelie = 0;
-	m_nPrevDistanceTravelledOnWheelie = 0;
-	m_nPrevTimeSpentOnStoppie = 0;
-	m_nPrevDistanceTravelledOnStoppie = 0;
+	m_nLastTimeCarSpentOnTwoWheels = 0;
+	m_nLastDistanceCarTravelledOnTwoWheels = 0;
+	m_nLastTimeSpentOnWheelie = 0;
+	m_nLastDistanceTravelledOnWheelie = 0;
+	m_nLastTimeSpentOnStoppie = 0;
+	m_nLastDistanceTravelledOnStoppie = 0;
 	m_bInfiniteSprint = false;
 	m_bFastReload = false;
 	m_bFireproof = false;
@@ -415,8 +415,8 @@ CPlayerInfo::Process(void)
 					m_nCancelWheelStuntTimer += CTimer::GetTimeStepInMilliseconds();
 				} else {
 					if (m_nTimeCarSpentOnTwoWheels >= 2000) {
-						m_nPrevTimeCarSpentOnTwoWheels = m_nTimeCarSpentOnTwoWheels;
-						m_nPrevDistanceCarTravelledOnTwoWheels = m_nDistanceCarTravelledOnTwoWheels;
+						m_nLastTimeCarSpentOnTwoWheels = m_nTimeCarSpentOnTwoWheels;
+						m_nLastDistanceCarTravelledOnTwoWheels = m_nDistanceCarTravelledOnTwoWheels;
 						if (CStats::Longest2Wheel < m_nTimeCarSpentOnTwoWheels / 1000)
 							CStats::Longest2Wheel = m_nTimeCarSpentOnTwoWheels / 1000;
 						if (CStats::Longest2WheelDist < m_nDistanceCarTravelledOnTwoWheels)
@@ -443,8 +443,8 @@ CPlayerInfo::Process(void)
 
 			} else {
 				if (m_nTimeCarSpentOnTwoWheels >= 2000) {
-					m_nPrevTimeCarSpentOnTwoWheels = m_nTimeCarSpentOnTwoWheels;
-					m_nPrevDistanceCarTravelledOnTwoWheels = m_nDistanceCarTravelledOnTwoWheels;
+					m_nLastTimeCarSpentOnTwoWheels = m_nTimeCarSpentOnTwoWheels;
+					m_nLastDistanceCarTravelledOnTwoWheels = m_nDistanceCarTravelledOnTwoWheels;
 					if (CStats::Longest2Wheel < m_nTimeCarSpentOnTwoWheels / 1000)
 						CStats::Longest2Wheel = m_nTimeCarSpentOnTwoWheels / 1000;
 					if (CStats::Longest2WheelDist < m_nDistanceCarTravelledOnTwoWheels)
@@ -456,8 +456,8 @@ CPlayerInfo::Process(void)
 			}
 		} else if (m_nTimeCarSpentOnTwoWheels != 0) {
 			if (m_nTimeCarSpentOnTwoWheels >= 2000) {
-				m_nPrevTimeCarSpentOnTwoWheels = m_nTimeCarSpentOnTwoWheels;
-				m_nPrevDistanceCarTravelledOnTwoWheels = m_nDistanceCarTravelledOnTwoWheels;
+				m_nLastTimeCarSpentOnTwoWheels = m_nTimeCarSpentOnTwoWheels;
+				m_nLastDistanceCarTravelledOnTwoWheels = m_nDistanceCarTravelledOnTwoWheels;
 				if (CStats::Longest2Wheel < m_nTimeCarSpentOnTwoWheels / 1000)
 					CStats::Longest2Wheel = m_nTimeCarSpentOnTwoWheels / 1000;
 				if (CStats::Longest2WheelDist < m_nDistanceCarTravelledOnTwoWheels)
@@ -483,8 +483,8 @@ CPlayerInfo::Process(void)
 					m_nCancelWheelStuntTimer += CTimer::GetTimeStepInMilliseconds();
 				} else {
 					if (m_nTimeSpentOnWheelie >= 5000) {
-						m_nPrevTimeSpentOnWheelie = m_nTimeSpentOnWheelie;
-						m_nPrevDistanceTravelledOnWheelie = m_nDistanceTravelledOnWheelie;
+						m_nLastTimeSpentOnWheelie = m_nTimeSpentOnWheelie;
+						m_nLastDistanceTravelledOnWheelie = m_nDistanceTravelledOnWheelie;
 						if (CStats::LongestWheelie < m_nTimeSpentOnWheelie / 1000)
 							CStats::LongestWheelie = m_nTimeSpentOnWheelie / 1000;
 						if (CStats::LongestWheelieDist < m_nDistanceTravelledOnWheelie)
@@ -497,8 +497,8 @@ CPlayerInfo::Process(void)
 			}
 		} else if (m_nTimeSpentOnWheelie != 0) {
 			if (m_nTimeSpentOnWheelie >= 5000) {
-				m_nPrevTimeSpentOnWheelie = m_nTimeSpentOnWheelie;
-				m_nPrevDistanceTravelledOnWheelie = m_nDistanceTravelledOnWheelie;
+				m_nLastTimeSpentOnWheelie = m_nTimeSpentOnWheelie;
+				m_nLastDistanceTravelledOnWheelie = m_nDistanceTravelledOnWheelie;
 				if (CStats::LongestWheelie < m_nTimeSpentOnWheelie / 1000)
 					CStats::LongestWheelie = m_nTimeSpentOnWheelie / 1000;
 				if (CStats::LongestWheelieDist < m_nDistanceTravelledOnWheelie)
@@ -519,8 +519,8 @@ CPlayerInfo::Process(void)
 				m_nCancelWheelStuntTimer += CTimer::GetTimeStepInMilliseconds();
 			} else {
 				if (m_nTimeSpentOnStoppie >= 2000) {
-					m_nPrevTimeSpentOnStoppie = m_nTimeSpentOnStoppie;
-					m_nPrevDistanceTravelledOnStoppie = m_nDistanceTravelledOnStoppie;
+					m_nLastTimeSpentOnStoppie = m_nTimeSpentOnStoppie;
+					m_nLastDistanceTravelledOnStoppie = m_nDistanceTravelledOnStoppie;
 					if (CStats::LongestStoppie < m_nTimeSpentOnStoppie / 1000)
 						CStats::LongestStoppie = m_nTimeSpentOnStoppie / 1000;
 					if (CStats::LongestStoppieDist < m_nDistanceTravelledOnStoppie)

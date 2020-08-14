@@ -12725,14 +12725,20 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_GET_WHEELIE_STATS:
 	{
 		CollectParameters(&m_nIp, 1);
-		static bool bShowed = false;
-		if (!bShowed) {
-			debug("GET_WHEELIE_STATS not implemented\n");
-			bShowed = true;
-		}
-		for (int i = 0; i < 6; i++)
-			ScriptParams[i] = 0;
+		CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
+		ScriptParams[0] = pPlayerInfo->m_nLastTimeCarSpentOnTwoWheels;
+		ScriptParams[1] = pPlayerInfo->m_nLastDistanceCarTravelledOnTwoWheels;
+		ScriptParams[2] = pPlayerInfo->m_nLastTimeSpentOnWheelie;
+		ScriptParams[3] = pPlayerInfo->m_nLastDistanceTravelledOnWheelie;
+		ScriptParams[4] = pPlayerInfo->m_nLastTimeSpentOnStoppie;
+		ScriptParams[5] = pPlayerInfo->m_nLastDistanceTravelledOnStoppie;
 		StoreParameters(&m_nIp, 6);
+		pPlayerInfo->m_nLastTimeCarSpentOnTwoWheels = 0;
+		pPlayerInfo->m_nLastDistanceCarTravelledOnTwoWheels = 0;
+		pPlayerInfo->m_nLastTimeSpentOnWheelie = 0;
+		pPlayerInfo->m_nLastDistanceTravelledOnWheelie = 0;
+		pPlayerInfo->m_nLastTimeSpentOnStoppie = 0;
+		pPlayerInfo->m_nLastDistanceTravelledOnStoppie = 0;
 		return 0;
 	}
 	//case COMMAND_DISARM_CHAR:

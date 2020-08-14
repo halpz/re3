@@ -61,12 +61,12 @@ public:
 	int32 m_nTimeSpentOnStoppie;
 	float m_nDistanceTravelledOnStoppie;
 	int32 m_nCancelWheelStuntTimer;
-	int32 m_nPrevTimeCarSpentOnTwoWheels;
-	int32 m_nPrevDistanceCarTravelledOnTwoWheels;
-	int32 m_nPrevTimeSpentOnWheelie;
-	int32 m_nPrevDistanceTravelledOnWheelie;
-	int32 m_nPrevTimeSpentOnStoppie;
-	int32 m_nPrevDistanceTravelledOnStoppie;
+	int32 m_nLastTimeCarSpentOnTwoWheels;
+	int32 m_nLastDistanceCarTravelledOnTwoWheels;
+	int32 m_nLastTimeSpentOnWheelie;
+	int32 m_nLastDistanceTravelledOnWheelie;
+	int32 m_nLastTimeSpentOnStoppie;
+	int32 m_nLastDistanceTravelledOnStoppie;
 	int16 m_nTrafficMultiplier;
 	int16 field_12A;
 	float m_fRoadDensity;
