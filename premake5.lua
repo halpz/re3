@@ -2,21 +2,21 @@ newoption {
 	trigger     = "glewdir",
 	value       = "PATH",
 	description = "Directory of GLEW",
-	default     = "glew-2.1.0"
+	default     = "vendor/glew-2.1.0"
 }
 
 newoption {
 	trigger     = "glfwdir64",
 	value       = "PATH",
 	description = "Directory of glfw",
-	default     = "glfw-3.3.2.bin.WIN64",
+	default     = "vendor/glfw-3.3.2.bin.WIN64",
 }
 
 newoption {
 	trigger     = "glfwdir32",
 	value       = "PATH",
 	description = "Directory of glfw",
-	default     = "glfw-3.3.2.bin.WIN32",
+	default     = "vendor/glfw-3.3.2.bin.WIN32",
 }
 
 newoption {
@@ -30,9 +30,9 @@ newoption {
 }
 
 if(_OPTIONS["with-librw"]) then
-	Librw = "librw"
+	Librw = "vendor/librw"
 else
-	Librw = os.getenv("LIBRW") or "librw"
+	Librw = os.getenv("LIBRW") or "vendor/librw"
 end
 
 function getsys(a)
@@ -152,7 +152,7 @@ if(_OPTIONS["with-librw"]) then
 project "librw"
 	kind "StaticLib"
 	targetname "rw"
-	targetdir "lib/%{cfg.platform}/%{cfg.buildcfg}"
+	targetdir(path.join(Librw, "lib/%{cfg.platform}/%{cfg.buildcfg}"))
 	files { path.join(Librw, "src/*.*") }
 	files { path.join(Librw, "src/*/*.*") }
 	
@@ -220,9 +220,9 @@ project "reVC"
 	includedirs { "src/extras" }
 	
 	if _OPTIONS["with-opus"] then
-		includedirs { "ogg/include" }
-		includedirs { "opus/include" }
-		includedirs { "opusfile/include" }
+		includedirs { "vendor/ogg/include" }
+		includedirs { "vendor/opus/include" }
+		includedirs { "vendor/opusfile/include" }
 	end
 
 	filter "platforms:*mss"
@@ -232,9 +232,9 @@ project "reVC"
 	
 	if _OPTIONS["with-opus"] then
 		filter "platforms:win*"
-			libdirs { "ogg/win32/VS2015/Win32/%{cfg.buildcfg}" }
-			libdirs { "opus/win32/VS2015/Win32/%{cfg.buildcfg}" }
-			libdirs { "opusfile/win32/VS2015/Win32/Release-NoHTTP" }
+			libdirs { "vendor/ogg/win32/VS2015/Win32/%{cfg.buildcfg}" }
+			libdirs { "vendor/opus/win32/VS2015/Win32/%{cfg.buildcfg}" }
+			libdirs { "vendor/opusfile/win32/VS2015/Win32/Release-NoHTTP" }
 		filter {}
 		defines { "AUDIO_OPUS" }
 	end
@@ -254,21 +254,20 @@ project "reVC"
 		characterset ("MBCS")
 		targetextension ".exe"
 		
+	filter "platforms:win*oal"
+		includedirs { "vendor/openal-soft/include" }
+		includedirs { "vendor/libsndfile/include" }
+		includedirs { "vendor/mpg123/include" }
+		
 	filter "platforms:win-x86*oal"
-		includedirs { "openal-soft/include" }
-		includedirs { "libsndfile.32/include" }
-		includedirs { "mpg123.32/include" }
-		libdirs { "mpg123.32/lib" }
-		libdirs { "libsndfile.32/lib" }
-		libdirs { "openal-soft/libs/Win32" }
+		libdirs { "vendor/mpg123/lib/Win32" }
+		libdirs { "vendor/libsndfile/lib/Win32" }
+		libdirs { "vendor/openal-soft/libs/Win32" }
 		
 	filter "platforms:win-amd64*oal"
-		includedirs { "openal-soft/include" }
-		includedirs { "libsndfile.64/include" }
-		includedirs { "mpg123.64/include" }
-		libdirs { "mpg123.64/lib" }
-		libdirs { "libsndfile.64/lib" }
-		libdirs { "openal-soft/libs/Win64" }
+		libdirs { "vendor/mpg123/lib/Win64" }
+		libdirs { "vendor/libsndfile/lib/Win64" }
+		libdirs { "vendor/openal-soft/libs/Win64" }
 
 	filter "platforms:linux*oal"
 		links { "openal", "mpg123", "sndfile", "pthread" }
@@ -297,7 +296,7 @@ project "reVC"
 		includedirs { "src/fakerw" }
 		includedirs { Librw }
 		if(_OPTIONS["with-librw"]) then
-			libdirs { "lib/%{cfg.platform}/%{cfg.buildcfg}" }
+			libdirs { "vendor/librw/lib/%{cfg.platform}/%{cfg.buildcfg}" }
 		end
 		links { "rw" }
 
