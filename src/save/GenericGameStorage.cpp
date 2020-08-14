@@ -57,7 +57,7 @@ wchar SlotSaveDate[SLOT_COUNT][70];
 int CheckSum;
 eLevelName m_LevelToLoad;
 char SaveFileNameJustSaved[260];
-int Slots[SLOT_COUNT+1];
+int Slots[SLOT_COUNT];
 CDate CompileDateAndTime;
 
 bool b_FoundRecentSavedGameWantToLoad;

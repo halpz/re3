@@ -66,8 +66,6 @@ CRGBA LIST_BACKGROUND_COLOR(49, 101, 148, 255);
 #define FEET_IN_METER 3.33f
 #endif
 
-#define isPlainTextScreen(screen) (screen == MENUPAGE_BRIEFS || screen == MENUPAGE_STATS)
-
 #ifdef TRIANGLE_BACK_BUTTON
 #define GetBackJustUp GetTriangleJustUp
 #define GetBackJustDown GetTriangleJustDown
@@ -925,9 +923,9 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 			str = TheText.Get(aScreens[MENUPAGE_DELETE_SLOT_CONFIRM].m_aEntries[0].m_EntryName);
 			break;
 		case MENUPAGE_SAVE_OVERWRITE_CONFIRM:
-			if (Slots[m_nCurrSaveSlot + 1] == SLOT_OK)
+			if (Slots[m_nCurrSaveSlot] == SLOT_OK)
 				str = TheText.Get("FESZ_QO");
-			else if (Slots[m_nCurrSaveSlot + 1] == SLOT_CORRUPTED)
+			else if (Slots[m_nCurrSaveSlot] == SLOT_CORRUPTED)
 				str = TheText.Get("FESZ_QZ");
 			else
 				str = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName);
@@ -3584,7 +3582,7 @@ CMenuManager::Process(void)
 	InitialiseChangedLanguageSettings();
 
 	if (m_bMenuActive) {
-		ProcessButtonPresses();
+		UserInput();
 		ProcessFileActions();
 		DMAudio.Service();
 
@@ -3594,9 +3592,476 @@ CMenuManager::Process(void)
 	SwitchMenuOnAndOff();
 }
 
-// TODO(Miami)
+// Original name is unknown
 void
-CMenuManager::ProcessButtonPresses(void)
+CMenuManager::ProcessList(bool &optionSelected, bool &goBack)
+{
+	if (m_bWaitingForNewKeyBind)
+		return;
+
+	if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
+		m_nTotalListRow = m_nSkinsTotal;
+	}
+	if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
+		m_nTotalListRow = m_ControlMethod == CONTROL_CLASSIC ? 30 : 25;
+		if (m_nSelectedListRow > m_nTotalListRow)
+			m_nSelectedListRow = m_nTotalListRow - 1;
+	}
+
+	if (CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetCrossJustDown()) {
+		m_bShowMouse = 0;
+		optionSelected = true;
+	}
+	if (CPad::GetPad(0)->GetBackspaceJustDown() && m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS && !field_159) {
+		if (m_nCurrExLayer == HOVEROPTION_LIST) {
+			m_nHoverOption = HOVEROPTION_NOT_HOVERING;
+			m_bWaitingForNewKeyBind = true;
+			m_bStartWaitingForKeyBind = true;
+			m_bKeyChangeNotProcessed = true;
+			pControlEdit = &m_KeyPressedCode;
+		}
+	} else {
+		field_159 = false;
+	}
+
+	static PauseModeTime lastTimeClickedScrollButton = 0;
+
+	if (CTimer::GetTimeInMillisecondsPauseMode() - lastTimeClickedScrollButton >= 200) {
+		m_bPressedPgUpOnList = false;
+		m_bPressedPgDnOnList = false;
+		m_bPressedUpOnList = false;
+		m_bPressedDownOnList = false;
+		m_bPressedScrollButton = false;
+		lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
+	}
+
+	if (CPad::GetPad(0)->GetTabJustDown()) {
+		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
+		m_bShowMouse = false;
+		switch (m_nCurrExLayer) {
+		case HOVEROPTION_BACK:
+		default:
+			m_nCurrExLayer = HOVEROPTION_LIST;
+			break;
+		case HOVEROPTION_LIST:
+			m_nCurrExLayer = HOVEROPTION_USESKIN;
+			break;
+		case HOVEROPTION_USESKIN:
+			m_nCurrExLayer = HOVEROPTION_BACK;
+		}
+		if (((m_nCurrScreen == MENUPAGE_SKIN_SELECT) && (m_nCurrExLayer == HOVEROPTION_USESKIN)) && strcmp(m_aSkinName, m_PrefsSkinFile) == 0) {
+			m_nCurrExLayer = HOVEROPTION_BACK;
+		}
+		if ((m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) && (m_nCurrExLayer == HOVEROPTION_USESKIN)) {
+			m_nCurrExLayer = HOVEROPTION_BACK;
+		}
+	}
+
+	bool pressed = false;
+	if (CPad::GetPad(0)->GetUp() || CPad::GetPad(0)->GetAnaloguePadUp() || CPad::GetPad(0)->GetDPadUpJustDown()) {
+		m_bShowMouse = false;
+		pressed = true;
+	} else if (CPad::GetPad(0)->GetMouseWheelUpJustUp()) {
+		m_bShowMouse = true;
+		pressed = true;
+	}
+
+	// Up
+	if (pressed) {
+		m_nCurrExLayer = HOVEROPTION_LIST;
+		if (!m_bPressedUpOnList) {
+			m_bPressedUpOnList = true;
+			lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
+			ScrollUpListByOne();
+		}
+	} else {
+		m_bPressedUpOnList = false;
+	}
+
+	pressed = false;
+	if (CPad::GetPad(0)->GetDown() || CPad::GetPad(0)->GetAnaloguePadDown() || CPad::GetPad(0)->GetDPadDownJustDown()) {
+		m_bShowMouse = false;
+		pressed = true;
+	} else if (CPad::GetPad(0)->GetMouseWheelDownJustDown()) {
+		m_bShowMouse = true;
+		pressed = true;
+	}
+
+	// Down
+	if (pressed) {
+		m_nCurrExLayer = HOVEROPTION_LIST;
+		if (!m_bPressedDownOnList) {
+			m_bPressedDownOnList = true;
+			lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
+			ScrollDownListByOne();
+		}
+	} else {
+		m_bPressedDownOnList = false;
+	}
+
+	if (m_nCurrScreen != MENUPAGE_KEYBOARD_CONTROLS) {
+		if (!CPad::GetPad(0)->GetPageUp()) {
+			m_bPressedPgUpOnList = false;
+		} else {
+			m_nCurrExLayer = HOVEROPTION_LIST;
+			if (!m_bPressedPgUpOnList) {
+				m_bPressedPgUpOnList = true;
+				lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
+				m_bShowMouse = false;
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
+				PageUpList(false);
+			}
+		}
+		if (!CPad::GetPad(0)->GetPageDown()) {
+			m_bPressedPgDnOnList = false;
+		} else {
+			m_nCurrExLayer = HOVEROPTION_LIST;
+			if (!m_bPressedPgDnOnList) {
+				m_bPressedPgDnOnList = true;
+				lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
+				m_bShowMouse = false;
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
+				PageDownList(false);
+			}
+		}
+		if (CPad::GetPad(0)->GetHome()) {
+			m_nCurrExLayer = HOVEROPTION_LIST;
+			m_bShowMouse = false;
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
+			if (m_nTotalListRow >= MAX_VISIBLE_LIST_ROW) {
+				m_nFirstVisibleRowOnList = 0;
+			}
+			m_nSelectedListRow = 0;
+			m_nScrollbarTopMargin = (SCROLLBAR_MAX_HEIGHT / m_nTotalListRow) * m_nFirstVisibleRowOnList;
+		}
+		if (CPad::GetPad(0)->GetEnd()) {
+			m_nCurrExLayer = HOVEROPTION_LIST;
+			m_bShowMouse = false;
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
+			if (m_nTotalListRow >= MAX_VISIBLE_LIST_ROW) {
+				m_nFirstVisibleRowOnList = m_nTotalListRow - MAX_VISIBLE_LIST_ROW;
+			}
+			m_nSelectedListRow = m_nTotalListRow - 1;
+			m_nScrollbarTopMargin = (SCROLLBAR_MAX_HEIGHT / m_nTotalListRow) * m_nFirstVisibleRowOnList;
+		}
+	}
+
+	if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetBackJustDown()) {
+		m_bShowMouse = false;
+		goBack = true;
+	}
+
+	if (CPad::GetPad(0)->GetLeftMouseJustDown()) {
+		switch (m_nHoverOption) {
+		case HOVEROPTION_BACK:
+			goBack = true;
+			break;
+		case HOVEROPTION_PAGEUP:
+			PageUpList(true);
+			break;
+		case HOVEROPTION_PAGEDOWN:
+			PageDownList(true);
+			break;
+		case HOVEROPTION_USESKIN:
+			if (m_nSkinsTotal > 0) {
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
+				m_pSelectedSkin = m_pSkinListHead.nextSkin;
+				strcpy(m_PrefsSkinFile, m_aSkinName);
+				CWorld::Players[0].SetPlayerSkin(m_PrefsSkinFile);
+				SaveSettings();
+			}
+		}
+	}
+
+	if (CPad::GetPad(0)->GetLeftMouseJustDown()) {
+		switch (m_nHoverOption) {
+		case HOVEROPTION_OVER_SCROLL_UP:
+			m_nHoverOption = HOVEROPTION_CLICKED_SCROLL_UP;
+			break;
+		case HOVEROPTION_OVER_SCROLL_DOWN:
+			m_nHoverOption = HOVEROPTION_CLICKED_SCROLL_DOWN;
+			break;
+		case HOVEROPTION_LIST:
+			m_nHoverOption = HOVEROPTION_SKIN;
+		}
+	} else if ((CPad::GetPad(0)->GetLeftMouseJustUp())
+		&& ((m_nHoverOption == HOVEROPTION_CLICKED_SCROLL_UP || (m_nHoverOption == HOVEROPTION_CLICKED_SCROLL_DOWN)))) {
+		m_nHoverOption = HOVEROPTION_NOT_HOVERING;
+	}
+
+	if (!CPad::GetPad(0)->GetLeftMouse()) {
+		holdingScrollBar = false;
+	} else {
+		if ((m_nHoverOption == HOVEROPTION_HOLDING_SCROLLBAR) || holdingScrollBar) {
+			holdingScrollBar = true;
+			// TODO: This part is a bit hard to reverse. Not much code tho
+			assert(0 && "Holding scrollbar isn't done yet");
+		} else {
+			switch (m_nHoverOption) {
+			case HOVEROPTION_OVER_SCROLL_UP:
+			case HOVEROPTION_CLICKED_SCROLL_UP:
+				if (!m_bPressedScrollButton) {
+					m_bPressedScrollButton = true;
+					lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
+					ScrollUpListByOne();
+				}
+				break;
+			case HOVEROPTION_OVER_SCROLL_DOWN:
+			case HOVEROPTION_CLICKED_SCROLL_DOWN:
+				if (!m_bPressedScrollButton) {
+					m_bPressedScrollButton = true;
+					lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
+					ScrollDownListByOne();
+				}
+				break;
+			default:
+				m_bPressedScrollButton = false;
+			}
+		}
+	}
+}
+
+void
+CMenuManager::UserInput(void)
+{
+	bool goBack = false;
+	bool optionSelected = false;
+	bool goUp = false;
+	bool goDown = false;
+	int8 changeValueBy;
+
+	if (!m_AllowNavigation && m_menuTransitionProgress == 255)
+		m_AllowNavigation = true;
+	if (!m_bShowMouse && m_nCurrScreen != MENUPAGE_MAP && (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY)) {
+		m_bShowMouse = true;
+	}
+
+	static int oldOption = -99;
+	oldOption = m_nCurrOption;
+	for (int rowToCheck = 0; rowToCheck < NUM_MENUROWS; ++rowToCheck) {
+		if (aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Action == MENUACTION_NOTHING || 
+			aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Action == MENUACTION_LABEL)
+			continue;
+
+		int extraOffset = 0;
+		if (aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Action == MENUACTION_RADIO)
+			extraOffset = MENURADIO_ICON_SCALE;
+
+		if (m_nMousePosY > MENU_Y(aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Y) &&
+			m_nMousePosY < MENU_Y(aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Y + MENU_DEFAULT_LINE_HEIGHT)) {
+			static int oldScreen = m_nCurrScreen;
+
+			m_nOptionMouseHovering = rowToCheck;
+			if (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY) {
+				m_nCurrOption = rowToCheck;
+				m_bShowMouse = true;
+			}
+
+			int action = aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Action;
+			if (action != MENUACTION_BRIGHTNESS && action != MENUACTION_DRAWDIST && action != MENUACTION_MUSICVOLUME
+				&& action != MENUACTION_SFXVOLUME && action != MENUACTION_MOUSESENS && action != MENUACTION_MP3VOLUMEBOOST)
+				m_nHoverOption = HOVEROPTION_RANDOM_ITEM;
+
+			break;
+		}
+		if (m_bShowMouse && m_nMenuFadeAlpha == 255) {
+			m_nOptionMouseHovering = oldOption;
+			m_nCurrOption = oldOption;
+		}
+	}
+
+	if (m_bShowMouse) {
+		if (oldOption != m_nCurrOption) {
+			if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_LABEL) {
+				++m_nCurrOption;
+				++m_nOptionMouseHovering;
+			}
+			m_nOptionHighlightTransitionBlend = 0;
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
+		}
+	}
+
+	m_nMouseOldPosX = m_nMousePosX;
+	m_nMouseOldPosY = m_nMousePosY;
+	m_nMousePosX = m_nMouseTempPosX;
+	m_nMousePosY = m_nMouseTempPosY;
+
+	if (m_nMousePosX < 0) m_nMousePosX = 0;
+	if (m_nMousePosX > SCREEN_WIDTH) m_nMousePosX = SCREEN_WIDTH;
+	if (m_nMousePosY < 0) m_nMousePosY = 0;
+	if (m_nMousePosY > SCREEN_HEIGHT) m_nMousePosY = SCREEN_HEIGHT;
+
+	changeValueBy = 0;
+	if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS || m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
+		ProcessList(optionSelected, goBack);
+	} else {
+		// TODO(Miami): Seperate that code into a new function from ProcessButtonPresses
+		// ProcessScrollingExceptLists(goBack);
+
+		if (m_AllowNavigation &&
+			(CPad::GetPad(0)->GetDownJustDown() || CPad::GetPad(0)->GetAnaloguePadDown() || CPad::GetPad(0)->GetDPadDownJustDown())) {
+			m_bShowMouse = false;
+			goDown = true;
+			m_nOptionHighlightTransitionBlend = 0;
+
+		}
+		else if (m_AllowNavigation &&
+			(CPad::GetPad(0)->GetUpJustDown() || CPad::GetPad(0)->GetAnaloguePadUp() || CPad::GetPad(0)->GetDPadUpJustDown())) {
+			m_bShowMouse = false;
+			goUp = true;
+			m_nOptionHighlightTransitionBlend = 0;
+		}
+
+		if ((m_nCurrOption == 0) && (m_nCurrScreen == MENUPAGE_PAUSE_MENU)) {
+			if (CPad::GetPad(0)->GetEnterJustUp() || CPad::GetPad(0)->GetCrossJustUp()) {
+				m_bShowMouse = false;
+				optionSelected = true;
+			}
+		}
+		else {
+			if (CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetCrossJustDown()) {
+				m_bShowMouse = false;
+				optionSelected = true;
+			}
+		}
+
+		if (CPad::GetPad(0)->GetLeftMouseJustUp() && m_nCurrScreen != MENUPAGE_MAP) {
+			// TODO(Miami): New radio selector
+			if (m_nHoverOption == HOVEROPTION_RANDOM_ITEM) {
+				m_nCurrOption = m_nOptionMouseHovering;
+				optionSelected = true;
+			}
+		}
+		// TODO(Miami): This part is old radio selector, remove when new is reversed!!
+		else if (CPad::GetPad(0)->GetLeftMouseJustDown()) {
+			if (m_nHoverOption >= HOVEROPTION_RADIO_0 && m_nHoverOption <= HOVEROPTION_RADIO_9) {
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
+				m_PrefsRadioStation = m_nHoverOption - HOVEROPTION_RADIO_0;
+				SaveSettings();
+				DMAudio.SetRadioInCar(m_PrefsRadioStation);
+				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+				OutputDebugString("FRONTEND RADIO STATION CHANGED");
+			}
+		}
+
+		if (CPad::GetPad(0)->GetLeftMouse()) {
+			switch (m_nHoverOption) {
+			case HOVEROPTION_INCREASE_BRIGHTNESS:
+			case HOVEROPTION_INCREASE_MP3BOOST:
+			case HOVEROPTION_INCREASE_DRAWDIST:
+			case HOVEROPTION_INCREASE_MUSICVOLUME:
+			case HOVEROPTION_INCREASE_SFXVOLUME:
+			case HOVEROPTION_INCREASE_MOUSESENS:
+				CheckSliderMovement(1);
+				break;
+			case HOVEROPTION_DECREASE_BRIGHTNESS:
+			case HOVEROPTION_DECREASE_MP3BOOST:
+			case HOVEROPTION_DECREASE_DRAWDIST:
+			case HOVEROPTION_DECREASE_MUSICVOLUME:
+			case HOVEROPTION_DECREASE_SFXVOLUME:
+			case HOVEROPTION_DECREASE_MOUSESENS:
+				CheckSliderMovement(-1);
+				break;
+			}
+		}
+
+		if (CPad::GetPad(0)->GetLeftMouseJustUp() || CPad::GetPad(0)->GetLeftJustUp() || CPad::GetPad(0)->GetRightJustUp()
+			|| CPad::GetPad(0)->GetDPadLeftJustUp() || CPad::GetPad(0)->GetDPadRightJustUp()
+			|| CPad::GetPad(0)->GetAnaloguePadLeftJustUp() || CPad::GetPad(0)->GetAnaloguePadRightJustUp()
+			|| CPad::GetPad(0)->GetMouseWheelUpJustDown() || CPad::GetPad(0)->GetMouseWheelDownJustDown()) {
+			int option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action;
+			if (option == MENUACTION_BRIGHTNESS)
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_FAIL, 0);
+			else if (option == MENUACTION_SFXVOLUME)
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_AUDIO_TEST, 0);
+			else if (option == MENUACTION_DRAWDIST || option == MENUACTION_MOUSESTEER)
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_FAIL, 0);
+
+		}
+		if (CPad::GetPad(0)->GetBackJustDown() || CPad::GetPad(0)->GetEscapeJustDown()) {
+			if (m_nCurrScreen != MENUPAGE_NONE && m_nCurrScreen != MENUPAGE_PAUSE_MENU && m_nCurrScreen != MENUPAGE_CHOOSE_SAVE_SLOT
+				&& m_nCurrScreen != MENUPAGE_SAVE_CHEAT_WARNING && m_nCurrScreen != MENUPAGE_SAVING_IN_PROGRESS
+				&& m_nCurrScreen != MENUPAGE_DELETING_IN_PROGRESS && m_nCurrScreen != MENUPAGE_OUTRO)
+			{
+				m_bShowMouse = false;
+				goBack = true;
+			}
+		}
+
+		if (((goDown) || (goUp)) || (optionSelected)) {
+			goBack = false;
+		}
+
+	}
+
+	int curAction = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action;
+	if (CPad::GetPad(0)->GetLeft() || CPad::GetPad(0)->GetPedWalkLeftRight() < 0 || CPad::GetPad(0)->GetDPadLeft()) {
+		static PauseModeTime lastSliderDecrease = 0;
+		if (CTimer::GetTimeInMillisecondsPauseMode() - lastSliderDecrease > 150) {
+			if (curAction == MENUACTION_BRIGHTNESS || curAction == MENUACTION_MUSICVOLUME ||
+				curAction == MENUACTION_SFXVOLUME || curAction == MENUACTION_RADIO ||
+				curAction == MENUACTION_DRAWDIST || curAction == MENUACTION_MOUSESENS ||
+				curAction == MENUACTION_MP3VOLUMEBOOST)
+				changeValueBy = -1;
+
+			lastSliderDecrease = CTimer::GetTimeInMillisecondsPauseMode();
+		}
+	} else if (CPad::GetPad(0)->GetRight() || CPad::GetPad(0)->GetPedWalkLeftRight() > 0 || CPad::GetPad(0)->GetDPadRight()) {
+		static PauseModeTime lastSliderIncrease = 0;
+		if (CTimer::GetTimeInMillisecondsPauseMode() - lastSliderIncrease > 150) {
+			if (curAction == MENUACTION_BRIGHTNESS || curAction == MENUACTION_MUSICVOLUME ||
+				curAction == MENUACTION_SFXVOLUME || curAction == MENUACTION_RADIO ||
+				curAction == MENUACTION_DRAWDIST || curAction == MENUACTION_MOUSESENS ||
+				curAction == MENUACTION_MP3VOLUMEBOOST)
+				changeValueBy = 1;
+			lastSliderIncrease = CTimer::GetTimeInMillisecondsPauseMode();
+		}
+	}
+
+	if (CPad::GetPad(0)->GetMouseWheelUpJustDown()) {
+		changeValueBy = 1;
+	} else if (CPad::GetPad(0)->GetMouseWheelDownJustDown()) {
+		changeValueBy = -1;
+	}
+	
+	if (m_AllowNavigation) {
+		if (CPad::GetPad(0)->GetRightJustDown() || CPad::GetPad(0)->GetAnaloguePadRight() || CPad::GetPad(0)->GetDPadRightJustDown()) {
+			m_bShowMouse = false;
+			changeValueBy = 1;
+		}
+	}
+
+	if (m_AllowNavigation) {
+		if (CPad::GetPad(0)->GetLeftJustDown() || CPad::GetPad(0)->GetAnaloguePadLeft() || CPad::GetPad(0)->GetDPadLeftJustDown()) {
+			m_bShowMouse = false;
+			changeValueBy = -1;
+		}
+	}
+	if (changeValueBy != 0) {
+		if ((m_nCurrScreen == MENUPAGE_SOUND_SETTINGS || m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS || m_nCurrScreen == MENUPAGE_CONTROLLER_PC || m_nCurrScreen == MENUPAGE_MOUSE_CONTROLS)
+			&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_NOTHING
+			&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_LABEL
+			&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_YES
+			&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_NO
+			&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_CHANGEMENU
+			&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_KEYBOARDCTRLS
+			&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_GOBACK
+			&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_RESTOREDEF
+			&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_DRAWDIST
+			&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_MOUSESENS
+			&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_MP3VOLUMEBOOST) {
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_FAIL, 0);
+		}
+	}
+	ProcessButtonPresses(goDown, goUp, optionSelected, goBack, changeValueBy);
+}
+
+// TODO(Miami)
+// Also rename it to ProcessUserInput when it's done
+void
+CMenuManager::ProcessButtonPresses(uint8 goDown, uint8 goUp, uint8 optionSelected, uint8 goBack, int8 changeAmount)
 {
 	if (m_nCurrScreen == MENUPAGE_OUTRO)
 		return;
@@ -3661,14 +4126,6 @@ CMenuManager::ProcessButtonPresses(void)
 	if (pEditString || pControlEdit)
 		return;
 
-	bool goBack = false;
-	bool optionSelected = false;
-	bool goUp = false;
-	bool goDown = false;
-#ifdef TIDY_UP_PBP
-	bool assumeIncrease = false;
-#endif
-
 #ifdef USE_DEBUG_SCRIPT_LOADER
 	if (m_nCurrScreen == MENUPAGE_START_MENU || m_nCurrScreen == MENUPAGE_NEW_GAME || m_nCurrScreen == MENUPAGE_NEW_GAME_RELOAD) {
 #ifdef RW_GL3
@@ -3686,577 +4143,6 @@ CMenuManager::ProcessButtonPresses(void)
 #endif
 	}
 #endif
-
-	if (!m_bShowMouse && (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY)) {
-		m_bShowMouse = true;
-	}
-
-	static int oldOption = -99;
-	oldOption = m_nCurrOption;
-	for (int rowToCheck = 0; rowToCheck < NUM_MENUROWS; ++rowToCheck) {
-		if (aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Action == MENUACTION_NOTHING || 
-			aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Action == MENUACTION_LABEL)
-			continue;
-
-		int extraOffset = 0;
-		if (aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Action == MENUACTION_RADIO)
-			extraOffset = MENURADIO_ICON_SCALE;
-
-		if (m_nMousePosY > MENU_Y(aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Y) &&
-			m_nMousePosY < MENU_Y(aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Y + MENU_DEFAULT_LINE_HEIGHT)) {
-			static int oldScreen = m_nCurrScreen;
-
-			m_nOptionMouseHovering = rowToCheck;
-			if (m_nMouseOldPosX != m_nMousePosX || m_nMouseOldPosY != m_nMousePosY) {
-				m_nCurrOption = rowToCheck;
-				m_bShowMouse = true;
-			}
-
-			int action = aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Action;
-			if (action != MENUACTION_BRIGHTNESS && action != MENUACTION_DRAWDIST && action != MENUACTION_MUSICVOLUME
-				&& action != MENUACTION_SFXVOLUME && action != MENUACTION_MOUSESENS && action != MENUACTION_MP3VOLUMEBOOST)
-				m_nHoverOption = HOVEROPTION_RANDOM_ITEM;
-
-			break;
-		}
-		if (m_bShowMouse && m_nMenuFadeAlpha == 255) {
-			m_nOptionMouseHovering = oldOption;
-			m_nCurrOption = oldOption;
-		}
-	}
-
-	if (m_bShowMouse) {
-		if (oldOption != m_nCurrOption) {
-			if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_LABEL) {
-				++m_nCurrOption;
-				++m_nOptionMouseHovering;
-			}
-			m_nOptionHighlightTransitionBlend = 0;
-			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
-		}
-	}
-
-	m_nMouseOldPosX = m_nMousePosX;
-	m_nMouseOldPosY = m_nMousePosY;
-	m_nMousePosX = m_nMouseTempPosX;
-	m_nMousePosY = m_nMouseTempPosY;
-
-	if (m_nMousePosX < 0) m_nMousePosX = 0;
-	if (m_nMousePosX > SCREEN_WIDTH) m_nMousePosX = SCREEN_WIDTH;
-	if (m_nMousePosY < 0) m_nMousePosY = 0;
-	if (m_nMousePosY > SCREEN_HEIGHT) m_nMousePosY = SCREEN_HEIGHT;
-
-	if (m_nCurrScreen == MENUPAGE_SKIN_SELECT || m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
-
-		if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
-			m_nTotalListRow = m_nSkinsTotal;
-		}
-		if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
-			m_nTotalListRow = m_ControlMethod == CONTROL_CLASSIC ? 30 : 25;
-			if (m_nSelectedListRow > m_nTotalListRow)
-				m_nSelectedListRow = m_nTotalListRow - 1;
-		}
-
-		if (CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetCrossJustDown()) {
-			m_bShowMouse = 0;
-			optionSelected = true;
-		}
-		if (CPad::GetPad(0)->GetBackspaceJustDown() && m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS && !field_159) {
-			if (m_nCurrExLayer == HOVEROPTION_LIST) {
-				m_nHoverOption = HOVEROPTION_NOT_HOVERING;
-				m_bWaitingForNewKeyBind = true;
-				m_bStartWaitingForKeyBind = true;
-				m_bKeyChangeNotProcessed = true;
-				pControlEdit = &m_KeyPressedCode;
-			}
-		} else {
-			field_159 = false;
-		}
-
-		static PauseModeTime lastTimeClickedScrollButton = 0;
-
-		if (CTimer::GetTimeInMillisecondsPauseMode() - lastTimeClickedScrollButton >= 200) {
-			m_bPressedPgUpOnList = false;
-			m_bPressedPgDnOnList = false;
-			m_bPressedUpOnList = false;
-			m_bPressedDownOnList = false;
-			m_bPressedScrollButton = false;
-			lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
-		}
-
-		if (CPad::GetPad(0)->GetTabJustDown()) {
-			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
-			m_bShowMouse = false;
-			switch (m_nCurrExLayer) {
-				case HOVEROPTION_BACK:
-				default:
-					m_nCurrExLayer = HOVEROPTION_LIST;
-					break;
-				case HOVEROPTION_LIST:
-					m_nCurrExLayer = HOVEROPTION_USESKIN;
-					break;
-				case HOVEROPTION_USESKIN:
-					m_nCurrExLayer = HOVEROPTION_BACK;
-			}
-			if (((m_nCurrScreen == MENUPAGE_SKIN_SELECT) && (m_nCurrExLayer == HOVEROPTION_USESKIN)) && strcmp(m_aSkinName, m_PrefsSkinFile) == 0) {
-				m_nCurrExLayer = HOVEROPTION_BACK;
-			}
-			if ((m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) && (m_nCurrExLayer == HOVEROPTION_USESKIN)) {
-				m_nCurrExLayer = HOVEROPTION_BACK;
-			}
-		}
-
-		bool pressed = false;
-		if (CPad::GetPad(0)->GetUp() || CPad::GetPad(0)->GetAnaloguePadUp() || CPad::GetPad(0)->GetDPadUpJustDown()) {
-			m_bShowMouse = false;
-			pressed = true;
-		} else if (CPad::GetPad(0)->GetMouseWheelUpJustUp()) {
-			m_bShowMouse = true;
-			pressed = true;
-		}
-
-		// Up
-		if (pressed) {
-			m_nCurrExLayer = HOVEROPTION_LIST;
-			if (!m_bPressedUpOnList) {
-				m_bPressedUpOnList = true;
-				lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
-				ScrollUpListByOne();
-			}
-		} else {
-			m_bPressedUpOnList = false;
-		}
-
-		pressed = false;
-		if (CPad::GetPad(0)->GetDown() || CPad::GetPad(0)->GetAnaloguePadDown() || CPad::GetPad(0)->GetDPadDownJustDown()) {
-			m_bShowMouse = false;
-			pressed = true;
-		} else if (CPad::GetPad(0)->GetMouseWheelDownJustDown()) {
-			m_bShowMouse = true;
-			pressed = true;
-		}
-
-		// Down
-		if (pressed) {
-			m_nCurrExLayer = HOVEROPTION_LIST;
-			if (!m_bPressedDownOnList) {
-				m_bPressedDownOnList = true;
-				lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
-				ScrollDownListByOne();
-			}
-		} else {
-			m_bPressedDownOnList = false;
-		}
-
-		if (m_nCurrScreen != MENUPAGE_KEYBOARD_CONTROLS) {
-			if (!CPad::GetPad(0)->GetPageUp()) {
-				m_bPressedPgUpOnList = false;
-			} else {
-				m_nCurrExLayer = HOVEROPTION_LIST;
-				if (!m_bPressedPgUpOnList) {
-					m_bPressedPgUpOnList = true;
-					lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
-					m_bShowMouse = false;
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
-					PageUpList(false);
-				}
-			}
-			if (!CPad::GetPad(0)->GetPageDown()) {
-				m_bPressedPgDnOnList = false;
-			} else {
-				m_nCurrExLayer = HOVEROPTION_LIST;
-				if (!m_bPressedPgDnOnList) {
-					m_bPressedPgDnOnList = true;
-					lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
-					m_bShowMouse = false;
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
-					PageDownList(false);
-				}
-			}
-			if (CPad::GetPad(0)->GetHome()) {
-				m_nCurrExLayer = HOVEROPTION_LIST;
-				m_bShowMouse = false;
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
-				if (m_nTotalListRow >= MAX_VISIBLE_LIST_ROW) {
-					m_nFirstVisibleRowOnList = 0;
-				}
-				m_nSelectedListRow = 0;
-				m_nScrollbarTopMargin = (SCROLLBAR_MAX_HEIGHT / m_nTotalListRow) * m_nFirstVisibleRowOnList;
-			}
-			if (CPad::GetPad(0)->GetEnd()) {
-				m_nCurrExLayer = HOVEROPTION_LIST;
-				m_bShowMouse = false;
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
-				if (m_nTotalListRow >= MAX_VISIBLE_LIST_ROW) {
-					m_nFirstVisibleRowOnList = m_nTotalListRow - MAX_VISIBLE_LIST_ROW;
-				}
-				m_nSelectedListRow = m_nTotalListRow - 1;
-				m_nScrollbarTopMargin = (SCROLLBAR_MAX_HEIGHT / m_nTotalListRow) * m_nFirstVisibleRowOnList;
-			}
-		}
-
-		if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetBackJustDown()) {
-			m_bShowMouse = false;
-			goBack = true;
-		}
-
-		if (CPad::GetPad(0)->GetLeftMouseJustDown()) {
-			switch (m_nHoverOption) {
-				case HOVEROPTION_BACK:
-					goBack = true;
-					break;
-				case HOVEROPTION_PAGEUP:
-					PageUpList(true);
-					break;
-				case HOVEROPTION_PAGEDOWN:
-					PageDownList(true);
-					break;
-				case HOVEROPTION_USESKIN:
-					if (m_nSkinsTotal > 0) {
-						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-						m_pSelectedSkin = m_pSkinListHead.nextSkin;
-						strcpy(m_PrefsSkinFile, m_aSkinName);
-						CWorld::Players[0].SetPlayerSkin(m_PrefsSkinFile);
-						SaveSettings();
-					}
-			}
-		}
-
-		if (CPad::GetPad(0)->GetLeftMouseJustDown()) {
-			switch (m_nHoverOption) {
-				case HOVEROPTION_OVER_SCROLL_UP:
-					m_nHoverOption = HOVEROPTION_CLICKED_SCROLL_UP;
-					break;
-				case HOVEROPTION_OVER_SCROLL_DOWN:
-					m_nHoverOption = HOVEROPTION_CLICKED_SCROLL_DOWN;
-					break;
-				case HOVEROPTION_LIST:
-					m_nHoverOption = HOVEROPTION_SKIN;
-			}
-		} else if ((CPad::GetPad(0)->GetLeftMouseJustUp())
-			&& ((m_nHoverOption == HOVEROPTION_CLICKED_SCROLL_UP || (m_nHoverOption == HOVEROPTION_CLICKED_SCROLL_DOWN)))) {
-			m_nHoverOption = HOVEROPTION_NOT_HOVERING;
-		}
-
-		if (!CPad::GetPad(0)->GetLeftMouse()) {
-			holdingScrollBar = false;
-		} else {
-			if ((m_nHoverOption == HOVEROPTION_HOLDING_SCROLLBAR) || holdingScrollBar) {
-				holdingScrollBar = true;
-				// TODO: This part is a bit hard to reverse. Not much code tho
-				assert(0 && "Holding scrollbar isn't done yet");
-			} else {
-				switch (m_nHoverOption) {
-				case HOVEROPTION_OVER_SCROLL_UP:
-				case HOVEROPTION_CLICKED_SCROLL_UP:
-					if (!m_bPressedScrollButton) {
-						m_bPressedScrollButton = true;
-						lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
-						ScrollUpListByOne();
-					}
-					break;
-				case HOVEROPTION_OVER_SCROLL_DOWN:
-				case HOVEROPTION_CLICKED_SCROLL_DOWN:
-					if (!m_bPressedScrollButton) {
-						m_bPressedScrollButton = true;
-						lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
-						ScrollDownListByOne();
-					}
-					break;
-				default:
-					m_bPressedScrollButton = false;
-				}
-			}
-		}
-	} else if (isPlainTextScreen(m_nCurrScreen)) {
-		if (CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetCrossJustDown() || CPad::GetPad(0)->GetLeftMouseJustDown()) {
-			optionSelected = true;
-		}
-		if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetBackJustUp()) {
-			if (m_nCurrScreen != MENUPAGE_START_MENU) {
-				goBack = true;
-			}
-		}
-	} else {
-		if (CPad::GetPad(0)->GetDownJustDown() || CPad::GetPad(0)->GetAnaloguePadDown() || CPad::GetPad(0)->GetDPadDownJustDown()) {
-			m_bShowMouse = false;
-			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
-			goDown = true;
-			m_nOptionHighlightTransitionBlend = 0;
-		} else if (CPad::GetPad(0)->GetUpJustDown() || CPad::GetPad(0)->GetAnaloguePadUp() || CPad::GetPad(0)->GetDPadUpJustDown()) {
-			m_bShowMouse = false;
-			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
-			goUp = true;
-			m_nOptionHighlightTransitionBlend = 0;
-		}
-
-		if ((m_nCurrOption == 0) && (m_nCurrScreen == MENUPAGE_PAUSE_MENU)) {
-			if (CPad::GetPad(0)->GetEnterJustUp() || CPad::GetPad(0)->GetCrossJustUp()) {
-				m_bShowMouse = false;
-				optionSelected = true;
-			}
-		} else {
-			if (CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetCrossJustDown()) {
-				m_bShowMouse = false;
-				optionSelected = true;
-			}
-		}
-
-		if (CPad::GetPad(0)->GetLeftMouseJustUp()) {
-#ifndef TIDY_UP_PBP
-			if (((m_nCurrOption == 0) && (m_nCurrScreen == MENUPAGE_PAUSE_MENU)) &&
-#else
-			if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_RESUME &&
-#endif
-				(m_nHoverOption == HOVEROPTION_RANDOM_ITEM)) {
-				m_nCurrOption = m_nOptionMouseHovering;
-				optionSelected = true;
-			}
-		} else if (CPad::GetPad(0)->GetLeftMouseJustDown()) {
-#ifdef TIDY_UP_PBP
-			if (m_nHoverOption >= HOVEROPTION_RADIO_0 && m_nHoverOption <= HOVEROPTION_RADIO_9) {
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-				m_PrefsRadioStation = m_nHoverOption - HOVEROPTION_RADIO_0;
-				SaveSettings();
-				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
-				OutputDebugString("FRONTEND RADIO STATION CHANGED");
-			} else if (m_nHoverOption == HOVEROPTION_RANDOM_ITEM
-				&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_RESUME) {
-				m_nCurrOption = m_nOptionMouseHovering;
-				optionSelected = true;
-			}
-#else
-			switch (m_nHoverOption) {
-			case HOVEROPTION_RADIO_0:
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-				m_PrefsRadioStation = HEAD_RADIO;
-				SaveSettings();
-				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
-				OutputDebugString("FRONTEND RADIO STATION CHANGED");
-				break;
-			case HOVEROPTION_RADIO_1:
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-				m_PrefsRadioStation = DOUBLE_CLEF;
-				SaveSettings();
-				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
-				OutputDebugString("FRONTEND RADIO STATION CHANGED");
-				break;
-			case HOVEROPTION_RADIO_2:
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-				m_PrefsRadioStation = JAH_RADIO;
-				SaveSettings();
-				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
-				OutputDebugString("FRONTEND RADIO STATION CHANGED");
-				break;
-			case HOVEROPTION_RADIO_3:
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-				m_PrefsRadioStation = RISE_FM;
-				SaveSettings();
-				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
-				OutputDebugString("FRONTEND RADIO STATION CHANGED");
-				break;
-			case HOVEROPTION_RADIO_4:
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-				m_PrefsRadioStation = LIPS_106;
-				SaveSettings();
-				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
-				OutputDebugString("FRONTEND RADIO STATION CHANGED");
-				break;
-			case HOVEROPTION_RADIO_5:
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-				m_PrefsRadioStation = GAME_FM;
-				SaveSettings();
-				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
-				OutputDebugString("FRONTEND RADIO STATION CHANGED");
-				break;
-			case HOVEROPTION_RADIO_6:
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-				m_PrefsRadioStation = MSX_FM;
-				SaveSettings();
-				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
-				OutputDebugString("FRONTEND RADIO STATION CHANGED");
-				break;
-			case HOVEROPTION_RADIO_7:
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-				m_PrefsRadioStation = FLASHBACK;
-				SaveSettings();
-				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
-				OutputDebugString("FRONTEND RADIO STATION CHANGED");
-				break;
-			case HOVEROPTION_RADIO_8:
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-				m_PrefsRadioStation = CHATTERBOX;
-				SaveSettings();
-				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
-				OutputDebugString("FRONTEND RADIO STATION CHANGED");
-				break;
-			case HOVEROPTION_RADIO_9:
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-				m_PrefsRadioStation = USERTRACK;
-				SaveSettings();
-				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
-				OutputDebugString("FRONTEND RADIO STATION CHANGED");
-				break;
-			case HOVEROPTION_RANDOM_ITEM:
-				if (((m_nCurrOption != 0) || (m_nCurrScreen != MENUPAGE_PAUSE_MENU)) {
-					m_nCurrOption = m_nOptionMouseHovering;
-						optionSelected = true;
-				}
-				break;
-			}
-#endif
-		}
-
-		if (CPad::GetPad(0)->GetLeftMouse()) {
-#ifndef TIDY_UP_PBP
-			switch (m_nHoverOption) {
-			case HOVEROPTION_INCREASE_BRIGHTNESS:
-				m_PrefsBrightness = m_PrefsBrightness + 32;
-				if (m_PrefsBrightness < 0) {
-					m_PrefsBrightness = 0;
-				}
-				if (510 < m_PrefsBrightness) {
-					m_PrefsBrightness = 511;
-				}
-				SaveSettings();
-				break;
-			case HOVEROPTION_DECREASE_BRIGHTNESS:
-				m_PrefsBrightness = m_PrefsBrightness - 32;
-				if (m_PrefsBrightness < 0) {
-					m_PrefsBrightness = 0;
-				}
-				if (510 < m_PrefsBrightness) {
-					m_PrefsBrightness = 511;
-				}
-				SaveSettings();
-				break;
-			case HOVEROPTION_INCREASE_DRAWDIST:
-				m_PrefsLOD = m_PrefsLOD + (1.0f / 16);
-				m_PrefsLOD = min(1.8f, m_PrefsLOD);
-				CRenderer::ms_lodDistScale = m_PrefsLOD;
-				SaveSettings();
-				break;
-			case HOVEROPTION_DECREASE_DRAWDIST:
-				m_PrefsLOD = m_PrefsLOD - (1.0f / 16);
-				m_PrefsLOD = max(0.8f, m_PrefsLOD);
-				CRenderer::ms_lodDistScale = m_PrefsLOD;
-				SaveSettings();
-				break;
-			case HOVEROPTION_INCREASE_MUSICVOLUME:
-				m_PrefsMusicVolume = m_PrefsMusicVolume + 8;
-				m_PrefsMusicVolume = clamp(m_PrefsMusicVolume, 0, 127);
-				DMAudio.SetMusicMasterVolume(uchar)(m_PrefsMusicVolume);
-				SaveSettings();
-				break;
-			case HOVEROPTION_DECREASE_MUSICVOLUME:
-				m_PrefsMusicVolume = m_PrefsMusicVolume - 8;
-				if (m_PrefsMusicVolume < 0) {
-					m_PrefsMusicVolume = 0;
-				}
-				if (126 < m_PrefsMusicVolume) {
-					m_PrefsMusicVolume = 127;
-				}
-				DMAudio.SetMusicMasterVolume(uchar)(m_PrefsMusicVolume);
-				SaveSettings();
-				break;
-			case HOVEROPTION_INCREASE_SFXVOLUME:
-				m_PrefsSFXVolume = m_PrefsSFXVolume + 8;
-				if (m_PrefsSFXVolume < 0) {
-					m_PrefsSFXVolume = 0;
-				}
-				if (126 < m_PrefsSFXVolume) {
-					m_PrefsSFXVolume = 127;
-				}
-				DMAudio.SetEffectsMasterVolume(uchar)(m_PrefsSFXVolume);
-				SaveSettings();
-				break;
-			case HOVEROPTION_DECREASE_SFXVOLUME:
-				m_PrefsSFXVolume = m_PrefsSFXVolume - 8;
-				if (m_PrefsSFXVolume < 0) {
-					m_PrefsSFXVolume = 0;
-				}
-				if (126 < m_PrefsSFXVolume) {
-					m_PrefsSFXVolume = 127;
-				}
-				DMAudio.SetEffectsMasterVolume(uchar)(m_PrefsSFXVolume);
-				SaveSettings();
-				break;
-			case HOVEROPTION_INCREASE_MOUSESENS:
-				TheCamera.m_fMouseAccelHorzntl += (1.0f / 3000);
-				TheCamera.m_fMouseAccelHorzntl = clamp(TheCamera.m_fMouseAccelHorzntl, 1.0f / 3200, 1.0f / 200);
-				SaveSettings();
-				break;
-			case HOVEROPTION_DECREASE_MOUSESENS:
-				TheCamera.m_fMouseAccelHorzntl -= (1.0f / 3000);
-				TheCamera.m_fMouseAccelHorzntl = clamp(TheCamera.m_fMouseAccelHorzntl, 1.0f / 3200, 1.0f / 200);
-				SaveSettings();
-				break;
-			}
-#else
-			switch (m_nHoverOption) {
-				case HOVEROPTION_INCREASE_BRIGHTNESS:
-				case HOVEROPTION_INCREASE_DRAWDIST:
-				case HOVEROPTION_INCREASE_MUSICVOLUME:
-				case HOVEROPTION_INCREASE_SFXVOLUME:
-				case HOVEROPTION_INCREASE_MOUSESENS:
-					CheckSliderMovement(1);
-					break;
-				case HOVEROPTION_DECREASE_BRIGHTNESS:
-				case HOVEROPTION_DECREASE_DRAWDIST:
-				case HOVEROPTION_DECREASE_MUSICVOLUME:
-				case HOVEROPTION_DECREASE_SFXVOLUME:
-				case HOVEROPTION_DECREASE_MOUSESENS:
-					CheckSliderMovement(-1);
-					break;
-			}
-#endif
-		}
-
-		if (CPad::GetPad(0)->GetLeftMouseJustUp() || CPad::GetPad(0)->GetLeftJustUp() || CPad::GetPad(0)->GetRightJustUp()
-			|| CPad::GetPad(0)->GetDPadLeftJustUp() || CPad::GetPad(0)->GetDPadRightJustUp()
-			|| CPad::GetPad(0)->GetAnaloguePadLeftJustUp() || CPad::GetPad(0)->GetAnaloguePadRightJustUp()
-			|| CPad::GetPad(0)->GetMouseWheelUpJustDown() || CPad::GetPad(0)->GetMouseWheelDownJustDown()) {
-			int option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action;
-			if (option == MENUACTION_BRIGHTNESS || option == MENUACTION_DRAWDIST)
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-			else if (option == MENUACTION_SFXVOLUME)
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_AUDIO_TEST, 0);
-			else if (option == MENUACTION_MOUSESENS)
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-
-		}
-		if (CPad::GetPad(0)->GetBackJustDown()) {
-			if (m_nCurrScreen != MENUPAGE_START_MENU && m_nCurrScreen != MENUPAGE_PAUSE_MENU) {
-				m_bShowMouse = false;
-				goBack = true;
-			}
-		}
-
-		if (CPad::GetPad(0)->GetEscapeJustDown()) {
-			if (m_nCurrScreen != MENUPAGE_START_MENU) {
-				m_bShowMouse = false;
-				goBack = true;
-			}
-		}
-
-		if (((goDown) || (goUp)) || (optionSelected)) {
-			goBack = false;
-		}
-	}
-
 
 #ifdef PS2_LIKE_MENU
 	if (CPad::GetPad(0)->GetLeftMouseJustDown() && hoveredBottomBarOption != -1) {
@@ -4297,11 +4183,14 @@ CMenuManager::ProcessButtonPresses(void)
 	}
 #endif
 
+	int oldOption = m_nCurrOption;
 	if (goDown) {
 		m_nCurrOption++;
 		if (m_nCurrOption == NUM_MENUROWS || (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_NOTHING)) {
 			m_nCurrOption = 0;
 		}
+		if (oldOption != m_nCurrOption)
+			m_nOptionHighlightTransitionBlend = 0;
 	}
 	if (goUp) {
 		if (m_nCurrOption == (aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL)) {
@@ -4312,6 +4201,8 @@ CMenuManager::ProcessButtonPresses(void)
 		} else {
 			m_nCurrOption--;
 		}
+		if (oldOption != m_nCurrOption)
+			m_nOptionHighlightTransitionBlend = 0;
 	}
 
 	if (optionSelected) {
@@ -4322,10 +4213,10 @@ CMenuManager::ProcessButtonPresses(void)
 				strncmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FESZ_CA", 8) != 0) {
 
 				if (m_nCurrScreen == MENUPAGE_CHOOSE_DELETE_SLOT) {
-					if (Slots[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_SaveSlot - 1] == SLOT_EMPTY)
-						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_FAIL, 0);
+					if (Slots[m_nCurrOption] != SLOT_OK)
+						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_BACK, 0);
 					else
-						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
+						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_FAIL, 0);
 				} else
 					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
 			} else {
@@ -4400,21 +4291,17 @@ CMenuManager::ProcessButtonPresses(void)
 			option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action;
 			switch (option) {
 				case MENUACTION_RADIO:
-#ifdef TIDY_UP_PBP
-					assumeIncrease = true;
-#else
 					++m_PrefsRadioStation;
 					if (DMAudio.IsMP3RadioChannelAvailable()) {
 						if (m_PrefsRadioStation > USERTRACK)
-							m_PrefsRadioStation = HEAD_RADIO;
-					} else if (m_PrefsRadioStation > CHATTERBOX) {
+							m_PrefsRadioStation = WILDSTYLE;
+					} else if (m_PrefsRadioStation > WAVE) {
 						m_PrefsRadioStation = USERTRACK;
 					}
 					SaveSettings();
 					DMAudio.SetRadioInCar(m_PrefsRadioStation);
 					DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
 					OutputDebugString("FRONTEND RADIO STATION CHANGED");
-#endif
 					break;
 				case MENUACTION_LANG_ENG:
 					m_PrefsLanguage = LANGUAGE_AMERICAN;
@@ -4472,7 +4359,7 @@ CMenuManager::ProcessButtonPresses(void)
 
 					if (saveSlot >= 2 && saveSlot <= 9) {
 						m_nCurrSaveSlot = saveSlot - 2;
-						if (Slots[m_nCurrSaveSlot + 1] != SLOT_EMPTY && Slots[m_nCurrSaveSlot + 1] != SLOT_CORRUPTED) {
+						if (Slots[m_nCurrSaveSlot] != SLOT_EMPTY && Slots[m_nCurrSaveSlot] != SLOT_CORRUPTED) {
 							if (m_nCurrScreen == MENUPAGE_CHOOSE_LOAD_SLOT) {
 								SwitchToNewScreen(MENUPAGE_LOAD_SLOT_CONFIRM);
 							} else if (m_nCurrScreen == MENUPAGE_CHOOSE_DELETE_SLOT) {
@@ -4555,16 +4442,12 @@ CMenuManager::ProcessButtonPresses(void)
 					break;
 				}
 				case MENUACTION_SPEAKERCONF:
-#ifndef TIDY_UP_PBP
 					if (m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER) {
 						if (--m_PrefsSpeakers < 0)
 							m_PrefsSpeakers = 2;
 						DMAudio.SetSpeakerConfig(m_PrefsSpeakers);
 						SaveSettings();
 					}
-#else
-					assumeIncrease = true;
-#endif
 					break;
 				case MENUACTION_PLAYERSETUP:
 					CPlayerSkin::BeginFrontendSkinEdit();
@@ -4634,7 +4517,6 @@ CMenuManager::ProcessButtonPresses(void)
 					SetHelperText(2);
 					break;
 				case MENUACTION_CTRLMETHOD:
-#ifndef TIDY_UP_PBP
 					if (m_ControlMethod == CONTROL_CLASSIC) {
 						CCamera::m_bUseMouse3rdPerson = true;
 						m_ControlMethod = CONTROL_STANDARD;
@@ -4643,9 +4525,6 @@ CMenuManager::ProcessButtonPresses(void)
 						m_ControlMethod = CONTROL_CLASSIC;
 					}
 					SaveSettings();
-#else
-					assumeIncrease = true;
-#endif
 					break;
 				case MENUACTION_LOADRADIO:
 					SwitchToNewScreen(MENUPAGE_SOUND_SETTINGS);
@@ -4761,58 +4640,11 @@ CMenuManager::ProcessButtonPresses(void)
 		return;
 #endif
 
-	int changeValueBy = 0;
-	bool decrease = false;
-#ifdef TIDY_UP_PBP
-	bool increase = assumeIncrease;
-#else
-	bool increase = false;
-#endif
-	if (CPad::GetPad(0)->GetLeft() || CPad::GetPad(0)->GetPedWalkLeftRight() < 0 || CPad::GetPad(0)->GetDPadLeft()) {
-		static PauseModeTime lastSliderDecrease = 0;
-		if (CTimer::GetTimeInMillisecondsPauseMode() - lastSliderDecrease > 150) {
-			CheckSliderMovement(-1);
-			lastSliderDecrease = CTimer::GetTimeInMillisecondsPauseMode();
-		}
-	} else if (CPad::GetPad(0)->GetRight() || CPad::GetPad(0)->GetPedWalkLeftRight() > 0 || CPad::GetPad(0)->GetDPadRight()) {
-		static PauseModeTime lastSliderIncrease = 0;
-		if (CTimer::GetTimeInMillisecondsPauseMode() - lastSliderIncrease > 150) {
-			CheckSliderMovement(1);
-			lastSliderIncrease = CTimer::GetTimeInMillisecondsPauseMode();
-		}
-	}
 
-	if (CPad::GetPad(0)->GetRightJustDown() || CPad::GetPad(0)->GetAnaloguePadRight() || CPad::GetPad(0)->GetDPadRightJustDown()) {
-		m_bShowMouse = false;
-		increase = true;
-	} else if (CPad::GetPad(0)->GetMouseWheelUpJustDown() && m_nCurrScreen != MENUPAGE_KEYBOARD_CONTROLS) {
-		increase = true;
-		CheckSliderMovement(1);
-		m_bShowMouse = true;
-	}
-
-	if (!CPad::GetPad(0)->GetLeftJustDown() && !CPad::GetPad(0)->GetAnaloguePadLeft() && !CPad::GetPad(0)->GetDPadLeftJustDown()) {
-		if (CPad::GetPad(0)->GetMouseWheelDownJustDown()) {
-			if (m_nCurrScreen != MENUPAGE_KEYBOARD_CONTROLS) {
-				decrease = true;
-				CheckSliderMovement(-1);
-				m_bShowMouse = true;
-			}
-		}
-	} else {
-		m_bShowMouse = false;
-		decrease = true;
-	}
-
-	if (increase)
-		changeValueBy++;
-	else if (decrease)
-		changeValueBy--;
-
-	if (changeValueBy != 0) {
+	if (changeAmount != 0) {
 		switch (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action) {
 			case MENUACTION_RADIO:
-				m_PrefsRadioStation += changeValueBy;
+				m_PrefsRadioStation += changeAmount;
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 				if (DMAudio.IsMP3RadioChannelAvailable()) {
 					if (m_PrefsRadioStation < WILDSTYLE)
@@ -4832,7 +4664,7 @@ CMenuManager::ProcessButtonPresses(void)
 				break;
 #ifdef ASPECT_RATIO_SCALE
 			case MENUACTION_WIDESCREEN:
-				if (changeValueBy > 0) {
+				if (changeAmount > 0) {
 					m_PrefsUseWideScreen++;
 					if (m_PrefsUseWideScreen > 2)
 						m_PrefsUseWideScreen = 0;
@@ -4849,7 +4681,7 @@ CMenuManager::ProcessButtonPresses(void)
 				if (m_bGameNotLoaded) {
 					RwChar** videoMods = _psGetVideoModeList();
 					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
-					if (changeValueBy > 0) {
+					if (changeAmount > 0) {
 						do {
 							++m_nDisplayVideoMode;
 
@@ -4874,14 +4706,14 @@ CMenuManager::ProcessButtonPresses(void)
 #endif
 			case MENUACTION_AUDIOHW:
 				if (m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER) {
-					m_nPrefsAudio3DProviderIndex += changeValueBy;
+					m_nPrefsAudio3DProviderIndex += changeAmount;
 					m_nPrefsAudio3DProviderIndex = clamp(m_nPrefsAudio3DProviderIndex, 0, DMAudio.GetNum3DProvidersAvailable() - 1);
 				}
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
 				break;
 			case MENUACTION_SPEAKERCONF:
 				if (m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER) {
-					m_PrefsSpeakers -= changeValueBy;
+					m_PrefsSpeakers -= changeAmount;
 					m_PrefsSpeakers = clamp(m_PrefsSpeakers, 0, 2);
 					DMAudio.SetSpeakerConfig(m_PrefsSpeakers);
 					SaveSettings();
@@ -4899,7 +4731,7 @@ CMenuManager::ProcessButtonPresses(void)
 				FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu];
 				if (m_nCurrScreen == option.screen && m_nCurrOption == option.screenOptionOrder) {
 					if (option.type == FEOPTION_SELECT) {
-						if (changeValueBy > 0) {
+						if (changeAmount > 0) {
 							option.displayedValue++;
 							if (option.displayedValue >= option.numRightTexts)
 								option.displayedValue = 0;
@@ -4913,7 +4745,7 @@ CMenuManager::ProcessButtonPresses(void)
 							*option.value = option.displayedValue;
 						}
 					} else if (option.type == FEOPTION_DYNAMIC) {
-						option.buttonPressFunc(changeValueBy > 0 ? FEOPTION_ACTION_RIGHT : FEOPTION_ACTION_LEFT);
+						option.buttonPressFunc(changeAmount > 0 ? FEOPTION_ACTION_RIGHT : FEOPTION_ACTION_LEFT);
 					}
 					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 				}
@@ -4925,14 +4757,14 @@ CMenuManager::ProcessButtonPresses(void)
 				break;
 #endif
 		}
+		CheckSliderMovement(changeAmount);
 		ProcessOnOffMenuOptions();
 		if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
-			if (changeValueBy < 1) {
+			if (changeAmount < 1) {
 				m_nSelectedContSetupColumn = CONTSETUP_PED_COLUMN;
 			} else {
 				m_nSelectedContSetupColumn = CONTSETUP_VEHICLE_COLUMN;
 			}
-			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
 		}
 	}
 }

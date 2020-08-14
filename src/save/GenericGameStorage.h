@@ -31,7 +31,7 @@ extern wchar SlotFileName[SLOT_COUNT][260];
 extern wchar SlotSaveDate[SLOT_COUNT][70];
 extern int CheckSum;
 extern enum eLevelName m_LevelToLoad;
-extern int Slots[SLOT_COUNT+1];
+extern int Slots[SLOT_COUNT];
 
 extern bool b_FoundRecentSavedGameWantToLoad;
 extern bool JustLoadedDontFadeInYet;

@@ -318,6 +318,8 @@ enum eCheckHover
 	HOVEROPTION_DECREASE_SFXVOLUME,
 	HOVEROPTION_INCREASE_MOUSESENS,
 	HOVEROPTION_DECREASE_MOUSESENS,
+	HOVEROPTION_INCREASE_MP3BOOST,
+	HOVEROPTION_DECREASE_MP3BOOST,
 	HOVEROPTION_NOT_HOVERING,
 };
 
@@ -633,7 +635,9 @@ public:
 	static void PrintErrorMessage();
 	void PrintStats();
 	void Process();
-	void ProcessButtonPresses();
+	void ProcessList(bool &optionSelected, bool &goBack);
+	void UserInput();
+	void ProcessButtonPresses(uint8, uint8, uint8, uint8, int8);
 	void ProcessFileActions();
 	void ProcessOnOffMenuOptions();
 	void RequestFrontEndShutDown();
