@@ -651,6 +651,11 @@ void CControllerConfigManager::AffectControllerStateOn_ButtonDown(int32 button, 
 			}
 
 			AffectControllerStateOn_ButtonDown_AllStates(button, type, *state);
+
+#ifdef REGISTER_START_BUTTON
+			if (button == 12)
+				state->Start = 255;
+#endif
 		}
 	}
 }
@@ -1060,6 +1065,11 @@ void CControllerConfigManager::AffectControllerStateOn_ButtonUp(int32 button, eC
 		{
 			if (FrontEndMenuManager.GetIsMenuActive())
 				AffectControllerStateOn_ButtonUp_All_Player_States(button, type, *state);
+
+#ifdef REGISTER_START_BUTTON
+			if (button == 12)
+				state->Start = 0;
+#endif
 		}
 	}
 }
