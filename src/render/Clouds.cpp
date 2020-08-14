@@ -71,6 +71,43 @@ CClouds::Update(void)
 #endif
 }
 
+float StarCoorsX[9] = { 0.0f, 0.05f, 0.13f, 0.4f, 0.7f, 0.6f, 0.27f, 0.55f, 0.75f };
+float StarCoorsY[9] = { 0.0f, 0.45f, 0.9f, 1.0f, 0.85f, 0.52f, 0.48f, 0.35f, 0.2f };
+float StarSizes[9] = { 1.0f, 1.4f, 0.9f, 1.0f, 0.6f, 1.5f, 1.3f, 1.0f, 0.8f };
+
+float LowCloudsX[12] = { 1.0f, 0.7f, 0.0f, -0.7f, -1.0f, -0.7f, 0.0f, 0.7f, 0.8f, -0.8f, 0.4f, -0.4f };
+float LowCloudsY[12] = { 0.0f, -0.7f, -1.0f, -0.7f, 0.0f, 0.7f, 1.0f, 0.7f, 0.4f, 0.4f, -0.8f, -0.8f };
+float LowCloudsZ[12] = { 0.0f, 1.0f, 0.5f, 0.0f, 1.0f, 0.3f, 0.9f, 0.4f, 1.3f, 1.4f, 1.2f, 1.7f };
+
+float CoorsOffsetX[37] = {
+	0.0f, 60.0f, 72.0f, 48.0f, 21.0f, 12.0f,
+	9.0f, -3.0f, -8.4f, -18.0f, -15.0f, -36.0f,
+	-40.0f, -48.0f, -60.0f, -24.0f, 100.0f, 100.0f,
+	100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f,
+	100.0f, 100.0f, -30.0f, -20.0f, 10.0f, 30.0f,
+	0.0f, -100.0f, -100.0f, -100.0f, -100.0f, -100.0f, -100.0f
+};
+float CoorsOffsetY[37] = {
+	100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f,
+	100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f,
+	100.0f, 100.0f, 100.0f, 100.0f, -30.0f, 10.0f,
+	-25.0f, -5.0f, 28.0f, -10.0f, 10.0f, 0.0f,
+	15.0f, 40.0f, -100.0f, -100.0f, -100.0f, -100.0f,
+	-100.0f, -40.0f, -20.0f, 0.0f, 10.0f, 30.0f, 35.0f
+};
+float CoorsOffsetZ[37] = {
+	2.0f, 1.0f, 0.0f, 0.3f, 0.7f, 1.4f,
+	1.7f, 0.24f, 0.7f, 1.3f, 1.6f, 1.0f,
+	1.2f, 0.3f, 0.7f, 1.4f, 0.0f, 0.1f,
+	0.5f, 0.4f, 0.55f, 0.75f, 1.0f, 1.4f,
+	1.7f, 2.0f, 2.0f, 2.3f, 1.9f, 2.4f,
+	2.0f, 2.0f, 1.5f, 1.2f, 1.7f, 1.5f, 2.1f
+};
+
+uint8 BowRed[6] = { 30, 30, 30, 10, 0, 15 };
+uint8 BowGreen[6] = { 0, 15, 30, 30, 0, 0 };
+uint8 BowBlue[6] = { 0, 0, 0, 10, 30, 30 };
+
 void
 CClouds::Render(void)
 {
@@ -94,11 +131,10 @@ CClouds::Render(void)
 	float minute = CClock::GetHours()*60 + CClock::GetMinutes() + CClock::GetSeconds()/60.0f;
 	RwV3d campos = *(RwV3d*)&TheCamera.GetPosition();
 
-	float coverage = Max(CWeather::Foggyness, CWeather::Foggyness);
-
 	// Moon
 	float moonfadeout = Abs(minute - 180.0f);	// fully visible at 3AM
 	if((int)moonfadeout < 180){			// fade in/out 3 hours
+		float coverage = Max(CWeather::Foggyness, CWeather::CloudCoverage);
 		int brightness = (1.0f - coverage) * (180 - (int)moonfadeout);
 		RwV3d pos = { 0.0f, -100.0f, 15.0f };
 		RwV3dAdd(&worldpos, &campos, &pos);
@@ -122,11 +158,10 @@ CClouds::Render(void)
 	else if(CClock::GetHours() == 5)
 		starintens = 255 * (60 - CClock::GetMinutes())/60.0f;
 	if(starintens != 0){
-		// R
-		static float StarCoorsX[9] = { 0.0f, 0.05f, 0.13f, 0.4f, 0.7f, 0.6f, 0.27f, 0.55f, 0.75f };
-		static float StarCoorsY[9] = { 0.0f, 0.45f, 0.9f, 1.0f, 0.85f, 0.52f, 0.48f, 0.35f, 0.2f };
-		static float StarSizes[9] = { 1.0f, 1.4f, 0.9f, 1.0f, 0.6f, 1.5f, 1.3f, 1.0f, 0.8f };
+		float coverage = Max(CWeather::Foggyness, CWeather::CloudCoverage);
 		int brightness = (1.0f - coverage) * starintens;
+
+		// R
 		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpCoronaTexture[0]));
 		for(i = 0; i < 11; i++){
 			RwV3d pos = { 100.0f, 0.0f, 10.0f };
@@ -155,13 +190,7 @@ CClouds::Render(void)
 	}
 
 	// Low clouds
-	static float LowCloudsX[12] = { 1.0f, 0.7f, 0.0f, -0.7f, -1.0f, -0.7f,
-		0.0f, 0.7f, 0.8f, -0.8f, 0.4f, -0.4f };
-	static float LowCloudsY[12] = { 0.0f, -0.7f, -1.0f, -0.7f, 0.0f, 0.7f,
-		1.0f, 0.7f, 0.4f, 0.4f, -0.8f, -0.8f };
-	static float LowCloudsZ[12] = { 0.0f, 1.0f, 0.5f, 0.0f, 1.0f, 0.3f,
-		0.9f, 0.4f, 1.3f, 1.4f, 1.2f, 1.7f };
-	float lowcloudintensity = 1.0f - Max(coverage, CWeather::ExtraSunnyness);
+	float lowcloudintensity = 1.0f - Max(Max(CWeather::Foggyness, CWeather::CloudCoverage), CWeather::ExtraSunnyness);
 	int r = CTimeCycle::GetLowCloudsRed() * lowcloudintensity;
 	int g = CTimeCycle::GetLowCloudsGreen() * lowcloudintensity;
 	int b = CTimeCycle::GetLowCloudsBlue() * lowcloudintensity;
@@ -184,30 +213,6 @@ CClouds::Render(void)
 	float rot_cos = Cos(CloudRotation);
 	int fluffyalpha = 160 * (1.0f - Max(CWeather::Foggyness, CWeather::ExtraSunnyness));
 	if(fluffyalpha != 0){
-		static float CoorsOffsetX[37] = {
-			0.0f, 60.0f, 72.0f, 48.0f, 21.0f, 12.0f,
-			9.0f, -3.0f, -8.4f, -18.0f, -15.0f, -36.0f,
-			-40.0f, -48.0f, -60.0f, -24.0f, 100.0f, 100.0f,
-			100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f,
-			100.0f, 100.0f, -30.0f, -20.0f, 10.0f, 30.0f,
-			0.0f, -100.0f, -100.0f, -100.0f, -100.0f, -100.0f, -100.0f
-		};
-		static float CoorsOffsetY[37] = {
-			100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f,
-			100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f,
-			100.0f, 100.0f, 100.0f, 100.0f, -30.0f, 10.0f,
-			-25.0f, -5.0f, 28.0f, -10.0f, 10.0f, 0.0f,
-			15.0f, 40.0f, -100.0f, -100.0f, -100.0f, -100.0f,
-			-100.0f, -40.0f, -20.0f, 0.0f, 10.0f, 30.0f, 35.0f
-		};
-		static float CoorsOffsetZ[37] = {
-			2.0f, 1.0f, 0.0f, 0.3f, 0.7f, 1.4f,
-			1.7f, 0.24f, 0.7f, 1.3f, 1.6f, 1.0f,
-			1.2f, 0.3f, 0.7f, 1.4f, 0.0f, 0.1f,
-			0.5f, 0.4f, 0.55f, 0.75f, 1.0f, 1.4f,
-			1.7f, 2.0f, 2.0f, 2.3f, 1.9f, 2.4f,
-			2.0f, 2.0f, 1.5f, 1.2f, 1.7f, 1.5f, 2.1f
-		};
 		static bool bCloudOnScreen[37];
 		float sundist, hilight;
 
@@ -230,7 +235,7 @@ CClouds::Render(void)
 				int bb = CTimeCycle::GetFluffyCloudsBottomBlue();
 				int distLimit = (3*SCREEN_WIDTH)/4;
 				if(sundist < distLimit){
-					hilight = (1.0f - coverage) * (1.0f - sundist/(float)distLimit);
+					hilight = (1.0f - Max(CWeather::Foggyness, CWeather::CloudCoverage)) * (1.0f - sundist/(float)distLimit);
 					tr = tr*(1.0f-hilight) + 255*hilight;
 					tg = tg*(1.0f-hilight) + 190*hilight;
 					tb = tb*(1.0f-hilight) + 190*hilight;
@@ -277,9 +282,6 @@ CClouds::Render(void)
 
 	// Rainbow
 	if(CWeather::Rainbow != 0.0f){
-		static uint8 BowRed[6] = { 30, 30, 30, 10, 0, 15 };
-		static uint8 BowGreen[6] = { 0, 15, 30, 30, 0, 0 };
-		static uint8 BowBlue[6] = { 0, 0, 0, 10, 30, 30 };
 		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpCoronaTexture[0]));
 		for(i = 0; i < 6; i++){
 			RwV3d pos = { i*1.5f, 100.0f, 5.0f };
