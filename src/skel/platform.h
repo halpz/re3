@@ -22,6 +22,7 @@ extern void   psTerminate(void);
 
 extern void psCameraShowRaster(RwCamera *camera);
 extern RwBool psCameraBeginUpdate(RwCamera *camera);
+extern RwImage *psGrabScreen(RwCamera *camera);
 
 extern void psMouseSetPos(RwV2d *pos);
 
