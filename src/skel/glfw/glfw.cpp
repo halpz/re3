@@ -185,6 +185,22 @@ psCameraShowRaster(RwCamera *camera)
 	return;
 }
 
+/*
+ *****************************************************************************
+ */
+RwImage *
+psGrabScreen(RwCamera *pCamera)
+{
+#ifndef LIBRW
+	RwRaster *pRaster = RwCameraGetRaster(pCamera);
+	if (RwImage *pImage = RwImageCreate(pRaster->width, pRaster->height, 32)) {
+		RwImageAllocatePixels(pImage);
+		RwImageSetFromRaster(pImage, pRaster);
+		return pImage;
+	}
+#endif
+	return nil;
+}
 
 /*
  *****************************************************************************
