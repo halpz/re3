@@ -111,7 +111,7 @@ void LangJapSelect(int8 action)
 }
 #endif
 
-#ifdef IMPROVED_VIDEOMODE
+/*#ifdef IMPROVED_VIDEOMODE
 void ScreenModeChange(int8 displayedValue)
 {
 	if (displayedValue != FrontEndMenuManager.m_nPrefsWindowed) {
@@ -121,7 +121,7 @@ void ScreenModeChange(int8 displayedValue)
 		FrontEndMenuManager.SaveSettings();
 	}
 }
-#endif
+#endif*/
 
 #ifdef FREE_CAM
 void ToggleFreeCam(int8 action)
@@ -133,13 +133,13 @@ void ToggleFreeCam(int8 action)
 }
 #endif
 
-#ifdef CUTSCENE_BORDERS_SWITCH
-void BorderModeChange(int8 displayedValue)
-{
-	CMenuManager::m_PrefsCutsceneBorders = !!displayedValue;
-	FrontEndMenuManager.SaveSettings();
-}
-#endif
+//#ifdef CUTSCENE_BORDERS_SWITCH
+//void BorderModeChange(int8 displayedValue)
+//{
+//	CMenuManager::m_PrefsCutsceneBorders = !!displayedValue;
+//	FrontEndMenuManager.SaveSettings();
+//}
+//#endif
 
 // Reloaded on language change, so you can use hardcoded wchar* and TheText.Get with peace of mind
 void
@@ -154,11 +154,11 @@ CustomFrontendOptionsPopulate(void)
 	FrontendOptionAddDynamic(TheText.Get("FEL_JAP"), nil, LangJapSelect, nil);
 #endif
 
-#ifdef IMPROVED_VIDEOMODE
+/*#ifdef IMPROVED_VIDEOMODE
 	static const wchar *screenModes[] = { (wchar*)L"FULLSCREEN", (wchar*)L"WINDOWED" };
 	FrontendOptionSetPosition(MENUPAGE_GRAPHICS_SETTINGS, 8);
 	FrontendOptionAddSelect(TheText.Get("SCRFOR"), screenModes, 2, (int8*)&FrontEndMenuManager.m_nPrefsWindowed, true, ScreenModeChange, nil);
-#endif
+#endif*/
 
 #ifdef MENU_MAP
 	FrontendOptionSetPosition(MENUPAGE_PAUSE_MENU, 2);
@@ -171,11 +171,11 @@ CustomFrontendOptionsPopulate(void)
 	FrontendOptionAddDynamic(text, nil, ToggleFreeCam, nil);
 #endif
 
-#ifdef CUTSCENE_BORDERS_SWITCH
+/*#ifdef CUTSCENE_BORDERS_SWITCH
 	static const wchar *off_on[] = { TheText.Get("FEM_OFF"), TheText.Get("FEM_ON") };
-	FrontendOptionSetPosition(MENUPAGE_GRAPHICS_SETTINGS, 9);
+	FrontendOptionSetPosition(MENUPAGE_DISPLAY_SETTINGS, 3);
 	FrontendOptionAddSelect((const wchar *)L"CUTSCENE BORDERS", off_on, 2, (int8 *)&CMenuManager::m_PrefsCutsceneBorders, false, BorderModeChange, nil);
-#endif
+#endif*/
 }
 #endif
 

@@ -116,6 +116,12 @@ int32 CMenuManager::m_PrefsSfxVolume = 102;
 bool CMenuManager::m_PrefsCutsceneBorders = true;
 #endif
 
+
+#ifdef MULTISAMPLING
+int8 CMenuManager::m_nPrefsMSAALevel = 0;
+int8 CMenuManager::m_nDisplayMSAALevel = 0;
+#endif
+
 char CMenuManager::m_PrefsSkinFile[256] = DEFAULT_SKIN_NAME;
 
 int32 CMenuManager::m_KeyPressedCode = -1;
@@ -399,8 +405,15 @@ CMenuManager::ThingsToDoBeforeGoingBack()
 		DMAudio.StopFrontEndTrack();
 		OutputDebugString("FRONTEND AUDIO TRACK STOPPED");
 #endif
+#ifdef GRAPHICS_MENU_OPTIONS
 	} else if (m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
+#else
+	} else if (m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
+#endif
 		m_nDisplayVideoMode = m_nPrefsVideoMode;
+#ifdef MULTISAMPLING
+		m_nDisplayMSAALevel = m_nPrefsMSAALevel;
+#endif
 	}
 
 	if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
@@ -848,7 +861,7 @@ CMenuManager::Draw()
 			CFont::SetCentreOn();
 			break;
 		case MENUPAGE_SOUND_SETTINGS:
-		case MENUPAGE_GRAPHICS_SETTINGS:
+		case MENUPAGE_DISPLAY_SETTINGS:
 		case MENUPAGE_MULTIPLAYER_CREATE:
 		case MENUPAGE_SKIN_SELECT_OLD:
 		case MENUPAGE_CONTROLLER_PC_OLD1:
@@ -856,7 +869,10 @@ CMenuManager::Draw()
 		case MENUPAGE_CONTROLLER_PC_OLD3:
 		case MENUPAGE_CONTROLLER_PC_OLD4:
 		case MENUPAGE_CONTROLLER_DEBUG:
-		case MENUPAGE_MOUSE_CONTROLS:
+	    case MENUPAGE_MOUSE_CONTROLS:
+#ifdef GRAPHICS_MENU_OPTIONS
+	    case MENUPAGE_GRAPHICS_SETTINGS:
+#endif
 			columnWidth = 50;
 			headerHeight = 0;
 			lineHeight = 20;
@@ -1155,6 +1171,25 @@ CMenuManager::Draw()
 				AsciiToUnicode(_psGetVideoModeList()[m_nDisplayVideoMode], unicodeTemp);
 				rightText = unicodeTemp;
 				break;
+#ifdef IMPROVED_VIDEOMODE
+			case MENUACTION_SCREENFORMAT:
+				rightText = TheText.Get(FrontEndMenuManager.m_nSelectedScreenMode ? "FED_WND" : "FED_FLS");
+				break;
+#endif
+#ifdef MULTISAMPLING
+			case MENUACTION_MULTISAMPLING:
+				switch (m_nDisplayMSAALevel) {
+				case 0:
+					rightText = TheText.Get("FEM_OFF");
+					break;
+				default:
+					sprintf(gString, "%iX", 1 << (m_nDisplayMSAALevel));
+					AsciiToUnicode(gString, unicodeTemp);
+					rightText = unicodeTemp;
+					break;
+				}
+				break;
+#endif
 			case MENUACTION_AUDIOHW:
 				if (m_nPrefsAudio3DProviderIndex == -1)
 					rightText = TheText.Get("FEA_NAH");
@@ -1205,6 +1240,11 @@ CMenuManager::Draw()
 			case MENUACTION_MOUSESTEER:
 				rightText = TheText.Get(CVehicle::m_bDisableMouseSteering ? "FEM_OFF" : "FEM_ON");
 				break;
+#ifdef CUTSCENE_BORDERS_SWITCH
+			case MENUACTION_CUTSCENEBORDERS:
+				rightText = TheText.Get(m_PrefsCutsceneBorders ? "FEM_ON" : "FEM_OFF");
+				break;
+#endif
 #ifdef CUSTOM_FRONTEND_OPTIONS
 			case MENUACTION_TRIGGERFUNC:
 				FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
@@ -1306,7 +1346,14 @@ CMenuManager::Draw()
 						CFont::SetRightJustifyOn();
 					
 					if(textLayer == 1)
-						if(!strcmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FED_RES") 
+						if((!strcmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FED_RES")
+#ifdef IMPROVED_VIDEOMODE
+						     || !strcmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FEM_SCF")
+#endif
+#ifdef MULTISAMPLING
+						     || !strcmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FED_AAS")
+#endif
+							)
 							&& !m_bGameNotLoaded
 #ifdef CUSTOM_FRONTEND_OPTIONS
 							|| isOptionDisabled
@@ -1331,6 +1378,18 @@ CMenuManager::Draw()
 				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_RES") && m_nHelperTextMsgId == 1)
 					ResetHelperText();
 			}
+#ifdef IMPROVED_VIDEOMODE
+			if (m_nSelectedScreenMode == m_nPrefsWindowed) {
+				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEM_SCF") && m_nHelperTextMsgId == 1)
+					ResetHelperText();
+			}
+#endif
+#ifdef MULTISAMPLING
+			if (m_nDisplayMSAALevel == m_nPrefsMSAALevel) {
+				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_AAS") && m_nHelperTextMsgId == 1)
+					ResetHelperText();
+			}
+#endif
 			if (m_nPrefsAudio3DProviderIndex != DMAudio.GetCurrent3DProviderIndex()) {
 				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEA_3DH"))
 					SetHelperText(1);
@@ -1339,6 +1398,18 @@ CMenuManager::Draw()
 				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_RES"))
 					SetHelperText(1);
 			}
+#ifdef IMPROVED_VIDEOMODE
+			if (m_nSelectedScreenMode != m_nPrefsWindowed) {
+				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEM_SCF"))
+					SetHelperText(1);
+			}
+#endif
+#ifdef MULTISAMPLING
+			if (m_nDisplayMSAALevel != m_nPrefsMSAALevel) {
+				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_AAS"))
+					SetHelperText(1);
+			}
+#endif
 			if (m_nPrefsAudio3DProviderIndex != DMAudio.GetCurrent3DProviderIndex()) {
 				if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEA_3DH") != 0
 					&& m_nCurrScreen == MENUPAGE_SOUND_SETTINGS && m_nPrefsAudio3DProviderIndex != -1) {
@@ -1349,11 +1420,41 @@ CMenuManager::Draw()
 			}
 			if (m_nDisplayVideoMode != m_nPrefsVideoMode) {
 				if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_RES") != 0
-					&& m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
+#ifdef GRAPHICS_MENU_OPTIONS
+				    && m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
+#else
+					&& m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
+#endif
 					m_nDisplayVideoMode = m_nPrefsVideoMode;
 					SetHelperText(3);
 				}
 			}
+#ifdef IMPROVED_VIDEOMODE
+			if (m_nSelectedScreenMode != m_nPrefsWindowed) {
+				if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEM_SCF") != 0
+#ifdef GRAPHICS_MENU_OPTIONS
+				    && m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
+#else
+					&& m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
+#endif
+					m_nSelectedScreenMode = m_nPrefsWindowed;
+					SetHelperText(3);
+				}
+			}
+#endif
+#ifdef MULTISAMPLING
+			if (m_nSelectedScreenMode != m_nPrefsWindowed) {
+				if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_AAS") != 0
+#ifdef GRAPHICS_MENU_OPTIONS
+				    && m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
+#else
+				    && m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
+#endif
+					m_nDisplayMSAALevel = m_nPrefsMSAALevel;
+					SetHelperText(3);
+				}
+			}
+#endif
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
 			if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action == MENUACTION_TRIGGERFUNC) {
@@ -1419,10 +1520,13 @@ CMenuManager::Draw()
 	switch (m_nCurrScreen) {
 	case MENUPAGE_CONTROLLER_SETTINGS:
 	case MENUPAGE_SOUND_SETTINGS:
-	case MENUPAGE_GRAPHICS_SETTINGS:
+	case MENUPAGE_DISPLAY_SETTINGS:
 	case MENUPAGE_SKIN_SELECT:
 	case MENUPAGE_CONTROLLER_PC:
 	case MENUPAGE_MOUSE_CONTROLS:
+#ifdef GRAPHICS_MENU_OPTIONS
+	case MENUPAGE_GRAPHICS_SETTINGS:
+#endif
 		DisplayHelperText();
 		break;
 	}
@@ -2079,7 +2183,7 @@ CMenuManager::DrawFrontEnd()
 				bbNames[0] = { "FEB_SAV",MENUPAGE_NEW_GAME };
 				bbNames[1] = { "FEB_CON",MENUPAGE_CONTROLLER_PC };
 				bbNames[2] = { "FEB_AUD",MENUPAGE_SOUND_SETTINGS };
-				bbNames[3] = { "FEB_DIS",MENUPAGE_GRAPHICS_SETTINGS };
+				bbNames[3] = { "FEB_DIS",MENUPAGE_DISPLAY_SETTINGS };
 				bbNames[4] = { "FEB_LAN",MENUPAGE_LANGUAGE_SETTINGS };
 				bbNames[5] = { "FESZ_QU",MENUPAGE_EXIT };
 				bbTabCount = 6;
@@ -2091,7 +2195,7 @@ CMenuManager::DrawFrontEnd()
 				bbNames[2] = { "FEB_BRI",MENUPAGE_BRIEFS };
 				bbNames[3] = { "FEB_CON",MENUPAGE_CONTROLLER_PC };
 				bbNames[4] = { "FEB_AUD",MENUPAGE_SOUND_SETTINGS };
-				bbNames[5] = { "FEB_DIS",MENUPAGE_GRAPHICS_SETTINGS };
+				bbNames[5] = { "FEB_DIS",MENUPAGE_DISPLAY_SETTINGS };
 				bbNames[6] = { "FEB_LAN",MENUPAGE_LANGUAGE_SETTINGS };
 				bbNames[7] = { "FESZ_QU",MENUPAGE_EXIT };
 				bbTabCount = 8;
@@ -2212,7 +2316,7 @@ CMenuManager::DrawFrontEndNormal()
 		case MENUPAGE_DELETE_SLOT_CONFIRM:
 			currentSprite = FE_ICONSAVE;
 			break;
-		case MENUPAGE_GRAPHICS_SETTINGS:
+		case MENUPAGE_DISPLAY_SETTINGS:
 			currentSprite = FE_ICONDISPLAY;
 			break;
 		case MENUPAGE_SOUND_SETTINGS:
@@ -3225,6 +3329,10 @@ CMenuManager::LoadSettings()
 #ifdef CUTSCENE_BORDERS_SWITCH
 			CFileMgr::Read(fileHandle, (char *)&CMenuManager::m_PrefsCutsceneBorders, 1);
 #endif
+#ifdef MULTISAMPLING
+			CFileMgr::Read(fileHandle, (char *)&m_nPrefsMSAALevel, 1);
+			m_nDisplayMSAALevel = m_nPrefsMSAALevel;
+#endif
 		}
 	}
 
@@ -3320,6 +3428,9 @@ CMenuManager::SaveSettings()
 #endif
 #ifdef CUTSCENE_BORDERS_SWITCH
 		CFileMgr::Write(fileHandle, (char *)&CMenuManager::m_PrefsCutsceneBorders, 1);
+#endif
+#ifdef MULTISAMPLING
+		CFileMgr::Write(fileHandle, (char *)&CMenuManager::m_nPrefsMSAALevel, 1);
 #endif
 	}
 
@@ -4638,7 +4749,27 @@ CMenuManager::ProcessButtonPresses(void)
 						SetHelperText(0);
 						SaveSettings();
 					}
+				    break;
+#ifdef IMPROVED_VIDEOMODE
+			    case MENUACTION_SCREENFORMAT:
+				    if (m_nSelectedScreenMode != m_nPrefsWindowed) {
+					    m_nPrefsWindowed = m_nSelectedScreenMode;
+						_psSelectScreenVM(m_nPrefsVideoMode);
+						SetHelperText(0);
+						SaveSettings();
+					}
 					break;
+#endif
+#ifdef MULTISAMPLING
+			    case MENUACTION_MULTISAMPLING:
+				    if (m_nDisplayMSAALevel != m_nPrefsMSAALevel) {
+					    m_nPrefsMSAALevel = m_nDisplayMSAALevel;
+					    _psSelectScreenVM(m_nPrefsVideoMode);
+					    SetHelperText(0);
+					    SaveSettings();
+				    }
+				    break;
+#endif
 				case MENUACTION_AUDIOHW:
 				{
 					int selectedProvider = m_nPrefsAudio3DProviderIndex;
@@ -4685,7 +4816,8 @@ CMenuManager::ProcessButtonPresses(void)
 						DMAudio.SetRadioInCar(m_PrefsRadioStation);
 						DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
 						SaveSettings();
-					} else if (m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
+#ifndef GRAPHICS_MENU_OPTIONS
+					} else if (m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
 						m_PrefsFrameLimiter = true;
 						m_PrefsBrightness = 256;
 						m_PrefsVsyncDisp = true;
@@ -4707,7 +4839,39 @@ CMenuManager::ProcessButtonPresses(void)
 #else
 						CMBlur::BlurOn = true;
 #endif
+#ifdef CUTSCENE_BORDERS_SWITCH
+					    m_PrefsCutsceneBorders = true;
+#endif
 						SaveSettings();
+#else
+				    } else if (m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
+					    m_PrefsBrightness = 256;
+					    m_PrefsShowSubtitles = true;
+#ifdef CUTSCENE_BORDERS_SWITCH
+					    m_PrefsCutsceneBorders = true;
+#endif
+					    SaveSettings();
+				    } else if (m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
+					    m_PrefsFrameLimiter = true;
+					    m_PrefsUseWideScreen = false;
+					    m_PrefsVsyncDisp = true;
+					    m_PrefsLOD = 1.2f;
+					    m_PrefsVsync = true;
+					    CRenderer::ms_lodDistScale = 1.2f;
+					    m_nDisplayVideoMode = m_nPrefsVideoMode;
+#ifdef GTA3_1_1_PATCH
+					    if (_dwOperatingSystemVersion == OS_WIN98) {
+						    CMBlur::BlurOn = false;
+						    CMBlur::MotionBlurClose();
+					    } else {
+						    CMBlur::BlurOn = true;
+						    CMBlur::MotionBlurOpen(Scene.camera);
+					    }
+#else
+					    CMBlur::BlurOn = true;
+#endif // GTA3_1_1_PATCH
+					    SaveSettings();
+#endif // GRAPHICS_MENU_OPTIONS
 					} else if ((m_nCurrScreen != MENUPAGE_SKIN_SELECT_OLD) && (m_nCurrScreen == MENUPAGE_CONTROLLER_PC)) {
 						ControlsManager.MakeControllerActionsBlank();
 						ControlsManager.InitDefaultControlConfiguration();
@@ -4966,6 +5130,32 @@ CMenuManager::ProcessButtonPresses(void)
 					}
 				}
 				break;
+#ifdef IMPROVED_VIDEOMODE
+		    case MENUACTION_SCREENFORMAT:
+			    if (m_bGameNotLoaded) {
+				    FrontEndMenuManager.m_nSelectedScreenMode = !FrontEndMenuManager.m_nSelectedScreenMode;
+			    }
+			    break;
+#endif
+#ifdef MULTISAMPLING
+		    case MENUACTION_MULTISAMPLING:
+			    if (m_bGameNotLoaded) {
+				    m_nDisplayMSAALevel += changeValueBy;
+
+				    int i = 0;
+				    int maxAA = RwD3D8EngineGetMaxMultiSamplingLevels();
+				    while (maxAA != 1) {
+					    i++;
+					    maxAA >>= 1;
+				    }
+
+				    if (m_nDisplayMSAALevel < 0)
+					    m_nDisplayMSAALevel = i;
+				    else if (m_nDisplayMSAALevel > i)
+					    m_nDisplayMSAALevel = 0;
+			    }
+			    break;
+#endif
 			case MENUACTION_AUDIOHW:
 				if (m_nPrefsAudio3DProviderIndex != -1) {
 					m_nPrefsAudio3DProviderIndex += changeValueBy;
@@ -5131,6 +5321,13 @@ CMenuManager::ProcessOnOffMenuOptions()
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		SaveSettings();
 		break;
+#ifdef CUTSCENE_BORDERS_SWITCH
+	case MENUACTION_CUTSCENEBORDERS:
+		m_PrefsCutsceneBorders = !m_PrefsCutsceneBorders;
+		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
+		SaveSettings();
+		break;
+#endif
 	}
 }
 

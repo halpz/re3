@@ -209,6 +209,12 @@ enum Config {
 //#define USE_TEXTURE_POOL
 #define CUTSCENE_BORDERS_SWITCH
 //#define EXTENDED_COLOURFILTER		// more options for colour filter (replaces mblur)
+#define MULTISAMPLING		// adds MSAA option
+
+#ifdef LIBRW
+// these are not supported with librw yet
+#	undef MULTISAMPLING
+#endif
 
 // Particle
 //#define PC_PARTICLE
@@ -233,14 +239,15 @@ enum Config {
 #ifndef PC_MENU
 #	define PS2_MENU
 //#	define PS2_MENU_USEALLPAGEICONS
-#else
 #	define PS2_SAVE_DIALOG		// PS2 style save dialog with transparent black box
 //#	define PS2_LIKE_MENU	// An effort to recreate PS2 menu, cycling through tabs, different bg etc.
+#else
 #	define MENU_MAP			// VC-like menu map. Make sure you have new menu.txd
 #	define SCROLLABLE_STATS_PAGE	// only draggable by mouse atm
 #	define TRIANGLE_BACK_BUTTON
 //#	define CIRCLE_BACK_BUTTON
 #	define CUSTOM_FRONTEND_OPTIONS
+#	define GRAPHICS_MENU_OPTIONS
 #endif
 
 // Script
