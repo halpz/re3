@@ -24,9 +24,9 @@ private:
 	static int32 AmmoInterruptedWeapon;
 	static int32 KillsNeeded;
 	static int8 InterruptedWeapon;
-	static int8 bStandardSoundAndMessages;
-	static int8 bNeedHeadShot;
-	static int8 bProperKillFrenzy;
+	static bool bStandardSoundAndMessages;
+	static bool bNeedHeadShot;
+	static bool bProperKillFrenzy;
 	static uint16 Status;
 	static uint16 RegisteredKills[NUM_DEFAULT_MODELS];
 	static int32 ModelToKill;

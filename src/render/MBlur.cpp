@@ -10,6 +10,7 @@
 #include "RwHelper.h"
 #include "Camera.h"
 #include "MBlur.h"
+#include "postfx.h"
 
 // Originally taken from RW example 'mblur'
 
@@ -27,6 +28,10 @@ extern "C" D3DCAPS8 _RwD3D8DeviceCaps;
 RwBool
 CMBlur::MotionBlurOpen(RwCamera *cam)
 {
+#ifdef EXTENDED_COLOURFILTER
+	CPostFX::Open(cam);
+	return TRUE;
+#else
 #ifdef GTA_PS2
 	RwRect rect = {0, 0, 0, 0};
 	
@@ -127,18 +132,22 @@ CMBlur::MotionBlurOpen(RwCamera *cam)
 	
 	return TRUE;
 #endif
+#endif
 }
 
 RwBool
 CMBlur::MotionBlurClose(void)
 {
+#ifdef EXTENDED_COLOURFILTER
+	CPostFX::Close();
+#else
 	if(pFrontBuffer){
 		RwRasterDestroy(pFrontBuffer);
 		pFrontBuffer = nil;
 		
 		return TRUE;
 	}
-	
+#endif
 	return FALSE;
 }
 
@@ -192,12 +201,14 @@ CMBlur::CreateImmediateModeData(RwCamera *cam, RwRect *rect)
 	RwIm2DVertexSetU(&Vertex[3], 1.0f, 1.0f/RwCameraGetNearClipPlane(cam));
 	RwIm2DVertexSetV(&Vertex[3], 0.0f, 1.0f/RwCameraGetNearClipPlane(cam));
 	RwIm2DVertexSetIntRGBA(&Vertex[3], 255, 255, 255, 255);
-
 }
 
 void
 CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blur, int32 type, uint32 bluralpha)
 {
+#ifdef EXTENDED_COLOURFILTER
+	CPostFX::Render(cam, red, green, blue, blur, type, bluralpha);
+#else
 	RwRGBA color = { (RwUInt8)red, (RwUInt8)green, (RwUInt8)blue, (RwUInt8)blur };
 #ifdef GTA_PS2
 	if( pFrontBuffer )
@@ -216,6 +227,7 @@ CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, u
 	}else{
 		OverlayRender(cam, nil, color, type, bluralpha);
 	}
+#endif
 #endif
 }
 

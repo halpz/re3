@@ -29,6 +29,8 @@
 #include "Text.h"
 #include "WaterLevel.h"
 #include "main.h"
+#include "MBlur.h"
+#include "postfx.h"
 
 #ifndef _WIN32
 #include "assert.h"
@@ -461,6 +463,13 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Render", "Frame limiter", &FrontEndMenuManager.m_PrefsFrameLimiter, nil);
 		DebugMenuAddVarBool8("Render", "VSynch", &FrontEndMenuManager.m_PrefsVsync, nil);
 		DebugMenuAddVar("Render", "Max FPS", &RsGlobal.maxFPS, nil, 1, 1, 1000, nil);
+#ifdef EXTENDED_COLOURFILTER
+		static const char *filternames[] = { "None", "Simple", "Normal", "Mobile" };
+		e = DebugMenuAddVar("Render", "Colourfilter", &CPostFX::EffectSwitch, nil, 1, CPostFX::POSTFX_OFF, CPostFX::POSTFX_MOBILE, filternames);
+		DebugMenuEntrySetWrap(e, true);
+		DebugMenuAddVar("Render", "Intensity", &CPostFX::Intensity, nil, 0.05f, 0, 10.0f);
+		DebugMenuAddVarBool8("Render", "Motion Blur", &CPostFX::MotionBlurOn, nil);
+#endif
 		DebugMenuAddVarBool8("Render", "Show Ped Paths", &gbShowPedPaths, nil);
 		DebugMenuAddVarBool8("Render", "Show Car Paths", &gbShowCarPaths, nil);
 		DebugMenuAddVarBool8("Render", "Show Car Path Links", &gbShowCarPathsLinks, nil);

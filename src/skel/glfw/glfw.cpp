@@ -181,6 +181,22 @@ psCameraShowRaster(RwCamera *camera)
 	return;
 }
 
+/*
+ *****************************************************************************
+ */
+RwImage *
+psGrabScreen(RwCamera *pCamera)
+{
+#ifndef LIBRW
+	RwRaster *pRaster = RwCameraGetRaster(pCamera);
+	if (RwImage *pImage = RwImageCreate(pRaster->width, pRaster->height, 32)) {
+		RwImageAllocatePixels(pImage);
+		RwImageSetFromRaster(pImage, pRaster);
+		return pImage;
+	}
+#endif
+	return nil;
+}
 
 /*
  *****************************************************************************
@@ -209,7 +225,11 @@ double
 psTimer(void)
 {
 	struct timespec start; 
+#ifdef __linux__
 	clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+#else
+	clock_gettime(CLOCK_MONOTONIC, &start);
+#endif
 	return start.tv_sec * 1000.0 + start.tv_nsec/1000000.0;
 }
 #endif       

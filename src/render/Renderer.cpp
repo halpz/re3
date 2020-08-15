@@ -836,8 +836,13 @@ CRenderer::ScanSectorPoly(RwV2d *poly, int32 numVertices, void (*scanfunc)(CPtrL
 			a2 = i;
 		}
 	}
+#ifdef FIX_BUGS
+	y = Floor(miny);
+	yend = Floor(maxy);
+#else
 	y = miny;
 	yend = maxy;
+#endif
 
 	// Go left in poly to find first edge b
 	b2 = a2;
@@ -875,8 +880,8 @@ CRenderer::ScanSectorPoly(RwV2d *poly, int32 numVertices, void (*scanfunc)(CPtrL
 	while(y <= yend && y < NUMSECTORS_Y){
 		// scan one x-line
 		if(y >= 0 && xstart < NUMSECTORS_X)
-			for(x = xstart; x <= xend; x++)
-				if(x >= 0 && x != NUMSECTORS_X)
+			for(x = xstart; x <= xend && x != NUMSECTORS_X; x++)
+				if(x >= 0)
 					scanfunc(CWorld::GetSector(x, y)->m_lists);
 
 		// advance one scan line

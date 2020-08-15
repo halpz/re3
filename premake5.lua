@@ -2,21 +2,21 @@ newoption {
 	trigger     = "glewdir",
 	value       = "PATH",
 	description = "Directory of GLEW",
-	default     = "glew-2.1.0"
+	default     = "vendor/glew-2.1.0"
 }
 
 newoption {
 	trigger     = "glfwdir64",
 	value       = "PATH",
 	description = "Directory of glfw",
-	default     = "glfw-3.3.2.bin.WIN64",
+	default     = "vendor/glfw-3.3.2.bin.WIN64",
 }
 
 newoption {
 	trigger     = "glfwdir32",
 	value       = "PATH",
 	description = "Directory of glfw",
-	default     = "glfw-3.3.2.bin.WIN32",
+	default     = "vendor/glfw-3.3.2.bin.WIN32",
 }
 
 newoption {
@@ -30,9 +30,9 @@ newoption {
 }
 
 if(_OPTIONS["with-librw"]) then
-	Librw = "librw"
+	Librw = "vendor/librw"
 else
-	Librw = os.getenv("LIBRW") or "librw"
+	Librw = os.getenv("LIBRW") or "vendor/librw"
 end
 
 function getsys(a)
@@ -77,6 +77,11 @@ workspace "re3"
 			"linux-arm-librw_gl3_glfw-oal",
 		}
 
+	filter { "system:bsd" }
+		platforms {
+			"bsd-amd64-librw_gl3_glfw-oal"
+		}
+
 	filter "configurations:Debug"
 		defines { "DEBUG" }
 		
@@ -90,6 +95,9 @@ workspace "re3"
 	filter { "platforms:linux*" }
 		system "linux"
 		
+	filter { "platforms:bsd*" }
+		system "bsd"
+	
 	filter { "platforms:*x86*" }
 		architecture "x86"
 		
@@ -144,9 +152,14 @@ if(_OPTIONS["with-librw"]) then
 project "librw"
 	kind "StaticLib"
 	targetname "rw"
-	targetdir "lib/%{cfg.platform}/%{cfg.buildcfg}"
+	targetdir(path.join(Librw, "lib/%{cfg.platform}/%{cfg.buildcfg}"))
 	files { path.join(Librw, "src/*.*") }
 	files { path.join(Librw, "src/*/*.*") }
+	
+	filter "platforms:bsd*"
+		includedirs { "/usr/local/include" }
+		libdirs { "/usr/local/lib" }
+	
 	filter "platforms:*RW33*"
 		flags { "ExcludeFromBuild" }
 	filter  {}
@@ -206,9 +219,9 @@ project "re3"
 	includedirs { "src/extras" }
 	
 	if _OPTIONS["with-opus"] then
-		includedirs { "ogg/include" }
-		includedirs { "opus/include" }
-		includedirs { "opusfile/include" }
+		includedirs { "vendor/ogg/include" }
+		includedirs { "vendor/opus/include" }
+		includedirs { "vendor/opusfile/include" }
 	end
 
 	filter "platforms:*mss"
@@ -218,9 +231,9 @@ project "re3"
 	
 	if _OPTIONS["with-opus"] then
 		filter "platforms:win*"
-			libdirs { "ogg/win32/VS2015/Win32/%{cfg.buildcfg}" }
-			libdirs { "opus/win32/VS2015/Win32/%{cfg.buildcfg}" }
-			libdirs { "opusfile/win32/VS2015/Win32/Release-NoHTTP" }
+			libdirs { "vendor/ogg/win32/VS2015/Win32/%{cfg.buildcfg}" }
+			libdirs { "vendor/opus/win32/VS2015/Win32/%{cfg.buildcfg}" }
+			libdirs { "vendor/opusfile/win32/VS2015/Win32/Release-NoHTTP" }
 		filter {}
 		defines { "AUDIO_OPUS" }
 	end
@@ -240,23 +253,25 @@ project "re3"
 		characterset ("MBCS")
 		targetextension ".exe"
 		
+	filter "platforms:win*oal"
+		includedirs { "vendor/openal-soft/include" }
+		includedirs { "vendor/libsndfile/include" }
+		includedirs { "vendor/mpg123/include" }
+		
 	filter "platforms:win-x86*oal"
-		includedirs { "openal-soft/include" }
-		includedirs { "libsndfile.32/include" }
-		includedirs { "mpg123.32/include" }
-		libdirs { "mpg123.32/lib" }
-		libdirs { "libsndfile.32/lib" }
-		libdirs { "openal-soft/libs/Win32" }
+		libdirs { "vendor/mpg123/lib/Win32" }
+		libdirs { "vendor/libsndfile/lib/Win32" }
+		libdirs { "vendor/openal-soft/libs/Win32" }
 		
 	filter "platforms:win-amd64*oal"
-		includedirs { "openal-soft/include" }
-		includedirs { "libsndfile.64/include" }
-		includedirs { "mpg123.64/include" }
-		libdirs { "mpg123.64/lib" }
-		libdirs { "libsndfile.64/lib" }
-		libdirs { "openal-soft/libs/Win64" }
+		libdirs { "vendor/mpg123/lib/Win64" }
+		libdirs { "vendor/libsndfile/lib/Win64" }
+		libdirs { "vendor/openal-soft/libs/Win64" }
 
 	filter "platforms:linux*oal"
+		links { "openal", "mpg123", "sndfile", "pthread" }
+		
+	filter "platforms:bsd*oal"
 		links { "openal", "mpg123", "sndfile", "pthread" }
 	
 	if _OPTIONS["with-opus"] then
@@ -280,7 +295,7 @@ project "re3"
 		includedirs { "src/fakerw" }
 		includedirs { Librw }
 		if(_OPTIONS["with-librw"]) then
-			libdirs { "lib/%{cfg.platform}/%{cfg.buildcfg}" }
+			libdirs { "vendor/librw/lib/%{cfg.platform}/%{cfg.buildcfg}" }
 		end
 		links { "rw" }
 
@@ -306,3 +321,8 @@ project "re3"
 
 	filter "platforms:linux*gl3_glfw*"
 		links { "GL", "GLEW", "glfw" }
+		
+	filter "platforms:bsd*gl3_glfw*"
+		links { "GL", "GLEW", "glfw", "sysinfo" }
+		includedirs { "/usr/local/include" }
+		libdirs { "/usr/local/lib" }

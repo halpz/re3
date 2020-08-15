@@ -10232,7 +10232,11 @@ CPed::ProcessControl(void)
 					CPed::Chat();
 					break;
 				case PED_AIM_GUN:
-					if (m_pPointGunAt && m_pPointGunAt->IsPed() && ((CPed*)m_pPointGunAt)->CanSeeEntity(this, CAN_SEE_ENTITY_ANGLE_THRESHOLD * 2)) {
+					if (m_pPointGunAt && m_pPointGunAt->IsPed()
+#ifdef FIX_BUGS
+				        && !GetWeapon()->IsTypeMelee()
+#endif
+						&& ((CPed*)m_pPointGunAt)->CanSeeEntity(this, CAN_SEE_ENTITY_ANGLE_THRESHOLD * 2)) {
 						((CPed*)m_pPointGunAt)->ReactToPointGun(this);
 					}
 					PointGunAt();
