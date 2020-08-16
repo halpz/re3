@@ -381,9 +381,6 @@ enum eMenuAction
 #ifdef CUTSCENE_BORDERS_SWITCH
 	MENUACTION_CUTSCENEBORDERS,
 #endif
-#ifdef CUSTOM_FRONTEND_OPTIONS
-	MENUACTION_TRIGGERFUNC
-#endif
 };
 
 enum eCheckHover
@@ -478,7 +475,7 @@ struct CMenuScreen
 		int32 m_Action; // eMenuAction
 		char m_EntryName[8];
 		int32 m_SaveSlot; // eSaveSlot
-		int32 m_TargetMenu; // eMenuScreen // FrontendOption ID if it's a custom option
+		int32 m_TargetMenu; // eMenuScreen
 	} m_aEntries[NUM_MENUROWS];
 };
 
