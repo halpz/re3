@@ -21,6 +21,7 @@
 #include "SurfaceTable.h"
 #include "Lines.h"
 #include "Collision.h"
+#include "Frontend.h"
 
 
 // TODO: where do these go?
@@ -519,74 +520,101 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 			}
 	}
 
-	if(level == CGame::currLevel || forceChange){
+	if (level == CGame::currLevel || forceChange) {
 		CTimer::Stop();
-#ifndef NO_ISLAND_LOADING
-		DMAudio.SetEffectsFadeVol(0);
-		CPad::StopPadsShaking();
-		LoadCollisionScreen(CGame::currLevel);
-		DMAudio.Service();
+#ifdef NO_ISLAND_LOADING
+		if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
 #endif
+		{
+			DMAudio.SetEffectsFadeVol(0);
+			CPad::StopPadsShaking();
+			LoadCollisionScreen(CGame::currLevel);
+			DMAudio.Service();
+		}
 
 		CPopulation::DealWithZoneChange(ms_collisionInMemory, CGame::currLevel, false);
 
-#ifndef NO_ISLAND_LOADING
-		CStreaming::RemoveIslandsNotUsed(LEVEL_INDUSTRIAL);
-		CStreaming::RemoveIslandsNotUsed(LEVEL_COMMERCIAL);
-		CStreaming::RemoveIslandsNotUsed(LEVEL_SUBURBAN);
-		CStreaming::RemoveBigBuildings(LEVEL_INDUSTRIAL);
-		CStreaming::RemoveBigBuildings(LEVEL_COMMERCIAL);
-		CStreaming::RemoveBigBuildings(LEVEL_SUBURBAN);
-		CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
-		CStreaming::RemoveUnusedModelsInLoadedList();
-		CGame::TidyUpMemory(true, true);
-		CFileLoader::LoadCollisionFromDatFile(CGame::currLevel);
+#ifdef NO_ISLAND_LOADING
+		if (CMenuManager::m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_HIGH)
 #endif
+		{
+			CStreaming::RemoveIslandsNotUsed(LEVEL_INDUSTRIAL);
+			CStreaming::RemoveIslandsNotUsed(LEVEL_COMMERCIAL);
+			CStreaming::RemoveIslandsNotUsed(LEVEL_SUBURBAN);
+		}
+#ifdef NO_ISLAND_LOADING
+		if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
+#endif
+		{
+			CStreaming::RemoveBigBuildings(LEVEL_INDUSTRIAL);
+			CStreaming::RemoveBigBuildings(LEVEL_COMMERCIAL);
+			CStreaming::RemoveBigBuildings(LEVEL_SUBURBAN);
+			CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
+			CStreaming::RemoveUnusedModelsInLoadedList();
+			CGame::TidyUpMemory(true, true);
+			CFileLoader::LoadCollisionFromDatFile(CGame::currLevel);
+		}
 
 		ms_collisionInMemory = CGame::currLevel;
 		CReplay::EmptyReplayBuffer();
-#ifndef NO_ISLAND_LOADING
-		if(CGame::currLevel != LEVEL_GENERIC)
-			LoadSplash(GetLevelSplashScreen(CGame::currLevel));
-		CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
-		CStreaming::RemoveUnusedBuildings(CGame::currLevel);
-		CStreaming::RequestBigBuildings(CGame::currLevel);
+#ifdef NO_ISLAND_LOADING
+		if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
+#endif
+		{
+			if (CGame::currLevel != LEVEL_GENERIC)
+				LoadSplash(GetLevelSplashScreen(CGame::currLevel));
+			CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
+			CStreaming::RemoveUnusedBuildings(CGame::currLevel);
+			CStreaming::RequestBigBuildings(CGame::currLevel);
+		}
+#ifdef NO_ISLAND_LOADING
+		else if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_MEDIUM)
+			CStreaming::RequestIslands(CGame::currLevel);
 #endif
 		CStreaming::LoadAllRequestedModels(true);
-#ifndef NO_ISLAND_LOADING
-		CStreaming::HaveAllBigBuildingsLoaded(CGame::currLevel);
+#ifdef NO_ISLAND_LOADING
+		if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
+#endif
+		{
+			CStreaming::HaveAllBigBuildingsLoaded(CGame::currLevel);
 
-		CGame::TidyUpMemory(true, true);
-#endif
+			CGame::TidyUpMemory(true, true);
+		}
 		CTimer::Update();
-#ifndef NO_ISLAND_LOADING
-		DMAudio.SetEffectsFadeVol(127);
+#ifdef NO_ISLAND_LOADING
+		if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
 #endif
+			DMAudio.SetEffectsFadeVol(127);
 	}
 }
 
+#ifdef NO_ISLAND_LOADING
+bool CCollision::bAlreadyLoaded = false;
+#endif
 void
 CCollision::SortOutCollisionAfterLoad(void)
 {
 	if(ms_collisionInMemory == CGame::currLevel)
 		return;
-#ifndef NO_ISLAND_LOADING
-	CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
+#ifdef NO_ISLAND_LOADING
+	if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
 #endif
+		CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
+
 	if (CGame::currLevel != LEVEL_GENERIC) {
 #ifdef NO_ISLAND_LOADING
-		static bool bAlreadyLoaded = false;
-		if (bAlreadyLoaded) {
-			ms_collisionInMemory = CGame::currLevel;
-			return;
-		}
-		bAlreadyLoaded = true;
-		CFileLoader::LoadCollisionFromDatFile(LEVEL_INDUSTRIAL);
-		CFileLoader::LoadCollisionFromDatFile(LEVEL_COMMERCIAL);
-		CFileLoader::LoadCollisionFromDatFile(LEVEL_SUBURBAN);
-#else
-		CFileLoader::LoadCollisionFromDatFile(CGame::currLevel);
+		if (CMenuManager::m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_LOW) {
+			if (bAlreadyLoaded) {
+				ms_collisionInMemory = CGame::currLevel;
+				return;
+			}
+			bAlreadyLoaded = true;
+			CFileLoader::LoadCollisionFromDatFile(LEVEL_INDUSTRIAL);
+			CFileLoader::LoadCollisionFromDatFile(LEVEL_COMMERCIAL);
+			CFileLoader::LoadCollisionFromDatFile(LEVEL_SUBURBAN);
+		} else
 #endif
+		CFileLoader::LoadCollisionFromDatFile(CGame::currLevel);
 		if(!CGame::playingIntro)
 			LoadSplash(GetLevelSplashScreen(CGame::currLevel));
 	}

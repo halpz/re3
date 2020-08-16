@@ -122,6 +122,11 @@ int8 CMenuManager::m_nPrefsMSAALevel = 0;
 int8 CMenuManager::m_nDisplayMSAALevel = 0;
 #endif
 
+#ifdef NO_ISLAND_LOADING
+int8 CMenuManager::m_DisplayIslandLoading = ISLAND_LOADING_LOW;
+int8 CMenuManager::m_PrefsIslandLoading = ISLAND_LOADING_LOW;
+#endif
+
 char CMenuManager::m_PrefsSkinFile[256] = DEFAULT_SKIN_NAME;
 
 int32 CMenuManager::m_KeyPressedCode = -1;
@@ -154,6 +159,10 @@ bool DisplayComboButtonErrMsg;
 int32 MouseButtonJustClicked;
 int32 JoyButtonJustClicked;
 //int32 *pControlTemp = 0;
+
+#ifdef PS2_ALPHA_TEST
+extern bool gPS2alphaTest;
+#endif
 
 #ifndef MASTER
 bool CMenuManager::m_PrefsMarketing = false;
@@ -1190,6 +1199,21 @@ CMenuManager::Draw()
 				}
 				break;
 #endif
+#ifdef NO_ISLAND_LOADING
+			case MENUACTION_ISLANDLOADING:
+				switch (m_DisplayIslandLoading) {
+				case ISLAND_LOADING_LOW:
+					rightText = TheText.Get("FEM_LOW");
+					break;
+				case ISLAND_LOADING_MEDIUM:
+					rightText = TheText.Get("FEM_MED");
+					break;
+				case ISLAND_LOADING_HIGH:
+					rightText = TheText.Get("FEM_HIG");
+					break;
+				}
+				break;
+#endif
 			case MENUACTION_AUDIOHW:
 				if (m_nPrefsAudio3DProviderIndex == -1)
 					rightText = TheText.Get("FEA_NAH");
@@ -1243,6 +1267,11 @@ CMenuManager::Draw()
 #ifdef CUTSCENE_BORDERS_SWITCH
 			case MENUACTION_CUTSCENEBORDERS:
 				rightText = TheText.Get(m_PrefsCutsceneBorders ? "FEM_ON" : "FEM_OFF");
+				break;
+#endif
+#ifdef PS2_ALPHA_TEST
+			case MENUACTION_PS2_ALPHA_TEST:
+				rightText = TheText.Get(gPS2alphaTest ? "FEM_ON" : "FEM_OFF");
 				break;
 #endif
 #ifdef CUSTOM_FRONTEND_OPTIONS
@@ -1390,6 +1419,12 @@ CMenuManager::Draw()
 					ResetHelperText();
 			}
 #endif
+#ifdef NO_ISLAND_LOADING
+			if (m_DisplayIslandLoading == m_PrefsIslandLoading) {
+				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEM_ISL") && m_nHelperTextMsgId == 1)
+					ResetHelperText();
+			}
+#endif
 			if (m_nPrefsAudio3DProviderIndex != DMAudio.GetCurrent3DProviderIndex()) {
 				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEA_3DH"))
 					SetHelperText(1);
@@ -1407,6 +1442,12 @@ CMenuManager::Draw()
 #ifdef MULTISAMPLING
 			if (m_nDisplayMSAALevel != m_nPrefsMSAALevel) {
 				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_AAS"))
+					SetHelperText(1);
+			}
+#endif
+#ifdef NO_ISLAND_LOADING
+			if (m_DisplayIslandLoading != m_PrefsIslandLoading) {
+				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEM_ISL"))
 					SetHelperText(1);
 			}
 #endif
@@ -3333,6 +3374,13 @@ CMenuManager::LoadSettings()
 			CFileMgr::Read(fileHandle, (char *)&m_nPrefsMSAALevel, 1);
 			m_nDisplayMSAALevel = m_nPrefsMSAALevel;
 #endif
+#ifdef NO_ISLAND_LOADING
+			CFileMgr::Read(fileHandle, (char *)&CMenuManager::m_PrefsIslandLoading, 1);
+			CMenuManager::m_DisplayIslandLoading = CMenuManager::m_PrefsIslandLoading;
+#endif
+#ifdef PS2_ALPHA_TEST
+			CFileMgr::Read(fileHandle, (char *)&gPS2alphaTest, 1);
+#endif // PS2_ALPHA_TEST
 		}
 	}
 
@@ -3432,6 +3480,12 @@ CMenuManager::SaveSettings()
 #ifdef MULTISAMPLING
 		CFileMgr::Write(fileHandle, (char *)&CMenuManager::m_nPrefsMSAALevel, 1);
 #endif
+#ifdef NO_ISLAND_LOADING
+		CFileMgr::Write(fileHandle, (char *)&CMenuManager::m_PrefsIslandLoading, 1);
+#endif
+#ifdef PS2_ALPHA_TEST
+		CFileMgr::Write(fileHandle, (char *)&gPS2alphaTest, 1);
+#endif // PS2_ALPHA_TEST
 	}
 
 	CFileMgr::CloseFile(fileHandle);
@@ -4770,6 +4824,45 @@ CMenuManager::ProcessButtonPresses(void)
 				    }
 				    break;
 #endif
+#ifdef NO_ISLAND_LOADING
+			    case MENUACTION_ISLANDLOADING:
+				    if (m_DisplayIslandLoading != m_PrefsIslandLoading) {
+					    if (!m_bGameNotLoaded) {
+						    if (m_DisplayIslandLoading > ISLAND_LOADING_LOW) {
+							    if (m_DisplayIslandLoading == ISLAND_LOADING_HIGH)
+								    CStreaming::RemoveIslandsNotUsed(LEVEL_GENERIC);
+							    if (m_PrefsIslandLoading == ISLAND_LOADING_LOW) {
+								    if (CGame::currLevel != LEVEL_INDUSTRIAL)
+									    CFileLoader::LoadCollisionFromDatFile(LEVEL_INDUSTRIAL);
+								    if (CGame::currLevel != LEVEL_COMMERCIAL)
+									    CFileLoader::LoadCollisionFromDatFile(LEVEL_COMMERCIAL);
+								    if (CGame::currLevel != LEVEL_SUBURBAN)
+									    CFileLoader::LoadCollisionFromDatFile(LEVEL_SUBURBAN);
+								    CCollision::bAlreadyLoaded = true;
+								    m_PrefsIslandLoading = m_DisplayIslandLoading;
+								    CStreaming::RequestBigBuildings(CGame::currLevel);
+							    } else if (m_PrefsIslandLoading == ISLAND_LOADING_HIGH) {
+								    m_PrefsIslandLoading = m_DisplayIslandLoading;
+								    CStreaming::RequestIslands(CGame::currLevel);
+							    } else
+								    m_PrefsIslandLoading = m_DisplayIslandLoading;
+						    } else { // low
+							    m_PrefsIslandLoading = m_DisplayIslandLoading;
+							    CCollision::bAlreadyLoaded = false;
+							    CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
+							    CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
+							    CStreaming::RemoveUnusedBuildings(CGame::currLevel);
+							    CStreaming::RequestIslands(CGame::currLevel);
+						    }
+
+						    CStreaming::LoadAllRequestedModels(true);
+					    } else
+						    m_PrefsIslandLoading = m_DisplayIslandLoading;
+					    SetHelperText(0);
+					    SaveSettings();
+				    }
+				    break;
+#endif
 				case MENUACTION_AUDIOHW:
 				{
 					int selectedProvider = m_nPrefsAudio3DProviderIndex;
@@ -4842,6 +4935,43 @@ CMenuManager::ProcessButtonPresses(void)
 #ifdef CUTSCENE_BORDERS_SWITCH
 					    m_PrefsCutsceneBorders = true;
 #endif
+#ifdef NO_ISLAND_LOADING
+					    m_DisplayIslandLoading = ISLAND_LOADING_LOW;
+					    if (!m_bGameNotLoaded) {
+						    if (m_DisplayIslandLoading > ISLAND_LOADING_LOW) {
+							    if (m_DisplayIslandLoading == ISLAND_LOADING_HIGH)
+								    CStreaming::RemoveIslandsNotUsed(LEVEL_GENERIC);
+							    if (m_PrefsIslandLoading == ISLAND_LOADING_LOW) {
+								    if (CGame::currLevel != LEVEL_INDUSTRIAL)
+									    CFileLoader::LoadCollisionFromDatFile(LEVEL_INDUSTRIAL);
+								    if (CGame::currLevel != LEVEL_COMMERCIAL)
+									    CFileLoader::LoadCollisionFromDatFile(LEVEL_COMMERCIAL);
+								    if (CGame::currLevel != LEVEL_SUBURBAN)
+									    CFileLoader::LoadCollisionFromDatFile(LEVEL_SUBURBAN);
+								    CCollision::bAlreadyLoaded = true;
+								    m_PrefsIslandLoading = m_DisplayIslandLoading;
+								    CStreaming::RequestBigBuildings(CGame::currLevel);
+							    } else if (m_PrefsIslandLoading == ISLAND_LOADING_HIGH) {
+								    m_PrefsIslandLoading = m_DisplayIslandLoading;
+								    CStreaming::RequestIslands(CGame::currLevel);
+							    } else
+								    m_PrefsIslandLoading = m_DisplayIslandLoading;
+						    } else { // low
+							    m_PrefsIslandLoading = m_DisplayIslandLoading;
+							    CCollision::bAlreadyLoaded = false;
+							    CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
+							    CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
+							    CStreaming::RemoveUnusedBuildings(CGame::currLevel);
+							    CStreaming::RequestIslands(CGame::currLevel);
+						    }
+
+						    CStreaming::LoadAllRequestedModels(true);
+					    } else
+						    m_PrefsIslandLoading = m_DisplayIslandLoading;
+#endif // NO_ISLAND_LOADING
+#ifdef PS2_ALPHA_TEST
+					    gPS2alphaTest = false;
+#endif // PS2_ALPHA_TEST
 						SaveSettings();
 #else
 				    } else if (m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
@@ -4870,6 +5000,43 @@ CMenuManager::ProcessButtonPresses(void)
 #else
 					    CMBlur::BlurOn = true;
 #endif // GTA3_1_1_PATCH
+#ifdef NO_ISLAND_LOADING
+					    m_DisplayIslandLoading = ISLAND_LOADING_LOW;
+					    if (!m_bGameNotLoaded) {
+						    if (m_DisplayIslandLoading > ISLAND_LOADING_LOW) {
+							    if (m_DisplayIslandLoading == ISLAND_LOADING_HIGH)
+								    CStreaming::RemoveIslandsNotUsed(LEVEL_GENERIC);
+							    if (m_PrefsIslandLoading == ISLAND_LOADING_LOW) {
+								    if (CGame::currLevel != LEVEL_INDUSTRIAL)
+									    CFileLoader::LoadCollisionFromDatFile(LEVEL_INDUSTRIAL);
+								    if (CGame::currLevel != LEVEL_COMMERCIAL)
+									    CFileLoader::LoadCollisionFromDatFile(LEVEL_COMMERCIAL);
+								    if (CGame::currLevel != LEVEL_SUBURBAN)
+									    CFileLoader::LoadCollisionFromDatFile(LEVEL_SUBURBAN);
+								    CCollision::bAlreadyLoaded = true;
+								    m_PrefsIslandLoading = m_DisplayIslandLoading;
+								    CStreaming::RequestBigBuildings(CGame::currLevel);
+							    } else if (m_PrefsIslandLoading == ISLAND_LOADING_HIGH) {
+								    m_PrefsIslandLoading = m_DisplayIslandLoading;
+								    CStreaming::RequestIslands(CGame::currLevel);
+							    } else
+								    m_PrefsIslandLoading = m_DisplayIslandLoading;
+						    } else { // low
+							    m_PrefsIslandLoading = m_DisplayIslandLoading;
+							    CCollision::bAlreadyLoaded = false;
+							    CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
+							    CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
+							    CStreaming::RemoveUnusedBuildings(CGame::currLevel);
+							    CStreaming::RequestIslands(CGame::currLevel);
+						    }
+
+						    CStreaming::LoadAllRequestedModels(true);
+					    } else
+						    m_PrefsIslandLoading = m_DisplayIslandLoading;
+#endif // NO_ISLAND_LOADING
+#ifdef PS2_ALPHA_TEST
+					    gPS2alphaTest = false;
+#endif // PS2_ALPHA_TEST
 					    SaveSettings();
 #endif // GRAPHICS_MENU_OPTIONS
 					} else if ((m_nCurrScreen != MENUPAGE_SKIN_SELECT_OLD) && (m_nCurrScreen == MENUPAGE_CONTROLLER_PC)) {
@@ -5156,6 +5323,15 @@ CMenuManager::ProcessButtonPresses(void)
 			    }
 			    break;
 #endif
+#ifdef NO_ISLAND_LOADING
+		    case MENUACTION_ISLANDLOADING:
+			    m_DisplayIslandLoading += changeValueBy;
+			    if (m_DisplayIslandLoading > ISLAND_LOADING_HIGH)
+				    m_DisplayIslandLoading = ISLAND_LOADING_LOW;
+			    else if (m_DisplayIslandLoading < ISLAND_LOADING_LOW)
+				    m_DisplayIslandLoading = ISLAND_LOADING_HIGH;
+			    break;
+#endif
 			case MENUACTION_AUDIOHW:
 				if (m_nPrefsAudio3DProviderIndex != -1) {
 					m_nPrefsAudio3DProviderIndex += changeValueBy;
@@ -5324,6 +5500,13 @@ CMenuManager::ProcessOnOffMenuOptions()
 #ifdef CUTSCENE_BORDERS_SWITCH
 	case MENUACTION_CUTSCENEBORDERS:
 		m_PrefsCutsceneBorders = !m_PrefsCutsceneBorders;
+		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
+		SaveSettings();
+		break;
+#endif
+#ifdef PS2_ALPHA_TEST
+	case MENUACTION_PS2_ALPHA_TEST:
+		gPS2alphaTest = !gPS2alphaTest;
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		SaveSettings();
 		break;

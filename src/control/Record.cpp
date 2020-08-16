@@ -9,6 +9,7 @@
 #include "Timer.h"
 #include "VehicleModelInfo.h"
 #include "World.h"
+#include "Frontend.h"
 
 uint16 CRecordDataForGame::RecordingState;
 uint8* CRecordDataForGame::pDataBuffer;
@@ -439,10 +440,11 @@ void CRecordDataForChase::StartChaseScene(float startTime)
 	Status = STATE_PLAYBACK;
 	AnimTime = startTime;
 	AnimStartTime = CTimer::GetTimeInMilliseconds();
-#ifndef NO_ISLAND_LOADING
-	RemoveUnusedCollision();
-	CStreaming::RemoveIslandsNotUsed(LEVEL_SUBURBAN);
+#ifdef NO_ISLAND_LOADING
+	if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
 #endif
+		RemoveUnusedCollision();
+	CStreaming::RemoveIslandsNotUsed(LEVEL_SUBURBAN);
 	CGame::TidyUpMemory(true, true);
 	CStreaming::ImGonnaUseStreamingMemory();
 	CFileMgr::SetDir("data\\paths");

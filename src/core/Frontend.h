@@ -372,6 +372,12 @@ enum eMenuAction
 #ifdef MULTISAMPLING
 	MENUACTION_MULTISAMPLING,
 #endif
+#ifdef NO_ISLAND_LOADING
+	MENUACTION_ISLANDLOADING,
+#endif
+#ifdef PS2_ALPHA_TEST
+	MENUACTION_PS2_ALPHA_TEST,
+#endif
 #ifdef CUTSCENE_BORDERS_SWITCH
 	MENUACTION_CUTSCENEBORDERS,
 #endif
@@ -620,6 +626,18 @@ public:
 	static float fMapCenterX;
 	static CSprite2d m_aMapSprites[NUM_MAP_SPRITES];
 	void PrintMap();
+#endif
+
+#ifdef NO_ISLAND_LOADING
+	enum
+	{
+		ISLAND_LOADING_LOW = 0,
+		ISLAND_LOADING_MEDIUM,
+		ISLAND_LOADING_HIGH
+	};
+
+	static int8 m_DisplayIslandLoading;
+	static int8 m_PrefsIslandLoading;
 #endif
 
 public:

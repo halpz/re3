@@ -212,6 +212,9 @@ class CCollision
 public:
 	static eLevelName ms_collisionInMemory;
 	static CLinkList<CColModel*> ms_colModelCache;
+#ifdef NO_ISLAND_LOADING
+	static bool bAlreadyLoaded;
+#endif
 
 	static void Init(void);
 	static void Shutdown(void);

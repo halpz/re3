@@ -32,6 +32,7 @@
 #include "Replay.h"
 #endif
 #include "main.h"
+#include "Frontend.h"
 
 bool CStreaming::ms_disableStreaming;
 bool CStreaming::ms_bLoadingBigModel;
@@ -727,7 +728,9 @@ CStreaming::RequestBigBuildings(eLevelName level)
 	for(i = n; i >= 0; i--){
 		b = CPools::GetBuildingPool()->GetSlot(i);
 		if(b && b->bIsBIGBuilding
-#ifndef NO_ISLAND_LOADING
+#ifdef NO_ISLAND_LOADING
+		    && ((CMenuManager::m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_LOW) || (b->m_level == level))
+#else
 		    && b->m_level == level
 #endif
 		)
@@ -740,7 +743,9 @@ CStreaming::RequestBigBuildings(eLevelName level)
 void
 CStreaming::RequestIslands(eLevelName level)
 {
-#ifndef NO_ISLAND_LOADING
+#ifdef NO_ISLAND_LOADING
+	if (CMenuManager::m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_HIGH)
+#endif
 	switch(level){
 	case LEVEL_INDUSTRIAL:
 		RequestModel(islandLODcomInd, BIGBUILDINGFLAGS);
@@ -756,7 +761,6 @@ CStreaming::RequestIslands(eLevelName level)
 		break;
 	default: break;
 	}
-#endif
 }
 
 void
@@ -942,14 +946,17 @@ CStreaming::RemoveBuildings(eLevelName level)
 void
 CStreaming::RemoveUnusedBigBuildings(eLevelName level)
 {
-#ifndef NO_ISLAND_LOADING
-	if(level != LEVEL_INDUSTRIAL)
-		RemoveBigBuildings(LEVEL_INDUSTRIAL);
-	if(level != LEVEL_COMMERCIAL)
-		RemoveBigBuildings(LEVEL_COMMERCIAL);
-	if(level != LEVEL_SUBURBAN)
-		RemoveBigBuildings(LEVEL_SUBURBAN);
+#ifdef NO_ISLAND_LOADING
+	if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
 #endif
+	{
+		if (level != LEVEL_INDUSTRIAL)
+			RemoveBigBuildings(LEVEL_INDUSTRIAL);
+		if (level != LEVEL_COMMERCIAL)
+			RemoveBigBuildings(LEVEL_COMMERCIAL);
+		if (level != LEVEL_SUBURBAN)
+			RemoveBigBuildings(LEVEL_SUBURBAN);
+	}
 	RemoveIslandsNotUsed(level);
 }
 
@@ -969,7 +976,15 @@ DeleteIsland(CEntity *island)
 void
 CStreaming::RemoveIslandsNotUsed(eLevelName level)
 {
-#ifndef NO_ISLAND_LOADING
+#ifdef NO_ISLAND_LOADING
+	if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_HIGH) {
+		DeleteIsland(pIslandLODindustEntity);
+		DeleteIsland(pIslandLODcomIndEntity);
+		DeleteIsland(pIslandLODcomSubEntity);
+		DeleteIsland(pIslandLODsubIndEntity);
+		DeleteIsland(pIslandLODsubComEntity);
+	} else
+#endif
 	switch(level){
 	case LEVEL_INDUSTRIAL:
 		DeleteIsland(pIslandLODindustEntity);
@@ -987,16 +1002,13 @@ CStreaming::RemoveIslandsNotUsed(eLevelName level)
 		DeleteIsland(pIslandLODcomIndEntity);
 		break;
 	default:
-#endif // !NO_ISLAND_LOADING
 		DeleteIsland(pIslandLODindustEntity);
 		DeleteIsland(pIslandLODcomIndEntity);
 		DeleteIsland(pIslandLODcomSubEntity);
 		DeleteIsland(pIslandLODsubIndEntity);
 		DeleteIsland(pIslandLODsubComEntity);
-#ifndef NO_ISLAND_LOADING
 		break;
 	}
-#endif // !NO_ISLAND_LOADING
 }
 
 void
