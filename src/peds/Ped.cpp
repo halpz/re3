@@ -439,7 +439,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bCrouchWhenScared = false;
 	bKnockedOffBike = false;
 	b158_8 = false;
-	b158_10 = false;
+	bCollectBusFare = false;
 	bBoughtIceCream = false;
 	b158_40 = false;
 
@@ -12986,10 +12986,10 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 		ped->b157_40 = false;
 		ped->bRemoveFromWorld = true;
 	}
-	if (ped->b158_10) {
-		ped->b158_10 = false;
+	if (ped->bCollectBusFare) {
+		ped->bCollectBusFare = false;
 		if (FindPlayerPed())
-			FindPlayerPed()->m_nPadUpPressedInMilliseconds += 5;
+			FindPlayerPed()->m_nLastBusFareCollected += 5;
 	}
 
 	if (!ped->IsNotInWreckedVehicle() || ped->DyingOrDead())
@@ -15176,7 +15176,7 @@ CPed::ProcessObjective(void)
 							b157_40 = true;
 							CPlayerPed *player = FindPlayerPed();
 							if (pBus->IsPassenger(player) || pBus->IsDriver(player)) {
-								b158_10 = true;
+								bCollectBusFare = true;
 							}
 						}
 					}
