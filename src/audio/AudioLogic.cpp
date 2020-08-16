@@ -2756,7 +2756,6 @@ cAudioManager::ProcessPlane(cVehicleParams *params)
 		ProcessCesna(params);
 		break;
 	default:
-		debug("Plane Model Id is %d\n, ", params->m_pVehicle->GetModelIndex());
 		break;
 	}
 }

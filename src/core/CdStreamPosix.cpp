@@ -150,9 +150,11 @@ CdStreamInit(int32 numChannels)
         ASSERT(0);
         return;
     }
-
+#ifdef __linux__
 	_gdwCdStreamFlags = O_RDONLY | O_NOATIME;
-
+#else
+	_gdwCdStreamFlags = O_RDONLY;
+#endif
 	// People say it's slower
 /*
 	if ( fsInfo.f_bsize <= CDSTREAM_SECTOR_SIZE )
@@ -400,9 +402,12 @@ void *CdStreamThread(void *param)
         if (gCdStreamThreadStatus == 0){
             gCdStreamThreadStatus = 1;
 #endif
+
+#ifdef __linux__
             pid_t tid = syscall(SYS_gettid);
             int ret = setpriority(PRIO_PROCESS, tid, getpriority(PRIO_PROCESS, getpid()) + 1);
-        }
+#endif
+	}
 
 		// spurious wakeup or we sent interrupt signal for flushing
 		if(pChannel->nSectorsToRead == 0)

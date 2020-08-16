@@ -160,7 +160,7 @@ CShadowCamera::SetCenter(RwV3d *center)
 	ASSERT(m_pCamera != nil);
 	
 	RwFrame            *camFrame = RwCameraGetFrame(m_pCamera);
-    RwMatrix           *camMatrix = RwFrameGetMatrix(camFrame);
+	RwMatrix           *camMatrix = RwFrameGetMatrix(camFrame);
 	
 	*RwMatrixGetPos(camMatrix) = *center;
 	
@@ -188,7 +188,7 @@ CShadowCamera::Update(RpClump *clump)
 
 	if ( RwCameraBeginUpdate(m_pCamera) )
 	{
-		geometry = GetFirstAtomic(clump)->geometry;
+		geometry = RpAtomicGetGeometry(GetFirstAtomic(clump));
 		ASSERT(geometry != nil);
 		
 		flags = RpGeometryGetFlags(geometry);

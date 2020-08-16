@@ -89,6 +89,8 @@
 #include "Occlusion.h"
 #include "debugmenu.h"
 #include "Ropes.h"
+#include "WindModifiers.h"
+#include "postfx.h"
 
 eLevelName CGame::currLevel;
 int32 CGame::currArea;
@@ -151,6 +153,9 @@ CGame::InitialiseOnceBeforeRW(void)
 	CFileMgr::Initialise();
 	CdStreamInit(MAX_CDCHANNELS);
 	ValidateVersion();
+#ifdef EXTENDED_COLOURFILTER
+	CPostFX::InitOnce();
+#endif
 	return true;
 }
 
@@ -695,6 +700,7 @@ void CGame::Process(void)
 	if (!CCutsceneMgr::IsCutsceneProcessing() && !CTimer::GetIsCodePaused())
 		FrontEndMenuManager.Process();
 	CStreaming::Update();
+	CWindModifiers::Number = 0;
 	if (!CTimer::GetIsPaused())
 	{
 		CTheZones::Update();

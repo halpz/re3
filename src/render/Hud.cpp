@@ -205,7 +205,8 @@ void CHud::Draw()
 					rect.right = f3rdX + SCREEN_SCALE_X(32.0f * 0.6f);
 					rect.bottom = f3rdY + SCREEN_SCALE_Y(32.0f  * 0.6f);
 
-					Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
+					Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255),
+						0.0f, 0.0f,  1.0f, 0.0f,  0.0f, 1.0f,  1.0f, 1.0f);
 				}
 				else {
 					rect.left = f3rdX - SCREEN_SCALE_X(32.0f * 0.4f);
@@ -213,7 +214,8 @@ void CHud::Draw()
 					rect.right = f3rdX + SCREEN_SCALE_X(32.0f * 0.4f);
 					rect.bottom = f3rdY + SCREEN_SCALE_Y(32.0f  * 0.4f);
 
-					Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
+					Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255),
+						0.0f, 0.0f,  1.0f, 0.0f,  0.0f, 1.0f,  1.0f, 1.0f);
 				}
 			} else {
 				if (Mode == CCam::MODE_M16_1STPERSON ||
@@ -223,7 +225,8 @@ void CHud::Draw()
 					rect.top = (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(32.0f);
 					rect.right = (SCREEN_WIDTH / 2) + SCREEN_SCALE_X(32.0f);
 					rect.bottom = (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(32.0f);
-					Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
+					Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255),
+						0.0f, 0.0f,  1.0f, 0.0f,  0.0f, 1.0f,  1.0f, 1.0f);
 				}
 				else if (Mode == CCam::MODE_1STPERSON_RUNABOUT) {
 					rect.left = (SCREEN_WIDTH / 2) - SCREEN_SCALE_X(32.0f * 0.7f);
@@ -231,7 +234,8 @@ void CHud::Draw()
 					rect.right = (SCREEN_WIDTH / 2) + SCREEN_SCALE_X(32.0f * 0.7f);
 					rect.bottom = (SCREEN_HEIGHT / 2) + SCREEN_SCALE_Y(32.0f * 0.7f);
 
-					Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
+					Sprites[HUD_SITEM16].Draw(CRect(rect), CRGBA(255, 255, 255, 255),
+						0.0f, 0.0f,  1.0f, 0.0f,  0.0f, 1.0f,  1.0f, 1.0f);
 				}
 				else if (Mode == CCam::MODE_ROCKETLAUNCHER || Mode == CCam::MODE_ROCKETLAUNCHER_RUNABOUT) {
 					RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);
@@ -248,29 +252,33 @@ void CHud::Draw()
 
 					// TODO(Miami)
 					// Sniper
-					rect.left = (SCREEN_WIDTH / 2) - SCREEN_SCALE_X(210.0f);
-					rect.top = (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(210.0f);
-					rect.right = SCREEN_WIDTH / 2;
-					rect.bottom = SCREEN_HEIGHT / 2;
-					Sprites[HUD_SITESNIPER].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
+					rect.left = SCREEN_WIDTH/2 - SCREEN_SCALE_X(210.0f);
+					rect.top = SCREEN_HEIGHT/2 - SCREEN_SCALE_Y(210.0f);
+					rect.right = SCREEN_WIDTH/2;
+					rect.bottom = SCREEN_HEIGHT/2;
+					Sprites[HUD_SITESNIPER].Draw(CRect(rect), CRGBA(255, 255, 255, 255),
+						0.01f, 0.01f,  1.0f, 0.0f,  0.01f, 1.0f,  1.0f, 1.0f);
 
-					rect.right = (SCREEN_WIDTH / 2);
-					rect.top = (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(210.0f);
-					rect.left = SCREEN_SCALE_X(210.0f) + (SCREEN_WIDTH / 2);
-					rect.bottom = SCREEN_HEIGHT / 2;
-					Sprites[HUD_SITESNIPER].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
+					rect.left = SCREEN_WIDTH/2;
+					rect.top = SCREEN_HEIGHT/2 - SCREEN_SCALE_Y(210.0f);
+					rect.right = SCREEN_WIDTH/2 + SCREEN_SCALE_X(210.0f);
+					rect.bottom = SCREEN_HEIGHT/2;
+					Sprites[HUD_SITESNIPER].Draw(CRect(rect), CRGBA(255, 255, 255, 255),
+						0.99f, 0.0f,  0.01f, 0.01f,  0.99f, 1.0f,  0.01f, 1.0f);
 
-					rect.left = (SCREEN_WIDTH / 2) - SCREEN_SCALE_X(210.0f);
-					rect.bottom = (SCREEN_HEIGHT / 2);
-					rect.right = (SCREEN_WIDTH / 2);
-					rect.top = SCREEN_SCALE_Y(210.0f) + (SCREEN_HEIGHT / 2);
-					Sprites[HUD_SITESNIPER].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
+					rect.left = SCREEN_WIDTH/2 - SCREEN_SCALE_X(210.0f);
+					rect.top = SCREEN_HEIGHT/2;
+					rect.right = SCREEN_WIDTH/2;
+					rect.bottom = SCREEN_HEIGHT/2 + SCREEN_SCALE_Y(210.0f);
+					Sprites[HUD_SITESNIPER].Draw(CRect(rect), CRGBA(255, 255, 255, 255),
+						0.01f, 0.99f,  1.0f, 0.99f,  0.01f, 0.01f,  1.0f, 0.01f);
 
-					rect.right = (SCREEN_WIDTH / 2);
-					rect.bottom = (SCREEN_HEIGHT / 2);
-					rect.left = SCREEN_SCALE_X(210.0f) + (SCREEN_WIDTH / 2);
-					rect.top = SCREEN_SCALE_Y(210.0f) + (SCREEN_HEIGHT / 2);
-					Sprites[HUD_SITESNIPER].Draw(CRect(rect), CRGBA(255, 255, 255, 255));
+					rect.left = SCREEN_WIDTH/2;
+					rect.top = SCREEN_HEIGHT/2;
+					rect.right = SCREEN_WIDTH/2 + SCREEN_SCALE_X(210.0f);
+					rect.bottom = SCREEN_HEIGHT/2 + SCREEN_SCALE_Y(210.0f);
+					Sprites[HUD_SITESNIPER].Draw(CRect(rect), CRGBA(255, 255, 255, 255),
+						0.99f, 0.99f,  0.01f, 0.99f,  0.99f, 0.01f,  0.1f, 0.01f);
 				}
 			}
 			RwRenderStateSet(rwRENDERSTATESRCBLEND, (void *)rwBLENDSRCALPHA);

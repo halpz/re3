@@ -2,6 +2,7 @@
 #include "rpmatfx.h"
 #include "rphanim.h"
 #include "rpskin.h"
+#include "rtbmp.h"
 
 #include "main.h"
 #include "CdStream.h"
@@ -61,6 +62,7 @@
 #include "MemoryCard.h"
 #include "SceneEdit.h"
 #include "debugmenu.h"
+#include "Clock.h"
 #include "Occlusion.h"
 #include "Ropes.h"
 
@@ -279,6 +281,28 @@ DoFade(void)
 	}
 }
 
+bool
+RwGrabScreen(RwCamera *camera, RwChar *filename)
+{
+	char temp[255];
+	RwImage *pImage = RsGrabScreen(camera);
+	bool result = true;
+
+	if (pImage == nil)
+		return false;
+
+	strcpy(temp, CFileMgr::GetRootDirName());
+	strcat(temp, filename);
+
+	if (RtBMPImageWrite(pImage, &temp[0]) == nil)
+		result = false;
+	RwImageDestroy(pImage);
+	return result;
+}
+
+#define TILE_WIDTH 576
+#define TILE_HEIGHT 432
+
 void
 DoRWStuffEndOfFrame(void)
 {
@@ -287,6 +311,20 @@ DoRWStuffEndOfFrame(void)
 	FlushObrsPrintfs();
 	RwCameraEndUpdate(Scene.camera);
 	RsCameraShowRaster(Scene.camera);
+#ifndef MASTER
+	char s[48];
+	if (CPad::GetPad(1)->GetLeftShockJustDown()) {
+		// try using both controllers for this thing... crazy bastards
+		if (CPad::GetPad(0)->GetRightStickY() > 0) {
+			sprintf(s, "screen%d%d.ras", CClock::ms_nGameClockHours, CClock::ms_nGameClockMinutes);
+			// TODO
+			//RtTileRender(Scene.camera, TILE_WIDTH * 2, TILE_HEIGHT * 2, TILE_WIDTH, TILE_HEIGHT, &NewTileRendererCB, nil, s);
+		} else {
+			sprintf(s, "screen%d%d.bmp", CClock::ms_nGameClockHours, CClock::ms_nGameClockMinutes);
+			RwGrabScreen(Scene.camera, s);
+		}
+	}
+#endif // !MASTER
 }
 
 static RwBool 
@@ -852,7 +890,7 @@ RenderScene(void)
 	CRenderer::RenderFadingInEntities();
 	RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
 	CWeather::RenderRainStreaks();
-	// CCoronas::RenderSunReflection
+	CCoronas::RenderSunReflection();
 }
 
 void

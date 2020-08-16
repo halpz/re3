@@ -363,7 +363,7 @@ class CVehicle;
 class CPed : public CPhysical
 {
 public:
-#if 1
+#ifdef USE_CUTSCENE_SHADOW_FOR_PED
 	class CCutsceneShadow *m_pRTShadow;
 #endif
 	// 0x128

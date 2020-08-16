@@ -245,6 +245,23 @@ psCameraShowRaster(RwCamera *camera)
 /*
  *****************************************************************************
  */
+RwImage *
+psGrabScreen(RwCamera *pCamera)
+{
+#ifndef LIBRW
+	RwRaster *pRaster = RwCameraGetRaster(pCamera);
+	if (RwImage *pImage = RwImageCreate(pRaster->width, pRaster->height, 32)) {
+		RwImageAllocatePixels(pImage);
+		RwImageSetFromRaster(pImage, pRaster);
+		return pImage;
+	}
+#endif
+	return nil;
+}
+
+/*
+ *****************************************************************************
+ */
 RwUInt32
 psTimer(void)
 {
@@ -1863,7 +1880,11 @@ void PlayMovieInWindow(int cmdShow, const char* szFile)
 	MultiByteToWideChar(CP_ACP, 0, szFile, -1, wFileName, sizeof(wFileName) - 1);
 
 	// Initialize COM
+#ifdef FIX_BUGS // will also return S_FALSE if it has already been inited in the same thread
+	CoInitialize(nil);
+#else
 	JIF(CoInitialize(nil));
+#endif
 
 	// Get the interface for DirectShow's GraphBuilder
 	JIF(CoCreateInstance(CLSID_FilterGraph, nil, CLSCTX_INPROC, 
@@ -2233,9 +2254,10 @@ WinMain(HINSTANCE instance,
 					
 					case GS_INIT_INTRO_MPEG:
 					{
+#ifndef NO_MOVIES
 						CloseClip();
-						
 						CoUninitialize();
+#endif
 						
 						if ( FrontEndMenuManager.OS_Language == LANG_FRENCH || FrontEndMenuManager.OS_Language == LANG_GERMAN )
 							PlayMovieInWindow(cmdShow, "movies\\GTAtitlesGER.mpg");
@@ -2269,8 +2291,10 @@ WinMain(HINSTANCE instance,
 					
 					case GS_INIT_ONCE:
 					{
+#ifndef NO_MOVIES
 						CloseClip();
 						CoUninitialize();
+#endif
 						
 #ifdef FIX_BUGS
 						// draw one frame because otherwise we'll end up looking at black screen for a while if vsync is on

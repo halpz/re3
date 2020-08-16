@@ -236,9 +236,9 @@ CShadows::StoreStaticShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, C
 
 	float fDistToCamSqr = (*pPosn - TheCamera.GetPosition()).MagnitudeSqr2D();
 
-	if ( SQR(fDrawDistance) > fDistToCamSqr || fDistToCamSqr == 0.0f )
+	if ( SQR(fDrawDistance) > fDistToCamSqr || fDrawDistance == 0.0f )
 	{
-		if ( fDistToCamSqr != 0.0f )
+		if ( fDrawDistance != 0.0f )
 		{
 			float fDistToCam = Sqrt(fDistToCamSqr);
 
@@ -277,8 +277,10 @@ CShadows::StoreStaticShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, C
 				aStaticShadows[nSlot].m_fScale           = fScale;
 				aStaticShadows[nSlot].m_bTemp            = bTempShadow;
 				aStaticShadows[nSlot].m_nTimeCreated     = CTimer::GetTimeInMilliseconds();
+				
+				return true;
 			}
-            else if (  Abs(pPosn->x - aStaticShadows[nSlot].m_vecPosn.x) < 0.05f
+			else if (  Abs(pPosn->x - aStaticShadows[nSlot].m_vecPosn.x) < 0.05f
 					&& Abs(pPosn->y - aStaticShadows[nSlot].m_vecPosn.y) < 0.05f
 					&& Abs(pPosn->z - aStaticShadows[nSlot].m_vecPosn.z) < 2.0f
 
@@ -299,7 +301,7 @@ CShadows::StoreStaticShadow(uint32 nID, uint8 ShadowType, RwTexture *pTexture, C
 				aStaticShadows[nSlot].m_bTemp            = bTempShadow;
 				aStaticShadows[nSlot].m_nTimeCreated     = CTimer::GetTimeInMilliseconds();
 				
-				return false;
+				return true;
 			}
 			else
 			{
@@ -585,7 +587,7 @@ CShadows::StoreShadowForVehicle(CVehicle *pCar, VEH_SHD_TYPE type)
 			CarPos.x -= pCar->GetForward().x * (((fVehicleHeight/2) - pCar->GetColModel()->boundingBox.max.y)*size);
 			CarPos.y -= pCar->GetForward().y * (((fVehicleHeight/2) - pCar->GetColModel()->boundingBox.max.y)*size);
 			
-			RwTexture *tex;
+			RwTexture *tex = gpShadowCarTex;
 			switch ( type )
 			{
 				case VEH_SHD_TYPE_BIKE:
@@ -625,8 +627,8 @@ CShadows::StoreShadowForVehicle(CVehicle *pCar, VEH_SHD_TYPE type)
 			
 			float frontx = pCar->GetForward().x;
 			float fronty = pCar->GetForward().y;
-			float sidex = pCar->GetRight().x;
-			float sidey = pCar->GetRight().y;
+			float sidex  = pCar->GetRight().x;
+			float sidey  = pCar->GetRight().y;
 			
 			switch ( type )
 			{
@@ -769,7 +771,7 @@ CShadows::StoreCarLightShadow(CAutomobile *pCar, int32 nID, RwTexture *pTexture,
 }
 
 
-#if 1
+#ifdef USE_CUTSCENE_SHADOW_FOR_PED
 void
 StoreShadowForCutscenePedObject(CPed *pObject, float fDisplacementX, float fDisplacementY,
 								float fFrontX, float fFrontY, float fSideX, float fSideY)
@@ -853,7 +855,7 @@ CShadows::StoreShadowForPed(CPed *pPed, float fDisplacementX, float fDisplacemen
 		{
 			if ( CTimeCycle::GetShadowStrength() != 0 )
 			{
-				#ifndef LIBRW
+#ifdef USE_CUTSCENE_SHADOW_FOR_PED
 					CCutsceneShadow *pShadow = pPed->m_pRTShadow;
 				
 					if (pShadow)
@@ -864,7 +866,7 @@ CShadows::StoreShadowForPed(CPed *pPed, float fDisplacementX, float fDisplacemen
 					}
 					
 					return;
-				#endif
+#endif
 
 				StoreShadowForPedObject(pPed,
 					fDisplacementX, fDisplacementY,
@@ -920,6 +922,9 @@ void
 CShadows::StoreShadowForCutscenePedObject(CCutsceneObject *pObject, float fDisplacementX, float fDisplacementY,
 								float fFrontX, float fFrontY, float fSideX, float fSideY)
 {
+#ifdef DISABLE_CUTSCENE_SHADOWS
+	return;
+#endif
 	ASSERT(pObject != nil);
 	
 	CCutsceneShadow *shadow = pObject->m_pShadow;

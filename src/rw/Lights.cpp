@@ -23,6 +23,13 @@ RwRGBAReal DirectionalLightColourForFrame;
 RwRGBAReal AmbientLightColour;
 RwRGBAReal DirectionalLightColour;
 
+#ifdef EXTENDED_COLOURFILTER
+#include "postfx.h"
+#define USEBLURCOLORS CPostFX::UseBlurColours()
+#else
+#define USEBLURCOLORS CMBlur::BlurOn
+#endif
+
 //--MIAMI: done
 void
 SetLightsWithTimeOfDayColour(RpWorld *)
@@ -31,7 +38,7 @@ SetLightsWithTimeOfDayColour(RpWorld *)
 	RwMatrix mat;
 
 	if(pAmbient){
-		if(CMBlur::BlurOn){
+		if(USEBLURCOLORS){
 			AmbientLightColourForFrame.red = CTimeCycle::GetAmbientRed_Bl() * CCoronas::LightsMult;
 			AmbientLightColourForFrame.green = CTimeCycle::GetAmbientGreen_Bl() * CCoronas::LightsMult;
 			AmbientLightColourForFrame.blue = CTimeCycle::GetAmbientBlue_Bl() * CCoronas::LightsMult;
@@ -41,7 +48,7 @@ SetLightsWithTimeOfDayColour(RpWorld *)
 			AmbientLightColourForFrame.blue = CTimeCycle::GetAmbientBlue() * CCoronas::LightsMult;
 		}
 
-		if(CMBlur::BlurOn){
+		if(USEBLURCOLORS){
 			AmbientLightColourForFrame_PedsCarsAndObjects.red = CTimeCycle::GetAmbientRed_Obj_Bl() * CCoronas::LightsMult;
 			AmbientLightColourForFrame_PedsCarsAndObjects.green = CTimeCycle::GetAmbientGreen_Obj_Bl() * CCoronas::LightsMult;
 			AmbientLightColourForFrame_PedsCarsAndObjects.blue = CTimeCycle::GetAmbientBlue_Obj_Bl() * CCoronas::LightsMult;

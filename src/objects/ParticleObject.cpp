@@ -124,8 +124,6 @@ CParticleObject::AddObject(uint16 type, CVector const &pos, CVector const &targe
 {
 	CParticleObject *pobj = pUnusedListHead;
 	
-	ASSERT(pobj != nil);
-	
 	if ( pobj == nil )
 	{
 		printf("Error: No particle objects available!\n");

@@ -225,12 +225,16 @@ enum Config {
 //#define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
 //#define USE_TEXTURE_POOL
 #define CUTSCENE_BORDERS_SWITCH
+//#define EXTENDED_COLOURFILTER		// more options for colour filter (replaces mblur)
 
 // Water & Particle
 #define PC_PARTICLE
 //#define PS2_ALTERNATIVE_CARSPLASH // unused on PS2
 // #define PC_WATER
 #define WATER_CHEATS
+
+//#define USE_CUTSCENE_SHADOW_FOR_PED
+#define DISABLE_CUTSCENE_SHADOWS
 
 // Pad
 #if !defined(RW_GL3) && defined(_WIN32)

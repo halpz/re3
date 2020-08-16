@@ -7,6 +7,7 @@
 #include "Credits.h"
 #include "Camera.h"
 #include "Weather.h"
+#include "Timecycle.h"
 #include "Clock.h"
 #include "World.h"
 #include "Vehicle.h"
@@ -32,6 +33,8 @@
 #include "WaterLevel.h"
 #include "main.h"
 #include "Script.h"
+#include "MBlur.h"
+#include "postfx.h"
 
 #ifndef _WIN32
 #include "assert.h"
@@ -406,6 +409,26 @@ DebugMenuPopulate(void)
 		static const char *weathers[] = {
 			"Sunny", "Cloudy", "Rainy", "Foggy", "Extrasunny", "Stormy"
 		};
+		static const char *extracols[] = {
+			"1 - Malibu club",
+			"2 - Strib club",
+			"3 - Hotel",
+			"4 - Bank",
+			"5 - Police HQ",
+			"6 - Mall",
+			"7 - Rifle Range",
+			"8 - Mansion",
+			"9 - Dirt ring",
+			"10 - Blood ring",
+			"11 - Hot ring",
+			"12 - Concert hall",
+			"13 - Auntie Poulets",
+			"14 - Intro at docks",
+			"15 - Biker bar",
+			"16 - Intro cafe",
+			"17 - Studio",
+			"18", "19", "20", "21", "22", "23", "24"
+		};
 		DebugMenuEntry *e;
 		e = DebugMenuAddVar("Time & Weather", "Current Hour", &CClock::GetHoursRef(), nil, 1, 0, 23, nil);
 		DebugMenuEntrySetWrap(e, true);
@@ -416,7 +439,8 @@ DebugMenuPopulate(void)
 		DebugMenuEntrySetWrap(e, true);
 		e = DebugMenuAddVar("Time & Weather", "New Weather", (int16*)&CWeather::NewWeatherType, nil, 1, 0, 5, weathers);
 		DebugMenuEntrySetWrap(e, true);
-		DebugMenuAddVar("Time & Weather", "Wind", (float*)&CWeather::Wind, nil, 0.1f, 0.0f, 1.0f);
+		DebugMenuAddVarBool32("Time & Weather", "Extracolours On", &CTimeCycle::m_bExtraColourOn, nil);
+		DebugMenuAddVar("Time & Weather", "Extracolour", &CTimeCycle::m_ExtraColour, nil, 1, 0, 23, extracols);
 		DebugMenuAddVar("Time & Weather", "Time scale", (float*)&CTimer::GetTimeScale(), nil, 0.1f, 0.0f, 10.0f);
 
 		DebugMenuAddCmd("Cheats", "Weapon set 1", WeaponCheat1);
@@ -493,6 +517,15 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Render", "Frame limiter", &FrontEndMenuManager.m_PrefsFrameLimiter, nil);
 		DebugMenuAddVarBool8("Render", "VSynch", &FrontEndMenuManager.m_PrefsVsync, nil);
 		DebugMenuAddVar("Render", "Max FPS", &RsGlobal.maxFPS, nil, 1, 1, 1000, nil);
+#ifdef EXTENDED_COLOURFILTER
+		static const char *filternames[] = { "None", "Simple", "Normal", "Mobile" };
+		e = DebugMenuAddVar("Render", "Colourfilter", &CPostFX::EffectSwitch, nil, 1, CPostFX::POSTFX_OFF, CPostFX::POSTFX_MOBILE, filternames);
+		DebugMenuEntrySetWrap(e, true);
+		DebugMenuAddVar("Render", "Intensity", &CPostFX::Intensity, nil, 0.05f, 0, 10.0f);
+		DebugMenuAddVarBool8("Render", "Blur", &CPostFX::BlurOn, nil);
+		DebugMenuAddVarBool8("Render", "Motion Blur", &CPostFX::MotionBlurOn, nil);
+#endif
+		DebugMenuAddVar("Render", "Drunkness", &CMBlur::Drunkness, nil, 0.05f, 0, 1.0f);
 		DebugMenuAddVarBool8("Render", "Occlusion debug", &bDisplayOccDebugStuff, nil);
 		DebugMenuAddVarBool8("Render", "Show Ped Paths", &gbShowPedPaths, nil);
 		DebugMenuAddVarBool8("Render", "Show Car Paths", &gbShowCarPaths, nil);
@@ -534,7 +567,30 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Debug", "Show Timebars", &gbShowTimebars, nil);
 #endif
 #ifdef MISSION_SWITCHER
-		DebugMenuAddInt8("Debug", "Select mission no", &nextMissionToSwitch, nil, 1, 0, 96, nil);
+		DebugMenuEntry *missionEntry;
+		static const char* missions[] = {
+			"Initial", "Intro", "An Old Friend", "The Party", "Back Alley Brawl", "Jury Fury", "Riot",
+			"Treacherous Swine", "Mall Shootout", "Guardian Angels", "Sir, Yes Sir!", "All Hands On Deck!",
+			"The Chase", "Phnom Penh '86", "The Fastest Boat", "Supply & Demand", "Rub Out", "Death Row",
+			"Four Iron", "Demolition Man", "Two Bit Hit", "No Escape?", "The Shootist", "The Driver",
+			"The Job", "Gun Runner", "Boomshine Saigon", "Recruitment Drive", "Dildo Dodo", "Martha's Mug Shot",
+			"G-spotlight", "Shakedown", "Bar Brawl", "Cop Land", "Spilling the Beans", "Hit the Courier",
+			"Printworks Buy", "Sunshine Autos", "Interglobal Films Buy", "Cherry Popper Icecreams Buy",
+			"Kaufman Cabs Buy", "Malibu Club Buy", "The Boatyard Buy", "Pole Position Club Buy", "El Swanko Casa Buy",
+			"Links View Apartment Buy", "Hyman Condo Buy", "Ocean Heighs Aprt. Buy", "1102 Washington Street Buy",
+			"Vice Point Buy", "Skumole Shack Buy", "Cap the Collector", "Keep your Friends Close...",
+			"Alloy Wheels of Steel", "Messing with the Man", "Hog Tied", "Stunt Boat Challenge", "Cannon Fodder",
+			"Naval Engagement", "Trojan Voodoo", "Juju Scramble", "Bombs Away!", "Dirty Lickin's", "Love Juice",
+			"Psycho Killer", "Publicity Tour", "Weapon Range", "Road Kill", "Waste the Wife", "Autocide",
+			"Check Out at the Check In", "Loose Ends", "V.I.P.", "Friendly Rivalry", "Cabmaggedon", "TAXI DRIVER",
+			"PARAMEDIC", "FIREFIGHTER", "VIGILANTE", "HOTRING", "BLOODRING", "DIRTRING", "Sunshine Autos Races",
+			"Distribution", "Downtown Chopper Checkpoint", "Ocean Beach Chopper Checkpoint", "Vice Point Chopper Checkpoint",
+			"Little Haiti Chopper Checkpoint", "Trial by Dirt", "Test Track", "PCJ Playground", "Cone Crazy",
+			"PIZZA BOY", "RC Raider Pickup", "RC Bandit Race", "RC Baron Race", "Checkpoint Charlie"
+		};
+
+		missionEntry = DebugMenuAddVar("Debug", "Select mission", &nextMissionToSwitch, nil, 1, 0, 96, missions);
+		DebugMenuEntrySetWrap(missionEntry, true);
 		DebugMenuAddCmd("Debug", "Start selected mission ", SwitchToMission);
 #endif
 		extern bool PrintDebugCode;

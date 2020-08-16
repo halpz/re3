@@ -2,6 +2,7 @@
 
 #include "main.h"
 #include "General.h"
+#include "RenderBuffer.h"
 #include "TxdStore.h"
 #include "Camera.h"
 #include "Sprite.h"
@@ -11,6 +12,8 @@
 #include "Collision.h"
 #include "Timecycle.h"
 #include "Coronas.h"
+
+//--MIAMI: file done
 
 struct FlareDef
 {
@@ -130,12 +133,20 @@ void
 CCoronas::RegisterCorona(uint32 id, uint8 red, uint8 green, uint8 blue, uint8 alpha,
 	const CVector &coors, float size, float drawDist, RwTexture *tex,
 	int8 flareType, uint8 reflection, uint8 LOScheck, uint8 drawStreak, float someAngle,
-	bool longDist, float nearDist)
+	bool useNearDist, float nearDist)
 {
 	int i;
 
 	if(sq(drawDist) < (TheCamera.GetPosition() - coors).MagnitudeSqr2D())
 		return;
+
+	if(useNearDist){
+		float dist = (TheCamera.GetPosition() - coors).Magnitude();
+		if(dist < 35.0f)
+			return;
+		if(dist < 50.0f)
+			alpha *= (dist - 35.0f)/(50.0f - 35.0f);
+	}
 
 	for(i = 0; i < NUMCORONAS; i++)
 		if(aCoronas[i].id == id)
@@ -189,17 +200,19 @@ CCoronas::RegisterCorona(uint32 id, uint8 red, uint8 green, uint8 blue, uint8 al
 	aCoronas[i].reflection = reflection;
 	aCoronas[i].LOScheck = LOScheck;
 	aCoronas[i].drawStreak = drawStreak;
+	aCoronas[i].useNearDist = useNearDist;
+	aCoronas[i].nearDist = nearDist;
 }
 
 void
 CCoronas::RegisterCorona(uint32 id, uint8 red, uint8 green, uint8 blue, uint8 alpha,
 	const CVector &coors, float size, float drawDist, uint8 type,
 	int8 flareType, uint8 reflection, uint8 LOScheck, uint8 drawStreak, float someAngle,
-	bool longDist, float nearDist)
+	bool useNearDist, float nearDist)
 {
 	RegisterCorona(id, red, green, blue, alpha, coors, size, drawDist,
 		gpCoronaTexture[type], flareType, reflection, LOScheck, drawStreak, someAngle,
-		longDist, nearDist);
+		useNearDist, nearDist);
 }
 
 void
@@ -258,7 +271,10 @@ CCoronas::Render(void)
 
 		CVector spriteCoors;
 		float spritew, spriteh;
-		if(CSprite::CalcScreenCoors(aCoronas[i].coors, spriteCoors, &spritew, &spriteh, true)){
+		if(!CSprite::CalcScreenCoors(aCoronas[i].coors, spriteCoors, &spritew, &spriteh, true)){
+			aCoronas[i].offScreen = true;
+			aCoronas[i].sightClear = false;
+		}else{
 			aCoronas[i].offScreen = false;
 
 			if(spriteCoors.x < 0.0f || spriteCoors.y < 0.0f ||
@@ -292,10 +308,7 @@ CCoronas::Render(void)
 			}
 
 
-			if(aCoronas[i].fadeAlpha == 0)
-				continue;
-
-			if(spriteCoors.z < aCoronas[i].drawDist){
+			if(aCoronas[i].fadeAlpha && spriteCoors.z < aCoronas[i].drawDist){
 				float recipz = 1.0f/spriteCoors.z;
 				float fadeDistance = aCoronas[i].drawDist / 2.0f;
 				float distanceFade = spriteCoors.z < fadeDistance ? 1.0f : 1.0f - (spriteCoors.z - fadeDistance)/fadeDistance;
@@ -312,7 +325,7 @@ CCoronas::Render(void)
 					if(CCoronas::aCoronas[i].id == SUN_CORE)
 						spriteCoors.z = 0.95f * RwCameraGetFarClipPlane(Scene.camera);
 					RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(aCoronas[i].texture));
-					spriteCoors.z -= 1.5f;
+					spriteCoors.z -= aCoronas[i].nearDist;
 
 					if(aCoronas[i].texture == gpCoronaTexture[8]){
 						// what's this?
@@ -370,14 +383,11 @@ CCoronas::Render(void)
 							recipz, 255);
 					}
 				}
-			}else{
-				aCoronas[i].offScreen = true;
-				aCoronas[i].sightClear = false;
 			}
 		}
 	}
 
-	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
@@ -393,23 +403,24 @@ CCoronas::Render(void)
 			if(!aCoronas[i].hasValue[j] || !aCoronas[i].hasValue[j+1])
 				continue;
 
-			int mod1 = (float)(6 - j) / 6 * 128;
-			int mod2 = (float)(6 - (j+1)) / 6 * 128;
+			int alpha1 = (float)(6 - j) / 6 * 128;
+			int alpha2 = (float)(6 - (j+1)) / 6 * 128;
 
 			RwIm2DVertexSetScreenX(&vertexbufferX[0], aCoronas[i].prevX[j]);
 			RwIm2DVertexSetScreenY(&vertexbufferX[0], aCoronas[i].prevY[j]);
-			RwIm2DVertexSetIntRGBA(&vertexbufferX[0], aCoronas[i].prevRed[j] * mod1 / 256, aCoronas[i].prevGreen[j] * mod1 / 256, aCoronas[i].prevBlue[j] * mod1 / 256, 255);
+			RwIm2DVertexSetIntRGBA(&vertexbufferX[0], aCoronas[i].prevRed[j] * alpha1 / 256, aCoronas[i].prevGreen[j] * alpha1 / 256, aCoronas[i].prevBlue[j] * alpha1 / 256, 255);
 			RwIm2DVertexSetScreenX(&vertexbufferX[1], aCoronas[i].prevX[j+1]);
 			RwIm2DVertexSetScreenY(&vertexbufferX[1], aCoronas[i].prevY[j+1]);
-			RwIm2DVertexSetIntRGBA(&vertexbufferX[1], aCoronas[i].prevRed[j+1] * mod2 / 256, aCoronas[i].prevGreen[j+1] * mod2 / 256, aCoronas[i].prevBlue[j+1] * mod2 / 256, 255);
+			RwIm2DVertexSetIntRGBA(&vertexbufferX[1], aCoronas[i].prevRed[j+1] * alpha2 / 256, aCoronas[i].prevGreen[j+1] * alpha2 / 256, aCoronas[i].prevBlue[j+1] * alpha2 / 256, 255);
 
-			// BUG: game doesn't do this
+#ifdef FIX_BUGS
 			RwIm2DVertexSetScreenZ(&vertexbufferX[0], RwIm2DGetNearScreenZ());
 			RwIm2DVertexSetCameraZ(&vertexbufferX[0], RwCameraGetNearClipPlane(Scene.camera));
 			RwIm2DVertexSetRecipCameraZ(&vertexbufferX[0], 1.0f/RwCameraGetNearClipPlane(Scene.camera));
 			RwIm2DVertexSetScreenZ(&vertexbufferX[1], RwIm2DGetNearScreenZ());
 			RwIm2DVertexSetCameraZ(&vertexbufferX[1], RwCameraGetNearClipPlane(Scene.camera));
 			RwIm2DVertexSetRecipCameraZ(&vertexbufferX[1], 1.0f/RwCameraGetNearClipPlane(Scene.camera));
+#endif
 
 			RwIm2DRenderLine(vertexbufferX, 2, 0, 1);
 		}
@@ -428,6 +439,8 @@ CCoronas::RenderReflections(void)
 	CEntity *entity;
 
 	if(CWeather::WetRoads > 0.0f){
+		CSprite::InitSpriteBuffer();
+
 		RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
 		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 		RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
@@ -438,7 +451,8 @@ CCoronas::RenderReflections(void)
 
 		for(i = 0; i < NUMCORONAS; i++){
 			if(aCoronas[i].id == 0 ||
-			   aCoronas[i].fadeAlpha == 0 && aCoronas[i].alpha == 0)
+			   aCoronas[i].fadeAlpha == 0 && aCoronas[i].alpha == 0 ||
+			   aCoronas[i].reflection == 0)
 				continue;
 
 			// check if we want a reflection on this corona
@@ -453,11 +467,8 @@ CCoronas::RenderReflections(void)
 				}
 			}
 
-			if(!aCoronas[i].renderReflection)
-				continue;
-
 			// Don't draw if reflection is too high
-			if(aCoronas[i].heightAboveRoad < 20.0f){
+			if(aCoronas[i].renderReflection && aCoronas[i].heightAboveRoad < 20.0f){
 				// don't draw if camera is below road
 				if(CCoronas::aCoronas[i].coors.z - aCoronas[i].heightAboveRoad > TheCamera.GetPosition().z)
 					continue;
@@ -469,13 +480,14 @@ CCoronas::RenderReflections(void)
 				float spritew, spriteh;
 				if(CSprite::CalcScreenCoors(coors, spriteCoors, &spritew, &spriteh, true)){
 					float drawDist = 0.75f * aCoronas[i].drawDist;
-					drawDist = Min(drawDist, 50.0f);
+					drawDist = Min(drawDist, 55.0f);
 					if(spriteCoors.z < drawDist){
 						float fadeDistance = drawDist / 2.0f;
 						float distanceFade = spriteCoors.z < fadeDistance ? 1.0f : 1.0f - (spriteCoors.z - fadeDistance)/fadeDistance;
 						distanceFade = clamp(distanceFade, 0.0f, 1.0f);
 						float recipz = 1.0f/RwCameraGetNearClipPlane(Scene.camera);
-						int intensity = (20.0f - aCoronas[i].heightAboveRoad) * 230.0 * distanceFade*CWeather::WetRoads * 0.05f;
+						float heightFade = (20.0f - aCoronas[i].heightAboveRoad)/20.0f;
+						int intensity = distanceFade*heightFade * 230.0 * CWeather::WetRoads;
 
 						CSprite::RenderBufferedOneXLUSprite(
 							spriteCoors.x, spriteCoors.y, RwIm2DGetNearScreenZ(),
@@ -504,6 +516,130 @@ CCoronas::RenderReflections(void)
 	}
 }
 
+void
+CCoronas::RenderSunReflection(void)
+{
+	float sunZDir = CTimeCycle::GetSunDirection().z;
+	if(sunZDir > -0.05f){
+		float intensity = (0.3f - Abs(sunZDir - 0.25f))/0.3f *
+			(1.0f - CWeather::CloudCoverage) *
+			(1.0f - CWeather::Foggyness) *
+			(1.0f - CWeather::Wind);
+		if(intensity > 0.0f){
+			int r = (CTimeCycle::GetSunCoreRed() + CTimeCycle::GetSunCoronaRed())*intensity*0.25f;
+			int g = (CTimeCycle::GetSunCoreGreen() + CTimeCycle::GetSunCoronaGreen())*intensity*0.25f;
+			int b = (CTimeCycle::GetSunCoreBlue() + CTimeCycle::GetSunCoronaBlue())*intensity*0.25f;
+
+			CVector sunPos = 40.0f*CTimeCycle::GetSunDirection() + TheCamera.GetPosition();
+			sunPos.z = 0.5f*CWeather::Wind + 6.1f;
+			CVector sunDir = CTimeCycle::GetSunDirection();
+			sunDir.z = 0.0;
+			sunDir.Normalise();
+
+			TempBufferIndicesStored = 6;
+			TempBufferRenderIndexList[0] = 2;
+			TempBufferRenderIndexList[1] = 1;
+			TempBufferRenderIndexList[2] = 0;
+			TempBufferRenderIndexList[3] = 2;
+			TempBufferRenderIndexList[4] = 3;
+			TempBufferRenderIndexList[5] = 1;
+
+			// 60 unit square in sun direction
+			TempBufferVerticesStored = 4;
+			RwIm3DVertexSetRGBA(&TempBufferRenderVertices[0], r, g, b, 255);
+			RwIm3DVertexSetPos(&TempBufferRenderVertices[0],
+				sunPos.x + 30.0f*sunDir.y,
+				sunPos.y - 30.0f*sunDir.x,
+				sunPos.z);
+			RwIm3DVertexSetRGBA(&TempBufferRenderVertices[1], r, g, b, 255);
+			RwIm3DVertexSetPos(&TempBufferRenderVertices[1],
+				sunPos.x - 30.0f*sunDir.y,
+				sunPos.y + 30.0f*sunDir.x,
+				sunPos.z);
+			RwIm3DVertexSetRGBA(&TempBufferRenderVertices[2], r, g, b, 255);
+			RwIm3DVertexSetPos(&TempBufferRenderVertices[2],
+				sunPos.x + 60.0f*sunDir.x + 30.0f*sunDir.y,
+				sunPos.y + 60.0f*sunDir.y - 30.0f*sunDir.x,
+				sunPos.z);
+			RwIm3DVertexSetRGBA(&TempBufferRenderVertices[3], r, g, b, 255);
+			RwIm3DVertexSetPos(&TempBufferRenderVertices[3],
+				sunPos.x + 60.0f*sunDir.x - 30.0f*sunDir.y,
+				sunPos.y + 60.0f*sunDir.y + 30.0f*sunDir.x,
+				sunPos.z);
+
+			RwIm3DVertexSetU(&TempBufferRenderVertices[0], 0.0f);
+			RwIm3DVertexSetV(&TempBufferRenderVertices[0], 1.0f);
+			RwIm3DVertexSetU(&TempBufferRenderVertices[1], 1.0f);
+			RwIm3DVertexSetV(&TempBufferRenderVertices[1], 1.0f);
+			RwIm3DVertexSetU(&TempBufferRenderVertices[2], 0.0f);
+			RwIm3DVertexSetV(&TempBufferRenderVertices[2], 0.5f);
+			RwIm3DVertexSetU(&TempBufferRenderVertices[3], 1.0f);
+			RwIm3DVertexSetV(&TempBufferRenderVertices[3], 0.5f);
+
+			int timeInc = 0;
+			int sideInc = 0;
+			int fwdInc = 0;
+			for(int i = 0; i < 20; i++){
+				TempBufferRenderIndexList[TempBufferIndicesStored + 0] = TempBufferVerticesStored;
+				TempBufferRenderIndexList[TempBufferIndicesStored + 1] = TempBufferVerticesStored-1;
+				TempBufferRenderIndexList[TempBufferIndicesStored + 2] = TempBufferVerticesStored-2;
+				TempBufferRenderIndexList[TempBufferIndicesStored + 3] = TempBufferVerticesStored;
+				TempBufferRenderIndexList[TempBufferIndicesStored + 4] = TempBufferVerticesStored+1;
+				TempBufferRenderIndexList[TempBufferIndicesStored + 5] = TempBufferVerticesStored-1;
+				TempBufferIndicesStored += 6;
+
+				// What a weird way to do it...
+				float fwdLen = fwdInc/20 + 60;
+				float sideLen = sideInc/20 + 30;
+				sideLen += 10.0f*Sin((float)(CTimer::GetTimeInMilliseconds()+timeInc & 0x7FF)/0x800*TWOPI);
+				timeInc += 900;
+				sideInc += 970;
+				fwdInc += 1440;
+
+				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored+0], r, g, b, 255);
+				RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored+0],
+					sunPos.x + fwdLen*sunDir.x + sideLen*sunDir.y,
+					sunPos.y + fwdLen*sunDir.y - sideLen*sunDir.x,
+					sunPos.z);
+
+				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored+1], r, g, b, 255);
+				RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored+1],
+					sunPos.x + fwdLen*sunDir.x - sideLen*sunDir.y,
+					sunPos.y + fwdLen*sunDir.y + sideLen*sunDir.x,
+					sunPos.z);
+
+				RwIm3DVertexSetU(&TempBufferRenderVertices[TempBufferVerticesStored+0], 0.0f);
+				RwIm3DVertexSetV(&TempBufferRenderVertices[TempBufferVerticesStored+0], 0.5f);
+				RwIm3DVertexSetU(&TempBufferRenderVertices[TempBufferVerticesStored+1], 1.0f);
+				RwIm3DVertexSetV(&TempBufferRenderVertices[TempBufferVerticesStored+1], 0.5f);
+				TempBufferVerticesStored += 2;
+			}
+
+
+			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
+			RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+			RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
+			RwRenderStateSet(rwRENDERSTATEFOGTYPE, (void*)rwFOGTYPELINEAR);
+			RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
+			RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+			RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+			RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpCoronaTexture[4]));
+			if(RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStored, nil, rwIM3D_VERTEXUV)){
+				RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TempBufferRenderIndexList, TempBufferIndicesStored);
+				RwIm3DEnd();
+			}
+			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+			RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+			RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+			RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+			RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
+			RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+			TempBufferVerticesStored = 0;
+			TempBufferIndicesStored = 0;
+		}
+	}
+}
+
 void 
 CCoronas::DoSunAndMoon(void)
 {
@@ -520,7 +656,7 @@ CCoronas::DoSunAndMoon(void)
 			255, sunCoors, size,
 			999999.88f, TYPE_STAR, FLARE_NONE, REFLECTION_OFF, LOSCHECK_OFF, STREAK_OFF, 0.0f);
 
-		if(CTimeCycle::GetSunDirection().z > 0.0f)
+		if(CTimeCycle::GetSunDirection().z > 0.0f && !CGame::IsInInterior())
 			RegisterCorona(SUN_CORONA,
 				CTimeCycle::GetSunCoronaRed(), CTimeCycle::GetSunCoronaGreen(), CTimeCycle::GetSunCoronaBlue(),
 				255, sunCoors, 25.0f * CTimeCycle::GetSunSize(),

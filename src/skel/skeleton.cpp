@@ -53,6 +53,15 @@ RsCameraBeginUpdate(RwCamera * camera)
 /*
  *****************************************************************************
  */
+RwImage*
+RsGrabScreen(RwCamera *camera)
+{
+	return psGrabScreen(camera);
+}
+
+/*
+ *****************************************************************************
+ */
 RwBool
 RsRegisterImageLoader(void)
 {

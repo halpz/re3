@@ -6,6 +6,8 @@
 #include "Replay.h"
 #include "Skidmarks.h"
 
+//--MIAMI: file done
+
 CSkidmark CSkidmarks::aSkidmarks[NUMSKIDMARKS];
 
 RwImVertexIndex SkidmarkIndexList[SKIDMARK_LENGTH * 6];
@@ -36,13 +38,6 @@ CSkidmarks::Init(void)
 		SkidmarkIndexList[i*6+4] = ix+2;
 		SkidmarkIndexList[i*6+5] = ix+3;
 		ix += 2;
-	}
-
-	for(i = 0; i < SKIDMARK_LENGTH; i++){
-		RwIm3DVertexSetU(&SkidmarkVertices[i*2 + 0], 0.0f);
-		RwIm3DVertexSetV(&SkidmarkVertices[i*2 + 0], i*5.01f);
-		RwIm3DVertexSetU(&SkidmarkVertices[i*2 + 1], 1.0f);
-		RwIm3DVertexSetV(&SkidmarkVertices[i*2 + 1], i*5.01f);
 	}
 }
 
@@ -141,8 +136,12 @@ CSkidmarks::Render(void)
 			p2.y -= aSkidmarks[i].m_sideY[j];
 			RwIm3DVertexSetRGBA(&SkidmarkVertices[j*2+0], color.red, color.green, color.blue, alpha);
 			RwIm3DVertexSetPos(&SkidmarkVertices[j*2+0], p1.x, p1.y, p1.z+0.1f);
+			RwIm3DVertexSetU(&SkidmarkVertices[j*2+0], 0.0f);
+			RwIm3DVertexSetV(&SkidmarkVertices[j*2+0], j*5.01f);
 			RwIm3DVertexSetRGBA(&SkidmarkVertices[j*2+1], color.red, color.green, color.blue, alpha);
 			RwIm3DVertexSetPos(&SkidmarkVertices[j*2+1], p2.x, p2.y, p2.z+0.1f);
+			RwIm3DVertexSetU(&SkidmarkVertices[j*2+1], 1.0f);
+			RwIm3DVertexSetV(&SkidmarkVertices[j*2+1], j*5.01f);
 		}
 
 		LittleTest();

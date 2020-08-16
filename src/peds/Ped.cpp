@@ -63,6 +63,7 @@
 #include "Debug.h"
 #include "GameLogic.h"
 #include "Bike.h"
+#include "WindModifiers.h"
 #include "CutsceneShadow.h"
 
 #define CAN_SEE_ENTITY_ANGLE_THRESHOLD	DEGTORAD(60.0f)
@@ -147,7 +148,7 @@ void CPed::operator delete(void *p, int handle) { CPools::GetPedPool()->Delete((
 // --MIAMI: Done
 CPed::~CPed(void)
 {
-#if 1
+#ifdef USE_CUTSCENE_SHADOW_FOR_PED
 	if ( m_pRTShadow ) delete m_pRTShadow;
 #endif
 	CWorld::Remove(this);
@@ -207,8 +208,8 @@ CPed::FlagToDestroyWhenNextProcessed(void)
 
 CPed::CPed(uint32 pedType) : m_pedIK(this)
 {
-#if 1
-	m_pRTShadow = NULL;
+#ifdef USE_CUTSCENE_SHADOW_FOR_PED
+	m_pRTShadow = nil;
 #endif
 	m_type = ENTITY_TYPE_PED;
 	bPedPhysics = true;
@@ -2792,12 +2793,12 @@ CPed::SetModelIndex(uint32 mi)
 		modelInfo->CreateHitColModelSkinned(GetClump());
 
 	UpdateRpHAnim();
-
-#ifndef LIBRW
+#ifdef USE_CUTSCENE_SHADOW_FOR_PED
 	if (!m_pRTShadow)
 	{
 		m_pRTShadow = new CCutsceneShadow;
 		m_pRTShadow->Create(m_rwObject, 10, 1, 1, 1);
+		//m_pRTShadow->Create(m_rwObject, 8, 0, 0, 0);
 	}
 #endif
 }
@@ -3159,6 +3160,8 @@ CPed::SetStoredObjective(void)
 		case OBJECTIVE_GOTO_CHAR_ON_FOOT:
 		case OBJECTIVE_GOTO_CHAR_ON_FOOT_WALKING:
 		case OBJECTIVE_HASSLE_CHAR:
+		case OBJECTIVE_FOLLOW_CHAR_IN_FORMATION:
+		case OBJECTIVE_LEAVE_CAR:
 		case OBJECTIVE_ENTER_CAR_AS_PASSENGER:
 		case OBJECTIVE_ENTER_CAR_AS_DRIVER:
 		case OBJECTIVE_GOTO_AREA_ON_FOOT:
@@ -4729,9 +4732,11 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 		} else {
 			CDarkel::RegisterKillNotByPlayer(this, method);
 		}
-		if (method == WEAPONTYPE_DROWNING)
+		if (method == WEAPONTYPE_DROWNING) {
 			bIsInTheAir = false;
-		// TODO(Miami): timesDrowned
+			if (FindPlayerPed() == this)
+				CStats::TimesDrowned++;
+		}
 
 		return true;
 	}
@@ -11805,7 +11810,11 @@ CPed::ProcessControl(void)
 					CPed::Chat();
 					break;
 				case PED_AIM_GUN:
-					if (m_pPointGunAt && m_pPointGunAt->IsPed() && ((CPed*)m_pPointGunAt)->CanSeeEntity(this, CAN_SEE_ENTITY_ANGLE_THRESHOLD * 2)) {
+					if (m_pPointGunAt && m_pPointGunAt->IsPed()
+#ifdef FIX_BUGS
+				        && !GetWeapon()->IsTypeMelee()
+#endif
+						&& ((CPed*)m_pPointGunAt)->CanSeeEntity(this, CAN_SEE_ENTITY_ANGLE_THRESHOLD * 2)) {
 						((CPed*)m_pPointGunAt)->ReactToPointGun(this);
 					}
 					PointGunAt();
@@ -16425,6 +16434,77 @@ CPed::PreRender(void)
 		}
 	}
 #endif
+
+	bool bIsWindModifierTurnedOn = false;
+	float fAnyDirectionShift = 1.0f;
+	if (IsPlayer() && CWindModifiers::FindWindModifier(GetPosition(), &fAnyDirectionShift, &fAnyDirectionShift)
+		&& !CCullZones::PlayerNoRain() && GetPedState() != PED_DRIVING)
+		bIsWindModifierTurnedOn = true;
+
+	bool bIsPedDrivingBikeOrOpenTopCar = false;
+	if (GetPedState() == PED_DRIVING && m_pMyVehicle) {
+		if (m_pMyVehicle->m_vehType == VEHICLE_TYPE_BIKE
+			|| (m_pMyVehicle->m_vehType == VEHICLE_TYPE_CAR && m_pMyVehicle->IsOpenTopCar()))
+			bIsPedDrivingBikeOrOpenTopCar = true;
+	}
+
+	if (bIsWindModifierTurnedOn || bIsPedDrivingBikeOrOpenTopCar) {
+		float fWindMult = 0.0f;
+		if (bIsPedDrivingBikeOrOpenTopCar) {
+			fWindMult = DotProduct(m_pMyVehicle->m_vecMoveSpeed, GetForward());
+			if (fWindMult > 0.4f) {
+				float volume = (fWindMult - 0.4f) / 0.6f;
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_SET_202, volume); //TODO(MIAMI): revise when audio is done
+			}
+		}
+
+		if (bIsWindModifierTurnedOn) 
+			fWindMult = Min(fWindMult, Abs(fAnyDirectionShift - 1.0f));
+
+		RpHAnimHierarchy* hier = GetAnimHierarchyFromSkinClump(GetClump());
+		int32 idx;
+		RwV3d scale;
+		float fScaleOffset;
+
+		fScaleOffset = fWindMult * 0.2f;
+		scale.x = CGeneral::GetRandomNumberInRange(1.0f - fScaleOffset, 1.0f + fScaleOffset);
+		scale.y = CGeneral::GetRandomNumberInRange(1.0f - fScaleOffset, 1.0f + fScaleOffset);
+		scale.z = CGeneral::GetRandomNumberInRange(1.0f - fScaleOffset, 1.0f + fScaleOffset);
+
+		idx = RpHAnimIDGetIndex(hier, ConvertPedNode2BoneTag(PED_NECK));
+		RwMatrix* neck = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
+		RwMatrixScale(neck, &scale, rwCOMBINEPRECONCAT);
+
+		fScaleOffset = fWindMult * 0.1f;
+		scale.x = CGeneral::GetRandomNumberInRange(1.0f - fScaleOffset, 1.0f + fScaleOffset);
+		scale.y = CGeneral::GetRandomNumberInRange(1.0f - fScaleOffset, 1.0f + fScaleOffset);
+		scale.z = CGeneral::GetRandomNumberInRange(1.0f - fScaleOffset, 1.0f + fScaleOffset);
+
+		idx = RpHAnimIDGetIndex(hier, ConvertPedNode2BoneTag(PED_CLAVICLEL));
+		RwMatrix* clavicleL = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
+		RwMatrixScale(clavicleL, &scale, rwCOMBINEPRECONCAT);
+		
+		idx = RpHAnimIDGetIndex(hier, ConvertPedNode2BoneTag(PED_CLAVICLER));
+		RwMatrix* clavicleR = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
+		RwMatrixScale(clavicleR, &scale, rwCOMBINEPRECONCAT);
+
+		idx = RpHAnimIDGetIndex(hier, ConvertPedNode2BoneTag(PED_MID));
+		RwMatrix* mid = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
+		RwMatrixScale(mid, &scale, rwCOMBINEPRECONCAT);
+
+		fScaleOffset = fWindMult * 0.2f;
+		scale.x = CGeneral::GetRandomNumberInRange(1.0f - fScaleOffset, 1.0f + fScaleOffset);
+		scale.y = CGeneral::GetRandomNumberInRange(1.0f - fScaleOffset, 1.0f + fScaleOffset);
+		scale.z = CGeneral::GetRandomNumberInRange(1.0f - fScaleOffset, 1.0f + fScaleOffset);
+
+		idx = RpHAnimIDGetIndex(hier, ConvertPedNode2BoneTag(PED_UPPERARML));
+		RwMatrix* upperArmL = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
+		RwMatrixScale(upperArmL, &scale, rwCOMBINEPRECONCAT);
+
+		idx = RpHAnimIDGetIndex(hier, ConvertPedNode2BoneTag(PED_UPPERARMR));
+		RwMatrix* upperArmR = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
+		RwMatrixScale(upperArmR, &scale, rwCOMBINEPRECONCAT);
+	}
 
 	if (bBodyPartJustCameOff && bIsPedDieAnimPlaying && m_bodyPartBleeding != -1 && (CTimer::GetFrameCounter() & 7) > 3) {
 		CVector bloodDir(0.0f, 0.0f, 0.0f);
