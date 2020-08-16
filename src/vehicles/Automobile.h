@@ -54,7 +54,7 @@ public:
 	float m_fTraction;
 	float m_fTireTemperature;
 	float m_fOrientation;	// for heli and plane go-to
-	float m_auto_unk4;	// related to the above
+	float m_fPlaneSteer;	// related to the above
 	float m_fVelocityChangeForAudio;
 	float m_randomValues[6];	// used for what?
 	float m_fFireBlowUpTimer;
