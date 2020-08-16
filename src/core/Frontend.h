@@ -183,7 +183,7 @@ enum eMenuScreen
 	MENUPAGE_BRIEFS = 3,
 	MENUPAGE_CONTROLLER_SETTINGS = 4,
 	MENUPAGE_SOUND_SETTINGS = 5,
-	MENUPAGE_GRAPHICS_SETTINGS = 6,
+	MENUPAGE_DISPLAY_SETTINGS = 6,
 	MENUPAGE_LANGUAGE_SETTINGS = 7,
 	MENUPAGE_CHOOSE_LOAD_SLOT = 8,
 	MENUPAGE_CHOOSE_DELETE_SLOT = 9,
@@ -238,6 +238,9 @@ enum eMenuScreen
 	MENUPAGE_58 = 58,
 #ifdef MENU_MAP
 	MENUPAGE_MAP = 59,
+#endif
+#ifdef GRAPHICS_MENU_OPTIONS
+	MENUPAGE_GRAPHICS_SETTINGS,
 #endif
 	MENUPAGES
 };
@@ -359,8 +362,24 @@ enum eMenuAction
 	MENUACTION_UNK112,
 	MENUACTION_REJECT_RETRY,
 	MENUACTION_UNK114,
-#ifdef CUSTOM_FRONTEND_OPTIONS
-	MENUACTION_TRIGGERFUNC
+#ifdef IMPROVED_VIDEOMODE
+	MENUACTION_SCREENFORMAT,
+#endif
+#ifdef ANISOTROPIC_FILTERING
+	MENUACTION_MIPMAPS,
+	MENUACTION_TEXTURE_FILTERING,
+#endif
+#ifdef MULTISAMPLING
+	MENUACTION_MULTISAMPLING,
+#endif
+#ifdef NO_ISLAND_LOADING
+	MENUACTION_ISLANDLOADING,
+#endif
+#ifdef PS2_ALPHA_TEST
+	MENUACTION_PS2_ALPHA_TEST,
+#endif
+#ifdef CUTSCENE_BORDERS_SWITCH
+	MENUACTION_CUTSCENEBORDERS,
 #endif
 };
 
@@ -456,7 +475,7 @@ struct CMenuScreen
 		int32 m_Action; // eMenuAction
 		char m_EntryName[8];
 		int32 m_SaveSlot; // eSaveSlot
-		int32 m_TargetMenu; // eMenuScreen // FrontendOption ID if it's a custom option
+		int32 m_TargetMenu; // eMenuScreen
 	} m_aEntries[NUM_MENUROWS];
 };
 
@@ -532,6 +551,10 @@ public:
 	int32 m_nPrefsSubsystem;
 	int32 m_nSelectedScreenMode;
 #endif
+#ifdef MULTISAMPLING
+	static int8 m_nPrefsMSAALevel;
+	static int8 m_nDisplayMSAALevel;
+#endif
 
 	enum LANGUAGE
 	{
@@ -600,6 +623,18 @@ public:
 	static float fMapCenterX;
 	static CSprite2d m_aMapSprites[NUM_MAP_SPRITES];
 	void PrintMap();
+#endif
+
+#ifdef NO_ISLAND_LOADING
+	enum
+	{
+		ISLAND_LOADING_LOW = 0,
+		ISLAND_LOADING_MEDIUM,
+		ISLAND_LOADING_HIGH
+	};
+
+	static int8 m_DisplayIslandLoading;
+	static int8 m_PrefsIslandLoading;
 #endif
 
 public:

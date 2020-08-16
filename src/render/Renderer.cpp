@@ -19,6 +19,7 @@
 #include "Shadows.h"
 #include "PointLights.h"
 #include "Renderer.h"
+#include "Frontend.h"
 
 bool gbShowPedRoadGroups;
 bool gbShowCarRoadGroups;
@@ -710,15 +711,18 @@ CRenderer::ScanWorld(void)
 				ScanSectorPoly(poly, 3, ScanSectorList);
 			}
 #ifdef NO_ISLAND_LOADING
-			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_INDUSTRIAL));
-			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_COMMERCIAL));
-			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_SUBURBAN));
-#else
+			if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_HIGH) {
+				ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_INDUSTRIAL));
+				ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_COMMERCIAL));
+				ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_SUBURBAN));
+			} else 
+#endif
+			{
 	#ifdef FIX_BUGS
 			if (CCollision::ms_collisionInMemory != LEVEL_GENERIC)
 	#endif
-			ScanBigBuildingList(CWorld::GetBigBuildingList(CCollision::ms_collisionInMemory));
-#endif
+				ScanBigBuildingList(CWorld::GetBigBuildingList(CCollision::ms_collisionInMemory));
+			}
 			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_GENERIC));
 		}
 	}
