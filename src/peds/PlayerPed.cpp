@@ -83,7 +83,7 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 		m_pMeleeList[i] = nil;
 	}
 	m_nCheckPlayersIndex = 0;
-	m_nPadUpPressedInMilliseconds = 0;
+	m_nLastBusFareCollected = 0;
 	idleAnimBlockIndex = CAnimManager::GetAnimationBlockIndex("playidles");
 }
 

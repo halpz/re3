@@ -1824,7 +1824,7 @@ void CMissionCleanup::Process()
 	CWorld::Players[0].MakePlayerSafe(false);
 	CWorld::Players[0].m_pPed->m_nFadeDrunkenness = 1;
 	CWorld::Players[0].m_pPed->m_nDrunkCountdown = 0;
-	// CPad::GetPad(0)->SetDrunkInputDelay(0); // TODO(Miami)
+	CPad::GetPad(0)->SetDrunkInputDelay(0);
 	CWorld::Players[0].m_bDriveByAllowed = true;
 	// DMAudio::ShutUpPlayerTalking(0); // TODO(Miami)
 	CVehicle::bDisableRemoteDetonation = false;
@@ -10645,7 +10645,8 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 	case COMMAND_SET_DRUNK_INPUT_DELAY:
 	{
 		CollectParameters(&m_nIp, 2);
-		debug("SET_DRUNK_INPUT_DELAY not implemented\n");
+		assert(ScriptParams[1] < CPad::DRUNK_STEERING_BUFFER_SIZE);
+		CPad::GetPad(ScriptParams[0])->SetDrunkInputDelay(ScriptParams[1]);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_MONEY:
@@ -13606,9 +13607,11 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_GET_BUS_FARES_COLLECTED_BY_PLAYER:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("GET_BUS_FARES_COLLECTED_BY_PLAYER not implemented\n"); // TODO(MIAMI)
-		ScriptParams[0] = 0;
+		CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
+		ScriptParams[0] = pPlayerInfo->m_pPed->m_nLastBusFareCollected;
+		pPlayerInfo->m_pPed->m_nLastBusFareCollected = 0;
 		StoreParameters(&m_nIp, 1);
+		return 0;
 	}
 	case COMMAND_SET_CHAR_OBJ_BUY_ICE_CREAM:
 	{

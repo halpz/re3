@@ -631,6 +631,11 @@ void CPad::Clear(bool bResetPlayerControls)
 	ShakeFreq = 0;
 	ShakeDur = 0;
 
+	for (int32 i = 0; i < DRUNK_STEERING_BUFFER_SIZE; i++)
+		SteeringLeftRightBuffer[i] = 0;
+
+	DrunkDrivingBufferUsed = 0;
+
 	if ( bResetPlayerControls )
 		DisablePlayerControls = PLAYERCONTROL_ENABLED;
 
@@ -1806,6 +1811,9 @@ void CPad::Update(int16 pad)
 
 	bHornHistory[iCurrHornHistory] = GetHorn();
 
+	for (int32 i = DRUNK_STEERING_BUFFER_SIZE - 2; i >= 0; i--) {
+		SteeringLeftRightBuffer[i + 1] = SteeringLeftRightBuffer[i];
+	}
 
 	if ( !bDisplayNoControllerMessage )
 		CGame::bDemoMode = false;
@@ -1899,6 +1907,7 @@ int16 CPad::GetSteeringLeftRight(void)
 	if ( ArePlayerControlsDisabled() )
 		return 0;
 
+	int16 value;
 	switch (CURMODE)
 	{
 		case 0:
@@ -1908,9 +1917,12 @@ int16 CPad::GetSteeringLeftRight(void)
 			int16 dpad = (NewState.DPadRight - NewState.DPadLeft) / 2;
 
 			if ( Abs(axis) > Abs(dpad) )
-				return axis;
+				value = axis;
 			else
-				return dpad;
+				value = dpad;
+
+			SteeringLeftRightBuffer[0] = value;
+			value = SteeringLeftRightBuffer[DrunkDrivingBufferUsed];
 
 			break;
 		}
@@ -1918,13 +1930,18 @@ int16 CPad::GetSteeringLeftRight(void)
 		case 1:
 		case 3:
 		{
-			return NewState.LeftStickX;
-
+			SteeringLeftRightBuffer[0] = NewState.LeftStickX;
+			value = SteeringLeftRightBuffer[DrunkDrivingBufferUsed];
+			break;
+		}
+		default:
+		{
+			value = 0;
 			break;
 		}
 	}
 
-	return 0;
+	return value;
 }
 
 int16 CPad::GetSteeringUpDown(void)
