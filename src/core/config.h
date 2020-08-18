@@ -206,11 +206,17 @@ enum Config {
 #define PS2_ALPHA_TEST		// emulate ps2 alpha test 
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
 #define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
-//#define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
+#define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
 //#define USE_TEXTURE_POOL
 #define CUTSCENE_BORDERS_SWITCH
 //#define EXTENDED_COLOURFILTER		// more options for colour filter (replaces mblur)
 //#define EXTENDED_PIPELINES		// custom render pipelines (includes Neo)
+#define MULTISAMPLING		// adds MSAA option
+
+#ifdef LIBRW
+// these are not supported with librw yet
+#	undef MULTISAMPLING
+#endif
 
 // Particle
 //#define PC_PARTICLE
@@ -235,14 +241,14 @@ enum Config {
 #ifndef PC_MENU
 #	define PS2_MENU
 //#	define PS2_MENU_USEALLPAGEICONS
-#else
 #	define PS2_SAVE_DIALOG		// PS2 style save dialog with transparent black box
 //#	define PS2_LIKE_MENU	// An effort to recreate PS2 menu, cycling through tabs, different bg etc.
+#else
 #	define MENU_MAP			// VC-like menu map. Make sure you have new menu.txd
 #	define SCROLLABLE_STATS_PAGE	// only draggable by mouse atm
 #	define TRIANGLE_BACK_BUTTON
 //#	define CIRCLE_BACK_BUTTON
-#	define CUSTOM_FRONTEND_OPTIONS
+#	define GRAPHICS_MENU_OPTIONS
 #endif
 
 // Script

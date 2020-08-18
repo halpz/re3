@@ -19,4 +19,5 @@ public:
 	static bool ReadLine(int fd, char *buf, int len);
 	static int CloseFile(int fd);
 	static int GetErrorReadWrite(int fd);
+	static char *GetRootDirName() { return ms_rootDirName; }
 };

@@ -274,6 +274,9 @@ RsCameraBeginUpdate(RwCamera *camera);
 //extern void                     
 //RsMouseSetVisibility(RwBool visible);
 
+extern RwImage*
+RsGrabScreen(RwCamera *camera);
+
 extern void                     
 RsMouseSetPos(RwV2d *pos);
 

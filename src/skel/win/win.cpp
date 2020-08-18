@@ -241,6 +241,23 @@ psCameraShowRaster(RwCamera *camera)
 /*
  *****************************************************************************
  */
+RwImage *
+psGrabScreen(RwCamera *pCamera)
+{
+#ifndef LIBRW
+	RwRaster *pRaster = RwCameraGetRaster(pCamera);
+	if (RwImage *pImage = RwImageCreate(pRaster->width, pRaster->height, 32)) {
+		RwImageAllocatePixels(pImage);
+		RwImageSetFromRaster(pImage, pRaster);
+		return pImage;
+	}
+#endif
+	return nil;
+}
+
+/*
+ *****************************************************************************
+ */
 RwUInt32
 psTimer(void)
 {
@@ -1580,7 +1597,9 @@ psSelectDevice()
 		PSGLOBAL(fullScreen) = FALSE;
 #endif
 	}
-
+#ifdef MULTISAMPLING
+	RwD3D8EngineSetMultiSamplingLevels(1 << FrontEndMenuManager.m_nPrefsMSAALevel);
+#endif
 	return TRUE;
 }
 

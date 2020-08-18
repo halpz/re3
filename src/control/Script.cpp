@@ -10017,15 +10017,21 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CTimer::Stop();
 		CGame::currLevel = (eLevelName)ScriptParams[0];
-#ifndef NO_ISLAND_LOADING
-		CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
-		CStreaming::RemoveUnusedBuildings(CGame::currLevel);
+#ifdef NO_ISLAND_LOADING
+		if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
 #endif
+		{
+			CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
+			CStreaming::RemoveUnusedBuildings(CGame::currLevel);
+		}
 		CCollision::SortOutCollisionAfterLoad();
-#ifndef NO_ISLAND_LOADING
-		CStreaming::RequestIslands(CGame::currLevel);
-		CStreaming::LoadAllRequestedModels(true);
+#ifdef NO_ISLAND_LOADING
+		if (CMenuManager::m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_HIGH)
 #endif
+		{
+			CStreaming::RequestIslands(CGame::currLevel);
+			CStreaming::LoadAllRequestedModels(true);
+		}
 		CTimer::Update();
 		return 0;
 	}
@@ -10641,24 +10647,40 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		CTimer::Stop();
 		CGame::currLevel = (eLevelName)ScriptParams[0];
 		if (CGame::currLevel != CCollision::ms_collisionInMemory) {
-#ifndef NO_ISLAND_LOADING
-			DMAudio.SetEffectsFadeVol(0);
-			CPad::StopPadsShaking();
-			CCollision::LoadCollisionScreen(CGame::currLevel);
-			DMAudio.Service();
+#ifdef NO_ISLAND_LOADING
+			if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
 #endif
+			{
+				DMAudio.SetEffectsFadeVol(0);
+				CPad::StopPadsShaking();
+				CCollision::LoadCollisionScreen(CGame::currLevel);
+				DMAudio.Service();
+			}
 			CPopulation::DealWithZoneChange(CCollision::ms_collisionInMemory, CGame::currLevel, false);
-#ifndef NO_ISLAND_LOADING
-			CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
-			CStreaming::RemoveUnusedBuildings(CGame::currLevel);
+#ifdef NO_ISLAND_LOADING
+			if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
 #endif
+			{
+				CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
+				CStreaming::RemoveUnusedBuildings(CGame::currLevel);
+			}
 			CCollision::SortOutCollisionAfterLoad();
-#ifndef NO_ISLAND_LOADING
-			CStreaming::RequestIslands(CGame::currLevel);
-			CStreaming::RequestBigBuildings(CGame::currLevel);
-			CStreaming::LoadAllRequestedModels(true);
-			DMAudio.SetEffectsFadeVol(127);
+#ifdef NO_ISLAND_LOADING
+			if (CMenuManager::m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_HIGH)
 #endif
+				CStreaming::RequestIslands(CGame::currLevel);
+#ifdef NO_ISLAND_LOADING
+			if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
+#endif
+				CStreaming::RequestBigBuildings(CGame::currLevel);
+#ifdef NO_ISLAND_LOADING
+			if (CMenuManager::m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_HIGH)
+#endif
+				CStreaming::LoadAllRequestedModels(true);
+#ifdef NO_ISLAND_LOADING
+			if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
+#endif
+				DMAudio.SetEffectsFadeVol(127);
 		}
 		CTimer::Update();
 		return 0;

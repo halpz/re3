@@ -30,9 +30,9 @@ int8 CDarkel::InterruptedWeapon;
  * makes game handle sounds & messages instead of SCM (just like in GTA2)
  * but it's never been used in the game. Has unused sliding text when frenzy completed etc.
  */
-int8 CDarkel::bStandardSoundAndMessages;
-int8 CDarkel::bNeedHeadShot;
-int8 CDarkel::bProperKillFrenzy;
+bool CDarkel::bStandardSoundAndMessages;
+bool CDarkel::bNeedHeadShot;
+bool CDarkel::bProperKillFrenzy;
 uint16 CDarkel::Status;
 uint16 CDarkel::RegisteredKills[NUM_DEFAULT_MODELS];
 int32 CDarkel::ModelToKill;
@@ -108,9 +108,15 @@ CDarkel::DrawMessages()
 			sprintf(gString, "%d", (CDarkel::KillsNeeded >= 0 ? CDarkel::KillsNeeded : 0));
 			AsciiToUnicode(gString, gUString);
 			CFont::SetColor(CRGBA(0, 0, 0, 255));
-			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(35.0f), SCREEN_SCALE_Y(144.0f), gUString);
+#ifdef FIX_BUGS
+#define DARKEL_COUNTER_HEIGHT 143.0f
+#else
+#define DARKEL_COUNTER_HEIGHT 128.0f
+#endif
+		    CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(35.0f), SCREEN_SCALE_Y(DARKEL_COUNTER_HEIGHT + 1.0f), gUString);
 			CFont::SetColor(CRGBA(255, 128, 128, 255));
-			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(34.0f), SCREEN_SCALE_Y(143.0f), gUString);
+		    CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(34.0f), SCREEN_SCALE_Y(DARKEL_COUNTER_HEIGHT), gUString);
+#undef DARKEL_COUNTER_HEIGHT
 			break;
 		}
 		case KILLFRENZY_PASSED:
