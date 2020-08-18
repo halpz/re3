@@ -726,6 +726,10 @@ CCarCtrl::RemoveDistantCars()
 void
 CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 {
+#ifdef FIX_BUGS
+	if (pVehicle->bIsLocked)
+		return;
+#endif
 	CVector vecPlayerPos = FindPlayerCentreOfWorld(CWorld::PlayerInFocus);
 	/* BUG: this variable is initialized only in if-block below but can be used outside of it. */
 	if (!IsThisVehicleInteresting(pVehicle) && !pVehicle->bIsLocked &&
