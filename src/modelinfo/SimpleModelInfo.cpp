@@ -3,6 +3,7 @@
 #include "General.h"
 #include "Camera.h"
 #include "ModelInfo.h"
+#include "custompipes.h"
 
 #define LOD_DISTANCE (300.0f)
 
@@ -75,6 +76,10 @@ CSimpleModelInfo::SetAtomic(int n, RpAtomic *atomic)
 		RpGeometry *geo = RpAtomicGetGeometry(atomic);
 		RpGeometrySetFlags(geo, RpGeometryGetFlags(geo) & ~rpGEOMETRYLIGHT);
 	}
+
+#ifdef EXTENDED_PIPELINES
+	CustomPipes::AttachWorldPipe(atomic);
+#endif
 }
 
 void

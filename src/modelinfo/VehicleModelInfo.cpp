@@ -19,6 +19,7 @@
 #include "Bike.h"
 #include "ModelIndices.h"
 #include "ModelInfo.h"
+#include "custompipes.h"
 
 int8 CVehicleModelInfo::ms_compsToUse[2] = { -2, -2 };
 int8 CVehicleModelInfo::ms_compsUsed[2];
@@ -1037,6 +1038,10 @@ CVehicleModelInfo::SetEnvironmentMap(void)
 				SetEnvironmentMapCB(wheelmi->m_atomics[i], m_envMap);
 		}
 	}
+
+#ifdef EXTENDED_PIPELINES
+	CustomPipes::AttachVehiclePipe(m_clump);
+#endif
 }
 
 void
