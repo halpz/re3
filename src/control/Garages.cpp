@@ -1884,8 +1884,9 @@ CVehicle* CStoredCar::RestoreCar()
 	pVehicle->m_nRadioStation = m_nRadioStation;
 	pVehicle->bFreebies = false;
 #ifdef FIX_BUGS
-	((CAutomobile*)pVehicle)->m_bombType = m_nCarBombType;
+	if (pVehicle->IsCar())
 #endif
+		((CAutomobile*)pVehicle)->m_bombType = m_nCarBombType;
 	pVehicle->bHasBeenOwnedByPlayer = true;
 	pVehicle->m_nDoorLock = CARLOCK_UNLOCKED;
 	pVehicle->bBulletProof = m_bBulletproof;
