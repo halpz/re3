@@ -9700,7 +9700,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 			return 0;
 		CVehicle* car;
 		if (!CModelInfo::IsBikeModel(model))
-			car = new CAutomobile(model, MISSION_VEHICLE);
+			car = new CAutomobile(model, RANDOM_VEHICLE);
 		CVector pos = *(CVector*)&ScriptParams[0];
 		pos.z += car->GetDistanceFromCentreOfMassToBaseOfModel();
 		car->SetPosition(pos);
