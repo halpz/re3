@@ -33,7 +33,7 @@
 #include "WindModifiers.h"
 #include "Occlusion.h"
 
-//--MIAMI: file almost done (see TODO)
+//--MIAMI: file done
 
 int gBuildings;
 

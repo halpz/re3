@@ -715,7 +715,7 @@ CShadows::StoreShadowForVehicle(CVehicle *pCar, VEH_SHD_TYPE type)
 }
 
 void
-CShadows::StoreCarLightShadow(CAutomobile *pCar, int32 nID, RwTexture *pTexture, CVector *pPosn,
+CShadows::StoreCarLightShadow(CVehicle *pCar, int32 nID, RwTexture *pTexture, CVector *pPosn,
 							float fFrontX, float fFrontY, float fSideX, float fSideY, uint8 nRed, uint8 nGreen, uint8 nBlue,
 							float fMaxViewAngle)
 {

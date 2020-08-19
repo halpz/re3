@@ -1448,16 +1448,13 @@ CBike::PreRender(void)
 			fwd.Normalise();
 			float f = headLightPos.y + 6.0f;
 			pos += CVector(f*fwd.x, f*fwd.y, 2.0f);
-
-// TODO(MIAMI):
-//			CShadows::StoreCarLightShadow(this, (uintptr)this + 22, gpShadowExplosionTex, &pos,
-//				7.0f*fwd.x, 7.0f*fwd.y, 3.5f*fwd.y, -3.5f*fwd.x, 45, 45, 45, 7.0f);
+			CShadows::StoreCarLightShadow(this, (uintptr)this + 22, gpShadowExplosionTex, &pos,
+				7.0f*fwd.x, 7.0f*fwd.y, 3.5f*fwd.y, -3.5f*fwd.x, 45, 45, 45, 7.0f);
 
 			f = (tailLightPos.y - 2.5f) - (headLightPos.y + 6.0f);
 			pos += CVector(f*fwd.x, f*fwd.y, 0.0f);
-// TODO(MIAMI):
-//			CShadows::StoreCarLightShadow(this, (uintptr)this + 25, gpShadowExplosionTex, &pos,
-//				3.0f, 0.0f, 0.0f, -3.0f, 35, 0, 0, 4.0f);
+			CShadows::StoreCarLightShadow(this, (uintptr)this + 25, gpShadowExplosionTex, &pos,
+				3.0f, 0.0f, 0.0f, -3.0f, 35, 0, 0, 4.0f);
 		}
 
 		if(this == FindPlayerVehicle() && !alarmOff){
