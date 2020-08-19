@@ -226,6 +226,7 @@ enum Config {
 //#define USE_TEXTURE_POOL
 #define CUTSCENE_BORDERS_SWITCH
 //#define EXTENDED_COLOURFILTER		// more options for colour filter (replaces mblur)
+//#define EXTENDED_PIPELINES		// custom render pipelines (includes Neo)
 
 // Water & Particle
 #define PC_PARTICLE

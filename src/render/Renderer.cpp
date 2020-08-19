@@ -21,6 +21,7 @@
 #include "PointLights.h"
 #include "Occlusion.h"
 #include "Renderer.h"
+#include "custompipes.h"
 
 //--MIAMI: file done
 
@@ -242,6 +243,11 @@ CRenderer::RenderEverythingBarRoads(void)
 
 		if(IsRoad(e))
 			continue;
+
+#ifdef EXTENDED_PIPELINES
+		if(CustomPipes::bRenderingEnvMap && (e->IsPed() || e->IsVehicle()))
+			continue;
+#endif
 
 		if(e->IsVehicle() ||
 		   e->IsPed() && CVisibilityPlugins::GetClumpAlpha((RpClump*)e->m_rwObject) != 255){

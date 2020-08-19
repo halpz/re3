@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "ModelInfo.h"
 #include "AnimManager.h"
+#include "custompipes.h"
 
 //--MIAMI: file done
 
@@ -88,6 +89,13 @@ CSimpleModelInfo::SetAtomic(int n, RpAtomic *atomic)
 	if(RpGeometryGetFlags(geo) & rpGEOMETRYNORMALS &&
 	   RpGeometryGetNumTriangles(geo) > 200)
 		debug("%s has %d polys\n", m_name, RpGeometryGetNumTriangles(geo));
+
+#ifdef EXTENDED_PIPELINES
+	if(m_wetRoadReflection)
+		CustomPipes::AttachGlossPipe(atomic);
+	else
+		CustomPipes::AttachWorldPipe(atomic);
+#endif
 }
 
 void
