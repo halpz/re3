@@ -333,6 +333,7 @@ bool CGame::Initialise(const char* datFile)
 	CDebug::DebugInitTextBuffer();
 	ThePaths.Init();
 	ThePaths.AllocatePathFindInfoMem(4500);
+	CScriptPaths::Init();
 	CWeather::Init();
 	CCullZones::Init();
 	COcclusion::Init();
@@ -463,6 +464,7 @@ bool CGame::ShutDown(void)
 	CReplay::FinishPlayback();
 	CPlane::Shutdown();
 	CTrain::Shutdown();
+	CScriptPaths::Shutdown();
 	CSpecialFX::Shutdown();
 #ifndef PS2
 	CGarages::Shutdown();
@@ -577,6 +579,7 @@ void CGame::ReInitGameObjectVariables(void)
 	CSpecialFX::Init();
 	CRopes::Init();
 	CWaterCannons::Init();
+	CScriptPaths::Init();
 	CParticle::ReloadConfig();
 
 #ifdef PS2_MENU
@@ -719,6 +722,7 @@ void CGame::Process(void)
 		CWeather::Update();
 		CTheScripts::Process();
 		CCollision::Update();
+		CScriptPaths::Update();
 		CTrain::UpdateTrains();
 		CPlane::UpdatePlanes();
 		CHeli::UpdateHelis();

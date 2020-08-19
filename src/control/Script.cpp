@@ -82,6 +82,7 @@
 #include "main.h"
 #include "Ropes.h"
 #include "MBlur.h"
+#include "Fluff.h"
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #include <stdarg.h>
 #endif
@@ -12046,36 +12047,42 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	//case COMMAND_IS_PLAYER_STANDING_ON_A_VEHICLE:
 	//case COMMAND_IS_PLAYER_FOOT_DOWN:
 	//case COMMAND_IS_CHAR_FOOT_DOWN:
-	case COMMAND_INITIALISE_OBJECT_PATH:
-		// TODO(MIAMI): script path
+	case COMMAND_INITIALISE_OBJECT_PATH: {
 		CollectParameters(&m_nIp, 2);
-		debug("INITALISE_OBJECT_PATH not yet implemented, skipping\n");
-		ScriptParams[0] = 0;
+		int32 counter = 0;
+		while (counter < 3 && CScriptPaths::aArray[counter].m_state != SCRIPT_PATH_DISABLED) {
+			counter++;
+		}
+		CScriptPaths::aArray[counter].InitialiseOne(ScriptParams[0], *(float*)&ScriptParams[1]);
+		ScriptParams[0] = counter;
 		StoreParameters(&m_nIp, 1);
 		return 0;
+	}
 	case COMMAND_START_OBJECT_ON_PATH:
 	{
 		CollectParameters(&m_nIp, 2);
-		debug("START_OBJECT_ON_PATH not yet implemented, skipping\n");
+		CObject *pObj = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		assert(pObj);
+		CScriptPaths::aArray[ScriptParams[1]].SetObjectToControl(pObj);
 		return 0;
 	}
 	case COMMAND_SET_OBJECT_PATH_SPEED:
 	{
 		CollectParameters(&m_nIp, 2);
-		debug("SET_OBJECT_PATH_SPEED not yet implemented, skipping\n");
+		CScriptPaths::aArray[ScriptParams[0]].m_fSpeed = *(float*)&ScriptParams[1];
 		return 0;
 	}
 	case COMMAND_SET_OBJECT_PATH_POSITION:
 	{
 		CollectParameters(&m_nIp, 2);
-		debug("SET_OBJECT_PATH_POSITION not yet implemented, skipping\n");
+		CScriptPaths::aArray[ScriptParams[0]].m_fPosition = *(float*)&ScriptParams[1];
 		return 0;
 	}
 	//case COMMAND_GET_OBJECT_DISTANCE_ALONG_PATH:
 	case COMMAND_CLEAR_OBJECT_PATH:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("CLEAR_OBJECT_PATH not yet implemented, skipping\n");
+		CScriptPaths::aArray[ScriptParams[0]].Clear();
 		return 0;
 	}
 	case COMMAND_HELI_GOTO_COORDS:
