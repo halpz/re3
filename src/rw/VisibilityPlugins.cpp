@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "VisibilityPlugins.h"
 #include "World.h"
+#include "custompipes.h"
 
 #define FADE_DISTANCE 20.0f
 
@@ -146,6 +147,10 @@ CVisibilityPlugins::RenderFadingEntities(void)
 		CEntity *e = node->item.entity;
 		if(e->m_rwObject == nil)
 			continue;
+#ifdef EXTENDED_PIPELINES
+		if(CustomPipes::bRenderingEnvMap && (e->IsPed() || e->IsVehicle()))
+			continue;
+#endif
 		mi = (CSimpleModelInfo *)CModelInfo::GetModelInfo(e->GetModelIndex());
 #ifdef FIX_BUGS
 		if(mi->GetModelType() == MITYPE_SIMPLE && mi->m_noZwrite)

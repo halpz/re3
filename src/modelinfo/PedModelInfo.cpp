@@ -8,6 +8,7 @@
 #include "NodeName.h"
 #include "VisibilityPlugins.h"
 #include "ModelInfo.h"
+#include "custompipes.h"
 
 void
 CPedModelInfo::DeleteRwObject(void)
@@ -91,8 +92,10 @@ CPedModelInfo::findLimbsCb(RpAtomic *atomic, void *data)
 void
 CPedModelInfo::SetClump(RpClump *clump)
 {
+#ifdef EXTENDED_PIPELINES
+	CustomPipes::AttachRimPipe(clump);
+#endif
 #ifdef PED_SKIN
-
 	// CB has to be set here before atomics are detached from clump
 	if(strncmp(GetName(), "player", 7) == 0)
 		RpClumpForAllAtomics(clump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPlayerCB);

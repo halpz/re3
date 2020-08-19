@@ -20,6 +20,7 @@
 #include "PointLights.h"
 #include "Renderer.h"
 #include "Frontend.h"
+#include "custompipes.h"
 
 bool gbShowPedRoadGroups;
 bool gbShowCarRoadGroups;
@@ -97,8 +98,12 @@ CRenderer::RenderOneRoad(CEntity *e)
 		return;
 	if(gbShowCollisionPolys)
 		CCollision::DrawColModel_Coloured(e->GetMatrix(), *CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel(), e->GetModelIndex());
-	else
+	else{
+#ifdef EXTENDED_PIPELINES
+		CustomPipes::AttachGlossPipe(e->GetAtomic());
+#endif
 		e->Render();
+	}
 }
 
 void
@@ -232,6 +237,11 @@ CRenderer::RenderEverythingBarRoads(void)
 
 		if(e->IsBuilding() && ((CBuilding*)e)->GetIsATreadable())
 			continue;
+
+#ifdef EXTENDED_PIPELINES
+		if(CustomPipes::bRenderingEnvMap && (e->IsPed() || e->IsVehicle()))
+			continue;
+#endif
 
 		if(e->IsVehicle() ||
 		   e->IsPed() && CVisibilityPlugins::GetClumpAlpha((RpClump*)e->m_rwObject) != 255){

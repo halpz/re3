@@ -87,6 +87,7 @@
 #include "Zones.h"
 #include "debugmenu.h"
 #include "postfx.h"
+#include "custompipes.h"
 
 eLevelName CGame::currLevel;
 bool CGame::bDemoMode = true;
@@ -355,6 +356,10 @@ bool CGame::Initialise(const char* datFile)
 	CdStreamAddImage("MODELS\\GTA3.IMG");
 	CFileLoader::LoadLevel("DATA\\DEFAULT.DAT");
 	CFileLoader::LoadLevel(datFile);
+#ifdef EXTENDED_PIPELINES
+	// for generic fallback
+	CustomPipes::SetTxdFindCallback();
+#endif
 	CWorld::AddParticles();
 	CVehicleModelInfo::LoadVehicleColours();
 	CVehicleModelInfo::LoadEnvironmentMaps();

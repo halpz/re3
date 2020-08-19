@@ -8,7 +8,8 @@ enum Config {
 	MAX_CDCHANNELS = 5,
 
 	MODELINFOSIZE = 5500,
-	TXDSTORESIZE = 850,
+//	TXDSTORESIZE = 850,
+	TXDSTORESIZE = 1024,	// for Xbox map
 	EXTRADIRSIZE = 128,
 	CUTSCENEDIRSIZE = 512,
 
@@ -209,6 +210,7 @@ enum Config {
 //#define USE_TEXTURE_POOL
 #define CUTSCENE_BORDERS_SWITCH
 //#define EXTENDED_COLOURFILTER		// more options for colour filter (replaces mblur)
+//#define EXTENDED_PIPELINES		// custom render pipelines (includes Neo)
 #define MULTISAMPLING		// adds MSAA option
 
 #ifdef LIBRW
