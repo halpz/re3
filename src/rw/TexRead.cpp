@@ -289,6 +289,11 @@ CreateTxdImageForVideoCard()
 		ConvertingTexturesScreen(i, TXDSTORESIZE, "CVT_MSG");
 
 		if (CTxdStore::GetSlot(i) != nil && CStreaming::IsObjectInCdImage(i + STREAM_OFFSET_TXD)) {
+#ifdef FIX_BUGS
+			if(strcmp(CTxdStore::GetTxdName(i), "generic") == 0)
+				continue;
+#endif
+
 			CStreaming::RequestTxd(i, STREAMFLAGS_KEEP_IN_MEMORY);
 			CStreaming::RequestModelStream(0);
 			CStreaming::FlushChannels();
