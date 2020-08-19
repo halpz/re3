@@ -154,7 +154,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	m_fElasticity = 0.05f;
 	m_fBuoyancy = pHandling->fBuoyancy;
 
-	m_fOrientation = m_auto_unk4 = 0.0f;
+	m_fOrientation = m_fPlaneSteer = 0.0f;
 
 	m_nBusDoorTimerEnd = 0;
 	m_nBusDoorTimerStart = 0;

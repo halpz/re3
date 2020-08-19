@@ -143,7 +143,9 @@ void CStats::Init()
 	DistanceTravelledByBoat = 0;
 	DistanceTravelledByGolfCart = 0;
 	DistanceTravelledByHelicoptor = 0;
-	DistanceTravelledByPlane = 0; // FIX: Wasn't initialized
+#ifdef FIX_BUGS
+	DistanceTravelledByPlane = 0;
+#endif
 	LivesSavedWithAmbulance = 0;
 	CriminalsCaught = 0;
 	HighestLevelVigilanteMission = 0;

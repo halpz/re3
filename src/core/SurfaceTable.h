@@ -96,4 +96,5 @@ public:
 	static int GetAdhesionGroup(uint8 surfaceType);
 	static float GetWetMultiplier(uint8 surfaceType);
 	static float GetAdhesiveLimit(CColPoint &colpoint);
+	static bool IsSoftLanding(uint8 surf);
 };

@@ -12,12 +12,10 @@ const char *colourfilterVC_frag_src =
 "main(void)\n"
 "{\n"
 "	float a = u_blurcolor.a;\n"
-
 "	vec4 doublec = clamp(u_blurcolor*2, 0.0, 1.0);\n"
 "	vec4 dst = texture(tex0, vec2(v_tex0.x, 1.0-v_tex0.y));\n"
 "	vec4 prev = dst;\n"
 "	for(int i = 0; i < 5; i++){\n"
-"//		vec4 doublec = clamp(u_blurcolor*2, 0.0, 1.0);\n"
 "		vec4 tmp = dst*(1.0-a) + prev*doublec*a;\n"
 "		tmp += prev*u_blurcolor;\n"
 "		tmp += prev*u_blurcolor;\n"

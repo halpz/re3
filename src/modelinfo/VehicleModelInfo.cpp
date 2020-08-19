@@ -19,6 +19,7 @@
 #include "Bike.h"
 #include "ModelIndices.h"
 #include "ModelInfo.h"
+#include "custompipes.h"
 
 //--MIAMI: done
 
@@ -1124,6 +1125,10 @@ CVehicleModelInfo::SetEnvironmentMap(void)
 		for(i = 0; i < wheelmi->m_numAtomics; i++)
 			SetEnvironmentMapCB(wheelmi->m_atomics[i], nil);
 	}
+
+#ifdef EXTENDED_PIPELINES
+	CustomPipes::AttachVehiclePipe(m_clump);
+#endif
 }
 
 void

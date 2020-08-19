@@ -6,6 +6,8 @@
 #include "Collision.h"
 #include "SurfaceTable.h"
 
+//--MIAMI: file done
+
 float CSurfaceTable::ms_aAdhesiveLimitTable[NUMADHESIVEGROUPS][NUMADHESIVEGROUPS];
 
 void
@@ -147,4 +149,10 @@ float
 CSurfaceTable::GetAdhesiveLimit(CColPoint &colpoint)
 {
 	return ms_aAdhesiveLimitTable[GetAdhesionGroup(colpoint.surfaceB)][GetAdhesionGroup(colpoint.surfaceA)];
+}
+
+bool
+CSurfaceTable::IsSoftLanding(uint8 surf)
+{
+	return surf == SURFACE_GRASS || surf == SURFACE_SAND || surf == SURFACE_SAND_BEACH;
 }

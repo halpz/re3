@@ -35,6 +35,7 @@
 #include "Script.h"
 #include "MBlur.h"
 #include "postfx.h"
+#include "custompipes.h"
 
 #ifndef _WIN32
 #include "assert.h"
@@ -423,6 +424,17 @@ DebugMenuPopulate(void)
 #endif
 		DebugMenuAddVar("Render", "Drunkness", &CMBlur::Drunkness, nil, 0.05f, 0, 1.0f);
 		DebugMenuAddVarBool8("Render", "Occlusion debug", &bDisplayOccDebugStuff, nil);
+#ifdef EXTENDED_PIPELINES
+		static const char *vehpipenames[] = { "MatFX", "Neo" };
+		e = DebugMenuAddVar("Render", "Vehicle Pipeline", &CustomPipes::VehiclePipeSwitch, nil,
+			1, CustomPipes::VEHICLEPIPE_MATFX, CustomPipes::VEHICLEPIPE_NEO, vehpipenames);
+		DebugMenuEntrySetWrap(e, true);
+		DebugMenuAddVar("Render", "Neo Vehicle Shininess", &CustomPipes::VehicleShininess, nil, 0.1f, 0, 1.0f);
+		DebugMenuAddVar("Render", "Neo Vehicle Specularity", &CustomPipes::VehicleSpecularity, nil, 0.1f, 0, 1.0f);
+		DebugMenuAddVar("Render", "Neo Ped Rim light", &CustomPipes::RimlightMult, nil, 0.1f, 0, 1.0f);
+		DebugMenuAddVar("Render", "Neo World Lightmaps", &CustomPipes::LightmapMult, nil, 0.1f, 0, 1.0f);
+		DebugMenuAddVar("Render", "Neo Road Gloss", &CustomPipes::GlossMult, nil, 0.1f, 0, 1.0f);
+#endif
 		DebugMenuAddVarBool8("Render", "Show Ped Paths", &gbShowPedPaths, nil);
 		DebugMenuAddVarBool8("Render", "Show Car Paths", &gbShowCarPaths, nil);
 		DebugMenuAddVarBool8("Render", "Show Car Path Links", &gbShowCarPathsLinks, nil);

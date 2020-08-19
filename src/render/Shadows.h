@@ -159,7 +159,7 @@ public:
 	static void StoreShadowToBeRendered        (            uint8 ShadowType,                      CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue);
 	static void StoreShadowToBeRendered        (            uint8 ShadowType, RwTexture *pTexture, CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY, int16 nIntensity, uint8 nRed, uint8 nGreen, uint8 nBlue, float fZDistance, bool bDrawOnWater, float fScale, CCutsceneShadow *pShadow, bool bDrawOnBuildings);
 	static void StoreShadowForVehicle          (CVehicle *pCar, VEH_SHD_TYPE type);
-	static void StoreCarLightShadow            (CAutomobile *pCar, int32 nID, RwTexture *pTexture, CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY,                   uint8 nRed, uint8 nGreen, uint8 nBlue, float fMaxViewAngle);
+	static void StoreCarLightShadow            (CVehicle *pCar, int32 nID, RwTexture *pTexture, CVector *pPosn, float fFrontX, float fFrontY, float fSideX, float fSideY,                   uint8 nRed, uint8 nGreen, uint8 nBlue, float fMaxViewAngle);
 	static void StoreShadowForPed              (CPed        *pPed,     float fDisplacementX, float fDisplacementY, float fFrontX, float fFrontY, float fSideX, float fSideY);
 	static void StoreShadowForPedObject        (CEntity *pPedObject,   float fDisplacementX, float fDisplacementY, float fFrontX, float fFrontY, float fSideX, float fSideY);
 	static void StoreShadowForCutscenePedObject(CCutsceneObject *pObject, float fDisplacementX, float fDisplacementY, float fFrontX, float fFrontY, float fSideX, float fSideY);

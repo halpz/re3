@@ -42,6 +42,7 @@
 #include "Gangs.h"
 #include "platform.h"
 #include "Stats.h"
+#include "CarCtrl.h"
 
 #ifdef GTA_PS2
 #include "eetypes.h"
@@ -435,6 +436,12 @@ void PinkCarsCheat()
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
 	gbBlackCars = false;
 	gbPinkCars = true;
+}
+
+void MadCarsCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	CCarCtrl::bMadDriversCheat = true;
 }
 
 void NoSeaBedCheat(void)
@@ -1228,6 +1235,7 @@ void CPad::AddToPCCheatString(char c)
 	// "MIAMITRAFFIC"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "FNMGNmWPNLVU")) {
 		KeyBoardCheatString[0] = ' ';
+		MadCarsCheat();
 	}
 	// "AHAIRDRESSERSCAR"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "UFJT_`VZF]QZPaUG")) {
@@ -3104,7 +3112,7 @@ void CPad::ResetCheats(void)
 	CVehicle::bCheat8 = false;
 	gbBlackCars = false;
 	gbPinkCars = false;
-
+	CCarCtrl::bMadDriversCheat = false;
 	gbFastTime = false;
 	CTimer::SetTimeScale(1.0f);
 }

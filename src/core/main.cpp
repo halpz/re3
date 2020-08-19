@@ -65,6 +65,7 @@
 #include "Clock.h"
 #include "Occlusion.h"
 #include "Ropes.h"
+#include "custompipes.h"
 
 GlobalScene Scene;
 
@@ -383,6 +384,9 @@ PluginAttach(void)
 		
 		return FALSE;
 	}
+#ifdef EXTENDED_PIPELINES
+	CustomPipes::CustomPipeRegister();
+#endif
 
 	return TRUE;
 }
@@ -396,7 +400,11 @@ Initialise3D(void *param)
 		DebugMenuInit();
 		DebugMenuPopulate();
 #endif // !DEBUGMENU
-		return CGame::InitialiseRenderWare();
+		bool ret = CGame::InitialiseRenderWare();
+#ifdef EXTENDED_PIPELINES
+		CustomPipes::CustomPipeInit();	// need Scene.world for this
+#endif
+		return ret;
 	}
 
 	return (FALSE);
@@ -405,6 +413,9 @@ Initialise3D(void *param)
 static void 
 Terminate3D(void)
 {
+#ifdef EXTENDED_PIPELINES
+	CustomPipes::CustomPipeShutdown();
+#endif
 	CGame::ShutdownRenderWare();
 #ifdef DEBUGMENU
 	DebugMenuShutdown();
@@ -1103,6 +1114,12 @@ Idle(void *arg)
 		tbEndTimer("PreRender");
 #endif
 
+#ifdef FIX_BUGS
+		// This has to be done BEFORE RwCameraBeginUpdate
+		RwCameraSetFarClipPlane(Scene.camera, CTimeCycle::GetFarClip());
+		RwCameraSetFogDistance(Scene.camera, CTimeCycle::GetFogStart());
+#endif
+
 		if(CWeather::LightningFlash && !CCullZones::CamNoRain()){
 			if(!DoRWStuffStartOfFrame_Horizon(255, 255, 255, 255, 255, 255, 255))
 				return;
@@ -1115,9 +1132,10 @@ Idle(void *arg)
 
 		DefinedState();
 
-		// BUG. This has to be done BEFORE RwCameraBeginUpdate
+#ifndef FIX_BUGS
 		RwCameraSetFarClipPlane(Scene.camera, CTimeCycle::GetFarClip());
 		RwCameraSetFogDistance(Scene.camera, CTimeCycle::GetFogStart());
+#endif
 
 #ifdef TIMEBARS
 		tbStartTimer(0, "RenderScene");
@@ -1126,6 +1144,11 @@ Idle(void *arg)
 #ifdef TIMEBARS
 		tbEndTimer("RenderScene");
 #endif
+
+#ifdef EXTENDED_PIPELINES
+		CustomPipes::EnvMapRender();
+#endif
+
 		RenderDebugShit();
 		RenderEffects();
 
