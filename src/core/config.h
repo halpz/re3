@@ -248,6 +248,7 @@ enum Config {
 #	define SCROLLABLE_STATS_PAGE	// only draggable by mouse atm
 #	define TRIANGLE_BACK_BUTTON
 //#	define CIRCLE_BACK_BUTTON
+#	define CUSTOM_FRONTEND_OPTIONS
 #	define GRAPHICS_MENU_OPTIONS
 #endif
 

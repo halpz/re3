@@ -36,6 +36,7 @@
 #include "Stats.h"
 #include "Messages.h"
 #include "FileLoader.h"
+#include "frontendoption.h"
 
 #define TIDY_UP_PBP // ProcessButtonPresses
 #define MAX_VISIBLE_LIST_ROW 30
@@ -431,12 +432,46 @@ CMenuManager::ThingsToDoBeforeGoingBack()
 	if ((m_nCurrScreen == MENUPAGE_SKIN_SELECT) || (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS)) {
 		m_nTotalListRow = 0;
 	}
+
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	for (int i = 0; i < numCustomFrontendOptions; i++) {
+		FrontendOption &option = customFrontendOptions[i];
+		if (option.type != FEOPTION_REDIRECT && option.type != FEOPTION_GOBACK && m_nCurrScreen == option.screen) {
+			if (option.returnPrevPageFunc)
+				option.returnPrevPageFunc();
+
+			if (m_nCurrOption == option.screenOptionOrder && option.type == FEOPTION_DYNAMIC)
+				option.buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
+
+			if (option.onlyApplyOnEnter)
+				option.displayedValue = *option.value;
+		}
+	}
+#endif
 }
 
 int8
 CMenuManager::GetPreviousPageOption()
 {
+#ifndef CUSTOM_FRONTEND_OPTIONS
 	return !m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_ParentEntry[1] : aScreens[m_nCurrScreen].m_ParentEntry[0];
+#else
+	int8 prevPage = !m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_PreviousPage[1] : aScreens[m_nCurrScreen].m_PreviousPage[0];
+
+	if (prevPage == -1) // Game also does same
+		return 0;
+
+	prevPage = prevPage == MENUPAGE_NONE ? (!m_bGameNotLoaded ? MENUPAGE_PAUSE_MENU : MENUPAGE_START_MENU) : prevPage;
+
+	for (int i = 0; i < NUM_MENUROWS; i++) {
+		if (aScreens[prevPage].m_aEntries[i].m_TargetMenu == m_nCurrScreen) {
+			return i;
+		}
+	}
+
+	// Couldn't find current screen option on previous page, use default behaviour (maybe save-related screen?)
+	return !m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_ParentEntry[1] : aScreens[m_nCurrScreen].m_ParentEntry[0];
+#endif
 }
 
 // ------ Functions not in the game/inlined ends
@@ -955,7 +990,14 @@ CMenuManager::Draw()
 	}
 #endif
 
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	static int lastOption = m_nCurrOption;
+#endif
+
 	for (int i = 0; i < NUM_MENUROWS; ++i) {
+#ifdef CUSTOM_FRONTEND_OPTIONS
+		bool isOptionDisabled = false;
+#endif
 		if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action != MENUACTION_LABEL && aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName[0] != '\0') {
 			wchar *rightText = nil;
 			wchar *leftText;
@@ -1232,6 +1274,29 @@ CMenuManager::Draw()
 				rightText = TheText.Get(gPS2alphaTest ? "FEM_ON" : "FEM_OFF");
 				break;
 #endif
+#ifdef CUSTOM_FRONTEND_OPTIONS
+			case MENUACTION_TRIGGERFUNC:
+				FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
+				if (m_nCurrScreen == option.screen && i == option.screenOptionOrder) {
+					leftText = (wchar*)option.leftText;
+					if (option.type == FEOPTION_SELECT) {
+						if (option.displayedValue >= option.numRightTexts || option.displayedValue < 0)
+							option.displayedValue = 0;
+
+						rightText = (wchar*)option.rightTexts[option.displayedValue];
+
+					} else if (option.type == FEOPTION_DYNAMIC) {
+						if (option.drawFunc) {
+							rightText = option.drawFunc(&isOptionDisabled);
+						}
+					}
+				} else {
+					debug("A- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, i, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu, option.screen, option.screenOptionOrder);
+					assert(0 && "Custom frontend options is borked");
+				}
+
+				break;
+#endif
 			}
 
 			float nextItemY = headerHeight + nextYToUse;
@@ -1318,7 +1383,11 @@ CMenuManager::Draw()
 						     || !strcmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FED_AAS")
 #endif
 							)
-							&& !m_bGameNotLoaded)
+							&& !m_bGameNotLoaded
+#ifdef CUSTOM_FRONTEND_OPTIONS
+							|| isOptionDisabled
+#endif
+							)
 							CFont::SetColor(CRGBA(155, 117, 6, FadeIn(255)));
 
 					CFont::PrintString(MENU_X_RIGHT_ALIGNED(columnWidth - textLayer), itemY, rightText);
@@ -1428,6 +1497,20 @@ CMenuManager::Draw()
 			}
 #endif
 
+#ifdef CUSTOM_FRONTEND_OPTIONS
+			if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action == MENUACTION_TRIGGERFUNC) {
+				FrontendOption &option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
+				if (option.onlyApplyOnEnter && m_nCurrOption != i)
+					option.displayedValue = *option.value;
+
+				if (m_nCurrOption != lastOption && lastOption == i) {
+					FrontendOption &oldOption = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[lastOption].m_TargetMenu];
+					if (oldOption.type == FEOPTION_DYNAMIC)
+						oldOption.buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
+				}
+			}
+#endif
+
 			// Sliders
 			int lastActiveBarX;
 			switch (aScreens[m_nCurrScreen].m_aEntries[i].m_Action) {
@@ -1470,6 +1553,10 @@ CMenuManager::Draw()
 			}
 		}
 	}
+
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	lastOption = m_nCurrOption;
+#endif
 
 	switch (m_nCurrScreen) {
 	case MENUPAGE_CONTROLLER_SETTINGS:
@@ -3128,6 +3215,10 @@ CMenuManager::InitialiseChangedLanguageSettings()
 		default:
 			break;
 		}
+
+#ifdef CUSTOM_FRONTEND_OPTIONS
+		CustomFrontendOptionsPopulate();
+#endif
 	}
 }
 
@@ -5006,6 +5097,33 @@ CMenuManager::ProcessButtonPresses(void)
 					RetryMission(2, 0);
 					return;
 #endif
+#ifdef CUSTOM_FRONTEND_OPTIONS
+				case MENUACTION_TRIGGERFUNC:
+					FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu];
+					if (m_nCurrScreen == option.screen && m_nCurrOption == option.screenOptionOrder) {
+						if (option.type == FEOPTION_SELECT) {
+							if (!option.onlyApplyOnEnter) {
+								option.displayedValue++;
+								if (option.displayedValue >= option.numRightTexts || option.displayedValue < 0)
+									option.displayedValue = 0;
+							}
+							option.changeFunc(option.displayedValue);
+							*option.value = option.displayedValue;
+
+						} else if (option.type == FEOPTION_DYNAMIC) {
+							option.buttonPressFunc(FEOPTION_ACTION_SELECT);
+						} else if (option.type == FEOPTION_REDIRECT) {
+							ChangeScreen(option.to, option.option, true, option.fadeIn);
+						} else if (option.type == FEOPTION_GOBACK) {
+							goBack = true;
+						}
+					} else {
+						debug("B- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, m_nCurrOption, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, option.screen, option.screenOptionOrder);
+						assert(0 && "Custom frontend options are borked");
+					}
+
+					break;
+#endif
 			}
 		}
 		ProcessOnOffMenuOptions();
@@ -5236,6 +5354,36 @@ CMenuManager::ProcessButtonPresses(void)
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 				SaveSettings();
 				break;
+#ifdef CUSTOM_FRONTEND_OPTIONS
+			case MENUACTION_TRIGGERFUNC:
+				FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu];
+				if (m_nCurrScreen == option.screen && m_nCurrOption == option.screenOptionOrder) {
+					if (option.type == FEOPTION_SELECT) {
+						if (changeValueBy > 0) {
+							option.displayedValue++;
+							if (option.displayedValue >= option.numRightTexts)
+								option.displayedValue = 0;
+						} else {
+							option.displayedValue--;
+							if (option.displayedValue < 0)
+								option.displayedValue = option.numRightTexts - 1;
+						}
+						if (!option.onlyApplyOnEnter) {
+							option.changeFunc(option.displayedValue);
+							*option.value = option.displayedValue;
+						}
+					} else if (option.type == FEOPTION_DYNAMIC) {
+						option.buttonPressFunc(changeValueBy > 0 ? FEOPTION_ACTION_RIGHT : FEOPTION_ACTION_LEFT);
+					}
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
+				}
+				else {
+					debug("C- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, m_nCurrOption, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, option.screen, option.screenOptionOrder);
+					assert(0 && "Custom frontend options are borked");
+				}
+
+				break;
+#endif
 		}
 		ProcessOnOffMenuOptions();
 		if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
