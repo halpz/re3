@@ -743,9 +743,7 @@ CStreaming::RequestBigBuildings(eLevelName level)
 void
 CStreaming::RequestIslands(eLevelName level)
 {
-#ifdef NO_ISLAND_LOADING
-	if (CMenuManager::m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_HIGH)
-#endif
+	ISLAND_LOADING_ISNT(HIGH)
 	switch(level){
 	case LEVEL_INDUSTRIAL:
 		RequestModel(islandLODcomInd, BIGBUILDINGFLAGS);
@@ -946,9 +944,7 @@ CStreaming::RemoveBuildings(eLevelName level)
 void
 CStreaming::RemoveUnusedBigBuildings(eLevelName level)
 {
-#ifdef NO_ISLAND_LOADING
-	if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
-#endif
+	ISLAND_LOADING_IS(LOW)
 	{
 		if (level != LEVEL_INDUSTRIAL)
 			RemoveBigBuildings(LEVEL_INDUSTRIAL);

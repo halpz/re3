@@ -521,10 +521,12 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 	}
 
 	if (level == CGame::currLevel || forceChange) {
+#ifdef FIX_BUGS
+		CTimer::Suspend();
+#else
 		CTimer::Stop();
-#ifdef NO_ISLAND_LOADING
-		if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
 #endif
+		ISLAND_LOADING_IS(LOW)
 		{
 			DMAudio.SetEffectsFadeVol(0);
 			CPad::StopPadsShaking();
@@ -534,17 +536,13 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 
 		CPopulation::DealWithZoneChange(ms_collisionInMemory, CGame::currLevel, false);
 
-#ifdef NO_ISLAND_LOADING
-		if (CMenuManager::m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_HIGH)
-#endif
+		ISLAND_LOADING_ISNT(HIGH)
 		{
 			CStreaming::RemoveIslandsNotUsed(LEVEL_INDUSTRIAL);
 			CStreaming::RemoveIslandsNotUsed(LEVEL_COMMERCIAL);
 			CStreaming::RemoveIslandsNotUsed(LEVEL_SUBURBAN);
 		}
-#ifdef NO_ISLAND_LOADING
-		if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
-#endif
+		ISLAND_LOADING_IS(LOW)
 		{
 			CStreaming::RemoveBigBuildings(LEVEL_INDUSTRIAL);
 			CStreaming::RemoveBigBuildings(LEVEL_COMMERCIAL);
@@ -557,9 +555,7 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 
 		ms_collisionInMemory = CGame::currLevel;
 		CReplay::EmptyReplayBuffer();
-#ifdef NO_ISLAND_LOADING
-		if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
-#endif
+		ISLAND_LOADING_IS(LOW)
 		{
 			if (CGame::currLevel != LEVEL_GENERIC)
 				LoadSplash(GetLevelSplashScreen(CGame::currLevel));
@@ -572,18 +568,19 @@ CCollision::LoadCollisionWhenINeedIt(bool forceChange)
 			CStreaming::RequestIslands(CGame::currLevel);
 #endif
 		CStreaming::LoadAllRequestedModels(true);
-#ifdef NO_ISLAND_LOADING
-		if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
-#endif
+
+		ISLAND_LOADING_IS(LOW)
 		{
 			CStreaming::HaveAllBigBuildingsLoaded(CGame::currLevel);
 
 			CGame::TidyUpMemory(true, true);
 		}
+#ifdef FIX_BUGS
+		CTimer::Resume();
+#else
 		CTimer::Update();
-#ifdef NO_ISLAND_LOADING
-		if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
 #endif
+		ISLAND_LOADING_IS(LOW)
 			DMAudio.SetEffectsFadeVol(127);
 	}
 }
@@ -596,9 +593,7 @@ CCollision::SortOutCollisionAfterLoad(void)
 {
 	if(ms_collisionInMemory == CGame::currLevel)
 		return;
-#ifdef NO_ISLAND_LOADING
-	if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
-#endif
+	ISLAND_LOADING_IS(LOW)
 		CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
 
 	if (CGame::currLevel != LEVEL_GENERIC) {

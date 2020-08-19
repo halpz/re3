@@ -218,9 +218,7 @@ CModelInfo::IsBikeModel(int32 id)
 void
 CModelInfo::RemoveColModelsFromOtherLevels(eLevelName level)
 {
-#ifdef NO_ISLAND_LOADING
-	if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_LOW)
-#endif
+	ISLAND_LOADING_IS(LOW)
 	{
 		int i;
 		CBaseModelInfo *mi;
