@@ -525,6 +525,7 @@ SetTxdFindCallback(void)
 	CTxdStore::AddRef(slot);
 	// TODO: function for this
 	genericTxd = CTxdStore::GetSlot(slot)->texDict;
+	assert(genericTxd);
 	if(defaultFindCB == nil)
 		defaultFindCB = rw::Texture::findCB;
 	rw::Texture::findCB = customFindCB;
