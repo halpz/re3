@@ -199,11 +199,25 @@ CStreaming::Init2(void)
 	ms_pStreamingBuffer[1] = ms_pStreamingBuffer[0] + ms_streamingBufferSize*CDSTREAM_SECTOR_SIZE;
 	debug("Streaming buffer size is %d sectors", ms_streamingBufferSize);
 
+	// PC only, figure out how much memory we got
+#ifdef GTA_PC
 #define MB (1024*1024)
+#ifdef FIX_BUGS
+	// do what gta3 does
+	extern size_t _dwMemAvailPhys;
+	ms_memoryAvailable = (_dwMemAvailPhys - 10*MB)/2;
+	if(ms_memoryAvailable < 65*MB)
+		ms_memoryAvailable = 65*MB;
+	desiredNumVehiclesLoaded = (int32)((ms_memoryAvailable / MB - 65) / 3 + 12);
+	if(desiredNumVehiclesLoaded > MAXVEHICLESLOADED)
+		desiredNumVehiclesLoaded = MAXVEHICLESLOADED;
+#else
 	ms_memoryAvailable = 65 * MB;
 	desiredNumVehiclesLoaded = 25;
-	debug("Memory allocated to Streaming is %dMB", ms_memoryAvailable / MB);
+	debug("Memory allocated to Streaming is %zuMB", ms_memoryAvailable/MB); // original modifier was %d
+#endif
 #undef MB
+#endif
 
 	// find island LODs
 
