@@ -290,7 +290,7 @@ CMenuManager::ThingsToDoBeforeLeavingPage()
 		DMAudio.StopFrontEndTrack();
 		OutputDebugString("FRONTEND AUDIO TRACK STOPPED");
 #endif
-	} else if (m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
+	} else if (m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
 		m_nDisplayVideoMode = m_nPrefsVideoMode;
 #ifdef IMPROVED_VIDEOMODE
 		m_nSelectedScreenMode = m_nPrefsWindowed;
@@ -300,48 +300,13 @@ CMenuManager::ThingsToDoBeforeLeavingPage()
 	if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
 		CPlayerSkin::EndFrontendSkinEdit();
 	}
-
-#ifdef CUSTOM_FRONTEND_OPTIONS
-	for (int i = 0; i < numCustomFrontendOptions; i++) {
-		FrontendOption& option = customFrontendOptions[i];
-		if (option.type != FEOPTION_REDIRECT && option.type != FEOPTION_GOBACK && m_nCurrScreen == option.screen) {
-			if (option.returnPrevPageFunc)
-				option.returnPrevPageFunc();
-
-			if (m_nCurrOption == option.screenOptionOrder && option.type == FEOPTION_DYNAMIC)
-				option.buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
-
-			if (option.onlyApplyOnEnter)
-				option.displayedValue = *option.value;
-		}
-	}
-#endif
 }
 
 int8
 CMenuManager::GetPreviousPageOption()
 {
-#ifndef CUSTOM_FRONTEND_OPTIONS
 	return (!m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_ParentEntry :
 		(m_nCurrScreen == MENUPAGE_NEW_GAME ? 0 : (m_nCurrScreen == MENUPAGE_OPTIONS ? 1 : (m_nCurrScreen == MENUPAGE_EXIT ? 2 : aScreens[m_nCurrScreen].m_ParentEntry))));
-#else
-	int8 prevPage = aScreens[m_nCurrScreen].m_PreviousPage;
-
-	if (prevPage == -1) // Game also does same
-		return 0;
-
-	prevPage = prevPage == MENUPAGE_NONE ? (!m_bGameNotLoaded ? MENUPAGE_PAUSE_MENU : MENUPAGE_START_MENU) : prevPage;
-
-	for (int i = 0; i < NUM_MENUROWS; i++) {
-		if (aScreens[prevPage].m_aEntries[i].m_TargetMenu == m_nCurrScreen) {
-			return i;
-		}
-	}
-
-	// Couldn't find current screen option on previous page, use default behaviour (maybe save-related screen?)
-	return (!m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_ParentEntry :
-		(m_nCurrScreen == MENUPAGE_NEW_GAME ? 0 : (m_nCurrScreen == MENUPAGE_OPTIONS ? 1 : (m_nCurrScreen == MENUPAGE_EXIT ? 2 : aScreens[m_nCurrScreen].m_ParentEntry))));
-#endif
 }
 
 // ------ Functions not in the game/inlined ends
@@ -1139,7 +1104,7 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 					}
 					break;
 #ifdef IMPROVED_VIDEOMODE
-				case MENUACTION_SCREENMODE:
+				case MENUACTION_SCREENFORMAT:
 					if (m_nSelectedScreenMode == 0)
 						sprintf(asciiTemp, "FULLSCREEN");
 					else
@@ -1210,32 +1175,6 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 						rightText = TheText.Get("FEA_NM3");
 					}
 					break;
-#ifdef CUSTOM_FRONTEND_OPTIONS
-				case MENUACTION_TRIGGERFUNC:
-					FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
-					if (m_nCurrScreen == option.screen && i == option.screenOptionOrder) {
-						leftText = (wchar*)option.leftText;
-						if (option.type == FEOPTION_SELECT) {
-							if (option.displayedValue >= option.numRightTexts || option.displayedValue < 0)
-								option.displayedValue = 0;
-
-							rightText = (wchar*)option.rightTexts[option.displayedValue];
-
-						} else if (option.type == FEOPTION_DYNAMIC) {
-							if (option.drawFunc) {
-								bool isOptionDisabled = false;
-								rightText = option.drawFunc(&isOptionDisabled);
-								if (isOptionDisabled)
-									CFont::SetColor(CRGBA(DARKMENUOPTION_COLOR.r, DARKMENUOPTION_COLOR.g, DARKMENUOPTION_COLOR.b, FadeIn(255)));
-							}
-						}
-					} else {
-						debug("A- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, i, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu, option.screen, option.screenOptionOrder);
-						assert(0 && "Custom frontend options is borked");
-					}
-
-					break;
-#endif
 				}
 
 				// Highlight trapezoid
@@ -1377,7 +1316,7 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 					}
 					if (m_nDisplayVideoMode != m_nPrefsVideoMode) {
 						if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_RES") != 0
-							&& m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
+							&& m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
 							m_nDisplayVideoMode = m_nPrefsVideoMode;
 							SetHelperText(3);
 						}
@@ -1385,28 +1324,10 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 #ifdef IMPROVED_VIDEOMODE
 					if (m_nSelectedScreenMode != m_nPrefsWindowed) {
 						if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_POS") != 0
-							&& m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
+							&& m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
 							m_nSelectedScreenMode = m_nPrefsWindowed;
 						}
 					}
-#endif
-#ifdef CUSTOM_FRONTEND_OPTIONS
-					static int lastOption = m_nCurrOption;
-
-					if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action == MENUACTION_TRIGGERFUNC) {
-						FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
-						if (option.onlyApplyOnEnter && m_nCurrOption != i)
-							option.displayedValue = *option.value;
-
-						if (m_nCurrOption != lastOption && lastOption == i) {
-							FrontendOption& oldOption = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[lastOption].m_TargetMenu];
-							if (oldOption.type == FEOPTION_DYNAMIC)
-								oldOption.buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
-						}
-					}
-
-					if (i == MAX_MENUROWS - 1 || aScreens[m_nCurrScreen].m_aEntries[i + 1].m_EntryName[0] == '\0')
-						lastOption = m_nCurrOption;
 #endif
 
 					// TODO(Miami): check
@@ -1464,7 +1385,7 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 		case MENUPAGE_STATS:
 		case MENUPAGE_CONTROLLER_PC:
 		case MENUPAGE_SOUND_SETTINGS:
-		case MENUPAGE_GRAPHICS_SETTINGS:
+		case MENUPAGE_DISPLAY_SETTINGS:
 		case MENUPAGE_MOUSE_CONTROLS:
 			DisplayHelperText(nil);
 			break;
@@ -2140,7 +2061,7 @@ CMenuManager::DrawFrontEnd()
 				bbNames[0] = { "FEB_SAV",MENUPAGE_NEW_GAME };
 				bbNames[1] = { "FEB_CON",MENUPAGE_CONTROLLER_PC };
 				bbNames[2] = { "FEB_AUD",MENUPAGE_SOUND_SETTINGS };
-				bbNames[3] = { "FEB_DIS",MENUPAGE_GRAPHICS_SETTINGS };
+				bbNames[3] = { "FEB_DIS",MENUPAGE_DISPLAY_SETTINGS };
 				bbNames[4] = { "FEB_LAN",MENUPAGE_LANGUAGE_SETTINGS };
 				bbNames[5] = { "FESZ_QU",MENUPAGE_EXIT };
 				bbTabCount = 6;
@@ -2152,7 +2073,7 @@ CMenuManager::DrawFrontEnd()
 				bbNames[2] = { "FEB_BRI",MENUPAGE_BRIEFS };
 				bbNames[3] = { "FEB_CON",MENUPAGE_CONTROLLER_PC };
 				bbNames[4] = { "FEB_AUD",MENUPAGE_SOUND_SETTINGS };
-				bbNames[5] = { "FEB_DIS",MENUPAGE_GRAPHICS_SETTINGS };
+				bbNames[5] = { "FEB_DIS",MENUPAGE_DISPLAY_SETTINGS };
 				bbNames[6] = { "FEB_LAN",MENUPAGE_LANGUAGE_SETTINGS };
 				bbNames[7] = { "FESZ_QU",MENUPAGE_EXIT };
 				bbTabCount = 8;
@@ -2225,7 +2146,7 @@ CMenuManager::DrawBackground()
 		case MENUPAGE_DELETE_SLOT_CONFIRM:
 			currentSprite = FE_ICONSAVE;
 			break;
-		case MENUPAGE_GRAPHICS_SETTINGS:
+		case MENUPAGE_DISPLAY_SETTINGS:
 			currentSprite = FE_ICONDISPLAY;
 			break;
 		case MENUPAGE_SOUND_SETTINGS:
@@ -2471,7 +2392,7 @@ CMenuManager::DrawBackground(bool transitionCall)
 				menuBg.bottomRight_y = 398.0f;
 				break;
 			case MENUPAGE_BRIEFS:
-			case MENUPAGE_GRAPHICS_SETTINGS:
+			case MENUPAGE_DISPLAY_SETTINGS:
 			case MENUPAGE_MAP:
 			case MENUPAGE_CHOOSE_LOAD_SLOT:
 			case MENUPAGE_CHOOSE_DELETE_SLOT:
@@ -3106,9 +3027,6 @@ CMenuManager::InitialiseChangedLanguageSettings()
 			break;
 		}
 
-#ifdef CUSTOM_FRONTEND_OPTIONS
-		CustomFrontendOptionsPopulate();
-#endif
 	}
 }
 
@@ -4040,7 +3958,7 @@ CMenuManager::UserInput(void)
 		}
 	}
 	if (changeValueBy != 0) {
-		if ((m_nCurrScreen == MENUPAGE_SOUND_SETTINGS || m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS || m_nCurrScreen == MENUPAGE_CONTROLLER_PC || m_nCurrScreen == MENUPAGE_MOUSE_CONTROLS)
+		if ((m_nCurrScreen == MENUPAGE_SOUND_SETTINGS || m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS || m_nCurrScreen == MENUPAGE_CONTROLLER_PC || m_nCurrScreen == MENUPAGE_MOUSE_CONTROLS)
 			&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_NOTHING
 			&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_LABEL
 			&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_YES
@@ -4419,7 +4337,7 @@ CMenuManager::ProcessButtonPresses(uint8 goDown, uint8 goUp, uint8 optionSelecte
 					}
 					break;
 #ifdef IMPROVED_VIDEOMODE
-				case MENUACTION_SCREENMODE:
+				case MENUACTION_SCREENFORMAT:
 					if (m_nSelectedScreenMode != m_nPrefsWindowed) {
 						m_nPrefsWindowed = m_nSelectedScreenMode;
 						_psSelectScreenVM(m_nPrefsVideoMode); // apply same resolution
@@ -4471,7 +4389,7 @@ CMenuManager::ProcessButtonPresses(uint8 goDown, uint8 goUp, uint8 optionSelecte
 						DMAudio.SetRadioInCar(m_PrefsRadioStation);
 						DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
 						SaveSettings();
-					} else if (m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
+					} else if (m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
 						m_PrefsBrightness = 256;
 						m_PrefsLOD = 1.2f;
 #ifdef LEGACY_MENU_OPTIONS
@@ -4541,33 +4459,6 @@ CMenuManager::ProcessButtonPresses(uint8 goDown, uint8 goUp, uint8 optionSelecte
 					}
 					break;
 				}
-#ifdef CUSTOM_FRONTEND_OPTIONS
-				case MENUACTION_TRIGGERFUNC:
-					FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu];
-					if (m_nCurrScreen == option.screen && m_nCurrOption == option.screenOptionOrder) {
-						if (option.type == FEOPTION_SELECT) {
-							if (!option.onlyApplyOnEnter) {
-								option.displayedValue++;
-								if (option.displayedValue >= option.numRightTexts || option.displayedValue < 0)
-									option.displayedValue = 0;
-							}
-							option.changeFunc(option.displayedValue);
-							*option.value = option.displayedValue;
-
-						} else if (option.type == FEOPTION_DYNAMIC) {
-							option.buttonPressFunc(FEOPTION_ACTION_SELECT);
-						} else if (option.type == FEOPTION_REDIRECT) {
-							ChangeScreen(option.to, option.option, true, option.fadeIn);
-						} else if (option.type == FEOPTION_GOBACK) {
-							goBack = true;
-						}
-					} else {
-						debug("B- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, m_nCurrOption, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, option.screen, option.screenOptionOrder);
-						assert(0 && "Custom frontend options are borked");
-					}
-
-					break;
-#endif
 			}
 		}
 		ProcessOnOffMenuOptions();
@@ -4699,7 +4590,7 @@ CMenuManager::ProcessButtonPresses(uint8 goDown, uint8 goUp, uint8 optionSelecte
 				}
 				break;
 #ifdef IMPROVED_VIDEOMODE
-			case MENUACTION_SCREENMODE:
+			case MENUACTION_SCREENFORMAT:
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
 				m_nSelectedScreenMode = !m_nSelectedScreenMode;
 				break;
@@ -4726,36 +4617,6 @@ CMenuManager::ProcessButtonPresses(uint8 goDown, uint8 goUp, uint8 optionSelecte
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 				SaveSettings();
 				break;
-#ifdef CUSTOM_FRONTEND_OPTIONS
-			case MENUACTION_TRIGGERFUNC:
-				FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu];
-				if (m_nCurrScreen == option.screen && m_nCurrOption == option.screenOptionOrder) {
-					if (option.type == FEOPTION_SELECT) {
-						if (changeAmount > 0) {
-							option.displayedValue++;
-							if (option.displayedValue >= option.numRightTexts)
-								option.displayedValue = 0;
-						} else {
-							option.displayedValue--;
-							if (option.displayedValue < 0)
-								option.displayedValue = option.numRightTexts - 1;
-						}
-						if (!option.onlyApplyOnEnter) {
-							option.changeFunc(option.displayedValue);
-							*option.value = option.displayedValue;
-						}
-					} else if (option.type == FEOPTION_DYNAMIC) {
-						option.buttonPressFunc(changeAmount > 0 ? FEOPTION_ACTION_RIGHT : FEOPTION_ACTION_LEFT);
-					}
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-				}
-				else {
-					debug("C- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, m_nCurrOption, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, option.screen, option.screenOptionOrder);
-					assert(0 && "Custom frontend options are borked");
-				}
-
-				break;
-#endif
 		}
 		CheckSliderMovement(changeAmount);
 		ProcessOnOffMenuOptions();

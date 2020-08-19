@@ -224,8 +224,14 @@ enum Config {
 //#define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
 //#define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
 //#define USE_TEXTURE_POOL
-#define CUTSCENE_BORDERS_SWITCH
+//#define CUTSCENE_BORDERS_SWITCH
 //#define EXTENDED_COLOURFILTER		// more options for colour filter (replaces mblur)
+//#define MULTISAMPLING		// adds MSAA option TODO
+
+#ifdef LIBRW
+// these are not supported with librw yet
+#	undef MULTISAMPLING
+#endif
 
 // Water & Particle
 #define PC_PARTICLE
@@ -255,12 +261,13 @@ enum Config {
 #ifndef PC_MENU
 #	define PS2_MENU
 //#	define PS2_MENU_USEALLPAGEICONS
-#else
 //#	define PS2_LIKE_MENU	// An effort to recreate PS2 menu, cycling through tabs, different bg etc.
+#else
 #	define MAP_ENHANCEMENTS			// Adding waypoint etc.
 #	define TRIANGLE_BACK_BUTTON
 //#	define CIRCLE_BACK_BUTTON
 //#define CUSTOM_FRONTEND_OPTIONS
+#	define GRAPHICS_MENU_OPTIONS
 #define LEGACY_MENU_OPTIONS
 #define MUCH_SHORTER_OUTRO_SCREEN
 

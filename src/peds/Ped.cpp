@@ -14611,7 +14611,7 @@ CPed::ProcessObjective(void)
 					if (m_pMyVehicle) {
 						m_pMyVehicle->AutoPilot.m_nCruiseSpeed = 0;
 					} else {
-						float closestVehDist = 3600.0f;
+						float closestVehDist = SQR(60.0f);
 						int16 lastVehicle;
 						CEntity* vehicles[8];
 						CWorld::FindObjectsInRange(GetPosition(), 25.0f, true, &lastVehicle, 6, vehicles, false, true, false, false, false);
@@ -14624,11 +14624,11 @@ CPed::ProcessObjective(void)
 							CVector ourSpeed = GetSpeed();
 							*/
 							CVector vehDistVec = nearVeh->GetPosition() - GetPosition();
-							if (vehDistVec.Magnitude() < closestVehDist
+							if (vehDistVec.MagnitudeSqr() < closestVehDist
 								&& m_pedInObjective->m_pMyVehicle != nearVeh)
 							{
 								foundVeh = nearVeh;
-								closestVehDist = vehDistVec.Magnitude();
+								closestVehDist = vehDistVec.MagnitudeSqr();
 							}
 						}
 						m_pMyVehicle = foundVeh;

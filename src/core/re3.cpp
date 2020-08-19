@@ -74,110 +74,6 @@ mysrand(unsigned int seed)
 	myrand_seed = seed;
 }
 
-#ifdef CUSTOM_FRONTEND_OPTIONS
-#include "frontendoption.h"
-#include "platform.h"
-
-void ReloadFrontendOptions(void)
-{
-	CustomFrontendOptionsPopulate();
-}
-
-#ifdef MORE_LANGUAGES
-void LangPolSelect(int8 action)
-{
-	if (action == FEOPTION_ACTION_SELECT) {
-		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_POLISH;
-		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
-		FrontEndMenuManager.InitialiseChangedLanguageSettings();
-		FrontEndMenuManager.SaveSettings();
-	}
-}
-
-void LangRusSelect(int8 action)
-{
-	if (action == FEOPTION_ACTION_SELECT) {
-		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_RUSSIAN;
-		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
-		FrontEndMenuManager.InitialiseChangedLanguageSettings();
-		FrontEndMenuManager.SaveSettings();
-	}
-}
-
-void LangJapSelect(int8 action)
-{
-	if (action == FEOPTION_ACTION_SELECT) {
-		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_JAPANESE;
-		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
-		FrontEndMenuManager.InitialiseChangedLanguageSettings();
-		FrontEndMenuManager.SaveSettings();
-	}
-}
-#endif
-
-#ifdef IMPROVED_VIDEOMODE
-void ScreenModeChange(int8 displayedValue)
-{
-	if (displayedValue != FrontEndMenuManager.m_nPrefsWindowed) {
-		FrontEndMenuManager.m_nPrefsWindowed = displayedValue;
-		_psSelectScreenVM(FrontEndMenuManager.m_nPrefsVideoMode); // apply same resolution
-		FrontEndMenuManager.SetHelperText(0);
-		FrontEndMenuManager.SaveSettings();
-	}
-}
-#endif
-
-#ifdef FREE_CAM
-void ToggleFreeCam(int8 action)
-{
-	if (action == FEOPTION_ACTION_SELECT) {
-		TheCamera.bFreeCam = !TheCamera.bFreeCam;
-		FrontEndMenuManager.SaveSettings();
-	}
-}
-#endif
-
-#ifdef CUTSCENE_BORDERS_SWITCH
-void BorderModeChange(int8 displayedValue)
-{
-	CMenuManager::m_PrefsCutsceneBorders = !!displayedValue;
-	FrontEndMenuManager.SaveSettings();
-}
-#endif
-
-// Reloaded on language change, so you can use hardcoded wchar* and TheText.Get with peace of mind
-void
-CustomFrontendOptionsPopulate(void)
-{
-	RemoveCustomFrontendOptions(); // if exist
-
-#ifdef MORE_LANGUAGES
-	FrontendOptionSetPosition(MENUPAGE_LANGUAGE_SETTINGS);
-	FrontendOptionAddDynamic(TheText.Get("FEL_POL"), nil, LangPolSelect, nil);
-	FrontendOptionAddDynamic(TheText.Get("FEL_RUS"), nil, LangRusSelect, nil);
-	FrontendOptionAddDynamic(TheText.Get("FEL_JAP"), nil, LangJapSelect, nil);
-#endif
-
-#ifdef IMPROVED_VIDEOMODE
-	static const wchar *screenModes[] = { (wchar*)L"FULLSCREEN", (wchar*)L"WINDOWED" };
-	FrontendOptionSetPosition(MENUPAGE_GRAPHICS_SETTINGS, 8);
-	FrontendOptionAddSelect(TheText.Get("SCRFOR"), screenModes, 2, (int8*)&FrontEndMenuManager.m_nPrefsWindowed, true, ScreenModeChange, nil);
-#endif
-
-#ifdef FREE_CAM
-	static const wchar *text = (wchar*)L"TOGGLE FREE CAM";
-	FrontendOptionSetPosition(MENUPAGE_CONTROLLER_PC, 1);
-	FrontendOptionAddDynamic(text, nil, ToggleFreeCam, nil);
-#endif
-
-#ifdef CUTSCENE_BORDERS_SWITCH
-	static const wchar *off_on[] = { TheText.Get("FEM_OFF"), TheText.Get("FEM_ON") };
-	FrontendOptionSetPosition(MENUPAGE_GRAPHICS_SETTINGS, 9);
-	FrontendOptionAddSelect((const wchar *)L"CUTSCENE BORDERS", off_on, 2, (int8 *)&CMenuManager::m_PrefsCutsceneBorders, false, BorderModeChange, nil);
-#endif
-}
-#endif
-
 #ifdef DEBUGMENU
 void WeaponCheat1();
 void WeaponCheat2();
@@ -553,9 +449,6 @@ DebugMenuPopulate(void)
 
 		DebugMenuAddVarBool8("Debug", "Script Heli On", &CHeli::ScriptHeliOn, nil);
 
-#ifdef CUSTOM_FRONTEND_OPTIONS
-		DebugMenuAddCmd("Debug", "Reload custom frontend options", ReloadFrontendOptions);
-#endif
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
 

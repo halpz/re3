@@ -160,7 +160,7 @@ enum eMenuScreen
 	MENUPAGE_NEW_GAME = 1,
 	MENUPAGE_BRIEFS = 2,
 	MENUPAGE_SOUND_SETTINGS = 3,
-	MENUPAGE_GRAPHICS_SETTINGS = 4,
+	MENUPAGE_DISPLAY_SETTINGS = 4,
 	MENUPAGE_LANGUAGE_SETTINGS = 5,
 	MENUPAGE_MAP = 6,
 	MENUPAGE_NEW_GAME_RELOAD = 7,
@@ -199,6 +199,9 @@ enum eMenuScreen
 	MENUPAGE_CONTROLLER_PC_OLD3,
 	MENUPAGE_CONTROLLER_PC_OLD4,
 	MENUPAGE_CONTROLLER_DEBUG,
+#endif
+#ifdef GRAPHICS_MENU_OPTIONS
+	MENUPAGE_GRAPHICS_SETTINGS,
 #endif
 	MENUPAGES
 };
@@ -266,11 +269,27 @@ enum eMenuAction
 	MENUACTION_MOUSESTEER,
 	MENUACTION_UNK110,
 #ifdef IMPROVED_VIDEOMODE
-	MENUACTION_SCREENMODE,
+	MENUACTION_SCREENFORMAT,
 #endif
 #ifdef LEGACY_MENU_OPTIONS
 	MENUACTION_CTRLVIBRATION,
 	MENUACTION_CTRLCONFIG,
+#endif
+#ifdef ANISOTROPIC_FILTERING
+	MENUACTION_MIPMAPS,
+	MENUACTION_TEXTURE_FILTERING,
+#endif
+#ifdef MULTISAMPLING
+	MENUACTION_MULTISAMPLING,
+#endif
+#ifdef NO_ISLAND_LOADING
+	MENUACTION_ISLANDLOADING,
+#endif
+#ifdef PS2_ALPHA_TEST
+	MENUACTION_PS2_ALPHA_TEST,
+#endif
+#ifdef CUTSCENE_BORDERS_SWITCH
+	MENUACTION_CUTSCENEBORDERS,
 #endif
 };
 
@@ -576,6 +595,10 @@ public:
 	int32 m_nPrefsSubsystem;
 	int32 m_nSelectedScreenMode;
 #endif
+#ifdef MULTISAMPLING
+	static int8 m_nPrefsMSAALevel;
+	static int8 m_nDisplayMSAALevel;
+#endif
 
 	enum LANGUAGE
 	{
@@ -603,7 +626,19 @@ public:
 
 	CMenuManager(void);
 	~CMenuManager(void) { UnloadTextures(); }
-	
+
+#ifdef NO_ISLAND_LOADING
+	enum
+	{
+		ISLAND_LOADING_LOW = 0,
+		ISLAND_LOADING_MEDIUM,
+		ISLAND_LOADING_HIGH
+	};
+
+	static int8 m_DisplayIslandLoading;
+	static int8 m_PrefsIslandLoading;
+#endif
+
 	void Initialise();
 	void PrintMap();
 	void SetFrontEndRenderStates();
