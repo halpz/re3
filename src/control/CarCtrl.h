@@ -145,6 +145,7 @@ public:
 		return angle;
 	}
 
+	static bool bMadDriversCheat;
 	static int32 NumLawEnforcerCars;
 	static int32 NumAmbulancesOnDuty;
 	static int32 NumFiretrucksOnDuty;
