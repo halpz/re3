@@ -4,6 +4,8 @@
 #include "HandlingMgr.h"
 #include "Transmission.h"
 
+//--MIAMI: done
+
 void
 cTransmission::InitGearRatios(void)
 {
@@ -80,59 +82,51 @@ cTransmission::CalculateDriveAcceleration(const float &gasPedal, uint8 &gear, fl
 	if(fVelocity > pGearRatio->fShiftUpVelocity){
 		if(gear != 0 || gasPedal > 0.0f){
 			gear++;
-			time = 0.0f;
 			return CalculateDriveAcceleration(gasPedal, gear, time, fVelocity, false);
 		}
 	}else if(fVelocity < pGearRatio->fShiftDownVelocity && gear != 0){
 		if(gear != 1 || gasPedal < 0.0f){
 			gear--;
-			time = 0.0f;
 			return CalculateDriveAcceleration(gasPedal, gear, time, fVelocity, false);
 		}
 	}
 
-	if(time > 0.0f){
-		// changing gears currently, can't accelerate
-		fAcceleration = 0.0f;
-		time -= CTimer::GetTimeStepInSeconds();
+	float speedMul, accelMul;
+
+	if(gear < 1){
+		// going reverse
+		accelMul = (Flags & HANDLING_2G_BOOST) ? 2.0f : 1.0f;
+		speedMul = -1.0f;
+	}else if(nNumberOfGears == 1){
+		accelMul = 1.0f;
+		speedMul = 1.0f;
 	}else{
-		float speedMul, accelMul;
-
-		if(gear < 1){
-			// going reverse
-			accelMul = (Flags & HANDLING_2G_BOOST) ? 2.0f : 1.0f;
-			speedMul = -1.0f;
-		}else if(nNumberOfGears == 1){
-			accelMul = 1.0f;
-			speedMul = 1.0f;
-		}else{
-			// BUG or not? this is 1.0 normally but 0.0 in the highest gear
-			float f = 1.0f - (gear-1)/(nNumberOfGears-1);
-			speedMul = 3.0f*sq(f) + 1.0f;
-			// This is pretty ugly, could be written more clearly
-			if(Flags & HANDLING_2G_BOOST){
-				if(gear == 1)
-					accelMul = (Flags & HANDLING_1G_BOOST) ? 3.0f : 2.0f;
-				else if(gear == 2)
-					accelMul = 1.3f;
-				else
-					accelMul = 1.0f;
-			}else if(Flags & HANDLING_1G_BOOST && gear == 1){
-				accelMul = 3.0f;
-			}else
+		// BUG or not? this is 1.0 normally but 0.0 in the highest gear
+		float f = 1.0f - (gear-1)/(nNumberOfGears-1);
+		speedMul = 3.0f*sq(f) + 1.0f;
+		// This is pretty ugly, could be written more clearly
+		if(Flags & HANDLING_2G_BOOST){
+			if(gear == 1)
+				accelMul = (Flags & HANDLING_1G_BOOST) ? 2.0f : 1.6f;
+			else if(gear == 2)
+				accelMul = 1.3f;
+			else
 				accelMul = 1.0f;
-		}
-
-		if(cheat)
-			fCheat = 1.2f;
-		else
-			fCheat = 1.0f;
-		float targetVelocity = Gears[gear].fMaxVelocity*speedMul*fCheat;
-		float accel = fEngineAcceleration*accelMul * (targetVelocity - fVelocity)/Abs(targetVelocity);
-		if(Abs(fVelocity) < Abs(Gears[gear].fMaxVelocity*fCheat))
-			fAcceleration = gasPedal * accel * CTimer::GetTimeStep();
-		else
-			fAcceleration = 0.0f;
+		}else if(Flags & HANDLING_1G_BOOST && gear == 1){
+			accelMul = 2.0f;
+		}else
+			accelMul = 1.0f;
 	}
+
+	if(cheat)
+		fCheat = 1.2f;
+	else
+		fCheat = 1.0f;
+	float targetVelocity = Gears[gear].fMaxVelocity*speedMul*fCheat;
+	float accel = fEngineAcceleration*accelMul * (targetVelocity - fVelocity)/Abs(targetVelocity);
+	if(Abs(fVelocity) < Abs(Gears[gear].fMaxVelocity*fCheat))
+		fAcceleration = gasPedal * accel * CTimer::GetTimeStep();
+	else
+		fAcceleration = 0.0f;
 	return fAcceleration;
 }
