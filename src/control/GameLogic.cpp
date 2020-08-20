@@ -372,7 +372,7 @@ CGameLogic::RestorePlayerStuffDuringResurrection(CPlayerPed *pPlayerPed, CVector
 	CWorld::ClearExcitingStuffFromArea(pos, 4000.0, 1);
 	pPlayerPed->RestoreHeadingRate();
 	CGame::currArea = AREA_MAIN_MAP;
-	//CStreaming::RemoveBuildingsNotInArea(0); // TODO(MIAMI)
+	CStreaming::RemoveBuildingsNotInArea(0);
 	TheCamera.SetCameraDirectlyInFrontForFollowPed_CamOnAString();
 	TheCamera.Restore();
 	CReferences::RemoveReferencesToPlayer();
