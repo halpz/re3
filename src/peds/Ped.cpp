@@ -3001,6 +3001,22 @@ CPed::CanBeDeleted(void)
 	}
 }
 
+//--MIAMI: done
+bool
+CPed::CanBeDeletedEvenInVehicle(void)
+{
+	switch (CharCreatedBy) {
+		case RANDOM_CHAR:
+			return true;
+		case MISSION_CHAR:
+			return false;
+		case TODO_CHAR:
+			return false;
+		default:
+			return true;
+	}
+}
+
 // --MIAMI: Done
 bool
 CPed::CanPedDriveOff(void)

@@ -1,7 +1,9 @@
 #pragma warning( push )
 #pragma warning( disable : 4005)
 #pragma warning( pop )
+#ifndef LIBRW
 #define WITHD3D
+#endif
 #include "common.h"
 #ifndef LIBRW
 #include "rpanisot.h"
@@ -221,7 +223,11 @@ CanVideoCardDoDXT(void)
 {
 #ifdef LIBRW
 	// TODO
+#ifdef RW_OPENGL
+	return false
+#else
 	return true;
+#endif
 #else
 	return _rwD3D8CheckValidTextureFormat(D3DFMT_DXT1) && _rwD3D8CheckValidTextureFormat(D3DFMT_DXT3);
 #endif

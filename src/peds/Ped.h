@@ -911,6 +911,7 @@ public:
 	bool IsPedInControl(void);
 	bool CanPedDriveOff(void);
 	bool CanBeDeleted(void);
+	bool CanBeDeletedEvenInVehicle(void);
 	bool CanStrafeOrMouseControl(void);
 	bool CanPedReturnToState(void);
 	void SetMoveState(eMoveState);

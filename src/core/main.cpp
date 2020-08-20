@@ -609,17 +609,13 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 	}
 }
 
+//--MIAMI: done
 void
 LoadingIslandScreen(const char *levelName)
 {
 	CSprite2d *splash;
-	wchar *name;
-	char str[100];
-	wchar wstr[80];
-	CRGBA col;
 
 	splash = LoadSplash(nil);
-	name = TheText.Get(levelName);
 	if(!DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255))
 		return;
 
@@ -627,26 +623,10 @@ LoadingIslandScreen(const char *levelName)
 	CSprite2d::InitPerFrame();
 	CFont::InitPerFrame();
 	DefinedState();
-	col = CRGBA(255, 255, 255, 255);
+	CRGBA col = CRGBA(255, 255, 255, 255);
+	CRGBA col2 = CRGBA(0, 0, 0, 255);
+	CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), col2);
 	splash->Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), col, col, col, col);
-	CFont::SetBackgroundOff();
-	CFont::SetScale(1.5f, 1.5f);
-	CFont::SetPropOn();
-	CFont::SetRightJustifyOn();
-	CFont::SetRightJustifyWrap(150.0f);
-	CFont::SetFontStyle(FONT_HEADING);
-	sprintf(str, "WELCOME TO");
-	AsciiToUnicode(str, wstr);
-	CFont::SetDropColor(CRGBA(0, 0, 0, 255));
-	CFont::SetDropShadowPosition(3);
-	CFont::SetColor(CRGBA(243, 237, 71, 255));
-	CFont::SetScale(SCREEN_STRETCH_X(1.2f), SCREEN_STRETCH_Y(1.2f));
-	CFont::PrintString(SCREEN_WIDTH - 20, SCREEN_STRETCH_FROM_BOTTOM(110.0f), TheText.Get("WELCOME"));
-	TextCopy(wstr, name);
-	TheText.UpperCase(wstr);
-	CFont::SetColor(CRGBA(243, 237, 71, 255));
-	CFont::SetScale(SCREEN_STRETCH_X(1.2f), SCREEN_STRETCH_Y(1.2f));
-	CFont::PrintString(SCREEN_WIDTH-20, SCREEN_STRETCH_FROM_BOTTOM(80.0f), wstr);
 	CFont::DrawFonts();
 	DoRWStuffEndOfFrame();
 }

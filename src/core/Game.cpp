@@ -616,10 +616,7 @@ void CGame::ShutDownForRestart(void)
 	CWorld::ClearForRestart();
 	CGameLogic::ClearShortCut();
 	CTimer::Shutdown();
-	CStreaming::FlushRequestList();
-	CStreaming::DeleteAllRwObjects();
-	CStreaming::RemoveAllUnusedModels();
-	CStreaming::ms_disableStreaming = false;
+	CStreaming::ReInit();
 	CRadar::RemoveRadarSections();
 	FrontEndMenuManager.UnloadTextures();
 	CParticleObject::RemoveAllExpireableParticleObjects();
