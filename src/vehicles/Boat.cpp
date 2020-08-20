@@ -242,7 +242,7 @@ CBoat::ProcessControl(void)
 					m_fHealth -= (collisionDamage-25.0f)/2.0f;
 			}else{
 				if(collisionDamage > 60.0f && pDriver)
-					pDriver->Say(SOUND_PED_CAR_COLLISION);
+					pDriver->Say(SOUND_PED_ANNOYED_DRIVER);
 				if(bTakeLessDamage)
 					m_fHealth -= (collisionDamage-25.0f)/12.0f;
 				else

@@ -37,7 +37,7 @@
 #include "Bike.h"
 #include "Debug.h"
 
-//--MIAMI: done except for TODOs
+//--MIAMI: file done
 
 // TODO: maybe put this somewhere else
 inline void
@@ -2134,8 +2134,7 @@ CBike::VehicleDamage(void)
 			   m_pDamageEntity && m_pDamageEntity->IsVehicle() &&
 			   (this != FindPlayerVehicle() || ((CVehicle*)m_pDamageEntity)->VehicleCreatedBy == MISSION_VEHICLE) &&
 			   ((CVehicle*)m_pDamageEntity)->pDriver)
-// TODO(MIAMI): enum
-					pDriver->Say(144);
+					pDriver->Say(SOUND_PED_CRASH_VEHICLE);
 
 			int oldHealth = m_fHealth;
 			if(this == FindPlayerVehicle())
@@ -2542,11 +2541,11 @@ CBike::PlayCarHorn(void)
 		m_nCarHornTimer = 45;
 	}else if(r < 4){
 		if(pDriver)
-			pDriver->Say(SOUND_PED_CAR_COLLISION);
+			pDriver->Say(SOUND_PED_ANNOYED_DRIVER);
 		m_nCarHornTimer = 45;
 	}else{
 		if(pDriver)
-			pDriver->Say(SOUND_PED_CAR_COLLISION);
+			pDriver->Say(SOUND_PED_ANNOYED_DRIVER);
 	}
 }
 
