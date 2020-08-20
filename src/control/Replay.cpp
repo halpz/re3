@@ -39,6 +39,7 @@
 #include "Text.h"
 #include "Camera.h"
 #include "Radar.h"
+#include "Fluff.h"
 
 uint8 CReplay::Mode;
 CAddressInReplayBuffer CReplay::Record;
@@ -229,7 +230,7 @@ void CReplay::EnableReplays(void)
 void PlayReplayFromHD(void);
 void CReplay::Update(void)
 {
-	if (CCutsceneMgr::IsCutsceneProcessing() || CTimer::GetIsPaused())
+	if (CCutsceneMgr::IsCutsceneProcessing() || CTimer::GetIsPaused() || CScriptPaths::IsOneActive()) 
 		return;
 	switch (Mode){
 	case MODE_RECORD:
@@ -1175,6 +1176,7 @@ void CReplay::StoreStuffInMem(void)
 		if (ped)
 			StoreDetailedPedAnimation(ped, &pPedAnims[i]);
 	}
+	CScriptPaths::Save_ForReplay();
 }
 
 void CReplay::RestoreStuffFromMem(void)
@@ -1351,6 +1353,7 @@ void CReplay::RestoreStuffFromMem(void)
 	}
 	delete[] pPedAnims;
 	pPedAnims = nil;
+	CScriptPaths::Load_ForReplay();
 	DMAudio.ChangeMusicMode(MUSICMODE_FRONTEND);
 	DMAudio.SetRadioInCar(OldRadioStation);
 	DMAudio.ChangeMusicMode(MUSICMODE_GAME);

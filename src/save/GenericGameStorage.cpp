@@ -38,6 +38,7 @@
 #include "World.h"
 #include "Zones.h"
 #include "Timecycle.h"
+#include "Fluff.h"
 
 #define BLOCK_COUNT 20
 #define SIZE_OF_SIMPLEVARS 0xD4
@@ -226,6 +227,7 @@ GenericSave(int file)
 	WriteSaveDataBlock(CTheCarGenerators::SaveAllCarGenerators);
 	WriteSaveDataBlock(CParticleObject::SaveParticle);
 	WriteSaveDataBlock(cAudioScriptObject::SaveAllAudioScriptObjects);
+	WriteSaveDataBlock(CScriptPaths::Save);
 	WriteSaveDataBlock(CWorld::Players[CWorld::PlayerInFocus].SavePlayerInfo);
 	WriteSaveDataBlock(CStats::SaveStats);
 	WriteSaveDataBlock(CSetPieces::Save);
@@ -376,6 +378,8 @@ GenericLoad()
 	ReadDataFromBlock("Loading Particles \n", CParticleObject::LoadParticle);
 	LoadSaveDataBlock();
 	ReadDataFromBlock("Loading AudioScript Objects \n", cAudioScriptObject::LoadAllAudioScriptObjects);
+	LoadSaveDataBlock();
+	ReadDataFromBlock("Loading ScriptPaths \n", CScriptPaths::Load);
 	LoadSaveDataBlock();
 	ReadDataFromBlock("Loading Player Info \n", CWorld::Players[CWorld::PlayerInFocus].LoadPlayerInfo);
 	LoadSaveDataBlock();

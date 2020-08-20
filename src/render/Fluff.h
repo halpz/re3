@@ -2,17 +2,45 @@
 #include "common.h"
 #include "Vector.h"
 #include "Object.h"
+#include "Plane.h"
 
-// TODO
+enum {
+	SCRIPT_PATH_DISABLED = 0,
+	SCRIPT_PATH_INITIALIZED,
+	SCRIPT_PATH_ACTIVE
+};
+
 class CScriptPath
 {
 public:
+	int32 m_numNodes;
+	CPlaneNode *m_pNode;
+	float m_fTotalLength;
+	float m_fSpeed;
+	float m_fPosition;
+	float m_fObjectLength;
+	int32 m_state;
+	CObject *m_pObjects[6];
+
+	void Clear(void);
+	void Update(void);
+	void InitialiseOne(int32 numNodes, float width);
+	void FindCoorsFromDistanceOnPath(float t, float *pX, float *pY, float *pZ);
+	void SetObjectToControl(CObject *pObj);
 };
 
-// TODO
 class CScriptPaths
 {
 public:
+	static CScriptPath aArray[3];
+	static void Init(void);
+	static void Shutdown(void);
+	static void Update(void);
+	static bool IsOneActive(void);
+	static void Save(uint8 *buf, uint32 *size);
+	static void Load(uint8 *buf, uint32 size);
+	static void Save_ForReplay();
+	static void Load_ForReplay();
 };
 
 class CPlaneTrail
