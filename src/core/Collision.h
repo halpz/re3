@@ -181,7 +181,6 @@ struct CStoredCollPoly
 	bool valid;
 };
 
-//--MIAMI: done struct
 struct CColModel
 {
 	CSphere boundingSphere;
@@ -208,6 +207,8 @@ struct CColModel
 	void SetLinkPtr(CLink<CColModel*>*);
 	void GetTrianglePoint(CVector &v, int i) const;
 
+	void *operator new(size_t);
+	void operator delete(void *p, size_t);
 	CColModel& operator=(const CColModel& other);
 };
 

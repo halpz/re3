@@ -3,6 +3,9 @@
 #include "rphanim.h"
 #include "rpskin.h"
 #include "rtbmp.h"
+#ifndef LIBRW
+#include "rpanisot.h"
+#endif
 
 #include "main.h"
 #include "CdStream.h"
@@ -384,6 +387,9 @@ PluginAttach(void)
 		
 		return FALSE;
 	}
+#ifndef LIBRW
+	RpAnisotPluginAttach();
+#endif
 #ifdef EXTENDED_PIPELINES
 	CustomPipes::CustomPipeRegister();
 #endif

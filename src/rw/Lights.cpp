@@ -10,6 +10,8 @@
 #include "Frontend.h"
 #include "MBlur.h"
 
+//--MIAMI: done
+
 RpLight *pAmbient;
 RpLight *pDirect;
 RpLight *pExtraDirectionals[4] = { nil };
@@ -30,7 +32,6 @@ RwRGBAReal DirectionalLightColour;
 #define USEBLURCOLORS CMBlur::BlurOn
 #endif
 
-//--MIAMI: done
 void
 SetLightsWithTimeOfDayColour(RpWorld *)
 {
@@ -307,6 +308,14 @@ void
 ActivateDirectional(void)
 {
 	RpLightSetFlags(pDirect, rpLIGHTLIGHTATOMICS);
+}
+
+RwRGBAReal FullLight = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+void
+SetFullAmbient(void)
+{
+	RpLightSetColor(pAmbient, &FullLight);
 }
 
 void

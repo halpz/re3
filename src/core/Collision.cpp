@@ -3049,6 +3049,18 @@ CColModel::GetTrianglePoint(CVector &v, int i) const
 	v = vertices[i].Get();
 }
 
+void*
+CColModel::operator new(size_t){
+	CColModel *node = CPools::GetColModelPool()->New();
+	assert(node);
+	return node;
+}
+
+void
+CColModel::operator delete(void *p, size_t){
+	CPools::GetColModelPool()->Delete((CColModel*)p);
+}
+
 CColModel&
 CColModel::operator=(const CColModel &other)
 {

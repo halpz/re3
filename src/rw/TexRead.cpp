@@ -1,7 +1,11 @@
 #pragma warning( push )
 #pragma warning( disable : 4005)
 #pragma warning( pop )
+#define WITHD3D
 #include "common.h"
+#ifndef LIBRW
+#include "rpanisot.h"
+#endif
 #include "crossplatform.h"
 #include "platform.h"
 
@@ -47,6 +51,15 @@ RwTextureGtaStreamRead(RwStream *stream)
 		texLoadTime = (texNumLoaded * texLoadTime + (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond() - preloadTime) / (float)(texNumLoaded+1);
 		texNumLoaded++;
 	}
+
+	if(tex == nil)
+		return nil;
+
+#ifndef LIBRW
+	if(RpAnisotTextureGetMaxAnisotropy(tex) > 1)
+		RpAnisotTextureSetMaxAnisotropy(tex, RpAnisotTextureGetMaxAnisotropy(tex));
+#endif
+
 	return tex;
 }
 
@@ -152,6 +165,7 @@ RwTexDictionaryGtaStreamRead2(RwStream *stream, RwTexDictionary *texDict)
 #ifdef GTA_PC
 #ifdef RWLIBS
 extern "C" RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags);
+extern "C" RwBool   _rwD3D8CheckValidTextureFormat(RwInt32 format);
 #else
 RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags);
 #endif
@@ -202,8 +216,16 @@ WriteVideoCardCapsFile(void)
 	}
 }
 
-bool DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha);
-void DoRWStuffEndOfFrame(void);
+bool
+CanVideoCardDoDXT(void)
+{
+#ifdef LIBRW
+	// TODO
+	return true;
+#else
+	return _rwD3D8CheckValidTextureFormat(D3DFMT_DXT1) && _rwD3D8CheckValidTextureFormat(D3DFMT_DXT3);
+#endif
+}
 
 void
 ConvertingTexturesScreen(uint32 num, uint32 count, const char *text)
@@ -229,6 +251,7 @@ ConvertingTexturesScreen(uint32 num, uint32 count, const char *text)
 	CFont::SetBackgroundOff();
 	CFont::SetPropOn();
 	CFont::SetScale(SCREEN_SCALE_X(0.45f), SCREEN_SCALE_Y(0.7f));
+	CFont::SetCentreOff();
 	CFont::SetWrapx(SCREEN_SCALE_FROM_RIGHT(170.0f));
 	CFont::SetJustifyOff();
 	CFont::SetColor(CRGBA(255, 217, 106, 255));

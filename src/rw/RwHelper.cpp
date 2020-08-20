@@ -209,24 +209,11 @@ GetFirstTexture(RwTexDictionary *txd)
 	return tex;
 }
 
-#ifdef PED_SKIN
-static RpAtomic*
-isSkinnedCb(RpAtomic *atomic, void *data)
-{
-	RpAtomic **pAtomic = (RpAtomic**)data;
-	if(*pAtomic)
-		return nil;	// already found one
-	if(RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic)))
-		*pAtomic = atomic;	// we could just return nil here directly...
-	return atomic;
-}
-
-RpAtomic*
+bool
 IsClumpSkinned(RpClump *clump)
 {
-	RpAtomic *atomic = nil;
-	RpClumpForAllAtomics(clump, isSkinnedCb, &atomic);
-	return atomic;
+	RpAtomic *atomic = GetFirstAtomic(clump);
+	return atomic ? RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic)) : nil;
 }
 
 static RpAtomic*
@@ -264,17 +251,6 @@ GetAnimHierarchyFromClump(RpClump *clump)
 	return hier;
 }
 
-RwFrame*
-GetHierarchyFromChildNodesCB(RwFrame *frame, void *data)
-{
-	RpHAnimHierarchy **pHier = (RpHAnimHierarchy**)data;
-	RpHAnimHierarchy *hier = RpHAnimFrameGetHierarchy(frame);
-	if(hier == nil)
-		RwFrameForAllChildren(frame, GetHierarchyFromChildNodesCB, &hier);
-	*pHier = hier;
-	return nil;
-}
-
 void
 SkinGetBonePositionsToTable(RpClump *clump, RwV3d *boneTable)
 {
@@ -290,8 +266,7 @@ SkinGetBonePositionsToTable(RpClump *clump, RwV3d *boneTable)
 	if(boneTable == nil)
 		return;
 
-//	atomic = GetFirstAtomic(clump);		// mobile, also VC
-	atomic = IsClumpSkinned(clump);		// xbox, seems safer
+	atomic = GetFirstAtomic(clump);		// mobile, also VC
 	assert(atomic);
 	skin = RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic));
 	assert(skin);
@@ -397,7 +372,6 @@ RenderSkeleton(RpHAnimHierarchy *hier)
 			par = stack[--sp];
 	}
 }
-#endif
 
 
 RwBool Im2DRenderQuad(RwReal x1, RwReal y1, RwReal x2, RwReal y2, RwReal z, RwReal recipCamZ, RwReal uvOffset)
@@ -560,6 +534,7 @@ CameraSize(RwCamera * camera, RwRect * rect,
 			}
 		}
 
+		// BUG: game just changes camera raster's sizes, but this is a hack
 		if (( origSize.w != rect->w ) && ( origSize.h != rect->h ))
 		{
 			RwRaster           *raster;

@@ -18,16 +18,13 @@ RwObject *GetFirstObject(RwFrame *frame);
 RpAtomic *GetFirstAtomic(RpClump *clump);
 RwTexture *GetFirstTexture(RwTexDictionary *txd);
 
-#ifdef PED_SKIN
-RpAtomic *IsClumpSkinned(RpClump *clump);
+bool IsClumpSkinned(RpClump *clump);
 RpHAnimHierarchy *GetAnimHierarchyFromSkinClump(RpClump *clump);	// get from atomic
 RpHAnimHierarchy *GetAnimHierarchyFromClump(RpClump *clump);	// get from frame
-RwFrame *GetHierarchyFromChildNodesCB(RwFrame *frame, void *data);
 void SkinGetBonePositionsToTable(RpClump *clump, RwV3d *boneTable);
 RpHAnimAnimation *HAnimAnimationCreateForHierarchy(RpHAnimHierarchy *hier);
 RpAtomic *AtomicRemoveAnimFromSkinCB(RpAtomic *atomic, void *data);
 void RenderSkeleton(RpHAnimHierarchy *hier);
-#endif
 
 RwBool Im2DRenderQuad(RwReal x1, RwReal y1, RwReal x2, RwReal y2, RwReal z, RwReal recipCamZ, RwReal uvOffset);
 RpClump *RpClumpGetBoundingSphere(RpClump *clump, RwSphere *sphere, bool useLTM);
@@ -38,6 +35,7 @@ RwTexDictionary *RwTexDictionaryGtaStreamRead2(RwStream *stream, RwTexDictionary
 void ReadVideoCardCapsFile(uint32&, uint32&, uint32&, uint32&);
 bool CheckVideoCardCaps(void);
 void WriteVideoCardCapsFile(void);
+bool CanVideoCardDoDXT(void);
 void ConvertingTexturesScreen(uint32, uint32, const char*);
 void DealWithTxdWriteError(uint32, uint32, const char*);
 bool CreateTxdImageForVideoCard();

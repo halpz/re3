@@ -22,21 +22,25 @@ CTreadablePool *CPools::ms_pTreadablePool;
 CObjectPool *CPools::ms_pObjectPool;
 CDummyPool *CPools::ms_pDummyPool;
 CAudioScriptObjectPool *CPools::ms_pAudioScriptObjectPool;
+CColModelPool *CPools::ms_pColModelPool;
 
+//--MIAMI: done
 void
 CPools::Initialise(void)
 {
-	ms_pPtrNodePool = new CCPtrNodePool(NUMPTRNODES);
-	ms_pEntryInfoNodePool = new CEntryInfoNodePool(NUMENTRYINFOS);
-	ms_pPedPool = new CPedPool(NUMPEDS);
-	ms_pVehiclePool = new CVehiclePool(NUMVEHICLES);
-	ms_pBuildingPool = new CBuildingPool(NUMBUILDINGS);
-	ms_pTreadablePool = new CTreadablePool(NUMTREADABLES);
-	ms_pObjectPool = new CObjectPool(NUMOBJECTS);
-	ms_pDummyPool = new CDummyPool(NUMDUMMIES);
-	ms_pAudioScriptObjectPool = new CAudioScriptObjectPool(NUMAUDIOSCRIPTOBJECTS);
+	ms_pPtrNodePool = new CCPtrNodePool(NUMPTRNODES, "PtrNode");
+	ms_pEntryInfoNodePool = new CEntryInfoNodePool(NUMENTRYINFOS, "EntryInfoNode");
+	ms_pPedPool = new CPedPool(NUMPEDS, "Peds");
+	ms_pVehiclePool = new CVehiclePool(NUMVEHICLES, "Vehicles");
+	ms_pBuildingPool = new CBuildingPool(NUMBUILDINGS, "Buildings");
+	ms_pTreadablePool = new CTreadablePool(NUMTREADABLES, "Treadables");
+	ms_pObjectPool = new CObjectPool(NUMOBJECTS, "Objects");
+	ms_pDummyPool = new CDummyPool(NUMDUMMIES, "Dummys");
+	ms_pAudioScriptObjectPool = new CAudioScriptObjectPool(NUMAUDIOSCRIPTOBJECTS, "AudioScriptObj");
+	ms_pColModelPool = new CColModelPool(NUMCOLMODELS, "ColModel");
 }
 
+//--MIAMI: done
 void
 CPools::ShutDown(void)
 {
@@ -49,6 +53,7 @@ CPools::ShutDown(void)
 	debug("Objects left %d\n", ms_pObjectPool->GetNoOfUsedSpaces());
 	debug("Dummys left %d\n", ms_pDummyPool->GetNoOfUsedSpaces());
 	debug("AudioScriptObjects left %d\n", ms_pAudioScriptObjectPool->GetNoOfUsedSpaces());
+	debug("ColModels left %d\n", ms_pColModelPool->GetNoOfUsedSpaces());
 	printf("Shutdown pool started\n");
 
 	delete ms_pPtrNodePool;
@@ -60,6 +65,7 @@ CPools::ShutDown(void)
 	delete ms_pObjectPool;
 	delete ms_pDummyPool;
 	delete ms_pAudioScriptObjectPool;
+	delete ms_pColModelPool;
 
 	printf("Shutdown pool done\n");
 }
