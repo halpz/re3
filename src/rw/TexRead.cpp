@@ -202,9 +202,6 @@ WriteVideoCardCapsFile(void)
 	}
 }
 
-bool DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha);
-void DoRWStuffEndOfFrame(void);
-
 void
 ConvertingTexturesScreen(uint32 num, uint32 count, const char *text)
 {
