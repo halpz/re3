@@ -1824,7 +1824,7 @@ CStreaming::LoadBigBuildingsWhenNeeded(void)
 		LoadSplash(GetLevelSplashScreen(CGame::currLevel));
 
 	CStreaming::RequestBigBuildings(CGame::currLevel, TheCamera.GetPosition());
-	CStreaming::LoadAllRequestedModels(true);
+	CStreaming::LoadAllRequestedModels(false);
 
 	CGame::TidyUpMemory(true, true);
 	CTimer::Resume();
