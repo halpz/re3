@@ -300,6 +300,12 @@ TWEAKSWITCH(CWeather::NewWeatherType, 0, 3, wt, NULL);
 */
 
 void
+switchWeather(void)
+{
+	CWeather::StreamAfterRainTimer = 0;
+}
+
+void
 DebugMenuPopulate(void)
 {
 	if(1){
@@ -332,9 +338,9 @@ DebugMenuPopulate(void)
 		e = DebugMenuAddVar("Time & Weather", "Current Minute", &CClock::GetMinutesRef(),
 			[](){ CWeather::InterpolationValue = CClock::GetMinutes()/60.0f; }, 1, 0, 59, nil);
 			DebugMenuEntrySetWrap(e, true);
-		e = DebugMenuAddVar("Time & Weather", "Old Weather", (int16*)&CWeather::OldWeatherType, nil, 1, 0, 5, weathers);
+		e = DebugMenuAddVar("Time & Weather", "Old Weather", (int16*)&CWeather::OldWeatherType, switchWeather, 1, 0, 5, weathers);
 		DebugMenuEntrySetWrap(e, true);
-		e = DebugMenuAddVar("Time & Weather", "New Weather", (int16*)&CWeather::NewWeatherType, nil, 1, 0, 5, weathers);
+		e = DebugMenuAddVar("Time & Weather", "New Weather", (int16*)&CWeather::NewWeatherType, switchWeather, 1, 0, 5, weathers);
 		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddVarBool32("Time & Weather", "Extracolours On", &CTimeCycle::m_bExtraColourOn, nil);
 		DebugMenuAddVar("Time & Weather", "Extracolour", &CTimeCycle::m_ExtraColour, nil, 1, 0, 23, extracols);

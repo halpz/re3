@@ -19,6 +19,9 @@
 #include "World.h"
 #include "ZoneCull.h"
 #include "SpecialFX.h"
+#include "Replay.h"
+
+//--MIAMI: file done
 
 int32 CWeather::SoundHandle = -1;
 
@@ -33,6 +36,7 @@ uint32 CWeather::LightningStart;
 uint32 CWeather::LightningFlashLastChange;
 uint32 CWeather::WhenToPlayLightningSound;
 uint32 CWeather::LightningDuration;
+int32 CWeather::StreamAfterRainTimer;
 
 float CWeather::ExtraSunnyness;
 float CWeather::Foggyness;
@@ -88,7 +92,7 @@ const int16 WeatherTypesList_WithHurricanes[] = {
 	WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY, WEATHER_EXTRA_SUNNY
 };
 
-const float Windiness[] = {
+const float Windyness[] = {
 	0.25f,// WEATHER_SUNNY
 	0.7f, // WEATHER_CLOUDY
 	1.0f, // WEATHER_RAINY
@@ -140,22 +144,27 @@ void CWeather::Init(void)
 
 void CWeather::Update(void)
 {
-	float fNewInterpolation = CClock::GetMinutes() * 1.0f / 60;
-	if (fNewInterpolation < InterpolationValue) {
-		// new hour
-		OldWeatherType = NewWeatherType;
-		if (ForcedWeatherType >= 0)
-			NewWeatherType = ForcedWeatherType;
-		else {
-			WeatherTypeInList = (WeatherTypeInList + 1) % ARRAY_SIZE(WeatherTypesList);
-			NewWeatherType = CStats::NoMoreHurricanes ? WeatherTypesList[WeatherTypeInList] : WeatherTypesList_WithHurricanes[WeatherTypeInList];
+	if(!CReplay::IsPlayingBack()){
+		float fNewInterpolation = (CClock::GetMinutes() + CClock::GetSeconds()/60.0f)/60.0f;
+		if (fNewInterpolation < InterpolationValue) {
+			// new hour
+			OldWeatherType = NewWeatherType;
+			if (ForcedWeatherType >= 0)
+				NewWeatherType = ForcedWeatherType;
+			else {
+				WeatherTypeInList = (WeatherTypeInList + 1) % ARRAY_SIZE(WeatherTypesList);
+				NewWeatherType = CStats::NoMoreHurricanes ? WeatherTypesList[WeatherTypeInList] : WeatherTypesList_WithHurricanes[WeatherTypeInList];
+			}
 		}
+		InterpolationValue = fNewInterpolation;
 	}
-	InterpolationValue = fNewInterpolation;
+
+#ifndef FINAL
 	if (CPad::GetPad(1)->GetRightShockJustDown()) {
 		NewWeatherType = (NewWeatherType + 1) % WEATHER_TOTAL;
 		OldWeatherType = NewWeatherType;
 	}
+#endif
 
 	// Lightning
 	if (NewWeatherType != WEATHER_RAINY || OldWeatherType != WEATHER_RAINY) {
@@ -227,6 +236,7 @@ void CWeather::Update(void)
 				// if rain is ongoing for >24 minutes, values: 0.25, 0.5, 0.75, 1.0, switching every ~16.5s
 				fNewRain = 0.25f + ((uint16)CTimer::GetTimeInMilliseconds() >> 14) * 0.25f;
 		}
+		fNewRain = Max(fNewRain, 0.5f);
 	}
 	else
 		fNewRain = 0.0f;
@@ -257,7 +267,7 @@ void CWeather::Update(void)
 		ExtraSunnyness += InterpolationValue;
 
 	// Rainbow
-	if (OldWeatherType == WEATHER_RAINY && (NewWeatherType == WEATHER_SUNNY || NewWeatherType == WEATHER_EXTRA_SUNNY) &&
+	if (OldWeatherType == WEATHER_CLOUDY && (NewWeatherType == WEATHER_SUNNY || NewWeatherType == WEATHER_EXTRA_SUNNY) &&
 		InterpolationValue < 0.5f && CClock::GetHours() > 6 && CClock::GetHours() < 21)
 		Rainbow = 1.0f - 4.0f * Abs(InterpolationValue - 0.25f) / 4.0f;
 	else
@@ -278,18 +288,21 @@ void CWeather::Update(void)
 			SunGlare *= (1.0f - (CGeneral::GetRandomNumber()&0x1F)*0.007f);
 	}
 
-	Wind = InterpolationValue * Windiness[NewWeatherType] + (1.0f - InterpolationValue) * Windiness[OldWeatherType];
+	Wind = InterpolationValue * Windyness[NewWeatherType] + (1.0f - InterpolationValue) * Windyness[OldWeatherType];
 	WindClipped = Min(1.0f, Wind);
 
-	if (CClock::GetHours() == 20)
+	if (CClock::GetHours() > 20)
+		TrafficLightBrightness = 1.0f;
+	else if (CClock::GetHours() > 19)
 		TrafficLightBrightness = CClock::GetMinutes() / 60.0f;
-	else if (CClock::GetHours() > 6 && CClock::GetHours() < 20)
+	else if (CClock::GetHours() > 6)
 		TrafficLightBrightness = 0.0f;
-	else if (CClock::GetHours() == 6)
+	else if (CClock::GetHours() > 5)
 		TrafficLightBrightness = 1.0f - CClock::GetMinutes() / 60.0f;
 	else
 		TrafficLightBrightness = 1.0f;
 	TrafficLightBrightness = Max(WetRoads, TrafficLightBrightness);
+	TrafficLightBrightness = Max(Foggyness, TrafficLightBrightness);
 	TrafficLightBrightness = Max(Rain, TrafficLightBrightness);
 
 	AddRain();
@@ -312,12 +325,32 @@ void CWeather::Update(void)
 
 void CWeather::AddHeatHaze()
 {
-	/* TODO(MIAMI) */
+	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN ||
+	   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED)
+		return;
+	CVector pos;
+	pos.x = SCREEN_WIDTH*0.5f;
+	if(TheCamera.GetLookingForwardFirstPerson())
+		pos.y = CGeneral::GetRandomNumberInRange(SCREEN_HEIGHT*0.25f, SCREEN_HEIGHT*0.9f);
+	else
+		pos.y = CGeneral::GetRandomNumberInRange(SCREEN_HEIGHT*0.4f, SCREEN_HEIGHT*0.9f);
+	pos.z = 100.0f;
+	CParticle::AddParticle(PARTICLE_HEATHAZE_IN_DIST, pos, CVector(0.0f, 0.0f, 0.0f));
 }
 
 void CWeather::AddBeastie()
 {
-	/* TODO(MIAMI) */
+	if(FindPlayerVehicle() || CTimer::GetFrameCounter()%10 || (CGeneral::GetRandomNumber()&5) == 0)
+		return;
+	CVector pos = TheCamera.GetPosition();
+	float dist = CGeneral::GetRandomNumberInRange(90.0f, 60.0f);
+	int angle = CGeneral::GetRandomNumber() % CParticle::SIN_COS_TABLE_SIZE;
+	float c = CParticle::m_CosTable[angle];
+	float s = CParticle::m_SinTable[angle];
+	pos.x += dist*(c - s);
+	pos.y += dist*(c + s);
+	pos.z += CGeneral::GetRandomNumberInRange(7.5f, 30.0f);
+	CParticle::AddParticle(PARTICLE_BEASTIE, pos, CVector(0.0f, 0.0f, 0.0f));
 }
 
 void CWeather::ForceWeather(int16 weather)
@@ -337,6 +370,62 @@ void CWeather::ReleaseWeather()
 	ForcedWeatherType = -1;
 }
 
+void CWeather::AddSplashesDuringHurricane()
+{
+	RwRGBA colour = { 255, 255, 255, 32 };
+	CVector pos = TheCamera.pTargetEntity ? TheCamera.pTargetEntity->GetPosition() : TheCamera.GetPosition();
+	bool foundGround;
+	float groundZ = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z, &foundGround) + 0.1f;
+	if(!foundGround)
+		groundZ = pos.z + 0.5f;
+	for(int i = 0; i < 20; i++){
+		float dist = (CGeneral::GetRandomNumber()&0xFF)/255.0f +
+			CGeneral::GetRandomNumberInRange(-10.0f, 30.0f);
+		float angle;
+		uint8 rnd = CGeneral::GetRandomNumber();
+		if(rnd&1)
+			angle = (CGeneral::GetRandomNumber()&0x7F)/128.0f * TWOPI;
+		else
+			angle = TheCamera.Orientation + (rnd-128)/160.0f;
+		pos.x = TheCamera.GetPosition().x + dist*Sin(angle);
+		pos.y = TheCamera.GetPosition().y + dist*Cos(angle);
+		pos.z = groundZ;
+		if(foundGround)
+			CParticle::AddParticle(PARTICLE_GROUND_STEAM, pos, CVector(-0.002f, -0.002f, 0.015f), nil, 0.0f, colour);
+	}
+}
+
+static int startStreamAfterRain;
+
+void CWeather::AddStreamAfterRain()
+{
+	if(CClock::GetHours() > 6 && CClock::GetHours() < 18){
+		RwRGBA colour = { 255, 255, 255, 24 };
+		CVector pos = TheCamera.pTargetEntity ? TheCamera.pTargetEntity->GetPosition() : TheCamera.GetPosition();
+		bool foundGround;
+		float groundZ = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z, &foundGround) + 0.2f;
+		if(!foundGround)
+			groundZ = pos.z + 0.75f;
+		for(int i = 0; i < 20; i++){
+			float dist = (CGeneral::GetRandomNumber()&0xFF)/255.0f +
+				CGeneral::GetRandomNumberInRange(-10.0f, 30.0f);
+			float angle;
+			uint8 rnd = CGeneral::GetRandomNumber();
+			if(rnd&1)
+				angle = (CGeneral::GetRandomNumber()&0x7F)/128.0f * TWOPI;
+			else
+				angle = TheCamera.Orientation + (rnd-128)/160.0f;
+			pos.x = TheCamera.GetPosition().x + dist*Sin(angle);
+			pos.y = TheCamera.GetPosition().y + dist*Cos(angle);
+			pos.z = groundZ;
+			CParticle::AddParticle(PARTICLE_GROUND_STEAM, pos, CVector(0.0f, 0.0f, 0.015f), nil, 0.0f, colour);
+		}
+	}else{
+		startStreamAfterRain = 0;
+		StreamAfterRainTimer = 800;
+	}
+}
+
 void CWeather::AddRain()
 {
 	if (CCullZones::CamNoRain() || CCullZones::PlayerNoRain())
@@ -348,104 +437,77 @@ void CWeather::AddRain()
 			return;
 		}
 	}
+
+	if(Rain > 0.0){
+		startStreamAfterRain = 1;
+		StreamAfterRainTimer = 800;
+	}else if(startStreamAfterRain){
+		if(StreamAfterRainTimer > 0){
+			AddStreamAfterRain();
+			StreamAfterRainTimer--;
+		}else{
+			startStreamAfterRain = 0;
+			StreamAfterRainTimer = 800;
+		}
+	}
+
+	if (Wind > 1.1f)
+		AddSplashesDuringHurricane();
+
 	if (Rain <= 0.1f)
 		return;
 	static RwRGBA colour;
-	float screen_width = RsGlobal.width;
-	float screen_height = RsGlobal.height;
-	int cur_frame = (int)(3 * Rain) & 3;
-	int num_drops = (int)(2 * Rain) + 2;
-	static int STATIC_RAIN_ANGLE = -45;
-	static int count = 1500;
-	static int add_angle = 1;
-	if (--count == 0) {
-		count = 1;
-		if (add_angle) {
-			STATIC_RAIN_ANGLE += 12;
-			if (STATIC_RAIN_ANGLE > 45) {
-				count = 1500;
-				add_angle = !add_angle;
-			}
-		}
-		else {
-			STATIC_RAIN_ANGLE -= 12;
-			if (STATIC_RAIN_ANGLE < -45) {
-				count = 1500;
-				add_angle = !add_angle;
-			}
-		}
-	}
-	float rain_angle = DEGTORAD(STATIC_RAIN_ANGLE + ((STATIC_RAIN_ANGLE < 0) ? 360 : 0));
-	float sin_angle = Sin(rain_angle);
-	float cos_angle = Cos(rain_angle);
-	float base_x = 0.0f * cos_angle - 1.0f * sin_angle;
-	float base_y = 1.0f * cos_angle + 0.0f * sin_angle;
-	CVector xpos(0.0f, 0.0f, 0.0f);
-	for (int i = 0; i < 2 * num_drops; i++) {
-		CVector dir;
-		dir.x = (CGeneral::GetRandomNumberInRange(-0.5f, 0.5f) + base_x) * CGeneral::GetRandomNumberInRange(10.0f, 25.0f);
-		dir.y = (CGeneral::GetRandomNumberInRange(-0.5f, 0.5f) + base_y) * CGeneral::GetRandomNumberInRange(10.0f, 25.0f);
-		dir.z = 0;
-		CParticle::AddParticle(PARTICLE_RAINDROP_2D, xpos, dir, nil, CGeneral::GetRandomNumberInRange(0.5f, 0.9f),
-			colour, 0, rain_angle + CGeneral::GetRandomNumberInRange(-10, 10), cur_frame);
-		xpos.x += screen_width / (2 * num_drops);
-		xpos.x += CGeneral::GetRandomNumberInRange(-25.0f, 25.0f);
-	}
-	CVector ypos(0.0f, 0.0f, 0.0f);
-	for (int i = 0; i < num_drops; i++) {
-		CVector dir;
-		dir.x = (CGeneral::GetRandomNumberInRange(-0.5f, 0.5f) + base_x) * CGeneral::GetRandomNumberInRange(10.0f, 25.0f);
-		dir.y = (CGeneral::GetRandomNumberInRange(-0.5f, 0.5f) + base_y) * CGeneral::GetRandomNumberInRange(10.0f, 25.0f);
-		dir.z = 0;
-		CParticle::AddParticle(PARTICLE_RAINDROP_2D, ypos, dir, nil, CGeneral::GetRandomNumberInRange(0.5f, 0.9f),
-			colour, 0, rain_angle + CGeneral::GetRandomNumberInRange(-10, 10), cur_frame);
-		ypos.y += screen_width / num_drops;
-		ypos.y += CGeneral::GetRandomNumberInRange(-25.0f, 25.0f);
-	}
-	CVector ypos2(0.0f, 0.0f, 0.0f);
-	for (int i = 0; i < num_drops; i++) {
-		CVector dir;
-		dir.x = (CGeneral::GetRandomNumberInRange(-0.5f, 0.5f) + base_x) * CGeneral::GetRandomNumberInRange(10.0f, 25.0f);
-		dir.y = (CGeneral::GetRandomNumberInRange(-0.5f, 0.5f) + base_y) * CGeneral::GetRandomNumberInRange(10.0f, 25.0f);
-		dir.z = 0;
-		CParticle::AddParticle(PARTICLE_RAINDROP_2D, ypos2, dir, nil, CGeneral::GetRandomNumberInRange(0.5f, 0.9f),
-			colour, 0, rain_angle + CGeneral::GetRandomNumberInRange(-10, 10), cur_frame);
-		ypos2.y += screen_width / num_drops;
-		ypos2.y += CGeneral::GetRandomNumberInRange(-25.0f, 25.0f);
-	}
-	for (int i = 0; i < num_drops; i++) {
-		CVector pos;
-		pos.x = CGeneral::GetRandomNumberInRange(DROPLETS_LEFT_OFFSET, screen_width - DROPLETS_RIGHT_OFFSET);
-		pos.y = CGeneral::GetRandomNumberInRange(DROPLETS_TOP_OFFSET, screen_height - DROPLETS_TOP_OFFSET);
+	int numDrops = 5.0f * Rain;
+	int numSplashes = 2.0f * Rain;
+	CVector pos, dir;
+	for(int i = 0; i < numDrops; i++){
+		pos.x = CGeneral::GetRandomNumberInRange(0, (int)SCREEN_WIDTH);
+		pos.y = CGeneral::GetRandomNumberInRange(0, (int)SCREEN_HEIGHT/5);
 		pos.z = 0.0f;
-		CParticle::AddParticle(PARTICLE_RAINDROP_2D, pos, CVector(0.0f, 0.0f, 0.0f), nil, CGeneral::GetRandomNumberInRange(0.5f, 0.9f),
-			colour, CGeneral::GetRandomNumberInRange(-10, 10), 360 - rain_angle + CGeneral::GetRandomNumberInRange(-30, 30), cur_frame, 0);
-	}
-	int num_splash_attempts = (int)(3 * Rain) + 1;
-	int num_splashes = (int)(3 * Rain) + 4;
-	CVector splash_points[4];
-	splash_points[0] = CVector(-RwCameraGetViewWindow(TheCamera.m_pRwCamera)->x, RwCameraGetViewWindow(TheCamera.m_pRwCamera)->y, 1.0f) *
-		RwCameraGetFarClipPlane(TheCamera.m_pRwCamera) / (RwCameraGetFarClipPlane(TheCamera.m_pRwCamera) * *(CVector2D*)RwCameraGetViewWindow(TheCamera.m_pRwCamera)).Magnitude();
-	splash_points[1] = CVector(RwCameraGetViewWindow(TheCamera.m_pRwCamera)->x, RwCameraGetViewWindow(TheCamera.m_pRwCamera)->y, 1.0f) *
-		RwCameraGetFarClipPlane(TheCamera.m_pRwCamera) / (RwCameraGetFarClipPlane(TheCamera.m_pRwCamera) * *(CVector2D*)RwCameraGetViewWindow(TheCamera.m_pRwCamera)).Magnitude();
-	splash_points[2] = 4.0f * CVector(-RwCameraGetViewWindow(TheCamera.m_pRwCamera)->x, RwCameraGetViewWindow(TheCamera.m_pRwCamera)->y, 1.0f) *
-		RwCameraGetFarClipPlane(TheCamera.m_pRwCamera) / (RwCameraGetFarClipPlane(TheCamera.m_pRwCamera) * *(CVector2D*)RwCameraGetViewWindow(TheCamera.m_pRwCamera)).Magnitude();
-	splash_points[3] = 4.0f * CVector(RwCameraGetViewWindow(TheCamera.m_pRwCamera)->x, RwCameraGetViewWindow(TheCamera.m_pRwCamera)->y, 1.0f) *
-		RwCameraGetFarClipPlane(TheCamera.m_pRwCamera) / (RwCameraGetFarClipPlane(TheCamera.m_pRwCamera) * *(CVector2D*)RwCameraGetViewWindow(TheCamera.m_pRwCamera)).Magnitude();
-	RwV3dTransformPoints((RwV3d*)splash_points, (RwV3d*)splash_points, 4, RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)));
-	CVector fp = (splash_points[0] + splash_points[1] + splash_points[2] + splash_points[3]) / 4;
-	for (int i = 0; i < num_splash_attempts; i++) {
+		dir.x = 0.0f;
+		dir.y = CGeneral::GetRandomNumberInRange(30.0f, 40.0f);
+		dir.z = 0.0f;
+		CParticle::AddParticle(PARTICLE_RAINDROP_2D, pos, dir, nil, CGeneral::GetRandomNumberInRange(0.1f, 0.75f), 0, 0, (int)Rain&3, 0);
+
+		pos.x = CGeneral::GetRandomNumberInRange(0, (int)SCREEN_WIDTH);
+		pos.y = CGeneral::GetRandomNumberInRange((int)SCREEN_HEIGHT/5, (int)SCREEN_HEIGHT/2);
+		pos.z = 0.0f;
+		dir.x = 0.0f;
+		dir.y = CGeneral::GetRandomNumberInRange(30.0f, 40.0f);
+		dir.z = 0.0f;
+		CParticle::AddParticle(PARTICLE_RAINDROP_2D, pos, dir, nil, CGeneral::GetRandomNumberInRange(0.1f, 0.75f), 0, 0, (int)Rain&3, 0);
+
+		pos.x = CGeneral::GetRandomNumberInRange(0, (int)SCREEN_WIDTH);
+		pos.y = 0.0f;
+		pos.z = 0.0f;
+		dir.x = 0.0f;
+		dir.y = CGeneral::GetRandomNumberInRange(30.0f, 40.0f);
+		dir.z = 0.0f;
+		CParticle::AddParticle(PARTICLE_RAINDROP_2D, pos, dir, nil, CGeneral::GetRandomNumberInRange(0.1f, 0.75f), 0, 0, (int)Rain&3, 0);
+
+		float dist = CGeneral::GetRandomNumberInRange(0.0f, Max(10.0f*Rain, 40.0f)/2.0f);
+		float angle;
+		uint8 rnd = CGeneral::GetRandomNumber();
+		if(rnd&1)
+			angle = (CGeneral::GetRandomNumber()&0x7F)/128.0f * TWOPI;
+		else
+			angle = TheCamera.Orientation + (rnd-128)/160.0f;
+		pos.x = TheCamera.GetPosition().x + dist*Sin(angle);
+		pos.y = TheCamera.GetPosition().y + dist*Cos(angle);
+		pos.z = 0.0f;
 		CColPoint point;
-		CEntity* entity;
-		CVector np = fp + CVector(CGeneral::GetRandomNumberInRange(-SPLASH_CHECK_RADIUS, SPLASH_CHECK_RADIUS), CGeneral::GetRandomNumberInRange(-SPLASH_CHECK_RADIUS, SPLASH_CHECK_RADIUS), 0.0f);
-		if (CWorld::ProcessVerticalLine(np + CVector(0.0f, 0.0f, 40.0f), -40.0f, point, entity, true, false, false, false, true, false, nil)) {
-			for (int j = 0; j < num_splashes; j++)
-				CParticle::AddParticle((CGeneral::GetRandomTrueFalse() ? PARTICLE_RAIN_SPLASH : PARTICLE_RAIN_SPLASHUP),
-					CVector(
-						np.x + CGeneral::GetRandomNumberInRange(-SPLASH_OFFSET_RADIUS, SPLASH_OFFSET_RADIUS),
-						np.y + CGeneral::GetRandomNumberInRange(-SPLASH_OFFSET_RADIUS, SPLASH_OFFSET_RADIUS),
-						point.point.z + 0.1f),
-					CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, colour);
+		CEntity *ent;
+		if(CWorld::ProcessVerticalLine(pos+CVector(0.0f, 0.0f, 40.0f), -40.0f, point, ent, true, false, false, false, true, false, nil)){
+			pos.z = point.point.z;
+			for(int j = 0; j < numSplashes+15; j++){
+				CVector pos2 = pos;
+				pos2.x += CGeneral::GetRandomNumberInRange(-15.0f, 15.0f);
+				pos2.y += CGeneral::GetRandomNumberInRange(-15.0f, 15.0f);
+				if(CGeneral::GetRandomNumber() & 1)
+					CParticle::AddParticle(PARTICLE_RAIN_SPLASH, pos2, CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, colour);
+				else
+					CParticle::AddParticle(PARTICLE_RAIN_SPLASHUP, pos2, CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, colour);
+			}
 		}
 	}
 }
@@ -470,11 +532,11 @@ void RenderOneRainStreak(CVector pos, CVector unused, int intensity, bool scale,
 	RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored + 0], 0, 0, 0, 0);
 	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 0], pos.x + 11.0f * TheCamera.GetUp().x, pos.y + 11.0f * TheCamera.GetUp().y, pos.z + 11.0f * TheCamera.GetUp().z);
 	RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored + 1], 0, 0, 0, 0);
-	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 1], pos.x - 9.0f * TheCamera.GetRight().x, pos.y - 9.0f * TheCamera.GetRight().y, pos.z - 9.0f * TheCamera.GetUp().z);
+	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 1], pos.x - 9.0f * TheCamera.GetRight().x, pos.y - 9.0f * TheCamera.GetRight().y, pos.z - 9.0f * TheCamera.GetRight().z);
 	RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored + 2], RAIN_COLOUR_R * intensity / 256, RAIN_COLOUR_G * intensity / 256, RAIN_COLOUR_B * intensity / 256, RAIN_ALPHA);
 	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 2], pos.x, pos.y, pos.z);
 	RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored + 3], 0, 0, 0, 0);
-	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 3], pos.x + 9.0f * TheCamera.GetRight().x, pos.y + 9.0f * TheCamera.GetRight().y, pos.z + 9.0f * TheCamera.GetUp().z);
+	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 3], pos.x + 9.0f * TheCamera.GetRight().x, pos.y + 9.0f * TheCamera.GetRight().y, pos.z + 9.0f * TheCamera.GetRight().z);
 	RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored + 4], 0, 0, 0, 0); 
 	RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + 4], pos.x - 11.0f * TheCamera.GetUp().x, pos.y - 11.0f * TheCamera.GetUp().y, pos.z - 11.0f * TheCamera.GetUp().z);
 	float u = STREAK_U;
@@ -493,9 +555,9 @@ void RenderOneRainStreak(CVector pos, CVector unused, int intensity, bool scale,
 	u *= distance_coefficient;
 	v *= distance_coefficient;
 	if (!CTimer::GetIsPaused()) {
-		RandomTex = ((CGeneral::GetRandomNumber() & 255) - 128) * 0.01f;
-		RandomTexX = (CGeneral::GetRandomNumber() & 127) * 0.01f;
-		RandomTexY = (CGeneral::GetRandomNumber() & 127) * 0.01f;
+		RandomTex = 0.0f;
+		RandomTexX = 0.0f;
+		RandomTexY = 0.0f;
 	}
 	RwIm3DVertexSetU(&TempBufferRenderVertices[TempBufferVerticesStored + 0], 0.5f * u - RandomTex + RandomTexX);
 	RwIm3DVertexSetV(&TempBufferRenderVertices[TempBufferVerticesStored + 0], -v * 0.5f + RandomTexY);
@@ -518,6 +580,8 @@ void CWeather::RenderRainStreaks(void)
 	int base_intensity = (64.0f - CTimeCycle::GetFogReduction()) / 64.0f * int(255 * Rain);
 	if (base_intensity == 0)
 		return;
+	if (TheCamera.m_CameraAverageSpeed > 1.75f)
+		return;
 	TempBufferIndicesStored = 0;
 	TempBufferVerticesStored = 0;
 	for (int i = 0; i < NUM_RAIN_STREAKS; i++) {
@@ -528,11 +592,11 @@ void CWeather::RenderRainStreaks(void)
 			else{
 				int intensity;
 				if (secondsElapsed < STREAK_INTEROLATION_TIME)
-					intensity = base_intensity * 0.5f * secondsElapsed / STREAK_INTEROLATION_TIME;
+					intensity = base_intensity * 0.25f * secondsElapsed / STREAK_INTEROLATION_TIME;
 				else if (secondsElapsed > (STREAK_LIFETIME - STREAK_INTEROLATION_TIME))
-					intensity = (STREAK_LIFETIME - secondsElapsed) * 0.5f * base_intensity / STREAK_INTEROLATION_TIME;
+					intensity = (STREAK_LIFETIME - secondsElapsed) * 0.25f * base_intensity / STREAK_INTEROLATION_TIME;
 				else
-					intensity = base_intensity * 0.5f;
+					intensity = base_intensity * 0.25f;
 				CVector dir = Streaks[i].direction;
 				dir.Normalise();
 				CVector pos = Streaks[i].position + secondsElapsed * Streaks[i].direction;
@@ -546,7 +610,7 @@ void CWeather::RenderRainStreaks(void)
 		}
 		else if ((CGeneral::GetRandomNumber() & 0xF00) == 0){
 			// 1/16 probability
-			Streaks[i].direction = CVector(4.0f, 4.0f, -4.0f);
+			Streaks[i].direction = CVector(0.0f, 0.0f, -12.0f);
 			Streaks[i].position = 6.0f * TheCamera.GetForward() + TheCamera.GetPosition() + CVector(-1.8f * Streaks[i].direction.x, -1.8f * Streaks[i].direction.y, 8.0f);
 			if (!CCutsceneMgr::IsRunning()) {
 				Streaks[i].position.x += 2.0f * FindPlayerSpeed().x * 60.0f;
@@ -554,8 +618,8 @@ void CWeather::RenderRainStreaks(void)
 			}
 			else
 				Streaks[i].position += (TheCamera.GetPosition() - TheCamera.m_RealPreviousCameraPosition) * 20.0f;
-			Streaks[i].position.x += ((CGeneral::GetRandomNumber() & 255) - 128) * 0.08f;
-			Streaks[i].position.y += ((CGeneral::GetRandomNumber() & 255) - 128) * 0.08f;
+			Streaks[i].position.x += ((CGeneral::GetRandomNumber() & 255) - 128) * 0.04f;
+			Streaks[i].position.y += ((CGeneral::GetRandomNumber() & 255) - 128) * 0.04f;
 			Streaks[i].timer = CTimer::GetTimeInMilliseconds();
 		}
 	}

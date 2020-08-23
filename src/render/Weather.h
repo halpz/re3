@@ -27,6 +27,7 @@ public:
 	static uint32 LightningFlashLastChange;
 	static uint32 WhenToPlayLightningSound;
 	static uint32 LightningDuration;
+	static int32 StreamAfterRainTimer;
 
 	static float ExtraSunnyness;
 	static float Foggyness;
@@ -49,6 +50,8 @@ public:
 	static void ReleaseWeather();
 	static void ForceWeather(int16);
 	static void ForceWeatherNow(int16);
+	static void AddSplashesDuringHurricane();
+	static void AddStreamAfterRain();
 	static void AddRain();
 	static void AddHeatHaze();
 	static void AddBeastie();
