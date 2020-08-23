@@ -209,8 +209,8 @@ enum Config {
 #define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
 //#define USE_TEXTURE_POOL
 #define CUTSCENE_BORDERS_SWITCH
-#define EXTENDED_COLOURFILTER		// more options for colour filter (replaces mblur)
-#define EXTENDED_PIPELINES		// custom render pipelines (includes Neo)
+//#define EXTENDED_COLOURFILTER		// more options for colour filter (replaces mblur)
+//#define EXTENDED_PIPELINES		// custom render pipelines (includes Neo)
 #define MULTISAMPLING		// adds MSAA option
 
 #ifdef LIBRW
