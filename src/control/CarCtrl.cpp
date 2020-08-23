@@ -161,7 +161,7 @@ CCarCtrl::GenerateOneRandomCar()
 		carModel = ChoosePoliceCarModel();
 	}else{
 		carModel = ChooseModel(&zone, &vecTargetPos, &carClass);
-		if (carClass == COPS && pWanted->m_nWantedLevel >= 1 || carModel < 0)
+		if (carModel == -1 || (carClass == COPS && pWanted->m_nWantedLevel >= 1))
 			/* All cop spawns with wanted level are handled by condition above. */
 			/* In particular it means that cop cars never spawn if player has wanted level of 1. */
 			return;
@@ -761,7 +761,8 @@ CCarCtrl::ChooseCarRating(CZoneInfo* pZoneInfo)
 int32
 CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass) {
 	int32 model = -1;
-	for (int i = 0; i < 10 && (model == -1 || !CStreaming::HasModelLoaded(model)); i++) {
+	int32 i;
+	for (i = 10; i > 0 && (model == -1 || !CStreaming::HasModelLoaded(model)); i--) {
 		int rnd = CGeneral::GetRandomNumberInRange(0, 1000);
 
 		if (rnd < pZone->copThreshold) {
@@ -770,9 +771,9 @@ CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass) {
 			continue;
 		}
 
-		int j;
+		int32 j;
 		for (j = 0; j < NUM_GANG_CAR_CLASSES; j++) {
-			if (rnd < pZone->gangThreshold[i]) {
+			if (rnd < pZone->gangThreshold[j]) {
 				*pClass = j + FIRST_GANG_CAR_RATING;
 				model = ChooseGangCarModel(j);
 				break;
@@ -785,6 +786,8 @@ CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass) {
 		*pClass = ChooseCarRating(pZone);
 		model = ChooseCarModel(*pClass);
 	}
+	if (i == 0)
+		return -1;
 	return model;
 }
 
