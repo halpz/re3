@@ -15,6 +15,8 @@
 #include "Timer.h"
 #include "Lights.h"
 
+//--MIAMI: file done
+
 RpClump *gpPlayerClump;
 float gOldFov;
 
@@ -109,9 +111,7 @@ CPlayerSkin::GetSkinTexture(const char *texName)
 
 		tex = RwTextureCreate(raster);
 		RwTextureSetName(tex, texName);
-#ifdef FIX_BUGS
-		RwTextureSetFilterMode(tex, rwFILTERLINEAR); // filtering bugfix from VC
-#endif
+		RwTextureSetFilterMode(tex, rwFILTERLINEAR);
 		RwTexDictionaryAddTexture(CTxdStore::GetSlot(m_txdSlot)->texDict, tex);
 
 		RwImageDestroy(image);
@@ -143,8 +143,7 @@ CPlayerSkin::RenderFrontendSkinEdit(void)
 	static float rotation = 0.0f;
 	RwRGBAReal AmbientColor = { 0.65f, 0.65f, 0.65f, 1.0f };
 	const RwV3d pos = { 1.35f, 0.35f, 7.725f };
-	const RwV3d axis1 = { 1.0f, 0.0f, 0.0f };
-	const RwV3d axis2 = { 0.0f, 0.0f, 1.0f };
+	const RwV3d axis = { 0.0f, 1.0f, 0.0f };
 	static uint32 LastFlash = 0;
 
 	RwFrame *frame = RpClumpGetFrame(gpPlayerClump);
@@ -157,8 +156,7 @@ CPlayerSkin::RenderFrontendSkinEdit(void)
 	}
 	RwFrameTransform(frame, RwFrameGetMatrix(RwCameraGetFrame(Scene.camera)), rwCOMBINEREPLACE);
 	RwFrameTranslate(frame, &pos, rwCOMBINEPRECONCAT);
-	RwFrameRotate(frame, &axis1, -90.0f, rwCOMBINEPRECONCAT);
-	RwFrameRotate(frame, &axis2, rotation, rwCOMBINEPRECONCAT);
+	RwFrameRotate(frame, &axis, rotation, rwCOMBINEPRECONCAT);
 	RwFrameUpdateObjects(frame);
 	SetAmbientColours(&AmbientColor);
 	RpClumpRender(gpPlayerClump);
