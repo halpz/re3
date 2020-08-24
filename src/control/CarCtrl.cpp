@@ -2759,7 +2759,7 @@ void CCarCtrl::SteerAIPlaneTowardsTargetCoors(CAutomobile* pPlane)
 	float steer = difference > 0.0f ? 0.04f : -0.04f;
 	if (Abs(difference) < 0.2f)
 		steer *= 5.0f * Abs(difference);
-	pPlane->m_fPlaneSteer *= Pow(0.96, CTimer::GetTimeStep());
+	pPlane->m_fPlaneSteer *= Pow(0.96f, CTimer::GetTimeStep());
 	float steerChange = steer - pPlane->m_fPlaneSteer;
 	float maxChange = 0.003f * CTimer::GetTimeStep();
 	if (Abs(steerChange) < maxChange)
@@ -2782,7 +2782,7 @@ void CCarCtrl::SteerAIPlaneTowardsTargetCoors(CAutomobile* pPlane)
 	pPlane->GetMatrix().GetRight() = right;
 	pPlane->GetMatrix().GetForward() = forward;
 	pPlane->GetMatrix().GetUp() = up;
-	float newSplit = 1.0f - Pow(0.95, CTimer::GetTimeStep());
+	float newSplit = 1.0f - Pow(0.95f, CTimer::GetTimeStep());
 	float oldSplit = 1.0f - newSplit;
 #ifdef FIX_BUGS
 	pPlane->m_vecMoveSpeed = pPlane->m_vecMoveSpeed * oldSplit + pPlane->AutoPilot.GetCruiseSpeed() * 0.01f * forward * newSplit;

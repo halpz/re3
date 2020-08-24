@@ -1668,7 +1668,7 @@ CStreaming::StreamZoneModels(const CVector &pos)
 			while(ms_bIsPedFromPedGroupLoaded[j]);
 			ms_bIsPedFromPedGroupLoaded[j] = true;
 			if(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[j] != -1)
-				RequestModel(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i], STREAMFLAGS_DEPENDENCY);
+				RequestModel(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[j], STREAMFLAGS_DEPENDENCY);
 		}
 		ms_numPedsLoaded = MAXZONEPEDSLOADED;
 		timeBeforeNextLoad = 300;
@@ -1692,7 +1692,7 @@ CStreaming::StreamZoneModels(const CVector &pos)
 				j = CGeneral::GetRandomNumberInRange(0, NUMMODELSPERPEDGROUP);
 			while(ms_bIsPedFromPedGroupLoaded[j]);
 			if(ms_numPedsLoaded == MAXZONEPEDSLOADED)
-				ms_bIsPedFromPedGroupLoaded[i] = 0;
+				ms_bIsPedFromPedGroupLoaded[i] = false;
 			ms_bIsPedFromPedGroupLoaded[j] = true;
 			int newMI = CPopulation::ms_pPedGroups[ms_currentPedGrp].models[j];
 			if(newMI != oldMI){
@@ -1766,6 +1766,7 @@ CStreaming::RemoveCurrentZonesModels(void)
 
 	if (ms_currentPedGrp != -1)
 		for (i = 0; i < NUMMODELSPERPEDGROUP; i++) {
+			ms_bIsPedFromPedGroupLoaded[i] = false;
 			if (CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] != -1 &&
 			    CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] != MI_MALE01) {
 				SetModelIsDeletable(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i]);

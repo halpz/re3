@@ -12,6 +12,7 @@ struct AnimBlendFrameData
 		VELOCITY_EXTRACTION = 8,
 		VELOCITY_EXTRACTION_3D = 0x10,
 		UPDATE_KEYFRAMES = 0x20,
+		UNK_COMPRESSED = 0x40,
 	};
 
 	uint8 flag;

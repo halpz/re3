@@ -25,6 +25,7 @@ public:
 	void RemoveAnimSequences(void);
 	void Uncompress(void);
 	void RemoveUncompressedData(void);
+	bool IsCompressed() { return !!compressed; };
 };
 
 VALIDATE_SIZE(CAnimBlendHierarchy, 0x28);

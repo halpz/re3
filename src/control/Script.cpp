@@ -13017,14 +13017,20 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_ATTACH_CUTSCENE_OBJECT_TO_BONE:
 	{
 		CollectParameters(&m_nIp, 3);
-		debug("ATTACH_CUTSCENE_OBJECT_TO_BONE not implemented, skipping\n"); // TODO(MIAMI)
+		CCutsceneMgr::AttachObjectToBone(CPools::GetObjectPool()->GetAt(ScriptParams[0]), CPools::GetObjectPool()->GetAt(ScriptParams[1]), ScriptParams[2]);
 		return 0;
 	}
 	case COMMAND_ATTACH_CUTSCENE_OBJECT_TO_COMPONENT:
 	{
 		CollectParameters(&m_nIp, 2);
-		debug("ATTACH_CUTSCENE_OBJECT_TO_COMPONENT not implemented, skipping\n"); // TODO(MIAMI)
+		CObject *obj1 = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		CObject *obj2 = CPools::GetObjectPool()->GetAt(ScriptParams[1]);
+
+		char key[KEY_LENGTH_IN_SCRIPT];
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
+
+		CCutsceneMgr::AttachObjectToFrame(obj1, obj2, key);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_STAY_IN_CAR_WHEN_JACKED:
@@ -13236,7 +13242,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_ATTACH_CUTSCENE_OBJECT_TO_VEHICLE:
 	{
 		CollectParameters(&m_nIp, 2);
-		debug("ATTACH_CUTSCENE_OBJECT_TO_VEHICLE not implemented\n"); // TODO(MIAMI)
+		CCutsceneMgr::AttachObjectToParent(CPools::GetObjectPool()->GetAt(ScriptParams[0]), CPools::GetVehiclePool()->GetAt(ScriptParams[1]));
 		return 0;
 	}
 	case COMMAND_LOAD_MISSION_TEXT:
