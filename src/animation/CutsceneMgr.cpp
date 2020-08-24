@@ -578,10 +578,11 @@ CCutsceneMgr::AttachObjectToFrame(CObject *pObject, CEntity *pAttachTo, const ch
 		CModelInfo::GetModelInfo(pObject->GetModelIndex())->GetName(),
 		frame,
 		CModelInfo::GetModelInfo(pAttachTo->GetModelIndex())->GetName());
-	RpClump* clump = pObject->GetClump();
-	if (RwObjectGetType(clump) == rpCLUMP)
+	if (RwObjectGetType(pObject->m_rwObject) == rpCLUMP) {
+		RpClump *clump = (RpClump*)pObject->m_rwObject;
 		if (IsClumpSkinned(clump))
 			RpAtomicGetBoundingSphere(GetFirstAtomic(clump))->radius *= 1.1f;
+	}
 }
 
 void
