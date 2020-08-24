@@ -19,6 +19,11 @@
 #include "RpAnimBlend.h"
 #include "ModelIndices.h"
 #include "TempColModels.h"
+#include "ColStore.h"
+#include "Radar.h"
+#include "Pools.h"
+
+//--MIAMI: file done
 
 const struct {
 	const char *szTrackName;
@@ -119,15 +124,22 @@ int32 CCutsceneMgr::ms_numCutsceneObjs;
 bool CCutsceneMgr::ms_loaded;
 bool CCutsceneMgr::ms_animLoaded;
 bool CCutsceneMgr::ms_useLodMultiplier;
-bool CCutsceneMgr::ms_camLoaded;
 char CCutsceneMgr::ms_cutsceneName[CUTSCENENAMESIZE];
-char CCutsceneMgr::ms_uncompressedAnims[8][32];
-uint32 CCutsceneMgr::ms_numUncompressedAnims;
 CAnimBlendAssocGroup CCutsceneMgr::ms_cutsceneAssociations;
 CVector CCutsceneMgr::ms_cutsceneOffset;
 float CCutsceneMgr::ms_cutsceneTimer;
 bool CCutsceneMgr::ms_wasCutsceneSkipped;
 uint32 CCutsceneMgr::ms_cutsceneLoadStatus;
+bool CCutsceneMgr::ms_useCutsceneShadows = true;
+
+bool bCamLoaded;
+bool bIsEverythingRemovedFromTheWorldForTheBiggestFuckoffCutsceneEver; // pls don't shrink the name :P
+int32 NumberOfSavedWeapons;
+eWeaponType SavedWeaponIDs[TOTAL_WEAPON_SLOTS];
+int32 SavedWeaponAmmo[TOTAL_WEAPON_SLOTS];
+char uncompressedAnims[8][32];
+uint32 numUncompressedAnims;
+
 
 RpAtomic *
 CalculateBoundingSphereRadiusCB(RpAtomic *atomic, void *data)
@@ -151,15 +163,15 @@ CCutsceneMgr::Initialise(void)
 	ms_loaded = false;
 	ms_wasCutsceneSkipped = false;
 	ms_running = false;
+	ms_useLodMultiplier = false;
 	ms_animLoaded = false;
 	ms_cutsceneProcessing = false;
-	ms_useLodMultiplier = false;
 
 	ms_pCutsceneDir = new CDirectory(CUTSCENEDIRSIZE);
 	ms_pCutsceneDir->ReadDirFile("ANIM\\CUTS.DIR");
 
-	ms_numUncompressedAnims = 0;
-	ms_uncompressedAnims[0][0] = '\0';
+	numUncompressedAnims = 0;
+	uncompressedAnims[0][0] = '\0';
 }
 
 void
@@ -178,9 +190,9 @@ CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
 
 	ms_cutsceneProcessing = true;
 	ms_wasCutsceneSkipped = false;
-	if (!strcasecmp(szCutsceneName, "jb"))
-		ms_useLodMultiplier = true;
 	CTimer::Suspend();
+	if (!bIsEverythingRemovedFromTheWorldForTheBiggestFuckoffCutsceneEver)
+		CStreaming::RemoveCurrentZonesModels();
 
 	ms_pCutsceneDir->numEntries = 0;
 	ms_pCutsceneDir->ReadDirFile("ANIM\\CUTS.DIR");
@@ -200,7 +212,7 @@ CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
 		CStreaming::MakeSpaceFor(size << 11);
 		CStreaming::ImGonnaUseStreamingMemory();
 		RwStreamSkip(stream,  offset << 11);
-		CAnimManager::LoadAnimFile(stream, true, ms_uncompressedAnims);
+		CAnimManager::LoadAnimFile(stream, true, uncompressedAnims);
 		ms_cutsceneAssociations.CreateAssociations(szCutsceneName);
 		CStreaming::IHaveUsedStreamingMemory();
 		ms_animLoaded = true;
@@ -217,9 +229,9 @@ CCutsceneMgr::LoadCutsceneData(const char *szCutsceneName)
 		CFileMgr::Seek(file, offset << 11, SEEK_SET);
 		TheCamera.LoadPathSplines(file);
 		CStreaming::IHaveUsedStreamingMemory();
-		ms_camLoaded = true;
+		bCamLoaded = true;
 	} else {
-		ms_camLoaded = false;
+		bCamLoaded = false;
 	}
 
 	CFileMgr::CloseFile(file);
@@ -252,7 +264,7 @@ void
 CCutsceneMgr::FinishCutscene()
 {
 	ms_wasCutsceneSkipped = true;
-	if (ms_camLoaded) {
+	if (bCamLoaded) {
 		CCutsceneMgr::ms_cutsceneTimer = TheCamera.GetCutSceneFinishTime() * 0.001f;
 		TheCamera.FinishCutscene();
 	}
@@ -264,7 +276,7 @@ CCutsceneMgr::FinishCutscene()
 void
 CCutsceneMgr::SetupCutsceneToStart(void)
 {
-	if (ms_camLoaded) {
+	if (bCamLoaded) {
 		TheCamera.SetCamCutSceneOffSet(ms_cutsceneOffset);
 		TheCamera.TakeControlWithSpline(JUMP_CUT);
 		TheCamera.SetWideScreenOn();
@@ -276,7 +288,16 @@ CCutsceneMgr::SetupCutsceneToStart(void)
 		assert(RwObjectGetType(ms_pCutsceneObjects[i]->m_rwObject) == rpCLUMP);
 		if (CAnimBlendAssociation *pAnimBlendAssoc = RpAnimBlendClumpGetFirstAssociation((RpClump*)ms_pCutsceneObjects[i]->m_rwObject)) {
 			assert(pAnimBlendAssoc->hierarchy->sequences[0].HasTranslation());
-			ms_pCutsceneObjects[i]->SetPosition(ms_cutsceneOffset + ((KeyFrameTrans*)pAnimBlendAssoc->hierarchy->sequences[0].GetKeyFrame(0))->translation);
+			if (ms_pCutsceneObjects[i]->m_pAttachTo != nil) {
+				pAnimBlendAssoc->flags &= (~ASSOC_HAS_TRANSLATION);
+			} else {
+				KeyFrameTrans* keyFrames;
+				if (pAnimBlendAssoc->hierarchy->IsCompressed())
+					keyFrames = ((KeyFrameTrans*)pAnimBlendAssoc->hierarchy->sequences[0].GetKeyFrameCompressed(0));
+				else
+					keyFrames = ((KeyFrameTrans*)pAnimBlendAssoc->hierarchy->sequences[0].GetKeyFrame(0));
+				ms_pCutsceneObjects[i]->SetPosition(ms_cutsceneOffset + keyFrames->translation);
+			}
 			pAnimBlendAssoc->SetRun();
 		} else {
 			ms_pCutsceneObjects[i]->SetPosition(ms_cutsceneOffset);
@@ -300,19 +321,31 @@ CCutsceneMgr::SetCutsceneAnim(const char *animName, CObject *pObject)
 	CAnimBlendClumpData *pAnimBlendClumpData;
 
 	assert(RwObjectGetType(pObject->m_rwObject) == rpCLUMP);
+	debug("Give cutscene anim %s\n", animName);
 	RpAnimBlendClumpRemoveAllAssociations((RpClump*)pObject->m_rwObject);
 
-	pNewAnim = ms_cutsceneAssociations.CopyAnimation(animName);
+	pNewAnim = ms_cutsceneAssociations.GetAnimation(animName);
 	if (!pNewAnim) {
 		debug("\n\nHaven't I told you I can't find the fucking animation %s\n\n\n", animName);
 		return;
 	}
+
+	if (pNewAnim->hierarchy->IsCompressed())
+		pNewAnim->hierarchy->compressed2 = true;
+
+	CStreaming::ImGonnaUseStreamingMemory();
+	pNewAnim = ms_cutsceneAssociations.CopyAnimation(animName);
+	CStreaming::IHaveUsedStreamingMemory();
+
 	pNewAnim->SetCurrentTime(0.0f);
 	pNewAnim->flags |= ASSOC_HAS_TRANSLATION;
 	pNewAnim->flags &= ~ASSOC_RUNNING;
 
 	pAnimBlendClumpData = *RPANIMBLENDCLUMPDATA(pObject->m_rwObject);
 	pAnimBlendClumpData->link.Prepend(&pNewAnim->link);
+
+	if (pNewAnim->hierarchy->compressed2)
+		pAnimBlendClumpData->frames->flag |= AnimBlendFrameData::UNK_COMPRESSED;
 }
 
 void
@@ -327,25 +360,42 @@ CCutsceneMgr::AddCutsceneHead(CObject *pObject, int modelId)
 	return nil;
 }
 
+void UpdateCutsceneObjectBoundingBox(RpClump* clump, int modelId)
+{
+	if (modelId >= MI_CUTOBJ01 && modelId <= MI_CUTOBJ05) {
+		CColModel* pColModel = &CTempColModels::ms_colModelCutObj[modelId - MI_CUTOBJ01];
+		float radius = 0.0f;
+		RpClumpForAllAtomics(clump, CalculateBoundingSphereRadiusCB, &radius);
+		pColModel->boundingSphere.radius = radius;
+		pColModel->boundingBox.min = CVector(-radius, -radius, -radius);
+		pColModel->boundingBox.max = CVector(radius, radius, radius);
+	}
+}
+
 CCutsceneObject *
 CCutsceneMgr::CreateCutsceneObject(int modelId)
 {
 	CBaseModelInfo *pModelInfo;
 	CColModel *pColModel;
-	float radius;
-	RpClump *clump;
 	CCutsceneObject *pCutsceneObject;
 
+	CStreaming::ImGonnaUseStreamingMemory();
+	debug("Created cutscene object %s\n", CModelInfo::GetModelInfo(modelId)->GetName());
 	if (modelId >= MI_CUTOBJ01 && modelId <= MI_CUTOBJ05) {
 		pModelInfo = CModelInfo::GetModelInfo(modelId);
 		pColModel = &CTempColModels::ms_colModelCutObj[modelId - MI_CUTOBJ01];
-		radius = 0.0f;
-
 		pModelInfo->SetColModel(pColModel);
-		clump = (RpClump*)pModelInfo->GetRwObject();
-		assert(RwObjectGetType((RwObject*)clump) == rpCLUMP);
-		RpClumpForAllAtomics(clump, CalculateBoundingSphereRadiusCB, &radius);
-
+		UpdateCutsceneObjectBoundingBox((RpClump*)pModelInfo->GetRwObject(), modelId);
+	} else if (modelId >= MI_SPECIAL01 && modelId <= MI_SPECIAL21) {
+		pModelInfo = CModelInfo::GetModelInfo(modelId);
+		if (pModelInfo->GetColModel() == &CTempColModels::ms_colModelPed1) {
+			CColModel *colModel = new CColModel();
+			colModel->boundingSphere.radius = 2.0f;
+			colModel->boundingSphere.center = CVector(0.0f, 0.0f, 0.0f);
+			pModelInfo->SetColModel(colModel, true);
+		}
+		pColModel = pModelInfo->GetColModel();
+		float radius = 2.0f;
 		pColModel->boundingSphere.radius = radius;
 		pColModel->boundingBox.min = CVector(-radius, -radius, -radius);
 		pColModel->boundingBox.max = CVector(radius, radius, radius);
@@ -353,7 +403,10 @@ CCutsceneMgr::CreateCutsceneObject(int modelId)
 
 	pCutsceneObject = new CCutsceneObject();
 	pCutsceneObject->SetModelIndex(modelId);
+	if (ms_useCutsceneShadows)
+		pCutsceneObject->CreateShadow();
 	ms_pCutsceneObjects[ms_numCutsceneObjs++] = pCutsceneObject;
+	CStreaming::IHaveUsedStreamingMemory();
 	return pCutsceneObject;
 }
 
@@ -365,6 +418,7 @@ CCutsceneMgr::DeleteCutsceneData(void)
 
 	ms_cutsceneProcessing = false;
 	ms_useLodMultiplier = false;
+	ms_useCutsceneShadows = true;
 
 	for (--ms_numCutsceneObjs; ms_numCutsceneObjs >= 0; ms_numCutsceneObjs--) {
 		CWorld::Remove(ms_pCutsceneObjects[ms_numCutsceneObjs]);
@@ -374,14 +428,23 @@ CCutsceneMgr::DeleteCutsceneData(void)
 	}
 	ms_numCutsceneObjs = 0;
 
+	for (int i = MI_SPECIAL01; i < MI_SPECIAL21; i++) {
+		CBaseModelInfo *minfo = CModelInfo::GetModelInfo(i);
+		CColModel *colModel = minfo->GetColModel();
+		if (colModel != &CTempColModels::ms_colModelPed1) {
+			delete colModel;
+			minfo->SetColModel(&CTempColModels::ms_colModelPed1);
+		}
+	}
+
 	if (ms_animLoaded)
 		CAnimManager::RemoveLastAnimFile();
 
 	ms_animLoaded = false;
-	ms_numUncompressedAnims = 0;
-	ms_uncompressedAnims[0][0] = '\0';
+	numUncompressedAnims = 0;
+	uncompressedAnims[0][0] = '\0';
 
-	if (ms_camLoaded) {
+	if (bCamLoaded) {
 		TheCamera.RestoreWithJumpCut();
 		TheCamera.SetWideScreenOff();
 		TheCamera.DeleteCutSceneCamDataMemory();
@@ -397,10 +460,37 @@ CCutsceneMgr::DeleteCutsceneData(void)
 		DMAudio.StopCutSceneMusic();
 		DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 	}
+
+	CStreaming::ms_disableStreaming = false;
+	CWorld::bProcessCutsceneOnly = false;
+
+	if(bCamLoaded)
+		CGame::DrasticTidyUpMemory(TheCamera.GetScreenFadeStatus() == FADE_2);
 	
-	if(ms_camLoaded)
-		CGame::DrasticTidyUpMemory(TheCamera.GetScreenFadeStatus() == 2);
-	
+	CPad::GetPad(0)->Clear(false);
+	if (bIsEverythingRemovedFromTheWorldForTheBiggestFuckoffCutsceneEver) {
+		CStreaming::LoadInitialPeds();
+		CStreaming::LoadInitialWeapons();
+		CStreaming::LoadInitialVehicles();
+		bIsEverythingRemovedFromTheWorldForTheBiggestFuckoffCutsceneEver = false;
+		
+		CPlayerPed *pPlayerPed = FindPlayerPed();
+		for (int i = 0; i < NumberOfSavedWeapons; i++) {
+			int32 weaponModelId = CWeaponInfo::GetWeaponInfo(SavedWeaponIDs[i])->m_nModelId;
+			uint8 flags = CStreaming::ms_aInfoForModel[weaponModelId].m_flags;
+			CStreaming::RequestModel(weaponModelId, STREAMFLAGS_DONT_REMOVE);
+			CStreaming::LoadAllRequestedModels(false);
+			if (CWeaponInfo::GetWeaponInfo(SavedWeaponIDs[i])->m_nModel2Id != -1) {
+				CStreaming::RequestModel(CWeaponInfo::GetWeaponInfo(SavedWeaponIDs[i])->m_nModel2Id, 0);
+				CStreaming::LoadAllRequestedModels(false);
+			}
+			if (!(flags & STREAMFLAGS_DONT_REMOVE))
+				CStreaming::SetModelIsDeletable(weaponModelId);
+			pPlayerPed->GiveWeapon(SavedWeaponIDs[i], SavedWeaponAmmo[i], true);
+		}
+		NumberOfSavedWeapons = 0;
+	}
+
 	CTimer::Resume();
 }
 
@@ -437,26 +527,155 @@ CCutsceneMgr::Update(void)
 
 	ms_cutsceneTimer += CTimer::GetTimeStepNonClippedInSeconds();
 
-	if (ms_camLoaded)
+	for (int i = 0; i < ms_numCutsceneObjs; i++) {
+		int modelId = ms_pCutsceneObjects[i]->GetModelIndex();
+		if (modelId >= MI_CUTOBJ01 && modelId <= MI_CUTOBJ05)
+			UpdateCutsceneObjectBoundingBox(ms_pCutsceneObjects[i]->GetClump(), modelId);
+
+		if (ms_pCutsceneObjects[i]->m_pAttachTo != nil && modelId >= MI_SPECIAL01 && modelId <= MI_SPECIAL21)
+			UpdateCutsceneObjectBoundingBox(ms_pCutsceneObjects[i]->GetClump(), modelId);
+	}
+
+	if (bCamLoaded)
 		if (CGeneral::faststricmp(ms_cutsceneName, "finale") && TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FLYBY && ms_cutsceneLoadStatus == CUTSCENE_LOADING_0) {
 			if (CPad::GetPad(0)->GetCrossJustDown()
 				|| (CGame::playingIntro && CPad::GetPad(0)->GetStartJustDown())
 				|| CPad::GetPad(0)->GetLeftMouseJustDown()
 				|| CPad::GetPad(0)->GetEnterJustDown()
 				|| CPad::GetPad(0)->GetCharJustDown(' '))
-				FinishCutscene();
+					FinishCutscene();
 		}
 }
 
-bool CCutsceneMgr::HasCutsceneFinished(void) { return !ms_camLoaded || TheCamera.GetPositionAlongSpline() == 1.0f; }
+bool CCutsceneMgr::HasCutsceneFinished(void) { return !bCamLoaded || TheCamera.GetPositionAlongSpline() == 1.0f; }
 
 void
 CCutsceneMgr::LoadAnimationUncompressed(char const* name)
 {
-	strcpy(ms_uncompressedAnims[ms_numUncompressedAnims], name);
+	strcpy(uncompressedAnims[numUncompressedAnims], name);
 	
 	// Because that's how CAnimManager knows the end of array
-	++ms_numUncompressedAnims;
-	assert(ms_numUncompressedAnims < ARRAY_SIZE(ms_uncompressedAnims));
-	ms_uncompressedAnims[ms_numUncompressedAnims][0] = '\0';
+	++numUncompressedAnims;
+	assert(numUncompressedAnims < ARRAY_SIZE(uncompressedAnims));
+	uncompressedAnims[numUncompressedAnims][0] = '\0';
+}
+
+void
+CCutsceneMgr::AttachObjectToParent(CObject *pObject, CEntity *pAttachTo)
+{
+	((CCutsceneObject*)pObject)->m_pAttachmentObject = nil;
+	((CCutsceneObject*)pObject)->m_pAttachTo = RpClumpGetFrame(pAttachTo->GetClump());
+
+	debug("Attach %s to %s\n", CModelInfo::GetModelInfo(pObject->GetModelIndex())->GetName(), CModelInfo::GetModelInfo(pAttachTo->GetModelIndex())->GetName());
+}
+
+void
+CCutsceneMgr::AttachObjectToFrame(CObject *pObject, CEntity *pAttachTo, const char *frame)
+{
+	((CCutsceneObject*)pObject)->m_pAttachmentObject = nil;
+	((CCutsceneObject*)pObject)->m_pAttachTo = RpAnimBlendClumpFindFrame(pAttachTo->GetClump(), frame)->frame;
+	debug("Attach %s to component %s of %s\n",
+		CModelInfo::GetModelInfo(pObject->GetModelIndex())->GetName(),
+		frame,
+		CModelInfo::GetModelInfo(pAttachTo->GetModelIndex())->GetName());
+	RpClump* clump = pObject->GetClump();
+	if (RwObjectGetType(clump) == rpCLUMP)
+		if (IsClumpSkinned(clump))
+			RpAtomicGetBoundingSphere(GetFirstAtomic(clump))->radius *= 1.1f;
+}
+
+void
+CCutsceneMgr::AttachObjectToBone(CObject *pObject, CObject *pAttachTo, int bone)
+{
+	RpHAnimHierarchy *hanim = GetAnimHierarchyFromSkinClump(pAttachTo->GetClump());
+	RwInt32 id = RpHAnimIDGetIndex(hanim, bone);
+	RwMatrix *matrixArray = RpHAnimHierarchyGetMatrixArray(hanim);
+	((CCutsceneObject*)pObject)->m_pAttachmentObject = pAttachTo;
+	((CCutsceneObject*)pObject)->m_pAttachTo = &matrixArray[id];
+	debug("Attach %s to %s\n",
+		CModelInfo::GetModelInfo(pObject->GetModelIndex())->GetName(),
+		CModelInfo::GetModelInfo(pAttachTo->GetModelIndex())->GetName());
+}
+
+void
+CCutsceneMgr::RemoveEverythingFromTheWorldForTheBiggestFuckoffCutsceneEver()
+{
+	CStreaming::ms_disableStreaming = true;
+	CColStore::RemoveAllCollision();
+	CWorld::bProcessCutsceneOnly = true;
+	ms_cutsceneProcessing = true;
+
+	for (int i = CPools::GetPedPool()->GetSize() - 1; i >= 0; i--) {
+		CPed *pPed = CPools::GetPedPool()->GetSlot(i);
+		if (pPed) {
+			if (!pPed->IsPlayer() && pPed->CanBeDeleted()) {
+				CWorld::Remove(pPed);
+				delete pPed;
+			}
+		}
+	}
+
+	for (int i = CPools::GetVehiclePool()->GetSize() - 1; i >= 0; i--) {
+		CVehicle *pVehicle = CPools::GetVehiclePool()->GetSlot(i);
+		if (pVehicle) {
+			if (pVehicle->CanBeDeleted()) {
+				CWorld::Remove(pVehicle);
+				delete pVehicle;
+			}
+		}
+	}
+
+	bIsEverythingRemovedFromTheWorldForTheBiggestFuckoffCutsceneEver = true;
+	CStreaming::RemoveCurrentZonesModels();
+	CStreaming::SetModelIsDeletable(MI_MALE01);
+	CStreaming::SetModelTxdIsDeletable(MI_MALE01);
+	CStreaming::SetModelIsDeletable(MI_HMOCA);
+	CStreaming::SetModelTxdIsDeletable(MI_HMOCA);
+	CStreaming::SetModelIsDeletable(MI_NIGHTSTICK);
+	CStreaming::SetModelTxdIsDeletable(MI_NIGHTSTICK);
+	CStreaming::SetModelIsDeletable(MI_MISSILE);
+	CStreaming::SetModelTxdIsDeletable(MI_MISSILE);
+	CStreaming::SetModelIsDeletable(MI_POLICE);
+	CStreaming::SetModelTxdIsDeletable(MI_POLICE);
+
+	while (CStreaming::RemoveLoadedVehicle()) ;
+
+	CRadar::RemoveRadarSections();
+
+	for (int i = CPools::GetDummyPool()->GetSize() - 1; i >= 0; i--) {
+		CDummy* pDummy = CPools::GetDummyPool()->GetSlot(i);
+		if (pDummy)
+			pDummy->DeleteRwObject();
+	}
+
+	for (int i = CPools::GetObjectPool()->GetSize() - 1; i >= 0; i--) {
+		CObject* pObject = CPools::GetObjectPool()->GetSlot(i);
+		if (pObject)
+			pObject->DeleteRwObject();
+	}
+
+	for (int i = CPools::GetBuildingPool()->GetSize() - 1; i >= 0; i--) {
+		CBuilding* pBuilding = CPools::GetBuildingPool()->GetSlot(i);
+		if (pBuilding && pBuilding->GetClump() != nil && pBuilding->bIsBIGBuilding && pBuilding->bStreamBIGBuilding) {
+			if (pBuilding->bIsBIGBuilding)
+				CStreaming::RequestModel(pBuilding->GetModelIndex(), 0);
+			if (!pBuilding->bImBeingRendered)
+				pBuilding->DeleteRwObject();
+		}
+	}
+
+	CPlayerPed *pPlayerPed = FindPlayerPed();
+	pPlayerPed->RemoveWeaponAnims(0, -1000.0f);
+	NumberOfSavedWeapons = 0;
+
+	for (int i = 0; i < TOTAL_WEAPON_SLOTS; i++) {
+		if (pPlayerPed->m_weapons[i].m_eWeaponType != WEAPONTYPE_UNARMED) {
+			SavedWeaponIDs[NumberOfSavedWeapons] = pPlayerPed->m_weapons[i].m_eWeaponType;
+			SavedWeaponAmmo[NumberOfSavedWeapons] = pPlayerPed->m_weapons[i].m_nAmmoTotal;
+			NumberOfSavedWeapons++;
+		}
+	}
+
+	pPlayerPed->ClearWeapons();
+	CGame::DrasticTidyUpMemory(true);
 }
