@@ -148,10 +148,10 @@ CSprite::RenderOneXLUSprite_Rotate_Aspect(float x, float y, float z, float w, fl
 
 	// Fade out when too near
 	// why not in buffered version?
-	if(z < 3.0f){
-		if(z < 1.5f)
+	if(z < 2.3f){
+		if(z < 1.3f)
 			return;
-		int f = (z - 1.5f)/1.5f * 255;
+		int f = (z - 1.3f)/(2.3f-1.3f) * 255;
 		r = f*r >> 8;
 		g = f*g >> 8;
 		b = f*b >> 8;
