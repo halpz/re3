@@ -45,7 +45,7 @@ CRemote::GivePlayerRemoteControlledCar(float x, float y, float z, float rot, uin
 }
 
 void
-CRemote::TakeRemoteControlledCarFromPlayer(bool unk)
+CRemote::TakeRemoteControlledCarFromPlayer(bool blowUp)
 {
 	if (CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle->VehicleCreatedBy == MISSION_VEHICLE) {
 		CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle->VehicleCreatedBy = RANDOM_VEHICLE;
@@ -55,6 +55,6 @@ CRemote::TakeRemoteControlledCarFromPlayer(bool unk)
 	CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle->bIsLocked = false;
 	CWorld::Players[CWorld::PlayerInFocus].m_nTimeLostRemoteCar = CTimer::GetTimeInMilliseconds();
 	CWorld::Players[CWorld::PlayerInFocus].m_bInRemoteMode = true;
-	CWorld::Players[CWorld::PlayerInFocus].field_D5 = unk;
+	CWorld::Players[CWorld::PlayerInFocus].field_D5 = blowUp;
 	CWorld::Players[CWorld::PlayerInFocus].field_D6 = true;
 }
