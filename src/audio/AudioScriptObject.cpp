@@ -4,6 +4,16 @@
 #include "Pools.h"
 #include "DMAudio.h"
 
+cAudioScriptObject::cAudioScriptObject()
+{
+	Reset();
+};
+
+cAudioScriptObject::~cAudioScriptObject()
+{
+	Reset();
+};
+
 void
 cAudioScriptObject::Reset()
 {
