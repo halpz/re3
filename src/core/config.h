@@ -249,7 +249,8 @@ enum Config {
 #	define SCROLLABLE_STATS_PAGE	// only draggable by mouse atm
 #	define TRIANGLE_BACK_BUTTON
 //#	define CIRCLE_BACK_BUTTON
-#	define GRAPHICS_MENU_OPTIONS
+#	define CUSTOM_FRONTEND_OPTIONS
+#	define GRAPHICS_MENU_OPTIONS // otherwise Advanced Options menu will appear if Display is full
 #endif
 
 // Script

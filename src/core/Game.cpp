@@ -86,6 +86,7 @@
 #include "ZoneCull.h"
 #include "Zones.h"
 #include "debugmenu.h"
+#include "frontendoption.h"
 #include "postfx.h"
 #include "custompipes.h"
 
@@ -292,6 +293,10 @@ bool CGame::InitialiseOnceAfterRW(void)
 	DMAudio.SetEffectsFadeVol(127);
 	DMAudio.SetMusicFadeVol(127);
 	CWorld::Players[0].SetPlayerSkin(CMenuManager::m_PrefsSkinFile);
+
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	CustomFrontendOptionsPopulate();
+#endif
 	return true;
 }
 

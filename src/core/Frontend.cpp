@@ -36,6 +36,7 @@
 #include "Stats.h"
 #include "Messages.h"
 #include "FileLoader.h"
+#include "frontendoption.h"
 
 #define TIDY_UP_PBP // ProcessButtonPresses
 #define MAX_VISIBLE_LIST_ROW 30
@@ -115,7 +116,6 @@ int32 CMenuManager::m_PrefsSfxVolume = 102;
 bool CMenuManager::m_PrefsCutsceneBorders = true;
 #endif
 
-
 #ifdef MULTISAMPLING
 int8 CMenuManager::m_nPrefsMSAALevel = 0;
 int8 CMenuManager::m_nDisplayMSAALevel = 0;
@@ -158,10 +158,6 @@ bool DisplayComboButtonErrMsg;
 int32 MouseButtonJustClicked;
 int32 JoyButtonJustClicked;
 //int32 *pControlTemp = 0;
-
-#ifdef PS2_ALPHA_TEST
-extern bool gPS2alphaTest;
-#endif
 
 #ifndef MASTER
 bool CMenuManager::m_PrefsMarketing = false;
@@ -401,27 +397,40 @@ CMenuManager::PageDownList(bool playSoundOnSuccess)
 	}
 }
 
+#ifdef CUSTOM_FRONTEND_OPTIONS
+bool ScreenHasOption(int screen, const char* gxtKey)
+{
+	for (int i = 0; i < NUM_MENUROWS; i++) {
+		if (strcmp(gxtKey, aScreens[screen].m_aEntries[i].m_EntryName) == 0)
+			return true;
+	}
+	return false;
+}
+#endif
+
 void
 CMenuManager::ThingsToDoBeforeGoingBack()
 {
 	if ((m_nCurrScreen == MENUPAGE_SKIN_SELECT) && strcmp(m_aSkinName, m_PrefsSkinFile) != 0) {
 		CWorld::Players[0].SetPlayerSkin(m_PrefsSkinFile);
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	} else if (ScreenHasOption(m_nCurrScreen, "FEA_3DH")) {
+#else
 	} else if (m_nCurrScreen == MENUPAGE_SOUND_SETTINGS) {
+#endif
 		if (m_nPrefsAudio3DProviderIndex != -1)
 			m_nPrefsAudio3DProviderIndex = DMAudio.GetCurrent3DProviderIndex();
 #ifdef TIDY_UP_PBP
 		DMAudio.StopFrontEndTrack();
 		OutputDebugString("FRONTEND AUDIO TRACK STOPPED");
 #endif
-#ifdef GRAPHICS_MENU_OPTIONS
-	} else if (m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
+
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	} else if (ScreenHasOption(m_nCurrScreen, "FED_RES")) {
 #else
 	} else if (m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
 #endif
 		m_nDisplayVideoMode = m_nPrefsVideoMode;
-#ifdef MULTISAMPLING
-		m_nDisplayMSAALevel = m_nPrefsMSAALevel;
-#endif
 	}
 
 	if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
@@ -431,12 +440,62 @@ CMenuManager::ThingsToDoBeforeGoingBack()
 	if ((m_nCurrScreen == MENUPAGE_SKIN_SELECT) || (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS)) {
 		m_nTotalListRow = 0;
 	}
+
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	for (int i = 0; i < numCustomFrontendOptions; i++) {
+		FrontendOption &option = customFrontendOptions[i];
+		if (option.type != FEOPTION_REDIRECT && option.type != FEOPTION_GOBACK && m_nCurrScreen == option.screen) {
+			if (option.returnPrevPageFunc)
+				option.returnPrevPageFunc();
+
+			if (m_nCurrOption == option.screenOptionOrder && (option.type == FEOPTION_DYNAMIC || option.type == FEOPTION_BUILTIN_ACTION))
+				if(option.buttonPressFunc)
+					option.buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
+
+			if (option.type == FEOPTION_SELECT && option.onlyApplyOnEnter && option.lastSavedValue != option.displayedValue)
+				option.displayedValue = *option.value = option.lastSavedValue;
+		}
+	}
+
+	if (m_nCurrScreen > lastOgScreen) {
+		for (int i = 0; i < numCustomFrontendScreens; i++) {
+			FrontendScreen& screen = customFrontendScreens[i];
+			if (m_nCurrScreen == screen.id && screen.returnPrevPageFunc) {
+				screen.returnPrevPageFunc();
+				break;
+			}
+		}
+	}
+#endif
 }
 
 int8
 CMenuManager::GetPreviousPageOption()
 {
+#ifndef CUSTOM_FRONTEND_OPTIONS
 	return !m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_ParentEntry[1] : aScreens[m_nCurrScreen].m_ParentEntry[0];
+#else
+	int8 prevPage = !m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_PreviousPage[1] : aScreens[m_nCurrScreen].m_PreviousPage[0];
+
+	if (prevPage == -1) // Game also does same
+		return 0;
+
+	prevPage = prevPage == MENUPAGE_NONE ? (!m_bGameNotLoaded ? MENUPAGE_PAUSE_MENU : MENUPAGE_START_MENU) : prevPage;
+
+	for (int i = 0; i < NUM_MENUROWS; i++) {
+		if (aScreens[prevPage].m_aEntries[i].m_SaveSlot == SAVESLOT_CFO) {
+			FrontendOption &option = customFrontendOptions[aScreens[prevPage].m_aEntries[i].m_TargetMenu];
+			if(option.type == FEOPTION_REDIRECT && option.to == m_nCurrScreen) {
+				return i;
+			}
+		} else if (aScreens[prevPage].m_aEntries[i].m_TargetMenu == m_nCurrScreen) {
+			return i;
+		}
+	}
+
+	// Couldn't find current screen option on previous page, use default behaviour (maybe save-related screen?)
+	return !m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_ParentEntry[1] : aScreens[m_nCurrScreen].m_ParentEntry[0];
+#endif
 }
 
 // ------ Functions not in the game/inlined ends
@@ -844,9 +903,6 @@ CMenuManager::Draw()
 		case MENUPAGE_CONTROLLER_PC_OLD4:
 		case MENUPAGE_CONTROLLER_DEBUG:
 	    case MENUPAGE_MOUSE_CONTROLS:
-#ifdef GRAPHICS_MENU_OPTIONS
-	    case MENUPAGE_GRAPHICS_SETTINGS:
-#endif
 			columnWidth = 50;
 			headerHeight = 0;
 			lineHeight = 20;
@@ -902,12 +958,43 @@ CMenuManager::Draw()
 			break;
 #endif
 		default:
-			columnWidth = 320;
-			headerHeight = 40;
-			lineHeight = 24;
-			CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
-			CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = BIGTEXT_X_SCALE), MENU_Y(MENU_TEXT_SIZE_Y = BIGTEXT_Y_SCALE));
-			CFont::SetCentreOn();
+#ifdef CUSTOM_FRONTEND_OPTIONS
+			bool custom = m_nCurrScreen > lastOgScreen;
+			if (custom) {
+				for (int i = 0; i < numCustomFrontendScreens; i++) {
+					FrontendScreen& screen = customFrontendScreens[i];
+					if (m_nCurrScreen == screen.id) {
+						columnWidth = screen.columnWidth;
+						headerHeight = screen.headerHeight;
+						lineHeight = screen.lineHeight;
+						CFont::SetFontStyle(FONT_LOCALE(screen.font));
+						CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = screen.fontScaleX), MENU_Y(MENU_TEXT_SIZE_Y = screen.fontScaleY));
+						if (screen.alignment == FESCREEN_LEFT_ALIGN) {
+							CFont::SetCentreOff();
+							CFont::SetRightJustifyOff();
+						} else if (screen.alignment == FESCREEN_RIGHT_ALIGN) {
+							CFont::SetCentreOff();
+							CFont::SetRightJustifyOn();
+						} else {
+							CFont::SetRightJustifyOff();
+							CFont::SetCentreOn();
+						}
+						break;
+					}
+					if (i == numCustomFrontendScreens - 1)
+						custom = false;
+				}
+			}
+			if (!custom)
+#endif
+			{
+				columnWidth = 320;
+				headerHeight = 40;
+				lineHeight = 24;
+				CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
+				CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = BIGTEXT_X_SCALE), MENU_Y(MENU_TEXT_SIZE_Y = BIGTEXT_Y_SCALE));
+				CFont::SetCentreOn();
+			}
 			break;
 	}
 
@@ -955,7 +1042,14 @@ CMenuManager::Draw()
 	}
 #endif
 
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	static int lastOption = m_nCurrOption;
+#endif
+
 	for (int i = 0; i < NUM_MENUROWS; ++i) {
+#ifdef CUSTOM_FRONTEND_OPTIONS
+		bool isOptionDisabled = false;
+#endif
 		if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action != MENUACTION_LABEL && aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName[0] != '\0') {
 			wchar *rightText = nil;
 			wchar *leftText;
@@ -972,6 +1066,12 @@ CMenuManager::Draw()
 					leftText = TheText.Get(gString);
 				}
 			} else {
+#ifdef CUSTOM_FRONTEND_OPTIONS
+				if (aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot == SAVESLOT_CFO){
+					FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
+					leftText = (wchar*)option.leftText;
+				} else
+#endif
 				leftText = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName);
 			}
 
@@ -1138,40 +1238,21 @@ CMenuManager::Draw()
 				AsciiToUnicode(_psGetVideoModeList()[m_nDisplayVideoMode], unicodeTemp);
 				rightText = unicodeTemp;
 				break;
-#ifdef IMPROVED_VIDEOMODE
-			case MENUACTION_SCREENFORMAT:
-				rightText = TheText.Get(FrontEndMenuManager.m_nSelectedScreenMode ? "FED_WND" : "FED_FLS");
-				break;
-#endif
-#ifdef MULTISAMPLING
-			case MENUACTION_MULTISAMPLING:
-				switch (m_nDisplayMSAALevel) {
-				case 0:
-					rightText = TheText.Get("FEM_OFF");
-					break;
-				default:
-					sprintf(gString, "%iX", 1 << (m_nDisplayMSAALevel));
-					AsciiToUnicode(gString, unicodeTemp);
-					rightText = unicodeTemp;
-					break;
-				}
-				break;
-#endif
-#ifdef NO_ISLAND_LOADING
-			case MENUACTION_ISLANDLOADING:
-				switch (m_DisplayIslandLoading) {
-				case ISLAND_LOADING_LOW:
-					rightText = TheText.Get("FEM_LOW");
-					break;
-				case ISLAND_LOADING_MEDIUM:
-					rightText = TheText.Get("FEM_MED");
-					break;
-				case ISLAND_LOADING_HIGH:
-					rightText = TheText.Get("FEM_HIG");
-					break;
-				}
-				break;
-#endif
+//#ifdef NO_ISLAND_LOADING
+//			case MENUACTION_ISLANDLOADING:
+//				switch (m_DisplayIslandLoading) {
+//				case ISLAND_LOADING_LOW:
+//					rightText = TheText.Get("FEM_LOW");
+//					break;
+//				case ISLAND_LOADING_MEDIUM:
+//					rightText = TheText.Get("FEM_MED");
+//					break;
+//				case ISLAND_LOADING_HIGH:
+//					rightText = TheText.Get("FEM_HIG");
+//					break;
+//				}
+//				break;
+//#endif
 			case MENUACTION_AUDIOHW:
 				if (m_nPrefsAudio3DProviderIndex == -1)
 					rightText = TheText.Get("FEA_NAH");
@@ -1222,14 +1303,30 @@ CMenuManager::Draw()
 			case MENUACTION_MOUSESTEER:
 				rightText = TheText.Get(CVehicle::m_bDisableMouseSteering ? "FEM_OFF" : "FEM_ON");
 				break;
-#ifdef CUTSCENE_BORDERS_SWITCH
-			case MENUACTION_CUTSCENEBORDERS:
-				rightText = TheText.Get(m_PrefsCutsceneBorders ? "FEM_ON" : "FEM_OFF");
-				break;
-#endif
-#ifdef PS2_ALPHA_TEST
-			case MENUACTION_PS2_ALPHA_TEST:
-				rightText = TheText.Get(gPS2alphaTest ? "FEM_ON" : "FEM_OFF");
+#ifdef CUSTOM_FRONTEND_OPTIONS
+			case MENUACTION_TRIGGERFUNC:
+				FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
+				if (m_nCurrScreen == option.screen && i == option.screenOptionOrder) {
+					if (option.type == FEOPTION_SELECT) {
+						// To whom manipulate option.value of static options externally (like RestoreDef functions)
+						if (*option.value != option.lastSavedValue)
+							option.displayedValue = option.lastSavedValue = *option.value;
+
+						if (option.displayedValue >= option.numRightTexts || option.displayedValue < 0)
+							option.displayedValue = 0;
+
+						rightText = (wchar*)option.rightTexts[option.displayedValue];
+
+					} else if (option.type == FEOPTION_DYNAMIC) {
+						if (option.drawFunc) {
+							rightText = option.drawFunc(&isOptionDisabled, m_nCurrOption == i);
+						}
+					}
+				} else {
+					debug("A- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, i, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu, option.screen, option.screenOptionOrder);
+					assert(0 && "Custom frontend options is borked");
+				}
+
 				break;
 #endif
 			}
@@ -1310,15 +1407,11 @@ CMenuManager::Draw()
 						CFont::SetRightJustifyOn();
 					
 					if(textLayer == 1)
-						if((!strcmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FED_RES")
-#ifdef IMPROVED_VIDEOMODE
-						     || !strcmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FEM_SCF")
-#endif
-#ifdef MULTISAMPLING
-						     || !strcmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FED_AAS")
+						if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FED_RES") && !m_bGameNotLoaded
+#ifdef CUSTOM_FRONTEND_OPTIONS
+							|| isOptionDisabled
 #endif
 							)
-							&& !m_bGameNotLoaded)
 							CFont::SetColor(CRGBA(155, 117, 6, FadeIn(255)));
 
 					CFont::PrintString(MENU_X_RIGHT_ALIGNED(columnWidth - textLayer), itemY, rightText);
@@ -1338,24 +1431,12 @@ CMenuManager::Draw()
 				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_RES") && m_nHelperTextMsgId == 1)
 					ResetHelperText();
 			}
-#ifdef IMPROVED_VIDEOMODE
-			if (m_nSelectedScreenMode == m_nPrefsWindowed) {
-				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEM_SCF") && m_nHelperTextMsgId == 1)
-					ResetHelperText();
-			}
-#endif
-#ifdef MULTISAMPLING
-			if (m_nDisplayMSAALevel == m_nPrefsMSAALevel) {
-				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_AAS") && m_nHelperTextMsgId == 1)
-					ResetHelperText();
-			}
-#endif
-#ifdef NO_ISLAND_LOADING
-			if (m_DisplayIslandLoading == m_PrefsIslandLoading) {
-				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEM_ISL") && m_nHelperTextMsgId == 1)
-					ResetHelperText();
-			}
-#endif
+//#ifdef NO_ISLAND_LOADING
+//			if (m_DisplayIslandLoading == m_PrefsIslandLoading) {
+//				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEM_ISL") && m_nHelperTextMsgId == 1)
+//					ResetHelperText();
+//			}
+//#endif
 			if (m_nPrefsAudio3DProviderIndex != DMAudio.GetCurrent3DProviderIndex()) {
 				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEA_3DH"))
 					SetHelperText(1);
@@ -1364,27 +1445,19 @@ CMenuManager::Draw()
 				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_RES"))
 					SetHelperText(1);
 			}
-#ifdef IMPROVED_VIDEOMODE
-			if (m_nSelectedScreenMode != m_nPrefsWindowed) {
-				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEM_SCF"))
-					SetHelperText(1);
-			}
-#endif
-#ifdef MULTISAMPLING
-			if (m_nDisplayMSAALevel != m_nPrefsMSAALevel) {
-				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_AAS"))
-					SetHelperText(1);
-			}
-#endif
-#ifdef NO_ISLAND_LOADING
-			if (m_DisplayIslandLoading != m_PrefsIslandLoading) {
-				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEM_ISL"))
-					SetHelperText(1);
-			}
-#endif
+//#ifdef NO_ISLAND_LOADING
+//			if (m_DisplayIslandLoading != m_PrefsIslandLoading) {
+//				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEM_ISL"))
+//					SetHelperText(1);
+//			}
+//#endif
 			if (m_nPrefsAudio3DProviderIndex != DMAudio.GetCurrent3DProviderIndex()) {
 				if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEA_3DH") != 0
-					&& m_nCurrScreen == MENUPAGE_SOUND_SETTINGS && m_nPrefsAudio3DProviderIndex != -1) {
+					// To make assigning built-in actions to new custom options possible.
+#ifndef CUSTOM_FRONTEND_OPTIONS
+					&& m_nCurrScreen == MENUPAGE_SOUND_SETTINGS
+#endif
+					&& m_nPrefsAudio3DProviderIndex != -1) {
 
 					m_nPrefsAudio3DProviderIndex = DMAudio.GetCurrent3DProviderIndex();
 					SetHelperText(3);
@@ -1392,38 +1465,46 @@ CMenuManager::Draw()
 			}
 			if (m_nDisplayVideoMode != m_nPrefsVideoMode) {
 				if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_RES") != 0
-#ifdef GRAPHICS_MENU_OPTIONS
-				    && m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
+					// To make assigning built-in actions to new custom options possible.
+#ifdef CUSTOM_FRONTEND_OPTIONS
+					&& ScreenHasOption(m_nCurrScreen, "FED_RES")
 #else
-					&& m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
+					&& m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS
 #endif
+					){
 					m_nDisplayVideoMode = m_nPrefsVideoMode;
 					SetHelperText(3);
 				}
 			}
-#ifdef IMPROVED_VIDEOMODE
-			if (m_nSelectedScreenMode != m_nPrefsWindowed) {
-				if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEM_SCF") != 0
-#ifdef GRAPHICS_MENU_OPTIONS
-				    && m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
-#else
-					&& m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
-#endif
-					m_nSelectedScreenMode = m_nPrefsWindowed;
-					SetHelperText(3);
+
+#ifdef CUSTOM_FRONTEND_OPTIONS
+			if (aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot == SAVESLOT_CFO) {
+				FrontendOption &option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
+				if (option.type == FEOPTION_SELECT) {
+					if (option.onlyApplyOnEnter){
+						if (m_nCurrOption != i) {
+							if (option.displayedValue != option.lastSavedValue)
+								SetHelperText(3); // Restored original value
+
+//							option.displayedValue = option.lastSavedValue = *option.value;
+
+						} else {
+							if (option.displayedValue != *option.value)
+								SetHelperText(1); // Enter to apply
+							else if (m_nHelperTextMsgId == 1)
+								ResetHelperText(); // Applied
+						}
+					}
 				}
-			}
-#endif
-#ifdef MULTISAMPLING
-			if (m_nSelectedScreenMode != m_nPrefsWindowed) {
-				if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_AAS") != 0
-#ifdef GRAPHICS_MENU_OPTIONS
-				    && m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
-#else
-				    && m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
-#endif
-					m_nDisplayMSAALevel = m_nPrefsMSAALevel;
-					SetHelperText(3);
+
+				if (m_nCurrOption != lastOption && lastOption == i) {
+					FrontendOption &oldOption = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[lastOption].m_TargetMenu];
+					if (oldOption.type == FEOPTION_DYNAMIC || oldOption.type == FEOPTION_BUILTIN_ACTION)
+						if(oldOption.buttonPressFunc)
+							oldOption.buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
+
+					if (oldOption.onlyApplyOnEnter && oldOption.type == FEOPTION_SELECT)
+						oldOption.displayedValue = oldOption.lastSavedValue = *oldOption.value;
 				}
 			}
 #endif
@@ -1471,6 +1552,10 @@ CMenuManager::Draw()
 		}
 	}
 
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	lastOption = m_nCurrOption;
+#endif
+
 	switch (m_nCurrScreen) {
 	case MENUPAGE_CONTROLLER_SETTINGS:
 	case MENUPAGE_SOUND_SETTINGS:
@@ -1478,11 +1563,21 @@ CMenuManager::Draw()
 	case MENUPAGE_SKIN_SELECT:
 	case MENUPAGE_CONTROLLER_PC:
 	case MENUPAGE_MOUSE_CONTROLS:
-#ifdef GRAPHICS_MENU_OPTIONS
-	case MENUPAGE_GRAPHICS_SETTINGS:
-#endif
 		DisplayHelperText();
 		break;
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	default:
+		if (m_nCurrScreen > lastOgScreen) {
+			for (int i = 0; i < numCustomFrontendScreens; i++) {
+				FrontendScreen& screen = customFrontendScreens[i];
+				if (m_nCurrScreen == screen.id && screen.showLeftRightHelper) {
+					DisplayHelperText();
+					break;
+				}
+			}
+		}
+		break;
+#endif
 	}
 
 	if (m_nCurrScreen == MENUPAGE_CONTROLLER_SETTINGS)
@@ -2471,7 +2566,22 @@ CMenuManager::DrawFrontEndNormal()
 				previousSprite = MENUSPRITE_PLAYERSET;
 				break;
 			default:
-				previousSprite = MENUSPRITE_MAINMENU;
+#ifdef CUSTOM_FRONTEND_OPTIONS
+				bool custom = m_nPrevScreen > lastOgScreen;
+				if (custom) {
+					for (int i = 0; i < numCustomFrontendScreens; i++) {
+						FrontendScreen& screen = customFrontendScreens[i];
+						if (m_nPrevScreen == screen.id) {
+							previousSprite = screen.sprite;
+							break;
+						}
+						if (i == numCustomFrontendScreens - 1)
+							custom = false;
+					}
+				}
+				if (!custom)
+#endif
+					previousSprite = MENUSPRITE_MAINMENU;
 				break;
 		}
 		
@@ -2521,6 +2631,20 @@ CMenuManager::DrawFrontEndNormal()
 		case MENUPAGE_OPTIONS:
 			currentSprite = MENUSPRITE_PLAYERSET;
 			break;
+#ifdef CUSTOM_FRONTEND_OPTIONS
+		default:
+			bool custom = m_nCurrScreen > lastOgScreen;
+			if (custom) {
+				for (int i = 0; i < numCustomFrontendScreens; i++) {
+					FrontendScreen& screen = customFrontendScreens[i];
+					if (m_nCurrScreen == screen.id) {
+						currentSprite = screen.sprite;
+						break;
+					}
+				}
+			}
+			break;
+#endif
 	}
 
 	if (m_nMenuFadeAlpha < 255) {
@@ -3132,6 +3256,10 @@ CMenuManager::InitialiseChangedLanguageSettings()
 		default:
 			break;
 		}
+
+#ifdef CUSTOM_FRONTEND_OPTIONS
+		CustomFrontendOptionsPopulate();
+#endif
 	}
 }
 
@@ -3277,23 +3405,19 @@ CMenuManager::LoadSettings()
 			CFileMgr::Read(fileHandle, m_PrefsSkinFile, 256);
 			CFileMgr::Read(fileHandle, (char*)&m_ControlMethod, 1);
 			CFileMgr::Read(fileHandle, (char*)&m_PrefsLanguage, 1);
-#ifdef FREE_CAM
-			CFileMgr::Read(fileHandle, (char*)&TheCamera.bFreeCam, 1);
-#endif
-#ifdef CUTSCENE_BORDERS_SWITCH
-			CFileMgr::Read(fileHandle, (char *)&CMenuManager::m_PrefsCutsceneBorders, 1);
-#endif
-#ifdef MULTISAMPLING
-			CFileMgr::Read(fileHandle, (char *)&m_nPrefsMSAALevel, 1);
-			m_nDisplayMSAALevel = m_nPrefsMSAALevel;
+#ifdef CUSTOM_FRONTEND_OPTIONS
+			for (int i = 0; i < numCustomFrontendOptions; i++) {
+				FrontendOption& option = customFrontendOptions[i];
+				if (option.save) {
+					CFileMgr::Read(fileHandle, (char*)option.value, 1);
+					option.lastSavedValue = option.displayedValue = *option.value;
+				}
+			}
 #endif
 #ifdef NO_ISLAND_LOADING
 			CFileMgr::Read(fileHandle, (char *)&CMenuManager::m_PrefsIslandLoading, 1);
 			CMenuManager::m_DisplayIslandLoading = CMenuManager::m_PrefsIslandLoading;
 #endif
-#ifdef PS2_ALPHA_TEST
-			CFileMgr::Read(fileHandle, (char *)&gPS2alphaTest, 1);
-#endif // PS2_ALPHA_TEST
 		}
 	}
 
@@ -3384,21 +3508,17 @@ CMenuManager::SaveSettings()
 		CFileMgr::Write(fileHandle, m_PrefsSkinFile, 256);
 		CFileMgr::Write(fileHandle, (char*)&m_ControlMethod, 1);
 		CFileMgr::Write(fileHandle, (char*)&m_PrefsLanguage, 1);
-#ifdef FREE_CAM
-		CFileMgr::Write(fileHandle, (char*)&TheCamera.bFreeCam, 1);
-#endif
-#ifdef CUTSCENE_BORDERS_SWITCH
-		CFileMgr::Write(fileHandle, (char *)&CMenuManager::m_PrefsCutsceneBorders, 1);
-#endif
-#ifdef MULTISAMPLING
-		CFileMgr::Write(fileHandle, (char *)&CMenuManager::m_nPrefsMSAALevel, 1);
+#ifdef CUSTOM_FRONTEND_OPTIONS
+		for (int i = 0; i < numCustomFrontendOptions; i++) {
+			FrontendOption &option = customFrontendOptions[i];
+			if (option.save) {
+				CFileMgr::Write(fileHandle, (char*)option.value, 1);
+			}
+		}
 #endif
 #ifdef NO_ISLAND_LOADING
 		CFileMgr::Write(fileHandle, (char *)&CMenuManager::m_PrefsIslandLoading, 1);
 #endif
-#ifdef PS2_ALPHA_TEST
-		CFileMgr::Write(fileHandle, (char *)&gPS2alphaTest, 1);
-#endif // PS2_ALPHA_TEST
 	}
 
 	CFileMgr::CloseFile(fileHandle);
@@ -4717,65 +4837,45 @@ CMenuManager::ProcessButtonPresses(void)
 						SaveSettings();
 					}
 				    break;
-#ifdef IMPROVED_VIDEOMODE
-			    case MENUACTION_SCREENFORMAT:
-				    if (m_nSelectedScreenMode != m_nPrefsWindowed) {
-					    m_nPrefsWindowed = m_nSelectedScreenMode;
-						_psSelectScreenVM(m_nPrefsVideoMode);
-						SetHelperText(0);
-						SaveSettings();
-					}
-					break;
-#endif
-#ifdef MULTISAMPLING
-			    case MENUACTION_MULTISAMPLING:
-				    if (m_nDisplayMSAALevel != m_nPrefsMSAALevel) {
-					    m_nPrefsMSAALevel = m_nDisplayMSAALevel;
-					    _psSelectScreenVM(m_nPrefsVideoMode);
-					    SetHelperText(0);
-					    SaveSettings();
-				    }
-				    break;
-#endif
-#ifdef NO_ISLAND_LOADING
-			    case MENUACTION_ISLANDLOADING:
-				    if (m_DisplayIslandLoading != m_PrefsIslandLoading) {
-					    if (!m_bGameNotLoaded) {
-						    if (m_DisplayIslandLoading > ISLAND_LOADING_LOW) {
-							    if (m_DisplayIslandLoading == ISLAND_LOADING_HIGH)
-								    CStreaming::RemoveIslandsNotUsed(LEVEL_GENERIC);
-							    if (m_PrefsIslandLoading == ISLAND_LOADING_LOW) {
-								    if (CGame::currLevel != LEVEL_INDUSTRIAL)
-									    CFileLoader::LoadCollisionFromDatFile(LEVEL_INDUSTRIAL);
-								    if (CGame::currLevel != LEVEL_COMMERCIAL)
-									    CFileLoader::LoadCollisionFromDatFile(LEVEL_COMMERCIAL);
-								    if (CGame::currLevel != LEVEL_SUBURBAN)
-									    CFileLoader::LoadCollisionFromDatFile(LEVEL_SUBURBAN);
-								    CCollision::bAlreadyLoaded = true;
-								    m_PrefsIslandLoading = m_DisplayIslandLoading;
-								    CStreaming::RequestBigBuildings(CGame::currLevel);
-							    } else if (m_PrefsIslandLoading == ISLAND_LOADING_HIGH) {
-								    m_PrefsIslandLoading = m_DisplayIslandLoading;
-								    CStreaming::RequestIslands(CGame::currLevel);
-							    } else
-								    m_PrefsIslandLoading = m_DisplayIslandLoading;
-						    } else { // low
-							    m_PrefsIslandLoading = m_DisplayIslandLoading;
-							    CCollision::bAlreadyLoaded = false;
-							    CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
-							    CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
-							    CStreaming::RemoveUnusedBuildings(CGame::currLevel);
-							    CStreaming::RequestIslands(CGame::currLevel);
-						    }
-
-						    CStreaming::LoadAllRequestedModels(true);
-					    } else
-						    m_PrefsIslandLoading = m_DisplayIslandLoading;
-					    SetHelperText(0);
-					    SaveSettings();
-				    }
-				    break;
-#endif
+//#ifdef NO_ISLAND_LOADING
+//			    case MENUACTION_ISLANDLOADING:
+//				    if (m_DisplayIslandLoading != m_PrefsIslandLoading) {
+//					    if (!m_bGameNotLoaded) {
+//						    if (m_DisplayIslandLoading > ISLAND_LOADING_LOW) {
+//							    if (m_DisplayIslandLoading == ISLAND_LOADING_HIGH)
+//								    CStreaming::RemoveIslandsNotUsed(LEVEL_GENERIC);
+//							    if (m_PrefsIslandLoading == ISLAND_LOADING_LOW) {
+//								    if (CGame::currLevel != LEVEL_INDUSTRIAL)
+//									    CFileLoader::LoadCollisionFromDatFile(LEVEL_INDUSTRIAL);
+//								    if (CGame::currLevel != LEVEL_COMMERCIAL)
+//									    CFileLoader::LoadCollisionFromDatFile(LEVEL_COMMERCIAL);
+//								    if (CGame::currLevel != LEVEL_SUBURBAN)
+//									    CFileLoader::LoadCollisionFromDatFile(LEVEL_SUBURBAN);
+//								    CCollision::bAlreadyLoaded = true;
+//								    m_PrefsIslandLoading = m_DisplayIslandLoading;
+//								    CStreaming::RequestBigBuildings(CGame::currLevel);
+//							    } else if (m_PrefsIslandLoading == ISLAND_LOADING_HIGH) {
+//								    m_PrefsIslandLoading = m_DisplayIslandLoading;
+//								    CStreaming::RequestIslands(CGame::currLevel);
+//							    } else
+//								    m_PrefsIslandLoading = m_DisplayIslandLoading;
+//						    } else { // low
+//							    m_PrefsIslandLoading = m_DisplayIslandLoading;
+//							    CCollision::bAlreadyLoaded = false;
+//							    CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
+//							    CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
+//							    CStreaming::RemoveUnusedBuildings(CGame::currLevel);
+//							    CStreaming::RequestIslands(CGame::currLevel);
+//						    }
+//
+//						    CStreaming::LoadAllRequestedModels(true);
+//					    } else
+//						    m_PrefsIslandLoading = m_DisplayIslandLoading;
+//					    SetHelperText(0);
+//					    SaveSettings();
+//				    }
+//				    break;
+//#endif
 				case MENUACTION_AUDIOHW:
 				{
 					int selectedProvider = m_nPrefsAudio3DProviderIndex;
@@ -4822,7 +4922,6 @@ CMenuManager::ProcessButtonPresses(void)
 						DMAudio.SetRadioInCar(m_PrefsRadioStation);
 						DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
 						SaveSettings();
-#ifndef GRAPHICS_MENU_OPTIONS
 					} else if (m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
 						m_PrefsFrameLimiter = true;
 						m_PrefsBrightness = 256;
@@ -4837,121 +4936,55 @@ CMenuManager::ProcessButtonPresses(void)
 						if (_dwOperatingSystemVersion == OS_WIN98) {
 							CMBlur::BlurOn = false;
 							CMBlur::MotionBlurClose();
-						}
-						else {
+						} else {
 							CMBlur::BlurOn = true;
 							CMBlur::MotionBlurOpen(Scene.camera);
 						}
 #else
 						CMBlur::BlurOn = true;
 #endif
-#ifdef CUTSCENE_BORDERS_SWITCH
-					    m_PrefsCutsceneBorders = true;
-#endif
-#ifdef NO_ISLAND_LOADING
-					    m_DisplayIslandLoading = ISLAND_LOADING_LOW;
-					    if (!m_bGameNotLoaded) {
-						    if (m_DisplayIslandLoading > ISLAND_LOADING_LOW) {
-							    if (m_DisplayIslandLoading == ISLAND_LOADING_HIGH)
-								    CStreaming::RemoveIslandsNotUsed(LEVEL_GENERIC);
-							    if (m_PrefsIslandLoading == ISLAND_LOADING_LOW) {
-								    if (CGame::currLevel != LEVEL_INDUSTRIAL)
-									    CFileLoader::LoadCollisionFromDatFile(LEVEL_INDUSTRIAL);
-								    if (CGame::currLevel != LEVEL_COMMERCIAL)
-									    CFileLoader::LoadCollisionFromDatFile(LEVEL_COMMERCIAL);
-								    if (CGame::currLevel != LEVEL_SUBURBAN)
-									    CFileLoader::LoadCollisionFromDatFile(LEVEL_SUBURBAN);
-								    CCollision::bAlreadyLoaded = true;
-								    m_PrefsIslandLoading = m_DisplayIslandLoading;
-								    CStreaming::RequestBigBuildings(CGame::currLevel);
-							    } else if (m_PrefsIslandLoading == ISLAND_LOADING_HIGH) {
-								    m_PrefsIslandLoading = m_DisplayIslandLoading;
-								    CStreaming::RequestIslands(CGame::currLevel);
-							    } else
-								    m_PrefsIslandLoading = m_DisplayIslandLoading;
-						    } else { // low
-							    m_PrefsIslandLoading = m_DisplayIslandLoading;
-							    CCollision::bAlreadyLoaded = false;
-							    CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
-							    CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
-							    CStreaming::RemoveUnusedBuildings(CGame::currLevel);
-							    CStreaming::RequestIslands(CGame::currLevel);
-						    }
+#ifdef CUSTOM_FRONTEND_OPTIONS
+						extern void RestoreDefGraphics(int8);
+						extern void RestoreDefDisplay(int8);
 
-						    CStreaming::LoadAllRequestedModels(true);
-					    } else
-						    m_PrefsIslandLoading = m_DisplayIslandLoading;
-#endif // NO_ISLAND_LOADING
-#ifdef PS2_ALPHA_TEST
-					    gPS2alphaTest = false;
-#endif // PS2_ALPHA_TEST
+						RestoreDefGraphics(FEOPTION_ACTION_SELECT);
+						RestoreDefDisplay(FEOPTION_ACTION_SELECT);
+#endif
+//#ifdef NO_ISLAND_LOADING
+//					    m_DisplayIslandLoading = ISLAND_LOADING_LOW;
+//					    if (!m_bGameNotLoaded) {
+//						    if (m_DisplayIslandLoading > ISLAND_LOADING_LOW) {
+//							    if (m_DisplayIslandLoading == ISLAND_LOADING_HIGH)
+//								    CStreaming::RemoveIslandsNotUsed(LEVEL_GENERIC);
+//							    if (m_PrefsIslandLoading == ISLAND_LOADING_LOW) {
+//								    if (CGame::currLevel != LEVEL_INDUSTRIAL)
+//									    CFileLoader::LoadCollisionFromDatFile(LEVEL_INDUSTRIAL);
+//								    if (CGame::currLevel != LEVEL_COMMERCIAL)
+//									    CFileLoader::LoadCollisionFromDatFile(LEVEL_COMMERCIAL);
+//								    if (CGame::currLevel != LEVEL_SUBURBAN)
+//									    CFileLoader::LoadCollisionFromDatFile(LEVEL_SUBURBAN);
+//								    CCollision::bAlreadyLoaded = true;
+//								    m_PrefsIslandLoading = m_DisplayIslandLoading;
+//								    CStreaming::RequestBigBuildings(CGame::currLevel);
+//							    } else if (m_PrefsIslandLoading == ISLAND_LOADING_HIGH) {
+//								    m_PrefsIslandLoading = m_DisplayIslandLoading;
+//								    CStreaming::RequestIslands(CGame::currLevel);
+//							    } else
+//								    m_PrefsIslandLoading = m_DisplayIslandLoading;
+//						    } else { // low
+//							    m_PrefsIslandLoading = m_DisplayIslandLoading;
+//							    CCollision::bAlreadyLoaded = false;
+//							    CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
+//							    CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
+//							    CStreaming::RemoveUnusedBuildings(CGame::currLevel);
+//							    CStreaming::RequestIslands(CGame::currLevel);
+//						    }
+//
+//						    CStreaming::LoadAllRequestedModels(true);
+//					    } else
+//						    m_PrefsIslandLoading = m_DisplayIslandLoading;
+//#endif // NO_ISLAND_LOADING
 						SaveSettings();
-#else
-				    } else if (m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
-					    m_PrefsBrightness = 256;
-					    m_PrefsShowSubtitles = true;
-#ifdef CUTSCENE_BORDERS_SWITCH
-					    m_PrefsCutsceneBorders = true;
-#endif
-					    SaveSettings();
-				    } else if (m_nCurrScreen == MENUPAGE_GRAPHICS_SETTINGS) {
-					    m_PrefsFrameLimiter = true;
-					    m_PrefsUseWideScreen = false;
-					    m_PrefsVsyncDisp = true;
-					    m_PrefsLOD = 1.2f;
-					    m_PrefsVsync = true;
-					    CRenderer::ms_lodDistScale = 1.2f;
-					    m_nDisplayVideoMode = m_nPrefsVideoMode;
-#ifdef GTA3_1_1_PATCH
-					    if (_dwOperatingSystemVersion == OS_WIN98) {
-						    CMBlur::BlurOn = false;
-						    CMBlur::MotionBlurClose();
-					    } else {
-						    CMBlur::BlurOn = true;
-						    CMBlur::MotionBlurOpen(Scene.camera);
-					    }
-#else
-					    CMBlur::BlurOn = true;
-#endif // GTA3_1_1_PATCH
-#ifdef NO_ISLAND_LOADING
-					    m_DisplayIslandLoading = ISLAND_LOADING_LOW;
-					    if (!m_bGameNotLoaded) {
-						    if (m_DisplayIslandLoading > ISLAND_LOADING_LOW) {
-							    if (m_DisplayIslandLoading == ISLAND_LOADING_HIGH)
-								    CStreaming::RemoveIslandsNotUsed(LEVEL_GENERIC);
-							    if (m_PrefsIslandLoading == ISLAND_LOADING_LOW) {
-								    if (CGame::currLevel != LEVEL_INDUSTRIAL)
-									    CFileLoader::LoadCollisionFromDatFile(LEVEL_INDUSTRIAL);
-								    if (CGame::currLevel != LEVEL_COMMERCIAL)
-									    CFileLoader::LoadCollisionFromDatFile(LEVEL_COMMERCIAL);
-								    if (CGame::currLevel != LEVEL_SUBURBAN)
-									    CFileLoader::LoadCollisionFromDatFile(LEVEL_SUBURBAN);
-								    CCollision::bAlreadyLoaded = true;
-								    m_PrefsIslandLoading = m_DisplayIslandLoading;
-								    CStreaming::RequestBigBuildings(CGame::currLevel);
-							    } else if (m_PrefsIslandLoading == ISLAND_LOADING_HIGH) {
-								    m_PrefsIslandLoading = m_DisplayIslandLoading;
-								    CStreaming::RequestIslands(CGame::currLevel);
-							    } else
-								    m_PrefsIslandLoading = m_DisplayIslandLoading;
-						    } else { // low
-							    m_PrefsIslandLoading = m_DisplayIslandLoading;
-							    CCollision::bAlreadyLoaded = false;
-							    CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
-							    CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
-							    CStreaming::RemoveUnusedBuildings(CGame::currLevel);
-							    CStreaming::RequestIslands(CGame::currLevel);
-						    }
-
-						    CStreaming::LoadAllRequestedModels(true);
-					    } else
-						    m_PrefsIslandLoading = m_DisplayIslandLoading;
-#endif // NO_ISLAND_LOADING
-#ifdef PS2_ALPHA_TEST
-					    gPS2alphaTest = false;
-#endif // PS2_ALPHA_TEST
-					    SaveSettings();
-#endif // GRAPHICS_MENU_OPTIONS
 					} else if ((m_nCurrScreen != MENUPAGE_SKIN_SELECT_OLD) && (m_nCurrScreen == MENUPAGE_CONTROLLER_PC)) {
 						ControlsManager.MakeControllerActionsBlank();
 						ControlsManager.InitDefaultControlConfiguration();
@@ -5010,9 +5043,44 @@ CMenuManager::ProcessButtonPresses(void)
 					RetryMission(2, 0);
 					return;
 #endif
+#ifdef CUSTOM_FRONTEND_OPTIONS
+				case MENUACTION_TRIGGERFUNC:
+					FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu];
+					if (m_nCurrScreen == option.screen && m_nCurrOption == option.screenOptionOrder) {
+						if (option.type == FEOPTION_SELECT) {
+							if (!option.onlyApplyOnEnter) {
+								option.displayedValue++;
+								if (option.displayedValue >= option.numRightTexts || option.displayedValue < 0)
+									option.displayedValue = 0;
+							}
+							option.changeFunc(option.displayedValue);
+							*option.value = option.lastSavedValue = option.displayedValue;
+
+						} else if (option.type == FEOPTION_DYNAMIC) {
+							option.buttonPressFunc(FEOPTION_ACTION_SELECT);
+						} else if (option.type == FEOPTION_REDIRECT) {
+							ChangeScreen(option.to, option.option, true, option.fadeIn);
+						} else if (option.type == FEOPTION_GOBACK) {
+							goBack = true;
+						}
+					} else {
+						debug("B- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, m_nCurrOption, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, option.screen, option.screenOptionOrder);
+						assert(0 && "Custom frontend options are borked");
+					}
+
+					break;
+#endif
 			}
 		}
 		ProcessOnOffMenuOptions();
+#ifdef CUSTOM_FRONTEND_OPTIONS
+		if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_SaveSlot == SAVESLOT_CFO) {
+			FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu];
+			if (option.type == FEOPTION_BUILTIN_ACTION && option.buttonPressFunc) {
+				option.buttonPressFunc(FEOPTION_ACTION_SELECT);
+			}
+		}
+#endif
 	}
 
 	if (goBack) {
@@ -5183,41 +5251,15 @@ CMenuManager::ProcessButtonPresses(void)
 					}
 				}
 				break;
-#ifdef IMPROVED_VIDEOMODE
-		    case MENUACTION_SCREENFORMAT:
-			    if (m_bGameNotLoaded) {
-				    FrontEndMenuManager.m_nSelectedScreenMode = !FrontEndMenuManager.m_nSelectedScreenMode;
-			    }
-			    break;
-#endif
-#ifdef MULTISAMPLING
-		    case MENUACTION_MULTISAMPLING:
-			    if (m_bGameNotLoaded) {
-				    m_nDisplayMSAALevel += changeValueBy;
-
-				    int i = 0;
-				    int maxAA = RwD3D8EngineGetMaxMultiSamplingLevels();
-				    while (maxAA != 1) {
-					    i++;
-					    maxAA >>= 1;
-				    }
-
-				    if (m_nDisplayMSAALevel < 0)
-					    m_nDisplayMSAALevel = i;
-				    else if (m_nDisplayMSAALevel > i)
-					    m_nDisplayMSAALevel = 0;
-			    }
-			    break;
-#endif
-#ifdef NO_ISLAND_LOADING
-		    case MENUACTION_ISLANDLOADING:
-			    m_DisplayIslandLoading += changeValueBy;
-			    if (m_DisplayIslandLoading > ISLAND_LOADING_HIGH)
-				    m_DisplayIslandLoading = ISLAND_LOADING_LOW;
-			    else if (m_DisplayIslandLoading < ISLAND_LOADING_LOW)
-				    m_DisplayIslandLoading = ISLAND_LOADING_HIGH;
-			    break;
-#endif
+//#ifdef NO_ISLAND_LOADING
+//		    case MENUACTION_ISLANDLOADING:
+//			    m_DisplayIslandLoading += changeValueBy;
+//			    if (m_DisplayIslandLoading > ISLAND_LOADING_HIGH)
+//				    m_DisplayIslandLoading = ISLAND_LOADING_LOW;
+//			    else if (m_DisplayIslandLoading < ISLAND_LOADING_LOW)
+//				    m_DisplayIslandLoading = ISLAND_LOADING_HIGH;
+//			    break;
+//#endif
 			case MENUACTION_AUDIOHW:
 				if (m_nPrefsAudio3DProviderIndex != -1) {
 					m_nPrefsAudio3DProviderIndex += changeValueBy;
@@ -5240,6 +5282,36 @@ CMenuManager::ProcessButtonPresses(void)
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 				SaveSettings();
 				break;
+#ifdef CUSTOM_FRONTEND_OPTIONS
+			case MENUACTION_TRIGGERFUNC:
+				FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu];
+				if (m_nCurrScreen == option.screen && m_nCurrOption == option.screenOptionOrder) {
+					if (option.type == FEOPTION_SELECT) {
+						if (changeValueBy > 0) {
+							option.displayedValue++;
+							if (option.displayedValue >= option.numRightTexts)
+								option.displayedValue = 0;
+						} else {
+							option.displayedValue--;
+							if (option.displayedValue < 0)
+								option.displayedValue = option.numRightTexts - 1;
+						}
+						if (!option.onlyApplyOnEnter) {
+							option.changeFunc(option.displayedValue);
+							*option.value = option.lastSavedValue = option.displayedValue;
+						}
+					} else if (option.type == FEOPTION_DYNAMIC) {
+						option.buttonPressFunc(changeValueBy > 0 ? FEOPTION_ACTION_RIGHT : FEOPTION_ACTION_LEFT);
+					}
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
+				}
+				else {
+					debug("C- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, m_nCurrOption, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, option.screen, option.screenOptionOrder);
+					assert(0 && "Custom frontend options are borked");
+				}
+
+				break;
+#endif
 		}
 		ProcessOnOffMenuOptions();
 		if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
@@ -5353,20 +5425,6 @@ CMenuManager::ProcessOnOffMenuOptions()
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		SaveSettings();
 		break;
-#ifdef CUTSCENE_BORDERS_SWITCH
-	case MENUACTION_CUTSCENEBORDERS:
-		m_PrefsCutsceneBorders = !m_PrefsCutsceneBorders;
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-		SaveSettings();
-		break;
-#endif
-#ifdef PS2_ALPHA_TEST
-	case MENUACTION_PS2_ALPHA_TEST:
-		gPS2alphaTest = !gPS2alphaTest;
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-		SaveSettings();
-		break;
-#endif
 	}
 }
 
@@ -6205,20 +6263,6 @@ CMenuManager::ConstructStatLine(int rowIdx)
 
 #undef STAT_LINE
 }
-
-#if 0
-uint8 CMenuManager::GetNumberOfMenuOptions()
-{
-	uint8 Rows = -1;
-	for (int i = 0; i < NUM_MENUROWS; i++) {
-		if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action == MENUACTION_NOTHING)
-			break;
-
-		++Rows;
-	}
-	return Rows;
-}
-#endif
 
 #undef GetBackJustUp
 #undef GetBackJustDown
