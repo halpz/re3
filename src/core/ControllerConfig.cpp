@@ -208,7 +208,10 @@ void CControllerConfigManager::InitDefaultControlConfiguration()
 																		          
 	SetControllerKeyAssociatedWithAction    (PED_FIREWEAPON,                      rsPADINS,   KEYBOARD);
 	SetControllerKeyAssociatedWithAction    (PED_FIREWEAPON,                      rsLCTRL,    OPTIONAL_EXTRA);
-																		          
+#ifdef BIND_VEHICLE_FIREWEAPON
+	SetControllerKeyAssociatedWithAction    (VEHICLE_FIREWEAPON,                  rsPADINS,   KEYBOARD);
+	SetControllerKeyAssociatedWithAction    (VEHICLE_FIREWEAPON,                  rsLCTRL,    OPTIONAL_EXTRA);
+#endif
 	SetControllerKeyAssociatedWithAction    (PED_CYCLE_WEAPON_LEFT,               rsPADDEL,   KEYBOARD);
 
 	SetControllerKeyAssociatedWithAction    (PED_CYCLE_WEAPON_RIGHT,              rsPADENTER, OPTIONAL_EXTRA); // BUG: must be KEYBOARD ?
@@ -276,6 +279,9 @@ void CControllerConfigManager::InitDefaultControlConfigMouse(CMouseControllerSta
 	{
 		m_bMouseAssociated = true;
 		SetMouseButtonAssociatedWithAction(PED_FIREWEAPON,               1);
+#ifdef BIND_VEHICLE_FIREWEAPON	
+		SetMouseButtonAssociatedWithAction(VEHICLE_FIREWEAPON,           1);
+#endif
 	}
 
 	if (availableButtons.RMB)
@@ -361,6 +367,9 @@ void CControllerConfigManager::InitDefaultControlConfigJoyPad(uint32 buttons)
 			SetControllerKeyAssociatedWithAction(PED_SNIPER_ZOOM_OUT,                3, JOYSTICK);
 		case 2:
 			SetControllerKeyAssociatedWithAction(PED_FIREWEAPON,                     2, JOYSTICK);
+#ifdef BIND_VEHICLE_FIREWEAPON	
+			SetControllerKeyAssociatedWithAction(VEHICLE_FIREWEAPON,                 2, JOYSTICK);
+#endif
 		case 1:
 			SetControllerKeyAssociatedWithAction(VEHICLE_ENTER_EXIT,                 1, JOYSTICK);
 		/*******************************************************************************************/
@@ -411,6 +420,9 @@ void CControllerConfigManager::InitDefaultControlConfigJoyPad(uint32 buttons)
 			SetControllerKeyAssociatedWithAction(PED_SNIPER_ZOOM_OUT,                2, JOYSTICK);
 		case 1:
 			SetControllerKeyAssociatedWithAction(PED_FIREWEAPON,                     1, JOYSTICK);
+#ifdef BIND_VEHICLE_FIREWEAPON
+			SetControllerKeyAssociatedWithAction(VEHICLE_FIREWEAPON,                 1, JOYSTICK);
+#endif
 		/*******************************************************************************************/
 		}
 	}
@@ -449,6 +461,9 @@ void CControllerConfigManager::InitialiseControllerActionNameArray()
 	SETACTIONNAME(SHOW_MOUSE_POINTER_TOGGLE);
 	SETACTIONNAME(CAMERA_CHANGE_VIEW_ALL_SITUATIONS);
 	SETACTIONNAME(PED_FIREWEAPON);
+#ifdef BIND_VEHICLE_FIREWEAPON
+	SETACTIONNAME(VEHICLE_FIREWEAPON);
+#endif
 	SETACTIONNAME(VEHICLE_ENTER_EXIT);
 	SETACTIONNAME(GO_LEFT);
 	SETACTIONNAME(GO_RIGHT);
@@ -644,6 +659,10 @@ void CControllerConfigManager::AffectControllerStateOn_ButtonDown(int32 button, 
 
 void CControllerConfigManager::AffectControllerStateOn_ButtonDown_Driving(int32 button, eControllerType type, CControllerState &state)
 {
+#ifdef BIND_VEHICLE_FIREWEAPON
+	if (button == GetControllerKeyAssociatedWithAction(VEHICLE_FIREWEAPON, type))
+		state.Circle = 255;
+#endif
 	if (button == GetControllerKeyAssociatedWithAction(VEHICLE_LOOKBEHIND, type))
 	{
 		state.LeftShoulder2 = 255;
@@ -788,7 +807,11 @@ void CControllerConfigManager::AffectControllerStateOn_ButtonDown_ThirdPersonOnl
 void CControllerConfigManager::AffectControllerStateOn_ButtonDown_FirstAndThirdPersonOnly(int32 button, eControllerType type, CControllerState &state)
 {
 	CPad *pad = CPad::GetPad(PAD1);
-	
+
+#ifdef BIND_VEHICLE_FIREWEAPON
+	if (button == GetControllerKeyAssociatedWithAction(PED_FIREWEAPON, type))
+		state.Circle = 255;
+#endif
 	if (button == GetControllerKeyAssociatedWithAction(PED_LOCK_TARGET, type))
 		state.RightShoulder1 = 255;
 
@@ -870,8 +893,11 @@ void CControllerConfigManager::AffectControllerStateOn_ButtonDown_AllStates(int3
 {
 	if (button == GetControllerKeyAssociatedWithAction(CAMERA_CHANGE_VIEW_ALL_SITUATIONS, type))
 		state.Select = 255;
+
+#ifndef BIND_VEHICLE_FIREWEAPON
 	if (button == GetControllerKeyAssociatedWithAction(PED_FIREWEAPON, type))
 		state.Circle = 255;
+#endif
 
 	if (button == GetControllerKeyAssociatedWithAction(GO_LEFT, type))
 	{
@@ -1587,28 +1613,25 @@ bool CControllerConfigManager::GetIsMouseButtonUp(RsKeyCodes keycode)
 	return false;
 }
 
+#define CLEAR_ACTION_IF_NEEDED(action) \
+if (key == GetControllerKeyAssociatedWithAction(action, type))\
+	ClearSettingsAssociatedWithAction(action, type);
+
 void CControllerConfigManager::DeleteMatchingCommonControls(e_ControllerAction action, int32 key, eControllerType type)
 {
 	if (!GetIsKeyBlank(key, type))
 	{
-		if (key == GetControllerKeyAssociatedWithAction(CAMERA_CHANGE_VIEW_ALL_SITUATIONS,type))
-			ClearSettingsAssociatedWithAction(CAMERA_CHANGE_VIEW_ALL_SITUATIONS, type);
-		if (key == GetControllerKeyAssociatedWithAction(PED_FIREWEAPON, type))
-			ClearSettingsAssociatedWithAction(PED_FIREWEAPON, type);
-		if (key == GetControllerKeyAssociatedWithAction(GO_LEFT, type))
-			ClearSettingsAssociatedWithAction(GO_LEFT, type);
-		if (key == GetControllerKeyAssociatedWithAction(GO_RIGHT, type))
-			ClearSettingsAssociatedWithAction(GO_RIGHT, type);
-		if (key == GetControllerKeyAssociatedWithAction(NETWORK_TALK, type))
-			ClearSettingsAssociatedWithAction(NETWORK_TALK, type);
-		if (key == GetControllerKeyAssociatedWithAction(SWITCH_DEBUG_CAM_ON, type))
-			ClearSettingsAssociatedWithAction(SWITCH_DEBUG_CAM_ON, type);
-		if (key == GetControllerKeyAssociatedWithAction(TOGGLE_DPAD, type))
-			ClearSettingsAssociatedWithAction(TOGGLE_DPAD, type);
-		if (key == GetControllerKeyAssociatedWithAction(TAKE_SCREEN_SHOT, type))
-			ClearSettingsAssociatedWithAction(TAKE_SCREEN_SHOT, type);
-		if (key == GetControllerKeyAssociatedWithAction(SHOW_MOUSE_POINTER_TOGGLE, type))
-			ClearSettingsAssociatedWithAction(SHOW_MOUSE_POINTER_TOGGLE, type);
+		CLEAR_ACTION_IF_NEEDED(CAMERA_CHANGE_VIEW_ALL_SITUATIONS);
+#ifndef BIND_VEHICLE_FIREWEAPON
+		CLEAR_ACTION_IF_NEEDED(PED_FIREWEAPON);
+#endif
+		CLEAR_ACTION_IF_NEEDED(GO_LEFT);
+		CLEAR_ACTION_IF_NEEDED(GO_RIGHT);
+		CLEAR_ACTION_IF_NEEDED(NETWORK_TALK);
+		CLEAR_ACTION_IF_NEEDED(SWITCH_DEBUG_CAM_ON);
+		CLEAR_ACTION_IF_NEEDED(TOGGLE_DPAD);
+		CLEAR_ACTION_IF_NEEDED(TAKE_SCREEN_SHOT);
+		CLEAR_ACTION_IF_NEEDED(SHOW_MOUSE_POINTER_TOGGLE);
 	}
 }
 
@@ -1616,25 +1639,17 @@ void CControllerConfigManager::DeleteMatching3rdPersonControls(e_ControllerActio
 {
 	if (!GetIsKeyBlank(key, type))
 	{
-		if (key == GetControllerKeyAssociatedWithAction(PED_LOOKBEHIND, type))
-			ClearSettingsAssociatedWithAction(PED_LOOKBEHIND, type);
-		if (key == GetControllerKeyAssociatedWithAction(PED_CYCLE_WEAPON_LEFT, type))
-			ClearSettingsAssociatedWithAction(PED_CYCLE_WEAPON_LEFT, type);
-		if (key == GetControllerKeyAssociatedWithAction(PED_CYCLE_WEAPON_RIGHT, type))
-			ClearSettingsAssociatedWithAction(PED_CYCLE_WEAPON_RIGHT, type);
-		if (key == GetControllerKeyAssociatedWithAction(PED_JUMPING, type))
-			ClearSettingsAssociatedWithAction(PED_JUMPING, type);
-		if (key == GetControllerKeyAssociatedWithAction(PED_SPRINT, type))
-			ClearSettingsAssociatedWithAction(PED_SPRINT, type);
+		CLEAR_ACTION_IF_NEEDED(PED_LOOKBEHIND);
+		CLEAR_ACTION_IF_NEEDED(PED_CYCLE_WEAPON_LEFT);
+		CLEAR_ACTION_IF_NEEDED(PED_CYCLE_WEAPON_RIGHT);
+		CLEAR_ACTION_IF_NEEDED(PED_JUMPING);
+		CLEAR_ACTION_IF_NEEDED(PED_SPRINT);
 
 		if (CMenuManager::m_ControlMethod == CONTROL_CLASSIC)
 		{
-			if (key == GetControllerKeyAssociatedWithAction(PED_CYCLE_TARGET_LEFT, type))
-				ClearSettingsAssociatedWithAction(PED_CYCLE_TARGET_LEFT, type);
-			if (key == GetControllerKeyAssociatedWithAction(PED_CYCLE_TARGET_RIGHT, type))
-				ClearSettingsAssociatedWithAction(PED_CYCLE_TARGET_RIGHT, type);
-			if (key == GetControllerKeyAssociatedWithAction(PED_CENTER_CAMERA_BEHIND_PLAYER, type))
-				ClearSettingsAssociatedWithAction(PED_CENTER_CAMERA_BEHIND_PLAYER, type);
+			CLEAR_ACTION_IF_NEEDED(PED_CYCLE_TARGET_LEFT);
+			CLEAR_ACTION_IF_NEEDED(PED_CYCLE_TARGET_RIGHT);
+			CLEAR_ACTION_IF_NEEDED(PED_CENTER_CAMERA_BEHIND_PLAYER);
 		}
 	}
 }
@@ -1643,23 +1658,19 @@ void CControllerConfigManager::DeleteMatching1rst3rdPersonControls(e_ControllerA
 {
 	if (!GetIsKeyBlank(key, type))
 	{
-		if (key == GetControllerKeyAssociatedWithAction(PED_LOCK_TARGET, type))
-			ClearSettingsAssociatedWithAction(PED_LOCK_TARGET, type);
-		if (key == GetControllerKeyAssociatedWithAction(GO_FORWARD, type))
-			ClearSettingsAssociatedWithAction(GO_FORWARD, type);
-		if (key == GetControllerKeyAssociatedWithAction(GO_BACK, type))
-			ClearSettingsAssociatedWithAction(GO_BACK, type);
+#ifdef BIND_VEHICLE_FIREWEAPON
+		CLEAR_ACTION_IF_NEEDED(PED_FIREWEAPON);
+#endif
+		CLEAR_ACTION_IF_NEEDED(PED_LOCK_TARGET);
+		CLEAR_ACTION_IF_NEEDED(GO_FORWARD);
+		CLEAR_ACTION_IF_NEEDED(GO_BACK);
 
 		if (CMenuManager::m_ControlMethod == CONTROL_CLASSIC)
 		{
-			if (key == GetControllerKeyAssociatedWithAction(PED_1RST_PERSON_LOOK_LEFT, type))
-				ClearSettingsAssociatedWithAction(PED_1RST_PERSON_LOOK_LEFT, type);
-			if (key == GetControllerKeyAssociatedWithAction(PED_1RST_PERSON_LOOK_RIGHT, type))
-				ClearSettingsAssociatedWithAction(PED_1RST_PERSON_LOOK_RIGHT, type);
-			if (key == GetControllerKeyAssociatedWithAction(PED_1RST_PERSON_LOOK_DOWN, type))
-				ClearSettingsAssociatedWithAction(PED_1RST_PERSON_LOOK_DOWN, type);
-			if (key == GetControllerKeyAssociatedWithAction(PED_1RST_PERSON_LOOK_UP, type))
-				ClearSettingsAssociatedWithAction(PED_1RST_PERSON_LOOK_UP, type);
+			CLEAR_ACTION_IF_NEEDED(PED_1RST_PERSON_LOOK_LEFT);
+			CLEAR_ACTION_IF_NEEDED(PED_1RST_PERSON_LOOK_RIGHT);
+			CLEAR_ACTION_IF_NEEDED(PED_1RST_PERSON_LOOK_DOWN);
+			CLEAR_ACTION_IF_NEEDED(PED_1RST_PERSON_LOOK_UP);
 		}
 	}
 }
@@ -1668,34 +1679,23 @@ void CControllerConfigManager::DeleteMatchingVehicleControls(e_ControllerAction 
 {
 	if (!GetIsKeyBlank(key, type))
 	{
-		if (key == GetControllerKeyAssociatedWithAction(VEHICLE_LOOKBEHIND, type))
-			ClearSettingsAssociatedWithAction(VEHICLE_LOOKBEHIND, type);
-		if (key == GetControllerKeyAssociatedWithAction(VEHICLE_LOOKLEFT, type))
-			ClearSettingsAssociatedWithAction(VEHICLE_LOOKLEFT, type);
-		if (key == GetControllerKeyAssociatedWithAction(VEHICLE_LOOKRIGHT, type))
-			ClearSettingsAssociatedWithAction(VEHICLE_LOOKRIGHT, type);
-		if (key == GetControllerKeyAssociatedWithAction(VEHICLE_LOOKBEHIND, type)) // note: dublicate
-			ClearSettingsAssociatedWithAction(VEHICLE_LOOKBEHIND, type);
-		if (key == GetControllerKeyAssociatedWithAction(VEHICLE_HORN, type))
-			ClearSettingsAssociatedWithAction(VEHICLE_HORN, type);
-		if (key == GetControllerKeyAssociatedWithAction(VEHICLE_HANDBRAKE, type))
-			ClearSettingsAssociatedWithAction(VEHICLE_HANDBRAKE, type);
-		if (key == GetControllerKeyAssociatedWithAction(VEHICLE_ACCELERATE, type))
-			ClearSettingsAssociatedWithAction(VEHICLE_ACCELERATE, type);
-		if (key == GetControllerKeyAssociatedWithAction(VEHICLE_BRAKE, type))
-			ClearSettingsAssociatedWithAction(VEHICLE_BRAKE, type);
-		if (key == GetControllerKeyAssociatedWithAction(VEHICLE_CHANGE_RADIO_STATION, type))
-			ClearSettingsAssociatedWithAction(VEHICLE_CHANGE_RADIO_STATION, type);
-		if (key == GetControllerKeyAssociatedWithAction(TOGGLE_SUBMISSIONS, type))
-			ClearSettingsAssociatedWithAction(TOGGLE_SUBMISSIONS, type);
-		if (key == GetControllerKeyAssociatedWithAction(VEHICLE_TURRETLEFT, type))
-			ClearSettingsAssociatedWithAction(VEHICLE_TURRETLEFT, type);
-		if (key == GetControllerKeyAssociatedWithAction(VEHICLE_TURRETRIGHT, type))
-			ClearSettingsAssociatedWithAction(VEHICLE_TURRETRIGHT, type);
-		if (key == GetControllerKeyAssociatedWithAction(VEHICLE_TURRETUP, type))
-			ClearSettingsAssociatedWithAction(VEHICLE_TURRETUP, type);
-		if (key == GetControllerKeyAssociatedWithAction(VEHICLE_TURRETDOWN, type))
-			ClearSettingsAssociatedWithAction(VEHICLE_TURRETDOWN, type);
+#ifdef BIND_VEHICLE_FIREWEAPON
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_FIREWEAPON);
+#endif
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_LOOKBEHIND);
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_LOOKLEFT);
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_LOOKRIGHT);
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_LOOKBEHIND); // note: duplicate
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_HORN);
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_HANDBRAKE);
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_ACCELERATE);
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_BRAKE);
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_CHANGE_RADIO_STATION);
+		CLEAR_ACTION_IF_NEEDED(TOGGLE_SUBMISSIONS);
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_TURRETLEFT);
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_TURRETRIGHT);
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_TURRETUP);
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_TURRETDOWN);
 	}
 }
 
@@ -1703,8 +1703,7 @@ void CControllerConfigManager::DeleteMatchingVehicle_3rdPersonControls(e_Control
 {
 	if (!GetIsKeyBlank(key, type))
 	{
-		if (key == GetControllerKeyAssociatedWithAction(VEHICLE_ENTER_EXIT, type))
-			ClearSettingsAssociatedWithAction(VEHICLE_ENTER_EXIT, type);
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_ENTER_EXIT);
 	}
 }
 
@@ -1712,12 +1711,12 @@ void CControllerConfigManager::DeleteMatching1rstPersonControls(e_ControllerActi
 {
 	if (!GetIsKeyBlank(key, type))
 	{
-		if (key == GetControllerKeyAssociatedWithAction(PED_SNIPER_ZOOM_IN, type))
-			ClearSettingsAssociatedWithAction(PED_SNIPER_ZOOM_IN, type);
-		if (key == GetControllerKeyAssociatedWithAction(PED_SNIPER_ZOOM_OUT, type))
-			ClearSettingsAssociatedWithAction(PED_SNIPER_ZOOM_OUT, type);
+		CLEAR_ACTION_IF_NEEDED(PED_SNIPER_ZOOM_IN);
+		CLEAR_ACTION_IF_NEEDED(PED_SNIPER_ZOOM_OUT);
 	}
 }
+
+#undef CLEAR_ACTION_IF_NEEDED
 
 void CControllerConfigManager::DeleteMatchingActionInitiators(e_ControllerAction action, int32 key, eControllerType type)
 {
@@ -1797,7 +1796,9 @@ e_ControllerActionType CControllerConfigManager::GetActionType(e_ControllerActio
 	switch (action)
 	{
 	case CAMERA_CHANGE_VIEW_ALL_SITUATIONS:
+#ifndef BIND_VEHICLE_FIREWEAPON
 	case PED_FIREWEAPON:
+#endif
 	case GO_LEFT:
 	case GO_RIGHT:
 	case NETWORK_TALK:
@@ -1819,6 +1820,9 @@ e_ControllerActionType CControllerConfigManager::GetActionType(e_ControllerActio
 		return ACTIONTYPE_3RDPERSON;
 		break;
 
+#ifdef BIND_VEHICLE_FIREWEAPON
+	case VEHICLE_FIREWEAPON:
+#endif
 	case VEHICLE_LOOKBEHIND:
 	case VEHICLE_LOOKLEFT:
 	case VEHICLE_LOOKRIGHT:
@@ -1839,6 +1843,9 @@ e_ControllerActionType CControllerConfigManager::GetActionType(e_ControllerActio
 		return ACTIONTYPE_VEHICLE_3RDPERSON;
 		break;
 
+#ifdef BIND_VEHICLE_FIREWEAPON
+	case PED_FIREWEAPON:
+#endif
 	case PED_LOCK_TARGET:
 	case GO_FORWARD:
 	case GO_BACK:

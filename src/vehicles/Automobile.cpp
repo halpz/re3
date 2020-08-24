@@ -3413,7 +3413,7 @@ CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
 				m_fHealth -= bTakeLessDamage ? damage/6.0f : damage/2.0f;
 			}else{
 				if(damage > 35.0f && pDriver)
-					pDriver->Say(SOUND_PED_CAR_COLLISION);
+					pDriver->Say(SOUND_PED_ANNOYED_DRIVER);
 				m_fHealth -= bTakeLessDamage ? damage/12.0f : damage/4.0f;
 			}
 			if(m_fHealth <= 0.0f && oldHealth > 0)
@@ -4047,11 +4047,11 @@ CAutomobile::PlayCarHorn(void)
 		m_nCarHornTimer = 45;
 	}else if(r < 4){
 		if(pDriver)
-			pDriver->Say(SOUND_PED_CAR_COLLISION);
+			pDriver->Say(SOUND_PED_ANNOYED_DRIVER);
 		m_nCarHornTimer = 45;
 	}else{
 		if(pDriver)
-			pDriver->Say(SOUND_PED_CAR_COLLISION);
+			pDriver->Say(SOUND_PED_ANNOYED_DRIVER);
 	}
 }
 

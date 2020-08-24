@@ -203,7 +203,7 @@ cDMAudio::ReportCrime(eCrimeType crime, const CVector &pos)
 int32
 cDMAudio::CreateLoopingScriptObject(cAudioScriptObject *scriptObject)
 {
-	int32 audioEntity = AudioManager.CreateEntity(AUDIOTYPE_SCRIPTOBJECT, (CPhysical *)scriptObject);
+	int32 audioEntity = AudioManager.CreateEntity(AUDIOTYPE_SCRIPTOBJECT, scriptObject);
 
 	if ( AEHANDLE_IS_OK(audioEntity) )
 		AudioManager.SetEntityStatus(audioEntity, true);
@@ -220,7 +220,7 @@ cDMAudio::DestroyLoopingScriptObject(int32 audioEntity)
 void
 cDMAudio::CreateOneShotScriptObject(cAudioScriptObject *scriptObject)
 {
-	int32 audioEntity = AudioManager.CreateEntity(AUDIOTYPE_SCRIPTOBJECT, (CPhysical *)scriptObject);
+	int32 audioEntity = AudioManager.CreateEntity(AUDIOTYPE_SCRIPTOBJECT, scriptObject);
 
 	if ( AEHANDLE_IS_OK(audioEntity) )
 	{

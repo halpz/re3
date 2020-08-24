@@ -1721,7 +1721,11 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 		} else if (column == CONTSETUP_VEHICLE_COLUMN) {
 			switch (optionIdx) {
 				case 0:
-					controllerAction = PED_FIREWEAPON;
+#ifdef BIND_VEHICLE_FIREWEAPON
+ 					controllerAction = VEHICLE_FIREWEAPON;
+#else
+ 					controllerAction = PED_FIREWEAPON;
+#endif
 					break;
 				case 1:
 				case 2:

@@ -134,7 +134,7 @@ CPed::Say(uint16 audio)
 				case SOUND_PED_FLEE_SPRINT:
 				case SOUND_PED_TAXI_WAIT:
 				case SOUND_PED_EVADE:
-				case SOUND_PED_CAR_COLLISION:
+				case SOUND_PED_ANNOYED_DRIVER:
 					break;
 				default:
 					return;
