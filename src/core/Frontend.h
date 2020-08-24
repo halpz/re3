@@ -155,7 +155,10 @@ enum eSaveSlot
 	SAVESLOT_6,
 	SAVESLOT_7,
 	SAVESLOT_8,
-	SAVESLOT_LABEL = 36
+	SAVESLOT_LABEL = 36,
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	SAVESLOT_CFO
+#endif
 };
 
 #ifdef MENU_MAP
@@ -235,14 +238,15 @@ enum eMenuScreen
 	MENUPAGE_KEYBOARD_CONTROLS = 55,
 	MENUPAGE_MOUSE_CONTROLS = 56,
 	MENUPAGE_MISSION_RETRY = 57,
-	MENUPAGE_58 = 58,
 #ifdef MENU_MAP
-	MENUPAGE_MAP = 59,
+	MENUPAGE_MAP,
 #endif
-#ifdef GRAPHICS_MENU_OPTIONS
-	MENUPAGE_GRAPHICS_SETTINGS,
-#endif
+	MENUPAGE_UNK, // 58 in game. Map page is added above, because last screen in CMenuScreens should always be empty to make CFO work
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	MENUPAGES = 65 // for some room to add more screen
+#else
 	MENUPAGES
+#endif
 };
 
 enum eMenuAction
@@ -362,25 +366,13 @@ enum eMenuAction
 	MENUACTION_UNK112,
 	MENUACTION_REJECT_RETRY,
 	MENUACTION_UNK114,
-#ifdef IMPROVED_VIDEOMODE
-	MENUACTION_SCREENFORMAT,
-#endif
-#ifdef ANISOTROPIC_FILTERING
-	MENUACTION_MIPMAPS,
-	MENUACTION_TEXTURE_FILTERING,
-#endif
-#ifdef MULTISAMPLING
-	MENUACTION_MULTISAMPLING,
-#endif
-#ifdef NO_ISLAND_LOADING
-	MENUACTION_ISLANDLOADING,
-#endif
-#ifdef PS2_ALPHA_TEST
-	MENUACTION_PS2_ALPHA_TEST,
-#endif
-#ifdef CUTSCENE_BORDERS_SWITCH
-	MENUACTION_CUTSCENEBORDERS,
-#endif
+//#ifdef ANISOTROPIC_FILTERING
+//	MENUACTION_MIPMAPS,
+//	MENUACTION_TEXTURE_FILTERING,
+//#endif
+//#ifdef NO_ISLAND_LOADING
+//	MENUACTION_ISLANDLOADING,
+//#endif
 #ifdef CUSTOM_FRONTEND_OPTIONS
 	MENUACTION_TRIGGERFUNC
 #endif
@@ -469,7 +461,7 @@ struct BottomBarOption
 struct CMenuScreen
 {
 	char m_ScreenName[8];
-	int32 unk; // 2 on MENUPAGE_MULTIPLAYER_START, 1 on everywhere else
+	int32 unk; // 2 on MENUPAGE_MULTIPLAYER_START, 1 on everywhere else, 0 on unused.
 	int32 m_PreviousPage[2]; // eMenuScreen
 	int32 m_ParentEntry[2]; // row
 
@@ -704,8 +696,6 @@ public:
 	void PageUpList(bool);
 	void PageDownList(bool);
 	int8 GetPreviousPageOption();
-	
-	// uint8 GetNumberOfMenuOptions();
 };
 
 #ifndef IMPROVED_VIDEOMODE
@@ -713,6 +703,6 @@ VALIDATE_SIZE(CMenuManager, 0x564);
 #endif
 
 extern CMenuManager FrontEndMenuManager;
-extern CMenuScreen aScreens[];
+extern CMenuScreen aScreens[MENUPAGES];
 
 #endif

@@ -250,7 +250,7 @@ enum Config {
 #	define TRIANGLE_BACK_BUTTON
 //#	define CIRCLE_BACK_BUTTON
 #	define CUSTOM_FRONTEND_OPTIONS
-#	define GRAPHICS_MENU_OPTIONS
+#	define GRAPHICS_MENU_OPTIONS // otherwise Advanced Options menu will appear if Display is full
 #endif
 
 // Script
