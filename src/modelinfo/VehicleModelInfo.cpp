@@ -211,7 +211,7 @@ CVehicleModelInfo::CreateInstance(void)
 		clumpframe = RpClumpGetFrame(clump);
 
 		comp1 = ChooseComponent();
-		if(comp1 != -1){
+		if(comp1 != -1 && m_comps[comp1]){
 			atomic = RpAtomicClone(m_comps[comp1]);
 			f = RwFrameCreate();
 			RwFrameTransform(f,
@@ -224,7 +224,7 @@ CVehicleModelInfo::CreateInstance(void)
 		ms_compsUsed[0] = comp1;
 
 		comp2 = ChooseSecondComponent();
-		if(comp2 != -1){
+		if(comp2 != -1 && m_comps[comp2]){
 			atomic = RpAtomicClone(m_comps[comp2]);
 			f = RwFrameCreate();
 			RwFrameTransform(f,
