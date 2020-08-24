@@ -374,7 +374,7 @@ CCutsceneMgr::DeleteCutsceneData(void)
 			DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 	}
 	CTimer::Stop();
-	CGame::DrasticTidyUpMemory(TheCamera.GetScreenFadeStatus() == 2);
+	CGame::DrasticTidyUpMemory(TheCamera.GetScreenFadeStatus() == FADE_2);
 	CTimer::Update();
 }
 
