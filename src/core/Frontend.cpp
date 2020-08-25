@@ -1075,6 +1075,38 @@ CMenuManager::Draw()
 				leftText = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName);
 			}
 
+#ifdef CUSTOM_FRONTEND_OPTIONS
+			if (aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot == SAVESLOT_CFO) {
+				FrontendOption &option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
+				if (option.type == FEOPTION_SELECT) {
+					if (option.onlyApplyOnEnter){
+						if (m_nCurrOption != i) {
+							if (option.displayedValue != option.lastSavedValue)
+								SetHelperText(3); // Restored original value
+
+//							option.displayedValue = option.lastSavedValue = *option.value;
+
+						} else {
+							if (option.displayedValue != *option.value)
+								SetHelperText(1); // Enter to apply
+							else if (m_nHelperTextMsgId == 1)
+								ResetHelperText(); // Applied
+						}
+					}
+				}
+
+				if (m_nCurrOption != lastOption && lastOption == i) {
+					FrontendOption &oldOption = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[lastOption].m_TargetMenu];
+					if (oldOption.type == FEOPTION_DYNAMIC || oldOption.type == FEOPTION_BUILTIN_ACTION)
+						if(oldOption.buttonPressFunc)
+							oldOption.buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
+
+					if (oldOption.onlyApplyOnEnter && oldOption.type == FEOPTION_SELECT)
+						oldOption.displayedValue = oldOption.lastSavedValue = *oldOption.value;
+				}
+			}
+#endif
+
 			switch (aScreens[m_nCurrScreen].m_aEntries[i].m_Action) {
 			case MENUACTION_CHANGEMENU: {
 				switch (aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu) {
@@ -1476,38 +1508,6 @@ CMenuManager::Draw()
 					SetHelperText(3);
 				}
 			}
-
-#ifdef CUSTOM_FRONTEND_OPTIONS
-			if (aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot == SAVESLOT_CFO) {
-				FrontendOption &option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
-				if (option.type == FEOPTION_SELECT) {
-					if (option.onlyApplyOnEnter){
-						if (m_nCurrOption != i) {
-							if (option.displayedValue != option.lastSavedValue)
-								SetHelperText(3); // Restored original value
-
-//							option.displayedValue = option.lastSavedValue = *option.value;
-
-						} else {
-							if (option.displayedValue != *option.value)
-								SetHelperText(1); // Enter to apply
-							else if (m_nHelperTextMsgId == 1)
-								ResetHelperText(); // Applied
-						}
-					}
-				}
-
-				if (m_nCurrOption != lastOption && lastOption == i) {
-					FrontendOption &oldOption = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[lastOption].m_TargetMenu];
-					if (oldOption.type == FEOPTION_DYNAMIC || oldOption.type == FEOPTION_BUILTIN_ACTION)
-						if(oldOption.buttonPressFunc)
-							oldOption.buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
-
-					if (oldOption.onlyApplyOnEnter && oldOption.type == FEOPTION_SELECT)
-						oldOption.displayedValue = oldOption.lastSavedValue = *oldOption.value;
-				}
-			}
-#endif
 
 			// Sliders
 			int lastActiveBarX;

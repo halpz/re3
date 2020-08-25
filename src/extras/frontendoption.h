@@ -107,7 +107,7 @@ struct FrontendOption
 
 		// Only for static/select
 		struct {
-			const wchar** rightTexts;
+			wchar** rightTexts;
 			int8 numRightTexts;
 			bool onlyApplyOnEnter;
 			ChangeFunc changeFunc;

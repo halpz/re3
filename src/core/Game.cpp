@@ -295,7 +295,10 @@ bool CGame::InitialiseOnceAfterRW(void)
 	CWorld::Players[0].SetPlayerSkin(CMenuManager::m_PrefsSkinFile);
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
-	CustomFrontendOptionsPopulate();
+	if (numCustomFrontendOptions == 0 && numCustomFrontendScreens == 0) {
+		CustomFrontendOptionsPopulate();
+		FrontEndMenuManager.LoadSettings();
+	}
 #endif
 	return true;
 }

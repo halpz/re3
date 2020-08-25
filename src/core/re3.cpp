@@ -177,7 +177,12 @@ wchar* MultiSamplingDraw(bool *disabled, bool userHovering) {
 		} else {
 			FrontEndMenuManager.SetHelperText(1);
 		}
+	} else {
+		if (FrontEndMenuManager.m_nDisplayMSAALevel != FrontEndMenuManager.m_nPrefsMSAALevel) {
+			FrontEndMenuManager.m_nDisplayMSAALevel = FrontEndMenuManager.m_nPrefsMSAALevel;
+		}
 	}
+
 	if (!FrontEndMenuManager.m_bGameNotLoaded)
 		*disabled = true;
 
@@ -305,7 +310,7 @@ CustomFrontendOptionsPopulate(void)
 #endif
 	// -- Graphics/display seperation preperation end
 
-	static const wchar* off_on[] = { TheText.Get("FEM_OFF"), TheText.Get("FEM_ON") };
+	const wchar* off_on[] = { TheText.Get("FEM_OFF"), TheText.Get("FEM_ON") };
 
 #ifdef MORE_LANGUAGES
 	FrontendOptionSetCursor(MENUPAGE_LANGUAGE_SETTINGS, -2);
@@ -326,7 +331,7 @@ CustomFrontendOptionsPopulate(void)
 	CLONE_OPTION(TheText.Get("FED_WIS"), MENUACTION_WIDESCREEN, nil, nil)
 
 #ifdef IMPROVED_VIDEOMODE
-	static const wchar* screenModes[] = { (wchar*)L"FULLSCREEN", (wchar*)L"WINDOWED" };
+	const wchar* screenModes[] = { TheText.Get("FED_FLS"), TheText.Get("FED_WND") };
 	// Storing isn't enabled because it's handled in Frontend
 	FrontendOptionAddSelect(TheText.Get("FEM_SCF"), screenModes, 2, (int8*)&FrontEndMenuManager.m_nPrefsWindowed, true, ScreenModeChange, nil);
 #endif
