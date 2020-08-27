@@ -9,6 +9,8 @@
 #include "World.h"
 #include "Timer.h"
 
+//--MIAMI: file almost done (loading/saving will perhaps stay different)
+
 eLevelName CTheZones::m_CurrLevel;
 int16 CTheZones::FindIndex;
 
@@ -26,14 +28,12 @@ CZoneInfo CTheZones::ZoneInfoArray[2*NUMINFOZONES];
 
 #define SWAPF(a, b) { float t; t = a; a = b; b = t; }
 
-//--MIAMI: done
 wchar*
 CZone::GetTranslatedName(void)
 {
 	return TheText.Get(name);
 }
 
-//--MIAMI: done
 void
 CTheZones::Init(void)
 {
@@ -124,7 +124,6 @@ CTheZones::Init(void)
 	MapZoneArray[0].level = LEVEL_GENERIC;
 }
 
-//--MIAMI: done
 void
 CTheZones::Update(void)
 {
@@ -137,7 +136,6 @@ CTheZones::Update(void)
 	m_CurrLevel = GetLevelFromPosition(&pos);
 }
 
-//--MIAMI: done
 void
 CTheZones::CreateZone(char *name, eZoneType type,
 	              float minx, float miny, float minz,
@@ -204,7 +202,6 @@ CTheZones::CreateZone(char *name, eZoneType type,
 	}
 }
 
-//--MIAMI: done
 void
 CTheZones::PostZoneCreation(void)
 {
@@ -214,7 +211,6 @@ CTheZones::PostZoneCreation(void)
 	InitialiseAudioZoneArray();
 }
 
-//--MIAMI: done, but does nothing
 void
 CTheZones::CheckZonesForOverlap(void)
 {
@@ -231,7 +227,6 @@ CTheZones::CheckZonesForOverlap(void)
 	}
 }
 
-//--MIAMI: done
 void
 CTheZones::InsertZoneIntoZoneHierarchy(CZone *zone)
 {
@@ -241,7 +236,6 @@ CTheZones::InsertZoneIntoZoneHierarchy(CZone *zone)
 	InsertZoneIntoZoneHierRecursive(zone, &NavigationZoneArray[0]);
 }
 
-//--MIAMI: done
 bool
 CTheZones::InsertZoneIntoZoneHierRecursive(CZone *inner, CZone *outer)
 {
@@ -285,7 +279,6 @@ CTheZones::InsertZoneIntoZoneHierRecursive(CZone *inner, CZone *outer)
 	return true;
 }
 
-//--MIAMI: done
 bool
 CTheZones::ZoneIsEntirelyContainedWithinOtherZone(CZone *inner, CZone *outer)
 {
@@ -310,7 +303,6 @@ CTheZones::ZoneIsEntirelyContainedWithinOtherZone(CZone *inner, CZone *outer)
 	return true;
 }
 
-//--MIAMI: done
 bool
 CTheZones::PointLiesWithinZone(const CVector *v, CZone *zone)
 {
@@ -319,7 +311,6 @@ CTheZones::PointLiesWithinZone(const CVector *v, CZone *zone)
 	       zone->minz <= v->z && v->z <= zone->maxz;
 }
 
-//--MIAMI: done
 eLevelName
 CTheZones::GetLevelFromPosition(CVector const *v)
 {
@@ -333,7 +324,6 @@ CTheZones::GetLevelFromPosition(CVector const *v)
 	return MapZoneArray[0].level;
 }
 
-//--MIAMI: done
 CZone*
 CTheZones::FindInformationZoneForPosition(const CVector *v)
 {
@@ -347,7 +337,6 @@ CTheZones::FindInformationZoneForPosition(const CVector *v)
 	return &InfoZoneArray[0];
 }
 
-//--MIAMI: done
 CZone*
 CTheZones::FindSmallestNavigationZoneForPosition(const CVector *v, bool findDefault, bool findNavig)
 {
@@ -370,7 +359,6 @@ CTheZones::FindSmallestNavigationZoneForPosition(const CVector *v, bool findDefa
 	return best;
 }
 
-//--MIAMI: done
 int16
 CTheZones::FindZoneByLabelAndReturnIndex(char *name, eZoneType type)
 {
@@ -400,7 +388,6 @@ CTheZones::FindZoneByLabelAndReturnIndex(char *name, eZoneType type)
 	return -1;
 }
 
-//--MIAMI: done
 int16
 CTheZones::FindNextZoneByLabelAndReturnIndex(char *name, eZoneType type)
 {
@@ -431,7 +418,6 @@ CTheZones::FindNextZoneByLabelAndReturnIndex(char *name, eZoneType type)
 	return -1;
 }
 
-//--MIAMI: done
 CZoneInfo*
 CTheZones::GetZoneInfo(const CVector *v, uint8 day)
 {
@@ -556,7 +542,7 @@ CTheZones::SetZonePedInfo(uint16 zoneid, uint8 day, int16 pedDensity,
 	info->gangPedThreshold[8] = info->gangPedThreshold[7];
 }
 
-//--MIAMI: done, unused
+//--MIAMI: unused
 void
 CTheZones::SetCarDensity(uint16 zoneid, uint8 day, uint16 cardensity)
 {
@@ -565,7 +551,7 @@ CTheZones::SetCarDensity(uint16 zoneid, uint8 day, uint16 cardensity)
 	ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight].carDensity = cardensity;
 }
 
-//--MIAMI: done, unused
+//--MIAMI: unused
 void
 CTheZones::SetPedDensity(uint16 zoneid, uint8 day, uint16 peddensity)
 {
@@ -574,7 +560,6 @@ CTheZones::SetPedDensity(uint16 zoneid, uint8 day, uint16 peddensity)
 	ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight].pedDensity = peddensity;
 }
 
-//--MIAMI: done
 void
 CTheZones::SetPedGroup(uint16 zoneid, uint8 day, uint16 pedgroup)
 {
@@ -583,7 +568,6 @@ CTheZones::SetPedGroup(uint16 zoneid, uint8 day, uint16 pedgroup)
 	ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight].pedGroup = pedgroup;
 }
 
-//--MIAMI: done
 int16
 CTheZones::FindAudioZone(CVector *pos)
 {
@@ -595,7 +579,6 @@ CTheZones::FindAudioZone(CVector *pos)
 	return -1;
 }
 
-//--MIAMI: done
 void
 CTheZones::AddZoneToAudioZoneArray(CZone *zone)
 {
@@ -613,7 +596,6 @@ CTheZones::AddZoneToAudioZoneArray(CZone *zone)
 	AudioZoneArray[NumberOfAudioZones++] = z;
 }
 
-//--MIAMI: done
 void
 CTheZones::InitialiseAudioZoneArray(void)
 {
@@ -645,7 +627,6 @@ CTheZones::InitialiseAudioZoneArray(void)
 		}
 }
 
-//--MIAMI: TODO
 void
 CTheZones::SaveAllZones(uint8 *buffer, uint32 *size)
 {
@@ -666,7 +647,7 @@ CTheZones::SaveAllZones(uint8 *buffer, uint32 *size)
 	WriteSaveBuf(buffer, FindIndex);
 	WriteSaveBuf(buffer, (int16)0); // padding
 
-// TODO(MIAMI): implement SaveOneZone
+// TODO(MIAMI) ? implement SaveOneZone
 	for(i = 0; i < ARRAY_SIZE(NavigationZoneArray); i++){
 		CZone *zone = WriteSaveBuf(buffer, NavigationZoneArray[i]);
 		zone->child = (CZone*)GetIndexForZonePointer(NavigationZoneArray[i].child);
@@ -676,6 +657,14 @@ CTheZones::SaveAllZones(uint8 *buffer, uint32 *size)
 
 	for(i = 0; i < ARRAY_SIZE(InfoZoneArray); i++){
 		CZone *zone = WriteSaveBuf(buffer, InfoZoneArray[i]);
+		/*
+		The call of GetIndexForZonePointer is wrong, as it is
+		meant for a different array, but the game doesn't brake
+		if those fields are nil. Let's make sure they are.
+		*/
+		assert(InfoZoneArray[i].child == nil);
+		assert(InfoZoneArray[i].parent == nil);
+		assert(InfoZoneArray[i].next == nil);
 		zone->child = (CZone*)GetIndexForZonePointer(InfoZoneArray[i].child);
 		zone->parent = (CZone*)GetIndexForZonePointer(InfoZoneArray[i].parent);
 		zone->next = (CZone*)GetIndexForZonePointer(InfoZoneArray[i].next);
@@ -691,11 +680,7 @@ CTheZones::SaveAllZones(uint8 *buffer, uint32 *size)
 	for(i = 0; i < ARRAY_SIZE(MapZoneArray); i++) {
 		CZone* zone = WriteSaveBuf(buffer, MapZoneArray[i]);
 
-		/*
-		The call of GetIndexForZonePointer is wrong, as it is
-		meant for a different array, but the game doesn't brake
-		if those fields are nil. Let's make sure they are.
-		*/
+		// see above
 		assert(MapZoneArray[i].child == nil);
 		assert(MapZoneArray[i].parent == nil);
 		assert(MapZoneArray[i].next == nil);
@@ -713,7 +698,6 @@ CTheZones::SaveAllZones(uint8 *buffer, uint32 *size)
 	VALIDATESAVEBUF(*size)
 }
 
-//--MIAMI: TODO
 void
 CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 {
@@ -726,7 +710,7 @@ CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 	FindIndex = ReadSaveBuf<int16>(buffer);
 	ReadSaveBuf<int16>(buffer);
 
-// TODO(MIAMI): implement LoadOneZone
+// TODO(MIAMI) ? implement LoadOneZone
 	for(i = 0; i < ARRAY_SIZE(NavigationZoneArray); i++){
 		NavigationZoneArray[i] = ReadSaveBuf<CZone>(buffer);
 
@@ -738,6 +722,14 @@ CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 	for(i = 0; i < ARRAY_SIZE(InfoZoneArray); i++){
 		InfoZoneArray[i] = ReadSaveBuf<CZone>(buffer);
 
+		/*
+		The call of GetPointerForZoneIndex is wrong, as it is
+		meant for a different array, but the game doesn't brake
+		if save data stored is -1.
+		*/
+		InfoZoneArray[i].child = GetPointerForZoneIndex((uintptr)InfoZoneArray[i].child);
+		InfoZoneArray[i].parent = GetPointerForZoneIndex((uintptr)InfoZoneArray[i].parent);
+		InfoZoneArray[i].next = GetPointerForZoneIndex((uintptr)InfoZoneArray[i].next);
 		InfoZoneArray[i].child = GetPointerForZoneIndex((uintptr)InfoZoneArray[i].child);
 		InfoZoneArray[i].parent = GetPointerForZoneIndex((uintptr)InfoZoneArray[i].parent);
 		InfoZoneArray[i].next = GetPointerForZoneIndex((uintptr)InfoZoneArray[i].next);
@@ -753,11 +745,7 @@ CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 	for(i = 0; i < ARRAY_SIZE(MapZoneArray); i++){
 		MapZoneArray[i] = ReadSaveBuf<CZone>(buffer);
 
-		/*
-		The call of GetPointerForZoneIndex is wrong, as it is
-		meant for a different array, but the game doesn't brake
-		if save data stored is -1.
-		*/
+		// see above
 		MapZoneArray[i].child = GetPointerForZoneIndex((uintptr)MapZoneArray[i].child);
 		MapZoneArray[i].parent = GetPointerForZoneIndex((uintptr)MapZoneArray[i].parent);
 		MapZoneArray[i].next = GetPointerForZoneIndex((uintptr)MapZoneArray[i].next);

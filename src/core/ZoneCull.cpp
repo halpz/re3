@@ -11,6 +11,8 @@
 #include "ZoneCull.h"
 #include "Zones.h"
 
+//--MIAMI: done
+
 int32     CCullZones::NumAttributeZones;
 CAttributeZone CCullZones::aAttributeZones[NUMATTRIBZONES];
 
@@ -18,6 +20,7 @@ int32 CCullZones::CurrentWantedLevelDrop_Player;
 int32 CCullZones::CurrentFlags_Camera;
 int32 CCullZones::CurrentFlags_Player;
 bool CCullZones::bCurrentSubwayIsInvisible;
+bool CCullZones::bAtBeachForAudio;
 
 void
 CCullZones::Init(void)
@@ -37,6 +40,7 @@ CCullZones::Update(void)
 	switch(CTimer::GetFrameCounter() & 7){
 	case 0:
 	case 4:
+		UpdateAtBeachForAudio();
 		break;
 
 	case 2:
@@ -55,6 +59,27 @@ CCullZones::Update(void)
 			&CurrentWantedLevelDrop_Player);
 		break;
 	}
+}
+
+// TODO? put somewhere else?
+bool
+IsPointWithinArbitraryArea(float px, float py, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
+{
+	if((px-x1)*(x2-x1) - (py-y1)*(y2-y1) < 0.0f) return false;
+	if((px-x2)*(x3-x2) - (py-y2)*(y3-y2) < 0.0f) return false;
+	if((px-x3)*(x4-x3) - (py-y3)*(y4-y3) < 0.0f) return false;
+	if((px-x4)*(x1-x4) - (py-y4)*(y1-y4) < 0.0f) return false;
+	return true;
+}
+
+void
+CCullZones::UpdateAtBeachForAudio(void)
+{
+	bAtBeachForAudio = IsPointWithinArbitraryArea(TheCamera.GetPosition().x, TheCamera.GetPosition().y,
+		400.0f, -1644.4f,
+		751.9f, 1267.8f,
+		971.9f, 1216.2f,
+		840.0f, -1744.0f);
 }
 
 void

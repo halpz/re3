@@ -485,7 +485,7 @@ public:
 	uint32 bCrouchWhenScared : 1;
 	uint32 bKnockedOffBike : 1;
 	uint32 b158_8 : 1;
-	uint32 b158_10 : 1;
+	uint32 bCollectBusFare : 1;
 	uint32 bBoughtIceCream : 1;
 	uint32 b158_40 : 1;
 	//uint32 b158_80
@@ -911,6 +911,7 @@ public:
 	bool IsPedInControl(void);
 	bool CanPedDriveOff(void);
 	bool CanBeDeleted(void);
+	bool CanBeDeletedEvenInVehicle(void);
 	bool CanStrafeOrMouseControl(void);
 	bool CanPedReturnToState(void);
 	void SetMoveState(eMoveState);

@@ -28,6 +28,7 @@
 #include "Particle.h"
 #include "ColStore.h"
 #include "Automobile.h"
+#include "MBlur.h"
 
 uint8 CGameLogic::ActivePlayers;
 uint8 CGameLogic::ShortCutState;
@@ -343,7 +344,10 @@ CGameLogic::RestorePlayerStuffDuringResurrection(CPlayerPed *pPlayerPed, CVector
 	pPlayerPed->bIsVisible = true;
 	pPlayerPed->m_bloodyFootprintCountOrDeathTime = 0;
 	pPlayerPed->bDoBloodyFootprints = false;
-	//TODO(MIAMI): clear drunk stuff
+	pPlayerPed->m_nDrunkenness = 0;
+	pPlayerPed->m_nFadeDrunkenness = 0;
+	CMBlur::ClearDrunkBlur();
+	pPlayerPed->m_nDrunkCountdown = 0;
 	pPlayerPed->ClearAdrenaline();
 	pPlayerPed->m_fCurrentStamina = pPlayerPed->m_fMaxStamina;
 	if (pPlayerPed->m_pFire)
@@ -368,7 +372,7 @@ CGameLogic::RestorePlayerStuffDuringResurrection(CPlayerPed *pPlayerPed, CVector
 	CWorld::ClearExcitingStuffFromArea(pos, 4000.0, 1);
 	pPlayerPed->RestoreHeadingRate();
 	CGame::currArea = AREA_MAIN_MAP;
-	//CStreaming::RemoveBuildingsNotInArea(0); // TODO(MIAMI)
+	CStreaming::RemoveBuildingsNotInArea(0);
 	TheCamera.SetCameraDirectlyInFrontForFollowPed_CamOnAString();
 	TheCamera.Restore();
 	CReferences::RemoveReferencesToPlayer();

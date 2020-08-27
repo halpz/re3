@@ -141,9 +141,12 @@ public:
 	enum
 	{
 		HORNHISTORY_SIZE = 5,
+		DRUNK_STEERING_BUFFER_SIZE = 10,
 	};
 	CControllerState NewState;
 	CControllerState OldState;
+	int16 SteeringLeftRightBuffer[DRUNK_STEERING_BUFFER_SIZE];
+	int32 DrunkDrivingBufferUsed;
 	CControllerState PCTempKeyState;
 	CControllerState PCTempJoyState;
 	CControllerState PCTempMouseState;
@@ -171,6 +174,7 @@ public:
 	static bool bObsoleteControllerMessage;
 	static bool bOldDisplayNoControllerMessage;
 	static bool m_bMapPadOneToPadTwo;
+	static bool bHasPlayerCheated;
 	
 	static CKeyboardState OldKeyState;
 	static CKeyboardState NewKeyState;
@@ -262,6 +266,7 @@ public:
 	static char *EditString(char *pStr, int32 nSize);
 	static int32 *EditCodesForControls(int32 *pRsKeys, int32 nSize);
 	uint32 InputHowLongAgo(void);
+	void SetDrunkInputDelay(int32 delay) { DrunkDrivingBufferUsed = delay; }
 
 #ifdef XINPUT
 	void AffectFromXinput(uint32 pad);

@@ -4894,11 +4894,6 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 
 	if (ResetStatics) {
 		FOV = DefaultFOV;
-
-		// TODO(Miami): Remove that when cam is done!
-		// GTA 3 has this in veh. camera
-		if (TheCamera.m_bIdleOn)
-			TheCamera.m_uiTimeWeEnteredIdle = CTimer::GetTimeInMilliseconds();
 	} else {
 		if (isCar || isBike) {
 			// 0.4f: CAR_FOV_START_SPEED
@@ -4933,18 +4928,13 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 		Rotating = false;
 		m_bCollisionChecksOn = true;
 
-
-		// TODO(Miami): Uncomment that when cam is done!
-
-		// Garage exit cam is not working well in III...
-		// if (!TheCamera.m_bJustCameOutOfGarage)
-		// {
-		Alpha = 0.0f;
-		Beta = car->GetForward().Heading() - HALFPI;
-		if (TheCamera.m_bCamDirectlyInFront) {
-			Beta += PI;
+		if (!TheCamera.m_bJustCameOutOfGarage) {
+			Alpha = 0.0f;
+			Beta = car->GetForward().Heading() - HALFPI;
+			if (TheCamera.m_bCamDirectlyInFront) {
+				Beta += PI;
+			}
 		}
-		// }
 
 		BetaSpeed = 0.0;
 		AlphaSpeed = 0.0;

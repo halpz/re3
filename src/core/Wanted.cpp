@@ -10,6 +10,7 @@
 #include "CopPed.h"
 #include "Wanted.h"
 #include "General.h"
+#include "Stats.h"
 
 int32 CWanted::MaximumWantedLevel = 6;
 int32 CWanted::nMaximumWantedLevel = 9600;
@@ -308,7 +309,6 @@ CWanted::ReportCrimeNow(eCrimeType type, const CVector &coors, bool policeDoesnt
 	UpdateWantedLevel();
 }
 
-// TODO(Miami): Stats
 void
 CWanted::UpdateWantedLevel()
 {
@@ -318,36 +318,44 @@ CWanted::UpdateWantedLevel()
 		m_nChaos = nMaximumWantedLevel;
 
 	if (m_nChaos >= 0 && m_nChaos < 50) {
+		if (m_nWantedLevel == 1)
+			++CStats::WantedStarsEvaded;
 		m_nWantedLevel = 0;
 		m_MaximumLawEnforcerVehicles = 0;
 		m_MaxCops = 0;
 		m_RoadblockDensity = 0;
 	} else if (m_nChaos >= 50 && m_nChaos < 180) {
+		CStats::WantedStarsAttained += 1 - m_nWantedLevel;
 		m_nWantedLevel = 1;
 		m_MaximumLawEnforcerVehicles = 1;
 		m_MaxCops = 1;
 		m_RoadblockDensity = 0;
 	} else if (m_nChaos >= 180 && m_nChaos < 550) {
+		CStats::WantedStarsAttained += 2 - m_nWantedLevel;
 		m_nWantedLevel = 2;
 		m_MaximumLawEnforcerVehicles = 2;
 		m_MaxCops = 3;
 		m_RoadblockDensity = 0;
 	} else if (m_nChaos >= 550 && m_nChaos < 1200) {
+		CStats::WantedStarsAttained += 3 - m_nWantedLevel;
 		m_nWantedLevel = 3;
 		m_MaximumLawEnforcerVehicles = 2;
 		m_MaxCops = 4;
 		m_RoadblockDensity = 12;
 	} else if (m_nChaos >= 1200 && m_nChaos < 2400) {
+		CStats::WantedStarsAttained += 4 - m_nWantedLevel;
 		m_nWantedLevel = 4;
 		m_MaximumLawEnforcerVehicles = 2;
 		m_MaxCops = 6;
 		m_RoadblockDensity = 18;
 	} else if (m_nChaos >= 2400 && m_nChaos < 4800) {
+		CStats::WantedStarsAttained += 5 - m_nWantedLevel;
 		m_nWantedLevel = 5;
 		m_MaximumLawEnforcerVehicles = 3;
 		m_MaxCops = 8;
 		m_RoadblockDensity = 24;
 	} else if (m_nChaos >= 4800) {
+		CStats::WantedStarsAttained += 6 - m_nWantedLevel;
 		m_nWantedLevel = 6;
 		m_MaximumLawEnforcerVehicles = 3;
 		m_MaxCops = 10;
@@ -494,8 +502,7 @@ CWanted::UpdateCrimesQ(void)
 void
 CWanted::Suspend(void)
 {
-	// TODO(Miami): Stats
-	// dwStarsEvaded += m_nWantedLevel;
+	CStats::WantedStarsEvaded += m_nWantedLevel;
 	m_nMinChaos = m_nChaos;
 	m_nMinWantedLevel = m_nWantedLevel;
 	m_nLastTimeSuspended = CTimer::GetTimeInMilliseconds();

@@ -32,9 +32,9 @@ int8 CDarkel::InterruptedWeapon;
  * makes game handle sounds & messages instead of SCM (just like in GTA2)
  * but it's never been used in the game. Has unused sliding text when frenzy completed etc.
  */
-int8 CDarkel::bStandardSoundAndMessages;
-int8 CDarkel::bNeedHeadShot;
-int8 CDarkel::bProperKillFrenzy;
+bool CDarkel::bStandardSoundAndMessages;
+bool CDarkel::bNeedHeadShot;
+bool CDarkel::bProperKillFrenzy;
 uint16 CDarkel::Status;
 uint16 CDarkel::RegisteredKills[NUM_DEFAULT_MODELS];
 int32 CDarkel::ModelToKill;

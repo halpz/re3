@@ -81,6 +81,9 @@
 #define OFFSCREEN_DESPAWN_RANGE (40.0f)
 #define EXTENDED_RANGE_DESPAWN_MULTIPLIER (1.5f)
 
+//--MIAMI: file done
+
+bool CCarCtrl::bMadDriversCheat;
 int CCarCtrl::NumLawEnforcerCars;
 int CCarCtrl::NumAmbulancesOnDuty;
 int CCarCtrl::NumFiretrucksOnDuty;
@@ -158,7 +161,7 @@ CCarCtrl::GenerateOneRandomCar()
 		carModel = ChoosePoliceCarModel();
 	}else{
 		carModel = ChooseModel(&zone, &vecTargetPos, &carClass);
-		if (carClass == COPS && pWanted->m_nWantedLevel >= 1 || carModel < 0)
+		if (carModel == -1 || (carClass == COPS && pWanted->m_nWantedLevel >= 1))
 			/* All cop spawns with wanted level are handled by condition above. */
 			/* In particular it means that cop cars never spawn if player has wanted level of 1. */
 			return;
@@ -664,7 +667,7 @@ CCarCtrl::GenerateOneRandomCar()
 		nMadDrivers = 6;
 		break;
 	}
-	if ((CGeneral::GetRandomNumber() & 0x7F) < nMadDrivers /* TODO(MIAMI): || mad drivers cheat */) {
+	if ((CGeneral::GetRandomNumber() & 0x7F) < nMadDrivers || bMadDriversCheat) {
 		pVehicle->SetStatus(STATUS_PHYSICS);
 		pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
 		pVehicle->AutoPilot.m_nCruiseSpeed += 10;
@@ -758,7 +761,8 @@ CCarCtrl::ChooseCarRating(CZoneInfo* pZoneInfo)
 int32
 CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass) {
 	int32 model = -1;
-	for (int i = 0; i < 10 && (model == -1 || !CStreaming::HasModelLoaded(model)); i++) {
+	int32 i;
+	for (i = 10; i > 0 && (model == -1 || !CStreaming::HasModelLoaded(model)); i--) {
 		int rnd = CGeneral::GetRandomNumberInRange(0, 1000);
 
 		if (rnd < pZone->copThreshold) {
@@ -767,9 +771,9 @@ CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass) {
 			continue;
 		}
 
-		int j;
+		int32 j;
 		for (j = 0; j < NUM_GANG_CAR_CLASSES; j++) {
-			if (rnd < pZone->gangThreshold[i]) {
+			if (rnd < pZone->gangThreshold[j]) {
 				*pClass = j + FIRST_GANG_CAR_RATING;
 				model = ChooseGangCarModel(j);
 				break;
@@ -782,6 +786,8 @@ CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass) {
 		*pClass = ChooseCarRating(pZone);
 		model = ChooseCarModel(*pClass);
 	}
+	if (i == 0)
+		return -1;
 	return model;
 }
 
@@ -950,6 +956,10 @@ CCarCtrl::RemoveCarsIfThePoolGetsFull(void)
 void
 CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 {
+#ifdef FIX_BUGS
+	if (pVehicle->bIsLocked)
+		return;
+#endif
 	CVector vecPlayerPos = FindPlayerCentreOfWorld(CWorld::PlayerInFocus);
 	/* BUG: this variable is initialized only in if-block below but can be used outside of it. */
 	if (!IsThisVehicleInteresting(pVehicle) && !pVehicle->bIsLocked &&
@@ -2515,7 +2525,7 @@ void CCarCtrl::SteerAICarWithPhysics_OnlyMission(CVehicle* pVehicle, float* pSwe
 		SteerAIBoatWithPhysicsAttackingPlayer(pVehicle, pSwerve, pAccel, pBrake, pHandbrake);
 		return;
 	case MISSION_PLANE_FLYTOCOORS:
-		//SteerAIPlaneTowardsTargetCoors((CAutomobile*)pVehicle);
+		SteerAIPlaneTowardsTargetCoors((CAutomobile*)pVehicle);
 		return;
 	case MISSION_SLOWLY_DRIVE_TOWARDS_PLAYER_1:
 		SteerAICarWithPhysicsHeadingForTarget(pVehicle, nil,
@@ -2735,6 +2745,51 @@ void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* pHeli)
 	pHeli->GetMatrix().GetRight() = right;
 	pHeli->GetMatrix().GetForward() = forward;
 	pHeli->GetMatrix().GetUp() = up;
+}
+
+void CCarCtrl::SteerAIPlaneTowardsTargetCoors(CAutomobile* pPlane)
+{
+	CVector2D vecToTarget = pPlane->AutoPilot.m_vecDestinationCoors - pPlane->GetPosition();
+	float fForwardZ = (pPlane->AutoPilot.m_vecDestinationCoors.z - pPlane->GetPosition().z) / vecToTarget.Magnitude();
+	fForwardZ = clamp(fForwardZ, -0.3f, 0.3f);
+	float angle = CGeneral::GetATanOfXY(vecToTarget.x, vecToTarget.y);
+	while (angle > TWOPI)
+		angle -= TWOPI;
+	float difference = LimitRadianAngle(angle - pPlane->m_fOrientation);
+	float steer = difference > 0.0f ? 0.04f : -0.04f;
+	if (Abs(difference) < 0.2f)
+		steer *= 5.0f * Abs(difference);
+	pPlane->m_fPlaneSteer *= Pow(0.96f, CTimer::GetTimeStep());
+	float steerChange = steer - pPlane->m_fPlaneSteer;
+	float maxChange = 0.003f * CTimer::GetTimeStep();
+	if (Abs(steerChange) < maxChange)
+		pPlane->m_fPlaneSteer = steer;
+	else if (steerChange < 0.0f)
+		pPlane->m_fPlaneSteer -= maxChange;
+	else
+		pPlane->m_fPlaneSteer += maxChange;
+	pPlane->m_fOrientation += pPlane->m_fPlaneSteer * CTimer::GetTimeStep();
+	CVector up(0.0f, 0.0f, 1.0f);
+	up.Normalise();
+	CVector forward(Cos(pPlane->m_fOrientation), Sin(pPlane->m_fOrientation), fForwardZ);
+	forward.Normalise();
+	CVector right = CrossProduct(forward, up);
+	right.z -= 5.0f * pPlane->m_fPlaneSteer;
+	right.Normalise();
+	up = CrossProduct(forward, right);
+	up.Normalise();
+	right = CrossProduct(forward, up);
+	pPlane->GetMatrix().GetRight() = right;
+	pPlane->GetMatrix().GetForward() = forward;
+	pPlane->GetMatrix().GetUp() = up;
+	float newSplit = 1.0f - Pow(0.95f, CTimer::GetTimeStep());
+	float oldSplit = 1.0f - newSplit;
+#ifdef FIX_BUGS
+	pPlane->m_vecMoveSpeed = pPlane->m_vecMoveSpeed * oldSplit + pPlane->AutoPilot.GetCruiseSpeed() * 0.01f * forward * newSplit;
+#else
+	pPlane->m_vecMoveSpeed = pPlane->m_vecMoveSpeed * oldSplit + pPlane->AutoPilot.m_nCruiseSpeed * 0.01f * forward * newSplit;
+#endif
+	pPlane->m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
 }
 
 void CCarCtrl::SteerAICarWithPhysicsFollowPath(CVehicle* pVehicle, float* pSwerve, float* pAccel, float* pBrake, bool* pHandbrake)

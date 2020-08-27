@@ -20,6 +20,9 @@ class CPointLights
 public:
 	static int16 NumLights;
 	static CRegisteredPointLight aLights[NUMPOINTLIGHTS];
+	static CVector aCachedMapReads[32];
+	static float aCachedMapReadResults[32];
+	static int32 NextCachedValue;
 
 	enum {
 		LIGHT_POINT,
@@ -37,9 +40,11 @@ public:
 		FOG_ALWAYS
 	};
 
+	static void Init(void);
 	static void InitPerFrame(void);
 	static void AddLight(uint8 type, CVector coors, CVector dir, float radius, float red, float green, float blue, uint8 fogType, bool castExtraShadows);
 	static float GenerateLightsAffectingObject(Const CVector *objCoors);
 	static void RemoveLightsAffectingObject(void);
 	static void RenderFogEffect(void);
+	static bool ProcessVerticalLineUsingCache(CVector coors, float *groundZ);
 };

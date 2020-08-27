@@ -31,6 +31,9 @@
 #include "main.h"
 #include "ColStore.h"
 #include "DMAudio.h"
+#include "Script.h"
+
+//--MIAMI: file done (possibly bugs)
 
 bool CStreaming::ms_disableStreaming;
 bool CStreaming::ms_bLoadingBigModel;
@@ -48,6 +51,7 @@ size_t CStreaming::ms_memoryUsed;
 CStreamingChannel CStreaming::ms_channel[2];
 int32 CStreaming::ms_channelError;
 int32 CStreaming::ms_numVehiclesLoaded;
+int32 CStreaming::ms_numPedsLoaded;
 int32 CStreaming::ms_vehiclesLoaded[MAXVEHICLESLOADED];
 int32 CStreaming::ms_lastVehicleDeleted;
 bool CStreaming::ms_bIsPedFromPedGroupLoaded[NUMMODELSPERPEDGROUP];
@@ -70,7 +74,6 @@ CEntity *pIslandLODbeachEntity;
 int32 islandLODmainland;
 int32 islandLODbeach;
 
-//--MIAMI: done
 bool
 CStreamingInfo::GetCdPosnAndSize(uint32 &posn, uint32 &size)
 {
@@ -81,7 +84,6 @@ CStreamingInfo::GetCdPosnAndSize(uint32 &posn, uint32 &size)
 	return true;
 }
 
-//--MIAMI: done
 void
 CStreamingInfo::SetCdPosnAndSize(uint32 posn, uint32 size)
 {
@@ -89,7 +91,6 @@ CStreamingInfo::SetCdPosnAndSize(uint32 posn, uint32 size)
 	m_size = size;
 }
 
-//--MIAMI: done
 void
 CStreamingInfo::AddToList(CStreamingInfo *link)
 {
@@ -100,7 +101,6 @@ CStreamingInfo::AddToList(CStreamingInfo *link)
 	m_next->m_prev = this;
 }
 
-//--MIAMI: done
 void
 CStreamingInfo::RemoveFromList(void)
 {
@@ -110,7 +110,6 @@ CStreamingInfo::RemoveFromList(void)
 	m_prev = nil;
 }
 
-//--MIAMI: done
 void
 CStreaming::Init2(void)
 {
@@ -179,6 +178,7 @@ CStreaming::Init2(void)
 	for(i = 0; i < MAXVEHICLESLOADED; i++)
 		ms_vehiclesLoaded[i] = -1;
 	ms_numVehiclesLoaded = 0;
+	ms_numPedsLoaded = 8;
 
 	for(i = 0; i < ARRAY_SIZE(ms_bIsPedFromPedGroupLoaded); i++)
 		ms_bIsPedFromPedGroupLoaded[i] = false;
@@ -199,11 +199,25 @@ CStreaming::Init2(void)
 	ms_pStreamingBuffer[1] = ms_pStreamingBuffer[0] + ms_streamingBufferSize*CDSTREAM_SECTOR_SIZE;
 	debug("Streaming buffer size is %d sectors", ms_streamingBufferSize);
 
+	// PC only, figure out how much memory we got
+#ifdef GTA_PC
 #define MB (1024*1024)
+#ifdef FIX_BUGS
+	// do what gta3 does
+	extern size_t _dwMemAvailPhys;
+	ms_memoryAvailable = (_dwMemAvailPhys - 10*MB)/2;
+	if(ms_memoryAvailable < 65*MB)
+		ms_memoryAvailable = 65*MB;
+	desiredNumVehiclesLoaded = (int32)((ms_memoryAvailable / MB - 65) / 3 + 12);
+	if(desiredNumVehiclesLoaded > MAXVEHICLESLOADED)
+		desiredNumVehiclesLoaded = MAXVEHICLESLOADED;
+#else
 	ms_memoryAvailable = 65 * MB;
 	desiredNumVehiclesLoaded = 25;
-	debug("Memory allocated to Streaming is %dMB", ms_memoryAvailable / MB);
+	debug("Memory allocated to Streaming is %zuMB", ms_memoryAvailable/MB); // original modifier was %d
+#endif
 #undef MB
+#endif
 
 	// find island LODs
 
@@ -219,36 +233,54 @@ void
 CStreaming::Init(void)
 {
 #ifdef USE_TXD_CDIMAGE
-	int txdHandle = CFileMgr::OpenFile("MODELS\\TXD.IMG", "r");
-	if (txdHandle)
-		CFileMgr::CloseFile(txdHandle);
-	if (!CheckVideoCardCaps() && txdHandle) {
-		CdStreamAddImage("MODELS\\TXD.IMG");
-		CStreaming::Init2();
-	} else {
-		CStreaming::Init2();
-		if (CreateTxdImageForVideoCard()) {
-			CStreaming::Shutdown();
+	if(!CanVideoCardDoDXT()){
+		int txdHandle = CFileMgr::OpenFile("MODELS\\TXD.IMG", "r");
+		if (txdHandle)
+			CFileMgr::CloseFile(txdHandle);
+		if (!CheckVideoCardCaps() && txdHandle) {
 			CdStreamAddImage("MODELS\\TXD.IMG");
 			CStreaming::Init2();
+		} else {
+			CStreaming::Init2();
+			if (CreateTxdImageForVideoCard()) {
+				CStreaming::Shutdown();
+				CdStreamAddImage("MODELS\\TXD.IMG");
+				CStreaming::Init2();
+			}
 		}
-	}
+	} else
+		CStreaming::Init2();
 #else
 	CStreaming::Init2();
 #endif
 }
 
-//--MIAMI: done
+void
+CStreaming::ReInit(void)
+{
+	int i;
+	CStreaming::FlushRequestList();
+	CStreaming::DeleteAllRwObjects();
+	CStreaming::RemoveAllUnusedModels();
+	for(i = 0; i < MODELINFOSIZE; i++)
+		if(CModelInfo::GetModelInfo(i) && ms_aInfoForModel[i].m_flags & STREAMFLAGS_SCRIPTOWNED)
+			SetMissionDoesntRequireModel(i);
+	CStreaming::ms_disableStreaming = false;
+}
+
 void
 CStreaming::Shutdown(void)
 {
 	RwFreeAlign(ms_pStreamingBuffer[0]);
 	ms_streamingBufferSize = 0;
-	if(ms_pExtraObjectsDir)
+	if(ms_pExtraObjectsDir) {
 		delete ms_pExtraObjectsDir;
+#ifdef FIX_BUGS
+		ms_pExtraObjectsDir = nil;
+#endif
+	}
 }
 
-//--MIAMI: done
 void
 CStreaming::Update(void)
 {
@@ -267,7 +299,7 @@ CStreaming::Update(void)
 
 	LoadBigBuildingsWhenNeeded();
 	if(!ms_disableStreaming && TheCamera.GetPosition().z < 55.0f)
-		AddModelsToRequestList(TheCamera.GetPosition());
+		AddModelsToRequestList(TheCamera.GetPosition(), 0);
 
 	DeleteFarAwayRwObjects(TheCamera.GetPosition());
 
@@ -299,7 +331,6 @@ CStreaming::Update(void)
 	}
 }
 
-//--MIAMI: done
 void
 CStreaming::LoadCdDirectory(void)
 {
@@ -328,7 +359,6 @@ CStreaming::LoadCdDirectory(void)
 	ms_imageSize /= CDSTREAM_SECTOR_SIZE;
 }
 
-//--MIAMI: done
 void
 CStreaming::LoadCdDirectory(const char *dirname, int n)
 {
@@ -426,7 +456,6 @@ GetObjectName(int streamId)
 }
 
 
-//--MIAMI: done
 bool
 CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 {
@@ -577,7 +606,6 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 	return true;
 }
 
-//--MIAMI: done
 bool
 CStreaming::FinishLoadingLargeFile(int8 *buf, int32 streamId)
 {
@@ -640,7 +668,6 @@ CStreaming::FinishLoadingLargeFile(int8 *buf, int32 streamId)
 	return true;
 }
 
-//--MIAMI: done
 void
 CStreaming::RequestModel(int32 id, int32 flags)
 {
@@ -696,7 +723,6 @@ CStreaming::RequestModel(int32 id, int32 flags)
 
 #define BIGBUILDINGFLAGS STREAMFLAGS_DONT_REMOVE
 
-//--MIAMI: done
 void
 CStreaming::RequestBigBuildings(eLevelName level)
 {
@@ -713,7 +739,6 @@ CStreaming::RequestBigBuildings(eLevelName level)
 	RequestIslands(level);
 }
 
-//--MIAMI: done
 void
 CStreaming::RequestBigBuildings(eLevelName level, const CVector &pos)
 {
@@ -737,7 +762,6 @@ CStreaming::RequestBigBuildings(eLevelName level, const CVector &pos)
 	RequestIslands(level);
 }
 
-//--MIAMI: done
 void
 CStreaming::InstanceBigBuildings(eLevelName level, const CVector &pos)
 {
@@ -754,7 +778,6 @@ CStreaming::InstanceBigBuildings(eLevelName level, const CVector &pos)
 	}
 }
 
-//--MIAMI: done
 void
 CStreaming::InstanceLoadedModelsInSectorList(CPtrList &list)
 {
@@ -767,7 +790,6 @@ CStreaming::InstanceLoadedModelsInSectorList(CPtrList &list)
 	}
 }
 
-//--MIAMI: done
 void
 CStreaming::InstanceLoadedModels(const CVector &pos)
 {
@@ -795,7 +817,6 @@ CStreaming::InstanceLoadedModels(const CVector &pos)
 	}
 }
 
-//--MIAMI: done
 void
 CStreaming::RequestIslands(eLevelName level)
 {
@@ -814,7 +835,56 @@ CStreaming::RequestIslands(eLevelName level)
 #endif
 }
 
-//--MIAMI: TODO
+static char *IGnames[] = {
+	"player",
+	"player2",
+	"player3",
+	"player4",
+	"player5",
+	"player6",
+	"player7",
+	"player8",
+	"player9",
+	"play10",
+	"play11",
+	"igken",
+	"igcandy",
+	"igsonny",
+	"igbuddy",
+	"igjezz",
+	"ighlary",
+	"igphil",
+	"igmerc",
+	"igdick",
+	"igdiaz",
+	""
+};
+
+static char *CSnames[] = {
+	"csplay",
+	"csplay2",
+	"csplay3",
+	"csplay4",
+	"csplay5",
+	"csplay6",
+	"csplay7",
+	"csplay8",
+	"csplay9",
+	"csplay10",
+	"csplay11",
+	"csken",
+	"cscandy",
+	"cssonny",
+	"csbuddy",
+	"csjezz",
+	"cshlary",
+	"csphil",
+	"csmerc",
+	"csdick",
+	"csdiaz",
+	""
+};
+
 void
 CStreaming::RequestSpecialModel(int32 modelId, const char *modelName, int32 flags)
 {
@@ -822,12 +892,41 @@ CStreaming::RequestSpecialModel(int32 modelId, const char *modelName, int32 flag
 	int txdId;
 	char oldName[48];
 	uint32 pos, size;
+	int i, n;
 
 	mi = CModelInfo::GetModelInfo(modelId);
+	if(!CGeneral::faststrcmp("CSPlay", modelName)){
+		char *curname = CModelInfo::GetModelInfo(MI_PLAYER)->GetName();
+		for(int i = 0; CSnames[i][0]; i++){
+			if(strcasecmp(curname, IGnames[i]) == 0){
+				modelName = CSnames[i];
+				break;
+			}
+		}
+	}
 	if(!CGeneral::faststrcmp(mi->GetName(), modelName)){
 		// Already have the correct name, just request it
 		RequestModel(modelId, flags);
 		return;
+	}
+
+	if(mi->GetNumRefs() > 0){
+		n = CPools::GetPedPool()->GetSize()-1;
+		for(i = n; i >= 0 && mi->GetNumRefs() > 0; i--){
+			CPed *ped = CPools::GetPedPool()->GetSlot(i);
+			if(ped && ped->GetModelIndex() == modelId &&
+			   !ped->IsPlayer() && ped->CanBeDeletedEvenInVehicle())
+				CTheScripts::RemoveThisPed(ped);
+		}
+		n = CPools::GetObjectPool()->GetSize()-1;
+		for(i = n; i >= 0 && mi->GetNumRefs() > 0; i--){
+			CObject *obj = CPools::GetObjectPool()->GetSlot(i);
+			if(obj && obj->GetModelIndex() == modelId && obj->CanBeDeleted()){
+				CWorld::Remove(obj);
+				CWorld::RemoveReferencesToDeletedObject(obj);
+				delete obj;
+			}
+		}
 	}
 
 	strcpy(oldName, mi->GetName());
@@ -856,28 +955,24 @@ CStreaming::RequestSpecialModel(int32 modelId, const char *modelName, int32 flag
 	RequestModel(modelId, flags);
 }
 
-//--MIAMI: done
 void
 CStreaming::RequestSpecialChar(int32 charId, const char *modelName, int32 flags)
 {
 	RequestSpecialModel(charId + MI_SPECIAL01, modelName, flags);
 }
 
-//--MIAMI: done
 bool
 CStreaming::HasSpecialCharLoaded(int32 id)
 {
 	return HasModelLoaded(id + MI_SPECIAL01);
 }
 
-//--MIAMI: done
 void
 CStreaming::SetMissionDoesntRequireSpecialChar(int32 id)
 {
 	return SetMissionDoesntRequireModel(id + MI_SPECIAL01);
 }
 
-//--MIAMI: done
 void
 CStreaming::DecrementRef(int32 id)
 {
@@ -888,7 +983,6 @@ CStreaming::DecrementRef(int32 id)
 	}
 }
 
-//--MIAMI: done
 void
 CStreaming::RemoveModel(int32 id)
 {
@@ -941,7 +1035,6 @@ CStreaming::RemoveModel(int32 id)
 	ms_aInfoForModel[id].m_loadState = STREAMSTATE_NOTLOADED;
 }
 
-//--MIAMI: done
 void
 CStreaming::RemoveUnusedBuildings(eLevelName level)
 {
@@ -951,7 +1044,6 @@ CStreaming::RemoveUnusedBuildings(eLevelName level)
 		RemoveBuildings(LEVEL_MAINLAND);
 }
 
-//--MIAMI: done
 void
 CStreaming::RemoveBuildings(eLevelName level)
 {
@@ -1012,7 +1104,61 @@ CStreaming::RemoveBuildings(eLevelName level)
 	}
 }
 
-//--MIAMI: done
+void
+CStreaming::RemoveBuildingsNotInArea(int32 area)
+{
+	int i, n;
+	CEntity *e;
+
+	n = CPools::GetBuildingPool()->GetSize()-1;
+	for(i = n; i >= 0; i--){
+		e = CPools::GetBuildingPool()->GetSlot(i);
+		if(e && e->m_rwObject && !IsAreaVisible(area) &&
+		   (!e->bIsBIGBuilding || e->bStreamBIGBuilding)){
+			if(e->bIsBIGBuilding)
+				RequestModel(e->GetModelIndex(), 0);
+			if(!e->bImBeingRendered)
+				e->DeleteRwObject();
+		}
+	}
+
+	n = CPools::GetTreadablePool()->GetSize()-1;
+	for(i = n; i >= 0; i--){
+		e = CPools::GetTreadablePool()->GetSlot(i);
+		if(e && e->m_rwObject && !IsAreaVisible(area) &&
+		   (!e->bIsBIGBuilding || e->bStreamBIGBuilding)){
+			if(e->bIsBIGBuilding)
+				RequestModel(e->GetModelIndex(), 0);
+			if(!e->bImBeingRendered)
+				e->DeleteRwObject();
+		}
+	}
+
+	n = CPools::GetObjectPool()->GetSize()-1;
+	for(i = n; i >= 0; i--){
+		e = CPools::GetObjectPool()->GetSlot(i);
+		if(e && e->m_rwObject && !IsAreaVisible(area) &&
+		   (!e->bIsBIGBuilding || e->bStreamBIGBuilding)){
+			if(e->bIsBIGBuilding)
+				RequestModel(e->GetModelIndex(), 0);
+			if(!e->bImBeingRendered)
+				e->DeleteRwObject();
+		}
+	}
+
+	n = CPools::GetDummyPool()->GetSize()-1;
+	for(i = n; i >= 0; i--){
+		e = CPools::GetDummyPool()->GetSlot(i);
+		if(e && e->m_rwObject && !IsAreaVisible(area) &&
+		   (!e->bIsBIGBuilding || e->bStreamBIGBuilding)){
+			if(e->bIsBIGBuilding)
+				RequestModel(e->GetModelIndex(), 0);
+			if(!e->bImBeingRendered)
+				e->DeleteRwObject();
+		}
+	}
+}
+
 void
 CStreaming::RemoveUnusedBigBuildings(eLevelName level)
 {
@@ -1025,7 +1171,6 @@ CStreaming::RemoveUnusedBigBuildings(eLevelName level)
 	RemoveIslandsNotUsed(level);
 }
 
-//--MIAMI: done
 void
 DeleteIsland(CEntity *island)
 {
@@ -1039,7 +1184,6 @@ DeleteIsland(CEntity *island)
 	}
 }
 
-//--MIAMI: done
 void
 CStreaming::RemoveIslandsNotUsed(eLevelName level)
 {
@@ -1068,7 +1212,6 @@ CStreaming::RemoveIslandsNotUsed(eLevelName level)
 #endif // !NO_ISLAND_LOADING
 }
 
-//--MIAMI: done
 void
 CStreaming::RemoveBigBuildings(eLevelName level)
 {
@@ -1115,7 +1258,6 @@ found:
 	return true;
 }
 
-//--MIAMI: done
 bool
 CStreaming::RemoveLeastUsedModel(uint32 excludeMask)
 {
@@ -1149,7 +1291,6 @@ CStreaming::RemoveLeastUsedModel(uint32 excludeMask)
 	return (ms_numVehiclesLoaded > 7 || CGame::currArea != AREA_MAIN_MAP && ms_numVehiclesLoaded > 4) && RemoveLoadedVehicle();
 }
 
-//--MIAMI: done
 void
 CStreaming::RemoveAllUnusedModels(void)
 {
@@ -1167,14 +1308,35 @@ CStreaming::RemoveAllUnusedModels(void)
 	}
 }
 
-//--MIAMI: done
 void
 CStreaming::RemoveUnusedModelsInLoadedList(void)
 {
 	// empty
 }
 
-//--MIAMI: done
+bool
+CStreaming::RemoveLoadedZoneModel(void)
+{
+	int i;
+
+	if(ms_currentPedGrp == -1)
+		return false;
+
+	for(i = 0; i < NUMMODELSPERPEDGROUP; i++){
+		int mi = CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i];
+		if(mi != -1 && ms_bIsPedFromPedGroupLoaded[i] &&
+		   HasModelLoaded(mi) &&  CanRemoveModel(mi) &&
+		   CModelInfo::GetModelInfo(mi)->GetNumRefs() == 0){
+			RemoveModel(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i]);
+			ms_numPedsLoaded--;
+			ms_bIsPedFromPedGroupLoaded[i] = false;
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool
 CStreaming::IsTxdUsedByRequestedModels(int32 txdId)
 {
@@ -1277,7 +1439,7 @@ found:
 			if(id == -1)
 				return false;	// still no luck
 			ms_lastVehicleDeleted = id;
-			// this is more that we wanted actually
+			// this is more than we wanted actually
 			ms_numVehiclesLoaded++;
 		}
 		else{
@@ -1308,7 +1470,7 @@ void
 CStreaming::SetModelIsDeletable(int32 id)
 {
 	ms_aInfoForModel[id].m_flags &= ~STREAMFLAGS_DONT_REMOVE;
-	if ((id >= STREAM_OFFSET_TXD || CModelInfo::GetModelInfo(id)->GetModelType() != MITYPE_VEHICLE) &&
+	if ((id >= STREAM_OFFSET_TXD && id < STREAM_OFFSET_COL || CModelInfo::GetModelInfo(id)->GetModelType() != MITYPE_VEHICLE) &&
 	   (ms_aInfoForModel[id].m_flags & STREAMFLAGS_SCRIPTOWNED) == 0){
 		if(ms_aInfoForModel[id].m_loadState != STREAMSTATE_LOADED)
 			RemoveModel(id);
@@ -1323,7 +1485,6 @@ CStreaming::SetModelTxdIsDeletable(int32 id)
 	SetModelIsDeletable(CModelInfo::GetModelInfo(id)->GetTxdSlot() + STREAM_OFFSET_TXD);
 }
 
-//--MIAMI: done
 void
 CStreaming::SetMissionDoesntRequireModel(int32 id)
 {
@@ -1355,15 +1516,10 @@ CStreaming::LoadInitialWeapons(void)
 void
 CStreaming::LoadInitialVehicles(void)
 {
-	int id;
-
 	ms_numVehiclesLoaded = 0;
 	ms_lastVehicleDeleted = 0;
 
-	if(CModelInfo::GetModelInfo("taxi", &id))
-		RequestModel(id, STREAMFLAGS_DONT_REMOVE);
-	if(CModelInfo::GetModelInfo("police", &id))
-		RequestModel(id, STREAMFLAGS_DONT_REMOVE);
+	RequestModel(MI_POLICE, STREAMFLAGS_DONT_REMOVE);
 }
 
 void
@@ -1424,25 +1580,26 @@ CStreaming::StreamVehiclesAndPeds(void)
 		SetModelIsDeletable(MI_VICE6);
 		SetModelIsDeletable(MI_VICE7);
 		SetModelIsDeletable(MI_VICE8);
-		switch (CCarCtrl::MiamiViceCycle) {
-		case 0:
-			RequestModel(MI_VICE1, STREAMFLAGS_DONT_REMOVE);
-			RequestModel(MI_VICE2, STREAMFLAGS_DONT_REMOVE);
-			break;
-		case 1:
-			RequestModel(MI_VICE3, STREAMFLAGS_DONT_REMOVE);
-			RequestModel(MI_VICE4, STREAMFLAGS_DONT_REMOVE);
-			break;
-		case 2:
-			RequestModel(MI_VICE5, STREAMFLAGS_DONT_REMOVE);
-			RequestModel(MI_VICE6, STREAMFLAGS_DONT_REMOVE);
-			break;
-		case 3:
-			RequestModel(MI_VICE7, STREAMFLAGS_DONT_REMOVE);
-			RequestModel(MI_VICE8, STREAMFLAGS_DONT_REMOVE);
-			break;
-		}
 		RequestModel(MI_VICECHEE, STREAMFLAGS_DONT_REMOVE);
+		if(CPopulation::NumMiamiViceCops == 0)
+			switch (CCarCtrl::MiamiViceCycle) {
+			case 0:
+				RequestModel(MI_VICE1, STREAMFLAGS_DONT_REMOVE);
+				RequestModel(MI_VICE2, STREAMFLAGS_DONT_REMOVE);
+				break;
+			case 1:
+				RequestModel(MI_VICE3, STREAMFLAGS_DONT_REMOVE);
+				RequestModel(MI_VICE4, STREAMFLAGS_DONT_REMOVE);
+				break;
+			case 2:
+				RequestModel(MI_VICE5, STREAMFLAGS_DONT_REMOVE);
+				RequestModel(MI_VICE6, STREAMFLAGS_DONT_REMOVE);
+				break;
+			case 3:
+				RequestModel(MI_VICE7, STREAMFLAGS_DONT_REMOVE);
+				RequestModel(MI_VICE8, STREAMFLAGS_DONT_REMOVE);
+				break;
+			}
 	}
 	else {
 		SetModelIsDeletable(MI_VICECHEE);
@@ -1481,13 +1638,13 @@ CStreaming::StreamVehiclesAndPeds(void)
 	}
 }
 
-//--MIAMI: TODO
 void
 CStreaming::StreamZoneModels(const CVector &pos)
 {
-	int i;
+	int i, j;
 	uint16 gangsToLoad, gangCarsToLoad, bit;
 	CZoneInfo info;
+	static int timeBeforeNextLoad = 0;
 
 	CTheZones::GetZoneInfoForTimeOfDay(&pos, &info);
 
@@ -1496,22 +1653,64 @@ CStreaming::StreamZoneModels(const CVector &pos)
 		// unload pevious group
 		if(ms_currentPedGrp != -1)
 			for(i = 0; i < NUMMODELSPERPEDGROUP; i++){
-				if(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] == -1)
-					break;
-				SetModelIsDeletable(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i]);
-				SetModelTxdIsDeletable(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i]);
+				ms_bIsPedFromPedGroupLoaded[i] = false;
+				if(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] != -1){
+					SetModelIsDeletable(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i]);
+					SetModelTxdIsDeletable(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i]);
+				}
 			}
 
 		ms_currentPedGrp = info.pedGroup;
 
-		for(i = 0; i < NUMMODELSPERPEDGROUP; i++){
-			if(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] == -1)
-				break;
-			RequestModel(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i], STREAMFLAGS_DEPENDENCY);
+		for(i = 0; i < MAXZONEPEDSLOADED; i++){
+			do
+				j = CGeneral::GetRandomNumberInRange(0, NUMMODELSPERPEDGROUP);
+			while(ms_bIsPedFromPedGroupLoaded[j]);
+			ms_bIsPedFromPedGroupLoaded[j] = true;
+			if(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[j] != -1)
+				RequestModel(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[j], STREAMFLAGS_DEPENDENCY);
+		}
+		ms_numPedsLoaded = MAXZONEPEDSLOADED;
+		timeBeforeNextLoad = 300;
+	}
+
+	if(timeBeforeNextLoad >= 0)
+		timeBeforeNextLoad--;
+	else{
+		// Switch a ped
+		int oldMI;
+		// Find a ped to unload
+		for(i = 0; i < NUMMODELSPERPEDGROUP; i++)
+			if(ms_bIsPedFromPedGroupLoaded[i]){
+				oldMI = CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i];
+				if(oldMI != -1 && CModelInfo::GetModelInfo(oldMI)->GetNumRefs() == 0)
+					break;
+			}
+		// And load a new one
+		if(i != NUMMODELSPERPEDGROUP || ms_numPedsLoaded < MAXZONEPEDSLOADED){
+			do
+				j = CGeneral::GetRandomNumberInRange(0, NUMMODELSPERPEDGROUP);
+			while(ms_bIsPedFromPedGroupLoaded[j]);
+			if(ms_numPedsLoaded == MAXZONEPEDSLOADED)
+				ms_bIsPedFromPedGroupLoaded[i] = false;
+			ms_bIsPedFromPedGroupLoaded[j] = true;
+			int newMI = CPopulation::ms_pPedGroups[ms_currentPedGrp].models[j];
+			if(newMI != oldMI){
+				RequestModel(newMI, STREAMFLAGS_DEPENDENCY);
+				debug("Request Ped %s\n", CModelInfo::GetModelInfo(newMI)->GetName());
+				if(ms_numPedsLoaded == MAXZONEPEDSLOADED){
+					SetModelIsDeletable(oldMI);
+					SetModelTxdIsDeletable(oldMI);
+					debug("Remove Ped %s\n", CModelInfo::GetModelInfo(oldMI)->GetName());
+				}else
+					ms_numPedsLoaded++;
+				timeBeforeNextLoad = 300;
+			}
 		}
 	}
+
 	RequestModel(MI_MALE01, STREAMFLAGS_DONT_REMOVE);
-	//RequestModel(MI_HMOCA, STREAMFLAGS_DONT_REMOVE);
+	RequestModel(MI_TAXI_D, STREAMFLAGS_DONT_REMOVE);
 
 	gangsToLoad = 0;
 	gangCarsToLoad = 0;
@@ -1529,35 +1728,35 @@ CStreaming::StreamZoneModels(const CVector &pos)
 	if(gangsToLoad == ms_loadedGangs && gangCarsToLoad == ms_loadedGangCars)
 		return;
 
-	gangsToLoad |= gangCarsToLoad;
+	int gangModelsToload = gangsToLoad | gangCarsToLoad;
 
-	for(i = 0; i < NUM_GANGS; i++){
-		bit = 1<<i;
+	if(gangsToLoad != ms_loadedGangs || gangCarsToLoad != ms_loadedGangCars){
+		for(i = 0; i < NUM_GANGS; i++){
+			bit = 1<<i;
 
-		if(gangsToLoad & bit && (ms_loadedGangs & bit) == 0){
-			RequestModel(CGangs::GetGangPedModel1(i), STREAMFLAGS_DEPENDENCY);
-			RequestModel(CGangs::GetGangPedModel2(i), STREAMFLAGS_DEPENDENCY);
-			ms_loadedGangs |= bit;
-		}else if((gangsToLoad & bit) == 0 && ms_loadedGangs & bit){
-			SetModelIsDeletable(CGangs::GetGangPedModel1(i));
-			SetModelIsDeletable(CGangs::GetGangPedModel2(i));
-			SetModelTxdIsDeletable(CGangs::GetGangPedModel1(i));
-			SetModelTxdIsDeletable(CGangs::GetGangPedModel2(i));
-			ms_loadedGangs &= ~bit;
+			if(gangModelsToload & bit && (ms_loadedGangs & bit) == 0){
+				RequestModel(CGangs::GetGangPedModel1(i), STREAMFLAGS_DEPENDENCY);
+				RequestModel(CGangs::GetGangPedModel2(i), STREAMFLAGS_DEPENDENCY);
+				ms_loadedGangs |= bit;
+			}else if((gangModelsToload & bit) == 0 && ms_loadedGangs & bit){
+				SetModelIsDeletable(CGangs::GetGangPedModel1(i));
+				SetModelIsDeletable(CGangs::GetGangPedModel2(i));
+				SetModelTxdIsDeletable(CGangs::GetGangPedModel1(i));
+				SetModelTxdIsDeletable(CGangs::GetGangPedModel2(i));
+				ms_loadedGangs &= ~bit;
+			}
+
+			if(CGangs::GetGangVehicleModel(i) != -1){
+				if((gangCarsToLoad & bit) && (ms_loadedGangCars & bit) == 0){
+					RequestModel(CGangs::GetGangVehicleModel(i), STREAMFLAGS_DEPENDENCY);
+				}else if((gangCarsToLoad & bit) == 0 && ms_loadedGangCars & bit){
+					SetModelIsDeletable(CGangs::GetGangVehicleModel(i));
+					SetModelTxdIsDeletable(CGangs::GetGangVehicleModel(i));
+				}
+			}
 		}
-
-		// TODO(MIAMI): check this
-		if(CGangs::GetGangVehicleModel(i) < 0)
-			continue;
-
-		if((gangCarsToLoad & bit) && (ms_loadedGangCars & bit) == 0){
-			RequestModel(CGangs::GetGangVehicleModel(i), STREAMFLAGS_DEPENDENCY);
-		}else if((gangCarsToLoad & bit) == 0 && ms_loadedGangCars & bit){
-			SetModelIsDeletable(CGangs::GetGangVehicleModel(i));
-			SetModelTxdIsDeletable(CGangs::GetGangVehicleModel(i));
-		}
+		ms_loadedGangCars = gangCarsToLoad;
 	}
-	ms_loadedGangCars = gangCarsToLoad;
 }
 
 void
@@ -1567,9 +1766,9 @@ CStreaming::RemoveCurrentZonesModels(void)
 
 	if (ms_currentPedGrp != -1)
 		for (i = 0; i < NUMMODELSPERPEDGROUP; i++) {
-			if (CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] == -1)
-				break;
-			if (CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] != MI_MALE01) {
+			ms_bIsPedFromPedGroupLoaded[i] = false;
+			if (CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] != -1 &&
+			    CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] != MI_MALE01) {
 				SetModelIsDeletable(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i]);
 				SetModelTxdIsDeletable(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i]);
 			}
@@ -1616,7 +1815,6 @@ CStreaming::LoadBigBuildingsWhenNeeded(void)
 	CCollision::LoadCollisionScreen(CGame::currLevel);
 	DMAudio.Service();
 
-	// CPopulation::DealWithZoneChange is unused in VC
 	RemoveUnusedBigBuildings(CGame::currLevel);
 	RemoveUnusedBuildings(CGame::currLevel);
 	RemoveUnusedModelsInLoadedList();
@@ -1627,7 +1825,7 @@ CStreaming::LoadBigBuildingsWhenNeeded(void)
 		LoadSplash(GetLevelSplashScreen(CGame::currLevel));
 
 	CStreaming::RequestBigBuildings(CGame::currLevel, TheCamera.GetPosition());
-	CStreaming::LoadAllRequestedModels(true);
+	CStreaming::LoadAllRequestedModels(false);
 
 	CGame::TidyUpMemory(true, true);
 	CTimer::Resume();
@@ -1757,11 +1955,8 @@ CStreaming::GetNextFileOnCd(int32 lastPosn, bool priority)
  * Files larger than the buffer size can only be loaded by channel 0,
  * which then uses both buffers, while channel 1 is idle.
  * ms_bLoadingBigModel is set to true to indicate this state.
- *
- * TODO: two-part files
  */
 
-//--MIAMI: done
 // Make channel read from disc
 void
 CStreaming::RequestModelStream(int32 ch)
@@ -1872,7 +2067,6 @@ CStreaming::RequestModelStream(int32 ch)
 	ms_channel[ch].numTries = 0;
 }
 
-//--MIAMI: done
 // Load data previously read from disc
 bool
 CStreaming::ProcessLoadingChannel(int32 ch)
@@ -1942,7 +2136,6 @@ CStreaming::ProcessLoadingChannel(int32 ch)
 	return true;
 }
 
-//--MIAMI: done
 void
 CStreaming::RetryLoadFile(int32 ch)
 {
@@ -1979,7 +2172,6 @@ CStreaming::RetryLoadFile(int32 ch)
 	}
 }
 
-//--MIAMI: done
 void
 CStreaming::LoadRequestedModels(void)
 {
@@ -2004,7 +2196,6 @@ CStreaming::LoadRequestedModels(void)
 	}
 }
 
-//--MIAMI: done
 void
 CStreaming::LoadAllRequestedModels(bool priority)
 {
@@ -2013,18 +2204,26 @@ CStreaming::LoadAllRequestedModels(bool priority)
 	int i;
 	uint32 posn, size;
 
+	int numRequests = 4*ms_numModelsRequested;
+
 	if(bInsideLoadAll)
 		return;
+	bInsideLoadAll = true;
+
+	if(priority)
+		numRequests = ms_numPriorityRequests;
 
 	FlushChannels();
 	imgOffset = GetCdImageOffset(CdStreamGetLastPosn());
 
-	while(ms_endRequestedList.m_prev != &ms_startRequestedList){
+	while(ms_endRequestedList.m_prev != &ms_startRequestedList && numRequests > 0){
+		numRequests--;
 		streamId = GetNextFileOnCd(0, priority);
 		if(streamId == -1)
 			break;
 
 		ms_aInfoForModel[streamId].RemoveFromList();
+		ms_channel[0].streamIds[0] = streamId;
 		DecrementRef(streamId);
 
 		if(ms_aInfoForModel[streamId].GetCdPosnAndSize(posn, size)){
@@ -2058,7 +2257,6 @@ CStreaming::LoadAllRequestedModels(bool priority)
 	bInsideLoadAll = false;
 }
 
-//--MIAMI: done
 void
 CStreaming::FlushChannels(void)
 {
@@ -2080,7 +2278,6 @@ CStreaming::FlushChannels(void)
 		ProcessLoadingChannel(1);
 }
 
-//--MIAMI: done
 void
 CStreaming::FlushRequestList(void)
 {
@@ -2112,10 +2309,10 @@ CStreaming::UpdateMemoryUsed(void)
 	// empty
 }
 
-#define STREAM_DIST (2*SECTOR_SIZE_X)
+#define STREAM_DIST 80.0f
 
 void
-CStreaming::AddModelsToRequestList(const CVector &pos)
+CStreaming::AddModelsToRequestList(const CVector &pos, int32 flags)
 {
 	float xmin, xmax, ymin, ymax;
 	int ixmin, ixmax, iymin, iymax;
@@ -2149,23 +2346,23 @@ CStreaming::AddModelsToRequestList(const CVector &pos)
 			dx = ix - CWorld::GetSectorIndexX(pos.x);
 			d = dx*dx + dy*dy;
 			sect = CWorld::GetSector(ix, iy);
-			if(d <= 1){
-				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS]);
-				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS_OVERLAP]);
-				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_OBJECTS]);
-				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_DUMMIES]);
-			}else if(d <= 4*4){
-				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS], pos.x, pos.y, xmin, ymin, xmax, ymax);
-				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], pos.x, pos.y, xmin, ymin, xmax, ymax);
-				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_OBJECTS], pos.x, pos.y, xmin, ymin, xmax, ymax);
-				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_DUMMIES], pos.x, pos.y, xmin, ymin, xmax, ymax);
+			if(d <= 0){
+				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS], flags);
+				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], flags);
+				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_OBJECTS], flags);
+				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_DUMMIES], flags);
+			}else if(d <= 3*3){
+				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS], pos.x, pos.y, xmin, ymin, xmax, ymax, flags);
+				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_BUILDINGS_OVERLAP], pos.x, pos.y, xmin, ymin, xmax, ymax, flags);
+				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_OBJECTS], pos.x, pos.y, xmin, ymin, xmax, ymax, flags);
+				ProcessEntitiesInSectorList(sect->m_lists[ENTITYLIST_DUMMIES], pos.x, pos.y, xmin, ymin, xmax, ymax, flags);
 			}
 		}
 	}
 }
 
 void
-CStreaming::ProcessEntitiesInSectorList(CPtrList &list, float x, float y, float xmin, float ymin, float xmax, float ymax)
+CStreaming::ProcessEntitiesInSectorList(CPtrList &list, float x, float y, float xmin, float ymin, float xmax, float ymax, int32 flags)
 {
 	CPtrNode *node;
 	CEntity *e;
@@ -2179,8 +2376,7 @@ CStreaming::ProcessEntitiesInSectorList(CPtrList &list, float x, float y, float 
 			continue;
 
 		e->m_scanCode = CWorld::GetCurrentScanCode();
-		if(!e->bStreamingDontDelete && !e->bIsSubway &&
-		   (!e->IsObject() || ((CObject*)e)->ObjectCreatedBy != TEMP_OBJECT)){
+		if(!e->bStreamingDontDelete && IsAreaVisible(e->m_area) && !e->bDontStream && e->bIsVisible){
 			CTimeModelInfo *mi = (CTimeModelInfo*)CModelInfo::GetModelInfo(e->GetModelIndex());
 			if (mi->GetModelType() != MITYPE_TIME || CClock::GetIsTimeInRange(mi->GetTimeOn(), mi->GetTimeOff())) {
 				lodDistSq = sq(mi->GetLargestLodDistance());
@@ -2189,14 +2385,14 @@ CStreaming::ProcessEntitiesInSectorList(CPtrList &list, float x, float y, float 
 				if(xmin < pos.x && pos.x < xmax &&
 				   ymin < pos.y && pos.y < ymax &&
 				   (CVector2D(x, y) - pos).MagnitudeSqr() < lodDistSq)
-					RequestModel(e->GetModelIndex(), 0);
+					RequestModel(e->GetModelIndex(), flags);
 			}
 		}
 	}
 }
 
 void
-CStreaming::ProcessEntitiesInSectorList(CPtrList &list)
+CStreaming::ProcessEntitiesInSectorList(CPtrList &list, int32 flags)
 {
 	CPtrNode *node;
 	CEntity *e;
@@ -2208,11 +2404,10 @@ CStreaming::ProcessEntitiesInSectorList(CPtrList &list)
 			continue;
 
 		e->m_scanCode = CWorld::GetCurrentScanCode();
-		if(!e->bStreamingDontDelete && !e->bIsSubway &&
-		   (!e->IsObject() || ((CObject*)e)->ObjectCreatedBy != TEMP_OBJECT)){
+		if(!e->bStreamingDontDelete && IsAreaVisible(e->m_area) && !e->bDontStream && e->bIsVisible){
 			CTimeModelInfo *mi = (CTimeModelInfo*)CModelInfo::GetModelInfo(e->GetModelIndex());
 			if (mi->GetModelType() != MITYPE_TIME || CClock::GetIsTimeInRange(mi->GetTimeOn(), mi->GetTimeOff()))
-				RequestModel(e->GetModelIndex(), 0);
+				RequestModel(e->GetModelIndex(), flags);
 		}
 	}
 }
@@ -2407,7 +2602,7 @@ CStreaming::DeleteRwObjectsBehindCamera(size_t mem)
 		assert(ymin <= ymax);
 
 		// Delete a block of sectors that we know is behind the camera
-		if(TheCamera.GetForward().x > 0){
+		if(TheCamera.GetForward().x > 0.0f){
 			// looking east
 			xmax = Max(ix - 2, 0);
 			xmin = Max(ix - 10, 0);
@@ -2428,8 +2623,13 @@ CStreaming::DeleteRwObjectsBehindCamera(size_t mem)
 			}
 		}
 
+		
+		while(RemoveLoadedZoneModel())
+			if(ms_memoryUsed < mem)
+				return;
+
 		// Now a block that intersects with the camera's frustum
-		if(TheCamera.GetForward().x > 0){
+		if(TheCamera.GetForward().x > 0.0f){
 			// looking east
 			xmax = Max(ix + 10, 0);
 			xmin = Max(ix - 2, 0);
@@ -2468,7 +2668,7 @@ CStreaming::DeleteRwObjectsBehindCamera(size_t mem)
 		assert(xmin <= xmax);
 
 		// Delete a block of sectors that we know is behind the camera
-		if(TheCamera.GetForward().y > 0){
+		if(TheCamera.GetForward().y > 0.0f){
 			// looking north
 			ymax = Max(iy - 2, 0);
 			ymin = Max(iy - 10, 0);
@@ -2489,8 +2689,12 @@ CStreaming::DeleteRwObjectsBehindCamera(size_t mem)
 			}
 		}
 
+		while(RemoveLoadedZoneModel())
+			if(ms_memoryUsed < mem)
+				return;
+
 		// Now a block that intersects with the camera's frustum
-		if(TheCamera.GetForward().y > 0){
+		if(TheCamera.GetForward().y > 0.0f){
 			// looking north
 			ymax = Max(iy + 10, 0);
 			ymin = Max(iy - 2, 0);
@@ -2511,6 +2715,10 @@ CStreaming::DeleteRwObjectsBehindCamera(size_t mem)
 			}
 		}
 
+// this is gone in mobile together with RemoveReferencedTxds
+//		if(RemoveReferencedTxds(mem))
+//			return;
+
 		// As last resort, delete objects from the last step more aggressively
 		for(x = xmin; x <= xmax; x++){
 			for(y = ymax; y != ymin; y -= inc){
@@ -2522,6 +2730,8 @@ CStreaming::DeleteRwObjectsBehindCamera(size_t mem)
 			}
 		}
 	}
+
+	while(ms_memoryUsed >= mem && RemoveLeastUsedModel(0));
 }
 
 void
@@ -2547,13 +2757,13 @@ CStreaming::DeleteRwObjectsInOverlapSectorList(CPtrList &list, int32 x, int32 y)
 		e = (CEntity*)node->item;
 		if(e->m_rwObject && !e->bStreamingDontDelete && !e->bImBeingRendered){
 			// Now this is pretty weird...
-			if(Abs(CWorld::GetSectorIndexX(e->GetPosition().x) - x) >= 2.0f)
+			if(Abs(CWorld::GetSectorIndexX(e->GetPosition().x) - x) >= 1.6f)
 //			{
 				e->DeleteRwObject();
 //				return;		// BUG?
 //			}
 			else	// FIX?
-			if(Abs(CWorld::GetSectorIndexY(e->GetPosition().y) - y) >= 2.0f)
+			if(Abs(CWorld::GetSectorIndexY(e->GetPosition().y) - y) >= 1.6f)
 				e->DeleteRwObject();
 		}
 	}
@@ -2568,7 +2778,8 @@ CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, size_t mem)
 	for(node = list.first; node; node = node->next){
 		e = (CEntity*)node->item;
 		if(!e->bStreamingDontDelete && !e->bImBeingRendered &&
-		   e->m_rwObject && ms_aInfoForModel[e->GetModelIndex()].m_next){
+		   e->m_rwObject && ms_aInfoForModel[e->GetModelIndex()].m_next &&
+		   FindPlayerPed()->m_pCurSurface != e){
 			e->DeleteRwObject();
 			if (CModelInfo::GetModelInfo(e->GetModelIndex())->GetNumRefs() == 0) {
 				RemoveModel(e->GetModelIndex());
@@ -2589,7 +2800,7 @@ CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, size_t mem)
 	for(node = list.first; node; node = node->next){
 		e = (CEntity*)node->item;
 		if(!e->bStreamingDontDelete && !e->bImBeingRendered &&
-		   e->m_rwObject && !e->IsVisible() && ms_aInfoForModel[e->GetModelIndex()].m_next){
+		   e->m_rwObject && (!e->IsVisible() || e->bOffscreen) && ms_aInfoForModel[e->GetModelIndex()].m_next){
 			e->DeleteRwObject();
 			if (CModelInfo::GetModelInfo(e->GetModelIndex())->GetNumRefs() == 0) {
 				RemoveModel(e->GetModelIndex());
@@ -2615,7 +2826,6 @@ CStreaming::MakeSpaceFor(int32 size)
 		}
 }
 
-//--MIAMI: done
 void
 CStreaming::LoadScene(const CVector &pos)
 {
@@ -2641,7 +2851,7 @@ CStreaming::LoadScene(const CVector &pos)
 	LoadAllRequestedModels(false);
 	InstanceBigBuildings(level, pos);
 	InstanceBigBuildings(LEVEL_GENERIC, pos);
-	AddModelsToRequestList(pos);
+	AddModelsToRequestList(pos, STREAMFLAGS_20);
 	CRadar::StreamRadarSections(pos);
 
 	if (!CGame::IsInInterior()) {
@@ -2660,7 +2870,6 @@ CStreaming::LoadScene(const CVector &pos)
 	debug("End load scene\n");
 }
 
-//--MIAMI: done
 void
 CStreaming::LoadSceneCollision(const CVector &pos)
 {
@@ -2697,7 +2906,7 @@ void
 CStreaming::UpdateForAnimViewer(void)
 {
 	if (CStreaming::ms_channelError == -1) {
-		CStreaming::AddModelsToRequestList(CVector(0.0f, 0.0f, 0.0f));
+		CStreaming::AddModelsToRequestList(CVector(0.0f, 0.0f, 0.0f), 0);
 		CStreaming::LoadRequestedModels();
 		// original modifier was %d
 		sprintf(gString, "Requested %d, memory size %zuK\n", CStreaming::ms_numModelsRequested, 2 * CStreaming::ms_memoryUsed);

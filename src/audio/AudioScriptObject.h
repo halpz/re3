@@ -7,6 +7,9 @@ public:
 	CVector Posn;
 	int32 AudioEntity;
 
+	cAudioScriptObject();
+	~cAudioScriptObject();
+
 	void Reset(); /// ok
 
 	static void* operator new(size_t);

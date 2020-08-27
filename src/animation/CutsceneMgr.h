@@ -17,15 +17,13 @@ class CCutsceneMgr
 	static bool ms_animLoaded;
 	static bool ms_useLodMultiplier;
 
-	static bool ms_camLoaded;
 	static char ms_cutsceneName[CUTSCENENAMESIZE];
-	static char ms_uncompressedAnims[8][32];
-	static uint32 ms_numUncompressedAnims;
 	static CAnimBlendAssocGroup ms_cutsceneAssociations;
 	static CVector ms_cutsceneOffset;
 	static float ms_cutsceneTimer;
 	static bool ms_wasCutsceneSkipped;
 	static bool ms_cutsceneProcessing;
+	static bool ms_useCutsceneShadows;
 public:
 	static CDirectory *ms_pCutsceneDir;
 	static uint32 ms_cutsceneLoadStatus;
@@ -54,4 +52,9 @@ public:
 	static void DeleteCutsceneData(void);
 	static void LoadAnimationUncompressed(char const*);
 	static void Update(void);
+
+	static void AttachObjectToParent(CObject *pObject, CEntity *pAttachTo);
+	static void AttachObjectToFrame(CObject *pObject, CEntity *pAttachTo, const char *frame);
+	static void AttachObjectToBone(CObject *pObject, CObject *pAttachTo, int frame);
+	static void RemoveEverythingFromTheWorldForTheBiggestFuckoffCutsceneEver();
 };

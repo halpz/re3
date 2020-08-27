@@ -19,6 +19,7 @@
 #include "Bike.h"
 #include "ModelIndices.h"
 #include "ModelInfo.h"
+#include "custompipes.h"
 
 //--MIAMI: done
 
@@ -210,7 +211,7 @@ CVehicleModelInfo::CreateInstance(void)
 		clumpframe = RpClumpGetFrame(clump);
 
 		comp1 = ChooseComponent();
-		if(comp1 != -1){
+		if(comp1 != -1 && m_comps[comp1]){
 			atomic = RpAtomicClone(m_comps[comp1]);
 			f = RwFrameCreate();
 			RwFrameTransform(f,
@@ -223,7 +224,7 @@ CVehicleModelInfo::CreateInstance(void)
 		ms_compsUsed[0] = comp1;
 
 		comp2 = ChooseSecondComponent();
-		if(comp2 != -1){
+		if(comp2 != -1 && m_comps[comp2]){
 			atomic = RpAtomicClone(m_comps[comp2]);
 			f = RwFrameCreate();
 			RwFrameTransform(f,
@@ -1124,6 +1125,10 @@ CVehicleModelInfo::SetEnvironmentMap(void)
 		for(i = 0; i < wheelmi->m_numAtomics; i++)
 			SetEnvironmentMapCB(wheelmi->m_atomics[i], nil);
 	}
+
+#ifdef EXTENDED_PIPELINES
+	CustomPipes::AttachVehiclePipe(m_clump);
+#endif
 }
 
 void

@@ -127,8 +127,7 @@ CPopulation::Initialise()
 void
 CPopulation::RemovePed(CPed *ent)
 {
-	// CPed dtor already does that
-	// CWorld::Remove((CEntity*)ent);
+	CWorld::Remove((CEntity*)ent);
 	delete ent;
 }
 

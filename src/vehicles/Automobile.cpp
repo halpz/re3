@@ -49,7 +49,7 @@
 #include "Object.h"
 #include "Automobile.h"
 
-//--MIAMI: file done except TODOs
+//--MIAMI: file done
 
 bool bAllCarCheat;
 
@@ -154,7 +154,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	m_fElasticity = 0.05f;
 	m_fBuoyancy = pHandling->fBuoyancy;
 
-	m_fOrientation = m_auto_unk4 = 0.0f;
+	m_fOrientation = m_fPlaneSteer = 0.0f;
 
 	m_nBusDoorTimerEnd = 0;
 	m_nBusDoorTimerStart = 0;
@@ -4210,12 +4210,11 @@ CAutomobile::VehicleDamage(float impulse, uint16 damagedPiece)
 			   pDriver &&
 			   m_pDamageEntity && m_pDamageEntity->IsVehicle() &&
 			   (this != FindPlayerVehicle() || ((CVehicle*)m_pDamageEntity)->VehicleCreatedBy == MISSION_VEHICLE) &&
-// TODO(MIAMI): enum
 			   ((CVehicle*)m_pDamageEntity)->pDriver){
 				if(GetVehicleAppearance() == VEHICLE_APPEARANCE_CAR)
-					pDriver->Say(145);
+					pDriver->Say(SOUND_PED_CRASH_CAR);
 				else
-					pDriver->Say(144);
+					pDriver->Say(SOUND_PED_CRASH_VEHICLE);
 			}
 
 			int oldHealth = m_fHealth;
@@ -4944,11 +4943,11 @@ CAutomobile::PlayCarHorn(void)
 		m_nCarHornTimer = 45;
 	}else if(r < 4){
 		if(pDriver)
-			pDriver->Say(SOUND_PED_CAR_COLLISION);
+			pDriver->Say(SOUND_PED_ANNOYED_DRIVER);
 		m_nCarHornTimer = 45;
 	}else{
 		if(pDriver)
-			pDriver->Say(SOUND_PED_CAR_COLLISION);
+			pDriver->Say(SOUND_PED_ANNOYED_DRIVER);
 	}
 }
 

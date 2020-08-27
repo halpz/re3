@@ -43,7 +43,7 @@ public:
 	float m_fGunSpinSpeed; // for minigun
 	float m_fGunSpinAngle;
 	unsigned int m_nPadDownPressedInMilliseconds;
-	unsigned int m_nPadUpPressedInMilliseconds;
+	unsigned int m_nLastBusFareCollected;
 
 	CPlayerPed();
 	~CPlayerPed();

@@ -8,6 +8,7 @@
 #include "NodeName.h"
 #include "VisibilityPlugins.h"
 #include "ModelInfo.h"
+#include "custompipes.h"
 
 //--MIAMI: file done
 
@@ -39,6 +40,9 @@ RwObjectNameIdAssocation CPedModelInfo::m_pPedIds[PED_NODE_MAX] = {
 void
 CPedModelInfo::SetClump(RpClump *clump)
 {
+#ifdef EXTENDED_PIPELINES
+	CustomPipes::AttachRimPipe(clump);
+#endif
 	CClumpModelInfo::SetClump(clump);
 	SetFrameIds(m_pPedIds);	// not needed in VC actually
 	if(m_hitColModel == nil)

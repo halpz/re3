@@ -93,6 +93,7 @@ public:
 	static CStreamingChannel ms_channel[2];
 	static int32 ms_channelError;
 	static int32 ms_numVehiclesLoaded;
+	static int32 ms_numPedsLoaded;
 	static int32 ms_vehiclesLoaded[MAXVEHICLESLOADED];
 	static int32 ms_lastVehicleDeleted;
 	static bool ms_bIsPedFromPedGroupLoaded[NUMMODELSPERPEDGROUP];
@@ -110,6 +111,7 @@ public:
 
 	static void Init(void);
 	static void Init2(void);
+	static void ReInit(void);
 	static void Shutdown(void);
 	static void Update(void);
 	static void LoadCdDirectory(void);
@@ -149,6 +151,7 @@ public:
 	static void RemoveAnim(int32 id) { RemoveModel(id + STREAM_OFFSET_ANIM); }
 	static void RemoveUnusedBuildings(eLevelName level);
 	static void RemoveBuildings(eLevelName level);
+	static void RemoveBuildingsNotInArea(int32 area);
 	static void RemoveUnusedBigBuildings(eLevelName level);
 	static void RemoveIslandsNotUsed(eLevelName level);
 	static void RemoveBigBuildings(eLevelName level);
@@ -156,6 +159,7 @@ public:
 	static bool RemoveLeastUsedModel(uint32 excludeMask);
 	static void RemoveAllUnusedModels(void);
 	static void RemoveUnusedModelsInLoadedList(void);
+	static bool RemoveLoadedZoneModel(void);
 	static int32 GetAvailableVehicleSlot(void);
 	static bool IsTxdUsedByRequestedModels(int32 txdId);
 	static bool AreAnimsUsedByRequestedModels(int32 animId);
@@ -187,9 +191,9 @@ public:
 	static void IHaveUsedStreamingMemory(void);
 	static void UpdateMemoryUsed(void);
 
-	static void AddModelsToRequestList(const CVector &pos);
-	static void ProcessEntitiesInSectorList(CPtrList &list, float x, float y, float xmin, float ymin, float xmax, float ymax);
-	static void ProcessEntitiesInSectorList(CPtrList &list);
+	static void AddModelsToRequestList(const CVector &pos, int32 flags);
+	static void ProcessEntitiesInSectorList(CPtrList &list, float x, float y, float xmin, float ymin, float xmax, float ymax, int32 flags);
+	static void ProcessEntitiesInSectorList(CPtrList &list, int32 flags);
 	static void DeleteFarAwayRwObjects(const CVector &pos);
 	static void DeleteAllRwObjects(void);
 	static void DeleteRwObjectsAfterDeath(const CVector &pos);

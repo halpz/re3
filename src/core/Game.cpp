@@ -89,6 +89,9 @@
 #include "Occlusion.h"
 #include "debugmenu.h"
 #include "Ropes.h"
+#include "WindModifiers.h"
+#include "postfx.h"
+#include "custompipes.h"
 
 eLevelName CGame::currLevel;
 int32 CGame::currArea;
@@ -151,6 +154,9 @@ CGame::InitialiseOnceBeforeRW(void)
 	CFileMgr::Initialise();
 	CdStreamInit(MAX_CDCHANNELS);
 	ValidateVersion();
+#ifdef EXTENDED_COLOURFILTER
+	CPostFX::InitOnce();
+#endif
 	return true;
 }
 
@@ -288,10 +294,6 @@ bool CGame::InitialiseOnceAfterRW(void)
 	DMAudio.SetEffectsFadeVol(127);
 	DMAudio.SetMusicFadeVol(127);
 	CWorld::Players[0].SetPlayerSkin(FrontEndMenuManager.m_PrefsSkinFile);
-
-#ifdef CUSTOM_FRONTEND_OPTIONS
-	CustomFrontendOptionsPopulate();
-#endif
 	return true;
 }
 
@@ -327,6 +329,7 @@ bool CGame::Initialise(const char* datFile)
 	CDebug::DebugInitTextBuffer();
 	ThePaths.Init();
 	ThePaths.AllocatePathFindInfoMem(4500);
+	CScriptPaths::Init();
 	CWeather::Init();
 	CCullZones::Init();
 	COcclusion::Init();
@@ -355,6 +358,10 @@ bool CGame::Initialise(const char* datFile)
 	CdStreamAddImage("MODELS\\GTA3.IMG");
 	CFileLoader::LoadLevel("DATA\\DEFAULT.DAT");
 	CFileLoader::LoadLevel(datFile);
+#ifdef EXTENDED_PIPELINES
+	// for generic fallback
+	CustomPipes::SetTxdFindCallback();
+#endif
 	CWorld::AddParticles();
 	CVehicleModelInfo::LoadVehicleColours();
 	CVehicleModelInfo::LoadEnvironmentMaps();
@@ -453,6 +460,7 @@ bool CGame::ShutDown(void)
 	CReplay::FinishPlayback();
 	CPlane::Shutdown();
 	CTrain::Shutdown();
+	CScriptPaths::Shutdown();
 	CSpecialFX::Shutdown();
 #ifndef PS2
 	CGarages::Shutdown();
@@ -567,6 +575,7 @@ void CGame::ReInitGameObjectVariables(void)
 	CSpecialFX::Init();
 	CRopes::Init();
 	CWaterCannons::Init();
+	CScriptPaths::Init();
 	CParticle::ReloadConfig();
 
 #ifdef PS2_MENU
@@ -607,10 +616,7 @@ void CGame::ShutDownForRestart(void)
 	CWorld::ClearForRestart();
 	CGameLogic::ClearShortCut();
 	CTimer::Shutdown();
-	CStreaming::FlushRequestList();
-	CStreaming::DeleteAllRwObjects();
-	CStreaming::RemoveAllUnusedModels();
-	CStreaming::ms_disableStreaming = false;
+	CStreaming::ReInit();
 	CRadar::RemoveRadarSections();
 	FrontEndMenuManager.UnloadTextures();
 	CParticleObject::RemoveAllExpireableParticleObjects();
@@ -695,6 +701,7 @@ void CGame::Process(void)
 	if (!CCutsceneMgr::IsCutsceneProcessing() && !CTimer::GetIsCodePaused())
 		FrontEndMenuManager.Process();
 	CStreaming::Update();
+	CWindModifiers::Number = 0;
 	if (!CTimer::GetIsPaused())
 	{
 		CTheZones::Update();
@@ -708,6 +715,7 @@ void CGame::Process(void)
 		CWeather::Update();
 		CTheScripts::Process();
 		CCollision::Update();
+		CScriptPaths::Update();
 		CTrain::UpdateTrains();
 		CPlane::UpdatePlanes();
 		CHeli::UpdateHelis();

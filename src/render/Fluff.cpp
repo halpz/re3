@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "Sprite.h"
 #include "Coronas.h"
+#include "PointLights.h"
 #include "Rubbish.h"
 #include "Timecycle.h"
 #include "General.h"
@@ -391,13 +392,15 @@ void CMovingThings::Init()
 	CPlaneTrails::Init();
 	CSmokeTrails::Init();
 	CPlaneBanners::Init();
-	CEscalators::Init();
+	CPointLights::Init();
 
 	StartCloseList.m_pNext = &CMovingThings::EndCloseList;
 	StartCloseList.m_pPrev = nil;
 	EndCloseList.m_pNext = nil;
 	EndCloseList.m_pPrev = &CMovingThings::StartCloseList;
 	Num = 0;
+
+	CEscalators::Init();
 
 #ifndef MIAMI	// something is still used here actually
 	// Initialize scroll bars
@@ -1517,4 +1520,197 @@ CEscalators::Shutdown(void) {
 		aEscalators[i].SwitchOff();
 	}
 	NumEscalators = 0;
+}
+
+
+CScriptPath CScriptPaths::aArray[3];
+
+void CScriptPath::FindCoorsFromDistanceOnPath(float t, float *pX, float *pY, float *pZ)
+{
+	int32 i;
+	for (i = 0; m_pNode[i + 1].t < t; i++)
+		if (i == m_numNodes - 1) {
+			// don't go beyond last node
+			*pX = m_pNode[m_numNodes - 1].p.x;
+			*pY = m_pNode[m_numNodes - 1].p.y;
+			*pZ = m_pNode[m_numNodes - 1].p.z;
+			return;
+		}
+	float f = (t - m_pNode[i].t) / (m_pNode[i + 1].t - m_pNode[i].t);
+	*pX = (1.0f - f)*m_pNode[i].p.x + f*m_pNode[i + 1].p.x;
+	*pY = (1.0f - f)*m_pNode[i].p.y + f*m_pNode[i + 1].p.y;
+	*pZ = (1.0f - f)*m_pNode[i].p.z + f*m_pNode[i + 1].p.z;
+}
+
+void CScriptPath::Update(void) {
+	if (m_state != SCRIPT_PATH_ACTIVE)
+		return;
+
+	m_fPosition += m_fSpeed * CTimer::GetTimeStepInSeconds();
+	m_fPosition = clamp(m_fPosition, 0.0f, m_fTotalLength);
+
+	if (m_pObjects[0] || m_pObjects[1] || m_pObjects[2] || m_pObjects[3]
+		|| m_pObjects[4] || m_pObjects[5]) {
+
+		float t1, t2;
+		CVector pos1, pos2;
+
+		t1 = Max(m_fPosition - m_fObjectLength / 2.0f, 0.0f);
+		FindCoorsFromDistanceOnPath(t1, &pos1.x, &pos1.y, &pos1.z);
+		t2 = Min(m_fPosition + m_fObjectLength / 2.0f, m_fTotalLength);
+		FindCoorsFromDistanceOnPath(t2, &pos2.x, &pos2.y, &pos2.z);
+
+		CVector newForward, newUp(0.0f, 0.0f, 1.0f), newRight;
+
+		newForward = pos2 - pos1;
+		newForward.Normalise();
+		newRight = CrossProduct(newForward, newUp);
+		newRight.Normalise();
+		newUp = CrossProduct(newRight, newForward);
+
+		for (int i = 0; i < 6; i++) {
+			if (m_pObjects[i]) {
+				CMatrix prevMat(m_pObjects[i]->GetMatrix());
+				CVector prevPosition = m_pObjects[i]->GetPosition();
+
+				m_pObjects[i]->SetPosition((pos1 + pos2) / 2.0f);
+				m_pObjects[i]->GetRight() = newRight;
+				m_pObjects[i]->GetUp() = newUp;
+				m_pObjects[i]->GetForward() = newForward;
+				m_pObjects[i]->GetMatrix().UpdateRW();
+				m_pObjects[i]->UpdateRwFrame();
+
+				if (!m_pObjects[i]->bIsBIGBuilding && prevPosition != m_pObjects[i]->GetPosition())
+					m_pObjects[i]->RemoveAndAdd();
+
+				m_pObjects[i]->GetMatrix().UpdateRW();
+				m_pObjects[i]->UpdateRwFrame();
+
+				m_pObjects[i]->m_vecMoveSpeed = (m_pObjects[i]->GetPosition() - prevMat.GetPosition()) / CTimer::GetTimeStep();
+
+				float deltaAngle = m_pObjects[i]->GetForward().Heading() - prevMat.GetForward().Heading();
+				while (deltaAngle < (float)PI) deltaAngle += (float)TWOPI;
+				while (deltaAngle > (float)PI) deltaAngle -= (float)TWOPI;
+				float zTurnSpeed = deltaAngle / CTimer::GetTimeStep();
+
+				m_pObjects[i]->m_vecTurnSpeed = CVector(0.0f, 0.0f, zTurnSpeed);
+				m_pObjects[i]->m_vecMoveFriction = CVector(0.0f, 0.0f, 0.0f);
+				m_pObjects[i]->m_vecTurnFriction = CVector(0.0f, 0.0f, 0.0f);
+			}
+		}
+	}
+}
+
+void CScriptPath::Clear(void) {
+	if (m_pNode)
+		delete m_pNode;
+	m_pNode = nil;
+	m_numNodes = 0;
+	for (int i = 0; i < 6; i++)
+		m_pObjects[i] = nil;
+	m_state = SCRIPT_PATH_DISABLED;
+}
+
+void CScriptPath::InitialiseOne(int32 numNodes, float width) {
+	char Dest[32];
+	sprintf(Dest, "data\\paths\\spath%d.dat", numNodes);
+	m_pNode = CPlane::LoadPath(Dest, m_numNodes, m_fTotalLength, false);
+	m_fSpeed = 1.0f;
+	m_fPosition = 0.0f;
+	m_fObjectLength = width;
+	m_state = SCRIPT_PATH_INITIALIZED;
+}
+
+void CScriptPath::SetObjectToControl(CObject *pObj) {
+	int32 i = 0;
+	while (i < 6 && m_pObjects[i])
+		i++;
+	m_pObjects[i] = pObj;
+	pObj->RegisterReference((CEntity**)&m_pObjects[i]);
+	pObj->m_phy_flagA08 = false;
+	m_state = SCRIPT_PATH_ACTIVE;
+}
+
+void CScriptPaths::Init(void) {
+	for (int i = 0; i < 3; i++)
+		aArray[i].Clear();
+}
+
+void CScriptPaths::Shutdown(void) {
+	for (int i = 0; i < 3; i++)
+		aArray[i].Clear();
+}
+
+void CScriptPaths::Update(void) {
+	for (int i = 0; i < 3; i++)
+		aArray[i].Update();
+}
+
+bool CScriptPaths::IsOneActive(void) {
+	for (int i = 0; i < 3; i++)
+		if (aArray[i].m_state == SCRIPT_PATH_ACTIVE && aArray[i].m_fSpeed != 0.0f)
+			return true;
+
+	return false;
+}
+
+void CScriptPaths::Load(uint8 *buf, uint32 size) {
+INITSAVEBUF
+	for (int32 i = 0; i < 3; i++)
+		aArray[i].Clear();
+
+	for (int32 i = 0; i < 3; i++) {
+		aArray[i] = ReadSaveBuf<CScriptPath>(buf);
+
+		for (int32 j = 0; j < 6; j++) {
+			CScriptPath *pPath = &aArray[i];
+			if (pPath->m_pObjects[j] != nil) {
+				pPath->m_pObjects[j] = CPools::GetObjectPool()->GetSlot((uintptr)pPath->m_pObjects[j] - 1);
+				pPath->m_pObjects[j]->m_phy_flagA08 = false;
+			}
+		}
+
+		aArray[i].m_pNode = new CPlaneNode[aArray[i].m_numNodes];
+		for (int32 j = 0; j < aArray[i].m_numNodes; j++) {
+			aArray[i].m_pNode[j] = ReadSaveBuf<CPlaneNode>(buf);
+		}
+	}
+VALIDATESAVEBUF(size)
+}
+
+void CScriptPaths::Save(uint8 *buf, uint32 *size) {
+	*size = sizeof(aArray);
+INITSAVEBUF
+	for (int32 i = 0; i < 3; i++) {
+		CScriptPath *pPath = WriteSaveBuf(buf, aArray[i]);
+
+		for (int32 j = 0; j < 6; j++) {
+			if (pPath->m_pObjects[j] != nil)
+				pPath->m_pObjects[j] = (CObject*)(CPools::GetObjectPool()->GetJustIndex(pPath->m_pObjects[j]) + 1);
+		}
+
+		for (int32 j = 0; j < aArray[i].m_numNodes; j++) {
+			WriteSaveBuf(buf, aArray[i].m_pNode[j]);
+			*size += sizeof(aArray[i].m_pNode[j]);
+		}
+	}
+VALIDATESAVEBUF(*size);
+}
+
+CObject* g_pScriptPathObjects[18];
+
+void CScriptPaths::Load_ForReplay(void) {
+	for (int i = 0; i < 3; i++) {
+		for (int32 j = 0; j < 6; j++) {
+			aArray[i].m_pObjects[j] = g_pScriptPathObjects[6 * i + j];
+		}
+	}
+}
+
+void CScriptPaths::Save_ForReplay(void) {
+	for (int i = 0; i < 3; i++) {
+		for (int32 j = 0; j < 6; j++) {
+			g_pScriptPathObjects[6 * i + j] = aArray[i].m_pObjects[j];
+		}
+	}
 }

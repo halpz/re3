@@ -45,7 +45,7 @@ class CPool
 
 public:
 	// TODO(MIAMI): remove ctor without name argument
-	CPool(int size){
+	CPool(int size, const char *name){
 		// TODO: use new here
 		m_entries = (U*)malloc(sizeof(U)*size);
 		m_flags = (Flags*)malloc(sizeof(Flags)*size);
@@ -56,8 +56,6 @@ public:
 			m_flags[i].free = 1;
 		}
 	}
-	CPool(int size, const char *name)
-	 : CPool(size) {}
 	~CPool() {
 		Flush();
 	}

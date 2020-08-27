@@ -1,15 +1,16 @@
-[submodule "librw"]
-	path = librw
-	url = https://github.com/aap/librw
-[submodule "opus"]
-	path = opus
+[submodule "vendor/ogg"]
+	path = vendor/ogg
+	url = https://github.com/xiph/ogg.git
+	branch = master
+[submodule "vendor/opus"]
+	path = vendor/opus
 	url = https://github.com/xiph/opus.git
 	branch = master
-[submodule "opusfile"]
-	path = opusfile
+[submodule "vendor/opusfile"]
+	path = vendor/opusfile
 	url = https://github.com/xiph/opusfile.git
 	branch = master
-[submodule "ogg"]
-	path = ogg
-	url = https://github.com/xiph/ogg.git
+[submodule "vendor/librw"]
+	path = vendor/librw
+	url = https://github.com/aap/librw.git
 	branch = master

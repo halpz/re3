@@ -587,16 +587,16 @@ cSampleManager::Initialise(void)
 		}
 		
 		nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN] = (uintptr)malloc(nSampleBankSize[SAMPLEBANK_MAIN]);
-		ASSERT(nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN] != NULL);
+		ASSERT(nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN] != 0);
 		
-		if ( nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN] == NULL )
+		if ( nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN] == 0 )
 		{
 			Terminate();
 			return false;
 		}
 		
 		nSampleBankMemoryStartAddress[SAMPLEBANK_PED] = (uintptr)malloc(PED_BLOCKSIZE*MAX_PEDSFX);
-		ASSERT(nSampleBankMemoryStartAddress[SAMPLEBANK_PED] != NULL);
+		ASSERT(nSampleBankMemoryStartAddress[SAMPLEBANK_PED] != 0);
 	}
 	
 	

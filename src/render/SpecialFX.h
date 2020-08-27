@@ -87,6 +87,7 @@ public:
 	RpMaterial *m_pMaterial;
 	uint16 m_nType;
 	bool m_bIsUsed;
+	bool m_bFindZOnNextPlacement;
 	uint32 m_nIdentifier;
 	RwRGBA m_Color;
 	uint16 m_nPulsePeriod;

@@ -13,7 +13,7 @@ void
 CTxdStore::Initialise(void)
 {
 	if(ms_pTxdPool == nil)
-		ms_pTxdPool = new CPool<TxdDef,TxdDef>(TXDSTORESIZE);
+		ms_pTxdPool = new CPool<TxdDef,TxdDef>(TXDSTORESIZE, "TexDictionary");
 }
 
 void
@@ -58,11 +58,10 @@ CTxdStore::RemoveTxdSlot(int slot)
 int
 CTxdStore::FindTxdSlot(const char *name)
 {
-	char *defname;
 	int size = ms_pTxdPool->GetSize();
 	for(int i = 0; i < size; i++){
-		defname = GetTxdName(i);
-		if(defname && !CGeneral::faststricmp(defname, name))
+		TxdDef *def = GetSlot(i);
+		if(def && !CGeneral::faststricmp(def->name, name))
 			return i;
 	}
 	return -1;
@@ -71,8 +70,7 @@ CTxdStore::FindTxdSlot(const char *name)
 char*
 CTxdStore::GetTxdName(int slot)
 {
-	TxdDef *def = GetSlot(slot);
-	return def ? def->name : nil;
+	return GetSlot(slot)->name;
 }
 
 void
@@ -91,9 +89,7 @@ CTxdStore::PopCurrentTxd(void)
 void
 CTxdStore::SetCurrentTxd(int slot)
 {
-	TxdDef *def = GetSlot(slot);
-	if(def)
-		RwTexDictionarySetCurrent(def->texDict);
+	RwTexDictionarySetCurrent(GetSlot(slot)->texDict);
 }
 
 void
@@ -118,7 +114,7 @@ void
 CTxdStore::RemoveRef(int slot)
 {
 	if(--GetSlot(slot)->refCount <= 0)
-		CStreaming::RemoveModel(slot + STREAM_OFFSET_TXD);
+		CStreaming::RemoveTxd(slot);
 }
 
 void

@@ -27,16 +27,16 @@ enum Config {
 
 	// Pool sizes
 	NUMPTRNODES = 50000,
-	NUMENTRYINFOS = 5400, // only 3200 in VC???
+	NUMENTRYINFOS = 3200,
 	NUMPEDS = 140,
 	NUMVEHICLES = 110,
 	NUMBUILDINGS = 7000,
-	NUMTREADABLES = 1214,	// 1 in VC
+	NUMTREADABLES = 1,
 	NUMOBJECTS = 460,
-	NUMDUMMIES = 2802, // 2340 in VC
-	NUMAUDIOSCRIPTOBJECTS = 256,	// 192 in VC
+	NUMDUMMIES = 2340,
+	NUMAUDIOSCRIPTOBJECTS = 192,
+	NUMCOLMODELS = 4400,
 	NUMCUTSCENEOBJECTS = 50,	// does not exist in VC
-	// TODO(MIAMI): colmodel pool
 
 	NUMANIMBLOCKS = 35,
 	NUMANIMATIONS = 450,
@@ -113,6 +113,7 @@ enum Config {
 	NUMPHONES = 50,
 	NUMPEDGROUPS = 67,
 	NUMMODELSPERPEDGROUP = 16,
+	MAXZONEPEDSLOADED = 8,
 	NUMSHOTINFOS = 100,
 
 	NUMROADBLOCKS = 300,
@@ -224,7 +225,15 @@ enum Config {
 //#define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
 //#define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
 //#define USE_TEXTURE_POOL
-#define CUTSCENE_BORDERS_SWITCH
+//#define CUTSCENE_BORDERS_SWITCH
+//#define EXTENDED_COLOURFILTER		// more options for colour filter (replaces mblur)
+//#define EXTENDED_PIPELINES		// custom render pipelines (includes Neo)
+//#define MULTISAMPLING		// adds MSAA option TODO
+
+#ifdef LIBRW
+// these are not supported with librw yet
+#	undef MULTISAMPLING
+#endif
 
 // Water & Particle
 #define PC_PARTICLE
@@ -244,6 +253,7 @@ enum Config {
 #define ALLCARSHELI_CHEAT
 #define ALT_DODO_CHEAT
 #define REGISTER_START_BUTTON
+//#define BIND_VEHICLE_FIREWEAPON // Adds ability to rebind fire key for 'in vehicle' controls
 
 // Hud, frontend and radar
 #define HUD_ENHANCEMENTS	// Adjusts some aspects to make the HUD look/behave a little bit better.
@@ -254,12 +264,13 @@ enum Config {
 #ifndef PC_MENU
 #	define PS2_MENU
 //#	define PS2_MENU_USEALLPAGEICONS
-#else
 //#	define PS2_LIKE_MENU	// An effort to recreate PS2 menu, cycling through tabs, different bg etc.
+#else
 #	define MAP_ENHANCEMENTS			// Adding waypoint etc.
 #	define TRIANGLE_BACK_BUTTON
 //#	define CIRCLE_BACK_BUTTON
 //#define CUSTOM_FRONTEND_OPTIONS
+#	define GRAPHICS_MENU_OPTIONS
 #define LEGACY_MENU_OPTIONS
 #define MUCH_SHORTER_OUTRO_SCREEN
 

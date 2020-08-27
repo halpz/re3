@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "VisibilityPlugins.h"
 #include "World.h"
+#include "custompipes.h"
 
 //--MIAMI: file done
 
@@ -193,6 +194,10 @@ CVisibilityPlugins::RenderFadingEntities(CLinkList<AlphaObjectInfo> &list)
 		CEntity *e = node->item.entity;
 		if(e->m_rwObject == nil)
 			continue;
+#ifdef EXTENDED_PIPELINES
+		if(CustomPipes::bRenderingEnvMap && (e->IsPed() || e->IsVehicle()))
+			continue;
+#endif
 		mi = (CSimpleModelInfo *)CModelInfo::GetModelInfo(e->GetModelIndex());
 		if(mi->GetModelType() == MITYPE_SIMPLE && mi->m_noZwrite)
 			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, FALSE);

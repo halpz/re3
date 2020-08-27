@@ -30,7 +30,13 @@
 #include "World.h"
 #include "ZoneCull.h"
 #include "main.h"
+#include "Bike.h"
+#include "Automobile.h"
+#include "GameLogic.h"
 
+CVector lastPlayerPos;
+
+// --MIAMI: Done
 void
 CPlayerInfo::SetPlayerSkin(char *skin)
 {
@@ -38,6 +44,7 @@ CPlayerInfo::SetPlayerSkin(char *skin)
 	LoadPlayerSkin();
 }
 
+// --MIAMI: Done
 const CVector &
 CPlayerInfo::GetPos()
 {
@@ -50,16 +57,16 @@ CPlayerInfo::GetPos()
 	return m_pPed->GetPosition();
 }
 
+// --MIAMI: Done
 void
 CPlayerInfo::LoadPlayerSkin()
 {
 	DeletePlayerSkin();
 
 	m_pSkinTexture = CPlayerSkin::GetSkinTexture(m_aSkinName);
-	if (!m_pSkinTexture)
-		m_pSkinTexture = CPlayerSkin::GetSkinTexture(DEFAULT_SKIN_NAME);
 }
 
+// --MIAMI: Done
 void
 CPlayerInfo::DeletePlayerSkin()
 {
@@ -69,6 +76,7 @@ CPlayerInfo::DeletePlayerSkin()
 	}
 }
 
+// --MIAMI: Done
 void
 CPlayerInfo::KillPlayer()
 {
@@ -81,6 +89,7 @@ CPlayerInfo::KillPlayer()
 	CStats::TimesDied++;
 }
 
+// --MIAMI: Done
 void
 CPlayerInfo::ArrestPlayer()
 {
@@ -88,11 +97,13 @@ CPlayerInfo::ArrestPlayer()
 
 	m_WBState = WBSTATE_BUSTED;
 	m_nWBTime = CTimer::GetTimeInMilliseconds();
+	m_nBustedAudioStatus = BUSTEDAUDIO_NONE;
 	CDarkel::ResetOnPlayerDeath();
 	CMessages::AddBigMessage(TheText.Get("BUSTED"), 5000, 2);
 	CStats::TimesArrested++;
 }
 
+// --MIAMI: Done
 bool
 CPlayerInfo::IsPlayerInRemoteMode()
 {
@@ -109,6 +120,7 @@ CPlayerInfo::PlayerFailedCriticalMission()
 	CDarkel::ResetOnPlayerDeath();
 }
 
+// --MIAMI: Done
 void
 CPlayerInfo::Clear(void)
 {
@@ -125,6 +137,8 @@ CPlayerInfo::Clear(void)
 	m_nTrafficMultiplier = 0;
 	m_fRoadDensity = 1.0f;
 	m_bInRemoteMode = false;
+	field_D5 = false;
+	field_D6 = false;
 	m_bUnusedTaxiThing = false;
 	m_nUnusedTaxiTimer = 0;
 	m_nCollectedPackages = 0;
@@ -136,10 +150,25 @@ CPlayerInfo::Clear(void)
 	m_nSexFrequency = 0;
 	m_pHooker = nil;
 	m_nTimeTankShotGun = 0;
-	field_248 = 0;
+	field_EC = 0;
 	m_nUpsideDownCounter = 0;
+	m_nTimeCarSpentOnTwoWheels = 0;
+	m_nDistanceCarTravelledOnTwoWheels = 0;
+	m_nTimeNotFullyOnGround = 0;
+	m_nTimeSpentOnWheelie = 0;
+	m_nDistanceTravelledOnWheelie = 0.0f;
+	m_nTimeSpentOnStoppie = 0;
+	m_nDistanceTravelledOnStoppie = 0.0f;
+	m_nCancelWheelStuntTimer = 0;
+	m_nLastTimeCarSpentOnTwoWheels = 0;
+	m_nLastDistanceCarTravelledOnTwoWheels = 0;
+	m_nLastTimeSpentOnWheelie = 0;
+	m_nLastDistanceTravelledOnWheelie = 0;
+	m_nLastTimeSpentOnStoppie = 0;
+	m_nLastDistanceTravelledOnStoppie = 0;
 	m_bInfiniteSprint = false;
 	m_bFastReload = false;
+	m_bFireproof = false;
 	m_nMaxHealth = m_nMaxArmour = 100;
 	m_bGetOutOfJailFree = false;
 	m_bGetOutOfHospitalFree = false;
@@ -147,22 +176,24 @@ CPlayerInfo::Clear(void)
 	m_nPreviousTimeRewardedForExplosion = 0;
 	m_nExplosionsSinceLastReward = 0;
 	m_nHavocLevel = 0;
-	m_fMediaAttention = 0;
+	m_fMediaAttention = 0.0f;
 	m_nCurrentBustedAudio = 1;
 	m_nBustedAudioStatus = BUSTEDAUDIO_NONE;
 }
 
+// --MIAMI: Done
 void
 CPlayerInfo::BlowUpRCBuggy(bool actually)
 {
 	if (!m_pRemoteVehicle || m_pRemoteVehicle->bRemoveFromWorld)
 		return;
 
-	CRemote::TakeRemoteControlledCarFromPlayer();
+	CRemote::TakeRemoteControlledCarFromPlayer(actually);
 	if (actually)
 		m_pRemoteVehicle->BlowUpCar(FindPlayerPed());
 }
 
+// --MIAMI: Done
 void
 CPlayerInfo::CancelPlayerEnteringCars(CVehicle *car)
 {
@@ -174,6 +205,7 @@ CPlayerInfo::CancelPlayerEnteringCars(CVehicle *car)
 		m_pPed->ClearObjective();
 }
 
+// --MIAMI: Done
 void
 CPlayerInfo::MakePlayerSafe(bool toggle)
 {
@@ -198,8 +230,7 @@ CPlayerInfo::MakePlayerSafe(bool toggle)
 		CWorld::ExtinguishAllCarFiresInArea(GetPos(), 4000.0f);
 		CReplay::DisableReplays();
 
-	}
-	else {
+	} else {
 		m_pPed->m_pWanted->m_bIgnoredByEveryone = false;
 		CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_PLAYERINFO);
 		m_pPed->bBulletProof = false;
@@ -214,18 +245,21 @@ CPlayerInfo::MakePlayerSafe(bool toggle)
 	}
 }
 
+// --MIAMI: Done
 bool
 CPlayerInfo::IsRestartingAfterDeath()
 {
 	return m_WBState == WBSTATE_WASTED;
 }
 
+// --MIAMI: Done
 bool
 CPlayerInfo::IsRestartingAfterArrest()
 {
 	return m_WBState == WBSTATE_BUSTED;
 }
 
+// --MIAMI: Done
 // lastCloseness is passed to other calls of this function
 void
 CPlayerInfo::EvaluateCarPosition(CEntity *carToTest, CPed *player, float carBoundCentrePedDist, float *lastCloseness, CVehicle **closestCarOutput)
@@ -250,32 +284,7 @@ CPlayerInfo::EvaluateCarPosition(CEntity *carToTest, CPed *player, float carBoun
 	}
 }
 
-// There is something unfinished in here... Sadly all IDBs we have have it unfinished.
-void
-CPlayerInfo::AwardMoneyForExplosion(CVehicle *wreckedCar)
-{
-	if (CTimer::GetTimeInMilliseconds() - m_nPreviousTimeRewardedForExplosion < 6000)
-		++m_nExplosionsSinceLastReward;
-	else
-		m_nExplosionsSinceLastReward = 1;
-
-	m_nPreviousTimeRewardedForExplosion = CTimer::GetTimeInMilliseconds();
-	int award = wreckedCar->pHandling->nMonetaryValue * 0.002f;
-	sprintf(gString, "$%d", award);
-#ifdef MONEY_MESSAGES
-	// This line is a leftover from PS2, I don't know what it was meant to be.
-	// CVector sth(TheCamera.GetPosition() * 4.0f);
-
-	CMoneyMessages::RegisterOne(wreckedCar->GetPosition() + CVector(0.0f, 0.0f, 2.0f), gString, 0, 255, 0, 2.0f, 0.5f);
-#endif
-	CWorld::Players[CWorld::PlayerInFocus].m_nMoney += award;
-
-	for (int i = m_nExplosionsSinceLastReward; i > 1; --i) {
-		CGeneral::GetRandomNumber();
-		CWorld::Players[CWorld::PlayerInFocus].m_nMoney += award;
-	}
-}
-
+// --MIAMI: Done
 void
 CPlayerInfo::SavePlayerInfo(uint8 *buf, uint32 *size)
 {
@@ -293,12 +302,19 @@ CPlayerInfo::SavePlayerInfo(uint8 *buf, uint32 *size)
 	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nTotalPackages);
 	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bInfiniteSprint);
 	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bFastReload);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bFireproof);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nMaxHealth);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nMaxArmour);
 	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfJailFree);
 	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfHospitalFree);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bDriveByAllowed);
 	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_aPlayerName);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nBustedAudioStatus);
+	CopyToBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nCurrentBustedAudio);
 #undef CopyToBuf
 }
 
+// --MIAMI: Done
 void
 CPlayerInfo::LoadPlayerInfo(uint8 *buf, uint32 size)
 {
@@ -313,12 +329,19 @@ CPlayerInfo::LoadPlayerInfo(uint8 *buf, uint32 size)
 	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nTotalPackages);
 	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bInfiniteSprint);
 	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bFastReload);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bFireproof);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nMaxHealth);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nMaxArmour);
 	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfJailFree);
 	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bGetOutOfHospitalFree);
-	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_aPlayerName)
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_bDriveByAllowed);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_aPlayerName);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nBustedAudioStatus);
+	CopyFromBuf(buf, CWorld::Players[CWorld::PlayerInFocus].m_nCurrentBustedAudio)
 #undef CopyFromBuf
 }
 
+// --MIAMI: Done
 void
 CPlayerInfo::FindClosestCarSectorList(CPtrList& carList, CPed* ped, float unk1, float unk2, float unk3, float unk4, float* lastCloseness, CVehicle** closestCarOutput)
 {
@@ -333,7 +356,7 @@ CPlayerInfo::FindClosestCarSectorList(CPtrList& carList, CPed* ped, float unk1, 
 				&& (car->GetUp().z > 0.3f || (car->IsVehicle() && ((CVehicle*)car)->m_vehType == VEHICLE_TYPE_BIKE))) {
 				CVector carCentre = car->GetBoundCentre();
 
-				if (Abs(ped->GetPosition().z - carCentre.z) < 2.0f) {
+				if (Abs(ped->GetPosition().z - carCentre.z) < 2.0f || car->IsCar() && carCentre.z < ped->GetPosition().z && ped->GetPosition().z - 4.f < carCentre.z) {
 					float dist = (ped->GetPosition() - carCentre).Magnitude2D();
 					if (dist <= 10.0f && !CCranes::IsThisCarBeingCarriedByAnyCrane(car)) {
 						EvaluateCarPosition(car, ped, dist, lastCloseness, closestCarOutput);
@@ -367,6 +390,157 @@ CPlayerInfo::Process(void)
 	if (startTaxiTimer)
 		m_nUnusedTaxiTimer = CTimer::GetTimeInMilliseconds();
 
+	if (!m_pPed->InVehicle()) {
+		m_nTimeCarSpentOnTwoWheels = 0;
+		m_nTimeNotFullyOnGround = 0;
+		m_nTimeSpentOnWheelie = 0;
+		m_nTimeSpentOnStoppie = 0;
+		m_nCancelWheelStuntTimer = 0;
+	} else if (m_pPed->m_pMyVehicle->IsCar()) {
+		CAutomobile *car = (CAutomobile*)m_pPed->m_pMyVehicle;
+
+		if (car->m_nWheelsOnGround < 3)
+			m_nTimeNotFullyOnGround += CTimer::GetTimeInMilliseconds();
+		else
+			m_nTimeNotFullyOnGround = 0;
+
+		if (car->m_aSuspensionSpringRatioPrev[2] == 1.f && car->m_aSuspensionSpringRatioPrev[3] == 1.f) {
+			if (car->m_aSuspensionSpringRatioPrev[0] < 1.0f && car->m_aSuspensionSpringRatioPrev[1] < 1.0f && car->m_fDamageImpulse == 0.0f) {
+				m_nTimeCarSpentOnTwoWheels += CTimer::GetTimeStepInMilliseconds();
+				m_nDistanceCarTravelledOnTwoWheels += car->m_fDistanceTravelled;
+				m_nCancelWheelStuntTimer = Max(0.0f, m_nCancelWheelStuntTimer - CTimer::GetTimeStepInMilliseconds() * 0.5f);
+
+			} else {
+				if (m_nTimeCarSpentOnTwoWheels != 0 && m_nCancelWheelStuntTimer < 500) {
+					m_nCancelWheelStuntTimer += CTimer::GetTimeStepInMilliseconds();
+				} else {
+					if (m_nTimeCarSpentOnTwoWheels >= 2000) {
+						m_nLastTimeCarSpentOnTwoWheels = m_nTimeCarSpentOnTwoWheels;
+						m_nLastDistanceCarTravelledOnTwoWheels = m_nDistanceCarTravelledOnTwoWheels;
+						if (CStats::Longest2Wheel < m_nTimeCarSpentOnTwoWheels / 1000)
+							CStats::Longest2Wheel = m_nTimeCarSpentOnTwoWheels / 1000;
+						if (CStats::Longest2WheelDist < m_nDistanceCarTravelledOnTwoWheels)
+							CStats::Longest2WheelDist = m_nDistanceCarTravelledOnTwoWheels;
+					}
+					m_nTimeCarSpentOnTwoWheels = 0;
+					m_nDistanceCarTravelledOnTwoWheels = 0;
+					m_nCancelWheelStuntTimer = 0;
+				}
+			}
+		} else if (car->m_aSuspensionSpringRatioPrev[0] == 1.0f && car->m_aSuspensionSpringRatioPrev[1] == 1.0f) {
+#ifdef FIX_BUGS
+			if (car->m_aSuspensionSpringRatioPrev[2] < 1.f
+#else
+			if (car->m_aSuspensionSpringRatioPrev[1] < 1.f
+#endif
+				&& car->m_aSuspensionSpringRatioPrev[3] < 1.f && 0.0f == car->m_fDamageImpulse) {
+				m_nTimeCarSpentOnTwoWheels += CTimer::GetTimeStepInMilliseconds();
+				m_nDistanceCarTravelledOnTwoWheels += car->m_fDistanceTravelled;
+				m_nCancelWheelStuntTimer = Max(0.0f, m_nCancelWheelStuntTimer - CTimer::GetTimeStepInMilliseconds() * 0.2f);
+
+			} else if (m_nTimeCarSpentOnTwoWheels != 0 && m_nCancelWheelStuntTimer < 500) {
+				m_nCancelWheelStuntTimer += CTimer::GetTimeStepInMilliseconds();
+
+			} else {
+				if (m_nTimeCarSpentOnTwoWheels >= 2000) {
+					m_nLastTimeCarSpentOnTwoWheels = m_nTimeCarSpentOnTwoWheels;
+					m_nLastDistanceCarTravelledOnTwoWheels = m_nDistanceCarTravelledOnTwoWheels;
+					if (CStats::Longest2Wheel < m_nTimeCarSpentOnTwoWheels / 1000)
+						CStats::Longest2Wheel = m_nTimeCarSpentOnTwoWheels / 1000;
+					if (CStats::Longest2WheelDist < m_nDistanceCarTravelledOnTwoWheels)
+						CStats::Longest2WheelDist = m_nDistanceCarTravelledOnTwoWheels;
+				}
+				m_nTimeCarSpentOnTwoWheels = 0;
+				m_nDistanceCarTravelledOnTwoWheels = 0;
+				m_nCancelWheelStuntTimer = 0;
+			}
+		} else if (m_nTimeCarSpentOnTwoWheels != 0) {
+			if (m_nTimeCarSpentOnTwoWheels >= 2000) {
+				m_nLastTimeCarSpentOnTwoWheels = m_nTimeCarSpentOnTwoWheels;
+				m_nLastDistanceCarTravelledOnTwoWheels = m_nDistanceCarTravelledOnTwoWheels;
+				if (CStats::Longest2Wheel < m_nTimeCarSpentOnTwoWheels / 1000)
+					CStats::Longest2Wheel = m_nTimeCarSpentOnTwoWheels / 1000;
+				if (CStats::Longest2WheelDist < m_nDistanceCarTravelledOnTwoWheels)
+					CStats::Longest2WheelDist = m_nDistanceCarTravelledOnTwoWheels;
+			}
+			m_nTimeCarSpentOnTwoWheels = 0;
+			m_nDistanceCarTravelledOnTwoWheels = 0;
+			m_nCancelWheelStuntTimer = 0;
+		}
+		m_nTimeSpentOnWheelie = 0;
+		m_nTimeSpentOnStoppie = 0;
+	} else if (m_pPed->m_pMyVehicle->IsBike()) {
+		CBike *bike = (CBike*)m_pPed->m_pMyVehicle;
+		if (bike->m_aSuspensionSpringRatioPrev[0] == 1.0f && bike->m_aSuspensionSpringRatioPrev[1] == 1.0f) {
+			if (bike->m_aSuspensionSpringRatioPrev[2] < 1.0f
+				|| (bike->m_aSuspensionSpringRatioPrev[3] < 1.0f && 0.0f == bike->m_fDamageImpulse)) {
+				m_nTimeSpentOnWheelie += CTimer::GetTimeStepInMilliseconds();
+				m_nDistanceTravelledOnWheelie += bike->m_fDistanceTravelled;
+				m_nCancelWheelStuntTimer = Max(0.0f, m_nCancelWheelStuntTimer - CTimer::GetTimeStepInMilliseconds() * 0.2f);
+
+			} else {
+				if (m_nTimeSpentOnWheelie != 0 && m_nCancelWheelStuntTimer < 500) {
+					m_nCancelWheelStuntTimer += CTimer::GetTimeStepInMilliseconds();
+				} else {
+					if (m_nTimeSpentOnWheelie >= 5000) {
+						m_nLastTimeSpentOnWheelie = m_nTimeSpentOnWheelie;
+						m_nLastDistanceTravelledOnWheelie = m_nDistanceTravelledOnWheelie;
+						if (CStats::LongestWheelie < m_nTimeSpentOnWheelie / 1000)
+							CStats::LongestWheelie = m_nTimeSpentOnWheelie / 1000;
+						if (CStats::LongestWheelieDist < m_nDistanceTravelledOnWheelie)
+							CStats::LongestWheelieDist = m_nDistanceTravelledOnWheelie;
+					}
+					m_nTimeSpentOnWheelie = 0;
+					m_nDistanceTravelledOnWheelie = 0;
+					m_nCancelWheelStuntTimer = 0;
+				}
+			}
+		} else if (m_nTimeSpentOnWheelie != 0) {
+			if (m_nTimeSpentOnWheelie >= 5000) {
+				m_nLastTimeSpentOnWheelie = m_nTimeSpentOnWheelie;
+				m_nLastDistanceTravelledOnWheelie = m_nDistanceTravelledOnWheelie;
+				if (CStats::LongestWheelie < m_nTimeSpentOnWheelie / 1000)
+					CStats::LongestWheelie = m_nTimeSpentOnWheelie / 1000;
+				if (CStats::LongestWheelieDist < m_nDistanceTravelledOnWheelie)
+					CStats::LongestWheelieDist = m_nDistanceTravelledOnWheelie;
+			}
+			m_nTimeSpentOnWheelie = 0;
+			m_nDistanceTravelledOnWheelie = 0;
+			m_nCancelWheelStuntTimer = 0;
+
+		} else if (bike->m_aSuspensionSpringRatioPrev[2] == 1.0f && bike->m_aSuspensionSpringRatioPrev[3] == 1.0f
+			&& 0.0f == bike->m_fDamageImpulse) {
+			m_nTimeSpentOnStoppie += CTimer::GetTimeStepInMilliseconds();
+			m_nDistanceTravelledOnStoppie += bike->m_fDistanceTravelled;
+			m_nCancelWheelStuntTimer = Max(0.0f, m_nCancelWheelStuntTimer - CTimer::GetTimeStepInMilliseconds() * 0.2f);
+
+		} else {
+			if (m_nTimeSpentOnStoppie != 0 && m_nCancelWheelStuntTimer < 500) {
+				m_nCancelWheelStuntTimer += CTimer::GetTimeStepInMilliseconds();
+			} else {
+				if (m_nTimeSpentOnStoppie >= 2000) {
+					m_nLastTimeSpentOnStoppie = m_nTimeSpentOnStoppie;
+					m_nLastDistanceTravelledOnStoppie = m_nDistanceTravelledOnStoppie;
+					if (CStats::LongestStoppie < m_nTimeSpentOnStoppie / 1000)
+						CStats::LongestStoppie = m_nTimeSpentOnStoppie / 1000;
+					if (CStats::LongestStoppieDist < m_nDistanceTravelledOnStoppie)
+						CStats::LongestStoppieDist = m_nDistanceTravelledOnStoppie;
+				}
+				m_nTimeSpentOnStoppie = 0;
+				m_nDistanceTravelledOnStoppie = 0;
+				m_nCancelWheelStuntTimer = 0;
+			}
+		}
+		m_nTimeCarSpentOnTwoWheels = 0;
+		m_nTimeNotFullyOnGround = 0;
+	} else {
+		m_nTimeCarSpentOnTwoWheels = 0;
+		m_nTimeNotFullyOnGround = 0;
+		m_nTimeSpentOnWheelie = 0;
+		m_nTimeSpentOnStoppie = 0;
+		m_nCancelWheelStuntTimer = 0;
+	}
+
 	// The effect that makes money counter does while earning/losing money
 	if (m_nVisibleMoney != m_nMoney) {
 		int diff = m_nMoney - m_nVisibleMoney;
@@ -395,7 +569,7 @@ CPlayerInfo::Process(void)
 		m_fRoadDensity = ThePaths.CalcRoadDensity(playerPos.x, playerPos.y);
 	}
 
-	m_fRoadDensity = clamp(m_fRoadDensity, 0.4f, 1.45f);
+	m_fRoadDensity = clamp(m_fRoadDensity, 0.5f, 1.45f);
 
 	// Because vehicle enter/exit use same key binding.
 	bool enterOrExitVeh;
@@ -404,39 +578,31 @@ CPlayerInfo::Process(void)
 	else
 		enterOrExitVeh = CPad::GetPad(0)->GetExitVehicle();
 
-	if (enterOrExitVeh && m_pPed->m_nPedState != PED_SNIPER_MODE && m_pPed->m_nPedState != PED_ROCKET_MODE) {
+	if (enterOrExitVeh && m_pPed->m_nPedState != PED_ANSWER_MOBILE && m_pPed->m_nPedState != PED_SNIPER_MODE && m_pPed->m_nPedState != PED_ROCKET_MODE) {
 		if (m_pPed->bInVehicle) {
 			if (!m_pRemoteVehicle) {
 				CEntity *surfaceBelowVeh = m_pPed->m_pMyVehicle->m_pCurGroundEntity;
 				if (!surfaceBelowVeh || !CBridge::ThisIsABridgeObjectMovingUp(surfaceBelowVeh->GetModelIndex())) {
 					CVehicle *veh = m_pPed->m_pMyVehicle;
 					if (!veh->IsBoat() || veh->m_nDoorLock == CARLOCK_LOCKED_PLAYER_INSIDE) {
-
-						// This condition will always return true, else block was probably WIP Miami code.
-						if (veh->m_vehType != VEHICLE_TYPE_BIKE || veh->m_nDoorLock == CARLOCK_LOCKED_PLAYER_INSIDE) {
-							if (veh->GetStatus() != STATUS_WRECKED && veh->GetStatus() != STATUS_TRAIN_MOVING && veh->m_nDoorLock != CARLOCK_LOCKED_PLAYER_INSIDE) {
-								if (veh->m_vecMoveSpeed.Magnitude() < 0.17f && CTimer::GetTimeScale() >= 0.5f && !veh->bIsInWater) {
-									m_pPed->SetObjective(OBJECTIVE_LEAVE_CAR, veh);
-								}
+						if (veh->GetStatus() != STATUS_WRECKED && veh->GetStatus() != STATUS_TRAIN_MOVING && veh->m_nDoorLock != CARLOCK_LOCKED_PLAYER_INSIDE) {
+							bool canJumpOff = false;
+							if (veh->m_vehType == VEHICLE_TYPE_BIKE) {
+								canJumpOff = veh->CanPedJumpOffBike();
+							} else if (veh->pDriver == m_pPed) {
+								canJumpOff = veh->CanPedJumpOutCar();
 							}
-						} else {
-							CVector sth = 0.7f * veh->GetRight() + veh->GetPosition();
-							bool found = false;
-							float groundZ = CWorld::FindGroundZFor3DCoord(sth.x, sth.y, 2.0f + sth.z, &found);
 
-							if (found)
-								sth.z = 1.0f + groundZ;
-							m_pPed->m_nPedState = PED_IDLE;
-							m_pPed->SetMoveState(PEDMOVE_STILL);
-							CPed::PedSetOutCarCB(0, m_pPed);
-							CAnimManager::BlendAnimation(m_pPed->GetClump(), m_pPed->m_animGroup, ANIM_IDLE_STANCE, 100.0f);
-							CAnimManager::BlendAnimation(m_pPed->GetClump(), ASSOCGRP_STD, ANIM_FALL_LAND, 100.0f);
-							m_pPed->SetPosition(sth);
-							m_pPed->SetMoveState(PEDMOVE_STILL);
-							m_pPed->m_vecMoveSpeed = veh->m_vecMoveSpeed;
+							if (canJumpOff || veh->m_vecMoveSpeed.Magnitude() < 0.1f) {
+								if (!veh->bIsInWater)
+									m_pPed->SetObjective(OBJECTIVE_LEAVE_CAR, veh);
+
+							} else if (veh->GetStatus() != STATUS_PLAYER && veh != CGameLogic::pShortCutTaxi) {
+								veh->AutoPilot.m_nTempAction = TEMPACT_WAIT;
+								veh->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 1000;
+							}
 						}
 					} else {
-						// The code in here was under CPed::SetExitBoat in VC, did the same for here.
 						m_pPed->SetExitBoat(veh);
 						m_pPed->bTryingToReachDryLand = true;
 					}
@@ -451,14 +617,10 @@ CPlayerInfo::Process(void)
 				CEntity *surfaceBelow = m_pPed->m_pCurrentPhysSurface;
 				if (surfaceBelow && surfaceBelow->IsVehicle()) {
 					carBelow = (CVehicle*)surfaceBelow;
-					if (carBelow->IsBoat()) {
+					if (carBelow->IsBoat() && carBelow->m_modelIndex != MI_SKIMMER) {
 						weAreOnBoat = true;
 						m_pPed->bOnBoat = true;
-#ifdef VC_PED_PORTS
 						if (carBelow->GetStatus() != STATUS_WRECKED && carBelow->GetUp().z > 0.3f)
-#else
-						if (carBelow->GetStatus() != STATUS_WRECKED)
-#endif
 							m_pPed->SetSeekBoatPosition(carBelow);
 					}
 				}
@@ -506,14 +668,15 @@ CPlayerInfo::Process(void)
 			}
 		}
 	}
+
 	if (m_bInRemoteMode) {
 		uint32 timeWithoutRemoteCar = CTimer::GetTimeInMilliseconds() - m_nTimeLostRemoteCar;
-		if (CTimer::GetPreviousTimeInMilliseconds() - m_nTimeLostRemoteCar < 1000 && timeWithoutRemoteCar >= 1000 && m_WBState == WBSTATE_PLAYING) {
+		if (CTimer::GetPreviousTimeInMilliseconds() - m_nTimeLostRemoteCar < 1000 && timeWithoutRemoteCar >= 1000 && m_WBState == WBSTATE_PLAYING && field_D6) {
 			TheCamera.SetFadeColour(0, 0, 0);
 			TheCamera.Fade(1.0f, 0);
 		}
 		if (timeWithoutRemoteCar > 2000) {
-			if (m_WBState == WBSTATE_PLAYING) {
+			if (m_WBState == WBSTATE_PLAYING && field_D6) {
 				TheCamera.RestoreWithJumpCut();
 				TheCamera.SetFadeColour(0, 0, 0);
 				TheCamera.Fade(1.0f, 1);
@@ -525,6 +688,7 @@ CPlayerInfo::Process(void)
 				CTimer::Update();
 			}
 			m_bInRemoteMode = false;
+			CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle->bRemoveFromWorld = true;
 			CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle = nil;
 			if (FindPlayerVehicle()) {
 				FindPlayerVehicle()->SetStatus(STATUS_PLAYER);
@@ -534,11 +698,10 @@ CPlayerInfo::Process(void)
 	if (!(CTimer::GetFrameCounter() & 31)) {
 		CVehicle *veh = FindPlayerVehicle();
 		if (veh && m_pPed->bInVehicle && veh->GetUp().z < 0.0f
-			&& veh->m_vecMoveSpeed.Magnitude() < 0.05f && veh->IsCar() && !veh->bIsInWater) {
+			&& veh->m_vecMoveSpeed.Magnitude() < 0.05f && (veh->IsCar() || veh->IsBoat()) && !veh->bIsInWater) {
 
 			if (veh->GetUp().z < -0.5f) {
 				m_nUpsideDownCounter += 2;
-			
 			} else {
 				m_nUpsideDownCounter++;
 			}
@@ -562,8 +725,74 @@ CPlayerInfo::Process(void)
 			if (veh->pPassengers[i])
 				veh->pPassengers[i]->m_nZoneLevel = LEVEL_GENERIC;
 		}
-		CStats::DistanceTravelledInVehicle += veh->m_fDistanceTravelled;
+		if(veh->m_modelIndex == MI_CADDY)
+			CStats::DistanceTravelledByGolfCart += veh->m_fDistanceTravelled;
+		else {
+			if(veh->GetVehicleAppearance() == VEHICLE_APPEARANCE_HELI)
+				CStats::DistanceTravelledByHelicoptor += veh->m_fDistanceTravelled;
+			if (veh->GetVehicleAppearance() == VEHICLE_APPEARANCE_PLANE)
+				CStats::DistanceTravelledByPlane += veh->m_fDistanceTravelled;
+			if (veh->GetVehicleAppearance() == VEHICLE_APPEARANCE_CAR)
+				CStats::DistanceTravelledByCar += veh->m_fDistanceTravelled;
+			if (veh->GetVehicleAppearance() == VEHICLE_APPEARANCE_BIKE)
+				CStats::DistanceTravelledByBike += veh->m_fDistanceTravelled;
+			if (veh->GetVehicleAppearance() == VEHICLE_APPEARANCE_BOAT)
+				CStats::DistanceTravelledByBoat += veh->m_fDistanceTravelled;
+
+			if (veh->GetVehicleAppearance() == VEHICLE_APPEARANCE_PLANE) {
+				if (veh->m_vecMoveSpeed.Magnitude() > 0.2f) {
+					CStats::FlightTime += CTimer::GetTimeStep() * 16.f; // what a weird choice
+				}
+			}
+		}
 	} else {
 		CStats::DistanceTravelledOnFoot += FindPlayerPed()->m_fDistanceTravelled;
 	}
+
+	if (m_pPed->m_pWanted->m_nWantedLevel && !CTheScripts::IsPlayerOnAMission()) {
+		float maxDelta = 0.0f;
+		static bool movedSignificantly = true;
+		static bool thereIsACarPathNear = true;
+		// there was one more guard without variable's itself???
+
+		if (CTimer::GetTimeInMilliseconds() / 20000 != CTimer::GetPreviousTimeInMilliseconds() / 20000) {
+			float posChange = (lastPlayerPos - FindPlayerCoors()).Magnitude();
+			movedSignificantly = posChange >= 10.0f;
+			lastPlayerPos = FindPlayerCoors();
+			thereIsACarPathNear = ThePaths.FindNodeClosestToCoors(FindPlayerCoors(), PATH_CAR, 60.0f, true, false, false, false) != 0;
+		}
+		switch (m_pPed->m_pWanted->m_nWantedLevel) {
+			case 1:
+				maxDelta = 31.f;
+				break;
+			case 2:
+				maxDelta = 62.f;
+				break;
+			case 3:
+				maxDelta = 125.f;
+				break;
+			case 4:
+				maxDelta = 250.f;
+				break;
+			case 5:
+				maxDelta = 500.f;
+				break;
+			case 6:
+				maxDelta = 1000.f;
+				break;
+			default:
+				break;
+		}
+		float increaseDelta = maxDelta - m_fMediaAttention;
+		float increaseAttentionBy = CTimer::GetTimeStep() * 0.0001f * increaseDelta;
+		if (increaseAttentionBy < 0.0f
+			|| movedSignificantly && thereIsACarPathNear && !CCullZones::NoPolice() && !CCullZones::PoliceAbandonCars() && CGame::currArea == AREA_MAIN_MAP) {
+			m_fMediaAttention += increaseAttentionBy;
+		}
+	} else {
+		m_fMediaAttention = 0.0f;
+	}
+	CStats::HighestChaseValue = Max(m_fMediaAttention, CStats::HighestChaseValue);
+	m_nMoney = Min(999999999, m_nMoney);
+	m_nVisibleMoney = Min(999999999, m_nVisibleMoney);
 }
