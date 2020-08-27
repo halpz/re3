@@ -110,6 +110,9 @@ public:
 	static CVehicle *pPlayerVehicle;
 	static CVector StaticCamCoors;
 	static uint32 StaticCamStartTime;
+	
+//TODO(MIAMI)
+	static void RemoveAllPickupsOfACertainWeaponGroupWithNoAmmo(eWeaponType) {}
 };
 
 extern uint16 AmmoForWeapon[20];

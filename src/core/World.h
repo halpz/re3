@@ -71,6 +71,7 @@ public:
 	static bool bProcessCutsceneOnly;
 	static bool bDoingCarCollisions;
 	static bool bIncludeCarTyres;
+	static bool bIncludeBikers;
 	static CColPoint m_aTempColPts[MAX_COLLISION_POINTS];
 
 	static void Remove(CEntity *entity);

@@ -8,7 +8,9 @@ enum AssocGroupId;
 
 class CWeaponInfo {
 	static CWeaponInfo ms_apWeaponInfos[WEAPONTYPE_TOTALWEAPONS];
+	static char ms_aWeaponNames[WEAPONTYPE_TOTALWEAPONS][32];
 public:
+	static uint16 ms_aReloadSampleTime[WEAPONTYPE_TOTALWEAPONS];
 	static int32 ms_aMaxAmmoForWeapon[WEAPONTYPE_TOTALWEAPONS];
 
 	eWeaponFire m_eWeaponFire;

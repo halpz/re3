@@ -29,6 +29,7 @@ RwIm3DVertex TraceVertices[6];
 RwImVertexIndex TraceIndexList[12];
 
 bool CSpecialFX::bSnapShotActive;
+int32 CSpecialFX::SnapShotFrames;
 
 void
 CSpecialFX::Init(void)
