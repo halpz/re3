@@ -60,7 +60,10 @@ public:
 	
 //TODO(MIAMI)
 	static void AddTrace(CVector *, CVector *, float, unsigned int, unsigned char) {}
-	static void AddTrace(CVector *, CVector *, int32 weapontype, class CEntity *shooter) {}
+	static void AddTrace(CVector *a, CVector *b, int32 weapontype, class CEntity *shooter)
+	{
+		AddTrace(a, b); //TODO: temp
+	}
 };
 
 enum

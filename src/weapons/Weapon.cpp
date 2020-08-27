@@ -2412,7 +2412,7 @@ CWeapon::FireInstantHitFromCar(CVehicle *shooter, bool left, bool right)
 			else if ( right )
 				target = source + info->m_fRange * shooter->GetRight();
 			else
-				target = source + info->m_fRange * shooter->GetRight();
+				target = source + info->m_fRange * shooter->GetForward();
 				
 		}
 		else if ( left )
