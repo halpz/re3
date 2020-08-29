@@ -29,7 +29,9 @@ bool gOccluderCoorsValid[8];
 CVector gOccluderCoorsOnScreen[8];
 CVector gOccluderCoors[8];
 
+#ifndef MASTER
 bool bDisplayOccDebugStuff;
+#endif
 
 void
 COcclusion::Init(void)
@@ -39,7 +41,9 @@ COcclusion::Init(void)
 	NearbyList = -1;
 	ListWalkThroughFA = -1;
 	PreviousListWalkThroughFA = -1;
+#ifndef MASTER
 	bDisplayOccDebugStuff = false;
+#endif
 }
 
 void
@@ -436,6 +440,7 @@ bool COcclusion::IsPositionOccluded(CVector pos, float side) {
 	return false;
 }
 
+#ifndef MASTER
 #include "Lines.h"
 
 RwIm2DVertex vertexbufferT[2];
@@ -476,3 +481,4 @@ void COcclusion::Render() {
 
 	DefinedState();
 }
+#endif

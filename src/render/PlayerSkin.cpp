@@ -99,7 +99,7 @@ CPlayerSkin::GetSkinTexture(const char *texName)
 	CTxdStore::PopCurrentTxd();
 	if (tex != nil) return tex;
 
-	if (strcmp(DEFAULT_SKIN_NAME, texName) == 0)
+	if (strcmp(DEFAULT_SKIN_NAME, texName) == 0 || texName[0] == '\0')
 		sprintf(gString, "models\\generic\\player.bmp");
 	else
 		sprintf(gString, "skins\\%s.bmp", texName);

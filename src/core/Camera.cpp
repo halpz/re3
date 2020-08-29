@@ -2044,7 +2044,11 @@ CCamera::GetScreenRect(CRect &rect)
 {
 	rect.left = 0.0f;
 	rect.right = SCREEN_WIDTH;
-	if(m_WideScreenOn){
+	if(m_WideScreenOn
+#ifdef CUTSCENE_BORDERS_SWITCH
+		&& CMenuManager::m_PrefsCutsceneBorders
+#endif
+		){
 		float borderSize = (SCREEN_HEIGHT / 2) * (m_ScreenReductionPercentage / 100.f);
 		rect.top = borderSize - SCREEN_SCALE_Y(22.f);
 		rect.bottom = SCREEN_HEIGHT - borderSize - SCREEN_SCALE_Y(14.f);

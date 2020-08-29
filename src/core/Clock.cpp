@@ -5,6 +5,8 @@
 #include "Clock.h"
 #include "Stats.h"
 
+// --MIAMI: File done
+
 _TODO("gbFastTime");
 bool gbFastTime;
 
@@ -73,8 +75,14 @@ CClock::Update(void)
 void
 CClock::SetGameClock(uint8 h, uint8 m)
 {
-	ms_nGameClockHours = h;
+	while (m >= 60) {
+		m -= 60;
+		h++;
+	}
 	ms_nGameClockMinutes = m;
+	while (h >= 24)
+		h -= 24;
+	ms_nGameClockHours = h;
 	ms_nGameClockSeconds = 0;
 	ms_nLastClockTick = CTimer::GetTimeInMilliseconds();
 }
