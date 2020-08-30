@@ -138,7 +138,7 @@ public:
 	void AddEntityToList(int32, uint8);
 	void RemoveEntityFromList(int32, uint8);
 	void Process();
-	void CheckIfCollisionHasLoadedForMissionObject();
+	void CheckIfCollisionHasLoadedForMissionObjects();
 	CPhysical* DoesThisEntityWaitForCollision(int i);
 };
 

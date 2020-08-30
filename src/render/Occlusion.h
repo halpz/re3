@@ -49,10 +49,14 @@ public:
 	static bool OccluderHidesBehind(CActiveOccluder *occl1, CActiveOccluder *occl2);
 	static bool IsAABoxOccluded(CVector pos, float width, float length, float height);
 	static bool IsPositionOccluded(CVector pos, float side);
+#ifndef MASTER
 	static void Render();
+#endif
 };
 
 bool CalcScreenCoors(CVector const &in, CVector *out, float *outw, float *outh);
 bool CalcScreenCoors(CVector const &in, CVector *out);
 
+#ifndef MASTER
 extern bool bDisplayOccDebugStuff;
+#endif

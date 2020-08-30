@@ -730,9 +730,9 @@ CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 		InfoZoneArray[i].child = GetPointerForZoneIndex((uintptr)InfoZoneArray[i].child);
 		InfoZoneArray[i].parent = GetPointerForZoneIndex((uintptr)InfoZoneArray[i].parent);
 		InfoZoneArray[i].next = GetPointerForZoneIndex((uintptr)InfoZoneArray[i].next);
-		InfoZoneArray[i].child = GetPointerForZoneIndex((uintptr)InfoZoneArray[i].child);
-		InfoZoneArray[i].parent = GetPointerForZoneIndex((uintptr)InfoZoneArray[i].parent);
-		InfoZoneArray[i].next = GetPointerForZoneIndex((uintptr)InfoZoneArray[i].next);
+		assert(InfoZoneArray[i].child == nil);
+		assert(InfoZoneArray[i].parent == nil);
+		assert(InfoZoneArray[i].next == nil);
 	}
 
 	for(i = 0; i < ARRAY_SIZE(ZoneInfoArray); i++)

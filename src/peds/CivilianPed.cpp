@@ -23,6 +23,7 @@ CCivilianPed::CCivilianPed(ePedType pedtype, uint32 mi) : CPed(pedtype)
 	m_bAttractorUnk = (CGeneral::GetRandomNumberInRange(0.0f, 1.0f) < 1.25f);
 }
 
+// --MIAMI: Done
 void
 CCivilianPed::CivilianAI(void)
 {
@@ -39,7 +40,13 @@ CCivilianPed::CivilianAI(void)
 		if (CTimer::GetTimeInMilliseconds() <= m_lookTimer)
 			return;
 
-		uint32 closestThreatFlag = ScanForThreats();
+		ScanForDelayedResponseThreats();
+		if (!m_threatFlags || CTimer::GetTimeInMilliseconds() <= m_threatCheckTimer)
+			return;
+		CheckThreatValidity();
+		uint32 closestThreatFlag = m_threatFlags;
+		m_threatFlags = 0;
+		m_threatCheckTimer = 0;
 		if (closestThreatFlag == PED_FLAG_EXPLOSION) {
 			float angleToFace = CGeneral::GetRadianAngleBetweenPoints(
 				m_eventOrThreat.x,  m_eventOrThreat.y,
@@ -53,18 +60,30 @@ CCivilianPed::CivilianAI(void)
 		}
 		return;
 	}
-	uint32 closestThreatFlag = ScanForThreats();
+	ScanForDelayedResponseThreats();
+	if (!m_threatFlags || CTimer::GetTimeInMilliseconds() <= m_threatCheckTimer)
+		return;
+	CheckThreatValidity();
+	uint32 closestThreatFlag = m_threatFlags;
+	m_threatFlags = 0;
+	m_threatCheckTimer = 0;
 	if (closestThreatFlag == PED_FLAG_GUN) {
 		if (!m_threatEntity || !m_threatEntity->IsPed())
 			return;
 
 		CPed *threatPed = (CPed*)m_threatEntity;
 		float threatDistSqr = (m_threatEntity->GetPosition() - GetPosition()).MagnitudeSqr2D();
+		if (CharCreatedBy == MISSION_CHAR && bCrouchWhenScared) {
+			SetDuck(10000, true);
+			SetLookFlag(m_threatEntity, false);
+			SetLookTimer(500);
+			return;
+		}
 		if (m_pedStats->m_fear <= m_pedStats->m_lawfulness) {
 			if (m_pedStats->m_temper <= m_pedStats->m_fear) {
 				if (!threatPed->IsPlayer() || !RunToReportCrime(CRIME_POSSESSION_GUN)) {
-					if (threatDistSqr < sq(10.0f)) {
-						Say(SOUND_PED_FLEE_SPRINT);
+					if (threatDistSqr < sq(30.0f)) {
+						bMakeFleeScream = true;
 						SetFindPathAndFlee(m_threatEntity, 10000);
 					} else {
 						SetFindPathAndFlee(m_threatEntity->GetPosition(), 5000, true);
@@ -74,13 +93,16 @@ CCivilianPed::CivilianAI(void)
 				SetFindPathAndFlee(m_threatEntity, 5000);
 				if (threatDistSqr < sq(20.0f)) {
 					SetMoveState(PEDMOVE_RUN);
-					Say(SOUND_PED_FLEE_SPRINT);
+					bMakeFleeScream = true;
 				} else {
 					SetMoveState(PEDMOVE_WALK);
 				}
+			} else if (threatPed->IsPlayer() && IsGangMember() && b158_80) {
+				SetObjective(OBJECTIVE_KILL_CHAR_ON_FOOT, m_threatEntity);
+
 			} else if (threatPed->IsPlayer() && FindPlayerPed()->m_pWanted->m_CurrentCops != 0)  {
 				SetFindPathAndFlee(m_threatEntity, 5000);
-				if (threatDistSqr < sq(10.0f)) {
+				if (threatDistSqr < sq(30.0f)) {
 					SetMoveState(PEDMOVE_RUN);
 				} else {
 					SetMoveState(PEDMOVE_WALK);
@@ -89,12 +111,12 @@ CCivilianPed::CivilianAI(void)
 				SetObjective(OBJECTIVE_KILL_CHAR_ON_FOOT, m_threatEntity);
 			}
 		} else {
-			if (threatDistSqr < sq(10.0f)) {
-				Say(SOUND_PED_FLEE_SPRINT);
+			if (threatDistSqr < sq(30.0f)) {
+				bMakeFleeScream = true;
 				SetFindPathAndFlee(m_threatEntity, 10000);
 				SetMoveState(PEDMOVE_SPRINT);
 			} else {
-				Say(SOUND_PED_FLEE_SPRINT);
+				bMakeFleeScream = false;
 				SetFindPathAndFlee(m_threatEntity, 5000);
 				SetMoveState(PEDMOVE_RUN);
 			}
@@ -103,7 +125,10 @@ CCivilianPed::CivilianAI(void)
 		SetLookTimer(500);
 	} else if (closestThreatFlag == PED_FLAG_DEADPEDS) {
 		float eventDistSqr = (m_pEventEntity->GetPosition() - GetPosition()).MagnitudeSqr2D();
-		if (((CPed*)m_pEventEntity)->bIsDrowning || IsGangMember() && m_nPedType == ((CPed*)m_pEventEntity)->m_nPedType) {
+		if (CharCreatedBy == MISSION_CHAR && bCrouchWhenScared && eventDistSqr < sq(5.0f)) {
+			SetDuck(10000, true);
+
+		} else if (((CPed*)m_pEventEntity)->bIsDrowning || IsGangMember() && m_nPedType == ((CPed*)m_pEventEntity)->m_nPedType) {
 			if (eventDistSqr < sq(5.0f)) {
 				SetFindPathAndFlee(m_pEventEntity, 2000);
 				SetMoveState(PEDMOVE_RUN);
@@ -128,8 +153,11 @@ CCivilianPed::CivilianAI(void)
 	} else if (closestThreatFlag == PED_FLAG_EXPLOSION) {
 		CVector2D eventDistVec = m_eventOrThreat - GetPosition();
 		float eventDistSqr = eventDistVec.MagnitudeSqr();
-		if (eventDistSqr < sq(20.0f)) {
-			Say(SOUND_PED_FLEE_SPRINT);
+		if (CharCreatedBy == MISSION_CHAR && bCrouchWhenScared && eventDistSqr < sq(20.0f)) {
+			SetDuck(10000, true);
+
+		} else if (eventDistSqr < sq(20.0f)) {
+			bMakeFleeScream = true;
 			SetFlee(m_eventOrThreat, 2000);
 			float angleToFace = CGeneral::GetRadianAngleBetweenPoints(
 				m_eventOrThreat.x, m_eventOrThreat.y,
@@ -154,8 +182,11 @@ CCivilianPed::CivilianAI(void)
 		if (m_threatEntity && m_threatEntity->IsPed()) {
 			CPed *threatPed = (CPed*)m_threatEntity;
 			if (m_pedStats->m_fear <= 100 - threatPed->m_pedStats->m_temper && threatPed->m_nPedType != PEDTYPE_COP) {
-				if (threatPed->GetWeapon(m_currentWeapon).IsTypeMelee() || !GetWeapon()->IsTypeMelee()) {
-					if (threatPed->IsPlayer() && FindPlayerPed()->m_pWanted->m_CurrentCops != 0) {
+				if (threatPed->GetWeapon()->IsTypeMelee() || !GetWeapon()->IsTypeMelee()) {
+					if (threatPed->IsPlayer() && IsGangMember() && b158_80) {
+						SetObjective(OBJECTIVE_KILL_CHAR_ON_FOOT, m_threatEntity);
+
+					} else if (threatPed->IsPlayer() && FindPlayerPed()->m_pWanted->m_CurrentCops != 0) {
 						if (m_objective == OBJECTIVE_KILL_CHAR_ON_FOOT || m_objective == OBJECTIVE_KILL_CHAR_ANY_MEANS) {
 							SetFindPathAndFlee(m_threatEntity, 10000);
 						}

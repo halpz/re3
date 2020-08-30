@@ -66,7 +66,7 @@ public:
 	static uint32 NumMiamiViceCops;
 
 	static void Initialise();
-	static void Update(void);
+	static void Update(bool);
 	static void LoadPedGroups();
 	static void UpdatePedCount(ePedType, bool);
 	static void DealWithZoneChange(eLevelName oldLevel, eLevelName newLevel, bool);

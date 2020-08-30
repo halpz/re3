@@ -256,26 +256,11 @@ DoFade(void)
 			fadeColor.a = alpha;
 		}
 
-		// This is CCamera::GetScreenRect in VC
-		if(TheCamera.m_WideScreenOn
-#ifdef CUTSCENE_BORDERS_SWITCH
-			&& CMenuManager::m_PrefsCutsceneBorders
-#endif
-			){
-			float y = SCREEN_HEIGHT/2 * TheCamera.m_ScreenReductionPercentage/100.0f;
-			rect.left = 0.0f;
-			rect.right = SCREEN_WIDTH;
-			rect.top = y - SCREEN_SCALE_Y(22.0f);
-			rect.bottom = SCREEN_HEIGHT - y - SCREEN_SCALE_Y(14.0f);
-		}else{
-			rect.left = 0.0f;
-			rect.right = SCREEN_WIDTH;
-			rect.top = 0.0f;
-			rect.bottom = SCREEN_HEIGHT;
-		}
+		TheCamera.GetScreenRect(rect);
 		CSprite2d::DrawRect(rect, fadeColor);
 
 		if(CDraw::FadeValue != 0 && TheCamera.m_FadeTargetIsSplashScreen){
+			RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
 			fadeColor.r = 255;
 			fadeColor.g = 255;
 			fadeColor.b = 255;
@@ -954,11 +939,12 @@ Render2dStuff(void)
 	if(cammode == CCam::MODE_SNIPER ||
 	   cammode == CCam::MODE_SNIPER_RUNABOUT ||
 	   cammode == CCam::MODE_ROCKETLAUNCHER ||
-	   cammode == CCam::MODE_ROCKETLAUNCHER_RUNABOUT)
+	   cammode == CCam::MODE_ROCKETLAUNCHER_RUNABOUT ||
+	   cammode == CCam::MODE_CAMERA)
 		firstPersonWeapon = true;
 
 	// Draw black border for sniper and rocket launcher
-	if((weaponType == WEAPONTYPE_SNIPERRIFLE || weaponType == WEAPONTYPE_ROCKETLAUNCHER) && firstPersonWeapon){
+	if((weaponType == WEAPONTYPE_SNIPERRIFLE || weaponType == WEAPONTYPE_ROCKETLAUNCHER || weaponType == WEAPONTYPE_LASERSCOPE) && firstPersonWeapon){
 		CRGBA black(0, 0, 0, 255);
 
 		// top and bottom strips
@@ -980,13 +966,17 @@ Render2dStuff(void)
 		CSceneEdit::Draw();
 	else
 		CHud::Draw();
+	// TODO(Miami)
+	// CSpecialFX::Render2DFXs();
 	CUserDisplay::OnscnTimer.ProcessForDisplay();
 	CMessages::Display();
 	CDarkel::DrawMessages();
 	CGarages::PrintMessages();
 	CPad::PrintErrorMessage();
 	CFont::DrawFonts();
+#ifndef MASTER
 	COcclusion::Render();
+#endif
 
 #ifdef DEBUGMENU
 	DebugMenuRender();

@@ -1698,11 +1698,11 @@ void CMissionCleanup::AddEntityToList(int32 id, uint8 type)
 	m_nCount++;
 }
 
-static void PossiblyWakeThisEntity(CPhysical* pEntity)
+static void PossiblyWakeThisEntity(CPhysical* pEntity, bool ifColLoaded = false)
 {
 	if (!pEntity->bIsStaticWaitingForCollision)
 		return;
-	if (CColStore::HasCollisionLoaded(pEntity->GetPosition())) {
+	if (!ifColLoaded || CColStore::HasCollisionLoaded(pEntity->GetPosition())) {
 		pEntity->bIsStaticWaitingForCollision = false;
 		if (!pEntity->IsStatic())
 			pEntity->AddToMovingList();
@@ -1745,7 +1745,7 @@ void CMissionCleanup::RemoveEntityFromList(int32 id, uint8 type)
 	}
 }
 
-void CMissionCleanup::CheckIfCollisionHasLoadedForMissionObject()
+void CMissionCleanup::CheckIfCollisionHasLoadedForMissionObjects()
 {
 	for (int i = 0; i < MAX_CLEANUP; i++) {
 		switch (m_sEntities[i].type) {
@@ -1753,21 +1753,21 @@ void CMissionCleanup::CheckIfCollisionHasLoadedForMissionObject()
 		{
 			CVehicle* v = CPools::GetVehiclePool()->GetAt(m_sEntities[i].id);
 			if (v)
-				PossiblyWakeThisEntity(v);
+				PossiblyWakeThisEntity(v, true);
 			break;
 		}
 		case CLEANUP_CHAR:
 		{
 			CPed* p = CPools::GetPedPool()->GetAt(m_sEntities[i].id);
 			if (p)
-				PossiblyWakeThisEntity(p);
+				PossiblyWakeThisEntity(p, true);
 			break;
 		}
 		case CLEANUP_OBJECT:
 		{
 			CObject* o = CPools::GetObjectPool()->GetAt(m_sEntities[i].id);
 			if (o)
-				PossiblyWakeThisEntity(o);
+				PossiblyWakeThisEntity(o, true);
 			break;
 		}
 		default:
@@ -2351,7 +2351,7 @@ void CTheScripts::Process()
 	float timeStep = CTimer::GetTimeStepInMilliseconds();
 	UpsideDownCars.UpdateTimers();
 	StuckCars.Process();
-	MissionCleanup.CheckIfCollisionHasLoadedForMissionObject();
+	MissionCleanup.CheckIfCollisionHasLoadedForMissionObjects();
 	DrawScriptSpheres();
 	if (FailCurrentMission)
 		--FailCurrentMission;

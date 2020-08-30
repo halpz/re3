@@ -3507,8 +3507,9 @@ CMenuManager::Process(void)
 		UserInput();
 		ProcessFileActions();
 		DMAudio.Service();
-
-		// Game calls some texture pool cleanup functions in here
+#ifdef USE_TEXTURE_POOL
+		// TODO
+#endif
 	}
 
 	SwitchMenuOnAndOff();
