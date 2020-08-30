@@ -744,7 +744,7 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 		}
 		else
 		{
-			nearCar->VehicleDamage(info->m_nDamage* (0.00075f * nearCar->pHandling->fMass), gaTempSphereColPoints[0].pieceB);
+			nearCar->VehicleDamage(info->m_nDamage* (0.01f * nearCar->pHandling->fMass), gaTempSphereColPoints[0].pieceB);
 		}
 		if (nearCar->m_fHealth < oldHealth)
 		{
