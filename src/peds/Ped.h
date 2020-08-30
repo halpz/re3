@@ -358,6 +358,8 @@ enum eMoveState {
 	PEDMOVE_THROWN
 };
 
+extern float gfTommyFatness;
+
 class CVehicle;
 
 class CPed : public CPhysical

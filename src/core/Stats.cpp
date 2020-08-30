@@ -341,6 +341,30 @@ wchar *CStats::FindCriminalRatingString()
 	return TheText.Get(CWorld::Players[CWorld::PlayerInFocus].m_nVisibleMoney > 10000000 ? "RATNG52" : "RATNG51");
 }
 
+wchar *CStats::FindChaseString(float fMediaLevel) {
+	if (fMediaLevel < 20.0f) return TheText.Get("MEDIA1");
+	if (fMediaLevel < 50.0f) return TheText.Get("MEDIA2");
+	if (fMediaLevel < 75.0f) return TheText.Get("MEDIA3");
+	if (fMediaLevel < 100.0f) return TheText.Get("MEDIA4");
+	if (fMediaLevel < 150.0f) return TheText.Get("MEDIA5");
+	if (fMediaLevel < 200.0f) return TheText.Get("MEDIA6");
+	if (fMediaLevel < 250.0f) return TheText.Get("MEDIA7");
+	if (fMediaLevel < 300.0f) return TheText.Get("MEDIA8");
+	if (fMediaLevel < 350.0f) return TheText.Get("MEDIA9");
+	if (fMediaLevel < 400.0f) return TheText.Get("MEDIA10");
+	if (fMediaLevel < 500.0f) return TheText.Get("MEDIA11");
+	if (fMediaLevel < 600.0f) return TheText.Get("MEDIA12");
+	if (fMediaLevel < 700.0f) return TheText.Get("MEDIA13");
+	if (fMediaLevel < 800.0f) return TheText.Get("MEDIA14");
+	if (fMediaLevel < 900.0f) return TheText.Get("MEDIA15");
+	if (fMediaLevel < 1000.0f) return TheText.Get("MEDIA16");
+	if (fMediaLevel < 1200.0f) return TheText.Get("MEDIA17");
+	if (fMediaLevel < 1400.0f) return TheText.Get("MEDIA18");
+	if (fMediaLevel < 1600.0f) return TheText.Get("MEDIA19");
+	if (fMediaLevel < 1800.0f) return TheText.Get("MEDIA20");
+	return TheText.Get("MEDIA21");
+}
+
 int32 CStats::FindCriminalRatingNumber()
 {
 	int32 rating;

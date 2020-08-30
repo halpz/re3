@@ -5369,6 +5369,7 @@ CMenuManager::ConstructStatLine(int rowIdx)
 	STAT_LINE("FEST_CC", &CStats::CriminalsCaught, false, nil);
 	STAT_LINE("FEST_FE", &CStats::FiresExtinguished, false, nil);
 	STAT_LINE("DAYPLC", &(nTemp = CTimer::GetTimeInMilliseconds() + 100), false, nil);
+	//TODO(MIAMI): move this function to the CStats and add reading of Stat lines tied with "MEDIA" for the "CHASESTAT" cheatcode
 	return counter;
 
 #undef STAT_LINE

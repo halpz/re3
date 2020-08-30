@@ -16,6 +16,8 @@ enum {
 class CTrafficLights
 {
 public:
+	static bool bGreenLightsCheat;
+
 	static void DisplayActualLight(CEntity *ent);
 	static void ScanForLightsOnMap(void);
 	static int FindTrafficLightType(CEntity *light);
