@@ -376,7 +376,7 @@ CPopulation::FindClosestZoneForCoors(CVector *coors, int *safeZoneOut, eLevelNam
 }
 
 void
-CPopulation::Update()
+CPopulation::Update(bool addPeds)
 {
 	if (!CReplay::IsPlayingBack()) {
 		ManagePopulation();
@@ -392,7 +392,7 @@ CPopulation::Update()
 			ms_nTotalPeds = ms_nNumDummy + ms_nNumEmergency + ms_nNumCop
 				+ ms_nTotalGangPeds + ms_nNumCivFemale + ms_nNumCivMale;
 			ms_nTotalPeds -= ms_nTotalCarPassengerPeds;
-			if (!CCutsceneMgr::IsRunning()) {
+			if (!CCutsceneMgr::IsRunning() && addPeds) {
 				float pcdm = PedCreationDistMultiplier();
 				AddToPopulation(pcdm * (MIN_CREATION_DIST * TheCamera.GenerationDistMultiplier),
 					pcdm * ((MIN_CREATION_DIST + CREATION_RANGE) * TheCamera.GenerationDistMultiplier),

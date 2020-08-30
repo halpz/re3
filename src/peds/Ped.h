@@ -455,17 +455,17 @@ public:
 	uint32 bTurnedAroundOnAttractor : 1;
 
 	uint32 bHasAlreadyUsedAttractor : 1;
-	//uint32 b155_2
+	uint32 b155_2 : 1;
 	uint32 bCarPassenger : 1;
-	//uint32 b155_8
-	//uint32 b155_10
+	uint32 b155_8 : 1;
+	uint32 b155_10 : 1;
 	uint32 bMiamiViceCop : 1;
 	uint32 bMoneyHasBeenGivenByScript : 1; //
 	uint32 bHasBeenPhotographed : 1;  //
 
 	uint32 bIsDrowning : 1;
 	uint32 bDrownsInWater : 1;
-	//uint32 b156_4
+	uint32 b156_4 : 1;
 	uint32 bHeldHostageInCar : 1;
 	uint32 bIsPlayerFriend : 1;
 	uint32 bHeadStuckInCollision : 1;
@@ -475,7 +475,7 @@ public:
 	uint32 bDontFight : 1;
 	uint32 bDoomAim : 1;
 	uint32 bCanBeShotInVehicle : 1;
-	//uint32 b157_8
+	uint32 b157_8 : 1;
 	uint32 bMakeFleeScream : 1;
 	uint32 bPushedAlongByCar : 1;
 	uint32 b157_40 : 1;
@@ -488,7 +488,7 @@ public:
 	uint32 bCollectBusFare : 1;
 	uint32 bBoughtIceCream : 1;
 	uint32 b158_40 : 1;
-	//uint32 b158_80
+	uint32 b158_80 : 1;
 
 	// our own flags
 	uint32 m_ped_flagI80 : 1; // KANGAROO_CHEAT define makes use of this as cheat toggle 
@@ -566,10 +566,9 @@ public:
 	bool bInVehicle;
 	float m_distanceToCountSeekDone;
 	float m_acceptableHeadingOffset;
+	CVehicle* m_vehicleInAccident;
 	CPedAttractor* m_attractor;
 	int32 m_positionInQueue;
-	CVehicle* m_vehicleInAccident;
-
 	bool bRunningToPhone;
 	int16 m_phoneId;
 	eCrimeType m_crimeToReportOnPhone;
@@ -635,14 +634,16 @@ public:
 	float m_attachRotStep;
 	uint32 m_attachWepAmmo;
 	uint32 m_threatFlags;
-	uint32 m_threatCheck;
-	uint32 m_lastThreatCheck;
+	uint32 m_threatCheckTimer;
+	uint32 m_threatCheckInterval;
 	uint32 m_delayedSoundID;
 	uint32 m_delayedSoundTimer;
 	uint32 m_lastSoundStart;
 	uint32 m_soundStart;
 	uint16 m_lastQueuedSound;
 	uint16 m_queuedSound;
+	bool m_canTalk;
+	int32 m_lastComment;
 	CVector m_vecSeekPosEx; // used for OBJECTIVE_GUARD_SPOT
 	float m_distanceToCountSeekDoneEx; // used for OBJECTIVE_GUARD_SPOT
 
@@ -864,6 +865,7 @@ public:
 	void DriveVehicle();
 	void PositionAttachedPed();
 	bool CanUseTorsoWhenLooking();
+	void ScanForDelayedResponseThreats();
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);

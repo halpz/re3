@@ -6,6 +6,8 @@
 #include "Pools.h"
 #include "World.h"
 
+// --MIAMI: File done
+
 CAccidentManager gAccidentManager;
 
 CAccident*
