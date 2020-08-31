@@ -18,6 +18,7 @@
 #include "Camera.h"
 #include "PedPlacement.h"
 #include "Ropes.h"
+#include "Stinger.h"
 
 CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 {
@@ -92,6 +93,7 @@ CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 	m_nHassleTimer = 0;
 	field_61C = 0;
 	field_624 = 0;
+	m_pStinger = new CStinger;
 	if (m_pPointGunAt)
 		m_pPointGunAt->CleanUpOldReference((CEntity**)&m_pPointGunAt);
 	m_pPointGunAt = nil;
@@ -100,6 +102,8 @@ CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 CCopPed::~CCopPed()
 {
 	ClearPursuit();
+	m_pStinger->Remove();
+	delete m_pStinger;
 }
 
 // --MIAMI: Done
