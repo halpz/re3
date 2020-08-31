@@ -188,14 +188,14 @@ CStinger::Process()
 		// no break
 	case STINGERSTATE_STATE1:
 		if (m_nSpikeState != STINGERSTATE_STATE1 || CTimer::GetTimeInMilliseconds() <= m_nTimeOfDeploy + 2500) {
-			float something = (CTimer::GetTimeInMilliseconds() - m_nTimeOfDeploy) / 2500.0f;
+			float progress = (CTimer::GetTimeInMilliseconds() - m_nTimeOfDeploy) / 2500.0f;
 			if (m_nSpikeState != STINGERSTATE_STATE1)
-				something = 1.0f - something;
+				progress = 1.0f - progress;
 
-			float radangle = something * ARRAY_SIZE(m_vPositions);
-			float angle1 = m_fMax_Z + DEGTORAD(radangle);
-			float angle2 = m_fMax_Z - DEGTORAD(radangle);
-			int pos = clamp(radangle, 0, ARRAY_SIZE(m_vPositions)-1);
+			float degangle = progress * ARRAY_SIZE(m_vPositions);
+			float angle1 = m_fMax_Z + DEGTORAD(degangle);
+			float angle2 = m_fMax_Z - DEGTORAD(degangle);
+			int pos = clamp(degangle, 0, ARRAY_SIZE(m_vPositions)-1);
 
 			CVector2D pos2d = m_vPositions[pos];
 			CVector pos3d = m_vPos;
