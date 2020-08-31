@@ -172,24 +172,26 @@ CStinger::Process()
 			&& pOwner->GetPedState() == PED_DEPLOY_STINGER
 			&& RpAnimBlendClumpGetAssociation(pOwner->GetClump(), ANIM_WEAPON_THROWU)->currentTime > 0.39f)
 		{
-			m_nSpikeState = STINGERSTATE_STATE1;
+			m_nSpikeState = STINGERSTATE_DEPLOYING;
 			for (int i = 0; i < NUM_STINGER_SEGMENTS; i++)
 				CWorld::Add(pSpikes[i]);
 			pOwner->SetIdle();
 		}
 		break;
-	case STINGERSTATE_STATE2:
+	case STINGERSTATE_DEPLOYED:
 		if (pOwner != nil && pOwner->m_nPedType == PEDTYPE_COP)
 			((CCopPed*)pOwner)->m_bThrowsSpikeTrap = false;
 		break;
-	case STINGERSTATE_STATE3:
+	case STINGERSTATE_UNDEPLOYING:
 		if (CTimer::GetTimeInMilliseconds() > m_nTimeOfDeploy + 2500)
 			m_nSpikeState = STINGERSTATE_REMOVE;
 		// no break
-	case STINGERSTATE_STATE1:
-		if (m_nSpikeState != STINGERSTATE_STATE1 || CTimer::GetTimeInMilliseconds() <= m_nTimeOfDeploy + 2500) {
+	case STINGERSTATE_DEPLOYING:
+		if (m_nSpikeState == STINGERSTATE_DEPLOYING && CTimer::GetTimeInMilliseconds() > m_nTimeOfDeploy + 2500)
+			m_nSpikeState = STINGERSTATE_DEPLOYED;
+		else {
 			float progress = (CTimer::GetTimeInMilliseconds() - m_nTimeOfDeploy) / 2500.0f;
-			if (m_nSpikeState != STINGERSTATE_STATE1)
+			if (m_nSpikeState != STINGERSTATE_DEPLOYING)
 				progress = 1.0f - progress;
 
 			float degangle = progress * ARRAY_SIZE(m_vPositions);
@@ -221,8 +223,7 @@ CStinger::Process()
 				}
 				pSpikes[spike]->SetPosition(pos3d);
 			}
-		} else
-			m_nSpikeState = STINGERSTATE_STATE2;
+		}
 		break;
 	case STINGERSTATE_REMOVE:
 		Remove();
