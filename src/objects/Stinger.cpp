@@ -54,10 +54,7 @@ CStinger::Init(CPed *pPed)
 	m_fMax_Z = Atan2(-pPed->GetForward().x, pPed->GetForward().y) + HALFPI;
 
 	for (i = 0; i < NUM_STINGER_SEGMENTS; i++) {
-		// shouldn't this be some inlined method? guh...
-		CVector pos = pSpikes[i]->GetPosition();
-		pSpikes[i]->GetMatrix().SetRotate(0.0f, 0.0f, Atan2(-pPed->GetForward().x, pPed->GetForward().y));
-		pSpikes[i]->GetMatrix().Translate(pos);
+		pSpikes[i]->SetOrientation(0.0f, 0.0f, Atan2(-pPed->GetForward().x, pPed->GetForward().y));
 		pSpikes[i]->SetPosition(m_vPos);
 	}
 
@@ -216,15 +213,11 @@ CStinger::Process()
 					pos2d = CVector2D(0.0f, 0.0f);
 
 				if (spike % 2 == 0) {
-					CVector pos = pSpikes[spike]->GetPosition();
-					pSpikes[spike]->GetMatrix().SetRotate(0.0f, 0.0f, angle1);
-					pSpikes[spike]->GetMatrix().Translate(pos);
+					pSpikes[spike]->SetOrientation(0.0f, 0.0f, angle1);
 					pos3d.x += pos2d.x;
 					pos3d.y += pos2d.y;
 				} else {
-					CVector pos = pSpikes[spike]->GetPosition();
-					pSpikes[spike]->GetMatrix().SetRotate(0.0f, 0.0f, angle2);
-					pSpikes[spike]->GetMatrix().Translate(pos);
+					pSpikes[spike]->SetOrientation(0.0f, 0.0f, angle2);
 				}
 				pSpikes[spike]->SetPosition(pos3d);
 			}
