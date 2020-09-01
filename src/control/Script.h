@@ -122,7 +122,7 @@ struct CMissionCleanupEntity
 enum {
 	MAX_CLEANUP = 50,
 	MAX_UPSIDEDOWN_CAR_CHECKS = 6,
-	MAX_STUCK_CAR_CHECKS = 6
+	MAX_STUCK_CAR_CHECKS = 16
 };
 
 class CMissionCleanup

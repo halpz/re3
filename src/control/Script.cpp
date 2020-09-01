@@ -2174,6 +2174,7 @@ void CRunningScript::Init()
 		m_anStack[i] = 0;
 	m_nStackPointer = 0;
 	m_nWakeTime = 0;
+	m_bIsActive = false;
 	m_bCondResult = false;
 	m_bIsMissionScript = false;
 	m_bSkipWakeTime = false;
