@@ -104,7 +104,7 @@ CStinger::CheckForBurstTyres()
 
 	CVehicle *vehsInRange[16];
 	int16 numObjects;
-	CEntity someEntity;
+	CEntity entity;
 
 	CWorld::FindObjectsInRange((lastPos + firstPos) / 2.0f,
 		dist, true, &numObjects, 15, (CEntity**)vehsInRange,
@@ -122,7 +122,7 @@ CStinger::CheckForBurstTyres()
 		if (pAutomobile == nil && pBike == nil) continue;
 
 		int wheelId = 0;
-		float someWheelDist = sq(((CVehicleModelInfo*)CModelInfo::GetModelInfo(vehsInRange[i]->GetModelIndex()))->m_wheelScale);
+		float wheelScaleSq = sq(((CVehicleModelInfo*)CModelInfo::GetModelInfo(vehsInRange[i]->GetModelIndex()))->m_wheelScale);
 
 		for (; wheelId < 4; wheelId++) {
 			if ((pAutomobile != nil && pAutomobile->m_aSuspensionSpringRatioPrev[wheelId] < 1.0f) ||
@@ -139,7 +139,7 @@ CStinger::CheckForBurstTyres()
 			vecWheelPos = pBike->m_aWheelColPoints[wheelId].point;
 
 		for (int32 spike = 0; spike < NUM_STINGER_SEGMENTS; spike++) {
-			if ((pSpikes[spike]->GetPosition() - vecWheelPos).Magnitude() < someWheelDist) {
+			if ((pSpikes[spike]->GetPosition() - vecWheelPos).Magnitude() < wheelScaleSq) {
 				if (pBike) {
 					if (wheelId < 2)
 						vehsInRange[i]->BurstTyre(CAR_PIECE_WHEEL_LF, true);
@@ -210,8 +210,7 @@ CStinger::Process()
 			angle2 = CGeneral::LimitRadianAngle(angle2);
 
 			for (int spike = 0; spike < NUM_STINGER_SEGMENTS; spike++) {
-				CVector somePosAgain = pos3d + CVector(pos2d.x, pos2d.y, 0.6f);
-				if (CWorld::TestSphereAgainstWorld(somePosAgain, 0.3f, nil, true, false, false, true, false, false))
+				if (CWorld::TestSphereAgainstWorld(pos3d + CVector(pos2d.x, pos2d.y, 0.6f), 0.3f, nil, true, false, false, true, false, false))
 					pos2d = CVector2D(0.0f, 0.0f);
 
 				if (spike % 2 == 0) {
