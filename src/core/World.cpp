@@ -49,6 +49,7 @@ bool CWorld::bProcessCutsceneOnly;
 
 bool CWorld::bDoingCarCollisions;
 bool CWorld::bIncludeCarTyres;
+bool CWorld::bIncludeBikers;
 
 CColPoint CWorld::m_aTempColPts[MAX_COLLISION_POINTS];
 
@@ -63,6 +64,7 @@ CWorld::Initialise()
 	bIncludeDeadPeds = false;
 	bForceProcessControl = false;
 	bIncludeCarTyres = false;
+	bIncludeBikers = false;
 }
 
 void
@@ -272,7 +274,9 @@ CWorld::ProcessLineOfSightSector(CSector &sector, const CColLine &line, CColPoin
 {
 	float mindist = dist;
 	bool deadPeds = !!bIncludeDeadPeds;
+	bool bikers = !!bIncludeBikers;
 	bIncludeDeadPeds = false;
+	bIncludeBikers = false;
 
 	if(checkBuildings) {
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_BUILDINGS], line, point, mindist, entity,
@@ -290,11 +294,13 @@ CWorld::ProcessLineOfSightSector(CSector &sector, const CColLine &line, CColPoin
 
 	if(checkPeds) {
 		if(deadPeds) bIncludeDeadPeds = true;
+		if(bikers) bIncludeBikers = true;
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_PEDS], line, point, mindist, entity,
 		                             ignoreSeeThrough, false, ignoreShootThrough);
 		ProcessLineOfSightSectorList(sector.m_lists[ENTITYLIST_PEDS_OVERLAP], line, point, mindist, entity,
 		                             ignoreSeeThrough, false, ignoreShootThrough);
 		bIncludeDeadPeds = false;
+		bIncludeBikers = false;
 	}
 
 	if(checkObjects) {
@@ -312,6 +318,7 @@ CWorld::ProcessLineOfSightSector(CSector &sector, const CColLine &line, CColPoin
 	}
 
 	bIncludeDeadPeds = deadPeds;
+	bIncludeBikers = bikers;
 
 	if(mindist < dist) {
 		dist = mindist;
@@ -325,22 +332,24 @@ CWorld::ProcessLineOfSightSectorList(CPtrList &list, const CColLine &line, CColP
                                      CEntity *&entity, bool ignoreSeeThrough, bool ignoreSomeObjects, bool ignoreShootThrough)
 {
 	bool deadPeds = false;
+	bool bikers = false;
 	float mindist = dist;
 	CPtrNode *node;
 	CEntity *e;
 	CColModel *colmodel;
 
 	if(list.first && bIncludeDeadPeds && ((CEntity *)list.first->item)->IsPed()) deadPeds = true;
+	if(list.first && bIncludeBikers && ((CEntity *)list.first->item)->IsPed()) bikers = true;
 
 	for(node = list.first; node; node = node->next) {
 		e = (CEntity *)node->item;
-		if(e->m_scanCode != GetCurrentScanCode() && e != pIgnoreEntity && (e->bUsesCollision || deadPeds) &&
+		if(e->m_scanCode != GetCurrentScanCode() && e != pIgnoreEntity && (e->bUsesCollision || deadPeds || bikers) &&
 		   !(ignoreSomeObjects && CameraToIgnoreThisObject(e))) {
 			colmodel = nil;
 			e->m_scanCode = GetCurrentScanCode();
 
 			if(e->IsPed()) {
-				if(e->bUsesCollision || deadPeds && ((CPed *)e)->m_nPedState == PED_DEAD) {
+				if(e->bUsesCollision || deadPeds && ((CPed *)e)->m_nPedState == PED_DEAD || bikers) {
 					colmodel = ((CPedModelInfo *)CModelInfo::GetModelInfo(e->GetModelIndex()))->AnimatePedColModelSkinned(e->GetClump());
 				} else
 					colmodel = nil;

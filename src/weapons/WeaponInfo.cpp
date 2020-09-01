@@ -9,16 +9,57 @@
 #include "ModelInfo.h"
 #include "ModelIndices.h"
 
+uint16 CWeaponInfo::ms_aReloadSampleTime[WEAPONTYPE_TOTALWEAPONS] =
+{
+	0,			// UNARMED
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,			// GRENADE
+	0,			// DETONATEGRENADE
+	0,			// TEARGAS
+	0,			// MOLOTOV
+	0,			// ROCKET
+	250,		// COLT45
+	250,		// PYTHON
+	650,		// SHOTGUN
+	650,		// SPAS12 SHOTGUN
+	650,		// STUBBY SHOTGUN
+	400,		// TEC9
+	400,		// UZIhec
+	400,		// SILENCED_INGRAM
+	400,		// MP5
+	300,		// M16
+	300,		// AK47
+	423,		// SNIPERRIFLE
+	423,		// LASERSCOPE
+	400,		// ROCKETLAUNCHER
+	0,			// FLAMETHROWER
+	0,			// M60
+	0,			// MINIGUN
+	0,			// DETONATOR
+	0,			// HELICANNON
+	0			// CAMERA
+};
+
 // Yeah...
-int32 CWeaponInfo::ms_aMaxAmmoForWeapon[WEAPONTYPE_TOTALWEAPONS] = {
+int32 CWeaponInfo::ms_aMaxAmmoForWeapon[WEAPONTYPE_TOTALWEAPONS] =
+{
 	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 	-1, -1, -1, -1, -1, -1, -1, -1, -1
 };
 
 CWeaponInfo CWeaponInfo::ms_apWeaponInfos[WEAPONTYPE_TOTALWEAPONS];
-
-// --MIAMI: Todo
-static char ms_aWeaponNames[][32] = {
+char CWeaponInfo::ms_aWeaponNames[WEAPONTYPE_TOTALWEAPONS][32] =
+{
 	"Unarmed",
 	"BrassKnuckle",
 	"ScrewDriver",
@@ -61,7 +102,7 @@ static char ms_aWeaponNames[][32] = {
 CWeaponInfo*
 CWeaponInfo::GetWeaponInfo(eWeaponType weaponType)
 {
-	return &CWeaponInfo::ms_apWeaponInfos[weaponType];
+	return &ms_apWeaponInfos[weaponType];
 }
 
 // --MIAMI: done except WEAPONTYPE_TOTALWEAPONS value

@@ -53,4 +53,5 @@ public:
 
 //TODO(MIAMI)
 	static void CarWindscreenShatters(CVehicle *vehicle, bool unk) {}
+	static void BreakGlassPhysically(CVector, float) {}
 };
