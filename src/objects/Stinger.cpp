@@ -51,6 +51,7 @@ CStinger::Init(CPed *pPed)
 	}
 	bIsDeployed = true;
 	m_vPos = pPed->GetPosition();
+	m_vPos.z -= 1.0f;
 	m_fMax_Z = Atan2(-pPed->GetForward().x, pPed->GetForward().y) + HALFPI;
 
 	for (i = 0; i < NUM_STINGER_SEGMENTS; i++) {
@@ -61,7 +62,7 @@ CStinger::Init(CPed *pPed)
 	CVector2D fwd2d(pPed->GetForward().x, pPed->GetForward().y);
 
 	for (i = 0; i < ARRAY_SIZE(m_vPositions); i++)
-		m_vPositions[i] = fwd2d * Sin(DEGTORAD(i));
+		m_vPositions[i] = fwd2d * 1.8f * Sin(DEGTORAD(i));
 
 	m_nSpikeState = STINGERSTATE_NONE;
 	m_nTimeOfDeploy = CTimer::GetTimeInMilliseconds();

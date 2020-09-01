@@ -95,7 +95,7 @@ CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 	field_624 = 0;
 	m_pStinger = new CStinger;
 	if (m_pPointGunAt)
-		m_pPointGunAt->CleanUpOldReference((CEntity**)&m_pPointGunAt);
+		m_pPointGunAt->CleanUpOldReference(&m_pPointGunAt);
 	m_pPointGunAt = nil;
 }
 
@@ -601,7 +601,7 @@ CCopPed::CopAI(void)
 	}
 }
 
-// --MIAMI: Done except commented things
+// --MIAMI: Done
 void
 CCopPed::ProcessControl(void)
 {
@@ -611,15 +611,13 @@ CCopPed::ProcessControl(void)
 	CPed::ProcessControl();
 
 	if (m_bThrowsSpikeTrap) {
-		// TODO(Miami)
-		/*
 		if (CGame::currArea != AREA_MALL)
 			ProcessStingerCop();
-		*/
 		return;
 	}
 
-	// TODO(Miami): CStinger::Process
+	if (m_pStinger && m_pStinger->bIsDeployed && m_pStinger->m_nSpikeState == STINGERSTATE_DEPLOYED && CGame::currArea != AREA_MALL)
+		m_pStinger->Process();
 
 	if (bWasPostponed)
 		return;
@@ -857,5 +855,37 @@ CCopPed::ProcessHeliSwat(void)
 		m_nCopType = COP_SWAT;
 		SetInTheAir();
 		bKnockedUpIntoAir = true;
+	}
+}
+
+// --MIAMI: Done
+void
+CCopPed::ProcessStingerCop(void)
+{
+	if (m_pStinger->bIsDeployed || FindPlayerVehicle() && (FindPlayerVehicle()->IsCar() || FindPlayerVehicle()->IsBike())) {
+		if (m_pStinger->bIsDeployed) {
+			m_pStinger->Process();
+		} else {
+			CVector2D vehDist = GetPosition() - FindPlayerVehicle()->GetPosition();
+			CVector2D dirVehGoing = FindPlayerVehicle()->m_vecMoveSpeed;
+			if (vehDist.MagnitudeSqr() < sq(30.0f)) {
+				if (dirVehGoing.MagnitudeSqr() > 0.0f) {
+					vehDist.Normalise();
+					dirVehGoing.Normalise();
+					if (DotProduct2D(vehDist, dirVehGoing) > 0.8f) {
+						float angle = (CrossProduct2D(vehDist, dirVehGoing - vehDist) < 0.0f ?
+							FindPlayerVehicle()->GetForward().Heading() - HALFPI :
+							HALFPI + FindPlayerVehicle()->GetForward().Heading());
+
+						SetHeading(angle);
+						m_fRotationCur = angle;
+						m_fRotationDest = angle;
+						m_pStinger->Deploy(this);
+					}
+				}
+			}
+		}
+	} else {
+		ClearPursuit();
 	}
 }

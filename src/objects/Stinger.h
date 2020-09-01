@@ -11,16 +11,17 @@ public:
 
 #define NUM_STINGER_SEGMENTS (12)
 
+enum {
+	STINGERSTATE_NONE = 0,
+	STINGERSTATE_DEPLOYING,
+	STINGERSTATE_DEPLOYED,
+	STINGERSTATE_UNDEPLOYING,
+	STINGERSTATE_REMOVE,
+};
+
 class CStinger
 {
-	enum {
-		STINGERSTATE_NONE = 0,
-		STINGERSTATE_DEPLOYING,
-		STINGERSTATE_DEPLOYED,
-		STINGERSTATE_UNDEPLOYING,
-		STINGERSTATE_REMOVE,
-	};
-
+public:
 	bool bIsDeployed;
 	uint32 m_nTimeOfDeploy;
 	CVector m_vPos;
@@ -30,7 +31,6 @@ class CStinger
 	CStingerSegment *pSpikes[NUM_STINGER_SEGMENTS];
 	class CPed *pOwner;
 	uint8 m_nSpikeState;
-public:
 	CStinger();
 	void Init(CPed *pPed);
 	void Remove();

@@ -45,6 +45,7 @@ public:
 	void ScanForCrimes(void);
 	void CopAI(void);
 	void ProcessHeliSwat(void);
+	void ProcessStingerCop(void);
 };
 
 #ifndef PED_SKIN
