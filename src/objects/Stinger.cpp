@@ -98,8 +98,10 @@ CStinger::Deploy(CPed *pPed)
 void
 CStinger::CheckForBurstTyres()
 {
-	const CVector firstPos = pSpikes[0]->GetPosition();
-	const CVector lastPos = pSpikes[NUM_STINGER_SEGMENTS - 1]->GetPosition();
+	CVector firstPos = pSpikes[0]->GetPosition();
+	firstPos.z += 0.2f;
+	CVector lastPos = pSpikes[NUM_STINGER_SEGMENTS - 1]->GetPosition();
+	lastPos.z += 0.2f;
 	float dist = (lastPos - firstPos).Magnitude();
 	if (dist < 0.1f) return;
 
