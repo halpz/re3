@@ -101,7 +101,7 @@ CStinger::CheckForBurstTyres()
 	const CVector firstPos = pSpikes[0]->GetPosition();
 	const CVector lastPos = pSpikes[NUM_STINGER_SEGMENTS - 1]->GetPosition();
 	float dist = (lastPos - firstPos).Magnitude();
-	if (dist > 0.1f) return;
+	if (dist < 0.1f) return;
 
 	CVehicle *vehsInRange[16];
 	int16 numObjects;
@@ -121,42 +121,39 @@ CStinger::CheckForBurstTyres()
 			pBike = (CBike*)vehsInRange[i];
 
 		if (pAutomobile == nil && pBike == nil) continue;
+		
+		float maxWheelDistToSpike = sq(((CVehicleModelInfo*)CModelInfo::GetModelInfo(vehsInRange[i]->GetModelIndex()))->m_wheelScale + 0.1f);
 
-		int wheelId = 0;
-		float wheelScaleSq = sq(((CVehicleModelInfo*)CModelInfo::GetModelInfo(vehsInRange[i]->GetModelIndex()))->m_wheelScale);
-
-		for (; wheelId < 4; wheelId++) {
+		for (int wheelId = 0; wheelId < 4; wheelId++) {
 			if ((pAutomobile != nil && pAutomobile->m_aSuspensionSpringRatioPrev[wheelId] < 1.0f) ||
-				(pBike != nil && pBike->m_aSuspensionSpringRatioPrev[wheelId] < 1.0f))
-				break;
-		}
+				(pBike != nil && pBike->m_aSuspensionSpringRatioPrev[wheelId] < 1.0f)) {
+				CVector vecWheelPos;
+				if (pAutomobile != nil)
+					vecWheelPos = pAutomobile->m_aWheelColPoints[wheelId].point;
+				else if (pBike != nil)
+					vecWheelPos = pBike->m_aWheelColPoints[wheelId].point;
 
-		if (wheelId >= 4) continue;
-
-		CVector vecWheelPos;
-		if (pAutomobile != nil)
-			vecWheelPos = pAutomobile->m_aWheelColPoints[wheelId].point;
-		else if (pBike != nil)
-			vecWheelPos = pBike->m_aWheelColPoints[wheelId].point;
-
-		for (int32 spike = 0; spike < NUM_STINGER_SEGMENTS; spike++) {
-			if ((pSpikes[spike]->GetPosition() - vecWheelPos).Magnitude() < wheelScaleSq) {
-				if (pBike) {
-					if (wheelId < 2)
-						vehsInRange[i]->BurstTyre(CAR_PIECE_WHEEL_LF, true);
-					else
-						vehsInRange[i]->BurstTyre(CAR_PIECE_WHEEL_LR, true);
-				} else {
-					switch (wheelId) {
-					case 0: vehsInRange[i]->BurstTyre(CAR_PIECE_WHEEL_LF, true); break;
-					case 1: vehsInRange[i]->BurstTyre(CAR_PIECE_WHEEL_LR, true); break;
-					case 2: vehsInRange[i]->BurstTyre(CAR_PIECE_WHEEL_RF, true); break;
-					case 3: vehsInRange[i]->BurstTyre(CAR_PIECE_WHEEL_RR, true); break;
+				for (int32 spike = 0; spike < NUM_STINGER_SEGMENTS; spike++) {
+					if ((pSpikes[spike]->GetPosition() - vecWheelPos).Magnitude() < maxWheelDistToSpike) {
+						if (pBike) {
+							if (wheelId < 2)
+								vehsInRange[i]->BurstTyre(CAR_PIECE_WHEEL_LF, true);
+							else
+								vehsInRange[i]->BurstTyre(CAR_PIECE_WHEEL_LR, true);
+						}
+						else {
+							switch (wheelId) {
+							case 0: vehsInRange[i]->BurstTyre(CAR_PIECE_WHEEL_LF, true); break;
+							case 1: vehsInRange[i]->BurstTyre(CAR_PIECE_WHEEL_LR, true); break;
+							case 2: vehsInRange[i]->BurstTyre(CAR_PIECE_WHEEL_RF, true); break;
+							case 3: vehsInRange[i]->BurstTyre(CAR_PIECE_WHEEL_RR, true); break;
+							}
+						}
+						vecWheelPos.z += 0.15f;
+						for (int j = 0; j < 4; j++)
+							CParticle::AddParticle(PARTICLE_BULLETHIT_SMOKE, vecWheelPos, vehsInRange[i]->GetRight() * 0.1f);
 					}
 				}
-				vecWheelPos.z += 0.15f; // BUG? doesn't that break the burst of other tires?
-				for (int j = 0; j < 4; j++)
-					CParticle::AddParticle(PARTICLE_BULLETHIT_SMOKE, vecWheelPos, vehsInRange[i]->GetRight() * 0.1f);
 			}
 		}
 	}
