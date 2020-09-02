@@ -2239,7 +2239,6 @@ void CTheScripts::Init()
 	StoreVehicleWasRandom = true;
 	OnAMissionFlag = 0;
 	LastMissionPassedTime = (uint32)-1;
-	NextFreeCollectiveIndex = 0;
 	LastRandomPedId = -1;
 	for (int i = 0; i < MAX_NUM_USED_OBJECTS; i++){
 		memset(&UsedObjectArray[i].name, 0, sizeof(UsedObjectArray[i].name));
@@ -16138,7 +16137,7 @@ void CTheScripts::ReadMultiScriptFileOffsetsFromScript()
 	MainScriptSize = Read4BytesFromScript(&ip);
 	LargestMissionScriptSize = Read4BytesFromScript(&ip);
 	NumberOfMissionScripts = Read2BytesFromScript(&ip);
-	ip += 2;
+	NumberOfExclusiveMissionScripts = Read2BytesFromScript(&ip);
 	for (int i = 0; i < NumberOfMissionScripts; i++) {
 		MultiScriptArray[i] = Read4BytesFromScript(&ip);
 	}

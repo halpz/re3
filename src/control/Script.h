@@ -37,7 +37,7 @@ struct intro_script_rectangle
 VALIDATE_SIZE(intro_script_rectangle, 0x18);
 
 enum {
-	SCRIPT_TEXT_MAX_LENGTH = 500
+	SCRIPT_TEXT_MAX_LENGTH = 100
 };
 
 struct intro_text_line 
@@ -227,7 +227,11 @@ enum {
 };
 
 enum {
+#ifdef PS2
+	SIZE_MAIN_SCRIPT = 205512,
+#else
 	SIZE_MAIN_SCRIPT = 225512,
+#endif
 	SIZE_MISSION_SCRIPT = 35000,
 	SIZE_SCRIPT_SPACE = SIZE_MAIN_SCRIPT + SIZE_MISSION_SCRIPT
 };
