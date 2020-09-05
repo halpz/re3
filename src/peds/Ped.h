@@ -14,6 +14,7 @@
 
 #define FEET_OFFSET	1.04f
 #define CHECK_NEARBY_THINGS_MAX_DIST	15.0f
+#define ENTER_CAR_MAX_DIST	30.0f
 
 class CAccident;
 class CObject;
@@ -457,8 +458,8 @@ public:
 	uint32 bHasAlreadyUsedAttractor : 1;
 	uint32 b155_2 : 1;
 	uint32 bCarPassenger : 1;
-	uint32 b155_8 : 1;
-	uint32 b155_10 : 1;
+	uint32 bFleeWhenStanding : 1;
+	uint32 bGotUpOfMyOwnAccord : 1;
 	uint32 bMiamiViceCop : 1;
 	uint32 bMoneyHasBeenGivenByScript : 1; //
 	uint32 bHasBeenPhotographed : 1;  //
@@ -475,10 +476,10 @@ public:
 	uint32 bDontFight : 1;
 	uint32 bDoomAim : 1;
 	uint32 bCanBeShotInVehicle : 1;
-	uint32 b157_8 : 1;
+	uint32 bCanGiveUpSunbathing : 1;
 	uint32 bMakeFleeScream : 1;
 	uint32 bPushedAlongByCar : 1;
-	uint32 b157_40 : 1;
+	uint32 bRemoveMeWhenIGotIntoCar : 1;
 	uint32 bIgnoreThreatsBehindObjects : 1;
 
 	uint32 bNeverEverTargetThisPed : 1;
@@ -487,7 +488,7 @@ public:
 	uint32 b158_8 : 1;
 	uint32 bCollectBusFare : 1;
 	uint32 bBoughtIceCream : 1;
-	uint32 b158_40 : 1;
+	uint32 bDonePositionOutOfCollision : 1;
 	uint32 b158_80 : 1;
 
 	// our own flags
@@ -580,7 +581,7 @@ public:
 	float m_fleeFromPosY;
 	CEntity *m_fleeFrom;
 	uint32 m_fleeTimer;
-	CEntity* pThreatEx; // TODO(Miami): What is this?
+	CEntity* m_threatEx; // TODO(Miami): What is this?
 	CEntity* m_collidingEntityWhileFleeing;
 	uint32 m_collidingThingTimer;
 	CEntity *m_pCollidingEntity;
@@ -831,6 +832,7 @@ public:
 	void ReactToPointGun(CEntity*);
 	void SeekCar(void);
 	bool PositionPedOutOfCollision(void);
+	bool PositionAnyPedOutOfCollision(void);
 	bool RunToReportCrime(eCrimeType);
 	bool PlacePedOnDryLand(void);
 	bool PossiblyFindBetterPosToSeekCar(CVector*, CVehicle*);
@@ -905,6 +907,9 @@ public:
 	static void RestoreHeadingRateCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedSetQuickDraggedOutCarPositionCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedSetDraggedOutCarPositionCB(CAnimBlendAssociation *assoc, void *arg);
+	static void DeleteSunbatheIdleAnimCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedSetPreviousStateCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedAnimShuffleCB(CAnimBlendAssociation *assoc, void *arg);
 
 	bool IsPlayer(void);
 	bool IsFemale(void) { return m_nPedType == PEDTYPE_CIVFEMALE || m_nPedType == PEDTYPE_PROSTITUTE; }

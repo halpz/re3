@@ -3773,7 +3773,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 				CPed* pNearPed = ped->m_nearPeds[i];
 				if (pNearPed->m_leader == ped) {
 					pNearPed->Teleport(pos);
-					pNearPed->PositionPedOutOfCollision(); // TODO(MIAMI): this is PositionAnyPedOutOfCollision!!!
+					pNearPed->PositionAnyPedOutOfCollision();
 				}
 			}
 		}
