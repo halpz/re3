@@ -24,7 +24,7 @@ public:
 
 	void Clear(void);
 	void Update(void);
-	void InitialiseOne(int32 numNodes, float width);
+	void InitialiseOne(int32 numNodes, float length);
 	void FindCoorsFromDistanceOnPath(float t, float *pX, float *pY, float *pZ);
 	void SetObjectToControl(CObject *pObj);
 };

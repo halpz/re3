@@ -47,6 +47,7 @@
 #include "platform.h"
 #include "Stats.h"
 #include "CarCtrl.h"
+#include "TrafficLights.h"
 
 #ifdef GTA_PS2
 #include "eetypes.h"
@@ -208,15 +209,20 @@ void HealthCheat()
 	}
 }
 
-void VehicleCheat(bool something, int model)
+void VehicleCheat(int model)
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
-	CStreaming::RequestModel(model, 0);
-	CStreaming::LoadAllRequestedModels(something);
+	CStreaming::RequestModel(model, STREAMFLAGS_DONT_REMOVE);
+	CStreaming::LoadAllRequestedModels(false);
 	if (CStreaming::ms_aInfoForModel[model].m_loadState == STREAMSTATE_LOADED) {
 		CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
-		int32 node = ThePaths.FindNodeClosestToCoors(FindPlayerCoors(), PATH_CAR, 100.0f);
 
+		if (!(CStreaming::ms_aInfoForModel[model].m_loadState & STREAMFLAGS_DONT_REMOVE)) {
+			CStreaming::SetModelIsDeletable(model);
+			CStreaming::SetModelTxdIsDeletable(model);
+		}
+
+		int32 node = ThePaths.FindNodeClosestToCoors(FindPlayerCoors(), PATH_CAR, 100.0f);
 		if (node < 0) return;
 
 #ifdef FIX_BUGS
@@ -362,16 +368,16 @@ void SunnyWeatherCheat()
 	CWeather::ForceWeatherNow(WEATHER_SUNNY);
 }
 
+void ExtraSunnyWeatherCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT7"), true);
+	CWeather::ForceWeatherNow(WEATHER_EXTRA_SUNNY);
+}
+
 void CloudyWeatherCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT7"), true);
 	CWeather::ForceWeatherNow(WEATHER_CLOUDY);
-}
-
-void StormyWeatherCheat()
-{
-	CHud::SetHelpMessage(TheText.Get("CHEAT7"), true);
-	CWeather::ForceWeatherNow(WEATHER_HURRICANE);
 }
 
 void RainyWeatherCheat()
@@ -440,6 +446,12 @@ void PinkCarsCheat()
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
 	gbBlackCars = false;
 	gbPinkCars = true;
+}
+
+void TrafficLightsCheat()
+{
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	CTrafficLights::bGreenLightsCheat = true;
 }
 
 void MadCarsCheat()
@@ -546,6 +558,11 @@ void FlyingFishCheat(void)
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
 	CVehicle::bCheat8 = !CVehicle::bCheat8;
+}
+
+void DoShowChaseStatCheat(void) {
+	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+	CStats::ShowChaseStatOnScreen = 1;
 }
 
 bool
@@ -1030,7 +1047,7 @@ void CPad::AddToCheatString(char c)
 
 	// "CCCCCC321TCT"	-	CIRCLE CIRCLE CIRCLE CIRCLE CIRCLE CIRCLE R1 L2 L1 TRIANGLE CIRCLE TRIANGLE
 	else if ( !_CHEATCMP("TCT123CCCCCC") )
-		VehicleCheat(true, MI_RHINO);
+		VehicleCheat(MI_RHINO);
 
 	// "CCCSSSSS1TCT"	-	CIRCLE CIRCLE CIRCLE SQUARE SQUARE SQUARE SQUARE SQUARE L1 TRIANGLE CIRCLE TRIANGLE
 	else if ( !_CHEATCMP("TCT1SSSSSCCC") )
@@ -1142,19 +1159,22 @@ void CPad::AddToPCCheatString(char c)
 	// "APLEASANTDAY"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "\\FKU[\\VHFW]I")) {
 		KeyBoardCheatString[0] = ' ';
-		CloudyWeatherCheat();
+		SunnyWeatherCheat();
 	}
 	// "ALOVELYDAY"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "\\FKZY`YVML")) {
 		KeyBoardCheatString[0] = ' ';
-		SunnyWeatherCheat();
+		ExtraSunnyWeatherCheat();
 	}
 	// "ABITDRIEG"
-
+	else if (!Cheat_strncmp(KeyBoardCheatString, "JJPSQoLIB")) {
+		KeyBoardCheatString[0] = ' ';
+		CloudyWeatherCheat();
+	}
 	// "CATSANDDOGS"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "VLVEQiDZULP")) {
 		KeyBoardCheatString[0] = ' ';
-		StormyWeatherCheat();
+		RainyWeatherCheat();
 	}
 	// "CANTSEEATHING"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "JSPIa\\HLT_[IJ")) {
@@ -1164,10 +1184,13 @@ void CPad::AddToPCCheatString(char c)
 	// "PANZER"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "UJaONk")) {
 		KeyBoardCheatString[0] = ' ';
-		VehicleCheat(true, MI_RHINO);
+		VehicleCheat(MI_RHINO);
 	}
 	// "LIFEISPASSINGMEBY"
-
+	else if (!Cheat_strncmp(KeyBoardCheatString, "\\GLNTiLZTL][PeSOh")) {
+		KeyBoardCheatString[0] = ' ';
+		FastWeatherCheat();
+	}
 	// "BIGBANG"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "JSHCTdE")) {
 		KeyBoardCheatString[0] = ' ';
@@ -1221,6 +1244,7 @@ void CPad::AddToPCCheatString(char c)
 	// "CHASESTAT"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "WF[TRnDOD")) {
 		KeyBoardCheatString[0] = ' ';
+		DoShowChaseStatCheat();
 	}
 	// "CHICKSWITHGUNS"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "VS\\HUoL^TVPQOc")) {
@@ -1235,6 +1259,7 @@ void CPad::AddToPCCheatString(char c)
 	// "GREENLIGHT"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "WMNJYiHLSR")) {
 		KeyBoardCheatString[0] = ' ';
+		TrafficLightsCheat();
 	}
 	// "MIAMITRAFFIC"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "FNMGNmWPNLVU")) {
@@ -1254,47 +1279,47 @@ void CPad::AddToPCCheatString(char c)
 	// "TRAVELINSTYLE"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "HQ`U`iLSFaNZ[")) {
 		KeyBoardCheatString[0] = ' ';
-		VehicleCheat(true, MI_BLOODRA);
+		VehicleCheat(MI_BLOODRA);
 	}
 	// "THELASTRIDE"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "HIPSanDSFSa")) {
 		KeyBoardCheatString[0] = ' ';
-		VehicleCheat(true, MI_ROMERO);
+		VehicleCheat(MI_ROMERO);
 	}
 	// "ROCKANDROLLCAR"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "UFJMYjUKOLXKVr")) {
 		KeyBoardCheatString[0] = ' ';
-		VehicleCheat(true, MI_LOVEFIST);
+		VehicleCheat(MI_LOVEFIST);
 	}
 	// "RUBBISHCAR"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "UFJI`dEIV]")) {
 		KeyBoardCheatString[0] = ' ';
-		VehicleCheat(true, MI_TRASH);
+		VehicleCheat(MI_TRASH);
 	}
 	// "GETTHEREQUICKLY"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "\\QRDVpTLSPU\\[eT")) {
 		KeyBoardCheatString[0] = ' ';
-		VehicleCheat(true, MI_BLOODRB);
+		VehicleCheat(MI_BLOODRB);
 	}
 	// "GETTHEREFAST"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "WXHGRmHOU_RO")) {
 		KeyBoardCheatString[0] = ' ';
-		VehicleCheat(true, MI_SABRETUR);
+		VehicleCheat(MI_SABRETUR);
 	}
 	// "BETTERTHANWALKING"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "JSPLY\\ZUBSaZLtaK^")) {
 		KeyBoardCheatString[0] = ' ';
-		VehicleCheat(true, MI_CADDY);
+		VehicleCheat(MI_CADDY);
 	}
 	// "GETTHEREFASTINDEED"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "GJLE[dWZBQfZLvRXa[^WHL")) {
 		KeyBoardCheatString[0] = ' ';
-		VehicleCheat(true, MI_HOTRINA);
+		VehicleCheat(MI_HOTRINA);
 	}
 	// "GETTHEREAMAZINGLYFAST"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "WXHGfgJUJeNUHe_Kdg^HJ")) {
 		KeyBoardCheatString[0] = ' ';
-		VehicleCheat(true, MI_HOTRINB);
+		VehicleCheat(MI_HOTRINB);
 	}
 	// LOOKLIKELANCE
 	else if (!Cheat_strncmp(KeyBoardCheatString, "HHUBY`NPMV\\WS")) {
@@ -1346,6 +1371,16 @@ void CPad::AddToPCCheatString(char c)
 		KeyBoardCheatString[0] = ' ';
 		ChangePlayerModel("igdiaz");
 	}
+	// DEEPFRIEDMARSBARS
+	else if (!Cheat_strncmp(KeyBoardCheatString, "VWHC`mDTEPVZMpRK")) {
+		KeyBoardCheatString[0] = ' ';
+		gfTommyFatness = 0.26f;
+	}
+	// PROGRAMMER
+	else if (!Cheat_strncmp(KeyBoardCheatString, "UJTNNmJVS[")) {
+		KeyBoardCheatString[0] = ' ';
+		gfTommyFatness = -0.3f;
+	}
 	// SEAWAYS
 	else if (!Cheat_strncmp(KeyBoardCheatString, "V^HXN`V")) {
 		KeyBoardCheatString[0] = ' ';
@@ -1366,17 +1401,6 @@ void CPad::AddToPCCheatString(char c)
 		KeyBoardCheatString[0] = ' ';
 		FannyMagnetCheat();
 	}
-	// "ILOVESCOTLAND"
-	if (!_CHEATCMP("DNALTOCSEVOLI"))
-		RainyWeatherCheat();
-
-	// "MADWEATHER"
-	if (!_CHEATCMP("REHTAEWDAM"))
-		FastWeatherCheat();
-
-	// "CHITTYCHITTYBB"
-	if (!_CHEATCMP("BBYTTIHCYTTIHC"))
-		ChittyChittyBangBangCheat();
 
 	// "NASTYLIMBSCHEAT"
 	if (!_CHEATCMP("TAEHCSBMILYTSAN"))
@@ -3117,6 +3141,8 @@ void CPad::ResetCheats(void)
 	gbBlackCars = false;
 	gbPinkCars = false;
 	CCarCtrl::bMadDriversCheat = false;
+	CTrafficLights::bGreenLightsCheat = false;
+	CStats::ShowChaseStatOnScreen = 0;
 	gbFastTime = false;
 	CTimer::SetTimeScale(1.0f);
 }

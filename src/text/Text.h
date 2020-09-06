@@ -8,6 +8,7 @@ void UnicodeStrcpy(wchar *dst, const wchar *src);
 void UnicodeStrcat(wchar *dst, wchar *append);
 int UnicodeStrlen(const wchar *str);
 void TextCopy(wchar *dst, const wchar *src);
+void UnicodeMakeUpperCase(wchar *dst, wchar *src);
 
 struct CKeyEntry
 {
