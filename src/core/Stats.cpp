@@ -447,6 +447,11 @@ void CStats::AddPropertyAsOwned(int32 id)
 	}
 }
 
+float CStats::GetFavoriteRadioStationList(int32 station)
+{
+	return FavoriteRadioStationList[station];
+}
+
 void CStats::SaveStats(uint8 *buf, uint32 *size)
 {
 	CheckPointReachedSuccessfully();

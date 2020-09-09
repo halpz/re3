@@ -5,6 +5,9 @@
 
 #define SLOT_COUNT (8)
 
+void InitRadioStationPositionList();
+uint32 GetSavedRadioStationPosition(int32 station);
+void PopulateRadioStationPositionList();
 bool GenericSave(int file);
 bool GenericLoad();
 bool ReadInSizeofSaveFileBuffer(int32 &file, uint32 &size);
