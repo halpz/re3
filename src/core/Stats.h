@@ -144,5 +144,6 @@ public:
 
 	static void LongestTimeInBloodRing(int32);
 	static void AddPropertyAsOwned(int32);
+	static void PopulateFavoriteRadioStationList();
 	static float GetFavoriteRadioStationList(int32);
 };
