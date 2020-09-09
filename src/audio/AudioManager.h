@@ -197,8 +197,8 @@ public:
 
 	// miami
 	uint8 m_bIsPlayerShutUp;
-	uint8 m_bPlayerMood;
-	uint32 field_4B34;
+	uint8 m_PlayerMood;
+	uint32 m_nPlayerMoodTimer;
 	uint8 field_rest[4];
 	uint8 field_4B3C;
 

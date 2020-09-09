@@ -3839,9 +3839,9 @@ cAudioManager::SetPlayersMood(uint8 mood, int32 time)
 {
 	if (!m_bIsInitialised) return;
 
-	if (mood < 4) {
-		m_bPlayerMood = mood;
-		field_4B34 = CTimer::GetTimeInMilliseconds() + time;
+	if (mood < MAX_PLAYER_MOODS) {
+		m_nPlayerMood = mood;
+		m_nPlayerMoodTimer = CTimer::GetTimeInMilliseconds() + time;
 	}
 
 }
