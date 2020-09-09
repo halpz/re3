@@ -53,8 +53,8 @@ public:
 public:
 	cMusicManager();
 	bool IsInitialised() { return m_bIsInitialised; }
-	uint32 GetMusicMode() { return m_nMusicMode; }
-	uint8 GetCurrentTrack() { return m_nPlayingTrack; }
+	uint8 GetMusicMode() { return m_nMusicMode; }
+	uint32 GetCurrentTrack() { return m_nPlayingTrack; }
 
 	void ResetMusicAfterReload();
 	void SetStartingTrackPositions(uint8 isNewGameTimer);
