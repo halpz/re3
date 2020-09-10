@@ -12,6 +12,7 @@
 
 #define FEET_OFFSET	1.04f
 #define CHECK_NEARBY_THINGS_MAX_DIST	15.0f
+#define ENTER_CAR_MAX_DIST	30.0f
 
 struct CPathNode;
 class CAccident;
