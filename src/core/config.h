@@ -252,6 +252,7 @@ enum Config {
 #define KANGAROO_CHEAT
 #define ALLCARSHELI_CHEAT
 #define ALT_DODO_CHEAT
+#define WALLCLIMB_CHEAT
 #define REGISTER_START_BUTTON
 //#define BIND_VEHICLE_FIREWEAPON // Adds ability to rebind fire key for 'in vehicle' controls
 
