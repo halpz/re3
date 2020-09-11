@@ -30,6 +30,7 @@ public:
 	uintptr m_nRopeID;
 	uint32 m_nHassleTimer;
 	uint32 field_61C;
+	class CStinger *m_pStinger;
 	int32 field_624;
 	int8 field_628;
 
@@ -44,6 +45,7 @@ public:
 	void ScanForCrimes(void);
 	void CopAI(void);
 	void ProcessHeliSwat(void);
+	void ProcessStingerCop(void);
 };
 
 #ifndef PED_SKIN

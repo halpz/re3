@@ -80,7 +80,7 @@ void WeaponCheat1();
 void WeaponCheat2();
 void WeaponCheat3();
 void HealthCheat();
-void VehicleCheat(bool something, int model);
+void VehicleCheat(int model);
 void BlowUpCarsCheat();
 void ChangePlayerCheat();
 void MayhemCheat();
@@ -353,7 +353,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Cheats", "Health", HealthCheat);
 		DebugMenuAddCmd("Cheats", "Wanted level up", WantedLevelUpCheat);
 		DebugMenuAddCmd("Cheats", "Wanted level down", WantedLevelDownCheat);
-		DebugMenuAddCmd("Cheats", "Tank", []() { VehicleCheat(true, MI_TAXI); });
+		DebugMenuAddCmd("Cheats", "Tank", []() { VehicleCheat(MI_TAXI); });
 		DebugMenuAddCmd("Cheats", "Blow up cars", BlowUpCarsCheat);
 		DebugMenuAddCmd("Cheats", "Change player", ChangePlayerCheat);
 		DebugMenuAddCmd("Cheats", "Mayhem", MayhemCheat);

@@ -21,6 +21,8 @@
 #include "User.h"
 #include "World.h"
 #include "CutsceneMgr.h"
+#include "Stats.h"
+#include "main.h"
 
 // Game has colors inlined in code.
 // For easier modification we collect them here:
@@ -90,6 +92,8 @@ int32 CHud::SpriteBrightness;
 float CHud::PagerXOffset;
 int16 CHud::PagerTimer;
 int16 CHud::PagerOn;
+
+wchar *prevChaseString;
 
 uint32 CHud::m_WantedFadeTimer;
 uint32 CHud::m_WantedState;
@@ -520,6 +524,53 @@ void CHud::Draw()
 						CFont::SetColor(NOTWANTED_COLOR);
 						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
 					}
+				}
+			}
+		}
+
+		static int32 nMediaLevelCounter = 0;
+		if (CStats::ShowChaseStatOnScreen != 0) {
+			float fCurAttentionLevel = CWorld::Players[CWorld::PlayerInFocus].m_fMediaAttention;
+			if (0.7f * CStats::HighestChaseValue > fCurAttentionLevel
+				|| fCurAttentionLevel <= 40.0f || CTheScripts::IsPlayerOnAMission()) {
+				nMediaLevelCounter = 0;
+			}
+			else {
+				if (fCurAttentionLevel == CStats::HighestChaseValue) {
+					sprintf(gString, "%s %d", UnicodeToAscii(TheText.Get("CHSE")), (int32)fCurAttentionLevel);
+				}
+				else {
+					sprintf(gString, "%s %d" "-%d-", UnicodeToAscii(TheText.Get("CHSE")), (int32)fCurAttentionLevel, (int32)CStats::HighestChaseValue);
+				}
+				AsciiToUnicode(gString, gUString);
+				CFont::SetBackgroundOff();
+				CFont::SetScale(SCREEN_SCALE_X(HUD_TEXT_SCALE_X), SCREEN_SCALE_Y(HUD_TEXT_SCALE_Y));
+				CFont::SetCentreOff();
+				CFont::SetRightJustifyOn();
+				CFont::SetRightJustifyWrap(0.0f);
+				CFont::SetBackGroundOnlyTextOff();
+				CFont::SetFontStyle(FONT_HEADING);
+				CFont::SetPropOff();
+				CFont::SetDropShadowPosition(2);
+				CFont::SetDropColor(CRGBA(0, 0, 0, 255));
+
+				CRGBA colour;
+				if (CTimer::GetTimeInMilliseconds() & 0x200)
+					colour = CRGBA(204, 0, 185, 180);
+				else
+					colour = CRGBA(178, 0, 162, 180);
+				CFont::SetColor(colour);
+				CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f), SCREEN_SCALE_Y(113.0f), gUString);
+				
+				if (CStats::FindChaseString(fCurAttentionLevel) != prevChaseString) {
+					prevChaseString = CStats::FindChaseString(fCurAttentionLevel);
+					nMediaLevelCounter = 100;
+				}
+
+				if (nMediaLevelCounter != 0) {
+					nMediaLevelCounter--;
+					UnicodeMakeUpperCase(gUString, CStats::FindChaseString(fCurAttentionLevel));
+					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f), SCREEN_SCALE_Y(138.0f), gUString);
 				}
 			}
 		}

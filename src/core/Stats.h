@@ -118,6 +118,7 @@ public:
 	static void RegisterLevelFireMission(int32);
 	static void AnotherFireExtinguished();
 	static wchar *FindCriminalRatingString();
+	static wchar *FindChaseString(float fMediaLevel);
 	static void AnotherKillFrenzyPassed();
 	static void SetTotalNumberKillFrenzies(int32);
 	static void SetTotalNumberMissions(int32);

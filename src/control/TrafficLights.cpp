@@ -18,6 +18,8 @@
 // TODO: figure out the meaning of this
 enum { SOME_FLAG = 0x80 };
 
+bool CTrafficLights::bGreenLightsCheat;
+
 void
 CTrafficLights::DisplayActualLight(CEntity *ent)
 {
@@ -310,6 +312,12 @@ CTrafficLights::LightForPeds(void)
 uint8
 CTrafficLights::LightForCars1(void)
 {
+	if (CWeather::Wind > 1.1f)
+		return CAR_LIGHTS_GREEN;
+
+	if (bGreenLightsCheat)
+		return CAR_LIGHTS_GREEN;
+
 	uint32 period = CTimer::GetTimeInMilliseconds() % 16384;
 
 	if(period < 5000)
@@ -323,6 +331,12 @@ CTrafficLights::LightForCars1(void)
 uint8
 CTrafficLights::LightForCars2(void)
 {
+	if (CWeather::Wind > 1.1f)
+		return CAR_LIGHTS_GREEN;
+
+	if (bGreenLightsCheat)
+		return CAR_LIGHTS_GREEN;
+
 	uint32 period = CTimer::GetTimeInMilliseconds() % 16384;
 
 	if(period < 6000)

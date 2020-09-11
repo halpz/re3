@@ -1611,13 +1611,13 @@ void CScriptPath::Clear(void) {
 	m_state = SCRIPT_PATH_DISABLED;
 }
 
-void CScriptPath::InitialiseOne(int32 numNodes, float width) {
+void CScriptPath::InitialiseOne(int32 numNodes, float length) {
 	char Dest[32];
 	sprintf(Dest, "data\\paths\\spath%d.dat", numNodes);
 	m_pNode = CPlane::LoadPath(Dest, m_numNodes, m_fTotalLength, false);
 	m_fSpeed = 1.0f;
 	m_fPosition = 0.0f;
-	m_fObjectLength = width;
+	m_fObjectLength = length;
 	m_state = SCRIPT_PATH_INITIALIZED;
 }
 
@@ -1697,7 +1697,7 @@ INITSAVEBUF
 VALIDATESAVEBUF(*size);
 }
 
-CObject* g_pScriptPathObjects[18];
+CObject *g_pScriptPathObjects[18];
 
 void CScriptPaths::Load_ForReplay(void) {
 	for (int i = 0; i < 3; i++) {
