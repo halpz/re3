@@ -1121,15 +1121,19 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 						rightText = TheText.Get("FEA_ADP");
 					else {
 						char* provider = DMAudio.Get3DProviderName(m_nPrefsAudio3DProviderIndex);
-
-						if (!strcmp(strupr(provider), "DIRECTSOUND3D HARDWARE SUPPORT")) {
-							strcpy(provider, "DSOUND3D HARDWARE SUPPORT");
+						if (provider != NULL) {
+							if (!strcmp(strupr(provider), "DIRECTSOUND3D HARDWARE SUPPORT")) {
+								strcpy(provider, "DSOUND3D HARDWARE SUPPORT");
+							}
+							else if (!strcmp(strupr(provider), "DIRECTSOUND3D SOFTWARE EMULATION")) {
+								strcpy(provider, "DSOUND3D SOFTWARE EMULATION");
+							}
+							AsciiToUnicode(provider, unicodeTemp);
+							rightText = unicodeTemp;
 						}
-						else if (!strcmp(strupr(provider), "DIRECTSOUND3D SOFTWARE EMULATION")) {
-							strcpy(provider, "DSOUND3D SOFTWARE EMULATION");
+						else {
+							rightText = TheText.Get("not defined");
 						}
-						AsciiToUnicode(provider, unicodeTemp);
-						rightText = unicodeTemp;
 					}
 					break;
 				case MENUACTION_SPEAKERCONF: {

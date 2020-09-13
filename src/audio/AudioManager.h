@@ -143,6 +143,7 @@ public:
 class cVehicleParams
 {
 public:
+	int32 m_VehicleType;
 	bool m_bDistanceCalculated;
 	float m_fDistance;
 	CVehicle *m_pVehicle;
@@ -319,6 +320,7 @@ public:
 #endif
 	bool ProcessCarBombTick(cVehicleParams *params);
 	void ProcessCesna(cVehicleParams *params);
+	void ProcessPlayersVehicleEngine1(cVehicleParams* params, CVehicle* veh);
 	//void ProcessCrane();
 	bool ProcessEngineDamage(cVehicleParams *params);
 	void ProcessEntity(int32 sound);

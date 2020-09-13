@@ -37,6 +37,7 @@
 #include "Weather.h"
 #include "ZoneCull.h"
 #include "sampman.h"
+#include <vehicles\Bike.h>
 
 const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
 const int policeChannel = channels + 1;
@@ -550,116 +551,116 @@ struct tVehicleSampleData {
 	uint8 m_bDoorType;
 };
 
-const tVehicleSampleData aVehicleSettings[110] = { {SFX_CAR_REV_2, 2, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9935, 1},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_56CHEV, 11487, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_8, 8, SFX_CAR_HORN_PORSCHE, 11025, SFX_CAR_HORN_JEEP, 10928, 1},
-												 {SFX_CAR_REV_6, 6, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_HORN_JEEP, 9935, 2},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_56CHEV, 12893, SFX_CAR_HORN_JEEP, 8941, 0},
-												 {SFX_CAR_REV_5, 5, SFX_CAR_HORN_BMW328, 10706, SFX_CAR_HORN_JEEP, 11922, 1},
-												 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_HORN_JEEP, 7948, 2},
-												 {SFX_CAR_REV_6, 6, SFX_CAR_HORN_TRUCK, 29711, SFX_POLICE_SIREN_SLOW, 11556, 2},
-												 {SFX_CAR_REV_6, 6, SFX_CAR_HORN_TRUCK, 31478, SFX_CAR_HORN_JEEP, 8941, 2},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_BMW328, 9538, SFX_CAR_HORN_JEEP, 12220, 1},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_56CHEV, 10842, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_3, 3, SFX_CAR_HORN_BMW328, 12017, SFX_CAR_HORN_JEEP, 9935, 1},
-												 {SFX_CAR_REV_2, 2, SFX_CAR_HORN_JEEP, 22295, SFX_CAR_HORN_JEEP, 12200, 1},
-												 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_BUS2, 18000, SFX_CAR_HORN_JEEP, 13400, 1},
-												 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_BUS, 18286, SFX_CAR_HORN_JEEP, 9935, 2},
-												 {SFX_CAR_REV_3, 3, SFX_CAR_HORN_PORSCHE, 11025, SFX_CAR_HORN_JEEP, 13600, 1},
-												 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_JEEP, 22295, SFX_AMBULANCE_SIREN_SLOW, 8795, 2},
-												 {SFX_CAR_REV_5, 5, SFX_CAR_HORN_PORSCHE, 9271, SFX_POLICE_SIREN_SLOW, 16168, 1},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_56CHEV, 12170, SFX_CAR_HORN_JEEP, 8000, 1},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_BUS2, 12345, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_2, 2, SFX_CAR_HORN_BMW328, 10796, SFX_CAR_HORN_JEEP, 8543, 1},
-												 {SFX_CAR_REV_5, 5, SFX_CAR_HORN_PORSCHE, 9271, SFX_CAR_HORN_JEEP, 9935, 1},
-												 {SFX_CAR_REV_2, 2, SFX_CAR_HORN_PICKUP, 10924, SFX_CAR_HORN_JEEP, 9935, 1},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_PICKUP, 11025, SFX_ICE_CREAM_TUNE, 11025, 0},
-												 {SFX_CAR_REV_7, 7, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9935, 1},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 10000, 0},
-												 {SFX_CAR_REV_5, 5, SFX_CAR_HORN_BMW328, 10706, SFX_POLICE_SIREN_SLOW, 13596, 1},
-												 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_BUS, 17260, SFX_POLICE_SIREN_SLOW, 13000, 2},
-												 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_PICKUP, 8670, SFX_CAR_HORN_JEEP, 9935, 2},
-												 {SFX_CAR_REV_8, 8, SFX_CAR_HORN_PORSCHE, 10400, SFX_CAR_HORN_JEEP, 10123, 1},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 26513, SFX_POLICE_SIREN_SLOW, 13596, 0},
-												 {SFX_CAR_REV_6, 6, SFX_CAR_HORN_BUS2, 11652, SFX_CAR_HORN_JEEP, 10554, 3},
-												 {SFX_CAR_REV_6, 6, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_HORN_JEEP, 8000, 2},
-												 {SFX_CAR_REV_6, 6, SFX_CAR_HORN_TRUCK, 28043, SFX_CAR_HORN_JEEP, 9935, 2},
-												 {SFX_CAR_REV_1, 0, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_HORN_JEEP, 9935, 3},
-												 {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CESNA_IDLE, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_6, 6, SFX_CAR_HORN_BUS, 16291, SFX_CAR_HORN_JEEP, 7500, 3},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_56CHEV, 10842, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_56CHEV, 10233, SFX_CAR_HORN_JEEP, 8935, 0},
-												 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_PICKUP, 8670, SFX_CAR_HORN_JEEP, 8935, 0},
-												 {SFX_CAR_REV_1, 0, SFX_CAR_HORN_PICKUP, 2000, SFX_CAR_HORN_JEEP, 17000, 0},
-												 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_5, 5, SFX_CAR_HORN_BMW328, 9003, SFX_CAR_HORN_JEEP, 9935, 1},
-												 {SFX_CAR_REV_2, 2, SFX_CAR_HORN_PORSCHE, 12375, SFX_CAR_HORN_JEEP, 9935, 1},
-												 {SFX_CAR_REV_5, 5, SFX_CAR_HORN_BUS2, 15554, SFX_CAR_HORN_JEEP, 9935, 1},
-												 {SFX_CAR_REV_7, 7, SFX_CAR_HORN_BUS2, 13857, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_7, 7, SFX_CAR_HORN_PICKUP, 10924, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 2},
-												 {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 20143, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9000, 0},
-												 {SFX_CAR_REV_6, 6, SFX_CAR_HORN_TRUCK, 28043, SFX_CAR_HORN_JEEP, 9935, 2},
-												 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_BUS, 18286, SFX_CAR_HORN_JEEP, 9935, 2},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_56CHEV, 10842, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_4, 4, SFX_CAR_HORN_BUS2, 18000, SFX_CAR_HORN_JEEP, 13400, 1},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0},
-												 {SFX_CAR_REV_1, 1, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9935, 0} };
+const tVehicleSampleData aVehicleSettings[110] = { {SFX_CAR_REV_10, 13, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9935, 0},
+                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_56CHEV, 11487, SFX_CAR_HORN_JEEP, 9900, 0},
+                                                   {SFX_CAR_REV_2, 5, SFX_CAR_HORN_PORSCHE, 11025, SFX_CAR_HORN_JEEP, 9890, 1},
+                                                   {SFX_CAR_REV_5, 8, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_HORN_JEEP, 9960, 2},
+                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_56CHEV, 12893, SFX_CAR_HORN_JEEP, 9500, 0},
+                                                   {SFX_CAR_REV_4, 7, SFX_CAR_HORN_BMW328, 10706, SFX_CAR_HORN_JEEP, 9600, 1},
+                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_HORN_JEEP, 9700, 1},
+                                                   {SFX_CAR_REV_5, 8, SFX_CAR_HORN_TRUCK, 29711, SFX_POLICE_SIREN_SLOW, 10588, 2},
+                                                   {SFX_CAR_REV_5, 8, SFX_CAR_HORN_TRUCK, 31478, SFX_CAR_HORN_JEEP, 9800, 2},
+                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_BMW328, 9538, SFX_CAR_HORN_JEEP, 9900, 1},
+                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_56CHEV, 10842, SFX_CAR_HORN_JEEP, 10000, 0},
+                                                   {SFX_CAR_REV_7, 10, SFX_CAR_HORN_BMW328, 12017, SFX_CAR_HORN_JEEP, 9900, 1},
+                                                   {SFX_CAR_REV_9, 12, SFX_CAR_HORN_JEEP, 22293, SFX_CAR_HORN_JEEP, 9800, 1},
+                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_BUS2, 18000, SFX_CAR_HORN_JEEP, 9700, 0},
+                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_BUS, 18286, SFX_CAR_HORN_JEEP, 9600, 0},
+                                                   {SFX_CAR_REV_2, 5, SFX_CAR_HORN_PORSCHE, 11025, SFX_CAR_HORN_JEEP, 9500, 1},
+                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_JEEP, 22295, SFX_AMBULANCE_SIREN_SLOW, 12688, 0},
+                                                   {SFX_CAR_REV_4, 7, SFX_CAR_HORN_PORSCHE, 9271, SFX_POLICE_SIREN_SLOW, 11471, 1},
+                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_56CHEV, 12170, SFX_CAR_HORN_JEEP, 9400, 0},
+                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_BMW328, 11000, SFX_CAR_HORN_JEEP, 9300, 0},
+                                                   {SFX_CAR_REV_10, 13, SFX_CAR_HORN_BMW328, 10796, SFX_CAR_HORN_JEEP, 9200, 1},
+                                                   {SFX_CAR_REV_4, 7, SFX_CAR_HORN_BMW328, 10500, SFX_CAR_HORN_JEEP, 9100, 1},
+                                                   {SFX_CAR_REV_10, 13, SFX_CAR_HORN_PICKUP, 10924, SFX_CAR_HORN_JEEP, 9000, 0},
+                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_PICKUP, 11025, SFX_ICE_CREAM_TUNE, 11025, 0},
+                                                   {SFX_CAR_REV_6, 9, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9100, 0},
+                                                   {SFX_HELI_APACHE_1, 30, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9200, 1},
+                                                   {SFX_CAR_REV_4, 7, SFX_CAR_HORN_BMW328, 10706, SFX_POLICE_SIREN_SLOW, 10511, 1},
+                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_BUS, 17260, SFX_POLICE_SIREN_SLOW, 11029, 0},
+                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_PICKUP, 8670, SFX_CAR_HORN_JEEP, 9300, 0},
+                                                   {SFX_CAR_REV_7, 10, SFX_CAR_HORN_PORSCHE, 10400, SFX_CAR_HORN_JEEP, 9400, 1},
+                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_POLICE_SIREN_SLOW, 11912, 1},
+                                                   {SFX_CAR_REV_5, 8, SFX_CAR_HORN_BUS2, 11652, SFX_CAR_HORN_JEEP, 9500, 3},
+                                                   {SFX_CAR_REV_5, 8, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_HORN_JEEP, 9600, 2},
+                                                   {SFX_CAR_REV_5, 8, SFX_CAR_HORN_TRUCK, 28043, SFX_CAR_HORN_JEEP, 9700, 2},
+                                                   {SFX_CAR_REV_6, 9, SFX_CAR_HORN_JEEP, 25400, SFX_CAR_HORN_JEEP, 9800, 0},
+                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9900, 1},
+                                                   {SFX_CAR_REV_17, 20, SFX_CAR_HORN_JEEP, 26313, SFX_CAR_HORN_JEEP, 10000, 1},
+                                                   {SFX_CAR_REV_5, 8, SFX_CAR_HORN_BUS, 16291, SFX_CAR_HORN_JEEP, 10100, 3},
+                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_56CHEV, 10842, SFX_CAR_HORN_JEEP, 9900, 0},
+                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_56CHEV, 10233, SFX_CAR_HORN_JEEP, 9800, 1},
+                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_PICKUP, 8670, SFX_CAR_HORN_JEEP, 9700, 0},
+                                                   {SFX_RC_REV, 17, SFX_CAR_HORN_PICKUP, 20000, SFX_CAR_HORN_JEEP, 9600, 1},
+                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9500, 1},
+                                                   {SFX_CAR_REV_5, 8, SFX_CAR_HORN_TRUCK, 29000, SFX_CAR_HORN_JEEP, 9400, 2},
+                                                   {SFX_CAR_REV_1, 4, SFX_CAR_HORN_BMW328, 9003, SFX_CAR_HORN_JEEP, 9300, 1},
+                                                   {SFX_CAR_REV_4, 7, SFX_CAR_HORN_PORSCHE, 12375, SFX_CAR_HORN_JEEP, 9200, 1},
+                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_BUS2, 15554, SFX_CAR_HORN_JEEP, 9100, 1},
+                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_BUS2, 13857, SFX_CAR_HORN_JEEP, 9000, 2},
+                                                   {SFX_MOPED_REV, 21, SFX_CAR_HORN_JEEP, 30000, SFX_CAR_HORN_JEEP, 9100, 1},
+                                                   {SFX_CAR_REV_7, 10, SFX_CAR_HORN_JEEP, 22043, SFX_CAR_HORN_JEEP, 9200, 0},
+                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9300, 1},
+                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9400, 1},
+                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9500, 1},
+                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9600, 1},
+                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9700, 1},
+                                                   {SFX_CAR_REV_5, 8, SFX_CAR_HORN_TRUCK, 28043, SFX_CAR_HORN_JEEP, 9800, 2},
+                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_BUS, 18286, SFX_CAR_HORN_JEEP, 9900, 0},
+                                                   {SFX_CAR_REV_12, 15, SFX_CAR_HORN_JEEP, 28500, SFX_CAR_HORN_JEEP, 9800, 1},
+                                                   {SFX_CAR_REV_1, 4, SFX_CAR_HORN_56CHEV, 10842, SFX_CAR_HORN_JEEP, 9700, 0},
+                                                   {SFX_CAR_REV_8, 11, SFX_CAR_HORN_BUS2, 18000, SFX_CAR_HORN_JEEP, 9700, 0},
+                                                   {SFX_SEAPLANE_PRO1, 35, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9700, 1},
+                                                   {SFX_CAR_REV_20, 23, SFX_CAR_HORN_JEEP, 27000, SFX_CAR_HORN_JEEP, 9600, 1},
+                                                   {SFX_MOPED_REV, 21, SFX_CAR_HORN_JEEP, 31000, SFX_CAR_HORN_JEEP, 9500, 1},
+                                                   {SFX_CAR_REV_17, 20, SFX_CAR_HORN_PICKUP, 11000, SFX_CAR_HORN_JEEP, 9400, 1},
+                                                   {SFX_RC_REV, 17, SFX_CAR_HORN_JEEP, 30000, SFX_CAR_HORN_JEEP, 15000, 1},
+                                                   {SFX_CAR_RC_HELI, 18, SFX_CAR_HORN_JEEP, 30000, SFX_CAR_HORN_JEEP, 15000, 1},
+                                                   {SFX_CAR_REV_9, 12, SFX_CAR_HORN_56CHEV, 10300, SFX_CAR_HORN_JEEP, 9100, 0},
+                                                   {SFX_CAR_REV_9, 12, SFX_CAR_HORN_56CHEV, 10500, SFX_CAR_HORN_JEEP, 9000, 0},
+                                                   {SFX_CAR_REV_19, 22, SFX_CAR_HORN_JEEP, 30000, SFX_CAR_HORN_JEEP, 9000, 1},
+                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9100, 2},
+                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_TRUCK, 28000, SFX_CAR_HORN_JEEP, 9200, 2},
+                                                   {SFX_CAR_REV_7, 10, SFX_CAR_HORN_PICKUP, 11200, SFX_CAR_HORN_JEEP, 9300, 1},
+                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9400, 1},
+                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9500, 1},
+                                                   {SFX_CAR_REV_9, 12, SFX_CAR_HORN_56CHEV, 10700, SFX_CAR_HORN_JEEP, 9600, 0},
+                                                   {SFX_CAR_REV_1, 4, SFX_CAR_HORN_BMW328, 9000, SFX_CAR_HORN_JEEP, 9700, 0},
+                                                   {SFX_CAR_REV_6, 9, SFX_CAR_HORN_BMW328, 9200, SFX_CAR_HORN_JEEP, 9800, 0},
+                                                   {SFX_CAR_REV_7, 10, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9900, 1},
+                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_56CHEV, 10540, SFX_CAR_HORN_JEEP, 9935, 2},
+                                                   {SFX_CAR_REV_8, 11, SFX_CAR_HORN_PICKUP, 11000, SFX_CAR_HORN_JEEP, 9700, 1},
+                                                   {SFX_CAR_REV_2, 5, SFX_CAR_HORN_BMW328, 9500, SFX_CAR_HORN_JEEP, 9800, 1},
+                                                   {SFX_CAR_REV_7, 10, SFX_CAR_HORN_BMW328, 9700, SFX_CAR_HORN_JEEP, 9700, 1},
+                                                   {SFX_CAR_REV_8, 11, SFX_CAR_HORN_BUS2, 18000, SFX_CAR_HORN_JEEP, 9600, 0},
+                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_BUS, 18000, SFX_CAR_HORN_JEEP, 9500, 2},
+                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9400, 1},
+                                                   {SFX_CAR_REV_8, 11, SFX_CAR_HORN_JEEP, 27513, SFX_CAR_HORN_JEEP, 9300, 1},
+                                                   {SFX_CAR_REV_8, 11, SFX_CAR_HORN_56CHEV, 10700, SFX_CAR_HORN_JEEP, 9200, 0},
+                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9100, 2},
+                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9000, 2},
+                                                   {SFX_CAR_REV_10, 13, SFX_CAR_HORN_BUS2, 18000, SFX_CAR_HORN_JEEP, 9100, 2},
+                                                   {SFX_CAR_REV_1, 4, SFX_CAR_HORN_BUS2, 17900, SFX_POLICE_SIREN_SLOW, 10511, 2},
+                                                   {SFX_CAR_REV_4, 7, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9200, 1},
+                                                   {SFX_CAR_REV_8, 11, SFX_CAR_HORN_BMW328, 9600, SFX_CAR_HORN_JEEP, 9300, 1},
+                                                   {SFX_CAR_REV_4, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9400, 1},
+                                                   {SFX_CAR_REV_7, 10, SFX_CAR_HORN_PORSCHE, 10000, SFX_CAR_HORN_JEEP, 9500, 0},
+                                                   {SFX_CAR_REV_6, 9, SFX_CAR_HORN_PORSCHE, 10500, SFX_CAR_HORN_JEEP, 9600, 0},
+                                                   {SFX_CAR_REV_10, 13, SFX_CAR_HORN_JEEP, 25513, SFX_CAR_HORN_JEEP, 9700, 1},
+                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9800, 1},
+                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9900, 1},
+                                                   {SFX_CAR_REV_10, 13, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9800, 1},
+                                                   {SFX_CAR_REV_1, 4, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9700, 1},
+                                                   {SFX_CAR_RC_HELI, 18, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9600, 1},
+                                                   {SFX_CAR_REV_6, 9, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9700, 1},
+                                                   {SFX_CAR_REV_7, 10, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9600, 1},
+                                                   {SFX_CAR_REV_1, 4, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9500, 1},
+                                                   {SFX_CAR_REV_9, 12, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9400, 1},
+                                                   {SFX_CAR_REV_2, 5, SFX_CAR_HORN_PORSCHE, 11025, SFX_POLICE_SIREN_SLOW, 11000, 1},
+                                                   {SFX_CAR_REV_1, 4, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9200, 1},
+                                                   {SFX_CAR_REV_1, 4, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9300, 1},
+                                                   {SFX_CAR_REV_1, 4, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9400, 1} };
 
 
 bool bPlayerJustEnteredCar;
@@ -692,6 +693,10 @@ cAudioManager::ProcessVehicle(CVehicle *veh)
 	cVehicleParams params;
 	m_sQueueSample.m_vecPos = veh->GetPosition();
 
+	float gas;
+	float gasPedalAudio;
+	float tmp;
+
 	params.m_bDistanceCalculated = false;
 	params.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	params.m_pVehicle = veh;
@@ -717,6 +722,7 @@ cAudioManager::ProcessVehicle(CVehicle *veh)
 			((CAutomobile *)veh)->m_fVelocityChangeForAudio = params.m_fVelocityChange;
 			break;
 		}
+
 		if (params.m_nIndex == DODO) {
 			if (!ProcessVehicleRoadNoise(&params)) {
 				ProcessVehicleOneShots(&params);
@@ -769,6 +775,34 @@ cAudioManager::ProcessVehicle(CVehicle *veh)
 	case VEHICLE_TYPE_PLANE:
 		ProcessPlane(&params);
 		ProcessVehicleOneShots(&params);
+		break;
+	case VEHICLE_TYPE_BIKE:
+		gas = fabs(params.m_pVehicle->m_fGasPedal);
+		gasPedalAudio = ((CBike*)params.m_pVehicle)->m_fGasPedalAudio;
+		if (gas <= gasPedalAudio) {
+			tmp = gasPedalAudio = 0.07f;
+			if (tmp <= gas)
+				tmp = gas;
+		} else {
+			tmp = gasPedalAudio + 0.09f;
+			if (tmp < gas)
+				tmp = gas;
+		}
+		((CBike*)params.m_pVehicle)->m_fGasPedalAudio = tmp;
+
+		if (ProcessVehicleRoadNoise(&params)) {
+			if (CWeather::WetRoads > 0.0f)
+				ProcessWetRoadNoise(&params);
+			ProcessVehicleSkidding(&params);
+			ProcessVehicleHorn(&params);
+			ProcessVehicleSirenOrAlarm(&params);
+			ProcessCarBombTick(&params);
+			ProcessEngineDamage(&params);
+			ProcessVehicleEngine(&params);
+			//ProcessVehicleFlatTyre();
+		}
+		ProcessVehicleOneShots(&params);
+		((CBike*)veh)->m_fVelocityChangeForAudio = params.m_fVelocityChange;
 		break;
 	default:
 		break;
@@ -1048,6 +1082,16 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
 			SampleManager.StopChannel(m_nActiveSamples);
 			return;
 		}
+		if (!params->m_bDistanceCalculated) {
+			if (params->m_fDistance <= 0.0)
+				m_sQueueSample.m_fDistance = 0.0;
+			else
+				m_sQueueSample.m_fDistance = sqrt(params->m_fDistance);
+		}
+		//if (playerVeh == veh /*&& veh->m_modelIndex != DODO(187)*/) {
+		//	ProcessPlayersVehicleEngine(params, params->m_pVehicle);
+		//	return;
+		//}
 		if (veh->bEngineOn) {
 			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 			automobile = (CAutomobile *)params->m_pVehicle;
@@ -1291,6 +1335,123 @@ cAudioManager::ProcessCesna(cVehicleParams *params)
 			}
 		}
 	}
+}
+
+void
+cAudioManager::ProcessPlayersVehicleEngine1(cVehicleParams* params, CVehicle* veh)
+{
+	int accelerateState;
+	int brakeState;
+	float velocityChange;
+	bool isAccelerate;
+
+	bool isPizzaOrFaggio;
+
+	CBike* bikeVehicle;
+	CAutomobile* automobileVehicle;
+	uint8 wheelsOnGround;
+	uint8 wheelsOnGroundPrev;
+	float* gasPedalAudio;
+	tWheelState* wheelsState;
+	float velocityChangeForAudio;
+
+	cTransmission* transmission;
+	bool lostTraction;
+	int wheelInUseCounter;
+	float time;
+	int freqModifier;
+
+	if (bPlayerJustEnteredCar) {
+		
+	}
+	if (CReplay::IsPlayingBack()) {
+		accelerateState = accelerateState = 255.f * clamp(veh->m_fGasPedal, 0.0f, 1.0f);
+		brakeState = 255.f * clamp(veh->m_fGasPedal, 0.0f, 1.0f);
+	} else {
+		accelerateState = Pads[0].GetAccelerate();
+		brakeState = Pads[0].GetBrake();
+	}
+	velocityChange = params->m_fVelocityChange;
+	isAccelerate = velocityChange >= -0.001;
+	isPizzaOrFaggio = veh->m_modelIndex == MI_PIZZABOY || veh->m_modelIndex == MI_FAGGIO;
+
+
+	switch (params->m_VehicleType)
+	{
+	case VEHICLE_TYPE_CAR:
+		automobileVehicle = (CAutomobile*)params->m_pVehicle;
+		wheelsOnGround = automobileVehicle->m_nDriveWheelsOnGround;
+		wheelsOnGroundPrev = automobileVehicle->m_nDriveWheelsOnGroundPrev;
+		gasPedalAudio = &automobileVehicle->m_fGasPedalAudio;
+		wheelsState = automobileVehicle->m_aWheelState;
+		velocityChangeForAudio = automobileVehicle->m_fVelocityChangeForAudio;
+		break;
+	case VEHICLE_TYPE_BIKE:
+		bikeVehicle = (CBike*)params->m_pVehicle;
+		wheelsOnGround = bikeVehicle->m_nDriveWheelsOnGround;
+		wheelsOnGroundPrev = bikeVehicle->m_nDriveWheelsOnGroundPrev;
+		gasPedalAudio = &bikeVehicle->m_fGasPedalAudio;
+		wheelsState = bikeVehicle->m_aWheelState;
+		velocityChangeForAudio = bikeVehicle->m_fVelocityChangeForAudio;
+		break;
+	default:
+		break;
+	}
+
+	transmission = params->m_pTransmission;
+	switch (transmission->nDriveType)
+	{
+	case '4':
+		if (params->m_VehicleType != VEHICLE_TYPE_BIKE) {
+			wheelInUseCounter = 0;
+			for (uint8 i = 0; i < ARRAY_SIZE(wheelsState); i++) {
+				if (wheelsState[i] != WHEEL_STATE_NORMAL)
+					++wheelInUseCounter;
+			}
+			if (wheelInUseCounter > 2)
+				lostTraction = true;
+		}
+		break;
+	case 'F':
+		if (params->m_VehicleType == VEHICLE_TYPE_BIKE) {
+			if (wheelsState[BIKEWHEEL_FRONT] != WHEEL_STATE_NORMAL)
+				lostTraction = true;
+		} else {
+			if ((wheelsState[CARWHEEL_FRONT_LEFT] != WHEEL_STATE_NORMAL || wheelsState[CARWHEEL_FRONT_RIGHT] != WHEEL_STATE_NORMAL) &&
+				(wheelsState[CARWHEEL_REAR_LEFT] != WHEEL_STATE_NORMAL || wheelsState[CARWHEEL_REAR_RIGHT] != WHEEL_STATE_NORMAL))
+				lostTraction = true;
+		}
+		break;
+	case 'R':
+		if (params->m_VehicleType == VEHICLE_TYPE_BIKE) {
+			if (wheelsState[BIKEWHEEL_REAR] != WHEEL_STATE_NORMAL)
+				lostTraction = true;
+		}
+		else {
+			if (wheelsState[CARWHEEL_REAR_LEFT] != WHEEL_STATE_NORMAL || wheelsState[CARWHEEL_REAR_RIGHT] != WHEEL_STATE_NORMAL)
+				lostTraction = true;
+		}
+		break;
+	default:
+		break;
+	}
+
+	if (velocityChange != 0.0f) {
+		time = params->m_pVehicle->m_vecMoveSpeed.z / velocityChange;
+		if (time > 0.0f)
+			freqModifier = -(Min(0.2f, time) * 3000.0f * 5.0f);
+		else
+			freqModifier = -(Max(-0.2f, time) * 3000.0f * 5.0f);
+		if (params->m_fVelocityChange < -0.001f)
+			freqModifier = -freqModifier;
+	}
+	else
+		freqModifier = 0;
+
+	if (params->m_VehicleType == VEHICLE_TYPE_BIKE && bikeVehicle->bIsStanding)
+		freqModifier += 1400;
+
+
 }
 
 void
