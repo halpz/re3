@@ -463,8 +463,7 @@ bool CGame::Initialise(const char* datFile)
 #ifdef USE_TEXTURE_POOL
 	_TexturePoolsUnknown(true);
 #endif
-	// TODO(Miami)
-	// DMAudio.SetStartingTrackPositions(1);
+	DMAudio.SetStartingTrackPositions(true);
 	DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 	return true;
 }

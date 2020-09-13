@@ -197,9 +197,9 @@ public:
 	cAudioScriptObjectManager m_sAudioScriptObjectManager;
 
 	// miami
-	uint8 field_4B30;
-	uint8 m_bPlayerMood;
-	uint32 field_4B34;
+	uint8 m_bIsPlayerShutUp;
+	uint8 m_nPlayerMood;
+	uint32 m_nPlayerMoodTimer;
 	uint8 field_rest[4];
 	uint8 field_4B3C;
 
@@ -270,6 +270,7 @@ public:
 	char *Get3DProviderName(uint8 id) const;
 	uint8 GetCDAudioDriveLetter() const;
 	int8 GetCurrent3DProviderIndex() const;
+	int8 AutoDetect3DProviders() const;
 	float GetCollisionLoopingRatio(uint32 a, uint32 b, float c) const; // not used
 	float GetCollisionOneShotRatio(int32 a, float b) const;
 	float GetCollisionRatio(float a, float b, float c, float d) const;
@@ -388,6 +389,7 @@ public:
 	void SetDynamicAcousticModelingStatus(uint8 status);
 	void SetEffectsFadeVol(uint8 volume) const;
 	void SetEffectsMasterVolume(uint8 volume) const;
+	void SetMP3BoostVolume(uint8 volume) const;
 	void SetEntityStatus(int32 id, uint8 status);
 	uint32 SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollision &audioCollision);
 	void SetMissionAudioLocation(uint8 slot, float x, float y, float z);
@@ -415,6 +417,10 @@ public:
 	bool UsesReverseWarning(int32 model) const;
 	bool UsesSiren(int32 model) const;
 	bool UsesSirenSwitching(int32 model) const;
+
+	CVehicle *FindVehicleOfPlayer();
+	void SetPedTalkingStatus(CPed *ped, uint8 status);
+	void SetPlayersMood(uint8 mood, int32 time);
 
 #ifdef GTA_PC
 	// only used in pc

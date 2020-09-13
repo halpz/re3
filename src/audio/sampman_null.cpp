@@ -114,6 +114,11 @@ cSampleManager::SetMusicMasterVolume(uint8 nVolume)
 }
 
 void
+cSampleManager::SetMusicMasterVolume(uint8 nVolume)
+{
+}
+
+void
 cSampleManager::SetEffectsFadeVolume(uint8 nVolume)
 {
 }
@@ -363,6 +368,16 @@ cSampleManager::InitialiseSampleBanks(void)
 {
 	
 	return true;
+}
+
+void
+cSampleManager::SetStreamedFileLoopFlag(uint8 nLoopFlag, uint8 nChannel)
+{
+}
+
+int8 cSampleManager::AutoDetect3DProviders()
+{
+	return -1;
 }
 
 #endif

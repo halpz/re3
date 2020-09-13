@@ -4,6 +4,7 @@
 #include "Text.h"
 #include "World.h"
 #include "Pad.h"
+#include "DMAudio.h"
 
 #include <climits>
 
@@ -102,7 +103,7 @@ float CStats::LongestWheelieDist;
 float CStats::LongestStoppieDist;
 float CStats::Longest2WheelDist;
 
-// --MIAMI: functions below are done except TODOs, but there are some to be moved from Frontend
+// --MIAMI: functions below are done, but there are some to be moved from Frontend
 
 void CStats::Init()
 {
@@ -198,9 +199,7 @@ void CStats::Init()
 	NoMoreHurricanes = 0;
 	ShowChaseStatOnScreen = 0;
 	abSonyCDs[0] = 0;
-	// TODO(Miami): Change this with PopulateFavoriteRadioStationList(); !!
-	for (int i = 0; i < NUM_RADIOS; i++)
-		FavoriteRadioStationList[i] = 0.0f;
+	PopulateFavoriteRadioStationList();
 
 	NumPropertyOwned = 0;
 	for (int i = 0; i < TOTAL_PROPERTIES; i++)
@@ -471,6 +470,11 @@ void CStats::AddPropertyAsOwned(int32 id)
 	}
 }
 
+float CStats::GetFavoriteRadioStationList(int32 station)
+{
+	return FavoriteRadioStationList[station];
+}
+
 void CStats::SaveStats(uint8 *buf, uint32 *size)
 {
 	CheckPointReachedSuccessfully();
@@ -652,7 +656,7 @@ void CStats::SaveStats(uint8 *buf, uint32 *size)
 	CopyToBuf(buf, TotalLegitimateKills);
 	CopyToBuf(buf, LastMissionPassedName);
 	CopyToBuf(buf, CheatedCount);
-	// TODO(Miami): Set favourite radio stations!!
+	PopulateFavoriteRadioStationList();
 	CopyToBuf(buf, FavoriteRadioStationList);
 
 	assert(buf - buf_start == *size);
@@ -756,4 +760,12 @@ void CStats::LoadStats(uint8 *buf, uint32 size)
 
 	assert(buf - buf_start == size);
 #undef CopyFromBuf
+}
+
+void
+CStats::PopulateFavoriteRadioStationList()
+{
+	float* pListenTimeArray = DMAudio.GetListenTimeArray();
+	for (int i = 0; i < NUM_RADIOS; i++)
+		FavoriteRadioStationList[i] = pListenTimeArray[i];
 }
