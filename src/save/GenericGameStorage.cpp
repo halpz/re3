@@ -41,7 +41,7 @@
 #include "Fluff.h"
 
 #define BLOCK_COUNT 20
-#define SIZE_OF_SIMPLEVARS 0xD4
+#define SIZE_OF_SIMPLEVARS 0xFC
 
 const uint32 SIZE_OF_ONE_GAME_IN_BYTES = 201729;
 
@@ -66,6 +66,28 @@ bool JustLoadedDontFadeInYet;
 bool StillToFadeOut;
 uint32 TimeStartedCountingForFade;
 uint32 TimeToStayFadedBeforeFadeOut = 1750;
+
+uint32 RadioStationPosition[NUM_RADIOS];
+
+void
+InitRadioStationPositionList()
+{
+	for (int i = 0; i < NUM_RADIOS; i++)
+		RadioStationPosition[i] = 0;
+}
+
+uint32
+GetSavedRadioStationPosition(int32 station)
+{
+	return RadioStationPosition[station];
+}
+
+void
+PopulateRadioStationPositionList()
+{
+	for (int i = 0; i < NUM_RADIOS; i++)
+		RadioStationPosition[i] = DMAudio.GetRadioPosition(i);
+}
 
 #define ReadDataFromBufferPointer(buf, to) memcpy(&to, buf, sizeof(to)); buf += align4bytes(sizeof(to));
 #define WriteDataToBufferPointer(buf, from) memcpy(buf, &from, sizeof(from)); buf += align4bytes(sizeof(from));
@@ -197,6 +219,8 @@ GenericSave(int file)
 	WriteDataToBufferPointer(buf, CTimeCycle::m_ExtraColour);
 	WriteDataToBufferPointer(buf, CTimeCycle::m_bExtraColourOn);
 	WriteDataToBufferPointer(buf, CTimeCycle::m_ExtraColourInter);
+	PopulateRadioStationPositionList();
+	WriteDataToBufferPointer(buf, RadioStationPosition);
 	assert(buf - work_buff == SIZE_OF_SIMPLEVARS);
 
 	// Save scripts, block is nested within the same block as simple vars for some reason
@@ -334,6 +358,7 @@ GenericLoad()
 	ReadDataFromBufferPointer(buf, CTimeCycle::m_ExtraColour);
 	ReadDataFromBufferPointer(buf, CTimeCycle::m_bExtraColourOn);
 	ReadDataFromBufferPointer(buf, CTimeCycle::m_ExtraColourInter);
+	ReadDataFromBufferPointer(buf, RadioStationPosition);
 	assert(buf - work_buff == SIZE_OF_SIMPLEVARS);
 #ifdef MISSION_REPLAY
 	WaitForSave = 0;

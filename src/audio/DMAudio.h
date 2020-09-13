@@ -30,6 +30,7 @@ public:
 	void DestroyAllGameCreatedEntities(void);
 	
 	void SetMonoMode(uint8 mono);
+	void SetMP3BoostVolume(uint8 volume);
 	void SetEffectsMasterVolume(uint8 volume);
 	void SetMusicMasterVolume(uint8 volume);
 	void SetEffectsFadeVol(uint8 volume);
@@ -90,5 +91,13 @@ public:
 	uint8 GetRadioInCar(void);
 	void SetRadioInCar(uint32 radio);
 	void SetRadioChannel(int8 radio, int32 pos);
+
+	void SetStartingTrackPositions(uint8 isStartGame);
+	float *GetListenTimeArray();
+	uint32 GetFavouriteRadioStation();
+	int32 GetRadioPosition(uint32 station);
+	void SetPedTalkingStatus(class CPed *ped, uint8 status);
+	void SetPlayersMood(uint8 mood, int32 time);
+	void ShutUpPlayerTalking(uint8 state);
 };
 extern cDMAudio DMAudio;

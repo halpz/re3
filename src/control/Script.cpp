@@ -11935,7 +11935,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		return 0;
 	case COMMAND_SHUT_CHAR_UP:
 		CollectParameters(&m_nIp, 2);
-		debug("SHUT_CHAR_UP not implemented"); // TODO(MIAMI)
+		DMAudio.SetPedTalkingStatus(CPools::GetPedPool()->GetAt(ScriptParams[0]), ScriptParams[1] == 0);
 		return 0;
 	case COMMAND_SET_ENABLE_RC_DETONATE:
 		CollectParameters(&m_nIp, 1);
@@ -12562,13 +12562,13 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_SHUT_PLAYER_UP:
 	{
 		CollectParameters(&m_nIp, 2);
-		debug("SHUT_PLAYER_UP is not implemented\n"); // TODO(MIAMI)
+		DMAudio.ShutUpPlayerTalking(!!ScriptParams[1]);
 		return 0;
 	}
 	case COMMAND_SET_PLAYER_MOOD:
 	{
 		CollectParameters(&m_nIp, 3);
-		debug("SET_PLAYER_MOOD is not implemented\n"); // TODO(MIAMI)
+		DMAudio.SetPlayersMood(ScriptParams[1], ScriptParams[2]);
 		return 0;
 	}
 	case COMMAND_REQUEST_COLLISION:
@@ -13000,7 +13000,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	}
 	case COMMAND_DISABLE_CUTSCENE_SHADOWS:
 	{
-		debug("DISABLE_CUTSCENE_SHADOWS not implemented, skipping\n"); // TODO(MIAMI)
+		CCutsceneMgr::DisableCutsceneShadows();
 		return 0;
 	}
 	case COMMAND_HAS_GLASS_BEEN_SHATTERED_NEARBY:
@@ -13185,7 +13185,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		return 0;
 	case COMMAND_REMOVE_EVERYTHING_FOR_HUGE_CUTSCENE:
 	{
-		debug("REMOVE_EVERYTHING_FOR_HUGE_CUTSCENE not implemented, skipping\n");
+		CCutsceneMgr::RemoveEverythingFromTheWorldForTheBiggestFuckoffCutsceneEver();
 		return 0;
 	}
 	case COMMAND_IS_PLAYER_TOUCHING_VEHICLE:

@@ -57,4 +57,5 @@ public:
 	static void AttachObjectToFrame(CObject *pObject, CEntity *pAttachTo, const char *frame);
 	static void AttachObjectToBone(CObject *pObject, CObject *pAttachTo, int frame);
 	static void RemoveEverythingFromTheWorldForTheBiggestFuckoffCutsceneEver();
+	static void DisableCutsceneShadows() { ms_useCutsceneShadows = false; }
 };

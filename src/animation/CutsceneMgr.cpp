@@ -657,7 +657,7 @@ CCutsceneMgr::RemoveEverythingFromTheWorldForTheBiggestFuckoffCutsceneEver()
 
 	for (int i = CPools::GetBuildingPool()->GetSize() - 1; i >= 0; i--) {
 		CBuilding* pBuilding = CPools::GetBuildingPool()->GetSlot(i);
-		if (pBuilding && pBuilding->GetClump() != nil && pBuilding->bIsBIGBuilding && pBuilding->bStreamBIGBuilding) {
+		if (pBuilding && pBuilding->m_rwObject != nil && pBuilding->bIsBIGBuilding && pBuilding->bStreamBIGBuilding) {
 			if (pBuilding->bIsBIGBuilding)
 				CStreaming::RequestModel(pBuilding->GetModelIndex(), 0);
 			if (!pBuilding->bImBeingRendered)

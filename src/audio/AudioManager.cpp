@@ -217,6 +217,12 @@ cAudioManager::PlayOneShot(int32 index, int16 sound, float vol)
 }
 
 void
+cAudioManager::SetMP3BoostVolume(uint8 volume) const
+{
+	SampleManager.SetMP3BoostVolume(volume);
+}
+
+void
 cAudioManager::SetEffectsMasterVolume(uint8 volume) const
 {
 	SampleManager.SetEffectsMasterVolume(volume);
@@ -337,6 +343,15 @@ cAudioManager::GetCurrent3DProviderIndex() const
 }
 
 int8
+cAudioManager::AutoDetect3DProviders() const
+{
+	if (m_bIsInitialised)
+		return SampleManager.AutoDetect3DProviders();
+
+	return -1;
+}
+
+int8
 cAudioManager::SetCurrent3DProvider(uint8 which)
 {
 	if (!m_bIsInitialised)
@@ -420,6 +435,7 @@ cAudioManager::IsAudioInitialised() const
 void
 cAudioManager::ServiceSoundEffects()
 {
+	field_5554++;
 	m_bFifthFrameFlag = (m_FrameCounter++ % 5) == 0;
 	if (m_nUserPause && !m_nPreviousUserPause) {
 		for (int32 i = 0; i < allChannels; i++)
