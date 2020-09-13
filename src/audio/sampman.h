@@ -117,15 +117,19 @@ class cSampleManager
 {
 	uint8   m_nEffectsVolume;
 	uint8   m_nMusicVolume;
+	uint8   m_nMP3BoostVolume;
 	uint8   m_nEffectsFadeVolume;
 	uint8   m_nMusicFadeVolume;
 	uint8   m_nMonoMode;
-	char	unk;
 	char    m_szCDRomRootPath[80];
 	bool    m_bInitialised;
 	uint8   m_nNumberOfProviders;
 	char   *m_aAudioProviders[MAXPROVIDERS];
 	tSample m_aSamples[TOTAL_AUDIO_SAMPLES];
+	char    m_MiscomPath[260];
+	char    m_SfxPath[260];
+	char    m_StreamedAudioPath[188];
+	void   *m_aChannels[18];
 
 public:
 	
@@ -145,6 +149,8 @@ public:
 	
 	int8 GetCurrent3DProviderIndex(void);
 	int8 SetCurrent3DProvider(uint8 which);
+
+	int8 AutoDetect3DProviders();
 	
 	bool IsMP3RadioChannelAvailable(void);
 	
@@ -165,6 +171,7 @@ public:
 
 	void SetEffectsMasterVolume(uint8 nVolume);
 	void SetMusicMasterVolume  (uint8 nVolume);
+	void SetMP3BoostVolume     (uint8 nVolume);
 	void SetEffectsFadeVolume  (uint8 nVolume);
 	void SetMusicFadeVolume    (uint8 nVolume);
 	void SetMonoMode           (uint8 nMode);
@@ -213,6 +220,9 @@ public:
 	void  Service(void);
 #endif
 	bool  InitialiseSampleBanks(void);
+
+	uint8 GetMusicVolume() const { return m_nMusicVolume;  }
+	void SetStreamedFileLoopFlag(uint8 nLoopFlag, uint8 nStream);
 };
 
 extern cSampleManager SampleManager;

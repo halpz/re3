@@ -293,6 +293,18 @@ cAudioManager::CalculateDistance(bool &distCalculated, float dist)
 	}
 }
 
+CVehicle *cAudioManager::FindVehicleOfPlayer()
+{
+	CVehicle* vehicle = FindPlayerVehicle();
+	CPlayerPed* ped = FindPlayerPed();
+	if (vehicle == nil && ped != nil) {
+		CEntity *attachedTo = ped->m_attachedTo;
+		if (attachedTo && attachedTo->IsVehicle())
+			vehicle = (CVehicle*)attachedTo;
+	}
+	return vehicle;
+}
+
 void
 cAudioManager::ProcessSpecial()
 {
@@ -3813,6 +3825,25 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			}
 		}
 	}
+}
+
+void
+cAudioManager::SetPedTalkingStatus(CPed *ped, uint8 status)
+{
+	if (ped != nil)
+		ped->m_canTalk = status;
+}
+
+void
+cAudioManager::SetPlayersMood(uint8 mood, int32 time)
+{
+	if (!m_bIsInitialised) return;
+
+	if (mood < MAX_PLAYER_MOODS) {
+		m_nPlayerMood = mood;
+		m_nPlayerMoodTimer = CTimer::GetTimeInMilliseconds() + time;
+	}
+
 }
 
 void

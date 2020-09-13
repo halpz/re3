@@ -131,6 +131,7 @@ uint32     nNumMP3s;
 CStream    *aStream[MAX_STREAMS];
 uint8      nStreamPan   [MAX_STREAMS];
 uint8      nStreamVolume[MAX_STREAMS];
+uint8      nStreamLoopedFlag[MAX_STREAMS];
 
 ///////////////////////////////////////////////////////////////
 //	Env		Size	Diffus	Room	RoomHF	RoomLF	DecTm	DcHF	DcLF	Refl	RefDel	Ref Pan				Revb	RevDel		Rev Pan				EchTm	EchDp	ModTm	ModDp	AirAbs	HFRef		LFRef	RRlOff	FLAGS
@@ -468,6 +469,38 @@ int8 cSampleManager::SetCurrent3DProvider(uint8 nProvider)
 		return curprovider;
 }
 
+int8
+cSampleManager::AutoDetect3DProviders()
+{
+	if (!AudioManager.IsAudioInitialised())
+		return -1;
+
+	int eax = -1, eax2 = -1, eax3 = -1, ds3dh = -1, ds3ds = -1;
+
+	for (uint32 i = 0; i < GetNum3DProvidersAvailable(); i++)
+	{
+		char* providername = Get3DProviderName(i);
+
+		if (!strcasecmp(providername, "OPENAL SOFT")) {
+			SetCurrent3DProvider(i);
+			if (GetCurrent3DProviderIndex() == i)
+				return i;
+		}
+	}
+
+	if (eax3 != -1)
+		return eax3;
+	if (eax2 != -1)
+		return eax2;
+	if (eax != -1)
+		return eax;
+	if (ds3dh != -1)
+		return ds3dh;
+	if (ds3ds != -1)
+		return ds3ds;
+	return -1;
+}
+
 bool
 cSampleManager::IsMP3RadioChannelAvailable(void)
 {
@@ -727,6 +760,12 @@ void
 cSampleManager::SetMusicMasterVolume(uint8 nVolume)
 {
 	m_nMusicVolume = nVolume;
+}
+
+void
+cSampleManager::SetMP3BoostVolume(uint8 nVolume)
+{
+	m_nMP3BoostVolume = nVolume;
 }
 
 void
@@ -1466,6 +1505,13 @@ cSampleManager::InitialiseSampleBanks(void)
 	nSampleBankSize[SAMPLEBANK_PED]  = _nSampleDataEndOffset                      - nSampleBankDiscStartOffset[SAMPLEBANK_PED];
 
 	return true;
+}
+
+void
+cSampleManager::SetStreamedFileLoopFlag(uint8 nLoopFlag, uint8 nChannel)
+{
+	if (m_bInitialised)
+		nStreamLoopedFlag[nChannel] = nLoopFlag;
 }
 
 #endif

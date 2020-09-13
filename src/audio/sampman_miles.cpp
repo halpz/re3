@@ -61,6 +61,7 @@ char _mp3DirectoryPath[MAX_PATH];
 HSTREAM mp3Stream [MAX_STREAMS];
 int8 nStreamPan   [MAX_STREAMS];
 int8 nStreamVolume[MAX_STREAMS];
+uint8 nStreamLoopedFlag[MAX_STREAMS];
 uint32 _CurMP3Index;
 int32 _CurMP3Pos;
 bool _bIsMp3Active;
@@ -405,6 +406,63 @@ cSampleManager::SetCurrent3DProvider(uint8 nProvider)
 	}
 	else
 		return curprovider;
+}
+
+int8
+cSampleManager::AutoDetect3DProviders()
+{
+	if (!AudioManager.IsAudioInitialised())
+		return -1;
+
+	int eax = -1, eax2 = -1, eax3 = -1, ds3dh = -1, ds3ds = -1;
+
+	for (uint32 i = 0; i < GetNum3DProvidersAvailable(); i++)
+	{
+		char* providername = Get3DProviderName(i);
+
+		if (!strcasecmp(providername, "CREATIVE LABS EAX (TM)")) {
+			AudioManager.SetCurrent3DProvider(i);
+			if (GetCurrent3DProviderIndex() == i)
+				eax = i;
+		}
+
+		if (!strcasecmp(providername, "CREATIVE LABS EAX 2 (TM)")) {
+			AudioManager.SetCurrent3DProvider(i);
+			if (GetCurrent3DProviderIndex() == i)
+				eax2 = i;
+		}
+
+		if (!strcasecmp(providername, "CREATIVE LABS EAX 3 (TM)")) {
+			AudioManager.SetCurrent3DProvider(i);
+			if (GetCurrent3DProviderIndex() == i) {
+				eax3 = i;
+			}
+		}
+
+		if (!strcasecmp(providername, "DIRECTSOUND3D HARDWARE SUPPORT")) {
+			AudioManager.SetCurrent3DProvider(i);
+			if (GetCurrent3DProviderIndex() == i)
+				ds3dh = i;
+		}
+
+		if (!strcasecmp(providername, "DIRECTSOUND3D SOFTWARE EMULATION")) {
+			AudioManager.SetCurrent3DProvider(i);
+			if (GetCurrent3DProviderIndex() == i)
+				ds3ds = i;
+		}
+	}
+
+	if (eax3 != -1)
+		return eax3;
+	if (eax2 != -1)
+		return eax2;
+	if (eax != -1)
+		return eax;
+	if (ds3dh != -1)
+		return ds3dh;
+	if (ds3ds != -1)
+		return ds3ds;
+	return -1;
 }
 
 static bool
@@ -1456,6 +1514,12 @@ cSampleManager::SetMusicMasterVolume(uint8 nVolume)
 }
 
 void
+cSampleManager::SetMP3BoostVolume(uint8 nVolume)
+{
+	m_nMP3BoostVolume = nVolume;
+}
+
+void
 cSampleManager::SetEffectsFadeVolume(uint8 nVolume)
 {
 	m_nEffectsFadeVolume = nVolume;
@@ -2132,7 +2196,8 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 							    AIL_open_stream(DIG, filename, 0);
 							if(mp3Stream[nStream]) {
 								AIL_set_stream_loop_count(
-								    mp3Stream[nStream], 1);
+								    mp3Stream[nStream], nStreamLoopedFlag[nStream] ? 0 : 1);
+								nStreamLoopedFlag[nStream] = true;
 								AIL_set_stream_ms_position(
 								    mp3Stream[nStream], position);
 								AIL_pause_stream(mp3Stream[nStream],
@@ -2385,6 +2450,14 @@ cSampleManager::InitialiseSampleBanks(void)
 	nSampleBankSize[SAMPLEBANK_PED] = _nSampleDataEndOffset                       - nSampleBankDiscStartOffset[SAMPLEBANK_PED];
 	
 	return true;
+}
+
+
+void
+cSampleManager::SetStreamedFileLoopFlag(uint8 nLoopFlag, uint8 nChannel)
+{
+	if (m_bInitialised)
+		nStreamLoopedFlag[nChannel] = nLoopFlag;
 }
 
 #endif

@@ -282,12 +282,12 @@ class CTheScripts
 	static uint8 UseTextCommands;
 	static uint16 CommandsExecuted;
 	static uint16 ScriptsUpdated;
-	static uint8 RiotIntensity;
 	static uint32 LastMissionPassedTime;
 	static uint16 NumberOfExclusiveMissionScripts;
 	static bool bPlayerIsInTheStatium;
+public:
+	static uint8 RiotIntensity;
 	static bool bPlayerHasMetDebbieHarry;
-
 public:
 	static void Init();
 	static void Process();
