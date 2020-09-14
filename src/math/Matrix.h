@@ -7,28 +7,22 @@ public:
 	RwMatrix *m_attachment;
 	bool m_hasRwMatrix;	// are we the owner?
 
-	CMatrix(void){
-		m_attachment = nil;
-		m_hasRwMatrix = false;
-	}
-	CMatrix(CMatrix const &m){
-		m_attachment = nil;
-		m_hasRwMatrix = false;
-		*this = m;
-	}
-	CMatrix(RwMatrix *matrix, bool owner = false){
-		m_attachment = nil;
-		Attach(matrix, owner);
-	}
+	CMatrix(void);
+	CMatrix(CMatrix const &m);
+	CMatrix(RwMatrix *matrix, bool owner = false);
 	CMatrix(float scale){
 		m_attachment = nil;
 		m_hasRwMatrix = false;
 		SetScale(scale);
 	}
-	~CMatrix(void){
-		if(m_hasRwMatrix && m_attachment)
-			RwMatrixDestroy(m_attachment);
-	}
+	~CMatrix(void);
+	void Attach(RwMatrix *matrix, bool owner = false);
+	void AttachRW(RwMatrix *matrix, bool owner = false);
+	void Detach(void);
+	void Update(void);
+	void UpdateRW(void);
+	void operator=(CMatrix const &rhs);
+	CMatrix &operator+=(CMatrix const &rhs);
 #ifdef RWCORE_H
 	operator RwMatrix (void) const {
 		return m_matrix;
@@ -38,59 +32,7 @@ public:
 		return &m_matrix;
 	}
 #endif
-	void Attach(RwMatrix *matrix, bool owner = false){
-#ifdef FIX_BUGS
-		if(m_attachment && m_hasRwMatrix)
-#else
-		if(m_hasRwMatrix && m_attachment)
-#endif
-			RwMatrixDestroy(m_attachment);
-		m_attachment = matrix;
-		m_hasRwMatrix = owner;
-		Update();
-	}
-	void AttachRW(RwMatrix *matrix, bool owner = false){
-		if(m_hasRwMatrix && m_attachment)
-			RwMatrixDestroy(m_attachment);
-		m_attachment = matrix;
-		m_hasRwMatrix = owner;
-		UpdateRW();
-	}
-	void Detach(void){
-		if(m_hasRwMatrix && m_attachment)
-			RwMatrixDestroy(m_attachment);
-		m_attachment = nil;
-	}
-	void Update(void){
-		m_matrix = *m_attachment;
-	}
-	void UpdateRW(void){
-		if(m_attachment){
-			*m_attachment = m_matrix;
-			RwMatrixUpdate(m_attachment);
-		}
-	}
-	void operator=(CMatrix const &rhs){
-		m_matrix = rhs.m_matrix;
-		if(m_attachment)
-			UpdateRW();
-	}
-	CMatrix& operator+=(CMatrix const &rhs){
-		m_matrix.right.x += rhs.m_matrix.right.x;
-		m_matrix.up.x += rhs.m_matrix.up.x;
-		m_matrix.at.x += rhs.m_matrix.at.x;
-		m_matrix.right.y += rhs.m_matrix.right.y;
-		m_matrix.up.y += rhs.m_matrix.up.y;
-		m_matrix.at.y += rhs.m_matrix.at.y;
-		m_matrix.right.z += rhs.m_matrix.right.z;
-		m_matrix.up.z += rhs.m_matrix.up.z;
-		m_matrix.at.z += rhs.m_matrix.at.z;
-		m_matrix.pos.x += rhs.m_matrix.pos.x;
-		m_matrix.pos.y += rhs.m_matrix.pos.y;
-		m_matrix.pos.z += rhs.m_matrix.pos.z;
-		return *this;
-	}
-	CMatrix& operator*=(CMatrix const &rhs);
+	CMatrix &operator*=(CMatrix const &rhs);
 
 	const CVector &GetPosition(void) const { return *(CVector*)&m_matrix.pos; }
 	CVector& GetPosition(void) { return *(CVector*)&m_matrix.pos; }
@@ -98,23 +40,7 @@ public:
 	CVector &GetForward(void) { return *(CVector*)&m_matrix.up; }
 	CVector &GetUp(void) { return *(CVector*)&m_matrix.at; }
 
-	void SetTranslate(float x, float y, float z){
-		m_matrix.right.x = 1.0f;
-		m_matrix.right.y = 0.0f;
-		m_matrix.right.z = 0.0f;
-
-		m_matrix.up.x = 0.0f;
-		m_matrix.up.y = 1.0f;
-		m_matrix.up.z = 0.0f;
-
-		m_matrix.at.x = 0.0f;
-		m_matrix.at.y = 0.0f;
-		m_matrix.at.z = 1.0f;
-
-		m_matrix.pos.x = x;
-		m_matrix.pos.y = y;
-		m_matrix.pos.z = z;
-	}
+	void SetTranslate(float x, float y, float z);
 	void SetTranslate(const CVector &trans){ SetTranslate(trans.x, trans.y, trans.z); }
 	void Translate(float x, float y, float z){
 		m_matrix.pos.x += x;
@@ -123,23 +49,7 @@ public:
 	}
 	void Translate(const CVector &trans){ Translate(trans.x, trans.y, trans.z); }
 
-	void SetScale(float s){
-		m_matrix.right.x = s;
-		m_matrix.right.y = 0.0f;
-		m_matrix.right.z = 0.0f;
-
-		m_matrix.up.x = 0.0f;
-		m_matrix.up.y = s;
-		m_matrix.up.z = 0.0f;
-
-		m_matrix.at.x = 0.0f;
-		m_matrix.at.y = 0.0f;
-		m_matrix.at.z = s;
-
-		m_matrix.pos.x = 0.0f;
-		m_matrix.pos.y = 0.0f;
-		m_matrix.pos.z = 0.0f;
-	}
+	void SetScale(float s);
 	void Scale(float scale)
 	{
 		float *pFloatMatrix = (float*)&m_matrix;
@@ -158,66 +68,9 @@ public:
 	}
 
 
-	void SetRotateXOnly(float angle){
-		float c = Cos(angle);
-		float s = Sin(angle);
-
-		m_matrix.right.x = 1.0f;
-		m_matrix.right.y = 0.0f;
-		m_matrix.right.z = 0.0f;
-
-		m_matrix.up.x = 0.0f;
-		m_matrix.up.y = c;
-		m_matrix.up.z = s;
-
-		m_matrix.at.x = 0.0f;
-		m_matrix.at.y = -s;
-		m_matrix.at.z = c;
-	}
-	void SetRotateX(float angle){
-		SetRotateXOnly(angle);
-		m_matrix.pos.x = 0.0f;
-		m_matrix.pos.y = 0.0f;
-		m_matrix.pos.z = 0.0f;
-	}
-	void SetRotateYOnly(float angle){
-		float c = Cos(angle);
-		float s = Sin(angle);
-
-		m_matrix.right.x = c;
-		m_matrix.right.y = 0.0f;
-		m_matrix.right.z = -s;
-
-		m_matrix.up.x = 0.0f;
-		m_matrix.up.y = 1.0f;
-		m_matrix.up.z = 0.0f;
-
-		m_matrix.at.x = s;
-		m_matrix.at.y = 0.0f;
-		m_matrix.at.z = c;
-	}
-	void SetRotateY(float angle){
-		SetRotateYOnly(angle);
-		m_matrix.pos.x = 0.0f;
-		m_matrix.pos.y = 0.0f;
-		m_matrix.pos.z = 0.0f;
-	}
-	void SetRotateZOnly(float angle){
-		float c = Cos(angle);
-		float s = Sin(angle);
-
-		m_matrix.right.x = c;
-		m_matrix.right.y = s;
-		m_matrix.right.z = 0.0f;
-
-		m_matrix.up.x = -s;
-		m_matrix.up.y = c;
-		m_matrix.up.z = 0.0f;
-
-		m_matrix.at.x = 0.0f;
-		m_matrix.at.y = 0.0f;
-		m_matrix.at.z = 1.0f;
-	}
+	void SetRotateXOnly(float angle);
+	void SetRotateYOnly(float angle);
+	void SetRotateZOnly(float angle);
 	void SetRotateZOnlyScaled(float angle, float scale) {
 		float c = Cos(angle);
 		float s = Sin(angle);
@@ -234,12 +87,9 @@ public:
 		m_matrix.at.y = 0.0f;
 		m_matrix.at.z = scale;
 	}
-	void SetRotateZ(float angle){
-		SetRotateZOnly(angle);
-		m_matrix.pos.x = 0.0f;
-		m_matrix.pos.y = 0.0f;
-		m_matrix.pos.z = 0.0f;
-	}
+	void SetRotateX(float angle);
+	void SetRotateY(float angle);
+	void SetRotateZ(float angle);
 	void SetRotate(float xAngle, float yAngle, float zAngle);
 	void Rotate(float x, float y, float z);
 	void RotateX(float x);
@@ -247,9 +97,9 @@ public:
 	void RotateZ(float z);
 
 	void Reorthogonalise(void);
-	void CopyOnlyMatrix(CMatrix *other){
-		m_matrix = other->m_matrix;
-	}
+	void CopyOnlyMatrix(CMatrix *other);
+	void SetUnity(void);
+	void ResetOrientation(void);
 	void CopyRwMatrix(RwMatrix *matrix){
 		m_matrix = *matrix;
 	}
@@ -259,31 +109,6 @@ public:
 		RwMatrixUpdate(matrix);
 	}
 	
-	void SetUnity(void) {
-		m_matrix.right.x = 1.0f;
-		m_matrix.right.y = 0.0f;
-		m_matrix.right.z = 0.0f;
-		m_matrix.up.x = 0.0f;
-		m_matrix.up.y = 1.0f;
-		m_matrix.up.z = 0.0f;
-		m_matrix.at.x = 0.0f;
-		m_matrix.at.y = 0.0f;
-		m_matrix.at.z = 1.0f;
-		m_matrix.pos.x = 0.0f;
-		m_matrix.pos.y = 0.0f;
-		m_matrix.pos.z = 0.0f;
-	}
-	void ResetOrientation(void) {
-		m_matrix.right.x = 1.0f;
-		m_matrix.right.y = 0.0f;
-		m_matrix.right.z = 0.0f;
-		m_matrix.up.x = 0.0f;
-		m_matrix.up.y = 1.0f;
-		m_matrix.up.z = 0.0f;
-		m_matrix.at.x = 0.0f;
-		m_matrix.at.y = 0.0f;
-		m_matrix.at.z = 1.0f;
-	}
 	void SetTranslateOnly(float x, float y, float z) {
 		m_matrix.pos.x = x;
 		m_matrix.pos.y = y;
@@ -292,11 +117,12 @@ public:
 	void SetTranslateOnly(const CVector& pos) {
 		SetTranslateOnly(pos.x, pos.y, pos.z);
 	}
+	void CheckIntegrity(){}
 };
 
 
 CMatrix &Invert(const CMatrix &src, CMatrix &dst);
-CVector operator*(const CMatrix &mat, const CVector &vec);
+CMatrix Invert(const CMatrix &matrix);
 CMatrix operator*(const CMatrix &m1, const CMatrix &m2);
 inline CVector MultiplyInverse(const CMatrix &mat, const CVector &vec)
 {
@@ -307,15 +133,6 @@ inline CVector MultiplyInverse(const CMatrix &mat, const CVector &vec)
 		mat.m_matrix.at.x * v.x + mat.m_matrix.at.y * v.y + mat.m_matrix.at.z * v.z);
 }
 
-const CVector Multiply3x3(const CMatrix &mat, const CVector &vec);
-const CVector Multiply3x3(const CVector &vec, const CMatrix &mat);
-
-inline CMatrix
-Invert(const CMatrix &matrix)
-{
-	CMatrix inv;
-	return Invert(matrix, inv);
-}
 
 
 class CCompressedMatrixNotAligned
@@ -328,28 +145,8 @@ class CCompressedMatrixNotAligned
 	int8 m_upY;
 	int8 m_upZ;
 public:
-	void CompressFromFullMatrix(CMatrix &other)
-	{
-		m_rightX = 127.0f * other.GetRight().x;
-		m_rightY = 127.0f * other.GetRight().y;
-		m_rightZ = 127.0f * other.GetRight().z;
-		m_upX = 127.0f * other.GetForward().x;
-		m_upY = 127.0f * other.GetForward().y;
-		m_upZ = 127.0f * other.GetForward().z;
-		m_vecPos = other.GetPosition();
-	}
-	void DecompressIntoFullMatrix(CMatrix &other)
-	{
-		other.GetRight().x = m_rightX / 127.0f;
-		other.GetRight().y = m_rightY / 127.0f;
-		other.GetRight().z = m_rightZ / 127.0f;
-		other.GetForward().x = m_upX / 127.0f;
-		other.GetForward().y = m_upY / 127.0f;
-		other.GetForward().z = m_upZ / 127.0f;
-		other.GetUp() = CrossProduct(other.GetRight(), other.GetForward());
-		other.GetPosition() = m_vecPos;
-		other.Reorthogonalise();
-	}
+	void CompressFromFullMatrix(CMatrix &other);
+	void DecompressIntoFullMatrix(CMatrix &other);
 };
 
 class CCompressedMatrix : public CCompressedMatrixNotAligned

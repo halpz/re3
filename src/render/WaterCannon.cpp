@@ -140,8 +140,7 @@ void CWaterCannon::Render(void)
 			if ( !bInit )
 			{
 				CVector cp = CrossProduct(m_avecPos[pointB] - m_avecPos[pointA], TheCamera.GetForward());
-				cp.Normalise(0.05f);
-				norm = cp;
+				norm = cp * (0.05f / cp.Magnitude());
 				bInit = true;
 			}
 			
