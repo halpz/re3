@@ -321,7 +321,6 @@ public:
 #endif
 	bool ProcessCarBombTick(cVehicleParams *params);
 	void ProcessCesna(cVehicleParams *params);
-	void ProcessPlayersVehicleEngine1(cVehicleParams* params, CVehicle* veh);
 	//void ProcessCrane();
 	bool ProcessEngineDamage(cVehicleParams *params);
 	void ProcessEntity(int32 sound);
@@ -347,7 +346,7 @@ public:
 	void ProcessPedOneShots(cPedParams *params);
 	void ProcessPhysical(int32 id);
 	void ProcessPlane(cVehicleParams *params);
-	void ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *automobile);
+	void ProcessPlayersVehicleEngine(cVehicleParams *params, CVehicle* veh);
 	void ProcessProjectiles();
 	void ProcessRainOnVehicle(cVehicleParams *params);
 	void ProcessReverb() const;
