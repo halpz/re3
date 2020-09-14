@@ -11,7 +11,13 @@ public:
 	float Magnitude(void) const { return Sqrt(x*x + y*y); }
 	float MagnitudeSqr(void) const { return x*x + y*y; }
 
-	void Normalise(void);
+	void Normalise(void) {
+		float sq = MagnitudeSqr();
+		// assert(sq != 0.0f);	// just be safe here
+		float invsqrt = RecipSqrt(sq);
+		x *= invsqrt;
+		y *= invsqrt;
+	}
 
 	void NormaliseSafe(void) {
 		float sq = MagnitudeSqr();
@@ -20,7 +26,7 @@ public:
 			x *= invsqrt;
 			y *= invsqrt;
 		}else
-			y = 1.0f;
+			x = 1.0f;
 	}
 
 	const CVector2D &operator+=(CVector2D const &right) {

@@ -24,24 +24,7 @@ public:
 	float MagnitudeSqr(void) const { return x*x + y*y + z*z; }
 	float Magnitude2D(void) const { return Sqrt(x*x + y*y); }
 	float MagnitudeSqr2D(void) const { return x*x + y*y; }
-	void Normalise(void) {
-		float sq = MagnitudeSqr();
-		if(sq > 0.0f){
-			float invsqrt = RecipSqrt(sq);
-			x *= invsqrt;
-			y *= invsqrt;
-			z *= invsqrt;
-		}else
-			x = 1.0f;
-	}
-	
-	void Normalise(float norm) {
-		float sq = MagnitudeSqr();
-		float invsqrt = RecipSqrt(norm, sq);
-		x *= invsqrt;
-		y *= invsqrt;
-		z *= invsqrt;
-	}
+	void Normalise(void);
 	
 	void Normalise2D(void) {
 		float sq = MagnitudeSqr2D();
@@ -124,17 +107,16 @@ DotProduct(const CVector &v1, const CVector &v2)
 	return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
 }
 
-inline const CVector
-CrossProduct(const CVector &v1, const CVector &v2)
-{
-	return CVector(
-		v1.y*v2.z - v1.z*v2.y,
-		v1.z*v2.x - v1.x*v2.z,
-		v1.x*v2.y - v1.y*v2.x);
-}
+CVector CrossProduct(const CVector &v1, const CVector &v2);
 
 inline float
 Distance(const CVector &v1, const CVector &v2)
 {
 	return (v2 - v1).Magnitude();
 }
+
+class CMatrix;
+
+CVector Multiply3x3(const CMatrix &mat, const CVector &vec);
+CVector Multiply3x3(const CVector &vec, const CMatrix &mat);
+CVector operator*(const CMatrix &mat, const CVector &vec);
