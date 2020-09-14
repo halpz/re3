@@ -18,7 +18,7 @@ public:
 			x *= invsqrt;
 			y *= invsqrt;
 		}else
-			y = 1.0f;
+			x = 1.0f;
 	}
 
 	const CVector2D &operator+=(CVector2D const &right) {

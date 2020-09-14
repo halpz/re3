@@ -700,7 +700,7 @@ CGlass::WindowRespondsToExplosion(CEntity *entity, CVector point)
 
 	if ( fDistToGlass < 10.0f )
 	{
-		distToGlass.Normalise(0.3f);
+		distToGlass *= (0.3f / fDistToGlass); // normalise
 		WindowRespondsToCollision(object, 10000.0f, distToGlass, object->GetPosition(), true);
 	}
 	else
