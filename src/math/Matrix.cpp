@@ -327,14 +327,14 @@ CMatrix::RotateY(float y)
 	float px = m_matrix.pos.x;
 	float pz = m_matrix.pos.z;
 
-	m_matrix.right.x = c * rx - s * rz;
-	m_matrix.right.z = c * rz + s * rx;
-	m_matrix.up.x = c * ux - s * uz;
-	m_matrix.up.z = c * uz + s * ux;
-	m_matrix.at.x = c * ax - s * az;
-	m_matrix.at.z = c * az + s * ax;
-	m_matrix.pos.x = c * px - s * pz;
-	m_matrix.pos.z = c * pz + s * px;
+	m_matrix.right.x = c * rx + s * rz;
+	m_matrix.right.z = c * rz - s * rx;
+	m_matrix.up.x = c * ux + s * uz;
+	m_matrix.up.z = c * uz - s * ux;
+	m_matrix.at.x = c * ax + s * az;
+	m_matrix.at.z = c * az - s * ax;
+	m_matrix.pos.x = c * px + s * pz;
+	m_matrix.pos.z = c * pz - s * px;
 }
 
 void
