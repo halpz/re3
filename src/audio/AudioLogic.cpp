@@ -697,131 +697,148 @@ const bool hornPatternsArray[8][44] = {
      false, false, false, false, true, true, true,  true,  true, true, true, true, true, true,  true,  true,  true, false, false, false, false, false},
 };
 
-
-void
-cAudioManager::ProcessVehicle(CVehicle *veh)
+void cAudioManager::ProcessVehicle(CVehicle* veh)
 {
-	tHandlingData *handling = veh->pHandling;
-	float velChange;
+	CPlayerPed* player;
+	CVehicle* playerVeh;
+	CEntity* attachedTo;
 	cVehicleParams params;
-	m_sQueueSample.m_vecPos = veh->GetPosition();
+	CBike* bike;
+	CAutomobile* automobile;
+	float gasPedal;
 
-	float gas;
-	float gasPedalAudio;
-	float tmp;
-
-	params.m_bDistanceCalculated = false;
-	params.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
-	params.m_pVehicle = veh;
-	params.m_pTransmission = nil;
-	params.m_nIndex = 0;
-	params.m_fVelocityChange = 0.0f;
-
-	if (handling != nil)
-		params.m_pTransmission = &handling->Transmission;
-
-	params.m_nIndex = veh->GetModelIndex() - MI_FIRST_VEHICLE;
-	if (params.m_pVehicle->GetStatus() == STATUS_SIMPLE)
-		velChange = params.m_pVehicle->AutoPilot.m_fMaxTrafficSpeed * 0.02f;
-	else
-		velChange = DotProduct(params.m_pVehicle->m_vecMoveSpeed, params.m_pVehicle->GetForward());
-	params.m_fVelocityChange = velChange;
-	params.m_VehicleType = params.m_pVehicle->m_vehType;
-	switch (params.m_pVehicle->m_vehType) {
-	case VEHICLE_TYPE_CAR:
-		UpdateGasPedalAudio((CAutomobile *)veh);
-		if (params.m_nIndex == RCBANDIT) {
-			ProcessModelCarEngine(&params);
+	//44-58
+	player = FindPlayerPed();
+	playerVeh = FindPlayerVehicle();
+	if (playerVeh == NULL && player != NULL) {
+		attachedTo = player->m_attachedTo;
+		if (attachedTo != NULL && attachedTo->GetType() == ENTITY_TYPE_VEHICLE)
+			playerVeh = (CVehicle*)attachedTo;
+	}
+	if (playerVeh == veh
+		|| CGame::currArea == AREA_OVALRING
+		|| CGame::currArea == AREA_BLOOD
+		|| CGame::currArea == AREA_DIRT
+		|| CGame::currArea == AREA_EVERYWHERE
+		|| CGame::currArea == AREA_MALL
+		|| CGame::currArea == AREA_MAIN_MAP) {
+		//62-84
+		m_sQueueSample.m_vecPos = veh->GetPosition();
+		params.m_bDistanceCalculated = false;
+		params.m_pVehicle = veh;
+		params.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
+		params.m_pTransmission = veh->pHandling != NULL ? &veh->pHandling->Transmission : NULL;
+		params.m_nIndex = veh->m_modelIndex - MI_FIRST_VEHICLE;
+		if (veh->GetStatus() == STATUS_SIMPLE)
+			params.m_fVelocityChange = veh->AutoPilot.m_fMaxTrafficSpeed * 0.02f;
+		else
+			params.m_fVelocityChange = DotProduct(veh->m_vecMoveSpeed, veh->GetForward());
+		params.m_VehicleType = veh->m_vehType;
+		
+		if (CGame::currArea == AREA_MALL && playerVeh != veh) {
 			ProcessVehicleOneShots(&params);
-			((CAutomobile *)veh)->m_fVelocityChangeForAudio = params.m_fVelocityChange;
+			ProcessVehicleSirenOrAlarm(&params);
+			ProcessEngineDamage(&params);
+			return;
+		}
+		//104-
+		switch (params.m_VehicleType) {
+		case VEHICLE_TYPE_CAR://done
+			automobile = (CAutomobile*)veh;
+			UpdateGasPedalAudio(&automobile->m_fGasPedalAudio, automobile->m_fGasPedal);
+			if (veh->m_modelIndex == MI_RCBANDIT || veh->m_modelIndex == MI_RCBARON) {
+				ProcessModelCarEngine(&params);//recheck
+				ProcessEngineDamage(&params);
+			} else if (veh->m_modelIndex == MI_RCRAIDER || veh->m_modelIndex == MI_RCGOBLIN) {
+				//ProcessModelHeliVehicle(this, &params);
+				ProcessEngineDamage(&params);
+			} else {
+				switch (veh->GetVehicleAppearance()) {
+				case VEHICLE_APPEARANCE_HELI:
+					ProcessHelicopter(&params);
+					//ProcessVehicleFlatTyre(&params);
+					ProcessEngineDamage(&params);
+					break;
+				case VEHICLE_APPEARANCE_BOAT:
+				case VEHICLE_APPEARANCE_PLANE:
+					break;
+				default:
+					if (ProcessVehicleRoadNoise(&params)) {
+						ProcessReverseGear(&params);
+						if (CWeather::WetRoads > 0.0)
+							ProcessWetRoadNoise(&params);
+						ProcessVehicleSkidding(&params);
+						//ProcessVehicleFlatTyre(params);
+						ProcessVehicleHorn(&params);
+						ProcessVehicleSirenOrAlarm(&params);
+						if (UsesReverseWarning(params.m_nIndex))
+							ProcessVehicleReverseWarning(&params);
+						if(HasAirBrakes(params.m_nIndex))
+							ProcessAirBrakes(&params);
+						ProcessCarBombTick(&params);
+						ProcessVehicleEngine(&params);
+						ProcessEngineDamage(&params);
+						ProcessVehicleDoors(&params);
+					}
+					break;
+				}
+			}
+			ProcessVehicleOneShots(&params);
+			automobile->m_fVelocityChangeForAudio = params.m_fVelocityChange;
+			break;
+		case VEHICLE_TYPE_BOAT://done
+			if (veh->m_modelIndex == MI_SKIMMER)
+				ProcessHelicopter(&params);
+			else
+				ProcessBoatEngine(&params);
+			ProcessBoatMovingOverWater(&params);
+			ProcessVehicleOneShots(&params);
+			break;
+		case VEHICLE_TYPE_HELI: //done
+			ProcessHelicopter(&params); //TODO recheck
+			ProcessVehicleOneShots(&params);
+			break;
+		case VEHICLE_TYPE_PLANE://done
+			switch (params.m_nIndex) {
+			case AIRTRAIN:
+				ProcessJumbo(&params);//recheck
+				break;
+			case DEADDODO:
+				ProcessCesna(&params);//recheck
+				break;
+			default:
+				break;
+			}
+			ProcessVehicleOneShots(&params);
+			//ProcessVehicleFlatType(&params);
+			break;
+		case VEHICLE_TYPE_BIKE: //done
+			bike = (CBike*)veh;
+			//gasPedal = fabs(veh->m_fGasPedal);
+			//if (gasPedal <= bike->m_fGasPedalAudio)
+			//	bike->m_fGasPedalAudio = Max(bike->m_fGasPedalAudio - 0.07f, gasPedal);
+			//else
+			//	bike->m_fGasPedalAudio = Min(bike->m_fGasPedalAudio + 0.09f, gasPedal);
+			UpdateGasPedalAudio(&bike->m_fGasPedalAudio, bike->m_fGasPedal);
+			if (ProcessVehicleRoadNoise(&params)) {
+				if (CWeather::WetRoads > 0.0f)
+					ProcessWetRoadNoise(&params);
+				ProcessVehicleSkidding(&params);
+				ProcessVehicleHorn(&params);
+				ProcessVehicleSirenOrAlarm(&params);
+				ProcessCarBombTick(&params);
+				ProcessEngineDamage(&params);
+				ProcessVehicleEngine(&params);
+				//ProcessVehicleFlatTyre();
+			}
+			ProcessVehicleOneShots(&params);
+			bike->m_fVelocityChangeForAudio = params.m_fVelocityChange;
+			break;
+		default:
 			break;
 		}
-
-		if (params.m_nIndex == DODO) {
-			if (!ProcessVehicleRoadNoise(&params)) {
-				ProcessVehicleOneShots(&params);
-				((CAutomobile *)veh)->m_fVelocityChangeForAudio = params.m_fVelocityChange;
-				break;
-			}
-			if (CWeather::WetRoads > 0.f)
-				ProcessWetRoadNoise(&params);
-			ProcessVehicleSkidding(&params);
-		} else {
-			if (!ProcessVehicleRoadNoise(&params)) {
-				ProcessVehicleOneShots(&params);
-				((CAutomobile *)veh)->m_fVelocityChangeForAudio = params.m_fVelocityChange;
-				break;
-			}
-			ProcessReverseGear(&params);
-			if (CWeather::WetRoads > 0.f)
-				ProcessWetRoadNoise(&params);
-			ProcessVehicleSkidding(&params);
-			ProcessVehicleHorn(&params);
-			ProcessVehicleSirenOrAlarm(&params);
-			if (UsesReverseWarning(params.m_nIndex))
-				ProcessVehicleReverseWarning(&params);
-			if (HasAirBrakes(params.m_nIndex))
-				ProcessAirBrakes(&params);
-		}
-		ProcessCarBombTick(&params);
-		ProcessVehicleEngine(&params);
-		ProcessEngineDamage(&params);
-		ProcessVehicleDoors(&params);
-
-		ProcessVehicleOneShots(&params);
-		((CAutomobile *)veh)->m_fVelocityChangeForAudio = params.m_fVelocityChange;
-		break;
-	case VEHICLE_TYPE_BOAT:
-		ProcessBoatEngine(&params);
-		ProcessBoatMovingOverWater(&params);
-		ProcessVehicleOneShots(&params);
-		break;
-#ifdef GTA_TRAIN
-	case VEHICLE_TYPE_TRAIN:
-		ProcessTrainNoise(&params);
-		ProcessVehicleOneShots(&params);
-		break;
-#endif
-	case VEHICLE_TYPE_HELI:
-		ProcessHelicopter(&params);
-		ProcessVehicleOneShots(&params);
-		break;
-	case VEHICLE_TYPE_PLANE:
-		ProcessPlane(&params);
-		ProcessVehicleOneShots(&params);
-		break;
-	case VEHICLE_TYPE_BIKE:
-		gas = fabs(params.m_pVehicle->m_fGasPedal);
-		gasPedalAudio = ((CBike*)params.m_pVehicle)->m_fGasPedalAudio;
-		if (gas <= gasPedalAudio) {
-			tmp = gasPedalAudio = 0.07f;
-			if (tmp <= gas)
-				tmp = gas;
-		} else {
-			tmp = gasPedalAudio + 0.09f;
-			if (tmp < gas)
-				tmp = gas;
-		}
-		((CBike*)params.m_pVehicle)->m_fGasPedalAudio = tmp;
-
-		if (ProcessVehicleRoadNoise(&params)) {
-			if (CWeather::WetRoads > 0.0f)
-				ProcessWetRoadNoise(&params);
-			ProcessVehicleSkidding(&params);
-			ProcessVehicleHorn(&params);
-			ProcessVehicleSirenOrAlarm(&params);
-			ProcessCarBombTick(&params);
-			ProcessEngineDamage(&params);
-			ProcessVehicleEngine(&params);
-			//ProcessVehicleFlatTyre();
-		}
-		ProcessVehicleOneShots(&params);
-		((CBike*)veh)->m_fVelocityChangeForAudio = params.m_fVelocityChange;
-		break;
-	default:
-		break;
+		ProcessRainOnVehicle(&params);
 	}
-	ProcessRainOnVehicle(&params);
 }
 
 void
@@ -1227,15 +1244,14 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
 }
 
 void
-cAudioManager::UpdateGasPedalAudio(CAutomobile *automobile)
+cAudioManager::UpdateGasPedalAudio(float* gasPedalAudio, float vehGasPedal)
 {
-	float gasPedal = Abs(automobile->m_fGasPedal);
-	float gasPedalAudio = automobile->m_fGasPedalAudio;
+	float gasPedal = Abs(vehGasPedal);
 
-	if (gasPedalAudio < gasPedal)
-		automobile->m_fGasPedalAudio = Min(gasPedalAudio + 0.09f, gasPedal);
+	if (*gasPedalAudio < gasPedal)
+		*gasPedalAudio = Min(*gasPedalAudio + 0.09f, gasPedal);
 	else
-		automobile->m_fGasPedalAudio = Max(gasPedalAudio - 0.07f, gasPedal);
+		*gasPedalAudio = Max(*gasPedalAudio - 0.07f, gasPedal);
 }
 
 void
@@ -2072,7 +2088,7 @@ cAudioManager::ProcessVehicleSirenOrAlarm(cVehicleParams *params)
 bool
 cAudioManager::UsesReverseWarning(int32 model) const
 {
-	return model == LINERUN || model == FIRETRUK || model == TRASH || model == BUS || model == COACH;
+	return model == LINERUN || model == FIRETRUK || model == BUS || model == COACH || model == PACKER || model == FLATBED;
 }
 
 bool
@@ -2204,7 +2220,8 @@ cAudioManager::ProcessAirBrakes(cVehicleParams *params)
 bool
 cAudioManager::HasAirBrakes(int32 model) const
 {
-	return model == LINERUN || model == FIRETRUK || model == TRASH || model == BUS || model == COACH;
+	return model == LINERUN || model == FIRETRUK || model == TRASH || model == BUS || model == BARRACKS 
+		|| model == COACH || model == PACKER || model == FLATBED;
 }
 
 bool

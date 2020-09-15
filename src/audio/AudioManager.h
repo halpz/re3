@@ -359,6 +359,7 @@ public:
 	void ProcessVehicle(CVehicle *vehicle);
 	bool ProcessVehicleDoors(cVehicleParams *params);
 	void ProcessVehicleEngine(cVehicleParams *params);
+	void UpdateGasPedalAudio(float* gasPedalAudio, float vehGasPedal);
 	void ProcessVehicleHorn(cVehicleParams *params);
 	void ProcessVehicleOneShots(cVehicleParams *params);
 	bool ProcessVehicleReverseWarning(cVehicleParams *params);
@@ -411,7 +412,6 @@ public:
 	void Terminate();
 	void TranslateEntity(Const CVector *v1, CVector *v2) const;
 
-	void UpdateGasPedalAudio(CAutomobile *automobile);
 	void UpdateReflections();
 	bool UsesReverseWarning(int32 model) const;
 	bool UsesSiren(int32 model) const;
