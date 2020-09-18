@@ -37,7 +37,7 @@
 #include "Weather.h"
 #include "ZoneCull.h"
 #include "sampman.h"
-#include <vehicles\Bike.h>
+#include "Bike.h"
 
 
 const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
@@ -709,9 +709,9 @@ void cAudioManager::ProcessVehicle(CVehicle* veh)
 
 	player = FindPlayerPed();
 	playerVeh = FindPlayerVehicle();
-	if (playerVeh == NULL && player != NULL) {
+	if (playerVeh == nil && player != nil) {
 		attachedTo = player->m_attachedTo;
-		if (attachedTo != NULL && attachedTo->GetType() == ENTITY_TYPE_VEHICLE)
+		if (attachedTo != nil && attachedTo->GetType() == ENTITY_TYPE_VEHICLE)
 			playerVeh = (CVehicle*)attachedTo;
 	}
 	if (playerVeh == veh
@@ -725,7 +725,7 @@ void cAudioManager::ProcessVehicle(CVehicle* veh)
 		params.m_bDistanceCalculated = false;
 		params.m_pVehicle = veh;
 		params.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
-		params.m_pTransmission = veh->pHandling != NULL ? &veh->pHandling->Transmission : NULL;
+		params.m_pTransmission = veh->pHandling != nil ? &veh->pHandling->Transmission : nil;
 		params.m_nIndex = veh->m_modelIndex - MI_FIRST_VEHICLE;
 		if (veh->GetStatus() == STATUS_SIMPLE)
 			params.m_fVelocityChange = veh->AutoPilot.m_fMaxTrafficSpeed * 0.02f;
@@ -744,7 +744,7 @@ void cAudioManager::ProcessVehicle(CVehicle* veh)
 			automobile = (CAutomobile*)veh;
 			UpdateGasPedalAudio(&automobile->m_fGasPedalAudio, automobile->m_fGasPedal);
 			if (veh->m_modelIndex == MI_RCBANDIT || veh->m_modelIndex == MI_RCBARON) {
-				ProcessModelCarEngine(&params);//recheck
+				ProcessModelCarEngine(&params);
 				ProcessEngineDamage(&params);
 			} else if (veh->m_modelIndex == MI_RCRAIDER || veh->m_modelIndex == MI_RCGOBLIN) {
 				//ProcessModelHeliVehicle(this, &params);
@@ -792,16 +792,16 @@ void cAudioManager::ProcessVehicle(CVehicle* veh)
 			ProcessVehicleOneShots(&params);
 			break;
 		case VEHICLE_TYPE_HELI: 
-			ProcessHelicopter(&params); //recheck
+			ProcessHelicopter(&params);
 			ProcessVehicleOneShots(&params);
 			break;
 		case VEHICLE_TYPE_PLANE:
 			switch (params.m_nIndex) {
 			case AIRTRAIN:
-				ProcessJumbo(&params);//recheck
+				ProcessJumbo(&params);
 				break;
 			case DEADDODO:
-				ProcessCesna(&params);//recheck
+				ProcessCesna(&params);
 				break;
 			default:
 				break;
@@ -1091,7 +1091,7 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
 	float relativeGearChange;
 	float relativeChange;
 	uint8 volume;
-	int32 freq = 0; // uninitialized variable
+	int32 freq = 0;
 	uint8 emittingVol;
 	cTransmission *transmission;
 	uint8 currentGear;
@@ -1106,15 +1106,12 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
 			return;
 		}
 		if (!params->m_bDistanceCalculated) {
-			if (params->m_fDistance <= 0.0)
-				m_sQueueSample.m_fDistance = 0.0;
+			if (params->m_fDistance <= 0.0f)
+				m_sQueueSample.m_fDistance = 0.0f;
 			else
-				m_sQueueSample.m_fDistance = sqrt(params->m_fDistance);
+				m_sQueueSample.m_fDistance = Sqrt(params->m_fDistance);
 		}
-		//if (playerVeh == veh /*&& veh->m_modelIndex != DODO(187)*/) {
-		//	ProcessPlayersVehicleEngine(params, params->m_pVehicle);
-		//	return;
-		//}
+
 		if (veh->bEngineOn) {
 			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 			automobile = (CAutomobile *)params->m_pVehicle;
@@ -1374,7 +1371,7 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 	int32 freq;
 	int32 baseFreq;
 	int32 freqModifier;
-	uint32 tmp;
+	uint32 gearSoundLength;
 	uint32 soundOffset;
 	uint8 engineSoundType;
 	uint8 wheelInUseCounter;
@@ -1395,8 +1392,7 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 	bool processedAccelSampleStopped;
 	bool PizzaFaggBool;
 
-
-	static uint32 curTime = CTimer::GetTimeInMilliseconds();
+	static uint32 gearSoundStartTime = CTimer::GetTimeInMilliseconds();
 	static int32 nCruising = 0;
 	static int16 LastAccel = 0;
 	static uint8 CurrentPretendGear = 1;
@@ -1408,17 +1404,17 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 	PizzaFaggBool = params->m_pVehicle->m_modelIndex == MI_PIZZABOY || params->m_pVehicle->m_modelIndex == MI_FAGGIO;
 	processedAccelSampleStopped = false;
 	if (bPlayerJustEnteredCar) {
-		bAccelSampleStopped = 1;
-		bPlayerJustEnteredCar = 0;
+		bAccelSampleStopped = true;
+		bPlayerJustEnteredCar = false;
 		nCruising = 0;
 		LastAccel = 0;
-		bLostTractionLastFrame = 0;
+		bLostTractionLastFrame = false;
 		CurrentPretendGear = 1;
-		bHandbrakeOnLastFrame = 0;
+		bHandbrakeOnLastFrame = false;
 	}
 	if (CReplay::IsPlayingBack()) {
-		accelerateState = (signed int)(255.0 * clamp(params->m_pVehicle->m_fGasPedal, 0.0, 1.0));
-		brakeState = (signed int)(255.0 * clamp(params->m_pVehicle->m_fBrakePedal, 0.0, 1.0));
+		accelerateState = (255.0f * clamp(params->m_pVehicle->m_fGasPedal, 0.0f, 1.0f));
+		brakeState = (255.0f * clamp(params->m_pVehicle->m_fBrakePedal, 0.0f, 1.0f));
 	} else {
 		accelerateState = Pads[0].GetAccelerate();
 		brakeState = Pads[0].GetBrake();
@@ -1508,68 +1504,68 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 		freqModifier = 0;
 	if (params->m_VehicleType == VEHICLE_TYPE_BIKE && bike->bExtraSpeed)
 		freqModifier += 1400;
-	tmp = 0;
+	gearSoundLength = 0;
 	engineSoundType = aVehicleSettings[params->m_nIndex].m_nBank;
 	soundOffset = 3 * (engineSoundType - 4);
 	err = false;
 	switch (soundOffset) {
 	case 0:
-		tmp = 2526;
+		gearSoundLength = 2526;
 		break;
 	case 3:
-		tmp = 3587;
+		gearSoundLength = 3587;
 		break;
 	case 6:
-		tmp = 4898;
+		gearSoundLength = 4898;
 		break;
 	case 9:
-		tmp = 4003;
+		gearSoundLength = 4003;
 		break;
 	case 12:
-		tmp = 6289;
+		gearSoundLength = 6289;
 		break;
 	case 15:
-		tmp = 2766;
+		gearSoundLength = 2766;
 		break;
 	case 18:
-		tmp = 3523;
+		gearSoundLength = 3523;
 		break;
 	case 21:
-		tmp = 2773;
+		gearSoundLength = 2773;
 		break;
 	case 24:
-		tmp = 2560;
+		gearSoundLength = 2560;
 		break;
 	case 27:
-		tmp = 4228;
+		gearSoundLength = 4228;
 		break;
 	case 30:
-		tmp = 4648;
+		gearSoundLength = 4648;
 		break;
 	case 48:
-		tmp = 3480;
+		gearSoundLength = 3480;
 		break;
 	case 54:
-		tmp = 2380;
+		gearSoundLength = 2380;
 		break;
 	case 57:
-		tmp = 2410;
+		gearSoundLength = 2410;
 		break;
 	default:
 		err = true;
 		break;
 	}
 	if (!channelUsed || nCruising || err) {
-		curTime = CTimer::GetTimeInMilliseconds();
+		gearSoundStartTime = CTimer::GetTimeInMilliseconds();
 	} else {
-		tmp -= 1000;
-		if (CTimer::GetTimeInMilliseconds() - curTime > tmp) {
+		gearSoundLength -= 1000;
+		if (CTimer::GetTimeInMilliseconds() - gearSoundStartTime > gearSoundLength) {
 			channelUsed = false;
-			curTime = CTimer::GetTimeInMilliseconds();
+			gearSoundStartTime = CTimer::GetTimeInMilliseconds();
 		}
 	}
-	relativeVelocityChange = 2.0 * params->m_fVelocityChange / params->m_pTransmission->fMaxVelocity;
-	accelerationMultipler = clamp(relativeVelocityChange, 0.0, 1.0);
+	relativeVelocityChange = 2.0f * params->m_fVelocityChange / params->m_pTransmission->fMaxVelocity;
+	accelerationMultipler = clamp(relativeVelocityChange, 0.0f, 1.0f);
 	gasPedalAudio = accelerationMultipler;
 	switch (engineSoundType) {
 	case 21:
@@ -1593,7 +1589,7 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 			if (wheelsOnGround == 0 || params->m_pVehicle->bIsHandbrakeOn || lostTraction)
 				gasPedalAudio = *gasPedalAudioPtr;
 			else if (params->m_VehicleType == VEHICLE_TYPE_BIKE)
-				gasPedalAudio = 0.0;
+				gasPedalAudio = 0.0f;
 			else
 				gasPedalAudio = Min(1.0f, params->m_fVelocityChange / params->m_pTransmission->fMaxReverseVelocity);
 			*gasPedalAudioPtr = Max(0.0f, gasPedalAudio);
@@ -1625,7 +1621,7 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 			}
 		}
 		freq = (10000.f * gasPedalAudio) + 22050;
-		vol = 110 - (40.0 * gasPedalAudio);
+		vol = 110 - (40.0f * gasPedalAudio);
 		if (engineSoundType == SAMPLEBANK_CAR_COBRA)
 			freq /= 2;
 		if (params->m_pVehicle->bIsDrowning)
@@ -1667,7 +1663,7 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 					vol /= 4;
 				AddPlayerCarSample(vol, freq, engineSoundType + SFX_CAR_REV_1 - 4, SAMPLEBANK_MAIN, 2, true);
 			} else {
-				cAudioManager::TranslateEntity(&m_sQueueSample.m_vecPos, &pos);
+				TranslateEntity(&m_sQueueSample.m_vecPos, &pos);
 				if (bAccelSampleStopped) {
 					if (CurrentPretendGear != 1 || currentGear != 2)
 						CurrentPretendGear = Max(1, currentGear - 1);
@@ -1687,7 +1683,7 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 						SampleManager.StartChannel(m_nActiveSamples);
 					}
 				} else if (processedAccelSampleStopped) {
-					curTime = CTimer::GetTimeInMilliseconds();
+					gearSoundStartTime = CTimer::GetTimeInMilliseconds();
 					params->m_pVehicle->bAudioChangingGear = true;
 					if (!SampleManager.InitialiseChannel(m_nActiveSamples, soundOffset + SFX_CAR_ACCEL_1, SAMPLEBANK_MAIN))
 						return;
@@ -1707,7 +1703,7 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 					}
 				} else if (CurrentPretendGear < params->m_pTransmission->nNumberOfGears - 1) {
 					++CurrentPretendGear;
-					curTime = CTimer::GetTimeInMilliseconds();
+					gearSoundStartTime = CTimer::GetTimeInMilliseconds();
 					params->m_pVehicle->bAudioChangingGear = true;
 					if (!SampleManager.InitialiseChannel(m_nActiveSamples, soundOffset + SFX_CAR_ACCEL_1, SAMPLEBANK_MAIN))
 						return;
@@ -1728,11 +1724,11 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 				} else {
 					nCruising = 1;
 					params->m_pVehicle->bAudioChangingGear = true;
-					bAccelSampleStopped = 1;
+					bAccelSampleStopped = true;
 					SampleManager.StopChannel(m_nActiveSamples);
 					if (PizzaFaggBool || accelerateState >= 150 && wheelsOnGround && brakeState <= 0 && !params->m_pVehicle->bIsHandbrakeOn
 						&& !lostTraction && currentGear >= params->m_pTransmission->nNumberOfGears - 1) {
-						if (accelerateState >= 220 && params->m_fVelocityChange + 0.001 >= velocityChangeForAudio) {
+						if (accelerateState >= 220 && params->m_fVelocityChange + 0.001f >= velocityChangeForAudio) {
 							if (nCruising < 800)
 								++nCruising;
 						} else if (nCruising > 3) {
@@ -1749,11 +1745,11 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 			}
 		} else {
 			params->m_pVehicle->bAudioChangingGear = true;
-			bAccelSampleStopped = 1;
+			bAccelSampleStopped = true;
 			SampleManager.StopChannel(m_nActiveSamples);
 			if (PizzaFaggBool || accelerateState >= 150 && wheelsOnGround && brakeState <= 0 && !params->m_pVehicle->bIsHandbrakeOn
 				&& !lostTraction && currentGear >= params->m_pTransmission->nNumberOfGears - 1) {
-				if (accelerateState >= 220 && params->m_fVelocityChange + 0.001 >= velocityChangeForAudio) {
+				if (accelerateState >= 220 && params->m_fVelocityChange + 0.001f >= velocityChangeForAudio) {
 					if (nCruising < 800)
 						++nCruising;
 				} else if (nCruising > 3) {

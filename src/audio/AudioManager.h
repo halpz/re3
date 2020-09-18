@@ -3,6 +3,7 @@
 #include "audio_enums.h"
 #include "AudioCollision.h"
 #include "PoliceRadio.h"
+#include "VehicleModelInfo.h"
 
 class tSound
 {
