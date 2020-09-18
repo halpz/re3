@@ -1370,60 +1370,51 @@ cAudioManager::ProcessCesna(cVehicleParams *params)
 void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle* veh)
 {
 	static int32 GearFreqAdj[] = { 6000, 6000, 3400, 1200, 0, -1000 };
-	double gasPedal; // st6
+
 	tWheelState* wheelState;
-	CAutomobile* automobile; // ebp
-	CBike* bike; // edx
-	float* gasPedalAudioPtr; // edi
-	uint8 wheelInUseCounter; // cl
-	int freqModifier; // [esp+Ch] [ebp-74h]
-	signed int accelerateState; // [esp+20h] [ebp-60h]
-	bool channelUsed; // [esp+2Ch] [ebp-54h]
-	bool lostTraction; // [esp+30h] [ebp-50h]
-	int engineSoundType; // [esp+1Ch] [ebp-64h]
-	signed int brakeState; // [esp+24h] [ebp-5Ch]
-	uint8 wheelsOnGround; // [esp+3Ch] [ebp-44h]
+	CAutomobile* automobile;
+	CBike* bike;
+	CVector pos;
+	float* gasPedalAudioPtr;
+
+	int32 accelerateState;
+	int32 brakeState;
+	int32 freq;
+	int32 baseFreq;
+	int32 freqModifier;
+	uint32 tmp;
+	uint32 soundOffset;
+	uint8 engineSoundType;
+	uint8 wheelInUseCounter;
+	uint8 wheelsOnGround;
+	uint8 vol;
+	uint8 currentGear;
+	uint8 wheelsOnGroundPrev;
+
+	float accelerationMultipler;
 	float gasPedalAudio;
-	double relativeVelocityChange; // st6
-	float accelerationMultipler; // [esp+50h] [ebp-30h]
 	float velocityChangeForAudio;
-	int baseFreq; // ebp
-	uint8 vol; // bl
-
-	double time; // st7
-
-	double timeClip; // st4
-	int tmp; // edx
-	int soundOffset; // ebx
-	char err; // al
-
-	unsigned int freq_2; // edi
-	bool stuckInSand; // cl
+	float relativeVelocityChange;
+	float time;
+	bool channelUsed;
+	bool lostTraction;
+	bool err;
+	bool stuckInSand;
+	bool processedAccelSampleStopped;
+	bool PizzaFaggBool;
 
 
-	unsigned int freq; // edi
-
-	bool speedBool; // [esp+28h] [ebp-58h]
-
-	unsigned __int8 currentGear; // [esp+34h] [ebp-4Ch]
-	char processedAccelSampleStopped; // [esp+38h] [ebp-48h]
-	char wheelsOnGroundPrev; // [esp+40h] [ebp-40h]
-	bool PizzaFaggBool; // [esp+44h] [ebp-3Ch]
-
-	CVector pos; // [esp+64h] [ebp-1Ch]
-
-	//67-105
+	static uint32 curTime = CTimer::GetTimeInMilliseconds();
+	static int32 nCruising = 0;
 	static int16 LastAccel = 0;
 	static uint8 CurrentPretendGear = 1;
 	static bool bLostTractionLastFrame = false;
 	static bool bHandbrakeOnLastFrame = false;
-	static int32 nCruising = 0;
 	static bool bAccelSampleStopped = true;
-	static uint32 curTime = CTimer::GetTimeInMilliseconds();
 
-	lostTraction = 0;
-	PizzaFaggBool = 0;
-	processedAccelSampleStopped = 0;
+	lostTraction = false;
+	PizzaFaggBool = params->m_pVehicle->m_modelIndex == MI_PIZZABOY || params->m_pVehicle->m_modelIndex == MI_FAGGIO;
+	processedAccelSampleStopped = false;
 	if (bPlayerJustEnteredCar) {
 		bAccelSampleStopped = 1;
 		bPlayerJustEnteredCar = 0;
@@ -1433,7 +1424,6 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 		CurrentPretendGear = 1;
 		bHandbrakeOnLastFrame = 0;
 	}
-	//106-157
 	if (CReplay::IsPlayingBack()) {
 		accelerateState = (signed int)(255.0 * clamp(params->m_pVehicle->m_fGasPedal, 0.0, 1.0));
 		brakeState = (signed int)(255.0 * clamp(params->m_pVehicle->m_fBrakePedal, 0.0, 1.0));
@@ -1441,14 +1431,8 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 		accelerateState = Pads[0].GetAccelerate();
 		brakeState = Pads[0].GetBrake();
 	}
-	//158-162
-	speedBool = params->m_fVelocityChange >= -0.001;
 	channelUsed = SampleManager.GetChannelUsedFlag(m_nActiveSamples);
-	//163-184
-	if (params->m_pVehicle->m_modelIndex != MI_PIZZABOY
-		&& params->m_pVehicle->m_modelIndex != MI_FAGGIO) {
-		currentGear = params->m_pVehicle->m_nCurrentGear;
-	} else {
+	if (PizzaFaggBool) {
 		CurrentPretendGear = params->m_pTransmission->nNumberOfGears;
 		currentGear = CurrentPretendGear;
 		if (params->m_pVehicle->bIsHandbrakeOn) {
@@ -1459,16 +1443,16 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 		} else {
 			nCruising = 1;
 		}
-		PizzaFaggBool = true;
+	} else {
+		currentGear = params->m_pVehicle->m_nCurrentGear;
 	}
 
-	//185-205
 	switch (params->m_VehicleType) {
 	case VEHICLE_TYPE_CAR:
 		automobile = (CAutomobile*)params->m_pVehicle;
 		wheelsOnGround = automobile->m_nDriveWheelsOnGround;
 		wheelsOnGroundPrev = automobile->m_nDriveWheelsOnGroundPrev;
-		gasPedalAudioPtr = (float*)&automobile->m_fGasPedalAudio;
+		gasPedalAudioPtr = &automobile->m_fGasPedalAudio;
 		wheelState = automobile->m_aWheelState;
 		velocityChangeForAudio = automobile->m_fVelocityChangeForAudio;
 		break;
@@ -1480,13 +1464,11 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 		wheelState = bike->m_aWheelState;
 		velocityChangeForAudio = bike->m_fVelocityChangeForAudio;
 		break;
-		//641-644
 	default:
-		//dbgprint(" ** AUDIOLOG: Unrecognised vehicle type %d in ProcessVehicleEngine() * \n", vehType);
+		debug(" ** AUDIOLOG: Unrecognised vehicle type %d in ProcessVehicleEngine() * \n", params->m_VehicleType);
 		return;
 	}
 	if (!PizzaFaggBool) {
-		//208-253
 		switch (params->m_pTransmission->nDriveType) {
 		case '4':
 			if (params->m_VehicleType != VEHICLE_TYPE_BIKE) {
@@ -1522,7 +1504,6 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 			break;
 		}
 	}
-	//254-281
 	if (params->m_fVelocityChange != 0.0f) {
 		time = params->m_pVehicle->m_vecMoveSpeed.z / params->m_fVelocityChange;
 		if (time > 0.0f)
@@ -1533,15 +1514,12 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 			freqModifier = -freqModifier;
 	} else
 		freqModifier = 0;
-	//282-283
 	if (params->m_VehicleType == VEHICLE_TYPE_BIKE && bike->bExtraSpeed)
 		freqModifier += 1400;
-	//TODO rewtire this part
-	//284-349
 	tmp = 0;
 	engineSoundType = aVehicleSettings[params->m_nIndex].m_nBank;
 	soundOffset = 3 * (engineSoundType - 4);
-	err = 0;
+	err = false;
 	switch (soundOffset) {
 	case 0:
 		tmp = 2526;
@@ -1586,7 +1564,7 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 		tmp = 2410;
 		break;
 	default:
-		err = 1;
+		err = true;
 		break;
 	}
 	if (!channelUsed || nCruising || err) {
@@ -1594,15 +1572,13 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 	} else {
 		tmp -= 1000;
 		if (CTimer::GetTimeInMilliseconds() - curTime > tmp) {
-			channelUsed = 0;
+			channelUsed = false;
 			curTime = CTimer::GetTimeInMilliseconds();
 		}
 	}
-	//349-366
 	relativeVelocityChange = 2.0 * params->m_fVelocityChange / params->m_pTransmission->fMaxVelocity;
 	accelerationMultipler = clamp(relativeVelocityChange, 0.0, 1.0);
 	gasPedalAudio = accelerationMultipler;
-	//367-380
 	switch (engineSoundType) {
 	case 21:
 		++soundOffset;
@@ -1616,7 +1592,6 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 	default:
 		break;
 	}
-	//381-476
 	if (accelerateState <= 0) {
 		if (params->m_fVelocityChange < -0.001f) {
 			if (channelUsed) {
@@ -1640,11 +1615,12 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 				|| params->m_pVehicle->bIsHandbrakeOn
 				|| lostTraction
 				|| params->m_fVelocityChange < 0.01f && *gasPedalAudioPtr > 0.2f) {
-				if (!PizzaFaggBool) {
+				if (PizzaFaggBool) {
+					gasPedalAudio = 0.0f;
+				} else {
 					*gasPedalAudioPtr *= 0.6f;
 					gasPedalAudio = *gasPedalAudioPtr;
-				} else
-					gasPedalAudio = 0.0f;
+				}
 			}
 			if (gasPedalAudio > 0.05f) {
 				freq = (5000.f * (gasPedalAudio - 0.05f) * 20.f / 19) + 19000;
@@ -1666,7 +1642,6 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 
 		CurrentPretendGear = Max(1, currentGear);
 	}
-	//477-515
 	else {
 		if (nCruising == 0){
 			stuckInSand = params->m_VehicleType == VEHICLE_TYPE_CAR && ((CAutomobile*)params->m_pVehicle)->bStuckInSand;
@@ -1689,7 +1664,6 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 						baseFreq = (15000.0f * *gasPedalAudioPtr) + 14000;
 					vol = (25.0f * *gasPedalAudioPtr) + 60;
 				}
-				//516-535
 				freq = freqModifier + baseFreq;
 				if (engineSoundType == SAMPLEBANK_CAR_COBRA)
 					freq /= 2;
@@ -1701,7 +1675,6 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 					vol /= 4;
 				AddPlayerCarSample(vol, freq, engineSoundType + SFX_CAR_REV_1 - 4, SAMPLEBANK_MAIN, 2, true);
 			} else {
-				//536-548
 				cAudioManager::TranslateEntity(&m_sQueueSample.m_vecPos, &pos);
 				if (bAccelSampleStopped) {
 					if (CurrentPretendGear != 1 || currentGear != 2)
@@ -1709,7 +1682,6 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 					processedAccelSampleStopped = true;
 					bAccelSampleStopped = false;
 				}
-				//549-
 				if (channelUsed) {
 					SampleManager.SetChannelEmittingVolume(m_nActiveSamples, 120);
 					SampleManager.SetChannel3DPosition(m_nActiveSamples, pos.x, pos.y, pos.z);
