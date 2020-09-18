@@ -1648,7 +1648,7 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 			}
 			if (gasPedalAudio > 0.05f) {
 				freq = (5000.f * (gasPedalAudio - 0.05f) * 20.f / 19) + 19000;
-				vol = (25.0 * (gasPedalAudio - 0.05f) * 20.f / 19) + 40;
+				vol = (25.0f * (gasPedalAudio - 0.05f) * 20.f / 19) + 40;
 				if (params->m_pVehicle->bIsDrowning)
 					vol /= 4;
 				if (engineSoundType == SAMPLEBANK_CAR_COBRA)
@@ -1671,15 +1671,14 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 		if (nCruising == 0){
 			stuckInSand = params->m_VehicleType == VEHICLE_TYPE_CAR && ((CAutomobile*)params->m_pVehicle)->bStuckInSand;
 			if (accelerateState < 150 || wheelsOnGround == 0 || params->m_pVehicle->bIsHandbrakeOn || lostTraction
-				|| currentGear < 2 && params->m_fVelocityChange - velocityChangeForAudio >= 0.01f || brakeState > 0) {
-				if ((wheelsOnGround && !params->m_pVehicle->bIsHandbrakeOn && !lostTraction || !stuckInSand)
-					&& brakeState <= 0) {
+				|| (currentGear < 2 && params->m_fVelocityChange - velocityChangeForAudio < 0.01f) || brakeState > 0) {
+
+				if (((wheelsOnGround && !params->m_pVehicle->bIsHandbrakeOn && !lostTraction ) || stuckInSand) && brakeState <= 0) {
 					baseFreq = (8000.0f * accelerationMultipler) + 16000;
 					vol = (25.0f * accelerationMultipler) + 60;
 					*gasPedalAudioPtr = accelerationMultipler;
 				} else {
-					if (wheelsOnGround == 0 && wheelsOnGroundPrev != 0
-						|| (params->m_pVehicle->bIsHandbrakeOn && !bHandbrakeOnLastFrame || lostTraction && !bLostTractionLastFrame)
+					if (wheelsOnGround == 0 && wheelsOnGroundPrev != 0 || (params->m_pVehicle->bIsHandbrakeOn && !bHandbrakeOnLastFrame || lostTraction && !bLostTractionLastFrame)
 						&& wheelsOnGround != 0) {
 						*gasPedalAudioPtr *= 0.6f;
 					}
@@ -1769,7 +1768,7 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 					SampleManager.StopChannel(m_nActiveSamples);
 					if (PizzaFaggBool || accelerateState >= 150 && wheelsOnGround && brakeState <= 0 && !params->m_pVehicle->bIsHandbrakeOn
 						&& !lostTraction && currentGear >= params->m_pTransmission->nNumberOfGears - 1) {
-						if (accelerateState >= 220 && params->m_fVelocityChange + 0.001 < velocityChangeForAudio) {
+						if (accelerateState >= 220 && params->m_fVelocityChange + 0.001 >= velocityChangeForAudio) {
 							if (nCruising < 800)
 								++nCruising;
 						} else if (nCruising > 3) {
@@ -1790,7 +1789,7 @@ void cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams* params, CVehicle
 			SampleManager.StopChannel(m_nActiveSamples);
 			if (PizzaFaggBool || accelerateState >= 150 && wheelsOnGround && brakeState <= 0 && !params->m_pVehicle->bIsHandbrakeOn
 				&& !lostTraction && currentGear >= params->m_pTransmission->nNumberOfGears - 1) {
-				if (accelerateState >= 220 && params->m_fVelocityChange + 0.001 < velocityChangeForAudio) {
+				if (accelerateState >= 220 && params->m_fVelocityChange + 0.001 >= velocityChangeForAudio) {
 					if (nCruising < 800)
 						++nCruising;
 				} else if (nCruising > 3) {
