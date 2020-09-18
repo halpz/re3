@@ -707,7 +707,6 @@ void cAudioManager::ProcessVehicle(CVehicle* veh)
 	CAutomobile* automobile;
 	float gasPedal;
 
-	//44-58
 	player = FindPlayerPed();
 	playerVeh = FindPlayerVehicle();
 	if (playerVeh == NULL && player != NULL) {
@@ -722,7 +721,6 @@ void cAudioManager::ProcessVehicle(CVehicle* veh)
 		|| CGame::currArea == AREA_EVERYWHERE
 		|| CGame::currArea == AREA_MALL
 		|| CGame::currArea == AREA_MAIN_MAP) {
-		//62-84
 		m_sQueueSample.m_vecPos = veh->GetPosition();
 		params.m_bDistanceCalculated = false;
 		params.m_pVehicle = veh;
@@ -741,9 +739,8 @@ void cAudioManager::ProcessVehicle(CVehicle* veh)
 			ProcessEngineDamage(&params);
 			return;
 		}
-		//104-
 		switch (params.m_VehicleType) {
-		case VEHICLE_TYPE_CAR://done
+		case VEHICLE_TYPE_CAR:
 			automobile = (CAutomobile*)veh;
 			UpdateGasPedalAudio(&automobile->m_fGasPedalAudio, automobile->m_fGasPedal);
 			if (veh->m_modelIndex == MI_RCBANDIT || veh->m_modelIndex == MI_RCBARON) {
@@ -786,7 +783,7 @@ void cAudioManager::ProcessVehicle(CVehicle* veh)
 			ProcessVehicleOneShots(&params);
 			automobile->m_fVelocityChangeForAudio = params.m_fVelocityChange;
 			break;
-		case VEHICLE_TYPE_BOAT://done
+		case VEHICLE_TYPE_BOAT:
 			if (veh->m_modelIndex == MI_SKIMMER)
 				ProcessHelicopter(&params);
 			else
@@ -794,11 +791,11 @@ void cAudioManager::ProcessVehicle(CVehicle* veh)
 			ProcessBoatMovingOverWater(&params);
 			ProcessVehicleOneShots(&params);
 			break;
-		case VEHICLE_TYPE_HELI: //done
-			ProcessHelicopter(&params); //TODO recheck
+		case VEHICLE_TYPE_HELI: 
+			ProcessHelicopter(&params); //recheck
 			ProcessVehicleOneShots(&params);
 			break;
-		case VEHICLE_TYPE_PLANE://done
+		case VEHICLE_TYPE_PLANE:
 			switch (params.m_nIndex) {
 			case AIRTRAIN:
 				ProcessJumbo(&params);//recheck
@@ -812,13 +809,8 @@ void cAudioManager::ProcessVehicle(CVehicle* veh)
 			ProcessVehicleOneShots(&params);
 			//ProcessVehicleFlatType(&params);
 			break;
-		case VEHICLE_TYPE_BIKE: //done
+		case VEHICLE_TYPE_BIKE:
 			bike = (CBike*)veh;
-			//gasPedal = fabs(veh->m_fGasPedal);
-			//if (gasPedal <= bike->m_fGasPedalAudio)
-			//	bike->m_fGasPedalAudio = Max(bike->m_fGasPedalAudio - 0.07f, gasPedal);
-			//else
-			//	bike->m_fGasPedalAudio = Min(bike->m_fGasPedalAudio + 0.09f, gasPedal);
 			UpdateGasPedalAudio(&bike->m_fGasPedalAudio, bike->m_fGasPedal);
 			if (ProcessVehicleRoadNoise(&params)) {
 				if (CWeather::WetRoads > 0.0f)
