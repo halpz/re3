@@ -434,6 +434,7 @@ cMusicManager::ServiceGameMode()
 {
 	bool bRadioOff = false;
 	static int8 nFramesSinceCutsceneEnded = -1;
+	uint8 volume;
 
 	m_bPreviousPlayerInCar = m_bPlayerInCar;
 	m_bPlayerInCar = PlayerInCar();
@@ -520,25 +521,25 @@ cMusicManager::ServiceGameMode()
 			}
 			if (CTimer::GetIsSlowMotionActive()) {
 				if (TheCamera.pTargetEntity != nil) {
-					float dist = (TheCamera.pTargetEntity->GetPosition() - TheCamera.GetPosition()).MagnitudeSqr();
-					if (dist >= 3025.0f) {
+					float DistToTargetSq = (TheCamera.pTargetEntity->GetPosition() - TheCamera.GetPosition()).MagnitudeSqr();
+					if (DistToTargetSq >= SQR(55.0f)) {
 						SampleManager.SetStreamedVolumeAndPan(0, 63, 0, 0);
-					} else if (dist >= 100.0f) {
-						int8 volume = ((45.0f - (Sqrt(dist) - 10.0f)) / 45.0f * 100.0f);
-						int8 pan;
-						if (AudioManager.IsMissionAudioSamplePlaying())
+					} else if (DistToTargetSq >= SQR(10.0f)) {
+						volume = ((45.0f - (Sqrt(DistToTargetSq) - 10.0f)) / 45.0f * 100.0f);
+						uint8 pan;
+						if (AudioManager.ShouldDuckMissionAudio())
 							volume /= 4;
-						if (volume != 0) {
-							CVector trVec;
-							AudioManager.TranslateEntity(&TheCamera.pTargetEntity->GetPosition(), &trVec);
-							pan = AudioManager.ComputePan(55.0f, &trVec);
+						if (volume > 0) {
+							CVector panVec;
+							AudioManager.TranslateEntity(&TheCamera.pTargetEntity->GetPosition(), &panVec);
+							pan = AudioManager.ComputePan(55.0f, &panVec);
 						} else {
 							pan = 0;
 						}
 						if (gRetuneCounter)
 							volume /= 4;
 						SampleManager.SetStreamedVolumeAndPan(volume, pan, 0, 0);
-					} else if (AudioManager.IsMissionAudioSamplePlaying()) {
+					} else if (AudioManager.ShouldDuckMissionAudio()) {
 						SampleManager.SetStreamedVolumeAndPan(25, 63, 0, 0);
 					} else if (gRetuneCounter) {
 						SampleManager.SetStreamedVolumeAndPan(25, 63, 0, 0);
@@ -546,26 +547,24 @@ cMusicManager::ServiceGameMode()
 						SampleManager.SetStreamedVolumeAndPan(100, 63, 0, 0);
 					}
 				}
-			} else if (AudioManager.IsMissionAudioSamplePlaying()) {
+			} else if (AudioManager.ShouldDuckMissionAudio()) {
 				SampleManager.SetStreamedVolumeAndPan(25, 63, 0, 0);
 				nFramesSinceCutsceneEnded = 0;
 			} else {
-				int8 volume;
 				if (nFramesSinceCutsceneEnded == -1) {
 					volume = 100;
-				} else if (nFramesSinceCutsceneEnded >= 20) {
-					if (nFramesSinceCutsceneEnded >= 40) {
-						nFramesSinceCutsceneEnded = -1;
-						volume = 100;
-					} else {
-						volume = 3 * (nFramesSinceCutsceneEnded - 20) + 25;
-						nFramesSinceCutsceneEnded++;
-					}
-				} else {
+				} else if (nFramesSinceCutsceneEnded < 20) {
 					nFramesSinceCutsceneEnded++;
 					volume = 25;
+				} else if (nFramesSinceCutsceneEnded < 40) {
+					volume = 3 * (nFramesSinceCutsceneEnded - 20) + 25;
+					nFramesSinceCutsceneEnded++;
+				} else {
+					nFramesSinceCutsceneEnded = -1;
+					volume = 100;
 				}
-				if (gRetuneCounter) volume /= 4;
+				if (gRetuneCounter != 0)
+					volume /= 4;
 				SampleManager.SetStreamedVolumeAndPan(volume, 63, 0, 0);
 			}
 			return;
@@ -698,16 +697,15 @@ cMusicManager::StopCutSceneMusic(void)
 uint32
 cMusicManager::GetTrackStartPos(uint8 track)
 {
-	uint32 result;
-	uint32 timer = m_aTracks[track].m_nLastPosCheckTimer;
-	if (CTimer::GetTimeInMillisecondsPauseMode() <= timer) {
-		result = m_aTracks[track].m_nPosition;
+	uint32 pos = m_aTracks[track].m_nPosition;
+	if (CTimer::GetTimeInMillisecondsPauseMode() > m_aTracks[track].m_nLastPosCheckTimer)
+		pos += Min(CTimer::GetTimeInMillisecondsPauseMode() - m_aTracks[track].m_nLastPosCheckTimer, 90000);
+	else
 		m_aTracks[track].m_nLastPosCheckTimer = CTimer::GetTimeInMillisecondsPauseMode();
-	} else 
-		result = Min(CTimer::GetTimeInMillisecondsPauseMode() - timer, 90000) + m_aTracks[track].m_nPosition;
 
-	if (result > m_aTracks[track].m_nLength) result %= m_aTracks[track].m_nLength;
-	return result;
+	if (pos > m_aTracks[track].m_nLength)
+		pos %= m_aTracks[track].m_nLength;
+	return pos;
 }
 
 
@@ -832,7 +830,7 @@ cMusicManager::ServiceAnnouncement()
 
 		SampleManager.SetStreamedVolumeAndPan(0, 63, 0, 0);
 		if (SampleManager.StartStreamedFile(m_nAnnouncement, 0, 0)) {
-			SampleManager.SetStreamedVolumeAndPan(AudioManager.IsMissionAudioSamplePlaying() ? 25 : 100, 63, 0, 0);
+			SampleManager.SetStreamedVolumeAndPan(AudioManager.ShouldDuckMissionAudio() ? 25 : 100, 63, 0, 0);
 			m_bAnnouncementInProgress = true;
 			m_nPreviousStreamedSound = m_nCurrentStreamedSound;
 			m_nCurrentStreamedSound = m_nAnnouncement;
@@ -905,7 +903,7 @@ cMusicManager::ChangeRadioChannel()
 			return false;
 		if (!SampleManager.StartStreamedFile(m_nCurrentStreamedSound, GetTrackStartPos(m_nCurrentStreamedSound), 0))
 			return false;
-		SampleManager.SetStreamedVolumeAndPan(AudioManager.IsMissionAudioSamplePlaying() ? 25 : 100, 63, 0, 0);
+		SampleManager.SetStreamedVolumeAndPan(AudioManager.ShouldDuckMissionAudio() ? 25 : 100, 63, 0, 0);
 	}
 	return true;
 }
