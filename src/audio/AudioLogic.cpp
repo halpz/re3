@@ -736,7 +736,7 @@ void cAudioManager::ProcessVehicle(CVehicle* veh)
 		switch (params.m_VehicleType) {
 		case VEHICLE_TYPE_CAR:
 			automobile = (CAutomobile*)veh;
-			UpdateGasPedalAudio(&automobile->m_fGasPedalAudio, automobile->m_fGasPedal);
+			UpdateGasPedalAudio(veh, params.m_VehicleType);
 			if (veh->m_modelIndex == MI_RCBANDIT || veh->m_modelIndex == MI_RCBARON) {
 				ProcessModelCarEngine(&params);
 				ProcessEngineDamage(&params);
@@ -805,7 +805,7 @@ void cAudioManager::ProcessVehicle(CVehicle* veh)
 			break;
 		case VEHICLE_TYPE_BIKE:
 			bike = (CBike*)veh;
-			UpdateGasPedalAudio(&bike->m_fGasPedalAudio, bike->m_fGasPedal);
+			UpdateGasPedalAudio(veh, params.m_VehicleType);
 			if (ProcessVehicleRoadNoise(&params)) {
 				if (CWeather::WetRoads > 0.0f)
 					ProcessWetRoadNoise(&params);
@@ -1075,35 +1075,32 @@ cAudioManager::ProcessWetRoadNoise(cVehicleParams *params)
 }
 
 void
-cAudioManager::ProcessVehicleEngine1(cVehicleParams* params)
+cAudioManager::ProcessVehicleEngine(cVehicleParams* params)
 {
 	const float SOUND_INTENSITY = 50.0f;
 
 	CVehicle* playerVeh;
 	CVehicle* veh;
 	CAutomobile* automobile;
-	float relativeGearChange;
-	float relativeChange;
-	uint8 volume;
-	int32 freq = 0;
-	uint8 emittingVol;
 	cTransmission* transmission;
-	uint8 currentGear;
-	float modificator;
-	float traction = 0.f;
-
-	bool bPizzaFaggio;
-	bool bCaddy;
 	CBike* bike;
-	int8 wheelsOnGround;
-	int8 wheelsOnGroundPrev;
 	tWheelState* wheelState;
 	float* gasPedalAudioPtr;
 
-	float someValue;
+	int32 freq = 0;
+	uint8 currentGear;
+	uint8 emittingVol;
+	int8 wheelsOnGround;
+	int8 wheelsOnGroundPrev;
+	float relativeGearChange;
+	float relativeChange;
+	float modificator;
+	float traction;
+	bool pizzaFaggBool;
+	bool caddyBool;
 
-	bPizzaFaggio = false;
-	bCaddy = false;
+	pizzaFaggBool = false;
+	caddyBool = false;
 	traction = 0.0f;
 	if (params->m_fDistance >= SQR(SOUND_INTENSITY))
 		return;
@@ -1125,12 +1122,12 @@ cAudioManager::ProcessVehicleEngine1(cVehicleParams* params)
 		switch (veh->m_modelIndex) {
 		case MI_PIZZABOY:
 		case MI_FAGGIO:
-			bPizzaFaggio = true;
+			pizzaFaggBool = true;
 			currentGear = transmission->nNumberOfGears;
 			break;
 		case MI_CADDY:
 			currentGear = transmission->nNumberOfGears;
-			bCaddy = true;
+			caddyBool = true;
 			break;
 		default:
 			currentGear = veh->m_nCurrentGear;
@@ -1157,8 +1154,8 @@ cAudioManager::ProcessVehicleEngine1(cVehicleParams* params)
 		}
 
 		if (wheelsOnGround != 0) {
-			if (!veh->bIsHandbrakeOn || bPizzaFaggio && bCaddy) { //mb bug, bcs it's can't be true together
-				if (veh->GetStatus() == STATUS_SIMPLE || bPizzaFaggio || bCaddy) {
+			if (!veh->bIsHandbrakeOn || pizzaFaggBool && caddyBool) { //mb bug, bcs it's can't be true together
+				if (veh->GetStatus() == STATUS_SIMPLE || pizzaFaggBool || caddyBool) {
 					traction = 0.0f;
 				} else {
 					switch (transmission->nDriveType) {
@@ -1199,46 +1196,43 @@ cAudioManager::ProcessVehicleEngine1(cVehicleParams* params)
 						break;
 					}
 				}
-			} else if (0.0f != params->m_fVelocityChange) {
+			} else if (0.0f == params->m_fVelocityChange) {
 				traction = 0.9f;
 			}
 			if (transmission->fMaxVelocity <= 0.0) {
 				relativeChange = 0.0f;
-				//var = 0.0f;
-				//goto lab86;
-			}
-
-			//201-243
-			if (!bPizzaFaggio && !bCaddy) {
-				if (currentGear != 0) {
-					relativeGearChange = Min(1.0f,
-						params->m_fVelocityChange - transmission->Gears[currentGear].fShiftDownVelocity) / transmission->fMaxVelocity * 2.5f;
-					if (traction != 0.0f && veh->GetStatus() != STATUS_SIMPLE && params->m_fVelocityChange >= transmission->Gears[1].fShiftUpVelocity)
-						traction = 0.7f;
-					relativeChange = traction * *gasPedalAudioPtr * 0.95f + (1.0f - traction) * relativeGearChange;
+				modificator = 0.0f;
+			} else {
+				if (!pizzaFaggBool && !caddyBool) {
+					if (currentGear != 0) {
+						relativeGearChange = Min(1.0f,
+							params->m_fVelocityChange - transmission->Gears[currentGear].fShiftDownVelocity) / transmission->fMaxVelocity * 2.5f;
+						if (traction == 0.0f && veh->GetStatus() != STATUS_SIMPLE && 
+							params->m_fVelocityChange < transmission->Gears[1].fShiftUpVelocity)
+							traction = 0.7f;
+						relativeChange = traction * *gasPedalAudioPtr * 0.95f + (1.0f - traction) * relativeGearChange;
+					} else {
+						relativeChange = Min(1.0f,
+							1.0f - Abs((params->m_fVelocityChange - transmission->Gears[0].fShiftDownVelocity) / transmission->fMaxReverseVelocity));
+					}
+					modificator = relativeChange;
 				} else {
-					relativeChange = Min(1.0f,
-						1.0f - Abs((params->m_fVelocityChange - transmission->Gears[0].fShiftDownVelocity) / transmission->fMaxReverseVelocity));
+					modificator = Min(1.0, Abs(params->m_fVelocityChange / transmission->fMaxVelocity > 1.0f));
 				}
-				//goto lab85
 			}
-
-			//244-254
-			modificator = Min(1.0, Abs(params->m_fVelocityChange / transmission->fMaxVelocity > 1.0f));
 		} else {
 			if (wheelsOnGroundPrev != 0)
 				*gasPedalAudioPtr *= 0.4f;
 			relativeChange = *gasPedalAudioPtr;
 			modificator = relativeChange;
 		}
-		//256-272
 		if (currentGear != 0 || wheelsOnGround == 0)
 			freq = 1200 * currentGear + 18000.0f * modificator + 14000;
 		else if (params->m_VehicleType == VEHICLE_TYPE_BIKE)
 			freq = 22050;
 		else
 			freq = 13000.0f * modificator + 14000;
-		if (modificator < 0.75f)
+		if (modificator >= 0.75f)
 			emittingVol = 90;
 		else
 			emittingVol = modificator * (4.0f / 3.0f) * 15.0f + 75;
@@ -1246,19 +1240,18 @@ cAudioManager::ProcessVehicleEngine1(cVehicleParams* params)
 		modificator = 0.0f;
 		emittingVol = 75;
 	}
-	//273-
 	if (veh->bIsDrowning)
 		emittingVol /= 4;
-	if (bCaddy) {
+	if (caddyBool) {
 		emittingVol = 100.0f * modificator;
 		freq = 2130.0f * modificator + 4270;
 		m_sQueueSample.m_nCounter = 2;
 	}
 	m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
 	if (m_sQueueSample.m_nVolume != 0) {
-		if (!bCaddy) {
+		if (!caddyBool) {
 			if (veh->GetStatus() == STATUS_SIMPLE) {
-				if (modificator >= 0.02f) {
+				if (modificator < 0.02f) {
 					m_sQueueSample.m_nSampleIndex = aVehicleSettings[params->m_nIndex].m_nBank - CAR_SFX_BANKS_OFFSET + SFX_CAR_IDLE_1;
 					m_sQueueSample.m_nCounter = 52;
 					freq = 10000.0f * modificator + 22050;
@@ -1267,7 +1260,7 @@ cAudioManager::ProcessVehicleEngine1(cVehicleParams* params)
 					m_sQueueSample.m_nCounter = 2;
 				}
 			} else {
-				if (veh->m_fGasPedal >= 0.02f) {
+				if (veh->m_fGasPedal < 0.02f) {
 					m_sQueueSample.m_nSampleIndex = aVehicleSettings[params->m_nIndex].m_nBank - CAR_SFX_BANKS_OFFSET + SFX_CAR_IDLE_1;
 					m_sQueueSample.m_nCounter = 52;
 					freq = 10000.0f * modificator + 22050;
@@ -1301,171 +1294,27 @@ cAudioManager::ProcessVehicleEngine1(cVehicleParams* params)
 		m_sQueueSample.m_bRequireReflection = false;
 		AddSampleToRequestedQueue();
 	}
-
-
 }
 
 void
-cAudioManager::ProcessVehicleEngine(cVehicleParams *params)
+cAudioManager::UpdateGasPedalAudio(CVehicle* veh, eVehicleType vehType)
 {
-	const float SOUND_INTENSITY = 50.0f;
+	float gasPedal = Abs(veh->m_fGasPedal);
+	float* gasPealAudioPtr;
 
-	CVehicle *playerVeh;
-	CVehicle *veh;
-	CAutomobile *automobile;
-	float relativeGearChange;
-	float relativeChange;
-	uint8 volume;
-	int32 freq = 0;
-	uint8 emittingVol;
-	cTransmission *transmission;
-	uint8 currentGear;
-	float modificator;
-	float traction = 0.f;
-
-	if (params->m_fDistance < SQR(SOUND_INTENSITY)) {
-		playerVeh = FindPlayerVehicle();
-		veh = params->m_pVehicle;
-		if (playerVeh == veh && veh->GetStatus() == STATUS_WRECKED) {
-			SampleManager.StopChannel(m_nActiveSamples);
-			return;
-		}
-		if (!params->m_bDistanceCalculated) {
-			if (params->m_fDistance <= 0.0f)
-				m_sQueueSample.m_fDistance = 0.0f;
-			else
-				m_sQueueSample.m_fDistance = Sqrt(params->m_fDistance);
-		}
-
-		if (veh->bEngineOn) {
-			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
-			automobile = (CAutomobile *)params->m_pVehicle;
-			if (params->m_nIndex == DODO) {
-				ProcessCesna(params);
-				return;
-			}
-			if (FindPlayerVehicle() == veh) {
-				ProcessPlayersVehicleEngine(params, params->m_pVehicle);
-				return;
-			}
-			transmission = params->m_pTransmission;
-			if (transmission != nil) {
-				currentGear = params->m_pVehicle->m_nCurrentGear;
-				if (automobile->m_nWheelsOnGround != 0) {
-					if (automobile->bIsHandbrakeOn) {
-						if (params->m_fVelocityChange == 0.0f)
-							traction = 0.9f;
-					} else if (params->m_pVehicle->GetStatus() == STATUS_SIMPLE) {
-						traction = 0.0f;
-					} else {
-						switch (transmission->nDriveType) {
-						case '4':
-							for (int32 i = 0; i < ARRAY_SIZE(automobile->m_aWheelState); i++) {
-								if (automobile->m_aWheelState[i] == WHEEL_STATE_SPINNING)
-									traction += 0.05f;
-							}
-							break;
-						case 'F':
-							if (automobile->m_aWheelState[CARWHEEL_FRONT_LEFT] == WHEEL_STATE_SPINNING)
-								traction += 0.1f;
-							if (automobile->m_aWheelState[CARWHEEL_FRONT_RIGHT] == WHEEL_STATE_SPINNING)
-								traction += 0.1f;
-							break;
-						case 'R':
-							if (automobile->m_aWheelState[CARWHEEL_REAR_LEFT] == WHEEL_STATE_SPINNING)
-								traction += 0.1f;
-							if (automobile->m_aWheelState[CARWHEEL_REAR_RIGHT] == WHEEL_STATE_SPINNING)
-								traction += 0.1f;
-							break;
-						}
-					}
-					if (transmission->fMaxVelocity <= 0.f) {
-						relativeChange = 0.f;
-					} else if (currentGear != 0) {
-						relativeGearChange =
-						    Min(1.0f, (params->m_fVelocityChange - transmission->Gears[currentGear].fShiftDownVelocity) / transmission->fMaxVelocity * 2.5f);
-						if (traction == 0.0f && automobile->GetStatus() != STATUS_SIMPLE &&
-						    params->m_fVelocityChange < transmission->Gears[1].fShiftUpVelocity) {
-							traction = 0.7f;
-						}
-						relativeChange = traction * automobile->m_fGasPedalAudio * 0.95f + (1.0f - traction) * relativeGearChange;
-					} else
-						relativeChange =
-						    Min(1.0f, 1.0f - Abs((params->m_fVelocityChange - transmission->Gears[0].fShiftDownVelocity) / transmission->fMaxReverseVelocity));
-				} else {
-					if (automobile->m_nDriveWheelsOnGround != 0)
-						automobile->m_fGasPedalAudio *= 0.4f;
-					relativeChange = automobile->m_fGasPedalAudio;
-				}
-				modificator = relativeChange;
-				if (currentGear != 0 || automobile->m_nWheelsOnGround == 0)
-					freq = 1200 * currentGear + 18000.f * modificator + 14000;
-				else
-					freq = 13000.f * modificator + 14000;
-				if (modificator >= 0.75f) {
-					emittingVol = 120;
-					volume = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
-				} else {
-					emittingVol = modificator * 4.0f / 3.0f * 40.f + 80.f;
-					volume = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
-				}
-			} else {
-				modificator = 0.f;
-				emittingVol = 80;
-				volume = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
-			}
-			m_sQueueSample.m_nVolume = volume;
-			if (m_sQueueSample.m_nVolume != 0) {
-				if (automobile->GetStatus() == STATUS_SIMPLE) {
-					if (modificator < 0.02f) {
-						m_sQueueSample.m_nSampleIndex = aVehicleSettings[params->m_nIndex].m_nBank - CAR_SFX_BANKS_OFFSET + SFX_CAR_IDLE_1;
-						freq = modificator * 10000 + 22050;
-						m_sQueueSample.m_nCounter = 52;
-					} else {
-						m_sQueueSample.m_nSampleIndex = aVehicleSettings[params->m_nIndex].m_nAccelerationSampleIndex;
-						m_sQueueSample.m_nCounter = 2;
-					}
-				} else {
-					if (automobile->m_fGasPedal < 0.05f) {
-						m_sQueueSample.m_nSampleIndex = aVehicleSettings[params->m_nIndex].m_nBank - CAR_SFX_BANKS_OFFSET + SFX_CAR_IDLE_1;
-						freq = modificator * 10000 + 22050;
-						m_sQueueSample.m_nCounter = 52;
-					} else {
-						m_sQueueSample.m_nSampleIndex = aVehicleSettings[params->m_nIndex].m_nAccelerationSampleIndex;
-						m_sQueueSample.m_nCounter = 2;
-					}
-				}
-				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				m_sQueueSample.m_bIs2D = false;
-				m_sQueueSample.m_nReleasingVolumeModificator = 3;
-				m_sQueueSample.m_nFrequency = freq + 100 * m_sQueueSample.m_nEntityIndex % 1000;
-				if (m_sQueueSample.m_nSampleIndex == SFX_CAR_IDLE_6 || m_sQueueSample.m_nSampleIndex == SFX_CAR_REV_6)
-					m_sQueueSample.m_nFrequency /= 2;
-				m_sQueueSample.m_nLoopCount = 0;
-				m_sQueueSample.m_nEmittingVolume = emittingVol;
-				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_fSpeedMultiplier = 6.0f;
-				m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
-				m_sQueueSample.m_bReleasingSoundFlag = false;
-				m_sQueueSample.m_nReleasingVolumeDivider = 8;
-				m_sQueueSample.m_bReverbFlag = true;
-				m_sQueueSample.m_bRequireReflection = false;
-				AddSampleToRequestedQueue();
-			}
-		}
+	switch (vehType) {
+	case VEHICLE_TYPE_CAR:
+		gasPealAudioPtr = &((CAutomobile*)veh)->m_fGasPedalAudio;
+	case VEHICLE_TYPE_BIKE:
+		gasPealAudioPtr = &((CBike*)veh)->m_fGasPedalAudio;
+	default:
+		return;
+		break;
 	}
-}
-
-void
-cAudioManager::UpdateGasPedalAudio(float* gasPedalAudio, float vehGasPedal)
-{
-	float gasPedal = Abs(vehGasPedal);
-
-	if (*gasPedalAudio < gasPedal)
-		*gasPedalAudio = Min(*gasPedalAudio + 0.09f, gasPedal);
+	if (*gasPealAudioPtr < gasPedal)
+		*gasPealAudioPtr = Min(*gasPealAudioPtr + 0.09f, gasPedal);
 	else
-		*gasPedalAudio = Max(*gasPedalAudio - 0.07f, gasPedal);
+		*gasPealAudioPtr = Max(*gasPealAudioPtr - 0.07f, gasPedal);
 }
 
 void

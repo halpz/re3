@@ -360,7 +360,7 @@ public:
 	void ProcessVehicle(CVehicle *vehicle);
 	bool ProcessVehicleDoors(cVehicleParams *params);
 	void ProcessVehicleEngine(cVehicleParams *params);
-	void UpdateGasPedalAudio(float* gasPedalAudio, float vehGasPedal);
+	void UpdateGasPedalAudio(CVehicle* veh, eVehicleType vehType);
 	void ProcessVehicleHorn(cVehicleParams *params);
 	void ProcessVehicleOneShots(cVehicleParams *params);
 	bool ProcessVehicleReverseWarning(cVehicleParams *params);
@@ -370,8 +370,6 @@ public:
 	void ProcessWaterCannon(int32);
 	void ProcessWeather(int32 id);
 	bool ProcessWetRoadNoise(cVehicleParams *params);
-
-	void ProcessVehicleEngine1(cVehicleParams* params);
 
 	int32 RandomDisplacement(uint32 seed) const;
 	void ReacquireDigitalHandle() const;
