@@ -619,10 +619,10 @@ cSampleManager::Initialise(void)
 			return false;
 		}
 		
-		nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN] = (uintptr)malloc(nSampleBankSize[SAMPLEBANK_MAIN]);
-		ASSERT(nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN] != 0);
+		nSampleBankMemoryStartAddress[SFX_BANK_0] = (uintptr)malloc(nSampleBankSize[SFX_BANK_0]);
+		ASSERT(nSampleBankMemoryStartAddress[SFX_BANK_0] != 0);
 		
-		if ( nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN] == 0 )
+		if ( nSampleBankMemoryStartAddress[SFX_BANK_0] == 0 )
 		{
 			Terminate();
 			return false;
@@ -677,7 +677,7 @@ cSampleManager::Initialise(void)
 #endif
 	}
 		
-	LoadSampleBank(SAMPLEBANK_MAIN);
+	LoadSampleBank(SFX_BANK_0);
 	
 	return true;
 }
@@ -699,10 +699,10 @@ cSampleManager::Terminate(void)
 
 	CStream::Terminate();
 	
-	if ( nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN] != 0 )
+	if ( nSampleBankMemoryStartAddress[SFX_BANK_0] != 0 )
 	{
-		free((void *)nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN]);
-		nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN] = 0;
+		free((void *)nSampleBankMemoryStartAddress[SFX_BANK_0]);
+		nSampleBankMemoryStartAddress[SFX_BANK_0] = 0;
 	}
 
 	if ( nSampleBankMemoryStartAddress[SAMPLEBANK_PED] != 0 )
@@ -797,7 +797,7 @@ cSampleManager::LoadSampleBank(uint8 nBank)
 	
 	if ( MusicManager.IsInitialised()
 		&& MusicManager.GetMusicMode() == MUSICMODE_CUTSCENE
-		&& nBank != SAMPLEBANK_MAIN )
+		&& nBank != SFX_BANK_0 )
 	{
 		return false;
 	}
@@ -956,8 +956,8 @@ cSampleManager::GetBankContainingSound(uint32 offset)
 	if ( offset >= BankStartOffset[SAMPLEBANK_PED] )
 		return SAMPLEBANK_PED;
 	
-	if ( offset >= BankStartOffset[SAMPLEBANK_MAIN] )
-		return SAMPLEBANK_MAIN;
+	if ( offset >= BankStartOffset[SFX_BANK_0] )
+		return SFX_BANK_0;
 	
 	return SAMPLEBANK_INVALID;
 }
@@ -1460,7 +1460,7 @@ cSampleManager::Service(void)
 bool
 cSampleManager::InitialiseSampleBanks(void)
 {
-	int32 nBank = SAMPLEBANK_MAIN;
+	int32 nBank = SFX_BANK_0;
 	
 	fpSampleDescHandle = fopen(SampleBankDescFilename, "rb");
 	if ( fpSampleDescHandle == NULL )
@@ -1494,14 +1494,14 @@ cSampleManager::InitialiseSampleBanks(void)
 #ifdef FIX_BUGS
 		if (nBank >= MAX_SAMPLEBANKS) break;
 #endif
-		if ( BankStartOffset[nBank] == BankStartOffset[SAMPLEBANK_MAIN] + i )
+		if ( BankStartOffset[nBank] == BankStartOffset[SFX_BANK_0] + i )
 		{
 			nSampleBankDiscStartOffset[nBank] = m_aSamples[i].nOffset;
 			nBank++;
 		}
 	}
 
-	nSampleBankSize[SAMPLEBANK_MAIN] = nSampleBankDiscStartOffset[SAMPLEBANK_PED] - nSampleBankDiscStartOffset[SAMPLEBANK_MAIN];
+	nSampleBankSize[SFX_BANK_0] = nSampleBankDiscStartOffset[SAMPLEBANK_PED] - nSampleBankDiscStartOffset[SFX_BANK_0];
 	nSampleBankSize[SAMPLEBANK_PED]  = _nSampleDataEndOffset                      - nSampleBankDiscStartOffset[SAMPLEBANK_PED];
 
 	return true;

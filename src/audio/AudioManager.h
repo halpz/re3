@@ -371,6 +371,8 @@ public:
 	void ProcessWeather(int32 id);
 	bool ProcessWetRoadNoise(cVehicleParams *params);
 
+	void ProcessVehicleEngine1(cVehicleParams* params);
+
 	int32 RandomDisplacement(uint32 seed) const;
 	void ReacquireDigitalHandle() const;
 	void ReleaseDigitalHandle() const;
