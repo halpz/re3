@@ -77,7 +77,7 @@ public:
 	int16 m_doingBurnout;
 	float m_fTireTemperature;
 	float m_fBrakeDestabilization;
-	uint32 field_490;
+	float m_fVelocityChangeForAudio;
 	float m_fFireBlowUpTimer;
 	CPhysical *m_aGroundPhysical[4];
 	CVector m_aGroundOffset[4];

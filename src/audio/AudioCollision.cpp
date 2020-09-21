@@ -165,7 +165,7 @@ cAudioManager::SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 coun
 			if(m_sQueueSample.m_nVolume) {
 				m_sQueueSample.m_nCounter = counter;
 				m_sQueueSample.m_vecPos = col.m_vecPosition;
-				m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				m_sQueueSample.m_bIs2D = false;
 				m_sQueueSample.m_nReleasingVolumeModificator = 7;
 				m_sQueueSample.m_nLoopCount = 0;
@@ -306,7 +306,7 @@ cAudioManager::SetUpOneShotCollisionSound(const cAudioCollision &col)
 				m_sQueueSample.m_nCounter = counter++;
 				if(counter >= 255) counter = 28;
 				m_sQueueSample.m_vecPos = col.m_vecPosition;
-				m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				m_sQueueSample.m_bIs2D = false;
 				m_sQueueSample.m_nReleasingVolumeModificator = 11;
 				m_sQueueSample.m_nLoopCount = 1;

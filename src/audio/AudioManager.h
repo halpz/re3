@@ -3,6 +3,7 @@
 #include "audio_enums.h"
 #include "AudioCollision.h"
 #include "PoliceRadio.h"
+#include "VehicleModelInfo.h"
 
 class tSound
 {
@@ -143,6 +144,7 @@ public:
 class cVehicleParams
 {
 public:
+	eVehicleType m_VehicleType;
 	bool m_bDistanceCalculated;
 	float m_fDistance;
 	CVehicle *m_pVehicle;
@@ -345,7 +347,7 @@ public:
 	void ProcessPedOneShots(cPedParams *params);
 	void ProcessPhysical(int32 id);
 	void ProcessPlane(cVehicleParams *params);
-	void ProcessPlayersVehicleEngine(cVehicleParams *params, CAutomobile *automobile);
+	void ProcessPlayersVehicleEngine(cVehicleParams *params, CVehicle* veh);
 	void ProcessProjectiles();
 	void ProcessRainOnVehicle(cVehicleParams *params);
 	void ProcessReverb() const;
@@ -358,6 +360,7 @@ public:
 	void ProcessVehicle(CVehicle *vehicle);
 	bool ProcessVehicleDoors(cVehicleParams *params);
 	void ProcessVehicleEngine(cVehicleParams *params);
+	void UpdateGasPedalAudio(CVehicle* veh, int vehType);
 	void ProcessVehicleHorn(cVehicleParams *params);
 	void ProcessVehicleOneShots(cVehicleParams *params);
 	bool ProcessVehicleReverseWarning(cVehicleParams *params);
@@ -410,7 +413,6 @@ public:
 	void Terminate();
 	void TranslateEntity(Const CVector *v1, CVector *v2) const;
 
-	void UpdateGasPedalAudio(CAutomobile *automobile);
 	void UpdateReflections();
 	bool UsesReverseWarning(int32 model) const;
 	bool UsesSiren(int32 model) const;

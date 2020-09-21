@@ -352,3 +352,4 @@ MigrationBackup/
 vendor/glew-2.1.0/
 vendor/glfw-3.3.2.bin.WIN32/
 vendor/glfw-3.3.2.bin.WIN64/
+/vendor/glfw-3.3.2

@@ -24,7 +24,7 @@ enum {
 	ATOMIC_FLAG_NOCULL	= 0x800,
 };
 
-enum eVehicleType {
+enum eVehicleType : uint8{
 	VEHICLE_TYPE_CAR,
 	VEHICLE_TYPE_BOAT,
 	VEHICLE_TYPE_TRAIN,

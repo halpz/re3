@@ -129,7 +129,7 @@ CBike::CBike(int32 id, uint8 CreatedBy)
 
 	m_fTireTemperature = 1.0f;
 	m_fBrakeDestabilization = 0.0f;
-	field_490 = 0;
+	m_fVelocityChangeForAudio = 0;
 
 	for(i = 0; i < 2; i++){
 		m_aWheelRotation[i] = 0.0f;
