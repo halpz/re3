@@ -360,7 +360,7 @@ public:
 	void ProcessVehicle(CVehicle *vehicle);
 	bool ProcessVehicleDoors(cVehicleParams *params);
 	void ProcessVehicleEngine(cVehicleParams *params);
-	void UpdateGasPedalAudio(CVehicle* veh, eVehicleType vehType);
+	void UpdateGasPedalAudio(CVehicle* veh, int vehType);
 	void ProcessVehicleHorn(cVehicleParams *params);
 	void ProcessVehicleOneShots(cVehicleParams *params);
 	bool ProcessVehicleReverseWarning(cVehicleParams *params);

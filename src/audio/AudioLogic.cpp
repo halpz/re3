@@ -290,10 +290,11 @@ void
 cAudioManager::CalculateDistance(bool &distCalculated, float dist)
 {
 	if (!distCalculated) {
-		if (dist <= 0.0)
-			m_sQueueSample.m_fDistance = 0.0;
-		else
+		if (dist > 0.0f)
 			m_sQueueSample.m_fDistance = Sqrt(dist);
+
+		else
+			m_sQueueSample.m_fDistance = 0.0f;
 		distCalculated = true;
 	}
 }
@@ -1297,7 +1298,7 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams* params)
 }
 
 void
-cAudioManager::UpdateGasPedalAudio(CVehicle* veh, eVehicleType vehType)
+cAudioManager::UpdateGasPedalAudio(CVehicle* veh, int vehType)
 {
 	float gasPedal = Abs(veh->m_fGasPedal);
 	float* gasPealAudioPtr;
