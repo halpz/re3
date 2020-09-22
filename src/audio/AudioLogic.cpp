@@ -39,6 +39,7 @@
 #include "sampman.h"
 #include "Bike.h"
 #include "WindModifiers.h"
+#include "Fluff.h"
 
 
 const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
@@ -400,7 +401,7 @@ cAudioManager::ProcessEntity(int32 id)
 		case AUDIOTYPE_ESCALATOR:
 			if (!m_nUserPause) {
 				m_sQueueSample.m_bReverbFlag = true;
-				//ProcessEscalators(); //TODO
+				ProcessEscalators();
 			}
 			break;
 		case AUDIOTYPE_EXTRA_SOUNDS:
@@ -3072,6 +3073,7 @@ cAudioManager::ProcessHelicopter(cVehicleParams *params)
 	return true;
 }
 
+//TODO use it in ProcessVehicle
 void
 cAudioManager::ProcessPlane(cVehicleParams *params)
 {
@@ -4557,12 +4559,14 @@ cAudioManager::ProcessWaterCannon(int32)
 	}
 }
 
+//positon of arcade machines
 CVector aVecExtraSoundPosition[] = { {-1042.546, 88.793999, 11.324}, {-1004.476, 181.69701, 11.324} };
 
 void 
 cAudioManager::ProcessExtraSounds()
 {
-	const float extraSoundIntensity = 18;
+	const float extraSoundIntensity = 18.0f;
+	const uint8 extraSoundVolume = 50;
 
 	float distance;
 
@@ -4574,24 +4578,66 @@ cAudioManager::ProcessExtraSounds()
 				m_sQueueSample.m_fDistance = Sqrt(distance);
 			else
 				m_sQueueSample.m_fDistance = 0.0f;
-			m_sQueueSample.m_nVolume = ComputeVolume(50, 18.0f, m_sQueueSample.m_fDistance);
+			m_sQueueSample.m_nVolume = ComputeVolume(extraSoundVolume, extraSoundIntensity, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume != 0) {
 				this->m_sQueueSample.m_nCounter = i;
 				this->m_sQueueSample.m_nSampleIndex = SFX_ARCADE;
-				this->m_sQueueSample.m_nBankIndex = 0;
+				this->m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				this->m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_ARCADE);
 				this->m_sQueueSample.m_bIs2D = false;
 				this->m_sQueueSample.m_nLoopCount = 0;
 				this->m_sQueueSample.m_bReleasingSoundFlag = false;
 				this->m_sQueueSample.m_nReleasingVolumeModificator = 4;
-				this->m_sQueueSample.m_fSpeedMultiplier = 3.0;
-				this->m_sQueueSample.m_nEmittingVolume = 50;
+				this->m_sQueueSample.m_fSpeedMultiplier = 3.0f;
+				this->m_sQueueSample.m_nEmittingVolume = extraSoundVolume;
 				this->m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_ARCADE);
 				this->m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_ARCADE);
 				this->m_sQueueSample.m_bReverbFlag = true;
-				this->m_sQueueSample.m_fSoundIntensity = 18.0f;
+				this->m_sQueueSample.m_fSoundIntensity = extraSoundIntensity;
 				this->m_sQueueSample.m_bRequireReflection = false;
 				this->m_sQueueSample.m_nReleasingVolumeDivider = 3;
+				AddSampleToRequestedQueue();
+			}
+		}
+	}
+}
+
+void
+cAudioManager::ProcessEscalators()
+{
+	const float escalatorsSoundIntensity = 30.0f;
+	const uint8 escalatorsSoundVolume = 26;
+
+	float distance;
+
+	for (int i = 0; i < CEscalators::NumEscalators; i++) {
+		if (!CEscalators::aEscalators[i].m_bIsActive)
+			continue;
+		m_sQueueSample.m_vecPos = CEscalators::aEscalators[i].m_midPoint;
+		distance = GetDistanceSquared(m_sQueueSample.m_vecPos);
+		if (distance < SQR(escalatorsSoundIntensity)) {
+			if (distance > 0.0)
+				m_sQueueSample.m_fDistance = Sqrt(distance);
+			else
+				m_sQueueSample.m_fDistance = 0.0f;
+			m_sQueueSample.m_nVolume = ComputeVolume(escalatorsSoundVolume, escalatorsSoundIntensity, m_sQueueSample.m_fDistance);
+			if (m_sQueueSample.m_nVolume != 0) {
+				this->m_sQueueSample.m_nSampleIndex = SFX_BOAT_V12_LOOP;
+				this->m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				this->m_sQueueSample.m_nFrequency = i * 50 % 250 + 3973;
+				this->m_sQueueSample.m_nReleasingVolumeModificator = 3;
+				this->m_sQueueSample.m_fSpeedMultiplier = 3.0f;
+				this->m_sQueueSample.m_nReleasingVolumeDivider = 5;
+				this->m_sQueueSample.m_fSoundIntensity = escalatorsSoundIntensity;
+				this->m_sQueueSample.m_nCounter = i;
+				this->m_sQueueSample.m_bIs2D = false;
+				this->m_sQueueSample.m_nLoopCount = 0;
+				this->m_sQueueSample.m_nEmittingVolume = escalatorsSoundVolume;
+				this->m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_BOAT_V12_LOOP);
+				this->m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_BOAT_V12_LOOP);
+				this->m_sQueueSample.m_bReverbFlag = true;
+				this->m_sQueueSample.m_bReleasingSoundFlag = false;
+				this->m_sQueueSample.m_bRequireReflection = false;
 				AddSampleToRequestedQueue();
 			}
 		}

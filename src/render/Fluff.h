@@ -90,15 +90,15 @@ class CEscalator
 	CVector m_pos2;
 	CVector m_pos3;
 	CMatrix m_matrix;
-	bool m_bIsActive;
 	bool m_bIsMovingDown;
 	int32 m_stepsCount;
 	float m_lowerEnd; 
 	float m_upperEnd; 
-	CVector m_midPoint;
 	float m_radius;
 	CObject *m_pSteps[24];
 public:
+	bool m_bIsActive;//TODO also recheck!
+	CVector m_midPoint;
 	CEscalator();
 	void Update(void);
 	void SwitchOff(void);
@@ -107,8 +107,8 @@ public:
 
 class CEscalators
 {
-	static CEscalator aEscalators[NUM_ESCALATORS];
 public:
+	static CEscalator aEscalators[NUM_ESCALATORS];//TODO need recheck this!
 	static int32 NumEscalators;
 	static void Init(void);
 	static void Update(void);
