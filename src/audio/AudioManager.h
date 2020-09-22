@@ -370,6 +370,8 @@ public:
 	void ProcessWaterCannon(int32);
 	void ProcessWeather(int32 id);
 	bool ProcessWetRoadNoise(cVehicleParams *params);
+	void ProcessEscalators();
+	void ProcessExtraSounds();
 
 	int32 RandomDisplacement(uint32 seed) const;
 	void ReacquireDigitalHandle() const;

@@ -38,6 +38,7 @@
 #include "ZoneCull.h"
 #include "sampman.h"
 #include "Bike.h"
+#include "WindModifiers.h"
 
 
 const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
@@ -292,7 +293,6 @@ cAudioManager::CalculateDistance(bool &distCalculated, float dist)
 	if (!distCalculated) {
 		if (dist > 0.0f)
 			m_sQueueSample.m_fDistance = Sqrt(dist);
-
 		else
 			m_sQueueSample.m_fDistance = 0.0f;
 		distCalculated = true;
@@ -337,7 +337,7 @@ cAudioManager::ProcessSpecial()
 void
 cAudioManager::ProcessEntity(int32 id)
 {
-	if (m_asAudioEntities[id].m_nStatus) {
+	if (m_asAudioEntities[id].m_nStatus != STATUS_PLAYER) {
 		m_sQueueSample.m_nEntityIndex = id;
 		switch (m_asAudioEntities[id].m_nType) {
 		case AUDIOTYPE_PHYSICAL:
@@ -361,29 +361,16 @@ cAudioManager::ProcessEntity(int32 id)
 		case AUDIOTYPE_WEATHER:
 			if (!m_nUserPause) {
 				m_sQueueSample.m_bReverbFlag = true;
-				ProcessWeather(id);
+				if(CGame::currArea == AREA_MAIN_MAP || CGame::currArea == AREA_EVERYWHERE)
+					ProcessWeather(id);
 			}
 			break;
-/*		case AUDIOTYPE_CRANE:
-			if (!m_nUserPause) {
-				m_sQueueSample.m_bReverbFlag = true;
-				ProcessCrane();
-			}
-			break;*/
 		case AUDIOTYPE_SCRIPTOBJECT:
 			if (!m_nUserPause) {
 				m_sQueueSample.m_bReverbFlag = true;
 				ProcessScriptObject(id);
 			}
 			break;
-#ifdef GTA_BRIDGE
-		case AUDIOTYPE_BRIDGE:
-			if (!m_nUserPause) {
-				m_sQueueSample.m_bReverbFlag = true;
-				ProcessBridge();
-			}
-			break;
-#endif
 		case AUDIOTYPE_FRONTEND:
 			m_sQueueSample.m_bReverbFlag = false;
 			ProcessFrontEnd();
@@ -408,6 +395,18 @@ cAudioManager::ProcessEntity(int32 id)
 			if (!m_nUserPause) {
 				m_sQueueSample.m_bReverbFlag = true;
 				ProcessWaterCannon(id);
+			}
+			break;
+		case AUDIOTYPE_ESCALATOR:
+			if (!m_nUserPause) {
+				m_sQueueSample.m_bReverbFlag = true;
+				//ProcessEscalators(); //TODO
+			}
+			break;
+		case AUDIOTYPE_EXTRA_SOUNDS:
+			if (!m_nUserPause) {
+				m_sQueueSample.m_bReverbFlag = true;
+				ProcessExtraSounds();
 			}
 			break;
 		default:
@@ -869,27 +868,28 @@ cAudioManager::ProcessReverseGear(cVehicleParams *params)
 {
 	const int reverseGearIntensity = 30;
 
-	CVehicle *veh;
-	CAutomobile *automobile;
-	int32 emittingVol;
+	CAutomobile* automobile;
 	float modificator;
+	uint8 emittingVolume;
 
 	if (params->m_fDistance >= SQR(reverseGearIntensity))
 		return false;
-	veh = params->m_pVehicle;
-	if (veh->bEngineOn && (veh->m_fGasPedal < 0.0f || veh->m_nCurrentGear == 0)) {
+	automobile = (CAutomobile*)params->m_pVehicle;
+	if (automobile->m_modelIndex == MI_CADDY)
+		return true;
+	if (automobile->bEngineOn && (automobile->m_fGasPedal < 0.0f || automobile->m_nCurrentGear == 0)) {
 		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
-		automobile = (CAutomobile *)params->m_pVehicle;
-		if (automobile->m_nWheelsOnGround != 0) {
+		if (automobile->m_nDriveWheelsOnGround != 0) {
 			modificator = params->m_fVelocityChange / params->m_pTransmission->fMaxReverseVelocity;
 		} else {
-			if (automobile->m_nDriveWheelsOnGround != 0)
+			if (automobile->m_nDriveWheelsOnGroundPrev != 0)
 				automobile->m_fGasPedalAudio *= 0.4f;
 			modificator = automobile->m_fGasPedalAudio;
 		}
 		modificator = Abs(modificator);
-		emittingVol = (24.f * modificator);
-		m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, reverseGearIntensity, m_sQueueSample.m_fDistance);
+		emittingVolume = modificator * 24.0f;
+		m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, reverseGearIntensity, m_sQueueSample.m_fDistance);
+
 		if (m_sQueueSample.m_nVolume != 0) {
 			if (params->m_pVehicle->m_fGasPedal >= 0.0f) {
 				m_sQueueSample.m_nCounter = 62;
@@ -901,9 +901,9 @@ cAudioManager::ProcessReverseGear(cVehicleParams *params)
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_bIs2D = false;
 			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_nFrequency = (6000.f * modificator) + 7000;
+			m_sQueueSample.m_nFrequency = (6000.0f * modificator) + 7000;
 			m_sQueueSample.m_nLoopCount = 0;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
+			m_sQueueSample.m_nEmittingVolume = emittingVolume;
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_fSpeedMultiplier = 3.0f;
@@ -1197,7 +1197,7 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams* params)
 						break;
 					}
 				}
-			} else if (0.0f == params->m_fVelocityChange) {
+			} else if (params->m_fVelocityChange == 0.0f) {
 				traction = 0.9f;
 			}
 			if (transmission->fMaxVelocity <= 0.0) {
@@ -4186,7 +4186,6 @@ cAudioManager::SetupPedComments(cPedParams *params, uint32 sound)
 				return;
 			break;
 		}
-
 		soundIntensity = 50.0f;
 	} else {
 		switch (sound) {
@@ -4558,6 +4557,47 @@ cAudioManager::ProcessWaterCannon(int32)
 	}
 }
 
+CVector aVecExtraSoundPosition[] = { {-1042.546, 88.793999, 11.324}, {-1004.476, 181.69701, 11.324} };
+
+void 
+cAudioManager::ProcessExtraSounds()
+{
+	const float extraSoundIntensity = 18;
+
+	float distance;
+
+	for (int i = 0; i < ARRAY_SIZE(aVecExtraSoundPosition); i++) {
+		m_sQueueSample.m_vecPos = aVecExtraSoundPosition[i];
+		distance = GetDistanceSquared(m_sQueueSample.m_vecPos);
+		if (distance < SQR(extraSoundIntensity)) {
+			if (distance > 0.0)
+				m_sQueueSample.m_fDistance = Sqrt(distance);
+			else
+				m_sQueueSample.m_fDistance = 0.0f;
+			m_sQueueSample.m_nVolume = ComputeVolume(50, 18.0f, m_sQueueSample.m_fDistance);
+			if (m_sQueueSample.m_nVolume != 0) {
+				this->m_sQueueSample.m_nCounter = i;
+				this->m_sQueueSample.m_nSampleIndex = SFX_ARCADE;
+				this->m_sQueueSample.m_nBankIndex = 0;
+				this->m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_ARCADE);
+				this->m_sQueueSample.m_bIs2D = false;
+				this->m_sQueueSample.m_nLoopCount = 0;
+				this->m_sQueueSample.m_bReleasingSoundFlag = false;
+				this->m_sQueueSample.m_nReleasingVolumeModificator = 4;
+				this->m_sQueueSample.m_fSpeedMultiplier = 3.0;
+				this->m_sQueueSample.m_nEmittingVolume = 50;
+				this->m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_ARCADE);
+				this->m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_ARCADE);
+				this->m_sQueueSample.m_bReverbFlag = true;
+				this->m_sQueueSample.m_fSoundIntensity = 18.0f;
+				this->m_sQueueSample.m_bRequireReflection = false;
+				this->m_sQueueSample.m_nReleasingVolumeDivider = 3;
+				AddSampleToRequestedQueue();
+			}
+		}
+	}
+}
+
 #pragma region SCRIPT_OBJECTS
 const int SCRIPT_OBJECT_INTENSITY_S = 30;
 const int SCRIPT_OBJECT_INTENSITY_L = 80;
@@ -4565,13 +4605,15 @@ const int SCRIPT_OBJECT_INTENSITY_L = 80;
 void
 cAudioManager::ProcessScriptObject(int32 id)
 {
-	cAudioScriptObject *entity = (cAudioScriptObject *)m_asAudioEntities[id].m_pEntity;
-	if (entity != nil) {
-		m_sQueueSample.m_vecPos = entity->Posn;
-		if (m_asAudioEntities[id].m_AudioEvents == 1)
-			ProcessOneShotScriptObject(m_asAudioEntities[id].m_awAudioEvent[0]);
-		else
-			ProcessLoopingScriptObject(entity->AudioId);
+	if (MusicManager.m_nMusicMode == MUSICMODE_GAME) {
+		cAudioScriptObject* entity = (cAudioScriptObject*)m_asAudioEntities[id].m_pEntity;
+		if (entity != nil) {
+			m_sQueueSample.m_vecPos = entity->Posn;
+			if (m_asAudioEntities[id].m_AudioEvents == 1)
+				ProcessOneShotScriptObject(m_asAudioEntities[id].m_awAudioEvent[0]);
+			else
+				ProcessLoopingScriptObject(entity->AudioId);
+		}
 	}
 }
 
@@ -4959,14 +5001,19 @@ void
 cAudioManager::ProcessWeather(int32 id)
 {
 	uint8 vol;
+	float x;
+	float y;
+	float modifier;
+	float wind;
+
 	static uint8 iSound = 0;
 
-	if (m_asAudioEntities[id].m_AudioEvents && m_asAudioEntities[id].m_awAudioEvent[0] == SOUND_LIGHTNING) {
+	if (m_asAudioEntities[id].m_AudioEvents != 0 && m_asAudioEntities[id].m_awAudioEvent[0] == SOUND_LIGHTNING) {
 		if (m_asAudioEntities[id].m_afVolume[0] >= 10.f) {
 			m_sQueueSample.m_nSampleIndex = SFX_EXPLOSION_1;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_GENERIC_EXTRA;
 			m_sQueueSample.m_nFrequency = RandomDisplacement(500) + 4000;
-			vol = (m_asAudioEntities[id].m_afVolume[0] - 10.f) + 40;
+			vol = (m_asAudioEntities[id].m_afVolume[0] - 10.0f) + 40;
 		} else {
 			m_sQueueSample.m_nSampleIndex = SFX_EXPLOSION_2;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
@@ -4974,7 +5021,7 @@ cAudioManager::ProcessWeather(int32 id)
 			vol = (m_asAudioEntities[id].m_afVolume[0]) + 35;
 		}
 		m_sQueueSample.m_nVolume = vol;
-		if (TheCamera.SoundDistUp < 20.f)
+		if (TheCamera.SoundDistUp < 20.0f)
 			m_sQueueSample.m_nVolume /= 2;
 		if (iSound == 4)
 			iSound = 0;
@@ -4994,7 +5041,7 @@ cAudioManager::ProcessWeather(int32 id)
 	if (CWeather::Rain > 0.0f && (!CCullZones::CamNoRain() || !CCullZones::PlayerNoRain())) {
 		m_sQueueSample.m_nSampleIndex = SFX_RAIN;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RAIN);
-		m_sQueueSample.m_nVolume = (int32)(25.f * CWeather::Rain);
+		m_sQueueSample.m_nVolume = (uint8)(25.0f * CWeather::Rain);
 		m_sQueueSample.m_nCounter = 4;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 		m_sQueueSample.m_nReleasingVolumeModificator = 0;
@@ -5009,6 +5056,32 @@ cAudioManager::ProcessWeather(int32 id)
 		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 		m_sQueueSample.m_bRequireReflection = false;
 		AddSampleToRequestedQueue();
+	}
+	x = 0.0f;
+	y = 0.0f;
+	CWindModifiers::FindWindModifier(TheCamera.GetPosition(), &x, &y);
+	modifier = Max(Abs(x), Abs(y)) * 10.0f;
+	modifier = Min(1.0f, modifier);
+	wind = Max(CWeather::Wind, modifier);
+	if (wind > 0.0f && CObject::fDistToNearestTree < 75.0) {
+		m_sQueueSample.m_nSampleIndex = SFX_PALM_TREE_LO;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_PALM_TREE_LO);
+		m_sQueueSample.m_nVolume = (m_anRandomTable[1] % 10 + 45.0f) * (75.0f - CObject::fDistToNearestTree) * (4.0f / 300.0f) * wind;
+		m_sQueueSample.m_nCounter = 5;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+		m_sQueueSample.m_nReleasingVolumeModificator = 1;
+		m_sQueueSample.m_nOffset = 63;
+		m_sQueueSample.m_bIs2D = true;
+		m_sQueueSample.m_nLoopCount = 0;
+		m_sQueueSample.m_bReleasingSoundFlag = false;
+		m_sQueueSample.m_nReleasingVolumeDivider = 7;
+		m_sQueueSample.m_bReverbFlag = false;
+		m_sQueueSample.m_nEmittingVolume = m_sQueueSample.m_nVolume;
+		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_bRequireReflection = false;
+		AddSampleToRequestedQueue();
+		CObject::fDistToNearestTree = 999999.9f;
 	}
 }
 
