@@ -89,6 +89,10 @@ bool CPad::IsAffectedByController = false;
 _TODO("gbFastTime");
 extern bool gbFastTime;
 
+#ifdef WALLCLIMB_CHEAT
+extern bool gGravityCheat;
+#endif
+
 void WeaponCheat1()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT2"), true);
@@ -549,6 +553,22 @@ void AltDodoCheat(void)
 	else {
 		string = TheText.Get("CHEAT1");
 		CVehicle::bAltDodoCheat = true;
+	}
+	CHud::SetHelpMessage(string, true);
+}
+#endif
+
+#ifdef WALLCLIMB_CHEAT
+void WallClimbingCheat(void)
+{
+	wchar* string;
+	if (gGravityCheat) {
+		string = TheText.Get("CHEATOF");
+		gGravityCheat = false;
+	}
+	else {
+		string = TheText.Get("CHEAT1");
+		gGravityCheat = true;
 	}
 	CHud::SetHelpMessage(string, true);
 }
@@ -1428,6 +1448,12 @@ void CPad::AddToPCCheatString(char c)
 	// "IWANTTOMASTERDODO"
 	if (!_CHEATCMP("ODODRETSAMOTTNAWI"))
 		AltDodoCheat();
+#endif
+
+#ifdef WALLCLIMB_CHEAT
+	// "SPIDERCAR"
+	if (!_CHEATCMP("RACREDIPS"))
+		WallClimbingCheat();
 #endif
 
 #if !defined(PC_WATER) && defined(WATER_CHEATS)

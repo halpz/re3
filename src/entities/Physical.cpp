@@ -23,6 +23,11 @@
 
 //--MIAMI: file done
 
+#ifdef WALLCLIMB_CHEAT
+bool gGravityCheat;
+#endif
+
+
 CPhysical::CPhysical(void)
 {
 	int i;
@@ -521,8 +526,29 @@ CPhysical::ApplySpringDampening(float damping, CVector &springDir, CVector &poin
 void
 CPhysical::ApplyGravity(void)
 {
-	if(bAffectedByGravity)
-		m_vecMoveSpeed.z -= GRAVITY * CTimer::GetTimeStep();
+	if (!bAffectedByGravity)
+		return;
+#ifdef WALLCLIMB_CHEAT
+	if (gGravityCheat && this == FindPlayerVehicle()) {
+		static CVector v1(0.0f, 0.0f, 1.0f), v2(0.0f, 0.0f, 1.0f);
+		CVector prop = GetPosition() - (GetUp() + GetUp());
+		CColPoint point;
+		CEntity* entity;
+		if (CWorld::ProcessLineOfSight(GetPosition(), prop, point, entity, true, false, false, false, false, false))
+			v2 = point.normal;
+		else
+			v2 = CVector(0.0f, 0.0f, 1.0f);
+		float coef = clamp(CTimer::GetTimeStep() * 0.5f, 0.05f, 0.8f);
+		v1 = v1 * (1.0f - coef) + v2 * coef;
+		if (v1.MagnitudeSqr() < 0.1f)
+			v1 = CVector(0.0f, 0.0f, 1.0f);
+		else
+			v1.Normalise();
+		m_vecMoveSpeed -= GRAVITY * CTimer::GetTimeStep() * v1;
+		return;
+	}
+#endif
+	m_vecMoveSpeed.z -= GRAVITY * CTimer::GetTimeStep();
 }
 
 void
