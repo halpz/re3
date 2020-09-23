@@ -458,7 +458,7 @@ public:
 	uint32 bTurnedAroundOnAttractor : 1;
 
 	uint32 bHasAlreadyUsedAttractor : 1;
-	uint32 b155_2 : 1;
+	uint32 bHasAlreadyStoleACar : 1;
 	uint32 bCarPassenger : 1;
 	uint32 bFleeWhenStanding : 1;
 	uint32 bGotUpOfMyOwnAccord : 1;
@@ -468,7 +468,7 @@ public:
 
 	uint32 bIsDrowning : 1;
 	uint32 bDrownsInWater : 1;
-	uint32 b156_4 : 1;
+	uint32 bWaitForLeaderToComeCloser : 1;
 	uint32 bHeldHostageInCar : 1;
 	uint32 bIsPlayerFriend : 1;
 	uint32 bHeadStuckInCollision : 1;
@@ -809,7 +809,6 @@ public:
 	void GetNearestDoor(CVehicle*, CVector&);
 	bool GetNearestPassengerDoor(CVehicle*, CVector&);
 	int GetNextPointOnRoute(void);
-	uint8 GetPedRadioCategory(uint32);
 	int GetWeaponSlot(eWeaponType);
 	bool CanWeRunAndFireWithWeapon(void);
 	void GoToNearestDoor(CVehicle*);
@@ -966,6 +965,8 @@ public:
 	void Dress(void);
 	int32 KillCharOnFootMelee(CVector&, CVector&, CVector&);
 	int32 KillCharOnFootArmed(CVector&, CVector&, CVector&);
+	void SetLook(CEntity* to);
+	void SetLook(float direction);
 
 	bool HasWeaponSlot(uint8 slot) { return m_weapons[slot].m_eWeaponType != WEAPONTYPE_UNARMED; }
 	CWeapon& GetWeapon(uint8 slot) { return m_weapons[slot]; }
