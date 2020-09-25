@@ -3071,7 +3071,7 @@ void cAudioManager::ProcessCarHeli(cVehicleParams* params)
 	CAutomobile* automobile; // [esp+10h] [ebp-CCh]
 	CBoat* boat; // [esp+1Ch] [ebp-C0h]
 
-	signed int volume; // ebx
+	signed int volume_5; // ebx
 	unsigned int freqModifier; // eax
 	signed int volume; // ebx
 	uint32 freq_6; // eax
@@ -3142,13 +3142,12 @@ void cAudioManager::ProcessCarHeli(cVehicleParams* params)
 	CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 
 
-	if (m_sQueueSample.m_fDistance >= 40.0f)
+	if (m_sQueueSample.m_fDistance >= 40.0f) //!!
 		volume = speedMultiplied * 75.0f;
-	else if (m_sQueueSample.m_fDistance >= 25.0f)
-		volume = 0;
-	else
+	else if (m_sQueueSample.m_fDistance >= 25.0f) //!!
 		volume = (m_sQueueSample.m_fDistance - 25.0f) * 0.06666667f * (75.0f * speedMultiplied);
-
+	else
+		volume = 0;
 
 
 
@@ -3250,8 +3249,8 @@ void cAudioManager::ProcessCarHeli(cVehicleParams* params)
 		if (!boat && params->m_VehicleType != VEHICLE_TYPE_HELI && m_sQueueSample.m_fDistance >= 30.0f) { //!!
 			if (automobile->bEngineOn) {
 				if (speedMultiplied >= 1.0f) {
-					volume = (1.0f - 0.5f * speedMultiplied) * 70.0f;
-					m_sQueueSample.m_nVolume = ComputeVolume(volume, 30.0, m_sQueueSample.m_fDistance);
+					volume_5 = (1.0f - 0.5f * speedMultiplied) * 70.0f;
+					m_sQueueSample.m_nVolume = ComputeVolume(volume_5, 30.0, m_sQueueSample.m_fDistance);
 					if (m_sQueueSample.m_nVolume) {
 						if (hunterBool) {
 							m_sQueueSample.m_nSampleIndex = SFX_HELI_APACHE_4;
@@ -3267,7 +3266,7 @@ void cAudioManager::ProcessCarHeli(cVehicleParams* params)
 						m_sQueueSample.m_bIs2D = false;
 						m_sQueueSample.m_nReleasingVolumeModificator = 1;
 						m_sQueueSample.m_nLoopCount = 0;
-						m_sQueueSample.m_nEmittingVolume = volume;
+						m_sQueueSample.m_nEmittingVolume = volume_5;
 						m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 						m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 						m_sQueueSample.m_fSpeedMultiplier = 6.0f;
