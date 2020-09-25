@@ -740,12 +740,14 @@ DisplayGameDebugText()
 	static bool bDisplayRate = false;
 	static bool bDisplayCheatStr = false;
 
+#ifndef FINAL
 	{
 		SETTWEAKPATH("GameDebugText");
 		TWEAKBOOL(bDisplayPosn);
 		TWEAKBOOL(bDisplayRate);
 		TWEAKBOOL(bDisplayCheatStr);
 	}
+#endif
 
 
 	char str[200];
@@ -1091,6 +1093,7 @@ Idle(void *arg)
 #endif
 
 #ifdef FIX_BUGS
+		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void *)FALSE); // TODO: temp? this fixes OpenGL render but there should be a better place for this
 		// This has to be done BEFORE RwCameraBeginUpdate
 		RwCameraSetFarClipPlane(Scene.camera, CTimeCycle::GetFarClip());
 		RwCameraSetFogDistance(Scene.camera, CTimeCycle::GetFogStart());
