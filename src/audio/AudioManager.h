@@ -332,6 +332,7 @@ public:
 	void ProcessGarages();
 	bool ProcessHelicopter(cVehicleParams *params);
 	void ProcessCarHeli(cVehicleParams* params);
+	void ProcessVehicleFlatTyre(cVehicleParams* params);
 	void ProcessJumbo(cVehicleParams *);
 	void ProcessJumboAccel(CPlane *plane);
 	void ProcessJumboDecel(CPlane *plane);
