@@ -18,7 +18,8 @@
 #include <float.h>
 #endif
 
-// --MIAMI: Done
+// --MIAMI: file done except TODOs
+
 CCivilianPed::CCivilianPed(ePedType pedtype, uint32 mi) : CPed(pedtype)
 {
 	SetModelIndex(mi);
@@ -43,7 +44,6 @@ CCivilianPed::CCivilianPed(ePedType pedtype, uint32 mi) : CPed(pedtype)
 	m_bAttractorUnk = (CGeneral::GetRandomNumberInRange(0.0f, 1.0f) < 1.25f);
 }
 
-// --MIAMI: Done
 void
 CCivilianPed::CivilianAI(void)
 {
@@ -221,7 +221,6 @@ CCivilianPed::CivilianAI(void)
 	}
 }
 
-// --MIAMI: Done except comments
 void
 CCivilianPed::ProcessControl(void)
 {
@@ -504,7 +503,6 @@ bool CCivilianPed::IsAttractedTo(int8 type)
 	return false;
 }
 
-// --MIAMI: Done
 void
 CCivilianPed::EnterVacantNearbyCars(void)
 {

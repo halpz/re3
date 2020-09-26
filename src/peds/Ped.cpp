@@ -67,6 +67,8 @@
 #include "CutsceneShadow.h"
 #include "Clock.h"
 
+// --MIAMI: file done except TODOs
+
 #define CAN_SEE_ENTITY_ANGLE_THRESHOLD	DEGTORAD(60.0f)
 
 CPed *gapTempPedList[50];
@@ -10945,7 +10947,7 @@ CPed::PedAnimAlignCB(CAnimBlendAssociation *animAssoc, void *arg)
 				pedToDragOut->RegisterThreatWithGangPeds(ped);
 
 			if (ped->m_nPedType == PEDTYPE_COP && pedToDragOut == FindPlayerPed() && veh->IsBike())
-				((CCopPed*)ped)->field_601 = 1;
+				((CCopPed*)ped)->m_bDragsPlayerFromCar = 1;
 
 			if (pedToDragOut == veh->pDriver) {
 				if (veh->pPassengers[0])
@@ -20894,11 +20896,11 @@ CPed::KillCharOnFootMelee(CVector &ourPos, CVector &targetPos, CVector &distWith
 	}
 	if (m_nPedType == PEDTYPE_COP && m_pedInObjective->IsPlayer()) {
 		float maxArrestDist = 1.5f;
-		if (((CCopPed*)this)->field_601) {
+		if (((CCopPed*)this)->m_bDragsPlayerFromCar) {
 			if (m_nPedState == PED_FALL) {
 				maxArrestDist = 3.5f;
 			} else if (m_nPedState != PED_DRAG_FROM_CAR) {
-				((CCopPed*)this)->field_601 = 0;
+				((CCopPed*)this)->m_bDragsPlayerFromCar = 0;
 			}
 		}
 
@@ -21139,11 +21141,11 @@ CPed::KillCharOnFootArmed(CVector &ourPos, CVector &targetPos, CVector &distWith
 	}
 	if (m_nPedType == PEDTYPE_COP && m_pedInObjective->IsPlayer()) {
 		float maxArrestDist = 1.5f;
-		if (((CCopPed*)this)->field_601) {
+		if (((CCopPed*)this)->m_bDragsPlayerFromCar) {
 			if (m_nPedState == PED_FALL) {
 				maxArrestDist = 3.5f;
 			} else if (m_nPedState != PED_DRAG_FROM_CAR) {
-				((CCopPed*)this)->field_601 = 0;
+				((CCopPed*)this)->m_bDragsPlayerFromCar = 0;
 			}
 		}
 
