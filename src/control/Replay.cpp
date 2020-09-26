@@ -744,7 +744,7 @@ void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressI
 			car->Damage.SetDoorStatus(DOOR_FRONT_LEFT, DOOR_STATUS_SWINGING);
 		if (vp->door_angles[1])
 			car->Damage.SetDoorStatus(DOOR_FRONT_RIGHT, DOOR_STATUS_SWINGING);
-		if (vp->door_status & 1 && car->Damage.GetDoorStatus(DOOR_BONNET) != DOOR_STATUS_MISSING){
+		if (vp->door_status & 1 && car->Damage.GetDoorStatus(DOOR_BONNET) != DOOR_STATUS_MISSING) {
 			car->Damage.SetDoorStatus(DOOR_BONNET, DOOR_STATUS_MISSING);
 			car->SetDoorDamage(CAR_BONNET, DOOR_BONNET, true);
 		}
@@ -768,14 +768,14 @@ void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressI
 			car->Damage.SetDoorStatus(DOOR_REAR_RIGHT, DOOR_STATUS_MISSING);
 			car->SetDoorDamage(CAR_DOOR_RR, DOOR_REAR_RIGHT, true);
 		}
-		vehicle->bEngineOn = true;
-		if (vehicle->IsCar())
-			((CAutomobile*)vehicle)->m_nDriveWheelsOnGround = 4;
-		CWorld::Remove(vehicle);
-		CWorld::Add(vehicle);
-		if (vehicle->IsBoat())
-			((CBoat*)vehicle)->m_bIsAnchored = false;
 	}
+	vehicle->bEngineOn = true;
+	if (vehicle->IsCar())
+		((CAutomobile*)vehicle)->m_nDriveWheelsOnGround = 4;
+	CWorld::Remove(vehicle);
+	CWorld::Add(vehicle);
+	if (vehicle->IsBoat())
+		((CBoat*)vehicle)->m_bIsAnchored = false;
 }
 
 bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, float interpolation, uint32 *pTimer){
