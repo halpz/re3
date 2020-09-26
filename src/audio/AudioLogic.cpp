@@ -2265,34 +2265,36 @@ cAudioManager::HasAirBrakes(int32 model) const
 		|| model == COACH || model == PACKER || model == FLATBED;
 }
 
-bool
+void
 cAudioManager::ProcessEngineDamage(cVehicleParams *params)
 {
 	const int engineDamageIntensity = 40;
 
-	CAutomobile *veh;
-	uint8 engineStatus;
+	float health;
 	uint8 emittingVolume;
 
 	if (params->m_fDistance >= SQR(engineDamageIntensity))
-		return false;
-	veh = (CAutomobile *)params->m_pVehicle;
-	if (veh->bEngineOn) {
-		engineStatus = veh->Damage.GetEngineStatus();
-		if (engineStatus > 250 || engineStatus < 100)
-			return true;
-		if (engineStatus < 225) {
-			m_sQueueSample.m_nSampleIndex = SFX_JUMBO_TAXI;
-			emittingVolume = 6;
-			m_sQueueSample.m_nReleasingVolumeModificator = 7;
-			m_sQueueSample.m_nFrequency = 40000;
-		} else {
+		return;
+	if (params->m_pVehicle->m_modelIndex == MI_CADDY)
+		return;
+	if (params->m_pVehicle->GetStatus() == STATUS_WRECKED)
+		return;
+	health = params->m_pVehicle->m_fHealth;
+	if (health < 390.0f) {
+		if (health < 250.0f) {
 			emittingVolume = 60;
 			m_sQueueSample.m_nSampleIndex = SFX_CAR_ON_FIRE;
 			m_sQueueSample.m_nReleasingVolumeModificator = 7;
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CAR_ON_FIRE);
+		} else {
+			emittingVolume = 30;
+			m_sQueueSample.m_nSampleIndex = SFX_PALM_TREE_LO;
+			m_sQueueSample.m_nReleasingVolumeModificator = 7;
+			m_sQueueSample.m_nFrequency = 27000;
 		}
 		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
+		if (params->m_pVehicle->bIsDrowning)
+			emittingVolume /= 2;
 		m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, engineDamageIntensity, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume != 0) {
 			m_sQueueSample.m_nCounter = 28;
@@ -2311,7 +2313,6 @@ cAudioManager::ProcessEngineDamage(cVehicleParams *params)
 			AddSampleToRequestedQueue();
 		}
 	}
-	return true;
 }
 
 bool

@@ -323,7 +323,7 @@ public:
 	bool ProcessCarBombTick(cVehicleParams *params);
 	void ProcessCesna(cVehicleParams *params);
 	//void ProcessCrane();
-	bool ProcessEngineDamage(cVehicleParams *params);
+	void ProcessEngineDamage(cVehicleParams *params); //done
 	void ProcessEntity(int32 sound); //done
 	void ProcessExplosions(int32 explosion);
 	void ProcessFireHydrant();
