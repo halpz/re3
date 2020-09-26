@@ -10098,11 +10098,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 			model = CStreaming::ms_vehiclesLoaded[index];
 			if (model == -1)
 				continue;
-			// desperatly want to believe this was inlined :|
-			CBaseModelInfo* pInfo = CModelInfo::GetModelInfo(model);
-			script_assert(pInfo->GetModelType() == MITYPE_VEHICLE);
-			CVehicleModelInfo* pVehicleInfo = (CVehicleModelInfo*)pInfo;
-			if (pVehicleInfo->m_vehicleType == VEHICLE_TYPE_CAR || pVehicleInfo->m_vehicleType == VEHICLE_TYPE_BIKE) {
+			if (CModelInfo::IsCarModel(model) || CModelInfo::IsBikeModel(model)) {
 				switch (model) {
 				case MI_LANDSTAL:
 				case MI_LINERUN:
