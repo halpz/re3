@@ -476,7 +476,11 @@ CCoronas::RenderReflections(void)
 						int intensity = distanceFade*heightFade * 230.0 * CWeather::WetRoads;
 
 						CSprite::RenderBufferedOneXLUSprite(
+#ifdef FIX_BUGS
+							spriteCoors.x, spriteCoors.y, spriteCoors.z,
+#else
 							spriteCoors.x, spriteCoors.y, RwIm2DGetNearScreenZ(),
+#endif
 							spritew * aCoronas[i].size * 0.75f,
 							spriteh * aCoronas[i].size * 2.0f,
 							(intensity * CCoronas::aCoronas[i].red)>>8,
