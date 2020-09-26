@@ -104,7 +104,7 @@ CCamera::Init(void)
 		memset(this, 0, sizeof(CCamera));	// getting rid of vtable, eh?
 	#endif
 	
-    #if defined(GTA3_1_1_PATCH) || defined(FIX_BUGS)
+	#if defined(GTA3_1_1_PATCH) || defined(FIX_BUGS)
 		m_fMouseAccelHorzntl = fMouseAccelHorzntl;
 		m_fMouseAccelVertical = fMouseAccelVertical;
 	#endif
