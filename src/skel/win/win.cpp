@@ -1095,8 +1095,11 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 
 			if ( wParam == VK_SHIFT )
 				_InputTranslateShiftKeyUpDown(&ks);
-
+#ifdef FIX_BUGS
+			break;
+#else
 			return 0L;
+#endif
 		}
 
 		case WM_KEYUP:
@@ -1109,7 +1112,11 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 			if ( wParam == VK_SHIFT )
 				_InputTranslateShiftKeyUpDown(&ks);
 
+#ifdef FIX_BUGS
+			break;
+#else
 			return 0L;
+#endif
 		}
 
 		case WM_SYSKEYDOWN:
@@ -1122,7 +1129,11 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 			if ( wParam == VK_SHIFT )
 				_InputTranslateShiftKeyUpDown(&ks);
 
+#ifdef FIX_BUGS
+			break;
+#else
 			return 0L;
+#endif
 		}
 
 		case WM_SYSKEYUP:
@@ -1135,7 +1146,11 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 			if ( wParam == VK_SHIFT )
 				_InputTranslateShiftKeyUpDown(&ks);
 
+#ifdef FIX_BUGS
+			break;
+#else
 			return 0L;
+#endif
 		}
 
 		case WM_ACTIVATEAPP:

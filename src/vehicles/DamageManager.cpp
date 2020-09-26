@@ -42,8 +42,10 @@ CDamageManager::FuckCarCompletely(void)
 #endif
 	}
 	// Why set to no damage?
+#ifndef FIX_BUGS
 	m_lightStatus = 0;
 	m_panelStatus = 0;
+#endif
 	SetEngineStatus(250);
 }
 

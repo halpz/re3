@@ -1100,6 +1100,10 @@ int CRadar::SetCoordBlip(eBlipType type, CVector pos, int32 color, eBlipDisplay 
 		if (!ms_RadarTrace[nextBlip].m_bInUse)
 			break;
 	}
+#ifdef FIX_BUGS
+	if (nextBlip == NUMRADARBLIPS)
+		return -1;
+#endif
 	ms_RadarTrace[nextBlip].m_eBlipType = type;
 	ms_RadarTrace[nextBlip].m_nColor = color;
 	ms_RadarTrace[nextBlip].m_bDim = 1;
@@ -1121,6 +1125,10 @@ int CRadar::SetEntityBlip(eBlipType type, int32 handle, int32 color, eBlipDispla
 		if (!ms_RadarTrace[nextBlip].m_bInUse)
 			break;
 	}
+#ifdef FIX_BUGS
+	if (nextBlip == NUMRADARBLIPS)
+		return -1;
+#endif
 	ms_RadarTrace[nextBlip].m_eBlipType = type;
 	ms_RadarTrace[nextBlip].m_nColor = color;
 	ms_RadarTrace[nextBlip].m_bDim = 1;
@@ -1452,6 +1460,10 @@ CRadar::ToggleTargetMarker(float x, float y)
 			if (!ms_RadarTrace[nextBlip].m_bInUse)
 				break;
 		}
+#ifdef FIX_BUGS
+		if (nextBlip == NUMRADARBLIPS)
+			return;
+#endif
 		ms_RadarTrace[nextBlip].m_eBlipType = BLIP_COORD;
 		ms_RadarTrace[nextBlip].m_nColor = 0x333333FF;
 		ms_RadarTrace[nextBlip].m_bDim = 1;

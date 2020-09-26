@@ -1608,6 +1608,9 @@ CWeapon::FireM16_1stPerson(CEntity *shooter)
 
 	if ( shooter == FindPlayerPed() )
 	{
+#ifdef FIX_BUGS
+		CStats::InstantHitsFiredByPlayer++;
+#endif
 		CPad::GetPad(0)->StartShake_Distance(240, 128, FindPlayerPed()->GetPosition().x, FindPlayerPed()->GetPosition().y, FindPlayerPed()->GetPosition().z);
 
 		if ( m_eWeaponType == WEAPONTYPE_M16 )
