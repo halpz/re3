@@ -12,12 +12,32 @@
 #include "Weather.h"
 #include "PedAttractor.h"
 #include "Object.h"
+#include "CarCtrl.h"
 
+#ifndef _WIN32
+#include <float.h>
+#endif
+
+// --MIAMI: Done
 CCivilianPed::CCivilianPed(ePedType pedtype, uint32 mi) : CPed(pedtype)
 {
 	SetModelIndex(mi);
 	for (int i = 0; i < ARRAY_SIZE(m_nearPeds); i++) {
 		m_nearPeds[i] = nil;
+	}
+	m_bLookForVacantCars = false;
+	if (pedtype == PEDTYPE_CRIMINAL)
+		m_bLookForVacantCars = true;
+
+	m_nLookForVacantCarsCounter = 0;
+	m_bJustStoleACar = false;
+	m_bStealCarEvenIfThereIsSomeoneInIt = false;
+	for (int i = 0; i < ARRAY_SIZE(m_nStealWishList); i++) {
+		uint32 randomCarModel = CGeneral::GetRandomNumberInRange(MI_LANDSTAL, MI_LAST_VEHICLE + 1);
+		if (CModelInfo::IsCarModel(randomCarModel) || CModelInfo::IsBikeModel(randomCarModel))
+			m_nStealWishList[i] = randomCarModel;
+		else
+			m_nStealWishList[i] = MI_CHEETAH;
 	}
 	m_nAttractorCycleState = 0;
 	m_bAttractorUnk = (CGeneral::GetRandomNumberInRange(0.0f, 1.0f) < 1.25f);
@@ -384,7 +404,7 @@ CCivilianPed::ProcessControl(void)
 		CivilianAI();
 
 	if (CharCreatedBy == RANDOM_CHAR) {
-		// TODO(Miami): EnterVacantNearbyCars();
+		EnterVacantNearbyCars();
 		UseNearbyAttractors();
 	}
 
@@ -480,6 +500,86 @@ bool CCivilianPed::IsAttractedTo(int8 type)
 	case ATTRACTOR_PIZZA: return true;
 	case ATTRACTOR_SHELTER: return CWeather::Rain >= 0.2f;
 	case ATTRACTOR_ICECREAM: return false;
+	}
+	return false;
+}
+
+// --MIAMI: Done
+void
+CCivilianPed::EnterVacantNearbyCars(void)
+{
+	if (!m_bLookForVacantCars)
+		return;
+
+	if (m_bJustStoleACar && bInVehicle && m_carInObjective == m_pMyVehicle) {
+		m_bJustStoleACar = false;
+		m_pMyVehicle->SetStatus(STATUS_PHYSICS);
+		m_pMyVehicle->AutoPilot.m_nCarMission = MISSION_CRUISE;
+		m_pMyVehicle->AutoPilot.m_nCruiseSpeed = 10;
+		m_pMyVehicle->bEngineOn = true;
+
+	} else if (!bHasAlreadyStoleACar) {
+		if (m_nLookForVacantCarsCounter == 8) {
+			m_nLookForVacantCarsCounter = 0;
+			if (IsPedInControl() && m_objective == OBJECTIVE_NONE) {
+
+				CVehicle *foundCar = nil;
+				float closestDist = FLT_MAX;
+				int minX = CWorld::GetSectorIndexX(GetPosition().x - 10.0f);
+				if (minX < 0) minX = 0;
+				int minY = CWorld::GetSectorIndexY(GetPosition().y - 10.0f);
+				if (minY < 0) minY = 0;
+				int maxX = CWorld::GetSectorIndexX(GetPosition().x + 10.0f);
+				if (maxX > NUMSECTORS_X - 1) maxX = NUMSECTORS_X - 1;
+				int maxY = CWorld::GetSectorIndexY(GetPosition().y + 10.0f);
+				if (maxY > NUMSECTORS_Y - 1) maxY = NUMSECTORS_Y - 1;
+
+				for (int curY = minY; curY <= maxY; curY++) {
+					for (int curX = minX; curX <= maxX; curX++) {
+						CSector* sector = CWorld::GetSector(curX, curY);
+						for (CPtrNode* node = sector->m_lists[ENTITYLIST_VEHICLES].first; node; node = node->next) {
+							CVehicle* veh = (CVehicle*)node->item;
+							if (veh && veh->IsCar()) {
+
+								// Looks like PARKED_VEHICLE condition isn't there in Mobile.
+								if (veh->VehicleCreatedBy == RANDOM_VEHICLE || veh->VehicleCreatedBy == PARKED_VEHICLE) {
+									if (IsOnStealWishList(veh->GetModelIndex()) && !veh->IsLawEnforcementVehicle()
+										&& (m_bStealCarEvenIfThereIsSomeoneInIt || !veh->pDriver && !veh->m_nNumPassengers)
+										&& !veh->m_nNumGettingIn && !veh->m_nGettingInFlags && !veh->m_nGettingOutFlags
+										&& !veh->m_pCarFire && veh->m_fHealth > 800.0f
+										&& !veh->IsUpsideDown() && !veh->IsOnItsSide() && veh->CanPedEnterCar()) {
+										float dist = (GetPosition() - veh->GetPosition()).MagnitudeSqr();
+										if (dist < sq(10.0f) && dist < closestDist && veh->IsClearToDriveAway()) {
+											foundCar = veh;
+											closestDist = dist;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				if (foundCar) {
+					m_bJustStoleACar = true;
+					bHasAlreadyStoleACar = true;
+					CCarCtrl::JoinCarWithRoadSystem(foundCar);
+					SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, foundCar);
+					SetObjectiveTimer(10000);
+				}
+			}
+		} else {
+			++m_nLookForVacantCarsCounter;
+		}
+	}
+}
+
+bool
+CCivilianPed::IsOnStealWishList(int32 model)
+{
+	for (int i = 0; i < ARRAY_SIZE(m_nStealWishList); i++) {
+		if (model == m_nStealWishList[i]) {
+			return true;
+		}
 	}
 	return false;
 }

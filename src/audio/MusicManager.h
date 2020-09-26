@@ -42,7 +42,7 @@ public:
 	bool field_3995;
 	bool field_3996;
 	bool field_3997;
-	int8 field_3998;
+	int8 nFramesSinceCutsceneEnded;
 	bool field_3999;
 	bool field_399A;
 	uint8 m_nMusicModeToBeSet;

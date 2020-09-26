@@ -88,7 +88,7 @@ cMusicManager::ResetMusicAfterReload()
 	field_3995 = false;
 	field_3996 = false;
 	field_3997 = false;
-	field_3998 = -1;
+	nFramesSinceCutsceneEnded = -1;
 	field_3999 = false;
 	field_399A = false;
 	field_399C = false;
@@ -195,7 +195,7 @@ cMusicManager::Initialise()
 		field_3995 = false;
 		field_3996 = false;
 		field_3997 = false;
-		field_3998 = -1;
+		nFramesSinceCutsceneEnded = -1;
 		field_3999 = false;
 		field_399A = false;
 		m_nMusicModeToBeSet = MUSICMODE_DISABLED;
@@ -507,7 +507,7 @@ cMusicManager::ServiceGameMode()
 	}
 
 	if (!field_3996) {
-		field_3998 = -1;
+		nFramesSinceCutsceneEnded = -1;
 		gNumRetunePresses = 0;
 		gRetuneCounter = 0;
 		field_2 = false;
@@ -867,7 +867,7 @@ cMusicManager::ServiceTrack(CVehicle *veh, CPed *ped)
 {
 	static bool bRadioStatsRecorded = false;
 	static bool bRadioStatsRecorded2 = false;
-	uint8 AmbienceVol;
+	uint8 volume;
 	if (!field_398F)
 		m_nStreamedTrack = m_nFrontendTrack;
 	if (gRetuneCounter != 0 || field_2) {
@@ -920,8 +920,8 @@ cMusicManager::ServiceTrack(CVehicle *veh, CPed *ped)
 						}
 						else
 						{
-							ComputeAmbienceVol(true, AmbienceVol);
-							SampleManager.SetStreamedVolumeAndPan(AmbienceVol, 63, 1, 0);
+							ComputeAmbienceVol(true, volume);
+							SampleManager.SetStreamedVolumeAndPan(volume, 63, 1, 0);
 						}
 						if (m_nStreamedTrack < STREAMED_SOUND_CITY_AMBIENT)
 							m_nLastTrackServiceTime = CTimer::GetTimeInMillisecondsPauseMode();
@@ -952,8 +952,8 @@ cMusicManager::ServiceTrack(CVehicle *veh, CPed *ped)
 
 	if (m_nPlayingTrack >= STREAMED_SOUND_CITY_AMBIENT && m_nPlayingTrack <= STREAMED_SOUND_AMBSIL_AMBIENT)
 	{
-		ComputeAmbienceVol(false, AmbienceVol);
-		SampleManager.SetStreamedVolumeAndPan(AmbienceVol, 63, 1, 0);
+		ComputeAmbienceVol(false, volume);
+		SampleManager.SetStreamedVolumeAndPan(volume, 63, 1, 0);
 		return;
 	}
 	if (CTimer::GetIsSlowMotionActive())
@@ -967,57 +967,51 @@ cMusicManager::ServiceTrack(CVehicle *veh, CPed *ped)
 			}
 			else if (DistToTargetSq >= SQR(10.0f))
 			{
-				AmbienceVol = (45.0f - (Sqrt(DistToTargetSq) - 10.0f)) / 45.0f * m_nCurrentVolume;
+				volume = (45.0f - (Sqrt(DistToTargetSq) - 10.0f)) / 45.0f * m_nCurrentVolume;
 				if (AudioManager.ShouldDuckMissionAudio(0) || AudioManager.ShouldDuckMissionAudio(1))
-					AmbienceVol /= 4;
+					volume /= 4;
 
 				uint8 pan = 0;
-				if (AmbienceVol > 0)
+				if (volume > 0)
 				{
 					CVector panVec;
 					AudioManager.TranslateEntity(&TheCamera.pTargetEntity->GetPosition(), &panVec);
 					pan = AudioManager.ComputePan(55.0f, &panVec);
 				}
 				if (gRetuneCounter != 0)
-					AmbienceVol = 0;
-				SampleManager.SetStreamedVolumeAndPan(AmbienceVol, pan, 0, 0);
+					volume = 0;
+				SampleManager.SetStreamedVolumeAndPan(volume, pan, 0, 0);
 			}
-			else if (!AudioManager.ShouldDuckMissionAudio(0) && !AudioManager.ShouldDuckMissionAudio(1))
-			{
-				if (gRetuneCounter == 0)
-					SampleManager.SetStreamedVolumeAndPan(m_nCurrentVolume, 63, 0, 0);
-				else
-					SampleManager.SetStreamedVolumeAndPan(0, 63, 0, 0);
-			}
+			else if (AudioManager.ShouldDuckMissionAudio(0) || AudioManager.ShouldDuckMissionAudio(1))
+				SampleManager.SetStreamedVolumeAndPan(m_nCurrentVolume, 63, 0, 0);
+			else if (gRetuneCounter != 0)
+				SampleManager.SetStreamedVolumeAndPan(0, 63, 0, 0);
 			else
 				SampleManager.SetStreamedVolumeAndPan(m_nCurrentVolume, 63, 0, 0);
 		}
-	}
-	else
-	{
-		if (!AudioManager.ShouldDuckMissionAudio(0) && !AudioManager.ShouldDuckMissionAudio(1)) {
-			if (field_3998 == -1)
-				AmbienceVol = m_nCurrentVolume;
-			else if (field_3998 < 20)
-			{
-				AmbienceVol = Min(m_nCurrentVolume, 25);
-				field_3998++;
-			}
-			else if (field_3998 < 40)
-			{
-				AmbienceVol = Min(m_nCurrentVolume, 3 * (field_3998 - 20) + 25);
-				field_3998++;
-			}
-			else
-			{
-				AmbienceVol = m_nCurrentVolume;
-				field_3998 = -1;
-			}
-			if (gRetuneCounter != 0)
-				AmbienceVol = 0;
-			SampleManager.SetStreamedVolumeAndPan(AmbienceVol, 63, 0, 0);
-		} else 
-			SampleManager.SetStreamedVolumeAndPan(Min(m_nCurrentVolume, 25), 63, 0, 0);
+	} else if (AudioManager.ShouldDuckMissionAudio(0) || AudioManager.ShouldDuckMissionAudio(1)) {
+		SampleManager.SetStreamedVolumeAndPan(Min(m_nCurrentVolume, 25), 63, 0, 0);
+	} else {
+		if (nFramesSinceCutsceneEnded == -1)
+			volume = m_nCurrentVolume;
+		else if (nFramesSinceCutsceneEnded < 20)
+		{
+			volume = Min(m_nCurrentVolume, 25);
+			nFramesSinceCutsceneEnded++;
+		}
+		else if (nFramesSinceCutsceneEnded < 40)
+		{
+			volume = Min(m_nCurrentVolume, 3 * (nFramesSinceCutsceneEnded - 20) + 25);
+			nFramesSinceCutsceneEnded++;
+		}
+		else
+		{
+			volume = m_nCurrentVolume;
+			nFramesSinceCutsceneEnded = -1;
+		}
+		if (gRetuneCounter != 0)
+			volume = 0;
+		SampleManager.SetStreamedVolumeAndPan(volume, 63, 0, 0);
 	}
 	if (m_nVolumeLatency > 0)
 		m_nVolumeLatency--;
@@ -1115,7 +1109,8 @@ cMusicManager::GetListenTimeArray()
 	return aListenTimeArray;
 }
 
-uint32 cMusicManager::GetTrackStartPos(uint32 track)
+uint32
+cMusicManager::GetTrackStartPos(uint32 track)
 {
 	if (!IsInitialised()) return 0;
 
