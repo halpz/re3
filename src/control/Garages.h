@@ -300,5 +300,6 @@ private:
 	static bool IsThisGarageTypeSafehouse(eGarageType type) { return FindSafeHouseIndexForGarageType(type) >= 0; }
 
 	friend class cAudioManager;
+	friend class CReplay;
 	friend class CGarage;
 };

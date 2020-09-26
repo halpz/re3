@@ -139,4 +139,5 @@ public:
 	static void LoadAnimFile(RwStream *stream, bool compress, char (*somename)[32] = nil);
 	static void CreateAnimAssocGroups(void);
 	static void RemoveLastAnimFile(void);
+	static CAnimBlendAssocGroup* GetAnimAssocGroups(void) { return ms_aAnimAssocGroups; }
 };

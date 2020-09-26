@@ -10102,7 +10102,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 			CBaseModelInfo* pInfo = CModelInfo::GetModelInfo(model);
 			script_assert(pInfo->GetModelType() == MITYPE_VEHICLE);
 			CVehicleModelInfo* pVehicleInfo = (CVehicleModelInfo*)pInfo;
-			if (pVehicleInfo->m_vehicleType != VEHICLE_TYPE_CAR) {
+			if (pVehicleInfo->m_vehicleType == VEHICLE_TYPE_CAR || pVehicleInfo->m_vehicleType == VEHICLE_TYPE_BIKE) {
 				switch (model) {
 				case MI_LANDSTAL:
 				case MI_LINERUN:

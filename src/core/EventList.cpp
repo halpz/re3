@@ -230,7 +230,11 @@ CEventList::ReportCrimeForEvent(eEventType type, size_t crimeId, bool copsDontCa
 	if(crime == CRIME_NONE)
 		return;
 
+#ifdef FIX_BUGS
+	CVector playerPedCoors = FindPlayerCoors();
+#else
 	CVector playerPedCoors = FindPlayerPed()->GetPosition();
+#endif
 	CVector playerCoors = FindPlayerCoors();
 
 	if(CWanted::WorkOutPolicePresence(playerCoors, 14.0f) != 0 ||
