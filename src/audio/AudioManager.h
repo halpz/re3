@@ -330,7 +330,6 @@ public:
 	void ProcessFires(int32 entity);
 	void ProcessFrontEnd();
 	void ProcessGarages();
-	bool ProcessHelicopter(cVehicleParams *params);
 	void ProcessCarHeli(cVehicleParams* params);
 	void ProcessVehicleFlatTyre(cVehicleParams* params);
 	void ProcessJumbo(cVehicleParams *);
