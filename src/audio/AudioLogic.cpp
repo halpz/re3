@@ -2628,9 +2628,8 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 		case SOUND_31:{
 			const float SOUND_INTENSITY = 35.0f;
 			relVol = ((CAutomobile*)params->m_pVehicle)->m_aWheelSpeed[1] * 50.0f / 11.0f;
-			if (relVol < 0.2 || 1.0 == relVol)
+			if (relVol < 0.2f || 1.0f == relVol)
 				continue;
-			relVol /= 20;
 			emittingVol = (1.0f - relVol) * 70.0f;
 			maxDist = SQR(SOUND_INTENSITY);
 			m_sQueueSample.m_nSampleIndex = SFX_CAR_HELI_ROT;
@@ -3085,19 +3084,19 @@ cAudioManager::ProcessHelicopter(cVehicleParams *params)
 	return true;
 }
 
-void cAudioManager::ProcessCarHeli(cVehicleParams* params)
+void
+cAudioManager::ProcessCarHeli(cVehicleParams* params)
 {
+	const float SOUND_INTENSITY = 250.0f;
+
 	CVehicle* playerVeh; // eax
 	CVehicle* veh; // ecx
 	CAutomobile* automobile; // [esp+10h] [ebp-CCh]
 	CBoat* boat; // [esp+1Ch] [ebp-C0h]
 
 	signed int volume; // ebx
-	signed int volume_5; // ebx
 	signed int volume_3; // ebx
 	signed int volume_2; // ebx
-	signed int volume_4; // [esp+28h] [ebp-B4h]
-	signed int volume_1; // [esp+2Ch] [ebp-B0h]
 	float volumeModifier; // [esp+40h] [ebp-9Ch]
 
 	uint32 freq_6; // eax
@@ -3114,7 +3113,6 @@ void cAudioManager::ProcessCarHeli(cVehicleParams* params)
 	float distance_3; // [esp+44h] [ebp-98h]
 
 	CVector posBackup; // [esp+48h] [ebp-94h]
-	CMatrix cameraMatrix; // [esp+60h] [ebp-7Ch]
 	CVector pos; // [esp+A8h] [ebp-34h]
 	//CVector multipliedVector; // [esp+B4h] [ebp-28h]
 	//CVector MatrixMultiplier; // [esp+C0h] [ebp-1Ch]
@@ -3123,18 +3121,13 @@ void cAudioManager::ProcessCarHeli(cVehicleParams* params)
 	static uint32 freqPrev_1 = 7143;
 	static uint32 freqPrev_0 = 14287;
 
-	const float CarHeliDistance = 250.0f;
-
 	boat = nil;
-	hunterBool = false;
 	automobile = nil;
-	cameraMatrix.m_attachment = 0;
-	cameraMatrix.m_hasRwMatrix = 0;
+	hunterBool = false;
 
-	if (params->m_fDistance >= SQR(CarHeliDistance)) {//!!
-		cameraMatrix.~CMatrix();
+	if (params->m_fDistance >= SQR(SOUND_INTENSITY))
 		return;
-	}
+
 	playerVeh = FindPlayerVehicle();
 	veh = params->m_pVehicle;
 	if (playerVeh == veh) {
@@ -3144,50 +3137,43 @@ void cAudioManager::ProcessCarHeli(cVehicleParams* params)
 		accelerate = veh->m_fGasPedal * 255.0f;
 		brake = veh->m_fBrakePedal * 255.0f;
 	}
-	cameraMatrix = TheCamera.m_matrix;
 	vehAtYAbs = Abs(veh->m_matrix.GetUp().y);
-	vehCameraDot = (DotProduct(veh->m_matrix.GetForward(), cameraMatrix.GetForward()) + 1.0f) / 2.0f;
-	if (veh->m_modelIndex == MI_SKIMMER) {//!!
-		boat = (CBoat*)params->m_pVehicle;
+	vehCameraDot = (DotProduct(veh->m_matrix.GetForward(), TheCamera.GetForward()) + 1.0f) / 2.0f;
+	if (veh->m_modelIndex == MI_SKIMMER) {
+		boat = (CBoat*)veh;
 		speedMultiplied = boat->m_fMovingSpeed * 50.0f / 11.0f;
-	} else if (params->m_VehicleType == VEHICLE_TYPE_HELI) {//!!
+	} else if (params->m_VehicleType == VEHICLE_TYPE_HELI) {
 		speedMultiplied = 1.0f;
 	} else {
-		automobile = (CAutomobile*)params->m_pVehicle;
+		automobile = (CAutomobile*)veh;
 		speedMultiplied = automobile->m_aWheelSpeed[1] * 50.0f / 11.0f;
 	}
-	if (speedMultiplied == 0.0f) {//??
-		cameraMatrix.~CMatrix();
+
+	if (speedMultiplied == 0.0f)
 		return;
-	}
+
 	speedMultiplied = Min(1.0f, speedMultiplied);
 	CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 
 
-	if (m_sQueueSample.m_fDistance >= 40.0f) //!!
+	//sound on long distances
+	if (m_sQueueSample.m_fDistance >= 40.0f)
 		volume = speedMultiplied * 75.0f;
-	else if (m_sQueueSample.m_fDistance >= 25.0f) //!!
+	else if (m_sQueueSample.m_fDistance >= 25.0f)
 		volume = (m_sQueueSample.m_fDistance - 25.0f) * 0.06666667f * (75.0f * speedMultiplied);
 	else
 		volume = 0;
-
-
-
-	//on height distance
-	if (volume != 0) {//!!
-		m_sQueueSample.m_nVolume = ComputeVolume(volume, 250.0f, m_sQueueSample.m_fDistance);
-		if (m_sQueueSample.m_nVolume != 0) { //!!
+	if (volume != 0) {
+		m_sQueueSample.m_nVolume = ComputeVolume(volume, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
+		if (m_sQueueSample.m_nVolume != 0) {
 			m_sQueueSample.m_nCounter = 88;
-			if (boat != nil) { //!!
+			if (boat != nil) {
 				m_sQueueSample.m_nSampleIndex = SFX_SEAPLANE_PRO3;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				if (accelerate <= 0 && brake <= 0) { //!!
-					freqModifier = Min(1.0f, vehAtYAbs) * 949;//???
-					m_sQueueSample.m_nFrequency = 3651 + freqModifier;
-				} else {
-					freqModifier = Min(1.0f, (Max(accelerate, brake) / 255) * vehAtYAbs) * 563;
-					m_sQueueSample.m_nFrequency = 4600 + freqModifier;
-				}
+				if (accelerate <= 0 && brake <= 0)
+					m_sQueueSample.m_nFrequency = 3651 + Min(1.0f, vehAtYAbs) * 949;
+				else
+					m_sQueueSample.m_nFrequency = 4600 + Min(1.0f, (Max(accelerate, brake) / 255.0f) * vehAtYAbs) * 563;
 			} else {
 				m_sQueueSample.m_nSampleIndex = SFX_HELI_1;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
@@ -3200,64 +3186,44 @@ void cAudioManager::ProcessCarHeli(cVehicleParams* params)
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_fSpeedMultiplier = 6.0f;
-			m_sQueueSample.m_fSoundIntensity = 250.0f;
-			m_sQueueSample.m_bReleasingSoundFlag = 0;
+			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
+			m_sQueueSample.m_bReleasingSoundFlag = false;
 			m_sQueueSample.m_nReleasingVolumeDivider = 5;
-			m_sQueueSample.m_bReverbFlag = 1;
-			m_sQueueSample.m_bRequireReflection = 0;
+			m_sQueueSample.m_bReverbFlag = true;
+			m_sQueueSample.m_bRequireReflection = false;
 			AddSampleToRequestedQueue();
 		}
 	}
 
-
-
-	//244-
-	if (automobile) { //!!
-		automobile->GetComponentWorldPosition(CAR_BOOT, pos);
-	} else if (params->m_VehicleType == VEHICLE_TYPE_HELI) { //!!
-		//MatrixMultiplier.z = 0.0;
-		//MatrixMultiplier.x = 0.0;
-		//MatrixMultiplier.y = -10.0;
-		//multipliedVector = params->m_pVehicle->m_matrix * MatrixMultiplier;
-		pos = { 0.0f, -10.0f, 0.0f };
-	} else {
-		pos = m_sQueueSample.m_vecPos;
-	}
-
-
-	//263-270
-	if (params->m_fDistance >= 19600.0f) { //??
-		cameraMatrix.~CMatrix();
+	if (params->m_fDistance >= 19600.0f)
 		return;
-	}
 
-	if (speedMultiplied >= 0.4f) //??
+	if (speedMultiplied >= 0.4f)
 		volumeModifier = (speedMultiplied - 0.4f) * 5.0f / 3.0f;
 	else
 		volumeModifier = 0.0f;
-	//270-286
-	if (!boat) { //!!
+	if (!boat) {
 		freqModifier_2 = Min(1300, 7000.0f * vehAtYAbs);
-		if (playerVeh == veh && (accelerate > 0 || brake > 0) && freqModifier_2 < 1300) //!!
+		if (playerVeh == veh && (accelerate > 0 || brake > 0) && freqModifier_2 < 1300)//unnesesary freqModifier alredy <= 1300
 			freqModifier_2 = 1300;
-		if (veh->m_modelIndex == MI_HUNTER) //!!
+		if (veh->m_modelIndex == MI_HUNTER)
 			hunterBool = true;
 	}
 
 
 	//sound from front of helicopter
-	volume_1 = (1.0f - vehCameraDot) * volumeModifier * 127.0f;
-	m_sQueueSample.m_nVolume = ComputeVolume(volume_1, 140.0f, m_sQueueSample.m_fDistance);
+	volume = (1.0f - vehCameraDot) * volumeModifier * 127.0f;
+	m_sQueueSample.m_nVolume = ComputeVolume(volume, 140.0f, m_sQueueSample.m_fDistance);
 	if (m_sQueueSample.m_nVolume != 0) {
-		m_sQueueSample.m_nCounter = 3; //347 andro
-		if (hunterBool) { //!!
+		m_sQueueSample.m_nCounter = 3;
+		if (hunterBool) {
 			m_sQueueSample.m_nSampleIndex = SFX_HELI_APACHE_1;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nFrequency = (volumeModifier + 1) * 16000 + freqModifier_2;
+			m_sQueueSample.m_nFrequency = (volumeModifier + 1.0f) * 16000 + freqModifier_2;
 			m_sQueueSample.m_bIs2D = false;
 			m_sQueueSample.m_nReleasingVolumeModificator = 1;
 			m_sQueueSample.m_nLoopCount = 0;
-			m_sQueueSample.m_nEmittingVolume = volume_1;
+			m_sQueueSample.m_nEmittingVolume = volume;
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_fSpeedMultiplier = 6.0f;
@@ -3267,34 +3233,22 @@ void cAudioManager::ProcessCarHeli(cVehicleParams* params)
 			m_sQueueSample.m_bReverbFlag = true;
 			m_sQueueSample.m_bRequireReflection = false;
 			AddSampleToRequestedQueue();
-		} else if (boat) { //!!
+		} else if (boat != nil) {
 			m_sQueueSample.m_nSampleIndex = SFX_SEAPLANE_PRO1;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 
-			if (accelerate <= 0 && brake <= 0) { //!!
-			//freqModifier_4 = 3713.0 * vehAtYAbs;
-			//if (freqModifier_4 > 3713)//!!
-			//	freqModifier_4 = 3713;
-				m_sQueueSample.m_nFrequency = 14287 + Min(1.0f, vehAtYAbs) * 3713; //???
-			} else {
-				m_sQueueSample.m_nFrequency = 18000 + Min(1.0f, vehAtYAbs * (Max(accelerate, brake) / 255)) * 2204;
-			}
-
-			if (speedMultiplied < 1.0) { //??
-				//v27 = (double)(this_1->m_sQueueSample.m_nFrequency >> 1);
-				//this_1->m_sQueueSample.m_nFrequency = (signed __int64)(v27 * speedMultiplied + v27);
-				m_sQueueSample.m_nFrequency = (speedMultiplied + 1.0f) * m_sQueueSample.m_nFrequency / 2.0f;
-			}
-
-			m_sQueueSample.m_nFrequency = m_sQueueSample.m_nFrequency < freqPrev ?
-				Max(m_sQueueSample.m_nFrequency, freqPrev - 197) : Min(m_sQueueSample.m_nFrequency, freqPrev + 197);
-			freqPrev = m_sQueueSample.m_nFrequency;
-			//TODO maybe clamp!!!
+			if (accelerate <= 0 && brake <= 0)
+				m_sQueueSample.m_nFrequency = 14287 + Min(1.0f, vehAtYAbs) * 3713;
+			else
+				m_sQueueSample.m_nFrequency = 18000 + Min(1.0f, vehAtYAbs * (Max(accelerate, brake) / 255.0f)) * 2204;
+			if (speedMultiplied < 1.0f)
+				m_sQueueSample.m_nFrequency = (speedMultiplied + 1.0f) * (m_sQueueSample.m_nFrequency / 2.0f);
+			m_sQueueSample.m_nFrequency = clamp(m_sQueueSample.m_nFrequency, freqPrev - 197, freqPrev + 197);
 
 			m_sQueueSample.m_bIs2D = false;
 			m_sQueueSample.m_nReleasingVolumeModificator = 1;
 			m_sQueueSample.m_nLoopCount = 0;
-			m_sQueueSample.m_nEmittingVolume = volume_1;
+			m_sQueueSample.m_nEmittingVolume = volume;
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_fSpeedMultiplier = 6.0f;
@@ -3311,7 +3265,7 @@ void cAudioManager::ProcessCarHeli(cVehicleParams* params)
 			m_sQueueSample.m_bIs2D = false;
 			m_sQueueSample.m_nReleasingVolumeModificator = 1;
 			m_sQueueSample.m_nLoopCount = 0;
-			m_sQueueSample.m_nEmittingVolume = volume_1;
+			m_sQueueSample.m_nEmittingVolume = volume;
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_fSpeedMultiplier = 6.0f;
@@ -3325,13 +3279,12 @@ void cAudioManager::ProcessCarHeli(cVehicleParams* params)
 	}
 
 
-
-	if (!boat && params->m_VehicleType != VEHICLE_TYPE_HELI && m_sQueueSample.m_fDistance < 30.0f) { //!!
-		//engine starting sound 
+	//engine starting sound 
+	if (boat == nil && params->m_VehicleType != VEHICLE_TYPE_HELI && m_sQueueSample.m_fDistance < 30.0f) { //strange way to check if automobile != nil
 		if (automobile->bEngineOn) {
 			if (speedMultiplied < 1.0f) {
-				volume_5 = (1.0f - 0.5f * speedMultiplied) * 70.0f;
-				m_sQueueSample.m_nVolume = ComputeVolume(volume_5, 30.0, m_sQueueSample.m_fDistance);
+				volume = (1.0f - speedMultiplied / 2.0f) * 70.0f;
+				m_sQueueSample.m_nVolume = ComputeVolume(volume, 30.0, m_sQueueSample.m_fDistance);
 				if (m_sQueueSample.m_nVolume) {
 					if (hunterBool) {
 						m_sQueueSample.m_nSampleIndex = SFX_HELI_APACHE_4;
@@ -3347,7 +3300,7 @@ void cAudioManager::ProcessCarHeli(cVehicleParams* params)
 					m_sQueueSample.m_bIs2D = false;
 					m_sQueueSample.m_nReleasingVolumeModificator = 1;
 					m_sQueueSample.m_nLoopCount = 0;
-					m_sQueueSample.m_nEmittingVolume = volume_5;
+					m_sQueueSample.m_nEmittingVolume = volume;
 					m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 					m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 					m_sQueueSample.m_fSpeedMultiplier = 6.0f;
@@ -3365,8 +3318,8 @@ void cAudioManager::ProcessCarHeli(cVehicleParams* params)
 
 
 	//after accel rotor sound
-	volume_4 = ((vehCameraDot + 1) * volumeModifier * 127.0f) / 2;
-	m_sQueueSample.m_nVolume = ComputeVolume(volume_4, 140.0, m_sQueueSample.m_fDistance);
+	volume = ((vehCameraDot + 1.0f) * volumeModifier * 127.0f) / 2.0f;
+	m_sQueueSample.m_nVolume = ComputeVolume(volume, 140.0, m_sQueueSample.m_fDistance);
 	if (m_sQueueSample.m_nVolume != 0) {
 		m_sQueueSample.m_nCounter = 1;
 		if (hunterBool) {
@@ -3377,12 +3330,12 @@ void cAudioManager::ProcessCarHeli(cVehicleParams* params)
 			m_sQueueSample.m_nSampleIndex = SFX_SEAPLANE_PRO2;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 
-			if (accelerate <= 0 && brake <= 0) //!!
+			if (accelerate <= 0 && brake <= 0)
 				m_sQueueSample.m_nFrequency = 7143 + Min(1.0f, vehAtYAbs) * 1857;
 			else
 				m_sQueueSample.m_nFrequency = 9000 + Min(1.0f, (Max(accelerate, brake) / 255) * vehAtYAbs) * 1102;
 
-			if (speedMultiplied < 1.0) //??
+			if (speedMultiplied < 1.0f)
 				m_sQueueSample.m_nFrequency = (speedMultiplied + 1) * (m_sQueueSample.m_nFrequency / 2);
 
 			m_sQueueSample.m_nFrequency = clamp(m_sQueueSample.m_nFrequency, freqPrev_1 - 98, freqPrev_1 + 98);
@@ -3395,7 +3348,7 @@ void cAudioManager::ProcessCarHeli(cVehicleParams* params)
 		m_sQueueSample.m_bIs2D = false;
 		m_sQueueSample.m_nReleasingVolumeModificator = 1;
 		m_sQueueSample.m_nLoopCount = 0;
-		m_sQueueSample.m_nEmittingVolume = volume_4;
+		m_sQueueSample.m_nEmittingVolume = volume;
 		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 		m_sQueueSample.m_fSpeedMultiplier = 6.0f;
@@ -3410,30 +3363,28 @@ void cAudioManager::ProcessCarHeli(cVehicleParams* params)
 
 
 	if (boat) {
-		//489-568
-		if (TheCamera.Cams[TheCamera.ActiveCam].Mode == 15 && m_sQueueSample.m_fDistance < 20.0f && speedMultiplied > 0.0f) { //?? 525 andro
-			volume_3 = speedMultiplied * 100.0f;
-			m_sQueueSample.m_nVolume = ComputeVolume(volume_3, 20.0f, m_sQueueSample.m_fDistance);
-
-			if (accelerate <= 0 && brake <= 0)//!!
-				m_sQueueSample.m_nFrequency = 14287 + Min(1.0f, vehAtYAbs) * 3713;
-			else
-				m_sQueueSample.m_nFrequency = 18000 + Min(1.0f, (Max(accelerate, brake) / 255) * vehAtYAbs) * 2204;
-			if (speedMultiplied < 1.0) //??
-				m_sQueueSample.m_nFrequency = (speedMultiplied + 1) * (m_sQueueSample.m_nFrequency / 2);
-			m_sQueueSample.m_nFrequency = clamp(m_sQueueSample.m_nFrequency, freqPrev_0 - 197, freqPrev_0 + 197);
-			freqPrev_0 = m_sQueueSample.m_nFrequency;
-
+		if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FIXED && m_sQueueSample.m_fDistance < 20.0f && speedMultiplied > 0.0f) {
+			m_sQueueSample.m_nVolume = ComputeVolume(speedMultiplied * 100.0f, 20.0f, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume) {
+
+				if (accelerate <= 0 && brake <= 0)
+					m_sQueueSample.m_nFrequency = 14287 + Min(1.0f, vehAtYAbs) * 3713;
+				else
+					m_sQueueSample.m_nFrequency = 18000 + Min(1.0f, (Max(accelerate, brake) / 255.0f) * vehAtYAbs) * 2204;
+				if (speedMultiplied < 1.0)
+					m_sQueueSample.m_nFrequency = (speedMultiplied + 1) * (m_sQueueSample.m_nFrequency / 2.0f);
+				m_sQueueSample.m_nFrequency = clamp(m_sQueueSample.m_nFrequency, freqPrev_0 - 197, freqPrev_0 + 197);
+				freqPrev_0 = m_sQueueSample.m_nFrequency;
+
 				m_sQueueSample.m_nSampleIndex = SFX_SEAPLANE_PRO4;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				m_sQueueSample.m_nCounter = 12;
 				m_sQueueSample.m_bIs2D = false;
 				m_sQueueSample.m_nReleasingVolumeModificator = 3;
 				m_sQueueSample.m_nLoopCount = 0;
-				m_sQueueSample.m_nEmittingVolume = volume_3;
-				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(464);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(464);
+				m_sQueueSample.m_nEmittingVolume = speedMultiplied * 100.0f;
+				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_SEAPLANE_PRO4);
+				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_SEAPLANE_PRO4);
 				m_sQueueSample.m_fSpeedMultiplier = 5.0f;
 				m_sQueueSample.m_fSoundIntensity = 20.0f;
 				m_sQueueSample.m_bReleasingSoundFlag = false;
@@ -3449,33 +3400,33 @@ void cAudioManager::ProcessCarHeli(cVehicleParams* params)
 		distCalcBool = params->m_bDistanceCalculated;
 		distance_3 = params->m_fDistance;
 		
-		m_sQueueSample.m_vecPos = pos;
+		if (automobile != nil)
+			automobile->GetComponentWorldPosition(CAR_BOOT, m_sQueueSample.m_vecPos);
+		else if (params->m_VehicleType == VEHICLE_TYPE_HELI) 
+			m_sQueueSample.m_vecPos = { 0.0f, -10.0f, 0.0f }; //this is from android, but for real it's not used
+
 		params->m_bDistanceCalculated = false;
-		params->m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);//580-589
-		if (params->m_fDistance < 729.0f) { //!!
-			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);//593-605
-			volume_2 = 25.0f * volumeModifier;
-			m_sQueueSample.m_nVolume = ComputeVolume(volume_2, 27.0f, m_sQueueSample.m_fDistance);
-			if (m_sQueueSample.m_nVolume) {//!!
+		params->m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
+		if (params->m_fDistance < 729.0f) {
+			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
+			m_sQueueSample.m_nVolume = ComputeVolume(volumeModifier * 25.0f, 27.0f, m_sQueueSample.m_fDistance);
+			if (m_sQueueSample.m_nVolume) {
 				m_sQueueSample.m_nCounter = 2;
-				if (hunterBool)//!!
-					m_sQueueSample.m_nSampleIndex = SFX_HELI_APACHE_3;
-				else
-					m_sQueueSample.m_nSampleIndex = SFX_CAR_HELI_REA;
+				m_sQueueSample.m_nSampleIndex = hunterBool ? SFX_HELI_APACHE_3 : SFX_CAR_HELI_REA;
 				m_sQueueSample.m_nBankIndex = 0;
 				m_sQueueSample.m_bIs2D = 0;
 				m_sQueueSample.m_nReleasingVolumeModificator = 1;
-				m_sQueueSample.m_nFrequency = 16000.0f * volumeModifier + 16000;
+				m_sQueueSample.m_nFrequency = (volumeModifier + 1.0f) * 16000;
 				m_sQueueSample.m_nLoopCount = 0;
-				m_sQueueSample.m_nEmittingVolume = volume_2;
+				m_sQueueSample.m_nEmittingVolume = volumeModifier * 25.0f;
 				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.m_fSpeedMultiplier = 6.0f;
 				m_sQueueSample.m_fSoundIntensity = 27.0f;
-				m_sQueueSample.m_bReleasingSoundFlag = 0;
+				m_sQueueSample.m_bReleasingSoundFlag = false;
 				m_sQueueSample.m_nReleasingVolumeDivider = 5;
-				m_sQueueSample.m_bReverbFlag = 1;
-				m_sQueueSample.m_bRequireReflection = 0;
+				m_sQueueSample.m_bReverbFlag = true;
+				m_sQueueSample.m_bRequireReflection = false;
 				AddSampleToRequestedQueue();
 			}
 		}
@@ -3484,8 +3435,6 @@ void cAudioManager::ProcessCarHeli(cVehicleParams* params)
 		params->m_bDistanceCalculated = distCalcBool;
 		params->m_fDistance = distance_3;
 	}
-	cameraMatrix.~CMatrix();
-	return;
 }
 
 void
