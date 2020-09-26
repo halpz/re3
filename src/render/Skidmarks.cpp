@@ -222,10 +222,11 @@ CSkidmarks::RegisterOne(uintptr id, CVector pos, float fwdX, float fwdY, bool *i
 
 		aSkidmarks[i].m_pos[aSkidmarks[i].m_last] = pos;
 
-		CVector2D dist = aSkidmarks[i].m_pos[aSkidmarks[i].m_last] - aSkidmarks[i].m_pos[aSkidmarks[i].m_last-1];
-		dist.NormaliseSafe();
+		CVector2D right(aSkidmarks[i].m_pos[aSkidmarks[i].m_last].y - aSkidmarks[i].m_pos[aSkidmarks[i].m_last - 1].y,
+		                aSkidmarks[i].m_pos[aSkidmarks[i].m_last - 1].x - aSkidmarks[i].m_pos[aSkidmarks[i].m_last].x);
+
+		right.NormaliseSafe();
 		fwd.NormaliseSafe();
-		CVector2D right(dist.y, -dist.x);
 		float turn = DotProduct2D(fwd, right);
 		turn = Abs(turn) + 1.0f;
 		aSkidmarks[i].m_side[aSkidmarks[i].m_last] = CVector(right.x, right.y, 0.0f) * turn * 0.125f;

@@ -1,5 +1,15 @@
 #if defined RW_GL3 && !defined LIBRW_SDL2
 
+#ifdef _WIN32
+#include <windows.h>
+#include <mmsystem.h>
+#include <shellapi.h>
+#include <windowsx.h>
+#include <basetsd.h>
+#include <regstr.h>
+#include <shlobj.h>
+#endif
+
 #define WITHWINDOWS
 #include "common.h"
 
@@ -1180,7 +1190,11 @@ void resizeCB(GLFWwindow* window, int width, int height) {
 	* memory things don't work.
 	*/
 	/* redraw window */
-	if (RwInitialised && (gGameState == GS_PLAYING_GAME || gGameState == GS_ANIMVIEWER))
+	if (RwInitialised && (gGameState == GS_PLAYING_GAME
+#ifndef MASTER
+		|| gGameState == GS_ANIMVIEWER
+#endif
+	                      ))
 	{
 		RsEventHandler((gGameState == GS_PLAYING_GAME ? rsIDLE : rsANIMVIEWER), (void*)TRUE);
 	}
@@ -1610,6 +1624,72 @@ main(int argc, char *argv[])
 						break;
 					}
 
+				    case GS_INIT_LOGO_MPEG:
+					{
+					    //if (!startupDeactivate)
+						//    PlayMovieInWindow(cmdShow, "movies\\Logo.mpg");
+					    gGameState = GS_LOGO_MPEG;
+					    TRACE("gGameState = GS_LOGO_MPEG;");
+					    break;
+				    }
+
+				    case GS_LOGO_MPEG:
+					{
+//					    CPad::UpdatePads();
+
+//					    if (startupDeactivate || ControlsManager.GetJoyButtonJustDown() != 0)
+						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetLeftMouseJustDown())
+//						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetEnterJustDown())
+//						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetCharJustDown(' '))
+//						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetAltJustDown())
+//						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetTabJustDown())
+//						    ++gGameState;
+
+					    break;
+				    }
+
+				    case GS_INIT_INTRO_MPEG:
+					{
+//#ifndef NO_MOVIES
+//					    CloseClip();
+//					    CoUninitialize();
+//#endif
+//
+//					    if (CMenuManager::OS_Language == LANG_FRENCH || CMenuManager::OS_Language == LANG_GERMAN)
+//						    PlayMovieInWindow(cmdShow, "movies\\GTAtitlesGER.mpg");
+//					    else
+//						    PlayMovieInWindow(cmdShow, "movies\\GTAtitles.mpg");
+
+					    gGameState = GS_INTRO_MPEG;
+					    TRACE("gGameState = GS_INTRO_MPEG;");
+					    break;
+				    }
+
+				    case GS_INTRO_MPEG:
+					{
+//					    CPad::UpdatePads();
+//
+//					    if (startupDeactivate || ControlsManager.GetJoyButtonJustDown() != 0)
+						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetLeftMouseJustDown())
+//						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetEnterJustDown())
+//						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetCharJustDown(' '))
+//						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetAltJustDown())
+//						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetTabJustDown())
+//						    ++gGameState;
+
+					    break;
+				    }
+
 					case GS_INIT_ONCE:
 					{
 						//CoUninitialize();
@@ -1818,8 +1898,10 @@ main(int argc, char *argv[])
 		{
 			if ( gGameState == GS_PLAYING_GAME )
 				CGame::ShutDown();
+#ifndef MASTER
 			else if ( gGameState == GS_ANIMVIEWER )
 				CAnimViewer::Shutdown();
+#endif
 			
 			CTimer::Stop();
 			
@@ -1843,8 +1925,10 @@ main(int argc, char *argv[])
 
 	if ( gGameState == GS_PLAYING_GAME )
 		CGame::ShutDown();
+#ifndef MASTER
 	else if ( gGameState == GS_ANIMVIEWER )
 		CAnimViewer::Shutdown();
+#endif
 
 	DMAudio.Terminate();
 	

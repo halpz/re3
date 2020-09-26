@@ -14,7 +14,7 @@ such that we have a working game at all times.
 
 ## How can I try it?
 
-- re3 requires game assets to work, so you **must** own a copy of GTA III.
+- re3 requires game assets to work, so you **must** own [a copy of GTA III](https://store.steampowered.com/app/12100/Grand_Theft_Auto_III/).
 - Build re3 or download it from one of the above links (Debug or Release).
 - (Optional) If you want to use optional features like Russian language or menu map, copy the files in /gamefiles folder to your game root folder.
 - Move re3.exe to GTA 3 directory and run it.

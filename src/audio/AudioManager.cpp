@@ -86,7 +86,7 @@ cAudioManager::Terminate()
 		m_sAudioScriptObjectManager.m_nScriptObjectEntityTotal = 0;
 		PreTerminateGameSpecificShutdown();
 
-		for (uint32 i = 0; i < MAX_SAMPLEBANKS; i++) {
+		for (uint32 i = 0; i < MAX_SFX_BANKS; i++) {
 			if (SampleManager.IsSampleBankLoaded(i))
 				SampleManager.UnloadSampleBank(i);
 		}
@@ -917,7 +917,7 @@ cAudioManager::ClearActiveSamples()
 		m_asActiveSamples[i].m_nEntityIndex = AEHANDLE_NONE;
 		m_asActiveSamples[i].m_nCounter = 0;
 		m_asActiveSamples[i].m_nSampleIndex = NO_SAMPLE;
-		m_asActiveSamples[i].m_nBankIndex = SAMPLEBANK_INVALID;
+		m_asActiveSamples[i].m_nBankIndex = INVALID_SFX_BANK;
 		m_asActiveSamples[i].m_bIs2D = false;
 		m_asActiveSamples[i].m_nReleasingVolumeModificator = 5;
 		m_asActiveSamples[i].m_nFrequency = 0;
