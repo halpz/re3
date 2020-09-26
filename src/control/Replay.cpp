@@ -1894,7 +1894,7 @@ size_t CReplay::FindSizeOfPacket(uint8 type)
 	switch (type) {
 	case REPLAYPACKET_END:			return 4;
 	case REPLAYPACKET_VEHICLE:		return sizeof(tVehicleUpdatePacket);
-	case REPLAYPACKET_BIKE:		    return sizeof(tBikeUpdatePacket);
+	case REPLAYPACKET_BIKE:			return sizeof(tBikeUpdatePacket);
 	case REPLAYPACKET_PED_HEADER:	return sizeof(tPedHeaderPacket);
 	case REPLAYPACKET_PED_UPDATE:	return sizeof(tPedUpdatePacket);
 	case REPLAYPACKET_GENERAL:		return sizeof(tGeneralPacket);
@@ -1903,8 +1903,8 @@ size_t CReplay::FindSizeOfPacket(uint8 type)
 	case REPLAYPACKET_ENDOFFRAME:	return 4;
 	case REPLAYPACKET_TIMER:		return sizeof(tTimerPacket);
 	case REPLAYPACKET_BULLET_TRACES:return sizeof(tBulletTracePacket);
-	case REPLAYPACKET_PARTICLE:     return sizeof(tParticlePacket);
-	case REPLAYPACKET_MISC:         return sizeof(tMiscPacket);
+	case REPLAYPACKET_PARTICLE:		return sizeof(tParticlePacket);
+	case REPLAYPACKET_MISC:			return sizeof(tMiscPacket);
 	default: assert(false); break;
 	}
 	return 0;
