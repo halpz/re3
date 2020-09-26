@@ -366,12 +366,26 @@ cAudioManager::ProcessEntity(int32 id)
 					ProcessWeather(id);
 			}
 			break;
+/*		case AUDIOTYPE_CRANE:
+			if (!m_nUserPause) {
+				m_sQueueSample.m_bReverbFlag = true;
+				ProcessCrane();
+			}
+			break;*/
 		case AUDIOTYPE_SCRIPTOBJECT:
 			if (!m_nUserPause) {
 				m_sQueueSample.m_bReverbFlag = true;
 				ProcessScriptObject(id);
 			}
 			break;
+#ifdef GTA_BRIDGE
+		case AUDIOTYPE_BRIDGE:
+			if (!m_nUserPause) {
+				m_sQueueSample.m_bReverbFlag = true;
+				ProcessBridge();
+			}
+			break;
+#endif
 		case AUDIOTYPE_FRONTEND:
 			m_sQueueSample.m_bReverbFlag = false;
 			ProcessFrontEnd();
@@ -4973,9 +4987,9 @@ cAudioManager::ProcessEscalators()
 	float distance;
 
 	for (int i = 0; i < CEscalators::NumEscalators; i++) {
-		if (!CEscalators::aEscalators[i].m_bIsActive)
+		if (!CEscalators::GetEscalator(i).IsActive())
 			continue;
-		m_sQueueSample.m_vecPos = CEscalators::aEscalators[i].m_midPoint;
+		m_sQueueSample.m_vecPos = CEscalators::GetEscalator(i).GetPosition();
 		distance = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		if (distance < SQR(SOUND_INTENSITY)) {
 			if (distance > 0.0f)
