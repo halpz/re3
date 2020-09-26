@@ -450,9 +450,9 @@ int8 cSampleManager::GetCurrent3DProviderIndex(void)
 
 int8 cSampleManager::SetCurrent3DProvider(uint8 nProvider)
 {
-	ASSERT( nProvider < m_nNumberOfProviders );
 	if (nProvider >= m_nNumberOfProviders)
 		nProvider = 0;
+	ASSERT( nProvider < m_nNumberOfProviders );
 	int savedprovider = curprovider;
 	
 	if ( nProvider < m_nNumberOfProviders )

@@ -202,8 +202,8 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_pedFormation = FORMATION_UNDEFINED;
 	m_collidingThingTimer = 0;
 	m_nPedStateTimer = 0;
-	m_actionX = 0;
-	m_actionY = 0;
+	m_actionX = 0.0f;
+	m_actionY = 0.0f;
 	m_phoneTalkTimer = 0;
 	m_stateUnused = 0;
 	m_leaveCarTimer = 0;
@@ -295,7 +295,6 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bIsShooting = false;
 	bFindNewNodeAfterStateRestore = false;
 
-	bHasACamera = false;
 	bGonnaInvestigateEvent = false;
 	bPedIsBleeding = false;
 	bStopAndShoot = false;
@@ -352,7 +351,9 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bSomeVCflag1 = false;
 #endif
 
-	if ((CGeneral::GetRandomNumber() & 3) == 0)
+	if (CGeneral::GetRandomNumber() & 3)
+		bHasACamera = false;
+	else
 		bHasACamera = true;
 
 	m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, this);
@@ -766,10 +767,10 @@ CPed::OurPedCanSeeThisOne(CEntity *target)
 	CColPoint colpoint;
 	CEntity *ent;
 
-	CVector2D dist = CVector2D(target->GetPosition()) - CVector2D(this->GetPosition());
+	CVector2D dist = CVector2D(target->GetPosition()) - CVector2D(GetPosition());
 
 	// Check if target is behind ped
-	if (DotProduct2D(dist, CVector2D(this->GetForward())) < 0.0f)
+	if (DotProduct2D(dist, CVector2D(GetForward())) < 0.0f)
 		return false;
 
 	// Check if target is too far away
@@ -798,7 +799,7 @@ CPed::Avoid(void)
 			if (nearestPed && nearestPed->m_nPedState != PED_DEAD && nearestPed != m_pSeekTarget && nearestPed != m_pedInObjective) {
 
 				// Check if this ped wants to avoid the nearest one
-				if (CPedType::GetAvoid(this->m_nPedType) & CPedType::GetFlag(nearestPed->m_nPedType)) {
+				if (CPedType::GetAvoid(m_nPedType) & CPedType::GetFlag(nearestPed->m_nPedType)) {
 
 					// Further codes checks whether the distance between us and ped will be equal or below 1.0, if we walk up to him by 1.25 meters.
 					// If so, we want to avoid it, so we turn our body 45 degree and look to somewhere else.
@@ -1761,7 +1762,6 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 
 	if (seatPosMult > 0.2f || vehIsUpsideDown) {
 		SetPosition(neededPos);
-
 		SetHeading(m_fRotationCur);
 	} else {
 		CMatrix vehDoorMat(veh->GetMatrix());
@@ -2925,7 +2925,7 @@ CPed::ReactToAttack(CEntity *attacker)
 					return;
 				}
 			} else if (bCrouchWhenShooting || bKindaStayInSamePlace) {
-				SetDuck(CGeneral::GetRandomNumberInRange(1000,3000));
+				SetDuck(CGeneral::GetRandomNumberInRange(1000, 3000));
 				return;
 			}
 
@@ -8130,7 +8130,7 @@ CPed::InvestigateEvent(void)
 						animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_STANCE);
 
 					if (animAssoc && animAssoc->animId == ANIM_IDLE_CAM) {
-						CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 14.0f);
+						CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 4.0f);
 						SetLookTimer(CGeneral::GetRandomNumberInRange(1000, 2500));
 
 					} else if (CGeneral::GetRandomNumber() & 3) {
@@ -8157,7 +8157,7 @@ CPed::InvestigateEvent(void)
 							animToPlay = ANIM_XPRESS_SCRATCH;
 
 						CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, animToPlay, 4.0f);
-						SetLookTimer(CGeneral::GetRandomNumberInRange(1000, 2500));
+						SetLookTimer(CGeneral::GetRandomNumberInRange(1500, 4000));
 
 					} else if (animAssoc && animAssoc->animId == ANIM_IDLE_HBHB) {
 						animAssoc->blendDelta = -8.0f;
@@ -8247,7 +8247,7 @@ CPed::InvestigateEvent(void)
 			SetMoveState(PEDMOVE_WALK);
 			return;
 		}
-		if (distSqr > 1.44f) {
+		if (distSqr > sq(1.2f)) {
 			SetMoveState(PEDMOVE_WALK);
 			return;
 		}
@@ -8555,7 +8555,6 @@ CPed::LookForInterestingNodes(void)
 {
 	CBaseModelInfo *model;
 	CPtrNode *ptrNode;
-	CVector effectPos;
 	CVector effectDist;
 	C2dEffect *effect;
 	CMatrix *objMat;
@@ -8596,7 +8595,7 @@ CPed::LookForInterestingNodes(void)
 						effect = model->Get2dEffect(e);
 						if (effect->type == EFFECT_ATTRACTOR && effect->attractor.probability >= randVal) {
 							objMat = &veh->GetMatrix();
-							effectPos = veh->GetMatrix() * effect->pos;
+							CVector effectPos = veh->GetMatrix() * effect->pos;
 							effectDist = effectPos - GetPosition();
 							if (effectDist.MagnitudeSqr() < sq(8.0f)) {
 								found = true;
@@ -8614,7 +8613,7 @@ CPed::LookForInterestingNodes(void)
 						effect = model->Get2dEffect(e);
 						if (effect->type == EFFECT_ATTRACTOR && effect->attractor.probability >= randVal) {
 							objMat = &obj->GetMatrix();
-							effectPos = obj->GetMatrix() * effect->pos;
+							CVector effectPos = obj->GetMatrix() * effect->pos;
 							effectDist = effectPos - GetPosition();
 							if (effectDist.MagnitudeSqr() < sq(8.0f)) {
 								found = true;
@@ -8632,7 +8631,7 @@ CPed::LookForInterestingNodes(void)
 						effect = model->Get2dEffect(e);
 						if (effect->type == EFFECT_ATTRACTOR && effect->attractor.probability >= randVal) {
 							objMat = &building->GetMatrix();
-							effectPos = building->GetMatrix() * effect->pos;
+							CVector effectPos = building->GetMatrix() * effect->pos;
 							effectDist = effectPos - GetPosition();
 							if (effectDist.MagnitudeSqr() < sq(8.0f)) {
 								found = true;
@@ -8650,7 +8649,7 @@ CPed::LookForInterestingNodes(void)
 						effect = model->Get2dEffect(e);
 						if (effect->type == EFFECT_ATTRACTOR && effect->attractor.probability >= randVal) {
 							objMat = &building->GetMatrix();
-							effectPos = building->GetMatrix() * effect->pos;
+							CVector effectPos = building->GetMatrix() * effect->pos;
 							effectDist = effectPos - GetPosition();
 							if (effectDist.MagnitudeSqr() < sq(8.0f)) {
 								found = true;
@@ -8676,12 +8675,13 @@ CPed::LookForInterestingNodes(void)
 		return false;
 	}
 
+	CVector2D effectPos = *objMat * effect->pos;
 	switch (effect->attractor.type) {
 		case ATTRACTORTYPE_ICECREAM:
-			SetInvestigateEvent(EVENT_ICECREAM, CVector2D(effectPos), 0.1f, 15000, angleToFace);
+			SetInvestigateEvent(EVENT_ICECREAM, effectPos, 0.1f, 15000, angleToFace);
 			break;
 		case ATTRACTORTYPE_STARE:
-			SetInvestigateEvent(EVENT_SHOPSTALL, CVector2D(effectPos), 1.0f,
+			SetInvestigateEvent(EVENT_SHOPSTALL, effectPos, 1.0f,
 								CGeneral::GetRandomNumberInRange(8000, 10 * effect->attractor.probability + 8500),
 								angleToFace);
 			break;
@@ -11732,7 +11732,7 @@ CPed::RegisterThreatWithGangPeds(CEntity *attacker)
 		if (!attackerPed->m_pMyVehicle || attackerPed->m_pMyVehicle->GetModelIndex() != MI_TOYZ) {
 			int16 lastVehicle;
 			CEntity *vehicles[8];
-			CWorld::FindObjectsInRange(GetPosition(), 30.0f, true, &lastVehicle, 6, vehicles, false, true, false, false, false);
+			CWorld::FindObjectsInRange(GetPosition(), ENTER_CAR_MAX_DIST, true, &lastVehicle, 6, vehicles, false, true, false, false, false);
 
 			if (lastVehicle > 8)
 				lastVehicle = 8;
@@ -12539,7 +12539,8 @@ CPed::ProcessObjective(void)
 					SetObjective(OBJECTIVE_LEAVE_CAR, m_pMyVehicle);
 					bFleeAfterExitingCar = true;
 				} else if (m_nPedState != PED_FLEE_POS) {
-					SetFlee(GetPosition(), 10000);
+					CVector2D fleePos = GetPosition();
+					SetFlee(fleePos, 10000);
 					bUsePedNodeSeek = true;
 					m_pNextPathNode = nil;
 				}
@@ -12585,7 +12586,7 @@ CPed::ProcessObjective(void)
 			{
 				if (m_pedInObjective) {
 					if (m_pedInObjective->IsPlayer() && CharCreatedBy != MISSION_CHAR
-						&& m_nPedType != PEDTYPE_COP && FindPlayerPed()->m_pWanted->m_CurrentCops
+						&& m_nPedType != PEDTYPE_COP && FindPlayerPed()->m_pWanted->m_CurrentCops != 0
 						&& !bKindaStayInSamePlace) {
 
 						SetObjective(OBJECTIVE_FLEE_ON_FOOT_TILL_SAFE);
@@ -12693,7 +12694,6 @@ CPed::ProcessObjective(void)
 					SetObjective(OBJECTIVE_LEAVE_CAR, m_pMyVehicle);
 					break;
 				}
-
 				if (!m_pedInObjective || m_pedInObjective->DyingOrDead()) {
 					ClearLookFlag();
 					bObjectiveCompleted = true;
@@ -13249,7 +13249,7 @@ CPed::ProcessObjective(void)
 						if (m_carInObjective && m_carInObjective->m_fHealth > 0.0f) {
 							distWithTarget = m_carInObjective->GetPosition() - GetPosition();
 							if (!bInVehicle) {
-								if (nEnterCarRangeMultiplier * 30.0f < distWithTarget.Magnitude()) {
+								if (nEnterCarRangeMultiplier * ENTER_CAR_MAX_DIST < distWithTarget.Magnitude()) {
 									if (!m_carInObjective->pDriver && !m_carInObjective->GetIsOnScreen() && !GetIsOnScreen())
 										WarpPedToNearEntityOffScreen(m_carInObjective);
 
@@ -13534,11 +13534,12 @@ CPed::ProcessObjective(void)
 					RestorePreviousObjective();
 				} else if (m_hitRecoverTimer < CTimer::GetTimeInMilliseconds()) {
 					CVehicle *carToSteal = nil;
-					float closestCarDist = 30.0f;
+					float closestCarDist = ENTER_CAR_MAX_DIST;
 					CVector pos = GetPosition();
 					int16 lastVehicle;
 					CEntity *vehicles[8];
 
+					// NB: This should've been ENTER_CAR_MAX_DIST actually, and is fixed in VC.
 					CWorld::FindObjectsInRange(pos, CHECK_NEARBY_THINGS_MAX_DIST, true, &lastVehicle, 6, vehicles, false, true, false, false, false);
 					for(int i = 0; i < lastVehicle; i++) {
 						CVehicle *nearVeh = (CVehicle*)vehicles[i];
@@ -14545,48 +14546,44 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 							upperSpeedLimit *= 2.0f;
 							lowerSpeedLimit *= 1.5f;
 						}
-						if (!bWasStanding) {
-							if ((speed <= upperSpeedLimit /* || (bfFlagsL >> 5) & 1 */) && m_vecMoveSpeed.z >= lowerSpeedLimit
-								|| m_pCollidingEntity == collidingEnt) {
+						CAnimBlendAssociation *fallAnim = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL);
+						if (!bWasStanding && speed > upperSpeedLimit && (/*!bPushedAlongByCar ||*/ m_vecMoveSpeed.z < lowerSpeedLimit)
+							&& m_pCollidingEntity != collidingEnt) {
 
-								if (RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL) && -0.016f * CTimer::GetTimeStep() > m_vecMoveSpeed.z) {
-									InflictDamage(collidingEnt, WEAPONTYPE_FALL, 15.0f, PEDPIECE_TORSO, 2);
-								}
-							} else {
-								float damage = 100.0f * Max(speed - 0.25f, 0.0f);
-								float damage2 = damage;
-								if (m_vecMoveSpeed.z < -0.25f)
-									damage += (-0.25f - m_vecMoveSpeed.z) * 150.0f;
+							float damage = 100.0f * Max(speed - 0.25f, 0.0f);
+							float damage2 = damage;
+							if (m_vecMoveSpeed.z < -0.25f)
+								damage += (-0.25f - m_vecMoveSpeed.z) * 150.0f;
 
-								uint8 dir = 2; // from backward
-								if (m_vecMoveSpeed.x > 0.01f || m_vecMoveSpeed.x < -0.01f || m_vecMoveSpeed.y > 0.01f || m_vecMoveSpeed.y < -0.01f) {
-									CVector2D offset = -m_vecMoveSpeed;
-									dir = GetLocalDirection(offset);
-								}
-								InflictDamage(collidingEnt, WEAPONTYPE_FALL, damage, PEDPIECE_TORSO, dir);
-								if (IsPlayer() && damage2 > 5.0f)
-									Say(SOUND_PED_LAND);
+							uint8 dir = 2; // from backward
+							if (m_vecMoveSpeed.x > 0.01f || m_vecMoveSpeed.x < -0.01f || m_vecMoveSpeed.y > 0.01f || m_vecMoveSpeed.y < -0.01f) {
+								CVector2D offset = -m_vecMoveSpeed;
+								dir = GetLocalDirection(offset);
 							}
+
+							InflictDamage(collidingEnt, WEAPONTYPE_FALL, damage, PEDPIECE_TORSO, dir);
+							if (IsPlayer() && damage2 > 5.0f)
+								Say(SOUND_PED_LAND);
+
+						} else if (!bWasStanding && fallAnim && -0.016f * CTimer::GetTimeStep() > m_vecMoveSpeed.z) {
+							InflictDamage(collidingEnt, WEAPONTYPE_FALL, 15.0f, PEDPIECE_TORSO, 2);
 						}
 #else
 						float speedSqr = 0.0f;
-						if (!bWasStanding) {
-							if (m_vecMoveSpeed.z >= -0.25f && (speedSqr = m_vecMoveSpeed.MagnitudeSqr()) <= sq(0.5f)) {
+						CAnimBlendAssociation *fallAnim = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL);
+						if (!bWasStanding && (m_vecMoveSpeed.z < -0.25f || (speedSqr = m_vecMoveSpeed.MagnitudeSqr()) > sq(0.5f))) {
+							if (speedSqr == 0.0f)
+								speedSqr = sq(m_vecMoveSpeed.z);
 
-								if (RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FALL_FALL) && -0.016f * CTimer::GetTimeStep() > m_vecMoveSpeed.z) {
-									InflictDamage(collidingEnt, WEAPONTYPE_FALL, 15.0f, PEDPIECE_TORSO, 2);
-								}
-							} else {
-								if (speedSqr == 0.0f)
-									speedSqr = sq(m_vecMoveSpeed.z);
-
-								uint8 dir = 2; // from backward
-								if (m_vecMoveSpeed.x > 0.01f || m_vecMoveSpeed.x < -0.01f || m_vecMoveSpeed.y > 0.01f || m_vecMoveSpeed.y < -0.01f) {
-									CVector2D offset = -m_vecMoveSpeed;
-									dir = GetLocalDirection(offset);
-								}
-								InflictDamage(collidingEnt, WEAPONTYPE_FALL, 350.0f * sq(speedSqr), PEDPIECE_TORSO, dir);
+							uint8 dir = 2; // from backward
+							if (m_vecMoveSpeed.x > 0.01f || m_vecMoveSpeed.x < -0.01f || m_vecMoveSpeed.y > 0.01f || m_vecMoveSpeed.y < -0.01f) {
+								CVector2D offset = -m_vecMoveSpeed;
+								dir = GetLocalDirection(offset);
 							}
+							InflictDamage(collidingEnt, WEAPONTYPE_FALL, 350.0f * sq(speedSqr), PEDPIECE_TORSO, dir);
+
+						} else if (!bWasStanding && fallAnim && -0.016f * CTimer::GetTimeStep() > m_vecMoveSpeed.z) {
+							InflictDamage(collidingEnt, WEAPONTYPE_FALL, 15.0f, PEDPIECE_TORSO, 2);
 						}
 #endif
 						m_vecMoveSpeed.z = 0.0f;
@@ -14613,7 +14610,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 			bHasHitWall = true;
 		}
 	}
-	if (collidingEnt->IsBuilding() || collidingEnt->IsStatic()) 	{
+	if (collidingEnt->IsBuilding() || collidingEnt->IsStatic()) {
 
 		if (bWasStanding) {
 			CVector sphereNormal;
@@ -15008,7 +15005,7 @@ CPed::ProcessBuoyancy(void)
 		ApplyMoveForce(buoyancyImpulse);
 		if (!DyingOrDead()) {
 			if (bTryingToReachDryLand) {
-				if (buoyancyImpulse.z / m_fMass > 0.0032f * CTimer::GetTimeStep()) {
+				if (buoyancyImpulse.z / m_fMass > GRAVITY * 0.4f * CTimer::GetTimeStep()) {
 					bTryingToReachDryLand = false;
 					CVector pos = GetPosition();
 					if (PlacePedOnDryLand()) {
@@ -15032,7 +15029,7 @@ CPed::ProcessBuoyancy(void)
 				}
 			}
 			float speedMult = 0.0f;
-			if (buoyancyImpulse.z / m_fMass > 0.006f * CTimer::GetTimeStep()
+			if (buoyancyImpulse.z / m_fMass > GRAVITY * 0.75f * CTimer::GetTimeStep()
 				|| mod_Buoyancy.m_waterlevel > GetPosition().z) {
 				speedMult = pow(0.9f, CTimer::GetTimeStep());
 				m_vecMoveSpeed.x *= speedMult;
@@ -15041,7 +15038,7 @@ CPed::ProcessBuoyancy(void)
 				bIsStanding = false;
 				InflictDamage(nil, WEAPONTYPE_DROWNING, 3.0f * CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
 			}
-			if (buoyancyImpulse.z / m_fMass > 0.002f * CTimer::GetTimeStep()) {
+			if (buoyancyImpulse.z / m_fMass > GRAVITY * 0.25f * CTimer::GetTimeStep()) {
 				if (speedMult == 0.0f) {
 					speedMult = pow(0.9f, CTimer::GetTimeStep());
 				}

@@ -76,6 +76,10 @@ RemoveCustomFrontendOptions()
 			for (int j = 0; j < NUM_MENUROWS; j++) {
 				if (aScreens[i].m_aEntries[j].m_SaveSlot == SAVESLOT_CFO) {
 					int ogOptionId = customFrontendOptions[aScreens[i].m_aEntries[j].m_TargetMenu].ogOptionId;
+
+					if (customFrontendOptions[aScreens[i].m_aEntries[j].m_TargetMenu].type == FEOPTION_SELECT)
+						free(customFrontendOptions[aScreens[i].m_aEntries[j].m_TargetMenu].rightTexts);
+
 					if (ogOptionId == -1) {
 						int k;
 						for (k = j; k < NUM_MENUROWS - 1; k++) {
@@ -219,7 +223,8 @@ void FrontendOptionAddSelect(const wchar* leftText, const wchar** rightTexts, in
 	FrontendOption& option = customFrontendOptions[numCustomFrontendOptions - 1];
 	option.type = FEOPTION_SELECT;
 	TextCopy(option.leftText, leftText);
-	option.rightTexts = rightTexts;
+	option.rightTexts = (wchar**)malloc(numRightTexts * sizeof(wchar*));
+	memcpy(option.rightTexts, rightTexts, numRightTexts * sizeof(wchar*));
 	option.numRightTexts = numRightTexts;
 	option.value = var;
 	option.displayedValue = *var;

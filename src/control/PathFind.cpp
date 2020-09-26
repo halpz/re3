@@ -1682,7 +1682,7 @@ CPathFind::Load(uint8 *buf, uint32 size)
 void
 CPathFind::DisplayPathData(void)
 {
-	// Not the function from mobm_carPathLinksile but my own!
+	// Not the function from mobile but my own!
 
 	int i, j, k;
 	// Draw 50 units around camera
