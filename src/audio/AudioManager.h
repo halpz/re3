@@ -241,13 +241,13 @@ public:
 	// "Should" be in alphabetic order, except "getXTalkSfx"
 	void AddDetailsToRequestedOrderList(uint8 sample);
 	void AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sample, uint8 bank,
-	                        uint8 counter, bool notLooping);
+	                        uint8 counter, bool notLooping); //done
 	void AddReflectionsToRequestedQueue();
 	void AddReleasingSounds();
 	void AddSampleToRequestedQueue();
 	void AgeCrimes();
 
-	void CalculateDistance(bool &condition, float dist);
+	void CalculateDistance(bool &condition, float dist); //done
 	bool CheckForAnAudioFileOnCD() const;
 	void ClearActiveSamples();
 	void ClearMissionAudio(uint8 slot);
@@ -275,7 +275,7 @@ public:
 	float GetCollisionLoopingRatio(uint32 a, uint32 b, float c) const; // not used
 	float GetCollisionOneShotRatio(int32 a, float b) const;
 	float GetCollisionRatio(float a, float b, float c, float d) const;
-	float GetDistanceSquared(const CVector &v) const;
+	float GetDistanceSquared(const CVector &v) const; //done
 	int32 GetJumboTaxiFreq() const;
 	uint8 GetMissionAudioLoadingStatus(uint8 slot) const;
 	int8 GetMissionScriptPoliceAudioPlayingStatus() const;
@@ -287,7 +287,7 @@ public:
 	float GetVehicleNonDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile,
 	                                       cTransmission *transmission, float velocityChange);
 
-	bool HasAirBrakes(int32 model) const;
+	bool HasAirBrakes(int32 model) const; //done
 
 	void Initialise();
 	void InitialisePoliceRadio();
@@ -302,13 +302,13 @@ public:
 	void PlayLoadedMissionAudio(uint8 slot);
 	void PlayOneShot(int32 index, int16 sound, float vol);
 	void PlaySuspectLastSeen(float x, float y, float z);
-	void PlayerJustGotInCar() const;
-	void PlayerJustLeftCar() const;
+	void PlayerJustGotInCar() const; //done
+	void PlayerJustLeftCar() const; //done
 	void PostInitialiseGameSpecificSetup();
-	void PostTerminateGameSpecificShutdown();
-	void PreInitialiseGameSpecificSetup() const;
+	void PostTerminateGameSpecificShutdown(); //done
+	void PreInitialiseGameSpecificSetup() const; //done
 	void PreloadMissionAudio(uint8 slot, Const char *name);
-	void PreTerminateGameSpecificShutdown();
+	void PreTerminateGameSpecificShutdown(); //done
 	/// processX - main logic of adding new sounds
 	void ProcessActiveQueues();
 	bool ProcessAirBrakes(cVehicleParams *params);
@@ -324,14 +324,14 @@ public:
 	void ProcessCesna(cVehicleParams *params);
 	//void ProcessCrane();
 	bool ProcessEngineDamage(cVehicleParams *params);
-	void ProcessEntity(int32 sound);
+	void ProcessEntity(int32 sound); //done
 	void ProcessExplosions(int32 explosion);
 	void ProcessFireHydrant();
 	void ProcessFires(int32 entity);
 	void ProcessFrontEnd();
 	void ProcessGarages();
-	void ProcessCarHeli(cVehicleParams* params);
-	void ProcessVehicleFlatTyre(cVehicleParams* params);
+	void ProcessCarHeli(cVehicleParams* params); //done
+	void ProcessVehicleFlatTyre(cVehicleParams* params); //done
 	void ProcessJumbo(cVehicleParams *);
 	void ProcessJumboAccel(CPlane *plane);
 	void ProcessJumboDecel(CPlane *plane);
@@ -346,22 +346,22 @@ public:
 	void ProcessOneShotScriptObject(uint8 sound);
 	void ProcessPed(CPhysical *ped);
 	void ProcessPedOneShots(cPedParams *params);
-	void ProcessPhysical(int32 id);
-	void ProcessPlane(cVehicleParams *params);
-	void ProcessPlayersVehicleEngine(cVehicleParams *params, CVehicle* veh);
+	void ProcessPhysical(int32 id); //done
+	void ProcessPlane(cVehicleParams *params); //done
+	void ProcessPlayersVehicleEngine(cVehicleParams *params, CVehicle* veh); //done
 	void ProcessProjectiles();
 	void ProcessRainOnVehicle(cVehicleParams *params);
 	void ProcessReverb() const;
-	bool ProcessReverseGear(cVehicleParams *params);
-	void ProcessScriptObject(int32 id);
+	bool ProcessReverseGear(cVehicleParams *params); //done
+	void ProcessScriptObject(int32 id); //done
 	void ProcessSpecial();
 #ifdef GTA_TRAIN
 	bool ProcessTrainNoise(cVehicleParams *params);
 #endif
-	void ProcessVehicle(CVehicle *vehicle);
+	void ProcessVehicle(CVehicle *vehicle); //done, but need add model functions
 	bool ProcessVehicleDoors(cVehicleParams *params);
-	void ProcessVehicleEngine(cVehicleParams *params);
-	void UpdateGasPedalAudio(CVehicle* veh, int vehType);
+	void ProcessVehicleEngine(cVehicleParams *params); //done
+	void UpdateGasPedalAudio(CVehicle* veh, int vehType); //done
 	void ProcessVehicleHorn(cVehicleParams *params);
 	void ProcessVehicleOneShots(cVehicleParams *params);
 	bool ProcessVehicleReverseWarning(cVehicleParams *params);
@@ -369,10 +369,10 @@ public:
 	bool ProcessVehicleSirenOrAlarm(cVehicleParams *params);
 	bool ProcessVehicleSkidding(cVehicleParams *params);
 	void ProcessWaterCannon(int32);
-	void ProcessWeather(int32 id);
+	void ProcessWeather(int32 id); //done
 	bool ProcessWetRoadNoise(cVehicleParams *params);
-	void ProcessEscalators();
-	void ProcessExtraSounds();
+	void ProcessEscalators(); //done
+	void ProcessExtraSounds(); //done
 
 	int32 RandomDisplacement(uint32 seed) const;
 	void ReacquireDigitalHandle() const;
@@ -417,11 +417,11 @@ public:
 	void TranslateEntity(Const CVector *v1, CVector *v2) const;
 
 	void UpdateReflections();
-	bool UsesReverseWarning(int32 model) const;
+	bool UsesReverseWarning(int32 model) const; //done
 	bool UsesSiren(int32 model) const;
 	bool UsesSirenSwitching(int32 model) const;
 
-	CVehicle *FindVehicleOfPlayer();
+	CVehicle *FindVehicleOfPlayer(); //done
 	void SetPedTalkingStatus(CPed *ped, uint8 status);
 	void SetPlayersMood(uint8 mood, int32 time);
 
