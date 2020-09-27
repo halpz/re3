@@ -1384,7 +1384,10 @@ CAutomobile::ProcessControl(void)
 						playRotorSound = true;
 			}
 		}else if((GetModelIndex() == MI_DODO || CVehicle::bAllDodosCheat) &&
-		         m_vecMoveSpeed.Magnitude() > 0.0f && CTimer::GetTimeStep() > 0.0f){
+#ifdef FIX_BUGS
+				!IsRealHeli() &&
+#endif
+				m_vecMoveSpeed.Magnitude() > 0.0f && CTimer::GetTimeStep() > 0.0f){
 #ifdef ALT_DODO_CHEAT
 			if (bAltDodoCheat)
 				FlyingControl(FLIGHT_MODEL_PLANE);
