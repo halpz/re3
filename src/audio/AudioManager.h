@@ -320,10 +320,10 @@ public:
 	void ProcessBridgeOneShots();
 	void ProcessBridgeWarning();
 #endif
-	bool ProcessCarBombTick(cVehicleParams *params);
+	bool ProcessCarBombTick(cVehicleParams *params); //done
 	void ProcessCesna(cVehicleParams *params);
 	//void ProcessCrane();
-	void ProcessEngineDamage(cVehicleParams *params); //done
+	bool ProcessEngineDamage(cVehicleParams *params); //done
 	void ProcessEntity(int32 sound); //done
 	void ProcessExplosions(int32 explosion);
 	void ProcessFireHydrant();
@@ -359,7 +359,7 @@ public:
 	bool ProcessTrainNoise(cVehicleParams *params);
 #endif
 	void ProcessVehicle(CVehicle *vehicle); //done, but need add model functions
-	bool ProcessVehicleDoors(cVehicleParams *params);
+	bool ProcessVehicleDoors(cVehicleParams *params); //done
 	void ProcessVehicleEngine(cVehicleParams *params); //done
 	void UpdateGasPedalAudio(CVehicle* veh, int vehType); //done
 	void ProcessVehicleHorn(cVehicleParams *params);
