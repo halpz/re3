@@ -235,28 +235,15 @@ const char* MenuFilenames[][2] = {
 	{ nil, nil }
 };
 
+#define MENU_X_RIGHT_ALIGNED(x) SCALE_AND_CENTER_X(DEFAULT_SCREEN_WIDTH - (x))
+
 #ifdef ASPECT_RATIO_SCALE
 // All of the defines below replace the StretchX function. Otherwise use SCREEN_SCALE_X.
-#define MENU_X_LEFT_ALIGNED(x) ScaleAndCenterX(x)
-#define MENU_X_RIGHT_ALIGNED(x) ScaleAndCenterX(DEFAULT_SCREEN_WIDTH - (x))
+#define MENU_X_LEFT_ALIGNED(x) SCALE_AND_CENTER_X(x)
 #define MENU_X(x) SCREEN_SCALE_X(x)
 #define MENU_Y(y) SCREEN_SCALE_Y(y)
-float
-ScaleAndCenterX(float x)
-{
-	if (SCREEN_WIDTH == DEFAULT_SCREEN_WIDTH)
-		return x;
-	else {
-		if (x > DEFAULT_SCREEN_WIDTH / 2) {
-			return SCREEN_WIDTH / 2 + SCREEN_SCALE_X(x - DEFAULT_SCREEN_WIDTH / 2);
-		} else {
-			return SCREEN_WIDTH / 2 - SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH / 2 - x);
-		}
-	}
-}
 #else
 #define MENU_X_LEFT_ALIGNED(x) StretchX(x)
-#define MENU_X_RIGHT_ALIGNED(x) SCREEN_STRETCH_FROM_RIGHT(x)
 #define MENU_X(x) StretchX(x)
 #define MENU_Y(y) StretchY(y)
 #endif
@@ -1425,7 +1412,6 @@ CMenuManager::Draw()
 #endif
 			if (i == m_nCurrOption && itemsAreSelectable) {
 #ifdef PS2_LIKE_MENU
-				// We keep stretching, because we also stretch background image and we want that bar to be aligned with borders of background
 				CSprite2d::DrawRect(CRect(MENU_X_LEFT_ALIGNED(29.0f), MENU_Y(bitAboveNextItemY),
 											MENU_X_RIGHT_ALIGNED(29.0f), MENU_Y(usableLineHeight + nextItemY)),
 											CRGBA(100, 200, 50, FadeIn(50)));
@@ -2348,11 +2334,10 @@ CMenuManager::DrawFrontEndNormal()
 
 	if (!m_bGameNotLoaded) {
 		CSprite2d *bg = LoadSplash(nil);
-		bg->Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
+		bg->Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(48, 48, 48, 255));
 	} else {
 		CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(0, 0, 0, 255));
 	}
-
 
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERNEAREST);
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
@@ -2459,6 +2444,46 @@ CMenuManager::DrawFrontEndNormal()
 		default:
 			Draw();
 			break;
+	}
+
+	// Positions/style from PS2 menu, credits to Fire_Head
+	/* Draw controller buttons */
+	CFont::SetFontStyle(FONT_BANK);
+	CFont::SetBackgroundOff();
+	CFont::SetScale(SCREEN_SCALE_X(0.35f), SCREEN_SCALE_Y(0.64f));
+	CFont::SetPropOn();
+	CFont::SetCentreOff();
+	CFont::SetJustifyOn();
+	CFont::SetRightJustifyOff();
+	CFont::SetBackGroundOnlyTextOn();
+	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(40.0f)); // 600.0f
+	CFont::SetColor(CRGBA(16, 16, 16, 255));
+	switch (m_nCurrScreen) {
+
+		// Page names overlaps buttons on those.
+		case MENUPAGE_MOUSE_CONTROLS:
+		case MENUPAGE_KEYBOARD_CONTROLS:
+			break;
+
+		default:
+		{
+			CFont::PrintString(MENU_X_LEFT_ALIGNED(52.0f), MENU_Y(360.0f), TheText.Get("FEDS_SE"));
+			CFont::PrintString(MENU_X_LEFT_ALIGNED(52.0f), MENU_Y(372.0f), TheText.Get("FEDS_BA"));
+			if (!m_bGameNotLoaded)
+				CFont::PrintString(MENU_X_LEFT_ALIGNED(52.0f), MENU_Y(384.0f), TheText.Get("FEDS_ST"));
+
+			if (bottomBarActive)
+				CFont::PrintString(MENU_X_LEFT_ALIGNED(242.0f), MENU_Y(372.0f), TheText.Get("FEDS_AM")); // <>-CHANGE MENU
+			else if (m_nCurrScreen != MENUPAGE_STATS && m_nCurrScreen != MENUPAGE_BRIEFS) {
+				CFont::PrintString(MENU_X_LEFT_ALIGNED(242.0f), MENU_Y(360.0f + 3.5f), TheText.Get("FEA_UP")); // ;
+				CFont::PrintString(MENU_X_LEFT_ALIGNED(242.0f), MENU_Y(384.0f - 3.5f), TheText.Get("FEA_DO")); // =
+				CFont::PrintString(MENU_X_LEFT_ALIGNED(242.0f - 10.0f), MENU_Y(372.0f), TheText.Get("FEA_LE")); // <
+				CFont::PrintString(MENU_X_LEFT_ALIGNED(242.0f + 11.0f), MENU_Y(372.0f), TheText.Get("FEA_RI")); // >
+				CFont::PrintString(MENU_X_LEFT_ALIGNED(242.0f + 20.0f), MENU_Y(372.0f), TheText.Get("FEDSAS3")); // - CHANGE SELECTION
+			}
+
+			break;
+		}
 	}
 
 	#define optionWidth		MENU_X(66.0f)
@@ -3560,15 +3585,15 @@ CMenuManager::MessageScreen(const char *text)
 	CFont::SetPropOn();
 	CFont::SetJustifyOn();
 	CFont::SetBackGroundOnlyTextOn();
-	CFont::SetWrapx(SCREEN_SCALE_FROM_RIGHT(170.0f));
-	CFont::SetRightJustifyWrap(SCREEN_SCALE_FROM_RIGHT(170.0f));
-	CSprite2d::DrawRect(CRect(SCREEN_SCALE_X(120.0f), SCREEN_SCALE_Y(150.0f), SCREEN_SCALE_FROM_RIGHT(120.0f), SCREEN_SCALE_FROM_BOTTOM(220.0f)), CRGBA(50, 50, 50, 210));
+	CFont::SetWrapx(SCREEN_WIDTH - StretchX(170.0f));
+	CFont::SetRightJustifyWrap(SCREEN_WIDTH - StretchX(170.0f));
+	CSprite2d::DrawRect(CRect(StretchX(120.0f), StretchY(150.0f), SCREEN_WIDTH - StretchX(120.0f), SCREEN_HEIGHT - StretchY(220.0f)), CRGBA(50, 50, 50, 210));
 	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
-	CFont::SetCentreSize(SCREEN_SCALE_X(380.0f));
+	CFont::SetCentreSize(SCREEN_STRETCH_X(380.0f));
 	CFont::SetCentreOn();
 	CFont::SetColor(CRGBA(255, 217, 106, 255));
 	CFont::SetScale(SCREEN_SCALE_X(SMALLTEXT_X_SCALE), SCREEN_SCALE_Y(SMALLTEXT_Y_SCALE));
-	CFont::PrintString(SCREEN_SCALE_X(320.0f), SCREEN_SCALE_Y(170.0f), TheText.Get(text));
+	CFont::PrintString(StretchX(320.0f), StretchY(170.0f), TheText.Get(text));
 	CFont::DrawFonts();
 	DoRWStuffEndOfFrame();
 }
@@ -4543,18 +4568,24 @@ CMenuManager::ProcessButtonPresses(void)
 			return;
 		} else if (CPad::GetPad(0)->GetLeftJustDown() || CPad::GetPad(0)->GetAnaloguePadLeft() || CPad::GetPad(0)->GetDPadLeftJustDown()
 			|| CPad::GetPad(0)->GetUpJustDown() || CPad::GetPad(0)->GetAnaloguePadUp() || CPad::GetPad(0)->GetDPadUpJustDown()) {
+
+			if (reverseAlpha && m_nMenuFadeAlpha > 30)
+				return;
+
 			m_bShowMouse = false;
 			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
-			if (curBottomBarOption > 0)
-				curBottomBarOption--;
+			curBottomBarOption = ((curBottomBarOption + bbTabCount) - 1) % bbTabCount;
 			ChangeScreen(bbNames[curBottomBarOption].screenId, 0, true, true);
 			return;
 		} else if (CPad::GetPad(0)->GetRightJustDown() || CPad::GetPad(0)->GetAnaloguePadRight() || CPad::GetPad(0)->GetDPadRightJustDown()
 			|| CPad::GetPad(0)->GetDownJustDown() || CPad::GetPad(0)->GetAnaloguePadDown() || CPad::GetPad(0)->GetDPadDownJustDown()) {
+
+			if (reverseAlpha && m_nMenuFadeAlpha > 30)
+				return;
+
 			m_bShowMouse = false;
 			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
-			if (curBottomBarOption < bbTabCount-1)
-				curBottomBarOption++;
+			curBottomBarOption = ((curBottomBarOption + bbTabCount) + 1) % bbTabCount;
 			ChangeScreen(bbNames[curBottomBarOption].screenId, 0, true, true);
 			return;
 		}
@@ -5121,7 +5152,7 @@ CMenuManager::ProcessButtonPresses(void)
 			return;
 #endif
 		}
-#ifdef PS2_LIKE_MENU
+#ifdef PS2_SAVE_DIALOG
 		else if (m_nCurrScreen == MENUPAGE_CHOOSE_SAVE_SLOT || m_nCurrScreen == MENUPAGE_SAVE) {
 #else
 		else if (m_nCurrScreen == MENUPAGE_CHOOSE_SAVE_SLOT) {

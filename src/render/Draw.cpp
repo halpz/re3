@@ -70,3 +70,14 @@ CDraw::SetFOV(float fov)
 #endif
 	ms_fFOV = fov;
 }
+
+#ifdef ASPECT_RATIO_SCALE
+float
+ScaleAndCenterX(float x)
+{
+	if (SCREEN_WIDTH == DEFAULT_SCREEN_WIDTH)
+		return x;
+	else
+		return (SCREEN_WIDTH - SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH)) / 2 + SCREEN_SCALE_X(x);
+}
+#endif

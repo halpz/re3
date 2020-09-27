@@ -144,8 +144,11 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 
 #ifdef ASPECT_RATIO_SCALE
 #define SCREEN_SCALE_AR(a) ((a) * DEFAULT_ASPECT_RATIO / SCREEN_ASPECT_RATIO)
+extern float ScaleAndCenterX(float x);
+#define SCALE_AND_CENTER_X(x) ScaleAndCenterX(x)
 #else
 #define SCREEN_SCALE_AR(a) (a)
+#define SCALE_AND_CENTER_X(x) SCREEN_STRETCH_X(x)
 #endif
 
 #include "maths.h"

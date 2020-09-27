@@ -11,13 +11,6 @@
 bool CCredits::bCreditsGoing;
 uint32 CCredits::CreditsStartTime;
 
-#ifdef ASPECT_RATIO_SCALE
-#define SCALE_AND_CENTER(x) ScaleAndCenterX(x)
-extern float ScaleAndCenterX(float x);
-#else
-#define SCALE_AND_CENTER(x) SCREEN_STRETCH_X(x)
-#endif
-
 void
 CCredits::Init(void)
 {
@@ -69,7 +62,7 @@ CCredits::Render(void)
 	scrolloffset = (CTimer::GetTimeInMilliseconds() - CreditsStartTime) / 24.0f;
 	CFont::SetJustifyOff();
 	CFont::SetBackgroundOff();
-	CFont::SetCentreSize(SCALE_AND_CENTER(DEFAULT_SCREEN_WIDTH - 20));
+	CFont::SetCentreSize(SCALE_AND_CENTER_X(DEFAULT_SCREEN_WIDTH - 20));
 	CFont::SetCentreOn();
 	CFont::SetPropOn();
 	CFont::SetColor(CRGBA(220, 220, 220, 220));
@@ -504,5 +497,3 @@ bool CCredits::AreCreditsDone(void)
 {
 	return !bCreditsGoing;
 }
-
-#undef SCALE_AND_CENTER

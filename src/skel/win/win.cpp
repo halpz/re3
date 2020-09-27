@@ -2513,8 +2513,10 @@ WinMain(HINSTANCE instance,
 		{
 			if ( gGameState == GS_PLAYING_GAME )
 				CGame::ShutDown();
+#ifndef MASTER
 			else if ( gGameState == GS_ANIMVIEWER )
 				CAnimViewer::Shutdown();
+#endif
 			
 			CTimer::Stop();
 			
@@ -2538,8 +2540,10 @@ WinMain(HINSTANCE instance,
 
 	if ( gGameState == GS_PLAYING_GAME )
 		CGame::ShutDown();
+#ifndef MASTER
 	else if ( gGameState == GS_ANIMVIEWER )
 		CAnimViewer::Shutdown();
+#endif
 
 	DMAudio.Terminate();
 	
