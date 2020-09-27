@@ -103,7 +103,7 @@ public:
 	void Update(void);
 	void SwitchOff(void);
 	void AddThisOne(CVector pos0, CVector pos1, CVector pos2, CVector pos3, bool b_isMovingDown);
-	bool IsActive() { return m_bIsActive; };
+	bool IsActive() const { return m_bIsActive; };
 	const CVector& GetPosition() const { return m_midPoint; };
 };
 
@@ -116,7 +116,7 @@ public:
 	static void Update(void);
 	static void AddOne(CVector pos0, CVector pos1, CVector pos2, CVector pos3, bool b_isMovingDown);
 	static void Shutdown(void);
-	static CEscalator& GetEscalator(int ind) { return aEscalators[ind]; };
+	static const CEscalator& GetEscalator(int ind) { return aEscalators[ind]; };
 };
 
 class CMovingThing

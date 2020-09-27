@@ -3210,7 +3210,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams* params)
 				m_sQueueSample.m_nFrequency = 14287 + Min(1.0f, freqModifier) * 3713;
 			if (propellerSpeed < 1.0f)
 				m_sQueueSample.m_nFrequency = (propellerSpeed + 1.0f) * (m_sQueueSample.m_nFrequency / 2.0f);
-			m_sQueueSample.m_nFrequency = clamp(m_sQueueSample.m_nFrequency, freqFrontPrev - 197, freqFrontPrev + 197);
+			m_sQueueSample.m_nFrequency = clamp2(m_sQueueSample.m_nFrequency, freqFrontPrev, 197);
 			freqFrontPrev = m_sQueueSample.m_nFrequency;
 
 			m_sQueueSample.m_bIs2D = false;
@@ -3268,7 +3268,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams* params)
 			if (propellerSpeed < 1.0f)
 				m_sQueueSample.m_nFrequency = (propellerSpeed + 1) * (m_sQueueSample.m_nFrequency / 2);
 
-			m_sQueueSample.m_nFrequency = clamp(m_sQueueSample.m_nFrequency, freqPropellerPrev - 98, freqPropellerPrev + 98);
+			m_sQueueSample.m_nFrequency = clamp2(m_sQueueSample.m_nFrequency, freqPropellerPrev, 98);
 			freqPropellerPrev = m_sQueueSample.m_nFrequency;
 		} else {
 			m_sQueueSample.m_nSampleIndex = SFX_CAR_HELI_MAI2;
@@ -3339,7 +3339,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams* params)
 					m_sQueueSample.m_nFrequency = 14287 + Min(1.0f, freqModifier) * 3713;
 				if (propellerSpeed < 1.0)
 					m_sQueueSample.m_nFrequency = (propellerSpeed + 1) * (m_sQueueSample.m_nFrequency / 2.0f);
-				m_sQueueSample.m_nFrequency = clamp(m_sQueueSample.m_nFrequency, freqSkimmerPrev - 197, freqSkimmerPrev + 197);
+				m_sQueueSample.m_nFrequency = clamp2(m_sQueueSample.m_nFrequency, freqSkimmerPrev, 197);
 				freqSkimmerPrev = m_sQueueSample.m_nFrequency;
 
 				m_sQueueSample.m_nSampleIndex = SFX_SEAPLANE_PRO4;
@@ -3441,8 +3441,8 @@ cAudioManager::ProcessVehicleFlatTyre(cVehicleParams* params)
 		return;
 	}
 	modifier = Min(1.0f, Abs(params->m_fVelocityChange) / (0.3f * params->m_pTransmission->fMaxVelocity));
-	if (modifier > 0.01) { //mb can be replaced by (emittingVol > 1)
-		emittingVol = (100.0 * modifier);
+	if (modifier > 0.01f) { //mb can be replaced by (emittingVol > 1)
+		emittingVol = (100.0f * modifier);
 		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
 		m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume) {
@@ -4968,7 +4968,7 @@ cAudioManager::ProcessExtraSounds()
 		m_sQueueSample.m_vecPos = aVecExtraSoundPosition[i];
 		distance = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		if (distance < SQR(SOUND_INTENSITY)) {
-			if (distance > 0.0)
+			if (distance > 0.0f)
 				m_sQueueSample.m_fDistance = Sqrt(distance);
 			else
 				m_sQueueSample.m_fDistance = 0.0f;
