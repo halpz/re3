@@ -822,12 +822,28 @@ void joysChangeCB(int jid, int event);
 
 bool IsThisJoystickBlacklisted(int i)
 {
-	const char *joyname = glfwGetJoystickName(i);
+	if (glfwJoystickIsGamepad(i))
+		return false;
+
+	const char* joyname = glfwGetJoystickName(i);
 
 	// this is just a keyboard and mouse
 	// Microsoft Microsoft® 2.4GHz Transceiver v8.0 Consumer Control
 	// Microsoft Microsoft® 2.4GHz Transceiver v8.0 System Control
-	if(strstr(joyname, "2.4GHz Transceiver"))
+	if (strstr(joyname, "2.4GHz Transceiver"))
+		return true;
+	// COMPANY USB Device System Control
+	// COMPANY USB Device Consumer Control
+	if (strstr(joyname, "COMPANY USB"))
+		return true;
+	// i.e. Synaptics TM2438-005
+	if (strstr(joyname, "Synaptics "))
+		return true;
+	// i.e. ELAN Touchscreen
+	if (strstr(joyname, "ELAN "))
+		return true;
+	// i.e. Primax Electronics, Ltd HP Wireless Keyboard Mouse Kit Consumer Control
+	if (strstr(joyname, "Keyboard"))
 		return true;
 
 	return false;
@@ -2016,11 +2032,11 @@ void CapturePad(RwInt32 padID)
 	
 	// Gamepad axes are guaranteed to return 0.0f if that particular gamepad doesn't have that axis.
 	if ( glfwPad != -1 ) {
-		leftStickPos.x = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[0] : numAxes >= 0 ? axes[0] : 0.0f;
-		leftStickPos.y = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[1] : numAxes >= 1 ? axes[1] : 0.0f;
+		leftStickPos.x = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[0] : numAxes >= 1 ? axes[0] : 0.0f;
+		leftStickPos.y = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[1] : numAxes >= 2 ? axes[1] : 0.0f;
 
-		rightStickPos.x = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[2] : numAxes >= 2 ? axes[2] : 0.0f;
-		rightStickPos.y = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[3] : numAxes >= 3 ? axes[3] : 0.0f;
+		rightStickPos.x = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[2] : numAxes >= 3 ? axes[2] : 0.0f;
+		rightStickPos.y = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[3] : numAxes >= 4 ? axes[3] : 0.0f;
 	}
 	
 	{

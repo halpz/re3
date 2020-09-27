@@ -262,6 +262,12 @@ ScaleAndCenterX(float x)
 #endif
 
 #ifdef PS2_LIKE_MENU
+#define PAGE_NAME_X MENU_X_RIGHT_ALIGNED
+#else
+#define PAGE_NAME_X SCREEN_SCALE_FROM_RIGHT
+#endif
+
+#ifdef PS2_LIKE_MENU
 #define ChangeScreen(screen, option, updateDelay, withReverseAlpha) \
 	do { \
 		if (reverseAlpha) { \
@@ -272,7 +278,7 @@ ScaleAndCenterX(float x)
 			if (updateDelay) \
 				m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode(); \
 		} \
-		if (withReverseAlpha) { \
+		if (withReverseAlpha && !m_bRenderGameInMenu) { \
 			pendingOption = option; \
 			pendingScreen = screen; \
 			reverseAlpha = true; \
@@ -827,7 +833,7 @@ CMenuManager::Draw()
 	if (aScreens[m_nCurrScreen].m_ScreenName[0] != '\0') {
 		
 		PREPARE_MENU_HEADER
-		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
+		CFont::PrintString(PAGE_NAME_X(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
 
 		// Weird place to put that.
 		nextYToUse += 24.0f + 10.0f;
@@ -1418,10 +1424,17 @@ CMenuManager::Draw()
 			if (!m_bRenderGameInMenu)
 #endif
 			if (i == m_nCurrOption && itemsAreSelectable) {
+#ifdef PS2_LIKE_MENU
+				// We keep stretching, because we also stretch background image and we want that bar to be aligned with borders of background
+				CSprite2d::DrawRect(CRect(MENU_X_LEFT_ALIGNED(29.0f), MENU_Y(bitAboveNextItemY),
+											MENU_X_RIGHT_ALIGNED(29.0f), MENU_Y(usableLineHeight + nextItemY)),
+											CRGBA(100, 200, 50, FadeIn(50)));
+#else
 				// We keep stretching, because we also stretch background image and we want that bar to be aligned with borders of background
 				CSprite2d::DrawRect(CRect(StretchX(10.0f), MENU_Y(bitAboveNextItemY),
-											SCREEN_STRETCH_FROM_RIGHT(11.0f), MENU_Y(usableLineHeight + nextItemY)),
-											CRGBA(100, 200, 50, FadeIn(50)));
+					SCREEN_STRETCH_FROM_RIGHT(11.0f), MENU_Y(usableLineHeight + nextItemY)),
+					CRGBA(100, 200, 50, FadeIn(50)));
+#endif
 			}
 
 			CFont::SetColor(CRGBA(0, 0, 0, FadeIn(90)));
@@ -2047,11 +2060,11 @@ CMenuManager::DrawControllerSetupScreen()
 
 	switch (m_ControlMethod) {
 		case CONTROL_STANDARD:
-			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y),
+			CFont::PrintString(PAGE_NAME_X(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y),
 				TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
 			break;
 		case CONTROL_CLASSIC:
-			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y),
+			CFont::PrintString(PAGE_NAME_X(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y),
 				TheText.Get("FET_CTI"));
 			break;
 		default:
@@ -2753,7 +2766,7 @@ CMenuManager::DrawPlayerSetupScreen()
 
 	PREPARE_MENU_HEADER
 
-	CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y), TheText.Get("FET_PS"));
+	CFont::PrintString(PAGE_NAME_X(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y), TheText.Get("FET_PS"));
 
 	// lstrcpy's changed with strcpy
 
@@ -3737,7 +3750,7 @@ CMenuManager::PrintStats()
 	// ::Draw already does that.
 	/*
 	PREPARE_MENU_HEADER
-	CFont::PrintString(MENU_X_RIGHT_ALIGNED(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
+	CFont::PrintString(PAGE_NAME_X(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
 	*/
 	CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X), MENU_Y(MENU_TEXT_SIZE_Y));
 }
@@ -4513,11 +4526,16 @@ CMenuManager::ProcessButtonPresses(void)
 		bottomBarActive = false;
 		curBottomBarOption = hoveredBottomBarOption;
 		ChangeScreen(bbNames[curBottomBarOption].screenId, 0, true, false);
+		if (bbNames[curBottomBarOption].screenId == MENUPAGE_SOUND_SETTINGS)
+			DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
 		return;
 	} else if (bottomBarActive) {
 		if (CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetCrossJustDown()) {
 			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 			bottomBarActive = false;
+
+			if (bbNames[curBottomBarOption].screenId == MENUPAGE_SOUND_SETTINGS)
+				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
 
 			// If there's a menu change with fade ongoing, finish it now
 			if (reverseAlpha)
