@@ -244,8 +244,8 @@ CFont::Initialise(void)
 	SetColor(CRGBA(0xFF, 0xFF, 0xFF, 0));
 	SetJustifyOff();
 	SetCentreOff();
-	SetWrapx(DEFAULT_SCREEN_WIDTH);
-	SetCentreSize(DEFAULT_SCREEN_WIDTH);
+	SetWrapx(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
+	SetCentreSize(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
 	SetBackgroundOff();
 	SetBackgroundColor(CRGBA(0x80, 0x80, 0x80, 0x80));
 	SetBackGroundOnlyTextOff();

@@ -129,7 +129,7 @@ cAudioManager::DoPoliceRadioCrackle()
 	m_sQueueSample.m_nEntityIndex = m_nPoliceChannelEntity;
 	m_sQueueSample.m_nCounter = 0;
 	m_sQueueSample.m_nSampleIndex = SFX_POLICE_RADIO_CRACKLE;
-	m_sQueueSample.m_nBankIndex = SAMPLEBANK_MAIN;
+	m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 	m_sQueueSample.m_bIs2D = true;
 	m_sQueueSample.m_nReleasingVolumeModificator = 10;
 	m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_POLICE_RADIO_CRACKLE);

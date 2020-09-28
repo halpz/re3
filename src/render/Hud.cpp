@@ -336,7 +336,7 @@ void CHud::Draw()
 		CFont::SetScale(SCREEN_SCALE_X(0.4f), SCREEN_SCALE_Y(0.6f));
 		CFont::SetJustifyOff();
 		CFont::SetCentreOn();
-		CFont::SetCentreSize(SCREEN_SCALE_X(640.0f));
+		CFont::SetCentreSize(SCREEN_WIDTH);
 		CFont::SetPropOn();
 		CFont::SetFontStyle(FONT_BANK);
 
@@ -740,7 +740,7 @@ void CHud::Draw()
 						CFont::SetRightJustifyWrap(0.0f);
 						CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 						CFont::SetColor(CRGBA(244, 20, 20, 255));
-						CFont::SetWrapx(SCREEN_SCALE_X(640.0f));
+						CFont::SetWrapx(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
 						CFont::SetPropOff();
 						CFont::SetBackGroundOnlyTextOn();
 
@@ -869,8 +869,8 @@ void CHud::Draw()
 				else
 					CFont::SetCentreOff();
 
-				CFont::SetWrapx(SCREEN_SCALE_X(CTheScripts::IntroTextLines[i].m_fWrapX));
-				CFont::SetCentreSize(SCREEN_SCALE_X(CTheScripts::IntroTextLines[i].m_fCenterSize));
+				CFont::SetWrapx(SCALE_AND_CENTER_X(CTheScripts::IntroTextLines[i].m_fWrapX));
+				CFont::SetCentreSize(SCALE_AND_CENTER_X(CTheScripts::IntroTextLines[i].m_fCenterSize));
 
 				if (CTheScripts::IntroTextLines[i].m_bBackground)
 					CFont::SetBackgroundOn();
@@ -890,7 +890,7 @@ void CHud::Draw()
 					CFont::SetPropOff();
 
 				CFont::SetFontStyle(FONT_LOCALE(CTheScripts::IntroTextLines[i].m_nFont));
-				CFont::PrintString(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - CTheScripts::IntroTextLines[i].m_fAtX), SCREEN_SCALE_Y(DEFAULT_SCREEN_HEIGHT - CTheScripts::IntroTextLines[i].m_fAtY), CTheScripts::IntroTextLines[i].m_Text);
+				CFont::PrintString(SCALE_AND_CENTER_X(DEFAULT_SCREEN_WIDTH - CTheScripts::IntroTextLines[i].m_fAtX), SCREEN_SCALE_Y(DEFAULT_SCREEN_HEIGHT - CTheScripts::IntroTextLines[i].m_fAtY), CTheScripts::IntroTextLines[i].m_Text);
 			}
 		}
 		for (int i = 0; i < ARRAY_SIZE(CTheScripts::IntroRectangles); i++) {
@@ -957,8 +957,10 @@ void CHud::Draw()
 				CFont::SetScale(SCREEN_SCALE_X(1.8f), SCREEN_SCALE_Y(1.8f));
 				CFont::SetPropOn();
 				CFont::SetCentreOn();
-				CFont::SetCentreSize(SCREEN_SCALE_X(615.0f));
+				CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(25.0f));
 				CFont::SetFontStyle(FONT_HEADING);
+
+				// Appearently sliding text in here was abandoned very early, since this text is centered now.
 
 				if (BigMessageX[0] >= SCREEN_SCALE_FROM_RIGHT(20.0f)) {
 					BigMessageInUse[0] += CTimer::GetTimeStep();
@@ -974,7 +976,7 @@ void CHud::Draw()
 					}
 				}
 				else {
-					BigMessageX[0] += (CTimer::GetTimeStepInMilliseconds() * 0.3f);
+					BigMessageX[0] += SCREEN_SCALE_X((CTimer::GetTimeStepInMilliseconds() * 0.3f));
 					BigMessageAlpha[0] += (CTimer::GetTimeStepInMilliseconds() * 0.3f);
 
 					if (BigMessageAlpha[0] > 255.0f)
@@ -983,17 +985,19 @@ void CHud::Draw()
 
 				CFont::SetColor(CRGBA(0, 0, 0, BigMessageAlpha[0]));
 #ifdef FIX_BUGS
-				CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(18.0f) + SCREEN_SCALE_Y(2.0f), m_BigMessage[0]);
+#define Y_OFFSET 18.0f
 #else
-				CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(20.0f) + SCREEN_SCALE_Y(2.0f), m_BigMessage[0]);
+#define Y_OFFSET 20.0f
 #endif
-
+				CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f), (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(Y_OFFSET) + SCREEN_SCALE_Y(2.0f), m_BigMessage[0]);
 				CFont::SetColor(CRGBA(BIGMESSAGE_COLOR.r, BIGMESSAGE_COLOR.g, BIGMESSAGE_COLOR.b, BigMessageAlpha[0]));
 				CFont::PrintString(SCREEN_WIDTH / 2, (SCREEN_HEIGHT / 2) - SCREEN_SCALE_Y(18.0f), m_BigMessage[0]);
+
+#undef Y_OFFSET
 			}
 			else {
 				BigMessageAlpha[0] = 0.0f;
-				BigMessageX[0] = -60.0f;
+				BigMessageX[0] = SCALE_AND_CENTER_X(-60.0f);
 				BigMessageInUse[0] = 1.0f;
 			}
 		}
@@ -1162,8 +1166,8 @@ void CHud::DrawAfterFade()
 			else
 				CFont::SetCentreOff();
 
-			CFont::SetWrapx(SCREEN_SCALE_X(line.m_fWrapX));
-			CFont::SetCentreSize(SCREEN_SCALE_X(line.m_fCenterSize));
+			CFont::SetWrapx(SCALE_AND_CENTER_X(line.m_fWrapX));
+			CFont::SetCentreSize(SCALE_AND_CENTER_X(line.m_fCenterSize));
 			if (line.m_bBackground)
 				CFont::SetBackgroundOn();
 			else
@@ -1181,7 +1185,7 @@ void CHud::DrawAfterFade()
 				CFont::SetPropOff();
 
 			CFont::SetFontStyle(line.m_nFont);
-			CFont::PrintString(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - line.m_fAtX), SCREEN_SCALE_Y(DEFAULT_SCREEN_HEIGHT - line.m_fAtY), line.m_Text);
+			CFont::PrintString(SCALE_AND_CENTER_X(DEFAULT_SCREEN_WIDTH - line.m_fAtX), SCREEN_SCALE_Y(DEFAULT_SCREEN_HEIGHT - line.m_fAtY), line.m_Text);
 		}
 	}
 	for (int i = 0; i < ARRAY_SIZE(CTheScripts::IntroRectangles); i++) {
@@ -1209,7 +1213,7 @@ void CHud::DrawAfterFade()
 		CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.5f));
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
-		CFont::SetCentreSize(SCREEN_SCALE_X(600.0f));
+		CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(40.0f));
 		CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
@@ -1225,7 +1229,7 @@ void CHud::DrawAfterFade()
 		CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.5f));
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
-		CFont::SetCentreSize(SCREEN_SCALE_X(620.0f));
+		CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(20.0f));
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
 		CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 
@@ -1329,7 +1333,7 @@ void CHud::DrawAfterFade()
 					BigMessageAlpha[1] = 0.0f;
 				}
 			} else {
-				BigMessageX[1] += (CTimer::GetTimeStepInMilliseconds() * 0.3f);
+				BigMessageX[1] += SCREEN_SCALE_X((CTimer::GetTimeStepInMilliseconds() * 0.3f));
 				BigMessageAlpha[1] += (CTimer::GetTimeStepInMilliseconds() * 0.3f);
 
 				if (BigMessageAlpha[1] > 255.0f)
@@ -1337,14 +1341,21 @@ void CHud::DrawAfterFade()
 			}
 
 			CFont::SetColor(CRGBA(40, 40, 40, BigMessageAlpha[1]));
+#ifdef BETA_SLIDING_TEXT
+			CFont::PrintString(SCREEN_SCALE_X(2.0f) + BigMessageX[1], SCREEN_SCALE_FROM_BOTTOM(120.0f) + SCREEN_SCALE_Y(2.0f), m_BigMessage[1]);
+
+			CFont::SetColor(CRGBA(MISSIONTITLE_COLOR.r, MISSIONTITLE_COLOR.g, MISSIONTITLE_COLOR.b, BigMessageAlpha[1]));
+			CFont::PrintString(BigMessageX[1], SCREEN_SCALE_FROM_BOTTOM(120.0f), m_BigMessage[1]);
+#else
 			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f) + SCREEN_SCALE_X(2.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f) + SCREEN_SCALE_Y(2.0f), m_BigMessage[1]);
 
 			CFont::SetColor(CRGBA(MISSIONTITLE_COLOR.r, MISSIONTITLE_COLOR.g, MISSIONTITLE_COLOR.b, BigMessageAlpha[1]));
 			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), m_BigMessage[1]);
+#endif
 		}
 		else {
 			BigMessageAlpha[1] = 0.0f;
-			BigMessageX[1] = -60.0f;
+			BigMessageX[1] = SCALE_AND_CENTER_X(-60.0f);
 			BigMessageInUse[1] = 1.0f;
 		}
 	}

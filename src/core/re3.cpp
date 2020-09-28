@@ -267,6 +267,7 @@ void PS2AlphaTestChange(int8 displayedValue)
 
 
 // Important: Make sure to read the warnings/informations in frontendoption.h!!
+// For texts: Either use TheText.Get, or use wcsdup(wchar version of strdup)
 void
 CustomFrontendOptionsPopulate(void)
 {
@@ -369,7 +370,7 @@ CustomFrontendOptionsPopulate(void)
 
 #ifdef FREE_CAM
 	SWITCH_TO_DISPLAY_MENU
-	static const wchar* text = (wchar*)L"FREE CAM";
+	static const wchar* text = (wchar*)wcsdup(L"FREE CAM");
 	FrontendOptionAddSelect(text, off_on, 2, (int8*)&TheCamera.bFreeCam, false, FreeCamChange, nil, true);
 #endif
 

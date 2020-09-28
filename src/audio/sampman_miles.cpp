@@ -21,7 +21,7 @@
 #pragma comment( lib, "mss32.lib" )
 
 cSampleManager SampleManager;
-uint32 BankStartOffset[MAX_SAMPLEBANKS];
+uint32 BankStartOffset[MAX_SFX_BANKS];
 ///////////////////////////////////////////////////////////////
 
 char SampleBankDescFilename[] = "AUDIO\\SFX.SDT";
@@ -29,10 +29,10 @@ char SampleBankDataFilename[] = "AUDIO\\SFX.RAW";
 
 FILE *fpSampleDescHandle;
 FILE *fpSampleDataHandle;
-bool  bSampleBankLoaded            [MAX_SAMPLEBANKS];
-int32 nSampleBankDiscStartOffset   [MAX_SAMPLEBANKS];
-int32 nSampleBankSize              [MAX_SAMPLEBANKS];
-int32 nSampleBankMemoryStartAddress[MAX_SAMPLEBANKS];
+bool  bSampleBankLoaded            [MAX_SFX_BANKS];
+int32 nSampleBankDiscStartOffset   [MAX_SFX_BANKS];
+int32 nSampleBankSize              [MAX_SFX_BANKS];
+int32 nSampleBankMemoryStartAddress[MAX_SFX_BANKS];
 int32 _nSampleDataEndOffset;
 
 int32 nPedSlotSfx    [MAX_PEDSFX];
@@ -896,7 +896,7 @@ cSampleManager::Initialise(void)
 		
 		_nSampleDataEndOffset = 0;
 		
-		for ( int32 i = 0; i < MAX_SAMPLEBANKS; i++ )
+		for ( int32 i = 0; i < MAX_SFX_BANKS; i++ )
 		{
 			bSampleBankLoaded[i]             = false;
 			nSampleBankDiscStartOffset[i]    = 0;
@@ -948,14 +948,14 @@ cSampleManager::Initialise(void)
 			return false;
 		}
 		
-		nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN] = (int32)AIL_mem_alloc_lock(nSampleBankSize[SAMPLEBANK_MAIN]);
-		if ( !nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN] )
+		nSampleBankMemoryStartAddress[SFX_BANK_0] = (int32)AIL_mem_alloc_lock(nSampleBankSize[SFX_BANK_0]);
+		if ( !nSampleBankMemoryStartAddress[SFX_BANK_0] )
 		{
 			Terminate();
 			return false;
 		}
 
-		nSampleBankMemoryStartAddress[SAMPLEBANK_PED] = (int32)AIL_mem_alloc_lock(PED_BLOCKSIZE*MAX_PEDSFX);
+		nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] = (int32)AIL_mem_alloc_lock(PED_BLOCKSIZE*MAX_PEDSFX);
 		
 	}
 	
@@ -1176,7 +1176,7 @@ cSampleManager::Initialise(void)
 	
 	TRACE("bank");
 	
-	LoadSampleBank(SAMPLEBANK_MAIN);
+	LoadSampleBank(SFX_BANK_0);
 	
 	// mp3
 	TRACE("mp3");
@@ -1271,16 +1271,16 @@ cSampleManager::Terminate(void)
 	
 	_DeleteMP3Entries();
 	
-	if ( nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN] != 0 )
+	if ( nSampleBankMemoryStartAddress[SFX_BANK_0] != 0 )
 	{
-		AIL_mem_free_lock((void *)nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN]);
-		nSampleBankMemoryStartAddress[SAMPLEBANK_MAIN] = 0;
+		AIL_mem_free_lock((void *)nSampleBankMemoryStartAddress[SFX_BANK_0]);
+		nSampleBankMemoryStartAddress[SFX_BANK_0] = 0;
 	}
 
-	if ( nSampleBankMemoryStartAddress[SAMPLEBANK_PED] != 0 )
+	if ( nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] != 0 )
 	{
-		AIL_mem_free_lock((void *)nSampleBankMemoryStartAddress[SAMPLEBANK_PED]);
-		nSampleBankMemoryStartAddress[SAMPLEBANK_PED] = 0;
+		AIL_mem_free_lock((void *)nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS]);
+		nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] = 0;
 	}
 	
 	if ( DIG )
@@ -1429,7 +1429,7 @@ cSampleManager::LoadSampleBank(uint8 nBank)
 	
 	if ( MusicManager.IsInitialised()
 		&& MusicManager.GetMusicMode() == MUSICMODE_CUTSCENE
-		&& nBank != SAMPLEBANK_MAIN )
+		&& nBank != SFX_BANK_0 )
 	{
 		return false;
 	}
@@ -1526,10 +1526,10 @@ cSampleManager::LoadPedComment(uint32 nComment)
 	if ( fseek(fpSampleDataHandle, m_aSamples[nComment].nOffset, SEEK_SET) != 0 )
 		return false;
 	
-	if ( fread((void *)(nSampleBankMemoryStartAddress[SAMPLEBANK_PED] + PED_BLOCKSIZE*nCurrentPedSlot), 1, m_aSamples[nComment].nSize, fpSampleDataHandle) != m_aSamples[nComment].nSize )
+	if ( fread((void *)(nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] + PED_BLOCKSIZE*nCurrentPedSlot), 1, m_aSamples[nComment].nSize, fpSampleDataHandle) != m_aSamples[nComment].nSize )
 		return false;
 	
-	nPedSlotSfxAddr[nCurrentPedSlot] = nSampleBankMemoryStartAddress[SAMPLEBANK_PED] + PED_BLOCKSIZE*nCurrentPedSlot;
+	nPedSlotSfxAddr[nCurrentPedSlot] = nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] + PED_BLOCKSIZE*nCurrentPedSlot;
 	nPedSlotSfx    [nCurrentPedSlot] = nComment;
 	
 	if ( ++nCurrentPedSlot >= MAX_PEDSFX )
@@ -1541,13 +1541,13 @@ cSampleManager::LoadPedComment(uint32 nComment)
 int32
 cSampleManager::GetBankContainingSound(uint32 offset)
 {
-	if ( offset >= BankStartOffset[SAMPLEBANK_PED] )
-		return SAMPLEBANK_PED;
+	if ( offset >= BankStartOffset[SFX_BANK_PED_COMMENTS] )
+		return SFX_BANK_PED_COMMENTS;
 	
-	if ( offset >= BankStartOffset[SAMPLEBANK_MAIN] )
-		return SAMPLEBANK_MAIN;
+	if ( offset >= BankStartOffset[SFX_BANK_0] )
+		return SFX_BANK_0;
 	
-	return SAMPLEBANK_INVALID;
+	return INVALID_SFX_BANK;
 }
 
 int32
@@ -2289,7 +2289,7 @@ cSampleManager::IsStreamPlaying(uint8 nStream)
 bool
 cSampleManager::InitialiseSampleBanks(void)
 {
-	int32 nBank = SAMPLEBANK_MAIN;
+	int32 nBank = SFX_BANK_0;
 	
 	fpSampleDescHandle = fopen(SampleBankDescFilename, "rb");
 	if ( fpSampleDescHandle == NULL )
@@ -2316,17 +2316,17 @@ cSampleManager::InitialiseSampleBanks(void)
 	for ( int32 i = 0; i < TOTAL_AUDIO_SAMPLES; i++ )
 	{
 #ifdef FIX_BUGS
-		if (nBank >= MAX_SAMPLEBANKS) break;
+		if (nBank >= MAX_SFX_BANKS) break;
 #endif
-		if ( BankStartOffset[nBank] == BankStartOffset[SAMPLEBANK_MAIN] + i )
+		if ( BankStartOffset[nBank] == BankStartOffset[SFX_BANK_0] + i )
 		{
 			nSampleBankDiscStartOffset[nBank] = m_aSamples[i].nOffset;
 			nBank++;
 		}
 	}
 
-	nSampleBankSize[SAMPLEBANK_MAIN] = nSampleBankDiscStartOffset[SAMPLEBANK_PED] - nSampleBankDiscStartOffset[SAMPLEBANK_MAIN];
-	nSampleBankSize[SAMPLEBANK_PED] = _nSampleDataEndOffset                       - nSampleBankDiscStartOffset[SAMPLEBANK_PED];
+	nSampleBankSize[SFX_BANK_0] = nSampleBankDiscStartOffset[SFX_BANK_PED_COMMENTS] - nSampleBankDiscStartOffset[SFX_BANK_0];
+	nSampleBankSize[SFX_BANK_PED_COMMENTS] = _nSampleDataEndOffset                       - nSampleBankDiscStartOffset[SFX_BANK_PED_COMMENTS];
 	
 	return true;
 }
