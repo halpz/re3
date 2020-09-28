@@ -28,7 +28,7 @@ void CCarGenerator::SwitchOff()
 
 void CCarGenerator::SwitchOn()
 {
-	m_nUsesRemaining = 255;
+	m_nUsesRemaining = UINT16_MAX;
 	m_nTimer = CalcNextGen();
 	++CTheCarGenerators::CurrentActiveCount;
 }
@@ -111,10 +111,10 @@ void CCarGenerator::DoInternalProcessing()
 		}
 	}
 #ifdef FIX_BUGS
-	if (m_nUsesRemaining != 0)
+	if (m_nUsesRemaining < UINT16_MAX)
 		--m_nUsesRemaining;
 #else
-	if (m_nUsesRemaining < -1)
+	if (m_nUsesRemaining < ~0)
 		--m_nUsesRemaining;
 #endif
 	m_nTimer = CalcNextGen();
