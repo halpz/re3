@@ -2796,7 +2796,7 @@ cAudioManager::SetupJumboTaxiSound(uint8 vol)
 }
 
 bool
-cAudioManager::SetupJumboWhineSound(uint8 emittingVol, int32 freq)
+cAudioManager::SetupJumboWhineSound(uint8 emittingVol, uint32 freq)
 {
 	const float SOUND_INTENSITY = 170.0f;
 
@@ -2828,7 +2828,7 @@ cAudioManager::SetupJumboWhineSound(uint8 emittingVol, int32 freq)
 }
 
 bool
-cAudioManager::SetupJumboEngineSound(uint8 vol, int32 freq)
+cAudioManager::SetupJumboEngineSound(uint8 vol, uint32 freq)
 {
 	const float SOUND_INTENSITY = 180.0f;
 	if (m_sQueueSample.m_fDistance >= SOUND_INTENSITY)

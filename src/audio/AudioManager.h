@@ -457,11 +457,11 @@ public:
 	void SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 counter);
 	void SetUpOneShotCollisionSound(const cAudioCollision &col);
 	bool SetupCrimeReport();
-	bool SetupJumboEngineSound(uint8 vol, int32 freq);
+	bool SetupJumboEngineSound(uint8 vol, uint32 freq);
 	bool SetupJumboFlySound(uint8 emittingVol);
 	bool SetupJumboRumbleSound(uint8 emittingVol);
 	bool SetupJumboTaxiSound(uint8 vol);
-	bool SetupJumboWhineSound(uint8 emittingVol, int32 freq);
+	bool SetupJumboWhineSound(uint8 emittingVol, uint32 freq);
 	void SetupPedComments(cPedParams *params, uint32 sound);
 	void SetupSuspectLastSeenReport();
 
