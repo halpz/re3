@@ -1670,6 +1670,8 @@ main(int argc, char *argv[])
 #endif
 		{
 			glfwPollEvents();
+			glfwSetInputMode(PSGLOBAL(window), GLFW_CURSOR,
+			                 (FrontEndMenuManager.m_bMenuActive && !PSGLOBAL(fullScreen)) ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_DISABLED);
 			if( ForegroundApp )
 			{
 				switch ( gGameState )
