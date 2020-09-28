@@ -3135,10 +3135,10 @@ cAudioManager::ProcessCarHeli(cVehicleParams* params)
 			if (boat != nil) {
 				m_sQueueSample.m_nSampleIndex = SFX_SEAPLANE_PRO3;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				if (accelerateState <= 0 && brakeState <= 0)
-					m_sQueueSample.m_nFrequency = 3651 + Min(1.0f, freqModifier) * 949;
-				else
+				if (accelerateState > 0 || brakeState > 0)
 					m_sQueueSample.m_nFrequency = 4600 + Min(1.0f, (Max(accelerateState, brakeState) / 255.0f) * freqModifier) * 563;
+				else
+					m_sQueueSample.m_nFrequency = 3651 + Min(1.0f, freqModifier) * 949;
 			} else {
 				m_sQueueSample.m_nSampleIndex = SFX_HELI_1;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
