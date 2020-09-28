@@ -351,11 +351,6 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		fSteerUD *= -fSteerMult;
 
 		// thrust
-#ifdef ALT_DODO_CHEAT //allow fly on cars
-		float dooCompinsator = ((CPad::GetPad(0)->GetAccelerate() - CPad::GetPad(0)->GetBrake()) / 255.0f) * 2;
-		if (bAltDodoCheat)
-			ApplyMoveForce(GetForward() * CTimer::GetTimeStep() * dooCompinsator);
-#endif
 		float fForwSpeed = DotProduct(GetMoveSpeed(), GetForward());
 		CVector vecTail = GetColModel()->boundingBox.min.y * GetForward();
 		float fThrust = (CPad::GetPad(0)->GetAccelerate() - CPad::GetPad(0)->GetBrake()) / 255.0f;
