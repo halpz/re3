@@ -917,7 +917,7 @@ void psPostRWinit(void)
 	RwEngineGetVideoModeInfo(&vm, GcurSelVM);
 
 	glfwSetKeyCallback(PSGLOBAL(window), keypressCB);
-	glfwSetWindowSizeCallback(PSGLOBAL(window), resizeCB);
+	glfwSetFramebufferSizeCallback(PSGLOBAL(window), resizeCB);
 	glfwSetScrollCallback(PSGLOBAL(window), scrollCB);
 	glfwSetCursorPosCallback(PSGLOBAL(window), cursorCB);
 	glfwSetCursorEnterCallback(PSGLOBAL(window), cursorEnterCB);
