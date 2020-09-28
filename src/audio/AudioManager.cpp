@@ -794,7 +794,7 @@ cAudioManager::ProcessActiveQueues()
 							if (sample.m_nFrequency != m_asActiveSamples[j].m_nFrequency) {
 								int32 freq;
 								if (sample.m_nFrequency <= m_asActiveSamples[j].m_nFrequency) {
-									freq = Max(sample.m_nFrequency, m_asActiveSamples[j].m_nFrequency - 6000);
+									freq = Max((int32)sample.m_nFrequency, (int32)(m_asActiveSamples[j].m_nFrequency - 6000));
 								} else {
 									freq = Min(sample.m_nFrequency, m_asActiveSamples[j].m_nFrequency + 6000);
 								}
