@@ -1397,8 +1397,11 @@ _InputTranslateShiftKeyUpDown(RsKeyCodes *rs) {
 // TODO this only works in frontend(and luckily only frontend use this). Fun fact: if I get pos manually in game, glfw reports that it's > 32000
 void
 cursorCB(GLFWwindow* window, double xpos, double ypos) {
-	FrontEndMenuManager.m_nMouseTempPosX = xpos;
-	FrontEndMenuManager.m_nMouseTempPosY = ypos;
+	int bufw, bufh, winw, winh;
+	glfwGetWindowSize(window, &winw, &winh);
+	glfwGetFramebufferSize(window, &bufw, &bufh);
+	FrontEndMenuManager.m_nMouseTempPosX = xpos * (bufw / winw);
+	FrontEndMenuManager.m_nMouseTempPosY = ypos * (bufh / winh);
 }
 
 void
