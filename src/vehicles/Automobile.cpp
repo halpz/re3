@@ -1384,7 +1384,10 @@ CAutomobile::ProcessControl(void)
 						playRotorSound = true;
 			}
 		}else if((GetModelIndex() == MI_DODO || CVehicle::bAllDodosCheat) &&
-		         m_vecMoveSpeed.Magnitude() > 0.0f && CTimer::GetTimeStep() > 0.0f){
+#ifdef FIX_BUGS
+				!IsRealHeli() &&
+#endif
+				m_vecMoveSpeed.Magnitude() > 0.0f && CTimer::GetTimeStep() > 0.0f){
 #ifdef ALT_DODO_CHEAT
 			if (bAltDodoCheat)
 				FlyingControl(FLIGHT_MODEL_PLANE);
@@ -1493,7 +1496,7 @@ CAutomobile::ProcessControl(void)
 				CMatrix mat;
 				mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_BONNET]));
 				CVector blade = mat.GetRight();
-				blade = GetMatrix() * blade;
+				blade = Multiply3x3(blade, GetMatrix());
 				camDist /= Max(Sqrt(distSq), 0.01f);
 				if(Abs(DotProduct(camDist, blade)) > 0.95f){
 					DMAudio.PlayOneShot(m_audioEntityId, SOUND_31, 0.0f);
