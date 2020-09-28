@@ -219,6 +219,8 @@ extern int strncasecmp(const char *str1, const char *str2, size_t len);
 
 #define clamp(v, low, high) ((v)<(low) ? (low) : (v)>(high) ? (high) : (v))
 
+#define clamp2(v, center, radius) ((v) < (center) ? Max(v, center - radius) : Min(v, center + radius))
+
 inline float sq(float x) { return x*x; }
 #define SQR(x) ((x) * (x))
 
