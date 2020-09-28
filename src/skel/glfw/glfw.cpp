@@ -235,8 +235,10 @@ double
 psTimer(void)
 {
 	struct timespec start; 
-#ifdef __linux__
+#if defined(CLOCK_MONOTONIC_RAW)
 	clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+#elif defined(CLOCK_MONOTONIC_FAST)
+	clock_gettime(CLOCK_MONOTONIC_FAST, &start);
 #else
 	clock_gettime(CLOCK_MONOTONIC, &start);
 #endif
