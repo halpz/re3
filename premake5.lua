@@ -92,7 +92,10 @@ workspace "reVC"
 
 	filter { "system:bsd" }
 		platforms {
-			"bsd-amd64-librw_gl3_glfw-oal"
+			"bsd-x86-librw_gl3_glfw-oal",
+			"bsd-amd64-librw_gl3_glfw-oal",
+			"bsd-arm-librw_gl3_glfw-oal",
+			"bsd-arm64-librw_gl3_glfw-oal"
 		}
 		
 	filter { "system:macosx" }
