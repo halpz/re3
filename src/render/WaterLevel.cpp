@@ -2745,7 +2745,11 @@ CWaterLevel::RenderSeaBirds()
 void
 CWaterLevel::RenderShipsOnHorizon()
 {
+#ifdef FIX_BUGS
+	CVector cur_pos = FindPlayerCoors();
+#else
 	CVector cur_pos = FindPlayerPed()->GetPosition();
+#endif
 
 	static CVector prev_pos(0.0f, 0.0f, 0.0f);
 	static CVector prev_front(0.0f, 0.0f, 0.0f);
@@ -2847,7 +2851,11 @@ CWaterLevel::HandleSeaLifeForms()
 void
 CWaterLevel::HandleBeachToysStuff(void)
 {
+#ifdef FIX_BUGS
+	CVector cur_pos = FindPlayerCoors();
+#else
 	CVector cur_pos = FindPlayerPed()->GetPosition();
+#endif
 	
 	static bool bBeachBallInit = true;
 	static CVector FirstBeachBallPos = cur_pos;

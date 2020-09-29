@@ -2,6 +2,7 @@
 
 #include "Pools.h"
 #include "World.h"
+#include "WeaponEffects.h"
 #include "ParticleType.h"
 
 #ifdef FIX_BUGS
@@ -25,14 +26,17 @@ struct CStoredAnimationState
 	uint8 animId;
 	uint8 time;
 	uint8 speed;
+	uint8 groupId;
 	uint8 secAnimId;
 	uint8 secTime;
 	uint8 secSpeed;
+	uint8 secGroupId;
 	uint8 blendAmount;
 	uint8 partAnimId;
 	uint8 partAnimTime;
 	uint8 partAnimSpeed;
 	uint8 partBlendAmount;
+	uint8 partGroupId;
 };
 
 enum {
@@ -46,20 +50,18 @@ struct CStoredDetailedAnimationState
 	uint8 aCurTime[NUM_MAIN_ANIMS_IN_REPLAY];
 	uint8 aSpeed[NUM_MAIN_ANIMS_IN_REPLAY];
 	uint8 aBlendAmount[NUM_MAIN_ANIMS_IN_REPLAY];
-#ifdef FIX_REPLAY_BUGS
 	int8 aBlendDelta[NUM_MAIN_ANIMS_IN_REPLAY];
-#endif
 	uint8 aFunctionCallbackID[NUM_MAIN_ANIMS_IN_REPLAY];
 	uint16 aFlags[NUM_MAIN_ANIMS_IN_REPLAY];
+	uint8 aGroupId[NUM_MAIN_ANIMS_IN_REPLAY];
 	uint8 aAnimId2[NUM_PARTIAL_ANIMS_IN_REPLAY];
 	uint8 aCurTime2[NUM_PARTIAL_ANIMS_IN_REPLAY];
 	uint8 aSpeed2[NUM_PARTIAL_ANIMS_IN_REPLAY];
 	uint8 aBlendAmount2[NUM_PARTIAL_ANIMS_IN_REPLAY];
-#ifdef FIX_REPLAY_BUGS
 	int8 aBlendDelta2[NUM_PARTIAL_ANIMS_IN_REPLAY];
-#endif
 	uint8 aFunctionCallbackID2[NUM_PARTIAL_ANIMS_IN_REPLAY];
 	uint16 aFlags2[NUM_PARTIAL_ANIMS_IN_REPLAY];
+	uint8 aGroupId2[NUM_PARTIAL_ANIMS_IN_REPLAY];
 };
 
 void PlayReplayFromHD(void);
@@ -73,21 +75,24 @@ class CReplay
 
 	enum {
 		REPLAYCAMMODE_ASSTORED = 0,
-		REPLAYCAMMODE_TOPDOWN = 1,
-		REPLAYCAMMODE_FIXED = 2
+		REPLAYCAMMODE_TOPDOWN,
+		REPLAYCAMMODE_FIXED
 	};
 
 	enum {
 		REPLAYPACKET_END = 0,
-		REPLAYPACKET_VEHICLE = 1,
-		REPLAYPACKET_PED_HEADER = 2,
-		REPLAYPACKET_PED_UPDATE = 3,
-		REPLAYPACKET_GENERAL = 4,
-		REPLAYPACKET_CLOCK = 5,
-		REPLAYPACKET_WEATHER = 6,
-		REPLAYPACKET_ENDOFFRAME = 7,
-		REPLAYPACKET_TIMER = 8,
-		REPLAYPACKET_BULLET_TRACES = 9
+		REPLAYPACKET_VEHICLE,
+		REPLAYPACKET_BIKE,
+		REPLAYPACKET_PED_HEADER,
+		REPLAYPACKET_PED_UPDATE,
+		REPLAYPACKET_GENERAL,
+		REPLAYPACKET_CLOCK,
+		REPLAYPACKET_WEATHER,
+		REPLAYPACKET_ENDOFFRAME,
+		REPLAYPACKET_TIMER,
+		REPLAYPACKET_BULLET_TRACES,
+		REPLAYPACKET_PARTICLE,
+		REPLAYPACKET_MISC
 	};
 
 	enum {
@@ -176,8 +181,9 @@ class CReplay
 		int8 vehicle_index;
 		CStoredAnimationState anim_state;
 		CCompressedMatrixNotAligned matrix;
-		int8 assoc_group_id;
 		uint16 weapon_model;
+		int8 assoc_group_id;
+		bool is_visible;
 	};
 	VALIDATE_SIZE(tPedUpdatePacket, 40);
 
@@ -203,8 +209,64 @@ class CReplay
 		uint8 door_status;
 		uint8 primary_color;
 		uint8 secondary_color;
+		bool render_scorched;
+		int8 skimmer_speed;
+		int8 vehicle_type;
+
 	};
-	VALIDATE_SIZE(tVehicleUpdatePacket, 48);
+	VALIDATE_SIZE(tVehicleUpdatePacket, 52);
+
+	struct tBikeUpdatePacket
+	{
+		uint8 type;
+		uint8 index;
+		uint8 health;
+		uint8 acceleration;
+		CCompressedMatrixNotAligned matrix;
+		int8 door_angles[2];
+		uint16 mi;
+		int8 velocityX;
+		int8 velocityY;
+		int8 velocityZ;
+		int8 wheel_state;
+		uint8 wheel_susp_dist[4];
+		uint8 wheel_rotation[4];
+		uint8 primary_color;
+		uint8 secondary_color;
+		int8 lean_angle;
+		int8 wheel_angle;
+
+	};
+	VALIDATE_SIZE(tBikeUpdatePacket, 44);
+
+	struct tParticlePacket
+	{
+		uint8 type;
+		uint8 particle_type;
+		int8 dir_x;
+		int8 dir_y;
+		int8 dir_z;
+		uint8 r;
+		uint8 g;
+		uint8 b;
+		uint8 a;
+		int16 pos_x;
+		int16 pos_y;
+		int16 pos_z;
+		float size;
+	};
+	VALIDATE_SIZE(tParticlePacket, 20);
+
+	struct tMiscPacket
+	{
+		uint8 type;
+		uint32 cam_shake_start;
+		float cam_shake_strength;
+		uint8 cur_area;
+		uint8 special_fx_flags;
+	};
+
+	VALIDATE_SIZE(tMiscPacket, 16);
 
 private:
 	static uint8 Mode;
@@ -269,6 +331,31 @@ private:
 	static float fDistanceLookAroundCam;
 	static float fAlphaAngleLookAroundCam;
 	static float fBetaAngleLookAroundCam;
+	static int ms_nNumCivMale_Stored;
+	static int ms_nNumCivFemale_Stored;
+	static int ms_nNumCop_Stored;
+	static int ms_nNumEmergency_Stored;
+	static int ms_nNumGang1_Stored;
+	static int ms_nNumGang2_Stored;
+	static int ms_nNumGang3_Stored;
+	static int ms_nNumGang4_Stored;
+	static int ms_nNumGang5_Stored;
+	static int ms_nNumGang6_Stored;
+	static int ms_nNumGang7_Stored;
+	static int ms_nNumGang8_Stored;
+	static int ms_nNumGang9_Stored;
+	static int ms_nNumDummy_Stored;
+	static int ms_nTotalCarPassengerPeds_Stored;
+	static int ms_nTotalCivPeds_Stored;
+	static int ms_nTotalGangPeds_Stored;
+	static int ms_nTotalPeds_Stored;
+	static int ms_nTotalMissionPeds_Stored;
+	static uint8* pGarages;
+	static CFire* FireArray;
+	static uint32 NumOfFires;
+	static uint8* paProjectileInfo;
+	static uint8* paProjectiles;
+	static uint8 CurrArea;
 #ifdef FIX_BUGS
 	static int nHandleOfPlayerPed[NUMPLAYERS];
 #endif
@@ -288,8 +375,7 @@ public:
 	static bool IsPlayingBack() { return Mode == MODE_PLAYBACK; }
 	static bool IsPlayingBackFromFile() { return bPlayingBackFromFile; }
 
-	static void RecordParticle(tParticleType type, CVector const &vecPos, CVector const &vecDir, float fSize, RwRGBA const&color)
-	{ } //TODO
+	static void RecordParticle(tParticleType type, CVector const& vecPos, CVector const& vecDir, float fSize, RwRGBA const& color);
 private:
 	static void RecordThisFrame(void);
 	static void StorePedUpdate(CPed *ped, int id);
@@ -302,7 +388,9 @@ private:
 	static void TriggerPlaybackLastCoupleOfSeconds(uint32, uint8, float, float, float, uint32);
 	static bool FastForwardToTime(uint32);
 	static void StoreCarUpdate(CVehicle *vehicle, int id);
+	static void StoreBikeUpdate(CVehicle* vehicle, int id);
 	static void ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressInReplayBuffer *buffer);
+	static void ProcessBikeUpdate(CVehicle* vehicle, float interpolation, CAddressInReplayBuffer* buffer);
 	static bool PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, float interpolation, uint32 *pTimer);
 	static void ProcessReplayCamera(void);
 	static void StoreStuffInMem(void);
@@ -314,6 +402,7 @@ private:
 	static void FindFirstFocusCoordinate(CVector *coord);
 	static void ProcessLookAroundCam(void);
 	static size_t FindSizeOfPacket(uint8);
+	static void GoToNextBlock(void);
 
 	/* Absolute nonsense, but how could this function end up being outside of class? */
 	friend void PlayReplayFromHD(void); 

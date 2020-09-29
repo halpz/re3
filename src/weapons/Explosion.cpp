@@ -31,6 +31,16 @@ void
 CExplosion::Initialise()
 {
 	debug("Initialising CExplosion...\n");
+	ClearAllExplosions();
+	AudioHandle = DMAudio.CreateEntity(AUDIOTYPE_EXPLOSION, (void*)1);
+	if (AudioHandle >= 0)
+		DMAudio.SetEntityStatus(AudioHandle, true);
+	debug("CExplosion ready\n");
+}
+
+void
+CExplosion::ClearAllExplosions()
+{
 	for (int i = 0; i < ARRAY_SIZE(gaExplosion); i++) {
 		gaExplosion[i].m_ExplosionType = EXPLOSION_GRENADE;
 		gaExplosion[i].m_vecPosition = CVector(0.0f, 0.0f, 0.0f);
@@ -44,10 +54,6 @@ CExplosion::Initialise()
 		gaExplosion[i].m_fStartTime = 0.0f;
 		gaExplosion[i].m_bIsBoat = false;
 	}
-	AudioHandle = DMAudio.CreateEntity(AUDIOTYPE_EXPLOSION, (void*)1);
-	if (AudioHandle >= 0)
-		DMAudio.SetEntityStatus(AudioHandle, true);
-	debug("CExplosion ready\n");
 }
 
 void
