@@ -118,7 +118,7 @@ RemoveCustomFrontendOptions()
 	lastOgScreen = MENUPAGES;
 }
 
-int8 RegisterNewScreen(char *name, int prevPage)
+int8 RegisterNewScreen(const char *name, int prevPage)
 {
 	if (lastOgScreen == MENUPAGES)
 		lastOgScreen = GetLastMenuScreen();
