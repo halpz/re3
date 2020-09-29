@@ -279,7 +279,7 @@ void FrontendOptionAddBackButton(const wchar* text, bool fadeIn)
 	option.save = false;
 }
 
-uint8 FrontendScreenAdd(char* gxtKey, eMenuSprites sprite, int prevPage, int columnWidth, int headerHeight, int lineHeight,
+uint8 FrontendScreenAdd(const char* gxtKey, eMenuSprites sprite, int prevPage, int columnWidth, int headerHeight, int lineHeight,
 	int8 font, float fontScaleX, float fontScaleY, int8 alignment, bool showLeftRightHelper, ReturnPrevPageFunc returnPrevPageFunc) {
 
 	uint8 screenOrder = RegisterNewScreen(gxtKey, prevPage);

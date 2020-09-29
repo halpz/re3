@@ -158,5 +158,5 @@ void FrontendOptionAddDynamic(const wchar* leftText, DrawFunc rightTextDrawFunc,
 void FrontendOptionAddRedirect(const wchar* text, int to, int8 selectedOption = 0, bool fadeIn = true);
 void FrontendOptionAddBackButton(const wchar* text, bool fadeIn = true);
 
-uint8 FrontendScreenAdd(char* gxtKey, eMenuSprites sprite, int prevPage, int columnWidth, int headerHeight, int lineHeight, int8 font, float fontScaleX, float fontScaleY, int8 alignment, bool showLeftRightHelper, ReturnPrevPageFunc returnPrevPageFunc = nil);
+uint8 FrontendScreenAdd(const char* gxtKey, eMenuSprites sprite, int prevPage, int columnWidth, int headerHeight, int lineHeight, int8 font, float fontScaleX, float fontScaleY, int8 alignment, bool showLeftRightHelper, ReturnPrevPageFunc returnPrevPageFunc = nil);
 #endif
