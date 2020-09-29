@@ -50,7 +50,7 @@ void tbInit()
 #endif
 }
 
-void tbStartTimer(int32 unk, const char *name)
+void tbStartTimer(int32 unk, Const char *name)
 {
 	strcpy(TimerBar.Timers[TimerBar.count].name, name);
 	TimerBar.Timers[TimerBar.count].unk = unk;
@@ -58,7 +58,7 @@ void tbStartTimer(int32 unk, const char *name)
 	TimerBar.count++;
 }
 
-void tbEndTimer(const char* name)
+void tbEndTimer(Const char* name)
 {
 	uint32 n = 1500;
 	for (uint32 i = 0; i < TimerBar.count; i++) {
