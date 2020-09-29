@@ -1872,8 +1872,8 @@ CPathFind::TakeWidthIntoAccountForWandering(CPathNode* nextNode, uint16 random)
 void
 CPathFind::TakeWidthIntoAccountForCoors(CPathNode* node1, CPathNode* node2, uint16 random, float* x, float* y)
 {
-	*x += (Min(node1->width, node2->width) * ((random % 16) - 7));
-	*y += (Min(node1->width, node2->width) * (((random / 16) % 16) - 7));
+	*x += (Min(node1->width, node2->width) * WIDTH_TO_PED_NODE_WIDTH * ((random % 16) - 7));
+	*y += (Min(node1->width, node2->width) * WIDTH_TO_PED_NODE_WIDTH * (((random / 16) % 16) - 7));
 }
 
 CPathNode*

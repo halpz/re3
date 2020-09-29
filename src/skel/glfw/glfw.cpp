@@ -1736,7 +1736,6 @@ main(int argc, char *argv[])
 #else				
 						LoadingScreen(nil, nil, "loadsc0");
 #endif
-						
 						if ( !CGame::InitialiseOnceAfterRW() )
 							RsGlobal.quit = TRUE;
 						
@@ -1748,7 +1747,7 @@ main(int argc, char *argv[])
 #endif
 						break;
 					}
-					
+#ifndef PS2_MENU
 					case GS_INIT_FRONTEND:
 					{
 						LoadingScreen(nil, nil, "loadsc0");
@@ -1769,7 +1768,6 @@ main(int argc, char *argv[])
 						break;
 					}
 					
-#ifndef PS2_MENU
 					case GS_FRONTEND:
 					{
 						if(!glfwGetWindowAttrib(PSGLOBAL(window), GLFW_ICONIFIED))

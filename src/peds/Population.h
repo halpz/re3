@@ -13,23 +13,6 @@ struct PedGroup
 	int32 models[NUMMODELSPERPEDGROUP];
 };
 
-// Don't know the original name
-struct RegenerationPoint
-{
-	eLevelName srcLevel; // this and below one may need to be exchanged
-	eLevelName destLevel;
-	float x1;
-	float x2;
-	float y1;
-	float y2;
-	float z1;
-	float z2;
-	CVector destPosA;
-	CVector destPosB;
-	CVector srcPosA;
-	CVector srcPosB;
-};
-
 class CPopulation
 {
 public:
@@ -39,6 +22,7 @@ public:
 	static float PedDensityMultiplier;
 	static uint32 ms_nTotalMissionPeds;
 	static int32 MaxNumberOfPedsInUse;
+	static int32 MaxNumberOfPedsInUseInterior;
 	static uint32 ms_nNumCivMale;
 	static uint32 ms_nNumCivFemale;
 	static uint32 ms_nNumCop;
@@ -58,9 +42,6 @@ public:
 	static uint32 ms_nNumGang9;
 	static uint32 ms_nNumGang7;
 	static uint32 ms_nNumGang8;
-	static CVector RegenerationPoint_a;
-	static CVector RegenerationPoint_b;
-	static CVector RegenerationForward;
 
 	static uint32 ms_nTotalCarPassengerPeds;
 	static uint32 NumMiamiViceCops;
@@ -71,13 +52,12 @@ public:
 	static void UpdatePedCount(ePedType, bool);
 	static void DealWithZoneChange(eLevelName oldLevel, eLevelName newLevel, bool);
 	static CPed *AddPedInCar(CVehicle *car, bool isDriver);
-	static bool IsPointInSafeZone(CVector *coors);
 	static void RemovePed(CPed *ent);
 	static int32 ChooseCivilianOccupation(int32);
+	static int32 ChooseNextCivilianOccupation(int32);
+	static void ChooseCivilianCoupleOccupations(int32, int32&, int32&);
 	static int32 ChoosePolicePedOccupation();
 	static int32 ChooseGangOccupation(int);
-	static void FindCollisionZoneForCoors(CVector*, int*, eLevelName*);
-	static void FindClosestZoneForCoors(CVector*, int*, eLevelName, eLevelName);
 	static void GeneratePedsAtStartOfGame();
 	static float PedCreationDistMultiplier();
 	static CPed *AddPed(ePedType pedType, uint32 mi, CVector const &coors, int32 modifier = 0);
@@ -91,6 +71,18 @@ public:
 	static bool TestSafeForRealObject(CDummyObject*);
 	static bool IsSkateable(CVector const&);
 	static bool CanJeerAtStripper(int32 model);
-
+	static void RemovePedsIfThePoolGetsFull(void);
+	static bool IsMale(int32);
+	static bool IsFemale(int32);
+	static bool IsSunbather(int32);
+	static int32 ComputeRandomisedGangSize(void);
+	static bool CanSolicitPlayerInCar(int32);
+	static bool CanSolicitPlayerOnFoot(int32);
+	static bool IsSecurityGuard(ePedType);
+	static void PlaceGangMembers(ePedType, int32, CVector const&);
+	static void PlaceGangMembersInFormation(ePedType, int32, CVector const&);
+	static void PlaceGangMembersInCircle(ePedType, int32, CVector const&);
+	static void PlaceCouple(ePedType, int32, ePedType, int32, CVector);
+	static void PlaceMallPedsAsStationaryGroup(CVector const&, int32);
 	static CPed* AddDeadPedInFrontOfCar(const CVector& pos, CVehicle* pCulprit);
 };

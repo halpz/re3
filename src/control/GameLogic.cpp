@@ -380,7 +380,7 @@ CGameLogic::RestorePlayerStuffDuringResurrection(CPlayerPed *pPlayerPed, CVector
 	CStats::CheckPointReachedUnsuccessfully();
 	CWorld::Remove(pPlayerPed);
 	CWorld::Add(pPlayerPed);
-	//CHud::ResetWastedText() // TODO(MIAMI)
+	CHud::ResetWastedText();
 	CStreaming::StreamZoneModels(pos);
 	clearWaterDrop = true;
 }

@@ -228,8 +228,8 @@ CFont::Initialise(void)
 	SetColor(CRGBA(0xFF, 0xFF, 0xFF, 0));
 	SetJustifyOff();
 	SetCentreOff();
-	SetWrapx(DEFAULT_SCREEN_WIDTH);
-	SetCentreSize(DEFAULT_SCREEN_WIDTH);
+	SetWrapx(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
+	SetCentreSize(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
 	SetBackgroundOff();
 	SetBackgroundColor(CRGBA(0x80, 0x80, 0x80, 0x80));
 	SetBackGroundOnlyTextOff();
@@ -996,22 +996,10 @@ CFont::GetStringWidth(wchar *s, bool spaces)
 	{
 		for (wchar c = *s; (c != ' ' || spaces) && c != '\0'; c = *(++s)) {
 			if (c == '~') {
-
-				// This is original code
-#if 0
 				s++;
 				while (*s != '~') {
 					s++;
 				}
-#else
-				// TODO(Miami): This is my code to prevent fuck up until InsertPlayerControlKeysInString is done 
-				if (*(s + 1) != '~') {
-					s++;
-					while (*s != '~') {
-						s++;
-					}
-				}
-#endif
 			}
 			else {
 				w += GetCharacterSize(c - ' ');

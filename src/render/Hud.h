@@ -140,4 +140,5 @@ public:
 	static void SetZoneName(wchar *name);
 	static void Shutdown();
 	static float DrawFadeState(DRAW_FADE_STATE, int);
+	static void ResetWastedText(void);
 };

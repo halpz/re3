@@ -89,7 +89,7 @@ void tbDisplay()
 	CFont::SetScale(0.48f, 1.12f);
 	CFont::SetCentreOff();
 	CFont::SetJustifyOff();
-	CFont::SetWrapx(640.0f);
+	CFont::SetWrapx(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
 	CFont::SetRightJustifyOff();
 	CFont::SetPropOn();
 	CFont::SetFontStyle(FONT_STANDARD);
