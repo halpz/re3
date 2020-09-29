@@ -286,6 +286,8 @@ public:
 	bool GetMiddleMouseJustUp() { return !!(!NewMouseControllerState.MMB && OldMouseControllerState.MMB); }
 	bool GetMouseWheelUpJustUp() { return !!(!NewMouseControllerState.WHEELUP && OldMouseControllerState.WHEELUP); }
 	bool GetMouseWheelDownJustUp() { return !!(!NewMouseControllerState.WHEELDN && OldMouseControllerState.WHEELDN); }
+	bool GetMouseX1JustUp() { return !!(!NewMouseControllerState.MXB1 && OldMouseControllerState.MXB1); }
+	bool GetMouseX2JustUp() { return !!(!NewMouseControllerState.MXB2 && OldMouseControllerState.MXB2); }
 
 	bool GetLeftMouse()         { return NewMouseControllerState.LMB; }
 	bool GetRightMouse()        { return NewMouseControllerState.RMB; }
@@ -470,7 +472,3 @@ public:
 
 VALIDATE_SIZE(CPad, 0xFC);
 extern CPad Pads[MAX_PADS];
-
-#ifdef ALLCARSHELI_CHEAT
-extern bool bAllCarCheat;
-#endif

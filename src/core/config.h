@@ -250,7 +250,7 @@ enum Config {
 #endif
 #define DETECT_PAD_INPUT_SWITCH // Adds automatic switch of pad related stuff between controller and kb/m
 #define KANGAROO_CHEAT
-#define ALLCARSHELI_CHEAT
+#define RESTORE_ALLCARSHELI_CHEAT
 #define ALT_DODO_CHEAT
 #define WALLCLIMB_CHEAT
 #define REGISTER_START_BUTTON
@@ -258,14 +258,13 @@ enum Config {
 
 // Hud, frontend and radar
 #define HUD_ENHANCEMENTS	// Adjusts some aspects to make the HUD look/behave a little bit better.
-#define BETA_SLIDING_TEXT
+//#define BETA_SLIDING_TEXT
 #define TRIANGULAR_BLIPS	// height indicating triangular radar blips, as in VC
 #define PC_MENU
 
 #ifndef PC_MENU
 #	define PS2_MENU
 //#	define PS2_MENU_USEALLPAGEICONS
-//#	define PS2_LIKE_MENU	// An effort to recreate PS2 menu, cycling through tabs, different bg etc.
 #else
 #	define MAP_ENHANCEMENTS			// Adding waypoint etc.
 #	define TRIANGLE_BACK_BUTTON
