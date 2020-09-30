@@ -1741,7 +1741,7 @@ int32 CRunningScript::CollectNextParameterWithoutIncreasingPC(uint32 ip)
 	case ARGUMENT_INT32:
 		return CTheScripts::Read4BytesFromScript(pIp);
 	case ARGUMENT_GLOBALVAR:
-		return *((int32*)&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(pIp)]);
+		return *((int32*)&CTheScripts::ScriptSpace[(uint16)CTheScripts::Read2BytesFromScript(pIp)]);
 	case ARGUMENT_LOCALVAR:
 		return m_anLocalVariables[CTheScripts::Read2BytesFromScript(pIp)];
 	case ARGUMENT_INT8:
@@ -1762,7 +1762,7 @@ void CRunningScript::StoreParameters(uint32* pIp, int16 number)
 	for (int16 i = 0; i < number; i++){
 		switch (CTheScripts::Read1ByteFromScript(pIp)) {
 		case ARGUMENT_GLOBALVAR:
-			*(int32*)&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(pIp)] = ScriptParams[i];
+			*(int32*)&CTheScripts::ScriptSpace[(uint16)CTheScripts::Read2BytesFromScript(pIp)] = ScriptParams[i];
 			break;
 		case ARGUMENT_LOCALVAR:
 			m_anLocalVariables[CTheScripts::Read2BytesFromScript(pIp)] = ScriptParams[i];
@@ -1779,7 +1779,7 @@ int32 *CRunningScript::GetPointerToScriptVariable(uint32* pIp, int16 type)
 	{
 	case ARGUMENT_GLOBALVAR:
 		script_assert(type == VAR_GLOBAL);
-		return (int32*)&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(pIp)];
+		return (int32*)&CTheScripts::ScriptSpace[(uint16)CTheScripts::Read2BytesFromScript(pIp)];
 	case ARGUMENT_LOCALVAR:
 		script_assert(type == VAR_LOCAL);
 		return &m_anLocalVariables[CTheScripts::Read2BytesFromScript(pIp)];
@@ -2093,7 +2093,7 @@ int8 CRunningScript::ProcessOneCommand()
 {
 	int8 retval = -1;
 	++CTheScripts::CommandsExecuted;
-	int32 command = CTheScripts::Read2BytesFromScript(&m_nIp);
+	int32 command = (uint16)CTheScripts::Read2BytesFromScript(&m_nIp);
 	m_bNotFlag = (command & 0x8000);
 	command &= 0x7FFF;
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
@@ -2716,7 +2716,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 				pNew->m_anLocalVariables[i] = CTheScripts::Read4BytesFromScript(&m_nIp);
 				break;
 			case ARGUMENT_GLOBALVAR:
-				pNew->m_anLocalVariables[i] = *(int32*)&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(&m_nIp)];
+				pNew->m_anLocalVariables[i] = *(int32*)&CTheScripts::ScriptSpace[(uint16)CTheScripts::Read2BytesFromScript(&m_nIp)];
 				break;
 			case ARGUMENT_LOCALVAR:
 				pNew->m_anLocalVariables[i] = m_anLocalVariables[CTheScripts::Read2BytesFromScript(&m_nIp)];
@@ -4502,21 +4502,21 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	{
 		script_assert(CTheScripts::ScriptSpace[m_nIp] == ARGUMENT_GLOBALVAR);
 		m_nIp++;
-		CUserDisplay::OnscnTimer.AddClock(CTheScripts::Read2BytesFromScript(&m_nIp), nil);
+		CUserDisplay::OnscnTimer.AddClock((uint16)CTheScripts::Read2BytesFromScript(&m_nIp), nil);
 		return 0;
 	}
 	case COMMAND_CLEAR_ONSCREEN_TIMER:
 	{
 		script_assert(CTheScripts::ScriptSpace[m_nIp] == ARGUMENT_GLOBALVAR);
 		m_nIp++;
-		CUserDisplay::OnscnTimer.ClearClock(CTheScripts::Read2BytesFromScript(&m_nIp));
+		CUserDisplay::OnscnTimer.ClearClock((uint16)CTheScripts::Read2BytesFromScript(&m_nIp));
 		return 0;
 	}
 	case COMMAND_DISPLAY_ONSCREEN_COUNTER:
 	{
 		script_assert(CTheScripts::ScriptSpace[m_nIp] == ARGUMENT_GLOBALVAR);
 		m_nIp++;
-		int32 counter = CTheScripts::Read2BytesFromScript(&m_nIp);
+		uint16 counter = CTheScripts::Read2BytesFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 1);
 		CUserDisplay::OnscnTimer.AddCounter(counter, ScriptParams[0], nil);
 		return 0;
@@ -4525,7 +4525,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	{
 		script_assert(CTheScripts::ScriptSpace[m_nIp] == ARGUMENT_GLOBALVAR);
 		m_nIp++;
-		CUserDisplay::OnscnTimer.ClearCounter(CTheScripts::Read2BytesFromScript(&m_nIp));
+		CUserDisplay::OnscnTimer.ClearCounter((uint16)CTheScripts::Read2BytesFromScript(&m_nIp));
 		return 0;
 	}
 	case COMMAND_SET_ZONE_CAR_INFO:
@@ -4914,11 +4914,11 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	case COMMAND_GET_CAMERA_POSITION_ALONG_SPLINE:
 	*/
 	case COMMAND_DECLARE_MISSION_FLAG:
-		CTheScripts::OnAMissionFlag = CTheScripts::Read2BytesFromScript(&++m_nIp);
+		CTheScripts::OnAMissionFlag = (uint16)CTheScripts::Read2BytesFromScript(&++m_nIp);
 		return 0;
 	case COMMAND_DECLARE_MISSION_FLAG_FOR_CONTACT:
 		CollectParameters(&m_nIp, 1);
-		CTheScripts::OnAMissionForContactFlag[ScriptParams[0]] = CTheScripts::Read2BytesFromScript(&++m_nIp);
+		CTheScripts::OnAMissionForContactFlag[ScriptParams[0]] = (uint16)CTheScripts::Read2BytesFromScript(&++m_nIp);
 		return 0;
 	case COMMAND_DECLARE_BASE_BRIEF_ID_FOR_CONTACT:
 		CollectParameters(&m_nIp, 2);
@@ -9578,7 +9578,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_DISPLAY_ONSCREEN_TIMER_WITH_STRING:
 	{
 		script_assert(CTheScripts::ScriptSpace[m_nIp++] == ARGUMENT_GLOBALVAR);
-		int16 var = CTheScripts::Read2BytesFromScript(&m_nIp);
+		uint16 var = CTheScripts::Read2BytesFromScript(&m_nIp);
 		wchar* text = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]); // ???
 		strncpy(onscreen_str, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
@@ -9588,7 +9588,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_DISPLAY_ONSCREEN_COUNTER_WITH_STRING:
 	{
 		script_assert(CTheScripts::ScriptSpace[m_nIp++] == ARGUMENT_GLOBALVAR);
-		int16 var = CTheScripts::Read2BytesFromScript(&m_nIp);
+		uint16 var = CTheScripts::Read2BytesFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 1);
 		wchar* text = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]); // ???
 		strncpy(onscreen_str, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
