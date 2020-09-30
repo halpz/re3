@@ -132,7 +132,11 @@ CBoat::ProcessControl(void)
 	if(bRenderScorched)
 		m_fBuoyancy *= 0.99f;
 
+#ifdef FIX_BUGS
+	if(FindPlayerPed() && FindPlayerPed()->m_pWanted->m_nWantedLevel > 0 && GetModelIndex() == MI_PREDATOR){
+#else
 	if(FindPlayerPed()->m_pWanted->m_nWantedLevel > 0 && GetModelIndex() == MI_PREDATOR){
+#endif
 		CVehicle *playerVeh = FindPlayerVehicle();
 		if(playerVeh && playerVeh->GetVehicleAppearance() == VEHICLE_APPEARANCE_BOAT &&
 		   (AutoPilot.m_nCarMission == MISSION_RAMPLAYER_FARAWAY || 

@@ -92,10 +92,16 @@ CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType
 		pCopPed->SetIdle();
 		pCopPed->bKindaStayInSamePlace = true;
 		pCopPed->bNotAllowedToDuck = false;
-		pCopPed->bCrouchWhenShooting = roadBlockType != 2;
+		pCopPed->m_nExtendedRangeTimer = CTimer::GetTimeInMilliseconds() + 10000;
+		pCopPed->m_nRoadblockVeh = pVehicle;
+		pCopPed->m_nRoadblockVeh->RegisterReference((CEntity**)&pCopPed->m_nRoadblockVeh);
+		pCopPed->bCrouchWhenShooting = roadBlockType == 2 ? false : true;
 		if (pEntityToAttack) {
+			if (pCopPed->m_pPointGunAt)
+				pCopPed->m_pPointGunAt->CleanUpOldReference(&pCopPed->m_pPointGunAt);
 			pCopPed->m_pPointGunAt = pEntityToAttack;
-			pEntityToAttack->RegisterReference(&pCopPed->m_pPointGunAt);
+			if (pEntityToAttack)
+				pEntityToAttack->RegisterReference(&pCopPed->m_pPointGunAt);
 			pCopPed->SetAttack(pEntityToAttack);
 		}
 		pCopPed->m_pMyVehicle = pVehicle;

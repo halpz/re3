@@ -1,5 +1,15 @@
 #if defined RW_GL3 && !defined LIBRW_SDL2
 
+#ifdef _WIN32
+#include <windows.h>
+#include <mmsystem.h>
+#include <shellapi.h>
+#include <windowsx.h>
+#include <basetsd.h>
+#include <regstr.h>
+#include <shlobj.h>
+#endif
+
 #define WITHWINDOWS
 #include "common.h"
 
@@ -816,12 +826,28 @@ void joysChangeCB(int jid, int event);
 
 bool IsThisJoystickBlacklisted(int i)
 {
-	const char *joyname = glfwGetJoystickName(i);
+	if (glfwJoystickIsGamepad(i))
+		return false;
+
+	const char* joyname = glfwGetJoystickName(i);
 
 	// this is just a keyboard and mouse
 	// Microsoft Microsoft® 2.4GHz Transceiver v8.0 Consumer Control
 	// Microsoft Microsoft® 2.4GHz Transceiver v8.0 System Control
-	if(strstr(joyname, "2.4GHz Transceiver"))
+	if (strstr(joyname, "2.4GHz Transceiver"))
+		return true;
+	// COMPANY USB Device System Control
+	// COMPANY USB Device Consumer Control
+	if (strstr(joyname, "COMPANY USB"))
+		return true;
+	// i.e. Synaptics TM2438-005
+	if (strstr(joyname, "Synaptics "))
+		return true;
+	// i.e. ELAN Touchscreen
+	if (strstr(joyname, "ELAN "))
+		return true;
+	// i.e. Primax Electronics, Ltd HP Wireless Keyboard Mouse Kit Consumer Control
+	if (strstr(joyname, "Keyboard"))
 		return true;
 
 	return false;
@@ -1195,7 +1221,11 @@ void resizeCB(GLFWwindow* window, int width, int height) {
 	* memory things don't work.
 	*/
 	/* redraw window */
-	if (RwInitialised && (gGameState == GS_PLAYING_GAME || gGameState == GS_ANIMVIEWER))
+	if (RwInitialised && (gGameState == GS_PLAYING_GAME
+#ifndef MASTER
+		|| gGameState == GS_ANIMVIEWER
+#endif
+	                      ))
 	{
 		RsEventHandler((gGameState == GS_PLAYING_GAME ? rsIDLE : rsANIMVIEWER), (void*)TRUE);
 	}
@@ -1625,6 +1655,72 @@ main(int argc, char *argv[])
 						break;
 					}
 
+				    case GS_INIT_LOGO_MPEG:
+					{
+					    //if (!startupDeactivate)
+						//    PlayMovieInWindow(cmdShow, "movies\\Logo.mpg");
+					    gGameState = GS_LOGO_MPEG;
+					    TRACE("gGameState = GS_LOGO_MPEG;");
+					    break;
+				    }
+
+				    case GS_LOGO_MPEG:
+					{
+//					    CPad::UpdatePads();
+
+//					    if (startupDeactivate || ControlsManager.GetJoyButtonJustDown() != 0)
+						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetLeftMouseJustDown())
+//						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetEnterJustDown())
+//						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetCharJustDown(' '))
+//						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetAltJustDown())
+//						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetTabJustDown())
+//						    ++gGameState;
+
+					    break;
+				    }
+
+				    case GS_INIT_INTRO_MPEG:
+					{
+//#ifndef NO_MOVIES
+//					    CloseClip();
+//					    CoUninitialize();
+//#endif
+//
+//					    if (CMenuManager::OS_Language == LANG_FRENCH || CMenuManager::OS_Language == LANG_GERMAN)
+//						    PlayMovieInWindow(cmdShow, "movies\\GTAtitlesGER.mpg");
+//					    else
+//						    PlayMovieInWindow(cmdShow, "movies\\GTAtitles.mpg");
+
+					    gGameState = GS_INTRO_MPEG;
+					    TRACE("gGameState = GS_INTRO_MPEG;");
+					    break;
+				    }
+
+				    case GS_INTRO_MPEG:
+					{
+//					    CPad::UpdatePads();
+//
+//					    if (startupDeactivate || ControlsManager.GetJoyButtonJustDown() != 0)
+						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetLeftMouseJustDown())
+//						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetEnterJustDown())
+//						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetCharJustDown(' '))
+//						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetAltJustDown())
+//						    ++gGameState;
+//					    else if (CPad::GetPad(0)->GetTabJustDown())
+//						    ++gGameState;
+
+					    break;
+				    }
+
 					case GS_INIT_ONCE:
 					{
 						//CoUninitialize();
@@ -1833,8 +1929,10 @@ main(int argc, char *argv[])
 		{
 			if ( gGameState == GS_PLAYING_GAME )
 				CGame::ShutDown();
+#ifndef MASTER
 			else if ( gGameState == GS_ANIMVIEWER )
 				CAnimViewer::Shutdown();
+#endif
 			
 			CTimer::Stop();
 			
@@ -1858,8 +1956,10 @@ main(int argc, char *argv[])
 
 	if ( gGameState == GS_PLAYING_GAME )
 		CGame::ShutDown();
+#ifndef MASTER
 	else if ( gGameState == GS_ANIMVIEWER )
 		CAnimViewer::Shutdown();
+#endif
 
 	DMAudio.Terminate();
 	
@@ -1947,11 +2047,11 @@ void CapturePad(RwInt32 padID)
 	
 	// Gamepad axes are guaranteed to return 0.0f if that particular gamepad doesn't have that axis.
 	if ( glfwPad != -1 ) {
-		leftStickPos.x = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[0] : numAxes >= 0 ? axes[0] : 0.0f;
-		leftStickPos.y = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[1] : numAxes >= 1 ? axes[1] : 0.0f;
+		leftStickPos.x = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[0] : numAxes >= 1 ? axes[0] : 0.0f;
+		leftStickPos.y = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[1] : numAxes >= 2 ? axes[1] : 0.0f;
 
-		rightStickPos.x = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[2] : numAxes >= 2 ? axes[2] : 0.0f;
-		rightStickPos.y = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[3] : numAxes >= 3 ? axes[3] : 0.0f;
+		rightStickPos.x = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[2] : numAxes >= 3 ? axes[2] : 0.0f;
+		rightStickPos.y = ControlsManager.m_NewState.isGamepad ? gamepadState.axes[3] : numAxes >= 4 ? axes[3] : 0.0f;
 	}
 	
 	{

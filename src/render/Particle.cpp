@@ -1261,7 +1261,11 @@ void CParticle::Update()
 			{
 				if ( CTimer::GetFrameCounter() & 10 )
 				{
+#ifdef FIX_BUGS
+					if ( FindPlayerPed() && FindPlayerPed()->GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN )
+#else
 					if ( FindPlayerPed()->GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN )
+#endif
 					{
 						AddParticle(PARTICLE_HEATHAZE, particle->m_vecPosition, CVector(0.0f, 0.0f, 0.0f));
 					}

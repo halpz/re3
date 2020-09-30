@@ -38,6 +38,8 @@
 #include "ZoneCull.h"
 #include "sampman.h"
 #include "Bike.h"
+#include "WindModifiers.h"
+#include "Fluff.h"
 
 
 const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
@@ -292,7 +294,6 @@ cAudioManager::CalculateDistance(bool &distCalculated, float dist)
 	if (!distCalculated) {
 		if (dist > 0.0f)
 			m_sQueueSample.m_fDistance = Sqrt(dist);
-
 		else
 			m_sQueueSample.m_fDistance = 0.0f;
 		distCalculated = true;
@@ -337,7 +338,7 @@ cAudioManager::ProcessSpecial()
 void
 cAudioManager::ProcessEntity(int32 id)
 {
-	if (m_asAudioEntities[id].m_nStatus) {
+	if (m_asAudioEntities[id].m_nStatus != STATUS_PLAYER) {
 		m_sQueueSample.m_nEntityIndex = id;
 		switch (m_asAudioEntities[id].m_nType) {
 		case AUDIOTYPE_PHYSICAL:
@@ -361,7 +362,8 @@ cAudioManager::ProcessEntity(int32 id)
 		case AUDIOTYPE_WEATHER:
 			if (!m_nUserPause) {
 				m_sQueueSample.m_bReverbFlag = true;
-				ProcessWeather(id);
+				if(CGame::currArea == AREA_MAIN_MAP || CGame::currArea == AREA_EVERYWHERE)
+					ProcessWeather(id);
 			}
 			break;
 /*		case AUDIOTYPE_CRANE:
@@ -408,6 +410,18 @@ cAudioManager::ProcessEntity(int32 id)
 			if (!m_nUserPause) {
 				m_sQueueSample.m_bReverbFlag = true;
 				ProcessWaterCannon(id);
+			}
+			break;
+		case AUDIOTYPE_ESCALATOR:
+			if (!m_nUserPause) {
+				m_sQueueSample.m_bReverbFlag = true;
+				ProcessEscalators();
+			}
+			break;
+		case AUDIOTYPE_EXTRA_SOUNDS:
+			if (!m_nUserPause) {
+				m_sQueueSample.m_bReverbFlag = true;
+				ProcessExtraSounds();
 			}
 			break;
 		default:
@@ -543,6 +557,10 @@ enum eVehicleModel {
 	BLOODRA,
 	BLOODRB,
 	VICECHEE,
+	CAR237,
+	CAR238,
+	CAR239,
+	MAX_CARS,
 
 	// HACK so this compiles
 	// TODO(MIAMI): check it out
@@ -551,10 +569,10 @@ enum eVehicleModel {
 
 enum
 {
-	DOOR_TYPE_OLD = 0,
-	DOOR_TYPE_NEW,
-	DOOR_TYPE_TRUCK,
-	DOOR_TYPE_AIRBREAK,
+	OLD_DOOR = 0,
+	NEW_DOOR,
+	TRUCK_DOOR,
+	BUS_DOOR,
 };
 
 
@@ -568,116 +586,118 @@ struct tVehicleSampleData {
 	uint8 m_bDoorType;
 };
 
-const tVehicleSampleData aVehicleSettings[110] = { {SFX_CAR_REV_10, 13, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9935, 0},
-                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_56CHEV, 11487, SFX_CAR_HORN_JEEP, 9900, 0},
-                                                   {SFX_CAR_REV_2, 5, SFX_CAR_HORN_PORSCHE, 11025, SFX_CAR_HORN_JEEP, 9890, 1},
-                                                   {SFX_CAR_REV_5, 8, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_HORN_JEEP, 9960, 2},
-                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_56CHEV, 12893, SFX_CAR_HORN_JEEP, 9500, 0},
-                                                   {SFX_CAR_REV_4, 7, SFX_CAR_HORN_BMW328, 10706, SFX_CAR_HORN_JEEP, 9600, 1},
-                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_HORN_JEEP, 9700, 1},
-                                                   {SFX_CAR_REV_5, 8, SFX_CAR_HORN_TRUCK, 29711, SFX_POLICE_SIREN_SLOW, 10588, 2},
-                                                   {SFX_CAR_REV_5, 8, SFX_CAR_HORN_TRUCK, 31478, SFX_CAR_HORN_JEEP, 9800, 2},
-                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_BMW328, 9538, SFX_CAR_HORN_JEEP, 9900, 1},
-                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_56CHEV, 10842, SFX_CAR_HORN_JEEP, 10000, 0},
-                                                   {SFX_CAR_REV_7, 10, SFX_CAR_HORN_BMW328, 12017, SFX_CAR_HORN_JEEP, 9900, 1},
-                                                   {SFX_CAR_REV_9, 12, SFX_CAR_HORN_JEEP, 22293, SFX_CAR_HORN_JEEP, 9800, 1},
-                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_BUS2, 18000, SFX_CAR_HORN_JEEP, 9700, 0},
-                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_BUS, 18286, SFX_CAR_HORN_JEEP, 9600, 0},
-                                                   {SFX_CAR_REV_2, 5, SFX_CAR_HORN_PORSCHE, 11025, SFX_CAR_HORN_JEEP, 9500, 1},
-                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_JEEP, 22295, SFX_AMBULANCE_SIREN_SLOW, 12688, 0},
-                                                   {SFX_CAR_REV_4, 7, SFX_CAR_HORN_PORSCHE, 9271, SFX_POLICE_SIREN_SLOW, 11471, 1},
-                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_56CHEV, 12170, SFX_CAR_HORN_JEEP, 9400, 0},
-                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_BMW328, 11000, SFX_CAR_HORN_JEEP, 9300, 0},
-                                                   {SFX_CAR_REV_10, 13, SFX_CAR_HORN_BMW328, 10796, SFX_CAR_HORN_JEEP, 9200, 1},
-                                                   {SFX_CAR_REV_4, 7, SFX_CAR_HORN_BMW328, 10500, SFX_CAR_HORN_JEEP, 9100, 1},
-                                                   {SFX_CAR_REV_10, 13, SFX_CAR_HORN_PICKUP, 10924, SFX_CAR_HORN_JEEP, 9000, 0},
-                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_PICKUP, 11025, SFX_ICE_CREAM_TUNE, 11025, 0},
-                                                   {SFX_CAR_REV_6, 9, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9100, 0},
-                                                   {SFX_HELI_APACHE_1, 30, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9200, 1},
-                                                   {SFX_CAR_REV_4, 7, SFX_CAR_HORN_BMW328, 10706, SFX_POLICE_SIREN_SLOW, 10511, 1},
-                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_BUS, 17260, SFX_POLICE_SIREN_SLOW, 11029, 0},
-                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_PICKUP, 8670, SFX_CAR_HORN_JEEP, 9300, 0},
-                                                   {SFX_CAR_REV_7, 10, SFX_CAR_HORN_PORSCHE, 10400, SFX_CAR_HORN_JEEP, 9400, 1},
-                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_POLICE_SIREN_SLOW, 11912, 1},
-                                                   {SFX_CAR_REV_5, 8, SFX_CAR_HORN_BUS2, 11652, SFX_CAR_HORN_JEEP, 9500, 3},
-                                                   {SFX_CAR_REV_5, 8, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_HORN_JEEP, 9600, 2},
-                                                   {SFX_CAR_REV_5, 8, SFX_CAR_HORN_TRUCK, 28043, SFX_CAR_HORN_JEEP, 9700, 2},
-                                                   {SFX_CAR_REV_6, 9, SFX_CAR_HORN_JEEP, 25400, SFX_CAR_HORN_JEEP, 9800, 0},
-                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9900, 1},
-                                                   {SFX_CAR_REV_17, 20, SFX_CAR_HORN_JEEP, 26313, SFX_CAR_HORN_JEEP, 10000, 1},
-                                                   {SFX_CAR_REV_5, 8, SFX_CAR_HORN_BUS, 16291, SFX_CAR_HORN_JEEP, 10100, 3},
-                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_56CHEV, 10842, SFX_CAR_HORN_JEEP, 9900, 0},
-                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_56CHEV, 10233, SFX_CAR_HORN_JEEP, 9800, 1},
-                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_PICKUP, 8670, SFX_CAR_HORN_JEEP, 9700, 0},
-                                                   {SFX_RC_REV, 17, SFX_CAR_HORN_PICKUP, 20000, SFX_CAR_HORN_JEEP, 9600, 1},
-                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9500, 1},
-                                                   {SFX_CAR_REV_5, 8, SFX_CAR_HORN_TRUCK, 29000, SFX_CAR_HORN_JEEP, 9400, 2},
-                                                   {SFX_CAR_REV_1, 4, SFX_CAR_HORN_BMW328, 9003, SFX_CAR_HORN_JEEP, 9300, 1},
-                                                   {SFX_CAR_REV_4, 7, SFX_CAR_HORN_PORSCHE, 12375, SFX_CAR_HORN_JEEP, 9200, 1},
-                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_BUS2, 15554, SFX_CAR_HORN_JEEP, 9100, 1},
-                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_BUS2, 13857, SFX_CAR_HORN_JEEP, 9000, 2},
-                                                   {SFX_MOPED_REV, 21, SFX_CAR_HORN_JEEP, 30000, SFX_CAR_HORN_JEEP, 9100, 1},
-                                                   {SFX_CAR_REV_7, 10, SFX_CAR_HORN_JEEP, 22043, SFX_CAR_HORN_JEEP, 9200, 0},
-                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9300, 1},
-                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9400, 1},
-                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9500, 1},
-                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9600, 1},
-                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9700, 1},
-                                                   {SFX_CAR_REV_5, 8, SFX_CAR_HORN_TRUCK, 28043, SFX_CAR_HORN_JEEP, 9800, 2},
-                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_BUS, 18286, SFX_CAR_HORN_JEEP, 9900, 0},
-                                                   {SFX_CAR_REV_12, 15, SFX_CAR_HORN_JEEP, 28500, SFX_CAR_HORN_JEEP, 9800, 1},
-                                                   {SFX_CAR_REV_1, 4, SFX_CAR_HORN_56CHEV, 10842, SFX_CAR_HORN_JEEP, 9700, 0},
-                                                   {SFX_CAR_REV_8, 11, SFX_CAR_HORN_BUS2, 18000, SFX_CAR_HORN_JEEP, 9700, 0},
-                                                   {SFX_SEAPLANE_PRO1, 35, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9700, 1},
-                                                   {SFX_CAR_REV_20, 23, SFX_CAR_HORN_JEEP, 27000, SFX_CAR_HORN_JEEP, 9600, 1},
-                                                   {SFX_MOPED_REV, 21, SFX_CAR_HORN_JEEP, 31000, SFX_CAR_HORN_JEEP, 9500, 1},
-                                                   {SFX_CAR_REV_17, 20, SFX_CAR_HORN_PICKUP, 11000, SFX_CAR_HORN_JEEP, 9400, 1},
-                                                   {SFX_RC_REV, 17, SFX_CAR_HORN_JEEP, 30000, SFX_CAR_HORN_JEEP, 15000, 1},
-                                                   {SFX_CAR_RC_HELI, 18, SFX_CAR_HORN_JEEP, 30000, SFX_CAR_HORN_JEEP, 15000, 1},
-                                                   {SFX_CAR_REV_9, 12, SFX_CAR_HORN_56CHEV, 10300, SFX_CAR_HORN_JEEP, 9100, 0},
-                                                   {SFX_CAR_REV_9, 12, SFX_CAR_HORN_56CHEV, 10500, SFX_CAR_HORN_JEEP, 9000, 0},
-                                                   {SFX_CAR_REV_19, 22, SFX_CAR_HORN_JEEP, 30000, SFX_CAR_HORN_JEEP, 9000, 1},
-                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9100, 2},
-                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_TRUCK, 28000, SFX_CAR_HORN_JEEP, 9200, 2},
-                                                   {SFX_CAR_REV_7, 10, SFX_CAR_HORN_PICKUP, 11200, SFX_CAR_HORN_JEEP, 9300, 1},
-                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9400, 1},
-                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9500, 1},
-                                                   {SFX_CAR_REV_9, 12, SFX_CAR_HORN_56CHEV, 10700, SFX_CAR_HORN_JEEP, 9600, 0},
-                                                   {SFX_CAR_REV_1, 4, SFX_CAR_HORN_BMW328, 9000, SFX_CAR_HORN_JEEP, 9700, 0},
-                                                   {SFX_CAR_REV_6, 9, SFX_CAR_HORN_BMW328, 9200, SFX_CAR_HORN_JEEP, 9800, 0},
-                                                   {SFX_CAR_REV_7, 10, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9900, 1},
-                                                   {SFX_CAR_REV_11, 14, SFX_CAR_HORN_56CHEV, 10540, SFX_CAR_HORN_JEEP, 9935, 2},
-                                                   {SFX_CAR_REV_8, 11, SFX_CAR_HORN_PICKUP, 11000, SFX_CAR_HORN_JEEP, 9700, 1},
-                                                   {SFX_CAR_REV_2, 5, SFX_CAR_HORN_BMW328, 9500, SFX_CAR_HORN_JEEP, 9800, 1},
-                                                   {SFX_CAR_REV_7, 10, SFX_CAR_HORN_BMW328, 9700, SFX_CAR_HORN_JEEP, 9700, 1},
-                                                   {SFX_CAR_REV_8, 11, SFX_CAR_HORN_BUS2, 18000, SFX_CAR_HORN_JEEP, 9600, 0},
-                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_BUS, 18000, SFX_CAR_HORN_JEEP, 9500, 2},
-                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9400, 1},
-                                                   {SFX_CAR_REV_8, 11, SFX_CAR_HORN_JEEP, 27513, SFX_CAR_HORN_JEEP, 9300, 1},
-                                                   {SFX_CAR_REV_8, 11, SFX_CAR_HORN_56CHEV, 10700, SFX_CAR_HORN_JEEP, 9200, 0},
-                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9100, 2},
-                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9000, 2},
-                                                   {SFX_CAR_REV_10, 13, SFX_CAR_HORN_BUS2, 18000, SFX_CAR_HORN_JEEP, 9100, 2},
-                                                   {SFX_CAR_REV_1, 4, SFX_CAR_HORN_BUS2, 17900, SFX_POLICE_SIREN_SLOW, 10511, 2},
-                                                   {SFX_CAR_REV_4, 7, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9200, 1},
-                                                   {SFX_CAR_REV_8, 11, SFX_CAR_HORN_BMW328, 9600, SFX_CAR_HORN_JEEP, 9300, 1},
-                                                   {SFX_CAR_REV_4, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9400, 1},
-                                                   {SFX_CAR_REV_7, 10, SFX_CAR_HORN_PORSCHE, 10000, SFX_CAR_HORN_JEEP, 9500, 0},
-                                                   {SFX_CAR_REV_6, 9, SFX_CAR_HORN_PORSCHE, 10500, SFX_CAR_HORN_JEEP, 9600, 0},
-                                                   {SFX_CAR_REV_10, 13, SFX_CAR_HORN_JEEP, 25513, SFX_CAR_HORN_JEEP, 9700, 1},
-                                                   {SFX_CAR_REV_1, 0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9800, 1},
-                                                   {SFX_CAR_REV_3, 6, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9900, 1},
-                                                   {SFX_CAR_REV_10, 13, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9800, 1},
-                                                   {SFX_CAR_REV_1, 4, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9700, 1},
-                                                   {SFX_CAR_RC_HELI, 18, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9600, 1},
-                                                   {SFX_CAR_REV_6, 9, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9700, 1},
-                                                   {SFX_CAR_REV_7, 10, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9600, 1},
-                                                   {SFX_CAR_REV_1, 4, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9500, 1},
-                                                   {SFX_CAR_REV_9, 12, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9400, 1},
-                                                   {SFX_CAR_REV_2, 5, SFX_CAR_HORN_PORSCHE, 11025, SFX_POLICE_SIREN_SLOW, 11000, 1},
-                                                   {SFX_CAR_REV_1, 4, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9200, 1},
-                                                   {SFX_CAR_REV_1, 4, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9300, 1},
-                                                   {SFX_CAR_REV_1, 4, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9400, 1} };
+const tVehicleSampleData aVehicleSettings[MAX_CARS] = {
+	{SFX_CAR_REV_10, SFX_BANK_PATHFINDER, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9935, OLD_DOOR},
+	{SFX_CAR_REV_11, SFX_BANK_PACARD, SFX_CAR_HORN_56CHEV, 11487, SFX_CAR_HORN_JEEP, 9900, OLD_DOOR},
+	{SFX_CAR_REV_2, SFX_BANK_PORSCHE, SFX_CAR_HORN_PORSCHE, 11025, SFX_CAR_HORN_JEEP, 9890, NEW_DOOR},
+	{SFX_CAR_REV_5, SFX_BANK_TRUCK, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_HORN_JEEP, 9960, TRUCK_DOOR},
+	{SFX_CAR_REV_11, SFX_BANK_PACARD, SFX_CAR_HORN_56CHEV, 12893, SFX_CAR_HORN_JEEP, 9500, OLD_DOOR},
+	{SFX_CAR_REV_4, SFX_BANK_MERC, SFX_CAR_HORN_BMW328, 10706, SFX_CAR_HORN_JEEP, 9600, NEW_DOOR},
+	{SFX_CAR_REV_1, SFX_BANK_0, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_HORN_JEEP, 9700, NEW_DOOR},
+	{SFX_CAR_REV_5, SFX_BANK_TRUCK, SFX_CAR_HORN_TRUCK, 29711, SFX_POLICE_SIREN_SLOW, 10588, TRUCK_DOOR},
+	{SFX_CAR_REV_5, SFX_BANK_TRUCK, SFX_CAR_HORN_TRUCK, 31478, SFX_CAR_HORN_JEEP, 9800, TRUCK_DOOR},
+	{SFX_CAR_REV_11, SFX_BANK_PACARD, SFX_CAR_HORN_BMW328, 9538, SFX_CAR_HORN_JEEP, 9900, NEW_DOOR},
+	{SFX_CAR_REV_11, SFX_BANK_PACARD, SFX_CAR_HORN_56CHEV, 10842, SFX_CAR_HORN_JEEP, 10000, OLD_DOOR},
+	{SFX_CAR_REV_7, SFX_BANK_COBRA, SFX_CAR_HORN_BMW328, 12017, SFX_CAR_HORN_JEEP, 9900, NEW_DOOR},
+	{SFX_CAR_REV_9, SFX_BANK_CADILLAC, SFX_CAR_HORN_JEEP, 22293, SFX_CAR_HORN_JEEP, 9800, NEW_DOOR},
+	{SFX_CAR_REV_3, SFX_BANK_SPIDER, SFX_CAR_HORN_BUS2, 18000, SFX_CAR_HORN_JEEP, 9700, OLD_DOOR},
+	{SFX_CAR_REV_3, SFX_BANK_SPIDER, SFX_CAR_HORN_BUS, 18286, SFX_CAR_HORN_JEEP, 9600, OLD_DOOR},
+	{SFX_CAR_REV_2, SFX_BANK_PORSCHE, SFX_CAR_HORN_PORSCHE, 11025, SFX_CAR_HORN_JEEP, 9500, NEW_DOOR},
+	{SFX_CAR_REV_3, SFX_BANK_SPIDER, SFX_CAR_HORN_JEEP, 22295, SFX_AMBULANCE_SIREN_SLOW, 12688, OLD_DOOR},
+	{SFX_CAR_REV_4, SFX_BANK_MERC, SFX_CAR_HORN_PORSCHE, 9271, SFX_POLICE_SIREN_SLOW, 11471, NEW_DOOR},
+	{SFX_CAR_REV_11, SFX_BANK_PACARD, SFX_CAR_HORN_56CHEV, 12170, SFX_CAR_HORN_JEEP, 9400, OLD_DOOR},
+	{SFX_CAR_REV_11, SFX_BANK_PACARD, SFX_CAR_HORN_BMW328, 11000, SFX_CAR_HORN_JEEP, 9300, OLD_DOOR},
+	{SFX_CAR_REV_10, SFX_BANK_PATHFINDER, SFX_CAR_HORN_BMW328, 10796, SFX_CAR_HORN_JEEP, 9200, NEW_DOOR},
+	{SFX_CAR_REV_4, SFX_BANK_MERC, SFX_CAR_HORN_BMW328, 10500, SFX_CAR_HORN_JEEP, 9100, NEW_DOOR},
+	{SFX_CAR_REV_10, SFX_BANK_PATHFINDER, SFX_CAR_HORN_PICKUP, 10924, SFX_CAR_HORN_JEEP, 9000, OLD_DOOR},
+	{SFX_CAR_REV_3, SFX_BANK_SPIDER, SFX_CAR_HORN_PICKUP, 11025, SFX_ICE_CREAM_TUNE, 11025, OLD_DOOR},
+	{SFX_CAR_REV_6, SFX_BANK_HOTROD, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9100, OLD_DOOR},
+	{SFX_HELI_APACHE_1, SFX_BANK_HELI_APACHE, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9200, NEW_DOOR},
+	{SFX_CAR_REV_4, SFX_BANK_MERC, SFX_CAR_HORN_BMW328, 10706, SFX_POLICE_SIREN_SLOW, 10511, NEW_DOOR},
+	{SFX_CAR_REV_3, SFX_BANK_SPIDER, SFX_CAR_HORN_BUS, 17260, SFX_POLICE_SIREN_SLOW, 11029, OLD_DOOR},
+	{SFX_CAR_REV_3, SFX_BANK_SPIDER, SFX_CAR_HORN_PICKUP, 8670, SFX_CAR_HORN_JEEP, 9300, OLD_DOOR},
+	{SFX_CAR_REV_7, SFX_BANK_COBRA, SFX_CAR_HORN_PORSCHE, 10400, SFX_CAR_HORN_JEEP, 9400, NEW_DOOR},
+	{SFX_CAR_REV_1, SFX_BANK_0, SFX_CAR_HORN_JEEP, 26513, SFX_POLICE_SIREN_SLOW, 11912, NEW_DOOR},
+	{SFX_CAR_REV_5, SFX_BANK_TRUCK, SFX_CAR_HORN_BUS2, 11652, SFX_CAR_HORN_JEEP, 9500, BUS_DOOR},
+	{SFX_CAR_REV_5, SFX_BANK_TRUCK, SFX_CAR_HORN_TRUCK, 29711, SFX_CAR_HORN_JEEP, 9600, TRUCK_DOOR},
+	{SFX_CAR_REV_5, SFX_BANK_TRUCK, SFX_CAR_HORN_TRUCK, 28043, SFX_CAR_HORN_JEEP, 9700, TRUCK_DOOR},
+	{SFX_CAR_REV_6, SFX_BANK_HOTROD, SFX_CAR_HORN_JEEP, 25400, SFX_CAR_HORN_JEEP, 9800, OLD_DOOR},
+	{SFX_CAR_REV_1, SFX_BANK_0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9900, NEW_DOOR},
+	{SFX_CAR_REV_17, SFX_BANK_VTWIN, SFX_CAR_HORN_JEEP, 26313, SFX_CAR_HORN_JEEP, 10000, NEW_DOOR},
+	{SFX_CAR_REV_5, SFX_BANK_TRUCK, SFX_CAR_HORN_BUS, 16291, SFX_CAR_HORN_JEEP, 10100, BUS_DOOR},
+	{SFX_CAR_REV_11, SFX_BANK_PACARD, SFX_CAR_HORN_56CHEV, 10842, SFX_CAR_HORN_JEEP, 9900, OLD_DOOR},
+	{SFX_CAR_REV_11, SFX_BANK_PACARD, SFX_CAR_HORN_56CHEV, 10233, SFX_CAR_HORN_JEEP, 9800, NEW_DOOR},
+	{SFX_CAR_REV_3, SFX_BANK_SPIDER, SFX_CAR_HORN_PICKUP, 8670, SFX_CAR_HORN_JEEP, 9700, OLD_DOOR},
+	{SFX_RC_REV, SFX_BANK_RC, SFX_CAR_HORN_PICKUP, 20000, SFX_CAR_HORN_JEEP, 9600, NEW_DOOR},
+	{SFX_CAR_REV_11, SFX_BANK_PACARD, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9500, NEW_DOOR},
+	{SFX_CAR_REV_5, SFX_BANK_TRUCK, SFX_CAR_HORN_TRUCK, 29000, SFX_CAR_HORN_JEEP, 9400, TRUCK_DOOR},
+	{SFX_CAR_REV_1, CAR_SFX_BANKS_OFFSET, SFX_CAR_HORN_BMW328, 9003, SFX_CAR_HORN_JEEP, 9300, NEW_DOOR},
+	{SFX_CAR_REV_4, SFX_BANK_MERC, SFX_CAR_HORN_PORSCHE, 12375, SFX_CAR_HORN_JEEP, 9200, NEW_DOOR},
+	{SFX_CAR_REV_1, SFX_BANK_0, SFX_CAR_HORN_BUS2, 15554, SFX_CAR_HORN_JEEP, 9100, NEW_DOOR},
+	{SFX_CAR_REV_1, SFX_BANK_0, SFX_CAR_HORN_BUS2, 13857, SFX_CAR_HORN_JEEP, 9000, TRUCK_DOOR},
+	{SFX_MOPED_REV, SFX_BANK_MOPED, SFX_CAR_HORN_JEEP, 30000, SFX_CAR_HORN_JEEP, 9100, NEW_DOOR},
+	{SFX_CAR_REV_7, SFX_BANK_COBRA, SFX_CAR_HORN_JEEP, 22043, SFX_CAR_HORN_JEEP, 9200, OLD_DOOR},
+	{SFX_CAR_REV_1, SFX_BANK_0, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9300, NEW_DOOR},
+	{SFX_CAR_REV_1, SFX_BANK_0, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9400, NEW_DOOR},
+	{SFX_CAR_REV_1, SFX_BANK_0, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9500, NEW_DOOR},
+	{SFX_CAR_REV_1, SFX_BANK_0, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9600, NEW_DOOR},
+	{SFX_CAR_REV_1, SFX_BANK_0, SFX_CAR_HORN_JEEP, 21043, SFX_CAR_HORN_JEEP, 9700, NEW_DOOR},
+	{SFX_CAR_REV_5, SFX_BANK_TRUCK, SFX_CAR_HORN_TRUCK, 28043, SFX_CAR_HORN_JEEP, 9800, TRUCK_DOOR},
+	{SFX_CAR_REV_3, SFX_BANK_SPIDER, SFX_CAR_HORN_BUS, 18286, SFX_CAR_HORN_JEEP, 9900, OLD_DOOR},
+	{SFX_CAR_REV_12, SFX_BANK_GOLF_CART, SFX_CAR_HORN_JEEP, 28500, SFX_CAR_HORN_JEEP, 9800, NEW_DOOR},
+	{SFX_CAR_REV_1, CAR_SFX_BANKS_OFFSET, SFX_CAR_HORN_56CHEV, 10842, SFX_CAR_HORN_JEEP, 9700, OLD_DOOR},
+	{SFX_CAR_REV_8, SFX_BANK_PONTIAC_SLOW, SFX_CAR_HORN_BUS2, 18000, SFX_CAR_HORN_JEEP, 9700, OLD_DOOR},
+	{SFX_SEAPLANE_PRO1, SFX_BANK_PLANE_SEAPLANE, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9700, NEW_DOOR},
+	{SFX_CAR_REV_20, SFX_BANK_SPORTS_BIKE, SFX_CAR_HORN_JEEP, 27000, SFX_CAR_HORN_JEEP, 9600, NEW_DOOR},
+	{SFX_MOPED_REV, SFX_BANK_MOPED, SFX_CAR_HORN_JEEP, 31000, SFX_CAR_HORN_JEEP, 9500, NEW_DOOR},
+	{SFX_CAR_REV_17, SFX_BANK_VTWIN, SFX_CAR_HORN_PICKUP, 11000, SFX_CAR_HORN_JEEP, 9400, NEW_DOOR},
+	{SFX_RC_REV, SFX_BANK_RC, SFX_CAR_HORN_JEEP, 30000, SFX_CAR_HORN_JEEP, 15000, NEW_DOOR},
+	{SFX_CAR_RC_HELI, SFX_BANK_RC_HELI, SFX_CAR_HORN_JEEP, 30000, SFX_CAR_HORN_JEEP, 15000, NEW_DOOR},
+	{SFX_CAR_REV_9, SFX_BANK_CADILLAC, SFX_CAR_HORN_56CHEV, 10300, SFX_CAR_HORN_JEEP, 9100, OLD_DOOR},
+	{SFX_CAR_REV_9, SFX_BANK_CADILLAC, SFX_CAR_HORN_56CHEV, 10500, SFX_CAR_HORN_JEEP, 9000, OLD_DOOR},
+	{SFX_CAR_REV_19, SFX_BANK_HONDA250, SFX_CAR_HORN_JEEP, 30000, SFX_CAR_HORN_JEEP, 9000, NEW_DOOR},
+	{SFX_CAR_REV_1, SFX_BANK_0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9100, TRUCK_DOOR},
+	{SFX_CAR_REV_3, SFX_BANK_SPIDER, SFX_CAR_HORN_TRUCK, 28000, SFX_CAR_HORN_JEEP, 9200, TRUCK_DOOR},
+	{SFX_CAR_REV_7, SFX_BANK_COBRA, SFX_CAR_HORN_PICKUP, 11200, SFX_CAR_HORN_JEEP, 9300, NEW_DOOR},
+	{SFX_CAR_REV_1, SFX_BANK_0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9400, NEW_DOOR},
+	{SFX_CAR_REV_1, SFX_BANK_0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9500, NEW_DOOR},
+	{SFX_CAR_REV_9, SFX_BANK_CADILLAC, SFX_CAR_HORN_56CHEV, 10700, SFX_CAR_HORN_JEEP, 9600, OLD_DOOR},
+	{SFX_CAR_REV_1, CAR_SFX_BANKS_OFFSET, SFX_CAR_HORN_BMW328, 9000, SFX_CAR_HORN_JEEP, 9700, OLD_DOOR},
+	{SFX_CAR_REV_6, SFX_BANK_HOTROD, SFX_CAR_HORN_BMW328, 9200, SFX_CAR_HORN_JEEP, 9800, OLD_DOOR},
+	{SFX_CAR_REV_7, SFX_BANK_COBRA, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9900, NEW_DOOR},
+	{SFX_CAR_REV_11, SFX_BANK_PACARD, SFX_CAR_HORN_56CHEV, 10540, SFX_CAR_HORN_JEEP, 9935, TRUCK_DOOR},
+	{SFX_CAR_REV_8, SFX_BANK_PONTIAC_SLOW, SFX_CAR_HORN_PICKUP, 11000, SFX_CAR_HORN_JEEP, 9700, NEW_DOOR},
+	{SFX_CAR_REV_2, SFX_BANK_PORSCHE, SFX_CAR_HORN_BMW328, 9500, SFX_CAR_HORN_JEEP, 9800, NEW_DOOR},
+	{SFX_CAR_REV_7, SFX_BANK_COBRA, SFX_CAR_HORN_BMW328, 9700, SFX_CAR_HORN_JEEP, 9700, NEW_DOOR},
+	{SFX_CAR_REV_8, SFX_BANK_PONTIAC_SLOW, SFX_CAR_HORN_BUS2, 18000, SFX_CAR_HORN_JEEP, 9600, OLD_DOOR},
+	{SFX_CAR_REV_3, SFX_BANK_SPIDER, SFX_CAR_HORN_BUS, 18000, SFX_CAR_HORN_JEEP, 9500, TRUCK_DOOR},
+	{SFX_CAR_REV_1, SFX_BANK_0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9400, NEW_DOOR},
+	{SFX_CAR_REV_8, SFX_BANK_PONTIAC_SLOW, SFX_CAR_HORN_JEEP, 27513, SFX_CAR_HORN_JEEP, 9300, NEW_DOOR},
+	{SFX_CAR_REV_8, SFX_BANK_PONTIAC_SLOW, SFX_CAR_HORN_56CHEV, 10700, SFX_CAR_HORN_JEEP, 9200, OLD_DOOR},
+	{SFX_CAR_REV_1, SFX_BANK_0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9100, TRUCK_DOOR},
+	{SFX_CAR_REV_1, SFX_BANK_0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9000, TRUCK_DOOR},
+	{SFX_CAR_REV_10, SFX_BANK_PATHFINDER, SFX_CAR_HORN_BUS2, 18000, SFX_CAR_HORN_JEEP, 9100, TRUCK_DOOR},
+	{SFX_CAR_REV_1, CAR_SFX_BANKS_OFFSET, SFX_CAR_HORN_BUS2, 17900, SFX_POLICE_SIREN_SLOW, 10511, TRUCK_DOOR},
+	{SFX_CAR_REV_4, SFX_BANK_MERC, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9200, NEW_DOOR},
+	{SFX_CAR_REV_8, SFX_BANK_PONTIAC_SLOW, SFX_CAR_HORN_BMW328, 9600, SFX_CAR_HORN_JEEP, 9300, NEW_DOOR},
+	{SFX_CAR_REV_4, SFX_BANK_0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9400, NEW_DOOR},
+	{SFX_CAR_REV_7, SFX_BANK_COBRA, SFX_CAR_HORN_PORSCHE, 10000, SFX_CAR_HORN_JEEP, 9500, OLD_DOOR},
+	{SFX_CAR_REV_6, SFX_BANK_HOTROD, SFX_CAR_HORN_PORSCHE, 10500, SFX_CAR_HORN_JEEP, 9600, OLD_DOOR},
+	{SFX_CAR_REV_10, SFX_BANK_PATHFINDER, SFX_CAR_HORN_JEEP, 25513, SFX_CAR_HORN_JEEP, 9700, NEW_DOOR},
+	{SFX_CAR_REV_1, SFX_BANK_0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9800, NEW_DOOR},
+	{SFX_CAR_REV_3, SFX_BANK_SPIDER, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9900, NEW_DOOR},
+	{SFX_CAR_REV_10, SFX_BANK_PATHFINDER, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9800, NEW_DOOR},
+	{SFX_CAR_REV_1, CAR_SFX_BANKS_OFFSET, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9700, NEW_DOOR},
+	{SFX_CAR_RC_HELI, SFX_BANK_RC_HELI, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9600, NEW_DOOR},
+	{SFX_CAR_REV_6, SFX_BANK_HOTROD, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9700, NEW_DOOR},
+	{SFX_CAR_REV_7, SFX_BANK_COBRA, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9600, NEW_DOOR},
+	{SFX_CAR_REV_1, CAR_SFX_BANKS_OFFSET, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9500, NEW_DOOR},
+	{SFX_CAR_REV_9, SFX_BANK_CADILLAC, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9400, NEW_DOOR},
+	{SFX_CAR_REV_2, SFX_BANK_PORSCHE, SFX_CAR_HORN_PORSCHE, 11025, SFX_POLICE_SIREN_SLOW, 11000, NEW_DOOR},
+	{SFX_CAR_REV_1, CAR_SFX_BANKS_OFFSET, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9200, NEW_DOOR},
+	{SFX_CAR_REV_1, CAR_SFX_BANKS_OFFSET, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9300, NEW_DOOR},
+	{SFX_CAR_REV_1, CAR_SFX_BANKS_OFFSET, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9400, NEW_DOOR} };
+
 
 
 bool bPlayerJustEnteredCar;
@@ -747,8 +767,8 @@ void cAudioManager::ProcessVehicle(CVehicle* veh)
 			} else {
 				switch (veh->GetVehicleAppearance()) {
 				case VEHICLE_APPEARANCE_HELI:
-					ProcessHelicopter(&params);
-					//ProcessVehicleFlatTyre(&params);
+					ProcessCarHeli(&params);
+					ProcessVehicleFlatTyre(&params);
 					ProcessEngineDamage(&params);
 					break;
 				case VEHICLE_APPEARANCE_BOAT:
@@ -760,7 +780,7 @@ void cAudioManager::ProcessVehicle(CVehicle* veh)
 						if (CWeather::WetRoads > 0.0)
 							ProcessWetRoadNoise(&params);
 						ProcessVehicleSkidding(&params);
-						//ProcessVehicleFlatTyre(params);
+						ProcessVehicleFlatTyre(&params);
 						ProcessVehicleHorn(&params);
 						ProcessVehicleSirenOrAlarm(&params);
 						if (UsesReverseWarning(params.m_nIndex))
@@ -780,29 +800,20 @@ void cAudioManager::ProcessVehicle(CVehicle* veh)
 			break;
 		case VEHICLE_TYPE_BOAT:
 			if (veh->m_modelIndex == MI_SKIMMER)
-				ProcessHelicopter(&params);
+				ProcessCarHeli(&params);
 			else
 				ProcessBoatEngine(&params);
 			ProcessBoatMovingOverWater(&params);
 			ProcessVehicleOneShots(&params);
 			break;
 		case VEHICLE_TYPE_HELI: 
-			ProcessHelicopter(&params);
+			ProcessCarHeli(&params);
 			ProcessVehicleOneShots(&params);
 			break;
 		case VEHICLE_TYPE_PLANE:
-			switch (params.m_nIndex) {
-			case AIRTRAIN:
-				ProcessJumbo(&params);
-				break;
-			case DEADDODO:
-				ProcessCesna(&params);
-				break;
-			default:
-				break;
-			}
+			ProcessPlane(&params);
 			ProcessVehicleOneShots(&params);
-			//ProcessVehicleFlatType(&params);
+			ProcessVehicleFlatTyre(&params);
 			break;
 		case VEHICLE_TYPE_BIKE:
 			bike = (CBike*)veh;
@@ -816,7 +827,7 @@ void cAudioManager::ProcessVehicle(CVehicle* veh)
 				ProcessCarBombTick(&params);
 				ProcessEngineDamage(&params);
 				ProcessVehicleEngine(&params);
-				//ProcessVehicleFlatTyre();
+				ProcessVehicleFlatTyre(&params);
 			}
 			ProcessVehicleOneShots(&params);
 			bike->m_fVelocityChangeForAudio = params.m_fVelocityChange;
@@ -869,27 +880,28 @@ cAudioManager::ProcessReverseGear(cVehicleParams *params)
 {
 	const int reverseGearIntensity = 30;
 
-	CVehicle *veh;
-	CAutomobile *automobile;
-	int32 emittingVol;
+	CAutomobile* automobile;
 	float modificator;
+	uint8 emittingVolume;
 
 	if (params->m_fDistance >= SQR(reverseGearIntensity))
 		return false;
-	veh = params->m_pVehicle;
-	if (veh->bEngineOn && (veh->m_fGasPedal < 0.0f || veh->m_nCurrentGear == 0)) {
+	automobile = (CAutomobile*)params->m_pVehicle;
+	if (automobile->m_modelIndex == MI_CADDY)
+		return true;
+	if (automobile->bEngineOn && (automobile->m_fGasPedal < 0.0f || automobile->m_nCurrentGear == 0)) {
 		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
-		automobile = (CAutomobile *)params->m_pVehicle;
-		if (automobile->m_nWheelsOnGround != 0) {
+		if (automobile->m_nDriveWheelsOnGround != 0) {
 			modificator = params->m_fVelocityChange / params->m_pTransmission->fMaxReverseVelocity;
 		} else {
-			if (automobile->m_nDriveWheelsOnGround != 0)
+			if (automobile->m_nDriveWheelsOnGroundPrev != 0)
 				automobile->m_fGasPedalAudio *= 0.4f;
 			modificator = automobile->m_fGasPedalAudio;
 		}
 		modificator = Abs(modificator);
-		emittingVol = (24.f * modificator);
-		m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, reverseGearIntensity, m_sQueueSample.m_fDistance);
+		emittingVolume = modificator * 24.0f;
+		m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, reverseGearIntensity, m_sQueueSample.m_fDistance);
+
 		if (m_sQueueSample.m_nVolume != 0) {
 			if (params->m_pVehicle->m_fGasPedal >= 0.0f) {
 				m_sQueueSample.m_nCounter = 62;
@@ -901,9 +913,9 @@ cAudioManager::ProcessReverseGear(cVehicleParams *params)
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_bIs2D = false;
 			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_nFrequency = (6000.f * modificator) + 7000;
+			m_sQueueSample.m_nFrequency = (6000.0f * modificator) + 7000;
 			m_sQueueSample.m_nLoopCount = 0;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
+			m_sQueueSample.m_nEmittingVolume = emittingVolume;
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_fSpeedMultiplier = 3.0f;
@@ -1197,7 +1209,7 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams* params)
 						break;
 					}
 				}
-			} else if (0.0f == params->m_fVelocityChange) {
+			} else if (params->m_fVelocityChange == 0.0f) {
 				traction = 0.9f;
 			}
 			if (transmission->fMaxVelocity <= 0.0) {
@@ -2183,7 +2195,7 @@ cAudioManager::ProcessVehicleDoors(cVehicleParams *params)
 			if (doorState == DOORST_OPEN || doorState == DOORST_CLOSED) {
 				velocity = Min(0.3f, Abs(automobile->Doors[i].m_fAngVel));
 				if (velocity > 0.0035f) {
-					emittingVol = (100.f * velocity * 10.f / 3.f);
+					emittingVol = (100.0f * velocity * 10.0f / 3.0f);
 					m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
 					if (m_sQueueSample.m_nVolume != 0) {
 						m_sQueueSample.m_nCounter = i + 6;
@@ -2262,32 +2274,34 @@ cAudioManager::HasAirBrakes(int32 model) const
 bool
 cAudioManager::ProcessEngineDamage(cVehicleParams *params)
 {
-	const int engineDamageIntensity = 40;
+	const float SOUND_INTENSITY = 40.0f;
 
-	CAutomobile *veh;
-	uint8 engineStatus;
+	float health;
 	uint8 emittingVolume;
 
-	if (params->m_fDistance >= SQR(engineDamageIntensity))
+	if (params->m_fDistance >= SQR(SOUND_INTENSITY))
 		return false;
-	veh = (CAutomobile *)params->m_pVehicle;
-	if (veh->bEngineOn) {
-		engineStatus = veh->Damage.GetEngineStatus();
-		if (engineStatus > 250 || engineStatus < 100)
-			return true;
-		if (engineStatus < 225) {
-			m_sQueueSample.m_nSampleIndex = SFX_JUMBO_TAXI;
-			emittingVolume = 6;
-			m_sQueueSample.m_nReleasingVolumeModificator = 7;
-			m_sQueueSample.m_nFrequency = 40000;
-		} else {
+	if (params->m_pVehicle->m_modelIndex == MI_CADDY)
+		return true;
+	if (params->m_pVehicle->GetStatus() == STATUS_WRECKED)
+		return true;
+	health = params->m_pVehicle->m_fHealth;
+	if (health < 390.0f) {
+		if (health < 250.0f) {
 			emittingVolume = 60;
 			m_sQueueSample.m_nSampleIndex = SFX_CAR_ON_FIRE;
 			m_sQueueSample.m_nReleasingVolumeModificator = 7;
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CAR_ON_FIRE);
+		} else {
+			emittingVolume = 30;
+			m_sQueueSample.m_nSampleIndex = SFX_PALM_TREE_LO;
+			m_sQueueSample.m_nReleasingVolumeModificator = 7;
+			m_sQueueSample.m_nFrequency = 27000;
 		}
 		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
-		m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, engineDamageIntensity, m_sQueueSample.m_fDistance);
+		if (params->m_pVehicle->bIsDrowning)
+			emittingVolume /= 2;
+		m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume != 0) {
 			m_sQueueSample.m_nCounter = 28;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
@@ -2297,7 +2311,7 @@ cAudioManager::ProcessEngineDamage(cVehicleParams *params)
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-			m_sQueueSample.m_fSoundIntensity = engineDamageIntensity;
+			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 			m_sQueueSample.m_bReleasingSoundFlag = false;
 			m_sQueueSample.m_nReleasingVolumeDivider = 3;
 			m_sQueueSample.m_bReverbFlag = true;
@@ -2311,32 +2325,48 @@ cAudioManager::ProcessEngineDamage(cVehicleParams *params)
 bool
 cAudioManager::ProcessCarBombTick(cVehicleParams *params)
 {
-	CAutomobile *automobile;
+	const float SOUND_INTENSITY = 40.0f;
+	const uint8 EMITTING_VOLUME = 60;
 
-	if (params->m_fDistance >= SQR(40.f))
+	uint8 bombType;
+
+	if (params->m_fDistance >= SQR(SOUND_INTENSITY))
 		return false;
-	automobile = (CAutomobile *)params->m_pVehicle;
-	if (automobile->bEngineOn && automobile->m_bombType == CARBOMB_TIMEDACTIVE) {
-		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
-		m_sQueueSample.m_nVolume = ComputeVolume(60, 40.f, m_sQueueSample.m_fDistance);
-		if (m_sQueueSample.m_nVolume != 0) {
-			m_sQueueSample.m_nCounter = 35;
-			m_sQueueSample.m_nSampleIndex = SFX_COUNTDOWN;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_nReleasingVolumeModificator = 0;
-			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_COUNTDOWN);
-			m_sQueueSample.m_nLoopCount = 0;
-			m_sQueueSample.m_nEmittingVolume = 60;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-			m_sQueueSample.m_fSoundIntensity = 40.0f;
-			m_sQueueSample.m_bReleasingSoundFlag = false;
-			m_sQueueSample.m_nReleasingVolumeDivider = 3;
-			m_sQueueSample.m_bReverbFlag = true;
-			m_sQueueSample.m_bRequireReflection = false;
-			AddSampleToRequestedQueue();
+	if (params->m_pVehicle->bEngineOn) {
+		switch (params->m_VehicleType) {
+		case VEHICLE_TYPE_CAR:
+			bombType = params->m_pVehicle->m_bombType;
+			break;
+		case VEHICLE_TYPE_BIKE:
+			bombType = params->m_pVehicle->m_bombType;
+			break;
+		default:
+			debug("\n * AUDIOLOG:  ProcessCarBombTick()  Unsupported vehicle type %d * \n", params->m_VehicleType);
+			return true;
+			break;
+		}
+		if (bombType == CARBOMB_TIMEDACTIVE) {
+			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
+			m_sQueueSample.m_nVolume = ComputeVolume(EMITTING_VOLUME, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
+			if (m_sQueueSample.m_nVolume != 0) {
+				m_sQueueSample.m_nCounter = 35;
+				m_sQueueSample.m_nSampleIndex = SFX_COUNTDOWN;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_nReleasingVolumeModificator = 0;
+				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_COUNTDOWN);
+				m_sQueueSample.m_nLoopCount = 0;
+				m_sQueueSample.m_nEmittingVolume = EMITTING_VOLUME;
+				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+				m_sQueueSample.m_fSpeedMultiplier = 2.0f;
+				m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
+				m_sQueueSample.m_bReleasingSoundFlag = false;
+				m_sQueueSample.m_nReleasingVolumeDivider = 3;
+				m_sQueueSample.m_bReverbFlag = true;
+				m_sQueueSample.m_bRequireReflection = false;
+				AddSampleToRequestedQueue();
+			}
 		}
 	}
 	return true;
@@ -2353,11 +2383,6 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 	float maxDist;
 	cPedParams pedParams;
 
-	static uint8 WaveIndex = 41;
-	static uint8 GunIndex = 53;
-	static uint8 iWheelIndex = 82;
-	static uint8 CrunchOffset = 0;
-
 	for (int i = 0; i < m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_AudioEvents; i++) {
 		noReflections = 0;
 		m_sQueueSample.m_bRequireReflection = false;
@@ -2373,17 +2398,17 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 			maxDist = SQR(SOUND_INTENSITY);
 			emittingVol = m_anRandomTable[2] % 5 + 122;
 			switch (aVehicleSettings[params->m_nIndex].m_bDoorType) {
-			case DOOR_TYPE_OLD:
+			case OLD_DOOR:
 				m_sQueueSample.m_nSampleIndex = SFX_OLD_CAR_DOOR_CLOSE;
 				break;
-			case DOOR_TYPE_NEW:
+			case NEW_DOOR:
 			default:
 				m_sQueueSample.m_nSampleIndex = SFX_NEW_CAR_DOOR_CLOSE;
 				break;
-			case DOOR_TYPE_TRUCK:
+			case TRUCK_DOOR:
 				m_sQueueSample.m_nSampleIndex = SFX_TRUCK_DOOR_CLOSE;
 				break;
-			case DOOR_TYPE_AIRBREAK:
+			case BUS_DOOR:
 				m_sQueueSample.m_nSampleIndex = SFX_AIR_BRAKES;
 				break;
 			}
@@ -2407,17 +2432,17 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 			maxDist = SQR(SOUND_INTENSITY);
 			emittingVol = m_anRandomTable[1] % 10 + 117;
 			switch (aVehicleSettings[params->m_nIndex].m_bDoorType) {
-			case DOOR_TYPE_OLD:
+			case OLD_DOOR:
 				m_sQueueSample.m_nSampleIndex = SFX_OLD_CAR_DOOR_OPEN;
 				break;
-			case DOOR_TYPE_NEW:
+			case NEW_DOOR:
 			default:
 				m_sQueueSample.m_nSampleIndex = SFX_NEW_CAR_DOOR_OPEN;
 				break;
-			case DOOR_TYPE_TRUCK:
+			case TRUCK_DOOR:
 				m_sQueueSample.m_nSampleIndex = SFX_TRUCK_DOOR_OPEN;
 				break;
-			case DOOR_TYPE_AIRBREAK:
+			case BUS_DOOR:
 				m_sQueueSample.m_nSampleIndex = SFX_AIR_BRAKES;
 				break;
 			}
@@ -2445,13 +2470,14 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 		} break;
 		case SOUND_CAR_JUMP: {
 			const float SOUND_INTENSITY = 35.0f;
+			static uint8 WheelIndex = 82;
 			emittingVol = Max(80.f, 2 * (100.f * m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i]));
 			maxDist = SQR(SOUND_INTENSITY);
 			m_sQueueSample.m_nSampleIndex = SFX_TYRE_BUMP;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iWheelIndex++;
-			if (iWheelIndex > 85)
-				iWheelIndex = 82;
+			m_sQueueSample.m_nCounter = WheelIndex++;
+			if (WheelIndex > 85)
+				WheelIndex = 82;
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_TYRE_BUMP);
 			m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 16);
 			if (params->m_nIndex == RCBANDIT) {
@@ -2540,6 +2566,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 		}
 		case SOUND_CAR_SPLASH: {
 			const float SOUND_INTENSITY = 40.0f;
+			static uint8 WaveIndex = 41;
 			vol = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i];
 			if (vol <= 300.f)
 				continue;
@@ -2631,8 +2658,28 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 			emittingVol = m_anRandomTable[4] % 25 + 75;
 			break;
 		}
+		case SOUND_31:{
+			const float SOUND_INTENSITY = 35.0f;
+			static uint8 HeliIndex = 0;
+			relVol = ((CAutomobile*)params->m_pVehicle)->m_aWheelSpeed[1] * 50.0f / 11.0f;
+			if (relVol < 0.2f || relVol == 1.0f)
+				continue;
+			emittingVol = (1.0f - relVol) * 70.0f;
+			maxDist = SQR(SOUND_INTENSITY);
+			m_sQueueSample.m_nSampleIndex = SFX_CAR_HELI_ROT;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+			m_sQueueSample.m_nCounter = HeliIndex + 89;
+			HeliIndex = HeliIndex != 1 ? HeliIndex + 1 : 0; //maybe better use 1 and 0, to avoid extreme values
+			m_sQueueSample.m_nFrequency = (8000.0f * relVol) + 16000;
+			m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
+			m_sQueueSample.m_nReleasingVolumeModificator = 2;
+			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
+			break;
+		}
 		case SOUND_WEAPON_SHOT_FIRED: {
 			const float SOUND_INTENSITY = 120.0f;
+			static uint8 GunIndex = 53;
 			emittingVol = m_anRandomTable[2];
 			maxDist = SQR(SOUND_INTENSITY);
 			m_sQueueSample.m_nSampleIndex = SFX_UZI_LEFT;
@@ -2711,6 +2758,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 		}
 		case SOUND_SPLATTER: {
 			const float SOUND_INTENSITY = 40.0f;
+			static uint8 CrunchOffset = 0;
 			m_sQueueSample.m_nSampleIndex = CrunchOffset + SFX_PED_CRUNCH_1;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_nCounter = 48;
@@ -3016,52 +3064,404 @@ cAudioManager::ProcessBoatMovingOverWater(cVehicleParams *params)
 	return true;
 }
 
-struct tHelicopterSampleData {
-	float m_fMaxDistance;
-	float m_fBaseDistance;
-	uint8 m_bBaseVolume;
-};
-
-bool
-cAudioManager::ProcessHelicopter(cVehicleParams *params)
+void
+cAudioManager::ProcessCarHeli(cVehicleParams* params)
 {
-	CHeli *heli;
-	float MaxDist;
-	float dist;
-	float baseDist;
-	int32 emittingVol;
-	static const tHelicopterSampleData gHeliSfxRanges[3] = {{400.f, 380.f, 100}, {100.f, 70.f, MAX_VOLUME}, {60.f, 30.f, MAX_VOLUME}};
+	const float SOUND_INTENSITY = 250.0f;
 
-	if (SQR(gHeliSfxRanges[0].m_fMaxDistance) <= params->m_fDistance)
-		return false;
+	CVehicle* playerVeh;
+	CVehicle* veh;
+	CAutomobile* automobile;
+	CBoat* boat;
 
+	uint8 emittingVol;
+	int16 brakeState;
+	int16 accelerateState;
+	uint32 freq;
+	float propellerSpeed;
+	float freqModifier; //may be relate to angle with horison
+	float cameraAngle;
+	bool distanceCalculatedOld;
+	float distanceOld;
+	CVector vecPosOld;
+
+	float volumeModifier;//TODO find better name
+	bool hunterBool;
+	
+	static uint32 freqFrontPrev = 14287;
+	static uint32 freqPropellerPrev = 7143;
+	static uint32 freqSkimmerPrev = 14287;
+
+	boat = nil;
+	automobile = nil;
+	hunterBool = false;
+
+	if (params->m_fDistance >= SQR(SOUND_INTENSITY))
+		return;
+
+	playerVeh = FindPlayerVehicle();
+	veh = params->m_pVehicle;
+	if (playerVeh == veh) {
+		accelerateState = Pads[0].GetAccelerate();
+		brakeState = Pads[0].GetBrake();
+	} else {
+		accelerateState = veh->m_fGasPedal * 255.0f;
+		brakeState = veh->m_fBrakePedal * 255.0f;
+	}
+	freqModifier = Abs(veh->GetUp().y);
+	cameraAngle = (DotProduct(veh->m_matrix.GetForward(), TheCamera.GetForward()) + 1.0f) / 2.0f;
+	if (veh->m_modelIndex == MI_SKIMMER) {
+		boat = (CBoat*)veh;
+		propellerSpeed = boat->m_fMovingSpeed * 50.0f / 11.0f;
+	} else if (params->m_VehicleType == VEHICLE_TYPE_HELI) {
+		propellerSpeed = 1.0f;
+	} else {
+		automobile = (CAutomobile*)veh;
+		propellerSpeed = automobile->m_aWheelSpeed[1] * 50.0f / 11.0f;
+	}
+
+	if (propellerSpeed == 0.0f)
+		return;
+
+	propellerSpeed = Min(1.0f, propellerSpeed);
 	CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
-	heli = (CHeli *)params->m_pVehicle;
-	for (uint32 i = 0; i < ARRAY_SIZE(gHeliSfxRanges); i++) {
-		MaxDist = gHeliSfxRanges[i].m_fMaxDistance;
-		dist = m_sQueueSample.m_fDistance;
-		if (dist >= MaxDist)
-			return true;
-		baseDist = gHeliSfxRanges[i].m_fBaseDistance;
-		if (dist < baseDist)
-			emittingVol = (gHeliSfxRanges[i].m_bBaseVolume * ((MaxDist - dist) / (MaxDist - baseDist)));
-		else
-			emittingVol = gHeliSfxRanges[i].m_bBaseVolume;
 
-		m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, gHeliSfxRanges[i].m_fMaxDistance, m_sQueueSample.m_fDistance);
+
+	//sound on long distances
+	if (m_sQueueSample.m_fDistance >= 40.0f)
+		emittingVol = propellerSpeed * 75.0f;
+	else if (m_sQueueSample.m_fDistance >= 25.0f)
+		emittingVol = (m_sQueueSample.m_fDistance - 25.0f) * (75.0f * propellerSpeed) / 15.0f;
+	else
+		emittingVol = 0;
+	if (emittingVol != 0) {
+		m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume != 0) {
-			m_sQueueSample.m_nCounter = i + 65;
-			m_sQueueSample.m_nSampleIndex = i + SFX_HELI_1;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+			m_sQueueSample.m_nCounter = 88;
+			if (boat != nil) {
+				m_sQueueSample.m_nSampleIndex = SFX_SEAPLANE_PRO3;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				if (accelerateState > 0 || brakeState > 0)
+					m_sQueueSample.m_nFrequency = 4600 + Min(1.0f, (Max(accelerateState, brakeState) / 255.0f) * freqModifier) * 563;
+				else
+					m_sQueueSample.m_nFrequency = 3651 + Min(1.0f, freqModifier) * 949;
+			} else {
+				m_sQueueSample.m_nSampleIndex = SFX_HELI_1;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+			}
 			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_nReleasingVolumeModificator = 0;
-			m_sQueueSample.m_nFrequency = 1200 * heli->m_nHeliId + SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_nReleasingVolumeModificator = 2;
 			m_sQueueSample.m_nLoopCount = 0;
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_fSpeedMultiplier = 6.0f;
-			m_sQueueSample.m_fSoundIntensity = gHeliSfxRanges[i].m_fMaxDistance;
+			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
+			m_sQueueSample.m_bReleasingSoundFlag = false;
+			m_sQueueSample.m_nReleasingVolumeDivider = 5;
+			m_sQueueSample.m_bReverbFlag = true;
+			m_sQueueSample.m_bRequireReflection = false;
+			AddSampleToRequestedQueue();
+		}
+	}
+
+	if (params->m_fDistance >= SQR(140.0f))
+		return;
+
+	if (propellerSpeed >= 0.4f)
+		volumeModifier = (propellerSpeed - 0.4f) * 5.0f / 3.0f;
+	else
+		volumeModifier = 0.0f;
+	if (!boat) {
+		freq = Min(1300, 7000.0f * freqModifier);
+		if (playerVeh == veh && (accelerateState > 0 || brakeState > 0) && freq < 1300)//unnesesary freqModifier alredy <= 1300
+			freq = 1300;
+		if (veh->m_modelIndex == MI_HUNTER)
+			hunterBool = true;
+	}
+
+
+	//sound from front of helicopter
+	emittingVol = (1.0f - cameraAngle) * volumeModifier * 127.0f;
+	m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, 140.0f, m_sQueueSample.m_fDistance);
+	if (m_sQueueSample.m_nVolume != 0) {
+		m_sQueueSample.m_nCounter = 3;
+		if (hunterBool) {
+			m_sQueueSample.m_nSampleIndex = SFX_HELI_APACHE_1;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+			m_sQueueSample.m_nFrequency = (volumeModifier + 1.0f) * 16000 + freq;
+			m_sQueueSample.m_bIs2D = false;
+			m_sQueueSample.m_nReleasingVolumeModificator = 1;
+			m_sQueueSample.m_nLoopCount = 0;
+			m_sQueueSample.m_nEmittingVolume = emittingVol;
+			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_fSpeedMultiplier = 6.0f;
+			m_sQueueSample.m_fSoundIntensity = 140.0f;
+			m_sQueueSample.m_bReleasingSoundFlag = false;
+			m_sQueueSample.m_nReleasingVolumeDivider = 5;
+			m_sQueueSample.m_bReverbFlag = true;
+			m_sQueueSample.m_bRequireReflection = false;
+			AddSampleToRequestedQueue();
+		} else if (boat != nil) {
+			m_sQueueSample.m_nSampleIndex = SFX_SEAPLANE_PRO1;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+
+			if (accelerateState > 0 || brakeState > 0)
+				m_sQueueSample.m_nFrequency = 18000 + Min(1.0f, freqModifier * (Max(accelerateState, brakeState) / 255.0f)) * 2204;
+			else
+				m_sQueueSample.m_nFrequency = 14287 + Min(1.0f, freqModifier) * 3713;
+			if (propellerSpeed < 1.0f)
+				m_sQueueSample.m_nFrequency = (propellerSpeed + 1.0f) * (m_sQueueSample.m_nFrequency / 2.0f);
+			m_sQueueSample.m_nFrequency = clamp2(m_sQueueSample.m_nFrequency, freqFrontPrev, 197);
+			freqFrontPrev = m_sQueueSample.m_nFrequency;
+
+			m_sQueueSample.m_bIs2D = false;
+			m_sQueueSample.m_nReleasingVolumeModificator = 1;
+			m_sQueueSample.m_nLoopCount = 0;
+			m_sQueueSample.m_nEmittingVolume = emittingVol;
+			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_fSpeedMultiplier = 6.0f;
+			m_sQueueSample.m_fSoundIntensity = 140.0f;
+			m_sQueueSample.m_bReleasingSoundFlag = false;
+			m_sQueueSample.m_nReleasingVolumeDivider = 5;
+			m_sQueueSample.m_bReverbFlag = true;
+			m_sQueueSample.m_bRequireReflection = false;
+			AddSampleToRequestedQueue();
+		} else {
+			m_sQueueSample.m_nSampleIndex = SFX_CAR_HELI_MAI;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+			m_sQueueSample.m_nFrequency = (volumeModifier + 1) * 16000 + freq;
+			m_sQueueSample.m_bIs2D = false;
+			m_sQueueSample.m_nReleasingVolumeModificator = 1;
+			m_sQueueSample.m_nLoopCount = 0;
+			m_sQueueSample.m_nEmittingVolume = emittingVol;
+			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_fSpeedMultiplier = 6.0f;
+			m_sQueueSample.m_fSoundIntensity = 140.0f;
+			m_sQueueSample.m_bReleasingSoundFlag = false;
+			m_sQueueSample.m_nReleasingVolumeDivider = 5;
+			m_sQueueSample.m_bReverbFlag = true;
+			m_sQueueSample.m_bRequireReflection = false;
+			AddSampleToRequestedQueue();
+		}
+	}
+
+
+	//after accel rotor sound
+	emittingVol = ((cameraAngle + 1.0f) * volumeModifier * 127.0f) / 2.0f;
+	m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, 140.0, m_sQueueSample.m_fDistance);
+	if (m_sQueueSample.m_nVolume != 0) {
+		m_sQueueSample.m_nCounter = 1;
+		if (hunterBool) {
+			m_sQueueSample.m_nSampleIndex = SFX_HELI_APACHE_2;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+			m_sQueueSample.m_nFrequency = (volumeModifier + 1) * 16000 + freq;
+		} else if (boat) {
+			m_sQueueSample.m_nSampleIndex = SFX_SEAPLANE_PRO2;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+
+			if (accelerateState > 0 || brakeState > 0)
+				m_sQueueSample.m_nFrequency = 9000 + Min(1.0f, (Max(accelerateState, brakeState) / 255) * freqModifier) * 1102;
+			else
+				m_sQueueSample.m_nFrequency = 7143 + Min(1.0f, freqModifier) * 1857;
+
+			if (propellerSpeed < 1.0f)
+				m_sQueueSample.m_nFrequency = (propellerSpeed + 1) * (m_sQueueSample.m_nFrequency / 2);
+
+			m_sQueueSample.m_nFrequency = clamp2(m_sQueueSample.m_nFrequency, freqPropellerPrev, 98);
+			freqPropellerPrev = m_sQueueSample.m_nFrequency;
+		} else {
+			m_sQueueSample.m_nSampleIndex = SFX_CAR_HELI_MAI2;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+			m_sQueueSample.m_nFrequency = (volumeModifier + 1) * 16000 + freq;
+		}
+		m_sQueueSample.m_bIs2D = false;
+		m_sQueueSample.m_nReleasingVolumeModificator = 1;
+		m_sQueueSample.m_nLoopCount = 0;
+		m_sQueueSample.m_nEmittingVolume = emittingVol;
+		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_fSpeedMultiplier = 6.0f;
+		m_sQueueSample.m_fSoundIntensity = 140.0f;
+		m_sQueueSample.m_bReleasingSoundFlag = false;
+		m_sQueueSample.m_nReleasingVolumeDivider = 5;
+		m_sQueueSample.m_bReverbFlag = true;
+		m_sQueueSample.m_bRequireReflection = false;
+		AddSampleToRequestedQueue();
+	}
+
+
+	//engine starting sound 
+	if (boat == nil && params->m_VehicleType != VEHICLE_TYPE_HELI && m_sQueueSample.m_fDistance < 30.0f) { //strange way to check if automobile != nil
+		if (automobile->bEngineOn) {
+			if (propellerSpeed < 1.0f) {
+				emittingVol = (1.0f - propellerSpeed / 2.0f) * 70.0f;
+				m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, 30.0, m_sQueueSample.m_fDistance);
+				if (m_sQueueSample.m_nVolume) {
+					if (hunterBool) {
+						m_sQueueSample.m_nSampleIndex = SFX_HELI_APACHE_4;
+						m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+						freq = 3000.0f * propellerSpeed + 30000;
+					} else {
+						m_sQueueSample.m_nSampleIndex = SFX_CAR_HELI_STA;
+						m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+						freq = 3000.0f * propellerSpeed + 6000;
+					}
+					m_sQueueSample.m_nFrequency = freq;
+					m_sQueueSample.m_nCounter = 12;
+					m_sQueueSample.m_bIs2D = false;
+					m_sQueueSample.m_nReleasingVolumeModificator = 1;
+					m_sQueueSample.m_nLoopCount = 0;
+					m_sQueueSample.m_nEmittingVolume = emittingVol;
+					m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+					m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+					m_sQueueSample.m_fSpeedMultiplier = 6.0f;
+					m_sQueueSample.m_fSoundIntensity = 30.0f;
+					m_sQueueSample.m_bReleasingSoundFlag = false;
+					m_sQueueSample.m_nReleasingVolumeDivider = 30;
+					m_sQueueSample.m_bReverbFlag = true;
+					m_sQueueSample.m_bRequireReflection = false;
+					AddSampleToRequestedQueue();
+				}
+			}
+		}
+	}
+
+
+	if (boat) {
+		if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_FIXED && m_sQueueSample.m_fDistance < 20.0f && propellerSpeed > 0.0f) {
+			m_sQueueSample.m_nVolume = ComputeVolume(propellerSpeed * 100.0f, 20.0f, m_sQueueSample.m_fDistance);
+			if (m_sQueueSample.m_nVolume) {
+
+				if (accelerateState > 0 || brakeState > 0)
+					m_sQueueSample.m_nFrequency = 18000 + Min(1.0f, (Max(accelerateState, brakeState) / 255.0f) * freqModifier) * 2204;
+				else
+					m_sQueueSample.m_nFrequency = 14287 + Min(1.0f, freqModifier) * 3713;
+				if (propellerSpeed < 1.0)
+					m_sQueueSample.m_nFrequency = (propellerSpeed + 1) * (m_sQueueSample.m_nFrequency / 2.0f);
+				m_sQueueSample.m_nFrequency = clamp2(m_sQueueSample.m_nFrequency, freqSkimmerPrev, 197);
+				freqSkimmerPrev = m_sQueueSample.m_nFrequency;
+
+				m_sQueueSample.m_nSampleIndex = SFX_SEAPLANE_PRO4;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nCounter = 12;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_nReleasingVolumeModificator = 3;
+				m_sQueueSample.m_nLoopCount = 0;
+				m_sQueueSample.m_nEmittingVolume = propellerSpeed * 100.0f;
+				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_SEAPLANE_PRO4);
+				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_SEAPLANE_PRO4);
+				m_sQueueSample.m_fSpeedMultiplier = 5.0f;
+				m_sQueueSample.m_fSoundIntensity = 20.0f;
+				m_sQueueSample.m_bReleasingSoundFlag = false;
+				m_sQueueSample.m_nReleasingVolumeDivider = 7;
+				m_sQueueSample.m_bReverbFlag = true;
+				m_sQueueSample.m_bRequireReflection = false;
+				AddSampleToRequestedQueue();
+			}
+		}
+	} else {
+		//vacuum cleaner sound
+		vecPosOld = m_sQueueSample.m_vecPos;
+		distanceCalculatedOld = params->m_bDistanceCalculated;
+		distanceOld = params->m_fDistance;
+		
+		if (automobile != nil)
+			automobile->GetComponentWorldPosition(CAR_BOOT, m_sQueueSample.m_vecPos);
+		else if (params->m_VehicleType == VEHICLE_TYPE_HELI) 
+			m_sQueueSample.m_vecPos = CVector(0.0f, -10.0f, 0.0f); //this is from android, but for real it's not used
+
+		params->m_bDistanceCalculated = false;
+		params->m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
+		if (params->m_fDistance < SQR(27.0f)) {
+			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
+			m_sQueueSample.m_nVolume = ComputeVolume(volumeModifier * 25.0f, 27.0f, m_sQueueSample.m_fDistance);
+			if (m_sQueueSample.m_nVolume) {
+				m_sQueueSample.m_nCounter = 2;
+				m_sQueueSample.m_nSampleIndex = hunterBool ? SFX_HELI_APACHE_3 : SFX_CAR_HELI_REA;
+				m_sQueueSample.m_nBankIndex = 0;
+				m_sQueueSample.m_bIs2D = 0;
+				m_sQueueSample.m_nReleasingVolumeModificator = 1;
+				m_sQueueSample.m_nFrequency = (volumeModifier + 1.0f) * 16000;
+				m_sQueueSample.m_nLoopCount = 0;
+				m_sQueueSample.m_nEmittingVolume = volumeModifier * 25.0f;
+				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+				m_sQueueSample.m_fSpeedMultiplier = 6.0f;
+				m_sQueueSample.m_fSoundIntensity = 27.0f;
+				m_sQueueSample.m_bReleasingSoundFlag = false;
+				m_sQueueSample.m_nReleasingVolumeDivider = 5;
+				m_sQueueSample.m_bReverbFlag = true;
+				m_sQueueSample.m_bRequireReflection = false;
+				AddSampleToRequestedQueue();
+			}
+		}
+		
+		m_sQueueSample.m_vecPos = vecPosOld;
+		params->m_bDistanceCalculated = distanceCalculatedOld;
+		params->m_fDistance = distanceOld;
+	}
+}
+
+void
+cAudioManager::ProcessVehicleFlatTyre(cVehicleParams* params)
+{
+	const float SOUND_INTENSITY = 60.0f;
+
+	CAutomobile* automobile;
+	CBike* bike;
+	bool wheelBurst;
+	uint8 emittingVol;
+
+	float modifier;
+
+	if (params->m_fDistance >= SQR(SOUND_INTENSITY))
+		return;
+
+	switch (params->m_VehicleType) {
+	case VEHICLE_TYPE_CAR:
+		automobile = (CAutomobile*)params->m_pVehicle;
+		wheelBurst = false;
+		for (int i = 0; i < 4; i++)
+			if (automobile->Damage.GetWheelStatus(i) == WHEEL_STATUS_BURST && automobile->m_aWheelTimer[i] > 0.0f)
+				wheelBurst = true;
+		if (!wheelBurst)
+			return;
+		break;
+	case VEHICLE_TYPE_BIKE:
+		bike = (CBike*)params->m_pVehicle;
+		wheelBurst = false;
+		for(int i = 0; i < 2; i++)
+			if (bike->m_wheelStatus[i] == WHEEL_STATUS_BURST && bike->m_aWheelTimer[i] > 0.0f)
+				wheelBurst = true;
+		if (!wheelBurst)
+			return;
+		break;
+	default:
+		return;
+	}
+	modifier = Min(1.0f, Abs(params->m_fVelocityChange) / (0.3f * params->m_pTransmission->fMaxVelocity));
+	if (modifier > 0.01f) { //mb can be replaced by (emittingVol > 1)
+		emittingVol = (100.0f * modifier);
+		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
+		m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
+		if (m_sQueueSample.m_nVolume) {
+			m_sQueueSample.m_nCounter = 95;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+			m_sQueueSample.m_bIs2D = false;
+			m_sQueueSample.m_nReleasingVolumeModificator = 5;
+			m_sQueueSample.m_nSampleIndex = SFX_TYRE_BURST_L;
+			m_sQueueSample.m_nFrequency = (5500.0f * modifier) + 8000;
+			m_sQueueSample.m_nLoopCount = 0;
+			m_sQueueSample.m_nEmittingVolume = emittingVol;
+			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_TYRE_BURST_L);
+			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_TYRE_BURST_L);
+			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
+			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 			m_sQueueSample.m_bReleasingSoundFlag = false;
 			m_sQueueSample.m_nReleasingVolumeDivider = 3;
 			m_sQueueSample.m_bReverbFlag = true;
@@ -3069,9 +3469,9 @@ cAudioManager::ProcessHelicopter(cVehicleParams *params)
 			AddSampleToRequestedQueue();
 		}
 	}
-	return true;
 }
 
+//TODO use it in ProcessVehicle
 void
 cAudioManager::ProcessPlane(cVehicleParams *params)
 {
@@ -3246,7 +3646,7 @@ cAudioManager::SetupJumboTaxiSound(uint8 vol)
 }
 
 bool
-cAudioManager::SetupJumboWhineSound(uint8 emittingVol, int32 freq)
+cAudioManager::SetupJumboWhineSound(uint8 emittingVol, uint32 freq)
 {
 	const float SOUND_INTENSITY = 170.0f;
 
@@ -3278,7 +3678,7 @@ cAudioManager::SetupJumboWhineSound(uint8 emittingVol, int32 freq)
 }
 
 bool
-cAudioManager::SetupJumboEngineSound(uint8 vol, int32 freq)
+cAudioManager::SetupJumboEngineSound(uint8 vol, uint32 freq)
 {
 	const float SOUND_INTENSITY = 180.0f;
 	if (m_sQueueSample.m_fDistance >= SOUND_INTENSITY)
@@ -4186,7 +4586,6 @@ cAudioManager::SetupPedComments(cPedParams *params, uint32 sound)
 				return;
 			break;
 		}
-
 		soundIntensity = 50.0f;
 	} else {
 		switch (sound) {
@@ -4558,6 +4957,91 @@ cAudioManager::ProcessWaterCannon(int32)
 	}
 }
 
+//positon of arcade machines
+CVector aVecExtraSoundPosition[] = { {-1042.546f, 88.794f, 11.324f}, {-1004.476f, 181.697f, 11.324f} };
+
+void 
+cAudioManager::ProcessExtraSounds()
+{
+	const float SOUND_INTENSITY = 18.0f;
+	const uint8 EMITTING_VOLUME = 50;
+
+	float distance;
+
+	for (int i = 0; i < ARRAY_SIZE(aVecExtraSoundPosition); i++) {
+		m_sQueueSample.m_vecPos = aVecExtraSoundPosition[i];
+		distance = GetDistanceSquared(m_sQueueSample.m_vecPos);
+		if (distance < SQR(SOUND_INTENSITY)) {
+			if (distance > 0.0f)
+				m_sQueueSample.m_fDistance = Sqrt(distance);
+			else
+				m_sQueueSample.m_fDistance = 0.0f;
+			m_sQueueSample.m_nVolume = ComputeVolume(EMITTING_VOLUME, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
+			if (m_sQueueSample.m_nVolume != 0) {
+				m_sQueueSample.m_nCounter = i;
+				m_sQueueSample.m_nSampleIndex = SFX_ARCADE;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_ARCADE);
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_nLoopCount = 0;
+				m_sQueueSample.m_bReleasingSoundFlag = false;
+				m_sQueueSample.m_nReleasingVolumeModificator = 4;
+				m_sQueueSample.m_fSpeedMultiplier = 3.0f;
+				m_sQueueSample.m_nEmittingVolume = EMITTING_VOLUME;
+				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_ARCADE);
+				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_ARCADE);
+				m_sQueueSample.m_bReverbFlag = true;
+				m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
+				m_sQueueSample.m_bRequireReflection = false;
+				m_sQueueSample.m_nReleasingVolumeDivider = 3;
+				AddSampleToRequestedQueue();
+			}
+		}
+	}
+}
+
+void
+cAudioManager::ProcessEscalators()
+{
+	const float SOUND_INTENSITY = 30.0f;
+	const uint8 EMITTING_VOLUME = 26;
+
+	float distance;
+
+	for (int i = 0; i < CEscalators::NumEscalators; i++) {
+		if (!CEscalators::GetEscalator(i).IsActive())
+			continue;
+		m_sQueueSample.m_vecPos = CEscalators::GetEscalator(i).GetPosition();
+		distance = GetDistanceSquared(m_sQueueSample.m_vecPos);
+		if (distance < SQR(SOUND_INTENSITY)) {
+			if (distance > 0.0f)
+				m_sQueueSample.m_fDistance = Sqrt(distance);
+			else
+				m_sQueueSample.m_fDistance = 0.0f;
+			m_sQueueSample.m_nVolume = ComputeVolume(EMITTING_VOLUME, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
+			if (m_sQueueSample.m_nVolume != 0) {
+				m_sQueueSample.m_nSampleIndex = SFX_BOAT_V12_LOOP;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nFrequency = i * 50 % 250 + 3973;
+				m_sQueueSample.m_nReleasingVolumeModificator = 3;
+				m_sQueueSample.m_fSpeedMultiplier = 3.0f;
+				m_sQueueSample.m_nReleasingVolumeDivider = 5;
+				m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
+				m_sQueueSample.m_nCounter = i;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_nLoopCount = 0;
+				m_sQueueSample.m_nEmittingVolume = EMITTING_VOLUME;
+				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_BOAT_V12_LOOP);
+				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_BOAT_V12_LOOP);
+				m_sQueueSample.m_bReverbFlag = true;
+				m_sQueueSample.m_bReleasingSoundFlag = false;
+				m_sQueueSample.m_bRequireReflection = false;
+				AddSampleToRequestedQueue();
+			}
+		}
+	}
+}
+
 #pragma region SCRIPT_OBJECTS
 const int SCRIPT_OBJECT_INTENSITY_S = 30;
 const int SCRIPT_OBJECT_INTENSITY_L = 80;
@@ -4565,13 +5049,15 @@ const int SCRIPT_OBJECT_INTENSITY_L = 80;
 void
 cAudioManager::ProcessScriptObject(int32 id)
 {
-	cAudioScriptObject *entity = (cAudioScriptObject *)m_asAudioEntities[id].m_pEntity;
-	if (entity != nil) {
-		m_sQueueSample.m_vecPos = entity->Posn;
-		if (m_asAudioEntities[id].m_AudioEvents == 1)
-			ProcessOneShotScriptObject(m_asAudioEntities[id].m_awAudioEvent[0]);
-		else
-			ProcessLoopingScriptObject(entity->AudioId);
+	if (MusicManager.m_nMusicMode == MUSICMODE_GAME) {
+		cAudioScriptObject* entity = (cAudioScriptObject*)m_asAudioEntities[id].m_pEntity;
+		if (entity != nil) {
+			m_sQueueSample.m_vecPos = entity->Posn;
+			if (m_asAudioEntities[id].m_AudioEvents == 1)
+				ProcessOneShotScriptObject(m_asAudioEntities[id].m_awAudioEvent[0]);
+			else
+				ProcessLoopingScriptObject(entity->AudioId);
+		}
 	}
 }
 
@@ -4959,14 +5445,19 @@ void
 cAudioManager::ProcessWeather(int32 id)
 {
 	uint8 vol;
+	float x;
+	float y;
+	float modifier;
+	float wind;
+
 	static uint8 iSound = 0;
 
-	if (m_asAudioEntities[id].m_AudioEvents && m_asAudioEntities[id].m_awAudioEvent[0] == SOUND_LIGHTNING) {
+	if (m_asAudioEntities[id].m_AudioEvents != 0 && m_asAudioEntities[id].m_awAudioEvent[0] == SOUND_LIGHTNING) {
 		if (m_asAudioEntities[id].m_afVolume[0] >= 10.f) {
 			m_sQueueSample.m_nSampleIndex = SFX_EXPLOSION_1;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_GENERIC_EXTRA;
 			m_sQueueSample.m_nFrequency = RandomDisplacement(500) + 4000;
-			vol = (m_asAudioEntities[id].m_afVolume[0] - 10.f) + 40;
+			vol = (m_asAudioEntities[id].m_afVolume[0] - 10.0f) + 40;
 		} else {
 			m_sQueueSample.m_nSampleIndex = SFX_EXPLOSION_2;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
@@ -4974,7 +5465,7 @@ cAudioManager::ProcessWeather(int32 id)
 			vol = (m_asAudioEntities[id].m_afVolume[0]) + 35;
 		}
 		m_sQueueSample.m_nVolume = vol;
-		if (TheCamera.SoundDistUp < 20.f)
+		if (TheCamera.SoundDistUp < 20.0f)
 			m_sQueueSample.m_nVolume /= 2;
 		if (iSound == 4)
 			iSound = 0;
@@ -4994,7 +5485,7 @@ cAudioManager::ProcessWeather(int32 id)
 	if (CWeather::Rain > 0.0f && (!CCullZones::CamNoRain() || !CCullZones::PlayerNoRain())) {
 		m_sQueueSample.m_nSampleIndex = SFX_RAIN;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RAIN);
-		m_sQueueSample.m_nVolume = (int32)(25.f * CWeather::Rain);
+		m_sQueueSample.m_nVolume = (uint8)(25.0f * CWeather::Rain);
 		m_sQueueSample.m_nCounter = 4;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 		m_sQueueSample.m_nReleasingVolumeModificator = 0;
@@ -5009,6 +5500,32 @@ cAudioManager::ProcessWeather(int32 id)
 		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 		m_sQueueSample.m_bRequireReflection = false;
 		AddSampleToRequestedQueue();
+	}
+	x = 0.0f;
+	y = 0.0f;
+	CWindModifiers::FindWindModifier(TheCamera.GetPosition(), &x, &y);
+	modifier = Max(Abs(x), Abs(y)) * 10.0f;
+	modifier = Min(1.0f, modifier);
+	wind = Max(CWeather::Wind, modifier);
+	if (wind > 0.0f && CObject::fDistToNearestTree < 75.0) {
+		m_sQueueSample.m_nSampleIndex = SFX_PALM_TREE_LO;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_PALM_TREE_LO);
+		m_sQueueSample.m_nVolume = (m_anRandomTable[1] % 10 + 45.0f) * (75.0f - CObject::fDistToNearestTree) * (4.0f / 300.0f) * wind;
+		m_sQueueSample.m_nCounter = 5;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+		m_sQueueSample.m_nReleasingVolumeModificator = 1;
+		m_sQueueSample.m_nOffset = 63;
+		m_sQueueSample.m_bIs2D = true;
+		m_sQueueSample.m_nLoopCount = 0;
+		m_sQueueSample.m_bReleasingSoundFlag = false;
+		m_sQueueSample.m_nReleasingVolumeDivider = 7;
+		m_sQueueSample.m_bReverbFlag = false;
+		m_sQueueSample.m_nEmittingVolume = m_sQueueSample.m_nVolume;
+		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_bRequireReflection = false;
+		AddSampleToRequestedQueue();
+		CObject::fDistToNearestTree = 999999.9f;
 	}
 }
 

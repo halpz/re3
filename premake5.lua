@@ -47,6 +47,8 @@ function getarch(a)
 		return 'amd64'
 	elseif a == 'ARM' then
 		return 'arm'
+	elseif a == 'ARM64' then
+		return 'arm64'
 	end
 	return a
 end
@@ -75,6 +77,7 @@ workspace "reVC"
 			"linux-x86-librw_gl3_glfw-oal",
 			"linux-amd64-librw_gl3_glfw-oal",
 			"linux-arm-librw_gl3_glfw-oal",
+			"linux-arm64-librw_gl3_glfw-oal",
 		}
 
 	filter { "system:bsd" }

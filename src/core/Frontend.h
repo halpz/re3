@@ -663,7 +663,7 @@ public:
 	void DrawQuitGameScreen();
 	void DrawFrontEnd();
 	void DrawBackground(bool transitionCall);
-	void DrawPlayerSetupScreen();
+	void DrawPlayerSetupScreen(bool);
 	int FadeIn(int alpha);
 	void FilterOutColorMarkersFromString(wchar*);
 	int GetStartOptionsCntrlConfigScreens();

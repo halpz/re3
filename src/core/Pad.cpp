@@ -526,7 +526,7 @@ void KangarooCheat()
 }
 #endif
 
-#ifdef ALLCARSHELI_CHEAT
+#ifdef RESTORE_ALLCARSHELI_CHEAT
 void AllCarsHeliCheat(void)
 {
 	wchar* string;
@@ -1438,7 +1438,7 @@ void CPad::AddToPCCheatString(char c)
 		CPed::SwitchDebugDisplay();
 #endif
 
-#ifdef ALLCARSHELI_CHEAT
+#ifdef RESTORE_ALLCARSHELI_CHEAT
 	// "CARSAREHELI"
 	if (!_CHEATCMP("ILEHERASRAC"))
 		AllCarsHeliCheat();
@@ -3105,10 +3105,11 @@ void CPad::PrintErrorMessage(void)
 {
 	if ( bDisplayNoControllerMessage && !CGame::playingIntro && !FrontEndMenuManager.m_bMenuActive )
 	{
-		CFont::SetScale(0.85f, 1.0f);
+		CSprite2d::DrawRect(CRect(SCREEN_STRETCH_X(20.0f), SCREEN_SCALE_FROM_BOTTOM(130.0f), SCREEN_STRETCH_FROM_RIGHT(20.0f), SCREEN_SCALE_Y(140.0f)), CRGBA(50, 50, 50, 210));
+		CFont::SetScale(SCREEN_SCALE_X(0.85f), SCREEN_SCALE_Y(1.0f));
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-		CFont::SetCentreSize(SCREEN_WIDTH - 20);
+		CFont::SetCentreSize(SCREEN_STRETCH_FROM_RIGHT(50.0f));
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
 		CFont::SetColor(CRGBA(255, 255, 200, 200));
@@ -3116,16 +3117,17 @@ void CPad::PrintErrorMessage(void)
 		CFont::PrintString
 		(
 			SCREEN_WIDTH  / 2,
-			SCREEN_HEIGHT / 2,
+			SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(40.0f),
 			TheText.Get("NOCONT") // Please reconnect an analog controller (DUALSHOCK@) or analog controller (DUALSHOCK@2). to controller port 1 to continue
 		);
 	}
 	else if ( bObsoleteControllerMessage )
 	{
-		CFont::SetScale(0.85f, 1.0f);
+		CSprite2d::DrawRect(CRect(SCREEN_STRETCH_X(20.0f), SCREEN_SCALE_FROM_BOTTOM(130.0f), SCREEN_STRETCH_FROM_RIGHT(20.0f), SCREEN_SCALE_Y(140.0f)), CRGBA(50, 50, 50, 210));
+		CFont::SetScale(SCREEN_SCALE_X(0.85f), SCREEN_SCALE_Y(1.0f));
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-		CFont::SetCentreSize(SCREEN_WIDTH - 20);
+		CFont::SetCentreSize(SCREEN_STRETCH_FROM_RIGHT(50.0f));
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
 		CFont::SetColor(CRGBA(255, 255, 200, 200));
@@ -3133,7 +3135,7 @@ void CPad::PrintErrorMessage(void)
 		CFont::PrintString
 		(
 			SCREEN_WIDTH  / 2,
-			SCREEN_HEIGHT / 2,
+			SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(40.0f),
 			TheText.Get("WRCONT") // The controller connected to controller port 1 is an unsupported controller. Grand Theft Auto III requires an analog controller (DUALSHOCK@) or analog controller (DUALSHOCK@2).
 		);
 	}

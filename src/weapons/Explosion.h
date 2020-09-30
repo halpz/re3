@@ -37,6 +37,7 @@ class CExplosion
 	float m_fZshift;
 public:
 	static void Initialise();
+	static void ClearAllExplosions();
 	static void Shutdown();
 	static int8 GetExplosionActiveCounter(uint8 id);
 	static void ResetExplosionActiveCounter(uint8 id);

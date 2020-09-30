@@ -432,7 +432,12 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 	case FLIGHT_MODEL_RCHELI:
 	case FLIGHT_MODEL_HELI:
 	{
-		float rm = Pow(pFlyingHandling->fMoveRes, CTimer::GetTimeStep());
+#ifdef RESTORE_ALLCARSHELI_CHEAT
+		tFlyingHandlingData* flyingHandling = bAllCarCheat && GetStatus() == STATUS_PLAYER && !IsRealHeli() ? mod_HandlingManager.GetFlyingPointer(HANDLING_MAVERICK) : pFlyingHandling;
+#else
+		tFlyingHandlingData* flyingHandling = pFlyingHandling;
+#endif
+		float rm = Pow(flyingHandling->fMoveRes, CTimer::GetTimeStep());
 		m_vecMoveSpeed *= rm;
 		if (GetStatus() != STATUS_PLAYER && GetStatus() != STATUS_PLAYER_REMOTE)
 			return;
@@ -441,11 +446,11 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		if(fThrust < 0.0f)
 			fThrust *= 2.0f;
 		if(flightModel == FLIGHT_MODEL_RCHELI){
-			fThrust = pFlyingHandling->fThrust * fThrust + 0.45f;
+			fThrust = flyingHandling->fThrust * fThrust + 0.45f;
 			ApplyMoveForce(GRAVITY * CVector(0.0f, 0.0f, 0.5f) * m_fMass * CTimer::GetTimeStep());
 		}else
-			fThrust = pFlyingHandling->fThrust * fThrust + 0.95f;
-		fThrust -= pFlyingHandling->fThrustFallOff * fUpSpeed;
+			fThrust = flyingHandling->fThrust * fThrust + 0.95f;
+		fThrust -= flyingHandling->fThrustFallOff * fUpSpeed;
 		if(flightModel == FLIGHT_MODEL_RCHELI && GetPosition().z > 40.0f)
 			fThrust *= 10.0f/(GetPosition().z - 30.0f);
 		else if(GetPosition().z > 80.0f)
@@ -453,20 +458,20 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		ApplyMoveForce(GRAVITY * GetUp() * fThrust * m_fMass * CTimer::GetTimeStep());
 
 		if (GetUp().z > 0.0f){
-			float upRight = clamp(GetRight().z, -pFlyingHandling->fFormLift, pFlyingHandling->fFormLift);
-			float upImpulseRight = -upRight * pFlyingHandling->fAttackLift * m_fTurnMass * CTimer::GetTimeStep();
+			float upRight = clamp(GetRight().z, -flyingHandling->fFormLift, flyingHandling->fFormLift);
+			float upImpulseRight = -upRight * flyingHandling->fAttackLift * m_fTurnMass * CTimer::GetTimeStep();
 			ApplyTurnForce(upImpulseRight * GetUp(), GetRight());
 
-			float upFwd = clamp(GetForward().z, -pFlyingHandling->fFormLift, pFlyingHandling->fFormLift);
-			float upImpulseFwd = -upFwd * pFlyingHandling->fAttackLift * m_fTurnMass * CTimer::GetTimeStep();
+			float upFwd = clamp(GetForward().z, -flyingHandling->fFormLift, flyingHandling->fFormLift);
+			float upImpulseFwd = -upFwd * flyingHandling->fAttackLift * m_fTurnMass * CTimer::GetTimeStep();
 			ApplyTurnForce(upImpulseFwd * GetUp(), GetForward());
 		}else{
-			float upRight = GetRight().z < 0.0f ? -pFlyingHandling->fFormLift : pFlyingHandling->fFormLift;
-			float upImpulseRight = -upRight * pFlyingHandling->fAttackLift * m_fTurnMass * CTimer::GetTimeStep();
+			float upRight = GetRight().z < 0.0f ? -flyingHandling->fFormLift : flyingHandling->fFormLift;
+			float upImpulseRight = -upRight * flyingHandling->fAttackLift * m_fTurnMass * CTimer::GetTimeStep();
 			ApplyTurnForce(upImpulseRight * GetUp(), GetRight());
 
-			float upFwd = GetForward().z < 0.0f ? -pFlyingHandling->fFormLift : pFlyingHandling->fFormLift;
-			float upImpulseFwd = -upFwd * pFlyingHandling->fAttackLift * m_fTurnMass * CTimer::GetTimeStep();
+			float upFwd = GetForward().z < 0.0f ? -flyingHandling->fFormLift : flyingHandling->fFormLift;
+			float upImpulseFwd = -upFwd * flyingHandling->fAttackLift * m_fTurnMass * CTimer::GetTimeStep();
 			ApplyTurnForce(upImpulseFwd * GetUp(), GetForward());
 		}
 
@@ -490,25 +495,25 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 			fPitch = -CPad::GetPad(0)->GetCarGunUpDown() / 128.0f;
 		if (CPad::GetPad(0)->GetHorn()) {
 			fYaw = 0.0f;
-			fPitch = clamp(pFlyingHandling->fPitchStab * DotProduct(m_vecMoveSpeed, GetForward()), -200.0f, 1.3f);
-			fRoll = clamp(pFlyingHandling->fRollStab * DotProduct(m_vecMoveSpeed, GetRight()), -200.0f, 1.3f);
+			fPitch = clamp(flyingHandling->fPitchStab * DotProduct(m_vecMoveSpeed, GetForward()), -200.0f, 1.3f);
+			fRoll = clamp(flyingHandling->fRollStab * DotProduct(m_vecMoveSpeed, GetRight()), -200.0f, 1.3f);
 		}
-		ApplyTurnForce(fPitch * GetUp() * pFlyingHandling->fPitch * m_fTurnMass * CTimer::GetTimeStep(), GetForward());
-		ApplyTurnForce(fRoll * GetUp() * pFlyingHandling->fRoll * m_fTurnMass * CTimer::GetTimeStep(), GetRight());
+		ApplyTurnForce(fPitch * GetUp() * flyingHandling->fPitch * m_fTurnMass * CTimer::GetTimeStep(), GetForward());
+		ApplyTurnForce(fRoll * GetUp() * flyingHandling->fRoll * m_fTurnMass * CTimer::GetTimeStep(), GetRight());
 
 		float fSideSpeed = -DotProduct(GetMoveSpeed(), GetRight());
-		float fSideSlipAccel = pFlyingHandling->fSideSlip * fSideSpeed * Abs(fSideSpeed);
+		float fSideSlipAccel = flyingHandling->fSideSlip * fSideSpeed * Abs(fSideSpeed);
 		ApplyMoveForce(m_fMass * GetRight() * fSideSlipAccel * CTimer::GetTimeStep());
-		float fYawAccel = pFlyingHandling->fYawStab * fSideSpeed * Abs(fSideSpeed) + pFlyingHandling->fYaw * fYaw;
+		float fYawAccel = flyingHandling->fYawStab * fSideSpeed * Abs(fSideSpeed) + flyingHandling->fYaw * fYaw;
 		ApplyTurnForce(fYawAccel * GetRight() * m_fTurnMass * CTimer::GetTimeStep(), -GetForward());
 
-		ApplyTurnForce(fYaw * GetForward() * pFlyingHandling->fYaw * m_fTurnMass * CTimer::GetTimeStep(), GetRight());
+		ApplyTurnForce(fYaw * GetForward() * flyingHandling->fYaw * m_fTurnMass * CTimer::GetTimeStep(), GetRight());
 
-		float rX = Pow(pFlyingHandling->vecTurnRes.x, CTimer::GetTimeStep());
-		float rY = Pow(pFlyingHandling->vecTurnRes.y, CTimer::GetTimeStep());
-		float rZ = Pow(pFlyingHandling->vecTurnRes.z, CTimer::GetTimeStep());
+		float rX = Pow(flyingHandling->vecTurnRes.x, CTimer::GetTimeStep());
+		float rY = Pow(flyingHandling->vecTurnRes.y, CTimer::GetTimeStep());
+		float rZ = Pow(flyingHandling->vecTurnRes.z, CTimer::GetTimeStep());
 		CVector vecTurnSpeed = Multiply3x3(m_vecTurnSpeed, GetMatrix());
-		float fResistanceMultiplier = Pow(1.0f / (pFlyingHandling->vecSpeedRes.z * SQR(vecTurnSpeed.z) + 1.0f) * rZ, CTimer::GetTimeStep());
+		float fResistanceMultiplier = Pow(1.0f / (flyingHandling->vecSpeedRes.z * SQR(vecTurnSpeed.z) + 1.0f) * rZ, CTimer::GetTimeStep());
 		float fResistance = vecTurnSpeed.z * fResistanceMultiplier - vecTurnSpeed.z;
 		vecTurnSpeed.x *= rX;
 		vecTurnSpeed.y *= rY;

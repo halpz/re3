@@ -812,7 +812,7 @@ CMenuManager::DoSettingsBeforeStartingAGame()
 }
 
 void
-CMenuManager::DrawStandardMenus(bool drawCurrScreen)
+CMenuManager::DrawStandardMenus(bool activeScreen)
 {
 	float nextYToUse = 0.0f; // III leftover, set but unused in VC
 #ifdef PS2_LIKE_MENU
@@ -1182,7 +1182,7 @@ CMenuManager::DrawStandardMenus(bool drawCurrScreen)
 				}
 
 				// Highlight trapezoid
-				if (drawCurrScreen && i == m_nCurrOption && itemsAreSelectable && section == 0) {
+				if (activeScreen && i == m_nCurrOption && itemsAreSelectable && section == 0) {
 
 					int leftXMax, rightXMin;
 
@@ -2460,16 +2460,16 @@ CMenuManager::DrawBackground(bool transitionCall)
 			m_nMenuFadeAlpha = 255 - m_nMenuFadeAlpha;
 			switch (m_nCurrScreen) {
 				case MENUPAGE_SKIN_SELECT:
-					CMenuManager::DrawPlayerSetupScreen();
+					DrawPlayerSetupScreen(false);
 					break;
 				case MENUPAGE_KEYBOARD_CONTROLS:
-					CMenuManager::DrawControllerSetupScreen();
+					DrawControllerSetupScreen();
 					break;
 				case MENUPAGE_OUTRO:
-					CMenuManager::DrawQuitGameScreen();
+					DrawQuitGameScreen();
 					break;
 				default:
-					CMenuManager::DrawStandardMenus(false);
+					DrawStandardMenus(false);
 					break;
 			}
 			m_nCurrScreen = actualScreen;
@@ -2479,7 +2479,7 @@ CMenuManager::DrawBackground(bool transitionCall)
 
 	switch (m_nCurrScreen) {
 		case MENUPAGE_SKIN_SELECT:
-			DrawPlayerSetupScreen();
+			DrawPlayerSetupScreen(true);
 			break;
 		case MENUPAGE_KEYBOARD_CONTROLS:
 			DrawControllerSetupScreen();
@@ -2530,7 +2530,7 @@ CMenuManager::DrawBackground(bool transitionCall)
 #endif
 
 void
-CMenuManager::DrawPlayerSetupScreen()
+CMenuManager::DrawPlayerSetupScreen(bool activeScreen)
 {
 	CFont::SetBackgroundOff();
 	CFont::SetScale(MENU_X(MENUACTION_SCALE_MULT), MENU_Y(MENUACTION_SCALE_MULT));
@@ -2807,7 +2807,8 @@ CMenuManager::DrawPlayerSetupScreen()
 #endif
 
 		}
-		CPlayerSkin::RenderFrontendSkinEdit();
+		if (activeScreen)
+			CPlayerSkin::RenderFrontendSkinEdit();
 
 		// Big apply button
 		if (strcmp(m_aSkinName, m_PrefsSkinFile) != 0) {
@@ -4112,6 +4113,9 @@ CMenuManager::ProcessButtonPresses(uint8 goDown, uint8 goUp, uint8 optionSelecte
 
 	int oldOption = m_nCurrOption;
 	if (goDown) {
+		if (m_nCurrScreen != MENUPAGE_MAP)
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
+
 		m_nCurrOption++;
 		if (m_nCurrOption == NUM_MENUROWS || (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action == MENUACTION_NOTHING)) {
 			m_nCurrOption = 0;
@@ -4120,6 +4124,9 @@ CMenuManager::ProcessButtonPresses(uint8 goDown, uint8 goUp, uint8 optionSelecte
 			m_nOptionHighlightTransitionBlend = 0;
 	}
 	if (goUp) {
+		if (m_nCurrScreen != MENUPAGE_MAP)
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NEW_PAGE, 0);
+
 		if (m_nCurrOption == (aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL)) {
 			while (m_nCurrOption != NUM_MENUROWS - 1
 				&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption + 1].m_Action != MENUACTION_NOTHING) {

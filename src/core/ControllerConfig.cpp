@@ -732,10 +732,7 @@ void CControllerConfigManager::AffectControllerStateOn_ButtonDown_Driving(int32 
 	if (FindPlayerVehicle() && (FindPlayerVehicle()->IsVehicle() && (
 		FindPlayerVehicle()->GetModelIndex() == MI_DODO
 #ifdef FIX_BUGS
-		|| CVehicle::bAllDodosCheat
-#ifdef ALLCARSHELI_CHEAT
-		|| bAllCarCheat
-#endif
+		|| (CVehicle::bAllDodosCheat && !FindPlayerVehicle()->IsRealHeli())
 #endif
 		)))
 	{

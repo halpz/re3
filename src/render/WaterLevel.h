@@ -84,7 +84,9 @@ enum eBeachToy
 	BEACHTOY_2,
 	BEACHTOY_3,
 	BEACHTOY_4,
-	BEACHTOY_LOUNGE = 5
+	BEACHTOY_LOUNGE = 5,
+	BEACHTOY_6,
+	BEACHTOY_11 = 11
 };
 
 extern RwRaster* gpWaterRaster;

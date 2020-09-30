@@ -168,3 +168,4 @@ public:
 };
 
 extern CVector vecHunterGunPos;
+extern bool bAllCarCheat;
