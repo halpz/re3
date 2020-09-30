@@ -106,12 +106,14 @@ CdStreamInit(int32 numChannels)
 	GetDiskFreeSpace(nil, &SectorsPerCluster, &BytesPerSector, &NumberOfFreeClusters, &TotalNumberOfClusters);
 	
 	_gdwCdStreamFlags = 0;
-	
+
+#ifndef FIX_BUGS // this just slows down streaming
 	if ( BytesPerSector <= CDSTREAM_SECTOR_SIZE )
 	{
 		_gdwCdStreamFlags |= FILE_FLAG_NO_BUFFERING;
 		debug("Using no buffered loading for streaming\n");
 	}
+#endif
 	
 	_gbCdStreamOverlapped = TRUE;
 

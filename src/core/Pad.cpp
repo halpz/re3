@@ -526,7 +526,7 @@ void KangarooCheat()
 }
 #endif
 
-#ifdef ALLCARSHELI_CHEAT
+#ifdef RESTORE_ALLCARSHELI_CHEAT
 void AllCarsHeliCheat(void)
 {
 	wchar* string;
@@ -1438,7 +1438,7 @@ void CPad::AddToPCCheatString(char c)
 		CPed::SwitchDebugDisplay();
 #endif
 
-#ifdef ALLCARSHELI_CHEAT
+#ifdef RESTORE_ALLCARSHELI_CHEAT
 	// "CARSAREHELI"
 	if (!_CHEATCMP("ILEHERASRAC"))
 		AllCarsHeliCheat();

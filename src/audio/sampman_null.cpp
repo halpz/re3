@@ -6,7 +6,7 @@
 cSampleManager SampleManager;
 bool _bSampmanInitialised = false;
 
-uint32 BankStartOffset[MAX_SAMPLEBANKS];
+uint32 BankStartOffset[MAX_SFX_BANKS];
 uint32     nNumMP3s;
 
 cSampleManager::cSampleManager(void)
@@ -136,20 +136,20 @@ cSampleManager::SetMonoMode(uint8 nMode)
 bool
 cSampleManager::LoadSampleBank(uint8 nBank)
 {
-	ASSERT( nBank < MAX_SAMPLEBANKS );
+	ASSERT( nBank < MAX_SFX_BANKS );
 	return false;
 }
 
 void
 cSampleManager::UnloadSampleBank(uint8 nBank)
 {
-	ASSERT( nBank < MAX_SAMPLEBANKS );
+	ASSERT( nBank < MAX_SFX_BANKS );
 }
 
 bool
 cSampleManager::IsSampleBankLoaded(uint8 nBank)
 {
-	ASSERT( nBank < MAX_SAMPLEBANKS );
+	ASSERT( nBank < MAX_SFX_BANKS );
 	
 	return false;
 }
@@ -179,7 +179,7 @@ cSampleManager::LoadPedComment(uint32 nComment)
 int32
 cSampleManager::GetBankContainingSound(uint32 offset)
 {
-	return SAMPLEBANK_INVALID;
+	return INVALID_SFX_BANK;
 }
 
 int32

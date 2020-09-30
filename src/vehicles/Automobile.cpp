@@ -100,7 +100,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	}
 
 	pHandling = mod_HandlingManager.GetHandlingData((eHandlingId)mi->m_handlingId);
-	pFlyingHandling = mod_HandlingManager.GetFlyingPointer((eHandlingId)mi->m_handlingId);
+	pFlyingHandling =  mod_HandlingManager.GetFlyingPointer((eHandlingId)mi->m_handlingId);
 
 	m_auto_unused1 = 20.0f;
 	m_auto_unused2 = 0;
@@ -1293,7 +1293,7 @@ CAutomobile::ProcessControl(void)
 
 		// Process front wheels off ground
 
-		if(!IsRealHeli()){
+		if (!IsRealHeli()) {
 			if(m_aWheelTimer[CARWHEEL_FRONT_LEFT] <= 0.0f){
 				if(mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier) || acceleration == 0.0f)
 					m_aWheelSpeed[CARWHEEL_FRONT_LEFT] *= 0.95f;
@@ -1400,24 +1400,31 @@ CAutomobile::ProcessControl(void)
 		}else if(GetModelIndex() == MI_RCBARON){
 			FlyingControl(FLIGHT_MODEL_RCPLANE);
 		}else if(IsRealHeli() || bAllCarCheat){
-			// Speed up rotor
-			if(m_aWheelSpeed[1] < 0.22f && !bIsInWater){
-				if(GetModelIndex() == MI_RCRAIDER || GetModelIndex() == MI_RCGOBLIN)
-					m_aWheelSpeed[1] += 0.003f;
-				else
-					m_aWheelSpeed[1] += 0.001f;
-			}
+#ifdef RESTORE_ALLCARSHELI_CHEAT
+			if (bAllCarCheat)
+				FlyingControl(FLIGHT_MODEL_HELI);
+			else
+#endif
+			{
+				// Speed up rotor
+				if (m_aWheelSpeed[1] < 0.22f && !bIsInWater) {
+					if (GetModelIndex() == MI_RCRAIDER || GetModelIndex() == MI_RCGOBLIN)
+						m_aWheelSpeed[1] += 0.003f;
+					else
+						m_aWheelSpeed[1] += 0.001f;
+				}
 
-			// Fly
-			if(m_aWheelSpeed[1] > 0.15f){
-				if(GetModelIndex() == MI_RCRAIDER || GetModelIndex() == MI_RCGOBLIN)
-					FlyingControl(FLIGHT_MODEL_RCHELI);
-				else if(m_nWheelsOnGround < 4 && !(GetModelIndex() == MI_SEASPAR && bTouchingWater) ||
-				        CPad::GetPad(0)->GetAccelerate() != 0 || CPad::GetPad(0)->GetCarGunUpDown() > 1.0f ||
-				        Abs(m_vecMoveSpeed.x) > 0.02f ||
-				        Abs(m_vecMoveSpeed.y) > 0.02f ||
-				        Abs(m_vecMoveSpeed.z) > 0.02f)
-					FlyingControl(FLIGHT_MODEL_HELI);
+				// Fly
+				if (m_aWheelSpeed[1] > 0.15f) {
+					if (GetModelIndex() == MI_RCRAIDER || GetModelIndex() == MI_RCGOBLIN)
+						FlyingControl(FLIGHT_MODEL_RCHELI);
+					else if (m_nWheelsOnGround < 4 && !(GetModelIndex() == MI_SEASPAR && bTouchingWater) ||
+						CPad::GetPad(0)->GetAccelerate() != 0 || CPad::GetPad(0)->GetCarGunUpDown() > 1.0f ||
+						Abs(m_vecMoveSpeed.x) > 0.02f ||
+						Abs(m_vecMoveSpeed.y) > 0.02f ||
+						Abs(m_vecMoveSpeed.z) > 0.02f)
+						FlyingControl(FLIGHT_MODEL_HELI);
+				}
 			}
 
 			// Blade collision
@@ -1489,7 +1496,7 @@ CAutomobile::ProcessControl(void)
 				CMatrix mat;
 				mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_BONNET]));
 				CVector blade = mat.GetRight();
-				blade = GetMatrix() * blade;
+				blade = Multiply3x3(blade, GetMatrix());
 				camDist /= Max(Sqrt(distSq), 0.01f);
 				if(Abs(DotProduct(camDist, blade)) > 0.95f){
 					DMAudio.PlayOneShot(m_audioEntityId, SOUND_31, 0.0f);
