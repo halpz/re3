@@ -226,6 +226,9 @@ enum Config {
 #if !defined(RW_GL3) && defined(_WIN32)
 #define XINPUT
 #endif
+#if defined(RW_GL3) && !defined(__SWITCH__) // TODO
+#define DONT_TRUST_RECOGNIZED_JOYSTICKS // Then we'll only rely on GLFW gamepad DB, and want user to enter Cpntroller->Detect joysticks if his joystick isn't on that list.
+#endif
 #define DETECT_PAD_INPUT_SWITCH // Adds automatic switch of pad related stuff between controller and kb/m
 #define KANGAROO_CHEAT
 #define ALLCARSHELI_CHEAT
