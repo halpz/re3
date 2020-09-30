@@ -87,6 +87,11 @@ long _dwOperatingSystemVersion;
 #include <signal.h>
 #include <errno.h>
 #endif
+
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+char gSelectedJoystickName[128] = "";
+#endif
+
 /*
  *****************************************************************************
  */
@@ -822,31 +827,19 @@ void joysChangeCB(int jid, int event);
 
 bool IsThisJoystickBlacklisted(int i)
 {
+#ifndef DONT_TRUST_RECOGNIZED_JOYSTICKS
+	return false;
+#else
 	if (glfwJoystickIsGamepad(i))
 		return false;
 
 	const char* joyname = glfwGetJoystickName(i);
 
-	// this is just a keyboard and mouse
-	// Microsoft Microsoft® 2.4GHz Transceiver v8.0 Consumer Control
-	// Microsoft Microsoft® 2.4GHz Transceiver v8.0 System Control
-	if (strstr(joyname, "2.4GHz Transceiver"))
-		return true;
-	// COMPANY USB Device System Control
-	// COMPANY USB Device Consumer Control
-	if (strstr(joyname, "COMPANY USB"))
-		return true;
-	// i.e. Synaptics TM2438-005
-	if (strstr(joyname, "Synaptics "))
-		return true;
-	// i.e. ELAN Touchscreen
-	if (strstr(joyname, "ELAN "))
-		return true;
-	// i.e. Primax Electronics, Ltd HP Wireless Keyboard Mouse Kit Consumer Control
-	if (strstr(joyname, "Keyboard"))
-		return true;
+	if (strncmp(joyname, gSelectedJoystickName, sizeof(gSelectedJoystickName)) == 0)
+		return false;
 
-	return false;
+	return true;
+#endif
 }
 
 void _InputInitialiseJoys()
@@ -865,6 +858,7 @@ void _InputInitialiseJoys()
 	if (PSGLOBAL(joy1id) != -1) {
 		int count;
 		glfwGetJoystickButtons(PSGLOBAL(joy1id), &count);
+		strcpy(gSelectedJoystickName, glfwGetJoystickName(PSGLOBAL(joy1id)));
 		ControlsManager.InitDefaultControlConfigJoyPad(count);
 	}
 }
@@ -2070,18 +2064,18 @@ void CapturePad(RwInt32 padID)
 
 void joysChangeCB(int jid, int event)
 {
-	if (event == GLFW_CONNECTED && !IsThisJoystickBlacklisted(jid))
-	{
-		if (PSGLOBAL(joy1id) == -1)
+	if (event == GLFW_CONNECTED && !IsThisJoystickBlacklisted(jid)) {
+		if (PSGLOBAL(joy1id) == -1) {
 			PSGLOBAL(joy1id) = jid;
-		else if (PSGLOBAL(joy2id) == -1)
+			strcpy(gSelectedJoystickName, glfwGetJoystickName(jid));
+		} else if (PSGLOBAL(joy2id) == -1)
 			PSGLOBAL(joy2id) = jid;
-	}
-	else if (event == GLFW_DISCONNECTED)
-	{
-		if (PSGLOBAL(joy1id) == jid)
+
+	} else if (event == GLFW_DISCONNECTED) {
+		if (PSGLOBAL(joy1id) == jid) {
 			PSGLOBAL(joy1id) = -1;
-		else if (PSGLOBAL(joy2id) == jid)
+			strcpy(gSelectedJoystickName, "");
+		} else if (PSGLOBAL(joy2id) == jid)
 			PSGLOBAL(joy2id) = -1;
 	}
 }

@@ -32,6 +32,7 @@
 #include "MBlur.h"
 #include "postfx.h"
 #include "custompipes.h"
+#include "ControllerConfig.h"
 
 #ifndef _WIN32
 #include "assert.h"
@@ -195,6 +196,7 @@ wchar* MultiSamplingDraw(bool *disabled, bool userHovering) {
 			return unicodeTemp;
 	}
 }
+char* multisamplingKey = "MultiSampling";
 #endif
 
 #ifdef MORE_LANGUAGES
@@ -247,6 +249,8 @@ void FreeCamChange(int8 displayedValue)
 	TheCamera.bFreeCam = !!displayedValue;
 	FrontEndMenuManager.SaveSettings();
 }
+const wchar* freeCamText = (wchar*)L"FREE CAM";
+char* freeCamKey = "FreeCam";
 #endif
 
 #ifdef CUTSCENE_BORDERS_SWITCH
@@ -255,6 +259,7 @@ void BorderModeChange(int8 displayedValue)
 	CMenuManager::m_PrefsCutsceneBorders = !!displayedValue;
 	FrontEndMenuManager.SaveSettings();
 }
+char* cutsceneBordersKey = "CutsceneBorders";
 #endif
 
 #ifdef PS2_ALPHA_TEST
@@ -263,11 +268,52 @@ void PS2AlphaTestChange(int8 displayedValue)
 	gPS2alphaTest = !!displayedValue;
 	FrontEndMenuManager.SaveSettings();
 }
+char* ps2alphaKey = "PS2AlphaTest";
 #endif
 
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+const wchar* detectJoystickText = (wchar*)L"Detect Joystick";
+const wchar* detectJoystickExplanation = (wchar*)L"Press any key on your preferred joystick that you would like to use on the game.";
+const wchar* detectedJoystickText = (wchar*)L"Detected Joystick";
+wchar selectedJoystickUnicode[128];
+
+wchar* DetectJoystickDraw(bool* disabled, bool userHovering) {
+	int numButtons;
+	int found = -1;
+	const char *joyname;
+	if (userHovering) {
+		for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++) {
+			if (joyname = glfwGetJoystickName(i)) {
+				const uint8* buttons = glfwGetJoystickButtons(i, &numButtons);
+				for (int j = 0; j < numButtons; j++) {
+					if (buttons[j]) {
+						strcpy(gSelectedJoystickName, joyname);
+						found = i;
+						break;
+					}
+				}
+				if (found != -1)
+					break;
+			}
+		}
+
+		if (found != -1 && PSGLOBAL(joy1id) != found) {
+			if (PSGLOBAL(joy1id) != -1 && PSGLOBAL(joy1id) != found)
+				PSGLOBAL(joy2id) = PSGLOBAL(joy1id);
+			else
+				PSGLOBAL(joy2id) = -1;
+
+			PSGLOBAL(joy1id) = found;
+		}
+	}
+	AsciiToUnicode(gSelectedJoystickName, selectedJoystickUnicode);
+
+	return selectedJoystickUnicode;
+}
+#endif
 
 // Important: Make sure to read the warnings/informations in frontendoption.h!!
-// For texts: Either use TheText.Get, or use wcsdup(wchar version of strdup)
+// If you won't use GXT entry as text, you may want to declare them globally, to not alloc them on each reload. (static declared texts has some problems on Linux etc.)
 void
 CustomFrontendOptionsPopulate(void)
 {
@@ -342,14 +388,14 @@ CustomFrontendOptionsPopulate(void)
 
 #ifdef MULTISAMPLING
 	SWITCH_TO_GRAPHICS_MENU
-	FrontendOptionAddDynamic(TheText.Get("FED_AAS"), MultiSamplingDraw, (int8*)&FrontEndMenuManager.m_nPrefsMSAALevel, MultiSamplingButtonPress, MultiSamplingGoBack, true);
+	FrontendOptionAddDynamic(TheText.Get("FED_AAS"), MultiSamplingDraw, (int8*)&FrontEndMenuManager.m_nPrefsMSAALevel, MultiSamplingButtonPress, MultiSamplingGoBack, multisamplingKey);
 #endif
 
 	CLONE_OPTION(TheText.Get("FED_TRA"), MENUACTION_TRAILS, nil, nil);
 
 #ifdef PS2_ALPHA_TEST
 	SWITCH_TO_GRAPHICS_MENU
-	FrontendOptionAddSelect(TheText.Get("FEM_2PR"), off_on, 2, (int8*)&gPS2alphaTest, false, PS2AlphaTestChange, nil, true);
+	FrontendOptionAddSelect(TheText.Get("FEM_2PR"), off_on, 2, (int8*)&gPS2alphaTest, false, PS2AlphaTestChange, nil, ps2alphaKey);
 #endif
 
 	ADD_RESTORE_DEFAULTS(RestoreDefGraphics)
@@ -365,13 +411,12 @@ CustomFrontendOptionsPopulate(void)
 
 #ifdef CUTSCENE_BORDERS_SWITCH
 	SWITCH_TO_DISPLAY_MENU
-	FrontendOptionAddSelect(TheText.Get("FEM_CSB"), off_on, 2, (int8 *)&CMenuManager::m_PrefsCutsceneBorders, false, BorderModeChange, nil, true);
+	FrontendOptionAddSelect(TheText.Get("FEM_CSB"), off_on, 2, (int8 *)&CMenuManager::m_PrefsCutsceneBorders, false, BorderModeChange, nil, cutsceneBordersKey);
 #endif
 
 #ifdef FREE_CAM
 	SWITCH_TO_DISPLAY_MENU
-	static const wchar* text = (wchar*)wcsdup(L"FREE CAM");
-	FrontendOptionAddSelect(text, off_on, 2, (int8*)&TheCamera.bFreeCam, false, FreeCamChange, nil, true);
+	FrontendOptionAddSelect(freeCamText, off_on, 2, (int8*)&TheCamera.bFreeCam, false, FreeCamChange, nil, freeCamKey);
 #endif
 
 	CLONE_OPTION(TheText.Get("FED_SUB"), MENUACTION_SUBTITLES, nil, nil);
@@ -388,7 +433,21 @@ CustomFrontendOptionsPopulate(void)
 #endif
 
 	ADD_RESTORE_DEFAULTS(RestoreDefDisplay)
-	ADD_BACK
+		ADD_BACK
+
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+	int detectJoystickMenu = FrontendScreenAdd("FET_CON", MENUSPRITE_MAINMENU, MENUPAGE_CONTROLLER_PC, 50, 60, 20,
+		FONT_BANK, MEDIUMTEXT_X_SCALE, MEDIUMTEXT_Y_SCALE, FESCREEN_LEFT_ALIGN, false);
+
+	FrontendOptionSetCursor(detectJoystickMenu, 0);
+
+	FrontendOptionAddBuiltinAction(detectJoystickExplanation, MENUACTION_LABEL, nil, nil);
+	FrontendOptionAddDynamic(detectedJoystickText, DetectJoystickDraw, nil, nil, nil);
+	FrontendOptionAddBackButton(TheText.Get("FEDS_TB"));
+
+	FrontendOptionSetCursor(MENUPAGE_CONTROLLER_PC, 2);
+	FrontendOptionAddRedirect(detectJoystickText, detectJoystickMenu, 1);
+#endif
 }
 #endif
 

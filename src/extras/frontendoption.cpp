@@ -213,10 +213,10 @@ void FrontendOptionAddBuiltinAction(const wchar* leftText, int action, ButtonPre
 	TextCopy(option.leftText, leftText);
 	option.screenOptionOrder = screenOptionOrder;
 	option.returnPrevPageFunc = returnPrevPageFunc;
-	option.save = false;
+	option.save = nil;
 }
 
-void FrontendOptionAddSelect(const wchar* leftText, const wchar** rightTexts, int8 numRightTexts, int8 *var, bool onlyApplyOnEnter, ChangeFunc changeFunc, ReturnPrevPageFunc returnPrevPageFunc, bool save)
+void FrontendOptionAddSelect(const wchar* leftText, const wchar** rightTexts, int8 numRightTexts, int8 *var, bool onlyApplyOnEnter, ChangeFunc changeFunc, ReturnPrevPageFunc returnPrevPageFunc, char* saveName)
 {
 	int8 screenOptionOrder = RegisterNewOption();
 
@@ -229,14 +229,14 @@ void FrontendOptionAddSelect(const wchar* leftText, const wchar** rightTexts, in
 	option.value = var;
 	option.displayedValue = *var;
 	option.lastSavedValue = *var;
-	option.save = save;
+	option.save = saveName;
 	option.onlyApplyOnEnter = onlyApplyOnEnter;
 	option.changeFunc = changeFunc;
 	option.screenOptionOrder = screenOptionOrder;
 	option.returnPrevPageFunc = returnPrevPageFunc;
 }
 
-void FrontendOptionAddDynamic(const wchar* leftText, DrawFunc drawFunc, int8 *var, ButtonPressFunc buttonPressFunc, ReturnPrevPageFunc returnPrevPageFunc, bool save)
+void FrontendOptionAddDynamic(const wchar* leftText, DrawFunc drawFunc, int8 *var, ButtonPressFunc buttonPressFunc, ReturnPrevPageFunc returnPrevPageFunc, char* saveName)
 {
 	int8 screenOptionOrder = RegisterNewOption();
 
@@ -246,7 +246,7 @@ void FrontendOptionAddDynamic(const wchar* leftText, DrawFunc drawFunc, int8 *va
 	option.buttonPressFunc = buttonPressFunc;
 	TextCopy(option.leftText, leftText);
 	option.value = var;
-	option.save = save;
+	option.save = saveName;
 	option.screenOptionOrder = screenOptionOrder;
 	option.returnPrevPageFunc = returnPrevPageFunc;
 }
@@ -263,7 +263,7 @@ void FrontendOptionAddRedirect(const wchar* text, int to, int8 selectedOption, b
 	TextCopy(option.leftText, text);
 	option.screenOptionOrder = screenOptionOrder;
 	option.returnPrevPageFunc = nil;
-	option.save = false;
+	option.save = nil;
 }
 
 void FrontendOptionAddBackButton(const wchar* text, bool fadeIn)
@@ -276,7 +276,7 @@ void FrontendOptionAddBackButton(const wchar* text, bool fadeIn)
 	TextCopy(option.leftText, text);
 	option.screenOptionOrder = screenOptionOrder;
 	option.returnPrevPageFunc = nil;
-	option.save = false;
+	option.save = nil;
 }
 
 uint8 FrontendScreenAdd(const char* gxtKey, eMenuSprites sprite, int prevPage, int columnWidth, int headerHeight, int lineHeight,

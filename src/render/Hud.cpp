@@ -997,7 +997,7 @@ void CHud::Draw()
 			}
 			else {
 				BigMessageAlpha[0] = 0.0f;
-				BigMessageX[0] = SCALE_AND_CENTER_X(-60.0f);
+				BigMessageX[0] = SCREEN_SCALE_FROM_RIGHT(DEFAULT_SCREEN_WIDTH + 60.0f);
 				BigMessageInUse[0] = 1.0f;
 			}
 		}
@@ -1008,7 +1008,7 @@ void CHud::Draw()
 		// WastedBustedText
 		if (m_BigMessage[2][0]) {
 			if (BigMessageInUse[2] != 0.0f) {
-				BigMessageAlpha[2] += (CTimer::GetTimeStepInSeconds() * 255.0f);
+				BigMessageAlpha[2] += (CTimer::GetTimeStepInMilliseconds() * 0.4f);
 
 				if (BigMessageAlpha[2] > 255.0f)
 					BigMessageAlpha[2] = 255.0f;
@@ -1261,7 +1261,7 @@ void CHud::DrawAfterFade()
 				}
 				break;
 			case 2:
-				OddJob2Timer += (20.0f * CTimer::GetTimeStep());
+				OddJob2Timer += CTimer::GetTimeStepInMilliseconds();
 				if (OddJob2Timer > 1500) {
 					OddJob2On = 3;
 				}
@@ -1355,7 +1355,7 @@ void CHud::DrawAfterFade()
 		}
 		else {
 			BigMessageAlpha[1] = 0.0f;
-			BigMessageX[1] = SCALE_AND_CENTER_X(-60.0f);
+			BigMessageX[1] = SCREEN_SCALE_FROM_RIGHT(DEFAULT_SCREEN_WIDTH + 60.0f);
 			BigMessageInUse[1] = 1.0f;
 		}
 	}

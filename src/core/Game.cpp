@@ -297,7 +297,6 @@ bool CGame::InitialiseOnceAfterRW(void)
 #ifdef CUSTOM_FRONTEND_OPTIONS
 	if (numCustomFrontendOptions == 0 && numCustomFrontendScreens == 0) {
 		CustomFrontendOptionsPopulate();
-		FrontEndMenuManager.LoadSettings();
 	}
 #endif
 	return true;
