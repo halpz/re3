@@ -255,6 +255,7 @@ public:
 	void Load(uint8 *buf, uint32 size);
 
 	static CVector TakeWidthIntoAccountForWandering(CPathNode*, uint16);
+	static void TakeWidthIntoAccountForCoors(CPathNode*, CPathNode*, uint16, float*, float*);
 
 	CPathNode *GetNode(int16 index);
 	int16 GetIndex(CPathNode *node);

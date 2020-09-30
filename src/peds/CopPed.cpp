@@ -20,6 +20,8 @@
 #include "Ropes.h"
 #include "Stinger.h"
 
+// --MIAMI: file done except TODOs
+
 CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 {
 	m_nCopType = copType;
@@ -83,10 +85,10 @@ CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 	m_attackTimer = 0;
 	m_bBeatingSuspect = false;
 	m_bStopAndShootDisabledZone = false;
-	field_601 = false;
+	m_bDragsPlayerFromCar = false;
 	m_bZoneDisabled = false;
 	field_628 = -1;
-	m_nRoadblockNode = -1; // TODO(Miami): this will be nil
+	m_nRoadblockVeh = nil;
 	m_bThrowsSpikeTrap = false;
 	m_pRopeEntity = nil;
 	m_fAbseilPos = 0.0f;
@@ -106,7 +108,6 @@ CCopPed::~CCopPed()
 	delete m_pStinger;
 }
 
-// --MIAMI: Done
 // Parameter should always be CPlayerPed, but it seems they considered making civilians arrestable at some point
 void
 CCopPed::SetArrestPlayer(CPed *player)
@@ -155,7 +156,6 @@ CCopPed::SetArrestPlayer(CPed *player)
 		SetCurrentWeapon(WEAPONTYPE_COLT45);
 }
 
-// --MIAMI: Done
 void
 CCopPed::ClearPursuit(void)
 {
@@ -194,7 +194,7 @@ CCopPed::ClearPursuit(void)
 	bNotAllowedToDuck = false;
 	bKindaStayInSamePlace = false;
 	m_bStopAndShootDisabledZone = false;
-	field_601 = false;
+	m_bDragsPlayerFromCar = false;
 	m_bZoneDisabled = false;
 	ClearObjective();
 	if (IsPedInControl()) {
@@ -212,7 +212,6 @@ CCopPed::ClearPursuit(void)
 	}
 }
 
-// --MIAMI: Done
 // TODO: I don't know why they needed that parameter.
 void
 CCopPed::SetPursuit(bool ignoreCopLimit)
@@ -245,7 +244,6 @@ CCopPed::SetPursuit(bool ignoreCopLimit)
 	}
 }
 
-// --MIAMI: Done
 void
 CCopPed::ArrestPlayer(void)
 {
@@ -311,7 +309,6 @@ CCopPed::ScanForCrimes(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CCopPed::CopAI(void)
 {
@@ -465,17 +462,13 @@ CCopPed::CopAI(void)
 						bNotAllowedToDuck = false;
 						bDuckAndCover = false;
 					} else {
-						// TODO(Miami): Roadblock system is still III
 						float dotProd;
-						if (m_nRoadblockNode != -1) {
-							CPathNode *roadBlockNode = &ThePaths.m_pathNodes[CRoadBlocks::RoadBlockNodes[m_nRoadblockNode]];
-							dotProd = DotProduct2D(playerOrHisVeh->GetPosition() - roadBlockNode->GetPosition(), GetPosition() - roadBlockNode->GetPosition());
+						if (m_nRoadblockVeh) {
+							dotProd = DotProduct2D(playerOrHisVeh->GetPosition() - m_nRoadblockVeh->GetPosition(), GetPosition() - m_nRoadblockVeh->GetPosition());
 						} else
 							dotProd = -1.0f;
 
-						if(dotProd >= 0.0f) {
-							bIsPointingGunAt = true;
-						} else {
+						if(dotProd < 0.0f) {
 							if (bIsDucking)
 								ClearDuck();
 							m_bIsDisabledCop = false;
@@ -484,6 +477,8 @@ CCopPed::CopAI(void)
 							bCrouchWhenShooting = false;
 							bDuckAndCover = false;
 							SetPursuit(false);
+						} else {
+							bIsPointingGunAt = true;
 						}
 					}
 				}
@@ -601,7 +596,6 @@ CCopPed::CopAI(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CCopPed::ProcessControl(void)
 {
@@ -822,7 +816,6 @@ CCopPed::ProcessControl(void)
 		field_624 = 0;
 }
 
-// --MIAMI: Done
 void
 CCopPed::ProcessHeliSwat(void)
 {
@@ -858,7 +851,6 @@ CCopPed::ProcessHeliSwat(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CCopPed::ProcessStingerCop(void)
 {

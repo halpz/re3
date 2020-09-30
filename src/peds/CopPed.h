@@ -14,14 +14,14 @@ enum eCopType
 class CCopPed : public CPed
 {
 public:
-	int16 m_nRoadblockNode;
+	CVehicle* m_nRoadblockVeh;
 	float m_fDistanceToTarget;
 	bool m_bIsInPursuit;
 	bool m_bIsDisabledCop;
 	int8 field_5FE;
 	bool m_bBeatingSuspect;
 	bool m_bStopAndShootDisabledZone;
-	bool field_601; // set when police dragging player from car
+	bool m_bDragsPlayerFromCar;
 	bool m_bZoneDisabled;
 	float m_fAbseilPos;
 	eCopType m_nCopType;
