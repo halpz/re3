@@ -357,7 +357,7 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 #ifdef BETTER_ALLCARSAREDODO_CHEAT
 		if (bAltDodoCheat && !IsRealPlane()) {
 			fThrust = pHandling->Transmission.fEngineAcceleration
-				* pHandling->Transmission.nDriveType == '4' ? 4.0f : 2.0f;
+				* (pHandling->Transmission.nDriveType == '4' ? 4.0f : 2.0f);
 			fThrust = 5.0f * Max(fThrust, pFlyingHandling->fThrust);
 			fThrustFallOff = Min(1.0f / pHandling->Transmission.fMaxVelocity, fThrustFallOff);
 			fThrustFallOffBack = -1.0f / pHandling->Transmission.fMaxReverseVelocity;
