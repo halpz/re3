@@ -351,14 +351,25 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		fSteerUD *= -fSteerMult;
 
 		// thrust
+		float fHandlingThrust = pFlyingHandling->fThrust;
+		float fThrustFallOff = pFlyingHandling->fThrustFallOff;
+		float fThrustFallOffBack = pFlyingHandling->fThrustFallOff * 8.0f;
+#ifdef ALT_DODO_CHEAT
+		if (bAltDodoCheat && !IsRealPlane()) {
+			fHandlingThrust = pHandling->Transmission.fEngineAcceleration;
+			fHandlingThrust *= pHandling->Transmission.nDriveType == '4' ? 4 : 2;
+			fThrustFallOff = 0.7f / pHandling->Transmission.fMaxVelocity;
+			fThrustFallOffBack = 0.7f / pHandling->Transmission.fMaxReverseVelocity;
+		}
+#endif // ALT_DOOD_CHEAT
 		float fForwSpeed = DotProduct(GetMoveSpeed(), GetForward());
 		CVector vecTail = GetColModel()->boundingBox.min.y * GetForward();
 		float fThrust = (CPad::GetPad(0)->GetAccelerate() - CPad::GetPad(0)->GetBrake()) / 255.0f;
 		float fThrustAccel;
 		if(fForwSpeed > 0.0f || fThrust > 0.0f)
-			fThrustAccel = (fThrust - pFlyingHandling->fThrustFallOff * fForwSpeed) * pFlyingHandling->fThrust;
+			fThrustAccel = (fThrust - fThrustFallOff * fForwSpeed) * fHandlingThrust;
 		else
-			fThrustAccel = Min(fThrust - 8.0f * pFlyingHandling->fThrustFallOff * fForwSpeed, 0.0f) * pFlyingHandling->fThrust;
+			fThrustAccel = Min(fThrust - fThrustFallOffBack * fForwSpeed, 0.0f) * fHandlingThrust;
 		if(flightModel == FLIGHT_MODEL_PLANE_UNUSED)
 			fThrustAccel *= 0.3f;
 		else if(flightModel == FLIGHT_MODEL_PLANE)

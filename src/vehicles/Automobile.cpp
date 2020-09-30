@@ -1390,7 +1390,7 @@ CAutomobile::ProcessControl(void)
 				m_vecMoveSpeed.Magnitude() > 0.0f && CTimer::GetTimeStep() > 0.0f){
 #ifdef ALT_DODO_CHEAT
 			if (bAltDodoCheat)
-				FlyingControl(FLIGHT_MODEL_PLANE);
+				FlyingControl(FLIGHT_MODEL_PLANE_UNUSED);
 			else
 #endif
 			if(GetModelIndex() == MI_DODO)
