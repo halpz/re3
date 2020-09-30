@@ -400,7 +400,7 @@ public:
 	static bool bCheat4;
 	static bool bCheat5;
 	static bool bCheat8;
-#ifdef ALT_DODO_CHEAT
+#ifdef BETTER_ALLCARSAREDODO_CHEAT
 	static bool bAltDodoCheat;
 #endif
 	static bool bHoverCheat;

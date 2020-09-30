@@ -1375,6 +1375,13 @@ CAutomobile::ProcessControl(void)
 		// Flying
 
 		bool playRotorSound = false;
+		bool isPlane = GetModelIndex() == MI_DODO || bAllDodosCheat;
+#ifdef BETTER_ALLCARSAREDODO_CHEAT
+		isPlane = isPlane || bAltDodoCheat;
+#endif
+#ifdef FIX_BUGS
+		isPlane = isPlane && !IsRealHeli();
+#endif
 		if(GetStatus() != STATUS_PLAYER && GetStatus() != STATUS_PLAYER_REMOTE && GetStatus() != STATUS_PHYSICS){
 			if(IsRealHeli()){
 				bEngineOn = false;
@@ -1383,16 +1390,7 @@ CAutomobile::ProcessControl(void)
 					if(m_aWheelSpeed[1] < 0.154f && m_aWheelSpeed[1] > 0.0044f)
 						playRotorSound = true;
 			}
-		}else if((GetModelIndex() == MI_DODO || CVehicle::bAllDodosCheat) &&
-#ifdef FIX_BUGS
-				!IsRealHeli() &&
-#endif
-				m_vecMoveSpeed.Magnitude() > 0.0f && CTimer::GetTimeStep() > 0.0f){
-#ifdef ALT_DODO_CHEAT
-			if (bAltDodoCheat)
-				FlyingControl(FLIGHT_MODEL_PLANE_UNUSED);
-			else
-#endif
+		}else if(isPlane && m_vecMoveSpeed.Magnitude() > 0.0f && CTimer::GetTimeStep() > 0.0f){
 			if(GetModelIndex() == MI_DODO)
 				FlyingControl(FLIGHT_MODEL_DODO);
 			else

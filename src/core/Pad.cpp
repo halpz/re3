@@ -542,8 +542,8 @@ void AllCarsHeliCheat(void)
 }
 #endif
 
-#ifdef ALT_DODO_CHEAT
-void AltDodoCheat(void)
+#ifdef BETTER_ALLCARSAREDODO_CHEAT
+void AllCarsPlaneCheat(void)
 {
 	wchar* string;
 	if (CVehicle::bAltDodoCheat) {
@@ -1444,10 +1444,10 @@ void CPad::AddToPCCheatString(char c)
 		AllCarsHeliCheat();
 #endif
 
-#ifdef ALT_DODO_CHEAT
-	// "IWANTTOMASTERDODO"
-	if (!_CHEATCMP("ODODRETSAMOTTNAWI"))
-		AltDodoCheat();
+#ifdef BETTER_ALLCARSAREDODO_CHEAT
+	// "CARSAREPLANE"
+	if (!_CHEATCMP("ENALPERASRAC"))
+		AllCarsPlaneCheat();
 #endif
 
 #ifdef WALLCLIMB_CHEAT
@@ -3166,6 +3166,14 @@ void CPad::ResetCheats(void)
 	CVehicle::bCheat4 = false;
 	CVehicle::bCheat5 = false;
 	CVehicle::bCheat8 = false;
+#ifdef RESTORE_ALLCARSHELI_CHEAT
+	bAllCarCheat = false;
+#endif
+#ifdef BETTER_ALLCARSAREDODO_CHEAT
+	CVehicle::bAltDodoCheat = false;
+#endif
+
+
 	gbBlackCars = false;
 	gbPinkCars = false;
 	CCarCtrl::bMadDriversCheat = false;
