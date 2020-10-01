@@ -181,6 +181,7 @@ public:
 	uint8 m_nActiveSamples;
 	uint8 field_4; // unused
 	bool m_bDynamicAcousticModelingStatus;
+	int8 field_6;
 	float m_fSpeedOfSound;
 	bool m_bTimerJustReset;
 	int32 m_nTimer;

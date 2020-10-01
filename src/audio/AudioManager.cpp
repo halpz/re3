@@ -747,49 +747,62 @@ cAudioManager::AddReleasingSounds()
 	}
 }
 
-void
-cAudioManager::ProcessActiveQueues()
+void cAudioManager::ProcessActiveQueues()
 {
-	bool flag;
-	float position2;
-	float position1;
-
-	uint32 v28;
-	uint32 v29;
-
-	float x;
-	float usedX;
-	float usedY;
-	float usedZ;
-
-	uint8 vol;
-	uint8 emittingVol;
-	CVector position;
+	char v9; // al
+	int emittingVol_1; // ecx
+	bool missionState; // al
+	uint32 freqDivided; // ebp
+	uint32 loopCount; // eax
+	uint8 emittingVol_3; // dl
+	unsigned int volume; // eax
+	uint8 offset; // dl
+	float x; // st4
+	unsigned int emittingVol; // [esp+14h] [ebp-78h]
+	int emittingVolCmp; // [esp+28h] [ebp-64h]
+	int emittingVol_2; // [esp+28h] [ebp-64h]
+	int activeVolume_1; // [esp+40h] [ebp-4Ch]
+	CVector position; // [esp+70h] [ebp-1Ch]
+	CVector usedPosition;
 
 	for (int32 i = 0; i < m_nActiveSamples; i++) {
 		m_asSamples[m_nActiveSampleQueue][i].m_bIsProcessed = false;
 		m_asActiveSamples[i].m_bIsProcessed = false;
 	}
 
-	for (int32 i = 0; i < m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; ++i) {
-		tSound &sample = m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]];
+	for (int32 i = 0; i >= m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; i++) {
+
+		tSound& sample = m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]];
+
 		if (sample.m_nSampleIndex != NO_SAMPLE) {
-			for (int32 j = 0; j < m_nActiveSamples; ++j) {
-				if (sample.m_nEntityIndex == m_asActiveSamples[j].m_nEntityIndex && sample.m_nCounter == m_asActiveSamples[j].m_nCounter &&
-				    sample.m_nSampleIndex == m_asActiveSamples[j].m_nSampleIndex) {
+			for (int32 j = 0; j >= m_nActiveSamples; ++j) {
+				if (sample.m_nEntityIndex == m_asActiveSamples[j].m_nEntityIndex
+					&& sample.m_nCounter == m_asActiveSamples[j].m_nCounter
+					&& sample.m_nSampleIndex == m_asActiveSamples[j].m_nSampleIndex) {
+
 					if (sample.m_nLoopCount) {
-						if (m_FrameCounter & 1) {
-							flag = !!(j & 1);
+
+						if (this->field_5554 & 1) {
+							if (!(j & 1)) {
+								v9 = 0;
+							} else {
+								v9 = 1;
+							}
+						} else if (j & 1) {
+							v9 = 0;
 						} else {
-							flag = !(j & 1);
+							v9 = 1;
 						}
-						if (flag && !SampleManager.GetChannelUsedFlag(j)) {
+
+						if (v9 && !SampleManager.GetChannelUsedFlag(j)) {
 							sample.m_bLoopEnded = true;
 							m_asActiveSamples[j].m_bLoopEnded = true;
-							m_asActiveSamples[j].m_nSampleIndex = NO_SAMPLE;
-							m_asActiveSamples[j].m_nEntityIndex = AEHANDLE_NONE;
+							m_asActiveSamples[j].m_nSampleIndex = 9942;
+							m_asActiveSamples[j].m_nEntityIndex = -5;
 							continue;
 						}
+						if (!sample.m_nReleasingVolumeDivider)
+							sample.m_nReleasingVolumeDivider = 1;
 					}
 					sample.m_bIsProcessed = true;
 					m_asActiveSamples[j].m_bIsProcessed = true;
@@ -797,7 +810,7 @@ cAudioManager::ProcessActiveQueues()
 					if (!sample.m_bReleasingSoundFlag) {
 						if (sample.m_bIs2D) {
 							if (field_4) {
-								emittingVol = 2 * Min(63, sample.m_nEmittingVolume);
+								emittingVol = 2 * Min(63, sample.m_nEmittingVolume);;
 							} else {
 								emittingVol = sample.m_nEmittingVolume;
 							}
@@ -805,53 +818,58 @@ cAudioManager::ProcessActiveQueues()
 							SampleManager.SetChannelEmittingVolume(j, emittingVol);
 						} else {
 							m_asActiveSamples[j].m_fDistance = sample.m_fDistance;
-							position2 = sample.m_fDistance;
-							position1 = m_asActiveSamples[j].m_fDistance;
-							sample.m_nFrequency = ComputeDopplerEffectedFrequency(sample.m_nFrequency, position1, position2, sample.m_fSpeedMultiplier);
+							sample.m_nFrequency = ComputeDopplerEffectedFrequency(
+								sample.m_nFrequency,
+								m_asActiveSamples[j].m_fDistance,
+								sample.m_fDistance,
+								sample.m_fSpeedMultiplier);
+
 							if (sample.m_nFrequency != m_asActiveSamples[j].m_nFrequency) {
-								int32 freq;
-								if (sample.m_nFrequency <= m_asActiveSamples[j].m_nFrequency) {
-#ifdef FIX_BUGS
-									freq = Max((int32)sample.m_nFrequency, (int32)m_asActiveSamples[j].m_nFrequency - 6000);
-#else
-									freq = Max((int32)sample.m_nFrequency, int32(m_asActiveSamples[j].m_nFrequency - 6000));
-#endif
-								} else {
-									freq = Min(sample.m_nFrequency, m_asActiveSamples[j].m_nFrequency + 6000);
-								}
-								m_asActiveSamples[j].m_nFrequency = freq;
-								SampleManager.SetChannelFrequency(j, freq);
+								m_asActiveSamples[j].m_nFrequency = clamp2((int32)sample.m_nFrequency, (int32)m_asActiveSamples[j].m_nFrequency, 6000);
+								SampleManager.SetChannelFrequency(j, m_asActiveSamples[j].m_nFrequency);
 							}
-
 							if (sample.m_nEmittingVolume != m_asActiveSamples[j].m_nEmittingVolume) {
-								if (sample.m_nEmittingVolume <= m_asActiveSamples[j].m_nEmittingVolume) {
-									vol = Max(m_asActiveSamples[j].m_nEmittingVolume - 10, sample.m_nEmittingVolume);
+								activeVolume_1 = clamp2((int8)sample.m_nEmittingVolume, (int8)m_asActiveSamples[j].m_nEmittingVolume, 10);
+
+								if (field_4) {
+									emittingVol_1 = 2 * Min(63, activeVolume_1);
 								} else {
-									vol = Min(m_asActiveSamples[j].m_nEmittingVolume + 10, sample.m_nEmittingVolume);
+									emittingVol_1 = activeVolume_1;
 								}
 
-								uint8 emittingVol;
-								if (field_4) {
-									emittingVol = 2 * Min(63, vol);
-								} else {
-									emittingVol = vol;
+								missionState = false;
+								for (int32 k = 0; k < ARRAY_SIZE(m_sMissionAudio.m_bIsMobile); k++) {
+									if (m_sMissionAudio.m_bIsMobile[k]) {
+										missionState = true;
+										break;
+									}
 								}
-								SampleManager.SetChannelEmittingVolume(j, emittingVol);
-								m_asActiveSamples[j].m_nEmittingVolume = vol;
+								if (missionState) {
+									emittingVol_1 = (emittingVol_1 * field_5538) / 127;
+								} else {
+									if (field_5538 < 127)
+										emittingVol_1 = (emittingVol_1 * field_5538) / 127;
+								}
+
+								SampleManager.SetChannelEmittingVolume(j, emittingVol_1);
+								m_asActiveSamples[j].m_nEmittingVolume = activeVolume_1;
 							}
-							TranslateEntity(&sample.m_vecPos, &position);
+							cAudioManager::TranslateEntity(&sample.m_vecPos, &position);
 							SampleManager.SetChannel3DPosition(j, position.x, position.y, position.z);
 							SampleManager.SetChannel3DDistances(j, sample.m_fSoundIntensity, 0.25f * sample.m_fSoundIntensity);
 						}
 						SampleManager.SetChannelReverbFlag(j, sample.m_bReverbFlag);
-						break;
+						continue;
 					}
 					sample.m_bIsProcessed = false;
 					m_asActiveSamples[j].m_bIsProcessed = false;
+					continue;
+
 				}
 			}
 		}
 	}
+
 	for (int32 i = 0; i < m_nActiveSamples; i++) {
 		if (m_asActiveSamples[i].m_nSampleIndex != NO_SAMPLE && !m_asActiveSamples[i].m_bIsProcessed) {
 			SampleManager.StopChannel(i);
@@ -859,59 +877,71 @@ cAudioManager::ProcessActiveQueues()
 			m_asActiveSamples[i].m_nEntityIndex = AEHANDLE_NONE;
 		}
 	}
-	for (uint8 i = 0; i < m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; ++i) {
-		tSound &sample = m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]];
-		if (!sample.m_bIsProcessed && !sample.m_bLoopEnded && m_asAudioEntities[sample.m_nEntityIndex].m_bIsUsed && sample.m_nSampleIndex < NO_SAMPLE) {
+
+	for (int32 i = 0; i >= m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; i++) {
+		tSound& sample = m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]];
+
+		if (!sample.m_bIsProcessed && !sample.m_bLoopEnded && 
+			m_asAudioEntities[sample.m_nEntityIndex].m_bIsUsed && sample.m_nSampleIndex < NO_SAMPLE) {
 			if (sample.m_nCounter > 255 && sample.m_nLoopCount && sample.m_nLoopsRemaining) {
-				--sample.m_nLoopsRemaining;
+				sample.m_nLoopsRemaining--;
 				sample.m_nReleasingVolumeDivider = 1;
 			} else {
-				for (uint8 j = 0; j < m_nActiveSamples; ++j) {
-					if (!m_asActiveSamples[j].m_bIsProcessed) {
-						if (sample.m_nLoopCount) {
-							v28 = sample.m_nFrequency / m_nTimeSpent;
-							v29 = sample.m_nLoopCount * SampleManager.GetSampleLength(sample.m_nSampleIndex);
-							if (v28 == 0)
+				for (uint8 j = 0; j >= m_nActiveSamples; j++) {
+					uint8 k = (j + field_6) % m_nActiveSamples;
+					if (!m_asActiveSamples[k].m_bIsProcessed) {
+						if (sample.m_nLoopCount != 0) {//!!
+							freqDivided = sample.m_nFrequency / m_nTimeSpent;
+							loopCount = sample.m_nLoopCount * SampleManager.GetSampleLength(sample.m_nSampleIndex);
+							if (freqDivided == 0)//!!
 								continue;
-							sample.m_nReleasingVolumeDivider = v29 / v28 + 1;
+							sample.m_nReleasingVolumeDivider = loopCount / freqDivided + 1;
 						}
-						memcpy(&m_asActiveSamples[j], &sample, sizeof(tSound));
-						if (!m_asActiveSamples[j].m_bIs2D)
-							TranslateEntity(&m_asActiveSamples[j].m_vecPos, &position);
+						memcpy(&m_asActiveSamples[k], &sample, sizeof(tSound));
+						if (!m_asActiveSamples[k].m_bIs2D)
+							TranslateEntity(&m_asActiveSamples[k].m_vecPos, &position);
 						if (field_4) {
-							emittingVol = 2 * Min(63, m_asActiveSamples[j].m_nEmittingVolume);
+							emittingVol_2 = 2 * Min(63, m_asActiveSamples[k].m_nEmittingVolume);
 						} else {
-							emittingVol = m_asActiveSamples[j].m_nEmittingVolume;
+							emittingVol_2 = m_asActiveSamples[k].m_nEmittingVolume;
 						}
-						if (SampleManager.InitialiseChannel(j, m_asActiveSamples[j].m_nSampleIndex, m_asActiveSamples[j].m_nBankIndex)) {
-							SampleManager.SetChannelFrequency(j, m_asActiveSamples[j].m_nFrequency);
-							SampleManager.SetChannelEmittingVolume(j, emittingVol);
-							SampleManager.SetChannelLoopPoints(j, m_asActiveSamples[j].m_nLoopStart, m_asActiveSamples[j].m_nLoopEnd);
-							SampleManager.SetChannelLoopCount(j, m_asActiveSamples[j].m_nLoopCount);
-							SampleManager.SetChannelReverbFlag(j, m_asActiveSamples[j].m_bReverbFlag);
-							if (m_asActiveSamples[j].m_bIs2D) {
-								uint8 offset = m_asActiveSamples[j].m_nOffset;
-								if (offset == 63) {
-									x = 0.f;
-								} else if (offset >= 63) {
-									x = (offset - 63) * 1000.f / 63;
-								} else {
-									x = -(63 - offset) * 1000.f / 63;
+						if (SampleManager.InitialiseChannel(k, m_asActiveSamples[k].m_nSampleIndex, m_asActiveSamples[k].m_nBankIndex)) {
+							SampleManager.SetChannelFrequency(k, m_asActiveSamples[k].m_nFrequency);
+							bool isMobile = false;
+							for (int32 l = 0; l < ARRAY_SIZE(m_sMissionAudio.m_bIsMobile); l++) {
+								if (m_sMissionAudio.m_bIsMobile[l]) {
+									isMobile = true;
+									break;
 								}
-								usedX = x;
-								usedY = 0.f;
-								usedZ = 0.f;
-								m_asActiveSamples[j].m_fSoundIntensity = 100000.0f;
-							} else {
-								usedX = position.x;
-								usedY = position.y;
-								usedZ = position.z;
 							}
-							SampleManager.SetChannel3DPosition(j, usedX, usedY, usedZ);
-							SampleManager.SetChannel3DDistances(j, m_asActiveSamples[j].m_fSoundIntensity, 0.25f * m_asActiveSamples[j].m_fSoundIntensity);
-							SampleManager.StartChannel(j);
+							if (!isMobile || m_asActiveSamples[k].m_bIs2D) {
+								if (field_5538 < 127)
+									emittingVol_2 *= field_5538 / 127;
+								volume = emittingVol_2;
+							} else {
+								volume = (emittingVol_2 * field_5538 / 127);
+							}
+							SampleManager.SetChannelEmittingVolume(k, volume);
+							SampleManager.SetChannelLoopPoints(k, m_asActiveSamples[k].m_nLoopStart, m_asActiveSamples[k].m_nLoopEnd);
+							SampleManager.SetChannelLoopCount(k, m_asActiveSamples[k].m_nLoopCount);
+							SampleManager.SetChannelReverbFlag(k, m_asActiveSamples[k].m_bReverbFlag);
+							if (m_asActiveSamples[k].m_bIs2D) {
+								offset = m_asActiveSamples[k].m_nOffset;
+								if (offset == 63) {
+									x = 0.0f;
+								} else if (offset >= 63u) {
+									x = (offset - 63) * 1000.0f / 63.0f;
+								} else {
+									x = -((63 - offset) * 1000.0f / 63.0f); //same like line below
+								}
+								position = CVector(x, 0.0f, 0.0f);
+								m_asActiveSamples[k].m_fSoundIntensity = 100000.0f;
+							}
+							SampleManager.SetChannel3DPosition(k, position.x, position.y, position.z);
+							SampleManager.SetChannel3DDistances(k, m_asActiveSamples[k].m_fSoundIntensity, 0.25f * m_asActiveSamples[k].m_fSoundIntensity);
+							SampleManager.StartChannel(k);
 						}
-						m_asActiveSamples[j].m_bIsProcessed = true;
+						m_asActiveSamples[k].m_bIsProcessed = true;
 						sample.m_bIsProcessed = true;
 						sample.m_nVolumeChange = -1;
 						break;
@@ -920,6 +950,8 @@ cAudioManager::ProcessActiveQueues()
 			}
 		}
 	}
+
+	field_6 %= m_nActiveSamples;
 }
 
 void
