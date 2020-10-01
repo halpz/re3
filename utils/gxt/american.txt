@@ -8002,6 +8002,26 @@ HIGH
 [FEM_2PR]
 PS2 ALPHA TEST
 
+[FEC_FRC]
+FREE CAM
+
+{ Linux joy detection }
+[FEC_JOD]
+DETECT JOYSTICK
+
+[FEC_JPR]
+Press any key on the joystick of your choice that you want to use on the game, and it will be selected.
+
+[FEC_JDE]
+Detected joystick
+
+{ mission restart }
+[FET_RMS]
+REPLAY MISSION
+
+[FESZ_RM]
+RETRY?
+
 { end of file }
 
 [DUMMY]
