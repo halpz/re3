@@ -4,7 +4,6 @@
 #include <pthread.h>
 #include <signal.h>
 #include <semaphore.h>
-#include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/time.h>
@@ -22,30 +21,6 @@
 #define CDDEBUG(f, ...)   debug ("%s: " f "\n", "cdvd_stream", ## __VA_ARGS__)
 #define CDTRACE(f, ...)   printf("%s: " f "\n", "cdvd_stream", ## __VA_ARGS__)
 
-#ifdef __APPLE__
-#define COMPAT_SEM_T sem_t *
-int compat_sem_init(sem_t **ptr, __attribute__((unused)) int x, __attribute__((unused)) int y) {
-  *ptr = sem_open("/semaphore", O_CREAT, 0644, 1);
-  return *ptr == SEM_FAILED ? -1 : 0;
-}
-int compat_sem_post(sem_t **sem) {
-  return sem_post(*sem);
-}
-int compat_sem_wait(sem_t **sem) {
-  return sem_wait(*sem);
-}
-int compat_sem_destroy(sem_t **sem, const char * name) {
-  sem_close(*sem);
-  sem_unlink(name);
-}
-#else
-#define COMPAT_SEM_T sem_t
-#define compat_sem_post sem_post
-#define compat_sem_destroy(x, y) sem_destroy(x)
-#define compat_sem_init sem_init
-#define compat_sem_wait sem_wait
-#endif
-
 // #define ONE_THREAD_PER_CHANNEL // Don't use if you're not on SSD/Flash. (Also you may want to benefit from this via using all channels in Streaming.cpp)
 
 bool flushStream[MAX_CDCHANNELS];
@@ -60,11 +35,11 @@ struct CdReadInfo
 	int32 nStatus;
 #ifdef ONE_THREAD_PER_CHANNEL
 	int8 nThreadStatus; // 0: created 1:initalized 2:abort now
-  pthread_t pChannelThread;
-  COMPAT_SEM_T pStartSemaphore;
+    pthread_t pChannelThread;
+    sem_t *pStartSemaphore;
 #endif
-  COMPAT_SEM_T pDoneSemaphore; // used for CdStreamSync
-  int32 hFile;
+	sem_t *pDoneSemaphore; // used for CdStreamSync
+	int32 hFile;
 };
 
 char gCdImageNames[MAX_CDIMAGES+1][64];
@@ -76,7 +51,7 @@ char *gImgNames[MAX_CDIMAGES];
 
 #ifndef ONE_THREAD_PER_CHANNEL
 pthread_t _gCdStreamThread;
-COMPAT_SEM_T gCdStreamSema; // released when we have new thing to read(so channel is set)
+sem_t *gCdStreamSema; // released when we have new thing to read(so channel is set)
 int8 gCdStreamThreadStatus; // 0: created 1:initalized 2:abort now
 Queue gChannelRequestQ;
 bool _gbCdStreamOverlapped;
@@ -101,11 +76,11 @@ CdStreamInitThread(void)
 	gChannelRequestQ.tail = 0;
 	gChannelRequestQ.size = gNumChannels + 1;
 	ASSERT(gChannelRequestQ.items != nil );
-    status = compat_sem_init(&gCdStreamSema, 0, 0);
+  gCdStreamSema = sem_open("/semaphore_cd_stream", O_CREAT, 0644, 1);
 #endif
 
 
-	if (status == -1) {
+	if (gCdStreamSema == SEM_FAILED) {
 		CDTRACE("failed to create stream semaphore");
 		ASSERT(0);
 		return;
@@ -116,18 +91,18 @@ CdStreamInitThread(void)
 	{
 		for ( int32 i = 0; i < gNumChannels; i++ )
 		{
-		    status = compat_sem_init(&gpReadInfo[i].pDoneSemaphore, 0, 0);
+      gpReadInfo[i].pDoneSemaphore = sem_open("/semaphore_done", O_CREAT, 0644, 1);
 
-			if (status == -1)
+      if (gpReadInfo[i].pDoneSemaphore == SEM_FAILED)
 			{
 				CDTRACE("failed to create sync semaphore");
 				ASSERT(0);
 				return;
 			}
 #ifdef ONE_THREAD_PER_CHANNEL
-		    status = compat_sem_init(&gpReadInfo[i].pStartSemaphore, 0, 0);
+      gpReadInfo[i].pStartSemaphore = sem_open("/semaphore_start", O_CREAT, 0644, 1);
 
-			if (status == -1)
+      if (gpReadInfo[i].pStartSemaphore == SEM_FAILED)
 			{
 				CDTRACE("failed to create start semaphore");
 				ASSERT(0);
@@ -160,7 +135,7 @@ CdStreamInitThread(void)
         return;
     }
 #else
-    debug("Using seperate streaming threads for each channel\n");
+    debug("Using separate streaming threads for each channel\n");
 #endif
 }
 
@@ -239,13 +214,13 @@ CdStreamShutdown(void)
     // Destroying semaphores and free(gpReadInfo) will be done at threads
 #ifndef ONE_THREAD_PER_CHANNEL
     gCdStreamThreadStatus = 2;
-    compat_sem_post(&gCdStreamSema);
+    sem_post(gCdStreamSema);
 #endif
 
 #ifdef ONE_THREAD_PER_CHANNEL
     for ( int32 i = 0; i < gNumChannels; i++ ) {
         gpReadInfo[i].nThreadStatus = 2;
-        compat_sem_post(&gpReadInfo[i].pStartSemaphore);
+        sem_post(&gpReadInfo[i].pStartSemaphore);
     }
 #endif
 }
@@ -279,10 +254,10 @@ CdStreamRead(int32 channel, void *buffer, uint32 offset, uint32 size)
 
 #ifndef ONE_THREAD_PER_CHANNEL
     AddToQueue(&gChannelRequestQ, channel);
-    if ( compat_sem_post(&gCdStreamSema) != 0 )
+    if ( sem_post(gCdStreamSema) != 0 )
         printf("Signal Sema Error\n");
 #else
-    if ( compat_sem_post(&gpReadInfo[channel].pStartSemaphore) != 0 )
+    if ( sem_post(&gpReadInfo[channel].pStartSemaphore) != 0 )
         printf("Signal Sema Error\n");
 #endif
 
@@ -357,7 +332,7 @@ CdStreamSync(int32 channel)
     {
         pChannel->bLocked = true;
 
-        compat_sem_wait(&pChannel->pDoneSemaphore);
+        sem_wait(pChannel->pDoneSemaphore);
     }
 
     pChannel->bReading = false;
@@ -408,12 +383,12 @@ void *CdStreamThread(void *param)
 
 #ifndef ONE_THREAD_PER_CHANNEL
     while (gCdStreamThreadStatus != 2) {
-		compat_sem_wait(&gCdStreamSema);
+		sem_wait(gCdStreamSema);
         int32 channel = GetFirstInQueue(&gChannelRequestQ);
 #else
     int channel = *((int*)param);
     while (gpReadInfo[channel].nThreadStatus != 2){
-		compat_sem_wait(&gpReadInfo[channel].pStartSemaphore);
+		sem_wait(&gpReadInfo[channel].pStartSemaphore);
 #endif
 		ASSERT( channel < gNumChannels );
 
@@ -462,22 +437,26 @@ void *CdStreamThread(void *param)
 
 		if ( pChannel->bLocked )
 		{
-			compat_sem_post(&pChannel->pDoneSemaphore);
+			sem_post(pChannel->pDoneSemaphore);
 		}
 		pChannel->bReading = false;
 	}
 #ifndef ONE_THREAD_PER_CHANNEL
-	for ( int32 i = 0; i < gNumChannels; i++ )
-	{
-		compat_sem_destroy(&gpReadInfo[i].pDoneSemaphore, "/semaphoredone");
-	}
-	compat_sem_destroy(&gCdStreamSema, "/semaphore");
-	free(gChannelRequestQ.items);
+    for ( int32 i = 0; i < gNumChannels; i++ )
+    {
+      sem_close(gpReadInfo[i].pDoneSemaphore);
+      sem_unlink("/semaphore_done");
+    }
+    sem_close(gCdStreamSema);
+    sem_unlink("/semaphore_cd_stream");
+    free(gChannelRequestQ.items);
 #else
-	compat_sem_destroy(&gpReadInfo[channel].pStartSemaphore, "/semaphorestart");
-	compat_sem_destroy(&gpReadInfo[channel].pDoneSemaphore, "/semaphoredone");
+  sem_close(gpReadInfo[channel].pStartSemaphore);
+  sem_unlink("/semaphore_start");
+  sem_close(gpReadInfo[channel].pDoneSemaphore);
+  sem_unlink("/semaphore_done");
 #endif
-	free(gpReadInfo);
+    free(gpReadInfo);
 	pthread_exit(nil);
 }
 
