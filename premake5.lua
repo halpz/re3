@@ -87,8 +87,8 @@ workspace "reVC"
 		
 	filter { "system:macosx" }
 		platforms {
-			"macosx-amd64-librw_gl3_glfw-oal",
 			"macosx-arm64-librw_gl3_glfw-oal",
+			"macosx-amd64-librw_gl3_glfw-oal",
 		}
 
 	filter "configurations:Debug"
