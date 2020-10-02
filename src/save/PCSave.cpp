@@ -11,6 +11,8 @@
 #include "PCSave.h"
 #include "Text.h"
 
+// --MIAMI: file done
+
 const char* _psGetUserFilesFolder();
 
 C_PcSave PcSaveHelper;
@@ -18,7 +20,7 @@ C_PcSave PcSaveHelper;
 void
 C_PcSave::SetSaveDirectory(const char *path)
 {
-	sprintf(DefaultPCSaveFileName, "%s\\%s", path, "GTA3sf");
+	sprintf(DefaultPCSaveFileName, "%s\\%s", path, "GTAVCsf");
 }
 
 bool

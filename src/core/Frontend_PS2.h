@@ -161,6 +161,9 @@ public:
 	static CONTRCONFIG m_PrefsControllerConfig;
 	static bool m_PrefsUseVibration;
 
+#ifdef CUTSCENE_BORDERS_SWITCH
+	static bool m_PrefsCutsceneBorders;
+#endif
 
 #ifdef GTA_PC
 	bool m_bQuitGameNoCD;
