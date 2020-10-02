@@ -105,7 +105,7 @@ void CCarGenerator::DoInternalProcessing()
 			debug("CCarGenerator::DoInternalProcessing - can't find ground z for new car x = %f y = %f \n", m_vecPos.x, m_vecPos.y);
 			return;
 		}
-		if (CModelInfo::GetModelInfo(mi)->GetModelType() == VEHICLE_TYPE_BIKE) {
+		if (((CVehicleModelInfo*)CModelInfo::GetModelInfo(mi))->m_vehicleType == VEHICLE_TYPE_BIKE) {
 			CBike* pBike = new CBike(mi, PARKED_VEHICLE);
 			pBike->bIsStanding = true;
 			pVehicle = pBike;
