@@ -510,7 +510,7 @@ cAudioManager::ComputePan(float dist, CVector *vec)
 	return Min(107, PanTable[index] + 63);
 }
 
-int32
+uint32
 cAudioManager::ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2, float speedMultiplier) const
 {
 	uint32 newFreq = oldFreq;
@@ -519,11 +519,7 @@ cAudioManager::ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, 
 		if (dist != 0.0f) {
 			float speedOfSource = (dist / m_nTimeSpent) * speedMultiplier;
 			if (m_fSpeedOfSound > Abs(speedOfSource)) {
-				if (speedOfSource < 0.0f) {
-					speedOfSource = Max(speedOfSource, -1.5f);
-				} else {
-					speedOfSource = Min(speedOfSource, 1.5f);
-				}
+				speedOfSource = clamp2(speedOfSource, 0.0f, 1.5f);
 				newFreq = (oldFreq * m_fSpeedOfSound) / (speedOfSource + m_fSpeedOfSound);
 			}
 		}
@@ -952,7 +948,7 @@ cAudioManager::ClearRequestedQueue()
 void
 cAudioManager::ClearActiveSamples()
 {
-	for (int32 i = 0; i < m_nActiveSamples; i++) {
+	for (uint8 i = 0; i < m_nActiveSamples; i++) {
 		m_asActiveSamples[i].m_nEntityIndex = AEHANDLE_NONE;
 		m_asActiveSamples[i].m_nCounter = 0;
 		m_asActiveSamples[i].m_nSampleIndex = NO_SAMPLE;

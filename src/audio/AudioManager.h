@@ -250,14 +250,14 @@ public:
 
 	void CalculateDistance(bool &condition, float dist); //done
 	bool CheckForAnAudioFileOnCD() const;
-	void ClearActiveSamples();
-	void ClearMissionAudio(uint8 slot);
+	void ClearActiveSamples(); //done
+	void ClearMissionAudio(uint8 slot); //done
 	void ClearRequestedQueue();
-	int32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2,
-	                                      float speedMultiplier) const;
+	uint32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2,
+	                                      float speedMultiplier) const; //done
 	int32 ComputePan(float, CVector *);
 	uint8 ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance) const;
-	int32 CreateEntity(eAudioType type, void *entity);
+	int32 CreateEntity(eAudioType type, void *entity); //done
 
 	void DestroyAllGameCreatedEntities();
 	void DestroyEntity(int32 id);
@@ -311,7 +311,7 @@ public:
 	void PreloadMissionAudio(uint8 slot, Const char *name);
 	void PreTerminateGameSpecificShutdown(); //done
 	/// processX - main logic of adding new sounds
-	void ProcessActiveQueues();
+	void ProcessActiveQueues(); //done
 	bool ProcessAirBrakes(cVehicleParams *params);
 	bool ProcessBoatEngine(cVehicleParams *params);
 	bool ProcessBoatMovingOverWater(cVehicleParams *params);
