@@ -411,19 +411,16 @@ cAudioManager::SetDynamicAcousticModelingStatus(uint8 status)
 	m_bDynamicAcousticModelingStatus = status!=0;
 }
 
-//bool
-//cAudioManager::CheckForAnAudioFileOnCD() const
-//{
-//	return SampleManager.CheckForAnAudioFileOnCD();
-//}
+bool
+cAudioManager::CheckForAnAudioFileOnCD() const
+{
+	return SampleManager.CheckForAnAudioFileOnCD();
+}
 
 uint8
 cAudioManager::GetCDAudioDriveLetter() const
 {
-	if (m_bIsInitialised)
-		return SampleManager.GetCDAudioDriveLetter();
-
-	return 0;
+	return SampleManager.GetCDAudioDriveLetter();
 }
 
 bool
@@ -945,8 +942,6 @@ void
 cAudioManager::ClearRequestedQueue()
 {
 	for (int32 i = 0; i < m_nActiveSamples; i++) {
-		if (i >= m_nActiveSamples)
-			break;
 		m_abSampleQueueIndexTable[m_nActiveSampleQueue][i] = m_nActiveSamples;
 	}
 	m_SampleRequestQueuesStatus[m_nActiveSampleQueue] = 0;
@@ -978,7 +973,7 @@ cAudioManager::ClearActiveSamples()
 		m_asActiveSamples[i].m_nCalculatedVolume = 0;
 		m_asActiveSamples[i].m_nReleasingVolumeDivider = 0;
 		m_asActiveSamples[i].m_nVolumeChange = -1;
-		m_asActiveSamples[i].m_vecPos = {0.0f, 0.0f, 0.0f};
+		m_asActiveSamples[i].m_vecPos = CVector(0.0f, 0.0f, 0.0f);
 		m_asActiveSamples[i].m_bReverbFlag = false;
 		m_asActiveSamples[i].m_nLoopsRemaining = 0;
 		m_asActiveSamples[i].m_bRequireReflection = false;

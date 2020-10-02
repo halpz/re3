@@ -171,7 +171,7 @@ cDMAudio::SetDynamicAcousticModelingStatus(uint8 status)
 bool
 cDMAudio::CheckForAnAudioFileOnCD(void)
 {
-	return 0; //exists only in android version, and used only in symbols
+	return AudioManager.CheckForAnAudioFileOnCD();
 }
 
 char

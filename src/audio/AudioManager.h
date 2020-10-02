@@ -248,7 +248,7 @@ public:
 	void AgeCrimes();                                                                                                     // done (inlined in vc)
 
 	void CalculateDistance(bool &condition, float dist);                                                                   // done
-	//bool CheckForAnAudioFileOnCD() const;                                                                                // not exists in v1.0 and android
+	bool CheckForAnAudioFileOnCD() const;                                                                                  // done
 	void ClearActiveSamples();                                                                                             // done
 	void ClearMissionAudio(uint8 slot);                                                                                    // done
 	void ClearRequestedQueue();                                                                                            // done (inlined in vc)
