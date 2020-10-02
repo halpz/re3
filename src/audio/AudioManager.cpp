@@ -411,11 +411,11 @@ cAudioManager::SetDynamicAcousticModelingStatus(uint8 status)
 	m_bDynamicAcousticModelingStatus = status!=0;
 }
 
-bool
-cAudioManager::CheckForAnAudioFileOnCD() const
-{
-	return SampleManager.CheckForAnAudioFileOnCD();
-}
+//bool
+//cAudioManager::CheckForAnAudioFileOnCD() const
+//{
+//	return SampleManager.CheckForAnAudioFileOnCD();
+//}
 
 uint8
 cAudioManager::GetCDAudioDriveLetter() const
@@ -483,12 +483,18 @@ uint8
 cAudioManager::ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance) const
 {
 	float newSoundIntensity;
+	float newEmittingVolume;
+
 	if (soundIntensity <= 0.0f)
 		return 0;
+
 	newSoundIntensity = soundIntensity / 5.0f;
-	if (newSoundIntensity <= distance)
-		emittingVolume = sq((soundIntensity - newSoundIntensity - (distance - newSoundIntensity)) / (soundIntensity - newSoundIntensity)) * emittingVolume;
-	return emittingVolume;
+	if (newSoundIntensity > distance)
+		return emittingVolume;
+
+	newEmittingVolume = emittingVolume * SQR((soundIntensity - newSoundIntensity - (distance - newSoundIntensity))
+		/ (soundIntensity - newSoundIntensity));
+	return Min(127u, newEmittingVolume);
 }
 
 void
@@ -500,10 +506,9 @@ cAudioManager::TranslateEntity(Const CVector *in, CVector *out) const
 int32
 cAudioManager::ComputePan(float dist, CVector *vec)
 {
-	const uint8 PanTable[64] = {0,  3,  8,  12, 16, 19, 22, 24, 26, 28, 30, 31, 33, 34, 36, 37, 39, 40, 41, 42, 44, 45, 46, 47, 48, 49, 49, 50, 51, 52, 53, 53,
-	                            54, 55, 55, 56, 56, 57, 57, 58, 58, 58, 59, 59, 59, 60, 60, 61, 61, 61, 61, 62, 62, 62, 62, 62, 63, 63, 63, 63, 63, 63, 63, 63};
-
-	int32 index = Min(63, Abs(vec->x / (dist / 64.f)));
+	const uint8 PanTable[64] = { 0,  3,  8, 12, 16, 19, 22, 24, 26, 28, 30, 31, 33, 34, 36, 37, 39, 40, 41, 42, 44, 45, 46, 47, 48, 49, 49, 50, 51, 52, 53, 53,
+								54, 55, 55, 56, 56, 57, 57, 58, 58, 58, 59, 59, 59, 60, 60, 61, 61, 61, 61, 62, 62, 62, 62, 62, 63, 63, 63, 63, 63, 63, 63, 63};
+	int32 index = Min(63, Abs(int32(vec->x / (dist / 64.f))));
 
 	if (vec->x > 0.f)
 		return Max(20, 63 - PanTable[index]);
@@ -940,6 +945,8 @@ void
 cAudioManager::ClearRequestedQueue()
 {
 	for (int32 i = 0; i < m_nActiveSamples; i++) {
+		if (i >= m_nActiveSamples)
+			break;
 		m_abSampleQueueIndexTable[m_nActiveSampleQueue][i] = m_nActiveSamples;
 	}
 	m_SampleRequestQueuesStatus[m_nActiveSampleQueue] = 0;

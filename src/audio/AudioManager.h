@@ -247,16 +247,15 @@ public:
 	void AddSampleToRequestedQueue();                                                                                     // done
 	void AgeCrimes();                                                                                                     // done (inlined in vc)
 
-	void CalculateDistance(bool &condition, float dist); // done
-	bool CheckForAnAudioFileOnCD() const;
-	void ClearActiveSamples(); //done
-	void ClearMissionAudio(uint8 slot); //done
-	void ClearRequestedQueue();
-	uint32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2,
-	                                      float speedMultiplier) const; //done
-	int32 ComputePan(float, CVector *);
-	uint8 ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance) const;
-	int32 CreateEntity(eAudioType type, void *entity); //done
+	void CalculateDistance(bool &condition, float dist);                                                                   // done
+	//bool CheckForAnAudioFileOnCD() const;                                                                                // not exists in v1.0 and android
+	void ClearActiveSamples();                                                                                             // done
+	void ClearMissionAudio(uint8 slot);                                                                                    // done
+	void ClearRequestedQueue();                                                                                            // done (inlined in vc)
+	uint32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2, float speedMultiplier) const; // done
+	int32 ComputePan(float, CVector *);                                                                                    // done
+	uint8 ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance) const;                                 // done
+	int32 CreateEntity(eAudioType type, void *entity);                                                                     // done
 
 	void DestroyAllGameCreatedEntities();
 	void DestroyEntity(int32 id); //done (inlined in vc)
@@ -290,7 +289,7 @@ public:
 	void Initialise(); // done
 	void InitialisePoliceRadio();
 	void InitialisePoliceRadioZones();
-	void InterrogateAudioEntities();
+	void InterrogateAudioEntities(); // done
 	bool IsAudioInitialised() const;
 	bool IsMissionAudioSampleFinished(uint8 slot);
 	bool IsMP3RadioChannelAvailable() const; // done
