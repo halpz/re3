@@ -163,7 +163,7 @@ CdStreamInit(int32 numChannels)
 		debug("Using no buffered loading for streaming\n");
 	}
 */
-	void *pBuffer = (void *)RwMallocAlign(CDSTREAM_SECTOR_SIZE, fsInfo.f_bsize);
+	void *pBuffer = (void *)RwMallocAlign(CDSTREAM_SECTOR_SIZE, (RwUInt32)fsInfo.f_bsize);
 	ASSERT( pBuffer != nil );
 
 	gNumImages = 0;
@@ -205,7 +205,7 @@ GetGTA3ImgSize(void)
         return 0;
     }
 ok:
-	return statbuf.st_size;
+	return (uint32)statbuf.st_size;
 }
 
 void
