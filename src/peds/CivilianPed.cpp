@@ -117,7 +117,7 @@ CCivilianPed::CivilianAI(void)
 				} else {
 					SetMoveState(PEDMOVE_WALK);
 				}
-			} else if (threatPed->IsPlayer() && IsGangMember() && b158_80) {
+			} else if (threatPed->IsPlayer() && IsGangMember() && bCanAttackPlayerWithCops) {
 				SetObjective(OBJECTIVE_KILL_CHAR_ON_FOOT, m_threatEntity);
 
 			} else if (threatPed->IsPlayer() && FindPlayerPed()->m_pWanted->m_CurrentCops != 0)  {
@@ -203,7 +203,7 @@ CCivilianPed::CivilianAI(void)
 			CPed *threatPed = (CPed*)m_threatEntity;
 			if (m_pedStats->m_fear <= 100 - threatPed->m_pedStats->m_temper && threatPed->m_nPedType != PEDTYPE_COP) {
 				if (threatPed->GetWeapon()->IsTypeMelee() || !GetWeapon()->IsTypeMelee()) {
-					if (threatPed->IsPlayer() && IsGangMember() && b158_80) {
+					if (threatPed->IsPlayer() && IsGangMember() && bCanAttackPlayerWithCops) {
 						SetObjective(OBJECTIVE_KILL_CHAR_ON_FOOT, m_threatEntity);
 
 					} else if (threatPed->IsPlayer() && FindPlayerPed()->m_pWanted->m_CurrentCops != 0) {

@@ -52,17 +52,22 @@ void CCranes::InitCranes(void)
 				CEntity* pEntity = (CEntity*)pNode->item;
 				if (MODELID_CRANE_1 == pEntity->GetModelIndex() ||
 					MODELID_CRANE_2 == pEntity->GetModelIndex() ||
-					MODELID_CRANE_3 == pEntity->GetModelIndex())
+					MODELID_CRANE_3 == pEntity->GetModelIndex() ||
+					MODELID_CRANE_4 == pEntity->GetModelIndex() ||
+					MODELID_CRANE_5 == pEntity->GetModelIndex() ||
+					MODELID_CRANE_6 == pEntity->GetModelIndex())
 					AddThisOneCrane(pEntity);
 			}
 		}
 	}
-	// TODO(MIAMI): LEVEL_MAINLAND just so it compiles
 	for (CPtrNode* pNode = CWorld::GetBigBuildingList(LEVEL_MAINLAND).first; pNode; pNode = pNode->next) {
 		CEntity* pEntity = (CEntity*)pNode->item;
 		if (MODELID_CRANE_1 == pEntity->GetModelIndex() ||
 			MODELID_CRANE_2 == pEntity->GetModelIndex() ||
-			MODELID_CRANE_3 == pEntity->GetModelIndex())
+			MODELID_CRANE_3 == pEntity->GetModelIndex() ||
+			MODELID_CRANE_4 == pEntity->GetModelIndex() ||
+			MODELID_CRANE_5 == pEntity->GetModelIndex() ||
+			MODELID_CRANE_6 == pEntity->GetModelIndex())
 			AddThisOneCrane(pEntity);
 	}
 }
@@ -85,21 +90,7 @@ void CCranes::AddThisOneCrane(CEntity* pEntity)
 	pCrane->m_nCraneState = CCrane::IDLE;
 	pCrane->m_bWasMilitaryCrane = false;
 	pCrane->m_bIsTop = (MODELID_CRANE_1 != pEntity->GetModelIndex());
-#if 0
-	// Is this used to avoid military crane?
-	if (pCrane->m_bIsTop || pEntity->GetPosition().y > 0.0f) {
-		CObject* pHook = new CObject(MI_MAGNET, false);
-		pHook->ObjectCreatedBy = MISSION_OBJECT;
-		pHook->bUsesCollision = false;
-		pHook->bExplosionProof = true;
-		pHook->bAffectedByGravity = false;
-		pCrane->m_pHook = pHook;
-		pCrane->CalcHookCoordinates(&pCrane->m_vecHookCurPos.x, &pCrane->m_vecHookCurPos.y, &pCrane->m_vecHookCurPos.z);
-		pCrane->SetHookMatrix();
-	}
-	else
-#endif
-		pCrane->m_pHook = nil;
+	pCrane->m_pHook = nil;
 	NumCranes++;
 }
 

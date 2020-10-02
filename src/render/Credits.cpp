@@ -14,14 +14,6 @@
 bool CCredits::bCreditsGoing;
 uint32 CCredits::CreditsStartTime;
 
-#ifdef ASPECT_RATIO_SCALE
-#define SCALE_AND_CENTER(x) ScaleAndCenterX(x)
-extern float ScaleAndCenterX(float x);
-#else
-#define SCALE_AND_CENTER(x) SCREEN_STRETCH_X(x)
-#endif
-
-
 void
 CCredits::Init(void)
 {
@@ -81,7 +73,7 @@ CCredits::Render(void)
 	scrolloffset = (CTimer::GetTimeInMilliseconds() - CreditsStartTime) / 24.0f;
 	CFont::SetJustifyOff();
 	CFont::SetBackgroundOff();
-	CFont::SetCentreSize(SCALE_AND_CENTER(DEFAULT_SCREEN_WIDTH * 0.75f));
+	CFont::SetCentreSize(SCALE_AND_CENTER_X(DEFAULT_SCREEN_WIDTH * 0.75f));
 	CFont::SetCentreOn();
 	CFont::SetPropOn();
 	CFont::SetFontStyle(FONT_STANDARD);
@@ -429,7 +421,7 @@ CCredits::Render(void)
     PrintCreditText(0.65f, 0.65f, TheText.Get("CRED129"), lineoffset, scrolloffset);
     PrintCreditSpace(1.5f, lineoffset);
 
-    CFont::SetCentreSize(SCALE_AND_CENTER(DEFAULT_SCREEN_WIDTH * 0.8f));
+    CFont::SetCentreSize(SCALE_AND_CENTER_X(DEFAULT_SCREEN_WIDTH * 0.8f));
 
     PrintCreditText(1.1f, 0.8f, TheText.Get("CRD111A"), lineoffset, scrolloffset);
     PrintCreditSpace(0.5f, lineoffset);
@@ -477,7 +469,7 @@ CCredits::Render(void)
         PrintCreditSpace(0.5f, lineoffset);
     PrintCreditText(0.65f, 0.65f, TheText.Get("CRD134I"), lineoffset, scrolloffset);
 
-    CFont::SetCentreSize(SCALE_AND_CENTER(DEFAULT_SCREEN_WIDTH * 0.7f));
+    CFont::SetCentreSize(SCALE_AND_CENTER_X(DEFAULT_SCREEN_WIDTH * 0.7f));
 
     PrintCreditSpace(1.5f, lineoffset);
     PrintCreditText(1.1f, 0.8f, TheText.Get("CRED135"), lineoffset, scrolloffset);
@@ -513,7 +505,7 @@ CCredits::Render(void)
     PrintCreditText(1.1f, 1.1f, TheText.Get("CRD140L"), lineoffset, scrolloffset);
     PrintCreditSpace(1.5f, lineoffset);
     
-    CFont::SetCentreSize(SCALE_AND_CENTER(DEFAULT_SCREEN_WIDTH * 0.85f));
+    CFont::SetCentreSize(SCALE_AND_CENTER_X(DEFAULT_SCREEN_WIDTH * 0.85f));
 
     PrintCreditText(0.95f, 0.7f, TheText.Get("CRED259"), lineoffset, scrolloffset);
     PrintCreditSpace(0.5f, lineoffset);
@@ -594,7 +586,7 @@ CCredits::Render(void)
     PrintCreditText(0.65f, 0.65f, TheText.Get("CRED172"), lineoffset, scrolloffset);
     PrintCreditSpace(0.5f, lineoffset);
 
-    CFont::SetCentreSize(SCALE_AND_CENTER(DEFAULT_SCREEN_WIDTH * 0.75f));
+    CFont::SetCentreSize(SCALE_AND_CENTER_X(DEFAULT_SCREEN_WIDTH * 0.75f));
 
     PrintCreditSpace(1.5f, lineoffset);
     PrintCreditText(0.95f, 0.7f, TheText.Get("CRED217"), lineoffset, scrolloffset);
@@ -717,7 +709,7 @@ CCredits::Render(void)
     PrintCreditText(0.65f, 0.65f, TheText.Get("CRED332"), lineoffset, scrolloffset);
     PrintCreditSpace(1.5f, lineoffset);
     
-    CFont::SetCentreSize(SCALE_AND_CENTER(DEFAULT_SCREEN_WIDTH * 0.8f));
+    CFont::SetCentreSize(SCALE_AND_CENTER_X(DEFAULT_SCREEN_WIDTH * 0.8f));
 
     PrintCreditText(0.95f, 0.7f, TheText.Get("CRED333"), lineoffset, scrolloffset);
     PrintCreditSpace(0.5f, lineoffset);
@@ -755,7 +747,7 @@ CCredits::Render(void)
 
     PrintCreditSpace(1.5f, lineoffset);
 
-    CFont::SetCentreSize(SCALE_AND_CENTER(DEFAULT_SCREEN_WIDTH * 0.75f));
+    CFont::SetCentreSize(SCALE_AND_CENTER_X(DEFAULT_SCREEN_WIDTH * 0.75f));
 
     PrintCreditText(0.95f, 0.7f, TheText.Get("CRED267"), lineoffset, scrolloffset);
     PrintCreditSpace(0.5f, lineoffset);
@@ -819,5 +811,3 @@ bool CCredits::AreCreditsDone(void)
 {
 	return !bCreditsGoing;
 }
-
-#undef SCALE_AND_CENTER

@@ -6,6 +6,7 @@ class CVehicle;
 class CPtrList;
 
 #define LANE_WIDTH 5.0f
+#define WIDTH_TO_PED_NODE_WIDTH (31.f/(500.f * 8.f))
 
 enum
 {
@@ -89,7 +90,7 @@ struct CPathNode
 	float GetZ(void) { return z/8.0f; }
 	bool HasDivider(void) { return width != 0; }
 	float GetDividerWidth(void) { return width/(2*8.0f); }
-	float GetPedNodeWidth(void) { return width*(31.f/(500.f * 8.f)); }
+	float GetPedNodeWidth(void) { return width*WIDTH_TO_PED_NODE_WIDTH; }
 	CPathNode *GetPrev(void);
 	CPathNode *GetNext(void);
 	void SetPrev(CPathNode *node);

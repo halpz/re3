@@ -203,6 +203,9 @@ static const char* FrontendFilenames[][2] =
 	{"fe_radio9",         "" },
 };
 
+#ifdef CUTSCENE_BORDERS_SWITCH
+bool CMenuManager::m_PrefsCutsceneBorders = true;
+#endif
 
 int32 CMenuManager::m_PrefsSfxVolume = 102;
 int32 CMenuManager::m_PrefsMusicVolume = 102;

@@ -2527,7 +2527,7 @@ WinMain(HINSTANCE instance,
 			else if ( gGameState == GS_ANIMVIEWER )
 				CAnimViewer::Shutdown();
 #endif
-			
+
 			CTimer::Stop();
 			
 			if ( FrontEndMenuManager.m_bFirstTime == true )
