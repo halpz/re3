@@ -236,19 +236,18 @@ public:
 	float GetReflectionsDistance(int32 idx) const { return m_afReflectionsDistances[idx]; }
 	int32 GetRandomNumber(int32 idx) const { return m_anRandomTable[idx]; }
 	int32 GetRandomNumberInRange(int32 idx, int32 low, int32 high) const { return (m_anRandomTable[idx] % (high - low + 1)) + low; }
-	bool IsMissionAudioSamplePlaying(uint8 slot) const;// { return m_sMissionAudio.m_nPlayStatus == 1; }
+	bool IsMissionAudioSamplePlaying(uint8 slot) const; // { return m_sMissionAudio.m_nPlayStatus == 1; }
 	bool ShouldDuckMissionAudio(uint8 slot) const;
 
 	// "Should" be in alphabetic order, except "getXTalkSfx"
-	void AddDetailsToRequestedOrderList(uint8 sample);
-	void AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sample, uint8 bank,
-	                        uint8 counter, bool notLooping); //done
-	void AddReflectionsToRequestedQueue();
-	void AddReleasingSounds();
-	void AddSampleToRequestedQueue();
-	void AgeCrimes();
+	void AddDetailsToRequestedOrderList(uint8 sample);                                                                    // done (inlined in vc)
+	void AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sample, uint8 bank, uint8 counter, bool notLooping); // done
+	void AddReflectionsToRequestedQueue();                                                                                // done
+	void AddReleasingSounds();                                                                                            // done
+	void AddSampleToRequestedQueue();                                                                                     // done
+	void AgeCrimes();                                                                                                     // done (inlined in vc)
 
-	void CalculateDistance(bool &condition, float dist); //done
+	void CalculateDistance(bool &condition, float dist); // done
 	bool CheckForAnAudioFileOnCD() const;
 	void ClearActiveSamples(); //done
 	void ClearMissionAudio(uint8 slot); //done
@@ -260,7 +259,7 @@ public:
 	int32 CreateEntity(eAudioType type, void *entity); //done
 
 	void DestroyAllGameCreatedEntities();
-	void DestroyEntity(int32 id);
+	void DestroyEntity(int32 id); //done (inlined in vc)
 	void DoPoliceRadioCrackle();
 
 	// functions returning talk sfx,
@@ -272,44 +271,42 @@ public:
 	char *Get3DProviderName(uint8 id) const;
 	uint8 GetCDAudioDriveLetter() const;
 	int8 GetCurrent3DProviderIndex() const;
-	int8 AutoDetect3DProviders() const;
+	int8 AutoDetect3DProviders() const;                                // done
 	float GetCollisionLoopingRatio(uint32 a, uint32 b, float c) const; // not used
 	float GetCollisionOneShotRatio(int32 a, float b) const;
 	float GetCollisionRatio(float a, float b, float c, float d) const;
-	float GetDistanceSquared(const CVector &v) const; //done
+	float GetDistanceSquared(const CVector &v) const; // done (inlined in vc)
 	int32 GetJumboTaxiFreq() const;
-	uint8 GetMissionAudioLoadingStatus(uint8 slot) const;
+	uint8 GetMissionAudioLoadingStatus(uint8 slot) const; // done
 	int8 GetMissionScriptPoliceAudioPlayingStatus() const;
-	uint8 GetNum3DProvidersAvailable() const;
+	uint8 GetNum3DProvidersAvailable() const; // done
 	int32 GetPedCommentSfx(CPed *ped, int32 sound);
 	void GetPhrase(uint32 *phrase, uint32 *prevPhrase, uint32 sample, uint32 maxOffset) const;
-	float GetVehicleDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile,
-	                                    cTransmission *transmission, float velocityChange);
-	float GetVehicleNonDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile,
-	                                       cTransmission *transmission, float velocityChange);
+	float GetVehicleDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile, cTransmission *transmission, float velocityChange);
+	float GetVehicleNonDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile, cTransmission *transmission, float velocityChange);
 
-	bool HasAirBrakes(int32 model) const; //done
+	bool HasAirBrakes(int32 model) const; // done
 
-	void Initialise();
+	void Initialise(); // done
 	void InitialisePoliceRadio();
 	void InitialisePoliceRadioZones();
 	void InterrogateAudioEntities();
 	bool IsAudioInitialised() const;
 	bool IsMissionAudioSampleFinished(uint8 slot);
-	bool IsMP3RadioChannelAvailable() const;
+	bool IsMP3RadioChannelAvailable() const; // done
 
 	bool MissionScriptAudioUsesPoliceChannel(int32 soundMission) const;
 
-	void PlayLoadedMissionAudio(uint8 slot);
-	void PlayOneShot(int32 index, int16 sound, float vol);
+	void PlayLoadedMissionAudio(uint8 slot);               // done
+	void PlayOneShot(int32 index, int16 sound, float vol); // done
 	void PlaySuspectLastSeen(float x, float y, float z);
-	void PlayerJustGotInCar() const; //done
-	void PlayerJustLeftCar() const; //done
+	void PlayerJustGotInCar() const; // done
+	void PlayerJustLeftCar() const;  // done
 	void PostInitialiseGameSpecificSetup();
-	void PostTerminateGameSpecificShutdown(); //done
-	void PreInitialiseGameSpecificSetup() const; //done
-	void PreloadMissionAudio(uint8 slot, Const char *name);
-	void PreTerminateGameSpecificShutdown(); //done
+	void PostTerminateGameSpecificShutdown();               // done
+	void PreInitialiseGameSpecificSetup() const;            // done
+	void PreloadMissionAudio(uint8 slot, Const char *name); // done
+	void PreTerminateGameSpecificShutdown();                // done
 	/// processX - main logic of adding new sounds
 	void ProcessActiveQueues(); //done
 	bool ProcessAirBrakes(cVehicleParams *params);
@@ -376,11 +373,10 @@ public:
 	void ProcessExtraSounds(); //done
 
 	int32 RandomDisplacement(uint32 seed) const;
-	void ReacquireDigitalHandle() const;
-	void ReleaseDigitalHandle() const;
-	void ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface1, uint8 surface2,
-	                     float collisionPower, float intensity2);
-	void ReportCrime(int32 crime, const CVector *pos);
+	void ReacquireDigitalHandle() const;                                                                                              // done
+	void ReleaseDigitalHandle() const;                                                                                                // done
+	void ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface1, uint8 surface2, float collisionPower, float intensity2); // done
+	void ReportCrime(int32 crime, const CVector *pos);                                                                                // done
 	void ResetAudioLogicTimers(uint32 timer);
 	void ResetPoliceRadio();
 	void ResetTimers(uint32 time);
@@ -395,7 +391,7 @@ public:
 	void SetEffectsFadeVol(uint8 volume) const;
 	void SetEffectsMasterVolume(uint8 volume) const;
 	void SetMP3BoostVolume(uint8 volume) const;
-	void SetEntityStatus(int32 id, uint8 status);
+	void SetEntityStatus(int32 id, uint8 status); //done
 	uint32 SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollision &audioCollision);
 	void SetMissionAudioLocation(uint8 slot, float x, float y, float z);
 	void SetMissionScriptPoliceAudio(int32 sfx) const;

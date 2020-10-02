@@ -725,7 +725,7 @@ cAudioManager::AgeCrimes()
 {
 	for (uint8 i = 0; i < ARRAY_SIZE(m_sPoliceRadioQueue.crimes); i++) {
 		if (m_sPoliceRadioQueue.crimes[i].type != CRIME_NONE) {
-			if (++m_sPoliceRadioQueue.crimes[i].timer > 1500) m_sPoliceRadioQueue.crimes[i].type = CRIME_NONE;
+			if (++m_sPoliceRadioQueue.crimes[i].timer > 1200) m_sPoliceRadioQueue.crimes[i].type = CRIME_NONE;
 		}
 	}
 }
