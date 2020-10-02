@@ -181,6 +181,7 @@ public:
 	uint8 m_nActiveSamples;
 	uint8 field_4; // unused
 	bool m_bDynamicAcousticModelingStatus;
+	int8 field_6;
 	float m_fSpeedOfSound;
 	bool m_bTimerJustReset;
 	int32 m_nTimer;
@@ -246,16 +247,15 @@ public:
 	void AddSampleToRequestedQueue();                                                                                     // done
 	void AgeCrimes();                                                                                                     // done (inlined in vc)
 
-	void CalculateDistance(bool &condition, float dist); // done
-	bool CheckForAnAudioFileOnCD() const;
-	void ClearActiveSamples();
-	void ClearMissionAudio(uint8 slot); //done
-	void ClearRequestedQueue();
-	int32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2,
-	                                      float speedMultiplier) const;
-	int32 ComputePan(float, CVector *);
-	uint8 ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance) const;
-	int32 CreateEntity(eAudioType type, void *entity); // done
+	void CalculateDistance(bool &condition, float dist);                                                                   // done
+	bool CheckForAnAudioFileOnCD() const;                                                                                  // done
+	void ClearActiveSamples();                                                                                             // done
+	void ClearMissionAudio(uint8 slot);                                                                                    // done
+	void ClearRequestedQueue();                                                                                            // done (inlined in vc)
+	uint32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2, float speedMultiplier) const; // done
+	int32 ComputePan(float, CVector *);                                                                                    // done
+	uint8 ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance) const;                                 // done
+	int32 CreateEntity(eAudioType type, void *entity);                                                                     // done
 
 	void DestroyAllGameCreatedEntities();
 	void DestroyEntity(int32 id); //done (inlined in vc)
@@ -289,7 +289,7 @@ public:
 	void Initialise(); // done
 	void InitialisePoliceRadio();
 	void InitialisePoliceRadioZones();
-	void InterrogateAudioEntities();
+	void InterrogateAudioEntities(); // done
 	bool IsAudioInitialised() const;
 	bool IsMissionAudioSampleFinished(uint8 slot);
 	bool IsMP3RadioChannelAvailable() const; // done
@@ -307,7 +307,7 @@ public:
 	void PreloadMissionAudio(uint8 slot, Const char *name); // done
 	void PreTerminateGameSpecificShutdown();                // done
 	/// processX - main logic of adding new sounds
-	void ProcessActiveQueues();
+	void ProcessActiveQueues(); //done
 	bool ProcessAirBrakes(cVehicleParams *params);
 	bool ProcessBoatEngine(cVehicleParams *params);
 	bool ProcessBoatMovingOverWater(cVehicleParams *params);
