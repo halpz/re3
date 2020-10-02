@@ -1376,9 +1376,6 @@ CAutomobile::ProcessControl(void)
 
 		bool playRotorSound = false;
 		bool isPlane = GetModelIndex() == MI_DODO || bAllDodosCheat;
-#ifdef BETTER_ALLCARSAREDODO_CHEAT
-		isPlane = isPlane || bAltDodoCheat;
-#endif
 #ifdef FIX_BUGS
 		isPlane = isPlane && !IsRealHeli();
 #endif

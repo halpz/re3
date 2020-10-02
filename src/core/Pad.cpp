@@ -412,7 +412,11 @@ void OnlyRenderWheelsCheat()
 
 void ChittyChittyBangBangCheat()
 {
+#ifdef BETTER_ALLCARSAREDODO_CHEAT
+	CHud::SetHelpMessage(TheText.Get(!CVehicle::bAllDodosCheat ? "CHEAT1" : "CHEATOF"), true);
+#else
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+#endif
 	CVehicle::bAllDodosCheat = !CVehicle::bAllDodosCheat;
 	CStats::CheatedCount += 1000;
 	CPad::bHasPlayerCheated = true;
@@ -537,22 +541,6 @@ void AllCarsHeliCheat(void)
 	else {
 		string = TheText.Get("CHEAT1");
 		bAllCarCheat = true;
-	}
-	CHud::SetHelpMessage(string, true);
-}
-#endif
-
-#ifdef BETTER_ALLCARSAREDODO_CHEAT
-void AllCarsPlaneCheat(void)
-{
-	wchar* string;
-	if (CVehicle::bAltDodoCheat) {
-		string = TheText.Get("CHEATOF");
-		CVehicle::bAltDodoCheat = false;
-	}
-	else {
-		string = TheText.Get("CHEAT1");
-		CVehicle::bAltDodoCheat = true;
 	}
 	CHud::SetHelpMessage(string, true);
 }
@@ -1442,12 +1430,6 @@ void CPad::AddToPCCheatString(char c)
 	// "CARSAREHELI"
 	if (!_CHEATCMP("ILEHERASRAC"))
 		AllCarsHeliCheat();
-#endif
-
-#ifdef BETTER_ALLCARSAREDODO_CHEAT
-	// "CARSAREPLANE"
-	if (!_CHEATCMP("ENALPERASRAC"))
-		AllCarsPlaneCheat();
 #endif
 
 #ifdef WALLCLIMB_CHEAT
@@ -3169,11 +3151,6 @@ void CPad::ResetCheats(void)
 #ifdef RESTORE_ALLCARSHELI_CHEAT
 	bAllCarCheat = false;
 #endif
-#ifdef BETTER_ALLCARSAREDODO_CHEAT
-	CVehicle::bAltDodoCheat = false;
-#endif
-
-
 	gbBlackCars = false;
 	gbPinkCars = false;
 	CCarCtrl::bMadDriversCheat = false;

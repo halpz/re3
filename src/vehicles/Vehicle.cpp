@@ -41,9 +41,6 @@ bool CVehicle::bCheat3;
 bool CVehicle::bCheat4;
 bool CVehicle::bCheat5;
 bool CVehicle::bCheat8;
-#ifdef BETTER_ALLCARSAREDODO_CHEAT
-bool CVehicle::bAltDodoCheat;
-#endif
 bool CVehicle::bHoverCheat;
 bool CVehicle::bAllTaxisHaveNitro;
 bool CVehicle::m_bDisableMouseSteering = true;
@@ -355,11 +352,11 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		float fThrustFallOff = pFlyingHandling->fThrustFallOff;
 		float fThrustFallOffBack = pFlyingHandling->fThrustFallOff * 8.0f;
 #ifdef BETTER_ALLCARSAREDODO_CHEAT
-		if (bAltDodoCheat && !IsRealPlane()) {
+		if (bAllDodosCheat && !IsRealPlane()) {
 			fThrust = pHandling->Transmission.fEngineAcceleration
 				* (pHandling->Transmission.nDriveType == '4' ? 4.0f : 2.0f);
-			fThrust = 5.0f * Max(fThrust, pFlyingHandling->fThrust);
-			fThrustFallOff = Min(1.0f / pHandling->Transmission.fMaxVelocity, fThrustFallOff);
+			fThrust = 5.0f * Max(fThrust, pFlyingHandling->fThrust); //tweak: (cars engines too weak to thrust car on air)
+			fThrustFallOff = Min(0.7f / pHandling->Transmission.fMaxVelocity, fThrustFallOff); //tweak: (use 0.7 instead of 1.0 to make cars 30% faster)
 			fThrustFallOffBack = -1.0f / pHandling->Transmission.fMaxReverseVelocity;
 		}
 #endif
@@ -417,7 +414,7 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 			else if (flightModel == FLIGHT_MODEL_SEAPLANE && GetPosition().z > 80.0f)
 				fLiftImpulse = CTimer::GetTimeStep() * 0.9f*GRAVITY * m_fMass;
 #ifdef BETTER_ALLCARSAREDODO_CHEAT
-			else if(GetPosition().z > 180.0f)
+			else if(bAllDodosCheat && GetPosition().z > 170.0f)
 				fLiftImpulse = CTimer::GetTimeStep() * 0.9f * GRAVITY * m_fMass;
 #endif
 		}
