@@ -5,6 +5,8 @@
 #include "ModelIndices.h"
 #include "ModelInfo.h"
 
+// --MIAMI: file done
+
 CBaseModelInfo *CModelInfo::ms_modelInfoPtrs[MODELINFOSIZE];
 
 CStore<CSimpleModelInfo, SIMPLEMODELSIZE> CModelInfo::ms_simpleModelStore;
@@ -20,6 +22,14 @@ CModelInfo::Initialise(void)
 {
 	int i;
 	CSimpleModelInfo *m;
+
+	debug("sizeof SimpleModelStore %d\n", sizeof(ms_simpleModelStore));
+	debug("sizeof TimeModelStore %d\n", sizeof(ms_timeModelStore));
+	debug("sizeof WeaponModelStore %d\n", sizeof(ms_weaponModelStore));
+	debug("sizeof ClumpModelStore %d\n", sizeof(ms_clumpModelStore));
+	debug("sizeof VehicleModelStore %d\n", sizeof(ms_vehicleModelStore));
+	debug("sizeof PedModelStore %d\n", sizeof(ms_pedModelStore));
+	debug("sizeof 2deffectsModelStore %d\n", sizeof(ms_2dEffectStore));
 
 	for(i = 0; i < MODELINFOSIZE; i++)
 		ms_modelInfoPtrs[i] = nil;
@@ -191,6 +201,9 @@ CModelInfo::GetModelInfo(const char *name, int *id)
 CBaseModelInfo*
 CModelInfo::GetModelInfo(const char *name, int minIndex, int maxIndex)
 {
+	if (minIndex > maxIndex)
+		return 0;
+
 	CBaseModelInfo *modelinfo;
 	for(int i = minIndex; i <= maxIndex; i++){
 		modelinfo = CModelInfo::ms_modelInfoPtrs[i];
@@ -219,6 +232,20 @@ CModelInfo::IsCarModel(int32 id)
 {
 	return GetModelInfo(id)->GetModelType() == MITYPE_VEHICLE &&
 		((CVehicleModelInfo*)GetModelInfo(id))->m_vehicleType == VEHICLE_TYPE_CAR;
+}
+
+bool
+CModelInfo::IsHeliModel(int32 id)
+{
+	return GetModelInfo(id)->GetModelType() == MITYPE_VEHICLE &&
+		((CVehicleModelInfo*)GetModelInfo(id))->m_vehicleType == VEHICLE_TYPE_HELI;
+}
+
+bool
+CModelInfo::IsPlaneModel(int32 id)
+{
+	return GetModelInfo(id)->GetModelType() == MITYPE_VEHICLE &&
+		((CVehicleModelInfo*)GetModelInfo(id))->m_vehicleType == VEHICLE_TYPE_PLANE;
 }
 
 void

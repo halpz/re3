@@ -7,8 +7,10 @@
 #include "main.h"
 #include "Population.h"
 
-float CIniFile::PedNumberMultiplier = 1.0f;
-float CIniFile::CarNumberMultiplier = 1.0f;
+// --MIAMI: file done
+
+float CIniFile::PedNumberMultiplier = 0.6f;
+float CIniFile::CarNumberMultiplier = 0.6f;
 
 void CIniFile::LoadIniFile()
 {
@@ -24,5 +26,6 @@ void CIniFile::LoadIniFile()
 		CFileMgr::CloseFile(f);
 	}
 	CPopulation::MaxNumberOfPedsInUse = 25.0f * PedNumberMultiplier;
+	CPopulation::MaxNumberOfPedsInUseInterior = 40.0f * PedNumberMultiplier;
 	CCarCtrl::MaxNumberOfCarsInUse = 12.0f * CarNumberMultiplier;
 }

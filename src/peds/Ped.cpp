@@ -459,7 +459,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bCollectBusFare = false;
 	bBoughtIceCream = false;
 	bDonePositionOutOfCollision = false;
-	b158_80 = false;
+	bCanAttackPlayerWithCops = false;
 
 	if (CGeneral::GetRandomNumber() & 3)
 		bHasACamera = false;

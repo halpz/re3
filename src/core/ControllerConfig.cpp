@@ -21,6 +21,8 @@
 #include "Camera.h"
 #include "GenericGameStorage.h"
 
+// --MIAMI: file done
+
 CControllerConfigManager ControlsManager;
 
 CControllerConfigManager::CControllerConfigManager()
@@ -314,6 +316,10 @@ void CControllerConfigManager::InitDefaultControlConfigMouse(CMouseControllerSta
 		SetMouseButtonAssociatedWithAction(PED_CYCLE_WEAPON_RIGHT,       5);
 
 		SetMouseButtonAssociatedWithAction(VEHICLE_CHANGE_RADIO_STATION, 4);
+
+		SetMouseButtonAssociatedWithAction(PED_SNIPER_ZOOM_IN, 4);
+
+		SetMouseButtonAssociatedWithAction(PED_SNIPER_ZOOM_OUT, 5);
 	}
 }
 
@@ -516,11 +522,12 @@ void CControllerConfigManager::UpdateJoyInConfigMenus_ButtonDown(int32 button, i
 			case 13:
 				pad->PCTempJoyState.DPadUp = 255;
 				break;
-#ifdef REGISTER_START_BUTTON
 			case 12:
-				pad->PCTempJoyState.Start = 255;
-				break;
+#ifndef REGISTER_START_BUTTON
+				if (padNumber == 1)
 #endif
+					pad->PCTempJoyState.Start = 255;
+				break;
 			case 11:
 				pad->PCTempJoyState.RightShock = 255;
 				break;
@@ -624,6 +631,7 @@ void CControllerConfigManager::AffectControllerStateOn_ButtonDown(int32 button, 
 		if (   mode == CCam::MODE_1STPERSON
 			|| mode == CCam::MODE_SNIPER
 			|| mode == CCam::MODE_ROCKETLAUNCHER
+			|| mode == CCam::MODE_CAMERA
 			|| mode == CCam::MODE_M16_1STPERSON)
 		{
 			firstPerson = true;
@@ -1642,12 +1650,12 @@ void CControllerConfigManager::DeleteMatchingCommonControls(e_ControllerAction a
 {
 	if (!GetIsKeyBlank(key, type))
 	{
-		CLEAR_ACTION_IF_NEEDED(CAMERA_CHANGE_VIEW_ALL_SITUATIONS);
 #ifndef BIND_VEHICLE_FIREWEAPON
 		CLEAR_ACTION_IF_NEEDED(PED_FIREWEAPON);
 #endif
 		CLEAR_ACTION_IF_NEEDED(GO_LEFT);
 		CLEAR_ACTION_IF_NEEDED(GO_RIGHT);
+		CLEAR_ACTION_IF_NEEDED(CAMERA_CHANGE_VIEW_ALL_SITUATIONS);
 		CLEAR_ACTION_IF_NEEDED(NETWORK_TALK);
 		CLEAR_ACTION_IF_NEEDED(SWITCH_DEBUG_CAM_ON);
 		CLEAR_ACTION_IF_NEEDED(TOGGLE_DPAD);
@@ -1660,15 +1668,13 @@ void CControllerConfigManager::DeleteMatching3rdPersonControls(e_ControllerActio
 {
 	if (!GetIsKeyBlank(key, type))
 	{
-		CLEAR_ACTION_IF_NEEDED(PED_LOOKBEHIND);
 		CLEAR_ACTION_IF_NEEDED(PED_CYCLE_WEAPON_LEFT);
 		CLEAR_ACTION_IF_NEEDED(PED_CYCLE_WEAPON_RIGHT);
 		CLEAR_ACTION_IF_NEEDED(PED_JUMPING);
 		CLEAR_ACTION_IF_NEEDED(PED_SPRINT);
-		if (key == GetControllerKeyAssociatedWithAction(PED_DUCK, type))
-			ClearSettingsAssociatedWithAction(PED_DUCK, type);
-		if (key == GetControllerKeyAssociatedWithAction(PED_ANSWER_PHONE, type))
-			ClearSettingsAssociatedWithAction(PED_ANSWER_PHONE, type);
+		CLEAR_ACTION_IF_NEEDED(PED_LOOKBEHIND);
+		CLEAR_ACTION_IF_NEEDED(PED_DUCK);
+		CLEAR_ACTION_IF_NEEDED(PED_ANSWER_PHONE);
 
 		if (FrontEndMenuManager.m_ControlMethod == CONTROL_CLASSIC)
 		{
@@ -1707,16 +1713,15 @@ void CControllerConfigManager::DeleteMatchingVehicleControls(e_ControllerAction 
 #ifdef BIND_VEHICLE_FIREWEAPON
 		CLEAR_ACTION_IF_NEEDED(VEHICLE_FIREWEAPON);
 #endif
-		CLEAR_ACTION_IF_NEEDED(VEHICLE_LOOKBEHIND);
-		CLEAR_ACTION_IF_NEEDED(VEHICLE_LOOKLEFT);
-		CLEAR_ACTION_IF_NEEDED(VEHICLE_LOOKRIGHT);
-		CLEAR_ACTION_IF_NEEDED(VEHICLE_LOOKBEHIND); // note: duplicate
-		CLEAR_ACTION_IF_NEEDED(VEHICLE_HORN);
-		CLEAR_ACTION_IF_NEEDED(VEHICLE_HANDBRAKE);
 		CLEAR_ACTION_IF_NEEDED(VEHICLE_ACCELERATE);
 		CLEAR_ACTION_IF_NEEDED(VEHICLE_BRAKE);
 		CLEAR_ACTION_IF_NEEDED(VEHICLE_CHANGE_RADIO_STATION);
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_HORN);
 		CLEAR_ACTION_IF_NEEDED(TOGGLE_SUBMISSIONS);
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_HANDBRAKE);
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_LOOKLEFT);
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_LOOKRIGHT);
+		CLEAR_ACTION_IF_NEEDED(VEHICLE_LOOKBEHIND);
 		CLEAR_ACTION_IF_NEEDED(VEHICLE_TURRETLEFT);
 		CLEAR_ACTION_IF_NEEDED(VEHICLE_TURRETRIGHT);
 		CLEAR_ACTION_IF_NEEDED(VEHICLE_TURRETUP);
@@ -1755,36 +1760,36 @@ void CControllerConfigManager::DeleteMatchingActionInitiators(e_ControllerAction
 			DeleteMatching1rst3rdPersonControls    (action, key, type);
 			break;
 		case ACTIONTYPE_3RDPERSON:
-			DeleteMatching3rdPersonControls        (action, key, type);
 			DeleteMatchingCommonControls           (action, key, type);
-			DeleteMatchingVehicle_3rdPersonControls(action, key, type);
 			DeleteMatching1rst3rdPersonControls    (action, key, type);
+			DeleteMatching3rdPersonControls        (action, key, type);
+			DeleteMatchingVehicle_3rdPersonControls(action, key, type);
 			break;
 		case ACTIONTYPE_VEHICLE:
-			DeleteMatchingVehicleControls          (action, key, type);
 			DeleteMatchingCommonControls           (action, key, type);
+			DeleteMatchingVehicleControls          (action, key, type);
 			DeleteMatchingVehicle_3rdPersonControls(action, key, type);
 			break;
 		case ACTIONTYPE_VEHICLE_3RDPERSON:
+			DeleteMatchingCommonControls           (action, key, type);
+			DeleteMatching1rst3rdPersonControls    (action, key, type);
 			DeleteMatching3rdPersonControls        (action, key, type);
 			DeleteMatchingVehicleControls          (action, key, type);
-			DeleteMatchingCommonControls           (action, key, type);
-			DeleteMatching1rst3rdPersonControls    (action, key, type);
-			break;
-		case ACTIONTYPE_1RST3RDPERSON:
-			DeleteMatching1rstPersonControls       (action, key, type);
-			DeleteMatching3rdPersonControls        (action, key, type);
-			DeleteMatchingCommonControls           (action, key, type);
-			DeleteMatchingVehicle_3rdPersonControls(action, key, type);
-			DeleteMatching1rst3rdPersonControls    (action, key, type);
 			break;
 		case ACTIONTYPE_COMMON:
+			DeleteMatchingCommonControls           (action, key, type);
 			DeleteMatching1rstPersonControls       (action, key, type);
+			DeleteMatching1rst3rdPersonControls    (action, key, type);
 			DeleteMatching3rdPersonControls        (action, key, type);
 			DeleteMatchingVehicleControls          (action, key, type);
 			DeleteMatchingVehicle_3rdPersonControls(action, key, type);
+			break;
+		case ACTIONTYPE_1RST3RDPERSON:
 			DeleteMatchingCommonControls           (action, key, type);
+			DeleteMatching1rstPersonControls       (action, key, type);
 			DeleteMatching1rst3rdPersonControls    (action, key, type);
+			DeleteMatching3rdPersonControls        (action, key, type);
+			DeleteMatchingVehicle_3rdPersonControls(action, key, type);
 			break;
 		default: break;
 		}
@@ -1850,15 +1855,15 @@ e_ControllerActionType CControllerConfigManager::GetActionType(e_ControllerActio
 #ifdef BIND_VEHICLE_FIREWEAPON
 	case VEHICLE_FIREWEAPON:
 #endif
-	case VEHICLE_LOOKBEHIND:
-	case VEHICLE_LOOKLEFT:
-	case VEHICLE_LOOKRIGHT:
-	case VEHICLE_HORN:
-	case VEHICLE_HANDBRAKE:
 	case VEHICLE_ACCELERATE:
 	case VEHICLE_BRAKE:
 	case VEHICLE_CHANGE_RADIO_STATION:
+	case VEHICLE_HORN:
 	case TOGGLE_SUBMISSIONS:
+	case VEHICLE_HANDBRAKE:
+	case VEHICLE_LOOKLEFT:
+	case VEHICLE_LOOKRIGHT:
+	case VEHICLE_LOOKBEHIND:
 	case VEHICLE_TURRETLEFT:
 	case VEHICLE_TURRETRIGHT:
 	case VEHICLE_TURRETUP:

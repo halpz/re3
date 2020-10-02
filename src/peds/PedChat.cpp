@@ -4,7 +4,8 @@
 #include "General.h"
 #include "Ped.h"
 
-// --MIAMI: Done
+// --MIAMI: file done
+
 // Corresponds to ped sounds (from SOUND_PED_DEATH to SOUND_PED_TAXI_CALL)
 PedAudioData CommentWaitTime[56] = {
   { 500, 800, 500, 2 },
@@ -65,14 +66,12 @@ PedAudioData CommentWaitTime[56] = {
   { 0, 0, 0, 0 }
 };
 
-// --MIAMI: Done
 bool
 CPed::ServiceTalkingWhenDead(void)
 {
 	return m_queuedSound == SOUND_PED_DEATH;
 }
 
-// --MIAMI: Done
 void
 CPed::ServiceTalking(void)
 {
@@ -102,7 +101,6 @@ CPed::ServiceTalking(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::Say(uint16 audio)
 {
@@ -157,7 +155,6 @@ CPed::Say(uint16 audio)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::Say(uint16 audio, int32 time)
 {
