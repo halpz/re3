@@ -41,7 +41,6 @@
 #include "AnimViewer.h"
 #include "Font.h"
 
-
 #define MAX_SUBSYSTEMS		(16)
 
 
@@ -425,6 +424,10 @@ psInitialize(void)
 			_dwOperatingSystemVersion = OS_WIN95;
 		}
 	}
+#else
+	_dwOperatingSystemVersion = OS_WINXP; // To fool other classes
+#endif
+
 	
 #ifndef PS2_MENU
 
@@ -434,6 +437,8 @@ psInitialize(void)
 
 #endif
 
+
+#ifdef _WIN32
 	MEMORYSTATUS memstats;
 	GlobalMemoryStatus(&memstats);
 
@@ -442,20 +447,10 @@ psInitialize(void)
 	debug("Physical memory size %u\n", memstats.dwTotalPhys);
 	debug("Available physical memory %u\n", memstats.dwAvailPhys);
 #else
-	
-#ifndef PS2_MENU
-
-#ifdef GTA3_1_1_PATCH
-	FrontEndMenuManager.LoadSettings();
-#endif
-
-#endif
 	struct sysinfo systemInfo;
 	sysinfo(&systemInfo);
 	
 	_dwMemAvailPhys = systemInfo.freeram;
-	_dwOperatingSystemVersion = OS_WINXP; // To fool other classes
-
 	debug("Physical memory size %u\n", systemInfo.totalram);
 	debug("Available physical memory %u\n", systemInfo.freeram);
 
@@ -835,7 +830,7 @@ bool IsThisJoystickBlacklisted(int i)
 
 	const char* joyname = glfwGetJoystickName(i);
 
-	if (strncmp(joyname, gSelectedJoystickName, sizeof(gSelectedJoystickName)) == 0)
+	if (strncmp(joyname, gSelectedJoystickName, strlen(gSelectedJoystickName)) == 0)
 		return false;
 
 	return true;
@@ -844,6 +839,9 @@ bool IsThisJoystickBlacklisted(int i)
 
 void _InputInitialiseJoys()
 {
+	PSGLOBAL(joy1id) = -1;
+	PSGLOBAL(joy2id) = -1;
+
 	for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++) {
 		if (glfwJoystickPresent(i) && !IsThisJoystickBlacklisted(i)) {
 			if (PSGLOBAL(joy1id) == -1)
@@ -858,7 +856,9 @@ void _InputInitialiseJoys()
 	if (PSGLOBAL(joy1id) != -1) {
 		int count;
 		glfwGetJoystickButtons(PSGLOBAL(joy1id), &count);
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 		strcpy(gSelectedJoystickName, glfwGetJoystickName(PSGLOBAL(joy1id)));
+#endif
 		ControlsManager.InitDefaultControlConfigJoyPad(count);
 	}
 }
@@ -2067,14 +2067,15 @@ void joysChangeCB(int jid, int event)
 	if (event == GLFW_CONNECTED && !IsThisJoystickBlacklisted(jid)) {
 		if (PSGLOBAL(joy1id) == -1) {
 			PSGLOBAL(joy1id) = jid;
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 			strcpy(gSelectedJoystickName, glfwGetJoystickName(jid));
+#endif
 		} else if (PSGLOBAL(joy2id) == -1)
 			PSGLOBAL(joy2id) = jid;
 
 	} else if (event == GLFW_DISCONNECTED) {
 		if (PSGLOBAL(joy1id) == jid) {
 			PSGLOBAL(joy1id) = -1;
-			strcpy(gSelectedJoystickName, "");
 		} else if (PSGLOBAL(joy2id) == jid)
 			PSGLOBAL(joy2id) = -1;
 	}

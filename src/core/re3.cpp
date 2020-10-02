@@ -1,6 +1,7 @@
 #include <csignal>
 #define WITHWINDOWS
 #include "common.h"
+#include "platform.h"
 #include "crossplatform.h"
 #include "Renderer.h"
 #include "Credits.h"
@@ -16,7 +17,6 @@
 #include "Heli.h"
 #include "Automobile.h"
 #include "Ped.h"
-#include "Particle.h"
 #include "Console.h"
 #include "Debug.h"
 #include "Hud.h"
@@ -32,14 +32,11 @@
 #include "MBlur.h"
 #include "postfx.h"
 #include "custompipes.h"
-#include "ControllerConfig.h"
 
 #ifndef _WIN32
 #include "assert.h"
 #include <stdarg.h>
 #endif
-
-#include <list>
 
 #ifdef RWLIBS
 extern "C" int vsprintf(char* const _Buffer, char const* const _Format, va_list  _ArgList);
@@ -74,7 +71,6 @@ mysrand(unsigned int seed)
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
 #include "frontendoption.h"
-#include "platform.h"
 #include "Font.h"
 
 void ReloadFrontendOptions(void)
@@ -196,7 +192,7 @@ wchar* MultiSamplingDraw(bool *disabled, bool userHovering) {
 			return unicodeTemp;
 	}
 }
-char* multisamplingKey = "MultiSampling";
+const char* multisamplingKey = "MultiSampling";
 #endif
 
 #ifdef MORE_LANGUAGES
@@ -249,8 +245,7 @@ void FreeCamChange(int8 displayedValue)
 	TheCamera.bFreeCam = !!displayedValue;
 	FrontEndMenuManager.SaveSettings();
 }
-const wchar* freeCamText = (wchar*)L"FREE CAM";
-char* freeCamKey = "FreeCam";
+const char* freeCamKey = "FreeCam";
 #endif
 
 #ifdef CUTSCENE_BORDERS_SWITCH
@@ -259,7 +254,7 @@ void BorderModeChange(int8 displayedValue)
 	CMenuManager::m_PrefsCutsceneBorders = !!displayedValue;
 	FrontEndMenuManager.SaveSettings();
 }
-char* cutsceneBordersKey = "CutsceneBorders";
+const char* cutsceneBordersKey = "CutsceneBorders";
 #endif
 
 #ifdef PS2_ALPHA_TEST
@@ -268,13 +263,10 @@ void PS2AlphaTestChange(int8 displayedValue)
 	gPS2alphaTest = !!displayedValue;
 	FrontEndMenuManager.SaveSettings();
 }
-char* ps2alphaKey = "PS2AlphaTest";
+const char* ps2alphaKey = "PS2AlphaTest";
 #endif
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
-const wchar* detectJoystickText = (wchar*)L"Detect Joystick";
-const wchar* detectJoystickExplanation = (wchar*)L"Press any key on your preferred joystick that you would like to use on the game.";
-const wchar* detectedJoystickText = (wchar*)L"Detected Joystick";
 wchar selectedJoystickUnicode[128];
 
 wchar* DetectJoystickDraw(bool* disabled, bool userHovering) {
@@ -287,7 +279,6 @@ wchar* DetectJoystickDraw(bool* disabled, bool userHovering) {
 				const uint8* buttons = glfwGetJoystickButtons(i, &numButtons);
 				for (int j = 0; j < numButtons; j++) {
 					if (buttons[j]) {
-						strcpy(gSelectedJoystickName, joyname);
 						found = i;
 						break;
 					}
@@ -303,17 +294,21 @@ wchar* DetectJoystickDraw(bool* disabled, bool userHovering) {
 			else
 				PSGLOBAL(joy2id) = -1;
 
+			strcpy(gSelectedJoystickName, joyname);
 			PSGLOBAL(joy1id) = found;
 		}
 	}
-	AsciiToUnicode(gSelectedJoystickName, selectedJoystickUnicode);
+	if (PSGLOBAL(joy1id) == -1)
+		AsciiToUnicode("Not found", selectedJoystickUnicode);
+	else
+		AsciiToUnicode(gSelectedJoystickName, selectedJoystickUnicode);
 
 	return selectedJoystickUnicode;
 }
 #endif
 
 // Important: Make sure to read the warnings/informations in frontendoption.h!!
-// If you won't use GXT entry as text, you may want to declare them globally, to not alloc them on each reload. (static declared texts has some problems on Linux etc.)
+// If you will hardcode any text, please use AllocUnicode! wchar_t size differs between platforms
 void
 CustomFrontendOptionsPopulate(void)
 {
@@ -416,7 +411,7 @@ CustomFrontendOptionsPopulate(void)
 
 #ifdef FREE_CAM
 	SWITCH_TO_DISPLAY_MENU
-	FrontendOptionAddSelect(freeCamText, off_on, 2, (int8*)&TheCamera.bFreeCam, false, FreeCamChange, nil, freeCamKey);
+	FrontendOptionAddSelect(TheText.Get("FEC_FRC"), off_on, 2, (int8*)&TheCamera.bFreeCam, false, FreeCamChange, nil, freeCamKey);
 #endif
 
 	CLONE_OPTION(TheText.Get("FED_SUB"), MENUACTION_SUBTITLES, nil, nil);
@@ -433,23 +428,95 @@ CustomFrontendOptionsPopulate(void)
 #endif
 
 	ADD_RESTORE_DEFAULTS(RestoreDefDisplay)
-		ADD_BACK
+	ADD_BACK
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
-	int detectJoystickMenu = FrontendScreenAdd("FET_CON", MENUSPRITE_MAINMENU, MENUPAGE_CONTROLLER_PC, 50, 60, 20,
+	int detectJoystickMenu = FrontendScreenAdd("FEC_JOD", MENUSPRITE_MAINMENU, MENUPAGE_CONTROLLER_PC, 40, 60, 20,
 		FONT_BANK, MEDIUMTEXT_X_SCALE, MEDIUMTEXT_Y_SCALE, FESCREEN_LEFT_ALIGN, false);
 
 	FrontendOptionSetCursor(detectJoystickMenu, 0);
 
-	FrontendOptionAddBuiltinAction(detectJoystickExplanation, MENUACTION_LABEL, nil, nil);
-	FrontendOptionAddDynamic(detectedJoystickText, DetectJoystickDraw, nil, nil, nil);
+	FrontendOptionAddBuiltinAction(TheText.Get("FEC_JPR"), MENUACTION_LABEL, nil, nil);
+	FrontendOptionAddDynamic(TheText.Get("FEC_JDE"), DetectJoystickDraw, nil, nil, nil);
 	FrontendOptionAddBackButton(TheText.Get("FEDS_TB"));
 
 	FrontendOptionSetCursor(MENUPAGE_CONTROLLER_PC, 2);
-	FrontendOptionAddRedirect(detectJoystickText, detectJoystickMenu, 1);
+	FrontendOptionAddRedirect(TheText.Get("FEC_JOD"), detectJoystickMenu, 1);
 #endif
 }
 #endif
+
+#ifdef LOAD_INI_SETTINGS
+#include "ini_parser.hpp"
+void LoadINISettings()
+{
+	linb::ini cfg;
+	cfg.load_file("re3.ini");
+	char defaultStr[4];
+
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+	strcpy(gSelectedJoystickName, cfg.get("DetectJoystick", "JoystickName", "").c_str());
+	_InputInitialiseJoys();
+#endif
+
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	for (int i = 0; i < numCustomFrontendOptions; i++) {
+		FrontendOption& option = customFrontendOptions[i];
+		if (option.save) {
+			// CFO only supports saving uint8 right now
+			sprintf(defaultStr, "%u", *option.value);
+			option.lastSavedValue = option.displayedValue = *option.value = atoi(cfg.get("FrontendOptions", option.save, defaultStr).c_str());
+		}
+	}
+#endif
+
+#ifdef NO_ISLAND_LOADING
+	sprintf(defaultStr, "%u", CMenuManager::m_PrefsIslandLoading);
+	CMenuManager::m_PrefsIslandLoading = atoi(cfg.get("FrontendOptions", "NoIslandLoading", defaultStr).c_str());
+	CMenuManager::m_DisplayIslandLoading = CMenuManager::m_PrefsIslandLoading;
+#endif
+
+}
+
+void SaveINISettings()
+{
+	linb::ini cfg;
+	cfg.load_file("re3.ini");
+	bool changed = false;
+	char temp[4];
+
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+	if (strncmp(cfg.get("DetectJoystick", "JoystickName", "").c_str(), gSelectedJoystickName, strlen(gSelectedJoystickName)) != 0) {
+		changed = true;
+		cfg.set("DetectJoystick", "JoystickName", gSelectedJoystickName);
+	}
+#endif
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	for (int i = 0; i < numCustomFrontendOptions; i++) {
+		FrontendOption &option = customFrontendOptions[i];
+		if (option.save) {
+			if (atoi(cfg.get("FrontendOptions", option.save, "xxx").c_str()) != *option.value) { // if .ini doesn't have that key compare with xxx, so we can add it
+				changed = true;
+				sprintf(temp, "%u", *option.value);
+				cfg.set("FrontendOptions", option.save, temp);
+			}
+		}
+	}
+#endif
+#ifdef NO_ISLAND_LOADING
+	if (atoi(cfg.get("FrontendOptions", "NoIslandLoading", "xxx").c_str()) != CMenuManager::m_PrefsIslandLoading) {
+		changed = true;
+		sprintf(temp, "%u", CMenuManager::m_PrefsIslandLoading);
+		cfg.set("FrontendOptions", "NoIslandLoading", temp);
+	}
+#endif
+
+	if (changed)
+		cfg.write_file("re3.ini");
+}
+
+#endif
+
 
 #ifdef DEBUGMENU
 void WeaponCheat();
@@ -597,6 +664,8 @@ static const char *carnames[] = {
 	"bellyup", "mrwongs", "mafia", "yardie", "yakuza", "diablos", "columb", "hoods", "airtrain", "deaddodo", "speeder", "reefer", "panlant", "flatbed",
 	"yankee", "escape", "borgnine", "toyz", "ghost",
 };
+
+//#include <list>
 
 static CTweakVar** TweakVarsList;
 static int TweakVarsListSize = -1;

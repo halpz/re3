@@ -216,7 +216,7 @@ void FrontendOptionAddBuiltinAction(const wchar* leftText, int action, ButtonPre
 	option.save = nil;
 }
 
-void FrontendOptionAddSelect(const wchar* leftText, const wchar** rightTexts, int8 numRightTexts, int8 *var, bool onlyApplyOnEnter, ChangeFunc changeFunc, ReturnPrevPageFunc returnPrevPageFunc, char* saveName)
+void FrontendOptionAddSelect(const wchar* leftText, const wchar** rightTexts, int8 numRightTexts, int8 *var, bool onlyApplyOnEnter, ChangeFunc changeFunc, ReturnPrevPageFunc returnPrevPageFunc, const char* saveName)
 {
 	int8 screenOptionOrder = RegisterNewOption();
 
@@ -236,7 +236,7 @@ void FrontendOptionAddSelect(const wchar* leftText, const wchar** rightTexts, in
 	option.returnPrevPageFunc = returnPrevPageFunc;
 }
 
-void FrontendOptionAddDynamic(const wchar* leftText, DrawFunc drawFunc, int8 *var, ButtonPressFunc buttonPressFunc, ReturnPrevPageFunc returnPrevPageFunc, char* saveName)
+void FrontendOptionAddDynamic(const wchar* leftText, DrawFunc drawFunc, int8 *var, ButtonPressFunc buttonPressFunc, ReturnPrevPageFunc returnPrevPageFunc, const char* saveName)
 {
 	int8 screenOptionOrder = RegisterNewOption();
 

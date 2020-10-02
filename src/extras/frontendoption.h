@@ -91,11 +91,11 @@ struct FrontendOption
 	int8 type;
 	int8 screenOptionOrder;
 	int32 screen;
-	wchar leftText[64];
+	wchar leftText[128];
 	ReturnPrevPageFunc returnPrevPageFunc;
 	int8* value;
 	int8 displayedValue; // only if onlyApplyOnEnter enabled for now
-	char* save;
+	const char* save;
 	int32 ogOptionId; // for replacements, see overwrite parameter of SetCursor
 	
 	union {
@@ -153,8 +153,8 @@ void FrontendOptionSetCursor(int screen, int8 option, bool overwrite = false);
 
 // var is optional in AddDynamic, enables you to save them in an INI file(also needs passing char array to saveName param. obv), otherwise pass nil/0
 void FrontendOptionAddBuiltinAction(const wchar* leftText, int action, ButtonPressFunc buttonPressFunc, ReturnPrevPageFunc returnPrevPageFunc);
-void FrontendOptionAddSelect(const wchar* leftText, const wchar** rightTexts, int8 numRightTexts, int8 *var, bool onlyApplyOnEnter, ChangeFunc changeFunc, ReturnPrevPageFunc returnPrevPageFunc, char* saveName = nil);
-void FrontendOptionAddDynamic(const wchar* leftText, DrawFunc rightTextDrawFunc, int8 *var, ButtonPressFunc buttonPressFunc, ReturnPrevPageFunc returnPrevPageFunc, char* saveName = nil);
+void FrontendOptionAddSelect(const wchar* leftText, const wchar** rightTexts, int8 numRightTexts, int8 *var, bool onlyApplyOnEnter, ChangeFunc changeFunc, ReturnPrevPageFunc returnPrevPageFunc, const char* saveName = nil);
+void FrontendOptionAddDynamic(const wchar* leftText, DrawFunc rightTextDrawFunc, int8 *var, ButtonPressFunc buttonPressFunc, ReturnPrevPageFunc returnPrevPageFunc, const char* saveName = nil);
 void FrontendOptionAddRedirect(const wchar* text, int to, int8 selectedOption = 0, bool fadeIn = true);
 void FrontendOptionAddBackButton(const wchar* text, bool fadeIn = true);
 

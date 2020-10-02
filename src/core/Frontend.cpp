@@ -3450,21 +3450,6 @@ CMenuManager::LoadSettings()
 			CFileMgr::Read(fileHandle, m_PrefsSkinFile, 256);
 			CFileMgr::Read(fileHandle, (char*)&m_ControlMethod, 1);
 			CFileMgr::Read(fileHandle, (char*)&m_PrefsLanguage, 1);
-/*
-#ifdef CUSTOM_FRONTEND_OPTIONS
-			for (int i = 0; i < numCustomFrontendOptions; i++) {
-				FrontendOption& option = customFrontendOptions[i];
-				if (option.save) {
-					CFileMgr::Read(fileHandle, (char*)option.value, 1);
-					option.lastSavedValue = option.displayedValue = *option.value;
-				}
-			}
-#endif
-#ifdef NO_ISLAND_LOADING
-			CFileMgr::Read(fileHandle, (char *)&CMenuManager::m_PrefsIslandLoading, 1);
-			CMenuManager::m_DisplayIslandLoading = CMenuManager::m_PrefsIslandLoading;
-#endif
-*/
 		}
 	}
 
@@ -3481,8 +3466,11 @@ CMenuManager::LoadSettings()
 		m_bLanguageLoaded = false;
 	else {
 		m_bLanguageLoaded = true;
+		// Already called in InitialiseChangedLanguageSettings
+		/*
 		TheText.Unload();
 		TheText.Load();
+		*/
 		m_bFrontEnd_ReloadObrTxtGxt = true;
 		InitialiseChangedLanguageSettings();
 
@@ -3555,23 +3543,14 @@ CMenuManager::SaveSettings()
 		CFileMgr::Write(fileHandle, m_PrefsSkinFile, 256);
 		CFileMgr::Write(fileHandle, (char*)&m_ControlMethod, 1);
 		CFileMgr::Write(fileHandle, (char*)&m_PrefsLanguage, 1);
-/*
-#ifdef CUSTOM_FRONTEND_OPTIONS
-		for (int i = 0; i < numCustomFrontendOptions; i++) {
-			FrontendOption &option = customFrontendOptions[i];
-			if (option.save) {
-				CFileMgr::Write(fileHandle, (char*)option.value, 1);
-			}
-		}
-#endif
-#ifdef NO_ISLAND_LOADING
-		CFileMgr::Write(fileHandle, (char *)&CMenuManager::m_PrefsIslandLoading, 1);
-#endif
-*/
 	}
 
 	CFileMgr::CloseFile(fileHandle);
 	CFileMgr::SetDir("");
+
+#ifdef LOAD_INI_SETTINGS
+	SaveINISettings();
+#endif
 }
 
 bool DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha);
