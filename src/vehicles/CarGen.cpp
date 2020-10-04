@@ -28,8 +28,13 @@ uint32 CTheCarGenerators::CurrentActiveCount;
 
 void CCarGenerator::SwitchOff()
 {
-	m_nUsesRemaining = 0;
-	--CTheCarGenerators::CurrentActiveCount;
+#ifdef FIX_BUGS
+	if (m_nUsesRemaining != 0)
+#endif
+	{
+		m_nUsesRemaining = 0;
+		--CTheCarGenerators::CurrentActiveCount;
+	}
 }
 
 void CCarGenerator::SwitchOn()

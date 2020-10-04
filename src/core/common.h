@@ -106,7 +106,7 @@ typedef uint16_t wchar;
 inline uint32 dpb(uint32 b, uint32 p, uint32 s, uint32 w)
 {
 	uint32 m = MASK(p,s);
-	return w & ~m | b<<p & m;
+	return (w & ~m) | ((b<<p) & m);
 }
 inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 {
