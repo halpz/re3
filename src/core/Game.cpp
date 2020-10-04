@@ -295,10 +295,14 @@ bool CGame::InitialiseOnceAfterRW(void)
 	CWorld::Players[0].SetPlayerSkin(CMenuManager::m_PrefsSkinFile);
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
+	// Apparently this func. can be run multiple times at the start.
 	if (numCustomFrontendOptions == 0 && numCustomFrontendScreens == 0) {
+		// needs stored language and TheText to be loaded, and last TheText reload is at the start of here
 		CustomFrontendOptionsPopulate();
-		FrontEndMenuManager.LoadSettings();
 	}
+#endif
+#ifdef LOAD_INI_SETTINGS
+	LoadINISettings(); // needs frontend options to be loaded
 #endif
 	return true;
 }

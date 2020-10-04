@@ -36,3 +36,8 @@ void ResetLoadingScreenBar(void);
 #ifndef MASTER
 void TheModelViewer(void);
 #endif
+
+#ifdef LOAD_INI_SETTINGS
+void LoadINISettings();
+void SaveINISettings();
+#endif
