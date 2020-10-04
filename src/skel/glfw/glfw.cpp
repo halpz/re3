@@ -80,7 +80,12 @@ DWORD _dwOperatingSystemVersion;
 #include "resource.h"
 #else
 long _dwOperatingSystemVersion;
+#ifndef __APPLE__
 #include <sys/sysinfo.h>
+#else
+#include <mach/mach_host.h>
+#include <sys/sysctl.h>
+#endif
 #include <stddef.h>
 #include <locale.h>
 #include <signal.h>
@@ -446,16 +451,28 @@ psInitialize(void)
 
 	debug("Physical memory size %u\n", memstats.dwTotalPhys);
 	debug("Available physical memory %u\n", memstats.dwAvailPhys);
+#elif defined (__APPLE__)
+	uint64_t size = 0;
+	uint64_t page_size = 0;
+	size_t uint64_len = sizeof(uint64_t);
+	size_t ull_len = sizeof(unsigned long long);
+	sysctl((int[]){CTL_HW, HW_PAGESIZE}, 2, &page_size, &ull_len, NULL, 0);
+	sysctl((int[]){CTL_HW, HW_MEMSIZE}, 2, &size, &uint64_len, NULL, 0);
+	vm_statistics_data_t vm_stat;
+	mach_msg_type_number_t count = HOST_VM_INFO_COUNT;
+	host_statistics(mach_host_self(), HOST_VM_INFO, (host_info_t)&vm_stat, &count);
+	_dwMemAvailPhys = (uint64_t)(vm_stat.free_count * page_size);
+	debug("Physical memory size %llu\n", _dwMemAvailPhys);
+	debug("Available physical memory %llu\n", size);
 #else
-	struct sysinfo systemInfo;
+ 	struct sysinfo systemInfo;
 	sysinfo(&systemInfo);
-	
 	_dwMemAvailPhys = systemInfo.freeram;
 	debug("Physical memory size %u\n", systemInfo.totalram);
 	debug("Available physical memory %u\n", systemInfo.freeram);
-
 #endif
-	TheText.Unload();
+  
+  TheText.Unload();
 
 	return TRUE;
 }

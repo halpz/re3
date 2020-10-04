@@ -2578,7 +2578,7 @@ void CCarCtrl::SwitchVehicleToRealPhysics(CVehicle* pVehicle)
 void CCarCtrl::JoinCarWithRoadSystem(CVehicle* pVehicle)
 {
 	pVehicle->AutoPilot.m_nPrevRouteNode = pVehicle->AutoPilot.m_nCurrentRouteNode = pVehicle->AutoPilot.m_nNextRouteNode = 0;
-	pVehicle->AutoPilot.m_nCurrentRouteNode = pVehicle->AutoPilot.m_nPreviousPathNodeInfo = pVehicle->AutoPilot.m_nNextPathNodeInfo = 0;
+	pVehicle->AutoPilot.m_nCurrentPathNodeInfo = pVehicle->AutoPilot.m_nPreviousPathNodeInfo = pVehicle->AutoPilot.m_nNextPathNodeInfo = 0;
 	int nodeId = ThePaths.FindNodeClosestToCoorsFavourDirection(pVehicle->GetPosition(), 0, pVehicle->GetForward().x, pVehicle->GetForward().y);
 	CPathNode* pNode = &ThePaths.m_pathNodes[nodeId];
 	int prevNodeId = -1;
