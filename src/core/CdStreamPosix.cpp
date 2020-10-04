@@ -34,9 +34,9 @@ struct CdReadInfo
 	bool bReading;
 	int32 nStatus;
 #ifdef ONE_THREAD_PER_CHANNEL
-	int8 nThreadStatus; // 0: created 1:initalized 2:abort now
-    pthread_t pChannelThread;
-    sem_t *pStartSemaphore;
+	int8 nThreadStatus; // 0: created 1:priority set up 2:abort now
+	pthread_t pChannelThread;
+	sem_t *pStartSemaphore;
 #endif
 	sem_t *pDoneSemaphore; // used for CdStreamSync
 	int32 hFile;
@@ -52,7 +52,7 @@ char *gImgNames[MAX_CDIMAGES];
 #ifndef ONE_THREAD_PER_CHANNEL
 pthread_t _gCdStreamThread;
 sem_t *gCdStreamSema; // released when we have new thing to read(so channel is set)
-int8 gCdStreamThreadStatus; // 0: created 1:initalized 2:abort now
+int8 gCdStreamThreadStatus; // 0: created 1:priority set up 2:abort now
 Queue gChannelRequestQ;
 bool _gbCdStreamOverlapped;
 #endif
@@ -69,15 +69,14 @@ void
 CdStreamInitThread(void)
 {
 	int status;
-
+	char semName[20];
 #ifndef ONE_THREAD_PER_CHANNEL
 	gChannelRequestQ.items = (int32 *)calloc(gNumChannels + 1, sizeof(int32));
 	gChannelRequestQ.head = 0;
 	gChannelRequestQ.tail = 0;
 	gChannelRequestQ.size = gNumChannels + 1;
 	ASSERT(gChannelRequestQ.items != nil );
-  gCdStreamSema = sem_open("/semaphore_cd_stream", O_CREAT, 0644, 1);
-#endif
+	gCdStreamSema = sem_open("/semaphore_cd_stream", O_CREAT, 0644, 1);
 
 
 	if (gCdStreamSema == SEM_FAILED) {
@@ -85,33 +84,35 @@ CdStreamInitThread(void)
 		ASSERT(0);
 		return;
 	}
-
+#endif
 
 	if ( gNumChannels > 0 )
 	{
 		for ( int32 i = 0; i < gNumChannels; i++ )
 		{
-      gpReadInfo[i].pDoneSemaphore = sem_open("/semaphore_done", O_CREAT, 0644, 1);
+			sprintf(semName,"/semaphore_done%d",i);
+			gpReadInfo[i].pDoneSemaphore = sem_open(semName, O_CREAT, 0644, 1);
 
-      if (gpReadInfo[i].pDoneSemaphore == SEM_FAILED)
+			if (gpReadInfo[i].pDoneSemaphore == SEM_FAILED)
 			{
 				CDTRACE("failed to create sync semaphore");
 				ASSERT(0);
 				return;
 			}
 #ifdef ONE_THREAD_PER_CHANNEL
-      gpReadInfo[i].pStartSemaphore = sem_open("/semaphore_start", O_CREAT, 0644, 1);
+			sprintf(semName,"/semaphore_start%d",i);
+			gpReadInfo[i].pStartSemaphore = sem_open(semName, O_CREAT, 0644, 1);
 
-      if (gpReadInfo[i].pStartSemaphore == SEM_FAILED)
+			if (gpReadInfo[i].pStartSemaphore == SEM_FAILED)
 			{
 				CDTRACE("failed to create start semaphore");
 				ASSERT(0);
 				return;
 			}
-            gpReadInfo[i].nThreadStatus = 0;
+			gpReadInfo[i].nThreadStatus = 0;
 			int *channelI = (int*)malloc(sizeof(int));
 			*channelI = i;
-            status = pthread_create(&gpReadInfo[i].pChannelThread, NULL, CdStreamThread, (void*)channelI);
+			status = pthread_create(&gpReadInfo[i].pChannelThread, NULL, CdStreamThread, (void*)channelI);
 
 			if (status == -1)
 			{
@@ -124,32 +125,32 @@ CdStreamInitThread(void)
 	}
 
 #ifndef ONE_THREAD_PER_CHANNEL
-    debug("Using one streaming thread for all channels\n");
-    status = pthread_create(&_gCdStreamThread, NULL, CdStreamThread, nil);
-    gCdStreamThreadStatus = 0;
+	debug("Using one streaming thread for all channels\n");
+	gCdStreamThreadStatus = 0;
+	status = pthread_create(&_gCdStreamThread, NULL, CdStreamThread, nil);
 
-    if (status == -1)
-    {
-        CDTRACE("failed to create sync thread");
-        ASSERT(0);
-        return;
-    }
+	if (status == -1)
+	{
+		CDTRACE("failed to create sync thread");
+		ASSERT(0);
+		return;
+	}
 #else
-    debug("Using separate streaming threads for each channel\n");
+	debug("Using separate streaming threads for each channel\n");
 #endif
 }
 
 void
 CdStreamInit(int32 numChannels)
 {
-    struct statvfs fsInfo;
+	struct statvfs fsInfo;
 
-    if((statvfs("models/gta3.img", &fsInfo)) < 0)
-    {
-        CDTRACE("can't get filesystem info");
-        ASSERT(0);
-        return;
-    }
+	if((statvfs("models/gta3.img", &fsInfo)) < 0)
+	{
+		CDTRACE("can't get filesystem info");
+		ASSERT(0);
+		return;
+	}
 #ifdef __linux__
 	_gdwCdStreamFlags = O_RDONLY | O_NOATIME;
 #else
@@ -185,26 +186,26 @@ uint32
 GetGTA3ImgSize(void)
 {
 	ASSERT( gImgFiles[0] > 0 );
-    struct stat statbuf;
+	struct stat statbuf;
 
-    char path[PATH_MAX];
-    realpath(gImgNames[0], path);
-    if (stat(path, &statbuf) == -1) {
+	char path[PATH_MAX];
+	realpath(gImgNames[0], path);
+	if (stat(path, &statbuf) == -1) {
 		// Try case-insensitivity
 		char* real = casepath(gImgNames[0], false);
 		if (real)
 		{
 			realpath(real, path);
 			free(real);
-    		if (stat(path, &statbuf) != -1)
+			if (stat(path, &statbuf) != -1)
 				goto ok;
 		}
 
-        CDTRACE("can't get size of gta3.img");
-        ASSERT(0);
-        return 0;
-    }
-ok:
+		CDTRACE("can't get size of gta3.img");
+		ASSERT(0);
+		return 0;
+	}
+	ok:
 	return (uint32)statbuf.st_size;
 }
 
@@ -213,15 +214,13 @@ CdStreamShutdown(void)
 {
     // Destroying semaphores and free(gpReadInfo) will be done at threads
 #ifndef ONE_THREAD_PER_CHANNEL
-    gCdStreamThreadStatus = 2;
-    sem_post(gCdStreamSema);
-#endif
-
-#ifdef ONE_THREAD_PER_CHANNEL
-    for ( int32 i = 0; i < gNumChannels; i++ ) {
-        gpReadInfo[i].nThreadStatus = 2;
-        sem_post(&gpReadInfo[i].pStartSemaphore);
-    }
+	gCdStreamThreadStatus = 2;
+	sem_post(gCdStreamSema);
+#else
+	for ( int32 i = 0; i < gNumChannels; i++ ) {
+		gpReadInfo[i].nThreadStatus = 2;
+		sem_post(gpReadInfo[i].pStartSemaphore);
+	}
 #endif
 }
 
@@ -243,25 +242,28 @@ CdStreamRead(int32 channel, void *buffer, uint32 offset, uint32 size)
 
 	pChannel->hFile = hImage - 1;
 
-    if ( pChannel->nSectorsToRead != 0 || pChannel->bReading )
-        return STREAM_NONE;
+	if ( pChannel->nSectorsToRead != 0 || pChannel->bReading ) {
+		flushStream[channel] = 1;
+		CdStreamSync(channel);
+		//return STREAM_NONE;
+	}
 
-    pChannel->nStatus = STREAM_NONE;
-    pChannel->nSectorOffset = _GET_OFFSET(offset);
-    pChannel->nSectorsToRead = size;
-    pChannel->pBuffer = buffer;
-    pChannel->bLocked = 0;
+	pChannel->nStatus = STREAM_NONE;
+	pChannel->nSectorOffset = _GET_OFFSET(offset);
+	pChannel->nSectorsToRead = size;
+	pChannel->pBuffer = buffer;
+	pChannel->bLocked = 0;
 
 #ifndef ONE_THREAD_PER_CHANNEL
-    AddToQueue(&gChannelRequestQ, channel);
-    if ( sem_post(gCdStreamSema) != 0 )
-        printf("Signal Sema Error\n");
+	AddToQueue(&gChannelRequestQ, channel);
+	if ( sem_post(gCdStreamSema) != 0 )
+		printf("Signal Sema Error\n");
 #else
-    if ( sem_post(&gpReadInfo[channel].pStartSemaphore) != 0 )
-        printf("Signal Sema Error\n");
+	if ( sem_post(pChannel->pStartSemaphore) != 0 )
+		printf("Signal Sema Error\n");
 #endif
 
-    return STREAM_SUCCESS;
+	return STREAM_SUCCESS;
 }
 
 int32
@@ -272,29 +274,29 @@ CdStreamGetStatus(int32 channel)
 	ASSERT( pChannel != nil );
 
 #ifdef ONE_THREAD_PER_CHANNEL
-    if (pChannel->nThreadStatus == 2)
-        return STREAM_NONE;
+	if (pChannel->nThreadStatus == 2)
+		return STREAM_NONE;
 #else
-    if (gCdStreamThreadStatus == 2)
-        return STREAM_NONE;
+	if (gCdStreamThreadStatus == 2)
+		return STREAM_NONE;
 #endif
 
-    if ( pChannel->bReading )
-        return STREAM_READING;
+	if ( pChannel->bReading )
+		return STREAM_READING;
 
-    if ( pChannel->nSectorsToRead != 0 )
-        return STREAM_WAITING;
+	if ( pChannel->nSectorsToRead != 0 )
+		return STREAM_WAITING;
 
-    if ( pChannel->nStatus != STREAM_NONE )
-    {
-        int32 status = pChannel->nStatus;
+	if ( pChannel->nStatus != STREAM_NONE )
+	{
+		int32 status = pChannel->nStatus;
 
-        pChannel->nStatus = STREAM_NONE;
+		pChannel->nStatus = STREAM_NONE;
 
-        return status;
-    }
+		return status;
+	}
 
-    return STREAM_NONE;
+	return STREAM_NONE;
 }
 
 int32
@@ -314,30 +316,34 @@ CdStreamSync(int32 channel)
 	if (flushStream[channel]) {
 #ifdef ONE_THREAD_PER_CHANNEL
 		pChannel->nSectorsToRead = 0;
-		pthread_kill(gpReadInfo[channel].pChannelThread, SIGINT);
-#else
+		pthread_kill(pChannel->pChannelThread, SIGINT);
 		if (pChannel->bReading) {
-			pChannel->nSectorsToRead = 0;
+			pChannel->bLocked = true;
+			sem_wait(pChannel->pDoneSemaphore);
+		}
+#else
+		pChannel->nSectorsToRead = 0;
+		if (pChannel->bReading) {
+			pChannel->bLocked = true;
 			pthread_kill(_gCdStreamThread, SIGINT);
-		} else {
-			pChannel->nSectorsToRead = 0;
+			sem_wait(pChannel->pDoneSemaphore);
 		}
 #endif
 		pChannel->bReading = false;
 		flushStream[channel] = false;
-	    return STREAM_NONE;
+		return STREAM_NONE;
 	}
 
-    if ( pChannel->nSectorsToRead != 0 )
-    {
-        pChannel->bLocked = true;
+	if ( pChannel->nSectorsToRead != 0 )
+	{
+		pChannel->bLocked = true;
 
-        sem_wait(pChannel->pDoneSemaphore);
-    }
+		sem_wait(pChannel->pDoneSemaphore);
+	}
 
-    pChannel->bReading = false;
+	pChannel->bReading = false;
 
-    return pChannel->nStatus;
+	return pChannel->nStatus;
 }
 
 void
@@ -382,53 +388,52 @@ void *CdStreamThread(void *param)
 	debug("Created cdstream thread\n");
 
 #ifndef ONE_THREAD_PER_CHANNEL
-    while (gCdStreamThreadStatus != 2) {
+	while (gCdStreamThreadStatus != 2) {
 		sem_wait(gCdStreamSema);
-        int32 channel = GetFirstInQueue(&gChannelRequestQ);
+		int32 channel = GetFirstInQueue(&gChannelRequestQ);
 #else
-    int channel = *((int*)param);
-    while (gpReadInfo[channel].nThreadStatus != 2){
-		sem_wait(&gpReadInfo[channel].pStartSemaphore);
+	int channel = *((int*)param);
+	while (gpReadInfo[channel].nThreadStatus != 2){
+		sem_wait(gpReadInfo[channel].pStartSemaphore);
 #endif
-		ASSERT( channel < gNumChannels );
 
 		CdReadInfo *pChannel = &gpReadInfo[channel];
 		ASSERT( pChannel != nil );
 
-#ifdef ONE_THREAD_PER_CHANNEL
-        if (gpReadInfo[channel].nThreadStatus == 0){
-            gpReadInfo[channel].nThreadStatus = 1;
-#else
-        if (gCdStreamThreadStatus == 0){
-            gCdStreamThreadStatus = 1;
-#endif
-
-#ifdef __linux__
-            pid_t tid = syscall(SYS_gettid);
-            int ret = setpriority(PRIO_PROCESS, tid, getpriority(PRIO_PROCESS, getpid()) + 1);
-#endif
-	}
-
 		// spurious wakeup or we sent interrupt signal for flushing
 		if(pChannel->nSectorsToRead == 0)
-            continue;
+			continue;
 
 		pChannel->bReading = true;
 
+		// Not standard POSIX :shrug:
+#ifdef __linux__
+#ifdef ONE_THREAD_PER_CHANNEL
+		if (gpReadInfo[channel].nThreadStatus == 0){
+			gpReadInfo[channel].nThreadStatus = 1;
+#else
+		if (gCdStreamThreadStatus == 0){
+			gCdStreamThreadStatus = 1;
+#endif
+			pid_t tid = syscall(SYS_gettid);
+			int ret = setpriority(PRIO_PROCESS, tid, getpriority(PRIO_PROCESS, getpid()) + 1);
+		}
+#endif
 		if ( pChannel->nStatus == STREAM_NONE )
 		{
-            ASSERT(pChannel->hFile >= 0);
-            ASSERT(pChannel->pBuffer != nil );
+			ASSERT(pChannel->hFile >= 0);
+			ASSERT(pChannel->pBuffer != nil );
 
 			lseek(pChannel->hFile, pChannel->nSectorOffset * CDSTREAM_SECTOR_SIZE, SEEK_SET);
-		    if (read(pChannel->hFile, pChannel->pBuffer, pChannel->nSectorsToRead * CDSTREAM_SECTOR_SIZE) == -1) {
+			if (read(pChannel->hFile, pChannel->pBuffer, pChannel->nSectorsToRead * CDSTREAM_SECTOR_SIZE) == -1) {
 				// pChannel->nSectorsToRead == 0 at this point means we wanted to flush channel
-                pChannel->nStatus = pChannel->nSectorsToRead == 0 ? STREAM_NONE : STREAM_ERROR;
-            } else {
-                pChannel->nStatus = STREAM_NONE;
-            }
+				// STREAM_WAITING is a little hack to make CStreaming not process this data
+				pChannel->nStatus = pChannel->nSectorsToRead == 0 ? STREAM_WAITING : STREAM_ERROR;
+			} else {
+				pChannel->nStatus = STREAM_NONE;
+			}
 		}
-	
+
 #ifndef ONE_THREAD_PER_CHANNEL
 		RemoveFirstInQueue(&gChannelRequestQ);
 #endif
@@ -437,26 +442,33 @@ void *CdStreamThread(void *param)
 
 		if ( pChannel->bLocked )
 		{
-			sem_post(pChannel->pDoneSemaphore);
+			sem_post(pChannel->pDoneSemaphore);	
 		}
 		pChannel->bReading = false;
 	}
+	char semName[20];
 #ifndef ONE_THREAD_PER_CHANNEL
-    for ( int32 i = 0; i < gNumChannels; i++ )
-    {
-      sem_close(gpReadInfo[i].pDoneSemaphore);
-      sem_unlink("/semaphore_done");
-    }
-    sem_close(gCdStreamSema);
-    sem_unlink("/semaphore_cd_stream");
-    free(gChannelRequestQ.items);
+	for ( int32 i = 0; i < gNumChannels; i++ )
+	{
+		sem_close(gpReadInfo[i].pDoneSemaphore);
+		sprintf(semName,"/semaphore_done%d",i);
+		sem_unlink(semName);
+	}
+	sem_close(gCdStreamSema);
+	sem_unlink("/semaphore_cd_stream");
+	free(gChannelRequestQ.items);
 #else
-  sem_close(gpReadInfo[channel].pStartSemaphore);
-  sem_unlink("/semaphore_start");
-  sem_close(gpReadInfo[channel].pDoneSemaphore);
-  sem_unlink("/semaphore_done");
+	sem_close(gpReadInfo[channel].pStartSemaphore);
+	sprintf(semName,"/semaphore_start%d",channel);
+	sem_unlink(semName);
+
+	sem_close(gpReadInfo[channel].pDoneSemaphore);
+	sprintf(semName,"/semaphore_done%d",channel);
+	sem_unlink(semName);
 #endif
-    free(gpReadInfo);
+	if (gpReadInfo)
+		free(gpReadInfo);
+	gpReadInfo = nil;
 	pthread_exit(nil);
 }
 
@@ -473,7 +485,7 @@ CdStreamAddImage(char const *path)
 		char* real = casepath(path, false);
 		if (real)
 		{
-		    gImgFiles[gNumImages] = open(real, _gdwCdStreamFlags);
+			gImgFiles[gNumImages] = open(real, _gdwCdStreamFlags);
 			free(real);
 		}
 	}
@@ -506,8 +518,10 @@ CdStreamGetImageName(int32 cd)
 void
 CdStreamRemoveImages(void)
 {
-	for ( int32 i = 0; i < gNumChannels; i++ )
+	for ( int32 i = 0; i < gNumChannels; i++ ) {
+		flushStream[i] = 1;
 		CdStreamSync(i);
+	}
 
 	for ( int32 i = 0; i < gNumImages; i++ )
 	{

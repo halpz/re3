@@ -56,7 +56,7 @@ GetNumberOfMenuOptions(int screen)
 uint8
 GetLastMenuScreen()
 {
-	uint8 page = -1;
+	int8 page = -1;
 	for (int i = 0; i < MENUPAGES; i++) {
 		if (strcmp(aScreens[i].m_ScreenName, "") == 0 && aScreens[i].unk == 0)
 			break;

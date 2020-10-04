@@ -1509,7 +1509,7 @@ void CGarage::UpdateCrusherShake(float X, float Y)
 }
 
 // This is dumb but there is no way to avoid goto. What was there originally even?
-static bool DoINeedToRefreshPointer(CEntity * pDoor, bool bIsDummy, int8 nIndex)
+static bool DoINeedToRefreshPointer(CEntity * pDoor, bool bIsDummy, uint8 nIndex)
 {
 	bool bNeedToFindDoorEntities = false;
 	if (pDoor) {
