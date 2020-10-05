@@ -2135,7 +2135,7 @@ CVehicle::HeliDustGenerate(CEntity *heli, float radius, float ground, int rnd)
 				r = clamp(red, 0.0f, 255.0f);
 				g = clamp(green, 0.0f, 255.0f);
 				b = clamp(blue, 0.0f, 255.0f);
-				RwRGBA col1 = { r, g, b, CGeneral::GetRandomNumberInRange(8, 32) };
+				RwRGBA col1 = { r, g, b, (RwUInt8)CGeneral::GetRandomNumberInRange(8, 32) };
 				RwRGBA col2 = { 255, 255, 255, 32 };
 
 				if(n&1)
