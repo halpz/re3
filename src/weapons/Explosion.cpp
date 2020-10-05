@@ -53,6 +53,7 @@ CExplosion::ClearAllExplosions()
 		gaExplosion[i].m_nIteration = 0;
 		gaExplosion[i].m_fStartTime = 0.0f;
 		gaExplosion[i].m_bIsBoat = false;
+		gaExplosion[i].m_bIsMakeSound = true;
 	}
 }
 
@@ -365,6 +366,7 @@ CExplosion::Update()
 			case EXPLOSION_GRENADE:
 			case EXPLOSION_ROCKET:
 			case EXPLOSION_HELI:
+			case EXPLOSION_HELI2:
 			case EXPLOSION_MINE:
 			case EXPLOSION_BARREL:
 				if (CTimer::GetFrameCounter() & 1) {
@@ -383,8 +385,10 @@ CExplosion::Update()
 						point1.z += 5.0f;
 						CColPoint colPoint;
 						CEntity *pEntity;
-						CWorld::ProcessVerticalLine(point1, -1000.0f, colPoint, pEntity, true, false, false, false, true, false, nil);
-						explosion.m_fZshift = colPoint.point.z;
+						if (CWorld::ProcessVerticalLine(point1, -1000.0f, colPoint, pEntity, true, false, false, false, true, false, nil))
+							explosion.m_fZshift = colPoint.point.z;
+						else
+							explosion.m_fZshift = explosion.m_vecPosition.z;
 					}
 					float ff = ((float)explosion.m_nIteration * 0.55f);
 					for (int i = 0; i < 5 * ff; i++) {
@@ -393,8 +397,6 @@ CExplosion::Update()
 						CVector pos = explosion.m_vecPosition;
 						pos.x += ff * Sin(angle);
 						pos.y += ff * Cos(angle);
-						pos.z += 5.0f; // what is the point of this?
-
 						pos.z = explosion.m_fZshift + 0.5f;
 						CParticle::AddParticle(PARTICLE_EXPLOSION_MEDIUM, pos, CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, color, CGeneral::GetRandomNumberInRange(-3.0f, 3.0f), CGeneral::GetRandomNumberInRange(-180.0f, 180.0f));
 					}
@@ -402,9 +404,10 @@ CExplosion::Update()
 				break;
 			case EXPLOSION_CAR:
 			case EXPLOSION_CAR_QUICK:
+			case EXPLOSION_BOAT:
 				if (someTime >= 3500) {
-					if (explosion.m_pVictimEntity != nil && !explosion.m_bIsBoat) {
-						if ((CGeneral::GetRandomNumber() & 0xF) == 0) {
+					if (explosion.m_pVictimEntity != nil) {
+						if ((CGeneral::GetRandomNumber() & 0xF) == 0 && !explosion.m_bIsBoat) {
 							CVehicle *veh = (CVehicle*)explosion.m_pVictimEntity;
 							uint8 component = CAR_WING_LR;
 
@@ -415,16 +418,14 @@ CExplosion::Update()
 							if (veh->IsComponentPresent(component)) {
 								CVector componentPos;
 								veh->GetComponentWorldPosition(component, componentPos);
-								CParticle::AddJetExplosion(componentPos, 1.5f, 0.0f);
+								CParticle::AddJetExplosion(componentPos, 0.5f, 0.0f);
 							}
 						}
 						if (CTimer::GetTimeInMilliseconds() > explosion.m_fStartTime) {
 							explosion.m_fStartTime = CTimer::GetTimeInMilliseconds() + 125 + (CGeneral::GetRandomNumber() & 0x7F);
 							CVector pos = explosion.m_pVictimEntity->GetPosition();
-							for (int i = 0; i < (CGeneral::GetRandomNumber() & 1) + 1; i++) {
+							for (int i = 0; i < (CGeneral::GetRandomNumber() & 1) + 1; i++)
 								CParticle::AddParticle(PARTICLE_EXPLOSION_MEDIUM, pos, CVector(0.0f, 0.0f, 0.0f), nil, 3.5f, color);
-								CParticle::AddParticle(PARTICLE_EXPLOSION_LARGE, pos, CVector(0.0f, 0.0f, 0.0f), nil, 5.5f, color);
-							}
 						}
 					}
 					if (CTimer::GetFrameCounter() & 1) {
@@ -451,12 +452,14 @@ CExplosion::Update()
 						CVector pos(x - 128, y - 128, (z % 128) + 1);
 
 						pos.Normalise();
-						pos *= ff / 5.0f;
+						pos *= (explosion.m_nIteration + 1) * ff / 5.0f;
 						pos += explosion.m_vecPosition;
 						pos.z += 0.5f;
 						CParticle::AddParticle(PARTICLE_EXPLOSION_LARGE, pos, CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, color, CGeneral::GetRandomNumberInRange(-3.0f, 3.0f), CGeneral::GetRandomNumberInRange(-180.0f, 180.0f));
 					}
 				}
+				break;
+			default:
 				break;
 			}
 			if (someTime > 0)
