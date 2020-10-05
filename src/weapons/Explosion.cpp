@@ -56,7 +56,7 @@ CExplosion::ClearAllExplosions()
 		gaExplosion[i].m_nIteration = 0;
 		gaExplosion[i].m_fStartTime = 0.0f;
 		gaExplosion[i].m_bIsBoat = false;
-		gaExplosion[i].m_bIsMakeSound = true;
+		gaExplosion[i].m_bMakeSound = true;
 	}
 }
 
@@ -92,7 +92,7 @@ CExplosion::GetExplosionType(uint8 id)
 bool
 CExplosion::DoesExplosionMakeSound(uint8 id)
 { 
-	return gaExplosion[id].m_bIsMakeSound; 
+	return gaExplosion[id].m_bMakeSound; 
 };
 
 CVector *
@@ -140,7 +140,7 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 	explosion.m_nIteration = 1;
 	explosion.m_nActiveCounter = 1;
 	explosion.m_bIsBoat = false;
-	explosion.m_bIsMakeSound = makeSound;
+	explosion.m_bMakeSound = makeSound;
 	explosion.m_nParticlesExpireTime = lifetime != 0 ? CTimer::GetTimeInMilliseconds() + lifetime : 0;
 	switch (type)
 	{

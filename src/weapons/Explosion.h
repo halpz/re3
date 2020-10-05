@@ -31,7 +31,7 @@ class CExplosion
 	uint8 m_nIteration;
 	uint8 m_nActiveCounter;
 	bool m_bIsBoat;
-	bool m_bIsMakeSound;
+	bool m_bMakeSound;
 	float m_fStartTime;
 	uint32 m_nParticlesExpireTime;
 	float m_fPower;
