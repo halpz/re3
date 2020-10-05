@@ -85,6 +85,12 @@ CExplosion::GetExplosionType(uint8 id)
 	return gaExplosion[id].m_ExplosionType;
 }
 
+bool
+CExplosion::DoesExplosionMakeSound(uint8 id)
+{ 
+	return gaExplosion[id].m_bIsMakeSound; 
+};
+
 CVector *
 CExplosion::GetExplosionPosition(uint8 id)
 {
@@ -92,14 +98,16 @@ CExplosion::GetExplosionPosition(uint8 id)
 }
 
 bool
-CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32 lifetime, bool unk)
+CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32 lifetime, bool isMakeSound)
 {
+	const RwRGBA color = { 160, 160, 160, 255 };
+	const RwRGBA colorGrenade = { 96, 96, 96, 255 };
+
 	CVector pPosn;
 	CVector posGround;
 
 	RwRGBA colorMedium = colMedExpl;
 	bool bDontExplode = false;
-	const RwRGBA color = { 160, 160, 160, 255 };
 	pPosn = pos;
 	pPosn.z += 5.0f;
 #ifdef FIX_BUGS
@@ -129,6 +137,7 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 	explosion.m_nIteration = 1;
 	explosion.m_nActiveCounter = 1;
 	explosion.m_bIsBoat = false;
+	explosion.m_bIsMakeSound = true;
 	explosion.m_nParticlesExpireTime = lifetime != 0 ? CTimer::GetTimeInMilliseconds() + lifetime : 0;
 	switch (type)
 	{
@@ -140,8 +149,13 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 		posGround = pos;
 		posGround.z = CWorld::FindGroundZFor3DCoord(posGround.x, posGround.y, posGround.z + 3.0f, nil);
 		CEventList::RegisterEvent(EVENT_EXPLOSION, posGround, 250);
-		if (Distance(explosion.m_vecPosition, TheCamera.GetPosition()) < 40.0f)
-			CParticle::AddParticle(PARTICLE_EXPLOSION_LFAST, explosion.m_vecPosition, CVector(0.0f, 0.0f, 0.0f), nil, 5.5f, color);
+		if (Distance(explosion.m_vecPosition, TheCamera.GetPosition()) < 40.0f) {
+			uint8 tmp = CGeneral::GetRandomNumberInRange(0, 64) - 64;
+			RwRGBA tmpColor = colorGrenade;
+			tmpColor.green += tmp;
+			tmpColor.blue += tmp;
+			CParticle::AddParticle(PARTICLE_EXPLOSION_LFAST, explosion.m_vecPosition, CVector(0.0f, 0.0f, 0.0f), nil, 4.5f, tmpColor);
+		}
 		break;
 	case EXPLOSION_MOLOTOV:
 	{
@@ -151,18 +165,17 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 		explosion.m_fPropagationRate = 0.5f;
 		posGround = pos;
 		bool found;
-		posGround.z = CWorld::FindGroundZFor3DCoord(posGround.x, posGround.y, posGround.z + 3.0f, &found);
-		if (found) {
-			float waterLevel;
-			if (CWaterLevel::GetWaterLevelNoWaves(posGround.x, posGround.y, posGround.z, &waterLevel)
-				&& posGround.z < waterLevel
-				&& waterLevel - 6.0f < posGround.z) // some subway/tunnels check?
-				bDontExplode = true;
-			else
-				gFireManager.StartFire(posGround, 1.8f, false);
-		}
-		else
+		float tmp = CWorld::FindGroundZFor3DCoord(posGround.x, posGround.y, posGround.z + 3.0f, &found);
+		if (found)
+			posGround.z = tmp;
+
+		float waterLevel;
+		if (CWaterLevel::GetWaterLevelNoWaves(posGround.x, posGround.y, posGround.z, &waterLevel)
+			&& posGround.z < waterLevel && waterLevel - 6.0f < posGround.z) { // some subway/tunnels check?
 			bDontExplode = true;
+		} else if (found) {
+			gFireManager.StartFire(posGround, 1.8f, false);
+		}
 		break;
 	}
 	case EXPLOSION_ROCKET:
@@ -186,60 +199,71 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 			if (explosion.m_pVictimEntity->IsVehicle() && ((CVehicle*)explosion.m_pVictimEntity)->IsBoat())
 				explosion.m_bIsBoat = true;
 			CEventList::RegisterEvent(EVENT_EXPLOSION, EVENT_ENTITY_VEHICLE, explosion.m_pVictimEntity, nil, 1000);
-		} else 
+		} else {
 			CEventList::RegisterEvent(EVENT_EXPLOSION, pos, 1000);
+		}
 
 		if (explosion.m_pVictimEntity != nil && !explosion.m_bIsBoat) {
-			int rn = (CGeneral::GetRandomNumber() & 1) + 2;
-			for (int i = 0; i < rn; i++) {
-				CParticle::AddParticle(PARTICLE_EXPLOSION_MEDIUM, explosion.m_pVictimEntity->GetPosition(), CVector(0.0f, 0.0f, 0.0f), nil, 3.5f, colMedExpl);
-				CParticle::AddParticle(PARTICLE_EXPLOSION_LFAST, explosion.m_pVictimEntity->GetPosition(), CVector(0.0f, 0.0f, 0.0f), nil, 5.5f, color);
-			}
 			CVehicle *veh = (CVehicle*)explosion.m_pVictimEntity;
-			int32 component = CAR_WING_LR;
+			CVector componentPos;
 
-			// miami leftover
-			if (veh->IsBike())
-				component = BIKE_FORKS_REAR;
-
-			if (veh->IsComponentPresent(component)) {
-				CVector componentPos;
-				veh->GetComponentWorldPosition(component, componentPos);
-				rn = (CGeneral::GetRandomNumber() & 1) + 1;
+			if (veh->IsBike()) {
+				veh->GetComponentWorldPosition(BIKE_FORKS_REAR, componentPos);
+			} else if (veh->IsComponentPresent(CAR_BUMP_REAR) && veh->IsComponentPresent(CAR_WHEEL_LB)) { //mb it's another enum
+				CVector tmpVec;
+				veh->GetComponentWorldPosition(CAR_BUMP_REAR, componentPos);
+				veh->GetComponentWorldPosition(CAR_WHEEL_LB, tmpVec);
+				componentPos += tmpVec;
+				componentPos /= 2.0f;
+			} else if (veh->IsComponentPresent(CAR_BOOT)) {
+				veh->GetComponentWorldPosition(CAR_BOOT, componentPos);
+			}
+			if (componentPos != nil) {
+				int rn = (CGeneral::GetRandomNumber() & 1) + 1;
 				for (int i = 0; i < rn; i++)
-					CParticle::AddJetExplosion(componentPos, 1.4f, 0.0f);
+					CParticle::AddJetExplosion(componentPos, (CGeneral::GetRandomNumber() & 7) / 7.0f  + 1.5f, 0.5f);
 			}
 		}
 		break;
 	case EXPLOSION_HELI:
 	case EXPLOSION_HELI2:
-		explosion.m_fRadius = 6.0f;
-		explosion.m_fPower = 300.0f;
+		if (type == EXPLOSION_HELI2) {
+			explosion.m_fRadius = 12.0f;
+			explosion.m_fPower = 500.0f;
+		} else {
+			explosion.m_fRadius = 6.0f;
+			explosion.m_fPower = 300.0f;
+		}
 		explosion.m_fStopTime = lifetime + CTimer::GetTimeInMilliseconds() + 750;
 		explosion.m_fPropagationRate = 0.5f;
 		explosion.m_fStartTime = CTimer::GetTimeInMilliseconds();
 		for (int i = 0; i < 10; i++) {
 			CVector randpos;
-			uint8 x, y, z;
 
-			x = CGeneral::GetRandomNumber();
-			y = CGeneral::GetRandomNumber();
-			z = CGeneral::GetRandomNumber();
-			randpos = pos + CVector(x - 128, y - 128, z - 128) / 20.0f;
+			randpos.x = CGeneral::GetRandomNumber();
+			randpos.y = CGeneral::GetRandomNumber();
+			randpos.z = CGeneral::GetRandomNumber();
+			randpos -= CVector(128, 128, 128);
+			randpos /= 20.0f;
+			randpos += pos;
 
 			CParticle::AddParticle(PARTICLE_EXPLOSION_MFAST, randpos, CVector(0.0f, 0.0f, 0.0f), nil, 2.5f, color);
 
-			x = CGeneral::GetRandomNumber();
-			y = CGeneral::GetRandomNumber();
-			z = CGeneral::GetRandomNumber();
-			randpos = pos + CVector(x - 128, y - 128, z - 128) / 20.0f;
+			randpos.x = CGeneral::GetRandomNumber();
+			randpos.y = CGeneral::GetRandomNumber();
+			randpos.z = CGeneral::GetRandomNumber();
+			randpos -= CVector(128, 128, 128);
+			randpos /= 20.0f;
+			randpos += pos;
 
 			CParticle::AddParticle(PARTICLE_EXPLOSION_LFAST, randpos, CVector(0.0f, 0.0f, 0.0f), nil, 5.0f, color);
 
-			x = CGeneral::GetRandomNumber();
-			y = CGeneral::GetRandomNumber();
-			z = CGeneral::GetRandomNumber();
-			randpos = pos + CVector(x - 128, y - 128, z - 128) / 20.0f;
+			randpos.x = CGeneral::GetRandomNumber();
+			randpos.y = CGeneral::GetRandomNumber();
+			randpos.z = CGeneral::GetRandomNumber();
+			randpos -= CVector(128, 128, 128);
+			randpos /= 20.0f;
+			randpos += pos;
 
 			CParticle::AddJetExplosion(randpos, 1.4f, 3.0f);
 		}
@@ -262,13 +286,10 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 		explosion.m_fPropagationRate = 0.5f;
 		for (int i = 0; i < 6; i++) {
 			CVector randpos;
-			uint8 x, y, z;
-
-			x = CGeneral::GetRandomNumber();
-			y = CGeneral::GetRandomNumber();
-			z = CGeneral::GetRandomNumber();
-			randpos = CVector(x - 128, y - 128, z - 128);
-
+			randpos.x = CGeneral::GetRandomNumber();
+			randpos.y = CGeneral::GetRandomNumber();
+			randpos.z = CGeneral::GetRandomNumber();
+			randpos -= CVector(128, 128, 128);
 			randpos.x /= 50.0f;
 			randpos.y /= 50.0f;
 			randpos.z /= 25.0f;
@@ -300,7 +321,11 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 			CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z + 4.0f, nil); // BUG? result is unused
 		CEventList::RegisterEvent(EVENT_EXPLOSION, posGround, 250);
 		break;
+	default:
+		debug("Undefined explosion type, AddExplosion, Explosion.cpp");
+		break;
 	}
+
 	if (bDontExplode) {
 		explosion.m_nIteration = 0;
 		return false;
@@ -309,8 +334,12 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 	if (explosion.m_fPower != 0.0f && explosion.m_nParticlesExpireTime == 0)
 		CWorld::TriggerExplosion(pos, explosion.m_fRadius, explosion.m_fPower, culprit, (type == EXPLOSION_ROCKET || type == EXPLOSION_CAR_QUICK || type == EXPLOSION_MINE || type == EXPLOSION_BARREL || type == EXPLOSION_TANK_GRENADE || type == EXPLOSION_HELI_BOMB));
 
-	TheCamera.CamShake(0.6f, pos.x, pos.y, pos.z);
-	CPad::GetPad(0)->StartShake_Distance(300, 128, pos.x, pos.y, pos.z);
+	if (type == EXPLOSION_MOLOTOV) {
+		TheCamera.CamShake(0.2f, pos.x, pos.y, pos.z);
+	} else {
+		TheCamera.CamShake(0.6f, pos.x, pos.y, pos.z);
+		CPad::GetPad(0)->StartShake_Distance(300, 128, pos.x, pos.y, pos.z);
+	}
 	return true;
 }
 

@@ -257,9 +257,9 @@ public:
 	uint8 ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance) const;                                 // done
 	int32 CreateEntity(eAudioType type, void *entity);                                                                     // done
 
-	void DestroyAllGameCreatedEntities();
-	void DestroyEntity(int32 id); //done (inlined in vc)
-	void DoPoliceRadioCrackle();
+	void DestroyAllGameCreatedEntities();                                                                                  // done ? I don't seed pEntity = nil;
+	void DestroyEntity(int32 id);                                                                                          // done (inlined in vc) ? I not seen id checks
+	void DoPoliceRadioCrackle();                                                                                           // done
 
 	// functions returning talk sfx,
 	// order from GetPedCommentSfx
@@ -296,12 +296,12 @@ public:
 
 	bool MissionScriptAudioUsesPoliceChannel(int32 soundMission) const;
 
-	void PlayLoadedMissionAudio(uint8 slot);               // done
-	void PlayOneShot(int32 index, int16 sound, float vol); // done
-	void PlaySuspectLastSeen(float x, float y, float z);
-	void PlayerJustGotInCar() const; // done
-	void PlayerJustLeftCar() const;  // done
-	void PostInitialiseGameSpecificSetup();
+	void PlayLoadedMissionAudio(uint8 slot);                // done
+	void PlayOneShot(int32 index, int16 sound, float vol);  // done
+	void PlaySuspectLastSeen(float x, float y, float z);    //
+	void PlayerJustGotInCar() const;                        // done
+	void PlayerJustLeftCar() const;                         // done
+	void PostInitialiseGameSpecificSetup();                 //
 	void PostTerminateGameSpecificShutdown();               // done
 	void PreInitialiseGameSpecificSetup() const;            // done
 	void PreloadMissionAudio(uint8 slot, Const char *name); // done
@@ -317,40 +317,40 @@ public:
 	void ProcessBridgeOneShots();
 	void ProcessBridgeWarning();
 #endif
-	bool ProcessCarBombTick(cVehicleParams *params); //done
-	void ProcessCesna(cVehicleParams *params);
-	//void ProcessCrane();
-	bool ProcessEngineDamage(cVehicleParams *params); //done
-	void ProcessEntity(int32 sound); //done
-	void ProcessExplosions(int32 explosion);
-	void ProcessFireHydrant();
-	void ProcessFires(int32 entity);
-	void ProcessFrontEnd();
-	void ProcessGarages();
-	void ProcessCarHeli(cVehicleParams* params); //done
-	void ProcessVehicleFlatTyre(cVehicleParams* params); //done
-	void ProcessJumbo(cVehicleParams *);
-	void ProcessJumboAccel(CPlane *plane);
-	void ProcessJumboDecel(CPlane *plane);
-	void ProcessJumboFlying();
-	void ProcessJumboLanding(CPlane *plane);
-	void ProcessJumboTakeOff(CPlane *plane);
-	void ProcessJumboTaxi();
-	void ProcessLoopingScriptObject(uint8 sound);
-	void ProcessMissionAudio();
-	void ProcessMissionAudioSlot(uint8 slot);
-	void ProcessModelCarEngine(cVehicleParams *params);
-	void ProcessOneShotScriptObject(uint8 sound);
-	void ProcessPed(CPhysical *ped);
-	void ProcessPedOneShots(cPedParams *params);
-	void ProcessPhysical(int32 id); //done
-	void ProcessPlane(cVehicleParams *params); //done
-	void ProcessPlayersVehicleEngine(cVehicleParams *params, CVehicle* veh); //done
-	void ProcessProjectiles();
-	void ProcessRainOnVehicle(cVehicleParams *params);
-	void ProcessReverb() const;
-	bool ProcessReverseGear(cVehicleParams *params); //done
-	void ProcessScriptObject(int32 id); //done
+	bool ProcessCarBombTick(cVehicleParams *params);                         // done
+	void ProcessCesna(cVehicleParams *params);                               // 
+	//void ProcessCrane();                                                   // 
+	bool ProcessEngineDamage(cVehicleParams *params);                        // done
+	void ProcessEntity(int32 sound);                                         // done
+	void ProcessExplosions(int32 explosion);                                 // done
+	void ProcessFireHydrant();                                               // done
+	void ProcessFires(int32 entity);                                         // 
+	void ProcessFrontEnd();                                                  // 
+	void ProcessGarages();                                                   // 
+	void ProcessCarHeli(cVehicleParams* params);                             // done
+	void ProcessVehicleFlatTyre(cVehicleParams* params);                     // done
+	void ProcessJumbo(cVehicleParams *);                                     // 
+	void ProcessJumboAccel(CPlane *plane);                                   // 
+	void ProcessJumboDecel(CPlane *plane);                                   // 
+	void ProcessJumboFlying();                                               // 
+	void ProcessJumboLanding(CPlane *plane);                                 // 
+	void ProcessJumboTakeOff(CPlane *plane);                               	 // 
+	void ProcessJumboTaxi();                                                 // 
+	void ProcessLoopingScriptObject(uint8 sound);                            // 
+	void ProcessMissionAudio();                                              // 
+	void ProcessMissionAudioSlot(uint8 slot);                                // 
+	void ProcessModelCarEngine(cVehicleParams *params);                      // 
+	void ProcessOneShotScriptObject(uint8 sound);                            // 
+	void ProcessPed(CPhysical *ped);                                         // 
+	void ProcessPedOneShots(cPedParams *params);                             // 
+	void ProcessPhysical(int32 id);                                          // done
+	void ProcessPlane(cVehicleParams *params);                               // done
+	void ProcessPlayersVehicleEngine(cVehicleParams *params, CVehicle* veh); // done
+	void ProcessProjectiles();                                               // 
+	void ProcessRainOnVehicle(cVehicleParams *params);                       // 
+	void ProcessReverb() const;                                              // 
+	bool ProcessReverseGear(cVehicleParams *params);                         // done
+	void ProcessScriptObject(int32 id);                                      // done
 	void ProcessSpecial();
 #ifdef GTA_TRAIN
 	bool ProcessTrainNoise(cVehicleParams *params);
