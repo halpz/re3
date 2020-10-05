@@ -24,12 +24,12 @@ public:
 	
 	uint32 ms2samples(uint32 ms)
 	{
-		return float(ms) / 1000.0f * float(GetChannels()) * float(GetSampleRate());
+		return float(ms) / 1000.0f * float(GetSampleRate());
 	}
 	
 	uint32 samples2ms(uint32 sm)
 	{
-		return float(sm) * 1000.0f / float(GetChannels()) / float(GetSampleRate());
+		return float(sm) * 1000.0f / float(GetSampleRate());
 	}
 	
 	uint32 GetBufferSamples()

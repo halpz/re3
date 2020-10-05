@@ -161,10 +161,10 @@ cMusicManager::SetStartingTrackPositions(uint8 isNewGameTimer)
 			if (i < STREAMED_SOUND_CITY_AMBIENT && isNewGameTimer)
 				m_aTracks[i].m_nPosition = NewGameRadioTimers[i];
 			else if (i < STREAMED_SOUND_ANNOUNCE_BRIDGE_CLOSED)
-				m_aTracks[i].m_nPosition = pos * AudioManager.GetRandomNumber(i % 5) % m_aTracks[i].m_nLength;
+				m_aTracks[i].m_nPosition = (pos * AudioManager.GetRandomNumber(i % 5)) % m_aTracks[i].m_nLength;
 			else
 				m_aTracks[i].m_nPosition = 0;
-
+			
 			m_aTracks[i].m_nLastPosCheckTimer = CTimer::GetTimeInMillisecondsPauseMode();
 		}
 	}
