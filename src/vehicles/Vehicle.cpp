@@ -706,7 +706,7 @@ CVehicle::InflictDamage(CEntity* damagedBy, eWeaponType weaponType, float damage
 		}
 	}
 #ifdef FIX_BUGS // removing dumb case when shooting police car in player's own garage gives wanted level
-	if (GetModelIndex() == MI_POLICE && damagedBy == FindPlayerPed() && !bHasBeenOwnedByPlayer)
+	if (GetModelIndex() == MI_POLICE && damagedBy == FindPlayerPed() && damagedBy != nil && !bHasBeenOwnedByPlayer)
 #else
 	if (GetModelIndex() == MI_POLICE && damagedBy == FindPlayerPed())
 #endif
