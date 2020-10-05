@@ -25,6 +25,9 @@ CExplosion gaExplosion[NUM_EXPLOSIONS];
 RwRGBA colMedExpl = { 0, 0, 0, 0 };
 RwRGBA colUpdate = { 0, 0, 0, 0 };
 
+const RwRGBA colAddExplosion = { 160, 160, 160, 255 };
+const RwRGBA colGrenade = { 96, 96, 96, 255 };
+
 int AudioHandle = AEHANDLE_NONE;
 
 void
@@ -99,15 +102,14 @@ CExplosion::GetExplosionPosition(uint8 id)
 }
 
 bool
-CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32 lifetime, bool isMakeSound)
+CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32 lifetime, bool makeSound)
 {
-	const RwRGBA color = { 160, 160, 160, 255 };
-	const RwRGBA colorGrenade = { 96, 96, 96, 255 };
-
 	CVector pPosn;
 	CVector posGround;
 
 	RwRGBA colorMedium = colMedExpl;
+	RwRGBA color = colAddExplosion;
+	RwRGBA colorGrenade = colGrenade;
 	bool bDontExplode = false;
 	pPosn = pos;
 	pPosn.z += 5.0f;
@@ -138,7 +140,7 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 	explosion.m_nIteration = 1;
 	explosion.m_nActiveCounter = 1;
 	explosion.m_bIsBoat = false;
-	explosion.m_bIsMakeSound = true;
+	explosion.m_bIsMakeSound = makeSound;
 	explosion.m_nParticlesExpireTime = lifetime != 0 ? CTimer::GetTimeInMilliseconds() + lifetime : 0;
 	switch (type)
 	{
@@ -152,10 +154,9 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 		CEventList::RegisterEvent(EVENT_EXPLOSION, posGround, 250);
 		if (Distance(explosion.m_vecPosition, TheCamera.GetPosition()) < 40.0f) {
 			uint8 tmp = CGeneral::GetRandomNumberInRange(0, 64) - 64;
-			RwRGBA tmpColor = colorGrenade;
-			tmpColor.green += tmp;
-			tmpColor.blue += tmp;
-			CParticle::AddParticle(PARTICLE_EXPLOSION_LFAST, explosion.m_vecPosition, CVector(0.0f, 0.0f, 0.0f), nil, 4.5f, tmpColor);
+			colorGrenade.green += tmp;
+			colorGrenade.blue += tmp;
+			CParticle::AddParticle(PARTICLE_EXPLOSION_LFAST, explosion.m_vecPosition, CVector(0.0f, 0.0f, 0.0f), nil, 4.5f, colorGrenade);
 		}
 		break;
 	case EXPLOSION_MOLOTOV:

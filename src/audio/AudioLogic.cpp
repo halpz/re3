@@ -5932,7 +5932,7 @@ cAudioManager::ProcessGarages()
 void
 cAudioManager::ProcessFireHydrant()
 {
-	static const int SOUND_INTENSITY = 35;
+	const int SOUND_INTENSITY = 35;
 
 	float distSquared;
 
