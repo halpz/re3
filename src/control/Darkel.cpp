@@ -13,6 +13,9 @@
 #include "Font.h"
 #include "Text.h"
 #include "Vehicle.h"
+#ifdef FIX_BUGS
+#include "Replay.h"
+#endif
 
 #define FRENZY_ANY_PED -1
 #define FRENZY_ANY_CAR -2
@@ -60,6 +63,10 @@ CDarkel::CalcFade(uint32 time, uint32 start, uint32 end)
 void
 CDarkel::DrawMessages()
 {
+#ifdef FIX_BUGS
+	if (CReplay::IsPlayingBack())
+		return;
+#endif
 	switch (Status) {
 		case KILLFRENZY_ONGOING:
 		{
@@ -171,6 +178,10 @@ CDarkel::ReadStatus()
 void
 CDarkel::RegisterCarBlownUpByPlayer(CVehicle *vehicle)
 {
+#ifdef FIX_BUGS
+	if (CReplay::IsPlayingBack())
+		return;
+#endif
 	if (FrenzyOnGoing()) {
 		int32 model = vehicle->GetModelIndex();
 		if (ModelToKill == FRENZY_ANY_CAR || ModelToKill == model || ModelToKill2 == model || ModelToKill3 == model || ModelToKill4 == model) {
@@ -185,6 +196,10 @@ CDarkel::RegisterCarBlownUpByPlayer(CVehicle *vehicle)
 void
 CDarkel::RegisterKillByPlayer(CPed *victim, eWeaponType weapon, bool headshot)
 {
+#ifdef FIX_BUGS
+	if (CReplay::IsPlayingBack())
+		return;
+#endif
 	if (FrenzyOnGoing() && (weapon == WeaponType
 			|| weapon == WEAPONTYPE_EXPLOSION
 			|| weapon == WEAPONTYPE_UZI_DRIVEBY && WeaponType == WEAPONTYPE_UZI
@@ -210,6 +225,10 @@ CDarkel::RegisterKillByPlayer(CPed *victim, eWeaponType weapon, bool headshot)
 void
 CDarkel::RegisterKillNotByPlayer(CPed* victim, eWeaponType weapontype)
 {
+#ifdef FIX_BUGS
+	if (CReplay::IsPlayingBack())
+		return;
+#endif
 	CStats::PeopleKilledByOthers++;
 }
 
@@ -301,6 +320,11 @@ CDarkel::StartFrenzy(eWeaponType weaponType, int32 time, uint16 kill, int32 mode
 void
 CDarkel::Update()
 {
+#ifdef FIX_BUGS
+	if (CReplay::IsPlayingBack())
+		return;
+#endif
+
 	if (Status != KILLFRENZY_ONGOING)
 		return;
 
