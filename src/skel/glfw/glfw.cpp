@@ -41,7 +41,6 @@
 #include "AnimViewer.h"
 #include "Font.h"
 
-
 #define MAX_SUBSYSTEMS		(16)
 
 
@@ -92,6 +91,11 @@ long _dwOperatingSystemVersion;
 #include <signal.h>
 #include <errno.h>
 #endif
+
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+char gSelectedJoystickName[128] = "";
+#endif
+
 /*
  *****************************************************************************
  */
@@ -425,6 +429,10 @@ psInitialize(void)
 			_dwOperatingSystemVersion = OS_WIN95;
 		}
 	}
+#else
+	_dwOperatingSystemVersion = OS_WINXP; // To fool other classes
+#endif
+
 	
 #ifndef PS2_MENU
 
@@ -434,6 +442,8 @@ psInitialize(void)
 
 #endif
 
+
+#ifdef _WIN32
 	MEMORYSTATUS memstats;
 	GlobalMemoryStatus(&memstats);
 
@@ -441,22 +451,7 @@ psInitialize(void)
 
 	debug("Physical memory size %u\n", memstats.dwTotalPhys);
 	debug("Available physical memory %u\n", memstats.dwAvailPhys);
-#else
-	
-#ifndef PS2_MENU
-
-#ifdef GTA3_1_1_PATCH
-	FrontEndMenuManager.LoadSettings();
-#endif
-
-#endif
-#ifndef __APPLE__
-	struct sysinfo systemInfo;
-	sysinfo(&systemInfo);
-	_dwMemAvailPhys = systemInfo.freeram;
-	debug("Physical memory size %u\n", systemInfo.totalram);
-	debug("Available physical memory %u\n", systemInfo.freeram);
-#else
+#elif defined (__APPLE__)
 	uint64_t size = 0;
 	uint64_t page_size = 0;
 	size_t uint64_len = sizeof(uint64_t);
@@ -469,10 +464,15 @@ psInitialize(void)
 	_dwMemAvailPhys = (uint64_t)(vm_stat.free_count * page_size);
 	debug("Physical memory size %llu\n", _dwMemAvailPhys);
 	debug("Available physical memory %llu\n", size);
+#else
+ 	struct sysinfo systemInfo;
+	sysinfo(&systemInfo);
+	_dwMemAvailPhys = systemInfo.freeram;
+	debug("Physical memory size %u\n", systemInfo.totalram);
+	debug("Available physical memory %u\n", systemInfo.freeram);
 #endif
-	_dwOperatingSystemVersion = OS_WINXP; // To fool other classes
-#endif
-	TheText.Unload();
+  
+  TheText.Unload();
 
 	return TRUE;
 }
@@ -839,35 +839,26 @@ void joysChangeCB(int jid, int event);
 
 bool IsThisJoystickBlacklisted(int i)
 {
+#ifndef DONT_TRUST_RECOGNIZED_JOYSTICKS
+	return false;
+#else
 	if (glfwJoystickIsGamepad(i))
 		return false;
 
 	const char* joyname = glfwGetJoystickName(i);
 
-	// this is just a keyboard and mouse
-	// Microsoft Microsoft® 2.4GHz Transceiver v8.0 Consumer Control
-	// Microsoft Microsoft® 2.4GHz Transceiver v8.0 System Control
-	if (strstr(joyname, "2.4GHz Transceiver"))
-		return true;
-	// COMPANY USB Device System Control
-	// COMPANY USB Device Consumer Control
-	if (strstr(joyname, "COMPANY USB"))
-		return true;
-	// i.e. Synaptics TM2438-005
-	if (strstr(joyname, "Synaptics "))
-		return true;
-	// i.e. ELAN Touchscreen
-	if (strstr(joyname, "ELAN "))
-		return true;
-	// i.e. Primax Electronics, Ltd HP Wireless Keyboard Mouse Kit Consumer Control
-	if (strstr(joyname, "Keyboard"))
-		return true;
+	if (strncmp(joyname, gSelectedJoystickName, strlen(gSelectedJoystickName)) == 0)
+		return false;
 
-	return false;
+	return true;
+#endif
 }
 
 void _InputInitialiseJoys()
 {
+	PSGLOBAL(joy1id) = -1;
+	PSGLOBAL(joy2id) = -1;
+
 	for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++) {
 		if (glfwJoystickPresent(i) && !IsThisJoystickBlacklisted(i)) {
 			if (PSGLOBAL(joy1id) == -1)
@@ -882,6 +873,9 @@ void _InputInitialiseJoys()
 	if (PSGLOBAL(joy1id) != -1) {
 		int count;
 		glfwGetJoystickButtons(PSGLOBAL(joy1id), &count);
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+		strcpy(gSelectedJoystickName, glfwGetJoystickName(PSGLOBAL(joy1id)));
+#endif
 		ControlsManager.InitDefaultControlConfigJoyPad(count);
 	}
 }
@@ -2087,18 +2081,19 @@ void CapturePad(RwInt32 padID)
 
 void joysChangeCB(int jid, int event)
 {
-	if (event == GLFW_CONNECTED && !IsThisJoystickBlacklisted(jid))
-	{
-		if (PSGLOBAL(joy1id) == -1)
+	if (event == GLFW_CONNECTED && !IsThisJoystickBlacklisted(jid)) {
+		if (PSGLOBAL(joy1id) == -1) {
 			PSGLOBAL(joy1id) = jid;
-		else if (PSGLOBAL(joy2id) == -1)
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+			strcpy(gSelectedJoystickName, glfwGetJoystickName(jid));
+#endif
+		} else if (PSGLOBAL(joy2id) == -1)
 			PSGLOBAL(joy2id) = jid;
-	}
-	else if (event == GLFW_DISCONNECTED)
-	{
-		if (PSGLOBAL(joy1id) == jid)
+
+	} else if (event == GLFW_DISCONNECTED) {
+		if (PSGLOBAL(joy1id) == jid) {
 			PSGLOBAL(joy1id) = -1;
-		else if (PSGLOBAL(joy2id) == jid)
+		} else if (PSGLOBAL(joy2id) == jid)
 			PSGLOBAL(joy2id) = -1;
 	}
 }

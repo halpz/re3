@@ -198,6 +198,7 @@ enum Config {
 #define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more
 #define MORE_LANGUAGES		// Add more translations to the game
 #define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
+#define LOAD_INI_SETTINGS
 
 // Rendering/display
 #define ASPECT_RATIO_SCALE	// Not just makes everything scale with aspect ratio, also adds support for all aspect ratios
@@ -225,6 +226,9 @@ enum Config {
 // Pad
 #if !defined(RW_GL3) && defined(_WIN32)
 #define XINPUT
+#endif
+#if !defined(_WIN32) && !defined(__SWITCH__)
+#define DONT_TRUST_RECOGNIZED_JOYSTICKS // Then we'll only rely on GLFW gamepad DB, and expect user to enter Controller->Detect joysticks if his joystick isn't on that list.
 #endif
 #define DETECT_PAD_INPUT_SWITCH // Adds automatic switch of pad related stuff between controller and kb/m
 #define KANGAROO_CHEAT

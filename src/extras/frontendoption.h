@@ -10,7 +10,7 @@
 
 // About texts:
 //		All text parameters accept wchar(including hardcoded wchar* and TheText.Get)
-//		except FrontendScreenAdd(it's char[8] by the design of Frontend).
+//		except FrontendScreenAdd(it's char[8] GXT key by the design of Frontend).
 //		All texts reload if custom options reloaded too, which includes language changes and via live reload feature in debug menu!
 
 // Execute direction:
@@ -26,7 +26,7 @@
 //
 // Static/select:	You allocate the variable, pass it to function and game sets it from user input among the strings given to function,
 //					then you can handle ChangeFunc(only called on enter if onlyApplyOnEnter set, or set immediately)
-//					and ReturnPrevPageFunc optionally. You can store the option in gta3.set if you pass true to corresponding parameter.
+//					and ReturnPrevPageFunc optionally. You can store the option in an INI file if you pass the key(as a char array) to corresponding parameter.
 //
 // Dynamic:			Passing variable to function is only needed if you want to store it, otherwise you should do
 //					all the operations with ButtonPressFunc, this includes allocating the variable.
@@ -91,11 +91,11 @@ struct FrontendOption
 	int8 type;
 	int8 screenOptionOrder;
 	int32 screen;
-	wchar leftText[64];
+	wchar leftText[128];
 	ReturnPrevPageFunc returnPrevPageFunc;
 	int8* value;
 	int8 displayedValue; // only if onlyApplyOnEnter enabled for now
-	bool save;
+	const char* save;
 	int32 ogOptionId; // for replacements, see overwrite parameter of SetCursor
 	
 	union {
@@ -151,10 +151,10 @@ uint8 GetNumberOfMenuOptions(int screen);
 
 void FrontendOptionSetCursor(int screen, int8 option, bool overwrite = false);
 
-// var is optional in AddDynamic, you can enable save parameter if you pass one, otherwise pass nil/0
+// var is optional in AddDynamic, enables you to save them in an INI file(also needs passing char array to saveName param. obv), otherwise pass nil/0
 void FrontendOptionAddBuiltinAction(const wchar* leftText, int action, ButtonPressFunc buttonPressFunc, ReturnPrevPageFunc returnPrevPageFunc);
-void FrontendOptionAddSelect(const wchar* leftText, const wchar** rightTexts, int8 numRightTexts, int8 *var, bool onlyApplyOnEnter, ChangeFunc changeFunc, ReturnPrevPageFunc returnPrevPageFunc, bool save = false);
-void FrontendOptionAddDynamic(const wchar* leftText, DrawFunc rightTextDrawFunc, int8 *var, ButtonPressFunc buttonPressFunc, ReturnPrevPageFunc returnPrevPageFunc, bool save = false);
+void FrontendOptionAddSelect(const wchar* leftText, const wchar** rightTexts, int8 numRightTexts, int8 *var, bool onlyApplyOnEnter, ChangeFunc changeFunc, ReturnPrevPageFunc returnPrevPageFunc, const char* saveName = nil);
+void FrontendOptionAddDynamic(const wchar* leftText, DrawFunc rightTextDrawFunc, int8 *var, ButtonPressFunc buttonPressFunc, ReturnPrevPageFunc returnPrevPageFunc, const char* saveName = nil);
 void FrontendOptionAddRedirect(const wchar* text, int to, int8 selectedOption = 0, bool fadeIn = true);
 void FrontendOptionAddBackButton(const wchar* text, bool fadeIn = true);
 

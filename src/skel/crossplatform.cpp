@@ -84,6 +84,16 @@ void FileTimeToSystemTime(time_t* writeTime, SYSTEMTIME* out) {
 }
 #endif
 
+// Because wchar length differs between platforms.
+wchar*
+AllocUnicode(const char* src)
+{
+	wchar *dst = (wchar*)malloc(strlen(src)*2 + 2);
+	wchar *i = dst;
+	while((*i++ = (unsigned char)*src++) != '\0');
+	return dst;
+}
+
 // Funcs/features from Windows that we need on other platforms
 #ifndef _WIN32
 char *strupr(char *s) {

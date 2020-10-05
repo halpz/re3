@@ -854,6 +854,13 @@ CMenuManager::Draw()
 				str = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName);
 			break;
 		default:
+#ifdef CUSTOM_FRONTEND_OPTIONS
+			if (aScreens[m_nCurrScreen].m_aEntries[0].m_SaveSlot == SAVESLOT_CFO) {
+				FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[0].m_TargetMenu];
+				str = (wchar*)option.leftText;
+			}
+			else
+#endif
 			str = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName);
 			break;
 		}
@@ -3443,19 +3450,6 @@ CMenuManager::LoadSettings()
 			CFileMgr::Read(fileHandle, m_PrefsSkinFile, 256);
 			CFileMgr::Read(fileHandle, (char*)&m_ControlMethod, 1);
 			CFileMgr::Read(fileHandle, (char*)&m_PrefsLanguage, 1);
-#ifdef CUSTOM_FRONTEND_OPTIONS
-			for (int i = 0; i < numCustomFrontendOptions; i++) {
-				FrontendOption& option = customFrontendOptions[i];
-				if (option.save) {
-					CFileMgr::Read(fileHandle, (char*)option.value, 1);
-					option.lastSavedValue = option.displayedValue = *option.value;
-				}
-			}
-#endif
-#ifdef NO_ISLAND_LOADING
-			CFileMgr::Read(fileHandle, (char *)&CMenuManager::m_PrefsIslandLoading, 1);
-			CMenuManager::m_DisplayIslandLoading = CMenuManager::m_PrefsIslandLoading;
-#endif
 		}
 	}
 
@@ -3472,8 +3466,11 @@ CMenuManager::LoadSettings()
 		m_bLanguageLoaded = false;
 	else {
 		m_bLanguageLoaded = true;
+		// Already called in InitialiseChangedLanguageSettings
+		/*
 		TheText.Unload();
 		TheText.Load();
+		*/
 		m_bFrontEnd_ReloadObrTxtGxt = true;
 		InitialiseChangedLanguageSettings();
 
@@ -3546,21 +3543,14 @@ CMenuManager::SaveSettings()
 		CFileMgr::Write(fileHandle, m_PrefsSkinFile, 256);
 		CFileMgr::Write(fileHandle, (char*)&m_ControlMethod, 1);
 		CFileMgr::Write(fileHandle, (char*)&m_PrefsLanguage, 1);
-#ifdef CUSTOM_FRONTEND_OPTIONS
-		for (int i = 0; i < numCustomFrontendOptions; i++) {
-			FrontendOption &option = customFrontendOptions[i];
-			if (option.save) {
-				CFileMgr::Write(fileHandle, (char*)option.value, 1);
-			}
-		}
-#endif
-#ifdef NO_ISLAND_LOADING
-		CFileMgr::Write(fileHandle, (char *)&CMenuManager::m_PrefsIslandLoading, 1);
-#endif
 	}
 
 	CFileMgr::CloseFile(fileHandle);
 	CFileMgr::SetDir("");
+
+#ifdef LOAD_INI_SETTINGS
+	SaveINISettings();
+#endif
 }
 
 bool DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha);
@@ -3880,7 +3870,10 @@ CMenuManager::Process(void)
 					MouseButtonJustClicked = 4;
 				else if (CPad::GetPad(0)->GetMouseWheelDownJustUp())
 					MouseButtonJustClicked = 5;
-				// TODO two more buttons
+				else if (CPad::GetPad(0)->GetMouseX1JustUp())
+					MouseButtonJustClicked = 6;
+				else if (CPad::GetPad(0)->GetMouseX2JustUp())
+					MouseButtonJustClicked = 7;
 
 				JoyButtonJustClicked = ControlsManager.GetJoyButtonJustDown();
 
@@ -5106,7 +5099,8 @@ CMenuManager::ProcessButtonPresses(void)
 							*option.value = option.lastSavedValue = option.displayedValue;
 
 						} else if (option.type == FEOPTION_DYNAMIC) {
-							option.buttonPressFunc(FEOPTION_ACTION_SELECT);
+							if (option.buttonPressFunc)
+								option.buttonPressFunc(FEOPTION_ACTION_SELECT);
 						} else if (option.type == FEOPTION_REDIRECT) {
 							ChangeScreen(option.to, option.option, true, option.fadeIn);
 						} else if (option.type == FEOPTION_GOBACK) {
@@ -5349,7 +5343,7 @@ CMenuManager::ProcessButtonPresses(void)
 							option.changeFunc(option.displayedValue);
 							*option.value = option.lastSavedValue = option.displayedValue;
 						}
-					} else if (option.type == FEOPTION_DYNAMIC) {
+					} else if (option.type == FEOPTION_DYNAMIC && option.buttonPressFunc) {
 						option.buttonPressFunc(changeValueBy > 0 ? FEOPTION_ACTION_RIGHT : FEOPTION_ACTION_LEFT);
 					}
 					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
