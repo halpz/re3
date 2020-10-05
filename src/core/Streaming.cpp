@@ -2556,12 +2556,17 @@ CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, size_t mem)
 void
 CStreaming::MakeSpaceFor(int32 size)
 {
-	// BUG: ms_memoryAvailable can be uninitialized
-	// the code still happens to work in that case because ms_memoryAvailable is unsigned
-	// but it's not nice....
-
+#ifdef FIX_BUGS
+#define MB (1024 * 1024)
+	if(ms_memoryAvailable == 0) {
+		extern size_t _dwMemAvailPhys;
+		ms_memoryAvailable = (_dwMemAvailPhys - 10 * MB) / 2;
+		if(ms_memoryAvailable < 50 * MB) ms_memoryAvailable = 50 * MB;
+	}
+#undef MB
+#endif
 	while(ms_memoryUsed >= ms_memoryAvailable - size)
-		if(!RemoveLeastUsedModel()){
+		if(!RemoveLeastUsedModel()) {
 			DeleteRwObjectsBehindCamera(ms_memoryAvailable - size);
 			return;
 		}

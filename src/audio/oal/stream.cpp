@@ -155,13 +155,13 @@ public:
 	void Seek(uint32 milliseconds)
 	{
 		if ( !IsOpened() ) return;
-		mpg123_seek(m_pMH, ms2samples(milliseconds)*GetSampleSize(), SEEK_SET);
+		mpg123_seek(m_pMH, ms2samples(milliseconds), SEEK_SET);
 	}
 	
 	uint32 Tell()
 	{
 		if ( !IsOpened() ) return 0;
-		return samples2ms(mpg123_tell(m_pMH)/GetSampleSize());
+		return samples2ms(mpg123_tell(m_pMH));
 	}
 	
 	uint32 Decode(void *buffer)
@@ -247,13 +247,13 @@ public:
 	void Seek(uint32 milliseconds)
 	{
 		if ( !IsOpened() ) return;
-		op_pcm_seek(m_FileH, ms2samples(milliseconds) * GetSampleSize());
+		op_pcm_seek(m_FileH, ms2samples(milliseconds) / GetChannels());
 	}
 	
 	uint32 Tell()
 	{
 		if ( !IsOpened() ) return 0;
-		return samples2ms(op_pcm_tell(m_FileH)/GetSampleSize());
+		return samples2ms(op_pcm_tell(m_FileH) * GetChannels());
 	}
 	
 	uint32 Decode(void *buffer)
@@ -461,8 +461,8 @@ uint32 CStream::GetPosMS()
 	alGetSourcei(m_alSource, AL_BYTE_OFFSET, &offset);
 
 	return m_pSoundFile->Tell()
-		- m_pSoundFile->samples2ms(m_pSoundFile->GetBufferSamples() * (NUM_STREAMBUFFERS-1))
-		+ m_pSoundFile->samples2ms(offset/m_pSoundFile->GetSampleSize());
+		- m_pSoundFile->samples2ms(m_pSoundFile->GetBufferSamples() * (NUM_STREAMBUFFERS-1)) / m_pSoundFile->GetChannels()
+		+ m_pSoundFile->samples2ms(offset/m_pSoundFile->GetSampleSize()) / m_pSoundFile->GetChannels();
 }
 
 uint32 CStream::GetLengthMS()

@@ -27,6 +27,7 @@
 #include "MusicManager.h"
 #include "Frontend.h"
 #include "Timer.h"
+#include "crossplatform.h"
 #ifdef AUDIO_OPUS
 #include <opusfile.h>
 #endif
@@ -1423,11 +1424,11 @@ cSampleManager::InitialiseSampleBanks(void)
 {
 	int32 nBank = SFX_BANK_0;
 	
-	fpSampleDescHandle = fopen(SampleBankDescFilename, "rb");
+	fpSampleDescHandle = fcaseopen(SampleBankDescFilename, "rb");
 	if ( fpSampleDescHandle == NULL )
 		return false;
 #ifndef AUDIO_OPUS
-	fpSampleDataHandle = fopen(SampleBankDataFilename, "rb");
+	fpSampleDataHandle = fcaseopen(SampleBankDataFilename, "rb");
 	if ( fpSampleDataHandle == NULL )
 	{
 		fclose(fpSampleDescHandle);
