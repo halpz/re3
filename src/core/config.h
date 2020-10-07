@@ -251,7 +251,7 @@ enum Config {
 #define DETECT_PAD_INPUT_SWITCH // Adds automatic switch of pad related stuff between controller and kb/m
 #define KANGAROO_CHEAT
 #define RESTORE_ALLCARSHELI_CHEAT
-#define ALT_DODO_CHEAT
+#define BETTER_ALLCARSAREDODO_CHEAT
 #define WALLCLIMB_CHEAT
 #define REGISTER_START_BUTTON
 //#define BIND_VEHICLE_FIREWEAPON // Adds ability to rebind fire key for 'in vehicle' controls
