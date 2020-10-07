@@ -402,9 +402,6 @@ public:
 	static bool bCheat8;
 	static bool bCheat9;
 	static bool bCheat10;
-#ifdef ALT_DODO_CHEAT
-	static bool bAltDodoCheat;
-#endif
 	static bool bHoverCheat;
 	static bool bAllTaxisHaveNitro;
 	static bool m_bDisableMouseSteering;

@@ -43,9 +43,6 @@ bool CVehicle::bCheat5;
 bool CVehicle::bCheat8;
 bool CVehicle::bCheat9;
 bool CVehicle::bCheat10;
-#ifdef ALT_DODO_CHEAT
-bool CVehicle::bAltDodoCheat;
-#endif
 bool CVehicle::bHoverCheat;
 bool CVehicle::bAllTaxisHaveNitro;
 bool CVehicle::m_bDisableMouseSteering = true;
@@ -353,14 +350,26 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		fSteerUD *= -fSteerMult;
 
 		// thrust
+		float fThrust = pFlyingHandling->fThrust;
+		float fThrustFallOff = pFlyingHandling->fThrustFallOff;
+		float fThrustFallOffBack = pFlyingHandling->fThrustFallOff * 8.0f;
+#ifdef BETTER_ALLCARSAREDODO_CHEAT
+		if (bAllDodosCheat && !IsRealPlane()) {
+			fThrust = pHandling->Transmission.fEngineAcceleration
+				* (pHandling->Transmission.nDriveType == '4' ? 4.0f : 2.0f);
+			fThrust = 5.0f * Max(fThrust, pFlyingHandling->fThrust); //tweak: (cars engines too weak to thrust car on air)
+			fThrustFallOff = Min(0.7f / pHandling->Transmission.fMaxVelocity, fThrustFallOff); //tweak: (use 0.7 instead of 1.0 to make cars 30% faster)
+			fThrustFallOffBack = -1.0f / pHandling->Transmission.fMaxReverseVelocity;
+		}
+#endif
 		float fForwSpeed = DotProduct(GetMoveSpeed(), GetForward());
 		CVector vecTail = GetColModel()->boundingBox.min.y * GetForward();
-		float fThrust = (CPad::GetPad(0)->GetAccelerate() - CPad::GetPad(0)->GetBrake()) / 255.0f;
+		float fPedalState = (CPad::GetPad(0)->GetAccelerate() - CPad::GetPad(0)->GetBrake()) / 255.0f;
 		float fThrustAccel;
-		if(fForwSpeed > 0.0f || fThrust > 0.0f)
-			fThrustAccel = (fThrust - pFlyingHandling->fThrustFallOff * fForwSpeed) * pFlyingHandling->fThrust;
+		if(fForwSpeed > 0.0f || fPedalState > 0.0f)
+			fThrustAccel = (fPedalState - fThrustFallOff * fForwSpeed) * fThrust;
 		else
-			fThrustAccel = Min(fThrust - 8.0f * pFlyingHandling->fThrustFallOff * fForwSpeed, 0.0f) * pFlyingHandling->fThrust;
+			fThrustAccel = Min(fPedalState - fThrustFallOffBack * fForwSpeed, 0.0f) * fThrust;
 		if(flightModel == FLIGHT_MODEL_PLANE_UNUSED)
 			fThrustAccel *= 0.3f;
 		else if(flightModel == FLIGHT_MODEL_PLANE)
@@ -398,14 +407,18 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		float fPitchAccel = pFlyingHandling->fPitchStab * fTail * Abs(fTail) + pFlyingHandling->fPitch * fSteerUD * fForwSpeed;
 		ApplyTurnForce(fPitchAccel * m_fTurnMass * GetUp() * CTimer::GetTimeStep(), vecTail);
 
-		float fLift = -DotProduct(GetMoveSpeed(), GetUp()) / Max(0.01f, GetMoveSpeed().Magnitude());
-		float fLiftAccel = (pFlyingHandling->fAttackLift * fLift + pFlyingHandling->fFormLift) * fForwSpeed * fForwSpeed;
+		float fLift = DotProduct(GetMoveSpeed(), GetUp()) / Max(0.01f, GetMoveSpeed().Magnitude()); //accel*angle
+		float fLiftAccel = (pFlyingHandling->fFormLift - pFlyingHandling->fAttackLift * fLift) * SQR(fForwSpeed);
 		float fLiftImpulse = fLiftAccel * m_fMass * CTimer::GetTimeStep();
 		if (GRAVITY * CTimer::GetTimeStep() * m_fMass < fLiftImpulse) {
 			if (flightModel == FLIGHT_MODEL_RCPLANE && GetPosition().z > 50.0f)
 				fLiftImpulse = CTimer::GetTimeStep() * 0.9f*GRAVITY * m_fMass;
 			else if (flightModel == FLIGHT_MODEL_SEAPLANE && GetPosition().z > 80.0f)
 				fLiftImpulse = CTimer::GetTimeStep() * 0.9f*GRAVITY * m_fMass;
+#ifdef BETTER_ALLCARSAREDODO_CHEAT
+			else if(bAllDodosCheat && GetPosition().z > 170.0f)
+				fLiftImpulse = CTimer::GetTimeStep() * 0.9f * GRAVITY * m_fMass;
+#endif
 		}
 		ApplyMoveForce(fLiftImpulse * GetUp());
 
@@ -435,7 +448,7 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 	case FLIGHT_MODEL_HELI:
 	{
 #ifdef RESTORE_ALLCARSHELI_CHEAT
-		tFlyingHandlingData* flyingHandling = bAllCarCheat && GetStatus() == STATUS_PLAYER && !IsRealHeli() ? mod_HandlingManager.GetFlyingPointer(HANDLING_MAVERICK) : pFlyingHandling;
+		tFlyingHandlingData* flyingHandling = bAllCarCheat && !IsRealHeli() ? mod_HandlingManager.GetFlyingPointer(HANDLING_MAVERICK) : pFlyingHandling;
 #else
 		tFlyingHandlingData* flyingHandling = pFlyingHandling;
 #endif

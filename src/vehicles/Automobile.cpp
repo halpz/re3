@@ -1375,6 +1375,10 @@ CAutomobile::ProcessControl(void)
 		// Flying
 
 		bool playRotorSound = false;
+		bool isPlane = GetModelIndex() == MI_DODO || bAllDodosCheat;
+#ifdef FIX_BUGS
+		isPlane = isPlane && !IsRealHeli();
+#endif
 		if(GetStatus() != STATUS_PLAYER && GetStatus() != STATUS_PLAYER_REMOTE && GetStatus() != STATUS_PHYSICS){
 			if(IsRealHeli()){
 				bEngineOn = false;
@@ -1383,16 +1387,7 @@ CAutomobile::ProcessControl(void)
 					if(m_aWheelSpeed[1] < 0.154f && m_aWheelSpeed[1] > 0.0044f)
 						playRotorSound = true;
 			}
-		}else if((GetModelIndex() == MI_DODO || CVehicle::bAllDodosCheat) &&
-#ifdef FIX_BUGS
-				!IsRealHeli() &&
-#endif
-				m_vecMoveSpeed.Magnitude() > 0.0f && CTimer::GetTimeStep() > 0.0f){
-#ifdef ALT_DODO_CHEAT
-			if (bAltDodoCheat)
-				FlyingControl(FLIGHT_MODEL_PLANE);
-			else
-#endif
+		}else if(isPlane && m_vecMoveSpeed.Magnitude() > 0.0f && CTimer::GetTimeStep() > 0.0f){
 			if(GetModelIndex() == MI_DODO)
 				FlyingControl(FLIGHT_MODEL_DODO);
 			else
@@ -2594,6 +2589,10 @@ CAutomobile::PreRender(void)
 					CGeneral::GetRandomNumberInRange(0.0f, 90.0f),
 					CGeneral::GetRandomNumberInRange(0.0f, 10.0f), 1);
 			}
+#ifdef BETTER_ALLCARSAREDODO_CHEAT
+		} else if (bAllDodosCheat && m_nDriveWheelsOnGround == 0 && m_nDriveWheelsOnGroundPrev == 0) {
+			mat.RotateY(-HALFPI);
+#endif
 		}else{
 			// tilt wheel depending oh how much it presses on ground
 			float groundOffset = pos.z + m_fHeightAboveRoad - 0.5f*mi->m_wheelScale;
@@ -2631,6 +2630,10 @@ CAutomobile::PreRender(void)
 					CGeneral::GetRandomNumberInRange(0.0f, 90.0f),
 					CGeneral::GetRandomNumberInRange(0.0f, 10.0f), 1);
 			}
+#ifdef BETTER_ALLCARSAREDODO_CHEAT
+		} else if (bAllDodosCheat && m_nDriveWheelsOnGround == 0 && m_nDriveWheelsOnGroundPrev == 0) {
+			mat.RotateY(HALFPI);
+#endif
 		}else{
 			// tilt wheel depending oh how much it presses on ground
 			float groundOffset = pos.z + m_fHeightAboveRoad - 0.5f*mi->m_wheelScale;
@@ -2660,6 +2663,10 @@ CAutomobile::PreRender(void)
 			   m_aWheelColPoints[CARWHEEL_REAR_RIGHT].surfaceB == SURFACE_WATER){
 				// hovering on water
 				mat.RotateY(-HALFPI);
+#ifdef BETTER_ALLCARSAREDODO_CHEAT
+			} else if (bAllDodosCheat && m_nDriveWheelsOnGround == 0 && m_nDriveWheelsOnGroundPrev == 0) {
+				mat.RotateY(-HALFPI);
+#endif
 			}else{
 				// tilt wheel depending oh how much it presses on ground
 				float groundOffset = pos.z + m_fHeightAboveRoad - 0.5f*mi->m_wheelScale;
@@ -2690,6 +2697,10 @@ CAutomobile::PreRender(void)
 			   m_aWheelColPoints[CARWHEEL_REAR_LEFT].surfaceB == SURFACE_WATER){
 				// hovering on water
 				mat.RotateY(HALFPI);
+#ifdef BETTER_ALLCARSAREDODO_CHEAT
+			} else if (bAllDodosCheat && m_nDriveWheelsOnGround == 0 && m_nDriveWheelsOnGroundPrev == 0) {
+				mat.RotateY(HALFPI);
+#endif
 			}else{
 				// tilt wheel depending oh how much it presses on ground
 				float groundOffset = pos.z + m_fHeightAboveRoad - 0.5f*mi->m_wheelScale;
@@ -2820,6 +2831,10 @@ CAutomobile::PreRender(void)
 						CGeneral::GetRandomNumberInRange(0.0f, 90.0f),
 						CGeneral::GetRandomNumberInRange(0.0f, 10.0f), 1);
 				}
+#ifdef BETTER_ALLCARSAREDODO_CHEAT
+			} else if (bAllDodosCheat && m_nDriveWheelsOnGround == 0 && m_nDriveWheelsOnGroundPrev == 0) {
+				mat.RotateY(-HALFPI);
+#endif
 			}else{
 				// tilt wheel depending oh how much it presses on ground
 				float groundOffset = pos.z + m_fHeightAboveRoad - 0.5f*mi->m_wheelScale;
@@ -2857,6 +2872,10 @@ CAutomobile::PreRender(void)
 						CGeneral::GetRandomNumberInRange(0.0f, 90.0f),
 						CGeneral::GetRandomNumberInRange(0.0f, 10.0f), 1);
 				}
+#ifdef BETTER_ALLCARSAREDODO_CHEAT
+			} else if (bAllDodosCheat && m_nDriveWheelsOnGround == 0 && m_nDriveWheelsOnGroundPrev == 0) {
+				mat.RotateY(HALFPI);
+#endif
 			}else{
 				// tilt wheel depending oh how much it presses on ground
 				float groundOffset = pos.z + m_fHeightAboveRoad - 0.5f*mi->m_wheelScale;
