@@ -54,6 +54,8 @@
 #include "libpad.h"
 #endif
 
+// --MIAMI: file done except Mobile(see TODOs) and PS2 stuff
+
 CPad Pads[MAX_PADS];
 #ifdef GTA_PS2
 u_long128 pad_dma_buf[scePadDmaBufferMax] __attribute__((aligned(64)));
@@ -66,7 +68,9 @@ bool CPad::bDisplayNoControllerMessage;
 bool CPad::bObsoleteControllerMessage;
 bool CPad::bOldDisplayNoControllerMessage;
 bool CPad::m_bMapPadOneToPadTwo;
+bool CPad::m_bDebugCamPCOn;
 bool CPad::bHasPlayerCheated;
+bool CPad::bInvertLook4Pad;
 #ifdef GTA_PS2
 unsigned char act_direct[6];
 unsigned char act_align[6];
@@ -92,6 +96,74 @@ extern bool gbFastTime;
 #ifdef WALLCLIMB_CHEAT
 extern bool gGravityCheat;
 #endif
+
+void SpecialCarCheats()
+{
+	if ( !CVehicle::bCheat9 )
+	{
+		((CVehicleModelInfo*)CModelInfo::GetModelInfo(MI_INFERNUS))->m_wheelScale *= 1.3f;
+		((CVehicleModelInfo*)CModelInfo::GetModelInfo(MI_CHEETAH))->m_wheelScale *= 1.3f;
+		((CVehicleModelInfo*)CModelInfo::GetModelInfo(MI_PHEONIX))->m_wheelScale *= 1.3f;
+		((CVehicleModelInfo*)CModelInfo::GetModelInfo(MI_DELUXO))->m_wheelScale *= 1.3f;
+		mod_HandlingManager.GetHandlingData(HANDLING_LANDSTAL)->Transmission.fEngineAcceleration *= 2.0f;
+		mod_HandlingManager.GetHandlingData(HANDLING_PATRIOT)->Transmission.fEngineAcceleration *= 2.0f;
+		mod_HandlingManager.GetHandlingData(HANDLING_BOBCAT)->Transmission.fEngineAcceleration *= 2.0f;
+		mod_HandlingManager.GetHandlingData(HANDLING_BFINJECT)->Transmission.fEngineAcceleration *= 2.0f;
+		mod_HandlingManager.GetHandlingData(HANDLING_RANCHER)->Transmission.fEngineAcceleration *= 2.0f;
+		mod_HandlingManager.GetHandlingData(HANDLING_DESPERAD)->Transmission.fEngineAcceleration *= 2.0f;
+		mod_HandlingManager.GetHandlingData(HANDLING_DELUXO)->Transmission.fEngineAcceleration *= 2.0f;
+
+		mod_HandlingManager.GetHandlingData(HANDLING_BAGGAGE)->Transmission.fEngineAcceleration *= 2.0f;
+		mod_HandlingManager.GetHandlingData(HANDLING_BAGGAGE)->Transmission.fMaxVelocity *= 2.0f;
+		mod_HandlingManager.GetHandlingData(HANDLING_BAGGAGE)->Transmission.InitGearRatios();
+
+		mod_HandlingManager.GetHandlingData(HANDLING_GOLFCART)->Transmission.fEngineAcceleration *= 2.0f;
+		mod_HandlingManager.GetHandlingData(HANDLING_GOLFCART)->Transmission.fMaxVelocity *= 2.0f;
+		mod_HandlingManager.GetHandlingData(HANDLING_GOLFCART)->Transmission.InitGearRatios();
+
+		mod_HandlingManager.GetHandlingData(HANDLING_STINGER)->fCollisionDamageMultiplier *= 0.25f;
+		mod_HandlingManager.GetHandlingData(HANDLING_STINGER)->fMass *= 2.5f;
+		mod_HandlingManager.GetHandlingData(HANDLING_STINGER)->fTurnMass *= 4.0f;
+
+		mod_HandlingManager.GetHandlingData(HANDLING_BANSHEE)->fCollisionDamageMultiplier *= 0.25f;
+		mod_HandlingManager.GetHandlingData(HANDLING_BANSHEE)->fMass *= 2.5f;
+		mod_HandlingManager.GetHandlingData(HANDLING_BANSHEE)->fTurnMass *= 4.0f;
+
+		mod_HandlingManager.GetHandlingData(HANDLING_SABRETUR)->fCollisionDamageMultiplier *= 0.25f;
+		mod_HandlingManager.GetHandlingData(HANDLING_SABRETUR)->fMass *= 2.5f;
+		mod_HandlingManager.GetHandlingData(HANDLING_SABRETUR)->fTurnMass *= 4.0f;
+
+		mod_HandlingManager.GetHandlingData(HANDLING_COMET)->fCollisionDamageMultiplier *= 0.25f;
+		mod_HandlingManager.GetHandlingData(HANDLING_COMET)->fMass *= 2.5f;
+		mod_HandlingManager.GetHandlingData(HANDLING_COMET)->fTurnMass *= 4.0f;
+
+		mod_HandlingManager.GetHandlingData(HANDLING_DELUXO)->fCollisionDamageMultiplier *= 0.25f;
+		mod_HandlingManager.GetHandlingData(HANDLING_DELUXO)->fMass *= 2.5f;
+		mod_HandlingManager.GetHandlingData(HANDLING_DELUXO)->fTurnMass *= 4.0f;
+		CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+		CVehicle::bCheat9 = true;
+		CPad::bHasPlayerCheated = true;
+	}
+}
+
+void PickUpChicksCheat()
+{
+	if ( FindPlayerVehicle() && (FindPlayerVehicle()->IsCar() || FindPlayerVehicle()->IsBike()) )
+	{
+		CVehicle *vehicle = FindPlayerVehicle();
+		if ( FindPlayerVehicle()->m_vehType == 5 )
+		{
+			if ( vehicle->pPassengers[0] )
+				vehicle->pPassengers[0]->SetObjective(OBJECTIVE_LEAVE_CAR, vehicle);
+		}
+		CPed* someoneElse = (CPed*)CWorld::TestSphereAgainstWorld(vehicle->GetPosition(), 6.0f, FindPlayerPed(), false, false, true, false, false, false);
+		if ( someoneElse && someoneElse->m_nPedState != PED_DRIVING )
+		{
+			CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
+			someoneElse->SetObjective(OBJECTIVE_ENTER_CAR_AS_PASSENGER, vehicle);
+		}
+	}
+}
 
 void WeaponCheat1()
 {
@@ -127,6 +199,11 @@ void WeaponCheat1()
 	CStreaming::SetModelIsDeletable(MI_RUGER);
 	CStreaming::SetModelIsDeletable(MI_SNIPERRIFLE);
 	CStreaming::SetModelIsDeletable(MI_FLAMETHROWER);
+#ifdef MOBILE_IMPROVEMENTS
+	if (FindPlayerVehicle()) {
+		FindPlayerPed()->RemoveWeaponWhenEnteringVehicle();
+	}
+#endif
 }
 
 void WeaponCheat2()
@@ -162,6 +239,11 @@ void WeaponCheat2()
 	CStreaming::SetModelIsDeletable(MI_M4);
 	CStreaming::SetModelIsDeletable(MI_LASERSCOPE);
 	CStreaming::SetModelIsDeletable(MI_ROCKETLAUNCHER);
+#ifdef MOBILE_IMPROVEMENTS
+	if (FindPlayerVehicle()) {
+		FindPlayerPed()->RemoveWeaponWhenEnteringVehicle();
+	}
+#endif
 }
 
 void WeaponCheat3()
@@ -197,6 +279,12 @@ void WeaponCheat3()
 	CStreaming::SetModelIsDeletable(MI_LASERSCOPE);
 	CStreaming::SetModelIsDeletable(MI_MINIGUN);
 	CStreaming::SetModelIsDeletable(MI_MINIGUN2);
+
+#ifdef MOBILE_IMPROVEMENTS
+	if (FindPlayerVehicle()) {
+		FindPlayerPed()->RemoveWeaponWhenEnteringVehicle();
+	}
+#endif
 }
 
 void HealthCheat()
@@ -213,6 +301,7 @@ void HealthCheat()
 	}
 }
 
+// TODO(Miami): this is HELLA different on mobile, although it mostly has debug oriented things like player exiting it's current car and enters spawned one etc.
 void VehicleCheat(int model)
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
@@ -232,7 +321,7 @@ void VehicleCheat(int model)
 #ifdef FIX_BUGS
 		CAutomobile* vehicle = new CAutomobile(model, RANDOM_VEHICLE);
 #else
-		CAutomobile* vehicle = new CAutomobile(MI_RHINO, MISSION_VEHICLE);
+		CAutomobile* vehicle = new CAutomobile(model, MISSION_VEHICLE);
 #endif
 		if (vehicle != nil) {
 			CVector pos = ThePaths.m_pathNodes[node].GetPosition();
@@ -249,6 +338,7 @@ void VehicleCheat(int model)
 	CPad::bHasPlayerCheated = true;
 }
 
+
 void BlowUpCarsCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
@@ -262,7 +352,8 @@ void BlowUpCarsCheat()
 
 void ChangePlayerCheat()
 {
-	int modelId;
+	// I don't know wtf is going on in here...
+	int modelId, anotherModelId;
 
 	if (FindPlayerPed()->IsPedInControl() && CModelInfo::GetModelInfo("player", nil)) {
 		CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
@@ -270,21 +361,22 @@ void ChangePlayerCheat()
 		AssocGroupId AnimGrp = ped->m_animGroup;
 		do
 		{
-			do
-				modelId = CGeneral::GetRandomNumberInRange(0, MI_WFYG2+1);
-			while (!CModelInfo::GetModelInfo(modelId));
-		} while (modelId == MI_TAXI_D);
+			do {
+				modelId = CGeneral::GetRandomNumberInRange(0, MI_PGA);
+				anotherModelId = modelId+1;
+			} while (!CModelInfo::GetModelInfo(anotherModelId));
+		} while (anotherModelId >= MI_SPECIAL01 && anotherModelId <= MI_SPECIAL04 || modelId == MI_TAXI_D);
 
-		uint8 flags = CStreaming::ms_aInfoForModel[modelId].m_flags;
+		uint8 flags = CStreaming::ms_aInfoForModel[anotherModelId].m_flags;
 		ped->DeleteRwObject();
-		CStreaming::RequestModel(modelId, STREAMFLAGS_DEPENDENCY| STREAMFLAGS_DONT_REMOVE);
+		CStreaming::RequestModel(anotherModelId, STREAMFLAGS_DEPENDENCY| STREAMFLAGS_DONT_REMOVE);
 		CStreaming::LoadAllRequestedModels(false);
 		ped->m_modelIndex = -1;
-		ped->SetModelIndex(modelId);
+		ped->SetModelIndex(anotherModelId);
 		ped->m_animGroup = AnimGrp;
-		if (modelId != MI_PLAYER) {
+		if (modelId != -1) {
 			if (!(flags & STREAMFLAGS_DONT_REMOVE))
-				CStreaming::SetModelIsDeletable(modelId);
+				CStreaming::SetModelIsDeletable(anotherModelId);
 		}
 	}
 }
@@ -424,11 +516,6 @@ void StrongGripCheat()
 	CVehicle::bCheat3 = !CVehicle::bCheat3;
 	CStats::CheatedCount += 1000;
 	CPad::bHasPlayerCheated = true;
-}
-
-void NastyLimbsCheat()
-{
-	CPed::bNastyLimbsCheat = !CPed::bNastyLimbsCheat;
 }
 
 void FannyMagnetCheat()
@@ -578,6 +665,7 @@ void FlyingFishCheat(void)
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
 	CVehicle::bCheat8 = !CVehicle::bCheat8;
+	CPad::bHasPlayerCheated = true;
 }
 
 void DoShowChaseStatCheat(void) {
@@ -655,6 +743,8 @@ void CPad::Initialise(void)
 	bObsoleteControllerMessage	   = false;
 	bOldDisplayNoControllerMessage = false;
 	bDisplayNoControllerMessage	   = false;
+	m_bMapPadOneToPadTwo = false;
+	m_bDebugCamPCOn = false;
 }
 #endif
 
@@ -687,8 +777,8 @@ void CPad::Clear(bool bResetPlayerControls)
 	if ( bResetPlayerControls )
 		DisablePlayerControls = PLAYERCONTROL_ENABLED;
 
+	JustOutOfFrontend = 0;
 	bApplyBrakes = false;
-
 
 	for ( int32 i = 0; i < HORNHISTORY_SIZE; i++ )
 		bHornHistory[i] = false;
@@ -713,6 +803,14 @@ void CPad::ClearMouseHistory()
 	PCTempMouseControllerState.Clear();
 	NewMouseControllerState.Clear();
 	OldMouseControllerState.Clear();
+}
+
+// unused
+void CPad::ClearKeyBoardHistory()
+{
+	NewKeyState.Clear();
+	OldKeyState.Clear();
+	TempKeyState.Clear();
 }
 
 CMouseControllerState::CMouseControllerState()
@@ -1113,9 +1211,6 @@ void CPad::AddToCheatString(char c)
 	else if ( !_CHEATCMP("T33L1413") )
 		StrongGripCheat();
 
-	// "S1CD13TR1X"		-	SQUARE L1 CIRCLE DOWN L1 R1 TRIANGLE RIGHT L1 CROSS
-	else if ( !_CHEATCMP("X1RT31DC1S") )
-		NastyLimbsCheat();
 #undef _CHEATCMP
 }
 #endif
@@ -1132,6 +1227,7 @@ int Cheat_strncmp(char* sourceStr, char* origCheatStr)
 	return 0;
 }
 
+// TODO(Miami): Mobile has changed some of the cheats to include debugging things
 void CPad::AddToPCCheatString(char c)
 {
 	for (int32 i = ARRAY_SIZE(KeyBoardCheatString) - 2; i >= 0; i--)
@@ -1406,6 +1502,16 @@ void CPad::AddToPCCheatString(char c)
 		KeyBoardCheatString[0] = ' ';
 		BackToTheFuture();
 	}
+	// LOADSOFLITTLETHINGS
+	else if (!Cheat_strncmp(KeyBoardCheatString, "VLUJUoHSU_VTMo`J]bV")) {
+		KeyBoardCheatString[0] = ' ';
+		SpecialCarCheats();
+	}
+	// HOPINGIRL
+	else if (!Cheat_strncmp(KeyBoardCheatString, "OWPH[dSVI")) {
+		KeyBoardCheatString[0] = ' ';
+		PickUpChicksCheat();
+	}
 	//CERTAINDEATH
 	else if (!Cheat_strncmp(KeyBoardCheatString, "KYHFQiLHU]RK")) {
 		KeyBoardCheatString[0] = ' ';
@@ -1421,10 +1527,6 @@ void CPad::AddToPCCheatString(char c)
 		KeyBoardCheatString[0] = ' ';
 		FannyMagnetCheat();
 	}
-
-	// "NASTYLIMBSCHEAT"
-	if (!_CHEATCMP("TAEHCSBMILYTSAN"))
-		NastyLimbsCheat();
 
 #ifdef KANGAROO_CHEAT
 	// "KANGAROO"
@@ -1879,6 +1981,9 @@ void CPad::Update(int16 pad)
 
 	if ( !bDisplayNoControllerMessage )
 		CGame::bDemoMode = false;
+
+	if ( JustOutOfFrontend != 0 )
+		--JustOutOfFrontend;
 }
 
 void CPad::DoCheats(void)
@@ -1962,7 +2067,6 @@ CPad *CPad::GetPad(int32 pad)
 #else
 #define CURMODE (Mode)
 #endif
-
 
 int16 CPad::GetSteeringLeftRight(void)
 {
@@ -2126,7 +2230,6 @@ int16 CPad::GetPedWalkLeftRight(void)
 	return 0;
 }
 
-
 int16 CPad::GetPedWalkUpDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
@@ -2182,6 +2285,36 @@ int16 CPad::GetAnalogueUpDown(void)
 		case 3:
 		{
 			return NewState.LeftStickY;
+
+			break;
+		}
+	}
+
+	return 0;
+}
+
+int16 CPad::GetAnalogueLeftRight(void)
+{
+	switch (CURMODE)
+	{
+		case 0:
+		case 2:
+		{
+			int16 axis = NewState.LeftStickX;
+			int16 dpad = (NewState.DPadRight - NewState.DPadLeft) / 2;
+
+			if ( Abs(axis) > Abs(dpad) )
+				return axis;
+			else
+				return dpad;
+
+			break;
+		}
+
+		case 1:
+		case 3:
+		{
+			return NewState.LeftStickX;
 
 			break;
 		}
@@ -2300,7 +2433,6 @@ bool CPad::HornJustDown(void)
 
 	return false;
 }
-
 
 bool CPad::GetCarGunFired(void)
 {
@@ -2432,6 +2564,10 @@ bool CPad::GetExitVehicle(void)
 	if ( ArePlayerControlsDisabled() )
 		return false;
 
+
+	if ( JustOutOfFrontend != 0 )
+		return false;
+
 	switch (CURMODE)
 	{
 		case 0:
@@ -2457,6 +2593,9 @@ bool CPad::GetExitVehicle(void)
 bool CPad::ExitVehicleJustDown(void)
 {
 	if ( ArePlayerControlsDisabled() )
+		return false;
+
+	if ( JustOutOfFrontend != 0 )
 		return false;
 
 	switch (CURMODE)
@@ -2585,6 +2724,53 @@ int16 CPad::GetAccelerate(void)
 	return 0;
 }
 
+bool CPad::CycleCameraModeJustDown(void)
+{
+	bool result;
+	switch (CURMODE)
+	{
+		case 0:
+		case 2:
+		case 3:
+		{
+			result = !!(NewState.Select && !OldState.Select);
+
+			break;
+		}
+
+		case 1:
+		{
+			result = !!(NewState.DPadUp && !OldState.DPadUp);
+
+			break;
+		}
+		default:
+		{
+			result = false;
+			break;
+		}
+	}
+
+	if (!result)
+	{
+		switch (CURMODE)
+		{
+			case 1:
+			{
+				result = !!(NewState.DPadDown && !OldState.DPadDown);
+				break;
+			}
+			default:
+			{
+				result = false;
+				break;
+			}
+		}
+	}
+
+	return result;
+}
+
 bool CPad::CycleCameraModeUpJustDown(void)
 {
 	switch (CURMODE)
@@ -2671,7 +2857,6 @@ bool CPad::ChangeStationJustDown(void)
 
 	return false;
 }
-
 
 bool CPad::CycleWeaponLeftJustDown(void)
 {
@@ -2831,23 +3016,23 @@ bool CPad::ShiftTargetRightJustDown(void)
 	if ( ArePlayerControlsDisabled() )
 		return false;
 
-	return !!(NewState.RightShoulder2 && !OldState.RightShoulder2);
+	return !!(NewState.LeftShoulder1 && !OldState.LeftShoulder1) || !!(NewState.RightShoulder2 && !OldState.RightShoulder2);
 }
 
 bool CPad::GetAnaloguePadUp(void)
 {
 	static int16 oldfStickY = 0;
 
-	int16 Y = CPad::GetPad(0)->GetAnalogueUpDown();
+	int16 leftStickY = CPad::GetPad(0)->GetLeftStickY();
 
-	if ( Y < 0 && oldfStickY >= 0 )
+	if ( leftStickY < -15 && oldfStickY >= -5 )
 	{
-		oldfStickY = Y;
+		oldfStickY = leftStickY;
 		return true;
 	}
 	else
 	{
-		oldfStickY = Y;
+		oldfStickY = leftStickY;
 		return false;
 	}
 }
@@ -2856,16 +3041,16 @@ bool CPad::GetAnaloguePadDown(void)
 {
 	static int16 oldfStickY = 0;
 
-	int16 Y = CPad::GetPad(0)->GetAnalogueUpDown();
+	int16 leftStickY = CPad::GetPad(0)->GetLeftStickY();
 
-	if ( Y > 0 && oldfStickY <= 0 )
+	if ( leftStickY > 15 && oldfStickY <= 5 )
 	{
-		oldfStickY = Y;
+		oldfStickY = leftStickY;
 		return true;
 	}
 	else
 	{
-		oldfStickY = Y;
+		oldfStickY = leftStickY;
 		return false;
 	}
 }
@@ -2874,16 +3059,16 @@ bool CPad::GetAnaloguePadLeft(void)
 {
 	static int16 oldfStickX = 0;
 
-	int16 X = CPad::GetPad(0)->GetPedWalkLeftRight();
+	int16 leftStickX = CPad::GetPad(0)->GetLeftStickX();
 
-	if ( X < 0 && oldfStickX >= 0 )
+	if ( leftStickX < -15 && oldfStickX >= -5 )
 	{
-		oldfStickX = X;
+		oldfStickX = leftStickX;
 		return true;
 	}
 	else
 	{
-		oldfStickX = X;
+		oldfStickX = leftStickX;
 		return false;
 	}
 }
@@ -2892,16 +3077,16 @@ bool CPad::GetAnaloguePadRight(void)
 {
 	static int16 oldfStickX = 0;
 
-	int16 X = CPad::GetPad(0)->GetPedWalkLeftRight();
+	int16 leftStickX = CPad::GetPad(0)->GetLeftStickX();
 
-	if ( X > 0 && oldfStickX <= 0 )
+	if ( leftStickX > 15 && oldfStickX <= 5 )
 	{
-		oldfStickX = X;
+		oldfStickX = leftStickX;
 		return true;
 	}
 	else
 	{
-		oldfStickX = X;
+		oldfStickX = leftStickX;
 		return false;
 	}
 }
@@ -2914,7 +3099,7 @@ bool CPad::GetAnaloguePadLeftJustUp(void)
 
 	if ( X == 0 && oldfStickX < 0 )
 	{
-		oldfStickX = X;
+		oldfStickX = 0;
 
 		return true;
 	}
@@ -2934,7 +3119,7 @@ bool CPad::GetAnaloguePadRightJustUp(void)
 
 	if ( X == 0 && oldfStickX > 0 )
 	{
-		oldfStickX = X;
+		oldfStickX = 0;
 
 		return true;
 	}
@@ -3040,23 +3225,35 @@ int16 CPad::SniperModeLookLeftRight(void)
 	int16 axis = NewState.LeftStickX;
 	int16 dpad = (NewState.DPadRight - NewState.DPadLeft) / 2;
 
-	if ( Abs(axis) > Abs(dpad) )
-		return axis;
-	else
+	if ( Abs(axis) > Abs(dpad) ) {
+		if ( Abs(axis) > 35.0f ) {
+		  return (axis > 0.f ? axis - 35.f : axis + 35.f) * 1.3763441f;
+		} else {
+		  return 0;
+		}
+	} else
 		return dpad;
 }
 
 int16 CPad::SniperModeLookUpDown(void)
 {
 	int16 axis = NewState.LeftStickY;
-#ifdef FIX_BUGS
-	axis = -axis;
-#endif
-	int16 dpad = (NewState.DPadUp - NewState.DPadDown) / 2;
+	int16 dpad;
 
-	if ( Abs(axis) > Abs(dpad) )
-		return axis;
-	else
+	if (CPad::bInvertLook4Pad) {
+		axis = -axis;
+		dpad = (NewState.DPadDown - NewState.DPadUp) / 2;
+	} else {
+		dpad = (NewState.DPadUp - NewState.DPadDown) / 2;
+	}
+
+	if ( Abs(axis) > Abs(dpad) ) {
+	    if ( Abs(axis) > 35.0f ) {
+	      return (axis > 0.f ? axis - 35.f : axis + 35.f) * 1.3763441f;
+	    } else {
+	      return 0;
+	    }
+	} else
 		return dpad;
 }
 
@@ -3079,9 +3276,8 @@ int16 CPad::LookAroundUpDown(void)
 {
 	int16 axis = GetPad(0)->NewState.RightStickY;
 
-#ifdef FIX_BUGS
-	axis = -axis;
-#endif
+	if (CPad::bInvertLook4Pad)
+		axis = -axis;
 
 	if ( Abs(axis) > 85 && !GetLookBehindForPed() )
 		return (int16) ( (axis + ( ( axis > 0 ) ? -85 : 85) )
@@ -3094,7 +3290,6 @@ int16 CPad::LookAroundUpDown(void)
 	return 0;
 }
 
-
 void CPad::ResetAverageWeapon(void)
 {
 	AverageWeapon = GetWeapon();
@@ -3103,6 +3298,9 @@ void CPad::ResetAverageWeapon(void)
 
 void CPad::PrintErrorMessage(void)
 {
+	if (TheCamera.m_WideScreenOn)
+		return;
+
 	if ( bDisplayNoControllerMessage && !CGame::playingIntro && !FrontEndMenuManager.m_bMenuActive )
 	{
 		CSprite2d::DrawRect(CRect(SCREEN_STRETCH_X(20.0f), SCREEN_SCALE_FROM_BOTTOM(130.0f), SCREEN_STRETCH_FROM_RIGHT(20.0f), SCREEN_SCALE_Y(140.0f)), CRGBA(50, 50, 50, 210));
@@ -3153,26 +3351,30 @@ void CPad::ResetCheats(void)
 {
 	CWeather::ReleaseWeather();
 
+	gbFastTime = false;
 	CPopulation::ms_bGivePedsWeapons = false;
-
-	CPed::bNastyLimbsCheat = false;
-	CPed::bFannyMagnetCheat = false;
-	CPed::bPedCheat2 = false;
-	CPed::bPedCheat3 = false;
+	CTimer::SetTimeScale(1.0f);
 
 	CVehicle::bWheelsOnlyCheat = false;
 	CVehicle::bAllDodosCheat = false;
 	CVehicle::bCheat3 = false;
 	CVehicle::bCheat4 = false;
 	CVehicle::bCheat5 = false;
+	CVehicle::bAllTaxisHaveNitro = false;
+	CVehicle::bHoverCheat = false;
 	CVehicle::bCheat8 = false;
+	CVehicle::bCheat9 = false;
+	CVehicle::bCheat10 = false;
 	gbBlackCars = false;
 	gbPinkCars = false;
+
 	CCarCtrl::bMadDriversCheat = false;
 	CTrafficLights::bGreenLightsCheat = false;
 	CStats::ShowChaseStatOnScreen = 0;
-	gbFastTime = false;
-	CTimer::SetTimeScale(1.0f);
+	CPed::bNastyLimbsCheat = false;
+	CPed::bFannyMagnetCheat = false;
+	CPed::bPedCheat3 = false;
+
 }
 
 char *CPad::EditString(char *pStr, int32 nSize)
@@ -3376,4 +3578,14 @@ int32 *CPad::EditCodesForControls(int32 *pRsKeys, int32 nSize)
 		*pRsKeys = rsAPPS;
 
 	return pRsKeys;
+}
+
+void CPad::FixPadsAfterSave(void)
+{
+	UpdatePads();
+	if ( bObsoleteControllerMessage )
+	{
+		bObsoleteControllerMessage = false;
+		GetPad(0)->Phase = 0;
+	}
 }

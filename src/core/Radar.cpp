@@ -750,9 +750,7 @@ void CRadar::DrawBlips()
 void CRadar::DrawMap()
 {
 	if (!TheCamera.m_WideScreenOn && CHud::m_Wants_To_Draw_Hud) {
-#if 1 // from VC
 		CalculateCachedSinCos();
-#endif
 		if (FindPlayerVehicle()) {
 			float speed = FindPlayerSpeed().Magnitude();
 			if (speed < RADAR_MIN_SPEED)
@@ -1366,33 +1364,8 @@ void CRadar::TransformRealWorldToTexCoordSpace(CVector2D &out, const CVector2D &
 void CRadar::TransformRadarPointToRealWorldSpace(CVector2D &out, const CVector2D &in)
 {
 	float s, c;
-#if 1
 	s = -cachedSin;
 	c = cachedCos;
-#else
-	// Original code
-
-	s = -Sin(TheCamera.GetForward().Heading());
-	c = Cos(TheCamera.GetForward().Heading());
-
-	if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED) {
-		s = 0.0f;
-		c = 1.0f;
-	}
-	else if (TheCamera.GetLookDirection() != LOOKING_FORWARD) {
-		CVector forward;
-
-		if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON) {
-			forward = TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->GetForward();
-			forward.Normalise();	// a bit useless...
-		}
-		else
-			forward = TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->GetPosition() - TheCamera.Cams[TheCamera.ActiveCam].SourceBeforeLookBehind;
-
-		s = -Sin(forward.Heading());
-		c = Cos(forward.Heading());
-	}
-#endif
 
 	out.x = s * in.y + c * in.x;
 	out.y = c * in.y - s * in.x;
@@ -1419,35 +1392,8 @@ void CRadar::TransformRadarPointToScreenSpace(CVector2D &out, const CVector2D &i
 void CRadar::TransformRealWorldPointToRadarSpace(CVector2D &out, const CVector2D &in)
 {
 	float s, c;
-#if 1
 	s = cachedSin;
 	c = cachedCos;
-#else
-	// Original code
-
-	float s, c;
-	if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED) {
-		s = 0.0f;
-		c = 1.0f;
-	}
-	else if (TheCamera.GetLookDirection() == LOOKING_FORWARD) {
-		s = Sin(TheCamera.GetForward().Heading());
-		c = Cos(TheCamera.GetForward().Heading());
-	}
-	else {
-		CVector forward;
-
-		if (TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON) {
-			forward = TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->GetForward();
-			forward.Normalise();	// a bit useless...
-		}
-		else
-			forward = TheCamera.Cams[TheCamera.ActiveCam].CamTargetEntity->GetPosition() - TheCamera.Cams[TheCamera.ActiveCam].SourceBeforeLookBehind;
-
-		s = Sin(forward.Heading());
-		c = Cos(forward.Heading());
-	}
-#endif
 
 	float x = (in.x - vec2DRadarOrigin.x) * (1.0f / m_radarRange);
 	float y = (in.y - vec2DRadarOrigin.y) * (1.0f / m_radarRange);
@@ -1534,10 +1480,10 @@ CRadar::ToggleTargetMarker(float x, float y)
 			if (!ms_RadarTrace[nextBlip].m_bInUse)
 				break;
 		}
-#ifdef FIX_BUGS
+		
 		if (nextBlip == NUMRADARBLIPS)
 			return;
-#endif
+			
 		ms_RadarTrace[nextBlip].m_eBlipType = BLIP_COORD;
 		ms_RadarTrace[nextBlip].m_nColor = 0x333333FF;
 		ms_RadarTrace[nextBlip].m_bDim = 1;

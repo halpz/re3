@@ -41,6 +41,8 @@ bool CVehicle::bCheat3;
 bool CVehicle::bCheat4;
 bool CVehicle::bCheat5;
 bool CVehicle::bCheat8;
+bool CVehicle::bCheat9;
+bool CVehicle::bCheat10;
 #ifdef ALT_DODO_CHEAT
 bool CVehicle::bAltDodoCheat;
 #endif

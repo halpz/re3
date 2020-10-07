@@ -1114,7 +1114,6 @@ public:
 
 	static bool bNastyLimbsCheat;
 	static bool bFannyMagnetCheat;
-	static bool bPedCheat2;
 	static bool bPedCheat3;
 	static CVector2D ms_vec2DFleePosition;
 

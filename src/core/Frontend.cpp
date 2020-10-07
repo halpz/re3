@@ -352,7 +352,7 @@ CMenuManager::CMenuManager()
 	m_PrefsUseVibration = 0;
 	m_PrefsShowHud = 1;
 	m_PrefsRadarMode = 0;
-	field_10 = 0;
+	m_DisplayControllerOnFoot = false;
 	m_bShutDownFrontEndRequested = false;
 	m_bStartUpFrontEndRequested = false;
 	pEditString = nil;
@@ -949,6 +949,13 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 						rightText = TheText.Get("FEC_CF4");
 						break;
 					}
+					break;
+				// This one is still in enum and ProcessOnOffMenuOptions, but removed from other places
+				case MENUACTION_CTRLDISPLAY:
+					if (m_DisplayControllerOnFoot)
+						rightText = TheText.Get("FEC_ONF");
+					else
+						rightText = TheText.Get("FEC_INC");
 					break;
 #endif
 				case MENUACTION_FRAMESYNC:
@@ -4206,6 +4213,7 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 	}
 }
 
+// --MIAMI: Done
 void
 CMenuManager::ProcessOnOffMenuOptions()
 {
@@ -4213,78 +4221,78 @@ CMenuManager::ProcessOnOffMenuOptions()
 #ifdef LEGACY_MENU_OPTIONS
 	case MENUACTION_CTRLVIBRATION:
 		m_PrefsUseVibration = !m_PrefsUseVibration;
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		break;
 	case MENUACTION_CTRLCONFIG:
 		CPad::GetPad(0)->Mode++;
 		if (CPad::GetPad(0)->Mode > 3)
 			CPad::GetPad(0)->Mode = 0;
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		break;
 #endif
+	case MENUACTION_INVERTPADY:
+		CPad::bInvertLook4Pad = !CPad::bInvertLook4Pad;
+		SaveSettings(); // FIX: Why don't SaveSettings? Because of it's an hidden option? :(
+		break;
+	case MENUACTION_CTRLDISPLAY:
+		m_DisplayControllerOnFoot = !m_DisplayControllerOnFoot;
+		break;
 	case MENUACTION_FRAMESYNC:
 		m_PrefsVsyncDisp = !m_PrefsVsyncDisp;
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-		SaveSettings();
+		SaveSettings(); // FIX: Again... This makes me very unhappy
 		break;
 	case MENUACTION_FRAMELIMIT:
 		m_PrefsFrameLimiter = !m_PrefsFrameLimiter;
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		SaveSettings();
 		break;
 	case MENUACTION_TRAILS:
 		CMBlur::BlurOn = !CMBlur::BlurOn;
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		SaveSettings();
-		if (CMBlur::BlurOn)
-			CMBlur::MotionBlurOpen(Scene.camera);
-		else
-			CMBlur::MotionBlurClose();
 		break;
 	case MENUACTION_SUBTITLES:
 		m_PrefsShowSubtitles = !m_PrefsShowSubtitles;
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		SaveSettings();
 		break;
 #ifndef ASPECT_RATIO_SCALE
 	case MENUACTION_WIDESCREEN:
 		m_PrefsUseWideScreen = !m_PrefsUseWideScreen;
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		SaveSettings();
 		break;
 #endif
+	case MENUACTION_LEGENDS:
+		m_PrefsShowLegends = !m_PrefsShowLegends;
+		break;
+	case MENUACTION_HUD:
+		m_PrefsShowHud = !m_PrefsShowHud;
+		SaveSettings();
+		break;
+#ifdef LEGACY_MENU_OPTIONS
 	case MENUACTION_SETDBGFLAG:
 		CTheScripts::InvertDebugFlag();
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		break;
 	case MENUACTION_SWITCHBIGWHITEDEBUGLIGHT:
 		gbBigWhiteDebugLightSwitchedOn = !gbBigWhiteDebugLightSwitchedOn;
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		break;
 	case MENUACTION_COLLISIONPOLYS:
 		gbShowCollisionPolys = !gbShowCollisionPolys;
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		break;
+#endif
 	case MENUACTION_SHOWHEADBOB:
 		TheCamera.m_bHeadBob = !TheCamera.m_bHeadBob;
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		SaveSettings();
 		break;
 	case MENUACTION_INVVERT:
 		MousePointerStateHelper.bInvertVertically = !MousePointerStateHelper.bInvertVertically;
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		SaveSettings();
 		break;
 	case MENUACTION_DYNAMICACOUSTIC:
 		m_PrefsDMA = !m_PrefsDMA;
 		DMAudio.SetDynamicAcousticModelingStatus(m_PrefsDMA);
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		SaveSettings();
 		break;
 	case MENUACTION_MOUSESTEER:
-		CVehicle::m_bDisableMouseSteering = !CVehicle::m_bDisableMouseSteering;
-		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-		SaveSettings();
+		if (m_ControlMethod == CONTROL_STANDARD) {
+			CVehicle::m_bDisableMouseSteering = !CVehicle::m_bDisableMouseSteering;
+			SaveSettings();
+		}
 		break;
 	}
 }
