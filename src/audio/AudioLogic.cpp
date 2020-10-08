@@ -4784,11 +4784,10 @@ void
 cAudioManager::ProcessExplosions(int32 explosion)
 {
 	uint8 type;
-	CVector *pos;
 	float distSquared;
 
 	for (uint8 i = 0; i < ARRAY_SIZE(gaExplosion); i++) {
-		if (CExplosion::GetExplosionActiveCounter(i) == 1) {
+		if (CExplosion::DoesExplosionMakeSound(i) && CExplosion::GetExplosionActiveCounter(i) == 1) {
 			CExplosion::ResetExplosionActiveCounter(i);
 			type = CExplosion::GetExplosionType(i);
 			switch (type) {
@@ -4796,42 +4795,44 @@ cAudioManager::ProcessExplosions(int32 explosion)
 			case EXPLOSION_ROCKET:
 			case EXPLOSION_BARREL:
 			case EXPLOSION_TANK_GRENADE:
-				m_sQueueSample.m_fSoundIntensity = 400.0f;
+				m_sQueueSample.m_fSoundIntensity = 200.0f;
 				m_sQueueSample.m_nSampleIndex = SFX_EXPLOSION_2;
-				m_sQueueSample.m_nFrequency = RandomDisplacement(2000) + 38000;
+				m_sQueueSample.m_nFrequency = RandomDisplacement(1000) + 19000;
 				m_sQueueSample.m_nReleasingVolumeModificator = 0;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_bRequireReflection = true;
 				break;
 			case EXPLOSION_MOLOTOV:
-				m_sQueueSample.m_fSoundIntensity = 200.0f;
+				m_sQueueSample.m_fSoundIntensity = 150.0f;
 				m_sQueueSample.m_nSampleIndex = SFX_EXPLOSION_3;
 				m_sQueueSample.m_nFrequency = RandomDisplacement(1000) + 19000;
 				m_sQueueSample.m_nReleasingVolumeModificator = 0;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_bRequireReflection = false;
 				break;
 			case EXPLOSION_MINE:
 			case EXPLOSION_HELI_BOMB:
-				m_sQueueSample.m_fSoundIntensity = 300.0f;
+				m_sQueueSample.m_fSoundIntensity = 200.0f;
 				m_sQueueSample.m_nSampleIndex = SFX_ROCKET_LEFT;
 				m_sQueueSample.m_nFrequency = RandomDisplacement(1000) + 12347;
 				m_sQueueSample.m_nReleasingVolumeModificator = 0;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_bRequireReflection = true;
 				break;
 			default:
-				m_sQueueSample.m_fSoundIntensity = 400.0f;
+				m_sQueueSample.m_fSoundIntensity = 200.0f;
 				m_sQueueSample.m_nSampleIndex = SFX_EXPLOSION_1;
-				m_sQueueSample.m_nFrequency = RandomDisplacement(2000) + 38000;
+				m_sQueueSample.m_nFrequency = RandomDisplacement(1000) + 19500;
 				if (type == EXPLOSION_HELI)
-					m_sQueueSample.m_nFrequency = 8 * m_sQueueSample.m_nFrequency / 10;
+					m_sQueueSample.m_nFrequency = 8 * m_sQueueSample.m_nFrequency / 10; //same *= 8 / 10;
 				m_sQueueSample.m_nReleasingVolumeModificator = 0;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_GENERIC_EXTRA;
 				break;
 			}
-			pos = CExplosion::GetExplosionPosition(i);
-			m_sQueueSample.m_vecPos = *pos;
+			m_sQueueSample.m_vecPos = *CExplosion::GetExplosionPosition(i);
 			distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 			if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
-				m_sQueueSample.m_fDistance = Sqrt(distSquared);
+				m_sQueueSample.m_fDistance = distSquared <= 0.0f ? 0.0f : Sqrt(distSquared);
 				m_sQueueSample.m_nVolume = ComputeVolume(MAX_VOLUME, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 				if (m_sQueueSample.m_nVolume != 0) {
 					m_sQueueSample.m_nCounter = i;
@@ -4839,12 +4840,10 @@ cAudioManager::ProcessExplosions(int32 explosion)
 					m_sQueueSample.m_bIs2D = false;
 					m_sQueueSample.m_nLoopCount = 1;
 					m_sQueueSample.m_bReleasingSoundFlag = true;
-					m_sQueueSample.m_bReverbFlag = true;
 					m_sQueueSample.m_nEmittingVolume = MAX_VOLUME;
 					m_sQueueSample.m_nLoopStart = 0;
 					m_sQueueSample.m_nLoopEnd = -1;
 					m_sQueueSample.m_bReverbFlag = true;
-					m_sQueueSample.m_bRequireReflection = true;
 					AddSampleToRequestedQueue();
 				}
 			}
@@ -5933,15 +5932,15 @@ cAudioManager::ProcessGarages()
 void
 cAudioManager::ProcessFireHydrant()
 {
+	const int SOUND_INTENSITY = 35;
+
 	float distSquared;
-	bool distCalculated = false;
-	static const int intensity = 35;
 
 	m_sQueueSample.m_vecPos = ((CEntity *)m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_pEntity)->GetPosition();
 	distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
-	if (distSquared < SQR(intensity)) {
-		CalculateDistance(distCalculated, distSquared);
-		m_sQueueSample.m_nVolume = ComputeVolume(40, 35.f, m_sQueueSample.m_fDistance);
+	if (distSquared < SQR(SOUND_INTENSITY)) {
+		m_sQueueSample.m_fDistance = distSquared <= 0.0f ? 0.0f : Sqrt(distSquared);
+		m_sQueueSample.m_nVolume = ComputeVolume(40, 35.0f, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume != 0) {
 			m_sQueueSample.m_nCounter = 0;
 			m_sQueueSample.m_nSampleIndex = SFX_JUMBO_TAXI;
@@ -5954,7 +5953,7 @@ cAudioManager::ProcessFireHydrant()
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-			m_sQueueSample.m_fSoundIntensity = intensity;
+			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 			m_sQueueSample.m_bReleasingSoundFlag = false;
 			m_sQueueSample.m_nReleasingVolumeDivider = 3;
 			m_sQueueSample.m_bReverbFlag = true;

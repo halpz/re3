@@ -30,24 +30,25 @@ class CExplosion
 	float m_fStopTime;
 	uint8 m_nIteration;
 	uint8 m_nActiveCounter;
+	bool m_bIsBoat;
+	bool m_bMakeSound;
 	float m_fStartTime;
 	uint32 m_nParticlesExpireTime;
 	float m_fPower;
-	bool m_bIsBoat;
 	float m_fZshift;
 public:
-	static void Initialise();
-	static void ClearAllExplosions();
-	static void Shutdown();
-	static int8 GetExplosionActiveCounter(uint8 id);
-	static void ResetExplosionActiveCounter(uint8 id);
-	static uint8 GetExplosionType(uint8 id);
-	static CVector *GetExplosionPosition(uint8 id);
-// TODO(MIAMI): that new parameter
-	static bool AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32 lifetime, bool unk = true);
-	static void Update();
-	static bool TestForExplosionInArea(eExplosionType type, float x1, float x2, float y1, float y2, float z1, float z2);
-	static void RemoveAllExplosionsInArea(CVector pos, float radius);
+	static bool AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32 lifetime, bool makeSound = true); //done(new parametr in android ver is fix for one mission)
+	static void ClearAllExplosions(); //done
+	static bool DoesExplosionMakeSound(uint8 id); //done
+	static int8 GetExplosionActiveCounter(uint8 id); //done
+	static CVector *GetExplosionPosition(uint8 id); //done
+	static uint8 GetExplosionType(uint8 id); //done, mb need change type to tExplosionType
+	static void Initialise(); //done
+	static void RemoveAllExplosionsInArea(CVector pos, float radius); //done
+	static void ResetExplosionActiveCounter(uint8 id); //done
+	static void Shutdown(); //done
+	static void Update(); //done
+	static bool TestForExplosionInArea(eExplosionType type, float x1, float x2, float y1, float y2, float z1, float z2); //done, not used
 };
 
 extern CExplosion gaExplosion[NUM_EXPLOSIONS];
