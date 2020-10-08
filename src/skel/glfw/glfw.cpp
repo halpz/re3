@@ -1228,7 +1228,9 @@ void terminateHandler(int sig, siginfo_t *info, void *ucontext) {
 }
 
 void dummyHandler(int sig){
+	// Don't kill the app pls
 }
+
 #endif
 
 void resizeCB(GLFWwindow* window, int width, int height) {
@@ -1475,9 +1477,10 @@ main(int argc, char *argv[])
 	act.sa_flags = SA_SIGINFO;
 	sigaction(SIGTERM, &act, NULL);
 	struct sigaction sa;
+	sigemptyset(&sa.sa_mask);
 	sa.sa_handler = dummyHandler;
 	sa.sa_flags = 0;
-	sigaction(SIGINT, &sa, NULL); // Needed for CdStreamPosix
+	sigaction(SIGUSR1, &sa, NULL); // Needed for CdStreamPosix
 #endif
 
 	/* 

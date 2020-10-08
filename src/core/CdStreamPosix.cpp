@@ -240,14 +240,17 @@ CdStreamRead(int32 channel, void *buffer, uint32 offset, uint32 size)
 	CdReadInfo *pChannel = &gpReadInfo[channel];
 	ASSERT( pChannel != nil );
 
-	pChannel->hFile = hImage - 1;
 
 	if ( pChannel->nSectorsToRead != 0 || pChannel->bReading ) {
+		if (pChannel->nSectorOffset == _GET_OFFSET(offset) && pChannel->nSectorsToRead >= size)
+			return STREAM_SUCCESS;
+			
 		flushStream[channel] = 1;
 		CdStreamSync(channel);
 		//return STREAM_NONE;
 	}
 
+	pChannel->hFile = hImage - 1;
 	pChannel->nStatus = STREAM_NONE;
 	pChannel->nSectorOffset = _GET_OFFSET(offset);
 	pChannel->nSectorsToRead = size;
@@ -316,7 +319,7 @@ CdStreamSync(int32 channel)
 	if (flushStream[channel]) {
 #ifdef ONE_THREAD_PER_CHANNEL
 		pChannel->nSectorsToRead = 0;
-		pthread_kill(pChannel->pChannelThread, SIGINT);
+		pthread_kill(pChannel->pChannelThread, SIGUSR1);
 		if (pChannel->bReading) {
 			pChannel->bLocked = true;
 			sem_wait(pChannel->pDoneSemaphore);
@@ -325,8 +328,9 @@ CdStreamSync(int32 channel)
 		pChannel->nSectorsToRead = 0;
 		if (pChannel->bReading) {
 			pChannel->bLocked = true;
-			pthread_kill(_gCdStreamThread, SIGINT);
+			pthread_kill(_gCdStreamThread, SIGUSR1);
 			sem_wait(pChannel->pDoneSemaphore);
+			
 		}
 #endif
 		pChannel->bReading = false;
