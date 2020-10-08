@@ -1220,8 +1220,11 @@ void CParticle::Update()
 			
 			if ( psystem->m_Type == PARTICLE_HEATHAZE || psystem->m_Type == PARTICLE_HEATHAZE_IN_DIST )
 			{
+#ifdef FIX_BUGS
+				int32 nSinCosIndex = (int32(DEGTORAD((float)particle->m_nRotation) * float(SIN_COS_TABLE_SIZE) / TWOPI) + SIN_COS_TABLE_SIZE) % SIN_COS_TABLE_SIZE;
+#else
 				int32 nSinCosIndex = int32(DEGTORAD((float)particle->m_nRotation) * float(SIN_COS_TABLE_SIZE) / TWOPI) % SIN_COS_TABLE_SIZE;
-				
+#endif
 				vecMoveStep.x = Sin(nSinCosIndex);
 				vecMoveStep.y = Sin(nSinCosIndex);
 				
@@ -1233,8 +1236,11 @@ void CParticle::Update()
 			
 			if ( psystem->m_Type == PARTICLE_BEASTIE )
 			{
+#ifdef FIX_BUGS
+				int32 nSinCosIndex = (int32(DEGTORAD((float)particle->m_nRotation) * float(SIN_COS_TABLE_SIZE) / TWOPI) + SIN_COS_TABLE_SIZE) % SIN_COS_TABLE_SIZE;
+#else
 				int32 nSinCosIndex = int32(DEGTORAD((float)particle->m_nRotation) * float(SIN_COS_TABLE_SIZE) / TWOPI) % SIN_COS_TABLE_SIZE;
-				
+#endif				
 				particle->m_vecVelocity.x = 0.50f * Cos(nSinCosIndex);
 				particle->m_vecVelocity.y = Cos(nSinCosIndex);
 				particle->m_vecVelocity.z = 0.25f * Sin(nSinCosIndex);
@@ -1750,7 +1756,11 @@ void CParticle::Update()
 			}
 			
 			if ( particle->m_nRotationStep != 0 )
+#ifdef FIX_BUGS
+				particle->m_nRotation = CGeneral::LimitAngle(particle->m_nRotation + particle->m_nRotationStep);
+#else
 				particle->m_nRotation += particle->m_nRotationStep;
+#endif
 			
 			if ( particle->m_fCurrentZRadius != 0.0f )
 			{
@@ -2403,7 +2413,7 @@ void CParticle::HandleShootableBirdsStuff(CEntity *entity, CVector const&camPos)
 {
 	float fHeadingRad = entity->GetForward().Heading();
 	float fHeading = RADTODEG(fHeadingRad);
-	float fBirdAngle = Cos(DEGTORAD(1.5f));
+	float fBirdAngle = ::Cos(DEGTORAD(1.5f));
 	
 	tParticleSystemData *psystem = &mod_ParticleSystemManager.m_aParticles[PARTICLE_BIRD_FRONT];
 	CParticle *particle = psystem->m_pParticles;

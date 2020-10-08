@@ -841,8 +841,8 @@ CAutomobile::ProcessControl(void)
 					m_nBusDoorTimerEnd -= CTimer::GetTimeStepInMilliseconds();
 			}
 
-			if(m_aSuspensionSpringRatio[0] < 1.0f || m_aSuspensionSpringRatio[1] < 1.0f ||
-			   m_aSuspensionSpringRatio[2] < 1.0f || m_aSuspensionSpringRatio[3] < 1.0f)
+			if((m_aSuspensionSpringRatio[0] < 1.0f || m_aSuspensionSpringRatio[2] < 1.0f) &&
+			   (m_aSuspensionSpringRatio[1] < 1.0f || m_aSuspensionSpringRatio[3] < 1.0f))
 				ApplyTurnForce(-GRAVITY*Min(m_fTurnMass, 2500.0f)*GetUp(), -1.0f*GetForward());
 		}
 

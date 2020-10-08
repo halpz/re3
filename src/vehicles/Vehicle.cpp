@@ -41,6 +41,8 @@ bool CVehicle::bCheat3;
 bool CVehicle::bCheat4;
 bool CVehicle::bCheat5;
 bool CVehicle::bCheat8;
+bool CVehicle::bCheat9;
+bool CVehicle::bCheat10;
 bool CVehicle::bHoverCheat;
 bool CVehicle::bAllTaxisHaveNitro;
 bool CVehicle::m_bDisableMouseSteering = true;

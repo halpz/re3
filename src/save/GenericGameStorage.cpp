@@ -213,9 +213,7 @@ GenericSave(int file)
 #endif
 	WriteDataToBufferPointer(buf, CGame::currArea);
 	WriteDataToBufferPointer(buf, CVehicle::bAllTaxisHaveNitro);
-	// TODO(Miami): Pad invert Y
-	bool invertY = 0;
-	WriteDataToBufferPointer(buf, invertY);
+	WriteDataToBufferPointer(buf, CPad::bInvertLook4Pad);
 	WriteDataToBufferPointer(buf, CTimeCycle::m_ExtraColour);
 	WriteDataToBufferPointer(buf, CTimeCycle::m_bExtraColourOn);
 	WriteDataToBufferPointer(buf, CTimeCycle::m_ExtraColourInter);
@@ -279,7 +277,8 @@ GenericSave(int file)
 
 		return false;
 	}
-	
+
+	CPad::FixPadsAfterSave();	
 	return true;
 }
 
@@ -352,9 +351,7 @@ GenericLoad()
 #endif
 	ReadDataFromBufferPointer(buf, CGame::currArea);
 	ReadDataFromBufferPointer(buf, CVehicle::bAllTaxisHaveNitro);
-	// TODO(Miami): Pad invert Y
-	bool invertY = 0;
-	ReadDataFromBufferPointer(buf, invertY);
+	ReadDataFromBufferPointer(buf, CPad::bInvertLook4Pad);
 	ReadDataFromBufferPointer(buf, CTimeCycle::m_ExtraColour);
 	ReadDataFromBufferPointer(buf, CTimeCycle::m_bExtraColourOn);
 	ReadDataFromBufferPointer(buf, CTimeCycle::m_ExtraColourInter);

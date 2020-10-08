@@ -17,8 +17,15 @@
 uint32 projectileInUse;
 #endif
 
+// --MIAMI: file done except TODOs
+
 CProjectileInfo gaProjectileInfo[NUM_PROJECTILES];
 CProjectile *CProjectileInfo::ms_apProjectile[NUM_PROJECTILES];
+
+#define PROJECTILE_BOUNDARY_MIN_X -2390.0f
+#define PROJECTILE_BOUNDARY_MAX_X 1590.0f
+#define PROJECTILE_BOUNDARY_MIN_Y -1990.0f
+#define PROJECTILE_BOUNDARY_MAX_Y 1990.0f
 
 void
 CProjectileInfo::Initialise()
@@ -53,7 +60,6 @@ CProjectileInfo::GetProjectileInfo(int32 id)
 	return &gaProjectileInfo[id];
 }
 
-// --MIAMI: Mostly done
 bool
 CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos, float speed)
 {
@@ -67,70 +73,87 @@ CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos,
 
 	switch (weapon)
 	{
-	case WEAPONTYPE_ROCKET:
-	{
-		float vy = 0.35f;
-		time = CTimer::GetTimeInMilliseconds() + 2000;
-		if (entity->GetModelIndex() == MI_SPARROW || entity->GetModelIndex() == MI_HUNTER || entity->GetModelIndex() == MI_SENTINEL) {
-			matrix = ped->GetMatrix();
-			matrix.GetPosition() = pos;
-			CVector vecSpeed = ((CPhysical*)entity)->m_vecMoveSpeed;
-			vy += Max(0.0f, DotProduct(vecSpeed, entity->GetForward())) + Max(0.0f, DotProduct(vecSpeed, entity->GetUp()));
-		} else {
-			if (ped->IsPlayer()) {
-				matrix.GetForward() = TheCamera.Cams[TheCamera.ActiveCam].Front;
-				matrix.GetUp() = TheCamera.Cams[TheCamera.ActiveCam].Up;
-				matrix.GetRight() = CrossProduct(TheCamera.Cams[TheCamera.ActiveCam].Up, TheCamera.Cams[TheCamera.ActiveCam].Front);
-				matrix.GetPosition() = pos;
-			} else if (ped->m_pSeekTarget != nil) {
-				float ry = CGeneral::GetRadianAngleBetweenPoints(1.0f, ped->m_pSeekTarget->GetPosition().z, 1.0f, pos.z);
-				float rz = Atan2(-ped->GetForward().x, ped->GetForward().y);
-				vy = 0.35f * speed + 0.15f;
-				matrix.SetTranslate(0.0f, 1.0f, 1.0f);
-				matrix.Rotate(0.0f, ry, rz);
-				matrix.GetPosition() += pos;
-			} else {
+		case WEAPONTYPE_ROCKET:
+		{
+			float vy = 0.35f;
+			time = CTimer::GetTimeInMilliseconds() + 2000;
+			if (entity->GetModelIndex() == MI_SPARROW || entity->GetModelIndex() == MI_HUNTER || entity->GetModelIndex() == MI_SENTINEL) {
 				matrix = ped->GetMatrix();
+				matrix.GetPosition() = pos;
+				CVector vecSpeed = ((CPhysical*)entity)->m_vecMoveSpeed;
+				vy += Max(0.0f, DotProduct(vecSpeed, entity->GetForward())) + Max(0.0f, DotProduct(vecSpeed, entity->GetUp()));
+			} else {
+				if (ped->IsPlayer()) {
+					matrix.GetForward() = TheCamera.Cams[TheCamera.ActiveCam].Front;
+					matrix.GetUp() = TheCamera.Cams[TheCamera.ActiveCam].Up;
+					matrix.GetRight() = CrossProduct(TheCamera.Cams[TheCamera.ActiveCam].Up, TheCamera.Cams[TheCamera.ActiveCam].Front);
+					matrix.GetPosition() = pos;
+				} else if (ped->m_pSeekTarget != nil) {
+					float ry = CGeneral::GetRadianAngleBetweenPoints(1.0f, ped->m_pSeekTarget->GetPosition().z, 1.0f, pos.z);
+					float rz = Atan2(-ped->GetForward().x, ped->GetForward().y);
+					vy = 0.35f * speed + 0.15f;
+					matrix.SetTranslate(0.0f, 1.0f, 1.0f);
+					matrix.Rotate(0.0f, ry, rz);
+					matrix.GetPosition() += pos;
+				} else {
+					matrix = ped->GetMatrix();
+				}
 			}
+			velocity = Multiply3x3(matrix, CVector(0.0f, vy, 0.0f));
+			gravity = false;
+			break;
 		}
-		velocity = Multiply3x3(matrix, CVector(0.0f, vy, 0.0f));
-		gravity = false;
-		break;
-	}
-	case WEAPONTYPE_MOLOTOV:
-	{
-		time = CTimer::GetTimeInMilliseconds() + 2000;
-		float scale = 0.22f * speed + 0.15f;
-		if (scale < 0.2f)
-			scale = 0.2f;
-		float angle = Atan2(-ped->GetForward().x, ped->GetForward().y);
-		matrix.SetTranslate(0.0f, 0.0f, 0.0f);
-		matrix.RotateZ(angle);
-		matrix.GetPosition() += pos;
-		velocity.x = -1.0f * scale * Sin(angle);
-		velocity.y = scale * Cos(angle);
-		velocity.z = (0.2f * speed + 0.4f) * scale;
-		break;
-	}
-	case WEAPONTYPE_GRENADE:
-	case WEAPONTYPE_DETONATOR_GRENADE:
-	{
-		time = CTimer::GetTimeInMilliseconds() + 2000;
-		float scale = 0.0f;
-		if (speed != 0.0f)
-			scale = 0.22f * speed + 0.15f;
-		float angle = Atan2(-ped->GetForward().x, ped->GetForward().y);
-		matrix.SetTranslate(0.0f, 0.0f, 0.0f);
-		matrix.RotateZ(angle);
-		matrix.GetPosition() += pos;
-		SpecialCollisionResponseCase = COLLRESPONSE_UNKNOWN5;
-		velocity.x = -1.0f * scale * Sin(angle);
-		velocity.y = scale * Cos(angle);
-		velocity.z = (0.4f * speed + 0.4f) * scale;
-		elasticity = 0.5f;
-		break;
-	}
-	default:
+		case WEAPONTYPE_MOLOTOV:
+		{
+			time = CTimer::GetTimeInMilliseconds() + 2000;
+			float scale = 0.22f * speed + 0.15f;
+			if (scale < 0.2f)
+				scale = 0.2f;
+			float angle = Atan2(-ped->GetForward().x, ped->GetForward().y);
+			matrix.SetTranslate(0.0f, 0.0f, 0.0f);
+			matrix.RotateZ(angle);
+			matrix.GetPosition() += pos;
+			velocity.x = -1.0f * scale * Sin(angle);
+			velocity.y = scale * Cos(angle);
+			velocity.z = (0.2f * speed + 0.4f) * scale;
+			break;
+		}
+		case WEAPONTYPE_TEARGAS:
+		{
+			time = CTimer::GetTimeInMilliseconds() + 20000;
+			float scale = 0.0f;
+			if (speed != 0.0f)
+				scale = 0.22f * speed + 0.15f;
+			float angle = Atan2(-ped->GetForward().x, ped->GetForward().y);
+			matrix.SetTranslate(0.0f, 0.0f, 0.0f);
+			matrix.RotateZ(angle);
+			matrix.GetPosition() += pos;
+			SpecialCollisionResponseCase = COLLRESPONSE_UNKNOWN5;
+			velocity.x = -1.0f * scale * Sin(angle);
+			velocity.y = scale * Cos(angle);
+			velocity.z = (0.4f * speed + 0.4f) * scale;
+			elasticity = 0.5f;
+			break;
+		}
+		case WEAPONTYPE_GRENADE:
+		case WEAPONTYPE_DETONATOR_GRENADE:
+		{
+			time = CTimer::GetTimeInMilliseconds() + 2000;
+			float scale = 0.0f;
+			if (speed != 0.0f)
+				scale = 0.22f * speed + 0.15f;
+			float angle = Atan2(-ped->GetForward().x, ped->GetForward().y);
+			matrix.SetTranslate(0.0f, 0.0f, 0.0f);
+			matrix.RotateZ(angle);
+			matrix.GetPosition() += pos;
+			SpecialCollisionResponseCase = COLLRESPONSE_UNKNOWN5;
+			velocity.x = -1.0f * scale * Sin(angle);
+			velocity.y = scale * Cos(angle);
+			velocity.z = (0.4f * speed + 0.4f) * scale;
+			elasticity = 0.5f;
+			break;
+		}
+		default:
 		Error("Undefined projectile type, AddProjectile, ProjectileInfo.cpp");
 		break;
 	}
@@ -143,19 +166,20 @@ CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos,
 
 	switch (weapon)
 	{
-	case WEAPONTYPE_ROCKET:
+		case WEAPONTYPE_ROCKET:
 		ms_apProjectile[i] = new CProjectile(MI_MISSILE);
 		break;
-	case WEAPONTYPE_FLAMETHROWER:
+		case WEAPONTYPE_TEARGAS:
+		ms_apProjectile[i] = new CProjectile(MI_TEARGAS);
 		break;
-	case WEAPONTYPE_MOLOTOV:
+		case WEAPONTYPE_MOLOTOV:
 		ms_apProjectile[i] = new CProjectile(MI_MOLOTOV);
 		break;
-	case WEAPONTYPE_GRENADE:
-	case WEAPONTYPE_DETONATOR_GRENADE:
+		case WEAPONTYPE_GRENADE:
+		case WEAPONTYPE_DETONATOR_GRENADE:
 		ms_apProjectile[i] = new CProjectile(MI_GRENADE);
 		break;
-	default: break;
+		default: break;
 	}
 
 	if (ms_apProjectile[i] == nil)
@@ -189,7 +213,18 @@ CProjectileInfo::AddProjectile(CEntity *entity, eWeaponType weapon, CVector pos,
 void
 CProjectileInfo::RemoveProjectile(CProjectileInfo *info, CProjectile *projectile)
 {
-	RemoveNotAdd(info->m_pSource, info->m_eWeaponType, projectile->GetPosition());
+	// TODO(Miami): New parameter: 1
+	switch (info->m_eWeaponType) {
+		case WEAPONTYPE_GRENADE:
+			CExplosion::AddExplosion(nil, info->m_pSource, EXPLOSION_GRENADE, projectile->GetPosition(), 0);
+			break;
+		case WEAPONTYPE_MOLOTOV:
+			CExplosion::AddExplosion(nil, info->m_pSource, EXPLOSION_MOLOTOV, projectile->GetPosition(), 0);
+			break;
+		case WEAPONTYPE_ROCKET:
+			CExplosion::AddExplosion(nil, info->m_pSource->IsVehicle() ? ((CVehicle*)info->m_pSource)->pDriver : info->m_pSource, EXPLOSION_ROCKET, projectile->GetPosition(), 0);
+			break;
+	}
 #ifdef SQUEEZE_PERFORMANCE
 	projectileInUse--;
 #endif
@@ -202,18 +237,17 @@ CProjectileInfo::RemoveProjectile(CProjectileInfo *info, CProjectile *projectile
 void
 CProjectileInfo::RemoveNotAdd(CEntity *entity, eWeaponType weaponType, CVector pos)
 {
-	switch (weaponType)
-	{
-	case WEAPONTYPE_GRENADE:
-		CExplosion::AddExplosion(nil, entity, EXPLOSION_GRENADE, pos, 0);
-		break;
-	case WEAPONTYPE_MOLOTOV:
-		CExplosion::AddExplosion(nil, entity, EXPLOSION_MOLOTOV, pos, 0);
-		break;
-	case WEAPONTYPE_ROCKET:
-		CExplosion::AddExplosion(nil, entity, EXPLOSION_ROCKET, pos, 0);
-		break;
-	default: break;
+	// TODO(Miami): New parameter: 1
+	switch (weaponType) {
+		case WEAPONTYPE_GRENADE:
+			CExplosion::AddExplosion(nil, entity, EXPLOSION_GRENADE, pos, 0);
+			break;
+		case WEAPONTYPE_MOLOTOV:
+			CExplosion::AddExplosion(nil, entity, EXPLOSION_MOLOTOV, pos, 0);
+			break;
+		case WEAPONTYPE_ROCKET:
+			CExplosion::AddExplosion(nil, entity, EXPLOSION_ROCKET, pos, 0);
+			break;
 	}
 }
 
@@ -225,6 +259,8 @@ CProjectileInfo::Update()
 		return;
 #endif
 
+	int tearGasOffset = -0.0f; // unused
+	
 	for (int i = 0; i < ARRAY_SIZE(gaProjectileInfo); i++) {
 		if (!gaProjectileInfo[i].m_bInUse) continue;
 
@@ -240,21 +276,48 @@ CProjectileInfo::Update()
 			gaProjectileInfo[i].m_bInUse = false;
 			continue;
 		}
+		if ( (gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_DETONATOR_GRENADE || gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_TEARGAS) && ms_apProjectile[i]->m_fElasticity > 0.1f ) {
+			if ( Abs(ms_apProjectile[i]->m_vecMoveSpeed.x) < 0.05f && Abs(ms_apProjectile[i]->m_vecMoveSpeed.y) < 0.05f && Abs(ms_apProjectile[i]->m_vecMoveSpeed.z) < 0.05f ) {
+				ms_apProjectile[i]->m_fElasticity = 0.03f;
+			}
+		}
+		const CVector &projectilePos = ms_apProjectile[i]->GetPosition();
+		CVector nextPos = CTimer::GetTimeStep() * ms_apProjectile[i]->m_vecMoveSpeed + projectilePos;
 
-		if (gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKET) {
-			CParticle::AddParticle(PARTICLE_SMOKE, ms_apProjectile[i]->GetPosition(), CVector(0.0f, 0.0f, 0.0f));
+		if ( nextPos.x <= PROJECTILE_BOUNDARY_MIN_X || nextPos.x >= PROJECTILE_BOUNDARY_MAX_X || nextPos.y <= PROJECTILE_BOUNDARY_MIN_Y || nextPos.y >= PROJECTILE_BOUNDARY_MAX_Y ) {
+			// Not RemoveProjectile, because we don't want no explosion
+			gaProjectileInfo[i].m_bInUse = false;
+			CWorld::Remove(ms_apProjectile[i]);
+			delete ms_apProjectile[i];
+        	continue;
+		}
+		if ( gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_TEARGAS && CTimer::GetTimeInMilliseconds() > gaProjectileInfo[i].m_nExplosionTime - 19500 ) {
+			CParticle::AddParticle(PARTICLE_TEARGAS, projectilePos, CVector(0.2f, tearGasOffset, 0.0f), 0, 0.0f, 0, 0, 0, 0);
+			CParticle::AddParticle(PARTICLE_TEARGAS, projectilePos, CVector(-0.2f, tearGasOffset, 0.0f), 0, 0.0f, 0, 0, 0, 0);
+			CParticle::AddParticle(PARTICLE_TEARGAS, projectilePos, CVector(tearGasOffset, tearGasOffset, 0.0f), 0, 0.0f, 0, 0, 0, 0);
+
+			// TODO(Miami): SetPedsChoking
+			/*if ( CTimer::GetTimeInMilliseconds() & 0x200 )
+				CWorld::SetPedsChoking(projectilePos.x, projectilePos.y, projectilePos.z, 6.0f, gaProjectileInfo[i].m_pSource);
+			*/
 		}
 
-		if (CTimer::GetTimeInMilliseconds() <= gaProjectileInfo[i].m_nExplosionTime) {
+		if (gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKET) {
+			CParticle::AddParticlesAlongLine(PARTICLE_ROCKET_SMOKE, gaProjectileInfo[i].m_vecPos, projectilePos, CVector(0.0f, 0.0f, 0.0f), 0.7f, 0, 0, 0, 3000);
+		}
+
+		if (CTimer::GetTimeInMilliseconds() <= gaProjectileInfo[i].m_nExplosionTime || gaProjectileInfo[i].m_nExplosionTime == 0) {
 			if (gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKET) {
 				CVector pos = ms_apProjectile[i]->GetPosition();
 				CWorld::pIgnoreEntity = ms_apProjectile[i];
 				if (ms_apProjectile[i]->bHasCollided
 					|| !CWorld::GetIsLineOfSightClear(gaProjectileInfo[i].m_vecPos, pos, true, true, true, true, false, false)
-					|| gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKET && (CHeli::TestRocketCollision(&pos) || CPlane::TestRocketCollision(&pos))) {
+					|| CHeli::TestRocketCollision(&pos) || CPlane::TestRocketCollision(&pos)) {
 					RemoveProjectile(&gaProjectileInfo[i], ms_apProjectile[i]);
 				}
 				CWorld::pIgnoreEntity = nil;
+				ms_apProjectile[i]->m_vecMoveSpeed *= 1.07f;
+
 			} else if (gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_MOLOTOV) {
 				CVector pos = ms_apProjectile[i]->GetPosition();
 				CWorld::pIgnoreEntity = ms_apProjectile[i];
@@ -263,8 +326,7 @@ CProjectileInfo::Update()
 					|| ((gaProjectileInfo[i].m_vecPos - gaProjectileInfo[i].m_pSource->GetPosition()).MagnitudeSqr() >= 2.0f))
 				{
 					if (ms_apProjectile[i]->bHasCollided
-						|| !CWorld::GetIsLineOfSightClear(gaProjectileInfo[i].m_vecPos, pos, true, true, true, true, false, false)
-						|| gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKET && (CHeli::TestRocketCollision(&pos) || CPlane::TestRocketCollision(&pos))) {
+						|| !CWorld::GetIsLineOfSightClear(gaProjectileInfo[i].m_vecPos, pos, true, true, true, true, false, false)) {
 						RemoveProjectile(&gaProjectileInfo[i], ms_apProjectile[i]);
 					}
 				}
@@ -315,13 +377,12 @@ CProjectileInfo::IsProjectileInRange(float x1, float x2, float y1, float y2, flo
 	return result;
 }
 
-// --MIAMI: Done
 void
 CProjectileInfo::RemoveDetonatorProjectiles()
 {
 	for (int i = 0; i < ARRAY_SIZE(ms_apProjectile); i++) {
 		if (gaProjectileInfo[i].m_bInUse && gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_DETONATOR_GRENADE) {
-			CExplosion::AddExplosion(nil, gaProjectileInfo[i].m_pSource, EXPLOSION_GRENADE, gaProjectileInfo[i].m_vecPos, 0); // TODO(Miami): New parameter (1)
+			CExplosion::AddExplosion(nil, gaProjectileInfo[i].m_pSource, EXPLOSION_GRENADE, gaProjectileInfo[i].m_vecPos, 0); // TODO(Miami): New parameter: 1
 			gaProjectileInfo[i].m_bInUse = false;
 			CWorld::Remove(ms_apProjectile[i]);
 			delete ms_apProjectile[i];

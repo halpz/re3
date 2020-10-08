@@ -136,7 +136,6 @@ CVector vecPedBikeKickAnimOffset;
 
 bool CPed::bNastyLimbsCheat;
 bool CPed::bFannyMagnetCheat;
-bool CPed::bPedCheat2;
 bool CPed::bPedCheat3;
 CVector2D CPed::ms_vec2DFleePosition;
 
@@ -14404,7 +14403,7 @@ CPed::PossiblyFindBetterPosToSeekCar(CVector *pos, CVehicle *veh)
 	return true;
 }
 
-extern CVector vecTestTemp(-1.0f, -1.0f, -1.0f);
+CVector vecTestTemp(-1.0f, -1.0f, -1.0f);
 
 // --MIAMI: Done
 void

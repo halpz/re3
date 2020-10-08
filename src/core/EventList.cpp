@@ -10,6 +10,8 @@
 #include "main.h"
 #include "Accident.h"
 
+// --MIAMI: file done
+
 int32 CEventList::ms_nFirstFreeSlotIndex;
 CEvent gaEvent[NUMEVENTS];
 
@@ -57,6 +59,7 @@ CEventList::Update(void)
 	}
 }
 
+// ok
 void
 CEventList::RegisterEvent(eEventType type, eEventEntity entityType, CEntity *ent, CPed *criminal, int32 timeout)
 {
@@ -195,7 +198,6 @@ CEventList::FindClosestEvent(eEventType type, CVector posn, int32 *event)
 	return found;
 }
 
-// --MIAMI: Done
 void
 CEventList::ReportCrimeForEvent(eEventType type, size_t crimeId, bool copsDontCare)
 {

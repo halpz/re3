@@ -158,6 +158,7 @@ public:
 	uint8 ShakeFreq;
 	bool bHornHistory[HORNHISTORY_SIZE];
 	uint8 iCurrHornHistory;
+	int8 JustOutOfFrontend;
 	int8 bApplyBrakes;
 	char CheatString[12];
 	int32 LastTimeTouched;
@@ -174,7 +175,9 @@ public:
 	static bool bObsoleteControllerMessage;
 	static bool bOldDisplayNoControllerMessage;
 	static bool m_bMapPadOneToPadTwo;
+	static bool m_bDebugCamPCOn;
 	static bool bHasPlayerCheated;
+	static bool bInvertLook4Pad;
 	
 	static CKeyboardState OldKeyState;
 	static CKeyboardState NewKeyState;
@@ -190,6 +193,7 @@ public:
 #endif
 	void Clear(bool bResetPlayerControls);
 	void ClearMouseHistory();
+	void ClearKeyBoardHistory();
 	void UpdateMouse();
 	CControllerState ReconcileTwoControllersInput(CControllerState const &State1, CControllerState const &State2);
 	void StartShake(int16 nDur, uint8 nFreq);
@@ -219,6 +223,7 @@ public:
 	int16 GetPedWalkLeftRight(void);
 	int16 GetPedWalkUpDown(void);
 	int16 GetAnalogueUpDown(void);
+	int16 GetAnalogueLeftRight(void);
 	bool GetLookLeft(void);
 	bool GetLookRight(void);
 	bool GetLookBehindForCar(void);
@@ -234,6 +239,7 @@ public:
 	int32 GetWeapon(void);
 	bool WeaponJustDown(void);
 	int16 GetAccelerate(void);
+	bool CycleCameraModeJustDown(void);
 	bool CycleCameraModeUpJustDown(void);
 	bool CycleCameraModeDownJustDown(void);
 	bool ChangeStationJustDown(void);
@@ -261,6 +267,7 @@ public:
 	int16 LookAroundLeftRight(void);
 	int16 LookAroundUpDown(void);
 	void ResetAverageWeapon(void);
+	static void FixPadsAfterSave(void);
 	static void PrintErrorMessage(void);
 	static void ResetCheats(void);
 	static char *EditString(char *pStr, int32 nSize);

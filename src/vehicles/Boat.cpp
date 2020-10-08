@@ -959,17 +959,24 @@ CBoat::PreRender(void)
 				matrix.Translate(pos);
 				matrix.UpdateRW();
 			}
+			// FIX: Planes can also be controlled with GetCarGunUpDown
+#ifdef FIX_BUGS
+			static float steeringUpDown = 0.0f;
+			steeringUpDown += ((Abs(CPad::GetPad(0)->GetCarGunUpDown()) > 1.0f ? (-CPad::GetPad(0)->GetCarGunUpDown() / 128.0f) : (-CPad::GetPad(0)->GetSteeringUpDown() / 128.0f)) - steeringUpDown) * Min(1.f, CTimer::GetTimeStep() / 5.f);
+#else
+			float steeringUpDown = -CPad::GetPad(0)->GetSteeringUpDown()/128.0f;
+#endif
 			if(m_aBoatNodes[BOAT_REARFLAP_LEFT]){
 				matrix.Attach(RwFrameGetMatrix(m_aBoatNodes[BOAT_REARFLAP_LEFT]));
 				pos = matrix.GetPosition();
-				matrix.SetRotateX(-CPad::GetPad(0)->GetSteeringUpDown()/128.0f);
+				matrix.SetRotateX(steeringUpDown);
 				matrix.Translate(pos);
 				matrix.UpdateRW();
 			}
 			if(m_aBoatNodes[BOAT_REARFLAP_RIGHT]){
 				matrix.Attach(RwFrameGetMatrix(m_aBoatNodes[BOAT_REARFLAP_RIGHT]));
 				pos = matrix.GetPosition();
-				matrix.SetRotateX(-CPad::GetPad(0)->GetSteeringUpDown()/128.0f);
+				matrix.SetRotateX(steeringUpDown);
 				matrix.Translate(pos);
 				matrix.UpdateRW();
 			}
