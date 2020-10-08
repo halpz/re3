@@ -1208,3 +1208,36 @@ bool CEntity::IsEntityOccluded(void) {
 
 	return false;
 }
+
+/*
+0x487A10 - SetAtomicAlphaCB
+0x4879E0 - SetClumpAlphaCB
+*/
+
+RpMaterial* SetAtomicAlphaCB(RpMaterial *material, void *data) {
+	((RwRGBA*)RpMaterialGetColor(material))->alpha = (uint8)(uintptr)data;
+	return material;
+}
+
+RpAtomic* SetClumpAlphaCB(RpAtomic *atomic, void *data) {
+	RpGeometry *geometry = RpAtomicGetGeometry(atomic);
+	RpGeometrySetFlags(geometry, RpGeometryGetFlags(geometry) | rpGEOMETRYMODULATEMATERIALCOLOR);
+	RpGeometryForAllMaterials(geometry, SetAtomicAlphaCB, (void*)data);
+	return atomic;
+}
+
+void CEntity::SetRwObjectAlpha(int32 alpha) {
+	if (m_rwObject != nil) {
+		switch (RwObjectGetType(m_rwObject)) {
+		case rpATOMIC: {
+			RpGeometry *geometry = RpAtomicGetGeometry(GetFirstAtomic(GetClump()));
+			RpGeometrySetFlags(geometry, RpGeometryGetFlags(geometry) | rpGEOMETRYMODULATEMATERIALCOLOR);
+			RpGeometryForAllMaterials(geometry, SetAtomicAlphaCB, (void*)alpha);
+			break;
+		}
+		case rpCLUMP:
+			RpClumpForAllAtomics((RpClump*)m_rwObject, SetClumpAlphaCB, (void*)alpha);
+			break;
+		}
+	}
+}

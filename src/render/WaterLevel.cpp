@@ -2839,7 +2839,7 @@ CWaterLevel::HandleSeaLifeForms()
 				vecPos.y += (fSin + fCos) * fAngle;
 				
 				//TODO(MIAMI)
-				//CWaterCreatures::CreateOne(vecPos, 0xFFFFFFFF);
+				//CWaterCreatures::CreateOne(vecPos, -1);
 			}
 		}
 	}
