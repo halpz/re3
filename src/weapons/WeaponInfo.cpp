@@ -160,17 +160,17 @@ CWeaponInfo::LoadWeaponData(void)
 		ms_apWeaponInfos[weaponType].m_fAnimFrameFire = delayBetweenAnimAndFire / 30.0f;
 		ms_apWeaponInfos[weaponType].m_fAnim2FrameFire = delayBetweenAnim2AndFire / 30.0f;
 		ms_apWeaponInfos[weaponType].m_nModelId = modelId;
-		ms_apWeaponInfos[weaponType].m_bUseGravity = flags;
-		ms_apWeaponInfos[weaponType].m_bSlowsDown = flags >> 1;
-		ms_apWeaponInfos[weaponType].m_bDissipates = flags >> 2;
-		ms_apWeaponInfos[weaponType].m_bRandSpeed = flags >> 3;
-		ms_apWeaponInfos[weaponType].m_bExpands = flags >> 4;
-		ms_apWeaponInfos[weaponType].m_bExplodes = flags >> 5;
-		ms_apWeaponInfos[weaponType].m_bCanAim = flags >> 6;
-		ms_apWeaponInfos[weaponType].m_bCanAimWithArm = flags >> 7;
-		ms_apWeaponInfos[weaponType].m_b1stPerson = flags >> 8;
-		ms_apWeaponInfos[weaponType].m_bHeavy = flags >> 9;
-		ms_apWeaponInfos[weaponType].m_bThrow = flags >> 10;
+		ms_apWeaponInfos[weaponType].m_bUseGravity = flags & 1;
+		ms_apWeaponInfos[weaponType].m_bSlowsDown = (flags >> 1) & 1;
+		ms_apWeaponInfos[weaponType].m_bDissipates = (flags >> 2) & 1;
+		ms_apWeaponInfos[weaponType].m_bRandSpeed = (flags >> 3) & 1;
+		ms_apWeaponInfos[weaponType].m_bExpands = (flags >> 4) & 1;
+		ms_apWeaponInfos[weaponType].m_bExplodes = (flags >> 5) & 1;
+		ms_apWeaponInfos[weaponType].m_bCanAim = (flags >> 6) & 1;
+		ms_apWeaponInfos[weaponType].m_bCanAimWithArm = (flags >> 7) & 1;
+		ms_apWeaponInfos[weaponType].m_b1stPerson = (flags >> 8) & 1;
+		ms_apWeaponInfos[weaponType].m_bHeavy = (flags >> 9) & 1;
+		ms_apWeaponInfos[weaponType].m_bThrow = (flags >> 10) & 1;
 	}
 }
 

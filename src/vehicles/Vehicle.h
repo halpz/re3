@@ -111,7 +111,7 @@ public:
 	CAutoPilot AutoPilot;
 	uint8 m_currentColour1;
 	uint8 m_currentColour2;
-	uint8 m_aExtras[2];
+	int8 m_aExtras[2];
 	int16 m_nAlarmState;
 	int16 m_nMissionValue;
 	CPed *pDriver;
