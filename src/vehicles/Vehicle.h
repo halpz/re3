@@ -400,6 +400,8 @@ public:
 	static bool bCheat4;
 	static bool bCheat5;
 	static bool bCheat8;
+	static bool bCheat9;
+	static bool bCheat10;
 	static bool bHoverCheat;
 	static bool bAllTaxisHaveNitro;
 	static bool m_bDisableMouseSteering;

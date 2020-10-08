@@ -207,8 +207,8 @@ enum eMenuAction
 	MENUACTION_YES,
 	MENUACTION_NO,
 	MENUACTION_CHANGEMENU,
-	MENUACTION_UNK5,
 	MENUACTION_INVERTPADY,
+	MENUACTION_CTRLDISPLAY,
 	MENUACTION_FRAMESYNC,
 	MENUACTION_FRAMELIMIT,
 	MENUACTION_TRAILS,
@@ -466,7 +466,7 @@ public:
 	bool m_PrefsUseVibration;
 	bool m_PrefsShowHud;
 	int32 m_PrefsRadarMode;
-	uint8 field_10;
+	bool m_DisplayControllerOnFoot;
 	bool m_bShutDownFrontEndRequested;
 	bool m_bStartUpFrontEndRequested;
 	int32 m_KeyPressedCode;

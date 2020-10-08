@@ -12020,7 +12020,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		script_assert(pVehicle);
 		bool bIsBurst = false;
 		CBike* pBike = (CBike*)pVehicle;
-		if (pVehicle->m_vehType == VEHICLE_APPEARANCE_BIKE) {
+		if (pVehicle->IsBike()) {
 			if (ScriptParams[1] == 4) {
 				for (int i = 0; i < 2; i++) {
 					if (pBike->m_wheelStatus[i] == WHEEL_STATUS_BURST)
