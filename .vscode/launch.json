@@ -6,9 +6,30 @@
       "cwd": "${workspaceFolder}",
       "environment": [],
       "externalConsole": false,
-      "name": "(gdb) Launch",
-      "preLaunchTask": "Compile (Linux x64)",
+      "name": "(gdb) Launch (Debug)",
+      "preLaunchTask": "Compile (Debug Linux x64)",
       "program": "${workspaceFolder}/bin/linux-amd64-librw_gl3_glfw-oal/Debug/re3",
+      "request": "launch",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "ignoreFailures": true,
+          "text": "-enable-pretty-printing"
+        }
+      ],
+      "stopAtEntry": false,
+      "targetArchitecture": "x64",
+      "type": "cppdbg"
+    },
+    {
+      "MIMode": "gdb",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "name": "(gdb) Launch (Release)",
+      "preLaunchTask": "Compile (Release Linux x64)",
+      "program": "${workspaceFolder}/bin/linux-amd64-librw_gl3_glfw-oal/Release/re3",
       "request": "launch",
       "setupCommands": [
         {

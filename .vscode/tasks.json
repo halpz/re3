@@ -1,12 +1,4 @@
 {
-  "inputs": [
-    {
-      "default": "5",
-      "description": "Number of jobs to run simultaneously when compiling",
-      "id": "numberOfJobs",
-      "type": "promptString"
-    }
-  ],
   "tasks": [
     {
       "args": ["--with-librw", "gmake2"],
@@ -17,7 +9,7 @@
     },
     {
       "args": [
-        "-j${input:numberOfJobs}",
+        "-j5",
         "config=debug_linux-amd64-librw_gl3_glfw-oal",
         "verbose=1"
       ],
@@ -27,7 +19,26 @@
         "isDefault": true,
         "kind": "build"
       },
-      "label": "Compile (Linux x64)",
+      "label": "Compile (Debug Linux x64)",
+      "options": {
+        "cwd": "${workspaceFolder}/build"
+      },
+      "problemMatcher": "$gcc",
+      "type": "shell"
+    },
+    {
+      "args": [
+        "-j5",
+        "config=release_linux-amd64-librw_gl3_glfw-oal",
+        "verbose=1"
+      ],
+      "command": "make",
+      "dependsOn": "Premake (Linux)",
+      "group": {
+        "isDefault": true,
+        "kind": "build"
+      },
+      "label": "Compile (Release Linux x64)",
       "options": {
         "cwd": "${workspaceFolder}/build"
       },
