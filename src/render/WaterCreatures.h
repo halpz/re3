@@ -1,7 +1,7 @@
 #pragma once
 #include "Object.h"
 
-enum {
+enum eFishSlotState {
 	WATER_CREATURE_ALLOCATED = 0,
 	WATER_CREATURE_ACTIVE,
 	WATER_CREATURE_UPDATE,
@@ -20,9 +20,9 @@ public:
 
 	CWaterCreature();
 	~CWaterCreature();
-	void Allocate(CObject *pObj, float fRightMult, float fZTurnSpeed, float fWaterDepth, uint32 alpha, int eFishSlotState);
+	void Allocate(CObject *pObj, float fRightMult, float fZTurnSpeed, float fWaterDepth, uint32 alpha, eFishSlotState state);
 	void Free();
-	void Initialise(CObject *pObj, float fRightMult, float fZTurnSpeed, float fWaterDepth, uint32 alpha, int eFishSlotState);
+	void Initialise(CObject *pObj, float fRightMult, float fZTurnSpeed, float fWaterDepth, uint32 alpha, eFishSlotState state);
 };
 
 class CWaterCreatures {
@@ -30,8 +30,8 @@ class CWaterCreatures {
 public:
 	static CWaterCreature aWaterCreatures[NUM_WATER_CREATURES];
 	static int32 nNumActiveSeaLifeForms;
-	static CObject *CreateSeaLifeForm(CVector pos, int16 modelID, float zRotAngle);
-	static void CreateOne(CVector pos, int16 modelID);
+	static CObject *CreateSeaLifeForm(CVector const& pos, int16 modelID, int32 zRotAngle);
+	static void CreateOne(CVector const& pos, int32 modelID);
 	static void UpdateAll();
 	static void FreeFishStructSlot(CWaterCreature *wc);
 	static bool IsSpaceForMoreWaterCreatures();
@@ -44,6 +44,6 @@ struct WaterCreatureProperties {
 	int16 *modelID;
 	float fRightMult;
 	float fLevel;
-	float fUnk2;
+	float fUnknown; //unused
 	float fWaterDepth;
 };

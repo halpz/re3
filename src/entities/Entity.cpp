@@ -1230,7 +1230,7 @@ void CEntity::SetRwObjectAlpha(int32 alpha) {
 	if (m_rwObject != nil) {
 		switch (RwObjectGetType(m_rwObject)) {
 		case rpATOMIC: {
-			RpGeometry *geometry = RpAtomicGetGeometry(GetFirstAtomic(GetClump()));
+			RpGeometry *geometry = RpAtomicGetGeometry((RpAtomic*)m_rwObject);
 			RpGeometrySetFlags(geometry, RpGeometryGetFlags(geometry) | rpGEOMETRYMODULATEMATERIALCOLOR);
 			RpGeometryForAllMaterials(geometry, SetAtomicAlphaCB, (void*)alpha);
 			break;

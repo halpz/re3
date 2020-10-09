@@ -36,6 +36,7 @@ CObject::CObject(void)
 	m_colour2 = 0;
 	m_colour1 = m_colour2;
 	m_nBonusValue = 0;
+	// m_nCostValue = 0; // TODO(Miami)
 	bIsPickup = false;
 	bPickupObjWithMessage = false;
 	bOutOfStock = false;
@@ -44,8 +45,12 @@ CObject::CObject(void)
 	bHasBeenDamaged = false;
 	m_nRefModelIndex = -1;
 	bUseVehicleColours = false;
+//	bIsStreetLight = false;		// duplicate
 	m_pCurSurface = nil;
 	m_pCollidingEntity = nil;
+	m_nBeachballBounces = 0;
+	bIsStreetLight = false;
+	m_area = AREA_EVERYWHERE;
 }
 
 CObject::CObject(int32 mi, bool createRW)
@@ -138,11 +143,15 @@ CObject::Render(void)
 bool
 CObject::SetupLighting(void)
 {
-	DeActivateDirectional();
-	SetAmbientColours();
-
 	if(bRenderScorched){
 		WorldReplaceNormalLightsWithScorched(Scene.world, 0.1f);
+		return true;
+	} else if (bIsPickup) {
+		SetFullAmbient();
+		return true;
+	} else if (bIsWeapon) {
+		ActivateDirectional();
+		SetAmbientColoursForPedsCarsAndObjects();
 		return true;
 	}
 	return false;
@@ -151,8 +160,10 @@ CObject::SetupLighting(void)
 void
 CObject::RemoveLighting(bool reset)
 {
-	if(reset)
-		WorldReplaceScorchedLightsWithNormal(Scene.world);
+	if(reset) {
+		SetAmbientColours();
+		DeActivateDirectional();
+	}
 }
 
 void 
@@ -362,6 +373,8 @@ CObject::CanBeDeleted(void)
 		case TEMP_OBJECT:
 			return true;
 		case CUTSCENE_OBJECT:
+			return false;
+		case CONTROLLED_SUB_OBJECT:
 			return false;
 		default:
 			return true;

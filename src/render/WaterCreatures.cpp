@@ -86,17 +86,17 @@ CWaterCreature::~CWaterCreature() {
 	//looks like unused
 }
 
-void CWaterCreature::Initialise(CObject *pObj, float fRightMult, float fZTurnSpeed, float fWaterDepth, uint32 alpha, int eFishSlotState) {
+void CWaterCreature::Initialise(CObject *pObj, float fRightMult, float fZTurnSpeed, float fWaterDepth, uint32 alpha, eFishSlotState state) {
 	this->m_pObj = pObj;
 	this->m_fRightMult = fRightMult;
-	this->m_fZTurnSpeed = 0.0f;
+	this->m_fZTurnSpeed = fZTurnSpeed;
 	this->m_fWaterDepth = fWaterDepth;
 	this->m_alpha = alpha;
-	this->m_state = eFishSlotState;
+	this->m_state = state;
 }
 
-void CWaterCreature::Allocate(CObject *pObj, float fRightMult, float fZTurnSpeed, float fWaterDepth, uint32 alpha, int eFishSlotState) {
-	CWaterCreature::Initialise(pObj, fRightMult, fZTurnSpeed, fWaterDepth, alpha, eFishSlotState);
+void CWaterCreature::Allocate(CObject *pObj, float fRightMult, float fZTurnSpeed, float fWaterDepth, uint32 alpha, eFishSlotState state) {
+	CWaterCreature::Initialise(pObj, fRightMult, fZTurnSpeed, fWaterDepth, alpha, state);
 }
 
 void CWaterCreature::Free() {
@@ -111,7 +111,7 @@ CWaterCreature *CWaterCreatures::GetFishStructSlot() {
 	return nil;
 }
 
-CObject *CWaterCreatures::CreateSeaLifeForm(CVector pos, int16 modelID, float zRotAngle) {
+CObject *CWaterCreatures::CreateSeaLifeForm(CVector const& pos, int16 modelID, int32 zRotAngle) {
 	if (CObject::nNoTempObjects >= 40)
 		return nil;
 
@@ -151,23 +151,24 @@ float CWaterCreatures::CalculateFishHeading(CVector const& pos1, CVector const& 
 	return Atan2(-delta.x, delta.y);
 }
 
-void CWaterCreatures::CreateOne(CVector pos, int16 modelID) {
+void CWaterCreatures::CreateOne(CVector const& pos, int32 modelID) {
 	if (!IsSpaceForMoreWaterCreatures())
 		return;
 
+	CVector storedPos = pos;
 	float fDepth, fLevelNoWaves;
-	if (TheCamera.IsSphereVisible(pos, 3.0f) 
-		&& CWaterLevel::GetWaterDepth(pos, &fDepth, &fLevelNoWaves, nil) && fDepth > 4.5f) {
+	if (!TheCamera.IsSphereVisible(storedPos, 3.0f)
+		&& CWaterLevel::GetWaterDepth(storedPos, &fDepth, &fLevelNoWaves, nil) && fDepth > 4.5f) {
 		
-		if (modelID == -1 || modelID > 64) 
+		if (modelID == -1 || modelID < 0 || modelID > 64)
 			modelID = CGeneral::GetRandomNumberInRange(0, 64);
 
 		WaterCreatureProperties *creature = &aProperties[modelID];
-		pos.z = fLevelNoWaves - creature->fLevel;
-		float fRightMult = CGeneral::GetRandomNumberInRange(0.0f, 0.01f);
-		float angle = CWaterCreatures::CalculateFishHeading(FindPlayerPed()->GetPosition(), pos);
+		storedPos.z = fLevelNoWaves - creature->fLevel;
+		float fRightMult = CGeneral::GetRandomNumberInRange(0.0f, creature->fRightMult) + 0.01f;
+		float angle = CWaterCreatures::CalculateFishHeading(FindPlayerPed()->GetPosition(), storedPos);
 		
-		CObject *fish = CreateSeaLifeForm(pos, modelID, angle);
+		CObject *fish = CreateSeaLifeForm(storedPos, *(int16*)creature->modelID, angle);
 		if (!fish) return;
 
 		fish->SetRwObjectAlpha(255); 
@@ -188,32 +189,36 @@ void CWaterCreatures::UpdateAll() {
 	CVector playerPos = FindPlayerPed()->GetPosition();
 	for (int i = 0; i < NUM_WATER_CREATURES; i++) {
 		switch (aWaterCreatures[i].m_state) {
-		case WATER_CREATURE_ALLOCATED:
-		case WATER_CREATURE_ACTIVE: {
+		case WATER_CREATURE_ACTIVE: 
 			aWaterCreatures[i].m_pObj->m_nEndOfLifeTime = CTimer::GetTimeInMilliseconds() + 40000;
-			if (aWaterCreatures[i].m_pObj->GetIsOnScreen()) {
-				if ((playerPos - aWaterCreatures[i].m_pObj->GetPosition()).Magnitude() < SQR(75.0f)) {
-					if (aWaterCreatures[i].m_alpha < 255)
-						aWaterCreatures[i].m_alpha = Min(aWaterCreatures[i].m_alpha + 4, 255);
-					CVector newRight = aWaterCreatures[i].m_pObj->GetRight();
-					newRight.Normalise();
-					aWaterCreatures[i].m_pObj->m_vecMoveSpeed = newRight * aWaterCreatures[i].m_fRightMult;
-					aWaterCreatures[i].m_pObj->m_vecTurnSpeed = CVector(0.0f, 0.0f, aWaterCreatures[i].m_fZTurnSpeed);
-					aWaterCreatures[i].m_pObj->bIsStatic = false;
-					float fDepth = 0.0;
-					CWaterLevel::GetWaterDepth(aWaterCreatures[i].m_pObj->GetPosition(), &fDepth, nil, nil);
-					if (fDepth < 0.0f) {
-						if (aWaterCreatures[i].m_pObj->m_nEndOfLifeTime <= CTimer::GetTimeInMilliseconds() + 40000)
-							aWaterCreatures[i].m_state = WATER_CREATURE_ACTIVE;
-					}
-					else {
-						aWaterCreatures[i].m_state = WATER_CREATURE_UPDATE;
-					}
-
+			if (!aWaterCreatures[i].m_pObj->GetIsOnScreen()) {
+				aWaterCreatures[i].m_pObj->SetRwObjectAlpha(0);
+				aWaterCreatures[i].m_state = WATER_CREATURE_TO_REMOVE;
+				break;
+			}
+		case WATER_CREATURE_ALLOCATED: {
+			if ((playerPos - aWaterCreatures[i].m_pObj->GetPosition()).Magnitude() < SQR(75.0f)) {
+				if (aWaterCreatures[i].m_alpha < 255)
+					aWaterCreatures[i].m_alpha = Min(aWaterCreatures[i].m_alpha + 4, 255);
+				aWaterCreatures[i].m_pObj->SetRwObjectAlpha(aWaterCreatures[i].m_alpha);
+				CVector newRight = aWaterCreatures[i].m_pObj->GetRight();
+				newRight.Normalise();
+				aWaterCreatures[i].m_pObj->m_vecMoveSpeed = newRight * aWaterCreatures[i].m_fRightMult;
+				aWaterCreatures[i].m_pObj->m_vecTurnSpeed = CVector(0.0f, 0.0f, aWaterCreatures[i].m_fZTurnSpeed);
+				aWaterCreatures[i].m_pObj->bIsStatic = false;
+				float fDepth = 0.0;
+				CWaterLevel::GetWaterDepth(aWaterCreatures[i].m_pObj->GetPosition(), &fDepth, nil, nil);
+				if (aWaterCreatures[i].m_fWaterDepth < fDepth) {
+					if (aWaterCreatures[i].m_pObj->m_nEndOfLifeTime - 40000 <= CTimer::GetTimeInMilliseconds())
+						aWaterCreatures[i].m_state = WATER_CREATURE_ACTIVE;
 				}
 				else {
-					aWaterCreatures[i].m_state = WATER_CREATURE_TO_REMOVE;
+					aWaterCreatures[i].m_state = WATER_CREATURE_UPDATE;
 				}
+
+			}
+			else {
+				aWaterCreatures[i].m_state = WATER_CREATURE_TO_REMOVE;
 			}
 			break;
 		}
@@ -237,15 +242,14 @@ void CWaterCreatures::UpdateAll() {
 			}
 			break;
 		}
-		case WATER_CREATURE_TO_REMOVE: {
+		case WATER_CREATURE_TO_REMOVE: 
 			if (aWaterCreatures[i].m_pObj)
 				CWorld::Remove(aWaterCreatures[i].m_pObj);
 			FreeFishStructSlot(&aWaterCreatures[i]);
 			nNumActiveSeaLifeForms--;
 			aWaterCreatures[i].m_state = WATER_CREATURE_DISABLED;
 			break;
-		}
-		case WATER_CREATURE_DISABLED:
+		default:
 			break;
 		}
 	}

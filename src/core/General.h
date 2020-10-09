@@ -2,6 +2,8 @@
 
 #include <ctype.h>
 
+// --MIAMI: file done
+
 class CGeneral
 {
 public:

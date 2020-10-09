@@ -4,6 +4,8 @@
 #include "FileMgr.h"
 #include "PedStats.h"
 
+// --MIAMI: file done
+
 CPedStats *CPedStats::ms_apPedStats[NUM_PEDSTATS];
 
 void
