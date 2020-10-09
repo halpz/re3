@@ -1011,14 +1011,16 @@ CHeli::TestSniperCollision(CVector *line0, CVector *line1)
 	bool hit = false;
 
 	for(i = 0; i < NUM_HELIS; i++){
-		CVector pilotPos = pHelis[i]->GetMatrix() * CVector(-0.43f, 1.49f, 1.5f);
-		if(pHelis[i] && !pHelis[i]->bBulletProof && CCollision::DistToLine(line0, line1, &pilotPos) < 0.8f){
-			pHelis[i]->m_fAngularSpeed = CGeneral::GetRandomTrueFalse() ? 0.05f : -0.05f;
-			pHelis[i]->m_heliStatus = HELI_STATUS_SHOT_DOWN;
-			pHelis[i]->m_nExplosionTimer = CTimer::GetTimeInMilliseconds() + 9999999;
-			pHelis[i]->m_numSwat = 0;
+		if(pHelis[i] && !pHelis[i]->bBulletProof) {
+			CVector pilotPos = pHelis[i]->GetMatrix() * CVector(-0.43f, 1.49f, 1.5f);
+			if(CCollision::DistToLine(line0, line1, &pilotPos) < 0.8f){
+				pHelis[i]->m_fAngularSpeed = CGeneral::GetRandomTrueFalse() ? 0.05f : -0.05f;
+				pHelis[i]->m_heliStatus = HELI_STATUS_SHOT_DOWN;
+				pHelis[i]->m_nExplosionTimer = CTimer::GetTimeInMilliseconds() + 9999999;
+				pHelis[i]->m_numSwat = 0;
 
-			hit = true;
+				hit = true;
+			}
 		}
 	}
 	return hit;

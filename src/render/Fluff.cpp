@@ -1358,7 +1358,7 @@ CEscalator::Update(void) {
 					if (m_pSteps[i]) {
 						m_pSteps[i]->SetPosition(m_pos1);
 						CWorld::Add(m_pSteps[i]);
-						m_pSteps[i]->ObjectCreatedBy = ESCALATOR_OBJECT;
+						m_pSteps[i]->ObjectCreatedBy = CONTROLLED_SUB_OBJECT;
 					}
 				}
 			}
