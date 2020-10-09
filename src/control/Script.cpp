@@ -1804,9 +1804,8 @@ void CMissionCleanup::Process()
 	if (!CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle)
 		TheCamera.Restore();
 	TheCamera.SetWideScreenOff();
-	// TODO(MIAMI)
-	//CSpecialFX::bLiftCam = false;
-	//CSpecialFX::bVideoCam = false;
+	CSpecialFX::bLiftCam = false;
+	CSpecialFX::bVideoCam = false;
 	CTimeCycle::StopExtraColour(0);
 	for (int i = 0; i < MISSION_AUDIO_SLOTS; i++)
 		DMAudio.ClearMissionAudio(i);
@@ -12395,7 +12394,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_SWITCH_SECURITY_CAMERA:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("SWITCH_SECURITY_CAMERA is not implemented\n"); // TODO(MIAMI)
+		CSpecialFX::bVideoCam = ScriptParams[0] != 0;
 		return 0;
 	}
 	//case COMMAND_IS_CHAR_IN_FLYING_VEHICLE:
@@ -12833,7 +12832,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_SWITCH_LIFT_CAMERA:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("SWITCH_LIFT_CAMERA is not implemented\n"); // TODO(MIAMI)
+		CSpecialFX::bLiftCam = ScriptParams[0] != 0;
 		return 0;
 	}
 	case COMMAND_CLOSE_ALL_CAR_DOORS:

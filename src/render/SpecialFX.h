@@ -3,13 +3,17 @@
 class CSpecialFX
 {
 public:
+	static bool bVideoCam;
+	static bool bLiftCam;
 	static bool bSnapShotActive;
 	static int32 SnapShotFrames;
 
-	static void Render(void);
-	static void Update(void);
-	static void Init(void);
-	static void Shutdown(void);
+	static void Render(void); //done
+	static void Update(void); //done
+	static void Init(void); //done
+	static void Shutdown(void); //done
+	static void AddWeaponStreak(int type);
+	static void Render2DFXs(); //done
 };
 
 class CRegisteredMotionBlurStreak
@@ -23,7 +27,7 @@ public:
 	CVector m_pos2[3];
 	bool m_isValid[3];
 
-	void Update(void);
+	void Update(void); //done
 	void Render(void);
 };
 
@@ -32,7 +36,7 @@ class CMotionBlurStreaks
 	static CRegisteredMotionBlurStreak aStreaks[NUMMBLURSTREAKS];
 public:
 	static void Init(void);
-	static void Update(void);
+	static void Update(void); //done
 	static void RegisterStreak(uintptr id, uint8 r, uint8 g, uint8 b, CVector p1, CVector p2);
 	static void Render(void);
 };
@@ -42,10 +46,15 @@ struct CBulletTrace
 	CVector m_vecCurrentPos;
 	CVector m_vecTargetPos;
 	bool m_bInUse;
+	uint32 m_nCreationTime;
+	uint32 m_nLifeTime;
+	uint32 field_24;
+	uint8 field_28;
+
 	uint8 m_framesInUse;
 	uint8 m_lifeTime;
 
-	void Update(void);
+	void Update(void); //done
 };
 
 class CBulletTraces
@@ -56,7 +65,7 @@ public:
 	static void Init(void);
 	static void AddTrace(CVector*, CVector*);
 	static void Render(void);
-	static void Update(void);
+	static void Update(void); //done
 	
 //TODO(MIAMI)
 	static void AddTrace(CVector *, CVector *, float, unsigned int, unsigned char) {}
@@ -213,7 +222,7 @@ class CMoneyMessage
 	float	m_fSize;
 	float	m_fOpacity;
 public:
-	void Render();
+	void Render(); //done
 };
 
 class CMoneyMessages
@@ -221,7 +230,7 @@ class CMoneyMessages
 	static CMoneyMessage aMoneyMessages[NUMMONEYMESSAGES];
 public:
 	static void Init();
-	static void Render();
+	static void Render(); //done
 	static void	RegisterOne(CVector vecPos, const char *pText, uint8 bRed, uint8 bGreen, uint8 bBlue, float fSize, float fOpacity);
 };
 

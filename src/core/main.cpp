@@ -969,7 +969,7 @@ Render2dStuff(void)
 	else
 		CHud::Draw();
 	// TODO(Miami)
-	// CSpecialFX::Render2DFXs();
+	CSpecialFX::Render2DFXs();
 	CUserDisplay::OnscnTimer.ProcessForDisplay();
 	CMessages::Display();
 	CDarkel::DrawMessages();
