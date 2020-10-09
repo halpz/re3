@@ -81,7 +81,12 @@ DWORD _dwOperatingSystemVersion;
 #include "resource.h"
 #else
 long _dwOperatingSystemVersion;
+#ifndef __APPLE__
 #include <sys/sysinfo.h>
+#else
+#include <mach/mach_host.h>
+#include <sys/sysctl.h>
+#endif
 #include <stddef.h>
 #include <locale.h>
 #include <signal.h>
@@ -449,15 +454,27 @@ psInitialize(void)
 #endif
 
 #endif
+#ifndef __APPLE__
 	struct sysinfo systemInfo;
 	sysinfo(&systemInfo);
-	
 	_dwMemAvailPhys = systemInfo.freeram;
-	_dwOperatingSystemVersion = OS_WINXP; // To fool other classes
-
 	debug("Physical memory size %u\n", systemInfo.totalram);
 	debug("Available physical memory %u\n", systemInfo.freeram);
-
+#else
+	uint64_t size = 0;
+	uint64_t page_size = 0;
+	size_t uint64_len = sizeof(uint64_t);
+	size_t ull_len = sizeof(unsigned long long);
+	sysctl((int[]){CTL_HW, HW_PAGESIZE}, 2, &page_size, &ull_len, NULL, 0);
+	sysctl((int[]){CTL_HW, HW_MEMSIZE}, 2, &size, &uint64_len, NULL, 0);
+	vm_statistics_data_t vm_stat;
+	mach_msg_type_number_t count = HOST_VM_INFO_COUNT;
+	host_statistics(mach_host_self(), HOST_VM_INFO, (host_info_t)&vm_stat, &count);
+	_dwMemAvailPhys = (uint64_t)(vm_stat.free_count * page_size);
+	debug("Physical memory size %llu\n", _dwMemAvailPhys);
+	debug("Available physical memory %llu\n", size);
+#endif
+	_dwOperatingSystemVersion = OS_WINXP; // To fool other classes
 #endif
 	TheText.Unload();
 
@@ -1211,7 +1228,9 @@ void terminateHandler(int sig, siginfo_t *info, void *ucontext) {
 }
 
 void dummyHandler(int sig){
+	// Don't kill the app pls
 }
+
 #endif
 
 void resizeCB(GLFWwindow* window, int width, int height) {
@@ -1458,9 +1477,10 @@ main(int argc, char *argv[])
 	act.sa_flags = SA_SIGINFO;
 	sigaction(SIGTERM, &act, NULL);
 	struct sigaction sa;
+	sigemptyset(&sa.sa_mask);
 	sa.sa_handler = dummyHandler;
 	sa.sa_flags = 0;
-	sigaction(SIGINT, &sa, NULL); // Needed for CdStreamPosix
+	sigaction(SIGUSR1, &sa, NULL); // Needed for CdStreamPosix
 #endif
 
 	/* 

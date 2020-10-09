@@ -187,7 +187,7 @@ public:
 	CAutoPilot AutoPilot;
 	uint8 m_currentColour1;
 	uint8 m_currentColour2;
-	uint8 m_aExtras[2];
+	int8 m_aExtras[2];
 	int16 m_nAlarmState;
 	int16 m_nRouteSeed;
 	CPed *pDriver;
@@ -400,6 +400,8 @@ public:
 	static bool bCheat4;
 	static bool bCheat5;
 	static bool bCheat8;
+	static bool bCheat9;
+	static bool bCheat10;
 	static bool bHoverCheat;
 	static bool bAllTaxisHaveNitro;
 	static bool m_bDisableMouseSteering;

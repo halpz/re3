@@ -1749,7 +1749,7 @@ CCamera::CamControl(void)
 
 	if(PrevMode != Cams[ActiveCam].Mode || switchedFromObbe ||
 	   Cams[ActiveCam].Mode == CCam::MODE_FOLLOWPED || Cams[ActiveCam].Mode == CCam::MODE_CAM_ON_A_STRING)
-		if(CPad::GetPad(0)->CycleCameraModeUpJustDown() &&
+		if(CPad::GetPad(0)->CycleCameraModeJustDown() &&
 		   !CReplay::IsPlayingBack() &&
 		   (m_bLookingAtPlayer || WhoIsInControlOfTheCamera == CAMCONTROL_OBBE) &&
 		   !m_WideScreenOn &&

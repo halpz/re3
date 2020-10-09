@@ -366,6 +366,12 @@ COcclusion::ProcessBeforeRendering(void)
 					}
 					NumActiveOccluders--;
 					i--;
+					// Taken from Mobile!
+#ifdef FIX_BUGS
+					if (i == -1) {
+						i = 0;
+					}
+#endif
 				}
 			}
 		}

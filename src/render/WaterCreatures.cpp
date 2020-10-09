@@ -160,16 +160,16 @@ void CWaterCreatures::CreateOne(CVector pos, int16 modelID) {
 		&& CWaterLevel::GetWaterDepth(pos, &fDepth, &fLevelNoWaves, nil) && fDepth > 4.5f) {
 		
 		if (modelID == -1 || modelID > 64) 
-			modelID = CGeneral::GetRandomNumberInRange(0.0f, 64.0f);
+			modelID = CGeneral::GetRandomNumberInRange(0, 64);
 
 		WaterCreatureProperties *creature = &aProperties[modelID];
 		pos.z = fLevelNoWaves - creature->fLevel;
-		float fRightMult = CGeneral::GetRandomNumberInRange(0.0f, 0.01);
+		float fRightMult = CGeneral::GetRandomNumberInRange(0.0f, 0.01f);
 		float angle = CWaterCreatures::CalculateFishHeading(FindPlayerPed()->GetPosition(), pos);
 		
 		CObject *fish = CreateSeaLifeForm(pos, modelID, angle);
-		if (!fish)
-			return;
+		if (!fish) return;
+
 		fish->SetRwObjectAlpha(255); 
 		CWaterCreature *wc = GetFishStructSlot();
 		wc->Allocate(fish, fRightMult, 0.0f, creature->fWaterDepth, 255, WATER_CREATURE_ALLOCATED);
