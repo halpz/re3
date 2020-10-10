@@ -9,11 +9,12 @@
 #include "Text.h"
 #include "Timer.h"
 
+//--MIAMI: file done
+
 static wchar WideErrorString[25];
 
 CText TheText;
 
-//--MIAMI: DONE
 CText::CText(void)
 {
 	encoding = 'e';
@@ -23,7 +24,6 @@ CText::CText(void)
 	memset(WideErrorString, 0, sizeof(WideErrorString));
 }
 
-//--MIAMI: DONE
 void
 CText::Load(void)
 {
@@ -95,7 +95,6 @@ CText::Load(void)
 	CFileMgr::SetDir("");
 }
 
-//--MIAMI: DONE
 void
 CText::Unload(void)
 {
@@ -108,7 +107,6 @@ CText::Unload(void)
 	memset(szMissionTableName, 0, sizeof(szMissionTableName));
 }
 
-//--MIAMI: DONE
 wchar*
 CText::Get(const char *key)
 {
@@ -158,7 +156,6 @@ wchar FrenchUpperCaseTable[128] = {
 	253, 254, 255
 };
 
-//--MIAMI: TODO (check tables)
 wchar
 CText::GetUpperCase(wchar c)
 {
@@ -190,7 +187,6 @@ CText::GetUpperCase(wchar c)
 	return c;
 }
 
-//--MIAMI: DONE
 void
 CText::UpperCase(wchar *s)
 {
@@ -200,23 +196,28 @@ CText::UpperCase(wchar *s)
 	}
 }
 
-//--MIAMI: DONE
 void
 CText::GetNameOfLoadedMissionText(char *outName)
 {
 	strcpy(outName, szMissionTableName);
 }
 
-//--MIAMI: DONE
 void
 CText::ReadChunkHeader(ChunkHeader *buf, int32 file, size_t *offset)
 {
+#if DUMB
+	char *_buf = (char*)buf;
+	for (int i = 0; i < sizeof(ChunkHeader); i++) {
+		CFileMgr::Read(file, &_buf[i], 1);
+		(*offset)++;
+	}
+#else
 	// original code loops 8 times to read 1 byte with CFileMgr::Read, that's retarded
 	CFileMgr::Read(file, (char*)buf, sizeof(ChunkHeader));
 	*offset += sizeof(ChunkHeader);
+#endif
 }
 
-//--MIAMI: DONE
 void
 CText::LoadMissionText(char *MissionTableName)
 {
@@ -307,7 +308,6 @@ CText::LoadMissionText(char *MissionTableName)
 }
 
 
-//--MIAMI: DONE
 void
 CKeyArray::Load(size_t length, int file, size_t* offset)
 {
@@ -319,14 +319,16 @@ CKeyArray::Load(size_t length, int file, size_t* offset)
 	rawbytes = (char*)entries;
 
 #if DUMB
-	for (uint32 i = 0; i < length; i++)
+	for (uint32 i = 0; i < length; i++) {
 		CFileMgr::Read(file, &rawbytes[i], 1);
+		(*offset)++;
+	}
 #else
 	CFileMgr::Read(file, rawbytes, length);
+	*offset += length;
 #endif
 }
 
-//--MIAMI: DONE
 void
 CKeyArray::Unload(void)
 {
@@ -335,7 +337,6 @@ CKeyArray::Unload(void)
 	numEntries = 0;
 }
 
-//--MIAMI: DONE
 void
 CKeyArray::Update(wchar *chars)
 {
@@ -346,7 +347,6 @@ CKeyArray::Update(wchar *chars)
 #endif
 }
 
-//--MIAMI: DONE
 CKeyEntry*
 CKeyArray::BinarySearch(const char *key, CKeyEntry *entries, int16 low, int16 high)
 {
@@ -367,7 +367,6 @@ CKeyArray::BinarySearch(const char *key, CKeyEntry *entries, int16 low, int16 hi
 	return nil;
 }
 
-//--MIAMI: DONE
 wchar*
 #ifdef FIX_BUGS
 CKeyArray::Search(const char *key, wchar *data, uint8 *result)
@@ -403,7 +402,6 @@ CKeyArray::Search(const char *key, uint8 *result)
 	return WideErrorString;
 }
 
-//--MIAMI: DONE
 void
 CData::Load(size_t length, int file, size_t * offset)
 {
@@ -415,14 +413,16 @@ CData::Load(size_t length, int file, size_t * offset)
 	rawbytes = (char*)chars;
 
 #if DUMB
-	for(uint32 i = 0; i < length; i++)
+	for(uint32 i = 0; i < length; i++){
 		CFileMgr::Read(file, &rawbytes[i], 1);
+		(*offset)++;
+	}
 #else
 	CFileMgr::Read(file, rawbytes, length);
+	*offset += length;
 #endif
 }
 
-//--MIAMI: DONE
 void
 CData::Unload(void)
 {
@@ -431,16 +431,31 @@ CData::Unload(void)
 	numChars = 0;
 }
 
-//--MIAMI: DONE
 void
 CMissionTextOffsets::Load(size_t table_size, int file, size_t *offset, int)
 {
+#if DUMB
+	size_t num_of_entries = table_size / sizeof(CMissionTextOffsets::Entry);
+	for (size_t mi = 0; mi < num_of_entries; mi++) {
+		for (uint32 i = 0; i < sizeof(data[mi].szMissionName); i++) {
+			CFileMgr::Read(file, &data[i].szMissionName[i], 1);
+			(*offset)++;
+		}
+		char* _buf = (char*)&data[mi].offset;
+		for (uint32 i = 0; i < sizeof(data[mi].offset); i++) {
+			CFileMgr::Read(file, &_buf[i], 1);
+			(*offset)++;
+		}
+	}
+	size = (uint16)num_of_entries;
+#else
 	// not exact VC code but smaller and better :P
 
 	// You can make this size_t if you want to exceed 32-bit boundaries, everything else should be ready.
 	size = (uint16) (table_size / sizeof(CMissionTextOffsets::Entry));
 	CFileMgr::Read(file, (char*)data, sizeof(CMissionTextOffsets::Entry) * size);
 	*offset += sizeof(CMissionTextOffsets::Entry) * size;
+#endif
 }
 
 void
@@ -461,8 +476,29 @@ UnicodeToAscii(wchar *src)
 		if(*src < 128)
 #endif
 			aStr[len] = *src;
-		else
-			aStr[len] = '#';
+		// convert to CP1252
+		else if(*src <= 131)
+			aStr[len] = *src + 64;
+		else if (*src <= 141)
+			aStr[len] = *src + 66;
+		else if (*src <= 145)
+			aStr[len] = *src + 68;
+		else if (*src <= 149)
+			aStr[len] = *src + 71;
+		else if (*src <= 154)
+			aStr[len] = *src + 73;
+		else if (*src <= 164)
+			aStr[len] = *src + 75;
+		else if (*src <= 168)
+			aStr[len] = *src + 77;
+		else if (*src <= 204)
+			aStr[len] = *src + 80;
+		else switch (*src) {
+		case 205: aStr[len] = 209; break;
+		case 206: aStr[len] = 241; break;
+		case 207: aStr[len] = 191; break;
+		default: aStr[len] = '#'; break;
+		}
 	aStr[len] = '\0';
 	return aStr;
 }
@@ -472,7 +508,7 @@ UnicodeToAsciiForSaveLoad(wchar *src)
 {
 	static char aStr[256];
 	int len;
-	for(len = 0; *src != '\0' && len < 256-1; len++, src++)
+	for(len = 0; *src != '\0' && len < 256; len++, src++)
 		if(*src < 256)
 			aStr[len] = *src;
 		else
