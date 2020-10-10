@@ -1102,6 +1102,7 @@ CFont::ParseToken(wchar *s)
 		switch(*s){
 		case 'B':
 			Details.bBold = !Details.bBold;
+			break;
 		case 'N':
 		case 'n':
 			NewLine = 1;
@@ -1109,7 +1110,7 @@ CFont::ParseToken(wchar *s)
 		case 'b': SetColor(CRGBA(27, 89, 130, 255)); Details.anonymous_23 = true; break;
 		case 'f':
 			Details.bFlash = !Details.bFlash;
-			if (Details.bFlash)
+			if (!Details.bFlash)
 				Details.color.a = 255;
 			break;
 		case 'g': SetColor(CRGBA(255, 150, 225, 255)); Details.anonymous_23 = true; break;
