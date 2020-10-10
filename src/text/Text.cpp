@@ -221,6 +221,7 @@ void
 CText::LoadMissionText(char *MissionTableName)
 {
 	char filename[32];
+	CMessages::ClearAllMessagesDisplayedByGame();
 
 	mission_keyArray.Unload();
 	mission_data.Unload();
