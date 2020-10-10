@@ -1,0 +1,30 @@
+{
+  "C_Cpp.default.cStandard": "gnu11",
+  "C_Cpp.default.cppStandard": "gnu++14",
+  "C_Cpp.default.includePath": [
+    "src/animation",
+    "src/audio",
+    "src/control",
+    "src/core",
+    "src/entities",
+    "src/extras",
+    "src/fakerw",
+    "src/math",
+    "src/modelinfo",
+    "src/objects",
+    "src/peds",
+    "src/render",
+    "src/rw",
+    "src/save",
+    "src/skel",
+    "src/text",
+    "src/vehicles",
+    "src/weapons",
+    "vendor/librw"
+  ],
+  "C_Cpp.vcFormat.indent.gotoLabels": "leftmostColumn",
+  "C_Cpp.vcFormat.space.pointerReferenceAlignment": "right",
+  "cSpell.enabled": false,
+  "files.trimFinalNewlines": false,
+  "files.trimTrailingWhitespace": false
+}

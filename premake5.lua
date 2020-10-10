@@ -185,7 +185,7 @@ project "librw"
 		includedirs {"/usr/local/include" }
 		libdirs { "/opt/local/lib" }
 		libdirs { "/usr/local/lib" }
-
+	
 	filter "platforms:*RW34*"
 		flags { "ExcludeFromBuild" }
 	filter  {}
