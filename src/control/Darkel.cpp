@@ -15,9 +15,6 @@
 #include "Text.h"
 #include "Vehicle.h"
 #include "GameLogic.h"
-#ifdef FIX_BUGS
-#include "Replay.h"
-#endif
 
 //--MIAMI: file done except TODO
 
