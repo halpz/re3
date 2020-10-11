@@ -31,6 +31,20 @@ UnicodeStrlen(const wchar *str)
 	return len;
 }
 
+void
+UnicodeMakeUpperCase(wchar *dst, const wchar *src) //idk what to do with it, seems to be incorrect implementation by R*
+{
+	while (*src != '\0') {
+		if (*src < 'a' || *src > 'z')
+			*dst = *src;
+		else
+			*dst = *src - 32;
+		dst++;
+		src++;
+	}
+	*dst = '\0';
+}
+
 CFontDetails CFont::Details;
 int16 CFont::NewLine;
 CSprite2d CFont::Sprite[MAX_FONTS];

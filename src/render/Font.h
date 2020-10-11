@@ -4,6 +4,7 @@ void AsciiToUnicode(const char *src, wchar *dst);
 void UnicodeStrcpy(wchar *dst, const wchar *src);
 void UnicodeStrcat(wchar *dst, wchar *append);
 int UnicodeStrlen(const wchar *str);
+void UnicodeMakeUpperCase(wchar *dst, const wchar *src);
 
 struct CFontDetails
 {

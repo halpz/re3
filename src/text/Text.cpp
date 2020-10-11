@@ -431,6 +431,7 @@ CData::Unload(void)
 	numChars = 0;
 }
 
+void
 CMissionTextOffsets::Load(size_t table_size, int file, size_t *offset, int)
 {
 #if DUMB
@@ -457,7 +458,6 @@ CMissionTextOffsets::Load(size_t table_size, int file, size_t *offset, int)
 #endif
 }
 
-void
 char*
 UnicodeToAscii(wchar *src)
 {
@@ -523,20 +523,6 @@ UnicodeToAsciiForMemoryCard(wchar *src)
 			aStr[len] = '#';
 	aStr[len] = '\0';
 	return aStr;
-}
-
-void
-UnicodeMakeUpperCase(wchar *dst, wchar *src) //idk what to do with it, seems to be incorrect implementation by R*
-{
-	while (*src != '\0') {
-		if (*src < 'a' || *src > 'z')
-			*dst = *src;
-		else
-			*dst = *src - 32;
-		dst++;
-		src++;
-	}
-	*dst = '\0';
 }
 
 void

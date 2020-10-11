@@ -4,7 +4,6 @@ char *UnicodeToAscii(wchar *src);
 char *UnicodeToAsciiForSaveLoad(wchar *src);
 char *UnicodeToAsciiForMemoryCard(wchar *src);
 void TextCopy(wchar *dst, const wchar *src);
-void UnicodeMakeUpperCase(wchar *dst, wchar *src);
 
 struct CKeyEntry
 {
