@@ -109,12 +109,13 @@ public:
 	void Render(); //done
 };
 
+//done
 class C3dMarkers
 {
 public:
 	static void Init(); //done
 	static void Shutdown(); //done
-	static C3dMarker *PlaceMarker(uint32 id, uint16 type, CVector &pos, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);
+	static C3dMarker *PlaceMarker(uint32 id, uint16 type, CVector &pos, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate); //done
 	static void PlaceMarkerSet(uint32 id, uint16 type, CVector &pos, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate); //done
 	static void Render(); //done
 	static void Update(); //done
@@ -172,7 +173,7 @@ public:
 	static void Init(void); //done
 	static void RegisterOne(CVector pos, CVector up, CVector side, CVector front,
 		uint8 type, uint8 red = 0, uint8 green = 0, uint8 blue = 0); //done
-	static void Render(void); //looks similad but needs recheck
+	static void Render(void); //looks similad but needs recheck      !!!!!!!!!!!!!!!!!
 	static void RenderOutGeometryBuffer(void); //done
 };
 
@@ -235,11 +236,12 @@ public:
 	static void	RegisterOne(CVector vecPos, const char *pText, uint8 bRed, uint8 bGreen, uint8 bBlue, float fSize, float fOpacity); //done
 };
 
+//done
 class CSpecialParticleStuff
 {
 	static uint32 BoatFromStart;
 public:
-	static void CreateFoamAroundObject(CMatrix*, float, float, float, int32);
-	static void StartBoatFoamAnimation();
-	static void UpdateBoatFoamAnimation(CMatrix*);
+	static void CreateFoamAroundObject(CMatrix*, float, float, float, int32); //done, not used
+	static void StartBoatFoamAnimation(); //done, not used
+	static void UpdateBoatFoamAnimation(CMatrix*); //done, not used
 };

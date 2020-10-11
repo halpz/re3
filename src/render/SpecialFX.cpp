@@ -824,7 +824,7 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 			} else {
 				pMarker->m_fStdSize = size;
 			}
-		} else if (type == MARKERTYPE_CYLINDER) {
+		} else {
 			if (dist < size + 12.0f) {
 				if (dist > size + 1.0f)
 					pMarker->m_Color.alpha = (1.0f - (size + 12.0f - dist) * 0.7f / 11.0f) * (float)a;
@@ -837,15 +837,9 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 		float someSin = Sin(TWOPI * (float)((pMarker->m_nPulsePeriod - 1) & (CTimer::GetTimeInMilliseconds() - pMarker->m_nStartTime)) / (float)pMarker->m_nPulsePeriod);
 		pMarker->m_fSize = pMarker->m_fStdSize - pulseFraction * pMarker->m_fStdSize * someSin;
 
-		if (type == MARKERTYPE_ARROW) {
+		if (type == MARKERTYPE_ARROW)
 			pos.z += 0.25f * pMarker->m_fStdSize * someSin;
-		} else if (type == MARKERTYPE_0) {
-			if (someSin > 0.0f)
-				pMarker->m_Color.alpha = (float)a * 0.7f * someSin + a;
-			else
-				pMarker->m_Color.alpha = (float)a * 0.4f * someSin + a;
-		}
-		if (pMarker->m_nRotateRate) {
+		if (pMarker->m_nRotateRate != 0) {
 			RwV3d pos = pMarker->m_Matrix.m_matrix.pos;
 			pMarker->m_Matrix.RotateZ(DEGTORAD(pMarker->m_nRotateRate * CTimer::GetTimeStep()));
 			pMarker->m_Matrix.GetPosition() = pos;
@@ -869,7 +863,7 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 		pMarker->DeleteMarkerObject();
 
 	pMarker->AddMarker(identifier, type, size, r, g, b, a, pulsePeriod, pulseFraction, rotateRate);
-	if (type == MARKERTYPE_CYLINDER || type == MARKERTYPE_0 || type == MARKERTYPE_2) {
+	if (type == MARKERTYPE_CYLINDER) {
 		if ((playerPos - pos).MagnitudeSqr() < sq(100.f) && CColStore::HasCollisionLoaded(CVector2D(pos))) {
 			float z = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z + 1.0f, nil);
 			if (z != 0.0f)
@@ -880,10 +874,6 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 		}
 	}
 	pMarker->m_Matrix.SetTranslate(pos.x, pos.y, pos.z);
-	if (type == MARKERTYPE_2) {
-		pMarker->m_Matrix.RotateX(PI);
-		pMarker->m_Matrix.GetPosition() = pos;
-	}
 	pMarker->m_Matrix.UpdateRW();
 	if (type == MARKERTYPE_ARROW) {
 		if (dist < 25.0f) {
@@ -894,7 +884,7 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 		} else {
 			pMarker->m_fStdSize = size;
 		}
-	} else if (type == MARKERTYPE_CYLINDER) {
+	} else {
 		if (dist < size + 12.0f) {
 			if (dist > size + 1.0f)
 				pMarker->m_Color.alpha = (1.0f - (size + 12.0f - dist) * 0.7f / 11.0f) * (float)a;
