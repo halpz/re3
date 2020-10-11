@@ -132,7 +132,6 @@ class CGarage
 	uint32 m_nTimeToStartAction;
 	uint8 m_bCollectedCarsState;
 	CVehicle *m_pTarget;
-	void* field_96; // unused
 	CStoredCar m_sStoredCar; // not needed
 
 	void OpenThisGarage();

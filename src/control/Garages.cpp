@@ -26,6 +26,8 @@
 #include "Wanted.h"
 #include "World.h"
 
+//--MIAMI: file done
+
 #define CRUSHER_GARAGE_X1 (1135.5f)
 #define CRUSHER_GARAGE_Y1 (57.0f)
 #define CRUSHER_GARAGE_Z1 (-1.0f)
@@ -236,7 +238,6 @@ int16 CGarages::AddOne(float X1, float Y1, float Z1, float X2, float Y2, float X
 	pGarage->m_nTimeToStartAction = 0;
 	pGarage->field_2 = false;
 	pGarage->m_nTargetModelIndex = targetId;
-	pGarage->field_96 = nil;
 	pGarage->m_bCollectedCarsState = 0;
 	pGarage->m_bDeactivated = false;
 	pGarage->m_bResprayHappened = false;
@@ -2141,11 +2142,11 @@ void CGarages::SetAllDoorsBackToOriginalHeight()
 	}
 }
 
-// TODO(MIAMI)
 void CGarages::Save(uint8 * buf, uint32 * size)
 {
 INITSAVEBUF
-	*size = (6 * sizeof(uint32) + TOTAL_COLLECTCARS_GARAGES * sizeof(*CarTypesCollected) + sizeof(uint32) + TOTAL_HIDEOUT_GARAGES * NUM_GARAGE_STORED_CARS * sizeof(CStoredCar) + NUM_GARAGES * sizeof(CGarage));
+	*size = 7876; // for some reason it's not actual size again
+	//*size = (6 * sizeof(uint32) + TOTAL_COLLECTCARS_GARAGES * sizeof(*CarTypesCollected) + sizeof(uint32) + TOTAL_HIDEOUT_GARAGES * NUM_GARAGE_STORED_CARS * sizeof(CStoredCar) + NUM_GARAGES * sizeof(CGarage));
 	CloseHideOutGaragesBeforeSave();
 	WriteSaveBuf(buf, NumGarages);
 	WriteSaveBuf(buf, (uint32)BombsAreFree);
@@ -2185,11 +2186,11 @@ const CStoredCar &CStoredCar::operator=(const CStoredCar & other)
 	return *this;
 }
 
-//TODO(MIAMI)
 void CGarages::Load(uint8* buf, uint32 size)
 {
 INITSAVEBUF
-	assert(size == (6 * sizeof(uint32) + TOTAL_COLLECTCARS_GARAGES * sizeof(*CarTypesCollected) + sizeof(uint32) + TOTAL_HIDEOUT_GARAGES * NUM_GARAGE_STORED_CARS * sizeof(CStoredCar) + NUM_GARAGES * sizeof(CGarage)));
+	assert(size = 7876);
+	//assert(size == (6 * sizeof(uint32) + TOTAL_COLLECTCARS_GARAGES * sizeof(*CarTypesCollected) + sizeof(uint32) + TOTAL_HIDEOUT_GARAGES * NUM_GARAGE_STORED_CARS * sizeof(CStoredCar) + NUM_GARAGES * sizeof(CGarage)));
 	CloseHideOutGaragesBeforeSave();
 	NumGarages = ReadSaveBuf<uint32>(buf);
 	BombsAreFree = ReadSaveBuf<uint32>(buf);
@@ -2210,7 +2211,6 @@ INITSAVEBUF
 		aGarages[i].m_pDoor1 = nil;
 		aGarages[i].m_pDoor2 = nil;
 		aGarages[i].m_pTarget = nil;
-		aGarages[i].field_96 = nil;
 		aGarages[i].m_bRecreateDoorOnNextRefresh = true;
 		aGarages[i].RefreshDoorPointers(true);
 		if (aGarages[i].m_eGarageType == GARAGE_CRUSHER)

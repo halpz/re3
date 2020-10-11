@@ -4,6 +4,8 @@
 #include "Zones.h"
 #include "PathFind.h"
 
+//--MIAMI: file done
+
 uint8 CRestart::OverrideHospitalLevel;
 uint8 CRestart::OverridePoliceStationLevel;
 bool CRestart::bFadeInAfterNextArrest;

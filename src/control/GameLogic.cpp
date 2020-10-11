@@ -45,9 +45,10 @@ CVector CGameLogic::ShortCutDropOffForMission;
 float CGameLogic::ShortCutDropOffOrientationForMission;
 bool CGameLogic::MissionDropOffReadyToBeUsed;
 
-//--MIAMI: file done except TODO
+//--MIAMI: file done
 
 #define SHORTCUT_TAXI_COST (9)
+#define TOTAL_BUSTED_AUDIO (28)
 
 void
 CGameLogic::InitAtStartOfGame()
@@ -196,7 +197,7 @@ CGameLogic::Update()
 				sprintf(name, pPlayerInfo.m_nCurrentBustedAudio >= 10 ? "bust_%d" : "bust_0%d", pPlayerInfo.m_nCurrentBustedAudio);
 				DMAudio.ClearMissionAudio(0);
 				DMAudio.PreloadMissionAudio(0, name);
-				pPlayerInfo.m_nCurrentBustedAudio = pPlayerInfo.m_nCurrentBustedAudio % 28 + 1; // enum? const? TODO
+				pPlayerInfo.m_nCurrentBustedAudio = pPlayerInfo.m_nCurrentBustedAudio % TOTAL_BUSTED_AUDIO + 1;
 			}
 		}
 		if (CTimer::GetTimeInMilliseconds() - pPlayerInfo.m_nWBTime > 4000 &&

@@ -23,7 +23,8 @@ private:
 	static int32 WeaponType;
 	static int32 AmmoInterruptedWeapon;
 	static int32 KillsNeeded;
-	static int8 InterruptedWeapon;
+	static int32 InterruptedWeaponType;
+	static int32 InterruptedWeaponSelected;
 	static bool bStandardSoundAndMessages;
 	static bool bNeedHeadShot;
 	static bool bProperKillFrenzy;
@@ -49,5 +50,6 @@ public:
 	static void ResetOnPlayerDeath();
 	static void StartFrenzy(eWeaponType weaponType, int32 time, uint16 kill, int32 modelId0, wchar *text, int32 modelId2, int32 modelId3, int32 modelId4, bool standardSound, bool needHeadShot);
 	static void Update();
+	static void DealWithWeaponChangeAtEndOfFrenzy();
 
 };

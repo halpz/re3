@@ -93,9 +93,9 @@ public:
 	static float BigMessageAlpha[6];
 	static float BigMessageX[6];
 	static float OddJob2OffTimer;
-	static bool CounterOnLastFrame;
+	static bool CounterOnLastFrame[NUMONSCREENCOUNTERENTRIES];
 	static float OddJob2XOffset;
-	static uint16 CounterFlashTimer;
+	static uint16 CounterFlashTimer[NUMONSCREENCOUNTERENTRIES];
 	static uint16 OddJob2Timer;
 	static bool TimerOnLastFrame;
 	static int16 OddJob2On;

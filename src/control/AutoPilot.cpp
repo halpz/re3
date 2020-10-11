@@ -6,7 +6,8 @@
 #include "Curves.h"
 #include "PathFind.h"
 
-//--MIAMI: done
+//--MIAMI: file done
+
 void CAutoPilot::ModifySpeed(float speed)
 {
 	m_fMaxTrafficSpeed = Max(0.01f, speed);
@@ -40,7 +41,6 @@ void CAutoPilot::ModifySpeed(float speed)
 #endif
 }
 
-//--MIAMI: done
 void CAutoPilot::RemoveOnePathNode()
 {
 	--m_nPathFindNodesCount;
@@ -49,7 +49,6 @@ void CAutoPilot::RemoveOnePathNode()
 }
 
 #ifdef COMPATIBLE_SAVES
-//--MIAMI: TODO
 void CAutoPilot::Save(uint8*& buf)
 {
 	WriteSaveBuf<int32>(buf, m_nCurrentRouteNode);
@@ -73,6 +72,9 @@ void CAutoPilot::Save(uint8*& buf)
 	WriteSaveBuf<uint32>(buf, m_nTimeTempAction);
 	WriteSaveBuf<float>(buf, m_fMaxTrafficSpeed);
 	WriteSaveBuf<uint8>(buf, m_nCruiseSpeed);
+	WriteSaveBuf<uint8>(buf, m_nCruiseSpeedMultiplierType);
+	SkipSaveBuf(buf, 2);
+	WriteSaveBuf<float>(buf, m_fCruiseSpeedMultiplier);
 	uint8 flags = 0;
 	if (m_bSlowedDownBecauseOfCars) flags |= BIT(0);
 	if (m_bSlowedDownBecauseOfPeds) flags |= BIT(1);
@@ -80,6 +82,7 @@ void CAutoPilot::Save(uint8*& buf)
 	if (m_bStayInFastLane) flags |= BIT(3);
 	if (m_bIgnorePathfinding) flags |= BIT(4);
 	WriteSaveBuf<uint8>(buf, flags);
+	WriteSaveBuf<uint8>(buf, m_nSwitchDistance);
 	SkipSaveBuf(buf, 2);
 	WriteSaveBuf<float>(buf, m_vecDestinationCoors.x);
 	WriteSaveBuf<float>(buf, m_vecDestinationCoors.y);
@@ -89,7 +92,6 @@ void CAutoPilot::Save(uint8*& buf)
 	SkipSaveBuf(buf, 6);
 }
 
-//--MIAMI: TODO
 void CAutoPilot::Load(uint8*& buf)
 {
 	m_nCurrentRouteNode = ReadSaveBuf<int32>(buf);
@@ -113,12 +115,16 @@ void CAutoPilot::Load(uint8*& buf)
 	m_nTimeTempAction = ReadSaveBuf<uint32>(buf);
 	m_fMaxTrafficSpeed = ReadSaveBuf<float>(buf);
 	m_nCruiseSpeed = ReadSaveBuf<uint8>(buf);
+	m_nCruiseSpeedMultiplierType = ReadSaveBuf<uint8>(buf);
+	SkipSaveBuf(buf, 2);
+	m_fCruiseSpeedMultiplier = ReadSaveBuf<float>(buf);
 	uint8 flags = ReadSaveBuf<uint8>(buf);
 	m_bSlowedDownBecauseOfCars = !!(flags & BIT(0));
 	m_bSlowedDownBecauseOfPeds = !!(flags & BIT(1));
 	m_bStayInCurrentLevel = !!(flags & BIT(2));
 	m_bStayInFastLane = !!(flags & BIT(3));
 	m_bIgnorePathfinding = !!(flags & BIT(4));
+	m_nSwitchDistance = ReadSaveBuf<uint8>(buf);
 	SkipSaveBuf(buf, 2);
 	m_vecDestinationCoors.x = ReadSaveBuf<float>(buf);
 	m_vecDestinationCoors.y = ReadSaveBuf<float>(buf);

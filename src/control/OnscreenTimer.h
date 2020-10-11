@@ -9,30 +9,37 @@ enum
 class COnscreenTimerEntry
 {
 public:
-	uint32 m_nTimerOffset;
-	uint32 m_nCounterOffset;
-	char m_aTimerText[10];
-	char m_aCounterText[10];
-	uint16 m_nType;
-	char m_bCounterBuffer[42];
-	char m_bTimerBuffer[42];
-	bool m_bTimerProcessed;
-	bool m_bTimerGoingDown;
-	bool m_bCounterProcessed;
+	uint32 m_nOffset;
+	char m_aText[10];
+	char m_bBuffer[42];
+	bool m_bProcessed;
+	bool m_bGoingDown;
+
 
 	void Process();
 	bool ProcessForDisplay();
 
 	void ProcessForDisplayClock();
-	void ProcessForDisplayCounter();
 };
 
-VALIDATE_SIZE(COnscreenTimerEntry, 0x74);
+class COnscreenCounterEntry
+{
+public:
+	uint32 m_nOffset;
+	char m_aText[10];
+	uint16 m_nType;
+	char m_bBuffer[42];
+	bool m_bProcessed;
+
+	bool ProcessForDisplay();
+	void ProcessForDisplayCounter();
+};
 
 class COnscreenTimer
 {
 public:
-	COnscreenTimerEntry m_sEntries[NUMONSCREENTIMERENTRIES];
+	COnscreenTimerEntry m_sTimers[NUMONSCREENTIMERENTRIES];
+	COnscreenCounterEntry m_sCounters[NUMONSCREENCOUNTERENTRIES];
 	bool m_bProcessed;
 	bool m_bDisabled;
 

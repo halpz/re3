@@ -292,7 +292,7 @@ CCarCtrl::GenerateOneRandomCar()
 			break;
 		}
 	}
-	if (!ThePaths.NewGenerateCarCreationCoors(vecTargetPos.x, vecTargetPos.y, frontX, frontY,
+	if (!ThePaths.GenerateCarCreationCoors(vecTargetPos.x, vecTargetPos.y, frontX, frontY,
 		preferredDistance, angleLimit, invertAngleLimitTest, &spawnPosition, &curNodeId, &nextNodeId,
 		&positionBetweenNodes, carClass == COPS && pWanted->m_nWantedLevel >= 1))
 		return;
@@ -3228,7 +3228,7 @@ bool CCarCtrl::GenerateOneEmergencyServicesCar(uint32 mi, CVector vecPos)
 	int curNode, nextNode;
 	float posBetweenNodes;
 	while (!created && attempts < 5){
-		if (ThePaths.NewGenerateCarCreationCoors(pPlayerPos.x, pPlayerPos.y, 0.707f, 0.707f,
+		if (ThePaths.GenerateCarCreationCoors(pPlayerPos.x, pPlayerPos.y, 0.707f, 0.707f,
 		  120.0f, -1.0f, true, &spawnPos, &curNode, &nextNode, &posBetweenNodes, false)){
 			int16 colliding[2];
 			if (!ThePaths.GetNode(curNode)->bWaterPath) {
