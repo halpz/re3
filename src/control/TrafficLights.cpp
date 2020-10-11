@@ -261,7 +261,7 @@ CTrafficLights::DisplayActualLight(CEntity *ent)
 		CVector pos = (pos1 + pos2) / 2;
 		if (id >= 0) {
 			CBrightLights::RegisterOne(pos1, ent->GetUp(), ent->GetRight(), CVector(0.0f, 0.0f, 0.0f), id + BRIGHTLIGHT_TRAFFIC_GREEN);
-			CBrightLights::RegisterOne(pos2, ent->GetUp(), -ent->GetRight(), CVector(0.0f, 0.0f, 0.0f), id + BRIGHTLIGHT_TRAFFIC_GREEN);
+			CBrightLights::RegisterOne(pos2, ent->GetUp(), ent->GetRight(), CVector(0.0f, 0.0f, 0.0f), id + BRIGHTLIGHT_TRAFFIC_GREEN);
 		}
 
 		if (CWeather::TrafficLightBrightness > 0.5f)
