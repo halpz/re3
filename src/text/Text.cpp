@@ -431,7 +431,6 @@ CData::Unload(void)
 	numChars = 0;
 }
 
-void
 CMissionTextOffsets::Load(size_t table_size, int file, size_t *offset, int)
 {
 #if DUMB
@@ -459,11 +458,6 @@ CMissionTextOffsets::Load(size_t table_size, int file, size_t *offset, int)
 }
 
 void
-AsciiToUnicode(const char *src, wchar *dst)
-{
-	while((*dst++ = (unsigned char)*src++) != '\0');
-}
-
 char*
 UnicodeToAscii(wchar *src)
 {
@@ -522,7 +516,7 @@ UnicodeToAsciiForMemoryCard(wchar *src)
 {
 	static char aStr[256];
 	int len;
-	for(len = 0; *src != '\0' && len < 256-1; len++, src++)
+	for(len = 0; *src != '\0' && len < 256; len++, src++)
 		if(*src < 256)
 			aStr[len] = *src;
 		else
@@ -543,26 +537,6 @@ UnicodeMakeUpperCase(wchar *dst, wchar *src) //idk what to do with it, seems to 
 		src++;
 	}
 	*dst = '\0';
-}
-
-void
-UnicodeStrcpy(wchar *dst, const wchar *src)
-{
-	while((*dst++ = *src++) != '\0');
-}
-
-void
-UnicodeStrcat(wchar *dst, wchar *append)
-{
-	UnicodeStrcpy(&dst[UnicodeStrlen(dst)], append);
-}
-
-int
-UnicodeStrlen(const wchar *str)
-{
-	int len;
-	for(len = 0; *str != '\0'; len++, str++);
-	return len;
 }
 
 void
