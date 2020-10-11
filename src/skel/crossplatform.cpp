@@ -52,7 +52,7 @@ bool FindNextFile(HANDLE d, WIN32_FIND_DATA* finddata) {
 	while ((file = readdir((DIR*)d)) != NULL) {
 
 		// We only want "DT_REG"ular Files, but reportedly some FS and OSes gives DT_UNKNOWN as type.
-		if ((file->d_type == DT_UNKNOWN || file->d_type == DT_REG) &&
+		if ((file->d_type == DT_UNKNOWN || file->d_type == DT_REG || file->d_type == DT_LNK) &&
 			(extensionLen == 0 || strncmp(&file->d_name[strlen(file->d_name) - extensionLen], finddata->extension, extensionLen) == 0)) {
 
 			sprintf(relativepath, "%s/%s", finddata->folder, file->d_name);
