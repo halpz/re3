@@ -1529,7 +1529,7 @@ CPathFind::GeneratePedCreationCoors(float x, float y, float minDist, float maxDi
 	int i;
 	int node1, node2;
 	float node1_dist, node2_dist;
-	static uint32 node_cnt;
+	static int32 node_cnt;
 
 	if(m_numPedPathNodes == 0)
 		return false;
