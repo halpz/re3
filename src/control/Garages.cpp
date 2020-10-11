@@ -2144,7 +2144,7 @@ void CGarages::SetAllDoorsBackToOriginalHeight()
 
 void CGarages::Save(uint8 * buf, uint32 * size)
 {
-INITSAVEBUF
+//INITSAVEBUF
 	*size = 7876; // for some reason it's not actual size again
 	//*size = (6 * sizeof(uint32) + TOTAL_COLLECTCARS_GARAGES * sizeof(*CarTypesCollected) + sizeof(uint32) + TOTAL_HIDEOUT_GARAGES * NUM_GARAGE_STORED_CARS * sizeof(CStoredCar) + NUM_GARAGES * sizeof(CGarage));
 	CloseHideOutGaragesBeforeSave();
@@ -2164,7 +2164,7 @@ INITSAVEBUF
 	}
 	for (int i = 0; i < NUM_GARAGES; i++)
 		WriteSaveBuf(buf, aGarages[i]);
-VALIDATESAVEBUF(*size);
+//VALIDATESAVEBUF(*size);
 }
 
 const CStoredCar &CStoredCar::operator=(const CStoredCar & other)
@@ -2188,7 +2188,7 @@ const CStoredCar &CStoredCar::operator=(const CStoredCar & other)
 
 void CGarages::Load(uint8* buf, uint32 size)
 {
-INITSAVEBUF
+//INITSAVEBUF
 	assert(size = 7876);
 	//assert(size == (6 * sizeof(uint32) + TOTAL_COLLECTCARS_GARAGES * sizeof(*CarTypesCollected) + sizeof(uint32) + TOTAL_HIDEOUT_GARAGES * NUM_GARAGE_STORED_CARS * sizeof(CStoredCar) + NUM_GARAGES * sizeof(CGarage)));
 	CloseHideOutGaragesBeforeSave();
@@ -2218,7 +2218,7 @@ INITSAVEBUF
 		else
 			aGarages[i].UpdateDoorsHeight();
 	}
-VALIDATESAVEBUF(size);
+//VALIDATESAVEBUF(size);
 
 	MessageEndTime = 0;
 	bCamShouldBeOutisde = false;
