@@ -3,6 +3,7 @@
 #include "crossplatform.h"
 
 #include "FileMgr.h"
+#include "Font.h"
 #ifdef MORE_LANGUAGES
 #include "Game.h"
 #endif

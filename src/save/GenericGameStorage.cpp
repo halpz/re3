@@ -11,6 +11,7 @@
 #include "Clock.h"
 #include "Date.h"
 #include "FileMgr.h"
+#include "Font.h"
 #include "Frontend.h"
 #include "GameLogic.h"
 #include "Gangs.h"

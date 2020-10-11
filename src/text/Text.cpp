@@ -278,12 +278,6 @@ CData::Unload(void)
 	numChars = 0;
 }
 
-void
-AsciiToUnicode(const char *src, wchar *dst)
-{
-	while((*dst++ = (unsigned char)*src++) != '\0');
-}
-
 char*
 UnicodeToAscii(wchar *src)
 {
@@ -307,7 +301,7 @@ UnicodeToAsciiForSaveLoad(wchar *src)
 {
 	static char aStr[256];
 	int len;
-	for(len = 0; *src != '\0' && len < 256-1; len++, src++)
+	for(len = 0; *src != '\0' && len < 256; len++, src++)
 		if(*src < 256)
 			aStr[len] = *src;
 		else
@@ -321,33 +315,13 @@ UnicodeToAsciiForMemoryCard(wchar *src)
 {
 	static char aStr[256];
 	int len;
-	for(len = 0; *src != '\0' && len < 256-1; len++, src++)
+	for(len = 0; *src != '\0' && len < 256; len++, src++)
 		if(*src < 256)
 			aStr[len] = *src;
 		else
 			aStr[len] = '#';
 	aStr[len] = '\0';
 	return aStr;
-}
-
-void
-UnicodeStrcpy(wchar *dst, const wchar *src)
-{
-	while((*dst++ = *src++) != '\0');
-}
-
-void
-UnicodeStrcat(wchar *dst, wchar *append)
-{
-	UnicodeStrcpy(&dst[UnicodeStrlen(dst)], append);
-}
-
-int
-UnicodeStrlen(const wchar *str)
-{
-	int len;
-	for(len = 0; *str != '\0'; len++, str++);
-	return len;
 }
 
 void
