@@ -24,11 +24,15 @@
 #include "ColStore.h"
 #include "Coronas.h"
 #include "Script.h"
+#include "DMAudio.h"
 
 RwIm3DVertex StreakVertices[4];
 RwImVertexIndex StreakIndexList[12];
 
 RwIm3DVertex TraceVertices[10];
+static RwImVertexIndex TraceIndexList[48] = {0, 5, 7, 0, 7, 2, 0, 7, 5, 0, 2, 7, 0, 4, 9, 0,
+										9, 5, 0, 9, 4, 0, 5, 9, 0, 1, 6, 0, 6, 5, 0, 6,
+										1, 0, 5, 6, 0, 3, 8, 0, 8, 5, 0, 8, 3, 0, 5, 8 };
 
 bool CSpecialFX::bVideoCam;
 bool CSpecialFX::bLiftCam;
@@ -93,6 +97,37 @@ CSpecialFX::Init(void)
 	if(gpSmokeTrailTexture == nil)
 		gpSmokeTrailTexture = RwTextureRead("smoketrail", 0);
 	CTxdStore::PopCurrentTxd();
+}
+
+void
+CSpecialFX::AddWeaponStreak(int type)
+{
+	static CMatrix matrix;
+	CVector start;
+	CVector end;
+
+	if (FindPlayerPed() != nil && FindPlayerPed()->m_pWeaponModel != nil) {
+		switch (type) {
+		case WEAPONTYPE_BASEBALLBAT:
+			matrix = RwFrameGetLTM(RpAtomicGetFrame(FindPlayerPed()->m_pWeaponModel));
+			start = matrix * CVector(0.02f, 0.05f, 0.07f);
+			end = matrix * CVector(0.246f, 0.0325f, 0.796f);
+			break;
+		case WEAPONTYPE_GOLFCLUB:
+			matrix = RwFrameGetLTM(RpAtomicGetFrame(FindPlayerPed()->m_pWeaponModel));
+			start = matrix * CVector(0.02f, 0.05f, 0.07f);
+			end = matrix * CVector(-0.054f, 0.0325f, 0.796f);
+			break;
+		case WEAPONTYPE_KATANA:
+			matrix = RwFrameGetLTM(RpAtomicGetFrame(FindPlayerPed()->m_pWeaponModel));
+			start = matrix * CVector(0.02f, 0.05f, 0.07f);
+			end = matrix * CVector(0.096f, -0.0175f, 1.096f);
+			break;
+		default:
+			break;
+		}
+		CMotionBlurStreaks::RegisterStreak((uintptr)FindPlayerPed()->m_pWeaponModel, 100, 100, 100, start, end);
+	}
 }
 
 RwObject*
@@ -279,6 +314,7 @@ void
 CMotionBlurStreaks::RegisterStreak(uintptr id, uint8 r, uint8 g, uint8 b, CVector p1, CVector p2)
 {
 	int i;
+
 	for(i = 0; i < NUMMBLURSTREAKS; i++){
 		if(aStreaks[i].m_id == id){
 			// Found a streak from last frame, update
@@ -291,10 +327,12 @@ CMotionBlurStreaks::RegisterStreak(uintptr id, uint8 r, uint8 g, uint8 b, CVecto
 			return;
 		}
 	}
+
 	// Find free slot
-	for(i = 0; aStreaks[i].m_id; i++)
+	for(i = 0; aStreaks[i].m_id != nil ; i++)
 		if(i == NUMMBLURSTREAKS-1)
 			return;
+
 	// Create a new streak
 	aStreaks[i].m_id = id;
 	aStreaks[i].m_red = r;
@@ -313,7 +351,7 @@ CMotionBlurStreaks::Render(void)
 	bool setRenderStates = false;
 	int i;
 	for(i = 0; i < NUMMBLURSTREAKS; i++)
-		if(aStreaks[i].m_id){
+		if(aStreaks[i].m_id != nil){
 			if(!setRenderStates){
 				RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 				RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
@@ -343,61 +381,222 @@ void CBulletTraces::Init(void)
 		aTraces[i].m_bInUse = false;
 }
 
-void CBulletTraces::AddTrace(CVector* vecStart, CVector* vecTarget)
+void CBulletTraces::AddTrace(CVector* start, CVector* end, float thicknes, uint32 lifeTime, uint8 visibility)
 {
-	int index;
-	for (index = 0; index < NUMBULLETTRACES; index++) {
-		if (!aTraces[index].m_bInUse)
-			break;
+	int32 enabledCount;
+	uint32 modifiedLifeTime;
+	int32 nextSlot;
+
+	enabledCount = 0;
+	for (int i = 0; i < NUMBULLETTRACES; i++)
+		if (aTraces[i].m_bInUse)
+			enabledCount++;
+	if (enabledCount >= 10)
+		modifiedLifeTime = lifeTime / 4;
+	else if (enabledCount >= 5)
+		modifiedLifeTime = lifeTime / 2;
+	else
+		modifiedLifeTime = lifeTime;
+
+	nextSlot = 0;
+	for (int i = 0; nextSlot < NUMBULLETTRACES && aTraces[i].m_bInUse; i++)
+		nextSlot++;
+	if (nextSlot < 16) {
+		aTraces[nextSlot].m_vecCurrentPos = *start;
+		aTraces[nextSlot].m_vecTargetPos = *end;
+		aTraces[nextSlot].m_bInUse = true;
+		aTraces[nextSlot].m_nCreationTime = CTimer::GetTimeInMilliseconds();
+		aTraces[nextSlot].m_fVisibility = visibility;
+		aTraces[nextSlot].m_fThicknes = thicknes;
+		aTraces[nextSlot].m_nLifeTime = modifiedLifeTime;
 	}
-	if (index == NUMBULLETTRACES)
-		return;
-	aTraces[index].m_vecCurrentPos = *vecStart;
-	aTraces[index].m_vecTargetPos = *vecTarget;
-	aTraces[index].m_bInUse = true;
-	aTraces[index].m_framesInUse = 0;
-	aTraces[index].m_lifeTime = 25 + CGeneral::GetRandomNumber() % 32;
+
+	float upDotProd = DotProduct(TheCamera.GetUp(), *start - TheCamera.GetPosition());
+	float forwardDotProd = DotProduct(TheCamera.GetForward(), *start - TheCamera.GetPosition());
+	float upDotProdEnd = DotProduct(TheCamera.GetUp(), *end - TheCamera.GetPosition());
+	float forwardDotProdEnd = DotProduct(TheCamera.GetForward(), *end - TheCamera.GetPosition());
+	if (forwardDotProd*forwardDotProdEnd < 0.0f) {
+		float tmp = Abs(forwardDotProd) / (Abs(forwardDotProd) + Abs(forwardDotProdEnd));
+		float tmp2 = (upDotProdEnd - upDotProd) * tmp + upDotProd;
+		float dotProdEndRight = DotProduct(TheCamera.GetRight(), *end - TheCamera.GetPosition());
+		float dotProdRight = DotProduct(TheCamera.GetRight(), *start - TheCamera.GetPosition());
+		float tmp3 = (dotProdEndRight - dotProdRight) * tmp + dotProdRight;
+		float dist = Sqrt(SQR(tmp2) + SQR(tmp3));
+		if (dist < 2.0f) {
+			if(tmp3 < 0.0f)
+				DMAudio.PlayFrontEndSound(SOUND_BULLETTRACE_2, 127 * (1.0f - dist * 0.5f));
+			else
+				DMAudio.PlayFrontEndSound(SOUND_BULLETTRACE_1, 127 * (1.0f - dist * 0.5f));
+		}
+	}
+}
+
+void CBulletTraces::AddTrace(CVector* start, CVector* end, int32 weaponType, class CEntity* shooter)
+{
+	CPhysical* player;
+	float speed;
+	int16 camMode;
+	
+	if (shooter == (CEntity*)FindPlayerPed() || (FindPlayerVehicle() != nil && FindPlayerVehicle() == (CVehicle*)shooter)) {
+		camMode = TheCamera.Cams[TheCamera.ActiveCam].Mode;
+		if (camMode == CCam::MODE_M16_1STPERSON
+			|| camMode == CCam::MODE_CAMERA
+			|| camMode == CCam::MODE_SNIPER
+			|| camMode == CCam::MODE_M16_1STPERSON_RUNABOUT
+#ifdef MOBILE_IMPROVEMENTS
+			|| camMode == CCam::MODE_ROCKETLAUNCHER
+			|| camMode == CCam::MODE_ROCKETLAUNCHER_RUNABOUT
+#endif
+			|| camMode == CCam::MODE_SNIPER_RUNABOUT
+			|| camMode == CCam::MODE_HELICANNON_1STPERSON) {
+
+			player = FindPlayerVehicle() ? (CPhysical*)FindPlayerVehicle() : (CPhysical*)FindPlayerPed();
+			speed = player->m_vecMoveSpeed.Magnitude();
+			if (speed < 0.05f)
+				return;
+		}
+	}
+
+	switch (weaponType) {
+	case WEAPONTYPE_PYTHON:
+	case WEAPONTYPE_SHOTGUN:
+	case WEAPONTYPE_SPAS12_SHOTGUN:
+	case WEAPONTYPE_STUBBY_SHOTGUN:
+		CBulletTraces::AddTrace(start, end, 0.7f, 1000, 200);
+		break;
+	case WEAPONTYPE_M4:
+	case WEAPONTYPE_RUGER:
+	case WEAPONTYPE_SNIPERRIFLE:
+	case WEAPONTYPE_LASERSCOPE:
+	case WEAPONTYPE_M60:
+	case WEAPONTYPE_MINIGUN:
+	case WEAPONTYPE_HELICANNON:
+		CBulletTraces::AddTrace(start, end, 1.0f, 2000, 220);
+		break;
+	default:
+		CBulletTraces::AddTrace(start, end, 0.4f, 750, 150);
+		break;
+	}
 }
 
 void CBulletTraces::Render(void)
 {
-//	for (int i = 0; i < NUMBULLETTRACES; i++) {
-//		if (!aTraces[i].m_bInUse)
-//			continue;
-//		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
-//#ifdef FIX_BUGS
-//		// Raster has no transparent pixels so it relies on the raster format having alpha
-//		// to turn on blending. librw image conversion might get rid of it right now so let's
-//		// just force it on.
-//		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-//#endif
-//		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
-//		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
-//		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpShadowExplosionTex));
-//		CVector inf = aTraces[i].m_vecCurrentPos;
-//		CVector sup = aTraces[i].m_vecTargetPos;
-//		CVector center = (inf + sup) / 2;
-//		CVector width = CrossProduct(TheCamera.GetForward(), (sup - inf));
-//		width.Normalise();
-//		width /= 20;
-//		uint8 intensity = aTraces[i].m_lifeTime;
-//		for (int i = 0; i < ARRAY_SIZE(TraceVertices); i++)
-//			RwIm3DVertexSetRGBA(&TraceVertices[i], intensity, intensity, intensity, 0xFF);
-//		RwIm3DVertexSetPos(&TraceVertices[0], inf.x + width.x, inf.y + width.y, inf.z + width.z);
-//		RwIm3DVertexSetPos(&TraceVertices[1], inf.x - width.x, inf.y - width.y, inf.z - width.z);
-//		RwIm3DVertexSetPos(&TraceVertices[2], center.x + width.x, center.y + width.y, center.z + width.z);
-//		RwIm3DVertexSetPos(&TraceVertices[3], center.x - width.x, center.y - width.y, center.z - width.z);
-//		RwIm3DVertexSetPos(&TraceVertices[4], sup.x + width.x, sup.y + width.y, sup.z + width.z);
-//		RwIm3DVertexSetPos(&TraceVertices[5], sup.x - width.x, sup.y - width.y, sup.z - width.z);
-//		LittleTest();
-//		if (RwIm3DTransform(TraceVertices, ARRAY_SIZE(TraceVertices), nil, 1)) {
-//			RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TraceIndexList, ARRAY_SIZE(TraceIndexList));
-//			RwIm3DEnd();
-//		}
-//	}
-//	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
-//	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-//	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+	for (int i = 0; i < NUMBULLETTRACES; i++) {
+		if (!aTraces[i].m_bInUse)
+			continue;
+		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
+		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpSmokeTrailTexture));
+
+		float nTimeOfLiving = CTimer::GetTimeInMilliseconds() - aTraces[i].m_nCreationTime;
+		
+		float traceThicknes = aTraces[i].m_fThicknes * nTimeOfLiving / aTraces[i].m_nLifeTime;
+		CVector vecOffset = aTraces[i].m_vecTargetPos - aTraces[i].m_vecCurrentPos;
+		vecOffset.Normalise();
+		vecOffset *= traceThicknes;
+		uint8 nAlphaValue = aTraces[i].m_fVisibility * (aTraces[i].m_nLifeTime - nTimeOfLiving) / aTraces[i].m_nLifeTime;
+
+		CVector currentPos = aTraces[i].m_vecCurrentPos;
+		CVector targetPos = aTraces[i].m_vecTargetPos;
+		float dotProdCur = DotProduct(currentPos - TheCamera.GetPosition(), TheCamera.GetForward()) - 0.7f;
+		float dotProdTar = DotProduct(targetPos - TheCamera.GetPosition(), TheCamera.GetForward()) - 0.7f;
+		if (dotProdCur >= 0.0f || dotProdTar >= 0.0f) {
+			if (dotProdCur < 0.0f) {
+				float absDotProdCur = Abs(dotProdCur);
+				float absDotProdTar = Abs(dotProdTar);
+				currentPos = (absDotProdTar * currentPos + absDotProdCur * targetPos) / (absDotProdCur + absDotProdTar);
+			} else if (dotProdTar < 0.0f){
+				float absDotProdCur = Abs(dotProdCur);
+				float absDotProdTar = Abs(dotProdTar);
+				targetPos = (absDotProdTar * currentPos + absDotProdCur * targetPos) / (absDotProdCur + absDotProdTar);
+			}
+			RwIm3DVertexSetV(&TraceVertices[5], 10.0f);
+			RwIm3DVertexSetV(&TraceVertices[6], 10.0f);
+			RwIm3DVertexSetV(&TraceVertices[7], 10.0f);
+			RwIm3DVertexSetV(&TraceVertices[8], 10.0f);
+			RwIm3DVertexSetV(&TraceVertices[9], 10.0f);
+
+			RwIm3DVertexSetRGBA(&TraceVertices[0], 255, 255, 255, nAlphaValue);
+			RwIm3DVertexSetRGBA(&TraceVertices[1], 255, 255, 255, nAlphaValue);
+			RwIm3DVertexSetRGBA(&TraceVertices[2], 255, 255, 255, nAlphaValue);
+			RwIm3DVertexSetRGBA(&TraceVertices[3], 255, 255, 255, nAlphaValue);
+			RwIm3DVertexSetRGBA(&TraceVertices[4], 255, 255, 255, nAlphaValue);
+			RwIm3DVertexSetRGBA(&TraceVertices[5], 255, 255, 255, nAlphaValue);
+			RwIm3DVertexSetRGBA(&TraceVertices[6], 255, 255, 255, nAlphaValue);
+			RwIm3DVertexSetRGBA(&TraceVertices[7], 255, 255, 255, nAlphaValue);
+			RwIm3DVertexSetRGBA(&TraceVertices[8], 255, 255, 255, nAlphaValue);
+			RwIm3DVertexSetRGBA(&TraceVertices[9], 255, 255, 255, nAlphaValue);
+
+			CVector currentPos2 = (7.0f * currentPos + targetPos) / 8;
+			CVector targetPos2 = (7.0f * targetPos + currentPos) / 8;
+			RwIm3DVertexSetPos(&TraceVertices[0], currentPos2.x, currentPos2.y, currentPos2.z);
+			RwIm3DVertexSetPos(&TraceVertices[1], currentPos2.x, currentPos2.y, currentPos2.z + traceThicknes);
+			RwIm3DVertexSetPos(&TraceVertices[2], currentPos2.x + vecOffset.y, currentPos2.y - vecOffset.x, currentPos2.z);
+			RwIm3DVertexSetPos(&TraceVertices[3], currentPos2.x, currentPos2.y, currentPos2.z - traceThicknes);
+			RwIm3DVertexSetPos(&TraceVertices[4], currentPos2.x - vecOffset.y, currentPos2.y - vecOffset.y, currentPos2.z);
+
+			RwIm3DVertexSetPos(&TraceVertices[5], targetPos2.x, targetPos2.y, targetPos2.z);
+			RwIm3DVertexSetPos(&TraceVertices[6], targetPos2.x, targetPos2.y, targetPos2.z + traceThicknes);
+			RwIm3DVertexSetPos(&TraceVertices[7], targetPos2.x + vecOffset.y, targetPos2.y - vecOffset.x, targetPos2.z);
+			RwIm3DVertexSetPos(&TraceVertices[8], targetPos2.x, targetPos2.y, targetPos2.z - traceThicknes);
+			RwIm3DVertexSetPos(&TraceVertices[9], targetPos2.x - vecOffset.y, targetPos2.y - vecOffset.y, targetPos2.z);
+
+			if (RwIm3DTransform(TraceVertices, ARRAY_SIZE(TraceVertices), nil, 1)) {
+				RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TraceIndexList, ARRAY_SIZE(TraceIndexList));
+				RwIm3DEnd();
+			}
+
+
+			RwIm3DVertexSetV(&TraceVertices[5], 2.0f);
+			RwIm3DVertexSetV(&TraceVertices[6], 2.0f);
+			RwIm3DVertexSetV(&TraceVertices[7], 2.0f);
+			RwIm3DVertexSetV(&TraceVertices[8], 2.0f);
+			RwIm3DVertexSetV(&TraceVertices[9], 2.0f);
+			RwIm3DVertexSetRGBA(&TraceVertices[0], 255, 255, 255, 0);
+			RwIm3DVertexSetRGBA(&TraceVertices[1], 255, 255, 255, 0);
+			RwIm3DVertexSetRGBA(&TraceVertices[2], 255, 255, 255, 0);
+			RwIm3DVertexSetRGBA(&TraceVertices[3], 255, 255, 255, 0);
+			RwIm3DVertexSetRGBA(&TraceVertices[4], 255, 255, 255, 0);
+
+			RwIm3DVertexSetPos(&TraceVertices[0], currentPos.x, currentPos.y, currentPos.z);
+			RwIm3DVertexSetPos(&TraceVertices[1], currentPos.x, currentPos.y, currentPos.z + traceThicknes);
+			RwIm3DVertexSetPos(&TraceVertices[2], currentPos.x + vecOffset.y, currentPos.y - vecOffset.x, currentPos.z);
+			RwIm3DVertexSetPos(&TraceVertices[3], currentPos.x, currentPos.y, currentPos.z - traceThicknes);
+			RwIm3DVertexSetPos(&TraceVertices[4], currentPos.x - vecOffset.y, currentPos.y - vecOffset.y, currentPos.z);
+
+			RwIm3DVertexSetPos(&TraceVertices[5], currentPos2.x, currentPos2.y, currentPos2.z);
+			RwIm3DVertexSetPos(&TraceVertices[6], currentPos2.x, currentPos2.y, currentPos2.z + traceThicknes);
+			RwIm3DVertexSetPos(&TraceVertices[7], currentPos2.x + vecOffset.y, currentPos2.y - vecOffset.x, currentPos2.z);
+			RwIm3DVertexSetPos(&TraceVertices[8], currentPos2.x, currentPos2.y, currentPos2.z - traceThicknes);
+			RwIm3DVertexSetPos(&TraceVertices[9], currentPos2.x - vecOffset.y, currentPos2.y - vecOffset.y, currentPos2.z);
+
+			if (RwIm3DTransform(TraceVertices, ARRAY_SIZE(TraceVertices), nil, 1)) {
+				RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TraceIndexList, ARRAY_SIZE(TraceIndexList));
+				RwIm3DEnd();
+			}
+
+			RwIm3DVertexSetPos(&TraceVertices[1], targetPos.x, targetPos.y, targetPos.z);
+			RwIm3DVertexSetPos(&TraceVertices[2], targetPos.x, targetPos.y, targetPos.z + traceThicknes);
+			RwIm3DVertexSetPos(&TraceVertices[3], targetPos.x + vecOffset.y, targetPos.y - vecOffset.x, targetPos.z);
+			RwIm3DVertexSetPos(&TraceVertices[4], targetPos.x, targetPos.y, targetPos.z - traceThicknes);
+			RwIm3DVertexSetPos(&TraceVertices[5], targetPos.x - vecOffset.y, targetPos.y - vecOffset.y, targetPos.z);
+
+			RwIm3DVertexSetPos(&TraceVertices[5], targetPos2.x, targetPos2.y, targetPos2.z);
+			RwIm3DVertexSetPos(&TraceVertices[6], targetPos2.x, targetPos2.y, targetPos2.z + traceThicknes);
+			RwIm3DVertexSetPos(&TraceVertices[7], targetPos2.x + vecOffset.y, targetPos2.y - vecOffset.x, targetPos2.z);
+			RwIm3DVertexSetPos(&TraceVertices[8], targetPos2.x, targetPos2.y, targetPos2.z - traceThicknes);
+			RwIm3DVertexSetPos(&TraceVertices[9], targetPos2.x - vecOffset.y, targetPos2.y - vecOffset.y, targetPos2.z);
+
+			if (RwIm3DTransform(TraceVertices, ARRAY_SIZE(TraceVertices), nil, 1)) {
+				RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TraceIndexList, ARRAY_SIZE(TraceIndexList));
+				RwIm3DEnd();
+			}
+		}
+	}
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 }
 
 void CBulletTraces::Update(void)
@@ -563,7 +762,7 @@ C3dMarkers::Render()
 					CCoronas::RegisterCorona((uintptr)&m_aMarkerArray[i],
 						SPHERE_MARKER_R, SPHERE_MARKER_G, SPHERE_MARKER_B, 192,
 						m_aMarkerArray[i].m_Matrix.GetPosition(), 1.2f * m_aMarkerArray[i].m_fSize, 50.0f * TheCamera.LODDistMultiplier,
-						CCoronas::TYPE_STAR, CCoronas::FLARE_NONE, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, 0.0f, false);
+						CCoronas::TYPE_STAR, CCoronas::FLARE_NONE, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, 0.0f, false, 1.5f);
 				}
 			}
 			NumActiveMarkers++;
