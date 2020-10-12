@@ -854,11 +854,7 @@ void CHud::Draw()
 					break;
 				}
 
-#ifndef HUD_ENHANCEMENTS
 				if (!m_Message[0]) {
-#else
-				if (!m_Message[0] && !m_BigMessage[2][0]) { // Hide vehicle name if wasted/busted text is displaying
-#endif
 					m_VehicleNameTimer += CTimer::GetTimeStepInMilliseconds();
 					CFont::SetJustifyOff();
 					CFont::SetPropOn();
@@ -1378,16 +1374,16 @@ void CHud::Draw()
 				CFont::SetRightJustifyOn();
 				CFont::SetFontStyle(FONT_HEADING);
 
-				CFont::SetColor(CRGBA(0, 0, 0, BigMessageAlpha[2]));
-				CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f - 4.0f), SCREEN_SCALE_FROM_BOTTOM(78.0f), m_BigMessage[2]);
+				CFont::SetDropShadowPosition(2);
+				CFont::SetDropColor(CRGBA(0, 0, 0, BigMessageAlpha[2]));
 
 				CFont::SetColor(CRGBA(WASTEDBUSTED_COLOR.r, WASTEDBUSTED_COLOR.g, WASTEDBUSTED_COLOR.b, BigMessageAlpha[2]));
-				CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(82.0f), m_BigMessage[2]);
+				CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(90.0f), m_BigMessage[2]);
 			}
 			else {
 				BigMessageInUse[2] = 1.0f;
 				BigMessageAlpha[2] = 0.0f;
-				if (m_VehicleState != 0)
+				if (m_VehicleState != 0) // Hide vehicle name if wasted/busted text is displaying
 					m_VehicleState = 0;
 				if (m_ZoneState != 0)
 					m_ZoneState = 0;
