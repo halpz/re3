@@ -1,6 +1,11 @@
 #pragma once
 #include "Sprite2d.h"
 
+#define HELP_MSG_LENGTH 256
+
+#define HUD_TEXT_SCALE_X 0.7f
+#define HUD_TEXT_SCALE_Y 1.25f
+
 enum eItems
 {
 	ITEM_NONE = -1,
@@ -31,41 +36,29 @@ enum eFadeOperation
 enum eSprites 
 {
 	HUD_FIST,
-	HUD_BAT,
-	HUD_PISTOL,
-	HUD_UZI,
-	HUD_SHOTGUN,
-	HUD_AK47,
-	HUD_M16,
-	HUD_SNIPER,
-	HUD_ROCKET,
-	HUD_FLAME,
-	HUD_MOLOTOV,
-	HUD_GRENADE,
-	HUD_DETONATOR,
-	HUD_RADARDISC = 15,
-	HUD_PAGER = 16,
-	HUD_SITESNIPER = 20,
+	HUD_SITEROCKET = 41,
+	HUD_RADARDISC = 50,
+	HUD_SITESNIPER = 63,
 	HUD_SITEM16,
-	HUD_SITEROCKET,
-	NUM_HUD_SPRITES,
+	HUD_SITELASER,
+	HUD_LASERDOT,
+	HUD_VIEWFINDER,
+	HUD_BLEEDER,
+	NUM_HUD_SPRITES = 69,
 };
-
-#define HUD_TEXT_SCALE_X 0.7f
-#define HUD_TEXT_SCALE_Y 1.25f
 
 class CHud
 {
 public:
 	static CSprite2d Sprites[NUM_HUD_SPRITES];
-	static wchar m_HelpMessage[256];
-	static wchar m_LastHelpMessage[256];
+	static wchar m_HelpMessage[HELP_MSG_LENGTH];
+	static wchar m_LastHelpMessage[HELP_MSG_LENGTH];
 	static uint32 m_HelpMessageState;
 	static uint32 m_HelpMessageTimer;
 	static int32 m_HelpMessageFadeTimer;
-	static wchar m_HelpMessageToPrint[256];
-	static float &m_HelpMessageDisplayTime;
-	static float m_fHelpMessageTime;
+	static wchar m_HelpMessageToPrint[HELP_MSG_LENGTH];
+	static float m_HelpMessageDisplayTime;
+	static bool m_HelpMessageDisplayForever;
 	static bool	m_HelpMessageQuick;
 	static uint32 m_ZoneState;
 	static int32 m_ZoneFadeTimer;
@@ -86,16 +79,16 @@ public:
 	static wchar m_BigMessage[6][128];
 	static int16 m_ItemToFlash;
 	static bool m_HideRadar;
-	static int32 m_DrawClock;
+	static int32 m_ClockState;
 
 	// These aren't really in CHud
 	static float BigMessageInUse[6];
 	static float BigMessageAlpha[6];
 	static float BigMessageX[6];
 	static float OddJob2OffTimer;
-	static bool CounterOnLastFrame[NUMONSCREENCOUNTERENTRIES];
+	static bool CounterOnLastFrame[NUMONSCREENCOUNTERS];
 	static float OddJob2XOffset;
-	static uint16 CounterFlashTimer[NUMONSCREENCOUNTERENTRIES];
+	static uint16 CounterFlashTimer[NUMONSCREENCOUNTERS];
 	static uint16 OddJob2Timer;
 	static bool TimerOnLastFrame;
 	static int16 OddJob2On;
@@ -121,6 +114,8 @@ public:
 
 	static uint32 m_LastDisplayScore;
 	static uint32 m_LastWanted;
+	static uint32 m_LastWeapon;
+	static uint32 m_LastTimeEnergyLost;
 
 public:
 	static void Draw();
@@ -131,8 +126,8 @@ public:
 #endif
 	static void Initialise();
 	static void ReInitialise();
-	static void SetBigMessage(wchar *message, int16 style);
-	static void SetHelpMessage(wchar *message, bool quick);
+	static void SetBigMessage(wchar *message, uint16 style);
+	static void SetHelpMessage(wchar *message, bool quick, bool displayForever = false);
 	static bool IsHelpMessageBeingDisplayed(void);
 	static void SetMessage(wchar *message);
 	static void SetPagerMessage(wchar *message);

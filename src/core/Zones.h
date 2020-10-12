@@ -108,5 +108,7 @@ public:
 	static void AddZoneToAudioZoneArray(CZone *zone);
 	static void InitialiseAudioZoneArray(void);
 	static void SaveAllZones(uint8 *buffer, uint32 *length);
+	static void SaveOneZone(CZone *zone, uint8 **buffer, uint32 *length, eZoneType zoneType);
 	static void LoadAllZones(uint8 *buffer, uint32 length);
+	static void LoadOneZone(CZone *zone, uint8 **buffer, uint32 *length, eZoneType zoneType);
 };

@@ -77,9 +77,13 @@ void CWaterCannon::Update_OncePerFrame(int16 index)
 		}
 	}
 	
-	int32 extinguishingPoint = CGeneral::GetRandomNumber() & (NUM_SEGMENTPOINTS - 1);
-	if ( m_abUsed[extinguishingPoint] )
-		gFireManager.ExtinguishPoint(m_avecPos[extinguishingPoint], 3.0f);
+	for ( int32 i = 0; i < NUM_SEGMENTPOINTS; i++ )
+	{
+		if ( m_abUsed[i] && gFireManager.ExtinguishPointWithWater(m_avecPos[i], 4.0f) )
+		{
+			break;
+		}
+	}
 	
 	if ( ((index + CTimer::GetFrameCounter()) & 3) == 0 )
 		PushPeds();
