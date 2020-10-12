@@ -27,13 +27,28 @@ void GetLocalTime_CP(SYSTEMTIME *out) {
 #ifndef _WIN32
 HANDLE FindFirstFile(const char* pathname, WIN32_FIND_DATA* firstfile) {
 	char newpathname[32];
+	
 	strncpy(newpathname, pathname, 32);
-	char* path = strtok(newpathname, "\\*");
+	char* path = strtok(newpathname, "*");
+	
+	// Case-sensitivity and backslashes...
+	char *real = casepath(path);
+	if (real) {
+		real[strlen(real)] = '*';
+		char *extension = strtok(NULL, "*");
+		if (extension)
+			strcat(real, extension);
+		
+		strncpy(newpathname, real, 32);
+		free(real);
+		path = strtok(newpathname, "*");
+	}
+	
 	strncpy(firstfile->folder, path, sizeof(firstfile->folder));
 
 	// Both w/ extension and w/o extension is ok
-	if (strlen(path) + 2 != strlen(pathname))
-		strncpy(firstfile->extension, strtok(NULL, "\\*"), sizeof(firstfile->extension));
+	if (strlen(path) + 1 != strlen(pathname))
+		strncpy(firstfile->extension, strtok(NULL, "*"), sizeof(firstfile->extension));
 	else
 		strncpy(firstfile->extension, "", sizeof(firstfile->extension));
 
@@ -52,8 +67,8 @@ bool FindNextFile(HANDLE d, WIN32_FIND_DATA* finddata) {
 	while ((file = readdir((DIR*)d)) != NULL) {
 
 		// We only want "DT_REG"ular Files, but reportedly some FS and OSes gives DT_UNKNOWN as type.
-		if ((file->d_type == DT_UNKNOWN || file->d_type == DT_REG) &&
-			(extensionLen == 0 || strncmp(&file->d_name[strlen(file->d_name) - extensionLen], finddata->extension, extensionLen) == 0)) {
+		if ((file->d_type == DT_UNKNOWN || file->d_type == DT_REG || file->d_type == DT_LNK) &&
+			(extensionLen == 0 || strncasecmp(&file->d_name[strlen(file->d_name) - extensionLen], finddata->extension, extensionLen) == 0)) {
 
 			sprintf(relativepath, "%s/%s", finddata->folder, file->d_name);
 			realpath(relativepath, path);
