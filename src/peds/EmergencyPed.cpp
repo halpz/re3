@@ -104,7 +104,6 @@ CEmergencyPed::FiremanAI(void)
 				m_pAttendedFire = nearestFire;
 #ifdef FIX_BUGS
 				bIsRunning = true;
-				++nearestFire->m_nFiremenPuttingOut;
 #endif
 			}
 			break;
@@ -116,10 +115,6 @@ CEmergencyPed::FiremanAI(void)
 				SetMoveState(PEDMOVE_RUN);
 #ifdef FIX_BUGS
 				bIsRunning = true;
-				if (m_pAttendedFire) {
-					--m_pAttendedFire->m_nFiremenPuttingOut;
-				}
-				++nearestFire->m_nFiremenPuttingOut;
 				m_pAttendedFire = nearestFire;
 			} else if (!nearestFire) {
 #else
@@ -153,10 +148,7 @@ CEmergencyPed::FiremanAI(void)
 		case EMERGENCY_PED_STOP:
 #ifdef FIX_BUGS
 			bIsRunning = false;
-			if (m_pAttendedFire)
 #endif
-				--m_pAttendedFire->m_nFiremenPuttingOut;
-
 			m_nPedState = PED_NONE;
 			SetWanderPath(CGeneral::GetRandomNumber() & 7);
 			m_pAttendedFire = nil;

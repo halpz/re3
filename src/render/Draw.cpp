@@ -24,12 +24,17 @@ float
 CDraw::CalculateAspectRatio(void)
 {
 	if (FrontEndMenuManager.m_PrefsUseWideScreen) {
+#ifdef ASPECT_RATIO_SCALE
+		if (TheCamera.m_WideScreenOn)
+			CDraw::ms_fAspectRatio = FrontEndMenuManager.m_PrefsUseWideScreen == AR_AUTO ?
+				(5.f / 3.f) * (SCREEN_WIDTH / SCREEN_HEIGHT) / (16.f / 9.f) :
+				5.f / 3.f; // It's used on theatrical showings according to Wiki
+		else
+			CDraw::ms_fAspectRatio = FrontEndMenuManager.m_PrefsUseWideScreen == AR_AUTO ? SCREEN_WIDTH / SCREEN_HEIGHT : 16.f / 9.f;
+#else
 		if (TheCamera.m_WideScreenOn)
 			CDraw::ms_fAspectRatio = 5.f / 3.f; // It's used on theatrical showings according to Wiki
 		else
-#ifdef ASPECT_RATIO_SCALE
-			CDraw::ms_fAspectRatio = FrontEndMenuManager.m_PrefsUseWideScreen == AR_AUTO ? SCREEN_WIDTH / SCREEN_HEIGHT : 16.f / 9.f;
-#else
 			CDraw::ms_fAspectRatio = 16.f / 9.f;
 #endif
 	} else if (TheCamera.m_WideScreenOn) {

@@ -14,10 +14,10 @@ public:
 	CEntity *m_pSource;
 	uint32 m_nExtinguishTime;
 	uint32 m_nStartTime;
-	int32 field_20;
 	uint32 m_nNextTimeToAddFlames;
-	uint32 m_nFiremenPuttingOut;
 	float m_fStrength;
+	float m_fWaterExtinguishCountdown;
+	bool m_bExtinguishedWithWater;
 
 	CFire();
 	~CFire();
@@ -34,15 +34,17 @@ class CFireManager
 public:
 	uint32 m_nTotalFires;
 	CFire m_aFires[NUM_FIRES];
-	void StartFire(CVector pos, float size, bool propagation);
-	CFire *StartFire(CEntity *entityOnFire, CEntity *fleeFrom, float strength, bool propagation);
+
+	void StartFire(CVector pos, float size, uint8 propagation);
+	CFire *StartFire(CEntity *entityOnFire, CEntity *fleeFrom, float strength, uint8 propagation);
 	void Update(void);
 	CFire *FindFurthestFire_NeverMindFireMen(CVector coords, float minRange, float maxRange);
 	CFire *FindNearestFire(CVector vecPos, float *pDistance);
 	CFire *GetNextFreeFire(void);
 	uint32 GetTotalActiveFires() const;
 	void ExtinguishPoint(CVector point, float range);
-	int32 StartScriptFire(const CVector &pos, CEntity *target, float strength, bool propagation);
+	bool ExtinguishPointWithWater(CVector point, float range);
+	int32 StartScriptFire(const CVector &pos, CEntity *target, float strength, uint8 propagation);
 	bool IsScriptFireExtinguish(int16 index);
 	void RemoveAllScriptFires(void);
 	void RemoveScriptFire(int16 index);

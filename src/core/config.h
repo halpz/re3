@@ -87,7 +87,8 @@ enum Config {
 	NUMMBLURSTREAKS = 4,
 	NUMSKIDMARKS = 32,
 
-	NUMONSCREENTIMERENTRIES = 1,
+	NUMONSCREENCLOCKS = 1,
+	NUMONSCREENCOUNTERS = 3,
 	NUMRADARBLIPS = 75,
 	NUMGENERALPICKUPS = 320,
 	NUMSCRIPTEDPICKUPS = 16,
@@ -137,6 +138,7 @@ enum Config {
 
 	NUM_CRANES = 8,
 	NUM_ESCALATORS = 22,
+	NUM_WATER_CREATURES = 8,
 
 	NUM_EXPLOSIONS = 48,
 
@@ -260,7 +262,6 @@ enum Config {
 //#define BIND_VEHICLE_FIREWEAPON // Adds ability to rebind fire key for 'in vehicle' controls
 
 // Hud, frontend and radar
-#define HUD_ENHANCEMENTS	// Adjusts some aspects to make the HUD look/behave a little bit better.
 //#define BETA_SLIDING_TEXT
 #define TRIANGULAR_BLIPS	// height indicating triangular radar blips, as in VC
 #define PC_MENU

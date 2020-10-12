@@ -90,6 +90,7 @@
 #include "debugmenu.h"
 #include "Ropes.h"
 #include "WindModifiers.h"
+#include "WaterCreatures.h"
 #include "postfx.h"
 #include "custompipes.h"
 
@@ -478,8 +479,7 @@ bool CGame::ShutDown(void)
 	CPlane::Shutdown();
 	CTrain::Shutdown();
 	CScriptPaths::Shutdown();
-	// TODO(Miami)
-	// CWaterCreatures::RemoveAll();
+	CWaterCreatures::RemoveAll();
 	CSpecialFX::Shutdown();
 #ifndef PS2
 	CGarages::Shutdown();
@@ -650,7 +650,7 @@ void CGame::ShutDownForRestart(void)
 	CRadar::RemoveRadarSections();
 	FrontEndMenuManager.UnloadTextures();
 	CParticleObject::RemoveAllExpireableParticleObjects();
-	//CWaterCreatures::RemoveAll(); //TODO(Miami)
+	CWaterCreatures::RemoveAll(); 
 	CSetPieces::Init();
 	CPedType::Shutdown();
 	CSpecialFX::Shutdown();

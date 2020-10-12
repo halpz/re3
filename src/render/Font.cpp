@@ -5,6 +5,46 @@
 #include "Font.h"
 #include "Timer.h"
 
+void
+AsciiToUnicode(const char *src, wchar *dst)
+{
+	while((*dst++ = (unsigned char)*src++) != '\0');
+}
+
+void
+UnicodeStrcat(wchar *dst, wchar *append)
+{
+	UnicodeStrcpy(&dst[UnicodeStrlen(dst)], append);
+}
+
+void
+UnicodeStrcpy(wchar *dst, const wchar *src)
+{
+	while((*dst++ = *src++) != '\0');
+}
+
+int
+UnicodeStrlen(const wchar *str)
+{
+	int len;
+	for(len = 0; *str != '\0'; len++, str++);
+	return len;
+}
+
+void
+UnicodeMakeUpperCase(wchar *dst, const wchar *src) //idk what to do with it, seems to be incorrect implementation by R*
+{
+	while (*src != '\0') {
+		if (*src < 'a' || *src > 'z')
+			*dst = *src;
+		else
+			*dst = *src - 32;
+		dst++;
+		src++;
+	}
+	*dst = '\0';
+}
+
 CFontDetails CFont::Details;
 int16 CFont::NewLine;
 CSprite2d CFont::Sprite[MAX_FONTS];
@@ -1102,6 +1142,7 @@ CFont::ParseToken(wchar *s)
 		switch(*s){
 		case 'B':
 			Details.bBold = !Details.bBold;
+			break;
 		case 'N':
 		case 'n':
 			NewLine = 1;
@@ -1109,7 +1150,7 @@ CFont::ParseToken(wchar *s)
 		case 'b': SetColor(CRGBA(27, 89, 130, 255)); Details.anonymous_23 = true; break;
 		case 'f':
 			Details.bFlash = !Details.bFlash;
-			if (Details.bFlash)
+			if (!Details.bFlash)
 				Details.color.a = 255;
 			break;
 		case 'g': SetColor(CRGBA(255, 150, 225, 255)); Details.anonymous_23 = true; break;
