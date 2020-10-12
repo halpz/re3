@@ -20,7 +20,7 @@
 
 #pragma comment( lib, "mss32.lib" )
 
-// --MIAMI: file done, except MP3 player
+// --MIAMI: file done
 
 cSampleManager SampleManager;
 uint32 BankStartOffset[MAX_SFX_BANKS];
