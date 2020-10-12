@@ -988,6 +988,9 @@ CBrightLights::Render(void)
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
 
+	TempBufferVerticesStored = 0;
+	TempBufferIndicesStored = 0;
+
 	for(i = 0; i < NumBrightLights; i++){
 		if(TempBufferIndicesStored > TEMPBUFFERINDEXSIZE-40 || TempBufferVerticesStored > TEMPBUFFERVERTSIZE-40)
 			RenderOutGeometryBuffer();
@@ -1023,6 +1026,13 @@ CBrightLights::Render(void)
 			r = aBrightLights[i].m_red;
 			g = aBrightLights[i].m_green;
 			b = aBrightLights[i].m_blue;
+			break;
+		default:
+#ifdef FIX_BUGS  //just to make sure that color never will be undefined
+			r = 0;
+			g = 0;
+			b = 0;
+#endif
 			break;
 		}
 
@@ -1087,6 +1097,22 @@ CBrightLights::Render(void)
 			TempBufferIndicesStored += 12*3;
 			break;
 
+		case BRIGHTLIGHT_FRONT_BIG:
+		case BRIGHTLIGHT_REAR_BIG:
+			for (j = 0; j < 8; j++) {
+				pos = BigCarHeadLightsSide[j] * aBrightLights[i].m_side +
+					BigCarHeadLightsUp[j] * aBrightLights[i].m_up +
+					BigCarHeadLightsFront[j] * aBrightLights[i].m_front +
+					aBrightLights[i].m_pos;
+				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored + j], r, g, b, a);
+				RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + j], pos.x, pos.y, pos.z);
+			}
+			for (j = 0; j < 12 * 3; j++)
+				TempBufferRenderIndexList[TempBufferIndicesStored + j] = CubeIndices[j] + TempBufferVerticesStored;
+			TempBufferVerticesStored += 8;
+			TempBufferIndicesStored += 12 * 3;
+			break;
+
 		case BRIGHTLIGHT_FRONT_TALL:
 		case BRIGHTLIGHT_REAR_TALL:
 			for(j = 0; j < 8; j++){
@@ -1105,8 +1131,8 @@ CBrightLights::Render(void)
 
 		case BRIGHTLIGHT_SIREN:
 			for(j = 0; j < 6; j++){
-				pos = SirenLightsSide[j]*aBrightLights[i].m_side +
-					SirenLightsUp[j]*aBrightLights[i].m_up +
+				pos = SirenLightsSide[j]*TheCamera.GetRight() +
+					SirenLightsUp[j]* TheCamera.GetUp() +
 					aBrightLights[i].m_pos;
 				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored+j], r, g, b, a);
 				RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored+j], pos.x, pos.y, pos.z);

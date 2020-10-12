@@ -165,6 +165,7 @@ public:
 	uint8 m_blue;
 };
 
+//done
 class CBrightLights
 {
 	static int NumBrightLights;
@@ -173,7 +174,7 @@ public:
 	static void Init(void); //done
 	static void RegisterOne(CVector pos, CVector up, CVector side, CVector front,
 		uint8 type, uint8 red = 0, uint8 green = 0, uint8 blue = 0); //done
-	static void Render(void); //looks similad but needs recheck      !!!!!!!!!!!!!!!!!
+	static void Render(void); //done
 	static void RenderOutGeometryBuffer(void); //done
 };
 
