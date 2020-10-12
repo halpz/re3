@@ -46,16 +46,6 @@ const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
 const int policeChannel = channels + 1;
 const int allChannels = channels + 2;
 
-uint32 gPornNextTime;
-uint32 gSawMillNextTime;
-uint32 gShopNextTime;
-uint32 gAirportNextTime;
-uint32 gCinemaNextTime;
-uint32 gDocksNextTime;
-uint32 gHomeNextTime;
-uint32 gCellNextTime;
-uint32 gNextCryTime;
-
 enum PLAY_STATUS : uint8 { PLAY_STATUS_STOPPED = 0, PLAY_STATUS_PLAYING, PLAY_STATUS_FINISHED };
 enum LOADING_STATUS : uint8 { LOADING_STATUS_NOT_LOADED = 0, LOADING_STATUS_LOADED, LOADING_STATUS_FAILED };
 
@@ -187,7 +177,11 @@ cAudioManager::PostInitialiseGameSpecificSetup()
 	field_5538 = 127;
 
 	ResetAudioLogicTimers(CTimer::GetTimeInMilliseconds());
+	m_bIsPlayerShutUp = false;
+	m_nPlayerMood = 0;
+	m_nPlayerMoodTimer = 0;
 }
+
 void
 cAudioManager::PreTerminateGameSpecificShutdown()
 {
@@ -240,15 +234,6 @@ cAudioManager::PostTerminateGameSpecificShutdown()
 void
 cAudioManager::ResetAudioLogicTimers(uint32 timer)
 {
-	gPornNextTime = timer;
-	gNextCryTime = timer;
-	gSawMillNextTime = timer;
-	gCellNextTime = timer;
-	gShopNextTime = timer;
-	gHomeNextTime = timer;
-	gAirportNextTime = timer;
-	gDocksNextTime = timer;
-	gCinemaNextTime = timer;
 	for (int32 i = 0; i < m_nAudioEntitiesTotal; i++) {
 		if (m_asAudioEntities[m_anAudioEntityIndices[i]].m_nType == AUDIOTYPE_PHYSICAL) {
 			CPed *ped = (CPed *)m_asAudioEntities[m_anAudioEntityIndices[i]].m_pEntity;
