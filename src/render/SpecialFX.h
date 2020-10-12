@@ -1,6 +1,7 @@
 #pragma once
 
-//done
+//file done
+
 class CSpecialFX
 {
 public:
@@ -9,15 +10,15 @@ public:
 	static bool bSnapShotActive;
 	static int32 SnapShotFrames;
 
-	static void Render(void); //done
-	static void Update(void); //done
-	static void Init(void); //done
-	static void Shutdown(void); //done
-	static void AddWeaponStreak(int type); //done
-	static void Render2DFXs(); //done
+	static void Render(void);
+	static void Update(void);
+	static void Init(void);
+	static void Shutdown(void);
+	static void AddWeaponStreak(int type);
+	static void Render2DFXs();
 };
 
-//done
+
 class CRegisteredMotionBlurStreak
 {
 public:
@@ -29,22 +30,22 @@ public:
 	CVector m_pos2[3];
 	bool m_isValid[3];
 
-	void Update(void); //done
-	void Render(void); //done
+	void Update(void);
+	void Render(void);
 };
 
-//done
+
 class CMotionBlurStreaks
 {
 	static CRegisteredMotionBlurStreak aStreaks[NUMMBLURSTREAKS];
 public:
-	static void Init(void); //done
-	static void Update(void); //done
-	static void RegisterStreak(uintptr id, uint8 r, uint8 g, uint8 b, CVector p1, CVector p2); //done
-	static void Render(void); //done
+	static void Init(void);
+	static void Update(void);
+	static void RegisterStreak(uintptr id, uint8 r, uint8 g, uint8 b, CVector p1, CVector p2);
+	static void Render(void);
 };
 
-//done
+
 struct CBulletTrace
 {
 	CVector m_vecCurrentPos;
@@ -55,20 +56,20 @@ struct CBulletTrace
 	float m_fThicknes;
 	uint8 m_fVisibility;
 
-	void Update(void); //done
+	void Update(void);
 };
 
-//done
+
 class CBulletTraces
 {
 public:
 	static CBulletTrace aTraces[NUMBULLETTRACES];
 
-	static void Init(void); //done
-	static void Render(void); //done
-	static void Update(void); //done
-	static void AddTrace(CVector* start, CVector* end, float thickness, uint32 lifeTime, uint8 visibility); //done
-	static void AddTrace(CVector* start, CVector* end, int32 weaponType, class CEntity* shooter); //done
+	static void Init(void);
+	static void Render(void);
+	static void Update(void);
+	static void AddTrace(CVector* start, CVector* end, float thickness, uint32 lifeTime, uint8 visibility);
+	static void AddTrace(CVector* start, CVector* end, int32 weaponType, class CEntity* shooter);
 };
 
 enum
@@ -83,7 +84,7 @@ enum
 	MARKERTYPE_INVALID = 0x101
 };
 
-//done
+
 class C3dMarker
 {
 public:
@@ -104,21 +105,21 @@ public:
 	float m_fBrightness;
 	float m_fCameraRange;
 
-	bool AddMarker(uint32 identifier, uint16 type, float fSize, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate); //done
-	void DeleteMarkerObject(); //done
-	void Render(); //done
+	bool AddMarker(uint32 identifier, uint16 type, float fSize, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);
+	void DeleteMarkerObject();
+	void Render();
 };
 
-//done
+
 class C3dMarkers
 {
 public:
-	static void Init(); //done
-	static void Shutdown(); //done
-	static C3dMarker *PlaceMarker(uint32 id, uint16 type, CVector &pos, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate); //done
-	static void PlaceMarkerSet(uint32 id, uint16 type, CVector &pos, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate); //done
-	static void Render(); //done
-	static void Update(); //done
+	static void Init();
+	static void Shutdown();
+	static C3dMarker *PlaceMarker(uint32 id, uint16 type, CVector &pos, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);
+	static void PlaceMarkerSet(uint32 id, uint16 type, CVector &pos, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);
+	static void Render();
+	static void Update();
 
 	static C3dMarker m_aMarkerArray[NUM3DMARKERS];
 	static int32 NumActiveMarkers;
@@ -150,7 +151,7 @@ enum
 	BRIGHTLIGHT_REAR = BRIGHTLIGHT_REAR_LONG,
 };
 
-//done
+
 class CBrightLight
 {
 public:
@@ -165,17 +166,17 @@ public:
 	uint8 m_blue;
 };
 
-//done
+
 class CBrightLights
 {
 	static int NumBrightLights;
 	static CBrightLight aBrightLights[NUMBRIGHTLIGHTS];
 public:
-	static void Init(void); //done
+	static void Init(void);
 	static void RegisterOne(CVector pos, CVector up, CVector side, CVector front,
-		uint8 type, uint8 red = 0, uint8 green = 0, uint8 blue = 0); //done
-	static void Render(void); //done
-	static void RenderOutGeometryBuffer(void); //done
+		uint8 type, uint8 red = 0, uint8 green = 0, uint8 blue = 0);
+	static void Render(void);
+	static void RenderOutGeometryBuffer(void);
 };
 
 
@@ -185,7 +186,7 @@ enum
 	SHINYTEXT_FLAT
 };
 
-//done
+
 class CShinyText
 {
 public:
@@ -198,21 +199,21 @@ public:
 	uint8 m_blue;
 };
 
-//done
+
 class CShinyTexts 
 {
 	static int NumShinyTexts;
 	static CShinyText aShinyTexts[NUMSHINYTEXTS];
 public:
-	static void Init(void); //done
+	static void Init(void);
 	static void RegisterOne(CVector p0, CVector p1, CVector p2, CVector p3,
 		float u0, float v0, float u1, float v1, float u2, float v2, float u3, float v3,
-		uint8 type, uint8 red, uint8 green, uint8 blue, float maxDist); //done, not used
-	static void Render(void); //done
-	static void RenderOutGeometryBuffer(void); //done
+		uint8 type, uint8 red, uint8 green, uint8 blue, float maxDist); //not used
+	static void Render(void);
+	static void RenderOutGeometryBuffer(void);
 };
 
-//done
+
 class CMoneyMessage
 {
 	friend class CMoneyMessages;
@@ -224,25 +225,25 @@ class CMoneyMessage
 	float	m_fSize;
 	float	m_fOpacity;
 public:
-	void Render(); //done
+	void Render();
 };
 
-//done
+
 class CMoneyMessages
 {
 	static CMoneyMessage aMoneyMessages[NUMMONEYMESSAGES];
 public:
-	static void Init(); //done
-	static void Render(); //done
-	static void	RegisterOne(CVector vecPos, const char *pText, uint8 bRed, uint8 bGreen, uint8 bBlue, float fSize, float fOpacity); //done
+	static void Init();
+	static void Render();
+	static void	RegisterOne(CVector vecPos, const char *pText, uint8 bRed, uint8 bGreen, uint8 bBlue, float fSize, float fOpacity);
 };
 
-//done
+
 class CSpecialParticleStuff
 {
 	static uint32 BoatFromStart;
 public:
-	static void CreateFoamAroundObject(CMatrix*, float, float, float, int32); //done, not used
-	static void StartBoatFoamAnimation(); //done, not used
-	static void UpdateBoatFoamAnimation(CMatrix*); //done, not used
+	static void CreateFoamAroundObject(CMatrix*, float, float, float, int32); //not used
+	static void StartBoatFoamAnimation(); //not used
+	static void UpdateBoatFoamAnimation(CMatrix*); //not used
 };

@@ -179,11 +179,11 @@ CSpecialFX::Render2DFXs(void)
 		CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-		CFont::SetCentreSize(SCREEN_WIDTH - 20);
+		CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(20.0f));
 		CFont::SetCentreOff();
 		CFont::SetPropOn();
 		CFont::SetColor(CRGBA(0, 255, 0, 200));
-		CFont::SetFontStyle(FONT_STANDARD);
+		FONT_LOCALE(FONT_STANDARD);
 		sprintf(gString, "%d", CTimer::GetFrameCounter() & 0x3F); // mb % 63
 		AsciiToUnicode(gString, gUString);
 		CFont::PrintString(SCREEN_WIDTH * 8 / 10, SCREEN_HEIGHT * 8 / 10, gUString);
@@ -204,11 +204,11 @@ CSpecialFX::Render2DFXs(void)
 		CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-		CFont::SetCentreSize(SCREEN_WIDTH - 20);
+		CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(20.0f));
 		CFont::SetCentreOff();
 		CFont::SetPropOn();
 		CFont::SetColor(CRGBA(100, 100, 100, 200));
-		CFont::SetFontStyle(FONT_STANDARD);
+		FONT_LOCALE(FONT_STANDARD);
 		CFont::PrintString(SCREEN_WIDTH * 8 / 10, SCREEN_HEIGHT * 8 / 10, gUString);
 		for (int32 i = 0; i < SCREEN_HEIGHT; i += 4) {
 			RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
@@ -1337,7 +1337,7 @@ CMoneyMessage::Render()
 			CFont::SetJustifyOff();
 			CFont::SetColor(CRGBA(m_Colour.r, m_Colour.g, m_Colour.b, (255.0f - 255.0f * fLifeTime) * m_fOpacity));
 			CFont::SetBackGroundOnlyTextOff();
-			CFont::SetFontStyle(FONT_STANDARD);
+			FONT_LOCALE(FONT_STANDARD);
 			CFont::PrintString(vecOut.x, vecOut.y, m_aText);
 		}
 	}
