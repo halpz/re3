@@ -106,7 +106,7 @@ typedef uint16_t wchar;
 inline uint32 dpb(uint32 b, uint32 p, uint32 s, uint32 w)
 {
 	uint32 m = MASK(p,s);
-	return w & ~m | b<<p & m;
+	return (w & ~m) | ((b<<p) & m);
 }
 inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 {
@@ -412,6 +412,15 @@ inline void SkipSaveBuf(uint8 *&buf, int32 skip)
 #endif
 }
 
+inline void SkipSaveBuf(uint8*& buf, uint32 &length, int32 skip)
+{
+	buf += skip;
+	length += skip;
+#ifdef VALIDATE_SAVE_SIZE
+	_saveBufCount += skip;
+#endif
+}
+
 template<typename T>
 inline const T ReadSaveBuf(uint8 *&buf)
 {
@@ -421,11 +430,28 @@ inline const T ReadSaveBuf(uint8 *&buf)
 }
 
 template<typename T>
+inline const T ReadSaveBuf(uint8 *&buf, uint32 &length)
+{
+	T &value = *(T*)buf;
+	SkipSaveBuf(buf, length, sizeof(T));
+	return value;
+}
+
+template<typename T>
 inline T *WriteSaveBuf(uint8 *&buf, const T &value)
 {
 	T *p = (T*)buf;
 	*p = value;
 	SkipSaveBuf(buf, sizeof(T));
+	return p;
+}
+
+template<typename T>
+inline T *WriteSaveBuf(uint8 *&buf, uint32 &length, const T &value)
+{
+	T *p = (T*)buf;
+	*p = value;
+	SkipSaveBuf(buf, length, sizeof(T));
 	return p;
 }
 
@@ -439,12 +465,26 @@ inline T *WriteSaveBuf(uint8 *&buf, const T &value)
 	WriteSaveBuf(buf, d);\
 	WriteSaveBuf<uint32>(buf, size);
 
+#define WriteSaveHeaderWithLength(buf,len,a,b,c,d,size) \
+	WriteSaveBuf(buf, len, a);\
+	WriteSaveBuf(buf, len, b);\
+	WriteSaveBuf(buf, len, c);\
+	WriteSaveBuf(buf, len, d);\
+	WriteSaveBuf<uint32>(buf, len, size);
+
 #define CheckSaveHeader(buf,a,b,c,d,size)\
 	assert(ReadSaveBuf<char>(buf) == a);\
 	assert(ReadSaveBuf<char>(buf) == b);\
 	assert(ReadSaveBuf<char>(buf) == c);\
 	assert(ReadSaveBuf<char>(buf) == d);\
 	assert(ReadSaveBuf<uint32>(buf) == size);
+
+#define CheckSaveHeaderWithLength(buf,len,a,b,c,d,size)\
+	assert(ReadSaveBuf<char>(buf,len) == a);\
+	assert(ReadSaveBuf<char>(buf,len) == b);\
+	assert(ReadSaveBuf<char>(buf,len) == c);\
+	assert(ReadSaveBuf<char>(buf,len) == d);\
+	assert(ReadSaveBuf<uint32>(buf,len) == size);
 
 
 void cprintf(char*, ...);

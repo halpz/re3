@@ -46,7 +46,11 @@ CStreamingInfo CStreaming::ms_endRequestedList;
 int32 CStreaming::ms_oldSectorX;
 int32 CStreaming::ms_oldSectorY;
 int32 CStreaming::ms_streamingBufferSize;
+#ifndef ONE_THREAD_PER_CHANNEL
 int8 *CStreaming::ms_pStreamingBuffer[2];
+#else
+int8 *CStreaming::ms_pStreamingBuffer[4];
+#endif
 size_t CStreaming::ms_memoryUsed;
 CStreamingChannel CStreaming::ms_channel[2];
 int32 CStreaming::ms_channelError;
@@ -197,6 +201,10 @@ CStreaming::Init2(void)
 	ms_pStreamingBuffer[0] = (int8*)RwMallocAlign(ms_streamingBufferSize*CDSTREAM_SECTOR_SIZE, CDSTREAM_SECTOR_SIZE);
 	ms_streamingBufferSize /= 2;
 	ms_pStreamingBuffer[1] = ms_pStreamingBuffer[0] + ms_streamingBufferSize*CDSTREAM_SECTOR_SIZE;
+#ifdef ONE_THREAD_PER_CHANNEL
+	ms_pStreamingBuffer[2] = (int8*)RwMallocAlign(ms_streamingBufferSize*2*CDSTREAM_SECTOR_SIZE, CDSTREAM_SECTOR_SIZE);
+	ms_pStreamingBuffer[3] = ms_pStreamingBuffer[2] + ms_streamingBufferSize*CDSTREAM_SECTOR_SIZE;
+#endif
 	debug("Streaming buffer size is %d sectors", ms_streamingBufferSize);
 
 	// PC only, figure out how much memory we got
@@ -2196,6 +2204,110 @@ CStreaming::LoadRequestedModels(void)
 	}
 }
 
+
+// Let's load models first, then process it. Unfortunately processing models are still single-threaded.
+// Currently only supported on POSIX streamer.
+#ifdef ONE_THREAD_PER_CHANNEL
+void
+CStreaming::LoadAllRequestedModels(bool priority)
+{
+	static bool bInsideLoadAll = false;
+	int imgOffset, streamId, status;
+	int i;
+	uint32 posn, size;
+
+	if(bInsideLoadAll)
+		return;
+	bInsideLoadAll = true;
+
+	FlushChannels();
+	imgOffset = GetCdImageOffset(CdStreamGetLastPosn());
+
+	int streamIds[ARRAY_SIZE(ms_pStreamingBuffer)];
+	int streamSizes[ARRAY_SIZE(ms_pStreamingBuffer)];
+	int streamPoses[ARRAY_SIZE(ms_pStreamingBuffer)];
+	bool first = true;
+	int processI = 0;
+
+	while (true) {
+		// Enumerate files and start reading
+		for (int i=0; i<ARRAY_SIZE(ms_pStreamingBuffer); i++) {
+			if (!first && streamIds[i] != -1) {
+				processI = i;
+				continue;
+			}
+
+			if(ms_endRequestedList.m_prev != &ms_startRequestedList){
+				streamId = GetNextFileOnCd(0, priority);
+				if(streamId == -1){
+					streamIds[i] = -1;
+					break;
+				}
+
+				if (ms_aInfoForModel[streamId].GetCdPosnAndSize(posn, size)) {
+					streamIds[i] = -1;
+					if (size > (uint32)ms_streamingBufferSize) {
+						if (i + 1 == ARRAY_SIZE(ms_pStreamingBuffer))
+							continue;
+						else if (!first && streamIds[i+1] != -1)
+							continue;
+					} else {
+						if (i != 0 && streamIds[i-1] != -1 && streamSizes[i-1] > (uint32)ms_streamingBufferSize)
+							continue;
+					}
+					ms_aInfoForModel[streamId].RemoveFromList();
+					DecrementRef(streamId);
+
+					streamIds[i] = streamId;
+					streamSizes[i] = size;
+					streamPoses[i] = posn;
+					CdStreamRead(i, ms_pStreamingBuffer[i], imgOffset+posn, size);
+					processI = i;
+				} else {
+					ms_aInfoForModel[streamId].RemoveFromList();
+					DecrementRef(streamId);
+
+					ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_LOADED;
+					streamIds[i] = -1;
+				}
+			} else
+				streamIds[i] = -1;
+		}
+
+		first = false;
+
+		// Now process
+		if (streamIds[processI] == -1) 
+			break;
+
+		// Try again on error
+		while (CdStreamSync(processI) != STREAM_NONE) {
+			CdStreamRead(processI, ms_pStreamingBuffer[processI], imgOffset+streamPoses[processI], streamSizes[processI]);
+		}
+		ms_aInfoForModel[streamIds[processI]].m_loadState = STREAMSTATE_READING;
+		
+		MakeSpaceFor(streamSizes[processI] * CDSTREAM_SECTOR_SIZE);
+		ConvertBufferToObject(ms_pStreamingBuffer[processI], streamIds[processI]);
+		if(ms_aInfoForModel[streamIds[processI]].m_loadState == STREAMSTATE_STARTED)
+			FinishLoadingLargeFile(ms_pStreamingBuffer[processI], streamIds[processI]);
+
+		if(streamIds[processI] < STREAM_OFFSET_TXD){
+			CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(streamIds[processI]);
+			if(mi->IsSimple())
+				mi->m_alpha = 255;
+		}
+		streamIds[processI] = -1;
+	}
+
+	ms_bLoadingBigModel = false;
+	for(i = 0; i < 4; i++){
+		ms_channel[1].streamIds[i] = -1;
+		ms_channel[1].offsets[i] = -1;
+	}
+	ms_channel[1].state = CHANNELSTATE_IDLE;
+	bInsideLoadAll = false;
+}
+#else
 void
 CStreaming::LoadAllRequestedModels(bool priority)
 {
@@ -2256,6 +2368,7 @@ CStreaming::LoadAllRequestedModels(bool priority)
 	ms_channel[1].state = CHANNELSTATE_IDLE;
 	bInsideLoadAll = false;
 }
+#endif
 
 void
 CStreaming::FlushChannels(void)
@@ -2287,6 +2400,14 @@ CStreaming::FlushRequestList(void)
 		next = si->m_next;
 		RemoveModel(si - ms_aInfoForModel);
 	}
+#ifndef _WIN32
+	if(ms_channel[0].state == CHANNELSTATE_READING) {
+		flushStream[0] = 1;
+	}
+	if(ms_channel[1].state == CHANNELSTATE_READING) {
+		flushStream[1] = 1;
+	}
+#endif
 	FlushChannels();
 }
 
@@ -2815,10 +2936,15 @@ CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, size_t mem)
 void
 CStreaming::MakeSpaceFor(int32 size)
 {
-	// BUG: ms_memoryAvailable can be uninitialized
-	// the code still happens to work in that case because ms_memoryAvailable is unsigned
-	// but it's not nice....
-
+#ifdef FIX_BUGS
+#define MB (1024 * 1024)
+	if(ms_memoryAvailable == 0) {
+		extern size_t _dwMemAvailPhys;
+		ms_memoryAvailable = (_dwMemAvailPhys - 10 * MB) / 2;
+		if(ms_memoryAvailable < 65 * MB) ms_memoryAvailable = 65 * MB;
+	}
+#undef MB
+#endif
 	while(ms_memoryUsed >= ms_memoryAvailable - size)
 		if(!RemoveLeastUsedModel(STREAMFLAGS_20)){
 			DeleteRwObjectsBehindCamera(ms_memoryAvailable - size);

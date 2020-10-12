@@ -142,17 +142,17 @@ static size_t
 myfread(void *buf, size_t elt, size_t n, int fd)
 {
 	if(myfiles[fd].isText){
-		char *p;
+		unsigned char *p;
 		size_t i;
 		int c;
 
 		n *= elt;
-		p = (char*)buf;
+		p = (unsigned char*)buf;
 		for(i = 0; i < n; i++){
 			c = myfgetc(fd);
 			if(c == EOF)
 				break;
-			*p++ = c;
+			*p++ = (unsigned char)c;
 		}
 		return i / elt;
 	}
@@ -163,12 +163,12 @@ static size_t
 myfwrite(void *buf, size_t elt, size_t n, int fd)
 {
 	if(myfiles[fd].isText){
-		char *p;
+		unsigned char *p;
 		size_t i;
 		int c;
 
 		n *= elt;
-		p = (char*)buf;
+		p = (unsigned char*)buf;
 		for(i = 0; i < n; i++){
 			c = *p++;
 			myfputc(c, fd);

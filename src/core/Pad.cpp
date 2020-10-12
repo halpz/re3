@@ -3209,7 +3209,7 @@ int16 CPad::SniperModeLookLeftRight(void)
 
 	if ( Abs(axis) > Abs(dpad) ) {
 		if ( Abs(axis) > 35.0f ) {
-		  return (axis > 0.f ? axis - 35.f : axis + 35.f) * 1.3763441f;
+		  return (axis > 0.f ? axis - 35.f : axis + 35.f) * (128.f / (128 - 35));
 		} else {
 		  return 0;
 		}
@@ -3231,7 +3231,7 @@ int16 CPad::SniperModeLookUpDown(void)
 
 	if ( Abs(axis) > Abs(dpad) ) {
 	    if ( Abs(axis) > 35.0f ) {
-	      return (axis > 0.f ? axis - 35.f : axis + 35.f) * 1.3763441f;
+	      return (axis > 0.f ? axis - 35.f : axis + 35.f) * (128.f / (128 - 35));
 	    } else {
 	      return 0;
 	    }

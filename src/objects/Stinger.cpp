@@ -23,7 +23,7 @@ CStingerSegment::CStingerSegment()
 	m_fBuoyancy = GRAVITY * m_fMass * 0.1f;
 	bExplosionProof = true;
 	SetModelIndex(MI_PLC_STINGER);
-	ObjectCreatedBy = ESCALATOR_OBJECT;
+	ObjectCreatedBy = CONTROLLED_SUB_OBJECT;
 	NumOfStingerSegments++;
 }
 

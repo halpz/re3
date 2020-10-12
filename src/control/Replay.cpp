@@ -51,6 +51,7 @@
 #include "Camera.h"
 #include "Radar.h"
 #include "Fluff.h"
+#include "WaterCreatures.h"
 
 uint8 CReplay::Mode;
 CAddressInReplayBuffer CReplay::Record;
@@ -1300,7 +1301,7 @@ void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float ca
 	DMAudio.SetEffectsFadeVol(0);
 	DMAudio.SetMusicFadeVol(0);
 	CEscalators::Shutdown();
-	// TODO(MIAMI): CWaterCreatures::RemoveAll();
+	CWaterCreatures::RemoveAll();
 	int current;
 	for (current = 0; current < NUM_REPLAYBUFFERS; current++)
 		if (BufferStatus[current] == REPLAYBUFFER_RECORD)
