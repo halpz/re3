@@ -27,6 +27,7 @@
 #include "Replay.h"
 #include "WaterLevel.h"
 #include "SurfaceTable.h"
+#include "WaterCreatures.h"
 
 #define RwIm3DVertexSet_RGBA(vert, rgba) RwIm3DVertexSetRGBA(vert, rgba.red, rgba.green, rgba.blue, rgba.alpha) // (RwRGBAAssign(&(_dst)->color, &_src))
 
@@ -2821,8 +2822,7 @@ CWaterLevel::HandleSeaLifeForms()
 	}
 	else if ( (CTimer::GetTimeInMilliseconds() - timecounter) > 5000 )
 	{
-//TODO(MIAMI)
-//		if ( CWaterCreatures::IsSpaceForMoreWaterCreatures() )
+	if ( CWaterCreatures::IsSpaceForMoreWaterCreatures() )
 		{
 			for ( int32 i = 0; i < 3; i++ )
 			{
@@ -2838,14 +2838,12 @@ CWaterLevel::HandleSeaLifeForms()
 				vecPos.x += (fCos - fSin) * fAngle;
 				vecPos.y += (fSin + fCos) * fAngle;
 				
-				//TODO(MIAMI)
-				//CWaterCreatures::CreateOne(vecPos, 0xFFFFFFFF);
+				CWaterCreatures::CreateOne(vecPos, -1);
 			}
 		}
 	}
 	
-	//TODO(MIAMI)
-	//CWaterCreatures::UpdateAll();
+	CWaterCreatures::UpdateAll();
 }
 
 void

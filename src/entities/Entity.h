@@ -179,6 +179,7 @@ public:
 	void ModifyMatrixForTreeInWind(void);
 	void ModifyMatrixForBannerInWind(void);
 	void ProcessLightsForEntity(void);
+	void SetRwObjectAlpha(int32 alpha);
 
 	static void AddSteamsFromGround(CPtrList& list);
 };
