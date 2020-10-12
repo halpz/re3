@@ -76,6 +76,7 @@ public:
 	uint8 m_nIndexMap[NUM_PED_COMMENTS_BANKS][NUM_PED_COMMENTS_SLOTS];
 	uint8 m_nCommentsInBank[NUM_PED_COMMENTS_BANKS];
 	uint8 m_nActiveBank;
+	uint32 field_48C;
 
 	cPedComments()
 	{
@@ -93,7 +94,7 @@ public:
 	void Process();
 };
 
-VALIDATE_SIZE(cPedComments, 1164);
+VALIDATE_SIZE(cPedComments, 0x490);
 
 class CEntity;
 
@@ -286,8 +287,8 @@ public:
 	bool HasAirBrakes(int32 model) const; // done
 
 	void Initialise(); // done
-	void InitialisePoliceRadio();
-	void InitialisePoliceRadioZones();
+	void InitialisePoliceRadio(); //done
+	void InitialisePoliceRadioZones(); //done
 	void InterrogateAudioEntities(); // done
 	bool IsAudioInitialised() const; // done
 	bool IsMissionAudioSampleFinished(uint8 slot); // done
@@ -370,17 +371,17 @@ public:
 	void ProcessEscalators();                                  // done
 	void ProcessExtraSounds();                                 // done
 
-	int32 RandomDisplacement(uint32 seed) const;                                                                                      // 
+	int32 RandomDisplacement(uint32 seed) const;                                                                                      // done
 	void ReacquireDigitalHandle() const;                                                                                              // done
 	void ReleaseDigitalHandle() const;                                                                                                // done
 	void ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface1, uint8 surface2, float collisionPower, float intensity2); // done
 	void ReportCrime(int32 crime, const CVector *pos);                                                                                // done
 	void ResetAudioLogicTimers(uint32 timer);                                                                                         // done
-	void ResetPoliceRadio();                                                                                                          // 
-	void ResetTimers(uint32 time);                                                                                                    // 
+	void ResetPoliceRadio();                                                                                                          // done
+	void ResetTimers(uint32 time);                                                                                                    // done
 
 	void Service(); //done
-	void ServiceCollisions();
+	void ServiceCollisions(); //done
 	void ServicePoliceRadio();
 	void ServicePoliceRadioChannel(int32 wantedLevel);
 	void ServiceSoundEffects();
@@ -408,13 +409,13 @@ public:
 	void SetupPedComments(cPedParams *params, uint32 sound);
 	void SetupSuspectLastSeenReport();
 
-	void Terminate();
-	void TranslateEntity(Const CVector *v1, CVector *v2) const;
+	void Terminate(); //done
+	void TranslateEntity(Const CVector *v1, CVector *v2) const; //done
 
 	void UpdateReflections();
 	bool UsesReverseWarning(int32 model) const; //done
-	bool UsesSiren(int32 model) const;
-	bool UsesSirenSwitching(int32 model) const;
+	bool UsesSiren(cVehicleParams *params) const; //done
+	bool UsesSirenSwitching(cVehicleParams* params) const; //done
 
 	CVehicle *FindVehicleOfPlayer(); //done
 	void SetPedTalkingStatus(CPed *ped, uint8 status);

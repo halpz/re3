@@ -2027,33 +2027,17 @@ cAudioManager::ProcessVehicleHorn(cVehicleParams *params)
 }
 
 bool
-cAudioManager::UsesSiren(int32 model) const
+cAudioManager::UsesSiren(cVehicleParams *params) const
 {
-	switch (model) {
-	case FIRETRUK:
-	case AMBULAN:
-	case FBICAR:
-	case POLICE:
-	case ENFORCER:
-	case PREDATOR:
-		return true;
-	default:
-		return false;
-	}
+	params->m_pVehicle->UsesSiren();
 }
 
 bool
-cAudioManager::UsesSirenSwitching(int32 model) const
+cAudioManager::UsesSirenSwitching(cVehicleParams *params) const
 {
-	switch (model) {
-	case AMBULAN:
-	case POLICE:
-	case ENFORCER:
-	case PREDATOR:
-		return true;
-	default:
+	if (params->m_nIndex == FIRETRUK || params->m_nIndex == MRWHOOP)
 		return false;
-	}
+	return params->m_pVehicle->UsesSiren();
 }
 
 bool

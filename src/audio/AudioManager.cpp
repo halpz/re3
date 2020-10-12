@@ -275,6 +275,7 @@ cAudioManager::ResetTimers(uint32 time)
 		SampleManager.SetEffectsFadeVolume(0);
 		SampleManager.SetMusicFadeVolume(0);
 		MusicManager.ResetMusicAfterReload();
+		m_bIsPlayerShutUp = false;
 #ifdef AUDIO_OAL
 		SampleManager.Service();
 #endif

@@ -374,7 +374,7 @@ cMusicManager::Service()
 		field_399A = true;
 		if (!field_3999 && !AudioManager.m_nUserPause && AudioManager.m_nPreviousUserPause)
 			field_3999 = true;
-		if (AudioManager.field_5554 % 4 == 0) {
+		if (AudioManager.m_FrameCounter % 4 == 0) {
 			gNumRetunePresses = 0;
 			gRetuneCounter = 0;
 			field_2 = false;
@@ -422,7 +422,7 @@ cMusicManager::ServiceFrontEndMode()
 		m_nPlayingTrack = NO_TRACK;
 	}
 
-	if (AudioManager.field_5554 % 4 != 0) return;
+	if (AudioManager.m_FrameCounter % 4 != 0) return;
 
 	if (!field_398F && !field_3995) {
 		m_nStreamedTrack = m_nFrontendTrack;
@@ -893,7 +893,7 @@ cMusicManager::ServiceTrack(CVehicle *veh, CPed *ped)
 	{
 		field_398F = true;
 		SampleManager.SetStreamedVolumeAndPan(0, 63, 0, 0);
-		if (!(AudioManager.field_5554 & 1)) {
+		if (!(AudioManager.m_FrameCounter & 1)) {
 			if (field_3995 || !SampleManager.IsStreamPlaying(0)) {
 				bRadioStatsRecorded2 = false;
 				if (SampleManager.IsStreamPlaying(0)) {
