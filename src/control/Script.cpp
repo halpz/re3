@@ -1827,7 +1827,7 @@ void CMissionCleanup::Process()
 	CWorld::Players[0].m_pPed->m_nDrunkCountdown = 0;
 	CPad::GetPad(0)->SetDrunkInputDelay(0);
 	CWorld::Players[0].m_bDriveByAllowed = true;
-	// DMAudio::ShutUpPlayerTalking(0); // TODO(Miami)
+	DMAudio.ShutUpPlayerTalking(0);
 	CVehicle::bDisableRemoteDetonation = false;
 	CVehicle::bDisableRemoteDetonationOnContact = false;
 	CGameLogic::ClearShortCut();
@@ -6372,7 +6372,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 	}
 	case COMMAND_ADD_EXPLOSION:
 		CollectParameters(&m_nIp, 4);
-		CExplosion::AddExplosion(nil, nil, (eExplosionType)ScriptParams[3], *(CVector*)&ScriptParams[0], 0);
+		CExplosion::AddExplosion(nil, nil, (eExplosionType)ScriptParams[3], *(CVector*)&ScriptParams[0], 0, true);
 		return 0;
 
 	case COMMAND_IS_CAR_UPRIGHT:
@@ -7042,7 +7042,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		CCoronas::RegisterCorona((uintptr)this + m_nIp, ScriptParams[6], ScriptParams[7], ScriptParams[8],
-			255, pos, *(float*)&ScriptParams[3], 150.0f, ScriptParams[4], ScriptParams[5], 1, 0, 0, 0.0f); // TODO(MIAMI): more params
+			255, pos, *(float*)&ScriptParams[3], 150.0f, ScriptParams[4], ScriptParams[5], 1, 0, 0, 0.0f);
 		return 0;
 	}
 	case COMMAND_DRAW_LIGHT:
@@ -7497,7 +7497,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		CVector pos = *(CVector*)&ScriptParams[0];
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		CPathNode* pNode = &ThePaths.m_pathNodes[ThePaths.FindNodeClosestToCoors(pos, 1, 999999.9f)];
+		CPathNode* pNode = &ThePaths.m_pathNodes[ThePaths.FindNodeClosestToCoors(pos, 1, 999999.9f, true)];
 		*(CVector*)&ScriptParams[0] = pNode->GetPosition();
 		StoreParameters(&m_nIp, 3);
 		return 0;
@@ -7508,8 +7508,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		CVector pos = *(CVector*)&ScriptParams[0];
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		CPathNode* pNode = &ThePaths.m_pathNodes[ThePaths.FindNodeClosestToCoors(pos, 0, 999999.9f)];
-		*(CVector*)&ScriptParams[0] = pNode->GetPosition();
+		*(CVector*)&ScriptParams[0] = ThePaths.FindNodeCoorsForScript(ThePaths.FindNodeClosestToCoors(pos, 0, 999999.9f, true, true));
 		StoreParameters(&m_nIp, 3);
 		return 0;
 	}
@@ -8978,7 +8977,6 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CollectParameters(&m_nIp, 1);
 		char zone[KEY_LENGTH_IN_SCRIPT];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, zone);
-// TODO(MIAMI): just getting this to compile with new argument
 		int zone_id = CTheZones::FindZoneByLabelAndReturnIndex(zone, ZONE_DEFAULT);
 		if (zone_id != -1)
 			m_nIp += KEY_LENGTH_IN_SCRIPT;
@@ -10344,8 +10342,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		int node = ThePaths.FindNodeClosestToCoors(pos, 0, 999999.9f, true, true);
-		// TODO(MIAMI): replace GetPosition with FindNodeCoorsForScript
-		*(CVector*)&ScriptParams[0] = ThePaths.m_pathNodes[node].GetPosition();
+		*(CVector*)&ScriptParams[0] = ThePaths.FindNodeCoorsForScript(node);
 		*(float*)&ScriptParams[3] = ThePaths.FindNodeOrientationForCarPlacement(node);
 		StoreParameters(&m_nIp, 4);
 		return 0;
@@ -11204,7 +11201,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		return 0;
 	*/
 	case COMMAND_ARE_ANY_CAR_CHEATS_ACTIVATED:
-		UpdateCompareFlag(CVehicle::bAllDodosCheat || CVehicle::bCheat3 || CVehicle::bHoverCheat || CVehicle::bCheat8); // TODO(MIAMI): more cheats!
+		UpdateCompareFlag(CVehicle::bAllDodosCheat || CVehicle::bCheat3 || CVehicle::bHoverCheat || CVehicle::bCheat8 || CVehicle::bCheat9);
 		return 0;
 	case COMMAND_SET_CHAR_SUFFERS_CRITICAL_HITS:
 	{
@@ -12284,10 +12281,20 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_GET_CLOSEST_STRAIGHT_ROAD:
 	{
 		CollectParameters(&m_nIp, 5);
-		debug("GET_CLOSEST_STRAIGHT_ROAD not implemented!\n");
-		for (int i = 0; i < 7; i++)
-			ScriptParams[i] = 0;
-		StoreParameters(&m_nIp, 7); // TODO(MIAMI)
+		int node1, node2;
+		float angle;
+		ThePaths.FindNodePairClosestToCoors(*(CVector*)&ScriptParams[0], PATH_CAR, &node1, &node2, &angle,
+			*(float*)&ScriptParams[3], *(float*)&ScriptParams[4], true, true);
+		if (node1 == -1) {
+			for (int i = 0; i < 7; i++)
+				ScriptParams[i] = 0;
+		}
+		else {
+			*(CVector*)&ScriptParams[0] = ThePaths.FindNodeCoorsForScript(node1);
+			*(CVector*)&ScriptParams[3] = ThePaths.FindNodeCoorsForScript(node2);
+			*(float*)&ScriptParams[6] = angle;
+		}
+		StoreParameters(&m_nIp, 7);
 		return 0;
 	}
 	case COMMAND_SET_CAR_FORWARD_SPEED:
@@ -12461,9 +12468,11 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_GET_NTH_CLOSEST_CAR_NODE:
 	{
 		CollectParameters(&m_nIp, 4);
-		debug("GET_NTH_CLOSEST_CAR_NODE is not implemented\n"); // TODO(MIAMI)
-		ScriptParams[0] = 0;
-		StoreParameters(&m_nIp, 1);
+		CVector pos = *(CVector*)&ScriptParams[0];
+		if (pos.z <= MAP_Z_LOW_LIMIT)
+			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+		*(CVector*)&ScriptParams[0] = ThePaths.FindNodeCoorsForScript(ThePaths.FindNthNodeClosestToCoors(pos, 0, 999999.9f, true, true, ScriptParams[3] - 1));
+		StoreParameters(&m_nIp, 3);
 		return 0;
 	}
 	//case COMMAND_GET_NTH_CLOSEST_CHAR_NODE:
@@ -13252,7 +13261,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_SET_TONIGHTS_EVENT:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("skipping SET_TONIGHTS_EVENT\n"); // TODO(MIAMI)
+		CScrollBar::TonightsEvent = ScriptParams[0];
 		return 0;
 	}
 	case COMMAND_CLEAR_CHAR_LAST_DAMAGE_ENTITY:
@@ -13416,9 +13425,9 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
 		script_assert(pPed);
 		if (pPed->bInVehicle) {
-			if (pPed->GetWeapon(5).m_eWeaponType) { // TODO(MIAMI): enum
-				if (pPed->GetWeapon(5).m_nAmmoTotal < ScriptParams[1])
-					pPed->SetAmmo(pPed->GetWeapon(5).m_eWeaponType, ScriptParams[1]);
+			if (pPed->GetWeapon(WEAPONSLOT_SUBMACHINEGUN).m_eWeaponType) {
+				if (pPed->GetWeapon(WEAPONSLOT_SUBMACHINEGUN).m_nAmmoTotal < ScriptParams[1])
+					pPed->SetAmmo(pPed->GetWeapon(WEAPONSLOT_SUBMACHINEGUN).m_eWeaponType, ScriptParams[1]);
 			}
 			else {
 				pPed->GiveWeapon(WEAPONTYPE_UZI, ScriptParams[1], true);
@@ -13440,7 +13449,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_ADD_EXPLOSION_NO_SOUND:
 	{
 		CollectParameters(&m_nIp, 4);
-		CExplosion::AddExplosion(nil, nil, (eExplosionType)ScriptParams[3], *(CVector*)&ScriptParams[0], 0); // TODO(MIAMI): last arg is 0
+		CExplosion::AddExplosion(nil, nil, (eExplosionType)ScriptParams[3], *(CVector*)&ScriptParams[0], 0, false);
 		return 0;
 	}
 	case COMMAND_SET_OBJECT_AREA_VISIBLE:
