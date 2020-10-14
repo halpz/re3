@@ -14,6 +14,7 @@
 #include "AnimBlendClumpData.h"
 #include "AnimBlendAssociation.h"
 #include "Fire.h"
+#include "Glass.h"
 #include "DMAudio.h"
 #include "General.h"
 #include "SurfaceTable.h"
@@ -5865,7 +5866,7 @@ CPed::FightStrike(CVector &touchedNodePos, bool fightWithWeapon)
 	if (m_fightState == FIGHTSTATE_JUST_ATTACKED)
 		return false;
 	
-	// TODO(Miami): BreakGlassPhysically
+	CGlass::BreakGlassPhysically(touchedNodePos, radius);
 
 	for (int i = 0; i < m_numNearPeds; i++) {
 		int8 pedFound = 0;
