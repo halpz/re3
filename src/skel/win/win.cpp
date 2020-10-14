@@ -189,7 +189,7 @@ const char *_psGetUserFilesFolder()
 							&KeycbData) == ERROR_SUCCESS )
 		{
 			RegCloseKey(hKey);
-			strcat(szUserFiles, "\\GTA3 User Files");
+			strcat(szUserFiles, "\\GTA Vice City User Files");
 			_psCreateFolder(szUserFiles);
 			return szUserFiles;
 		}	
@@ -650,10 +650,6 @@ psInitialize(void)
 	C_PcSave::SetSaveDirectory(_psGetUserFilesFolder());
 	
 	InitialiseLanguage();
-#ifndef GTA3_1_1_PATCH
-	FrontEndMenuManager.LoadSettings();
-#endif
-
 #endif
 	
 	gGameState = GS_START_UP;
@@ -688,7 +684,7 @@ psInitialize(void)
 	}
 	else if ( verInfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS )
 	{
-		if ( verInfo.dwMajorVersion > 4 || verInfo.dwMajorVersion == 4 && verInfo.dwMinorVersion == 1 )
+		if ( verInfo.dwMajorVersion > 4 || verInfo.dwMajorVersion == 4 && verInfo.dwMinorVersion != 0 )
 		{
 			debug("Operating System is Win98\n");
 			_dwOperatingSystemVersion = OS_WIN98;
@@ -701,11 +697,7 @@ psInitialize(void)
 	}
 
 #ifndef PS2_MENU
-
-#ifdef GTA3_1_1_PATCH
 	FrontEndMenuManager.LoadSettings();
-#endif
-
 #endif
 
 	dwDXVersion = GetDXVersion();
@@ -945,8 +937,7 @@ void HandleGraphEvent(void)
 
 /*
  *****************************************************************************
- */
- 
+ */ 
 LRESULT CALLBACK
 MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -1016,10 +1007,17 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 			RECT				rect;
 
 			/* redraw window */
+#ifndef MASTER
 			if (RwInitialised && (gGameState == GS_PLAYING_GAME || gGameState == GS_ANIMVIEWER))
 			{
 				RsEventHandler((gGameState == GS_PLAYING_GAME ? rsIDLE : rsANIMVIEWER), (void *)TRUE);
 			}
+#else
+			if (RwInitialised && gGameState == GS_PLAYING_GAME)
+			{
+				RsEventHandler(rsIDLE, (void *)TRUE);
+			}
+#endif
 
 			/* Manually resize window */
 			rect.left = rect.top = 0;
@@ -1327,7 +1325,7 @@ InitApplication(HANDLE instance)
 	windowClass.cbClsExtra = 0;
 	windowClass.cbWndExtra = 0;
 	windowClass.hInstance = (HINSTANCE)instance;
-	windowClass.hIcon = nil;
+	windowClass.hIcon = LoadIcon((HINSTANCE)instance, (LPCSTR)IDI_MAIN_ICON);
 	windowClass.hCursor = LoadCursor(nil, IDC_ARROW);
 	windowClass.hbrBackground = nil;
 	windowClass.lpszMenuName = NULL;
@@ -1382,17 +1380,17 @@ UINT GetBestRefreshRate(UINT width, UINT height, UINT depth)
 #endif	
 		if ( mode.Width == width && mode.Height == height && mode.Format == format )
 		{
-			if ( mode.RefreshRate == 0 )
+			if ( mode.RefreshRate == 0 ) {
+				d3d->Release();
 				return 0;
+			}
 
 			if ( mode.RefreshRate < refreshRate && mode.RefreshRate >= 60 )
 				refreshRate = mode.RefreshRate;
 		}
 	}
 	
-#ifdef FIX_BUGS
 	d3d->Release();
-#endif
 	
 	if ( refreshRate == -1 )
 		return -1;
@@ -2255,6 +2253,8 @@ WinMain(HINSTANCE instance,
 
 						if ( startupDeactivate || ControlsManager.GetJoyButtonJustDown() != 0 )
 							++gGameState;
+						else if ( CPad::GetPad(0)->NewState.CheckForInput() )
+							++gGameState;
 						else if ( CPad::GetPad(0)->GetLeftMouseJustDown() )
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetEnterJustDown() )
@@ -2292,6 +2292,8 @@ WinMain(HINSTANCE instance,
 
 						if ( startupDeactivate || ControlsManager.GetJoyButtonJustDown() != 0 )
 							++gGameState;
+						else if ( CPad::GetPad(0)->NewState.CheckForInput() )
+							++gGameState;
 						else if ( CPad::GetPad(0)->GetLeftMouseJustDown() )
 							++gGameState;
 						else if ( CPad::GetPad(0)->GetEnterJustDown() )
@@ -2328,6 +2330,7 @@ WinMain(HINSTANCE instance,
 						printf("Into TheGame!!!\n");
 #else				
 						LoadingScreen(nil, nil, "loadsc0");
+						// LoadingScreen(nil, nil, "loadsc0"); // duplicate
 #endif
 						if ( !CGame::InitialiseOnceAfterRW() )
 							RsGlobal.quit = TRUE;
@@ -2345,6 +2348,7 @@ WinMain(HINSTANCE instance,
 					case GS_INIT_FRONTEND:
 					{
 						LoadingScreen(nil, nil, "loadsc0");
+						// LoadingScreen(nil, nil, "loadsc0"); // duplicate
 						
 						FrontEndMenuManager.m_bGameNotLoaded = true;
 						
