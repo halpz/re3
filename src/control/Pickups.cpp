@@ -76,11 +76,11 @@ CPickup::GiveUsAPickUpObject(int32 handle)
 {
 	CObject *object;
 
-	if (handle <= 0) object = new CObject(m_eModelIndex, false);
-	else {
+	if (handle >= 0) {
 		CPools::MakeSureSlotInObjectPoolIsEmpty(handle);
-		object = new(handle) CObject(m_eModelIndex, false);
-	}
+		object = new (handle) CObject(m_eModelIndex, false);
+	} else
+		object = new CObject(m_eModelIndex, false);
 
 	if (object == nil) return nil;
 	object->ObjectCreatedBy = MISSION_OBJECT;
