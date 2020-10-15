@@ -420,9 +420,9 @@ void CBulletTraces::AddTrace(CVector* start, CVector* end, float thicknes, uint3
 		float endProjUp = DotProduct(TheCamera.GetUp(), *end - TheCamera.GetPosition());
 		float distUp = (endProjUp - startProjUp) * fStartDistFwd + startProjUp;
 
-		float startProjRight = DotProduct(TheCamera.GetRight(), *end - TheCamera.GetPosition());
 		float startProjRight = DotProduct(TheCamera.GetRight(), *start - TheCamera.GetPosition());
-		float distRight = (startProjRight - startProjRight) * fStartDistFwd + startProjRight;
+		float endProjRight = DotProduct(TheCamera.GetRight(), *end - TheCamera.GetPosition());
+		float distRight = (endProjRight - startProjRight) * fStartDistFwd + startProjRight;
 
 		float dist = Sqrt(SQR(distUp) + SQR(distRight));
 		if (dist < 2.0f) {
