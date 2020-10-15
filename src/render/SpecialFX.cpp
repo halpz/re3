@@ -84,8 +84,8 @@ CSpecialFX::Init(void)
 	StreakIndexList[11] = 3;
 
 	CMotionBlurStreaks::Init();
-	CShinyTexts::Init();
 	CBrightLights::Init();
+	CShinyTexts::Init();
 	CMoneyMessages::Init();
 	C3dMarkers::Init();
 	CSpecialFX::bSnapShotActive = false;
@@ -124,7 +124,7 @@ CSpecialFX::AddWeaponStreak(int type)
 			end = matrix * CVector(0.096f, -0.0175f, 1.096f);
 			break;
 		default:
-			break;
+			return;
 		}
 		CMotionBlurStreaks::RegisterStreak((uintptr)FindPlayerPed()->m_pWeaponModel, 100, 100, 100, start, end);
 	}
@@ -235,7 +235,7 @@ CSpecialFX::Render2DFXs(void)
 		} else {
 			CTimer::SetTimeScale(0.0f); //in andro it's 0.00001
 			if (CSpecialFX::SnapShotFrames < 10) {
-				int32 tmp = (1 - CSpecialFX::SnapShotFrames / 10) * 255 * 0.65f;
+				int32 tmp = (255 - 255 * CSpecialFX::SnapShotFrames / 10) * 0.65f;
 				RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
 				RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
 				CSprite2d::Draw2DPolygon(0.0f, 0.0f, SCREEN_WIDTH, 0.0f, 0.0f, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT, CRGBA(tmp, tmp, tmp, tmp));
@@ -329,7 +329,7 @@ CMotionBlurStreaks::RegisterStreak(uintptr id, uint8 r, uint8 g, uint8 b, CVecto
 	}
 
 	// Find free slot
-	for(i = 0; aStreaks[i].m_id != nil ; i++)
+	for(i = 0; aStreaks[i].m_id != 0 ; i++)
 		if(i == NUMMBLURSTREAKS-1)
 			return;
 
@@ -402,8 +402,8 @@ void CBulletTraces::AddTrace(CVector* start, CVector* end, float thicknes, uint3
 	for (int i = 0; nextSlot < NUMBULLETTRACES && aTraces[i].m_bInUse; i++)
 		nextSlot++;
 	if (nextSlot < 16) {
-		aTraces[nextSlot].m_vecCurrentPos = *start;
-		aTraces[nextSlot].m_vecTargetPos = *end;
+		aTraces[nextSlot].m_vecStartPos = *start;
+		aTraces[nextSlot].m_vecEndPos = *end;
 		aTraces[nextSlot].m_bInUse = true;
 		aTraces[nextSlot].m_nCreationTime = CTimer::GetTimeInMilliseconds();
 		aTraces[nextSlot].m_fVisibility = visibility;
@@ -411,19 +411,22 @@ void CBulletTraces::AddTrace(CVector* start, CVector* end, float thicknes, uint3
 		aTraces[nextSlot].m_nLifeTime = modifiedLifeTime;
 	}
 
-	float upDotProd = DotProduct(TheCamera.GetUp(), *start - TheCamera.GetPosition());
-	float forwardDotProd = DotProduct(TheCamera.GetForward(), *start - TheCamera.GetPosition());
-	float upDotProdEnd = DotProduct(TheCamera.GetUp(), *end - TheCamera.GetPosition());
-	float forwardDotProdEnd = DotProduct(TheCamera.GetForward(), *end - TheCamera.GetPosition());
-	if (forwardDotProd*forwardDotProdEnd < 0.0f) {
-		float tmp = Abs(forwardDotProd) / (Abs(forwardDotProd) + Abs(forwardDotProdEnd));
-		float tmp2 = (upDotProdEnd - upDotProd) * tmp + upDotProd;
-		float dotProdEndRight = DotProduct(TheCamera.GetRight(), *end - TheCamera.GetPosition());
-		float dotProdRight = DotProduct(TheCamera.GetRight(), *start - TheCamera.GetPosition());
-		float tmp3 = (dotProdEndRight - dotProdRight) * tmp + dotProdRight;
-		float dist = Sqrt(SQR(tmp2) + SQR(tmp3));
+	float startProjFwd = DotProduct(TheCamera.GetForward(), *start - TheCamera.GetPosition());
+	float endProjFwd = DotProduct(TheCamera.GetForward(), *end - TheCamera.GetPosition());
+	if (startProjFwd * endProjFwd < 0.0f) { //if one of point behind us and second before us
+		float fStartDistFwd = Abs(startProjFwd) / (Abs(startProjFwd) + Abs(endProjFwd));
+
+		float startProjUp = DotProduct(TheCamera.GetUp(), *start - TheCamera.GetPosition());
+		float endProjUp = DotProduct(TheCamera.GetUp(), *end - TheCamera.GetPosition());
+		float distUp = (endProjUp - startProjUp) * fStartDistFwd + startProjUp;
+
+		float startProjRight = DotProduct(TheCamera.GetRight(), *end - TheCamera.GetPosition());
+		float startProjRight = DotProduct(TheCamera.GetRight(), *start - TheCamera.GetPosition());
+		float distRight = (startProjRight - startProjRight) * fStartDistFwd + startProjRight;
+
+		float dist = Sqrt(SQR(distUp) + SQR(distRight));
 		if (dist < 2.0f) {
-			if(tmp3 < 0.0f)
+			if(distRight < 0.0f)
 				DMAudio.PlayFrontEndSound(SOUND_BULLETTRACE_2, 127 * (1.0f - dist * 0.5f));
 			else
 				DMAudio.PlayFrontEndSound(SOUND_BULLETTRACE_1, 127 * (1.0f - dist * 0.5f));
@@ -443,10 +446,8 @@ void CBulletTraces::AddTrace(CVector* start, CVector* end, int32 weaponType, cla
 			|| camMode == CCam::MODE_CAMERA
 			|| camMode == CCam::MODE_SNIPER
 			|| camMode == CCam::MODE_M16_1STPERSON_RUNABOUT
-#ifdef MOBILE_IMPROVEMENTS
 			|| camMode == CCam::MODE_ROCKETLAUNCHER
 			|| camMode == CCam::MODE_ROCKETLAUNCHER_RUNABOUT
-#endif
 			|| camMode == CCam::MODE_SNIPER_RUNABOUT
 			|| camMode == CCam::MODE_HELICANNON_1STPERSON) {
 
@@ -489,109 +490,130 @@ void CBulletTraces::Render(void)
 		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpSmokeTrailTexture));
 
-		float nTimeOfLiving = CTimer::GetTimeInMilliseconds() - aTraces[i].m_nCreationTime;
-		
-		float traceThicknes = aTraces[i].m_fThicknes * nTimeOfLiving / aTraces[i].m_nLifeTime;
-		CVector vecOffset = aTraces[i].m_vecTargetPos - aTraces[i].m_vecCurrentPos;
-		vecOffset.Normalise();
-		vecOffset *= traceThicknes;
-		uint8 nAlphaValue = aTraces[i].m_fVisibility * (aTraces[i].m_nLifeTime - nTimeOfLiving) / aTraces[i].m_nLifeTime;
+		float timeAlive = CTimer::GetTimeInMilliseconds() - aTraces[i].m_nCreationTime;
 
-		CVector currentPos = aTraces[i].m_vecCurrentPos;
-		CVector targetPos = aTraces[i].m_vecTargetPos;
-		float dotProdCur = DotProduct(currentPos - TheCamera.GetPosition(), TheCamera.GetForward()) - 0.7f;
-		float dotProdTar = DotProduct(targetPos - TheCamera.GetPosition(), TheCamera.GetForward()) - 0.7f;
-		if (dotProdCur >= 0.0f || dotProdTar >= 0.0f) {
-			if (dotProdCur < 0.0f) {
-				float absDotProdCur = Abs(dotProdCur);
-				float absDotProdTar = Abs(dotProdTar);
-				currentPos = (absDotProdTar * currentPos + absDotProdCur * targetPos) / (absDotProdCur + absDotProdTar);
-			} else if (dotProdTar < 0.0f){
-				float absDotProdCur = Abs(dotProdCur);
-				float absDotProdTar = Abs(dotProdTar);
-				targetPos = (absDotProdTar * currentPos + absDotProdCur * targetPos) / (absDotProdCur + absDotProdTar);
-			}
-			RwIm3DVertexSetV(&TraceVertices[5], 10.0f);
-			RwIm3DVertexSetV(&TraceVertices[6], 10.0f);
-			RwIm3DVertexSetV(&TraceVertices[7], 10.0f);
-			RwIm3DVertexSetV(&TraceVertices[8], 10.0f);
-			RwIm3DVertexSetV(&TraceVertices[9], 10.0f);
+		float traceThicknes = aTraces[i].m_fThicknes * timeAlive / aTraces[i].m_nLifeTime;
+		CVector horizontalOffset = aTraces[i].m_vecEndPos - aTraces[i].m_vecStartPos;
+		horizontalOffset.Normalise();
+		horizontalOffset *= traceThicknes;
 
-			RwIm3DVertexSetRGBA(&TraceVertices[0], 255, 255, 255, nAlphaValue);
-			RwIm3DVertexSetRGBA(&TraceVertices[1], 255, 255, 255, nAlphaValue);
-			RwIm3DVertexSetRGBA(&TraceVertices[2], 255, 255, 255, nAlphaValue);
-			RwIm3DVertexSetRGBA(&TraceVertices[3], 255, 255, 255, nAlphaValue);
-			RwIm3DVertexSetRGBA(&TraceVertices[4], 255, 255, 255, nAlphaValue);
-			RwIm3DVertexSetRGBA(&TraceVertices[5], 255, 255, 255, nAlphaValue);
-			RwIm3DVertexSetRGBA(&TraceVertices[6], 255, 255, 255, nAlphaValue);
-			RwIm3DVertexSetRGBA(&TraceVertices[7], 255, 255, 255, nAlphaValue);
-			RwIm3DVertexSetRGBA(&TraceVertices[8], 255, 255, 255, nAlphaValue);
-			RwIm3DVertexSetRGBA(&TraceVertices[9], 255, 255, 255, nAlphaValue);
+		//then closer trace to die then it more transparent
+		uint8 nAlphaValue = aTraces[i].m_fVisibility * (aTraces[i].m_nLifeTime - timeAlive) / aTraces[i].m_nLifeTime;
 
-			CVector currentPos2 = (7.0f * currentPos + targetPos) / 8;
-			CVector targetPos2 = (7.0f * targetPos + currentPos) / 8;
-			RwIm3DVertexSetPos(&TraceVertices[0], currentPos2.x, currentPos2.y, currentPos2.z);
-			RwIm3DVertexSetPos(&TraceVertices[1], currentPos2.x, currentPos2.y, currentPos2.z + traceThicknes);
-			RwIm3DVertexSetPos(&TraceVertices[2], currentPos2.x + vecOffset.y, currentPos2.y - vecOffset.x, currentPos2.z);
-			RwIm3DVertexSetPos(&TraceVertices[3], currentPos2.x, currentPos2.y, currentPos2.z - traceThicknes);
-			RwIm3DVertexSetPos(&TraceVertices[4], currentPos2.x - vecOffset.y, currentPos2.y - vecOffset.y, currentPos2.z);
+		CVector start = aTraces[i].m_vecStartPos;
+		CVector end = aTraces[i].m_vecEndPos;
+		float startProj = DotProduct(start - TheCamera.GetPosition(), TheCamera.GetForward()) - 0.7f;
+		float endProj = DotProduct(end - TheCamera.GetPosition(), TheCamera.GetForward()) - 0.7f;
+		if (startProj < 0.0f && endProj < 0.0f) //we dont need render trace behind us
+			continue;
 
-			RwIm3DVertexSetPos(&TraceVertices[5], targetPos2.x, targetPos2.y, targetPos2.z);
-			RwIm3DVertexSetPos(&TraceVertices[6], targetPos2.x, targetPos2.y, targetPos2.z + traceThicknes);
-			RwIm3DVertexSetPos(&TraceVertices[7], targetPos2.x + vecOffset.y, targetPos2.y - vecOffset.x, targetPos2.z);
-			RwIm3DVertexSetPos(&TraceVertices[8], targetPos2.x, targetPos2.y, targetPos2.z - traceThicknes);
-			RwIm3DVertexSetPos(&TraceVertices[9], targetPos2.x - vecOffset.y, targetPos2.y - vecOffset.y, targetPos2.z);
+		if (startProj < 0.0f) { //if strat behind us move it closer
+			float absStartProj = Abs(startProj);
+			float absEndProj = Abs(endProj);
+			start = (absEndProj * start + absStartProj * end) / (absStartProj + absEndProj);
+		} else if (endProj < 0.0f) {
+			float absStartProj = Abs(startProj);
+			float absEndProj = Abs(endProj);
+			end = (absEndProj * start + absStartProj * end) / (absStartProj + absEndProj);
+		}
 
-			if (RwIm3DTransform(TraceVertices, ARRAY_SIZE(TraceVertices), nil, 1)) {
-				RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TraceIndexList, ARRAY_SIZE(TraceIndexList));
-				RwIm3DEnd();
-			}
+		//we divide trace at three parts
+		CVector start2 = (7.0f * start + end) / 8;
+		CVector end2 = (7.0f * end + start) / 8;
 
+		RwIm3DVertexSetV(&TraceVertices[5], 10.0f);
+		RwIm3DVertexSetV(&TraceVertices[6], 10.0f);
+		RwIm3DVertexSetV(&TraceVertices[7], 10.0f);
+		RwIm3DVertexSetV(&TraceVertices[8], 10.0f);
+		RwIm3DVertexSetV(&TraceVertices[9], 10.0f);
 
-			RwIm3DVertexSetV(&TraceVertices[5], 2.0f);
-			RwIm3DVertexSetV(&TraceVertices[6], 2.0f);
-			RwIm3DVertexSetV(&TraceVertices[7], 2.0f);
-			RwIm3DVertexSetV(&TraceVertices[8], 2.0f);
-			RwIm3DVertexSetV(&TraceVertices[9], 2.0f);
-			RwIm3DVertexSetRGBA(&TraceVertices[0], 255, 255, 255, 0);
-			RwIm3DVertexSetRGBA(&TraceVertices[1], 255, 255, 255, 0);
-			RwIm3DVertexSetRGBA(&TraceVertices[2], 255, 255, 255, 0);
-			RwIm3DVertexSetRGBA(&TraceVertices[3], 255, 255, 255, 0);
-			RwIm3DVertexSetRGBA(&TraceVertices[4], 255, 255, 255, 0);
+		RwIm3DVertexSetRGBA(&TraceVertices[0], 255, 255, 255, nAlphaValue);
+		RwIm3DVertexSetRGBA(&TraceVertices[1], 255, 255, 255, nAlphaValue);
+		RwIm3DVertexSetRGBA(&TraceVertices[2], 255, 255, 255, nAlphaValue);
+		RwIm3DVertexSetRGBA(&TraceVertices[3], 255, 255, 255, nAlphaValue);
+		RwIm3DVertexSetRGBA(&TraceVertices[4], 255, 255, 255, nAlphaValue);
+		RwIm3DVertexSetRGBA(&TraceVertices[5], 255, 255, 255, nAlphaValue);
+		RwIm3DVertexSetRGBA(&TraceVertices[6], 255, 255, 255, nAlphaValue);
+		RwIm3DVertexSetRGBA(&TraceVertices[7], 255, 255, 255, nAlphaValue);
+		RwIm3DVertexSetRGBA(&TraceVertices[8], 255, 255, 255, nAlphaValue);
+		RwIm3DVertexSetRGBA(&TraceVertices[9], 255, 255, 255, nAlphaValue);
+		//two points in center
+		RwIm3DVertexSetPos(&TraceVertices[0], start2.x, start2.y, start2.z);
+		RwIm3DVertexSetPos(&TraceVertices[5], end2.x, end2.y, end2.z);
+		//vetrical planes
+		RwIm3DVertexSetPos(&TraceVertices[1], start2.x, start2.y, start2.z + traceThicknes);
+		RwIm3DVertexSetPos(&TraceVertices[3], start2.x, start2.y, start2.z - traceThicknes);
+		RwIm3DVertexSetPos(&TraceVertices[6], end2.x, end2.y, end2.z + traceThicknes);
+		RwIm3DVertexSetPos(&TraceVertices[8], end2.x, end2.y, end2.z - traceThicknes);
+		//horizontal planes
+		RwIm3DVertexSetPos(&TraceVertices[2], start2.x + horizontalOffset.y, start2.y - horizontalOffset.x, start2.z);
+		RwIm3DVertexSetPos(&TraceVertices[7], end2.x + horizontalOffset.y, end2.y - horizontalOffset.x, end2.z);
+#ifdef FIX_BUGS //this point calcilated wrong for some reason
+		RwIm3DVertexSetPos(&TraceVertices[4], start2.x - horizontalOffset.y, start2.y + horizontalOffset.x, start2.z);
+		RwIm3DVertexSetPos(&TraceVertices[9], end2.x - horizontalOffset.y, end2.y + horizontalOffset.x, end2.z);
+#else
+		RwIm3DVertexSetPos(&TraceVertices[4], start2.x - horizontalOffset.y, start2.y - horizontalOffset.y, start2.z);
+		RwIm3DVertexSetPos(&TraceVertices[9], end2.x - horizontalOffset.y, end2.y - horizontalOffset.y, end2.z);
+#endif
 
-			RwIm3DVertexSetPos(&TraceVertices[0], currentPos.x, currentPos.y, currentPos.z);
-			RwIm3DVertexSetPos(&TraceVertices[1], currentPos.x, currentPos.y, currentPos.z + traceThicknes);
-			RwIm3DVertexSetPos(&TraceVertices[2], currentPos.x + vecOffset.y, currentPos.y - vecOffset.x, currentPos.z);
-			RwIm3DVertexSetPos(&TraceVertices[3], currentPos.x, currentPos.y, currentPos.z - traceThicknes);
-			RwIm3DVertexSetPos(&TraceVertices[4], currentPos.x - vecOffset.y, currentPos.y - vecOffset.y, currentPos.z);
+		if (RwIm3DTransform(TraceVertices, ARRAY_SIZE(TraceVertices), nil, 1)) {
+			RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TraceIndexList, ARRAY_SIZE(TraceIndexList));
+			RwIm3DEnd();
+		}
 
-			RwIm3DVertexSetPos(&TraceVertices[5], currentPos2.x, currentPos2.y, currentPos2.z);
-			RwIm3DVertexSetPos(&TraceVertices[6], currentPos2.x, currentPos2.y, currentPos2.z + traceThicknes);
-			RwIm3DVertexSetPos(&TraceVertices[7], currentPos2.x + vecOffset.y, currentPos2.y - vecOffset.x, currentPos2.z);
-			RwIm3DVertexSetPos(&TraceVertices[8], currentPos2.x, currentPos2.y, currentPos2.z - traceThicknes);
-			RwIm3DVertexSetPos(&TraceVertices[9], currentPos2.x - vecOffset.y, currentPos2.y - vecOffset.y, currentPos2.z);
+		RwIm3DVertexSetV(&TraceVertices[5], 2.0f);
+		RwIm3DVertexSetV(&TraceVertices[6], 2.0f);
+		RwIm3DVertexSetV(&TraceVertices[7], 2.0f);
+		RwIm3DVertexSetV(&TraceVertices[8], 2.0f);
+		RwIm3DVertexSetV(&TraceVertices[9], 2.0f);
+		RwIm3DVertexSetRGBA(&TraceVertices[0], 255, 255, 255, 0);
+		RwIm3DVertexSetRGBA(&TraceVertices[1], 255, 255, 255, 0);
+		RwIm3DVertexSetRGBA(&TraceVertices[2], 255, 255, 255, 0);
+		RwIm3DVertexSetRGBA(&TraceVertices[3], 255, 255, 255, 0);
+		RwIm3DVertexSetRGBA(&TraceVertices[4], 255, 255, 255, 0);
 
-			if (RwIm3DTransform(TraceVertices, ARRAY_SIZE(TraceVertices), nil, 1)) {
-				RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TraceIndexList, ARRAY_SIZE(TraceIndexList));
-				RwIm3DEnd();
-			}
+		RwIm3DVertexSetPos(&TraceVertices[0], start.x, start.y, start.z);
+		RwIm3DVertexSetPos(&TraceVertices[1], start.x, start.y, start.z + traceThicknes);
+		RwIm3DVertexSetPos(&TraceVertices[3], start.x, start.y, start.z - traceThicknes);
+		RwIm3DVertexSetPos(&TraceVertices[2], start.x + horizontalOffset.y, start.y - horizontalOffset.x, start.z);
 
-			RwIm3DVertexSetPos(&TraceVertices[1], targetPos.x, targetPos.y, targetPos.z);
-			RwIm3DVertexSetPos(&TraceVertices[2], targetPos.x, targetPos.y, targetPos.z + traceThicknes);
-			RwIm3DVertexSetPos(&TraceVertices[3], targetPos.x + vecOffset.y, targetPos.y - vecOffset.x, targetPos.z);
-			RwIm3DVertexSetPos(&TraceVertices[4], targetPos.x, targetPos.y, targetPos.z - traceThicknes);
-			RwIm3DVertexSetPos(&TraceVertices[5], targetPos.x - vecOffset.y, targetPos.y - vecOffset.y, targetPos.z);
+		RwIm3DVertexSetPos(&TraceVertices[5], start2.x, start2.y, start2.z);
+		RwIm3DVertexSetPos(&TraceVertices[6], start2.x, start2.y, start2.z + traceThicknes);
+		RwIm3DVertexSetPos(&TraceVertices[8], start2.x, start2.y, start2.z - traceThicknes);
+		RwIm3DVertexSetPos(&TraceVertices[7], start2.x + horizontalOffset.y, start2.y - horizontalOffset.x, start2.z);
+#ifdef FIX_BUGS
+		RwIm3DVertexSetPos(&TraceVertices[4], start.x - horizontalOffset.y, start.y + horizontalOffset.x, start.z);
+		RwIm3DVertexSetPos(&TraceVertices[9], start2.x - horizontalOffset.y, start2.y + horizontalOffset.x, start2.z);
+#else
+		RwIm3DVertexSetPos(&TraceVertices[4], start.x - horizontalOffset.y, start.y - horizontalOffset.y, start.z);
+		RwIm3DVertexSetPos(&TraceVertices[9], start2.x - horizontalOffset.y, start2.y - horizontalOffset.y, start2.z);
+#endif
 
-			RwIm3DVertexSetPos(&TraceVertices[5], targetPos2.x, targetPos2.y, targetPos2.z);
-			RwIm3DVertexSetPos(&TraceVertices[6], targetPos2.x, targetPos2.y, targetPos2.z + traceThicknes);
-			RwIm3DVertexSetPos(&TraceVertices[7], targetPos2.x + vecOffset.y, targetPos2.y - vecOffset.x, targetPos2.z);
-			RwIm3DVertexSetPos(&TraceVertices[8], targetPos2.x, targetPos2.y, targetPos2.z - traceThicknes);
-			RwIm3DVertexSetPos(&TraceVertices[9], targetPos2.x - vecOffset.y, targetPos2.y - vecOffset.y, targetPos2.z);
+		if (RwIm3DTransform(TraceVertices, ARRAY_SIZE(TraceVertices), nil, rwIM3D_VERTEXUV)) {
+			RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TraceIndexList, ARRAY_SIZE(TraceIndexList));
+			RwIm3DEnd();
+		}
 
-			if (RwIm3DTransform(TraceVertices, ARRAY_SIZE(TraceVertices), nil, 1)) {
-				RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TraceIndexList, ARRAY_SIZE(TraceIndexList));
-				RwIm3DEnd();
-			}
+		RwIm3DVertexSetPos(&TraceVertices[1], end.x, end.y, end.z);
+		RwIm3DVertexSetPos(&TraceVertices[2], end.x, end.y, end.z + traceThicknes);
+		RwIm3DVertexSetPos(&TraceVertices[4], end.x, end.y, end.z - traceThicknes);
+		RwIm3DVertexSetPos(&TraceVertices[3], end.x + horizontalOffset.y, end.y - horizontalOffset.x, end.z);
+
+		RwIm3DVertexSetPos(&TraceVertices[5], end2.x, end2.y, end2.z);
+		RwIm3DVertexSetPos(&TraceVertices[6], end2.x, end2.y, end2.z + traceThicknes);
+		RwIm3DVertexSetPos(&TraceVertices[8], end2.x, end2.y, end2.z - traceThicknes);
+		RwIm3DVertexSetPos(&TraceVertices[7], end2.x + horizontalOffset.y, end2.y - horizontalOffset.x, end2.z);
+#ifdef FIX_BUGS
+		RwIm3DVertexSetPos(&TraceVertices[5], end.x - horizontalOffset.y, end.y + horizontalOffset.x, end.z);
+		RwIm3DVertexSetPos(&TraceVertices[9], end2.x - horizontalOffset.y, end2.y + horizontalOffset.x, end2.z);
+#else
+		RwIm3DVertexSetPos(&TraceVertices[5], end.x - horizontalOffset.y, end.y - horizontalOffset.y, end.z);
+		RwIm3DVertexSetPos(&TraceVertices[9], end2.x - horizontalOffset.y, end2.y - horizontalOffset.y, end2.z);
+#endif
+
+		if (RwIm3DTransform(TraceVertices, ARRAY_SIZE(TraceVertices), nil, rwIM3D_VERTEXUV)) {
+			RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TraceIndexList, ARRAY_SIZE(TraceIndexList));
+			RwIm3DEnd();
 		}
 	}
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
@@ -762,7 +784,7 @@ C3dMarkers::Render()
 					CCoronas::RegisterCorona((uintptr)&m_aMarkerArray[i],
 						SPHERE_MARKER_R, SPHERE_MARKER_G, SPHERE_MARKER_B, 192,
 						m_aMarkerArray[i].m_Matrix.GetPosition(), 1.2f * m_aMarkerArray[i].m_fSize, 50.0f * TheCamera.LODDistMultiplier,
-						CCoronas::TYPE_STAR, CCoronas::FLARE_NONE, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, 0.0f, false, 1.5f);
+						CCoronas::TYPE_STAR, CCoronas::FLARE_NONE, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, 0.0f, false);
 				}
 			}
 			NumActiveMarkers++;
@@ -1029,11 +1051,10 @@ CBrightLights::Render(void)
 			break;
 		default:
 #ifdef FIX_BUGS  //just to make sure that color never will be undefined
-			r = 0;
-			g = 0;
-			b = 0;
-#endif
+			return;
+#else
 			break;
+#endif
 		}
 
 		if(aBrightLights[i].m_camDist < BRIGHTLIGHTS_FADE_DIST)

@@ -48,8 +48,8 @@ public:
 
 struct CBulletTrace
 {
-	CVector m_vecCurrentPos;
-	CVector m_vecTargetPos;
+	CVector m_vecStartPos;
+	CVector m_vecEndPos;
 	bool m_bInUse;
 	uint32 m_nCreationTime;
 	uint32 m_nLifeTime;
