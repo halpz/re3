@@ -204,7 +204,7 @@ CMotionBlurStreaks::Update(void)
 {
 	int i;
 	for(i = 0; i < NUMMBLURSTREAKS; i++)
-		if(aStreaks[i].m_id)
+		if(aStreaks[i].m_id != 0)
 			aStreaks[i].Update();
 }
 
@@ -225,7 +225,7 @@ CMotionBlurStreaks::RegisterStreak(uintptr id, uint8 r, uint8 g, uint8 b, CVecto
 		}
 	}
 	// Find free slot
-	for(i = 0; aStreaks[i].m_id; i++)
+	for(i = 0; aStreaks[i].m_id != 0; i++)
 		if(i == NUMMBLURSTREAKS-1)
 			return;
 	// Create a new streak
@@ -246,7 +246,7 @@ CMotionBlurStreaks::Render(void)
 	bool setRenderStates = false;
 	int i;
 	for(i = 0; i < NUMMBLURSTREAKS; i++)
-		if(aStreaks[i].m_id){
+		if(aStreaks[i].m_id != 0){
 			if(!setRenderStates){
 				RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 				RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
@@ -323,7 +323,7 @@ void CBulletTraces::Render(void)
 		RwIm3DVertexSetPos(&TraceVertices[4], sup.x + width.x, sup.y + width.y, sup.z + width.z);
 		RwIm3DVertexSetPos(&TraceVertices[5], sup.x - width.x, sup.y - width.y, sup.z - width.z);
 		LittleTest();
-		if (RwIm3DTransform(TraceVertices, ARRAY_SIZE(TraceVertices), nil, 1)) {
+		if (RwIm3DTransform(TraceVertices, ARRAY_SIZE(TraceVertices), nil, rwIM3D_VERTEXUV)) {
 			RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TraceIndexList, ARRAY_SIZE(TraceIndexList));
 			RwIm3DEnd();
 		}
@@ -821,6 +821,22 @@ CBrightLights::Render(void)
 			TempBufferIndicesStored += 12*3;
 			break;
 
+		case BRIGHTLIGHT_FRONT_BIG:
+		case BRIGHTLIGHT_REAR_BIG:
+			for (j = 0; j < 8; j++) {
+			pos = BigCarHeadLightsSide[j] * aBrightLights[i].m_side +
+				BigCarHeadLightsUp[j] * aBrightLights[i].m_up +
+				BigCarHeadLightsFront[j] * aBrightLights[i].m_front +
+				aBrightLights[i].m_pos;
+			RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored + j], r, g, b, a);
+			RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored + j], pos.x, pos.y, pos.z);
+		}
+		for (j = 0; j < 12 * 3; j++)
+			TempBufferRenderIndexList[TempBufferIndicesStored + j] = CubeIndices[j] + TempBufferVerticesStored;
+		TempBufferVerticesStored += 8;
+		TempBufferIndicesStored += 12 * 3;
+		break;
+
 		case BRIGHTLIGHT_FRONT_TALL:
 		case BRIGHTLIGHT_REAR_TALL:
 			for(j = 0; j < 8; j++){
@@ -839,8 +855,8 @@ CBrightLights::Render(void)
 
 		case BRIGHTLIGHT_SIREN:
 			for(j = 0; j < 6; j++){
-				pos = SirenLightsSide[j]*aBrightLights[i].m_side +
-					SirenLightsUp[j]*aBrightLights[i].m_up +
+				pos = SirenLightsSide[j] * TheCamera.GetRight() +
+					SirenLightsUp[j] * TheCamera.GetUp() +
 					aBrightLights[i].m_pos;
 				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored+j], r, g, b, a);
 				RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored+j], pos.x, pos.y, pos.z);
@@ -1037,11 +1053,8 @@ CMoneyMessage::Render()
 			CFont::SetPropOn();
 			CFont::SetBackgroundOff();
 
-			float fScaleY = fDistY / 100.0f;
-			if (fScaleY > MAX_SCALE) fScaleY = MAX_SCALE;
-
-			float fScaleX = fDistX / 100.0f;
-			if (fScaleX > MAX_SCALE) fScaleX = MAX_SCALE;
+			float fScaleY = Min(fDistY / 100.0f, MAX_SCALE);
+			float fScaleX = Min(fDistX / 100.0f, MAX_SCALE);
 
 			CFont::SetScale(fScaleX, fScaleY); // maybe use SCREEN_SCALE_X and SCREEN_SCALE_Y here?
 			CFont::SetCentreOn();
