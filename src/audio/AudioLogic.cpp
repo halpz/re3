@@ -972,7 +972,7 @@ cAudioManager::ProcessModelCarEngine(cVehicleParams *params)
 
 
 bool
-cAudioManager::ProcessVehicleRoadNoise(cVehicleParams *params)
+cAudioManager::ProcessVehicleRoadNoise(cVehicleParams* params)
 {
 	const float SOUND_INTENSITY = 95.0f;
 
@@ -981,51 +981,66 @@ cAudioManager::ProcessVehicleRoadNoise(cVehicleParams *params)
 	float modificator;
 	int sampleFreq;
 	float velocity;
+	uint8 wheelsOnGround;
 
 	if (params->m_fDistance >= SQR(SOUND_INTENSITY))
 		return false;
-	if (params->m_pTransmission != nil) {
-		if (((CAutomobile*)params->m_pVehicle)->m_nDriveWheelsOnGround != 0) {
-			velocity = Abs(params->m_fVelocityChange);
-			if (velocity > 0.0f) {
-				CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
-				emittingVol = 30.f * Min(1.f, velocity / (0.5f * params->m_pTransmission->fMaxVelocity));
-				m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
-				if (m_sQueueSample.m_nVolume != 0) {
-					m_sQueueSample.m_nCounter = 0;
-					m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-					m_sQueueSample.m_bIs2D = false;
-					m_sQueueSample.m_nReleasingVolumeModificator = 3;
-					if (params->m_pVehicle->m_nSurfaceTouched == SURFACE_WATER) {
-						m_sQueueSample.m_nSampleIndex = SFX_BOAT_WATER_LOOP;
-						freq = 6050 * emittingVol / 30 + 16000;
-					} else {
-						m_sQueueSample.m_nSampleIndex = SFX_ROAD_NOISE;
-						modificator = m_sQueueSample.m_fDistance / 190.f;
-						sampleFreq = SampleManager.GetSampleBaseFrequency(SFX_ROAD_NOISE);
-						freq = (sampleFreq * modificator) + ((3 * sampleFreq) / 4);
-					}
-					m_sQueueSample.m_nFrequency = freq;
-					m_sQueueSample.m_nLoopCount = 0;
-					m_sQueueSample.m_nEmittingVolume = emittingVol;
-					m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-					m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-					m_sQueueSample.m_fSpeedMultiplier = 6.0f;
-					m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
-					m_sQueueSample.m_bReleasingSoundFlag = false;
-					m_sQueueSample.m_nReleasingVolumeDivider = 4;
-					m_sQueueSample.m_bReverbFlag = true;
-					m_sQueueSample.m_bRequireReflection = false;
-					AddSampleToRequestedQueue();
-				}
+
+	if (params->m_fDistance >= SQR(SOUND_INTENSITY))
+		return false;
+	switch (params->m_VehicleType) {
+	case VEHICLE_TYPE_CAR:
+		wheelsOnGround = ((CAutomobile*)params->m_pVehicle)->m_nWheelsOnGround;
+		break;
+	case VEHICLE_TYPE_BIKE:
+		wheelsOnGround = ((CBike*)params->m_pVehicle)->m_nWheelsOnGround;
+		break;
+	default:
+		wheelsOnGround = 4;
+		break;
+	}
+	if (params->m_pTransmission == nil || wheelsOnGround == 0)
+		return true;
+
+	velocity = Abs(params->m_fVelocityChange);
+	if (velocity > 0.0f) {
+		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
+		emittingVol = 30.f * Min(1.f, velocity / (0.5f * params->m_pTransmission->fMaxVelocity));
+		m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
+		if (m_sQueueSample.m_nVolume != 0) {
+			m_sQueueSample.m_nCounter = 0;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+			m_sQueueSample.m_bIs2D = false;
+			m_sQueueSample.m_nReleasingVolumeModificator = 3;
+			if (params->m_pVehicle->m_nSurfaceTouched == SURFACE_WATER) {
+				m_sQueueSample.m_nSampleIndex = SFX_BOAT_WATER_LOOP;
+				freq = 6050 * emittingVol / 30 + 16000;
+			} else {
+				m_sQueueSample.m_nSampleIndex = SFX_ROAD_NOISE;
+				modificator = (m_sQueueSample.m_fDistance / 95.0f) * 0.5f;   //mb SOUND_INTENSITY?
+				sampleFreq = SampleManager.GetSampleBaseFrequency(SFX_ROAD_NOISE);
+				freq = (sampleFreq * modificator) + ((3 * sampleFreq) / 4);
 			}
+			m_sQueueSample.m_nFrequency = freq;
+			m_sQueueSample.m_nLoopCount = 0;
+			m_sQueueSample.m_nEmittingVolume = emittingVol;
+			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_fSpeedMultiplier = 6.0f;
+			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
+			m_sQueueSample.m_bReleasingSoundFlag = false;
+			m_sQueueSample.m_nReleasingVolumeDivider = 4;
+			m_sQueueSample.m_bReverbFlag = true;
+			m_sQueueSample.m_bRequireReflection = false;
+			AddSampleToRequestedQueue();
 		}
 	}
+
 	return true;
 }
 
 bool
-cAudioManager::ProcessWetRoadNoise(cVehicleParams *params)
+cAudioManager::ProcessWetRoadNoise(cVehicleParams* params)
 {
 	const float SOUND_INTENSITY = 30.0f;
 
@@ -1033,42 +1048,54 @@ cAudioManager::ProcessWetRoadNoise(cVehicleParams *params)
 	int32 emittingVol;
 	float modificator;
 	int freq;
-	float velChange;
+	float velocity;
+	uint8 wheelsOnGround;
 
 	if (params->m_fDistance >= SQR(SOUND_INTENSITY))
 		return false;
-	if (params->m_pTransmission != nil) {
-		if (((CAutomobile *)params->m_pVehicle)->m_nDriveWheelsOnGround != 0) {
-			velChange = Abs(params->m_fVelocityChange);
-			if (velChange > 0.f) {
-				CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
-				relativeVelocity = Min(1.0f, velChange / (0.5f * params->m_pTransmission->fMaxVelocity));
-				emittingVol = 23.0f * relativeVelocity * CWeather::WetRoads;
-				m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
-				if (m_sQueueSample.m_nVolume != 0) {
-					m_sQueueSample.m_nCounter = 1;
-					m_sQueueSample.m_nSampleIndex = SFX_ROAD_NOISE;
-					m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-					m_sQueueSample.m_bIs2D = false;
-					m_sQueueSample.m_nReleasingVolumeModificator = 3;
-					modificator = m_sQueueSample.m_fDistance / 6.f;
-					freq = SampleManager.GetSampleBaseFrequency(SFX_ROAD_NOISE);
-					m_sQueueSample.m_nFrequency = freq + freq * modificator;
-					m_sQueueSample.m_nLoopCount = 0;
-					m_sQueueSample.m_nEmittingVolume = emittingVol;
-					m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-					m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-					m_sQueueSample.m_fSpeedMultiplier = 6.0f;
-					m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
-					m_sQueueSample.m_bReleasingSoundFlag = false;
-					m_sQueueSample.m_nReleasingVolumeDivider = 4;
-					m_sQueueSample.m_bReverbFlag = true;
-					m_sQueueSample.m_bRequireReflection = false;
-					AddSampleToRequestedQueue();
-				}
-			}
+	switch (params->m_VehicleType) {
+	case VEHICLE_TYPE_CAR:
+		wheelsOnGround = ((CAutomobile*)params->m_pVehicle)->m_nWheelsOnGround;
+		break;
+	case VEHICLE_TYPE_BIKE:
+		wheelsOnGround = ((CBike*)params->m_pVehicle)->m_nWheelsOnGround;
+		break;
+	default:
+		wheelsOnGround = 4;
+		break;
+	}
+	if (params->m_pTransmission == nil || wheelsOnGround == 0)
+		return true;
+
+	velocity = Abs(params->m_fVelocityChange);
+	if (velocity > 0.0f) {
+		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
+		relativeVelocity = Min(1.0f, velocity / (0.5f * params->m_pTransmission->fMaxVelocity));
+		emittingVol = 23.0f * relativeVelocity * CWeather::WetRoads;
+		m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
+		if (m_sQueueSample.m_nVolume != 0) {
+			m_sQueueSample.m_nCounter = 1;
+			m_sQueueSample.m_nSampleIndex = SFX_ROAD_NOISE;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+			m_sQueueSample.m_bIs2D = false;
+			m_sQueueSample.m_nReleasingVolumeModificator = 3;
+			modificator = (m_sQueueSample.m_fDistance / 30.0f) * 0.5f; //need recheck in III, mb sount_intensity?
+			freq = SampleManager.GetSampleBaseFrequency(SFX_ROAD_NOISE);
+			m_sQueueSample.m_nFrequency = freq + freq * modificator;
+			m_sQueueSample.m_nLoopCount = 0;
+			m_sQueueSample.m_nEmittingVolume = emittingVol;
+			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_fSpeedMultiplier = 6.0f;
+			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
+			m_sQueueSample.m_bReleasingSoundFlag = false;
+			m_sQueueSample.m_nReleasingVolumeDivider = 4;
+			m_sQueueSample.m_bReverbFlag = true;
+			m_sQueueSample.m_bRequireReflection = false;
+			AddSampleToRequestedQueue();
 		}
 	}
+
 	return true;
 }
 
@@ -2132,13 +2159,15 @@ cAudioManager::ProcessVehicleReverseWarning(cVehicleParams *params)
 	const float SOUND_INTENSITY = 50.0f;
 
 	CVehicle *veh = params->m_pVehicle;
+	uint8 volume;
 
 	if (params->m_fDistance >= SQR(SOUND_INTENSITY))
 		return false;
 
 	if (veh->bEngineOn && veh->m_fGasPedal < 0.0f) {
 		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
-		m_sQueueSample.m_nVolume = ComputeVolume(60, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
+		volume = veh->bIsDrowning ? 15 : 60;
+		m_sQueueSample.m_nVolume = ComputeVolume(volume, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume != 0) {
 			m_sQueueSample.m_nCounter = 12;
 			m_sQueueSample.m_nSampleIndex = SFX_REVERSE_WARNING;
@@ -2147,7 +2176,7 @@ cAudioManager::ProcessVehicleReverseWarning(cVehicleParams *params)
 			m_sQueueSample.m_nReleasingVolumeModificator = 2;
 			m_sQueueSample.m_nFrequency = (100 * m_sQueueSample.m_nEntityIndex & 1023) + SampleManager.GetSampleBaseFrequency(SFX_REVERSE_WARNING);
 			m_sQueueSample.m_nLoopCount = 0;
-			m_sQueueSample.m_nEmittingVolume = 60;
+			m_sQueueSample.m_nEmittingVolume = 60; //mb bug?
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_fSpeedMultiplier = 3.0f;
@@ -2803,6 +2832,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 		}
 	}
 }
+
 #ifdef GTA_TRAIN
 bool
 cAudioManager::ProcessTrainNoise(cVehicleParams *params)

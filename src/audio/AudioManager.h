@@ -361,13 +361,13 @@ public:
 	void UpdateGasPedalAudio(CVehicle* veh, int vehType);      // done
 	bool ProcessVehicleHorn(cVehicleParams *params);           // done
 	void ProcessVehicleOneShots(cVehicleParams *params);       // 
-	bool ProcessVehicleReverseWarning(cVehicleParams *params); // 
-	bool ProcessVehicleRoadNoise(cVehicleParams *params);      // 
+	bool ProcessVehicleReverseWarning(cVehicleParams *params); // done
+	bool ProcessVehicleRoadNoise(cVehicleParams *params);      // done
 	bool ProcessVehicleSirenOrAlarm(cVehicleParams *params);   // done
 	bool ProcessVehicleSkidding(cVehicleParams *params);       // 
 	void ProcessWaterCannon(int32);                            // 
 	void ProcessWeather(int32 id);                             // done
-	bool ProcessWetRoadNoise(cVehicleParams *params);          // 
+	bool ProcessWetRoadNoise(cVehicleParams *params);          // done
 	void ProcessEscalators();                                  // done
 	void ProcessExtraSounds();                                 // done
 
