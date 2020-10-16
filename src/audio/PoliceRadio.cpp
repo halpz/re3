@@ -671,7 +671,6 @@ cAudioManager::PlaySuspectLastSeen(float x, float y, float z)
 	float halfY;
 	float quarterX;
 	float quarterY;
-	int32 sample;
 	bool processed = false;
 	CVector vec = CVector(x, y, z);
 
@@ -683,8 +682,7 @@ cAudioManager::PlaySuspectLastSeen(float x, float y, float z)
 			zone = CTheZones::GetAudioZone(audioZone);
 			for (int i = 0; i < NUMAUDIOZONES; i++) {
 				if (strcmp(zone->name, ZoneSfx[i].m_aName) == 0) {
-					sample = ZoneSfx[i].m_nSampleIndex;
-					m_sPoliceRadioQueue.Add(m_anRandomTable[4] % 3 + SFX_POLICE_RADIO_MESSAGE_NOISE_1);
+					m_sPoliceRadioQueue.Add(SFX_POLICE_RADIO_MESSAGE_NOISE_1);
 					m_sPoliceRadioQueue.Add(SFX_POLICE_RADIO_SUSPECT);
 					m_sPoliceRadioQueue.Add(SFX_POLICE_RADIO_LAST_SEEN);
 					m_sPoliceRadioQueue.Add(SFX_IN);
@@ -709,9 +707,10 @@ cAudioManager::PlaySuspectLastSeen(float x, float y, float z)
 						m_sPoliceRadioQueue.Add(SFX_WEST);
 					else if (!processed)
 						m_sPoliceRadioQueue.Add(SFX_CENTRAL);
-					m_sPoliceRadioQueue.Add(sample);
-					m_sPoliceRadioQueue.Add(m_anRandomTable[2] % 3 + SFX_POLICE_RADIO_MESSAGE_NOISE_1);
-					m_sPoliceRadioQueue.Add(TOTAL_AUDIO_SAMPLES);
+
+					m_sPoliceRadioQueue.Add(ZoneSfx[i].m_nSampleIndex);
+					m_sPoliceRadioQueue.Add(SFX_POLICE_RADIO_MESSAGE_NOISE_1);
+					m_sPoliceRadioQueue.Add(NO_SAMPLE);
 					gSpecialSuspectLastSeenReport = true;
 					break;
 				}

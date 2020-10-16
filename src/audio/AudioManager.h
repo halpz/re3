@@ -298,7 +298,7 @@ public:
 
 	void PlayLoadedMissionAudio(uint8 slot);                // done
 	void PlayOneShot(int32 index, int16 sound, float vol);  // done
-	void PlaySuspectLastSeen(float x, float y, float z);    //
+	void PlaySuspectLastSeen(float x, float y, float z);    // done
 	void PlayerJustGotInCar() const;                        // done
 	void PlayerJustLeftCar() const;                         // done
 	void PostInitialiseGameSpecificSetup();                 // done
@@ -308,7 +308,7 @@ public:
 	void PreTerminateGameSpecificShutdown();                // done
 	/// processX - main logic of adding new sounds
 	void ProcessActiveQueues();                             // done
-	bool ProcessAirBrakes(cVehicleParams *params);
+	bool ProcessAirBrakes(cVehicleParams *params);          // done
 	bool ProcessBoatEngine(cVehicleParams *params);
 	bool ProcessBoatMovingOverWater(cVehicleParams *params);
 #ifdef GTA_BRIDGE
@@ -359,11 +359,11 @@ public:
 	bool ProcessVehicleDoors(cVehicleParams *params);          // done
 	void ProcessVehicleEngine(cVehicleParams *params);         // done
 	void UpdateGasPedalAudio(CVehicle* veh, int vehType);      // done
-	void ProcessVehicleHorn(cVehicleParams *params);           // 
+	bool ProcessVehicleHorn(cVehicleParams *params);           // done
 	void ProcessVehicleOneShots(cVehicleParams *params);       // 
 	bool ProcessVehicleReverseWarning(cVehicleParams *params); // 
 	bool ProcessVehicleRoadNoise(cVehicleParams *params);      // 
-	bool ProcessVehicleSirenOrAlarm(cVehicleParams *params);   // 
+	bool ProcessVehicleSirenOrAlarm(cVehicleParams *params);   // done
 	bool ProcessVehicleSkidding(cVehicleParams *params);       // 
 	void ProcessWaterCannon(int32);                            // 
 	void ProcessWeather(int32 id);                             // done
