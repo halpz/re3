@@ -49,16 +49,18 @@ uint32 CPickups::StaticCamStartTime;
 
 tPickupMessage CPickups::aMessages[NUMPICKUPMESSAGES];
 
-// TODO(Miami)
-uint16 AmmoForWeapon[20] = { 0, 1, 45, 125, 25, 150, 300, 25, 5, 250, 5, 5, 0, 500, 0, 100, 0, 0, 0, 0 };
+// --MIAMI: Done
+uint16 AmmoForWeapon[WEAPONTYPE_TOTALWEAPONS + 1] = { 0,  1,  1,  1,   1,   1,   1,   1,   1,   1,  1,  1, 8,   8,   8,    8, 8,   68, 24,
+													 32, 28, 20, 200, 120, 120, 120, 120, 120, 40, 28, 8, 300, 200, 1000, 1, 400, 36, 0 };
 
 // --MIAMI: Done
-uint16 AmmoForWeapon_OnStreet[WEAPONTYPE_TOTALWEAPONS] = {
-	0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 34,
-	12, 16, 14, 10, 100, 60, 60, 60, 60, 60, 20, 14,
-	4, 150, 100, 500, 1, 400, 36, 0,
-};
-uint16 CostOfWeapon[20] = { 0, 10, 250, 800, 1500, 3000, 5000, 10000, 25000, 25000, 2000, 2000, 0, 50000, 0, 3000, 0, 0, 0, 0 };
+uint16 AmmoForWeapon_OnStreet[WEAPONTYPE_TOTALWEAPONS + 1] = { 0,  1,  1,  1,   1,  1,  1,  1,  1,  1,  1,  1, 4,   4,   4,   4, 4,   34, 12,
+															  16, 14, 10, 100, 60, 60, 60, 60, 60, 20, 14, 4, 150, 100, 500, 1, 400, 36, 0 };
+
+// --MIAMI: Done
+uint16 CostOfWeapon[WEAPONTYPE_TOTALWEAPONS + 3] = { 0,     10,    10,   10,   10,   10,    10,   10,    10,  10,  10,  10,   1000, 1000,
+													1000,  500,   8000, 250,  400,  1200,  1250, 1250,  800, 800, 650, 1200, 5000, 400,
+													10000, 10000, 8000, 8000, 8000, 10000, 1000, 11000, 500, 20,  10,  0 };
 
 struct
 {
@@ -704,7 +706,7 @@ CPickups::RemoveAllFloatingPickups()
 void
 CPickups::RemovePickUp(int32 pickupIndex)
 {
-	int32 index = CPickups::GetActualPickupIndex(pickupIndex);
+	int32 index = GetActualPickupIndex(pickupIndex);
 	if (index == -1) return;
 
 	if (aPickUps[index].m_pObject) {
@@ -1403,6 +1405,16 @@ void
 CPacManPickups::GeneratePMPickUps(CVector pos, float scrambleMult, int16 count, uint8 type)
 {
 }
+
+// diablo porn mission pickups
+static const CVector aRacePoints1[] = {
+	CVector(913.62219f, -155.13692f, 4.9699469f),
+	CVector(913.92401f, -124.12943f, 4.9692569f),
+	CVector(913.27899f, -93.524231f, 7.4325991f),
+	CVector(912.60852f, -63.15905f, 7.4533591f),
+	CVector(934.22144f, -42.049122f, 7.4511471f),
+	CVector(0.0f, 0.0f, 0.0f),
+};
 
 void
 CPacManPickups::GeneratePMPickUpsForRace(int32 race)

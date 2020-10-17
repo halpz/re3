@@ -118,9 +118,9 @@ public:
 	static CPickup *FindPickUpForThisObject(CEntity*);
 };
 
-extern uint16 AmmoForWeapon[20];
-extern uint16 AmmoForWeapon_OnStreet[WEAPONTYPE_TOTALWEAPONS];
-extern uint16 CostOfWeapon[20];
+extern uint16 AmmoForWeapon[WEAPONTYPE_TOTALWEAPONS + 1];
+extern uint16 AmmoForWeapon_OnStreet[WEAPONTYPE_TOTALWEAPONS + 1];
+extern uint16 CostOfWeapon[WEAPONTYPE_TOTALWEAPONS + 3];
 
 enum ePacmanPickupType
 {
