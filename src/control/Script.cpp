@@ -2381,9 +2381,11 @@ void CTheScripts::Process()
 	case 4:
 		AllowMissionReplay = 5;
 		RetryMission(0, 0);
+		break;
 	case 6:
 		AllowMissionReplay = 7;
 		TimeToWaitTill = CTimer::GetTimeInMilliseconds() + 500;
+		break;
 	case 7:
 		if (TimeToWaitTill < CTimer::GetTimeInMilliseconds()) {
 			AllowMissionReplay = 0;
