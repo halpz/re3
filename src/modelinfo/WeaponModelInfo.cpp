@@ -40,10 +40,10 @@ CWeaponModelInfo::SetWeaponInfo(int32 weaponId)
 	m_atomics[2] = (RpAtomic*)weaponId;
 }
 
-int32
+eWeaponType
 CWeaponModelInfo::GetWeaponInfo(void)
 {
-	return (int32)(uintptr)m_atomics[2];
+	return (eWeaponType)(uintptr)m_atomics[2];
 }
 
 void

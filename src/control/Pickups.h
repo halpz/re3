@@ -34,21 +34,23 @@ class CPickup
 {
 public:
 	CVector m_vecPos;
-	uint32 m_nRevenue;
+	float m_fRevenue;
 	CObject *m_pObject;
 	CObject *m_pExtraObject;
-	uint16 m_nQuantity;
+	uint32 m_nQuantity;
 	uint32 m_nTimer;
-	int16 m_nMoneySpeed;
+	uint16 m_nMoneySpeed;
 	int16 m_eModelIndex;
 	uint16 m_nIndex;
 	char m_sTextKey[8];
 	ePickupType m_eType;
 	bool m_bRemoved;
-	uint8 m_effects;
+	uint8 m_effects:1;
+	uint8 m_effects2:1;
 
-	CObject *GiveUsAPickUpObject(int32 handle);
+	CObject *GiveUsAPickUpObject(CObject **object, CObject **extraObject, int32 handle, int32 extraHandle);
 	bool Update(CPlayerPed *player, CVehicle *vehicle, int playerId);
+	void GetRidOfObjects();
 private:
 	bool IsMine() { return m_eType >= PICKUP_MINE_INACTIVE && m_eType <= PICKUP_FLOATINGPACKAGE_FLOATING; }
 	inline bool CanBePickedUp(CPlayerPed *player, int playerId);
@@ -111,8 +113,7 @@ public:
 	static CVector StaticCamCoors;
 	static uint32 StaticCamStartTime;
 	
-//TODO(MIAMI)
-	static void RemoveAllPickupsOfACertainWeaponGroupWithNoAmmo(eWeaponType) {}
+	static void RemoveAllPickupsOfACertainWeaponGroupWithNoAmmo(eWeaponType);
 };
 
 extern uint16 AmmoForWeapon[20];
