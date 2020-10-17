@@ -91,7 +91,7 @@ void CCarGenerator::DoInternalProcessing()
 		pVehicle = pBoat;
 		if (pos.z <= -100.0f)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		pBoat->bExtendedRange = false;
+		pBoat->bExtendedRange = true;
 	}else{
 		bool groundFound;
 		pos = m_vecPos;

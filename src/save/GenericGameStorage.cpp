@@ -41,7 +41,9 @@
 #include "Timecycle.h"
 #include "Fluff.h"
 
-#define BLOCK_COUNT 20
+// --MIAMI: file done
+
+#define BLOCK_COUNT 22
 #define SIZE_OF_SIMPLEVARS 0xE4
 
 const uint32 SIZE_OF_ONE_GAME_IN_BYTES = 201729;
@@ -60,7 +62,6 @@ int CheckSum;
 eLevelName m_LevelToLoad;
 char SaveFileNameJustSaved[260];
 int Slots[SLOT_COUNT];
-CDate CompileDateAndTime;
 
 bool b_FoundRecentSavedGameWantToLoad;
 bool JustLoadedDontFadeInYet;
@@ -112,13 +113,14 @@ do {\
 	buf += size;\
 } while (0)
 
-#define WriteSaveDataBlock(save_func)\
+#define WriteSaveDataBlock(save_func, msg)\
 do {\
 	size = 0;\
 	buf = work_buff;\
 	reserved = 0;\
 	MakeSpaceForSizeInBufferPointer(presize, buf, postsize);\
 	save_func(buf, &size);\
+	debug(msg"== %i \n", size);\
 	CopySizeAndPreparePointer(presize, buf, postsize, reserved, size);\
 	if (!PcSaveHelper.PcClassSaveRoutine(file, work_buff, buf - work_buff))\
 		return false;\
@@ -145,9 +147,10 @@ GenericSave(int file)
 	reserved = 0;
 
 	// Save simple vars
-	lastMissionPassed = TheText.Get(CStats::LastMissionPassedName);
+	lastMissionPassed = TheText.Get(CStats::LastMissionPassedName[0] ? CStats::LastMissionPassedName : "ITBEG");
 	if (lastMissionPassed[0] != '\0') {
 		AsciiToUnicode("...'", suffix);
+		suffix[3] = L'\0';
 #ifdef FIX_BUGS
 		// fix buffer overflow
 		int len = UnicodeStrlen(lastMissionPassed);
@@ -221,6 +224,7 @@ GenericSave(int file)
 	buf += 4;
 	postsize = buf;
 	CTheScripts::SaveAllScripts(buf, &size);
+	debug("ScriptSize== %i \n", size);
 	CopySizeAndPreparePointer(presize, buf, postsize, reserved, size);
 	if (!PcSaveHelper.PcClassSaveRoutine(file, work_buff, buf - work_buff))
 		return false;
@@ -228,28 +232,28 @@ GenericSave(int file)
 	totalSize = buf - work_buff;
 
 	// Save the rest
-	WriteSaveDataBlock(CPools::SavePedPool);
-	WriteSaveDataBlock(CGarages::Save);
-	WriteSaveDataBlock(CGameLogic::Save);
-	WriteSaveDataBlock(CPools::SaveVehiclePool);
-	WriteSaveDataBlock(CPools::SaveObjectPool);
-	WriteSaveDataBlock(ThePaths.Save);
-	WriteSaveDataBlock(CCranes::Save);
-	WriteSaveDataBlock(CPickups::Save);
-	WriteSaveDataBlock(gPhoneInfo.Save);
-	WriteSaveDataBlock(CRestart::SaveAllRestartPoints);
-	WriteSaveDataBlock(CRadar::SaveAllRadarBlips);
-	WriteSaveDataBlock(CTheZones::SaveAllZones);
-	WriteSaveDataBlock(CGangs::SaveAllGangData);
-	WriteSaveDataBlock(CTheCarGenerators::SaveAllCarGenerators);
-	WriteSaveDataBlock(CParticleObject::SaveParticle);
-	WriteSaveDataBlock(cAudioScriptObject::SaveAllAudioScriptObjects);
-	WriteSaveDataBlock(CScriptPaths::Save);
-	WriteSaveDataBlock(CWorld::Players[CWorld::PlayerInFocus].SavePlayerInfo);
-	WriteSaveDataBlock(CStats::SaveStats);
-	WriteSaveDataBlock(CSetPieces::Save);
-	WriteSaveDataBlock(CStreaming::MemoryCardSave);
-	WriteSaveDataBlock(CPedType::Save);
+	WriteSaveDataBlock(CPools::SavePedPool, "PedPoolSize");
+	WriteSaveDataBlock(CGarages::Save, "GaragesSize");
+	WriteSaveDataBlock(CGameLogic::Save, "GameLogicSize");
+	WriteSaveDataBlock(CPools::SaveVehiclePool, "VehPoolSize");
+	WriteSaveDataBlock(CPools::SaveObjectPool, "ObjectPoolSize");
+	WriteSaveDataBlock(ThePaths.Save, "ThePathsSize");
+	WriteSaveDataBlock(CCranes::Save, "CranesSize");
+	WriteSaveDataBlock(CPickups::Save, "PickUpsSize");
+	WriteSaveDataBlock(gPhoneInfo.Save, "PhoneInfoSize");
+	WriteSaveDataBlock(CRestart::SaveAllRestartPoints, "RestartPointsBufferSize");
+	WriteSaveDataBlock(CRadar::SaveAllRadarBlips, "RadarBlipsBufferSize");
+	WriteSaveDataBlock(CTheZones::SaveAllZones, "AllZonesBufferSize");
+	WriteSaveDataBlock(CGangs::SaveAllGangData, "AllGangDataSize");
+	WriteSaveDataBlock(CTheCarGenerators::SaveAllCarGenerators, "AllCarGeneratorsSize");
+	WriteSaveDataBlock(CParticleObject::SaveParticle, "ParticlesSize");
+	WriteSaveDataBlock(cAudioScriptObject::SaveAllAudioScriptObjects, "AllAudioScriptObjectsSize");
+	WriteSaveDataBlock(CScriptPaths::Save, "ScriptPathsSize");
+	WriteSaveDataBlock(CWorld::Players[CWorld::PlayerInFocus].SavePlayerInfo, "PlayerInfoSize");
+	WriteSaveDataBlock(CStats::SaveStats, "StatsSize");
+	WriteSaveDataBlock(CSetPieces::Save, "SetPiecesSize");
+	WriteSaveDataBlock(CStreaming::MemoryCardSave, "StreamingSize");
+	WriteSaveDataBlock(CPedType::Save, "PedTypeSize");
 
 	// Write padding
 	for (int i = 0; i < 4; i++) {
@@ -458,8 +462,13 @@ CloseFile(int32 file)
 void
 DoGameSpecificStuffAfterSucessLoad()
 {
+	CCollision::SortOutCollisionAfterLoad();
+	CStreaming::LoadSceneCollision(TheCamera.GetPosition());
+	CStreaming::LoadScene(TheCamera.GetPosition());
+	CGame::TidyUpMemory(true, false);
 	StillToFadeOut = true;
 	JustLoadedDontFadeInYet = true;
+	TheCamera.Fade(0.0f, 0);
 	CTheScripts::Process();
 }
 

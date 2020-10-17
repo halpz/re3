@@ -345,8 +345,9 @@ INITSAVEBUF
 			++nObjects;
 	}
 	*size = nObjects * (sizeof(int16) + sizeof(int) + sizeof(CCompressedMatrix) +
-		sizeof(float) + sizeof(CCompressedMatrix) + sizeof(int8) + 7 * sizeof(bool) + sizeof(float) +
-		sizeof(int8) + sizeof(int8) + sizeof(uint32) + 2 * sizeof(uint32)) + sizeof(int);
+		sizeof(float) + sizeof(CCompressedMatrix) + sizeof(int8) + 7 * sizeof(bool) + sizeof(int16) +
+		+ sizeof(int8) * 2 + sizeof(float) + sizeof(int8) + sizeof(int8) +
+		sizeof(uint32) + 2 * sizeof(uint32)) + sizeof(int);
 	CopyToBuf(buf, nObjects);
 	for (int i = 0; i < nPoolSize; i++) {
 		CObject* pObject = GetObjectPool()->GetSlot(i);
@@ -370,7 +371,6 @@ INITSAVEBUF
 			tmp.CompressFromFullMatrix(pObject->m_objectMatrix);
 			CopyToBuf(buf, tmp);
 			CopyToBuf(buf, pObject->ObjectCreatedBy);
-			SkipSaveBuf(buf, 1);
 			CopyToBuf(buf, bIsPickup);
 			CopyToBuf(buf, bPickupObjWithMessage);
 			CopyToBuf(buf, bOutOfStock);
@@ -380,6 +380,7 @@ INITSAVEBUF
 			CopyToBuf(buf, bUseVehicleColours);
 			CopyToBuf(buf, pObject->m_unk);
 			CopyToBuf(buf, pObject->m_nBonusValue);
+			SkipSaveBuf(buf, 1);
 			CopyToBuf(buf, pObject->m_fCollisionDamageMultiplier);
 			CopyToBuf(buf, pObject->m_nCollisionDamageEffect);
 			CopyToBuf(buf, pObject->m_nSpecialCollisionResponseCases);
