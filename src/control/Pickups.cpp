@@ -1106,8 +1106,14 @@ CPickups::DoPickUpEffects(CEntity *entity)
 		}
 
 		if (doInnerGlow)
-			CCoronas::RegisterCorona((uintptr)entity + 8, 126, 69, 121, 255, entity->GetPosition(), 1.2f, 50.0f,
-				CCoronas::TYPE_STAR, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, 0.f);
+			CCoronas::RegisterCorona(
+#ifdef FIX_BUGS
+				(uintptr)entity + 8 + 4,
+#else
+				(uintptr)entity + 9,
+#endif
+				126, 69, 121, 255, entity->GetPosition(), 1.2f, 50.0f,
+				CCoronas::TYPE_STAR, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, 0.0f);
 	}
 }
 
