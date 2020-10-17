@@ -745,7 +745,7 @@ void
 CPickups::DoMineEffects(CEntity *entity)
 {
 	const CVector &pos = entity->GetPosition();
-	float dist = Distance2D(pos, TheCamera.GetPosition());
+	float dist = Distance(pos, TheCamera.GetPosition());
 	const float MAXDIST = 20.0f;
 
 	if (dist < MAXDIST) {
@@ -764,7 +764,7 @@ void
 CPickups::DoMoneyEffects(CEntity *entity)
 {
 	const CVector &pos = entity->GetPosition();
-	float dist = Distance2D(pos, TheCamera.GetPosition());
+	float dist = Distance(pos, TheCamera.GetPosition());
 	const float MAXDIST = 20.0f;
 
 	if (dist < MAXDIST) {
@@ -783,7 +783,7 @@ void
 CPickups::DoCollectableEffects(CEntity *entity)
 {
 	const CVector &pos = entity->GetPosition();
-	float dist = Distance2D(pos, TheCamera.GetPosition());
+	float dist = Distance(pos, TheCamera.GetPosition());
 	const float MAXDIST = 14.0f;
 
 	if (dist < MAXDIST) {
