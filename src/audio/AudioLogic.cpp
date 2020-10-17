@@ -886,7 +886,11 @@ cAudioManager::ProcessWetRoadNoise(cVehicleParams *params)
 					m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 					m_sQueueSample.m_bIs2D = false;
 					m_sQueueSample.m_nReleasingVolumeModificator = 3;
+#ifdef FIX_BUGS
 					multiplier = (m_sQueueSample.m_fDistance / SOUND_INTENSITY) * 0.5f;
+#else
+					multiplier = (m_sQueueSample.m_fDistance / 3.0f) * 0.5f;
+#endif
 					freq = SampleManager.GetSampleBaseFrequency(SFX_ROAD_NOISE);
 					m_sQueueSample.m_nFrequency = freq + freq * multiplier;
 					m_sQueueSample.m_nLoopCount = 0;
@@ -6496,9 +6500,17 @@ cAudioManager::ProcessWaterCannon(int32)
 			float distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 			if (distSquared < SQR(SOUND_INTENSITY)) {
 				m_sQueueSample.m_fDistance = Sqrt(distSquared);
+#ifdef FIX_BUGS
 				m_sQueueSample.m_nVolume = ComputeVolume(50, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
+#else
+				m_sQueueSample.m_nVolume = ComputeVolume(50, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
+#endif
 				if (m_sQueueSample.m_nVolume != 0) {
+#ifdef FIX_BUGS
 					m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
+#else
+					m_sQueueSample.m_fSoundIntensity = SQR(SOUND_INTENSITY);
+#endif
 					m_sQueueSample.m_nSampleIndex = SFX_JUMBO_TAXI;
 					m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 					m_sQueueSample.m_nFrequency = 15591;
