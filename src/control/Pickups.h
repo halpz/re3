@@ -66,8 +66,9 @@ struct tPickupMessage
 	eWeaponType m_weaponType;
 	CVector2D m_dist;
 	CRGBA m_color;
-	uint8 m_bOutOfStock : 1;
+	uint8 m_bOutOfStock;
 	uint8 m_quantity;
+	uint16 money;
 };
 
 class CPickups
@@ -114,6 +115,7 @@ public:
 	static uint32 StaticCamStartTime;
 	
 	static void RemoveAllPickupsOfACertainWeaponGroupWithNoAmmo(eWeaponType);
+	static CPickup *FindPickUpForThisObject(CEntity*);
 };
 
 extern uint16 AmmoForWeapon[20];
