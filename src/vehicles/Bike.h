@@ -132,6 +132,12 @@ public:
 	void Fix(void);
 	void SetupModelNodes(void);
 	void ReduceHornCounter(void);
+
+#ifdef COMPATIBLE_SAVES
+	virtual void Save(uint8*& buf);
+	virtual void Load(uint8*& buf);
+#endif
+	static const uint32 nSaveStructSize;
 };
 
 // These functions and function names are made up

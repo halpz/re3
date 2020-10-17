@@ -59,7 +59,7 @@ bool CAutomobile::m_sAllTaxiLights;
 
 const uint32 CAutomobile::nSaveStructSize =
 #ifdef COMPATIBLE_SAVES
-	1448;
+	1500;
 #else
 	sizeof(CAutomobile);
 #endif
@@ -5713,7 +5713,7 @@ CAutomobile::Save(uint8*& buf)
 {
 	CVehicle::Save(buf);
 	WriteSaveBuf<CDamageManager>(buf, Damage);
-	SkipSaveBuf(buf, 800 - sizeof(CDamageManager));
+	SkipSaveBuf(buf, 1500 - 672 - sizeof(CDamageManager));
 }
 
 void
@@ -5721,7 +5721,7 @@ CAutomobile::Load(uint8*& buf)
 {
 	CVehicle::Load(buf);
 	Damage = ReadSaveBuf<CDamageManager>(buf);
-	SkipSaveBuf(buf, 800 - sizeof(CDamageManager));
+	SkipSaveBuf(buf, 1500 - 672 - sizeof(CDamageManager));
 	SetupDamageAfterLoad();
 }
 #endif

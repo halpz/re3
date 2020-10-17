@@ -42,7 +42,7 @@
 #include "Fluff.h"
 
 #define BLOCK_COUNT 20
-#define SIZE_OF_SIMPLEVARS 0xFC
+#define SIZE_OF_SIMPLEVARS 0xE4
 
 const uint32 SIZE_OF_ONE_GAME_IN_BYTES = 201729;
 
@@ -194,12 +194,6 @@ GenericSave(int file)
 	WriteDataToBufferPointer(buf, CWeather::NewWeatherType);
 	WriteDataToBufferPointer(buf, CWeather::ForcedWeatherType);
 	WriteDataToBufferPointer(buf, CWeather::InterpolationValue);
-	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nSecond);
-	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nMinute);
-	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nHour);
-	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nDay);
-	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nMonth);
-	WriteDataToBufferPointer(buf, CompileDateAndTime.m_nYear);
 	WriteDataToBufferPointer(buf, CWeather::WeatherTypeInList);
 #ifdef COMPATIBLE_SAVES
 	// converted to float for compatibility with original format
@@ -331,12 +325,6 @@ GenericLoad()
 	ReadDataFromBufferPointer(buf, CWeather::NewWeatherType);
 	ReadDataFromBufferPointer(buf, CWeather::ForcedWeatherType);
 	ReadDataFromBufferPointer(buf, CWeather::InterpolationValue);
-	ReadDataFromBufferPointer(buf, CompileDateAndTime.m_nSecond);
-	ReadDataFromBufferPointer(buf, CompileDateAndTime.m_nMinute);
-	ReadDataFromBufferPointer(buf, CompileDateAndTime.m_nHour);
-	ReadDataFromBufferPointer(buf, CompileDateAndTime.m_nDay);
-	ReadDataFromBufferPointer(buf, CompileDateAndTime.m_nMonth);
-	ReadDataFromBufferPointer(buf, CompileDateAndTime.m_nYear);
 	ReadDataFromBufferPointer(buf, CWeather::WeatherTypeInList);
 #ifdef COMPATIBLE_SAVES
 	// converted to float for compatibility with original format

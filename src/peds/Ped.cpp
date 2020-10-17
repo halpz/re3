@@ -20037,15 +20037,13 @@ CPed::Save(uint8*& buf)
 	CopyToBuf(buf, GetPosition().z);
 	SkipSaveBuf(buf, 288);
 	CopyToBuf(buf, CharCreatedBy);
-	SkipSaveBuf(buf, 351);
+	SkipSaveBuf(buf, 499);
 	CopyToBuf(buf, m_fHealth);
 	CopyToBuf(buf, m_fArmour);
-	SkipSaveBuf(buf, 148);
-	for (int i = 0; i < 13; i++) // has to be hardcoded
+	SkipSaveBuf(buf, 172);
+	for (int i = 0; i < 10; i++) // has to be hardcoded
 		m_weapons[i].Save(buf);
-	SkipSaveBuf(buf, 5);
-	CopyToBuf(buf, m_maxWeaponTypeAllowed);
-	SkipSaveBuf(buf, 162);
+	SkipSaveBuf(buf, 252);
 }
 
 void
@@ -20057,16 +20055,15 @@ CPed::Load(uint8*& buf)
 	CopyFromBuf(buf, GetMatrix().GetPosition().z);
 	SkipSaveBuf(buf, 288);
 	CopyFromBuf(buf, CharCreatedBy);
-	SkipSaveBuf(buf, 351);
+	SkipSaveBuf(buf, 499);
 	CopyFromBuf(buf, m_fHealth);
 	CopyFromBuf(buf, m_fArmour);
-	SkipSaveBuf(buf, 148);
+	SkipSaveBuf(buf, 172);
+	m_currentWeapon = WEAPONTYPE_UNARMED;
 
 	CWeapon bufWeapon;
-	for (int i = 0; i < 13; i++) { // has to be hardcoded
+	for (int i = 0; i < 10; i++) { // has to be hardcoded
 		bufWeapon.Load(buf);
-		if (i >= 10)
-			continue; // tmp hack before we fix save/load
 
 		if (bufWeapon.m_eWeaponType != WEAPONTYPE_UNARMED) {
 			int modelId = CWeaponInfo::GetWeaponInfo(bufWeapon.m_eWeaponType)->m_nModelId;
@@ -20081,9 +20078,7 @@ CPed::Load(uint8*& buf)
 			GiveWeapon(bufWeapon.m_eWeaponType, bufWeapon.m_nAmmoTotal);
 		}
 	}
-	SkipSaveBuf(buf, 5);
-	CopyFromBuf(buf, m_maxWeaponTypeAllowed);
-	SkipSaveBuf(buf, 162);
+	SkipSaveBuf(buf, 252);
 }
 #undef CopyFromBuf
 #undef CopyToBuf
