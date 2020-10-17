@@ -534,12 +534,13 @@ CameraSize(RwCamera * camera, RwRect * rect,
 			}
 		}
 
-		// BUG: game just changes camera raster's sizes, but this is a hack
-		if (( origSize.w != rect->w ) && ( origSize.h != rect->h ))
+		if (( origSize.w != rect->w ) || ( origSize.h != rect->h ))
 		{
 			RwRaster           *raster;
 			RwRaster           *zRaster;
 
+			// BUG: game just changes camera raster's sizes, but this is a hack
+#ifdef FIX_BUGS
 			/*
 			 * Destroy rasters...
 			 */
@@ -597,6 +598,13 @@ CameraSize(RwCamera * camera, RwRect * rect,
 				RwCameraSetRaster(camera, raster);
 				RwCameraSetZRaster(camera, zRaster);
 			}
+#else
+			raster = RwCameraGetRaster(camera);
+			zRaster = RwCameraGetZRaster(camera);
+			
+			raster->width = zRaster->width = rect->w;
+			raster->height = zRaster->height = rect->h;
+#endif
 		}
 
 		/* Figure out the view window */
