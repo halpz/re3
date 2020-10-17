@@ -628,7 +628,7 @@ CPickups::Update()
 #ifdef CAMERA_PICKUP
 	if ( bPickUpcamActivated ) // taken from PS2
 	{
-		float dist = (FindPlayerCoors() - StaticCamCoors).Magnitude2D();
+		float dist = Distance2D(StaticCamCoors, FindPlayerCoors());
 		float mult;
 		if ( dist < 10.0f )
 			mult = 1.0f - (dist / 10.0f );
@@ -644,8 +644,7 @@ CPickups::Update()
 			TheCamera.TakeControl(FindPlayerVehicle(), CCam::MODE_FIXED, JUMP_CUT, CAMCONTROL_SCRIPT);
 		}
 
-		if ( FindPlayerVehicle() != pPlayerVehicle
-			|| (FindPlayerCoors() - StaticCamCoors).Magnitude() > 40.0f
+		if ( FindPlayerVehicle() != pPlayerVehicle || Distance(StaticCamCoors, FindPlayerCoors()) > 40.0f
 			|| ((CTimer::GetTimeInMilliseconds() - StaticCamStartTime) > 60000) )
 		{
 			TheCamera.RestoreWithJumpCut();
@@ -715,7 +714,7 @@ CPickups::DoPickUpEffects(CEntity *entity)
 
 		CObject *object = (CObject*)entity;
 		if (object->bPickupObjWithMessage || object->bOutOfStock || object->m_nBonusValue) {
-			float dist = (TheCamera.GetPosition() - pos).Magnitude();
+			float dist = Distance2D(pos, TheCamera.GetPosition());
 			const float MAXDIST = 12.0f;
 
 			if (dist < MAXDIST && NumMessages < NUMPICKUPMESSAGES) {
@@ -746,7 +745,7 @@ void
 CPickups::DoMineEffects(CEntity *entity)
 {
 	const CVector &pos = entity->GetPosition();
-	float dist = (TheCamera.GetPosition() - pos).Magnitude();
+	float dist = Distance2D(pos, TheCamera.GetPosition());
 	const float MAXDIST = 20.0f;
 
 	if (dist < MAXDIST) {
@@ -765,7 +764,7 @@ void
 CPickups::DoMoneyEffects(CEntity *entity)
 {
 	const CVector &pos = entity->GetPosition();
-	float dist = (TheCamera.GetPosition() - pos).Magnitude();
+	float dist = Distance2D(pos, TheCamera.GetPosition());
 	const float MAXDIST = 20.0f;
 
 	if (dist < MAXDIST) {
@@ -784,7 +783,7 @@ void
 CPickups::DoCollectableEffects(CEntity *entity)
 {
 	const CVector &pos = entity->GetPosition();
-	float dist = (TheCamera.GetPosition() - pos).Magnitude();
+	float dist = Distance2D(pos, TheCamera.GetPosition());
 	const float MAXDIST = 14.0f;
 
 	if (dist < MAXDIST) {
