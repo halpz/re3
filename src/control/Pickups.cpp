@@ -1320,6 +1320,7 @@ CPickups::RemoveAllPickupsOfACertainWeaponGroupWithNoAmmo(eWeaponType weaponType
 	}
 }
 
+// --MIAMI: Done
 void
 CPickups::Load(uint8 *buf, uint32 size)
 {
@@ -1328,8 +1329,13 @@ INITSAVEBUF
 	for (int32 i = 0; i < NUMPICKUPS; i++) {
 		aPickUps[i] = ReadSaveBuf<CPickup>(buf);
 
-		if (aPickUps[i].m_eType != PICKUP_NONE && aPickUps[i].m_pObject != nil)
-			aPickUps[i].m_pObject = CPools::GetObjectPool()->GetSlot((uintptr)aPickUps[i].m_pObject - 1);
+		if (aPickUps[i].m_eType != PICKUP_NONE) {
+			if (aPickUps[i].m_pObject != nil)
+				aPickUps[i].m_pObject = CPools::GetObjectPool()->GetSlot((uintptr)aPickUps[i].m_pObject - 1);
+			if (aPickUps[i].m_pExtraObject != nil)
+				aPickUps[i].m_pExtraObject = CPools::GetObjectPool()->GetSlot((uintptr)aPickUps[i].m_pExtraObject - 1);
+		}
+			
 	}
 
 	CollectedPickUpIndex = ReadSaveBuf<uint16>(buf);
@@ -1342,17 +1348,23 @@ INITSAVEBUF
 VALIDATESAVEBUF(size)
 }
 
+// --MIAMI: Done
 void
 CPickups::Save(uint8 *buf, uint32 *size)
 {
-	*size = sizeof(aPickUps) + sizeof(uint16) + sizeof(uint16) + sizeof(aPickUpsCollected);
+	*size = sizeof(aPickUps);
+	*size += sizeof(uint16) + sizeof(uint16) + sizeof(aPickUpsCollected);
 
 INITSAVEBUF
 
 	for (int32 i = 0; i < NUMPICKUPS; i++) {
 		CPickup *buf_pickup = WriteSaveBuf(buf, aPickUps[i]);
-		if (buf_pickup->m_eType != PICKUP_NONE && buf_pickup->m_pObject != nil)
-			buf_pickup->m_pObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex(buf_pickup->m_pObject) + 1);
+		if (buf_pickup->m_eType != PICKUP_NONE) {
+			if (buf_pickup->m_pObject != nil)
+				buf_pickup->m_pObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex(buf_pickup->m_pObject) + 1);
+			if (buf_pickup->m_pExtraObject != nil)
+				buf_pickup->m_pExtraObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex(buf_pickup->m_pExtraObject) + 1);
+		}
 	}
 
 	WriteSaveBuf(buf, CollectedPickUpIndex);
