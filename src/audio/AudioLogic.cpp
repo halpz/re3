@@ -940,7 +940,11 @@ cAudioManager::ProcessModelVehicle(cVehicleParams *params)
 	if (FindPlayerVehicle() == params->m_pVehicle)
 		isPlayerVeh = true;
 	else
-		isPlayerVeh = CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle != nil;  //mb bug?
+#ifdef FIX_BUGS
+		isPlayerVeh = CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle == params->m_pVehicle;
+#else
+		isPlayerVeh = CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle != nil;
+#endif
 	if (params->m_pVehicle->m_modelIndex == MI_RCBANDIT) {
 		if (((CAutomobile*)params->m_pVehicle)->m_nDriveWheelsOnGround != 0) {
 			volume = Min(127, 127.0f * Abs(params->m_fVelocityChange) * 3.0f);
@@ -1052,7 +1056,7 @@ cAudioManager::ProcessVehicleRoadNoise(cVehicleParams* params)
 
 	int32 emittingVol;
 	uint32 freq;
-	float modificator;
+	float multiplier;
 	int sampleFreq;
 	float velocity;
 	uint8 wheelsOnGround;
@@ -1091,9 +1095,9 @@ cAudioManager::ProcessVehicleRoadNoise(cVehicleParams* params)
 				freq = 6050 * emittingVol / 30 + 16000;
 			} else {
 				m_sQueueSample.m_nSampleIndex = SFX_ROAD_NOISE;
-				modificator = (m_sQueueSample.m_fDistance / 95.0f) * 0.5f;   //mb SOUND_INTENSITY?
+				multiplier = (m_sQueueSample.m_fDistance / SOUND_INTENSITY) * 0.5f;
 				sampleFreq = SampleManager.GetSampleBaseFrequency(SFX_ROAD_NOISE);
-				freq = (sampleFreq * modificator) + ((3 * sampleFreq) / 4);
+				freq = (sampleFreq * multiplier) + ((3 * sampleFreq) / 4);
 			}
 			m_sQueueSample.m_nFrequency = freq;
 			m_sQueueSample.m_nLoopCount = 0;
@@ -1120,7 +1124,7 @@ cAudioManager::ProcessWetRoadNoise(cVehicleParams* params)
 
 	float relativeVelocity;
 	int32 emittingVol;
-	float modificator;
+	float multiplier;
 	int freq;
 	float velocity;
 	uint8 wheelsOnGround;
@@ -1153,9 +1157,9 @@ cAudioManager::ProcessWetRoadNoise(cVehicleParams* params)
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_bIs2D = false;
 			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			modificator = (m_sQueueSample.m_fDistance / 30.0f) * 0.5f; //need recheck in III, mb sount_intensity?
+			multiplier = (m_sQueueSample.m_fDistance / SOUND_INTENSITY) * 0.5f;
 			freq = SampleManager.GetSampleBaseFrequency(SFX_ROAD_NOISE);
-			m_sQueueSample.m_nFrequency = freq + freq * modificator;
+			m_sQueueSample.m_nFrequency = freq + freq * multiplier;
 			m_sQueueSample.m_nLoopCount = 0;
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
@@ -2125,7 +2129,11 @@ cAudioManager::ProcessVehicleHorn(cVehicleParams* params)
 			m_sQueueSample.m_nReleasingVolumeModificator = 2;
 			m_sQueueSample.m_nFrequency = aVehicleSettings[params->m_nIndex].m_nHornFrequency;
 			m_sQueueSample.m_nLoopCount = 0;
-			m_sQueueSample.m_nEmittingVolume = 80; //mb bug?
+#ifdef FIX_BUGS
+			m_sQueueSample.m_nEmittingVolume = volume;
+#else
+			m_sQueueSample.m_nEmittingVolume = 80;
+#endif
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_fSpeedMultiplier = 5.0f;
@@ -2143,7 +2151,7 @@ cAudioManager::ProcessVehicleHorn(cVehicleParams* params)
 bool
 cAudioManager::UsesSiren(cVehicleParams *params) const
 {
-	params->m_pVehicle->UsesSiren();
+	return params->m_pVehicle->UsesSiren();
 }
 
 bool
@@ -2250,7 +2258,11 @@ cAudioManager::ProcessVehicleReverseWarning(cVehicleParams *params)
 			m_sQueueSample.m_nReleasingVolumeModificator = 2;
 			m_sQueueSample.m_nFrequency = (100 * m_sQueueSample.m_nEntityIndex & 1023) + SampleManager.GetSampleBaseFrequency(SFX_REVERSE_WARNING);
 			m_sQueueSample.m_nLoopCount = 0;
-			m_sQueueSample.m_nEmittingVolume = 60; //mb bug?
+#ifdef FIX_BUGS
+			m_sQueueSample.m_nEmittingVolume = volume;
+#else
+			m_sQueueSample.m_nEmittingVolume = 60;
+#endif
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_fSpeedMultiplier = 3.0f;
@@ -5882,7 +5894,7 @@ cAudioManager::ProcessProjectiles()
 			}
 			m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 			m_sQueueSample.m_nReleasingVolumeDivider = 3;
-			m_sQueueSample.m_vecPos = CProjectileInfo::ms_apProjectile[i]->GetPosition(); //??
+			m_sQueueSample.m_vecPos = CProjectileInfo::ms_apProjectile[i]->GetPosition();
 			distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 			if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
 				m_sQueueSample.m_fDistance = distSquared <= 0.0f ? 0.0f : Sqrt(distSquared);
