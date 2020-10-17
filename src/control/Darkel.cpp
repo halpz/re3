@@ -391,7 +391,7 @@ CDarkel::DealWithWeaponChangeAtEndOfFrenzy()
 
 	CPlayerPed* player = FindPlayerPed();
 	if (fixedWeapon < WEAPONTYPE_TOTALWEAPONS) {
-		player->m_nSelectedWepSlot = InterruptedWeaponType;
+		player->m_nSelectedWepSlot = CWeaponInfo::GetWeaponInfo((eWeaponType)InterruptedWeaponSelected)->m_nWeaponSlot;
 		player->GiveWeapon((eWeaponType)InterruptedWeaponType, AmmoInterruptedWeapon, true);
 	}
 
