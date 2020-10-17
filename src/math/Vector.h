@@ -120,7 +120,7 @@ Distance2D(const CVector &v1, const CVector &v2)
 {
 	float x = v2.x - v1.x;
 	float y = v2.y - v1.y;
-	return Sqrt(sq(x) + sq(y));
+	return Sqrt(x*x + y*y);
 }
 
 class CMatrix;
