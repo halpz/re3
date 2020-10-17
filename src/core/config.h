@@ -172,7 +172,6 @@ enum Config {
 #	define RANDOMSPLASH
 #	define VU_COLLISION
 #elif defined GTA_PC
-#	define GTA3_1_1_PATCH
 //#	define GTA3_STEAM_PATCH
 //# define GTAVC_JP_PATCH
 #	ifdef GTA_PS2_STUFF
@@ -263,7 +262,6 @@ enum Config {
 
 // Hud, frontend and radar
 //#define BETA_SLIDING_TEXT
-#define TRIANGULAR_BLIPS	// height indicating triangular radar blips, as in VC
 #define PC_MENU
 
 #ifndef PC_MENU
