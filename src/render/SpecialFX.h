@@ -53,7 +53,7 @@ struct CBulletTrace
 	bool m_bInUse;
 	uint32 m_nCreationTime;
 	uint32 m_nLifeTime;
-	float m_fThicknes;
+	float m_fThickness;
 	uint8 m_fVisibility;
 
 	void Update(void);

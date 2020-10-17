@@ -381,7 +381,7 @@ void CBulletTraces::Init(void)
 		aTraces[i].m_bInUse = false;
 }
 
-void CBulletTraces::AddTrace(CVector* start, CVector* end, float thicknes, uint32 lifeTime, uint8 visibility)
+void CBulletTraces::AddTrace(CVector* start, CVector* end, float thickness, uint32 lifeTime, uint8 visibility)
 {
 	int32 enabledCount;
 	uint32 modifiedLifeTime;
@@ -407,7 +407,7 @@ void CBulletTraces::AddTrace(CVector* start, CVector* end, float thicknes, uint3
 		aTraces[nextSlot].m_bInUse = true;
 		aTraces[nextSlot].m_nCreationTime = CTimer::GetTimeInMilliseconds();
 		aTraces[nextSlot].m_fVisibility = visibility;
-		aTraces[nextSlot].m_fThicknes = thicknes;
+		aTraces[nextSlot].m_fThickness = thickness;
 		aTraces[nextSlot].m_nLifeTime = modifiedLifeTime;
 	}
 
@@ -492,10 +492,10 @@ void CBulletTraces::Render(void)
 
 		float timeAlive = CTimer::GetTimeInMilliseconds() - aTraces[i].m_nCreationTime;
 
-		float traceThicknes = aTraces[i].m_fThicknes * timeAlive / aTraces[i].m_nLifeTime;
+		float traceThickness = aTraces[i].m_fThickness * timeAlive / aTraces[i].m_nLifeTime;
 		CVector horizontalOffset = aTraces[i].m_vecEndPos - aTraces[i].m_vecStartPos;
 		horizontalOffset.Normalise();
-		horizontalOffset *= traceThicknes;
+		horizontalOffset *= traceThickness;
 
 		//then closer trace to die then it more transparent
 		uint8 nAlphaValue = aTraces[i].m_fVisibility * (aTraces[i].m_nLifeTime - timeAlive) / aTraces[i].m_nLifeTime;
@@ -540,15 +540,15 @@ void CBulletTraces::Render(void)
 		//two points in center
 		RwIm3DVertexSetPos(&TraceVertices[0], start2.x, start2.y, start2.z);
 		RwIm3DVertexSetPos(&TraceVertices[5], end2.x, end2.y, end2.z);
-		//vetrical planes
-		RwIm3DVertexSetPos(&TraceVertices[1], start2.x, start2.y, start2.z + traceThicknes);
-		RwIm3DVertexSetPos(&TraceVertices[3], start2.x, start2.y, start2.z - traceThicknes);
-		RwIm3DVertexSetPos(&TraceVertices[6], end2.x, end2.y, end2.z + traceThicknes);
-		RwIm3DVertexSetPos(&TraceVertices[8], end2.x, end2.y, end2.z - traceThicknes);
+		//vertical planes
+		RwIm3DVertexSetPos(&TraceVertices[1], start2.x, start2.y, start2.z + traceThickness);
+		RwIm3DVertexSetPos(&TraceVertices[3], start2.x, start2.y, start2.z - traceThickness);
+		RwIm3DVertexSetPos(&TraceVertices[6], end2.x, end2.y, end2.z + traceThickness);
+		RwIm3DVertexSetPos(&TraceVertices[8], end2.x, end2.y, end2.z - traceThickness);
 		//horizontal planes
 		RwIm3DVertexSetPos(&TraceVertices[2], start2.x + horizontalOffset.y, start2.y - horizontalOffset.x, start2.z);
 		RwIm3DVertexSetPos(&TraceVertices[7], end2.x + horizontalOffset.y, end2.y - horizontalOffset.x, end2.z);
-#ifdef FIX_BUGS //this point calcilated wrong for some reason
+#ifdef FIX_BUGS //this point calculated wrong for some reason
 		RwIm3DVertexSetPos(&TraceVertices[4], start2.x - horizontalOffset.y, start2.y + horizontalOffset.x, start2.z);
 		RwIm3DVertexSetPos(&TraceVertices[9], end2.x - horizontalOffset.y, end2.y + horizontalOffset.x, end2.z);
 #else
@@ -573,13 +573,13 @@ void CBulletTraces::Render(void)
 		RwIm3DVertexSetRGBA(&TraceVertices[4], 255, 255, 255, 0);
 
 		RwIm3DVertexSetPos(&TraceVertices[0], start.x, start.y, start.z);
-		RwIm3DVertexSetPos(&TraceVertices[1], start.x, start.y, start.z + traceThicknes);
-		RwIm3DVertexSetPos(&TraceVertices[3], start.x, start.y, start.z - traceThicknes);
+		RwIm3DVertexSetPos(&TraceVertices[1], start.x, start.y, start.z + traceThickness);
+		RwIm3DVertexSetPos(&TraceVertices[3], start.x, start.y, start.z - traceThickness);
 		RwIm3DVertexSetPos(&TraceVertices[2], start.x + horizontalOffset.y, start.y - horizontalOffset.x, start.z);
 
 		RwIm3DVertexSetPos(&TraceVertices[5], start2.x, start2.y, start2.z);
-		RwIm3DVertexSetPos(&TraceVertices[6], start2.x, start2.y, start2.z + traceThicknes);
-		RwIm3DVertexSetPos(&TraceVertices[8], start2.x, start2.y, start2.z - traceThicknes);
+		RwIm3DVertexSetPos(&TraceVertices[6], start2.x, start2.y, start2.z + traceThickness);
+		RwIm3DVertexSetPos(&TraceVertices[8], start2.x, start2.y, start2.z - traceThickness);
 		RwIm3DVertexSetPos(&TraceVertices[7], start2.x + horizontalOffset.y, start2.y - horizontalOffset.x, start2.z);
 #ifdef FIX_BUGS
 		RwIm3DVertexSetPos(&TraceVertices[4], start.x - horizontalOffset.y, start.y + horizontalOffset.x, start.z);
@@ -595,13 +595,13 @@ void CBulletTraces::Render(void)
 		}
 
 		RwIm3DVertexSetPos(&TraceVertices[1], end.x, end.y, end.z);
-		RwIm3DVertexSetPos(&TraceVertices[2], end.x, end.y, end.z + traceThicknes);
-		RwIm3DVertexSetPos(&TraceVertices[4], end.x, end.y, end.z - traceThicknes);
+		RwIm3DVertexSetPos(&TraceVertices[2], end.x, end.y, end.z + traceThickness);
+		RwIm3DVertexSetPos(&TraceVertices[4], end.x, end.y, end.z - traceThickness);
 		RwIm3DVertexSetPos(&TraceVertices[3], end.x + horizontalOffset.y, end.y - horizontalOffset.x, end.z);
 
 		RwIm3DVertexSetPos(&TraceVertices[5], end2.x, end2.y, end2.z);
-		RwIm3DVertexSetPos(&TraceVertices[6], end2.x, end2.y, end2.z + traceThicknes);
-		RwIm3DVertexSetPos(&TraceVertices[8], end2.x, end2.y, end2.z - traceThicknes);
+		RwIm3DVertexSetPos(&TraceVertices[6], end2.x, end2.y, end2.z + traceThickness);
+		RwIm3DVertexSetPos(&TraceVertices[8], end2.x, end2.y, end2.z - traceThickness);
 		RwIm3DVertexSetPos(&TraceVertices[7], end2.x + horizontalOffset.y, end2.y - horizontalOffset.x, end2.z);
 #ifdef FIX_BUGS
 		RwIm3DVertexSetPos(&TraceVertices[5], end.x - horizontalOffset.y, end.y + horizontalOffset.x, end.z);
@@ -1049,11 +1049,9 @@ CBrightLights::Render(void)
 			g = aBrightLights[i].m_green;
 			b = aBrightLights[i].m_blue;
 			break;
-		default:
 #ifdef FIX_BUGS  //just to make sure that color never will be undefined
+		default:
 			return;
-#else
-			break;
 #endif
 		}
 
