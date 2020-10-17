@@ -339,15 +339,15 @@ public:
 	void ProcessLoopingScriptObject(uint8 sound);                            // 
 	void ProcessMissionAudio();                                              // 
 	void ProcessMissionAudioSlot(uint8 slot);                                // 
-	void ProcessModelCarEngine(cVehicleParams *params);                      // 
+	void ProcessModelVehicle(cVehicleParams *params);                        // done
 	void ProcessOneShotScriptObject(uint8 sound);                            // 
 	void ProcessPed(CPhysical *ped);                                         // 
 	void ProcessPedOneShots(cPedParams *params);                             // 
 	void ProcessPhysical(int32 id);                                          // done
 	void ProcessPlane(cVehicleParams *params);                               // done
 	void ProcessPlayersVehicleEngine(cVehicleParams *params, CVehicle* veh); // done
-	void ProcessProjectiles();                                               // 
-	void ProcessRainOnVehicle(cVehicleParams *params);                       // 
+	void ProcessProjectiles();                                               // done
+	void ProcessRainOnVehicle(cVehicleParams *params);                       // done
 	void ProcessReverb() const;                                              // 
 	bool ProcessReverseGear(cVehicleParams *params);                         // done
 	void ProcessScriptObject(int32 id);                                      // done
@@ -365,7 +365,7 @@ public:
 	bool ProcessVehicleRoadNoise(cVehicleParams *params);      // done
 	bool ProcessVehicleSirenOrAlarm(cVehicleParams *params);   // done
 	bool ProcessVehicleSkidding(cVehicleParams *params);       // 
-	void ProcessWaterCannon(int32);                            // 
+	void ProcessWaterCannon(int32);                            // done
 	void ProcessWeather(int32 id);                             // done
 	bool ProcessWetRoadNoise(cVehicleParams *params);          // done
 	void ProcessEscalators();                                  // done
