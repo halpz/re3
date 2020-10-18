@@ -1412,7 +1412,7 @@ CPathFind::FindNodeCoorsForScript(int32 id)
 	dir.Normalise();
 	if (dir.x < 0)
 		dir = -dir;
-	return m_pathNodes[id].GetPosition() + CVector(-dir.y, dir.z, 0.0f) * (LANE_WIDTH / 2 + m_pathNodes[id].GetDividerWidth());
+	return m_pathNodes[id].GetPosition() + CVector(-dir.y, dir.x, 0.0f) * (LANE_WIDTH / 2 + m_pathNodes[id].GetDividerWidth());
 }
 
 float
