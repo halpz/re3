@@ -2192,8 +2192,8 @@ CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 						}
 
 						// move body cast
-						if(phys->IsStatic()){
-							phys->bIsStatic = false;
+						if(phys->GetIsStatic()){
+							phys->SetIsStatic(false);
 							phys->m_nStaticFrames = 0;
 							phys->ApplyMoveForce(m_vecMoveSpeed / Sqrt(speed));
 							phys->AddToMovingList();
@@ -4385,7 +4385,7 @@ CAutomobile::SpawnFlyingComponent(int32 component, uint32 type)
 	obj->m_fElasticity = 0.1f;
 	obj->m_fBuoyancy = obj->m_fMass*GRAVITY/0.75f;
 	obj->ObjectCreatedBy = TEMP_OBJECT;
-	obj->bIsStatic = false;
+	obj->SetIsStatic(false);
 	obj->bIsPickup = false;
 	obj->bUseVehicleColours = true;
 	obj->m_colour1 = m_currentColour1;

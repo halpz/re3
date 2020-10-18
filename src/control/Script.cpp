@@ -3577,7 +3577,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		pos.z += car->GetDistanceFromCentreOfMassToBaseOfModel();
-		car->bIsStatic = false;
+		car->SetIsStatic(false);
 		/* Again weird usage of virtual functions. */
 		if (car->IsBoat()) {
 			car->Teleport(pos);
@@ -9184,14 +9184,14 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
 		script_assert(pObject);
 		if (ScriptParams[1]) {
-			if (pObject->bIsStatic) {
-				pObject->bIsStatic = false;
+			if (pObject->GetIsStatic()) {
+				pObject->SetIsStatic(false);
 				pObject->AddToMovingList();
 			}
 		}
 		else {
-			if (!pObject->bIsStatic) {
-				pObject->bIsStatic = true;
+			if (!pObject->GetIsStatic()) {
+				pObject->SetIsStatic(true);
 				pObject->RemoveFromMovingList();
 			}
 		}

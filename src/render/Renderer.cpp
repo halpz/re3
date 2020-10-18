@@ -1208,7 +1208,7 @@ CRenderer::IsEntityCullZoneVisible(CEntity *ent)
 		return !(ped->m_pCurSurface && ped->m_pCurSurface->bZoneCulled2);
 	case ENTITY_TYPE_OBJECT:
 		obj = (CObject*)ent;
-		if(!obj->IsStatic())
+		if(!obj->GetIsStatic())
 			return true;
 		return !(obj->m_pCurSurface && obj->m_pCurSurface->bZoneCulled2);
 	default: break;

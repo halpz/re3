@@ -972,7 +972,7 @@ CPopulation::ConvertToRealObject(CDummyObject *dummy)
 	if (IsGlass(obj->GetModelIndex())) {
 		obj->bIsVisible = false;
 	} else if (obj->GetModelIndex() == MI_BUOY) {
-		obj->bIsStatic = false;
+		obj->SetIsStatic(false);
 		obj->m_vecMoveSpeed = CVector(0.0f, 0.0f, -0.001f);
 		obj->bTouchingWater = true;
 		obj->AddToMovingList();

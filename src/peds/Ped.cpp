@@ -14606,11 +14606,11 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 		if (!collidingEnt->IsBuilding())
 			((CPhysical*)collidingEnt)->AddCollisionRecord(this);
 
-		if (ourCollidedSpheres > 0 && (collidingEnt->IsBuilding() || collidingEnt->IsStatic())) {
+		if (ourCollidedSpheres > 0 && (collidingEnt->IsBuilding() || collidingEnt->GetIsStatic())) {
 			bHasHitWall = true;
 		}
 	}
-	if (collidingEnt->IsBuilding() || collidingEnt->IsStatic()) {
+	if (collidingEnt->IsBuilding() || collidingEnt->GetIsStatic()) {
 
 		if (bWasStanding) {
 			CVector sphereNormal;
@@ -15956,7 +15956,7 @@ CPed::SeekCar(void)
 				} else {
 					m_fRotationCur = m_fRotationDest;
 					if (!bVehEnterDoorIsBlocked) {
-						vehToSeek->bIsStatic = false;
+						vehToSeek->SetIsStatic(false);
 						if (m_objective == OBJECTIVE_SOLICIT_VEHICLE) {
 							SetSolicit(1000);
 						} else if (m_objective == OBJECTIVE_BUY_ICE_CREAM) {
@@ -16637,7 +16637,7 @@ CPed::SpawnFlyingComponent(int pedNode, int8 direction)
 	obj->m_fElasticity = 0.03f;
 	obj->m_fBuoyancy = m_fMass*GRAVITY/0.75f;
 	obj->ObjectCreatedBy = TEMP_OBJECT;
-	obj->bIsStatic = false;
+	obj->SetIsStatic(false);
 	obj->bIsPickup = false;
 	obj->m_nSpecialCollisionResponseCases = COLLRESPONSE_SMALLBOX;
 

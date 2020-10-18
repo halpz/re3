@@ -165,7 +165,7 @@ CRoadBlocks::GenerateRoadBlocks(void)
 							vehicleMatrix.GetPosition().z += fModelRadius - 0.6f;
 							pVehicle->m_matrix = vehicleMatrix;
 							pVehicle->PlaceOnRoadProperly();
-							pVehicle->bIsStatic = false;
+							pVehicle->SetIsStatic(false);
 							pVehicle->m_matrix.UpdateRW();
 							pVehicle->m_nDoorLock = CARLOCK_UNLOCKED;
 							CCarCtrl::JoinCarWithRoadSystem(pVehicle);
