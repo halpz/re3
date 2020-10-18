@@ -15403,17 +15403,17 @@ CPed::ProcessObjective(void)
 					CVector distance = m_nextRoutePointPos - GetPosition();
 					distance.z = 0.0f;
 					if (m_objective == OBJECTIVE_GOTO_SHELTER_ON_FOOT) {
-						if (m_nMoveState == PEDMOVE_SPRINT && distance.Magnitude() < SQR(2.0f)) {
+						if (m_nMoveState == PEDMOVE_RUN && distance.Magnitude() < SQR(2.0f)) {
 							SetMoveState(PEDMOVE_WALK);
 							bIsRunning = false;
 						}
-						else if (CWeather::Rain < 0.2f && m_attractor) {
+						if (CWeather::Rain < 0.2f && m_attractor) {
 							GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
 							return;
 						}
 					}
 					else if (m_objective == OBJECTIVE_GOTO_ICE_CREAM_VAN_ON_FOOT) {
-						if (m_nMoveState == PEDMOVE_SPRINT && distance.Magnitude() < SQR(4.0f)) {
+						if (m_nMoveState == PEDMOVE_RUN && distance.Magnitude() < SQR(4.0f)) {
 							SetMoveState(PEDMOVE_WALK);
 							bIsRunning = false;
 						}
@@ -15439,8 +15439,10 @@ CPed::ProcessObjective(void)
 						}
 					}
 					if (sq(m_distanceToCountSeekDone) < distance.MagnitudeSqr()) {
-						if (CTimer::GetTimeInMilliseconds() > m_nPedStateTimer || GetPedState() != PED_SEEK_POS)
+						if (CTimer::GetTimeInMilliseconds() > m_nPedStateTimer || GetPedState() != PED_SEEK_POS) {
+							m_vecSeekPos = m_nextRoutePointPos;
 							SetSeek(m_vecSeekPos, m_distanceToCountSeekDone);
+						}
 					}
 					else {
 						if (!bReachedAttractorHeadingTarget) {
@@ -15510,6 +15512,10 @@ CPed::ProcessObjective(void)
 									SetObjective(OBJECTIVE_WAIT_ON_FOOT_AT_ICE_CREAM_VAN);
 									break;
 								}
+							} else {
+								m_prevObjective = OBJECTIVE_NONE;
+								SetObjective(OBJECTIVE_WAIT_ON_FOOT);
+								m_objectiveTimer = 0;
 							}
 						}
 					}
@@ -15693,11 +15699,11 @@ CPed::ProcessObjective(void)
 				}
 				if (!pVan->m_bSirenOrAlarm) {
 					GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
-					return; // ???
+					return; // Why?
 				}
 				if (pVan->GetStatus() == STATUS_WRECKED) {
 					GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
-					return; // ???
+					return; // Why?
 				}
 				break;
 			}
