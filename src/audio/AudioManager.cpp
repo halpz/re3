@@ -321,8 +321,13 @@ cAudioManager::Get3DProviderName(uint8 id) const
 {
 	if (!m_bIsInitialised)
 		return nil;
+#ifdef AUDIO_OAL
+	id = clamp(id, 0, SampleManager.GetNum3DProvidersAvailable() - 1);
+#else
+	// We don't want that either since it will crash the game, but skipping for now
 	if (id >= SampleManager.GetNum3DProvidersAvailable())
 		return nil;
+#endif
 	return SampleManager.Get3DProviderName(id);
 }
 

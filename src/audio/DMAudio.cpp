@@ -118,7 +118,12 @@ int8 cDMAudio::AutoDetect3DProviders(void)
 	for ( int32 i = 0; i < GetNum3DProvidersAvailable(); i++ )
 	{
 		wchar buff[64];
-		
+
+#ifdef AUDIO_OAL
+		if (defaultProvider >= 0 && defaultProvider < GetNum3DProvidersAvailable()) {
+			return i;
+		}
+#endif
 		char *name = Get3DProviderName(i);
 		AsciiToUnicode(name, buff);
 		char *providername = UnicodeToAscii(buff);

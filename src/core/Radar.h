@@ -51,6 +51,17 @@ enum eRadarSprite
 
 enum
 {
+	RADAR_TRACE_RED,
+	RADAR_TRACE_GREEN,
+	RADAR_TRACE_LIGHT_BLUE,
+	RADAR_TRACE_GRAY,
+	RADAR_TRACE_YELLOW,
+	RADAR_TRACE_MAGENTA,
+	RADAR_TRACE_CYAN
+};
+
+enum
+{
 	BLIP_MODE_TRIANGULAR_UP = 0,
 	BLIP_MODE_TRIANGULAR_DOWN,
 	BLIP_MODE_SQUARE,
@@ -108,11 +119,6 @@ public:
 	static float cachedCos;
 	static float cachedSin;
 #ifdef MENU_MAP
-#define NUM_MAP_LEGENDS 75
-	static CRGBA ArrowBlipColour1;
-	static CRGBA ArrowBlipColour2;
-	static uint16 MapLegendList[NUM_MAP_LEGENDS];
-	static uint16 MapLegendCounter;
 	static int TargetMarkerId;
 	static CVector TargetMarkerPos;
 

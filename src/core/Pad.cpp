@@ -2399,7 +2399,7 @@ bool CPad::GetAnaloguePadLeftJustUp(void)
 
 	if ( X == 0 && oldfStickX < 0 )
 	{
-		oldfStickX = X;
+		oldfStickX = 0;
 
 		return true;
 	}
@@ -2419,7 +2419,7 @@ bool CPad::GetAnaloguePadRightJustUp(void)
 
 	if ( X == 0 && oldfStickX > 0 )
 	{
-		oldfStickX = X;
+		oldfStickX = 0;
 
 		return true;
 	}

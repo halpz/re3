@@ -218,6 +218,10 @@ public:
 extern cSampleManager SampleManager;
 extern uint32 BankStartOffset[MAX_SFX_BANKS];
 
+#ifdef AUDIO_OAL
+extern int defaultProvider;
+#endif
+
 #ifdef AUDIO_OPUS
 static char StreamedNameTable[][25] = {
     "AUDIO\\HEAD.OPUS",    "AUDIO\\CLASS.OPUS",   "AUDIO\\KJAH.OPUS",    "AUDIO\\RISE.OPUS",    "AUDIO\\LIPS.OPUS",    "AUDIO\\GAME.OPUS",

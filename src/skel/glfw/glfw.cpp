@@ -418,7 +418,7 @@ psInitialize(void)
 	}
 	else if ( verInfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS )
 	{
-		if ( verInfo.dwMajorVersion > 4 || verInfo.dwMajorVersion == 4 && verInfo.dwMinorVersion == 1 )
+		if ( verInfo.dwMajorVersion > 4 || verInfo.dwMajorVersion == 4 && verInfo.dwMinorVersion != 0 )
 		{
 			debug("Operating System is Win98\n");
 			_dwOperatingSystemVersion = OS_WIN98;
@@ -1220,14 +1220,17 @@ void resizeCB(GLFWwindow* window, int width, int height) {
 	* memory things don't work.
 	*/
 	/* redraw window */
-	if (RwInitialised && (gGameState == GS_PLAYING_GAME
 #ifndef MASTER
-		|| gGameState == GS_ANIMVIEWER
-#endif
-	                      ))
+	if (RwInitialised && (gGameState == GS_PLAYING_GAME || gGameState == GS_ANIMVIEWER))
 	{
-		RsEventHandler((gGameState == GS_PLAYING_GAME ? rsIDLE : rsANIMVIEWER), (void*)TRUE);
+		RsEventHandler((gGameState == GS_PLAYING_GAME ? rsIDLE : rsANIMVIEWER), (void *)TRUE);
 	}
+#else
+	if (RwInitialised && gGameState == GS_PLAYING_GAME)
+	{
+		RsEventHandler(rsIDLE, (void *)TRUE);
+	}
+#endif
 
 	if (RwInitialised && height > 0 && width > 0) {
 		RwRect r;

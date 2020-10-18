@@ -302,8 +302,8 @@ void CParticle::Initialise()
 	{		
 		float angle = DEGTORAD(float(i) * float(360.0f / SIN_COS_TABLE_SIZE));
 
-		m_SinTable[i] = Sin(angle);
-		m_CosTable[i] = Cos(angle);
+		m_SinTable[i] = ::Sin(angle);
+		m_CosTable[i] = ::Cos(angle);
 	}
 	
 	int32 slot = CTxdStore::FindTxdSlot("particle");

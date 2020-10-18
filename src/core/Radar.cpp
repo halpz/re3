@@ -84,10 +84,6 @@ static_assert(RADAR_TILE_SIZE == (RADAR_SIZE_Y / RADAR_NUM_TILES), "CRadar: not 
 #define RADAR_MAX_SPEED (0.9f)
 
 #ifdef MENU_MAP
-CRGBA CRadar::ArrowBlipColour1;
-CRGBA CRadar::ArrowBlipColour2;
-uint16 CRadar::MapLegendCounter;
-uint16 CRadar::MapLegendList[NUM_MAP_LEGENDS];
 int CRadar::TargetMarkerId = -1;
 CVector CRadar::TargetMarkerPos;
 #endif
@@ -116,7 +112,7 @@ void RequestMapSection(int32 x, int32 y)
 
 void RemoveMapSection(int32 x, int32 y)
 {
-	if (x >= 0 && x <= 7 && y >= 0 && y <= 7)
+	if (x >= 0 && x <= RADAR_NUM_TILES - 1 && y >= 0 && y <= RADAR_NUM_TILES - 1)
 		CStreaming::RemoveTxd(gRadarTxdIds[x + RADAR_NUM_TILES * y]);
 }
 
@@ -709,6 +705,7 @@ void CRadar::DrawBlips()
 		if (CMenuManager::bMenuMapActive) {
 			CVector2D in, out;
 			TransformRealWorldPointToRadarSpace(in, FindPlayerCentreOfWorld_NoSniperShift());
+			LimitRadarPoint(in);
 			TransformRadarPointToScreenSpace(out, in);
 			DrawYouAreHereSprite(out.x, out.y);
 		}
@@ -782,14 +779,20 @@ void CRadar::DrawRadarMask()
 	};
 
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)FALSE);
-	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDZERO);
-	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
 	RwRenderStateSet(rwRENDERSTATESHADEMODE, (void*)rwSHADEMODEFLAT);
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+#if !defined(GTA_PS2_STUFF) && defined(RWLIBS)
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+	RwD3D8SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
+#else
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDZERO);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+#endif
 
 	CVector2D out[8];
 	CVector2D in;
@@ -810,7 +813,10 @@ void CRadar::DrawRadarMask()
 
 		CSprite2d::SetMaskVertices(8, (float *)out);
 		RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, CSprite2d::GetVertices(), 8);
-	};
+	}
+#if !defined(GTA_PS2_STUFF) && defined(RWLIBS)
+	RwD3D8SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
+#endif
 }
 
 void CRadar::DrawRadarSection(int32 x, int32 y)
@@ -860,46 +866,22 @@ void CRadar::DrawRadarSection(int32 x, int32 y)
 void CRadar::DrawRadarSprite(uint16 sprite, float x, float y, uint8 alpha)
 {
 	RadarSprites[sprite]->Draw(CRect(x - SCREEN_SCALE_X(8.0f), y - SCREEN_SCALE_Y(8.0f), x + SCREEN_SCALE_X(8.0f), y + SCREEN_SCALE_Y(8.0f)), CRGBA(255, 255, 255, alpha));
-#ifdef MENU_MAP
-	if (CMenuManager::bMenuMapActive) {
-		bool alreadyThere = false;
-		for (int i = 0; i < NUM_MAP_LEGENDS; i++) {
-			if (MapLegendList[i] == sprite)
-				alreadyThere = true;
-		}
-		if (!alreadyThere) {
-			MapLegendList[MapLegendCounter] = sprite;
-			MapLegendCounter++;
-		}
-	}
-#endif
 }
 
 void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, int32 alpha)
 {
 	CVector curPosn[4];
-	CVector oldPosn[4];
-
-	curPosn[0].x = x - SCREEN_SCALE_X(5.6f);
-	curPosn[0].y = y + SCREEN_SCALE_Y(5.6f);
-
-	curPosn[1].x = x + SCREEN_SCALE_X(5.6f);
-	curPosn[1].y = y + SCREEN_SCALE_Y(5.6f);
-
-	curPosn[2].x = x - SCREEN_SCALE_X(5.6f);
-	curPosn[2].y = y - SCREEN_SCALE_Y(5.6f);
-
-	curPosn[3].x = x + SCREEN_SCALE_X(5.6f);
-	curPosn[3].y = y - SCREEN_SCALE_Y(5.6f);
+	const float sizeX = SCREEN_SCALE_X(8.0f);
+	const float correctedAngle = angle - PI / 4.f;
+	const float sizeY = SCREEN_SCALE_Y(8.0f);
 
 	for (uint32 i = 0; i < 4; i++) {
-		oldPosn[i] = curPosn[i];
-
-		curPosn[i].x = x + (oldPosn[i].x - x) * Cos(angle) + (oldPosn[i].y - y) * Sin(angle);
-		curPosn[i].y = y - (oldPosn[i].x - x) * Sin(angle) + (oldPosn[i].y - y) * Cos(angle);
+		const float cornerAngle = i * HALFPI + correctedAngle;
+		curPosn[i].x = x + (0.0f * Cos(cornerAngle) + 1.0f * Sin(cornerAngle)) * sizeX;
+		curPosn[i].y = y - (0.0f * Sin(cornerAngle) - 1.0f * Cos(cornerAngle)) * sizeY;
 	}
 
-	sprite->Draw(curPosn[2].x, curPosn[2].y, curPosn[3].x, curPosn[3].y, curPosn[0].x, curPosn[0].y, curPosn[1].x, curPosn[1].y, CRGBA(255, 255, 255, alpha));
+	sprite->Draw(curPosn[3].x, curPosn[3].y, curPosn[2].x, curPosn[2].y, curPosn[0].x, curPosn[0].y, curPosn[1].x, curPosn[1].y, CRGBA(255, 255, 255, alpha));
 }
 
 int32 CRadar::GetActualBlipArrayIndex(int32 i)
@@ -925,43 +907,43 @@ uint32 CRadar::GetRadarTraceColour(uint32 color, bool bright)
 {
 	int32 c;
 	switch (color) {
-	case 0:
+	case RADAR_TRACE_RED:
 		if (bright)
 			c = 0x712B49FF;
 		else
 			c = 0x7F0000FF;
 		break;
-	case 1:
+	case RADAR_TRACE_GREEN:
 		if (bright)
 			c = 0x5FA06AFF;
 		else
 			c = 0x007F00FF;
 		break;
-	case 2:
+	case RADAR_TRACE_LIGHT_BLUE:
 		if (bright)
 			c = 0x80A7F3FF;
 		else
 			c = 0x00007FFF;
 		break;
-	case 3:
+	case RADAR_TRACE_GRAY:
 		if (bright)
 			c = 0xE1E1E1FF;
 		else
 			c = 0x7F7F7FFF;
 		break;
-	case 4:
+	case RADAR_TRACE_YELLOW:
 		if (bright)
 			c = 0xFFFF00FF;
 		else
 			c = 0x7F7F00FF;
 		break;
-	case 5:
+	case RADAR_TRACE_MAGENTA:
 		if (bright)
 			c = 0xFF00FFFF;
 		else
 			c = 0x7F007FFF;
 		break;
-	case 6:
+	case RADAR_TRACE_CYAN:
 		if (bright)
 			c = 0x00FFFFFF;
 		else
@@ -1215,21 +1197,6 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, 
 		CSprite2d::DrawRect(CRect(x - SCREEN_SCALE_X(size), y - SCREEN_SCALE_Y(size), SCREEN_SCALE_X(size) + x, SCREEN_SCALE_Y(size) + y), CRGBA(red, green, blue, alpha));
 		break;
 	}
-#ifdef MENU_MAP
-	// VC uses -1 for coords and -2 for entities but meh, I don't want to edit DrawBlips
-	if (CMenuManager::bMenuMapActive) {
-		bool alreadyThere = false;
-		for (int i = 0; i < NUM_MAP_LEGENDS; i++) {
-			if (MapLegendList[i] == -1)
-				alreadyThere = true;
-		}
-		if (!alreadyThere) {
-			MapLegendList[MapLegendCounter] = -1;
-			MapLegendCounter++;
-			ArrowBlipColour1 = CRGBA(red, green, blue, alpha);
-		}
-	}
-#endif
 }
 
 void CRadar::Shutdown()
@@ -1415,12 +1382,6 @@ CRadar::InitFrontEndMap()
 	vec2DRadarOrigin.x = 0.0f;
 	vec2DRadarOrigin.y = 0.0f;
 	m_radarRange = 1000.0f; // doesn't mean anything, just affects the calculation in TransformRadarPointToScreenSpace
-	for (int i = 0; i < NUM_MAP_LEGENDS; i++) {
-		MapLegendList[i] = RADAR_SPRITE_NONE;
-	}
-	MapLegendCounter = 0;
-	ArrowBlipColour1 = CRGBA(0, 0, 0, 0);
-	ArrowBlipColour2 = CRGBA(0, 0, 0, 0);
 }
 
 void
@@ -1448,7 +1409,6 @@ CRadar::DrawYouAreHereSprite(float x, float y)
 		float bottom = y - SCREEN_SCALE_Y(24.0f);
 		CentreSprite.Draw(CRect(left, top, right, bottom), CRGBA(255, 255, 255, 255));
 	}
-	MapLegendList[MapLegendCounter++] = RADAR_SPRITE_CENTRE;
 }
 
 void
@@ -1465,8 +1425,8 @@ CRadar::ToggleTargetMarker(float x, float y)
 			return;
 #endif
 		ms_RadarTrace[nextBlip].m_eBlipType = BLIP_COORD;
-		ms_RadarTrace[nextBlip].m_nColor = 0x333333FF;
-		ms_RadarTrace[nextBlip].m_bDim = 1;
+		ms_RadarTrace[nextBlip].m_nColor = RADAR_TRACE_GRAY;
+		ms_RadarTrace[nextBlip].m_bDim = 0;
 		ms_RadarTrace[nextBlip].m_bInUse = 1;
 		ms_RadarTrace[nextBlip].m_Radius = 1.0f;
 		CVector pos(x, y, CWorld::FindGroundZForCoord(x,y));

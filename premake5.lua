@@ -330,14 +330,12 @@ project "re3"
 		links { "rw" }
 
 	filter "platforms:*d3d9*"
+		defines { "USE_D3D9" }
 		links { "d3d9" }
 		
 	filter "platforms:*x86*d3d*"
 		includedirs { "sdk/dx8sdk/include" }
 		libdirs { "sdk/dx8sdk/lib" }
-
-	filter "platforms:*amd64*d3d9*"
-		defines { "USE_D3D9" }
 		
 	filter "platforms:win-x86*gl3_glfw*"
 		libdirs { path.join(_OPTIONS["glewdir"], "lib/Release/Win32") }
