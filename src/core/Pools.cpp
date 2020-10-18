@@ -378,7 +378,7 @@ INITSAVEBUF
 			CopyToBuf(buf, bGlassBroken);
 			CopyToBuf(buf, bHasBeenDamaged);
 			CopyToBuf(buf, bUseVehicleColours);
-			CopyToBuf(buf, pObject->m_unk);
+			CopyToBuf(buf, pObject->m_nCostValue);
 			CopyToBuf(buf, pObject->m_nBonusValue);
 			SkipSaveBuf(buf, 1);
 			CopyToBuf(buf, pObject->m_fCollisionDamageMultiplier);
@@ -430,7 +430,7 @@ INITSAVEBUF
 		pBufferObject->bHasBeenDamaged = bitFlag;
 		CopyFromBuf(buf, bitFlag);
 		pBufferObject->bUseVehicleColours = bitFlag;
-		CopyFromBuf(buf, pBufferObject->m_unk);
+		CopyFromBuf(buf, pBufferObject->m_nCostValue);
 		CopyFromBuf(buf, pBufferObject->m_nBonusValue);
 		SkipSaveBuf(buf, 1);
 		CopyFromBuf(buf, pBufferObject->m_fCollisionDamageMultiplier);
@@ -467,7 +467,7 @@ INITSAVEBUF
 		(pObject->GetAddressOfEntityProperties())[1] = (pBufferObject->GetAddressOfEntityProperties())[1];
 #endif
 		pObject->bHasCollided = false;
-		pObject->m_unk = pBufferObject->m_unk;
+		pObject->m_nCostValue = pBufferObject->m_nCostValue;
 		pObject->m_nBonusValue = pBufferObject->m_nBonusValue;
 		CWorld::Add(pObject);
 		delete[] obuf;
