@@ -98,7 +98,7 @@ CObject::ProcessControl(void)
 	CPhysical::ProcessControl();
 	if (mod_Buoyancy.ProcessBuoyancy(this, m_fBuoyancy, &point, &impulse)) {
 		bIsInWater = true;
-		bIsStatic = false;
+		SetIsStatic(false);
 		ApplyMoveForce(impulse);
 		ApplyTurnForce(impulse, point);
 		float fTimeStep = Pow(0.97f, CTimer::GetTimeStep());
@@ -197,7 +197,7 @@ CObject::ObjectDamage(float amount)
 		case DAMAGE_EFFECT_SMASH_COMPLETELY:
 			bIsVisible = false;
 			bUsesCollision = false;
-			bIsStatic = true;
+			SetIsStatic(true);
 			bExplosionProof = true;
 			SetMoveSpeed(0.0f, 0.0f, 0.0f);
 			SetTurnSpeed(0.0f, 0.0f, 0.0f);
@@ -209,7 +209,7 @@ CObject::ObjectDamage(float amount)
 			else {
 				bIsVisible = false;
 				bUsesCollision = false;
-				bIsStatic = true;
+				SetIsStatic(true);
 				bExplosionProof = true;
 				SetMoveSpeed(0.0f, 0.0f, 0.0f);
 				SetTurnSpeed(0.0f, 0.0f, 0.0f);
@@ -218,7 +218,7 @@ CObject::ObjectDamage(float amount)
 		case DAMAGE_EFFECT_SMASH_CARDBOARD_COMPLETELY: {
 			bIsVisible = false;
 			bUsesCollision = false;
-			bIsStatic = true;
+			SetIsStatic(true);
 			bExplosionProof = true;
 			SetMoveSpeed(0.0f, 0.0f, 0.0f);
 			SetTurnSpeed(0.0f, 0.0f, 0.0f);
@@ -241,7 +241,7 @@ CObject::ObjectDamage(float amount)
 		case DAMAGE_EFFECT_SMASH_WOODENBOX_COMPLETELY: {
 			bIsVisible = false;
 			bUsesCollision = false;
-			bIsStatic = true;
+			SetIsStatic(true);
 			bExplosionProof = true;
 			SetMoveSpeed(0.0f, 0.0f, 0.0f);
 			SetTurnSpeed(0.0f, 0.0f, 0.0f);
@@ -264,7 +264,7 @@ CObject::ObjectDamage(float amount)
 		case DAMAGE_EFFECT_SMASH_TRAFFICCONE_COMPLETELY: {
 			bIsVisible = false;
 			bUsesCollision = false;
-			bIsStatic = true;
+			SetIsStatic(true);
 			bExplosionProof = true;
 			SetMoveSpeed(0.0f, 0.0f, 0.0f);
 			SetTurnSpeed(0.0f, 0.0f, 0.0f);
@@ -289,7 +289,7 @@ CObject::ObjectDamage(float amount)
 		case DAMAGE_EFFECT_SMASH_BARPOST_COMPLETELY: {
 			bIsVisible = false;
 			bUsesCollision = false;
-			bIsStatic = true;
+			SetIsStatic(true);
 			bExplosionProof = true;
 			SetMoveSpeed(0.0f, 0.0f, 0.0f);
 			SetTurnSpeed(0.0f, 0.0f, 0.0f);
@@ -329,7 +329,7 @@ CObject::Init(void)
 	CObjectData::SetObjectData(GetModelIndex(), *this);
 	m_nEndOfLifeTime = 0;
 	ObjectCreatedBy = GAME_OBJECT;
-	bIsStatic = true;
+	SetIsStatic(true);
 	bIsPickup = false;
 	bPickupObjWithMessage = false;
 	bOutOfStock = false;
