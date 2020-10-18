@@ -393,9 +393,9 @@ void
 CGlass::AskForObjectToBeRenderedInGlass(CEntity *entity)
 {
 #ifdef FIX_BUGS
-	if ( NumGlassEntities < NUM_GLASSPANES )
+	if ( NumGlassEntities < NUM_GLASSENTITIES )
 #else
-	if ( NumGlassEntities < NUM_GLASSPANES-1 )
+	if ( NumGlassEntities < NUM_GLASSENTITIES-1 )
 #endif
 	{
 		apEntitiesToBeRendered[NumGlassEntities++] = entity;

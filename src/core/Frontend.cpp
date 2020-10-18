@@ -37,6 +37,7 @@
 #include "Messages.h"
 #include "FileLoader.h"
 #include "User.h"
+#include "sampman.h"
 
 // TODO(Miami): Remove that!! That was my map implementation for III, instead use MAP_ENHACEMENTS on some places
 #define CUSTOM_MAP
@@ -376,8 +377,7 @@ CMenuManager::CMenuManager()
 	m_bShowMouse = true;
 	m_nHoverOption = HOVEROPTION_NOT_HOVERING;
 
-	// TODO(Miami)
-	// DMAudio.SetMP3BoostVolume(m_PrefsMP3BoostVolume);
+	DMAudio.SetMP3BoostVolume(m_PrefsMP3BoostVolume);
 	m_bMenuActive = false;
 	m_bActivateSaveMenu = false;
 	m_bWantToLoad = false;
@@ -426,9 +426,7 @@ CMenuManager::Initialise(void)
 	DMAudio.SetMusicMasterVolume(m_PrefsMusicVolume);
 	DMAudio.SetEffectsMasterVolume(m_PrefsSfxVolume);
 	m_PrefsRadioStation = DMAudio.GetRadioInCar();
-
-	// TODO(Miami)
-	// DMAudio.SetMP3BoostVolume(m_PrefsMP3BoostVolume);
+	DMAudio.SetMP3BoostVolume(m_PrefsMP3BoostVolume);
 	if (DMAudio.IsMP3RadioChannelAvailable()) {
 		if (m_PrefsRadioStation < WILDSTYLE || m_PrefsRadioStation > USERTRACK)
 			m_PrefsRadioStation = CGeneral::GetRandomNumber() % 10;
@@ -570,6 +568,7 @@ CMenuManager::CheckHover(int x1, int x2, int y1, int y2)
 	       m_nMousePosY > y1 && m_nMousePosY < y2;
 }
 
+// --MIAMI: Done
 void
 CMenuManager::CheckSliderMovement(int value)
 {
@@ -587,14 +586,27 @@ CMenuManager::CheckSliderMovement(int value)
 		CRenderer::ms_lodDistScale = m_PrefsLOD;
 		break;
 	case MENUACTION_MUSICVOLUME:
-		m_PrefsMusicVolume += value * (128/32);
-		m_PrefsMusicVolume = clamp(m_PrefsMusicVolume, 0, 65);
-		DMAudio.SetMusicMasterVolume(m_PrefsMusicVolume);
+		if (m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER) {
+			m_PrefsMusicVolume += value * (128 / 32);
+			m_PrefsMusicVolume = clamp(m_PrefsMusicVolume, 0, 65);
+			DMAudio.SetMusicMasterVolume(m_PrefsMusicVolume);
+		}
 		break;
 	case MENUACTION_SFXVOLUME:
-		m_PrefsSfxVolume += value * (128/32);
-		m_PrefsSfxVolume = clamp(m_PrefsSfxVolume, 0, 65);
-		DMAudio.SetEffectsMasterVolume(m_PrefsSfxVolume);
+		if (m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER) {
+			m_PrefsSfxVolume += value * (128 / 32);
+			m_PrefsSfxVolume = clamp(m_PrefsSfxVolume, 0, 65);
+			DMAudio.SetEffectsMasterVolume(m_PrefsSfxVolume);
+		}
+		break;
+	case MENUACTION_MP3VOLUMEBOOST:
+		if (m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER) {
+			if (DMAudio.IsMP3RadioChannelAvailable()) {
+				m_PrefsMP3BoostVolume += value * (128 / 32);
+				m_PrefsMP3BoostVolume = clamp(m_PrefsMP3BoostVolume, 0, 65);
+				DMAudio.SetMP3BoostVolume(m_PrefsMP3BoostVolume);
+			}
+		}
 		break;
 	case MENUACTION_MOUSESENS:
 		TheCamera.m_fMouseAccelHorzntl += value * 1.0f/200.0f/15.0f;	// ???
@@ -1065,20 +1077,17 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 					else if (m_nPrefsAudio3DProviderIndex == -1)
 						rightText = TheText.Get("FEA_ADP");
 					else {
-						char* provider = DMAudio.Get3DProviderName(m_nPrefsAudio3DProviderIndex);
-						if (provider != NULL) {
-							if (!strcmp(strupr(provider), "DIRECTSOUND3D HARDWARE SUPPORT")) {
-								strcpy(provider, "DSOUND3D HARDWARE SUPPORT");
-							}
-							else if (!strcmp(strupr(provider), "DIRECTSOUND3D SOFTWARE EMULATION")) {
-								strcpy(provider, "DSOUND3D SOFTWARE EMULATION");
-							}
-							AsciiToUnicode(provider, unicodeTemp);
-							rightText = unicodeTemp;
+						char *rawProvider = DMAudio.Get3DProviderName(m_nPrefsAudio3DProviderIndex);
+						AsciiToUnicode(rawProvider, unicodeTemp);
+						char *provider = UnicodeToAscii(unicodeTemp); // genius
+						strupr(provider);
+						if (!strcmp(provider, "DIRECTSOUND3D HARDWARE SUPPORT")) {
+							strcpy(provider, "DSOUND3D HARDWARE SUPPORT");
+						} else if (!strcmp(provider, "DIRECTSOUND3D SOFTWARE EMULATION")) {
+							strcpy(provider, "DSOUND3D SOFTWARE EMULATION");
 						}
-						else {
-							rightText = TheText.Get("not defined");
-						}
+						AsciiToUnicode(provider, unicodeTemp);
+						rightText = unicodeTemp;
 					}
 					break;
 				case MENUACTION_SPEAKERCONF: {
@@ -4007,6 +4016,7 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 				if (selectedProvider != NO_AUDIO_PROVIDER) {
 					if (selectedProvider == -1)
 						selectedProvider = m_nPrefsAudio3DProviderIndex = DMAudio.AutoDetect3DProviders();
+
 					m_nPrefsAudio3DProviderIndex = DMAudio.SetCurrent3DProvider(m_nPrefsAudio3DProviderIndex);
 					if (selectedProvider != m_nPrefsAudio3DProviderIndex) {
 						SetHelperText(5);
@@ -4039,7 +4049,7 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 					m_PrefsMP3BoostVolume = 0;
 					m_PrefsStereoMono = 1;
 					m_PrefsSpeakers = 0;
-					// DMAudio.SetMP3BoostVolume(m_PrefsMP3BoostVolume); // TODO(Miami)
+					DMAudio.SetMP3BoostVolume(m_PrefsMP3BoostVolume);
 					DMAudio.SetMusicMasterVolume(m_PrefsMusicVolume);
 					DMAudio.SetEffectsMasterVolume(m_PrefsSfxVolume);
 					DMAudio.SetRadioInCar(m_PrefsRadioStation);
@@ -4180,11 +4190,36 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 				break;
 #endif
 			case MENUACTION_AUDIOHW:
-				// TODO(Miami): What are the extra things in here??
-
 				if (m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER) {
 					m_nPrefsAudio3DProviderIndex += changeAmount;
-					m_nPrefsAudio3DProviderIndex = clamp(m_nPrefsAudio3DProviderIndex, 0, DMAudio.GetNum3DProvidersAvailable() - 1);
+
+					bool checkIfForbidden = true;
+					while (checkIfForbidden) {
+						checkIfForbidden = false;
+
+						if (m_nPrefsAudio3DProviderIndex < -1)
+							m_nPrefsAudio3DProviderIndex = DMAudio.GetNum3DProvidersAvailable() - 1;
+						else if (m_nPrefsAudio3DProviderIndex > DMAudio.GetNum3DProvidersAvailable() - 1)
+							m_nPrefsAudio3DProviderIndex = -1;
+
+						// what a retarded move...
+						if (m_nPrefsAudio3DProviderIndex != -1) {
+							char* provider = DMAudio.Get3DProviderName(m_nPrefsAudio3DProviderIndex);
+							strupr(provider);
+							if (!strcmp(provider, "MILES FAST 2D POSITIONAL AUDIO")) {
+								m_nPrefsAudio3DProviderIndex += changeAmount;
+								checkIfForbidden = true;
+
+							} else if (!strcmp(provider, "AUREAL A3D 2.0 (TM)")) {
+								m_nPrefsAudio3DProviderIndex += changeAmount;
+								checkIfForbidden = true;
+
+							} else if (!strcmp(provider, "AUREAL A3D INTERACTIVE (TM)")) {
+								m_nPrefsAudio3DProviderIndex += changeAmount;
+								checkIfForbidden = true;
+							}
+						}
+					}
 				}
 				break;
 			case MENUACTION_SPEAKERCONF:
@@ -4543,18 +4578,12 @@ CMenuManager::UnloadTextures()
 	CUserDisplay::PlaceName.ProcessAfterFrontEndShutDown();
 }
 
+// --MIAMI: Done
 void
 CMenuManager::WaitForUserCD()
 {
 	CSprite2d *splash;
 	char *splashscreen = nil;
-
-#if (!(defined RANDOMSPLASH) && !(defined GTA3_1_1_PATCH))
-	if (CGame::frenchGame || CGame::germanGame || !CGame::nastyGame)
-		splashscreen = "mainsc2";
-	else
-		splashscreen = "mainsc1";
-#endif
 
 	splash = LoadSplash(splashscreen);
 
@@ -4707,6 +4736,53 @@ CMenuManager::PrintMap(void)
 	}
 
 	CRadar::DrawBlips();
+	if (m_PrefsShowLegends) {
+		CFont::SetWrapx(SCREEN_SCALE_FROM_RIGHT(40.0f));
+		CFont::SetRightJustifyWrap(SCREEN_SCALE_X(84.0f));
+		CFont::SetBackGroundOnlyTextOff();
+		CFont::SetColor(CRGBA(255, 150, 225, FadeIn(255)));
+		CFont::SetDropShadowPosition(2);
+		CFont::SetDropColor(CRGBA(0, 0, 0, FadeIn(255)));
+		CFont::SetCentreOn();
+		CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
+		CFont::SetScale(SCREEN_SCALE_X(0.65f), SCREEN_SCALE_Y(0.95f));
+
+		int secondColumnStart = (CRadar::MapLegendCounter - 1) / 2;
+		int boxBottom = MENU_Y(100.0f);
+
+		// + 3, because we want 19*3 px padding
+		for (int i = 0; i < secondColumnStart + 3; i++) {
+			boxBottom += MENU_Y(19.f);
+		}
+
+		CSprite2d::DrawRect(CRect(MENU_X_LEFT_ALIGNED(95.0f), MENU_Y(100.0f), MENU_X_LEFT_ALIGNED(555.f), boxBottom),
+			CRGBA(0, 0, 0, FadeIn(190)));
+
+		CFont::PrintString(MENU_X_LEFT_ALIGNED(320.0f), MENU_Y(102.0f), TheText.Get("FE_MLG"));
+		CFont::SetRightJustifyOff();
+		CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
+		if (m_PrefsLanguage == LANGUAGE_AMERICAN)
+			CFont::SetScale(SCREEN_SCALE_X(0.55f), SCREEN_SCALE_Y(0.55f));
+		else
+			CFont::SetScale(SCREEN_SCALE_X(0.45f), SCREEN_SCALE_Y(0.55f));
+
+		CFont::SetColor(CRGBA(225, 225, 225, FadeIn(255)));
+		CFont::SetDropShadowPosition(0);
+
+		int y = MENU_Y(127.0f);
+		int x = MENU_X_LEFT_ALIGNED(160.0f);
+
+		for (int16 i = 0; i < CRadar::MapLegendCounter; i++) {
+			CRadar::DrawLegend(x, y, CRadar::MapLegendList[i]);
+
+			if (i == secondColumnStart) {
+				x = MENU_X_LEFT_ALIGNED(350.0f);
+				y = MENU_Y(127.0f);
+			} else {
+				y += MENU_Y(19.0f);
+			}
+		}
+	}
 
 #ifdef CUSTOM_MAP
 	CVector2D mapPoint;
@@ -4785,7 +4861,7 @@ CMenuManager::PrintMap(void)
 #endif
 	m_bMenuMapActive = false;
 
-	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(5.0f));
+	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(10.0f));
 	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(10.0f));
 	DisplayHelperText("FEH_MPH");
 }

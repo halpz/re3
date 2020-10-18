@@ -53,6 +53,9 @@ public:
 	CVector2D operator/(float t) const {
 		return CVector2D(x/t, y/t);
 	}
+	CVector2D operator-() const {
+		return CVector2D(-x, -y);
+	}
 };
 
 inline float

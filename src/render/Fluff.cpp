@@ -386,6 +386,8 @@ CMovingThing CMovingThings::StartCloseList;
 CMovingThing CMovingThings::EndCloseList;
 int16 CMovingThings::Num;
 CMovingThing CMovingThings::aMovingThings[NUMMOVINGTHINGS];
+
+int32 CScrollBar::TonightsEvent;
  
 void CMovingThings::Init()
 {
@@ -1603,7 +1605,7 @@ void CScriptPath::Update(void) {
 
 void CScriptPath::Clear(void) {
 	if (m_pNode)
-		delete m_pNode;
+		delete[] m_pNode;
 	m_pNode = nil;
 	m_numNodes = 0;
 	for (int i = 0; i < 6; i++)

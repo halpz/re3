@@ -170,6 +170,9 @@ private:
 	float       m_fScale;
 
 public:
+	static int TonightsEvent;
+
+public:
 	void SetVisibility(bool visible) { m_bVisible = visible; }
 	bool IsVisible() { return m_bVisible; }
 

@@ -406,8 +406,8 @@ CFireManager::ExtinguishPointWithWater(CVector point, float range)
 	CFire *fireToExtinguish = &m_aFires[fireI];
 	fireToExtinguish->m_fWaterExtinguishCountdown -= 0.012f * CTimer::GetTimeStep();
 	CVector steamPos = fireToExtinguish->m_vecPos +
-		CVector((CGeneral::GetRandomNumber() - 128) * 31.f / 200.f,
-			(CGeneral::GetRandomNumber() - 128) * 31.f / 200.f,
+		CVector((CGeneral::GetRandomNumber() - 128) * 3.1f / 200.f,
+			(CGeneral::GetRandomNumber() - 128) * 3.1f / 200.f,
 			CGeneral::GetRandomNumber() / 200.f);
 
 	CParticle::AddParticle(PARTICLE_STEAM_NY_SLOWMOTION, steamPos, CVector(0.f, 0.f, 0.2f), nil, 0.5f);

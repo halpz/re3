@@ -15403,17 +15403,17 @@ CPed::ProcessObjective(void)
 					CVector distance = m_nextRoutePointPos - GetPosition();
 					distance.z = 0.0f;
 					if (m_objective == OBJECTIVE_GOTO_SHELTER_ON_FOOT) {
-						if (m_nMoveState == PEDMOVE_SPRINT && distance.Magnitude() < SQR(2.0f)) {
+						if (m_nMoveState == PEDMOVE_RUN && distance.MagnitudeSqr() < SQR(2.0f)) {
 							SetMoveState(PEDMOVE_WALK);
 							bIsRunning = false;
 						}
-						else if (CWeather::Rain < 0.2f && m_attractor) {
+						if (CWeather::Rain < 0.2f && m_attractor) {
 							GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
 							return;
 						}
 					}
 					else if (m_objective == OBJECTIVE_GOTO_ICE_CREAM_VAN_ON_FOOT) {
-						if (m_nMoveState == PEDMOVE_SPRINT && distance.Magnitude() < SQR(4.0f)) {
+						if (m_nMoveState == PEDMOVE_RUN && distance.MagnitudeSqr() < SQR(4.0f)) {
 							SetMoveState(PEDMOVE_WALK);
 							bIsRunning = false;
 						}
@@ -15439,8 +15439,10 @@ CPed::ProcessObjective(void)
 						}
 					}
 					if (sq(m_distanceToCountSeekDone) < distance.MagnitudeSqr()) {
-						if (CTimer::GetTimeInMilliseconds() > m_nPedStateTimer || GetPedState() != PED_SEEK_POS)
+						if (CTimer::GetTimeInMilliseconds() > m_nPedStateTimer || GetPedState() != PED_SEEK_POS) {
+							m_vecSeekPos = m_nextRoutePointPos;
 							SetSeek(m_vecSeekPos, m_distanceToCountSeekDone);
+						}
 					}
 					else {
 						if (!bReachedAttractorHeadingTarget) {
@@ -15510,6 +15512,10 @@ CPed::ProcessObjective(void)
 									SetObjective(OBJECTIVE_WAIT_ON_FOOT_AT_ICE_CREAM_VAN);
 									break;
 								}
+							} else {
+								m_prevObjective = OBJECTIVE_NONE;
+								SetObjective(OBJECTIVE_WAIT_ON_FOOT);
+								m_objectiveTimer = 0;
 							}
 						}
 					}
@@ -15693,11 +15699,11 @@ CPed::ProcessObjective(void)
 				}
 				if (!pVan->m_bSirenOrAlarm) {
 					GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
-					return; // ???
+					return; // Why?
 				}
 				if (pVan->GetStatus() == STATUS_WRECKED) {
 					GetPedAttractorManager()->DeRegisterPed(this, m_attractor);
-					return; // ???
+					return; // Why?
 				}
 				break;
 			}
@@ -16422,11 +16428,11 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 		if (!collidingEnt->IsBuilding())
 			((CPhysical*)collidingEnt)->AddCollisionRecord(this);
 
-		if (ourCollidedSpheres > 0 && (collidingEnt->IsBuilding() || collidingEnt->IsStatic())) {
+		if (ourCollidedSpheres > 0 && (collidingEnt->IsBuilding() || collidingEnt->GetIsStatic())) {
 			bHasHitWall = true;
 		}
 	}
-	if (collidingEnt->IsBuilding() || collidingEnt->IsStatic()) {
+	if (collidingEnt->IsBuilding() || collidingEnt->GetIsStatic()) {
 		if (bWasStanding) {
 			CVector sphereNormal;
 			float normalLength;
@@ -17003,72 +17009,69 @@ CPed::ProcessBuoyancy(void)
 					}
 				}
 			}
-			float speedMult = 0.0f;
-			if (buoyancyImpulse.z / m_fMass > GRAVITY * CTimer::GetTimeStep()
-				|| mod_Buoyancy.m_waterlevel > GetPosition().z) {
+		}
+		float speedMult = 0.0f;
+		if (buoyancyImpulse.z / m_fMass > GRAVITY * CTimer::GetTimeStep()
+			|| mod_Buoyancy.m_waterlevel > GetPosition().z + 0.6f) {
+			speedMult = pow(0.9f, CTimer::GetTimeStep());
+			m_vecMoveSpeed.x *= speedMult;
+			m_vecMoveSpeed.y *= speedMult;
+			m_vecMoveSpeed.z *= speedMult;
+			bIsStanding = false;
+			bIsDrowning = true;
+			InflictDamage(nil, WEAPONTYPE_DROWNING, 3.0f * CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
+		}
+		if (buoyancyImpulse.z / m_fMass > GRAVITY * 0.25f * CTimer::GetTimeStep()) {
+			if (speedMult == 0.0f) {
 				speedMult = pow(0.9f, CTimer::GetTimeStep());
-				m_vecMoveSpeed.x *= speedMult;
-				m_vecMoveSpeed.y *= speedMult;
-				m_vecMoveSpeed.z *= speedMult;
-				bIsStanding = false;
-				bIsDrowning = true;
-				InflictDamage(nil, WEAPONTYPE_DROWNING, 3.0f * CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
 			}
-			if (buoyancyImpulse.z / m_fMass > GRAVITY * 0.25f * CTimer::GetTimeStep()) {
-				if (speedMult == 0.0f) {
-					speedMult = pow(0.9f, CTimer::GetTimeStep());
-				}
-				m_vecMoveSpeed.x *= speedMult;
-				m_vecMoveSpeed.y *= speedMult;
-				if (m_vecMoveSpeed.z >= -0.1f) {
-					if (m_vecMoveSpeed.z < -0.04f)
-						m_vecMoveSpeed.z = -0.02f;
-				} else {
-					m_vecMoveSpeed.z = -0.01f;
-					DMAudio.PlayOneShot(m_audioEntityId, SOUND_SPLASH, 0.0f);
-					CVector aBitForward = 2.2f * m_vecMoveSpeed + GetPosition();
-					float level = 0.0f;
-					if (CWaterLevel::GetWaterLevel(aBitForward, &level, false))
-						aBitForward.z = level;
+			m_vecMoveSpeed.x *= speedMult;
+			m_vecMoveSpeed.y *= speedMult;
+			if (m_vecMoveSpeed.z >= -0.1f) {
+				if (m_vecMoveSpeed.z < -0.04f)
+					m_vecMoveSpeed.z = -0.02f;
+			} else {
+				m_vecMoveSpeed.z = -0.01f;
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_SPLASH, 0.0f);
+				CVector aBitForward = 2.2f * m_vecMoveSpeed + GetPosition();
+				float level = 0.0f;
+				if (CWaterLevel::GetWaterLevel(aBitForward, &level, false))
+					aBitForward.z = level;
 
-					CParticleObject::AddObject(POBJECT_PED_WATER_SPLASH, aBitForward, CVector(0.0f, 0.0f, 0.1f), 0.0f, 200, color, true);
-					nGenerateRaindrops = CTimer::GetTimeInMilliseconds() + 80;
-					nGenerateWaterCircles = CTimer::GetTimeInMilliseconds() + 100;
+				CParticleObject::AddObject(POBJECT_PED_WATER_SPLASH, aBitForward, CVector(0.0f, 0.0f, 0.1f), 0.0f, 200, color, true);
+				nGenerateRaindrops = CTimer::GetTimeInMilliseconds() + 80;
+				nGenerateWaterCircles = CTimer::GetTimeInMilliseconds() + 100;
+			}
+		}
+		if (nGenerateWaterCircles && CTimer::GetTimeInMilliseconds() >= nGenerateWaterCircles) {
+			CVector pos = GetPosition();
+			float level = 0.0f;
+			if (CWaterLevel::GetWaterLevel(pos, &level, false))
+				pos.z = level;
+
+			if (pos.z != 0.0f) {
+				nGenerateWaterCircles = 0;
+				for(int i = 0; i < 4; i++) {
+					pos.x += CGeneral::GetRandomNumberInRange(-0.75f, 0.75f);
+					pos.y += CGeneral::GetRandomNumberInRange(-0.75f, 0.75f);
+					CParticle::AddParticle(PARTICLE_RAIN_SPLASH_BIGGROW, pos, CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, color, 0, 0, 0, 0);
 				}
 			}
-		} else
-			return;
+		}
+		if (nGenerateRaindrops && CTimer::GetTimeInMilliseconds() >= nGenerateRaindrops) {
+			CVector pos = GetPosition();
+			float level = 0.0f;
+			if (CWaterLevel::GetWaterLevel(pos, &level, false))
+				pos.z = level;
+
+			if (pos.z >= 0.0f) {
+				pos.z += 0.25f;
+				nGenerateRaindrops = 0;
+				CParticleObject::AddObject(POBJECT_SPLASHES_AROUND, pos, CVector(0.0f, 0.0f, 0.0f), 4.5f, 1500, CRGBA(0,0,0,0), true);
+			}
+		}
 	} else
 		bTouchingWater = false;
-
-	if (nGenerateWaterCircles && CTimer::GetTimeInMilliseconds() >= nGenerateWaterCircles) {
-		CVector pos = GetPosition();
-		float level = 0.0f;
-		if (CWaterLevel::GetWaterLevel(pos, &level, false))
-			pos.z = level;
-
-		if (pos.z != 0.0f) {
-			nGenerateWaterCircles = 0;
-			for(int i = 0; i < 4; i++) {
-				pos.x += CGeneral::GetRandomNumberInRange(-0.75f, 0.75f);
-				pos.y += CGeneral::GetRandomNumberInRange(-0.75f, 0.75f);
-				CParticle::AddParticle(PARTICLE_RAIN_SPLASH_BIGGROW, pos, CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, color, 0, 0, 0, 0);
-			}
-		}
-	}
-
-	if (nGenerateRaindrops && CTimer::GetTimeInMilliseconds() >= nGenerateRaindrops) {
-		CVector pos = GetPosition();
-		float level = 0.0f;
-		if (CWaterLevel::GetWaterLevel(pos, &level, false))
-			pos.z = level;
-
-		if (pos.z >= 0.0f) {
-			pos.z += 0.25f;
-			nGenerateRaindrops = 0;
-			CParticleObject::AddObject(POBJECT_SPLASHES_AROUND, pos, CVector(0.0f, 0.0f, 0.0f), 4.5f, 1500, CRGBA(0,0,0,0), true);
-		}
-	}
 }
 
 // --MIAMI: Done
@@ -18411,7 +18414,7 @@ CPed::SeekCar(void)
 				{
 					m_fRotationCur = m_fRotationDest;
 					if (!bVehEnterDoorIsBlocked) {
-						vehToSeek->bIsStatic = false;
+						vehToSeek->SetIsStatic(false);
 						if (m_objective == OBJECTIVE_SOLICIT_VEHICLE) {
 							SetSolicit(1000);
 						} else if (m_objective == OBJECTIVE_BUY_ICE_CREAM) {
@@ -20037,15 +20040,13 @@ CPed::Save(uint8*& buf)
 	CopyToBuf(buf, GetPosition().z);
 	SkipSaveBuf(buf, 288);
 	CopyToBuf(buf, CharCreatedBy);
-	SkipSaveBuf(buf, 351);
+	SkipSaveBuf(buf, 499);
 	CopyToBuf(buf, m_fHealth);
 	CopyToBuf(buf, m_fArmour);
-	SkipSaveBuf(buf, 148);
-	for (int i = 0; i < 13; i++) // has to be hardcoded
+	SkipSaveBuf(buf, 172);
+	for (int i = 0; i < 10; i++) // has to be hardcoded
 		m_weapons[i].Save(buf);
-	SkipSaveBuf(buf, 5);
-	CopyToBuf(buf, m_maxWeaponTypeAllowed);
-	SkipSaveBuf(buf, 162);
+	SkipSaveBuf(buf, 252);
 }
 
 void
@@ -20057,16 +20058,15 @@ CPed::Load(uint8*& buf)
 	CopyFromBuf(buf, GetMatrix().GetPosition().z);
 	SkipSaveBuf(buf, 288);
 	CopyFromBuf(buf, CharCreatedBy);
-	SkipSaveBuf(buf, 351);
+	SkipSaveBuf(buf, 499);
 	CopyFromBuf(buf, m_fHealth);
 	CopyFromBuf(buf, m_fArmour);
-	SkipSaveBuf(buf, 148);
+	SkipSaveBuf(buf, 172);
+	m_currentWeapon = WEAPONTYPE_UNARMED;
 
 	CWeapon bufWeapon;
-	for (int i = 0; i < 13; i++) { // has to be hardcoded
+	for (int i = 0; i < 10; i++) { // has to be hardcoded
 		bufWeapon.Load(buf);
-		if (i >= 10)
-			continue; // tmp hack before we fix save/load
 
 		if (bufWeapon.m_eWeaponType != WEAPONTYPE_UNARMED) {
 			int modelId = CWeaponInfo::GetWeaponInfo(bufWeapon.m_eWeaponType)->m_nModelId;
@@ -20081,9 +20081,7 @@ CPed::Load(uint8*& buf)
 			GiveWeapon(bufWeapon.m_eWeaponType, bufWeapon.m_nAmmoTotal);
 		}
 	}
-	SkipSaveBuf(buf, 5);
-	CopyFromBuf(buf, m_maxWeaponTypeAllowed);
-	SkipSaveBuf(buf, 162);
+	SkipSaveBuf(buf, 252);
 }
 #undef CopyFromBuf
 #undef CopyToBuf

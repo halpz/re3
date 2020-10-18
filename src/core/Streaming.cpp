@@ -903,7 +903,7 @@ CStreaming::RequestSpecialModel(int32 modelId, const char *modelName, int32 flag
 	int i, n;
 
 	mi = CModelInfo::GetModelInfo(modelId);
-	if(!CGeneral::faststrcmp("CSPlay", modelName)){
+	if(strncasecmp("CSPlay", modelName, 6) == 0){
 		char *curname = CModelInfo::GetModelInfo(MI_PLAYER)->GetName();
 		for(int i = 0; CSnames[i][0]; i++){
 			if(strcasecmp(curname, IGnames[i]) == 0){

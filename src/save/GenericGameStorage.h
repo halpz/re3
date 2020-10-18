@@ -25,8 +25,6 @@ bool CheckDataNotCorrupt(int32 slot, char *name);
 bool RestoreForStartLoad();
 int align4bytes(int32 size);
 
-extern class CDate CompileDateAndTime;
-
 extern char DefaultPCSaveFileName[260];
 extern char ValidSaveName[260];
 extern char LoadFileName[256];

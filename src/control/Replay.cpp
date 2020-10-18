@@ -53,6 +53,8 @@
 #include "Fluff.h"
 #include "WaterCreatures.h"
 
+//--MIAMI: file done except TODO
+
 uint8 CReplay::Mode;
 CAddressInReplayBuffer CReplay::Record;
 CAddressInReplayBuffer CReplay::Playback;
@@ -160,7 +162,6 @@ static void(*CBArray[])(CAnimBlendAssociation*, void*) =
 	&CPed::PedAnimShuffleCB, &CPed::DeleteSunbatheIdleAnimCB, &StartTalkingOnMobileCB, &FinishTalkingOnMobileCB
 };
 
-// --MIAMI: Done
 static uint8 FindCBFunctionID(void(*f)(CAnimBlendAssociation*, void*))
 {
 	for (int i = 0; i < sizeof(CBArray) / sizeof(*CBArray); i++){
@@ -171,13 +172,11 @@ static uint8 FindCBFunctionID(void(*f)(CAnimBlendAssociation*, void*))
 	return 0;
 }
 
-// --MIAMI: Done
 static void(*FindCBFunction(uint8 id))(CAnimBlendAssociation*, void*)
 {
 	return CBArray[id];
 }
 
-// --MIAMI: Done
 static void ApplyPanelDamageToCar(uint32 panels, CAutomobile* vehicle, bool flying)
 {
 	if(vehicle->Damage.GetPanelStatus(VEHPANEL_FRONT_LEFT) != CDamageManager::GetPanelStatus(panels, VEHPANEL_FRONT_LEFT)){
@@ -210,7 +209,6 @@ static void ApplyPanelDamageToCar(uint32 panels, CAutomobile* vehicle, bool flyi
 	}
 }
 
-// --MIAMI: Done
 void PrintElementsInPtrList(void) 
 {
 	for (CPtrNode* node = CWorld::GetBigBuildingList(LEVEL_GENERIC).first; node; node = node->next) {
@@ -218,7 +216,6 @@ void PrintElementsInPtrList(void)
 	}
 }
 
-// --MIAMI: Done
 void CReplay::Init(void)
 {
 	pBuf0 = nil;
@@ -261,20 +258,17 @@ void CReplay::Init(void)
 	MarkEverythingAsNew();
 }
 
-// --MIAMI: Done
 void CReplay::DisableReplays(void)
 {
 	bReplayEnabled = false;
 }
 
-// --MIAMI: Done
 void CReplay::EnableReplays(void)
 {
 	bReplayEnabled = true;
 }
 
 void PlayReplayFromHD(void);
-// --MIAMI: Done
 void CReplay::Update(void)
 {
 	if (CCutsceneMgr::IsCutsceneProcessing() || CPad::GetPad(0)->ArePlayerControlsDisabled() || CScriptPaths::IsOneActive() || FrontEndMenuManager.GetIsMenuActive()) {
@@ -309,7 +303,6 @@ void CReplay::Update(void)
 	}
 }
 
-// --MIAMI: Done except TODO
 void CReplay::RecordThisFrame(void)
 {
 	uint32 memory_required = sizeof(tGeneralPacket) + sizeof(tClockPacket) + sizeof(tWeatherPacket) + sizeof(tTimerPacket) + sizeof(tMiscPacket);
@@ -411,7 +404,6 @@ void CReplay::RecordThisFrame(void)
 	Record.m_pBase[Record.m_nOffset] = REPLAYPACKET_END;
 }
 
-// --MIAMI: Done
 void CReplay::GoToNextBlock(void)
 {
 	Record.m_pBase[Record.m_nOffset] = REPLAYPACKET_END;
@@ -424,7 +416,6 @@ void CReplay::GoToNextBlock(void)
 	MarkEverythingAsNew();
 }
 
-// --MIAMI: Done
 void CReplay::RecordParticle(tParticleType type, const CVector& vecPos, const CVector& vecDir, float fSize, const RwRGBA& color)
 {
 	if (Record.m_nOffset > REPLAYBUFFERSIZE - 16 - sizeof(tParticlePacket))
@@ -447,7 +438,6 @@ void CReplay::RecordParticle(tParticleType type, const CVector& vecPos, const CV
 	Record.m_pBase[Record.m_nOffset] = REPLAYPACKET_END;
 }
 
-// --MIAMI: Done
 void CReplay::StorePedUpdate(CPed *ped, int id)
 {
 	tPedUpdatePacket* pp = (tPedUpdatePacket*)&Record.m_pBase[Record.m_nOffset];
@@ -467,7 +457,6 @@ void CReplay::StorePedUpdate(CPed *ped, int id)
 	Record.m_nOffset += sizeof(tPedUpdatePacket);
 }
 
-// --MIAMI: Done
 void CReplay::StorePedAnimation(CPed *ped, CStoredAnimationState *state)
 {
 	CAnimBlendAssociation* second;
@@ -513,7 +502,6 @@ void CReplay::StorePedAnimation(CPed *ped, CStoredAnimationState *state)
 	}
 }
 
-// --MIAMI: Done
 void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state)
 {
 	for (int i = 0; i < NUM_MAIN_ANIMS_IN_REPLAY; i++){
@@ -571,7 +559,6 @@ void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState
 	}
 }
 
-// --MIAMI: Done
 void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayBuffer *buffer)
 {
 	tPedUpdatePacket *pp = (tPedUpdatePacket*)&buffer->m_pBase[buffer->m_nOffset];
@@ -616,14 +603,12 @@ void CReplay::ProcessPedUpdate(CPed *ped, float interpolation, CAddressInReplayB
 	buffer->m_nOffset += sizeof(tPedUpdatePacket);
 }
 
-// --MIAMI: Done
 bool HasAnimGroupLoaded(uint8 group)
 {
 	CAnimBlendAssocGroup* pGroup = &CAnimManager::GetAnimAssocGroups()[group];
 	return pGroup->animBlock && pGroup->animBlock->isLoaded;
 }
 
-// --MIAMI: Done
 void CReplay::RetrievePedAnimation(CPed *ped, CStoredAnimationState *state)
 {
 	CAnimBlendAssociation* anim1;
@@ -667,7 +652,6 @@ void CReplay::RetrievePedAnimation(CPed *ped, CStoredAnimationState *state)
 	}
 }
 
-// --MIAMI: Done
 void CReplay::RetrieveDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState *state)
 {
 	CAnimBlendAssociation* assoc;
@@ -713,7 +697,6 @@ void CReplay::RetrieveDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationSt
 	}
 }
 
-// --MIAMI: Done
 void CReplay::PlaybackThisFrame(void)
 {
 	static int FrameSloMo = 0;
@@ -741,7 +724,6 @@ void CReplay::PlaybackThisFrame(void)
 
 // next two functions are only found in mobile version
 // most likely they were optimized out for being unused
-// --MIAMI: Done
 void CReplay::TriggerPlaybackLastCoupleOfSeconds(uint32 start, uint8 cam_mode, float cam_x, float cam_y, float cam_z, uint32 slomo)
 {
 	if (Mode != MODE_RECORD)
@@ -753,7 +735,6 @@ void CReplay::TriggerPlaybackLastCoupleOfSeconds(uint32 start, uint8 cam_mode, f
 		Mode = MODE_RECORD;
 }
 
-// --MIAMI: Done
 bool CReplay::FastForwardToTime(uint32 start)
 {
 	uint32 timer = 0;
@@ -763,7 +744,6 @@ bool CReplay::FastForwardToTime(uint32 start)
 	return true;
 }
 
-// --MIAMI: Done
 void CReplay::StoreCarUpdate(CVehicle *vehicle, int id)
 {
 	tVehicleUpdatePacket* vp = (tVehicleUpdatePacket*)&Record.m_pBase[Record.m_nOffset];
@@ -804,7 +784,6 @@ void CReplay::StoreCarUpdate(CVehicle *vehicle, int id)
 	Record.m_nOffset += sizeof(tVehicleUpdatePacket);
 }
 
-// --MIAMI: Done
 void CReplay::StoreBikeUpdate(CVehicle* vehicle, int id)
 {
 	CBike* bike = (CBike*)vehicle;
@@ -830,7 +809,6 @@ void CReplay::StoreBikeUpdate(CVehicle* vehicle, int id)
 	Record.m_nOffset += sizeof(tBikeUpdatePacket);
 }
 
-// --MIAMI: Done
 void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressInReplayBuffer *buffer)
 {
 	tVehicleUpdatePacket* vp = (tVehicleUpdatePacket*)&buffer->m_pBase[buffer->m_nOffset];
@@ -904,7 +882,6 @@ void CReplay::ProcessCarUpdate(CVehicle *vehicle, float interpolation, CAddressI
 		((CBoat*)vehicle)->m_fMovingSpeed = vp->skimmer_speed / 50.0f;
 }
 
-// --MIAMI: Done
 void CReplay::ProcessBikeUpdate(CVehicle* vehicle, float interpolation, CAddressInReplayBuffer* buffer)
 {
 	CBike* bike = (CBike*)vehicle;
@@ -938,7 +915,6 @@ void CReplay::ProcessBikeUpdate(CVehicle* vehicle, float interpolation, CAddress
 	CWorld::Add(vehicle);
 }
 
-// --MIAMI: Done
 bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, float interpolation, uint32 *pTimer)
 {
 	CBulletTraces::Init();
@@ -1193,7 +1169,6 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, flo
 	return false;
 }
 
-// --MIAMI: Done
 void CReplay::FinishPlayback(void)
 {
 	if (Mode != MODE_PLAYBACK)
@@ -1216,7 +1191,6 @@ void CReplay::FinishPlayback(void)
 	DMAudio.SetMusicFadeVol(127);
 }
 
-// --MIAMI: Done
 void CReplay::EmptyReplayBuffer(void)
 {
 	if (Mode == MODE_PLAYBACK)
@@ -1232,7 +1206,6 @@ void CReplay::EmptyReplayBuffer(void)
 	MarkEverythingAsNew();
 }
 
-// --MIAMI: Done
 void CReplay::ProcessReplayCamera(void)
 {
 	switch (CameraMode) {
@@ -1279,7 +1252,6 @@ void CReplay::ProcessReplayCamera(void)
 
 extern CWeaponEffects gCrossHair;
 
-// --MIAMI: Done except TODO
 void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float cam_z, bool load_scene)
 {
 	if (Mode != MODE_RECORD)
@@ -1339,7 +1311,6 @@ void CReplay::TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float ca
 	CDraw::SetFOV(70.0f);
 }
 
-// --MIAMI: Done
 void CReplay::StoreStuffInMem(void)
 {
 #ifdef FIX_BUGS
@@ -1426,7 +1397,6 @@ void CReplay::StoreStuffInMem(void)
 	CScriptPaths::Save_ForReplay();
 }
 
-// --MIAMI: Done
 void CReplay::RestoreStuffFromMem(void)
 {
 	CPools::GetVehiclePool()->CopyBack(pBuf0, pBuf1);
@@ -1651,7 +1621,6 @@ void CReplay::RestoreStuffFromMem(void)
 	DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 }
 
-// --MIAMI: Done
 void CReplay::EmptyPedsAndVehiclePools(void)
 {
 	int i = CPools::GetVehiclePool()->GetSize();
@@ -1672,7 +1641,6 @@ void CReplay::EmptyPedsAndVehiclePools(void)
 	}
 }
 
-// --MIAMI: Done
 void CReplay::EmptyAllPools(void)
 {
 	EmptyPedsAndVehiclePools();
@@ -1694,7 +1662,6 @@ void CReplay::EmptyAllPools(void)
 	}
 }
 
-// --MIAMI: Done
 void CReplay::MarkEverythingAsNew(void)
 {
 	int i = CPools::GetVehiclePool()->GetSize();
@@ -1744,7 +1711,6 @@ void CReplay::SaveReplayToHD(void)
 	CFileMgr::SetDir("");
 }
 
-// --MIAMI: Done
 void PlayReplayFromHD(void)
 {
 	CFileMgr::SetDirMyDocuments();
@@ -1777,7 +1743,6 @@ void PlayReplayFromHD(void)
 	CReplay::StreamAllNecessaryCarsAndPeds();
 }
 
-// --MIAMI: Done
 void CReplay::StreamAllNecessaryCarsAndPeds(void)
 {
 	for (int slot = 0; slot < NUM_REPLAYBUFFERS; slot++) {
@@ -1802,7 +1767,6 @@ void CReplay::StreamAllNecessaryCarsAndPeds(void)
 	CStreaming::LoadAllRequestedModels(false);
 }
 
-// --MIAMI: Done
 void CReplay::FindFirstFocusCoordinate(CVector *coord)
 {
 	*coord = CVector(0.0f, 0.0f, 0.0f);
@@ -1818,7 +1782,6 @@ void CReplay::FindFirstFocusCoordinate(CVector *coord)
 	}
 }
 
-// --MIAMI: Done
 bool CReplay::ShouldStandardCameraBeProcessed(void)
 {
 	if (Mode != MODE_PLAYBACK)
@@ -1828,7 +1791,6 @@ bool CReplay::ShouldStandardCameraBeProcessed(void)
 	return FindPlayerVehicle() != nil;
 }
 
-// --MIAMI: Done
 void CReplay::ProcessLookAroundCam(void)
 {
 	if (!bAllowLookAroundCam)
@@ -1885,7 +1847,6 @@ void CReplay::ProcessLookAroundCam(void)
 	RwFrameUpdateObjects(RwCameraGetFrame(TheCamera.m_pRwCamera));
 }
 
-// --MIAMI: Done
 size_t CReplay::FindSizeOfPacket(uint8 type)
 {
 	switch (type) {
@@ -1907,7 +1868,6 @@ size_t CReplay::FindSizeOfPacket(uint8 type)
 	return 0;
 }
 
-// --MIAMI: Done (function didn't change since III and we already had it modified)
 void CReplay::Display()
 {
 	static int TimeCount = 0;

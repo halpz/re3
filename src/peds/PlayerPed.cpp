@@ -23,7 +23,7 @@
 
 const uint32 CPlayerPed::nSaveStructSize =
 #ifdef COMPATIBLE_SAVES
-	1520;
+	1752;
 #else
 	sizeof(CPlayerPed);
 #endif
@@ -1935,7 +1935,7 @@ CPlayerPed::Save(uint8*& buf)
 	CopyToBuf(buf, m_nTargettableObjects[1]);
 	CopyToBuf(buf, m_nTargettableObjects[2]);
 	CopyToBuf(buf, m_nTargettableObjects[3]);
-	SkipSaveBuf(buf, 116);
+	SkipSaveBuf(buf, 164);
 }
 
 void
@@ -1949,7 +1949,7 @@ CPlayerPed::Load(uint8*& buf)
 	CopyFromBuf(buf, m_nTargettableObjects[1]);
 	CopyFromBuf(buf, m_nTargettableObjects[2]);
 	CopyFromBuf(buf, m_nTargettableObjects[3]);
-	SkipSaveBuf(buf, 116);
+	SkipSaveBuf(buf, 164);
 }
 #undef CopyFromBuf
 #undef CopyToBuf

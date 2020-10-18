@@ -205,13 +205,13 @@ void CBulletInfo::Update(void)
 					if (pHitEntity->IsObject()) {
 						CObject *pHitObject = (CObject*)pHitEntity;
 						if ( !pHitObject->bInfiniteMass && pHitObject->m_fCollisionDamageMultiplier < 99.9f) {
-							bool notStatic = !pHitObject->IsStatic();
+							bool notStatic = !pHitObject->GetIsStatic();
 							if (notStatic && pHitObject->m_fUprootLimit <= 0.0f) {
 								pHitObject->bIsStatic = false;
 								pHitObject->AddToMovingList();
 							}
 
-							notStatic = !pHitObject->IsStatic();
+							notStatic = !pHitObject->GetIsStatic();
 							if (!notStatic) {
 								CVector moveForce = point.normal * -BULLET_HIT_FORCE;
 								pHitObject->ApplyMoveForce(moveForce.x, moveForce.y, moveForce.z);

@@ -306,7 +306,7 @@ CMotionBlurStreaks::Update(void)
 {
 	int i;
 	for(i = 0; i < NUMMBLURSTREAKS; i++)
-		if(aStreaks[i].m_id)
+		if(aStreaks[i].m_id != 0)
 			aStreaks[i].Update();
 }
 
@@ -351,7 +351,7 @@ CMotionBlurStreaks::Render(void)
 	bool setRenderStates = false;
 	int i;
 	for(i = 0; i < NUMMBLURSTREAKS; i++)
-		if(aStreaks[i].m_id != nil){
+		if(aStreaks[i].m_id != 0){
 			if(!setRenderStates){
 				RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 				RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
@@ -1150,8 +1150,8 @@ CBrightLights::Render(void)
 
 		case BRIGHTLIGHT_SIREN:
 			for(j = 0; j < 6; j++){
-				pos = SirenLightsSide[j]*TheCamera.GetRight() +
-					SirenLightsUp[j]* TheCamera.GetUp() +
+				pos = SirenLightsSide[j] * TheCamera.GetRight() +
+					SirenLightsUp[j] * TheCamera.GetUp() +
 					aBrightLights[i].m_pos;
 				RwIm3DVertexSetRGBA(&TempBufferRenderVertices[TempBufferVerticesStored+j], r, g, b, a);
 				RwIm3DVertexSetPos(&TempBufferRenderVertices[TempBufferVerticesStored+j], pos.x, pos.y, pos.z);
