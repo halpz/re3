@@ -17003,72 +17003,69 @@ CPed::ProcessBuoyancy(void)
 					}
 				}
 			}
-			float speedMult = 0.0f;
-			if (buoyancyImpulse.z / m_fMass > GRAVITY * CTimer::GetTimeStep()
-				|| mod_Buoyancy.m_waterlevel > GetPosition().z) {
+		}
+		float speedMult = 0.0f;
+		if (buoyancyImpulse.z / m_fMass > GRAVITY * CTimer::GetTimeStep()
+			|| mod_Buoyancy.m_waterlevel > GetPosition().z + 0.6f) {
+			speedMult = pow(0.9f, CTimer::GetTimeStep());
+			m_vecMoveSpeed.x *= speedMult;
+			m_vecMoveSpeed.y *= speedMult;
+			m_vecMoveSpeed.z *= speedMult;
+			bIsStanding = false;
+			bIsDrowning = true;
+			InflictDamage(nil, WEAPONTYPE_DROWNING, 3.0f * CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
+		}
+		if (buoyancyImpulse.z / m_fMass > GRAVITY * 0.25f * CTimer::GetTimeStep()) {
+			if (speedMult == 0.0f) {
 				speedMult = pow(0.9f, CTimer::GetTimeStep());
-				m_vecMoveSpeed.x *= speedMult;
-				m_vecMoveSpeed.y *= speedMult;
-				m_vecMoveSpeed.z *= speedMult;
-				bIsStanding = false;
-				bIsDrowning = true;
-				InflictDamage(nil, WEAPONTYPE_DROWNING, 3.0f * CTimer::GetTimeStep(), PEDPIECE_TORSO, 0);
 			}
-			if (buoyancyImpulse.z / m_fMass > GRAVITY * 0.25f * CTimer::GetTimeStep()) {
-				if (speedMult == 0.0f) {
-					speedMult = pow(0.9f, CTimer::GetTimeStep());
-				}
-				m_vecMoveSpeed.x *= speedMult;
-				m_vecMoveSpeed.y *= speedMult;
-				if (m_vecMoveSpeed.z >= -0.1f) {
-					if (m_vecMoveSpeed.z < -0.04f)
-						m_vecMoveSpeed.z = -0.02f;
-				} else {
-					m_vecMoveSpeed.z = -0.01f;
-					DMAudio.PlayOneShot(m_audioEntityId, SOUND_SPLASH, 0.0f);
-					CVector aBitForward = 2.2f * m_vecMoveSpeed + GetPosition();
-					float level = 0.0f;
-					if (CWaterLevel::GetWaterLevel(aBitForward, &level, false))
-						aBitForward.z = level;
+			m_vecMoveSpeed.x *= speedMult;
+			m_vecMoveSpeed.y *= speedMult;
+			if (m_vecMoveSpeed.z >= -0.1f) {
+				if (m_vecMoveSpeed.z < -0.04f)
+					m_vecMoveSpeed.z = -0.02f;
+			} else {
+				m_vecMoveSpeed.z = -0.01f;
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_SPLASH, 0.0f);
+				CVector aBitForward = 2.2f * m_vecMoveSpeed + GetPosition();
+				float level = 0.0f;
+				if (CWaterLevel::GetWaterLevel(aBitForward, &level, false))
+					aBitForward.z = level;
 
-					CParticleObject::AddObject(POBJECT_PED_WATER_SPLASH, aBitForward, CVector(0.0f, 0.0f, 0.1f), 0.0f, 200, color, true);
-					nGenerateRaindrops = CTimer::GetTimeInMilliseconds() + 80;
-					nGenerateWaterCircles = CTimer::GetTimeInMilliseconds() + 100;
+				CParticleObject::AddObject(POBJECT_PED_WATER_SPLASH, aBitForward, CVector(0.0f, 0.0f, 0.1f), 0.0f, 200, color, true);
+				nGenerateRaindrops = CTimer::GetTimeInMilliseconds() + 80;
+				nGenerateWaterCircles = CTimer::GetTimeInMilliseconds() + 100;
+			}
+		}
+		if (nGenerateWaterCircles && CTimer::GetTimeInMilliseconds() >= nGenerateWaterCircles) {
+			CVector pos = GetPosition();
+			float level = 0.0f;
+			if (CWaterLevel::GetWaterLevel(pos, &level, false))
+				pos.z = level;
+
+			if (pos.z != 0.0f) {
+				nGenerateWaterCircles = 0;
+				for(int i = 0; i < 4; i++) {
+					pos.x += CGeneral::GetRandomNumberInRange(-0.75f, 0.75f);
+					pos.y += CGeneral::GetRandomNumberInRange(-0.75f, 0.75f);
+					CParticle::AddParticle(PARTICLE_RAIN_SPLASH_BIGGROW, pos, CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, color, 0, 0, 0, 0);
 				}
 			}
-		} else
-			return;
+		}
+		if (nGenerateRaindrops && CTimer::GetTimeInMilliseconds() >= nGenerateRaindrops) {
+			CVector pos = GetPosition();
+			float level = 0.0f;
+			if (CWaterLevel::GetWaterLevel(pos, &level, false))
+				pos.z = level;
+
+			if (pos.z >= 0.0f) {
+				pos.z += 0.25f;
+				nGenerateRaindrops = 0;
+				CParticleObject::AddObject(POBJECT_SPLASHES_AROUND, pos, CVector(0.0f, 0.0f, 0.0f), 4.5f, 1500, CRGBA(0,0,0,0), true);
+			}
+		}
 	} else
 		bTouchingWater = false;
-
-	if (nGenerateWaterCircles && CTimer::GetTimeInMilliseconds() >= nGenerateWaterCircles) {
-		CVector pos = GetPosition();
-		float level = 0.0f;
-		if (CWaterLevel::GetWaterLevel(pos, &level, false))
-			pos.z = level;
-
-		if (pos.z != 0.0f) {
-			nGenerateWaterCircles = 0;
-			for(int i = 0; i < 4; i++) {
-				pos.x += CGeneral::GetRandomNumberInRange(-0.75f, 0.75f);
-				pos.y += CGeneral::GetRandomNumberInRange(-0.75f, 0.75f);
-				CParticle::AddParticle(PARTICLE_RAIN_SPLASH_BIGGROW, pos, CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, color, 0, 0, 0, 0);
-			}
-		}
-	}
-
-	if (nGenerateRaindrops && CTimer::GetTimeInMilliseconds() >= nGenerateRaindrops) {
-		CVector pos = GetPosition();
-		float level = 0.0f;
-		if (CWaterLevel::GetWaterLevel(pos, &level, false))
-			pos.z = level;
-
-		if (pos.z >= 0.0f) {
-			pos.z += 0.25f;
-			nGenerateRaindrops = 0;
-			CParticleObject::AddObject(POBJECT_SPLASHES_AROUND, pos, CVector(0.0f, 0.0f, 0.0f), 4.5f, 1500, CRGBA(0,0,0,0), true);
-		}
-	}
 }
 
 // --MIAMI: Done
