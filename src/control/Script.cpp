@@ -9184,13 +9184,13 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
 		script_assert(pObject);
 		if (ScriptParams[1]) {
-			if (pObject->GetIsStatic()) {
+			if (pObject->bIsStatic) {
 				pObject->SetIsStatic(false);
 				pObject->AddToMovingList();
 			}
 		}
 		else {
-			if (!pObject->GetIsStatic()) {
+			if (!pObject->bIsStatic) {
 				pObject->SetIsStatic(true);
 				pObject->RemoveFromMovingList();
 			}
