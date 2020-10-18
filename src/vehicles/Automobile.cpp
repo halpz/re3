@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 #include "main.h"
 
 #include "General.h"
@@ -3746,7 +3746,6 @@ CAutomobile::ProcessOpenDoor(uint32 component, uint32 anim, float time)
 	case ANIM_CAR_ROLLDOOR_LOW:
 		ProcessDoorOpenCloseAnimation(this, component, door, time, 0.1f, 0.6f, 0.95f);
 		break;
-		break;
 	case ANIM_CAR_GETOUT_LHS:
 	case ANIM_CAR_GETOUT_LOW_LHS:
 	case ANIM_CAR_GETOUT_RHS:
@@ -3760,6 +3759,7 @@ CAutomobile::ProcessOpenDoor(uint32 component, uint32 anim, float time)
 	case ANIM_CAR_PULLOUT_RHS:
 	case ANIM_CAR_PULLOUT_LOW_RHS:
 		OpenDoor(component, door, 1.0f);
+		break;
 	case ANIM_COACH_OPEN_L:
 	case ANIM_COACH_OPEN_R:
 		ProcessDoorOpenAnimation(this, component, door, time, 0.66f, 0.8f);
