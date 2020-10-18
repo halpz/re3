@@ -15403,7 +15403,7 @@ CPed::ProcessObjective(void)
 					CVector distance = m_nextRoutePointPos - GetPosition();
 					distance.z = 0.0f;
 					if (m_objective == OBJECTIVE_GOTO_SHELTER_ON_FOOT) {
-						if (m_nMoveState == PEDMOVE_RUN && distance.Magnitude() < SQR(2.0f)) {
+						if (m_nMoveState == PEDMOVE_RUN && distance.MagnitudeSqr() < SQR(2.0f)) {
 							SetMoveState(PEDMOVE_WALK);
 							bIsRunning = false;
 						}
@@ -15413,7 +15413,7 @@ CPed::ProcessObjective(void)
 						}
 					}
 					else if (m_objective == OBJECTIVE_GOTO_ICE_CREAM_VAN_ON_FOOT) {
-						if (m_nMoveState == PEDMOVE_RUN && distance.Magnitude() < SQR(4.0f)) {
+						if (m_nMoveState == PEDMOVE_RUN && distance.MagnitudeSqr() < SQR(4.0f)) {
 							SetMoveState(PEDMOVE_WALK);
 							bIsRunning = false;
 						}
