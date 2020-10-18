@@ -31,6 +31,7 @@
 #include "GameLogic.h"
 #include "Garages.h"
 #include "General.h"
+#include "Glass.h"
 #ifdef MISSION_REPLAY
 #include "GenericGameStorage.h"
 #endif
@@ -1804,9 +1805,8 @@ void CMissionCleanup::Process()
 	if (!CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle)
 		TheCamera.Restore();
 	TheCamera.SetWideScreenOff();
-	// TODO(MIAMI)
-	//CSpecialFX::bLiftCam = false;
-	//CSpecialFX::bVideoCam = false;
+	CSpecialFX::bLiftCam = false;
+	CSpecialFX::bVideoCam = false;
 	CTimeCycle::StopExtraColour(0);
 	for (int i = 0; i < MISSION_AUDIO_SLOTS; i++)
 		DMAudio.ClearMissionAudio(i);
@@ -12404,7 +12404,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_SWITCH_SECURITY_CAMERA:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("SWITCH_SECURITY_CAMERA is not implemented\n"); // TODO(MIAMI)
+		CSpecialFX::bVideoCam = ScriptParams[0] != 0;
 		return 0;
 	}
 	//case COMMAND_IS_CHAR_IN_FLYING_VEHICLE:
@@ -12844,7 +12844,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_SWITCH_LIFT_CAMERA:
 	{
 		CollectParameters(&m_nIp, 1);
-		debug("SWITCH_LIFT_CAMERA is not implemented\n"); // TODO(MIAMI)
+		CSpecialFX::bLiftCam = ScriptParams[0] != 0;
 		return 0;
 	}
 	case COMMAND_CLOSE_ALL_CAR_DOORS:
@@ -13013,12 +13013,12 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	case COMMAND_HAS_GLASS_BEEN_SHATTERED_NEARBY:
 	{
 		CollectParameters(&m_nIp, 3);
-		static bool bShowed = false;
-		if (!bShowed) {
-			debug("HAS_GLASS_BEEN_SHATTERED_NEARBY not implemented, default to TRUE\n"); // TODO(MIAMI)
-			bShowed = true;
-		}
-		UpdateCompareFlag(true);
+		
+		bool shattered = false;
+		if ( CGlass::HasGlassBeenShatteredAtCoors(*(float*)&ScriptParams[0], *(float*)&ScriptParams[1], *(float*)&ScriptParams[2]) )
+			shattered = true;
+		
+		UpdateCompareFlag(shattered);
 		return 0;
 	}
 	case COMMAND_ATTACH_CUTSCENE_OBJECT_TO_BONE:
