@@ -2176,8 +2176,7 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 		if ( mp3Stream[nStream] )
 		{
 			AIL_set_stream_loop_count(mp3Stream[nStream], 1);
-			AIL_set_stream_loop_count(mp3Stream[nStream], nStreamLoopedFlag[nStream] ? 0 : 1);
-			nStreamLoopedFlag[nStream] = true;
+			AIL_set_stream_ms_position(mp3Stream[nStream], position);
 			AIL_pause_stream(mp3Stream[nStream], 0);
 			return true;
 		}
