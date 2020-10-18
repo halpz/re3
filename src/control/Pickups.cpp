@@ -855,7 +855,7 @@ CPickups::Update()
 #ifdef CAMERA_PICKUP
 	if ( bPickUpcamActivated ) // taken from PS2
 	{
-		float dist = (FindPlayerCoors() - StaticCamCoors).Magnitude2D();
+		float dist = Distance2D(StaticCamCoors, FindPlayerCoors());
 		float mult;
 		if ( dist < 10.0f )
 			mult = 1.0f - (dist / 10.0f );
@@ -871,8 +871,7 @@ CPickups::Update()
 			TheCamera.TakeControl(FindPlayerVehicle(), CCam::MODE_FIXED, JUMP_CUT, CAMCONTROL_SCRIPT);
 		}
 
-		if ( FindPlayerVehicle() != pPlayerVehicle
-			|| (FindPlayerCoors() - StaticCamCoors).Magnitude() > 40.0f
+		if ( FindPlayerVehicle() != pPlayerVehicle || Distance(StaticCamCoors, FindPlayerCoors()) > 40.0f
 			|| ((CTimer::GetTimeInMilliseconds() - StaticCamStartTime) > 60000) )
 		{
 			TheCamera.RestoreWithJumpCut();

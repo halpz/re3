@@ -4247,7 +4247,7 @@ CCam::GetLookFromLampPostPos(CEntity *Target, CPed *Cop, CVector &TargetCoors, C
 	CWorld::FindObjectsInRange(TargetCoors, 30.0f, true, &NumObjects, 15, Objects, false, false, false, true, true);
 	float NearestDist = 10000.0f;
 	for(i = 0; i < NumObjects; i++){
-		if(Objects[i]->IsStatic() && Objects[i]->GetUp().z > 0.9f && IsLampPost(Objects[i]->GetModelIndex())){
+		if(Objects[i]->GetIsStatic() && Objects[i]->GetUp().z > 0.9f && IsLampPost(Objects[i]->GetModelIndex())){
 			float Dist = (Objects[i]->GetPosition() - TargetCoors).Magnitude2D();
 			if(Abs(ARRESTCAM_LAMP_BEST_DIST - Dist) < NearestDist){
 				CVector TestStart = Objects[i]->GetColModel()->boundingBox.max;
