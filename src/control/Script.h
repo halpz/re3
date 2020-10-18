@@ -381,6 +381,7 @@ private:
 public:
 	static void RemoveThisPed(CPed* pPed);
 
+	static uint32* GetLastMissionPassedTime() { return &LastMissionPassedTime; }
 #ifdef MISSION_SWITCHER
 	static void SwitchToMission(int32 mission);
 #endif

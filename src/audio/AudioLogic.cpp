@@ -40,6 +40,7 @@
 #include "Bike.h"
 #include "WindModifiers.h"
 #include "Fluff.h"
+#include "Script.h"
 
 
 const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
@@ -251,15 +252,14 @@ cAudioManager::ResetAudioLogicTimers(uint32 timer)
 void
 cAudioManager::ProcessReverb() const
 {
-	if (SampleManager.UpdateReverb() && m_bDynamicAcousticModelingStatus) {
-		for (uint32 i = 0; i <
 #ifdef FIX_BUGS
-		                   channels
+	const uint32 numChannels = channels;
 #else
-		                   28
+	const uint32 numChannels = 28;
 #endif
-		     ;
-		     i++) {
+
+	if (SampleManager.UpdateReverb() && m_bDynamicAcousticModelingStatus) {
+		for (uint32 i = 0; i < numChannels; i++) {
 			if (m_asActiveSamples[i].m_bReverbFlag)
 				SampleManager.SetChannelReverbFlag(i, 1);
 		}
@@ -298,24 +298,66 @@ CVehicle *cAudioManager::FindVehicleOfPlayer()
 }
 
 void
+cAudioManager::ProcessPlayerMood()
+{
+	CPlayerPed* playerPed;
+	uint32* lastMisstonPassedTime;
+	uint32 curTime = CTimer::GetTimeInMilliseconds();
+
+	if (m_nPlayerMoodTimer <= curTime) {
+		playerPed = FindPlayerPed();
+		if (playerPed != nil) {
+#ifdef 0
+			if (playerPed->m_pWanted->m_nWantedLevel > 3) {
+				m_nPlayerMood = 2;
+				return;
+			}
+			if (playerPed->m_pWanted->m_nWantedLevel > 1) {
+				m_nPlayerMood = 1;
+				return;
+			}
+#endif
+			if (playerPed->m_pWanted->m_nWantedLevel > 1) {
+				m_nPlayerMood = (playerPed->m_pWanted->m_nWantedLevel > 3) ? 2 : 1;
+				return;
+			}
+			lastMisstonPassedTime = CTheScripts::GetLastMissionPassedTime();
+			if (*lastMisstonPassedTime != -1) {
+				if (curTime < *lastMisstonPassedTime) {
+					*lastMisstonPassedTime = curTime;
+					return;
+				}
+				if (curTime < *lastMisstonPassedTime + 180000) {
+					m_nPlayerMood = 3;
+					return;
+				}
+			}
+			m_nPlayerMood = 0;
+		}
+	}
+}
+
+void
 cAudioManager::ProcessSpecial()
 {
+	CPlayerPed* playerPed;
+
 	if (m_nUserPause) {
 		if (!m_nPreviousUserPause) {
-			MusicManager.ChangeMusicMode(MUSICMODE_FRONTEND);
 			SampleManager.SetEffectsFadeVolume(MAX_VOLUME);
 			SampleManager.SetMusicFadeVolume(MAX_VOLUME);
 		}
 	} else {
-		if (m_nPreviousUserPause) {
-			MusicManager.StopFrontEndTrack();
-			MusicManager.ChangeMusicMode(MUSICMODE_GAME);
-		}
-		CPlayerPed *playerPed = FindPlayerPed();
-		if (playerPed) {
-			const PedState &state = playerPed->m_nPedState;
-			if (state != PED_ENTER_CAR && state != PED_STEAL_CAR && !playerPed->bInVehicle)
-				SampleManager.StopChannel(m_nActiveSamples);
+		if (!CReplay::IsPlayingBack())
+			ProcessPlayerMood();
+		playerPed = FindPlayerPed();
+		if (playerPed != nil) {
+			if (playerPed->m_audioEntityId >= 0 && m_asAudioEntities[playerPed->m_audioEntityId].m_bIsUsed) {
+				if (playerPed->m_nPedState != PED_ENTER_CAR && playerPed->m_nPedState != PED_CARJACK) {
+					if(!playerPed->bInVehicle&& CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle == nil)
+						SampleManager.StopChannel(m_nActiveSamples);
+				}
+			}
 		}
 	}
 }
@@ -3902,7 +3944,7 @@ cAudioManager::ProcessPed(CPhysical *ped)
 
 	m_sQueueSample.m_vecPos = ped->GetPosition();
 
-	// params.m_bDistanceCalculated = false;
+	//params.m_bDistanceCalculated = false;
 	params.m_pPed = (CPed *)ped;
 	params.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	ProcessPedOneShots(&params);
@@ -6853,6 +6895,12 @@ cAudioManager::ProcessMissionAudioSlot(uint8 slot)
 	default:
 		break;
 	}
+}
+
+void
+cAudioManager::ProcessModelHeliVehicle(cVehicleParams* params)
+{
+
 }
 
 void

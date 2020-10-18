@@ -339,19 +339,21 @@ public:
 	void ProcessLoopingScriptObject(uint8 sound);                            // 
 	void ProcessMissionAudio();                                              // 
 	void ProcessMissionAudioSlot(uint8 slot);                                // 
+	void ProcessModelHeliVehicle(cVehicleParams* params);                    //
 	void ProcessModelVehicle(cVehicleParams *params);                        // done
 	void ProcessOneShotScriptObject(uint8 sound);                            // 
-	void ProcessPed(CPhysical *ped);                                         // 
+	void ProcessPed(CPhysical *ped);                                         // done
 	void ProcessPedOneShots(cPedParams *params);                             // 
 	void ProcessPhysical(int32 id);                                          // done
 	void ProcessPlane(cVehicleParams *params);                               // done
+	void ProcessPlayerMood();                                                // done(need redo pointer)
 	void ProcessPlayersVehicleEngine(cVehicleParams *params, CVehicle* veh); // done
 	void ProcessProjectiles();                                               // done
 	void ProcessRainOnVehicle(cVehicleParams *params);                       // done
-	void ProcessReverb() const;                                              // 
+	void ProcessReverb() const;                                              // done
 	bool ProcessReverseGear(cVehicleParams *params);                         // done
 	void ProcessScriptObject(int32 id);                                      // done
-	void ProcessSpecial();
+	void ProcessSpecial();                                                   // done
 #ifdef GTA_TRAIN
 	bool ProcessTrainNoise(cVehicleParams *params);
 #endif
