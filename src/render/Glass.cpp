@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "Glass.h"
 #include "Timer.h"
@@ -138,7 +138,11 @@ CFallingGlassPane::Render(void)
 	fwdNorm.Normalise();
 	uint8 alpha = CGlass::CalcAlphaWithNormal(&fwdNorm);
 
-	int32 time = clamp(CTimer::GetTimeInMilliseconds() - m_nTimer, 0, 500);
+#ifdef FIX_BUGS
+	uint16 time = clamp(CTimer::GetTimeInMilliseconds() > m_nTimer ? CTimer::GetTimeInMilliseconds() - m_nTimer : 0u, 0u, 500u);
+#else
+	uint16 time = clamp(CTimer::GetTimeInMilliseconds() - m_nTimer, 0, 500);
+#endif
 
 	uint8 color = int32( float(alpha) * (float(time) / 500) );
 
