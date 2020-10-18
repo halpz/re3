@@ -386,7 +386,7 @@ bool CPedAttractor::BroadcastDeparture(CPed* pPed)
 		else if (qid == vWaitingQueue.size() - 1)
 			pPed->SetWanderPath(CGeneral::GetNodeHeadingFromVector(-vecQueueDir.x, -vecQueueDir.y));
 		else
-			pPed->SetWanderPath(CGeneral::GetNodeHeadingFromVector(-vecQueueDir.y, -vecQueueDir.z));
+			pPed->SetWanderPath(CGeneral::GetNodeHeadingFromVector(-vecQueueDir.y, -vecQueueDir.x));
 		UpdatePedStateOnDeparture(pPed);
 	}
 	vWaitingQueue.erase(vWaitingQueue.cbegin() + qid);
