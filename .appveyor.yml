@@ -47,7 +47,7 @@ deploy:
   publish: true
   on:
     branch: master
-    APPVEYOR_REPO_TAG: false
+    APPVEYOR_REPO_TAG: true
 
 cache:
 - "%GLEW_FILE%"
