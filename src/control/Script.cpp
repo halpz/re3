@@ -1704,7 +1704,7 @@ static void PossiblyWakeThisEntity(CPhysical* pEntity, bool ifColLoaded = false)
 		return;
 	if (!ifColLoaded || CColStore::HasCollisionLoaded(pEntity->GetPosition())) {
 		pEntity->bIsStaticWaitingForCollision = false;
-		if (!pEntity->IsStatic())
+		if (!pEntity->GetIsStatic())
 			pEntity->AddToMovingList();
 	}
 }
@@ -3973,7 +3973,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		pos.z += car->GetDistanceFromCentreOfMassToBaseOfModel();
-		car->bIsStatic = false;
+		car->SetIsStatic(false);
 		/* Again weird usage of virtual functions. */
 		if (car->IsBoat()) {
 			car->Teleport(pos);
@@ -9649,13 +9649,13 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		script_assert(pObject);
 		if (ScriptParams[1]) {
 			if (pObject->bIsStatic) {
-				pObject->bIsStatic = false;
+				pObject->SetIsStatic(false);
 				pObject->AddToMovingList();
 			}
 		}
 		else {
 			if (!pObject->bIsStatic) {
-				pObject->bIsStatic = true;
+				pObject->SetIsStatic(true);
 				pObject->RemoveFromMovingList();
 			}
 		}
@@ -13727,7 +13727,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 			pVehicle->bDontLoadCollision = true;
 			if (pVehicle->bIsStaticWaitingForCollision) {
 				pVehicle->bIsStaticWaitingForCollision = false;
-				if (!pVehicle->IsStatic())
+				if (!pVehicle->GetIsStatic())
 					pVehicle->AddToMovingList();
 			}
 		}
@@ -13750,7 +13750,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 			pPed->bDontLoadCollision = true;
 			if (pPed->bIsStaticWaitingForCollision) {
 				pPed->bIsStaticWaitingForCollision = false;
-				if (!pPed->IsStatic())
+				if (!pPed->GetIsStatic())
 					pPed->AddToMovingList();
 			}
 		}

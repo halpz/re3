@@ -16428,11 +16428,11 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 		if (!collidingEnt->IsBuilding())
 			((CPhysical*)collidingEnt)->AddCollisionRecord(this);
 
-		if (ourCollidedSpheres > 0 && (collidingEnt->IsBuilding() || collidingEnt->IsStatic())) {
+		if (ourCollidedSpheres > 0 && (collidingEnt->IsBuilding() || collidingEnt->GetIsStatic())) {
 			bHasHitWall = true;
 		}
 	}
-	if (collidingEnt->IsBuilding() || collidingEnt->IsStatic()) {
+	if (collidingEnt->IsBuilding() || collidingEnt->GetIsStatic()) {
 		if (bWasStanding) {
 			CVector sphereNormal;
 			float normalLength;
@@ -18414,7 +18414,7 @@ CPed::SeekCar(void)
 				{
 					m_fRotationCur = m_fRotationDest;
 					if (!bVehEnterDoorIsBlocked) {
-						vehToSeek->bIsStatic = false;
+						vehToSeek->SetIsStatic(false);
 						if (m_objective == OBJECTIVE_SOLICIT_VEHICLE) {
 							SetSolicit(1000);
 						} else if (m_objective == OBJECTIVE_BUY_ICE_CREAM) {
