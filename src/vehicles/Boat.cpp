@@ -43,7 +43,7 @@ CBoat *CBoat::apFrameWakeGeneratingBoats[4];
 
 const uint32 CBoat::nSaveStructSize =
 #ifdef COMPATIBLE_SAVES
-	1156;
+	1216;
 #else
 	sizeof(CBoat);
 #endif
@@ -1449,13 +1449,13 @@ void
 CBoat::Save(uint8*& buf)
 {
 	CVehicle::Save(buf);
-	SkipSaveBuf(buf, 1156 - 648);
+	SkipSaveBuf(buf, 1216 - 672);
 }
 
 void
 CBoat::Load(uint8*& buf)
 {
 	CVehicle::Load(buf);
-	SkipSaveBuf(buf, 1156 - 648);
+	SkipSaveBuf(buf, 1216 - 672);
 }
 #endif

@@ -2367,15 +2367,15 @@ CVehicle::Save(uint8*& buf)
 	WriteSaveBuf<float>(buf, GetPosition().z);
 	SkipSaveBuf(buf, 16);
 	SaveEntityFlags(buf);
-	SkipSaveBuf(buf, 212);
+	SkipSaveBuf(buf, 208);
 	AutoPilot.Save(buf);
 	WriteSaveBuf<int8>(buf, m_currentColour1);
 	WriteSaveBuf<int8>(buf, m_currentColour2);
 	SkipSaveBuf(buf, 2);
 	WriteSaveBuf<int16>(buf, m_nAlarmState);
-	SkipSaveBuf(buf, 43);
+	SkipSaveBuf(buf, 42);
 	WriteSaveBuf<uint8>(buf, m_nNumMaxPassengers);
-	SkipSaveBuf(buf, 2);
+	SkipSaveBuf(buf, 3);
 	WriteSaveBuf<float>(buf, field_1D0[0]);
 	WriteSaveBuf<float>(buf, field_1D0[1]);
 	WriteSaveBuf<float>(buf, field_1D0[2]);
@@ -2398,13 +2398,13 @@ CVehicle::Save(uint8*& buf)
 	WriteSaveBuf<uint8>(buf, m_nCurrentGear);
 	SkipSaveBuf(buf, 3);
 	WriteSaveBuf<float>(buf, m_fChangeGearTime);
-	SkipSaveBuf(buf, 4);
+	SkipSaveBuf(buf, 12);
 	WriteSaveBuf<uint32>(buf, m_nTimeOfDeath);
 	SkipSaveBuf(buf, 2);
 	WriteSaveBuf<int16>(buf, m_nBombTimer);
 	SkipSaveBuf(buf, 12);
 	WriteSaveBuf<int8>(buf, m_nDoorLock);
-	SkipSaveBuf(buf, 99);
+	SkipSaveBuf(buf, 111);
 }
 
 void
@@ -2430,15 +2430,15 @@ CVehicle::Load(uint8*& buf)
 	m_matrix = tmp;
 	SkipSaveBuf(buf, 16);
 	LoadEntityFlags(buf);
-	SkipSaveBuf(buf, 212);
+	SkipSaveBuf(buf, 208);
 	AutoPilot.Load(buf);
 	m_currentColour1 = ReadSaveBuf<int8>(buf);
 	m_currentColour2 = ReadSaveBuf<int8>(buf);
 	SkipSaveBuf(buf, 2);
 	m_nAlarmState = ReadSaveBuf<int16>(buf);
-	SkipSaveBuf(buf, 43);
+	SkipSaveBuf(buf, 42);
 	m_nNumMaxPassengers = ReadSaveBuf<int8>(buf);
-	SkipSaveBuf(buf, 2);
+	SkipSaveBuf(buf, 3);
 	field_1D0[0] = ReadSaveBuf<float>(buf);
 	field_1D0[1] = ReadSaveBuf<float>(buf);
 	field_1D0[2] = ReadSaveBuf<float>(buf);
@@ -2460,13 +2460,13 @@ CVehicle::Load(uint8*& buf)
 	m_nCurrentGear = ReadSaveBuf<uint8>(buf);
 	SkipSaveBuf(buf, 3);
 	m_fChangeGearTime = ReadSaveBuf<float>(buf);
-	SkipSaveBuf(buf, 4);
+	SkipSaveBuf(buf, 12);
 	m_nTimeOfDeath = ReadSaveBuf<uint32>(buf);
 	SkipSaveBuf(buf, 2);
 	m_nBombTimer = ReadSaveBuf<int16>(buf);
 	SkipSaveBuf(buf, 12);
 	m_nDoorLock = (eCarLock)ReadSaveBuf<int8>(buf);
-	SkipSaveBuf(buf, 99);
+	SkipSaveBuf(buf, 111);
 }
 #endif
 

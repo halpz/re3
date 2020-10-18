@@ -137,6 +137,7 @@ struct sRadarTrace
 struct sRadarTraceSave
 {
 	uint32 m_nColor;
+	float m_Radius;
 	uint32 m_eBlipType; // eBlipType
 	int32 m_nEntityHandle;
 	CVector2D m_vec2DPos;
@@ -146,7 +147,6 @@ struct sRadarTraceSave
 	bool m_bInUse;
 	bool m_bShortRange;
 	bool m_unused;
-	float m_Radius;
 	int16 m_wScale;
 	uint16 m_eBlipDisplay; // eBlipDisplay
 	uint16 m_eRadarSprite; // eRadarSprite

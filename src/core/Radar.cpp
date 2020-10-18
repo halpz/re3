@@ -924,6 +924,7 @@ INITSAVEBUF
 
 	for (int i = 0; i < NUMRADARBLIPS; i++) {
 		ms_RadarTrace[i].m_nColor = ReadSaveBuf<uint32>(buf);
+		ms_RadarTrace[i].m_Radius = ReadSaveBuf<float>(buf);
 		ms_RadarTrace[i].m_eBlipType = ReadSaveBuf<uint32>(buf);
 		ms_RadarTrace[i].m_nEntityHandle = ReadSaveBuf<int32>(buf);
 		ms_RadarTrace[i].m_vec2DPos.x = ReadSaveBuf<float>(buf); // CVector2D
@@ -934,7 +935,6 @@ INITSAVEBUF
 		ms_RadarTrace[i].m_bInUse = ReadSaveBuf<bool>(buf);
 		ms_RadarTrace[i].m_bShortRange = ReadSaveBuf<bool>(buf);
 		ms_RadarTrace[i].m_unused = ReadSaveBuf<bool>(buf);
-		ms_RadarTrace[i].m_Radius = ReadSaveBuf<float>(buf);
 		ms_RadarTrace[i].m_wScale = ReadSaveBuf<int16>(buf);
 		ms_RadarTrace[i].m_eBlipDisplay = ReadSaveBuf<uint16>(buf);
 		ms_RadarTrace[i].m_eRadarSprite = ReadSaveBuf<uint16>(buf);
@@ -961,6 +961,7 @@ INITSAVEBUF
 		sRadarTraceSave *saveStruct = (sRadarTraceSave*) buf;
 
 		saveStruct->m_nColor = ms_RadarTrace[i].m_nColor;
+		saveStruct->m_Radius = ms_RadarTrace[i].m_Radius;
 		saveStruct->m_eBlipType = ms_RadarTrace[i].m_eBlipType;
 		saveStruct->m_nEntityHandle = ms_RadarTrace[i].m_nEntityHandle;
 		saveStruct->m_vec2DPos = ms_RadarTrace[i].m_vec2DPos;
@@ -970,7 +971,6 @@ INITSAVEBUF
 		saveStruct->m_bInUse = ms_RadarTrace[i].m_bInUse;
 		saveStruct->m_bShortRange = ms_RadarTrace[i].m_bShortRange;
 		saveStruct->m_unused = ms_RadarTrace[i].m_unused;
-		saveStruct->m_Radius = ms_RadarTrace[i].m_Radius;
 		saveStruct->m_wScale = ms_RadarTrace[i].m_wScale;
 		saveStruct->m_eBlipDisplay = ms_RadarTrace[i].m_eBlipDisplay;
 		saveStruct->m_eRadarSprite = ms_RadarTrace[i].m_eRadarSprite;
