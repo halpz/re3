@@ -135,8 +135,10 @@ void CPedAttractorManager::RemoveIceCreamVanEffects(C2dEffect* pEffect)
 	if (vVehicleToEffect.empty())
 		return;
 	for (std::vector<CVehicleToEffect>::const_iterator assoc = vVehicleToEffect.cbegin(); assoc != vVehicleToEffect.cend();) {
-		if (assoc->GetVehicle() != pVehicle)
-			return;
+		if (assoc->GetVehicle() != pVehicle) {
+			assoc++;
+			continue;
+		}
 		uint32 total = 0;
 		for (uint32 j = 0; j < NUM_ATTRACTORS_FOR_ICECREAM_VAN; j++) {
 			if (FindAssociatedAttractor(assoc->GetEffect(j), vIceCreamAttractors))
