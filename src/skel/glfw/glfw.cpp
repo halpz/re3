@@ -847,7 +847,8 @@ bool IsThisJoystickBlacklisted(int i)
 
 	const char* joyname = glfwGetJoystickName(i);
 
-	if (strncmp(joyname, gSelectedJoystickName, strlen(gSelectedJoystickName)) == 0)
+	if (gSelectedJoystickName[0] != '\0' &&
+		strncmp(joyname, gSelectedJoystickName, strlen(gSelectedJoystickName)) == 0)
 		return false;
 
 	return true;
