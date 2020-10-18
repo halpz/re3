@@ -11,6 +11,9 @@
 #include "Fire.h"
 #include "WaterLevel.h"
 #include "Camera.h"
+#include "Particle.h"
+
+// --MIAMI: file done
 
 #define WATERCANNONVERTS 4
 #define WATERCANNONINDEXES 12
@@ -64,7 +67,7 @@ void CWaterCannon::Update_OncePerFrame(int16 index)
 	
 	if (CTimer::GetTimeInMilliseconds() > m_nTimeCreated + WATERCANNON_LIFETIME )
 	{
-		m_nCur = (m_nCur + 1) % -NUM_SEGMENTPOINTS;
+		m_nCur = (m_nCur + 1) % NUM_SEGMENTPOINTS;
 		m_abUsed[m_nCur] = false;
 	}
 	
@@ -128,7 +131,7 @@ void CWaterCannon::Render(void)
 	RwIm3DVertexSetV(&WaterCannonVertices[2], v);
 	RwIm3DVertexSetV(&WaterCannonVertices[3], v);
 	
-	int16 pointA = m_nCur % -NUM_SEGMENTPOINTS;
+	int16 pointA = m_nCur % NUM_SEGMENTPOINTS;
 	
 	int16 pointB = pointA - 1;
 	if ( (pointA - 1) < 0 )
@@ -235,11 +238,16 @@ void CWaterCannon::PushPeds(void)
 							ped->m_vecMoveSpeed.x = (0.6f * m_avecVelocity[j].x + ped->m_vecMoveSpeed.x) * 0.5f;
 							ped->m_vecMoveSpeed.y = (0.6f * m_avecVelocity[j].y + ped->m_vecMoveSpeed.y) * 0.5f;
 							
-							ped->SetFall(2000, AnimationId(ANIM_KO_SKID_FRONT + localDir), 0);
-							
-							CFire *fire = ped->m_pFire;
-							if ( fire )
-								fire->Extinguish();
+							float pedSpeed2D = ped->m_vecMoveSpeed.Magnitude2D();
+
+							if ( pedSpeed2D > 0.2f ) {
+								ped->m_vecMoveSpeed.x *= (0.2f / pedSpeed2D);
+								ped->m_vecMoveSpeed.y *= (0.2f / pedSpeed2D);
+							}
+							ped->SetFall(2000, (AnimationId)(localDir + ANIM_KO_SKID_FRONT), 0);
+							CParticle::AddParticle(PARTICLE_STEAM_NY_SLOWMOTION, ped->GetPosition(), ped->m_vecMoveSpeed * 0.3f, 0, 0.5f);
+							CParticle::AddParticle(PARTICLE_CAR_SPLASH, ped->GetPosition(), ped->m_vecMoveSpeed * -0.3f + CVector(0.f, 0.f, 0.5f), 0, 0.5f,
+								CGeneral::GetRandomNumberInRange(0.f, 10.f), CGeneral::GetRandomNumberInRange(0.f, 90.f), 1);
 							
 							j = NUM_SEGMENTPOINTS;
 						}

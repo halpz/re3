@@ -288,8 +288,8 @@ class CTheScripts
 	static uint16 ScriptsUpdated;
 	static uint32 LastMissionPassedTime;
 	static uint16 NumberOfExclusiveMissionScripts;
-	static bool bPlayerIsInTheStatium;
 public:
+	static bool bPlayerIsInTheStatium;
 	static uint8 RiotIntensity;
 	static bool bPlayerHasMetDebbieHarry;
 public:

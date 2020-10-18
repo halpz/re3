@@ -4578,18 +4578,12 @@ CMenuManager::UnloadTextures()
 	CUserDisplay::PlaceName.ProcessAfterFrontEndShutDown();
 }
 
+// --MIAMI: Done
 void
 CMenuManager::WaitForUserCD()
 {
 	CSprite2d *splash;
 	char *splashscreen = nil;
-
-#if (!(defined RANDOMSPLASH) && !(defined GTA3_1_1_PATCH))
-	if (CGame::frenchGame || CGame::germanGame || !CGame::nastyGame)
-		splashscreen = "mainsc2";
-	else
-		splashscreen = "mainsc1";
-#endif
 
 	splash = LoadSplash(splashscreen);
 
@@ -4742,6 +4736,53 @@ CMenuManager::PrintMap(void)
 	}
 
 	CRadar::DrawBlips();
+	if (m_PrefsShowLegends) {
+		CFont::SetWrapx(SCREEN_SCALE_FROM_RIGHT(40.0f));
+		CFont::SetRightJustifyWrap(SCREEN_SCALE_X(84.0f));
+		CFont::SetBackGroundOnlyTextOff();
+		CFont::SetColor(CRGBA(255, 150, 225, FadeIn(255)));
+		CFont::SetDropShadowPosition(2);
+		CFont::SetDropColor(CRGBA(0, 0, 0, FadeIn(255)));
+		CFont::SetCentreOn();
+		CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
+		CFont::SetScale(SCREEN_SCALE_X(0.65f), SCREEN_SCALE_Y(0.95f));
+
+		int secondColumnStart = (CRadar::MapLegendCounter - 1) / 2;
+		int boxBottom = MENU_Y(100.0f);
+
+		// + 3, because we want 19*3 px padding
+		for (int i = 0; i < secondColumnStart + 3; i++) {
+			boxBottom += MENU_Y(19.f);
+		}
+
+		CSprite2d::DrawRect(CRect(MENU_X_LEFT_ALIGNED(95.0f), MENU_Y(100.0f), MENU_X_LEFT_ALIGNED(555.f), boxBottom),
+			CRGBA(0, 0, 0, FadeIn(190)));
+
+		CFont::PrintString(MENU_X_LEFT_ALIGNED(320.0f), MENU_Y(102.0f), TheText.Get("FE_MLG"));
+		CFont::SetRightJustifyOff();
+		CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
+		if (m_PrefsLanguage == LANGUAGE_AMERICAN)
+			CFont::SetScale(SCREEN_SCALE_X(0.55f), SCREEN_SCALE_Y(0.55f));
+		else
+			CFont::SetScale(SCREEN_SCALE_X(0.45f), SCREEN_SCALE_Y(0.55f));
+
+		CFont::SetColor(CRGBA(225, 225, 225, FadeIn(255)));
+		CFont::SetDropShadowPosition(0);
+
+		int y = MENU_Y(127.0f);
+		int x = MENU_X_LEFT_ALIGNED(160.0f);
+
+		for (int16 i = 0; i < CRadar::MapLegendCounter; i++) {
+			CRadar::DrawLegend(x, y, CRadar::MapLegendList[i]);
+
+			if (i == secondColumnStart) {
+				x = MENU_X_LEFT_ALIGNED(350.0f);
+				y = MENU_Y(127.0f);
+			} else {
+				y += MENU_Y(19.0f);
+			}
+		}
+	}
 
 #ifdef CUSTOM_MAP
 	CVector2D mapPoint;
@@ -4820,7 +4861,7 @@ CMenuManager::PrintMap(void)
 #endif
 	m_bMenuMapActive = false;
 
-	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(5.0f));
+	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(10.0f));
 	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(10.0f));
 	DisplayHelperText("FEH_MPH");
 }

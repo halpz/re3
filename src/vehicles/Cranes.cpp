@@ -12,6 +12,8 @@
 #include "Object.h"
 #include "World.h"
 
+// --MIAMI: file done
+
 #define MAX_DISTANCE_TO_FIND_CRANE (10.0f)
 #define CRANE_UPDATE_RADIUS (300.0f)
 #define CRANE_MOVEMENT_PROCESSING_RADIUS (150.0f)
@@ -259,7 +261,6 @@ void CCrane::Update(void)
 							m_pVehiclePickedUp->bUsesCollision = false;
 							if (m_bIsCrusher)
 								m_pVehiclePickedUp->bCollisionProof = true;
-							DMAudio.PlayOneShot(m_nAudioEntity, SOUND_CRANE_PICKUP, 0.0f);
 						}
 					}
 				}
@@ -439,8 +440,6 @@ bool CCrane::DoesCranePickUpThisCarType(uint32 mi)
 			mi != MI_TRASH &&
 #ifdef FIX_BUGS
 			mi != MI_COACH &&
-#else
-			mi != MI_BLISTA &&
 #endif
 			mi != MI_SECURICA &&
 			mi != MI_BUS &&
@@ -657,11 +656,6 @@ void CCranes::Load(uint8* buf, uint32 size)
 		if (pCrane->m_pVehiclePickedUp != nil)
 			pCrane->m_pVehiclePickedUp = CPools::GetVehiclePool()->GetSlot((uintptr)pCrane->m_pVehiclePickedUp - 1);
 	}
-	/*for (int i = 0; i < NUM_CRANES; i++) {
-		aCranes[i].m_nAudioEntity = DMAudio.CreateEntity(AUDIOTYPE_CRANE, &aCranes[i]);
-		if (aCranes[i].m_nAudioEntity != 0)
-			DMAudio.SetEntityStatus(aCranes[i].m_nAudioEntity, 1);
-	}*/
 
 	VALIDATESAVEBUF(size);
 }

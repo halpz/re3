@@ -152,7 +152,7 @@ const char *_psGetUserFilesFolder()
 							&KeycbData) == ERROR_SUCCESS )
 		{
 			RegCloseKey(hKey);
-			strcat(szUserFiles, "\\GTA3 User Files");
+			strcat(szUserFiles, "\\GTA Vice City User Files");
 			_psCreateFolder(szUserFiles);
 			return szUserFiles;
 		}	
@@ -386,10 +386,6 @@ psInitialize(void)
 	
 	InitialiseLanguage();
 
-#ifndef GTA3_1_1_PATCH
-	FrontEndMenuManager.LoadSettings();
-#endif
-
 #endif
 	
 	gGameState = GS_START_UP;
@@ -422,7 +418,7 @@ psInitialize(void)
 	}
 	else if ( verInfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS )
 	{
-		if ( verInfo.dwMajorVersion > 4 || verInfo.dwMajorVersion == 4 && verInfo.dwMinorVersion == 1 )
+		if ( verInfo.dwMajorVersion > 4 || verInfo.dwMajorVersion == 4 && verInfo.dwMinorVersion != 0 )
 		{
 			debug("Operating System is Win98\n");
 			_dwOperatingSystemVersion = OS_WIN98;
@@ -439,11 +435,7 @@ psInitialize(void)
 
 	
 #ifndef PS2_MENU
-
-#ifdef GTA3_1_1_PATCH
 	FrontEndMenuManager.LoadSettings();
-#endif
-
 #endif
 
 
@@ -867,7 +859,8 @@ bool IsThisJoystickBlacklisted(int i)
 
 	const char* joyname = glfwGetJoystickName(i);
 
-	if (strncmp(joyname, gSelectedJoystickName, strlen(gSelectedJoystickName)) == 0)
+	if (gSelectedJoystickName[0] != '\0' &&
+		strncmp(joyname, gSelectedJoystickName, strlen(gSelectedJoystickName)) == 0)
 		return false;
 
 	return true;
@@ -1250,14 +1243,17 @@ void resizeCB(GLFWwindow* window, int width, int height) {
 	* memory things don't work.
 	*/
 	/* redraw window */
-	if (RwInitialised && (gGameState == GS_PLAYING_GAME
 #ifndef MASTER
-		|| gGameState == GS_ANIMVIEWER
-#endif
-	                      ))
+	if (RwInitialised && (gGameState == GS_PLAYING_GAME || gGameState == GS_ANIMVIEWER))
 	{
-		RsEventHandler((gGameState == GS_PLAYING_GAME ? rsIDLE : rsANIMVIEWER), (void*)TRUE);
+		RsEventHandler((gGameState == GS_PLAYING_GAME ? rsIDLE : rsANIMVIEWER), (void *)TRUE);
 	}
+#else
+	if (RwInitialised && gGameState == GS_PLAYING_GAME)
+	{
+		RsEventHandler(rsIDLE, (void *)TRUE);
+	}
+#endif
 
 	if (RwInitialised && height > 0 && width > 0) {
 		RwRect r;
@@ -1765,6 +1761,7 @@ main(int argc, char *argv[])
 						printf("Into TheGame!!!\n");
 #else				
 						LoadingScreen(nil, nil, "loadsc0");
+						// LoadingScreen(nil, nil, "loadsc0"); // duplicate
 #endif
 						if ( !CGame::InitialiseOnceAfterRW() )
 							RsGlobal.quit = TRUE;
@@ -1781,6 +1778,7 @@ main(int argc, char *argv[])
 					case GS_INIT_FRONTEND:
 					{
 						LoadingScreen(nil, nil, "loadsc0");
+						// LoadingScreen(nil, nil, "loadsc0"); // duplicate
 						
 						FrontEndMenuManager.m_bGameNotLoaded = true;
 						
