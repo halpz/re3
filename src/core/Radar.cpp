@@ -272,7 +272,7 @@ uint8 CRadar::CalculateBlipAlpha(float dist)
 		return 255;
 
 	if (dist <= 10.0f)
-		return (128.0f * ((dist - 1.0f) / 4.0f)) + ((1.0f - (dist - 1.0f) / 4.0f) * 255.0f);
+		return (128.0f * ((dist - 1.0f) / 9.0f)) + ((1.0f - (dist - 1.0f) / 9.0f) * 255.0f);
 
 	return 128;
 }
