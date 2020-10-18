@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "AudioManager.h"
 #include "audio_enums.h"
@@ -4103,14 +4103,13 @@ cAudioManager::GetArmyTalkSfx(int16 sound)
 	PedState pedState;
 	static uint32 lastSfx = NO_SAMPLE;
 
-	switch (sound) {
+	switch(sound) {
 	case SOUND_PED_PURSUIT_ARMY:
 		pedState = FindPlayerPed()->m_nPedState;
-		if (pedState == PED_ARRESTED || pedState == PED_DEAD || pedState == PED_DIE)
-			return NO_SAMPLE;
+		if(pedState == PED_ARRESTED || pedState == PED_DEAD || pedState == PED_DIE) return NO_SAMPLE;
 		GetPhrase(&sfx, &lastSfx, SFX_ARMY_VOICE_1_CHASE_1, 15);
-	default:
-		return GetGenericMaleTalkSfx(sound);
+		break;
+	default: return GetGenericMaleTalkSfx(sound);
 	}
 
 	return (SFX_ARMY_VOICE_2_CHASE_1 - SFX_ARMY_VOICE_1_CHASE_1) * (m_sQueueSample.m_nEntityIndex % 2) + sfx;
@@ -4598,32 +4597,16 @@ cAudioManager::GetBlackProjectMaleTalkSfx(int16 sound, int32 model)
 	uint32 sfx;
 	static uint32 lastSfx = NO_SAMPLE;
 
-	switch (sound) {
-	case SOUND_PED_HANDS_UP:
-		GetPhrase(&sfx, &lastSfx, SFX_BLACK_PROJECT_MALE_VOICE_1_GUN_COOL_1, 3);
-		break;
-	case SOUND_PED_CAR_JACKED:
-		GetPhrase(&sfx, &lastSfx, SFX_BLACK_PROJECT_MALE_VOICE_1_CARJACKED_1, 2);
-		break;
-	case SOUND_PED_ROBBED:
-		GetPhrase(&sfx, &lastSfx, SFX_BLACK_PROJECT_MALE_VOICE_1_MUGGED_1, 2);
-		break;
-	case SOUND_PED_ATTACK:
-		GetPhrase(&sfx, &lastSfx, SFX_BLACK_PROJECT_MALE_VOICE_1_FIGHT_1, 6);
-		break;
-	case SOUND_PED_EVADE:
-		GetPhrase(&sfx, &lastSfx, SFX_BLACK_PROJECT_MALE_VOICE_1_DODGE_1, 5);
-		break;
-	case SOUND_PED_ANNOYED_DRIVER:
-		GetPhrase(&sfx, &lastSfx, SFX_BLACK_PROJECT_MALE_VOICE_1_DRIVER_ABUSE_1, 7);
-		break;
-	case SOUND_PED_CHAT_SEXY:
-		GetPhrase(&sfx, &lastSfx, SFX_BLACK_PROJECT_MALE_VOICE_1_EYING_1, 3);
-		break;
-	case SOUND_PED_CHAT:
-		GetPhrase(&sfx, &lastSfx, SFX_BLACK_PROJECT_MALE_VOICE_1_CHAT_1, 6);
-	default:
-		return GetGenericMaleTalkSfx(sound);
+	switch(sound) {
+	case SOUND_PED_HANDS_UP: GetPhrase(&sfx, &lastSfx, SFX_BLACK_PROJECT_MALE_VOICE_1_GUN_COOL_1, 3); break;
+	case SOUND_PED_CAR_JACKED: GetPhrase(&sfx, &lastSfx, SFX_BLACK_PROJECT_MALE_VOICE_1_CARJACKED_1, 2); break;
+	case SOUND_PED_ROBBED: GetPhrase(&sfx, &lastSfx, SFX_BLACK_PROJECT_MALE_VOICE_1_MUGGED_1, 2); break;
+	case SOUND_PED_ATTACK: GetPhrase(&sfx, &lastSfx, SFX_BLACK_PROJECT_MALE_VOICE_1_FIGHT_1, 6); break;
+	case SOUND_PED_EVADE: GetPhrase(&sfx, &lastSfx, SFX_BLACK_PROJECT_MALE_VOICE_1_DODGE_1, 5); break;
+	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(&sfx, &lastSfx, SFX_BLACK_PROJECT_MALE_VOICE_1_DRIVER_ABUSE_1, 7); break;
+	case SOUND_PED_CHAT_SEXY: GetPhrase(&sfx, &lastSfx, SFX_BLACK_PROJECT_MALE_VOICE_1_EYING_1, 3); break;
+	case SOUND_PED_CHAT: GetPhrase(&sfx, &lastSfx, SFX_BLACK_PROJECT_MALE_VOICE_1_CHAT_1, 6); break;
+	default: return GetGenericMaleTalkSfx(sound);
 	}
 
 	if (model == MI_P_MAN2)
@@ -4637,26 +4620,14 @@ cAudioManager::GetWhiteFatMaleTalkSfx(int16 sound)
 	uint32 sfx;
 	static uint32 lastSfx = NO_SAMPLE;
 
-	switch (sound) {
-	case SOUND_PED_CAR_JACKED:
-		GetPhrase(&sfx, &lastSfx, SFX_WHITE_FAT_MALE_VOICE_1_CARJACKED_1, 3);
-		break;
-	case SOUND_PED_ROBBED:
-		GetPhrase(&sfx, &lastSfx, SFX_WHITE_FAT_MALE_VOICE_1_MUGGED_1, 3);
-		break;
-	case SOUND_PED_EVADE:
-		GetPhrase(&sfx, &lastSfx, SFX_WHITE_FAT_MALE_VOICE_1_DODGE_1, 9);
-		break;
-	case SOUND_PED_ANNOYED_DRIVER:
-		GetPhrase(&sfx, &lastSfx, SFX_WHITE_FAT_MALE_VOICE_1_DRIVER_ABUSE_1, 9);
-		break;
-	case SOUND_PED_WAIT_DOUBLEBACK:
-		GetPhrase(&sfx, &lastSfx, SFX_WHITE_FAT_MALE_VOICE_1_LOST_1, 2);
-		break;
-	case SOUND_PED_CHAT:
-		GetPhrase(&sfx, &lastSfx, SFX_WHITE_FAT_MALE_VOICE_1_CHAT_1, 9);
-	default:
-		return GetGenericMaleTalkSfx(sound);
+	switch(sound) {
+	case SOUND_PED_CAR_JACKED: GetPhrase(&sfx, &lastSfx, SFX_WHITE_FAT_MALE_VOICE_1_CARJACKED_1, 3); break;
+	case SOUND_PED_ROBBED: GetPhrase(&sfx, &lastSfx, SFX_WHITE_FAT_MALE_VOICE_1_MUGGED_1, 3); break;
+	case SOUND_PED_EVADE: GetPhrase(&sfx, &lastSfx, SFX_WHITE_FAT_MALE_VOICE_1_DODGE_1, 9); break;
+	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(&sfx, &lastSfx, SFX_WHITE_FAT_MALE_VOICE_1_DRIVER_ABUSE_1, 9); break;
+	case SOUND_PED_WAIT_DOUBLEBACK: GetPhrase(&sfx, &lastSfx, SFX_WHITE_FAT_MALE_VOICE_1_LOST_1, 2); break;
+	case SOUND_PED_CHAT: GetPhrase(&sfx, &lastSfx, SFX_WHITE_FAT_MALE_VOICE_1_CHAT_1, 9); break;
+	default: return GetGenericMaleTalkSfx(sound);
 	}
 	return sfx;
 }
