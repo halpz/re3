@@ -135,7 +135,7 @@ public:
 	int16 SizeList();
 };
 
-#define NUMMOVINGTHINGS 128
+#define NUMMOVINGTHINGS 48
 
 class CMovingThings
 {
@@ -149,6 +149,8 @@ public:
 	static void Shutdown();
 	static void Update();
 	static void Render();
+	static void PossiblyAddThisEntity(CEntity *pEnt);
+	static void RegisterOne(int16 nType, CEntity *pEnt);
 };
 
 class CScrollBar
@@ -176,51 +178,7 @@ public:
 	void SetVisibility(bool visible) { m_bVisible = visible; }
 	bool IsVisible() { return m_bVisible; }
 
-	void Init(CVector, uint8, float, float, float, uint8, uint8, uint8, float);
-	void Update();
-	void Render();
-};
-
-class CTowerClock
-{
-private:
-	CVector m_Position;
-	CVector m_Size;
-	float   m_fDrawDistance;
-	float   m_fScale;
-	uint8   m_uRed;
-	uint8   m_uGreen;
-	uint8   m_uBlue;
-	bool    m_bVisible;
-	float   m_fIntensity;
-
-public:
-	void SetVisibility(bool visible) { m_bVisible = visible; }
-	bool IsVisible() { return m_bVisible; }
-
-	void Init(CVector, float, float, uint8, uint8, uint8, float, float);
-	void Update();
-	void Render();
-};
-
-class CDigitalClock
-{
-private:
-	CVector m_Position;
-	CVector m_Size;
-	float   m_fDrawDistance;
-	float   m_fScale;
-	uint8   m_uRed;
-	uint8   m_uGreen;
-	uint8   m_uBlue;
-	bool    m_bVisible;
-	float   m_fIntensity;
-
-public:
-	void SetVisibility(bool visible) { m_bVisible = visible; }
-	bool IsVisible() { return m_bVisible; }
-
-	void Init(CVector, float, float, uint8, uint8, uint8, float, float);
+	void Init(CVector pos1, CVector pos2, uint8 type, uint8 red, uint8 green, uint8 blue, float scale);
 	void Update();
 	void Render();
 };
