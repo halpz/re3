@@ -4126,6 +4126,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		CMessages::AddMessageJumpQ(key, ScriptParams[0], ScriptParams[1]);
 		return 0;
 	}
+	/*
 	case COMMAND_PRINT_SOON:
 	{
 		wchar* key = CTheScripts::GetTextByKeyFromScript(&m_nIp);
@@ -4133,6 +4134,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		CMessages::AddMessageSoon(key, ScriptParams[0], ScriptParams[1]);
 		return 0;
 	}
+	*/
 	case COMMAND_CLEAR_PRINTS:
 		CMessages::ClearMessages();
 		return 0;
