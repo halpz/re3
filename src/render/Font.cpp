@@ -468,17 +468,21 @@ bool CFont::IsAnsiCharacter(wchar *s)
 void
 CFont::PrintString(float xstart, float ystart, wchar *s)
 {
-	CRect rect;
+	CRect rect(1000000.0f, -1000000.0f, 1000000.0f, -1000000.0f);
 	int numSpaces;
 	float lineLength;
 	float x, y;
 	bool first;
 	wchar *start, *t;
 
+	Details.bFlash = false;
+
 	if(*s == '*')
 		return;
 
+	Details.anonymous_25++;
 	if(Details.background){
+		RenderState.color = Details.color;
 		GetNumberLines(xstart, ystart, s);	// BUG: result not used
 		GetTextRect(&rect, xstart, ystart, s);
 		CSprite2d::DrawRect(rect, Details.backgroundColor);
@@ -1292,6 +1296,7 @@ CFont::RenderFontBuffer()
 	RenderState = *(CFontRenderState*)&FontRenderStateBuf[0];
 	textPosX = RenderState.fTextPosX;
 	textPosY = RenderState.fTextPosY;
+	color = RenderState.color;
 	tFontRenderStatePointer pRenderStateBufPointer;
 	pRenderStateBufPointer.pRenderState = (CFontRenderState*)&FontRenderStateBuf[0];
 	for (++pRenderStateBufPointer.pRenderState; pRenderStateBufPointer.pStr < FontRenderStatePointer.pStr; pRenderStateBufPointer.pStr++) {
