@@ -468,7 +468,7 @@ bool CFont::IsAnsiCharacter(wchar *s)
 void
 CFont::PrintString(float xstart, float ystart, wchar *s)
 {
-	CRect rect(1000000.0f, -1000000.0f, 1000000.0f, -1000000.0f);
+	CRect rect;
 	int numSpaces;
 	float lineLength;
 	float x, y;

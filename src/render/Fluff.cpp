@@ -410,7 +410,7 @@ void CMovingThings::Init()
 		}
 	}
 
-	for (int32 i = 0; i < 3; i++) {
+	for (int32 i = 0; i < NUM_LEVELS; i++) {
 		for (CPtrNode *pNode = CWorld::GetBigBuildingList((eLevelName)i).first; pNode; pNode = pNode->next) {
 			CEntity *pEntity = (CEntity *)pNode->item;
 			PossiblyAddThisEntity(pEntity);
@@ -418,7 +418,7 @@ void CMovingThings::Init()
 	}
 
 	CEscalators::Init();
-	aScrollBars[0].Init(CVector(-1069.209f, 1320.126f, 18.848f), CVector(-1069.209f, 1342.299f, 22.612), 0, 128, 255, 0, 0.3f);
+	aScrollBars[0].Init(CVector(-1069.209f, 1320.126f, 18.848f), CVector(-1069.209f, 1342.299f, 22.612), SCROLL_ARENA_STRING, 128, 255, 0, 0.3f);
 }
 
 void CMovingThings::Shutdown()
@@ -480,7 +480,7 @@ void CMovingThing::Update()
 {
 	switch (m_nType) {
 	case 1: {
-		float angle = (CTimer::GetTimeInMilliseconds() % 0x3FFF) * 0.0003835f;
+		float angle = (CTimer::GetTimeInMilliseconds() % 0x3FFF) * TWOPI / 0x3FFF;
 		m_pEntity->GetRight() = CVector(-Sin(angle), Cos(angle), 0.0f);
 		m_pEntity->GetForward() = CVector(0.0f, 0.0f, 1.0f);
 		m_pEntity->GetUp() = CVector(Cos(angle), Sin(angle), 0.0f);
@@ -489,33 +489,32 @@ void CMovingThing::Update()
 			if (Abs(TheCamera.GetPosition().x - m_pEntity->GetPosition().x) < 600.0f &&
 				Abs(TheCamera.GetPosition().y - m_pEntity->GetPosition().y) < 600.0f) {
 				CVector delta = m_pEntity->GetPosition() - TheCamera.GetPosition();
-				float ratio = 1.0f / delta.Magnitude();
-				CVector scaledDelta = delta * ratio;
+				delta.Normalise();
 
-				if (scaledDelta.x * Cos(angle) + scaledDelta.y * Sin(angle) < -0.92f) {
-					CVector coors = m_pEntity->GetPosition() - 10.0f * scaledDelta;
-					CCoronas::RegisterCorona((uintptr)&m_pEntity + 1, 128, 128, 100, 255, coors, 70.0f, 600.0f, 0.0f, CCoronas::TYPE_STAR, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f, false, 1.5f);
+				if (delta.x * Cos(angle) + delta.y * Sin(angle) < -0.92f) {
+					CVector coors = m_pEntity->GetPosition() - 10.0f * delta;
+					CCoronas::RegisterCorona(43, 128, 128, 100, 255, coors, 70.0f, 600.0f, 0.0f, CCoronas::TYPE_STAR, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f, false, 1.5f);
 				}
 			}
 		}
 	}
 		break;
 	case 2: {
-		float angle = (CTimer::GetTimeInMilliseconds() % 0x7FF) * 0.003068f;
+		float angle = (CTimer::GetTimeInMilliseconds() % 0x7FF) * TWOPI / 0x7FF;
 		m_pEntity->GetRight() = CVector(Cos(angle), Sin(angle), 0.0f);
 		m_pEntity->GetForward() = CVector(-Sin(angle), Cos(angle), 0.0f);
 		m_pEntity->GetUp() = CVector(0.0f, 0.0f, 1.0f);
 	}
 		break;
 	case 3: {
-		float angle = (CTimer::GetTimeInMilliseconds() % 0x3FF) * 0.006136f;
+		float angle = (CTimer::GetTimeInMilliseconds() % 0x3FF) * TWOPI / 0x3FF;
 		m_pEntity->GetRight() = CVector(Cos(angle), Sin(angle), 0.0f);
 		m_pEntity->GetForward() = CVector(-Sin(angle), Cos(angle), 0.0f);
 		m_pEntity->GetUp() = CVector(0.0f, 0.0f, 1.0f);
 	}
 		break;
 	case 4: {
-		float angle = (CTimer::GetTimeInMilliseconds() % 0x3FFFF) * 0.000024f;
+		float angle = (CTimer::GetTimeInMilliseconds() % 0x3FFFF) * TWOPI / 0x3FFFF;
 		m_pEntity->GetRight() = CVector(-Cos(angle), -Sin(angle), 0.0f);
 		m_pEntity->GetForward() = CVector(Sin(angle), -Cos(angle), 0.0f);
 		m_pEntity->GetUp() = CVector(0.0f, 0.0f, 1.0f);
@@ -529,15 +528,16 @@ void CMovingThing::Update()
 	m_pEntity->GetMatrix().UpdateRW();
 	m_pEntity->UpdateRwFrame();
 	
-	if (SQR(m_pEntity->GetPosition().x - TheCamera.GetPosition().x) + SQR(m_pEntity->GetPosition().y - TheCamera.GetPosition().y) >= lengths[m_nType]) {
-		if (m_nHidden == 1) {
-			AddToList(&CMovingThings::StartCloseList);
-			m_nHidden = 0;
-		}
-	} else {
+	if (SQR(m_pEntity->GetPosition().x - TheCamera.GetPosition().x) + SQR(m_pEntity->GetPosition().y - TheCamera.GetPosition().y) >= SQR(lengths[m_nType])) {
 		if (m_nHidden == 0) {
 			RemoveFromList();
 			m_nHidden = 1;
+		}
+	}
+	else {
+		if (m_nHidden == 1) {
+			AddToList(&CMovingThings::StartCloseList);
+			m_nHidden = 0;
 		}
 	}
 }
@@ -569,7 +569,7 @@ int16 CMovingThing::SizeList()
 	return count;
 }
 
-void CMovingThings::RegisterOne(int16 nType, CEntity *pEnt) {
+void CMovingThings::RegisterOne(CEntity *pEnt, uint16 nType) {
 	if (Num >= NUMMOVINGTHINGS)
 		return;
 
@@ -582,18 +582,19 @@ void CMovingThings::RegisterOne(int16 nType, CEntity *pEnt) {
 }
 
 void CMovingThings::PossiblyAddThisEntity(CEntity *pEnt) {
-	if (pEnt->GetModelIndex() == MI_LIGHTBEAM)
-		RegisterOne(1, pEnt);
-
-	if (pEnt->GetModelIndex() == MI_AIRPORTRADAR)
-		RegisterOne(2, pEnt);
-
-	if (pEnt->GetModelIndex() == MI_MALLFAN || pEnt->GetModelIndex() == MI_HOTELFAN_NIGHT
-		|| pEnt->GetModelIndex() == MI_HOTELFAN_DAY || pEnt->GetModelIndex() == MI_HOTROOMFAN)
-		RegisterOne(3, pEnt);
-
-	if (pEnt->GetModelIndex() == MI_BLIMP_NIGHT || pEnt->GetModelIndex() == MI_BLIMP_DAY)
-		RegisterOne(4, pEnt);
+	if (pEnt->GetModelIndex() == MI_LIGHTBEAM) {
+		RegisterOne(pEnt, 1);
+	}
+	else if (pEnt->GetModelIndex() == MI_AIRPORTRADAR) {
+		RegisterOne(pEnt, 2);
+	}
+	else if (pEnt->GetModelIndex() == MI_MALLFAN || pEnt->GetModelIndex() == MI_HOTELFAN_NIGHT
+		|| pEnt->GetModelIndex() == MI_HOTELFAN_DAY || pEnt->GetModelIndex() == MI_HOTROOMFAN) {
+		RegisterOne(pEnt, 3);
+	}
+	else if (pEnt->GetModelIndex() == MI_BLIMP_NIGHT || pEnt->GetModelIndex() == MI_BLIMP_DAY) {
+		RegisterOne(pEnt, 4);
+	}
 }
 
 char String_Time[] = "THE TIME IS 12:34    ";
@@ -614,7 +615,7 @@ void CScrollBar::Init(CVector pos1, CVector pos2, uint8 type, uint8 red, uint8 g
 
 	m_pMessage = ". ";
 	m_MessageCurrentChar = 0;
-	m_MessageLength = 2;
+	m_MessageLength = strlen(m_pMessage);
 
 	m_Counter  = 0;
 	m_bVisible = false;
@@ -654,7 +655,7 @@ void CScrollBar::Update()
 		if (m_Type == SCROLL_ARENA_STRING) {
 			while (previousMessage == m_pMessage)
 			{
-				switch (CGeneral::GetRandomNumber() % 3)
+				switch (CGeneral::GetRandomNumber() % 4)
 				{
 				case 0:
 					switch (TonightsEvent) {
@@ -686,8 +687,10 @@ void CScrollBar::Update()
 					m_pMessage = "HYMAN MEMORIAL STADIUM. HOME TO SOME OF THE BIGGEST EVENTS OF"
 						" THE WESTERN HEMISPHERE. ALSO AVAILABLE FOR CHILDREN PARTIES. . . ";
 					break;
-				default:
+				case 3:
 					m_pMessage = FindTimeMessage();
+					break;
+				default:
 					break;
 				}
 			}

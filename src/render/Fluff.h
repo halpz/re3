@@ -150,7 +150,7 @@ public:
 	static void Update();
 	static void Render();
 	static void PossiblyAddThisEntity(CEntity *pEnt);
-	static void RegisterOne(int16 nType, CEntity *pEnt);
+	static void RegisterOne(CEntity *pEnt, uint16 nType);
 };
 
 class CScrollBar
