@@ -71,10 +71,7 @@ CMessages::WideStringCompare(wchar *str1, wchar *str2, uint16 size)
 	if (len1 != len2 && (len1 < size || len2 < size))
 		return false;
 
-	for (int32 i = 0; i < size; i++) {
-		if (FixupChar(str1[i]) == '\0' || i > size)
-			break;
-
+	for (int32 i = 0; FixupChar(str1[i]) != '\0' && i < size; i++) {
 		if (FixupChar(str1[i]) != FixupChar(str2[i]))
 			return false;
 	}
@@ -393,7 +390,7 @@ CMessages::InsertNumberInString(wchar *str, int32 n1, int32 n2, int32 n3, int32 
 		if (str[c] == '~' && str[c + 1] == '1' && str[c + 2] == '~') {
 #endif
 			c += 3;
-			for (int j=0; j<outLen; j++)
+			for (int j = 0; j < outLen; j++)
 				*(outstr++) = wNumStr[j++];
 
 			i++;
