@@ -7,11 +7,10 @@
 #include "Sprite.h"
 #include "Text.h"
 
-// TODO(Miami)
 static char ObjectiveText[][28] = {
 	"No Obj",
 	"Wait on Foot",
-	"Wait on Foot For Cop",
+	"Wait on Foot for cop",
 	"Flee on Foot Till Safe",
 	"Guard Spot",
 	"Guard Area",
@@ -22,8 +21,8 @@ static char ObjectiveText[][28] = {
 	"Flee Char on Foot Till Safe",
 	"Flee Char on Foot Always",
 	"GoTo Char on Foot",
-	"GoTo Char on Foot Walking",
-	"Hassle Char",
+	"GoTo Char on Foot walking",
+	"Hassle char",
 	"Follow Char in Formation",
 	"Leave Car",
 	"Enter Car as Passenger",
@@ -40,14 +39,30 @@ static char ObjectiveText[][28] = {
 	"Guard Attack",
 	"Set Leader",
 	"Follow Route",
-	"Solicit",
+	"Solicit vehicle",
 	"Take Taxi",
 	"Catch Train",
 	"Buy IceCream",
 	"Steal Any Car",
-	"Steal Any Mission Car",
+	"Steal any mission car",
 	"Mug Char",
-	"Leave Car and Die",
+	"Lv car die",
+	"Goto seat",
+	"Goto atm",
+	"Flee car",
+	"Sunbathe",
+	"Goto bus stop",
+	"Goto pizza",
+	"Goto shelter",
+	"Aim gun at",
+	"Wander",
+	"Wait on foot at shltr",
+	"Sprint to area",
+	"Kill char on boat",
+	"Solicit ped",
+	"Wait at bus stop",
+	"Goto ice cream van foot",
+	"Wait foot icecream van"
 };
 
 static char StateText[][18] = {
@@ -84,11 +99,11 @@ static char StateText[][18] = {
 	"Investigate",
 	"Step away",
 	"On Fire",
-	"Sun Bathe",
+	"Bathe",
 	"Flash",
 	"Jog",
-	"Answer Mobile",
-	"Unknown",
+	"Answer mobile",
+	"Hang out",
 	"STATES_NO_AI",
 	"Abseil",
 	"Sit",
@@ -114,7 +129,7 @@ static char StateText[][18] = {
 	"Exit Car",
 	"Hands Up",
 	"Arrested",
-	"Deploying Stinger"
+	"Deply stgr"
 };
 
 static char PersonalityTypeText[][18] = {
@@ -141,8 +156,7 @@ static char PersonalityTypeText[][18] = {
 	"Geek Girl",
 	"Old Girl",
 	"Tough Girl",
-	"Tramp Male",
-	"Tramp Female",
+	"Tramp",
 	"Tourist",
 	"Prostitute",
 	"Criminal",
@@ -151,8 +165,6 @@ static char PersonalityTypeText[][18] = {
 	"Psycho",
 	"Steward",
 	"Sports Fan",
-	"Shopper",
-	"Old Shopper"
 };
 
 static char WaitStateText[][16] = {
@@ -177,6 +189,21 @@ static char WaitStateText[][16] = {
 	"Play HandsCower",
 	"Play Chat",
 	"Finish Flee",
+	"Sit down",
+	"Sit down rvrs",
+	"Sit up",
+	"Sit idle",
+	"Use atm",
+	"Sunbth pre",
+	"Sunbth down",
+	"Sunbth idle",
+	"Riot",
+	"Fast fall",
+	"Bomber",
+	"Stripper",
+	"Ground attack",
+	"Lance sitting",
+	"Handsup simple"
 };
 
 void
