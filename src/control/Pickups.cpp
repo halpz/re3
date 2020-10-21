@@ -218,7 +218,7 @@ CPickup::GiveUsAPickUpObject(CObject **ppObject, CObject **ppExtraObject, int32 
 	object->bExplosionProof = true;
 	object->bUsesCollision = false;
 	object->bIsPickup = true;
-	object->obj_flag_02 = m_bWasAmmoCollected;
+	object->bAmmoCollected = m_bWasAmmoCollected;
 	object->bHasPreRenderEffects = true;
 
 	if (extraObject) {
@@ -232,7 +232,7 @@ CPickup::GiveUsAPickUpObject(CObject **ppObject, CObject **ppExtraObject, int32 
 		extraObject->bExplosionProof = true;
 		extraObject->bUsesCollision = false;
 		extraObject->bIsPickup = true;
-		extraObject->obj_flag_02 = true;
+		extraObject->bAmmoCollected = true;
 		extraObject->bHasPreRenderEffects = true;
 		extraObject->m_nBonusValue = 0;
 		extraObject->bPickupObjWithMessage = false;
@@ -1076,7 +1076,7 @@ CPickups::DoPickUpEffects(CEntity *entity)
 			else
 				corona2 = true;
 
-			if (((CObject*)entity)->obj_flag_02) {
+			if (((CObject*)entity)->bAmmoCollected) {
 				corona2 = false;
 				corona1 = false;
 			}
