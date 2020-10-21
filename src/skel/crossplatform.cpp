@@ -26,34 +26,39 @@ void GetLocalTime_CP(SYSTEMTIME *out) {
 // Compatible with Linux/POSIX and MinGW on Windows
 #ifndef _WIN32
 HANDLE FindFirstFile(const char* pathname, WIN32_FIND_DATA* firstfile) {
-	char newpathname[32];
+	char pathCopy[32];
 	
-	strncpy(newpathname, pathname, 32);
-	char* path = strtok(newpathname, "*");
+	strncpy(pathCopy, pathname, 32);
+	char* folder = strtok(pathCopy, "*");
 	
 	// Case-sensitivity and backslashes...
-	char *real = casepath(path);
-	if (real) {
-		real[strlen(real)] = '*';
-		char *extension = strtok(NULL, "*");
-		if (extension)
-			strcat(real, extension);
+	char *realFolder = casepath(folder);
+	char *extension = nil;
+	if (realFolder) {
+		realFolder[strlen(realFolder)] = '*';
+		extension = strtok(NULL, "*");
+		if (extension) {
+			strcat(realFolder, extension);
+		}
 		
-		strncpy(newpathname, real, 32);
-		free(real);
-		path = strtok(newpathname, "*");
+		strncpy(pathCopy, realFolder, 32);
+		free(realFolder);
+		folder = strtok(pathCopy, "*");
+	} else {
+		// Wildcard (*)
+		if (strlen(folder) + 1 != strlen(pathname))
+			extension = strtok(NULL, "*");
 	}
 	
-	strncpy(firstfile->folder, path, sizeof(firstfile->folder));
+	strncpy(firstfile->folder, folder, sizeof(firstfile->folder));
 
-	// Both w/ extension and w/o extension is ok
-	if (strlen(path) + 1 != strlen(pathname))
-		strncpy(firstfile->extension, strtok(NULL, "*"), sizeof(firstfile->extension));
+	if (extension)
+		strncpy(firstfile->extension, extension, sizeof(firstfile->extension));
 	else
-		strncpy(firstfile->extension, "", sizeof(firstfile->extension));
+		firstfile->extension[0] = '\0';
 
 	HANDLE d;
-	if ((d = (HANDLE)opendir(path)) == NULL || !FindNextFile(d, firstfile))
+	if ((d = (HANDLE)opendir(folder)) == NULL || !FindNextFile(d, firstfile))
 		return NULL;
 
 	return d;
