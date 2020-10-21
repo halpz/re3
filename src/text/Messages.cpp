@@ -387,12 +387,11 @@ CMessages::InsertNumberInString(wchar *str, int32 n1, int32 n2, int32 n3, int32 
 		if (str[c] == '~' && str[c + 1] == '1' && str[c + 2] == '~') {
 #endif
 			c += 3;
-			for (int j = 0; j < outLen; j++)
+			for (int j = 0; j < outLen; )
 				*(outstr++) = wNumStr[j++];
 
 			i++;
 			switch (i) {
-			case 0: sprintf(numStr, "%d", n1); break;
 			case 1: sprintf(numStr, "%d", n2); break;
 			case 2: sprintf(numStr, "%d", n3); break;
 			case 3: sprintf(numStr, "%d", n4); break;
