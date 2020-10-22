@@ -27,23 +27,24 @@ void GetLocalTime_CP(SYSTEMTIME *out) {
 #ifndef _WIN32
 HANDLE FindFirstFile(const char* pathname, WIN32_FIND_DATA* firstfile) {
 	char pathCopy[32];
+	char constructedPath[32];
 	
 	strncpy(pathCopy, pathname, 32);
 	char* folder = strtok(pathCopy, "*");
-	
+
 	// Case-sensitivity and backslashes...
 	char *realFolder = casepath(folder);
 	char *extension = nil;
 	if (realFolder) {
-		realFolder[strlen(realFolder)] = '*';
+		sprintf(constructedPath, "%s*", realFolder);
 		extension = strtok(NULL, "*");
 		if (extension) {
-			strcat(realFolder, extension);
+			strcat(constructedPath, extension);
 		}
-		
-		strncpy(pathCopy, realFolder, 32);
+
 		free(realFolder);
-		folder = strtok(pathCopy, "*");
+		folder = strtok(constructedPath, "*");
+		extension = strtok(NULL, "*");
 	} else {
 		// Wildcard (*)
 		if (strlen(folder) + 1 != strlen(pathname))
