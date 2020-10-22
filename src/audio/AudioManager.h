@@ -440,7 +440,7 @@ public:
 	void Service();
 	void ServiceCollisions();
 	void ServicePoliceRadio();
-	void ServicePoliceRadioChannel(int32 wantedLevel);
+	void ServicePoliceRadioChannel(uint8 wantedLevel);
 	void ServiceSoundEffects();
 	int8 SetCurrent3DProvider(uint8 which);
 	void SetDynamicAcousticModelingStatus(uint8 status);
