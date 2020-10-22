@@ -432,7 +432,7 @@ public:
 	void ReleaseDigitalHandle() const;
 	void ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface1, uint8 surface2,
 	                     float collisionPower, float intensity2);
-	void ReportCrime(int32 crime, const CVector *pos);
+	void ReportCrime(eCrimeType crime, const CVector &pos);
 	void ResetAudioLogicTimers(uint32 timer);
 	void ResetPoliceRadio();
 	void ResetTimers(uint32 time);

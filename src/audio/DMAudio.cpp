@@ -203,7 +203,7 @@ cDMAudio::IsAudioInitialised(void)
 void
 cDMAudio::ReportCrime(eCrimeType crime, const CVector &pos)
 {
-	AudioManager.ReportCrime(crime, &pos);
+	AudioManager.ReportCrime(crime, pos);
 }
 
 int32
