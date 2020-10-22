@@ -153,7 +153,7 @@ cAudioManager::ServicePoliceRadio()
 }
 
 void
-cAudioManager::ServicePoliceRadioChannel(int32 wantedLevel)
+cAudioManager::ServicePoliceRadioChannel(uint8 wantedLevel)
 {
 	bool processed = false;
 	uint32 sample;
