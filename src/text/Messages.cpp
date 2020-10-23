@@ -802,7 +802,7 @@ CMessages::ClearThisBigPrint(wchar *str)
 				}
 				BIGMessages[style].m_Stack[i].m_pText = nil;
 			} else {
-				BIGMessages[style].m_Stack[0].m_pText = 0;
+				BIGMessages[style].m_Stack[0].m_pText = nil;
 				i = 0;
 				while (i < 3) {
 					if (BIGMessages[style].m_Stack[i + 1].m_pText == nil)
