@@ -98,7 +98,7 @@ void CTimer::Update(void)
 		
 		_oldPerfCounter = pc;
 		
-		float updInCyclesScaled = GetIsPaused() ? updInCycles : updInCyclesScaled * ms_fTimeScale;
+		float updInCyclesScaled = GetIsPaused() ? updInCycles : updInCycles * ms_fTimeScale;
 		
 		// We need that real frame time to fix transparent menu bug.
 #ifndef FIX_HIGH_FPS_BUGS_ON_FRONTEND
