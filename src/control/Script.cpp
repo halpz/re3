@@ -8333,11 +8333,11 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	}
 	case COMMAND_INDUSTRIAL_PASSED:
 		CStats::IndustrialPassed = true;
-		DMAudio.PlayRadioAnnouncement(13); //TODO: enum?
+		DMAudio.PlayRadioAnnouncement(STREAMED_SOUND_ANNOUNCE_COMMERCIAL_OPEN);
 		return 0;
 	case COMMAND_COMMERCIAL_PASSED:
 		CStats::CommercialPassed = true;
-		DMAudio.PlayRadioAnnouncement(14); //TODO: enum?
+		DMAudio.PlayRadioAnnouncement(STREAMED_SOUND_ANNOUNCE_SUBURBAN_OPEN);
 		return 0;
 	case COMMAND_SUBURBAN_PASSED:
 		CStats::SuburbanPassed = true;
