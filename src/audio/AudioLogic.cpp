@@ -5085,7 +5085,7 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 	static uint8 iSound = 0;
 
 	switch (sound) {
-	case SCRIPT_SOUND_INJURED_PED_MALE_OUCH_S:
+	/*case SCRIPT_SOUND_INJURED_PED_MALE_OUCH_S:
 	case SCRIPT_SOUND_INJURED_PED_MALE_OUCH_L:
 		male.m_pPed = nil;
 		male.m_bDistanceCalculated = false;
@@ -5113,7 +5113,7 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 		m_sQueueSample.m_bIs2D = false;
 		m_sQueueSample.m_bRequireReflection = true;
 		emittingVolume = RandomDisplacement(10) + 50;
-		break;
+		break;*/
 	case SCRIPT_SOUND_BULLET_HIT_GROUND_1:
 	case SCRIPT_SOUND_BULLET_HIT_GROUND_2:
 	case SCRIPT_SOUND_BULLET_HIT_GROUND_3:
@@ -5328,7 +5328,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	float distSquared;
 
 	switch (sound) {
-	case SCRIPT_SOUND_PARTY_1_LOOP_S:
+	/*case SCRIPT_SOUND_PARTY_1_LOOP_S:
 		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_1;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_0;//SAMPLEBANK_BUILDING_CLUB_1;
@@ -5427,7 +5427,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 		m_sQueueSample.m_nReleasingVolumeModificator = 8;
 		m_sQueueSample.m_nReleasingVolumeDivider = 10;
 		m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-		break;
+		break;*/
 	default:
 		return;
 	}

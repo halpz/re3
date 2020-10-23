@@ -1817,7 +1817,7 @@ void CMissionCleanup::Process()
 		CStreaming::SetMissionDoesntRequireModel(MI_CUTOBJ01 + i);
 	CStreaming::ms_disableStreaming = false;
 	CHud::m_ItemToFlash = -1;
-	CHud::SetHelpMessage(nil, false); // TODO(MIAMI): third parameter is false
+	CHud::SetHelpMessage(nil, false);
 	CUserDisplay::OnscnTimer.m_bDisabled = false;
 	CTheScripts::RemoveScriptTextureDictionary();
 	CWorld::Players[0].m_pPed->m_pWanted->m_bIgnoredByCops = false;
@@ -5387,22 +5387,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	case COMMAND_ADD_ONE_OFF_SOUND:
 	{
 		CollectParameters(&m_nIp, 4);
-		// TODO(MIAMI)
-		// SOUND_PART_MISSION_COMPLETE == 1
-		// SOUND_RACE_START_3 == 7
-		// SOUND_RACE_START_2 == 8
-		// SOUND_RACE_START_1 == 9
-		// SOUND_RACE_START_GO == 10
-		// SOUND_AMMUNATION_BUY_WEAPON == 13
-		// SOUND_AMMUNATION_BUY_WEAPON_DENIED == 14
-		// SOUND_AMMUNATION_IMRAN_ARM_BOMB == 16
 		switch (ScriptParams[3]) {
-		case SCRIPT_SOUND_EVIDENCE_PICKUP:
-			DMAudio.PlayFrontEndSound(SOUND_EVIDENCE_PICKUP, 0);
-			return 0;
-		case SCRIPT_SOUND_UNLOAD_GOLD:
-			DMAudio.PlayFrontEndSound(SOUND_UNLOAD_GOLD, 0);
-			return 0;
 		case SCRIPT_SOUND_PART_MISSION_COMPLETE:
 			DMAudio.PlayFrontEndSound(SOUND_PART_MISSION_COMPLETE, 0);
 			return 0;
@@ -5417,6 +5402,15 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 			return 0;
 		case SCRIPT_SOUND_RACE_START_GO:
 			DMAudio.PlayFrontEndSound(SOUND_RACE_START_GO, 0);
+			return 0;
+		case SCRIPT_SOUND_AMMUNATION_BUY_WEAPON:
+			DMAudio.PlayFrontEndSound(SOUND_PICKUP_WEAPON_BOUGHT, 0);
+			return 0;
+		case SCRIPT_SOUND_AMMUNATION_BUY_WEAPON_DENIED:
+			DMAudio.PlayFrontEndSound(SOUND_GARAGE_NO_MONEY, 0);
+			return 0;
+		case SCRIPT_SOUND_IMRAN_ARM_BOMB:
+			DMAudio.PlayFrontEndSound(SOUND_AMMUNATION_IMRAN_ARM_BOMB, 0);
 			return 0;
 		default:
 			break;
@@ -8763,11 +8757,11 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	}
 	case COMMAND_INDUSTRIAL_PASSED:
 		CStats::IndustrialPassed = true;
-		DMAudio.PlayRadioAnnouncement(13); //TODO: enum?
+		DMAudio.PlayRadioAnnouncement(STREAMED_SOUND_ANNOUNCE_COMMERCIAL_OPEN);
 		return 0;
 	case COMMAND_COMMERCIAL_PASSED:
 		CStats::CommercialPassed = true;
-		DMAudio.PlayRadioAnnouncement(14); //TODO: enum?
+		DMAudio.PlayRadioAnnouncement(STREAMED_SOUND_ANNOUNCE_SUBURBAN_OPEN);
 		return 0;
 	case COMMAND_SUBURBAN_PASSED:
 		CStats::SuburbanPassed = true;
@@ -12909,7 +12903,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_PRINT_HELP_FOREVER:
 	{
 		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
-		CHud::SetHelpMessage(text, false); // TODO(MIAMI): third param is true
+		CHud::SetHelpMessage(text, false, true);
 		return 0;
 	}
 	//case COMMAND_PRINT_HELP_FOREVER_WITH_NUMBER:

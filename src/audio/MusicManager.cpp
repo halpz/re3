@@ -1160,13 +1160,13 @@ cMusicManager::SetMalibuClubTrackPos(uint8 scriptObject)
 	if (m_nStreamedTrack != STREAMED_SOUND_MALIBU_AMBIENT && m_nPlayingTrack != STREAMED_SOUND_MALIBU_AMBIENT) {
 		switch (scriptObject)
 		{
-		case SCRIPT_SOUND_MALIBU_1:
+		case SCRIPT_SOUND_NEW_BUILDING_MALIBU_1:
 			m_aTracks[STREAMED_SOUND_MALIBU_AMBIENT].m_nPosition = (AudioManager.m_anRandomTable[0] % 128) + 8640;
 			break;
-		case SCRIPT_SOUND_MALIBU_2:
+		case SCRIPT_SOUND_NEW_BUILDING_MALIBU_2:
 			m_aTracks[STREAMED_SOUND_MALIBU_AMBIENT].m_nPosition = (AudioManager.m_anRandomTable[0] % 128) + 286720;
 			break;
-		case SCRIPT_SOUND_MALIBU_3:
+		case SCRIPT_SOUND_NEW_BUILDING_MALIBU_3:
 			m_aTracks[STREAMED_SOUND_MALIBU_AMBIENT].m_nPosition = (AudioManager.m_anRandomTable[0] % 128) + 509120;
 			break;
 		}
@@ -1183,13 +1183,13 @@ cMusicManager::SetStripClubTrackPos(uint8 scriptObject)
 	{
 		switch (scriptObject)
 		{
-		case SCRIPT_SOUND_STRIPCLUB_1:
+		case SCRIPT_SOUND_NEW_BUILDING_STRIP_1:
 			m_aTracks[STREAMED_SOUND_STRIPCLUB_AMBIENT].m_nPosition = AudioManager.m_anRandomTable[0] % 128;
 			break;
-		case SCRIPT_SOUND_STRIPCLUB_2:
+		case SCRIPT_SOUND_NEW_BUILDING_STRIP_2:
 			m_aTracks[STREAMED_SOUND_STRIPCLUB_AMBIENT].m_nPosition = (AudioManager.m_anRandomTable[0] % 128) + 320200;
 			break;
-		case SCRIPT_SOUND_STRIPCLUB_3:
+		case SCRIPT_SOUND_NEW_BUILDING_STRIP_3:
 			m_aTracks[STREAMED_SOUND_STRIPCLUB_AMBIENT].m_nPosition = (AudioManager.m_anRandomTable[0] % 128) + 672000;
 			break;
 		}
