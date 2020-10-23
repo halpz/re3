@@ -26,31 +26,23 @@ void GetLocalTime_CP(SYSTEMTIME *out) {
 // Compatible with Linux/POSIX and MinGW on Windows
 #ifndef _WIN32
 HANDLE FindFirstFile(const char* pathname, WIN32_FIND_DATA* firstfile) {
-	char pathCopy[32];
-	char constructedPath[32];
-	
-	strncpy(pathCopy, pathname, 32);
-	char* folder = strtok(pathCopy, "*");
+	char pathCopy[MAX_PATH];
+	strcpy(pathCopy, pathname);
 
+	char *folder = strtok(pathCopy, "*");
+	char *extension = strtok(NULL, "*");
+
+	// because strtok doesn't return NULL for last delimiter
+	if (extension - folder == strlen(pathname))
+		extension = nil;
+	
 	// Case-sensitivity and backslashes...
+	// Will be freed at the bottom
 	char *realFolder = casepath(folder);
-	char *extension = nil;
 	if (realFolder) {
-		sprintf(constructedPath, "%s*", realFolder);
-		extension = strtok(NULL, "*");
-		if (extension) {
-			strcat(constructedPath, extension);
-		}
-
-		free(realFolder);
-		folder = strtok(constructedPath, "*");
-		extension = strtok(NULL, "*");
-	} else {
-		// Wildcard (*)
-		if (strlen(folder) + 1 != strlen(pathname))
-			extension = strtok(NULL, "*");
+		folder = realFolder;
 	}
-	
+
 	strncpy(firstfile->folder, folder, sizeof(firstfile->folder));
 
 	if (extension)
@@ -58,8 +50,11 @@ HANDLE FindFirstFile(const char* pathname, WIN32_FIND_DATA* firstfile) {
 	else
 		firstfile->extension[0] = '\0';
 
+	if (realFolder)
+		free(realFolder);
+
 	HANDLE d;
-	if ((d = (HANDLE)opendir(folder)) == NULL || !FindNextFile(d, firstfile))
+	if ((d = (HANDLE)opendir(firstfile->folder)) == NULL || !FindNextFile(d, firstfile))
 		return NULL;
 
 	return d;
