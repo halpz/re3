@@ -7,6 +7,8 @@
 #include "Timer.h"
 #include "SpecialFX.h"
 
+// --MIAMI: file done
+
 uint32 CTimer::m_snTimeInMilliseconds;
 PauseModeTime CTimer::m_snTimeInMillisecondsPauseMode = 1;
 
@@ -96,7 +98,7 @@ void CTimer::Update(void)
 		
 		_oldPerfCounter = pc;
 		
-		float updInCyclesScaled = updInCycles * ms_fTimeScale;
+		float updInCyclesScaled = GetIsPaused() ? updInCycles : updInCyclesScaled * ms_fTimeScale;
 		
 		// We need that real frame time to fix transparent menu bug.
 #ifndef FIX_HIGH_FPS_BUGS_ON_FRONTEND

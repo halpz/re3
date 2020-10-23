@@ -644,7 +644,7 @@ ProcessSlowMode(void)
 	
 	do
 	{
-		if ( CPad::GetPad(1)->GetLeftShoulder1JustDown() || CPad::GetPad(1)->GetRightShoulder1() )
+		if ( CPad::GetPad(1)->GetSelectJustDown() || CPad::GetPad(1)->GetStart() )
 			break;
 		
 		if ( stop )
@@ -658,10 +658,7 @@ ProcessSlowMode(void)
 		RwCameraBeginUpdate(Scene.camera);
 		RwCameraEndUpdate(Scene.camera);
 		
-		if ( CPad::GetPad(1)->GetLeftShoulder1JustDown() || CPad::GetPad(1)->GetRightShoulder1() )
-			break;
-	
-	} while (!CPad::GetPad(1)->GetRightShoulder1());
+	} while (!CPad::GetPad(1)->GetSelectJustDown() && !CPad::GetPad(1)->GetStart());
 	
 	
 	CPad::GetPad(0)->OldState.LeftStickX = lX;
@@ -714,22 +711,32 @@ int32 FrameSamples;
 
 struct tZonePrint
 {
-  char name[12];
-  CRect rect;
+	char name[11];
+	char area[5];
+	CRect rect;
 };
 
 tZonePrint ZonePrint[] =
 {
-	{ "suburban", CRect(-1639.4f,  1014.3f, -226.23f, -1347.9f) },
-	{ "comntop",  CRect(-223.52f,  203.62f,  616.79f, -413.6f)  },
-	{ "comnbtm",  CRect(-227.24f, -413.6f,   620.51f, -911.84f) },
-	{ "comse",    CRect( 200.35f, -911.84f,  620.51f, -1737.3f) },
-	{ "comsw",    CRect(-223.52f, -911.84f,  200.35f, -1737.3f) },
-	{ "industsw", CRect( 744.05f, -473.0f,   1067.5f, -1331.5f) },
-	{ "industne", CRect( 1067.5f,  282.19f,  1915.3f, -473.0f)  },
-	{ "industnw", CRect( 744.05f,  324.95f,  1067.5f, -473.0f)  },
-	{ "industse", CRect( 1070.3f, -473.0f,   1918.1f, -1331.5f) },
-	{ "no zone",  CRect( 0.0f,     0.0f,     0.0f,    0.0f)     }
+	{ "DOWNTOWN", "GM", CRect(-1500.0f, 1500.0f, -300.0f, 980.0f)},
+	{ "DOWNTOWS", "KB", CRect(-1200.0f, 980.0f, -300.0f, 435.0f)},
+	{ "GOLF", "NT", CRect(-300.0f, 660.0f, 320.0f, -255.0f)},
+	{ "LITTLEHA", "AG", CRect(-1250.0f, -310.0f, -746.0f, -926.0f)},
+	{ "HAITI", "CJ", CRect(-1355.0f, 30.0f, -637.0f, -304.0f)},
+	{ "HAITIN", "SM", CRect(-1355.0f, 435.0f, -637.0f, 30.0f)},
+	{ "DOCKS", "AW", CRect(-1122.0f, -926.0f, -609.0f, -1575.0f)},
+	{ "AIRPORT", "NT", CRect(-2000.0f, 200.0f, -871.0f, -2000.0f)},
+	{ "STARISL", "CJ", CRect(-724.0f, -320.0f, -40.0f, -380.0f)},
+	{ "CENT.ISLA", "NT", CRect(-163.0f, 1260.0f,  120.0f, 830.0f)},
+	{ "MALL", "AW", CRect( 300.0f, 1266.0f,  483.0f, 995.0f)},
+	{ "MANSION", "KB", CRect(-724.0f, -500.0f, -40.0f, -670.0f)},
+	{ "NBEACH", "AS", CRect( 120.0f,  1340.0f,  900.0f,  600.0f)},
+	{ "NBEACHBT", "AS", CRect( 200.0f, 680.0f,  660.0f, -50.0f)},
+	{ "NBEACHW", "AS", CRect(-93.0f, 80.0f,  410.0f, -680.0f)},
+	{ "OCEANDRV", "AC", CRect( 200.0f, -964.0f,  955.0f, -1797.0f)},
+	{ "OCEANDN", "WS", CRect( 400.0f, 50.0f,  955.0f,  -964.0f)},
+	{ "WASHINGTN", "AC", CRect(-320.0f, -487.0f,  500.0f, -1200.0f)},
+	{ "WASHINBTM", "AC", CRect(-255.0f, -1200.0f,  500.0f, -1690.0f)}
 };
 
 #ifndef MASTER
@@ -737,14 +744,12 @@ void
 DisplayGameDebugText()
 {
 	static bool bDisplayPosn = false;
-	static bool bDisplayRate = false;
-	static bool bDisplayCheatStr = false;
+	static bool bDisplayCheatStr = false; // custom
 
 #ifndef FINAL
 	{
 		SETTWEAKPATH("GameDebugText");
 		TWEAKBOOL(bDisplayPosn);
-		TWEAKBOOL(bDisplayRate);
 		TWEAKBOOL(bDisplayCheatStr);
 	}
 #endif
@@ -777,23 +782,8 @@ DisplayGameDebugText()
 		FramesPerSecondCounter = 0.0f;
 		FrameSamples = 0;
 	}
-  
-	if ( !TheCamera.WorldViewerBeingUsed 
-		&& CPad::GetPad(1)->GetSquare() 
-		&& CPad::GetPad(1)->GetTriangle()
-		&& CPad::GetPad(1)->GetLeftShoulder2JustDown() )
-	{
-		bDisplayPosn = !bDisplayPosn;
-	}
 
-	if ( CPad::GetPad(1)->GetSquare()
-		&& CPad::GetPad(1)->GetTriangle()
-		&& CPad::GetPad(1)->GetRightShoulder2JustDown() )
-	{
-		bDisplayRate = !bDisplayRate;
-	}
-	
-	if ( bDisplayPosn || bDisplayRate )
+	if ( bDisplayPosn )
 	{
 		CVector pos = FindPlayerCoors();
 		int32 ZoneId = ARRAY_SIZE(ZonePrint)-1; // no zone
@@ -810,43 +800,42 @@ DisplayGameDebugText()
 		}
 
 		//NOTE: fps should be 30, but its 29 due to different fp2int conversion 
-		if ( bDisplayRate )
-			sprintf(str, "X:%5.1f, Y:%5.1f, Z:%5.1f, F-%d, %s", pos.x, pos.y, pos.z, (int32)FramesPerSecond, ZonePrint[ZoneId].name);
-		else
-			sprintf(str, "X:%5.1f, Y:%5.1f, Z:%5.1f, %s", pos.x, pos.y, pos.z, ZonePrint[ZoneId].name);
-		
+		sprintf(str, "X:%4.0f Y:%4.0f Z:%4.0f F-%d %s-%s", pos.x, pos.y, pos.z, (int32)FramesPerSecond,
+			ZonePrint[ZoneId].name, ZonePrint[ZoneId].area);
+
 		AsciiToUnicode(str, ustr);
 		
-		// Let's not scale those numbers, they look better that way :eyes:
-		CFont::SetPropOff();
+		CFont::SetPropOn();
 		CFont::SetBackgroundOff();
-		CFont::SetScale(0.7f, 1.5f);
+		CFont::SetScale(SCREEN_SCALE_X(0.6f), SCREEN_SCALE_Y(0.8f));
 		CFont::SetCentreOff();
 		CFont::SetRightJustifyOff();
 		CFont::SetJustifyOff();
 		CFont::SetBackGroundOnlyTextOff();
-		CFont::SetWrapx(640.0f);
-		CFont::SetFontStyle(FONT_HEADING);
-		
+		CFont::SetWrapx(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
+		CFont::SetFontStyle(FONT_STANDARD);
+		CFont::SetDropColor(CRGBA(0, 0, 0, 255));
+		CFont::SetDropShadowPosition(2);
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
-		CFont::PrintString(42.0f, 42.0f, ustr);
+		CFont::PrintString(41.0f, 41.0f, ustr);
 		
-		CFont::SetColor(CRGBA(255, 108, 0, 255));
+		CFont::SetColor(CRGBA(205, 205, 0, 255));
 		CFont::PrintString(40.0f, 40.0f, ustr);
 	}
 
+	// custom
 	if (bDisplayCheatStr)
 	{
 		sprintf(str, "%s", CPad::KeyBoardCheatString);
 		AsciiToUnicode(str, ustr);
 
-		CFont::SetPropOff();
+		CFont::SetPropOn();
 		CFont::SetBackgroundOff();
-		CFont::SetScale(0.7f, 1.5f);
+		CFont::SetScale(SCREEN_SCALE_X(0.6f), SCREEN_SCALE_Y(0.8f));
 		CFont::SetCentreOn();
 		CFont::SetBackGroundOnlyTextOff();
-		CFont::SetWrapx(640.0f);
-		CFont::SetFontStyle(FONT_HEADING);
+		CFont::SetWrapx(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
+		CFont::SetFontStyle(FONT_STANDARD);
 
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
 		CFont::PrintString(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH * 0.5f)+2.f, SCREEN_SCALE_FROM_BOTTOM(20.0f)+2.f, ustr);
@@ -968,7 +957,7 @@ Render2dStuff(void)
 		CSceneEdit::Draw();
 	else
 		CHud::Draw();
-	// TODO(Miami)
+
 	CSpecialFX::Render2DFXs();
 	CUserDisplay::OnscnTimer.ProcessForDisplay();
 	CMessages::Display();
@@ -1007,6 +996,9 @@ Render2dStuffAfterFade(void)
 	DisplayGameDebugText();
 #endif
 
+#ifdef MOBILE_IMPROVEMENTS
+	if (CDraw::FadeValue != 0)
+#endif
 	CHud::DrawAfterFade();
 	CFont::DrawFonts();
 	CCredits::Render();
@@ -1065,9 +1057,7 @@ Idle(void *arg)
 	if(arg == nil)
 		return;
 
-	// m_bRenderGameInMenu is there in III PS2 but I don't know about VC PS2.
-	if((!FrontEndMenuManager.m_bMenuActive/* || FrontEndMenuManager.m_bRenderGameInMenu*/) &&
-	   TheCamera.GetScreenFadeStatus() != FADE_2)
+	if(!FrontEndMenuManager.m_bMenuActive && TheCamera.GetScreenFadeStatus() != FADE_2)
 	{
 #ifdef GTA_PC
 			// This is from SA, but it's nice for windowed mode
