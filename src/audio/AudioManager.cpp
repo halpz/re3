@@ -624,7 +624,6 @@ cAudioManager::AddDetailsToRequestedOrderList(uint8 sample)
 	m_abSampleQueueIndexTable[m_nActiveSampleQueue][i] = sample;
 }
 
-// --MIAMI: Done
 void
 cAudioManager::AddReflectionsToRequestedQueue()
 {
@@ -686,7 +685,6 @@ cAudioManager::AddReflectionsToRequestedQueue()
 	m_sQueueSample.m_fDistance = oldDist;
 }
 
-// --MIAMI: Done
 void
 cAudioManager::UpdateReflections()
 {

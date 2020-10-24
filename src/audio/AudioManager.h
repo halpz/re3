@@ -410,9 +410,9 @@ public:
 	void Terminate(); //done
 	void TranslateEntity(Const CVector *v1, CVector *v2) const; //done
 
-	void UpdateReflections();
-	bool UsesReverseWarning(int32 model) const; //done
-	bool UsesSiren(cVehicleParams *params) const; //done
+	void UpdateReflections();                              //done
+	bool UsesReverseWarning(int32 model) const;            //done
+	bool UsesSiren(cVehicleParams *params) const;          //done
 	bool UsesSirenSwitching(cVehicleParams* params) const; //done
 
 	CVehicle *FindVehicleOfPlayer(); //done
