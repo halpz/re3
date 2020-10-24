@@ -216,10 +216,12 @@ CdStreamShutdown(void)
 #ifndef ONE_THREAD_PER_CHANNEL
 	gCdStreamThreadStatus = 2;
 	sem_post(gCdStreamSema);
+	pthread_join(_gCdStreamThread, nil);
 #else
 	for ( int32 i = 0; i < gNumChannels; i++ ) {
 		gpReadInfo[i].nThreadStatus = 2;
 		sem_post(gpReadInfo[i].pStartSemaphore);
+		pthread_join(gpReadInfo[i].pChannelThread, nil);
 	}
 #endif
 }
