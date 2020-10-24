@@ -45,17 +45,18 @@ public:
 	char m_sTextKey[8];
 	ePickupType m_eType;
 	bool m_bRemoved;
-	uint8 m_effects:1;
-	uint8 m_effects2:1;
+	uint8 m_bWasAmmoCollected:1;
+	uint8 m_bWasControlMessageShown:1;
 
 	CObject *GiveUsAPickUpObject(CObject **object, CObject **extraObject, int32 handle, int32 extraHandle);
 	bool Update(CPlayerPed *player, CVehicle *vehicle, int playerId);
 	void GetRidOfObjects();
+	void ExtractAmmoFromPickup(CPlayerPed *player);
+	void ProcessGunShot(CVector *vec1, CVector *vec2);
 private:
-	bool IsMine() { return m_eType >= PICKUP_MINE_INACTIVE && m_eType <= PICKUP_FLOATINGPACKAGE_FLOATING; }
+	inline bool IsMine() { return m_eType >= PICKUP_MINE_INACTIVE && m_eType <= PICKUP_FLOATINGPACKAGE_FLOATING; }
 	inline bool CanBePickedUp(CPlayerPed *player, int playerId);
-	void RemoveKeepType();
-	void Remove();
+	inline void Remove();
 };
 
 VALIDATE_SIZE(CPickup, 0x1C);
@@ -79,7 +80,6 @@ class CPickups
 	static tPickupMessage aMessages[NUMPICKUPMESSAGES];
 public:
 	static int32 PlayerOnWeaponPickup;
-	static int32 CollectPickupBuffer;
 
 	static void Init();
 	static void Update();
@@ -91,7 +91,6 @@ public:
 	static int32 GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quantity, uint32 rate = 0, bool highPriority = false, char* pText = nil);
 	static int32 GenerateNewOne_WeaponType(CVector pos, eWeaponType weaponType, uint8 type, uint32 quantity);
 	static void RemovePickUp(int32 pickupIndex);
-	static void RemoveAllFloatingPickups();
 	static void AddToCollectedPickupsArray(int32 index);
 	static bool IsPickUpPickedUp(int32 pickupId);
 	static int32 ModelForWeapon(eWeaponType weaponType);
@@ -103,6 +102,7 @@ public:
 	static bool TestForPickupsInBubble(CVector pos, float range);
 	static bool TryToMerge_WeaponType(CVector pos, eWeaponType weapon, uint8 type, uint32 quantity, bool unused);
 	static void CreateSomeMoney(CVector, int);
+	static void DetonateMinesHitByGunShot(CVector *vec1, CVector *vec2);
 	static void Load(uint8 *buf, uint32 size);
 	static void Save(uint8 *buf, uint32 *size);
 
@@ -121,6 +121,8 @@ public:
 extern uint16 AmmoForWeapon[WEAPONTYPE_TOTALWEAPONS + 1];
 extern uint16 AmmoForWeapon_OnStreet[WEAPONTYPE_TOTALWEAPONS + 1];
 extern uint16 CostOfWeapon[WEAPONTYPE_TOTALWEAPONS + 3];
+
+extern int32 CollectPickupBuffer;
 
 enum ePacmanPickupType
 {

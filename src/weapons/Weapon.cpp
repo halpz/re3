@@ -933,26 +933,25 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 	}
 	else if ( shooter == FindPlayerPed() && TheCamera.Cams[0].Using3rdPersonMouseCam()  )
 	{
-		CVector src, trgt;
-		TheCamera.Find3rdPersonCamTargetVector(info->m_fRange, *fireSource, src, trgt);
+		TheCamera.Find3rdPersonCamTargetVector(info->m_fRange, *fireSource, source, target);
 
 		CWorld::bIncludeBikers = true;
 		CWorld::bIncludeDeadPeds = true;
 		CWorld::bIncludeCarTyres = true;
-		CWorld::ProcessLineOfSight(src, trgt, point, victim, true, true, true, true, true, false, false, true);
+		CWorld::ProcessLineOfSight(source, target, point, victim, true, true, true, true, true, false, false, true);
 		CWorld::bIncludeBikers = false;
 		CWorld::bIncludeDeadPeds = false;
 		CWorld::bIncludeCarTyres = false;
 
 		if (victim)
-			CheckForShootingVehicleOccupant(&victim, &point, m_eWeaponType, src, trgt);
+			CheckForShootingVehicleOccupant(&victim, &point, m_eWeaponType, source, target);
 
 		int32 rotSpeed = 1;
 		if ( m_eWeaponType == WEAPONTYPE_M4 )
 			rotSpeed = 4;
 
 		CVector bulletPos;
-		if ( CHeli::TestBulletCollision(&src, &trgt, &bulletPos, 4) )
+		if ( CHeli::TestBulletCollision(&source, &target, &bulletPos, 4) )
 		{
 			for ( int32 i = 0; i < 16; i++ )
 				CParticle::AddParticle(PARTICLE_SPARK, bulletPos, CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, rotSpeed);

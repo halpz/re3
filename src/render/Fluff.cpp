@@ -22,6 +22,7 @@
 #include "Bones.h"
 #include "World.h"
 #include "Replay.h"
+#include "Coronas.h"
 
 CPlaneTrail CPlaneTrails::aArray[6];
 RwImVertexIndex TrailIndices[32] = {
@@ -369,18 +370,10 @@ uint8 ScrollCharSet[59][5] = {
 // ---------- CMovingThings ----------
 enum eScrollBarTypes
 {
-	SCROLL_BUSINESS,
-	SCROLL_TRAFFIC,
-	SCROLL_ENTERTAINMENT,
-	SCROLL_AIRPORT_DOORS,
-	SCROLL_AIRPORT_FRONT,
-	SCROLL_STORE,
-	SCROLL_USED_CARS
+	SCROLL_ARENA_STRING
 };
 
-CScrollBar    aScrollBars[11];
-CTowerClock   aTowerClocks[2];
-CDigitalClock aDigitalClocks[3];
+CScrollBar    aScrollBars[1];
 
 CMovingThing CMovingThings::StartCloseList;
 CMovingThing CMovingThings::EndCloseList;
@@ -391,66 +384,47 @@ int32 CScrollBar::TonightsEvent;
  
 void CMovingThings::Init()
 {
+	StartCloseList.m_pNext = &CMovingThings::EndCloseList;
+	StartCloseList.m_pPrev = nil;
+	EndCloseList.m_pNext = nil;
+	EndCloseList.m_pPrev = &CMovingThings::StartCloseList;
+
 	CPlaneTrails::Init();
 	CSmokeTrails::Init();
 	CPlaneBanners::Init();
 	CPointLights::Init();
 
-	StartCloseList.m_pNext = &CMovingThings::EndCloseList;
-	StartCloseList.m_pPrev = nil;
-	EndCloseList.m_pNext = nil;
-	EndCloseList.m_pPrev = &CMovingThings::StartCloseList;
 	Num = 0;
 
+	for (int32 i = 0; i < NUMMOVINGTHINGS; i++) {
+		aMovingThings[i].m_nType = 0;
+		aMovingThings[i].m_nHidden = 0;
+	}
+
+	for (int i = 0; i < NUMSECTORS_X; i++) {
+		for (int j = 0; j < NUMSECTORS_Y; j++) {
+			for (CPtrNode *pNode = CWorld::GetSector(i, j)->m_lists[ENTITYLIST_BUILDINGS].first; pNode; pNode = pNode->next) {
+				CEntity *pEntity = (CEntity *)pNode->item;
+				PossiblyAddThisEntity(pEntity);
+			}
+		}
+	}
+
+	for (int32 i = 0; i < NUM_LEVELS; i++) {
+		for (CPtrNode *pNode = CWorld::GetBigBuildingList((eLevelName)i).first; pNode; pNode = pNode->next) {
+			CEntity *pEntity = (CEntity *)pNode->item;
+			PossiblyAddThisEntity(pEntity);
+		}
+	}
+
 	CEscalators::Init();
-
-#ifndef MIAMI	// something is still used here actually
-	// Initialize scroll bars
-	 aScrollBars[0].Init(CVector(  228.3f,    -669.0f,     39.0f  ), SCROLL_BUSINESS,       0.0f,     0.5f,     0.5f,   255, 128, 0,   0.3f);
-	 aScrollBars[1].Init(CVector(  772.0f,     164.0f,     -9.5f  ), SCROLL_TRAFFIC,        0.0f,     0.5f,     0.25f,  128, 255, 0,   0.3f);
-	 aScrollBars[2].Init(CVector(-1089.61f,   -584.224f,   13.246f), SCROLL_AIRPORT_DOORS,  0.0f,    -0.1706f,  0.107f, 255, 0,   0,   0.11f);
-	 aScrollBars[3].Init(CVector(-1089.61f,   -602.04602f, 13.246f), SCROLL_AIRPORT_DOORS,  0.0f,    -0.1706f,  0.107f, 0,   255, 0,   0.11f);
-	 aScrollBars[4].Init(CVector(-1089.61f,   -619.81702f, 13.246f), SCROLL_AIRPORT_DOORS,  0.0f,    -0.1706f,  0.107f, 255, 128, 0,   0.11f);
-	 aScrollBars[5].Init(CVector(-754.578f,   -633.50897f, 18.411f), SCROLL_AIRPORT_FRONT,  0.0f,     0.591f,   0.52f,  100, 100, 255, 0.3f);
-	 aScrollBars[6].Init(CVector( -754.578f,  -586.672f,   18.411f), SCROLL_AIRPORT_FRONT,  0.0f,     0.591f,   0.52f,  100, 100, 255, 0.3f);
-	 aScrollBars[7].Init(CVector(   85.473f, -1069.512f,   30.5f  ), SCROLL_STORE,          0.625f,  -0.3125f,  0.727f, 100, 100, 255, 0.5f);
-	 aScrollBars[8].Init(CVector(   74.823f, -1086.879f,   31.495f), SCROLL_ENTERTAINMENT, -0.2083f,  0.1041f,  0.5f,   255, 255, 128, 0.3f);
-	 aScrollBars[9].Init(CVector(  -36.459f, -1031.2371f,  32.534f), SCROLL_ENTERTAINMENT, -0.1442f,  0.0721f,  0.229f, 150, 255, 50,  0.3f);
-	aScrollBars[10].Init(CVector( 1208.0f,     -62.208f,   19.157f), SCROLL_USED_CARS,      0.0642f, -0.20365f, 0.229f, 255, 128, 0,   0.3f);
-
-	// Initialize tower clocks
-	aTowerClocks[0].Init(CVector(59.4f, -1081.3f, 54.15f), -1.0f,  0.0f, 0, 0, 0, 80.0f, 2.0f);
-	aTowerClocks[1].Init(CVector(55.4f, -1083.6f, 54.15f),  0.0f, -1.0f, 0, 0, 0, 80.0f, 2.0f);
-
-	// Initialize digital clocks
-	CVector2D sz(3.7f, 2.144f);
-	sz.Normalise();
-	aDigitalClocks[0].Init(
-		CVector(54.485f - sz.x * 0.05f + sz.y * 0.3f, -1081.679f - sz.y * 0.05f - sz.x * 0.3f, 32.803f),
-		sz.y, -sz.x, 255, 0, 0, 100.0f, 0.8f
-	);
-	aDigitalClocks[1].Init(
-		CVector(60.564f + sz.x * 0.05f - sz.y * 0.3f, -1083.089f + sz.y * 0.05f + sz.x * 0.3f, 32.803f),
-		-sz.y, sz.x, 0, 0, 255, 100.0f, 0.8f
-	);
-	aDigitalClocks[2].Init(
-		CVector(58.145f - sz.y * 0.05f - sz.x * 0.3f, -1079.268f + sz.x * 0.05f - sz.y * 0.3f, 32.803f),
-		-sz.x, -sz.y, 0, 255, 0, 100.0f, 0.8f
-	);
-#endif
+	aScrollBars[0].Init(CVector(-1069.209f, 1320.126f, 18.848f), CVector(-1069.209f, 1342.299f, 22.612), SCROLL_ARENA_STRING, 128, 255, 0, 0.3f);
 }
 
 void CMovingThings::Shutdown()
 {
-	int i;
-	for (i = 0; i < ARRAY_SIZE(aScrollBars); ++i)
-		aScrollBars[i].SetVisibility(false);
-/*
-	for (i = 0; i < ARRAY_SIZE(aTowerClocks); ++i)
-		aTowerClocks[i].SetVisibility(false);
-	for (i = 0; i < ARRAY_SIZE(aDigitalClocks); ++i)
-		aDigitalClocks[i].SetVisibility(false);
-*/
+	
+	aScrollBars[0].SetVisibility(false);
 	CEscalators::Shutdown();
 }
 
@@ -475,23 +449,12 @@ void CMovingThings::Update()
 		if (aMovingThings[i].m_nHidden == 0)
 			aMovingThings[i].Update();
 	}
-	/* I don't think these are done yet? 
+
 	for (i = 0; i < ARRAY_SIZE(aScrollBars); ++i)
 	{
 		if (aScrollBars[i].IsVisible() || (CTimer::GetFrameCounter() + i) % 8 == 0)
 			aScrollBars[i].Update();
 	}
-	for (i = 0; i < ARRAY_SIZE(aTowerClocks); ++i)
-	{
-		if (aTowerClocks[i].IsVisible() || (CTimer::GetFrameCounter() + i) % 8 == 0)
-			aTowerClocks[i].Update();
-	}
-	for (i = 0; i < ARRAY_SIZE(aDigitalClocks); ++i)
-	{
-		if (aDigitalClocks[i].IsVisible() || (CTimer::GetFrameCounter() + i) % 8 == 0)
-			aDigitalClocks[i].Update();
-	}
-	*/
 }
 
 void CMovingThings::Render()
@@ -504,18 +467,6 @@ void CMovingThings::Render()
 		if (aScrollBars[i].IsVisible())
 			aScrollBars[i].Render();
 	}
-/*
-	for (i = 0; i < ARRAY_SIZE(aTowerClocks); ++i)
-	{
-		if (aTowerClocks[i].IsVisible())
-			aTowerClocks[i].Render();
-	}
-	for (i = 0; i < ARRAY_SIZE(aDigitalClocks); ++i)
-	{
-		if (aDigitalClocks[i].IsVisible())
-			aDigitalClocks[i].Render();
-	}
-*/
 
 	CPlaneTrails::Render();
 	CSmokeTrails::Render();
@@ -523,20 +474,70 @@ void CMovingThings::Render()
 }
 
 // ---------- CMovingThing ----------
+float lengths[5] = { 100.0f, 1500.0f, 400.0f, 100.0f, 2000.0f };
+
 void CMovingThing::Update()
 {
+	switch (m_nType) {
+	case 1: {
+		float angle = (CTimer::GetTimeInMilliseconds() % 0x3FFF) * TWOPI / 0x3FFF;
+		m_pEntity->GetRight() = CVector(-Sin(angle), Cos(angle), 0.0f);
+		m_pEntity->GetForward() = CVector(0.0f, 0.0f, 1.0f);
+		m_pEntity->GetUp() = CVector(Cos(angle), Sin(angle), 0.0f);
+
+		if (CClock::GetHours() >= 20 || CClock::GetHours() < 5) {
+			if (Abs(TheCamera.GetPosition().x - m_pEntity->GetPosition().x) < 600.0f &&
+				Abs(TheCamera.GetPosition().y - m_pEntity->GetPosition().y) < 600.0f) {
+				CVector delta = m_pEntity->GetPosition() - TheCamera.GetPosition();
+				delta.Normalise();
+
+				if (delta.x * Cos(angle) + delta.y * Sin(angle) < -0.92f) {
+					CVector coors = m_pEntity->GetPosition() - 10.0f * delta;
+					CCoronas::RegisterCorona(43, 128, 128, 100, 255, coors, 70.0f, 600.0f, 0.0f, CCoronas::TYPE_STAR, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f, false, 1.5f);
+				}
+			}
+		}
+	}
+		break;
+	case 2: {
+		float angle = (CTimer::GetTimeInMilliseconds() % 0x7FF) * TWOPI / 0x7FF;
+		m_pEntity->GetRight() = CVector(Cos(angle), Sin(angle), 0.0f);
+		m_pEntity->GetForward() = CVector(-Sin(angle), Cos(angle), 0.0f);
+		m_pEntity->GetUp() = CVector(0.0f, 0.0f, 1.0f);
+	}
+		break;
+	case 3: {
+		float angle = (CTimer::GetTimeInMilliseconds() % 0x3FF) * TWOPI / 0x3FF;
+		m_pEntity->GetRight() = CVector(Cos(angle), Sin(angle), 0.0f);
+		m_pEntity->GetForward() = CVector(-Sin(angle), Cos(angle), 0.0f);
+		m_pEntity->GetUp() = CVector(0.0f, 0.0f, 1.0f);
+	}
+		break;
+	case 4: {
+		float angle = (CTimer::GetTimeInMilliseconds() % 0x3FFFF) * TWOPI / 0x3FFFF;
+		m_pEntity->GetRight() = CVector(-Cos(angle), -Sin(angle), 0.0f);
+		m_pEntity->GetForward() = CVector(Sin(angle), -Cos(angle), 0.0f);
+		m_pEntity->GetUp() = CVector(0.0f, 0.0f, 1.0f);
+		m_pEntity->SetPosition(CVector(350.0f * Cos(angle) - 465.0f, 350.0f * Sin(angle) + 1163.0f, 260.0f));
+	}
+		break;
+	default:
+		break;
+	}
+
 	m_pEntity->GetMatrix().UpdateRW();
 	m_pEntity->UpdateRwFrame();
 	
-	if (SQR(m_pEntity->GetPosition().x - TheCamera.GetPosition().x) + SQR(m_pEntity->GetPosition().y - TheCamera.GetPosition().y) < 40000.0f) {
-		if (m_nHidden == 1) {
-			AddToList(&CMovingThings::StartCloseList);
-			m_nHidden = 0;
-		}
-	} else {
+	if (SQR(m_pEntity->GetPosition().x - TheCamera.GetPosition().x) + SQR(m_pEntity->GetPosition().y - TheCamera.GetPosition().y) >= SQR(lengths[m_nType])) {
 		if (m_nHidden == 0) {
 			RemoveFromList();
 			m_nHidden = 1;
+		}
+	}
+	else {
+		if (m_nHidden == 1) {
+			AddToList(&CMovingThings::StartCloseList);
+			m_nHidden = 0;
 		}
 	}
 }
@@ -568,27 +569,32 @@ int16 CMovingThing::SizeList()
 	return count;
 }
 
-// ---------- Find message functions ----------
-const char* FindTunnelMessage()
-{
-	if (CStats::CommercialPassed)
-		return "LIBERTY TUNNEL HAS BEEN OPENED TO ALL TRAFFIC . . .   ";
+void CMovingThings::RegisterOne(CEntity *pEnt, uint16 nType) {
+	if (Num >= NUMMOVINGTHINGS)
+		return;
 
-	if (CStats::IndustrialPassed)
-		return "FIRST PHASE LIBERTY TUNNEL HAS BEEN COMPLETED . . .   ";
-
-	return "FIRST PHASE LIBERTY TUNNEL ABOUT TO BE COMPLETED . . .   ";
+	aMovingThings[Num].m_pEntity = pEnt;
+	aMovingThings[Num].m_nType = nType;
+	aMovingThings[Num].m_nHidden = 0;
+	aMovingThings[Num].m_vecPosn = pEnt->GetPosition();
+	aMovingThings[Num].AddToList(&CMovingThings::StartCloseList);
+	Num++;
 }
 
-const char* FindBridgeMessage()
-{
-	if (CStats::CommercialPassed)
-		return "STAUNTON LIFT BRIDGE IS OPERATIONAL AGAIN    ";
-
-	if (CStats::IndustrialPassed)
-		return "LONG DELAYS BEHIND US AS CALLAHAN BRIDGE IS FIXED . . .   STAUNTON LIFT BRIDGE STUCK OPEN   ";
-
-	return "CHAOS AS CALLAHAN BRIDGE IS UNDER REPAIR. . .   ";
+void CMovingThings::PossiblyAddThisEntity(CEntity *pEnt) {
+	if (pEnt->GetModelIndex() == MI_LIGHTBEAM) {
+		RegisterOne(pEnt, 1);
+	}
+	else if (pEnt->GetModelIndex() == MI_AIRPORTRADAR) {
+		RegisterOne(pEnt, 2);
+	}
+	else if (pEnt->GetModelIndex() == MI_MALLFAN || pEnt->GetModelIndex() == MI_HOTELFAN_NIGHT
+		|| pEnt->GetModelIndex() == MI_HOTELFAN_DAY || pEnt->GetModelIndex() == MI_HOTROOMFAN) {
+		RegisterOne(pEnt, 3);
+	}
+	else if (pEnt->GetModelIndex() == MI_BLIMP_NIGHT || pEnt->GetModelIndex() == MI_BLIMP_DAY) {
+		RegisterOne(pEnt, 4);
+	}
 }
 
 char String_Time[] = "THE TIME IS 12:34    ";
@@ -601,49 +607,23 @@ const char* FindTimeMessage()
 	return String_Time;
 }
 
-char String_DigitalClock[] = "12:34";
-const char* FindDigitalClockMessage()
-{
-	if (((CTimer::GetTimeInMilliseconds() >> 10) & 7) < 6)
-	{
-		String_DigitalClock[0] = '0' + CClock::GetHours() / 10;
-		String_DigitalClock[1] = '0' + CClock::GetHours() % 10;
-		String_DigitalClock[2] = CTimer::GetTimeInMilliseconds() & 0x200 ? ':' : ' ';
-		String_DigitalClock[3] = '0' + CClock::GetMinutes() / 10;
-		String_DigitalClock[4] = '0' + CClock::GetMinutes() % 10;
-	}
-	else
-	{
-		// they didn't use rad2deg here because of 3.14
-		int temperature = 13.0f - 6.0f * Cos((CClock::GetMinutes() + 60.0f * CClock::GetHours()) / (4.0f * 180.0f / 3.14f) - 1.0f);
-		String_DigitalClock[0] = '0' + temperature / 10;
-		if (String_DigitalClock[0] == '0')
-			String_DigitalClock[0] = ' ';
-		String_DigitalClock[1] = '0' + temperature % 10;
-		String_DigitalClock[2] = ' ';
-		String_DigitalClock[3] = '@';
-		String_DigitalClock[4] = 'C';
-	}
-	return String_DigitalClock;
-}
-
 // ---------- CScrollBar ----------
-void CScrollBar::Init(CVector position, uint8 type, float sizeX, float sizeY, float sizeZ, uint8 red, uint8 green, uint8 blue, float scale)
+void CScrollBar::Init(CVector pos1, CVector pos2, uint8 type, uint8 red, uint8 green, uint8 blue, float scale)
 {
 	for (int i = 0; i < ARRAY_SIZE(m_MessageBar); ++i)
 		m_MessageBar[i] = 0;
 
 	m_pMessage = ". ";
 	m_MessageCurrentChar = 0;
-	m_MessageLength = 2;
+	m_MessageLength = strlen(m_pMessage);
 
 	m_Counter  = 0;
 	m_bVisible = false;
-	m_Position = position;
+	m_Position = pos1;
 	m_Type     = type;
-	m_Size.x   = sizeX;
-	m_Size.y   = sizeY;
-	m_Size.z   = sizeZ;
+	m_Size.x   = (pos2.x - pos1.x) * 0.025f;
+	m_Size.y   = (pos2.y - pos1.y) * 0.025f;
+	m_Size.z   = (pos2.z - pos1.z) * 0.2f;
 	m_uRed     = red;
 	m_uGreen   = green;
 	m_uBlue    = blue;
@@ -672,263 +652,48 @@ void CScrollBar::Update()
 	if (m_Counter == 0 && ++m_MessageCurrentChar >= m_MessageLength)
 	{
 		const char* previousMessage = m_pMessage;
-		switch (m_Type)
-		{
-		case SCROLL_BUSINESS:
-			while (previousMessage == m_pMessage)
-			{
-				switch (CGeneral::GetRandomNumber() % 7)
-				{
-				case 0:
-					m_pMessage = "SHARES  UYE<10% DWD<20% NDWE>22% . . .   ";
-					break;
-				case 1:
-					m_pMessage = "CRIME WAVE HITS LIBERTY CITY . . .   ";
-					break;
-				case 2:
-					m_pMessage = "SHARES  OBR>29% MADD<76% LEZ<11% ADAMSKI>53% AAG>110%. . .   ";
-					break;
-				case 3:
-					m_pMessage = FindTunnelMessage();
-					break;
-				case 4:
-					m_pMessage = FindBridgeMessage();
-					break;
-				case 5:
-					m_pMessage = FindTimeMessage();
-					break;
-				case 6:
-					if (FrontEndMenuManager.m_PrefsLanguage == CMenuManager::LANGUAGE_FRENCH || FrontEndMenuManager.m_PrefsLanguage == CMenuManager::LANGUAGE_GERMAN)
-						m_pMessage = FindTimeMessage();
-					else
-						m_pMessage = "WWW.GRANDTHEFTAUTO3.COM    ";
-					break;
-				}
-			}
-			break;
-		case SCROLL_TRAFFIC:
-			while (previousMessage == m_pMessage)
-			{
-				switch (CGeneral::GetRandomNumber() % 8)
-				{
-				case 0:
-					m_pMessage = "DRIVE CAREFULLY . . .   ";
-					break;
-				case 1:
-					m_pMessage = "RECENT WAVE OF CARJACKINGS. KEEP YOUR DOORS LOCKED !!!  ";
-					break;
-				case 2:
-					m_pMessage = "CHECK YOUR SPEED . . .  ";
-					break;
-				case 3:
-					m_pMessage = "KEEP YOUR EYES ON THE ROAD AND NOT ON THIS SIGN  ";
-					break;
-				case 4:
-					if (CWeather::Foggyness > 0.5f)
-						m_pMessage = "POOR VISIBILITY !   ";
-					else if (CWeather::WetRoads > 0.5f)
-						m_pMessage = "ROADS ARE SLIPPERY !   ";
-					else
-						m_pMessage = "ENJOY YOUR TRIP   ";
-					break;
-				case 5:
-					m_pMessage = FindTunnelMessage();
-					break;
-				case 6:
-					m_pMessage = FindBridgeMessage();
-					break;
-				case 7:
-					m_pMessage = FindTimeMessage();
-					break;
-				}
-			}
-			break;
-		case SCROLL_ENTERTAINMENT:
-			while (previousMessage == m_pMessage)
-			{
-				switch (CGeneral::GetRandomNumber() % 12)
-				{
-				case 0:
-					m_pMessage = " )69TH STREET) STILL HOLDS TOP POSITION THIS MONTH AT THE BOX-OFFICE WITH )MY FAIR LADYBOY) JUST CREEPING UP BEHIND.   ";
-					break;
-				case 1:
-					m_pMessage = " TALKING OF )FANNIE). THERE IS STILL TIME TO CATCH THIS LOVELY FAMILY MUSICAL, ABOUT THE ORPHAN WHO IS SO EASILY TAKEN IN BY ANY MAN WITH LOADS OF MONEY.  ";
-					break;
-				case 2:
-					m_pMessage = " DO NOT MISS  )GTA3, THE MUSICAL) . . . ";
-					break;
-				case 3:
-					m_pMessage =
-						" STILL RUNNING ARE )RATS) AND )GUYS AND DOGS), BETWEEN THEN THEY SHOULD HAVE THE LEGS TO LAST TILL THE AND OF THE YEAR. . . "
-						" ALSO FOR FOUR LEGGED FANS, THE STAGE VERSION OF THE GRITTY REALISTIC )SATERDAY NIGHT BEAVER) OPENED LAST WEEKEND,"
-						" AND I FOR ONE CERTAINLY ENJOYED THAT.  ";
-					break;
-				case 4:
-					m_pMessage =
-						" NOW SHOWING STATE-WIDE, ARNOLD STEELONE, HOLLYWOODS BEST LIVING SPECIAL EFFECT, APPEARS AGAIN AS A HALF_MAN,"
-						" HALF ANDROID IN THE HALF-BAKED ROMP, )TOP DOWN CITY). AN HOMAGE TO HIS EARLIER TWO MULTI_MILLION MAKING MOVIES,"
-						" IN WHICH HE PLAYED TWO-DEE, AN OUT OF CONTROL MONSTER, INTENT ON CORRUPTING CIVILISATION!   ";
-					break;
-				case 5:
-					m_pMessage =
-						" ALSO APPEARING THIS WEEK )HALF-COCKED) SEES CHUCK SCHWARTZ UP TO HIS USUAL NONSENSE AS HE TAKES ON HALF OF LIBERTY CITY"
-						" IN AN ATTEMPT TO SAVE HIS CROSS-DRESSING LADY-BOY SIDEKICK, )MISS PING-PONG), FROM A GANG OF RUTHLESS COSMETIC SURGEONS.    ";
-					break;
-				case 6:
-					m_pMessage =
-						" STILL SHOWING: )SOLDIERS OF MISFORTUNE), ATTROCIOUS ACTING WHICH SEES BOYZ 2 GIRLZ) TRANSITION FROM THE CHARTS TO THE BIG SCREEN,"
-						" AT LEAST THEY ALL DIE AT THE END. . . ";
-					break;
-				case 7:
-					m_pMessage =
-						" )BADFELLAS) IS STILL GOING STRONG WITH CROWDS ALMOST BEING PUSHED INTO CINEMAS TO SEE THIS ONE."
-						" ANOTHER ONE WORTH LOOKING INTO IS )THE TUNNEL).    ";
-					break;
-				case 8:
-					m_pMessage = FindTunnelMessage();
-					break;
-				case 9:
-					m_pMessage = FindBridgeMessage();
-					break;
-				case 10:
-					m_pMessage = FindTimeMessage();
-					break;
-				case 11:
-					m_pMessage = "WWW.ROCKSTARGAMES.COM    ";
-					break;
-				}
-			}
-			break;
-		case SCROLL_AIRPORT_DOORS:
+		if (m_Type == SCROLL_ARENA_STRING) {
 			while (previousMessage == m_pMessage)
 			{
 				switch (CGeneral::GetRandomNumber() % 4)
 				{
 				case 0:
-					m_pMessage = "WELCOME TO LIBERTY CITY . . .   ";
+					switch (TonightsEvent) {
+					case 0:
+						m_pMessage = "MAIN EVENT TONIGHT: CAR RACING . . .   ";
+						break;
+					case 1:
+						m_pMessage = "MAIN EVENT TONIGHT: DESTRUCTION DERBY . . .   ";
+						break;
+					case 2:
+						m_pMessage = "MAIN EVENT TONIGHT: BIKE RACING . . .   ";
+						break;
+					}
 					break;
 				case 1:
-					m_pMessage = "PLEASE HAVE YOUR PASSPORT READY . . .   ";
+					switch (TonightsEvent) {
+					case 0:
+						m_pMessage = "FOR TICKETS TO THE HOT RING EVENT CALL 555-3764 . . .   ";
+						break;
+					case 1:
+						m_pMessage = "FOR TICKETS TO THE BLOOD RING EVENT CALL 555-3765 . . .   ";
+						break;
+					case 2:
+						m_pMessage = "FOR TICKETS TO THE DIRT RING EVENT CALL 555-3766 . . .   ";
+						break;
+					}
 					break;
 				case 2:
-					m_pMessage = "PLACE KEYS, FIREARMS, CHANGE AND OTHER METAL OBJECTS ON THE TRAY PLEASE . . .  ";
+					m_pMessage = "HYMAN MEMORIAL STADIUM. HOME TO SOME OF THE BIGGEST EVENTS OF"
+						" THE WESTERN HEMISPHERE. ALSO AVAILABLE FOR CHILDREN PARTIES. . . ";
 					break;
 				case 3:
 					m_pMessage = FindTimeMessage();
 					break;
-				}
-			}
-			break;
-		case SCROLL_AIRPORT_FRONT:
-			while (previousMessage == m_pMessage)
-			{
-				switch (CGeneral::GetRandomNumber() % 4)
-				{
-				case 0:
-					m_pMessage = "WELCOME TO FRANCIS INTERNATIONAL AIRPORT . . .  ";
-					break;
-				case 1:
-					m_pMessage = "PLEASE DO NOT LEAVE LUGGAGE UNATTENDED . . .  ";
-					break;
-				case 2:
-					m_pMessage = "FOLLOW 1 FOR LONG AND SHORT TERM PARKING  ";
-					break;
-				case 3:
-					m_pMessage = FindTimeMessage();
+				default:
 					break;
 				}
 			}
-			break;
-		case SCROLL_STORE:
-			while (previousMessage == m_pMessage)
-			{
-				switch (CGeneral::GetRandomNumber() % 10)
-				{
-				case 0:
-					m_pMessage = "WWW.ROCKSTARGAMES.COM    ";
-					break;
-				case 1:
-					m_pMessage = "GTA3   OUT NOW . . . ";
-					break;
-				case 2:
-					m_pMessage = "OUR STUFF IS  CHEAP CHEAP CHEAP      ";
-					break;
-				case 3:
-					m_pMessage = "BUY 12 CDS GET ONE FREE . . . ";
-					break;
-				case 4:
-					m_pMessage = "APPEARING IN SHOP SOON, )THE BLOODY CHOPPERS), WITH THEIR NEW ALBUM, )IS THAT MY DAUGHTER?) ";
-					break;
-				case 5:
-					m_pMessage = "THIS MONTH IS OUR CRAZY CLEAROUT MONTH, EVERYTHING MUST GO, CDS, DVDS, STAFF, EVEN OUR CARPETS!    ";
-					break;
-				case 6:
-					m_pMessage =
-						"OUT THIS WEEK: THE THEME TUNE TO )BOYS TO GIRLS) FIRST MOVIE )SOLDIERS OF MISFORTUNE), "
-						"THE SINGLE )LET ME IN YOU)RE BODY-BAG) IS TAKEN FROM THE SOUNDTRACK ALBUM, )BOOT CAMP BOYS). "
-						"ALSO INCLUDES THE SMASH SINGLE, )PRAY IT GOES OK).    ";
-					break;
-				case 7:
-					m_pMessage =
-						"ALBUMS OUT THIS WEEK: MARYDANCING, )MUTHA O) CHRIST), FEATURING THE SINGLE )WASH HIM OFF), "
-						"ALSO CRAIG GRAYS) DEBUT, )FADE AWAY), INCLUDES THE SINGLE OF THE SAME NAME. . . ";
-					break;
-				case 8:
-					m_pMessage =
-						"ON THE FILM FRONT, A NELY COMPILED COMPILATION OF ARNOLD STEELONES GREATEST MOVIES ON DVD. "
-						"THE PACK INCLUDES THE EARLY )BY-CEP), THE CULT CLASSIC )FUTURE ANNHILATOR), AND THE HILARIOUS CROSS-DRESSING COMEDY )SISTERS). "
-						"ONE FOR ALL THE FAMILY. . . ";
-					break;
-				case 9:
-					m_pMessage = FindTimeMessage();
-					break;
-				}
-			}
-			break;
-		case SCROLL_USED_CARS:
-			while (previousMessage == m_pMessage)
-			{
-				switch (CGeneral::GetRandomNumber() % 11)
-				{
-				case 0:
-					m_pMessage = "QUICK, TAKE A LOOK AT OUR CURRENT STOCK )CAUSE THESE AUTOS ARE MOVIN) FAST . . .  ";
-					break;
-				case 1:
-					m_pMessage = "THAT)S RIGHT, HERE AT )CAPITAL AUTO SALES) OUR VEHICLES ARE SO GOOD THAT THEY PRACTICALLY DRIVE THEMSELVES OFF OUR LOT . . .   ";
-					break;
-				case 2:
-					m_pMessage = "EASY CREDIT ON ALL CARS . . .   ";
-					break;
-				case 3:
-					m_pMessage = "FEEL LIKE A STUD IN ONE OF OUR STALLIONS OR TEST-DRIVE OUR BANSHEE, IT)S A REAL STEAL!!!   ";
-					break;
-				case 4:
-					m_pMessage = "TRY OUR HARDY PERENNIAL, IT)LL LAST YOU THE WHOLE YEAR. OUR BOBCATS AIN)T NO PUSSIES EITHER!!!   ";
-					break;
-				case 5:
-					m_pMessage = "IF IT)S A GUARANTEE YOU'RE AFTER, GO SOMEWHERE ELSE, )CAPITAL) CARS ARE THAT GOOD THEY DON)T NEED GUARANTEES!!!   ";
-					break;
-				case 6:
-					m_pMessage = "TOP DOLLAR OFFERED FOR YOUR OLD WHEELS, NOT YOUR CAR, JUST IT)S WHEELS. . .   ";
-					break;
-				case 7:
-					m_pMessage = "THAT)S RIGHT WE)RE CAR SILLY. TEST DRIVE ANY CAR, YOU WON)T WANT TO BRING IT BACK!!!   ";
-					break;
-				case 8:
-					m_pMessage = "FREE FLUFFY DICE WITH ALL PURCHASES. . .";
-					break;
-				case 9:
-					if (FrontEndMenuManager.m_PrefsLanguage == CMenuManager::LANGUAGE_FRENCH || FrontEndMenuManager.m_PrefsLanguage == CMenuManager::LANGUAGE_GERMAN)
-						m_pMessage = "QUICK, TAKE A LOOK AT OUR CURRENT STOCK )CAUSE THESE AUTOS ARE MOVIN) FAST . . .  ";
-					else
-						m_pMessage = "HTTP:((ROCKSTARGAMES.COM(GRANDTHEFTAUTO3(CAPITALAUTOS    ";
-					break;
-				case 10:
-					m_pMessage = FindTimeMessage();
-					break;
-				}
-			}
-			break;
 		}
 
 		m_MessageLength = (uint32)strlen(m_pMessage);
@@ -1011,176 +776,6 @@ void CScrollBar::Render()
 	}
 
 	CSprite::FlushSpriteBuffer();
-}
-
-// ---------- CTowerClock ----------
-void CTowerClock::Init(CVector position, float sizeX, float sizeY, uint8 red, uint8 green, uint8 blue, float drawDistance, float scale)
-{
-	m_bVisible      = false;
-	m_Position      = position;
-	m_Size.x        = sizeX;
-	m_Size.y        = sizeY;
-	m_Size.z        = 0.0f;
-	m_uRed          = red;
-	m_uGreen        = green;
-	m_uBlue         = blue;
-	m_fDrawDistance = drawDistance;
-	m_fScale        = scale;
-}
-
-void CTowerClock::Update()
-{
-	float distanceFromCamera = (TheCamera.GetPosition() - m_Position).Magnitude();
-	if (distanceFromCamera < m_fDrawDistance)
-	{
-		m_bVisible = true;
-		if (distanceFromCamera < 0.75f * m_fDrawDistance)
-			m_fIntensity = 1.0f;
-		else
-			m_fIntensity = 1.0f - (distanceFromCamera - 0.75f * m_fDrawDistance) * 4.0f / m_fDrawDistance;
-	}
-	else
-		m_bVisible = false;
-}
-
-RwIm3DVertex TempV[4];
-void CTowerClock::Render()
-{
-	if (TheCamera.IsSphereVisible(m_Position, m_fScale))
-	{
-		// Calculate angle for each clock index
-		float angleHour   = 2.0f * (float)PI * (CClock::GetMinutes() + 60.0f * CClock::GetHours())   / 720.0f;
-		float angleMinute = 2.0f * (float)PI * (CClock::GetSeconds() + 60.0f * CClock::GetMinutes()) / 3600.0f;
-
-		// Prepare render states
-		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
-		RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
-		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-		RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-		RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
-		RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     (void*)rwFILTERLINEAR);
-		RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     nil);
-
-		// Set vertices colors
-		RwIm3DVertexSetRGBA(&TempV[0], m_uRed, m_uGreen, m_uBlue, (uint8)(m_fIntensity * 255.0f));
-		RwIm3DVertexSetRGBA(&TempV[1], m_uRed, m_uGreen, m_uBlue, (uint8)(m_fIntensity * 255.0f));
-		RwIm3DVertexSetRGBA(&TempV[2], m_uRed, m_uGreen, m_uBlue, (uint8)(m_fIntensity * 255.0f));
-		RwIm3DVertexSetRGBA(&TempV[3], m_uRed, m_uGreen, m_uBlue, (uint8)(m_fIntensity * 255.0f));
-
-		// Set vertices position
-		RwIm3DVertexSetPos(&TempV[0], m_Position.x, m_Position.y, m_Position.z);
-		RwIm3DVertexSetPos(
-			&TempV[1],
-			m_Position.x + Sin(angleMinute) * m_fScale * m_Size.x,
-			m_Position.y + Sin(angleMinute) * m_fScale * m_Size.y,
-			m_Position.z + Cos(angleMinute) * m_fScale
-		);
-		RwIm3DVertexSetPos(&TempV[2], m_Position.x, m_Position.y, m_Position.z);
-		RwIm3DVertexSetPos(
-			&TempV[3],
-			m_Position.x + Sin(angleHour) * 0.75f * m_fScale * m_Size.x,
-			m_Position.y + Sin(angleHour) * 0.75f * m_fScale * m_Size.y,
-			m_Position.z + Cos(angleHour) * 0.75f * m_fScale
-		);
-
-		LittleTest();
-
-		// Draw lines
-		if (RwIm3DTransform(TempV, 4, nil, 0))
-		{
-			RwIm3DRenderLine(0, 1);
-			RwIm3DRenderLine(2, 3);
-			RwIm3DEnd();
-		}
-	}
-}
-
-// ---------- CDigitalClock ----------
-void CDigitalClock::Init(CVector position, float sizeX, float sizeY, uint8 red, uint8 green, uint8 blue, float drawDistance, float scale)
-{
-	m_bVisible      = false;
-	m_Position      = position;
-	m_Size.x        = sizeX;
-	m_Size.y        = sizeY;
-	m_Size.z        = 0.0f;
-	m_uRed          = red;
-	m_uGreen        = green;
-	m_uBlue         = blue;
-	m_fDrawDistance = drawDistance;
-	m_fScale        = scale;
-}
-
-void CDigitalClock::Update()
-{
-	float distanceFromCamera = (TheCamera.GetPosition() - m_Position).Magnitude();
-	if (distanceFromCamera < m_fDrawDistance)
-	{
-		m_bVisible = true;
-		if (distanceFromCamera < 0.75f * m_fDrawDistance)
-			m_fIntensity = 1.0f;
-		else
-			m_fIntensity = 1.0f - (distanceFromCamera - 0.75f * m_fDrawDistance) * 4.0f / m_fDrawDistance;
-	}
-	else
-		m_bVisible = false;
-}
-
-void CDigitalClock::Render()
-{
-	if (TheCamera.IsSphereVisible(m_Position, 5.0f * m_fScale))
-	{
-		CSprite::InitSpriteBuffer();
-
-		// Simulate flicker
-		float currentIntensity = m_fIntensity * CGeneral::GetRandomNumberInRange(0x300, 0x400) / 1024.0f;
-
-		uint8 r = currentIntensity * m_uRed;
-		uint8 g = currentIntensity * m_uGreen;
-		uint8 b = currentIntensity * m_uBlue;
-
-		// Set render states
-		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)FALSE);
-		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-		RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDONE);
-		RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDONE);
-		RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     (void*)rwFILTERLINEAR);
-		RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RwTextureGetRaster(gpCoronaTexture[0]));
-		RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
-
-		const char* clockMessage = FindDigitalClockMessage();
-
-		CVector coronaCoord, screenCoord;
-		float   screenW, screenH;
-		for (int c = 0; c < 5; ++c) // for each char to be displayed
-		{
-			for (int i = 0; i < 5; ++i) // for each column of coronas
-			{
-				for (int j = 0; j < 5; ++j) // for each row of coronas
-				{
-					if (ScrollCharSet[clockMessage[c] - ' '][i] & (1 << j))
-					{
-						coronaCoord.x = m_Position.x + (8 * c + i) * m_Size.x * m_fScale / 8.0f;
-						coronaCoord.y = m_Position.y + (8 * c + i) * m_Size.y * m_fScale / 8.0f;
-						coronaCoord.z = m_Position.z + j * m_fScale / 8.0f;
-
-						if (CSprite::CalcScreenCoors(coronaCoord, screenCoord, &screenW, &screenH, true))
-						{
-							CSprite::RenderBufferedOneXLUSprite(
-								screenCoord.x, screenCoord.y, screenCoord.z,
-								screenW * m_fScale * 0.12f,
-								screenW * m_fScale * 0.12f,
-								r, g, b,
-								255,
-								1.0f / screenCoord.z,
-								255);
-						}
-					}
-				}
-			}
-		}
-
-		CSprite::FlushSpriteBuffer();
-	}
 }
 
 void

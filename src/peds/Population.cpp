@@ -767,13 +767,13 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 				CVector toyPos(newPed->GetPosition());
 				float waterLevel;
 				if (CWaterLevel::GetGroundLevel(toyPos, &waterLevel, nil, 30.0f)) {
-					toyPos.z = 0.004f + waterLevel;
-					CEntity *toy = CWaterLevel::CreateBeachToy(toyPos, BEACHTOY_11);
+					toyPos.z = 0.04f + waterLevel;
+					CEntity *toy = CWaterLevel::CreateBeachToy(toyPos, BEACHTOY_ANY_TOWEL);
 					if (toy)
 						toy->SetHeading(heading);
 
 					if (!(CGeneral::GetRandomNumber() & 3)) {
-						CWaterLevel::CreateBeachToy(toyPos + CVector(CGeneral::GetRandomNumberInRange(-2.f, 2.f), CGeneral::GetRandomNumberInRange(-2.f, 2.f), 0.f), BEACHTOY_6);
+						CWaterLevel::CreateBeachToy(toyPos + CVector(CGeneral::GetRandomNumberInRange(-2.f, 2.f), CGeneral::GetRandomNumberInRange(-2.f, 2.f), 0.f), BEACHTOY_LOTION);
 					}
 				}
 			} else {

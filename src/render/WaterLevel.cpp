@@ -125,15 +125,11 @@ WaterLevelInitialise(Const char *pWaterDat)
 	
 	if ( hFile > 0 )
 	{
-		if ( hFile >= 0 )
-		{
-			CFileMgr::Read(hFile, (char *)&CWaterLevel::ms_nNoOfWaterLevels, sizeof(CWaterLevel::ms_nNoOfWaterLevels));
-			CFileMgr::Read(hFile, (char *)CWaterLevel::ms_aWaterZs,	sizeof(CWaterLevel::ms_aWaterZs));
-			CFileMgr::Read(hFile, (char *)CWaterLevel::ms_aWaterRects, sizeof(CWaterLevel::ms_aWaterRects));
-			CFileMgr::Read(hFile, (char *)CWaterLevel::aWaterBlockList, sizeof(CWaterLevel::aWaterBlockList));
-			CFileMgr::Read(hFile, (char *)CWaterLevel::aWaterFineBlockList, sizeof(CWaterLevel::aWaterFineBlockList));
-		}
-		
+		CFileMgr::Read(hFile, (char *)&CWaterLevel::ms_nNoOfWaterLevels, sizeof(CWaterLevel::ms_nNoOfWaterLevels));
+		CFileMgr::Read(hFile, (char *)CWaterLevel::ms_aWaterZs,	sizeof(CWaterLevel::ms_aWaterZs));
+		CFileMgr::Read(hFile, (char *)CWaterLevel::ms_aWaterRects, sizeof(CWaterLevel::ms_aWaterRects));
+		CFileMgr::Read(hFile, (char *)CWaterLevel::aWaterBlockList, sizeof(CWaterLevel::aWaterBlockList));
+		CFileMgr::Read(hFile, (char *)CWaterLevel::aWaterFineBlockList, sizeof(CWaterLevel::aWaterFineBlockList));
 		CFileMgr::CloseFile(hFile);
 	}
 	
@@ -488,7 +484,6 @@ CWaterLevel::GetWaterNormal(float fX, float fY)
 	float fAngle = (CTimer::GetTimeInMilliseconds() & 4095) * (TWOPI / 4096.0f);
 	float fWindFactor = CWeather::WindClipped * 0.4f + 0.2f;
 	
-	//TODO: 
 	float _fWave = (WATER_UNSIGN_Y(fY) - y*SMALL_SECTOR_SIZE + WATER_UNSIGN_X(fX) - x*SMALL_SECTOR_SIZE)
 			* (TWOPI / SMALL_SECTOR_SIZE ) + fAngle;
 
@@ -2948,7 +2943,7 @@ CWaterLevel::HandleBeachToysStuff(void)
 							{
 								if ( coldata.SurfaceType == SURFACE_SAND )
 								{
-									CEntity *toy = CreateBeachToy(vecPos, BEACHTOY_LOUNGE);
+									CEntity *toy = CreateBeachToy(vecPos, BEACHTOY_ANY_LOUNGE);
 									if ( toy )
 									{
 										toy->SetHeading(DEGTORAD(CGeneral::GetRandomNumberInRange(0.0f, 359.0f)));
@@ -2968,6 +2963,104 @@ CWaterLevel::HandleBeachToysStuff(void)
 CEntity *
 CWaterLevel::CreateBeachToy(CVector const &vec, eBeachToy beachtoy)
 {
-	//TODO(MIAMI)
-	return nil;
+	if (CObject::nNoTempObjects >= 40)
+		return nil;
+
+	int finalToy = beachtoy;
+	bool isStatic = false;
+	int model = MI_BEACHBALL;
+	switch (beachtoy) {
+		case BEACHTOY_ANY_LOUNGE:
+			switch ( CGeneral::GetRandomNumber() & 7 ) {
+				case 1:
+				case 7:
+					finalToy = BEACHTOY_LOUNGE_WOOD_UP;
+					break;
+				case 3:
+				case 5:
+					finalToy = BEACHTOY_LOUNGE_TOWEL_UP;
+					break;
+				default:
+					finalToy = BEACHTOY_LOUNGE_WOOD_ON;
+					break;
+			}
+			break;
+		case BEACHTOY_ANY_TOWEL:
+			switch ( CGeneral::GetRandomNumber() & 7 ) {
+				case 1:
+				case 7:
+					finalToy = BEACHTOY_TOWEL2;
+					break;
+				case 2:
+				case 6:
+					finalToy = BEACHTOY_TOWEL3;
+					break;
+				case 3:
+				case 5:
+					finalToy = BEACHTOY_TOWEL4;
+					break;
+				default:
+					finalToy = BEACHTOY_TOWEL1;
+					break;
+			}
+			if (CObject::nNoTempObjects >= 35) {
+				return nil;
+			}
+		default:
+			break;
+	}
+	switch (finalToy) {
+		case BEACHTOY_BALL:
+			isStatic = false;
+			model = MI_BEACHBALL;
+			break;
+		case BEACHTOY_LOUNGE_WOOD_UP:
+			isStatic = false;
+			model = MI_LOUNGE_WOOD_UP;
+			break;
+		case BEACHTOY_LOUNGE_TOWEL_UP:
+			isStatic = false;
+			model = MI_LOUNGE_TOWEL_UP;
+			break;
+		case BEACHTOY_LOUNGE_WOOD_ON:
+			isStatic = false;
+			model = MI_LOUNGE_WOOD_DN;
+			break;
+		case BEACHTOY_LOTION:
+			model = MI_LOTION;
+			isStatic = true;
+			break;
+		case BEACHTOY_TOWEL1:
+			model = MI_BEACHTOWEL01;
+			isStatic = true;
+			break;
+		case BEACHTOY_TOWEL2:
+			model = MI_BEACHTOWEL02;
+			isStatic = true;
+			break;
+		case BEACHTOY_TOWEL3:
+			model = MI_BEACHTOWEL03;
+			isStatic = true;
+			break;
+		case BEACHTOY_TOWEL4:
+			model = MI_BEACHTOWEL04;
+			isStatic = true;
+			break;
+		default:
+			break;
+	}
+	CObject *toy = new CObject(model, true);
+	if (toy) {
+		toy->SetPosition(vec);
+		toy->GetMatrix().UpdateRW();
+		toy->m_vecMoveSpeed = CVector(0.f, 0.f, 0.f);
+		toy->m_vecTurnSpeed = CVector(0.f, 0.f, 0.f);
+		toy->ObjectCreatedBy = TEMP_OBJECT;
+		toy->bIsStatic = isStatic;
+		CObject::nNoTempObjects++;
+		toy->m_nEndOfLifeTime = CTimer::GetTimeInMilliseconds() + 43200000;
+		CWorld::Add(toy);
+		return toy;
+	} else
+		return nil;
 }

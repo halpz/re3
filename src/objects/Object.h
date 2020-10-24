@@ -61,7 +61,7 @@ public:
 	float m_fUprootLimit;
 	int8 ObjectCreatedBy;
 	uint8 bIsPickup : 1;
-	uint8 obj_flag_02 : 1;
+	uint8 bAmmoCollected : 1;
 	uint8 bPickupObjWithMessage : 1;
 	uint8 bOutOfStock : 1;
 	uint8 bGlassCracked : 1;
