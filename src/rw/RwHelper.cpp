@@ -437,7 +437,7 @@ CameraSize(RwCamera * camera, RwRect * rect,
 			RwRaster           *zRaster;
 
 			// BUG: game just changes camera raster's sizes, but this is a hack
-#if 0//def FIX_BUGS
+#ifdef FIX_BUGS
 			/*
 			 * Destroy rasters...
 			 */
