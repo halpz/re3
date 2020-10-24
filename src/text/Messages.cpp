@@ -69,7 +69,7 @@ CMessages::WideStringCompare(wchar *str1, wchar *str2, uint16 size)
 	if (len1 != len2 && (len1 < size || len2 < size))
 		return false;
 
-	for (int32 i = 0; FixupChar(str1[i]) != '\0' && i < size; i++) {
+	for (int32 i = 0; i < size && FixupChar(str1[i]) != '\0'; i++) {
 		if (FixupChar(str1[i]) != FixupChar(str2[i]))
 			return false;
 	}
@@ -97,13 +97,9 @@ CMessages::Process()
 
 	if (BriefMessages[0].m_pText != nil && CTimer::GetTimeInMilliseconds() > BriefMessages[0].m_nTime + BriefMessages[0].m_nStartTime) {
 		BriefMessages[0].m_pText = nil;
-		int32 i = 0;
-		while (i < NUMBRIEFMESSAGES-1) {
-			if (BriefMessages[i + 1].m_pText == nil)
-				break;
-
+		int32 i;
+		for (i = 0; i < NUMBRIEFMESSAGES-1 && BriefMessages[i + 1].m_pText != nil; i++) {
 			BriefMessages[i] = BriefMessages[i + 1];
-			i++;
 		}
 		CMessages::BriefMessages[i].m_pText = nil;
 		CMessages::BriefMessages[0].m_nStartTime = CTimer::GetTimeInMilliseconds();
@@ -325,7 +321,7 @@ void
 CMessages::AddToPreviousBriefArray(wchar *text, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, wchar *string)
 {
 	int32 i = 0;
-	for (i = 0; PreviousBriefs[i].m_pText && i < NUMPREVIOUSBRIEFS; i++) {
+	for (i = 0; i < NUMPREVIOUSBRIEFS && PreviousBriefs[i].m_pText != nil; i++) {
 		if (PreviousBriefs[i].m_nNumber[0] == n1
 			&& PreviousBriefs[i].m_nNumber[1] == n2
 			&& PreviousBriefs[i].m_nNumber[2] == n3
@@ -503,7 +499,7 @@ CMessages::AddMessageWithNumber(wchar *str, uint32 time, uint16 flag, int32 n1, 
 	GetWideStringLength(outstr);
 
 	uint16 i = 0;
-	while (i < NUMBRIEFMESSAGES && BriefMessages[i].m_pText)
+	while (i < NUMBRIEFMESSAGES && BriefMessages[i].m_pText != nil)
 		i++;
 
 	if (i >= NUMBRIEFMESSAGES) return;
@@ -720,35 +716,24 @@ CMessages::ClearThisPrint(wchar *str)
 
 	do {
 		equal = false;
-		uint16 i = 0;
-		while (i < NUMBRIEFMESSAGES) {
-			if (BriefMessages[i].m_pText == nil)
-				break;
-			
+		uint16 i;
+		for (i = 0; i < NUMBRIEFMESSAGES && BriefMessages[i].m_pText != nil; i++) {
 			equal = FastWideStringComparison(str, BriefMessages[i].m_pText);
 
 			if (equal) break;
-			i++;
 		}
 
 		if (equal) {
 			if (i != 0) {
 				BriefMessages[i].m_pText = nil;
-				while (i < NUMBRIEFMESSAGES-1) {
-					if (BriefMessages[i + 1].m_pText == nil)
-						break;
-
+				for (; i < NUMBRIEFMESSAGES-1 && BriefMessages[i+1].m_pText != nil; i++) {
 					BriefMessages[i] = BriefMessages[i + 1];
-					i++;
 				}
 				BriefMessages[i].m_pText = nil;
 			} else {
 				BriefMessages[0].m_pText = nil;
-				while (i < NUMBRIEFMESSAGES-1) {
-					if (BriefMessages[i + 1].m_pText == nil)
-						break;
+				for (; i < NUMBRIEFMESSAGES-1 && BriefMessages[i+1].m_pText != nil; i++) {
 					BriefMessages[i] = BriefMessages[i + 1];
-					i++;
 				}
 				BriefMessages[i].m_pText = nil;
 				BriefMessages[0].m_nStartTime = CTimer::GetTimeInMilliseconds();
