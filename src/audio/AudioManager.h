@@ -325,13 +325,13 @@ public:
 	void ProcessGarages();                                                   // 
 	void ProcessCarHeli(cVehicleParams* params);                             // done
 	void ProcessVehicleFlatTyre(cVehicleParams* params);                     // done
-	void ProcessJumbo(cVehicleParams *);                                     // 
-	void ProcessJumboAccel(CPlane *plane);                                   // 
-	void ProcessJumboDecel(CPlane *plane);                                   // 
-	void ProcessJumboFlying();                                               // 
-	void ProcessJumboLanding(CPlane *plane);                                 // 
-	void ProcessJumboTakeOff(CPlane *plane);                               	 // 
-	void ProcessJumboTaxi();                                                 // 
+	void ProcessJumbo(cVehicleParams *);                                     // done
+	void ProcessJumboAccel(CPlane *plane);                                   // done
+	void ProcessJumboDecel(CPlane *plane);                                   // done
+	void ProcessJumboFlying();                                               // done
+	void ProcessJumboLanding(CPlane *plane);                                 // done
+	void ProcessJumboTakeOff(CPlane *plane);                               	 // done
+	void ProcessJumboTaxi();                                                 // done
 	void ProcessLoopingScriptObject(uint8 sound);                            // 
 	void ProcessMissionAudio();                                              // 
 	void ProcessMissionAudioSlot(uint8 slot);                                // 

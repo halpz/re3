@@ -3704,38 +3704,34 @@ DoJumboVolOffset()
 }
 
 void
-cAudioManager::ProcessJumbo(cVehicleParams *params)
+cAudioManager::ProcessJumbo(cVehicleParams* params)
 {
-	CPlane *plane;
+	CPlane* plane;
 	float position;
 
-	if (params->m_fDistance < SQR(440)) {
-		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
-		plane = (CPlane *)params->m_pVehicle;
-		DoJumboVolOffset();
-		position = PlanePathPosition[plane->m_nPlaneId];
-		if (position <= TakeOffPoint) {
-			if (plane->m_fSpeed <= 0.103344f) {
-				ProcessJumboTaxi();
-				return;
-			}
+	if (params->m_fDistance >= SQR(440))
+		return;
 
+	CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
+	plane = (CPlane*)params->m_pVehicle;
+	DoJumboVolOffset();
+	position = PlanePathPosition[plane->m_nPlaneId];
+	if (position <= TakeOffPoint) {
+		if (plane->m_fSpeed > 0.103344f) {
 			ProcessJumboAccel(plane);
-		} else if (300.0f + TakeOffPoint >= position) {
-			ProcessJumboTakeOff(plane);
-		} else if (LandingPoint - 350.0f >= position) {
-			ProcessJumboFlying();
 		} else {
-			if (position > LandingPoint) {
-				if (plane->m_fSpeed > 0.103344f) {
-					ProcessJumboDecel(plane);
-					return;
-				}
-				ProcessJumboTaxi();
-				return;
-			}
-			ProcessJumboLanding(plane);
+			ProcessJumboTaxi();
 		}
+	} else 	if (position <= TakeOffPoint + 300.0f) {
+		ProcessJumboTakeOff(plane);
+	} else if (position <= LandingPoint - 350.0f) {
+		ProcessJumboFlying();
+	} else if (position <= LandingPoint) {
+		ProcessJumboLanding(plane);
+	} else if (plane->m_fSpeed > 0.103344f) {
+		ProcessJumboDecel(plane);
+	} else {
+		ProcessJumboTaxi();
 	}
 }
 
@@ -3753,25 +3749,23 @@ cAudioManager::ProcessJumboAccel(CPlane *plane)
 {
 	int32 engineFreq;
 	int32 vol;
-	float whineSoundFreq;
 	float modificator;
+	float freqModifier;
 
 	if (SetupJumboFlySound(20)) {
-		modificator = (plane->m_fSpeed - 0.103344f) * 1.6760077f;
-		if (modificator > 1.0f)
-			modificator = 1.0f;
+		modificator = Min(1.0f, (plane->m_fSpeed - 0.103344f) * 1.6760077f);
 		if (SetupJumboRumbleSound(MAX_VOLUME * modificator) && SetupJumboTaxiSound((1.0f - modificator) * 75.f)) {
 			if (modificator < 0.2f) {
-				whineSoundFreq = modificator * 5.f * 14600.0f + 29500;
-				vol = modificator * 5.f * MAX_VOLUME;
-				engineFreq = modificator * 5.f * 6050.f + 16000;
+				freqModifier = modificator * 5.0f;
+				vol = MAX_VOLUME * freqModifier;
+				engineFreq = 6050.0f * freqModifier + 16000;
 			} else {
-				whineSoundFreq = 44100;
+				freqModifier = 1.0f;
 				engineFreq = 22050;
 				vol = MAX_VOLUME;
 			}
 			SetupJumboEngineSound(vol, engineFreq);
-			SetupJumboWhineSound(18, whineSoundFreq);
+			SetupJumboWhineSound(18, 14600.0f * freqModifier + 29500);
 		}
 	}
 }
