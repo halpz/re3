@@ -195,7 +195,7 @@ public:
 
 		if (m_FileH) {
 			m_nChannels = op_head(m_FileH, 0)->channel_count;
-			m_nRate = op_head(m_FileH, 0)->input_sample_rate;
+			m_nRate = 48000;
 			const OpusTags *tags = op_tags(m_FileH, 0);
 			for (int i = 0; i < tags->comments; i++) {
 				if (strncmp(tags->user_comments[i], "SAMPLERATE", sizeof("SAMPLERATE")-1) == 0)
