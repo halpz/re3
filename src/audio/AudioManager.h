@@ -335,7 +335,7 @@ public:
 	void ProcessLoopingScriptObject(uint8 sound);                            // 
 	void ProcessMissionAudio();                                              // 
 	void ProcessMissionAudioSlot(uint8 slot);                                // 
-	void ProcessModelHeliVehicle(cVehicleParams* params);                    //
+	void ProcessModelHeliVehicle(cVehicleParams* params);                    // done
 	void ProcessModelVehicle(cVehicleParams *params);                        // done
 	void ProcessOneShotScriptObject(uint8 sound);                            // 
 	void ProcessPed(CPhysical *ped);                                         // done
@@ -353,7 +353,7 @@ public:
 #ifdef GTA_TRAIN
 	bool ProcessTrainNoise(cVehicleParams *params);
 #endif
-	void ProcessVehicle(CVehicle *vehicle);                    // done, but need add model functions
+	void ProcessVehicle(CVehicle *vehicle);                    // done
 	bool ProcessVehicleDoors(cVehicleParams *params);          // done
 	void ProcessVehicleEngine(cVehicleParams *params);         // done
 	void UpdateGasPedalAudio(CVehicle* veh, int vehType);      // done
