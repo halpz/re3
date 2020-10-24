@@ -32,6 +32,8 @@
 #include "MBlur.h"
 #include "postfx.h"
 #include "custompipes.h"
+#include "FileMgr.h"
+#include "ControllerConfig.h"
 
 #ifndef _WIN32
 #include "assert.h"
@@ -275,7 +277,7 @@ wchar* DetectJoystickDraw(bool* disabled, bool userHovering) {
 	const char *joyname;
 	if (userHovering) {
 		for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++) {
-			if (joyname = glfwGetJoystickName(i)) {
+			if ((joyname = glfwGetJoystickName(i))) {
 				const uint8* buttons = glfwGetJoystickButtons(i, &numButtons);
 				for (int j = 0; j < numButtons; j++) {
 					if (buttons[j]) {
@@ -455,8 +457,34 @@ void LoadINISettings()
 	char defaultStr[4];
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+	// Written by assuming the codes below will run after _InputInitialiseJoys().
 	strcpy(gSelectedJoystickName, cfg.get("DetectJoystick", "JoystickName", "").c_str());
-	_InputInitialiseJoys();
+	
+	if(gSelectedJoystickName[0] != '\0') {
+		for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++) {
+			if (glfwJoystickPresent(i) && strncmp(gSelectedJoystickName, glfwGetJoystickName(i), strlen(gSelectedJoystickName)) == 0) {
+				if (PSGLOBAL(joy1id) != -1) {
+					PSGLOBAL(joy2id) = PSGLOBAL(joy1id);
+				}
+				PSGLOBAL(joy1id) = i;
+				int count;
+				glfwGetJoystickButtons(PSGLOBAL(joy1id), &count);
+				
+				// We need to init and reload bindings, because;
+				//	1-joypad button number may differ with saved/prvly connected one
+				//	2-bindings are not init'ed if there is no joypad at the start
+				ControlsManager.InitDefaultControlConfigJoyPad(count);
+				CFileMgr::SetDirMyDocuments();
+				int32 gta3set = CFileMgr::OpenFile("gta3.set", "r");
+				if (gta3set) {
+					ControlsManager.LoadSettings(gta3set);
+					CFileMgr::CloseFile(gta3set);
+				}
+				CFileMgr::SetDir("");
+				break;
+			}
+		}
+	}
 #endif
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
