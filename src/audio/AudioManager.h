@@ -76,7 +76,8 @@ public:
 	uint8 m_nIndexMap[NUM_PED_COMMENTS_BANKS][NUM_PED_COMMENTS_SLOTS];
 	uint8 m_nCommentsInBank[NUM_PED_COMMENTS_BANKS];
 	uint8 m_nActiveBank;
-	uint32 field_48C;
+	bool m_bDelay;
+	uint32 m_nDelayTimer;
 
 	cPedComments()
 	{
@@ -157,19 +158,14 @@ public:
 VALIDATE_SIZE(cVehicleParams, 0x18);
 
 enum {
-	/*
-	REFLECTION_YMAX = 0, top
-	REFLECTION_YMIN = 1, bottom
-	REFLECTION_XMIN = 2, left
-	REFLECTION_XMAX = 3, right
-	REFLECTION_ZMAX = 4,
-	*/
-
-	REFLECTION_TOP = 0,
-	REFLECTION_BOTTOM,
-	REFLECTION_LEFT,
-	REFLECTION_RIGHT,
-	REFLECTION_UP,
+	REFLECTION_NORTH = 0,
+	REFLECTION_SOUTH,
+	REFLECTION_WEST,
+	REFLECTION_EAST,
+	REFLECTION_CEIL_NORTH,
+	REFLECTION_CEIL_SOUTH,
+	REFLECTION_CEIL_WEST,
+	REFLECTION_CEIL_EAST,
 	MAX_REFLECTIONS,
 };
 
@@ -385,7 +381,7 @@ public:
 	void Service(); //done
 	void ServiceCollisions(); //done
 	void ServicePoliceRadio();
-	void ServicePoliceRadioChannel(int32 wantedLevel);
+	void ServicePoliceRadioChannel(uint8 wantedLevel);
 	void ServiceSoundEffects();
 	int8 SetCurrent3DProvider(uint8 which);
 	void SetDynamicAcousticModelingStatus(uint8 status);

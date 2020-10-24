@@ -26,19 +26,35 @@ void GetLocalTime_CP(SYSTEMTIME *out) {
 // Compatible with Linux/POSIX and MinGW on Windows
 #ifndef _WIN32
 HANDLE FindFirstFile(const char* pathname, WIN32_FIND_DATA* firstfile) {
-	char newpathname[32];
-	strncpy(newpathname, pathname, 32);
-	char* path = strtok(newpathname, "\\*");
-	strncpy(firstfile->folder, path, sizeof(firstfile->folder));
+	char pathCopy[MAX_PATH];
+	strcpy(pathCopy, pathname);
 
-	// Both w/ extension and w/o extension is ok
-	if (strlen(path) + 2 != strlen(pathname))
-		strncpy(firstfile->extension, strtok(NULL, "\\*"), sizeof(firstfile->extension));
+	char *folder = strtok(pathCopy, "*");
+	char *extension = strtok(NULL, "*");
+
+    // because strtok doesn't return NULL for last delimiter
+    if (extension - folder == strlen(pathname))
+        extension = nil;
+	
+	// Case-sensitivity and backslashes...
+    // Will be freed at the bottom
+    char *realFolder = casepath(folder);
+	if (realFolder) {
+        folder = realFolder;
+	}
+
+	strncpy(firstfile->folder, folder, sizeof(firstfile->folder));
+
+	if (extension)
+		strncpy(firstfile->extension, extension, sizeof(firstfile->extension));
 	else
-		strncpy(firstfile->extension, "", sizeof(firstfile->extension));
+		firstfile->extension[0] = '\0';
+
+    if (realFolder)
+        free(realFolder);
 
 	HANDLE d;
-	if ((d = (HANDLE)opendir(path)) == NULL || !FindNextFile(d, firstfile))
+	if ((d = (HANDLE)opendir(firstfile->folder)) == NULL || !FindNextFile(d, firstfile))
 		return NULL;
 
 	return d;
@@ -52,8 +68,8 @@ bool FindNextFile(HANDLE d, WIN32_FIND_DATA* finddata) {
 	while ((file = readdir((DIR*)d)) != NULL) {
 
 		// We only want "DT_REG"ular Files, but reportedly some FS and OSes gives DT_UNKNOWN as type.
-		if ((file->d_type == DT_UNKNOWN || file->d_type == DT_REG) &&
-			(extensionLen == 0 || strncmp(&file->d_name[strlen(file->d_name) - extensionLen], finddata->extension, extensionLen) == 0)) {
+		if ((file->d_type == DT_UNKNOWN || file->d_type == DT_REG || file->d_type == DT_LNK) &&
+			(extensionLen == 0 || strncasecmp(&file->d_name[strlen(file->d_name) - extensionLen], finddata->extension, extensionLen) == 0)) {
 
 			sprintf(relativepath, "%s/%s", finddata->folder, file->d_name);
 			realpath(relativepath, path);

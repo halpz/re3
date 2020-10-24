@@ -135,8 +135,10 @@ void CPedAttractorManager::RemoveIceCreamVanEffects(C2dEffect* pEffect)
 	if (vVehicleToEffect.empty())
 		return;
 	for (std::vector<CVehicleToEffect>::const_iterator assoc = vVehicleToEffect.cbegin(); assoc != vVehicleToEffect.cend();) {
-		if (assoc->GetVehicle() != pVehicle)
-			return;
+		if (assoc->GetVehicle() != pVehicle) {
+			assoc++;
+			continue;
+		}
 		uint32 total = 0;
 		for (uint32 j = 0; j < NUM_ATTRACTORS_FOR_ICECREAM_VAN; j++) {
 			if (FindAssociatedAttractor(assoc->GetEffect(j), vIceCreamAttractors))
@@ -377,12 +379,16 @@ bool CPedAttractor::BroadcastDeparture(CPed* pPed)
 		if (pPed->GetPedState() == PED_IDLE || pPed->GetPedState() == PED_NONE)
 			pPed->SetWanderPath(CGeneral::GetNodeHeadingFromVector(-vecQueueDir.x, -vecQueueDir.y));
 	}
-	else if (qid == 0)
-		pPed->SetWanderPath(CGeneral::GetNodeHeadingFromVector(vecQueueDir.x, vecQueueDir.y));
-	else if (qid == vWaitingQueue.size() - 1)
-		pPed->SetWanderPath(CGeneral::GetNodeHeadingFromVector(-vecQueueDir.x, -vecQueueDir.y));
-	else
-		pPed->SetWanderPath(CGeneral::GetNodeHeadingFromVector(-vecQueueDir.y, -vecQueueDir.z));
+	else {
+		pPed->SetObjective(OBJECTIVE_NONE);
+		if (qid == 0)
+			pPed->SetWanderPath(CGeneral::GetNodeHeadingFromVector(vecQueueDir.x, vecQueueDir.y));
+		else if (qid == vWaitingQueue.size() - 1)
+			pPed->SetWanderPath(CGeneral::GetNodeHeadingFromVector(-vecQueueDir.x, -vecQueueDir.y));
+		else
+			pPed->SetWanderPath(CGeneral::GetNodeHeadingFromVector(-vecQueueDir.y, -vecQueueDir.x));
+		UpdatePedStateOnDeparture(pPed);
+	}
 	vWaitingQueue.erase(vWaitingQueue.cbegin() + qid);
 	for (std::vector<CPed*>::iterator pPedIt = vApproachingQueue.begin(); pPedIt != vApproachingQueue.end(); ++pPedIt) {
 		CPed* pPed = *pPedIt;
@@ -414,12 +420,16 @@ bool CPedShelterAttractor::BroadcastDeparture(CPed* pPed)
 		if (pPed->GetPedState() == PED_IDLE || pPed->GetPedState() == PED_NONE)
 			pPed->SetWanderPath(CGeneral::GetNodeHeadingFromVector(-vecQueueDir.x, -vecQueueDir.y));
 	}
-	else if (qid == 0)
-		pPed->SetWanderPath(CGeneral::GetNodeHeadingFromVector(vecQueueDir.x, vecQueueDir.y));
-	else if (qid == vWaitingQueue.size() - 1)
-		pPed->SetWanderPath(CGeneral::GetNodeHeadingFromVector(-vecQueueDir.x, -vecQueueDir.y));
-	else
-		pPed->SetWanderPath(CGeneral::GetNodeHeadingFromVector(-vecQueueDir.y, -vecQueueDir.z));
+	else {
+		pPed->SetObjective(OBJECTIVE_NONE);
+		if (qid == 0)
+			pPed->SetWanderPath(CGeneral::GetNodeHeadingFromVector(vecQueueDir.x, vecQueueDir.y));
+		else if (qid == vWaitingQueue.size() - 1)
+			pPed->SetWanderPath(CGeneral::GetNodeHeadingFromVector(-vecQueueDir.x, -vecQueueDir.y));
+		else
+			pPed->SetWanderPath(CGeneral::GetNodeHeadingFromVector(-vecQueueDir.y, -vecQueueDir.x));
+		UpdatePedStateOnDeparture(pPed);
+	}
 	vWaitingQueue.erase(vWaitingQueue.cbegin() + qid);
 	for (std::vector<CPed*>::iterator pPedIt = vApproachingQueue.begin(); pPedIt != vApproachingQueue.end(); ++pPedIt) {
 		CPed* pPed = *pPedIt;

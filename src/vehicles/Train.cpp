@@ -663,6 +663,7 @@ PlayAnnouncement(uint8 sound, uint8 station)
 void
 ProcessTrainAnnouncements(void)
 {
+#ifdef GTA_TRAIN
 	for (int i = 0; i < ARRAY_SIZE(StationDist); i++) {
 		for (int j = 0; j < ARRAY_SIZE(EngineTrackPosition); j++) {
 			if (!bTrainArrivalAnnounced[i]) {
@@ -691,6 +692,7 @@ ProcessTrainAnnouncements(void)
 			}
 		}
 	}
+#endif
 }
 
 void

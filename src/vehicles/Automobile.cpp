@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 #include "main.h"
 
 #include "General.h"
@@ -59,7 +59,7 @@ bool CAutomobile::m_sAllTaxiLights;
 
 const uint32 CAutomobile::nSaveStructSize =
 #ifdef COMPATIBLE_SAVES
-	1448;
+	1500;
 #else
 	sizeof(CAutomobile);
 #endif
@@ -4635,7 +4635,6 @@ CAutomobile::ProcessOpenDoor(uint32 component, uint32 anim, float time)
 	case ANIM_CAR_ROLLDOOR_LOW:
 		ProcessDoorOpenCloseAnimation(this, component, door, time, 0.1f, 0.6f, 0.95f);
 		break;
-		break;
 	case ANIM_CAR_GETOUT_LHS:
 	case ANIM_CAR_GETOUT_LOW_LHS:
 	case ANIM_CAR_GETOUT_RHS:
@@ -4649,6 +4648,7 @@ CAutomobile::ProcessOpenDoor(uint32 component, uint32 anim, float time)
 	case ANIM_CAR_PULLOUT_RHS:
 	case ANIM_CAR_PULLOUT_LOW_RHS:
 		OpenDoor(component, door, 1.0f);
+		break;
 	case ANIM_COACH_OPEN_L:
 	case ANIM_COACH_OPEN_R:
 		ProcessDoorOpenAnimation(this, component, door, time, 0.66f, 0.8f);
@@ -5349,7 +5349,7 @@ CAutomobile::SpawnFlyingComponent(int32 component, uint32 type)
 	obj->m_fElasticity = 0.1f;
 	obj->m_fBuoyancy = obj->m_fMass*GRAVITY/0.75f;
 	obj->ObjectCreatedBy = TEMP_OBJECT;
-	obj->bIsStatic = false;
+	obj->SetIsStatic(false);
 	obj->bIsPickup = false;
 	obj->bUseVehicleColours = true;
 	obj->m_colour1 = m_currentColour1;
@@ -5713,7 +5713,7 @@ CAutomobile::Save(uint8*& buf)
 {
 	CVehicle::Save(buf);
 	WriteSaveBuf<CDamageManager>(buf, Damage);
-	SkipSaveBuf(buf, 800 - sizeof(CDamageManager));
+	SkipSaveBuf(buf, 1500 - 672 - sizeof(CDamageManager));
 }
 
 void
@@ -5721,7 +5721,7 @@ CAutomobile::Load(uint8*& buf)
 {
 	CVehicle::Load(buf);
 	Damage = ReadSaveBuf<CDamageManager>(buf);
-	SkipSaveBuf(buf, 800 - sizeof(CDamageManager));
+	SkipSaveBuf(buf, 1500 - 672 - sizeof(CDamageManager));
 	SetupDamageAfterLoad();
 }
 #endif

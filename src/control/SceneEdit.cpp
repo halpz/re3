@@ -20,6 +20,8 @@
 #include "WeaponInfo.h"
 #include "World.h"
 
+//--MIAMI: file done
+
 bool CSceneEdit::m_bEditOn;
 int32 CSceneEdit::m_bCameraFollowActor;
 bool CSceneEdit::m_bRecording;
@@ -1070,7 +1072,7 @@ bool CSceneEdit::SelectWeapon(void)
 	}
 	if (CPad::GetPad(1)->GetLeftShoulder1JustDown()) {
 		if (++m_nWeaponType >= WEAPONTYPE_DETONATOR)
-			m_nWeaponType = WEAPONTYPE_BASEBALLBAT;
+			m_nWeaponType = WEAPONTYPE_BRASSKNUCKLE;
 		pActors[m_nActor]->ClearWeapons();
 		pActors[m_nActor]->GiveWeapon((eWeaponType)m_nWeaponType, 1000);
 		pActors[m_nActor]->AddWeaponModel(CWeaponInfo::GetWeaponInfo(pActors[m_nActor]->GetWeapon()->m_eWeaponType)->m_nModelId);
@@ -1078,7 +1080,7 @@ bool CSceneEdit::SelectWeapon(void)
 	}
 	else if (CPad::GetPad(1)->GetRightShoulder1JustDown()){
 		if (--m_nWeaponType <= WEAPONTYPE_UNARMED)
-			m_nWeaponType = WEAPONTYPE_GRENADE;
+			m_nWeaponType = WEAPONTYPE_MINIGUN;
 		pActors[m_nActor]->ClearWeapons();
 		pActors[m_nActor]->GiveWeapon((eWeaponType)m_nWeaponType, 1000);
 		pActors[m_nActor]->AddWeaponModel(CWeaponInfo::GetWeaponInfo(pActors[m_nActor]->GetWeapon()->m_eWeaponType)->m_nModelId);

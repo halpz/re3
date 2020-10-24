@@ -52,6 +52,8 @@ public:
 	static void AddNodeToList(CPedPathNode *pNode, int16 index, CPedPathNode *pList);
 	static void AddBlockade(CEntity *pEntity, CPedPathNode(*pathNodes)[40], CVector *pPosition);
 	static void AddBlockadeSectorList(CPtrList& list, CPedPathNode(*pathNodes)[40], CVector *pPosition);
+	static void AddBuildingBlockade(CEntity*, CPedPathNode(*)[40], CVector*);
+	static void AddBuildingBlockadeSectorList(CPtrList&, CPedPathNode(*)[40], CVector*);
 };
 
 struct CPathNode
@@ -74,7 +76,7 @@ struct CPathNode
 
 	uint8 bWaterPath : 1;
 	uint8 bOnlySmallBoats : 1;
-	uint8 flagB4 : 1;	// where is this set?
+	uint8 bSelected : 1;
 	uint8 speedLimit : 2;
 	//uint8 flagB20 : 1;
 	//uint8 flagB40 : 1;
@@ -115,7 +117,7 @@ struct CCarPathLink
 	int8 dirY;
 	int8 numLeftLanes : 3;
 	int8 numRightLanes : 3;
-	uint8 flag1 : 1;
+	uint8 trafficLightDirection : 1;
 	uint8 trafficLightType : 2;
 	uint8 bBridgeLights : 1;	// at least in LCS...
 	int8 width;
@@ -160,6 +162,7 @@ struct CPathInfoForObject
 
 	uint8 spawnRate : 4;
 
+	void CheckIntegrity(void);
 	void SwapConnectionsToBeRightWayRound(void);
 };
 extern CPathInfoForObject *InfoForTileCars;
@@ -188,6 +191,14 @@ struct CTempNodeExternal	// made up name
 	int8 width;
 	bool isCross;
 };
+
+// from mobile
+template<typename T>
+class CRoute
+{
+	T m_node[8];
+};
+
 
 class CPathFind
 {
@@ -242,12 +253,14 @@ public:
 	void MarkRoadsBetweenLevelsNodeAndNeighbours(int32 nodeId);
 	void MarkRoadsBetweenLevelsInArea(float x1, float x2, float y1, float y2, float z1, float z2);
 	void PedMarkRoadsBetweenLevelsInArea(float x1, float x2, float y1, float y2, float z1, float z2);
-// TODO(MIAMI): check callers for new arguments
-	int32 FindNodeClosestToCoors(CVector coors, uint8 type, float distLimit, bool ignoreDisabled = false, bool ignoreBetweenLevels = false, bool ignoreFlagB4 = false, bool bWaterPath = false);
+	int32 FindNodeClosestToCoors(CVector coors, uint8 type, float distLimit, bool ignoreDisabled = false, bool ignoreBetweenLevels = false, bool ignoreSelected = false, bool bWaterPath = false);
 	int32 FindNodeClosestToCoorsFavourDirection(CVector coors, uint8 type, float dirX, float dirY);
+	void FindNodePairClosestToCoors(CVector coors, uint8 type, int* node1, int* node2, float* angle, float minDist, float maxDist, bool ignoreDisabled = false, bool ignoreBetweenLevels = false, bool bWaterPath = false);
+	int32 FindNthNodeClosestToCoors(CVector coors, uint8 type, float distLimit, bool ignoreDisabled, bool ignoreBetweenLevels, int N, bool bWaterPath = false);
+	CVector FindNodeCoorsForScript(int32 id);
 	float FindNodeOrientationForCarPlacement(int32 nodeId);
 	float FindNodeOrientationForCarPlacementFacingDestination(int32 nodeId, float x, float y, bool towards);
-	bool NewGenerateCarCreationCoors(float x, float y, float dirX, float dirY, float spawnDist, float angleLimit, bool forward, CVector *pPosition, int32 *pNode1, int32 *pNode2, float *pPositionBetweenNodes, bool ignoreDisabled = false);
+	bool GenerateCarCreationCoors(float x, float y, float dirX, float dirY, float spawnDist, float angleLimit, bool forward, CVector *pPosition, int32 *pNode1, int32 *pNode2, float *pPositionBetweenNodes, bool ignoreDisabled = false);
 	bool GeneratePedCreationCoors(float x, float y, float minDist, float maxDist, float minDistOffScreen, float maxDistOffScreen, CVector *pPosition, int32 *pNode1, int32 *pNode2, float *pPositionBetweenNodes, CMatrix *camMatrix);
 	void FindNextNodeWandering(uint8, CVector, CPathNode**, CPathNode**, uint8, uint8*);
 	void DoPathSearch(uint8 type, CVector start, int32 startNodeId, CVector target, CPathNode **nodes, int16 *numNodes, int16 maxNumNodes, CVehicle *vehicle, float *dist, float distLimit, int32 forcedTargetNode);
@@ -267,6 +280,16 @@ public:
 	void ConnectionSetTrafficLight(int id) { m_connections[id] |= 0x4000; }
 
 	void DisplayPathData(void);
+
+	// Following methods are present on mobile but are unused. TODO: implement them
+	void SavePathFindData(void);
+	void ComputeRoute(uint8, const CVector&, const CVector&, CRoute<CPathNode*>&);
+	void RecordNodesClosestToCoors(CVector, uint8, int, CPathNode**, float, bool, bool, bool);
+	void RecordNodesInCircle(const CVector&, float, uint8, int, CPathNode**, bool, bool, bool, bool);
+	void ArrangeOneNodeList(CPathInfoForObject*, int16);
+	void ArrangeNodes(int16);
+	void RegisterMarker(CVector*);
+	void Shutdown(void);
 };
 
 extern CPathFind ThePaths;

@@ -8,7 +8,7 @@
 #define IDEXIT                          1002
 #define IDC_SELECTDEVICE                1005
 
-#define IDI_MAIN_ICON                   1042
+#define IDI_MAIN_ICON                   100
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED

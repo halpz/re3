@@ -143,8 +143,8 @@ class cSampleManager
 	char   *m_aAudioProviders[MAXPROVIDERS];
 	tSample m_aSamples[TOTAL_AUDIO_SAMPLES];
 	char    m_MiscomPath[260];
-	char    m_SfxPath[260];
-	char    m_StreamedAudioPath[188];
+	char    m_WavFilesPath[260];
+	char    m_MP3FilesPath[188];
 	void   *m_aChannels[18];
 
 public:

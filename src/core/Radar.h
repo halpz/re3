@@ -98,6 +98,17 @@ enum eRadarSprite
 
 enum
 {
+	RADAR_TRACE_RED,
+	RADAR_TRACE_GREEN,
+	RADAR_TRACE_LIGHT_BLUE,
+	RADAR_TRACE_GRAY,
+	RADAR_TRACE_YELLOW,
+	RADAR_TRACE_MAGENTA,
+	RADAR_TRACE_CYAN
+};
+
+enum
+{
 	BLIP_MODE_TRIANGULAR_UP = 0,
 	BLIP_MODE_TRIANGULAR_DOWN,
 	BLIP_MODE_SQUARE,
@@ -108,17 +119,39 @@ struct sRadarTrace
 	uint32 m_nColor;
 	uint32 m_eBlipType; // eBlipType
 	int32 m_nEntityHandle;
+	CVector m_vec2DPos;
+	CVector m_vecPos;
+	uint16 m_BlipIndex;
+	bool m_bDim;
+	bool m_bInUse;
+	bool m_bShortRange;
+	bool m_unused;
+	float m_Radius;
+	int16 m_wScale;
+	uint16 m_eBlipDisplay; // eBlipDisplay
+	uint16 m_eRadarSprite; // eRadarSprite
+};
+
+// Either that was a thing while saving/loading blips, or they added sizes of each field one by one. I want to do the former.
+#pragma pack(push,1)
+struct sRadarTraceSave
+{
+	uint32 m_nColor;
+	float m_Radius;
+	uint32 m_eBlipType; // eBlipType
+	int32 m_nEntityHandle;
 	CVector2D m_vec2DPos;
 	CVector m_vecPos;
 	uint16 m_BlipIndex;
 	bool m_bDim;
 	bool m_bInUse;
 	bool m_bShortRange;
-	float m_Radius;
+	bool m_unused;
 	int16 m_wScale;
 	uint16 m_eBlipDisplay; // eBlipDisplay
 	uint16 m_eRadarSprite; // eRadarSprite
 };
+#pragma pack(pop)
 
 // Values for screen space
 #define RADAR_LEFT (40.0f)
@@ -176,7 +209,7 @@ public:
 	static CRGBA ArrowBlipColour1;
 	static CRGBA ArrowBlipColour2;
 	static int16 MapLegendList[NUM_MAP_LEGENDS];
-	static uint16 MapLegendCounter;
+	static int16 MapLegendCounter;
 
 #ifdef MAP_ENHANCEMENTS
 	static int TargetMarkerId;
@@ -215,9 +248,9 @@ public:
 	static void RemoveRadarSections();
 	static void SaveAllRadarBlips(uint8*, uint32*);
 	static void SetBlipSprite(int32 i, int32 icon);
-	static int32 SetCoordBlip(eBlipType type, CVector pos, int32, eBlipDisplay);
-	static int32 SetEntityBlip(eBlipType type, int32, int32, eBlipDisplay);
-	static int32 SetShortRangeCoordBlip(eBlipType type, CVector pos, int32, eBlipDisplay);
+	static int32 SetCoordBlip(eBlipType type, CVector pos, uint32, eBlipDisplay);
+	static int32 SetEntityBlip(eBlipType type, int32, uint32, eBlipDisplay);
+	static int32 SetShortRangeCoordBlip(eBlipType type, CVector pos, uint32, eBlipDisplay);
 	static void SetRadarMarkerState(int32 i, bool flag);
 	static void ShowRadarMarker(CVector pos, uint32 color, float radius);
 	static void ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha);
@@ -229,7 +262,8 @@ public:
 	static void TransformRadarPointToRealWorldSpace(CVector2D &out, const CVector2D &in);
 	static void TransformRadarPointToScreenSpace(CVector2D &out, const CVector2D &in);
 	static void TransformRealWorldPointToRadarSpace(CVector2D &out, const CVector2D &in);
-
-	// no in CRadar in the game:	
 	static void CalculateCachedSinCos();
+	static void DrawEntityBlip(int32 blipId);
+	static void DrawCoordBlip(int32 blipId);
+	static void DrawLegend(int32, int32, int32);
 };

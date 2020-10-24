@@ -7,6 +7,7 @@
 #include "Timer.h"
 #include "DMAudio.h"
 #include "Population.h"
+#include "Replay.h"
 #include "Weapon.h"
 #include "World.h"
 #include "Stats.h"
@@ -14,9 +15,8 @@
 #include "Text.h"
 #include "Vehicle.h"
 #include "GameLogic.h"
-#ifdef FIX_BUGS
-#include "Replay.h"
-#endif
+
+//--MIAMI: file done except TODO
 
 #define FRENZY_ANY_PED -1
 #define FRENZY_ANY_CAR -2
@@ -27,7 +27,8 @@ int32 CDarkel::TimeOfFrenzyStart;
 int32 CDarkel::WeaponType;
 int32 CDarkel::AmmoInterruptedWeapon;
 int32 CDarkel::KillsNeeded;
-int8 CDarkel::InterruptedWeapon;
+int32 CDarkel::InterruptedWeaponType;
+int32 CDarkel::InterruptedWeaponSelected;
 
 /*
  * TODO: Collect timer/kill counter RGBA colors on top like in Hud/Frontend.
@@ -61,14 +62,12 @@ CDarkel::CalcFade(uint32 time, uint32 start, uint32 end)
 		return 0;
 }
 
-// Screen positions taken from VC
 void
 CDarkel::DrawMessages()
 {
-#ifdef FIX_BUGS
 	if (CReplay::IsPlayingBack())
 		return;
-#endif
+
 	switch (Status) {
 		case KILLFRENZY_ONGOING:
 		{
@@ -77,8 +76,8 @@ CDarkel::DrawMessages()
 			CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(30.0f));
 			CFont::SetCentreOn();
 			CFont::SetPropOn();
-			uint32 timePassedSinceStart = CTimer::GetTimeInMilliseconds() - CDarkel::TimeOfFrenzyStart;
-			if (CDarkel::bStandardSoundAndMessages) {
+			uint32 timePassedSinceStart = CTimer::GetTimeInMilliseconds() - TimeOfFrenzyStart;
+			if (bStandardSoundAndMessages) {
 				if (timePassedSinceStart >= 3000 && timePassedSinceStart < 11000) {
 					CFont::SetScale(SCREEN_SCALE_X(1.3f), SCREEN_SCALE_Y(1.3f));
 					CFont::SetJustifyOff();
@@ -103,8 +102,8 @@ CDarkel::DrawMessages()
 			CFont::SetCentreOff();
 			CFont::SetRightJustifyOn();
 			CFont::SetFontStyle(FONT_HEADING);
-			if (CDarkel::TimeLimit >= 0) {
-				uint32 timeLeft = CDarkel::TimeLimit - (CTimer::GetTimeInMilliseconds() - CDarkel::TimeOfFrenzyStart);
+			if (TimeLimit >= 0) {
+				uint32 timeLeft = TimeLimit - (CTimer::GetTimeInMilliseconds() - TimeOfFrenzyStart);
 				sprintf(gString, "%d:%02d", timeLeft / 60000, timeLeft % 60000 / 1000);
 				AsciiToUnicode(gString, gUString);
 				if (timeLeft > 4000 || CTimer::GetFrameCounter() & 1) {
@@ -114,7 +113,7 @@ CDarkel::DrawMessages()
 					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(34.0f), SCREEN_SCALE_Y(108.0f), gUString);
 				}
 			}
-			sprintf(gString, "%d", (CDarkel::KillsNeeded >= 0 ? CDarkel::KillsNeeded : 0));
+			sprintf(gString, "%d", (KillsNeeded >= 0 ? KillsNeeded : 0));
 			AsciiToUnicode(gString, gUString);
 			CFont::SetColor(CRGBA(0, 0, 0, 255));
 			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(35.0f), SCREEN_SCALE_Y(144.0f), gUString);
@@ -124,9 +123,9 @@ CDarkel::DrawMessages()
 		}
 		case KILLFRENZY_PASSED:
 		{
-			if (CDarkel::bStandardSoundAndMessages) {
-				uint32 timePassedSinceStart = CTimer::GetTimeInMilliseconds() - CDarkel::TimeOfFrenzyStart;
-				if (CTimer::GetTimeInMilliseconds() - CDarkel::TimeOfFrenzyStart < 5000) {
+			if (bStandardSoundAndMessages) {
+				uint32 timePassedSinceStart = CTimer::GetTimeInMilliseconds() - TimeOfFrenzyStart;
+				if (CTimer::GetTimeInMilliseconds() - TimeOfFrenzyStart < 5000) {
 					CFont::SetBackgroundOff();
 					CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(20.0f));
 					CFont::SetCentreOn();
@@ -186,7 +185,20 @@ CDarkel::RegisterCarBlownUpByPlayer(CVehicle *vehicle)
 		}
 	}
 	RegisteredKills[vehicle->GetModelIndex()]++;
-	CStats::CarsExploded++;
+	switch (vehicle->GetVehicleAppearance()) {
+	case VEHICLE_APPEARANCE_CAR:
+	case VEHICLE_APPEARANCE_BIKE:
+		CStats::CarsExploded++;;
+		break;
+	case VEHICLE_APPEARANCE_HELI:
+	case VEHICLE_APPEARANCE_PLANE:
+		CStats::HelisDestroyed++;
+		break;
+	case VEHICLE_APPEARANCE_BOAT:
+		CStats::BoatsExploded++;
+		break;
+	}
+	
 }
 
 void
@@ -245,23 +257,7 @@ CDarkel::ResetOnPlayerDeath()
 	Status = KILLFRENZY_FAILED;
 	TimeOfFrenzyStart = CTimer::GetTimeInMilliseconds();
 
-	eWeaponType fixedWeapon;
-	if (WeaponType == WEAPONTYPE_UZI_DRIVEBY)
-		fixedWeapon = WEAPONTYPE_UZI;
-	else
-		fixedWeapon = (eWeaponType)WeaponType;
-
-	CPlayerPed *player = FindPlayerPed();
-	if (fixedWeapon < WEAPONTYPE_TOTALWEAPONS) {
-		player->m_nSelectedWepSlot = InterruptedWeapon;
-		player->GetWeapon(player->GetWeaponSlot(fixedWeapon)).m_nAmmoTotal = CDarkel::AmmoInterruptedWeapon;
-	}
-
-	if (FindPlayerVehicle()) {
-		player->RemoveWeaponModel(CWeaponInfo::GetWeaponInfo(player->GetWeapon()->m_eWeaponType)->m_nModelId);
-		player->m_currentWeapon = player->m_nSelectedWepSlot;
-		player->MakeChangesForNewWeapon(player->m_currentWeapon);
-	}
+	DealWithWeaponChangeAtEndOfFrenzy();
 }
 
 void
@@ -298,16 +294,19 @@ CDarkel::StartFrenzy(eWeaponType weaponType, int32 time, uint16 kill, int32 mode
 
 	CPlayerPed *player = FindPlayerPed();
 	if (fixedWeapon < WEAPONTYPE_TOTALWEAPONS) {
-		InterruptedWeapon = player->m_currentWeapon;
-		player->GiveWeapon(fixedWeapon, 0);
+		InterruptedWeaponSelected = player->GetWeapon()->m_eWeaponType;
+		player->RemoveWeaponAnims(InterruptedWeaponSelected, -1000.0f);
+		InterruptedWeaponType = player->GetWeapon(player->GetWeaponSlot(fixedWeapon)).m_eWeaponType;
 		AmmoInterruptedWeapon = player->GetWeapon(player->GetWeaponSlot(fixedWeapon)).m_nAmmoTotal;
+		if (InterruptedWeaponType)
+			CModelInfo::GetModelInfo(CWeaponInfo::GetWeaponInfo((eWeaponType)InterruptedWeaponType)->m_nModelId)->AddRef();
 		player->GiveWeapon(fixedWeapon, 30000);
-		player->m_nSelectedWepSlot = player->GetWeaponSlot(fixedWeapon);
+		player->SetCurrentWeapon(fixedWeapon);
 		player->MakeChangesForNewWeapon(player->m_nSelectedWepSlot);
 
 		if (FindPlayerVehicle()) {
-			player->m_currentWeapon = player->m_nSelectedWepSlot;
-			player->GetWeapon()->m_nAmmoInClip = Min(player->GetWeapon()->m_nAmmoTotal, CWeaponInfo::GetWeaponInfo(player->GetWeapon()->m_eWeaponType)->m_nAmountofAmmunition);
+			player->SetCurrentWeapon(FindPlayerPed()->m_nSelectedWepSlot);
+			player->SetAmmo(fixedWeapon, Min(player->GetWeapon()->m_nAmmoTotal, CWeaponInfo::GetWeaponInfo(player->GetWeapon()->m_eWeaponType)->m_nAmountofAmmunition));
 			player->ClearWeaponTarget();
 		}
 	}
@@ -343,24 +342,7 @@ CDarkel::Update()
 		CPopulation::m_AllRandomPedsThisType = -1;
 		Status = KILLFRENZY_FAILED;
 		TimeOfFrenzyStart = CTimer::GetTimeInMilliseconds();
-
-		eWeaponType fixedWeapon;
-		if (WeaponType == WEAPONTYPE_UZI_DRIVEBY)
-			fixedWeapon = WEAPONTYPE_UZI;
-		else
-			fixedWeapon = (eWeaponType)WeaponType;
-
-		CPlayerPed *player = FindPlayerPed();
-		if (fixedWeapon < WEAPONTYPE_TOTALWEAPONS) {
-			player->m_nSelectedWepSlot = InterruptedWeapon;
-			player->GetWeapon(player->GetWeaponSlot(fixedWeapon)).m_nAmmoTotal = CDarkel::AmmoInterruptedWeapon;
-		}
-
-		if (FindPlayerVehicle()) {
-			player->RemoveWeaponModel(CWeaponInfo::GetWeaponInfo(player->GetWeapon()->m_eWeaponType)->m_nModelId);
-			player->m_currentWeapon = player->m_nSelectedWepSlot;
-			player->MakeChangesForNewWeapon(player->m_currentWeapon);
-		}
+		DealWithWeaponChangeAtEndOfFrenzy();
 
 		if (bStandardSoundAndMessages)
 			DMAudio.PlayFrontEndSound(SOUND_RAMPAGE_FAILED, 0);
@@ -377,25 +359,50 @@ CDarkel::Update()
 
 		FindPlayerPed()->m_pWanted->SetWantedLevel(0);
 
-		eWeaponType fixedWeapon;
-		if (WeaponType == WEAPONTYPE_UZI_DRIVEBY)
-			fixedWeapon = WEAPONTYPE_UZI;
-		else
-			fixedWeapon = (eWeaponType)WeaponType;
-
-		CPlayerPed* player = FindPlayerPed();
-		if (fixedWeapon < WEAPONTYPE_TOTALWEAPONS) {
-			player->m_nSelectedWepSlot = InterruptedWeapon;
-			player->GetWeapon(player->GetWeaponSlot(fixedWeapon)).m_nAmmoTotal = CDarkel::AmmoInterruptedWeapon;
-		}
-
-		if (FindPlayerVehicle()) {
-			player->RemoveWeaponModel(CWeaponInfo::GetWeaponInfo(player->GetWeapon()->m_eWeaponType)->m_nModelId);
-			player->m_currentWeapon = player->m_nSelectedWepSlot;
-			player->MakeChangesForNewWeapon(player->m_currentWeapon);
-		}
+		DealWithWeaponChangeAtEndOfFrenzy();
 
 		if (bStandardSoundAndMessages)
 			DMAudio.PlayFrontEndSound(SOUND_RAMPAGE_PASSED, 0);
+	}
+}
+
+void
+CDarkel::DealWithWeaponChangeAtEndOfFrenzy()
+{
+	eWeaponType fixedWeapon;
+	if (WeaponType == WEAPONTYPE_UZI_DRIVEBY)
+		fixedWeapon = WEAPONTYPE_UZI;
+	else
+		fixedWeapon = (eWeaponType)WeaponType;
+
+	if (fixedWeapon < WEAPONTYPE_TOTALWEAPONS && InterruptedWeaponType)
+		CModelInfo::GetModelInfo(CWeaponInfo::GetWeaponInfo((eWeaponType)InterruptedWeaponType)->m_nModelId)->RemoveRef();
+
+	if (fixedWeapon < WEAPONTYPE_TOTALWEAPONS) {
+		int slot = CWeaponInfo::GetWeaponInfo(fixedWeapon)->m_nWeaponSlot;
+		FindPlayerPed()->RemoveWeaponModel(FindPlayerPed()->GetWeapon(slot).GetInfo()->m_nModelId);
+		FindPlayerPed()->GetWeapon(slot).m_eWeaponType = WEAPONTYPE_UNARMED;
+		FindPlayerPed()->GetWeapon(slot).m_nAmmoTotal = 0;
+		FindPlayerPed()->GetWeapon(slot).m_nAmmoInClip = 0;
+		FindPlayerPed()->GetWeapon(slot).m_eWeaponState = WEAPONSTATE_READY;
+		FindPlayerPed()->RemoveWeaponAnims(fixedWeapon, -1000.0f);
+		CModelInfo::GetModelInfo(CWeaponInfo::GetWeaponInfo(fixedWeapon)->m_nModelId)->RemoveRef();
+	}
+
+	CPlayerPed* player = FindPlayerPed();
+	if (fixedWeapon < WEAPONTYPE_TOTALWEAPONS) {
+		player->m_nSelectedWepSlot = CWeaponInfo::GetWeaponInfo((eWeaponType)InterruptedWeaponSelected)->m_nWeaponSlot;
+		player->GiveWeapon((eWeaponType)InterruptedWeaponType, AmmoInterruptedWeapon, true);
+	}
+
+	if (FindPlayerVehicle()) {
+		player->RemoveWeaponModel(CWeaponInfo::GetWeaponInfo(player->GetWeapon()->m_eWeaponType)->m_nModelId);
+		if (FindPlayerPed()->GetWeapon(WEAPONSLOT_SUBMACHINEGUN).m_eWeaponType)
+			FindPlayerPed()->m_nSelectedWepSlot = WEAPONSLOT_SUBMACHINEGUN;
+		else
+			FindPlayerPed()->m_nSelectedWepSlot = WEAPONSLOT_UNARMED;
+		player->SetCurrentWeapon(FindPlayerPed()->m_nSelectedWepSlot);
+		player->MakeChangesForNewWeapon(player->m_currentWeapon);
+		//player->RemoveDriveByAnims(); // TODO(MIAMI)
 	}
 }

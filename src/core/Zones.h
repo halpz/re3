@@ -77,7 +77,7 @@ public:
 	static CZone *GetInfoZone(uint16 i) { return &InfoZoneArray[i]; }
 	static CZone *GetNavigationZone(uint16 i) { return &NavigationZoneArray[i]; }
 	static CZone *GetMapZone(uint16 i) { return &MapZoneArray[i]; }
-	static CZone *GetAudioZone(uint16 i) { return &InfoZoneArray[AudioZoneArray[i]]; }
+	static CZone *GetAudioZone(uint16 i) { return &NavigationZoneArray[AudioZoneArray[i]]; }
 	static void PostZoneCreation(void);
 	static void CheckZonesForOverlap(void);
 	static void InsertZoneIntoZoneHierarchy(CZone *zone);

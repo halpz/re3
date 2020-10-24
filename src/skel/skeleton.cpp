@@ -11,7 +11,7 @@
 #include "skeleton.h"
 #include "platform.h"
 
-
+// --MIAMI: file done
 
 static RwBool               DefaultVideoMode = TRUE;
 
@@ -371,8 +371,8 @@ RsRwInitialize(void *displayID)
 
 	psNativeTextureSupport();
 
+	RwTextureSetAutoMipmapping(TRUE);
 	RwTextureSetMipmapping(FALSE);
-	RwTextureSetAutoMipmapping(FALSE);
 
 	return TRUE;
 }

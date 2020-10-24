@@ -22,7 +22,11 @@ CColModel CTempColModels::ms_colModelWeapon;
 CColSphere s_aPedSpheres[3];
 CColSphere s_aPed2Spheres[3];
 CColSphere s_aPedGSpheres[4];
+#ifdef FIX_BUGS
+CColSphere s_aDoorSpheres[3];
+#else
 CColSphere s_aDoorSpheres[4];
+#endif
 CColSphere s_aBumperSpheres[4];
 CColSphere s_aPanelSpheres[4];
 CColSphere s_aBonnetSpheres[4];
@@ -130,7 +134,11 @@ CTempColModels::Initialise(void)
 	s_aDoorSpheres[1].center = CVector(0.0f, -0.95f, -0.35f);
 	s_aDoorSpheres[2].center = CVector(0.0f, -0.6f, 0.25f);
 
+#ifdef FIX_BUGS
 	for (i = 0; i < ARRAY_SIZE(s_aDoorSpheres); i++) {
+#else
+	for (i = 0; i < ARRAY_SIZE(s_aPed2Spheres); i++) {
+#endif
 		s_aDoorSpheres[i].surface = SURFACE_CAR_PANEL;
 		s_aDoorSpheres[i].piece = 0;
 	}
@@ -286,9 +294,13 @@ CTempColModels::Initialise(void)
 
 	SET_COLMODEL_SPHERES(ms_colModelBodyPart2, s_aBodyPartSpheres2);
 
-
-	ms_colModelWeapon.boundingSphere.Set(0.25f, CVector(0.0f, 0.0f, 0.0f));
-	ms_colModelWeapon.boundingBox.Set(CVector(-0.25f, -0.25, -0.25f), CVector(0.25f, 0.25, 0.25f));
+	ms_colModelWeapon.boundingSphere.radius = 0.25f;
+	ms_colModelWeapon.boundingBox.min.x = -0.25f;
+	ms_colModelWeapon.boundingBox.min.y = -0.25f;
+	ms_colModelWeapon.boundingBox.min.z = -0.25f;
+	ms_colModelWeapon.boundingBox.max.x = 0.25f;
+	ms_colModelWeapon.boundingBox.max.y = 0.25f;
+	ms_colModelWeapon.boundingBox.max.z = 0.25f;
 
 #undef SET_COLMODEL_SPHERES
 }

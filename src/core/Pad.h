@@ -436,6 +436,7 @@ public:
 	bool GetLeftShockJustDown()      { return !!(NewState.LeftShock && !OldState.LeftShock); }
 	bool GetRightShockJustDown()     { return !!(NewState.RightShock && !OldState.RightShock); }
 	bool GetStartJustDown()          { return !!(NewState.Start && !OldState.Start); }
+	bool GetSelectJustDown()          { return !!(NewState.Select && !OldState.Select); }
 	bool GetLeftStickXJustDown() { return !!(NewState.LeftStickX && !OldState.LeftStickX); }
 	bool GetLeftStickYJustDown() { return !!(NewState.LeftStickY && !OldState.LeftStickY); }
   
@@ -461,6 +462,7 @@ public:
 	bool GetRightShoulder1(void) { return !!NewState.RightShoulder1; }
 	bool GetRightShoulder2(void) { return !!NewState.RightShoulder2; }
 	bool GetStart()              { return !!NewState.Start; }
+	bool GetSelect()              { return !!NewState.Select; }
 	int16 GetLeftStickX(void)    { return NewState.LeftStickX; }
 	int16 GetLeftStickY(void)    { return NewState.LeftStickY; }
 	int16 GetRightStickX(void)    { return NewState.RightStickX; }

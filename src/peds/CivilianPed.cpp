@@ -425,7 +425,7 @@ void CCivilianPed::FindNearbyAttractorsSectorList(CPtrList& list, float& minDist
 {
 	for (CPtrNode* pNode = list.first; pNode != nil; pNode = pNode->next) {
 		CEntity* pEntity = (CEntity*)pNode->item;
-		if (pEntity->IsObject() && (!pEntity->IsStatic() || ((CObject*)pEntity)->bHasBeenDamaged))
+		if (pEntity->IsObject() && (!pEntity->GetIsStatic() || ((CObject*)pEntity)->bHasBeenDamaged))
 			continue;
 		CBaseModelInfo* pModelInfo = CModelInfo::GetModelInfo(pEntity->GetModelIndex());
 		for (int i = 0; i < pModelInfo->GetNum2dEffects(); i++) {

@@ -329,8 +329,13 @@ cAudioManager::Get3DProviderName(uint8 id) const
 {
 	if (!m_bIsInitialised)
 		return nil;
+#ifdef AUDIO_OAL
+	id = clamp(id, 0, SampleManager.GetNum3DProvidersAvailable() - 1);
+#else
+	// We don't want that either since it will crash the game, but skipping for now
 	if (id >= SampleManager.GetNum3DProvidersAvailable())
 		return nil;
+#endif
 	return SampleManager.Get3DProviderName(id);
 }
 
@@ -619,29 +624,56 @@ cAudioManager::AddDetailsToRequestedOrderList(uint8 sample)
 	m_abSampleQueueIndexTable[m_nActiveSampleQueue][i] = sample;
 }
 
+// --MIAMI: Done
 void
 cAudioManager::AddReflectionsToRequestedQueue()
 {
+#ifdef FIX_BUGS
+  	uint32 oldFreq = 0;
+#else
+  	uint32 oldFreq;
+#endif
 	float reflectionDistance;
 	int32 noise;
-	uint8 emittingVolume = (m_sQueueSample.m_nVolume / 2) + (m_sQueueSample.m_nVolume / 8);
+	uint8 emittingVolume;
+
+	uint32 oldCounter = m_sQueueSample.m_nCounter;
+	float oldDist = m_sQueueSample.m_fDistance;
+	CVector oldPos = m_sQueueSample.m_vecPos;
+	if ( CTimer::GetIsSlowMotionActive() ) {
+		emittingVolume = m_sQueueSample.m_nVolume;
+		oldFreq = m_sQueueSample.m_nFrequency;
+	} else {
+		emittingVolume = (m_sQueueSample.m_nVolume / 2) + (m_sQueueSample.m_nVolume / 16);
+	}
+	m_sQueueSample.m_fSoundIntensity = m_sQueueSample.m_fSoundIntensity / 2.f;
+
+	int halfOldFreq = oldFreq >> 1;
 
 	for (uint32 i = 0; i < ARRAY_SIZE(m_afReflectionsDistances); i++) {
+		if ( CTimer::GetIsSlowMotionActive() )
+			m_afReflectionsDistances[i] = GetRandomNumberInRange(i % 4, 0, 2) * 100.f / 8.f;
+
 		reflectionDistance = m_afReflectionsDistances[i];
 		if (reflectionDistance > 0.0f && reflectionDistance < 100.f && reflectionDistance < m_sQueueSample.m_fSoundIntensity) {
-			m_sQueueSample.m_nLoopsRemaining = (reflectionDistance * 500.f / 1029.f);
-			if (m_sQueueSample.m_nLoopsRemaining > 5) {
+			m_sQueueSample.m_nLoopsRemaining = CTimer::GetIsSlowMotionActive() ? (reflectionDistance * 800.f / 1029.f) : (reflectionDistance * 500.f / 1029.f);
+			if (m_sQueueSample.m_nLoopsRemaining > 3) {
 				m_sQueueSample.m_fDistance = m_afReflectionsDistances[i];
 				m_sQueueSample.m_nEmittingVolume = emittingVolume;
 				m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
+
 				if (m_sQueueSample.m_nVolume > emittingVolume / 16) {
-					m_sQueueSample.m_nCounter += (i + 1) * 256;
+					m_sQueueSample.m_nCounter = oldCounter + (i + 1) * 256;
 					if (m_sQueueSample.m_nLoopCount) {
-						noise = RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
-						if (noise <= 0)
-							m_sQueueSample.m_nFrequency += noise;
-						else
-							m_sQueueSample.m_nFrequency -= noise;
+						if ( CTimer::GetIsSlowMotionActive() ) {
+							m_sQueueSample.m_nFrequency = halfOldFreq + ((halfOldFreq * i) / ARRAY_SIZE(m_afReflectionsDistances));
+						} else {
+							noise = RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
+							if (noise <= 0)
+								m_sQueueSample.m_nFrequency += noise;
+							else
+								m_sQueueSample.m_nFrequency -= noise;
+						}
 					}
 					m_sQueueSample.m_nReleasingVolumeModificator += 20;
 					m_sQueueSample.m_vecPos = m_avecReflectionsPos[i];
@@ -650,50 +682,85 @@ cAudioManager::AddReflectionsToRequestedQueue()
 			}
 		}
 	}
+	m_sQueueSample.m_vecPos = oldPos;
+	m_sQueueSample.m_fDistance = oldDist;
 }
 
+// --MIAMI: Done
 void
 cAudioManager::UpdateReflections()
 {
-	const CVector &camPos = TheCamera.GetPosition();
+	CVector camPos = TheCamera.GetPosition();
 	CColPoint colpoint;
 	CEntity *ent;
 
 	if (m_FrameCounter % 8 == 0) {
 		m_avecReflectionsPos[0] = camPos;
-		m_avecReflectionsPos[0].y += 50.f;
+		m_avecReflectionsPos[0].y += 100.f;
 		if (CWorld::ProcessLineOfSight(camPos, m_avecReflectionsPos[0], colpoint, ent, true, false, false, true, false, true, true))
 			m_afReflectionsDistances[0] = Distance(camPos, colpoint.point);
 		else
-			m_afReflectionsDistances[0] = 50.0f;
+			m_afReflectionsDistances[0] = 100.0f;
+
 	} else if ((m_FrameCounter + 1) % 8 == 0) {
 		m_avecReflectionsPos[1] = camPos;
-		m_avecReflectionsPos[1].y -= 50.0f;
+		m_avecReflectionsPos[1].y -= 100.0f;
 		if (CWorld::ProcessLineOfSight(camPos, m_avecReflectionsPos[1], colpoint, ent, true, false, false, true, false, true, true))
 			m_afReflectionsDistances[1] = Distance(camPos, colpoint.point);
 		else
-			m_afReflectionsDistances[1] = 50.0f;
+			m_afReflectionsDistances[1] = 100.0f;
+
 	} else if ((m_FrameCounter + 2) % 8 == 0) {
 		m_avecReflectionsPos[2] = camPos;
-		m_avecReflectionsPos[2].x -= 50.0f;
+		m_avecReflectionsPos[2].x -= 100.0f;
 		if (CWorld::ProcessLineOfSight(camPos, m_avecReflectionsPos[2], colpoint, ent, true, false, false, true, false, true, true))
 			m_afReflectionsDistances[2] = Distance(camPos, colpoint.point);
 		else
-			m_afReflectionsDistances[2] = 50.0f;
+			m_afReflectionsDistances[2] = 100.0f;
+
 	} else if ((m_FrameCounter + 3) % 8 == 0) {
 		m_avecReflectionsPos[3] = camPos;
-		m_avecReflectionsPos[3].x += 50.0f;
+		m_avecReflectionsPos[3].x += 100.0f;
 		if (CWorld::ProcessLineOfSight(camPos, m_avecReflectionsPos[3], colpoint, ent, true, false, false, true, false, true, true))
 			m_afReflectionsDistances[3] = Distance(camPos, colpoint.point);
 		else
-			m_afReflectionsDistances[3] = 50.0f;
+			m_afReflectionsDistances[3] = 100.0f;
+
 	} else if ((m_FrameCounter + 4) % 8 == 0) {
+		camPos.y += 1.0f;
 		m_avecReflectionsPos[4] = camPos;
-		m_avecReflectionsPos[4].z += 50.0f;
+		m_avecReflectionsPos[4].z += 100.0f;
 		if (CWorld::ProcessVerticalLine(camPos, m_avecReflectionsPos[4].z, colpoint, ent, true, false, false, false, true, false, nil))
 			m_afReflectionsDistances[4] = colpoint.point.z - camPos.z;
 		else
-			m_afReflectionsDistances[4] = 50.0f;
+			m_afReflectionsDistances[4] = 100.0f;
+
+	} else if ((m_FrameCounter + 5) % 8 == 0) {
+		camPos.y -= 1.0f;
+		m_avecReflectionsPos[5] = camPos;
+		m_avecReflectionsPos[5].z += 100.0f;
+		if (CWorld::ProcessVerticalLine(camPos, m_avecReflectionsPos[5].z, colpoint, ent, true, false, false, false, true, false, nil))
+			m_afReflectionsDistances[5] = colpoint.point.z - camPos.z;
+		else
+			m_afReflectionsDistances[5] = 100.0f;
+
+	} else if ((m_FrameCounter + 6) % 8 == 0) {
+		camPos.x -= 1.0f;
+		m_avecReflectionsPos[6] = camPos;
+		m_avecReflectionsPos[6].z += 100.0f;
+		if (CWorld::ProcessVerticalLine(camPos, m_avecReflectionsPos[6].z, colpoint, ent, true, false, false, false, true, false, nil))
+			m_afReflectionsDistances[6] = colpoint.point.z - camPos.z;
+		else
+			m_afReflectionsDistances[6] = 100.0f;
+
+	} else if ((m_FrameCounter + 7) % 8 == 0) {
+		camPos.x += 1.0f;
+		m_avecReflectionsPos[7] = camPos;
+		m_avecReflectionsPos[7].z += 100.0f;
+		if (CWorld::ProcessVerticalLine(camPos, m_avecReflectionsPos[7].z, colpoint, ent, true, false, false, false, true, false, nil))
+			m_afReflectionsDistances[7] = colpoint.point.z - camPos.z;
+		else
+			m_afReflectionsDistances[7] = 100.0f;
 	}
 }
 

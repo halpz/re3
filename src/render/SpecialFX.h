@@ -1,8 +1,12 @@
 #pragma once
 
+//file done
+
 class CSpecialFX
 {
 public:
+	static bool bVideoCam;
+	static bool bLiftCam;
 	static bool bSnapShotActive;
 	static int32 SnapShotFrames;
 
@@ -10,7 +14,10 @@ public:
 	static void Update(void);
 	static void Init(void);
 	static void Shutdown(void);
+	static void AddWeaponStreak(int type);
+	static void Render2DFXs();
 };
+
 
 class CRegisteredMotionBlurStreak
 {
@@ -27,6 +34,7 @@ public:
 	void Render(void);
 };
 
+
 class CMotionBlurStreaks
 {
 	static CRegisteredMotionBlurStreak aStreaks[NUMMBLURSTREAKS];
@@ -37,16 +45,20 @@ public:
 	static void Render(void);
 };
 
+
 struct CBulletTrace
 {
-	CVector m_vecCurrentPos;
-	CVector m_vecTargetPos;
+	CVector m_vecStartPos;
+	CVector m_vecEndPos;
 	bool m_bInUse;
-	uint8 m_framesInUse;
-	uint8 m_lifeTime;
+	uint32 m_nCreationTime;
+	uint32 m_nLifeTime;
+	float m_fThickness;
+	uint8 m_fVisibility;
 
 	void Update(void);
 };
+
 
 class CBulletTraces
 {
@@ -54,16 +66,10 @@ public:
 	static CBulletTrace aTraces[NUMBULLETTRACES];
 
 	static void Init(void);
-	static void AddTrace(CVector*, CVector*);
 	static void Render(void);
 	static void Update(void);
-	
-//TODO(MIAMI)
-	static void AddTrace(CVector *, CVector *, float, unsigned int, unsigned char) {}
-	static void AddTrace(CVector *a, CVector *b, int32 weapontype, class CEntity *shooter)
-	{
-		AddTrace(a, b); //TODO: temp
-	}
+	static void AddTrace(CVector* start, CVector* end, float thickness, uint32 lifeTime, uint8 visibility);
+	static void AddTrace(CVector* start, CVector* end, int32 weaponType, class CEntity* shooter);
 };
 
 enum
@@ -103,6 +109,7 @@ public:
 	void DeleteMarkerObject();
 	void Render();
 };
+
 
 class C3dMarkers
 {
@@ -144,6 +151,7 @@ enum
 	BRIGHTLIGHT_REAR = BRIGHTLIGHT_REAR_LONG,
 };
 
+
 class CBrightLight
 {
 public:
@@ -157,6 +165,7 @@ public:
 	uint8 m_green;
 	uint8 m_blue;
 };
+
 
 class CBrightLights
 {
@@ -177,6 +186,7 @@ enum
 	SHINYTEXT_FLAT
 };
 
+
 class CShinyText
 {
 public:
@@ -189,7 +199,8 @@ public:
 	uint8 m_blue;
 };
 
-class CShinyTexts
+
+class CShinyTexts 
 {
 	static int NumShinyTexts;
 	static CShinyText aShinyTexts[NUMSHINYTEXTS];
@@ -197,10 +208,11 @@ public:
 	static void Init(void);
 	static void RegisterOne(CVector p0, CVector p1, CVector p2, CVector p3,
 		float u0, float v0, float u1, float v1, float u2, float v2, float u3, float v3,
-		uint8 type, uint8 red, uint8 green, uint8 blue, float maxDist);
+		uint8 type, uint8 red, uint8 green, uint8 blue, float maxDist); //not used
 	static void Render(void);
 	static void RenderOutGeometryBuffer(void);
 };
+
 
 class CMoneyMessage
 {
@@ -216,6 +228,7 @@ public:
 	void Render();
 };
 
+
 class CMoneyMessages
 {
 	static CMoneyMessage aMoneyMessages[NUMMONEYMESSAGES];
@@ -225,11 +238,12 @@ public:
 	static void	RegisterOne(CVector vecPos, const char *pText, uint8 bRed, uint8 bGreen, uint8 bBlue, float fSize, float fOpacity);
 };
 
+
 class CSpecialParticleStuff
 {
 	static uint32 BoatFromStart;
 public:
-	static void CreateFoamAroundObject(CMatrix*, float, float, float, int32);
-	static void StartBoatFoamAnimation();
-	static void UpdateBoatFoamAnimation(CMatrix*);
+	static void CreateFoamAroundObject(CMatrix*, float, float, float, int32); //not used
+	static void StartBoatFoamAnimation(); //not used
+	static void UpdateBoatFoamAnimation(CMatrix*); //not used
 };

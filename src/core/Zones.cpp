@@ -633,14 +633,17 @@ CTheZones::SaveAllZones(uint8 *buffer, uint32 *size)
 	INITSAVEBUF
 	int i;
 
+#define CZONE_SAVE_SIZE (sizeof(char)*8+sizeof(float)+sizeof(float)+sizeof(float)+sizeof(float)+sizeof(float)+sizeof(float)+sizeof(eZoneType)+sizeof(eLevelName)+sizeof(int16)+sizeof(int16)+sizeof(int32)+sizeof(int32)+sizeof(int32))
+
 	*size = SAVE_HEADER_SIZE
 		+ sizeof(m_CurrLevel) + sizeof(FindIndex)
 		+ sizeof(int16) // padding
-		+ sizeof(NavigationZoneArray) + sizeof(InfoZoneArray) + sizeof(ZoneInfoArray)
+		+ CZONE_SAVE_SIZE * ARRAY_SIZE(NavigationZoneArray) + CZONE_SAVE_SIZE * ARRAY_SIZE(InfoZoneArray) + sizeof(ZoneInfoArray)
 		+ sizeof(TotalNumberOfNavigationZones) + sizeof(TotalNumberOfInfoZones) + sizeof(TotalNumberOfZoneInfos)
 		+ sizeof(int16) // padding
-		+ sizeof(MapZoneArray) + sizeof(AudioZoneArray)
+		+ CZONE_SAVE_SIZE * ARRAY_SIZE(MapZoneArray) + sizeof(AudioZoneArray)
 		+ sizeof(TotalNumberOfMapZones) + sizeof(NumberOfAudioZones);
+#undef CZONE_SAVE_SIZE
 
 	uint32 length = 0;
 	WriteSaveHeaderWithLength(buffer, length, 'Z', 'N', 'S', '\0', *size - SAVE_HEADER_SIZE);
