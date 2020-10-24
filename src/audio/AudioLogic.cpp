@@ -5070,7 +5070,7 @@ cAudioManager::ProcessFires(int32)
 			if (entity) {
 				switch (entity->GetType()) {
 				case ENTITY_TYPE_BUILDING:
-					m_sQueueSample.m_fSoundIntensity = 50.0f;
+					m_sQueueSample.m_fSoundIntensity = 80.0f;
 					m_sQueueSample.m_nSampleIndex = SFX_CAR_ON_FIRE;
 					emittingVol = 100;
 					m_sQueueSample.m_nFrequency = 8 * SampleManager.GetSampleBaseFrequency(SFX_CAR_ON_FIRE) / 10;
@@ -5086,7 +5086,7 @@ cAudioManager::ProcessFires(int32)
 					m_sQueueSample.m_nReleasingVolumeModificator = 10;
 					break;
 				default:
-					m_sQueueSample.m_fSoundIntensity = 50.0f;
+					m_sQueueSample.m_fSoundIntensity = 80.0f;
 					m_sQueueSample.m_nSampleIndex = SFX_CAR_ON_FIRE;
 					m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CAR_ON_FIRE);
 					m_sQueueSample.m_nFrequency += i * (m_sQueueSample.m_nFrequency / 64);
@@ -5094,20 +5094,44 @@ cAudioManager::ProcessFires(int32)
 					m_sQueueSample.m_nReleasingVolumeModificator = 8;
 				}
 			} else {
-				m_sQueueSample.m_fSoundIntensity = 50.0f;
+				m_sQueueSample.m_fSoundIntensity = 80.0f;
 				m_sQueueSample.m_nSampleIndex = SFX_CAR_ON_FIRE;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CAR_ON_FIRE);
-				m_sQueueSample.m_nFrequency += i * (m_sQueueSample.m_nFrequency / 64);
+				//mb error in III
 				emittingVol = 80;
 				m_sQueueSample.m_nReleasingVolumeModificator = 8;
 			}
 			m_sQueueSample.m_vecPos = gFireManager.m_aFires[i].m_vecPos;
 			distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 			if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
-				m_sQueueSample.m_fDistance = Sqrt(distSquared);
+				m_sQueueSample.m_fDistance = distSquared < 0.0f ? 0.0f : Sqrt(distSquared);
 				m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 				if (m_sQueueSample.m_nVolume != 0) {
 					m_sQueueSample.m_nCounter = i;
+					m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+					m_sQueueSample.m_fSpeedMultiplier = 2.0f;
+					m_sQueueSample.m_nReleasingVolumeDivider = 10;
+					m_sQueueSample.m_bIs2D = false;
+					m_sQueueSample.m_nLoopCount = 0;
+					m_sQueueSample.m_bReleasingSoundFlag = false;
+					m_sQueueSample.m_nEmittingVolume = emittingVol;
+					m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+					m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+					m_sQueueSample.m_bReverbFlag = true;
+					m_sQueueSample.m_bRequireReflection = false;
+					AddSampleToRequestedQueue();
+				}
+			}
+			if (gFireManager.m_aFires[i].m_bExtinguishedWithWater) {
+				gFireManager.m_aFires[i].m_bExtinguishedWithWater = false;
+				emittingVol = 100.0f * gFireManager.m_aFires[i].m_fWaterExtinguishCountdown;
+				m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
+				if (m_sQueueSample.m_nVolume != 0) {
+					m_sQueueSample.m_nSampleIndex = SFX_JUMBO_TAXI;
+					m_sQueueSample.m_nFrequency = 19591;
+					m_sQueueSample.m_nFrequency += i * (m_sQueueSample.m_nFrequency / 64);
+					m_sQueueSample.m_nReleasingVolumeModificator = 9;
+					m_sQueueSample.m_nCounter = i + 40;
 					m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 					m_sQueueSample.m_fSpeedMultiplier = 2.0f;
 					m_sQueueSample.m_nReleasingVolumeDivider = 10;
@@ -6144,7 +6168,7 @@ cAudioManager::ProcessGarages()
 void
 cAudioManager::ProcessFireHydrant()
 {
-	const int SOUND_INTENSITY = 35;
+	const float SOUND_INTENSITY = 35;
 
 	float distSquared;
 
