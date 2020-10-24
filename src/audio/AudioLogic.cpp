@@ -307,7 +307,7 @@ cAudioManager::ProcessPlayerMood()
 	if (m_nPlayerMoodTimer <= curTime) {
 		playerPed = FindPlayerPed();
 		if (playerPed != nil) {
-#ifdef 0
+/*
 			if (playerPed->m_pWanted->m_nWantedLevel > 3) {
 				m_nPlayerMood = 2;
 				return;
@@ -316,7 +316,7 @@ cAudioManager::ProcessPlayerMood()
 				m_nPlayerMood = 1;
 				return;
 			}
-#endif
+*/
 			if (playerPed->m_pWanted->m_nWantedLevel > 1) {
 				m_nPlayerMood = (playerPed->m_pWanted->m_nWantedLevel > 3) ? 2 : 1;
 				return;
@@ -6165,29 +6165,29 @@ cAudioManager::ProcessFireHydrant()
 	const float SOUND_INTENSITY = 35;
 
 	float distSquared;
+	bool distCalculated = 0;
 
 	m_sQueueSample.m_vecPos = ((CEntity *)m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_pEntity)->GetPosition();
 	distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	if (distSquared < SQR(SOUND_INTENSITY)) {
-		m_sQueueSample.m_fDistance = distSquared <= 0.0f ? 0.0f : Sqrt(distSquared);
+		CalculateDistance(distCalculated, distSquared);
 		m_sQueueSample.m_nVolume = ComputeVolume(40, 35.0f, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume != 0) {
-			m_sQueueSample.m_nCounter = 0;
 			m_sQueueSample.m_nSampleIndex = SFX_JUMBO_TAXI;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_bIs2D = false;
 			m_sQueueSample.m_nReleasingVolumeModificator = 4;
 			m_sQueueSample.m_nFrequency = 15591;
-			m_sQueueSample.m_nLoopCount = 0;
+			m_sQueueSample.m_nCounter = 0;
 			m_sQueueSample.m_nEmittingVolume = 40;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+			m_sQueueSample.m_bIs2D = false;
+			m_sQueueSample.m_nLoopCount = 0;
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
 			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 			m_sQueueSample.m_bReleasingSoundFlag = false;
-			m_sQueueSample.m_nReleasingVolumeDivider = 3;
-			m_sQueueSample.m_bReverbFlag = true;
 			m_sQueueSample.m_bRequireReflection = false;
+			m_sQueueSample.m_nReleasingVolumeDivider = 3;
+			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
 			AddSampleToRequestedQueue();
 		}
 	}

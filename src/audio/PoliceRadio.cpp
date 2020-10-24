@@ -686,6 +686,7 @@ cAudioManager::PlaySuspectLastSeen(float x, float y, float z)
 	float halfY;
 	float quarterX;
 	float quarterY;
+	int32 sample;
 	bool processed = false;
 	CVector vec = CVector(x, y, z);
 

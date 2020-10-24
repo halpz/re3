@@ -342,7 +342,7 @@ public:
 	void ProcessPedOneShots(cPedParams *params);                             // 
 	void ProcessPhysical(int32 id);                                          // done
 	void ProcessPlane(cVehicleParams *params);                               // done
-	void ProcessPlayerMood();                                                // done(need redo pointer)
+	void ProcessPlayerMood();                                                // done
 	void ProcessPlayersVehicleEngine(cVehicleParams *params, CVehicle* veh); // done
 	void ProcessProjectiles();                                               // done
 	void ProcessRainOnVehicle(cVehicleParams *params);                       // done
@@ -373,7 +373,7 @@ public:
 	void ReacquireDigitalHandle() const;                                                                                              // done
 	void ReleaseDigitalHandle() const;                                                                                                // done
 	void ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface1, uint8 surface2, float collisionPower, float intensity2); // done
-	void ReportCrime(int32 crime, const CVector *pos);                                                                                // done
+	void ReportCrime(eCrimeType crime, const CVector &pos);                                                                           // done
 	void ResetAudioLogicTimers(uint32 timer);                                                                                         // done
 	void ResetPoliceRadio();                                                                                                          // done
 	void ResetTimers(uint32 time);                                                                                                    // done
