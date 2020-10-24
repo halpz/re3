@@ -34,7 +34,11 @@ CCivilianPed::CCivilianPed(ePedType pedtype, uint32 mi) : CPed(pedtype)
 	m_bJustStoleACar = false;
 	m_bStealCarEvenIfThereIsSomeoneInIt = false;
 	for (int i = 0; i < ARRAY_SIZE(m_nStealWishList); i++) {
-		uint32 randomCarModel = CGeneral::GetRandomNumberInRange(MI_LANDSTAL, MI_LAST_VEHICLE + 1);
+#ifdef FIX_BUGS
+		uint32 randomCarModel = CGeneral::GetRandomNumberInRange(MI_LANDSTAL, MI_LAST_VEHICLE);
+#else
+		uint32 randomCarModel = CGeneral::GetRandomNumberInRange(MI_LANDSTAL, MI_LANDSTAL + VEHICLEMODELSIZE);
+#endif
 		if (CModelInfo::IsCarModel(randomCarModel) || CModelInfo::IsBikeModel(randomCarModel))
 			m_nStealWishList[i] = randomCarModel;
 		else
