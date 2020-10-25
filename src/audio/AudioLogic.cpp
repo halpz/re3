@@ -4554,7 +4554,7 @@ cAudioManager::SetPedTalkingStatus(CPed *ped, uint8 status)
 }
 
 void
-cAudioManager::SetPlayersMood(uint8 mood, int32 time)
+cAudioManager::SetPlayersMood(uint8 mood, uint32 time)
 {
 	if (!m_bIsInitialised) return;
 

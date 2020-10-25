@@ -415,7 +415,7 @@ public:
 
 	CVehicle *FindVehicleOfPlayer(); //done
 	void SetPedTalkingStatus(CPed *ped, uint8 status);
-	void SetPlayersMood(uint8 mood, int32 time);
+	void SetPlayersMood(uint8 mood, uint32 time);
 
 #ifdef GTA_PC
 	// only used in pc
