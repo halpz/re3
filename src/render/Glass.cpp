@@ -668,7 +668,7 @@ CGlass::WindowRespondsToCollision(CEntity *entity, float amount, CVector speed, 
 	
 	object->bGlassBroken = true;
 	object->bIsVisible = false;
-	object->bUsesCollision = true;
+	object->bUsesCollision = false;
 }
 
 void
@@ -868,11 +868,11 @@ CGlass::HasGlassBeenShatteredAtCoors(float x, float y, float z)
 
 	CWorld::AdvanceCurrentScanCode();
 	
-	for ( int32 y = nStartY; y <= nEndY; y++ )
+	for ( int32 ys = nStartY; ys <= nEndY; ys++ )
 	{
-		for ( int32 x = nStartX; x <= nEndX; x++ )
+		for ( int32 xs = nStartX; xs <= nEndX; xs++ )
 		{
-			CSector *sector = CWorld::GetSector(x, y);
+			CSector *sector = CWorld::GetSector(xs, ys);
 
 			ASSERT(sector != nil);
 			

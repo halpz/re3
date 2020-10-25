@@ -5,9 +5,6 @@
 #include "AudioManager.h"
 #include "AudioScriptObject.h"
 #include "sampman.h"
-#include "Font.h"
-#include "Text.h"
-#include "crossplatform.h"
 
 cDMAudio DMAudio;
 
@@ -241,13 +238,13 @@ cDMAudio::PlayFrontEndSound(uint16 frontend, uint32 volume)
 }
 
 void
-cDMAudio::PlayRadioAnnouncement(uint8 announcement)
+cDMAudio::PlayRadioAnnouncement(uint32 announcement)
 {
 	MusicManager.PlayAnnouncement(announcement);
 }
 
 void
-cDMAudio::PlayFrontEndTrack(uint8 track, uint8 frontendFlag)
+cDMAudio::PlayFrontEndTrack(uint32 track, uint8 frontendFlag)
 {
 	MusicManager.PlayFrontEndTrack(track, frontendFlag);
 }
@@ -271,7 +268,7 @@ cDMAudio::ChangeMusicMode(uint8 mode)
 }
 
 void
-cDMAudio::PreloadCutSceneMusic(uint8 track)
+cDMAudio::PreloadCutSceneMusic(uint32 track)
 {
 	MusicManager.PreloadCutSceneMusic(track);
 }
@@ -337,7 +334,7 @@ cDMAudio::SetRadioInCar(uint32 radio)
 }
 
 void
-cDMAudio::SetRadioChannel(int8 radio, int32 pos)
+cDMAudio::SetRadioChannel(uint32 radio, int32 pos)
 {
 	MusicManager.SetRadioChannelByScript(radio, pos);
 }
@@ -373,7 +370,7 @@ cDMAudio::SetPedTalkingStatus(CPed *ped, uint8 status)
 }
 
 void
-cDMAudio::SetPlayersMood(uint8 mood, int32 time)
+cDMAudio::SetPlayersMood(uint8 mood, uint32 time)
 {
 	return AudioManager.SetPlayersMood(mood, time);
 }

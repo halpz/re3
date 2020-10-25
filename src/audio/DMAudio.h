@@ -69,15 +69,15 @@ public:
 	void ReportCollision(CEntity *entityA, CEntity *entityB, uint8 surfaceTypeA, uint8 surfaceTypeB, float collisionPower, float velocity);
 	
 	void PlayFrontEndSound(uint16 frontend, uint32 volume);
-	void PlayRadioAnnouncement(uint8 announcement);
-	void PlayFrontEndTrack(uint8 track, uint8 frontendFlag);
+	void PlayRadioAnnouncement(uint32 announcement);
+	void PlayFrontEndTrack(uint32 track, uint8 frontendFlag);
 	void StopFrontEndTrack(void);
 	
 	void ResetTimers(uint32 time);
 	
 	void ChangeMusicMode(uint8 mode);
 	
-	void PreloadCutSceneMusic(uint8 track);
+	void PreloadCutSceneMusic(uint32 track);
 	void PlayPreloadedCutSceneMusic(void);
 	void StopCutSceneMusic(void);
 	
@@ -90,14 +90,14 @@ public:
 
 	uint8 GetRadioInCar(void);
 	void SetRadioInCar(uint32 radio);
-	void SetRadioChannel(int8 radio, int32 pos);
+	void SetRadioChannel(uint32 radio, int32 pos);
 
 	void SetStartingTrackPositions(uint8 isStartGame);
 	float *GetListenTimeArray();
 	uint32 GetFavouriteRadioStation();
 	int32 GetRadioPosition(uint32 station);
 	void SetPedTalkingStatus(class CPed *ped, uint8 status);
-	void SetPlayersMood(uint8 mood, int32 time);
+	void SetPlayersMood(uint8 mood, uint32 time);
 	void ShutUpPlayerTalking(uint8 state);
 };
 extern cDMAudio DMAudio;

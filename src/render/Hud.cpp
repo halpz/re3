@@ -468,14 +468,10 @@ void CHud::Draw()
 						Sprites[WeaponType].Draw(
 							CRect(SCREEN_SCALE_FROM_RIGHT(99.0f), SCREEN_SCALE_Y(27.0f), SCREEN_SCALE_FROM_RIGHT(35.0f), SCREEN_SCALE_Y(91.0f)),
 							CRGBA(255, 255, 255, alpha),
-							0.015f,
-							0.015f,
-							1.0f,
-							0.0f,
-							0.015f,
-							1.0f,
-							1.0f,
-							1.0f);
+							0.015f, 0.015f,
+							1.0f, 0.0f,
+							0.015f, 1.0f,
+							1.0f, 1.0f);
 				} else {
 					CBaseModelInfo *weaponModel = CModelInfo::GetModelInfo(weaponInfo->m_nModelId);
 					RwTexDictionary *weaponTxd = CTxdStore::GetSlot(weaponModel->GetTxdSlot())->texDict;
@@ -483,13 +479,26 @@ void CHud::Draw()
 						RwTexture *weaponIcon = RwTexDictionaryFindNamedTexture(weaponTxd, weaponModel->GetName());
 						if (weaponIcon) {
 							RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
+#ifndef FIX_BUGS
+							const float xSize = SCREEN_SCALE_X(64.0f / 2.0f);
+							const float ySize = SCREEN_SCALE_Y(64.0f / 2.0f);
 							RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
 							RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(weaponIcon));
-							const float xSize = SCREEN_SCALE_X(64.0f / 2.0f);
-							const float ySize = SCREEN_SCALE_X(64.0f / 2.0f);
 							CSprite::RenderOneXLUSprite(SCREEN_SCALE_FROM_RIGHT(99.0f) + xSize, SCREEN_SCALE_Y(25.0f) + ySize, 1.0f, xSize, ySize,
 								255, 255, 255, 255, 1.0f, 255);
 							RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+#else
+							static CSprite2d sprite;
+							sprite.m_pTexture = weaponIcon;
+							sprite.Draw(
+								CRect(SCREEN_SCALE_FROM_RIGHT(99.0f), SCREEN_SCALE_Y(27.0f), SCREEN_SCALE_FROM_RIGHT(35.0f), SCREEN_SCALE_Y(91.0f)),
+								CRGBA(255, 255, 255, alpha),
+								0.015f, 0.015f,
+								1.0f, 0.0f,
+								0.015f, 1.0f,
+								1.0f, 1.0f);
+							sprite.m_pTexture = nil;
+#endif
 						}
 					}
 				}

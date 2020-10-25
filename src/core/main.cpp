@@ -1009,28 +1009,20 @@ Idle(void *arg)
 {
 	CTimer::Update();
 
-#ifdef TIMEBARS
 	tbInit();
-#endif
 
 	CSprite2d::InitPerFrame();
 	CFont::InitPerFrame();
 
 	CPointLights::InitPerFrame();
-#ifdef TIMEBARS
+
 	tbStartTimer(0, "CGame::Process");
-#endif
 	CGame::Process();
-#ifdef TIMEBARS
 	tbEndTimer("CGame::Process");
+
 	tbStartTimer(0, "DMAudio.Service");
-#endif
-
 	DMAudio.Service();
-
-#ifdef TIMEBARS
 	tbEndTimer("DMAudio.Service");
-#endif
 
 	if(CGame::bDemoMode && CTimer::GetTimeInMilliseconds() > (3*60 + 30)*1000 && !CCutsceneMgr::IsCutsceneProcessing()){
 #ifdef PS2_MENU
@@ -1066,21 +1058,16 @@ Idle(void *arg)
 			pos.y = SCREEN_HEIGHT / 2.0f;
 			RsMouseSetPos(&pos);
 #endif
-#ifdef TIMEBARS
 		tbStartTimer(0, "CnstrRenderList");
-#endif
 #ifdef PC_WATER
 		CWaterLevel::PreCalcWaterGeometry();
 #endif
 		CRenderer::ConstructRenderList();
-#ifdef TIMEBARS
 		tbEndTimer("CnstrRenderList");
+
 		tbStartTimer(0, "PreRender");
-#endif
 		CRenderer::PreRender();
-#ifdef TIMEBARS
 		tbEndTimer("PreRender");
-#endif
 
 #ifdef FIX_BUGS
 		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void *)FALSE); // TODO: temp? this fixes OpenGL render but there should be a better place for this
@@ -1106,13 +1093,9 @@ Idle(void *arg)
 		RwCameraSetFogDistance(Scene.camera, CTimeCycle::GetFogStart());
 #endif
 
-#ifdef TIMEBARS
 		tbStartTimer(0, "RenderScene");
-#endif
 		RenderScene();
-#ifdef TIMEBARS
 		tbEndTimer("RenderScene");
-#endif
 
 #ifdef EXTENDED_PIPELINES
 		CustomPipes::EnvMapRender();
@@ -1121,21 +1104,16 @@ Idle(void *arg)
 		RenderDebugShit();
 		RenderEffects();
 
-#ifdef TIMEBARS
 		tbStartTimer(0, "RenderMotionBlur");
-#endif
 		if((TheCamera.m_BlurType == MOTION_BLUR_NONE || TheCamera.m_BlurType == MOTION_BLUR_LIGHT_SCENE) &&
 		   TheCamera.m_ScreenReductionPercentage > 0.0f)
 		        TheCamera.SetMotionBlurAlpha(150);
 		TheCamera.RenderMotionBlur();
-#ifdef TIMEBARS
 		tbEndTimer("RenderMotionBlur");
+
 		tbStartTimer(0, "Render2dStuff");
-#endif
 		Render2dStuff();
-#ifdef TIMEBARS
 		tbEndTimer("Render2dStuff");
-#endif
 	}else{
 		CDraw::CalculateAspectRatio();
 #ifdef ASPECT_RATIO_SCALE
@@ -1149,35 +1127,27 @@ Idle(void *arg)
 			return;
 	}
 
-#ifdef TIMEBARS
 	tbStartTimer(0, "RenderMenus");
-#endif
 	RenderMenus();
-#ifdef TIMEBARS
 	tbEndTimer("RenderMenus");
-	tbStartTimer(0, "DoFade");
-#endif
 
 #ifdef PS2_MENU
 	if ( TheMemoryCard.m_bWantToLoad )
 		return;
 #endif
+
+	tbStartTimer(0, "DoFade");
 	DoFade();
-#ifdef TIMEBARS
 	tbEndTimer("DoFade");
+
 	tbStartTimer(0, "Render2dStuff-Fade");
-#endif
 	Render2dStuffAfterFade();
-#ifdef TIMEBARS
 	tbEndTimer("Render2dStuff-Fade");
-#endif
 	// CCredits::Render(); // They added it to function above and also forgot it here
 
 
-#ifdef TIMEBARS
 	if (gbShowTimebars)
 		tbDisplay();
-#endif
 
 	DoRWStuffEndOfFrame();
 

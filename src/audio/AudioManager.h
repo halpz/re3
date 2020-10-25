@@ -321,8 +321,8 @@ public:
 	void ProcessEntity(int32 sound);                                         // done
 	void ProcessExplosions(int32 explosion);                                 // done
 	void ProcessFireHydrant();                                               // done
-	void ProcessFires(int32 entity);                                         // done
-	void ProcessFrontEnd();                                                  // 
+	void ProcessFires(int32 entity);                                         // 
+	void ProcessFrontEnd();                                                  // done
 	void ProcessGarages();                                                   // 
 	void ProcessCarHeli(cVehicleParams* params);                             // done
 	void ProcessVehicleFlatTyre(cVehicleParams* params);                     // done
@@ -418,7 +418,7 @@ public:
 
 	CVehicle *FindVehicleOfPlayer(); //done
 	void SetPedTalkingStatus(CPed *ped, uint8 status);
-	void SetPlayersMood(uint8 mood, int32 time);
+	void SetPlayersMood(uint8 mood, uint32 time);
 
 #ifdef GTA_PC
 	// only used in pc

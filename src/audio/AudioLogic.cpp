@@ -4899,7 +4899,7 @@ cAudioManager::SetPedTalkingStatus(CPed *ped, uint8 status)
 }
 
 void
-cAudioManager::SetPlayersMood(uint8 mood, int32 time)
+cAudioManager::SetPlayersMood(uint8 mood, uint32 time)
 {
 	if (!m_bIsInitialised) return;
 
@@ -5907,18 +5907,21 @@ cAudioManager::ProcessFrontEnd()
 	bool stereo;
 	bool processedPickup;
 	bool processedMission;
-	bool frontendBank;
+	bool staticFreq;
+	bool center;
 	int16 sample;
 
 	static uint8 iSound = 0;
 	static uint32 cPickupNextFrame = 0;
 	static uint32 cPartMisComNextFrame = 0;
+	static uint32 radioDial = SFX_RADIO_DIAL_1;
 
 	for (uint32 i = 0; i < m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_AudioEvents; i++) {
+		staticFreq = false;
 		processedPickup = false;
-		stereo = false;
+		center = false;
 		processedMission = false;
-		frontendBank = false;
+		stereo = false;
 		switch (m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i]) {
 		case SOUND_WEAPON_SNIPER_SHOT_NO_ZOOM:
 			m_sQueueSample.m_nSampleIndex = SFX_ERROR_FIRE_RIFLE;
@@ -5926,102 +5929,124 @@ cAudioManager::ProcessFrontEnd()
 		case SOUND_WEAPON_ROCKET_SHOT_NO_ZOOM:
 			m_sQueueSample.m_nSampleIndex = SFX_ERROR_FIRE_ROCKET_LAUNCHER;
 			break;
-		//case SOUND_GARAGE_NO_MONEY:
-		//case SOUND_GARAGE_BAD_VEHICLE:
-		//case SOUND_GARAGE_BOMB_ALREADY_SET:
-		//	m_sQueueSample.m_nSampleIndex = SFX_PICKUP_ERROR_LEFT;
-		//	stereo = true;
-		//	break;
-		//case SOUND_GARAGE_OPENING:
-		//case SOUND_GARAGE_BOMB1_SET:
-		//case SOUND_GARAGE_BOMB2_SET:
-		//case SOUND_GARAGE_BOMB3_SET:
-		//case SOUND_41:
-		//case SOUND_GARAGE_VEHICLE_DECLINED:
-		//case SOUND_GARAGE_VEHICLE_ACCEPTED:
-		//case SOUND_PICKUP_HEALTH:
-		//case SOUND_4B:
-		//case SOUND_PICKUP_ADRENALINE:
-		//case SOUND_PICKUP_ARMOUR:
-		//case SOUND_EVIDENCE_PICKUP:
-		//case SOUND_UNLOAD_GOLD:
-		//	m_sQueueSample.m_nSampleIndex = SFX_PICKUP_2_LEFT;
-		//	processedPickup = true;
-		//	stereo = true;
-		//	break;
-		//case SOUND_PICKUP_WEAPON_BOUGHT:
-		//case SOUND_PICKUP_WEAPON:
-		//	m_sQueueSample.m_nSampleIndex = SFX_PICKUP_1_LEFT;
-		//	processedPickup = true;
-		//	stereo = true;
-		//	break;
-		//case SOUND_PICKUP_ERROR:
-		//	m_sQueueSample.m_nSampleIndex = SFX_PICKUP_ERROR_LEFT;
-		//	processedPickup = true;
-		//	stereo = true;
-		//	break;
-		//case SOUND_PICKUP_BONUS:
-		//case SOUND_PICKUP_MONEY:
-		//case SOUND_PICKUP_HIDDEN_PACKAGE:
-		//case SOUND_PICKUP_PACMAN_PILL:
-		//case SOUND_PICKUP_PACMAN_PACKAGE:
-		//case SOUND_PICKUP_FLOAT_PACKAGE:
-		//	m_sQueueSample.m_nSampleIndex = SFX_PICKUP_3_LEFT;
-		//	processedPickup = true;
-		//	stereo = true;
-		//	break;
-		//case SOUND_PAGER:
-		//	m_sQueueSample.m_nSampleIndex = SFX_PAGER;
-		//	break;
+		case SOUND_GARAGE_NO_MONEY:
+		case SOUND_GARAGE_BAD_VEHICLE:
+		case SOUND_GARAGE_BOMB_ALREADY_SET:
+			m_sQueueSample.m_nSampleIndex = SFX_WEAPON_LEFT;
+			stereo = true;
+			staticFreq = true;
+			center = true;
+			break;
+		case SOUND_GARAGE_OPENING:
+		case SOUND_71: //case SOUND_41:
+		case SOUND_GARAGE_VEHICLE_DECLINED:
+		case SOUND_GARAGE_VEHICLE_ACCEPTED:
+		case SOUND_EVIDENCE_PICKUP:
+		case SOUND_UNLOAD_GOLD:
+			stereo = true;
+			processedPickup = true;
+			m_sQueueSample.m_nSampleIndex = SFX_MONEY_LEFT;
+			break;
+		case SOUND_GARAGE_BOMB1_SET:
+		case SOUND_GARAGE_BOMB2_SET:
+		case SOUND_GARAGE_BOMB3_SET:
+			center = true;
+			processedPickup = true;
+			m_sQueueSample.m_nSampleIndex = SFX_WEAPON_LEFT;
+			stereo = true;
+			break;
+		case SOUND_PICKUP_HEALTH:
+		case SOUND_81: //case SOUND_4B:
+		case SOUND_PICKUP_ADRENALINE:
+		case SOUND_PICKUP_ARMOUR:
+			stereo = true;
+			processedPickup = true;
+			m_sQueueSample.m_nSampleIndex = SFX_MONEY_LEFT;
+			break;
+		case SOUND_80:
+			stereo = true;
+			processedPickup = true;
+			m_sQueueSample.m_nSampleIndex = SFX_WEAPON_LEFT;
+			center = true;
+			staticFreq = true;
+			break;
+		case SOUND_PICKUP_BONUS:
+		case SOUND_FRONTEND_MENU_STARTING:
+		case SOUND_HUD_SOUND:
+			stereo = true;
+			m_sQueueSample.m_nSampleIndex = SFX_INFO_LEFT;
+			center = true;
+			break;
+		case SOUND_PICKUP_MONEY:
+			stereo = true;
+			processedPickup = true;
+			m_sQueueSample.m_nSampleIndex = SFX_MONEY_LEFT;
+			break;
+		case SOUND_PICKUP_HIDDEN_PACKAGE:
+		case SOUND_PICKUP_PACMAN_PILL:
+		case SOUND_PICKUP_PACMAN_PACKAGE:
+		case SOUND_PICKUP_FLOAT_PACKAGE:
+			center = true;
+			processedPickup = true;
+			m_sQueueSample.m_nSampleIndex = SFX_PART_MISSION_COMPLETE_LEFT;
+			stereo = true;
+			break;
 		case SOUND_RACE_START_3:
 		case SOUND_RACE_START_2:
 		case SOUND_RACE_START_1:
-		case SOUND_CLOCK_TICK:
-			m_sQueueSample.m_nSampleIndex = SFX_TIMER_BEEP;
-			break;
-		case SOUND_RACE_START_GO:
-			m_sQueueSample.m_nSampleIndex = SFX_PART_MISSION_COMPLETE_LEFT;
-			break;
 		case SOUND_PART_MISSION_COMPLETE:
+			stereo = true;
 			m_sQueueSample.m_nSampleIndex = SFX_PART_MISSION_COMPLETE_LEFT;
 			processedMission = true;
+			center = true;
 			break;
-		case SOUND_FRONTEND_MENU_STARTING:
-			m_sQueueSample.m_nSampleIndex = SFX_FE_HIGHLIGHT_LEFT;
+		case SOUND_RACE_START_GO:
 			stereo = true;
+			m_sQueueSample.m_nSampleIndex = SFX_GO_LEFT;
+			center = true;
 			break;
-		case SOUND_FRONTEND_MENU_NEW_PAGE:
-			m_sQueueSample.m_nSampleIndex = SFX_FE_HIGHLIGHT_LEFT;
-			stereo = true;
-			frontendBank = true;
-			frontendBank = true;
-			break;
-		case SOUND_FRONTEND_MENU_SETTING_CHANGE:
-			m_sQueueSample.m_nSampleIndex = SFX_FE_SELECT_LEFT;
-			stereo = true;
-			frontendBank = true;
-
-
-			break;
-		//case SOUND_FRONTEND_EXIT:
-		//	m_sQueueSample.m_nSampleIndex = SFX_SUB_MENU_BACK_LEFT;
-		//	stereo = true;
-		//	break;
-		//case SOUND_FRONTEND_AUDIO_TEST:
-		//	m_sQueueSample.m_nSampleIndex = m_anRandomTable[0] % 3 + SFX_NOISE_BURST_1;
-		//	break;
-		case SOUND_FRONTEND_FAIL:
-			m_sQueueSample.m_nSampleIndex = SFX_FE_ERROR_LEFT;
-			frontendBank = true;
-			stereo = true;
+		case SOUND_CLOCK_TICK:
+			m_sQueueSample.m_nSampleIndex = SFX_TIMER;
 			break;
 		case SOUND_FRONTEND_NO_RADIO:
 		case SOUND_FRONTEND_RADIO_CHANGE:
 			m_sQueueSample.m_nSampleIndex = SFX_RADIO_CLICK;
 			break;
-		//case SOUND_HUD_SOUND:
-		//	m_sQueueSample.m_nSampleIndex = SFX_INFO;
-		//	break;
+		case SOUND_FRONTEND_RADIO_CHANGE_2:
+			m_sQueueSample.m_nSampleIndex = SFX_HURRICANE_MA;
+			break;
+		case SOUND_BULLETTRACE_1:
+		case SOUND_BULLETTRACE_2:
+			m_sQueueSample.m_nSampleIndex = (m_anRandomTable[0] % 2) + SFX_BULLET_PASS_1;
+			break;
+		case SOUND_AMMUNATION_IMRAN_ARM_BOMB:
+			m_sQueueSample.m_nSampleIndex = SFX_ARM_BOMB;
+			break;
+		case SOUND_RADIO_CHANGE:
+			m_sQueueSample.m_nSampleIndex = (m_anRandomTable[1] % 2) ? radioDial + 1 : radioDial + 2;
+			if (m_sQueueSample.m_nSampleIndex > SFX_RADIO_DIAL_12)
+				m_sQueueSample.m_nSampleIndex -= 12;
+			radioDial = m_sQueueSample.m_nSampleIndex;
+			break;
+		case SOUND_FRONTEND_HIGHLIGHT_OPTION:
+			stereo = true;
+			m_sQueueSample.m_nSampleIndex = SFX_FE_HIGHLIGHT_LEFT;
+			break;
+		case SOUND_FRONTEND_ENTER_OR_ADJUST:
+			stereo = true;
+			m_sQueueSample.m_nSampleIndex = SFX_FE_SELECT_LEFT;
+			break;
+		case SOUND_FRONTEND_BACK:
+			stereo = true;
+			m_sQueueSample.m_nSampleIndex = SFX_FE_BACK_LEFT;
+			break;
+		case SOUND_FRONTEND_FAIL:
+			stereo = true;
+			m_sQueueSample.m_nSampleIndex = SFX_FE_ERROR_LEFT;
+			break;
+		case SOUND_FRONTEND_AUDIO_TEST:
+			m_sQueueSample.m_nSampleIndex = m_anRandomTable[0] % 3 + SFX_FE_NOISE_BURST_1;
+			break;
 		default:
 			continue;
 		}
@@ -6037,37 +6062,64 @@ cAudioManager::ProcessFrontEnd()
 		}
 
 		sample = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i];
-		if (sample == SFX_RAIN) {
+
+		if (sample == SOUND_FRONTEND_NO_RADIO)
 			m_sQueueSample.m_nFrequency = 28509;
-		/*} else if (sample == SFX_PICKUP_1_LEFT) {
-			if (m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i] == 1.0f)
-				m_sQueueSample.m_nFrequency = 32000;
-			else
-				m_sQueueSample.m_nFrequency = 48000;*/
-		} else {
+		else if (sample == SOUND_FRONTEND_RADIO_CHANGE)
+			m_sQueueSample.m_nFrequency = 32000;
+		else if (sample == SOUND_BULLETTRACE_1 || sample == SOUND_BULLETTRACE_2) {
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
-		}
-		m_sQueueSample.m_nVolume = 110;
+			m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
+		} else if (staticFreq)
+			m_sQueueSample.m_nFrequency = 5382;
+		else
+			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+
+		m_sQueueSample.m_nVolume = 127;
+		if (m_sQueueSample.m_nSampleIndex == SFX_HURRICANE_MA && CWeather::Wind > 1.0f)
+			m_sQueueSample.m_nVolume = (CWeather::Wind - 1.0f) * m_sQueueSample.m_nVolume;
 		m_sQueueSample.m_nCounter = iSound++;
 		m_sQueueSample.m_nLoopCount = 1;
 		m_sQueueSample.m_bReleasingSoundFlag = true;
-		m_sQueueSample.m_nBankIndex = frontendBank ? SFX_BANK_FRONT_END_MENU : SFX_BANK_0;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_FRONT_END_MENU;
 		m_sQueueSample.m_nReleasingVolumeModificator = 0;
 		m_sQueueSample.m_bIs2D = true;
 		m_sQueueSample.m_nEmittingVolume = m_sQueueSample.m_nVolume;
 		m_sQueueSample.m_nLoopStart = 0;
 		m_sQueueSample.m_nLoopEnd = -1;
-		if (stereo)
-			m_sQueueSample.m_nOffset = m_anRandomTable[0] & 31;
-		else
+		m_sQueueSample.m_fDistance = 1.0f;
+		if (stereo) 
+			m_sQueueSample.m_nOffset = 0;
+		else {
+			sample = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i];
+			if (sample == SOUND_BULLETTRACE_1) {
+				m_sQueueSample.m_nOffset = 20;
+				m_sQueueSample.m_nVolume = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i];
+				m_sQueueSample.m_nReleasingVolumeModificator = 10;
+				m_sQueueSample.m_fDistance = 100.0f;
+			}
+			if (sample == SOUND_BULLETTRACE_2) {
+				m_sQueueSample.m_nOffset = 107;
+				m_sQueueSample.m_nVolume = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i];
+				m_sQueueSample.m_nReleasingVolumeModificator = 10;
+				m_sQueueSample.m_fDistance = 100.0f;
+			}
 			m_sQueueSample.m_nOffset = 63;
+		}
 		m_sQueueSample.m_bReverbFlag = false;
 		m_sQueueSample.m_bRequireReflection = false;
 		AddSampleToRequestedQueue();
 		if (stereo) {
 			++m_sQueueSample.m_nSampleIndex;
 			m_sQueueSample.m_nCounter = iSound++;
-			m_sQueueSample.m_nOffset = MAX_VOLUME - m_sQueueSample.m_nOffset;
+			m_sQueueSample.m_nOffset = 127 - m_sQueueSample.m_nOffset;
+			AddSampleToRequestedQueue();
+		}
+		if (center) {
+			++m_sQueueSample.m_nSampleIndex;
+			m_sQueueSample.m_nCounter = iSound++;
+			m_sQueueSample.m_nOffset = 63;
+			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 			AddSampleToRequestedQueue();
 		}
 	}
