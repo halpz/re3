@@ -359,7 +359,7 @@ public:
 	void ProcessVehicleEngine(cVehicleParams *params);         // done
 	void UpdateGasPedalAudio(CVehicle* veh, int vehType);      // done
 	bool ProcessVehicleHorn(cVehicleParams *params);           // done
-	void ProcessVehicleOneShots(cVehicleParams *params);       // 
+	void ProcessVehicleOneShots(cVehicleParams *params);       // done
 	bool ProcessVehicleReverseWarning(cVehicleParams *params); // done
 	bool ProcessVehicleRoadNoise(cVehicleParams *params);      // done
 	bool ProcessVehicleSirenOrAlarm(cVehicleParams *params);   // done
