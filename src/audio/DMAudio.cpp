@@ -5,8 +5,6 @@
 #include "AudioManager.h"
 #include "AudioScriptObject.h"
 #include "sampman.h"
-#include "Font.h"
-#include "Text.h"
 
 cDMAudio DMAudio;
 
