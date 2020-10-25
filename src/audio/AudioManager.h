@@ -4,6 +4,7 @@
 #include "AudioCollision.h"
 #include "PoliceRadio.h"
 #include "VehicleModelInfo.h"
+#include "vehicle.h"
 
 class tSound
 {
@@ -277,8 +278,8 @@ public:
 	uint8 GetNum3DProvidersAvailable() const; // done
 	int32 GetPedCommentSfx(CPed *ped, int32 sound);
 	void GetPhrase(uint32 *phrase, uint32 *prevPhrase, uint32 sample, uint32 maxOffset) const;
-	float GetVehicleDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile, cTransmission *transmission, float velocityChange);
-	float GetVehicleNonDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile, cTransmission *transmission, float velocityChange);
+	float GetVehicleDriveWheelSkidValue(CVehicle *veh, tWheelState wheelState, float gasPedalAudio, cTransmission *transmission, float velocityChange); // done
+	float GetVehicleNonDriveWheelSkidValue(CVehicle *veh, tWheelState wheelState, cTransmission *transmission, float velocityChange);                   // done
 
 	bool HasAirBrakes(int32 model) const; // done
 
@@ -362,7 +363,7 @@ public:
 	bool ProcessVehicleReverseWarning(cVehicleParams *params); // done
 	bool ProcessVehicleRoadNoise(cVehicleParams *params);      // done
 	bool ProcessVehicleSirenOrAlarm(cVehicleParams *params);   // done
-	bool ProcessVehicleSkidding(cVehicleParams *params);       // 
+	bool ProcessVehicleSkidding(cVehicleParams *params);       // done
 	void ProcessWaterCannon(int32);                            // done
 	void ProcessWeather(int32 id);                             // done
 	bool ProcessWetRoadNoise(cVehicleParams *params);          // done

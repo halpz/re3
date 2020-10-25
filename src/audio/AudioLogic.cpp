@@ -2055,6 +2055,13 @@ cAudioManager::ProcessVehicleSkidding(cVehicleParams *params)
 	const float SOUND_INTENSITY = 40.0f;
 
 	CAutomobile *automobile;
+	CBike *bike;
+	uint8 numWheels;
+	uint8 wheelsOnGround;
+	float gasPedalAudio;
+	tWheelState* wheelStateArr;
+
+
 	cTransmission *transmission;
 	int32 emittingVol;
 	float newSkidVal = 0.0f;
@@ -2062,29 +2069,48 @@ cAudioManager::ProcessVehicleSkidding(cVehicleParams *params)
 
 	if (params->m_fDistance >= SQR(SOUND_INTENSITY))
 		return false;
-	automobile = (CAutomobile *)params->m_pVehicle;
-	if (automobile->m_nWheelsOnGround == 0)
+	switch (params->m_VehicleType) {
+	case VEHICLE_TYPE_CAR:
+		automobile = (CAutomobile*)params->m_pVehicle;
+		numWheels = 4;
+		wheelStateArr = automobile->m_aWheelState;
+		wheelsOnGround = automobile->m_nWheelsOnGround;
+		gasPedalAudio = automobile->m_fGasPedalAudio;
+		break;
+	case VEHICLE_TYPE_BIKE:
+		bike = (CBike*)params->m_pVehicle;
+		numWheels = 2;
+		wheelStateArr = bike->m_aWheelState;
+		wheelsOnGround = bike->m_nWheelsOnGround;
+		gasPedalAudio = bike->m_fGasPedalAudio;
+		break;
+	default:
+		debug("\n * AUDIOLOG:  ProcessVehicleSkidding() Unsupported vehicle type %d * \n", params->m_VehicleType);
+		return true;
+	}
+	if (wheelsOnGround == 0)
 		return true;
 	CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
-	for (int32 i = 0; i < ARRAY_SIZE(automobile->m_aWheelState); i++) {
-		if (automobile->m_aWheelState[i] == WHEEL_STATE_NORMAL || automobile->Damage.GetWheelStatus(i) == WHEEL_STATUS_MISSING)
+
+	for (int32 i = 0; i < numWheels; i++) {
+		if (wheelStateArr[i] == WHEEL_STATE_NORMAL)
 			continue;
 		transmission = params->m_pTransmission;
 		switch (transmission->nDriveType) {
 		case '4':
-			newSkidVal = GetVehicleDriveWheelSkidValue(i, automobile, transmission, params->m_fVelocityChange);
+			newSkidVal = GetVehicleDriveWheelSkidValue(params->m_pVehicle, wheelStateArr[i], gasPedalAudio, transmission, params->m_fVelocityChange);
 			break;
 		case 'F':
 			if (i == CARWHEEL_FRONT_LEFT || i == CARWHEEL_FRONT_RIGHT)
-				newSkidVal = GetVehicleDriveWheelSkidValue(i, automobile, transmission, params->m_fVelocityChange);
+				newSkidVal = GetVehicleDriveWheelSkidValue(params->m_pVehicle, wheelStateArr[i], gasPedalAudio, transmission, params->m_fVelocityChange);
 			else
-				newSkidVal = GetVehicleNonDriveWheelSkidValue(i, automobile, transmission, params->m_fVelocityChange);
+				newSkidVal = GetVehicleNonDriveWheelSkidValue(params->m_pVehicle, wheelStateArr[i], transmission, params->m_fVelocityChange);
 			break;
 		case 'R':
 			if (i == CARWHEEL_REAR_LEFT || i == CARWHEEL_REAR_RIGHT)
-				newSkidVal = GetVehicleDriveWheelSkidValue(i, automobile, transmission, params->m_fVelocityChange);
+				newSkidVal = GetVehicleDriveWheelSkidValue(params->m_pVehicle, wheelStateArr[i], gasPedalAudio, transmission, params->m_fVelocityChange);
 			else
-				newSkidVal = GetVehicleNonDriveWheelSkidValue(i, automobile, transmission, params->m_fVelocityChange);
+				newSkidVal = GetVehicleNonDriveWheelSkidValue(params->m_pVehicle, wheelStateArr[i], transmission, params->m_fVelocityChange);
 			break;
 		default:
 			break;
@@ -2111,6 +2137,7 @@ cAudioManager::ProcessVehicleSkidding(cVehicleParams *params)
 			case SURFACE_MUD_DRY:
 			case SURFACE_SAND:
 			case SURFACE_WATER:
+			case SURFACE_SAND_BEACH:
 				m_sQueueSample.m_nSampleIndex = SFX_GRAVEL_SKID;
 				m_sQueueSample.m_nFrequency = 6000.f * skidVal + 10000.f;
 				break;
@@ -2118,6 +2145,8 @@ cAudioManager::ProcessVehicleSkidding(cVehicleParams *params)
 			default:
 				m_sQueueSample.m_nSampleIndex = SFX_SKID;
 				m_sQueueSample.m_nFrequency = 5000.f * skidVal + 11000.f;
+				if (params->m_VehicleType == VEHICLE_TYPE_BIKE)
+					m_sQueueSample.m_nFrequency += 2000;
 				break;
 			}
 
@@ -2141,18 +2170,17 @@ cAudioManager::ProcessVehicleSkidding(cVehicleParams *params)
 }
 
 float
-cAudioManager::GetVehicleDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile, cTransmission *transmission, float velocityChange)
+cAudioManager::GetVehicleDriveWheelSkidValue(CVehicle* veh, tWheelState wheelState, float gasPedalAudio, cTransmission *transmission, float velocityChange)
 {
 	float relativeVelChange = 0.0f;
-	float gasPedalAudio = automobile->m_fGasPedalAudio;
 	float velChange;
 	float relativeVel;
 
-	switch (automobile->m_aWheelState[wheel])
+	switch (wheelState)
 	{
 	case WHEEL_STATE_SPINNING:
 		if (gasPedalAudio > 0.4f)
-			relativeVelChange = (gasPedalAudio - 0.4f) * (5.0f / 3.0f) / (4.0f / 3.0f);
+			relativeVelChange = (gasPedalAudio - 0.4f) * (5.0f / 3.0f) * 0.75f;
 		break;
 	case WHEEL_STATE_SKIDDING:
 		relativeVelChange = Min(1.0f, Abs(velocityChange) / transmission->fMaxVelocity);
@@ -2173,18 +2201,18 @@ cAudioManager::GetVehicleDriveWheelSkidValue(uint8 wheel, CAutomobile *automobil
 		break;
 	}
 
-	return Max(relativeVelChange, Min(1.0f, Abs(automobile->m_vecTurnSpeed.z) * 20.0f));
+	return Max(relativeVelChange, Min(1.0f, Abs(veh->m_vecTurnSpeed.z) * 20.0f));
 }
 
 float
-cAudioManager::GetVehicleNonDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile, cTransmission *transmission, float velocityChange)
+cAudioManager::GetVehicleNonDriveWheelSkidValue(CVehicle* veh, tWheelState wheelState, cTransmission *transmission, float velocityChange)
 {
 	float relativeVelChange = 0.0f;
 
-	if (automobile->m_aWheelState[wheel] == WHEEL_STATE_SKIDDING)
+	if (wheelState == WHEEL_STATE_SKIDDING)
 		relativeVelChange = Min(1.0f, Abs(velocityChange) / transmission->fMaxVelocity);
 
-	return Max(relativeVelChange, Min(1.0f, Abs(automobile->m_vecTurnSpeed.z) * 20.0f));
+	return Max(relativeVelChange, Min(1.0f, Abs(veh->m_vecTurnSpeed.z) * 20.0f));
 }
 
 bool
