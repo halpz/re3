@@ -2651,7 +2651,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 				break;
 			}
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i] + 22;
+			m_sQueueSample.m_nCounter = event + 22;
 			if (params->m_pVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_HELI)
 				m_sQueueSample.m_nFrequency = 28062;
 			else
@@ -2687,7 +2687,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 				break;
 			}
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i] + 10;
+			m_sQueueSample.m_nCounter = event + 10;
 			if (params->m_pVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_HELI)
 				m_sQueueSample.m_nFrequency = 23459;
 			else
@@ -2716,7 +2716,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 			const float SOUND_INTENSITY = 35.0f;
 			static uint8 WheelIndex = 82;
 			maxDist = SQR(SOUND_INTENSITY);
-			if (m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i] == SOUND_CAR_JUMP_2) {
+			if (event == SOUND_CAR_JUMP_2) {
 				m_sQueueSample.m_nSampleIndex = SFX_TYRE_BURST_B;
 				emittingVol = Max(50.0f, 2 * (60.0f * m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i]));
 			} else {
