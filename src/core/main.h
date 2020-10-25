@@ -16,6 +16,8 @@ extern bool gbPrintShite;
 extern bool gbModelViewer;
 #ifdef TIMEBARS
 extern bool gbShowTimebars;
+#else
+#define gbShowTimebars false
 #endif
 
 class CSprite2d;
