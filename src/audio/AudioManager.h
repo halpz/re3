@@ -321,7 +321,7 @@ public:
 	void ProcessEntity(int32 sound);                                         // done
 	void ProcessExplosions(int32 explosion);                                 // done
 	void ProcessFireHydrant();                                               // done
-	void ProcessFires(int32 entity);                                         // 
+	void ProcessFires(int32 entity);                                         // done
 	void ProcessFrontEnd();                                                  // done
 	void ProcessGarages();                                                   // 
 	void ProcessCarHeli(cVehicleParams* params);                             // done
