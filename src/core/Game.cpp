@@ -277,12 +277,31 @@ bool CGame::InitialiseOnceAfterRW(void)
 	if ( DMAudio.GetNum3DProvidersAvailable() == 0 )
 		FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = -1;
 
-	if ( FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -99 || FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -2 )
-	{
+	if ( FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -99 || FrontEndMenuManager.m_nPrefsAudio3DProviderIndex == -2 ) {
 		CMenuManager::m_PrefsSpeakers = 0;
-		int8 provider = DMAudio.AutoDetect3DProviders();
-		if ( provider != -1 )
-			FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = provider;
+		int32 i;
+		for (i = 0; i < DMAudio.GetNum3DProvidersAvailable(); i++) {
+			wchar buff[64];
+
+#ifdef AUDIO_OAL
+			extern int defaultProvider;
+			if (defaultProvider >= 0 && defaultProvider < DMAudio.GetNum3DProvidersAvailable()) 
+				break;
+#endif
+			char *name = DMAudio.Get3DProviderName(i);
+			AsciiToUnicode(name, buff);
+			char *providername = UnicodeToAscii(buff);
+			strupr(providername);
+#if defined(AUDIO_MSS)
+			if (strcmp(providername, "MILES FAST 2D POSITIONAL AUDIO") == 0)
+				break;
+#elif defined(AUDIO_OAL)
+			if (strcmp(providername, "OPENAL SOFT") == 0)
+				break;
+#endif
+		}
+
+		FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = i;
 	}
 
 	DMAudio.SetCurrent3DProvider(FrontEndMenuManager.m_nPrefsAudio3DProviderIndex);
