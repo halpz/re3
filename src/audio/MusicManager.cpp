@@ -618,7 +618,7 @@ cMusicManager::ServiceGameMode()
 				}
 				if (RadioStaticCounter < 2 && CTimer::GetTimeInMilliseconds() > RadioStaticTimer + 800)
 				{
-					AudioManager.PlayOneShot(AudioManager.m_nFrontEndEntity, SOUND_194, 0.0f);
+					AudioManager.PlayOneShot(AudioManager.m_nFrontEndEntity, SOUND_RADIO_CHANGE, 0.0f);
 					RadioStaticCounter++;
 					RadioStaticTimer = CTimer::GetTimeInMilliseconds();
 				}
