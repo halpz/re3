@@ -32,8 +32,11 @@
 #include "MBlur.h"
 #include "postfx.h"
 #include "custompipes.h"
+
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 #include "FileMgr.h"
 #include "ControllerConfig.h"
+#endif
 
 #ifndef _WIN32
 #include "assert.h"
