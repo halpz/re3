@@ -321,7 +321,7 @@ public:
 	void ProcessExplosions(int32 explosion);                                 // done
 	void ProcessFireHydrant();                                               // done
 	void ProcessFires(int32 entity);                                         // 
-	void ProcessFrontEnd();                                                  // 
+	void ProcessFrontEnd();                                                  // done
 	void ProcessGarages();                                                   // 
 	void ProcessCarHeli(cVehicleParams* params);                             // done
 	void ProcessVehicleFlatTyre(cVehicleParams* params);                     // done
