@@ -5661,25 +5661,25 @@ cAudioManager::ProcessFrontEnd()
 		case SOUND_AMMUNATION_IMRAN_ARM_BOMB:
 			m_sQueueSample.m_nSampleIndex = SFX_ARM_BOMB;
 			break;
-		case SOUND_194:
+		case SOUND_RADIO_CHANGE:
 			m_sQueueSample.m_nSampleIndex = (m_anRandomTable[1] % 2) ? radioDial + 1 : radioDial + 2;
 			if (m_sQueueSample.m_nSampleIndex > SFX_RADIO_DIAL_12)
 				m_sQueueSample.m_nSampleIndex -= 12;
 			radioDial = m_sQueueSample.m_nSampleIndex;
 			break;
-		case SOUND_FRONTEND_MENU_NEW_PAGE:
+		case SOUND_FRONTEND_HIGHLIGHT_OPTION:
 			stereo = true;
 			m_sQueueSample.m_nSampleIndex = SFX_FE_HIGHLIGHT_LEFT;
 			break;
-		case SOUND_FRONTEND_FAIL:
+		case SOUND_FRONTEND_ENTER_OR_ADJUST:
 			stereo = true;
 			m_sQueueSample.m_nSampleIndex = SFX_FE_SELECT_LEFT;
 			break;
-		case SOUND_FRONTEND_MENU_SETTING_CHANGE:
+		case SOUND_FRONTEND_BACK:
 			stereo = true;
 			m_sQueueSample.m_nSampleIndex = SFX_FE_BACK_LEFT;
 			break;
-		case SOUND_FRONTEND_MENU_BACK:
+		case SOUND_FRONTEND_FAIL:
 			stereo = true;
 			m_sQueueSample.m_nSampleIndex = SFX_FE_ERROR_LEFT;
 			break;
