@@ -89,6 +89,7 @@
 #include "frontendoption.h"
 #include "postfx.h"
 #include "custompipes.h"
+#include "crossplatform.h"
 
 eLevelName CGame::currLevel;
 bool CGame::bDemoMode = true;

@@ -7,7 +7,6 @@
 #include "sampman.h"
 #include "Font.h"
 #include "Text.h"
-#include "crossplatform.h"
 
 cDMAudio DMAudio;
 
