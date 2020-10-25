@@ -1400,7 +1400,7 @@ void CGarages::PrintMessages()
 		CFont::SetPropOn();
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-		CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(50.0f));
+		CFont::SetCentreSize(SCREEN_SCALE_X(590.0f));
 		CFont::SetCentreOn();
 		CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 		CFont::SetColor(CRGBA(0, 0, 0, 255));

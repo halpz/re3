@@ -1058,7 +1058,7 @@ CMoneyMessage::Render()
 
 			CFont::SetScale(fScaleX, fScaleY); // maybe use SCREEN_SCALE_X and SCREEN_SCALE_Y here?
 			CFont::SetCentreOn();
-			CFont::SetCentreSize(SCREEN_WIDTH);
+			CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
 			CFont::SetJustifyOff();
 			CFont::SetColor(CRGBA(m_Colour.r, m_Colour.g, m_Colour.b, (255.0f - 255.0f * fLifeTime) * m_fOpacity));
 			CFont::SetBackGroundOnlyTextOff();
