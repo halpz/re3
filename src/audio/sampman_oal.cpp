@@ -109,9 +109,9 @@ ALuint ALStreamBuffers[MAX_STREAMS][NUM_STREAMBUFFERS];
 struct
 {
 	ALuint buffer;
-	ALuint timer;
+	ALint timer;
 
-	bool IsEmpty() { return timer == 0; }
+	bool IsEmpty() { return buffer == 0; }
 	void Set(ALuint buf) { buffer = buf; }
 	void Wait() { timer  = 10000; }
 	void Init()
@@ -121,19 +121,32 @@ struct
 	}
 	void Term()
 	{
-		if ( buffer != 0 && alIsBuffer(buffer) )
+		if (buffer != 0 && alIsBuffer(buffer)) {
 			alDeleteBuffers(1, &buffer);
+			assert(alGetError() == AL_NO_ERROR);
+		}
 		timer = 0;
+		buffer = 0;
 	}
 	void Update()
 	{
 		if ( !(timer > 0) ) return;
-		timer -= ALuint(CTimer::GetTimeStepInMilliseconds());
+		timer -= ALint(CTimer::GetTimeStepInMilliseconds());
 		if ( timer > 0 ) return;
-		if ( buffer != 0 && alIsBuffer(buffer) )
+		timer = 0;
+		if ( buffer != 0 )
 		{
+			if (!alIsBuffer(buffer))
+			{
+				buffer = 0;
+				return;
+			}
 			alDeleteBuffers(1, &buffer);
-			timer = ( alGetError() == AL_NO_ERROR ) ? 0 : 10000;
+			ALenum error = alGetError();
+			if (error != AL_NO_ERROR)
+				timer = 10000;
+			else
+				buffer = 0;
 		}
 	}
 }ALBuffers[SAMPLEBANK_MAX];
