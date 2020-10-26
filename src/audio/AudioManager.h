@@ -4,7 +4,7 @@
 #include "AudioCollision.h"
 #include "PoliceRadio.h"
 #include "VehicleModelInfo.h"
-#include "vehicle.h"
+#include "Vehicle.h"
 
 class tSound
 {
@@ -304,19 +304,19 @@ public:
 	void PreloadMissionAudio(uint8 slot, Const char *name); // done
 	void PreTerminateGameSpecificShutdown();                // done
 	/// processX - main logic of adding new sounds
-	void ProcessActiveQueues();                             // done
-	bool ProcessAirBrakes(cVehicleParams *params);          // done
-	bool ProcessBoatEngine(cVehicleParams *params);
-	bool ProcessBoatMovingOverWater(cVehicleParams *params);
+	void ProcessActiveQueues();                              // done
+	bool ProcessAirBrakes(cVehicleParams *params);           // done
+	bool ProcessBoatEngine(cVehicleParams *params);          
+	bool ProcessBoatMovingOverWater(cVehicleParams *params); 
 #ifdef GTA_BRIDGE
-	void ProcessBridge();
-	void ProcessBridgeMotor();
-	void ProcessBridgeOneShots();
-	void ProcessBridgeWarning();
+	void ProcessBridge();         // done(bcs not exists in VC)
+	void ProcessBridgeMotor();    // done(bcs not exists in VC)
+	void ProcessBridgeOneShots(); // done(bcs not exists in VC)
+	void ProcessBridgeWarning();  // done(bcs not exists in VC)
 #endif
 	bool ProcessCarBombTick(cVehicleParams *params);                         // done
 	void ProcessCesna(cVehicleParams *params);                               // 
-	//void ProcessCrane();                                                   // 
+	//void ProcessCrane();                                                   // done(bcs not exists in VC)
 	bool ProcessEngineDamage(cVehicleParams *params);                        // done
 	void ProcessEntity(int32 sound);                                         // done
 	void ProcessExplosions(int32 explosion);                                 // done
@@ -352,7 +352,7 @@ public:
 	void ProcessScriptObject(int32 id);                                      // done
 	void ProcessSpecial();                                                   // done
 #ifdef GTA_TRAIN
-	bool ProcessTrainNoise(cVehicleParams *params);
+	bool ProcessTrainNoise(cVehicleParams *params); //done(bcs not exists in VC)
 #endif
 	void ProcessVehicle(CVehicle *vehicle);                    // done
 	bool ProcessVehicleDoors(cVehicleParams *params);          // done

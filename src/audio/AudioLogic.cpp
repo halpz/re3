@@ -307,20 +307,16 @@ cAudioManager::ProcessPlayerMood()
 	if (m_nPlayerMoodTimer <= curTime) {
 		playerPed = FindPlayerPed();
 		if (playerPed != nil) {
-/*
+
 			if (playerPed->m_pWanted->m_nWantedLevel > 3) {
-				m_nPlayerMood = 2;
+				m_nPlayerMood = PLAYER_MOOD_ANGRY;
 				return;
 			}
 			if (playerPed->m_pWanted->m_nWantedLevel > 1) {
-				m_nPlayerMood = 1;
+				m_nPlayerMood = PLAYER_MOOD_PISSED_OFF;
 				return;
 			}
-*/
-			if (playerPed->m_pWanted->m_nWantedLevel > 1) {
-				m_nPlayerMood = (playerPed->m_pWanted->m_nWantedLevel > 3) ? 2 : 1;
-				return;
-			}
+
 			lastMisstonPassedTime = CTheScripts::GetLastMissionPassedTime();
 			if (*lastMisstonPassedTime != -1) {
 				if (curTime < *lastMisstonPassedTime) {
@@ -328,11 +324,11 @@ cAudioManager::ProcessPlayerMood()
 					return;
 				}
 				if (curTime < *lastMisstonPassedTime + 180000) {
-					m_nPlayerMood = 3;
+					m_nPlayerMood = PLAYER_MOOD_WISECRACKING;
 					return;
 				}
 			}
-			m_nPlayerMood = 0;
+			m_nPlayerMood = PLAYER_MOOD_CALM;
 		}
 	}
 }
