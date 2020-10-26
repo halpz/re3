@@ -67,13 +67,13 @@ public:
 	void Seek(uint32 milliseconds)
 	{
 		if ( !IsOpened() ) return;
-		sf_seek(m_pfSound, ms2samples(milliseconds) * (float)GetChannels(), SF_SEEK_SET);
+		sf_seek(m_pfSound, ms2samples(milliseconds), SF_SEEK_SET);
 	}
 	
 	uint32 Tell()
 	{
 		if ( !IsOpened() ) return 0;
-		return samples2ms(sf_seek(m_pfSound, 0, SF_SEEK_CUR)) / (float)GetChannels();
+		return samples2ms(sf_seek(m_pfSound, 0, SF_SEEK_CUR));
 	}
 	
 	uint32 Decode(void *buffer)
