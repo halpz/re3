@@ -20,6 +20,11 @@ newoption {
 }
 
 newoption {
+	trigger     = "with-asan",
+	description = "Build with address sanitizer"
+}
+
+newoption {
 	trigger     = "with-librw",
 	description = "Build and use librw from this solution"
 }
@@ -59,6 +64,11 @@ workspace "re3"
 	location "build"
 	symbols "Full"
 	staticruntime "off"
+
+	if _OPTIONS["with-asan"] then
+		buildoptions { "-fsanitize=address -g3 -fno-omit-frame-pointer" }
+		linkoptions { "-fsanitize=address" }
+	end
 
 	filter { "system:windows" }
 		platforms {
