@@ -98,45 +98,12 @@ int32 nPedSlotSfx    [MAX_PEDSFX];
 int32 nPedSlotSfxAddr[MAX_PEDSFX];
 uint8 nCurrentPedSlot;
 
-ALuint pedBuffers[MAX_PEDSFX];
-
 CChannel aChannel[MAXCHANNELS+MAX2DCHANNELS];
 uint8 nChannelVolume[MAXCHANNELS+MAX2DCHANNELS];
 
 uint32 nStreamLength[TOTAL_STREAMED_SOUNDS];
 ALuint ALStreamSources[MAX_STREAMS];
 ALuint ALStreamBuffers[MAX_STREAMS][NUM_STREAMBUFFERS];
-struct
-{
-	ALuint buffer;
-	ALuint timer;
-
-	bool IsEmpty() { return timer == 0; }
-	void Set(ALuint buf) { buffer = buf; }
-	void Wait() { timer  = 10000; }
-	void Init()
-	{
-		buffer = 0;
-		timer  = 0;
-	}
-	void Term()
-	{
-		if ( buffer != 0 && alIsBuffer(buffer) )
-			alDeleteBuffers(1, &buffer);
-		timer = 0;
-	}
-	void Update()
-	{
-		if ( !(timer > 0) ) return;
-		timer -= ALuint(CTimer::GetTimeStepInMilliseconds());
-		if ( timer > 0 ) return;
-		if ( buffer != 0 && alIsBuffer(buffer) )
-		{
-			alDeleteBuffers(1, &buffer);
-			timer = ( alGetError() == AL_NO_ERROR ) ? 0 : 10000;
-		}
-	}
-}ALBuffers[SAMPLEBANK_MAX];
 
 struct tMP3Entry
 {
@@ -282,12 +249,7 @@ release_existing()
 		alDeleteBuffers(NUM_STREAMBUFFERS, ALStreamBuffers[i]);
 	}
 	
-	alDeleteBuffers(MAX_PEDSFX, pedBuffers);
-	
-	for ( int32 i = 0; i < SAMPLEBANK_MAX; i++ )
-	{
-		ALBuffers[i].Term();
-	}
+	CChannel::DestroyChannels();
 	
 	if ( ALContext )
 	{
@@ -368,13 +330,6 @@ set_new_provider(int index)
 				stream->ProviderInit();
 		}
 		
-		for ( int32 i = 0; i < SAMPLEBANK_MAX; i++ )
-		{
-			ALBuffers[i].Init();
-		}
-		
-		alGenBuffers(MAX_PEDSFX,    pedBuffers);
-		
 		usingEAX = 0;
 		usingEAX3 = 0;
 		_usingEFX = false;
@@ -406,10 +361,12 @@ set_new_provider(int index)
 		}
 		
 		//SampleManager.SetSpeakerConfig(speaker_type);
-				
+		
+		CChannel::InitChannels();
+
 		for ( int32 i = 0; i < MAXCHANNELS; i++ )
-			aChannel[i].Init();
-		aChannel[CHANNEL2D].Init(true);
+			aChannel[i].Init(i);
+		aChannel[CHANNEL2D].Init(CHANNEL2D, true);
 		
 		if ( IsFXSupported() )
 		{
@@ -1178,7 +1135,7 @@ cSampleManager::Terminate(void)
 	_DeleteMP3Entries();
 
 	CStream::Terminate();
-	
+
 	if ( nSampleBankMemoryStartAddress[SFX_BANK_0] != 0 )
 	{
 		free((void *)nSampleBankMemoryStartAddress[SFX_BANK_0]);
@@ -1192,15 +1149,6 @@ cSampleManager::Terminate(void)
 	}
 	
 	_bSampmanInitialised = false;
-}
-
-void
-cSampleManager::UpdateSoundBuffers(void)
-{	
-	for ( int32 i = 0; i < SAMPLEBANK_MAX; i++ )
-	{
-		ALBuffers[i].Update();
-	}
 }
 
 bool cSampleManager::CheckForAnAudioFileOnCD(void)
@@ -1409,13 +1357,7 @@ cSampleManager::LoadPedComment(uint32 nComment)
 
 #endif
 	nPedSlotSfx[nCurrentPedSlot] = nComment;
-	
-	alBufferData(pedBuffers[nCurrentPedSlot],
-		AL_FORMAT_MONO16,
-		(void *)(nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] + PED_BLOCKSIZE*nCurrentPedSlot),
-		m_aSamples[nComment].nSize,
-		m_aSamples[nComment].nFrequency);
-	
+		
 	if ( ++nCurrentPedSlot >= MAX_PEDSFX )
 		nCurrentPedSlot = 0;
 	
@@ -1553,25 +1495,14 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 {
 	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
 	
-	ALuint buffer;
+	uintptr addr;
 	
 	if ( nSfx < SAMPLEBANK_MAX )
 	{
 		if ( !IsSampleBankLoaded(nBank) )
 			return false;
 		
-		uintptr addr = nSampleBankMemoryStartAddress[nBank] + m_aSamples[nSfx].nOffset - m_aSamples[BankStartOffset[nBank]].nOffset;
-	
-		if ( ALBuffers[nSfx].IsEmpty() )
-		{
-			ALuint buf;
-			alGenBuffers(1, &buf);
-			alBufferData(buf, AL_FORMAT_MONO16, (void *)addr, m_aSamples[nSfx].nSize, m_aSamples[nSfx].nFrequency);
-			ALBuffers[nSfx].Set(buf);
-		}
-		ALBuffers[nSfx].Wait();
-		
-		buffer = ALBuffers[nSfx].buffer;
+		addr = nSampleBankMemoryStartAddress[nBank] + m_aSamples[nSfx].nOffset - m_aSamples[BankStartOffset[nBank]].nOffset;
 	}
 	else
 	{
@@ -1579,14 +1510,7 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 			return false;
 		
 		int32 slot = _GetPedCommentSlot(nSfx);
-		
-		buffer = pedBuffers[slot];
-	}
-	
-	if ( buffer == 0 )
-	{
-		TRACE("No buffer to play id %d", nSfx);
-		return false;
+		addr = (nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] + PED_BLOCKSIZE * slot);
 	}
 	
 	if ( GetChannelUsedFlag(nChannel) )
@@ -1598,10 +1522,8 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 	aChannel[nChannel].Reset();
 	if ( aChannel[nChannel].HasSource() )
 	{	
-		aChannel[nChannel].SetSampleID     (nSfx);
-		aChannel[nChannel].SetFreq         (m_aSamples[nSfx].nFrequency);
+		aChannel[nChannel].SetSampleData   ((void*)addr, m_aSamples[nSfx].nSize, m_aSamples[nSfx].nFrequency);
 		aChannel[nChannel].SetLoopPoints   (0, -1);
-		aChannel[nChannel].SetBuffer       (buffer);
 		aChannel[nChannel].SetPitch        (1.0f);
 		return true;
 	}
@@ -2059,8 +1981,6 @@ cSampleManager::Service(void)
 		if ( stream )
 			stream->Update();
 	}
-	
-	UpdateSoundBuffers();
 }
 
 bool
