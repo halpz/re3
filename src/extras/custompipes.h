@@ -98,6 +98,7 @@ void DestroyVehiclePipe(void);
 void AttachVehiclePipe(rw::Atomic *atomic);
 void AttachVehiclePipe(rw::Clump *clump);
 
+extern bool LightmapEnable;
 extern float LightmapMult;
 extern InterpolatedFloat WorldLightmapBlend;
 extern rw::ObjPipeline *worldPipe;
@@ -106,6 +107,7 @@ void DestroyWorldPipe(void);
 void AttachWorldPipe(rw::Atomic *atomic);
 void AttachWorldPipe(rw::Clump *clump);
 
+extern bool GlossEnable;
 extern float GlossMult;
 extern rw::ObjPipeline *glossPipe;
 void CreateGlossPipe(void);
@@ -114,6 +116,7 @@ void AttachGlossPipe(rw::Atomic *atomic);
 void AttachGlossPipe(rw::Clump *clump);
 rw::Texture *GetGlossTex(rw::Material *mat);
 
+extern bool RimlightEnable;
 extern float RimlightMult;
 extern InterpolatedColor RampStart;
 extern InterpolatedColor RampEnd;
