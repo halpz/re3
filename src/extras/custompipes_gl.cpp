@@ -203,6 +203,11 @@ worldRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	using namespace rw;
 	using namespace rw::gl3;
 
+	if(!LightmapEnable){
+		gl3::defaultRenderCB(atomic, header);
+		return;
+	}
+
 	Material *m;
 
 	setWorldMatrix(atomic->getFrame()->getLTM());
@@ -315,6 +320,8 @@ glossRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	using namespace rw::gl3;
 
 	worldRenderCB(atomic, header);
+	if(!GlossEnable)
+		return;
 
 	Material *m;
 
@@ -442,6 +449,11 @@ rimSkinRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	using namespace rw;
 	using namespace rw::gl3;
 
+	if(!RimlightEnable){
+		gl3::skinRenderCB(atomic, header);
+		return;
+	}
+
 	Material *m;
 
 	setWorldMatrix(atomic->getFrame()->getLTM());
@@ -486,6 +498,11 @@ rimRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 {
 	using namespace rw;
 	using namespace rw::gl3;
+
+	if(!RimlightEnable){
+		gl3::defaultRenderCB(atomic, header);
+		return;
+	}
 
 	Material *m;
 
