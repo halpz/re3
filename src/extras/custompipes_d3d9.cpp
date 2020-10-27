@@ -447,7 +447,7 @@ rimSkinRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	using namespace rw::d3d9;
 
 	if(!RimlightEnable){
-		rimSkinRenderCB(atomic, header);
+		skinRenderCB(atomic, header);
 		return;
 	}
 
