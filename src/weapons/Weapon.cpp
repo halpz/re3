@@ -108,10 +108,17 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 	CVector fireOffset(0.0f, 0.0f, 0.6f);
 	CVector *source = fireSource;
 
-	if (!fireSource) {
+	if (!fireSource)
+	{
+		fireOffset = shooter->GetMatrix() * fireOffset;
+#ifdef FIX_BUGS
 		static CVector tmp;
-		tmp = shooter->GetMatrix() * fireOffset;
+		tmp = fireOffset;
 		source = &tmp;
+#else
+		source = &fireOffset;
+#endif
+		
 	}
 	if ( m_bAddRotOffset )
 	{
@@ -1166,6 +1173,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 	{
 		float shootAngle = DEGTORAD(7.5f*i + shooterAngle - 15.0f);
 		CVector2D shootRot(-Sin(shootAngle), Cos(shootAngle));
+		shootRot.Normalise();
 
 		CVector source, target;
 		CColPoint point;
