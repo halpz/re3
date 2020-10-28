@@ -5,6 +5,7 @@
 #include "NodeName.h"
 #include "VisibilityPlugins.h"
 #include "ModelInfo.h"
+#include "ModelIndices.h"
 
 void
 CClumpModelInfo::DeleteRwObject(void)
@@ -110,12 +111,18 @@ CClumpModelInfo::SetClump(RpClump *clump)
 			weights->w3 /= sum;
 		}
 		RpHAnimHierarchySetFlags(hier, (RpHAnimHierarchyFlag)(rpHANIMHIERARCHYUPDATEMODELLINGMATRICES|rpHANIMHIERARCHYUPDATELTMS));
-	}else
-#endif
-		// do not set on skinned clip because cutscene head is not compatible with player head
-		if(strncmp(GetName(), "playerh", 8) == 0)
+	}
+	if(strncmp(GetName(), "playerh", 8) == 0){
+		// playerh is incompatible with the xbox player skin
+		// so check if player model is skinned and only apply skin to head if it isn't
+		CPedModelInfo *body = (CPedModelInfo*)CModelInfo::GetModelInfo(MI_PLAYER);
+		if(!(body->m_clump && IsClumpSkinned(body->m_clump)))
 			RpClumpForAllAtomics(clump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPlayerCB);
-
+	}
+#else
+	if(strncmp(GetName(), "playerh", 8) == 0){
+		RpClumpForAllAtomics(clump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPlayerCB);
+#endif
 }
 
 void
