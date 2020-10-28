@@ -1,7 +1,6 @@
 #include <csignal>
 #define WITHWINDOWS
 #include "common.h"
-#include "platform.h"
 #include "crossplatform.h"
 #include "Renderer.h"
 #include "Credits.h"
@@ -16,7 +15,6 @@
 #include "Boat.h"
 #include "Heli.h"
 #include "Automobile.h"
-#include "Ped.h"
 #include "Console.h"
 #include "Debug.h"
 #include "Hud.h"
@@ -26,10 +24,8 @@
 #include "Radar.h"
 #include "debugmenu.h"
 #include "Frontend.h"
-#include "Text.h"
 #include "WaterLevel.h"
 #include "main.h"
-#include "MBlur.h"
 #include "postfx.h"
 #include "custompipes.h"
 
@@ -76,388 +72,39 @@ mysrand(unsigned int seed)
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
 #include "frontendoption.h"
-#include "Font.h"
 
-void ReloadFrontendOptions(void)
-{
-	CustomFrontendOptionsPopulate();
-}
-
-void RestoreDefGraphics(int8 action) {
-	if (action != FEOPTION_ACTION_SELECT)
-		return;
-
-	#ifdef PS2_ALPHA_TEST
-		gPS2alphaTest = false;
-	#endif
-	#ifdef MULTISAMPLING
-		FrontEndMenuManager.m_nPrefsMSAALevel = FrontEndMenuManager.m_nDisplayMSAALevel = 0;
-	#endif
-	#ifdef GRAPHICS_MENU_OPTIONS // otherwise Frontend will handle those
-		CMenuManager::m_PrefsFrameLimiter = true;
-		CMenuManager::m_PrefsVsyncDisp = true;
-		CMenuManager::m_PrefsVsync = true;
-		CMenuManager::m_PrefsUseWideScreen = false;
-		FrontEndMenuManager.m_nDisplayVideoMode = FrontEndMenuManager.m_nPrefsVideoMode;
-		#ifdef GTA3_1_1_PATCH
-			if (_dwOperatingSystemVersion == OS_WIN98) {
-				CMBlur::BlurOn = false;
-				CMBlur::MotionBlurClose();
-			} else {
-				CMBlur::BlurOn = true;
-				CMBlur::MotionBlurOpen(Scene.camera);
-			}
-		#else
-			CMBlur::BlurOn = true;
-		#endif
-		FrontEndMenuManager.SaveSettings();
-	#endif
-}
-
-void RestoreDefDisplay(int8 action) {
-	if (action != FEOPTION_ACTION_SELECT)
-		return;
-
-	#ifdef CUTSCENE_BORDERS_SWITCH
-		CMenuManager::m_PrefsCutsceneBorders = true;
-	#endif
-	#ifdef FREE_CAM
-		TheCamera.bFreeCam = false;
-	#endif
-	#ifdef GRAPHICS_MENU_OPTIONS // otherwise Frontend will handle those
-		CMenuManager::m_PrefsBrightness = 256;
-		CMenuManager::m_PrefsLOD = 1.2f;
-		CRenderer::ms_lodDistScale = 1.2f;
-		CMenuManager::m_PrefsShowSubtitles = true;
-		FrontEndMenuManager.SaveSettings();
-	#endif
-}
-
-#ifdef MULTISAMPLING
-void MultiSamplingGoBack() {
-	FrontEndMenuManager.m_nDisplayMSAALevel = FrontEndMenuManager.m_nPrefsMSAALevel;
-}
-
-void MultiSamplingButtonPress(int8 action) {
-	if (action == FEOPTION_ACTION_SELECT) {
-		if (FrontEndMenuManager.m_nDisplayMSAALevel != FrontEndMenuManager.m_nPrefsMSAALevel) {
-			FrontEndMenuManager.m_nPrefsMSAALevel = FrontEndMenuManager.m_nDisplayMSAALevel;
-			_psSelectScreenVM(FrontEndMenuManager.m_nPrefsVideoMode);
-			FrontEndMenuManager.SetHelperText(0);
-			FrontEndMenuManager.SaveSettings();
-		}
-	} else if (action == FEOPTION_ACTION_LEFT || action == FEOPTION_ACTION_RIGHT) {
-		if (FrontEndMenuManager.m_bGameNotLoaded) {
-			FrontEndMenuManager.m_nDisplayMSAALevel += (action == FEOPTION_ACTION_RIGHT ? 1 : -1);
-
-			int i = 0;
-			int maxAA = RwD3D8EngineGetMaxMultiSamplingLevels();
-			while (maxAA != 1) {
-				i++;
-				maxAA >>= 1;
-			}
-
-			if (FrontEndMenuManager.m_nDisplayMSAALevel < 0)
-				FrontEndMenuManager.m_nDisplayMSAALevel = i;
-			else if (FrontEndMenuManager.m_nDisplayMSAALevel > i)
-				FrontEndMenuManager.m_nDisplayMSAALevel = 0;
-		}
-	} else if (action == FEOPTION_ACTION_FOCUSLOSS) {
-		if (FrontEndMenuManager.m_nDisplayMSAALevel != FrontEndMenuManager.m_nPrefsMSAALevel) {
-			FrontEndMenuManager.m_nDisplayMSAALevel = FrontEndMenuManager.m_nPrefsMSAALevel;
-			FrontEndMenuManager.SetHelperText(3);
-		}
-	}
-}
-
-wchar* MultiSamplingDraw(bool *disabled, bool userHovering) {
-	static wchar unicodeTemp[64];
-	if (userHovering) {
-		if (FrontEndMenuManager.m_nDisplayMSAALevel == FrontEndMenuManager.m_nPrefsMSAALevel) {
-			if (FrontEndMenuManager.m_nHelperTextMsgId == 1) // Press enter to apply
-				FrontEndMenuManager.ResetHelperText();
-		} else {
-			FrontEndMenuManager.SetHelperText(1);
-		}
-	} else {
-		if (FrontEndMenuManager.m_nDisplayMSAALevel != FrontEndMenuManager.m_nPrefsMSAALevel) {
-			FrontEndMenuManager.m_nDisplayMSAALevel = FrontEndMenuManager.m_nPrefsMSAALevel;
-		}
-	}
-
-	if (!FrontEndMenuManager.m_bGameNotLoaded)
-		*disabled = true;
-
-	switch (FrontEndMenuManager.m_nDisplayMSAALevel) {
-		case 0:
-			return TheText.Get("FEM_OFF");
-		default:
-			sprintf(gString, "%iX", 1 << (FrontEndMenuManager.m_nDisplayMSAALevel));
-			AsciiToUnicode(gString, unicodeTemp);
-			return unicodeTemp;
-	}
-}
-const char* multisamplingKey = "MultiSampling";
-#endif
-
-#ifdef MORE_LANGUAGES
-void LangPolSelect(int8 action)
-{
-	if (action == FEOPTION_ACTION_SELECT) {
-		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_POLISH;
-		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
-		FrontEndMenuManager.InitialiseChangedLanguageSettings();
-		FrontEndMenuManager.SaveSettings();
-	}
-}
-
-void LangRusSelect(int8 action)
-{
-	if (action == FEOPTION_ACTION_SELECT) {
-		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_RUSSIAN;
-		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
-		FrontEndMenuManager.InitialiseChangedLanguageSettings();
-		FrontEndMenuManager.SaveSettings();
-	}
-}
-
-void LangJapSelect(int8 action)
-{
-	if (action == FEOPTION_ACTION_SELECT) {
-		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_JAPANESE;
-		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
-		FrontEndMenuManager.InitialiseChangedLanguageSettings();
-		FrontEndMenuManager.SaveSettings();
-	}
-}
-#endif
-
-#ifdef IMPROVED_VIDEOMODE
-void ScreenModeChange(int8 displayedValue)
-{
-	if (displayedValue != FrontEndMenuManager.m_nPrefsWindowed) {
-		FrontEndMenuManager.m_nPrefsWindowed = displayedValue;
-		_psSelectScreenVM(FrontEndMenuManager.m_nPrefsVideoMode); // apply same resolution
-		FrontEndMenuManager.SetHelperText(0);
-		FrontEndMenuManager.SaveSettings();
-	}
-}
-#endif
-
-#ifdef FREE_CAM
-void FreeCamChange(int8 displayedValue)
-{
-	TheCamera.bFreeCam = !!displayedValue;
-	FrontEndMenuManager.SaveSettings();
-}
-const char* freeCamKey = "FreeCam";
-#endif
-
-#ifdef CUTSCENE_BORDERS_SWITCH
-void BorderModeChange(int8 displayedValue)
-{
-	CMenuManager::m_PrefsCutsceneBorders = !!displayedValue;
-	FrontEndMenuManager.SaveSettings();
-}
-const char* cutsceneBordersKey = "CutsceneBorders";
-#endif
-
-#ifdef PS2_ALPHA_TEST
-void PS2AlphaTestChange(int8 displayedValue)
-{
-	gPS2alphaTest = !!displayedValue;
-	FrontEndMenuManager.SaveSettings();
-}
-const char* ps2alphaKey = "PS2AlphaTest";
-#endif
-
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
-wchar selectedJoystickUnicode[128];
-
-wchar* DetectJoystickDraw(bool* disabled, bool userHovering) {
-	int numButtons;
-	int found = -1;
-	const char *joyname;
-	if (userHovering) {
-		for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++) {
-			if ((joyname = glfwGetJoystickName(i))) {
-				const uint8* buttons = glfwGetJoystickButtons(i, &numButtons);
-				for (int j = 0; j < numButtons; j++) {
-					if (buttons[j]) {
-						found = i;
-						break;
-					}
-				}
-				if (found != -1)
-					break;
-			}
-		}
-
-		if (found != -1 && PSGLOBAL(joy1id) != found) {
-			if (PSGLOBAL(joy1id) != -1 && PSGLOBAL(joy1id) != found)
-				PSGLOBAL(joy2id) = PSGLOBAL(joy1id);
-			else
-				PSGLOBAL(joy2id) = -1;
-
-			strcpy(gSelectedJoystickName, joyname);
-			PSGLOBAL(joy1id) = found;
-		}
-	}
-	if (PSGLOBAL(joy1id) == -1)
-		AsciiToUnicode("Not found", selectedJoystickUnicode);
-	else
-		AsciiToUnicode(gSelectedJoystickName, selectedJoystickUnicode);
-
-	return selectedJoystickUnicode;
-}
-#endif
-
-// Important: Make sure to read the warnings/informations in frontendoption.h!!
-// If you will hardcode any text, please use AllocUnicode! wchar_t size differs between platforms
 void
 CustomFrontendOptionsPopulate(void)
 {
-	RemoveCustomFrontendOptions(); // if exist
-
-	// -- Graphics/display seperation preperation starts - don't add options in here!
-#ifdef GRAPHICS_MENU_OPTIONS
-	int graphicsMenu = FrontendScreenAdd("FET_GRA", MENUSPRITE_MAINMENU, MENUPAGE_OPTIONS, 50, 0, 20,
-		FONT_HEADING, MEDIUMTEXT_X_SCALE, MEDIUMTEXT_Y_SCALE, FESCREEN_LEFT_ALIGN, true);
-
-	int newDisplayMenu = FrontendScreenAdd("FET_DIS", MENUSPRITE_MAINMENU, MENUPAGE_OPTIONS, 50, 0, 20,
-		FONT_HEADING, MEDIUMTEXT_X_SCALE, MEDIUMTEXT_Y_SCALE, FESCREEN_LEFT_ALIGN, true);
-
-	FrontendOptionSetCursor(MENUPAGE_OPTIONS, 2, true);
-	FrontendOptionAddRedirect(TheText.Get("FET_DIS"), newDisplayMenu, 0);
-	FrontendOptionSetCursor(MENUPAGE_OPTIONS, 3);
-	FrontendOptionAddRedirect(TheText.Get("FET_GRA"), graphicsMenu, 0);
-
-#define SWITCH_TO_GRAPHICS_MENU FrontendOptionSetCursor(graphicsMenu, -1);
-#define SWITCH_TO_DISPLAY_MENU FrontendOptionSetCursor(newDisplayMenu, -1);
-#define CLONE_OPTION(a, b, c, d) FrontendOptionAddBuiltinAction(a, b, c, d);
-#define ADD_BACK FrontendOptionAddBackButton(TheText.Get("FEDS_TB"));
-#define ADD_RESTORE_DEFAULTS(a) FrontendOptionAddDynamic(TheText.Get("FET_DEF"), nil, nil, a, nil);
-#else
-	int advancedDisplayMenu = FrontendScreenAdd("FET_ADV", MENUSPRITE_MAINMENU, MENUPAGE_DISPLAY_SETTINGS, 50, 0, 20,
-		FONT_HEADING, MEDIUMTEXT_X_SCALE, MEDIUMTEXT_Y_SCALE, FESCREEN_LEFT_ALIGN, true);
-	bool movedToAdvMenu = false;
-
-#define SWITCH_TO_GRAPHICS_MENU \
-	if (GetNumberOfMenuOptions(MENUPAGE_DISPLAY_SETTINGS) >= 12) { \
-		FrontendOptionSetCursor(advancedDisplayMenu, -1); \
-		movedToAdvMenu = true; \
-	} else { \
-		FrontendOptionSetCursor(MENUPAGE_DISPLAY_SETTINGS, -3); \
-	}
-
-#define SWITCH_TO_DISPLAY_MENU SWITCH_TO_GRAPHICS_MENU
-#define CLONE_OPTION(a, b, c, d)
-#define ADD_BACK
-#define ADD_RESTORE_DEFAULTS(a)
-#endif
-	// -- Graphics/display seperation preperation end
-
-	const wchar* off_on[] = { TheText.Get("FEM_OFF"), TheText.Get("FEM_ON") };
-
-#ifdef MORE_LANGUAGES
-	FrontendOptionSetCursor(MENUPAGE_LANGUAGE_SETTINGS, -2);
-	FrontendOptionAddDynamic(TheText.Get("FEL_POL"), nil, nil, LangPolSelect, nil);
-	FrontendOptionAddDynamic(TheText.Get("FEL_RUS"), nil, nil, LangRusSelect, nil);
-	FrontendOptionAddDynamic(TheText.Get("FEL_JAP"), nil, nil, LangJapSelect, nil);
-#endif
-
-#ifdef MENU_MAP
-	FrontendOptionSetCursor(MENUPAGE_PAUSE_MENU, 2);
-	FrontendOptionAddRedirect(TheText.Get("FEG_MAP"), MENUPAGE_MAP);
-#endif
-
-	// -- Start of graphics menu - add options in display order!
-
-	SWITCH_TO_GRAPHICS_MENU
-	CLONE_OPTION(TheText.Get("FED_RES"), MENUACTION_SCREENRES, nil, nil);
-	CLONE_OPTION(TheText.Get("FED_WIS"), MENUACTION_WIDESCREEN, nil, nil)
-
-#ifdef IMPROVED_VIDEOMODE
-	const wchar* screenModes[] = { TheText.Get("FED_FLS"), TheText.Get("FED_WND") };
-	// Storing isn't enabled because it's handled in Frontend
-	FrontendOptionAddSelect(TheText.Get("FEM_SCF"), screenModes, 2, (int8*)&FrontEndMenuManager.m_nPrefsWindowed, true, ScreenModeChange, nil);
-#endif
-
-	CLONE_OPTION(TheText.Get("FEM_VSC"), MENUACTION_FRAMESYNC, nil, nil);
-	CLONE_OPTION(TheText.Get("FEM_FRM"), MENUACTION_FRAMELIMIT, nil, nil);
-
-#ifdef MULTISAMPLING
-	SWITCH_TO_GRAPHICS_MENU
-	FrontendOptionAddDynamic(TheText.Get("FED_AAS"), MultiSamplingDraw, (int8*)&FrontEndMenuManager.m_nPrefsMSAALevel, MultiSamplingButtonPress, MultiSamplingGoBack, multisamplingKey);
-#endif
-
-	CLONE_OPTION(TheText.Get("FED_TRA"), MENUACTION_TRAILS, nil, nil);
-
-#ifdef PS2_ALPHA_TEST
-	SWITCH_TO_GRAPHICS_MENU
-	FrontendOptionAddSelect(TheText.Get("FEM_2PR"), off_on, 2, (int8*)&gPS2alphaTest, false, PS2AlphaTestChange, nil, ps2alphaKey);
-#endif
-
-	ADD_RESTORE_DEFAULTS(RestoreDefGraphics)
-	ADD_BACK
-
-	// ---- End of Graphics Menu ----
-
-	// -- Start of Display menu - add options in display order!
-
-	SWITCH_TO_DISPLAY_MENU
-	CLONE_OPTION(TheText.Get("FED_BRI"), MENUACTION_BRIGHTNESS, nil, nil);
-	CLONE_OPTION(TheText.Get("FEM_LOD"), MENUACTION_DRAWDIST, nil, nil);
-
-#ifdef CUTSCENE_BORDERS_SWITCH
-	SWITCH_TO_DISPLAY_MENU
-	FrontendOptionAddSelect(TheText.Get("FEM_CSB"), off_on, 2, (int8 *)&CMenuManager::m_PrefsCutsceneBorders, false, BorderModeChange, nil, cutsceneBordersKey);
-#endif
-
-#ifdef FREE_CAM
-	SWITCH_TO_DISPLAY_MENU
-	FrontendOptionAddSelect(TheText.Get("FEC_FRC"), off_on, 2, (int8*)&TheCamera.bFreeCam, false, FreeCamChange, nil, freeCamKey);
-#endif
-
-	CLONE_OPTION(TheText.Get("FED_SUB"), MENUACTION_SUBTITLES, nil, nil);
-
-	// Add link to advanced graphics menu if it's filled.
-#ifndef GRAPHICS_MENU_OPTIONS
-	if (movedToAdvMenu) {
-		FrontendOptionSetCursor(MENUPAGE_DISPLAY_SETTINGS, -3);
-		FrontendOptionAddRedirect(TheText.Get("FET_ADV"), advancedDisplayMenu, 0);
-
-		FrontendOptionSetCursor(advancedDisplayMenu, -1);
-		FrontendOptionAddBackButton(TheText.Get("FEDS_TB"));
-	}
-#endif
-
-	ADD_RESTORE_DEFAULTS(RestoreDefDisplay)
-	ADD_BACK
-
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
-	int detectJoystickMenu = FrontendScreenAdd("FEC_JOD", MENUSPRITE_MAINMENU, MENUPAGE_CONTROLLER_PC, 40, 60, 20,
-		FONT_BANK, MEDIUMTEXT_X_SCALE, MEDIUMTEXT_Y_SCALE, FESCREEN_LEFT_ALIGN, false);
-
-	FrontendOptionSetCursor(detectJoystickMenu, 0);
-
-	FrontendOptionAddBuiltinAction(TheText.Get("FEC_JPR"), MENUACTION_LABEL, nil, nil);
-	FrontendOptionAddDynamic(TheText.Get("FEC_JDE"), DetectJoystickDraw, nil, nil, nil);
-	FrontendOptionAddBackButton(TheText.Get("FEDS_TB"));
-
-	FrontendOptionSetCursor(MENUPAGE_CONTROLLER_PC, 2);
-	FrontendOptionAddRedirect(TheText.Get("FEC_JOD"), detectJoystickMenu, 1);
-#endif
+	// Moved to an array in MenuScreensCustom.cpp, but APIs are still available. see frontendoption.h
 }
 #endif
 
 #ifdef LOAD_INI_SETTINGS
 #include "ini_parser.hpp"
+
+linb::ini cfg;
+int CheckAndReadIniInt(const char *cat, const char *key, int original)
+{
+	const char *value = (cfg.get(cat, key, "").c_str());
+	if (value && value[0] != '\0')
+		return atoi(value);
+
+	return original;
+}
+
+float CheckAndReadIniFloat(const char *cat, const char *key, float original)
+{
+	const char *value = (cfg.get(cat, key, "").c_str());
+	if (value && value[0] != '\0')
+		return atof(value);
+
+	return original;
+}
+
 void LoadINISettings()
 {
-	linb::ini cfg;
 	cfg.load_file("re3.ini");
-	char defaultStr[4];
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 	// Written by assuming the codes below will run after _InputInitialiseJoys().
@@ -491,28 +138,43 @@ void LoadINISettings()
 #endif
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
-	for (int i = 0; i < numCustomFrontendOptions; i++) {
-		FrontendOption& option = customFrontendOptions[i];
-		if (option.save) {
-			// CFO only supports saving uint8 right now
-			sprintf(defaultStr, "%u", *option.value);
-			option.lastSavedValue = option.displayedValue = *option.value = atoi(cfg.get("FrontendOptions", option.save, defaultStr).c_str());
+	for (int i = 0; i < MENUPAGES; i++) {
+		for (int j = 0; j < NUM_MENUROWS; j++) {
+			CMenuScreenCustom::CMenuEntry &option = aScreens[i].m_aEntries[j];
+			if (option.m_Action == MENUACTION_NOTHING)
+				break;
+				
+			// CFO check
+			if (option.m_Action < MENUACTION_NOTHING && option.m_CFO->save) {
+				// CFO only supports saving uint8 right now
+				*option.m_CFO->value = CheckAndReadIniInt("FrontendOptions", option.m_CFO->save, *option.m_CFO->value);
+				if (option.m_Action == MENUACTION_CFO_SELECT) {
+					option.m_CFOSelect->lastSavedValue = option.m_CFOSelect->displayedValue = *option.m_CFO->value;
+				}
+			}
 		}
 	}
 #endif
 
 #ifdef NO_ISLAND_LOADING
-	sprintf(defaultStr, "%u", CMenuManager::m_PrefsIslandLoading);
-	CMenuManager::m_PrefsIslandLoading = atoi(cfg.get("FrontendOptions", "NoIslandLoading", defaultStr).c_str());
+	CMenuManager::m_PrefsIslandLoading = CheckAndReadIniInt("FrontendOptions", "NoIslandLoading", CMenuManager::m_PrefsIslandLoading);
 	CMenuManager::m_DisplayIslandLoading = CMenuManager::m_PrefsIslandLoading;
 #endif
 
+#ifdef EXTENDED_COLOURFILTER
+	CPostFX::Intensity = CheckAndReadIniFloat("CustomPipesValues", "PostFXIntensity", CPostFX::Intensity);
+#endif
+#ifdef EXTENDED_PIPELINES
+	CustomPipes::VehicleShininess = CheckAndReadIniFloat("CustomPipesValues", "NeoVehicleShininess", CustomPipes::VehicleShininess);
+	CustomPipes::VehicleSpecularity = CheckAndReadIniFloat("CustomPipesValues", "NeoVehicleSpecularity", CustomPipes::VehicleSpecularity);
+	CustomPipes::RimlightMult = CheckAndReadIniFloat("CustomPipesValues", "RimlightMult", CustomPipes::RimlightMult);
+	CustomPipes::LightmapMult = CheckAndReadIniFloat("CustomPipesValues", "LightmapMult", CustomPipes::LightmapMult);
+	CustomPipes::GlossMult = CheckAndReadIniFloat("CustomPipesValues", "GlossMult", CustomPipes::GlossMult);
+#endif
 }
 
 void SaveINISettings()
 {
-	linb::ini cfg;
-	cfg.load_file("re3.ini");
 	bool changed = false;
 	char temp[4];
 
@@ -523,13 +185,18 @@ void SaveINISettings()
 	}
 #endif
 #ifdef CUSTOM_FRONTEND_OPTIONS
-	for (int i = 0; i < numCustomFrontendOptions; i++) {
-		FrontendOption &option = customFrontendOptions[i];
-		if (option.save) {
-			if (atoi(cfg.get("FrontendOptions", option.save, "xxx").c_str()) != *option.value) { // if .ini doesn't have that key compare with xxx, so we can add it
-				changed = true;
-				sprintf(temp, "%u", *option.value);
-				cfg.set("FrontendOptions", option.save, temp);
+	for (int i = 0; i < MENUPAGES; i++) {
+		for (int j = 0; j < NUM_MENUROWS; j++) {
+			CMenuScreenCustom::CMenuEntry &option = aScreens[i].m_aEntries[j];
+			if (option.m_Action == MENUACTION_NOTHING)
+				break;
+				
+			if (option.m_Action < MENUACTION_NOTHING && option.m_CFO->save) {
+				if (atoi(cfg.get("FrontendOptions", option.m_CFO->save, "xxx").c_str()) != *option.m_CFO->value) { // if .ini doesn't have that key compare with xxx, so we can add it
+					changed = true;
+					sprintf(temp, "%u", *option.m_CFO->value);
+					cfg.set("FrontendOptions", option.m_CFO->save, temp);
+				}
 			}
 		}
 	}
@@ -888,9 +555,6 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Debug", "Catalina Fly Away", CHeli::MakeCatalinaHeliFlyAway);
 		DebugMenuAddVarBool8("Debug", "Script Heli On", &CHeli::ScriptHeliOn, nil);
 
-#ifdef CUSTOM_FRONTEND_OPTIONS
-		DebugMenuAddCmd("Debug", "Reload custom frontend options", ReloadFrontendOptions);
-#endif
 		DebugMenuAddVarBool8("Debug", "Toggle popping heads on headshot", &CPed::bPopHeadsOnHeadshot, nil);
 		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
 		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);

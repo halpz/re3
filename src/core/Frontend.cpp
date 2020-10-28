@@ -435,29 +435,17 @@ CMenuManager::ThingsToDoBeforeGoingBack()
 	}
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
-	for (int i = 0; i < numCustomFrontendOptions; i++) {
-		FrontendOption &option = customFrontendOptions[i];
-		if (option.type != FEOPTION_REDIRECT && option.type != FEOPTION_GOBACK && m_nCurrScreen == option.screen) {
-			if (option.returnPrevPageFunc)
-				option.returnPrevPageFunc();
+	CMenuScreenCustom::CMenuEntry &option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption];
 
-			if (m_nCurrOption == option.screenOptionOrder && (option.type == FEOPTION_DYNAMIC || option.type == FEOPTION_BUILTIN_ACTION))
-				if(option.buttonPressFunc)
-					option.buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
+	if (option.m_Action == MENUACTION_CFO_DYNAMIC)
+		if(option.m_CFODynamic->buttonPressFunc)
+			option.m_CFODynamic->buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
 
-			if (option.type == FEOPTION_SELECT && option.onlyApplyOnEnter && option.lastSavedValue != option.displayedValue)
-				option.displayedValue = *option.value = option.lastSavedValue;
-		}
-	}
+	if (option.m_Action == MENUACTION_CFO_SELECT && option.m_CFOSelect->onlyApplyOnEnter && option.m_CFOSelect->lastSavedValue != option.m_CFOSelect->displayedValue)
+		option.m_CFOSelect->displayedValue = *option.m_CFO->value = option.m_CFOSelect->lastSavedValue;
 
-	if (m_nCurrScreen > lastOgScreen) {
-		for (int i = 0; i < numCustomFrontendScreens; i++) {
-			FrontendScreen& screen = customFrontendScreens[i];
-			if (m_nCurrScreen == screen.id && screen.returnPrevPageFunc) {
-				screen.returnPrevPageFunc();
-				break;
-			}
-		}
+	if (aScreens[m_nCurrScreen].returnPrevPageFunc) {
+		aScreens[m_nCurrScreen].returnPrevPageFunc();
 	}
 #endif
 }
@@ -476,18 +464,15 @@ CMenuManager::GetPreviousPageOption()
 	prevPage = prevPage == MENUPAGE_NONE ? (!m_bGameNotLoaded ? MENUPAGE_PAUSE_MENU : MENUPAGE_START_MENU) : prevPage;
 
 	for (int i = 0; i < NUM_MENUROWS; i++) {
-		if (aScreens[prevPage].m_aEntries[i].m_SaveSlot == SAVESLOT_CFO) {
-			FrontendOption &option = customFrontendOptions[aScreens[prevPage].m_aEntries[i].m_TargetMenu];
-			if(option.type == FEOPTION_REDIRECT && option.to == m_nCurrScreen) {
+		if (aScreens[prevPage].m_aEntries[i].m_Action >= MENUACTION_NOTHING) { // CFO check
+			if (aScreens[prevPage].m_aEntries[i].m_TargetMenu == m_nCurrScreen) {
 				return i;
 			}
-		} else if (aScreens[prevPage].m_aEntries[i].m_TargetMenu == m_nCurrScreen) {
-			return i;
 		}
 	}
-
-	// Couldn't find current screen option on previous page, use default behaviour (maybe save-related screen?)
-	return !m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_ParentEntry[1] : aScreens[m_nCurrScreen].m_ParentEntry[0];
+	
+	// This shouldn't happen
+	return 0;
 #endif
 }
 
@@ -854,13 +839,6 @@ CMenuManager::Draw()
 				str = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName);
 			break;
 		default:
-#ifdef CUSTOM_FRONTEND_OPTIONS
-			if (aScreens[m_nCurrScreen].m_aEntries[0].m_SaveSlot == SAVESLOT_CFO) {
-				FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[0].m_TargetMenu];
-				str = (wchar*)option.leftText;
-			}
-			else
-#endif
 			str = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName);
 			break;
 		}
@@ -959,30 +937,22 @@ CMenuManager::Draw()
 #endif
 		default:
 #ifdef CUSTOM_FRONTEND_OPTIONS
-			bool custom = m_nCurrScreen > lastOgScreen;
+			CCustomScreenLayout *custom = aScreens[m_nCurrScreen].layout;
 			if (custom) {
-				for (int i = 0; i < numCustomFrontendScreens; i++) {
-					FrontendScreen& screen = customFrontendScreens[i];
-					if (m_nCurrScreen == screen.id) {
-						columnWidth = screen.columnWidth;
-						headerHeight = screen.headerHeight;
-						lineHeight = screen.lineHeight;
-						CFont::SetFontStyle(FONT_LOCALE(screen.font));
-						CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = screen.fontScaleX), MENU_Y(MENU_TEXT_SIZE_Y = screen.fontScaleY));
-						if (screen.alignment == FESCREEN_LEFT_ALIGN) {
-							CFont::SetCentreOff();
-							CFont::SetRightJustifyOff();
-						} else if (screen.alignment == FESCREEN_RIGHT_ALIGN) {
-							CFont::SetCentreOff();
-							CFont::SetRightJustifyOn();
-						} else {
-							CFont::SetRightJustifyOff();
-							CFont::SetCentreOn();
-						}
-						break;
-					}
-					if (i == numCustomFrontendScreens - 1)
-						custom = false;
+				columnWidth = custom->columnWidth;
+				headerHeight = custom->headerHeight;
+				lineHeight = custom->lineHeight;
+				CFont::SetFontStyle(FONT_LOCALE(custom->font));
+				CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X = custom->fontScaleX), MENU_Y(MENU_TEXT_SIZE_Y = custom->fontScaleY));
+				if (custom->alignment == FESCREEN_LEFT_ALIGN) {
+					CFont::SetCentreOff();
+					CFont::SetRightJustifyOff();
+				} else if (custom->alignment == FESCREEN_RIGHT_ALIGN) {
+					CFont::SetCentreOff();
+					CFont::SetRightJustifyOn();
+				} else {
+					CFont::SetRightJustifyOff();
+					CFont::SetCentreOn();
 				}
 			}
 			if (!custom)
@@ -1066,28 +1036,22 @@ CMenuManager::Draw()
 					leftText = TheText.Get(gString);
 				}
 			} else {
-#ifdef CUSTOM_FRONTEND_OPTIONS
-				if (aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot == SAVESLOT_CFO){
-					FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
-					leftText = (wchar*)option.leftText;
-				} else
-#endif
 				leftText = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName);
 			}
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
-			if (aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot == SAVESLOT_CFO) {
-				FrontendOption &option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
-				if (option.type == FEOPTION_SELECT) {
-					if (option.onlyApplyOnEnter){
+			if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action < MENUACTION_NOTHING) {  // CFO check
+				CMenuScreenCustom::CMenuEntry &option = aScreens[m_nCurrScreen].m_aEntries[i];
+				if (option.m_Action == MENUACTION_CFO_SELECT) {
+					if (option.m_CFOSelect->onlyApplyOnEnter){
 						if (m_nCurrOption != i) {
-							if (option.displayedValue != option.lastSavedValue)
+							if (option.m_CFOSelect->displayedValue != option.m_CFOSelect->lastSavedValue)
 								SetHelperText(3); // Restored original value
 
-//							option.displayedValue = option.lastSavedValue = *option.value;
+//							option.displayedValue = option.lastSavedValue = *option.m_CFO->value;
 
 						} else {
-							if (option.displayedValue != *option.value)
+							if (option.m_CFOSelect->displayedValue != *option.m_CFO->value)
 								SetHelperText(1); // Enter to apply
 							else if (m_nHelperTextMsgId == 1)
 								ResetHelperText(); // Applied
@@ -1096,13 +1060,13 @@ CMenuManager::Draw()
 				}
 
 				if (m_nCurrOption != lastOption && lastOption == i) {
-					FrontendOption &oldOption = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[lastOption].m_TargetMenu];
-					if (oldOption.type == FEOPTION_DYNAMIC || oldOption.type == FEOPTION_BUILTIN_ACTION)
-						if(oldOption.buttonPressFunc)
-							oldOption.buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
+					CMenuScreenCustom::CMenuEntry &oldOption = aScreens[m_nCurrScreen].m_aEntries[lastOption];
+					if (oldOption.m_Action == MENUACTION_CFO_DYNAMIC)
+						if(oldOption.m_CFODynamic->buttonPressFunc)
+							oldOption.m_CFODynamic->buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
 
-					if (oldOption.onlyApplyOnEnter && oldOption.type == FEOPTION_SELECT)
-						oldOption.displayedValue = oldOption.lastSavedValue = *oldOption.value;
+					if (oldOption.m_Action == MENUACTION_CFO_SELECT && oldOption.m_CFOSelect->onlyApplyOnEnter)
+						oldOption.m_CFOSelect->displayedValue = oldOption.m_CFOSelect->lastSavedValue = *oldOption.m_CFO->value;
 				}
 			}
 #endif
@@ -1336,29 +1300,24 @@ CMenuManager::Draw()
 				rightText = TheText.Get(CVehicle::m_bDisableMouseSteering ? "FEM_OFF" : "FEM_ON");
 				break;
 #ifdef CUSTOM_FRONTEND_OPTIONS
-			case MENUACTION_TRIGGERFUNC:
-				FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu];
-				if (m_nCurrScreen == option.screen && i == option.screenOptionOrder) {
-					if (option.type == FEOPTION_SELECT) {
-						// To whom manipulate option.value of static options externally (like RestoreDef functions)
-						if (*option.value != option.lastSavedValue)
-							option.displayedValue = option.lastSavedValue = *option.value;
+			case MENUACTION_CFO_DYNAMIC:
+			case MENUACTION_CFO_SELECT:
+				CMenuScreenCustom::CMenuEntry &option = aScreens[m_nCurrScreen].m_aEntries[i];
+				if (option.m_Action == MENUACTION_CFO_SELECT) {
+					// To whom manipulate option.m_CFO->value of static options externally (like RestoreDef functions)
+					if (*option.m_CFO->value != option.m_CFOSelect->lastSavedValue)
+						option.m_CFOSelect->displayedValue = option.m_CFOSelect->lastSavedValue = *option.m_CFO->value;
 
-						if (option.displayedValue >= option.numRightTexts || option.displayedValue < 0)
-							option.displayedValue = 0;
+					if (option.m_CFOSelect->displayedValue >= option.m_CFOSelect->numRightTexts || option.m_CFOSelect->displayedValue < 0)
+						option.m_CFOSelect->displayedValue = 0;
 
-						rightText = (wchar*)option.rightTexts[option.displayedValue];
+					rightText = TheText.Get(option.m_CFOSelect->rightTexts[option.m_CFOSelect->displayedValue]);
 
-					} else if (option.type == FEOPTION_DYNAMIC) {
-						if (option.drawFunc) {
-							rightText = option.drawFunc(&isOptionDisabled, m_nCurrOption == i);
-						}
+				} else if (option.m_Action == MENUACTION_CFO_DYNAMIC) {
+					if (option.m_CFODynamic->drawFunc) {
+						rightText = option.m_CFODynamic->drawFunc(&isOptionDisabled, m_nCurrOption == i);
 					}
-				} else {
-					debug("A- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, i, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[i].m_TargetMenu, option.screen, option.screenOptionOrder);
-					assert(0 && "Custom frontend options is borked");
 				}
-
 				break;
 #endif
 			}
@@ -1573,13 +1532,9 @@ CMenuManager::Draw()
 		break;
 #ifdef CUSTOM_FRONTEND_OPTIONS
 	default:
-		if (m_nCurrScreen > lastOgScreen) {
-			for (int i = 0; i < numCustomFrontendScreens; i++) {
-				FrontendScreen& screen = customFrontendScreens[i];
-				if (m_nCurrScreen == screen.id && screen.showLeftRightHelper) {
-					DisplayHelperText();
-					break;
-				}
+		if (aScreens[m_nCurrScreen].layout) {
+			if (aScreens[m_nCurrScreen].layout->showLeftRightHelper) {
+				DisplayHelperText();
 			}
 		}
 		break;
@@ -2612,17 +2567,10 @@ CMenuManager::DrawFrontEndNormal()
 				break;
 			default:
 #ifdef CUSTOM_FRONTEND_OPTIONS
-				bool custom = m_nPrevScreen > lastOgScreen;
+				CCustomScreenLayout *custom = aScreens[m_nPrevScreen].layout;
 				if (custom) {
-					for (int i = 0; i < numCustomFrontendScreens; i++) {
-						FrontendScreen& screen = customFrontendScreens[i];
-						if (m_nPrevScreen == screen.id) {
-							previousSprite = screen.sprite;
-							break;
-						}
-						if (i == numCustomFrontendScreens - 1)
-							custom = false;
-					}
+					previousSprite = custom->sprite;
+					break;
 				}
 				if (!custom)
 #endif
@@ -2678,15 +2626,9 @@ CMenuManager::DrawFrontEndNormal()
 			break;
 #ifdef CUSTOM_FRONTEND_OPTIONS
 		default:
-			bool custom = m_nCurrScreen > lastOgScreen;
+			CCustomScreenLayout *custom = aScreens[m_nCurrScreen].layout;
 			if (custom) {
-				for (int i = 0; i < numCustomFrontendScreens; i++) {
-					FrontendScreen& screen = customFrontendScreens[i];
-					if (m_nCurrScreen == screen.id) {
-						currentSprite = screen.sprite;
-						break;
-					}
-				}
+				previousSprite = custom->sprite;
 			}
 			break;
 #endif
@@ -3301,10 +3243,6 @@ CMenuManager::InitialiseChangedLanguageSettings()
 		default:
 			break;
 		}
-
-#ifdef CUSTOM_FRONTEND_OPTIONS
-		CustomFrontendOptionsPopulate();
-#endif
 	}
 }
 
@@ -3494,6 +3432,9 @@ CMenuManager::LoadSettings()
 		strcpy(m_PrefsSkinFile, DEFAULT_SKIN_NAME);
 		strcpy(m_aSkinName, DEFAULT_SKIN_NAME);
 	}
+#ifdef LOAD_INI_SETTINGS
+	LoadINISettings(); // needs frontend options to be loaded
+#endif
 }
 
 void
@@ -5086,29 +5027,28 @@ CMenuManager::ProcessButtonPresses(void)
 					return;
 #endif
 #ifdef CUSTOM_FRONTEND_OPTIONS
-				case MENUACTION_TRIGGERFUNC:
-					FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu];
-					if (m_nCurrScreen == option.screen && m_nCurrOption == option.screenOptionOrder) {
-						if (option.type == FEOPTION_SELECT) {
-							if (!option.onlyApplyOnEnter) {
-								option.displayedValue++;
-								if (option.displayedValue >= option.numRightTexts || option.displayedValue < 0)
-									option.displayedValue = 0;
-							}
-							option.changeFunc(option.displayedValue);
-							*option.value = option.lastSavedValue = option.displayedValue;
-
-						} else if (option.type == FEOPTION_DYNAMIC) {
-							if (option.buttonPressFunc)
-								option.buttonPressFunc(FEOPTION_ACTION_SELECT);
-						} else if (option.type == FEOPTION_REDIRECT) {
-							ChangeScreen(option.to, option.option, true, option.fadeIn);
-						} else if (option.type == FEOPTION_GOBACK) {
-							goBack = true;
+				case MENUACTION_CFO_SELECT:
+				case MENUACTION_CFO_DYNAMIC:
+					CMenuScreenCustom::CMenuEntry &option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption];
+					if (option.m_Action == MENUACTION_CFO_SELECT) {
+						if (!option.m_CFOSelect->onlyApplyOnEnter) {
+							option.m_CFOSelect->displayedValue++;
+							if (option.m_CFOSelect->displayedValue >= option.m_CFOSelect->numRightTexts || option.m_CFOSelect->displayedValue < 0)
+								option.m_CFOSelect->displayedValue = 0;
 						}
-					} else {
-						debug("B- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, m_nCurrOption, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, option.screen, option.screenOptionOrder);
-						assert(0 && "Custom frontend options are borked");
+						int8 oldValue = *option.m_CFO->value;
+
+						*option.m_CFO->value = option.m_CFOSelect->lastSavedValue = option.m_CFOSelect->displayedValue;
+
+						if (option.m_CFOSelect->save)
+							SaveSettings();
+
+						if (option.m_CFOSelect->displayedValue != oldValue && option.m_CFOSelect->changeFunc)
+							option.m_CFOSelect->changeFunc(oldValue, option.m_CFOSelect->displayedValue);
+
+					} else if (option.m_Action == MENUACTION_CFO_DYNAMIC) {
+						if (option.m_CFODynamic->buttonPressFunc)
+							option.m_CFODynamic->buttonPressFunc(FEOPTION_ACTION_SELECT);
 					}
 
 					break;
@@ -5116,14 +5056,6 @@ CMenuManager::ProcessButtonPresses(void)
 			}
 		}
 		ProcessOnOffMenuOptions();
-#ifdef CUSTOM_FRONTEND_OPTIONS
-		if (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_SaveSlot == SAVESLOT_CFO) {
-			FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu];
-			if (option.type == FEOPTION_BUILTIN_ACTION && option.buttonPressFunc) {
-				option.buttonPressFunc(FEOPTION_ACTION_SELECT);
-			}
-		}
-#endif
 	}
 
 	if (goBack) {
@@ -5326,32 +5258,34 @@ CMenuManager::ProcessButtonPresses(void)
 				SaveSettings();
 				break;
 #ifdef CUSTOM_FRONTEND_OPTIONS
-			case MENUACTION_TRIGGERFUNC:
-				FrontendOption& option = customFrontendOptions[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu];
-				if (m_nCurrScreen == option.screen && m_nCurrOption == option.screenOptionOrder) {
-					if (option.type == FEOPTION_SELECT) {
-						if (changeValueBy > 0) {
-							option.displayedValue++;
-							if (option.displayedValue >= option.numRightTexts)
-								option.displayedValue = 0;
-						} else {
-							option.displayedValue--;
-							if (option.displayedValue < 0)
-								option.displayedValue = option.numRightTexts - 1;
-						}
-						if (!option.onlyApplyOnEnter) {
-							option.changeFunc(option.displayedValue);
-							*option.value = option.lastSavedValue = option.displayedValue;
-						}
-					} else if (option.type == FEOPTION_DYNAMIC && option.buttonPressFunc) {
-						option.buttonPressFunc(changeValueBy > 0 ? FEOPTION_ACTION_RIGHT : FEOPTION_ACTION_LEFT);
+			case MENUACTION_CFO_SELECT:
+			case MENUACTION_CFO_DYNAMIC:
+				CMenuScreenCustom::CMenuEntry &option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption];
+				if (option.m_Action == MENUACTION_CFO_SELECT) {
+					if (changeValueBy > 0) {
+						option.m_CFOSelect->displayedValue++;
+						if (option.m_CFOSelect->displayedValue >= option.m_CFOSelect->numRightTexts)
+							option.m_CFOSelect->displayedValue = 0;
+					} else {
+						option.m_CFOSelect->displayedValue--;
+						if (option.m_CFOSelect->displayedValue < 0)
+							option.m_CFOSelect->displayedValue = option.m_CFOSelect->numRightTexts - 1;
 					}
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
+					if (!option.m_CFOSelect->onlyApplyOnEnter) {
+						int8 oldValue = *option.m_CFO->value;
+
+						*option.m_CFO->value = option.m_CFOSelect->lastSavedValue = option.m_CFOSelect->displayedValue;
+
+						if (option.m_CFOSelect->save)
+							SaveSettings();
+
+						if (option.m_CFOSelect->displayedValue != oldValue && option.m_CFOSelect->changeFunc)
+							option.m_CFOSelect->changeFunc(oldValue, option.m_CFOSelect->displayedValue);
+					}
+				} else if (option.m_Action == MENUACTION_CFO_DYNAMIC && option.m_CFODynamic->buttonPressFunc) {
+					option.m_CFODynamic->buttonPressFunc(changeValueBy > 0 ? FEOPTION_ACTION_RIGHT : FEOPTION_ACTION_LEFT);
 				}
-				else {
-					debug("C- screen:%d option:%d - totalCo: %d, coId: %d, coScreen:%d, coOption:%d\n", m_nCurrScreen, m_nCurrOption, numCustomFrontendOptions, aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_TargetMenu, option.screen, option.screenOptionOrder);
-					assert(0 && "Custom frontend options are borked");
-				}
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 
 				break;
 #endif
