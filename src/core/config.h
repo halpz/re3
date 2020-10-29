@@ -167,9 +167,7 @@ enum Config {
 
 // quality of life fixes that should also be in FINAL
 #define NASTY_GAME	// nasty game for all languages
-#define NO_MOVIES	// disable intro videos
 #define NO_CDCHECK
-#define DEBUGMENU
 
 // those infamous texts
 #define DRAW_GAME_VERSION_TEXT
@@ -200,6 +198,9 @@ enum Config {
 #else
 	// not in master builds
 	#define VALIDATE_SAVE_SIZE
+
+	#define NO_MOVIES	// disable intro videos
+	#define DEBUGMENU
 #endif
 
 #ifdef FINAL
