@@ -201,8 +201,8 @@ enum Config {
 #define LOAD_INI_SETTINGS
 
 // Rendering/display
-#define EXTRA_MODEL_FLAGS	// from mobile to optimize rendering
-# define HARDCODED_MODEL_FLAGS	// sets the flags enabled above from hardcoded model names.
+//#define EXTRA_MODEL_FLAGS	// from mobile to optimize rendering
+//# define HARDCODED_MODEL_FLAGS	// sets the flags enabled above from hardcoded model names.
 				// NB: keep this enabled unless your map IDEs have these flags baked in
 #define ASPECT_RATIO_SCALE	// Not just makes everything scale with aspect ratio, also adds support for all aspect ratios
 #define DEFAULT_NATIVE_RESOLUTION	// Set default video mode to your native resolution (fixes Windows 10 launch)

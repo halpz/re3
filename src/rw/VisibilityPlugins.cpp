@@ -160,7 +160,7 @@ CVisibilityPlugins::RenderFadingEntities(void)
 #endif
 			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, FALSE);
 #ifdef EXTRA_MODEL_FLAGS
-		if(mi->m_bIsTree)
+		else if(mi->m_bIsTree)
 			SetAlphaRef(128);
 #endif
 
