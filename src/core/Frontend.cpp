@@ -789,9 +789,11 @@ CMenuManager::Draw()
 	CFont::SetScale(MENU_X(0.7f), MENU_Y(0.5f));
 	CFont::SetWrapx(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
 	CFont::SetRightJustifyWrap(0.0f);
+#ifdef DRAW_MENU_VERSION_TEXT
 	strcpy(gString, "V1.1");
 	AsciiToUnicode(gString, gUString);
 	CFont::PrintString(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 45, gUString);
+#endif
 #endif
 	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
 	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENUACTION_WIDTH));

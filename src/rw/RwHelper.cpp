@@ -6,8 +6,10 @@
 #include "Timecycle.h"
 #include "skeleton.h"
 #include "Debug.h"
-#ifndef FINAL
+#if !defined(FINAL) || defined(DEBUGMENU)
 #include "rtcharse.h"
+#endif
+#ifndef FINAL
 RtCharset *debugCharset;
 #endif
 
@@ -17,7 +19,7 @@ bool gPS2alphaTest = true;
 bool gPS2alphaTest = false;
 #endif
 
-#ifndef FINAL
+#if !defined(FINAL) || defined(DEBUGMENU)
 static bool charsetOpen;
 void OpenCharsetSafe()
 {
