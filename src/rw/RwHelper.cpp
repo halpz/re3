@@ -3,6 +3,7 @@
 #endif
 #include "common.h"
 
+#include "RwHelper.h"
 #include "Timecycle.h"
 #include "skeleton.h"
 #include "Debug.h"
@@ -16,6 +17,7 @@ bool gPS2alphaTest = true;
 #else
 bool gPS2alphaTest = false;
 #endif
+bool gBackfaceCulling = true;
 
 #ifndef FINAL
 static bool charsetOpen;
@@ -121,14 +123,32 @@ DefinedState(void)
 
 #ifdef LIBRW
 	rw::SetRenderState(rw::ALPHATESTFUNC, rw::ALPHAGREATEREQUAL);
-	rw::SetRenderState(rw::ALPHATESTREF, 3);
 
 	rw::SetRenderState(rw::GSALPHATEST, gPS2alphaTest);
 #else
 	// D3D stuff
 	RwD3D8SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
-	RwD3D8SetRenderState(D3DRS_ALPHAREF, 2);
 #endif
+	SetAlphaRef(2);
+}
+
+void
+SetAlphaRef(int ref)
+{
+#ifdef LIBRW
+	rw::SetRenderState(rw::ALPHATESTREF, ref+1);
+#else
+	RwD3D8SetRenderState(D3DRS_ALPHAREF, ref);
+#endif
+}
+
+void
+SetCullMode(uint32 mode)
+{
+	if(gBackfaceCulling)
+		RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)mode);
+	else
+		RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
 }
 
 RwFrame*

@@ -31,6 +31,14 @@ protected:
 	ModelInfoType m_type;
 	uint8        m_num2dEffects;
 	bool         m_bOwnsColModel;
+#ifdef EXTRA_MODEL_FLAGS
+public:
+	// from mobile
+	bool         m_bIsDoubleSided;
+	bool         m_bIsTree;
+	bool         m_bCanBeIgnored;	// for low-end devices
+	bool RenderDoubleSided(void) { return m_bIsDoubleSided || m_bIsTree; }
+#endif
 
 public:
 	CBaseModelInfo(ModelInfoType type);

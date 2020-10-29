@@ -11,6 +11,8 @@ void DestroyDebugFont();
 void ObrsPrintfString(const char *str, short x, short y);
 void FlushObrsPrintfs();
 void DefinedState(void);
+void SetAlphaRef(int ref);
+void SetCullMode(uint32 mode);
 RwFrame *GetFirstChild(RwFrame *frame);
 RwObject *GetFirstObject(RwFrame *frame);
 RpAtomic *GetFirstAtomic(RpClump *clump);

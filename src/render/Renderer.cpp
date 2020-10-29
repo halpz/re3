@@ -53,6 +53,14 @@ CVehicle *CRenderer::m_pFirstPersonVehicle;
 bool CRenderer::m_loadingPriority;
 float CRenderer::ms_lodDistScale = 1.2f;
 
+#ifdef EXTRA_MODEL_FLAGS
+#define BACKFACE_CULLING_ON SetCullMode(rwCULLMODECULLBACK)
+#define BACKFACE_CULLING_OFF SetCullMode(rwCULLMODECULLNONE)
+#else
+#define BACKFACE_CULLING_ON
+#define BACKFACE_CULLING_OFF
+#endif
+
 void
 CRenderer::Init(void)
 {
@@ -101,6 +109,13 @@ CRenderer::RenderOneRoad(CEntity *e)
 	else{
 #ifdef EXTENDED_PIPELINES
 		CustomPipes::AttachGlossPipe(e->GetAtomic());
+#endif
+#ifdef EXTRA_MODEL_FLAGS
+	if(CModelInfo::GetModelInfo(e->GetModelIndex())->RenderDoubleSided()){
+		BACKFACE_CULLING_OFF;
+		e->Render();
+		BACKFACE_CULLING_ON;
+	}else
 #endif
 		e->Render();
 	}
@@ -163,13 +178,22 @@ CRenderer::RenderOneNonRoad(CEntity *e)
 		for(i = 0; i < 8; i++)
 			if(veh->pPassengers[i] && veh->pPassengers[i]->m_nPedState == PED_DRIVING)
 				veh->pPassengers[i]->Render();
+		BACKFACE_CULLING_OFF;
 	}
+#ifdef EXTRA_MODEL_FLAGS
+	if(CModelInfo::GetModelInfo(e->GetModelIndex())->RenderDoubleSided()){
+		BACKFACE_CULLING_OFF;
+		e->Render();
+		BACKFACE_CULLING_ON;
+	}else
+#endif
 	e->Render();
 
 	if(e->IsVehicle()){
 		e->bImBeingRendered = true;
 		CVisibilityPlugins::RenderAlphaAtomics();
 		e->bImBeingRendered = false;
+		BACKFACE_CULLING_ON;
 	}
 
 	e->RemoveLighting(resetLights);
@@ -197,6 +221,7 @@ CRenderer::RenderRoads(void)
 	CTreadable *t;
 
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
+	BACKFACE_CULLING_ON;
 	DeActivateDirectional();
 	SetAmbientColours();
 
@@ -230,6 +255,7 @@ CRenderer::RenderEverythingBarRoads(void)
 	CVector dist;
 	EntityInfo ei;
 
+	BACKFACE_CULLING_ON;
 	gSortedVehiclesAndPeds.Clear();
 
 	for(i = 0; i < ms_nNoOfVisibleEntities; i++){
@@ -284,6 +310,8 @@ CRenderer::RenderBoats(void)
 {
 	CLink<EntityInfo> *node;
 
+	BACKFACE_CULLING_ON;
+
 	for(node = gSortedVehiclesAndPeds.tail.prev;
 	    node != &gSortedVehiclesAndPeds.head;
 	    node = node->prev){
@@ -298,6 +326,7 @@ void
 CRenderer::RenderFadingInEntities(void)
 {
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
+	BACKFACE_CULLING_ON;
 	DeActivateDirectional();
 	SetAmbientColours();
 	CVisibilityPlugins::RenderFadingEntities();
