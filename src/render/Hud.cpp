@@ -247,7 +247,7 @@ void CHud::Draw()
 					rect.right = SCREEN_WIDTH/2 + SCREEN_SCALE_X(210.0f);
 					rect.bottom = SCREEN_HEIGHT/2 + SCREEN_SCALE_Y(210.0f);
 					Sprites[HUD_SITESNIPER].Draw(CRect(rect), CRGBA(255, 255, 255, 255),
-						0.99f, 0.99f,  0.01f, 0.99f,  0.99f, 0.01f,  0.1f, 0.01f);
+						0.99f, 0.99f,  0.01f, 0.99f,  0.99f, 0.01f,  0.01f, 0.01f);
 				}
 			}
 			RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void *)rwFILTERLINEAR);
