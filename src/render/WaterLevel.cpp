@@ -2963,7 +2963,7 @@ CWaterLevel::HandleBeachToysStuff(void)
 CEntity *
 CWaterLevel::CreateBeachToy(CVector const &vec, eBeachToy beachtoy)
 {
-	if (CObject::nNoTempObjects >= 40)
+	if (CObject::nNoTempObjects >= NUMTEMPOBJECTS)
 		return nil;
 
 	int finalToy = beachtoy;

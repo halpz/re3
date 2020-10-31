@@ -2524,7 +2524,7 @@ CPed::PlayFootSteps(void)
 					CShadows::AddPermanentShadow(SHADOWTYPE_DARK, gpBloodPoolTex, &adjustedFootPos,
 						top.x, top.y,
 						right.x, right.y,
-						255, 255, 0, 0, 4.0f, 3000.0f, 1.0f);
+						255, 255, 0, 0, 4.0f, 3000, 1.0f);
 
 					if (m_bloodyFootprintCountOrDeathTime <= 20) {
 						m_bloodyFootprintCountOrDeathTime = 0;
@@ -2537,10 +2537,10 @@ CPed::PlayFootSteps(void)
 					CVector2D top(forward * -0.26f);
 					CVector2D right(GetRight() * (stepPart == 1 ? 0.1f : 0.14f));
 
-					CShadows::AddPermanentShadow(SHADOWTYPE_DARK, gpBloodPoolTex, &adjustedFootPos,
+					CShadows::AddPermanentShadow(SHADOWTYPE_DARK, gpShadowPedTex, &adjustedFootPos,
 						top.x, top.y,
 						right.x, right.y,
-						120, 250, 250, 50, 4.0f, 5000.0f, 1.0f);
+						120, 250, 250, 50, 4.0f, 5000, 1.0f);
 				}
 				if (CWeather::Rain <= 0.1f || CCullZones::CamNoRain() || CCullZones::PlayerNoRain()) {
 					if (IsPlayer())
@@ -2569,7 +2569,7 @@ CPed::PlayFootSteps(void)
 			CShadows::AddPermanentShadow(SHADOWTYPE_DARK, gpBloodPoolTex, &adjustedFootPosL,
 				top.x, top.y,
 				right.x, right.y,
-				255, 255, 0, 0, 4.0f, 3000.0f, 1.0f);
+				255, 255, 0, 0, 4.0f, 3000, 1.0f);
 
 			if (m_bloodyFootprintCountOrDeathTime <= 20) {
 				m_bloodyFootprintCountOrDeathTime = 0;
@@ -2584,10 +2584,10 @@ CPed::PlayFootSteps(void)
 				CVector2D top(forward * -0.26f);
 				CVector2D right(GetRight() * 0.14f);
 
-				CShadows::AddPermanentShadow(SHADOWTYPE_DARK, gpBloodPoolTex, &adjustedFootPosL,
+				CShadows::AddPermanentShadow(SHADOWTYPE_DARK, gpShadowPedTex, &adjustedFootPosL,
 					top.x, top.y,
 					right.x, right.y,
-					120, 250, 250, 50, 4.0f, 5000.0f, 1.0f);
+					120, 250, 250, 50, 4.0f, 5000, 1.0f);
 			}
 		}
 		if(!footPosRok)
@@ -2604,7 +2604,7 @@ CPed::PlayFootSteps(void)
 			CShadows::AddPermanentShadow(SHADOWTYPE_DARK, gpBloodPoolTex, &adjustedFootPosR,
 				top.x, top.y,
 				right.x, right.y,
-				255, 255, 0, 0, 4.0f, 3000.0f, 1.0f);
+				255, 255, 0, 0, 4.0f, 3000, 1.0f);
 
 			if (m_bloodyFootprintCountOrDeathTime <= 20) {
 				m_bloodyFootprintCountOrDeathTime = 0;
@@ -2618,10 +2618,10 @@ CPed::PlayFootSteps(void)
 				CVector2D top(forward * -0.26f);
 				CVector2D right(GetRight() * 0.14f);
 
-				CShadows::AddPermanentShadow(SHADOWTYPE_DARK, gpBloodPoolTex, &adjustedFootPosR,
+				CShadows::AddPermanentShadow(SHADOWTYPE_DARK, gpShadowPedTex, &adjustedFootPosR,
 					top.x, top.y,
 					right.x, right.y,
-					120, 250, 250, 50, 4.0f, 5000.0f, 1.0f);
+					120, 250, 250, 50, 4.0f, 5000, 1.0f);
 			}
 		}
 	}

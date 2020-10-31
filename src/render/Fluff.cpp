@@ -398,7 +398,7 @@ void CMovingThings::Init()
 
 	for (int32 i = 0; i < NUMMOVINGTHINGS; i++) {
 		aMovingThings[i].m_nType = 0;
-		aMovingThings[i].m_nHidden = 0;
+		aMovingThings[i].m_farAway = 0;
 	}
 
 	for (int i = 0; i < NUMSECTORS_X; i++) {
@@ -434,19 +434,19 @@ void CMovingThings::Update()
 	CPlaneTrails::Update();
 	CEscalators::Update();
 
-	const int TIME_SPAN = 64; // frames to process all aMovingThings
+	const int TIME_SPAN = 8; // frames to process all aMovingThings
 
 	int16 i;
 
 	int block = CTimer::GetFrameCounter() % TIME_SPAN;
 
 	for (i = (block * NUMMOVINGTHINGS) / TIME_SPAN; i < ((block + 1) * NUMMOVINGTHINGS) / TIME_SPAN; i++) {
-		if (aMovingThings[i].m_nHidden == 1)
+		if (aMovingThings[i].m_farAway == 1)
 			aMovingThings[i].Update();
 	}
 
 	for (i = 0; i < CMovingThings::Num; i++) {
-		if (aMovingThings[i].m_nHidden == 0)
+		if (aMovingThings[i].m_farAway == 0)
 			aMovingThings[i].Update();
 	}
 
@@ -473,27 +473,57 @@ void CMovingThings::Render()
 	CPlaneBanners::Render();
 }
 
+void CMovingThings::RegisterOne(CEntity *pEnt, uint16 nType) {
+	if (Num >= NUMMOVINGTHINGS)
+		return;
+
+	aMovingThings[Num].m_pEntity = pEnt;
+	aMovingThings[Num].m_nType = nType;
+	aMovingThings[Num].m_farAway = 0;
+	aMovingThings[Num].m_vecPosn = pEnt->GetPosition();
+	aMovingThings[Num].AddToList(&CMovingThings::StartCloseList);
+	Num++;
+}
+
+void CMovingThings::PossiblyAddThisEntity(CEntity *pEnt) {
+	if (pEnt->GetModelIndex() == MI_LIGHTBEAM) {
+		RegisterOne(pEnt, 1);
+	}
+	else if (pEnt->GetModelIndex() == MI_AIRPORTRADAR) {
+		RegisterOne(pEnt, 2);
+	}
+	else if (pEnt->GetModelIndex() == MI_MALLFAN || pEnt->GetModelIndex() == MI_HOTELFAN_NIGHT
+		|| pEnt->GetModelIndex() == MI_HOTELFAN_DAY || pEnt->GetModelIndex() == MI_HOTROOMFAN) {
+		RegisterOne(pEnt, 3);
+	}
+	else if (pEnt->GetModelIndex() == MI_BLIMP_NIGHT || pEnt->GetModelIndex() == MI_BLIMP_DAY) {
+		RegisterOne(pEnt, 4);
+	}
+}
+
 // ---------- CMovingThing ----------
-float lengths[5] = { 100.0f, 1500.0f, 400.0f, 100.0f, 2000.0f };
+static float maxUpdateDists[5] = { 100.0f, 1500.0f, 400.0f, 100.0f, 2000.0f };
 
 void CMovingThing::Update()
 {
 	switch (m_nType) {
 	case 1: {
 		float angle = (CTimer::GetTimeInMilliseconds() % 0x3FFF) * TWOPI / 0x3FFF;
-		m_pEntity->GetRight() = CVector(-Sin(angle), Cos(angle), 0.0f);
+		float s = Sin(angle);
+		float c = Cos(angle);
+		m_pEntity->GetRight() = CVector(-s, c, 0.0f);
 		m_pEntity->GetForward() = CVector(0.0f, 0.0f, 1.0f);
-		m_pEntity->GetUp() = CVector(Cos(angle), Sin(angle), 0.0f);
+		m_pEntity->GetUp() = CVector(c, s, 0.0f);
 
 		if (CClock::GetHours() >= 20 || CClock::GetHours() < 5) {
 			if (Abs(TheCamera.GetPosition().x - m_pEntity->GetPosition().x) < 600.0f &&
 				Abs(TheCamera.GetPosition().y - m_pEntity->GetPosition().y) < 600.0f) {
 				CVector delta = m_pEntity->GetPosition() - TheCamera.GetPosition();
-				delta.Normalise();
+				delta /= delta.Magnitude();
 
-				if (delta.x * Cos(angle) + delta.y * Sin(angle) < -0.92f) {
+				if (DotProduct(delta, CVector(c, s, 0.0f)) < -0.92f) {
 					CVector coors = m_pEntity->GetPosition() - 10.0f * delta;
-					CCoronas::RegisterCorona(43, 128, 128, 100, 255, coors, 70.0f, 600.0f, 0.0f, CCoronas::TYPE_STAR, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f, false, 1.5f);
+					CCoronas::RegisterCorona(43, 128, 128, 100, 255, coors, 70.0f, 600.0f, 0.0f, CCoronas::TYPE_STAR, CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF, CCoronas::STREAK_OFF, 0.0f);
 				}
 			}
 		}
@@ -501,24 +531,30 @@ void CMovingThing::Update()
 		break;
 	case 2: {
 		float angle = (CTimer::GetTimeInMilliseconds() % 0x7FF) * TWOPI / 0x7FF;
-		m_pEntity->GetRight() = CVector(Cos(angle), Sin(angle), 0.0f);
-		m_pEntity->GetForward() = CVector(-Sin(angle), Cos(angle), 0.0f);
+		float s = Sin(angle);
+		float c = Cos(angle);
+		m_pEntity->GetRight() = CVector(c, s, 0.0f);
+		m_pEntity->GetForward() = CVector(-s, c, 0.0f);
 		m_pEntity->GetUp() = CVector(0.0f, 0.0f, 1.0f);
 	}
 		break;
 	case 3: {
 		float angle = (CTimer::GetTimeInMilliseconds() % 0x3FF) * TWOPI / 0x3FF;
-		m_pEntity->GetRight() = CVector(Cos(angle), Sin(angle), 0.0f);
-		m_pEntity->GetForward() = CVector(-Sin(angle), Cos(angle), 0.0f);
+		float s = Sin(angle);
+		float c = Cos(angle);
+		m_pEntity->GetRight() = CVector(c, s, 0.0f);
+		m_pEntity->GetForward() = CVector(-s, c, 0.0f);
 		m_pEntity->GetUp() = CVector(0.0f, 0.0f, 1.0f);
 	}
 		break;
 	case 4: {
 		float angle = (CTimer::GetTimeInMilliseconds() % 0x3FFFF) * TWOPI / 0x3FFFF;
-		m_pEntity->GetRight() = CVector(-Cos(angle), -Sin(angle), 0.0f);
-		m_pEntity->GetForward() = CVector(Sin(angle), -Cos(angle), 0.0f);
+		float s = Sin(angle);
+		float c = Cos(angle);
+		m_pEntity->GetRight() = CVector(-c, -s, 0.0f);
+		m_pEntity->GetForward() = CVector(s, -c, 0.0f);
 		m_pEntity->GetUp() = CVector(0.0f, 0.0f, 1.0f);
-		m_pEntity->SetPosition(CVector(350.0f * Cos(angle) - 465.0f, 350.0f * Sin(angle) + 1163.0f, 260.0f));
+		m_pEntity->SetPosition(CVector(350.0f * c - 465.0f, 350.0f * s + 1163.0f, 260.0f));
 	}
 		break;
 	default:
@@ -528,16 +564,16 @@ void CMovingThing::Update()
 	m_pEntity->GetMatrix().UpdateRW();
 	m_pEntity->UpdateRwFrame();
 	
-	if (SQR(m_pEntity->GetPosition().x - TheCamera.GetPosition().x) + SQR(m_pEntity->GetPosition().y - TheCamera.GetPosition().y) >= SQR(lengths[m_nType])) {
-		if (m_nHidden == 0) {
-			RemoveFromList();
-			m_nHidden = 1;
+	if (SQR(m_pEntity->GetPosition().x - TheCamera.GetPosition().x) + SQR(m_pEntity->GetPosition().y - TheCamera.GetPosition().y) < SQR(maxUpdateDists[m_nType])) {
+		if (m_farAway == 1) {
+			AddToList(&CMovingThings::StartCloseList);
+			m_farAway = 0;
 		}
 	}
 	else {
-		if (m_nHidden == 1) {
-			AddToList(&CMovingThings::StartCloseList);
-			m_nHidden = 0;
+		if (m_farAway == 0) {
+			RemoveFromList();
+			m_farAway = 1;
 		}
 	}
 }
@@ -567,34 +603,6 @@ int16 CMovingThing::SizeList()
 	}
 
 	return count;
-}
-
-void CMovingThings::RegisterOne(CEntity *pEnt, uint16 nType) {
-	if (Num >= NUMMOVINGTHINGS)
-		return;
-
-	aMovingThings[Num].m_pEntity = pEnt;
-	aMovingThings[Num].m_nType = nType;
-	aMovingThings[Num].m_nHidden = 0;
-	aMovingThings[Num].m_vecPosn = pEnt->GetPosition();
-	aMovingThings[Num].AddToList(&CMovingThings::StartCloseList);
-	Num++;
-}
-
-void CMovingThings::PossiblyAddThisEntity(CEntity *pEnt) {
-	if (pEnt->GetModelIndex() == MI_LIGHTBEAM) {
-		RegisterOne(pEnt, 1);
-	}
-	else if (pEnt->GetModelIndex() == MI_AIRPORTRADAR) {
-		RegisterOne(pEnt, 2);
-	}
-	else if (pEnt->GetModelIndex() == MI_MALLFAN || pEnt->GetModelIndex() == MI_HOTELFAN_NIGHT
-		|| pEnt->GetModelIndex() == MI_HOTELFAN_DAY || pEnt->GetModelIndex() == MI_HOTROOMFAN) {
-		RegisterOne(pEnt, 3);
-	}
-	else if (pEnt->GetModelIndex() == MI_BLIMP_NIGHT || pEnt->GetModelIndex() == MI_BLIMP_DAY) {
-		RegisterOne(pEnt, 4);
-	}
 }
 
 char String_Time[] = "THE TIME IS 12:34    ";
