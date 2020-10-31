@@ -783,6 +783,7 @@ CMenuManager::Draw()
 	CFont::SetJustifyOn();
 	CFont::SetBackGroundOnlyTextOn();
 #ifdef GTA3_1_1_PATCH
+#ifdef DRAW_MENU_VERSION_TEXT
 	CFont::SetColor(CRGBA(235, 170, 50, FadeIn(255)));
 	CFont::SetRightJustifyOn();
 	CFont::SetFontStyle(FONT_HEADING);
@@ -792,6 +793,7 @@ CMenuManager::Draw()
 	strcpy(gString, "V1.1");
 	AsciiToUnicode(gString, gUString);
 	CFont::PrintString(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 45, gUString);
+#endif
 #endif
 	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
 	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENUACTION_WIDTH));

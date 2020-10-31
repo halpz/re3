@@ -156,6 +156,23 @@ enum Config {
 // any debug stuff that is only left in mobile, is not in MASTER
 //#define MASTER
 
+// once and for all:
+// pc: FINAL & MASTER
+// mobile: FINAL
+
+// MASTER builds must be FINAL
+#ifdef MASTER
+#define FINAL
+#endif
+
+// quality of life fixes that should also be in FINAL
+#define NASTY_GAME	// nasty game for all languages
+#define NO_CDCHECK
+
+// those infamous texts
+#define DRAW_GAME_VERSION_TEXT
+#define DRAW_MENU_VERSION_TEXT
+
 #if defined GTA_PS2
 #	define GTA_PS2_STUFF
 #	define RANDOMSPLASH
@@ -177,9 +194,13 @@ enum Config {
 
 #ifdef MASTER
 	// only in master builds
+	#undef DRAW_GAME_VERSION_TEXT
 #else
 	// not in master builds
 	#define VALIDATE_SAVE_SIZE
+
+	#define NO_MOVIES	// disable intro videos
+	#define DEBUGMENU
 #endif
 
 #ifdef FINAL
@@ -187,11 +208,7 @@ enum Config {
 #	define USE_MY_DOCUMENTS	// use my documents directory for user files
 #else
 	// not in any game
-#	define NASTY_GAME	// nasty game for all languages
-#	define NO_MOVIES	// disable intro videos
-#	define NO_CDCHECK
 #	define CHATTYSPLASH	// print what the game is loading
-#	define DEBUGMENU
 #	define TIMEBARS		// print debug timers
 #endif
 
