@@ -122,9 +122,11 @@ workspace "re3"
 	
 	filter { "platforms:*x86*" }
 		architecture "x86"
+		floatingpoint "Fast"
 		
 	filter { "platforms:*amd64*" }
 		architecture "amd64"
+		floatingpoint "Fast"
 
 	filter { "platforms:*arm*" }
 		architecture "ARM"
@@ -143,6 +145,7 @@ workspace "re3"
 		
 	filter "platforms:*librw_gl3_glfw*"
 		defines { "RW_GL3" }
+		staticruntime "Off"
 		includedirs { path.join(_OPTIONS["glewdir"], "include") }
 		if(not _OPTIONS["with-librw"]) then
 			libdirs { path.join(Librw, "lib/%{getsys(cfg.system)}-%{getarch(cfg.architecture)}-gl3/%{cfg.buildcfg}") }
@@ -184,6 +187,18 @@ project "librw"
 	files { path.join(Librw, "src/*.*") }
 	files { path.join(Librw, "src/*/*.*") }
 	
+	filter { "platforms:*x86*" }
+		architecture "x86"
+		floatingpoint "Fast"
+
+	filter { "platforms:*amd64*" }
+		architecture "amd64"
+		floatingpoint "Fast"
+
+	filter "platforms:win*"
+		staticruntime "on"
+		buildoptions { "/Zc:sizedDealloc-" }
+
 	filter "platforms:bsd*"
 		includedirs { "/usr/local/include" }
 		libdirs { "/usr/local/lib" }
@@ -194,6 +209,9 @@ project "librw"
 		includedirs {"/usr/local/include" }
 		libdirs { "/opt/local/lib" }
 		libdirs { "/usr/local/lib" }
+
+	filter "platforms:*librw_gl3_glfw*"
+		staticruntime "Off"
 	
 	filter "platforms:*RW33*"
 		flags { "ExcludeFromBuild" }
@@ -284,9 +302,11 @@ project "re3"
 	filter "platforms:win*"
 		files { addSrcFiles("src/skel/win") }
 		includedirs { "src/skel/win" }
+		buildoptions { "/Zc:sizedDealloc-" }
 		linkoptions "/SAFESEH:NO"
 		characterset ("MBCS")
 		targetextension ".exe"
+		staticruntime "on"
 		
 	filter "platforms:win*oal"
 		includedirs { "vendor/openal-soft/include" }
@@ -322,7 +342,6 @@ project "re3"
 	end
 
 	filter "platforms:*RW33*"
-		staticruntime "on"
 		includedirs { "sdk/rwsdk/include/d3d8" }
 		libdirs { "sdk/rwsdk/lib/d3d8/release" }
 		links { "rwcore", "rpworld", "rpmatfx", "rpskin", "rphanim", "rtbmp", "rtquat", "rtcharse" }
