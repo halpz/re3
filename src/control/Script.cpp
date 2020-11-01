@@ -5171,7 +5171,12 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
 		float angle = pPed->bInVehicle ? pPed->m_pMyVehicle->GetForward().Heading() : pPed->GetForward().Heading();
-		*(float*)&ScriptParams[0] = CGeneral::LimitAngle(RADTODEG(angle));
+		angle = RADTODEG(angle);
+		if (angle < 0.0f)
+			angle += 360.0f;
+		if (angle > 360.0f)
+			angle -= 360.0f;
+		*(float*)&ScriptParams[0] = angle;
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
@@ -5192,7 +5197,12 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		script_assert(pPed);
 		float angle = pPed->bInVehicle ? pPed->m_pMyVehicle->GetForward().Heading() : pPed->GetForward().Heading();
-		*(float*)&ScriptParams[0] = CGeneral::LimitAngle(RADTODEG(angle));
+		angle = RADTODEG(angle);
+		if (angle < 0.0f)
+			angle += 360.0f;
+		if (angle > 360.0f)
+			angle -= 360.0f;
+		*(float*)&ScriptParams[0] = angle;
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
@@ -5213,7 +5223,12 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		script_assert(pVehicle);
 		float angle = pVehicle->GetForward().Heading();
-		*(float*)&ScriptParams[0] = CGeneral::LimitAngle(RADTODEG(angle));
+		angle = RADTODEG(angle);
+		if (angle < 0.0f)
+			angle += 360.0f;
+		if (angle > 360.0f)
+			angle -= 360.0f;
+		*(float*)&ScriptParams[0] = angle;
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
@@ -5231,7 +5246,12 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
 		script_assert(pObject);
 		float angle = pObject->GetForward().Heading();
-		*(float*)&ScriptParams[0] = CGeneral::LimitAngle(RADTODEG(angle));
+		angle = RADTODEG(angle);
+		if (angle < 0.0f)
+			angle += 360.0f;
+		if (angle > 360.0f)
+			angle -= 360.0f;
+		*(float*)&ScriptParams[0] = angle;
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
@@ -13225,7 +13245,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	}
 	case COMMAND_CLEAR_CHAR_FOLLOW_PATH:
 	{
-		CollectParameters(&m_nIp, 2);
+		CollectParameters(&m_nIp, 1);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		script_assert(pPed);
 		if (pPed->GetPedState() == PED_FOLLOW_PATH) {
