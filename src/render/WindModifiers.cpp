@@ -33,8 +33,9 @@ CWindModifiers::FindWindModifier(CVector pos, float *x, float *y)
 				float dist = (pos - Array[i].m_pos).Magnitude();
 				if (dist < MAX_FADE_DIST) {
 					float distFade = dist < MIN_FADE_DIST ? 1.0f : 1.0f - (dist - MIN_FADE_DIST) / (MAX_FADE_DIST - MIN_FADE_DIST);
-					float heightFade = distFade * ((1.0f - zDist / MAX_HEIGHT_DIST) / 2.0f);
-					dir = (pos - Array[i].m_pos) * heightFade / dist;
+					float heightFade = 1.0f - zDist / MAX_HEIGHT_DIST;
+					float fade = distFade * heightFade * 0.5f;
+					dir = (pos - Array[i].m_pos) * fade / dist;
 					bWasWindModifierFound = true;
 				}
 			}
