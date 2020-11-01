@@ -73,7 +73,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	bBigWheels = false;
 	bWaterTight = false;
 
-	CAutomobile::SetModelIndex(id);
+	SetModelIndex(id);
 
 	pHandling = mod_HandlingManager.GetHandlingData((eHandlingId)mi->m_handlingId);
 
