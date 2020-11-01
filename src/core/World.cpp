@@ -75,7 +75,7 @@ CWorld::Add(CEntity *ent)
 
 	if(ent->IsBuilding() || ent->IsDummy()) return;
 
-	if(!ent->IsStatic()) ((CPhysical *)ent)->AddToMovingList();
+	if(!ent->GetIsStatic()) ((CPhysical *)ent)->AddToMovingList();
 }
 
 void
@@ -90,7 +90,7 @@ CWorld::Remove(CEntity *ent)
 
 	if(ent->IsBuilding() || ent->IsDummy()) return;
 
-	if(!ent->IsStatic()) ((CPhysical *)ent)->RemoveFromMovingList();
+	if(!ent->GetIsStatic()) ((CPhysical *)ent)->RemoveFromMovingList();
 }
 
 void
@@ -1960,7 +1960,7 @@ CWorld::Process(void)
 				RemoveEntityInsteadOfProcessingIt(movingEnt);
 			} else {
 				movingEnt->ProcessControl();
-				if(movingEnt->IsStatic()) { movingEnt->RemoveFromMovingList(); }
+				if(movingEnt->GetIsStatic()) { movingEnt->RemoveFromMovingList(); }
 			}
 		}
 		bForceProcessControl = true;
@@ -1971,7 +1971,7 @@ CWorld::Process(void)
 					RemoveEntityInsteadOfProcessingIt(movingEnt);
 				} else {
 					movingEnt->ProcessControl();
-					if(movingEnt->IsStatic()) { movingEnt->RemoveFromMovingList(); }
+					if(movingEnt->GetIsStatic()) { movingEnt->RemoveFromMovingList(); }
 				}
 			}
 		}
@@ -2124,13 +2124,13 @@ CWorld::TriggerExplosionSectorList(CPtrList &list, const CVector &position, floa
 			CObject *pObject = (CObject *)pEntity;
 			CVehicle *pVehicle = (CVehicle *)pEntity;
 			if(!pEntity->bExplosionProof && (!pEntity->IsPed() || !pPed->bInVehicle)) {
-				if(pEntity->IsStatic()) {
+				if(pEntity->GetIsStatic()) {
 					if(pEntity->IsObject()) {
 						if (fPower > pObject->m_fUprootLimit || IsFence(pObject->GetModelIndex())) {
 							if (IsGlass(pObject->GetModelIndex())) {
 								CGlass::WindowRespondsToExplosion(pObject, position);
 							} else {
-								pObject->bIsStatic = false;
+								pObject->SetIsStatic(false);
 								pObject->AddToMovingList();
 								int16 modelId = pEntity->GetModelIndex();
 								if(modelId != MI_FIRE_HYDRANT ||
@@ -2148,18 +2148,18 @@ CWorld::TriggerExplosionSectorList(CPtrList &list, const CVector &position, floa
 								}
 							}
 						}
-						if(pEntity->IsStatic()) {
+						if(pEntity->GetIsStatic()) {
 							float fDamageMultiplier =
 							    (fRadius - fMagnitude) * 2.0f / fRadius;
 							float fDamage = 300.0f * Min(fDamageMultiplier, 1.0f);
 							pObject->ObjectDamage(fDamage);
 						}
 					} else {
-						pEntity->bIsStatic = false;
+						pEntity->SetIsStatic(false);
 						pEntity->AddToMovingList();
 					}
 				}
-				if(!pEntity->IsStatic()) {
+				if(!pEntity->GetIsStatic()) {
 					float fDamageMultiplier = Min((fRadius - fMagnitude) * 2.0f / fRadius, 1.0f);
 					CVector vecForceDir =
 					    vecDistance * (fPower * pEntity->m_fMass * 0.00071429f * fDamageMultiplier /

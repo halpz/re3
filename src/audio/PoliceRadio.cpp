@@ -91,7 +91,7 @@ cAudioManager::InitialisePoliceRadio()
 	m_sPoliceRadioQueue.policeChannelTimerSeconds = 0;
 	m_sPoliceRadioQueue.policeChannelCounterSeconds = 0;
 	for (int32 i = 0; i < ARRAY_SIZE(m_sPoliceRadioQueue.crimes); i++)
-		m_sPoliceRadioQueue.crimes[i].type = 0;
+		m_sPoliceRadioQueue.crimes[i].type = CRIME_NONE;
 
 	SampleManager.SetChannelReverbFlag(policeChannel, 0);
 	gSpecialSuspectLastSeenReport = false;
@@ -154,7 +154,7 @@ cAudioManager::ServicePoliceRadio()
 
 	if(!m_bIsInitialised) return;
 
-	if(!m_nUserPause) {
+	if(m_nUserPause == 0) {
 		bool crimeReport = SetupCrimeReport();
 #ifdef FIX_BUGS // Crash at 0x5fe6ef
 		if(CReplay::IsPlayingBack() || !FindPlayerPed() || !FindPlayerPed()->m_pWanted)
@@ -162,8 +162,8 @@ cAudioManager::ServicePoliceRadio()
 #endif
 		wantedLevel = FindPlayerPed()->m_pWanted->m_nWantedLevel;
 		if(!crimeReport) {
-			if(wantedLevel) {
-				if(nLastSeen) {
+			if(wantedLevel != 0) {
+				if(nLastSeen != 0) {
 					--nLastSeen;
 				} else {
 					nLastSeen = m_anRandomTable[1] % 1000 + 2000;
@@ -176,7 +176,7 @@ cAudioManager::ServicePoliceRadio()
 }
 
 void
-cAudioManager::ServicePoliceRadioChannel(int32 wantedLevel)
+cAudioManager::ServicePoliceRadioChannel(uint8 wantedLevel)
 {
 	bool processed = false;
 	uint32 sample;
@@ -189,7 +189,7 @@ cAudioManager::ServicePoliceRadioChannel(int32 wantedLevel)
 
 	if (!m_bIsInitialised) return;
 
-	if (m_nUserPause) {
+	if (m_nUserPause != 0) {
 		if (SampleManager.GetChannelUsedFlag(policeChannel)) SampleManager.StopChannel(policeChannel);
 		if (g_nMissionAudioSfx != TOTAL_AUDIO_SAMPLES && bMissionAudioPhysicalPlayingStatus == 1 &&
 			SampleManager.IsStreamPlaying(1)) {
@@ -241,7 +241,7 @@ cAudioManager::ServicePoliceRadioChannel(int32 wantedLevel)
 			} else {
 				sample = TOTAL_AUDIO_SAMPLES;
 			}
-			if (!wantedLevel) {
+			if (wantedLevel == 0) {
 				if (gSpecialSuspectLastSeenReport) {
 					gSpecialSuspectLastSeenReport = 0;
 				} else if (((sample >= SFX_POLICE_RADIO_MESSAGE_NOISE_1) && (sample <= SFX_POLICE_RADIO_MESSAGE_NOISE_3)) || sample == TOTAL_AUDIO_SAMPLES) {
@@ -675,7 +675,7 @@ cAudioManager::SetupSuspectLastSeenReport()
 
 
 void
-cAudioManager::ReportCrime(int32 type, const CVector *pos)
+cAudioManager::ReportCrime(eCrimeType type, const CVector &pos)
 {
 	int32 lastCrime = ARRAY_SIZE(m_sPoliceRadioQueue.crimes);
 	if (m_bIsInitialised && MusicManager.m_nMusicMode != MUSICMODE_CUTSCENE && FindPlayerPed()->m_pWanted->m_nWantedLevel > 0 &&
@@ -683,7 +683,7 @@ cAudioManager::ReportCrime(int32 type, const CVector *pos)
 		for (int32 i = 0; i < ARRAY_SIZE(m_sPoliceRadioQueue.crimes); i++) {
 			if (m_sPoliceRadioQueue.crimes[i].type) {
 				if (m_sPoliceRadioQueue.crimes[i].type == type) {
-					m_sPoliceRadioQueue.crimes[i].position = *pos;
+					m_sPoliceRadioQueue.crimes[i].position = pos;
 					m_sPoliceRadioQueue.crimes[i].timer = 0;
 					return;
 				}
@@ -694,7 +694,7 @@ cAudioManager::ReportCrime(int32 type, const CVector *pos)
 
 		if (lastCrime < ARRAY_SIZE(m_sPoliceRadioQueue.crimes)) {
 			m_sPoliceRadioQueue.crimes[lastCrime].type = type;
-			m_sPoliceRadioQueue.crimes[lastCrime].position = *pos;
+			m_sPoliceRadioQueue.crimes[lastCrime].position = pos;
 			m_sPoliceRadioQueue.crimes[lastCrime].timer = 0;
 			gMinTimeToNextReport[type] = m_FrameCounter + 500;
 		}

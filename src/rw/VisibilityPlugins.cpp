@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include "RwHelper.h"
 #include "templates.h"
 #include "Entity.h"
 #include "ModelInfo.h"
@@ -158,6 +159,10 @@ CVisibilityPlugins::RenderFadingEntities(void)
 		if(mi->m_noZwrite)
 #endif
 			RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, FALSE);
+#ifdef EXTRA_MODEL_FLAGS
+		else if(mi->m_bIsTree)
+			SetAlphaRef(128);
+#endif
 
 		if(e->bDistanceFade){
 			DeActivateDirectional();
@@ -168,6 +173,10 @@ CVisibilityPlugins::RenderFadingEntities(void)
 		}else
 			CRenderer::RenderOneNonRoad(e);
 
+#ifdef EXTRA_MODEL_FLAGS
+		if(mi->m_bIsTree)
+			SetAlphaRef(2);
+#endif
 #ifdef FIX_BUGS
 		if(mi->GetModelType() == MITYPE_SIMPLE && mi->m_noZwrite)
 #else

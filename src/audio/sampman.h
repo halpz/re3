@@ -153,11 +153,7 @@ public:
 	
 	bool Initialise(void);
 	void Terminate (void);
-	
-#ifdef AUDIO_OAL
-	void UpdateSoundBuffers(void);
-#endif
-	
+		
 	bool CheckForAnAudioFileOnCD(void);
 	char GetCDAudioDriveLetter  (void);
 	
@@ -217,6 +213,10 @@ public:
 
 extern cSampleManager SampleManager;
 extern uint32 BankStartOffset[MAX_SFX_BANKS];
+
+#ifdef AUDIO_OAL
+extern int defaultProvider;
+#endif
 
 #ifdef AUDIO_OPUS
 static char StreamedNameTable[][25] = {

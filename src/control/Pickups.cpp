@@ -54,20 +54,15 @@ uint8 aWeaponGreens[] = { 0, 255, 128, 255, 0, 255, 128, 255, 0, 255, 255, 0, 25
 uint8 aWeaponBlues[] = { 0, 0, 255, 0, 255, 255, 0, 128, 255, 0, 255, 0, 128, 255, 0, 0 };
 float aWeaponScale[] = { 1.0f, 2.0f, 1.5f, 1.0f, 1.0f, 1.5f, 1.0f, 2.0f, 1.0f, 2.0f, 2.5f, 1.0f, 1.0f, 1.0f, 1.0f };
 
-void
-CPickup::RemoveKeepType()
+
+inline void
+CPickup::Remove()
 {
 	CWorld::Remove(m_pObject);
 	delete m_pObject;
 
 	m_bRemoved = true;
 	m_pObject = nil;
-}
-
-void
-CPickup::Remove()
-{
-	RemoveKeepType();
 	m_eType = PICKUP_NONE;
 }
 
@@ -131,7 +126,6 @@ CPickup::GiveUsAPickUpObject(int32 handle)
 bool
 CPickup::CanBePickedUp(CPlayerPed *player)
 {
-	assert(m_pObject != nil);
 	bool cannotBePickedUp =
 		(m_pObject->GetModelIndex() == MI_PICKUP_BODYARMOUR && player->m_fArmour > 99.5f)
 		|| (m_pObject->GetModelIndex() == MI_PICKUP_HEALTH && player->m_fHealth > 99.5f)
@@ -144,6 +138,7 @@ bool
 CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 {
 	float waterLevel;
+	bool result = false;
 
 	if (m_bRemoved) {
 		if (CTimer::GetTimeInMilliseconds() > m_nTimer) {
@@ -204,9 +199,12 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 						player->m_nSelectedWepSlot = player->GetWeaponSlot(CPickups::WeaponForModel(m_pObject->GetModelIndex()));
 						DMAudio.PlayFrontEndSound(SOUND_PICKUP_WEAPON_BOUGHT, m_pObject->GetModelIndex() - MI_GRENADE);
 					}
-					RemoveKeepType();
+					result = true;
+					CWorld::Remove(m_pObject);
+					delete m_pObject;
+					m_pObject = nil;
 					m_nTimer = CTimer::GetTimeInMilliseconds() + 5000;
-					return true;
+					m_bRemoved = true;
 				}
 				break;
 			case PICKUP_ON_STREET:
@@ -235,8 +233,12 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 						m_nTimer = CTimer::GetTimeInMilliseconds() + 720000;
 				}
 
-				RemoveKeepType();
-				return true;
+				result = true;
+				CWorld::Remove(m_pObject);
+				delete m_pObject;
+				m_pObject = nil;
+				m_bRemoved = true;
+				break;
 			case PICKUP_ONCE:
 			case PICKUP_ONCE_TIMEOUT:
 				if (!CPickups::GivePlayerGoodiesWithPickUpMI(m_pObject->GetModelIndex(), playerId)) {
@@ -247,8 +249,9 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 					}
 					DMAudio.PlayFrontEndSound(SOUND_PICKUP_WEAPON, m_pObject->GetModelIndex() - MI_GRENADE);
 				}
+				result = true;
 				Remove();
-				return true;
+				break;
 			case PICKUP_COLLECTABLE1:
 				CWorld::Players[playerId].m_nCollectedPackages++;
 				CWorld::Players[playerId].m_nMoney += 1000;
@@ -260,18 +263,20 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 				} else
 					CGarages::TriggerMessage("CO_ONE", CWorld::Players[CWorld::PlayerInFocus].m_nCollectedPackages, 5000, CWorld::Players[CWorld::PlayerInFocus].m_nTotalPackages);
 
+				result = true;
 				Remove();
 				DMAudio.PlayFrontEndSound(SOUND_PICKUP_HIDDEN_PACKAGE, 0);
-				return true;
+				break;
 			case PICKUP_MONEY:
 				CWorld::Players[playerId].m_nMoney += m_nQuantity;
 				sprintf(gString, "$%d", m_nQuantity);
 #ifdef MONEY_MESSAGES
 				CMoneyMessages::RegisterOne(m_vecPos + CVector(0.0f, 0.0f, 1.0f), gString, 0, 255, 0, 0.5f, 0.5f);
 #endif
+				result = true;
 				Remove();
 				DMAudio.PlayFrontEndSound(SOUND_PICKUP_MONEY, 0);
-				return true;
+				break;
 			default:
 				break;
 			}
@@ -298,7 +303,9 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 				CVehicle *vehicle = CPools::GetVehiclePool()->GetSlot(i);
 				if (vehicle != nil && vehicle->IsSphereTouchingVehicle(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z, 1.5f)) {
 					touched = true;
-					break; // added break here
+#ifdef FIX_BUGS
+					break;
+#endif
 				}
 			}
 
@@ -320,12 +327,17 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 			bool explode = false;
 			if (CTimer::GetTimeInMilliseconds() > m_nTimer)
 				explode = true;
-			else {// added else here since vehicle lookup is useless
+#ifdef FIX_BUGS
+			else// added else here since vehicle lookup is useless
+#endif
+			{
 				for (int32 i = CPools::GetVehiclePool()->GetSize()-1; i >= 0; i--) {
 					CVehicle *vehicle = CPools::GetVehiclePool()->GetSlot(i);
 					if (vehicle != nil && vehicle->IsSphereTouchingVehicle(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z, 1.5f)) {
 						explode = true;
-						break; // added break here
+#ifdef FIX_BUGS
+						break;
+#endif
 					}
 				}
 			}
@@ -352,8 +364,8 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 			m_pObject->UpdateRwFrame();
 			if (vehicle != nil && vehicle->IsSphereTouchingVehicle(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z, 2.0f)) {
 				Remove();
+				result = true;
 				DMAudio.PlayFrontEndSound(SOUND_PICKUP_FLOAT_PACKAGE, 0);
-				return true;
 			}
 			break;
 		default: break;
@@ -361,7 +373,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 	}
 	if (!m_bRemoved && (m_eType == PICKUP_ONCE_TIMEOUT || m_eType == PICKUP_MONEY) && CTimer::GetTimeInMilliseconds() > m_nTimer)
 		Remove();
-	return false;
+	return result;
 }
 
 void
@@ -628,7 +640,7 @@ CPickups::Update()
 #ifdef CAMERA_PICKUP
 	if ( bPickUpcamActivated ) // taken from PS2
 	{
-		float dist = (FindPlayerCoors() - StaticCamCoors).Magnitude2D();
+		float dist = Distance2D(StaticCamCoors, FindPlayerCoors());
 		float mult;
 		if ( dist < 10.0f )
 			mult = 1.0f - (dist / 10.0f );
@@ -644,8 +656,7 @@ CPickups::Update()
 			TheCamera.TakeControl(FindPlayerVehicle(), CCam::MODE_FIXED, JUMP_CUT, CAMCONTROL_SCRIPT);
 		}
 
-		if ( FindPlayerVehicle() != pPlayerVehicle
-			|| (FindPlayerCoors() - StaticCamCoors).Magnitude() > 40.0f
+		if ( FindPlayerVehicle() != pPlayerVehicle || Distance(StaticCamCoors, FindPlayerCoors()) > 40.0f
 			|| ((CTimer::GetTimeInMilliseconds() - StaticCamStartTime) > 60000) )
 		{
 			TheCamera.RestoreWithJumpCut();
@@ -715,7 +726,7 @@ CPickups::DoPickUpEffects(CEntity *entity)
 
 		CObject *object = (CObject*)entity;
 		if (object->bPickupObjWithMessage || object->bOutOfStock || object->m_nBonusValue) {
-			float dist = (TheCamera.GetPosition() - pos).Magnitude();
+			float dist = Distance2D(pos, TheCamera.GetPosition());
 			const float MAXDIST = 12.0f;
 
 			if (dist < MAXDIST && NumMessages < NUMPICKUPMESSAGES) {
@@ -746,7 +757,7 @@ void
 CPickups::DoMineEffects(CEntity *entity)
 {
 	const CVector &pos = entity->GetPosition();
-	float dist = (TheCamera.GetPosition() - pos).Magnitude();
+	float dist = Distance(pos, TheCamera.GetPosition());
 	const float MAXDIST = 20.0f;
 
 	if (dist < MAXDIST) {
@@ -765,7 +776,7 @@ void
 CPickups::DoMoneyEffects(CEntity *entity)
 {
 	const CVector &pos = entity->GetPosition();
-	float dist = (TheCamera.GetPosition() - pos).Magnitude();
+	float dist = Distance(pos, TheCamera.GetPosition());
 	const float MAXDIST = 20.0f;
 
 	if (dist < MAXDIST) {
@@ -784,7 +795,7 @@ void
 CPickups::DoCollectableEffects(CEntity *entity)
 {
 	const CVector &pos = entity->GetPosition();
-	float dist = (TheCamera.GetPosition() - pos).Magnitude();
+	float dist = Distance(pos, TheCamera.GetPosition());
 	const float MAXDIST = 14.0f;
 
 	if (dist < MAXDIST) {

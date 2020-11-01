@@ -1,6 +1,8 @@
 #pragma once
 #include "Sprite2d.h"
 
+#define HELP_MSG_LENGTH 256
+
 enum eItems
 {
 	ITEM_NONE = -1,
@@ -36,14 +38,13 @@ class CHud
 {
 public:
 	static CSprite2d Sprites[NUM_HUD_SPRITES];
-	static wchar m_HelpMessage[256];
-	static wchar m_LastHelpMessage[256];
+	static wchar m_HelpMessage[HELP_MSG_LENGTH];
+	static wchar m_LastHelpMessage[HELP_MSG_LENGTH];
 	static uint32 m_HelpMessageState;
 	static uint32 m_HelpMessageTimer;
 	static int32 m_HelpMessageFadeTimer;
-	static wchar m_HelpMessageToPrint[256];
-	static float &m_HelpMessageDisplayTime;
-	static float m_fHelpMessageTime;
+	static wchar m_HelpMessageToPrint[HELP_MSG_LENGTH];
+	static float m_HelpMessageDisplayTime;
 	static bool	m_HelpMessageQuick;
 	static uint32 m_ZoneState;
 	static int32 m_ZoneFadeTimer;
@@ -88,7 +89,7 @@ public:
 	static void GetRidOfAllHudMessages();
 	static void Initialise();
 	static void ReInitialise();
-	static void SetBigMessage(wchar *message, int16 style);
+	static void SetBigMessage(wchar *message, uint16 style);
 	static void SetHelpMessage(wchar *message, bool quick);
 	static void SetMessage(wchar *message);
 	static void SetPagerMessage(wchar *message);

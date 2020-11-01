@@ -62,7 +62,7 @@ CCredits::Render(void)
 	scrolloffset = (CTimer::GetTimeInMilliseconds() - CreditsStartTime) / 24.0f;
 	CFont::SetJustifyOff();
 	CFont::SetBackgroundOff();
-	CFont::SetCentreSize(SCALE_AND_CENTER_X(DEFAULT_SCREEN_WIDTH - 20));
+	CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - 20));
 	CFont::SetCentreOn();
 	CFont::SetPropOn();
 	CFont::SetColor(CRGBA(220, 220, 220, 220));

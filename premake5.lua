@@ -20,6 +20,11 @@ newoption {
 }
 
 newoption {
+	trigger     = "with-asan",
+	description = "Build with address sanitizer"
+}
+
+newoption {
 	trigger     = "with-librw",
 	description = "Build and use librw from this solution"
 }
@@ -59,6 +64,11 @@ workspace "re3"
 	location "build"
 	symbols "Full"
 	staticruntime "off"
+
+	if _OPTIONS["with-asan"] then
+		buildoptions { "-fsanitize=address -g3 -fno-omit-frame-pointer" }
+		linkoptions { "-fsanitize=address" }
+	end
 
 	filter { "system:windows" }
 		platforms {
@@ -330,14 +340,12 @@ project "re3"
 		links { "rw" }
 
 	filter "platforms:*d3d9*"
+		defines { "USE_D3D9" }
 		links { "d3d9" }
 		
 	filter "platforms:*x86*d3d*"
 		includedirs { "sdk/dx8sdk/include" }
 		libdirs { "sdk/dx8sdk/lib" }
-
-	filter "platforms:*amd64*d3d9*"
-		defines { "USE_D3D9" }
 		
 	filter "platforms:win-x86*gl3_glfw*"
 		libdirs { path.join(_OPTIONS["glewdir"], "lib/Release/Win32") }

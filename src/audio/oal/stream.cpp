@@ -195,7 +195,7 @@ public:
 
 		if (m_FileH) {
 			m_nChannels = op_head(m_FileH, 0)->channel_count;
-			m_nRate = op_head(m_FileH, 0)->input_sample_rate;
+			m_nRate = 48000;
 			const OpusTags *tags = op_tags(m_FileH, 0);
 			for (int i = 0; i < tags->comments; i++) {
 				if (strncmp(tags->user_comments[i], "SAMPLERATE", sizeof("SAMPLERATE")-1) == 0)
@@ -323,8 +323,8 @@ CStream::CStream(char *filename, ALuint &source, ALuint (&buffers)[NUM_STREAMBUF
 #endif
 	else 
 		m_pSoundFile = nil;
-	ASSERT(m_pSoundFile != nil);
-	if (m_pSoundFile && m_pSoundFile->IsOpened() )
+
+	if ( IsOpened() )
 	{
 		m_pBuffer            = malloc(m_pSoundFile->GetBufferSize());
 		ASSERT(m_pBuffer!=nil);
@@ -371,14 +371,14 @@ bool CStream::HasSource()
 
 bool CStream::IsOpened()
 {
-	return m_pSoundFile->IsOpened();
+	return m_pSoundFile && m_pSoundFile->IsOpened();
 }
 
 bool CStream::IsPlaying()
 {
 	if ( !HasSource() || !IsOpened() ) return false;
 	
-	if ( m_pSoundFile->IsOpened() && !m_bPaused )
+	if ( !m_bPaused )
 	{
 		ALint sourceState;
 		alGetSourcei(m_alSource, AL_SOURCE_STATE, &sourceState);
@@ -446,7 +446,7 @@ void CStream::SetPan(uint8 nPan)
 
 void CStream::SetPosMS(uint32 nPos)
 {
-	if ( !m_pSoundFile->IsOpened() ) return;
+	if ( !IsOpened() ) return;
 	m_pSoundFile->Seek(nPos);
 	ClearBuffers();
 }
@@ -454,7 +454,7 @@ void CStream::SetPosMS(uint32 nPos)
 uint32 CStream::GetPosMS()
 {
 	if ( !HasSource() ) return 0;
-	if ( !m_pSoundFile->IsOpened() ) return 0;
+	if ( !IsOpened() ) return 0;
 	
 	ALint offset;
 	//alGetSourcei(m_alSource, AL_SAMPLE_OFFSET, &offset);
@@ -467,7 +467,7 @@ uint32 CStream::GetPosMS()
 
 uint32 CStream::GetLengthMS()
 {
-	if ( !m_pSoundFile->IsOpened() ) return 0;
+	if ( !IsOpened() ) return 0;
 	return m_pSoundFile->GetLength();
 }
 
@@ -475,7 +475,7 @@ bool CStream::FillBuffer(ALuint alBuffer)
 {
 	if ( !HasSource() )
 		return false;
-	if ( !m_pSoundFile->IsOpened() )
+	if ( !IsOpened() )
 		return false;
 	if ( !(alBuffer != AL_NONE && alIsBuffer(alBuffer)) )
 		return false;
@@ -517,7 +517,7 @@ void CStream::ClearBuffers()
 
 bool CStream::Setup()
 {
-	if ( m_pSoundFile->IsOpened() )
+	if ( IsOpened() )
 	{
 		m_pSoundFile->Seek(0);
 		alSourcei(m_alSource, AL_SOURCE_RELATIVE, AL_TRUE);

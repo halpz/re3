@@ -115,6 +115,14 @@ Distance(const CVector &v1, const CVector &v2)
 	return (v2 - v1).Magnitude();
 }
 
+inline float
+Distance2D(const CVector &v1, const CVector &v2)
+{
+	float x = v2.x - v1.x;
+	float y = v2.y - v1.y;
+	return Sqrt(x*x + y*y);
+}
+
 class CMatrix;
 
 CVector Multiply3x3(const CMatrix &mat, const CVector &vec);

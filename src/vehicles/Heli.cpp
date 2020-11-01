@@ -726,7 +726,7 @@ CHeli::SpawnFlyingComponent(int32 component)
 	obj->m_fElasticity = 0.1f;
 	obj->m_fBuoyancy = obj->m_fMass*GRAVITY/0.75f;
 	obj->ObjectCreatedBy = TEMP_OBJECT;
-	obj->bIsStatic = false;
+	obj->SetIsStatic(false);
 	obj->bIsPickup = false;
 
 	// life time

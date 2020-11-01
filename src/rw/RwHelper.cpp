@@ -3,11 +3,14 @@
 #endif
 #include "common.h"
 
+#include "RwHelper.h"
 #include "Timecycle.h"
 #include "skeleton.h"
 #include "Debug.h"
-#ifndef FINAL
+#if !defined(FINAL) || defined(DEBUGMENU)
 #include "rtcharse.h"
+#endif
+#ifndef FINAL
 RtCharset *debugCharset;
 #endif
 
@@ -16,8 +19,9 @@ bool gPS2alphaTest = true;
 #else
 bool gPS2alphaTest = false;
 #endif
+bool gBackfaceCulling = true;
 
-#ifndef FINAL
+#if !defined(FINAL) || defined(DEBUGMENU)
 static bool charsetOpen;
 void OpenCharsetSafe()
 {
@@ -121,14 +125,32 @@ DefinedState(void)
 
 #ifdef LIBRW
 	rw::SetRenderState(rw::ALPHATESTFUNC, rw::ALPHAGREATEREQUAL);
-	rw::SetRenderState(rw::ALPHATESTREF, 3);
 
 	rw::SetRenderState(rw::GSALPHATEST, gPS2alphaTest);
 #else
 	// D3D stuff
 	RwD3D8SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
-	RwD3D8SetRenderState(D3DRS_ALPHAREF, 2);
 #endif
+	SetAlphaRef(2);
+}
+
+void
+SetAlphaRef(int ref)
+{
+#ifdef LIBRW
+	rw::SetRenderState(rw::ALPHATESTREF, ref+1);
+#else
+	RwD3D8SetRenderState(D3DRS_ALPHAREF, ref);
+#endif
+}
+
+void
+SetCullMode(uint32 mode)
+{
+	if(gBackfaceCulling)
+		RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)mode);
+	else
+		RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
 }
 
 RwFrame*
@@ -431,11 +453,13 @@ CameraSize(RwCamera * camera, RwRect * rect,
 			}
 		}
 
-		if (( origSize.w != rect->w ) && ( origSize.h != rect->h ))
+		if (( origSize.w != rect->w ) || ( origSize.h != rect->h ))
 		{
 			RwRaster           *raster;
 			RwRaster           *zRaster;
 
+			// BUG: game just changes camera raster's sizes, but this is a hack
+#ifdef FIX_BUGS
 			/*
 			 * Destroy rasters...
 			 */
@@ -444,12 +468,14 @@ CameraSize(RwCamera * camera, RwRect * rect,
 			if( raster )
 			{
 				RwRasterDestroy(raster);
+				camera->frameBuffer = nil;
 			}
 
 			zRaster = RwCameraGetZRaster(camera);
 			if( zRaster )
 			{
 				RwRasterDestroy(zRaster);
+				camera->zBuffer = nil;
 			}
 
 			/*
@@ -493,6 +519,13 @@ CameraSize(RwCamera * camera, RwRect * rect,
 				RwCameraSetRaster(camera, raster);
 				RwCameraSetZRaster(camera, zRaster);
 			}
+#else
+			raster = RwCameraGetRaster(camera);
+			zRaster = RwCameraGetZRaster(camera);
+
+			raster->width = zRaster->width = rect->w;
+			raster->height = zRaster->height = rect->h;
+#endif
 		}
 
 		/* Figure out the view window */

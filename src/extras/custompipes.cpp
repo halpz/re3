@@ -337,7 +337,7 @@ ReadTweakValueTable(char *fp, InterpolatedValue &interp)
  * Neo Vehicle pipe
  */
 
-int32 VehiclePipeSwitch = VEHICLEPIPE_NEO;
+int32 VehiclePipeSwitch = VEHICLEPIPE_MATFX;
 float VehicleShininess = 0.7f;	// the default is a bit extreme
 float VehicleSpecularity = 1.0f;
 InterpolatedFloat Fresnel(0.4f);
@@ -365,6 +365,7 @@ AttachVehiclePipe(rw::Clump *clump)
  * Neo World pipe
  */
 
+bool LightmapEnable;
 float LightmapMult = 1.0f;
 InterpolatedFloat WorldLightmapBlend(1.0f);
 rw::ObjPipeline *worldPipe;
@@ -389,6 +390,7 @@ AttachWorldPipe(rw::Clump *clump)
  * Neo Gloss pipe
  */
 
+bool GlossEnable;
 float GlossMult = 1.0f;
 rw::ObjPipeline *glossPipe;
 
@@ -427,6 +429,7 @@ AttachGlossPipe(rw::Clump *clump)
  * Neo Rim pipes
  */
 
+bool RimlightEnable;
 float RimlightMult = 1.0f;
 InterpolatedColor RampStart(Color(0.0f, 0.0f, 0.0f, 1.0f));
 InterpolatedColor RampEnd(Color(1.0f, 1.0f, 1.0f, 1.0f));

@@ -684,7 +684,7 @@ psInitialize(void)
 	}
 	else if ( verInfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS )
 	{
-		if ( verInfo.dwMajorVersion > 4 || verInfo.dwMajorVersion == 4 && verInfo.dwMinorVersion == 1 )
+		if ( verInfo.dwMajorVersion > 4 || verInfo.dwMajorVersion == 4 && verInfo.dwMinorVersion != 0 )
 		{
 			debug("Operating System is Win98\n");
 			_dwOperatingSystemVersion = OS_WIN98;
@@ -1012,11 +1012,17 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 			RECT				rect;
 
 			/* redraw window */
+#ifndef MASTER
 			if (RwInitialised && (gGameState == GS_PLAYING_GAME || gGameState == GS_ANIMVIEWER))
 			{
 				RsEventHandler((gGameState == GS_PLAYING_GAME ? rsIDLE : rsANIMVIEWER), (void *)TRUE);
 			}
-
+#else
+			if (RwInitialised && gGameState == GS_PLAYING_GAME)
+			{
+				RsEventHandler(rsIDLE, (void *)TRUE);
+			}
+#endif
 			/* Manually resize window */
 			rect.left = rect.top = 0;
 			rect.bottom = newPos->bottom - newPos->top;
@@ -1369,14 +1375,20 @@ UINT GetBestRefreshRate(UINT width, UINT height, UINT depth)
 #endif	
 		if ( mode.Width == width && mode.Height == height && mode.Format == format )
 		{
-			if ( mode.RefreshRate == 0 )
+			if ( mode.RefreshRate == 0 ) {
+				// From VC
+#ifdef FIX_BUGS
+				d3d->Release();
+#endif
 				return 0;
+			}
 
 			if ( mode.RefreshRate < refreshRate && mode.RefreshRate >= 60 )
 				refreshRate = mode.RefreshRate;
 		}
 	}
 	
+	// From VC
 #ifdef FIX_BUGS
 	d3d->Release();
 #endif

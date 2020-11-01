@@ -631,7 +631,7 @@ CPed::ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer)
 
 		// BUG: This condition will always return true. Even fixing it won't work, because these states are unused.
 		// if (m_nPedState != PED_PASSENGER || m_nPedState != PED_TAXI_PASSENGER) {
-			CPed::SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
+			SetDie(ANIM_KO_SHOT_FRONT1, 4.0f, 0.0f);
 		// }
 
 		bBodyPartJustCameOff = true;
@@ -814,15 +814,15 @@ CPed::Avoid(void)
 					// Get distance to ped we want to avoid
 					CVector2D distToPed = CVector2D(nearestPed->GetPosition()) - testPosition;
 
-					if (distToPed.Magnitude() <= 1.0f && CPed::OurPedCanSeeThisOne((CEntity*)nearestPed)) {
+					if (distToPed.Magnitude() <= 1.0f && OurPedCanSeeThisOne((CEntity*)nearestPed)) {
 						m_nPedStateTimer = CTimer::GetTimeInMilliseconds()
 							+ 500 + (m_randomSeed + 3 * CTimer::GetFrameCounter())
 							% 1000 / 5;
 
 						m_fRotationDest += DEGTORAD(45.0f);
 						if (!bIsLooking) {
-							CPed::SetLookFlag(nearestPed, false);
-							CPed::SetLookTimer(CGeneral::GetRandomNumberInRange(500, 800));
+							SetLookFlag(nearestPed, false);
+							SetLookTimer(CGeneral::GetRandomNumberInRange(500, 800));
 						}
 					}
 				}
@@ -861,8 +861,7 @@ CPed::ClearLookFlag(void) {
 			m_lookTimer = CTimer::GetTimeInMilliseconds() + 4000;
 
 		if (m_nPedState == PED_LOOK_HEADING || m_nPedState == PED_LOOK_ENTITY) {
-			RestorePreviousState();
-			ClearLookFlag();
+			ClearLook();
 		}
 	}
 }
@@ -985,7 +984,7 @@ CPed::Attack(void)
 						weaponAnimAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ourWeapon->m_Anim2ToPlay, 8.0f);
 					}
 
-					weaponAnimAssoc->SetFinishCallback(CPed::FinishedAttackCB, this);
+					weaponAnimAssoc->SetFinishCallback(FinishedAttackCB, this);
 					weaponAnimAssoc->SetRun();
 
 					if (weaponAnimAssoc->currentTime == weaponAnimAssoc->hierarchy->totalLength)
@@ -2900,7 +2899,7 @@ CPed::ReactToAttack(CEntity *attacker)
 
 #ifdef VC_PED_PORTS
 	if (m_nPedState == PED_DRIVING && InVehicle()
-		&& (m_pMyVehicle->pDriver == this || m_pMyVehicle->pDriver && m_pMyVehicle->pDriver->m_nPedState == PED_DRIVING)) {
+		&& (m_pMyVehicle->pDriver == this || m_pMyVehicle->pDriver && m_pMyVehicle->pDriver->m_nPedState == PED_DRIVING && m_pMyVehicle->pDriver->m_objective != OBJECTIVE_LEAVE_CAR_AND_DIE)) {
 
 		if (m_pMyVehicle->VehicleCreatedBy == RANDOM_VEHICLE
 			&& (m_pMyVehicle->GetStatus() == STATUS_SIMPLE || m_pMyVehicle->GetStatus() == STATUS_PHYSICS)
@@ -4435,11 +4434,11 @@ CPed::SetEvasiveStep(CEntity *reason, uint8 animType)
 	bool vehPressedHorn = false;
 
 	if (neededTurn > PI)
-		neededTurn = 2 * PI - neededTurn;
+		neededTurn = TWOPI - neededTurn;
 
 	CVehicle *veh = (CVehicle*)reason;
 	if (reason->IsVehicle() && veh->m_vehType == VEHICLE_TYPE_CAR) {
-		if (veh->m_nCarHornTimer) {
+		if (veh->m_nCarHornTimer != 0) {
 			vehPressedHorn = true;
 			if (!IsPlayer())
 				animType = 1;
@@ -4459,7 +4458,7 @@ CPed::SetEvasiveStep(CEntity *reason, uint8 animType)
 			angleToFace += PI;
 
 			if (angleToFace > PI)
-				angleToFace -=  2*PI;
+				angleToFace -=  TWOPI;
 
 			// We don't want to run towards car's direction
 			float dangerZone = angleToFace - vehDirection;
@@ -4467,16 +4466,15 @@ CPed::SetEvasiveStep(CEntity *reason, uint8 animType)
 
 			// So, add or subtract 90deg (jump to left/right) according to that
 			if (dangerZone <= 0.0f)
-				angleToFace = 0.5f*PI + vehDirection;
+				angleToFace = HALFPI + vehDirection;
 			else
-				angleToFace = vehDirection - 0.5f*PI;
+				angleToFace = vehDirection - HALFPI;
 
-			if (animType == 2)
-				stepAnim = ANIM_HANDSCOWER;
-			else if (animType < 2)
+			stepAnim = NUM_ANIMS;
+			if (animType == 0 || animType == 1)
 				stepAnim = ANIM_EV_STEP;
-			else
-				stepAnim = NUM_ANIMS;
+			else if (animType == 2)
+				stepAnim = ANIM_HANDSCOWER;
 		}
 		if (!RpAnimBlendClumpGetAssociation(GetClump(), stepAnim)) {
 			CAnimBlendAssociation *stepAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, stepAnim, 8.0f);
@@ -4506,7 +4504,7 @@ CPed::SetEvasiveDive(CPhysical *reason, uint8 onlyRandomJump)
 
 	angleToFace = m_fRotationCur;
 	CVehicle *veh = (CVehicle*) reason;
-	if (reason->IsVehicle() && veh->m_vehType == VEHICLE_TYPE_CAR && veh->m_nCarHornTimer && !IsPlayer()) {
+	if (reason->IsVehicle() && veh->m_vehType == VEHICLE_TYPE_CAR && veh->m_nCarHornTimer != 0 && !IsPlayer()) {
 		onlyRandomJump = true;
 	}
 
@@ -8341,7 +8339,7 @@ CPed::KillPedWithCar(CVehicle *car, float impulse)
 			CPad::GetPad(0)->StartShake(40000 / shakeFreq, shakeFreq);
 		}
 		bIsStanding = false;
-		damageDir = CPed::GetLocalDirection(-m_vecMoveSpeed);
+		damageDir = GetLocalDirection(-m_vecMoveSpeed);
 		vehModel = (CVehicleModelInfo *)CModelInfo::GetModelInfo(car->GetModelIndex());
 		vehColModel = vehModel->GetColModel();
 		float carRightAndDistDotProd = DotProduct(distVec, car->GetRight());
@@ -8477,7 +8475,7 @@ CPed::KillPedWithCar(CVehicle *car, float impulse)
 				pieceToDamage = PEDPIECE_MID;
 				break;
 		}
-		CPed::InflictDamage(car, killMethod, 1000.0f, pieceToDamage, damageDir);
+		InflictDamage(car, killMethod, 1000.0f, pieceToDamage, damageDir);
 
 		if (DyingOrDead()
 			&& bIsPedDieAnimPlaying && !m_pCollidingEntity) {
@@ -8507,8 +8505,8 @@ CPed::KillPedWithCar(CVehicle *car, float impulse)
 		else
 			damage = 30.0f;
 	
-		CPed::InflictDamage(car, WEAPONTYPE_RAMMEDBYCAR, damage, PEDPIECE_TORSO, fallDirection);
-		CPed::SetFall(1000, (AnimationId)(fallDirection + ANIM_KO_SKID_FRONT), true);
+		InflictDamage(car, WEAPONTYPE_RAMMEDBYCAR, damage, PEDPIECE_TORSO, fallDirection);
+		SetFall(1000, (AnimationId)(fallDirection + ANIM_KO_SKID_FRONT), true);
 
 		if (OnGround() && !m_pCollidingEntity &&
 		    (!IsPlayer() || bHasHitWall || car->GetModelIndex() == MI_TRAIN || m_vecDamageNormal.z < -0.8f)) {
@@ -9680,7 +9678,7 @@ CPed::ProcessControl(void)
 							} else if (CTimer::GetTimeInMilliseconds() >= CWorld::Players[CWorld::PlayerInFocus].m_nLastBumpPlayerCarTimer
 								|| m_nPedStateTimer >= CTimer::GetTimeInMilliseconds()) {
 
-								CPed::SetDirectionToWalkAroundObject(collidingVeh);
+								SetDirectionToWalkAroundObject(collidingVeh);
 								CWorld::Players[CWorld::PlayerInFocus].m_nLastBumpPlayerCarTimer = m_nPedStateTimer;
 
 							} else if (m_fleeFrom != collidingVeh) {
@@ -9906,7 +9904,7 @@ CPed::ProcessControl(void)
 						SetHeading(m_fRotationCur);
 
 						if (m_nPedState != PED_FALL && !bIsPedDieAnimPlaying) {
-							CPed::SetFall(1000, ANIM_KO_SKID_BACK, true);
+							SetFall(1000, ANIM_KO_SKID_BACK, true);
 						}
 						bIsInTheAir = false;
 					} else if (m_vecDamageNormal.z > 0.4f) {
@@ -10217,19 +10215,19 @@ CPed::ProcessControl(void)
 					Flee();
 					break;
 				case PED_FOLLOW_PATH:
-					CPed::FollowPath();
+					FollowPath();
 					break;
 				case PED_PAUSE:
-					CPed::Pause();
+					Pause();
 					break;
 				case PED_ATTACK:
-					CPed::Attack();
+					Attack();
 					break;
 				case PED_FIGHT:
-					CPed::Fight();
+					Fight();
 					break;
 				case PED_CHAT:
-					CPed::Chat();
+					Chat();
 					break;
 				case PED_AIM_GUN:
 					if (m_pPointGunAt && m_pPointGunAt->IsPed()
@@ -14606,11 +14604,11 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 		if (!collidingEnt->IsBuilding())
 			((CPhysical*)collidingEnt)->AddCollisionRecord(this);
 
-		if (ourCollidedSpheres > 0 && (collidingEnt->IsBuilding() || collidingEnt->IsStatic())) {
+		if (ourCollidedSpheres > 0 && (collidingEnt->IsBuilding() || collidingEnt->GetIsStatic())) {
 			bHasHitWall = true;
 		}
 	}
-	if (collidingEnt->IsBuilding() || collidingEnt->IsStatic()) {
+	if (collidingEnt->IsBuilding() || collidingEnt->GetIsStatic()) {
 
 		if (bWasStanding) {
 			CVector sphereNormal;
@@ -15956,7 +15954,7 @@ CPed::SeekCar(void)
 				} else {
 					m_fRotationCur = m_fRotationDest;
 					if (!bVehEnterDoorIsBlocked) {
-						vehToSeek->bIsStatic = false;
+						vehToSeek->SetIsStatic(false);
 						if (m_objective == OBJECTIVE_SOLICIT_VEHICLE) {
 							SetSolicit(1000);
 						} else if (m_objective == OBJECTIVE_BUY_ICE_CREAM) {
@@ -15982,7 +15980,7 @@ CPed::SeekCar(void)
 									if (m_vehEnterType == CAR_DOOR_RF && vehToSeek->pPassengers[0]) {
 										if (vehToSeek->pPassengers[0]->bDontDragMeOutCar) {
 											if (IsPlayer())
-												CPed::SetEnterCar(vehToSeek, m_vehEnterType);
+												SetEnterCar(vehToSeek, m_vehEnterType);
 										} else {
 											SetCarJack(vehToSeek);
 										}
@@ -16152,15 +16150,15 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 				case HITLEVEL_LOW:
 #ifndef VC_PED_PORTS
 					if (direction == 2) {
-						CPed::SetFall(1000, ANIM_KO_SKID_BACK, false);
+						SetFall(1000, ANIM_KO_SKID_BACK, false);
 						return;
 					}
 #else
 					if (direction == 2 && (!IsPlayer() || ((CGeneral::GetRandomNumber() & 1) && m_fHealth < 30.0f))) {
-						CPed::SetFall(1000, ANIM_KO_SKID_BACK, false);
+						SetFall(1000, ANIM_KO_SKID_BACK, false);
 						return;
 					} else if (direction != 2 && !IsPlayer() && (CGeneral::GetRandomNumber() & 1) && m_fHealth < 30.0f) {
-						CPed::SetFall(1000, ANIM_KO_SHOT_STOM, false);
+						SetFall(1000, ANIM_KO_SHOT_STOM, false);
 						return;
 					}	
 #endif
@@ -16637,7 +16635,7 @@ CPed::SpawnFlyingComponent(int pedNode, int8 direction)
 	obj->m_fElasticity = 0.03f;
 	obj->m_fBuoyancy = m_fMass*GRAVITY/0.75f;
 	obj->ObjectCreatedBy = TEMP_OBJECT;
-	obj->bIsStatic = false;
+	obj->SetIsStatic(false);
 	obj->bIsPickup = false;
 	obj->m_nSpecialCollisionResponseCases = COLLRESPONSE_SMALLBOX;
 
@@ -17366,12 +17364,12 @@ CPed::SetExitBoat(CVehicle *boat)
 	CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 100.0f);
 	if (boat->GetModelIndex() == MI_SPEEDER && boat->IsUpsideDown()) {
 		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_CRAWLOUT_RHS, 8.0f);
-		m_pVehicleAnim->SetFinishCallback(CPed::PedSetOutCarCB, this);
+		m_pVehicleAnim->SetFinishCallback(PedSetOutCarCB, this);
 		m_vehEnterType = CAR_DOOR_RF;
 		m_nPedState = PED_EXIT_CAR;
 	} else {
 		m_vehEnterType = CAR_DOOR_RF;
-		CPed::PedSetOutCarCB(nil, this);
+		PedSetOutCarCB(nil, this);
 		bIsStanding = true;
 		m_pCurSurface = boat;
 		m_pCurSurface->RegisterReference((CEntity**)&m_pCurSurface);

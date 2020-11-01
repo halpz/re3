@@ -783,15 +783,17 @@ CMenuManager::Draw()
 	CFont::SetJustifyOn();
 	CFont::SetBackGroundOnlyTextOn();
 #ifdef GTA3_1_1_PATCH
+#ifdef DRAW_MENU_VERSION_TEXT
 	CFont::SetColor(CRGBA(235, 170, 50, FadeIn(255)));
 	CFont::SetRightJustifyOn();
 	CFont::SetFontStyle(FONT_HEADING);
 	CFont::SetScale(MENU_X(0.7f), MENU_Y(0.5f));
-	CFont::SetWrapx(SCREEN_WIDTH);
+	CFont::SetWrapx(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
 	CFont::SetRightJustifyWrap(0.0f);
 	strcpy(gString, "V1.1");
 	AsciiToUnicode(gString, gUString);
 	CFont::PrintString(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 45, gUString);
+#endif
 #endif
 	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
 	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENUACTION_WIDTH));
@@ -873,7 +875,7 @@ CMenuManager::Draw()
 #endif
 	}
 
-	CFont::SetCentreSize(SCREEN_WIDTH);
+	CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
 
 #ifdef PS2_LIKE_MENU
 	bool itemsAreSelectable = !bottomBarActive;
@@ -3575,11 +3577,11 @@ CMenuManager::MessageScreen(const char *text)
 	CFont::SetPropOn();
 	CFont::SetJustifyOn();
 	CFont::SetBackGroundOnlyTextOn();
-	CFont::SetWrapx(SCREEN_WIDTH - StretchX(170.0f));
-	CFont::SetRightJustifyWrap(SCREEN_WIDTH - StretchX(170.0f));
+	CFont::SetWrapx(SCREEN_WIDTH - StretchX(170.0f)); // not used
+	CFont::SetRightJustifyWrap(SCREEN_WIDTH - StretchX(170.0f)); // not used
 	CSprite2d::DrawRect(CRect(StretchX(120.0f), StretchY(150.0f), SCREEN_WIDTH - StretchX(120.0f), SCREEN_HEIGHT - StretchY(220.0f)), CRGBA(50, 50, 50, 210));
 	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
-	CFont::SetCentreSize(SCREEN_STRETCH_X(380.0f));
+	CFont::SetCentreSize(SCREEN_SCALE_X(380.0f));
 	CFont::SetCentreOn();
 	CFont::SetColor(CRGBA(255, 217, 106, 255));
 	CFont::SetScale(SCREEN_SCALE_X(SMALLTEXT_X_SCALE), SCREEN_SCALE_Y(SMALLTEXT_Y_SCALE));

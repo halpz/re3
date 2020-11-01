@@ -41,10 +41,9 @@ public:
 	CObject *GiveUsAPickUpObject(int32 handle);
 	bool Update(CPlayerPed *player, CVehicle *vehicle, int playerId);
 private:
-	bool IsMine() { return m_eType >= PICKUP_MINE_INACTIVE && m_eType <= PICKUP_FLOATINGPACKAGE_FLOATING; }
+	inline bool IsMine() { return m_eType >= PICKUP_MINE_INACTIVE && m_eType <= PICKUP_FLOATINGPACKAGE_FLOATING; }
 	inline bool CanBePickedUp(CPlayerPed *player);
-	void RemoveKeepType();
-	void Remove();
+	inline void Remove();
 };
 
 VALIDATE_SIZE(CPickup, 0x1C);

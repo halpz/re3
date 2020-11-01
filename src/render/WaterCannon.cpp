@@ -64,7 +64,7 @@ void CWaterCannon::Update_OncePerFrame(int16 index)
 	
 	if (CTimer::GetTimeInMilliseconds() > m_nTimeCreated + WATERCANNON_LIFETIME )
 	{
-		m_nCur = (m_nCur + 1) % -NUM_SEGMENTPOINTS;
+		m_nCur = (m_nCur + 1) % NUM_SEGMENTPOINTS;
 		m_abUsed[m_nCur] = false;
 	}
 	
@@ -124,7 +124,7 @@ void CWaterCannon::Render(void)
 	RwIm3DVertexSetV(&WaterCannonVertices[2], v);
 	RwIm3DVertexSetV(&WaterCannonVertices[3], v);
 	
-	int16 pointA = m_nCur % -NUM_SEGMENTPOINTS;
+	int16 pointA = m_nCur % NUM_SEGMENTPOINTS;
 	
 	int16 pointB = pointA - 1;
 	if ( (pointA - 1) < 0 )

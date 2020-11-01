@@ -346,7 +346,7 @@ void CWeather::AddRain()
 		pos.y = CGeneral::GetRandomNumberInRange(DROPLETS_TOP_OFFSET, screen_height - DROPLETS_TOP_OFFSET);
 		pos.z = 0.0f;
 		CParticle::AddParticle(PARTICLE_RAINDROP_2D, pos, CVector(0.0f, 0.0f, 0.0f), nil, CGeneral::GetRandomNumberInRange(0.5f, 0.9f),
-			colour, CGeneral::GetRandomNumberInRange(-10, 10), 360 - rain_angle + CGeneral::GetRandomNumberInRange(-30, 30), cur_frame, 0);
+			colour, CGeneral::GetRandomNumberInRange(-10, 10), 360 - rain_angle + CGeneral::GetRandomNumberInRange(-30, 30), cur_frame, 50);
 	}
 	int num_splash_attempts = (int)(3 * Rain) + 1;
 	int num_splashes = (int)(3 * Rain) + 4;

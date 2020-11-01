@@ -58,7 +58,7 @@ void CCarGenerator::DoInternalProcessing()
 		return;
 	if (CModelInfo::IsBoatModel(m_nModelIndex)){
 		CBoat* pBoat = new CBoat(m_nModelIndex, PARKED_VEHICLE);
-		pBoat->bIsStatic = false;
+		pBoat->SetIsStatic(false);
 		pBoat->bEngineOn = false;
 		CVector pos = m_vecPos;
 		if (pos.z <= -100.0f)
@@ -101,7 +101,7 @@ void CCarGenerator::DoInternalProcessing()
 			if (((CVehicleModelInfo*)CModelInfo::GetModelInfo(m_nModelIndex))->m_vehicleType != VEHICLE_TYPE_BIKE)
 				pCar = new CAutomobile(m_nModelIndex, PARKED_VEHICLE);
 
-			pCar->bIsStatic = false;
+			pCar->SetIsStatic(false);
 			pCar->bEngineOn = false;
 			pos.z += pCar->GetDistanceFromCentreOfMassToBaseOfModel();
 			pCar->SetPosition(pos);

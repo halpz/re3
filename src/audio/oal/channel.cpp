@@ -10,17 +10,49 @@
 
 extern bool IsFXSupported();
 
+ALuint alSources[MAXCHANNELS+MAX2DCHANNELS];
+ALuint alFilters[MAXCHANNELS+MAX2DCHANNELS];
+ALuint alBuffers[MAXCHANNELS+MAX2DCHANNELS];
+bool bChannelsCreated = false;
+
+void
+CChannel::InitChannels()
+{
+	alGenSources(MAXCHANNELS+MAX2DCHANNELS, alSources);
+	alGenBuffers(MAXCHANNELS+MAX2DCHANNELS, alBuffers);
+	if (IsFXSupported())
+		alGenFilters(MAXCHANNELS + MAX2DCHANNELS, alFilters);
+	bChannelsCreated = true;
+}
+
+void
+CChannel::DestroyChannels()
+{
+	if (bChannelsCreated) 
+	{
+		alDeleteSources(MAXCHANNELS + MAX2DCHANNELS, alSources);
+		memset(alSources, 0, sizeof(alSources));
+		alDeleteBuffers(MAXCHANNELS + MAX2DCHANNELS, alBuffers);
+		memset(alBuffers, 0, sizeof(alBuffers));
+		if (IsFXSupported())
+		{
+			alDeleteFilters(MAXCHANNELS + MAX2DCHANNELS, alFilters);
+			memset(alFilters, 0, sizeof(alFilters));
+		}
+		bChannelsCreated = false;
+	}
+}
+
+
 CChannel::CChannel()
 {
-	alSource  = AL_NONE;
-	alFilter  = AL_FILTER_NULL;
+	Data = nil;
+	DataSize = 0;
 	SetDefault();
 }
 
 void CChannel::SetDefault()
 {
-	alBuffer = AL_NONE;
-
 	Pitch = 1.0f;
 	Gain = 1.0f;
 	Mix = 0.0f;
@@ -39,25 +71,19 @@ void CChannel::Reset()
 	SetDefault();
 }
 
-void CChannel::Init(bool Is2D)
+void CChannel::Init(uint32 _id, bool Is2D)
 {
-	ASSERT(!HasSource());
-	alGenSources(1, &alSource);
+	id = _id;
 	if ( HasSource() )
 	{
-		alSourcei(alSource, AL_SOURCE_RELATIVE, AL_TRUE);
+		alSourcei(alSources[id], AL_SOURCE_RELATIVE, AL_TRUE);
 		if ( IsFXSupported() )
-			alSource3i(alSource, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
+			alSource3i(alSources[id], AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
 		
 		if ( Is2D )
 		{
-			alSource3f(alSource, AL_POSITION, 0.0f, 0.0f, 0.0f);
-			alSourcef (alSource, AL_GAIN, 1.0f);
-		}
-		else
-		{
-			if ( IsFXSupported() )
-				alGenFilters(1,&alFilter);
+			alSource3f(alSources[id], AL_POSITION, 0.0f, 0.0f, 0.0f);
+			alSourcef(alSources[id], AL_GAIN, 1.0f);
 		}
 	}
 }
@@ -69,39 +95,34 @@ void CChannel::Term()
 	{
 		if ( IsFXSupported() )
 		{
-			alSource3i(alSource, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
-			
-			if(alFilter != AL_FILTER_NULL)
-				alDeleteFilters(1,&alFilter);
+			alSource3i(alSources[id], AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
 		}
-
-		alDeleteSources(1, &alSource);
 	}
-	alSource = AL_NONE;
-	alFilter = AL_FILTER_NULL;
 }
 
 void CChannel::Start()
 {
 	if ( !HasSource() ) return;
-	
+	if ( !Data ) return;
+
+	alBufferData(alBuffers[id], AL_FORMAT_MONO16, Data, DataSize, Frequency);
 	if ( LoopPoints[0] != 0 && LoopPoints[0] != -1 )
-		alBufferiv(alBuffer, AL_LOOP_POINTS_SOFT, LoopPoints);
-	alSourcei   (alSource, AL_BUFFER, alBuffer);
-	alSourcePlay(alSource);
+		alBufferiv(alBuffers[id], AL_LOOP_POINTS_SOFT, LoopPoints);
+	alSourcei(alSources[id], AL_BUFFER, alBuffers[id]);
+	alSourcePlay(alSources[id]);
 }
 
 void CChannel::Stop()
 {
 	if ( HasSource() )
-		alSourceStop(alSource);
+		alSourceStop(alSources[id]);
 	
 	Reset();
 }
 
 bool CChannel::HasSource()
 {
-	return alSource != AL_NONE;
+	return alSources[id] != AL_NONE;
 }
 	
 bool CChannel::IsUsed()
@@ -109,7 +130,7 @@ bool CChannel::IsUsed()
 	if ( HasSource() )
 	{
 		ALint sourceState;
-		alGetSourcei(alSource, AL_SOURCE_STATE, &sourceState);
+		alGetSourcei(alSources[id], AL_SOURCE_STATE, &sourceState);
 		return sourceState == AL_PLAYING;
 	}
 	return false;
@@ -118,27 +139,24 @@ bool CChannel::IsUsed()
 void CChannel::SetPitch(float pitch)
 {
 	if ( !HasSource() ) return;
-	alSourcef(alSource, AL_PITCH, pitch);
+	alSourcef(alSources[id], AL_PITCH, pitch);
 }
 
 void CChannel::SetGain(float gain)
 {
 	if ( !HasSource() ) return;
-	alSourcef(alSource, AL_GAIN, gain);
+	alSourcef(alSources[id], AL_GAIN, gain);
 }
 	
 void CChannel::SetVolume(int32 vol)
 {
 	SetGain(ALfloat(vol) / MAX_VOLUME);
 }
-	
-void CChannel::SetSampleID(uint32 nSfx)
+
+void CChannel::SetSampleData(void *_data, size_t _DataSize, int32 freq)
 {
-	Sample = nSfx;
-}
-	
-void CChannel::SetFreq(int32 freq)
-{
+	Data = _data;
+	DataSize = _DataSize;
 	Frequency = freq;
 }
 	
@@ -150,7 +168,7 @@ void CChannel::SetCurrentFreq(uint32 freq)
 void CChannel::SetLoopCount(int32 loopCount) // fake. TODO:
 {
 	if ( !HasSource() ) return;
-	alSourcei(alSource, AL_LOOPING, loopCount == 1 ? AL_FALSE : AL_TRUE);
+	alSourcei(alSources[id], AL_LOOPING, loopCount == 1 ? AL_FALSE : AL_TRUE);
 }
 
 void CChannel::SetLoopPoints(ALint start, ALint end)
@@ -162,53 +180,49 @@ void CChannel::SetLoopPoints(ALint start, ALint end)
 void CChannel::SetPosition(float x, float y, float z)
 {
 	if ( !HasSource() ) return;
-	alSource3f(alSource, AL_POSITION, x, y, z);
+	alSource3f(alSources[id], AL_POSITION, x, y, z);
 }
 	
 void CChannel::SetDistances(float max, float min)
 {
 	if ( !HasSource() ) return;
-	alSourcef   (alSource, AL_MAX_DISTANCE,       max);
-	alSourcef   (alSource, AL_REFERENCE_DISTANCE, min);
-	alSourcef   (alSource, AL_MAX_GAIN, 1.0f);
-	alSourcef   (alSource, AL_ROLLOFF_FACTOR, 1.0f);
+	alSourcef   (alSources[id], AL_MAX_DISTANCE,       max);
+	alSourcef   (alSources[id], AL_REFERENCE_DISTANCE, min);
+	alSourcef   (alSources[id], AL_MAX_GAIN, 1.0f);
+	alSourcef   (alSources[id], AL_ROLLOFF_FACTOR, 1.0f);
 }
 	
-void CChannel::SetPan(uint32 pan)
+void CChannel::SetPan(int32 pan)
 {
 	SetPosition((pan-63)/64.0f, 0.0f, Sqrt(1.0f-SQR((pan-63)/64.0f)));
-}
-
-void CChannel::SetBuffer(ALuint buffer)
-{
-	alBuffer = buffer;
 }
 
 void CChannel::ClearBuffer()
 {
 	if ( !HasSource() ) return;
-	SetBuffer(AL_NONE);
-	alSourcei(alSource, AL_BUFFER, AL_NONE);
+	alSourcei(alSources[id], AL_BUFFER, AL_NONE);
+	Data = nil;
+	DataSize = 0;
 }
 
 void CChannel::SetReverbMix(ALuint slot, float mix)
 {
 	if ( !IsFXSupported() ) return;
 	if ( !HasSource() ) return;
-	if ( alFilter == AL_FILTER_NULL ) return;
+	if ( alFilters[id] == AL_FILTER_NULL ) return;
 	
 	Mix = mix;
-	EAX3_SetReverbMix(alFilter, mix);
-	alSource3i(alSource, AL_AUXILIARY_SEND_FILTER, slot, 0, alFilter);
+	EAX3_SetReverbMix(alFilters[id], mix);
+	alSource3i(alSources[id], AL_AUXILIARY_SEND_FILTER, slot, 0, alFilters[id]);
 }
 
 void CChannel::UpdateReverb(ALuint slot)
 {
 	if ( !IsFXSupported() ) return;
 	if ( !HasSource() ) return;
-	if ( alFilter == AL_FILTER_NULL ) return;
-	EAX3_SetReverbMix(alFilter, Mix);
-	alSource3i(alSource, AL_AUXILIARY_SEND_FILTER, slot, 0, alFilter);
+	if ( alFilters[id] == AL_FILTER_NULL ) return;
+	EAX3_SetReverbMix(alFilters[id], Mix);
+	alSource3i(alSources[id], AL_AUXILIARY_SEND_FILTER, slot, 0, alFilters[id]);
 }
 
 #endif

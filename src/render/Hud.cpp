@@ -41,13 +41,13 @@ CRGBA ODDJOB_COLOR(89, 115, 150, 255);
 CRGBA ODDJOB2_COLOR(156, 91, 40, 255);
 CRGBA MISSIONTITLE_COLOR(220, 172, 2, 255);
 
-wchar CHud::m_HelpMessage[256];
-wchar CHud::m_LastHelpMessage[256];
+wchar CHud::m_HelpMessage[HELP_MSG_LENGTH];
+wchar CHud::m_LastHelpMessage[HELP_MSG_LENGTH];
 uint32 CHud::m_HelpMessageState;
 uint32 CHud::m_HelpMessageTimer;
 int32 CHud::m_HelpMessageFadeTimer;
-wchar CHud::m_HelpMessageToPrint[256];
-float CHud::m_fHelpMessageTime;
+wchar CHud::m_HelpMessageToPrint[HELP_MSG_LENGTH];
+float CHud::m_HelpMessageDisplayTime;
 bool CHud::m_HelpMessageQuick;
 uint32 CHud::m_ZoneState;
 int32 CHud::m_ZoneFadeTimer;
@@ -247,7 +247,7 @@ void CHud::Draw()
 					rect.right = SCREEN_WIDTH/2 + SCREEN_SCALE_X(210.0f);
 					rect.bottom = SCREEN_HEIGHT/2 + SCREEN_SCALE_Y(210.0f);
 					Sprites[HUD_SITESNIPER].Draw(CRect(rect), CRGBA(255, 255, 255, 255),
-						0.99f, 0.99f,  0.01f, 0.99f,  0.99f, 0.01f,  0.1f, 0.01f);
+						0.99f, 0.99f,  0.01f, 0.99f,  0.99f, 0.01f,  0.01f, 0.01f);
 				}
 			}
 			RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void *)rwFILTERLINEAR);
@@ -336,7 +336,7 @@ void CHud::Draw()
 		CFont::SetScale(SCREEN_SCALE_X(0.4f), SCREEN_SCALE_Y(0.6f));
 		CFont::SetJustifyOff();
 		CFont::SetCentreOn();
-		CFont::SetCentreSize(SCREEN_WIDTH);
+		CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
 		CFont::SetPropOn();
 		CFont::SetFontStyle(FONT_BANK);
 
@@ -740,7 +740,7 @@ void CHud::Draw()
 						CFont::SetRightJustifyWrap(0.0f);
 						CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 						CFont::SetColor(CRGBA(244, 20, 20, 255));
-						CFont::SetWrapx(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
+						CFont::SetWrapx(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
 						CFont::SetPropOff();
 						CFont::SetBackGroundOnlyTextOn();
 
@@ -869,8 +869,8 @@ void CHud::Draw()
 				else
 					CFont::SetCentreOff();
 
-				CFont::SetWrapx(SCALE_AND_CENTER_X(CTheScripts::IntroTextLines[i].m_fWrapX));
-				CFont::SetCentreSize(SCALE_AND_CENTER_X(CTheScripts::IntroTextLines[i].m_fCenterSize));
+				CFont::SetWrapx(SCREEN_SCALE_X(CTheScripts::IntroTextLines[i].m_fWrapX));
+				CFont::SetCentreSize(SCREEN_SCALE_X(CTheScripts::IntroTextLines[i].m_fCenterSize));
 
 				if (CTheScripts::IntroTextLines[i].m_bBackground)
 					CFont::SetBackgroundOn();
@@ -957,12 +957,12 @@ void CHud::Draw()
 				CFont::SetScale(SCREEN_SCALE_X(1.8f), SCREEN_SCALE_Y(1.8f));
 				CFont::SetPropOn();
 				CFont::SetCentreOn();
-				CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(25.0f));
+				CFont::SetCentreSize(SCREEN_SCALE_X(590.0f));
 				CFont::SetFontStyle(FONT_HEADING);
 
 				// Appearently sliding text in here was abandoned very early, since this text is centered now.
 
-				if (BigMessageX[0] >= SCREEN_SCALE_FROM_RIGHT(20.0f)) {
+				if (BigMessageX[0] >= SCALE_AND_CENTER_X(620.0f)) {
 					BigMessageInUse[0] += CTimer::GetTimeStep();
 
 					if (BigMessageInUse[0] >= 120.0f) {
@@ -997,7 +997,7 @@ void CHud::Draw()
 			}
 			else {
 				BigMessageAlpha[0] = 0.0f;
-				BigMessageX[0] = SCREEN_SCALE_FROM_RIGHT(DEFAULT_SCREEN_WIDTH + 60.0f);
+				BigMessageX[0] = SCALE_AND_CENTER_X(-60.0f);
 				BigMessageInUse[0] = 1.0f;
 			}
 		}
@@ -1047,14 +1047,14 @@ void CHud::DrawAfterFade()
 		return;
 
 	if (m_HelpMessage[0]) {
-		if (!CMessages::WideStringCompare(m_HelpMessage, m_LastHelpMessage, 256)) {
+		if (!CMessages::WideStringCompare(m_HelpMessage, m_LastHelpMessage, HELP_MSG_LENGTH)) {
 			switch (m_HelpMessageState) {
 			case 0:
 				m_HelpMessageFadeTimer = 0;
 				m_HelpMessageState = 2;
 				m_HelpMessageTimer = 0;
-				CMessages::WideStringCopy(m_HelpMessageToPrint, m_HelpMessage, 256);
-				m_fHelpMessageTime = CMessages::GetWideStringLength(m_HelpMessage) * 0.05f + 3.0f;
+				CMessages::WideStringCopy(m_HelpMessageToPrint, m_HelpMessage, HELP_MSG_LENGTH);
+				m_HelpMessageDisplayTime = CMessages::GetWideStringLength(m_HelpMessage) * 0.05f + 3.0f;
 
 				if (TheCamera.m_ScreenReductionPercentage == 0.0f)
 					DMAudio.PlayFrontEndSound(SOUND_HUD, 0);
@@ -1069,7 +1069,7 @@ void CHud::DrawAfterFade()
 			default:
 				break;
 			}
-			CMessages::WideStringCopy(m_LastHelpMessage, m_HelpMessage, 256);
+			CMessages::WideStringCopy(m_LastHelpMessage, m_HelpMessage, HELP_MSG_LENGTH);
 		}
 
 		float fAlpha = 225.0f;
@@ -1079,7 +1079,7 @@ void CHud::DrawAfterFade()
 			case 1:
 				fAlpha = 225.0f;
 				m_HelpMessageFadeTimer = 600;
-				if (m_HelpMessageTimer > m_fHelpMessageTime * 1000.0f || m_HelpMessageQuick && m_HelpMessageTimer > 1500.0f) {
+				if (m_HelpMessageTimer > m_HelpMessageDisplayTime * 1000.0f || m_HelpMessageQuick && m_HelpMessageTimer > 1500.0f) {
 					m_HelpMessageFadeTimer = 600;
 					m_HelpMessageState = 3;
 				}
@@ -1105,7 +1105,7 @@ void CHud::DrawAfterFade()
 				if (m_HelpMessageFadeTimer < 0) {
 					m_HelpMessageState = 2;
 					m_HelpMessageFadeTimer = 0;
-					CMessages::WideStringCopy(m_HelpMessageToPrint, m_LastHelpMessage, 256);
+					CMessages::WideStringCopy(m_HelpMessageToPrint, m_LastHelpMessage, HELP_MSG_LENGTH);
 				}
 				fAlpha = m_HelpMessageFadeTimer * 0.001f * 225.0f;
 				break;
@@ -1166,8 +1166,8 @@ void CHud::DrawAfterFade()
 			else
 				CFont::SetCentreOff();
 
-			CFont::SetWrapx(SCALE_AND_CENTER_X(line.m_fWrapX));
-			CFont::SetCentreSize(SCALE_AND_CENTER_X(line.m_fCenterSize));
+			CFont::SetWrapx(SCREEN_SCALE_X(line.m_fWrapX));
+			CFont::SetCentreSize(SCREEN_SCALE_X(line.m_fCenterSize));
 			if (line.m_bBackground)
 				CFont::SetBackgroundOn();
 			else
@@ -1213,7 +1213,7 @@ void CHud::DrawAfterFade()
 		CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.5f));
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
-		CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(40.0f));
+		CFont::SetCentreSize(SCREEN_SCALE_X(600.0f));
 		CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
@@ -1229,7 +1229,7 @@ void CHud::DrawAfterFade()
 		CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.5f));
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
-		CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(20.0f));
+		CFont::SetCentreSize(SCREEN_SCALE_X(620.0f));
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
 		CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 
@@ -1286,7 +1286,7 @@ void CHud::DrawAfterFade()
 			CFont::SetScale(SCREEN_SCALE_X(1.0f), SCREEN_SCALE_Y(1.2f));
 			CFont::SetCentreOn();
 			CFont::SetPropOn();
-			CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(20.0f));
+			CFont::SetCentreSize(SCREEN_SCALE_X(620.0f));
 			CFont::SetColor(CRGBA(0, 0, 0, 255));
 			CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 
@@ -1371,7 +1371,7 @@ void CHud::GetRidOfAllHudMessages()
 	m_ZoneNameTimer = 0;
 	m_pZoneName = nil;
 
-	for (int i = 0; i < 256; i++) {
+	for (int i = 0; i < HELP_MSG_LENGTH; i++) {
 		m_HelpMessage[i] = 0;
 		m_LastHelpMessage[i] = 0;
 		m_HelpMessageToPrint[i] = 0;
@@ -1381,7 +1381,7 @@ void CHud::GetRidOfAllHudMessages()
 	m_HelpMessageFadeTimer = 0;
 	m_HelpMessageState = 0;
 	m_HelpMessageQuick = 0;
-	m_fHelpMessageTime = 1.0f;
+	m_HelpMessageDisplayTime = 1.0f;
 	m_VehicleName = nil;
 	m_pLastVehicleName = nil;
 	m_pVehicleNameToPrint = nil;
@@ -1389,7 +1389,7 @@ void CHud::GetRidOfAllHudMessages()
 	m_VehicleFadeTimer = 0;
 	m_VehicleState = 0;
 
-	for (int i = 0; i < 256; i++)
+	for (int i = 0; i < ARRAY_SIZE(m_Message); i++)
 		m_Message[i] = 0;
 
 	for (int i = 0; i < 6; i++) {
@@ -1464,7 +1464,7 @@ void CHud::ReInitialise() {
 
 wchar LastBigMessage[6][128];
 
-void CHud::SetBigMessage(wchar *message, int16 style)
+void CHud::SetBigMessage(wchar *message, uint16 style)
 {
 	int i = 0;
 
@@ -1495,10 +1495,10 @@ void CHud::SetBigMessage(wchar *message, int16 style)
 void CHud::SetHelpMessage(wchar *message, bool quick)
 {
 	if (!CReplay::IsPlayingBack()) {
-		CMessages::WideStringCopy(m_HelpMessage, message, 256);
+		CMessages::WideStringCopy(m_HelpMessage, message, HELP_MSG_LENGTH);
 		CMessages::InsertPlayerControlKeysInString(m_HelpMessage);
 
-		for (int i = 0; i < 256; i++) {
+		for (int i = 0; i < HELP_MSG_LENGTH; i++) {
 			m_LastHelpMessage[i] = 0;
 		}
 
@@ -1510,7 +1510,7 @@ void CHud::SetHelpMessage(wchar *message, bool quick)
 void CHud::SetMessage(wchar *message)
 {
 	int i = 0;
-	for (i = 0; i < 256; i++) {
+	for (i = 0; i < ARRAY_SIZE(m_Message); i++) {
 		if (message[i] == 0)
 			break;
 
@@ -1522,7 +1522,7 @@ void CHud::SetMessage(wchar *message)
 void CHud::SetPagerMessage(wchar *message)
 {
 	int i = 0;
-	for (i = 0; i < 256; i++) {
+	for (i = 0; i < ARRAY_SIZE(m_PagerMessage); i++) {
 		if (message[i] == 0)
 			break;
 

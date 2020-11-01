@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 #include "main.h"
 
 #include "General.h"
@@ -2192,8 +2192,8 @@ CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 						}
 
 						// move body cast
-						if(phys->IsStatic()){
-							phys->bIsStatic = false;
+						if(phys->GetIsStatic()){
+							phys->SetIsStatic(false);
 							phys->m_nStaticFrames = 0;
 							phys->ApplyMoveForce(m_vecMoveSpeed / Sqrt(speed));
 							phys->AddToMovingList();
@@ -3746,7 +3746,6 @@ CAutomobile::ProcessOpenDoor(uint32 component, uint32 anim, float time)
 	case ANIM_CAR_ROLLDOOR_LOW:
 		ProcessDoorOpenCloseAnimation(this, component, door, time, 0.1f, 0.6f, 0.95f);
 		break;
-		break;
 	case ANIM_CAR_GETOUT_LHS:
 	case ANIM_CAR_GETOUT_LOW_LHS:
 	case ANIM_CAR_GETOUT_RHS:
@@ -3760,6 +3759,7 @@ CAutomobile::ProcessOpenDoor(uint32 component, uint32 anim, float time)
 	case ANIM_CAR_PULLOUT_RHS:
 	case ANIM_CAR_PULLOUT_LOW_RHS:
 		OpenDoor(component, door, 1.0f);
+		break;
 	case ANIM_COACH_OPEN_L:
 	case ANIM_COACH_OPEN_R:
 		ProcessDoorOpenAnimation(this, component, door, time, 0.66f, 0.8f);
@@ -4385,7 +4385,7 @@ CAutomobile::SpawnFlyingComponent(int32 component, uint32 type)
 	obj->m_fElasticity = 0.1f;
 	obj->m_fBuoyancy = obj->m_fMass*GRAVITY/0.75f;
 	obj->ObjectCreatedBy = TEMP_OBJECT;
-	obj->bIsStatic = false;
+	obj->SetIsStatic(false);
 	obj->bIsPickup = false;
 	obj->bUseVehicleColours = true;
 	obj->m_colour1 = m_currentColour1;

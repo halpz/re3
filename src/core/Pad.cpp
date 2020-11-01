@@ -2399,7 +2399,7 @@ bool CPad::GetAnaloguePadLeftJustUp(void)
 
 	if ( X == 0 && oldfStickX < 0 )
 	{
-		oldfStickX = X;
+		oldfStickX = 0;
 
 		return true;
 	}
@@ -2419,7 +2419,7 @@ bool CPad::GetAnaloguePadRightJustUp(void)
 
 	if ( X == 0 && oldfStickX > 0 )
 	{
-		oldfStickX = X;
+		oldfStickX = 0;
 
 		return true;
 	}
@@ -2593,7 +2593,7 @@ void CPad::PrintErrorMessage(void)
 		CFont::SetScale(0.85f, 1.0f);
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-		CFont::SetCentreSize(SCREEN_WIDTH - 20);
+		CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - 20));
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
 		CFont::SetColor(CRGBA(255, 255, 200, 200));
@@ -2610,7 +2610,7 @@ void CPad::PrintErrorMessage(void)
 		CFont::SetScale(0.85f, 1.0f);
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-		CFont::SetCentreSize(SCREEN_WIDTH - 20);
+		CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - 20));
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
 		CFont::SetColor(CRGBA(255, 255, 200, 200));

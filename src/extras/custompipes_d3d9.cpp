@@ -190,6 +190,11 @@ worldRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	using namespace rw::d3d;
 	using namespace rw::d3d9;
 
+	if(!LightmapEnable){
+		defaultRenderCB_Shader(atomic, header);
+		return;
+	}
+
 	int vsBits;
 	setStreamSource(0, header->vertexStream[0].vertexBuffer, 0, header->vertexStream[0].stride);
 	setIndices(header->indexBuffer);
@@ -297,6 +302,9 @@ glossRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	using namespace rw::d3d;
 	using namespace rw::d3d9;
 
+	if(!GlossEnable)
+		return;
+
 	setVertexShader(neoGloss_VS);
 	setPixelShader(neoGloss_PS);
 
@@ -395,6 +403,11 @@ rimRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	using namespace rw::d3d;
 	using namespace rw::d3d9;
 
+	if(!RimlightEnable){
+		defaultRenderCB_Shader(atomic, header);
+		return;
+	}
+
 	int vsBits;
 	setStreamSource(0, header->vertexStream[0].vertexBuffer, 0, header->vertexStream[0].stride);
 	setIndices(header->indexBuffer);
@@ -432,6 +445,11 @@ rimSkinRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	using namespace rw;
 	using namespace rw::d3d;
 	using namespace rw::d3d9;
+
+	if(!RimlightEnable){
+		skinRenderCB(atomic, header);
+		return;
+	}
 
 	int vsBits;
 

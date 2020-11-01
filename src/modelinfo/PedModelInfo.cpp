@@ -218,7 +218,6 @@ CPedModelInfo::CreateHitColModel(void)
 {
 	RwObjectNameAssociation nameAssoc;
 	RwObjectIdAssociation idAssoc;
-	CVector center;
 	RwFrame *nodeFrame;
 	CColModel *colmodel = new CColModel;
 	CColSphere *spheres = (CColSphere*)RwMalloc(NUMPEDINFONODES*sizeof(CColSphere));
@@ -251,23 +250,17 @@ CPedModelInfo::CreateHitColModel(void)
 				if(RwFrameGetParent(nodeFrame) == root)
 					break;
 			}
-			center.x = mat->pos.x + m_pColNodeInfos[i].x;
-			center.y = mat->pos.y + 0.0f;
-			center.z = mat->pos.z + m_pColNodeInfos[i].z;
-			spheres[i].Set(radius, center, SURFACE_PED, m_pColNodeInfos[i].pieceType);
+			spheres[i].center = mat->pos + CVector(m_pColNodeInfos[i].x, 0.0f, m_pColNodeInfos[i].z);
+			spheres[i].radius = radius;
+			spheres[i].surface = SURFACE_PED;
+			spheres[i].piece = m_pColNodeInfos[i].pieceType;
 		}
 	}
 	RwMatrixDestroy(mat);
 	colmodel->spheres = spheres;
 	colmodel->numSpheres = NUMPEDINFONODES;
-	center.x = center.y = center.z = 0.0f;
-	colmodel->boundingSphere.Set(2.0f, center, 0, 0);
-	CVector min, max;
-	min.x = min.y = -0.5f;
-	min.z = -1.2f;
-	max.x = max.y = 0.5f;
-	max.z = 1.2f;
-	colmodel->boundingBox.Set(min, max, 0, 0);
+	colmodel->boundingSphere.Set(2.0f, CVector(0.0f, 0.0f, 0.0f), SURFACE_DEFAULT, 0);
+	colmodel->boundingBox.Set(CVector(-0.5f, -0.5f, -1.2f), CVector(0.5f, 0.5f, 1.2f), SURFACE_DEFAULT, 0);
 	colmodel->level = LEVEL_GENERIC;
 	m_hitColModel = colmodel;
 }
@@ -303,9 +296,7 @@ CPedModelInfo::AnimatePedColModel(CColModel* colmodel, RwFrame* frame)
 					break;
 			}
 
-			spheres[i].center.x = mat->pos.x + m_pColNodeInfos[i].x;
-			spheres[i].center.y = mat->pos.y + 0.0f;
-			spheres[i].center.z = mat->pos.z + m_pColNodeInfos[i].z;
+			spheres[i].center = mat->pos + CVector(m_pColNodeInfos[i].x, 0.0f, m_pColNodeInfos[i].z);
 		}
 	}
 
@@ -316,7 +307,6 @@ CPedModelInfo::AnimatePedColModel(CColModel* colmodel, RwFrame* frame)
 void
 CPedModelInfo::CreateHitColModelSkinned(RpClump *clump)
 {
-	CVector center;
 	RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(clump);
 	CColModel *colmodel = new CColModel;
 	CColSphere *spheres = (CColSphere*)RwMalloc(NUMPEDINFONODES*sizeof(CColSphere));
@@ -335,23 +325,17 @@ CPedModelInfo::CreateHitColModelSkinned(RpClump *clump)
 		RwV3d pos = { 0.0f, 0.0f, 0.0f };
 		RwV3dTransformPoints(&pos, &pos, 1, mat);
 
-		center.x = pos.x + m_pColNodeInfos[i].x;
-		center.y = pos.y + 0.0f;
-		center.z = pos.z + m_pColNodeInfos[i].z;
-		spheres[i].Set(m_pColNodeInfos[i].radius, center, SURFACE_PED, m_pColNodeInfos[i].pieceType);
+		spheres[i].center = pos + CVector(m_pColNodeInfos[i].x, 0.0f, m_pColNodeInfos[i].z);
+		spheres[i].radius = m_pColNodeInfos[i].radius;
+		spheres[i].surface = SURFACE_PED;
+		spheres[i].piece = m_pColNodeInfos[i].pieceType;
 	}
 	RwMatrixDestroy(invmat);
 	RwMatrixDestroy(mat);
 	colmodel->spheres = spheres;
 	colmodel->numSpheres = NUMPEDINFONODES;
-	center.x = center.y = center.z = 0.0f;
-	colmodel->boundingSphere.Set(2.0f, center, 0, 0);
-	CVector min, max;
-	min.x = min.y = -0.5f;
-	min.z = -1.2f;
-	max.x = max.y = 0.5f;
-	max.z = 1.2f;
-	colmodel->boundingBox.Set(min, max, 0, 0);
+	colmodel->boundingSphere.Set(2.0f, CVector(0.0f, 0.0f, 0.0f), SURFACE_DEFAULT, 0);
+	colmodel->boundingBox.Set(CVector(-0.5f, -0.5f, -1.2f), CVector(0.5f, 0.5f, 1.2f), SURFACE_DEFAULT, 0);
 	colmodel->level = LEVEL_GENERIC;
 	m_hitColModel = colmodel;
 }
@@ -379,9 +363,7 @@ CPedModelInfo::AnimatePedColModelSkinned(RpClump *clump)
 		RwV3d pos = { 0.0f, 0.0f, 0.0f };
 		RwV3dTransformPoints(&pos, &pos, 1, mat);
 
-		spheres[i].center.x = pos.x + m_pColNodeInfos[i].x;
-		spheres[i].center.y = pos.y + 0.0f;
-		spheres[i].center.z = pos.z + m_pColNodeInfos[i].z;
+		spheres[i].center = pos + CVector(m_pColNodeInfos[i].x, 0.0f, m_pColNodeInfos[i].z);
 	}
 	RwMatrixDestroy(invmat);
 	RwMatrixDestroy(mat);
