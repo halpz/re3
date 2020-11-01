@@ -125,7 +125,7 @@ public:
 	CMovingThing *m_pNext;
 	CMovingThing *m_pPrev;
 	int16 m_nType;
-	int16 m_nHidden;
+	int16 m_farAway;
 	CVector m_vecPosn;
 	CEntity* m_pEntity;
 

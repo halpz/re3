@@ -167,6 +167,22 @@ enum Config {
 // any debug stuff that is only left in mobile, is not in MASTER
 //#define MASTER
 
+// once and for all:
+// pc: FINAL & MASTER
+// mobile: FINAL
+
+// MASTER builds must be FINAL
+#ifdef MASTER
+#define FINAL
+#endif
+
+// quality of life fixes that should also be in FINAL
+#define NASTY_GAME	// nasty game for all languages
+#define NO_CDCHECK
+
+// those infamous texts
+#define DRAW_GAME_VERSION_TEXT
+
 #if defined GTA_PS2
 #	define GTA_PS2_STUFF
 #	define RANDOMSPLASH
@@ -188,9 +204,13 @@ enum Config {
 
 #ifdef MASTER
 	// only in master builds
+	#undef DRAW_GAME_VERSION_TEXT
 #else
 	// not in master builds
 	#define VALIDATE_SAVE_SIZE
+
+	#define NO_MOVIES	// disable intro videos
+	#define DEBUGMENU
 #endif
 
 #ifdef FINAL
@@ -198,11 +218,7 @@ enum Config {
 #	define USE_MY_DOCUMENTS	// use my documents directory for user files
 #else
 	// not in any game
-#	define NASTY_GAME	// nasty game for all languages
-#	define NO_MOVIES	// disable intro videos
-#	define NO_CDCHECK
 #	define CHATTYSPLASH	// print what the game is loading
-#	define DEBUGMENU
 #	define TIMEBARS		// print debug timers
 #endif
 
@@ -223,7 +239,7 @@ enum Config {
 #define USE_TXD_CDIMAGE		// generate and load textures from txd.img
 #define PS2_ALPHA_TEST		// emulate ps2 alpha test 
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
-//#define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
+#define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
 //#define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
 //#define USE_TEXTURE_POOL
 //#define CUTSCENE_BORDERS_SWITCH

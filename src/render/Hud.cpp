@@ -351,7 +351,7 @@ void CHud::Draw()
 					rect.right = SCREEN_WIDTH/2 + xOffset;
 					rect.bottom = SCREEN_HEIGHT/2 + yOffset;
 					Sprites[sprite].Draw(CRect(rect), CRGBA(255, 255, 255, 255),
-						0.99f, 0.99f,  0.01f, 0.99f,  0.99f, 0.01f,  0.1f, 0.01f);
+						0.99f, 0.99f,  0.01f, 0.99f,  0.99f, 0.01f,  0.01f, 0.01f);
 
 					CVector dotPos;
 					float size = 25.0f;

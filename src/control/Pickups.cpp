@@ -1014,8 +1014,11 @@ CPickups::DoPickUpEffects(CEntity *entity)
 		float s = Sin((float)((CTimer::GetTimeInMilliseconds() + (uintptr)entity) & 0x7FF) * DEGTORAD(360.0f / 0x800));
 		float modifiedSin = 0.3f * (s + 1.0f);
 
-
+#ifdef FIX_BUGS
+		int16 colorId = 0;
+#else
 		int16 colorId;
+#endif
 		bool doInnerGlow = false;
 		bool doOuterGlow = true;
 
@@ -1029,7 +1032,6 @@ CPickups::DoPickUpEffects(CEntity *entity)
 			doInnerGlow = true;
 			doOuterGlow = false;
 		} else if (entity->GetModelIndex() == MI_PICKUP_INFO || entity->GetModelIndex() == MI_PICKUP_KILLFRENZY) {
-			colorId = WEAPONTYPE_TOTALWEAPONS + 2;
 			doInnerGlow = true;
 			doOuterGlow = false;
 		} else if (entity->GetModelIndex() == MI_PICKUP_HEALTH || entity->GetModelIndex() == MI_PICKUP_BONUS) {
