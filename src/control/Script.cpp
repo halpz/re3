@@ -2488,7 +2488,7 @@ int8 CRunningScript::ProcessOneCommand()
 		if (commands[command].position == -1)
 			strcat(commandInfo, commands[command].name + sizeof("COMMAND_") - 1);
 		for (int i = 0; commands[command].input[i] != ARGTYPE_NONE; i++) {
-			char tmp[16];
+			char tmp[32];
 			bool var = false;
 			int value;
 			switch (commands[command].input[i]) {
@@ -2552,7 +2552,7 @@ int8 CRunningScript::ProcessOneCommand()
 			m_nIp = ip;
 			ip = t;
 			for (int i = 0; commands[command].output[i] != ARGTYPE_NONE; i++) {
-				char tmp[16];
+				char tmp[32];
 				switch (commands[command].output[i]) {
 				case ARGTYPE_INT:
 				case ARGTYPE_PED_HANDLE:
