@@ -19094,7 +19094,7 @@ CPed::WarpPedIntoCar(CVehicle *car)
 	m_pMyVehicle->RegisterReference((CEntity **) &m_pMyVehicle);
 	m_carInObjective = car;
 	m_carInObjective->RegisterReference((CEntity **) &m_carInObjective);
-	SetPedState(m_nPedState);
+	SetPedState(PED_DRIVING);
 	bUsesCollision = false;
 	bIsInTheAir = false;
 	bVehExitWillBeInstant = true;

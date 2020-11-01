@@ -1859,9 +1859,9 @@ CVehicle::SetDriver(CPed *driver)
 	}
 
 	if(IsBike())
-		ApplyMoveForce(-0.2f*driver->m_fMass * GetUp());
+		ApplyMoveForce(-0.02f*driver->m_fMass * GetUp());
 	else
-		ApplyTurnForce(0.0f, 0.0f, -0.2f*driver->m_fMass,
+		ApplyTurnForce(0.0f, 0.0f, -0.02f*driver->m_fMass,
 			driver->GetPosition().x - GetPosition().x,
 			driver->GetPosition().y - GetPosition().y,
 			0.0f);
