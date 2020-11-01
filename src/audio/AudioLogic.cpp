@@ -2636,6 +2636,9 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 			case OLD_DOOR:
 				m_sQueueSample.m_nSampleIndex = SFX_OLD_CAR_DOOR_CLOSE;
 				break;
+			case NEW_DOOR:
+				m_sQueueSample.m_nSampleIndex = SFX_NEW_CAR_DOOR_CLOSE;
+				break;
 			case TRUCK_DOOR:
 				m_sQueueSample.m_nSampleIndex = SFX_TRUCK_DOOR_CLOSE;
 				break;
@@ -2647,7 +2650,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 				break;
 			}
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = event + 22;
+			m_sQueueSample.m_nCounter = event + 22; //originaly used m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i], which is same
 			if (params->m_pVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_HELI)
 				m_sQueueSample.m_nFrequency = 28062;
 			else
@@ -3867,7 +3870,7 @@ cAudioManager::ProcessJumbo(cVehicleParams* params)
 		} else {
 			ProcessJumboTaxi();
 		}
-	} else 	if (position <= TakeOffPoint + 300.0f) {
+	} else if (position <= TakeOffPoint + 300.0f) {
 		ProcessJumboTakeOff(plane);
 	} else if (position <= LandingPoint - 350.0f) {
 		ProcessJumboFlying();
