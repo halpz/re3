@@ -145,7 +145,6 @@ workspace "re3"
 		
 	filter "platforms:*librw_gl3_glfw*"
 		defines { "RW_GL3" }
-		staticruntime "Off"
 		includedirs { path.join(_OPTIONS["glewdir"], "include") }
 		if(not _OPTIONS["with-librw"]) then
 			libdirs { path.join(Librw, "lib/%{getsys(cfg.system)}-%{getarch(cfg.architecture)}-gl3/%{cfg.buildcfg}") }
@@ -210,8 +209,8 @@ project "librw"
 		libdirs { "/opt/local/lib" }
 		libdirs { "/usr/local/lib" }
 
-	filter "platforms:*librw_gl3_glfw*"
-		staticruntime "Off"
+	filter "platforms:*gl3_glfw*"
+		staticruntime "off"
 	
 	filter "platforms:*RW33*"
 		flags { "ExcludeFromBuild" }
@@ -307,6 +306,9 @@ project "re3"
 		characterset ("MBCS")
 		targetextension ".exe"
 		staticruntime "on"
+
+	filter "platforms:win*glfw*"
+		staticruntime "off"
 		
 	filter "platforms:win*oal"
 		includedirs { "vendor/openal-soft/include" }
