@@ -12,6 +12,8 @@
 #include "World.h"
 #include "Floater.h"
 #include "soundlist.h"
+#include "WaterLevel.h"
+#include "Timecycle.h"
 
 int16 CObject::nNoTempObjects;
 //int16 CObject::nBodyCastHealth = 1000;
@@ -128,13 +130,113 @@ CObject::Teleport(CVector vecPos)
 void
 CObject::Render(void)
 {
-	if(bDoNotRender)
+	if (bDoNotRender)
 		return;
 
-	if(m_nRefModelIndex != -1 && ObjectCreatedBy == TEMP_OBJECT && bUseVehicleColours){
+	if (m_nRefModelIndex != -1 && ObjectCreatedBy == TEMP_OBJECT && bUseVehicleColours) {
 		CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(m_nRefModelIndex);
 		assert(mi->GetModelType() == MITYPE_VEHICLE);
 		mi->SetVehicleColour(m_colour1, m_colour2);
+	}
+
+	float red = (0.8f * CTimeCycle::GetDirectionalRed() + CTimeCycle::GetAmbientRed_Obj()) * 165.75f;
+	float green = (0.8f * CTimeCycle::GetDirectionalGreen() + CTimeCycle::GetAmbientGreen_Obj()) * 165.75f;
+	float blue = (0.8f * CTimeCycle::GetDirectionalBlue() + CTimeCycle::GetAmbientBlue_Obj()) * 165.75f;
+
+	red = clamp(red, 0.0f, 255.0f);
+	green = clamp(green, 0.0f, 255.0f);
+	blue = clamp(blue, 0.0f, 255.0f);
+
+	int alpha = CGeneral::GetRandomNumberInRange(196, 225);
+
+	RwRGBA color = { (uint8)red, (uint8)green, (uint8)blue, (uint8)alpha };
+
+	if (this->GetModelIndex() == MI_YT_MAIN_BODY) {
+		float moveSpeedMagnitude = this->GetMoveSpeed().Magnitude();
+		if (moveSpeedMagnitude > 0.0f) {
+			float scaleMax = GetColModel()->boundingBox.max.y * 0.85f;
+
+			CVector dir = this->GetMoveSpeed() + 0.3f * this->GetRight() - 0.5f * this->GetForward();
+			dir.z += 0.05f * moveSpeedMagnitude;
+
+			CVector pos = scaleMax * this->GetForward() + 2.25f * this->GetRight() + this->GetPosition();
+
+			float fWaterLevel;
+			CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, &fWaterLevel, true);
+			pos.z = fWaterLevel + 0.75f;
+
+			CParticle::AddParticle(PARTICLE_BOAT_SPLASH, pos, dir, nil, 1.2f * moveSpeedMagnitude, color,
+				CGeneral::GetRandomNumberInRange(0.0f, 0.4f), CGeneral::GetRandomNumberInRange(0.0f, 45.0f), 0, 0);
+
+			float scaleMin = GetColModel()->boundingBox.min.y;
+
+			dir = this->GetMoveSpeed() - 0.5f * this->GetForward();
+			dir.z += 0.05f * moveSpeedMagnitude;
+
+			pos = scaleMin * this->GetForward() + 4.5f * this->GetRight() + this->GetPosition();
+
+			CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, &fWaterLevel, true);
+			pos.z = fWaterLevel + 0.55f;
+
+			CParticle::AddParticle(PARTICLE_BOAT_SPLASH, pos, dir, nil, 0.9f, color,
+				CGeneral::GetRandomNumberInRange(0.0f, 0.4f), CGeneral::GetRandomNumberInRange(0.0f, 45.0f), 0, 0);
+
+			pos = scaleMin * 1.1f * this->GetForward() + 2.25f * this->GetRight() + this->GetPosition();
+
+			CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, &fWaterLevel, true);
+			pos.z = fWaterLevel + 0.55f;
+
+			CParticle::AddParticle(PARTICLE_BOAT_SPLASH, pos, dir, nil, 0.9f, color,
+				CGeneral::GetRandomNumberInRange(0.0f, 0.4f), CGeneral::GetRandomNumberInRange(0.0f, 45.0f), 0, 0);
+
+			pos = scaleMin * 1.1f * this->GetForward() - 0.05f * this->GetRight() + this->GetPosition();
+
+			CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, &fWaterLevel, true);
+			pos.z = fWaterLevel + 0.55f;
+
+			CParticle::AddParticle(PARTICLE_BOAT_SPLASH, pos, dir, nil, 0.9f, color,
+				CGeneral::GetRandomNumberInRange(0.0f, 0.4f), CGeneral::GetRandomNumberInRange(0.0f, 45.0f), 0, 0);
+		}
+	}
+
+	if (this->GetModelIndex() == MI_YT_MAIN_BODY2) {
+		float moveSpeedMagnitude = this->GetMoveSpeed().Magnitude();
+		if (moveSpeedMagnitude > 0.0f) {
+			float scaleMax = GetColModel()->boundingBox.max.y * 0.85f;
+
+			CVector dir = this->GetMoveSpeed() - 0.3f * this->GetRight() - 0.5f * this->GetForward();
+			dir.z += 0.05f * moveSpeedMagnitude;
+
+			CVector pos = scaleMax * this->GetForward() - 2.25f * this->GetRight() + this->GetPosition();
+
+			float fWaterLevel;
+			CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, &fWaterLevel, true);
+			pos.z = fWaterLevel + 0.75f;
+
+			CParticle::AddParticle(PARTICLE_BOAT_SPLASH, pos, dir, nil, 1.2f * moveSpeedMagnitude, color,
+				CGeneral::GetRandomNumberInRange(0.0f, 0.4f), CGeneral::GetRandomNumberInRange(0.0f, 45.0f), 0, 0);
+
+			float scaleMin = GetColModel()->boundingBox.min.y;
+
+			dir = this->GetMoveSpeed() - 0.5f * this->GetForward();
+			dir.z += 0.05f * moveSpeedMagnitude;
+
+			pos = scaleMin * this->GetForward() - 4.5f * this->GetRight() + this->GetPosition();
+
+			CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, &fWaterLevel, true);
+			pos.z = fWaterLevel + 0.55f;
+
+			CParticle::AddParticle(PARTICLE_BOAT_SPLASH, pos, dir, nil, 0.9f, color,
+				CGeneral::GetRandomNumberInRange(0.0f, 0.4f), CGeneral::GetRandomNumberInRange(0.0f, 45.0f), 0, 0);
+
+			pos = scaleMin * 1.1f * this->GetForward() - 2.25f * this->GetRight() + this->GetPosition();
+
+			CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, &fWaterLevel, true);
+			pos.z = fWaterLevel + 0.55f;
+
+			CParticle::AddParticle(PARTICLE_BOAT_SPLASH, pos, dir, nil, 0.9f, color,
+				CGeneral::GetRandomNumberInRange(0.0f, 0.4f), CGeneral::GetRandomNumberInRange(0.0f, 45.0f), 0, 0);
+		}
 	}
 
 	CEntity::Render();
