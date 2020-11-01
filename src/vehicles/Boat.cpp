@@ -48,7 +48,7 @@ CBoat::CBoat(int mi, uint8 owner) : CVehicle(owner)
 	m_fSteeringLeftRight = 0.0f;
 	m_nPadID = 0;
 	m_fMovingRotation = 0.0f;
-	SetModelIndex(mi);
+	CBoat::SetModelIndex(mi);
 
 	pHandling = mod_HandlingManager.GetHandlingData((eHandlingId)minfo->m_handlingId);
 	minfo->ChooseVehicleColour(m_currentColour1, m_currentColour2);
