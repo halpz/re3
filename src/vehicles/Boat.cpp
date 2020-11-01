@@ -60,7 +60,7 @@ CBoat::CBoat(int mi, uint8 owner) : CVehicle(owner)
 	m_fMovingSpeed = 0.0f;
 	m_skimmerThingTimer = 0.0f;
 	m_nPoliceShoutTimer = CTimer::GetTimeInMilliseconds();
-	CBoat::SetModelIndex(mi);
+	SetModelIndex(mi);
 
 	pHandling = mod_HandlingManager.GetHandlingData((eHandlingId)minfo->m_handlingId);
 	pFlyingHandling = mod_HandlingManager.GetFlyingPointer((eHandlingId)minfo->m_handlingId);
