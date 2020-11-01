@@ -79,7 +79,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	bBigWheels = false;
 	bWaterTight = false;
 
-	SetModelIndex(id);
+	CAutomobile::SetModelIndex(id);
 
 	// Already done in CVehicle...
 	switch(GetModelIndex()){
