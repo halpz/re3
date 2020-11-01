@@ -2696,8 +2696,10 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 #ifdef MISSION_REPLAY
 		if (m_bMissionFlag) {
 			CPlayerInfo* pPlayerInfo = &CWorld::Players[CWorld::PlayerInFocus];
+#if 0 // makeing autosave is pointless and is a bit buggy
 			if (pPlayerInfo->m_pPed->GetPedState() != PED_DEAD && pPlayerInfo->m_WBState == WBSTATE_PLAYING && !m_bDeatharrestExecuted)
 				SaveGameForPause(1);
+#endif
 			oldTargetX = oldTargetY = 0.0f;
 			if (AllowMissionReplay == 1)
 				AllowMissionReplay = 2;
