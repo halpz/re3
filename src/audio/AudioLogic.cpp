@@ -179,7 +179,7 @@ cAudioManager::PostInitialiseGameSpecificSetup()
 
 	ResetAudioLogicTimers(CTimer::GetTimeInMilliseconds());
 	m_bIsPlayerShutUp = false;
-	m_nPlayerMood = 0;
+	m_nPlayerMood = PLAYER_MOOD_CALM;
 	m_nPlayerMoodTimer = 0;
 }
 
@@ -863,7 +863,7 @@ void cAudioManager::ProcessVehicle(CVehicle* veh)
 }
 
 void
-cAudioManager::ProcessRainOnVehicle(cVehicleParams* params)
+cAudioManager::ProcessRainOnVehicle(cVehicleParams *params)
 {
 	const int SOUND_INTENSITY = 22.0f;
 
@@ -3151,16 +3151,6 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 				}
 				m_sQueueSample.m_bIs2D = false;
 				AddSampleToRequestedQueue();
-/* looks like this code ca't be reached(originaly it exist bcs used goto)
-				if (isHeli) {
-					m_sQueueSample.m_nOffset = 127;
-					m_sQueueSample.m_nSampleIndex++;
-					m_sQueueSample.m_nCounter = GunIndex++;
-					if (GunIndex > 58)
-						GunIndex = 53;
-					m_sQueueSample.m_bRequireReflection = 0;
-					AddSampleToRequestedQueue();
-				}*/
 				continue;
 
 			}
