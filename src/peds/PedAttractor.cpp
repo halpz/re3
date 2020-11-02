@@ -136,7 +136,7 @@ void CPedAttractorManager::RemoveIceCreamVanEffects(C2dEffect* pEffect)
 		return;
 	for (std::vector<CVehicleToEffect>::const_iterator assoc = vVehicleToEffect.cbegin(); assoc != vVehicleToEffect.cend();) {
 		if (assoc->GetVehicle() != pVehicle) {
-			assoc++;
+			++assoc;
 			continue;
 		}
 		uint32 total = 0;
@@ -145,7 +145,7 @@ void CPedAttractorManager::RemoveIceCreamVanEffects(C2dEffect* pEffect)
 				total++;
 		}
 		if (total > 0)
-			assoc++;
+			++assoc;
 		else
 			assoc = vVehicleToEffect.erase(assoc);
 	}

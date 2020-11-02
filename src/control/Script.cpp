@@ -12280,7 +12280,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_IS_CONSTANT_GREATER_OR_EQUAL_TO_INT_VAR:
 	{
 		CollectParameters(&m_nIp, 1);
-		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		UpdateCompareFlag(ScriptParams[0] >= *ptr);
 		return 0;
 	}
