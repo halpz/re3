@@ -911,6 +911,7 @@ public:
 	static void DeleteSunbatheIdleAnimCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedSetPreviousStateCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedAnimShuffleCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedSetGetInCarPositionCB(CAnimBlendAssociation* assoc, void* arg);
 
 	bool IsPlayer(void);
 	bool IsFemale(void) { return m_nPedType == PEDTYPE_CIVFEMALE || m_nPedType == PEDTYPE_PROSTITUTE; }
