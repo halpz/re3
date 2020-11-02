@@ -9115,12 +9115,16 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 						switch (pPed->m_vehEnterType) {
 						case CAR_DOOR_LF:
 							flags = pPed->m_pMyVehicle->m_nNumMaxPassengers != 0 ? CAR_DOOR_FLAG_LF : CAR_DOOR_FLAG_LF | CAR_DOOR_FLAG_LR;
+							break;
 						case CAR_DOOR_LR:
 							flags = pPed->m_pMyVehicle->m_nNumMaxPassengers != 0 ? CAR_DOOR_FLAG_RF : CAR_DOOR_FLAG_LF | CAR_DOOR_FLAG_LR;
+							break;
 						case CAR_DOOR_RF:
 							flags = CAR_DOOR_FLAG_RF;
+							break;
 						case CAR_DOOR_RR:
 							flags = CAR_DOOR_FLAG_RR;
+							break;
 						}
 					}
 					pPed->m_pMyVehicle->m_nGettingOutFlags &= ~flags;
