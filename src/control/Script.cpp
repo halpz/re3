@@ -12125,14 +12125,14 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	{
 		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		CollectParameters(&m_nIp, 1);
-		UpdateCompareFlag(*ptr = ScriptParams[0]);
+		UpdateCompareFlag(*ptr == ScriptParams[0]);
 		return 0;
 	}
 	case COMMAND_IS_INT_LVAR_EQUAL_TO_CONSTANT:
 	{
 		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		CollectParameters(&m_nIp, 1);
-		UpdateCompareFlag(*ptr = ScriptParams[0]);
+		UpdateCompareFlag(*ptr == ScriptParams[0]);
 		return 0;
 	}
 	case COMMAND_GET_DEAD_CHAR_PICKUP_COORDS:
