@@ -107,6 +107,10 @@ void TheGame(void);
 void DebugMenuPopulate(void);
 #endif
 
+#ifdef NEW_RENDERER
+bool gbNewRenderer;
+#endif
+
 void
 ValidateVersion()
 {
@@ -849,9 +853,128 @@ DisplayGameDebugText()
 }
 #endif
 
+bool gbRenderRoads = true;
+bool gbRenderEverythingBarRoads = true;
+bool gbRenderFadingInUnderwaterEntities = true;
+bool gbRenderFadingInEntities = true;
+bool gbRenderWater = true;
+bool gbRenderBoats = true;
+bool gbRenderVehicles = true;
+bool gbRenderWorld0 = true;
+bool gbRenderWorld1 = true;
+bool gbRenderWorld2 = true;
+
+#ifdef NEW_RENDERER
+void
+MattRenderScene(void)
+{
+	// this calls CMattRenderer::Render
+	CWorld::AdvanceCurrentScanCode();
+	// CMattRenderer::ResetRenderStates
+	CRenderer::ClearForFrame();
+	// CClock::CalcEnvMapTimeMultiplicator
+if(gbRenderWater)
+	CWaterLevel::RenderWater();	// actually CMattRenderer::RenderWater
+	// CClock::ms_EnvMapTimeMultiplicator = 1.0f;
+	// cWorldStream::ClearDynamics
+	CRenderer::ConstructRenderList();
+if(gbRenderWorld0)
+	CRenderer::RenderWorld(0);	// roads
+	// CMattRenderer::ResetRenderStates
+	CRenderer::PreRender();
+	CCoronas::RenderReflections();
+if(gbRenderWorld1)
+	CRenderer::RenderWorld(1);	// opaque
+if(gbRenderRoads)
+	CRenderer::RenderRoads();
+
+	// not sure where to put these since LCS has no underwater entities
+if(gbRenderFadingInUnderwaterEntities)
+	CRenderer::RenderFadingInUnderwaterEntities();
+if(gbRenderWater)
+	CWaterLevel::RenderTransparentWater();
+
+if(gbRenderEverythingBarRoads)
+	CRenderer::RenderEverythingBarRoads();
+	// get env map here?
+	// moved this:
+	// CRenderer::RenderFadingInEntities();
+}
+
+void
+RenderScene_new(void)
+{
+	CClouds::Render();
+	DoRWRenderHorizon();
+
+	MattRenderScene();
+	DefinedState();
+	// CMattRenderer::ResetRenderStates
+if(gbRenderBoats)
+	CRenderer::RenderBoats();
+}
+
+// TODO
+bool FredIsInFirstPersonCam(void) { return false; }
+
+void
+RenderEffects_new(void)
+{
+	CShadows::RenderStaticShadows();
+	// CRenderer::GenerateEnvironmentMap
+	CShadows::RenderStoredShadows();
+	CSkidmarks::Render();
+	CRubbish::Render();
+
+	// these aren't really effects
+	DefinedState();
+	if(FredIsInFirstPersonCam()){
+		DefinedState();
+		C3dMarkers::Render();	// normally rendered in CSpecialFX::Render()
+if(gbRenderWorld2)
+		CRenderer::RenderWorld(2);	// transparent
+if(gbRenderVehicles)
+		CRenderer::RenderVehiclesAndPeds();
+	}else{
+if(gbRenderVehicles)
+		CRenderer::RenderVehiclesAndPeds();
+if(gbRenderWorld2)
+		CRenderer::RenderWorld(2);	// transparent
+	}
+	// better render these after transparent world
+if(gbRenderFadingInEntities)
+	CRenderer::RenderFadingInEntities();
+
+	// actual effects here
+	CGlass::Render();
+	// CMattRenderer::ResetRenderStates
+	DefinedState();
+	CCoronas::RenderSunReflection();
+	CWeather::RenderRainStreaks();
+	// CWeather::AddSnow
+	CWaterCannons::Render();
+	CAntennas::Render();
+	CSpecialFX::Render();
+	CRopes::Render();
+	CCoronas::Render();
+	CParticle::Render();
+	CPacManPickups::Render();
+	CWeaponEffects::Render();
+	CPointLights::RenderFogEffect();
+	CMovingThings::Render();
+	CRenderer::RenderFirstPersonVehicle();
+}
+#endif
+
 void
 RenderScene(void)
 {
+#ifdef NEW_RENDERER
+	if(gbNewRenderer){
+		RenderScene_new();
+		return;
+	}
+#endif
 	CClouds::Render();
 	DoRWRenderHorizon();
 	CRenderer::RenderRoads();
@@ -885,6 +1008,12 @@ RenderDebugShit(void)
 void
 RenderEffects(void)
 {
+#ifdef NEW_RENDERER
+	if(gbNewRenderer){
+		RenderEffects_new();
+		return;
+	}
+#endif
 	CGlass::Render();
 	CWaterCannons::Render();
 	CSpecialFX::Render();
@@ -1061,6 +1190,10 @@ Idle(void *arg)
 			pos.y = SCREEN_HEIGHT / 2.0f;
 			RsMouseSetPos(&pos);
 #endif
+#ifdef NEW_RENDERER
+	if(!gbNewRenderer)
+#endif
+{
 		tbStartTimer(0, "CnstrRenderList");
 #ifdef PC_WATER
 		CWaterLevel::PreCalcWaterGeometry();
@@ -1071,6 +1204,7 @@ Idle(void *arg)
 		tbStartTimer(0, "PreRender");
 		CRenderer::PreRender();
 		tbEndTimer("PreRender");
+}
 
 #ifdef FIX_BUGS
 		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void *)FALSE); // TODO: temp? this fixes OpenGL render but there should be a better place for this

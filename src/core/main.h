@@ -38,3 +38,8 @@ void ResetLoadingScreenBar(void);
 #ifndef MASTER
 void TheModelViewer(void);
 #endif
+
+#ifdef NEW_RENDERER
+extern bool gbNewRenderer;
+bool FredIsInFirstPersonCam(void);
+#endif
