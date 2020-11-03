@@ -10,6 +10,7 @@
 #include "postfx.h"
 #include "custompipes.h"
 #include "RwHelper.h"
+#include "Text.h"
 
 // Menu screens array is at the bottom of the file.
 
