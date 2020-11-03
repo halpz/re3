@@ -111,7 +111,7 @@ CRenderer::RenderOneRoad(CEntity *e)
 		CustomPipes::AttachGlossPipe(e->GetAtomic());
 #endif
 #ifdef EXTRA_MODEL_FLAGS
-	if(CModelInfo::GetModelInfo(e->GetModelIndex())->RenderDoubleSided()){
+	if(!e->IsBuilding() || CModelInfo::GetModelInfo(e->GetModelIndex())->RenderDoubleSided()){
 		BACKFACE_CULLING_OFF;
 		e->Render();
 		BACKFACE_CULLING_ON;
@@ -181,7 +181,7 @@ CRenderer::RenderOneNonRoad(CEntity *e)
 		BACKFACE_CULLING_OFF;
 	}
 #ifdef EXTRA_MODEL_FLAGS
-	if(CModelInfo::GetModelInfo(e->GetModelIndex())->RenderDoubleSided()){
+	if(!e->IsBuilding() || CModelInfo::GetModelInfo(e->GetModelIndex())->RenderDoubleSided()){
 		BACKFACE_CULLING_OFF;
 		e->Render();
 		BACKFACE_CULLING_ON;
