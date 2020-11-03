@@ -422,6 +422,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Render", "Frame limiter", &FrontEndMenuManager.m_PrefsFrameLimiter, nil);
 		DebugMenuAddVarBool8("Render", "VSynch", &FrontEndMenuManager.m_PrefsVsync, nil);
 		DebugMenuAddVar("Render", "Max FPS", &RsGlobal.maxFPS, nil, 1, 1, 1000, nil);
+#ifdef NEW_RENDERER
 		DebugMenuAddVarBool8("Render", "new renderer", &gbNewRenderer, nil);
 extern bool gbRenderRoads;
 extern bool gbRenderEverythingBarRoads;
@@ -443,6 +444,7 @@ extern bool gbRenderWorld2;
 		DebugMenuAddVarBool8("Render", "gbRenderWorld0", &gbRenderWorld0, nil);
 		DebugMenuAddVarBool8("Render", "gbRenderWorld1", &gbRenderWorld1, nil);
 		DebugMenuAddVarBool8("Render", "gbRenderWorld2", &gbRenderWorld2, nil);
+#endif
 
 #ifdef EXTENDED_COLOURFILTER
 		static const char *filternames[] = { "None", "Simple", "Normal", "Mobile" };
