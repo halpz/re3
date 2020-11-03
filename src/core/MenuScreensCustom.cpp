@@ -50,18 +50,18 @@
 
 #ifdef EXTENDED_COLOURFILTER
 	#define POSTFX_SELECTORS \
-		MENUACTION_CFO_SELECT, "FED_VPL", { new CCFOSelect((int8*)&CustomPipes::VehiclePipeSwitch, "VehiclePipeline", vehPipelineNames, ARRAY_SIZE(vehPipelineNames), false, nil) }, \
-		MENUACTION_CFO_SELECT, "FED_PRM", { new CCFOSelect((int8*)&CustomPipes::RimlightEnable, "NeoRimLight", off_on, 2, false, nil) }, \
-		MENUACTION_CFO_SELECT, "FED_WLM", { new CCFOSelect((int8*)&CustomPipes::LightmapEnable, "NeoLightMaps", off_on, 2, false, nil) }, \
-		MENUACTION_CFO_SELECT, "FED_RGL", { new CCFOSelect((int8*)&CustomPipes::GlossEnable, "NeoRoadGloss", off_on, 2, false, nil) },
+		MENUACTION_CFO_SELECT, "FED_CLF", { new CCFOSelect((int8*)&CPostFX::EffectSwitch, "ColourFilter", filterNames, ARRAY_SIZE(filterNames), false, nil) }, \
+		MENUACTION_CFO_SELECT, "FED_MBL", { new CCFOSelect((int8*)&CPostFX::MotionBlurOn, "MotionBlur", off_on, 2, false, nil) },
 #else
 	#define POSTFX_SELECTORS
 #endif	
 
 #ifdef EXTENDED_PIPELINES
 	#define PIPELINES_SELECTOR \
-		MENUACTION_CFO_SELECT, "FED_CLF", { new CCFOSelect((int8*)&CPostFX::EffectSwitch, "ColourFilter", filterNames, ARRAY_SIZE(filterNames), false, nil) }, \
-		MENUACTION_CFO_SELECT, "FED_MBL", { new CCFOSelect((int8*)&CPostFX::MotionBlurOn, "MotionBlur", off_on, 2, false, nil) },
+		MENUACTION_CFO_SELECT, "FED_VPL", { new CCFOSelect((int8*)&CustomPipes::VehiclePipeSwitch, "VehiclePipeline", vehPipelineNames, ARRAY_SIZE(vehPipelineNames), false, nil) }, \
+		MENUACTION_CFO_SELECT, "FED_PRM", { new CCFOSelect((int8*)&CustomPipes::RimlightEnable, "NeoRimLight", off_on, 2, false, nil) }, \
+		MENUACTION_CFO_SELECT, "FED_WLM", { new CCFOSelect((int8*)&CustomPipes::LightmapEnable, "NeoLightMaps", off_on, 2, false, nil) }, \
+		MENUACTION_CFO_SELECT, "FED_RGL", { new CCFOSelect((int8*)&CustomPipes::GlossEnable, "NeoRoadGloss", off_on, 2, false, nil) },
 #else
 	#define PIPELINES_SELECTOR
 #endif
