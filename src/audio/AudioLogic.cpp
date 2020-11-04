@@ -300,7 +300,7 @@ CVehicle *cAudioManager::FindVehicleOfPlayer()
 void
 cAudioManager::ProcessPlayerMood()
 {
-	CPlayerPed* playerPed;
+	CPlayerPed *playerPed;
 	uint32* lastMisstonPassedTime;
 	uint32 curTime = CTimer::GetTimeInMilliseconds();
 
@@ -336,7 +336,7 @@ cAudioManager::ProcessPlayerMood()
 void
 cAudioManager::ProcessSpecial()
 {
-	CPlayerPed* playerPed;
+	CPlayerPed *playerPed;
 
 	if (m_nUserPause) {
 		if (!m_nPreviousUserPause) {
@@ -867,7 +867,7 @@ cAudioManager::ProcessRainOnVehicle(cVehicleParams *params)
 {
 	const int SOUND_INTENSITY = 22.0f;
 
-	CVehicle* veh;
+	CVehicle *veh;
 	uint8 emittingVol;
 
 	if (params->m_fDistance >= SQR(SOUND_INTENSITY) || CWeather::Rain <= 0.01f || CCullZones::CamNoRain() && CCullZones::PlayerNoRain())
@@ -1147,7 +1147,7 @@ cAudioManager::ProcessModelHeliVehicle(cVehicleParams* params)
 }
 
 bool
-cAudioManager::ProcessVehicleRoadNoise(cVehicleParams* params)
+cAudioManager::ProcessVehicleRoadNoise(cVehicleParams *params)
 {
 	const float SOUND_INTENSITY = 95.0f;
 
@@ -1215,7 +1215,7 @@ cAudioManager::ProcessVehicleRoadNoise(cVehicleParams* params)
 }
 
 bool
-cAudioManager::ProcessWetRoadNoise(cVehicleParams* params)
+cAudioManager::ProcessWetRoadNoise(cVehicleParams *params)
 {
 	const float SOUND_INTENSITY = 30.0f;
 
@@ -2166,7 +2166,7 @@ cAudioManager::ProcessVehicleSkidding(cVehicleParams *params)
 }
 
 float
-cAudioManager::GetVehicleDriveWheelSkidValue(CVehicle* veh, tWheelState wheelState, float gasPedalAudio, cTransmission *transmission, float velocityChange)
+cAudioManager::GetVehicleDriveWheelSkidValue(CVehicle *veh, tWheelState wheelState, float gasPedalAudio, cTransmission *transmission, float velocityChange)
 {
 	float relativeVelChange = 0.0f;
 	float velChange;
@@ -2201,7 +2201,7 @@ cAudioManager::GetVehicleDriveWheelSkidValue(CVehicle* veh, tWheelState wheelSta
 }
 
 float
-cAudioManager::GetVehicleNonDriveWheelSkidValue(CVehicle* veh, tWheelState wheelState, cTransmission *transmission, float velocityChange)
+cAudioManager::GetVehicleNonDriveWheelSkidValue(CVehicle *veh, tWheelState wheelState, cTransmission *transmission, float velocityChange)
 {
 	float relativeVelChange = 0.0f;
 
@@ -2212,7 +2212,7 @@ cAudioManager::GetVehicleNonDriveWheelSkidValue(CVehicle* veh, tWheelState wheel
 }
 
 bool
-cAudioManager::ProcessVehicleHorn(cVehicleParams* params)
+cAudioManager::ProcessVehicleHorn(cVehicleParams *params)
 {
 	const float SOUND_INTENSITY = 40.0f;
 
@@ -2288,11 +2288,11 @@ cAudioManager::UsesSirenSwitching(cVehicleParams *params) const
 }
 
 bool
-cAudioManager::ProcessVehicleSirenOrAlarm(cVehicleParams* params)
+cAudioManager::ProcessVehicleSirenOrAlarm(cVehicleParams *params)
 {
 	const float SOUND_INTENSITY = 110.0f;
 
-	CVehicle* veh;
+	CVehicle *veh;
 	uint8 volume;
 
 	if (params->m_fDistance >= SQR(SOUND_INTENSITY))
@@ -2948,8 +2948,8 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 		}
 		case SOUND_WEAPON_SHOT_FIRED: {
 			const float SOUND_INTENSITY = 120.0f;
-			CVehicle* playerVeh;
-			CPlayerPed* playerPed;
+			CVehicle *playerVeh;
+			CPlayerPed *playerPed;
 
 			switch (params->m_pVehicle->m_modelIndex) {
 			case MI_HUNTER:
@@ -2962,7 +2962,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 					if (Pads[0].GetHandBrake() == 0) {
 						playerVeh = FindPlayerVehicle();
 						playerPed = FindPlayerPed();
-						if (playerVeh == 0 && playerPed != 0) {
+						if (playerVeh == nil && playerPed != nil) {
 							if (playerPed->m_attachedTo != nil && playerPed->m_attachedTo->GetType() == ENTITY_TYPE_VEHICLE)
 								playerVeh = (CVehicle*)playerPed->m_attachedTo;
 						}
@@ -3842,9 +3842,9 @@ DoJumboVolOffset()
 }
 
 void
-cAudioManager::ProcessJumbo(cVehicleParams* params)
+cAudioManager::ProcessJumbo(cVehicleParams *params)
 {
-	CPlane* plane;
+	CPlane *plane;
 	float position;
 
 	if (params->m_fDistance >= SQR(440))
