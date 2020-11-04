@@ -818,6 +818,8 @@ CRenderer::RenderVehiclesAndPeds(void)
 {
 	int i;
 	CEntity *e;
+	EntityInfo ei;
+	CLink<EntityInfo> *node;
 
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
 	//CVisibilityPlugins::InitAlphaEntityList();	// not safe yet
@@ -826,9 +828,21 @@ CRenderer::RenderVehiclesAndPeds(void)
 	for(i = 0; i < ms_nNoOfVisibleVehicles; i++){
 		e = ms_aVisibleVehiclePtrs[i];
 		if(e->IsVehicle() && PutIntoSortedVehicleList((CVehicle*)e))
-			continue;
-		RenderOneNonRoad(e);
+			continue;	// boats handled elsewhere
+		if(e->IsPed())
+			RenderOneNonRoad(e);
+		else{
+			ei.ent = e;
+			ei.sort = (ms_vecCameraPosition - e->GetPosition()).MagnitudeSqr();
+			gSortedVehiclesAndPeds.InsertSorted(ei);
+		}
 	}
+
+	for(node = gSortedVehiclesAndPeds.tail.prev;
+	    node != &gSortedVehiclesAndPeds.head;
+	    node = node->prev)
+		RenderOneNonRoad(node->item.ent);
+
 //	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
 }
 
