@@ -74,7 +74,8 @@ public:
 
 #ifdef NEW_RENDERER
 	static void ClearForFrame(void);
-	static void RenderVehiclesAndPeds(void);	// just called RenderVehicles in LCS
+	static void RenderPeds(void);
+	static void RenderVehicles(void);	// also renders peds in LCS
 	static void RenderOneBuilding(CEntity *ent, float camdist = 0.0f);
 	static void RenderWorld(int pass);	// like cWorldStream::Render(int)
 	static void RenderTransparentWater(void);	// keep-out polys and transparent water

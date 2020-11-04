@@ -876,7 +876,6 @@ MattRenderScene(void)
 	// CMattRenderer::ResetRenderStates
 	CRenderer::ClearForFrame();
 	// CClock::CalcEnvMapTimeMultiplicator
-//if(gbRenderWater)
 	CWaterLevel::RenderWater();	// actually CMattRenderer::RenderWater
 	// CClock::ms_EnvMapTimeMultiplicator = 1.0f;
 	// cWorldStream::ClearDynamics
@@ -919,11 +918,13 @@ RenderScene_new(void)
 }
 
 // TODO
-bool FredIsInFirstPersonCam(void) { return false; }
+bool FredIsInFirstPersonCam(void) { return true; }	// this seems to give the best result in all cases
 
 void
 RenderEffects_new(void)
 {
+	CRenderer::RenderPeds();
+
 	CShadows::RenderStaticShadows();
 	// CRenderer::GenerateEnvironmentMap
 	CShadows::RenderStoredShadows();
@@ -938,10 +939,10 @@ RenderEffects_new(void)
 if(gbRenderWorld2)
 		CRenderer::RenderWorld(2);	// transparent
 if(gbRenderVehicles)
-		CRenderer::RenderVehiclesAndPeds();
+		CRenderer::RenderVehicles();
 	}else{
 if(gbRenderVehicles)
-		CRenderer::RenderVehiclesAndPeds();
+		CRenderer::RenderVehicles();
 if(gbRenderWorld2)
 		CRenderer::RenderWorld(2);	// transparent
 	}

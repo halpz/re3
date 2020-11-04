@@ -814,36 +814,42 @@ CRenderer::RenderWorld(int pass)
 }
 
 void
-CRenderer::RenderVehiclesAndPeds(void)
+CRenderer::RenderPeds(void)
+{
+	int i;
+	CEntity *e;
+
+	for(i = 0; i < ms_nNoOfVisibleVehicles; i++){
+		e = ms_aVisibleVehiclePtrs[i];
+		if(e->IsPed())
+			RenderOneNonRoad(e);
+	}
+}
+
+void
+CRenderer::RenderVehicles(void)
 {
 	int i;
 	CEntity *e;
 	EntityInfo ei;
 	CLink<EntityInfo> *node;
 
-	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
-	//CVisibilityPlugins::InitAlphaEntityList();	// not safe yet
-
 	// not the real thing
 	for(i = 0; i < ms_nNoOfVisibleVehicles; i++){
 		e = ms_aVisibleVehiclePtrs[i];
-		if(e->IsVehicle() && PutIntoSortedVehicleList((CVehicle*)e))
+		if(!e->IsVehicle())
+			continue;
+		if(PutIntoSortedVehicleList((CVehicle*)e))
 			continue;	// boats handled elsewhere
-		if(e->IsPed())
-			RenderOneNonRoad(e);
-		else{
-			ei.ent = e;
-			ei.sort = (ms_vecCameraPosition - e->GetPosition()).MagnitudeSqr();
-			gSortedVehiclesAndPeds.InsertSorted(ei);
-		}
+		ei.ent = e;
+		ei.sort = (ms_vecCameraPosition - e->GetPosition()).MagnitudeSqr();
+		gSortedVehiclesAndPeds.InsertSorted(ei);
 	}
 
 	for(node = gSortedVehiclesAndPeds.tail.prev;
 	    node != &gSortedVehiclesAndPeds.head;
 	    node = node->prev)
 		RenderOneNonRoad(node->item.ent);
-
-//	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
 }
 
 void
