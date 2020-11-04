@@ -7,6 +7,7 @@
 #include "Treadable.h"
 #include "Ped.h"
 #include "Vehicle.h"
+#include "Boat.h"
 #include "Heli.h"
 #include "Bike.h"
 #include "Object.h"
@@ -334,6 +335,7 @@ CRenderer::RenderBoats(void)
 #ifndef LIBRW
 #error "Need librw for EXTENDED_PIPELINES"
 #endif
+#include "WaterLevel.h"
 
 enum {
 	// blend passes
@@ -354,6 +356,34 @@ struct BuildingInst
 };
 static BuildingInst blendInsts[3][2000];
 static int numBlendInsts[3];
+
+static void
+SetStencilState(int state)
+{
+	switch(state){
+	// disable stencil
+	case 0:
+		rw::d3d::setRenderState(D3DRS_STENCILENABLE, FALSE);
+		break;
+	// test against stencil
+	case 1:
+		rw::d3d::setRenderState(D3DRS_STENCILENABLE, TRUE);
+		rw::d3d::setRenderState(D3DRS_STENCILFUNC, D3DCMP_NOTEQUAL);
+		rw::d3d::setRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_KEEP);
+		rw::d3d::setRenderState(D3DRS_STENCILFAIL, D3DSTENCILOP_KEEP);
+		rw::d3d::setRenderState(D3DRS_STENCILZFAIL, D3DSTENCILOP_KEEP);
+		rw::d3d::setRenderState(D3DRS_STENCILMASK, 0xFF);
+		rw::d3d::setRenderState(D3DRS_STENCILREF, 0xFF);
+		break;
+	// write to stencil
+	case 2:
+		rw::d3d::setRenderState(D3DRS_STENCILENABLE, TRUE);
+		rw::d3d::setRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
+		rw::d3d::setRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE);
+		rw::d3d::setRenderState(D3DRS_STENCILREF, 0xFF);
+		break;
+	}
+}
 
 static void
 SetMatrix(BuildingInst *building, rw::Matrix *worldMat)
@@ -448,6 +478,7 @@ AtomicFullyTransparent(RpAtomic *atomic, int pass, int fadeAlpha)
 	assert(building->instHeader != nil);
 	assert(building->instHeader->platform == PLATFORM_D3D9);
 	building->fadeAlpha = fadeAlpha;
+	building->lighting = !!(atomic->geometry->flags & rw::Geometry::LIGHT);
 	SetMatrix(building, atomic->getFrame()->getLTM());
 	numBlendInsts[pass]++;
 }
@@ -505,6 +536,30 @@ struct BuildingInst
 };
 static BuildingInst blendInsts[3][2000];
 static int numBlendInsts[3];
+
+static void
+SetStencilState(int state)
+{
+	switch(state){
+	// disable stencil
+	case 0:
+		glDisable(GL_STENCIL_TEST);    
+		break;
+	// test against stencil
+	case 1:
+		glEnable(GL_STENCIL_TEST);
+		glStencilFunc(GL_NOTEQUAL, 0xFF, 0xFF);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+		glStencilMask(0xFF);
+		break;
+	// write to stencil
+	case 2:
+		glEnable(GL_STENCIL_TEST);    
+		glStencilFunc(GL_ALWAYS, 0xFF, 0xFF);
+		glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+		break;
+	}
+}
 
 static bool
 IsTextureTransparent(RwTexture *tex)
@@ -595,6 +650,7 @@ AtomicFullyTransparent(RpAtomic *atomic, int pass, int fadeAlpha)
 	assert(building->instHeader != nil);
 	assert(building->instHeader->platform == PLATFORM_GL3);
 	building->fadeAlpha = fadeAlpha;
+	building->lighting = !!(atomic->geometry->flags & rw::Geometry::LIGHT);
 	building->matrix = *atomic->getFrame()->getLTM();
 	numBlendInsts[pass]++;
 }
@@ -643,6 +699,9 @@ RenderBlendPass(int pass)
 
 			drawInst(building->instHeader, inst);
 		}
+#ifndef RW_GL_USE_VAOS
+		disableAttribPointers(building->instHeader->attribDesc, building->instHeader->numAttribs);
+#endif
 	}
 }
 #endif
@@ -771,6 +830,37 @@ CRenderer::RenderVehiclesAndPeds(void)
 		RenderOneNonRoad(e);
 	}
 //	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
+}
+
+void
+CRenderer::RenderTransparentWater(void)
+{
+	int i;
+	CEntity *e;
+
+	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDZERO);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
+	SetStencilState(2);
+
+	for(i = 0; i < ms_nNoOfVisibleVehicles; i++){
+		e = ms_aVisibleVehiclePtrs[i];
+		if(e->IsVehicle() && ((CVehicle*)e)->IsBoat())
+			((CBoat*)e)->RenderWaterOutPolys();
+	}
+
+	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+	SetStencilState(1);
+
+	CWaterLevel::RenderTransparentWater();
+
+	SetStencilState(0);
 }
 
 void
@@ -1541,6 +1631,20 @@ CRenderer::ScanSectorPoly(RwV2d *poly, int32 numVertices, void (*scanfunc)(CPtrL
 }
 
 void
+CRenderer::InsertEntityIntoList(CEntity *ent)
+{
+#ifdef NEW_RENDERER
+	// TODO: there are more flags being checked here
+	if(gbNewRenderer && (ent->IsVehicle() || ent->IsPed()))
+		ms_aVisibleVehiclePtrs[ms_nNoOfVisibleVehicles++] = ent;
+	else if(gbNewRenderer && ent->IsBuilding())
+		ms_aVisibleBuildingPtrs[ms_nNoOfVisibleBuildings++] = ent;
+	else
+#endif
+		ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
+}
+
+void
 CRenderer::ScanBigBuildingList(CPtrList &list)
 {
 	CPtrNode *node;
@@ -1557,15 +1661,7 @@ CRenderer::ScanBigBuildingList(CPtrList &list)
 			vis = VIS_VISIBLE;
 		switch(vis){
 		case VIS_VISIBLE:
-#ifdef NEW_RENDERER
-			// TODO: this isn't quite right...
-			if(gbNewRenderer && (ent->IsVehicle() || ent->IsPed()))
-				ms_aVisibleVehiclePtrs[ms_nNoOfVisibleVehicles++] = ent;
-			else if(gbNewRenderer && ent->IsBuilding())
-				ms_aVisibleBuildingPtrs[ms_nNoOfVisibleBuildings++] = ent;
-			else
-#endif
-			ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
+			InsertEntityIntoList(ent);
 			ent->bOffscreen = false;
 			break;
 		case VIS_STREAMME:
@@ -1596,15 +1692,7 @@ CRenderer::ScanSectorList(CPtrList *lists)
 
 			switch(SetupEntityVisibility(ent)){
 			case VIS_VISIBLE:
-#ifdef NEW_RENDERER
-				// TODO: this isn't quite right...
-				if(gbNewRenderer && (ent->IsVehicle() || ent->IsPed()))
-					ms_aVisibleVehiclePtrs[ms_nNoOfVisibleVehicles++] = ent;
-				else if(gbNewRenderer && ent->IsBuilding())
-					ms_aVisibleBuildingPtrs[ms_nNoOfVisibleBuildings++] = ent;
-				else
-#endif
-				ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
+				InsertEntityIntoList(ent);
 				break;
 			case VIS_INVISIBLE:
 				if(!IsGlass(ent->GetModelIndex()))
@@ -1649,15 +1737,7 @@ CRenderer::ScanSectorList_Priority(CPtrList *lists)
 
 			switch(SetupEntityVisibility(ent)){
 			case VIS_VISIBLE:
-#ifdef NEW_RENDERER
-				// TODO: this isn't quite right...
-				if(gbNewRenderer && (ent->IsVehicle() || ent->IsPed()))
-					ms_aVisibleVehiclePtrs[ms_nNoOfVisibleVehicles++] = ent;
-				else if(gbNewRenderer && ent->IsBuilding())
-					ms_aVisibleBuildingPtrs[ms_nNoOfVisibleBuildings++] = ent;
-				else
-#endif
-				ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
+				InsertEntityIntoList(ent);
 				break;
 			case VIS_INVISIBLE:
 				if(!IsGlass(ent->GetModelIndex()))
@@ -1704,15 +1784,7 @@ CRenderer::ScanSectorList_Subway(CPtrList *lists)
 			ent->bOffscreen = false;
 			switch(SetupEntityVisibility(ent)){
 			case VIS_VISIBLE:
-#ifdef NEW_RENDERER
-				// TODO: this isn't quite right...
-				if(gbNewRenderer && (ent->IsVehicle() || ent->IsPed()))
-					ms_aVisibleVehiclePtrs[ms_nNoOfVisibleVehicles++] = ent;
-				else if(gbNewRenderer && ent->IsBuilding())
-					ms_aVisibleBuildingPtrs[ms_nNoOfVisibleBuildings++] = ent;
-				else
-#endif
-				ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
+				InsertEntityIntoList(ent);
 				break;
 			case VIS_OFFSCREEN:
 				ent->bOffscreen = true;

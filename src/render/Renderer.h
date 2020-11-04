@@ -77,5 +77,7 @@ public:
 	static void RenderVehiclesAndPeds(void);	// just called RenderVehicles in LCS
 	static void RenderOneBuilding(CEntity *ent, float camdist = 0.0f);
 	static void RenderWorld(int pass);	// like cWorldStream::Render(int)
+	static void RenderTransparentWater(void);	// keep-out polys and transparent water
 #endif
+	static void InsertEntityIntoList(CEntity *ent);
 };

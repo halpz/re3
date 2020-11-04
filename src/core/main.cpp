@@ -109,6 +109,9 @@ void DebugMenuPopulate(void);
 
 #ifdef NEW_RENDERER
 bool gbNewRenderer;
+#define CLEARMODE (rwCAMERACLEARZ | rwCAMERACLEARSTENCIL)
+#else
+#define CLEARMODE (rwCAMERACLEARZ)
 #endif
 
 void
@@ -155,7 +158,7 @@ DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomR
 	CDraw::CalculateAspectRatio();
 	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-	RwCameraClear(Scene.camera, &TopColor.rwRGBA, rwCAMERACLEARZ);
+	RwCameraClear(Scene.camera, &TopColor.rwRGBA, CLEARMODE);
 
 	if(!RsCameraBeginUpdate(Scene.camera))
 		return false;
@@ -174,7 +177,7 @@ DoRWStuffStartOfFrame_Horizon(int16 TopRed, int16 TopGreen, int16 TopBlue, int16
 	CDraw::CalculateAspectRatio();
 	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+	RwCameraClear(Scene.camera, &gColourTop, CLEARMODE);
 
 	if(!RsCameraBeginUpdate(Scene.camera))
 		return false;
@@ -873,7 +876,7 @@ MattRenderScene(void)
 	// CMattRenderer::ResetRenderStates
 	CRenderer::ClearForFrame();
 	// CClock::CalcEnvMapTimeMultiplicator
-if(gbRenderWater)
+//if(gbRenderWater)
 	CWaterLevel::RenderWater();	// actually CMattRenderer::RenderWater
 	// CClock::ms_EnvMapTimeMultiplicator = 1.0f;
 	// cWorldStream::ClearDynamics
@@ -889,10 +892,12 @@ if(gbRenderRoads)
 	CRenderer::RenderRoads();
 
 	// not sure where to put these since LCS has no underwater entities
+if(gbRenderBoats)
+	CRenderer::RenderBoats();
 if(gbRenderFadingInUnderwaterEntities)
 	CRenderer::RenderFadingInUnderwaterEntities();
 if(gbRenderWater)
-	CWaterLevel::RenderTransparentWater();
+	CRenderer::RenderTransparentWater();
 
 if(gbRenderEverythingBarRoads)
 	CRenderer::RenderEverythingBarRoads();
@@ -910,8 +915,7 @@ RenderScene_new(void)
 	MattRenderScene();
 	DefinedState();
 	// CMattRenderer::ResetRenderStates
-if(gbRenderBoats)
-	CRenderer::RenderBoats();
+	// moved CRenderer::RenderBoats to before transparent water
 }
 
 // TODO
@@ -1259,7 +1263,7 @@ Idle(void *arg)
 		CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
 #endif
 		CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-		RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+		RwCameraClear(Scene.camera, &gColourTop, CLEARMODE);
 		if(!RsCameraBeginUpdate(Scene.camera))
 			return;
 	}
@@ -1308,7 +1312,7 @@ FrontendIdle(void)
 
 	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+	RwCameraClear(Scene.camera, &gColourTop, CLEARMODE);
 	if(!RsCameraBeginUpdate(Scene.camera))
 		return;
 
@@ -1584,7 +1588,7 @@ void TheGame(void)
 			{
 				CameraSize(Scene.camera, NULL, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 				CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-				RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+				RwCameraClear(Scene.camera, &gColourTop, CLEARMODE);
 				if (!RsCameraBeginUpdate(Scene.camera))
 					break;
 			}
