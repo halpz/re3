@@ -5404,6 +5404,11 @@ CMenuManager::ProcessOnOffMenuOptions()
 		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 		SaveSettings();
 		break;
+#ifdef INVERT_LOOK_FOR_PAD
+	case MENUACTION_INVERTPADY:
+		CPad::bInvertLook4Pad = !CPad::bInvertLook4Pad;
+		break;
+#endif
 	}
 }
 
