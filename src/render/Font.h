@@ -103,6 +103,7 @@ public:
 	static CFontDetails Details;
 
 #ifdef BUTTON_ICONS
+	static int32 ButtonsSlot;
 	static CSprite2d ButtonSprite[MAX_BUTTON_ICONS];
 	static int PS2Symbol;
 

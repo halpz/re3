@@ -3,6 +3,9 @@
 #include "Sprite2d.h"
 #include "TxdStore.h"
 #include "Font.h"
+#ifdef BUTTON_ICONS
+#include "FileMgr.h"
+#endif
 
 void
 AsciiToUnicode(const char *src, wchar *dst)
@@ -227,6 +230,7 @@ wchar foreign_table[128] = {
 #ifdef BUTTON_ICONS
 CSprite2d CFont::ButtonSprite[MAX_BUTTON_ICONS];
 int CFont::PS2Symbol = BUTTON_NONE;
+int CFont::ButtonsSlot = -1;
 #endif // BUTTON_ICONS
 
 void
@@ -288,28 +292,31 @@ CFont::Initialise(void)
 	CTxdStore::PopCurrentTxd();
 
 #ifdef BUTTON_ICONS
-	slot = CTxdStore::AddTxdSlot("buttons");
-	CTxdStore::LoadTxd(slot, "MODELS/X360BTNS.TXD");
-	CTxdStore::AddRef(slot);
-	CTxdStore::PushCurrentTxd();
-	CTxdStore::SetCurrentTxd(slot);
+	if (int file = CFileMgr::OpenFile("MODELS/X360BTNS.TXD")) {
+		CFileMgr::CloseFile(file);
+		ButtonsSlot = CTxdStore::AddTxdSlot("buttons");
+		CTxdStore::LoadTxd(ButtonsSlot, "MODELS/X360BTNS.TXD");
+		CTxdStore::AddRef(ButtonsSlot);
+		CTxdStore::PushCurrentTxd();
+		CTxdStore::SetCurrentTxd(ButtonsSlot);
 #if 0  // unused
-	ButtonSprite[BUTTON_UP].SetTexture("up");
-	ButtonSprite[BUTTON_DOWN].SetTexture("down");
-	ButtonSprite[BUTTON_LEFT].SetTexture("left");
-	ButtonSprite[BUTTON_RIGHT].SetTexture("right");
+		ButtonSprite[BUTTON_UP].SetTexture("up");
+		ButtonSprite[BUTTON_DOWN].SetTexture("down");
+		ButtonSprite[BUTTON_LEFT].SetTexture("left");
+		ButtonSprite[BUTTON_RIGHT].SetTexture("right");
 #endif
-	ButtonSprite[BUTTON_CROSS].SetTexture("cross");
-	ButtonSprite[BUTTON_CIRCLE].SetTexture("circle");
-	ButtonSprite[BUTTON_SQUARE].SetTexture("square");
-	ButtonSprite[BUTTON_TRIANGLE].SetTexture("triangle");
-	ButtonSprite[BUTTON_L1].SetTexture("l1");
-	ButtonSprite[BUTTON_L2].SetTexture("l2");
-	ButtonSprite[BUTTON_L3].SetTexture("l3");
-	ButtonSprite[BUTTON_R1].SetTexture("r1");
-	ButtonSprite[BUTTON_R2].SetTexture("r2");
-	ButtonSprite[BUTTON_R3].SetTexture("r3");
-	CTxdStore::PopCurrentTxd();
+		ButtonSprite[BUTTON_CROSS].SetTexture("cross");
+		ButtonSprite[BUTTON_CIRCLE].SetTexture("circle");
+		ButtonSprite[BUTTON_SQUARE].SetTexture("square");
+		ButtonSprite[BUTTON_TRIANGLE].SetTexture("triangle");
+		ButtonSprite[BUTTON_L1].SetTexture("l1");
+		ButtonSprite[BUTTON_L2].SetTexture("l2");
+		ButtonSprite[BUTTON_L3].SetTexture("l3");
+		ButtonSprite[BUTTON_R1].SetTexture("r1");
+		ButtonSprite[BUTTON_R2].SetTexture("r2");
+		ButtonSprite[BUTTON_R3].SetTexture("r3");
+		CTxdStore::PopCurrentTxd();
+	}
 #endif // BUTTON_ICONS
 }
 
@@ -360,9 +367,11 @@ void
 CFont::Shutdown(void)
 {
 #ifdef BUTTON_ICONS
-	for (int i = 0; i < MAX_BUTTON_ICONS; i++)
-		ButtonSprite[i].Delete();
-	CTxdStore::RemoveTxdSlot(CTxdStore::FindTxdSlot("buttons"));
+	if (ButtonsSlot != -1) {
+		for (int i = 0; i < MAX_BUTTON_ICONS; i++)
+			ButtonSprite[i].Delete();
+		CTxdStore::RemoveTxdSlot(ButtonsSlot);
+	}
 #endif
 	Sprite[0].Delete();
 	Sprite[1].Delete();
