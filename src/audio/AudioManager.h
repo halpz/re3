@@ -59,7 +59,7 @@ VALIDATE_SIZE(tAudioEntity, 40);
 class tPedComment
 {
 public:
-	int32 m_nSampleIndex;
+	uint32 m_nSampleIndex;
 	int32 m_nEntityIndex;
 	CVector m_vecPos;
 	float m_fDistance;
@@ -76,8 +76,10 @@ public:
 	uint8 m_nIndexMap[NUM_PED_COMMENTS_BANKS][NUM_PED_COMMENTS_SLOTS];
 	uint8 m_nCommentsInBank[NUM_PED_COMMENTS_BANKS];
 	uint8 m_nActiveBank;
+#ifdef GTA_PC
 	bool m_bDelay;
 	uint32 m_nDelayTimer;
+#endif
 
 	cPedComments()
 	{
@@ -259,101 +261,101 @@ public:
 
 	// functions returning talk sfx,
 	// order from GetPedCommentSfx
-	int32 GetPlayerTalkSfx(CPed *ped, int16 sound);
-	int32 GetCopTalkSfx(CPed *ped, int16 sound);
-	int32 GetSwatTalkSfx(CPed *ped, int16 sound);
-	int32 GetFBITalkSfx(CPed *ped, int16 sound);
-	int32 GetArmyTalkSfx(CPed *ped, int16 sound);
-	int32 GetMedicTalkSfx(CPed *ped, int16 sound);
-	int32 GetFiremanTalkSfx(CPed *ped, int16 sound);
-	int32 GetDefaultTalkSfx(CPed *ped, int16 sound);
-	int32 GetHFYSTTalkSfx(CPed *ped, int16 sound);
-	int32 GetHFOSTTalkSfx(CPed *ped, int16 sound);
-	int32 GetHMYSTTalkSfx(CPed *ped, int16 sound);
-	int32 GetHMOSTTalkSfx(CPed *ped, int16 sound);
-	int32 GetHFYRITalkSfx(CPed *ped, int16 sound);
-	int32 GetHFORITalkSfx(CPed *ped, int16 sound); 
-	int32 GetHMYRITalkSfx(CPed *ped, int16 sound); 
-	int32 GetHMORITalkSfx(CPed *ped, int16 sound);
-	int32 GetHFYBETalkSfx(CPed *ped, int16 sound);
-	int32 GetHFOBETalkSfx(CPed *ped, int16 sound);
-	int32 GetHMYBETalkSfx(CPed *ped, int16 sound);
-	int32 GetHMOBETalkSfx(CPed *ped, int16 sound);
-	int32 GetHFYBUTalkSfx(CPed *ped, int16 sound);
-	int32 GetHFYMDTalkSfx(CPed *ped, int16 sound);
-	int32 GetHFYCGTalkSfx(CPed *ped, int16 sound);
-	int32 GetHFYPRTalkSfx(CPed *ped, int16 sound);
-	int32 GetHFOTRTalkSfx(CPed *ped, int16 sound);
-	int32 GetHMOTRTalkSfx(CPed *ped, int16 sound);
-	int32 GetHMYAPTalkSfx(CPed *ped, int16 sound);
-	int32 GetHMOCATalkSfx(CPed *ped, int16 sound);
-	int32 GetBMODKTalkSfx(CPed *ped, int16 sound);
-	int32 GetBMYCRTalkSfx(CPed *ped, int16 sound);
-	int32 GetBFYSTTalkSfx(CPed *ped, int16 sound);
-	int32 GetBFOSTTalkSfx(CPed *ped, int16 sound);
-	int32 GetBMYSTTalkSfx(CPed *ped, int16 sound);
-	int32 GetBMOSTTalkSfx(CPed *ped, int16 sound);
-	int32 GetBFYRITalkSfx(CPed *ped, int16 sound);
-	int32 GetBFORITalkSfx(CPed *ped, int16 sound);
-	int32 GetBMYRITalkSfx(CPed *ped, int16 sound);
-	int32 GetBFYBETalkSfx(CPed *ped, int16 sound);
-	int32 GetBMYBETalkSfx(CPed *ped, int16 sound);
-	int32 GetBFOBETalkSfx(CPed *ped, int16 sound);
-	int32 GetBMOBETalkSfx(CPed *ped, int16 sound);
-	int32 GetBMYBUTalkSfx(CPed *ped, int16 sound);
-	int32 GetBFYPRTalkSfx(CPed *ped, int16 sound);
-	int32 GetBFOTRTalkSfx(CPed *ped, int16 sound);
-	int32 GetBMOTRTalkSfx(CPed *ped, int16 sound);
-	int32 GetBMYPITalkSfx(CPed *ped, int16 sound);
-	int32 GetBMYBBTalkSfx(CPed *ped, int16 sound);
-	int32 GetWMYCRTalkSfx(CPed *ped, int16 sound);
-	int32 GetWFYSTTalkSfx(CPed *ped, int16 sound);
-	int32 GetWFOSTTalkSfx(CPed *ped, int16 sound);
-	int32 GetWMYSTTalkSfx(CPed *ped, int16 sound);
-	int32 GetWMOSTTalkSfx(CPed *ped, int16 sound);
-	int32 GetWFYRITalkSfx(CPed *ped, int16 sound);
-	int32 GetWFORITalkSfx(CPed *ped, int16 sound);
-	int32 GetWMYRITalkSfx(CPed *ped, int16 sound);
-	int32 GetWMORITalkSfx(CPed *ped, int16 sound);
-	int32 GetWFYBETalkSfx(CPed *ped, int16 sound);
-	int32 GetWMYBETalkSfx(CPed *ped, int16 sound);
-	int32 GetWFOBETalkSfx(CPed *ped, int16 sound);
-	int32 GetWMOBETalkSfx(CPed *ped, int16 sound);
-	int32 GetWMYCWTalkSfx(CPed *ped, int16 sound);
-	int32 GetWMYGOTalkSfx(CPed *ped, int16 sound);
-	int32 GetWFOGOTalkSfx(CPed *ped, int16 sound);
-	int32 GetWMOGOTalkSfx(CPed *ped, int16 sound);
-	int32 GetWFYLGTalkSfx(CPed *ped, int16 sound);
-	int32 GetWMYLGTalkSfx(CPed *ped, int16 sound);
-	int32 GetWFYBUTalkSfx(CPed *ped, int16 sound);
-	int32 GetWMYBUTalkSfx(CPed *ped, int16 sound);
-	int32 GetWMOBUTalkSfx(CPed *ped, int16 sound);
-	int32 GetWFYPRTalkSfx(CPed *ped, int16 sound);
-	int32 GetWFOTRTalkSfx(CPed *ped, int16 sound);
-	int32 GetWMOTRTalkSfx(CPed *ped, int16 sound);
-	int32 GetWMYPITalkSfx(CPed *ped, int16 sound);
-	int32 GetWMOCATalkSfx(CPed *ped, int16 sound);
-	int32 GetWFYJGTalkSfx(CPed *ped, int16 sound);
-	int32 GetWMYJGTalkSfx(CPed *ped, int16 sound);
-	int32 GetWFYSKTalkSfx(CPed *ped, int16 sound);
-	int32 GetWMYSKTalkSfx(CPed *ped, int16 sound);
-	int32 GetWFYSHTalkSfx(CPed *ped, int16 sound);
-	int32 GetWFOSHTalkSfx(CPed *ped, int16 sound);
-	int32 GetJFOTOTalkSfx(CPed *ped, int16 sound);
-	int32 GetJMOTOTalkSfx(CPed *ped, int16 sound);
-	int32 GetCBTalkSfx(CPed *ped, int16 sound);
-	int32 GetHNTalkSfx(CPed *ped, int16 sound);
-	int32 GetSGTalkSfx(CPed *ped, int16 sound);
-	int32 GetCLTalkSfx(CPed *ped, int16 sound);
-	int32 GetGDTalkSfx(CPed *ped, int16 sound);
-	int32 GetBKTalkSfx(CPed *ped, int16 sound);
-	int32 GetPGTalkSfx(CPed *ped, int16 sound);
-	int32 GetVICETalkSfx(CPed *ped, int16 sound, int16 model);
-	int32 GetWFYG1TalkSfx(CPed *ped, int16 sound);
-	int32 GetWFYG2TalkSfx(CPed *ped, int16 sound);
+	uint32 GetPlayerTalkSfx(CPed *ped, int16 sound);
+	uint32 GetCopTalkSfx(CPed *ped, int16 sound);
+	uint32 GetSwatTalkSfx(CPed *ped, int16 sound);
+	uint32 GetFBITalkSfx(CPed *ped, int16 sound);
+	uint32 GetArmyTalkSfx(CPed *ped, int16 sound);
+	uint32 GetMedicTalkSfx(CPed *ped, int16 sound);
+	uint32 GetFiremanTalkSfx(CPed *ped, int16 sound);
+	uint32 GetDefaultTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFYSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFOSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHMYSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHMOSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFYRITalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFORITalkSfx(CPed *ped, int16 sound); 
+	uint32 GetHMYRITalkSfx(CPed *ped, int16 sound); 
+	uint32 GetHMORITalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFYBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFOBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetHMYBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetHMOBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFYBUTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFYMDTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFYCGTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFYPRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFOTRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHMOTRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHMYAPTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHMOCATalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMODKTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMYCRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBFYSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBFOSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMYSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMOSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBFYRITalkSfx(CPed *ped, int16 sound);
+	uint32 GetBFORITalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMYRITalkSfx(CPed *ped, int16 sound);
+	uint32 GetBFYBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMYBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetBFOBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMOBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMYBUTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBFYPRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBFOTRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMOTRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMYPITalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMYBBTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYCRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFOSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMOSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYRITalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFORITalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYRITalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMORITalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFOBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMOBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYCWTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYGOTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFOGOTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMOGOTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYLGTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYLGTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYBUTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYBUTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMOBUTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYPRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFOTRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMOTRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYPITalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMOCATalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYJGTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYJGTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYSKTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYSKTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYSHTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFOSHTalkSfx(CPed *ped, int16 sound);
+	uint32 GetJFOTOTalkSfx(CPed *ped, int16 sound);
+	uint32 GetJMOTOTalkSfx(CPed *ped, int16 sound);
+	uint32 GetCBTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHNTalkSfx(CPed *ped, int16 sound);
+	uint32 GetSGTalkSfx(CPed *ped, int16 sound);
+	uint32 GetCLTalkSfx(CPed *ped, int16 sound);
+	uint32 GetGDTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBKTalkSfx(CPed *ped, int16 sound);
+	uint32 GetPGTalkSfx(CPed *ped, int16 sound);
+	uint32 GetVICETalkSfx(CPed *ped, int16 sound, int16 model);
+	uint32 GetWFYG1TalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYG2TalkSfx(CPed *ped, int16 sound);
 
-	int32 GetGenericMaleTalkSfx(CPed *ped, int16 sound);   // todo names (inlined in vc)
-	int32 GetGenericFemaleTalkSfx(CPed *ped, int16 sound); // todo names (inlined in vc)
+	uint32 GetGenericMaleTalkSfx(CPed *ped, int16 sound);   // todo names (inlined in vc)
+	uint32 GetGenericFemaleTalkSfx(CPed *ped, int16 sound); // todo names (inlined in vc)
 	// end of functions returning talk sfx
 
 	void GenerateIntegerRandomNumberTable();
@@ -369,8 +371,8 @@ public:
 	uint8 GetMissionAudioLoadingStatus(uint8 slot) const; // done
 	int8 GetMissionScriptPoliceAudioPlayingStatus() const;
 	uint8 GetNum3DProvidersAvailable() const; // done
-	int32 GetPedCommentSfx(CPed *ped, int32 sound);
-	void GetPhrase(int32 *phrase, int32 *prevPhrase, int32 sample, int32 maxOffset) const;
+	uint32 GetPedCommentSfx(CPed *ped, int32 sound);
+	void GetPhrase(uint32 &phrase, uint32 &prevPhrase, uint32 sample, uint32 maxOffset) const;
 	float GetVehicleDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile, cTransmission *transmission, float velocityChange);
 	float GetVehicleNonDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile, cTransmission *transmission, float velocityChange);
 
