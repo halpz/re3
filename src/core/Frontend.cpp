@@ -122,7 +122,6 @@ int8 CMenuManager::m_nDisplayMSAALevel = 0;
 #endif
 
 #ifdef NO_ISLAND_LOADING
-int8 CMenuManager::m_DisplayIslandLoading = ISLAND_LOADING_LOW;
 int8 CMenuManager::m_PrefsIslandLoading = ISLAND_LOADING_LOW;
 #endif
 
@@ -1236,21 +1235,6 @@ CMenuManager::Draw()
 				AsciiToUnicode(_psGetVideoModeList()[m_nDisplayVideoMode], unicodeTemp);
 				rightText = unicodeTemp;
 				break;
-//#ifdef NO_ISLAND_LOADING
-//			case MENUACTION_ISLANDLOADING:
-//				switch (m_DisplayIslandLoading) {
-//				case ISLAND_LOADING_LOW:
-//					rightText = TheText.Get("FEM_LOW");
-//					break;
-//				case ISLAND_LOADING_MEDIUM:
-//					rightText = TheText.Get("FEM_MED");
-//					break;
-//				case ISLAND_LOADING_HIGH:
-//					rightText = TheText.Get("FEM_HIG");
-//					break;
-//				}
-//				break;
-//#endif
 			case MENUACTION_AUDIOHW:
 				if (m_nPrefsAudio3DProviderIndex == -1)
 					rightText = TheText.Get("FEA_NAH");
@@ -1430,12 +1414,6 @@ CMenuManager::Draw()
 				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_RES") && m_nHelperTextMsgId == 1)
 					ResetHelperText();
 			}
-//#ifdef NO_ISLAND_LOADING
-//			if (m_DisplayIslandLoading == m_PrefsIslandLoading) {
-//				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEM_ISL") && m_nHelperTextMsgId == 1)
-//					ResetHelperText();
-//			}
-//#endif
 			if (m_nPrefsAudio3DProviderIndex != DMAudio.GetCurrent3DProviderIndex()) {
 				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEA_3DH"))
 					SetHelperText(1);
@@ -1444,12 +1422,6 @@ CMenuManager::Draw()
 				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FED_RES"))
 					SetHelperText(1);
 			}
-//#ifdef NO_ISLAND_LOADING
-//			if (m_DisplayIslandLoading != m_PrefsIslandLoading) {
-//				if (!strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEM_ISL"))
-//					SetHelperText(1);
-//			}
-//#endif
 			if (m_nPrefsAudio3DProviderIndex != DMAudio.GetCurrent3DProviderIndex()) {
 				if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEA_3DH") != 0
 					// To make assigning built-in actions to new custom options possible.
@@ -4822,45 +4794,6 @@ CMenuManager::ProcessButtonPresses(void)
 						SaveSettings();
 					}
 				    break;
-//#ifdef NO_ISLAND_LOADING
-//			    case MENUACTION_ISLANDLOADING:
-//				    if (m_DisplayIslandLoading != m_PrefsIslandLoading) {
-//					    if (!m_bGameNotLoaded) {
-//						    if (m_DisplayIslandLoading > ISLAND_LOADING_LOW) {
-//							    if (m_DisplayIslandLoading == ISLAND_LOADING_HIGH)
-//								    CStreaming::RemoveIslandsNotUsed(LEVEL_GENERIC);
-//							    if (m_PrefsIslandLoading == ISLAND_LOADING_LOW) {
-//								    if (CGame::currLevel != LEVEL_INDUSTRIAL)
-//									    CFileLoader::LoadCollisionFromDatFile(LEVEL_INDUSTRIAL);
-//								    if (CGame::currLevel != LEVEL_COMMERCIAL)
-//									    CFileLoader::LoadCollisionFromDatFile(LEVEL_COMMERCIAL);
-//								    if (CGame::currLevel != LEVEL_SUBURBAN)
-//									    CFileLoader::LoadCollisionFromDatFile(LEVEL_SUBURBAN);
-//								    CCollision::bAlreadyLoaded = true;
-//								    m_PrefsIslandLoading = m_DisplayIslandLoading;
-//								    CStreaming::RequestBigBuildings(CGame::currLevel);
-//							    } else if (m_PrefsIslandLoading == ISLAND_LOADING_HIGH) {
-//								    m_PrefsIslandLoading = m_DisplayIslandLoading;
-//								    CStreaming::RequestIslands(CGame::currLevel);
-//							    } else
-//								    m_PrefsIslandLoading = m_DisplayIslandLoading;
-//						    } else { // low
-//							    m_PrefsIslandLoading = m_DisplayIslandLoading;
-//							    CCollision::bAlreadyLoaded = false;
-//							    CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
-//							    CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
-//							    CStreaming::RemoveUnusedBuildings(CGame::currLevel);
-//							    CStreaming::RequestIslands(CGame::currLevel);
-//						    }
-//
-//						    CStreaming::LoadAllRequestedModels(true);
-//					    } else
-//						    m_PrefsIslandLoading = m_DisplayIslandLoading;
-//					    SetHelperText(0);
-//					    SaveSettings();
-//				    }
-//				    break;
-//#endif
 				case MENUACTION_AUDIOHW:
 				{
 					int selectedProvider = m_nPrefsAudio3DProviderIndex;
@@ -4935,40 +4868,6 @@ CMenuManager::ProcessButtonPresses(void)
 						RestoreDefGraphics(FEOPTION_ACTION_SELECT);
 						RestoreDefDisplay(FEOPTION_ACTION_SELECT);
 #endif
-//#ifdef NO_ISLAND_LOADING
-//					    m_DisplayIslandLoading = ISLAND_LOADING_LOW;
-//					    if (!m_bGameNotLoaded) {
-//						    if (m_DisplayIslandLoading > ISLAND_LOADING_LOW) {
-//							    if (m_DisplayIslandLoading == ISLAND_LOADING_HIGH)
-//								    CStreaming::RemoveIslandsNotUsed(LEVEL_GENERIC);
-//							    if (m_PrefsIslandLoading == ISLAND_LOADING_LOW) {
-//								    if (CGame::currLevel != LEVEL_INDUSTRIAL)
-//									    CFileLoader::LoadCollisionFromDatFile(LEVEL_INDUSTRIAL);
-//								    if (CGame::currLevel != LEVEL_COMMERCIAL)
-//									    CFileLoader::LoadCollisionFromDatFile(LEVEL_COMMERCIAL);
-//								    if (CGame::currLevel != LEVEL_SUBURBAN)
-//									    CFileLoader::LoadCollisionFromDatFile(LEVEL_SUBURBAN);
-//								    CCollision::bAlreadyLoaded = true;
-//								    m_PrefsIslandLoading = m_DisplayIslandLoading;
-//								    CStreaming::RequestBigBuildings(CGame::currLevel);
-//							    } else if (m_PrefsIslandLoading == ISLAND_LOADING_HIGH) {
-//								    m_PrefsIslandLoading = m_DisplayIslandLoading;
-//								    CStreaming::RequestIslands(CGame::currLevel);
-//							    } else
-//								    m_PrefsIslandLoading = m_DisplayIslandLoading;
-//						    } else { // low
-//							    m_PrefsIslandLoading = m_DisplayIslandLoading;
-//							    CCollision::bAlreadyLoaded = false;
-//							    CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
-//							    CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
-//							    CStreaming::RemoveUnusedBuildings(CGame::currLevel);
-//							    CStreaming::RequestIslands(CGame::currLevel);
-//						    }
-//
-//						    CStreaming::LoadAllRequestedModels(true);
-//					    } else
-//						    m_PrefsIslandLoading = m_DisplayIslandLoading;
-//#endif // NO_ISLAND_LOADING
 						SaveSettings();
 					} else if ((m_nCurrScreen != MENUPAGE_SKIN_SELECT_OLD) && (m_nCurrScreen == MENUPAGE_CONTROLLER_PC)) {
 						ControlsManager.MakeControllerActionsBlank();
@@ -5228,15 +5127,6 @@ CMenuManager::ProcessButtonPresses(void)
 					}
 				}
 				break;
-//#ifdef NO_ISLAND_LOADING
-//		    case MENUACTION_ISLANDLOADING:
-//			    m_DisplayIslandLoading += changeValueBy;
-//			    if (m_DisplayIslandLoading > ISLAND_LOADING_HIGH)
-//				    m_DisplayIslandLoading = ISLAND_LOADING_LOW;
-//			    else if (m_DisplayIslandLoading < ISLAND_LOADING_LOW)
-//				    m_DisplayIslandLoading = ISLAND_LOADING_HIGH;
-//			    break;
-//#endif
 			case MENUACTION_AUDIOHW:
 				if (m_nPrefsAudio3DProviderIndex != -1) {
 					m_nPrefsAudio3DProviderIndex += changeValueBy;
