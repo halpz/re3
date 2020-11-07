@@ -203,20 +203,6 @@ static const char* FrontendFilenames[][2] =
 	{"fe_radio9",         "" },
 };
 
-#ifdef CUTSCENE_BORDERS_SWITCH
-bool CMenuManager::m_PrefsCutsceneBorders = true;
-#endif
-
-#ifdef MULTISAMPLING
-int8 CMenuManager::m_nPrefsMSAALevel = 0;
-int8 CMenuManager::m_nDisplayMSAALevel = 0;
-#endif
-
-#ifdef NO_ISLAND_LOADING
-int8 CMenuManager::m_DisplayIslandLoading = ISLAND_LOADING_LOW;
-int8 CMenuManager::m_PrefsIslandLoading = ISLAND_LOADING_LOW;
-#endif
-
 int32 CMenuManager::m_PrefsSfxVolume = 102;
 int32 CMenuManager::m_PrefsMusicVolume = 102;
 int32 CMenuManager::m_PrefsBrightness = 256;
