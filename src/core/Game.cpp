@@ -137,7 +137,7 @@ void MessageScreen(char *msg)
 	CFont::SetWrapx(SCREEN_SCALE_FROM_RIGHT(190.0f)); // 450.0f
 	CFont::SetScale(SCREEN_SCALE_X(1.0f), SCREEN_SCALE_Y(1.0f));
 	CFont::SetCentreOn();
-	CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(190.0f)); // 450.0f
+	CFont::SetCentreSize(SCREEN_SCALE_X(450.0f));
 	CFont::SetJustifyOff();
 	CFont::SetColor(CRGBA(255, 255, 255, 255));
 	CFont::SetDropColor(CRGBA(32, 32, 32, 255));

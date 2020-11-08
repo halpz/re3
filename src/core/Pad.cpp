@@ -3294,7 +3294,7 @@ void CPad::PrintErrorMessage(void)
 		CFont::SetScale(SCREEN_SCALE_X(0.85f), SCREEN_SCALE_Y(1.0f));
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-		CFont::SetCentreSize(SCREEN_STRETCH_FROM_RIGHT(50.0f));
+		CFont::SetCentreSize(SCREEN_SCALE_X(590.0f));
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
 		CFont::SetColor(CRGBA(255, 255, 200, 200));
@@ -3312,7 +3312,7 @@ void CPad::PrintErrorMessage(void)
 		CFont::SetScale(SCREEN_SCALE_X(0.85f), SCREEN_SCALE_Y(1.0f));
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-		CFont::SetCentreSize(SCREEN_STRETCH_FROM_RIGHT(50.0f));
+		CFont::SetCentreSize(SCREEN_SCALE_X(590.0f));
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
 		CFont::SetColor(CRGBA(255, 255, 200, 200));

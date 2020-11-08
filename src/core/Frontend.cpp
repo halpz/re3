@@ -767,8 +767,8 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 	CFont::SetBackGroundOnlyTextOff();
 
 	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_UNK_X_MARGIN));
-	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENU_UNK_WIDTH));
-	CFont::SetCentreSize(SCREEN_WIDTH);
+	CFont::SetRightJustifyWrap(MENU_X_LEFT_ALIGNED(MENU_UNK_X_MARGIN));
+	CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
 
 	switch (m_nCurrScreen) {
 		case MENUPAGE_CHOOSE_LOAD_SLOT:
@@ -808,7 +808,7 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 	wchar *str;
 	if (aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL) {
 		CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENULABEL_X_MARGIN));
-		CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENULABEL_WIDTH));
+		CFont::SetRightJustifyWrap(MENU_X_LEFT_ALIGNED(MENULABEL_X_MARGIN));
 		CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 		CFont::SetScale(MENU_X(BIGTEXT2_X_SCALE), MENU_Y(BIGTEXT2_Y_SCALE));
 		CFont::SetRightJustifyOff();
@@ -848,7 +848,7 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 
 		CFont::PrintString(MENU_X_LEFT_ALIGNED(100.0f), MENU_Y(97.0f), str);
 		CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_UNK_X_MARGIN));
-		CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENU_UNK_WIDTH));
+		CFont::SetRightJustifyWrap(MENU_X_LEFT_ALIGNED(MENU_UNK_X_MARGIN));
 	}
 
 	if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
@@ -1300,14 +1300,17 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 						ProcessSlider(TheCamera.m_fMouseAccelHorzntl * 200.0f, 170.0f, HOVEROPTION_INCREASE_MOUSESENS, HOVEROPTION_DECREASE_MOUSESENS, MENU_X_LEFT_ALIGNED(200.0f), SCREEN_WIDTH);
 						break;
 					}
-
-					nextYToUse = MENU_Y(150.f); // TODO(Miami): Temp
-
+					
+					// Not just unused, but also collides with the bug fix in Font.cpp. Yikes.
+#ifndef FIX_BUGS
 					nextYToUse += MENU_DEFAULT_LINE_HEIGHT * CFont::GetNumberLines(MENU_X_LEFT_ALIGNED(60.0f), MENU_Y(nextYToUse), leftText);
+#endif
 
-					// TODO(Miami): Remove here after audio page is done
+					nextYToUse = 300.0f; // TODO(Miami): temp
 					// Radio icons
 					if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action == MENUACTION_RADIO) {
+					
+						// TODO(Miami): Remove those after audio page is done
 						ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_WILDSTYLE], MENU_X_LEFT_ALIGNED(30.0f), MENU_Y(nextYToUse), 0, HOVEROPTION_RADIO_0);
 						ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_FLASH], MENU_X_LEFT_ALIGNED(90.0f), MENU_Y(nextYToUse), 1, HOVEROPTION_RADIO_1);
 						ProcessRadioIcon(m_aFrontEndSprites[MENUSPRITE_KCHAT], MENU_X_LEFT_ALIGNED(150.0f), MENU_Y(nextYToUse), 2, HOVEROPTION_RADIO_2);
@@ -1804,7 +1807,7 @@ CMenuManager::DrawControllerSetupScreen()
 	CFont::SetRightJustifyOff();
 	CFont::SetBackGroundOnlyTextOn();
 	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_UNK_X_MARGIN));
-	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENU_UNK_WIDTH));
+	CFont::SetRightJustifyWrap(MENU_X_LEFT_ALIGNED(MENU_UNK_X_MARGIN));
 	PREPARE_MENU_HEADER
 
 	switch (m_ControlMethod) {
@@ -2256,7 +2259,7 @@ CMenuManager::DrawPlayerSetupScreen(bool activeScreen)
 	CFont::SetRightJustifyOff();
 	CFont::SetBackGroundOnlyTextOn();
 	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_UNK_X_MARGIN));
-	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENU_UNK_WIDTH));
+	CFont::SetRightJustifyWrap(MENU_X_LEFT_ALIGNED(MENU_UNK_X_MARGIN));
 
 	// lstrcpy's changed with strcpy
 	if (!m_bSkinsEnumerated) {
@@ -3042,7 +3045,7 @@ CMenuManager::SmallMessageScreen(const char* text)
 	CFont::SetBackGroundOnlyTextOn();
 	CSprite2d::DrawRect(CRect(SCREEN_STRETCH_X(95.0f), SCREEN_SCALE_FROM_BOTTOM(165.0f), SCREEN_STRETCH_FROM_RIGHT(95.0f), SCREEN_SCALE_Y(115.0f)), CRGBA(50, 50, 50, FadeIn(210)));
 	CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
-	CFont::SetCentreSize(SCREEN_STRETCH_X(430.0f));
+	CFont::SetCentreSize(SCREEN_SCALE_X(430.0f));
 	CFont::SetCentreOn();
 	CFont::SetColor(CRGBA(LABEL_COLOR.r, LABEL_COLOR.g, LABEL_COLOR.b, FadeIn(255)));
 	CFont::SetDropShadowPosition(2);
@@ -4702,8 +4705,8 @@ CMenuManager::PrintMap(void)
 
 	CRadar::DrawBlips();
 	if (m_PrefsShowLegends) {
-		CFont::SetWrapx(SCREEN_SCALE_FROM_RIGHT(40.0f));
-		CFont::SetRightJustifyWrap(SCREEN_SCALE_X(84.0f));
+		CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(40.0f));
+		CFont::SetRightJustifyWrap(MENU_X_LEFT_ALIGNED(84.0f));
 		CFont::SetBackGroundOnlyTextOff();
 		CFont::SetColor(CRGBA(LABEL_COLOR.r, LABEL_COLOR.g, LABEL_COLOR.b, FadeIn(255)));
 		CFont::SetDropShadowPosition(2);
@@ -4826,8 +4829,8 @@ CMenuManager::PrintMap(void)
 #endif
 	m_bMenuMapActive = false;
 
-	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(10.0f));
-	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(10.0f));
+	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_UNK_X_MARGIN));
+	CFont::SetRightJustifyWrap(MENU_X_LEFT_ALIGNED(MENU_UNK_X_MARGIN));
 	DisplayHelperText("FEH_MPH");
 }
 
