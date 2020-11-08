@@ -88,6 +88,8 @@
 #include <stdarg.h>
 #endif
 
+//--MIAMI: file done
+
 #define PICKUP_PLACEMENT_OFFSET 0.5f
 #define PED_FIND_Z_OFFSET 5.0f
 #define COP_PED_FIND_Z_OFFSET 10.0f
@@ -9113,12 +9115,16 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 						switch (pPed->m_vehEnterType) {
 						case CAR_DOOR_LF:
 							flags = pPed->m_pMyVehicle->m_nNumMaxPassengers != 0 ? CAR_DOOR_FLAG_LF : CAR_DOOR_FLAG_LF | CAR_DOOR_FLAG_LR;
+							break;
 						case CAR_DOOR_LR:
 							flags = pPed->m_pMyVehicle->m_nNumMaxPassengers != 0 ? CAR_DOOR_FLAG_RF : CAR_DOOR_FLAG_LF | CAR_DOOR_FLAG_LR;
+							break;
 						case CAR_DOOR_RF:
 							flags = CAR_DOOR_FLAG_RF;
+							break;
 						case CAR_DOOR_RR:
 							flags = CAR_DOOR_FLAG_RR;
+							break;
 						}
 					}
 					pPed->m_pMyVehicle->m_nGettingOutFlags &= ~flags;
@@ -12119,14 +12125,14 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	{
 		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		CollectParameters(&m_nIp, 1);
-		UpdateCompareFlag(*ptr = ScriptParams[0]);
+		UpdateCompareFlag(*ptr == ScriptParams[0]);
 		return 0;
 	}
 	case COMMAND_IS_INT_LVAR_EQUAL_TO_CONSTANT:
 	{
 		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
 		CollectParameters(&m_nIp, 1);
-		UpdateCompareFlag(*ptr = ScriptParams[0]);
+		UpdateCompareFlag(*ptr == ScriptParams[0]);
 		return 0;
 	}
 	case COMMAND_GET_DEAD_CHAR_PICKUP_COORDS:
@@ -12274,7 +12280,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_IS_CONSTANT_GREATER_OR_EQUAL_TO_INT_VAR:
 	{
 		CollectParameters(&m_nIp, 1);
-		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_LOCAL);
+		int32* ptr = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL);
 		UpdateCompareFlag(ScriptParams[0] >= *ptr);
 		return 0;
 	}
@@ -15751,7 +15757,7 @@ INITSAVEBUF
 	uint32 script_data_size = SCRIPT_DATA_SIZE;
 	WriteSaveBuf(buf, script_data_size);
 	WriteSaveBuf(buf, OnAMissionFlag);
-	WriteSaveBuf(buf, NextFreeCollectiveIndex);
+	WriteSaveBuf(buf, LastMissionPassedTime);
 	for (uint32 i = 0; i < MAX_NUM_BUILDING_SWAPS; i++) {
 		CBuilding* pBuilding = BuildingSwapArray[i].m_pBuilding;
 		uint32 type, handle;
@@ -15801,12 +15807,12 @@ INITSAVEBUF
 		WriteSaveBuf(buf, handle);
 	}
 	WriteSaveBuf(buf, bUsingAMultiScriptFile);
-	WriteSaveBuf(buf, (uint8)0);
+	WriteSaveBuf(buf, bPlayerHasMetDebbieHarry);
 	WriteSaveBuf(buf, (uint16)0);
 	WriteSaveBuf(buf, MainScriptSize);
 	WriteSaveBuf(buf, LargestMissionScriptSize);
 	WriteSaveBuf(buf, NumberOfMissionScripts);
-	WriteSaveBuf(buf, (uint16)0);
+	WriteSaveBuf(buf, NumberOfExclusiveMissionScripts);
 	WriteSaveBuf(buf, runningScripts);
 	for (CRunningScript* pScript = pActiveScripts; pScript; pScript = pScript->GetNext())
 		pScript->Save(buf);
@@ -15823,7 +15829,7 @@ INITSAVEBUF
 		ScriptSpace[i] = ReadSaveBuf<uint8>(buf);
 	script_assert(ReadSaveBuf<uint32>(buf) == SCRIPT_DATA_SIZE);
 	OnAMissionFlag = ReadSaveBuf<uint32>(buf);
-	NextFreeCollectiveIndex = ReadSaveBuf<uint32>(buf);
+	LastMissionPassedTime = ReadSaveBuf<uint32>(buf);
 	for (uint32 i = 0; i < MAX_NUM_BUILDING_SWAPS; i++) {
 		uint32 type = ReadSaveBuf<uint32>(buf);
 		uint32 handle = ReadSaveBuf<uint32>(buf);
@@ -15871,12 +15877,12 @@ INITSAVEBUF
 			InvisibilitySettingArray[i]->bIsVisible = false;
 	}
 	script_assert(ReadSaveBuf<bool>(buf) == bUsingAMultiScriptFile);
-	ReadSaveBuf<uint8>(buf);
+	bPlayerHasMetDebbieHarry = ReadSaveBuf<uint8>(buf);
 	ReadSaveBuf<uint16>(buf);
 	script_assert(ReadSaveBuf<uint32>(buf) == MainScriptSize);
 	script_assert(ReadSaveBuf<uint32>(buf) == LargestMissionScriptSize);
 	script_assert(ReadSaveBuf<uint16>(buf) == NumberOfMissionScripts);
-	ReadSaveBuf<uint16>(buf);
+	script_assert(ReadSaveBuf<uint16>(buf) == NumberOfExclusiveMissionScripts);
 	uint32 runningScripts = ReadSaveBuf<uint32>(buf);
 	for (uint32 i = 0; i < runningScripts; i++)
 		StartNewScript(0)->Load(buf);
@@ -16103,7 +16109,7 @@ void CTheScripts::CleanUpThisObject(CObject* pObject)
 	if (pObject->ObjectCreatedBy != MISSION_OBJECT)
 		return;
 	pObject->ObjectCreatedBy = TEMP_OBJECT;
-	pObject->m_nEndOfLifeTime = CTimer::GetTimeInMilliseconds() + 20000;
+	pObject->m_nEndOfLifeTime = CTimer::GetTimeInMilliseconds() + 20000000;
 	pObject->m_nRefModelIndex = -1;
 	pObject->bUseVehicleColours = false;
 	++CObject::nNoTempObjects;

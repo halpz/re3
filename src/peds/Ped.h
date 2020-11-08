@@ -646,7 +646,7 @@ public:
 	uint16 m_lastQueuedSound;
 	uint16 m_queuedSound;
 	bool m_canTalk;
-	int32 m_lastComment;
+	uint32 m_lastComment;
 	CVector m_vecSeekPosEx; // used for OBJECTIVE_GUARD_SPOT
 	float m_distanceToCountSeekDoneEx; // used for OBJECTIVE_GUARD_SPOT
 
@@ -911,6 +911,7 @@ public:
 	static void DeleteSunbatheIdleAnimCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedSetPreviousStateCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedAnimShuffleCB(CAnimBlendAssociation *assoc, void *arg);
+	static void PedSetGetInCarPositionCB(CAnimBlendAssociation* assoc, void* arg);
 
 	bool IsPlayer(void);
 	bool IsFemale(void) { return m_nPedType == PEDTYPE_CIVFEMALE || m_nPedType == PEDTYPE_PROSTITUTE; }

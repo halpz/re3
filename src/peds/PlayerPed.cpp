@@ -1055,6 +1055,7 @@ CPlayerPed::FindWeaponLockOnTarget(void)
 	if (nextTarget)
 		nextTarget->RegisterReference((CEntity**)&m_pPointGunAt);
 	SetPointGunAt(nextTarget);
+	Say(SOUND_PED_AIMING);
 	return true;
 }
 

@@ -263,7 +263,8 @@ class CReplay
 		uint32 cam_shake_start;
 		float cam_shake_strength;
 		uint8 cur_area;
-		uint8 special_fx_flags;
+		uint8 video_cam : 1;
+		uint8 lift_cam : 1;
 	};
 
 	VALIDATE_SIZE(tMiscPacket, 16);

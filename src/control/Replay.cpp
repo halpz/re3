@@ -53,7 +53,7 @@
 #include "Fluff.h"
 #include "WaterCreatures.h"
 
-//--MIAMI: file done except TODO
+//--MIAMI: file done
 
 uint8 CReplay::Mode;
 CAddressInReplayBuffer CReplay::Record;
@@ -158,7 +158,7 @@ static void(*CBArray[])(CAnimBlendAssociation*, void*) =
 	&CPed::FinishedAttackCB,
 	&CPed::FinishFightMoveCB, &PhonePutDownCB, &PhonePickUpCB, &CPed::PedAnimDoorCloseRollingCB, &CPed::FinishJumpCB,
 	&CPed::PedLandCB, &CPed::RestoreHeadingRateCB, &CPed::PedSetQuickDraggedOutCarPositionCB, &CPed::PedSetDraggedOutCarPositionCB,
-	&CPed::PedSetPreviousStateCB, &CPed::FinishedReloadCB, /*&CPed::PedSetGetInCarPositionCB, TODO(MIAMI)*/
+	&CPed::PedSetPreviousStateCB, &CPed::FinishedReloadCB, &CPed::PedSetGetInCarPositionCB,
 	&CPed::PedAnimShuffleCB, &CPed::DeleteSunbatheIdleAnimCB, &StartTalkingOnMobileCB, &FinishTalkingOnMobileCB
 };
 
@@ -396,7 +396,8 @@ void CReplay::RecordThisFrame(void)
 	misc->cam_shake_start = TheCamera.m_uiCamShakeStart;
 	misc->cam_shake_strength = TheCamera.m_fCamShakeForce;
 	misc->cur_area = CGame::currArea;
-	//misc->special_fx_flags; // TODO(MIAMI)!!!
+	misc->video_cam = CSpecialFX::bVideoCam;
+	misc->lift_cam = CSpecialFX::bLiftCam;
 	Record.m_nOffset += sizeof(*misc);
 	tEndOfFramePacket* eof = (tEndOfFramePacket*)&Record.m_pBase[Record.m_nOffset];
 	eof->type = REPLAYPACKET_ENDOFFRAME;
@@ -1139,7 +1140,8 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer *buffer, flo
 			tMiscPacket* pm = (tMiscPacket*)&ptr[offset];
 			TheCamera.m_uiCamShakeStart = pm->cam_shake_start;
 			TheCamera.m_fCamShakeForce = pm->cam_shake_strength;
-			// TODO(MIAMI): SpecialFX
+			CSpecialFX::bVideoCam = pm->video_cam;
+			CSpecialFX::bLiftCam = pm->lift_cam;
 			CGame::currArea = pm->cur_area;
 			buffer->m_nOffset += sizeof(tMiscPacket);
 			break;

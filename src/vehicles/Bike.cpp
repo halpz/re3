@@ -792,7 +792,7 @@ CBike::ProcessControl(void)
 					   CSurfaceTable::GetAdhesionGroup(m_aWheelColPoints[rearLine].surfaceB) == ADHESIVE_SAND)
 						steer *= pBikeHandling->fSlipSteer;
 					f = Asin(Min(steer/SQR(fwdSpeed), 1.0))/DEGTORAD(pHandling->fSteeringLock);
-					if(m_fSteerAngle < 0.0f && m_fLeanLRAngle < 0.0f &&
+					if(m_fSteerAngle < 0.0f && m_fLeanLRAngle < 0.0f ||
 					   m_fSteerAngle > 0.0f && m_fLeanLRAngle > 0.0f)
 						f *= 2.0f;
 					f = Min(f, 1.0f);

@@ -522,7 +522,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_delayedSoundID = -1;
 	m_delayedSoundTimer = 0;
 	CPopulation::UpdatePedCount((ePedType)m_nPedType, false);
-	m_lastComment = -1;
+	m_lastComment = UINT32_MAX;
 }
 
 // --MIAMI: Done
@@ -21439,4 +21439,18 @@ CPed::SetLook(float direction)
 		SetPedState(PED_LOOK_HEADING);
 		SetLookFlag(direction, false);
 	}
+}
+
+// --MIAMI: Done
+// Unused
+void CPed::PedSetGetInCarPositionCB(CAnimBlendAssociation* assoc, void* arg)
+{
+	CPed* pPed = (CPed*)arg;
+	CMatrix mat(pPed->GetMatrix());
+	CVehicle* pVehicle = pPed->m_pMyVehicle;
+	const CVector& offset = (pVehicle->bIsVan && (pPed->m_vehEnterType == CAR_DOOR_RR || pPed->m_vehEnterType == CAR_DOOR_LR)) ? vecPedVanRearDoorAnimOffset : vecPedCarDoorAnimOffset;
+	CVector position = Multiply3x3(mat, offset) + pPed->GetPosition();
+	CPedPlacement::FindZCoorForPed(&position);
+	pPed->SetMoveSpeed(0.0f, 0.0f, 0.0f);
+	pPed->SetPosition(position);
 }
