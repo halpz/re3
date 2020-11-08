@@ -7201,7 +7201,10 @@ cPedComments::Process()
 				AudioManager.m_sQueueSample.m_bRequireReflection = true;
 				AudioManager.m_sQueueSample.m_bIs2D = false;
 #ifdef FIX_BUGS
-				AudioManager.m_sQueueSample.m_bIs2D = sampleIndex >= 8694 && sampleIndex < TOTAL_AUDIO_SAMPLES; // check if player sfx, TODO: enum
+				if (sampleIndex >= 8694 && sampleIndex < TOTAL_AUDIO_SAMPLES) { // check if player sfx, TODO: enum
+					AudioManager.m_sQueueSample.m_bIs2D = true;
+					AudioManager.m_sQueueSample.m_nOffset = 63;
+				}
 #endif // FIX_BUGS
 				AudioManager.m_sQueueSample.m_nFrequency =
 				    SampleManager.GetSampleBaseFrequency(AudioManager.m_sQueueSample.m_nSampleIndex) + AudioManager.RandomDisplacement(750);
