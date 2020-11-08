@@ -852,7 +852,7 @@ DisplayGameDebugText()
 		CFont::SetRightJustifyOff();
 		CFont::SetJustifyOff();
 		CFont::SetBackGroundOnlyTextOff();
-		CFont::SetWrapx(SCREEN_WIDTH);
+		CFont::SetWrapx(640.0f);
 		CFont::SetFontStyle(FONT_HEADING);
 		
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
