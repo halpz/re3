@@ -374,8 +374,8 @@ public:
 	uint8 GetNum3DProvidersAvailable() const; // done
 	uint32 GetPedCommentSfx(CPed *ped, int32 sound);
 	void GetPhrase(uint32 &phrase, uint32 &prevPhrase, uint32 sample, uint32 maxOffset) const;
-	float GetVehicleDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile, cTransmission *transmission, float velocityChange);   //done
-	float GetVehicleNonDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile, cTransmission *transmission, float velocityChange);//done
+	float GetVehicleDriveWheelSkidValue(CVehicle* veh, tWheelState wheelState, float gasPedalAudio, cTransmission* transmission, float velocityChange); // done
+	float GetVehicleNonDriveWheelSkidValue(CVehicle* veh, tWheelState wheelState, cTransmission* transmission, float velocityChange);                   // done
 
 	bool HasAirBrakes(int32 model) const; // done
 

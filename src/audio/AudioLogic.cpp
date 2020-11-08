@@ -3057,10 +3057,10 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams *params)
 			pedParams.m_fDistance = params->m_fDistance;
 			SetupPedComments(&pedParams, SOUND_PED_BODYCAST_HIT);
 			continue; */
-		case SOUND_115: {
+		case SOUND_PED_VCPA_PLAYER_FOUND: {
 			pedParams.m_bDistanceCalculated = params->m_bDistanceCalculated;
 			pedParams.m_fDistance = params->m_fDistance;
-			SetupPedComments(&pedParams, SOUND_115);
+			SetupPedComments(&pedParams, SOUND_PED_VCPA_PLAYER_FOUND);
 		}
 		case SOUND_WATER_FALL: {
 			const float SOUND_INTENSITY = 40.0f;
