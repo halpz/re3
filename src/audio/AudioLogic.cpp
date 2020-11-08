@@ -1047,7 +1047,11 @@ cAudioManager::ProcessModelVehicle(cVehicleParams& params)
 			freq = clamp2(freq, prevFreq, 800);
 		}
 		if (!vehSlowdown)
+#ifdef THIS_IS_STUPID
+			freq += 8000.0f * Abs(DotProduct(params.m_pVehicle->GetUp(), CVector(0.0f, 1.0f, 0.0f)));
+#else
 			freq += 8000.0f * Abs(params.m_pVehicle->GetUp().y);
+#endif
 		if (params.m_pVehicle->bIsDrowning)
 			volume /= 4;
 		if (volume > 0) {
@@ -2650,7 +2654,11 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 				break;
 			}
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+#ifdef THIS_IS_STUPID
 			m_sQueueSample.m_nCounter = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i] + 22;
+#else
+			m_sQueueSample.m_nCounter = event + 22;
+#endif
 			if (params.m_pVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_HELI)
 				m_sQueueSample.m_nFrequency = 28062;
 			else
@@ -2686,7 +2694,11 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 				break;
 			}
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+#ifdef THIS_IS_STUPID
 			m_sQueueSample.m_nCounter = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i] + 10;
+#else
+			m_sQueueSample.m_nCounter = event + 10;
+#endif
 			if (params.m_pVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_HELI)
 				m_sQueueSample.m_nFrequency = 23459;
 			else
@@ -2715,7 +2727,11 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 			const float SOUND_INTENSITY = 35.0f;
 			static uint8 WheelIndex = 82;
 			maxDist = SQR(SOUND_INTENSITY);
+#ifdef THIS_IS_STUPID
 			if (m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i] == SOUND_CAR_JUMP_2) {
+#else
+			if (event == SOUND_CAR_JUMP_2) {
+#endif
 				m_sQueueSample.m_nSampleIndex = SFX_TYRE_BURST_B;
 				emittingVol = Max(50.0f, 2 * (60.0f * m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i]));
 			} else {
@@ -7698,7 +7714,6 @@ cAudioManager::ProcessFires(int32)
 				m_sQueueSample.m_fSoundIntensity = 80.0f;
 				m_sQueueSample.m_nSampleIndex = SFX_CAR_ON_FIRE;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CAR_ON_FIRE);
-				//mb error in III
 				emittingVol = 80;
 				m_sQueueSample.m_nReleasingVolumeModificator = 8;
 			}
