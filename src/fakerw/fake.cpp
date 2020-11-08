@@ -462,6 +462,53 @@ RwBool RwIm3DRenderPrimitive(RwPrimitiveType primType);
 
 
 
+RwBool RwRenderStateGet(RwRenderState state, void *value)
+{
+	uint32 *uival = (uint32*)value;
+	uint32 fog;
+	switch(state){
+	case rwRENDERSTATETEXTURERASTER: *(void**)value = GetRenderStatePtr(TEXTURERASTER); return true;
+	case rwRENDERSTATETEXTUREADDRESS: *uival = GetRenderState(TEXTUREADDRESS); return true;
+	case rwRENDERSTATETEXTUREADDRESSU: *uival = GetRenderState(TEXTUREADDRESSU); return true;
+	case rwRENDERSTATETEXTUREADDRESSV: *uival = GetRenderState(TEXTUREADDRESSV); return true;
+	case rwRENDERSTATETEXTUREPERSPECTIVE: *uival = 1; return true;
+	case rwRENDERSTATEZTESTENABLE: *uival = GetRenderState(ZTESTENABLE); return true;
+	case rwRENDERSTATESHADEMODE: *uival = rwSHADEMODEGOURAUD; return true;
+	case rwRENDERSTATEZWRITEENABLE: *uival = GetRenderState(ZWRITEENABLE); return true;
+	case rwRENDERSTATETEXTUREFILTER: *uival = GetRenderState(TEXTUREFILTER); return true;
+	case rwRENDERSTATESRCBLEND: *uival = GetRenderState(SRCBLEND); return true;
+	case rwRENDERSTATEDESTBLEND: *uival = GetRenderState(DESTBLEND); return true;
+	case rwRENDERSTATEVERTEXALPHAENABLE: *uival = GetRenderState(VERTEXALPHA); return true;
+	case rwRENDERSTATEBORDERCOLOR: *uival = 0; return true;
+	case rwRENDERSTATEFOGENABLE: *uival = GetRenderState(FOGENABLE); return true;
+	case rwRENDERSTATEFOGCOLOR:
+		// have to swap R and B here
+		fog = GetRenderState(FOGCOLOR);
+		*uival = (fog>>16)&0xFF;
+		*uival |= (fog&0xFF)<<16;
+		*uival |= fog&0xFF00;
+		*uival |= fog&0xFF000000;
+		return true;
+	case rwRENDERSTATEFOGTYPE: *uival = rwFOGTYPELINEAR; return true;
+	case rwRENDERSTATEFOGDENSITY: *(float*)value = 1.0f; return true;
+	case rwRENDERSTATECULLMODE: *uival = GetRenderState(CULLMODE); return true;
+
+	// all unsupported
+	case rwRENDERSTATEFOGTABLE:
+	case rwRENDERSTATEALPHAPRIMITIVEBUFFER:
+
+	case rwRENDERSTATESTENCILENABLE:
+	case rwRENDERSTATESTENCILFAIL:
+	case rwRENDERSTATESTENCILZFAIL:
+	case rwRENDERSTATESTENCILPASS:
+	case rwRENDERSTATESTENCILFUNCTION:
+	case rwRENDERSTATESTENCILFUNCTIONREF:
+	case rwRENDERSTATESTENCILFUNCTIONMASK:
+	case rwRENDERSTATESTENCILFUNCTIONWRITEMASK:
+	default:
+		return false;
+	}
+}
 RwBool RwRenderStateSet(RwRenderState state, void *value)
 {
 	uint32 uival = (uintptr)value;

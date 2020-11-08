@@ -332,7 +332,7 @@ public:
 	int8 GetMissionScriptPoliceAudioPlayingStatus() const;
 	uint8 GetNum3DProvidersAvailable() const;
 	int32 GetPedCommentSfx(CPed *ped, int32 sound);
-	void GetPhrase(uint32 *phrase, uint32 *prevPhrase, uint32 sample, uint32 maxOffset) const;
+	void GetPhrase(uint32 &phrase, uint32 &prevPhrase, uint32 sample, uint32 maxOffset) const;
 	float GetVehicleDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile,
 	                                    cTransmission *transmission, float velocityChange);
 	float GetVehicleNonDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile,

@@ -2316,199 +2316,208 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	return num;
 }
 
-const char *XboxButtons[][MAX_CONTROLLERACTIONS] =
-{
-	{
-		"B",    // PED_FIREWEAPON
-		"RT",   // PED_CYCLE_WEAPON_RIGHT
-		"LT",   // PED_CYCLE_WEAPON_LEFT
-		nil,    // GO_FORWARD
-		nil,    // GO_BACK
-		nil,    // GO_LEFT
-		nil,    // GO_RIGHT
-		"X",    // PED_SNIPER_ZOOM_IN
-		"A",    // PED_SNIPER_ZOOM_OUT
-		"Y",    // VEHICLE_ENTER_EXIT
-		"BACK", // CAMERA_CHANGE_VIEW_ALL_SITUATIONS
-		"X",    // PED_JUMPING
-		"A",    // PED_SPRINT
-		"RS",   // PED_LOOKBEHIND
 #ifdef BIND_VEHICLE_FIREWEAPON
-		"B",   // VEHICLE_FIREWEAPON
+#define VFB(b) b,
+#else
+#define VFB(b)
 #endif
-		"A",  // VEHICLE_ACCELERATE
-		"X",  // VEHICLE_BRAKE
-		"LB", // VEHICLE_CHANGE_RADIO_STATION
-		"LS", // VEHICLE_HORN
-		"RS", // TOGGLE_SUBMISSIONS
-		"RB", // VEHICLE_HANDBRAKE
-		nil,  // PED_1RST_PERSON_LOOK_LEFT
-		nil,  // PED_1RST_PERSON_LOOK_RIGHT
-		"LT", // VEHICLE_LOOKLEFT
-		"RT", // VEHICLE_LOOKRIGHT
-		nil,  // VEHICLE_LOOKBEHIND
-		nil,  // VEHICLE_TURRETLEFT
-		nil,  // VEHICLE_TURRETRIGHT
-		nil,  // VEHICLE_TURRETUP
-		nil,  // VEHICLE_TURRETDOWN
-		"LT", // PED_CYCLE_TARGET_LEFT
-		"RT", // PED_CYCLE_TARGET_RIGHT
-		"LB", // PED_CENTER_CAMERA_BEHIND_PLAYER
-		"RB", // PED_LOCK_TARGET
-		nil,  // NETWORK_TALK
-		nil,  // PED_1RST_PERSON_LOOK_UP
-		nil,  // PED_1RST_PERSON_LOOK_DOWN
-		nil,  // _CONTROLLERACTION_36
-		nil,  // TOGGLE_DPAD
-		nil,  // SWITCH_DEBUG_CAM_ON
-		nil,  // TAKE_SCREEN_SHOT
-		nil,  // SHOW_MOUSE_POINTER_TOGGLE
-	},
-	{
-		"B",    // PED_FIREWEAPON
-		"RT",   // PED_CYCLE_WEAPON_RIGHT
-		"LT",   // PED_CYCLE_WEAPON_LEFT
-		nil,    // GO_FORWARD
-		nil,    // GO_BACK
-		nil,    // GO_LEFT
-		nil,    // GO_RIGHT
-		"X",    // PED_SNIPER_ZOOM_IN
-		"A",    // PED_SNIPER_ZOOM_OUT
-		"Y",    // VEHICLE_ENTER_EXIT
-		"BACK", // CAMERA_CHANGE_VIEW_ALL_SITUATIONS
-		"X",    // PED_JUMPING
-		"A",    // PED_SPRINT
-		"RS",   // PED_LOOKBEHIND
-#ifdef BIND_VEHICLE_FIREWEAPON
-		"B", // VEHICLE_FIREWEAPON
+
+#define CONTROLLER_BUTTONS(T, O, X, Q, L1, L2, L3, R1, R2, R3, SELECT)                                                                                         \
+	{{                                                                                                                                                         \
+	     O,      /* PED_FIREWEAPON */                                                                                                                          \
+	     R2,     /* PED_CYCLE_WEAPON_RIGHT */                                                                                                                  \
+	     L2,     /* PED_CYCLE_WEAPON_LEFT */                                                                                                                   \
+	     nil,    /* GO_FORWARD */                                                                                                                              \
+	     nil,    /* GO_BACK */                                                                                                                                 \
+	     nil,    /* GO_LEFT */                                                                                                                                 \
+	     nil,    /* GO_RIGHT */                                                                                                                                \
+	     Q,      /* PED_SNIPER_ZOOM_IN */                                                                                                                      \
+	     X,      /* PED_SNIPER_ZOOM_OUT */                                                                                                                     \
+	     T,      /* VEHICLE_ENTER_EXIT */                                                                                                                      \
+	     SELECT, /* CAMERA_CHANGE_VIEW_ALL_SITUATIONS */                                                                                                       \
+	     Q,      /* PED_JUMPING */                                                                                                                             \
+	     X,      /* PED_SPRINT */                                                                                                                              \
+	     R3,     /* PED_LOOKBEHIND */                                                                                                                          \
+	     VFB(O)  /* VEHICLE_FIREWEAPON */                                                                                                                      \
+	     X,      /* VEHICLE_ACCELERATE */                                                                                                                      \
+	     Q,      /* VEHICLE_BRAKE */                                                                                                                           \
+	     L1,     /* VEHICLE_CHANGE_RADIO_STATION */                                                                                                            \
+	     L3,     /* VEHICLE_HORN */                                                                                                                            \
+	     R3,     /* TOGGLE_SUBMISSIONS */                                                                                                                      \
+	     R1,     /* VEHICLE_HANDBRAKE */                                                                                                                       \
+	     nil,    /* PED_1RST_PERSON_LOOK_LEFT */                                                                                                               \
+	     nil,    /* PED_1RST_PERSON_LOOK_RIGHT */                                                                                                              \
+	     L2,     /* VEHICLE_LOOKLEFT */                                                                                                                        \
+	     R2,     /* VEHICLE_LOOKRIGHT */                                                                                                                       \
+	     nil,    /* VEHICLE_LOOKBEHIND */                                                                                                                      \
+	     nil,    /* VEHICLE_TURRETLEFT */                                                                                                                      \
+	     nil,    /* VEHICLE_TURRETRIGHT */                                                                                                                     \
+	     nil,    /* VEHICLE_TURRETUP */                                                                                                                        \
+	     nil,    /* VEHICLE_TURRETDOWN */                                                                                                                      \
+	     L2,     /* PED_CYCLE_TARGET_LEFT */                                                                                                                   \
+	     R2,     /* PED_CYCLE_TARGET_RIGHT */                                                                                                                  \
+	     L1,     /* PED_CENTER_CAMERA_BEHIND_PLAYER */                                                                                                         \
+	     R1,     /* PED_LOCK_TARGET */                                                                                                                         \
+	     nil,    /* NETWORK_TALK */                                                                                                                            \
+	     nil,    /* PED_1RST_PERSON_LOOK_UP */                                                                                                                 \
+	     nil,    /* PED_1RST_PERSON_LOOK_DOWN */                                                                                                               \
+	     nil,    /* _CONTROLLERACTION_36 */                                                                                                                    \
+	     nil,    /* TOGGLE_DPAD */                                                                                                                             \
+	     nil,    /* SWITCH_DEBUG_CAM_ON */                                                                                                                     \
+	     nil,    /* TAKE_SCREEN_SHOT */                                                                                                                        \
+	     nil,    /* SHOW_MOUSE_POINTER_TOGGLE */                                                                                                               \
+	 },                                                                                                                                                        \
+	 {                                                                                                                                                         \
+	     O,      /* PED_FIREWEAPON */                                                                                                                          \
+	     R2,     /* PED_CYCLE_WEAPON_RIGHT */                                                                                                                  \
+	     L2,     /* PED_CYCLE_WEAPON_LEFT */                                                                                                                   \
+	     nil,    /* GO_FORWARD */                                                                                                                              \
+	     nil,    /* GO_BACK */                                                                                                                                 \
+	     nil,    /* GO_LEFT */                                                                                                                                 \
+	     nil,    /* GO_RIGHT */                                                                                                                                \
+	     Q,      /* PED_SNIPER_ZOOM_IN */                                                                                                                      \
+	     X,      /* PED_SNIPER_ZOOM_OUT */                                                                                                                     \
+	     T,      /* VEHICLE_ENTER_EXIT */                                                                                                                      \
+	     SELECT, /* CAMERA_CHANGE_VIEW_ALL_SITUATIONS */                                                                                                       \
+	     Q,      /* PED_JUMPING */                                                                                                                             \
+	     X,      /* PED_SPRINT */                                                                                                                              \
+	     R3,     /* PED_LOOKBEHIND */                                                                                                                          \
+	     VFB(O)  /* VEHICLE_FIREWEAPON */                                                                                                                      \
+	     X,      /* VEHICLE_ACCELERATE */                                                                                                                      \
+	     Q,      /* VEHICLE_BRAKE */                                                                                                                           \
+	     SELECT, /* VEHICLE_CHANGE_RADIO_STATION */                                                                                                            \
+	     L1,     /* VEHICLE_HORN */                                                                                                                            \
+	     R3,     /* TOGGLE_SUBMISSIONS */                                                                                                                      \
+	     R1,     /* VEHICLE_HANDBRAKE */                                                                                                                       \
+	     nil,    /* PED_1RST_PERSON_LOOK_LEFT */                                                                                                               \
+	     nil,    /* PED_1RST_PERSON_LOOK_RIGHT */                                                                                                              \
+	     L2,     /* VEHICLE_LOOKLEFT */                                                                                                                        \
+	     R2,     /* VEHICLE_LOOKRIGHT */                                                                                                                       \
+	     nil,    /* VEHICLE_LOOKBEHIND */                                                                                                                      \
+	     nil,    /* VEHICLE_TURRETLEFT */                                                                                                                      \
+	     nil,    /* VEHICLE_TURRETRIGHT */                                                                                                                     \
+	     nil,    /* VEHICLE_TURRETUP */                                                                                                                        \
+	     nil,    /* VEHICLE_TURRETDOWN */                                                                                                                      \
+	     L2,     /* PED_CYCLE_TARGET_LEFT */                                                                                                                   \
+	     R2,     /* PED_CYCLE_TARGET_RIGHT */                                                                                                                  \
+	     L1,     /* PED_CENTER_CAMERA_BEHIND_PLAYER */                                                                                                         \
+	     R1,     /* PED_LOCK_TARGET */                                                                                                                         \
+	     nil,    /* NETWORK_TALK */                                                                                                                            \
+	     nil,    /* PED_1RST_PERSON_LOOK_UP */                                                                                                                 \
+	     nil,    /* PED_1RST_PERSON_LOOK_DOWN */                                                                                                               \
+	     nil,    /* _CONTROLLERACTION_36 */                                                                                                                    \
+	     nil,    /* TOGGLE_DPAD */                                                                                                                             \
+	     nil,    /* SWITCH_DEBUG_CAM_ON */                                                                                                                     \
+	     nil,    /* TAKE_SCREEN_SHOT */                                                                                                                        \
+	     nil,    /* SHOW_MOUSE_POINTER_TOGGLE */                                                                                                               \
+	 },                                                                                                                                                        \
+	 {                                                                                                                                                         \
+	     X,      /* PED_FIREWEAPON */                                                                                                                          \
+	     R2,     /* PED_CYCLE_WEAPON_RIGHT */                                                                                                                  \
+	     L2,     /* PED_CYCLE_WEAPON_LEFT */                                                                                                                   \
+	     nil,    /* GO_FORWARD */                                                                                                                              \
+	     nil,    /* GO_BACK */                                                                                                                                 \
+	     nil,    /* GO_LEFT */                                                                                                                                 \
+	     nil,    /* GO_RIGHT */                                                                                                                                \
+	     T,      /* PED_SNIPER_ZOOM_IN */                                                                                                                      \
+	     Q,      /* PED_SNIPER_ZOOM_OUT */                                                                                                                     \
+	     L1,     /* VEHICLE_ENTER_EXIT */                                                                                                                      \
+	     SELECT, /* CAMERA_CHANGE_VIEW_ALL_SITUATIONS */                                                                                                       \
+	     Q,      /* PED_JUMPING */                                                                                                                             \
+	     O,      /* PED_SPRINT */                                                                                                                              \
+	     R3,     /* PED_LOOKBEHIND */                                                                                                                          \
+	     VFB(O)  /* VEHICLE_FIREWEAPON */                                                                                                                      \
+	     X,      /* VEHICLE_ACCELERATE */                                                                                                                      \
+	     Q,      /* VEHICLE_BRAKE */                                                                                                                           \
+	     L3,     /* VEHICLE_CHANGE_RADIO_STATION */                                                                                                            \
+	     R1,     /* VEHICLE_HORN */                                                                                                                            \
+	     R3,     /* TOGGLE_SUBMISSIONS */                                                                                                                      \
+	     T,      /* VEHICLE_HANDBRAKE */                                                                                                                       \
+	     nil,    /* PED_1RST_PERSON_LOOK_LEFT */                                                                                                               \
+	     nil,    /* PED_1RST_PERSON_LOOK_RIGHT */                                                                                                              \
+	     L2,     /* VEHICLE_LOOKLEFT */                                                                                                                        \
+	     R2,     /* VEHICLE_LOOKRIGHT */                                                                                                                       \
+	     nil,    /* VEHICLE_LOOKBEHIND */                                                                                                                      \
+	     nil,    /* VEHICLE_TURRETLEFT */                                                                                                                      \
+	     nil,    /* VEHICLE_TURRETRIGHT */                                                                                                                     \
+	     nil,    /* VEHICLE_TURRETUP */                                                                                                                        \
+	     nil,    /* VEHICLE_TURRETDOWN */                                                                                                                      \
+	     L2,     /* PED_CYCLE_TARGET_LEFT */                                                                                                                   \
+	     R2,     /* PED_CYCLE_TARGET_RIGHT */                                                                                                                  \
+	     T,      /* PED_CENTER_CAMERA_BEHIND_PLAYER */                                                                                                         \
+	     R1,     /* PED_LOCK_TARGET */                                                                                                                         \
+	     nil,    /* NETWORK_TALK */                                                                                                                            \
+	     nil,    /* PED_1RST_PERSON_LOOK_UP */                                                                                                                 \
+	     nil,    /* PED_1RST_PERSON_LOOK_DOWN */                                                                                                               \
+	     nil,    /* _CONTROLLERACTION_36 */                                                                                                                    \
+	     nil,    /* TOGGLE_DPAD */                                                                                                                             \
+	     nil,    /* SWITCH_DEBUG_CAM_ON */                                                                                                                     \
+	     nil,    /* TAKE_SCREEN_SHOT */                                                                                                                        \
+	     nil,    /* SHOW_MOUSE_POINTER_TOGGLE */                                                                                                               \
+	 },                                                                                                                                                        \
+	 {                                                                                                                                                         \
+	     R1,     /* PED_FIREWEAPON */                                                                                                                          \
+	     R2,     /* PED_CYCLE_WEAPON_RIGHT */                                                                                                                  \
+	     L2,     /* PED_CYCLE_WEAPON_LEFT */                                                                                                                   \
+	     nil,    /* GO_FORWARD */                                                                                                                              \
+	     nil,    /* GO_BACK */                                                                                                                                 \
+	     nil,    /* GO_LEFT */                                                                                                                                 \
+	     nil,    /* GO_RIGHT */                                                                                                                                \
+	     Q,      /* PED_SNIPER_ZOOM_IN */                                                                                                                      \
+	     X,      /* PED_SNIPER_ZOOM_OUT */                                                                                                                     \
+	     T,      /* VEHICLE_ENTER_EXIT */                                                                                                                      \
+	     SELECT, /* CAMERA_CHANGE_VIEW_ALL_SITUATIONS */                                                                                                       \
+	     Q,      /* PED_JUMPING */                                                                                                                             \
+	     X,      /* PED_SPRINT */                                                                                                                              \
+	     R3,     /* PED_LOOKBEHIND */                                                                                                                          \
+	     VFB(R1) /* VEHICLE_FIREWEAPON */                                                                                                                      \
+	     nil,    /* VEHICLE_ACCELERATE */                                                                                                                      \
+	     nil,    /* VEHICLE_BRAKE */                                                                                                                           \
+	     O,      /* VEHICLE_CHANGE_RADIO_STATION */                                                                                                            \
+	     L3,     /* VEHICLE_HORN */                                                                                                                            \
+	     Q,      /* TOGGLE_SUBMISSIONS */                                                                                                                      \
+	     L1,     /* VEHICLE_HANDBRAKE */                                                                                                                       \
+	     nil,    /* PED_1RST_PERSON_LOOK_LEFT */                                                                                                               \
+	     nil,    /* PED_1RST_PERSON_LOOK_RIGHT */                                                                                                              \
+	     L2,     /* VEHICLE_LOOKLEFT */                                                                                                                        \
+	     R2,     /* VEHICLE_LOOKRIGHT */                                                                                                                       \
+	     nil,    /* VEHICLE_LOOKBEHIND */                                                                                                                      \
+	     nil,    /* VEHICLE_TURRETLEFT */                                                                                                                      \
+	     nil,    /* VEHICLE_TURRETRIGHT */                                                                                                                     \
+	     nil,    /* VEHICLE_TURRETUP */                                                                                                                        \
+	     nil,    /* VEHICLE_TURRETDOWN */                                                                                                                      \
+	     L2,     /* PED_CYCLE_TARGET_LEFT */                                                                                                                   \
+	     R2,     /* PED_CYCLE_TARGET_RIGHT */                                                                                                                  \
+	     O,      /* PED_CENTER_CAMERA_BEHIND_PLAYER */                                                                                                         \
+	     L1,     /* PED_LOCK_TARGET */                                                                                                                         \
+	     nil,    /* NETWORK_TALK */                                                                                                                            \
+	     nil,    /* PED_1RST_PERSON_LOOK_UP */                                                                                                                 \
+	     nil,    /* PED_1RST_PERSON_LOOK_DOWN */                                                                                                               \
+	     nil,    /* _CONTROLLERACTION_36 */                                                                                                                    \
+	     nil,    /* TOGGLE_DPAD */                                                                                                                             \
+	     nil,    /* SWITCH_DEBUG_CAM_ON */                                                                                                                     \
+	     nil,    /* TAKE_SCREEN_SHOT */                                                                                                                        \
+	     nil,    /* SHOW_MOUSE_POINTER_TOGGLE */                                                                                                               \
+	 }}
+
+
+const char *XboxButtons_noIcons[][MAX_CONTROLLERACTIONS] = CONTROLLER_BUTTONS("Y", "B", "A", "X", "LB", "LT", "LS", "RB", "RT", "RS", "BACK");
+
+#ifdef BUTTON_ICONS
+const char *XboxButtons[][MAX_CONTROLLERACTIONS] = CONTROLLER_BUTTONS("~T~", "~O~", "~X~", "~Q~", "~K~", "~M~", "~A~", "~J~", "~V~", "~C~", "BACK");
 #endif
-		"A",    // VEHICLE_ACCELERATE
-		"X",    // VEHICLE_BRAKE
-		"BACK", // VEHICLE_CHANGE_RADIO_STATION
-		"LB",   // VEHICLE_HORN
-		"RS",   // TOGGLE_SUBMISSIONS
-		"RB",   // VEHICLE_HANDBRAKE
-		nil,    // PED_1RST_PERSON_LOOK_LEFT
-		nil,    // PED_1RST_PERSON_LOOK_RIGHT
-		"LT",   // VEHICLE_LOOKLEFT
-		"RT",   // VEHICLE_LOOKRIGHT
-		nil,    // VEHICLE_LOOKBEHIND
-		nil,    // VEHICLE_TURRETLEFT
-		nil,    // VEHICLE_TURRETRIGHT
-		nil,    // VEHICLE_TURRETUP
-		nil,    // VEHICLE_TURRETDOWN
-		"LT",   // PED_CYCLE_TARGET_LEFT
-		"RT",   // PED_CYCLE_TARGET_RIGHT
-		"LB",   // PED_CENTER_CAMERA_BEHIND_PLAYER
-		"RB",   // PED_LOCK_TARGET
-		nil,    // NETWORK_TALK
-		nil,    // PED_1RST_PERSON_LOOK_UP
-		nil,    // PED_1RST_PERSON_LOOK_DOWN
-		nil,    // _CONTROLLERACTION_36
-		nil,    // TOGGLE_DPAD
-		nil,    // SWITCH_DEBUG_CAM_ON
-		nil,    // TAKE_SCREEN_SHOT
-		nil,    // SHOW_MOUSE_POINTER_TOGGLE
-	},
-	{
-		"A",    // PED_FIREWEAPON
-		"RT",   // PED_CYCLE_WEAPON_RIGHT
-		"LT",   // PED_CYCLE_WEAPON_LEFT
-		nil,    // GO_FORWARD
-		nil,    // GO_BACK
-		nil,    // GO_LEFT
-		nil,    // GO_RIGHT
-		"Y",    // PED_SNIPER_ZOOM_IN
-		"X",    // PED_SNIPER_ZOOM_OUT
-		"LB",   // VEHICLE_ENTER_EXIT
-		"BACK", // CAMERA_CHANGE_VIEW_ALL_SITUATIONS
-		"X",    // PED_JUMPING
-		"B",    // PED_SPRINT
-		"RS",   // PED_LOOKBEHIND
-#ifdef BIND_VEHICLE_FIREWEAPON
-		"B",   // VEHICLE_FIREWEAPON
-#endif
-		"A",  // VEHICLE_ACCELERATE
-		"X",  // VEHICLE_BRAKE
-		"LS", // VEHICLE_CHANGE_RADIO_STATION
-		"RB", // VEHICLE_HORN
-		"RS", // TOGGLE_SUBMISSIONS
-		"Y",  // VEHICLE_HANDBRAKE
-		nil,  // PED_1RST_PERSON_LOOK_LEFT
-		nil,  // PED_1RST_PERSON_LOOK_RIGHT
-		"LT", // VEHICLE_LOOKLEFT
-		"RT", // VEHICLE_LOOKRIGHT
-		nil,  // VEHICLE_LOOKBEHIND
-		nil,  // VEHICLE_TURRETLEFT
-		nil,  // VEHICLE_TURRETRIGHT
-		nil,  // VEHICLE_TURRETUP
-		nil,  // VEHICLE_TURRETDOWN
-		"LT", // PED_CYCLE_TARGET_LEFT
-		"RT", // PED_CYCLE_TARGET_RIGHT
-		"Y",  // PED_CENTER_CAMERA_BEHIND_PLAYER
-		"RB", // PED_LOCK_TARGET
-		nil,  // NETWORK_TALK
-		nil,  // PED_1RST_PERSON_LOOK_UP
-		nil,  // PED_1RST_PERSON_LOOK_DOWN
-		nil,  // _CONTROLLERACTION_36
-		nil,  // TOGGLE_DPAD
-		nil,  // SWITCH_DEBUG_CAM_ON
-		nil,  // TAKE_SCREEN_SHOT
-		nil,  // SHOW_MOUSE_POINTER_TOGGLE
-	},
-	{
-		"RB",   // PED_FIREWEAPON
-		"RT",   // PED_CYCLE_WEAPON_RIGHT
-		"LT",   // PED_CYCLE_WEAPON_LEFT
-		nil,    // GO_FORWARD
-		nil,    // GO_BACK
-		nil,    // GO_LEFT
-		nil,    // GO_RIGHT
-		"X",    // PED_SNIPER_ZOOM_IN
-		"A",    // PED_SNIPER_ZOOM_OUT
-		"Y",    // VEHICLE_ENTER_EXIT
-		"BACK", // CAMERA_CHANGE_VIEW_ALL_SITUATIONS
-		"X",    // PED_JUMPING
-		"A",    // PED_SPRINT
-		"RS",   // PED_LOOKBEHIND
-#ifdef BIND_VEHICLE_FIREWEAPON
-		"RB",   // VEHICLE_FIREWEAPON
-#endif
-		nil,  // VEHICLE_ACCELERATE
-		nil,  // VEHICLE_BRAKE
-		"B",  // VEHICLE_CHANGE_RADIO_STATION
-		"LS", // VEHICLE_HORN
-		"X",  // TOGGLE_SUBMISSIONS
-		"LB", // VEHICLE_HANDBRAKE
-		nil,  // PED_1RST_PERSON_LOOK_LEFT
-		nil,  // PED_1RST_PERSON_LOOK_RIGHT
-		"LT", // VEHICLE_LOOKLEFT
-		"RT", // VEHICLE_LOOKRIGHT
-		nil,  // VEHICLE_LOOKBEHIND
-		nil,  // VEHICLE_TURRETLEFT
-		nil,  // VEHICLE_TURRETRIGHT
-		nil,  // VEHICLE_TURRETUP
-		nil,  // VEHICLE_TURRETDOWN
-		"LT", // PED_CYCLE_TARGET_LEFT
-		"RT", // PED_CYCLE_TARGET_RIGHT
-		"B",  // PED_CENTER_CAMERA_BEHIND_PLAYER
-		"LB", // PED_LOCK_TARGET
-		nil,  // NETWORK_TALK
-		nil,  // PED_1RST_PERSON_LOOK_UP
-		nil,  // PED_1RST_PERSON_LOOK_DOWN
-		nil,  // _CONTROLLERACTION_36
-		nil,  // TOGGLE_DPAD
-		nil,  // SWITCH_DEBUG_CAM_ON
-		nil,  // TAKE_SCREEN_SHOT
-		nil,  // SHOW_MOUSE_POINTER_TOGGLE
-	}
-};
+
 
 #if 0 // set 1 for ps2 fonts
 #define PS2_TRIANGLE "\""
 #define PS2_CIRCLE "|"
 #define PS2_CROSS "/"
 #define PS2_SQUARE "^"
+#elif defined(BUTTON_ICONS)
+#define PS2_TRIANGLE "~T~"
+#define PS2_CIRCLE "~O~"
+#define PS2_CROSS "~X~"
+#define PS2_SQUARE "~Q~"
 #else
 #define PS2_TRIANGLE "TRIANGLE"
 #define PS2_CIRCLE "CIRCLE"
@@ -2516,198 +2525,21 @@ const char *XboxButtons[][MAX_CONTROLLERACTIONS] =
 #define PS2_SQUARE "SQUARE"
 #endif
 
+const char *PlayStationButtons_noIcons[][MAX_CONTROLLERACTIONS] =
+    CONTROLLER_BUTTONS(PS2_TRIANGLE, PS2_CIRCLE, PS2_CROSS, PS2_SQUARE, "L1", "L2", "L3", "R1", "R2", "R3", "SELECT");
+
+#ifdef BUTTON_ICONS
 const char *PlayStationButtons[][MAX_CONTROLLERACTIONS] =
-{
-	{
-		PS2_CIRCLE,    // PED_FIREWEAPON
-		"R2",   // PED_CYCLE_WEAPON_RIGHT
-		"L2",   // PED_CYCLE_WEAPON_LEFT
-		nil,    // GO_FORWARD
-		nil,    // GO_BACK
-		nil,    // GO_LEFT
-		nil,    // GO_RIGHT
-		PS2_SQUARE,    // PED_SNIPER_ZOOM_IN
-		PS2_CROSS,    // PED_SNIPER_ZOOM_OUT
-		PS2_TRIANGLE,    // VEHICLE_ENTER_EXIT
-		"SELECT", // CAMERA_CHANGE_VIEW_ALL_SITUATIONS
-		PS2_SQUARE,    // PED_JUMPING
-		PS2_CROSS,    // PED_SPRINT
-		"R3",   // PED_LOOKBEHIND
-#ifdef BIND_VEHICLE_FIREWEAPON
-		PS2_CIRCLE,   // VEHICLE_FIREWEAPON
+    CONTROLLER_BUTTONS(PS2_TRIANGLE, PS2_CIRCLE, PS2_CROSS, PS2_SQUARE, "~K~", "~M~", "~A~", "~J~", "~V~", "~C~", "SELECT");
 #endif
-		PS2_CROSS,  // VEHICLE_ACCELERATE
-		PS2_SQUARE,  // VEHICLE_BRAKE
-		"L1", // VEHICLE_CHANGE_RADIO_STATION
-		"L3", // VEHICLE_HORN
-		"R3", // TOGGLE_SUBMISSIONS
-		"R1", // VEHICLE_HANDBRAKE
-		nil,  // PED_1RST_PERSON_LOOK_LEFT
-		nil,  // PED_1RST_PERSON_LOOK_RIGHT
-		"L2", // VEHICLE_LOOKLEFT
-		"R2", // VEHICLE_LOOKRIGHT
-		nil,  // VEHICLE_LOOKBEHIND
-		nil,  // VEHICLE_TURRETLEFT
-		nil,  // VEHICLE_TURRETRIGHT
-		nil,  // VEHICLE_TURRETUP
-		nil,  // VEHICLE_TURRETDOWN
-		"L2", // PED_CYCLE_TARGET_LEFT
-		"R2", // PED_CYCLE_TARGET_RIGHT
-		"L1", // PED_CENTER_CAMERA_BEHIND_PLAYER
-		"R1", // PED_LOCK_TARGET
-		nil,  // NETWORK_TALK
-		nil,  // PED_1RST_PERSON_LOOK_UP
-		nil,  // PED_1RST_PERSON_LOOK_DOWN
-		nil,  // _CONTROLLERACTION_36
-		nil,  // TOGGLE_DPAD
-		nil,  // SWITCH_DEBUG_CAM_ON
-		nil,  // TAKE_SCREEN_SHOT
-		nil,  // SHOW_MOUSE_POINTER_TOGGLE
-	},
-	{
-		PS2_CIRCLE,    // PED_FIREWEAPON
-		"R2",   // PED_CYCLE_WEAPON_RIGHT
-		"L2",   // PED_CYCLE_WEAPON_LEFT
-		nil,    // GO_FORWARD
-		nil,    // GO_BACK
-		nil,    // GO_LEFT
-		nil,    // GO_RIGHT
-		PS2_SQUARE,    // PED_SNIPER_ZOOM_IN
-		PS2_CROSS,    // PED_SNIPER_ZOOM_OUT
-		PS2_TRIANGLE,    // VEHICLE_ENTER_EXIT
-		"SELECT", // CAMERA_CHANGE_VIEW_ALL_SITUATIONS
-		PS2_SQUARE,    // PED_JUMPING
-		PS2_CROSS,    // PED_SPRINT
-		"R3",   // PED_LOOKBEHIND
-#ifdef BIND_VEHICLE_FIREWEAPON
-		PS2_CIRCLE, // VEHICLE_FIREWEAPON
-#endif
-		PS2_CROSS,    // VEHICLE_ACCELERATE
-		PS2_SQUARE,    // VEHICLE_BRAKE
-		"BACK", // VEHICLE_CHANGE_RADIO_STATION
-		"L1",   // VEHICLE_HORN
-		"R3",   // TOGGLE_SUBMISSIONS
-		"R1",   // VEHICLE_HANDBRAKE
-		nil,    // PED_1RST_PERSON_LOOK_LEFT
-		nil,    // PED_1RST_PERSON_LOOK_RIGHT
-		"L2",   // VEHICLE_LOOKLEFT
-		"R2",   // VEHICLE_LOOKRIGHT
-		nil,    // VEHICLE_LOOKBEHIND
-		nil,    // VEHICLE_TURRETLEFT
-		nil,    // VEHICLE_TURRETRIGHT
-		nil,    // VEHICLE_TURRETUP
-		nil,    // VEHICLE_TURRETDOWN
-		"L2",   // PED_CYCLE_TARGET_LEFT
-		"R2",   // PED_CYCLE_TARGET_RIGHT
-		"L1",   // PED_CENTER_CAMERA_BEHIND_PLAYER
-		"R1",   // PED_LOCK_TARGET
-		nil,    // NETWORK_TALK
-		nil,    // PED_1RST_PERSON_LOOK_UP
-		nil,    // PED_1RST_PERSON_LOOK_DOWN
-		nil,    // _CONTROLLERACTION_36
-		nil,    // TOGGLE_DPAD
-		nil,    // SWITCH_DEBUG_CAM_ON
-		nil,    // TAKE_SCREEN_SHOT
-		nil,    // SHOW_MOUSE_POINTER_TOGGLE
-	},
-	{
-		PS2_CROSS,    // PED_FIREWEAPON
-		"R2",   // PED_CYCLE_WEAPON_RIGHT
-		"L2",   // PED_CYCLE_WEAPON_LEFT
-		nil,    // GO_FORWARD
-		nil,    // GO_BACK
-		nil,    // GO_LEFT
-		nil,    // GO_RIGHT
-		PS2_TRIANGLE,    // PED_SNIPER_ZOOM_IN
-		PS2_SQUARE,    // PED_SNIPER_ZOOM_OUT
-		"L1",   // VEHICLE_ENTER_EXIT
-		"BACK", // CAMERA_CHANGE_VIEW_ALL_SITUATIONS
-		PS2_SQUARE,    // PED_JUMPING
-		PS2_CIRCLE,    // PED_SPRINT
-		"R3",   // PED_LOOKBEHIND
-#ifdef BIND_VEHICLE_FIREWEAPON
-		PS2_CIRCLE,   // VEHICLE_FIREWEAPON
-#endif
-		PS2_CROSS,  // VEHICLE_ACCELERATE
-		PS2_SQUARE,  // VEHICLE_BRAKE
-		"L3", // VEHICLE_CHANGE_RADIO_STATION
-		"R1", // VEHICLE_HORN
-		"R3", // TOGGLE_SUBMISSIONS
-		PS2_TRIANGLE,  // VEHICLE_HANDBRAKE
-		nil,  // PED_1RST_PERSON_LOOK_LEFT
-		nil,  // PED_1RST_PERSON_LOOK_RIGHT
-		"L2", // VEHICLE_LOOKLEFT
-		"R2", // VEHICLE_LOOKRIGHT
-		nil,  // VEHICLE_LOOKBEHIND
-		nil,  // VEHICLE_TURRETLEFT
-		nil,  // VEHICLE_TURRETRIGHT
-		nil,  // VEHICLE_TURRETUP
-		nil,  // VEHICLE_TURRETDOWN
-		"L2", // PED_CYCLE_TARGET_LEFT
-		"R2", // PED_CYCLE_TARGET_RIGHT
-		PS2_TRIANGLE,  // PED_CENTER_CAMERA_BEHIND_PLAYER
-		"R1", // PED_LOCK_TARGET
-		nil,  // NETWORK_TALK
-		nil,  // PED_1RST_PERSON_LOOK_UP
-		nil,  // PED_1RST_PERSON_LOOK_DOWN
-		nil,  // _CONTROLLERACTION_36
-		nil,  // TOGGLE_DPAD
-		nil,  // SWITCH_DEBUG_CAM_ON
-		nil,  // TAKE_SCREEN_SHOT
-		nil,  // SHOW_MOUSE_POINTER_TOGGLE
-	},
-	{
-		"R1",   // PED_FIREWEAPON
-		"R2",   // PED_CYCLE_WEAPON_RIGHT
-		"L2",   // PED_CYCLE_WEAPON_LEFT
-		nil,    // GO_FORWARD
-		nil,    // GO_BACK
-		nil,    // GO_LEFT
-		nil,    // GO_RIGHT
-		PS2_SQUARE,    // PED_SNIPER_ZOOM_IN
-		PS2_CROSS,    // PED_SNIPER_ZOOM_OUT
-		PS2_TRIANGLE,    // VEHICLE_ENTER_EXIT
-		"SELECT", // CAMERA_CHANGE_VIEW_ALL_SITUATIONS
-		PS2_SQUARE,    // PED_JUMPING
-		PS2_CROSS,    // PED_SPRINT
-		"R3",   // PED_LOOKBEHIND
-#ifdef BIND_VEHICLE_FIREWEAPON
-		"R1",   // VEHICLE_FIREWEAPON
-#endif
-		nil,  // VEHICLE_ACCELERATE
-		nil,  // VEHICLE_BRAKE
-		PS2_CIRCLE,  // VEHICLE_CHANGE_RADIO_STATION
-		"L3", // VEHICLE_HORN
-		PS2_SQUARE,  // TOGGLE_SUBMISSIONS
-		"L1", // VEHICLE_HANDBRAKE
-		nil,  // PED_1RST_PERSON_LOOK_LEFT
-		nil,  // PED_1RST_PERSON_LOOK_RIGHT
-		"L2", // VEHICLE_LOOKLEFT
-		"R2", // VEHICLE_LOOKRIGHT
-		nil,  // VEHICLE_LOOKBEHIND
-		nil,  // VEHICLE_TURRETLEFT
-		nil,  // VEHICLE_TURRETRIGHT
-		nil,  // VEHICLE_TURRETUP
-		nil,  // VEHICLE_TURRETDOWN
-		"L2", // PED_CYCLE_TARGET_LEFT
-		"R2", // PED_CYCLE_TARGET_RIGHT
-		PS2_CIRCLE,  // PED_CENTER_CAMERA_BEHIND_PLAYER
-		"L1", // PED_LOCK_TARGET
-		nil,  // NETWORK_TALK
-		nil,  // PED_1RST_PERSON_LOOK_UP
-		nil,  // PED_1RST_PERSON_LOOK_DOWN
-		nil,  // _CONTROLLERACTION_36
-		nil,  // TOGGLE_DPAD
-		nil,  // SWITCH_DEBUG_CAM_ON
-		nil,  // TAKE_SCREEN_SHOT
-		nil,  // SHOW_MOUSE_POINTER_TOGGLE
-	}
-};
 
 #undef PS2_TRIANGLE
 #undef PS2_CIRCLE
 #undef PS2_CROSS
 #undef PS2_SQUARE
+
+#undef CONTROLLER_BUTTONS
+#undef VFB
 
 void CControllerConfigManager::GetWideStringOfCommandKeys(uint16 action, wchar *text, uint16 leight)
 {
@@ -2716,7 +2548,11 @@ void CControllerConfigManager::GetWideStringOfCommandKeys(uint16 action, wchar *
 		wchar wstr[16];
 
 		// TODO: INI and/or menu setting for Xbox/PS switch 
-		const char *(*Buttons)[MAX_CONTROLLERACTIONS] = XboxButtons;
+#ifdef BUTTON_ICONS
+		const char *(*Buttons)[MAX_CONTROLLERACTIONS] = CFont::ButtonsSlot != -1 ? XboxButtons : XboxButtons_noIcons;
+#else
+		const char *(*Buttons)[MAX_CONTROLLERACTIONS] = XboxButtons_noIcons;
+#endif
 
 		assert(Buttons[CPad::GetPad(0)->Mode][action] != nil); // we cannot use these
 		AsciiToUnicode(Buttons[CPad::GetPad(0)->Mode][action], wstr);

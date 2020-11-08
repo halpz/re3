@@ -11,6 +11,7 @@
 #include "Clock.h"
 #include "MBlur.h"
 #include "Date.h"
+#include "Font.h"
 #include "FileMgr.h"
 #include "Game.h"
 #include "GameLogic.h"
