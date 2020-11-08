@@ -3153,6 +3153,9 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 					if (0.2f * m_sQueueSample.m_fSoundIntensity > m_sQueueSample.m_fDistance) {
 						m_sQueueSample.m_bIs2D = true;
 						m_sQueueSample.m_nOffset = 0;
+#ifdef THIS_IS_STUPID
+						goto AddSample;
+#else
 						AddSampleToRequestedQueue();
 						m_sQueueSample.m_nOffset = 127;
 						m_sQueueSample.m_nSampleIndex++;
@@ -3162,11 +3165,26 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 						m_sQueueSample.m_bRequireReflection = 0;
 						AddSampleToRequestedQueue();
 						continue;
+#endif
 					}
 					isHeli = false;
 				}
 				m_sQueueSample.m_bIs2D = false;
+#ifdef THIS_IS_STUPID
+AddSample:
 				AddSampleToRequestedQueue();
+				if (isHeli) {
+					m_sQueueSample.m_nOffset = 127;
+					m_sQueueSample.m_nSampleIndex++;
+					m_sQueueSample.m_nCounter = GunIndex++;
+					if (GunIndex > 58)
+						GunIndex = 53;
+					m_sQueueSample.m_bRequireReflection = 0;
+					AddSampleToRequestedQueue();
+				}
+#else
+				AddSampleToRequestedQueue();
+#endif
 				continue;
 
 			}
