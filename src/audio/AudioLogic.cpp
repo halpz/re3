@@ -1943,7 +1943,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 				break;
 			}
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = event + 22; //originaly used m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i], which is same
+			m_sQueueSample.m_nCounter = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i] + 22;
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
 			m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -1977,7 +1977,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 				break;
 			}
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = event + 10; //also used m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i]
+			m_sQueueSample.m_nCounter = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i] + 10;
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
 			m_sQueueSample.m_nReleasingVolumeModificator = 3;
