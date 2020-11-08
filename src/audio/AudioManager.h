@@ -401,28 +401,27 @@ public:
 	void PreTerminateGameSpecificShutdown();                // done
 	/// processX - main logic of adding new sounds
 	void ProcessActiveQueues();                              // done
-	bool ProcessAirBrakes(cVehicleParams *params);           // done
-	bool ProcessBoatEngine(cVehicleParams *params);          
-	bool ProcessBoatMovingOverWater(cVehicleParams *params); 
+	bool ProcessAirBrakes(cVehicleParams& params);           // done
+	bool ProcessBoatEngine(cVehicleParams& params);          
+	bool ProcessBoatMovingOverWater(cVehicleParams& params); 
 #ifdef GTA_BRIDGE
 	void ProcessBridge();         // done(bcs not exists in VC)
 	void ProcessBridgeMotor();    // done(bcs not exists in VC)
 	void ProcessBridgeOneShots(); // done(bcs not exists in VC)
 	void ProcessBridgeWarning();  // done(bcs not exists in VC)
 #endif
-	bool ProcessCarBombTick(cVehicleParams *params);                         // done
-	void ProcessCesna(cVehicleParams *params);                               // 
+	bool ProcessCarBombTick(cVehicleParams& params);                         // done
+	void ProcessCarHeli(cVehicleParams& params);                             // done
+	void ProcessCesna(cVehicleParams& params);                               // 
 	//void ProcessCrane();                                                   // done(bcs not exists in VC)
-	bool ProcessEngineDamage(cVehicleParams *params);                        // done
+	bool ProcessEngineDamage(cVehicleParams& params);                        // done
 	void ProcessEntity(int32 sound);                                         // done
 	void ProcessExplosions(int32 explosion);                                 // done
 	void ProcessFireHydrant();                                               // done
 	void ProcessFires(int32 entity);                                         // done
 	void ProcessFrontEnd();                                                  // done
 	void ProcessGarages();                                                   // 
-	void ProcessCarHeli(cVehicleParams* params);                             // done
-	void ProcessVehicleFlatTyre(cVehicleParams* params);                     // done
-	void ProcessJumbo(cVehicleParams *);                                     // done
+	void ProcessJumbo(cVehicleParams& params);                               // done
 	void ProcessJumboAccel(CPlane *plane);                                   // done
 	void ProcessJumboDecel(CPlane *plane);                                   // done
 	void ProcessJumboFlying();                                               // done
@@ -432,37 +431,37 @@ public:
 	void ProcessLoopingScriptObject(uint8 sound);                            // 
 	void ProcessMissionAudio();                                              // 
 	void ProcessMissionAudioSlot(uint8 slot);                                // 
-	void ProcessModelHeliVehicle(cVehicleParams* params);                    // done
-	void ProcessModelVehicle(cVehicleParams *params);                        // done
+	void ProcessModelHeliVehicle(cVehicleParams& params);                    // done
+	void ProcessModelVehicle(cVehicleParams& params);                        // done
 	void ProcessOneShotScriptObject(uint8 sound);                            // 
 	void ProcessPed(CPhysical *ped);                                         // done
 	void ProcessPedOneShots(cPedParams *params);                             // 
 	void ProcessPhysical(int32 id);                                          // done
-	void ProcessPlane(cVehicleParams *params);                               // done
+	void ProcessPlane(cVehicleParams& params);                               // done
 	void ProcessPlayerMood();                                                // done
-	void ProcessPlayersVehicleEngine(cVehicleParams *params, CVehicle* veh); // done
+	void ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh); // done
 	void ProcessProjectiles();                                               // done
-	void ProcessRainOnVehicle(cVehicleParams *params);                       // done
+	void ProcessRainOnVehicle(cVehicleParams& params);                       // done
 	void ProcessReverb() const;                                              // done
-	bool ProcessReverseGear(cVehicleParams *params);                         // done
+	bool ProcessReverseGear(cVehicleParams& params);                         // done
 	void ProcessScriptObject(int32 id);                                      // done
 	void ProcessSpecial();                                                   // done
 #ifdef GTA_TRAIN
 	bool ProcessTrainNoise(cVehicleParams *params); //done(bcs not exists in VC)
 #endif
 	void ProcessVehicle(CVehicle *vehicle);                    // done
-	bool ProcessVehicleDoors(cVehicleParams *params);          // done
-	void ProcessVehicleEngine(cVehicleParams *params);         // done
-	void UpdateGasPedalAudio(CVehicle* veh, int vehType);      // done
-	bool ProcessVehicleHorn(cVehicleParams *params);           // done
-	void ProcessVehicleOneShots(cVehicleParams *params);       // done
-	bool ProcessVehicleReverseWarning(cVehicleParams *params); // done
-	bool ProcessVehicleRoadNoise(cVehicleParams *params);      // done
-	bool ProcessVehicleSirenOrAlarm(cVehicleParams *params);   // done
-	bool ProcessVehicleSkidding(cVehicleParams *params);       // done
+	bool ProcessVehicleDoors(cVehicleParams& params);          // done
+	void ProcessVehicleEngine(cVehicleParams& params);         // done
+	void ProcessVehicleFlatTyre(cVehicleParams& params);                     // done
+	bool ProcessVehicleHorn(cVehicleParams& params);           // done
+	void ProcessVehicleOneShots(cVehicleParams& params);       // done
+	bool ProcessVehicleReverseWarning(cVehicleParams& params); // done
+	bool ProcessVehicleRoadNoise(cVehicleParams& params);      // done
+	bool ProcessVehicleSirenOrAlarm(cVehicleParams& params);   // done
+	bool ProcessVehicleSkidding(cVehicleParams& params);       // done
 	void ProcessWaterCannon(int32);                            // done
 	void ProcessWeather(int32 id);                             // done
-	bool ProcessWetRoadNoise(cVehicleParams *params);          // done
+	bool ProcessWetRoadNoise(cVehicleParams& params);          // done
 	void ProcessEscalators();                                  // done
 	void ProcessExtraSounds();                                 // done
 
@@ -507,10 +506,11 @@ public:
 	void Terminate(); //done
 	void TranslateEntity(Const CVector *v1, CVector *v2) const; //done
 
+	void UpdateGasPedalAudio(CVehicle* veh, int vehType);      // done
 	void UpdateReflections();                              //done
 	bool UsesReverseWarning(int32 model) const;            //done
-	bool UsesSiren(cVehicleParams *params) const;          //done
-	bool UsesSirenSwitching(cVehicleParams* params) const; //done
+	bool UsesSiren(cVehicleParams& params) const;          //done
+	bool UsesSirenSwitching(cVehicleParams& params) const; //done
 
 	CVehicle *FindVehicleOfPlayer(); //done
 	void SetPedTalkingStatus(CPed *ped, uint8 status);
