@@ -781,6 +781,7 @@ public:
 	void PageUpList(bool);
 	void PageDownList(bool);
 	int8 GetPreviousPageOption();
+	void ProcessList(bool &goBack, bool &optionSelected);
 };
 
 #ifndef IMPROVED_VIDEOMODE

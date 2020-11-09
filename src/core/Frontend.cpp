@@ -41,19 +41,40 @@
 #define TIDY_UP_PBP // ProcessButtonPresses
 #define MAX_VISIBLE_LIST_ROW 30
 #define SCROLLBAR_MAX_HEIGHT 263.0f // not in end result
-
-#ifdef USE_PRECISE_MEASUREMENT_CONVERTION
-#define MILES_IN_METER 0.000621371192f
-#define FEET_IN_METER 3.28084f
-#else
-#define MILES_IN_METER 0.00059880241f
-#define FEET_IN_METER 3.33f
-#endif
+#define SCROLLABLE_PAGES
 
 #ifdef SCROLLABLE_STATS_PAGE
 #define isPlainTextScreen(screen) (screen == MENUPAGE_BRIEFS)
 #else
 #define isPlainTextScreen(screen) (screen == MENUPAGE_BRIEFS || screen == MENUPAGE_STATS)
+#endif
+
+#define hasNativeList(screen) (screen == MENUPAGE_MULTIPLAYER_FIND_GAME || screen == MENUPAGE_SKIN_SELECT \
+		|| screen == MENUPAGE_KEYBOARD_CONTROLS)
+		
+#ifdef SCROLLABLE_PAGES
+#define MAX_VISIBLE_OPTION 12
+#define MAX_VISIBLE_OPTION_ON_SCREEN (hasNativeList(m_nCurrScreen) ? MAX_VISIBLE_LIST_ROW : MAX_VISIBLE_OPTION)
+
+int GetOptionCount(int screen)
+{
+	int i = 0;
+	for (; i < NUM_MENUROWS && aScreens[screen].m_aEntries[i].m_Action != MENUACTION_NOTHING; i++);
+	return i;
+}
+
+#define SETUP_SCROLLING(screen) \
+		if (!hasNativeList(screen)) { \
+			m_nTotalListRow = GetOptionCount(screen); \
+			if (m_nTotalListRow > MAX_VISIBLE_OPTION) { \
+				m_nSelectedListRow = 0; \
+				m_nFirstVisibleRowOnList = 0; \
+				m_nScrollbarTopMargin = 0; \
+			} \
+		}
+#else
+#define MAX_VISIBLE_OPTION_ON_SCREEN MAX_VISIBLE_LIST_ROW
+#define SETUP_SCROLLING(screen)
 #endif
 
 #ifdef TRIANGLE_BACK_BUTTON
@@ -80,11 +101,38 @@ float CMenuManager::fMapCenterX;
 BottomBarOption bbNames[8];
 int bbTabCount = 0;
 bool bottomBarActive = false;
-bool reverseAlpha = false;
 int pendingScreen = -1;
 int pendingOption = -1;
 int curBottomBarOption = -1;
 int hoveredBottomBarOption = -1;
+#endif
+
+#ifdef CUTSCENE_BORDERS_SWITCH
+bool CMenuManager::m_PrefsCutsceneBorders = true;
+#endif
+
+#ifdef MULTISAMPLING
+int8 CMenuManager::m_nPrefsMSAALevel = 0;
+int8 CMenuManager::m_nDisplayMSAALevel = 0;
+#endif
+
+#ifdef NO_ISLAND_LOADING
+int8 CMenuManager::m_PrefsIslandLoading = ISLAND_LOADING_LOW;
+#endif
+
+// Originally that was PS2 option color, they forget it here and used in PrintBriefs once(but didn't use the output anyway)
+#ifdef PS2_LIKE_MENU
+const CRGBA TEXT_COLOR = CRGBA(150, 110, 30, 255);
+#else
+const CRGBA TEXT_COLOR = CRGBA(235, 170, 50, 255); // PC briefs text color
+#endif
+
+#ifdef USE_PRECISE_MEASUREMENT_CONVERTION
+#define MILES_IN_METER 0.000621371192f
+#define FEET_IN_METER 3.28084f
+#else
+#define MILES_IN_METER 0.00059880241f
+#define FEET_IN_METER 3.33f
 #endif
 
 int32 CMenuManager::OS_Language = LANG_ENGLISH;
@@ -112,29 +160,10 @@ int8 CMenuManager::m_bFrontEnd_ReloadObrTxtGxt;
 int32 CMenuManager::m_PrefsMusicVolume = 102;
 int32 CMenuManager::m_PrefsSfxVolume = 102;
 
-#ifdef CUTSCENE_BORDERS_SWITCH
-bool CMenuManager::m_PrefsCutsceneBorders = true;
-#endif
-
-#ifdef MULTISAMPLING
-int8 CMenuManager::m_nPrefsMSAALevel = 0;
-int8 CMenuManager::m_nDisplayMSAALevel = 0;
-#endif
-
-#ifdef NO_ISLAND_LOADING
-int8 CMenuManager::m_PrefsIslandLoading = ISLAND_LOADING_LOW;
-#endif
 
 char CMenuManager::m_PrefsSkinFile[256] = DEFAULT_SKIN_NAME;
 
 int32 CMenuManager::m_KeyPressedCode = -1;
-
-// Originally that was PS2 option color, they forget it here and used in PrintBriefs once(but didn't use the output anyway)
-#ifdef PS2_LIKE_MENU
-const CRGBA TEXT_COLOR = CRGBA(150, 110, 30, 255);
-#else
-const CRGBA TEXT_COLOR = CRGBA(235, 170, 50, 255); // PC briefs text color
-#endif
 
 float MENU_TEXT_SIZE_X = SMALLTEXT_X_SCALE;
 float MENU_TEXT_SIZE_Y = SMALLTEXT_Y_SCALE;
@@ -253,35 +282,12 @@ const char* MenuFilenames[][2] = {
 #define PAGE_NAME_X SCREEN_SCALE_FROM_RIGHT
 #endif
 
-#ifdef PS2_LIKE_MENU
-#define ChangeScreen(screen, option, updateDelay, withReverseAlpha) \
-	do { \
-		if (reverseAlpha) { \
-			m_nPrevScreen = m_nCurrScreen; \
-			m_nCurrScreen = pendingScreen; \
-			m_nCurrOption = pendingOption; \
-			reverseAlpha = false; \
-			if (updateDelay) \
-				m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode(); \
-		} \
-		if (withReverseAlpha && !m_bRenderGameInMenu) { \
-			pendingOption = option; \
-			pendingScreen = screen; \
-			reverseAlpha = true; \
-		} else { \
-			m_nPrevScreen = m_nCurrScreen; \
-			m_nCurrScreen = screen; \
-			m_nCurrOption = option; \
-			if (updateDelay) \
-				m_nScreenChangeDelayTimer = CTimer::GetTimeInMillisecondsPauseMode(); \
-		} \
-		m_nMenuFadeAlpha = 255; \
-	} while(0)
-#else
+// Seperate func. in VC
 #define ChangeScreen(screen, option, updateDelay, clearAlpha) \
 	do { \
 		m_nPrevScreen = m_nCurrScreen; \
 		int newOpt = option; \
+		SETUP_SCROLLING(screen) \
 		m_nCurrScreen = screen; \
 		m_nCurrOption = newOpt; \
 		if(updateDelay) \
@@ -289,7 +295,6 @@ const char* MenuFilenames[][2] = {
 		if(clearAlpha) \
 			m_nMenuFadeAlpha = 0; \
 	} while(0)
-#endif
 
 #define PREPARE_MENU_HEADER \
 	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255))); \
@@ -340,8 +345,8 @@ CMenuManager::ScrollUpListByOne()
 void
 CMenuManager::ScrollDownListByOne()
 {
-	if (m_nSelectedListRow == m_nFirstVisibleRowOnList + MAX_VISIBLE_LIST_ROW - 1) {
-		if (m_nFirstVisibleRowOnList < m_nTotalListRow - MAX_VISIBLE_LIST_ROW) {
+	if (m_nSelectedListRow == m_nFirstVisibleRowOnList + MAX_VISIBLE_OPTION_ON_SCREEN - 1) {
+		if (m_nFirstVisibleRowOnList < m_nTotalListRow - MAX_VISIBLE_OPTION_ON_SCREEN) {
 			m_nSelectedListRow++;
 			m_nFirstVisibleRowOnList++;
 			m_nScrollbarTopMargin += SCROLLBAR_MAX_HEIGHT / m_nTotalListRow;
@@ -356,13 +361,13 @@ CMenuManager::ScrollDownListByOne()
 void
 CMenuManager::PageUpList(bool playSoundOnSuccess)
 {
-	if (m_nTotalListRow > MAX_VISIBLE_LIST_ROW) {
+	if (m_nTotalListRow > MAX_VISIBLE_OPTION_ON_SCREEN) {
 		if (m_nFirstVisibleRowOnList > 0) {
 			if(playSoundOnSuccess)
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 
-			m_nFirstVisibleRowOnList = Max(0, m_nFirstVisibleRowOnList - MAX_VISIBLE_LIST_ROW);
-			m_nSelectedListRow = Min(m_nSelectedListRow, m_nFirstVisibleRowOnList + MAX_VISIBLE_LIST_ROW - 1);
+			m_nFirstVisibleRowOnList = Max(0, m_nFirstVisibleRowOnList - MAX_VISIBLE_OPTION_ON_SCREEN);
+			m_nSelectedListRow = Min(m_nSelectedListRow, m_nFirstVisibleRowOnList + MAX_VISIBLE_OPTION_ON_SCREEN - 1);
 		} else {
 			m_nFirstVisibleRowOnList = 0;
 			m_nSelectedListRow = 0;
@@ -374,15 +379,15 @@ CMenuManager::PageUpList(bool playSoundOnSuccess)
 void
 CMenuManager::PageDownList(bool playSoundOnSuccess)
 {
-	if (m_nTotalListRow > MAX_VISIBLE_LIST_ROW) {
-		if (m_nFirstVisibleRowOnList < m_nTotalListRow - MAX_VISIBLE_LIST_ROW) {
+	if (m_nTotalListRow > MAX_VISIBLE_OPTION_ON_SCREEN) {
+		if (m_nFirstVisibleRowOnList < m_nTotalListRow - MAX_VISIBLE_OPTION_ON_SCREEN) {
 			if(playSoundOnSuccess)
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 
-			m_nFirstVisibleRowOnList = Min(m_nFirstVisibleRowOnList + MAX_VISIBLE_LIST_ROW, m_nTotalListRow - MAX_VISIBLE_LIST_ROW);
+			m_nFirstVisibleRowOnList = Min(m_nFirstVisibleRowOnList + MAX_VISIBLE_OPTION_ON_SCREEN, m_nTotalListRow - MAX_VISIBLE_OPTION_ON_SCREEN);
 			m_nSelectedListRow = Max(m_nSelectedListRow, m_nFirstVisibleRowOnList);
 		} else {
-			m_nFirstVisibleRowOnList = m_nTotalListRow - MAX_VISIBLE_LIST_ROW;
+			m_nFirstVisibleRowOnList = m_nTotalListRow - MAX_VISIBLE_OPTION_ON_SCREEN;
 			m_nSelectedListRow = m_nTotalListRow - 1;
 		}
 		m_nScrollbarTopMargin = (SCROLLBAR_MAX_HEIGHT / m_nTotalListRow) * m_nFirstVisibleRowOnList;
@@ -433,6 +438,14 @@ CMenuManager::ThingsToDoBeforeGoingBack()
 		m_nTotalListRow = 0;
 	}
 
+#ifdef SCROLLABLE_PAGES
+	if (m_nTotalListRow > MAX_VISIBLE_OPTION && !hasNativeList(m_nCurrScreen)) {
+		m_nSelectedListRow = 0;
+		m_nFirstVisibleRowOnList = 0;
+		m_nScrollbarTopMargin = 0;
+	}
+#endif
+
 #ifdef CUSTOM_FRONTEND_OPTIONS
 	CMenuScreenCustom::CMenuEntry &option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption];
 
@@ -475,6 +488,236 @@ CMenuManager::GetPreviousPageOption()
 #endif
 }
 
+void
+CMenuManager::ProcessList(bool &goBack, bool &optionSelected)
+{
+	if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
+		m_nTotalListRow = m_nSkinsTotal;
+	}
+	if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
+		m_nTotalListRow = m_ControlMethod == CONTROL_CLASSIC ? 30 : 25;
+		if (m_nSelectedListRow > m_nTotalListRow)
+			m_nSelectedListRow = m_nTotalListRow - 1;
+	}
+
+#ifndef TIDY_UP_PBP
+	if (CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetCrossJustDown()) {
+		m_bShowMouse = 0;
+		optionSelected = true;
+	}
+#endif
+	if (CPad::GetPad(0)->GetBackspaceJustDown() && m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS && !field_535) {
+		if (m_nCurrExLayer == HOVEROPTION_LIST) {
+			m_nHoverOption = HOVEROPTION_NOT_HOVERING;
+			m_bWaitingForNewKeyBind = true;
+			m_bStartWaitingForKeyBind = true;
+			m_bKeyChangeNotProcessed = true;
+			pControlEdit = &m_KeyPressedCode;
+		}
+	} else {
+		field_535 = false;
+	}
+
+	static uint32 lastTimeClickedScrollButton = 0;
+
+	if (CTimer::GetTimeInMillisecondsPauseMode() - lastTimeClickedScrollButton >= 200) {
+		m_bPressedPgUpOnList = false;
+		m_bPressedPgDnOnList = false;
+		m_bPressedUpOnList = false;
+		m_bPressedDownOnList = false;
+		m_bPressedScrollButton = false;
+		lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
+	}
+
+	if (CPad::GetPad(0)->GetTabJustDown()) {
+		DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
+		m_bShowMouse = false;
+		switch (m_nCurrExLayer) {
+			case HOVEROPTION_BACK:
+			default:
+				m_nCurrExLayer = HOVEROPTION_LIST;
+				break;
+			case HOVEROPTION_LIST:
+				m_nCurrExLayer = HOVEROPTION_USESKIN;
+				break;
+			case HOVEROPTION_USESKIN:
+				m_nCurrExLayer = HOVEROPTION_BACK;
+		}
+		if (((m_nCurrScreen == MENUPAGE_SKIN_SELECT) && (m_nCurrExLayer == HOVEROPTION_USESKIN)) && strcmp(m_aSkinName, m_PrefsSkinFile) == 0) {
+			m_nCurrExLayer = HOVEROPTION_BACK;
+		}
+		if ((m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) && (m_nCurrExLayer == HOVEROPTION_USESKIN)) {
+			m_nCurrExLayer = HOVEROPTION_BACK;
+		}
+	}
+
+	bool pressed = false;
+	if (CPad::GetPad(0)->GetUp() || CPad::GetPad(0)->GetAnaloguePadUp() || CPad::GetPad(0)->GetDPadUpJustDown()) {
+		m_bShowMouse = false;
+		pressed = true;
+	} else if (CPad::GetPad(0)->GetMouseWheelUpJustUp()) {
+		m_bShowMouse = true;
+		pressed = true;
+	}
+
+	// Up
+	if (pressed) {
+		m_nCurrExLayer = HOVEROPTION_LIST;
+		if (!m_bPressedUpOnList) {
+			m_bPressedUpOnList = true;
+			lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
+			ScrollUpListByOne();
+		}
+	} else {
+		m_bPressedUpOnList = false;
+	}
+
+	pressed = false;
+	if (CPad::GetPad(0)->GetDown() || CPad::GetPad(0)->GetAnaloguePadDown() || CPad::GetPad(0)->GetDPadDownJustDown()) {
+		m_bShowMouse = false;
+		pressed = true;
+	} else if (CPad::GetPad(0)->GetMouseWheelDownJustDown()) {
+		m_bShowMouse = true;
+		pressed = true;
+	}
+
+	// Down
+	if (pressed) {
+		m_nCurrExLayer = HOVEROPTION_LIST;
+		if (!m_bPressedDownOnList) {
+			m_bPressedDownOnList = true;
+			lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
+			ScrollDownListByOne();
+		}
+	} else {
+		m_bPressedDownOnList = false;
+	}
+
+	if (m_nCurrScreen != MENUPAGE_KEYBOARD_CONTROLS) {
+		if (!CPad::GetPad(0)->GetPageUp()) {
+			m_bPressedPgUpOnList = false;
+		} else {
+			m_nCurrExLayer = HOVEROPTION_LIST;
+			if (!m_bPressedPgUpOnList) {
+				m_bPressedPgUpOnList = true;
+				lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
+				m_bShowMouse = false;
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
+				PageUpList(false);
+			}
+		}
+		if (!CPad::GetPad(0)->GetPageDown()) {
+			m_bPressedPgDnOnList = false;
+		} else {
+			m_nCurrExLayer = HOVEROPTION_LIST;
+			if (!m_bPressedPgDnOnList) {
+				m_bPressedPgDnOnList = true;
+				lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
+				m_bShowMouse = false;
+				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
+				PageDownList(false);
+			}
+		}
+		if (CPad::GetPad(0)->GetHome()) {
+			m_nCurrExLayer = HOVEROPTION_LIST;
+			m_bShowMouse = false;
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
+			if (m_nTotalListRow >= MAX_VISIBLE_OPTION_ON_SCREEN) {
+				m_nFirstVisibleRowOnList = 0;
+			}
+			m_nSelectedListRow = 0;
+			m_nScrollbarTopMargin = (SCROLLBAR_MAX_HEIGHT / m_nTotalListRow) * m_nFirstVisibleRowOnList;
+		}
+		if (CPad::GetPad(0)->GetEnd()) {
+			m_nCurrExLayer = HOVEROPTION_LIST;
+			m_bShowMouse = false;
+			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
+			if (m_nTotalListRow >= MAX_VISIBLE_OPTION_ON_SCREEN) {
+				m_nFirstVisibleRowOnList = m_nTotalListRow - MAX_VISIBLE_OPTION_ON_SCREEN;
+			}
+			m_nSelectedListRow = m_nTotalListRow - 1;
+			m_nScrollbarTopMargin = (SCROLLBAR_MAX_HEIGHT / m_nTotalListRow) * m_nFirstVisibleRowOnList;
+		}
+	}
+
+#ifndef TIDY_UP_PBP
+	if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetBackJustDown()) {
+		m_bShowMouse = false;
+		goBack = true;
+	}
+#endif
+
+	if (CPad::GetPad(0)->GetLeftMouseJustDown()) {
+		switch (m_nHoverOption) {
+			case HOVEROPTION_BACK:
+				goBack = true;
+				break;
+			case HOVEROPTION_PAGEUP:
+				PageUpList(true);
+				break;
+			case HOVEROPTION_PAGEDOWN:
+				PageDownList(true);
+				break;
+			case HOVEROPTION_USESKIN:
+				if (m_nSkinsTotal > 0) {
+					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
+					m_pSelectedSkin = m_pSkinListHead.nextSkin;
+					strcpy(m_PrefsSkinFile, m_aSkinName);
+					CWorld::Players[0].SetPlayerSkin(m_PrefsSkinFile);
+					SaveSettings();
+				}
+		}
+	}
+
+	if (CPad::GetPad(0)->GetLeftMouseJustDown()) {
+		switch (m_nHoverOption) {
+			case HOVEROPTION_OVER_SCROLL_UP:
+				m_nHoverOption = HOVEROPTION_CLICKED_SCROLL_UP;
+				break;
+			case HOVEROPTION_OVER_SCROLL_DOWN:
+				m_nHoverOption = HOVEROPTION_CLICKED_SCROLL_DOWN;
+				break;
+			case HOVEROPTION_LIST:
+				m_nHoverOption = HOVEROPTION_SKIN;
+		}
+	} else if ((CPad::GetPad(0)->GetLeftMouseJustUp())
+		&& ((m_nHoverOption == HOVEROPTION_CLICKED_SCROLL_UP || (m_nHoverOption == HOVEROPTION_CLICKED_SCROLL_DOWN)))) {
+		m_nHoverOption = HOVEROPTION_NOT_HOVERING;
+	}
+
+	if (!CPad::GetPad(0)->GetLeftMouse()) {
+		holdingScrollBar = false;
+	} else {
+		if ((m_nHoverOption == HOVEROPTION_HOLDING_SCROLLBAR) || holdingScrollBar) {
+			holdingScrollBar = true;
+			// TODO: This part is a bit hard to reverse. Not much code tho
+			assert(0 && "Holding scrollbar isn't done yet");
+		} else {
+			switch (m_nHoverOption) {
+			case HOVEROPTION_OVER_SCROLL_UP:
+			case HOVEROPTION_CLICKED_SCROLL_UP:
+				if (!m_bPressedScrollButton) {
+					m_bPressedScrollButton = true;
+					lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
+					ScrollUpListByOne();
+				}
+				break;
+			case HOVEROPTION_OVER_SCROLL_DOWN:
+			case HOVEROPTION_CLICKED_SCROLL_DOWN:
+				if (!m_bPressedScrollButton) {
+					m_bPressedScrollButton = true;
+					lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
+					ScrollDownListByOne();
+				}
+				break;
+			default:
+				m_bPressedScrollButton = false;
+			}
+		}
+	}
+}
 // ------ Functions not in the game/inlined ends
 
 void
@@ -1018,12 +1261,23 @@ CMenuManager::Draw()
 #endif
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
-	static int lastOption = m_nCurrOption;
+	static int lastSelectedOpt = m_nCurrOption;
 #endif
 
+#ifdef SCROLLABLE_PAGES
+	int firstOption = m_nTotalListRow > MAX_VISIBLE_OPTION && !hasNativeList(m_nCurrScreen) ? m_nFirstVisibleRowOnList : 0;
+	for (int i = firstOption; i < firstOption + MAX_VISIBLE_OPTION && i < NUM_MENUROWS; ++i) {
+#else
 	for (int i = 0; i < NUM_MENUROWS; ++i) {
+#endif
+
 #ifdef CUSTOM_FRONTEND_OPTIONS
 		bool isOptionDisabled = false;
+#endif
+		// Hide back button
+#ifdef PS2_LIKE_MENU
+		if ((i == NUM_MENUROWS - 1 || aScreens[m_nCurrScreen].m_aEntries[i+1].m_EntryName[0] == '\0') && strncmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FEDS_TB", 8) == 0)
+			break;
 #endif
 		if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action != MENUACTION_LABEL && aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName[0] != '\0') {
 			wchar *rightText = nil;
@@ -1064,8 +1318,8 @@ CMenuManager::Draw()
 					}
 				}
 
-				if (m_nCurrOption != lastOption && lastOption == i) {
-					CMenuScreenCustom::CMenuEntry &oldOption = aScreens[m_nCurrScreen].m_aEntries[lastOption];
+				if (m_nCurrOption != lastSelectedOpt && lastSelectedOpt == i) {
+					CMenuScreenCustom::CMenuEntry &oldOption = aScreens[m_nCurrScreen].m_aEntries[lastSelectedOpt];
 					if (oldOption.m_Action == MENUACTION_CFO_DYNAMIC)
 						if(oldOption.m_CFODynamic->buttonPressFunc)
 							oldOption.m_CFODynamic->buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
@@ -1317,9 +1571,20 @@ CMenuManager::Draw()
 			int nextYToCheck = bitAboveNextItemY;
 			
 			if (!foundTheHoveringItem) {
+#ifdef SCROLLABLE_PAGES
+				for (int rowToCheck = firstOption + (aScreens[m_nCurrScreen].m_aEntries[firstOption].m_Action == MENUACTION_LABEL); rowToCheck < firstOption + MAX_VISIBLE_OPTION && rowToCheck < NUM_MENUROWS; ++rowToCheck) {
+#else
 				for (int rowToCheck = aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL; rowToCheck < NUM_MENUROWS; ++rowToCheck) {
+#endif
 					if(aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Action == MENUACTION_NOTHING)
 						break;
+						
+					// Hide back button
+#ifdef PS2_LIKE_MENU
+					if ((rowToCheck == NUM_MENUROWS - 1 || aScreens[m_nCurrScreen].m_aEntries[rowToCheck+1].m_EntryName[0] == '\0') &&
+						strncmp(aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_EntryName, "FEDS_TB", 8) == 0)
+						break;
+#endif
 
 					int extraOffset = 0;
 					if (aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_Action == MENUACTION_RADIO)
@@ -1502,7 +1767,36 @@ CMenuManager::Draw()
 	}
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
-	lastOption = m_nCurrOption;
+	lastSelectedOpt = m_nCurrOption;
+#endif
+
+#ifdef SCROLLABLE_PAGES
+	#define SCROLLBAR_BOTTOM_X 125.0f // only for background, scrollbar's itself is calculated
+	#define SCROLLBAR_RIGHT_X 36.0f
+	#define SCROLLBAR_WIDTH 9.5f
+	#define SCROLLBAR_TOP_X 64
+
+	if (m_nTotalListRow > MAX_VISIBLE_OPTION && !hasNativeList(m_nCurrScreen)) {
+		// Scrollbar background
+		CSprite2d::DrawRect(CRect(MENU_X_RIGHT_ALIGNED(SCROLLBAR_RIGHT_X - 2), MENU_Y(SCROLLBAR_TOP_X),
+			MENU_X_RIGHT_ALIGNED(SCROLLBAR_RIGHT_X - 2 - SCROLLBAR_WIDTH), SCREEN_SCALE_FROM_BOTTOM(SCROLLBAR_BOTTOM_X)), CRGBA(100, 100, 66, FadeIn(205)));
+		
+		float scrollbarHeight = SCROLLBAR_MAX_HEIGHT / (m_nTotalListRow / (float) MAX_VISIBLE_OPTION);
+		float scrollbarBottom, scrollbarTop;
+
+		scrollbarBottom = MENU_Y(SCROLLBAR_TOP_X - 8 + m_nScrollbarTopMargin + scrollbarHeight);
+		scrollbarTop = MENU_Y(SCROLLBAR_TOP_X + m_nScrollbarTopMargin);
+		// Scrollbar shadow
+		CSprite2d::DrawRect(CRect(MENU_X_RIGHT_ALIGNED(SCROLLBAR_RIGHT_X - 4), scrollbarTop,
+			MENU_X_RIGHT_ALIGNED(SCROLLBAR_RIGHT_X - 1 - SCROLLBAR_WIDTH), scrollbarBottom + MENU_Y(1.0f)),
+			CRGBA(50, 50, 50, FadeIn(255)));
+
+		// Scrollbar
+		CSprite2d::DrawRect(CRect(MENU_X_RIGHT_ALIGNED(SCROLLBAR_RIGHT_X - 4), scrollbarTop,
+			MENU_X_RIGHT_ALIGNED(SCROLLBAR_RIGHT_X - SCROLLBAR_WIDTH), scrollbarBottom),
+			CRGBA(235, 170, 50, FadeIn(255)));
+			
+	}
 #endif
 
 	switch (m_nCurrScreen) {
@@ -2175,27 +2469,28 @@ CMenuManager::DrawFrontEnd()
 	CFont::SetAlphaFade(255.0f);
 
 #ifdef PS2_LIKE_MENU
+	#define setBbItem(a, b, c) strcpy(a.name, b); a.screenId = c;
 	if (m_nCurrScreen == MENUPAGE_NONE) {
 		if (m_bGameNotLoaded) {
 			if (bbTabCount != 6) {
-				bbNames[0] = { "FEB_SAV",MENUPAGE_NEW_GAME };
-				bbNames[1] = { "FEB_CON",MENUPAGE_CONTROLLER_PC };
-				bbNames[2] = { "FEB_AUD",MENUPAGE_SOUND_SETTINGS };
-				bbNames[3] = { "FEB_DIS",MENUPAGE_DISPLAY_SETTINGS };
-				bbNames[4] = { "FEB_LAN",MENUPAGE_LANGUAGE_SETTINGS };
-				bbNames[5] = { "FESZ_QU",MENUPAGE_EXIT };
+				setBbItem(bbNames[0], "FEB_SAV",MENUPAGE_NEW_GAME)
+				setBbItem(bbNames[1], "FEB_CON",MENUPAGE_CONTROLLER_PC)
+				setBbItem(bbNames[2], "FEB_AUD",MENUPAGE_SOUND_SETTINGS)
+				setBbItem(bbNames[3], "FEB_DIS",MENUPAGE_DISPLAY_SETTINGS)
+				setBbItem(bbNames[4], "FEB_LAN",MENUPAGE_LANGUAGE_SETTINGS)
+				setBbItem(bbNames[5], "FESZ_QU",MENUPAGE_EXIT)
 				bbTabCount = 6;
 			}
 		} else {
 			if (bbTabCount != 8) {
-				bbNames[0] = { "FEB_STA",MENUPAGE_STATS };
-				bbNames[1] = { "FEB_SAV",MENUPAGE_NEW_GAME };
-				bbNames[2] = { "FEB_BRI",MENUPAGE_BRIEFS };
-				bbNames[3] = { "FEB_CON",MENUPAGE_CONTROLLER_PC };
-				bbNames[4] = { "FEB_AUD",MENUPAGE_SOUND_SETTINGS };
-				bbNames[5] = { "FEB_DIS",MENUPAGE_DISPLAY_SETTINGS };
-				bbNames[6] = { "FEB_LAN",MENUPAGE_LANGUAGE_SETTINGS };
-				bbNames[7] = { "FESZ_QU",MENUPAGE_EXIT };
+				setBbItem(bbNames[0], "FEB_STA",MENUPAGE_STATS)
+				setBbItem(bbNames[1], "FEB_SAV",MENUPAGE_NEW_GAME)
+				setBbItem(bbNames[2], "FEB_BRI",MENUPAGE_BRIEFS)
+				setBbItem(bbNames[3], "FEB_CON",MENUPAGE_CONTROLLER_PC)
+				setBbItem(bbNames[4], "FEB_AUD",MENUPAGE_SOUND_SETTINGS)
+				setBbItem(bbNames[5], "FEB_DIS",MENUPAGE_DISPLAY_SETTINGS)
+				setBbItem(bbNames[6], "FEB_LAN",MENUPAGE_LANGUAGE_SETTINGS)
+				setBbItem(bbNames[7], "FESZ_QU",MENUPAGE_EXIT)
 				bbTabCount = 8;
 			}
 		}
@@ -2203,6 +2498,7 @@ CMenuManager::DrawFrontEnd()
 		bottomBarActive = true;
 		curBottomBarOption = 0;
 	}
+	#undef setBbItem
 #else
 	if (m_nCurrScreen == MENUPAGE_NONE) {
 		if (m_bGameNotLoaded) {
@@ -2293,7 +2589,7 @@ CMenuManager::DrawFrontEndNormal()
 	m_aFrontEndSprites[FE2_MAINPANEL_UR].Draw(CRect(SCREEN_WIDTH / 2, 0.0f, MENU_X_RIGHT_ALIGNED(0.0f), SCREEN_HEIGHT / 2), CRGBA(255, 255, 255, 255));
 	m_aFrontEndSprites[FE2_MAINPANEL_DL].Draw(CRect(MENU_X_LEFT_ALIGNED(0.0f), SCREEN_HEIGHT / 2, SCREEN_WIDTH / 2, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
 	m_aFrontEndSprites[FE2_MAINPANEL_DR].Draw(CRect(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, MENU_X_RIGHT_ALIGNED(0.0f), SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
-	
+
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
 	eFrontendSprites currentSprite;
 	switch (m_nCurrScreen) {
@@ -2333,39 +2629,15 @@ CMenuManager::DrawFrontEndNormal()
 			break;
 	}
 
-	m_aFrontEndSprites[currentSprite].Draw(CRect(MENU_X_LEFT_ALIGNED(50.0f), MENU_Y(50.0f), MENU_X_RIGHT_ALIGNED(50.0f), SCREEN_SCALE_FROM_BOTTOM(95.0f)), CRGBA(255, 255, 255, m_nMenuFadeAlpha > 255 ? 255 : m_nMenuFadeAlpha));
-
 	static float fadeAlpha = 0.0f;
-	static int lastState = 0;
 
-	// reverseAlpha = PS2 fading (wait for 255->0, then change screen)
 	if (m_nMenuFadeAlpha < 255) {
-		if (lastState == 1 && !reverseAlpha)
-			fadeAlpha = 0.f;
-
-		if (m_nMenuFadeAlpha <= 0 && reverseAlpha) {
-			reverseAlpha = false;
-			ChangeScreen(pendingScreen, pendingOption, true, false);
-		} else {
-			// +20 per every 33 ms (1000.f/30.f - original frame limiter fps)
-			if (!reverseAlpha)
-				fadeAlpha += (frameTime) * 20.f / 33.f;
-			else
-				fadeAlpha = max(0.0f, fadeAlpha - (frameTime) * 30.f / 33.f);
-
-			m_nMenuFadeAlpha = fadeAlpha;
-		} 
-		lastState = 0;
+		if (m_nMenuFadeAlpha == 0 && fadeAlpha > 1.0f) fadeAlpha = 0.0f;
+		
+		// +20 per every 33 ms (1000.f/30.f - original frame limiter fps)
+		fadeAlpha += (frameTime) * 20.f / 33.f;
+		m_nMenuFadeAlpha = fadeAlpha;
 	} else {
-		if (lastState == 0) fadeAlpha = 255.f;
-
-		if (reverseAlpha) {
-			fadeAlpha -= (frameTime) * 30.f / 33.f;
-
-			m_nMenuFadeAlpha = fadeAlpha;
-		}
-		lastState = 1;
-
 		// TODO: what is this? waiting mouse?
 		if(field_518 == 4){
 			if(m_nHoverOption == HOVEROPTION_3 || m_nHoverOption == HOVEROPTION_4 ||
@@ -2376,6 +2648,8 @@ CMenuManager::DrawFrontEndNormal()
 				field_518 = 1;
 		}
 	}
+
+	m_aFrontEndSprites[currentSprite].Draw(CRect(MENU_X_LEFT_ALIGNED(50.0f), MENU_Y(50.0f), MENU_X_RIGHT_ALIGNED(50.0f), SCREEN_SCALE_FROM_BOTTOM(95.0f)), CRGBA(255, 255, 255, m_nMenuFadeAlpha > 255 ? 255 : m_nMenuFadeAlpha));
 
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERNEAREST);
 	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void*)rwTEXTUREADDRESSCLAMP);
@@ -2912,14 +3186,13 @@ CMenuManager::DrawPlayerSetupScreen()
 		CSprite2d::DrawRect(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 2), MENU_Y(PLAYERSETUP_LIST_TOP),
 			MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 2 - PLAYERSETUP_SCROLLBAR_WIDTH), SCREEN_SCALE_FROM_BOTTOM(PLAYERSETUP_LIST_BOTTOM)), CRGBA(100, 100, 66, FadeIn(205)));
 		
-		// Scrollbar
-		float scrollbarHeight = SCROLLBAR_MAX_HEIGHT / m_nSkinsTotal * (float) MAX_VISIBLE_LIST_ROW;
+		float scrollbarHeight = SCROLLBAR_MAX_HEIGHT / (m_nSkinsTotal / (float) MAX_VISIBLE_LIST_ROW);
 		float scrollbarBottom, scrollbarTop;
 		if (m_nSkinsTotal <= MAX_VISIBLE_LIST_ROW) {
 			scrollbarBottom = SCREEN_SCALE_FROM_BOTTOM(PLAYERSETUP_LIST_BOTTOM + PLAYERSETUP_SCROLLBUTTON_HEIGHT + 4.0f);
 			scrollbarTop = MENU_Y(PLAYERSETUP_LIST_BODY_TOP);
 
-			// Shadow
+			// Scrollbar shadow
 			CSprite2d::DrawRect(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 4), scrollbarTop,
 				MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 1 - PLAYERSETUP_SCROLLBAR_WIDTH), scrollbarBottom + MENU_Y(1.0f)), CRGBA(50, 50, 50, FadeIn(255)));
 		} else {
@@ -2930,12 +3203,13 @@ CMenuManager::DrawPlayerSetupScreen()
 			scrollbarBottom = MENU_Y(PLAYERSETUP_LIST_BODY_TOP - 4 + m_nScrollbarTopMargin + scrollbarHeight - SCROLLBAR_MAX_HEIGHT / m_nSkinsTotal);
 			scrollbarTop = MENU_Y(SCROLLBAR_MAX_HEIGHT / m_nSkinsTotal + PLAYERSETUP_LIST_BODY_TOP - 3 + m_nScrollbarTopMargin);
 #endif
-			// Shadow
+			// Scrollbar shadow
 			CSprite2d::DrawRect(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 4), scrollbarTop,
 				MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 1 - PLAYERSETUP_SCROLLBAR_WIDTH), scrollbarBottom + MENU_Y(1.0f)),
 				CRGBA(50, 50, 50, FadeIn(255)));
 
 		}
+		// Scrollbar
 		CSprite2d::DrawRect(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 4), scrollbarTop,
 			MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - PLAYERSETUP_SCROLLBAR_WIDTH), scrollbarBottom),
 			CRGBA(235, 170, 50, FadeIn(255)));
@@ -3907,235 +4181,10 @@ CMenuManager::ProcessButtonPresses(void)
 	if (m_nMousePosY < 0) m_nMousePosY = 0;
 	if (m_nMousePosY > SCREEN_HEIGHT) m_nMousePosY = SCREEN_HEIGHT;
 
-	if (m_nCurrScreen == MENUPAGE_MULTIPLAYER_FIND_GAME || m_nCurrScreen == MENUPAGE_SKIN_SELECT
-		|| m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
+	if (hasNativeList(m_nCurrScreen)) {
+		// Not split to seperate function in III as in VC, but we need it for scrollable pages :)
+		ProcessList(goBack, optionSelected);
 
-		if (m_nCurrScreen == MENUPAGE_SKIN_SELECT) {
-			m_nTotalListRow = m_nSkinsTotal;
-		}
-		if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
-			m_nTotalListRow = m_ControlMethod == CONTROL_CLASSIC ? 30 : 25;
-			if (m_nSelectedListRow > m_nTotalListRow)
-				m_nSelectedListRow = m_nTotalListRow - 1;
-		}
-
-#ifndef TIDY_UP_PBP
-		if (CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetCrossJustDown()) {
-			m_bShowMouse = 0;
-			optionSelected = true;
-		}
-#endif
-		if (CPad::GetPad(0)->GetBackspaceJustDown() && m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS && !field_535) {
-			if (m_nCurrExLayer == HOVEROPTION_LIST) {
-				m_nHoverOption = HOVEROPTION_NOT_HOVERING;
-				m_bWaitingForNewKeyBind = true;
-				m_bStartWaitingForKeyBind = true;
-				m_bKeyChangeNotProcessed = true;
-				pControlEdit = &m_KeyPressedCode;
-			}
-		} else {
-			field_535 = false;
-		}
-
-		static uint32 lastTimeClickedScrollButton = 0;
-
-		if (CTimer::GetTimeInMillisecondsPauseMode() - lastTimeClickedScrollButton >= 200) {
-			m_bPressedPgUpOnList = false;
-			m_bPressedPgDnOnList = false;
-			m_bPressedUpOnList = false;
-			m_bPressedDownOnList = false;
-			m_bPressedScrollButton = false;
-			lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
-		}
-
-		if (CPad::GetPad(0)->GetTabJustDown()) {
-			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
-			m_bShowMouse = false;
-			switch (m_nCurrExLayer) {
-				case HOVEROPTION_BACK:
-				default:
-					m_nCurrExLayer = HOVEROPTION_LIST;
-					break;
-				case HOVEROPTION_LIST:
-					m_nCurrExLayer = HOVEROPTION_USESKIN;
-					break;
-				case HOVEROPTION_USESKIN:
-					m_nCurrExLayer = HOVEROPTION_BACK;
-			}
-			if (((m_nCurrScreen == MENUPAGE_SKIN_SELECT) && (m_nCurrExLayer == HOVEROPTION_USESKIN)) && strcmp(m_aSkinName, m_PrefsSkinFile) == 0) {
-				m_nCurrExLayer = HOVEROPTION_BACK;
-			}
-			if ((m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) && (m_nCurrExLayer == HOVEROPTION_USESKIN)) {
-				m_nCurrExLayer = HOVEROPTION_BACK;
-			}
-		}
-
-		bool pressed = false;
-		if (CPad::GetPad(0)->GetUp() || CPad::GetPad(0)->GetAnaloguePadUp() || CPad::GetPad(0)->GetDPadUpJustDown()) {
-			m_bShowMouse = false;
-			pressed = true;
-		} else if (CPad::GetPad(0)->GetMouseWheelUpJustUp()) {
-			m_bShowMouse = true;
-			pressed = true;
-		}
-
-		// Up
-		if (pressed) {
-			m_nCurrExLayer = HOVEROPTION_LIST;
-			if (!m_bPressedUpOnList) {
-				m_bPressedUpOnList = true;
-				lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
-				ScrollUpListByOne();
-			}
-		} else {
-			m_bPressedUpOnList = false;
-		}
-
-		pressed = false;
-		if (CPad::GetPad(0)->GetDown() || CPad::GetPad(0)->GetAnaloguePadDown() || CPad::GetPad(0)->GetDPadDownJustDown()) {
-			m_bShowMouse = false;
-			pressed = true;
-		} else if (CPad::GetPad(0)->GetMouseWheelDownJustDown()) {
-			m_bShowMouse = true;
-			pressed = true;
-		}
-
-		// Down
-		if (pressed) {
-			m_nCurrExLayer = HOVEROPTION_LIST;
-			if (!m_bPressedDownOnList) {
-				m_bPressedDownOnList = true;
-				lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
-				ScrollDownListByOne();
-			}
-		} else {
-			m_bPressedDownOnList = false;
-		}
-
-		if (m_nCurrScreen != MENUPAGE_KEYBOARD_CONTROLS) {
-			if (!CPad::GetPad(0)->GetPageUp()) {
-				m_bPressedPgUpOnList = false;
-			} else {
-				m_nCurrExLayer = HOVEROPTION_LIST;
-				if (!m_bPressedPgUpOnList) {
-					m_bPressedPgUpOnList = true;
-					lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
-					m_bShowMouse = false;
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
-					PageUpList(false);
-				}
-			}
-			if (!CPad::GetPad(0)->GetPageDown()) {
-				m_bPressedPgDnOnList = false;
-			} else {
-				m_nCurrExLayer = HOVEROPTION_LIST;
-				if (!m_bPressedPgDnOnList) {
-					m_bPressedPgDnOnList = true;
-					lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
-					m_bShowMouse = false;
-					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
-					PageDownList(false);
-				}
-			}
-			if (CPad::GetPad(0)->GetHome()) {
-				m_nCurrExLayer = HOVEROPTION_LIST;
-				m_bShowMouse = false;
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
-				if (m_nTotalListRow >= MAX_VISIBLE_LIST_ROW) {
-					m_nFirstVisibleRowOnList = 0;
-				}
-				m_nSelectedListRow = 0;
-				m_nScrollbarTopMargin = (SCROLLBAR_MAX_HEIGHT / m_nTotalListRow) * m_nFirstVisibleRowOnList;
-			}
-			if (CPad::GetPad(0)->GetEnd()) {
-				m_nCurrExLayer = HOVEROPTION_LIST;
-				m_bShowMouse = false;
-				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
-				if (m_nTotalListRow >= MAX_VISIBLE_LIST_ROW) {
-					m_nFirstVisibleRowOnList = m_nTotalListRow - MAX_VISIBLE_LIST_ROW;
-				}
-				m_nSelectedListRow = m_nTotalListRow - 1;
-				m_nScrollbarTopMargin = (SCROLLBAR_MAX_HEIGHT / m_nTotalListRow) * m_nFirstVisibleRowOnList;
-			}
-		}
-
-#ifndef TIDY_UP_PBP
-		if (CPad::GetPad(0)->GetEscapeJustDown() || CPad::GetPad(0)->GetBackJustDown()) {
-			m_bShowMouse = false;
-			goBack = true;
-		}
-#endif
-
-		if (CPad::GetPad(0)->GetLeftMouseJustDown()) {
-			switch (m_nHoverOption) {
-				case HOVEROPTION_BACK:
-					goBack = true;
-					break;
-				case HOVEROPTION_PAGEUP:
-					PageUpList(true);
-					break;
-				case HOVEROPTION_PAGEDOWN:
-					PageDownList(true);
-					break;
-				case HOVEROPTION_USESKIN:
-					if (m_nSkinsTotal > 0) {
-						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
-						m_pSelectedSkin = m_pSkinListHead.nextSkin;
-						strcpy(m_PrefsSkinFile, m_aSkinName);
-						CWorld::Players[0].SetPlayerSkin(m_PrefsSkinFile);
-						SaveSettings();
-					}
-			}
-		}
-
-		if (CPad::GetPad(0)->GetLeftMouseJustDown()) {
-			switch (m_nHoverOption) {
-				case HOVEROPTION_OVER_SCROLL_UP:
-					m_nHoverOption = HOVEROPTION_CLICKED_SCROLL_UP;
-					break;
-				case HOVEROPTION_OVER_SCROLL_DOWN:
-					m_nHoverOption = HOVEROPTION_CLICKED_SCROLL_DOWN;
-					break;
-				case HOVEROPTION_LIST:
-					m_nHoverOption = HOVEROPTION_SKIN;
-			}
-		} else if ((CPad::GetPad(0)->GetLeftMouseJustUp())
-			&& ((m_nHoverOption == HOVEROPTION_CLICKED_SCROLL_UP || (m_nHoverOption == HOVEROPTION_CLICKED_SCROLL_DOWN)))) {
-			m_nHoverOption = HOVEROPTION_NOT_HOVERING;
-		}
-
-		if (!CPad::GetPad(0)->GetLeftMouse()) {
-			holdingScrollBar = false;
-		} else {
-			if ((m_nHoverOption == HOVEROPTION_HOLDING_SCROLLBAR) || holdingScrollBar) {
-				holdingScrollBar = true;
-				// TODO: This part is a bit hard to reverse. Not much code tho
-				assert(0 && "Holding scrollbar isn't done yet");
-			} else {
-				switch (m_nHoverOption) {
-				case HOVEROPTION_OVER_SCROLL_UP:
-				case HOVEROPTION_CLICKED_SCROLL_UP:
-					if (!m_bPressedScrollButton) {
-						m_bPressedScrollButton = true;
-						lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
-						ScrollUpListByOne();
-					}
-					break;
-				case HOVEROPTION_OVER_SCROLL_DOWN:
-				case HOVEROPTION_CLICKED_SCROLL_DOWN:
-					if (!m_bPressedScrollButton) {
-						m_bPressedScrollButton = true;
-						lastTimeClickedScrollButton = CTimer::GetTimeInMillisecondsPauseMode();
-						ScrollDownListByOne();
-					}
-					break;
-				default:
-					m_bPressedScrollButton = false;
-				}
-			}
-		}
 	} else if (isPlainTextScreen(m_nCurrScreen)) {
 #ifndef TIDY_UP_PBP
 		if (CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetCrossJustDown() || CPad::GetPad(0)->GetLeftMouseJustDown()) {
@@ -4374,7 +4423,7 @@ CMenuManager::ProcessButtonPresses(void)
 				TheCamera.m_fMouseAccelVertical = TheCamera.m_fMouseAccelHorzntl;
 				SaveSettings();
 				break;
-				}
+			}
 #else
 			switch (m_nHoverOption) {
 				case HOVEROPTION_INCREASE_BRIGHTNESS:
@@ -4393,7 +4442,26 @@ CMenuManager::ProcessButtonPresses(void)
 					break;
 			}
 #endif
-			}
+		}
+		
+#ifdef SCROLLABLE_PAGES
+		if (m_nTotalListRow > MAX_VISIBLE_OPTION) {
+			bool temp = false;
+			
+			m_nSelectedListRow = m_nCurrOption;
+			
+			// ignore detected back/select states, it's our screen's job
+			ProcessList(temp, temp);
+			
+			// and ignore our screen's goUp/Down, now it's ProcessList's job
+			goUp = false;
+			goDown = false;
+			m_nCurrOption = m_nSelectedListRow;
+		}
+		
+		// Prevent sound on scroll. Mouse wheel is now belongs to us!
+		if (!(m_nTotalListRow > MAX_VISIBLE_OPTION && (CPad::GetPad(0)->GetMouseWheelUpJustDown() || CPad::GetPad(0)->GetMouseWheelDownJustDown())))
+#endif
 
 		if (CPad::GetPad(0)->GetLeftMouseJustUp() || CPad::GetPad(0)->GetLeftJustUp() || CPad::GetPad(0)->GetRightJustUp()
 			|| CPad::GetPad(0)->GetDPadLeftJustUp() || CPad::GetPad(0)->GetDPadRightJustUp()
@@ -4408,6 +4476,7 @@ CMenuManager::ProcessButtonPresses(void)
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 
 		}
+		
 #ifndef TIDY_UP_PBP
 		if (CPad::GetPad(0)->GetBackJustDown()) {
 			if (m_nCurrScreen != MENUPAGE_START_MENU && m_nCurrScreen != MENUPAGE_PAUSE_MENU) {
@@ -4427,7 +4496,7 @@ CMenuManager::ProcessButtonPresses(void)
 			goBack = false;
 		}
 #endif
-		}
+	}
 
 	// Centralized enter/back (except some conditions)
 #ifdef TIDY_UP_PBP
@@ -4480,15 +4549,9 @@ CMenuManager::ProcessButtonPresses(void)
 			if (bbNames[curBottomBarOption].screenId == MENUPAGE_SOUND_SETTINGS)
 				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
 
-			// If there's a menu change with fade ongoing, finish it now
-			if (reverseAlpha)
-				m_nMenuFadeAlpha = 0;
 			return;
 		} else if (CPad::GetPad(0)->GetLeftJustDown() || CPad::GetPad(0)->GetAnaloguePadLeft() || CPad::GetPad(0)->GetDPadLeftJustDown()
 			|| CPad::GetPad(0)->GetUpJustDown() || CPad::GetPad(0)->GetAnaloguePadUp() || CPad::GetPad(0)->GetDPadUpJustDown()) {
-
-			if (reverseAlpha && m_nMenuFadeAlpha > 30)
-				return;
 
 			m_bShowMouse = false;
 			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
@@ -4497,9 +4560,6 @@ CMenuManager::ProcessButtonPresses(void)
 			return;
 		} else if (CPad::GetPad(0)->GetRightJustDown() || CPad::GetPad(0)->GetAnaloguePadRight() || CPad::GetPad(0)->GetDPadRightJustDown()
 			|| CPad::GetPad(0)->GetDownJustDown() || CPad::GetPad(0)->GetAnaloguePadDown() || CPad::GetPad(0)->GetDPadDownJustDown()) {
-
-			if (reverseAlpha && m_nMenuFadeAlpha > 30)
-				return;
 
 			m_bShowMouse = false;
 			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
@@ -4530,6 +4590,12 @@ CMenuManager::ProcessButtonPresses(void)
 			m_nCurrOption--;
 		}
 	}
+
+	// Hide back button
+#ifdef PS2_LIKE_MENU
+	if ((goUp || goDown) && m_nCurrScreen != MENUPAGE_MULTIPLAYER_FIND_GAME && strncmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEDS_TB", 8) == 0)
+		m_nCurrOption = goUp ? m_nCurrOption - 1 : (aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL);
+#endif
 
 	if (optionSelected) {
 		int option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action;
@@ -5056,23 +5122,27 @@ CMenuManager::ProcessButtonPresses(void)
 	if (CPad::GetPad(0)->GetRightJustDown() || CPad::GetPad(0)->GetAnaloguePadRight() || CPad::GetPad(0)->GetDPadRightJustDown()) {
 		m_bShowMouse = false;
 		increase = true;
-	} else if (CPad::GetPad(0)->GetMouseWheelUpJustDown() && m_nCurrScreen != MENUPAGE_KEYBOARD_CONTROLS) {
+	} else if (
+#ifdef SCROLLABLE_PAGES
+		!(m_nTotalListRow > MAX_VISIBLE_OPTION && !hasNativeList(m_nCurrScreen)) &&
+#endif
+		CPad::GetPad(0)->GetMouseWheelUpJustDown() && m_nCurrScreen != MENUPAGE_KEYBOARD_CONTROLS) {
 		increase = true;
 		CheckSliderMovement(1);
 		m_bShowMouse = true;
 	}
 
-	if (!CPad::GetPad(0)->GetLeftJustDown() && !CPad::GetPad(0)->GetAnaloguePadLeft() && !CPad::GetPad(0)->GetDPadLeftJustDown()) {
-		if (CPad::GetPad(0)->GetMouseWheelDownJustDown()) {
-			if (m_nCurrScreen != MENUPAGE_KEYBOARD_CONTROLS) {
-				decrease = true;
-				CheckSliderMovement(-1);
-				m_bShowMouse = true;
-			}
-		}
-	} else {
+	if (CPad::GetPad(0)->GetLeftJustDown() || CPad::GetPad(0)->GetAnaloguePadLeft() || CPad::GetPad(0)->GetDPadLeftJustDown()) {
 		m_bShowMouse = false;
 		decrease = true;
+	} else if (
+#ifdef SCROLLABLE_PAGES
+		!(m_nTotalListRow > MAX_VISIBLE_OPTION && !hasNativeList(m_nCurrScreen)) &&
+#endif
+		CPad::GetPad(0)->GetMouseWheelDownJustDown() && m_nCurrScreen != MENUPAGE_KEYBOARD_CONTROLS) {
+		decrease = true;
+		CheckSliderMovement(-1);
+		m_bShowMouse = true;
 	}
 
 	if (increase)
