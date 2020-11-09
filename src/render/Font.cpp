@@ -279,8 +279,8 @@ CFont::Initialise(void)
 	SetColor(CRGBA(0xFF, 0xFF, 0xFF, 0));
 	SetJustifyOff();
 	SetCentreOff();
-	SetWrapx(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
-	SetCentreSize(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
+	SetWrapx(SCREEN_WIDTH);
+	SetCentreSize(SCREEN_WIDTH);
 	SetBackgroundOff();
 	SetBackgroundColor(CRGBA(0x80, 0x80, 0x80, 0x80));
 	SetBackGroundOnlyTextOff();
@@ -701,7 +701,14 @@ CFont::GetNumberLines(float xstart, float ystart, wchar *s)
 	y = ystart;
 
 	while(*s){
+#ifdef FIX_BUGS
+		float f = Details.centre ? Details.centreSize :
+		           Details.rightJustify ? xstart - Details.rightJustifyWrap :
+		           Details.wrapX;
+#else
 		float f = (Details.centre ? Details.centreSize : Details.wrapX);
+#endif
+
 #ifdef MORE_LANGUAGES
 		if (IsJapaneseFont())
 			f -= SCREEN_SCALE_X(21.0f * 2.0f);
@@ -781,8 +788,15 @@ CFont::GetTextRect(CRect *rect, float xstart, float ystart, wchar *s)
 			x = xstart;
 		y = ystart;
 
+#ifdef FIX_BUGS
+		float xEnd = Details.centre ? Details.centreSize :
+		           Details.rightJustify ? xstart - Details.rightJustifyWrap :
+		           Details.wrapX;
+#else
+		float xEnd = (Details.centre ? Details.centreSize : Details.wrapX);
+#endif
 		while(*s){
-			if(x + GetStringWidth(s) > (Details.centre ? Details.centreSize : Details.wrapX)){
+			if(x + GetStringWidth(s) > xEnd){
 				// reached end of line
 				if(x > maxlength)
 					maxlength = x;

@@ -780,7 +780,7 @@ CMenuManager::Draw()
 #endif
 #endif
 	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
-	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENUACTION_WIDTH));
+	CFont::SetRightJustifyWrap(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN - 2.0f));
 
 	switch (m_nCurrScreen) {
 		case MENUPAGE_STATS:
@@ -852,7 +852,11 @@ CMenuManager::Draw()
 #endif
 	}
 
+#ifdef ASPECT_RATIO_SCALE
+	CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
+#else
 	CFont::SetCentreSize(SCREEN_WIDTH);
+#endif
 
 #ifdef PS2_LIKE_MENU
 	bool itemsAreSelectable = !bottomBarActive;
@@ -1468,6 +1472,12 @@ CMenuManager::Draw()
 					break;
 			}
 
+			// Needed after the bug fix in Font.cpp
+#ifdef FIX_BUGS
+			if (!CFont::Details.centre)
+				CFont::SetRightJustifyOff();
+#endif
+
 			// 60.0 is silly
 			nextYToUse += lineHeight * CFont::GetNumberLines(MENU_X_LEFT_ALIGNED(60.0f), MENU_Y(nextYToUse), leftText);
 
@@ -1976,7 +1986,7 @@ CMenuManager::DrawControllerSetupScreen()
 	CFont::SetRightJustifyOff();
 	CFont::SetBackGroundOnlyTextOn();
 	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
-	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENUACTION_WIDTH));
+	CFont::SetRightJustifyWrap(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN - 2.0f));
 
 	PREPARE_MENU_HEADER
 
@@ -2392,7 +2402,7 @@ CMenuManager::DrawFrontEndNormal()
 	CFont::SetJustifyOn();
 	CFont::SetRightJustifyOff();
 	CFont::SetBackGroundOnlyTextOn();
-	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(40.0f)); // 600.0f
+	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN)); // 600.0f
 	CFont::SetColor(CRGBA(16, 16, 16, 255));
 	switch (m_nCurrScreen) {
 
@@ -2710,7 +2720,7 @@ CMenuManager::DrawPlayerSetupScreen()
 	CFont::SetRightJustifyOff();
 	CFont::SetBackGroundOnlyTextOn();
 	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
-	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(MENUACTION_WIDTH));
+	CFont::SetRightJustifyWrap(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN - 2.0f));
 
 	PREPARE_MENU_HEADER
 
@@ -3490,11 +3500,11 @@ CMenuManager::MessageScreen(const char *text)
 	CFont::SetPropOn();
 	CFont::SetJustifyOn();
 	CFont::SetBackGroundOnlyTextOn();
-	CFont::SetWrapx(SCREEN_WIDTH - StretchX(170.0f));
-	CFont::SetRightJustifyWrap(SCREEN_WIDTH - StretchX(170.0f));
+	CFont::SetWrapx(SCREEN_WIDTH - StretchX(170.0f)); // unused
+	CFont::SetRightJustifyWrap(SCREEN_WIDTH - StretchX(170.0f)); // unused
 	CSprite2d::DrawRect(CRect(StretchX(120.0f), StretchY(150.0f), SCREEN_WIDTH - StretchX(120.0f), SCREEN_HEIGHT - StretchY(220.0f)), CRGBA(50, 50, 50, 210));
 	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
-	CFont::SetCentreSize(SCREEN_STRETCH_X(380.0f));
+	CFont::SetCentreSize(SCREEN_SCALE_X(380.0f));
 	CFont::SetCentreOn();
 	CFont::SetColor(CRGBA(255, 217, 106, 255));
 	CFont::SetScale(SCREEN_SCALE_X(SMALLTEXT_X_SCALE), SCREEN_SCALE_Y(SMALLTEXT_Y_SCALE));
@@ -3585,7 +3595,7 @@ CMenuManager::PrintErrorMessage()
 	CFont::SetJustifyOn();
 	CFont::SetRightJustifyOff();
 	CFont::SetBackGroundOnlyTextOn();
-	CFont::SetWrapx(SCREEN_SCALE_FROM_RIGHT(40.0f));
+	CFont::SetWrapx(SCREEN_SCALE_FROM_RIGHT(MENU_X_MARGIN));
 #ifdef FIX_BUGS
 	CFont::PrintString(SCREEN_SCALE_X(50.0f), SCREEN_SCALE_Y(180.0f), TheText.Get(CPad::bDisplayNoControllerMessage ? "NOCONT" : "WRCONT"));
 #else
