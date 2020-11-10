@@ -1095,7 +1095,7 @@ void CHud::Draw()
 					CFont::SetCentreOff();
 
 				CFont::SetWrapx(SCALE_AND_CENTER_X(CTheScripts::IntroTextLines[i].m_fWrapX));
-				CFont::SetCentreSize(SCALE_AND_CENTER_X(CTheScripts::IntroTextLines[i].m_fCenterSize));
+				CFont::SetCentreSize(SCREEN_SCALE_X(CTheScripts::IntroTextLines[i].m_fCenterSize));
 
 				if (CTheScripts::IntroTextLines[i].m_bBackground)
 					CFont::SetBackgroundOn();
@@ -1168,7 +1168,7 @@ void CHud::Draw()
 				onceItWasWidescreen = true;
 				
 				if (FrontEndMenuManager.m_PrefsShowSubtitles || !CCutsceneMgr::IsRunning()) {
-					CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(60.0f));
+					CFont::SetCentreSize(SCREEN_WIDTH - SCREEN_SCALE_X(60.0f));
 					CFont::SetScale(SCREEN_SCALE_X(0.58f), SCREEN_SCALE_Y(1.2f));
 					CFont::PrintString(SCREEN_WIDTH / 2.f, SCREEN_SCALE_FROM_BOTTOM(80.0f), m_Message);
 				}
@@ -1182,11 +1182,11 @@ void CHud::Draw()
 				CFont::SetDropColor(CRGBA(0, 0, 0, 255));
 				CFont::SetScale(SCREEN_SCALE_X(0.58f), SCREEN_SCALE_Y(1.22f));
 
-				float offsetX = SCREEN_SCALE_X(140.0f) + SCREEN_SCALE_X(8.0f);
-				float center = SCREEN_SCALE_FROM_RIGHT(20.0f) - SCREEN_SCALE_X(8.0f) - offsetX;
-				CFont::SetCentreSize(center);
+				float radarBulge = SCREEN_SCALE_X(140.0f) + SCREEN_SCALE_X(8.0f);
+				float rectWidth = SCREEN_WIDTH - SCREEN_SCALE_X(20.0f) - SCREEN_SCALE_X(8.0f) - radarBulge;
+				CFont::SetCentreSize(rectWidth);
 
-				CFont::PrintString(center / 2.0f + offsetX, SCREEN_SCALE_FROM_BOTTOM(105.f + 2.0f), m_Message);
+				CFont::PrintString(rectWidth / 2.0f + radarBulge, SCREEN_SCALE_FROM_BOTTOM(105.f + 2.0f), m_Message);
 			}
 			CFont::SetDropShadowPosition(0);
 		}
@@ -1322,13 +1322,13 @@ void CHud::Draw()
 				}
 				CFont::SetPropOn();
 				CFont::SetCentreOn();
-				CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(50.0f));
+				CFont::SetCentreSize(SCREEN_SCALE_X(590.0f));
 				CFont::SetColor(CRGBA(255, 255, 0, BigMessageAlpha[0])); // unused color
 				CFont::SetFontStyle(FONT_HEADING);
 
 				// Appearently sliding text in here was abandoned very early, since this text is centered now.
 
-				if (BigMessageX[0] >= SCREEN_SCALE_FROM_RIGHT(20.0f)) {
+				if (BigMessageX[0] >= SCALE_AND_CENTER_X(620.0f)) {
 					BigMessageInUse[0] += CTimer::GetTimeStep();
 
 					if (BigMessageInUse[0] >= 120.0f) {
@@ -1356,7 +1356,7 @@ void CHud::Draw()
 			}
 			else {
 				BigMessageAlpha[0] = 0.0f;
-				BigMessageX[0] = SCREEN_SCALE_FROM_RIGHT(DEFAULT_SCREEN_WIDTH + 60.0f);
+				BigMessageX[0] = SCALE_AND_CENTER_X(-60.0f);
 				BigMessageInUse[0] = 1.0f;
 			}
 		}
@@ -1435,7 +1435,7 @@ void CHud::DrawAfterFade()
 				CFont::SetCentreOff();
 
 			CFont::SetWrapx(SCALE_AND_CENTER_X(line.m_fWrapX));
-			CFont::SetCentreSize(SCALE_AND_CENTER_X(line.m_fCenterSize));
+			CFont::SetCentreSize(SCREEN_SCALE_X(line.m_fCenterSize));
 			if (line.m_bBackground)
 				CFont::SetBackgroundOn();
 			else
@@ -1481,7 +1481,7 @@ void CHud::DrawAfterFade()
 		CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.5f));
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
-		CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(40.0f));
+		CFont::SetCentreSize(SCREEN_SCALE_X(600.0f));
 		CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 		CFont::SetDropShadowPosition(2);
 		CFont::SetDropColor(CRGBA(0, 0, 0, 255));
@@ -1495,7 +1495,7 @@ void CHud::DrawAfterFade()
 		CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.5f));
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
-		CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(60.0f));
+		CFont::SetCentreSize(SCREEN_SCALE_X(580.0f));
 		CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 		CFont::SetDropShadowPosition(2);
 		CFont::SetDropColor(CRGBA(0, 0, 0, 255));
@@ -1550,7 +1550,7 @@ void CHud::DrawAfterFade()
 			CFont::SetScale(SCREEN_SCALE_X(1.0f), SCREEN_SCALE_Y(1.2f));
 			CFont::SetCentreOn();
 			CFont::SetPropOn();
-			CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(80.0f));
+			CFont::SetCentreSize(SCREEN_SCALE_X(560.0f));
 			CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 			CFont::SetDropShadowPosition(2);
 			CFont::SetDropColor(CRGBA(0, 0, 0, 255));
@@ -1581,7 +1581,7 @@ void CHud::DrawAfterFade()
 				CFont::SetScale(SCREEN_SCALE_X(1.04f), SCREEN_SCALE_Y(1.6f));
 
 			CFont::SetPropOn();
-			CFont::SetRightJustifyWrap(0.0f);
+			CFont::SetRightJustifyWrap(SCALE_AND_CENTER_X(0.0f));
 			CFont::SetRightJustifyOn();
 			CFont::SetFontStyle(FONT_BANK);
 			CFont::SetScale(FrontEndMenuManager.m_PrefsLanguage == CMenuManager::LANGUAGE_AMERICAN ? SCREEN_SCALE_X(1.7f) : SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.8f));

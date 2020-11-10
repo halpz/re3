@@ -73,7 +73,7 @@ CDarkel::DrawMessages()
 		{
 			CFont::SetJustifyOff();
 			CFont::SetBackgroundOff();
-			CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(30.0f));
+			CFont::SetCentreSize(SCREEN_SCALE_X(610.0f));
 			CFont::SetCentreOn();
 			CFont::SetPropOn();
 			uint32 timePassedSinceStart = CTimer::GetTimeInMilliseconds() - TimeOfFrenzyStart;
@@ -127,7 +127,7 @@ CDarkel::DrawMessages()
 				uint32 timePassedSinceStart = CTimer::GetTimeInMilliseconds() - TimeOfFrenzyStart;
 				if (CTimer::GetTimeInMilliseconds() - TimeOfFrenzyStart < 5000) {
 					CFont::SetBackgroundOff();
-					CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(20.0f));
+					CFont::SetCentreSize(SCREEN_SCALE_X(620.0f));
 					CFont::SetCentreOn();
 					CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
 					CFont::SetJustifyOff();

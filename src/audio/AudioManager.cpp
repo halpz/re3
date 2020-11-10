@@ -275,6 +275,7 @@ cAudioManager::ResetTimers(uint32 time)
 		SampleManager.SetEffectsFadeVolume(0);
 		SampleManager.SetMusicFadeVolume(0);
 		MusicManager.ResetMusicAfterReload();
+		m_bIsPlayerShutUp = false;
 #ifdef AUDIO_OAL
 		SampleManager.Service();
 #endif
@@ -622,7 +623,6 @@ cAudioManager::AddDetailsToRequestedOrderList(uint8 sample)
 	m_abSampleQueueIndexTable[m_nActiveSampleQueue][i] = sample;
 }
 
-// --MIAMI: Done
 void
 cAudioManager::AddReflectionsToRequestedQueue()
 {
@@ -684,7 +684,6 @@ cAudioManager::AddReflectionsToRequestedQueue()
 	m_sQueueSample.m_fDistance = oldDist;
 }
 
-// --MIAMI: Done
 void
 cAudioManager::UpdateReflections()
 {

@@ -1,9 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "audio_enums.h"
 #include "AudioCollision.h"
 #include "PoliceRadio.h"
 #include "VehicleModelInfo.h"
+#include "Vehicle.h"
 
 class tSound
 {
@@ -59,7 +60,7 @@ VALIDATE_SIZE(tAudioEntity, 40);
 class tPedComment
 {
 public:
-	int32 m_nSampleIndex;
+	uint32 m_nSampleIndex;
 	int32 m_nEntityIndex;
 	CVector m_vecPos;
 	float m_fDistance;
@@ -76,8 +77,10 @@ public:
 	uint8 m_nIndexMap[NUM_PED_COMMENTS_BANKS][NUM_PED_COMMENTS_SLOTS];
 	uint8 m_nCommentsInBank[NUM_PED_COMMENTS_BANKS];
 	uint8 m_nActiveBank;
+#ifdef GTA_PC
 	bool m_bDelay;
 	uint32 m_nDelayTimer;
+#endif
 
 	cPedComments()
 	{
@@ -91,11 +94,11 @@ public:
 			m_nCommentsInBank[i] = 0;
 		m_nActiveBank = 0;
 	}
-	void Add(tPedComment *com);
-	void Process();
+	void Add(tPedComment *com); // done
+	void Process();             // done
 };
 
-VALIDATE_SIZE(cPedComments, 1164);
+VALIDATE_SIZE(cPedComments, 0x490);
 
 class CEntity;
 
@@ -200,7 +203,7 @@ public:
 	uint8 m_nPlayerMood;
 	uint32 m_nPlayerMoodTimer;
 	uint8 field_rest[4];
-	uint8 field_4B3C;
+	bool m_bGenericSfx;
 
 	cPedComments m_sPedComments;
 	int32 m_nFireAudioEntity;
@@ -228,8 +231,8 @@ public:
 	~cAudioManager();
 
 	// getters
-	uint32 GetFrameCounter() const { return m_FrameCounter; }
-	float GetReflectionsDistance(int32 idx) const { return m_afReflectionsDistances[idx]; }
+	uint32 GetFrameCounter() const { return m_FrameCounter; } // done
+	float GetReflectionsDistance(int32 idx) const { return m_afReflectionsDistances[idx]; } // done
 	int32 GetRandomNumber(int32 idx) const { return m_anRandomTable[idx]; }
 	int32 GetRandomNumberInRange(int32 idx, int32 low, int32 high) const { return (m_anRandomTable[idx] % (high - low + 1)) + low; }
 	bool IsMissionAudioSamplePlaying(uint8 slot) const; // { return m_sMissionAudio.m_nPlayStatus == 1; }
@@ -246,7 +249,7 @@ public:
 	void CalculateDistance(bool &condition, float dist);                                                                   // done
 	bool CheckForAnAudioFileOnCD() const;                                                                                  // done
 	void ClearActiveSamples();                                                                                             // done
-	void ClearMissionAudio(uint8 slot);                                                                                    // done
+	void ClearMissionAudio(uint8 slot);                                                                                    // done (inlined in vc)
 	void ClearRequestedQueue();                                                                                            // done (inlined in vc)
 	uint32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2, float speedMultiplier) const; // done
 	int32 ComputePan(float, CVector *);                                                                                    // done
@@ -259,10 +262,104 @@ public:
 
 	// functions returning talk sfx,
 	// order from GetPedCommentSfx
-	// TODO: miami
+	uint32 GetPlayerTalkSfx(CPed *ped, int16 sound);
+	uint32 GetCopTalkSfx(CPed *ped, int16 sound);
+	uint32 GetSwatTalkSfx(CPed *ped, int16 sound);
+	uint32 GetFBITalkSfx(CPed *ped, int16 sound);
+	uint32 GetArmyTalkSfx(CPed *ped, int16 sound);
+	uint32 GetMedicTalkSfx(CPed *ped, int16 sound);
+	uint32 GetFiremanTalkSfx(CPed *ped, int16 sound);
+	uint32 GetDefaultTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFYSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFOSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHMYSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHMOSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFYRITalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFORITalkSfx(CPed *ped, int16 sound); 
+	uint32 GetHMYRITalkSfx(CPed *ped, int16 sound); 
+	uint32 GetHMORITalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFYBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFOBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetHMYBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetHMOBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFYBUTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFYMDTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFYCGTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFYPRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHFOTRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHMOTRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHMYAPTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHMOCATalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMODKTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMYCRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBFYSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBFOSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMYSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMOSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBFYRITalkSfx(CPed *ped, int16 sound);
+	uint32 GetBFORITalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMYRITalkSfx(CPed *ped, int16 sound);
+	uint32 GetBFYBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMYBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetBFOBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMOBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMYBUTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBFYPRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBFOTRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMOTRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMYPITalkSfx(CPed *ped, int16 sound);
+	uint32 GetBMYBBTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYCRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFOSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMOSTTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYRITalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFORITalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYRITalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMORITalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFOBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMOBETalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYCWTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYGOTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFOGOTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMOGOTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYLGTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYLGTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYBUTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYBUTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMOBUTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYPRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFOTRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMOTRTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYPITalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMOCATalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYJGTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYJGTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYSKTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWMYSKTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYSHTalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFOSHTalkSfx(CPed *ped, int16 sound);
+	uint32 GetJFOTOTalkSfx(CPed *ped, int16 sound);
+	uint32 GetJMOTOTalkSfx(CPed *ped, int16 sound);
+	uint32 GetCBTalkSfx(CPed *ped, int16 sound);
+	uint32 GetHNTalkSfx(CPed *ped, int16 sound);
+	uint32 GetSGTalkSfx(CPed *ped, int16 sound);
+	uint32 GetCLTalkSfx(CPed *ped, int16 sound);
+	uint32 GetGDTalkSfx(CPed *ped, int16 sound);
+	uint32 GetBKTalkSfx(CPed *ped, int16 sound);
+	uint32 GetPGTalkSfx(CPed *ped, int16 sound);
+	uint32 GetVICETalkSfx(CPed *ped, int16 sound, int16 model);
+	uint32 GetWFYG1TalkSfx(CPed *ped, int16 sound);
+	uint32 GetWFYG2TalkSfx(CPed *ped, int16 sound);
+
+	uint32 GetGenericMaleTalkSfx(CPed *ped, int16 sound);   // todo names (inlined in vc)
+	uint32 GetGenericFemaleTalkSfx(CPed *ped, int16 sound); // todo names (inlined in vc)
 	// end of functions returning talk sfx
 
-	void GenerateIntegerRandomNumberTable();
+	void GenerateIntegerRandomNumberTable(); // done
 	char *Get3DProviderName(uint8 id) const;
 	uint8 GetCDAudioDriveLetter() const;
 	int8 GetCurrent3DProviderIndex() const;
@@ -275,109 +372,110 @@ public:
 	uint8 GetMissionAudioLoadingStatus(uint8 slot) const; // done
 	int8 GetMissionScriptPoliceAudioPlayingStatus() const;
 	uint8 GetNum3DProvidersAvailable() const; // done
-	int32 GetPedCommentSfx(CPed *ped, int32 sound);
-	void GetPhrase(uint32 *phrase, uint32 *prevPhrase, uint32 sample, uint32 maxOffset) const;
-	float GetVehicleDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile, cTransmission *transmission, float velocityChange);
-	float GetVehicleNonDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile, cTransmission *transmission, float velocityChange);
+	uint32 GetPedCommentSfx(CPed *ped, int32 sound);
+	void GetPhrase(uint32 &phrase, uint32 &prevPhrase, uint32 sample, uint32 maxOffset) const;
+	float GetVehicleDriveWheelSkidValue(CVehicle* veh, tWheelState wheelState, float gasPedalAudio, cTransmission* transmission, float velocityChange); // done
+	float GetVehicleNonDriveWheelSkidValue(CVehicle* veh, tWheelState wheelState, cTransmission* transmission, float velocityChange);                   // done
 
 	bool HasAirBrakes(int32 model) const; // done
 
 	void Initialise(); // done
-	void InitialisePoliceRadio();
-	void InitialisePoliceRadioZones();
+	void InitialisePoliceRadio(); //done
+	void InitialisePoliceRadioZones(); //done
 	void InterrogateAudioEntities(); // done
-	bool IsAudioInitialised() const;
-	bool IsMissionAudioSampleFinished(uint8 slot);
+	bool IsAudioInitialised() const; // done
+	bool IsMissionAudioSampleFinished(uint8 slot); // done
 	bool IsMP3RadioChannelAvailable() const; // done
 
-	bool MissionScriptAudioUsesPoliceChannel(int32 soundMission) const;
+	bool MissionScriptAudioUsesPoliceChannel(int32 soundMission) const; //done
 
 	void PlayLoadedMissionAudio(uint8 slot);                // done
 	void PlayOneShot(int32 index, int16 sound, float vol);  // done
-	void PlaySuspectLastSeen(float x, float y, float z);    //
+	void PlaySuspectLastSeen(float x, float y, float z);    // done
 	void PlayerJustGotInCar() const;                        // done
 	void PlayerJustLeftCar() const;                         // done
-	void PostInitialiseGameSpecificSetup();                 //
+	void PostInitialiseGameSpecificSetup();                 // done
 	void PostTerminateGameSpecificShutdown();               // done
 	void PreInitialiseGameSpecificSetup() const;            // done
 	void PreloadMissionAudio(uint8 slot, Const char *name); // done
 	void PreTerminateGameSpecificShutdown();                // done
 	/// processX - main logic of adding new sounds
-	void ProcessActiveQueues(); //done
-	bool ProcessAirBrakes(cVehicleParams *params);
-	bool ProcessBoatEngine(cVehicleParams *params);
-	bool ProcessBoatMovingOverWater(cVehicleParams *params);
+	void ProcessActiveQueues();                              // done
+	bool ProcessAirBrakes(cVehicleParams& params);           // done
+	bool ProcessBoatEngine(cVehicleParams& params);          
+	bool ProcessBoatMovingOverWater(cVehicleParams& params); 
 #ifdef GTA_BRIDGE
-	void ProcessBridge();
-	void ProcessBridgeMotor();
-	void ProcessBridgeOneShots();
-	void ProcessBridgeWarning();
+	void ProcessBridge();         // done(bcs not exists in VC)
+	void ProcessBridgeMotor();    // done(bcs not exists in VC)
+	void ProcessBridgeOneShots(); // done(bcs not exists in VC)
+	void ProcessBridgeWarning();  // done(bcs not exists in VC)
 #endif
-	bool ProcessCarBombTick(cVehicleParams *params);                         // done
-	void ProcessCesna(cVehicleParams *params);                               // 
-	//void ProcessCrane();                                                   // 
-	bool ProcessEngineDamage(cVehicleParams *params);                        // done
+	bool ProcessCarBombTick(cVehicleParams& params);                         // done
+	void ProcessCarHeli(cVehicleParams& params);                             // done
+	void ProcessCesna(cVehicleParams& params);                               // 
+	//void ProcessCrane();                                                   // done(bcs not exists in VC)
+	bool ProcessEngineDamage(cVehicleParams& params);                        // done
 	void ProcessEntity(int32 sound);                                         // done
 	void ProcessExplosions(int32 explosion);                                 // done
 	void ProcessFireHydrant();                                               // done
-	void ProcessFires(int32 entity);                                         // 
+	void ProcessFires(int32 entity);                                         // done
 	void ProcessFrontEnd();                                                  // done
 	void ProcessGarages();                                                   // 
-	void ProcessCarHeli(cVehicleParams* params);                             // done
-	void ProcessVehicleFlatTyre(cVehicleParams* params);                     // done
-	void ProcessJumbo(cVehicleParams *);                                     // 
-	void ProcessJumboAccel(CPlane *plane);                                   // 
-	void ProcessJumboDecel(CPlane *plane);                                   // 
-	void ProcessJumboFlying();                                               // 
-	void ProcessJumboLanding(CPlane *plane);                                 // 
-	void ProcessJumboTakeOff(CPlane *plane);                               	 // 
-	void ProcessJumboTaxi();                                                 // 
+	void ProcessJumbo(cVehicleParams& params);                               // done
+	void ProcessJumboAccel(CPlane *plane);                                   // done
+	void ProcessJumboDecel(CPlane *plane);                                   // done
+	void ProcessJumboFlying();                                               // done
+	void ProcessJumboLanding(CPlane *plane);                                 // done
+	void ProcessJumboTakeOff(CPlane *plane);                               	 // done
+	void ProcessJumboTaxi();                                                 // done
 	void ProcessLoopingScriptObject(uint8 sound);                            // 
 	void ProcessMissionAudio();                                              // 
 	void ProcessMissionAudioSlot(uint8 slot);                                // 
-	void ProcessModelCarEngine(cVehicleParams *params);                      // 
+	void ProcessModelHeliVehicle(cVehicleParams& params);                    // done
+	void ProcessModelVehicle(cVehicleParams& params);                        // done
 	void ProcessOneShotScriptObject(uint8 sound);                            // 
-	void ProcessPed(CPhysical *ped);                                         // 
+	void ProcessPed(CPhysical *ped);                                         // done
 	void ProcessPedOneShots(cPedParams *params);                             // 
 	void ProcessPhysical(int32 id);                                          // done
-	void ProcessPlane(cVehicleParams *params);                               // done
-	void ProcessPlayersVehicleEngine(cVehicleParams *params, CVehicle* veh); // done
-	void ProcessProjectiles();                                               // 
-	void ProcessRainOnVehicle(cVehicleParams *params);                       // 
-	void ProcessReverb() const;                                              // 
-	bool ProcessReverseGear(cVehicleParams *params);                         // done
+	void ProcessPlane(cVehicleParams& params);                               // done
+	void ProcessPlayerMood();                                                // done
+	void ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh); // done
+	void ProcessProjectiles();                                               // done
+	void ProcessRainOnVehicle(cVehicleParams& params);                       // done
+	void ProcessReverb() const;                                              // done
+	bool ProcessReverseGear(cVehicleParams& params);                         // done
 	void ProcessScriptObject(int32 id);                                      // done
-	void ProcessSpecial();
+	void ProcessSpecial();                                                   // done
 #ifdef GTA_TRAIN
-	bool ProcessTrainNoise(cVehicleParams *params);
+	bool ProcessTrainNoise(cVehicleParams *params); //done(bcs not exists in VC)
 #endif
-	void ProcessVehicle(CVehicle *vehicle); //done, but need add model functions
-	bool ProcessVehicleDoors(cVehicleParams *params); //done
-	void ProcessVehicleEngine(cVehicleParams *params); //done
-	void UpdateGasPedalAudio(CVehicle* veh, int vehType); //done
-	void ProcessVehicleHorn(cVehicleParams *params);
-	void ProcessVehicleOneShots(cVehicleParams *params);
-	bool ProcessVehicleReverseWarning(cVehicleParams *params);
-	bool ProcessVehicleRoadNoise(cVehicleParams *params);
-	bool ProcessVehicleSirenOrAlarm(cVehicleParams *params);
-	bool ProcessVehicleSkidding(cVehicleParams *params);
-	void ProcessWaterCannon(int32);
-	void ProcessWeather(int32 id); //done
-	bool ProcessWetRoadNoise(cVehicleParams *params);
-	void ProcessEscalators(); //done
-	void ProcessExtraSounds(); //done
+	void ProcessVehicle(CVehicle *vehicle);                    // done
+	bool ProcessVehicleDoors(cVehicleParams& params);          // done
+	void ProcessVehicleEngine(cVehicleParams& params);         // done
+	void ProcessVehicleFlatTyre(cVehicleParams& params);                     // done
+	bool ProcessVehicleHorn(cVehicleParams& params);           // done
+	void ProcessVehicleOneShots(cVehicleParams& params);       // done
+	bool ProcessVehicleReverseWarning(cVehicleParams& params); // done
+	bool ProcessVehicleRoadNoise(cVehicleParams& params);      // done
+	bool ProcessVehicleSirenOrAlarm(cVehicleParams& params);   // done
+	bool ProcessVehicleSkidding(cVehicleParams& params);       // done
+	void ProcessWaterCannon(int32);                            // done
+	void ProcessWeather(int32 id);                             // done
+	bool ProcessWetRoadNoise(cVehicleParams& params);          // done
+	void ProcessEscalators();                                  // done
+	void ProcessExtraSounds();                                 // done
 
-	int32 RandomDisplacement(uint32 seed) const;
+	int32 RandomDisplacement(uint32 seed) const;                                                                                      // done
 	void ReacquireDigitalHandle() const;                                                                                              // done
 	void ReleaseDigitalHandle() const;                                                                                                // done
 	void ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface1, uint8 surface2, float collisionPower, float intensity2); // done
-	void ReportCrime(eCrimeType crime, const CVector &pos);                                                                                // done
-	void ResetAudioLogicTimers(uint32 timer);
-	void ResetPoliceRadio();
-	void ResetTimers(uint32 time);
+	void ReportCrime(eCrimeType crime, const CVector &pos);                                                                           // done
+	void ResetAudioLogicTimers(uint32 timer);                                                                                         // done
+	void ResetPoliceRadio();                                                                                                          // done
+	void ResetTimers(uint32 time);                                                                                                    // done
 
-	void Service();
-	void ServiceCollisions();
+	void Service(); //done
+	void ServiceCollisions(); //done
 	void ServicePoliceRadio();
 	void ServicePoliceRadioChannel(uint8 wantedLevel);
 	void ServiceSoundEffects();
@@ -402,16 +500,17 @@ public:
 	bool SetupJumboRumbleSound(uint8 emittingVol);
 	bool SetupJumboTaxiSound(uint8 vol);
 	bool SetupJumboWhineSound(uint8 emittingVol, uint32 freq);
-	void SetupPedComments(cPedParams *params, uint32 sound);
+	void SetupPedComments(cPedParams *params, uint32 sound); // done
 	void SetupSuspectLastSeenReport();
 
-	void Terminate();
-	void TranslateEntity(Const CVector *v1, CVector *v2) const;
+	void Terminate(); //done
+	void TranslateEntity(Const CVector *v1, CVector *v2) const; //done
 
-	void UpdateReflections();
-	bool UsesReverseWarning(int32 model) const; //done
-	bool UsesSiren(int32 model) const;
-	bool UsesSirenSwitching(int32 model) const;
+	void UpdateGasPedalAudio(CVehicle* veh, int vehType);      // done
+	void UpdateReflections();                              //done
+	bool UsesReverseWarning(int32 model) const;            //done
+	bool UsesSiren(cVehicleParams& params) const;          //done
+	bool UsesSirenSwitching(cVehicleParams& params) const; //done
 
 	CVehicle *FindVehicleOfPlayer(); //done
 	void SetPedTalkingStatus(CPed *ped, uint8 status);
