@@ -1411,6 +1411,20 @@ CPickups::DetonateMinesHitByGunShot(CVector *vec1, CVector *vec2)
 }
 
 void
+CPickups::RemoveUnnecessaryPickups(const CVector& center, float radius)
+{
+	for (int i = 0; i < NUMPICKUPS; i++) {
+		if (aPickUps[i].m_eType == PICKUP_ONCE_TIMEOUT || aPickUps[i].m_eType == PICKUP_MONEY) {
+			if ((aPickUps[i].m_vecPos - center).Magnitude() < radius) {
+				aPickUps[i].GetRidOfObjects();
+				aPickUps[i].m_bRemoved = true;
+				aPickUps[i].m_eType = PICKUP_NONE;
+			}
+		}
+	}
+}
+
+void
 CPickups::Load(uint8 *buf, uint32 size)
 {
 INITSAVEBUF
