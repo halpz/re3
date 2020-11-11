@@ -390,6 +390,7 @@ CStreaming::LoadCdDirectory(const char *dirname, int n)
 	assert(sizeof(direntry) == 32);
 	while(CFileMgr::Read(fd, (char*)&direntry, sizeof(direntry))){
 		dot = strchr(direntry.name, '.');
+		assert(dot);
 		if(dot) *dot = '\0';
 		if(direntry.size > (uint32)ms_streamingBufferSize)
 			ms_streamingBufferSize = direntry.size;

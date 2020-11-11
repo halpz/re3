@@ -294,32 +294,12 @@ RwTextureAddressMode RwTextureGetAddressingV(const RwTexture *texture);
 // TODO
 void _rwD3D8TexDictionaryEnableRasterFormatConversion(bool enable) { }
 
-static rw::Raster*
-ConvertTexRaster(rw::Raster *ras)
-{
-	using namespace rw;
-
-	if(ras->platform == rw::platform)
-		return ras;
-	// compatible platforms
-	if(ras->platform == PLATFORM_D3D8 && rw::platform == PLATFORM_D3D9 ||
-	   ras->platform == PLATFORM_D3D9 && rw::platform == PLATFORM_D3D8)
-		return ras;
-
-	Image *img = ras->toImage();
-	ras->destroy();
-	img->unpalettize();
-	ras = Raster::createFromImage(img);
-	img->destroy();
-	return ras;
-}
-
 // hack for reading native textures
 RwBool rwNativeTextureHackRead(RwStream *stream, RwTexture **tex, RwInt32 size)
 {
 	*tex = Texture::streamReadNative(stream);
 #ifdef LIBRW
-	(*tex)->raster = ConvertTexRaster((*tex)->raster);
+	(*tex)->raster = rw::Raster::convertTexToCurrentPlatform((*tex)->raster);
 #endif
 	return *tex != nil;
 }
@@ -796,6 +776,9 @@ RwBool       RpWorldPluginAttach(void) {
 	registerNativeDataPlugin();
 	registerAtomicRightsPlugin();
 	registerMaterialRightsPlugin();
+
+	// not sure if this goes here
+	rw::xbox::registerVertexFormatPlugin();
 	return true;
 }
 

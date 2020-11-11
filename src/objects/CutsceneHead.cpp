@@ -12,6 +12,10 @@
 #include "CutsceneHead.h"
 #include "CdStream.h"
 
+#ifdef GTA_PS2_STUFF
+// this is a total hack to switch between PC and PS2 code
+static bool lastLoadedSKA;
+#endif
 
 CCutsceneHead::CCutsceneHead(CObject *obj)
 {
@@ -87,6 +91,10 @@ CCutsceneHead::ProcessControl(void)
 	assert(RwObjectGetType(m_rwObject) == rpCLUMP);
 	atm = GetFirstAtomic((RpClump*)m_rwObject);
 	hier = RpSkinAtomicGetHAnimHierarchy(atm);
+#ifdef GTA_PS2_STUFF
+	// PS2 only plays anims in cutscene, PC always plays anims
+	if(!lastLoadedSKA || CCutsceneMgr::IsRunning())
+#endif
 	RpHAnimHierarchyAddAnimTime(hier, CTimer::GetTimeStepNonClipped()/50.0f);
 }
 
@@ -168,6 +176,10 @@ CCutsceneHead::PlayAnimation(const char *animName)
 	uint32 offset, size;
 	RwStream *stream;
 
+#ifdef GTA_PS2_STUFF
+	lastLoadedSKA = false;
+#endif
+
 	assert(RwObjectGetType(m_rwObject) == rpCLUMP);
 	atm = GetFirstAtomic((RpClump*)m_rwObject);
 	hier = RpSkinAtomicGetHAnimHierarchy(atm);
@@ -191,4 +203,29 @@ CCutsceneHead::PlayAnimation(const char *animName)
 
 		RwStreamClose(stream, nil);
 	}
+#ifdef GTA_PS2_STUFF
+#ifdef LIBRW
+	else{
+		sprintf(gString, "%s.ska", animName);
+
+		if(CCutsceneMgr::ms_pCutsceneDir->FindItem(gString, offset, size)){
+			stream = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, "ANIM\\CUTS.IMG");
+			assert(stream);
+
+			CStreaming::MakeSpaceFor(size * CDSTREAM_SECTOR_SIZE);
+			CStreaming::ImGonnaUseStreamingMemory();
+
+			RwStreamSkip(stream, offset*2048);
+			anim = rw::Animation::streamReadLegacy(stream);
+			RpHAnimHierarchySetCurrentAnim(hier, anim);
+
+			CStreaming::IHaveUsedStreamingMemory();
+
+			RwStreamClose(stream, nil);
+
+			lastLoadedSKA = true;
+		}
+	}
+#endif
+#endif
 }

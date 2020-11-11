@@ -89,7 +89,11 @@ RwRGBA gColourTop;
 bool gameAlreadyInitialised;
 
 float NumberOfChunksLoaded;
+#ifdef GTA_PS2
+#define TOTALNUMCHUNKS 48.0f
+#else
 #define TOTALNUMCHUNKS 73.0f
+#endif
 
 bool g_SlowMode = false;
 char version_name[64];
