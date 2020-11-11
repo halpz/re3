@@ -91,7 +91,7 @@ void RestoreDefGraphics(int8 action) {
 		FrontEndMenuManager.m_nPrefsMSAALevel = FrontEndMenuManager.m_nDisplayMSAALevel = 0;
 	#endif
 	#ifdef NO_ISLAND_LOADING
-	    	if (FrontEndMenuManager.m_bGameNotLoaded) {
+	    	if (!FrontEndMenuManager.m_bGameNotLoaded) {
 	    		FrontEndMenuManager.m_PrefsIslandLoading = FrontEndMenuManager.ISLAND_LOADING_LOW;
 			CCollision::bAlreadyLoaded = false;
 			CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
