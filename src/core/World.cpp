@@ -1946,6 +1946,7 @@ CWorld::SetPedsChoking(float x, float y, float z, float radius, CEntity* reason)
 	int32 poolSize = CPools::GetPedPool()->GetSize();
 	for (int32 i = poolSize - 1; i >= 0; i--) {
 		CPed* pPed = CPools::GetPedPool()->GetSlot(i);
+		// suspicious copypaste
 		if (pPed && pPed->m_nPedState != PED_DEAD && !pPed->bInVehicle && !pPed->m_pFire && !pPed->bFireProof && pPed->CharCreatedBy != MISSION_CHAR) {
 			if (Abs(pPed->GetPosition().z - z) < 5.0f && Abs(pPed->GetPosition().x - x) < radius &&
 				Abs(pPed->GetPosition().y - y) < radius) {
