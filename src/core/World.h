@@ -77,7 +77,7 @@ public:
 	static void Remove(CEntity *entity);
 	static void Add(CEntity *entity);
 
-	static CSector *GetSector(int x, int y) { if (x > NUMSECTORS_X || y > NUMSECTORS_Y) return &ms_aSectors[0][0]; return &ms_aSectors[y][x]; }
+	static CSector *GetSector(int x, int y) { if (x > NUMSECTORS_X - 1 || y > NUMSECTORS_Y - 1) return &ms_aSectors[0][0]; return &ms_aSectors[y][x]; }
 	static CPtrList &GetBigBuildingList(eLevelName i) { return ms_bigBuildingsList[i]; }
 	static CPtrList &GetMovingEntityList(void) { return ms_listMovingEntityPtrs; }
 	static uint16 GetCurrentScanCode(void) { return ms_nCurrentScanCode; }
