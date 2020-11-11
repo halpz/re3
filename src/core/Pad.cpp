@@ -3222,6 +3222,9 @@ int16 CPad::SniperModeLookUpDown(void)
 	int16 axis = NewState.LeftStickY;
 	int16 dpad;
 
+#ifdef FIX_BUGS
+	axis = -axis;
+#endif
 	if (CPad::bInvertLook4Pad) {
 		axis = -axis;
 		dpad = (NewState.DPadDown - NewState.DPadUp) / 2;
@@ -3257,7 +3260,9 @@ int16 CPad::LookAroundLeftRight(void)
 int16 CPad::LookAroundUpDown(void)
 {
 	int16 axis = GetPad(0)->NewState.RightStickY;
-
+#ifdef FIX_BUGS
+	axis = -axis;
+#endif
 	if (CPad::bInvertLook4Pad)
 		axis = -axis;
 
@@ -3289,7 +3294,7 @@ void CPad::PrintErrorMessage(void)
 		CFont::SetScale(SCREEN_SCALE_X(0.85f), SCREEN_SCALE_Y(1.0f));
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-		CFont::SetCentreSize(SCREEN_STRETCH_FROM_RIGHT(50.0f));
+		CFont::SetCentreSize(SCREEN_SCALE_X(590.0f));
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
 		CFont::SetColor(CRGBA(255, 255, 200, 200));
@@ -3307,7 +3312,7 @@ void CPad::PrintErrorMessage(void)
 		CFont::SetScale(SCREEN_SCALE_X(0.85f), SCREEN_SCALE_Y(1.0f));
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-		CFont::SetCentreSize(SCREEN_STRETCH_FROM_RIGHT(50.0f));
+		CFont::SetCentreSize(SCREEN_SCALE_X(590.0f));
 		CFont::SetCentreOn();
 		CFont::SetPropOn();
 		CFont::SetColor(CRGBA(255, 255, 200, 200));

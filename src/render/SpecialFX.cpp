@@ -182,7 +182,7 @@ CSpecialFX::Render2DFXs(void)
 		CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-		CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(20.0f));
+		CFont::SetCentreSize(SCREEN_SCALE_X(620.0f)); // unused
 		CFont::SetCentreOff();
 		CFont::SetPropOn();
 		CFont::SetColor(CRGBA(0, 255, 0, 200));
@@ -207,7 +207,7 @@ CSpecialFX::Render2DFXs(void)
 		CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-		CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(20.0f));
+		CFont::SetCentreSize(SCREEN_SCALE_X(620.0f)); // unused
 		CFont::SetCentreOff();
 		CFont::SetPropOn();
 		CFont::SetColor(CRGBA(100, 100, 100, 200));

@@ -1,4 +1,4 @@
-#include "common.h"
+﻿#include "common.h"
 
 #include "main.h"
 #include "General.h"
@@ -146,7 +146,7 @@ CBoat::ProcessControl(void)
 		    AutoPilot.m_nCarMission == MISSION_BLOCKPLAYER_CLOSE || 
 		    AutoPilot.m_nCarMission == MISSION_ATTACKPLAYER) &&
 		   CTimer::GetTimeInMilliseconds() > m_nPoliceShoutTimer){
-			DMAudio.PlayOneShot(m_audioEntityId, SOUND_115, 0.0f);
+			DMAudio.PlayOneShot(m_audioEntityId, SOUND_PED_VCPA_PLAYER_FOUND, 0.0f);
 			m_nPoliceShoutTimer = CTimer::GetTimeInMilliseconds() + 4500 + (CGeneral::GetRandomNumber()&0xFFF);
 		}
 	}

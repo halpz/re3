@@ -967,7 +967,7 @@ CGlass::BreakGlassPhysically(CVector pos, float radius)
 					for ( int32 j = 0; j < col->numTriangles; j++ )
 					{
 						if ( CCollision::TestSphereTriangle(sphere,
-							col->vertices, col->triangles[i], col->trianglePlanes[i]) )
+							col->vertices, col->triangles[j], col->trianglePlanes[j]) )
 						{
 							hit = true;
 						}

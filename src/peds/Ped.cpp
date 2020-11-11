@@ -522,7 +522,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_delayedSoundID = -1;
 	m_delayedSoundTimer = 0;
 	CPopulation::UpdatePedCount((ePedType)m_nPedType, false);
-	m_lastComment = -1;
+	m_lastComment = UINT32_MAX;
 }
 
 // --MIAMI: Done

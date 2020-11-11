@@ -369,7 +369,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 			if (weaponType < WEAPONTYPE_TOTALWEAPONS && CDarkel::FrenzyOnGoing()) {
 				isPickupTouched = false;
 				m_bWasControlMessageShown = false;
-			} else if (weaponType != WEAPONTYPE_UNARMED) {
+			} else if (weaponType < WEAPONTYPE_TOTALWEAPONS && weaponType != WEAPONTYPE_UNARMED) {
 				uint32 slot = CWeaponInfo::GetWeaponInfo(weaponType)->m_nWeaponSlot;
 				eWeaponType plrWeaponSlot = FindPlayerPed()->GetWeapon(slot).m_eWeaponType;
 				if (plrWeaponSlot != weaponType) {
@@ -508,7 +508,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 				result = true;
 				Remove();
 				DMAudio.PlayFrontEndSound(SOUND_PICKUP_HIDDEN_PACKAGE, 0);
-				return true;
+				break;
 			case PICKUP_MONEY:
 				CWorld::Players[playerId].m_nMoney += m_nQuantity;
 				sprintf(gString, "$%d", m_nQuantity);
@@ -518,12 +518,13 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 				result = true;
 				Remove();
 				DMAudio.PlayFrontEndSound(SOUND_PICKUP_MONEY, 0);
-				return true;
+				player->Say(SOUND_PED_MUGGING);
+				break;
 			case PICKUP_ASSET_REVENUE:
 				CWorld::Players[CWorld::PlayerInFocus].m_nMoney += m_fRevenue;
 				m_fRevenue = 0.0f;
 				DMAudio.PlayFrontEndSound(SOUND_PICKUP_MONEY, 0);
-				return false;
+				break;
 			case PICKUP_PROPERTY_LOCKED:
 				if (!m_bWasControlMessageShown) {
 					m_bWasControlMessageShown = true;

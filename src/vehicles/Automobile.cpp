@@ -1494,7 +1494,7 @@ CAutomobile::ProcessControl(void)
 				blade = Multiply3x3(blade, GetMatrix());
 				camDist /= Max(Sqrt(distSq), 0.01f);
 				if(Abs(DotProduct(camDist, blade)) > 0.95f){
-					DMAudio.PlayOneShot(m_audioEntityId, SOUND_31, 0.0f);
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_HELI_BLADE, 0.0f);
 					m_fPropellerRotation = m_aWheelRotation[1];
 				}
 			}
