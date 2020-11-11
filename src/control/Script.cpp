@@ -11232,7 +11232,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		script_assert(pPed);
-		pPed->bNoCriticalHits = (ScriptParams[0] == 0);
+		pPed->bNoCriticalHits = (ScriptParams[1] == 0);
 		return 0;
 	}
 	/*
