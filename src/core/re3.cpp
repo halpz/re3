@@ -422,6 +422,30 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Render", "Frame limiter", &FrontEndMenuManager.m_PrefsFrameLimiter, nil);
 		DebugMenuAddVarBool8("Render", "VSynch", &FrontEndMenuManager.m_PrefsVsync, nil);
 		DebugMenuAddVar("Render", "Max FPS", &RsGlobal.maxFPS, nil, 1, 1, 1000, nil);
+#ifdef NEW_RENDERER
+		DebugMenuAddVarBool8("Render", "new renderer", &gbNewRenderer, nil);
+extern bool gbRenderRoads;
+extern bool gbRenderEverythingBarRoads;
+extern bool gbRenderFadingInUnderwaterEntities;
+extern bool gbRenderFadingInEntities;
+extern bool gbRenderWater;
+extern bool gbRenderBoats;
+extern bool gbRenderVehicles;
+extern bool gbRenderWorld0;
+extern bool gbRenderWorld1;
+extern bool gbRenderWorld2;
+		DebugMenuAddVarBool8("Render", "gbRenderRoads", &gbRenderRoads, nil);
+		DebugMenuAddVarBool8("Render", "gbRenderEverythingBarRoads", &gbRenderEverythingBarRoads, nil);
+		DebugMenuAddVarBool8("Render", "gbRenderFadingInUnderwaterEntities", &gbRenderFadingInUnderwaterEntities, nil);
+		DebugMenuAddVarBool8("Render", "gbRenderFadingInEntities", &gbRenderFadingInEntities, nil);
+		DebugMenuAddVarBool8("Render", "gbRenderWater", &gbRenderWater, nil);
+		DebugMenuAddVarBool8("Render", "gbRenderBoats", &gbRenderBoats, nil);
+		DebugMenuAddVarBool8("Render", "gbRenderVehicles", &gbRenderVehicles, nil);
+		DebugMenuAddVarBool8("Render", "gbRenderWorld0", &gbRenderWorld0, nil);
+		DebugMenuAddVarBool8("Render", "gbRenderWorld1", &gbRenderWorld1, nil);
+		DebugMenuAddVarBool8("Render", "gbRenderWorld2", &gbRenderWorld2, nil);
+#endif
+
 #ifdef EXTENDED_COLOURFILTER
 		static const char *filternames[] = { "None", "Simple", "Normal", "Mobile" };
 		e = DebugMenuAddVar("Render", "Colourfilter", &CPostFX::EffectSwitch, nil, 1, CPostFX::POSTFX_OFF, CPostFX::POSTFX_MOBILE, filternames);

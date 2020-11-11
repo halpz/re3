@@ -24,6 +24,9 @@ public:
 	static CLinkList<AlphaObjectInfo> m_alphaBoatAtomicList;
 	static CLinkList<AlphaObjectInfo> m_alphaEntityList;
 	static CLinkList<AlphaObjectInfo> m_alphaUnderwaterEntityList;
+#ifdef NEW_RENDERER
+	static CLinkList<AlphaObjectInfo> m_alphaBuildingList;
+#endif
 	static RwCamera *ms_pCamera;
 	static RwV3d *ms_pCameraPosn;
 	static float ms_cullCompsDist;
