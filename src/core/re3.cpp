@@ -86,7 +86,8 @@ CustomFrontendOptionsPopulate(void)
 linb::ini cfg;
 int CheckAndReadIniInt(const char *cat, const char *key, int original)
 {
-	const char *value = (cfg.get(cat, key, "").c_str());
+	std::string strval = cfg.get(cat, key, "");
+	const char *value = strval.c_str();
 	if (value && value[0] != '\0')
 		return atoi(value);
 
@@ -95,7 +96,8 @@ int CheckAndReadIniInt(const char *cat, const char *key, int original)
 
 float CheckAndReadIniFloat(const char *cat, const char *key, float original)
 {
-	const char *value = (cfg.get(cat, key, "").c_str());
+	std::string strval = cfg.get(cat, key, "");
+	const char *value = strval.c_str();
 	if (value && value[0] != '\0')
 		return atof(value);
 
