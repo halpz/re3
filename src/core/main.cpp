@@ -890,6 +890,8 @@ if(gbRenderWorld1)
 if(gbRenderRoads)
 	CRenderer::RenderRoads();
 
+	CRenderer::RenderPeds();
+
 	// not sure where to put these since LCS has no underwater entities
 if(gbRenderBoats)
 	CRenderer::RenderBoats();
@@ -923,8 +925,6 @@ bool FredIsInFirstPersonCam(void) { return true; }	// this seems to give the bes
 void
 RenderEffects_new(void)
 {
-	CRenderer::RenderPeds();
-
 	CShadows::RenderStaticShadows();
 	// CRenderer::GenerateEnvironmentMap
 	CShadows::RenderStoredShadows();
