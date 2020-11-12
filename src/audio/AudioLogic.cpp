@@ -1300,10 +1300,10 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams& params)
 	float relativeChange;
 	float modificator;
 	float traction;
-	bool pizzaFaggBool;
+	bool isMoped;
 	bool caddyBool;
 
-	pizzaFaggBool = false;
+	isMoped = false;
 	caddyBool = false;
 	traction = 0.0f;
 	if (params.m_fDistance >= SQR(SOUND_INTENSITY))
@@ -1326,7 +1326,7 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams& params)
 		switch (veh->m_modelIndex) {
 		case MI_PIZZABOY:
 		case MI_FAGGIO:
-			pizzaFaggBool = true;
+			isMoped = true;
 			currentGear = transmission->nNumberOfGears;
 			break;
 		case MI_CADDY:
@@ -1358,8 +1358,8 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams& params)
 		}
 
 		if (wheelsOnGround != 0) {
-			if (!veh->bIsHandbrakeOn || pizzaFaggBool && caddyBool) { //mb bug, bcs it's can't be true together
-				if (veh->GetStatus() == STATUS_SIMPLE || pizzaFaggBool || caddyBool) {
+			if (!veh->bIsHandbrakeOn || isMoped && caddyBool) { //mb bug, bcs it's can't be true together
+				if (veh->GetStatus() == STATUS_SIMPLE || isMoped || caddyBool) {
 					traction = 0.0f;
 				} else {
 					switch (transmission->nDriveType) {
@@ -1407,7 +1407,7 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams& params)
 				relativeChange = 0.0f;
 				modificator = 0.0f;
 			} else {
-				if (!pizzaFaggBool && !caddyBool) {
+				if (!isMoped && !caddyBool) {
 					if (currentGear != 0) {
 						relativeGearChange = Min(1.0f,
 							params.m_fVelocityChange - transmission->Gears[currentGear].fShiftDownVelocity) / transmission->fMaxVelocity * 2.5f;
@@ -1669,7 +1669,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 	bool noGearBox;
 	bool stuckInSand;
 	bool processedAccelSampleStopped;
-	bool PizzaFaggBool;
+	bool isMoped;
 
 	static uint32 gearSoundStartTime = CTimer::GetTimeInMilliseconds();
 	static int32 nCruising = 0;
@@ -1680,7 +1680,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 	static bool bAccelSampleStopped = true;
 
 	lostTraction = false;
-	PizzaFaggBool = params.m_pVehicle->m_modelIndex == MI_PIZZABOY || params.m_pVehicle->m_modelIndex == MI_FAGGIO;
+	isMoped = params.m_pVehicle->m_modelIndex == MI_PIZZABOY || params.m_pVehicle->m_modelIndex == MI_FAGGIO;
 	processedAccelSampleStopped = false;
 	if (bPlayerJustEnteredCar) {
 		bAccelSampleStopped = true;
@@ -1699,7 +1699,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 		brakeState = Pads[0].GetBrake();
 	}
 	channelUsed = SampleManager.GetChannelUsedFlag(m_nActiveSamples);
-	if (PizzaFaggBool) {
+	if (isMoped) {
 		CurrentPretendGear = params.m_pTransmission->nNumberOfGears;
 		currentGear = CurrentPretendGear;
 		if (params.m_pVehicle->bIsHandbrakeOn) {
@@ -1735,7 +1735,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 		debug(" ** AUDIOLOG: Unrecognised vehicle type %d in ProcessVehicleEngine() * \n", params.m_VehicleType);
 		return;
 	}
-	if (!PizzaFaggBool) {
+	if (!isMoped) {
 		switch (params.m_pTransmission->nDriveType) {
 		case '4':
 			if (params.m_VehicleType != VEHICLE_TYPE_BIKE) {
@@ -1882,7 +1882,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 				|| params.m_pVehicle->bIsHandbrakeOn
 				|| lostTraction
 				|| params.m_fVelocityChange < 0.01f && *gasPedalAudioPtr > 0.2f) {
-				if (PizzaFaggBool) {
+				if (isMoped) {
 					gasPedalAudio = 0.0f;
 				} else {
 					*gasPedalAudioPtr *= 0.6f;
@@ -2005,7 +2005,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 					params.m_pVehicle->bAudioChangingGear = true;
 					bAccelSampleStopped = true;
 					SampleManager.StopChannel(m_nActiveSamples);
-					if (PizzaFaggBool || accelerateState >= 150 && wheelsOnGround && brakeState <= 0 && !params.m_pVehicle->bIsHandbrakeOn
+					if (isMoped || accelerateState >= 150 && wheelsOnGround && brakeState <= 0 && !params.m_pVehicle->bIsHandbrakeOn
 						&& !lostTraction && currentGear >= params.m_pTransmission->nNumberOfGears - 1) {
 						if (accelerateState >= 220 && params.m_fVelocityChange + 0.001f >= velocityChangeForAudio) {
 							if (nCruising < 800)
@@ -2023,10 +2023,9 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 				}
 			}
 		} else {
-			params.m_pVehicle->bAudioChangingGear = true;
 			bAccelSampleStopped = true;
 			SampleManager.StopChannel(m_nActiveSamples);
-			if (PizzaFaggBool || accelerateState >= 150 && wheelsOnGround && brakeState <= 0 && !params.m_pVehicle->bIsHandbrakeOn
+			if (isMoped || accelerateState >= 150 && wheelsOnGround && brakeState <= 0 && !params.m_pVehicle->bIsHandbrakeOn
 				&& !lostTraction && currentGear >= params.m_pTransmission->nNumberOfGears - 1) {
 				if (accelerateState >= 220 && params.m_fVelocityChange + 0.001f >= velocityChangeForAudio) {
 					if (nCruising < 800)

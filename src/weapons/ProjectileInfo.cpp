@@ -296,10 +296,8 @@ CProjectileInfo::Update()
 			CParticle::AddParticle(PARTICLE_TEARGAS, projectilePos, CVector(-0.2f, tearGasOffset, 0.0f), 0, 0.0f, 0, 0, 0, 0);
 			CParticle::AddParticle(PARTICLE_TEARGAS, projectilePos, CVector(tearGasOffset, tearGasOffset, 0.0f), 0, 0.0f, 0, 0, 0, 0);
 
-			// TODO(Miami): SetPedsChoking
-			/*if ( CTimer::GetTimeInMilliseconds() & 0x200 )
+			if ( CTimer::GetTimeInMilliseconds() & 0x200 )
 				CWorld::SetPedsChoking(projectilePos.x, projectilePos.y, projectilePos.z, 6.0f, gaProjectileInfo[i].m_pSource);
-			*/
 		}
 
 		if (gaProjectileInfo[i].m_eWeaponType == WEAPONTYPE_ROCKET) {
