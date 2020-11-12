@@ -6618,7 +6618,6 @@ CPed::SetWaitState(eWaitState state, void *time)
 			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + 5000;
 			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_TURN_180, 4.0f);
 			animAssoc->SetFinishCallback(FinishedWaitCB, this);
-			animAssoc->SetDeleteCallback(RestoreHeadingRateCB, this);
 			break;
 		case WAITSTATE_SURPRISE:
 			m_headingRate = 0.0f;
@@ -8545,7 +8544,6 @@ CPed::Wait(void)
 		case WAITSTATE_TURN180:
 			if (CTimer::GetTimeInMilliseconds() > m_nWaitTimer) {
 				ClearWaitState();
-				SetMoveState(PEDMOVE_WALK);
 				m_fRotationCur = m_fRotationCur + PI;
 				if (m_nPedState == PED_INVESTIGATE)
 					ClearInvestigateEvent();
