@@ -532,14 +532,14 @@ CTheZones::SetZonePedInfo(uint16 zoneid, uint8 day, int16 pedDensity,
 	info->gangPedThreshold[8] = gang8Density;
 
 	info->gangPedThreshold[0] += info->copPedThreshold;
-	info->gangPedThreshold[1] = info->gangPedThreshold[0];
-	info->gangPedThreshold[2] = info->gangPedThreshold[1];
-	info->gangPedThreshold[3] = info->gangPedThreshold[2];
-	info->gangPedThreshold[4] = info->gangPedThreshold[3];
-	info->gangPedThreshold[5] = info->gangPedThreshold[4];
-	info->gangPedThreshold[6] = info->gangPedThreshold[5];
-	info->gangPedThreshold[7] = info->gangPedThreshold[6];
-	info->gangPedThreshold[8] = info->gangPedThreshold[7];
+	info->gangPedThreshold[1] += info->gangPedThreshold[0];
+	info->gangPedThreshold[2] += info->gangPedThreshold[1];
+	info->gangPedThreshold[3] += info->gangPedThreshold[2];
+	info->gangPedThreshold[4] += info->gangPedThreshold[3];
+	info->gangPedThreshold[5] += info->gangPedThreshold[4];
+	info->gangPedThreshold[6] += info->gangPedThreshold[5];
+	info->gangPedThreshold[7] += info->gangPedThreshold[6];
+	info->gangPedThreshold[8] += info->gangPedThreshold[7];
 }
 
 //--MIAMI: unused
