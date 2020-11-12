@@ -15,6 +15,7 @@
 #include "Object.h"
 #include "ParticleObject.h"
 #include "Ped.h"
+#include "Pickups.h"
 #include "PlayerPed.h"
 #include "Population.h"
 #include "ProjectileInfo.h"
@@ -28,6 +29,7 @@
 #include "WaterLevel.h"
 #include "World.h"
 
+// --MIAMI: file done
 
 #define OBJECT_REPOSITION_OFFSET_Z 2.0f
 
@@ -157,6 +159,7 @@ CWorld::ClearExcitingStuffFromArea(const CVector &pos, float radius, bool bRemov
 		CProjectileInfo::RemoveAllProjectiles();
 		CShadows::TidyUpShadows();
 	}
+	CPickups::RemoveUnnecessaryPickups(pos, radius);
 }
 
 bool
@@ -333,11 +336,24 @@ CWorld::ProcessLineOfSightSectorList(CPtrList &list, const CColLine &line, CColP
 {
 	bool deadPeds = false;
 	bool bikers = false;
+	bool carTyres = false;
 	float mindist = dist;
 	CPtrNode *node;
 	CEntity *e;
 	CColModel *colmodel;
+	CColModel tyreCol;
+	CColSphere tyreSpheres[6];
+	CColPoint tyreColPoint;
+	float tyreDist;
 
+	if(bIncludeCarTyres && list.first && ((CEntity*)list.first->item)->IsVehicle()){
+		carTyres = true;
+		tyreCol.numTriangles = 0;
+		tyreCol.numBoxes = 0;
+		tyreCol.numLines = 0;
+		tyreCol.spheres = tyreSpheres;
+		tyreCol.numSpheres = ARRAY_SIZE(tyreSpheres);
+	}
 	if(list.first && bIncludeDeadPeds && ((CEntity *)list.first->item)->IsPed()) deadPeds = true;
 	if(list.first && bIncludeBikers && ((CEntity *)list.first->item)->IsPed()) bikers = true;
 
@@ -346,10 +362,11 @@ CWorld::ProcessLineOfSightSectorList(CPtrList &list, const CColLine &line, CColP
 		if(e->m_scanCode != GetCurrentScanCode() && e != pIgnoreEntity && (e->bUsesCollision || deadPeds || bikers) &&
 		   !(ignoreSomeObjects && CameraToIgnoreThisObject(e))) {
 			colmodel = nil;
+			tyreDist = mindist;
 			e->m_scanCode = GetCurrentScanCode();
 
 			if(e->IsPed()) {
-				if(e->bUsesCollision || deadPeds && ((CPed *)e)->m_nPedState == PED_DEAD || bikers) {
+				if(e->bUsesCollision || deadPeds && ((CPed *)e)->m_nPedState == PED_DEAD || bikers && ((CPed*)e)->InVehicle() && (((CPed*)e)->m_pMyVehicle->IsBike() || ((CPed*)e)->m_pMyVehicle->IsBoat())) {
 					colmodel = ((CPedModelInfo *)CModelInfo::GetModelInfo(e->GetModelIndex()))->AnimatePedColModelSkinned(e->GetClump());
 				} else
 					colmodel = nil;
@@ -360,8 +377,18 @@ CWorld::ProcessLineOfSightSectorList(CPtrList &list, const CColLine &line, CColP
 			if(colmodel && CCollision::ProcessLineOfSight(line, e->GetMatrix(), *colmodel, point, dist,
 			                                              ignoreSeeThrough, ignoreShootThrough))
 				entity = e;
+			if(carTyres && ((CVehicle*)e)->SetUpWheelColModel(&tyreCol) && CCollision::ProcessLineOfSight(line, e->GetMatrix(), tyreCol, tyreColPoint, tyreDist, false, ignoreShootThrough)){
+				float dp1 = DotProduct(line.p1 - line.p0, e->GetRight());
+				float dp2 = DotProduct(point.point - e->GetPosition(), e->GetRight());
+				if(tyreDist < mindist || dp1 < -0.85f && dp2 > 0.0f || dp1 > 0.85f && dp2 < 0.0f){
+					mindist = tyreDist;
+					point = tyreColPoint;
+					entity = e;
+				}
+			}
 		}
 	}
+	tyreCol.spheres = nil;
 
 	if(mindist < dist) {
 		dist = mindist;
@@ -695,18 +722,10 @@ CWorld::FindObjectsInRange(Const CVector &centre, float radius, bool ignoreZ, in
 	if(minY <= 0) minY = 0;
 
 	int maxX = GetSectorIndexX(centre.x + radius);
-#ifdef FIX_BUGS
 	if(maxX >= NUMSECTORS_X) maxX = NUMSECTORS_X - 1;
-#else
-	if(maxX >= NUMSECTORS_X) maxX = NUMSECTORS_X;
-#endif
 
 	int maxY = GetSectorIndexY(centre.y + radius);
-#ifdef FIX_BUGS
 	if(maxY >= NUMSECTORS_Y) maxY = NUMSECTORS_Y - 1;
-#else
-	if(maxY >= NUMSECTORS_Y) maxY = NUMSECTORS_Y;
-#endif
 
 	AdvanceCurrentScanCode();
 
@@ -781,13 +800,18 @@ CWorld::FindObjectsOfTypeInRange(uint32 modelId, const CVector &position, float 
 	*nEntitiesFound = 0;
 	const CVector2D vecSectorStartPos(position.x - radius, position.y - radius);
 	const CVector2D vecSectorEndPos(position.x + radius, position.y + radius);
-	const int32 nStartX = Max(CWorld::GetSectorIndexX(vecSectorStartPos.x), 0);
-	const int32 nStartY = Max(CWorld::GetSectorIndexY(vecSectorStartPos.y), 0);
-	const int32 nEndX = Min(CWorld::GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X - 1);
-	const int32 nEndY = Min(CWorld::GetSectorIndexY(vecSectorEndPos.y), NUMSECTORS_Y - 1);
+	const int32 nStartX = Max(GetSectorIndexX(vecSectorStartPos.x), 0);
+	const int32 nStartY = Max(GetSectorIndexY(vecSectorStartPos.y), 0);
+#ifdef FIX_BUGS
+	const int32 nEndX = Min(GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X - 1);
+	const int32 nEndY = Min(GetSectorIndexY(vecSectorEndPos.y), NUMSECTORS_Y - 1);
+#else
+	const int32 nEndX = Min(GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X);
+	const int32 nEndY = Min(GetSectorIndexY(vecSectorEndPos.y), NUMSECTORS_Y);
+#endif
 	for(int32 y = nStartY; y <= nEndY; y++) {
 		for(int32 x = nStartX; x <= nEndX; x++) {
-			CSector *pSector = CWorld::GetSector(x, y);
+			CSector *pSector = GetSector(x, y);
 			if(bBuildings) {
 				CWorld::FindObjectsOfTypeInRangeSectorList(
 				    modelId, pSector->m_lists[ENTITYLIST_BUILDINGS], position, radius, bCheck2DOnly,
@@ -1050,13 +1074,18 @@ CWorld::FindObjectsKindaColliding(const CVector &position, float radius, bool bC
 	*nCollidingEntities = 0;
 	const CVector2D vecSectorStartPos(position.x - radius, position.y - radius);
 	const CVector2D vecSectorEndPos(position.x + radius, position.y + radius);
-	const int32 nStartX = Max(CWorld::GetSectorIndexX(vecSectorStartPos.x), 0);
-	const int32 nStartY = Max(CWorld::GetSectorIndexY(vecSectorStartPos.y), 0);
-	const int32 nEndX = Min(CWorld::GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X - 1);
-	const int32 nEndY = Min(CWorld::GetSectorIndexY(vecSectorEndPos.y), NUMSECTORS_Y - 1);
+	const int32 nStartX = Max(GetSectorIndexX(vecSectorStartPos.x), 0);
+	const int32 nStartY = Max(GetSectorIndexY(vecSectorStartPos.y), 0);
+#ifdef FIX_BUGS
+	const int32 nEndX = Min(GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X - 1);
+	const int32 nEndY = Min(GetSectorIndexY(vecSectorEndPos.y), NUMSECTORS_Y - 1);
+#else
+	const int32 nEndX = Min(GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X);
+	const int32 nEndY = Min(GetSectorIndexY(vecSectorEndPos.y), NUMSECTORS_Y);
+#endif
 	for(int32 y = nStartY; y <= nEndY; y++) {
 		for(int32 x = nStartX; x <= nEndX; x++) {
-			CSector *pSector = CWorld::GetSector(x, y);
+			CSector *pSector = GetSector(x, y);
 			if(bBuildings) {
 				CWorld::FindObjectsKindaCollidingSectorList(
 				    pSector->m_lists[ENTITYLIST_BUILDINGS], position, radius, bCheck2DOnly,
@@ -1129,13 +1158,18 @@ CWorld::FindObjectsIntersectingCube(const CVector &vecStartPos, const CVector &v
 {
 	CWorld::AdvanceCurrentScanCode();
 	*nIntersecting = 0;
-	const int32 nStartX = Max(CWorld::GetSectorIndexX(vecStartPos.x), 0);
-	const int32 nStartY = Max(CWorld::GetSectorIndexY(vecStartPos.y), 0);
-	const int32 nEndX = Min(CWorld::GetSectorIndexX(vecEndPos.x), NUMSECTORS_X - 1);
-	const int32 nEndY = Min(CWorld::GetSectorIndexY(vecEndPos.y), NUMSECTORS_Y - 1);
+	const int32 nStartX = Max(GetSectorIndexX(vecStartPos.x), 0);
+	const int32 nStartY = Max(GetSectorIndexY(vecStartPos.y), 0);
+#ifdef FIX_BUGS
+	const int32 nEndX = Min(GetSectorIndexX(vecStartPos.x), NUMSECTORS_X - 1);
+	const int32 nEndY = Min(GetSectorIndexY(vecStartPos.y), NUMSECTORS_Y - 1);
+#else
+	const int32 nEndX = Min(GetSectorIndexX(vecSectorPos.x), NUMSECTORS_X);
+	const int32 nEndY = Min(GetSectorIndexY(vecSectorPos.y), NUMSECTORS_Y);
+#endif
 	for(int32 y = nStartY; y <= nEndY; y++) {
 		for(int32 x = nStartX; x <= nEndX; x++) {
-			CSector *pSector = CWorld::GetSector(x, y);
+			CSector *pSector = GetSector(x, y);
 			if(bBuildings) {
 				CWorld::FindObjectsIntersectingCubeSectorList(pSector->m_lists[ENTITYLIST_BUILDINGS],
 				                                              vecStartPos, vecEndPos, nIntersecting,
@@ -1210,13 +1244,18 @@ CWorld::FindObjectsIntersectingAngledCollisionBox(const CBox &boundingBox, const
 {
 	CWorld::AdvanceCurrentScanCode();
 	*nEntitiesFound = 0;
-	const int32 nStartX = Max(CWorld::GetSectorIndexX(fStartX), 0);
-	const int32 nStartY = Max(CWorld::GetSectorIndexY(fStartY), 0);
-	const int32 nEndX = Min(CWorld::GetSectorIndexX(fEndX), NUMSECTORS_X - 1);
-	const int32 nEndY = Min(CWorld::GetSectorIndexY(fEndY), NUMSECTORS_Y - 1);
+	const int32 nStartX = Max(GetSectorIndexX(fStartX), 0);
+	const int32 nStartY = Max(GetSectorIndexY(fStartY), 0);
+#ifdef FIX_BUGS
+	const int32 nEndX = Min(GetSectorIndexX(fEndX), NUMSECTORS_X - 1);
+	const int32 nEndY = Min(GetSectorIndexY(fEndY), NUMSECTORS_Y - 1);
+#else
+	const int32 nEndX = Min(GetSectorIndexX(fEndX), NUMSECTORS_X);
+	const int32 nEndY = Min(GetSectorIndexY(fEndY), NUMSECTORS_Y);
+#endif
 	for(int32 y = nStartY; y <= nEndY; y++) {
 		for(int32 x = nStartX; x <= nEndX; x++) {
-			CSector *pSector = CWorld::GetSector(x, y);
+			CSector *pSector = GetSector(x, y);
 			if(bBuildings) {
 				CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(
 				    pSector->m_lists[ENTITYLIST_BUILDINGS], boundingBox, matrix, position,
@@ -1290,13 +1329,18 @@ CWorld::FindMissionEntitiesIntersectingCube(const CVector &vecStartPos, const CV
 {
 	CWorld::AdvanceCurrentScanCode();
 	*nIntersecting = 0;
-	const int32 nStartX = Max(CWorld::GetSectorIndexX(vecStartPos.x), 0);
-	const int32 nStartY = Max(CWorld::GetSectorIndexY(vecStartPos.y), 0);
-	const int32 nEndX = Min(CWorld::GetSectorIndexX(vecEndPos.x), NUMSECTORS_X - 1);
-	const int32 nEndY = Min(CWorld::GetSectorIndexY(vecEndPos.y), NUMSECTORS_Y - 1);
+	const int32 nStartX = Max(GetSectorIndexX(vecStartPos.x), 0);
+	const int32 nStartY = Max(GetSectorIndexY(vecStartPos.y), 0);
+#ifdef FIX_BUGS
+	const int32 nEndX = Min(GetSectorIndexX(vecEndPos.x), NUMSECTORS_X - 1);
+	const int32 nEndY = Min(GetSectorIndexY(vecEndPos.y), NUMSECTORS_Y - 1);
+#else
+	const int32 nEndX = Min(GetSectorIndexX(vecEndPos.x), NUMSECTORS_X);
+	const int32 nEndY = Min(GetSectorIndexY(vecEndPos.y), NUMSECTORS_Y);
+#endif
 	for(int32 y = nStartY; y <= nEndY; y++) {
 		for(int32 x = nStartX; x <= nEndX; x++) {
-			CSector *pSector = CWorld::GetSector(x, y);
+			CSector *pSector = GetSector(x, y);
 			if(bVehicles) {
 				CWorld::FindMissionEntitiesIntersectingCubeSectorList(
 				    pSector->m_lists[ENTITYLIST_VEHICLES], vecStartPos, vecEndPos, nIntersecting,
@@ -1504,13 +1548,18 @@ CWorld::CallOffChaseForArea(float x1, float y1, float x2, float y2)
 	float fStartY = y1 - 10.0f;
 	float fEndX = x2 + 10.0f;
 	float fEndY = y2 + 10.0f;
-	const int32 nStartX = Max(CWorld::GetSectorIndexX(fStartX), 0);
-	const int32 nStartY = Max(CWorld::GetSectorIndexY(fStartY), 0);
-	const int32 nEndX = Min(CWorld::GetSectorIndexX(fEndX), NUMSECTORS_X - 1);
-	const int32 nEndY = Min(CWorld::GetSectorIndexY(fEndY), NUMSECTORS_Y - 1);
+	const int32 nStartX = Max(GetSectorIndexX(fStartX), 0);
+	const int32 nStartY = Max(GetSectorIndexY(fStartY), 0);
+#ifdef FIX_BUGS
+	const int32 nEndX = Min(GetSectorIndexX(fEndX), NUMSECTORS_X - 1);
+	const int32 nEndY = Min(GetSectorIndexY(fEndY), NUMSECTORS_Y - 1);
+#else
+	const int32 nEndX = Min(GetSectorIndexX(fEndX), NUMSECTORS_X);
+	const int32 nEndY = Min(GetSectorIndexY(fEndY), NUMSECTORS_Y);
+#endif
 	for(int32 y = nStartY; y <= nEndY; y++) {
 		for(int32 x = nStartX; x <= nEndX; x++) {
-			CSector *pSector = CWorld::GetSector(x, y);
+			CSector *pSector = GetSector(x, y);
 			CWorld::CallOffChaseForAreaSectorListVehicles(pSector->m_lists[ENTITYLIST_VEHICLES], x1, y1, x2,
 			                                              y2, fStartX, fStartY, fEndX, fEndY);
 			CWorld::CallOffChaseForAreaSectorListVehicles(pSector->m_lists[ENTITYLIST_VEHICLES_OVERLAP], x1,
@@ -1638,7 +1687,7 @@ CWorld::RemoveFallenCars(void)
 		CVehicle *veh = CPools::GetVehiclePool()->GetSlot(poolIndex);
 		if(veh) {
 			if(veh->GetPosition().z < MAP_Z_LOW_LIMIT) {
-				if(veh->VehicleCreatedBy == MISSION_VEHICLE || veh == FindPlayerVehicle() ||
+				if(veh->VehicleCreatedBy == MISSION_VEHICLE && !veh->bRenderScorched || veh == FindPlayerVehicle() ||
 				   (veh->pDriver && veh->pDriver->IsPlayer())) {
 					int closestNode = ThePaths.FindNodeClosestToCoors(veh->GetPosition(), PATH_CAR,
 					                                                  999999.9f, false, false);
@@ -1825,37 +1874,55 @@ CWorld::RepositionOneObject(CEntity *pEntity)
 {
 	int16 modelId = pEntity->GetModelIndex();
 	if (modelId == MI_PARKINGMETER || modelId == MI_PHONEBOOTH1 || modelId == MI_WASTEBIN ||
-	    modelId == MI_BIN || modelId == MI_POSTBOX1 || modelId == MI_NEWSSTAND || modelId == MI_TRAFFICCONE ||
-	    modelId == MI_DUMP1 || modelId == MI_ROADWORKBARRIER1 || modelId == MI_BUSSIGN1 || modelId == MI_NOPARKINGSIGN1 ||
-	    modelId == MI_PHONESIGN || modelId == MI_FIRE_HYDRANT || modelId == MI_BOLLARDLIGHT ||
-	    modelId == MI_PARKTABLE || modelId == MI_PARKINGMETER2 || modelId == MI_TELPOLE02 ||
-	    modelId == MI_PARKBENCH || modelId == MI_BARRIER1 || IsTreeModel(modelId) ||
-		IsLightThatNeedsRepositioning(modelId)
+		modelId == MI_BIN || modelId == MI_POSTBOX1 || modelId == MI_NEWSSTAND || modelId == MI_TRAFFICCONE ||
+		modelId == MI_DUMP1 || modelId == MI_ROADWORKBARRIER1 || modelId == MI_BUSSIGN1 || modelId == MI_NOPARKINGSIGN1 ||
+		modelId == MI_PHONESIGN || modelId == MI_FIRE_HYDRANT || modelId == MI_BOLLARDLIGHT ||
+		modelId == MI_PARKTABLE || modelId == MI_PARKINGMETER2 || modelId == MI_TELPOLE02 ||
+		modelId == MI_PARKBENCH || modelId == MI_BARRIER1 || IsTreeModel(modelId)
 		) {
-		CVector &position = pEntity->GetMatrix().GetPosition();
-		CColModel *pColModel = pEntity->GetColModel();
+		CVector& position = pEntity->GetMatrix().GetPosition();
+		CColModel* pColModel = pEntity->GetColModel();
 		float fBoundingBoxMinZ = pColModel->boundingBox.min.z;
 		float fHeight = pColModel->boundingBox.max.z - pColModel->boundingBox.min.z;
-		if(fHeight < OBJECT_REPOSITION_OFFSET_Z) fHeight = OBJECT_REPOSITION_OFFSET_Z;
+		if (fHeight < OBJECT_REPOSITION_OFFSET_Z) fHeight = OBJECT_REPOSITION_OFFSET_Z;
 		position.z = CWorld::FindGroundZFor3DCoord(position.x, position.y,
-		                                           position.z + fHeight, nil) -
-		             fBoundingBoxMinZ;
+			position.z + fHeight, nil) -
+			fBoundingBoxMinZ;
 		pEntity->m_matrix.UpdateRW();
 		pEntity->UpdateRwFrame();
-	} else if(modelId == MI_BUOY) {
-		float fWaterLevel = 0.0f;
+	} else if(IsLightThatNeedsRepositioning(modelId)) {
+		CVector position = pEntity->GetMatrix().GetPosition();
+		CColModel* pColModel = pEntity->GetColModel();
+		float fBoundingBoxMinZ = pColModel->boundingBox.min.z;
+		float fHeight = pColModel->boundingBox.max.z - pColModel->boundingBox.min.z;
+		if (fHeight < OBJECT_REPOSITION_OFFSET_Z) fHeight = OBJECT_REPOSITION_OFFSET_Z;
+		if (pColModel->numBoxes == 1)
+			position = pEntity->GetMatrix() * CVector(
+				(pColModel->boxes[0].min.x + pColModel->boxes[0].max.x) / 2,
+				(pColModel->boxes[0].min.y + pColModel->boxes[0].max.y) / 2,
+				pColModel->boxes[0].min.z);
+		else if (pColModel->numSpheres > 0) {
+			position.z = 1000.0f;
+			for (int i = 0; i < pColModel->numSpheres; i++) {
+				if (pColModel->spheres[i].center.z < position.z)
+					position = pColModel->spheres[i].center;
+			}
+			if (position.z < 1000.0f)
+				position = pEntity->GetMatrix() * position;
+		}
+		pEntity->GetMatrix().GetPosition().z = FindGroundZFor3DCoord(position.x, position.y, pEntity->GetMatrix().GetPosition().z + fHeight, nil) - fBoundingBoxMinZ;
+		pEntity->GetMatrix().UpdateRW();
+		pEntity->UpdateRwFrame();
+		
+	}
+	if(modelId == MI_BUOY) {
 		bool bFound = true;
 		const CVector &position = pEntity->GetPosition();
 		float fGroundZ = CWorld::FindGroundZFor3DCoord(position.x, position.y,
 		                                               position.z + OBJECT_REPOSITION_OFFSET_Z, &bFound);
-		if(CWaterLevel::GetWaterLevelNoWaves(position.x, position.y, position.z + OBJECT_REPOSITION_OFFSET_Z,
-		                                     &fWaterLevel)) {
-			if(!bFound || fWaterLevel > fGroundZ) {
-				CColModel *pColModel = pEntity->GetColModel();
-				float fHeight = pColModel->boundingBox.max.z - pColModel->boundingBox.min.z;
-				pEntity->GetMatrix().GetPosition().z = 0.2f * fHeight + fWaterLevel - 0.5f * fHeight;
-			}
-		}
+		CColModel *pColModel = pEntity->GetColModel();
+		float fHeight = pColModel->boundingBox.max.z - pColModel->boundingBox.min.z;
+		pEntity->GetMatrix().GetPosition().z = 0.2f * fHeight + 6.0f - 0.5f * fHeight;
 	}
 }
 
@@ -1869,6 +1936,28 @@ CWorld::SetCarsOnFire(float x, float y, float z, float radius, CEntity *reason)
 			if(Abs(veh->GetPosition().z - z) < 5.0f && Abs(veh->GetPosition().x - x) < radius &&
 			   Abs(veh->GetPosition().y - y) < radius)
 				gFireManager.StartFire(veh, reason, 0.8f, true);
+		}
+	}
+}
+
+void
+CWorld::SetPedsChoking(float x, float y, float z, float radius, CEntity* reason)
+{
+	int32 poolSize = CPools::GetPedPool()->GetSize();
+	for (int32 i = poolSize - 1; i >= 0; i--) {
+		CPed* pPed = CPools::GetPedPool()->GetSlot(i);
+		// suspicious copypaste
+		if (pPed && pPed->m_nPedState != PED_DEAD && !pPed->bInVehicle && !pPed->m_pFire && !pPed->bFireProof && pPed->CharCreatedBy != MISSION_CHAR) {
+			if (Abs(pPed->GetPosition().z - z) < 5.0f && Abs(pPed->GetPosition().x - x) < radius &&
+				Abs(pPed->GetPosition().y - y) < radius) {
+				if (!pPed->IsPlayer())
+					pPed->SetFlee(CVector2D(x, y), 10000);
+#ifdef FIX_BUGS
+				pPed->InflictDamage(reason, WEAPONTYPE_TEARGAS, 1.0f, PEDPIECE_TORSO, 0);
+#else
+				pPed->InflictDamage(nil, WEAPONTYPE_TEARGAS, 1.0f, PEDPIECE_TORSO, 0);
+#endif
+			}
 		}
 	}
 }
@@ -1925,11 +2014,12 @@ CWorld::Process(void)
 			if(csObj && csObj->m_entryInfoList.first) {
 				if(csObj->m_rwObject && RwObjectGetType(csObj->m_rwObject) == rpCLUMP &&
 				   RpAnimBlendClumpGetFirstAssociation(csObj->GetClump())) {
-// TODO(MIAMI): doRender argument
-					RpAnimBlendClumpUpdateAnimations(csObj->GetClump(),
-					                                 0.02f * (csObj->IsObject()
-					                                              ? CTimer::GetTimeStepNonClipped()
-					                                              : CTimer::GetTimeStep()));
+					if (csObj->IsObject())
+						RpAnimBlendClumpUpdateAnimations(csObj->GetClump(), 0.02f * CTimer::GetTimeStepNonClipped());
+					else {
+						csObj->bOffscreen = !csObj->GetIsOnScreen();
+						RpAnimBlendClumpUpdateAnimations(csObj->GetClump(), 0.02f * CTimer::GetTimeStep(), !csObj->bOffscreen);
+					}
 				}
 				csObj->ProcessControl();
 				csObj->ProcessCollision();
@@ -1949,11 +2039,12 @@ CWorld::Process(void)
 #endif
 			if(movingEnt->m_rwObject && RwObjectGetType(movingEnt->m_rwObject) == rpCLUMP &&
 			   RpAnimBlendClumpGetFirstAssociation(movingEnt->GetClump())) {
-// TODO(MIAMI): doRender argument
-				RpAnimBlendClumpUpdateAnimations(movingEnt->GetClump(),
-				                                 0.02f * (movingEnt->IsObject()
-				                                              ? CTimer::GetTimeStepNonClipped()
-				                                              : CTimer::GetTimeStep()));
+				if (movingEnt->IsObject())
+					RpAnimBlendClumpUpdateAnimations(movingEnt->GetClump(), 0.02f * CTimer::GetTimeStepNonClipped());
+				else {
+					movingEnt->bOffscreen = !movingEnt->GetIsOnScreen();
+					RpAnimBlendClumpUpdateAnimations(movingEnt->GetClump(), 0.02f * CTimer::GetTimeStep(), !movingEnt->bOffscreen);
+				}
 			}
 		}
 		for(CPtrNode *node = ms_listMovingEntityPtrs.first; node; node = node->next) {
@@ -2037,7 +2128,7 @@ CWorld::Process(void)
 						movingEnt->bIsStuck = true;
 						if(movingEnt->GetStatus() == STATUS_PLAYER) {
 							printf("STUCK: Final Step: Player Entity %d Is Stuck\n", movingEnt->GetModelIndex());
-							movingEnt->m_vecMoveSpeed *= 0.3f;
+							movingEnt->m_vecMoveSpeed *= Pow(0.707f, CTimer::GetTimeStep());
 							movingEnt->ApplyMoveSpeed();
 							movingEnt->ApplyTurnSpeed();
 						}
@@ -2102,13 +2193,13 @@ CWorld::TriggerExplosion(const CVector &position, float fRadius, float fPower, C
 {
 	CVector2D vecStartPos(position.x - fRadius, position.y - fRadius);
 	CVector2D vecEndPos(position.x + fRadius, position.y + fRadius);
-	const int32 nStartX = Max(CWorld::GetSectorIndexX(vecStartPos.x), 0);
-	const int32 nStartY = Max(CWorld::GetSectorIndexY(vecStartPos.y), 0);
-	const int32 nEndX = Min(CWorld::GetSectorIndexX(vecEndPos.x), NUMSECTORS_X - 1);
-	const int32 nEndY = Min(CWorld::GetSectorIndexY(vecEndPos.y), NUMSECTORS_Y - 1);
+	const int32 nStartX = Max(GetSectorIndexX(vecStartPos.x), 0);
+	const int32 nStartY = Max(GetSectorIndexY(vecStartPos.y), 0);
+	const int32 nEndX = Min(GetSectorIndexX(vecEndPos.x), NUMSECTORS_X - 1);
+	const int32 nEndY = Min(GetSectorIndexY(vecEndPos.y), NUMSECTORS_Y - 1);
 	for(int32 y = nStartY; y <= nEndY; y++) {
 		for(int32 x = nStartX; x <= nEndX; x++) {
-			CSector *pSector = CWorld::GetSector(x, y);
+			CSector *pSector = GetSector(x, y);
 			CWorld::TriggerExplosionSectorList(pSector->m_lists[ENTITYLIST_VEHICLES], position, fRadius,
 			                                   fPower, pCreator, bProcessVehicleBombTimer);
 			CWorld::TriggerExplosionSectorList(pSector->m_lists[ENTITYLIST_PEDS], position, fRadius, fPower,
@@ -2146,7 +2237,7 @@ CWorld::TriggerExplosionSectorList(CPtrList &list, const CVector &position, floa
 								   pObject->bHasBeenDamaged) {
 									if(pEntity->IsObject() &&
 									   modelId != MI_EXPLODINGBARREL &&
-									   modelId != MI_PETROLPUMP)
+									   modelId != MI_PETROLPUMP && modelId != MI_PETROLPUMP2)
 										pObject->bHasBeenDamaged = true;
 								} else {
 									CVector pos = pEntity->GetPosition();
@@ -2171,7 +2262,7 @@ CWorld::TriggerExplosionSectorList(CPtrList &list, const CVector &position, floa
 				if(!pEntity->GetIsStatic()) {
 					float fDamageMultiplier = Min((fRadius - fMagnitude) * 2.0f / fRadius, 1.0f);
 					CVector vecForceDir =
-					    vecDistance * (fPower * pEntity->m_fMass * 0.00071429f * fDamageMultiplier /
+					    vecDistance * (fPower * pEntity->m_fMass / 14000.0f * fDamageMultiplier /
 					                   Max(fMagnitude, 0.01f));
 					vecForceDir.z = Max(vecForceDir.z, 0.0f);
 					if(pEntity == FindPlayerPed()) vecForceDir.z = Min(vecForceDir.z, 1.0f);

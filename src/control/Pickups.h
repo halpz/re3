@@ -103,6 +103,7 @@ public:
 	static bool TryToMerge_WeaponType(CVector pos, eWeaponType weapon, uint8 type, uint32 quantity, bool unused);
 	static void CreateSomeMoney(CVector, int);
 	static void DetonateMinesHitByGunShot(CVector *vec1, CVector *vec2);
+	static void RemoveUnnecessaryPickups(const CVector& center, float radius);
 	static void Load(uint8 *buf, uint32 size);
 	static void Save(uint8 *buf, uint32 *size);
 

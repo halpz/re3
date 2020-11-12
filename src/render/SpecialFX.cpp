@@ -169,6 +169,9 @@ CSpecialFX::Render(void)
 	CBrightLights::Render();
 	CShinyTexts::Render();
 	CMoneyMessages::Render();
+#ifdef NEW_RENDERER
+	if(!(gbNewRenderer && FredIsInFirstPersonCam()))
+#endif
 	C3dMarkers::Render();
 }
 

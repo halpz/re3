@@ -360,7 +360,11 @@ void CHud::Draw()
 						RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 						RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 						RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+#ifdef FIX_BUGS
+						RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+#else
 						RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVDESTALPHA);
+#endif
 						RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpLaserDotTex));
 #ifdef FIX_BUGS
 						int intensity = CGeneral::GetRandomNumberInRange(0, 37);

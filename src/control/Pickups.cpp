@@ -369,7 +369,7 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 			if (weaponType < WEAPONTYPE_TOTALWEAPONS && CDarkel::FrenzyOnGoing()) {
 				isPickupTouched = false;
 				m_bWasControlMessageShown = false;
-			} else if (weaponType != WEAPONTYPE_UNARMED) {
+			} else if (weaponType < WEAPONTYPE_TOTALWEAPONS && weaponType != WEAPONTYPE_UNARMED) {
 				uint32 slot = CWeaponInfo::GetWeaponInfo(weaponType)->m_nWeaponSlot;
 				eWeaponType plrWeaponSlot = FindPlayerPed()->GetWeapon(slot).m_eWeaponType;
 				if (plrWeaponSlot != weaponType) {
@@ -1408,6 +1408,20 @@ CPickups::DetonateMinesHitByGunShot(CVector *vec1, CVector *vec2)
 	for (int i = 0; i < NUMGENERALPICKUPS; i++) {
 		if (aPickUps[i].m_eType == PICKUP_NAUTICAL_MINE_ARMED)
 			aPickUps[i].ProcessGunShot(vec1, vec2);
+	}
+}
+
+void
+CPickups::RemoveUnnecessaryPickups(const CVector& center, float radius)
+{
+	for (int i = 0; i < NUMPICKUPS; i++) {
+		if (aPickUps[i].m_eType == PICKUP_ONCE_TIMEOUT || aPickUps[i].m_eType == PICKUP_MONEY) {
+			if (Distance(center, aPickUps[i].m_vecPos) < radius) {
+				aPickUps[i].GetRidOfObjects();
+				aPickUps[i].m_bRemoved = true;
+				aPickUps[i].m_eType = PICKUP_NONE;
+			}
+		}
 	}
 }
 

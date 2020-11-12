@@ -38,7 +38,7 @@ CObject::CObject(void)
 	m_colour2 = 0;
 	m_colour1 = m_colour2;
 	m_nBonusValue = 0;
-	// m_nCostValue = 0; // TODO(Miami)
+	m_nCostValue = 0;
 	bIsPickup = false;
 	bPickupObjWithMessage = false;
 	bOutOfStock = false;
@@ -444,7 +444,7 @@ CObject::Init(void)
 	m_colour2 = 0;
 	m_nBonusValue = 0;
 	bIsWeapon = false;
-// TODO(MIAMI): some new field here
+	m_nCostValue = 0;
 	m_pCollidingEntity = nil;
 	CColPoint point;
 	CEntity* outEntity = nil;

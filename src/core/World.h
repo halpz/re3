@@ -77,7 +77,7 @@ public:
 	static void Remove(CEntity *entity);
 	static void Add(CEntity *entity);
 
-	static CSector *GetSector(int x, int y) { return &ms_aSectors[y][x]; }
+	static CSector *GetSector(int x, int y) { if (x > NUMSECTORS_X - 1 || y > NUMSECTORS_Y - 1) return &ms_aSectors[0][0]; return &ms_aSectors[y][x]; }
 	static CPtrList &GetBigBuildingList(eLevelName i) { return ms_bigBuildingsList[i]; }
 	static CPtrList &GetMovingEntityList(void) { return ms_listMovingEntityPtrs; }
 	static uint16 GetCurrentScanCode(void) { return ms_nCurrentScanCode; }
@@ -144,6 +144,7 @@ public:
 	static void SetAllCarsCanBeDamaged(bool);
 	static void ExtinguishAllCarFiresInArea(CVector, float);
 	static void SetCarsOnFire(float x, float y, float z, float radius, CEntity* reason);
+	static void SetPedsChoking(float x, float y, float z, float radius, CEntity* reason);
 	static void SetPedsOnFire(float x, float y, float z, float radius, CEntity* reason);
 
 	static void Initialise();
@@ -157,6 +158,23 @@ public:
 	static void TriggerExplosion(const CVector& position, float fRadius, float fPower, CEntity* pCreator, bool bProcessVehicleBombTimer);
 	static void TriggerExplosionSectorList(CPtrList& list, const CVector& position, float fRadius, float fPower, CEntity* pCreator, bool bProcessVehicleBombTimer);
 	static void UseDetonator(CEntity *pEntity);
+
+	// NB: following functions are unused (TODO?)
+	static void CastShadow(float, float, float, float);
+	static void CastShadowSectorList(CPtrList&, float, float, float, float);
+	static void FindLowestZForCoord(float, float);
+	static void CheckBlockListIntegrity(void);
+	static void ProcessVerticalLineSectorList_FillGlobeColPoints(CPtrList&, const CColLine&, CEntity*&, bool, CStoredCollPoly*);
+	static void ProcessVerticalLineSector_FillGlobeColPoints(CSector&, const CColLine&, CEntity*&, bool, bool, bool, bool, bool, bool, CStoredCollPoly*);
+	static void ProcessVerticalLine_FillGlobeColPoints(const CVector&, float, CEntity*&, bool, bool, bool, bool, bool, bool, CStoredCollPoly*);
+	static void PrintCarChanges(void);
+	static void TestForBuildingsOnTopOfEachOther(CPtrList&);
+	static void TestForBuildingsOnTopOfEachOther(void);
+	static void TestForUnusedModels(CPtrList&, int*);
+	static void TestForUnusedModels(void);
+	static void HandleCollisionZoneChange(eLevelName, eLevelName);
+	static void DoZoneTestForChaser(class CPhysical*);
+	static void FindPlayerSlotWithPedPointer(void*);
 };
 
 extern CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];

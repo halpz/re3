@@ -94,7 +94,11 @@ CWeaponEffects::Render(void)
 		RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void *)FALSE);
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);
 		RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void *)rwBLENDSRCALPHA);
+#ifdef FIX_BUGS
+		RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void *)rwBLENDINVSRCALPHA);
+#else
 		RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void *)rwBLENDINVDESTALPHA);
+#endif
 		RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void *)gpCrossHairRaster);
 
 		RwV3d pos;
