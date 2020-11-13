@@ -2110,7 +2110,7 @@ CBike::VehicleDamage(void)
 		float total = fwd*Abs(DotProduct(m_vecDamageNormal, GetForward())) +
 			0.45f*Abs(DotProduct(m_vecDamageNormal, GetRight())) +
 			up*Max(DotProduct(m_vecDamageNormal, GetUp()), 0.0f);
-		float damage = (total - 1.5f*Max(DotProduct(m_vecDamageNormal, GetUp()), 0.0f))*colSpeed;
+		float damage = (total - 1.5f*Min(DotProduct(m_vecDamageNormal, GetUp()), 0.0f))*colSpeed;
 
 		if(pDriver->IsPlayer() && CCullZones::CamStairsForPlayer() && CCullZones::FindZoneWithStairsAttributeForPlayer())
 			damage = 0.0f;
@@ -2658,13 +2658,13 @@ CBike::KnockOffRider(eWeaponType weapon, uint8 direction, CPed *ped, bool bGetBa
 	case WEAPONTYPE_DROWNING:{
 		RwRGBA color;
 		anim = ANIM_FALL_FALL;
-		ped->m_vecMoveSpeed *= 0.2f;
+		ped->m_vecMoveSpeed = m_vecMoveSpeed*0.2f;
 		ped->m_vecMoveSpeed.z = 0.0f;
 		ped->m_pCollidingEntity = this;
 		color.red = (0.5f * CTimeCycle::GetDirectionalRed() + CTimeCycle::GetAmbientRed_Obj())*0.45f*255;
 		color.green = (0.5f * CTimeCycle::GetDirectionalGreen() + CTimeCycle::GetAmbientGreen_Obj())*0.45f*255;
 		color.blue = (0.5f * CTimeCycle::GetDirectionalBlue() + CTimeCycle::GetAmbientBlue_Obj())*0.45f*255;
-		color.alpha = CGeneral::GetRandomNumberInRange(0, 48) + 48;
+		color.alpha = CGeneral::GetRandomNumberInRange(48, 96);
 		DMAudio.PlayOneShot(m_audioEntityId, SOUND_SPLASH, 0.0f);
 		CVector splashPos = ped->GetPosition() + 2.2f*ped->m_vecMoveSpeed;
 		float waterZ = 0.0f;
