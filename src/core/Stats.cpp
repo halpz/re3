@@ -192,13 +192,18 @@ void CStats::Init()
 
 	KillsSinceLastCheckpoint = 0;
 	TotalLegitimateKills = 0;
+
+	for (int i = 0; i < ARRAY_SIZE(LastMissionPassedName); i++)
+		LastMissionPassedName[i] = 0;
+
 	IndustrialPassed = 0;
 	CommercialPassed = 0;
 	SuburbanPassed = 0;
 	PamphletMissionPassed = 0;
 	NoMoreHurricanes = 0;
 	ShowChaseStatOnScreen = 0;
-	abSonyCDs[0] = 0;
+	for (int i = 0; i < ARRAY_SIZE(abSonyCDs); i++)
+		abSonyCDs[i] = 0;
 	PopulateFavoriteRadioStationList();
 
 	NumPropertyOwned = 0;

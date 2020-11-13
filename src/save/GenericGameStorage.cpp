@@ -148,24 +148,22 @@ GenericSave(int file)
 
 	// Save simple vars
 	lastMissionPassed = TheText.Get(CStats::LastMissionPassedName[0] ? CStats::LastMissionPassedName : "ITBEG");
-	if (lastMissionPassed[0] != '\0') {
-		AsciiToUnicode("...'", suffix);
-		suffix[3] = L'\0';
+	AsciiToUnicode("...'", suffix);
+	suffix[3] = L'\0';
 #ifdef FIX_BUGS
-		// fix buffer overflow
-		int len = UnicodeStrlen(lastMissionPassed);
-		if (len > ARRAY_SIZE(saveName)-1)
-			len = ARRAY_SIZE(saveName)-1;
-		memcpy(saveName, lastMissionPassed, sizeof(wchar) * len);
+	// fix buffer overflow
+	int len = UnicodeStrlen(lastMissionPassed);
+	if (len > ARRAY_SIZE(saveName)-1)
+		len = ARRAY_SIZE(saveName)-1;
+	memcpy(saveName, lastMissionPassed, sizeof(wchar) * len);
 #else
-		TextCopy(saveName, lastMissionPassed);
-		int len = UnicodeStrlen(saveName);
+	TextCopy(saveName, lastMissionPassed);
+	int len = UnicodeStrlen(saveName);
 #endif
-		saveName[len] = '\0';
-		if (len > ARRAY_SIZE(saveName)-2)
-			TextCopy(&saveName[ARRAY_SIZE(saveName)-ARRAY_SIZE(suffix)], suffix);
-		saveName[ARRAY_SIZE(saveName)-1] = '\0';
-	}
+	saveName[len] = '\0';
+	if (len > ARRAY_SIZE(saveName)-2)
+		TextCopy(&saveName[ARRAY_SIZE(saveName)-ARRAY_SIZE(suffix)], suffix);
+	saveName[ARRAY_SIZE(saveName)-1] = '\0';
 	WriteDataToBufferPointer(buf, saveName);
 	GetLocalTime(&saveTime);
 	WriteDataToBufferPointer(buf, saveTime);

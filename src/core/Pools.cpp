@@ -602,7 +602,7 @@ INITSAVEBUF
 
 					CStreaming::LoadAllRequestedModels(false);
 				}
-				pPed->GiveWeapon(pBufferPlayer->GetWeapon(i).m_eWeaponType, pBufferPlayer->GetWeapon(i).m_nAmmoTotal);
+				pPed->GiveWeapon(pBufferPlayer->GetWeapon(i).m_eWeaponType, pBufferPlayer->GetWeapon(i).m_nAmmoTotal, false);
 			}
 		}
 
