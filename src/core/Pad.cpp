@@ -221,7 +221,11 @@ void WeaponCheat2()
 	CStreaming::RequestModel(MI_ROCKETLAUNCHER, STREAMFLAGS_DONT_REMOVE);
 	CStreaming::LoadAllRequestedModels(false);
 
+#ifdef FIX_BUGS
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_KATANA, 1);
+#else
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_KATANA, 0);
+#endif
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_DETONATOR_GRENADE, 10);
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_PYTHON, 40);
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_STUBBY_SHOTGUN, 25);
@@ -261,7 +265,11 @@ void WeaponCheat3()
 	CStreaming::RequestModel(MI_MINIGUN2, STREAMFLAGS_DONT_REMOVE);
 	CStreaming::LoadAllRequestedModels(false);
 
+#ifdef FIX_BUGS
+	FindPlayerPed()->GiveWeapon(WEAPONTYPE_CHAINSAW, 1);
+#else
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_CHAINSAW, 0);
+#endif
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_GRENADE, 10);
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_PYTHON, 40);
 	FindPlayerPed()->GiveWeapon(WEAPONTYPE_SPAS12_SHOTGUN, 30);

@@ -19969,7 +19969,7 @@ CPed::Load(uint8*& buf)
 
 				CStreaming::LoadAllRequestedModels(false);
 			}
-			GiveWeapon(bufWeapon.m_eWeaponType, bufWeapon.m_nAmmoTotal);
+			GiveWeapon(bufWeapon.m_eWeaponType, bufWeapon.m_nAmmoTotal, false);
 		}
 	}
 	SkipSaveBuf(buf, 252);

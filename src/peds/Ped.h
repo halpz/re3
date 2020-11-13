@@ -697,7 +697,7 @@ public:
 	void PlayFootSteps(void);
 	void QuitEnteringCar(void);
 	void BuildPedLists(void);
-	int32 GiveWeapon(eWeaponType weaponType, uint32 ammo, bool unused = false);
+	int32 GiveWeapon(eWeaponType weaponType, uint32 ammo, bool unused = true);
 	void CalculateNewOrientation(void);
 	float WorkOutHeadingForMovingFirstPerson(float);
 	void CalculateNewVelocity(void);
