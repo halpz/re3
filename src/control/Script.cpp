@@ -4723,18 +4723,18 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 				pPlayer->m_pPed->m_pMyVehicle->RemovePassenger(pPlayer->m_pPed);
 			}
 		}
+		pPlayer->m_pPed->RemoveInCarAnims();
 		pPlayer->m_pPed->bInVehicle = false;
 		pPlayer->m_pPed->m_pMyVehicle = nil;
 		pPlayer->m_pPed->SetPedState(PED_IDLE);
 		pPlayer->m_pPed->bUsesCollision = true;
 		pPlayer->m_pPed->SetMoveSpeed(0.0f, 0.0f, 0.0f);
 		pPlayer->m_pPed->ReplaceWeaponWhenExitingVehicle();
-		pPlayer->m_pPed->RemoveInCarAnims();
 		if (pPlayer->m_pPed->m_pVehicleAnim)
 			pPlayer->m_pPed->m_pVehicleAnim->blendDelta = -1000.0f;
 		pPlayer->m_pPed->m_pVehicleAnim = nil;
 		pPlayer->m_pPed->SetMoveState(PEDMOVE_NONE);
-		CAnimManager::BlendAnimation(pPlayer->m_pPed->GetClump(), pPlayer->m_pPed->m_animGroup, ANIM_IDLE_STANCE, 100.0f);
+		CAnimManager::BlendAnimation(pPlayer->m_pPed->GetClump(), pPlayer->m_pPed->m_animGroup, ANIM_IDLE_STANCE, 1000.0f);
 		pPlayer->m_pPed->RestartNonPartialAnims();
 		AudioManager.PlayerJustLeftCar();
 		pos.z += pPlayer->m_pPed->GetDistanceFromCentreOfMassToBaseOfModel();
