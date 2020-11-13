@@ -3229,7 +3229,7 @@ bool CCarCtrl::GenerateOneEmergencyServicesCar(uint32 mi, CVector vecPos)
 	float posBetweenNodes;
 	while (!created && attempts < 5){
 		if (ThePaths.GenerateCarCreationCoors(pPlayerPos.x, pPlayerPos.y, 0.707f, 0.707f,
-		  120.0f, -1.0f, true, &spawnPos, &curNode, &nextNode, &posBetweenNodes, false)){
+			REQUEST_ONSCREEN_DISTANCE, -1.0f, true, &spawnPos, &curNode, &nextNode, &posBetweenNodes, false)){
 			int16 colliding[2];
 			if (!ThePaths.GetNode(curNode)->bWaterPath) {
 				CWorld::FindObjectsKindaColliding(spawnPos, 10.0f, true, colliding, 2, nil, false, true, true, false, false);
