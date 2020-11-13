@@ -742,7 +742,9 @@ CStreaming::RequestBigBuildings(eLevelName level)
 		b = CPools::GetBuildingPool()->GetSlot(i);
 		if(b && b->bIsBIGBuilding
 #ifdef NO_ISLAND_LOADING
-		    && ((CMenuManager::m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_LOW) || (b->m_level == level))
+		    && (((CMenuManager::m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_LOW) && (b != pIslandLODindustEntity) && (b != pIslandLODcomIndEntity) &&
+		         (b != pIslandLODcomSubEntity) && (b != pIslandLODsubIndEntity) && (b != pIslandLODsubComEntity)
+				) || (b->m_level == level))
 #else
 		    && b->m_level == level
 #endif
