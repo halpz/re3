@@ -22,7 +22,11 @@
 #define MENU_DEFAULT_CONTENT_Y 100
 #define MENU_DEFAULT_LINE_HEIGHT 29
 
-#define MENURADIO_ICON_SCALE 60.0f
+#define MENURADIO_ICON_FIRST_X 238.f
+#define MENURADIO_ICON_Y 288.0f
+#define MENURADIO_ICON_SIZE 60.0f
+#define MENURADIO_SELECTOR_START_Y 285.f // other options should leave room on the screen
+#define MENURADIO_SELECTOR_HEIGHT 65.f
 
 #define MENUSLIDER_X 500.0f
 #define MENUSLIDER_UNK 100.0f
@@ -303,7 +307,13 @@ enum eCheckHover
 	HOVEROPTION_LIST, // also layer in controller setup and skin menu
 	HOVEROPTION_SKIN,
 	HOVEROPTION_USESKIN, // also layer in controller setup and skin menu
-	HOVEROPTION_RADIO_0,
+	HOVEROPTION_NEXT_RADIO,
+	HOVEROPTION_PREV_RADIO,
+
+	// Below is TODO(Miami)
+
+	// those are unused in VC
+	HOVEROPTION_RADIO_0 = HOVEROPTION_NEXT_RADIO, 
 	HOVEROPTION_RADIO_1,
 	HOVEROPTION_RADIO_2,
 	HOVEROPTION_RADIO_3,
@@ -313,6 +323,7 @@ enum eCheckHover
 	HOVEROPTION_RADIO_7,
 	HOVEROPTION_RADIO_8,
 	HOVEROPTION_RADIO_9,
+	
 	HOVEROPTION_INCREASE_BRIGHTNESS,
 	HOVEROPTION_DECREASE_BRIGHTNESS,
 	HOVEROPTION_INCREASE_DRAWDIST,
@@ -481,7 +492,7 @@ public:
 	int8 m_PrefsDMA;
 	int8 m_PrefsSfxVolume;
 	int8 m_PrefsMusicVolume;
-	uint8 m_PrefsRadioStation;
+	int8 m_PrefsRadioStation;
 	uint8 m_PrefsStereoMono; // unused except restore settings
 	int32 m_nCurrOption;
 	bool m_bQuitGameNoCD;
@@ -517,7 +528,7 @@ public:
 	int32 m_menuTransitionProgress;
 	CSprite2d m_aFrontEndSprites[NUM_MENU_SPRITES];
 	bool m_bSpritesLoaded;
-	int32 field_F0;
+	int32 m_LeftMostRadioX;
 	int32 m_ScrollRadioBy;
 	int32 m_nCurrScreen;
 	int32 m_nPrevScreen;
@@ -665,7 +676,7 @@ public:
 	void ProcessList(bool &optionSelected, bool &goBack);
 	void UserInput();
 	void ProcessUserInput(uint8, uint8, uint8, uint8, int8);
-	void ChangeRadioStation(uint8);
+	void ChangeRadioStation(int8);
 	void ProcessFileActions();
 	void ProcessOnOffMenuOptions();
 	void RequestFrontEndShutDown();
@@ -681,6 +692,9 @@ public:
 	int GetNumOptionsCntrlConfigScreens();
 	int ConstructStatLine(int);
 	void SwitchToNewScreen(int8);
+	void AdditionalOptionInput(bool &goBack);
+	void ExportStats(void);
+	void PrintRadioSelector(void);
 
 	// New (not in function or inlined in the game)
 	void ThingsToDoBeforeLeavingPage();
