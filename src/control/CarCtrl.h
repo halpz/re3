@@ -70,7 +70,7 @@ public:
 	static void GenerateRandomCars(void);
 	static void GenerateOneRandomCar(void);
 	static void GenerateEmergencyServicesCar(void);
-	static int32 ChooseModel(CZoneInfo*, CVector*, int*);
+	static int32 ChooseModel(CZoneInfo*, int*);
 	static int32 ChoosePoliceCarModel(void);
 	static int32 ChooseGangCarModel(int32 gang);
 	static void RemoveDistantCars(void);

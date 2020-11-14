@@ -14643,7 +14643,7 @@ CPed::ProcessObjective(void)
 										CZoneInfo zoneInfo;
 										int chosenCarClass;
 										CTheZones::GetZoneInfoForTimeOfDay(&ourPos, &zoneInfo);
-										int chosenModel = CCarCtrl::ChooseModel(&zoneInfo, &ourPos, &chosenCarClass);
+										int chosenModel = CCarCtrl::ChooseModel(&zoneInfo, &chosenCarClass);
 										CVehicle *newVeh = nil;
 										if (chosenModel != -1) {
 											if (CModelInfo::IsBikeModel(chosenModel)) {

@@ -38,6 +38,7 @@
 
 #define DISTANCE_TO_SPAWN_ROADBLOCK_PEDS (51.0f)
 #define DISTANCE_TO_SCAN_FOR_DANGER (14.0f)
+#define DISTANCE_TO_SCAN_FOR_PED_DANGER (11.0f)
 #define SAFE_DISTANCE_TO_PED (3.0f)
 #define INFINITE_Z (1000000000.0f)
 
@@ -160,7 +161,7 @@ CCarCtrl::GenerateOneRandomCar()
 		carClass = COPS;
 		carModel = ChoosePoliceCarModel();
 	}else{
-		carModel = ChooseModel(&zone, &vecTargetPos, &carClass);
+		carModel = ChooseModel(&zone, &carClass);
 		if (carModel == -1 || (carClass == COPS && pWanted->m_nWantedLevel >= 1))
 			/* All cop spawns with wanted level are handled by condition above. */
 			/* In particular it means that cop cars never spawn if player has wanted level of 1. */
@@ -377,7 +378,7 @@ CCarCtrl::GenerateOneRandomCar()
 		break;
 	case COPS_BOAT:
 		pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
-		pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(4.0f, 16.0f);
+		pVehicle->AutoPilot.m_nCruiseSpeed = CGeneral::GetRandomNumberInRange(4, 16);
 		pVehicle->AutoPilot.m_fMaxTrafficSpeed = pVehicle->AutoPilot.m_nCruiseSpeed;
 		pVehicle->AutoPilot.m_nCarMission = CCarAI::FindPoliceBoatMissionForWantedLevel();
 		pVehicle->bCreatedAsPoliceVehicle = true;
@@ -759,7 +760,7 @@ CCarCtrl::ChooseCarRating(CZoneInfo* pZoneInfo)
 }
 
 int32
-CCarCtrl::ChooseModel(CZoneInfo* pZone, CVector* pPos, int* pClass) {
+CCarCtrl::ChooseModel(CZoneInfo* pZone, int* pClass) {
 	int32 model = -1;
 	int32 i;
 	for (i = 10; i > 0 && (model == -1 || !CStreaming::HasModelLoaded(model)); i--) {
@@ -1003,7 +1004,7 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 		(pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_STOP_FOR_CARS || pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_STOP_FOR_CARS_IGNORE_LIGHTS)) &&
 		CTimer::GetTimeInMilliseconds() - pVehicle->AutoPilot.m_nTimeToStartMission > 5000 &&
 		!pVehicle->GetIsOnScreen() &&
-		(pVehicle->GetPosition() - vecPlayerPos).Magnitude2D() > 25.0f &&
+		(pVehicle->GetPosition() - vecPlayerPos).Magnitude2D() > 22.0f &&
 		!IsThisVehicleInteresting(pVehicle) &&
 		!pVehicle->bIsLocked &&
 		pVehicle->CanBeDeleted() &&
@@ -1146,10 +1147,10 @@ void
 CCarCtrl::ScanForPedDanger(CVehicle* pVehicle)
 {
 	bool storedSlowDownFlag = pVehicle->AutoPilot.m_bSlowedDownBecauseOfPeds;
-	float left = pVehicle->GetPosition().x - DISTANCE_TO_SCAN_FOR_DANGER;
-	float right = pVehicle->GetPosition().x + DISTANCE_TO_SCAN_FOR_DANGER;
-	float top = pVehicle->GetPosition().y - DISTANCE_TO_SCAN_FOR_DANGER;
-	float bottom = pVehicle->GetPosition().y + DISTANCE_TO_SCAN_FOR_DANGER;
+	float left = pVehicle->GetPosition().x - DISTANCE_TO_SCAN_FOR_PED_DANGER;
+	float right = pVehicle->GetPosition().x + DISTANCE_TO_SCAN_FOR_PED_DANGER;
+	float top = pVehicle->GetPosition().y - DISTANCE_TO_SCAN_FOR_PED_DANGER;
+	float bottom = pVehicle->GetPosition().y + DISTANCE_TO_SCAN_FOR_PED_DANGER;
 	int xstart = Max(0, CWorld::GetSectorIndexX(left));
 	int xend = Min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(right));
 	int ystart = Max(0, CWorld::GetSectorIndexY(top));
@@ -1190,7 +1191,7 @@ CCarCtrl::SlowCarOnRailsDownForTrafficAndLights(CVehicle* pVehicle)
 		if (curSpeed < 0.1f)
 			pVehicle->AutoPilot.ModifySpeed(0.0f);
 		else
-			pVehicle->AutoPilot.ModifySpeed(Max(maxSpeed, curSpeed - 0.5f * CTimer::GetTimeStep()));
+			pVehicle->AutoPilot.ModifySpeed(Max(maxSpeed, curSpeed - 0.7f * CTimer::GetTimeStep()));
 	}
 }
 
@@ -1291,7 +1292,7 @@ void CCarCtrl::SlowCarDownForPedsSectorList(CPtrList& lst, CVehicle* pVehicle, f
 		if (distanceUntilHit < 10.0f){
 			if (pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_STOP_FOR_CARS ||
 			  pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_SLOW_DOWN_FOR_CARS){
-				*pSpeed = Min(*pSpeed, ABS(distanceUntilHit - 1.0f) * 0.1f * curSpeed);
+				*pSpeed = Min(*pSpeed, ABS(distanceUntilHit - 1.0f) / 10.0f * curSpeed);
 				pVehicle->AutoPilot.m_bSlowedDownBecauseOfPeds = true;
 				if (distanceUntilHit < 2.0f){
 					pVehicle->AutoPilot.m_nTempAction = TEMPACT_WAIT;
@@ -1489,7 +1490,7 @@ float CCarCtrl::TestCollisionBetween2MovingRects(CVehicle* pVehicleA, CVehicle* 
 
 float CCarCtrl::FindAngleToWeaveThroughTraffic(CVehicle* pVehicle, CPhysical* pTarget, float angleToTarget, float angleForward)
 {
-	float distanceToTest = Min(2.0f, pVehicle->GetMoveSpeed().Magnitude2D() * 2.5f + 1.0f) * 12.0f;
+	float distanceToTest = Min(2.0f, pVehicle->GetMoveSpeed().Magnitude2D() / 0.4f + 1.0f) * 12.0f;
 	float left = pVehicle->GetPosition().x - distanceToTest;
 	float right = pVehicle->GetPosition().x + distanceToTest;
 	float top = pVehicle->GetPosition().y - distanceToTest;
@@ -1730,6 +1731,7 @@ void CCarCtrl::WeaveForObject(CEntity* pOtherEntity, CVehicle* pVehicle, float* 
 
 bool CCarCtrl::PickNextNodeAccordingStrategy(CVehicle* pVehicle)
 {
+	pVehicle->AutoPilot.m_nCruiseSpeedMultiplierType = ThePaths.m_pathNodes[pVehicle->AutoPilot.m_nNextRouteNode].speedLimit;
 	switch (pVehicle->AutoPilot.m_nCarMission){
 	case MISSION_RAMPLAYER_FARAWAY:
 	case MISSION_BLOCKPLAYER_FARAWAY:
@@ -2616,7 +2618,7 @@ void CCarCtrl::SteerAIBoatWithPhysicsHeadingForTarget(CVehicle* pVehicle, float 
 void CCarCtrl::SteerAIBoatWithPhysicsAttackingPlayer(CVehicle* pVehicle, float* pSwerve, float* pAccel, float* pBrake, bool* pHandbrake)
 {
 	float distanceToPlayer = (FindPlayerCoors() - pVehicle->GetPosition()).Magnitude();
-	float projection = Min(distanceToPlayer * 0.05f, 2.0f);
+	float projection = Min(distanceToPlayer / 20.0f, 2.0f);
 	CVector2D forward = pVehicle->GetForward();
 	forward.Normalise();
 	CVector2D vecToProjection = FindPlayerCoors() + FindPlayerSpeed() * projection * GAME_SPEED_TO_CARAI_SPEED;
@@ -2944,7 +2946,7 @@ void CCarCtrl::SteerAICarWithPhysicsHeadingForTarget(CVehicle* pVehicle, CPhysic
 	float speedDiff = speedTarget - currentSpeed;
 	if (speedDiff <= 0.0f){
 		*pAccel = 0.0f;
-		*pBrake = Min(0.5f, -speedDiff * 0.05f);
+		*pBrake = Min(0.5f, -speedDiff / 20.0f);
 	}else if (currentSpeed < 25.0f){
 		*pAccel = Min(1.0f, speedDiff * 0.1f);
 		*pBrake = 0.0f;
