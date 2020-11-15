@@ -8061,6 +8061,9 @@ PS2
 [FEM_XBX]
 XBOX
 
+[FEC_IVP]
+INVERT PAD VERTICALLY
+
 { end of file }
 
 [DUMMY]
