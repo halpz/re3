@@ -383,9 +383,6 @@ enum eMenuAction
 //#ifdef NO_ISLAND_LOADING
 //	MENUACTION_ISLANDLOADING,
 //#endif
-#ifdef INVERT_LOOK_FOR_PAD
-	MENUACTION_INVERTPADY,
-#endif
 };
 
 enum eCheckHover
