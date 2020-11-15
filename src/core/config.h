@@ -275,6 +275,7 @@ enum Config {
 #		define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
 #		define CUTSCENE_BORDERS_SWITCH
 #		define MULTISAMPLING		// adds MSAA option
+#		define INVERT_LOOK_FOR_PAD // add bInvertLook4Pad from VC
 #	endif
 #endif
 

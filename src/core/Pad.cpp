@@ -59,6 +59,9 @@ bool CPad::bDisplayNoControllerMessage;
 bool CPad::bObsoleteControllerMessage;
 bool CPad::bOldDisplayNoControllerMessage;
 bool CPad::m_bMapPadOneToPadTwo;
+#ifdef INVERT_LOOK_FOR_PAD
+bool CPad::bInvertLook4Pad;
+#endif
 #ifdef GTA_PS2
 unsigned char act_direct[6];
 unsigned char act_align[6];
@@ -2534,10 +2537,20 @@ int16 CPad::SniperModeLookLeftRight(void)
 int16 CPad::SniperModeLookUpDown(void)
 {
 	int16 axis = NewState.LeftStickY;
+	int16 dpad;
 #ifdef FIX_BUGS
 	axis = -axis;
 #endif
-	int16 dpad = (NewState.DPadUp - NewState.DPadDown) / 2;
+#ifndef INVERT_LOOK_FOR_PAD
+	dpad = (NewState.DPadUp - NewState.DPadDown) / 2;
+#else
+	if (CPad::bInvertLook4Pad) {
+		axis = -axis;
+		dpad = (NewState.DPadDown - NewState.DPadUp) / 2;
+	} else {
+		dpad = (NewState.DPadUp - NewState.DPadDown) / 2;
+	}
+#endif
 
 	if ( Abs(axis) > Abs(dpad) )
 		return axis;
@@ -2566,6 +2579,10 @@ int16 CPad::LookAroundUpDown(void)
 
 #ifdef FIX_BUGS
 	axis = -axis;
+#endif
+#ifdef INVERT_LOOK_FOR_PAD
+	if (CPad::bInvertLook4Pad)
+		axis = -axis;
 #endif
 
 	if ( Abs(axis) > 85 && !GetLookBehindForPed() )
