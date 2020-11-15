@@ -18,7 +18,6 @@
 
 #define MENU_X_MARGIN 40.0f
 #define MENUACTION_POS_Y 60.0f
-#define MENUACTION_WIDTH 38.0f
 #define MENUACTION_SCALE_MULT 0.9f
 
 #define MENURADIO_ICON_SCALE 60.0f
@@ -235,11 +234,11 @@ enum eMenuScreen
 	MENUPAGE_KEYBOARD_CONTROLS = 55,
 	MENUPAGE_MOUSE_CONTROLS = 56,
 	MENUPAGE_MISSION_RETRY = 57,
+#ifdef MENU_MAP
+	MENUPAGE_MAP = 58,
+#endif
 #ifdef CUSTOM_FRONTEND_OPTIONS
 
-#ifdef MENU_MAP
-	MENUPAGE_MAP,
-#endif
 #ifdef GRAPHICS_MENU_OPTIONS
 	MENUPAGE_GRAPHICS_SETTINGS,
 #else
@@ -379,9 +378,6 @@ enum eMenuAction
 //#ifdef ANISOTROPIC_FILTERING
 //	MENUACTION_MIPMAPS,
 //	MENUACTION_TEXTURE_FILTERING,
-//#endif
-//#ifdef NO_ISLAND_LOADING
-//	MENUACTION_ISLANDLOADING,
 //#endif
 };
 
@@ -718,7 +714,6 @@ public:
 		ISLAND_LOADING_HIGH
 	};
 
-	static int8 m_DisplayIslandLoading;
 	static int8 m_PrefsIslandLoading;
 
 	#define ISLAND_LOADING_IS(p) if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_##p)
@@ -786,6 +781,7 @@ public:
 	void PageUpList(bool);
 	void PageDownList(bool);
 	int8 GetPreviousPageOption();
+	void ProcessList(bool &goBack, bool &optionSelected);
 };
 
 #ifndef IMPROVED_VIDEOMODE

@@ -86,7 +86,8 @@ CustomFrontendOptionsPopulate(void)
 linb::ini cfg;
 int CheckAndReadIniInt(const char *cat, const char *key, int original)
 {
-	const char *value = (cfg.get(cat, key, "").c_str());
+	std::string strval = cfg.get(cat, key, "");
+	const char *value = strval.c_str();
 	if (value && value[0] != '\0')
 		return atoi(value);
 
@@ -95,11 +96,32 @@ int CheckAndReadIniInt(const char *cat, const char *key, int original)
 
 float CheckAndReadIniFloat(const char *cat, const char *key, float original)
 {
-	const char *value = (cfg.get(cat, key, "").c_str());
+	std::string strval = cfg.get(cat, key, "");
+	const char *value = strval.c_str();
 	if (value && value[0] != '\0')
 		return atof(value);
 
 	return original;
+}
+
+void CheckAndSaveIniInt(const char *cat, const char *key, int val, bool &changed)
+{
+	char temp[10];
+	if (atoi(cfg.get(cat, key, "xxx").c_str()) != val) { // if .ini doesn't have our key, compare with xxx and forcefully add it
+		changed = true;
+		sprintf(temp, "%u", val);
+		cfg.set(cat, key, temp);
+	}
+}
+
+void CheckAndSaveIniFloat(const char *cat, const char *key, float val, bool &changed)
+{
+	char temp[10];
+	if (atof(cfg.get(cat, key, "xxx").c_str()) != val) { // if .ini doesn't have our key, compare with xxx and forcefully add it
+		changed = true;
+		sprintf(temp, "%f", val);
+		cfg.set(cat, key, temp);
+	}
 }
 
 void LoadINISettings()
@@ -156,11 +178,6 @@ void LoadINISettings()
 	}
 #endif
 
-#ifdef NO_ISLAND_LOADING
-	CMenuManager::m_PrefsIslandLoading = CheckAndReadIniInt("FrontendOptions", "NoIslandLoading", CMenuManager::m_PrefsIslandLoading);
-	CMenuManager::m_DisplayIslandLoading = CMenuManager::m_PrefsIslandLoading;
-#endif
-
 #ifdef EXTENDED_COLOURFILTER
 	CPostFX::Intensity = CheckAndReadIniFloat("CustomPipesValues", "PostFXIntensity", CPostFX::Intensity);
 #endif
@@ -192,21 +209,22 @@ void SaveINISettings()
 				break;
 				
 			if (option.m_Action < MENUACTION_NOTHING && option.m_CFO->save) {
-				if (atoi(cfg.get("FrontendOptions", option.m_CFO->save, "xxx").c_str()) != *option.m_CFO->value) { // if .ini doesn't have that key compare with xxx, so we can add it
-					changed = true;
-					sprintf(temp, "%u", *option.m_CFO->value);
-					cfg.set("FrontendOptions", option.m_CFO->save, temp);
-				}
+				// Beware: CFO only supports saving uint8 right now
+				CheckAndSaveIniInt("FrontendOptions", option.m_CFO->save, *option.m_CFO->value, changed);
 			}
 		}
 	}
 #endif
-#ifdef NO_ISLAND_LOADING
-	if (atoi(cfg.get("FrontendOptions", "NoIslandLoading", "xxx").c_str()) != CMenuManager::m_PrefsIslandLoading) {
-		changed = true;
-		sprintf(temp, "%u", CMenuManager::m_PrefsIslandLoading);
-		cfg.set("FrontendOptions", "NoIslandLoading", temp);
-	}
+
+#ifdef EXTENDED_COLOURFILTER
+	CheckAndSaveIniFloat("CustomPipesValues", "PostFXIntensity", CPostFX::Intensity, changed);
+#endif
+#ifdef EXTENDED_PIPELINES
+	CheckAndSaveIniFloat("CustomPipesValues", "NeoVehicleShininess", CustomPipes::VehicleShininess, changed);
+	CheckAndSaveIniFloat("CustomPipesValues", "NeoVehicleSpecularity", CustomPipes::VehicleSpecularity, changed);
+	CheckAndSaveIniFloat("CustomPipesValues", "RimlightMult", CustomPipes::RimlightMult, changed);
+	CheckAndSaveIniFloat("CustomPipesValues", "LightmapMult", CustomPipes::LightmapMult, changed);
+	CheckAndSaveIniFloat("CustomPipesValues", "GlossMult", CustomPipes::GlossMult, changed);
 #endif
 
 	if (changed)

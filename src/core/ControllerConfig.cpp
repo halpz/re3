@@ -2500,10 +2500,11 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     nil,    /* SHOW_MOUSE_POINTER_TOGGLE */                                                                                                               \
 	 }}
 
+
+const char *XboxButtons_noIcons[][MAX_CONTROLLERACTIONS] = CONTROLLER_BUTTONS("Y", "B", "A", "X", "LB", "LT", "LS", "RB", "RT", "RS", "BACK");
+
 #ifdef BUTTON_ICONS
 const char *XboxButtons[][MAX_CONTROLLERACTIONS] = CONTROLLER_BUTTONS("~T~", "~O~", "~X~", "~Q~", "~K~", "~M~", "~A~", "~J~", "~V~", "~C~", "BACK");
-#else
-const char *XboxButtons[][MAX_CONTROLLERACTIONS] = CONTROLLER_BUTTONS("Y", "B", "A", "X", "LB", "LT", "LS", "RB", "RT", "RS", "BACK");
 #endif
 
 
@@ -2524,12 +2525,12 @@ const char *XboxButtons[][MAX_CONTROLLERACTIONS] = CONTROLLER_BUTTONS("Y", "B", 
 #define PS2_SQUARE "SQUARE"
 #endif
 
+const char *PlayStationButtons_noIcons[][MAX_CONTROLLERACTIONS] =
+    CONTROLLER_BUTTONS(PS2_TRIANGLE, PS2_CIRCLE, PS2_CROSS, PS2_SQUARE, "L1", "L2", "L3", "R1", "R2", "R3", "SELECT");
+
 #ifdef BUTTON_ICONS
 const char *PlayStationButtons[][MAX_CONTROLLERACTIONS] =
     CONTROLLER_BUTTONS(PS2_TRIANGLE, PS2_CIRCLE, PS2_CROSS, PS2_SQUARE, "~K~", "~M~", "~A~", "~J~", "~V~", "~C~", "SELECT");
-#else
-const char *PlayStationButtons[][MAX_CONTROLLERACTIONS] =
-    CONTROLLER_BUTTONS(PS2_TRIANGLE, PS2_CIRCLE, PS2_CROSS, PS2_SQUARE, "L1", "L2", "L3", "R1", "R2", "R3", "SELECT");
 #endif
 
 #undef PS2_TRIANGLE
@@ -2547,7 +2548,11 @@ void CControllerConfigManager::GetWideStringOfCommandKeys(uint16 action, wchar *
 		wchar wstr[16];
 
 		// TODO: INI and/or menu setting for Xbox/PS switch 
-		const char *(*Buttons)[MAX_CONTROLLERACTIONS] = XboxButtons;
+#ifdef BUTTON_ICONS
+		const char *(*Buttons)[MAX_CONTROLLERACTIONS] = CFont::ButtonsSlot != -1 ? XboxButtons : XboxButtons_noIcons;
+#else
+		const char *(*Buttons)[MAX_CONTROLLERACTIONS] = XboxButtons_noIcons;
+#endif
 
 		assert(Buttons[CPad::GetPad(0)->Mode][action] != nil); // we cannot use these
 		AsciiToUnicode(Buttons[CPad::GetPad(0)->Mode][action], wstr);

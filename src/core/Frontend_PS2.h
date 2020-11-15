@@ -160,31 +160,9 @@ public:
 	static int32 m_PrefsLanguage;
 	static CONTRCONFIG m_PrefsControllerConfig;
 	static bool m_PrefsUseVibration;
-#ifdef NO_ISLAND_LOADING
-	enum
-	{
-		ISLAND_LOADING_LOW = 0,
-		ISLAND_LOADING_MEDIUM,
-		ISLAND_LOADING_HIGH
-	};
 
-	static int8 m_DisplayIslandLoading;
-	static int8 m_PrefsIslandLoading;
-
-#define ISLAND_LOADING_IS(p) if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_##p)
-#define ISLAND_LOADING_ISNT(p) if (CMenuManager::m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_##p)
-#else
 #define ISLAND_LOADING_IS(p)
 #define ISLAND_LOADING_ISNT(p)
-#endif
-#ifdef CUTSCENE_BORDERS_SWITCH
-	static bool m_PrefsCutsceneBorders;
-#endif
-#ifdef MULTISAMPLING
-	static int8 m_nPrefsMSAALevel;
-	static int8 m_nDisplayMSAALevel;
-#endif
-
 #ifdef GTA_PC
 	bool m_bQuitGameNoCD;
 	

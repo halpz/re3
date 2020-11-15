@@ -11,6 +11,10 @@
 #include "custompipes.h"
 #include "RwHelper.h"
 #include "Text.h"
+#include "Streaming.h"
+#include "FileLoader.h"
+#include "Collision.h"
+#include "ModelInfo.h"
 
 // Menu screens array is at the bottom of the file.
 
@@ -48,6 +52,12 @@
 	#define DUALPASS_SELECTOR 
 #endif
 
+#ifdef NO_ISLAND_LOADING
+	#define ISLAND_LOADING_SELECTOR MENUACTION_CFO_SELECT, "FEM_ISL", { new CCFOSelect((int8*)&CMenuManager::m_PrefsIslandLoading, "IslandLoading", islandLoadingOpts, ARRAY_SIZE(islandLoadingOpts), true, IslandLoadingAfterChange) },
+#else
+	#define ISLAND_LOADING_SELECTOR 
+#endif
+
 #ifdef EXTENDED_COLOURFILTER
 	#define POSTFX_SELECTORS \
 		MENUACTION_CFO_SELECT, "FED_CLF", { new CCFOSelect((int8*)&CPostFX::EffectSwitch, "ColourFilter", filterNames, ARRAY_SIZE(filterNames), false, nil) }, \
@@ -79,6 +89,18 @@ void RestoreDefGraphics(int8 action) {
 	#endif
 	#ifdef MULTISAMPLING
 		FrontEndMenuManager.m_nPrefsMSAALevel = FrontEndMenuManager.m_nDisplayMSAALevel = 0;
+	#endif
+	#ifdef NO_ISLAND_LOADING
+	    	if (!FrontEndMenuManager.m_bGameNotLoaded) {
+	    		FrontEndMenuManager.m_PrefsIslandLoading = FrontEndMenuManager.ISLAND_LOADING_LOW;
+			CCollision::bAlreadyLoaded = false;
+			CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
+			CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
+			CStreaming::RemoveUnusedBuildings(CGame::currLevel);
+			CStreaming::RequestIslands(CGame::currLevel);
+			CStreaming::LoadAllRequestedModels(true);
+	    	} else
+	    		FrontEndMenuManager.m_PrefsIslandLoading = FrontEndMenuManager.ISLAND_LOADING_LOW;
 	#endif
 	#ifdef GRAPHICS_MENU_OPTIONS // otherwise Frontend will handle those
 		CMenuManager::m_PrefsFrameLimiter = true;
@@ -119,6 +141,47 @@ void RestoreDefDisplay(int8 action) {
 		FrontEndMenuManager.SaveSettings();
 	#endif
 }
+
+#ifdef NO_ISLAND_LOADING
+const char *islandLoadingOpts[] = { "FEM_LOW", "FEM_MED", "FEM_HIG" };
+void IslandLoadingAfterChange(int8 before, int8 after) {
+	if (!FrontEndMenuManager.m_bGameNotLoaded) {
+		if (after > FrontEndMenuManager.ISLAND_LOADING_LOW) {
+		    FrontEndMenuManager.m_PrefsIslandLoading = before; // calls below needs previous mode :shrug:
+		    
+		    if (after == FrontEndMenuManager.ISLAND_LOADING_HIGH)
+			    CStreaming::RemoveIslandsNotUsed(LEVEL_GENERIC);
+		    if (before == FrontEndMenuManager.ISLAND_LOADING_LOW) {
+			    if (CGame::currLevel != LEVEL_INDUSTRIAL)
+				    CFileLoader::LoadCollisionFromDatFile(LEVEL_INDUSTRIAL);
+			    if (CGame::currLevel != LEVEL_COMMERCIAL)
+				    CFileLoader::LoadCollisionFromDatFile(LEVEL_COMMERCIAL);
+			    if (CGame::currLevel != LEVEL_SUBURBAN)
+				    CFileLoader::LoadCollisionFromDatFile(LEVEL_SUBURBAN);
+			    CCollision::bAlreadyLoaded = true;
+			    FrontEndMenuManager.m_PrefsIslandLoading = after;
+			    CStreaming::RequestBigBuildings(CGame::currLevel);
+			    
+		    } else if (before == FrontEndMenuManager.ISLAND_LOADING_HIGH) {
+			    FrontEndMenuManager.m_PrefsIslandLoading = after;
+			    CStreaming::RequestIslands(CGame::currLevel);
+		    } else
+		    	    FrontEndMenuManager.m_PrefsIslandLoading = after;
+		    	    
+		} else { // low
+		    CCollision::bAlreadyLoaded = false;
+		    CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
+		    CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
+		    CStreaming::RemoveUnusedBuildings(CGame::currLevel);
+		    CStreaming::RequestIslands(CGame::currLevel);
+		}
+
+		CStreaming::LoadAllRequestedModels(true);
+	}
+
+	FrontEndMenuManager.SetHelperText(0);
+}
+#endif
 
 #ifdef MORE_LANGUAGES
 void LangPolSelect(int8 action)
@@ -761,6 +824,7 @@ CMenuScreenCustom aScreens[MENUPAGES] = {
 #ifdef EXTENDED_PIPELINES
 		PIPELINES_SELECTOR
 #endif
+		ISLAND_LOADING_SELECTOR
 		DUALPASS_SELECTOR
 		MENUACTION_CFO_DYNAMIC,	"FET_DEF", { new CCFODynamic(nil, nil, nil, RestoreDefGraphics) },
 		MENUACTION_CHANGEMENU,	"FEDS_TB", { nil, SAVESLOT_NONE, MENUPAGE_NONE },
@@ -770,6 +834,7 @@ CMenuScreenCustom aScreens[MENUPAGES] = {
 	{ "FET_ADV", MENUPAGE_OPTIONS, MENUPAGE_OPTIONS,
 		new CCustomScreenLayout({MENUSPRITE_MAINMENU, 50, 0, 20, FONT_HEADING, FESCREEN_LEFT_ALIGN, true, MEDIUMTEXT_X_SCALE, MEDIUMTEXT_Y_SCALE}), nil,
 
+		ISLAND_LOADING_SELECTOR
 		DUALPASS_SELECTOR
 		CUTSCENE_BORDERS_TOGGLE
 		FREE_CAM_TOGGLE

@@ -89,7 +89,11 @@ RwRGBA gColourTop;
 bool gameAlreadyInitialised;
 
 float NumberOfChunksLoaded;
+#ifdef GTA_PS2
+#define TOTALNUMCHUNKS 48.0f
+#else
 #define TOTALNUMCHUNKS 73.0f
+#endif
 
 bool g_SlowMode = false;
 char version_name[64];
@@ -625,20 +629,20 @@ LoadingIslandScreen(const char *levelName)
 	CFont::SetScale(1.5f, 1.5f);
 	CFont::SetPropOn();
 	CFont::SetRightJustifyOn();
-	CFont::SetRightJustifyWrap(150.0f);
+	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(150.0f));
 	CFont::SetFontStyle(FONT_HEADING);
 	sprintf(str, "WELCOME TO");
 	AsciiToUnicode(str, wstr);
 	CFont::SetDropColor(CRGBA(0, 0, 0, 255));
 	CFont::SetDropShadowPosition(3);
 	CFont::SetColor(CRGBA(243, 237, 71, 255));
-	CFont::SetScale(SCREEN_STRETCH_X(1.2f), SCREEN_STRETCH_Y(1.2f));
-	CFont::PrintString(SCREEN_WIDTH - 20, SCREEN_STRETCH_FROM_BOTTOM(110.0f), TheText.Get("WELCOME"));
+	CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.2f));
+	CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_STRETCH_FROM_BOTTOM(110.0f), TheText.Get("WELCOME"));
 	TextCopy(wstr, name);
 	TheText.UpperCase(wstr);
 	CFont::SetColor(CRGBA(243, 237, 71, 255));
-	CFont::SetScale(SCREEN_STRETCH_X(1.2f), SCREEN_STRETCH_Y(1.2f));
-	CFont::PrintString(SCREEN_WIDTH-20, SCREEN_STRETCH_FROM_BOTTOM(80.0f), wstr);
+	CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.2f));
+	CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_STRETCH_FROM_BOTTOM(80.0f), wstr);
 	CFont::DrawFonts();
 	DoRWStuffEndOfFrame();
 }
@@ -852,7 +856,7 @@ DisplayGameDebugText()
 		CFont::SetRightJustifyOff();
 		CFont::SetJustifyOff();
 		CFont::SetBackGroundOnlyTextOff();
-		CFont::SetWrapx(SCREEN_WIDTH);
+		CFont::SetWrapx(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
 		CFont::SetFontStyle(FONT_HEADING);
 		
 		CFont::SetColor(CRGBA(0, 0, 0, 255));

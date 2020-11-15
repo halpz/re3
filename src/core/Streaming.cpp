@@ -390,6 +390,7 @@ CStreaming::LoadCdDirectory(const char *dirname, int n)
 	assert(sizeof(direntry) == 32);
 	while(CFileMgr::Read(fd, (char*)&direntry, sizeof(direntry))){
 		dot = strchr(direntry.name, '.');
+		assert(dot);
 		if(dot) *dot = '\0';
 		if(direntry.size > (uint32)ms_streamingBufferSize)
 			ms_streamingBufferSize = direntry.size;
@@ -741,7 +742,9 @@ CStreaming::RequestBigBuildings(eLevelName level)
 		b = CPools::GetBuildingPool()->GetSlot(i);
 		if(b && b->bIsBIGBuilding
 #ifdef NO_ISLAND_LOADING
-		    && ((CMenuManager::m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_LOW) || (b->m_level == level))
+		    && (((CMenuManager::m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_LOW) && (b != pIslandLODindustEntity) && (b != pIslandLODcomIndEntity) &&
+		         (b != pIslandLODcomSubEntity) && (b != pIslandLODsubIndEntity) && (b != pIslandLODsubComEntity)
+				) || (b->m_level == level))
 #else
 		    && b->m_level == level
 #endif
