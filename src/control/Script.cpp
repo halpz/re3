@@ -13337,3 +13337,44 @@ void RetryMission(int type, int unk)
 }
 
 #endif
+
+#ifdef MISSION_SWITCHER
+void
+CTheScripts::SwitchToMission(int32 mission)
+{
+	for (CRunningScript* pScript = CTheScripts::pActiveScripts; pScript != nil; pScript = pScript->GetNext()) {
+		if (!pScript->m_bIsMissionScript || !pScript->m_bDeatharrestEnabled) {
+			continue;
+		}
+		while (pScript->m_nStackPointer > 0)
+			--pScript->m_nStackPointer;
+
+		pScript->m_nIp = pScript->m_anStack[pScript->m_nStackPointer];
+		*(int32*)&CTheScripts::ScriptSpace[CTheScripts::OnAMissionFlag] = 0;
+		pScript->m_nWakeTime = 0;
+		pScript->m_bDeatharrestExecuted = true;
+
+		while (!pScript->ProcessOneCommand());
+
+		CMessages::ClearMessages();
+	}
+
+#ifdef MISSION_REPLAY
+	missionRetryScriptIndex = mission;
+	if (missionRetryScriptIndex == 19)
+		CStats::LastMissionPassedName[0] = '\0';
+#endif
+	CTimer::Suspend();
+	int offset = CTheScripts::MultiScriptArray[mission];
+	CFileMgr::ChangeDir("\\");
+	int handle = CFileMgr::OpenFile("data\\main.scm", "rb");
+	CFileMgr::Seek(handle, offset, 0);
+	CFileMgr::Read(handle, (const char*)&CTheScripts::ScriptSpace[SIZE_MAIN_SCRIPT], SIZE_MISSION_SCRIPT);
+	CFileMgr::CloseFile(handle);
+	CRunningScript* pMissionScript = CTheScripts::StartNewScript(SIZE_MAIN_SCRIPT);
+	CTimer::Resume();
+	pMissionScript->m_bIsMissionScript = true;
+	pMissionScript->m_bMissionFlag = true;
+	CTheScripts::bAlreadyRunningAMissionScript = true;
+}
+#endif

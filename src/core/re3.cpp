@@ -26,6 +26,7 @@
 #include "Frontend.h"
 #include "WaterLevel.h"
 #include "main.h"
+#include "Script.h"
 #include "postfx.h"
 #include "custompipes.h"
 
@@ -373,6 +374,15 @@ ResetCamStatics(void)
 	TheCamera.Cams[TheCamera.ActiveCam].ResetStatics = true;
 }
 
+#ifdef MISSION_SWITCHER
+int8 nextMissionToSwitch = 0;
+static void
+SwitchToMission(void)
+{
+	CTheScripts::SwitchToMission(nextMissionToSwitch);
+}
+#endif
+
 static const char *carnames[] = {
 	"landstal", "idaho", "stinger", "linerun", "peren", "sentinel", "patriot", "firetruk", "trash", "stretch", "manana", "infernus", "blista", "pony",
 	"mule", "cheetah", "ambulan", "fbicar", "moonbeam", "esperant", "taxi", "kuruma", "bobcat", "mrwhoop", "bfinject", "corpse", "police", "enforcer",
@@ -580,6 +590,29 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Debug", "Show DebugStuffInRelease", &gbDebugStuffInRelease, nil);
 #ifdef TIMEBARS
 		DebugMenuAddVarBool8("Debug", "Show Timebars", &gbShowTimebars, nil);
+#endif
+#ifdef MISSION_SWITCHER
+		DebugMenuEntry *missionEntry;
+		static const char* missions[] = {
+			"Intro Movie", "Hospital Info Scene", "Police Station Info Scene",
+			"RC Diablo Destruction", "RC Mafia Massacre", "RC Rumpo Rampage", "RC Casino Calamity",
+			"Patriot Playground", "A Ride In The Park", "Gripped!", "Multistorey Mayhem",
+			"Paramedic", "Firefighter", "Vigilante", "Taxi Driver",
+			"The Crook", "The Thieves", "The Wife", "Her Lover",
+			"Give Me Liberty and Luigi's Girls", "Don't Spank My Bitch Up", "Drive Misty For Me", "Pump-Action Pimp", "The Fuzz Ball",
+			"Mike Lips Last Lunch", "Farewell 'Chunky' Lee Chong", "Van Heist", "Cipriani's Chauffeur", "Dead Skunk In The Trunk", "The Getaway",
+			"Taking Out The Laundry", "The Pick-Up", "Salvatore's Called A Meeting", "Triads And Tribulations", "Blow Fish", "Chaperone", "Cutting The Grass",
+			"Bomb Da Base: Act I", "Bomb Da Base: Act II", "Last Requests", "Turismo", "I Scream, You Scream", "Trial By Fire", "Big'N'Veiny", "Sayonara Salvatore",
+			"Under Surveillance", "Paparazzi Purge", "Payday For Ray", "Two-Faced Tanner", "Kanbu Bust-Out", "Grand Theft Auto", "Deal Steal", "Shima", "Smack Down",
+			"Silence The Sneak", "Arms Shortage", "Evidence Dash", "Gone Fishing", "Plaster Blaster", "Marked Man",
+			"Liberator", "Waka-Gashira Wipeout!", "A Drop In The Ocean", "Bling-Bling Scramble", "Uzi Rider", "Gangcar Round-Up", "Kingdom Come",
+			"Grand Theft Aero", "Escort Service", "Decoy", "Love's Disappearance", "Bait", "Espresso-2-Go!", "S.A.M.",
+			"Uzi Money", "Toyminator", "Rigged To Blow", "Bullion Run", "Rumble", "The Exchange"
+		};
+
+		missionEntry = DebugMenuAddVar("Debug", "Select mission", &nextMissionToSwitch, nil, 1, 0, 79, missions);
+		DebugMenuEntrySetWrap(missionEntry, true);
+		DebugMenuAddCmd("Debug", "Start selected mission ", SwitchToMission);
 #endif
 
 		extern bool PrintDebugCode;

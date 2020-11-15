@@ -217,6 +217,11 @@ enum Config {
 #define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
 #define LOAD_INI_SETTINGS // as the name suggests. fundamental for CUSTOM_FRONTEND_OPTIONS
 
+// Just debug menu entries
+#ifdef DEBUGMENU
+#define MISSION_SWITCHER // from debug menu
+#endif
+
 // Rendering/display
 //#define EXTRA_MODEL_FLAGS	// from mobile to optimize rendering
 //# define HARDCODED_MODEL_FLAGS	// sets the flags enabled above from hardcoded model names.
