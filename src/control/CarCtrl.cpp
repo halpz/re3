@@ -2692,7 +2692,7 @@ void CCarCtrl::GenerateEmergencyServicesCar(void)
 			float distance = 30.0f;
 			CFire* pNearestFire = gFireManager.FindNearestFire(FindPlayerCoors(), &distance);
 			if (pNearestFire) {
-				if (CountCarsOfType(MI_FIRETRUCK) < 2 && CTimer::GetTimeInMilliseconds() > LastTimeFireTruckCreated + 30000){
+				if (CountCarsOfType(MI_FIRETRUCK) < 2 && CTimer::GetTimeInMilliseconds() > LastTimeFireTruckCreated + 35000){
 					CStreaming::RequestModel(MI_FIRETRUCK, STREAMFLAGS_DEPENDENCY);
 					CStreaming::RequestModel(MI_FIREMAN, STREAMFLAGS_DONT_REMOVE);
 					if (CStreaming::HasModelLoaded(MI_FIRETRUCK) && CStreaming::HasModelLoaded(MI_FIREMAN)){
