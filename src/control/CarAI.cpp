@@ -4,6 +4,7 @@
 
 #include "Accident.h"
 #include "AutoPilot.h"
+#include "Bridge.h"
 #include "CarCtrl.h"
 #include "General.h"
 #include "HandlingMgr.h"
@@ -74,6 +75,18 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 	case STATUS_PLAYER_DISABLED:
 		break;
 	case STATUS_SIMPLE:
+	{
+		if (pVehicle->m_pCurGroundEntity && CBridge::ThisIsABridgeObjectMovingUp(pVehicle->m_pCurGroundEntity->GetModelIndex()))
+			pVehicle->SetStatus(STATUS_PHYSICS);
+		CColPoint colPoint;
+		CEntity* pEntity;
+		if (pVehicle->m_randomSeed & 0x3F == CTimer::GetFrameCounter() & 0x3F &&
+			!CWorld::ProcessVerticalLine(pVehicle->GetPosition(), -2.0f, colPoint, pEntity, true, false, false, false, true, false, nil)) {
+			debug("FLOATING CAR TURNED INTO PHYSICS CAR!\n");
+			pVehicle->SetStatus(STATUS_PHYSICS);
+		}
+	}
+	// fallthough
 	case STATUS_PHYSICS:
 		switch (pVehicle->AutoPilot.m_nCarMission) {
 		case MISSION_RAMPLAYER_FARAWAY:
