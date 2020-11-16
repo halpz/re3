@@ -451,9 +451,7 @@ public:
 	uint32 bVehExitWillBeInstant : 1;
 	uint32 bHasAlreadyBeenRecorded : 1;
 	uint32 bFallenDown : 1;
-#ifdef PED_SKIN
-	uint32 bDontAcceptIKLookAts : 1;	// TODO: find uses of this
-#endif
+	uint32 bDontAcceptIKLookAts : 1;
 	uint32 bReachedAttractorHeadingTarget : 1;
 	uint32 bTurnedAroundOnAttractor : 1;
 
@@ -513,10 +511,7 @@ public:
 	CEntity* m_pEventEntity;
 	float m_fAngleToEvent;
 	AnimBlendFrameData *m_pFrames[PED_NODE_MAX];
-#ifdef PED_SKIN
-	// stored inside the clump with non-skin ped
 	RpAtomic *m_pWeaponModel;
-#endif
 	AssocGroupId m_animGroup;
 	CAnimBlendAssociation *m_pVehicleAnim;
 	CVector2D m_vecAnimMoveDelta;
@@ -579,8 +574,7 @@ public:
 	CAccident *m_lastAccident;
 	uint32 m_nPedType;
 	CPedStats *m_pedStats;
-	float m_fleeFromPosX;
-	float m_fleeFromPosY;
+	CVector2D m_fleeFromPos;
 	CEntity *m_fleeFrom;
 	uint32 m_fleeTimer;
 	CEntity* m_threatEx; // TODO(Miami): What is this?

@@ -1,7 +1,6 @@
 #include "common.h"
 
 #include "TempColModels.h"
-#include "SurfaceTable.h"
 
 CColModel CTempColModels::ms_colModelPed1;
 CColModel CTempColModels::ms_colModelPed2;

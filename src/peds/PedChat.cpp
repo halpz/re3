@@ -75,28 +75,29 @@ CPed::ServiceTalkingWhenDead(void)
 void
 CPed::ServiceTalking(void)
 {
-	if (!bBodyPartJustCameOff || m_bodyPartBleeding != PED_HEAD) {
-		if (!CGame::germanGame && m_pFire)
-			m_queuedSound = SOUND_PED_BURNING;
+	if (bBodyPartJustCameOff && m_bodyPartBleeding == PED_HEAD)
+		return;
 
-		if (m_queuedSound != SOUND_NO_SOUND) {
-			if (m_queuedSound == SOUND_PED_DEATH)
-				m_soundStart = CTimer::GetTimeInMilliseconds() - 1;
+	if (!CGame::germanGame && m_pFire)
+		m_queuedSound = SOUND_PED_BURNING;
 
-			if (CTimer::GetTimeInMilliseconds() > m_soundStart) {
-				DMAudio.PlayOneShot(m_audioEntityId, m_queuedSound, 1.0f);
-				m_lastSoundStart = CTimer::GetTimeInMilliseconds();
-				m_soundStart =
-					CommentWaitTime[m_queuedSound - SOUND_PED_DEATH].m_nFixedDelayTime
-					+ CTimer::GetTimeInMilliseconds()
-					+ CGeneral::GetRandomNumberInRange(0, CommentWaitTime[m_queuedSound - SOUND_PED_DEATH].m_nOverrideFixedDelayTime);
+	if (m_queuedSound != SOUND_NO_SOUND) {
+		if (m_queuedSound == SOUND_PED_DEATH)
+			m_soundStart = CTimer::GetTimeInMilliseconds() - 1;
 
-				if (m_queuedSound == SOUND_PED_PLAYER_BEFORESEX && IsPlayer())
-					m_soundStart += 2000;
+		if (CTimer::GetTimeInMilliseconds() > m_soundStart) {
+			DMAudio.PlayOneShot(m_audioEntityId, m_queuedSound, 1.0f);
+			m_lastSoundStart = CTimer::GetTimeInMilliseconds();
+			m_soundStart =
+				CommentWaitTime[m_queuedSound - SOUND_PED_DEATH].m_nFixedDelayTime
+				+ CTimer::GetTimeInMilliseconds()
+				+ CGeneral::GetRandomNumberInRange(0, CommentWaitTime[m_queuedSound - SOUND_PED_DEATH].m_nOverrideFixedDelayTime);
 
-				m_lastQueuedSound = m_queuedSound;
-				m_queuedSound = SOUND_NO_SOUND;
-			}
+			if (m_queuedSound == SOUND_PED_PLAYER_BEFORESEX && IsPlayer())
+				m_soundStart += 2000;
+
+			m_lastQueuedSound = m_queuedSound;
+			m_queuedSound = SOUND_NO_SOUND;
 		}
 	}
 }
@@ -104,8 +105,6 @@ CPed::ServiceTalking(void)
 void
 CPed::Say(uint16 audio)
 {
-	uint16 audioToPlay = audio;
-
 	if (3.0f + TheCamera.GetPosition().z < GetPosition().z)
 		return;
 
@@ -138,19 +137,19 @@ CPed::Say(uint16 audio)
 		}
 	}
 
-	if (audioToPlay < m_queuedSound) {
-		if (audioToPlay != m_lastQueuedSound || audioToPlay == SOUND_PED_DEATH
+	if (audio < m_queuedSound) {
+		if (audio != m_lastQueuedSound || audio == SOUND_PED_DEATH
 
 		// See VC Ped Speech patch
 #ifdef FIX_BUGS
-			|| CommentWaitTime[audioToPlay - SOUND_PED_DEATH].m_nOverrideMaxRandomDelayTime
-				+ (uint32)CGeneral::GetRandomNumberInRange(0, CommentWaitTime[audioToPlay - SOUND_PED_DEATH].m_nMaxRandomDelayTime)
+			|| CommentWaitTime[audio - SOUND_PED_DEATH].m_nOverrideMaxRandomDelayTime
+				+ (uint32)CGeneral::GetRandomNumberInRange(0, CommentWaitTime[audio - SOUND_PED_DEATH].m_nMaxRandomDelayTime)
 #else
 			|| CommentWaitTime[m_queuedSound - SOUND_PED_DEATH].m_nOverrideMaxRandomDelayTime
 			+ (uint32)CGeneral::GetRandomNumberInRange(0, CommentWaitTime[m_queuedSound - SOUND_PED_DEATH].m_nMaxRandomDelayTime)
 #endif
 				+ m_lastSoundStart <= CTimer::GetTimeInMilliseconds()) {
-			m_queuedSound = audioToPlay;
+			m_queuedSound = audio;
 		}
 	}
 }

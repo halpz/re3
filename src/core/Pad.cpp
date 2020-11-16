@@ -1833,7 +1833,7 @@ void CPad::Update(int16 pad)
 		{
 			if ( ShakeDur )
 			{
-				ShakeDur = Max(ShakeDur - CTimer::GetTimeStepInMilliseconds(), 0);
+				ShakeDur = Max(ShakeDur - (int32)CTimer::GetTimeStepInMilliseconds(), 0);
 
 				if ( ShakeDur == 0 )
 				{
