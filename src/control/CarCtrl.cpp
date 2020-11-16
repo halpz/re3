@@ -2122,6 +2122,7 @@ bool CCarCtrl::PickNextNodeToFollowPath(CVehicle* pVehicle)
 			pVehicle, nil, 999999.9f, -1);
 		if (pVehicle->AutoPilot.m_nPathFindNodesCount < 2)
 			return true;
+		pVehicle->AutoPilot.RemoveOnePathNode();
 	}
 	CPathNode* pNextPathNode = &ThePaths.m_pathNodes[pVehicle->AutoPilot.m_nNextRouteNode];
 	CCarPathLink* pCurLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo];
