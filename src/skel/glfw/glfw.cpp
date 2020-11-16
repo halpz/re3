@@ -885,13 +885,7 @@ void _InputInitialiseJoys()
 
 long _InputInitialiseMouse()
 {
-#ifdef IMPROVED_VIDEOMODE
-	// May be windowed, transition will be handled in CMenuManager::SwitchMenuOnAndOff()
 	glfwSetInputMode(PSGLOBAL(window), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-#else
-	// Always fullscreen, disable mouse
-	glfwSetInputMode(PSGLOBAL(window), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-#endif
 	return 0;
 }
 
