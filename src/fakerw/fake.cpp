@@ -942,7 +942,9 @@ RwBool       RtCharsetDestroy(RtCharset * charSet) { charSet->destroy(); return 
 RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags)
 {
 #ifdef RW_GL3
-	return '3LGO';
+	if(flags & (rwRASTERFORMATPAL8 | rwRASTERFORMAT8888))
+		return 'NOPE';
+	return 'YUP';
 #endif
 	return flags & 0xF00;
 }
