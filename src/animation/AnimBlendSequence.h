@@ -12,6 +12,15 @@ struct KeyFrameTrans : KeyFrame {
 	CVector translation;
 };
 
+struct KeyFrameCompressed {
+	int16 rot[4];		// 4096
+	int16 deltaTime;	// 60
+};
+
+struct KeyFrameTransCompressed : KeyFrameCompressed {
+	int16 trans[3];		// 128
+};
+
 
 // The sequence of key frames of one animated node
 class CAnimBlendSequence
@@ -41,10 +50,9 @@ public:
 			&((KeyFrame*)keyFrames)[n];
 	}
 	bool HasTranslation(void) { return !!(type & KF_TRANS); }
-	// TODO? these are unused
-//	void Uncompress(void);
-//	void CompressKeyframes(void);
-//	void RemoveUncompressedData(void);
+	void Uncompress(void);
+	void CompressKeyframes(void);
+	void RemoveUncompressedData(void);
 
 #ifdef PED_SKIN
 	void SetBoneTag(int tag) { boneTag = tag; }
