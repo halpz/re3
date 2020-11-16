@@ -130,6 +130,9 @@ public:
 	static void SteerAIBoatWithPhysicsAttackingPlayer(CVehicle*, float*, float*, float*, bool*);
 	static void SteerAICarBlockingPlayerForwardAndBack(CVehicle*, float*, float*, float*, bool*);
 
+	static bool OkToCreateVehicleAtThisPosition(const CVector&) { return true; }
+	static float GetATanOfXY(float x, float y) { float t = CGeneral::GetATanOfXY(x, y); if (t < 0.0f) t += TWOPI; return t; } // TODO(LCS): replace where required
+
 	static float GetPositionAlongCurrentCurve(CVehicle* pVehicle)
 	{
 		uint32 timeInCurve = CTimer::GetTimeInMilliseconds() - pVehicle->AutoPilot.m_nTimeEnteredCurve;
