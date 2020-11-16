@@ -268,8 +268,7 @@ CPlayerPed::SetInitialState(void)
 	CTimer::SetTimeScale(1.0f);
 	m_pSeekTarget = nil;
 	m_vecSeekPos = CVector(0.0f, 0.0f, 0.0f);
-	m_fleeFromPosX = 0.0f;
-	m_fleeFromPosY = 0.0f;
+	m_fleeFromPos = CVector2D(0.0f, 0.0f);
 	m_fleeFrom = nil;
 	m_fleeTimer = 0;
 	m_objective = OBJECTIVE_NONE;
