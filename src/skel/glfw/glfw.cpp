@@ -885,7 +885,13 @@ void _InputInitialiseJoys()
 
 long _InputInitialiseMouse()
 {
+#ifdef IMPROVED_VIDEOMODE
+	// May be windowed, transition will be handled in CMenuManager::SwitchMenuOnAndOff()
 	glfwSetInputMode(PSGLOBAL(window), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+#else
+	// Always fullscreen, disable mouse
+	glfwSetInputMode(PSGLOBAL(window), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+#endif
 	return 0;
 }
 
@@ -1416,11 +1422,13 @@ _InputTranslateShiftKeyUpDown(RsKeyCodes *rs) {
 // TODO this only works in frontend(and luckily only frontend use this). Fun fact: if I get pos manually in game, glfw reports that it's > 32000
 void
 cursorCB(GLFWwindow* window, double xpos, double ypos) {
-	int bufw, bufh, winw, winh;
-	glfwGetWindowSize(window, &winw, &winh);
-	glfwGetFramebufferSize(window, &bufw, &bufh);
-	FrontEndMenuManager.m_nMouseTempPosX = xpos * (bufw / winw);
-	FrontEndMenuManager.m_nMouseTempPosY = ypos * (bufh / winh);
+	if (!FrontEndMenuManager.m_bMenuActive)
+		return;
+	
+	int winw, winh;
+	glfwGetWindowSize(PSGLOBAL(window), &winw, &winh);
+	FrontEndMenuManager.m_nMouseTempPosX = xpos * (RsGlobal.maximumWidth / winw);
+	FrontEndMenuManager.m_nMouseTempPosY = ypos * (RsGlobal.maximumHeight / winh);
 }
 
 void
@@ -1648,8 +1656,6 @@ main(int argc, char *argv[])
 #endif
 		{
 			glfwPollEvents();
-			glfwSetInputMode(PSGLOBAL(window), GLFW_CURSOR,
-			                 (FrontEndMenuManager.m_bMenuActive && !PSGLOBAL(fullScreen)) ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_DISABLED);
 			if( ForegroundApp )
 			{
 				switch ( gGameState )

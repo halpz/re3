@@ -5529,8 +5529,15 @@ CMenuManager::SwitchMenuOnAndOff()
 		gMusicPlaying = 0;
 	}
 */
-	if (m_bMenuActive != menuWasActive)
+	if (m_bMenuActive != menuWasActive) {
 		m_bMenuStateChanged = true;
+		
+		// Keep mouse centered while in game. Done in main.cpp in other conditions.
+		// IMPROVED_VIDEOMODE because otherwise there is no way for windowed mode.
+#if defined(RW_GL3) && defined(IMPROVED_VIDEOMODE)
+		glfwSetInputMode(PSGLOBAL(window), GLFW_CURSOR, m_bMenuActive && m_nPrefsWindowed ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_DISABLED);
+#endif
+	}
 
 	m_bStartUpFrontEndRequested = false;
 	m_bShutDownFrontEndRequested = false;
