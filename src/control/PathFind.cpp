@@ -542,6 +542,22 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 	int done, cont;
 	int tileStart;
 
+#ifndef MASTER
+	for (i = 0; i < m_numMapObjects-1; i++)
+		for (j = i+1; j < m_numMapObjects; j++) {
+			CTreadable *obj1 = m_mapObjects[i];
+			CTreadable *obj2 = m_mapObjects[j];
+			if (obj1->GetModelIndex() == obj2->GetModelIndex() &&
+				obj1->GetPosition().x == obj2->GetPosition().x && obj1->GetPosition().y == obj2->GetPosition().y && obj1->GetPosition().z == obj2->GetPosition().z &&
+				obj1->GetRight().x == obj2->GetRight().x && obj1->GetForward().x == obj2->GetForward().x && obj1->GetUp().x == obj2->GetUp().x &&
+				obj1->GetRight().y == obj2->GetRight().y && obj1->GetForward().y == obj2->GetForward().y && obj1->GetUp().y == obj2->GetUp().y &&
+				obj1->GetRight().z == obj2->GetRight().z && obj1->GetForward().z == obj2->GetForward().z && obj1->GetUp().z == obj2->GetUp().z) {
+					printf("THIS IS VERY BAD INDEED. FIX IMMEDIATELY!!!\n");
+					printf("Double road objects at the following coors: %f %f %f\n", obj1->GetPosition().x, obj1->GetPosition().y, obj1->GetPosition().z);
+				}
+		}
+#endif // !MASTER
+
 	oldNumPathNodes = m_numPathNodes;
 	oldNumLinks = m_numConnections;
 
