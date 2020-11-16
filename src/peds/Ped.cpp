@@ -3023,7 +3023,7 @@ CPed::Chat(void)
 		} else
 			Say(SOUND_PED_CHAT);
 
-	} else if (!RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FLAG_XPRESS)) {
+	} else if (!RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_IDLE)) {
 
 		if (CGeneral::GetRandomNumber() < 20) {
 			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_XPRESS_SCRATCH, 4.0f);
