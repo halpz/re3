@@ -1188,12 +1188,12 @@ Idle(void *arg)
 
 	if(!FrontEndMenuManager.m_bMenuActive && TheCamera.GetScreenFadeStatus() != FADE_2)
 	{
-#ifdef GTA_PC
-			// This is from SA, but it's nice for windowed mode
-			RwV2d pos;
-			pos.x = SCREEN_WIDTH / 2.0f;
-			pos.y = SCREEN_HEIGHT / 2.0f;
-			RsMouseSetPos(&pos);
+		// This is from SA, but it's nice for windowed mode
+#if defined(GTA_PC) && !defined(RW_GL3)
+		RwV2d pos;
+		pos.x = SCREEN_WIDTH / 2.0f;
+		pos.y = SCREEN_HEIGHT / 2.0f;
+		RsMouseSetPos(&pos);
 #endif
 #ifdef NEW_RENDERER
 	if(!gbNewRenderer)
