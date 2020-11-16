@@ -2120,7 +2120,7 @@ bool CCarCtrl::PickNextNodeToFollowPath(CVehicle* pVehicle)
 			pVehicle->AutoPilot.m_vecDestinationCoors, pVehicle->AutoPilot.m_aPathFindNodesInfo,
 			&pVehicle->AutoPilot.m_nPathFindNodesCount, NUM_PATH_NODES_IN_AUTOPILOT,
 			pVehicle, nil, 999999.9f, -1);
-		if (pVehicle->AutoPilot.m_nPathFindNodesCount < 1)
+		if (pVehicle->AutoPilot.m_nPathFindNodesCount < 2)
 			return true;
 	}
 	CPathNode* pNextPathNode = &ThePaths.m_pathNodes[pVehicle->AutoPilot.m_nNextRouteNode];
