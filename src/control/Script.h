@@ -376,6 +376,11 @@ private:
 #ifdef FIX_BUGS
 	friend void RetryMission(int, int);
 #endif
+
+#ifdef MISSION_SWITCHER
+public:
+	static void SwitchToMission(int32 mission);
+#endif
 };
 
 
@@ -514,6 +519,8 @@ private:
 			return false;
 		}
 	}
+
+	friend class CTheScripts;
 };
 
 #ifdef MISSION_REPLAY
