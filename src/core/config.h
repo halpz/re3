@@ -287,7 +287,7 @@ enum Config {
 #	define PS2_MENU
 //#	define PS2_MENU_USEALLPAGEICONS
 #else
-#	define MAP_ENHANCEMENTS			// Adding waypoint etc.
+#	define MAP_ENHANCEMENTS			// Adding waypoint and better mouse support
 #	define TRIANGLE_BACK_BUTTON
 //#	define CIRCLE_BACK_BUTTON
 //#define CUSTOM_FRONTEND_OPTIONS

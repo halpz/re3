@@ -256,3 +256,17 @@ char* casepath(char const* path, bool checkPathFirst)
     return out;
 }
 #endif
+
+#if !defined(_MSC_VER) && !defined(__CWCC__)
+char *strdate(char *buf) {
+	time_t timestamp;
+	time(&timestamp);
+	tm *localTm = localtime(&timestamp);
+	strftime(buf, 10, "%m/%d/%y", localTm);
+	return buf;
+}
+
+char *_strdate(char *buf) {
+	return strdate(buf);
+}
+#endif
