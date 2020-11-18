@@ -926,11 +926,20 @@ void CHud::Draw()
 			CFont::SetJustifyOff();
 			CFont::SetBackgroundOff();
 			CFont::SetBackgroundColor(CRGBA(0, 0, 0, 128));
-			CFont::SetScale(SCREEN_SCALE_X(0.48f), SCREEN_SCALE_Y(1.120f));
+			CFont::SetScale(SCREEN_SCALE_X(0.48f), SCREEN_SCALE_Y(1.12f));
 			CFont::SetCentreOn();
 			CFont::SetPropOn();
 			CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 
+#ifdef XBOX_SUBTITLES
+			float radarBulge = SCREEN_SCALE_X(45.0f) + SCREEN_SCALE_X(16.0f);
+			float rectWidth = SCREEN_WIDTH - SCREEN_SCALE_X(45.0f) - SCREEN_SCALE_X(16.0f) - radarBulge;
+			CFont::SetCentreSize(rectWidth);
+			CFont::SetColor(CRGBA(180, 180, 180, 255));
+
+			CFont::PrintOutlinedString(rectWidth / 2.0f + radarBulge, SCREEN_SCALE_Y(4.0f) + SCREEN_SCALE_FROM_BOTTOM(48.0f) - SCREEN_SCALE_Y(1), m_Message,
+				2.0f, true, CRGBA(0, 0, 0, 255));
+#else
 			float radarBulge = SCREEN_SCALE_X(40.0f) + SCREEN_SCALE_X(8.0f);
 			float rectWidth = SCREEN_WIDTH - SCREEN_SCALE_X(50.0f) - SCREEN_SCALE_X(8.0f) - radarBulge;
 			CFont::SetCentreSize(rectWidth);
@@ -943,6 +952,7 @@ void CHud::Draw()
 			// I'm not sure shadow substaction was intentional here, might be a leftover if CFont::PrintString was used for a shadow draw call
 			CFont::PrintString(rectWidth / 2.0f + radarBulge - SCREEN_SCALE_X(shadow), SCREEN_SCALE_Y(4.0f) + SCREEN_SCALE_FROM_BOTTOM(68.0f) - SCREEN_SCALE_Y(shadow), m_Message);
 			CFont::SetDropShadowPosition(0);
+#endif
 		}
 
 		/*
