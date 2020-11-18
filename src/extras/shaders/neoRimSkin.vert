@@ -5,16 +5,11 @@ uniform vec4 u_rampStart;
 uniform vec4 u_rampEnd;
 uniform vec3 u_rimData;
 
-layout(location = 0) in vec3 in_pos;
-layout(location = 1) in vec3 in_normal;
-layout(location = 2) in vec4 in_color;
-layout(location = 3) in vec2 in_tex0;
-layout(location = 11) in vec4 in_weights;
-layout(location = 12) in vec4 in_indices;
+VSIN(ATTRIB_POS)	vec3 in_pos;
 
-out vec4 v_color;
-out vec2 v_tex0;
-out float v_fog;
+VSOUT vec4 v_color;
+VSOUT vec2 v_tex0;
+VSOUT float v_fog;
 
 void
 main(void)

@@ -150,11 +150,80 @@ RwTexDictionaryGtaStreamRead2(RwStream *stream, RwTexDictionary *texDict)
 }
 
 #ifdef GTA_PC
-#ifdef RWLIBS
-extern "C" RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags);
-#else
-RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags);
+
+#ifdef LIBRW
+
+#define CAPSVERSION 0
+
+struct GPUcaps
+{
+	uint32 version;	// so we can force regeneration easily
+	uint32 platform;
+	uint32 subplatform;
+	uint32 dxtSupport;
+};
+
+static void
+GetGPUcaps(GPUcaps *caps)
+{
+	caps->version = CAPSVERSION;
+	caps->platform = rw::platform;
+	caps->subplatform = 0;
+	caps->dxtSupport = 0;
+	// TODO: more later
+#ifdef RW_GL3
+	caps->subplatform = rw::gl3::gl3Caps.gles;
+	caps->dxtSupport = rw::gl3::gl3Caps.dxtSupported;
 #endif
+#ifdef RW_D3D9
+	caps->dxtSupport = 1;	// TODO, probably
+#endif
+}
+
+void
+ReadVideoCardCapsFile(GPUcaps *caps)
+{
+	memset(caps, 0, sizeof(GPUcaps));
+
+	int32 file = CFileMgr::OpenFile("DATA\\CAPS.DAT", "rb");
+	if (file != 0) {
+		CFileMgr::Read(file, (char*)&caps->version, 4);
+		CFileMgr::Read(file, (char*)&caps->platform, 4);
+		CFileMgr::Read(file, (char*)&caps->subplatform, 4);
+		CFileMgr::Read(file, (char*)&caps->dxtSupport, 4);
+		CFileMgr::CloseFile(file);
+	}
+}
+
+bool
+CheckVideoCardCaps(void)
+{
+	GPUcaps caps, fcaps;
+	GetGPUcaps(&caps);
+	ReadVideoCardCapsFile(&fcaps);
+	return caps.version != fcaps.version ||
+		caps.platform != fcaps.platform ||
+		caps.subplatform != fcaps.subplatform ||
+		caps.dxtSupport != fcaps.dxtSupport;
+}
+
+void
+WriteVideoCardCapsFile(void)
+{
+	GPUcaps caps;
+	GetGPUcaps(&caps);
+	int32 file = CFileMgr::OpenFile("DATA\\CAPS.DAT", "wb");
+	if (file != 0) {
+		CFileMgr::Write(file, (char*)&caps.version, 4);
+		CFileMgr::Write(file, (char*)&caps.platform, 4);
+		CFileMgr::Write(file, (char*)&caps.subplatform, 4);
+		CFileMgr::Write(file, (char*)&caps.dxtSupport, 4);
+		CFileMgr::CloseFile(file);
+	}
+}
+
+#else
+extern "C" RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags);
 void
 ReadVideoCardCapsFile(uint32 &cap32, uint32 &cap24, uint32 &cap16, uint32 &cap8)
 {
@@ -201,6 +270,7 @@ WriteVideoCardCapsFile(void)
 		CFileMgr::CloseFile(file);
 	}
 }
+#endif
 
 void
 ConvertingTexturesScreen(uint32 num, uint32 count, const char *text)
@@ -281,6 +351,13 @@ CreateTxdImageForVideoCard()
 		return false;
 	}
 
+#ifdef LIBRW
+	// so we can read back DXT with GLES
+	// only works for textures that are not yet loaded
+	// so let's hope that is the case for all
+	rw::gl3::needToReadBackTextures = true;
+#endif
+
 	int32 i;
 	for (i = 0; i < TXDSTORESIZE; i++) {
 		ConvertingTexturesScreen(i, TXDSTORESIZE, "CVT_MSG");
@@ -308,6 +385,9 @@ CreateTxdImageForVideoCard()
 					delete []buf;
 					delete pDir;
 					CStreaming::RemoveTxd(i);
+#ifdef LIBRW
+					rw::gl3::needToReadBackTextures = false;
+#endif
 					return false;
 				}
 
@@ -333,6 +413,10 @@ CreateTxdImageForVideoCard()
 
 	RwStreamClose(img, nil);
 	delete []buf;
+
+#ifdef LIBRW
+	rw::gl3::needToReadBackTextures = false;
+#endif
 
 	if (!pDir->WriteDirFile("models\\txd.dir")) {
 		DealWithTxdWriteError(i, TXDSTORESIZE, "CVT_ERR");
