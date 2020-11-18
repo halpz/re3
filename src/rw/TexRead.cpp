@@ -351,7 +351,7 @@ CreateTxdImageForVideoCard()
 		return false;
 	}
 
-#ifdef LIBRW
+#ifdef RW_GL3
 	// so we can read back DXT with GLES
 	// only works for textures that are not yet loaded
 	// so let's hope that is the case for all
@@ -385,7 +385,7 @@ CreateTxdImageForVideoCard()
 					delete []buf;
 					delete pDir;
 					CStreaming::RemoveTxd(i);
-#ifdef LIBRW
+#ifdef RW_GL3
 					rw::gl3::needToReadBackTextures = false;
 #endif
 					return false;
@@ -414,7 +414,7 @@ CreateTxdImageForVideoCard()
 	RwStreamClose(img, nil);
 	delete []buf;
 
-#ifdef LIBRW
+#ifdef RW_GL3
 	rw::gl3::needToReadBackTextures = false;
 #endif
 
