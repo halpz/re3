@@ -1,15 +1,11 @@
 uniform vec3 u_eye;
 
+VSIN(ATTRIB_POS)	vec3 in_pos;
 
-layout(location = 0) in vec3 in_pos;
-layout(location = 1) in vec3 in_normal;
-layout(location = 2) in vec4 in_color;
-layout(location = 3) in vec2 in_tex0;
-
-out vec3 v_normal;
-out vec3 v_light;
-out vec2 v_tex0;
-out float v_fog;
+VSOUT vec3 v_normal;
+VSOUT vec3 v_light;
+VSOUT vec2 v_tex0;
+VSOUT float v_fog;
 
 void
 main(void)

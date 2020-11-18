@@ -152,13 +152,8 @@ CPostFX::Open(RwCamera *cam)
 	using namespace rw::gl3;
 
 	{
-#ifdef RW_GLES2
-#include "gl2_shaders/im2d_gl2.inc"
-#include "gl2_shaders/colourfilterVC_fs_gl2.inc"
-#else
-#include "shaders/im2d_gl3.inc"
-#include "shaders/colourfilterVC_fs_gl3.inc"
-#endif
+#include "shaders/im2d_gl.inc"
+#include "shaders/colourfilterVC_fs_gl.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, im2d_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, colourfilterVC_frag_src, nil };
 	colourFilterVC = Shader::create(vs, fs);
@@ -166,17 +161,12 @@ CPostFX::Open(RwCamera *cam)
 	}
 
 	{
-#ifdef RW_GLES2
-#include "gl2_shaders/im2d_gl2.inc"
-#include "gl2_shaders/contrast_fs_gl2.inc"
-#else
-#include "shaders/im2d_gl3.inc"
-#include "shaders/contrast_fs_gl3.inc"
+#include "shaders/im2d_gl.inc"
+#include "shaders/contrast_fs_gl.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, im2d_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, contrast_frag_src, nil };
 	contrast = Shader::create(vs, fs);
 	assert(contrast);
-#endif
 	}
 
 #endif

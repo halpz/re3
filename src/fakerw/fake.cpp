@@ -936,16 +936,3 @@ RtCharset   *RtCharsetSetColors(RtCharset * charSet, const RwRGBA * foreGround, 
 RtCharset   *RtCharsetGetDesc(RtCharset * charset, RtCharsetDesc * desc) { *desc = charset->desc; return charset; }
 RtCharset   *RtCharsetCreate(const RwRGBA * foreGround, const RwRGBA * backGround) { return Charset::create(foreGround, backGround); }
 RwBool       RtCharsetDestroy(RtCharset * charSet) { charSet->destroy(); return true; }
-
-
-
-// fake shit
-RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags)
-{
-#ifdef RW_GL3
-	if(flags & (rwRASTERFORMATPAL8 | rwRASTERFORMAT8888))
-		return 'NOPE';
-	return 'YUP';
-#endif
-	return flags & 0xF00;
-}
