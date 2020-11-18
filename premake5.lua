@@ -310,7 +310,10 @@ project "re3"
 		linkoptions "/SAFESEH:NO"
 		characterset ("MBCS")
 		targetextension ".exe"
-		staticruntime "on"
+		if(_OPTIONS["with-librw"]) then
+			-- external librw is dynamic
+			staticruntime "on"
+		end
 
 	filter "platforms:win*glfw*"
 		staticruntime "off"
