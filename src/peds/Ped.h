@@ -641,8 +641,8 @@ public:
 	uint16 m_queuedSound;
 	bool m_canTalk;
 	uint32 m_lastComment;
-	CVector m_vecSeekPosEx; // used for OBJECTIVE_GUARD_SPOT
-	float m_distanceToCountSeekDoneEx; // used for OBJECTIVE_GUARD_SPOT
+	CVector m_vecSpotToGuard;
+	float m_radiusToGuard;
 
 	static void *operator new(size_t);
 	static void *operator new(size_t, int);
