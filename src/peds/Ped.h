@@ -5,7 +5,7 @@
 #include "Crime.h"
 #include "EventList.h"
 #include "PedIK.h"
-#include "PedStats.h"
+#include "PedType.h"
 #include "Physical.h"
 #include "Weapon.h"
 #include "WeaponInfo.h"
@@ -13,6 +13,7 @@
 #define FEET_OFFSET	1.04f
 #define CHECK_NEARBY_THINGS_MAX_DIST	15.0f
 #define ENTER_CAR_MAX_DIST	30.0f
+#define CAN_SEE_ENTITY_ANGLE_THRESHOLD	DEGTORAD(60.0f)
 
 struct CPathNode;
 class CAccident;
@@ -568,7 +569,7 @@ public:
 	void CalculateNewOrientation(void);
 	float WorkOutHeadingForMovingFirstPerson(float);
 	void CalculateNewVelocity(void);
-	bool CanSeeEntity(CEntity*, float);
+	bool CanSeeEntity(CEntity*, float threshold = CAN_SEE_ENTITY_ANGLE_THRESHOLD);
 	void RestorePreviousObjective(void);
 	void SetIdle(void);
 #ifdef _MSC_VER
@@ -747,7 +748,7 @@ public:
 	static void PedSetQuickDraggedOutCarPositionCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedSetDraggedOutCarPositionCB(CAnimBlendAssociation *assoc, void *arg);
 
-	bool IsPlayer(void);
+	bool IsPlayer(void) const;
 	bool UseGroundColModel(void);
 	bool CanSetPedState(void);
 	bool IsPedInControl(void);
@@ -765,7 +766,7 @@ public:
 	void SetStoredObjective(void);
 	void SetLeader(CEntity* leader);
 	void SetPedStats(ePedStats);
-	bool IsGangMember(void);
+	bool IsGangMember(void) const;
 	void Die(void);
 	void EnterTrain(void);
 	void ExitTrain(void);
@@ -788,7 +789,7 @@ public:
 	CObject *SpawnFlyingComponent(int, int8);
 	void SetCarJack_AllClear(CVehicle*, uint32, uint32);
 #ifdef VC_PED_PORTS
-	bool CanPedJumpThis(CEntity*, CVector*);
+	bool CanPedJumpThis(CEntity *unused, CVector *damageNormal = nil);
 #else
 	bool CanPedJumpThis(CEntity*);
 #endif
@@ -809,9 +810,40 @@ public:
 	bool InVehicle(void) { return bInVehicle && m_pMyVehicle; } // True when ped is sitting/standing in vehicle, not in enter/exit state.
 	bool EnteringCar(void) { return m_nPedState == PED_ENTER_CAR || m_nPedState == PED_CARJACK; }
 
-	void ReplaceWeaponWhenExitingVehicle(void);
-	void RemoveWeaponWhenEnteringVehicle(void);
-	bool IsNotInWreckedVehicle();
+	// It was inlined in III but not in VC.
+	inline void
+	ReplaceWeaponWhenExitingVehicle(void)
+	{
+		eWeaponType weaponType = GetWeapon()->m_eWeaponType;
+
+		// If it's Uzi, we may have stored weapon. Uzi is the only gun we can use in car.
+		if (IsPlayer() && weaponType == WEAPONTYPE_UZI) {
+			if (/*IsPlayer() && */ m_storedWeapon != WEAPONTYPE_UNIDENTIFIED) {
+				SetCurrentWeapon(m_storedWeapon);
+				m_storedWeapon = WEAPONTYPE_UNIDENTIFIED;
+			}
+		} else {
+			AddWeaponModel(CWeaponInfo::GetWeaponInfo(weaponType)->m_nModelId);
+		}
+	}
+
+	// It was inlined in III but not in VC.
+	inline void
+	RemoveWeaponWhenEnteringVehicle(void)
+	{
+		if (IsPlayer() && HasWeapon(WEAPONTYPE_UZI) && GetWeapon(WEAPONTYPE_UZI).m_nAmmoTotal > 0) {
+			if (m_storedWeapon == WEAPONTYPE_UNIDENTIFIED)
+				m_storedWeapon = GetWeapon()->m_eWeaponType;
+			SetCurrentWeapon(WEAPONTYPE_UZI);
+		} else {
+			CWeaponInfo *ourWeapon = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
+			RemoveWeaponModel(ourWeapon->m_nModelId);
+		}
+	}
+	bool IsNotInWreckedVehicle()
+	{
+		return m_pMyVehicle != nil && ((CEntity*)m_pMyVehicle)->GetStatus() != STATUS_WRECKED;
+	}
 	// My additions, because there were many, many instances of that.
 	inline void SetFindPathAndFlee(CEntity *fleeFrom, int time, bool walk = false)
 	{

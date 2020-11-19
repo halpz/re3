@@ -11,7 +11,6 @@
 #include "HandlingMgr.h"
 #include "CarCtrl.h"
 #include "PedType.h"
-#include "PedStats.h"
 #include "AnimManager.h"
 #include "Game.h"
 #include "RwHelper.h"
