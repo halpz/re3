@@ -103,4 +103,6 @@ public:
 	
 	static bool Add   (CParticleObject *particleobject);
 	static void Remove(CParticleObject *particleobject);
+
+	static CAudioHydrant *Get(int n);	// for neo screen droplets
 };
