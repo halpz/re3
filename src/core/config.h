@@ -262,6 +262,7 @@ enum Config {
 #define HUD_ENHANCEMENTS	// Adjusts some aspects to make the HUD look/behave a little bit better.
 // #define BETA_SLIDING_TEXT
 #define TRIANGULAR_BLIPS	// height indicating triangular radar blips, as in VC
+// #define XBOX_SUBTITLES	// the infamous outlines
 #define PC_MENU
 
 #ifndef PC_MENU

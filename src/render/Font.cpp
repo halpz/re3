@@ -942,6 +942,40 @@ CFont::PrintString(float x, float y, wchar *start, wchar *end, float spwidth)
 }
 #endif
 
+#ifdef XBOX_SUBTITLES
+void
+CFont::PrintStringFromBottom(float x, float y, wchar *str)
+{
+#ifdef MORE_LANGUAGES
+	if (IsJapaneseFont())
+		y -= (32.0f * CFont::Details.scaleY / 2.75f + 2.0f * CFont::Details.scaleY) * GetNumberLines(x, y, str);
+	else
+#endif
+		y -= (32.0f * CFont::Details.scaleY * 0.5f + 2.0f * CFont::Details.scaleY) * GetNumberLines(x, y, str);
+	PrintString(x, y, str);
+}
+
+void
+CFont::PrintOutlinedString(float x, float y, wchar *str, float outlineStrength, bool fromBottom, CRGBA outlineColor)
+{
+	CRGBA textColor = Details.color;
+	SetColor(outlineColor);
+	CVector2D offsets[] = { {1.f, 1.f}, {1.f, -1.f}, {-1.f, 1.f}, {-1.f, -1.f} };
+	for(int i = 0; i < ARRAY_SIZE(offsets); i++){
+		if (fromBottom)
+			PrintStringFromBottom(x + SCREEN_SCALE_X(offsets[i].x * outlineStrength), y + SCREEN_SCALE_Y(offsets[i].y * outlineStrength), str);
+		else
+			PrintString(x + SCREEN_SCALE_X(offsets[i].x * outlineStrength), y + SCREEN_SCALE_Y(offsets[i].y * outlineStrength), str);
+	}
+	SetColor(textColor);
+	
+	if (fromBottom)
+		PrintStringFromBottom(x, y, str);
+	else
+		PrintString(x, y, str);
+}
+#endif
+
 float
 CFont::GetCharacterWidth(wchar c)
 {
