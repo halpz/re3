@@ -56,26 +56,27 @@ CPed::ServiceTalkingWhenDead(void)
 void
 CPed::ServiceTalking(void)
 {
-	if (!bBodyPartJustCameOff || m_bodyPartBleeding != PED_HEAD) {
-		if (!CGeneral::faststricmp(CModelInfo::GetModelInfo(GetModelIndex())->GetName(), "bomber"))
-			m_queuedSound = SOUND_PED_BOMBER;
-		else if (m_nPedState == PED_ON_FIRE)
-			m_queuedSound = SOUND_PED_BURNING;
+	if (bBodyPartJustCameOff && m_bodyPartBleeding == PED_HEAD)
+		return;
 
-		if (m_queuedSound != SOUND_NO_SOUND) {
-			if (m_queuedSound == SOUND_PED_DEATH)
-				m_soundStart = CTimer::GetTimeInMilliseconds() - 1;
+	if (!CGeneral::faststricmp(CModelInfo::GetModelInfo(GetModelIndex())->GetName(), "bomber"))
+		m_queuedSound = SOUND_PED_BOMBER;
+	else if (m_nPedState == PED_ON_FIRE)
+		m_queuedSound = SOUND_PED_BURNING;
 
-			if (CTimer::GetTimeInMilliseconds() > m_soundStart) {
-				DMAudio.PlayOneShot(m_audioEntityId, m_queuedSound, 1.0f);
-				m_lastSoundStart = CTimer::GetTimeInMilliseconds();
-				m_soundStart =
-					CommentWaitTime[m_queuedSound - SOUND_PED_DEATH].m_nFixedDelayTime
-					+ CTimer::GetTimeInMilliseconds()
-					+ CGeneral::GetRandomNumberInRange(0, CommentWaitTime[m_queuedSound - SOUND_PED_DEATH].m_nOverrideFixedDelayTime);
-				m_lastQueuedSound = m_queuedSound;
-				m_queuedSound = SOUND_NO_SOUND;
-			}
+	if (m_queuedSound != SOUND_NO_SOUND) {
+		if (m_queuedSound == SOUND_PED_DEATH)
+			m_soundStart = CTimer::GetTimeInMilliseconds() - 1;
+
+		if (CTimer::GetTimeInMilliseconds() > m_soundStart) {
+			DMAudio.PlayOneShot(m_audioEntityId, m_queuedSound, 1.0f);
+			m_lastSoundStart = CTimer::GetTimeInMilliseconds();
+			m_soundStart =
+				CommentWaitTime[m_queuedSound - SOUND_PED_DEATH].m_nFixedDelayTime
+				+ CTimer::GetTimeInMilliseconds()
+				+ CGeneral::GetRandomNumberInRange(0, CommentWaitTime[m_queuedSound - SOUND_PED_DEATH].m_nOverrideFixedDelayTime);
+			m_lastQueuedSound = m_queuedSound;
+			m_queuedSound = SOUND_NO_SOUND;
 		}
 	}
 }
@@ -83,14 +84,12 @@ CPed::ServiceTalking(void)
 void
 CPed::Say(uint16 audio)
 {
-	uint16 audioToPlay = audio;
-
 	if (IsPlayer()) {
 
 		// Ofc this part isn't in VC.
 		switch (audio) {
 			case SOUND_PED_DEATH:
-				audioToPlay = SOUND_PED_DAMAGE;
+				audio = SOUND_PED_DAMAGE;
 				break;
 			case SOUND_PED_DAMAGE:
 			case SOUND_PED_HIT:
@@ -99,7 +98,7 @@ CPed::Say(uint16 audio)
 			case SOUND_PED_BULLET_HIT:
 			case SOUND_PED_CAR_JACKED:
 			case SOUND_PED_DEFEND:
-				audioToPlay = SOUND_PED_HIT;
+				audio = SOUND_PED_HIT;
 				break;
 			default:
 				return;
@@ -142,12 +141,12 @@ CPed::Say(uint16 audio)
 		}
 	}
 
-	if (audioToPlay < m_queuedSound) {
-		if (audioToPlay != m_lastQueuedSound || audioToPlay == SOUND_PED_DEATH
-			|| CommentWaitTime[audioToPlay - SOUND_PED_DEATH].m_nOverrideMaxRandomDelayTime
+	if (audio < m_queuedSound) {
+		if (audio != m_lastQueuedSound || audio == SOUND_PED_DEATH
+			|| CommentWaitTime[audio - SOUND_PED_DEATH].m_nOverrideMaxRandomDelayTime
 				+ m_lastSoundStart
-				+ (uint32) CGeneral::GetRandomNumberInRange(0, CommentWaitTime[audioToPlay - SOUND_PED_DEATH].m_nMaxRandomDelayTime) <= CTimer::GetTimeInMilliseconds()) {
-			m_queuedSound = audioToPlay;
+				+ (uint32) CGeneral::GetRandomNumberInRange(0, CommentWaitTime[audio - SOUND_PED_DEATH].m_nMaxRandomDelayTime) <= CTimer::GetTimeInMilliseconds()) {
+			m_queuedSound = audio;
 		}
 	}
 }
