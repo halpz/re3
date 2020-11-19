@@ -44,7 +44,7 @@ CustomMatCopy(void *dst, void *src, int32, int32)
 
 
 
-static rw::TexDictionary *neoTxd;
+rw::TexDictionary *neoTxd;
 
 bool bRenderingEnvMap;
 int32 EnvMapSize = 128;

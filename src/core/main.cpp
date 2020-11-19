@@ -68,7 +68,9 @@
 #include "Clock.h"
 #include "Occlusion.h"
 #include "Ropes.h"
+#include "postfx.h"
 #include "custompipes.h"
+#include "screendroplets.h"
 
 GlobalScene Scene;
 
@@ -402,6 +404,9 @@ Initialise3D(void *param)
 #ifdef EXTENDED_PIPELINES
 		CustomPipes::CustomPipeInit();	// need Scene.world for this
 #endif
+#ifdef SCREEN_DROPLETS
+		ScreenDroplets::InitDraw();
+#endif
 		return ret;
 	}
 
@@ -411,6 +416,9 @@ Initialise3D(void *param)
 static void 
 Terminate3D(void)
 {
+#ifdef SCREEN_DROPLETS
+	ScreenDroplets::Shutdown();
+#endif
 #ifdef EXTENDED_PIPELINES
 	CustomPipes::CustomPipeShutdown();
 #endif
@@ -1246,10 +1254,17 @@ Idle(void *arg)
 		RenderDebugShit();
 		RenderEffects();
 
-		tbStartTimer(0, "RenderMotionBlur");
 		if((TheCamera.m_BlurType == MOTION_BLUR_NONE || TheCamera.m_BlurType == MOTION_BLUR_LIGHT_SCENE) &&
 		   TheCamera.m_ScreenReductionPercentage > 0.0f)
 		        TheCamera.SetMotionBlurAlpha(150);
+
+#ifdef SCREEN_DROPLETS
+		CPostFX::GetBackBuffer(Scene.camera);
+		ScreenDroplets::Process();
+		ScreenDroplets::Render();
+#endif
+
+		tbStartTimer(0, "RenderMotionBlur");
 		TheCamera.RenderMotionBlur();
 		tbEndTimer("RenderMotionBlur");
 

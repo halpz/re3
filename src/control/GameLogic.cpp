@@ -29,6 +29,7 @@
 #include "ColStore.h"
 #include "Automobile.h"
 #include "MBlur.h"
+#include "screendroplets.h"
 
 uint8 CGameLogic::ActivePlayers;
 uint8 CGameLogic::ShortCutState;
@@ -153,6 +154,9 @@ CGameLogic::Update()
 				}
 			}
 			CEventList::Initialise();
+#ifdef SCREEN_DROPLETS
+			ScreenDroplets::Initialise();
+#endif
 			CMessages::ClearMessages();
 			CCarCtrl::ClearInterestingVehicleList();
 			CWorld::ClearExcitingStuffFromArea(pPlayerInfo.GetPos(), 4000.0f, 1);
@@ -259,6 +263,9 @@ CGameLogic::Update()
 				}
 			}
 			CEventList::Initialise();
+#ifdef SCREEN_DROPLETS
+			ScreenDroplets::Initialise();
+#endif
 			CMessages::ClearMessages();
 			CCarCtrl::ClearInterestingVehicleList();
 			CWorld::ClearExcitingStuffFromArea(pPlayerInfo.GetPos(), 4000.0f, 1);
@@ -311,6 +318,9 @@ CGameLogic::Update()
 				}
 			}
 			CEventList::Initialise();
+#ifdef SCREEN_DROPLETS
+			ScreenDroplets::Initialise();
+#endif
 			CMessages::ClearMessages();
 			CCarCtrl::ClearInterestingVehicleList();
 			CWorld::ClearExcitingStuffFromArea(pPlayerInfo.GetPos(), 4000.0f, 1);

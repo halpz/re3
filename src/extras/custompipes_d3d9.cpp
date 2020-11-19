@@ -132,6 +132,8 @@ vehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 		inst++;
 	}
 
+	d3d::setTexture(1, nil);
+
 	SetRenderState(SRCBLEND, BLENDSRCALPHA);
 }
 
