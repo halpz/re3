@@ -1492,6 +1492,45 @@ CRenderer::RequestObjectsInFrustum(void)
 	}
 }
 
+// --MIAMI: Done
+bool
+CPed::SetupLighting(void)
+{
+	ActivateDirectional();
+	SetAmbientColoursForPedsCarsAndObjects();
+
+#ifndef MASTER
+	// Originally this was being called through iteration of Sectors, but putting it here is better.
+	if (GetDebugDisplay() != 0 && !IsPlayer())
+		DebugRenderOnePedText();
+#endif
+
+	if (bRenderScorched) {
+		WorldReplaceNormalLightsWithScorched(Scene.world, 0.1f);
+	} else {
+		// Note that this lightMult is only affected by LIGHT_DARKEN. If there's no LIGHT_DARKEN, it will be 1.0.
+		float lightMult = CPointLights::GenerateLightsAffectingObject(&GetPosition());
+		if (lightMult != 1.0f) {
+			SetAmbientAndDirectionalColours(lightMult);
+			return true;
+		}
+	}
+	return false;
+}
+
+// --MIAMI: Done
+void
+CPed::RemoveLighting(bool reset)
+{
+	if (!bRenderScorched) {
+		CRenderer::RemoveVehiclePedLights(this, reset);
+		if (reset)
+			ReSetAmbientAndDirectionalColours();
+	}
+	SetAmbientColours();
+	DeActivateDirectional();
+}
+
 float
 CalcNewDelta(RwV2d *a, RwV2d *b)
 {

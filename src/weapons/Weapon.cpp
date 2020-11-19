@@ -3171,6 +3171,21 @@ CWeapon::HasWeaponAmmoToBeUsed(void)
 		return m_nAmmoTotal != 0;
 }
 
+// --MIAMI: Done
+bool
+CPed::IsPedDoingDriveByShooting(void)
+{
+#ifdef FIX_BUGS
+	if (FindPlayerPed() == this && CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_nWeaponSlot == 5) {
+#else
+	if (FindPlayerPed() == this && GetWeapon()->m_eWeaponType == WEAPONTYPE_UZI) {
+#endif
+		if (TheCamera.Cams[TheCamera.ActiveCam].LookingLeft || TheCamera.Cams[TheCamera.ActiveCam].LookingRight)
+			return true;
+	}
+	return false;
+}
+
 bool
 CWeapon::ProcessLineOfSight(CVector const &point1, CVector const &point2, CColPoint &point, CEntity *&entity, eWeaponType type, CEntity *shooter, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects)
 {

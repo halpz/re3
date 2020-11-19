@@ -48,6 +48,7 @@
 #include "PlayerPed.h"
 #include "Object.h"
 #include "Automobile.h"
+#include "Bike.h"
 
 //--MIAMI: file done
 
@@ -5108,6 +5109,142 @@ CAutomobile::HasCarStoppedBecauseOfLight(void)
 
 	return false;
 }
+
+// --MIAMI: Done
+void
+CPed::DeadPedMakesTyresBloody(void)
+{
+	int minX = CWorld::GetSectorIndexX(GetPosition().x - 2.0f);
+	if (minX < 0) minX = 0;
+	int minY = CWorld::GetSectorIndexY(GetPosition().y - 2.0f);
+	if (minY < 0) minY = 0;
+	int maxX = CWorld::GetSectorIndexX(GetPosition().x + 2.0f);
+	if (maxX > NUMSECTORS_X-1) maxX = NUMSECTORS_X-1;
+	int maxY = CWorld::GetSectorIndexY(GetPosition().y + 2.0f);
+	if (maxY > NUMSECTORS_Y-1) maxY = NUMSECTORS_Y-1;
+
+	CWorld::AdvanceCurrentScanCode();
+
+	for (int curY = minY; curY <= maxY; curY++) {
+		for (int curX = minX; curX <= maxX; curX++) {
+			CSector *sector = CWorld::GetSector(curX, curY);
+			MakeTyresMuddySectorList(sector->m_lists[ENTITYLIST_VEHICLES]);
+			MakeTyresMuddySectorList(sector->m_lists[ENTITYLIST_VEHICLES_OVERLAP]);
+		}
+	}
+}
+
+// --MIAMI: Done
+void
+CPed::MakeTyresMuddySectorList(CPtrList &list)
+{
+	CAutomobile *car = nil;
+	CBike *bike = nil;
+	for (CPtrNode *node = list.first; node; node = node->next) {
+		CVehicle *veh = (CVehicle*)node->item;
+		if (veh->m_scanCode != CWorld::GetCurrentScanCode()) {
+			veh->m_scanCode = CWorld::GetCurrentScanCode();
+
+			if (Abs(GetPosition().x - veh->GetPosition().x) < 10.0f && Abs(GetPosition().y - veh->GetPosition().y) < 10.0f) {				
+				if (veh->IsCar()) {
+					bike = nil;
+					car = (CAutomobile*)veh;
+				} else if (veh->IsBike()) {
+					bike = (CBike*)veh;
+					car = nil;
+				}
+				if (veh->m_vecMoveSpeed.MagnitudeSqr2D() > 0.05f) {
+					if (car) {
+						for (int wheel = 0; wheel < 4; wheel++) {
+							if (!car->m_aWheelSkidmarkBloody[wheel] && car->m_aSuspensionSpringRatio[wheel] < 1.0f) {
+
+								CColModel* vehCol = car->GetModelInfo()->GetColModel();
+								CVector approxWheelOffset;
+								switch (wheel) {
+								case 0:
+									approxWheelOffset = CVector(-vehCol->boundingBox.max.x, vehCol->boundingBox.max.y, 0.0f);
+									break;
+								case 1:
+									approxWheelOffset = CVector(-vehCol->boundingBox.max.x, vehCol->boundingBox.min.y, 0.0f);
+									break;
+								case 2:
+									approxWheelOffset = CVector(vehCol->boundingBox.max.x, vehCol->boundingBox.max.y, 0.0f);
+									break;
+								case 3:
+									approxWheelOffset = CVector(vehCol->boundingBox.max.x, vehCol->boundingBox.min.y, 0.0f);
+									break;
+								default:
+									break;
+								}
+
+								// I hope so
+								CVector wheelPos = car->GetMatrix() * approxWheelOffset;
+								if (Abs(wheelPos.z - GetPosition().z) < 2.0f) {
+
+									if ((wheelPos - GetPosition()).MagnitudeSqr2D() < 1.0f) {
+										if (CGame::nastyGame) {
+											car->m_aWheelSkidmarkBloody[wheel] = true;
+											DMAudio.PlayOneShot(car->m_audioEntityId, SOUND_SPLATTER, 0.0f);
+										}
+										if (car->m_fMass > 500.f) {
+											car->ApplyMoveForce(CVector(0.0f, 0.0f, 50.0f * Min(1.0f, m_fMass * 0.001f)));
+
+											CVector vehAndWheelDist = wheelPos - car->GetPosition();
+											car->ApplyTurnForce(CVector(0.0f, 0.0f, 50.0f * Min(1.0f, m_fTurnMass * 0.0005f)), vehAndWheelDist);
+											if (car == FindPlayerVehicle()) {
+												CPad::GetPad(0)->StartShake(300, 70);
+											}
+										}
+									}
+								}
+							}
+						}
+					} else if (bike) {
+						for (int wheel = 0; wheel < 2; wheel++) {
+							if (!bike->m_aWheelSkidmarkBloody[wheel] && bike->m_aSuspensionSpringRatio[wheel] < 1.0f) {
+
+								CColModel* vehCol = bike->GetModelInfo()->GetColModel();
+								CVector approxWheelOffset;
+								switch (wheel) {
+								case 0:
+									approxWheelOffset = CVector(0.0f, 0.8f * vehCol->boundingBox.max.y, 0.0f);
+									break;
+								case 1:
+									approxWheelOffset = CVector(0.0f, 0.8f * vehCol->boundingBox.min.y, 0.0f);
+								default:
+									break;
+								}
+
+								// I hope so
+								CVector wheelPos = bike->GetMatrix() * approxWheelOffset;
+								if (Abs(wheelPos.z - GetPosition().z) < 2.0f) {
+
+									if ((wheelPos - GetPosition()).MagnitudeSqr2D() < 1.0f) {
+										if (CGame::nastyGame) {
+											bike->m_aWheelSkidmarkBloody[wheel] = true;
+											DMAudio.PlayOneShot(bike->m_audioEntityId, SOUND_SPLATTER, 0.0f);
+										}
+										if (bike->m_fMass > 100.0f) {
+											bike->ApplyMoveForce(CVector(0.0f, 0.0f, 10.0f));
+
+											CVector vehAndWheelDist = wheelPos - bike->GetPosition();
+											bike->ApplyTurnForce(CVector(0.0f, 0.0f, 10.0f), vehAndWheelDist);
+
+											if (bike == FindPlayerVehicle()) {
+												CPad::GetPad(0)->StartShake(300, 70);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 
 void
 CAutomobile::SetBusDoorTimer(uint32 timer, uint8 type)

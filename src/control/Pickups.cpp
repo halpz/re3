@@ -1578,3 +1578,102 @@ void
 CPacManPickups::ResetPowerPillsCarriedByPlayer()
 {
 }
+
+// --MIAMI: Done
+void
+CPed::CreateDeadPedMoney(void)
+{
+	if (!CGame::nastyGame)
+		return;
+
+	int mi = GetModelIndex();
+
+	if ((mi >= MI_COP && mi <= MI_FIREMAN) || (CharCreatedBy == MISSION_CHAR && !bMoneyHasBeenGivenByScript) || bInVehicle)
+		return;
+
+	int money = m_nPedMoney;
+	if (money < 10)
+		return;
+
+	CVector pickupPos = GetPosition();
+	CPickups::CreateSomeMoney(pickupPos, money);
+	m_nPedMoney = 0;
+}
+
+// --MIAMI: Done
+void
+CPed::CreateDeadPedWeaponPickups(void)
+{
+	CVector pickupPos;
+
+	if (bInVehicle)
+		return;
+
+	for(int i = 0; i < TOTAL_WEAPON_SLOTS; i++) {
+
+		eWeaponType weapon = GetWeapon(i).m_eWeaponType;
+		int weaponAmmo = GetWeapon(i).m_nAmmoTotal;
+		if (weapon == WEAPONTYPE_UNARMED || weapon == WEAPONTYPE_DETONATOR || (weaponAmmo == 0 && !GetWeapon(i).IsTypeMelee()))
+			continue;
+
+		int quantity = Min(weaponAmmo, AmmoForWeapon_OnStreet[weapon] / 2);
+		CreateDeadPedPickupCoors(&pickupPos.x, &pickupPos.y, &pickupPos.z);
+		pickupPos.z += 0.3f;
+		if (!CPickups::TryToMerge_WeaponType(pickupPos, weapon, PICKUP_ONCE_TIMEOUT, quantity, false)) {
+			CPickups::GenerateNewOne_WeaponType(pickupPos, weapon, PICKUP_ONCE_TIMEOUT, Min(weaponAmmo, quantity));
+		}
+	}
+	ClearWeapons();
+}
+
+// --MIAMI: Done
+void
+CPed::CreateDeadPedPickupCoors(float *x, float *y, float *z)
+{
+	bool found = false;
+	CVector pickupPos;
+
+#define NUMBER_OF_ATTEMPTS 32
+	for (int i = 0; i < NUMBER_OF_ATTEMPTS; i++) {
+
+		pickupPos = GetPosition();
+		pickupPos.x = 1.5f * Sin((CGeneral::GetRandomNumber() % 256)/256.0f * TWOPI) + GetPosition().x;
+		pickupPos.y = 1.5f * Cos((CGeneral::GetRandomNumber() % 256)/256.0f * TWOPI) + GetPosition().y;
+		pickupPos.z = CWorld::FindGroundZFor3DCoord(pickupPos.x, pickupPos.y, pickupPos.z, &found) + 0.5f;
+
+		if (!found)
+			continue;
+
+		CVector pedPos = GetPosition();
+		pedPos.z += 0.3f;
+
+		CVector pedToPickup = pickupPos - pedPos;
+		float distance = pedToPickup.Magnitude();
+
+		// outer edge of pickup
+		distance = (distance + 0.4f) / distance;
+		CVector pickupPos2 = pedPos;
+		pickupPos2 += distance * pedToPickup;
+
+		if ((pickupPos - FindPlayerCoors()).Magnitude2D() > 2.0f || i > NUMBER_OF_ATTEMPTS / 2) {
+
+			if (i > NUMBER_OF_ATTEMPTS / 2 || !CPickups::TestForPickupsInBubble(pickupPos, 1.3f)) {
+
+				if (CWorld::GetIsLineOfSightClear(pickupPos2, pedPos,
+					true, i < NUMBER_OF_ATTEMPTS / 2, false, i < NUMBER_OF_ATTEMPTS / 2, false, false, false)) {
+
+					if (i > NUMBER_OF_ATTEMPTS / 2 || !CWorld::TestSphereAgainstWorld(pickupPos, 1.2f, nil, false, true, false, false, false, false)) {
+						*x = pickupPos.x;
+						*y = pickupPos.y;
+						*z = pickupPos.z;
+						return;
+					}
+				}
+			}
+		}
+	}
+	*x = GetPosition().x;
+	*y = GetPosition().y;
+	*z = GetPosition().z + 0.4f;
+#undef NUMBER_OF_ATTEMPTS
+}
