@@ -128,7 +128,7 @@ CRestart::FindClosestPoliceRestartPoint(const CVector &pos, CVector *outPos, flo
 	}
 
 	eLevelName curlevel = CTheZones::FindZoneForPoint(pos);
-	float fMinDist = 16000000.0f;
+	float fMinDist = SQR(4000.0f);
 	int closestPoint = NUM_RESTART_POINTS;
 
 	// find closest point on this level
