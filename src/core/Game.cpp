@@ -88,6 +88,7 @@
 #include "debugmenu.h"
 #include "postfx.h"
 #include "custompipes.h"
+#include "screendroplets.h"
 #include "crossplatform.h"
 
 eLevelName CGame::currLevel;
@@ -408,6 +409,9 @@ bool CGame::Initialise(const char* datFile)
 	CPed::Initialise();
 	CRouteNode::Initialise();
 	CEventList::Initialise();
+#ifdef SCREEN_DROPLETS
+	ScreenDroplets::Initialise();
+#endif
 	LoadingScreen("Loading the Game", "Find big buildings", nil);
 	CRenderer::Init();
 	LoadingScreen("Loading the Game", "Setup game variables", nil);
@@ -559,6 +563,9 @@ void CGame::ReInitGameObjectVariables(void)
 	CStreaming::LoadAllRequestedModels(false);
 	CPed::Initialise();
 	CEventList::Initialise();
+#ifdef SCREEN_DROPLETS
+	ScreenDroplets::Initialise();
+#endif
 	CWeapon::InitialiseWeapons();
 	CPopulation::Initialise();
 	
