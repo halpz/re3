@@ -12,7 +12,7 @@ public:
 	float maxz;
 
 	int32 m_indexStart;
-	int16 m_groupIndexCount[3];
+	int16 m_groupIndexCount[3];	// only useful during resolution stage
 	int16 m_numBuildings;
 	int16 m_numTreadablesPlus10m;
 	int16 m_numTreadables;
@@ -26,30 +26,35 @@ public:
 	static void DoStuffEnteringZone_OneTreadable(uint16 i);
 
 
-	static bool TestLine(CVector a1, CVector a2);
+	static bool TestLine(CVector vec1, CVector vec2);
+	static bool DoThoroughLineTest(CVector vec1, CVector vec2, CEntity *testEntity);
 	float CalcDistToCullZoneSquared(float x, float y);
 	float CalcDistToCullZone(float x, float y) { return Sqrt(CalcDistToCullZoneSquared(x, y)); };
 	bool IsEntityCloseEnoughToZone(CEntity* entity, bool checkLevel);
+	bool PointFallsWithinZone(CVector pos, float radius);
+	bool TestEntityVisibilityFromCullZone(CEntity *entity, float extraDist, CEntity *LODentity);
+	void FindTestPoints();
 
 	void GetGroupStartAndSize(int32 groupid, int32 &start, int32 &size) {
 		switch (groupid) {
+		case 0:
+		default:
+			// buildings
+			start = m_indexStart;
+			size = m_groupIndexCount[0];
+			break;
 		case 1:
+			// treadables + 10m
 			start = m_groupIndexCount[0] + m_indexStart;
 			size = m_groupIndexCount[1];
 			break;
 		case 2:
+			// treadables
 			start = m_groupIndexCount[0] + m_groupIndexCount[1] + m_indexStart;
 			size = m_groupIndexCount[2];
 			break;
-		default:
-			start = m_indexStart;
-			size = m_groupIndexCount[0];
-			break;
 		}
 	}
-
-	void FindTestPoints() {}; // todo
-	bool TestEntityVisibilityFromCullZone(CEntity*, float, CEntity*) { return false; }; // todo
 };
 
 enum eZoneAttribs
@@ -121,5 +126,12 @@ public:
 	static void DoVisibilityTestCullZone(int zoneId, bool doIt);
 	static bool DoWeHaveMoreThanXOccurencesOfSet(int32 count, uint16 *set);
 
-	static void CompressIndicesArray() {};// todo
+	static void CompressIndicesArray();
+	static bool PickRandomSetForGroup(int32 zone, int32 group, uint16 *set);
+	static void ReplaceSetForAllGroups(uint16 *set, uint16 setid);
+	static void TidyUpAndMergeLists(uint16 *extraIndices, int32 numExtraIndices);
+
+	// debug
+	static bool LoadTempFile(void);
+	static void SaveTempFile(void);
 };

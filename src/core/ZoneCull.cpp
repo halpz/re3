@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include "General.h"
 #include "Building.h"
 #include "Treadable.h"
 #include "Train.h"
@@ -10,6 +11,9 @@
 #include "FileMgr.h"
 #include "ZoneCull.h"
 #include "Zones.h"
+
+#include "Debug.h"
+#include "Renderer.h"
 
 int32     CCullZones::NumCullZones;
 CCullZone CCullZones::aZones[NUMCULLZONES];
@@ -27,6 +31,8 @@ int32 CCullZones::EntityIndicesUsed;
 bool CCullZones::bCurrentSubwayIsInvisible;
 bool CCullZones::bCullZonesDisabled;
 
+#define NUMUNCOMPRESSED (6000)
+#define NUMTEMPINDICES (140000)
 
 void
 CCullZones::Init(void)
@@ -46,26 +52,6 @@ CCullZones::Init(void)
 		aPointersToBigBuildingsForBuildings[i] = -1;
 	for(i = 0; i < NUMTREADABLES; i++)
 		aPointersToBigBuildingsForTreadables[i] = -1;
-}
-
-bool CCullZone::TestLine(CVector vec1, CVector vec2)
-{
-	CColPoint colPoint;
-	CEntity *entity;
-
-	if (CWorld::ProcessLineOfSight(vec1, vec2, colPoint, entity, true, false, false, false, false, true, false))
-		return true;
-	if (CWorld::ProcessLineOfSight(CVector(vec1.x + 0.05f, vec1.y, vec1.z), CVector(vec2.x + 0.05f, vec2.y, vec2.z), colPoint, entity, true, false, false, false, false, true, false))
-		return true;
-	if (CWorld::ProcessLineOfSight(CVector(vec1.x - 0.05f, vec1.y, vec1.z), CVector(vec2.x - 0.05f, vec2.y, vec2.z), colPoint, entity, true, false, false, false, false, true, false))
-		return true;
-	if (CWorld::ProcessLineOfSight(CVector(vec1.x, vec1.y + 0.05f, vec1.z), CVector(vec2.x, vec2.y + 0.05f, vec2.z), colPoint, entity, true, false, false, false, false, true, false))
-		return true;
-	if (CWorld::ProcessLineOfSight(CVector(vec1.x, vec1.y - 0.05f, vec1.z), CVector(vec2.x, vec2.y - 0.05f, vec2.z), colPoint, entity, true, false, false, false, false, true, false))
-		return true;
-	if (CWorld::ProcessLineOfSight(CVector(vec1.x, vec1.y, vec1.z + 0.05f), CVector(vec2.x, vec2.y, vec2.z + 0.05f), colPoint, entity, true, false, false, false, false, true, false))
-		return true;
-	return CWorld::ProcessLineOfSight(CVector(vec1.x, vec1.y, vec1.z - 0.05f), CVector(vec2.x, vec2.y, vec2.z - 0.05f), colPoint, entity, true, false, false, false, false, true, false);
 }
 
 
@@ -89,19 +75,25 @@ CCullZones::ResolveVisibilities(void)
 		CFileMgr::Read(fd, (char*)aPointersToBigBuildingsForTreadables, sizeof(aPointersToBigBuildingsForTreadables));
 		CFileMgr::CloseFile(fd);
 	}else{
-#if 0
-		// TODO: implement code from mobile to generate data here
+#ifndef MASTER
 		EntityIndicesUsed = 0;
 		BuildListForBigBuildings();
-		pTempArrayIndices = new uint16[140000];
+		pTempArrayIndices = new uint16[NUMTEMPINDICES];
 		TempEntityIndicesUsed = 0;
 
-		for (int i = 0; i < NumCullZones; i++) {
-			DoVisibilityTestCullZone(i, true);
+//		if(!LoadTempFile())	// not in final game
+		{
+			for (int i = 0; i < NumCullZones; i++) {
+//printf("testing zone %d (%d indices)\n", i, TempEntityIndicesUsed);
+				DoVisibilityTestCullZone(i, true);
+			}
+
+//			SaveTempFile();	// not in final game
 		}
 
 		CompressIndicesArray();
 		delete[] pTempArrayIndices;
+		pTempArrayIndices = nil;
 
 		fd = CFileMgr::OpenFileForWriting("data\\cullzone.dat");
 		if (fd != 0) {
@@ -118,16 +110,53 @@ CCullZones::ResolveVisibilities(void)
 	}
 }
 
+bool
+CCullZones::LoadTempFile(void)
+{
+	int fd = CFileMgr::OpenFile("cullzone.tmp");
+	if (fd != 0) {
+		CFileMgr::Read(fd, (char*)&NumCullZones, sizeof(NumCullZones));
+		CFileMgr::Read(fd, (char*)aZones, sizeof(aZones));
+		CFileMgr::Read(fd, (char*)&NumAttributeZones, sizeof(NumAttributeZones));
+		CFileMgr::Read(fd, (char*)&aAttributeZones, sizeof(aAttributeZones));
+		CFileMgr::Read(fd, (char*)pTempArrayIndices, NUMTEMPINDICES*sizeof(uint16));
+		CFileMgr::Read(fd, (char*)&TempEntityIndicesUsed, sizeof(TempEntityIndicesUsed));
+		CFileMgr::Read(fd, (char*)&aPointersToBigBuildingsForBuildings, sizeof(aPointersToBigBuildingsForBuildings));
+		CFileMgr::Read(fd, (char*)&aPointersToBigBuildingsForTreadables, sizeof(aPointersToBigBuildingsForTreadables));
+		CFileMgr::CloseFile(fd);
+		return true;
+	}
+	return false;
+}
+
+void
+CCullZones::SaveTempFile(void)
+{
+	int fd = CFileMgr::OpenFileForWriting("cullzone.tmp");
+	if (fd != 0) {
+		CFileMgr::Write(fd, (char*)&NumCullZones, sizeof(NumCullZones));
+		CFileMgr::Write(fd, (char*)aZones, sizeof(aZones));
+		CFileMgr::Write(fd, (char*)&NumAttributeZones, sizeof(NumAttributeZones));
+		CFileMgr::Write(fd, (char*)&aAttributeZones, sizeof(aAttributeZones));
+		CFileMgr::Write(fd, (char*)pTempArrayIndices, NUMTEMPINDICES*sizeof(uint16));
+		CFileMgr::Write(fd, (char*)&TempEntityIndicesUsed, sizeof(TempEntityIndicesUsed));
+		CFileMgr::Write(fd, (char*)&aPointersToBigBuildingsForBuildings, sizeof(aPointersToBigBuildingsForBuildings));
+		CFileMgr::Write(fd, (char*)&aPointersToBigBuildingsForTreadables, sizeof(aPointersToBigBuildingsForTreadables));
+		CFileMgr::CloseFile(fd);
+	}
+}
+
+
 void
 CCullZones::BuildListForBigBuildings()
 {
 	for (int i = CPools::GetBuildingPool()->GetSize()-1; i >= 0; i--) {
 		CBuilding *building = CPools::GetBuildingPool()->GetSlot(i);
 		if (building == nil || !building->bIsBIGBuilding) continue;
-		CSimpleModelInfo *nonlod = (CSimpleModelInfo*)((CSimpleModelInfo *)CModelInfo::GetModelInfo(building->GetModelIndex()))->m_atomics[2];
+		CSimpleModelInfo *nonlod = ((CSimpleModelInfo *)CModelInfo::GetModelInfo(building->GetModelIndex()))->GetRelatedModel();
 		if (nonlod == nil) continue;
 
-		for (int j = i; j >= 0; j--) {
+		for (int j = CPools::GetBuildingPool()->GetSize()-1; j >= 0; j--) {
 			CBuilding *building2 = CPools::GetBuildingPool()->GetSlot(j);
 			if (building2 == nil || building2->bIsBIGBuilding) continue;
 			if (CModelInfo::GetModelInfo(building2->GetModelIndex()) == nonlod) {
@@ -150,7 +179,7 @@ CCullZones::BuildListForBigBuildings()
 }
 
 void
-CCullZones::DoVisibilityTestCullZone(int zoneId, bool doIt)
+CCullZones::DoVisibilityTestCullZone(int zoneId, bool findIndices)
 {
 	aZones[zoneId].m_groupIndexCount[0] = 0;
 	aZones[zoneId].m_groupIndexCount[1] = 0;
@@ -158,16 +187,17 @@ CCullZones::DoVisibilityTestCullZone(int zoneId, bool doIt)
 	aZones[zoneId].m_indexStart = TempEntityIndicesUsed;
 	aZones[zoneId].FindTestPoints();
 
-	if (!doIt) return;
+	if (!findIndices) return;
 
 	for (int i = CPools::GetBuildingPool()->GetSize() - 1; i >= 0; i--) {
 		CBuilding *building = CPools::GetBuildingPool()->GetSlot(i);
 		if (building != nil && !building->bIsBIGBuilding && aZones[zoneId].IsEntityCloseEnoughToZone(building, aPointersToBigBuildingsForBuildings[i] != -1)) {
-			CBuilding *building2 = nil;
+			CBuilding *LODbuilding = nil;
 			if (aPointersToBigBuildingsForBuildings[i] != -1)
-				building2 = CPools::GetBuildingPool()->GetSlot(aPointersToBigBuildingsForBuildings[i]);
+				LODbuilding = CPools::GetBuildingPool()->GetSlot(aPointersToBigBuildingsForBuildings[i]);
 
-			if (!aZones[zoneId].TestEntityVisibilityFromCullZone(building, 0.0f, building2)) {
+			if (!aZones[zoneId].TestEntityVisibilityFromCullZone(building, 0.0f, LODbuilding)) {
+				assert(TempEntityIndicesUsed < NUMTEMPINDICES);
 				pTempArrayIndices[TempEntityIndicesUsed++] = i;
 				aZones[zoneId].m_groupIndexCount[0]++;
 			}
@@ -175,13 +205,14 @@ CCullZones::DoVisibilityTestCullZone(int zoneId, bool doIt)
 	}
 
 	for (int i = CPools::GetTreadablePool()->GetSize() - 1; i >= 0; i--) {
-		CTreadable* building = CPools::GetTreadablePool()->GetSlot(i);
+		CBuilding* building = CPools::GetTreadablePool()->GetSlot(i);
 		if (building != nil && aZones[zoneId].IsEntityCloseEnoughToZone(building, aPointersToBigBuildingsForTreadables[i] != -1)) {
-			CTreadable* building2 = nil;
+			CBuilding *LODbuilding = nil;
 			if (aPointersToBigBuildingsForTreadables[i] != -1)
-				building2 = CPools::GetTreadablePool()->GetSlot(aPointersToBigBuildingsForTreadables[i]);
+				LODbuilding = CPools::GetBuildingPool()->GetSlot(aPointersToBigBuildingsForTreadables[i]);
 
-			if (!aZones[zoneId].TestEntityVisibilityFromCullZone(building, 10.0f, building2)) {
+			if (!aZones[zoneId].TestEntityVisibilityFromCullZone(building, 10.0f, LODbuilding)) {
+				assert(TempEntityIndicesUsed < NUMTEMPINDICES);
 				pTempArrayIndices[TempEntityIndicesUsed++] = i;
 				aZones[zoneId].m_groupIndexCount[1]++;
 			}
@@ -189,23 +220,28 @@ CCullZones::DoVisibilityTestCullZone(int zoneId, bool doIt)
 	}
 
 	for (int i = CPools::GetTreadablePool()->GetSize() - 1; i >= 0; i--) {
-		CTreadable *building = CPools::GetTreadablePool()->GetSlot(i);
-		if (building != nil && aZones[zoneId].CalcDistToCullZoneSquared(building->GetPosition().x, building->GetPosition().y) < 40000.0f) {
+		CBuilding *building = CPools::GetTreadablePool()->GetSlot(i);
+		if (building != nil && aZones[zoneId].CalcDistToCullZoneSquared(building->GetPosition().x, building->GetPosition().y) < SQR(200.0f)) {
 			int start = aZones[zoneId].m_groupIndexCount[0] + aZones[zoneId].m_indexStart;
 			int end = aZones[zoneId].m_groupIndexCount[1] + start;
 
 			bool alreadyAdded = false;
 
 			for (int k = start; k < end; k++) {
+#ifdef FIX_BUGS
+				if (pTempArrayIndices[k] == i)
+#else
 				if (aIndices[k] == i)
+#endif
 					alreadyAdded = true;
 			}
 
 			if (!alreadyAdded) {
-				CBuilding *building2 = nil;
+				CBuilding *LODbuilding = nil;
 				if (aPointersToBigBuildingsForTreadables[i] != -1)
-					building2 = CPools::GetBuildingPool()->GetSlot(aPointersToBigBuildingsForTreadables[i]);
-				if (!aZones[zoneId].TestEntityVisibilityFromCullZone(building, 0.0f, building2)) {
+					LODbuilding = CPools::GetBuildingPool()->GetSlot(aPointersToBigBuildingsForTreadables[i]);
+				if (!aZones[zoneId].TestEntityVisibilityFromCullZone(building, 0.0f, LODbuilding)) {
+					assert(TempEntityIndicesUsed < NUMTEMPINDICES);
 					pTempArrayIndices[TempEntityIndicesUsed++] = i;
 					aZones[zoneId].m_groupIndexCount[2]++;
 				}
@@ -353,7 +389,9 @@ CCullZones::AddCullZone(CVector const &position,
 	if((flag & ATTRZONE_NOTCULLZONE) == 0){
 		cull = &aZones[NumCullZones++];
 		v = position;
-		// WTF is this?
+		// reposition start point to the start/end of the
+		// alley next to the big building in the industrial district.
+		// probably isn't analyzed correctly otherwise?s
 		if((v-CVector(1032.14f, -624.255f, 24.93f)).Magnitude() < 1.0f)
 			v = CVector(1061.7f, -613.0f, 19.0f);
 		if((v-CVector(1029.48f, -495.757f, 21.98f)).Magnitude() < 1.0f)
@@ -385,6 +423,208 @@ CCullZones::AddCullZone(CVector const &position,
 	}
 }
 
+uint16 *pExtraArrayIndices;
+
+void
+CCullZones::CompressIndicesArray()
+{
+	uint16 set[3];
+
+	// These are used to hold the compressed groups in sets of 3
+	int numExtraIndices = 0;
+	pExtraArrayIndices = new uint16[NUMTEMPINDICES];
+
+	for(int numOccurrences = 6; numOccurrences > 1; numOccurrences--){
+		if(NumCullZones == 0)
+			break;
+
+//printf("checking occurrences %d\n", numOccurrences);
+		int attempt = 0;
+		while(attempt < 10000){
+			for(;;){
+				attempt++;
+
+				int zone = CGeneral::GetRandomNumber() % NumCullZones;
+				int group = CGeneral::GetRandomNumber() % 3;
+				if(!PickRandomSetForGroup(zone, group, set))
+					break;
+				if(!DoWeHaveMoreThanXOccurencesOfSet(numOccurrences, set))
+					break;
+
+				// add this set
+				attempt = 1;
+				int setId = numExtraIndices + NUMUNCOMPRESSED;
+				pExtraArrayIndices[numExtraIndices++] = set[0];
+				pExtraArrayIndices[numExtraIndices++] = set[1];
+				pExtraArrayIndices[numExtraIndices++] = set[2];
+				ReplaceSetForAllGroups(set, setId);
+			}
+		}
+	}
+
+	TidyUpAndMergeLists(pExtraArrayIndices, numExtraIndices);
+
+	delete[] pExtraArrayIndices;
+}
+
+// Get three random indices for this group of a zone
+bool
+CCullZones::PickRandomSetForGroup(int32 zone, int32 group, uint16 *set)
+{
+	int32 start;
+	int32 size;
+
+	aZones[zone].GetGroupStartAndSize(group, start, size);
+	if(size <= 0)
+		return false;
+
+	int numIndices = 0;
+	for(int i = 0; i < size; i++)
+		if(pTempArrayIndices[start + i] != 0xFFFF)
+			numIndices++;
+	if(numIndices < 3)
+		return false;
+
+	int first = CGeneral::GetRandomNumber() % (numIndices-2);
+
+	numIndices = 0;
+	int n = 0;
+	for(int i = 0; i < size; i++)
+		if(pTempArrayIndices[start + i] != 0xFFFF){
+			if(n++ < first) continue;
+
+			set[numIndices++] = pTempArrayIndices[start + i];
+			if(numIndices == 3)
+				break;
+		}
+	return true;
+}
+
+bool
+CCullZones::DoWeHaveMoreThanXOccurencesOfSet(int32 count, uint16 *set)
+{
+	int32 curCount;
+	int32 start;
+	int32 size;
+
+	curCount = 0;
+	for (int i = 0; i < NumCullZones; i++) {
+		for (int group = 0; group < 3; group++) {
+			aZones[i].GetGroupStartAndSize(group, start, size);
+			if(size <= 0) continue;
+
+			// check if the set is a subset of the group
+			int n = 0;
+			for (int j = 0; j < size; j++) {
+				for (int k = 0; k < 3; k++) {
+					if (pTempArrayIndices[start+j] == set[k])
+						n++;
+				}
+			}
+			// yes it is
+			if(n == 3){
+				curCount++;
+				// check if we have seen this set often enough
+				if(curCount >= count)
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
+void
+CCullZones::ReplaceSetForAllGroups(uint16 *set, uint16 setid)
+{
+	int32 start;
+	int32 size;
+
+	for(int i = 0; i < NumCullZones; i++)
+		for(int group = 0; group < 3; group++){
+			aZones[i].GetGroupStartAndSize(group, start, size);
+			if(size <= 0) continue;
+
+			// check if the set is a subset of the group
+			int n = 0;
+			for(int j = 0; j < size; j++){
+				for(int k = 0; k < 3; k++){
+					if(pTempArrayIndices[start+j] == set[k])
+						n++;
+				}
+			}
+
+			// yes it is, so replace it
+			if(n == 3){
+				bool insertedSet = false;
+				for(int j = 0; j < size; j++){
+					for(int k = 0; k < 3; k++){
+						// replace first element by set, invalidate others
+						if(pTempArrayIndices[start+j] == set[k]){
+							if(!insertedSet)
+								pTempArrayIndices[start+j] = setid;
+							else
+								pTempArrayIndices[start+j] = 0xFFFF;
+							insertedSet = true;
+						}
+					}
+				}
+			}
+		}
+}
+
+void
+CCullZones::TidyUpAndMergeLists(uint16 *extraIndices, int32 numExtraIndices)
+{
+	int numTempIndices = 0;
+	for(int i = 0; i < TempEntityIndicesUsed; i++)
+		if(pTempArrayIndices[i] != 0xFFFF)
+			numTempIndices++;
+
+	// Fix up zone ranges such that there are no holes
+	for(int i = 0; i < NumCullZones; i++){
+		int j;
+		int start = 0;
+		for(j = 0; j < aZones[i].m_indexStart; j++)
+			if(pTempArrayIndices[j] != 0xFFFF)
+				start++;
+
+		aZones[i].m_indexStart = start;
+		aZones[i].m_numBuildings = 0;
+		aZones[i].m_numTreadablesPlus10m = 0;
+		aZones[i].m_numTreadables = 0;
+
+		for(int k = 0; k < aZones[i].m_groupIndexCount[0]; k++)
+			if(pTempArrayIndices[j++] != 0xFFFF)
+				aZones[i].m_numBuildings++;
+		for(int k = 0; k < aZones[i].m_groupIndexCount[1]; k++)
+			if(pTempArrayIndices[j++] != 0xFFFF)
+				aZones[i].m_numTreadablesPlus10m++;
+		for(int k = 0; k < aZones[i].m_groupIndexCount[2]; k++)
+			if(pTempArrayIndices[j++] != 0xFFFF)
+				aZones[i].m_numTreadables++;
+	}
+
+	// Now copy the actually used indices
+	EntityIndicesUsed = 0;
+	for(int i = 0; i < TempEntityIndicesUsed; i++)
+		if(pTempArrayIndices[i] != 0xFFFF){
+			assert(EntityIndicesUsed < NUMZONEINDICES);
+			if(pTempArrayIndices[i] < NUMUNCOMPRESSED)
+				aIndices[EntityIndicesUsed++] = pTempArrayIndices[i];
+			else
+				aIndices[EntityIndicesUsed++] = pTempArrayIndices[i] + numTempIndices;
+		}
+	for(int i = 0; i < numExtraIndices; i++)
+		if(extraIndices[i] != 0xFFFF){
+			assert(EntityIndicesUsed < NUMZONEINDICES);
+			if(extraIndices[i] < NUMUNCOMPRESSED)
+				aIndices[EntityIndicesUsed++] = extraIndices[i];
+			else
+				aIndices[EntityIndicesUsed++] = extraIndices[i] + numTempIndices;
+		}
+}
+
+
 
 void
 CCullZone::DoStuffLeavingZone(void)
@@ -403,13 +643,14 @@ CCullZone::DoStuffLeavingZone_OneBuilding(uint16 i)
 	int16 bb;
 	int j;
 
-	if(i < 6000){
+
+	if(i < NUMUNCOMPRESSED){
 		CPools::GetBuildingPool()->GetSlot(i)->bZoneCulled = false;
 		bb = CCullZones::aPointersToBigBuildingsForBuildings[i];
 		if(bb != -1)
 			CPools::GetBuildingPool()->GetSlot(bb)->bZoneCulled = false;
 	}else{
-		i -= 6000;
+		i -= NUMUNCOMPRESSED;
 		for(j = 0; j < 3; j++)
 			DoStuffLeavingZone_OneBuilding(CCullZones::aIndices[i+j]);
 	}
@@ -421,14 +662,14 @@ CCullZone::DoStuffLeavingZone_OneTreadableBoth(uint16 i)
 	int16 bb;
 	int j;
 
-	if(i < 6000){
+	if(i < NUMUNCOMPRESSED){
 		CPools::GetTreadablePool()->GetSlot(i)->bZoneCulled = false;
 		CPools::GetTreadablePool()->GetSlot(i)->bZoneCulled2 = false;
 		bb = CCullZones::aPointersToBigBuildingsForTreadables[i];
 		if(bb != -1)
 			CPools::GetBuildingPool()->GetSlot(bb)->bZoneCulled = false;
 	}else{
-		i -= 6000;
+		i -= NUMUNCOMPRESSED;
 		for(j = 0; j < 3; j++)
 			DoStuffLeavingZone_OneTreadableBoth(CCullZones::aIndices[i+j]);
 	}
@@ -453,13 +694,13 @@ CCullZone::DoStuffEnteringZone_OneBuilding(uint16 i)
 	int16 bb;
 	int j;
 
-	if(i < 6000){
+	if(i < NUMUNCOMPRESSED){
 		CPools::GetBuildingPool()->GetSlot(i)->bZoneCulled = true;
 		bb = CCullZones::aPointersToBigBuildingsForBuildings[i];
 		if(bb != -1)
 			CPools::GetBuildingPool()->GetSlot(bb)->bZoneCulled = true;
 	}else{
-		i -= 6000;
+		i -= NUMUNCOMPRESSED;
 		for(j = 0; j < 3; j++)
 			DoStuffEnteringZone_OneBuilding(CCullZones::aIndices[i+j]);
 	}
@@ -471,14 +712,14 @@ CCullZone::DoStuffEnteringZone_OneTreadablePlus10m(uint16 i)
 	int16 bb;
 	int j;
 
-	if(i < 6000){
+	if(i < NUMUNCOMPRESSED){
 		CPools::GetTreadablePool()->GetSlot(i)->bZoneCulled = true;
 		CPools::GetTreadablePool()->GetSlot(i)->bZoneCulled2 = true;
 		bb = CCullZones::aPointersToBigBuildingsForTreadables[i];
 		if(bb != -1)
 			CPools::GetBuildingPool()->GetSlot(bb)->bZoneCulled = true;
 	}else{
-		i -= 6000;
+		i -= NUMUNCOMPRESSED;
 		for(j = 0; j < 3; j++)
 			DoStuffEnteringZone_OneTreadablePlus10m(CCullZones::aIndices[i+j]);
 	}
@@ -490,13 +731,13 @@ CCullZone::DoStuffEnteringZone_OneTreadable(uint16 i)
 	int16 bb;
 	int j;
 
-	if(i < 6000){
+	if(i < NUMUNCOMPRESSED){
 		CPools::GetTreadablePool()->GetSlot(i)->bZoneCulled = true;
 		bb = CCullZones::aPointersToBigBuildingsForTreadables[i];
 		if(bb != -1)
 			CPools::GetBuildingPool()->GetSlot(bb)->bZoneCulled = true;
 	}else{
-		i -= 6000;
+		i -= NUMUNCOMPRESSED;
 		for(j = 0; j < 3; j++)
 			DoStuffEnteringZone_OneTreadable(CCullZones::aIndices[i+j]);
 	}
@@ -519,6 +760,68 @@ CCullZone::CalcDistToCullZoneSquared(float x, float y)
 }
 
 bool
+CCullZone::TestLine(CVector vec1, CVector vec2)
+{
+	CColPoint colPoint;
+	CEntity *entity;
+
+	if (CWorld::ProcessLineOfSight(vec1, vec2, colPoint, entity, true, false, false, false, false, true, false))
+		return true;
+	if (CWorld::ProcessLineOfSight(CVector(vec1.x + 0.05f, vec1.y, vec1.z), CVector(vec2.x + 0.05f, vec2.y, vec2.z), colPoint, entity, true, false, false, false, false, true, false))
+		return true;
+	if (CWorld::ProcessLineOfSight(CVector(vec1.x - 0.05f, vec1.y, vec1.z), CVector(vec2.x - 0.05f, vec2.y, vec2.z), colPoint, entity, true, false, false, false, false, true, false))
+		return true;
+	if (CWorld::ProcessLineOfSight(CVector(vec1.x, vec1.y + 0.05f, vec1.z), CVector(vec2.x, vec2.y + 0.05f, vec2.z), colPoint, entity, true, false, false, false, false, true, false))
+		return true;
+	if (CWorld::ProcessLineOfSight(CVector(vec1.x, vec1.y - 0.05f, vec1.z), CVector(vec2.x, vec2.y - 0.05f, vec2.z), colPoint, entity, true, false, false, false, false, true, false))
+		return true;
+	if (CWorld::ProcessLineOfSight(CVector(vec1.x, vec1.y, vec1.z + 0.05f), CVector(vec2.x, vec2.y, vec2.z + 0.05f), colPoint, entity, true, false, false, false, false, true, false))
+		return true;
+	return CWorld::ProcessLineOfSight(CVector(vec1.x, vec1.y, vec1.z - 0.05f), CVector(vec2.x, vec2.y, vec2.z - 0.05f), colPoint, entity, true, false, false, false, false, true, false);
+}
+
+bool
+CCullZone::DoThoroughLineTest(CVector start, CVector end, CEntity *testEntity)
+{
+	CColPoint colPoint;
+	CEntity *entity;
+
+	if(CWorld::ProcessLineOfSight(start, end, colPoint, entity, true, false, false, false, false, true, false) &&
+	   testEntity != entity)
+		return false;
+
+	CVector side;
+#ifdef FIX_BUGS
+	if(start.x != end.x || start.y != end.y)
+#else
+	if(start.x != end.x && start.y != end.y)
+#endif
+		side = CVector(0.0f, 0.0f, 1.0f);
+	else
+		side = CVector(1.0f, 0.0f, 0.0f);
+	CVector up = CrossProduct(side, end - start);
+	side = CrossProduct(up, end - start);
+	side.Normalise();
+	up.Normalise();
+	side *= 0.1f;
+	up *= 0.1f;
+
+	if(CWorld::ProcessLineOfSight(start+side, end+side, colPoint, entity, true, false, false, false, false, true, false) &&
+	   testEntity != entity)
+		return false;
+	if(CWorld::ProcessLineOfSight(start-side, end-side, colPoint, entity, true, false, false, false, false, true, false) &&
+	   testEntity != entity)
+		return false;
+	if(CWorld::ProcessLineOfSight(start+up, end+up, colPoint, entity, true, false, false, false, false, true, false) &&
+	   testEntity != entity)
+		return false;
+	if(CWorld::ProcessLineOfSight(start-up, end-up, colPoint, entity, true, false, false, false, false, true, false) &&
+	   testEntity != entity)
+		return false;
+	return true;
+}
+
+bool
 CCullZone::IsEntityCloseEnoughToZone(CEntity *entity, bool checkLevel)
 {
 	const CVector &pos = entity->GetPosition();
@@ -526,10 +829,10 @@ CCullZone::IsEntityCloseEnoughToZone(CEntity *entity, bool checkLevel)
 	CSimpleModelInfo *minfo = (CSimpleModelInfo*)CModelInfo::GetModelInfo(entity->GetModelIndex());
 	float distToZone = CalcDistToCullZone(pos.x, pos.y);
 	float lodDist;
-	if (minfo->m_isSubway)
-		lodDist = minfo->GetLargestLodDistance() + 30.0f;
+	if (minfo->m_noFade)
+		lodDist = minfo->GetLargestLodDistance() + STREAM_DISTANCE;
 	else
-		lodDist = minfo->GetLargestLodDistance() + 50.0f;
+		lodDist = minfo->GetLargestLodDistance() + STREAM_DISTANCE + FADE_DISTANCE;
 
 	if (lodDist > distToZone) return true;
 	if (!checkLevel) return false;
@@ -538,27 +841,749 @@ CCullZone::IsEntityCloseEnoughToZone(CEntity *entity, bool checkLevel)
 }
 
 bool
-CCullZones::DoWeHaveMoreThanXOccurencesOfSet(int32 count, uint16 *set)
+CCullZone::PointFallsWithinZone(CVector pos, float radius)
 {
-	int32 curCount;
-	int32 start;
-	int32 size;
+	if(minx - radius > pos.x ||
+	   maxx + radius < pos.x ||
+	   miny - radius > pos.y ||
+	   maxy + radius < pos.y ||
+	   minz - radius > pos.z ||
+	   maxz + radius < pos.z)
+		return false;
+	return true;
+}
 
-	for (int i = 0; i < NumCullZones; i++) {
-		curCount = 0;
-		for (int group = 0; group < 3; group++) {
-			aZones[i].GetGroupStartAndSize(group, start, size);
 
-			int unk = 0; // TODO: figure out
-			for (int j = 0; j < size; j++) {
-				for (int k = 0; k < 3; k++) {
-					if (set[k] == pTempArrayIndices[start+j])
-						unk++;
+CVector ExtraFudgePointsCoors[] = {
+	CVector(978.0, -394.0, 18.0),
+	CVector(1189.7, -414.6, 27.0),
+	CVector(978.8, -391.0, 19.0),
+	CVector(1199.0, -502.3, 28.0),
+	CVector(1037.0, -391.9, 18.4),
+	CVector(1140.0, -608.7, 16.0),
+	CVector(1051.0, -26.0, 11.0),
+	CVector(951.5, -345.1, 12.0),
+	CVector(958.2, -394.6, 16.0),
+	CVector(1036.5, -390.0, 15.2),
+	CVector(960.6, -390.5, 20.9),
+	CVector(1061.0, -640.6, 16.3),
+	CVector(1034.5, -388.96, 14.78),
+	CVector(1038.4, -13.98, 12.2),
+	CVector(1047.2, -16.7, 10.6),
+	CVector(1257.9, -333.3, 40.0),
+	CVector(885.6, -424.9, 17.0),
+	CVector(1127.5, -795.8, 17.7),
+	CVector(1133.0, -716.0, 19.0),
+	CVector(1125.0, -694.0, 18.5),
+	CVector(1125.0, -670.0, 16.3),
+	CVector(1051.6, 36.3, 17.9),
+	CVector(1054.6, -11.4, 15.0),
+	CVector(1058.9, -278.0, 15.0),
+	CVector(1059.4, -261.0, 10.9),
+	CVector(1051.5, -638.5, 16.5),
+	CVector(1058.2, -643.4, 15.5),
+	CVector(1058.2, -643.4, 18.0),
+	CVector(826.0, -260.0, 7.0),
+	CVector(826.0, -260.0, 11.0),
+	CVector(833.0, -603.6, 16.4),
+	CVector(833.0, -603.6, 20.0),
+	CVector(1002.0, -318.5, 10.5),
+	CVector(998.0, -318.0, 9.8),
+	CVector(1127.0, -183.0, 18.1),
+	CVector(1123.0, -331.5, 23.8),
+	CVector(1123.8, -429.0, 24.0),
+	CVector(1197.0, -30.0, 13.7),
+	CVector(1117.5, -230.0, 17.3),
+	CVector(1117.5, -230.0, 20.0),
+	CVector(1120.0, -281.6, 21.5),
+	CVector(1120.0, -281.6, 24.0),
+	CVector(1084.5, -1022.7, 17.0),
+	CVector(1071.5, 5.4, 4.6),
+	CVector(1177.2, -215.7, 27.6),
+	CVector(841.6, -460.0, 19.7),
+	CVector(874.8, -456.6, 16.6),
+	CVector(918.3, -451.8, 17.8),
+	CVector(844.0, -495.7, 16.7),
+	CVector(842.0, -493.4, 21.0),
+	CVector(1433.5, -774.4, 16.9),
+	CVector(1051.0, -205.0, 7.5),
+	CVector(885.5, -425.6, 15.6),
+	CVector(182.6, -470.4, 27.8),
+	CVector(132.5, -930.2, 29.0),
+	CVector(124.7, -904.0, 28.0),
+	CVector(-50.0, -686.0, 22.0),
+	CVector(-49.1, -694.5, 22.5),
+	CVector(1063.8, -404.45, 16.2),
+	CVector(1062.2, -405.5, 17.0)
+};
+int32 NumTestPoints;
+int32 aTestPointsX[100];
+int32 aTestPointsY[100];
+int32 aTestPointsZ[100];
+CVector aTestPoints[100];
+int32 ElementsX, ElementsY, ElementsZ;
+float StepX, StepY, StepZ;
+int32 Memsize;
+uint8 *pMem;
+#define MEM(x, y, z) pMem[((x)*ElementsY + (y))*ElementsZ + (z)]
+#define FLAG_FREE 1
+#define FLAG_PROCESSED 2
+
+int32 MinValX, MaxValX;
+int32 MinValY, MaxValY;
+int32 MinValZ, MaxValZ;
+int32 Point1, Point2;
+int32 NewPointX, NewPointY, NewPointZ;
+
+
+void
+CCullZone::FindTestPoints()
+{
+	static int CZNumber;
+
+	NumTestPoints = 0;
+	ElementsX = (maxx-minx) < 1.0f ? 2 : (maxx-minx)+1.0f;
+	ElementsY = (maxy-miny) < 1.0f ? 2 : (maxy-miny)+1.0f;
+	ElementsZ = (maxz-minz) < 1.0f ? 2 : (maxz-minz)+1.0f;
+	if(ElementsX > 32) ElementsX = 32;
+	if(ElementsY > 32) ElementsY = 32;
+	if(ElementsZ > 32) ElementsZ = 32;
+	Memsize = ElementsX * ElementsY * ElementsZ;
+	StepX = (maxx-minx)/(ElementsX-1);
+	StepY = (maxy-miny)/(ElementsY-1);
+	StepZ = (maxz-minz)/(ElementsZ-1);
+
+	pMem = new uint8[Memsize];
+	memset(pMem, 0, Memsize);
+
+	// indices of center
+	int x = ElementsX * (position.x-minx)/(maxx-minx);
+	x = clamp(x, 0, ElementsX-1);
+	int y = ElementsY * (position.y-miny)/(maxy-miny);
+	y = clamp(y, 0, ElementsY-1);
+	int z = ElementsZ * (position.z-minz)/(maxz-minz);
+	z = clamp(z, 0, ElementsZ-1);
+
+	// Mark which test points inside the zone are not occupied by buildings.
+	// To do this, mark the start point as free and do a food fill.
+
+	// NB: we just assume the start position is free here!
+	MEM(x, y, z) |= FLAG_FREE;
+	aTestPointsX[NumTestPoints] = x;
+	aTestPointsY[NumTestPoints] = y;
+	aTestPointsZ[NumTestPoints] = z;
+	NumTestPoints++;
+
+	bool notDoneYet;
+	do{
+		notDoneYet = false;
+		for(x = 0; x < ElementsX; x++){
+			for(y = 0; y < ElementsY; y++){
+				for(z = 0; z < ElementsZ; z++){
+					if(!(MEM(x, y, z) & FLAG_FREE) || MEM(x, y, z) & FLAG_PROCESSED)
+						continue;
+
+					float pX = x*StepX + minx;
+					float pY = y*StepY + miny;
+					float pZ = z*StepZ + minz;
+
+					if(x > 0 && !(MEM(x-1, y, z) & (FLAG_FREE | FLAG_PROCESSED)) &&
+					   !TestLine(CVector(pX, pY, pZ), CVector(pX-StepX, pY, pZ)))
+						MEM(x-1, y, z) |= FLAG_FREE;
+					if(x < ElementsX-1 && !(MEM(x+1, y, z) & (FLAG_FREE | FLAG_PROCESSED)) &&
+					   !TestLine(CVector(pX, pY, pZ), CVector(pX+StepX, pY, pZ)))
+						MEM(x+1, y, z) |= FLAG_FREE;
+
+					if(y > 0 && !(MEM(x, y-1, z) & (FLAG_FREE | FLAG_PROCESSED)) &&
+					   !TestLine(CVector(pX, pY, pZ), CVector(pX, pY-StepY, pZ)))
+						MEM(x, y-1, z) |= FLAG_FREE;
+					if(y < ElementsY-1 && !(MEM(x, y+1, z) & (FLAG_FREE | FLAG_PROCESSED)) &&
+					   !TestLine(CVector(pX, pY, pZ), CVector(pX, pY+StepY, pZ)))
+						MEM(x, y+1, z) |= FLAG_FREE;
+
+					if(z > 0 && !(MEM(x, y, z-1) & (FLAG_FREE | FLAG_PROCESSED)) &&
+					   !TestLine(CVector(pX, pY, pZ), CVector(pX, pY, pZ-StepZ)))
+						MEM(x, y, z-1) |= FLAG_FREE;
+					if(z < ElementsZ-1 && !(MEM(x, y, z+1) & (FLAG_FREE | FLAG_PROCESSED)) &&
+					   !TestLine(CVector(pX, pY, pZ), CVector(pX, pY, pZ+StepZ)))
+						MEM(x, y, z+1) |= FLAG_FREE;
+
+					notDoneYet = true;
+					MEM(x, y, z) |= FLAG_PROCESSED;
 				}
 			}
-			if (unk == 3 && ++curCount >= count)
-				return true;
+		}
+	}while(notDoneYet);
+
+	bool done;
+
+	// Find bound planes of free space
+
+	// increase x, bounds in y and z
+	x = 0;
+	do{
+		done = false;
+		int minA = 10000;
+		int minB = 10000;
+		int maxA = -10000;
+		int maxB = -10000;
+		for(y = 0; y < ElementsY; y++)
+			for(z = 0; z < ElementsZ; z++)
+				if(MEM(x, y, z) & FLAG_FREE){
+					if(y + z < minA){
+						minA = y + z;
+						aTestPointsX[NumTestPoints] = x;
+						aTestPointsY[NumTestPoints] = y;
+						aTestPointsZ[NumTestPoints] = z;
+					}
+					if(y + z > maxA){
+						maxA = y + z;
+						aTestPointsX[NumTestPoints+1] = x;
+						aTestPointsY[NumTestPoints+1] = y;
+						aTestPointsZ[NumTestPoints+1] = z;
+					}
+					if(y - z < minB){
+						minB = y - z;
+						aTestPointsX[NumTestPoints+2] = x;
+						aTestPointsY[NumTestPoints+2] = y;
+						aTestPointsZ[NumTestPoints+2] = z;
+					}
+					if(y - z > maxB){
+						maxB = y - z;
+						aTestPointsX[NumTestPoints+3] = x;
+						aTestPointsY[NumTestPoints+3] = y;
+						aTestPointsZ[NumTestPoints+3] = z;
+					}
+					done = true;
+				}
+		x++;
+	}while(!done);
+	NumTestPoints += 4;
+
+	// decrease x, bounds in y and z
+	x = ElementsX-1;
+	do{
+		done = false;
+		int minA = 10000;
+		int minB = 10000;
+		int maxA = -10000;
+		int maxB = -10000;
+		for(y = 0; y < ElementsY; y++)
+			for(z = 0; z < ElementsZ; z++)
+				if(MEM(x, y, z) & FLAG_FREE){
+					if(y + z < minA){
+						minA = y + z;
+						aTestPointsX[NumTestPoints] = x;
+						aTestPointsY[NumTestPoints] = y;
+						aTestPointsZ[NumTestPoints] = z;
+					}
+					if(y + z > maxA){
+						maxA = y + z;
+						aTestPointsX[NumTestPoints+1] = x;
+						aTestPointsY[NumTestPoints+1] = y;
+						aTestPointsZ[NumTestPoints+1] = z;
+					}
+					if(y - z < minB){
+						minB = y - z;
+						aTestPointsX[NumTestPoints+2] = x;
+						aTestPointsY[NumTestPoints+2] = y;
+						aTestPointsZ[NumTestPoints+2] = z;
+					}
+					if(y - z > maxB){
+						maxB = y - z;
+						aTestPointsX[NumTestPoints+3] = x;
+						aTestPointsY[NumTestPoints+3] = y;
+						aTestPointsZ[NumTestPoints+3] = z;
+					}
+					done = true;
+				}
+		x--;
+	}while(!done);
+	NumTestPoints += 4;
+
+	// increase y, bounds in x and z
+	y = 0;
+	do{
+		done = false;
+		int minA = 10000;
+		int minB = 10000;
+		int maxA = -10000;
+		int maxB = -10000;
+		for(x = 0; x < ElementsX; x++)
+			for(z = 0; z < ElementsZ; z++)
+				if(MEM(x, y, z) & FLAG_FREE){
+					if(x + z < minA){
+						minA = x + z;
+						aTestPointsX[NumTestPoints] = x;
+						aTestPointsY[NumTestPoints] = y;
+						aTestPointsZ[NumTestPoints] = z;
+					}
+					if(x + z > maxA){
+						maxA = x + z;
+						aTestPointsX[NumTestPoints+1] = x;
+						aTestPointsY[NumTestPoints+1] = y;
+						aTestPointsZ[NumTestPoints+1] = z;
+					}
+					if(x - z < minB){
+						minB = x - z;
+						aTestPointsX[NumTestPoints+2] = x;
+						aTestPointsY[NumTestPoints+2] = y;
+						aTestPointsZ[NumTestPoints+2] = z;
+					}
+					if(x - z > maxB){
+						maxB = x - z;
+						aTestPointsX[NumTestPoints+3] = x;
+						aTestPointsY[NumTestPoints+3] = y;
+						aTestPointsZ[NumTestPoints+3] = z;
+					}
+					done = true;
+				}
+		y++;
+	}while(!done);
+	NumTestPoints += 4;
+
+	// decrease y, bounds in x and z
+	y = ElementsY-1;
+	do{
+		done = false;
+		int minA = 10000;
+		int minB = 10000;
+		int maxA = -10000;
+		int maxB = -10000;
+		for(x = 0; x < ElementsX; x++)
+			for(z = 0; z < ElementsZ; z++)
+				if(MEM(x, y, z) & FLAG_FREE){
+					if(x + z < minA){
+						minA = x + z;
+						aTestPointsX[NumTestPoints] = x;
+						aTestPointsY[NumTestPoints] = y;
+						aTestPointsZ[NumTestPoints] = z;
+					}
+					if(x + z > maxA){
+						maxA = x + z;
+						aTestPointsX[NumTestPoints+1] = x;
+						aTestPointsY[NumTestPoints+1] = y;
+						aTestPointsZ[NumTestPoints+1] = z;
+					}
+					if(x - z < minB){
+						minB = x - z;
+						aTestPointsX[NumTestPoints+2] = x;
+						aTestPointsY[NumTestPoints+2] = y;
+						aTestPointsZ[NumTestPoints+2] = z;
+					}
+					if(x - z > maxB){
+						maxB = x - z;
+						aTestPointsX[NumTestPoints+3] = x;
+						aTestPointsY[NumTestPoints+3] = y;
+						aTestPointsZ[NumTestPoints+3] = z;
+					}
+					done = true;
+				}
+		y--;
+	}while(!done);
+	NumTestPoints += 4;
+
+	// increase z, bounds in x and y
+	z = 0;
+	do{
+		done = false;
+		int minA = 10000;
+		int minB = 10000;
+		int maxA = -10000;
+		int maxB = -10000;
+		for(x = 0; x < ElementsX; x++)
+			for(y = 0; y < ElementsY; y++)
+				if(MEM(x, y, z) & FLAG_FREE){
+					if(x + y < minA){
+						minA = x + y;
+						aTestPointsX[NumTestPoints] = x;
+						aTestPointsY[NumTestPoints] = y;
+						aTestPointsZ[NumTestPoints] = z;
+					}
+					if(x + y > maxA){
+						maxA = x + y;
+						aTestPointsX[NumTestPoints+1] = x;
+						aTestPointsY[NumTestPoints+1] = y;
+						aTestPointsZ[NumTestPoints+1] = z;
+					}
+					if(x - y < minB){
+						minB = x - y;
+						aTestPointsX[NumTestPoints+2] = x;
+						aTestPointsY[NumTestPoints+2] = y;
+						aTestPointsZ[NumTestPoints+2] = z;
+					}
+					if(x - y > maxB){
+						maxB = x - y;
+						aTestPointsX[NumTestPoints+3] = x;
+						aTestPointsY[NumTestPoints+3] = y;
+						aTestPointsZ[NumTestPoints+3] = z;
+					}
+					done = true;
+				}
+		z++;
+	}while(!done);
+	NumTestPoints += 4;
+
+	// decrease z, bounds in x and y
+	z = ElementsZ-1;
+	do{
+		done = false;
+		int minA = 10000;
+		int minB = 10000;
+		int maxA = -10000;
+		int maxB = -10000;
+		for(x = 0; x < ElementsX; x++)
+			for(y = 0; y < ElementsY; y++)
+				if(MEM(x, y, z) & FLAG_FREE){
+					if(x + y < minA){
+						minA = x + y;
+						aTestPointsX[NumTestPoints] = x;
+						aTestPointsY[NumTestPoints] = y;
+						aTestPointsZ[NumTestPoints] = z;
+					}
+					if(x + y > maxA){
+						maxA = x + y;
+						aTestPointsX[NumTestPoints+1] = x;
+						aTestPointsY[NumTestPoints+1] = y;
+						aTestPointsZ[NumTestPoints+1] = z;
+					}
+					if(x - y < minB){
+						minB = x - y;
+						aTestPointsX[NumTestPoints+2] = x;
+						aTestPointsY[NumTestPoints+2] = y;
+						aTestPointsZ[NumTestPoints+2] = z;
+					}
+					if(x - y > maxB){
+						maxB = x - y;
+						aTestPointsX[NumTestPoints+3] = x;
+						aTestPointsY[NumTestPoints+3] = y;
+						aTestPointsZ[NumTestPoints+3] = z;
+					}
+					done = true;
+				}
+		z--;
+	}while(!done);
+	NumTestPoints += 4;
+
+	// divide the axis aligned bounding planes into 4 and place some test points
+
+	// x = 0 plane
+	MinValY = 999999;
+	MinValZ = 999999;
+	MaxValY = 0;
+	MaxValZ = 0;
+	for(y = 0; y < ElementsY; y++)
+		for(z = 0; z < ElementsZ; z++)
+			if(MEM(0, y, z) & FLAG_FREE){
+				if(y < MinValY) MinValY = y;
+				if(z < MinValZ) MinValZ = z;
+				if(y > MaxValY) MaxValY = y;
+				if(z > MaxValZ) MaxValZ = z;
+			}
+	// pick 4 points in the found bounds and add new test points
+	if(MaxValY != 0 && MaxValZ != 0)
+		for(Point1 = 0; Point1 < 2; Point1++)
+			for(Point2 = 0; Point2 < 2; Point2++){
+				NewPointY = (Point1 + 0.5f)*(MaxValY - MinValY)*0.5f + MinValY;
+				NewPointZ = (Point2 + 0.5f)*(MaxValZ - MinValZ)*0.5f + MinValZ;
+				if(MEM(0, NewPointY, NewPointZ) & FLAG_FREE){
+					aTestPointsX[NumTestPoints] = 0;
+					aTestPointsY[NumTestPoints] = NewPointY;
+					aTestPointsZ[NumTestPoints] = NewPointZ;
+					NumTestPoints++;
+				}
+			}
+
+	// x = ElementsX-1 plane
+	MinValY = 999999;
+	MinValZ = 999999;
+	MaxValY = 0;
+	MaxValZ = 0;
+	for(y = 0; y < ElementsY; y++)
+		for(z = 0; z < ElementsZ; z++)
+			if(MEM(ElementsX-1, y, z) & FLAG_FREE){
+				if(y < MinValY) MinValY = y;
+				if(z < MinValZ) MinValZ = z;
+				if(y > MaxValY) MaxValY = y;
+				if(z > MaxValZ) MaxValZ = z;
+			}
+	// pick 4 points in the found bounds and add new test points
+	if(MaxValY != 0 && MaxValZ != 0)
+		for(Point1 = 0; Point1 < 2; Point1++)
+			for(Point2 = 0; Point2 < 2; Point2++){
+				NewPointY = (Point1 + 0.5f)*(MaxValY - MinValY)*0.5f + MinValY;
+				NewPointZ = (Point2 + 0.5f)*(MaxValZ - MinValZ)*0.5f + MinValZ;
+				if(MEM(ElementsX-1, NewPointY, NewPointZ) & FLAG_FREE){
+					aTestPointsX[NumTestPoints] = ElementsX-1;
+					aTestPointsY[NumTestPoints] = NewPointY;
+					aTestPointsZ[NumTestPoints] = NewPointZ;
+					NumTestPoints++;
+				}
+			}
+
+	// y = 0 plane
+	MinValX = 999999;
+	MinValZ = 999999;
+	MaxValX = 0;
+	MaxValZ = 0;
+	for(x = 0; x < ElementsX; x++)
+		for(z = 0; z < ElementsZ; z++)
+			if(MEM(x, 0, z) & FLAG_FREE){
+				if(x < MinValX) MinValX = x;
+				if(z < MinValZ) MinValZ = z;
+				if(x > MaxValX) MaxValX = x;
+				if(z > MaxValZ) MaxValZ = z;
+			}
+	// pick 4 points in the found bounds and add new test points
+	if(MaxValX != 0 && MaxValZ != 0)
+		for(Point1 = 0; Point1 < 2; Point1++)
+			for(Point2 = 0; Point2 < 2; Point2++){
+				NewPointX = (Point1 + 0.5f)*(MaxValX - MinValX)*0.5f + MinValX;
+				NewPointZ = (Point2 + 0.5f)*(MaxValZ - MinValZ)*0.5f + MinValZ;
+				if(MEM(NewPointX, 0, NewPointZ) & FLAG_FREE){
+					aTestPointsX[NumTestPoints] = NewPointX;
+					aTestPointsY[NumTestPoints] = 0;
+					aTestPointsZ[NumTestPoints] = NewPointZ;
+					NumTestPoints++;
+				}
+			}
+
+	// y = ElementsY-1 plane
+	MinValX = 999999;
+	MinValZ = 999999;
+	MaxValX = 0;
+	MaxValZ = 0;
+	for(x = 0; x < ElementsX; x++)
+		for(z = 0; z < ElementsZ; z++)
+			if(MEM(x, ElementsY-1, z) & FLAG_FREE){
+				if(x < MinValX) MinValX = x;
+				if(z < MinValZ) MinValZ = z;
+				if(x > MaxValX) MaxValX = x;
+				if(z > MaxValZ) MaxValZ = z;
+			}
+	// pick 4 points in the found bounds and add new test points
+	if(MaxValX != 0 && MaxValZ != 0)
+		for(Point1 = 0; Point1 < 2; Point1++)
+			for(Point2 = 0; Point2 < 2; Point2++){
+				NewPointX = (Point1 + 0.5f)*(MaxValX - MinValX)*0.5f + MinValX;
+				NewPointZ = (Point2 + 0.5f)*(MaxValZ - MinValZ)*0.5f + MinValZ;
+				if(MEM(NewPointX, ElementsY-1, NewPointZ) & FLAG_FREE){
+					aTestPointsX[NumTestPoints] = NewPointX;
+					aTestPointsY[NumTestPoints] = ElementsY-1;
+					aTestPointsZ[NumTestPoints] = NewPointZ;
+					NumTestPoints++;
+				}
+			}
+
+	// z = 0 plane
+	MinValX = 999999;
+	MinValY = 999999;
+	MaxValX = 0;
+	MaxValY = 0;
+	for(x = 0; x < ElementsX; x++)
+		for(y = 0; y < ElementsY; y++)
+			if(MEM(x, y, 0) & FLAG_FREE){
+				if(x < MinValX) MinValX = x;
+				if(y < MinValY) MinValY = y;
+				if(x > MaxValX) MaxValX = x;
+				if(y > MaxValY) MaxValY = y;
+			}
+	// pick 4 points in the found bounds and add new test points
+	if(MaxValX != 0 && MaxValY != 0)
+		for(Point1 = 0; Point1 < 2; Point1++)
+			for(Point2 = 0; Point2 < 2; Point2++){
+				NewPointX = (Point1 + 0.5f)*(MaxValX - MinValX)*0.5f + MinValX;
+				NewPointY = (Point2 + 0.5f)*(MaxValY - MinValY)*0.5f + MinValY;
+				if(MEM(NewPointX, NewPointY, 0) & FLAG_FREE){
+					aTestPointsX[NumTestPoints] = NewPointX;
+					aTestPointsY[NumTestPoints] = NewPointY;
+					aTestPointsZ[NumTestPoints] = 0;
+					NumTestPoints++;
+				}
+			}
+
+	// z = ElementsZ-1 plane
+	MinValX = 999999;
+	MinValY = 999999;
+	MaxValX = 0;
+	MaxValY = 0;
+	for(x = 0; x < ElementsX; x++)
+		for(y = 0; y < ElementsY; y++)
+			if(MEM(x, y, ElementsZ-1) & FLAG_FREE){
+				if(x < MinValX) MinValX = x;
+				if(y < MinValY) MinValY = y;
+				if(x > MaxValX) MaxValX = x;
+				if(y > MaxValY) MaxValY = y;
+			}
+	// pick 4 points in the found bounds and add new test points
+	if(MaxValX != 0 && MaxValY != 0)
+		for(Point1 = 0; Point1 < 2; Point1++)
+			for(Point2 = 0; Point2 < 2; Point2++){
+				NewPointX = (Point1 + 0.5f)*(MaxValX - MinValX)*0.5f + MinValX;
+				NewPointY = (Point2 + 0.5f)*(MaxValY - MinValY)*0.5f + MinValY;
+				if(MEM(NewPointX, NewPointY, ElementsZ-1) & FLAG_FREE){
+					aTestPointsX[NumTestPoints] = NewPointX;
+					aTestPointsY[NumTestPoints] = NewPointY;
+					aTestPointsZ[NumTestPoints] = ElementsZ-1;
+					NumTestPoints++;
+				}
+			}
+
+	// add some hardcoded test points
+	for(int i = 0; i < ARRAY_SIZE(ExtraFudgePointsCoors); i++)
+		if(PointFallsWithinZone(ExtraFudgePointsCoors[i], 0.0f)){
+			x = ElementsX * (ExtraFudgePointsCoors[i].x-minx)/(maxx-minx);
+			y = ElementsY * (ExtraFudgePointsCoors[i].y-miny)/(maxy-miny);
+			z = ElementsZ * (ExtraFudgePointsCoors[i].z-minz)/(maxz-minz);
+			if(MEM(x, y, z) & FLAG_FREE){
+				aTestPointsX[NumTestPoints] = x;
+				aTestPointsY[NumTestPoints] = y;
+				aTestPointsZ[NumTestPoints] = z;
+				NumTestPoints++;
+			}
+		}
+
+	// remove duplicate points
+	for(int i = 0; i < NumTestPoints; i++)
+		for(int j = i+1; j < NumTestPoints; j++)
+			if(aTestPointsX[j] == aTestPointsX[i] &&
+			   aTestPointsY[j] == aTestPointsY[i] &&
+			   aTestPointsZ[j] == aTestPointsZ[i]){
+				// get rid of [j]
+				for(int k = j; k < NumTestPoints-1; k++){
+					aTestPointsX[k] = aTestPointsX[k+1];
+					aTestPointsY[k] = aTestPointsY[k+1];
+					aTestPointsZ[k] = aTestPointsZ[k+1];
+				}
+				NumTestPoints--;
+			}
+
+	// convert points to floating point
+	for(int i = 0; i < NumTestPoints; i++){
+		aTestPoints[i].x = aTestPointsX[i]*StepX + minx;
+		aTestPoints[i].y = aTestPointsY[i]*StepY + miny;
+		aTestPoints[i].z = aTestPointsZ[i]*StepZ + minz;
+	}
+
+	CZNumber++;
+
+	delete[] pMem;
+	pMem = nil;
+}
+
+bool
+CCullZone::TestEntityVisibilityFromCullZone(CEntity *entity, float extraDist, CEntity *LODentity)
+{
+	CColModel *colmodel = entity->GetColModel();
+	float boundMaxX = colmodel->boundingBox.max.x;
+	float boundMaxY = colmodel->boundingBox.max.y;
+	float boundMaxZ = colmodel->boundingBox.max.z;
+	float boundMinX = colmodel->boundingBox.min.x;
+	float boundMinY = colmodel->boundingBox.min.y;
+	float boundMinZ = colmodel->boundingBox.min.z;
+	if(LODentity){
+		colmodel = LODentity->GetColModel();
+		boundMaxX = Max(boundMaxX, colmodel->boundingBox.max.x);
+		boundMaxY = Max(boundMaxY, colmodel->boundingBox.max.y);
+		boundMaxZ = Max(boundMaxZ, colmodel->boundingBox.max.z);
+		boundMinX = Min(boundMinX, colmodel->boundingBox.min.x);
+		boundMinY = Min(boundMinY, colmodel->boundingBox.min.y);
+		boundMinZ = Min(boundMinZ, colmodel->boundingBox.min.z);
+	}
+
+	if(boundMaxZ-boundMinZ + extraDist < 0.5f)
+		boundMaxZ = boundMinZ + 0.5f;
+	else
+		boundMaxZ += extraDist;
+
+	CVector vecMin = entity->GetMatrix() * CVector(boundMinX, boundMinY, boundMinZ);
+	CVector vecMaxX = entity->GetMatrix() * CVector(boundMaxX, boundMinY, boundMinZ);
+	CVector vecMaxY = entity->GetMatrix() * CVector(boundMinX, boundMaxY, boundMinZ);
+	CVector vecMaxZ = entity->GetMatrix() * CVector(boundMinX, boundMinY, boundMaxZ);
+	CVector dirx = vecMaxX - vecMin;
+	CVector diry = vecMaxY - vecMin;
+	CVector dirz = vecMaxZ - vecMin;
+
+	// If building intersects zone at all, it's visible
+	int x, y, z;
+	for(x = 0; x < 9; x++){
+		CVector posX = vecMin + x/8.0f*dirx;
+		for(y = 0; y < 9; y++){
+			CVector posY = posX + y/8.0f*diry;
+			for(z = 0; z < 9; z++){
+ 				CVector posZ = posY + z/8.0f*dirz;
+				if(PointFallsWithinZone(posZ, 2.0f))
+					return true;
+			}
 		}
 	}
+
+	float distToZone = CalcDistToCullZone(entity->GetPosition().x, entity->GetPosition().y)/15.0f;
+	distToZone = Max(distToZone, 7.0f);
+	int numX = (boundMaxX - boundMinX)/distToZone + 2.0f;
+	int numY = (boundMaxY - boundMinY)/distToZone + 2.0f;
+	int numZ = (boundMaxZ - boundMinZ)/distToZone + 2.0f;
+
+	float stepX = 1.0f/(numX-1);
+	float stepY = 1.0f/(numY-1);
+	float stepZ = 1.0f/(numZ-1);
+	float midX = (boundMaxX + boundMinX)/2.0f;
+	float midY = (boundMaxY + boundMinY)/2.0f;
+	float midZ = (boundMaxZ + boundMinZ)/2.0f;
+
+	// check both xy planes
+	for(int i = 0; i < NumTestPoints; i++){
+		CVector testPoint = aTestPoints[i];
+		CVector mid = entity->GetMatrix() * CVector(midX, midY, midZ);
+		mid.z += 0.1f;
+		if(DoThoroughLineTest(testPoint, mid, entity))
+			return true;
+
+		CVector ray = entity->GetPosition() - testPoint;
+
+		float dotX = DotProduct(ray, dirx);
+		float dotY = DotProduct(ray, diry);
+		float dotZ = DotProduct(ray, dirz);
+
+		for(x = 0; x < numX; x++){
+			CVector pMinZ = vecMin + x*stepX*dirx;
+			CVector pMaxZ = vecMin + x*stepX*dirx + dirz;
+			for(y = 0; y < numY; y++)
+				if(dotZ > 0.0f){
+					if(DoThoroughLineTest(testPoint, pMinZ + y*stepY*diry, entity))
+						return true;
+				}else{
+					if(DoThoroughLineTest(testPoint, pMaxZ + y*stepY*diry, entity))
+						return true;
+				}
+		}
+
+		for(x = 0; x < numX; x++){
+			CVector pMinY = vecMin + x*stepX*dirx;
+			CVector pMaxY = vecMin + x*stepX*dirx + diry;
+			for(z = 1; z < numZ-1; z++)	// edge cases already handled
+				if(dotY > 0.0f){
+					if(DoThoroughLineTest(testPoint, pMinY + z*stepZ*dirz, entity))
+						return true;
+				}else{
+					if(DoThoroughLineTest(testPoint, pMaxY + z*stepZ*dirz, entity))
+						return true;
+				}
+		}
+
+		for(y = 1; y < numY-1; y++){	// edge cases already handled
+			CVector pMinX = vecMin + y*stepY*diry;
+			CVector pMaxX = vecMin + y*stepY*diry + dirx;
+			for(z = 1; z < numZ-1; z++)	// edge cases already handled
+				if(dotX > 0.0f){
+					if(DoThoroughLineTest(testPoint, pMinX + z*stepZ*dirz, entity))
+						return true;
+				}else{
+					if(DoThoroughLineTest(testPoint, pMaxX + z*stepZ*dirz, entity))
+						return true;
+				}
+		}
+	}
+
 	return false;
 }

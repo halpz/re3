@@ -21,12 +21,14 @@
 #include "Renderer.h"
 #include "Frontend.h"
 #include "custompipes.h"
+#include "Debug.h"
 
 bool gbShowPedRoadGroups;
 bool gbShowCarRoadGroups;
 bool gbShowCollisionPolys;
 bool gbShowCollisionLines;
 bool gbShowCullZoneDebugStuff;
+bool gbDisableZoneCull;	// not original
 bool gbBigWhiteDebugLightSwitchedOn;
 
 bool gbDontRenderBuildings;
@@ -34,6 +36,25 @@ bool gbDontRenderBigBuildings;
 bool gbDontRenderPeds;
 bool gbDontRenderObjects;
 bool gbDontRenderVehicles;
+
+int32 EntitiesRendered;
+int32 EntitiesNotRendered;
+int32 RenderedBigBuildings;
+int32 RenderedBuildings;
+int32 RenderedCars;
+int32 RenderedPeds;
+int32 RenderedObjects;
+int32 RenderedDummies;
+int32 TestedBigBuildings;
+int32 TestedBuildings;
+int32 TestedCars;
+int32 TestedPeds;
+int32 TestedObjects;
+int32 TestedDummies;
+
+// unused
+int16 TestCloseThings;
+int16 TestBigThings;
 
 struct EntityInfo
 {
@@ -60,6 +81,11 @@ float CRenderer::ms_lodDistScale = 1.2f;
 #define BACKFACE_CULLING_ON
 #define BACKFACE_CULLING_OFF
 #endif
+
+// unused
+BlockedRange CRenderer::aBlockedRanges[16];
+BlockedRange *CRenderer::pFullBlockedRanges;
+BlockedRange *CRenderer::pEmptyBlockedRanges;
 
 void
 CRenderer::Init(void)
@@ -347,6 +373,14 @@ CRenderer::RenderCollisionLines(void)
 	}
 }
 
+// unused
+void
+CRenderer::RenderBlockBuildingLines(void)
+{
+	for(BlockedRange *br = pFullBlockedRanges; br; br = br->next)
+		printf("Blocked: %f %f\n", br->a, br->b);
+}
+
 enum Visbility
 {
 	VIS_INVISIBLE,
@@ -354,14 +388,6 @@ enum Visbility
 	VIS_OFFSCREEN,
 	VIS_STREAMME
 };
-
-#ifdef FIX_BUGS
-#define LOD_DISTANCE (300.0f*TheCamera.LODDistMultiplier)
-#else
-#define LOD_DISTANCE 300.0f
-#endif
-#define FADE_DISTANCE 20.0f
-#define STREAM_DISTANCE 30.0f
 
 // Time Objects can be time culled if
 //   other == -1 || CModelInfo::GetModelInfo(other)->GetRwObject()
@@ -611,7 +637,21 @@ CRenderer::ConstructRenderList(void)
 	ms_nNoOfVisibleEntities = 0;
 	ms_nNoOfInVisibleEntities = 0;
 	ms_vecCameraPosition = TheCamera.GetPosition();
-	// TODO: blocked ranges, but unused
+
+	// unused
+	pFullBlockedRanges = nil;
+	pEmptyBlockedRanges = aBlockedRanges;
+	for(int i = 0; i < 16; i++){
+		aBlockedRanges[i].prev = &aBlockedRanges[i-1];
+		aBlockedRanges[i].next = &aBlockedRanges[i+1];
+	}
+	aBlockedRanges[0].prev = nil;
+	aBlockedRanges[15].next = nil;
+
+	// unused
+	TestCloseThings = 0;
+	TestBigThings = 0;
+
 	ScanWorld();
 }
 
@@ -646,6 +686,24 @@ CRenderer::ScanWorld(void)
 	CVector vectors[9];
 	RwMatrix *cammatrix;
 	RwV2d poly[3];
+
+#ifndef MASTER
+	// missing in game but has to be done somewhere
+	EntitiesRendered = 0;
+	EntitiesNotRendered = 0;
+	RenderedBigBuildings = 0;
+	RenderedBuildings = 0;
+	RenderedCars = 0;
+	RenderedPeds = 0;
+	RenderedObjects = 0;
+	RenderedDummies = 0;
+	TestedBigBuildings = 0;
+	TestedBuildings = 0;
+	TestedCars = 0;
+	TestedPeds = 0;
+	TestedObjects = 0;
+	TestedDummies = 0;
+#endif
 
 	memset(vectors, 0, sizeof(vectors));
 	vectors[CORNER_FAR_TOPLEFT].x = -vw.x * f;
@@ -765,6 +823,19 @@ CRenderer::ScanWorld(void)
 			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_GENERIC));
 		}
 	}
+
+#ifndef MASTER
+	if(gbShowCullZoneDebugStuff){
+		sprintf(gString, "Rejected: %d/%d.", EntitiesNotRendered, EntitiesNotRendered + EntitiesRendered);
+		CDebug::PrintAt(gString, 10, 10);
+		sprintf(gString, "Tested:BBuild:%d Build:%d Peds:%d Cars:%d Obj:%d Dummies:%d",
+			TestedBigBuildings, TestedBuildings, TestedPeds, TestedCars, TestedObjects, TestedDummies);
+		CDebug::PrintAt(gString, 10, 11);
+		sprintf(gString, "Rendered:BBuild:%d Build:%d Peds:%d Cars:%d Obj:%d Dummies:%d",
+			RenderedBigBuildings, RenderedBuildings, RenderedPeds, RenderedCars, RenderedObjects, RenderedDummies);
+		CDebug::PrintAt(gString, 10, 12);
+	}
+#endif
 }
 
 void
@@ -1014,8 +1085,20 @@ CRenderer::ScanBigBuildingList(CPtrList &list)
 
 	for(node = list.first; node; node = node->next){
 		ent = (CEntity*)node->item;
-		if(!ent->bZoneCulled && SetupBigBuildingVisibility(ent) == VIS_VISIBLE)
-			ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
+#ifndef MASTER
+		// all missing from game actually
+		TestedBigBuildings++;
+#endif
+		if(!ent->bZoneCulled){
+			if(SetupBigBuildingVisibility(ent) == VIS_VISIBLE)
+				ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
+#ifndef MASTER
+			EntitiesRendered++;
+			RenderedBigBuildings++;
+		}else{
+			EntitiesNotRendered++;
+#endif
+		}
 	}
 }
 
@@ -1036,7 +1119,7 @@ CRenderer::ScanSectorList(CPtrList *lists)
 				continue;	// already seen
 			ent->m_scanCode = CWorld::GetCurrentScanCode();
 
-			if(IsEntityCullZoneVisible(ent))
+			if(IsEntityCullZoneVisible(ent)){
 				switch(SetupEntityVisibility(ent)){
 				case VIS_VISIBLE:
 					ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
@@ -1059,11 +1142,37 @@ CRenderer::ScanSectorList(CPtrList *lists)
 							CStreaming::RequestModel(ent->GetModelIndex(), 0);
 					break;
 				}
-			else if(ent->IsBuilding() && ((CBuilding*)ent)->GetIsATreadable()){
-				if(!CStreaming::ms_disableStreaming)
-					if(SetupEntityVisibility(ent) == VIS_STREAMME)
-						if(!m_loadingPriority || CStreaming::ms_numModelsRequested < 10)
-							CStreaming::RequestModel(ent->GetModelIndex(), 0);
+#ifndef MASTER
+				EntitiesRendered++;
+				switch(ent->GetType()){
+				case ENTITY_TYPE_BUILDING:
+					if(ent->bIsBIGBuilding)
+						RenderedBigBuildings++;
+					else
+						RenderedBuildings++;
+					break;
+				case ENTITY_TYPE_VEHICLE:
+					RenderedCars++;
+					break;
+				case ENTITY_TYPE_PED:
+					RenderedPeds++;
+					break;
+				case ENTITY_TYPE_OBJECT:
+					RenderedObjects++;
+					break;
+				case ENTITY_TYPE_DUMMY:
+					RenderedDummies++;
+					break;
+				}
+#endif
+			}else if(ent->IsBuilding() && ((CBuilding*)ent)->GetIsATreadable() && !CStreaming::ms_disableStreaming){
+				if(SetupEntityVisibility(ent) == VIS_STREAMME)
+					if(!m_loadingPriority || CStreaming::ms_numModelsRequested < 10)
+						CStreaming::RequestModel(ent->GetModelIndex(), 0);
+			}else{
+#ifndef MASTER
+				EntitiesNotRendered++;
+#endif
 			}
 		}
 	}
@@ -1086,7 +1195,7 @@ CRenderer::ScanSectorList_Priority(CPtrList *lists)
 				continue;	// already seen
 			ent->m_scanCode = CWorld::GetCurrentScanCode();
 
-			if(IsEntityCullZoneVisible(ent))
+			if(IsEntityCullZoneVisible(ent)){
 				switch(SetupEntityVisibility(ent)){
 				case VIS_VISIBLE:
 					ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
@@ -1111,10 +1220,38 @@ CRenderer::ScanSectorList_Priority(CPtrList *lists)
 					}
 					break;
 				}
-			else if(ent->IsBuilding() && ((CBuilding*)ent)->GetIsATreadable()){
-				if(!CStreaming::ms_disableStreaming)
-					if(SetupEntityVisibility(ent) == VIS_STREAMME)
-						CStreaming::RequestModel(ent->GetModelIndex(), 0);
+#ifndef MASTER
+				// actually missing in game
+				EntitiesRendered++;
+				switch(ent->GetType()){
+				case ENTITY_TYPE_BUILDING:
+					if(ent->bIsBIGBuilding)
+						RenderedBigBuildings++;
+					else
+						RenderedBuildings++;
+					break;
+				case ENTITY_TYPE_VEHICLE:
+					RenderedCars++;
+					break;
+				case ENTITY_TYPE_PED:
+					RenderedPeds++;
+					break;
+				case ENTITY_TYPE_OBJECT:
+					RenderedObjects++;
+					break;
+				case ENTITY_TYPE_DUMMY:
+					RenderedDummies++;
+					break;
+				}
+#endif
+			}else if(ent->IsBuilding() && ((CBuilding*)ent)->GetIsATreadable() && !CStreaming::ms_disableStreaming){
+				if(SetupEntityVisibility(ent) == VIS_STREAMME)
+					CStreaming::RequestModel(ent->GetModelIndex(), 0);
+			}else{
+#ifndef MASTER
+				// actually missing in game
+				EntitiesNotRendered++;
+#endif
 			}
 		}
 	}
@@ -1220,8 +1357,33 @@ CRenderer::IsEntityCullZoneVisible(CEntity *ent)
 	CPed *ped;
 	CObject *obj;
 
+	if(gbDisableZoneCull) return true;
+
+#ifndef MASTER
+	switch(ent->GetType()){
+	case ENTITY_TYPE_BUILDING:
+		if(ent->bIsBIGBuilding)
+			TestedBigBuildings++;
+		else
+			TestedBuildings++;
+		break;
+	case ENTITY_TYPE_VEHICLE:
+		TestedCars++;
+		break;
+	case ENTITY_TYPE_PED:
+		TestedPeds++;
+		break;
+	case ENTITY_TYPE_OBJECT:
+		TestedObjects++;
+		break;
+	case ENTITY_TYPE_DUMMY:
+		TestedDummies++;
+		break;
+	}
+#endif
 	if(ent->bZoneCulled)
 		return false;
+
 
 	switch(ent->GetType()){
 	case ENTITY_TYPE_VEHICLE:

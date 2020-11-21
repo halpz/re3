@@ -11,8 +11,6 @@
 #include "World.h"
 #include "custompipes.h"
 
-#define FADE_DISTANCE 20.0f
-
 CLinkList<CVisibilityPlugins::AlphaObjectInfo> CVisibilityPlugins::m_alphaList;
 CLinkList<CVisibilityPlugins::AlphaObjectInfo> CVisibilityPlugins::m_alphaEntityList;
 
