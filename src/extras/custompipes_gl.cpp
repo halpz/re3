@@ -133,6 +133,8 @@ vehicleRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 		inst++;
 	}
 
+	setTexture(1, nil);
+
 	SetRenderState(SRCBLEND, BLENDSRCALPHA);
 
 #ifndef RW_GL_USE_VAOS

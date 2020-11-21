@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "Game.h"
 #include "DMAudio.h"
+#include "screendroplets.h"
 
 
 CParticleObject gPObjectArray[MAX_PARTICLEOBJECTS];
@@ -17,6 +18,8 @@ CParticleObject *CParticleObject::pFarListHead;
 CParticleObject *CParticleObject::pUnusedListHead;
 
 CAudioHydrant List[MAX_AUDIOHYDRANTS];
+
+CAudioHydrant *CAudioHydrant::Get(int n) { return &List[n]; }
 
 bool
 CAudioHydrant::Add(CParticleObject *particleobject)
@@ -246,6 +249,9 @@ CParticleObject::AddObject(uint16 type, CVector const &pos, CVector const &targe
 			pobj->m_nNumEffectCycles = 0;
 			pobj->m_nSkipFrames      = 1;
 			pobj->m_nCreationChance  = 0;
+#ifdef SCREEN_DROPLETS
+			ScreenDroplets::RegisterSplash(pobj);
+#endif
 			break;
 		}
 		

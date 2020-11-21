@@ -65,3 +65,13 @@ neoVehicle_fs_gl.inc: neoVehicle.frag
 	(echo 'const char *neoVehicle_frag_src =';\
 	 sed 's/..*/"&\\n"/' neoVehicle.frag;\
 	 echo ';') >neoVehicle_fs_gl.inc
+
+im2d_UV2_gl.inc: im2d_UV2.vert
+	(echo 'const char *im2d_UV2_vert_src =';\
+	 sed 's/..*/"&\\n"/' im2d_UV2.vert;\
+	 echo ';') >im2d_UV2_gl.inc
+
+screenDroplet_fs_gl.inc: screenDroplet.frag
+	(echo 'const char *screenDroplet_frag_src =';\
+	 sed 's/..*/"&\\n"/' screenDroplet.frag;\
+	 echo ';') >screenDroplet_fs_gl.inc

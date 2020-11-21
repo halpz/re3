@@ -246,9 +246,17 @@ enum Config {
 #ifdef LIBRW
 //#define EXTENDED_COLOURFILTER		// more options for colour filter (replaces mblur)
 //#define EXTENDED_PIPELINES		// custom render pipelines (includes Neo)
+//#define SCREEN_DROPLETS			// neo water droplets
 //#define NEW_RENDERER		// leeds-like world rendering, needs librw
 #endif
 //#define MULTISAMPLING		// adds MSAA option TODO
+
+#ifndef EXTENDED_COLOURFILTER
+#undef SCREEN_DROPLETS		// we need the front- (or back-)buffer for this effect
+#endif
+#ifndef EXTENDED_PIPELINES
+#undef SCREEN_DROPLETS		// we need neo.txd
+#endif
 
 #ifdef LIBRW
 // these are not supported with librw yet

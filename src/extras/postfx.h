@@ -39,6 +39,7 @@ public:
 	static void SmoothColor(uint32 red, uint32 green, uint32 blue, uint32 alpha);
 	static bool NeedBackBuffer(void);
 	static bool NeedFrontBuffer(int32 type);
+	static void GetBackBuffer(RwCamera *cam);
 	static bool UseBlurColours(void) { return EffectSwitch != POSTFX_SIMPLE; }
 };
 

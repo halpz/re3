@@ -376,6 +376,14 @@ CPostFX::NeedFrontBuffer(int32 type)
 }
 
 void
+CPostFX::GetBackBuffer(RwCamera *cam)
+{
+	RwRasterPushContext(pBackBuffer);
+	RwRasterRenderFast(RwCameraGetRaster(cam), 0, 0);
+	RwRasterPopContext();
+}
+
+void
 CPostFX::Render(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blur, int32 type, uint32 bluralpha)
 {
 	if(pFrontBuffer == nil)
@@ -391,11 +399,8 @@ CPostFX::Render(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blu
 		blur = AvgAlpha;
 	}
 
-	if(NeedBackBuffer()){
-		RwRasterPushContext(pBackBuffer);
-		RwRasterRenderFast(RwCameraGetRaster(cam), 0, 0);
-		RwRasterPopContext();
-	}
+	if(NeedBackBuffer())
+		GetBackBuffer(cam);
 
 	DefinedState();
 
