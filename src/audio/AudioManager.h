@@ -351,7 +351,7 @@ public:
 	bool MissionScriptAudioUsesPoliceChannel(int32 soundMission) const;
 
 	void PlayLoadedMissionAudio();
-	void PlayOneShot(int32 index, int16 sound, float vol);
+	void PlayOneShot(int32 index, uint16 sound, float vol);
 	void PlaySuspectLastSeen(float x, float y, float z);
 	void PlayerJustGotInCar() const;
 	void PlayerJustLeftCar() const;
@@ -397,8 +397,8 @@ public:
 	void ProcessModelCarEngine(cVehicleParams& params);
 	void ProcessOneShotScriptObject(uint8 sound);
 	void ProcessPed(CPhysical *ped);
-	void ProcessPedHeadphones(cPedParams *params);
-	void ProcessPedOneShots(cPedParams *params);
+	void ProcessPedHeadphones(cPedParams &params);
+	void ProcessPedOneShots(cPedParams &params);
 	void ProcessPhysical(int32 id);
 	void ProcessPlane(cVehicleParams& params);
 	void ProcessPlayersVehicleEngine(cVehicleParams& params, CAutomobile *automobile);
@@ -462,7 +462,7 @@ public:
 	bool SetupJumboRumbleSound(uint8 emittingVol);
 	bool SetupJumboTaxiSound(uint8 vol);
 	bool SetupJumboWhineSound(uint8 emittingVol, uint32 freq);
-	void SetupPedComments(cPedParams *params, uint32 sound);
+	void SetupPedComments(cPedParams &params, uint16 sound);
 	void SetupSuspectLastSeenReport();
 
 	void Terminate();

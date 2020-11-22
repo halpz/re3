@@ -2248,7 +2248,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 			pedParams.m_fDistance = 0.0f;
 			pedParams.m_bDistanceCalculated = params.m_bDistanceCalculated;
 			pedParams.m_fDistance = params.m_fDistance;
-			SetupPedComments(&pedParams, SOUND_PED_HELI_PLAYER_FOUND);
+			SetupPedComments(pedParams, SOUND_PED_HELI_PLAYER_FOUND);
 			continue;
 		case SOUND_PED_BODYCAST_HIT:
 			pedParams.m_pPed = nil;
@@ -2256,7 +2256,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 			pedParams.m_fDistance = 0.0f;
 			pedParams.m_bDistanceCalculated = params.m_bDistanceCalculated;
 			pedParams.m_fDistance = params.m_fDistance;
-			SetupPedComments(&pedParams, SOUND_PED_BODYCAST_HIT);
+			SetupPedComments(pedParams, SOUND_PED_BODYCAST_HIT);
 			continue;
 		case SOUND_WATER_FALL: {
 			const float SOUND_INTENSITY = 40.0f;
@@ -2965,21 +2965,21 @@ cAudioManager::ProcessPed(CPhysical *ped)
 	params.m_pPed = (CPed *)ped;
 	params.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	if (ped->GetModelIndex() == MI_FATMALE02)
-		ProcessPedHeadphones(&params);
-	ProcessPedOneShots(&params);
+		ProcessPedHeadphones(params);
+	ProcessPedOneShots(params);
 }
 
 void
-cAudioManager::ProcessPedHeadphones(cPedParams *params)
+cAudioManager::ProcessPedHeadphones(cPedParams &params)
 {
 	CPed *ped;
 	CAutomobile *veh;
 	uint8 emittingVol;
 
-	if (params->m_fDistance < SQR(7)) {
-		ped = params->m_pPed;
+	if (params.m_fDistance < SQR(7)) {
+		ped = params.m_pPed;
 		if (!ped->bIsAimingGun || ped->m_bodyPartBleeding != PED_HEAD) {
-			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
+			CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
 			if (ped->bInVehicle && ped->m_nPedState == PED_DRIVING) {
 				emittingVol = 10;
 				veh = (CAutomobile *)ped->m_pMyVehicle;
@@ -3021,12 +3021,12 @@ cAudioManager::ProcessPedHeadphones(cPedParams *params)
 }
 
 void
-cAudioManager::ProcessPedOneShots(cPedParams *params)
+cAudioManager::ProcessPedOneShots(cPedParams &params)
 {
 	uint8 emittingVol;
 	int32 sampleIndex;
 
-	CPed *ped = params->m_pPed;
+	CPed *ped = params.m_pPed;
 
 	bool stereo;
 	int16 sound;
@@ -3036,7 +3036,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 
 	static uint8 iSound = 21;
 
-	weapon = params->m_pPed->GetWeapon();
+	weapon = params.m_pPed->GetWeapon();
 	for (uint32 i = 0; i < m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_AudioEvents; i++) {
 		noReflection = false;
 		stereo = false;
@@ -3045,12 +3045,12 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 		switch (sound) {
 		case SOUND_STEP_START:
 		case SOUND_STEP_END:
-			if (!params->m_pPed->bIsLooking) {
+			if (!params.m_pPed->bIsLooking) {
 				emittingVol = m_anRandomTable[3] % 15 + 45;
 				if (FindPlayerPed() != m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_pEntity)
 					emittingVol /= 2;
 				maxDist = 400.f;
-				switch (params->m_pPed->m_nSurfaceTouched) {
+				switch (params.m_pPed->m_nSurfaceTouched) {
 				case SURFACE_GRASS:
 					sampleIndex = m_anRandomTable[1] % 5 + SFX_FOOTSTEP_GRASS_1;
 					break;
@@ -3094,7 +3094,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 				m_sQueueSample.m_nCounter = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i] - 28;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 17);
-				switch (params->m_pPed->m_nMoveState) {
+				switch (params.m_pPed->m_nMoveState) {
 				case PEDMOVE_WALK:
 					emittingVol /= 4;
 					m_sQueueSample.m_nFrequency = 9 * m_sQueueSample.m_nFrequency / 10;
@@ -3152,226 +3152,51 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 		case SOUND_FIGHT_PUNCH_33:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_1;
 			m_sQueueSample.m_nFrequency = 18000;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_KICK_34:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_1;
 			m_sQueueSample.m_nFrequency = 16500;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_HEADBUTT_35:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_1;
 			m_sQueueSample.m_nFrequency = 20000;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_PUNCH_36:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_2;
 			m_sQueueSample.m_nFrequency = 18000;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_PUNCH_37:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_2;
 			m_sQueueSample.m_nFrequency = 16500;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_CLOSE_PUNCH_38:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_2;
 			m_sQueueSample.m_nFrequency = 20000;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_PUNCH_39:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_4;
 			m_sQueueSample.m_nFrequency = 18000;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_PUNCH_OR_KICK_BELOW_40:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_4;
 			m_sQueueSample.m_nFrequency = 16500;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_PUNCH_41:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_4;
 			m_sQueueSample.m_nFrequency = 20000;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_PUNCH_FROM_BEHIND_42:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_5;
 			m_sQueueSample.m_nFrequency = 18000;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_KNEE_OR_KICK_43:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_5;
 			m_sQueueSample.m_nFrequency = 16500;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_KICK_44:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_5;
 			m_sQueueSample.m_nFrequency = 20000;
+		AddFightSound:
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_nCounter = iSound;
 			stereo = true;
@@ -3729,8 +3554,8 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 
 		if (stereo && iSound > 60)
 			iSound = 21;
-		if (params->m_fDistance < maxDist) {
-			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
+		if (params.m_fDistance < maxDist) {
+			CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
 			m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume != 0) {
 				if (noReflection) {
@@ -3762,9 +3587,9 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 }
 
 void
-cAudioManager::SetupPedComments(cPedParams *params, uint32 sound)
+cAudioManager::SetupPedComments(cPedParams &params, uint16 sound)
 {
-	CPed *ped = params->m_pPed;
+	CPed *ped = params.m_pPed;
 	uint8 emittingVol;
 	float soundIntensity;
 	tPedComment pedComment;
@@ -3815,8 +3640,8 @@ cAudioManager::SetupPedComments(cPedParams *params, uint32 sound)
 		}
 	}
 
-	if (params->m_fDistance < SQR(soundIntensity)) {
-		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
+	if (params.m_fDistance < SQR(soundIntensity)) {
+		CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
 		if (sound != SOUND_PAGER) {
 			switch (sound) {
 			case SOUND_AMMUNATION_WELCOME_1:
@@ -6549,14 +6374,14 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 		male.m_pPed = nil;
 		male.m_bDistanceCalculated = false;
 		male.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
-		SetupPedComments(&male, SOUND_INJURED_PED_MALE_OUCH);
+		SetupPedComments(male, SOUND_INJURED_PED_MALE_OUCH);
 		return;
 	case SCRIPT_SOUND_INJURED_PED_FEMALE_OUCH_S:
 	case SCRIPT_SOUND_INJURED_PED_FEMALE_OUCH_L:
 		female.m_pPed = nil;
 		female.m_bDistanceCalculated = false;
 		female.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
-		SetupPedComments(&female, SOUND_INJURED_PED_FEMALE);
+		SetupPedComments(female, SOUND_INJURED_PED_FEMALE);
 		return;
 	case SCRIPT_SOUND_GATE_START_CLUNK:
 	case SCRIPT_SOUND_GATE_STOP_CLUNK:
@@ -7934,7 +7759,7 @@ cAudioManager::ProcessPoliceCellBeatingScriptObject(uint8 sound)
 				params.m_bDistanceCalculated = true;
 				params.m_fDistance = distSquared;
 				params.m_pPed = nil;
-				SetupPedComments(&params, SOUND_INJURED_PED_MALE_PRISON);
+				SetupPedComments(params, SOUND_INJURED_PED_MALE_PRISON);
 			}
 			gCellNextTime = time + 500 + m_anRandomTable[3] % 1500;
 		}
