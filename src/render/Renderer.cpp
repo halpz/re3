@@ -570,7 +570,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 		// that of an atomic for another draw distance.
 		if(RpAtomicGetGeometry(a) != RpAtomicGetGeometry(rwobj))
 			RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
-		if(!ent->IsVisibleComplex())
+		if (!ent->IsVisible() || !ent->GetIsOnScreenComplex())
 			return VIS_INVISIBLE;
 		if(mi->m_drawLast){
 			CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist);
@@ -600,7 +600,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 	RpAtomic *rwobj = (RpAtomic*)ent->m_rwObject;
 	if(RpAtomicGetGeometry(a) != RpAtomicGetGeometry(rwobj))
 		RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
-	if(ent->IsVisibleComplex())
+	if (ent->IsVisible() && ent->GetIsOnScreenComplex())
 		CVisibilityPlugins::InsertEntityIntoSortedList(ent, dist);
 	return VIS_INVISIBLE;
 }
