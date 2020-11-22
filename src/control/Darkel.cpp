@@ -16,7 +16,7 @@
 #include "Vehicle.h"
 #include "GameLogic.h"
 
-//--MIAMI: file done except TODO
+//--MIAMI: file done
 
 #define FRENZY_ANY_PED -1
 #define FRENZY_ANY_CAR -2
@@ -403,6 +403,6 @@ CDarkel::DealWithWeaponChangeAtEndOfFrenzy()
 			FindPlayerPed()->m_nSelectedWepSlot = WEAPONSLOT_UNARMED;
 		player->SetCurrentWeapon(FindPlayerPed()->m_nSelectedWepSlot);
 		player->MakeChangesForNewWeapon(player->m_currentWeapon);
-		//player->RemoveDriveByAnims(); // TODO(MIAMI)
+		player->RemoveDrivebyAnims();
 	}
 }
