@@ -3028,9 +3028,9 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 
 	CPed *ped = params.m_pPed;
 
-	bool stereo;
+	bool narrowSoundRange;
 	int16 sound;
-	bool noReflection;
+	bool stereo;
 	CWeapon *weapon;
 	float maxDist = 0.f; // uninitialized variable
 
@@ -3038,8 +3038,8 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 
 	weapon = params.m_pPed->GetWeapon();
 	for (uint32 i = 0; i < m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_AudioEvents; i++) {
-		noReflection = false;
 		stereo = false;
+		narrowSoundRange = false;
 		m_sQueueSample.m_bRequireReflection = false;
 		sound = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i];
 		switch (sound) {
@@ -3199,7 +3199,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 		AddFightSound:
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
+			narrowSoundRange = true;
 			++iSound;
 			m_sQueueSample.m_nReleasingVolumeModificator = 3;
 			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
@@ -3218,7 +3218,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_nSampleIndex = SFX_BAT_HIT_LEFT;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_nCounter = iSound++;
-			stereo = true;
+			narrowSoundRange = true;
 			m_sQueueSample.m_nFrequency = RandomDisplacement(2000) + 22000;
 			m_sQueueSample.m_nReleasingVolumeModificator = 3;
 			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
@@ -3234,7 +3234,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			if (m_bDynamicAcousticModelingStatus)
 				m_sQueueSample.m_bRequireReflection = true;
 			else
-				noReflection = true;
+				stereo = true;
 			break;
 		case SOUND_WEAPON_SHOT_FIRED:
 			weapon = ped->GetWeapon();
@@ -3243,7 +3243,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				m_sQueueSample.m_nSampleIndex = SFX_COLT45_LEFT;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				m_sQueueSample.m_nCounter = iSound++;
-				stereo = true;
+				narrowSoundRange = true;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_COLT45_LEFT);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
 				m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -3260,13 +3260,13 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				if (m_bDynamicAcousticModelingStatus)
 					m_sQueueSample.m_bRequireReflection = true;
 				else
-					noReflection = true;
+					stereo = true;
 				break;
 			case WEAPONTYPE_UZI:
 				m_sQueueSample.m_nSampleIndex = SFX_UZI_LEFT;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				m_sQueueSample.m_nCounter = iSound++;
-				stereo = true;
+				narrowSoundRange = true;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_UZI_LEFT);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
 				m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -3285,7 +3285,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				m_sQueueSample.m_nSampleIndex = SFX_SHOTGUN_LEFT;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				m_sQueueSample.m_nCounter = iSound++;
-				stereo = true;
+				narrowSoundRange = true;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_SHOTGUN_LEFT);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
 				m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -3302,13 +3302,13 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				if (m_bDynamicAcousticModelingStatus)
 					m_sQueueSample.m_bRequireReflection = true;
 				else
-					noReflection = true;
+					stereo = true;
 				break;
 			case WEAPONTYPE_AK47:
 				m_sQueueSample.m_nSampleIndex = SFX_AK47_LEFT;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				m_sQueueSample.m_nCounter = iSound++;
-				stereo = true;
+				narrowSoundRange = true;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_AK47_LEFT);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
 				m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -3327,7 +3327,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				m_sQueueSample.m_nSampleIndex = SFX_M16_LEFT;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				m_sQueueSample.m_nCounter = iSound++;
-				stereo = true;
+				narrowSoundRange = true;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_M16_LEFT);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
 				m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -3346,7 +3346,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				m_sQueueSample.m_nSampleIndex = SFX_SNIPER_LEFT;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				m_sQueueSample.m_nCounter = iSound++;
-				stereo = true;
+				narrowSoundRange = true;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_SNIPER_LEFT);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
 				m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -3363,13 +3363,13 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				if (m_bDynamicAcousticModelingStatus)
 					m_sQueueSample.m_bRequireReflection = true;
 				else
-					noReflection = true;
+					stereo = true;
 				break;
 			case WEAPONTYPE_ROCKETLAUNCHER:
 				m_sQueueSample.m_nSampleIndex = SFX_ROCKET_LEFT;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				m_sQueueSample.m_nCounter = iSound++;
-				stereo = true;
+				narrowSoundRange = true;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_ROCKET_LEFT);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
 				m_sQueueSample.m_nReleasingVolumeModificator = 1;
@@ -3386,7 +3386,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				if (m_bDynamicAcousticModelingStatus)
 					m_sQueueSample.m_bRequireReflection = true;
 				else
-					noReflection = true;
+					stereo = true;
 				break;
 			case WEAPONTYPE_FLAMETHROWER:
 				m_sQueueSample.m_nSampleIndex = SFX_FLAMETHROWER_LEFT;
@@ -3408,7 +3408,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				if (m_bDynamicAcousticModelingStatus)
 					m_sQueueSample.m_bRequireReflection = true;
 				else
-					noReflection = true;
+					stereo = true;
 				break;
 			default:
 				continue;
@@ -3451,7 +3451,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			}
 			emittingVol = 75;
 			m_sQueueSample.m_nCounter = iSound++;
-			stereo = true;
+			narrowSoundRange = true;
 			m_sQueueSample.m_nFrequency += RandomDisplacement(300);
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_nReleasingVolumeModificator = 5;
@@ -3472,7 +3472,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_nSampleIndex = SFX_UZI_END_LEFT;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_nCounter = iSound++;
-			stereo = true;
+			narrowSoundRange = true;
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_UZI_END_LEFT);
 			m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 16);
 			m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -3489,7 +3489,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			if (m_bDynamicAcousticModelingStatus)
 				m_sQueueSample.m_bRequireReflection = true;
 			else
-				noReflection = true;
+				stereo = true;
 			break;
 		case SOUND_WEAPON_FLAMETHROWER_FIRE:
 			m_sQueueSample.m_nSampleIndex = SFX_FLAMETHROWER_START_LEFT;
@@ -3513,7 +3513,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_nSampleIndex = SFX_BULLET_PED;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_nCounter = iSound++;
-			stereo = true;
+			narrowSoundRange = true;
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_BULLET_PED);
 			m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 8);
 			m_sQueueSample.m_nReleasingVolumeModificator = 7;
@@ -3532,7 +3532,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_nSampleIndex = SFX_SPLASH_1;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_nCounter = iSound++;
-			stereo = true;
+			narrowSoundRange = true;
 			m_sQueueSample.m_nFrequency = RandomDisplacement(1400) + 20000;
 			m_sQueueSample.m_nReleasingVolumeModificator = 1;
 			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
@@ -3552,23 +3552,23 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			continue;
 		}
 
-		if (stereo && iSound > 60)
+		if (narrowSoundRange && iSound > 60)
 			iSound = 21;
 		if (params.m_fDistance < maxDist) {
 			CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
 			m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume != 0) {
-				if (noReflection) {
+				if (stereo) {
 					if (m_sQueueSample.m_fDistance < 0.2f * m_sQueueSample.m_fSoundIntensity) {
 						m_sQueueSample.m_bIs2D = true;
 						m_sQueueSample.m_nOffset = 0;
 					} else {
-						noReflection = false;
+						stereo = false;
 					}
 				}
 				m_sQueueSample.m_bReverbFlag = true;
 				AddSampleToRequestedQueue();
-				if (noReflection) {
+				if (stereo) {
 					m_sQueueSample.m_nOffset = 127;
 					++m_sQueueSample.m_nSampleIndex;
 					if (m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i] != SOUND_WEAPON_SHOT_FIRED ||
