@@ -1188,7 +1188,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 		if(RpAtomicGetGeometry(a) != RpAtomicGetGeometry(rwobj))
 			RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
 		mi->IncreaseAlpha();
-		if(!ent->IsVisibleComplex() || ent->IsEntityOccluded()){
+		if(!ent->IsVisible() || !ent->GetIsOnScreenComplex() || ent->IsEntityOccluded()){
 			mi->m_alpha = 255;
 			return VIS_INVISIBLE;
 		}
@@ -1232,7 +1232,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 	if(RpAtomicGetGeometry(a) != RpAtomicGetGeometry(rwobj))
 		RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
 	mi->IncreaseAlpha();
-	if(!ent->IsVisibleComplex() || ent->IsEntityOccluded()){
+	if(!ent->IsVisible() || !ent->GetIsOnScreenComplex() || ent->IsEntityOccluded()){
 		mi->m_alpha = 255;
 		return VIS_INVISIBLE;
 	}
