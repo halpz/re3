@@ -75,7 +75,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 
 	SetModelIndex(id);
 
-	pHandling = mod_HandlingManager.GetHandlingData((eHandlingId)mi->m_handlingId);
+	pHandling = mod_HandlingManager.GetHandlingData((tVehicleType)mi->m_handlingId);
 
 	m_auto_unused1 = 20.0f;
 	m_auto_unused2 = 0;

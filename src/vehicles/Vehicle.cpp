@@ -582,6 +582,13 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 	}
 }
 
+void
+CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint, int32 wheelsOnGround, float thrust,
+                           float brake, float adhesion, int8 wheelId, float *wheelSpeed, tWheelState *wheelState, eBikeWheelSpecial special, uint16 wheelStatus)
+{
+	// TODO: mobile code
+}
+
 float
 CVehicle::ProcessWheelRotation(tWheelState state, const CVector &fwd, const CVector &speed, float radius)
 {

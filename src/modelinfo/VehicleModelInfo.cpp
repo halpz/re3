@@ -536,7 +536,7 @@ CVehicleModelInfo::SetVehicleComponentFlags(RwFrame *frame, uint32 flags)
 {
 	tHandlingData *handling;
 
-	handling = mod_HandlingManager.GetHandlingData((eHandlingId)m_handlingId);
+	handling = mod_HandlingManager.GetHandlingData((tVehicleType)m_handlingId);
 
 #define SETFLAGS(f) RwFrameForAllObjects(frame, SetAtomicFlagCB, (void*)(f))
 
