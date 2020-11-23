@@ -91,6 +91,9 @@
 #include "screendroplets.h"
 #include "crossplatform.h"
 #include "MemoryHeap.h"
+#ifdef USE_TEXTURE_POOL
+#include "TexturePools.h"
+#endif
 
 eLevelName CGame::currLevel;
 bool CGame::bDemoMode = true;
