@@ -94,6 +94,9 @@
 #include "postfx.h"
 #include "custompipes.h"
 #include "screendroplets.h"
+#ifdef USE_TEXTURE_POOL
+#include "TexturePools.h"
+#endif
 
 eLevelName CGame::currLevel;
 int32 CGame::currArea;
