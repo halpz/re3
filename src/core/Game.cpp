@@ -674,8 +674,10 @@ void CGame::InitialiseWhenRestarting(void)
 	if (b_FoundRecentSavedGameWantToLoad || FrontEndMenuManager.m_bWantToLoad)
 	{
 		LoadSplash("splash1");
+#ifndef XBOX_MESSAGE_SCREEN
 		if (FrontEndMenuManager.m_bWantToLoad)
 			FrontEndMenuManager.MessageScreen("FELD_WR", true);
+#endif
 	}
 
 	b_FoundRecentSavedGameWantToLoad = false;
@@ -684,6 +686,14 @@ void CGame::InitialiseWhenRestarting(void)
 	
 	if ( FrontEndMenuManager.m_bWantToLoad == true )
 	{
+#ifdef XBOX_MESSAGE_SCREEN
+		FrontEndMenuManager.SetDialogTimer(1000);
+		DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 0);
+		CSprite2d::InitPerFrame();
+		CFont::InitPerFrame();
+		FrontEndMenuManager.DrawOverlays();
+		DoRWStuffEndOfFrame();
+#endif
 		RestoreForStartLoad();
 	}
 	
@@ -717,6 +727,9 @@ void CGame::InitialiseWhenRestarting(void)
 			currLevel = LEVEL_GENERIC;
 			CCollision::SortOutCollisionAfterLoad();
 		}
+#ifdef XBOX_MESSAGE_SCREEN
+		FrontEndMenuManager.ProcessDialogTimer();
+#endif
 	}
 	
 	CTimer::Update();

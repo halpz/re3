@@ -4,6 +4,7 @@
 #else
 
 #include "Sprite2d.h"
+#include "Timer.h"
 
 #define MENUHEADER_POS_X 10.0f
 #define MENUHEADER_POS_Y 10.0f
@@ -640,6 +641,22 @@ public:
 #else
 	#define ISLAND_LOADING_IS(p)
 	#define ISLAND_LOADING_ISNT(p)
+#endif
+
+#ifdef XBOX_MESSAGE_SCREEN
+	static uint32 m_nDialogHideTimer;
+	static PauseModeTime m_nDialogHideTimerPauseMode;
+	static bool m_bDialogOpen;
+	static wchar *m_pDialogText;
+	static bool m_bSaveWasSuccessful;
+
+	static void SetDialogText(const char*);
+	static bool DialogTextCmp(const char*);
+	static void ToggleDialog(bool);
+	static void SetDialogTimer(uint32);
+	void ProcessDialogTimer(void);
+	void DrawOverlays(void);
+	void CloseDialog(void);
 #endif
 
 	void Initialise();

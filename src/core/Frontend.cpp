@@ -150,6 +150,14 @@ const char* FrontendFilenames[][2] = {
 #define MENU_Y(y) StretchY(y)
 #endif
 
+#ifdef XBOX_MESSAGE_SCREEN
+bool CMenuManager::m_bDialogOpen = false;
+uint32 CMenuManager::m_nDialogHideTimer = 0;
+PauseModeTime CMenuManager::m_nDialogHideTimerPauseMode = 0;
+bool CMenuManager::m_bSaveWasSuccessful = false;
+wchar* CMenuManager::m_pDialogText = nil;
+#endif
+
 #define PREPARE_MENU_HEADER \
 	CFont::SetRightJustifyOn(); \
 	CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING)); \
@@ -1351,9 +1359,12 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 
 	if (m_nCurrScreen == MENUPAGE_DELETING_IN_PROGRESS) {
 		SmallMessageScreen("FEDL_WR");
-	} else if (m_nCurrScreen == MENUPAGE_SAVING_IN_PROGRESS) {
+	}
+#ifndef XBOX_MESSAGE_SCREEN
+	else if (m_nCurrScreen == MENUPAGE_SAVING_IN_PROGRESS) {
 		SmallMessageScreen("FESZ_WR");
 	}
+#endif
 }
 
 // --MIAMI: Done
@@ -3215,6 +3226,10 @@ CMenuManager::PrintStats()
 void
 CMenuManager::Process(void)
 {
+#ifdef XBOX_MESSAGE_SCREEN
+	ProcessDialogTimer();
+#endif
+
 	if (TheCamera.GetScreenFadeStatus() != FADE_0)
 		return;
 
@@ -4863,6 +4878,129 @@ float CMenuManager::StretchY(float y)
 		return SCREEN_STRETCH_Y(y);
 }
 
+#ifdef XBOX_MESSAGE_SCREEN
+void
+CMenuManager::CloseDialog(void)
+{
+	// We don't have this on PC GXT :shrug:
+	static wchar* gameSaved = AllocUnicode("Game saved successfully!");
+
+	if (m_bSaveWasSuccessful && DialogTextCmp("FESZ_WR")) {
+		m_bSaveWasSuccessful = false; // i don't know where XBOX resets that
+		m_pDialogText = gameSaved;
+		SetDialogTimer(1000);
+	    ProcessDialogTimer();
+	} else {
+		ToggleDialog(false);
+	}
+
+}
+
+void
+CMenuManager::ProcessDialogTimer(void)
+{
+	if (!m_bDialogOpen || m_nDialogHideTimer == 0)
+		return;
+
+	// Also XBOX has unified time source for in-game/menu, but we don't have that
+	if (m_bMenuActive && CTimer::GetTimeInMilliseconds() > m_nDialogHideTimer || !m_bMenuActive && CTimer::GetTimeInMillisecondsPauseMode() > m_nDialogHideTimerPauseMode) {
+
+		// This is originally activePage.funcs->closePage()
+		CloseDialog();
+	}
+}
+
+void
+CMenuManager::SetDialogTimer(uint32 timer)
+{
+	// XBOX iterates some page list(actives?) and then sets timer variable of specified page to specified value. We only have dialog right now.
+	// Also XBOX has unified time source for in-game/menu, but we don't have that, thus 2 timer variables...
+
+	m_nDialogHideTimer = CTimer::GetTimeInMilliseconds() + timer;
+	m_nDialogHideTimerPauseMode = CTimer::GetTimeInMillisecondsPauseMode() + timer;
+}
+
+void
+CMenuManager::SetDialogText(const char* key)
+{
+	// There are many things going around here, idk why
+	m_pDialogText = TheText.Get(key);
+}
+
+bool
+CMenuManager::DialogTextCmp(const char* key)
+{
+	wchar *value = TheText.Get(key);
+	wchar *i = m_pDialogText;
+	for (; *i != '\0' && *value != '\0'; i++, value++) {
+		if (*i != *value)
+			return false;
+	}
+	return *i == '\0' && *value == '\0';
+}
+
+void
+CMenuManager::ToggleDialog(bool toggle)
+{
+	// This originally calls some mysterious function on enable and close CB on disable, along with decreasing some counter. Which is no use for dialog
+
+	// XBOX doesn't do that
+	if (toggle)
+		m_nDialogHideTimer = 0;
+
+	m_bDialogOpen = toggle;
+}
+
+void
+DrawDialogBg(float offset, uint8 alpha)
+{
+	CSprite2d::Draw2DPolygon(SCALE_AND_CENTER_X(84.f + offset), MENU_Y(126.f + offset),
+		SCALE_AND_CENTER_X(512.f + offset), MENU_Y(109.f + offset),
+		SCALE_AND_CENTER_X(100.f + offset), MENU_Y(303.f + offset),
+		SCALE_AND_CENTER_X(474.f + offset), MENU_Y(311.f + offset), CRGBA(107, 193, 236, alpha));
+	CSprite2d::Draw2DPolygon(SCALE_AND_CENTER_X(523.f + offset), MENU_Y(108.f + offset),
+		SCALE_AND_CENTER_X(542.f + offset), MENU_Y(107.f + offset),
+		SCALE_AND_CENTER_X(485.f + offset), MENU_Y(310.f + offset),
+		SCALE_AND_CENTER_X(516.f + offset), MENU_Y(311.f + offset), CRGBA(107, 193, 236, alpha));
+}
+
+void
+CMenuManager::DrawOverlays(void)
+{
+	// This is stripped to show only Dialog box, XBOX does much more in here.
+
+	if (!m_bDialogOpen)
+		return;
+
+	DefinedState();
+
+	CSprite2d::DrawRect(CRect(0, SCREEN_HEIGHT, SCREEN_WIDTH, 0), CRGBA(0, 0, 0, 160));
+
+	// Ofc this is not hardcoded like that on Xbox, it should be a texture
+	DrawDialogBg(20.f, 160); // shadow
+	DrawDialogBg(0.f, 255);
+
+	CFont::SetBackgroundOff();
+	CFont::SetPropOn();
+	CFont::SetJustifyOn();
+	CFont::SetBackGroundOnlyTextOn();
+	CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
+	CFont::SetCentreSize(SCREEN_SCALE_X(380.0f));
+	CFont::SetCentreOn();
+	CFont::SetColor(CRGBA(LABEL_COLOR.r, LABEL_COLOR.g, LABEL_COLOR.b, 255));
+	CFont::SetDropShadowPosition(2);
+	CFont::SetDropColor(CRGBA(0, 0, 0, 255));
+	// Both of those are 0.9 on Xbox, which is ofcouse wrong...
+	CFont::SetScale(SCREEN_SCALE_X(BIGTEXT_X_SCALE), SCREEN_SCALE_Y(BIGTEXT_Y_SCALE));
+	
+	int x = SCREEN_WIDTH / 2.f - SCREEN_SCALE_X(30.0f);
+	int y = SCREEN_HEIGHT / 2.f - SCREEN_SCALE_Y(30.0f);
+	int numOfLines = CFont::GetNumberLines(x, y, m_pDialogText);
+	CFont::PrintString(x, y - SCREEN_SCALE_Y(numOfLines / 2.f), m_pDialogText);
+	CFont::DrawFonts();
+}
+#endif
+
 void
 CMenuManager::ProcessFileActions()
 {
@@ -4872,9 +5010,14 @@ CMenuManager::ProcessFileActions()
 #ifdef USE_DEBUG_SCRIPT_LOADER
 				scriptToLoad = 0;
 #endif
+
+#ifdef XBOX_MESSAGE_SCREEN
+				SetDialogText("FELD_WR");
+				ToggleDialog(true);
+#else
 				if (!m_bGameNotLoaded)
 					MessageScreen("FELD_WR", true);
-
+#endif
 				DoSettingsBeforeStartingAGame();
 				m_bWantToLoad = true;
 			} else
@@ -4907,6 +5050,41 @@ CMenuManager::ProcessFileActions()
 		}
 		case MENUPAGE_SAVING_IN_PROGRESS:
 		{
+#ifdef XBOX_MESSAGE_SCREEN
+			if (m_bDialogOpen && DialogTextCmp("FESZ_WR")) {
+				PauseModeTime startTime = CTimer::GetTimeInMillisecondsPauseMode();
+				int8 SaveSlot = PcSaveHelper.SaveSlot(m_nCurrSaveSlot);
+				PcSaveHelper.PopulateSlotInfo();
+
+				// Original code, but we don't want redundant saving text if it doesn't
+#if 0
+				CTimer::Update(); // not on Xbox, who updates it?
+
+				// it compensates the lag to show saving text always one second... how cute
+				int dialogDur = Max(1, startTime - CTimer::GetTimeInMillisecondsPauseMode() + 1000);
+#else
+				int dialogDur = 1;
+#endif
+
+				if (SaveSlot) {
+					// error. PC code
+					ToggleDialog(false);
+					SwitchToNewScreen(MENUPAGE_SAVE_CUSTOM_WARNING);
+					strncpy(aScreens[m_nCurrScreen].m_ScreenName, "FET_SG", 8);
+					strncpy(aScreens[m_nCurrScreen].m_aEntries[0].m_EntryName, "FES_CMP", 8);
+
+				} else {
+					m_bSaveWasSuccessful = true;
+					SetDialogTimer(dialogDur);
+					ProcessDialogTimer();
+					RequestFrontEndShutDown();
+				}
+
+			} else {
+				SetDialogText("FESZ_WR");
+				ToggleDialog(true);
+			}
+#else
 			static bool waitedForScreen = false;
 
 			if (waitedForScreen) {
@@ -4922,7 +5100,7 @@ CMenuManager::ProcessFileActions()
 				waitedForScreen = false;
 			} else if (m_nMenuFadeAlpha >= 255)
 				waitedForScreen = true;
-
+#endif
 			break;
 		}
 	}
@@ -4939,7 +5117,11 @@ CMenuManager::SwitchMenuOnAndOff()
 			&& (!m_bMenuActive || m_nCurrScreen == MENUPAGE_PAUSE_MENU || m_nCurrScreen == MENUPAGE_CHOOSE_SAVE_SLOT || m_nCurrScreen == MENUPAGE_SAVE_CHEAT_WARNING)
 			|| m_bShutDownFrontEndRequested || m_bStartUpFrontEndRequested) {
 
-			if (m_nCurrScreen != MENUPAGE_LOADING_IN_PROGRESS) {
+			if (m_nCurrScreen != MENUPAGE_LOADING_IN_PROGRESS
+#ifdef XBOX_MESSAGE_SCREEN
+				&& m_nCurrScreen != MENUPAGE_SAVING_IN_PROGRESS
+#endif
+				) {
 				DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
 				DoRWStuffEndOfFrame();
 				DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);

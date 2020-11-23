@@ -220,6 +220,8 @@ extern int strcasecmp(const char *str1, const char *str2);
 extern int strncasecmp(const char *str1, const char *str2, size_t len);
 #endif
 
+extern wchar *AllocUnicode(const char*src);
+
 #define clamp(v, low, high) ((v)<(low) ? (low) : (v)>(high) ? (high) : (v))
 
 #define clamp2(v, center, radius) ((v) < (center) ? Max(v, center - radius) : Min(v, center + radius))

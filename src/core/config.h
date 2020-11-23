@@ -302,6 +302,7 @@ enum Config {
 #	define GRAPHICS_MENU_OPTIONS
 #define LEGACY_MENU_OPTIONS
 #define MUCH_SHORTER_OUTRO_SCREEN
+// #define XBOX_MESSAGE_SCREEN			// Blue background, no "saved successfully press OK" screen etc.
 
 // Script
 #define USE_DEBUG_SCRIPT_LOADER	// Loads main.scm by default. Hold R for main_freeroam.scm and D for main_d.scm

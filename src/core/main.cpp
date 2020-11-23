@@ -1301,7 +1301,9 @@ Idle(void *arg)
 	Render2dStuffAfterFade();
 	tbEndTimer("Render2dStuff-Fade");
 	// CCredits::Render(); // They added it to function above and also forgot it here
-
+#ifdef XBOX_MESSAGE_SCREEN
+	FrontEndMenuManager.DrawOverlays();
+#endif
 
 	if (gbShowTimebars)
 		tbDisplay();
@@ -1334,6 +1336,9 @@ FrontendIdle(void)
 
 	DefinedState(); // seems redundant, but breaks resolution change.
 	RenderMenus();
+#ifdef XBOX_MESSAGE_SCREEN
+	FrontEndMenuManager.DrawOverlays();
+#endif
 	DoFade();
 	Render2dStuffAfterFade();
 	CFont::DrawFonts();
