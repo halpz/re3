@@ -24,9 +24,7 @@ public:
 	int32 type;
 	char name[24];
 	int32 numFrames;
-#ifdef PED_SKIN
 	int16 boneTag;
-#endif
 	void *keyFrames;
 	void *keyFramesCompressed;
 

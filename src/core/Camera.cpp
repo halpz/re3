@@ -1008,7 +1008,8 @@ CCamera::CamControl(void)
 			ReqMode = CCam::MODE_FOLLOWPED;
 
 			// Check 1st person mode
-			if(m_bLookingAtPlayer && pTargetEntity->IsPed() && !m_WideScreenOn && !Cams[0].Using3rdPersonMouseCam()
+			if((m_bLookingAtPlayer || m_bEnable1rstPersonCamCntrlsScript) && pTargetEntity->IsPed() &&
+			   (!m_WideScreenOn || m_bEnable1rstPersonCamCntrlsScript) && !Cams[0].Using3rdPersonMouseCam()
 #ifdef FREE_CAM
 			   && !CCamera::bFreeCam
 #endif
@@ -1023,6 +1024,8 @@ CCamera::CamControl(void)
 					   CPad::GetPad(0)->GetSquare() || CPad::GetPad(0)->GetTriangle() ||
 					   CPad::GetPad(0)->GetCross() || CPad::GetPad(0)->GetCircle() ||
 					   CTimer::GetTimeInMilliseconds() - m_uiFirstPersonCamLastInputTime > 2850.0f){
+						m_bFirstPersonBeingUsed = false;
+					}else if(CPad::GetPad(0)->TargetJustDown()){
 						m_bFirstPersonBeingUsed = false;
 						m_bJustJumpedOutOf1stPersonBecauseOfTarget = true;
 					}

@@ -2,7 +2,8 @@ all: im2d_gl.inc simple_fs_gl.inc default_UV2_gl.inc \
 	colourfilterVC_fs_gl.inc contrast_fs_gl.inc \
 	neoRim_gl.inc neoRimSkin_gl.inc \
 	neoWorldVC_fs_gl.inc neoGloss_vs_gl.inc neoGloss_fs_gl.inc \
-	neoVehicle_vs_gl.inc neoVehicle_fs_gl.inc
+	neoVehicle_vs_gl.inc neoVehicle_fs_gl.inc \
+	im2d_UV2_gl.inc screenDroplet_fs_gl.inc
 
 im2d_gl.inc: im2d.vert
 	(echo 'const char *im2d_vert_src =';\
