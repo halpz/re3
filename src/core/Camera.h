@@ -348,7 +348,7 @@ public:
 	bool m_bcutsceneFinished;
 	bool m_bCullZoneChecksOn;
 	bool m_bFirstPersonBeingUsed;
-	bool m_bJustJumpedOutOf1stPersonBecauseOfTarget;
+	bool m_bUnknown;
 	bool m_bIdleOn;
 	bool m_bInATunnelAndABigVehicle;
 	bool m_bInitialNodeFound;

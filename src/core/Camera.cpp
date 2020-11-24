@@ -123,7 +123,7 @@ CCamera::Init(void)
 	Cams[0].Mode = CCam::MODE_FOLLOWPED;
 	Cams[1].Mode = CCam::MODE_FOLLOWPED;
 	unknown = 0;
-	m_bJustJumpedOutOf1stPersonBecauseOfTarget = false;
+	m_bUnknown = false;
 	ClearPlayerWeaponMode();
 	m_bInATunnelAndABigVehicle = false;
 	m_iModeObbeCamIsInForCar = OBBE_INVALID;
@@ -3398,10 +3398,10 @@ CCamera::Fade(float timeout, int16 direction)
 		m_fTimeToFadeMusic = timeout;
 		m_uiFadeTimeStartedMusic = CTimer::GetTimeInMilliseconds();
 // Not on PS2
-		if(!m_bJustJumpedOutOf1stPersonBecauseOfTarget && m_iMusicFadingDirection == FADE_OUT){
+		if(!m_bUnknown && m_iMusicFadingDirection == FADE_OUT){
 			unknown++;
 			if(unknown >= 2){
-				m_bJustJumpedOutOf1stPersonBecauseOfTarget = true;
+				m_bUnknown = true;
 				unknown = 0;
 			}else
 				m_bMoveCamToAvoidGeom = true;
