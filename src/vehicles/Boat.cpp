@@ -63,9 +63,9 @@ CBoat::CBoat(int mi, uint8 owner) : CVehicle(owner)
 	m_nPoliceShoutTimer = CTimer::GetTimeInMilliseconds();
 	SetModelIndex(mi);
 
-	pHandling = mod_HandlingManager.GetHandlingData((eHandlingId)minfo->m_handlingId);
-	pFlyingHandling = mod_HandlingManager.GetFlyingPointer((eHandlingId)minfo->m_handlingId);
-	pBoatHandling = mod_HandlingManager.GetBoatPointer((eHandlingId)minfo->m_handlingId);
+	pHandling = mod_HandlingManager.GetHandlingData((tVehicleType)minfo->m_handlingId);
+	pFlyingHandling = mod_HandlingManager.GetFlyingPointer((tVehicleType)minfo->m_handlingId);
+	pBoatHandling = mod_HandlingManager.GetBoatPointer((tVehicleType)minfo->m_handlingId);
 	minfo->ChooseVehicleColour(m_currentColour1, m_currentColour2);
 
 	m_fMass = pHandling->fMass;

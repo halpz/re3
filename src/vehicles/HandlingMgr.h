@@ -2,7 +2,7 @@
 
 #include "Transmission.h"
 
-enum eHandlingId
+enum tVehicleType
 {
 	HANDLING_LANDSTAL,
 	HANDLING_IDAHO,
@@ -154,7 +154,7 @@ enum
 
 struct tHandlingData
 {
-	eHandlingId nIdentifier;
+	tVehicleType nIdentifier;
 	float fMass;
 	float fInvMass;
 	float fTurnMass;
@@ -187,7 +187,7 @@ struct tHandlingData
 
 struct tBikeHandlingData
 {
-	eHandlingId nIdentifier;
+	tVehicleType nIdentifier;
 	float fLeanFwdCOM;
 	float fLeanFwdForce;
 	float fLeanBakCOM;
@@ -207,7 +207,7 @@ struct tBikeHandlingData
 
 struct tBoatHandlingData
 {
-	eHandlingId nIdentifier;
+	tVehicleType nIdentifier;
 	float fThrustY;
 	float fThrustZ;
 	float fThrustAppZ;
@@ -222,7 +222,7 @@ struct tBoatHandlingData
 
 struct  tFlyingHandlingData
 {
-	eHandlingId nIdentifier;
+	tVehicleType nIdentifier;
 	float fThrust;
 	float fThrustFallOff;
 	float fYaw;
@@ -261,11 +261,11 @@ public:
 	void ConvertDataToGameUnits(tHandlingData *handling);
 	void ConvertBikeDataToGameUnits(tBikeHandlingData *handling);
 	int32 GetHandlingId(const char *name);
-	tHandlingData *GetHandlingData(eHandlingId id) { return &HandlingData[id]; }
+	tHandlingData *GetHandlingData(tVehicleType id) { return &HandlingData[id]; }
 	tBikeHandlingData *GetBikePointer(uint8 id) { return &BikeHandlingData[id-HANDLING_BIKE]; }
 	tFlyingHandlingData *GetFlyingPointer(uint8 id);
 	tBoatHandlingData *GetBoatPointer(uint8 id);
-	bool HasRearWheelDrive(eHandlingId id) { return HandlingData[id].Transmission.nDriveType == 'R'; }
-	bool HasFrontWheelDrive(eHandlingId id) { return HandlingData[id].Transmission.nDriveType == 'F'; }
+	bool HasRearWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType == 'R'; }
+	bool HasFrontWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType == 'F'; }
 };
 extern cHandlingDataMgr mod_HandlingManager;

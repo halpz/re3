@@ -70,7 +70,7 @@ CPlane::CPlane(int32 id, uint8 CreatedBy)
 {
 	CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(id);
 	m_vehType = VEHICLE_TYPE_PLANE;
-	pHandling = mod_HandlingManager.GetHandlingData((eHandlingId)mi->m_handlingId);
+	pHandling = mod_HandlingManager.GetHandlingData((tVehicleType)mi->m_handlingId);
 	SetModelIndex(id);
 
 	m_fMass = 100000000.0f;

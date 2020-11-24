@@ -187,7 +187,7 @@ cHandlingDataMgr::LoadHandlingData(void)
 						handlingId = FindExactWord(word, (const char*)VehicleNames, 14, NUMHANDLINGS);
 						assert(handlingId >= 0 && handlingId < NUMHANDLINGS);
 						bikeHandling = GetBikePointer(handlingId);
-						bikeHandling->nIdentifier = (eHandlingId)handlingId;
+						bikeHandling->nIdentifier = (tVehicleType)handlingId;
 						break;
 					case  2: bikeHandling->fLeanFwdCOM = atof(word); break;
 					case  3: bikeHandling->fLeanFwdForce = atof(word); break;
@@ -220,7 +220,7 @@ cHandlingDataMgr::LoadHandlingData(void)
 						handlingId = FindExactWord(word, (const char*)VehicleNames, 14, NUMHANDLINGS);
 						assert(handlingId >= 0 && handlingId < NUMHANDLINGS);
 						flyingHandling = GetFlyingPointer(handlingId);
-						flyingHandling->nIdentifier = (eHandlingId)handlingId;
+						flyingHandling->nIdentifier = (tVehicleType)handlingId;
 						break;
 					case  2: flyingHandling->fThrust = atof(word); break;
 					case  3: flyingHandling->fThrustFallOff = atof(word); break;
@@ -255,7 +255,7 @@ cHandlingDataMgr::LoadHandlingData(void)
 						handlingId = FindExactWord(word, (const char*)VehicleNames, 14, NUMHANDLINGS);
 						assert(handlingId >= 0 && handlingId < NUMHANDLINGS);
 						boatHandling = GetBoatPointer(handlingId);
-						boatHandling->nIdentifier = (eHandlingId)handlingId;
+						boatHandling->nIdentifier = (tVehicleType)handlingId;
 						break;
 					case  2: boatHandling->fThrustY = atof(word); break;
 					case  3: boatHandling->fThrustZ = atof(word); break;
@@ -284,7 +284,7 @@ cHandlingDataMgr::LoadHandlingData(void)
 						handlingId = FindExactWord(word, (const char*)VehicleNames, 14, NUMHANDLINGS);
 						assert(handlingId >= 0 && handlingId < NUMHANDLINGS);
 						handling = &HandlingData[handlingId];
-						handling->nIdentifier = (eHandlingId)handlingId;
+						handling->nIdentifier = (tVehicleType)handlingId;
 						break;
 					case  1: handling->fMass = atof(word); break;
 					case  2: handling->Dimension.x = atof(word); break;

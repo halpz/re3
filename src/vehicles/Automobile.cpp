@@ -100,8 +100,8 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 		break;
 	}
 
-	pHandling = mod_HandlingManager.GetHandlingData((eHandlingId)mi->m_handlingId);
-	pFlyingHandling =  mod_HandlingManager.GetFlyingPointer((eHandlingId)mi->m_handlingId);
+	pHandling = mod_HandlingManager.GetHandlingData((tVehicleType)mi->m_handlingId);
+	pFlyingHandling =  mod_HandlingManager.GetFlyingPointer((tVehicleType)mi->m_handlingId);
 
 	m_auto_unused1 = 20.0f;
 	m_auto_unused2 = 0;
