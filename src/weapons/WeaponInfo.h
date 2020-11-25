@@ -68,6 +68,7 @@ public:
 	static eWeaponFire FindWeaponFireType(char *name);
 	static eWeaponType FindWeaponType(char *name);
 	static void Shutdown(void);
+	static bool IsWeaponSlotAmmoMergeable(uint32 slot) { return slot == WEAPONSLOT_SHOTGUN || slot == WEAPONSLOT_SUBMACHINEGUN || slot == WEAPONSLOT_RIFLE; }
 };
 
 VALIDATE_SIZE(CWeaponInfo, 0x64);

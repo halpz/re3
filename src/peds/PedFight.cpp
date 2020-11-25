@@ -24,6 +24,7 @@
 #include "World.h"
 #include "Bike.h"
 #include "Glass.h"
+#include "SpecialFX.h"
 
 //--MIAMI: file done except TODOs
 
@@ -952,7 +953,18 @@ CPed::Attack(void)
 		}
 	}
 
-	// TODO(Miami): CSpecialFX::AddWeaponStreak
+	if (IsPlayer()) {
+		eWeaponType weaponType = GetWeapon()->m_eWeaponType;
+		if (weaponType == WEAPONTYPE_BASEBALLBAT || weaponType == WEAPONTYPE_GOLFCLUB || weaponType == WEAPONTYPE_KATANA) {
+			float loopEndWithDelay = animLoopEnd;
+			if (loopEndWithDelay >= 98.0f)
+				loopEndWithDelay = (14.0f / 30.0f) + delayBetweenAnimAndFire;
+			if (weaponAnimAssoc->flags & ASSOC_RUNNING) {
+				if (weaponAnimAssoc->currentTime >= animLoopStart && weaponAnimAssoc->currentTime <= loopEndWithDelay)
+					CSpecialFX::AddWeaponStreak(weaponType);
+			}
+		}
+	}
 
 	// Anim breakout on running
 	if (IsPlayer()) {
@@ -1447,9 +1459,7 @@ CPed::Fight(void)
 
 			if (tFightMoves[m_curFightMove].startFireTime - streakDelay < currentAssoc->currentTime &&
 				streakDelay + tFightMoves[m_curFightMove].endFireTime > currentAssoc->currentTime) {
-
-				// TODO(Miami): AddWeaponStreak
-				// CSpecialFX::AddWeaponStreak(v2->m_weapons[(char)v2->m_currentWeapon].nWeaponId);
+				CSpecialFX::AddWeaponStreak(GetWeapon()->m_eWeaponType);
 			}
 		}
 	}

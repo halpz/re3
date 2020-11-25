@@ -4712,9 +4712,7 @@ CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool unused)
 			GetWeapon(slot).m_eWeaponState = WEAPONSTATE_READY;
 	} else {
 		if (HasWeaponSlot(slot)) {
-
-			// TODO(Miami): Make an enum for that
-			if (slot == 4 || slot == 5 || slot == 6)
+			if (CWeaponInfo::IsWeaponSlotAmmoMergeable(slot))
 				ammo += GetWeapon(slot).m_nAmmoTotal;
 
 			RemoveWeaponModel(CWeaponInfo::GetWeaponInfo(GetWeapon(slot).m_eWeaponType)->m_nModelId);

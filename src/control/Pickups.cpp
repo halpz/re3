@@ -140,18 +140,12 @@ ModifyStringLabelForControlSetting(char *str)
 	}
 }
 
-inline bool
-IsWeaponSlotAmmoMergeable(uint32 slot)
-{
-	return slot == WEAPONSLOT_SHOTGUN || slot == WEAPONSLOT_SUBMACHINEGUN || slot == WEAPONSLOT_RIFLE;
-}
-
 void
 CPickup::ExtractAmmoFromPickup(CPlayerPed *player)
 {
 	eWeaponType weaponType = CPickups::WeaponForModel(m_pObject->GetModelIndex());
 	
-	if (m_eType == PICKUP_IN_SHOP || !IsWeaponSlotAmmoMergeable(CWeaponInfo::GetWeaponInfo(weaponType)->m_nWeaponSlot))
+	if (m_eType == PICKUP_IN_SHOP || !CWeaponInfo::IsWeaponSlotAmmoMergeable(CWeaponInfo::GetWeaponInfo(weaponType)->m_nWeaponSlot))
 		return;
 
 	uint32 ammo = m_nQuantity;
@@ -374,14 +368,14 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 				eWeaponType plrWeaponSlot = FindPlayerPed()->GetWeapon(slot).m_eWeaponType;
 				if (plrWeaponSlot != weaponType) {
 					if (CStreaming::ms_aInfoForModel[m_pObject->GetModelIndex()].m_loadState == STREAMSTATE_LOADED) {
-						if (plrWeaponSlot == WEAPONTYPE_UNARMED || (FindPlayerPed()->GetWeapon(slot).m_nAmmoTotal == 0 && !IsWeaponSlotAmmoMergeable(slot))) {
+						if (plrWeaponSlot == WEAPONTYPE_UNARMED || (FindPlayerPed()->GetWeapon(slot).m_nAmmoTotal == 0 && !CWeaponInfo::IsWeaponSlotAmmoMergeable(slot))) {
 							if (CTimer::GetTimeInMilliseconds() - FindPlayerPed()->m_nPadDownPressedInMilliseconds < 1500) {
 								CPickups::PlayerOnWeaponPickup = 6;
 								isPickupTouched = false;
 							}
 						} else {
 							CPickups::PlayerOnWeaponPickup = 6;
-							if (IsWeaponSlotAmmoMergeable(slot)) {
+							if (CWeaponInfo::IsWeaponSlotAmmoMergeable(slot)) {
 								if (m_eType == PICKUP_ONCE_TIMEOUT || m_eType == PICKUP_ONCE || m_eType == PICKUP_ON_STREET) {
 									ExtractAmmoFromPickup(player);
 									FindPlayerPed()->GetWeapon(slot).Reload();
@@ -1384,7 +1378,7 @@ void
 CPickups::RemoveAllPickupsOfACertainWeaponGroupWithNoAmmo(eWeaponType weaponType)
 {
 	uint32 weaponSlot = CWeaponInfo::GetWeaponInfo(weaponType)->m_nWeaponSlot;
-	if (IsWeaponSlotAmmoMergeable(weaponSlot)) {
+	if (CWeaponInfo::IsWeaponSlotAmmoMergeable(weaponSlot)) {
 		for (int slot = 0; slot < NUMPICKUPS; slot++) {
 			if (aPickUps[slot].m_eType == PICKUP_ONCE || aPickUps[slot].m_eType == PICKUP_ONCE_TIMEOUT || aPickUps[slot].m_eType == PICKUP_ONCE_TIMEOUT_SLOW) {
 				if (aPickUps[slot].m_pObject) {
