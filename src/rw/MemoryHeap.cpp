@@ -9,8 +9,11 @@
 
 #ifdef USE_CUSTOM_ALLOCATOR
 
-#define MEMORYHEAP_ASSERT(cond) { if (!(cond)) { printf("ASSERT File:%s Line:%d\n", __FILE__, __LINE__); exit(1); } }
-#define MEMORYHEAP_ASSERT_MESSAGE(cond, message) { if (!(cond)) { printf("ASSERT File:%s Line:%d:\n\t%s\n", __FILE__, __LINE__, message); exit(1); } }
+//#define MEMORYHEAP_ASSERT(cond) { if (!(cond)) { printf("ASSERT File:%s Line:%d\n", __FILE__, __LINE__); exit(1); } }
+//#define MEMORYHEAP_ASSERT_MESSAGE(cond, message) { if (!(cond)) { printf("ASSERT File:%s Line:%d:\n\t%s\n", __FILE__, __LINE__, message); exit(1); } }
+
+#define MEMORYHEAP_ASSERT(cond) assert(cond)
+#define MEMORYHEAP_ASSERT_MESSAGE(cond, message) assert(cond)
 
 // registered pointers that we keep track of
 void **gPtrList[4000];
@@ -272,6 +275,7 @@ CMemoryHeap::Free(void *ptr)
 	MEMORYHEAP_ASSERT(m_unkMemId == -1 || m_unkMemId == block->m_memId);
 
 	RegisterFree(block);
+	block->m_memId = MEMID_FREE;
 	CombineFreeBlocks(block);
 	FreeBlock(block);
 	if(block->m_ptrListIndex != -1){
@@ -313,7 +317,7 @@ uint32
 CMemoryHeap::CombineFreeBlocks(HeapBlockDesc *block)
 {
 	HeapBlockDesc *next = block->GetNextConsecutive();
-	if(next->m_memId == MEMID_FREE)
+	if(next->m_memId != MEMID_FREE)
 		return block->m_size;
 	// get rid of free blocks after this one and adjust size
 	for(; next->m_memId == MEMID_FREE; next = next->GetNextConsecutive())
@@ -535,6 +539,10 @@ MemoryMgrCalloc(uint32 num, uint32 size)
 void
 MemoryMgrFree(void *ptr)
 {
+#ifdef FIX_BUGS
+	// i don't suppose this is handled by RW?
+	if(ptr == nil) return;
+#endif
 	gMainHeap.Free(ptr);
 }
 

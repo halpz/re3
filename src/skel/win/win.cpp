@@ -97,6 +97,7 @@ static psGlobalType PsGlobal;
 #include "Sprite2d.h"
 #include "AnimViewer.h"
 #include "Font.h"
+#include "MemoryHeap.h"
 
 VALIDATE_SIZE(psGlobalType, 0x28);
 
@@ -304,7 +305,11 @@ psMouseSetPos(RwV2d *pos)
 RwMemoryFunctions*
 psGetMemoryFunctions(void)
 {
+#ifdef USE_CUSTOM_ALLOCATOR
+	return &memFuncs;
+#else
 	return nil;
+#endif
 }
 
 /*
@@ -2006,7 +2011,11 @@ WinMain(HINSTANCE instance,
 	RwChar **argv;
 	SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, nil, SPIF_SENDCHANGE);
 
-#if 0
+#ifdef USE_CUSTOM_ALLOCATOR
+	InitMemoryMgr();
+#endif
+
+#if 1
 	// TODO: make this an option somewhere
 	AllocConsole();
 	freopen("CONIN$", "r", stdin);

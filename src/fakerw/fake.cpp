@@ -16,9 +16,14 @@ using namespace rw;
 RwUInt8 RwObjectGetType(const RwObject *obj) { return obj->type; }
 
 
-void *RwMalloc(size_t size) { return malloc(size); }
-void *RwCalloc(size_t numObj, size_t sizeObj) { return calloc(numObj, sizeObj); }
-void  RwFree(void *mem) { free(mem); }
+void *RwMalloc(size_t size) { return engine->memfuncs.rwmalloc(size, 0); }
+void *RwCalloc(size_t numObj, size_t sizeObj) {
+	void *mem = RwMalloc(numObj*sizeObj);
+	if(mem)
+		memset(mem, 0, numObj*sizeObj);
+	return mem;
+}
+void  RwFree(void *mem) { engine->memfuncs.rwfree(mem); }
 
 
 //RwReal RwV3dNormalize(RwV3d * out, const RwV3d * in);
@@ -536,8 +541,27 @@ RwBool RwRenderStateSet(RwRenderState state, void *value)
 	}
 }
 
+static rw::MemoryFunctions gMemfuncs;
+static void *(*real_malloc)(size_t size);
+static void *(*real_realloc)(void *mem, size_t newSize);
+static void *mallocWrap(size_t sz, uint32 hint) { if(sz == 0) return nil; return real_malloc(sz); }
+static void *reallocWrap(void *p, size_t sz, uint32 hint) { return real_realloc(p, sz); }
+
+
 // WARNING: unused parameters
-RwBool RwEngineInit(RwMemoryFunctions *memFuncs, RwUInt32 initFlags, RwUInt32 resArenaSize) { Engine::init(); return true; }
+RwBool RwEngineInit(RwMemoryFunctions *memFuncs, RwUInt32 initFlags, RwUInt32 resArenaSize) {
+	if(memFuncs){
+		real_malloc = memFuncs->rwmalloc;
+		real_realloc = memFuncs->rwrealloc;
+		gMemfuncs.rwmalloc = mallocWrap;
+		gMemfuncs.rwrealloc = reallocWrap;
+		gMemfuncs.rwfree = memFuncs->rwfree;
+		Engine::init(&gMemfuncs);
+	}else{
+		Engine::init(nil);
+	}
+	return true;
+}
 // TODO: this is platform dependent
 RwBool RwEngineOpen(RwEngineOpenParams *initParams) {
 	static EngineOpenParams openParams;

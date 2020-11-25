@@ -1,6 +1,12 @@
 #pragma once
 
+// some windows shit
+#ifdef MoveMemory
+#undef MoveMemory
+#endif
+
 extern RwMemoryFunctions memFuncs;
+void InitMemoryMgr(void);
 
 template<typename T, uint32 N>
 class CStack
@@ -56,7 +62,10 @@ struct HeapBlockDesc
 	}
 };
 
+#ifdef USE_CUSTOM_ALLOCATOR
+// TODO: figure something out for 64 bit pointers
 static_assert(sizeof(HeapBlockDesc) == 0x10, "HeapBlockDesc must have 0x10 size otherwise most of assumptions don't make sense");
+#endif
 
 struct HeapBlockList
 {
@@ -181,8 +190,7 @@ public:
 				return;
 			}
 		}
-		HeapBlockDesc *it;
-		for(it = m_freeList.m_first.m_next; it->m_size < block->m_size; it = it->m_next);
-		block->InsertHeapFreeBlock(it->m_prev);
+		HeapBlockDesc *b = m_freeList.m_first.FindSmallestFreeBlock(block->m_size);
+		block->InsertHeapFreeBlock(b->m_prev);
 	}
 };

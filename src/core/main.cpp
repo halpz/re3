@@ -1601,7 +1601,7 @@ void SystemInit()
 	mwInit();
 #endif
 	
-#ifdef GTA_PS2
+#ifdef USE_CUSTOM_ALLOCATOR
 	InitMemoryMgr();
 #endif
 	
