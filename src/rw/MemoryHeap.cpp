@@ -44,7 +44,7 @@ CMemoryHeap::Init(uint32 total)
 	m_end = (HeapBlockDesc*)(mem + total - sizeof(HeapBlockDesc));
 	m_start->m_memId = MEMID_FREE;
 	m_start->m_size = total - 2*sizeof(HeapBlockDesc);
-	m_end->m_memId = MEMID_ID1;
+	m_end->m_memId = MEMID_GAME;
 	m_end->m_size = 0;
 
 	m_freeList.m_last.m_size = INT_MAX;
@@ -65,7 +65,7 @@ CMemoryHeap::Init(uint32 total)
 	RegisterMalloc(GetDescFromHeapPointer(m_memUsed));
 	RegisterMalloc(GetDescFromHeapPointer(m_blocksUsed));
 
-	m_currentMemID = MEMID_ID1;
+	m_currentMemID = MEMID_GAME;
 	for(int i = 0; i < NUM_MEMIDS; i++){
 		m_memUsed[i] = 0;
 		m_blocksUsed[i] = 0;
@@ -90,8 +90,8 @@ CMemoryHeap::RegisterFree(HeapBlockDesc *block)
 	if(block->m_memId == MEMID_FREE)
 		return;
 	m_totalMemUsed -= block->m_size + sizeof(HeapBlockDesc);
-	m_memUsed[m_currentMemID] -= block->m_size + sizeof(HeapBlockDesc);
-	m_blocksUsed[m_currentMemID]--;
+	m_memUsed[block->m_memId] -= block->m_size + sizeof(HeapBlockDesc);
+	m_blocksUsed[block->m_memId]--;
 	m_totalBlocksUsed--;
 }
 
@@ -433,13 +433,16 @@ CMemoryHeap::GetBlocksUsed(int32 id)
 void
 CMemoryHeap::PopMemId(void)
 {
+	assert(m_idStack.sp > 0);
 	m_currentMemID = m_idStack.pop();
+	assert(m_currentMemID != MEMID_FREE);
 }
 
 void
 CMemoryHeap::PushMemId(int32 id)
 {
 	MEMORYHEAP_ASSERT(id != MEMID_FREE);
+	assert(m_idStack.sp < 16);
 	m_idStack.push(m_currentMemID);
 	m_currentMemID = id;
 }
@@ -457,7 +460,7 @@ CMemoryHeap::ParseHeap(void)
 	for(HeapBlockDesc *block = m_start; block < m_end; block = block->GetNextConsecutive()){
 		char chr = '*';	// free
 		if(block->m_memId != MEMID_FREE)
-			chr = block->m_memId-MEMID_ID1 + 'A';
+			chr = block->m_memId-1 + 'A';
 		int numQW = block->m_size>>4;
 
 		if((addrQW & 0x3F) == 0){
@@ -506,10 +509,31 @@ InitMemoryMgr(void)
 #endif
 }
 
+
+RwMemoryFunctions memFuncs = {
+	MemoryMgrMalloc,
+	MemoryMgrFree,
+	MemoryMgrRealloc,
+	MemoryMgrCalloc
+};
+
+#ifdef USE_CUSTOM_ALLOCATOR
+// game seems to be using heap directly here, but this is nicer
+void *operator new(size_t sz) { return MemoryMgrMalloc(sz); }
+void *operator new[](size_t sz) { return MemoryMgrMalloc(sz); }
+void operator delete(void *ptr) noexcept { MemoryMgrFree(ptr); }
+void operator delete[](void *ptr) noexcept { MemoryMgrFree(ptr); }
+#endif
+#endif
+
 void*
 MemoryMgrMalloc(uint32 size)
 {
+#ifdef USE_CUSTOM_ALLOCATOR
 	void *mem = gMainHeap.Malloc(size);
+#else
+	void *mem = malloc(size);
+#endif
 	if(mem > pMemoryTop)
 		pMemoryTop = mem;
 	return mem;
@@ -518,7 +542,11 @@ MemoryMgrMalloc(uint32 size)
 void*
 MemoryMgrRealloc(void *ptr, uint32 size)
 {
+#ifdef USE_CUSTOM_ALLOCATOR
 	void *mem = gMainHeap.Realloc(ptr, size);
+#else
+	void *mem = realloc(ptr, size);
+#endif
 	if(mem > pMemoryTop)
 		pMemoryTop = mem;
 	return mem;
@@ -527,7 +555,11 @@ MemoryMgrRealloc(void *ptr, uint32 size)
 void*
 MemoryMgrCalloc(uint32 num, uint32 size)
 {
+#ifdef USE_CUSTOM_ALLOCATOR
 	void *mem = gMainHeap.Malloc(num*size);
+#else
+	void *mem = calloc(num, size);
+#endif
 	if(mem > pMemoryTop)
 		pMemoryTop = mem;
 #ifdef FIX_BUGS
@@ -539,18 +571,52 @@ MemoryMgrCalloc(uint32 num, uint32 size)
 void
 MemoryMgrFree(void *ptr)
 {
+#ifdef USE_CUSTOM_ALLOCATOR
 #ifdef FIX_BUGS
 	// i don't suppose this is handled by RW?
 	if(ptr == nil) return;
 #endif
 	gMainHeap.Free(ptr);
+#else
+	free(ptr);
+#endif
 }
 
-RwMemoryFunctions memFuncs = {
-	MemoryMgrMalloc,
-	MemoryMgrFree,
-	MemoryMgrRealloc,
-	MemoryMgrCalloc
-};
+void *
+RwMallocAlign(RwUInt32 size, RwUInt32 align)
+{
+#ifdef FIX_BUGS
+	uintptr ptralign = align-1;
+	void *mem = (void *)MemoryMgrMalloc(size + sizeof(uintptr) + ptralign);
 
+	ASSERT(mem != nil);
+
+	void *addr = (void *)((((uintptr)mem) + sizeof(uintptr) + ptralign) & ~ptralign);
+
+	ASSERT(addr != nil);
+#else
+	void *mem = (void *)MemoryMgrMalloc(size + align);
+
+	ASSERT(mem != nil);
+
+	void *addr = (void *)((((uintptr)mem) + align) & ~(align - 1));
+
+	ASSERT(addr != nil);
 #endif
+
+	*(((void **)addr) - 1) = mem;
+
+	return addr;
+}
+
+void
+RwFreeAlign(void *mem)
+{
+	ASSERT(mem != nil);
+
+	void *addr = *(((void **)mem) - 1);
+
+	ASSERT(addr != nil);
+
+	MemoryMgrFree(addr);
+}

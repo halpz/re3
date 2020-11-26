@@ -24,6 +24,7 @@
 #include "ZoneCull.h"
 #include "CdStream.h"
 #include "FileLoader.h"
+#include "MemoryHeap.h"
 
 char CFileLoader::ms_line[256];
 
@@ -71,11 +72,13 @@ CFileLoader::LoadLevel(const char *filename)
 		if(strncmp(line, "IMAGEPATH", 9) == 0){
 			RwImageSetPath(line + 10);
 		}else if(strncmp(line, "TEXDICTION", 10) == 0){
+			PUSH_MEMID(MEMID_TEXTURES);
 			strcpy(txdname, line+11);
 			LoadingScreenLoadingFile(txdname);
 			RwTexDictionary *txd = LoadTexDictionary(txdname);
 			AddTexDictionaries(savedTxd, txd);
 			RwTexDictionaryDestroy(txd);
+			POP_MEMID();
 		}else if(strncmp(line, "COLFILE", 7) == 0){
 			int level;
 			sscanf(line+8, "%d", &level);
@@ -94,12 +97,16 @@ CFileLoader::LoadLevel(const char *filename)
 			LoadObjectTypes(line + 4);
 		}else if(strncmp(line, "IPL", 3) == 0){
 			if(!objectsLoaded){
+				PUSH_MEMID(MEMID_DEF_MODELS);
 				CModelInfo::ConstructMloClumps();
+				POP_MEMID();
 				CObjectData::Initialise("DATA\\OBJECT.DAT");
 				objectsLoaded = true;
 			}
+			PUSH_MEMID(MEMID_WORLD);
 			LoadingScreenLoadingFile(line + 4);
 			LoadScene(line + 4);
+			POP_MEMID();
 		}else if(strncmp(line, "MAPZONE", 7) == 0){
 			LoadingScreenLoadingFile(line + 8);
 			LoadMapZones(line + 8);
@@ -188,6 +195,8 @@ CFileLoader::LoadCollisionFile(const char *filename)
 	CBaseModelInfo *mi;
 	ColHeader header;
 
+	PUSH_MEMID(MEMID_COLLISION);
+
 	debug("Loading collision file %s\n", filename);
 	fd = CFileMgr::OpenFile(filename, "rb");
 
@@ -211,6 +220,8 @@ CFileLoader::LoadCollisionFile(const char *filename)
 	}
 
 	CFileMgr::CloseFile(fd);
+
+	POP_MEMID();
 }
 
 void

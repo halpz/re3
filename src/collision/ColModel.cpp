@@ -1,6 +1,7 @@
 #include "common.h"
 #include "ColModel.h"
 #include "Game.h"
+#include "MemoryHeap.h"
 
 CColModel::CColModel(void)
 {
@@ -48,10 +49,15 @@ CColModel::RemoveCollisionVolumes(void)
 void
 CColModel::CalculateTrianglePlanes(void)
 {
+	PUSH_MEMID(MEMID_COLLISION);
+
 	// HACK: allocate space for one more element to stuff the link pointer into
 	trianglePlanes = (CColTrianglePlane*)RwMalloc(sizeof(CColTrianglePlane) * (numTriangles+1));
+	REGISTER_MEMPTR(&trianglePlanes);
 	for(int i = 0; i < numTriangles; i++)
 		trianglePlanes[i].Set(vertices, triangles[i]);
+
+	POP_MEMID();
 }
 
 void

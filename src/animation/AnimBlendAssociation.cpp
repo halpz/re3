@@ -5,7 +5,7 @@
 #include "RpAnimBlend.h"
 #include "AnimManager.h"
 #include "AnimBlendAssociation.h"
-#include "RwHelper.h"
+#include "MemoryHeap.h"
 
 CAnimBlendAssociation::CAnimBlendAssociation(void)
 {

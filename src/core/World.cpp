@@ -53,6 +53,9 @@ bool CWorld::bIncludeCarTyres;
 void
 CWorld::Initialise()
 {
+#ifdef GTA_PS2
+	CPools::Initialise();
+#endif
 	pIgnoreEntity = nil;
 	bDoingCarCollisions = false;
 	bSecondShift = false;

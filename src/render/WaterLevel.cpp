@@ -21,6 +21,7 @@
 #include "RenderBuffer.h"
 #include <rpworld.h>
 #include "WaterLevel.h"
+#include "MemoryHeap.h"
 
 
 float TEXTURE_ADDU;
@@ -1157,6 +1158,8 @@ CWaterLevel::AllocateBoatWakeArray()
 {
 	CStreaming::MakeSpaceFor(14 * CDSTREAM_SECTOR_SIZE); 
 
+	PUSH_MEMID(MEMID_STREAM);
+
 	ASSERT(ms_pWavyAtomic != NULL );
 	
 	RpGeometry    *wavyGeometry    = RpAtomicGetGeometry(ms_pWavyAtomic);
@@ -1230,6 +1233,8 @@ CWaterLevel::AllocateBoatWakeArray()
 			RpGeometryUnlock(apGeomArray[geom]);
 		}
 	}
+
+	POP_MEMID();
 }
 
 void

@@ -5,8 +5,74 @@
 #undef MoveMemory
 #endif
 
+#ifdef USE_CUSTOM_ALLOCATOR
+#define PUSH_MEMID(id) gMainHeap.PushMemId(id)
+#define POP_MEMID() gMainHeap.PopMemId()
+#define REGISTER_MEMPTR(ptr) gMainHeap.RegisterMemPointer(ptr)
+#else
+#define PUSH_MEMID(id)
+#define POP_MEMID()
+#define REGISTER_MEMPTR(ptr)
+#endif
+
+enum {
+	MEMID_FREE,
+	// IDs from LCS:
+/*
+	MEMID_GAME = 1,	// "Game"
+	MEMID_WORLD = 2,	// "World"
+	MEMID_ANIMATION = 3,	// "Animation"
+	MEMID_POOLS = 4,	// "Pools"
+	MEMID_DEF_MODELS = 5,	// "Default Models"
+	MEMID_STREAM = 6,	// "Streaming"
+	MEMID_STREAM_MODELS = 7,	// "Streamed Models"
+	MEMID_STREAM_LODS = 8,	// "Streamed LODs"
+	MEMID_STREAM_TEXUTRES = 9,	// "Streamed Textures"
+	MEMID_STREAM_COLLISION = 10,	// "Streamed Collision"
+	MEMID_STREAM_ANIMATION = 11,	// "Streamed Animation"
+	MEMID_TEXTURES = 12,	// "Textures"
+	MEMID_COLLISION = 13,	// "Collision"
+	MEMID_PRE_ALLOC = 14,	// "PreAlloc"
+	MEMID_GAME_PROCESS = 15,	// "Game Process"
+	MEMID_SCRIPT = 16,	// "Script"
+	MEMID_CARS = 17,	// "Cars"
+	MEMID_RENDER = 18,	// "Render"
+	MEMID_PED_ATTR = 19,	// "Ped Attr"
+*/
+	// III:
+	MEMID_GAME = 1,	// "Game"
+	MEMID_WORLD = 2,	// "World"
+	MEMID_ANIMATION = 3,	// "Animation"
+	MEMID_POOLS = 4,	// "Pools"
+	MEMID_DEF_MODELS = 5,	// "Default Models"
+	MEMID_STREAM = 6,	// "Streaming"
+	MEMID_STREAM_MODELS = 7,	// "Streamed Models" (instance)
+	MEMID_STREAM_TEXUTRES = 8,	// "Streamed Textures"
+	MEMID_TEXTURES = 9,	// "Textures"
+	MEMID_COLLISION = 10,	// "Collision"
+	MEMID_RENDERLIST = 11,	// ?
+	MEMID_GAME_PROCESS = 12,	// "Game Process"
+	MEMID_SCRIPT = 13,	// "Script"
+	MEMID_CARS = 14,	// "Cars"
+	MEMID_RENDER = 15,	// "Render"
+	MEMID_FRONTEND = 17,	// ?
+
+	NUM_MEMIDS,
+
+	NUM_FIXED_MEMBLOCKS = 6
+};
+
 extern RwMemoryFunctions memFuncs;
 void InitMemoryMgr(void);
+
+void *MemoryMgrMalloc(uint32 size);
+void *MemoryMgrRealloc(void *ptr, uint32 size);
+void *MemoryMgrCalloc(uint32 num, uint32 size);
+void MemoryMgrFree(void *ptr);
+
+void *RwMallocAlign(RwUInt32 size, RwUInt32 align);
+void RwFreeAlign(void *mem);
+
 
 template<typename T, uint32 N>
 class CStack
@@ -17,7 +83,7 @@ public:
 
 	CStack() : sp(0) {}
 	void push(const T& val) { values[sp++] = val; }
-	T& pop() { return values[sp--]; }
+	T& pop() { return values[--sp]; }
 };
 
 
@@ -111,34 +177,6 @@ struct CommonSize
 	}
 };
 
-enum {
-	MEMID_FREE,
-	// IDs from LCS:
-	MEMID_ID1,	// "Game"
-	MEMID_ID2,	// "World"
-	MEMID_ID3,	// "Animation"
-	MEMID_ID4,	// "Pools"
-	MEMID_ID5,	// "Default Models"
-	MEMID_ID6,	// "Streaming"
-	MEMID_ID7,	// "Streamed Models"
-	MEMID_ID8,	// "Streamed LODs"
-	MEMID_ID9,	// "Streamed Textures"
-	MEMID_ID10,	// "Streamed Collision"
-	MEMID_ID11,	// "Streamed Animation"
-	MEMID_ID12,	// "Textures"
-	MEMID_ID13,	// "Collision"
-	MEMID_ID14,	// "PreAlloc"
-	MEMID_ID15,	// "Game Process"
-	MEMID_ID16,	// "Script"
-	MEMID_ID17,	// "Cars"
-	MEMID_ID18,	// "Render"
-	MEMID_ID19,	// "Ped Attr"
-
-	NUM_MEMIDS,
-
-	NUM_FIXED_MEMBLOCKS = 6
-};
-
 class CMemoryHeap
 {
 public:
@@ -194,3 +232,5 @@ public:
 		block->InsertHeapFreeBlock(b->m_prev);
 	}
 };
+
+extern CMemoryHeap gMainHeap;
