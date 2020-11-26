@@ -33,6 +33,7 @@
 #endif
 #include "main.h"
 #include "Frontend.h"
+#include "Font.h"
 
 bool CStreaming::ms_disableStreaming;
 bool CStreaming::ms_bLoadingBigModel;
@@ -289,12 +290,22 @@ CStreaming::Shutdown(void)
 	}
 }
 
+#ifndef MASTER
+uint64 timeProcessingTXD;
+uint64 timeProcessingDFF;
+#endif
+
 void
 CStreaming::Update(void)
 {
 	CEntity *train;
 	CStreamingInfo *si, *prev;
 	bool requestedSubway = false;
+
+#ifndef MASTER
+	timeProcessingTXD = 0;
+	timeProcessingDFF = 0;
+#endif
 
 	UpdateMemoryUsed();
 
@@ -331,6 +342,14 @@ CStreaming::Update(void)
 
 	LoadRequestedModels();
 
+#ifndef MASTER
+	if (CPad::GetPad(1)->GetLeftShoulder1JustDown() && CPad::GetPad(1)->GetRightShoulder1() && CPad::GetPad(1)->GetRightShoulder2())
+		PrintStreamingBufferState();
+
+	// TODO: PrintRequestList
+	//if (CPad::GetPad(1)->GetLeftShoulder2JustDown() && CPad::GetPad(1)->GetRightShoulder1() && CPad::GetPad(1)->GetRightShoulder2())
+	//	PrintRequestList();
+#endif
 
 	for(si = ms_endRequestedList.m_prev; si != &ms_startRequestedList; si = prev){
 		prev = si->m_prev;
@@ -2635,4 +2654,72 @@ CStreaming::UpdateForAnimViewer(void)
 	else {
 		CStreaming::RetryLoadFile(CStreaming::ms_channelError);
 	}
+}
+
+
+void
+CStreaming::PrintStreamingBufferState()
+{
+	char str[128];
+	wchar wstr[128];
+	uint32 offset, size;
+
+	CTimer::Stop();
+	int i = 0;
+	while (i < NUMSTREAMINFO) {
+		while (true) {
+			int j = 0;
+			DoRWStuffStartOfFrame(50, 50, 50, 0, 0, 0, 255);
+			CPad::UpdatePads();
+			CSprite2d::InitPerFrame();
+			CFont::InitPerFrame();
+			DefinedState();
+
+			CRect unusedRect(0, 0, RsGlobal.maximumWidth, RsGlobal.maximumHeight);
+			CRGBA unusedColor(255, 255, 255, 255);
+			CFont::SetFontStyle(FONT_BANK);
+			CFont::SetBackgroundOff();
+			CFont::SetWrapx(DEFAULT_SCREEN_WIDTH);
+			CFont::SetScale(0.5f, 0.75f);
+			CFont::SetCentreOff();
+			CFont::SetCentreSize(DEFAULT_SCREEN_WIDTH);
+			CFont::SetJustifyOff();
+			CFont::SetColor(CRGBA(200, 200, 200, 200));
+			CFont::SetBackGroundOnlyTextOff();
+			int modelIndex = i;
+			if (modelIndex < NUMSTREAMINFO) {
+				int y = 24;
+				for ( ; j < 34 && modelIndex < NUMSTREAMINFO; modelIndex++) {
+					CStreamingInfo *streamingInfo = &ms_aInfoForModel[modelIndex];
+					CBaseModelInfo *modelInfo = CModelInfo::GetModelInfo(modelIndex);
+					if (streamingInfo->m_loadState != STREAMSTATE_LOADED || !streamingInfo->GetCdPosnAndSize(offset, size))
+						continue;
+
+					if (modelIndex >= STREAM_OFFSET_TXD)
+						sprintf(str, "txd %s, refs %d, size %dK, flags 0x%x", CTxdStore::GetTxdName(modelIndex - STREAM_OFFSET_TXD),
+						        CTxdStore::GetNumRefs(modelIndex - STREAM_OFFSET_TXD), 2 * size, streamingInfo->m_flags);
+					else
+						sprintf(str, "model %d,%s, refs%d, size%dK, flags%x", modelIndex, modelInfo->GetName(), modelInfo->GetNumRefs(), 2 * size,
+						        streamingInfo->m_flags);
+					AsciiToUnicode(str, wstr);
+					CFont::PrintString(24.0f, y, wstr);
+					y += 12;
+					j++;
+				}
+			}
+
+			if (CPad::GetPad(1)->GetCrossJustDown())
+				i = modelIndex;
+
+			if (!CPad::GetPad(1)->GetTriangleJustDown())
+				break;
+
+			i = 0;
+			CFont::DrawFonts();
+			DoRWStuffEndOfFrame();
+		}
+		CFont::DrawFonts();
+		DoRWStuffEndOfFrame();
+	}
+	CTimer::Update();
 }
