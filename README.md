@@ -21,14 +21,18 @@ such that we have a working game at all times.
 
 ## Preparing the environment for building
 
-- Clone the repo using the argument `--recursive`.
-- Point GTA_III_RE_DIR environment variable to GTA3 root folder.
-- Run premake
-	- On Windows: one of the `premake-vsXXXX.cmd` variants on root folder
-	- On Linux: proceed to [Building on Linux](https://github.com/GTAmodding/re3/wiki/Building-on-Linux).
-- There are various settings at the very bottom of [config.h](https://github.com/GTAmodding/re3/tree/master/src/core/config.h), you may want to take a look there. i.e. FIX_BUGS define fixes the bugs we've come across.
-- **If you use 64-bit D3D9**: We don't ship 64-bit Dx9 SDK. You need to download it from Microsoft if you don't have it(although it should come pre-installed after some Windows version)
+You may want to point GTA_VC_RE_DIR environment variable to GTA VC root folder if you want executable to be moved there via post-build script.
 
+- For Linux, proceed: [Building on Linux](https://github.com/GTAmodding/re3/wiki/Building-on-Linux)
+- For FreeBSD, proceed: [Building on FreeBSD](https://github.com/GTAmodding/re3/wiki/Building-on-FreeBSD) 
+- For Windows, assuming you have Visual Studio:
+    - Clone the repo using the argument `--recursive`.
+    - Run one of the `premake-vsXXXX.cmd` variants on root folder.
+    - Open the project via Visual Studio  
+    
+**If you use 64-bit D3D9**: We don't ship 64-bit Dx9 SDK. You need to download it from Microsoft if you don't have it(although it should come pre-installed after some Windows version)  
+
+There are various settings at the very bottom of [config.h](https://github.com/GTAmodding/re3/tree/master/src/core/config.h), you may want to take a look there. i.e. FIX_BUGS define fixes the bugs we've come across.
 
 > :information_source: **If you choose OpenAL on Windows** You must read [Running OpenAL build on Windows](https://github.com/GTAmodding/re3/wiki/Running-OpenAL-build-on-Windows).
 
