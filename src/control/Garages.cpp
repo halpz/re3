@@ -1260,9 +1260,9 @@ bool CGarage::IsPlayerOutsideGarage()
 bool CGarage::IsEntityTouching3D(CEntity * pEntity)
 {
 	float radius = pEntity->GetBoundRadius();
-	if (pEntity->GetPosition().x - radius < m_fX1 || pEntity->GetPosition().x + radius > m_fX2 ||
-		pEntity->GetPosition().y - radius < m_fY1 || pEntity->GetPosition().y + radius > m_fY2 ||
-		pEntity->GetPosition().z - radius < m_fZ1 || pEntity->GetPosition().z + radius > m_fZ2)
+	if (m_fX1 - radius > pEntity->GetPosition().x || m_fX2 + radius < pEntity->GetPosition().x ||
+		m_fY1 - radius > pEntity->GetPosition().y || m_fY2 + radius < pEntity->GetPosition().y ||
+		m_fZ1 - radius > pEntity->GetPosition().z || m_fZ2 + radius < pEntity->GetPosition().z)
 		return false;
 	CColModel* pColModel = pEntity->GetColModel();
 	for (int i = 0; i < pColModel->numSpheres; i++) {
@@ -1271,9 +1271,9 @@ bool CGarage::IsEntityTouching3D(CEntity * pEntity)
 		if (pos.x + radius > m_fX1 && pos.x - radius < m_fX2 &&
 			pos.y + radius > m_fY1 && pos.y - radius < m_fY2 &&
 			pos.z + radius > m_fZ1 && pos.z - radius < m_fZ2)
-			return false;
+			return true;
 	}
-	return true;
+	return false;
 }
 
 bool CGarage::EntityHasASphereWayOutsideGarage(CEntity * pEntity, float fMargin)
