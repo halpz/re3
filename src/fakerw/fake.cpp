@@ -578,6 +578,9 @@ void RwD3D8EngineSetRefreshRate(RwUInt32 refreshRate) {}
 RwBool RwD3D8DeviceSupportsDXTTexture(void) { return true; }
 
 
+void RwD3D8EngineSetMultiSamplingLevels(RwUInt32 level) { Engine::setMultiSamplingLevels(level); }
+RwUInt32 RwD3D8EngineGetMaxMultiSamplingLevels(void) { return Engine::getMaxMultiSamplingLevels(); }
+
 
 RpMaterial *RpMaterialCreate(void) { return Material::create(); }
 RwBool RpMaterialDestroy(RpMaterial *material) { material->destroy(); return true; }

@@ -841,7 +841,10 @@ psSelectDevice()
 		
 		PSGLOBAL(fullScreen) = !FrontEndMenuManager.m_nPrefsWindowed;
 #endif
-	
+
+#ifdef MULTISAMPLING
+	RwD3D8EngineSetMultiSamplingLevels(1 << FrontEndMenuManager.m_nPrefsMSAALevel);
+#endif
 	return TRUE;
 }
 

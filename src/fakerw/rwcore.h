@@ -411,3 +411,5 @@ RwFrame     *RwCameraGetFrame(const RwCamera *camera);
 
 void RwD3D8EngineSetRefreshRate(RwUInt32 refreshRate);
 RwBool RwD3D8DeviceSupportsDXTTexture(void);
+void RwD3D8EngineSetMultiSamplingLevels(RwUInt32 level);
+RwUInt32 RwD3D8EngineGetMaxMultiSamplingLevels(void);
