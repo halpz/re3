@@ -90,6 +90,7 @@
 #include "custompipes.h"
 #include "screendroplets.h"
 #include "crossplatform.h"
+#include "MemoryHeap.h"
 
 eLevelName CGame::currLevel;
 bool CGame::bDemoMode = true;
@@ -327,21 +328,35 @@ CGame::FinalShutdown(void)
 
 bool CGame::Initialise(const char* datFile)
 {
+#ifdef GTA_PS2
+	// TODO: upload VU0 collision code here
+#else
 	ResetLoadingScreenBar();
 	strcpy(aDatFile, datFile);
-	CPools::Initialise();
+	CPools::Initialise();	// done in CWorld on PS2
 	CIniFile::LoadIniFile();
+#endif
+
 	currLevel = LEVEL_INDUSTRIAL;
+
+	PUSH_MEMID(MEMID_TEXTURES);
 	LoadingScreen("Loading the Game", "Loading generic textures", GetRandomSplashScreen());
 	gameTxdSlot = CTxdStore::AddTxdSlot("generic");
 	CTxdStore::Create(gameTxdSlot);
 	CTxdStore::AddRef(gameTxdSlot);
+
 	LoadingScreen("Loading the Game", "Loading particles", nil);
 	int particleTxdSlot = CTxdStore::AddTxdSlot("particle");
 	CTxdStore::LoadTxd(particleTxdSlot, "MODELS/PARTICLE.TXD");
 	CTxdStore::AddRef(particleTxdSlot);
 	CTxdStore::SetCurrentTxd(gameTxdSlot);
 	LoadingScreen("Loading the Game", "Setup game variables", nil);
+	POP_MEMID();
+
+#ifdef GTA_PS2
+	CDma::SyncChannel(0, true);
+#endif
+
 	CGameLogic::InitAtStartOfGame();
 	CReferences::Init();
 	TheCamera.Init();
@@ -361,20 +376,41 @@ bool CGame::Initialise(const char* datFile)
 	CMessages::ClearAllMessagesDisplayedByGame();
 	CRecordDataForGame::Init();
 	CRestart::Initialise();
+
+	PUSH_MEMID(MEMID_WORLD);
 	CWorld::Initialise();
+	POP_MEMID();
+
+	PUSH_MEMID(MEMID_TEXTURES);
 	CParticle::Initialise();
-#ifdef PS2
+	POP_MEMID();
+
+#ifdef GTA_PS2
 	gStartX = -180.0f;
 	gStartY = 180.0f;
 	gStartZ = 14.0f;
 #endif
+
+	PUSH_MEMID(MEMID_ANIMATION);
 	CAnimManager::Initialise();
 	CCutsceneMgr::Initialise();
+	POP_MEMID();
+
+	PUSH_MEMID(MEMID_CARS);
 	CCarCtrl::Init();
+	POP_MEMID();
+
+#ifndef GTA_PS2
 	InitModelIndices();
+#endif
+
+	PUSH_MEMID(MEMID_DEF_MODELS);
 	CModelInfo::Initialise();
+#ifndef GTA_PS2
+	// probably moved before LoadLevel for multiplayer maps?
 	CPickups::Init();
 	CTheCarGenerators::Init();
+#endif
 	CdStreamAddImage("MODELS\\GTA3.IMG");
 	CFileLoader::LoadLevel("DATA\\DEFAULT.DAT");
 	CFileLoader::LoadLevel(datFile);
@@ -386,17 +422,23 @@ bool CGame::Initialise(const char* datFile)
 	CVehicleModelInfo::LoadVehicleColours();
 	CVehicleModelInfo::LoadEnvironmentMaps();
 	CTheZones::PostZoneCreation();
+	POP_MEMID();
+
 	LoadingScreen("Loading the Game", "Setup paths", GetRandomSplashScreen());
 	ThePaths.PreparePathData();
+	// done elsewhere on PS2
 	for (int i = 0; i < NUMPLAYERS; i++)
 		CWorld::Players[i].Clear();
 	CWorld::Players[0].LoadPlayerSkin();
 	TestModelIndices();
+	//
+
 	LoadingScreen("Loading the Game", "Setup water", nil);
 	CWaterLevel::Initialise("DATA\\WATER.DAT");
 	TheConsole.Init();
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;
+
 	LoadingScreen("Loading the Game", "Setup streaming", nil);
 	CStreaming::Init();
 	CStreaming::LoadInitialVehicles();
@@ -404,8 +446,12 @@ bool CGame::Initialise(const char* datFile)
 	CStreaming::RequestBigBuildings(LEVEL_GENERIC);
 	CStreaming::LoadAllRequestedModels(false);
 	printf("Streaming uses %zuK of its memory", CStreaming::ms_memoryUsed / 1024); // original modifier was %d
+
 	LoadingScreen("Loading the Game", "Load animations", GetRandomSplashScreen());
+	PUSH_MEMID(MEMID_ANIMATION);
 	CAnimManager::LoadAnimFiles();
+	POP_MEMID();
+
 	CPed::Initialise();
 	CRouteNode::Initialise();
 	CEventList::Initialise();
@@ -414,13 +460,16 @@ bool CGame::Initialise(const char* datFile)
 #endif
 	LoadingScreen("Loading the Game", "Find big buildings", nil);
 	CRenderer::Init();
+
 	LoadingScreen("Loading the Game", "Setup game variables", nil);
 	CRadar::Initialise();
 	CRadar::LoadTextures();
 	CWeapon::InitialiseWeapons();
+
 	LoadingScreen("Loading the Game", "Setup traffic lights", nil);
 	CTrafficLights::ScanForLightsOnMap();
 	CRoadBlocks::Init();
+
 	LoadingScreen("Loading the Game", "Setup game variables", nil);
 	CPopulation::Initialise();
 	CWorld::PlayerInFocus = 0;
@@ -431,26 +480,48 @@ bool CGame::Initialise(const char* datFile)
 	CAntennas::Init();
 	CGlass::Init();
 	gPhoneInfo.Initialise();
+#ifndef GTA_PS2
 	CSceneEdit::Initialise();
+#endif
+
 	LoadingScreen("Loading the Game", "Load scripts", nil);
+	PUSH_MEMID(MEMID_SCRIPT);
 	CTheScripts::Init();
 	CGangs::Initialise();
+	POP_MEMID();
+
 	LoadingScreen("Loading the Game", "Setup game variables", nil);
+#ifdef GTA_PS2
+	CTimer::Initialise();
+#endif
 	CClock::Initialise(1000);
+#ifdef GTA_PS2
+	CTheCarGenerators::Init();
+#endif
 	CHeli::InitHelis();
 	CCranes::InitCranes();
 	CMovingThings::Init();
 	CDarkel::Init();
 	CStats::Init();
+#ifdef GTA_PS2
+	CPickups::Init();
+#endif
 	CPacManPickups::Init();
+	// CGarages::Init(); here on PS2 instead
 	CRubbish::Init();
 	CClouds::Init();
+#ifdef GTA_PS2
+	CRemote::Init();
+#endif
 	CSpecialFX::Init();
 	CWaterCannons::Init();
 	CBridge::Init();
 	CGarages::Init();
+
 	LoadingScreen("Loading the Game", "Position dynamic objects", nil);
 	CWorld::RepositionCertainDynamicObjects();
+	// CCullZones::ResolveVisibilities(); on PS2 here instead
+
 	LoadingScreen("Loading the Game", "Initialise vehicle paths", nil);
 	CCullZones::ResolveVisibilities();
 	CTrain::InitTrains();
@@ -458,6 +529,7 @@ bool CGame::Initialise(const char* datFile)
 	CCredits::Init();
 	CRecordDataForChase::Init();
 	CReplay::Init();
+
 #ifdef PS2_MENU
 	if ( !TheMemoryCard.m_bWantToLoad )
 	{
@@ -469,6 +541,7 @@ bool CGame::Initialise(const char* datFile)
 #ifdef PS2_MENU
 	}
 #endif
+
 	LoadingScreen("Loading the Game", "Load scene", nil);
 	CModelInfo::RemoveColModelsFromOtherLevels(currLevel);
 	CCollision::ms_collisionInMemory = currLevel;
@@ -550,7 +623,7 @@ void CGame::ReInitGameObjectVariables(void)
 	CWorld::bDoingCarCollisions = false;
 	CHud::ReInitialise();
 	CRadar::Initialise();
-#ifdef PS2
+#ifdef GTA_PS2
 	gStartX = -180.0f;
 	gStartY = 180.0f;
 	gStartZ = 14.0f;
@@ -573,15 +646,19 @@ void CGame::ReInitGameObjectVariables(void)
 		CWorld::Players[i].Clear();
 	
 	CWorld::PlayerInFocus = 0;
-#ifdef PS2
+#ifdef GTA_PS2
 	CWeaponEffects::Init();
 	CSkidmarks::Init();
 #endif
 	CAntennas::Init();
 	CGlass::Init();
 	gPhoneInfo.Initialise();
+
+	PUSH_MEMID(MEMID_SCRIPT);
 	CTheScripts::Init();
 	CGangs::Initialise();
+	POP_MEMID();
+
 	CTimer::Initialise();
 	CClock::Initialise(1000);
 	CTheCarGenerators::Init();
@@ -592,7 +669,7 @@ void CGame::ReInitGameObjectVariables(void)
 	CPickups::Init();
 	CPacManPickups::Init();
 	CGarages::Init();
-#ifdef PS2
+#ifdef GTA_PS2
 	CClouds::Init();
 	CRemote::Init();
 #endif
@@ -807,7 +884,7 @@ void CGame::InitialiseWhenRestarting(void)
 void CGame::Process(void) 
 {
 	CPad::UpdatePads();
-#ifdef GTA_PS2
+#ifdef USE_CUSTOM_ALLOCATOR
 	ProcessTidyUpMemory();
 #endif
 	TheCamera.SetMotionBlurAlpha(0);
@@ -817,8 +894,12 @@ void CGame::Process(void)
 	DebugMenuProcess();
 #endif
 	CCutsceneMgr::Update();
+
+	PUSH_MEMID(MEMID_FRONTEND);
 	if (!CCutsceneMgr::IsCutsceneProcessing() && !CTimer::GetIsCodePaused())
 		FrontEndMenuManager.Process();
+	POP_MEMID();
+
 	CStreaming::Update();
 	if (!CTimer::GetIsPaused())
 	{
@@ -831,7 +912,11 @@ void CGame::Process(void)
 		CPad::DoCheats();
 		CClock::Update();
 		CWeather::Update();
+
+		PUSH_MEMID(MEMID_SCRIPT);
 		CTheScripts::Process();
+		POP_MEMID();
+
 		CCollision::Update();
 		CTrain::UpdateTrains();
 		CPlane::UpdatePlanes();
@@ -855,7 +940,11 @@ void CGame::Process(void)
 		CWaterCannons::Update();
 		CUserDisplay::Process();
 		CReplay::Update();
+
+		PUSH_MEMID(MEMID_WORLD);
 		CWorld::Process();
+		POP_MEMID();
+
 		gAccidentManager.Update();
 		CPacManPickups::Update();
 		CPickups::Update();
@@ -876,33 +965,35 @@ void CGame::Process(void)
 		gPhoneInfo.Update();
 		if (!CReplay::IsPlayingBack())
 		{
+			PUSH_MEMID(MEMID_CARS);
 			CCarCtrl::GenerateRandomCars();
 			CRoadBlocks::GenerateRoadBlocks();
 			CCarCtrl::RemoveDistantCars();
+			POP_MEMID();
 		}
 	}
-#ifdef PS2
+#ifdef GTA_PS2
 	CMemCheck::DoTest();
 #endif
 }
 
 void CGame::DrasticTidyUpMemory(bool)
 {
-#ifdef PS2
+#ifdef USE_CUSTOM_ALLOCATOR
 	// meow
 #endif
 }
 
 void CGame::TidyUpMemory(bool, bool)
 {
-#ifdef PS2
+#ifdef USE_CUSTOM_ALLOCATOR
 	// meow
 #endif
 }
 
 void CGame::ProcessTidyUpMemory(void)
 {
-#ifdef PS2
+#ifdef USE_CUSTOM_ALLOCATOR
 	// meow
 #endif
 }

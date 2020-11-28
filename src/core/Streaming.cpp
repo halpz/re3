@@ -34,6 +34,8 @@
 #include "main.h"
 #include "Frontend.h"
 #include "Font.h"
+#include "MemoryMgr.h"
+#include "MemoryHeap.h"
 
 bool CStreaming::ms_disableStreaming;
 bool CStreaming::ms_bLoadingBigModel;
@@ -489,8 +491,10 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 
 		// Set Txd to use
 		CTxdStore::AddRef(mi->GetTxdSlot());
-		CTxdStore::SetCurrentTxd(mi->GetTxdSlot());
 
+		PUSH_MEMID(MEMID_STREAM_MODELS);
+		CTxdStore::SetCurrentTxd(mi->GetTxdSlot());
+// TODO(USE_CUSTOM_ALLOCATOR): register mem pointers
 		if(mi->IsSimple()){
 			success = CFileLoader::LoadAtomicFile(stream, streamId);
 		} else if (mi->GetModelType() == MITYPE_VEHICLE) {
@@ -502,6 +506,7 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 		}else{
 			success = CFileLoader::LoadClumpFile(stream, streamId);
 		}
+		POP_MEMID();
 		UpdateMemoryUsed();
 
 		// Txd no longer needed unless we only read part of the file
@@ -525,12 +530,14 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 			return false;
 		}
 
+		PUSH_MEMID(MEMID_STREAM_TEXUTRES);
 		if(ms_bLoadingBigModel || cdsize > 200){
 			success = CTxdStore::StartLoadTxd(streamId - STREAM_OFFSET_TXD, stream);
 			if(success)
 				ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_STARTED;
 		}else
 		        success = CTxdStore::LoadTxd(streamId - STREAM_OFFSET_TXD, stream);
+		POP_MEMID();
 		UpdateMemoryUsed();
 
 		if(!success){
@@ -580,7 +587,9 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 	// Mark objects as loaded
 	if(ms_aInfoForModel[streamId].m_loadState != STREAMSTATE_STARTED){
 		ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_LOADED;
+#ifndef USE_CUSTOM_ALLOCATOR
 		ms_memoryUsed += ms_aInfoForModel[streamId].GetCdSize() * CDSTREAM_SECTOR_SIZE;
+#endif
 	}
 
 	endTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond();
@@ -619,32 +628,40 @@ CStreaming::FinishLoadingLargeFile(int8 *buf, int32 streamId)
 
 	if(streamId < STREAM_OFFSET_TXD){
 		// Model
+// TODO(USE_CUSTOM_ALLOCATOR): register pointers
 		mi = CModelInfo::GetModelInfo(streamId);
+		PUSH_MEMID(MEMID_STREAM_MODELS);
 		CTxdStore::SetCurrentTxd(mi->GetTxdSlot());
 		success = CFileLoader::FinishLoadClumpFile(stream, streamId);
 		if(success)
 			success = AddToLoadedVehiclesList(streamId);
+		POP_MEMID();
 		mi->RemoveRef();
 		CTxdStore::RemoveRefWithoutDelete(mi->GetTxdSlot());
 	}else{
 		// Txd
 		CTxdStore::AddRef(streamId - STREAM_OFFSET_TXD);
+		PUSH_MEMID(MEMID_STREAM_TEXUTRES);
 		success = CTxdStore::FinishLoadTxd(streamId - STREAM_OFFSET_TXD, stream);
+		POP_MEMID();
 		CTxdStore::RemoveRefWithoutDelete(streamId - STREAM_OFFSET_TXD);
 	}
 
 	RwStreamClose(stream, &mem);
-	ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_LOADED;
+
+	ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_LOADED;	// only done if success on PS2
+#ifndef USE_CUSTOM_ALLOCATOR
 	ms_memoryUsed += ms_aInfoForModel[streamId].GetCdSize() * CDSTREAM_SECTOR_SIZE;
+#endif
 
 	if(!success){
 		RemoveModel(streamId);
 		ReRequestModel(streamId);
-		UpdateMemoryUsed();
+		UpdateMemoryUsed();	// directly after pop on PS2
 		return false;
 	}
 
-	UpdateMemoryUsed();
+	UpdateMemoryUsed();	// directly after pop on PS2
 
 	endTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond();
 	timeDiff = endTime - startTime;
@@ -877,7 +894,11 @@ CStreaming::RemoveModel(int32 id)
 			CModelInfo::GetModelInfo(id)->DeleteRwObject();
 		else
 			CTxdStore::RemoveTxd(id - STREAM_OFFSET_TXD);
+#ifdef USE_CUSTOM_ALLOCATOR
+		UpdateMemoryUsed();
+#else
 		ms_memoryUsed -= ms_aInfoForModel[id].GetCdSize()*CDSTREAM_SECTOR_SIZE;
+#endif
 	}
 
 	if(ms_aInfoForModel[id].m_next){
@@ -899,6 +920,9 @@ CStreaming::RemoveModel(int32 id)
 			RpClumpGtaCancelStream();
 		else
 			CTxdStore::RemoveTxd(id - STREAM_OFFSET_TXD);
+#ifdef USE_CUSTOM_ALLOCATOR
+		UpdateMemoryUsed();
+#endif
 	}
 
 	ms_aInfoForModel[id].m_loadState = STREAMSTATE_NOTLOADED;
@@ -2063,19 +2087,25 @@ CStreaming::FlushRequestList(void)
 void
 CStreaming::ImGonnaUseStreamingMemory(void)
 {
-	// empty
+	PUSH_MEMID(MEMID_STREAM);
 }
 
 void
 CStreaming::IHaveUsedStreamingMemory(void)
 {
+	POP_MEMID();
 	UpdateMemoryUsed();
 }
 
 void
 CStreaming::UpdateMemoryUsed(void)
 {
-	// empty
+#ifdef USE_CUSTOM_ALLOCATOR
+	ms_memoryUsed =
+		gMainHeap.GetMemoryUsed(MEMID_STREAM) +
+		gMainHeap.GetMemoryUsed(MEMID_STREAM_MODELS) +
+		gMainHeap.GetMemoryUsed(MEMID_STREAM_TEXUTRES);
+#endif
 }
 
 #define STREAM_DIST 80.0f

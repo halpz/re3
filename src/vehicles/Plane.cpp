@@ -15,6 +15,7 @@
 #include "World.h"
 #include "HandlingMgr.h"
 #include "Plane.h"
+#include "MemoryHeap.h"
 
 CPlaneNode *pPathNodes;
 CPlaneNode *pPath2Nodes;
@@ -551,9 +552,11 @@ CPlane::ProcessControl(void)
 		if(m_rwObject && RwObjectGetType(m_rwObject) == rpCLUMP){
 			DeleteRwObject();
 			if(mi->m_planeLodId != -1){
+				PUSH_MEMID(MEMID_WORLD);
 				m_rwObject = CModelInfo::GetModelInfo(mi->m_planeLodId)->CreateInstance();
+				POP_MEMID();
 				if(m_rwObject)
-					m_matrix.Attach(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic*)m_rwObject)));
+					m_matrix.AttachRW(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic*)m_rwObject)));
 			}
 		}
 	}else if(CStreaming::HasModelLoaded(GetModelIndex())){

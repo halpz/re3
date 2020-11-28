@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include "AnimBlendSequence.h"
+#include "MemoryHeap.h"
 
 CAnimBlendSequence::CAnimBlendSequence(void)
 {
@@ -70,6 +71,8 @@ CAnimBlendSequence::Uncompress(void)
 	if(numFrames == 0)
 		return;
 
+	PUSH_MEMID(MEMID_ANIMATION);
+
 	float rotScale = 1.0f/4096.0f;
 	float timeScale = 1.0f/60.0f;
 	float transScale = 1.0f/128.0f;
@@ -105,8 +108,12 @@ CAnimBlendSequence::Uncompress(void)
 		}
 		keyFrames = newKfs;
 	}
+	REGISTER_MEMPTR(&keyFrames);
+
 	RwFree(keyFramesCompressed);
 	keyFramesCompressed = nil;
+
+	POP_MEMID();
 }
 
 void
@@ -116,6 +123,8 @@ CAnimBlendSequence::CompressKeyframes(void)
 
 	if(numFrames == 0)
 		return;
+
+	PUSH_MEMID(MEMID_ANIMATION);
 
 	float rotScale = 4096.0f;
 	float timeScale = 60.0f;
@@ -152,6 +161,9 @@ CAnimBlendSequence::CompressKeyframes(void)
 		}
 		keyFramesCompressed = newKfs;
 	}
+	REGISTER_MEMPTR(&keyFramesCompressed);
+
+	POP_MEMID();
 }
 
 void

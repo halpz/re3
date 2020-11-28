@@ -44,7 +44,7 @@ CMemoryHeap::Init(uint32 total)
 	m_end = (HeapBlockDesc*)(mem + total - sizeof(HeapBlockDesc));
 	m_start->m_memId = MEMID_FREE;
 	m_start->m_size = total - 2*sizeof(HeapBlockDesc);
-	m_end->m_memId = MEMID_ID1;
+	m_end->m_memId = MEMID_GAME;
 	m_end->m_size = 0;
 
 	m_freeList.m_last.m_size = INT_MAX;
@@ -65,7 +65,7 @@ CMemoryHeap::Init(uint32 total)
 	RegisterMalloc(GetDescFromHeapPointer(m_memUsed));
 	RegisterMalloc(GetDescFromHeapPointer(m_blocksUsed));
 
-	m_currentMemID = MEMID_ID1;
+	m_currentMemID = MEMID_GAME;
 	for(int i = 0; i < NUM_MEMIDS; i++){
 		m_memUsed[i] = 0;
 		m_blocksUsed[i] = 0;
@@ -90,8 +90,8 @@ CMemoryHeap::RegisterFree(HeapBlockDesc *block)
 	if(block->m_memId == MEMID_FREE)
 		return;
 	m_totalMemUsed -= block->m_size + sizeof(HeapBlockDesc);
-	m_memUsed[m_currentMemID] -= block->m_size + sizeof(HeapBlockDesc);
-	m_blocksUsed[m_currentMemID]--;
+	m_memUsed[block->m_memId] -= block->m_size + sizeof(HeapBlockDesc);
+	m_blocksUsed[block->m_memId]--;
 	m_totalBlocksUsed--;
 }
 
@@ -433,13 +433,16 @@ CMemoryHeap::GetBlocksUsed(int32 id)
 void
 CMemoryHeap::PopMemId(void)
 {
+	assert(m_idStack.sp > 0);
 	m_currentMemID = m_idStack.pop();
+	assert(m_currentMemID != MEMID_FREE);
 }
 
 void
 CMemoryHeap::PushMemId(int32 id)
 {
 	MEMORYHEAP_ASSERT(id != MEMID_FREE);
+	assert(m_idStack.sp < 16);
 	m_idStack.push(m_currentMemID);
 	m_currentMemID = id;
 }
@@ -457,7 +460,7 @@ CMemoryHeap::ParseHeap(void)
 	for(HeapBlockDesc *block = m_start; block < m_end; block = block->GetNextConsecutive()){
 		char chr = '*';	// free
 		if(block->m_memId != MEMID_FREE)
-			chr = block->m_memId-MEMID_ID1 + 'A';
+			chr = block->m_memId-1 + 'A';
 		int numQW = block->m_size>>4;
 
 		if((addrQW & 0x3F) == 0){
@@ -490,67 +493,5 @@ CommonSize::Init(uint32 size)
 	m_failed = 0;
 	m_remaining = 0;
 }
-
-
-
-void *pMemoryTop;
-
-void
-InitMemoryMgr(void)
-{
-#ifdef GTA_PS2
-#error "finish this"
-#else
-	// randomly allocate 128mb
-	gMainHeap.Init(128*1024*1024);
-#endif
-}
-
-void*
-MemoryMgrMalloc(uint32 size)
-{
-	void *mem = gMainHeap.Malloc(size);
-	if(mem > pMemoryTop)
-		pMemoryTop = mem;
-	return mem;
-}
-
-void*
-MemoryMgrRealloc(void *ptr, uint32 size)
-{
-	void *mem = gMainHeap.Realloc(ptr, size);
-	if(mem > pMemoryTop)
-		pMemoryTop = mem;
-	return mem;
-}
-
-void*
-MemoryMgrCalloc(uint32 num, uint32 size)
-{
-	void *mem = gMainHeap.Malloc(num*size);
-	if(mem > pMemoryTop)
-		pMemoryTop = mem;
-#ifdef FIX_BUGS
-	memset(mem, 0, num*size);
-#endif
-	return mem;
-}
-
-void
-MemoryMgrFree(void *ptr)
-{
-#ifdef FIX_BUGS
-	// i don't suppose this is handled by RW?
-	if(ptr == nil) return;
-#endif
-	gMainHeap.Free(ptr);
-}
-
-RwMemoryFunctions memFuncs = {
-	MemoryMgrMalloc,
-	MemoryMgrFree,
-	MemoryMgrRealloc,
-	MemoryMgrCalloc
-};
 
 #endif

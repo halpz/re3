@@ -1,7 +1,7 @@
 #include "common.h"
 
 #include "AnimBlendClumpData.h"
-#include "RwHelper.h"
+#include "MemoryMgr.h"
 
 
 CAnimBlendClumpData::CAnimBlendClumpData(void)

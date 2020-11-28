@@ -2,9 +2,6 @@
 
 extern bool gPS2alphaTest;
 
-void *RwMallocAlign(RwUInt32 size, RwUInt32 align);
-void RwFreeAlign(void *mem);
-
 void OpenCharsetSafe();
 void CreateDebugFont();
 void DestroyDebugFont();

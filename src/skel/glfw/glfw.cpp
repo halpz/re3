@@ -40,7 +40,7 @@
 #include "Sprite2d.h"
 #include "AnimViewer.h"
 #include "Font.h"
-#include "MemoryHeap.h"
+#include "MemoryMgr.h"
 
 #define MAX_SUBSYSTEMS		(16)
 
