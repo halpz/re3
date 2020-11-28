@@ -40,6 +40,23 @@
 #include "Zones.h"
 #include "Bike.h"
 
+#ifdef FIX_BUGS
+static bool IsSlideObjectUsedWrongByScript(const CVector& posTarget, const CVector& slideBy)
+{
+	if (posTarget == CVector(-559.476f, 784.807f, 23.279f) && slideBy == CVector(0.0f, 10.0f, 0.0f))
+		return true; // G-Spotlight bottom elevator, east side
+	if (posTarget == CVector(-559.476f, 779.64f, 23.279f) && slideBy == CVector(0.0f, 10.0f, 0.0f))
+		return true; // G-Spotlight bottom elevator, west side
+	if (posTarget == CVector(-553.563f, 790.595f, 97.917f) && slideBy == CVector(0.0f, 10.0f, 0.0f))
+		return true; // G-Spotlight top elevator, east side
+	if (posTarget == CVector(-553.563f, 785.427f, 97.917f) && slideBy == CVector(0.0f, 10.0f, 0.0f))
+		return true; // G-Spotlight top elevator, west side
+	if (posTarget == CVector(-866.689f, -572.095f, 15.573f) && slideBy == CVector(0.0f, 0.0f, 4.5f))
+		return true; // Cherry Popper garage door
+	return false;
+}
+#endif
+
 int8 CRunningScript::ProcessCommands800To899(int32 command)
 {
 	CMatrix tmp_matrix;
@@ -514,10 +531,14 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		script_assert(pObject);
 		CVector pos = pObject->GetPosition();
 		CVector posTarget = *(CVector*)&ScriptParams[1];
-#ifdef FIX_BUGS
-		CVector slideBy = *(CVector*)&ScriptParams[4] * CTimer::GetTimeStepFix();
-#else
 		CVector slideBy = *(CVector*)&ScriptParams[4];
+#ifdef FIX_BUGS
+		// the check is a hack for original script, where some objects are moved
+		// via SLIDE_OBJECT instead of SET_OBJECT_POSITION
+		// assuming the slide will take exactly one frame, which is true
+		// only without accounting time step (which is a bug)
+		if (!IsSlideObjectUsedWrongByScript(posTarget, slideBy))
+			slideBy *= CTimer::GetTimeStepFix();
 #endif
 		if (posTarget == pos) { // using direct comparasion here is fine
 			UpdateCompareFlag(true);
