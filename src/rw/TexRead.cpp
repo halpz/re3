@@ -18,6 +18,7 @@
 #include "Sprite2d.h"
 #include "Text.h"
 #include "RwHelper.h"
+#include "Frontend.h"
 #endif //GTA_PC
 
 float texLoadTime;
@@ -357,6 +358,15 @@ CreateTxdImageForVideoCard()
 	// so let's hope that is the case for all
 	rw::gl3::needToReadBackTextures = true;
 #endif
+	
+#ifdef DISABLE_VSYNC_ON_TEXTURE_CONVERSION
+	// let's disable vsync and frame limiter to speed up texture conversion
+	// (actually we probably don't need to disable frame limiter in here, but let's do it just in case =P)
+	int8 vsyncState = CMenuManager::m_PrefsVsync;
+	int8 frameLimiterState = CMenuManager::m_PrefsFrameLimiter;
+	CMenuManager::m_PrefsVsync = 0;
+	CMenuManager::m_PrefsFrameLimiter = 0;
+#endif
 
 	int32 i;
 	for (i = 0; i < TXDSTORESIZE; i++) {
@@ -410,6 +420,12 @@ CreateTxdImageForVideoCard()
 			CStreaming::FlushRequestList();
 		}
 	}
+
+#ifdef DISABLE_VSYNC_ON_TEXTURE_CONVERSION
+	// restore vsync and frame limiter states
+	CMenuManager::m_PrefsVsync = vsyncState;
+	CMenuManager::m_PrefsFrameLimiter = frameLimiterState;
+#endif
 
 	RwStreamClose(img, nil);
 	delete []buf;
