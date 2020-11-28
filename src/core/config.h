@@ -353,5 +353,4 @@ enum Config {
 
 #ifdef LIBRW
 // these are not supported with librw yet
-#	undef MULTISAMPLING
 #endif
