@@ -62,18 +62,6 @@ enum {
 	NUM_FIXED_MEMBLOCKS = 6
 };
 
-extern RwMemoryFunctions memFuncs;
-void InitMemoryMgr(void);
-
-void *MemoryMgrMalloc(uint32 size);
-void *MemoryMgrRealloc(void *ptr, uint32 size);
-void *MemoryMgrCalloc(uint32 num, uint32 size);
-void MemoryMgrFree(void *ptr);
-
-void *RwMallocAlign(RwUInt32 size, RwUInt32 align);
-void RwFreeAlign(void *mem);
-
-
 template<typename T, uint32 N>
 class CStack
 {

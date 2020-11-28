@@ -34,6 +34,7 @@
 #include "main.h"
 #include "Frontend.h"
 #include "Font.h"
+#include "MemoryMgr.h"
 #include "MemoryHeap.h"
 
 bool CStreaming::ms_disableStreaming;

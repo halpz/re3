@@ -97,7 +97,7 @@ static psGlobalType PsGlobal;
 #include "Sprite2d.h"
 #include "AnimViewer.h"
 #include "Font.h"
-#include "MemoryHeap.h"
+#include "MemoryMgr.h"
 
 VALIDATE_SIZE(psGlobalType, 0x28);
 
