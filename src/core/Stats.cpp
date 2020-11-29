@@ -5,6 +5,9 @@
 #include "World.h"
 #include "Pad.h"
 #include "DMAudio.h"
+#include "main.h"
+#include "Font.h"
+#include "Frontend.h"
 
 #include <climits>
 
@@ -773,4 +776,255 @@ CStats::PopulateFavoriteRadioStationList()
 	float* pListenTimeArray = DMAudio.GetListenTimeArray();
 	for (int i = 0; i < NUM_RADIOS; i++)
 		FavoriteRadioStationList[i] = pListenTimeArray[i];
+}
+
+void
+CStats::BuildStatLine(Const char *text, void *stat, int displayType, void *stat2, int isTime)
+{
+#define STAT_D *(int*)stat
+#define STAT_F *(float*)stat
+#define STAT2_D *(int*)stat2
+#define STAT2_F *(float*)stat2
+	if (!text)
+		return;
+
+	gString2[0] = '\0';
+	if (isTime == 1) {
+		if (*((int*)stat2) >= 10)
+			sprintf(gString2, " %d:%d", STAT_D, STAT2_D);
+		else
+			sprintf(gString2, " %d:0%d", STAT_D, STAT2_D);
+
+	} else if (stat2) {
+#ifdef MORE_LANGUAGES
+		if (CFont::IsJapanese()) {
+			switch (displayType) {
+				case 0:
+				case 4:
+				sprintf(gString2, "  %d/%d", STAT_D, STAT2_D);
+				break;
+				case 1:
+				sprintf(gString2, "  %.2f/%.2f", STAT_F, STAT2_F);
+				break;
+				case 2:
+				sprintf(gString2, "  %d%%/%d%%", STAT_D, STAT2_D);
+				break;
+				case 3:
+				sprintf(gString2, "  $%.2f/$%.2f", STAT_F, STAT2_F);
+				break;
+				default:
+				break;
+			}
+		} else
+#endif
+		{
+			switch (displayType) {
+				case 0:
+				sprintf(gString2, "  %d %s %d", STAT_D, UnicodeToAscii(TheText.Get("FEST_OO")), STAT2_D);
+				break;
+				case 1:
+				sprintf(gString2, "  %.2f %s %.2f", STAT_F, UnicodeToAscii(TheText.Get("FEST_OO")), STAT2_F);
+				break;
+				case 2:
+				sprintf(gString2, "  %d%% %s %d%%", STAT_D, UnicodeToAscii(TheText.Get("FEST_OO")), STAT2_D);
+				break;
+				case 3:
+				sprintf(gString2, "  $%.2f %s $%.2f", STAT_F, UnicodeToAscii(TheText.Get("FEST_OO")), STAT2_F);
+				break;
+				case 4:
+				sprintf(gString2, "  %d_ %s %d_", STAT_D, UnicodeToAscii(TheText.Get("FEST_OO")), STAT2_D);
+				break;
+				default:
+				break;
+			}
+		}
+	} else if (stat) {
+		switch (displayType) {
+			case 0:
+			sprintf(gString2, "%d", STAT_D);
+			break;
+			case 1:
+			sprintf(gString2, "%.2f", STAT_F);
+			break;
+			case 2:
+			sprintf(gString2, "%d%%", STAT_D);
+			break;
+			case 3:
+			sprintf(gString2, "$%.2f", STAT_F);
+			break;
+			case 4:
+#ifdef MORE_LANGUAGES
+			if (CFont::IsJapanese())
+				sprintf(gString2, "%d", STAT_D);
+			else
+#endif
+				sprintf(gString2, "%d_", STAT_D);
+			break;
+			default:
+			break;
+		}
+	}
+	UnicodeStrcpy(gUString, TheText.Get(text));
+	CFont::FilterOutTokensFromString(gUString);
+	AsciiToUnicode(gString2, gUString2);
+#undef STAT_D
+#undef STAT_F
+#undef STAT2_D
+#undef STAT2_F
+}
+
+// TODO(Miami)
+// rowIdx 99999 returns total numbers of rows. otherwise it returns 0.
+int
+CStats::ConstructStatLine(int rowIdx)
+{
+#define STAT_LINE(str, left, isFloat, right) \
+	do { \
+		if(counter == rowIdx){ \
+			BuildStatLine(str, left, isFloat ? 1 : 0, right, 0); \
+			return 0; \
+		} counter++; \
+	} while(0)
+
+	int counter = 0, nTemp;
+
+	STAT_LINE("PL_STAT", nil, false, nil);
+
+	int percentCompleted = GetPercentageProgress();
+
+	STAT_LINE("PER_COM", &percentCompleted, false, nil);
+	STAT_LINE("NMISON", &MissionsGiven, false, nil);
+	STAT_LINE("FEST_MP", &MissionsPassed, false, &TotalNumberMissions);
+	if (CGame::nastyGame) {
+		STAT_LINE("FEST_RP", &NumberKillFrenziesPassed, false, &TotalNumberKillFrenzies);
+	}
+	
+	CPlayerInfo &player = CWorld::Players[CWorld::PlayerInFocus];
+	float packagesPercent = 0.0f;
+	if (player.m_nTotalPackages != 0)
+		packagesPercent = player.m_nCollectedPackages * 100.0f / player.m_nTotalPackages;
+
+	int nPackagesPercent = packagesPercent;
+	STAT_LINE("PERPIC", &nPackagesPercent, false, &(nTemp = 100));
+	STAT_LINE("NOUNIF", &NumberOfUniqueJumpsFound, false, &TotalNumberOfUniqueJumps);
+	STAT_LINE("DAYSPS", &DaysPassed, false, nil);
+	if (CGame::nastyGame) {
+		STAT_LINE("PE_WAST", &PeopleKilledByPlayer, false, nil);
+		STAT_LINE("PE_WSOT", &PeopleKilledByOthers, false, nil);
+	}
+	STAT_LINE("CAR_EXP", &CarsExploded, false, nil);
+	STAT_LINE("TM_BUST", &TimesArrested, false, nil);
+	STAT_LINE("TM_DED", &TimesDied, false, nil);
+	STAT_LINE("GNG_WST", &(nTemp = PedsKilledOfThisType[PEDTYPE_GANG9] + PedsKilledOfThisType[PEDTYPE_GANG8]
+			+ PedsKilledOfThisType[PEDTYPE_GANG7] + PedsKilledOfThisType[PEDTYPE_GANG6]
+			+ PedsKilledOfThisType[PEDTYPE_GANG5] + PedsKilledOfThisType[PEDTYPE_GANG4]
+			+ PedsKilledOfThisType[PEDTYPE_GANG3] + PedsKilledOfThisType[PEDTYPE_GANG2]
+			+ PedsKilledOfThisType[PEDTYPE_GANG1]), false, nil);
+	STAT_LINE("DED_CRI", &(nTemp = PedsKilledOfThisType[PEDTYPE_CRIMINAL]), false, nil);
+	STAT_LINE("HEL_DST", &HelisDestroyed, false, nil);
+	STAT_LINE("KGS_EXP", &KgsOfExplosivesUsed, false, nil);
+
+	if (HighestScores[0] > 0) {
+		STAT_LINE("FEST_BB", nil, false, nil);
+		STAT_LINE("FEST_H0", &HighestScores[0], false, nil);
+	}
+	if (HighestScores[4] + HighestScores[3] + HighestScores[2] + HighestScores[1] > 0) {
+		STAT_LINE("FEST_GC", nil, false, nil);
+	}
+	if (HighestScores[1] > 0) {
+		STAT_LINE("FEST_H1", &HighestScores[1], false, nil);
+	}
+	if (HighestScores[2] > 0) {
+		STAT_LINE("FEST_H2", &HighestScores[2], false, nil);
+	}
+	if (HighestScores[3] > 0) {
+		STAT_LINE("FEST_H3", &HighestScores[3], false, nil);
+	}
+	if (HighestScores[4] > 0) {
+		STAT_LINE("FEST_H4", &HighestScores[4], false, nil);
+	}
+
+	switch (FrontEndMenuManager.m_PrefsLanguage) {
+		case CMenuManager::LANGUAGE_AMERICAN:
+#ifndef USE_MEASUREMENTS_IN_METERS
+			float fTemp;
+			STAT_LINE("FEST_DF", &(fTemp = DistanceTravelledOnFoot * MILES_IN_METER), true, nil);
+			STAT_LINE("FEST_DC", &(fTemp = DistanceTravelledByCar * MILES_IN_METER), true, nil);
+			STAT_LINE("DISTBIK", &(fTemp = DistanceTravelledByBike * MILES_IN_METER), true, nil);
+			STAT_LINE("DISTBOA", &(fTemp = DistanceTravelledByBoat * MILES_IN_METER), true, nil);
+			STAT_LINE("DISTGOL", &(fTemp = DistanceTravelledByGolfCart * MILES_IN_METER), true, nil);
+			STAT_LINE("DISTHEL", &(fTemp = DistanceTravelledByHelicoptor * MILES_IN_METER), true, nil);
+			STAT_LINE("MXCARD", &(fTemp = MaximumJumpDistance * FEET_IN_METER), true, nil);
+			STAT_LINE("MXCARJ", &(fTemp = MaximumJumpHeight * FEET_IN_METER), true, nil);
+			break;
+#endif
+		case CMenuManager::LANGUAGE_FRENCH:
+		case CMenuManager::LANGUAGE_GERMAN:
+		case CMenuManager::LANGUAGE_ITALIAN:
+		case CMenuManager::LANGUAGE_SPANISH:
+#ifdef MORE_LANGUAGES
+		case CMenuManager::LANGUAGE_POLISH:
+		case CMenuManager::LANGUAGE_RUSSIAN:
+		case CMenuManager::LANGUAGE_JAPANESE:
+#endif
+			STAT_LINE("FESTDFM", &DistanceTravelledOnFoot, true, nil);
+			STAT_LINE("FESTDCM", &DistanceTravelledByCar, true, nil);
+			STAT_LINE("DISTBIM", &DistanceTravelledByBike, true, nil);
+			STAT_LINE("DISTBOM", &DistanceTravelledByBoat, true, nil);
+			STAT_LINE("DISTGOM", &DistanceTravelledByGolfCart, true, nil);
+			STAT_LINE("DISTHEM", &DistanceTravelledByHelicoptor, true, nil);
+			STAT_LINE("MXCARDM", &MaximumJumpDistance, true, nil);
+			STAT_LINE("MXCARJM", &MaximumJumpHeight, true, nil);
+			break;
+		default:
+			break;
+	}
+
+	STAT_LINE("MXFLIP", &MaximumJumpFlips, false, nil);
+	STAT_LINE("MXJUMP", &MaximumJumpSpins, false, nil);
+	STAT_LINE("BSTSTU", nil, false, nil);
+
+	if (counter == rowIdx) {
+		gUString[0] = '\0';
+		switch (BestStuntJump) {
+			case 1:
+				UnicodeStrcpy(gUString2, TheText.Get("INSTUN"));
+				return 0;
+			case 2:
+				UnicodeStrcpy(gUString2, TheText.Get("PRINST"));
+				return 0;
+			case 3:
+				UnicodeStrcpy(gUString2, TheText.Get("DBINST"));
+				return 0;
+			case 4:
+				UnicodeStrcpy(gUString2, TheText.Get("DBPINS"));
+				return 0;
+			case 5:
+				UnicodeStrcpy(gUString2, TheText.Get("TRINST"));
+				return 0;
+			case 6:
+				UnicodeStrcpy(gUString2, TheText.Get("PRTRST"));
+				return 0;
+			case 7:
+				UnicodeStrcpy(gUString2, TheText.Get("QUINST"));
+				return 0;
+			case 8:
+				UnicodeStrcpy(gUString2, TheText.Get("PQUINS"));
+				return 0;
+			default:
+				UnicodeStrcpy(gUString2, TheText.Get("NOSTUC"));
+				return 0;
+		}
+	}
+	counter++;
+	STAT_LINE("PASDRO", &PassengersDroppedOffWithTaxi, false, nil);
+	STAT_LINE("MONTAX", &MoneyMadeWithTaxi, false, nil);
+	STAT_LINE("FEST_LS", &LivesSavedWithAmbulance, false, nil);
+	STAT_LINE("FEST_HA", &HighestLevelAmbulanceMission, false, nil);
+	STAT_LINE("FEST_CC", &CriminalsCaught, false, nil);
+	STAT_LINE("FEST_FE", &FiresExtinguished, false, nil);
+	STAT_LINE("DAYPLC", &(nTemp = CTimer::GetTimeInMilliseconds() + 100), false, nil);
+	return counter;
+
+#undef STAT_LINE
 }

@@ -324,11 +324,7 @@ CPed::SetObjective(eObjective newObj, void *entity)
 
 			break;
 		case OBJECTIVE_DESTROY_OBJECT:
-			if (m_pPointGunAt)
-				m_pPointGunAt->CleanUpOldReference(&m_pPointGunAt);
-			m_pPointGunAt = (CPed*)entity;
-			if (entity)
-				((CEntity*)entity)->RegisterReference((CEntity**) &m_pPointGunAt);
+			SetWeaponLockOnTarget((CEntity*)entity);
 			break;
 		case OBJECTIVE_ENTER_CAR_AS_PASSENGER:
 		case OBJECTIVE_ENTER_CAR_AS_DRIVER:
@@ -698,11 +694,7 @@ CPed::UpdateFromLeader(void)
 						m_pLookTarget->RegisterReference((CEntity **) &m_pLookTarget);
 						TurnBody();
 						if (m_attackTimer < CTimer::GetTimeInMilliseconds() && !GetWeapon()->IsTypeMelee()) {
-							if (m_pPointGunAt)
-								m_pPointGunAt->CleanUpOldReference(&m_pPointGunAt);
-							m_pPointGunAt = m_threatEntity;
-							if (m_threatEntity)
-								m_threatEntity->RegisterReference((CEntity **) &m_pPointGunAt);
+							SetWeaponLockOnTarget(m_threatEntity);
 							SetAttack(m_threatEntity);
 						}
 					}
@@ -1353,12 +1345,7 @@ CPed::ProcessObjective(void)
 					CWorld::bIncludeDeadPeds = false;
 					if (foundEnt == m_carInObjective) {
 						SetAttack(m_carInObjective);
-						if (m_pPointGunAt)
-							m_pPointGunAt->CleanUpOldReference((CEntity**)&m_pPointGunAt);
-						m_pPointGunAt = m_carInObjective;
-						if (m_pPointGunAt)
-							m_pPointGunAt->RegisterReference((CEntity **) &m_pPointGunAt);
-
+						SetWeaponLockOnTarget(m_carInObjective);
 						SetShootTimer(CGeneral::GetRandomNumberInRange(500, 2000));
 						if (distWithTargetSc > 10.0f && !bKindaStayInSamePlace) {
 							SetAttackTimer(CGeneral::GetRandomNumberInRange(2000, 5000));
@@ -6477,13 +6464,7 @@ CPed::KillCharOnFootArmed(CVector &ourPos, CVector &targetPos, CVector &distWith
 				if (m_attackTimer < CTimer::GetTimeInMilliseconds() && distWithTargetSc < wepRange && distWithTargetSc > 3.0f) {
 
 					SetAttack(vehOfTarget);
-					if (m_pPointGunAt)
-						m_pPointGunAt->CleanUpOldReference(&m_pPointGunAt);
-
-					m_pPointGunAt = vehOfTarget;
-					if (vehOfTarget)
-						vehOfTarget->RegisterReference((CEntity **) &m_pPointGunAt);
-
+					SetWeaponLockOnTarget(vehOfTarget);
 					SetShootTimer(CGeneral::GetRandomNumberInRange(500, 2000));
 					
 					CVector2D dirVehGoing = vehOfTarget->m_vecMoveSpeed;
@@ -6620,13 +6601,7 @@ CPed::KillCharOnFootArmed(CVector &ourPos, CVector &targetPos, CVector &distWith
 		}
 		bObstacleShowedUpDuringKillObjective = false;
 		SetAttack(m_pedInObjective);
-		if (m_pPointGunAt)
-			m_pPointGunAt->CleanUpOldReference(&m_pPointGunAt);
-
-		m_pPointGunAt = m_pedInObjective;
-		if (m_pedInObjective)
-			m_pedInObjective->RegisterReference((CEntity**)&m_pPointGunAt);
-
+		SetWeaponLockOnTarget(m_pedInObjective);
 		SetShootTimer(CGeneral::GetRandomNumberInRange(600.0f, 1500.0f));
 
 		int time;
@@ -6756,34 +6731,34 @@ CPed::KillCharOnFootMelee(CVector &ourPos, CVector &targetPos, CVector &distWith
 
 	// Already calculated at the start
 	// float distWithTargetSc = distWithTarget.Magnitude();
-	float wepRange = 0.3f;
-	float wepRangeAdjusted = wepInfo->m_fRange / 2.f;
+	float maxDistToKeep = 0.3f;
+	float wepRange = wepInfo->m_fRange / 2.f;
 
 	if (GetWeapon()->m_eWeaponType == WEAPONTYPE_UNARMED && !IsPlayer() && !(m_pedStats->m_flags & STAT_CAN_KICK))
-		wepRangeAdjusted -= 0.3f;
+		wepRange -= 0.3f;
 
-	if (distWithTargetSc <= 5.f && victimPlayer && !victimPlayer->m_bDrunkVisualsWearOff) {
-
-		if (m_pedInObjective->EnteringCar() && wepRangeAdjusted > 2.f) {
+	if (distWithTargetSc <= 5.f && victimPlayer && !victimPlayer->m_bNoPosForMeleeAttack) {
+	
+		if (m_pedInObjective->EnteringCar() && wepRange > 2.f) {
 			m_vecSeekPos = m_pedInObjective->GetPosition();
-			wepRangeAdjusted = 1.0f;
-			wepRange = 0.5f;
+			wepRange = 1.0f;
+			maxDistToKeep = 0.5f;
 		} else {
 			int8 attackDir = victimPlayer->FindMeleeAttackPoint(this, distWithTarget, endOfAttack);
 			if (attackDir == -1) {
 				m_vecSeekPos = victimPlayer->GetPosition();
-				wepRange = 4.0f;
+				maxDistToKeep = 4.0f;
 			} else {
-				victimPlayer->GetMeleeAttackCoords(m_vecSeekPos, attackDir, wepRangeAdjusted);
+				victimPlayer->GetMeleeAttackCoords(m_vecSeekPos, attackDir, wepRange);
 				distWithTargetSc = (m_vecSeekPos - GetPosition()).Magnitude();
 				canReachVictim = true;
 			}
 		}
 	} else {
 		m_vecSeekPos = m_pedInObjective->GetPosition();
-		wepRange = Max(0.8f, 0.9f * wepRangeAdjusted);
-		wepRangeAdjusted = 1.1f * wepRangeAdjusted;
-		if (victimPlayer && victimPlayer->m_bDrunkVisualsWearOff)
+		maxDistToKeep = Max(0.8f, 0.9f * wepRange);
+		wepRange *= 1.1f;
+		if (victimPlayer && victimPlayer->m_bNoPosForMeleeAttack)
 			victimPlayer = nil;
 	}
 
@@ -6851,7 +6826,7 @@ CPed::KillCharOnFootMelee(CVector &ourPos, CVector &targetPos, CVector &distWith
 		}
 	}
 
-	if (distWithTargetSc > wepRange && !bKindaStayInSamePlace && m_nPedState != PED_ATTACK &&
+	if (distWithTargetSc > maxDistToKeep && !bKindaStayInSamePlace && m_nPedState != PED_ATTACK &&
 		(m_nPedState != PED_FIGHT || m_curFightMove == FIGHTMOVE_IDLE) && !killPlayerInNoPoliceZone) {
 
 		bool goForward = false;
@@ -6859,10 +6834,10 @@ CPed::KillCharOnFootMelee(CVector &ourPos, CVector &targetPos, CVector &distWith
 		if (m_nPedState == PED_FIGHT) {
 			if (canReachVictim) {
 				CVector attackAndVictimDist = m_vecSeekPos - m_pedInObjective->GetPosition();
-				CVector victimFarness = attackAndVictimDist / wepRangeAdjusted;
+				CVector victimFarness = attackAndVictimDist / wepRange;
 				CVector distVec = GetPosition() - m_pedInObjective->GetPosition();
 				float distSqr = distVec.MagnitudeSqr();
-				if (sq(wepRangeAdjusted) > distSqr && distSqr > 0.05f) {
+				if (sq(wepRange) > distSqr && distSqr > 0.05f) {
 					distVec.Normalise();
 					if (DotProduct2D(victimFarness, distVec) > Cos(DEGTORAD(30.f)))
 						goForward = true;
@@ -6888,15 +6863,15 @@ CPed::KillCharOnFootMelee(CVector &ourPos, CVector &targetPos, CVector &distWith
 			SetSeek(m_vecSeekPos, m_distanceToCountSeekDone);
 		} else {
 			if (canReachVictim)
-				SetSeek(m_vecSeekPos, wepRange);
+				SetSeek(m_vecSeekPos, maxDistToKeep);
 			else
-				SetSeek(m_pedInObjective, wepRange);
+				SetSeek(m_pedInObjective, maxDistToKeep);
 		}
 		return ATTACK_IN_PROGRESS;
 	}
 
 	if (m_attackTimer < CTimer::GetTimeInMilliseconds()
-		&& distWithTargetSc < wepRangeAdjusted && m_pedInObjective->m_nPedState != PED_GETUP && m_pedInObjective->m_nPedState != PED_DRAG_FROM_CAR) {
+		&& distWithTargetSc < wepRange && m_pedInObjective->m_nPedState != PED_GETUP && m_pedInObjective->m_nPedState != PED_DRAG_FROM_CAR) {
 
 		if (bIsDucking) {
 			CAnimBlendAssociation* duckAnim = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DUCK_DOWN);

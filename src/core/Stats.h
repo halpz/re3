@@ -147,4 +147,6 @@ public:
 	static void AddPropertyAsOwned(int32);
 	static void PopulateFavoriteRadioStationList();
 	static float GetFavoriteRadioStationList(int32);
+	static void BuildStatLine(Const char *, void *, int, void *, int);
+	static int ConstructStatLine(int);
 };

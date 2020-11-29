@@ -1011,14 +1011,15 @@ CCamera::CamControl(void)
 			if((m_bLookingAtPlayer || m_bEnable1rstPersonCamCntrlsScript) && pTargetEntity->IsPed() &&
 			   (!m_WideScreenOn || m_bEnable1rstPersonCamCntrlsScript) && !Cams[0].Using3rdPersonMouseCam()
 #ifdef FREE_CAM
-			   && !CCamera::bFreeCam
+			   && (!CCamera::bFreeCam || m_bEnable1rstPersonCamCntrlsScript)
 #endif
 			   ){
 				// See if we want to enter first person mode
 				if(CPad::GetPad(0)->LookAroundLeftRight() || CPad::GetPad(0)->LookAroundUpDown()){
 					m_uiFirstPersonCamLastInputTime = CTimer::GetTimeInMilliseconds();
 					m_bFirstPersonBeingUsed = true;
-				}else if(m_bFirstPersonBeingUsed){
+				}
+				if(m_bFirstPersonBeingUsed){
 					// Or if we want to go back to 3rd person
 					if(CPad::GetPad(0)->GetPedWalkLeftRight() || CPad::GetPad(0)->GetPedWalkUpDown() ||
 					   CPad::GetPad(0)->GetSquare() || CPad::GetPad(0)->GetTriangle() ||
@@ -1701,7 +1702,7 @@ CCamera::CamControl(void)
 			StartTransitionWhenNotFinishedInter(ReqMode);
 			pTargetEntity->RegisterReference(&pTargetEntity);
 			Cams[ActiveCam].CamTargetEntity->RegisterReference(&Cams[ActiveCam].CamTargetEntity);
-		}else if(m_bStartInterScript && m_iTypeOfSwitch == JUMP_CUT){
+		}else if(m_bStartInterScript && m_iTypeOfSwitch == JUMP_CUT || jumpCutTo1stPrs){
 			m_uiTransitionState = 0;
 			m_vecDoingSpecialInterPolation = false;
 			if(m_bEnable1rstPersonCamCntrlsScript && ReqMode == CCam::MODE_1STPERSON)

@@ -8,7 +8,6 @@
 #include "WeaponType.h"
 
 RwTexture *gpCrossHairTex;
-RwRaster *gpCrossHairRaster;
 
 CWeaponEffects gCrossHair;
 
@@ -40,7 +39,6 @@ CWeaponEffects::Init(void)
 	CTxdStore::SetCurrentTxd(slot);
 	
 	gpCrossHairTex    = RwTextureRead("target256", "target256m");
-	gpCrossHairRaster = RwTextureGetRaster(gpCrossHairTex);
 	
 	CTxdStore::PopCurrentTxd();
 }
@@ -99,7 +97,7 @@ CWeaponEffects::Render(void)
 #else
 		RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void *)rwBLENDINVDESTALPHA);
 #endif
-		RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void *)gpCrossHairRaster);
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void *)RwTextureGetRaster(gpCrossHairTex));
 
 		RwV3d pos;
 		float w, h;

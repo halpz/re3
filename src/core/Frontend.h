@@ -85,16 +85,15 @@
 #define CONTSETUP_CLASSIC_ROW_HEIGHT 9.0f
 #define CONTSETUP_BOUND_HIGHLIGHT_HEIGHT 10
 #define CONTSETUP_BOUND_COLUMN_WIDTH 190.0f
-#define CONTSETUP_LIST_HEADER_HEIGHT 20.0f
-#define CONTSETUP_LIST_TOP 28.0f
+#define CONTSETUP_LIST_TOP 58.0f
 #define CONTSETUP_LIST_RIGHT 18.0f
-#define CONTSETUP_LIST_BOTTOM 120.0f
-#define CONTSETUP_LIST_LEFT 18.0f
+#define CONTSETUP_LIST_BOTTOM 78.0f
+#define CONTSETUP_LIST_LEFT 30.0f
 #define CONTSETUP_COLUMN_1_X 40.0f
 #define CONTSETUP_COLUMN_2_X 210.0f
 #define CONTSETUP_COLUMN_3_X (CONTSETUP_COLUMN_2_X + CONTSETUP_BOUND_COLUMN_WIDTH + 10.0f)
 #define CONTSETUP_BACK_RIGHT 35.0f
-#define CONTSETUP_BACK_BOTTOM 122.0f
+#define CONTSETUP_BACK_BOTTOM 82.0f
 #define CONTSETUP_BACK_HEIGHT 25.0f
 
 enum
@@ -310,21 +309,6 @@ enum eCheckHover
 	HOVEROPTION_USESKIN, // also layer in controller setup and skin menu
 	HOVEROPTION_NEXT_RADIO,
 	HOVEROPTION_PREV_RADIO,
-
-	// Below is TODO(Miami)
-
-	// those are unused in VC
-	HOVEROPTION_RADIO_0 = HOVEROPTION_NEXT_RADIO, 
-	HOVEROPTION_RADIO_1,
-	HOVEROPTION_RADIO_2,
-	HOVEROPTION_RADIO_3,
-	HOVEROPTION_RADIO_4,
-	HOVEROPTION_RADIO_5,
-	HOVEROPTION_RADIO_6,
-	HOVEROPTION_RADIO_7,
-	HOVEROPTION_RADIO_8,
-	HOVEROPTION_RADIO_9,
-	
 	HOVEROPTION_INCREASE_BRIGHTNESS,
 	HOVEROPTION_DECREASE_BRIGHTNESS,
 	HOVEROPTION_INCREASE_DRAWDIST,
@@ -359,7 +343,7 @@ enum eControlMethod
 enum ControllerSetupColumn
 {
 	CONTSETUP_PED_COLUMN = 0,
-	CONTSETUP_VEHICLE_COLUMN = 14,
+	CONTSETUP_VEHICLE_COLUMN = 16,
 };
 
 struct tSkinInfo
@@ -485,7 +469,7 @@ public:
 	int8 m_PrefsShowSubtitles;
 	int8 m_PrefsShowLegends;
 	int8 m_PrefsUseWideScreen;
-	int8 m_PrefsVsync; // TODO(Miami): Are we sure?
+	int8 m_PrefsVsync;
 	int8 m_PrefsVsyncDisp;
 	int8 m_PrefsFrameLimiter;
 	int8 m_nPrefsAudio3DProviderIndex;
@@ -526,7 +510,7 @@ public:
 	uint8 field_74[4];
 	int32 *pControlEdit;
 	bool m_OnlySaveMenu;
-	int32 m_menuTransitionProgress;
+	int32 m_firstStartCounter;
 	CSprite2d m_aFrontEndSprites[NUM_MENU_SPRITES];
 	bool m_bSpritesLoaded;
 	int32 m_LeftMostRadioX;
@@ -662,7 +646,6 @@ public:
 	void Initialise();
 	void PrintMap();
 	void SetFrontEndRenderStates();
-	static void BuildStatLine(Const char *text, void *stat, bool itsFloat, void *stat2);
 	static void CentreMousePointer();
 	void CheckCodesForControls(int);
 	bool CheckHover(int x1, int x2, int y1, int y2);
@@ -679,7 +662,6 @@ public:
 	void DrawBackground(bool transitionCall);
 	void DrawPlayerSetupScreen(bool);
 	int FadeIn(int alpha);
-	void FilterOutColorMarkersFromString(wchar*);
 	int GetStartOptionsCntrlConfigScreens();
 	void InitialiseChangedLanguageSettings();
 	void LoadAllTextures();
@@ -707,7 +689,6 @@ public:
 	void UnloadTextures();
 	void WaitForUserCD();
 	int GetNumOptionsCntrlConfigScreens();
-	int ConstructStatLine(int);
 	void SwitchToNewScreen(int8);
 	void AdditionalOptionInput(bool &goBack);
 	void ExportStats(void);

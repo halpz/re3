@@ -866,6 +866,7 @@ public:
 	void PositionAttachedPed();
 	bool CanUseTorsoWhenLooking();
 	void ScanForDelayedResponseThreats();
+	void SetWeaponLockOnTarget(CEntity*);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -1064,6 +1065,13 @@ public:
 	static AnimationId GetSecondFireAnim(CWeaponInfo* weapon) {
 		if (!!weapon->m_bUse2nd)
 			return ANIM_WEAPON_FIRE_2ND; // or ANIM_MELEE_ATTACK_2ND
+		else
+			return (AnimationId)0;
+	}
+	
+	static AnimationId GetMeleeStartAnim(CWeaponInfo* weapon) {
+		if (!!weapon->m_bPartialAttack)
+			return ANIM_MELEE_ATTACK_START;
 		else
 			return (AnimationId)0;
 	}
