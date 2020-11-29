@@ -14,6 +14,8 @@
 #include "soundlist.h"
 #include "WaterLevel.h"
 #include "Timecycle.h"
+#include "Stats.h"
+#include "SpecialFX.h"
 
 int16 CObject::nNoTempObjects;
 //int16 CObject::nBodyCastHealth = 1000;
@@ -91,9 +93,9 @@ CObject::~CObject(void)
 		nNoTempObjects--;
 }
 
-void 
-CObject::ProcessControl(void) 
-{ 
+void
+CObject::ProcessControl(void)
+{
 	CVector point, impulse;
 	if (m_nCollisionDamageEffect)
 		ObjectDamage(m_fDamageImpulse);
@@ -118,10 +120,53 @@ CObject::ProcessControl(void)
 	}
 	if (mi == MI_RCBOMB) {
 		float fTurnForce = -(m_fTurnMass / 20.0f);
-		CPhysical::ApplyTurnForce(m_vecMoveSpeed * fTurnForce, -GetForward());     
+		CPhysical::ApplyTurnForce(m_vecMoveSpeed * fTurnForce, -GetForward());
 		float fScalar = 1.0f - m_vecMoveSpeed.MagnitudeSqr() / 5.0f;
 		float fScalarTimed = Pow(fScalar, CTimer::GetTimeStep());
 		m_vecMoveSpeed *= fScalarTimed;
+	}
+	if (mi == MI_BEACHBALL) {
+		constexpr uint8 BEACHBALL_MAX_SCORE = 250;
+		constexpr float BEACHBALL_DEACCELERATION = 2.5f;
+		float fMoveSpeedMag = m_vecMoveSpeed.Magnitude2D();
+		float fTimeScale = powf(0.95, CTimer::GetTimeStep());
+		m_vecMoveSpeed.x *= fTimeScale;
+		m_vecMoveSpeed.y *= fTimeScale;
+		m_vecMoveSpeed.z += fMoveSpeedMag - m_vecMoveSpeed.Magnitude2D();
+		if (!FindPlayerVehicle()) {
+			CVector distance = FindPlayerCoors() - GetPosition();
+			float distanceMagnitude = distance.Magnitude2D();
+			if (distance.z > 0.0 && distance.z < 1.5f && distanceMagnitude < 1.0) {
+				CVector playerSpeed = FindPlayerSpeed();
+				if (fMoveSpeedMag < 0.05 && playerSpeed.Magnitude() > 0.1) {
+					playerSpeed.z = 0.0f;
+					playerSpeed.Normalise();
+					playerSpeed.z = 0.3;
+					m_vecMoveSpeed = CVector(playerSpeed.x / BEACHBALL_DEACCELERATION, playerSpeed.y / BEACHBALL_DEACCELERATION, 1.0f / BEACHBALL_DEACCELERATION * 0.3);
+					PlayOneShotScriptObject(SCRIPT_SOUND_HIT_BALL, GetPosition());
+					if (m_nBeachballBounces > 0) {
+						m_nBeachballBounces++;
+						sprintf(gString, "%d", m_nBeachballBounces);
+						CMoneyMessages::RegisterOne(GetPosition(), gString, 255, 50, 0, 0.6f, 0.5f);
+						CStats::RegisterHighestScore(3, m_nBeachballBounces);
+					}
+				}
+			}
+			if (distance.z > -1.05 && distance.z < -0.6 && distanceMagnitude < 0.9 && m_vecMoveSpeed.z < 0.0f) {
+				m_vecMoveSpeed.x += CGeneral::GetRandomNumberInRangeInc(-3, 4) / 100.0;
+				m_vecMoveSpeed.y += CGeneral::GetRandomNumberInRangeInc(-3, 4) / 100.0;
+				m_vecMoveSpeed.z = Max(m_vecMoveSpeed.z + 0.3f, 0.2f);
+				PlayOneShotScriptObject(SCRIPT_SOUND_HIT_BALL, GetPosition());
+				m_vecTurnSpeed.x += CGeneral::GetRandomNumberInRangeInc(-7, 8) / 10.0f;
+				m_vecTurnSpeed.y += CGeneral::GetRandomNumberInRangeInc(-7, 8) / 10.0f;
+				if (++m_nBeachballBounces >= BEACHBALL_MAX_SCORE) {
+					m_nBeachballBounces = BEACHBALL_MAX_SCORE;
+				}
+				sprintf(gString, "%d", m_nBeachballBounces);
+				CMoneyMessages::RegisterOne(GetPosition(), gString, 255, 50, 0, 0.6f, 0.5f);
+				CStats::RegisterHighestScore(3, m_nBeachballBounces);
+			}
+		}
 	}
 }
 

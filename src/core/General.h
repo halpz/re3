@@ -159,6 +159,11 @@ public:
 		
 	static int32 GetRandomNumberInRange(int32 low, int32 high)
 		{ return low + (high - low)*(GetRandomNumber()/float(MYRAND_MAX + 1)); }
+
+	// Returns inclusive value in the specified range
+	static int32 GetRandomNumberInRangeInc(int32 low, int32 high)
+		{ return GetRandomNumberInRange(low - 1, high + 1); }
+
 	static void SetRandomSeed(int32 seed)
 		{ mysrand(seed); }
 };
