@@ -107,13 +107,21 @@ CObject::ProcessControl(void)
 		m_vecMoveSpeed *= fTimeStep;
 		m_vecTurnSpeed *= fTimeStep;
 	}
-	if ((GetModelIndex() == MI_EXPLODINGBARREL || GetModelIndex() == MI_PETROLPUMP) && bHasBeenDamaged && bIsVisible
+	auto mi = GetModelIndex();
+	if ((mi == MI_EXPLODINGBARREL || mi == MI_PETROLPUMP || mi == MI_PETROLPUMP2) && bHasBeenDamaged && bIsVisible
 		&& (CGeneral::GetRandomNumber() & 0x1F) == 10) {
 		bExplosionProof = true;
 		bIsVisible = false;
 		bUsesCollision = false;
 		bAffectedByGravity = false;
 		m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+	}
+	if (mi == MI_RCBOMB) {
+		float fTurnForce = -(m_fTurnMass / 20.0f);
+		CPhysical::ApplyTurnForce(m_vecMoveSpeed * fTurnForce, -GetForward());     
+		float fScalar = 1.0f - m_vecMoveSpeed.MagnitudeSqr() / 5.0f;
+		float fScalarTimed = Pow(fScalar, CTimer::GetTimeStep());
+		m_vecMoveSpeed *= fScalarTimed;
 	}
 }
 
