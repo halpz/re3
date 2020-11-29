@@ -4157,9 +4157,19 @@ CMenuManager::ProcessButtonPresses(void)
 			DoSettingsBeforeStartingAGame();
 			return;
 		}
+		if (glfwGetKey(PSGLOBAL(window), GLFW_KEY_D) == GLFW_PRESS) {
+			scriptToLoad = 2;
+			DoSettingsBeforeStartingAGame();
+			return;
+		}
 #elif defined _WIN32
 		if (GetAsyncKeyState('R') & 0x8000) {
 			scriptToLoad = 1;
+			DoSettingsBeforeStartingAGame();
+			return;
+		}
+		if (GetAsyncKeyState('D') & 0x8000) {
+			scriptToLoad = 2;
 			DoSettingsBeforeStartingAGame();
 			return;
 		}
