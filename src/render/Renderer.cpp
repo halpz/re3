@@ -216,6 +216,7 @@ CRenderer::RenderOneNonRoad(CEntity *e)
 	e->Render();
 
 	if(e->IsVehicle()){
+		BACKFACE_CULLING_OFF;
 		e->bImBeingRendered = true;
 		CVisibilityPlugins::RenderAlphaAtomics();
 		e->bImBeingRendered = false;
