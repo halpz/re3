@@ -59,7 +59,13 @@ CFileLoader::LoadLevel(const char *filename)
 		savedTxd = RwTexDictionaryCreate();
 		RwTexDictionarySetCurrent(savedTxd);
 	}
+#if GTA_VERSION <= GTA3_PS2_160
+	CFileMgr::ChangeDir("\\DATA\\");
 	fd = CFileMgr::OpenFile(filename, "r");
+	CFileMgr::ChangeDir("\\");
+#else
+	fd = CFileMgr::OpenFile(filename, "r");
+#endif
 	assert(fd > 0);
 
 	for(line = LoadLine(fd); line; line = LoadLine(fd)){
