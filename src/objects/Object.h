@@ -76,7 +76,7 @@ public:
 	uint8 m_nCollisionDamageEffect;
 	uint8 m_nSpecialCollisionResponseCases;
 	bool m_bCameraToAvoidThisObject;
-	int8 m_nBeachballBounces;
+	uint8 m_nBeachballBounces;
 	uint32 m_obj_unused1;
 	uint32 m_nEndOfLifeTime;
 	int16 m_nRefModelIndex;
