@@ -26,6 +26,7 @@
 #include "AnimBlendAssociation.h"
 #include "RpAnimBlend.h"
 #include "Record.h"
+#include "Shadows.h"
 
 //--MIAMI: file done
 
@@ -1006,7 +1007,7 @@ CBoat::PreRender(void)
 			if(atomic)
 				SetComponentAtomicAlpha(atomic, Max(150-alpha, 0));
 		}
-		//CShadows::StoreShadowForVehicle(this);
+		CShadows::StoreShadowForVehicle(this, VEH_SHD_TYPE_SEAPLANE);
 	}else if(GetModelIndex() == MI_COASTG || GetModelIndex() == MI_DINGHY || GetModelIndex() == MI_RIO ||
 	         GetModelIndex() == MI_SQUALO || GetModelIndex() == MI_MARQUIS){
 		if(m_aBoatNodes[BOAT_RUDDER]){
