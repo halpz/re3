@@ -717,12 +717,12 @@ CCamera::Process(void)
 		LODDistMultiplier = 70.0f/CDraw::GetFOV() * CDraw::GetAspectRatio()/(4.0f/3.0f);
 	else
 		LODDistMultiplier = 1.0f;
-#if GTA_VERSION > GTA3_PS2_160
-#ifndef FIX_BUGS
-	// this seems problematic for very wide aspect ratios
-	// maybe just leaving it at 1.0 is the best thing to do
-	GenerationDistMultiplier = LODDistMultiplier;
+#ifdef FIX_BUGS
+	// from VC. to high values bug out spawns
+	LODDistMultiplier = Min(LODDistMultiplier, 2.2f);
 #endif
+#if GTA_VERSION > GTA3_PS2_160
+	GenerationDistMultiplier = LODDistMultiplier;
 	LODDistMultiplier *= CRenderer::ms_lodDistScale;
 #endif
 
