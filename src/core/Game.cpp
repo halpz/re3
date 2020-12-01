@@ -91,6 +91,9 @@
 #include "screendroplets.h"
 #include "crossplatform.h"
 #include "MemoryHeap.h"
+#ifdef USE_TEXTURE_POOL
+#include "TexturePools.h"
+#endif
 
 eLevelName CGame::currLevel;
 bool CGame::bDemoMode = true;
@@ -167,6 +170,7 @@ void ReplaceAtomicPipeCallback();
 #endif // PS2_ALPHA_TEST
 #endif // !LIBRW
 
+// missing altogether on PS2, mostly done in GameInit there it seems
 bool
 CGame::InitialiseRenderWare(void)
 {
@@ -233,6 +237,7 @@ CGame::InitialiseRenderWare(void)
 	return (true);
 }
 
+// missing altogether on PS2
 void CGame::ShutdownRenderWare(void)
 {
 	CMBlur::MotionBlurClose();
@@ -265,16 +270,19 @@ void CGame::ShutdownRenderWare(void)
 #endif
 }
 
+// missing altogether on PS2
 bool CGame::InitialiseOnceAfterRW(void)
 {
+#if GTA_VERSION > GTA3_PS2_160
 	TheText.Load();
-	DMAudio.Initialise();
+	DMAudio.Initialise();	// before TheGame() on PS2
 	CTimer::Initialise();
 	CTempColModels::Initialise();
 	mod_HandlingManager.Initialise();
 	CSurfaceTable::Initialise("DATA\\SURFACE.DAT");
 	CPedStats::Initialise();
 	CTimeCycle::Initialise();
+#endif
 
 	if ( DMAudio.GetNum3DProvidersAvailable() == 0 )
 		FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = -1;
@@ -318,6 +326,7 @@ bool CGame::InitialiseOnceAfterRW(void)
 	return true;
 }
 
+// missing altogether on PS2
 void
 CGame::FinalShutdown(void)
 {	
@@ -330,10 +339,15 @@ bool CGame::Initialise(const char* datFile)
 {
 #ifdef GTA_PS2
 	// TODO: upload VU0 collision code here
-#else
+#endif
+
+#if GTA_VERSION > GTA3_PS2_160
 	ResetLoadingScreenBar();
 	strcpy(aDatFile, datFile);
 	CPools::Initialise();	// done in CWorld on PS2
+#endif
+
+#ifndef GTA_PS2
 	CIniFile::LoadIniFile();
 #endif
 
@@ -367,13 +381,15 @@ bool CGame::Initialise(const char* datFile)
 	CWeather::Init();
 	CCullZones::Init();
 	CCollision::Init();
-#ifdef PS2_MENU
+#ifdef PS2_MENU	// TODO: is this the right define?
 	TheText.Load();
 #endif
 	CTheZones::Init();
 	CUserDisplay::Init();
 	CMessages::Init();
+#if GTA_VERSION > GTA3_PS2_160
 	CMessages::ClearAllMessagesDisplayedByGame();
+#endif
 	CRecordDataForGame::Init();
 	CRestart::Initialise();
 
@@ -381,11 +397,17 @@ bool CGame::Initialise(const char* datFile)
 	CWorld::Initialise();
 	POP_MEMID();
 
+#if GTA_VERSION <= GTA3_PS2_160
+	mod_HandlingManager.Initialise();
+	CSurfaceTable::Initialise("DATA\\SURFACE.DAT");
+	CTempColModels::Initialise();
+#endif
+
 	PUSH_MEMID(MEMID_TEXTURES);
 	CParticle::Initialise();
 	POP_MEMID();
 
-#ifdef GTA_PS2
+#if GTA_VERSION <= GTA3_PS2_160
 	gStartX = -180.0f;
 	gStartY = 180.0f;
 	gStartZ = 14.0f;
@@ -400,20 +422,31 @@ bool CGame::Initialise(const char* datFile)
 	CCarCtrl::Init();
 	POP_MEMID();
 
-#ifndef GTA_PS2
+#if GTA_VERSION > GTA3_PS2_160
 	InitModelIndices();
 #endif
 
 	PUSH_MEMID(MEMID_DEF_MODELS);
 	CModelInfo::Initialise();
-#ifndef GTA_PS2
+#if GTA_VERSION <= GTA3_PS2_160
+	CPedStats::Initialise();	// InitialiseOnceAfterRW
+#else
 	// probably moved before LoadLevel for multiplayer maps?
 	CPickups::Init();
 	CTheCarGenerators::Init();
 #endif
+
+#ifndef GTA_PS2		// or GTA_VERSION?
 	CdStreamAddImage("MODELS\\GTA3.IMG");
+#endif
+
+#if GTA_VERSION > GTA3_PS2_160
 	CFileLoader::LoadLevel("DATA\\DEFAULT.DAT");
 	CFileLoader::LoadLevel(datFile);
+#else
+	CFileLoader::LoadLevel("GTA3.DAT");
+#endif
+
 #ifdef EXTENDED_PIPELINES
 	// for generic fallback
 	CustomPipes::SetTxdFindCallback();
@@ -424,18 +457,25 @@ bool CGame::Initialise(const char* datFile)
 	CTheZones::PostZoneCreation();
 	POP_MEMID();
 
+#if GTA_VERSION <= GTA3_PS2_160
+	TestModelIndices();
+#endif
 	LoadingScreen("Loading the Game", "Setup paths", GetRandomSplashScreen());
 	ThePaths.PreparePathData();
-	// done elsewhere on PS2
+#if GTA_VERSION > GTA3_PS2_160
 	for (int i = 0; i < NUMPLAYERS; i++)
 		CWorld::Players[i].Clear();
 	CWorld::Players[0].LoadPlayerSkin();
 	TestModelIndices();
-	//
+#endif
 
 	LoadingScreen("Loading the Game", "Setup water", nil);
 	CWaterLevel::Initialise("DATA\\WATER.DAT");
+#if GTA_VERSION <= GTA3_PS2_160
+	CTimeCycle::Initialise();	// InitialiseOnceAfterRW
+#else
 	TheConsole.Init();
+#endif
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;
 
@@ -472,6 +512,11 @@ bool CGame::Initialise(const char* datFile)
 
 	LoadingScreen("Loading the Game", "Setup game variables", nil);
 	CPopulation::Initialise();
+#if GTA_VERSION <= GTA3_PS2_160
+	for (int i = 0; i < NUMPLAYERS; i++)
+		CWorld::Players[i].Clear();
+//	CWorld::Players[0].LoadPlayerSkin();	// TODO: use a define for this
+#endif
 	CWorld::PlayerInFocus = 0;
 	CCoronas::Init();
 	CShadows::Init();
@@ -480,7 +525,7 @@ bool CGame::Initialise(const char* datFile)
 	CAntennas::Init();
 	CGlass::Init();
 	gPhoneInfo.Initialise();
-#ifndef GTA_PS2
+#ifndef GTA_PS2		// TODO: define for this
 	CSceneEdit::Initialise();
 #endif
 
@@ -491,11 +536,11 @@ bool CGame::Initialise(const char* datFile)
 	POP_MEMID();
 
 	LoadingScreen("Loading the Game", "Setup game variables", nil);
-#ifdef GTA_PS2
+#if GTA_VERSION <= GTA3_PS2_160
 	CTimer::Initialise();
 #endif
 	CClock::Initialise(1000);
-#ifdef GTA_PS2
+#if GTA_VERSION <= GTA3_PS2_160
 	CTheCarGenerators::Init();
 #endif
 	CHeli::InitHelis();
@@ -503,27 +548,35 @@ bool CGame::Initialise(const char* datFile)
 	CMovingThings::Init();
 	CDarkel::Init();
 	CStats::Init();
-#ifdef GTA_PS2
+#if GTA_VERSION <= GTA3_PS2_160
 	CPickups::Init();
 #endif
 	CPacManPickups::Init();
-	// CGarages::Init(); here on PS2 instead
+#if GTA_VERSION <= GTA3_PS2_160
+	CGarages::Init();
+#endif
 	CRubbish::Init();
 	CClouds::Init();
-#ifdef GTA_PS2
+#if GTA_VERSION <= GTA3_PS2_160
 	CRemote::Init();
 #endif
 	CSpecialFX::Init();
 	CWaterCannons::Init();
 	CBridge::Init();
+#if GTA_VERSION > GTA3_PS2_160
 	CGarages::Init();
+#endif
 
 	LoadingScreen("Loading the Game", "Position dynamic objects", nil);
 	CWorld::RepositionCertainDynamicObjects();
-	// CCullZones::ResolveVisibilities(); on PS2 here instead
+#if GTA_VERSION <= GTA3_PS2_160
+	CCullZones::ResolveVisibilities();
+#endif
 
 	LoadingScreen("Loading the Game", "Initialise vehicle paths", nil);
+#if GTA_VERSION > GTA3_PS2_160
 	CCullZones::ResolveVisibilities();
+#endif
 	CTrain::InitTrains();
 	CPlane::InitPlanes();
 	CCredits::Init();
@@ -532,15 +585,13 @@ bool CGame::Initialise(const char* datFile)
 
 #ifdef PS2_MENU
 	if ( !TheMemoryCard.m_bWantToLoad )
+#endif
 	{
-#endif
-	LoadingScreen("Loading the Game", "Start script", nil);
-	CTheScripts::StartTestScript();
-	CTheScripts::Process();
-	TheCamera.Process();
-#ifdef PS2_MENU
+		LoadingScreen("Loading the Game", "Start script", nil);
+		CTheScripts::StartTestScript();
+		CTheScripts::Process();
+		TheCamera.Process();
 	}
-#endif
 
 	LoadingScreen("Loading the Game", "Load scene", nil);
 	CModelInfo::RemoveColModelsFromOtherLevels(currLevel);
@@ -556,7 +607,7 @@ bool CGame::ShutDown(void)
 	CPlane::Shutdown();
 	CTrain::Shutdown();
 	CSpecialFX::Shutdown();
-#ifndef PS2
+#if GTA_VERSION > GTA3_PS2_160
 	CGarages::Shutdown();
 #endif
 	CMovingThings::Shutdown();
@@ -597,7 +648,9 @@ bool CGame::ShutDown(void)
 	CSkidmarks::Shutdown();
 	CWeaponEffects::Shutdown();
 	CParticle::Shutdown();
+#if GTA_VERSION > GTA3_PS2_160
 	CPools::ShutDown();
+#endif
 	CTxdStore::RemoveTxdSlot(gameTxdSlot);
 	CdStreamRemoveImages();
 	return true;
@@ -608,13 +661,11 @@ void CGame::ReInitGameObjectVariables(void)
 	CGameLogic::InitAtStartOfGame();
 #ifdef PS2_MENU
 	if ( !TheMemoryCard.m_bWantToLoad )
+#endif
 	{
-#endif
-	TheCamera.Init();
-	TheCamera.SetRwCamera(Scene.camera);
-#ifdef PS2_MENU
+		TheCamera.Init();
+		TheCamera.SetRwCamera(Scene.camera);
 	}
-#endif
 	CDebug::DebugInitTextBuffer();
 	CWeather::Init();
 	CUserDisplay::Init();
@@ -623,7 +674,7 @@ void CGame::ReInitGameObjectVariables(void)
 	CWorld::bDoingCarCollisions = false;
 	CHud::ReInitialise();
 	CRadar::Initialise();
-#ifdef GTA_PS2
+#if GTA_VERSION <= GTA3_PS2_160
 	gStartX = -180.0f;
 	gStartY = 180.0f;
 	gStartZ = 14.0f;
@@ -646,7 +697,7 @@ void CGame::ReInitGameObjectVariables(void)
 		CWorld::Players[i].Clear();
 	
 	CWorld::PlayerInFocus = 0;
-#ifdef GTA_PS2
+#if GTA_VERSION <= GTA3_PS2_160
 	CWeaponEffects::Init();
 	CSkidmarks::Init();
 #endif
@@ -669,7 +720,7 @@ void CGame::ReInitGameObjectVariables(void)
 	CPickups::Init();
 	CPacManPickups::Init();
 	CGarages::Init();
-#ifdef GTA_PS2
+#if GTA_VERSION <= GTA3_PS2_160
 	CClouds::Init();
 	CRemote::Init();
 #endif
@@ -739,7 +790,7 @@ void CGame::ShutDownForRestart(void)
 	CRadar::RemoveRadarSections();
 	FrontEndMenuManager.UnloadTextures();
 	CParticleObject::RemoveAllParticleObjects();
-#ifndef PS2
+#if GTA_VERSION >= GTA3_PS2_160
 	CPedType::Shutdown();
 	CSpecialFX::Shutdown();
 #endif
@@ -925,7 +976,9 @@ void CGame::Process(void)
 		CSkidmarks::Update();
 		CAntennas::Update();
 		CGlass::Update();
+#ifndef GTA_PS2		// TODO: define
 		CSceneEdit::Update();
+#endif
 		CEventList::Update();
 		CParticle::Update();
 		gFireManager.Update();
@@ -977,23 +1030,163 @@ void CGame::Process(void)
 #endif
 }
 
-void CGame::DrasticTidyUpMemory(bool)
+int32 gNumMemMoved;
+
+RwTexture *
+MoveTextureMemoryCB(RwTexture *texture, void *pData)
+{
+	// TODO
+	return texture;
+}
+
+bool
+TidyUpModelInfo(CBaseModelInfo *,bool)
+{
+	// TODO
+	return false;
+}
+
+void CGame::DrasticTidyUpMemory(bool flushDraw)
 {
 #ifdef USE_CUSTOM_ALLOCATOR
-	// meow
+	bool removedCol = false;
+
+	TidyUpMemory(true, flushDraw);
+
+	if(gMainHeap.GetLargestFreeBlock() < 200000 && !playingIntro){
+		CStreaming::RemoveIslandsNotUsed(LEVEL_INDUSTRIAL);
+		CStreaming::RemoveIslandsNotUsed(LEVEL_COMMERCIAL);
+		CStreaming::RemoveIslandsNotUsed(LEVEL_SUBURBAN);
+		TidyUpMemory(true, flushDraw);
+	}
+
+	if(gMainHeap.GetLargestFreeBlock() < 200000 && !playingIntro){
+		CModelInfo::RemoveColModelsFromOtherLevels(LEVEL_GENERIC);
+		TidyUpMemory(true, flushDraw);
+		removedCol = true;
+	}
+
+	if(gMainHeap.GetLargestFreeBlock() < 200000 && !playingIntro){
+		CStreaming::RemoveBigBuildings(LEVEL_INDUSTRIAL);
+		CStreaming::RemoveBigBuildings(LEVEL_COMMERCIAL);
+		CStreaming::RemoveBigBuildings(LEVEL_SUBURBAN);
+		TidyUpMemory(true, flushDraw);
+	}
+
+	if(removedCol){
+		// different on PS2
+		CFileLoader::LoadCollisionFromDatFile(CCollision::ms_collisionInMemory);
+	}
+
+	if(!playingIntro)
+		CStreaming::RequestBigBuildings(currLevel);
+
+	CStreaming::LoadAllRequestedModels(true);
 #endif
 }
 
-void CGame::TidyUpMemory(bool, bool)
+void CGame::TidyUpMemory(bool moveTextures, bool flushDraw)
 {
 #ifdef USE_CUSTOM_ALLOCATOR
-	// meow
+	printf("Largest free block before tidy %d\n", gMainHeap.GetLargestFreeBlock());
+
+	if(moveTextures){
+		if(flushDraw){
+#ifdef GTA_PS2
+			for(int i = 0; i < sweMaxFlips+1; i++){
+#else
+			for(int i = 0; i < 5; i++){	// probably more than needed
+#endif
+				RwCameraBeginUpdate(Scene.camera);
+				RwCameraEndUpdate(Scene.camera);
+				RwCameraShowRaster(Scene.camera, nil, 0);
+			}
+		}
+		int fontSlot = CTxdStore::FindTxdSlot("fonts");
+
+		for(int i = 0; i < TXDSTORESIZE; i++){
+			if(i == fontSlot ||
+			   CTxdStore::GetSlot(i) == nil)
+				continue;
+			RwTexDictionary *txd = CTxdStore::GetSlot(i)->texDict;
+			if(txd)
+				RwTexDictionaryForAllTextures(txd, MoveTextureMemoryCB, nil);
+		}
+	}
+
+	// animations
+	for(int i = 0; i < NUMANIMATIONS; i++){
+		CAnimBlendHierarchy *anim = CAnimManager::GetAnimation(i);
+		if(anim == nil)
+			continue;	// cannot happen
+		anim->MoveMemory();
+	}
+
+	// model info
+	for(int i = 0; i < MODELINFOSIZE; i++){
+		CBaseModelInfo *mi = CModelInfo::GetModelInfo(i);
+		if(mi == nil)
+			continue;
+		TidyUpModelInfo(mi, false);
+	}
+
+	printf("Largest free block after tidy %d\n", gMainHeap.GetLargestFreeBlock());
 #endif
 }
 
 void CGame::ProcessTidyUpMemory(void)
 {
 #ifdef USE_CUSTOM_ALLOCATOR
-	// meow
+	static int32 modelIndex = 0;
+	static int32 animIndex = 0;
+	static int32 txdIndex = 0;
+	bool txdReturn = false;
+	RwTexDictionary *txd = nil;
+	gNumMemMoved = 0;
+
+	// model infos
+	for(int numCleanedUp = 0; numCleanedUp < 10; numCleanedUp++){
+		CBaseModelInfo *mi;
+		do{
+			mi = CModelInfo::GetModelInfo(modelIndex);
+			modelIndex++;
+			if(modelIndex >= MODELINFOSIZE)
+				modelIndex = 0;
+		}while(mi == nil);
+
+		if(TidyUpModelInfo(mi, true))
+			return;
+	}
+
+	// tex dicts
+	for(int numCleanedUp = 0; numCleanedUp < 3; numCleanedUp++){
+		if(gNumMemMoved > 80)
+			break;
+
+		do{
+#ifdef FIX_BUGS
+			txd = nil;
+#endif
+			if(CTxdStore::GetSlot(txdIndex))
+				txd = CTxdStore::GetSlot(txdIndex)->texDict;
+			txdIndex++;
+			if(txdIndex >= TXDSTORESIZE)
+				txdIndex = 0;
+		}while(txd == nil);
+
+		RwTexDictionaryForAllTextures(txd, MoveTextureMemoryCB, &txdReturn);
+		if(txdReturn)
+			return;
+	}
+
+	// animations
+	CAnimBlendHierarchy *anim;
+	do{
+		anim = CAnimManager::GetAnimation(animIndex);
+		animIndex++;
+		if(animIndex >= NUMANIMATIONS)
+			animIndex = 0;
+	}while(anim == nil);	// always != nil
+	anim->MoveMemory(true);
 #endif
 }

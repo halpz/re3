@@ -353,11 +353,11 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 
 			m_pObject->GetMatrix().UpdateRW();
 			m_pObject->UpdateRwFrame();
-			if (CWaterLevel::GetWaterLevel(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z + 5.0f, &waterLevel, 0) && waterLevel >= m_pObject->GetPosition().z)
+			if (CWaterLevel::GetWaterLevel(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z + 5.0f, &waterLevel, false) && waterLevel >= m_pObject->GetPosition().z)
 				m_eType = PICKUP_FLOATINGPACKAGE_FLOATING;
 			break;
 		case PICKUP_FLOATINGPACKAGE_FLOATING:
-			if (CWaterLevel::GetWaterLevel(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z + 5.0f, &waterLevel, 0))
+			if (CWaterLevel::GetWaterLevel(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z + 5.0f, &waterLevel, false))
 				m_pObject->GetMatrix().GetPosition().z = waterLevel;
 
 			m_pObject->GetMatrix().UpdateRW();

@@ -196,6 +196,7 @@ enum Config {
 #		define RANDOMSPLASH	// use random splash as on PS2
 #		define PS2_MATFX
 #	endif
+#	define GTA_REPLAY
 #elif defined GTA_XBOX
 #endif
 
