@@ -197,7 +197,7 @@ enum Config {
 #		define PS2_MATFX
 #	endif
 #	define GTA_REPLAY
-#   define GTA_SCENE_EDIT
+#	define GTA_SCENE_EDIT
 #elif defined GTA_XBOX
 #endif
 

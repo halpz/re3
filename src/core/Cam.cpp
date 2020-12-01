@@ -3938,6 +3938,7 @@ CCam::Process_Editor(const CVector&, float, float, float)
 	FOV = DefaultFOV;
 	Alpha += DEGTORAD(CPad::GetPad(1)->GetLeftStickY()) / 50.0f;
 	Beta  += DEGTORAD(CPad::GetPad(1)->GetLeftStickX()*1.5f) / 19.0f;
+
 	if(CamTargetEntity && CSceneEdit::m_bCameraFollowActor){
 		TargetCoors = CamTargetEntity->GetPosition();
 	}else if(CSceneEdit::m_bRecording){
