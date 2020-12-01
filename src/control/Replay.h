@@ -66,6 +66,12 @@ struct CStoredDetailedAnimationState
 
 void PlayReplayFromHD(void);
 
+#ifdef GTA_REPLAY
+#define REPLAY_STUB
+#else
+#define REPLAY_STUB {}
+#endif
+
 class CReplay
 {
 	enum {
@@ -362,21 +368,25 @@ private:
 #endif
 
 public:
-	static void Init(void);
-	static void DisableReplays(void);
-	static void EnableReplays(void);
-	static void Update(void);
-	static void FinishPlayback(void);
-	static void EmptyReplayBuffer(void);
-	static void Display(void);
-	static void TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float cam_z, bool load_scene);
-	static void StreamAllNecessaryCarsAndPeds(void);
-	static bool ShouldStandardCameraBeProcessed(void);
+	static void Init(void) REPLAY_STUB;
+	static void DisableReplays(void) REPLAY_STUB;
+	static void EnableReplays(void) REPLAY_STUB;
+	static void Update(void) REPLAY_STUB;
+	static void FinishPlayback(void) REPLAY_STUB;
+	static void EmptyReplayBuffer(void) REPLAY_STUB;
+	static void Display(void) REPLAY_STUB;
+	static void TriggerPlayback(uint8 cam_mode, float cam_x, float cam_y, float cam_z, bool load_scene) REPLAY_STUB;
+	static void StreamAllNecessaryCarsAndPeds(void) REPLAY_STUB;
+	static void RecordParticle(tParticleType type, CVector const& vecPos, CVector const& vecDir, float fSize, RwRGBA const& color) REPLAY_STUB;
 
+#ifndef GTA_REPLAY
+	static bool ShouldStandardCameraBeProcessed(void) { return true; }
+	static bool IsPlayingBack() { return false; }
+	static bool IsPlayingBackFromFile() { return false; }
+#else
+	static bool ShouldStandardCameraBeProcessed(void);
 	static bool IsPlayingBack() { return Mode == MODE_PLAYBACK; }
 	static bool IsPlayingBackFromFile() { return bPlayingBackFromFile; }
-
-	static void RecordParticle(tParticleType type, CVector const& vecPos, CVector const& vecDir, float fSize, RwRGBA const& color);
 private:
 	static void RecordThisFrame(void);
 	static void StorePedUpdate(CPed *ped, int id);
@@ -407,4 +417,5 @@ private:
 
 	/* Absolute nonsense, but how could this function end up being outside of class? */
 	friend void PlayReplayFromHD(void); 
+#endif
 };
