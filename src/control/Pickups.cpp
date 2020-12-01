@@ -1009,7 +1009,7 @@ INITSAVEBUF
 	for (int32 i = 0; i < NUMPICKUPS; i++) {
 		CPickup *buf_pickup = WriteSaveBuf(buf, aPickUps[i]);
 		if (buf_pickup->m_eType != PICKUP_NONE && buf_pickup->m_pObject != nil)
-			buf_pickup->m_pObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex(buf_pickup->m_pObject) + 1);
+			buf_pickup->m_pObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert(buf_pickup->m_pObject) + 1);
 	}
 
 	WriteSaveBuf(buf, CollectedPickUpIndex);
