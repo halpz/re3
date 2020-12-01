@@ -415,6 +415,7 @@ PluginAttach(void)
 	return TRUE;
 }
 
+// rather different on PS2
 static RwBool 
 Initialise3D(void *param)
 {
