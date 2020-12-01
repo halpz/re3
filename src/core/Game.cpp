@@ -525,7 +525,7 @@ bool CGame::Initialise(const char* datFile)
 	CAntennas::Init();
 	CGlass::Init();
 	gPhoneInfo.Initialise();
-#ifndef GTA_PS2		// TODO: define for this
+#ifdef GTA_SCENE_EDIT
 	CSceneEdit::Initialise();
 #endif
 
@@ -976,7 +976,7 @@ void CGame::Process(void)
 		CSkidmarks::Update();
 		CAntennas::Update();
 		CGlass::Update();
-#ifndef GTA_PS2		// TODO: define
+#ifdef GTA_SCENE_EDIT
 		CSceneEdit::Update();
 #endif
 		CEventList::Update();
