@@ -566,7 +566,7 @@ CPlane::ProcessControl(void)
 			if(mi->m_planeLodId != -1){
 				m_rwObject = CModelInfo::GetModelInfo(mi->m_planeLodId)->CreateInstance();
 				if(m_rwObject)
-					m_matrix.Attach(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic*)m_rwObject)));
+					m_matrix.AttachRW(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic*)m_rwObject)));
 			}
 		}
 	}else if(CStreaming::HasModelLoaded(GetModelIndex())){
