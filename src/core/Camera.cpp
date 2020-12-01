@@ -94,9 +94,9 @@ CCamera::Init(void)
 #endif
 
 #ifdef PS2_MENU
-	if ( !TheMemoryCard.m_bWantToLoad && !FrontEndMenuManager.m_bWantToRestart ) {
+	if ( !TheMemoryCard.m_bWantToLoad && !FrontEndMenuManager.m_bWantToRestart )
 #endif
-	
+	{
 	#ifdef FIX_BUGS
 		static const CCamera DummyCamera = CCamera(0.f);
 		*this = DummyCamera;
@@ -110,9 +110,7 @@ CCamera::Init(void)
 	#endif
 		m_pRwCamera = nil;
 	
-#ifdef PS2_MENU
 	}
-#endif
 	
 	m_1rstPersonRunCloseToAWall = false;
 	m_fPositionAlongSpline = 0.0f;
@@ -719,10 +717,14 @@ CCamera::Process(void)
 		LODDistMultiplier = 70.0f/CDraw::GetFOV() * CDraw::GetAspectRatio()/(4.0f/3.0f);
 	else
 		LODDistMultiplier = 1.0f;
-	// missing on PS2
-	GenerationDistMultiplier = 70.0f/CDraw::GetFOV() * fmin(CDraw::GetAspectRatio(),1.82f)/(4.0f/3.0f);
+#if GTA_VERSION > GTA3_PS2_160
+#ifndef FIX_BUGS
+	// this seems problematic for very wide aspect ratios
+	// maybe just leaving it at 1.0 is the best thing to do
+	GenerationDistMultiplier = LODDistMultiplier;
+#endif
 	LODDistMultiplier *= CRenderer::ms_lodDistScale;
-	//
+#endif
 
 	// Keep track of speed
 	if(m_bJustInitalised || m_bJust_Switched){
