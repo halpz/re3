@@ -91,6 +91,9 @@
 #include "screendroplets.h"
 #include "crossplatform.h"
 #include "MemoryHeap.h"
+#ifdef USE_TEXTURE_POOL
+#include "TexturePools.h"
+#endif
 
 eLevelName CGame::currLevel;
 bool CGame::bDemoMode = true;
@@ -522,7 +525,7 @@ bool CGame::Initialise(const char* datFile)
 	CAntennas::Init();
 	CGlass::Init();
 	gPhoneInfo.Initialise();
-#ifndef GTA_PS2		// TODO: define for this
+#ifdef GTA_SCENE_EDIT
 	CSceneEdit::Initialise();
 #endif
 
@@ -578,9 +581,7 @@ bool CGame::Initialise(const char* datFile)
 	CPlane::InitPlanes();
 	CCredits::Init();
 	CRecordDataForChase::Init();
-#ifndef GTA_PS2		// TODO: define for that
 	CReplay::Init();
-#endif
 
 #ifdef PS2_MENU
 	if ( !TheMemoryCard.m_bWantToLoad )
@@ -770,10 +771,8 @@ void CGame::ReloadIPLs(void)
 
 void CGame::ShutDownForRestart(void)
 {
-#ifndef GTA_PS2		// TODO: right define
 	CReplay::FinishPlayback();
 	CReplay::EmptyReplayBuffer();
-#endif
 	DMAudio.DestroyAllGameCreatedEntities();
 	
 	for (int i = 0; i < NUMPLAYERS; i++)
@@ -977,7 +976,7 @@ void CGame::Process(void)
 		CSkidmarks::Update();
 		CAntennas::Update();
 		CGlass::Update();
-#ifndef GTA_PS2		// TODO: define
+#ifdef GTA_SCENE_EDIT
 		CSceneEdit::Update();
 #endif
 		CEventList::Update();
@@ -993,9 +992,7 @@ void CGame::Process(void)
 		CMovingThings::Update();
 		CWaterCannons::Update();
 		CUserDisplay::Process();
-#ifndef GTA_PS2		// TODO: define
 		CReplay::Update();
-#endif
 
 		PUSH_MEMID(MEMID_WORLD);
 		CWorld::Process();
@@ -1008,14 +1005,10 @@ void CGame::Process(void)
 		CRubbish::Update();
 		CSpecialFX::Update();
 		CTimeCycle::Update();
-#ifndef GTA_PS2		// TODO: define
 		if (CReplay::ShouldStandardCameraBeProcessed())
-#endif
 			TheCamera.Process();
 		CCullZones::Update();
-#ifndef GTA_PS2		// TODO: define
 		if (!CReplay::IsPlayingBack())
-#endif
 			CGameLogic::Update();
 		CBridge::Update();
 		CCoronas::DoSunAndMoon();
@@ -1023,9 +1016,7 @@ void CGame::Process(void)
 		CShadows::UpdateStaticShadows();
 		CShadows::UpdatePermanentShadows();
 		gPhoneInfo.Update();
-#ifndef GTA_PS2		// TODO: define
 		if (!CReplay::IsPlayingBack())
-#endif
 		{
 			PUSH_MEMID(MEMID_CARS);
 			CCarCtrl::GenerateRandomCars();

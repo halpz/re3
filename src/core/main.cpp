@@ -1160,9 +1160,11 @@ Render2dStuff(void)
 
 	MusicManager.DisplayRadioStationName();
 	TheConsole.Display();
+#ifdef GTA_SCENE_EDIT
 	if(CSceneEdit::m_bEditOn)
 		CSceneEdit::Draw();
 	else
+#endif
 		CHud::Draw();
 	CUserDisplay::OnscnTimer.ProcessForDisplay();
 	CMessages::Display();
