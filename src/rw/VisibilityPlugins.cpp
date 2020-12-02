@@ -31,8 +31,7 @@ float CVisibilityPlugins::ms_pedLod0Dist;
 float CVisibilityPlugins::ms_pedLod1Dist;
 float CVisibilityPlugins::ms_pedFadeDist;
 
-//#ifdef GTA_PS2
-#if 1
+#ifdef GTA_PS2	// maybe something else?
 // if wanted, delete the original geometry data after rendering
 // and only keep the instanced data
 bool
