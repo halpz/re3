@@ -612,7 +612,7 @@ CCamera::Process(void)
 
 	// LOD dist
 	if(!CCutsceneMgr::IsRunning() || CCutsceneMgr::UseLodMultiplier()){
-		LODDistMultiplier = 70.0f/CDraw::GetFOV() * CDraw::GetAspectRatio()/(4.0f/3.0f);
+		LODDistMultiplier = 70.0f/CDraw::GetFOV();
 
 		if(GetPosition().z > 55.0f && FindPlayerVehicle() && FindPlayerVehicle()->pHandling->Flags & (HANDLING_IS_HELI|HANDLING_IS_PLANE) ||
 		   FindPlayerPed()->m_attachedTo){
