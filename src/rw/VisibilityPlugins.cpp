@@ -31,14 +31,93 @@ float CVisibilityPlugins::ms_pedLod0Dist;
 float CVisibilityPlugins::ms_pedLod1Dist;
 float CVisibilityPlugins::ms_pedFadeDist;
 
-#ifdef GTA_PS2
-void
-rpDefaultGeometryInstance(RpGeometry *geo, void *atomic, int unk)
+//#ifdef GTA_PS2
+#if 1
+// if wanted, delete the original geometry data after rendering
+// and only keep the instanced data
+bool
+rpDefaultGeometryInstance(RpGeometry *geo, void *atomic, int del)
 {
-	// TODO
-	// this function seems to delete the original geometry data
-	// and only keep the instanced data
+#if THIS_IS_COMPATIBLE_WITH_GTA3_RW31
+	if(RpGeometryGetNumMorphTargets(geo) != 1)
+		return false;
+
+	// this needs R*'s modification that geometry data is
+	// allocated separately from the geometry itself
+	geo->instanceFlags = rpGEOMETRYINSTANCE;
 	AtomicDefaultRenderCallBack((RpAtomic*)atomic);
+
+	if(!del)
+		return true;
+
+	// New mesh without indices
+	RpMeshHeader *newheader = _rpMeshHeaderCreate(sizeof(RpMesh)*geo->mesh->numMeshes + sizeof(RpMeshHeader));
+	newheader->numMeshes = geo->mesh->numMeshes;
+	newheader->serialNum = 1;
+	newheader->totalIndicesInMesh = 0;
+	newheader->firstMeshOffset = 0;
+	RpMesh *oldmesh = (RpMesh*)(geo->mesh+1);
+	RpMesh *newmesh = (RpMesh*)(newheader+1);
+	for(int i = 0; i < geo->mesh->numMeshes; i++){
+		newmesh[i].indices = nil;
+		newmesh[i].numIndices = 0;
+		newmesh[i].material = oldmesh[i].material;
+	}
+
+	geo->refCount++;
+	RpGeometryLock(geo, rpGEOMETRYLOCKPOLYGONS | rpGEOMETRYLOCKVERTICES |
+		rpGEOMETRYLOCKNORMALS | rpGEOMETRYLOCKPRELIGHT |
+		rpGEOMETRYLOCKTEXCOORDS1 | rpGEOMETRYLOCKTEXCOORDS2);
+
+	// vertices and normals
+	RpMorphTarget *mt = RpGeometryGetMorphTarget(geo, 0);
+	if(mt->verts){
+		RwFree(mt->verts);
+		mt->verts = nil;
+		mt->normals = nil;
+	}
+	geo->numVertices = 0;
+
+	// triangles
+	for(int i = 0; i < RpGeometryGetNumTriangles(geo); i++){
+		if(RpGeometryGetTriangles(geo)->matIndex == -1)
+			continue;
+		RpMaterialDestroy(_rpMaterialListGetMaterial(&geo->matList, RpGeometryGetTriangles(geo)->matIndex));
+	}
+	if(RpGeometryGetTriangles(geo)){
+		RwFree(RpGeometryGetTriangles(geo));
+		geo->triangles = nil;
+		geo->numTriangles = 0;
+	}
+
+	// tex coords
+	if(RpGeometryGetVertexTexCoords(geo, 1)){
+		RwFree(RpGeometryGetVertexTexCoords(geo, 1));
+		geo->texCoords[1] = nil;
+	}
+	if(RpGeometryGetVertexTexCoords(geo, 0)){
+		RwFree(RpGeometryGetVertexTexCoords(geo, 0));
+		geo->texCoords[0] = nil;
+	}
+
+	// vertex colors
+	if(RpGeometryGetPreLightColors(geo)){
+		RwFree(RpGeometryGetPreLightColors(geo));
+		geo->preLitLum = nil;
+	}
+
+	RpGeometryUnlock(geo);
+
+	geo->instanceFlags = rpGEOMETRYPERSISTENT;
+	// BUG? don't we have to free the old mesh?
+	geo->mesh = newheader;
+	geo->refCount--;
+#else
+	// We can do something for librw here actually, maybe later
+	AtomicDefaultRenderCallBack((RpAtomic*)atomic);
+#endif
+
+	return true;
 }
 
 RpAtomic*
