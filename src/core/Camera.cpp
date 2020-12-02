@@ -713,14 +713,14 @@ CCamera::Process(void)
 		DistanceToWater = CWaterLevel::CalcDistanceToWater(GetPosition().x, GetPosition().y);
 
 	// LOD dist
-	if(!CCutsceneMgr::IsRunning() || CCutsceneMgr::UseLodMultiplier())
-		LODDistMultiplier = 70.0f/CDraw::GetFOV() * CDraw::GetAspectRatio()/(4.0f/3.0f);
-	else
-		LODDistMultiplier = 1.0f;
-#ifdef FIX_BUGS
-	// from VC. to high values bug out spawns
-	LODDistMultiplier = Min(LODDistMultiplier, 2.2f);
+	if(!CCutsceneMgr::IsRunning() || CCutsceneMgr::UseLodMultiplier()){
+		LODDistMultiplier = 70.0f/CDraw::GetFOV();
+#ifndef FIX_BUGS
+		// makes no sense and gone in VC
+		LODDistMultiplier *= CDraw::GetAspectRatio()/(4.0f/3.0f);
 #endif
+	}else
+		LODDistMultiplier = 1.0f;
 #if GTA_VERSION > GTA3_PS2_160
 	GenerationDistMultiplier = LODDistMultiplier;
 	LODDistMultiplier *= CRenderer::ms_lodDistScale;
