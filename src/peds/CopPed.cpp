@@ -96,9 +96,7 @@ CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 	field_61C = 0;
 	field_624 = 0;
 	m_pStinger = new CStinger;
-	if (m_pPointGunAt)
-		m_pPointGunAt->CleanUpOldReference(&m_pPointGunAt);
-	m_pPointGunAt = nil;
+	SetWeaponLockOnTarget(nil);
 }
 
 CCopPed::~CCopPed()
@@ -493,12 +491,7 @@ CCopPed::CopAI(void)
 						false, true, false, false, true, false, false)
 						|| foundEnt && foundEnt == playerOrHisVeh) {
 
-						if (m_pPointGunAt)
-							m_pPointGunAt->CleanUpOldReference((CEntity**) &m_pPointGunAt);
-						m_pPointGunAt = playerOrHisVeh;
-						if (playerOrHisVeh)
-							playerOrHisVeh->RegisterReference((CEntity**) &m_pPointGunAt);
-
+						SetWeaponLockOnTarget(playerOrHisVeh);
 						SetAttack(playerOrHisVeh);
 						SetShootTimer(CGeneral::GetRandomNumberInRange(500, 1000));
 					}

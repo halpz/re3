@@ -1437,3 +1437,21 @@ CFont::SetDropColor(CRGBA col)
 	if (Details.alphaFade < 255.0f)
 		Details.dropColor.a *= Details.alphaFade / 255.0f;
 }
+
+void
+CFont::FilterOutTokensFromString(wchar *str)
+{
+	int newIdx = 0;
+	wchar copy[256], *c;
+	UnicodeStrcpy(copy, str);
+
+	for (c = copy; *c != '\0'; c++) {
+		if (*c == '~') {
+			c++;
+			while (*c != '~') c++;
+		} else {
+			str[newIdx++] = *c;
+		}
+	}
+	str[newIdx] = '\0';
+}

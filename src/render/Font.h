@@ -200,6 +200,7 @@ public:
 	static void SetColor(CRGBA col);
 	static void SetDropColor(CRGBA col);
 	static wchar FindNewCharacter(wchar c);
+	static void FilterOutTokensFromString(wchar*);
 #ifdef MORE_LANGUAGES
 	static void ReloadFonts(uint8 set);
 

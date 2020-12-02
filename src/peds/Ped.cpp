@@ -9770,6 +9770,17 @@ CPed::Say(uint16 audio, int32 time)
 	}
 }
 
+void
+CPed::SetWeaponLockOnTarget(CEntity *target)
+{
+	if (m_pPointGunAt)
+		m_pPointGunAt->CleanUpOldReference(&m_pPointGunAt);
+
+	m_pPointGunAt = (CPed*)target;
+	if (target)
+		((CEntity*)target)->RegisterReference(&m_pPointGunAt);
+}
+
 #ifdef COMPATIBLE_SAVES
 #define CopyFromBuf(buf, data) memcpy(&data, buf, sizeof(data)); SkipSaveBuf(buf, sizeof(data));
 #define CopyToBuf(buf, data) memcpy(buf, &data, sizeof(data)); SkipSaveBuf(buf, sizeof(data));
