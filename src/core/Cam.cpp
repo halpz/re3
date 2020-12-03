@@ -4125,6 +4125,12 @@ CCam::Process_ModelView(const CVector &CameraTarget, float, float, float)
 		Distance += CPad::GetPad(0)->GetLeftStickY()/1000.0f;
 	else
 		Distance += CPad::GetPad(0)->GetLeftStickY() * ((Distance - 10.0f)/20.0f + 1.0f) / 1000.0f;
+#ifdef IMPROVED_CAMERA
+	if(CPad::GetPad(0)->GetLeftMouse()){
+		Distance += DEGTORAD(CPad::GetPad(0)->GetMouseY()/2.0f);
+		Angle += DEGTORAD(CPad::GetPad(0)->GetMouseX()/2.0f);
+	}
+#endif
 	if(Distance < 1.5f)
 		Distance = 1.5f;
 
