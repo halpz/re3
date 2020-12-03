@@ -49,7 +49,7 @@ CAnimViewer::Render(void) {
 		if (pTarget) {
 #ifdef FIX_BUGS
 #ifdef PED_SKIN
-			if(pTarget->IsPed())
+			if(pTarget->IsPed() && IsClumpSkinned(pTarget->GetClump()))
 				((CPed*)pTarget)->UpdateRpHAnim();
 #endif
 #endif
@@ -100,6 +100,9 @@ CAnimViewer::Initialise(void) {
 	CRadar::Initialise();
 	CRadar::LoadTextures();
 	CVehicleModelInfo::LoadVehicleColours();
+#ifdef FIX_BUGS
+	CVehicleModelInfo::LoadEnvironmentMaps();
+#endif
 	CAnimManager::LoadAnimFiles();
 	CWorld::PlayerInFocus = 0;
 	CWeapon::InitialiseWeapons();
@@ -294,7 +297,12 @@ CAnimViewer::Update(void)
 		if (pTarget->IsVehicle() || pTarget->IsPed() || pTarget->IsObject()) {
 			((CPhysical*)pTarget)->m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
 		}
+#ifdef FIX_BUGS
+		// so we don't end up in the water
+		pTarget->GetMatrix().GetPosition().z = 10.0f;
+#else
 		pTarget->GetMatrix().GetPosition().z = 0.0f;
+#endif
 
 		if (modelInfo->GetModelType() == MITYPE_PED) {
 			((CPed*)pTarget)->bKindaStayInSamePlace = true;
