@@ -599,8 +599,10 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 			AsciiToUnicode(str1, tmpstr);
 			CFont::PrintString(hpos, top, tmpstr);
 			top += 22*yscale;
-			AsciiToUnicode(str2, tmpstr);
-			CFont::PrintString(hpos, top, tmpstr);
+			if (str2) {
+				AsciiToUnicode(str2, tmpstr);
+				CFont::PrintString(hpos, top, tmpstr);
+			}
 #endif
 		}
 
@@ -1424,15 +1426,6 @@ AppEventHandler(RsEvent event, void *param)
 			return rsEVENTPROCESSED;
 		}
 
-#ifndef MASTER
-		case rsANIMVIEWER:
-		{
-			TheModelViewer();
-
-			return rsEVENTPROCESSED;
-		}
-#endif
-
 		default:
 		{
 			return rsEVENTNOTPROCESSED;
@@ -1448,22 +1441,27 @@ TheModelViewer(void)
 	//TODO
 #else
 
-	CDraw::CalculateAspectRatio();
+	// This is not original. Because;
+	// 1- We want 2D things to be initalized, whereas original AnimViewer doesn't use them. my additions marked with X
+	// 2- VC Mobile code run it like main function(as opposed to III and LCS), so it has it's own loop inside it, but our func. already called in a loop.
+
+	CDraw::CalculateAspectRatio(); // X
 	CAnimViewer::Update();
-	CTimer::Update();
 	SetLightsWithTimeOfDayColour(Scene.world);
 	CRenderer::ConstructRenderList();
 	DoRWStuffStartOfFrame(CTimeCycle::GetSkyTopRed()*0.5f, CTimeCycle::GetSkyTopGreen()*0.5f, CTimeCycle::GetSkyTopBlue()*0.5f,
 		CTimeCycle::GetSkyBottomRed(), CTimeCycle::GetSkyBottomGreen(), CTimeCycle::GetSkyBottomBlue(),
 		255);
 
-	CSprite2d::InitPerFrame();
-	CFont::InitPerFrame();
+	CSprite2d::SetRecipNearClip(); // X
+	CSprite2d::InitPerFrame(); // X
+	CFont::InitPerFrame(); // X
 	DefinedState();
 	CVisibilityPlugins::InitAlphaEntityList();
 	CAnimViewer::Render();
-	Render2dStuff();
+	Render2dStuff(); // X
 	DoRWStuffEndOfFrame();
+	CTimer::Update();
 #endif
 }
 #endif

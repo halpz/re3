@@ -254,7 +254,7 @@ enum eObjective : uint32 {
 enum {
 	RANDOM_CHAR = 1,
 	MISSION_CHAR,
-	TODO_CHAR, // TODO(Miami)
+	UNK_CHAR,
 };
 
 enum PedLineUpPhase {
@@ -1155,10 +1155,7 @@ void FinishTalkingOnMobileCB(CAnimBlendAssociation* assoc, void* arg);
 void StartTalkingOnMobileCB(CAnimBlendAssociation* assoc, void* arg);
 void PlayRandomAnimationsFromAnimBlock(CPed* ped, AssocGroupId animGroup, uint32 first, uint32 amount);
 
-// TODO(Miami): Change those when Ped struct is done
-#ifndef PED_SKIN
-VALIDATE_SIZE(CPed, 0x53C);
-#endif
+VALIDATE_SIZE(CPed, 0x5F4);
 
 bool IsPedPointerValid(CPed*);
 bool IsPedPointerValid_NotInWorld(CPed*);

@@ -26,7 +26,7 @@
 #include "Glass.h"
 #include "SpecialFX.h"
 
-//--MIAMI: file done except TODOs
+//--MIAMI: file done
 
 uint16 nPlayerInComboMove;
 RpClump* flyingClumpTemp;

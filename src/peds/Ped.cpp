@@ -39,8 +39,7 @@
 #include "CutsceneShadow.h"
 #include "Clock.h"
 
-// --MIAMI: file done except TODOs
-
+// --MIAMI: file done
 
 CPed *gapTempPedList[50];
 uint16 gnNumTempPedList;
@@ -4559,7 +4558,7 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 	ped->bChangedSeat = true;
 }
 
-// --MIAMI: Done, but what is TODO_CHAR??
+// --MIAMI: Done
 bool
 CPed::CanBeDeleted(void)
 {
@@ -4571,7 +4570,7 @@ CPed::CanBeDeleted(void)
 			return true;
 		case MISSION_CHAR:
 			return false;
-		case TODO_CHAR:
+		case UNK_CHAR:
 			return false;
 		default:
 			return true;
@@ -4587,7 +4586,7 @@ CPed::CanBeDeletedEvenInVehicle(void)
 			return true;
 		case MISSION_CHAR:
 			return false;
-		case TODO_CHAR:
+		case UNK_CHAR:
 			return false;
 		default:
 			return true;
@@ -5522,7 +5521,7 @@ CPed::SetGetUp(void)
 		if (m_nWaitState == WAITSTATE_SUN_BATHE_IDLE) {
 			m_headingRate = 0.0f;
 
-			// TODO(Miami): Looks like that should've been another getup anim but R* forgot it. Visit here later
+			// Seemingly they planned to use different getup anims for different conditions, but sadly in final game all getup anims(GETUP1, GETUP2, GETUP3) are same...
 			if (bFleeWhenStanding && m_threatEx)
 				animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_GETUP1, 1000.0f);
 			else

@@ -18,6 +18,7 @@
 #include "World.h"
 #include "Renderer.h"
 #include "AnimManager.h"
+#include "AnimBlendAssocGroup.h"
 #include "AnimViewer.h"
 #include "PlayerPed.h"
 #include "Pools.h"
@@ -60,11 +61,14 @@ CAnimViewer::Render(void) {
 
 void
 CAnimViewer::Initialise(void) {
-	LoadingScreen("Loading the ModelViewer", "", GetRandomSplashScreen());
-	animTxdSlot = CTxdStore::AddTxdSlot("generic");
-	CTxdStore::Create(animTxdSlot);
+
+	// we need messages, messages needs hud, hud needs those
 	int hudSlot = CTxdStore::AddTxdSlot("hud");
 	CTxdStore::LoadTxd(hudSlot, "MODELS/HUD.TXD");
+	CHud::m_Wants_To_Draw_Hud = false;
+
+	animTxdSlot = CTxdStore::AddTxdSlot("generic");
+	CTxdStore::Create(animTxdSlot);
 	int particleSlot = CTxdStore::AddTxdSlot("particle");
 	CTxdStore::LoadTxd(particleSlot, "MODELS/PARTICLE.TXD");
 	CTxdStore::SetCurrentTxd(animTxdSlot);
@@ -73,10 +77,6 @@ CAnimViewer::Initialise(void) {
 	TheCamera.Init();
 	TheCamera.SetRwCamera(Scene.camera);
 	TheCamera.Cams[TheCamera.ActiveCam].Distance = 5.0f;
-
-	gbModelViewer = true;
-	CHud::m_Wants_To_Draw_Hud = false;
-
 	ThePaths.Init();
 	ThePaths.AllocatePathFindInfoMem(4500);
 	CCollision::Init();
@@ -138,6 +138,25 @@ CAnimViewer::Initialise(void) {
 	} else {
 		// TODO? maybe request some special models here so the thing doesn't crash
 	}
+
+	// From LCS. idk if needed
+	int vanBlock = CAnimManager::GetAnimationBlockIndex("van");
+	int bikesBlock = CAnimManager::GetAnimationBlockIndex("bikes");
+	int bikevBlock = CAnimManager::GetAnimationBlockIndex("bikev");
+	int bikehBlock = CAnimManager::GetAnimationBlockIndex("bikeh");
+	int bikedBlock = CAnimManager::GetAnimationBlockIndex("biked");
+	CStreaming::FlushRequestList();
+	CStreaming::RequestAnim(vanBlock, STREAMFLAGS_DEPENDENCY);
+	CStreaming::RequestAnim(bikesBlock, STREAMFLAGS_DEPENDENCY);
+	CStreaming::RequestAnim(bikevBlock, STREAMFLAGS_DEPENDENCY);
+	CStreaming::RequestAnim(bikehBlock, STREAMFLAGS_DEPENDENCY);
+	CStreaming::RequestAnim(bikedBlock, STREAMFLAGS_DEPENDENCY);
+	CStreaming::LoadAllRequestedModels(false);
+	CAnimManager::AddAnimBlockRef(vanBlock);
+	CAnimManager::AddAnimBlockRef(bikesBlock);
+	CAnimManager::AddAnimBlockRef(bikevBlock);
+	CAnimManager::AddAnimBlockRef(bikehBlock);
+	CAnimManager::AddAnimBlockRef(bikedBlock);
 }
 
 int
@@ -215,8 +234,7 @@ CAnimViewer::Update(void)
 {
 	static int modelId = 0;
 	static int animId = 0;
-	// Please don't make this bool, static bool's are problematic on my side.
-	static int reloadIFP = 0;
+	static bool reloadIFP = false;
 
 	AssocGroupId animGroup = ASSOCGRP_STD;
 	int nextModelId = modelId;
@@ -241,7 +259,7 @@ CAnimViewer::Update(void)
 			CAnimManager::Initialise();
 			CAnimManager::LoadAnimFiles();
 
-			reloadIFP = 0;
+			reloadIFP = false;
 		}
 	} else {
 		animGroup = ASSOCGRP_STD;
@@ -299,7 +317,7 @@ CAnimViewer::Update(void)
 
 			// Triangle in mobile
 			if (pad->GetSquareJustDown()) {
-				reloadIFP = 1;
+				reloadIFP = true;
 				AsciiToUnicode("IFP reloaded", gUString);
 				CMessages::AddMessage(gUString, 1000, 0);
 
@@ -316,7 +334,7 @@ CAnimViewer::Update(void)
 			} else if (pad->GetDPadUpJustDown()) {
 				animId--;
 				if (animId < 0) {
-					animId = NUM_ANIMS - 1;
+					animId = NUM_STD_ANIMS - 1;
 				}
 				PlayAnimation(pTarget->GetClump(), animGroup, (AnimationId)animId);
 
@@ -325,7 +343,7 @@ CAnimViewer::Update(void)
 				CMessages::AddMessage(gUString, 1000, 0);
 
 			} else if (pad->GetDPadDownJustDown()) {
-				animId = (animId == (NUM_ANIMS - 1) ? 0 : animId + 1);
+				animId = (animId == (NUM_STD_ANIMS - 1) ? 0 : animId + 1);
 				PlayAnimation(pTarget->GetClump(), animGroup, (AnimationId)animId);
 
 				sprintf(gString, "Current anim: %d", animId);
@@ -344,6 +362,11 @@ CAnimViewer::Update(void)
 				AsciiToUnicode("Ped Col model will be animated as long as you hold the button", gUString);
 				CMessages::AddMessage(gUString, 100, 0);
 			}
+
+			// From LCS
+			if (CAnimManager::GetAnimAssocGroups()[animGroup].numAssociations <= animId)
+				animId = 0;
+
 		} else if (modelInfo->GetModelType() == MITYPE_VEHICLE) {
 
 			if (pad->GetLeftShoulder1JustDown()) {
