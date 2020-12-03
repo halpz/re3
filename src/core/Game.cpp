@@ -1030,6 +1030,8 @@ void CGame::Process(void)
 #endif
 }
 
+#ifdef USE_CUSTOM_ALLOCATOR
+
 int32 gNumMemMoved;
 
 bool
@@ -1045,58 +1047,6 @@ MoveMem(void **ptr)
 	}
 	return false;
 }
-
-typedef struct _SkyRasterExt _SkyRasterExt;
-struct _SkyRasterExt
-{
-    RwInt32           dmaRefCount;                      /**< Internal use */
-    RwInt32           dmaClrCount;                      /**< Internal use */
-
-    /* General texture setup register */
-    RwUInt32          lsb;                              /**< Internal use */
-    RwUInt32          msb;                              /**< Internal use */
-    RwUInt32          palOffset;                        /**< Internal use */
-
-    /* K: a 12 bit 8.4 value in bottom bits */
-    /* L: a 2 bit value in 12,13 */
-    RwUInt16          mipmapKL;                         /**< Internal use */
-    /* NOTE: This is left shifted two */
-    RwUInt8           maxMipLevel;                      /**< Internal use */
-    /* Is this texture to stay in the cache? */
-    RwUInt8           bLocked;                          /**< Internal use */
-
-    /* Mipmap addresses */
-    RwUInt32          miptbp1Lsb;                       /**< Internal use */
-    RwUInt32          miptbp1Msb;                       /**< Internal use */
-    RwUInt32          miptbp2Lsb;                       /**< Internal use */
-    RwUInt32          miptbp2Msb;                       /**< Internal use */
-
-    /* Size in bytes in system memory for pixels */
-    RwUInt32          sysMemSize;                       /**< Internal use */
-    /* Size in bytes in system memory for palette */
-    RwUInt32          sysMemPalSize;                    /**< Internal use */
-
-    /* Size in words in video memory for pixels + palette */
-    RwUInt32          nTexCacheSize;                    /**< Internal use */
-
-    /* Should we cache packets for this raster */
-    RwUInt8           cachePkts;                        /**< Internal use */
-    RwUInt8           lockedMipLevel;     /**< Currently locked mip level */
-    RwUInt8           flags;                /**< Bit 0 new format texture */
-                                               /**< Bit 1 twiddled (->32) */
-                                              /**< Bit 2 twiddled (->16)  */
-    RwUInt8           pad[1];                           /**< Internal use */
-#if defined(GSB) && defined(GSPLUS)
-    RwUInt32          lsb3;                             /**< Internal use */
-    RwUInt32          msb3;                             /**< Internal use */
-    RwUInt32          miptbp3Lsb, miptbp3Msb;           /**< Internal use */
-    RwUInt32          miptbp4Lsb, miptbp4Msb;           /**< Internal use */
-#endif /* defined(GSB) && defined(GSPLUS) */
-};
-uint32 skyRasterExt;
-#define RASTEREXTFROMRASTER(raster) \
-    ((_SkyRasterExt *)(((RwUInt8 *)(raster)) + skyRasterExt))
-
 
 // Some convenience structs
 struct SkyDataPrefix
@@ -1289,6 +1239,7 @@ TidyUpModelInfo(CBaseModelInfo *modelInfo, bool onlyone)
 
 	return false;
 }
+#endif
 
 void CGame::DrasticTidyUpMemory(bool flushDraw)
 {
