@@ -49,8 +49,8 @@ public:
 	static int32 WantedStarsAttained;
 	static int32 WantedStarsEvaded;
 	static int32 PeopleKilledByPlayer;
-	static int32 ProgressMade;
-	static int32 TotalProgressInGame;
+	static float ProgressMade;
+	static float TotalProgressInGame;
 	static float MaximumJumpDistance;
 	static float MaximumJumpHeight;
 	static int32 MaximumJumpFlips;
