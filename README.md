@@ -1,6 +1,6 @@
 # reVC
 [![Build status](https://ci.appveyor.com/api/projects/status/hyiwgegks122h8jg/branch/miami?svg=true)](https://ci.appveyor.com/project/aap/re3/branch/miami)
-<a href="https://discord.gg/jYpXxTm"><img src="https://img.shields.io/badge/discord-join-7289DA.svg?logo=discord&longCache=true&style=flat" /></a>
+<a href="https://discord.gg/aKYAwCx92H"><img src="https://img.shields.io/badge/discord-join-7289DA.svg?logo=discord&longCache=true&style=flat" /></a>
 | Platform | Debug | Release |
 |------------------|-------------|-------------|
 | Windows Direct3D9 | [![Download](https://api.bintray.com/packages/gtamodding/revc/Debug_win-x86-librw_d3d9-mss/images/download.svg)](https://bintray.com/gtamodding/revc/Debug_win-x86-librw_d3d9-mss/_latestVersion) | [![Download](https://api.bintray.com/packages/gtamodding/revc/Release_win-x86-librw_d3d9-mss/images/download.svg)](https://bintray.com/gtamodding/revc/Release_win-x86-librw_d3d9-mss/_latestVersion) |
