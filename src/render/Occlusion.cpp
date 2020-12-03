@@ -292,6 +292,11 @@ COcclusion::ProcessBeforeRendering(void)
 {
 	NumActiveOccluders = 0;
 
+#ifndef MASTER
+	if (gbModelViewer)
+		return;
+#endif
+
 	if (CGame::currArea != AREA_MAIN_MAP)
 		return;
 

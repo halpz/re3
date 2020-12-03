@@ -18,7 +18,7 @@
 #include <float.h>
 #endif
 
-// --MIAMI: file done except TODOs
+// --MIAMI: file done
 
 CCivilianPed::CCivilianPed(ePedType pedtype, uint32 mi) : CPed(pedtype)
 {
@@ -228,7 +228,7 @@ CCivilianPed::CivilianAI(void)
 void
 CCivilianPed::ProcessControl(void)
 {
-	if (CharCreatedBy == TODO_CHAR)
+	if (CharCreatedBy == UNK_CHAR)
 		return;
 
 	CPed::ProcessControl();

@@ -1008,17 +1008,11 @@ MainWndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 			RECT				rect;
 
 			/* redraw window */
-#ifndef MASTER
-			if (RwInitialised && (gGameState == GS_PLAYING_GAME || gGameState == GS_ANIMVIEWER))
-			{
-				RsEventHandler((gGameState == GS_PLAYING_GAME ? rsIDLE : rsANIMVIEWER), (void *)TRUE);
-			}
-#else
+
 			if (RwInitialised && gGameState == GS_PLAYING_GAME)
 			{
 				RsEventHandler(rsIDLE, (void *)TRUE);
 			}
-#endif
 
 			/* Manually resize window */
 			rect.left = rect.top = 0;
@@ -2173,17 +2167,17 @@ WinMain(HINSTANCE instance,
 	}
 #endif
 
-	if (TurnOnAnimViewer)
-	{
 #ifndef MASTER
+	if (gbModelViewer) {
+		// This is TheModelViewer in LCS
+		LoadingScreen("Loading the ModelViewer", NULL, GetRandomSplashScreen());
 		CAnimViewer::Initialise();
+		CTimer::Update();
 #ifndef PS2_MENU
 		FrontEndMenuManager.m_bGameNotLoaded = false;
 #endif
-		gGameState = GS_ANIMVIEWER;
-		TurnOnAnimViewer = false;
-#endif
 	}
+#endif
 
 	while ( TRUE )
 	{
@@ -2228,6 +2222,12 @@ WinMain(HINSTANCE instance,
 					DispatchMessage(&message);
 				}
 			}
+#ifndef MASTER
+			else if (gbModelViewer) {
+				// This is TheModelViewerCore in LCS
+				TheModelViewer();
+			}
+#endif
 			else if( ForegroundApp )
 			{
 				switch ( gGameState )
@@ -2447,18 +2447,6 @@ WinMain(HINSTANCE instance,
 						}
 						break;
 					}
-#ifndef MASTER
-					case GS_ANIMVIEWER:
-					{
-						float ms = (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
-						if (RwInitialised)
-						{
-							if (!FrontEndMenuManager.m_PrefsFrameLimiter || (1000.0f / (float)RsGlobal.maxFPS) < ms)
-								RsEventHandler(rsANIMVIEWER, (void*)TRUE);
-						}
-						break;
-					}
-#endif
 				}
 			}
 			else
@@ -2530,12 +2518,13 @@ WinMain(HINSTANCE instance,
 		}
 		else
 		{
+#ifndef MASTER
+			if ( gbModelViewer )
+				CAnimViewer::Shutdown();
+			else
+#endif
 			if ( gGameState == GS_PLAYING_GAME )
 				CGame::ShutDown();
-#ifndef MASTER
-			else if ( gGameState == GS_ANIMVIEWER )
-				CAnimViewer::Shutdown();
-#endif
 
 			CTimer::Stop();
 			
@@ -2557,12 +2546,13 @@ WinMain(HINSTANCE instance,
 	}
 	
 
+#ifndef MASTER
+	if ( gbModelViewer )
+		CAnimViewer::Shutdown();
+	else
+#endif
 	if ( gGameState == GS_PLAYING_GAME )
 		CGame::ShutDown();
-#ifndef MASTER
-	else if ( gGameState == GS_ANIMVIEWER )
-		CAnimViewer::Shutdown();
-#endif
 
 	DMAudio.Terminate();
 	
