@@ -1539,7 +1539,8 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		script_assert(pVehicle);
-		UpdateCompareFlag(pVehicle->m_nCollisionRecords == 0);
+		bool usj_with_dodo = strcmp(m_abScriptName, "usj") == 0 && pVehicle->GetModelIndex() == MI_DODO;
+		UpdateCompareFlag(pVehicle->m_nCollisionRecords == 0 && !usj_with_dodo);
 		return 0;
 	}
 	default:
