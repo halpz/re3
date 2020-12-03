@@ -40,7 +40,7 @@ CTempColModels::Initialise(void)
 	colmodel.numSpheres = ARRAY_SIZE(sphrs);\
 	colmodel.spheres = sphrs;\
 	colmodel.level = LEVEL_GENERIC;\
-	colmodel.ownsCollisionVolumes = false;\
+	colmodel.ownsCollisionVolumes = false;
 
 	int i;
 

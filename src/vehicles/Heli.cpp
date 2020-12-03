@@ -778,8 +778,10 @@ CHeli::InitHelis(void)
 	for(i = 0; i < NUM_HELIS; i++)
 		pHelis[i] = nil;
 
+#if GTA_VERSION >= GTA3_PS2_160
 	((CVehicleModelInfo*)CModelInfo::GetModelInfo(MI_ESCAPE))->SetColModel(&CTempColModels::ms_colModelPed1);
 	((CVehicleModelInfo*)CModelInfo::GetModelInfo(MI_CHOPPER))->SetColModel(&CTempColModels::ms_colModelPed1);
+#endif
 }
 
 CHeli*
@@ -788,6 +790,13 @@ GenerateHeli(bool catalina)
 	CHeli *heli;
 	CVector heliPos;
 	int i;
+
+#if GTA_VERSION < GTA3_PS2_160
+	if(catalina)
+		((CVehicleModelInfo*)CModelInfo::GetModelInfo(MI_ESCAPE))->SetColModel(&CTempColModels::ms_colModelPed1);
+	else
+		((CVehicleModelInfo*)CModelInfo::GetModelInfo(MI_CHOPPER))->SetColModel(&CTempColModels::ms_colModelPed1);
+#endif
 
 	if(catalina)
 		heli = new CHeli(MI_ESCAPE, PERMANENT_VEHICLE);

@@ -1032,17 +1032,261 @@ void CGame::Process(void)
 
 int32 gNumMemMoved;
 
+bool
+MoveMem(void **ptr)
+{
+	if(*ptr){
+		gNumMemMoved++;
+		void *newPtr = gMainHeap.MoveMemory(*ptr);
+		if(*ptr != newPtr){
+			*ptr = newPtr;
+			return true;
+		}
+	}
+	return false;
+}
+
+typedef struct _SkyRasterExt _SkyRasterExt;
+struct _SkyRasterExt
+{
+    RwInt32           dmaRefCount;                      /**< Internal use */
+    RwInt32           dmaClrCount;                      /**< Internal use */
+
+    /* General texture setup register */
+    RwUInt32          lsb;                              /**< Internal use */
+    RwUInt32          msb;                              /**< Internal use */
+    RwUInt32          palOffset;                        /**< Internal use */
+
+    /* K: a 12 bit 8.4 value in bottom bits */
+    /* L: a 2 bit value in 12,13 */
+    RwUInt16          mipmapKL;                         /**< Internal use */
+    /* NOTE: This is left shifted two */
+    RwUInt8           maxMipLevel;                      /**< Internal use */
+    /* Is this texture to stay in the cache? */
+    RwUInt8           bLocked;                          /**< Internal use */
+
+    /* Mipmap addresses */
+    RwUInt32          miptbp1Lsb;                       /**< Internal use */
+    RwUInt32          miptbp1Msb;                       /**< Internal use */
+    RwUInt32          miptbp2Lsb;                       /**< Internal use */
+    RwUInt32          miptbp2Msb;                       /**< Internal use */
+
+    /* Size in bytes in system memory for pixels */
+    RwUInt32          sysMemSize;                       /**< Internal use */
+    /* Size in bytes in system memory for palette */
+    RwUInt32          sysMemPalSize;                    /**< Internal use */
+
+    /* Size in words in video memory for pixels + palette */
+    RwUInt32          nTexCacheSize;                    /**< Internal use */
+
+    /* Should we cache packets for this raster */
+    RwUInt8           cachePkts;                        /**< Internal use */
+    RwUInt8           lockedMipLevel;     /**< Currently locked mip level */
+    RwUInt8           flags;                /**< Bit 0 new format texture */
+                                               /**< Bit 1 twiddled (->32) */
+                                              /**< Bit 2 twiddled (->16)  */
+    RwUInt8           pad[1];                           /**< Internal use */
+#if defined(GSB) && defined(GSPLUS)
+    RwUInt32          lsb3;                             /**< Internal use */
+    RwUInt32          msb3;                             /**< Internal use */
+    RwUInt32          miptbp3Lsb, miptbp3Msb;           /**< Internal use */
+    RwUInt32          miptbp4Lsb, miptbp4Msb;           /**< Internal use */
+#endif /* defined(GSB) && defined(GSPLUS) */
+};
+uint32 skyRasterExt;
+#define RASTEREXTFROMRASTER(raster) \
+    ((_SkyRasterExt *)(((RwUInt8 *)(raster)) + skyRasterExt))
+
+
+// Some convenience structs
+struct SkyDataPrefix
+{
+	uint32 pktSize1;
+	uint32 data;	// pointer to data as read from TXD
+	uint32 pktSize2;
+	uint32 unused;
+};
+
+struct DMAGIFUpload
+{
+	uint32 tag1_qwc, tag1_addr;	// dmaref
+	uint32 nop1, vif_direct1;
+
+	uint32 giftag[4];
+	uint32 gs_bitbltbuf[4];
+
+	uint32 tag2_qwc, tag2_addr;	// dmaref
+	uint32 nop2, vif_direct2;
+};
+
+// This is very scary. it depends on the exact memory layout of the DMA chains and whatnot
 RwTexture *
 MoveTextureMemoryCB(RwTexture *texture, void *pData)
 {
-	// TODO
+#ifdef GTA_PS2
+	bool *pRet = (bool*)pData;
+	RwRaster *raster = RwTextureGetRaster(texture);
+	_SkyRasterExt *rasterExt = RASTEREXTFROMRASTER(raster);
+	if(raster->originalPixels == nil ||	// the raw data
+	   raster->cpPixels == raster->originalPixels ||	// old format, can't handle it
+	   rasterExt->dmaRefCount != 0 && rasterExt->dmaClrCount != 0)
+		return texture;
+
+	// this is the allocated pointer we will move
+	SkyDataPrefix *prefix = (SkyDataPrefix*)raster->originalPixels;
+	DMAGIFUpload *uploads = (DMAGIFUpload*)(prefix+1);
+
+	// We have 4qw for each upload,
+	// i.e. for each buffer width of mip levels,
+	// and the palette if there is one.
+	// NB: this code does NOT support mipmaps!
+	// so we assume two uploads (pixels and palette)
+	//
+	// each upload looks like this:
+	//    (DMAcnt; NOP; VIF DIRECT(2))
+	//     giftag (1, A+D)
+	//      GS_BITBLTBUF
+	//    (DMAref->pixel data; NOP; VIF DIRECT(5))
+	// the DMArefs are what we have to adjust
+	uintptr dataDiff, upload1Diff, upload2Diff, pixelDiff, paletteDiff;
+	dataDiff = prefix->data - (uintptr)raster->originalPixels;
+	upload1Diff = uploads[0].tag2_addr - (uintptr)raster->originalPixels;
+	if(raster->palette)
+		upload2Diff = uploads[1].tag2_addr - (uintptr)raster->originalPixels;
+	pixelDiff = (uintptr)raster->cpPixels - (uintptr)raster->originalPixels;
+	if(raster->palette)
+		paletteDiff = (uintptr)raster->palette - (uintptr)raster->originalPixels;
+	uint8 *newptr = (uint8*)gMainHeap.MoveMemory(raster->originalPixels);
+	if(newptr != raster->originalPixels){
+		// adjust everything
+		prefix->data = (uintptr)newptr + dataDiff;
+		uploads[0].tag2_addr = (uintptr)newptr + upload1Diff;
+		if(raster->palette)
+			uploads[1].tag2_addr = (uintptr)newptr + upload2Diff;
+		raster->originalPixels = newptr;
+		raster->cpPixels = newptr + pixelDiff;
+		if(raster->palette)
+			raster->palette = newptr + paletteDiff;
+
+		if(pRet){
+			*pRet = true;
+			return nil;
+		}
+	}
+#else
+	// nothing to do here really, everything should be in videomemory
+#endif
 	return texture;
 }
 
 bool
-TidyUpModelInfo(CBaseModelInfo *,bool)
+MoveAtomicMemory(RpAtomic *atomic, bool onlyOne)
 {
-	// TODO
+	RpGeometry *geo = RpAtomicGetGeometry(atomic);
+
+#if THIS_IS_COMPATIBLE_WITH_GTA3_RW31
+	if(MoveMem((void**)&geo->triangles) && onlyOne)
+		return true;
+	if(MoveMem((void**)&geo->matList.materials) && onlyOne)
+		return true;
+	if(MoveMem((void**)&geo->preLitLum) && onlyOne)
+		return true;
+	if(MoveMem((void**)&geo->texCoords[0]) && onlyOne)
+		return true;
+	if(MoveMem((void**)&geo->texCoords[1]) && onlyOne)
+		return true;
+
+	// verts and normals of morph target are allocated together
+	int vertDiff;
+	if(geo->morphTarget->normals)
+		vertDiff = geo->morphTarget->normals - geo->morphTarget->verts;
+	if(MoveMem((void**)&geo->morphTarget->verts)){
+		if(geo->morphTarget->normals)
+			geo->morphTarget->normals = geo->morphTarget->verts + vertDiff;
+		if(onlyOne)
+			return true;
+	}
+
+	RpMeshHeader *oldmesh = geo->mesh;
+	if(MoveMem((void**)&geo->mesh)){
+		// index pointers are allocated together with meshes,
+		// have to relocate those too
+		RpMesh *mesh = (RpMesh*)(geo->mesh+1);
+		uintptr reloc = (uintptr)geo->mesh - (uintptr)oldmesh;
+		for(int i = 0; i < geo->mesh->numMeshes; i++)
+			mesh[i].indices = (RxVertexIndex*)((uintptr)mesh[i].indices + reloc);
+		if(onlyOne)
+			return true;
+	}
+#else
+	// we could do something in librw here
+#endif
+	return false;
+}
+
+bool
+MoveColModelMemory(CColModel &colModel, bool onlyOne)
+{
+#if GTA_VERSION >= GTA3_PS2_160
+	// hm...should probably only do this if ownsCollisionVolumes
+	// but it doesn't exist on PS2...
+	if(!colModel.ownsCollisionVolumes)
+		return false;
+#endif
+
+	if(MoveMem((void**)&colModel.spheres) && onlyOne)
+		return true;
+	if(MoveMem((void**)&colModel.lines) && onlyOne)
+		return true;
+	if(MoveMem((void**)&colModel.boxes) && onlyOne)
+		return true;
+	if(MoveMem((void**)&colModel.vertices) && onlyOne)
+		return true;
+	if(MoveMem((void**)&colModel.triangles) && onlyOne)
+		return true;
+	if(MoveMem((void**)&colModel.trianglePlanes) && onlyOne)
+		return true;
+	return false;
+}
+
+RpAtomic*
+MoveAtomicMemoryCB(RpAtomic *atomic, void *pData)
+{
+	bool *pRet = (bool*)pData;
+	if(pRet == nil)
+		MoveAtomicMemory(atomic, false);
+	else if(MoveAtomicMemory(atomic, true)){
+		*pRet = true;
+		return nil;
+	}
+	return atomic;
+}
+
+bool
+TidyUpModelInfo(CBaseModelInfo *modelInfo, bool onlyone)
+{
+	if(modelInfo->GetColModel() && modelInfo->DoesOwnColModel())
+		if(MoveColModelMemory(*modelInfo->GetColModel(), onlyone))
+			return true;
+
+	RwObject *rwobj = modelInfo->GetRwObject();
+	if(RwObjectGetType(rwobj) == rpATOMIC)
+		if(MoveAtomicMemory((RpAtomic*)rwobj, onlyone))
+			return true;
+	if(RwObjectGetType(rwobj) == rpCLUMP){
+		bool ret = false;
+		if(onlyone)
+			RpClumpForAllAtomics((RpClump*)rwobj, MoveAtomicMemoryCB, &ret);
+		else
+			RpClumpForAllAtomics((RpClump*)rwobj, MoveAtomicMemoryCB, nil);
+		if(ret)
+			return true;
+	}
+
+	if(modelInfo->GetModelType() == MITYPE_PED && ((CPedModelInfo*)modelInfo)->m_hitColModel)
+		if(MoveColModelMemory(*((CPedModelInfo*)modelInfo)->m_hitColModel, onlyone))
+			return true;
+
 	return false;
 }
 
