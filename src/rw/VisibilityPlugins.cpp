@@ -820,7 +820,7 @@ CVisibilityPlugins::PluginAttach(void)
 		ID_VISIBILITYCLUMP,
 		ClumpConstructor, ClumpDestructor, ClumpCopyConstructor);
 
-#if GTA_VERSION <= GTA3_PS2_16
+#if GTA_VERSION <= GTA3_PS2_160
 	Initialise();
 #endif
 
