@@ -170,26 +170,39 @@ void ReplaceAtomicPipeCallback();
 #endif // PS2_ALPHA_TEST
 #endif // !LIBRW
 
-// missing altogether on PS2, mostly done in GameInit there it seems
 bool
 CGame::InitialiseRenderWare(void)
 {
 #ifdef USE_TEXTURE_POOL
 	_TexturePoolsInitialise();
 #endif
-	
-	CTxdStore::Initialise();
-	CVisibilityPlugins::Initialise();
-	
+
+#if GTA_VERSION > GTA3_PS2_160
+	CTxdStore::Initialise();	// in GameInit on ps2
+	CVisibilityPlugins::Initialise();	// in plugin attach on ps2
+#endif
+
+	//InitialiseScene(Scene);	// PS2 only, only clears Scene.camera
+
+#ifdef GTA_PS2
+	RpSkySelectTrueTSClipper(TRUE);
+	RpSkySelectTrueTLClipper(TRUE);
+
+	// PS2ManagerApplyDirectionalLightingCB() uploads the GTA lights
+	// directly without going through RpWorld and all that
+	SetupPS2ManagerDefaultLightingCallback();
+	PreAllocateRwObjects();
+#endif
+
 	/* Create camera */
-	Scene.camera = CameraCreate(RsGlobal.width, RsGlobal.height, TRUE);
+	Scene.camera = CameraCreate(SCREEN_WIDTH, SCREEN_HEIGHT, TRUE);
 	ASSERT(Scene.camera != nil);
 	if (!Scene.camera)
 	{
 		return (false);
 	}
 	
-	RwCameraSetFarClipPlane(Scene.camera, 2000.0f);
+	RwCameraSetFarClipPlane(Scene.camera, 2000.0f);	// 250.0f on PS2 but who cares
 	RwCameraSetNearClipPlane(Scene.camera, 0.9f);
 	
 	CameraSize(Scene.camera, nil, DEFAULT_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
@@ -212,8 +225,12 @@ CGame::InitialiseRenderWare(void)
 	/* Add the camera to the world */
 	RpWorldAddCamera(Scene.world, Scene.camera);
 	LightsCreate(Scene.world);
-	
-	CreateDebugFont();
+
+#if GTA_VERSION > GTA3_PS2_160
+	CreateDebugFont();	// in GameInit on PS2
+#else
+	RwImageSetPath("textures");
+#endif
 
 #ifdef LIBRW
 #ifdef PS2_MATFX
@@ -229,9 +246,16 @@ CGame::InitialiseRenderWare(void)
 	ReplaceAtomicPipeCallback();
 #endif // PS2_ALPHA_TEST
 #endif // LIBRW
-	
+
+
+#if GTA_VERSION > GTA3_PS2_160
+	// in GameInit on PS2
+	PUSH_MEMID(MEMID_TEXTURES);
 	CFont::Initialise();
 	CHud::Initialise();
+	POP_MEMID();
+#endif
+	// TODO: define
 	CPlayerSkin::Initialise();
 	
 	return (true);
@@ -247,7 +271,8 @@ void CGame::ShutdownRenderWare(void)
 	
 	for ( int32 i = 0; i < NUMPLAYERS; i++ )
 		CWorld::Players[i].DeletePlayerSkin();
-	
+
+	// TODO: define
 	CPlayerSkin::Shutdown();
 	
 	DestroyDebugFont();

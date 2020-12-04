@@ -819,6 +819,11 @@ CVisibilityPlugins::PluginAttach(void)
 	ms_clumpPluginOffset = RpClumpRegisterPlugin(sizeof(ClumpExt),
 		ID_VISIBILITYCLUMP,
 		ClumpConstructor, ClumpDestructor, ClumpCopyConstructor);
+
+#if GTA_VERSION <= GTA3_PS2_16
+	Initialise();
+#endif
+
 	return ms_atomicPluginOffset != -1 && ms_clumpPluginOffset != -1;
 }
 

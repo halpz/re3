@@ -114,7 +114,7 @@ void DebugMenuPopulate(void);
 bool gbPrintMemoryUsage;
 #endif
 
-#ifdef GTA_PS2
+#ifdef PS2_MENU
 #define WANT_TO_LOAD TheMemoryCard.m_bWantToLoad
 #define FOUND_GAME_TO_LOAD TheMemoryCard.b_FoundRecentSavedGameWantToLoad
 #else
@@ -415,7 +415,6 @@ PluginAttach(void)
 	return TRUE;
 }
 
-// rather different on PS2
 static RwBool 
 Initialise3D(void *param)
 {
@@ -1766,7 +1765,7 @@ void SystemInit()
 #ifdef GTA_PS2
 	CFileMgr::InitCd();
 	
-	Char modulepath[256];
+	char modulepath[256];
 	
 	strcpy(modulepath, "cdrom0:\\");
 	strcat(modulepath, "SYSTEM\\");
@@ -1989,7 +1988,7 @@ void GameInit()
 		CreateDebugFont();
 		
 #ifdef GTA_PS2
-		AddIntcHandler(_TODOCONST(2), VBlankCounter, 0);
+		AddIntcHandler(INTC_VBLANK_S, VBlankCounter, 0);
 #endif
 		
 		CameraSize(Scene.camera, NULL, DEFAULT_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
@@ -2031,8 +2030,7 @@ main(int argc, char *argv[])
 #ifdef GTA_PS2
 	int32 r = TheMemoryCard.CheckCardStateAtGameStartUp(CARD_ONE);
 		
-	if (   r == CMemoryCard::ERR_DIRNOENTRY  || r == CMemoryCard::ERR_NOFORMAT
-		&& r != CMemoryCard::ERR_OPENNOENTRY && r != CMemoryCard::ERR_NONE )
+	if ( r == CMemoryCard::ERR_DIRNOENTRY  || r == CMemoryCard::ERR_NOFORMAT )
 	{
 		GameInit();
 		
@@ -2042,6 +2040,8 @@ main(int argc, char *argv[])
 		CFont::Initialise();
 		
 		FrontEndMenuManager.DrawMemoryCardStartUpMenus();
+	}else if(r == CMemoryCard::ERR_OPENNOENTRY || r == CMemoryCard::ERR_NONE){
+		// eh?
 	}
 #endif
 	
@@ -2052,12 +2052,18 @@ main(int argc, char *argv[])
 
 		InitMPEGPlayer();
 
+#ifdef GTA_PAL
 		PlayMPEG("cdrom0:\\MOVIES\\DMAPAL.PSS;1", false);
 
 		if (CGame::frenchGame || CGame::germanGame)
 			PlayMPEG("cdrom0:\\MOVIES\\INTROPAF.PSS;1", true);
 		else
 			PlayMPEG("cdrom0:\\MOVIES\\INTROPAL.PSS;1", true);
+#else
+		PlayMPEG("cdrom0:\\MOVIES\\DMANTSC.PSS;1", false);
+
+		PlayMPEG("cdrom0:\\MOVIES\\INTRNTSC.PSS;1", true);
+#endif
 
 		ShutdownMPEGPlayer();
 

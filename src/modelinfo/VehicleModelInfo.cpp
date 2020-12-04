@@ -998,6 +998,8 @@ CVehicleModelInfo::SetEnvironmentMapCB(RpMaterial *material, void *data)
 	return material;
 }
 
+bool initialised;
+
 RpAtomic*
 CVehicleModelInfo::SetEnvironmentMapCB(RpAtomic *atomic, void *data)
 {
@@ -1011,7 +1013,12 @@ CVehicleModelInfo::SetEnvironmentMapCB(RpAtomic *atomic, void *data)
 		RpGeometryForAllMaterials(geo, SetEnvironmentMapCB, data);
 		RpGeometrySetFlags(geo, RpGeometryGetFlags(geo) | rpGEOMETRYMODULATEMATERIALCOLOR);
 		RpMatFXAtomicEnableEffects(atomic);
-		// PS2 sets of PS2Manager lighting CB here
+#ifdef GTA_PS2
+		if(!initialised){
+			SetupPS2ManagerLightingCallback(RpAtomicGetInstancePipeline(atomic));
+			initialised = true;
+		}
+#endif
 	}
 	return atomic;
 }
