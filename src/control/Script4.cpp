@@ -89,7 +89,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CBoat* pBoat = (CBoat*)CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		script_assert(pBoat && pBoat->m_vehType == VEHICLE_TYPE_BOAT);
-		pBoat->m_bIsAnchored = (ScriptParams[1] == 0);
+		pBoat->m_bIsAnchored = (ScriptParams[1] != 0);
 		return 0;
 	}
 	case COMMAND_SET_ZONE_GROUP:
