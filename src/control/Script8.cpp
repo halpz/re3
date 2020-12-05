@@ -14,7 +14,7 @@
 #endif
 #if (defined GTA_PC && !defined GTAVC_JP_PATCH || defined GTA_XBOX || defined SUPPORT_XBOX_SCRIPT || defined GTA_MOBILE || defined SUPPORT_MOBILE_SCRIPT)
 #include "General.h"
-#include "Maths.h"
+#include "maths.h"
 #endif
 #include "Hud.h"
 #include "Pad.h"
