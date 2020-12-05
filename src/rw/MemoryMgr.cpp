@@ -3,7 +3,7 @@
 #include "MemoryMgr.h"
 
 
-void *pMemoryTop;
+uint8 *pMemoryTop;
 
 void
 InitMemoryMgr(void)
@@ -42,8 +42,8 @@ MemoryMgrMalloc(size_t size)
 #else
 	void *mem = malloc(size);
 #endif
-	if(mem > pMemoryTop)
-		pMemoryTop = mem;
+	if((uint8*)mem + size > pMemoryTop)
+		pMemoryTop = (uint8*)mem + size ;
 	return mem;
 }
 
@@ -55,8 +55,8 @@ MemoryMgrRealloc(void *ptr, size_t size)
 #else
 	void *mem = realloc(ptr, size);
 #endif
-	if(mem > pMemoryTop)
-		pMemoryTop = mem;
+	if((uint8*)mem + size  > pMemoryTop)
+		pMemoryTop = (uint8*)mem + size ;
 	return mem;
 }
 
@@ -68,8 +68,8 @@ MemoryMgrCalloc(size_t num, size_t size)
 #else
 	void *mem = calloc(num, size);
 #endif
-	if(mem > pMemoryTop)
-		pMemoryTop = mem;
+	if((uint8*)mem + size  > pMemoryTop)
+		pMemoryTop = (uint8*)mem + size ;
 #ifdef FIX_BUGS
 	memset(mem, 0, num*size);
 #endif
