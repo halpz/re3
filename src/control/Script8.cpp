@@ -4,8 +4,18 @@
 #include "ScriptCommands.h"
 
 #include "DMAudio.h"
+#if ((defined GTAVC_JP_PATCH || defined SUPPORT_JAPANESE_SCRIPT) && defined MORE_LANGUAGES)
+#include "Frontend.h"
+#endif
 #include "GameLogic.h"
 #include "Garages.h"
+#ifdef MISSION_REPLAY
+#include "GenericGameStorage.h"
+#endif
+#if (defined GTA_PC && !defined GTAVC_JP_PATCH || defined GTA_XBOX || defined SUPPORT_XBOX_SCRIPT || defined GTA_MOBILE || defined SUPPORT_MOBILE_SCRIPT)
+#include "General.h"
+#include "maths.h"
+#endif
 #include "Hud.h"
 #include "Pad.h"
 #include "PedAttractor.h"
@@ -373,6 +383,228 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		}
 		return 0;
 	}
+#if (defined GTAVC_JP_PATCH || defined SUPPORT_JAPANESE_SCRIPT)
+	case COMMAND_IS_JAPANESE_GAME:
+#ifdef MORE_LANGUAGES
+		UpdateCompareFlag(FrontEndMenuManager.m_PrefsLanguage == LANGUAGE_JAPANESE);
+#elif (defined GTAVC_JP_PATCH)
+		UpdateCompareFlag(true);
+#else
+		UpdateCompareFlag(false);
+#endif
+		return 0;
+#elif (!defined GTA_PS2)
+	case COMMAND_SET_ONSCREEN_COUNTER_FLASH_WHEN_FIRST_DISPLAYED:
+		script_assert(CTheScripts::ScriptSpace[m_nIp++] == ARGUMENT_GLOBALVAR);
+		uint16 var = CTheScripts::Read2BytesFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 1);
+		//CUserDisplay::OnscnTimer.SetCounterFlashWhenFirstDisplayed(var, ScriptParams[0]);
+		break;
+#endif
+#if (defined GTA_PC && !defined GTAVC_JP_PATCH || defined GTA_XBOX || defined SUPPORT_XBOX_SCRIPT || defined GTA_MOBILE || defined SUPPORT_MOBILE_SCRIPT)
+	case COMMAND_SHUFFLE_CARD_DECKS:
+	{
+		CollectParameters(&m_nIp, 1);
+		script_assert(ScriptParams[0] >= 0 && ScriptParams[0] <= 6);
+		for (int i = 0; i < CARDS_IN_STACK; i++)
+			CTheScripts::CardStack[i] = 0;
+		int16 seq[CARDS_IN_STACK];
+		for (int i = 0; i < MAX_DECKS * CARDS_IN_DECK; i++)
+			seq[i] = i;
+		int cards_left = CARDS_IN_DECK * ScriptParams[0];
+		for (int k = 1; k < CARDS_IN_DECK + 1; k++) {
+			for (int deck = 0; deck < ScriptParams[0]; deck++) {
+				int index = CGeneral::GetRandomNumberInRange(0, cards_left);
+				CTheScripts::CardStack[seq[index]] = k;
+				for (int l = index; l < cards_left; l++) {
+					if (l + 1 < CARDS_IN_STACK)
+						seq[l] = seq[l + 1];
+					else
+						seq[l] = 0;
+				}
+				--cards_left;
+			}
+		}
+		CTheScripts::CardStackPosition = 0;
+		return 0;
+	}
+	case COMMAND_FETCH_NEXT_CARD:
+	{
+		if (CTheScripts::CardStack[CTheScripts::CardStackPosition] == 0)
+			CTheScripts::CardStackPosition = 0;
+		ScriptParams[0] = CTheScripts::CardStack[CTheScripts::CardStackPosition++];
+		if (CTheScripts::CardStackPosition == CARDS_IN_DECK * MAX_DECKS)
+			CTheScripts::CardStackPosition = 0;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+	case COMMAND_GET_OBJECT_VELOCITY:
+	{
+		CollectParameters(&m_nIp, 1);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		*(CVector*)ScriptParams[0] = GAME_SPEED_TO_METERS_PER_SECOND * pObject->GetMoveSpeed();
+		StoreParameters(&m_nIp, 3);
+		return 0;
+	}
+	case COMMAND_IS_DEBUG_CAMERA_ON:
+		UpdateCompareFlag(TheCamera.WorldViewerBeingUsed);
+		return 0;
+	case COMMAND_ADD_TO_OBJECT_ROTATION_VELOCITY:
+	{
+		CollectParameters(&m_nIp, 4);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		CVector newSpeed = pObject->GetTurnSpeed() + *(CVector*)ScriptParams[1] / GAME_SPEED_TO_METERS_PER_SECOND;
+		if (pObject->bIsStatic) {
+			pObject->SetIsStatic(false);
+			pObject->AddToMovingList();
+		}
+		pObject->SetTurnSpeed(newSpeed.x, newSpeed.y, newSpeed.z);
+		return 0;
+	}
+	case COMMAND_SET_OBJECT_ROTATION_VELOCITY:
+	{
+		CollectParameters(&m_nIp, 4);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		CVector newSpeed = *(CVector*)ScriptParams[1] / GAME_SPEED_TO_METERS_PER_SECOND;
+		if (pObject->bIsStatic) {
+			pObject->SetIsStatic(false);
+			pObject->AddToMovingList();
+		}
+		pObject->SetTurnSpeed(newSpeed.x, newSpeed.y, newSpeed.z);
+		return 0;
+	}
+	case COMMAND_IS_OBJECT_STATIC:
+	{
+		CollectParameters(&m_nIp, 1);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		UpdateCompareFlag(pObject->GetIsStatic());
+		return 0;
+	}
+	case COMMAND_GET_ANGLE_BETWEEN_2D_VECTORS:
+	{
+		CollectParameters(&m_nIp, 4);
+		CVector2D v1 = *(CVector2D*)ScriptParams[0];
+		CVector2D v2 = *(CVector2D*)ScriptParams[2];
+		float c = DotProduct2D(v1, v2) / (v1.Magnitude() * v2.Magnitude());
+#ifdef FIX_BUGS // command is a SA leftover where it was fixed to this
+		*(float*)ScriptParams[0] = RADTODEG(Acos(c));
+#else
+		*(float*)ScriptParams[0] = Acos(c);
+#endif
+		return 0;
+	}
+	case COMMAND_DO_2D_RECTANGLES_COLLIDE:
+	{
+		CollectParameters(&m_nIp, 8);
+		float infX1 = *(float*)&ScriptParams[0] - *(float*)&ScriptParams[2] * 0.5; // NB: not float
+		float supX1 = *(float*)&ScriptParams[0] + *(float*)&ScriptParams[2] * 0.5;
+		float infX2 = *(float*)&ScriptParams[4] - *(float*)&ScriptParams[6] * 0.5;
+		float supX2 = *(float*)&ScriptParams[4] + *(float*)&ScriptParams[6] * 0.5;
+		float infY1 = *(float*)&ScriptParams[1] - *(float*)&ScriptParams[3] * 0.5;
+		float supY1 = *(float*)&ScriptParams[1] + *(float*)&ScriptParams[3] * 0.5;
+		float infY2 = *(float*)&ScriptParams[5] - *(float*)&ScriptParams[7] * 0.5;
+		float supY2 = *(float*)&ScriptParams[5] + *(float*)&ScriptParams[7] * 0.5;
+		bool collide = true;
+		if (infY2 > supY1)
+			collide = false;
+		if (infY1 > supY2)
+			collide = false;
+		if (infX2 > supX1)
+			collide = false;
+		if (infX1 > supX2)
+			collide = false;
+		UpdateCompareFlag(collide);
+		return 0;
+	}
+	case COMMAND_GET_OBJECT_ROTATION_VELOCITY:
+	{
+		CollectParameters(&m_nIp, 1);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		*(CVector*)ScriptParams[0] = pObject->GetTurnSpeed() * GAME_SPEED_TO_METERS_PER_SECOND;
+		StoreParameters(&m_nIp, 3);
+		return 0;
+	}
+	case COMMAND_ADD_VELOCITY_RELATIVE_TO_OBJECT_VELOCITY:
+	{
+		CollectParameters(&m_nIp, 4);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		CVector vecAddition = *(CVector*)&ScriptParams[1] * CTimer::GetTimeStep() / GAME_SPEED_TO_METERS_PER_SECOND;
+		if (!pObject->bIsStatic) {
+			CVector vecCurrSpeed = pObject->GetSpeed();
+			vecCurrSpeed.Normalise();
+			if (vecCurrSpeed.z != 1.0) { // NB: not float!
+				CVector vx = CrossProduct(vecCurrSpeed, CVector(0.0f, 0.0f, 1.0f));
+				vx.Normalise();
+				CVector vz = CrossProduct(vx, vecCurrSpeed);
+				vz.Normalise();
+				CVector vecNewSpeed = pObject->GetSpeed() + vecAddition.x * vx + vecAddition.y * vecCurrSpeed + vecAddition.z * vecCurrSpeed;
+				if (pObject->bIsStatic) {
+					pObject->SetIsStatic(false);
+					pObject->AddToMovingList();
+				}
+				pObject->SetMoveSpeed(vecNewSpeed);
+			}
+		}
+		return 0;
+	}
+	case COMMAND_GET_OBJECT_SPEED:
+	{
+		CollectParameters(&m_nIp, 1);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		*(float*)ScriptParams[0] = pObject->GetMoveSpeed().Magnitude() * GAME_SPEED_TO_METERS_PER_SECOND;
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	}
+#endif
+#if (defined GTA_MOBILE || defined SUPPORT_MOBILE_SCRIPT)
+	case COMMAND_IS_MISSION_SKIP:
+#ifdef MISSION_REPLAY
+		ScriptParams[0] = MissionSkipLevel;
+#else
+		ScriptParams[0] = 0;
+#endif
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	case COMMAND_SET_IN_AMMUNATION:
+		CollectParameters(&m_nIp, 1);
+#ifdef MISSION_REPLAY
+		IsInAmmunation = ScriptParams[0];
+#endif
+		return 0;
+	case COMMAND_DO_SAVE_GAME:
+		CollectParameters(&m_nIp, 1);
+#ifdef MISSION_REPLAY
+		SaveGameForPause(ScriptParams[0]);
+#endif
+		return 0;
+	case COMMAND_IS_RETRY:
+#ifdef MISSION_REPLAY
+		if (strcmp(m_abScriptName, "porno4") != 0)
+			ScriptParams[0] = AllowMissionReplay;
+#ifdef FIX_BUGS
+		else
+			ScriptParams[0] = gbTryingPorn4Again;
+#else
+		else if (gbTryingPorn4Again)
+			ScriptParams[0] = 1;
+#endif
+#else
+		ScriptParams[0] = 0;
+#endif
+		StoreParameters(&m_nIp, 1);
+		return 0;
+	case COMMAND_DUMMY:
+		return 0;
+#endif
+#if (defined GTA_XBOX || defined SUPPORT_XBOX_SCRIPT || defined GTA_MOBILE || defined SUPPORT_MOBILE_SCRIPT)
+	// it is unknown what these commands do but they don't take parameters
+	case COMMAND_MARK_CUTSCENE_START:
+		return 0;
+	case COMMAND_MARK_CUTSCENE_END:
+		return 0;
+	case COMMAND_CUTSCENE_SCROLL:
+		return 0;
+#endif
 	default:
 		script_assert(0);
 	}

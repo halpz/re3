@@ -306,6 +306,15 @@ class CTheScripts
 	static uint16 ScriptsUpdated;
 	static uint32 LastMissionPassedTime;
 	static uint16 NumberOfExclusiveMissionScripts;
+#if (defined GTA_PC && !defined GTAVC_JP_PATCH || defined GTA_XBOX || defined SUPPORT_XBOX_SCRIPT || defined GTA_MOBILE || defined SUPPORT_MOBILE_SCRIPT)
+#define CARDS_IN_SUIT (13)
+#define NUM_SUITS (4)
+#define MAX_DECKS (6)
+#define CARDS_IN_DECK (CARDS_IN_SUIT * NUM_SUITS)
+#define CARDS_IN_STACK (CARDS_IN_DECK * MAX_DECKS)
+	static int16 CardStack[CARDS_IN_STACK];
+	static int16 CardStackPosition;
+#endif
 public:
 	static bool bPlayerIsInTheStatium;
 	static uint8 RiotIntensity;
@@ -547,12 +556,16 @@ private:
 extern int scriptToLoad;
 #endif
 #ifdef MISSION_REPLAY
+static_assert(false, "Mission replay is not supported");
 extern int AllowMissionReplay;
 extern uint32 WaitForMissionActivate;
 extern uint32 WaitForSave;
 extern uint32 MissionStartTime;
 extern int missionRetryScriptIndex;
 extern bool doingMissionRetry;
+extern bool gbTryingPorn4Again;
+extern int IsInAmmunation;
+extern int MissionSkipLevel;
 
 uint32 AddExtraDeathDelay();
 void RetryMission(int, int);
