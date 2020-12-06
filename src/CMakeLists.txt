@@ -33,6 +33,7 @@ target_compile_definitions(re3
     PRIVATE
         $<IF:$<CONFIG:DEBUG>,DEBUG,NDEBUG>
         LIBRW
+        RE3_NO_AUTOLINK
 )
 
 if(RE3_AUDIO STREQUAL "OAL")
