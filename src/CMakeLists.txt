@@ -2,66 +2,49 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 if(${RE3_AUDIO} STREQUAL "OAL")
-        find_package(OpenAL REQUIRED)
-        find_package(MPG123 REQUIRED)
-        find_package(SndFile REQUIRED)
+    find_package(OpenAL REQUIRED)
+    find_package(mpg123 REQUIRED)
+    find_package(SndFile REQUIRED)
 endif()
 
-file(GLOB_RECURSE Sources "*.cpp" "*.h")
+file(GLOB_RECURSE RE3_SOURCES "*.cpp" "*.h")
 
-MACRO(HEADER_DIRECTORIES return_list)
-    FILE(GLOB_RECURSE new_list *.cpp)
-    SET(dir_list "animation"
-            "audio"
-            "collision"
-            "control"
-            "core"
-            "entities"
-            "extras"
-            "fakerw"
-            "math"
-            "modelinfo"
-            "objects"
-            "peds"
-            "render"
-            "rw"
-            "save"
-            "skel"
-            "text"
-            "vehicles"
-            "weapons")
-    FOREACH(file_path ${new_list})
-        GET_FILENAME_COMPONENT(dir_path ${file_path} PATH)
-        SET(dir_list ${dir_list} ${dir_path})
-    ENDFOREACH()
-    LIST(REMOVE_DUPLICATES dir_list)
-    SET(${return_list} ${dir_list})
-ENDMACRO()
+function(header_directories RETURN_LIST)
+    file(GLOB_RECURSE ALL_SRCS *.h *.cpp *.c)
+    set(RELDIRS)
+    foreach(SRC ${ALL_SRCS})
+        file(RELATIVE_PATH RELSRC "${CMAKE_CURRENT_SOURCE_DIR}" "${SRC}")
+        get_filename_component(RELDIR "${RELSRC}" DIRECTORY)
+        list(APPEND RELDIRS ${RELDIR})
+    endforeach()
+    list(REMOVE_DUPLICATES RELDIRS)
+    set(${RETURN_LIST} ${RELDIRS} PARENT_SCOPE)
+endfunction()
 
-HEADER_DIRECTORIES(header_list)
-include_directories(${header_list})
+header_directories(RE3_INCLUDES)
+include_directories(${RE3_INCLUDES})
 
+add_executable(re3 ${RE3_SOURCES})
+target_link_libraries(re3 PRIVATE
+    librw::librw
+    Threads::Threads
+)
 
-add_executable(re3 ${Sources})
-target_link_libraries(re3 librw)
-target_link_libraries(re3 Threads::Threads)
-
-if(${RE3_AUDIO} STREQUAL "OAL")
-        target_link_libraries(re3 ${OPENAL_LIBRARY})
-        target_link_libraries(re3 ${MPG123_LIBRARIES})
-        target_link_libraries(re3 ${SNDFILE_LIBRARIES})
+if(RE3_AUDIO STREQUAL "OAL")
+    target_link_libraries(re3 PRIVATE ${OPENAL_LIBRARY})
+    target_link_libraries(re3 PRIVATE MPG123::libmpg123)
+    target_link_libraries(re3 PRIVATE SndFile::SndFile)
 endif()
 
 target_include_directories(re3
     INTERFACE
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:${RE3_INSTALL_INCLUDEDIR}>
     )
 
 target_compile_definitions(re3
     PRIVATE
         "$<IF:$<CONFIG:DEBUG>,DEBUG,NDEBUG>"
-    PUBLIC
-        "RW_${RE3_PLATFORM}"
     )
 
 target_compile_definitions(re3 PRIVATE LIBRW=1 AUDIO_OAL=1)
@@ -71,7 +54,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
         PRIVATE
             "-Wall"
         )
-    if (NOT RE3_PLATFORM_PS2)
+    if (NOT LIBRW_PLATFORM_PS2)
         target_compile_options(re3
             PRIVATE
                 "-Wextra"
@@ -94,15 +77,9 @@ set_target_properties(re3
         CXX_STANDARD 11
         CXX_EXTENSIONS OFF
         CXX_STANDARD_REQUIRED ON
-        PREFIX ""
     )
 
 if(RE3_INSTALL)
-    target_include_directories(re3
-        INTERFACE
-            $<INSTALL_INTERFACE:${RE3_INSTALL_INCLUDEDIR}>
-        )
-
     install(
         TARGETS re3
         EXPORT re3-targets

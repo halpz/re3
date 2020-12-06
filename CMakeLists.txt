@@ -23,12 +23,17 @@ if(RE3_INSTALL)
     set(RE3_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}/re3")
 endif()
 
-add_subdirectory("vendor/librw")
+option(RE3_VENDORED_LIBRW "Use vendored librw" ON)
+if(RE3_VENDORED_LIBRW)
+    add_subdirectory(vendor/librw)
+else()
+    find_package(librw REQUIRED)
+endif()
 add_subdirectory(src)
 
 if(RE3_INSTALL)
     include(CMakePackageConfigHelpers)
-    configure_package_config_file(re3-config.cmake.in re3-config.cmake
+    configure_package_config_file(cmake/re3-config.cmake.in re3-config.cmake
         INSTALL_DESTINATION "${CMAKE_INSTALL_PREFIX}"
         )
     install(
@@ -40,5 +45,15 @@ if(RE3_INSTALL)
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
         )
 
-    include(CMakeCPack.cmake)
+    set(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
+    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "GTA III reversed")
+    set(CPACK_PACKAGE_VENDOR "GTAModding")
+    #FIXME: missing license (https://github.com/GTAmodding/re3/issues/794)
+    #set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/LICENSE")
+    #set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
+    set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}")
+    set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}")
+    set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}")
+
+    include(CPack)
 endif()
