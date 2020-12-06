@@ -1046,8 +1046,8 @@ void CGarage::Update()
 			// Close car doors either if player is far, or if he is in vehicle and garage is full,
 			// or if player is very very far so that we can remove whatever is blocking garage door without him noticing
 			if ((distance > SQR(DISTANCE_TO_CLOSE_HIDEOUT_GARAGE_IN_CAR) ||
-				!FindPlayerVehicle() && distance > SQR(DISTANCE_TO_CLOSE_HIDEOUT_GARAGE_ON_FOOT) &&
-				!IsAnyCarBlockingDoor()))
+				!FindPlayerVehicle() && distance > SQR(DISTANCE_TO_CLOSE_HIDEOUT_GARAGE_ON_FOOT)) &&
+				!IsAnyCarBlockingDoor())
 				m_eGarageState = GS_CLOSING;
 			else if (FindPlayerVehicle() &&
 				CountCarsWithCenterPointWithinGarage(FindPlayerVehicle()) >=
