@@ -1459,7 +1459,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_CHANGE_GARAGE_TYPE_WITH_CAR_MODEL:
 	{
 		CollectParameters(&m_nIp, 3);
-		CGarages::ChangeGarageType(ScriptParams[0], (eGarageType)ScriptParams[1], ScriptParams[2]);
+		CGarages::ChangeGarageType(ScriptParams[0], ScriptParams[1], ScriptParams[2]);
 		return 0;
 	}
 	case COMMAND_FIND_DRUG_PLANE_COORDINATES:

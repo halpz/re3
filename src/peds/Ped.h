@@ -43,7 +43,7 @@ enum eFormation
 	FORMATION_FRONT
 };
 
-enum FightState : int8 {
+enum FightState {
 	FIGHTSTATE_MOVE_FINISHED = -2,
 	FIGHTSTATE_JUST_ATTACKED,
 	FIGHTSTATE_NO_MOVE,
@@ -484,7 +484,7 @@ public:
 	CVector m_vecHitLastPos;
 	uint32 m_curFightMove;
 	uint8 m_fightButtonPressure;
-	FightState m_fightState;
+	int8 m_fightState;
 	bool m_takeAStepAfterAttack;
 	CFire *m_pFire;
 	CEntity *m_pLookTarget;

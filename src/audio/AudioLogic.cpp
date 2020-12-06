@@ -8121,7 +8121,7 @@ cAudioManager::ProcessGarages()
 	const float SOUND_INTENSITY = 80.0f;
 
 	CEntity *entity;
-	eGarageState state;
+	uint8 state;
 	uint32 sampleIndex;
 	uint8 j;
 	float distSquared;
