@@ -4,12 +4,14 @@ project(re3 C CXX)
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 if(WIN32)
-    set(RE3_AUDIOS "NULL" "OAL" "MSS")
+    set(RE3_AUDIOS "OAL" "MSS")
 else()
-    set(RE3_AUDIOS "NULL" "OAL")
+    set(RE3_AUDIOS "OAL")
 endif()
 
 set(RE3_AUDIO "OAL" CACHE STRING "Audio")
+
+option(RE3_WITH_OPUS "Build re3 with opus support" ON)
 
 set_property(CACHE RE3_AUDIO PROPERTY STRINGS ${RE3_AUDIOS})
 message(STATUS "RE3_AUDIO = ${RE3_AUDIO} (choices=${RE3_AUDIOS})")

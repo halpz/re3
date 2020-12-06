@@ -1,12 +1,6 @@
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-if(${RE3_AUDIO} STREQUAL "OAL")
-    find_package(OpenAL REQUIRED)
-    find_package(mpg123 REQUIRED)
-    find_package(SndFile REQUIRED)
-endif()
-
 file(GLOB_RECURSE RE3_SOURCES "*.cpp" "*.h")
 
 function(header_directories RETURN_LIST)
@@ -22,32 +16,45 @@ function(header_directories RETURN_LIST)
 endfunction()
 
 header_directories(RE3_INCLUDES)
-include_directories(${RE3_INCLUDES})
 
-add_executable(re3 ${RE3_SOURCES})
+add_executable(re3 WIN32 ${RE3_SOURCES})
 target_link_libraries(re3 PRIVATE
     librw::librw
     Threads::Threads
 )
 
-if(RE3_AUDIO STREQUAL "OAL")
-    target_link_libraries(re3 PRIVATE ${OPENAL_LIBRARY})
-    target_link_libraries(re3 PRIVATE MPG123::libmpg123)
-    target_link_libraries(re3 PRIVATE SndFile::SndFile)
-endif()
-
 target_include_directories(re3
-    INTERFACE
+    PRIVATE
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-        $<INSTALL_INTERFACE:${RE3_INSTALL_INCLUDEDIR}>
-    )
+        $<BUILD_INTERFACE:${RE3_INCLUDES}>
+)
 
 target_compile_definitions(re3
     PRIVATE
-        "$<IF:$<CONFIG:DEBUG>,DEBUG,NDEBUG>"
-    )
+        $<IF:$<CONFIG:DEBUG>,DEBUG,NDEBUG>
+        LIBRW
+)
 
-target_compile_definitions(re3 PRIVATE LIBRW=1 AUDIO_OAL=1)
+if(RE3_AUDIO STREQUAL "OAL")
+    find_package(OpenAL REQUIRED)
+    target_include_directories(re3 PRIVATE ${OPENAL_INCLUDE_DIR})
+    target_link_libraries(re3 PRIVATE ${OPENAL_LIBRARY})
+    target_compile_definitions(re3 PRIVATE AUDIO_OAL)
+elseif(RE3_AUDIO STREQUAL "MSS")
+    target_compile_definitions(re3 PRIVATE AUDIO_MSS)
+endif()
+
+if(RE3_WITH_OPUS)
+    find_package(mpg123 REQUIRED)
+    find_package(SndFile REQUIRED)
+    target_link_libraries(re3 PRIVATE
+        MPG123::libmpg123
+        SndFile::SndFile
+    )
+    target_compile_definitions(re3 PRIVATE AUDIO_OPUS)
+endif()
+
+target_compile_definitions(re3 PRIVATE )
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     target_compile_options(re3
@@ -57,15 +64,15 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
     if (NOT LIBRW_PLATFORM_PS2)
         target_compile_options(re3
             PRIVATE
-                "-Wextra"
-                "-Wdouble-promotion"
-                "-Wpedantic"
+                -Wextra
+                -Wdouble-promotion
+                -Wpedantic
             )
     endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(re3
         PUBLIC
-            /wd4996 /wd4244
+            /Zc:sizedDealloc-
         )
 endif()
 
