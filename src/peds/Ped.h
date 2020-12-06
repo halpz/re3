@@ -212,7 +212,7 @@ enum PedOnGroundState {
 	PED_DEAD_ON_THE_FLOOR
 };
 
-enum PointBlankNecessity : uint8 {
+enum PointBlankNecessity {
 	NO_POINT_BLANK_PED,
 	POINT_BLANK_FOR_WANTED_PED,
 	POINT_BLANK_FOR_SOMEONE_ELSE
@@ -598,7 +598,7 @@ public:
 #endif
 	bool CheckForExplosions(CVector2D &area);
 	CPed *CheckForGunShots(void);
-	PointBlankNecessity CheckForPointBlankPeds(CPed*);
+	uint8 CheckForPointBlankPeds(CPed*);
 	bool CheckIfInTheAir(void);
 	void ClearAll(void);
 	void SetPointGunAt(CEntity*);

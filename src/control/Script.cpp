@@ -3593,7 +3593,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		script_assert(car);
-		car->AutoPilot.m_nDrivingStyle = (eCarDrivingStyle)ScriptParams[1];
+		car->AutoPilot.m_nDrivingStyle = (uint8)ScriptParams[1];
 		return 0;
 	}
 	case COMMAND_SET_CAR_MISSION:
@@ -3601,7 +3601,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		script_assert(car);
-		car->AutoPilot.m_nCarMission = (eCarMission)ScriptParams[1];
+		car->AutoPilot.m_nCarMission = (uint8)ScriptParams[1];
 		car->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
 		car->bEngineOn = true;
 		return 0;

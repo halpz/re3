@@ -329,7 +329,7 @@ CPed::SetAttack(CEntity *victim)
 		if (IsPlayer())
 			CPad::GetPad(0)->ResetAverageWeapon();
 
-		PointBlankNecessity pointBlankStatus;
+		uint8 pointBlankStatus;
 		if ((curWeapon->m_eWeaponFire == WEAPON_FIRE_INSTANT_HIT || GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER)
 			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON
 			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON_RUNABOUT
@@ -475,7 +475,7 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 		ped->ClearAttack();
 }
 
-PointBlankNecessity
+uint8
 CPed::CheckForPointBlankPeds(CPed *pedToVerify)
 {
 	float pbDistance = 1.1f;

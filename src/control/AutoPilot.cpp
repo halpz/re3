@@ -103,9 +103,9 @@ void CAutoPilot::Load(uint8*& buf)
 	m_nNextDirection = ReadSaveBuf<int8>(buf);
 	m_nCurrentLane = ReadSaveBuf<int8>(buf);
 	m_nNextLane = ReadSaveBuf<int8>(buf);
-	m_nDrivingStyle = (eCarDrivingStyle)ReadSaveBuf<uint8>(buf);
-	m_nCarMission = (eCarMission)ReadSaveBuf<uint8>(buf);
-	m_nTempAction = (eCarTempAction)ReadSaveBuf<uint8>(buf);
+	m_nDrivingStyle = ReadSaveBuf<uint8>(buf);
+	m_nCarMission = ReadSaveBuf<uint8>(buf);
+	m_nTempAction = ReadSaveBuf<uint8>(buf);
 	m_nTimeTempAction = ReadSaveBuf<uint32>(buf);
 	m_fMaxTrafficSpeed = ReadSaveBuf<float>(buf);
 	m_nCruiseSpeed = ReadSaveBuf<uint8>(buf);
