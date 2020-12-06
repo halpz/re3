@@ -13,13 +13,10 @@
 #include "Vehicle.h"
 #include "ModelIndices.h"
 #include "Streaming.h"
-#include "PathFind.h"
 #include "Boat.h"
 #include "Heli.h"
 #include "Automobile.h"
 #include "Bike.h"
-#include "Ped.h"
-#include "Particle.h"
 #include "Console.h"
 #include "Debug.h"
 #include "Hud.h"
@@ -29,13 +26,17 @@
 #include "Radar.h"
 #include "debugmenu.h"
 #include "Frontend.h"
-#include "Text.h"
 #include "WaterLevel.h"
 #include "main.h"
 #include "Script.h"
 #include "MBlur.h"
 #include "postfx.h"
 #include "custompipes.h"
+
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#include "FileMgr.h"
+#include "ControllerConfig.h"
+#endif
 
 #ifndef _WIN32
 #include "assert.h"
@@ -74,6 +75,169 @@ mysrand(unsigned int seed)
 {
 	myrand_seed = seed;
 }
+
+#ifdef CUSTOM_FRONTEND_OPTIONS
+#include "frontendoption.h"
+
+void
+CustomFrontendOptionsPopulate(void)
+{
+	// Moved to an array in MenuScreensCustom.cpp, but APIs are still available. see frontendoption.h
+}
+#endif
+
+#ifdef LOAD_INI_SETTINGS
+#include "ini_parser.hpp"
+
+linb::ini cfg;
+int CheckAndReadIniInt(const char *cat, const char *key, int original)
+{
+	std::string strval = cfg.get(cat, key, "");
+	const char *value = strval.c_str();
+	if (value && value[0] != '\0')
+		return atoi(value);
+
+	return original;
+}
+
+float CheckAndReadIniFloat(const char *cat, const char *key, float original)
+{
+	std::string strval = cfg.get(cat, key, "");
+	const char *value = strval.c_str();
+	if (value && value[0] != '\0')
+		return atof(value);
+
+	return original;
+}
+
+void CheckAndSaveIniInt(const char *cat, const char *key, int val, bool &changed)
+{
+	char temp[10];
+	if (atoi(cfg.get(cat, key, "xxx").c_str()) != val) { // if .ini doesn't have our key, compare with xxx and forcefully add it
+		changed = true;
+		sprintf(temp, "%u", val);
+		cfg.set(cat, key, temp);
+	}
+}
+
+void CheckAndSaveIniFloat(const char *cat, const char *key, float val, bool &changed)
+{
+	char temp[10];
+	if (atof(cfg.get(cat, key, "xxx").c_str()) != val) { // if .ini doesn't have our key, compare with xxx and forcefully add it
+		changed = true;
+		sprintf(temp, "%f", val);
+		cfg.set(cat, key, temp);
+	}
+}
+
+void LoadINISettings()
+{
+	cfg.load_file("reVC.ini");
+
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+	// Written by assuming the codes below will run after _InputInitialiseJoys().
+	strcpy(gSelectedJoystickName, cfg.get("DetectJoystick", "JoystickName", "").c_str());
+	
+	if(gSelectedJoystickName[0] != '\0') {
+		for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++) {
+			if (glfwJoystickPresent(i) && strncmp(gSelectedJoystickName, glfwGetJoystickName(i), strlen(gSelectedJoystickName)) == 0) {
+				if (PSGLOBAL(joy1id) != -1) {
+					PSGLOBAL(joy2id) = PSGLOBAL(joy1id);
+				}
+				PSGLOBAL(joy1id) = i;
+				int count;
+				glfwGetJoystickButtons(PSGLOBAL(joy1id), &count);
+				
+				// We need to init and reload bindings, because;
+				//	1-joypad button number may differ with saved/prvly connected one
+				//	2-bindings are not init'ed if there is no joypad at the start
+				ControlsManager.InitDefaultControlConfigJoyPad(count);
+				CFileMgr::SetDirMyDocuments();
+				int32 gta3set = CFileMgr::OpenFile("gta3.set", "r");
+				if (gta3set) {
+					ControlsManager.LoadSettings(gta3set);
+					CFileMgr::CloseFile(gta3set);
+				}
+				CFileMgr::SetDir("");
+				break;
+			}
+		}
+	}
+#endif
+
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	for (int i = 0; i < MENUPAGES; i++) {
+		for (int j = 0; j < NUM_MENUROWS; j++) {
+			CMenuScreenCustom::CMenuEntry &option = aScreens[i].m_aEntries[j];
+			if (option.m_Action == MENUACTION_NOTHING)
+				break;
+				
+			// CFO check
+			if (option.m_Action < MENUACTION_NOTHING && option.m_CFO->save) {
+				// CFO only supports saving uint8 right now
+				*option.m_CFO->value = CheckAndReadIniInt("FrontendOptions", option.m_CFO->save, *option.m_CFO->value);
+				if (option.m_Action == MENUACTION_CFO_SELECT) {
+					option.m_CFOSelect->lastSavedValue = option.m_CFOSelect->displayedValue = *option.m_CFO->value;
+				}
+			}
+		}
+	}
+#endif
+
+#ifdef EXTENDED_COLOURFILTER
+	CPostFX::Intensity = CheckAndReadIniFloat("CustomPipesValues", "PostFXIntensity", CPostFX::Intensity);
+#endif
+#ifdef EXTENDED_PIPELINES
+	CustomPipes::VehicleShininess = CheckAndReadIniFloat("CustomPipesValues", "NeoVehicleShininess", CustomPipes::VehicleShininess);
+	CustomPipes::VehicleSpecularity = CheckAndReadIniFloat("CustomPipesValues", "NeoVehicleSpecularity", CustomPipes::VehicleSpecularity);
+	CustomPipes::RimlightMult = CheckAndReadIniFloat("CustomPipesValues", "RimlightMult", CustomPipes::RimlightMult);
+	CustomPipes::LightmapMult = CheckAndReadIniFloat("CustomPipesValues", "LightmapMult", CustomPipes::LightmapMult);
+	CustomPipes::GlossMult = CheckAndReadIniFloat("CustomPipesValues", "GlossMult", CustomPipes::GlossMult);
+#endif
+}
+
+void SaveINISettings()
+{
+	bool changed = false;
+	char temp[4];
+
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+	if (strncmp(cfg.get("DetectJoystick", "JoystickName", "").c_str(), gSelectedJoystickName, strlen(gSelectedJoystickName)) != 0) {
+		changed = true;
+		cfg.set("DetectJoystick", "JoystickName", gSelectedJoystickName);
+	}
+#endif
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	for (int i = 0; i < MENUPAGES; i++) {
+		for (int j = 0; j < NUM_MENUROWS; j++) {
+			CMenuScreenCustom::CMenuEntry &option = aScreens[i].m_aEntries[j];
+			if (option.m_Action == MENUACTION_NOTHING)
+				break;
+				
+			if (option.m_Action < MENUACTION_NOTHING && option.m_CFO->save) {
+				// Beware: CFO only supports saving uint8 right now
+				CheckAndSaveIniInt("FrontendOptions", option.m_CFO->save, *option.m_CFO->value, changed);
+			}
+		}
+	}
+#endif
+
+#ifdef EXTENDED_COLOURFILTER
+	CheckAndSaveIniFloat("CustomPipesValues", "PostFXIntensity", CPostFX::Intensity, changed);
+#endif
+#ifdef EXTENDED_PIPELINES
+	CheckAndSaveIniFloat("CustomPipesValues", "NeoVehicleShininess", CustomPipes::VehicleShininess, changed);
+	CheckAndSaveIniFloat("CustomPipesValues", "NeoVehicleSpecularity", CustomPipes::VehicleSpecularity, changed);
+	CheckAndSaveIniFloat("CustomPipesValues", "RimlightMult", CustomPipes::RimlightMult, changed);
+	CheckAndSaveIniFloat("CustomPipesValues", "LightmapMult", CustomPipes::LightmapMult, changed);
+	CheckAndSaveIniFloat("CustomPipesValues", "GlossMult", CustomPipes::GlossMult, changed);
+#endif
+
+	if (changed)
+		cfg.write_file("reVC.ini");
+}
+
+#endif
 
 #ifdef DEBUGMENU
 void WeaponCheat1();

@@ -1597,7 +1597,7 @@ CPed::ProcessObjective(void)
 									Say(SOUND_PED_MUGGING);
 									bRichFromMugging = true;
 
-									// VC FIX: ClearObjective() clears m_pedInObjective in VC (also same with VC_PED_PORTS), so get it before call
+									// FIX: ClearObjective() clears m_pedInObjective, so get it before call
 									CPed *victim = m_pedInObjective;
 									ClearObjective();
 									if (victim->m_objective != OBJECTIVE_KILL_CHAR_ON_FOOT

@@ -11,7 +11,7 @@
 #define MENUHEADER_HEIGHT 2.0f
 #define MENUHEADER_WIDTH 1.0f
 
-#define MENU_UNK_X_MARGIN 10.0f
+#define MENU_X_MARGIN 10.0f
 
 #define MENUACTION_SCALE_MULT 0.9f
 
@@ -22,6 +22,8 @@
 #define MENU_DEFAULT_CONTENT_X 320
 #define MENU_DEFAULT_CONTENT_Y 100
 #define MENU_DEFAULT_LINE_HEIGHT 29
+
+#define RIGHT_ALIGNED_TEXT_RIGHT_MARGIN(xMargin) (xMargin + 30.0f)
 
 #define MENURADIO_ICON_FIRST_X 238.f
 #define MENURADIO_ICON_Y 288.0f
@@ -34,16 +36,22 @@
 #define MENUSLIDER_SMALLEST_BAR 8.0f
 #define MENUSLIDER_BIGGEST_BAR 25.0f
 
-#define BIGTEXT2_X_SCALE 0.6f
+#define BIGTEXT2_X_SCALE 0.6f // For FONT_STANDARD
 #define BIGTEXT2_Y_SCALE 1.2f
-#define BIGTEXT_X_SCALE 0.6f
+#define BIGTEXT_X_SCALE 0.6f // For FONT_HEADING
 #define BIGTEXT_Y_SCALE 1.0f
-#define MEDIUMTEXT_X_SCALE 0.48f
+#define MEDIUMTEXT_X_SCALE 0.48f // For FONT_STANDARD
 #define MEDIUMTEXT_Y_SCALE 1.0f
-#define SMALLTEXT_X_SCALE 0.42f
+#define SMALLTEXT_X_SCALE 0.42f // For FONT_STANDARD
 #define SMALLTEXT_Y_SCALE 0.9f
-#define SMALLESTTEXT_X_SCALE 0.3f
+#define SMALLESTTEXT_X_SCALE 0.3f // For FONT_STANDARD
 #define SMALLESTTEXT_Y_SCALE 0.7f
+
+#define LISTITEM_X_SCALE 0.4f // Only unproportional and commonly used scale for FONT_STANDARD
+#define LISTITEM_Y_SCALE 0.6f
+
+#define HELPER_TEXT_RIGHT_MARGIN MENU_X_MARGIN
+#define HELPER_TEXT_BOTTOM_MARGIN 18.f
 
 #define PLAYERSETUP_LIST_TOP 58.0f
 #define PLAYERSETUP_LIST_BOTTOM 95.0f
@@ -56,8 +64,6 @@
 #endif
 #define PLAYERSETUP_SCROLLBUTTON_HEIGHT 17.0f
 #define PLAYERSETUP_SCROLLBUTTON_TXD_DIMENSION 64
-#define PLAYERSETUP_ROW_TEXT_X_SCALE 0.4f
-#define PLAYERSETUP_ROW_TEXT_Y_SCALE 0.6f
 #define PLAYERSETUP_SKIN_COLUMN_LEFT 220.0f
 #define PLAYERSETUP_DATE_COLUMN_RIGHT 56.0f
 #define PLAYERSETUP_LIST_BODY_TOP 77
@@ -186,7 +192,6 @@ enum eMenuScreen
 	MENUPAGE_MOUSE_CONTROLS = 31,
 	MENUPAGE_PAUSE_MENU = 32,
 	MENUPAGE_NONE = 33, // Then chooses main menu or pause menu 
-	MENUPAGE_OUTRO = 34,
 #ifdef LEGACY_MENU_OPTIONS
 	MENUPAGE_CONTROLLER_SETTINGS,
 	MENUPAGE_DEBUG_MENU,
@@ -196,14 +201,26 @@ enum eMenuScreen
 	MENUPAGE_CONTROLLER_PC_OLD4,
 	MENUPAGE_CONTROLLER_DEBUG,
 #endif
+#ifdef CUSTOM_FRONTEND_OPTIONS
+
 #ifdef GRAPHICS_MENU_OPTIONS
 	MENUPAGE_GRAPHICS_SETTINGS,
 #endif
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+	MENUPAGE_DETECT_JOYSTICK,
+#endif
+
+#endif
+	MENUPAGE_OUTRO, // Originally 34, but CFO needs last screen to be empty to count number of menu pages
 	MENUPAGES
 };
 
 enum eMenuAction
 {
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	MENUACTION_CFO_SELECT = -2,
+	MENUACTION_CFO_DYNAMIC = -1,
+#endif
 	MENUACTION_NOTHING,
 	MENUACTION_LABEL,
 	MENUACTION_YES,
@@ -258,28 +275,9 @@ enum eMenuAction
 	MENUACTION_DRAWDIST,
 	MENUACTION_MOUSESENS,
 	MENUACTION_MP3VOLUMEBOOST,
-#ifdef IMPROVED_VIDEOMODE
-	MENUACTION_SCREENFORMAT,
-#endif
 #ifdef LEGACY_MENU_OPTIONS
 	MENUACTION_CTRLVIBRATION,
 	MENUACTION_CTRLCONFIG,
-#endif
-#ifdef ANISOTROPIC_FILTERING
-	MENUACTION_MIPMAPS,
-	MENUACTION_TEXTURE_FILTERING,
-#endif
-#ifdef MULTISAMPLING
-	MENUACTION_MULTISAMPLING,
-#endif
-#ifdef NO_ISLAND_LOADING
-	MENUACTION_ISLANDLOADING,
-#endif
-#ifdef PS2_ALPHA_TEST
-	MENUACTION_PS2_ALPHA_TEST,
-#endif
-#ifdef CUTSCENE_BORDERS_SWITCH
-	MENUACTION_CUTSCENEBORDERS,
 #endif
 };
 
@@ -326,8 +324,8 @@ enum eCheckHover
 
 enum
 {
-#ifdef LEGACY_MENU_OPTIONS
-	NUM_MENUROWS = 14,
+#if defined LEGACY_MENU_OPTIONS || defined CUSTOM_FRONTEND_OPTIONS
+	NUM_MENUROWS = 18,
 #else
 	NUM_MENUROWS = 12,
 #endif
@@ -361,6 +359,7 @@ struct BottomBarOption
 	int32 screenId;
 };
 
+#ifndef CUSTOM_FRONTEND_OPTIONS
 struct CMenuScreen
 {
 	char m_ScreenName[8];
@@ -378,6 +377,88 @@ struct CMenuScreen
 		uint8 m_Align;
 	} m_aEntries[NUM_MENUROWS];
 };
+extern CMenuScreen aScreens[MENUPAGES];
+#else
+#include "frontendoption.h"
+struct CCustomScreenLayout {
+	int startX; // not used at all if first entry has X and Y values
+	int startY; // not used at all if first entry has X and Y values
+	int lineHeight; // used to determine next entry's Y coordinate, if it has 0-0 as coordinates
+	bool showLeftRightHelper;
+	bool noInvasiveBorders; // not needed on pages already handled by game
+	int xMargin; // useful for two part texts - 0/empty = MENU_X_MARGIN
+};
+
+struct CCFO
+{
+	int8 *value;
+	const char *save;
+};
+
+struct CCFOSelect : CCFO
+{
+	char** rightTexts;
+	int8 numRightTexts;
+	bool onlyApplyOnEnter;
+	int8 displayedValue; // only if onlyApplyOnEnter enabled for now
+	int8 lastSavedValue; // only if onlyApplyOnEnter enabled
+	ChangeFunc changeFunc;
+
+	CCFOSelect() {};
+	CCFOSelect(int8* value, const char* save, const char** rightTexts, int8 numRightTexts, bool onlyApplyOnEnter, ChangeFunc changeFunc){
+		this->value = value;
+		if (value)
+			this->lastSavedValue = this->displayedValue = *value;
+
+		this->save = save;
+		this->rightTexts = (char**)rightTexts;
+		this->numRightTexts = numRightTexts;
+		this->onlyApplyOnEnter = onlyApplyOnEnter;
+		this->changeFunc = changeFunc;
+	}
+};
+
+struct CCFODynamic : CCFO
+{
+	DrawFunc drawFunc;
+	ButtonPressFunc buttonPressFunc;
+
+	CCFODynamic() {};
+	CCFODynamic(int8* value, const char* save, DrawFunc drawFunc, ButtonPressFunc buttonPressFunc){
+		this->value = value;
+		this->save = save;
+		this->drawFunc = drawFunc;
+		this->buttonPressFunc = buttonPressFunc;
+	}
+};
+
+struct CMenuScreenCustom
+{
+	char m_ScreenName[8];
+	int32 m_PreviousPage; // eMenuScreen
+	CCustomScreenLayout *layout;
+	ReturnPrevPageFunc returnPrevPageFunc;
+	
+	struct CMenuEntry
+	{
+		int32 m_Action; // eMenuAction - below zero is CFO
+		char m_EntryName[8];
+		struct {
+			union {
+				CCFO *m_CFO; // for initializing
+				CCFOSelect *m_CFOSelect;
+				CCFODynamic *m_CFODynamic;
+			};
+			int32 m_SaveSlot; // eSaveSlot
+			int32 m_TargetMenu; // eMenuScreen
+		};
+		uint16 m_X;
+		uint16 m_Y;
+		uint8 m_Align;
+	} m_aEntries[NUM_MENUROWS];
+};
+extern CMenuScreenCustom aScreens[MENUPAGES];
+#endif
 
 struct MenuTrapezoid
 {
@@ -617,7 +698,6 @@ public:
 		ISLAND_LOADING_HIGH
 	};
 
-	static int8 m_DisplayIslandLoading;
 	static int8 m_PrefsIslandLoading;
 
 	#define ISLAND_LOADING_IS(p) if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_##p)
@@ -710,6 +790,5 @@ VALIDATE_SIZE(CMenuManager, 0x688);
 #endif
 
 extern CMenuManager FrontEndMenuManager;
-extern CMenuScreen aScreens[];
 
 #endif

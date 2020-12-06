@@ -1771,11 +1771,7 @@ CPed::ProcessControl(void)
 	if (m_nPedState != PED_ARRESTED) {
 		if (m_nPedState == PED_DEAD) {
 			DeadPedMakesTyresBloody();
-#ifndef VC_PED_PORTS
-			if (CGame::nastyGame) {
-#else
 			if (CGame::nastyGame && !bIsInWater) {
-#endif
 				uint32 remainingBloodyFpTime = CTimer::GetTimeInMilliseconds() - m_bloodyFootprintCountOrDeathTime;
 				float timeDependentDist;
 				if (remainingBloodyFpTime >= 2000) {
@@ -2332,11 +2328,7 @@ CPed::ProcessControl(void)
 
 				ApplyMoveForce(forceDir);
 			}
-			if ((bIsInTheAir && !DyingOrDead())
-#ifdef VC_PED_PORTS
-				|| (!bIsStanding && !bWasStanding && m_nPedState == PED_FALL)
-#endif		
-			) {
+			if ((bIsInTheAir && !DyingOrDead()) || (!bIsStanding && !bWasStanding && m_nPedState == PED_FALL)) {
 				if (m_nPedStateTimer > 0 && m_nPedStateTimer <= 1000) {
 					forceDir = GetPosition() - m_vecHitLastPos;
 				} else {
@@ -2357,11 +2349,7 @@ CPed::ProcessControl(void)
 					if (m_nCollisionRecords == 1 && m_aCollisionRecords[0] != nil && m_aCollisionRecords[0]->IsBuilding()
 						&& m_nPedStateTimer > 50.0f / (2.0f * adjustedTs) && m_nPedStateTimer * 1.0f / 250.0f > Abs(forceDir.z)) {
 						offsetToCheck.x = -forceDir.y;
-#ifdef VC_PED_PORTS
 						offsetToCheck.z = 1.0f;
-#else
-						offsetToCheck.z = 0.0f;
-#endif
 						offsetToCheck.y = forceDir.x;
 						offsetToCheck.Normalise();
 
@@ -2386,7 +2374,6 @@ CPed::ProcessControl(void)
 						} else {
 							obstacleForFlyingOtherDirZ = 501.0f;
 						}
-#ifdef VC_PED_PORTS
 						uint8 flyDir = 0;
 						float feetZ = GetPosition().z - FEET_OFFSET;
 						if ((obstacleForFlyingZ <= feetZ || obstacleForFlyingOtherDirZ >= 500.0f) && (obstacleForFlyingZ <= feetZ || obstacleForFlyingOtherDirZ <= feetZ)) {
@@ -2403,7 +2390,6 @@ CPed::ProcessControl(void)
 							SetLanding();
 							bIsStanding = true;
 						}
-#endif
 						if (obstacleForFlyingZ < obstacleForFlyingOtherDirZ) {
 							offsetToCheck *= -1.0f;
 						}
@@ -2424,12 +2410,6 @@ CPed::ProcessControl(void)
 						}
 						bIsInTheAir = false;
 					} else if (m_vecDamageNormal.z > 0.4f) {
-#ifndef VC_PED_PORTS
-						forceDir = m_vecDamageNormal;
-						forceDir.z = 0.0f;
-						forceDir.Normalise();
-						ApplyMoveForce(2.0f * forceDir);
-#else
 						if (m_nPedState == PED_JUMP) {
 							if (m_nWaitTimer <= 2000) {
 								if (m_nWaitTimer < 1000)
@@ -2446,7 +2426,6 @@ CPed::ProcessControl(void)
 						} else {
 							ApplyMoveForce(-4.0f * forceDir);
 						}
-#endif
 					}
 				} else if ((CTimer::GetFrameCounter() + m_randomSeed % 256 + 3) & 7) {
 					if (IsPlayer() && m_nPedState != PED_JUMP && pad0->JumpJustDown()) {
@@ -2502,17 +2481,12 @@ CPed::ProcessControl(void)
 					offsetToCheck.z += 0.5f;
 
 					if (CWorld::ProcessVerticalLine(offsetToCheck, GetPosition().z - FEET_OFFSET, foundCol, foundEnt, true, true, false, true, false, false, nil)) {
-#ifdef VC_PED_PORTS
 						if (!bHeadStuckInCollision || FEET_OFFSET + foundCol.point.z < GetPosition().z) {
 							GetMatrix().GetPosition().z = FEET_OFFSET + foundCol.point.z;
 							GetMatrix().UpdateRW();
 							if (bHeadStuckInCollision)
 								bHeadStuckInCollision = false;
 						}
-#else
-						GetMatrix().GetPosition().z = FEET_OFFSET + foundCol.point.z;
-						GetMatrix().UpdateRW();
-#endif
 						SetLanding();
 						bIsStanding = true;
 					}
@@ -4131,12 +4105,9 @@ CPed::PedSetOutCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 		} else if (ped->m_objective == OBJECTIVE_NONE && ped->CharCreatedBy != MISSION_CHAR && ped->m_nPedState == PED_IDLE && !ped->IsPlayer()) {
 			ped->SetWanderPath(CGeneral::GetRandomNumberInRange(0.0f, 8.0f));
 		}
-	}
-#ifdef VC_PED_PORTS
-	else if (ped->m_nPedState == PED_DRIVING) {
+	} else if (ped->m_nPedState == PED_DRIVING) {
 		ped->m_nPedState = PED_IDLE;
 	}
-#endif
 
 	if (animAssoc)
 		animAssoc->blendDelta = -1000.0f;
