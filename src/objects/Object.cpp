@@ -527,7 +527,7 @@ IsObjectPointerValid(CObject* pObject)
 {
 	if (!pObject)
 		return false;
-	int index = CPools::GetObjectPool()->GetJustIndex(pObject);
+	int index = CPools::GetObjectPool()->GetJustIndex_NoFreeAssert(pObject);
 #ifdef FIX_BUGS
 	if (index < 0 || index >= CPools::GetObjectPool()->GetSize())
 #else

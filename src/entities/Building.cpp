@@ -27,14 +27,14 @@ IsBuildingPointerValid(CBuilding* pBuilding)
 	if (!pBuilding)
 		return false;
 	if (pBuilding->GetIsATreadable()) {
-		int index = CPools::GetTreadablePool()->GetJustIndex((CTreadable*)pBuilding);
+		int index = CPools::GetTreadablePool()->GetJustIndex_NoFreeAssert((CTreadable*)pBuilding);
 #ifdef FIX_BUGS
 		return index >= 0 && index < CPools::GetTreadablePool()->GetSize();
 #else
 		return index >= 0 && index <= CPools::GetTreadablePool()->GetSize();
 #endif
 	} else {
-		int index = CPools::GetBuildingPool()->GetJustIndex(pBuilding);
+		int index = CPools::GetBuildingPool()->GetJustIndex_NoFreeAssert(pBuilding);
 #ifdef FIX_BUGS
 		return index >= 0 && index < CPools::GetBuildingPool()->GetSize();
 #else

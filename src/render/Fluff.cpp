@@ -1291,7 +1291,7 @@ INITSAVEBUF
 
 		for (int32 j = 0; j < 6; j++) {
 			if (pPath->m_pObjects[j] != nil)
-				pPath->m_pObjects[j] = (CObject*)(CPools::GetObjectPool()->GetJustIndex(pPath->m_pObjects[j]) + 1);
+				pPath->m_pObjects[j] = (CObject*)(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert(pPath->m_pObjects[j]) + 1);
 		}
 
 		for (int32 j = 0; j < aArray[i].m_numNodes; j++) {
