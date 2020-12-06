@@ -35,6 +35,9 @@ public:
 	float m_aWheelPosition[4];
 	float m_aWheelSpeed[4];
 	uint8 m_auto_unused2;
+#if (defined GTA_PS2 && !defined FIX_BUGS)
+	uint8 m_bombType : 3;
+#endif
 	uint8 bTaxiLight : 1;
 	uint8 bFixedColour : 1;
 	uint8 bBigWheels : 1;
@@ -44,6 +47,9 @@ public:
 	uint8 bTankDetonateCars : 1;
 	uint8 bStuckInSand : 1;
 	uint8 bHeliDestroyed : 1;
+#if (defined GTA_PS2 && !defined FIX_BUGS)
+	CEntity* m_pBombRigger;
+#endif
 	int16 m_doingBurnout;
 	uint16 m_hydraulicState;
 	uint32 m_nBusDoorTimerEnd;

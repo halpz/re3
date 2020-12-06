@@ -69,10 +69,12 @@ void CRecordDataForChase::ProcessControlCars(void)
 {
 }
 
+#if (defined(GTA_PS2) || defined(FIX_BUGS))
 bool CRecordDataForChase::ShouldThisPadBeLeftAlone(uint8 pad)
 {
 	return false;
 }
+#endif
 
 void CRecordDataForChase::GiveUsACar(int32 mi, CVector pos, float angle, CAutomobile** ppCar, uint8 colour1, uint8 colour2)
 {

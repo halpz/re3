@@ -205,7 +205,7 @@ CText::GetNameOfLoadedMissionText(char *outName)
 void
 CText::ReadChunkHeader(ChunkHeader *buf, int32 file, size_t *offset)
 {
-#if DUMB
+#if THIS_IS_STUPID
 	char *_buf = (char*)buf;
 	for (int i = 0; i < sizeof(ChunkHeader); i++) {
 		CFileMgr::Read(file, &_buf[i], 1);

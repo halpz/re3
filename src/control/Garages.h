@@ -148,8 +148,8 @@ class CGarage
 		return Abs(TheCamera.GetPosition().x - GetGarageCenterX()) > SWITCH_GARAGE_DISTANCE_CLOSE ||
 			Abs(TheCamera.GetPosition().y - GetGarageCenterY()) > SWITCH_GARAGE_DISTANCE_CLOSE;
 #else
-		return Abs(TheCamera.GetPosition().x - m_fX1) > SWITCH_GARAGE_DISTANCE_CLOSE || 
-			Abs(TheCamera.GetPosition().y - m_fY1) > SWITCH_GARAGE_DISTANCE_CLOSE;
+		return Abs(TheCamera.GetPosition().x - m_fInfX) > SWITCH_GARAGE_DISTANCE_CLOSE || 
+			Abs(TheCamera.GetPosition().y - m_fInfY) > SWITCH_GARAGE_DISTANCE_CLOSE;
 #endif
 	}
 	void TidyUpGarageClose();
@@ -187,7 +187,7 @@ class CGarage
 	bool IsPointInsideGarage(CVector, float);
 	void ThrowCarsNearDoorOutOfGarage(CVehicle*);
 
-	int32 FindMaxNumStoredCarsForGarage() { return Max(NUM_GARAGE_STORED_CARS, m_nMaxStoredCars); }
+	int32 FindMaxNumStoredCarsForGarage() { return Min(NUM_GARAGE_STORED_CARS, m_nMaxStoredCars); }
 
 	friend class CGarages;
 	friend class cAudioManager;
@@ -198,7 +198,6 @@ class CGarages
 {
 	enum {
 		MESSAGE_LENGTH = 8,
-		MAX_NUM_CARS_IN_HIDEOUT_GARAGE = 4
 	};
 	static int32 BankVansCollected;
 	static bool BombsAreFree;
@@ -216,8 +215,7 @@ class CGarages
 	static bool PlayerInGarage;
 	static int32 PoliceCarsCollected;
 	static CGarage aGarages[NUM_GARAGES];
-	static CStoredCar aCarsInSafeHouses[TOTAL_HIDEOUT_GARAGES][MAX_NUM_CARS_IN_HIDEOUT_GARAGE];
-	static int32 AudioEntity;
+	static CStoredCar aCarsInSafeHouses[TOTAL_HIDEOUT_GARAGES][NUM_GARAGE_STORED_CARS];
 	static bool bCamShouldBeOutisde;
 
 public:

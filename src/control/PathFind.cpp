@@ -286,6 +286,8 @@ CPathFind::AllocatePathFindInfoMem(int16 numPathGroups)
 	DetachedInfoForTilePeds = new CPathInfoForObject[12*NUMDETACHED_PEDS];
 	memset(DetachedInfoForTilePeds, 0, 12*NUMDETACHED_PEDS*sizeof(CPathInfoForObject));
 
+	delete[] TempExternalNodes;
+	TempExternalNodes = nil;
 	TempExternalNodes = new CTempNodeExternal[NUMTEMPEXTERNALNODES];
 	memset(TempExternalNodes, 0, NUMTEMPEXTERNALNODES*sizeof(CTempNodeExternal));
 	NumTempExternalNodes = 0;

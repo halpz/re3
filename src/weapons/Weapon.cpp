@@ -1457,7 +1457,7 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 
 #ifndef FIX_BUGS
 					CVector dist = point->point - (*source);
-					CVector smokePos = point->point - Max(0.1f * dist.Magnitude(), 0.2f) / dist.Magnitude();
+					CVector smokePos = point->point - Max(0.1f * dist.Magnitude(), 0.2f) * dist / dist.Magnitude();
 #else
 				    CVector smokePos = point->point;
 #endif // !FIX_BUGS
@@ -1472,7 +1472,7 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 				}
 				case ENTITY_TYPE_VEHICLE:
 				{
-					if (point->pieceB >= SURFACE_LAMP_POST && point->pieceB <= SURFACE_METAL_CHAIN_FENCE) {
+					if (point->pieceB >= CAR_PIECE_WHEEL_LF && point->pieceB <= CAR_PIECE_WHEEL_RR) {
 						((CVehicle*)victim)->BurstTyre(point->pieceB, true);
 
 						for (int32 i = 0; i < 4; i++)
@@ -1486,9 +1486,9 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 							CParticle::AddParticle(PARTICLE_SPARK, point->point, point->normal * 0.05f);
 
 #ifndef FIX_BUGS
-						CVector dist = point.point - (*fireSource);
+						CVector dist = point->point - (*source);
 						CVector offset = dist - Max(0.2f * dist.Magnitude(), 0.5f) * CVector(ahead.x, ahead.y, 0.0f);
-						CVector smokePos = *fireSource + offset;
+						CVector smokePos = *source + offset;
 #else
 						CVector smokePos = point->point;
 #endif
@@ -1866,7 +1866,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				{
 					case ENTITY_TYPE_VEHICLE:
 					{
-						if (point.pieceB >= SURFACE_LAMP_POST && point.pieceB <= SURFACE_METAL_CHAIN_FENCE) {
+						if (point.pieceB >= CAR_PIECE_WHEEL_LF && point.pieceB <= CAR_PIECE_WHEEL_RR) {
 							((CVehicle*)victim)->BurstTyre(point.pieceB, true);
 
 							for (int32 i = 0; i < 4; i++)
