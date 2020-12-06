@@ -8,7 +8,7 @@
 #  SNDFILE_INCLUDE_DIRS - the libsndfile include directory
 #  SNDFILE_LIBRARIES    - Link these to use libsndfile
 #  SNDFILE_CFLAGS       - Compile options to use libsndfile
-#  SndFile::SNdFile     - Imported library of libsndfile
+#  SndFile::SndFile     - Imported library of libsndfile
 #
 #  Copyright (C) 2006  Wengo
 #
@@ -48,15 +48,15 @@ find_library(SNDFILE_LIBRARY
 
 set(SNDFILE_CFLAGS "${PKG_SNDFILE_CFLAGS_OTHER}" CACHE STRING "CFLAGS of libsndfile")
 
-set(SNDFILE_INCLUDE_DIRS ${SNDFILE_INCLUDE_DIR})
-set(SNDFILE_LIBRARIES ${SNDFILE_LIBRARY})
+set(SNDFILE_INCLUDE_DIRS "${SNDFILE_INCLUDE_DIR}")
+set(SNDFILE_LIBRARIES "${SNDFILE_LIBRARY}")
 
 if (SNDFILE_INCLUDE_DIRS AND SNDFILE_LIBRARIES)
 set(SNDFILE_FOUND TRUE)
 endif (SNDFILE_INCLUDE_DIRS AND SNDFILE_LIBRARIES)
 
 
-# handle the QUIETLY and REQUIRED arguments and set SNdFile_FOUND to TRUE if
+# handle the QUIETLY and REQUIRED arguments and set SndFile_FOUND to TRUE if
 # all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(SndFile DEFAULT_MSG SNDFILE_INCLUDE_DIRS SNDFILE_LIBRARIES)

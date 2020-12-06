@@ -40,19 +40,25 @@ if(RE3_AUDIO STREQUAL "OAL")
     find_package(OpenAL REQUIRED)
     target_include_directories(re3 PRIVATE ${OPENAL_INCLUDE_DIR})
     target_link_libraries(re3 PRIVATE ${OPENAL_LIBRARY})
+    target_compile_definitions(re3 PRIVATE ${OPENAL_DEFINITIONS})
     target_compile_definitions(re3 PRIVATE AUDIO_OAL)
 elseif(RE3_AUDIO STREQUAL "MSS")
     target_compile_definitions(re3 PRIVATE AUDIO_MSS)
 endif()
 
 if(RE3_WITH_OPUS)
+    find_package(opusfile REQUIRED)
+    target_link_libraries(re3 PRIVATE
+        opusfile::opusfile
+    )
+    target_compile_definitions(re3 PRIVATE AUDIO_OPUS)
+else()
     find_package(mpg123 REQUIRED)
     find_package(SndFile REQUIRED)
     target_link_libraries(re3 PRIVATE
         MPG123::libmpg123
         SndFile::SndFile
     )
-    target_compile_definitions(re3 PRIVATE AUDIO_OPUS)
 endif()
 
 target_compile_definitions(re3 PRIVATE )
