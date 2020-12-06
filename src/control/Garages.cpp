@@ -355,7 +355,7 @@ void CGarage::Update()
 			if (m_pDoor2)
 				m_pDoor2->bUsesCollision = true;
 		}
-#endif
+#else
 		if (m_eGarageState == GS_OPENING || m_eGarageState == GS_OPENED) {
 			if (m_pDoor1) {
 				if (FindPlayerPed()->m_pCurrentPhysSurface == m_pDoor1 || FindPlayerPed()->GetPedState() == PED_JUMP || FindPlayerPed()->GetPedState() == PED_FALL || !FindPlayerPed()->bIsStanding)
@@ -372,6 +372,7 @@ void CGarage::Update()
 			if (m_pDoor2)
 				m_pDoor2->bUsesCollision = true;
 		}
+#endif
 	}
 	switch (m_eGarageType) {
 	case GARAGE_RESPRAY:
