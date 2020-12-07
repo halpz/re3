@@ -187,7 +187,7 @@ enum eWaitState {
 	WAITSTATE_PLAYANIM_HANDSUP_SIMPLE,
 };
 
-enum eObjective : uint32 {
+enum eObjective {
 	OBJECTIVE_NONE,
 	OBJECTIVE_WAIT_ON_FOOT,
 	OBJECTIVE_WAIT_ON_FOOT_FOR_COP,
