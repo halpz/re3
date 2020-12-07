@@ -390,9 +390,9 @@ CFont::PrintChar(float x, float y, wchar c)
 						x + 32.0f * RenderState.scaleX * 1.0f,
 						y + 33.0f * RenderState.scaleY * 0.5f),
 					RenderState.color,
-					xoff / 16.0f, yoff / 12.8f,
-					(xoff + 1.0f) / 16.0f - 0.001f, yoff / 12.8f - 0.017f,
-					xoff / 16.0f, (yoff + 1.0f) / 12.8f,
+					xoff / 16.0f, yoff / 12.8f + 0.0021f,
+					(xoff + 1.0f) / 16.0f - 0.001f, yoff / 12.8f + 0.0021f,
+					xoff / 16.0f, (yoff + 1.0f) / 12.8f - 0.017f,
 					(xoff + 1.0f) / 16.0f - 0.001f, (yoff + 1.0f) / 12.8f - 0.017f);
 			}
 		} else
