@@ -153,7 +153,7 @@ enum eWaitState {
 	WAITSTATE_FINISH_FLEE
 };
 
-enum eObjective : uint32 {
+enum eObjective {
 	OBJECTIVE_NONE,
 	OBJECTIVE_WAIT_ON_FOOT,
 	OBJECTIVE_FLEE_ON_FOOT_TILL_SAFE,
