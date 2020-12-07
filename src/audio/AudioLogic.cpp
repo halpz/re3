@@ -47,8 +47,8 @@ const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
 const int policeChannel = channels + 1;
 const int allChannels = channels + 2;
 
-enum PLAY_STATUS : uint8 { PLAY_STATUS_STOPPED = 0, PLAY_STATUS_PLAYING, PLAY_STATUS_FINISHED };
-enum LOADING_STATUS : uint8 { LOADING_STATUS_NOT_LOADED = 0, LOADING_STATUS_LOADED, LOADING_STATUS_FAILED };
+enum PLAY_STATUS { PLAY_STATUS_STOPPED = 0, PLAY_STATUS_PLAYING, PLAY_STATUS_FINISHED };
+enum LOADING_STATUS { LOADING_STATUS_NOT_LOADED = 0, LOADING_STATUS_LOADED, LOADING_STATUS_FAILED };
 
 void
 cAudioManager::PreInitialiseGameSpecificSetup() const

@@ -10,7 +10,7 @@ enum eWastedBustedState
 	WBSTATE_FAILED_CRITICAL_MISSION,
 };
 
-enum eBustedAudioState : uint8
+enum eBustedAudioState
 {
 	BUSTEDAUDIO_NONE,
 	BUSTEDAUDIO_LOADING,
@@ -82,7 +82,7 @@ public:
 	bool m_bGetOutOfJailFree;
 	bool m_bGetOutOfHospitalFree;
 	bool m_bDriveByAllowed;
-	eBustedAudioState m_nBustedAudioStatus;
+	uint8 m_nBustedAudioStatus;
 	int16 m_nCurrentBustedAudio;
 	char m_aSkinName[32];
 	RwTexture *m_pSkinTexture;

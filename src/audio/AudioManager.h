@@ -149,7 +149,7 @@ public:
 class cVehicleParams
 {
 public:
-	eVehicleType m_VehicleType;
+	uint8 m_VehicleType;
 	bool m_bDistanceCalculated;
 	float m_fDistance;
 	CVehicle *m_pVehicle;

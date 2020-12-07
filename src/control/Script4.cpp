@@ -1513,7 +1513,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		script_assert(pVehicle);
-		pVehicle->SetStatus((eEntityStatus)ScriptParams[1]);
+		pVehicle->SetStatus(ScriptParams[1]);
 		return 0;
 	}
 	case COMMAND_IS_CHAR_MALE:

@@ -29,7 +29,7 @@ void CSetPieces::AddOne(uint8 type, CVector2D vTriggerInf, CVector2D vTriggerSup
 {
 	if (NumSetPieces >= NUM_SETPIECES)
 		return;
-	aSetPieces[NumSetPieces].m_nType = (eSetPieceType)type;
+	aSetPieces[NumSetPieces].m_nType = type;
 	aSetPieces[NumSetPieces].m_vTriggerInf.x = Min(vTriggerInf.x, vTriggerSup.x);
 	aSetPieces[NumSetPieces].m_vTriggerInf.y = Min(vTriggerInf.y, vTriggerSup.y);
 	aSetPieces[NumSetPieces].m_vTriggerSup.x = Max(vTriggerInf.x, vTriggerSup.x);
