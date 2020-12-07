@@ -19,6 +19,7 @@
 #include "Fire.h"
 #include "Script.h"
 #include "Garages.h"
+#include "screendroplets.h"
 
 uint8 CGameLogic::ActivePlayers;
 
@@ -117,6 +118,9 @@ CGameLogic::Update()
 				}
 			}
 			CEventList::Initialise();
+#ifdef SCREEN_DROPLETS
+			ScreenDroplets::Initialise();
+#endif
 			CMessages::ClearMessages();
 			CCarCtrl::ClearInterestingVehicleList();
 			CWorld::ClearExcitingStuffFromArea(pPlayerInfo.GetPos(), 4000.0f, 1);
@@ -196,6 +200,9 @@ CGameLogic::Update()
 				}
 			}
 			CEventList::Initialise();
+#ifdef SCREEN_DROPLETS
+			ScreenDroplets::Initialise();
+#endif
 			CMessages::ClearMessages();
 			CCarCtrl::ClearInterestingVehicleList();
 			CWorld::ClearExcitingStuffFromArea(pPlayerInfo.GetPos(), 4000.0f, 1);
@@ -245,6 +252,9 @@ CGameLogic::Update()
 				}
 			}
 			CEventList::Initialise();
+#ifdef SCREEN_DROPLETS
+			ScreenDroplets::Initialise();
+#endif
 			CMessages::ClearMessages();
 			CCarCtrl::ClearInterestingVehicleList();
 			CWorld::ClearExcitingStuffFromArea(pPlayerInfo.GetPos(), 4000.0f, 1);

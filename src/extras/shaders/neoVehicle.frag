@@ -1,13 +1,11 @@
 uniform sampler2D tex0;
 uniform sampler2D tex1;
 
-in vec4 v_color;
-in vec4 v_reflcolor;
-in vec2 v_tex0;
-in vec2 v_tex1;
-in float v_fog;
-
-out vec4 color;
+FSIN vec4 v_color;
+FSIN vec4 v_reflcolor;
+FSIN vec2 v_tex0;
+FSIN vec2 v_tex1;
+FSIN float v_fog;
 
 void
 main(void)
@@ -20,9 +18,12 @@ main(void)
 
 	vec3 pass2 = v_reflcolor.rgb * v_fog;
 
+	vec4 color;
 	color.rgb = pass1.rgb*pass1.a + pass2;
 	color.a = pass1.a;
 
 //	color.rgb = mix(u_fogColor.rgb, color.rgb, v_fog);
 	DoAlphaTest(color.a);
+
+	FRAGCOLOR(color);
 }

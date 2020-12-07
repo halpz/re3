@@ -75,7 +75,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 
 	SetModelIndex(id);
 
-	pHandling = mod_HandlingManager.GetHandlingData((eHandlingId)mi->m_handlingId);
+	pHandling = mod_HandlingManager.GetHandlingData((tVehicleType)mi->m_handlingId);
 
 	m_auto_unused1 = 20.0f;
 	m_auto_unused2 = 0;
@@ -4180,6 +4180,93 @@ CAutomobile::HasCarStoppedBecauseOfLight(void)
 	}
 
 	return false;
+}
+
+void
+CPed::DeadPedMakesTyresBloody(void)
+{
+	int minX = CWorld::GetSectorIndexX(GetPosition().x - 2.0f);
+	if (minX < 0) minX = 0;
+	int minY = CWorld::GetSectorIndexY(GetPosition().y - 2.0f);
+	if (minY < 0) minY = 0;
+	int maxX = CWorld::GetSectorIndexX(GetPosition().x + 2.0f);
+	if (maxX > NUMSECTORS_X-1) maxX = NUMSECTORS_X-1;
+	int maxY = CWorld::GetSectorIndexY(GetPosition().y + 2.0f);
+	if (maxY > NUMSECTORS_Y-1) maxY = NUMSECTORS_Y-1;
+
+	CWorld::AdvanceCurrentScanCode();
+
+	for (int curY = minY; curY <= maxY; curY++) {
+		for (int curX = minX; curX <= maxX; curX++) {
+			CSector *sector = CWorld::GetSector(curX, curY);
+			MakeTyresMuddySectorList(sector->m_lists[ENTITYLIST_VEHICLES]);
+			MakeTyresMuddySectorList(sector->m_lists[ENTITYLIST_VEHICLES_OVERLAP]);
+		}
+	}
+}
+
+void
+CPed::MakeTyresMuddySectorList(CPtrList &list)
+{
+	for (CPtrNode *node = list.first; node; node = node->next) {
+		CVehicle *veh = (CVehicle*)node->item;
+		if (veh->IsCar() && veh->m_scanCode != CWorld::GetCurrentScanCode()) {
+			veh->m_scanCode = CWorld::GetCurrentScanCode();
+
+			if (Abs(GetPosition().x - veh->GetPosition().x) < 10.0f) {
+
+				if (Abs(GetPosition().y - veh->GetPosition().y) < 10.0f
+					&& veh->m_vecMoveSpeed.MagnitudeSqr2D() > 0.05f) {
+
+					for(int wheel = 0; wheel < 4; wheel++) {
+
+						if (!((CAutomobile*)veh)->m_aWheelSkidmarkBloody[wheel]
+							&& ((CAutomobile*)veh)->m_aSuspensionSpringRatio[wheel] < 1.0f) {
+
+							CColModel *vehCol = veh->GetModelInfo()->GetColModel();
+							CVector approxWheelOffset;
+							switch (wheel) {
+								case 0:
+									approxWheelOffset = CVector(-vehCol->boundingBox.max.x, vehCol->boundingBox.max.y, 0.0f);
+									break;
+								case 1:
+									approxWheelOffset = CVector(-vehCol->boundingBox.max.x, vehCol->boundingBox.min.y, 0.0f);
+									break;
+								case 2:
+									approxWheelOffset = CVector(vehCol->boundingBox.max.x, vehCol->boundingBox.max.y, 0.0f);
+									break;
+								case 3:
+									approxWheelOffset = CVector(vehCol->boundingBox.max.x, vehCol->boundingBox.min.y, 0.0f);
+									break;
+								default:
+									break;
+							}
+
+							// I hope so
+							CVector wheelPos = veh->GetMatrix() * approxWheelOffset;
+							if (Abs(wheelPos.z - GetPosition().z) < 2.0f) {
+
+								if ((wheelPos - GetPosition()).MagnitudeSqr2D() < 1.0f) {
+									if (CGame::nastyGame) {
+										((CAutomobile*)veh)->m_aWheelSkidmarkBloody[wheel] = true;
+										DMAudio.PlayOneShot(veh->m_audioEntityId, SOUND_SPLATTER, 0.0f);
+									}
+									veh->ApplyMoveForce(CVector(0.0f, 0.0f, 50.0f));
+									
+									CVector vehAndWheelDist = wheelPos - veh->GetPosition();
+									veh->ApplyTurnForce(CVector(0.0f, 0.0f, 50.0f), vehAndWheelDist);
+
+									if (veh == FindPlayerVehicle()) {
+										CPad::GetPad(0)->StartShake(300, 70);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 void

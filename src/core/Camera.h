@@ -213,7 +213,9 @@ public:
 	void PrintMode(void);
 
 	void Process_Debug(const CVector&, float, float, float);
+#ifdef GTA_SCENE_EDIT
 	void Process_Editor(const CVector&, float, float, float);
+#endif
 	void Process_ModelView(const CVector &CameraTarget, float, float, float);
 	void Process_FollowPed(const CVector &CameraTarget, float TargetOrientation, float, float);
 	void Process_FollowPedWithMouse(const CVector &CameraTarget, float TargetOrientation, float, float);
@@ -348,7 +350,7 @@ public:
 	bool m_bcutsceneFinished;
 	bool m_bCullZoneChecksOn;
 	bool m_bFirstPersonBeingUsed;
-	bool m_bJustJumpedOutOf1stPersonBecauseOfTarget;
+	bool m_bUnknown;
 	bool m_bIdleOn;
 	bool m_bInATunnelAndABigVehicle;
 	bool m_bInitialNodeFound;

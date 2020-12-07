@@ -150,13 +150,8 @@ CPostFX::Open(RwCamera *cam)
 #ifdef RW_OPENGL
 	using namespace rw::gl3;
 	{
-#ifdef RW_GLES2
-#include "gl2_shaders/im2d_gl2.inc"
-#include "gl2_shaders/colourfilterIII_fs_gl2.inc"
-#else
-#include "shaders/im2d_gl3.inc"
-#include "shaders/colourfilterIII_fs_gl3.inc"
-#endif
+#include "shaders/im2d_gl.inc"
+#include "shaders/colourfilterIII_fs_gl.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, im2d_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, colourfilterIII_frag_src, nil };
 	colourFilterIII = Shader::create(vs, fs);
@@ -164,17 +159,12 @@ CPostFX::Open(RwCamera *cam)
 	}
 
 	{
-#ifdef RW_GLES2
-#include "gl2_shaders/im2d_gl2.inc"
-#include "gl2_shaders/contrast_fs_gl2.inc"
-#else
-#include "shaders/im2d_gl3.inc"
-#include "shaders/contrast_fs_gl3.inc"
+#include "shaders/im2d_gl.inc"
+#include "shaders/contrast_fs_gl.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, im2d_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, contrast_frag_src, nil };
 	contrast = Shader::create(vs, fs);
 	assert(contrast);
-#endif
 	}
 
 #endif
@@ -374,6 +364,14 @@ CPostFX::NeedFrontBuffer(int32 type)
 }
 
 void
+CPostFX::GetBackBuffer(RwCamera *cam)
+{
+	RwRasterPushContext(pBackBuffer);
+	RwRasterRenderFast(RwCameraGetRaster(cam), 0, 0);
+	RwRasterPopContext();
+}
+
+void
 CPostFX::Render(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blur, int32 type, uint32 bluralpha)
 {
 	switch(type)
@@ -415,11 +413,8 @@ CPostFX::Render(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blu
 	assert(pFrontBuffer);
 	assert(pBackBuffer);
 
-	if(NeedBackBuffer()){
-		RwRasterPushContext(pBackBuffer);
-		RwRasterRenderFast(RwCameraGetRaster(cam), 0, 0);
-		RwRasterPopContext();
-	}
+	if(NeedBackBuffer())
+		GetBackBuffer(cam);
 
 	DefinedState();
 

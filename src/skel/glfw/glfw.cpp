@@ -40,6 +40,7 @@
 #include "Sprite2d.h"
 #include "AnimViewer.h"
 #include "Font.h"
+#include "MemoryMgr.h"
 
 #define MAX_SUBSYSTEMS		(16)
 
@@ -244,8 +245,10 @@ double
 psTimer(void)
 {
 	struct timespec start; 
-#ifdef __linux__
+#if defined(CLOCK_MONOTONIC_RAW)
 	clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+#elif defined(CLOCK_MONOTONIC_FAST)
+	clock_gettime(CLOCK_MONOTONIC_FAST, &start);
 #else
 	clock_gettime(CLOCK_MONOTONIC, &start);
 #endif
@@ -275,7 +278,11 @@ psMouseSetPos(RwV2d *pos)
 RwMemoryFunctions*
 psGetMemoryFunctions(void)
 {
+#ifdef USE_CUSTOM_ALLOCATOR
+	return &memFuncs;
+#else
 	return nil;
+#endif
 }
 
 /*
@@ -382,7 +389,7 @@ psInitialize(void)
 	
 	InitialiseLanguage();
 
-#ifndef GTA3_1_1_PATCH
+#if GTA_VERSION < GTA3_PC_11
 	FrontEndMenuManager.LoadSettings();
 #endif
 
@@ -436,7 +443,7 @@ psInitialize(void)
 	
 #ifndef PS2_MENU
 
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	FrontEndMenuManager.LoadSettings();
 #endif
 
@@ -826,7 +833,10 @@ psSelectDevice()
 		
 		PSGLOBAL(fullScreen) = !FrontEndMenuManager.m_nPrefsWindowed;
 #endif
-	
+
+#ifdef MULTISAMPLING
+	RwD3D8EngineSetMultiSamplingLevels(1 << FrontEndMenuManager.m_nPrefsMSAALevel);
+#endif
 	return TRUE;
 }
 
@@ -893,7 +903,7 @@ void psPostRWinit(void)
 	RwEngineGetVideoModeInfo(&vm, GcurSelVM);
 
 	glfwSetKeyCallback(PSGLOBAL(window), keypressCB);
-	glfwSetWindowSizeCallback(PSGLOBAL(window), resizeCB);
+	glfwSetFramebufferSizeCallback(PSGLOBAL(window), resizeCB);
 	glfwSetScrollCallback(PSGLOBAL(window), scrollCB);
 	glfwSetCursorPosCallback(PSGLOBAL(window), cursorCB);
 	glfwSetCursorEnterCallback(PSGLOBAL(window), cursorEnterCB);
@@ -1414,8 +1424,13 @@ _InputTranslateShiftKeyUpDown(RsKeyCodes *rs) {
 // TODO this only works in frontend(and luckily only frontend use this). Fun fact: if I get pos manually in game, glfw reports that it's > 32000
 void
 cursorCB(GLFWwindow* window, double xpos, double ypos) {
-	FrontEndMenuManager.m_nMouseTempPosX = xpos;
-	FrontEndMenuManager.m_nMouseTempPosY = ypos;
+	if (!FrontEndMenuManager.m_bMenuActive)
+		return;
+	
+	int winw, winh;
+	glfwGetWindowSize(PSGLOBAL(window), &winw, &winh);
+	FrontEndMenuManager.m_nMouseTempPosX = xpos * (RsGlobal.maximumWidth / winw);
+	FrontEndMenuManager.m_nMouseTempPosY = ypos * (RsGlobal.maximumHeight / winh);
 }
 
 void
@@ -1438,12 +1453,14 @@ WinMain(HINSTANCE instance,
 	RwChar** argv;
 	SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, nil, SPIF_SENDCHANGE);
 
-#if 0
-	// TODO: make this an option somewhere
-	AllocConsole();
-	freopen("CONIN$", "r", stdin);
-	freopen("CONOUT$", "w", stdout);
-	freopen("CONOUT$", "w", stderr);
+#ifndef MASTER
+	if (strstr(cmdLine, "-console"))
+	{
+		AllocConsole();
+		freopen("CONIN$", "r", stdin);
+		freopen("CONOUT$", "w", stdout);
+		freopen("CONOUT$", "w", stderr);
+	}
 #endif
 
 #else
@@ -1453,6 +1470,10 @@ main(int argc, char *argv[])
 #endif
 	RwV2d pos;
 	RwInt32 i;
+
+#ifdef USE_CUSTOM_ALLOCATOR
+	InitMemoryMgr();
+#endif
 
 #ifndef _WIN32
 	struct sigaction act;

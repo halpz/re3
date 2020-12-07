@@ -167,7 +167,7 @@ cAudioManager::SetEntityStatus(int32 id, uint8 status)
 }
 
 void
-cAudioManager::PlayOneShot(int32 index, int16 sound, float vol)
+cAudioManager::PlayOneShot(int32 index, uint16 sound, float vol)
 {
 	static const uint8 OneShotPriority[] = {3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 3, 5, 2, 2, 1, 1, 3, 1, 3, 3, 1, 1, 1, 4, 4, 3, 1, 1,
 	                                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 3, 2, 2, 2, 2, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

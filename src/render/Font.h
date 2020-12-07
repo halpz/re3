@@ -63,6 +63,31 @@ enum
 #define FONT_LOCALE(style) (style)
 #endif
 
+#ifdef BUTTON_ICONS
+enum
+{
+	BUTTON_NONE = -1,
+#if 0 // unused
+	BUTTON_UP,
+	BUTTON_DOWN,
+	BUTTON_LEFT,
+	BUTTON_RIGHT,
+#endif
+	BUTTON_CROSS,
+	BUTTON_CIRCLE,
+	BUTTON_SQUARE,
+	BUTTON_TRIANGLE,
+	BUTTON_L1,
+	BUTTON_L2,
+	BUTTON_L3,
+	BUTTON_R1,
+	BUTTON_R2,
+	BUTTON_R3,
+	MAX_BUTTON_ICONS
+};
+#endif // BUTTON_ICONS
+
+
 class CFont
 {
 #ifdef MORE_LANGUAGES
@@ -77,11 +102,24 @@ public:
 	static CSprite2d Sprite[MAX_FONTS];
 	static CFontDetails Details;
 
+#ifdef BUTTON_ICONS
+	static int32 ButtonsSlot;
+	static CSprite2d ButtonSprite[MAX_BUTTON_ICONS];
+	static int PS2Symbol;
+
+	static void DrawButton(float x, float y);
+#endif // BUTTON_ICONS
+
+
 	static void Initialise(void);
 	static void Shutdown(void);
 	static void InitPerFrame(void);
 	static void PrintChar(float x, float y, wchar c);
 	static void PrintString(float x, float y, wchar *s);
+#ifdef XBOX_SUBTITLES
+	static void PrintStringFromBottom(float x, float y, wchar *str);
+	static void PrintOutlinedString(float x, float y, wchar *str, float outlineStrength, bool fromBottom, CRGBA outlineColor);
+#endif
 	static int GetNumberLines(float xstart, float ystart, wchar *s);
 	static void GetTextRect(CRect *rect, float xstart, float ystart, wchar *s);
 #ifdef MORE_LANGUAGES

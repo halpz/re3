@@ -405,7 +405,7 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		else
 			fThrust = fThrustVar * (CPad::GetPad(0)->GetAccelerate() - 2 * CPad::GetPad(0)->GetBrake()) / 255.0f + 0.95f;
 		fThrust -= fRotorFallOff * DotProduct(m_vecMoveSpeed, GetUp());
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 		if (fThrust > 0.9f && GetPosition().z > 80.0f)
 			fThrust = 0.9f;
 #endif
@@ -580,6 +580,13 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 		ApplyMoveForce(impulse * direction);
 		ApplyTurnForce(turnImpulse * direction, wheelContactPoint);
 	}
+}
+
+void
+CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint, int32 wheelsOnGround, float thrust,
+                           float brake, float adhesion, int8 wheelId, float *wheelSpeed, tWheelState *wheelState, eBikeWheelSpecial special, uint16 wheelStatus)
+{
+	// TODO: mobile code
 }
 
 float

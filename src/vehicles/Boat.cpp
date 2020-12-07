@@ -50,7 +50,7 @@ CBoat::CBoat(int mi, uint8 owner) : CVehicle(owner)
 	m_fMovingRotation = 0.0f;
 	SetModelIndex(mi);
 
-	pHandling = mod_HandlingManager.GetHandlingData((eHandlingId)minfo->m_handlingId);
+	pHandling = mod_HandlingManager.GetHandlingData((tVehicleType)minfo->m_handlingId);
 	minfo->ChooseVehicleColour(m_currentColour1, m_currentColour2);
 
 	m_fMass = pHandling->fMass;

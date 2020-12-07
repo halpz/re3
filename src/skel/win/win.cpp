@@ -97,6 +97,7 @@ static psGlobalType PsGlobal;
 #include "Sprite2d.h"
 #include "AnimViewer.h"
 #include "Font.h"
+#include "MemoryMgr.h"
 
 VALIDATE_SIZE(psGlobalType, 0x28);
 
@@ -304,7 +305,11 @@ psMouseSetPos(RwV2d *pos)
 RwMemoryFunctions*
 psGetMemoryFunctions(void)
 {
+#ifdef USE_CUSTOM_ALLOCATOR
+	return &memFuncs;
+#else
 	return nil;
+#endif
 }
 
 /*
@@ -646,7 +651,7 @@ psInitialize(void)
 	C_PcSave::SetSaveDirectory(_psGetUserFilesFolder());
 	
 	InitialiseLanguage();
-#ifndef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	FrontEndMenuManager.LoadSettings();
 #endif
 
@@ -698,7 +703,7 @@ psInitialize(void)
 
 #ifndef PS2_MENU
 
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	FrontEndMenuManager.LoadSettings();
 #endif
 
@@ -2006,12 +2011,18 @@ WinMain(HINSTANCE instance,
 	RwChar **argv;
 	SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, nil, SPIF_SENDCHANGE);
 
-#if 0
-	// TODO: make this an option somewhere
-	AllocConsole();
-	freopen("CONIN$", "r", stdin);
-	freopen("CONOUT$", "w", stdout);
-	freopen("CONOUT$", "w", stderr);
+#ifndef MASTER
+	if (strstr(cmdLine, "-console"))
+	{
+		AllocConsole();
+		freopen("CONIN$", "r", stdin);
+		freopen("CONOUT$", "w", stdout);
+		freopen("CONOUT$", "w", stderr);
+	}
+#endif
+
+#ifdef USE_CUSTOM_ALLOCATOR
+	InitMemoryMgr();
 #endif
 
 	/* 

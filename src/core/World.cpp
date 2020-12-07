@@ -53,6 +53,9 @@ bool CWorld::bIncludeCarTyres;
 void
 CWorld::Initialise()
 {
+#if GTA_VERSION <= GTA3_PS2_160
+	CPools::Initialise();
+#endif
 	pIgnoreEntity = nil;
 	bDoingCarCollisions = false;
 	bSecondShift = false;
@@ -919,24 +922,24 @@ CEntity *
 CWorld::TestSphereAgainstSectorList(CPtrList &list, CVector spherePos, float radius, CEntity *entityToIgnore,
                                     bool ignoreSomeObjects)
 {
-	static CColModel sphereCol;
+	static CColModel OurColModel;
 
-	sphereCol.boundingSphere.center.x = 0.0f;
-	sphereCol.boundingSphere.center.y = 0.0f;
-	sphereCol.boundingSphere.center.z = 0.0f;
-	sphereCol.boundingSphere.radius = radius;
-	sphereCol.boundingBox.min.x = -radius;
-	sphereCol.boundingBox.min.y = -radius;
-	sphereCol.boundingBox.min.z = -radius;
-	sphereCol.boundingBox.max.x = radius;
-	sphereCol.boundingBox.max.y = radius;
-	sphereCol.boundingBox.max.z = radius;
-	sphereCol.numSpheres = 1;
-	sphereCol.spheres = &sphereCol.boundingSphere;
-	sphereCol.numLines = 0;
-	sphereCol.numBoxes = 0;
-	sphereCol.numTriangles = 0;
-	sphereCol.ownsCollisionVolumes = false;
+	OurColModel.boundingSphere.center.x = 0.0f;
+	OurColModel.boundingSphere.center.y = 0.0f;
+	OurColModel.boundingSphere.center.z = 0.0f;
+	OurColModel.boundingSphere.radius = radius;
+	OurColModel.boundingBox.min.x = -radius;
+	OurColModel.boundingBox.min.y = -radius;
+	OurColModel.boundingBox.min.z = -radius;
+	OurColModel.boundingBox.max.x = radius;
+	OurColModel.boundingBox.max.y = radius;
+	OurColModel.boundingBox.max.z = radius;
+	OurColModel.numSpheres = 1;
+	OurColModel.spheres = &OurColModel.boundingSphere;
+	OurColModel.numLines = 0;
+	OurColModel.numBoxes = 0;
+	OurColModel.numTriangles = 0;
+	OurColModel.ownsCollisionVolumes = false;
 
 	CMatrix sphereMat;
 	sphereMat.SetTranslate(spherePos);
@@ -959,7 +962,7 @@ CWorld::TestSphereAgainstSectorList(CPtrList &list, CVector spherePos, float rad
 				if(e->GetBoundRadius() + radius > distance) {
 					CColModel *eCol = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
 					int collidedSpheres =
-					    CCollision::ProcessColModels(sphereMat, sphereCol, e->GetMatrix(), *eCol,
+					    CCollision::ProcessColModels(sphereMat, OurColModel, e->GetMatrix(), *eCol,
 					                                 gaTempSphereColPoints, nil, nil);
 
 					if(collidedSpheres != 0 ||
@@ -1735,10 +1738,12 @@ CWorld::ShutDown(void)
 			CWorld::Remove(pEntity);
 			delete pEntity;
 		}
+#ifndef FIX_BUGS
 		pSector->m_lists[ENTITYLIST_BUILDINGS].Flush();
 		pSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP].Flush();
 		pSector->m_lists[ENTITYLIST_DUMMIES].Flush();
 		pSector->m_lists[ENTITYLIST_DUMMIES_OVERLAP].Flush();
+#endif
 	}
 	for(int32 i = 0; i < 4; i++) {
 		for(CPtrNode *pNode = GetBigBuildingList((eLevelName)i).first; pNode; pNode = pNode->next) {
@@ -1750,6 +1755,12 @@ CWorld::ShutDown(void)
 	}
 	for(int i = 0; i < NUMSECTORS_X * NUMSECTORS_Y; i++) {
 		CSector *pSector = GetSector(i % NUMSECTORS_X, i / NUMSECTORS_Y);
+#ifdef FIX_BUGS
+		pSector->m_lists[ENTITYLIST_BUILDINGS].Flush();
+		pSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP].Flush();
+		pSector->m_lists[ENTITYLIST_DUMMIES].Flush();
+		pSector->m_lists[ENTITYLIST_DUMMIES_OVERLAP].Flush();
+#endif
 		if(pSector->m_lists[ENTITYLIST_BUILDINGS].first) {
 			sprintf(gString, "Building list %d,%d not empty\n", i % NUMSECTORS_X, i / NUMSECTORS_Y);
 			pSector->m_lists[ENTITYLIST_BUILDINGS].Flush();
@@ -1780,6 +1791,9 @@ CWorld::ShutDown(void)
 		}
 	}
 	ms_listMovingEntityPtrs.Flush();
+#if GTA_VERSION <= GTA3_PS2_160
+	CPools::Shutdown();
+#endif
 }
 
 void

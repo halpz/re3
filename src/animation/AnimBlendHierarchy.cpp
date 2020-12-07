@@ -30,15 +30,14 @@ void
 CAnimBlendHierarchy::CalcTotalTime(void)
 {
 	int i, j;
-	float totalTime = 0.0f;
+	totalLength = 0.0f;
 
 	for(i = 0; i < numSequences; i++){
 		float seqTime = 0.0f;
 		for(j = 0; j < sequences[i].numFrames; j++)
 			seqTime += sequences[i].GetKeyFrame(j)->deltaTime;
-		totalTime = Max(totalTime, seqTime);
+		totalLength = Max(totalLength, seqTime);
 	}
-	totalLength = totalTime;
 }
 
 void
@@ -61,6 +60,12 @@ CAnimBlendHierarchy::RemoveAnimSequences(void)
 void
 CAnimBlendHierarchy::Uncompress(void)
 {
+#ifdef ANIM_COMPRESSION
+	int i;
+	assert(compressed);
+	for(i = 0; i < numSequences; i++)
+		sequences[i].Uncompress();
+#endif
 	if(totalLength == 0.0f)
 		CalcTotalTime();
 	compressed = 0;
@@ -69,6 +74,22 @@ CAnimBlendHierarchy::Uncompress(void)
 void
 CAnimBlendHierarchy::RemoveUncompressedData(void)
 {
-	// useless
+#ifdef ANIM_COMPRESSION
+	int i;
+	assert(!compressed);
+	for(i = 0; i < numSequences; i++)
+		sequences[i].RemoveUncompressedData();
+#endif
 	compressed = 1;
 }
+
+#ifdef USE_CUSTOM_ALLOCATOR
+void
+CAnimBlendHierarchy::MoveMemory(bool onlyone)
+{
+	int i;
+	for(i = 0; i < numSequences; i++)
+		if(sequences[i].MoveMemory() && onlyone)
+			return;
+}
+#endif

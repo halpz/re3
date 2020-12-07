@@ -127,7 +127,7 @@ cHandlingDataMgr::LoadHandlingData(void)
 					handlingId = FindExactWord(word, (const char*)VehicleNames, 14, NUMHANDLINGS);
 					assert(handlingId >= 0 && handlingId < NUMHANDLINGS);
 					handling = &HandlingData[handlingId];
-					handling->nIdentifier = (eHandlingId)handlingId;
+					handling->nIdentifier = (tVehicleType)handlingId;
 					break;
 				case  1: handling->fMass = strtod(word, nil); break;
 				case  2: handling->Dimension.x = strtod(word, nil); break;
@@ -236,4 +236,28 @@ cHandlingDataMgr::GetHandlingId(const char *name)
 		if(strncmp(VehicleNames[i], name, 14) == 0)
 			break;
 	return i;
+}
+
+void
+cHandlingDataMgr::ConvertDataToWorldUnits(tHandlingData *handling)
+{
+	// TODO: mobile code
+}
+
+void
+cHandlingDataMgr::RangeCheck(tHandlingData *handling)
+{
+	// TODO: mobile code
+}
+
+void
+cHandlingDataMgr::ModifyHandlingValue(CVehicle *, const tVehicleType &, const tField &, const bool &)
+{
+	// TODO: mobile code
+}
+
+void
+cHandlingDataMgr::DisplayHandlingData(CVehicle *, tHandlingData *, uint8, bool)
+{
+	// TODO: mobile code
 }

@@ -46,8 +46,8 @@ class CPool
 public:
 	CPool(int size){
 		// TODO: use new here
-		m_entries = (U*)malloc(sizeof(U)*size);
-		m_flags = (Flags*)malloc(sizeof(Flags)*size);
+		m_entries = (U*)new uint8[sizeof(U)*size];
+		m_flags = (Flags*)new uint8[sizeof(Flags)*size];
 		m_size = size;
 		m_allocPtr = 0;
 		for(int i = 0; i < size; i++){
@@ -61,8 +61,8 @@ public:
 	}
 	void Flush() {
 		if (m_size > 0) {
-			free(m_entries);
-			free(m_flags);
+			delete[] (uint8*)m_entries;
+			delete[] (uint8*)m_flags;
 			m_entries = nil;
 			m_flags = nil;
 			m_size = 0;
@@ -124,12 +124,18 @@ public:
 		       (T*)&m_entries[handle >> 8] : nil;
 	}
 	int GetIndex(T *entry){
-		int i = GetJustIndex(entry);
+		int i = GetJustIndex_NoFreeAssert(entry);
 		return m_flags[i].u + (i<<8);
 	}
 	int GetJustIndex(T *entry){
-		// TODO: the cast is unsafe
-		return (int)((U*)entry - m_entries);
+		int index = GetJustIndex_NoFreeAssert(entry);
+		assert(!IsFreeSlot(index));
+		return index;
+	}
+	int GetJustIndex_NoFreeAssert(T* entry){
+		int index = ((U*)entry - m_entries);
+		assert((U*)entry == (U*)&m_entries[index]); // cast is unsafe - check required
+		return index;
 	}
 	int GetNoOfUsedSpaces(void) const{
 		int i;
@@ -141,8 +147,8 @@ public:
 	}
 	bool IsFreeSlot(int i) { return !!m_flags[i].free; }
 	void ClearStorage(uint8 *&flags, U *&entries){
-		free(flags);
-		free(entries);
+		delete[] (uint8*)flags;
+		delete[] (uint8*)entries;
 		flags = nil;
 		entries = nil;
 	}
@@ -156,8 +162,8 @@ public:
 		debug("CopyBack:%d (/%d)\n", GetNoOfUsedSpaces(), m_size); /* Assumed inlining */
 	}
 	void Store(uint8 *&flags, U *&entries){
-		flags = (uint8*)malloc(sizeof(uint8)*m_size);
-		entries = (U*)malloc(sizeof(U)*m_size);
+		flags = (uint8*)new uint8[sizeof(uint8)*m_size];
+		entries = (U*)new uint8[sizeof(U)*m_size];
 		memcpy(flags, m_flags, sizeof(uint8)*m_size);
 		memcpy(entries, m_entries, sizeof(U)*m_size);
 		debug("Stored:%d (/%d)\n", GetNoOfUsedSpaces(), m_size); /* Assumed inlining */

@@ -14,6 +14,7 @@
 #include "RwHelper.h"
 #include "Timer.h"
 #include "Lights.h"
+#include "MemoryMgr.h"
 
 RpClump *gpPlayerClump;
 float gOldFov;

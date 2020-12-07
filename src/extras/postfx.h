@@ -29,6 +29,7 @@ public:
 	static void Render(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blur, int32 type, uint32 bluralpha);
 	static bool NeedBackBuffer(void);
 	static bool NeedFrontBuffer(int32 type);
+	static void GetBackBuffer(RwCamera *cam);
 	static bool UseBlurColours(void) { return EffectSwitch != POSTFX_SIMPLE; }
 };
 

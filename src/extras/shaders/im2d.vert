@@ -1,12 +1,10 @@
 uniform vec4 u_xform;
 
-layout(location = 0) in vec4 in_pos;
-layout(location = 2) in vec4 in_color;
-layout(location = 3) in vec2 in_tex0;
+VSIN(ATTRIB_POS)	vec4 in_pos;
 
-out vec4 v_color;
-out vec2 v_tex0;
-out float v_fog;
+VSOUT vec4 v_color;
+VSOUT vec2 v_tex0;
+VSOUT float v_fog;
 
 void
 main(void)

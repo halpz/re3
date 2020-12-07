@@ -2,7 +2,6 @@
 
 #include "ClumpModelInfo.h"
 #include "PedType.h"
-#include "PedStats.h"
 
 enum PedNode {
 	PED_TORSO,

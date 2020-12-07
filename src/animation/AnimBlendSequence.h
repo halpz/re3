@@ -2,6 +2,10 @@
 
 #include "Quaternion.h"
 
+#ifdef MoveMemory
+#undef MoveMemory	// windows shit
+#endif
+
 // TODO: put them somewhere else?
 struct KeyFrame {
 	CQuaternion rotation;
@@ -10,6 +14,15 @@ struct KeyFrame {
 
 struct KeyFrameTrans : KeyFrame {
 	CVector translation;
+};
+
+struct KeyFrameCompressed {
+	int16 rot[4];		// 4096
+	int16 deltaTime;	// 60
+};
+
+struct KeyFrameTransCompressed : KeyFrameCompressed {
+	int16 trans[3];		// 128
 };
 
 
@@ -41,10 +54,10 @@ public:
 			&((KeyFrame*)keyFrames)[n];
 	}
 	bool HasTranslation(void) { return !!(type & KF_TRANS); }
-	// TODO? these are unused
-//	void Uncompress(void);
-//	void CompressKeyframes(void);
-//	void RemoveUncompressedData(void);
+	void Uncompress(void);
+	void CompressKeyframes(void);
+	void RemoveUncompressedData(void);
+	bool MoveMemory(void);
 
 #ifdef PED_SKIN
 	void SetBoneTag(int tag) { boneTag = tag; }

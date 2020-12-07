@@ -536,7 +536,7 @@ CVehicleModelInfo::SetVehicleComponentFlags(RwFrame *frame, uint32 flags)
 {
 	tHandlingData *handling;
 
-	handling = mod_HandlingManager.GetHandlingData((eHandlingId)m_handlingId);
+	handling = mod_HandlingManager.GetHandlingData((tVehicleType)m_handlingId);
 
 #define SETFLAGS(f) RwFrameForAllObjects(frame, SetAtomicFlagCB, (void*)(f))
 
@@ -962,7 +962,7 @@ CVehicleModelInfo::DeleteVehicleColourTextures(void)
 	for(i = 0; i < 256; i++){
 		if(ms_colourTextureTable[i]){
 			RwTextureDestroy(ms_colourTextureTable[i]);
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 			ms_colourTextureTable[i] = nil;
 #endif
 		}
@@ -998,6 +998,8 @@ CVehicleModelInfo::SetEnvironmentMapCB(RpMaterial *material, void *data)
 	return material;
 }
 
+bool initialised;
+
 RpAtomic*
 CVehicleModelInfo::SetEnvironmentMapCB(RpAtomic *atomic, void *data)
 {
@@ -1011,7 +1013,12 @@ CVehicleModelInfo::SetEnvironmentMapCB(RpAtomic *atomic, void *data)
 		RpGeometryForAllMaterials(geo, SetEnvironmentMapCB, data);
 		RpGeometrySetFlags(geo, RpGeometryGetFlags(geo) | rpGEOMETRYMODULATEMATERIALCOLOR);
 		RpMatFXAtomicEnableEffects(atomic);
-		// PS2 sets of PS2Manager lighting CB here
+#ifdef GTA_PS2
+		if(!initialised){
+			SetupPS2ManagerLightingCallback(RpAtomicGetInstancePipeline(atomic));
+			initialised = true;
+		}
+#endif
 	}
 	return atomic;
 }

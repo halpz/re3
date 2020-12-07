@@ -2,8 +2,10 @@
 #include "Frontend.h"
 #ifdef PC_MENU
 
-// If you want to add new options, please don't do that here and see CustomFrontendOptionsPopulate in re3.cpp.
+// Please don't touch this file, except for bug fixing or ports.
+// Check MenuScreensCustom.cpp
 
+#ifndef CUSTOM_FRONTEND_OPTIONS
 CMenuScreen aScreens[MENUPAGES] = {
 	// MENUPAGE_NONE = 0
 	{ "", 1, MENUPAGE_DISABLED, MENUPAGE_DISABLED, 0, 0, },
@@ -390,6 +392,9 @@ CMenuScreen aScreens[MENUPAGES] = {
    { "FET_PAU", 1, MENUPAGE_DISABLED, MENUPAGE_DISABLED, 0, 0,
 	   MENUACTION_RESUME,		"FEM_RES",	SAVESLOT_NONE, MENUPAGE_NONE,
 	   MENUACTION_CHANGEMENU,	"FEN_STA",	SAVESLOT_NONE, MENUPAGE_NEW_GAME,
+#ifdef MENU_MAP
+	   MENUACTION_CHANGEMENU,	"FEG_MAP",	SAVESLOT_NONE, MENUPAGE_MAP,
+#endif
 	   MENUACTION_CHANGEMENU,	"FEP_STA",	SAVESLOT_NONE, MENUPAGE_STATS,
 	   MENUACTION_CHANGEMENU,	"FEP_BRI",	SAVESLOT_NONE, MENUPAGE_BRIEFS,
 	   MENUACTION_CHANGEMENU,	"FET_OPT",	SAVESLOT_NONE, MENUPAGE_OPTIONS,
@@ -436,10 +441,10 @@ CMenuScreen aScreens[MENUPAGES] = {
 
 #ifdef MENU_MAP
 	// MENUPAGE_MAP
-   { "FEG_MAP", 1, MENUPAGE_NONE, MENUPAGE_NONE, 5, 2,
+	{ "FEG_MAP", 1, MENUPAGE_NONE, MENUPAGE_NONE, 2, 2,
 		MENUACTION_UNK110,	"", SAVESLOT_NONE, MENUPAGE_NONE, // to prevent cross/enter to go back
 		MENUACTION_CHANGEMENU,	"FEDS_TB", SAVESLOT_NONE, MENUPAGE_NONE,
-   },
+	},
 #endif
 
    // MENUPAGE_UNK
@@ -449,4 +454,5 @@ CMenuScreen aScreens[MENUPAGES] = {
 
 };
 
+#endif
 #endif

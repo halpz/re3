@@ -18,7 +18,6 @@
 
 #define MENU_X_MARGIN 40.0f
 #define MENUACTION_POS_Y 60.0f
-#define MENUACTION_WIDTH 38.0f
 #define MENUACTION_SCALE_MULT 0.9f
 
 #define MENURADIO_ICON_SCALE 60.0f
@@ -156,9 +155,6 @@ enum eSaveSlot
 	SAVESLOT_7,
 	SAVESLOT_8,
 	SAVESLOT_LABEL = 36,
-#ifdef CUSTOM_FRONTEND_OPTIONS
-	SAVESLOT_CFO
-#endif
 };
 
 #ifdef MENU_MAP
@@ -239,18 +235,31 @@ enum eMenuScreen
 	MENUPAGE_MOUSE_CONTROLS = 56,
 	MENUPAGE_MISSION_RETRY = 57,
 #ifdef MENU_MAP
-	MENUPAGE_MAP,
+	MENUPAGE_MAP = 58,
 #endif
-	MENUPAGE_UNK, // 58 in game. Map page is added above, because last screen in CMenuScreens should always be empty to make CFO work
 #ifdef CUSTOM_FRONTEND_OPTIONS
-	MENUPAGES = 65 // for some room to add more screen
+
+#ifdef GRAPHICS_MENU_OPTIONS
+	MENUPAGE_GRAPHICS_SETTINGS,
 #else
-	MENUPAGES
+	MENUPAGE_ADVANCED_DISPLAY_SETTINGS,
 #endif
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+	MENUPAGE_DETECT_JOYSTICK,
+#endif
+
+#endif
+	MENUPAGE_UNK, // originally 58. Custom screens are inserted above, because last screen in CMenuScreens should always be empty to make CFO work
+	MENUPAGES
+
 };
 
 enum eMenuAction
 {
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	MENUACTION_CFO_SELECT = -2,
+	MENUACTION_CFO_DYNAMIC = -1,
+#endif
 	MENUACTION_NOTHING,
 	MENUACTION_LABEL,
 	MENUACTION_CHANGEMENU,
@@ -370,12 +379,6 @@ enum eMenuAction
 //	MENUACTION_MIPMAPS,
 //	MENUACTION_TEXTURE_FILTERING,
 //#endif
-//#ifdef NO_ISLAND_LOADING
-//	MENUACTION_ISLANDLOADING,
-//#endif
-#ifdef CUSTOM_FRONTEND_OPTIONS
-	MENUACTION_TRIGGERFUNC
-#endif
 };
 
 enum eCheckHover
@@ -458,6 +461,7 @@ struct BottomBarOption
 	int32 screenId;
 };
 
+#ifndef CUSTOM_FRONTEND_OPTIONS
 struct CMenuScreen
 {
 	char m_ScreenName[8];
@@ -470,9 +474,91 @@ struct CMenuScreen
 		int32 m_Action; // eMenuAction
 		char m_EntryName[8];
 		int32 m_SaveSlot; // eSaveSlot
-		int32 m_TargetMenu; // eMenuScreen // FrontendOption ID if it's a custom option
+		int32 m_TargetMenu; // eMenuScreen
 	} m_aEntries[NUM_MENUROWS];
 };
+extern CMenuScreen aScreens[MENUPAGES];
+#else
+#include "frontendoption.h"
+struct CCustomScreenLayout {
+	eMenuSprites sprite;
+	int columnWidth;
+	int headerHeight;
+	int lineHeight;
+	int8 font;
+	int8 alignment;
+	bool showLeftRightHelper;
+	float fontScaleX;
+	float fontScaleY;
+};
+
+struct CCFO
+{
+	int8 *value;
+	const char *save;
+};
+
+struct CCFOSelect : CCFO
+{
+	char** rightTexts;
+	int8 numRightTexts;
+	bool onlyApplyOnEnter;
+	int8 displayedValue; // only if onlyApplyOnEnter enabled for now
+	int8 lastSavedValue; // only if onlyApplyOnEnter enabled
+	ChangeFunc changeFunc;
+
+	CCFOSelect() {};
+	CCFOSelect(int8* value, const char* save, const char** rightTexts, int8 numRightTexts, bool onlyApplyOnEnter, ChangeFunc changeFunc){
+		this->value = value;
+		if (value)
+			this->lastSavedValue = this->displayedValue = *value;
+
+		this->save = save;
+		this->rightTexts = (char**)rightTexts;
+		this->numRightTexts = numRightTexts;
+		this->onlyApplyOnEnter = onlyApplyOnEnter;
+		this->changeFunc = changeFunc;
+	}
+};
+
+struct CCFODynamic : CCFO
+{
+	DrawFunc drawFunc;
+	ButtonPressFunc buttonPressFunc;
+
+	CCFODynamic() {};
+	CCFODynamic(int8* value, const char* save, DrawFunc drawFunc, ButtonPressFunc buttonPressFunc){
+		this->value = value;
+		this->save = save;
+		this->drawFunc = drawFunc;
+		this->buttonPressFunc = buttonPressFunc;
+	}
+};
+
+struct CMenuScreenCustom
+{
+	char m_ScreenName[8];
+	int32 m_PreviousPage[2]; // eMenuScreen
+	CCustomScreenLayout *layout;
+	ReturnPrevPageFunc returnPrevPageFunc;
+	
+	struct CMenuEntry
+	{
+		int32 m_Action; // eMenuAction - below zero is CFO
+		char m_EntryName[8];
+		struct {
+			union {
+				CCFO *m_CFO; // for initializing
+				CCFOSelect *m_CFOSelect;
+				CCFODynamic *m_CFODynamic;
+			};
+			int32 m_SaveSlot; // eSaveSlot
+			int32 m_TargetMenu; // eMenuScreen
+		};
+	} m_aEntries[NUM_MENUROWS];
+};
+extern CMenuScreenCustom aScreens[MENUPAGES];
+#endif
 
 class CMenuManager
 {
@@ -628,7 +714,6 @@ public:
 		ISLAND_LOADING_HIGH
 	};
 
-	static int8 m_DisplayIslandLoading;
 	static int8 m_PrefsIslandLoading;
 
 	#define ISLAND_LOADING_IS(p) if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_##p)
@@ -696,6 +781,7 @@ public:
 	void PageUpList(bool);
 	void PageDownList(bool);
 	int8 GetPreviousPageOption();
+	void ProcessList(bool &goBack, bool &optionSelected);
 };
 
 #ifndef IMPROVED_VIDEOMODE
@@ -703,6 +789,5 @@ VALIDATE_SIZE(CMenuManager, 0x564);
 #endif
 
 extern CMenuManager FrontEndMenuManager;
-extern CMenuScreen aScreens[MENUPAGES];
 
 #endif

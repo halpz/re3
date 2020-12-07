@@ -10,6 +10,7 @@
 
 #include "skeleton.h"
 #include "platform.h"
+#include "MemoryHeap.h"
 
 
 
@@ -307,6 +308,8 @@ RsRwInitialize(void *displayID)
 {
 	RwEngineOpenParams  openParams;
 
+	PUSH_MEMID(MEMID_RENDER);	// NB: not popped on failed return
+
 	/*
 	 * Start RenderWare...
 	 */
@@ -373,6 +376,8 @@ RsRwInitialize(void *displayID)
 
 	RwTextureSetMipmapping(FALSE);
 	RwTextureSetAutoMipmapping(FALSE);
+
+	POP_MEMID();
 
 	return TRUE;
 }

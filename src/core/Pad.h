@@ -170,6 +170,9 @@ public:
 	static bool bObsoleteControllerMessage;
 	static bool bOldDisplayNoControllerMessage;
 	static bool m_bMapPadOneToPadTwo;
+#ifdef INVERT_LOOK_FOR_PAD
+	static bool bInvertLook4Pad;
+#endif
 	
 	static CKeyboardState OldKeyState;
 	static CKeyboardState NewKeyState;

@@ -43,7 +43,7 @@ CTrain::CTrain(int32 id, uint8 CreatedBy)
 {
 	CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(id);
 	m_vehType = VEHICLE_TYPE_TRAIN;
-	pHandling = mod_HandlingManager.GetHandlingData((eHandlingId)mi->m_handlingId);
+	pHandling = mod_HandlingManager.GetHandlingData((tVehicleType)mi->m_handlingId);
 	SetModelIndex(id);
 
 	Doors[0].Init(0.8f, 0.0f, 1, 0);

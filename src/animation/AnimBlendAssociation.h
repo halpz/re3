@@ -13,7 +13,7 @@ enum {
 	ASSOC_MOVEMENT = 0x20,	// ???
 	ASSOC_HAS_TRANSLATION = 0x40,
 	ASSOC_WALK = 0x80,	// for CPed::PlayFootSteps(void)
-	ASSOC_FLAG_XPRESS = 0x100,	// only used by xpress scratch, see CPed::Chat(void)
+	ASSOC_IDLE = 0x100,	// only used by xpress scratch, see CPed::Chat(void)
 	ASSOC_NOWALK = 0x200,	// see CPed::PlayFootSteps(void)
 	ASSOC_BLOCK = 0x400,	// unused in assoc description, blocks other anims from being played
 	ASSOC_FRONTAL = 0x800, // anims that we fall to front

@@ -424,3 +424,45 @@ CCivilianPed::ProcessControl(void)
 	if (m_moved.Magnitude() > 0.0f)
 		Avoid();
 }
+
+// It's "CPhoneInfo::ProcessNearestFreePhone" in PC IDB but that's not true, someone made it up.
+bool
+CPed::RunToReportCrime(eCrimeType crimeToReport)
+{
+#ifdef PEDS_REPORT_CRIMES_ON_PHONE
+	if (bRunningToPhone) {
+		if (!isPhoneAvailable(m_phoneId)) {
+			m_phoneId = -1;
+			bIsRunning = false;
+			ClearSeek(); // clears bRunningToPhone
+			return false;
+		}
+
+		return true;
+	}
+#else
+	// They changed true into false to make this function unusable. So running to phone actually starts but first frame after that cancels it.
+	if (m_nPedState == PED_SEEK_POS)
+		return false;
+#endif
+
+	CVector pos = GetPosition();
+	int phoneId = gPhoneInfo.FindNearestFreePhone(&pos);
+
+	if (phoneId == -1)
+		return false;
+
+	CPhone *phone = &gPhoneInfo.m_aPhones[phoneId];
+#ifndef PEDS_REPORT_CRIMES_ON_PHONE
+	if (phone->m_nState != PHONE_STATE_FREE)
+		return false;
+#endif
+
+	bRunningToPhone = true;
+	SetSeek(phone->m_pEntity->GetMatrix() * -phone->m_pEntity->GetForward(), 1.0f); // original: phone.m_vecPos, 0.3f
+	SetMoveState(PEDMOVE_RUN);
+	bIsRunning = true; // not there in original
+	m_phoneId = phoneId;
+	m_crimeToReportOnPhone = crimeToReport;
+	return true;
+}

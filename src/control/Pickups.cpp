@@ -353,11 +353,11 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 
 			m_pObject->GetMatrix().UpdateRW();
 			m_pObject->UpdateRwFrame();
-			if (CWaterLevel::GetWaterLevel(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z + 5.0f, &waterLevel, 0) && waterLevel >= m_pObject->GetPosition().z)
+			if (CWaterLevel::GetWaterLevel(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z + 5.0f, &waterLevel, false) && waterLevel >= m_pObject->GetPosition().z)
 				m_eType = PICKUP_FLOATINGPACKAGE_FLOATING;
 			break;
 		case PICKUP_FLOATINGPACKAGE_FLOATING:
-			if (CWaterLevel::GetWaterLevel(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z + 5.0f, &waterLevel, 0))
+			if (CWaterLevel::GetWaterLevel(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z + 5.0f, &waterLevel, false))
 				m_pObject->GetMatrix().GetPosition().z = waterLevel;
 
 			m_pObject->GetMatrix().UpdateRW();
@@ -1013,7 +1013,7 @@ INITSAVEBUF
 	for (int32 i = 0; i < NUMPICKUPS; i++) {
 		CPickup *buf_pickup = WriteSaveBuf(buf, aPickUps[i]);
 		if (buf_pickup->m_eType != PICKUP_NONE && buf_pickup->m_pObject != nil)
-			buf_pickup->m_pObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex(buf_pickup->m_pObject) + 1);
+			buf_pickup->m_pObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert(buf_pickup->m_pObject) + 1);
 	}
 
 	WriteSaveBuf(buf, CollectedPickUpIndex);
@@ -1435,4 +1435,86 @@ CPacManPickups::ResetPowerPillsCarriedByPlayer()
 		FindPlayerVehicle()->m_fTurnMass /= FindPlayerVehicle()->m_fForceMultiplier;
 		FindPlayerVehicle()->m_fForceMultiplier = 1.0f;
 	}
+}
+
+void
+CPed::CreateDeadPedMoney(void)
+{
+	if (!CGame::nastyGame)
+		return;
+
+	int mi = GetModelIndex();
+
+	if ((mi >= MI_COP && mi <= MI_FIREMAN) || CharCreatedBy == MISSION_CHAR || bInVehicle)
+		return;
+
+	int money = CGeneral::GetRandomNumber() % 60;
+	if (money < 10)
+		return;
+
+	if (money == 43)
+		money = 700;
+
+	int pickupCount = money / 40 + 1;
+	int moneyPerPickup = money / pickupCount;
+
+	for(int i = 0; i < pickupCount; i++) {
+		// (CGeneral::GetRandomNumber() % 256) * PI / 128 gives a float up to something TWOPI-ish.
+		float pickupX = 1.5f * Sin((CGeneral::GetRandomNumber() % 256) * PI / 128) + GetPosition().x;
+		float pickupY = 1.5f * Cos((CGeneral::GetRandomNumber() % 256) * PI / 128) + GetPosition().y;
+		bool found = false;
+		float groundZ = CWorld::FindGroundZFor3DCoord(pickupX, pickupY, GetPosition().z, &found) + 0.5f;
+		if (found) {
+			CPickups::GenerateNewOne(CVector(pickupX, pickupY, groundZ), MI_MONEY, PICKUP_MONEY, moneyPerPickup + (CGeneral::GetRandomNumber() & 7));
+		}
+	}
+}
+
+void
+CPed::CreateDeadPedWeaponPickups(void)
+{
+	bool found = false;
+	float angleToPed;
+	CVector pickupPos;
+
+	if (bInVehicle)
+		return;
+
+	for(int i = 0; i < WEAPONTYPE_TOTAL_INVENTORY_WEAPONS; i++) {
+
+		eWeaponType weapon = GetWeapon(i).m_eWeaponType;
+		int weaponAmmo = GetWeapon(i).m_nAmmoTotal;
+		if (weapon == WEAPONTYPE_UNARMED || weapon == WEAPONTYPE_DETONATOR || weaponAmmo == 0)
+			continue;
+
+		angleToPed = i * 1.75f;
+		pickupPos = GetPosition();
+		pickupPos.x += 1.5f * Sin(angleToPed);
+		pickupPos.y += 1.5f * Cos(angleToPed);
+		pickupPos.z = CWorld::FindGroundZFor3DCoord(pickupPos.x, pickupPos.y, pickupPos.z, &found) + 0.5f;
+
+		CVector pedPos = GetPosition();
+		pedPos.z += 0.3f;
+
+		CVector pedToPickup = pickupPos - pedPos;
+		float distance = pedToPickup.Magnitude();
+
+		// outer edge of pickup
+		distance = (distance + 0.3f) / distance;
+		CVector pickupPos2 = pedPos;
+		pickupPos2 += distance * pedToPickup;
+
+		// pickup must be on ground and line to its edge must be clear
+		if (!found || CWorld::GetIsLineOfSightClear(pickupPos2, pedPos, true, false, false, false, false, false, false)) {
+			// otherwise try another position (but disregard second check apparently)
+			angleToPed += 3.14f;
+			pickupPos = GetPosition();
+			pickupPos.x += 1.5f * Sin(angleToPed);
+			pickupPos.y += 1.5f * Cos(angleToPed);
+			pickupPos.z = CWorld::FindGroundZFor3DCoord(pickupPos.x, pickupPos.y, pickupPos.z, &found) + 0.5f;
+		}
+		if (found)
+			CPickups::GenerateNewOne_WeaponType(pickupPos, weapon, PICKUP_ONCE_TIMEOUT, Min(weaponAmmo, AmmoForWeapon_OnStreet[weapon]));
+	}
+	ClearWeapons();
 }

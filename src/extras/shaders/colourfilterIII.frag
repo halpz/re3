@@ -1,11 +1,9 @@
 uniform sampler2D tex0;
 uniform vec4 u_blurcolor;
 
-in vec4 v_color;
-in vec2 v_tex0;
-in float v_fog;
-
-out vec4 color;
+FSIN vec4 v_color;
+FSIN vec2 v_tex0;
+FSIN float v_fog;
 
 void
 main(void)
@@ -17,7 +15,10 @@ main(void)
 		vec4 tmp = dst*(1.0-a) + prev*u_blurcolor*a;
 		prev = clamp(tmp, 0.0, 1.0);
 	}
+	vec4 color;
 	color.rgb = prev.rgb;
 	color.a = 1.0f;
+
+	FRAGCOLOR(color);
 }
 

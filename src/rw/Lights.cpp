@@ -3,6 +3,7 @@
 #include <rpworld.h>
 
 #include "Lights.h"
+#include "Timer.h"
 #include "Timecycle.h"
 #include "Coronas.h"
 #include "Weather.h"
@@ -246,6 +247,46 @@ SetAmbientAndDirectionalColours(float f)
 
 	RpLightSetColor(pAmbient, &AmbientLightColour);
 	RpLightSetColor(pDirect, &DirectionalLightColour);
+}
+
+// unused
+void
+SetFlashyColours(float f)
+{
+	if(CTimer::GetTimeInMilliseconds() & 0x100){
+		AmbientLightColour.red = 1.0f;
+		AmbientLightColour.green = 1.0f;
+		AmbientLightColour.blue = 1.0f;
+
+		DirectionalLightColour.red = DirectionalLightColourForFrame.red;
+		DirectionalLightColour.green = DirectionalLightColourForFrame.green;
+		DirectionalLightColour.blue = DirectionalLightColourForFrame.blue;
+
+		RpLightSetColor(pAmbient, &AmbientLightColour);
+		RpLightSetColor(pDirect, &DirectionalLightColour);
+	}else{
+		SetAmbientAndDirectionalColours(f * 0.75f);
+	}
+}
+
+// unused
+void
+SetFlashyColours_Mild(float f)
+{
+	if(CTimer::GetTimeInMilliseconds() & 0x100){
+		AmbientLightColour.red = 0.65f;
+		AmbientLightColour.green = 0.65f;
+		AmbientLightColour.blue = 0.65f;
+
+		DirectionalLightColour.red = DirectionalLightColourForFrame.red;
+		DirectionalLightColour.green = DirectionalLightColourForFrame.green;
+		DirectionalLightColour.blue = DirectionalLightColourForFrame.blue;
+
+		RpLightSetColor(pAmbient, &AmbientLightColour);
+		RpLightSetColor(pDirect, &DirectionalLightColour);
+	}else{
+		SetAmbientAndDirectionalColours(f * 0.9f);
+	}
 }
 
 void

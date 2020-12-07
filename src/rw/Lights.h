@@ -14,6 +14,8 @@ void WorldReplaceScorchedLightsWithNormal(RpWorld *world);
 void AddAnExtraDirectionalLight(RpWorld *world, float dirx, float diry, float dirz, float red, float green, float blue);
 void RemoveExtraDirectionalLights(RpWorld *world);
 void SetAmbientAndDirectionalColours(float f);
+void SetFlashyColours(float f);
+void SetFlashyColours_Mild(float f);
 void SetBrightMarkerColours(float f);
 void ReSetAmbientAndDirectionalColours(void);
 void DeActivateDirectional(void);

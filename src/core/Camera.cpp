@@ -74,7 +74,7 @@ bool bDidWeProcessAnyCinemaCam;
 
 CCamera::CCamera(void)
 {
-#if defined(GTA3_1_1_PATCH) || defined(FIX_BUGS)
+#if GTA_VERSION >= GTA3_PC_11 || defined(FIX_BUGS)
 	m_fMouseAccelHorzntl = 0.0025f;
 	m_fMouseAccelVertical = 0.003f;
 #endif
@@ -88,15 +88,15 @@ CCamera::CCamera(float)
 void
 CCamera::Init(void)
 {
-#if defined(GTA3_1_1_PATCH) || defined(FIX_BUGS)
+#if GTA_VERSION >= GTA3_PC_11 || defined(FIX_BUGS)
 	float fMouseAccelHorzntl = m_fMouseAccelHorzntl;
 	float fMouseAccelVertical = m_fMouseAccelVertical;
 #endif
 
 #ifdef PS2_MENU
-	if ( !TheMemoryCard.m_bWantToLoad && !FrontEndMenuManager.m_bWantToRestart ) {
+	if ( !TheMemoryCard.m_bWantToLoad && !FrontEndMenuManager.m_bWantToRestart )
 #endif
-	
+	{
 	#ifdef FIX_BUGS
 		static const CCamera DummyCamera = CCamera(0.f);
 		*this = DummyCamera;
@@ -104,15 +104,13 @@ CCamera::Init(void)
 		memset(this, 0, sizeof(CCamera));	// getting rid of vtable, eh?
 	#endif
 	
-	#if defined(GTA3_1_1_PATCH) || defined(FIX_BUGS)
+	#if GTA_VERSION >= GTA3_PC_11 || defined(FIX_BUGS)
 		m_fMouseAccelHorzntl = fMouseAccelHorzntl;
 		m_fMouseAccelVertical = fMouseAccelVertical;
 	#endif
 		m_pRwCamera = nil;
 	
-#ifdef PS2_MENU
 	}
-#endif
 	
 	m_1rstPersonRunCloseToAWall = false;
 	m_fPositionAlongSpline = 0.0f;
@@ -123,7 +121,7 @@ CCamera::Init(void)
 	Cams[0].Mode = CCam::MODE_FOLLOWPED;
 	Cams[1].Mode = CCam::MODE_FOLLOWPED;
 	unknown = 0;
-	m_bJustJumpedOutOf1stPersonBecauseOfTarget = false;
+	m_bUnknown = false;
 	ClearPlayerWeaponMode();
 	m_bInATunnelAndABigVehicle = false;
 	m_iModeObbeCamIsInForCar = OBBE_INVALID;
@@ -237,7 +235,7 @@ CCamera::Init(void)
 	m_uiTransitionState = 0;
 	m_uiTimeTransitionStart = 0;
 	m_bLookingAtPlayer = true;
-#if !defined(GTA3_1_1_PATCH) && !defined(FIX_BUGS)
+#if GTA_VERSION < GTA3_PC_11 && !defined(FIX_BUGS)
 	m_fMouseAccelHorzntl = 0.0025f;
 	m_fMouseAccelVertical = 0.003f;
 #endif
@@ -715,14 +713,18 @@ CCamera::Process(void)
 		DistanceToWater = CWaterLevel::CalcDistanceToWater(GetPosition().x, GetPosition().y);
 
 	// LOD dist
-	if(!CCutsceneMgr::IsRunning() || CCutsceneMgr::UseLodMultiplier())
-		LODDistMultiplier = 70.0f/CDraw::GetFOV() * CDraw::GetAspectRatio()/(4.0f/3.0f);
-	else
+	if(!CCutsceneMgr::IsRunning() || CCutsceneMgr::UseLodMultiplier()){
+		LODDistMultiplier = 70.0f/CDraw::GetFOV();
+#ifndef FIX_BUGS
+		// makes no sense and gone in VC
+		LODDistMultiplier *= CDraw::GetAspectRatio()/(4.0f/3.0f);
+#endif
+	}else
 		LODDistMultiplier = 1.0f;
-	// missing on PS2
+#if GTA_VERSION > GTA3_PS2_160
 	GenerationDistMultiplier = LODDistMultiplier;
 	LODDistMultiplier *= CRenderer::ms_lodDistScale;
-	//
+#endif
 
 	// Keep track of speed
 	if(m_bJustInitalised || m_bJust_Switched){
@@ -1574,8 +1576,10 @@ CCamera::CamControl(void)
 					switchByJumpCut = true;
 			}
 		}
+#ifdef GTA_SCENE_EDIT
 		if(CSceneEdit::m_bEditOn)
 			ReqMode = CCam::MODE_EDITOR;
+#endif
 
 		if((m_uiTransitionState == 0 || switchByJumpCut) && ReqMode != Cams[ActiveCam].Mode){
 			if(switchByJumpCut){
@@ -3398,10 +3402,10 @@ CCamera::Fade(float timeout, int16 direction)
 		m_fTimeToFadeMusic = timeout;
 		m_uiFadeTimeStartedMusic = CTimer::GetTimeInMilliseconds();
 // Not on PS2
-		if(!m_bJustJumpedOutOf1stPersonBecauseOfTarget && m_iMusicFadingDirection == FADE_OUT){
+		if(!m_bUnknown && m_iMusicFadingDirection == FADE_OUT){
 			unknown++;
 			if(unknown >= 2){
-				m_bJustJumpedOutOf1stPersonBecauseOfTarget = true;
+				m_bUnknown = true;
 				unknown = 0;
 			}else
 				m_bMoveCamToAvoidGeom = true;

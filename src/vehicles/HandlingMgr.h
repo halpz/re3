@@ -2,7 +2,7 @@
 
 #include "Transmission.h"
 
-enum eHandlingId
+enum tVehicleType
 {
 	HANDLING_LANDSTAL,
 	HANDLING_IDAHO,
@@ -65,6 +65,11 @@ enum eHandlingId
 	NUMHANDLINGS
 };
 
+enum tField : uint32 // most likely a handling field enum, never used so :shrug:
+{
+
+};
+
 enum
 {
 	HANDLING_1G_BOOST = 1,
@@ -87,7 +92,7 @@ enum
 
 struct tHandlingData
 {
-	eHandlingId nIdentifier;
+	tVehicleType nIdentifier;
 	float fMass;
 	float fInvMass;
 	float fTurnMass;
@@ -118,6 +123,8 @@ struct tHandlingData
 };
 VALIDATE_SIZE(tHandlingData, 0xD8);
 
+class CVehicle;
+
 class cHandlingDataMgr
 {
 	float field_0;	// unused it seems
@@ -135,11 +142,15 @@ public:
 	void Initialise(void);
 	void LoadHandlingData(void);
 	int FindExactWord(const char *word, const char *words, int wordLen, int numWords);
+	void ConvertDataToWorldUnits(tHandlingData *handling);
 	void ConvertDataToGameUnits(tHandlingData *handling);
+	void RangeCheck(tHandlingData *handling);
+	void ModifyHandlingValue(CVehicle *, const tVehicleType &, const tField &, const bool &);
+	void DisplayHandlingData(CVehicle *, tHandlingData *, uint8, bool);
 	int32 GetHandlingId(const char *name);
-	tHandlingData *GetHandlingData(eHandlingId id) { return &HandlingData[id]; }
-	bool HasRearWheelDrive(eHandlingId id) { return HandlingData[id].Transmission.nDriveType == 'R'; }
-	bool HasFrontWheelDrive(eHandlingId id) { return HandlingData[id].Transmission.nDriveType == 'F'; }
+	tHandlingData *GetHandlingData(tVehicleType id) { return &HandlingData[id]; }
+	bool HasRearWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType == 'R'; }
+	bool HasFrontWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType == 'F'; }
 };
 VALIDATE_SIZE(cHandlingDataMgr, 0x3030);
 extern cHandlingDataMgr mod_HandlingManager;

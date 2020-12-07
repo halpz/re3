@@ -16,9 +16,14 @@ using namespace rw;
 RwUInt8 RwObjectGetType(const RwObject *obj) { return obj->type; }
 
 
-void *RwMalloc(size_t size) { return malloc(size); }
-void *RwCalloc(size_t numObj, size_t sizeObj) { return calloc(numObj, sizeObj); }
-void  RwFree(void *mem) { free(mem); }
+void *RwMalloc(size_t size) { return engine->memfuncs.rwmalloc(size, 0); }
+void *RwCalloc(size_t numObj, size_t sizeObj) {
+	void *mem = RwMalloc(numObj*sizeObj);
+	if(mem)
+		memset(mem, 0, numObj*sizeObj);
+	return mem;
+}
+void  RwFree(void *mem) { engine->memfuncs.rwfree(mem); }
 
 
 //RwReal RwV3dNormalize(RwV3d * out, const RwV3d * in);
@@ -294,32 +299,12 @@ RwTextureAddressMode RwTextureGetAddressingV(const RwTexture *texture);
 // TODO
 void _rwD3D8TexDictionaryEnableRasterFormatConversion(bool enable) { }
 
-static rw::Raster*
-ConvertTexRaster(rw::Raster *ras)
-{
-	using namespace rw;
-
-	if(ras->platform == rw::platform)
-		return ras;
-	// compatible platforms
-	if(ras->platform == PLATFORM_D3D8 && rw::platform == PLATFORM_D3D9 ||
-	   ras->platform == PLATFORM_D3D9 && rw::platform == PLATFORM_D3D8)
-		return ras;
-
-	Image *img = ras->toImage();
-	ras->destroy();
-	img->unpalettize();
-	ras = Raster::createFromImage(img);
-	img->destroy();
-	return ras;
-}
-
 // hack for reading native textures
 RwBool rwNativeTextureHackRead(RwStream *stream, RwTexture **tex, RwInt32 size)
 {
 	*tex = Texture::streamReadNative(stream);
 #ifdef LIBRW
-	(*tex)->raster = ConvertTexRaster((*tex)->raster);
+	(*tex)->raster = rw::Raster::convertTexToCurrentPlatform((*tex)->raster);
 #endif
 	return *tex != nil;
 }
@@ -462,6 +447,53 @@ RwBool RwIm3DRenderPrimitive(RwPrimitiveType primType);
 
 
 
+RwBool RwRenderStateGet(RwRenderState state, void *value)
+{
+	uint32 *uival = (uint32*)value;
+	uint32 fog;
+	switch(state){
+	case rwRENDERSTATETEXTURERASTER: *(void**)value = GetRenderStatePtr(TEXTURERASTER); return true;
+	case rwRENDERSTATETEXTUREADDRESS: *uival = GetRenderState(TEXTUREADDRESS); return true;
+	case rwRENDERSTATETEXTUREADDRESSU: *uival = GetRenderState(TEXTUREADDRESSU); return true;
+	case rwRENDERSTATETEXTUREADDRESSV: *uival = GetRenderState(TEXTUREADDRESSV); return true;
+	case rwRENDERSTATETEXTUREPERSPECTIVE: *uival = 1; return true;
+	case rwRENDERSTATEZTESTENABLE: *uival = GetRenderState(ZTESTENABLE); return true;
+	case rwRENDERSTATESHADEMODE: *uival = rwSHADEMODEGOURAUD; return true;
+	case rwRENDERSTATEZWRITEENABLE: *uival = GetRenderState(ZWRITEENABLE); return true;
+	case rwRENDERSTATETEXTUREFILTER: *uival = GetRenderState(TEXTUREFILTER); return true;
+	case rwRENDERSTATESRCBLEND: *uival = GetRenderState(SRCBLEND); return true;
+	case rwRENDERSTATEDESTBLEND: *uival = GetRenderState(DESTBLEND); return true;
+	case rwRENDERSTATEVERTEXALPHAENABLE: *uival = GetRenderState(VERTEXALPHA); return true;
+	case rwRENDERSTATEBORDERCOLOR: *uival = 0; return true;
+	case rwRENDERSTATEFOGENABLE: *uival = GetRenderState(FOGENABLE); return true;
+	case rwRENDERSTATEFOGCOLOR:
+		// have to swap R and B here
+		fog = GetRenderState(FOGCOLOR);
+		*uival = (fog>>16)&0xFF;
+		*uival |= (fog&0xFF)<<16;
+		*uival |= fog&0xFF00;
+		*uival |= fog&0xFF000000;
+		return true;
+	case rwRENDERSTATEFOGTYPE: *uival = rwFOGTYPELINEAR; return true;
+	case rwRENDERSTATEFOGDENSITY: *(float*)value = 1.0f; return true;
+	case rwRENDERSTATECULLMODE: *uival = GetRenderState(CULLMODE); return true;
+
+	// all unsupported
+	case rwRENDERSTATEFOGTABLE:
+	case rwRENDERSTATEALPHAPRIMITIVEBUFFER:
+
+	case rwRENDERSTATESTENCILENABLE:
+	case rwRENDERSTATESTENCILFAIL:
+	case rwRENDERSTATESTENCILZFAIL:
+	case rwRENDERSTATESTENCILPASS:
+	case rwRENDERSTATESTENCILFUNCTION:
+	case rwRENDERSTATESTENCILFUNCTIONREF:
+	case rwRENDERSTATESTENCILFUNCTIONMASK:
+	case rwRENDERSTATESTENCILFUNCTIONWRITEMASK:
+	default:
+		return false;
+	}
+}
 RwBool RwRenderStateSet(RwRenderState state, void *value)
 {
 	uint32 uival = (uintptr)value;
@@ -509,8 +541,27 @@ RwBool RwRenderStateSet(RwRenderState state, void *value)
 	}
 }
 
+static rw::MemoryFunctions gMemfuncs;
+static void *(*real_malloc)(size_t size);
+static void *(*real_realloc)(void *mem, size_t newSize);
+static void *mallocWrap(size_t sz, uint32 hint) { if(sz == 0) return nil; return real_malloc(sz); }
+static void *reallocWrap(void *p, size_t sz, uint32 hint) { return real_realloc(p, sz); }
+
+
 // WARNING: unused parameters
-RwBool RwEngineInit(RwMemoryFunctions *memFuncs, RwUInt32 initFlags, RwUInt32 resArenaSize) { Engine::init(); return true; }
+RwBool RwEngineInit(RwMemoryFunctions *memFuncs, RwUInt32 initFlags, RwUInt32 resArenaSize) {
+	if(memFuncs){
+		real_malloc = memFuncs->rwmalloc;
+		real_realloc = memFuncs->rwrealloc;
+		gMemfuncs.rwmalloc = mallocWrap;
+		gMemfuncs.rwrealloc = reallocWrap;
+		gMemfuncs.rwfree = memFuncs->rwfree;
+		Engine::init(&gMemfuncs);
+	}else{
+		Engine::init(nil);
+	}
+	return true;
+}
 // TODO: this is platform dependent
 RwBool RwEngineOpen(RwEngineOpenParams *initParams) {
 	static EngineOpenParams openParams;
@@ -549,6 +600,9 @@ RwInt32 RwEngineGetMaxTextureSize(void);
 void RwD3D8EngineSetRefreshRate(RwUInt32 refreshRate) {}
 RwBool RwD3D8DeviceSupportsDXTTexture(void) { return true; }
 
+
+void RwD3D8EngineSetMultiSamplingLevels(RwUInt32 level) { Engine::setMultiSamplingLevels(level); }
+RwUInt32 RwD3D8EngineGetMaxMultiSamplingLevels(void) { return Engine::getMaxMultiSamplingLevels(); }
 
 
 RpMaterial *RpMaterialCreate(void) { return Material::create(); }
@@ -749,6 +803,9 @@ RwBool       RpWorldPluginAttach(void) {
 	registerNativeDataPlugin();
 	registerAtomicRightsPlugin();
 	registerMaterialRightsPlugin();
+
+	// not sure if this goes here
+	rw::xbox::registerVertexFormatPlugin();
 	return true;
 }
 
@@ -905,14 +962,3 @@ RtCharset   *RtCharsetSetColors(RtCharset * charSet, const RwRGBA * foreGround, 
 RtCharset   *RtCharsetGetDesc(RtCharset * charset, RtCharsetDesc * desc) { *desc = charset->desc; return charset; }
 RtCharset   *RtCharsetCreate(const RwRGBA * foreGround, const RwRGBA * backGround) { return Charset::create(foreGround, backGround); }
 RwBool       RtCharsetDestroy(RtCharset * charSet) { charSet->destroy(); return true; }
-
-
-
-// fake shit
-RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags)
-{
-#ifdef RW_GL3
-	return '3LGO';
-#endif
-	return flags & 0xF00;
-}

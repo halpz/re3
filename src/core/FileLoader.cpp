@@ -11,7 +11,6 @@
 #include "HandlingMgr.h"
 #include "CarCtrl.h"
 #include "PedType.h"
-#include "PedStats.h"
 #include "AnimManager.h"
 #include "Game.h"
 #include "RwHelper.h"
@@ -25,6 +24,7 @@
 #include "ZoneCull.h"
 #include "CdStream.h"
 #include "FileLoader.h"
+#include "MemoryHeap.h"
 
 char CFileLoader::ms_line[256];
 
@@ -59,7 +59,13 @@ CFileLoader::LoadLevel(const char *filename)
 		savedTxd = RwTexDictionaryCreate();
 		RwTexDictionarySetCurrent(savedTxd);
 	}
+#if GTA_VERSION <= GTA3_PS2_160
+	CFileMgr::ChangeDir("\\DATA\\");
 	fd = CFileMgr::OpenFile(filename, "r");
+	CFileMgr::ChangeDir("\\");
+#else
+	fd = CFileMgr::OpenFile(filename, "r");
+#endif
 	assert(fd > 0);
 
 	for(line = LoadLine(fd); line; line = LoadLine(fd)){
@@ -72,11 +78,13 @@ CFileLoader::LoadLevel(const char *filename)
 		if(strncmp(line, "IMAGEPATH", 9) == 0){
 			RwImageSetPath(line + 10);
 		}else if(strncmp(line, "TEXDICTION", 10) == 0){
+			PUSH_MEMID(MEMID_TEXTURES);
 			strcpy(txdname, line+11);
 			LoadingScreenLoadingFile(txdname);
 			RwTexDictionary *txd = LoadTexDictionary(txdname);
 			AddTexDictionaries(savedTxd, txd);
 			RwTexDictionaryDestroy(txd);
+			POP_MEMID();
 		}else if(strncmp(line, "COLFILE", 7) == 0){
 			int level;
 			sscanf(line+8, "%d", &level);
@@ -95,12 +103,16 @@ CFileLoader::LoadLevel(const char *filename)
 			LoadObjectTypes(line + 4);
 		}else if(strncmp(line, "IPL", 3) == 0){
 			if(!objectsLoaded){
+				PUSH_MEMID(MEMID_DEF_MODELS);
 				CModelInfo::ConstructMloClumps();
+				POP_MEMID();
 				CObjectData::Initialise("DATA\\OBJECT.DAT");
 				objectsLoaded = true;
 			}
+			PUSH_MEMID(MEMID_WORLD);
 			LoadingScreenLoadingFile(line + 4);
 			LoadScene(line + 4);
+			POP_MEMID();
 		}else if(strncmp(line, "MAPZONE", 7) == 0){
 			LoadingScreenLoadingFile(line + 8);
 			LoadMapZones(line + 8);
@@ -189,6 +201,8 @@ CFileLoader::LoadCollisionFile(const char *filename)
 	CBaseModelInfo *mi;
 	ColHeader header;
 
+	PUSH_MEMID(MEMID_COLLISION);
+
 	debug("Loading collision file %s\n", filename);
 	fd = CFileMgr::OpenFile(filename, "rb");
 
@@ -212,6 +226,8 @@ CFileLoader::LoadCollisionFile(const char *filename)
 	}
 
 	CFileMgr::CloseFile(fd);
+
+	POP_MEMID();
 }
 
 void
@@ -233,6 +249,7 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 44;
 	if(model.numSpheres > 0){
 		model.spheres = (CColSphere*)RwMalloc(model.numSpheres*sizeof(CColSphere));
+		REGISTER_MEMPTR(&model.spheres);
 		for(i = 0; i < model.numSpheres; i++){
 			model.spheres[i].Set(*(float*)buf, *(CVector*)(buf+4), buf[16], buf[17]);
 			buf += 20;
@@ -244,6 +261,7 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 4;
 	if(model.numLines > 0){
 		model.lines = (CColLine*)RwMalloc(model.numLines*sizeof(CColLine));
+		REGISTER_MEMPTR(&model.lines);
 		for(i = 0; i < model.numLines; i++){
 			model.lines[i].Set(*(CVector*)buf, *(CVector*)(buf+12));
 			buf += 24;
@@ -255,6 +273,7 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 4;
 	if(model.numBoxes > 0){
 		model.boxes = (CColBox*)RwMalloc(model.numBoxes*sizeof(CColBox));
+		REGISTER_MEMPTR(&model.boxes);
 		for(i = 0; i < model.numBoxes; i++){
 			model.boxes[i].Set(*(CVector*)buf, *(CVector*)(buf+12), buf[24], buf[25]);
 			buf += 28;
@@ -266,6 +285,7 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 4;
 	if(numVertices > 0){
 		model.vertices = (CompressedVector*)RwMalloc(numVertices*sizeof(CompressedVector));
+		REGISTER_MEMPTR(&model.vertices);
 		for(i = 0; i < numVertices; i++){
 			model.vertices[i].Set(*(float*)buf, *(float*)(buf+4), *(float*)(buf+8));
 			if(Abs(*(float*)buf) >= 256.0f ||
@@ -281,6 +301,7 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 4;
 	if(model.numTriangles > 0){
 		model.triangles = (CColTriangle*)RwMalloc(model.numTriangles*sizeof(CColTriangle));
+		REGISTER_MEMPTR(&model.triangles);
 		for(i = 0; i < model.numTriangles; i++){
 			model.triangles[i].Set(model.vertices, *(int32*)buf, *(int32*)(buf+4), *(int32*)(buf+8), buf[12], buf[13]);
 			buf += 16;
@@ -332,6 +353,16 @@ CFileLoader::FindRelatedModelInfoCB(RpAtomic *atomic, void *data)
 	return atomic;
 }
 
+#ifdef LIBRW
+void
+InitClump(RpClump *clump)
+{
+	RpClumpForAllAtomics(clump, ConvertPlatformAtomic, nil);
+}
+#else
+#define InitClump(clump)
+#endif
+
 void
 CFileLoader::LoadModelFile(const char *filename)
 {
@@ -343,6 +374,7 @@ CFileLoader::LoadModelFile(const char *filename)
 	if(RwStreamFindChunk(stream, rwID_CLUMP, nil, nil)){
 		clump = RpClumpStreamRead(stream);
 		if(clump){
+			InitClump(clump);
 			RpClumpForAllAtomics(clump, FindRelatedModelInfoCB, clump);
 			RpClumpDestroy(clump);
 		}
@@ -368,6 +400,7 @@ CFileLoader::LoadClumpFile(const char *filename)
 			GetNameAndLOD(nodename, name, &n);
 			mi = (CClumpModelInfo*)CModelInfo::GetModelInfo(name, nil);
 			if(mi){
+				InitClump(clump);
 				assert(mi->IsClump());
 				mi->SetClump(clump);
 			}else
@@ -393,6 +426,7 @@ CFileLoader::LoadClumpFile(RwStream *stream, uint32 id)
 	if (mi->GetModelType() == MITYPE_PED && id != 0 && RwStreamFindChunk(stream, rwID_CLUMP, nil, nil)) {
 		// Read LOD ped
 		clump = RpClumpStreamRead(stream);
+		InitClump(clump);
 		if(clump){
 			((CPedModelInfo*)mi)->SetLowDetailClump(clump);
 			RpClumpDestroy(clump);
@@ -423,6 +457,7 @@ CFileLoader::FinishLoadClumpFile(RwStream *stream, uint32 id)
 	clump = RpClumpGtaStreamRead2(stream);
 
 	if(clump){
+		InitClump(clump);
 		mi = (CClumpModelInfo*)CModelInfo::GetModelInfo(id);
 		mi->SetClump(clump);
 		return true;
@@ -443,6 +478,7 @@ CFileLoader::LoadAtomicFile(RwStream *stream, uint32 id)
 		clump = RpClumpStreamRead(stream);
 		if(clump == nil)
 			return false;
+		InitClump(clump);
 		gpRelatedModelInfo = (CSimpleModelInfo*)CModelInfo::GetModelInfo(id);
 		RpClumpForAllAtomics(clump, SetRelatedModelInfoCB, clump);
 		RpClumpDestroy(clump);
@@ -806,6 +842,8 @@ CFileLoader::LoadAtomicFile2Return(const char *filename)
 	stream = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, filename);
 	if(RwStreamFindChunk(stream, rwID_CLUMP, nil, nil))
 		clump = RpClumpStreamRead(stream);
+	if(clump)
+		InitClump(clump);
 	RwStreamClose(stream, nil);
 	return clump;
 }

@@ -263,9 +263,11 @@ CCam::Process(void)
 	case MODE_FIGHT_CAM_RUNABOUT:
 		Process_1rstPersonPedOnPC(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
+#ifdef GTA_SCENE_EDIT
 	case MODE_EDITOR:
 		Process_Editor(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
+#endif
 	default:
 		Source = CVector(0.0f, 0.0f, 0.0f);
 		Front = CVector(0.0f, 1.0f, 0.0f);
@@ -2570,7 +2572,7 @@ CCam::Process_M16_1stPerson(const CVector &CameraTarget, float, float, float)
 		ResetStatics = false;
 	}
 
-#ifndef GTA3_1_1_PATCH
+#if GTA_VERSION < GTA3_PC_11
 	((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(&HeadPos, PED_HEAD);
 	Source = HeadPos;
 	Source.z += 0.1f;
@@ -2605,7 +2607,7 @@ CCam::Process_M16_1stPerson(const CVector &CameraTarget, float, float, float)
 	if(Alpha > DEGTORAD(60.0f)) Alpha = DEGTORAD(60.0f);
 	else if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
 
-#ifdef GTA3_1_1_PATCH
+#if GTA_VERSION >= GTA3_PC_11
 	HeadPos.x = 0.0f;
 	HeadPos.y = 0.0f;
 	HeadPos.z = 0.0f;
@@ -3919,6 +3921,7 @@ CCam::Process_Debug(const CVector&, float, float, float)
 }
 #endif
 
+#ifdef GTA_SCENE_EDIT
 void
 CCam::Process_Editor(const CVector&, float, float, float)
 {
@@ -3997,6 +4000,7 @@ CCam::Process_Editor(const CVector&, float, float, float)
 		sprintf(str, "Look@: %f, Look@: %f, Look@: %f ", Front.x + Source.x, Front.y + Source.y, Front.z + Source.z);
 	}
 }
+#endif
 
 void
 CCam::Process_ModelView(const CVector &CameraTarget, float, float, float)
@@ -4010,6 +4014,12 @@ CCam::Process_ModelView(const CVector &CameraTarget, float, float, float)
 		Distance += CPad::GetPad(0)->GetLeftStickY()/1000.0f;
 	else
 		Distance += CPad::GetPad(0)->GetLeftStickY() * ((Distance - 10.0f)/20.0f + 1.0f) / 1000.0f;
+#ifdef IMPROVED_CAMERA
+	if(CPad::GetPad(0)->GetLeftMouse()){
+		Distance += DEGTORAD(CPad::GetPad(0)->GetMouseY()/2.0f);
+		Angle += DEGTORAD(CPad::GetPad(0)->GetMouseX()/2.0f);
+	}
+#endif
 	if(Distance < 1.5f)
 		Distance = 1.5f;
 

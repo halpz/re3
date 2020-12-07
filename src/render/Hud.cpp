@@ -534,7 +534,7 @@ void CHud::Draw()
 		CFont::SetScale(SCREEN_SCALE_X(0.4f), SCREEN_SCALE_Y(0.6f));
 		CFont::SetJustifyOff();
 		CFont::SetCentreOn();
-		CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
+		CFont::SetCentreSize(SCREEN_WIDTH);
 		CFont::SetPropOn();
 		CFont::SetFontStyle(FONT_BANK);
 
@@ -1029,7 +1029,7 @@ void CHud::Draw()
 						CFont::SetRightJustifyWrap(0.0f);
 						CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 						CFont::SetColor(CRGBA(244, 20, 20, 255));
-						CFont::SetWrapx(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
+						CFont::SetWrapx(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
 						CFont::SetPropOff();
 						CFont::SetBackGroundOnlyTextOn();
 
@@ -1342,9 +1342,9 @@ void CHud::Draw()
 			CFont::PrintOutlinedString(rectWidth / 2.0f + radarBulge, SCREEN_SCALE_Y(4.0f) + SCREEN_SCALE_FROM_BOTTOM(48.0f) - SCREEN_SCALE_Y(1), m_Message,
 				2.0f, true, CRGBA(0, 0, 0, 255));
 #else
-
 			float radarBulge = SCREEN_SCALE_X(40.0f) + SCREEN_SCALE_X(8.0f);
 			float rectWidth = SCREEN_SCALE_FROM_RIGHT(50.0f) - SCREEN_SCALE_X(8.0f) - radarBulge;
+			
 			CFont::SetCentreSize(rectWidth);
 
 			const int16 shadow = 1;
@@ -1856,8 +1856,7 @@ void CHud::DrawAfterFade()
 
 			CFont::SetPropOn();
 #ifdef FIX_BUGS
-			//CFont::SetRightJustifyWrap(SCREEN_SCALE_FROM_RIGHT(DEFAULT_SCREEN_WIDTH + 500.0f));
-			CFont::SetRightJustifyWrap(SCREEN_SCALE_X(-500.0f));
+			CFont::SetRightJustifyWrap(SCREEN_SCALE_FROM_RIGHT(DEFAULT_SCREEN_WIDTH + 500.0f));
 #else
 			CFont::SetRightJustifyWrap(-500.0f);
 #endif

@@ -33,6 +33,9 @@
 #endif
 #include "main.h"
 #include "Frontend.h"
+#include "Font.h"
+#include "MemoryMgr.h"
+#include "MemoryHeap.h"
 
 bool CStreaming::ms_disableStreaming;
 bool CStreaming::ms_bLoadingBigModel;
@@ -289,12 +292,22 @@ CStreaming::Shutdown(void)
 	}
 }
 
+#ifndef MASTER
+uint64 timeProcessingTXD;
+uint64 timeProcessingDFF;
+#endif
+
 void
 CStreaming::Update(void)
 {
 	CEntity *train;
 	CStreamingInfo *si, *prev;
 	bool requestedSubway = false;
+
+#ifndef MASTER
+	timeProcessingTXD = 0;
+	timeProcessingDFF = 0;
+#endif
 
 	UpdateMemoryUsed();
 
@@ -331,6 +344,14 @@ CStreaming::Update(void)
 
 	LoadRequestedModels();
 
+#ifndef MASTER
+	if (CPad::GetPad(1)->GetLeftShoulder1JustDown() && CPad::GetPad(1)->GetRightShoulder1() && CPad::GetPad(1)->GetRightShoulder2())
+		PrintStreamingBufferState();
+
+	// TODO: PrintRequestList
+	//if (CPad::GetPad(1)->GetLeftShoulder2JustDown() && CPad::GetPad(1)->GetRightShoulder1() && CPad::GetPad(1)->GetRightShoulder2())
+	//	PrintRequestList();
+#endif
 
 	for(si = ms_endRequestedList.m_prev; si != &ms_startRequestedList; si = prev){
 		prev = si->m_prev;
@@ -390,6 +411,7 @@ CStreaming::LoadCdDirectory(const char *dirname, int n)
 	assert(sizeof(direntry) == 32);
 	while(CFileMgr::Read(fd, (char*)&direntry, sizeof(direntry))){
 		dot = strchr(direntry.name, '.');
+		assert(dot);
 		if(dot) *dot = '\0';
 		if(direntry.size > (uint32)ms_streamingBufferSize)
 			ms_streamingBufferSize = direntry.size;
@@ -436,6 +458,35 @@ CStreaming::LoadCdDirectory(const char *dirname, int n)
 	CFileMgr::CloseFile(fd);
 }
 
+#ifdef USE_CUSTOM_ALLOCATOR
+RpAtomic*
+RegisterAtomicMemPtrsCB(RpAtomic *atomic, void *data)
+{
+#if THIS_IS_COMPATIBLE_WITH_GTA3_RW31
+	// not quite sure what's going on here:
+	// gta3's RW 3.1 allocates separate memory for geometry data of RpGeometry.
+	// Is that a R* change? rpDefaultGeometryInstance also depends on it
+	RpGeometry *geo = RpAtomicGetGeometry(atomic);
+	if(geo->triangles)
+		REGISTER_MEMPTR(&geo->triangles);
+	if(geo->matList.materials)
+		REGISTER_MEMPTR(&geo->matList.materials);
+	if(geo->preLitLum)
+		REGISTER_MEMPTR(&geo->preLitLum);
+	if(geo->texCoords[0])
+		REGISTER_MEMPTR(&geo->texCoords[0]);
+	if(geo->texCoords[1])
+		REGISTER_MEMPTR(&geo->texCoords[1]);
+#else
+	// normally RpGeometry is allocated in one block (excluding morph targets)
+	// so we don't really have allocated pointers in the struct.
+	// NB: in librw we actually do it in two allocations (geometry itself and data)
+	// so we could conceivably come up with something here
+#endif
+	return atomic;
+}
+#endif
+
 bool
 CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 {
@@ -469,10 +520,14 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 
 		// Set Txd to use
 		CTxdStore::AddRef(mi->GetTxdSlot());
-		CTxdStore::SetCurrentTxd(mi->GetTxdSlot());
 
+		PUSH_MEMID(MEMID_STREAM_MODELS);
+		CTxdStore::SetCurrentTxd(mi->GetTxdSlot());
 		if(mi->IsSimple()){
 			success = CFileLoader::LoadAtomicFile(stream, streamId);
+#ifdef USE_CUSTOM_ALLOCATOR
+			RegisterAtomicMemPtrsCB(((CSimpleModelInfo*)mi)->m_atomics[0], nil);
+#endif
 		} else if (mi->GetModelType() == MITYPE_VEHICLE) {
 			// load vehicles in two parts
 			CModelInfo::GetModelInfo(streamId)->AddRef();
@@ -481,7 +536,12 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 				ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_STARTED;
 		}else{
 			success = CFileLoader::LoadClumpFile(stream, streamId);
+#ifdef USE_CUSTOM_ALLOCATOR
+			if(success)
+				RpClumpForAllAtomics((RpClump*)mi->GetRwObject(), RegisterAtomicMemPtrsCB, nil);
+#endif
 		}
+		POP_MEMID();
 		UpdateMemoryUsed();
 
 		// Txd no longer needed unless we only read part of the file
@@ -505,12 +565,14 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 			return false;
 		}
 
+		PUSH_MEMID(MEMID_STREAM_TEXUTRES);
 		if(ms_bLoadingBigModel || cdsize > 200){
 			success = CTxdStore::StartLoadTxd(streamId - STREAM_OFFSET_TXD, stream);
 			if(success)
 				ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_STARTED;
 		}else
 		        success = CTxdStore::LoadTxd(streamId - STREAM_OFFSET_TXD, stream);
+		POP_MEMID();
 		UpdateMemoryUsed();
 
 		if(!success){
@@ -560,7 +622,9 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 	// Mark objects as loaded
 	if(ms_aInfoForModel[streamId].m_loadState != STREAMSTATE_STARTED){
 		ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_LOADED;
+#ifndef USE_CUSTOM_ALLOCATOR
 		ms_memoryUsed += ms_aInfoForModel[streamId].GetCdSize() * CDSTREAM_SECTOR_SIZE;
+#endif
 	}
 
 	endTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond();
@@ -600,31 +664,42 @@ CStreaming::FinishLoadingLargeFile(int8 *buf, int32 streamId)
 	if(streamId < STREAM_OFFSET_TXD){
 		// Model
 		mi = CModelInfo::GetModelInfo(streamId);
+		PUSH_MEMID(MEMID_STREAM_MODELS);
 		CTxdStore::SetCurrentTxd(mi->GetTxdSlot());
 		success = CFileLoader::FinishLoadClumpFile(stream, streamId);
-		if(success)
+		if(success){
+#ifdef USE_CUSTOM_ALLOCATOR
+			RpClumpForAllAtomics((RpClump*)mi->GetRwObject(), RegisterAtomicMemPtrsCB, nil);
+#endif
 			success = AddToLoadedVehiclesList(streamId);
+		}
+		POP_MEMID();
 		mi->RemoveRef();
 		CTxdStore::RemoveRefWithoutDelete(mi->GetTxdSlot());
 	}else{
 		// Txd
 		CTxdStore::AddRef(streamId - STREAM_OFFSET_TXD);
+		PUSH_MEMID(MEMID_STREAM_TEXUTRES);
 		success = CTxdStore::FinishLoadTxd(streamId - STREAM_OFFSET_TXD, stream);
+		POP_MEMID();
 		CTxdStore::RemoveRefWithoutDelete(streamId - STREAM_OFFSET_TXD);
 	}
 
 	RwStreamClose(stream, &mem);
-	ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_LOADED;
+
+	ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_LOADED;	// only done if success on PS2
+#ifndef USE_CUSTOM_ALLOCATOR
 	ms_memoryUsed += ms_aInfoForModel[streamId].GetCdSize() * CDSTREAM_SECTOR_SIZE;
+#endif
 
 	if(!success){
 		RemoveModel(streamId);
 		ReRequestModel(streamId);
-		UpdateMemoryUsed();
+		UpdateMemoryUsed();	// directly after pop on PS2
 		return false;
 	}
 
-	UpdateMemoryUsed();
+	UpdateMemoryUsed();	// directly after pop on PS2
 
 	endTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond();
 	timeDiff = endTime - startTime;
@@ -741,7 +816,9 @@ CStreaming::RequestBigBuildings(eLevelName level)
 		b = CPools::GetBuildingPool()->GetSlot(i);
 		if(b && b->bIsBIGBuilding
 #ifdef NO_ISLAND_LOADING
-		    && ((CMenuManager::m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_LOW) || (b->m_level == level))
+		    && (((CMenuManager::m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_LOW) && (b != pIslandLODindustEntity) && (b != pIslandLODcomIndEntity) &&
+		         (b != pIslandLODcomSubEntity) && (b != pIslandLODsubIndEntity) && (b != pIslandLODsubComEntity)
+				) || (b->m_level == level))
 #else
 		    && b->m_level == level
 #endif
@@ -855,7 +932,11 @@ CStreaming::RemoveModel(int32 id)
 			CModelInfo::GetModelInfo(id)->DeleteRwObject();
 		else
 			CTxdStore::RemoveTxd(id - STREAM_OFFSET_TXD);
+#ifdef USE_CUSTOM_ALLOCATOR
+		UpdateMemoryUsed();
+#else
 		ms_memoryUsed -= ms_aInfoForModel[id].GetCdSize()*CDSTREAM_SECTOR_SIZE;
+#endif
 	}
 
 	if(ms_aInfoForModel[id].m_next){
@@ -877,6 +958,9 @@ CStreaming::RemoveModel(int32 id)
 			RpClumpGtaCancelStream();
 		else
 			CTxdStore::RemoveTxd(id - STREAM_OFFSET_TXD);
+#ifdef USE_CUSTOM_ALLOCATOR
+		UpdateMemoryUsed();
+#endif
 	}
 
 	ms_aInfoForModel[id].m_loadState = STREAMSTATE_NOTLOADED;
@@ -2041,19 +2125,25 @@ CStreaming::FlushRequestList(void)
 void
 CStreaming::ImGonnaUseStreamingMemory(void)
 {
-	// empty
+	PUSH_MEMID(MEMID_STREAM);
 }
 
 void
 CStreaming::IHaveUsedStreamingMemory(void)
 {
+	POP_MEMID();
 	UpdateMemoryUsed();
 }
 
 void
 CStreaming::UpdateMemoryUsed(void)
 {
-	// empty
+#ifdef USE_CUSTOM_ALLOCATOR
+	ms_memoryUsed =
+		gMainHeap.GetMemoryUsed(MEMID_STREAM) +
+		gMainHeap.GetMemoryUsed(MEMID_STREAM_MODELS) +
+		gMainHeap.GetMemoryUsed(MEMID_STREAM_TEXUTRES);
+#endif
 }
 
 #define STREAM_DIST 80.0f
@@ -2632,4 +2722,72 @@ CStreaming::UpdateForAnimViewer(void)
 	else {
 		CStreaming::RetryLoadFile(CStreaming::ms_channelError);
 	}
+}
+
+
+void
+CStreaming::PrintStreamingBufferState()
+{
+	char str[128];
+	wchar wstr[128];
+	uint32 offset, size;
+
+	CTimer::Stop();
+	int i = 0;
+	while (i < NUMSTREAMINFO) {
+		while (true) {
+			int j = 0;
+			DoRWStuffStartOfFrame(50, 50, 50, 0, 0, 0, 255);
+			CPad::UpdatePads();
+			CSprite2d::InitPerFrame();
+			CFont::InitPerFrame();
+			DefinedState();
+
+			CRect unusedRect(0, 0, RsGlobal.maximumWidth, RsGlobal.maximumHeight);
+			CRGBA unusedColor(255, 255, 255, 255);
+			CFont::SetFontStyle(FONT_BANK);
+			CFont::SetBackgroundOff();
+			CFont::SetWrapx(DEFAULT_SCREEN_WIDTH);
+			CFont::SetScale(0.5f, 0.75f);
+			CFont::SetCentreOff();
+			CFont::SetCentreSize(DEFAULT_SCREEN_WIDTH);
+			CFont::SetJustifyOff();
+			CFont::SetColor(CRGBA(200, 200, 200, 200));
+			CFont::SetBackGroundOnlyTextOff();
+			int modelIndex = i;
+			if (modelIndex < NUMSTREAMINFO) {
+				int y = 24;
+				for ( ; j < 34 && modelIndex < NUMSTREAMINFO; modelIndex++) {
+					CStreamingInfo *streamingInfo = &ms_aInfoForModel[modelIndex];
+					CBaseModelInfo *modelInfo = CModelInfo::GetModelInfo(modelIndex);
+					if (streamingInfo->m_loadState != STREAMSTATE_LOADED || !streamingInfo->GetCdPosnAndSize(offset, size))
+						continue;
+
+					if (modelIndex >= STREAM_OFFSET_TXD)
+						sprintf(str, "txd %s, refs %d, size %dK, flags 0x%x", CTxdStore::GetTxdName(modelIndex - STREAM_OFFSET_TXD),
+						        CTxdStore::GetNumRefs(modelIndex - STREAM_OFFSET_TXD), 2 * size, streamingInfo->m_flags);
+					else
+						sprintf(str, "model %d,%s, refs%d, size%dK, flags%x", modelIndex, modelInfo->GetName(), modelInfo->GetNumRefs(), 2 * size,
+						        streamingInfo->m_flags);
+					AsciiToUnicode(str, wstr);
+					CFont::PrintString(24.0f, y, wstr);
+					y += 12;
+					j++;
+				}
+			}
+
+			if (CPad::GetPad(1)->GetCrossJustDown())
+				i = modelIndex;
+
+			if (!CPad::GetPad(1)->GetTriangleJustDown())
+				break;
+
+			i = 0;
+			CFont::DrawFonts();
+			DoRWStuffEndOfFrame();
+		}
+		CFont::DrawFonts();
+		DoRWStuffEndOfFrame();
+	}
+	CTimer::Update();
 }

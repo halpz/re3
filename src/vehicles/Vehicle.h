@@ -103,6 +103,15 @@ enum eFlightModel
 	FLIGHT_MODEL_SEAPLANE
 };
 
+// TODO: what is this even?
+enum eBikeWheelSpecial {
+	BIKE_WHEELSPEC_0, // both wheels on ground
+	BIKE_WHEELSPEC_1, // rear wheel on ground
+	BIKE_WHEELSPEC_2, // only front wheel on ground
+	BIKE_WHEELSPEC_3, // can't happen
+};
+
+
 class CVehicle : public CPhysical
 {
 public:
@@ -237,6 +246,8 @@ public:
 	void FlyingControl(eFlightModel flightModel);
 	void ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint,
 		int32 wheelsOnGround, float thrust, float brake, float adhesion, int8 wheelId, float *wheelSpeed, tWheelState *wheelState, uint16 wheelStatus);
+	void ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint, int32 wheelsOnGround, float thrust,
+	                      float brake, float adhesion, int8 wheelId, float *wheelSpeed, tWheelState *wheelState, eBikeWheelSpecial special, uint16 wheelStatus);
 	void ExtinguishCarFire(void);
 	void ProcessDelayedExplosion(void);
 	float ProcessWheelRotation(tWheelState state, const CVector &fwd, const CVector &speed, float radius);
