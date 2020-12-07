@@ -86,7 +86,11 @@ VALIDATE_SIZE(sRadarTrace, 0x30);
 
 // Values for screen space
 #define RADAR_LEFT (40.0f)
+#ifdef PS2_HUD
+#define RADAR_BOTTOM (44.0f)
+#else
 #define RADAR_BOTTOM (47.0f)
+#endif
 #define RADAR_WIDTH (94.0f)
 #define RADAR_HEIGHT (76.0f)
 

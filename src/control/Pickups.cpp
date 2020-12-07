@@ -964,7 +964,11 @@ CPickups::RenderPickUpText()
 		float fScaleX = aMessages[i].m_dist.x / 100.0f;
 		if (fScaleX > MAX_SCALE) fScaleX = MAX_SCALE;
 
+#ifdef FIX_BUGS
+		CFont::SetScale(SCREEN_SCALE_X(fScaleX), SCREEN_SCALE_Y(fScaleY));
+#else
 		CFont::SetScale(fScaleX, fScaleY);
+#endif
 		CFont::SetCentreOn();
 		CFont::SetCentreSize(SCREEN_WIDTH);
 		CFont::SetJustifyOff();

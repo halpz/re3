@@ -163,7 +163,11 @@ cMusicManager::DisplayRadioStationName()
 		CFont::SetCentreOn();
 		CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
+#ifdef FIX_BUGS
 		CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f), SCREEN_SCALE_Y(22.0f) + SCREEN_SCALE_Y(2.0f), pCurrentStation);
+#else
+		CFont::PrintString(SCREEN_WIDTH / 2 + 2.0f, SCREEN_SCALE_Y(22.0f) + 2.0f, pCurrentStation);
+#endif
 
 		if(gNumRetunePresses)
 			CFont::SetColor(CRGBA(102, 133, 143, 255));

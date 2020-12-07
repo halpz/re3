@@ -1396,16 +1396,24 @@ void CGarage::RemoveCarsBlockingDoorNotInside()
 void CGarages::PrintMessages()
 {
 	if (CTimer::GetTimeInMilliseconds() > MessageStartTime && CTimer::GetTimeInMilliseconds() < MessageEndTime) {
-		CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.5f)); // BUG: game doesn't use macro here.
+#ifdef FIX_BUGS
+		CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.5f));
+#else
+		CFont::SetScale(1.2f, 1.5f);
+#endif
 		CFont::SetPropOn();
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-		CFont::SetCentreSize(SCREEN_SCALE_X(590.0f));
+#ifdef FIX_BUGS
+		CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - 50));
+#else
+		CFont::SetCentreSize(SCREEN_WIDTH - 50);
+#endif
 		CFont::SetCentreOn();
 		CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
 
-#if defined(PS2) || defined (FIX_BUGS)
+#if defined(PS2_HUD) || defined (FIX_BUGS)
 		float y_offset = SCREEN_HEIGHT / 3; // THIS is PS2 calculation
 #else
 		float y_offset = SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(84.0f); // This is PC and results in text being written over some HUD elements
@@ -1413,26 +1421,44 @@ void CGarages::PrintMessages()
 
 		if (MessageNumberInString2 < 0) {
 			if (MessageNumberInString < 0) {
+#ifdef FIX_BUGS
 				CFont::PrintString(SCREEN_WIDTH / 2 - SCREEN_SCALE_X(2.0f), y_offset - SCREEN_SCALE_Y(2.0f), TheText.Get(MessageIDString));
-
+#else
+				CFont::PrintString(SCREEN_WIDTH / 2 - 2.0f, y_offset - 2.0f, TheText.Get(MessageIDString));
+#endif
 				CFont::SetColor(CRGBA(89, 115, 150, 255));
 				CFont::PrintString(SCREEN_WIDTH / 2, y_offset, TheText.Get(MessageIDString));
 			}
 			else {
 				CMessages::InsertNumberInString(TheText.Get(MessageIDString), MessageNumberInString, -1, -1, -1, -1, -1, gUString);
-
+#ifdef FIX_BUGS
 				CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f), y_offset - SCREEN_SCALE_Y(40.0f) + SCREEN_SCALE_Y(2.0f), gUString);
+#else
+				CFont::PrintString(SCREEN_WIDTH / 2 + 2.0f, y_offset - 40.0f + 2.0f, gUString);
+#endif
 
 				CFont::SetColor(CRGBA(89, 115, 150, 255));
+				
+#ifdef FIX_BUGS
 				CFont::PrintString(SCREEN_WIDTH / 2, y_offset - SCREEN_SCALE_Y(40.0f), gUString);
+#else
+				CFont::PrintString(SCREEN_WIDTH / 2, y_offset - 40.0f, gUString);
+#endif
 			}
 		}
 		else {
 			CMessages::InsertNumberInString(TheText.Get(MessageIDString), MessageNumberInString, MessageNumberInString2, -1, -1, -1, -1, gUString);
+#ifdef FIX_BUGS
 			CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f), y_offset - SCREEN_SCALE_Y(40.0f) + SCREEN_SCALE_Y(2.0f), gUString);
-
+#else
+			CFont::PrintString(SCREEN_WIDTH / 2 + 2.0f, y_offset - 40.0f + 2.0f, gUString);
+#endif
 			CFont::SetColor(CRGBA(89, 115, 150, 255));
+#ifdef FIX_BUGS
 			CFont::PrintString(SCREEN_WIDTH / 2, y_offset - SCREEN_SCALE_Y(40.0f), gUString);
+#else
+			CFont::PrintString(SCREEN_WIDTH / 2, y_offset - 40.0f, gUString);
+#endif
 		}
 	}
 }

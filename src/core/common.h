@@ -116,17 +116,33 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 #include "skeleton.h"
 #include "Draw.h"
 
-#define DEFAULT_SCREEN_WIDTH (640)
-#define DEFAULT_SCREEN_HEIGHT (448)
-#define DEFAULT_SCREEN_HEIGHT_PAL (512)
-#define DEFAULT_SCREEN_HEIGHT_NTSC (448)
+#ifdef GTA_PS2
+#define DEFAULT_SCREEN_WIDTH  (640)
+#define DEFAULT_SCREEN_HEIGHT (480)
+#else
+#define DEFAULT_SCREEN_WIDTH  (640)
+//#define DEFAULT_SCREEN_HEIGHT (448)
+#define DEFAULT_SCREEN_HEIGHT (480)
+#endif
 #define DEFAULT_ASPECT_RATIO (4.0f/3.0f)
 #define DEFAULT_VIEWWINDOW (0.7f)
 
 // game uses maximumWidth/Height, but this probably won't work
 // with RW windowed mode
-#define SCREEN_WIDTH ((float)RsGlobal.width)
+#ifdef GTA_PS2
+	#ifdef GTA_PAL
+		#define SCREEN_WIDTH  ((float)640)
+		#define SCREEN_HEIGHT ((float)512)
+	#else
+		#define SCREEN_WIDTH  ((float)640)
+		#define SCREEN_HEIGHT ((float)448)
+	#endif
+#else
+#define SCREEN_WIDTH  ((float)RsGlobal.width)
 #define SCREEN_HEIGHT ((float)RsGlobal.height)
+#endif
+#define SCREEN_HEIGHT_PAL (512)
+#define SCREEN_HEIGHT_NTSC (448)
 #define SCREEN_ASPECT_RATIO (CDraw::GetAspectRatio())
 #define SCREEN_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetScaledFOV() * 0.5f)))
 

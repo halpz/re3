@@ -614,23 +614,39 @@ LoadingIslandScreen(const char *levelName)
 	col = CRGBA(255, 255, 255, 255);
 	splash->Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), col, col, col, col);
 	CFont::SetBackgroundOff();
+#ifdef FIX_BUGS
+	CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
+#else
 	CFont::SetScale(1.5f, 1.5f);
+#endif
 	CFont::SetPropOn();
 	CFont::SetRightJustifyOn();
+#ifdef FIX_BUGS
+	CFont::SetRightJustifyWrap(SCREEN_SCALE_X(150.0f));
+#else
 	CFont::SetRightJustifyWrap(150.0f);
+#endif
 	CFont::SetFontStyle(FONT_HEADING);
 	sprintf(str, "WELCOME TO");
 	AsciiToUnicode(str, wstr);
 	CFont::SetDropColor(CRGBA(0, 0, 0, 255));
 	CFont::SetDropShadowPosition(3);
 	CFont::SetColor(CRGBA(243, 237, 71, 255));
-	CFont::SetScale(SCREEN_STRETCH_X(1.2f), SCREEN_STRETCH_Y(1.2f));
+	CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.2f));
+#ifdef FIX_BUGS
+	CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(20.0f), SCREEN_STRETCH_FROM_BOTTOM(110.0f), TheText.Get("WELCOME"));
+#else
 	CFont::PrintString(SCREEN_WIDTH - 20, SCREEN_STRETCH_FROM_BOTTOM(110.0f), TheText.Get("WELCOME"));
+#endif
 	TextCopy(wstr, name);
 	TheText.UpperCase(wstr);
 	CFont::SetColor(CRGBA(243, 237, 71, 255));
-	CFont::SetScale(SCREEN_STRETCH_X(1.2f), SCREEN_STRETCH_Y(1.2f));
+	CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.2f));
+#ifdef FIX_BUGS
+	CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(20.0f), SCREEN_STRETCH_FROM_BOTTOM(80.0f), wstr);
+#else
 	CFont::PrintString(SCREEN_WIDTH-20, SCREEN_STRETCH_FROM_BOTTOM(80.0f), wstr);
+#endif
 	CFont::DrawFonts();
 	DoRWStuffEndOfFrame();
 }
@@ -782,7 +798,11 @@ DisplayGameDebugText()
 	CFont::SetJustifyOff();
 	CFont::SetBackGroundOnlyTextOff();
 	CFont::SetColor(CRGBA(255, 108, 0, 255));
+#ifdef FIX_BUGS
 	CFont::PrintString(SCREEN_SCALE_X(10.0f), SCREEN_SCALE_Y(10.0f), ver);
+#else
+	CFont::PrintString(10.0f, 10.0f, ver);
+#endif
 
 	FrameSamples++;
 	FramesPerSecondCounter += 1000.0f / (CTimer::GetTimeStepNonClippedInSeconds() * 1000.0f);	
@@ -841,14 +861,26 @@ DisplayGameDebugText()
 		CFont::SetRightJustifyOff();
 		CFont::SetJustifyOff();
 		CFont::SetBackGroundOnlyTextOff();
-		CFont::SetWrapx(SCREEN_WIDTH);
+#ifdef FIX_BUGS
+		CFont::SetWrapx(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
+#else
+		CFont::SetWrapx(DEFAULT_SCREEN_WIDTH);
+#endif
 		CFont::SetFontStyle(FONT_HEADING);
 		
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
-		CFont::PrintString(42.0f, 42.0f, ustr);
+#ifdef FIX_BUGS
+		CFont::PrintString(SCREEN_SCALE_X(40.0f+2.0f), SCREEN_SCALE_Y(40.0f+2.0f), ustr);
+#else
+		CFont::PrintString(40.0f+2.0f, 40.0f+2.0f, ustr);
+#endif
 		
 		CFont::SetColor(CRGBA(255, 108, 0, 255));
+#ifdef FIX_BUGS
+		CFont::PrintString(SCREEN_SCALE_X(40.0f), SCREEN_SCALE_Y(40.0f), ustr);
+#else
 		CFont::PrintString(40.0f, 40.0f, ustr);
+#endif
 	}
 }
 #endif
@@ -1075,7 +1107,7 @@ Idle(void *arg)
 	if((!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bRenderGameInMenu) &&
 	   TheCamera.GetScreenFadeStatus() != FADE_2)
 	{
-#ifdef GTA_PC
+#if defined(GTA_PC) && defined(FIX_BUGS)
 		if (!FrontEndMenuManager.m_bRenderGameInMenu) {
 			// This is from SA, but it's nice for windowed mode
 			RwV2d pos;
@@ -1483,7 +1515,11 @@ void TheGame(void)
 			}
 			else
 			{
-				CameraSize(Scene.camera, NULL, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
+#ifdef ASPECT_RATIO_SCALE
+				CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
+#else
+				CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
+#endif
 				CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 				RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
 				if (!RsCameraBeginUpdate(Scene.camera))

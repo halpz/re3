@@ -267,13 +267,18 @@ CFont::Initialise(void)
 	SetScale(1.0f, 1.0f);
 	SetSlantRefPoint(SCREEN_WIDTH, 0.0f);
 	SetSlant(0.0f);
-	SetColor(CRGBA(0xFF, 0xFF, 0xFF, 0));
+	SetColor(CRGBA(255, 255, 255, 0));
 	SetJustifyOff();
 	SetCentreOff();
-	SetWrapx(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
-	SetCentreSize(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
+#ifdef FIX_BUGS
+	SetWrapx(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
+	SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
+#else
+	SetWrapx(DEFAULT_SCREEN_WIDTH);
+	SetCentreSize(DEFAULT_SCREEN_WIDTH);
+#endif
 	SetBackgroundOff();
-	SetBackgroundColor(CRGBA(0x80, 0x80, 0x80, 0x80));
+	SetBackgroundColor(CRGBA(128, 128, 128, 128));
 	SetBackGroundOnlyTextOff();
 	SetPropOn();
 	SetFontStyle(FONT_BANK);
@@ -360,7 +365,11 @@ void
 CFont::PrintChar(float x, float y, wchar c)
 {
 	if(x <= 0.0f || x > SCREEN_WIDTH ||
-	   y <= 0.0f || y > SCREEN_HEIGHT)	// BUG: game uses SCREENW again
+#ifdef FIX_BUGS
+	   y <= 0.0f || y > SCREEN_HEIGHT)
+#else
+	   y <= 0.0f || y > SCREEN_WIDTH)
+#endif
 		return;
 
 	float w = GetCharacterWidth(c) / 32.0f;
@@ -421,6 +430,7 @@ CFont::PrintChar(float x, float y, wchar c)
 			xoff * w / 1024.0f + (1.0f / 48.0f) - 0.001f, (yoff + 1.0f) / 25.6f - 0.0001f);
 #endif
 	}else
+	{
 		CSprite2d::AddSpriteToBank(Details.bank + Details.style,	// BUG: game doesn't add bank
 			CRect(x, y,
 					x + 32.0f * Details.scaleX * w,
@@ -430,6 +440,7 @@ CFont::PrintChar(float x, float y, wchar c)
 			(xoff+w)/16.0f,           yoff/16.0f,
 			xoff/16.0f,               (yoff+1.0f)/16.0f,
 			(xoff+w)/16.0f - 0.0001f, (yoff+1.0f)/16.0f - 0.0001f);
+	}
 }
 
 #ifdef MORE_LANGUAGES

@@ -209,7 +209,7 @@ enum Config {
 #define USE_TXD_CDIMAGE		// generate and load textures from txd.img
 #define PS2_ALPHA_TEST		// emulate ps2 alpha test 
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
-#define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
+//#define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
 #define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
 //#define USE_TEXTURE_POOL
 #define CUTSCENE_BORDERS_SWITCH
@@ -241,6 +241,7 @@ enum Config {
 //#define BIND_VEHICLE_FIREWEAPON // Adds ability to rebind fire key for 'in vehicle' controls
 
 // Hud, frontend and radar
+#define PS2_HUD
 #define HUD_ENHANCEMENTS	// Adjusts some aspects to make the HUD look/behave a little bit better.
 // #define BETA_SLIDING_TEXT
 #define TRIANGULAR_BLIPS	// height indicating triangular radar blips, as in VC
