@@ -192,7 +192,7 @@ void CGarages::Update(void)
 		aGarages[GarageToBeTidied].TidyUpGarage();
 }
 
-int16 CGarages::AddOne(float X1, float Y1, float Z1, float X2, float Y2, float X3, float Y3, float Z2, eGarageType type, int32 targetId)
+int16 CGarages::AddOne(float X1, float Y1, float Z1, float X2, float Y2, float X3, float Y3, float Z2, uint8 type, int32 targetId)
 {
 	if (NumGarages >= NUM_GARAGES) {
 		assert(0);
@@ -293,7 +293,7 @@ int16 CGarages::AddOne(float X1, float Y1, float Z1, float X2, float Y2, float X
 	return NumGarages++;
 }
 
-void CGarages::ChangeGarageType(int16 garage, eGarageType type, int32 mi)
+void CGarages::ChangeGarageType(int16 garage, uint8 type, int32 mi)
 {
 	CGarage* pGarage = &aGarages[garage];
 	pGarage->m_eGarageType = type;
@@ -2074,7 +2074,7 @@ void CGarages::CloseHideOutGaragesBeforeSave()
 	}
 }
 
-int32 CGarages::CountCarsInHideoutGarage(eGarageType type)
+int32 CGarages::CountCarsInHideoutGarage(uint8 type)
 {
 	int32 total = 0;
 	for (int i = 0; i < NUM_GARAGE_STORED_CARS; i++) {

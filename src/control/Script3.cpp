@@ -286,7 +286,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		float supX = *(float*)&ScriptParams[5];
 		float supY = *(float*)&ScriptParams[6];
 		float supZ = *(float*)&ScriptParams[7];
-		ScriptParams[0] = CGarages::AddOne(infX, infY, infZ, X2, Y2, supX, supY, supZ, (eGarageType)ScriptParams[8], 0);
+		ScriptParams[0] = CGarages::AddOne(infX, infY, infZ, X2, Y2, supX, supY, supZ, ScriptParams[8], 0);
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
@@ -302,7 +302,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		float supX = *(float*)&ScriptParams[5];
 		float supY = *(float*)&ScriptParams[6];
 		float supZ = *(float*)&ScriptParams[7];
-		ScriptParams[0] = CGarages::AddOne(infX, infY, infZ, X2, Y2, supX, supY, supZ, (eGarageType)ScriptParams[8], ScriptParams[9]);
+		ScriptParams[0] = CGarages::AddOne(infX, infY, infZ, X2, Y2, supX, supY, supZ, ScriptParams[8], ScriptParams[9]);
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
@@ -1848,7 +1848,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 	}
 	case COMMAND_CHANGE_GARAGE_TYPE:
 		CollectParameters(&m_nIp, 2);
-		CGarages::ChangeGarageType(ScriptParams[0], (eGarageType)ScriptParams[1], 0);
+		CGarages::ChangeGarageType(ScriptParams[0], ScriptParams[1], 0);
 		return 0;
 	/*
 	case COMMAND_ACTIVATE_CRUSHER_CRANE:

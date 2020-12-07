@@ -52,7 +52,7 @@ enum eFormation
 	FORMATION_FRONT
 };
 
-enum FightState : int8 {
+enum FightState {
 	FIGHTSTATE_MOVE_FINISHED = -2,
 	FIGHTSTATE_JUST_ATTACKED,
 	FIGHTSTATE_NO_MOVE,
@@ -598,7 +598,7 @@ public:
 	uint32 m_curFightMove;
 	uint32 m_lastFightMove;
 	uint8 m_fightButtonPressure;
-	FightState m_fightState;
+	int8 m_fightState;
 	bool m_takeAStepAfterAttack;
 	uint8 m_bleedCounter;
 	CFire *m_pFire;
