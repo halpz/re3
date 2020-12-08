@@ -1,10 +1,6 @@
 # reVC
-[![Build status](https://ci.appveyor.com/api/projects/status/hyiwgegks122h8jg/branch/miami?svg=true)](https://ci.appveyor.com/project/aap/re3/branch/miami)
+[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FGTAmodding%2Fre3%2Fbadge%3Fref%3Dmiami&style=flat)](https://actions-badge.atrox.dev/GTAmodding/re3/goto?ref=miami)
 <a href="https://discord.gg/aKYAwCx92H"><img src="https://img.shields.io/badge/discord-join-7289DA.svg?logo=discord&longCache=true&style=flat" /></a>
-| Platform | Debug | Release |
-|------------------|-------------|-------------|
-| Windows Direct3D9 | [![Download](https://api.bintray.com/packages/gtamodding/revc/Debug_win-x86-librw_d3d9-mss/images/download.svg)](https://bintray.com/gtamodding/revc/Debug_win-x86-librw_d3d9-mss/_latestVersion) | [![Download](https://api.bintray.com/packages/gtamodding/revc/Release_win-x86-librw_d3d9-mss/images/download.svg)](https://bintray.com/gtamodding/revc/Release_win-x86-librw_d3d9-mss/_latestVersion) |
-| Windows OpenGL3.3 | [![Download](https://api.bintray.com/packages/gtamodding/revc/Debug_win-x86-librw_gl3_glfw-mss/images/download.svg)](https://bintray.com/gtamodding/revc/Debug_win-x86-librw_gl3_glfw-mss/_latestVersion) | [![Download](https://api.bintray.com/packages/gtamodding/revc/Release_win-x86-librw_gl3_glfw-mss/images/download.svg)](https://bintray.com/gtamodding/revc/Release_win-x86-librw_gl3_glfw-mss/_latestVersion) |
 
 ## Intro
 
