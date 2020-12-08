@@ -1,10 +1,6 @@
 # re3
-[![Build status](https://ci.appveyor.com/api/projects/status/hyiwgegks122h8jg/branch/master?svg=true)](https://ci.appveyor.com/project/aap/re3/branch/master)
+[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FGTAmodding%2Fre3%2Fbadge%3Fref%3Dmaster&style=flat)](https://actions-badge.atrox.dev/GTAmodding/re3/goto?ref=master)
 <a href="https://discord.gg/aKYAwCx92H"><img src="https://img.shields.io/badge/discord-join-7289DA.svg?logo=discord&longCache=true&style=flat" /></a>
-| Platform | Debug | Release |
-|------------------|-------------|-------------|
-| Windows Direct3D9 | [![Download](https://api.bintray.com/packages/gtamodding/re3/Debug_win-x86-librw_d3d9-mss/images/download.svg)](https://bintray.com/gtamodding/re3/Debug_win-x86-librw_d3d9-mss/_latestVersion) | [![Download](https://api.bintray.com/packages/gtamodding/re3/Release_win-x86-librw_d3d9-mss/images/download.svg)](https://bintray.com/gtamodding/re3/Release_win-x86-librw_d3d9-mss/_latestVersion) |
-| Windows OpenGL3.3 | [![Download](https://api.bintray.com/packages/gtamodding/re3/Debug_win-x86-librw_gl3_glfw-mss/images/download.svg)](https://bintray.com/gtamodding/re3/Debug_win-x86-librw_gl3_glfw-mss/_latestVersion) | [![Download](https://api.bintray.com/packages/gtamodding/re3/Release_win-x86-librw_gl3_glfw-mss/images/download.svg)](https://bintray.com/gtamodding/re3/Release_win-x86-librw_gl3_glfw-mss/_latestVersion) |
 
 ## Intro
 
