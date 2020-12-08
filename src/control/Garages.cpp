@@ -4,9 +4,7 @@
 #include "main.h"
 
 #include "Bike.h"
-#ifdef FIX_BUGS
 #include "Boat.h"
-#endif
 #include "DMAudio.h"
 #include "General.h"
 #include "Font.h"

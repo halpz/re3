@@ -148,8 +148,8 @@ class CGarage
 		return Abs(TheCamera.GetPosition().x - GetGarageCenterX()) > SWITCH_GARAGE_DISTANCE_CLOSE ||
 			Abs(TheCamera.GetPosition().y - GetGarageCenterY()) > SWITCH_GARAGE_DISTANCE_CLOSE;
 #else
-		return Abs(TheCamera.GetPosition().x - m_fX1) > SWITCH_GARAGE_DISTANCE_CLOSE || 
-			Abs(TheCamera.GetPosition().y - m_fY1) > SWITCH_GARAGE_DISTANCE_CLOSE;
+		return Abs(TheCamera.GetPosition().x - m_fInfX) > SWITCH_GARAGE_DISTANCE_CLOSE ||
+			Abs(TheCamera.GetPosition().y - m_fInfY) > SWITCH_GARAGE_DISTANCE_CLOSE;
 #endif
 	}
 	void TidyUpGarageClose();

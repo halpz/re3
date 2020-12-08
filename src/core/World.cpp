@@ -1164,8 +1164,8 @@ CWorld::FindObjectsIntersectingCube(const CVector &vecStartPos, const CVector &v
 	const int32 nEndX = Min(GetSectorIndexX(vecStartPos.x), NUMSECTORS_X - 1);
 	const int32 nEndY = Min(GetSectorIndexY(vecStartPos.y), NUMSECTORS_Y - 1);
 #else
-	const int32 nEndX = Min(GetSectorIndexX(vecSectorPos.x), NUMSECTORS_X);
-	const int32 nEndY = Min(GetSectorIndexY(vecSectorPos.y), NUMSECTORS_Y);
+	const int32 nEndX = Min(GetSectorIndexX(vecStartPos.x), NUMSECTORS_X);
+	const int32 nEndY = Min(GetSectorIndexY(vecStartPos.y), NUMSECTORS_Y);
 #endif
 	for(int32 y = nStartY; y <= nEndY; y++) {
 		for(int32 x = nStartX; x <= nEndX; x++) {
