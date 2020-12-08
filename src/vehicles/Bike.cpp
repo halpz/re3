@@ -202,7 +202,7 @@ CVector vecTestResistance(0.9995f, 0.9f, 0.95f);
 float fDAxisX = 1.0f;
 float fDAxisXExtra = 100.0f;
 float fDAxisY = 1000.0f;
-float fInAirXRes = 0.88f;
+float fInAirXRes = 0.98f;
 float fFlySpeedMult = -0.6f;
 
 void
