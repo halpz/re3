@@ -374,7 +374,11 @@ CFont::PrintChar(float x, float y, wchar c)
 	if(Details.style == FONT_BANK || Details.style == FONT_STANDARD){
 		if (bDontPrint) return;
 		if (RenderState.slant == 0.0f) {
+#ifdef FIX_BUGS
+			if (c < 192) {
+#else
 			if (c < 193) {
+#endif
 				CSprite2d::AddToBuffer(
 					CRect(x, y,
 						x + 32.0f * RenderState.scaleX * 1.0f,
