@@ -813,8 +813,7 @@ CObject::DeleteAllTempObjectsInArea(CVector point, float fRadius)
 	CObjectPool *objectPool = CPools::GetObjectPool();
 	for (int32 i = 0; i < objectPool->GetSize(); i++) {
 		CObject *pObject = objectPool->GetSlot(i);
-		CVector dist = point - pObject->GetPosition();
-		if (pObject && pObject->ObjectCreatedBy == TEMP_OBJECT && dist.MagnitudeSqr() < fRadius * fRadius) {
+		if (pObject && pObject->ObjectCreatedBy == TEMP_OBJECT && (point - pObject->GetPosition()).MagnitudeSqr() < SQR(fRadius)) {
 			CWorld::Remove(pObject);
 			delete pObject;
 		}
