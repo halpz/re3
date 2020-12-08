@@ -1457,7 +1457,8 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 
 #ifndef FIX_BUGS
 					CVector dist = point->point - (*source);
-					CVector smokePos = point->point - Max(0.1f * dist.Magnitude(), 0.2f) * dist / dist.Magnitude();
+					float distMagnitude = dist.Magnitude();
+					CVector smokePos = point->point - Max(distMagnitude / 10.0f, 0.2f) * dist / distMagnitude;
 #else
 				    CVector smokePos = point->point;
 #endif // !FIX_BUGS
