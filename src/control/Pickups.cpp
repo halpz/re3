@@ -1458,9 +1458,9 @@ INITSAVEBUF
 		CPickup *buf_pickup = WriteSaveBuf(buf, aPickUps[i]);
 		if (buf_pickup->m_eType != PICKUP_NONE) {
 			if (buf_pickup->m_pObject != nil)
-				buf_pickup->m_pObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex(buf_pickup->m_pObject) + 1);
+				buf_pickup->m_pObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert(buf_pickup->m_pObject) + 1);
 			if (buf_pickup->m_pExtraObject != nil)
-				buf_pickup->m_pExtraObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex(buf_pickup->m_pExtraObject) + 1);
+				buf_pickup->m_pExtraObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert(buf_pickup->m_pExtraObject) + 1);
 		}
 	}
 

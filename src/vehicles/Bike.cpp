@@ -1213,7 +1213,8 @@ CBike::ProcessControl(void)
 
 	// Balance bike
 	if(bBalancedByRider || bIsBeingPickedUp || bIsStanding){
-		float onSideness = clamp(DotProduct(GetRight(), m_vecAvgSurfaceNormal), -1.0f, 1.0f);
+		float onSideness = DotProduct(GetRight(), m_vecAvgSurfaceNormal);
+		onSideness = clamp(onSideness, -1.0f, 1.0f);
 		CVector worldCOM = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
 		// Keep bike upright
 		if(bBalancedByRider){
