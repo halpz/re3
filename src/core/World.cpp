@@ -33,7 +33,7 @@
 
 CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];
 
-CPtrList CWorld::ms_bigBuildingsList[4];
+CPtrList CWorld::ms_bigBuildingsList[NUM_LEVELS];
 CPtrList CWorld::ms_listMovingEntityPtrs;
 CSector CWorld::ms_aSectors[NUMSECTORS_Y][NUMSECTORS_X];
 uint16 CWorld::ms_nCurrentScanCode;
@@ -1745,13 +1745,13 @@ CWorld::ShutDown(void)
 		pSector->m_lists[ENTITYLIST_DUMMIES_OVERLAP].Flush();
 #endif
 	}
-	for(int32 i = 0; i < 4; i++) {
-		for(CPtrNode *pNode = GetBigBuildingList((eLevelName)i).first; pNode; pNode = pNode->next) {
+	for(int32 i = 0; i < NUM_LEVELS; i++) {
+		for(CPtrNode *pNode = ms_bigBuildingsList[i].first; pNode; pNode = pNode->next) {
 			CEntity *pEntity = (CEntity *)pNode->item;
 			// Maybe remove from world here?
 			delete pEntity;
 		}
-		GetBigBuildingList((eLevelName)i).Flush();
+		ms_bigBuildingsList[i].Flush();
 	}
 	for(int i = 0; i < NUMSECTORS_X * NUMSECTORS_Y; i++) {
 		CSector *pSector = GetSector(i % NUMSECTORS_X, i / NUMSECTORS_Y);
