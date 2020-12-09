@@ -132,7 +132,7 @@ const CRGBA TEXT_COLOR = CRGBA(235, 170, 50, 255); // PC briefs text color
 #define MILES_IN_METER 0.000621371192f
 #define FEET_IN_METER 3.28084f
 #else
-#define MILES_IN_METER 0.00059880241f
+#define MILES_IN_METER (1 / 1670.f)
 #define FEET_IN_METER 3.33f
 #endif
 
@@ -6101,108 +6101,157 @@ CMenuManager::PrintMap(void)
 int
 CMenuManager::ConstructStatLine(int rowIdx)
 {
-#define STAT_LINE(str, left, isFloat, right) \
+#define int_STAT_IS_FLOAT false
+#define float_STAT_IS_FLOAT true
+#define STAT_LINE_1(varType, left, right1) \
 	do { \
 		if(counter == rowIdx){ \
-			BuildStatLine(str, left, isFloat, right); \
+			varType a = right1; \
+			BuildStatLine(left, &a, varType##_STAT_IS_FLOAT, nil); \
 			return 0; \
 		} counter++; \
 	} while(0)
 
-	int counter = 0, nTemp;
+#define STAT_LINE_2(varType, left, right1, right2) \
+	do { \
+		if(counter == rowIdx){ \
+			varType a = right1; \
+			varType b = right2; \
+			BuildStatLine(left, &a, varType##_STAT_IS_FLOAT, &b); \
+			return 0; \
+		} counter++; \
+	} while(0)
 
-	STAT_LINE("PL_STAT", nil, false, nil);
+#define TEXT_ON_LEFT_GXT(name) \
+	do { \
+		if(counter == rowIdx){ \
+			BuildStatLine(name, nil, false, nil); \
+			return 0; \
+		} counter++; \
+	} while(0)
+
+#define TEXT_ON_RIGHT(text) \
+	do { \
+		if(counter == rowIdx){ \
+			gUString[0] = '\0'; \
+			UnicodeStrcpy(gUString2, text); \
+			return 0; \
+		} counter++; \
+	} while(0)
+
+	// Like TEXT_ON_LEFT_GXT, but counter wasn't initialized yet I think
+	if (rowIdx == 0) {
+		BuildStatLine("PL_STAT", nil, false, nil);
+		return 0;
+	}
 
 	int percentCompleted = (CStats::TotalProgressInGame == 0 ? 0 :
 		CStats::ProgressMade * 100.0f / (CGame::nastyGame ? CStats::TotalProgressInGame : CStats::TotalProgressInGame - 1));
 	percentCompleted = Min(percentCompleted, 100);
 
-	STAT_LINE("PER_COM", &percentCompleted, false, nil);
-	STAT_LINE("NMISON", &CStats::MissionsGiven, false, nil);
-	STAT_LINE("FEST_MP", &CStats::MissionsPassed, false, &CStats::TotalNumberMissions);
-	if (CGame::nastyGame) {
-		STAT_LINE("FEST_RP", &CStats::NumberKillFrenziesPassed, false, &CStats::TotalNumberKillFrenzies);
+	switch (rowIdx) {
+		// 0 is the heading text above
+		case 1: {
+			BuildStatLine("PER_COM", &percentCompleted, false, nil);
+			return 0;
+		}
+		case 2: {
+			BuildStatLine("NMISON", &CStats::MissionsGiven, false, nil);
+			return 0;
+		}
+		case 3: {
+			BuildStatLine("FEST_MP", &CStats::MissionsPassed, false, &CStats::TotalNumberMissions);
+			return 0;
+		}
 	}
+	int counter = 4;
+
+	if (CGame::nastyGame)
+		STAT_LINE_2(int, "FEST_RP", CStats::NumberKillFrenziesPassed, CStats::TotalNumberKillFrenzies);
 	
 	CPlayerInfo &player = CWorld::Players[CWorld::PlayerInFocus];
+
+	// Hidden packages shouldn't be shown with percent
+#ifdef FIX_BUGS
+	STAT_LINE_2(int, "PERPIC", player.m_nCollectedPackages, player.m_nTotalPackages);
+#else
 	float packagesPercent = 0.0f;
 	if (player.m_nTotalPackages != 0)
 		packagesPercent = player.m_nCollectedPackages * 100.0f / player.m_nTotalPackages;
 
-	int nPackagesPercent = packagesPercent;
-	STAT_LINE("PERPIC", &nPackagesPercent, false, &(nTemp = 100));
-	STAT_LINE("NOUNIF", &CStats::NumberOfUniqueJumpsFound, false, &CStats::TotalNumberOfUniqueJumps);
-	STAT_LINE("DAYSPS", &CStats::DaysPassed, false, nil);
+	STAT_LINE_2(int, "PERPIC", packagesPercent, 100);
+#endif
+	STAT_LINE_2(int, "NOUNIF", CStats::NumberOfUniqueJumpsFound, CStats::TotalNumberOfUniqueJumps);
+	STAT_LINE_1(int, "DAYSPS", CStats::DaysPassed);
 	if (CGame::nastyGame) {
-		STAT_LINE("PE_WAST", &CStats::PeopleKilledByPlayer, false, nil);
-		STAT_LINE("PE_WSOT", &CStats::PeopleKilledByOthers, false, nil);
+		STAT_LINE_1(int, "PE_WAST", CStats::PeopleKilledByPlayer);
+		STAT_LINE_1(int, "PE_WSOT", CStats::PeopleKilledByOthers);
 	}
-	STAT_LINE("CAR_EXP", &CStats::CarsExploded, false, nil);
-	STAT_LINE("TM_BUST", &CStats::TimesArrested, false, nil);
-	STAT_LINE("TM_DED", &CStats::TimesDied, false, nil);
-	STAT_LINE("GNG_WST", &(nTemp = CStats::PedsKilledOfThisType[PEDTYPE_GANG9] + CStats::PedsKilledOfThisType[PEDTYPE_GANG8]
+	STAT_LINE_1(int, "CAR_EXP", CStats::CarsExploded);
+	STAT_LINE_1(int, "TM_BUST", CStats::TimesArrested);
+	STAT_LINE_1(int, "TM_DED", CStats::TimesDied);
+	STAT_LINE_1(int, "GNG_WST", CStats::PedsKilledOfThisType[PEDTYPE_GANG9] + CStats::PedsKilledOfThisType[PEDTYPE_GANG8]
 			+ CStats::PedsKilledOfThisType[PEDTYPE_GANG7] + CStats::PedsKilledOfThisType[PEDTYPE_GANG6]
 			+ CStats::PedsKilledOfThisType[PEDTYPE_GANG5] + CStats::PedsKilledOfThisType[PEDTYPE_GANG4]
 			+ CStats::PedsKilledOfThisType[PEDTYPE_GANG3] + CStats::PedsKilledOfThisType[PEDTYPE_GANG2]
-			+ CStats::PedsKilledOfThisType[PEDTYPE_GANG1]), false, nil);
-	STAT_LINE("DED_CRI", &(nTemp = CStats::PedsKilledOfThisType[PEDTYPE_CRIMINAL]), false, nil);
-	STAT_LINE("HEL_DST", &CStats::HelisDestroyed, false, nil);
-	STAT_LINE("KGS_EXP", &CStats::KgsOfExplosivesUsed, false, nil);
-	STAT_LINE("ACCURA", &(nTemp = (CStats::InstantHitsFiredByPlayer == 0 ? 0 :
-			CStats::InstantHitsHitByPlayer * 100.0f / CStats::InstantHitsFiredByPlayer)), false, nil);
+			+ CStats::PedsKilledOfThisType[PEDTYPE_GANG1]);
+	STAT_LINE_1(int, "DED_CRI", CStats::PedsKilledOfThisType[PEDTYPE_CRIMINAL]);
+	STAT_LINE_1(int, "HEL_DST", CStats::HelisDestroyed);
+	STAT_LINE_1(int, "KGS_EXP", CStats::KgsOfExplosivesUsed);
+	STAT_LINE_1(int, "ACCURA", (CStats::InstantHitsFiredByPlayer == 0 ? 0 :
+			CStats::InstantHitsHitByPlayer * 100.0f / CStats::InstantHitsFiredByPlayer));
 	
 	if (CStats::ElBurroTime > 0) {
-		STAT_LINE("ELBURRO", &CStats::ElBurroTime, false, nil);
+		STAT_LINE_1(int, "ELBURRO", CStats::ElBurroTime);
 	}
 	if (CStats::Record4x4One > 0) {
-		STAT_LINE("FEST_R1", &CStats::Record4x4One, false, nil);
+		STAT_LINE_1(int, "FEST_R1", CStats::Record4x4One);
 	}
 	if (CStats::Record4x4Two > 0) {
-		STAT_LINE("FEST_R2", &CStats::Record4x4Two, false, nil);
+		STAT_LINE_1(int, "FEST_R2", CStats::Record4x4Two);
 	}
 	if (CStats::Record4x4Three > 0) {
-		STAT_LINE("FEST_R3", &CStats::Record4x4Three, false, nil);
+		STAT_LINE_1(int, "FEST_R3", CStats::Record4x4Three);
 	}
 	if (CStats::Record4x4Mayhem > 0) {
-		STAT_LINE("FEST_RM", &CStats::Record4x4Mayhem, false, nil);
+		STAT_LINE_1(int, "FEST_RM", CStats::Record4x4Mayhem);
 	}
 	if (CStats::LongestFlightInDodo > 0) {
-		STAT_LINE("FEST_LF", &CStats::LongestFlightInDodo, false, nil);
+		STAT_LINE_1(int, "FEST_LF", CStats::LongestFlightInDodo);
 	}
 	if (CStats::TimeTakenDefuseMission > 0) {
-		STAT_LINE("FEST_BD", &CStats::TimeTakenDefuseMission, false, nil);
+		STAT_LINE_1(int, "FEST_BD", CStats::TimeTakenDefuseMission);
 	}
-	STAT_LINE("CAR_CRU", &CStats::CarsCrushed, false, nil);
+	STAT_LINE_1(int, "CAR_CRU", CStats::CarsCrushed);
 
 	if (CStats::HighestScores[0] > 0) {
-		STAT_LINE("FEST_BB", nil, false, nil);
-		STAT_LINE("FEST_H0", &CStats::HighestScores[0], false, nil);
+		TEXT_ON_LEFT_GXT("FEST_BB");
+		STAT_LINE_1(int, "FEST_H0", CStats::HighestScores[0]);
 	}
 	if (CStats::HighestScores[4] + CStats::HighestScores[3] + CStats::HighestScores[2] + CStats::HighestScores[1] > 0) {
-		STAT_LINE("FEST_GC", nil, false, nil);
+		TEXT_ON_LEFT_GXT("FEST_GC");
 	}
 	if (CStats::HighestScores[1] > 0) {
-		STAT_LINE("FEST_H1", &CStats::HighestScores[1], false, nil);
+		STAT_LINE_1(int, "FEST_H1", CStats::HighestScores[1]);
 	}
 	if (CStats::HighestScores[2] > 0) {
-		STAT_LINE("FEST_H2", &CStats::HighestScores[2], false, nil);
+		STAT_LINE_1(int, "FEST_H2", CStats::HighestScores[2]);
 	}
 	if (CStats::HighestScores[3] > 0) {
-		STAT_LINE("FEST_H3", &CStats::HighestScores[3], false, nil);
+		STAT_LINE_1(int, "FEST_H3", CStats::HighestScores[3]);
 	}
 	if (CStats::HighestScores[4] > 0) {
-		STAT_LINE("FEST_H4", &CStats::HighestScores[4], false, nil);
+		STAT_LINE_1(int, "FEST_H4", CStats::HighestScores[4]);
 	}
 
 	switch (m_PrefsLanguage) {
 		case LANGUAGE_AMERICAN:
 #ifndef USE_MEASUREMENTS_IN_METERS
-			float fTemp;
-			STAT_LINE("FEST_DF", &(fTemp = CStats::DistanceTravelledOnFoot * MILES_IN_METER), true, nil);
-			STAT_LINE("FEST_DC", &(fTemp = CStats::DistanceTravelledInVehicle * MILES_IN_METER), true, nil);
-			STAT_LINE("MMRAIN", &CStats::mmRain, false, nil);
-			STAT_LINE("MXCARD", &(fTemp = CStats::MaximumJumpDistance * FEET_IN_METER), true, nil);
-			STAT_LINE("MXCARJ", &(fTemp = CStats::MaximumJumpHeight * FEET_IN_METER), true, nil);
+			STAT_LINE_1(float, "FEST_DF", CStats::DistanceTravelledOnFoot * MILES_IN_METER);
+			STAT_LINE_1(float, "FEST_DC", CStats::DistanceTravelledInVehicle * MILES_IN_METER);
+			STAT_LINE_1(int, "MMRAIN", CStats::mmRain);
+			STAT_LINE_1(float, "MXCARD", CStats::MaximumJumpDistance * FEET_IN_METER);
+			STAT_LINE_1(float, "MXCARJ", CStats::MaximumJumpHeight * FEET_IN_METER);
 			break;
 #endif
 		case LANGUAGE_FRENCH:
@@ -6214,63 +6263,65 @@ CMenuManager::ConstructStatLine(int rowIdx)
 		case LANGUAGE_RUSSIAN:
 		case LANGUAGE_JAPANESE:
 #endif
-			STAT_LINE("FESTDFM", &CStats::DistanceTravelledOnFoot, true, nil);
-			STAT_LINE("FESTDCM", &CStats::DistanceTravelledInVehicle, true, nil);
-			STAT_LINE("MMRAIN", &CStats::mmRain, false, nil);
-			STAT_LINE("MXCARDM", &CStats::MaximumJumpDistance, true, nil);
-			STAT_LINE("MXCARJM", &CStats::MaximumJumpHeight, true, nil);
+			STAT_LINE_1(float, "FESTDFM", CStats::DistanceTravelledOnFoot);
+			STAT_LINE_1(float, "FESTDCM", CStats::DistanceTravelledInVehicle);
+			STAT_LINE_1(int, "MMRAIN", CStats::mmRain);
+			STAT_LINE_1(float, "MXCARDM", CStats::MaximumJumpDistance);
+			STAT_LINE_1(float, "MXCARJM", CStats::MaximumJumpHeight);
 			break;
 		default:
 			break;
 	}
 
-	STAT_LINE("MXFLIP", &CStats::MaximumJumpFlips, false, nil);
-	STAT_LINE("MXJUMP", &CStats::MaximumJumpSpins, false, nil);
-	STAT_LINE("BSTSTU", nil, false, nil);
+	STAT_LINE_1(int, "MXFLIP", CStats::MaximumJumpFlips);
+	STAT_LINE_1(int, "MXJUMP", CStats::MaximumJumpSpins);
+	TEXT_ON_LEFT_GXT("BSTSTU");
 
-	if (counter == rowIdx) {
-		gUString[0] = '\0';
-		switch (CStats::BestStuntJump) {
-			case 1:
-				UnicodeStrcpy(gUString2, TheText.Get("INSTUN"));
-				return 0;
-			case 2:
-				UnicodeStrcpy(gUString2, TheText.Get("PRINST"));
-				return 0;
-			case 3:
-				UnicodeStrcpy(gUString2, TheText.Get("DBINST"));
-				return 0;
-			case 4:
-				UnicodeStrcpy(gUString2, TheText.Get("DBPINS"));
-				return 0;
-			case 5:
-				UnicodeStrcpy(gUString2, TheText.Get("TRINST"));
-				return 0;
-			case 6:
-				UnicodeStrcpy(gUString2, TheText.Get("PRTRST"));
-				return 0;
-			case 7:
-				UnicodeStrcpy(gUString2, TheText.Get("QUINST"));
-				return 0;
-			case 8:
-				UnicodeStrcpy(gUString2, TheText.Get("PQUINS"));
-				return 0;
-			default:
-				UnicodeStrcpy(gUString2, TheText.Get("NOSTUC"));
-				return 0;
-		}
+	switch (CStats::BestStuntJump) {
+		case 1:
+			TEXT_ON_RIGHT(TheText.Get("INSTUN"));
+			break;
+		case 2:
+			TEXT_ON_RIGHT(TheText.Get("PRINST"));
+			break;
+		case 3:
+			TEXT_ON_RIGHT(TheText.Get("DBINST"));
+			break;
+		case 4:
+			TEXT_ON_RIGHT(TheText.Get("DBPINS"));
+			break;
+		case 5:
+			TEXT_ON_RIGHT(TheText.Get("TRINST"));
+			break;
+		case 6:
+			TEXT_ON_RIGHT(TheText.Get("PRTRST"));
+			break;
+		case 7:
+			TEXT_ON_RIGHT(TheText.Get("QUINST"));
+			break;
+		case 8:
+			TEXT_ON_RIGHT(TheText.Get("PQUINS"));
+			break;
+		default:
+			TEXT_ON_RIGHT(TheText.Get("NOSTUC"));
+			break;
 	}
-	counter++;
-	STAT_LINE("PASDRO", &CStats::PassengersDroppedOffWithTaxi, false, nil);
-	STAT_LINE("MONTAX", &CStats::MoneyMadeWithTaxi, false, nil);
-	STAT_LINE("FEST_LS", &CStats::LivesSavedWithAmbulance, false, nil);
-	STAT_LINE("FEST_HA", &CStats::HighestLevelAmbulanceMission, false, nil);
-	STAT_LINE("FEST_CC", &CStats::CriminalsCaught, false, nil);
-	STAT_LINE("FEST_FE", &CStats::FiresExtinguished, false, nil);
-	STAT_LINE("DAYPLC", &(nTemp = CTimer::GetTimeInMilliseconds() + 100), false, nil);
+
+	STAT_LINE_1(int, "PASDRO", CStats::PassengersDroppedOffWithTaxi);
+	STAT_LINE_1(int, "MONTAX", CStats::MoneyMadeWithTaxi);
+	STAT_LINE_1(int, "FEST_LS", CStats::LivesSavedWithAmbulance);
+	STAT_LINE_1(int, "FEST_HA", CStats::HighestLevelAmbulanceMission);
+	STAT_LINE_1(int, "FEST_CC", CStats::CriminalsCaught);
+	STAT_LINE_1(int, "FEST_FE", CStats::FiresExtinguished);
+	STAT_LINE_1(int, "DAYPLC", CTimer::GetTimeInMilliseconds() + 100);
 	return counter;
 
-#undef STAT_LINE
+#undef STAT_LINE_1
+#undef STAT_LINE_2
+#undef TEXT_ON_LEFT_GXT
+#undef TEXT_ON_RIGHT
+#undef int_STAT_IS_FLOAT
+#undef float_STAT_IS_FLOAT
 }
 
 #undef GetBackJustUp

@@ -5239,7 +5239,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 		dontCollideWithCars = (timestepFactor * dontCollideWithCars) + ((1.0f - timestepFactor) * car->m_vecMoveSpeed.Magnitude());
 
 		// Our addition
-#define IS_TRAFFIC_LIGHT(ent) (ent->IsObject() && (IsStreetLight(ent->GetModelIndex()) || ent->GetModelIndex() == MI_STREETLAMP1 || ent->GetModelIndex() == MI_STREETLAMP2))
+#define IS_TRAFFIC_LIGHT(ent) (ent->IsObject() && (IsStreetLight(ent->GetModelIndex())))
 
 		// Move cam if on collision
 		CColPoint foundCol;
