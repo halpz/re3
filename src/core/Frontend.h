@@ -697,8 +697,6 @@ public:
 
 #ifdef MENU_MAP
 	static bool bMenuMapActive;
-	static bool bMapMouseShownOnce;
-	static bool bMapLoaded;
 	static float fMapSize;
 	static float fMapCenterY;
 	static float fMapCenterX;
