@@ -2492,7 +2492,7 @@ IsVehiclePointerValid(CVehicle* pVehicle)
 {
 	if (!pVehicle)
 		return false;
-	int index = CPools::GetVehiclePool()->GetJustIndex(pVehicle);
+	int index = CPools::GetVehiclePool()->GetJustIndex_NoFreeAssert(pVehicle);
 #ifdef FIX_BUGS
 	if (index < 0 || index >= NUMVEHICLES)
 #else

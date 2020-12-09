@@ -123,16 +123,16 @@ public:
 		return m_flags[handle>>8].u == (handle & 0xFF) ?
 		       (T*)&m_entries[handle >> 8] : nil;
 	}
-	int GetIndex(T *entry){
+	int GetIndex(T* entry) {
 		int i = GetJustIndex_NoFreeAssert(entry);
-		return m_flags[i].u + (i<<8);
+		return m_flags[i].u + (i << 8);
 	}
-	int GetJustIndex(T *entry){
+	int GetJustIndex(T* entry) {
 		int index = GetJustIndex_NoFreeAssert(entry);
 		assert(!IsFreeSlot(index));
 		return index;
 	}
-	int GetJustIndex_NoFreeAssert(T* entry){
+	int GetJustIndex_NoFreeAssert(T* entry) {
 		int index = ((U*)entry - m_entries);
 		assert((U*)entry == (U*)&m_entries[index]); // cast is unsafe - check required
 		return index;

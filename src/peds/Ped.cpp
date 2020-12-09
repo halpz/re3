@@ -7846,7 +7846,7 @@ IsPedPointerValid_NotInWorld(CPed* pPed)
 {
 	if (!pPed)
 		return false;
-	int index = CPools::GetPedPool()->GetJustIndex(pPed);
+	int index = CPools::GetPedPool()->GetJustIndex_NoFreeAssert(pPed);
 #ifdef FIX_BUGS
 	if (index < 0 || index >= NUMPEDS)
 #else
