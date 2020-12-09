@@ -70,9 +70,6 @@ static psGlobalType PsGlobal;
 
 #define PSGLOBAL(var) (((psGlobalType *)(RsGlobal.ps))->var)
 
-#undef MAKEPOINTS
-#define MAKEPOINTS(l)		(*((POINTS /*FAR*/ *)&(l)))
-
 size_t _dwMemAvailPhys;
 RwUInt32 gGameState;
 
@@ -877,6 +874,36 @@ void _InputInitialiseJoys()
 {
 	PSGLOBAL(joy1id) = -1;
 	PSGLOBAL(joy2id) = -1;
+
+	// Load our gamepad mappings.
+#define SDL_GAMEPAD_DB_PATH "gamecontrollerdb.txt"
+	FILE *f = fopen(SDL_GAMEPAD_DB_PATH, "rb");
+	if (f) {
+		fseek(f, 0, SEEK_END);
+		size_t fsize = ftell(f);
+		fseek(f, 0, SEEK_SET);
+
+		char *db = (char*)malloc(fsize + 1);
+		if (fread(db, 1, fsize, f) == fsize) {
+			db[fsize] = '\0';
+
+			if (glfwUpdateGamepadMappings(db) == GLFW_FALSE)
+				Error("glfwUpdateGamepadMappings didn't succeed, check " SDL_GAMEPAD_DB_PATH ".\n");
+		} else
+			Error("fread on " SDL_GAMEPAD_DB_PATH " wasn't successful.\n");
+
+		free(db);
+		fclose(f);
+	} else
+		printf("You don't seem to have copied " SDL_GAMEPAD_DB_PATH " file from re3/gamefiles to GTA3 directory. Some gamepads may not be recognized.\n");
+
+#undef SDL_GAMEPAD_DB_PATH
+
+	// But always overwrite it with the one in SDL_GAMECONTROLLERCONFIG.
+	char const* EnvControlConfig = getenv("SDL_GAMECONTROLLERCONFIG");
+	if (EnvControlConfig != nil) {
+		glfwUpdateGamepadMappings(EnvControlConfig);
+	}
 
 	for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++) {
 		if (glfwJoystickPresent(i) && !IsThisJoystickBlacklisted(i)) {
