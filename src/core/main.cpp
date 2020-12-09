@@ -616,8 +616,10 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 			AsciiToUnicode(str1, tmpstr);
 			CFont::PrintString(hpos, vpos, tmpstr);
 			vpos += 22*yscale;
-			AsciiToUnicode(str2, tmpstr);
-			CFont::PrintString(hpos, vpos, tmpstr);
+			if (str2) {
+				AsciiToUnicode(str2, tmpstr);
+				CFont::PrintString(hpos, vpos, tmpstr);
+			}
 #endif
 		}
 
@@ -1513,15 +1515,6 @@ AppEventHandler(RsEvent event, void *param)
 			return rsEVENTPROCESSED;
 		}
 
-#ifndef MASTER
-		case rsANIMVIEWER:
-		{
-			TheModelViewer();
-
-			return rsEVENTPROCESSED;
-		}
-#endif
-
 		default:
 		{
 			return rsEVENTNOTPROCESSED;
@@ -1536,8 +1529,11 @@ TheModelViewer(void)
 #if (defined(GTA_PS2) || defined(GTA_XBOX))
 	//TODO
 #else
+	// This is III Mobile code. III Xbox code run it like main function, which is impossible to implement on PC's state machine implementation.
+	// Also we want 2D things initialized in here to print animation ids etc., our additions for that marked with X
+
 #ifdef ASPECT_RATIO_SCALE
-	CDraw::SetAspectRatio(CDraw::FindAspectRatio());
+	CDraw::SetAspectRatio(CDraw::FindAspectRatio()); // X
 #endif
 	CAnimViewer::Update();
 	CTimer::Update();
@@ -1547,12 +1543,12 @@ TheModelViewer(void)
 		CTimeCycle::GetSkyBottomRed(), CTimeCycle::GetSkyBottomGreen(), CTimeCycle::GetSkyBottomBlue(),
 		255);
 
-	CSprite2d::InitPerFrame();
-	CFont::InitPerFrame();
+	CSprite2d::InitPerFrame(); // X
+	CFont::InitPerFrame(); // X
 	DefinedState();
 	CVisibilityPlugins::InitAlphaEntityList();
 	CAnimViewer::Render();
-	Render2dStuff();
+	Render2dStuff(); // X
 	DoRWStuffEndOfFrame();
 #endif
 }

@@ -1257,17 +1257,11 @@ void resizeCB(GLFWwindow* window, int width, int height) {
 	* memory things don't work.
 	*/
 	/* redraw window */
-#ifndef MASTER
-	if (RwInitialised && (gGameState == GS_PLAYING_GAME || gGameState == GS_ANIMVIEWER))
-	{
-		RsEventHandler((gGameState == GS_PLAYING_GAME ? rsIDLE : rsANIMVIEWER), (void *)TRUE);
-	}
-#else
+
 	if (RwInitialised && gGameState == GS_PLAYING_GAME)
 	{
 		RsEventHandler(rsIDLE, (void *)TRUE);
 	}
-#endif
 
 	if (RwInitialised && height > 0 && width > 0) {
 		RwRect r;
@@ -1646,18 +1640,6 @@ main(int argc, char *argv[])
 		FrontEndMenuManager.DrawMemoryCardStartUpMenus();
 	}
 #endif
-
-	if (TurnOnAnimViewer)
-	{
-#ifndef MASTER
-		CAnimViewer::Initialise();
-#ifndef PS2_MENU
-		FrontEndMenuManager.m_bGameNotLoaded = false;
-#endif
-		gGameState = GS_ANIMVIEWER;
-		TurnOnAnimViewer = false;
-#endif
-	}
 	
 	initkeymap();
 
@@ -1677,6 +1659,18 @@ main(int argc, char *argv[])
 		* Enter the message processing loop...
 		*/
 
+#ifndef MASTER
+		if (gbModelViewer) {
+			// This is TheModelViewer in LCS, but not compiled on III Mobile.
+			LoadingScreen("Loading the ModelViewer", NULL, GetRandomSplashScreen());
+			CAnimViewer::Initialise();
+			CTimer::Update();
+#ifndef PS2_MENU
+			FrontEndMenuManager.m_bGameNotLoaded = false;
+#endif
+		}
+#endif
+
 #ifdef PS2_MENU
 		if (TheMemoryCard.m_bWantToLoad)
 			LoadSplash(GetLevelSplashScreen(CGame::currLevel));
@@ -1691,7 +1685,13 @@ main(int argc, char *argv[])
 #endif
 		{
 			glfwPollEvents();
-			if( ForegroundApp )
+#ifndef MASTER
+			if (gbModelViewer) {
+				// This is TheModelViewerCore in LCS, but TheModelViewer on other state-machine III-VCs.
+				TheModelViewer();
+			} else
+#endif
+			if ( ForegroundApp )
 			{
 				switch ( gGameState )
 				{
@@ -1894,18 +1894,6 @@ main(int argc, char *argv[])
 						}
 						break;
 					}
-#ifndef MASTER
-					case GS_ANIMVIEWER:
-					{
-						float ms = (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
-						if (RwInitialised)
-						{
-							if (!CMenuManager::m_PrefsFrameLimiter || (1000.0f / (float)RsGlobal.maxFPS) < ms)
-								RsEventHandler(rsANIMVIEWER, (void*)TRUE);
-						}
-						break;
-					}
-#endif
 				}
 			}
 			else
@@ -1977,12 +1965,13 @@ main(int argc, char *argv[])
 		}
 		else
 		{
+#ifndef MASTER
+			if ( gbModelViewer )
+				CAnimViewer::Shutdown();
+			else
+#endif
 			if ( gGameState == GS_PLAYING_GAME )
 				CGame::ShutDown();
-#ifndef MASTER
-			else if ( gGameState == GS_ANIMVIEWER )
-				CAnimViewer::Shutdown();
-#endif
 			
 			CTimer::Stop();
 			
@@ -2004,12 +1993,13 @@ main(int argc, char *argv[])
 	}
 	
 
+#ifndef MASTER
+	if ( gbModelViewer )
+		CAnimViewer::Shutdown();
+	else
+#endif
 	if ( gGameState == GS_PLAYING_GAME )
 		CGame::ShutDown();
-#ifndef MASTER
-	else if ( gGameState == GS_ANIMVIEWER )
-		CAnimViewer::Shutdown();
-#endif
 
 	DMAudio.Terminate();
 	
