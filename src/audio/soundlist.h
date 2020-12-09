@@ -1,6 +1,6 @@
 #pragma once
 
-enum eSound : uint16
+enum eSound
 {
 	SOUND_CAR_DOOR_CLOSE_BONNET = 0,
 	SOUND_CAR_DOOR_CLOSE_BUMPER,
@@ -173,7 +173,7 @@ enum eSound : uint16
 };
 
 
-enum eScriptSounds : uint16 {
+enum eScriptSounds {
 	SCRIPT_SOUND_0 = 0,
 	SCRIPT_SOUND_1,
 	SCRIPT_SOUND_2,

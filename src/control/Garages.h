@@ -7,7 +7,7 @@
 class CVehicle;
 class CCamera;
 
-enum eGarageState : int8
+enum eGarageState
 {
 	GS_FULLYCLOSED,
 	GS_OPENED,
@@ -18,7 +18,7 @@ enum eGarageState : int8
 	GS_AFTERDROPOFF,
 };
 
-enum eGarageType : int8
+enum eGarageType
 {
 	GARAGE_NONE,
 	GARAGE_MISSION,
@@ -81,8 +81,8 @@ VALIDATE_SIZE(CStoredCar, 0x28);
 
 class CGarage
 {
-	eGarageType m_eGarageType;
-	eGarageState m_eGarageState;
+	uint8 m_eGarageType;
+	uint8 m_eGarageState;
 	bool field_2; // unused
 	bool m_bClosingWithoutTargetCar;
 	bool m_bDeactivated;
@@ -207,8 +207,8 @@ public:
 #endif
 	static void Update(void);
 
-	static int16 AddOne(CVector pos1, CVector pos2, eGarageType type, int32 targetId);
-	static void ChangeGarageType(int16, eGarageType, int32);
+	static int16 AddOne(CVector pos1, CVector pos2, uint8 type, int32 targetId);
+	static void ChangeGarageType(int16, uint8, int32);
 	static void PrintMessages(void);
 	static void TriggerMessage(const char* text, int16, uint16 time, int16);
 	static void SetTargetCarForMissonGarage(int16, CVehicle*);
@@ -244,10 +244,10 @@ private:
 	static bool IsCarSprayable(CVehicle*);
 	static float FindDoorHeightForMI(int32);
 	static void CloseHideOutGaragesBeforeSave(void);
-	static int32 CountCarsInHideoutGarage(eGarageType);
-	static int32 FindMaxNumStoredCarsForGarage(eGarageType);
-	static int32 GetBombTypeForGarageType(eGarageType type) { return type - GARAGE_BOMBSHOP1 + 1; }
-	static int32 GetCarsCollectedIndexForGarageType(eGarageType type) { return type - GARAGE_COLLECTCARS_1; }
+	static int32 CountCarsInHideoutGarage(uint8);
+	static int32 FindMaxNumStoredCarsForGarage(uint8);
+	static int32 GetBombTypeForGarageType(uint8 type) { return type - GARAGE_BOMBSHOP1 + 1; }
+	static int32 GetCarsCollectedIndexForGarageType(uint8 type) { return type - GARAGE_COLLECTCARS_1; }
 
 	friend class cAudioManager;
 	friend class CGarage;
