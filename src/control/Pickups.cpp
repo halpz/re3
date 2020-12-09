@@ -852,7 +852,7 @@ CPickups::GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quan
 
 	if (slot >= NUMPICKUPS) return -1;
 
-	aPickUps[slot].m_eType = (ePickupType)type;
+	aPickUps[slot].m_eType = type;
 	aPickUps[slot].m_bRemoved = false;
 	aPickUps[slot].m_nQuantity = quantity;
 	aPickUps[slot].m_nMoneySpeed = rate;

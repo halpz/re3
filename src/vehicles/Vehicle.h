@@ -281,7 +281,7 @@ public:
 	int8 m_comedyControlState;
 	CStoredCollPoly m_aCollPolys[2];     // poly which is under front/rear part of car
 	float m_fSteerInput;
-	eVehicleType m_vehType;
+	uint8 m_vehType;
 
 	static void *operator new(size_t);
 	static void *operator new(size_t sz, int slot);

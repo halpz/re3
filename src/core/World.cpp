@@ -1580,7 +1580,7 @@ CWorld::CallOffChaseForAreaSectorListVehicles(CPtrList &list, float x1, float y1
 		if(pVehicle->m_scanCode != GetCurrentScanCode()) {
 			pVehicle->m_scanCode = GetCurrentScanCode();
 			const CVector &vehiclePos = pVehicle->GetPosition();
-			eCarMission carMission = pVehicle->AutoPilot.m_nCarMission;
+			uint8 carMission = pVehicle->AutoPilot.m_nCarMission;
 			if(pVehicle != FindPlayerVehicle() && vehiclePos.x > fStartX && vehiclePos.x < fEndX &&
 			   vehiclePos.y > fStartY && vehiclePos.y < fEndY && pVehicle->bIsLawEnforcer &&
 			   (carMission == MISSION_RAMPLAYER_FARAWAY || carMission == MISSION_RAMPLAYER_CLOSE ||
