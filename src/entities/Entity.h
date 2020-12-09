@@ -6,7 +6,7 @@
 struct CReference;
 class CPtrList;
 
-enum eEntityType : uint8
+enum eEntityType
 {
 	ENTITY_TYPE_NOTHING = 0,
 	ENTITY_TYPE_BUILDING,
@@ -16,7 +16,7 @@ enum eEntityType : uint8
 	ENTITY_TYPE_DUMMY,
 };
 
-enum eEntityStatus : uint8
+enum eEntityStatus
 {
 	STATUS_PLAYER,
 	STATUS_PLAYER_PLAYBACKFROMBUFFER,
@@ -99,10 +99,10 @@ public:
 	CReference *m_pFirstReference;
 
 public:
-	eEntityType GetType() const { return (eEntityType)m_type; }
-	void SetType(eEntityType type) { m_type = type; }
-	eEntityStatus GetStatus() const { return (eEntityStatus)m_status; }
-	void SetStatus(eEntityStatus status) { m_status = status; }
+	uint8 GetType() const { return m_type; }
+	void SetType(uint8 type) { m_type = type; }
+	uint8 GetStatus() const { return m_status; }
+	void SetStatus(uint8 status) { m_status = status; }
 	CColModel *GetColModel(void) { return CModelInfo::GetModelInfo(m_modelIndex)->GetColModel(); }
 	bool GetIsStatic(void) const { return bIsStatic || bIsStaticWaitingForCollision; }
 	void SetIsStatic(bool state) { bIsStatic = state; }

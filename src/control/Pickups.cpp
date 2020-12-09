@@ -852,7 +852,7 @@ CPickups::GenerateNewOne(CVector pos, uint32 modelIndex, uint8 type, uint32 quan
 
 	if (slot >= NUMPICKUPS) return -1;
 
-	aPickUps[slot].m_eType = (ePickupType)type;
+	aPickUps[slot].m_eType = type;
 	aPickUps[slot].m_bRemoved = false;
 	aPickUps[slot].m_nQuantity = quantity;
 	aPickUps[slot].m_nMoneySpeed = rate;
@@ -1458,9 +1458,9 @@ INITSAVEBUF
 		CPickup *buf_pickup = WriteSaveBuf(buf, aPickUps[i]);
 		if (buf_pickup->m_eType != PICKUP_NONE) {
 			if (buf_pickup->m_pObject != nil)
-				buf_pickup->m_pObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex(buf_pickup->m_pObject) + 1);
+				buf_pickup->m_pObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert(buf_pickup->m_pObject) + 1);
 			if (buf_pickup->m_pExtraObject != nil)
-				buf_pickup->m_pExtraObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex(buf_pickup->m_pExtraObject) + 1);
+				buf_pickup->m_pExtraObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert(buf_pickup->m_pExtraObject) + 1);
 		}
 	}
 

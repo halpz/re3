@@ -1,7 +1,7 @@
 #pragma once
 #include "Weapon.h"
 
-enum ePickupType : uint8
+enum ePickupType
 {
 	PICKUP_NONE = 0,
 	PICKUP_IN_SHOP,
@@ -43,7 +43,7 @@ public:
 	int16 m_eModelIndex;
 	uint16 m_nIndex;
 	char m_sTextKey[8];
-	ePickupType m_eType;
+	uint8 m_eType;
 	bool m_bRemoved;
 	uint8 m_bWasAmmoCollected:1;
 	uint8 m_bWasControlMessageShown:1;

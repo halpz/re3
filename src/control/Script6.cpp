@@ -1409,7 +1409,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		CollectParameters(&m_nIp, 3);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		script_assert(pVehicle);
-		pVehicle->AutoPilot.m_nTempAction = (eCarTempAction)ScriptParams[1];
+		pVehicle->AutoPilot.m_nTempAction = (uint8)ScriptParams[1];
 		pVehicle->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + ScriptParams[2];
 		return 0;
 	}

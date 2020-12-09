@@ -634,7 +634,7 @@ void CCarAI::TellCarToBlockOtherCar(CVehicle* pVehicle, CVehicle* pTarget)
 	pVehicle->AutoPilot.m_nCruiseSpeed = Max(6, pVehicle->AutoPilot.m_nCruiseSpeed);
 }
 
-eCarMission CCarAI::FindPoliceCarMissionForWantedLevel()
+uint8 CCarAI::FindPoliceCarMissionForWantedLevel()
 {
 	switch (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->m_nWantedLevel){
 	case 0:
@@ -648,7 +648,7 @@ eCarMission CCarAI::FindPoliceCarMissionForWantedLevel()
 	}
 }
 
-eCarMission CCarAI::FindPoliceBoatMissionForWantedLevel()
+uint8 CCarAI::FindPoliceBoatMissionForWantedLevel()
 {
 	switch (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->m_nWantedLevel) {
 	case 0:

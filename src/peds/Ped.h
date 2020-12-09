@@ -52,7 +52,7 @@ enum eFormation
 	FORMATION_FRONT
 };
 
-enum FightState : int8 {
+enum FightState {
 	FIGHTSTATE_MOVE_FINISHED = -2,
 	FIGHTSTATE_JUST_ATTACKED,
 	FIGHTSTATE_NO_MOVE,
@@ -187,7 +187,7 @@ enum eWaitState {
 	WAITSTATE_PLAYANIM_HANDSUP_SIMPLE,
 };
 
-enum eObjective : uint32 {
+enum eObjective {
 	OBJECTIVE_NONE,
 	OBJECTIVE_WAIT_ON_FOOT,
 	OBJECTIVE_WAIT_ON_FOOT_FOR_COP,
@@ -271,7 +271,7 @@ enum PedOnGroundState {
 	PED_DEAD_ON_THE_FLOOR
 };
 
-enum PointBlankNecessity : uint8 {
+enum PointBlankNecessity {
 	NO_POINT_BLANK_PED,
 	POINT_BLANK_FOR_WANTED_PED,
 	POINT_BLANK_FOR_SOMEONE_ELSE
@@ -598,7 +598,7 @@ public:
 	uint32 m_curFightMove;
 	uint32 m_lastFightMove;
 	uint8 m_fightButtonPressure;
-	FightState m_fightState;
+	int8 m_fightState;
 	bool m_takeAStepAfterAttack;
 	uint8 m_bleedCounter;
 	CFire *m_pFire;
@@ -729,7 +729,7 @@ public:
 	CPed *CheckForDeadPeds(void);
 	bool CheckForExplosions(CVector2D &area);
 	CPed *CheckForGunShots(void);
-	PointBlankNecessity CheckForPointBlankPeds(CPed*);
+	uint8 CheckForPointBlankPeds(CPed*);
 	bool CheckIfInTheAir(void);
 	void ClearAll(void);
 	void SetPointGunAt(CEntity*);

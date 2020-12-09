@@ -35,7 +35,7 @@
 
 CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];
 
-CPtrList CWorld::ms_bigBuildingsList[4];
+CPtrList CWorld::ms_bigBuildingsList[NUM_LEVELS];
 CPtrList CWorld::ms_listMovingEntityPtrs;
 CSector CWorld::ms_aSectors[NUMSECTORS_Y][NUMSECTORS_X];
 uint16 CWorld::ms_nCurrentScanCode;
@@ -1164,8 +1164,8 @@ CWorld::FindObjectsIntersectingCube(const CVector &vecStartPos, const CVector &v
 	const int32 nEndX = Min(GetSectorIndexX(vecStartPos.x), NUMSECTORS_X - 1);
 	const int32 nEndY = Min(GetSectorIndexY(vecStartPos.y), NUMSECTORS_Y - 1);
 #else
-	const int32 nEndX = Min(GetSectorIndexX(vecSectorPos.x), NUMSECTORS_X);
-	const int32 nEndY = Min(GetSectorIndexY(vecSectorPos.y), NUMSECTORS_Y);
+	const int32 nEndX = Min(GetSectorIndexX(vecStartPos.x), NUMSECTORS_X);
+	const int32 nEndY = Min(GetSectorIndexY(vecStartPos.y), NUMSECTORS_Y);
 #endif
 	for(int32 y = nStartY; y <= nEndY; y++) {
 		for(int32 x = nStartX; x <= nEndX; x++) {
@@ -1580,7 +1580,7 @@ CWorld::CallOffChaseForAreaSectorListVehicles(CPtrList &list, float x1, float y1
 		if(pVehicle->m_scanCode != GetCurrentScanCode()) {
 			pVehicle->m_scanCode = GetCurrentScanCode();
 			const CVector &vehiclePos = pVehicle->GetPosition();
-			eCarMission carMission = pVehicle->AutoPilot.m_nCarMission;
+			uint8 carMission = pVehicle->AutoPilot.m_nCarMission;
 			if(pVehicle != FindPlayerVehicle() && vehiclePos.x > fStartX && vehiclePos.x < fEndX &&
 			   vehiclePos.y > fStartY && vehiclePos.y < fEndY && pVehicle->bIsLawEnforcer &&
 			   (carMission == MISSION_RAMPLAYER_FARAWAY || carMission == MISSION_RAMPLAYER_CLOSE ||
@@ -1781,21 +1781,29 @@ CWorld::ShutDown(void)
 			CWorld::Remove(pEntity);
 			delete pEntity;
 		}
+#ifndef FIX_BUGS
 		pSector->m_lists[ENTITYLIST_BUILDINGS].Flush();
 		pSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP].Flush();
 		pSector->m_lists[ENTITYLIST_DUMMIES].Flush();
 		pSector->m_lists[ENTITYLIST_DUMMIES_OVERLAP].Flush();
+#endif
 	}
-	for(int32 i = 0; i < 4; i++) {
-		for(CPtrNode *pNode = GetBigBuildingList((eLevelName)i).first; pNode; pNode = pNode->next) {
+	for(int32 i = 0; i < NUM_LEVELS; i++) {
+		for(CPtrNode *pNode = ms_bigBuildingsList[i].first; pNode; pNode = pNode->next) {
 			CEntity *pEntity = (CEntity *)pNode->item;
 			// Maybe remove from world here?
 			delete pEntity;
 		}
-		GetBigBuildingList((eLevelName)i).Flush();
+		ms_bigBuildingsList[i].Flush();
 	}
 	for(int i = 0; i < NUMSECTORS_X * NUMSECTORS_Y; i++) {
 		CSector *pSector = GetSector(i % NUMSECTORS_X, i / NUMSECTORS_Y);
+#ifdef FIX_BUGS
+		pSector->m_lists[ENTITYLIST_BUILDINGS].Flush();
+		pSector->m_lists[ENTITYLIST_BUILDINGS_OVERLAP].Flush();
+		pSector->m_lists[ENTITYLIST_DUMMIES].Flush();
+		pSector->m_lists[ENTITYLIST_DUMMIES_OVERLAP].Flush();
+#endif
 		if(pSector->m_lists[ENTITYLIST_BUILDINGS].first) {
 			sprintf(gString, "Building list %d,%d not empty\n", i % NUMSECTORS_X, i / NUMSECTORS_Y);
 			pSector->m_lists[ENTITYLIST_BUILDINGS].Flush();

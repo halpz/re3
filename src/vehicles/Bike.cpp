@@ -202,7 +202,7 @@ CVector vecTestResistance(0.9995f, 0.9f, 0.95f);
 float fDAxisX = 1.0f;
 float fDAxisXExtra = 100.0f;
 float fDAxisY = 1000.0f;
-float fInAirXRes = 0.88f;
+float fInAirXRes = 0.98f;
 float fFlySpeedMult = -0.6f;
 
 void
@@ -1213,7 +1213,8 @@ CBike::ProcessControl(void)
 
 	// Balance bike
 	if(bBalancedByRider || bIsBeingPickedUp || bIsStanding){
-		float onSideness = clamp(DotProduct(GetRight(), m_vecAvgSurfaceNormal), -1.0f, 1.0f);
+		float onSideness = DotProduct(GetRight(), m_vecAvgSurfaceNormal);
+		onSideness = clamp(onSideness, -1.0f, 1.0f);
 		CVector worldCOM = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
 		// Keep bike upright
 		if(bBalancedByRider){

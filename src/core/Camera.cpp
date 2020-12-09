@@ -3621,6 +3621,8 @@ CCamera::LoadPathSplines(int file)
 			m_arrPathArray[i].m_arr_PathData[j] = atof(token);
 			i++;
 			j = 0;
+			if (i == MAX_NUM_OF_SPLINETYPES)
+				reading = false;
 			memset(token, 0, 32);
 			n = 0;
 		}

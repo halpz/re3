@@ -4,9 +4,7 @@
 #include "main.h"
 
 #include "Bike.h"
-#ifdef FIX_BUGS
 #include "Boat.h"
-#endif
 #include "DMAudio.h"
 #include "General.h"
 #include "Font.h"
@@ -192,7 +190,7 @@ void CGarages::Update(void)
 		aGarages[GarageToBeTidied].TidyUpGarage();
 }
 
-int16 CGarages::AddOne(float X1, float Y1, float Z1, float X2, float Y2, float X3, float Y3, float Z2, eGarageType type, int32 targetId)
+int16 CGarages::AddOne(float X1, float Y1, float Z1, float X2, float Y2, float X3, float Y3, float Z2, uint8 type, int32 targetId)
 {
 	if (NumGarages >= NUM_GARAGES) {
 		assert(0);
@@ -293,7 +291,7 @@ int16 CGarages::AddOne(float X1, float Y1, float Z1, float X2, float Y2, float X
 	return NumGarages++;
 }
 
-void CGarages::ChangeGarageType(int16 garage, eGarageType type, int32 mi)
+void CGarages::ChangeGarageType(int16 garage, uint8 type, int32 mi)
 {
 	CGarage* pGarage = &aGarages[garage];
 	pGarage->m_eGarageType = type;
@@ -1468,7 +1466,7 @@ static bool DoINeedToRefreshPointer(CEntity * pDoor, bool bIsDummy, uint8 nIndex
 	bool bNeedToFindDoorEntities = false;
 	if (pDoor) {
 		if (bIsDummy) {
-			if (CPools::GetDummyPool()->IsFreeSlot(CPools::GetDummyPool()->GetJustIndex((CDummy*)pDoor)))
+			if (CPools::GetDummyPool()->IsFreeSlot(CPools::GetDummyPool()->GetJustIndex_NoFreeAssert((CDummy*)pDoor)))
 				return true;
 			if (nIndex != (CPools::GetDummyPool()->GetIndex((CDummy*)pDoor) & 0x7F))
 				bNeedToFindDoorEntities = true;
@@ -1476,7 +1474,7 @@ static bool DoINeedToRefreshPointer(CEntity * pDoor, bool bIsDummy, uint8 nIndex
 				return true;
 		}
 		else {
-			if (CPools::GetObjectPool()->IsFreeSlot(CPools::GetObjectPool()->GetJustIndex((CObject*)pDoor)))
+			if (CPools::GetObjectPool()->IsFreeSlot(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert((CObject*)pDoor)))
 				return true;
 			if (nIndex != (CPools::GetObjectPool()->GetIndex((CObject*)pDoor) & 0x7F))
 				bNeedToFindDoorEntities = true;
@@ -2074,7 +2072,7 @@ void CGarages::CloseHideOutGaragesBeforeSave()
 	}
 }
 
-int32 CGarages::CountCarsInHideoutGarage(eGarageType type)
+int32 CGarages::CountCarsInHideoutGarage(uint8 type)
 {
 	int32 total = 0;
 	for (int i = 0; i < NUM_GARAGE_STORED_CARS; i++) {
