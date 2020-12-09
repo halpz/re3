@@ -5042,9 +5042,9 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	float stickX = -(pad->GetCarGunLeftRight());
 	float stickY = pad->GetCarGunUpDown();
 
-	// In SA this checks for m_bUseMouse3rdPerson so num2/num8 do not move camera when Keyboard & Mouse controls are used.
-	if (CCamera::m_bUseMouse3rdPerson)
-		stickY = 0.0f;
+	// In SA this is for not let num2/num8 move camera when Keyboard & Mouse controls are used.
+	// if (CCamera::m_bUseMouse3rdPerson)
+	//	stickY = 0.0f;
 
 	float xMovement = Abs(stickX) * (FOV / 80.0f * 5.f / 70.f) * stickX * 0.007f * 0.007f;
 	float yMovement = Abs(stickY) * (FOV / 80.0f * 3.f / 70.f) * stickY * 0.007f * 0.007f;
@@ -5238,11 +5238,14 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 		float timestepFactor = Pow(0.99f, CTimer::GetTimeStep());
 		dontCollideWithCars = (timestepFactor * dontCollideWithCars) + ((1.0f - timestepFactor) * car->m_vecMoveSpeed.Magnitude());
 
+		// Our addition
+#define IS_TRAFFIC_LIGHT(ent) (ent->IsObject() && (IsStreetLight(ent->GetModelIndex()) || ent->GetModelIndex() == MI_STREETLAMP1 || ent->GetModelIndex() == MI_STREETLAMP2))
+
 		// Move cam if on collision
 		CColPoint foundCol;
 		CEntity* foundEnt;
 		CWorld::pIgnoreEntity = CamTargetEntity;
-		if (CWorld::ProcessLineOfSight(TargetCoors, Source, foundCol, foundEnt, true, dontCollideWithCars < 0.1f, false, false, false, true, false)) {
+		if (CWorld::ProcessLineOfSight(TargetCoors, Source, foundCol, foundEnt, true, dontCollideWithCars < 0.1f, false, true, false, true, false) && !IS_TRAFFIC_LIGHT(foundEnt)) {
 			float obstacleTargetDist = (TargetCoors - foundCol.point).Magnitude();
 			float obstacleCamDist = newDistance - obstacleTargetDist;
 			if (!foundEnt->IsPed() || obstacleCamDist <= 1.0f) {
@@ -5251,7 +5254,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 					RwCameraSetNearClipPlane(Scene.camera, Max(0.05f, obstacleTargetDist - 0.3f));
 				}
 			} else {
-				if (!CWorld::ProcessLineOfSight(foundCol.point, Source, foundCol, foundEnt, true, dontCollideWithCars < 0.1f, false, false, false, true, false)) {
+				if (!CWorld::ProcessLineOfSight(foundCol.point, Source, foundCol, foundEnt, true, dontCollideWithCars < 0.1f, false, true, false, true, false) || IS_TRAFFIC_LIGHT(foundEnt)) {
 					float lessClip = obstacleCamDist - 0.35f;
 					if (lessClip <= DEFAULT_NEAR)
 						RwCameraSetNearClipPlane(Scene.camera, lessClip);
@@ -5270,6 +5273,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 				}
 			}
 		}
+
 		CWorld::pIgnoreEntity = nil;
 		float nearClip = RwCameraGetNearClipPlane(Scene.camera);
 		float radius = Tan(DEGTORAD(FOV * 0.5f)) * CDraw::GetAspectRatio() * 1.1f;
@@ -5277,8 +5281,11 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 		// If we're seeing blue hell due to camera intersects some surface, fix it.
 		// SA and LCS have this unrolled.
 		for (int i = 0;
-			i <= 5 && CWorld::TestSphereAgainstWorld((nearClip * Front) + Source, radius * nearClip, nil, true, true, false, true, false, false);
+			i <= 5 && (foundEnt = CWorld::TestSphereAgainstWorld((nearClip * Front) + Source, radius * nearClip, nil, true, true, false, true, false, false));
 			i++) {
+
+			if (IS_TRAFFIC_LIGHT(foundEnt))
+				break;
 
 			CVector surfaceCamDist = gaTempSphereColPoints->point - Source;
 			CVector frontButInvertedIfTouchesSurface = DotProduct(surfaceCamDist, Front) * Front;
@@ -5297,6 +5304,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 			nearClip = RwCameraGetNearClipPlane(Scene.camera);
 			radius = Tan(DEGTORAD(FOV * 0.5f)) * CDraw::GetAspectRatio() * 1.1f;
 		}
+#undef IS_TRAFFIC_LIGHT
 	}
 	TheCamera.m_bCamDirectlyBehind = false;
 	TheCamera.m_bCamDirectlyInFront = false;
