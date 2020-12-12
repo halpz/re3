@@ -1007,7 +1007,7 @@ CStats::ConstructStatLine(int rowIdx)
 	// What a random stat...
 	if (lastProcessedDay != DaysPassed) {
 		lastProcessedDay = DaysPassed;
-		lastPoliceSpending = (CTimer::GetTimeInMilliseconds() + 80) * 255.44f;
+		lastPoliceSpending = (CTimer::GetTimeInMilliseconds() & 255 + 80) * 255.44f;
 	}
 	STAT_LINE_1(float, "DAYPLC", lastPoliceSpending, 3);
 
