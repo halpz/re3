@@ -2858,9 +2858,11 @@ void CCarCtrl::SteerAICarWithPhysicsFollowPath(CVehicle* pVehicle, float* pSwerv
 	case DRIVINGSTYLE_STOP_FOR_CARS_IGNORE_LIGHTS:
 		speedStyleMultiplier = FindMaximumSpeedForThisCarInTraffic(pVehicle);
 #ifdef FIX_BUGS
-		if (pVehicle->AutoPilot.m_nCruiseSpeed != 0)
+		if (pVehicle->AutoPilot.GetCruiseSpeed() != 0)
+			speedStyleMultiplier /= pVehicle->AutoPilot.GetCruiseSpeed();
+#else
+		speedStyleMultiplier /= pVehicle->AutoPilot.m_nCruiseSpeed;
 #endif
-			speedStyleMultiplier /= pVehicle->AutoPilot.m_nCruiseSpeed;
 		break;
 	default:
 		speedStyleMultiplier = 1.0f;
