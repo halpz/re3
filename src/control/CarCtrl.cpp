@@ -2338,7 +2338,11 @@ void CCarCtrl::SteerAICarWithPhysicsFollowPath(CVehicle* pVehicle, float* pSwerv
 	switch (pVehicle->AutoPilot.m_nDrivingStyle) {
 	case DRIVINGSTYLE_STOP_FOR_CARS:
 	case DRIVINGSTYLE_SLOW_DOWN_FOR_CARS:
-		speedStyleMultiplier = FindMaximumSpeedForThisCarInTraffic(pVehicle) / pVehicle->AutoPilot.m_nCruiseSpeed;
+		speedStyleMultiplier = FindMaximumSpeedForThisCarInTraffic(pVehicle);
+#ifdef FIX_BUGS
+		if (pVehicle->AutoPilot.m_nCruiseSpeed != 0)
+#endif
+			speedStyleMultiplier /= pVehicle->AutoPilot.m_nCruiseSpeed;
 		break;
 	default:
 		speedStyleMultiplier = 1.0f;
