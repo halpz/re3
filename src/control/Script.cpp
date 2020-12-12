@@ -2332,6 +2332,7 @@ CRunningScript* CTheScripts::StartNewScript(uint32 ip)
 	pNew->Init();
 	pNew->SetIP(ip);
 	pNew->AddScriptToList(&pActiveScripts);
+	pNew->m_bIsActive = true;
 	return pNew;
 }
 
@@ -2416,6 +2417,8 @@ void CTheScripts::Process()
 		script->UpdateTimers(timeStep);
 		script->Process();
 		script = next;
+		if (script && !script->m_bIsActive)
+			script = nil;
 	}
 	DbgFlag = false;
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT

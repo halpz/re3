@@ -166,7 +166,7 @@ void CGarages::Shutdown(void)
 
 void CGarages::Update(void)
 {
-	static int GarageToBeTidied = 0;
+	static uint32 GarageToBeTidied = 0;
 #ifndef PS2
 	if (CReplay::IsPlayingBack())
 		return;
@@ -174,13 +174,21 @@ void CGarages::Update(void)
 	bCamShouldBeOutisde = false;
 	TheCamera.pToGarageWeAreIn = nil;
 	TheCamera.pToGarageWeAreInForHackAvoidFirstPerson = nil;
+#ifdef FIX_BUGS
+	for (uint32 i = 0; i < NumGarages; i++) {
+#else
 	for (int i = 0; i < NUM_GARAGES; i++) {
+#endif
 		if (aGarages[i].IsUsed())
 			aGarages[i].Update();
 	}
 	if ((CTimer::GetFrameCounter() & 0xF) != 0xC)
 		return;
+#ifdef FIX_BUGS
+	if (++GarageToBeTidied >= NumGarages)
+#else
 	if (++GarageToBeTidied >= NUM_GARAGES)
+#endif
 		GarageToBeTidied = 0;
 	if (!aGarages[GarageToBeTidied].IsUsed())
 		return;
@@ -1930,7 +1938,11 @@ bool CGarage::RestoreCarsForThisHideout(CStoredCar* aCars)
 
 bool CGarages::IsPointInAGarageCameraZone(CVector point)
 {
+#ifdef FIX_BUGS
+	for (uint32 i = 0; i < NumGarages; i++) {
+#else
 	for (int i = 0; i < NUM_GARAGES; i++) {
+#endif
 		switch (aGarages[i].m_eGarageType) {
 		case GARAGE_NONE:
 			break;
@@ -2019,7 +2031,11 @@ void CGarage::TidyUpGarageClose()
 void CGarages::PlayerArrestedOrDied()
 {
 	static int GarageToBeTidied = 0; // lol
+#ifdef FIX_BUGS
+	for (uint32 i = 0; i < NumGarages; i++) {
+#else
 	for (int i = 0; i < NUM_GARAGES; i++) {
+#endif
 		if (aGarages[i].m_eGarageType != GARAGE_NONE)
 			aGarages[i].PlayerArrestedOrDied();
 	}
@@ -2114,16 +2130,20 @@ void CGarage::CenterCarInGarage(CVehicle* pVehicle)
 
 void CGarages::CloseHideOutGaragesBeforeSave()
 {
+#ifdef FIX_BUGS
+	for (uint32 i = 0; i < NumGarages; i++) {
+#else
 	for (int i = 0; i < NUM_GARAGES; i++) {
+#endif
 		if (!IsThisGarageTypeSafehouse(aGarages[i].m_eGarageType))
 			continue;
 		if (aGarages[i].m_eGarageState != GS_FULLYCLOSED) {
 			aGarages[i].m_eGarageState = GS_FULLYCLOSED;
 			aGarages[i].StoreAndRemoveCarsForThisHideout(aCarsInSafeHouses[FindSafeHouseIndexForGarageType(aGarages[i].m_eGarageType)], NUM_GARAGE_STORED_CARS);
 			aGarages[i].RemoveCarsBlockingDoorNotInside();
+			aGarages[i].m_fDoorPos = 0.0f;
+			aGarages[i].UpdateDoorsHeight();
 		}
-		aGarages[i].m_fDoorPos = 0.0f;
-		aGarages[i].UpdateDoorsHeight();
 	}
 }
 
@@ -2138,7 +2158,11 @@ int32 CGarages::CountCarsInHideoutGarage(uint8 type)
 
 bool CGarages::IsPointWithinHideOutGarage(Const CVector& point)
 {
+#ifdef FIX_BUGS
+	for (uint32 i = 0; i < NumGarages; i++) {
+#else
 	for (int i = 0; i < NUM_GARAGES; i++) {
+#endif
 		switch (aGarages[i].m_eGarageType) {
 		case GARAGE_HIDEOUT_ONE:
 		case GARAGE_HIDEOUT_TWO:
@@ -2162,7 +2186,11 @@ bool CGarages::IsPointWithinHideOutGarage(Const CVector& point)
 
 bool CGarages::IsPointWithinAnyGarage(Const CVector& point)
 {
+#ifdef FIX_BUGS
+	for (uint32 i = 0; i < NumGarages; i++) {
+#else
 	for (int i = 0; i < NUM_GARAGES; i++) {
+#endif
 		switch (aGarages[i].m_eGarageType) {
 		case GARAGE_NONE:
 			continue;
@@ -2176,7 +2204,11 @@ bool CGarages::IsPointWithinAnyGarage(Const CVector& point)
 
 void CGarages::SetAllDoorsBackToOriginalHeight()
 {
+#ifdef FIX_BUGS
+	for (uint32 i = 0; i < NumGarages; i++) {
+#else
 	for (int i = 0; i < NUM_GARAGES; i++) {
+#endif
 		switch (aGarages[i].m_eGarageType) {
 		case GARAGE_NONE:
 			continue;

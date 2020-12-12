@@ -63,7 +63,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_SET_MAXIMUM_NUMBER_OF_CARS_IN_GARAGE:
 		CollectParameters(&m_nIp, 2);
 		CGarages::SetMaxNumStoredCarsForGarage(ScriptParams[0], ScriptParams[1]);
-		break;
+		return 0;
 	case COMMAND_WANTED_STARS_ARE_FLASHING:
 	{
 		CWanted *pWanted = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted;

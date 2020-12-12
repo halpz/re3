@@ -295,11 +295,16 @@ CDarkel::StartFrenzy(eWeaponType weaponType, int32 time, uint16 kill, int32 mode
 	CPlayerPed *player = FindPlayerPed();
 	if (fixedWeapon < WEAPONTYPE_TOTALWEAPONS) {
 		InterruptedWeaponSelected = player->GetWeapon()->m_eWeaponType;
+#if (defined FIX_BUGS || !defined GTA_PS2)
 		player->RemoveWeaponAnims(InterruptedWeaponSelected, -1000.0f);
+#endif
 		InterruptedWeaponType = player->GetWeapon(player->GetWeaponSlot(fixedWeapon)).m_eWeaponType;
 		AmmoInterruptedWeapon = player->GetWeapon(player->GetWeaponSlot(fixedWeapon)).m_nAmmoTotal;
 		if (InterruptedWeaponType)
 			CModelInfo::GetModelInfo(CWeaponInfo::GetWeaponInfo((eWeaponType)InterruptedWeaponType)->m_nModelId)->AddRef();
+#if (!defined FIX_BUGS && defined GTA_PS2)
+		player->RemoveWeaponAnims(InterruptedWeaponSelected, -1000.0f);
+#endif
 		player->GiveWeapon(fixedWeapon, 30000);
 		player->SetCurrentWeapon(fixedWeapon);
 		player->MakeChangesForNewWeapon(player->m_nSelectedWepSlot);
