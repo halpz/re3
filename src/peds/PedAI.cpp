@@ -1334,14 +1334,14 @@ CPed::ProcessObjective(void)
 					// I hope so
 					CVector ourHead = GetMatrix() * CVector(0.5f, 0.0f, 0.6f);
 					CVector maxShotPos = m_carInObjective->GetPosition() - ourHead;
-					maxShotPos.Normalise();
-					maxShotPos = maxShotPos * wepInfo->m_fRange + ourHead;
+					maxShotPos *= wepInfo->m_fRange / maxShotPos.Magnitude();
+					maxShotPos += ourHead;
 
-					CWorld::bIncludeDeadPeds = true;
 					CColPoint foundCol;
 					CEntity *foundEnt;
-					CWorld::ProcessLineOfSight(ourHead, maxShotPos, foundCol, foundEnt,
-						true, true, true, true, false, true, false);
+
+					CWorld::bIncludeDeadPeds = true;
+					CWorld::ProcessLineOfSight(ourHead, maxShotPos, foundCol, foundEnt, true, true, true, true, false, true, false);
 					CWorld::bIncludeDeadPeds = false;
 					if (foundEnt == m_carInObjective) {
 						SetAttack(m_carInObjective);
