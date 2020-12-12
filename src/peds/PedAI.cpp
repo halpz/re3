@@ -1015,14 +1015,14 @@ CPed::ProcessObjective(void)
 								// I hope so
 								CVector ourHead = GetMatrix() * CVector(0.5f, 0.0f, 0.6f);
 								CVector maxShotPos = vehOfTarget->GetPosition() - ourHead;
-								maxShotPos.Normalise();
-								maxShotPos = maxShotPos * wepInfo->m_fRange + ourHead;
+								maxShotPos *= wepInfo->m_fRange / maxShotPos.Magnitude();
+								maxShotPos += ourHead;
 
-								CWorld::bIncludeDeadPeds = true;
 								CColPoint foundCol;
 								CEntity *foundEnt;
-								CWorld::ProcessLineOfSight(ourHead, maxShotPos, foundCol, foundEnt,
-									true, true, true, true, false, true, false);
+
+								CWorld::bIncludeDeadPeds = true;
+								CWorld::ProcessLineOfSight(ourHead, maxShotPos, foundCol, foundEnt, true, true, true, true, false, true, false);
 								CWorld::bIncludeDeadPeds = false;
 								if (foundEnt == vehOfTarget) {
 									SetAttack(vehOfTarget);
@@ -1038,8 +1038,7 @@ CPed::ProcessObjective(void)
 										SetAttackTimer(CGeneral::GetRandomNumberInRange(2000, 5000));
 									}
 								}
-							}
-							else if (m_nPedState != PED_ATTACK && !bKindaStayInSamePlace && !killPlayerInNoPoliceZone) {
+							} else if (m_nPedState != PED_ATTACK && !bKindaStayInSamePlace && !killPlayerInNoPoliceZone) {
 								if (vehOfTarget) {
 									if (m_nPedType == PEDTYPE_COP || vehOfTarget->bIsBus) {
 										GoToNearestDoor(vehOfTarget);
@@ -1152,17 +1151,15 @@ CPed::ProcessObjective(void)
 							target = m_pedInObjective->GetPosition();
 
 						target -= ourHead;
-						target.Normalise();
-						target = target * wepInfo->m_fRange + ourHead;
+						target *= wepInfo->m_fRange / target.Magnitude();
+						target += ourHead;
+
+						CColPoint foundCol;
+						CEntity *foundEnt = nil;
 
 						CWorld::bIncludeDeadPeds = true;
-						CEntity *foundEnt = nil;
-						CColPoint foundCol;
-
-						CWorld::ProcessLineOfSight(
-							ourHead, target, foundCol, foundEnt,
-							true, true, true, false, true, false);
-						CWorld::bIncludeDeadPeds = 0;
+						CWorld::ProcessLineOfSight(ourHead, target, foundCol, foundEnt, true, true, true, true, false, true, false);
+						CWorld::bIncludeDeadPeds = false;
 						if (foundEnt == m_pedInObjective) {
 							SetAttack(m_pedInObjective);
 							m_pPointGunAt = m_pedInObjective;
@@ -1180,25 +1177,27 @@ CPed::ProcessObjective(void)
 							SetAttackTimer(time);
 							bObstacleShowedUpDuringKillObjective = false;
 
-						} else if (foundEnt) {
-							if (foundEnt->IsPed()) {
-								SetAttackTimer(CGeneral::GetRandomNumberInRange(500.0f, 1000.0f));
-								bObstacleShowedUpDuringKillObjective = false;
-							} else {
-								if (foundEnt->IsObject()) {
-									SetAttackTimer(CGeneral::GetRandomNumberInRange(200.0f, 400.0f));
-									bObstacleShowedUpDuringKillObjective = true;
-								} else if (foundEnt->IsVehicle()) {
-									SetAttackTimer(CGeneral::GetRandomNumberInRange(400.0f, 600.0f));
-									bObstacleShowedUpDuringKillObjective = true;
+						} else {
+							if (foundEnt) {
+								if (foundEnt->IsPed()) {
+									SetAttackTimer(CGeneral::GetRandomNumberInRange(500.0f, 1000.0f));
+									bObstacleShowedUpDuringKillObjective = false;
 								} else {
-									SetAttackTimer(CGeneral::GetRandomNumberInRange(700.0f, 1200.0f));
-									bObstacleShowedUpDuringKillObjective = true;
+									if (foundEnt->IsObject()) {
+										SetAttackTimer(CGeneral::GetRandomNumberInRange(200.0f, 400.0f));
+										bObstacleShowedUpDuringKillObjective = true;
+									} else if (foundEnt->IsVehicle()) {
+										SetAttackTimer(CGeneral::GetRandomNumberInRange(400.0f, 600.0f));
+										bObstacleShowedUpDuringKillObjective = true;
+									} else {
+										SetAttackTimer(CGeneral::GetRandomNumberInRange(700.0f, 1200.0f));
+										bObstacleShowedUpDuringKillObjective = true;
+									}
 								}
-							}
 
-							m_fleeFrom = foundEnt;
-							m_fleeFrom->RegisterReference((CEntity**) &m_fleeFrom);
+								m_fleeFrom = foundEnt;
+								m_fleeFrom->RegisterReference((CEntity**) &m_fleeFrom);
+							}
 							SetPointGunAt(m_pedInObjective);
 						}
 					}
@@ -1541,14 +1540,14 @@ CPed::ProcessObjective(void)
 					// I hope so
 					CVector ourHead = GetMatrix() * CVector(0.5f, 0.0f, 0.6f);
 					CVector maxShotPos = m_carInObjective->GetPosition() - ourHead;
-					maxShotPos.Normalise();
-					maxShotPos = maxShotPos * wepInfo->m_fRange + ourHead;
+					maxShotPos *= wepInfo->m_fRange / maxShotPos.Magnitude();
+					maxShotPos += ourHead;
 
-					CWorld::bIncludeDeadPeds = true;
 					CColPoint foundCol;
 					CEntity *foundEnt;
-					CWorld::ProcessLineOfSight(ourHead, maxShotPos, foundCol, foundEnt,
-						true, true, true, true, false, true, false);
+
+					CWorld::bIncludeDeadPeds = true;
+					CWorld::ProcessLineOfSight(ourHead, maxShotPos, foundCol, foundEnt, true, true, true, true, false, true, false);
 					CWorld::bIncludeDeadPeds = false;
 					if (foundEnt == m_carInObjective) {
 						SetAttack(m_carInObjective);
