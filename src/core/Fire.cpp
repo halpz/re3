@@ -90,7 +90,11 @@ CFire::ProcessFire(void)
 			}
 		}
 	}
-	if (!FindPlayerVehicle() && !FindPlayerPed()->m_pFire && !(FindPlayerPed()->bFireProof)
+	if (!FindPlayerVehicle() &&
+#ifdef FIX_BUGS
+		FindPlayerPed() && 
+#endif
+		!FindPlayerPed()->m_pFire && !(FindPlayerPed()->bFireProof)
 		&& ((FindPlayerPed()->GetPosition() - m_vecPos).MagnitudeSqr() < 2.0f)) {
 		FindPlayerPed()->DoStuffToGoOnFire();
 		gFireManager.StartFire(FindPlayerPed(), m_pSource, 0.8f, 1);

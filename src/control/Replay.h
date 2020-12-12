@@ -275,6 +275,11 @@ private:
 	static float fAlphaAngleLookAroundCam;
 	static float fBetaAngleLookAroundCam;
 #ifdef FIX_BUGS
+	static uint8* pGarages;
+	static CFire* FireArray;
+	static uint32 NumOfFires;
+	static uint8* paProjectileInfo;
+	static uint8* paProjectiles;
 	static int nHandleOfPlayerPed[NUMPLAYERS];
 #endif
 

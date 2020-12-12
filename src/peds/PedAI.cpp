@@ -2990,9 +2990,15 @@ CPed::PedAnimStepOutCarCB(CAnimBlendAssociation* animAssoc, void* arg)
 	}
 
 	if (ped->bFleeAfterExitingCar || ped->bGonnaKillTheCarJacker) {
-		// POTENTIAL BUG? Why DOOR_FRONT_LEFT instead of door variable? or vice versa?
+#ifdef FIX_BUGS
+		if (!veh->IsDoorMissing(door))
+			((CAutomobile*)veh)->Damage.SetDoorStatus(door, DOOR_STATUS_SWINGING);
+		PedSetOutCarCB(nil, ped);
+		return;
+#else
 		if (!veh->IsDoorMissing(door))
 			((CAutomobile*)veh)->Damage.SetDoorStatus(DOOR_FRONT_LEFT, DOOR_STATUS_SWINGING);
+#endif
 	} else {
 		switch (door) {
 			case DOOR_FRONT_LEFT:

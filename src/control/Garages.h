@@ -251,4 +251,7 @@ private:
 
 	friend class cAudioManager;
 	friend class CGarage;
+#ifdef FIX_BUGS
+	friend class CReplay;
+#endif
 };
