@@ -39,6 +39,11 @@ void ResetLoadingScreenBar(void);
 void TheModelViewer(void);
 #endif
 
+#ifdef LOAD_INI_SETTINGS
+void LoadINISettings();
+void SaveINISettings();
+#endif
+
 #ifdef NEW_RENDERER
 extern bool gbNewRenderer;
 bool FredIsInFirstPersonCam(void);

@@ -226,6 +226,7 @@ enum Config {
 #define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more
 //#define MORE_LANGUAGES		// Add more translations to the game
 #define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
+#define LOAD_INI_SETTINGS // as the name suggests. fundamental for CUSTOM_FRONTEND_OPTIONS
 #define FIX_HIGH_FPS_BUGS_ON_FRONTEND
 
 // Just debug menu entries
@@ -242,27 +243,19 @@ enum Config {
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
 #define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
 #define DISABLE_VSYNC_ON_TEXTURE_CONVERSION // make texture conversion work faster by disabling vsync
-//#define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
 //#define USE_TEXTURE_POOL
-//#define CUTSCENE_BORDERS_SWITCH
 #ifdef LIBRW
 //#define EXTENDED_COLOURFILTER		// more options for colour filter (replaces mblur)
 //#define EXTENDED_PIPELINES		// custom render pipelines (includes Neo)
 //#define SCREEN_DROPLETS			// neo water droplets
 //#define NEW_RENDERER		// leeds-like world rendering, needs librw
 #endif
-//#define MULTISAMPLING		// adds MSAA option TODO
 
 #ifndef EXTENDED_COLOURFILTER
 #undef SCREEN_DROPLETS		// we need the front- (or back-)buffer for this effect
 #endif
 #ifndef EXTENDED_PIPELINES
 #undef SCREEN_DROPLETS		// we need neo.txd
-#endif
-
-#ifdef LIBRW
-// these are not supported with librw yet
-#	undef MULTISAMPLING
 #endif
 
 // Water & Particle
@@ -279,7 +272,7 @@ enum Config {
 #define XINPUT
 #endif
 #if !defined(_WIN32) && !defined(__SWITCH__)
-#define DONT_TRUST_RECOGNIZED_JOYSTICKS // Then we'll only rely on GLFW gamepad DB, and expect user to enter Controller->Detect joysticks if his joystick isn't on that list.
+//#define DONT_TRUST_RECOGNIZED_JOYSTICKS // Then we'll only rely on GLFW gamepad DB, and expect user to enter Controller->Detect joysticks if his joystick isn't on that list.
 #endif
 #define DETECT_PAD_INPUT_SWITCH // Adds automatic switch of pad related stuff between controller and kb/m
 #define KANGAROO_CHEAT
@@ -300,11 +293,19 @@ enum Config {
 #	define MAP_ENHANCEMENTS			// Adding waypoint and better mouse support
 #	define TRIANGLE_BACK_BUTTON
 //#	define CIRCLE_BACK_BUTTON
-//#define CUSTOM_FRONTEND_OPTIONS
-#	define GRAPHICS_MENU_OPTIONS
-#define LEGACY_MENU_OPTIONS
+#define LEGACY_MENU_OPTIONS			// i.e. frame sync(vsync)
 #define MUCH_SHORTER_OUTRO_SCREEN
 // #define XBOX_MESSAGE_SCREEN			// Blue background, no "saved successfully press OK" screen etc.
+#	define CUSTOM_FRONTEND_OPTIONS
+
+#	ifdef CUSTOM_FRONTEND_OPTIONS
+#		define GRAPHICS_MENU_OPTIONS // otherwise Display settings will be scrollable
+//#		define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
+#		define CUTSCENE_BORDERS_SWITCH
+//#		define MULTISAMPLING		// adds MSAA option
+#		define INVERT_LOOK_FOR_PAD // enable the hidden option
+#	endif
+#endif
 
 // Script
 #define USE_DEBUG_SCRIPT_LOADER	// Loads main.scm by default. Hold R for main_freeroam.scm and D for main_d.scm
@@ -316,6 +317,7 @@ enum Config {
 #if (defined SUPPORT_XBOX_SCRIPT && defined SUPPORT_MOBILE_SCRIPT)
 static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually exclusive");
 #endif
+#ifdef PC_MENU
 //#define MISSION_REPLAY // mobile feature
 #endif
 //#define SIMPLIER_MISSIONS // apply simplifications from mobile
@@ -340,8 +342,6 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 
 // Peds
 #define PED_SKIN		// support for skinned geometry on peds
-#define ANIMATE_PED_COL_MODEL
-#define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
 #define CANCELLABLE_CAR_ENTER
 
 // Camera
@@ -353,10 +353,14 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 //#define PS2_AUDIO   // changes audio paths for cutscenes and radio to PS2 paths, needs vbdec to support VB with MSS
 
 
+#ifdef LIBRW
+// these are not supported with librw yet
+#	undef MULTISAMPLING
+#endif
+
 //#define SQUEEZE_PERFORMANCE
 #ifdef SQUEEZE_PERFORMANCE
 	#undef PS2_ALPHA_TEST
 	#undef NO_ISLAND_LOADING
 	#define PC_PARTICLE
-	#define VC_PED_PORTS // To not process collisions always. But should be tested if that's really beneficial
 #endif
