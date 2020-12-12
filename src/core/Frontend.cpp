@@ -312,11 +312,32 @@ const char* MenuFilenames[][2] = {
 			m_nMenuFadeAlpha = 0; \
 	} while(0)
 
-#define PREPARE_MENU_HEADER \
+#define SET_FONT_FOR_MENU_HEADER \
 	CFont::SetColor(CRGBA(HEADER_COLOR.r, HEADER_COLOR.g, HEADER_COLOR.b, FadeIn(255))); \
 	CFont::SetRightJustifyOn(); \
 	CFont::SetScale(MENU_X(MENUHEADER_WIDTH), MENU_Y(MENUHEADER_HEIGHT)); \
 	CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
+
+#define RESET_FONT_FOR_NEW_PAGE \
+	CFont::SetBackgroundOff(); \
+	CFont::SetScale(MENU_X(MENUACTION_SCALE_MULT), MENU_Y(MENUACTION_SCALE_MULT)); \
+	CFont::SetPropOn(); \
+	CFont::SetCentreOff(); \
+	CFont::SetJustifyOn(); \
+	CFont::SetRightJustifyOff(); \
+	CFont::SetBackGroundOnlyTextOn(); \
+	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN)); \
+	CFont::SetRightJustifyWrap(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN - 2.0f));
+
+#define SET_FONT_FOR_HELPER_TEXT \
+	CFont::SetCentreOn(); \
+	CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE)); \
+	CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
+
+#define SET_FONT_FOR_LIST_ITEM \
+	CFont::SetRightJustifyOff(); \
+	CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE)); \
+	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 
 #define ProcessSlider(value, increaseAction, decreaseAction, hoverStartX, hoverEndX) \
 	do { \
@@ -512,6 +533,7 @@ CMenuManager::ProcessList(bool &goBack, bool &optionSelected)
 		m_nTotalListRow = m_nSkinsTotal;
 	}
 	if (m_nCurrScreen == MENUPAGE_KEYBOARD_CONTROLS) {
+		// GetNumOptionsCntrlConfigScreens would have been a better choice
 		m_nTotalListRow = m_ControlMethod == CONTROL_CLASSIC ? 30 : 25;
 		if (m_nSelectedListRow > m_nTotalListRow)
 			m_nSelectedListRow = m_nTotalListRow - 1;
@@ -932,10 +954,7 @@ CMenuManager::DisplayHelperText()
 		alpha = m_nHelperTextAlpha > 255 ? 255 : m_nHelperTextAlpha;
 	}
 
-	CFont::SetCentreOn();
-	CFont::SetScale(SCREEN_SCALE_X(SMALLESTTEXT_X_SCALE), SCREEN_SCALE_Y(SMALLESTTEXT_Y_SCALE));
-	CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
-
+	SET_FONT_FOR_HELPER_TEXT
 	// TODO: name this cases?
 	switch (m_nHelperTextMsgId) {
 		case 0:
@@ -1065,7 +1084,7 @@ CMenuManager::Draw()
 #endif
 	if (aScreens[m_nCurrScreen].m_ScreenName[0] != '\0') {
 		
-		PREPARE_MENU_HEADER
+		SET_FONT_FOR_MENU_HEADER
 		CFont::PrintString(PAGE_NAME_X(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
 
 		// Weird place to put that.
@@ -1876,6 +1895,7 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 	int controllerAction = PED_FIREWEAPON;
 	// GetStartOptionsCntrlConfigScreens();
 	int numOptions = GetNumOptionsCntrlConfigScreens();
+	int nextY = MENU_Y(yStart);
 	int bindingMargin = MENU_X(3.0f);
 	float rowHeight;
 	switch (m_ControlMethod) {
@@ -1890,9 +1910,10 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 	}
 
 	// MENU_Y(rowHeight * 0.0f + yStart);
-	for (int optionIdx = 0, nextY = MENU_Y(yStart); optionIdx < numOptions; nextY = MENU_Y(++optionIdx * rowHeight + yStart)) {
+	for (int optionIdx = 0; optionIdx < numOptions; nextY = MENU_Y(++optionIdx * rowHeight + yStart)) {
 		int nextX = xStart;
 		int bindingsForThisOpt = 0;
+		int contSetOrder = SETORDER_1;
 		CFont::SetColor(CRGBA(LIST_OPTION_COLOR.r, LIST_OPTION_COLOR.g, LIST_OPTION_COLOR.b, FadeIn(LIST_OPTION_COLOR.a)));
 
 		if (column == CONTSETUP_PED_COLUMN) {
@@ -2112,7 +2133,7 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 
 		// Print bindings, including seperator (-) between them
 		CFont::SetScale(MENU_X(0.25f), MENU_Y(0.6f));
-		for (int contSetOrder = SETORDER_1; contSetOrder < MAX_SETORDERS && controllerAction != -1; contSetOrder++) {
+		for (; contSetOrder < MAX_SETORDERS && controllerAction != -1; contSetOrder++) {
 			wchar *settingText = ControlsManager.GetControllerSettingTextWithOrderNumber((e_ControllerAction)controllerAction, (eContSetOrder)contSetOrder);
 			if (settingText) {
 				++bindingsForThisOpt;
@@ -2176,9 +2197,7 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 						CFont::SetColor(CRGBA(55, 55, 55, FadeIn(255)));
 						CFont::PrintString(nextX, nextY, TheText.Get("FEC_QUE")); // "???"
 					}
-					CFont::SetCentreOn();
-					CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE));
-					CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
+					SET_FONT_FOR_HELPER_TEXT
 					CFont::SetColor(CRGBA(255, 255, 255, FadeIn(255)));
 					if (m_bKeyChangeNotProcessed) {
 						CFont::PrintString(MENU_X_LEFT_ALIGNED(275.0f), SCREEN_SCALE_FROM_BOTTOM(114.0f), TheText.Get("FET_CIG")); // BACKSPACE TO CLEAR - LMB,RETURN TO CHANGE
@@ -2186,34 +2205,24 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 						CFont::PrintString(MENU_X_LEFT_ALIGNED(275.0f), SCREEN_SCALE_FROM_BOTTOM(114.0f), TheText.Get("FET_RIG")); // SELECT A NEW CONTROL FOR THIS ACTION OR ESC TO CANCEL
 					}
 					
-					CFont::SetRightJustifyOff();
-					CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE));
-					CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+					SET_FONT_FOR_LIST_ITEM
 					if (!m_bKeyIsOK)
 						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 
 					m_bKeyIsOK = true;
 				} else {
-					CFont::SetCentreOn();
-					CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE));
-					CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
+					SET_FONT_FOR_HELPER_TEXT
 					CFont::SetColor(CRGBA(255, 255, 255, FadeIn(255)));
 					CFont::PrintString(MENU_X_LEFT_ALIGNED(275.0f), SCREEN_SCALE_FROM_BOTTOM(114.0f), TheText.Get("FET_CIG")); // BACKSPACE TO CLEAR - LMB,RETURN TO CHANGE
-					CFont::SetRightJustifyOff();
-					CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE));
-					CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+					SET_FONT_FOR_LIST_ITEM
 					m_bKeyIsOK = false;
 					m_bKeyChangeNotProcessed = false;
 				}
 			} else if (optionIdx == m_nSelectedListRow) {
-				CFont::SetCentreOn();
-				CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE));
-				CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
+				SET_FONT_FOR_HELPER_TEXT
 				CFont::SetColor(CRGBA(55, 55, 55, FadeIn(255)));
 				CFont::PrintString(MENU_X_LEFT_ALIGNED(275.0f), SCREEN_SCALE_FROM_BOTTOM(114.0f), TheText.Get("FET_EIG")); // CANNOT SET A CONTROL FOR THIS ACTION
-				CFont::SetRightJustifyOff();
-				CFont::SetScale(MENU_X(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE));
-				CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+				SET_FONT_FOR_LIST_ITEM
 			}
 		}
 	}
@@ -2289,17 +2298,9 @@ CMenuManager::DrawControllerSetupScreen()
 		default:
 			break;
 	}
-	CFont::SetBackgroundOff();
-	CFont::SetScale(MENU_X(MENUACTION_SCALE_MULT), MENU_Y(MENUACTION_SCALE_MULT));
-	CFont::SetPropOn();
-	CFont::SetCentreOff();
-	CFont::SetJustifyOn();
-	CFont::SetRightJustifyOff();
-	CFont::SetBackGroundOnlyTextOn();
-	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
-	CFont::SetRightJustifyWrap(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN - 2.0f));
+	RESET_FONT_FOR_NEW_PAGE
 
-	PREPARE_MENU_HEADER
+	SET_FONT_FOR_MENU_HEADER
 
 	switch (m_ControlMethod) {
 		case CONTROL_STANDARD:
@@ -2374,15 +2375,15 @@ CMenuManager::DrawControllerSetupScreen()
 	CFont::PrintString(MENU_X_LEFT_ALIGNED(CONTSETUP_COLUMN_1_X), MENU_Y(CONTSETUP_LIST_TOP), TheText.Get("FET_CAC"));
 	CFont::PrintString(MENU_X_LEFT_ALIGNED(CONTSETUP_COLUMN_2_X), MENU_Y(CONTSETUP_LIST_TOP), TheText.Get("FET_CFT"));
 	CFont::PrintString(MENU_X_LEFT_ALIGNED(CONTSETUP_COLUMN_3_X), MENU_Y(CONTSETUP_LIST_TOP), TheText.Get("FET_CCR"));
-	CFont::SetRightJustifyOff();
-	CFont::SetScale(MENU_X_LEFT_ALIGNED(SMALLESTTEXT_X_SCALE), MENU_Y(SMALLESTTEXT_Y_SCALE));
-	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+	SET_FONT_FOR_LIST_ITEM
+	
 	int yStart;
 	if (m_ControlMethod == CONTROL_CLASSIC)
-		yStart = CONTSETUP_LIST_HEADER_HEIGHT + 29;
+		yStart = CONTSETUP_LIST_TOP + CONTSETUP_LIST_HEADER_HEIGHT + 1;
 	else
-		yStart = CONTSETUP_LIST_HEADER_HEIGHT + 34;
+		yStart = CONTSETUP_LIST_TOP + CONTSETUP_LIST_HEADER_HEIGHT + 5;
 
+	float optionYBottom = yStart + rowHeight;
 	for (int i = 0; i < ARRAY_SIZE(actionTexts); ++i) {
 		wchar *actionText = actionTexts[i];
 		if (!actionText)
@@ -2391,8 +2392,7 @@ CMenuManager::DrawControllerSetupScreen()
 		if (m_nMousePosX > MENU_X_LEFT_ALIGNED(CONTSETUP_LIST_LEFT + 2.0f) &&
 			m_nMousePosX < MENU_X_LEFT_ALIGNED(CONTSETUP_COLUMN_3_X + CONTSETUP_BOUND_COLUMN_WIDTH)) {
 
-			float curOptY = i * rowHeight + yStart;
-			if (m_nMousePosY > MENU_Y(curOptY) && m_nMousePosY < MENU_Y(rowHeight + curOptY)) {
+			if (m_nMousePosY > MENU_Y(i * rowHeight + yStart) && m_nMousePosY < MENU_Y(i * rowHeight + optionYBottom)) {
 					if (m_nOptionMouseHovering != i && m_nCurrExLayer == HOVEROPTION_LIST)
 						DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 
@@ -3042,17 +3042,9 @@ CMenuManager::DrawFrontEndNormal()
 void
 CMenuManager::DrawPlayerSetupScreen()
 {
-	CFont::SetBackgroundOff();
-	CFont::SetScale(MENU_X(MENUACTION_SCALE_MULT), MENU_Y(MENUACTION_SCALE_MULT));
-	CFont::SetPropOn();
-	CFont::SetCentreOff();
-	CFont::SetJustifyOn();
-	CFont::SetRightJustifyOff();
-	CFont::SetBackGroundOnlyTextOn();
-	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
-	CFont::SetRightJustifyWrap(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN - 2.0f));
+	RESET_FONT_FOR_NEW_PAGE
 
-	PREPARE_MENU_HEADER
+	SET_FONT_FOR_MENU_HEADER
 
 	CFont::PrintString(PAGE_NAME_X(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y), TheText.Get("FET_PS"));
 
@@ -4018,7 +4010,7 @@ CMenuManager::PrintStats()
 
 	// ::Draw already does that.
 	/*
-	PREPARE_MENU_HEADER
+	SET_FONT_FOR_MENU_HEADER
 	CFont::PrintString(PAGE_NAME_X(MENUHEADER_POS_X), SCREEN_SCALE_FROM_BOTTOM(MENUHEADER_POS_Y), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
 	*/
 	CFont::SetScale(MENU_X(MENU_TEXT_SIZE_X), MENU_Y(MENU_TEXT_SIZE_Y));

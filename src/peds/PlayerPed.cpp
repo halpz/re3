@@ -113,14 +113,10 @@ CPlayerPed::AnnoyPlayerPed(bool annoyedByPassingEntity)
 {
 	if (m_pedStats->m_temper < 52) {
 		m_pedStats->m_temper++;
-	} else {
-		if (annoyedByPassingEntity) {
-			if (m_pedStats->m_temper < 55) {
-				m_pedStats->m_temper++;
-			} else {
-				m_pedStats->m_temper = 46;
-			}
-		}
+	} else if (annoyedByPassingEntity && m_pedStats->m_temper < 55) {
+		m_pedStats->m_temper++;
+	} else if (annoyedByPassingEntity) {
+		m_pedStats->m_temper = 46;
 	}
 }
 
@@ -215,7 +211,7 @@ CPlayerPed::ReApplyMoveAnims(void)
 	for(int i = 0; i < ARRAY_SIZE(moveAnims); i++) {
 		CAnimBlendAssociation *curMoveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), moveAnims[i]);
 		if (curMoveAssoc) {
-			if (strcmp(CAnimManager::GetAnimAssociation(m_animGroup, moveAnims[i])->hierarchy->name, curMoveAssoc->hierarchy->name) != 0) {
+			if (CGeneral::faststrcmp(CAnimManager::GetAnimAssociation(m_animGroup, moveAnims[i])->hierarchy->name, curMoveAssoc->hierarchy->name)) {
 				CAnimBlendAssociation *newMoveAssoc = CAnimManager::AddAnimation(GetClump(), m_animGroup, moveAnims[i]);
 				newMoveAssoc->blendDelta = curMoveAssoc->blendDelta;
 				newMoveAssoc->blendAmount = curMoveAssoc->blendAmount;
@@ -288,7 +284,7 @@ CPlayerPed::SetRealMoveAnim(void)
 	if (!curIdleAssoc)
 		curIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_IDLE);
 
-	if ((!curRunStopAssoc || !(curRunStopAssoc->IsRunning())) && (!curRunStopRAssoc || !(curRunStopRAssoc->IsRunning()))) {
+	if (!((curRunStopAssoc && curRunStopAssoc->IsRunning()) || (curRunStopRAssoc && curRunStopRAssoc->IsRunning()))) {
 
 		if (curRunStopAssoc && curRunStopAssoc->blendDelta >= 0.0f || curRunStopRAssoc && curRunStopRAssoc->blendDelta >= 0.0f) {
 			if (curRunStopAssoc) {
@@ -340,8 +336,8 @@ CPlayerPed::SetRealMoveAnim(void)
 					CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 4.0f);
 				}
 			}
-
 			m_nMoveState = PEDMOVE_STILL;
+
 		} else {
 			if (curIdleAssoc) {
 				if (curWalkStartAssoc) {
@@ -394,6 +390,7 @@ CPlayerPed::SetRealMoveAnim(void)
 			}
 
 			if (curSprintAssoc && (m_nMoveState != PEDMOVE_SPRINT || m_fMoveSpeed < 0.4f)) {
+				// Stop sprinting in various conditions
 				if (curSprintAssoc->blendAmount == 0.0f) {
 					curSprintAssoc->blendDelta = -1000.0f;
 					curSprintAssoc->flags |= ASSOC_DELETEFADEDOUT;
@@ -417,8 +414,8 @@ CPlayerPed::SetRealMoveAnim(void)
 						curRunAssoc->flags &= ~ASSOC_RUNNING;
 						curRunAssoc->blendAmount = 0.0f;
 						curRunAssoc->blendDelta = 0.0f;
-					} else if (curSprintAssoc->blendDelta >= 0.0f) {
 
+					} else if (curSprintAssoc->blendDelta >= 0.0f) {
 						// Stop sprinting when tired
 						curSprintAssoc->flags |= ASSOC_DELETEFADEDOUT;
 						curSprintAssoc->blendDelta = -1.0f;
@@ -428,7 +425,9 @@ CPlayerPed::SetRealMoveAnim(void)
 					curSprintAssoc->blendDelta = -8.0f;
 					curRunAssoc->blendDelta = 8.0f;
 				}
+
 			} else if (curWalkStartAssoc) {
+				// Walk start and walk/run shouldn't run at the same time
 				curWalkAssoc->flags &= ~ASSOC_RUNNING;
 				curRunAssoc->flags &= ~ASSOC_RUNNING;
 				curWalkAssoc->blendAmount = 0.0f;
@@ -436,11 +435,13 @@ CPlayerPed::SetRealMoveAnim(void)
 
 			} else if (m_nMoveState == PEDMOVE_SPRINT) {
 				if (curSprintAssoc) {
+					// We have anim, do it
 					if (curSprintAssoc->blendDelta < 0.0f) {
 						curSprintAssoc->blendDelta = 2.0f;
 						curRunAssoc->blendDelta = -2.0f;
 					}
 				} else {
+					// Transition between run-sprint
 					curWalkAssoc->blendAmount = 0.0f;
 					curRunAssoc->blendAmount = 1.0f;
 					curSprintAssoc = CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_SPRINT, 2.0f);
@@ -703,14 +704,7 @@ CPlayerPed::PlayerControl1stPersonRunAround(CPad *padUsed)
 	float padMove = CVector2D(leftRight, upDown).Magnitude();
 	float padMoveInGameUnit = padMove / PAD_MOVE_TO_GAME_WORLD_MOVE;
 	if (padMoveInGameUnit > 0.0f) {
-#ifdef FREE_CAM
-		if (!CCamera::bFreeCam)
-			m_fRotationDest = CGeneral::LimitRadianAngle(TheCamera.Orientation);
-		else
-			m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -leftRight, upDown) - TheCamera.Orientation;
-#else
 		m_fRotationDest = CGeneral::LimitRadianAngle(TheCamera.Orientation);
-#endif
 		m_fMoveSpeed = Min(padMoveInGameUnit, 0.07f * CTimer::GetTimeStep() + m_fMoveSpeed);
 	} else {
 		m_fMoveSpeed = 0.0f;
@@ -718,8 +712,7 @@ CPlayerPed::PlayerControl1stPersonRunAround(CPad *padUsed)
 
 	if (m_nPedState == PED_JUMP) {
 		if (bIsInTheAir) {
-			if (bUsesCollision && !bHitSteepSlope &&
-				(!bHitSomethingLastFrame || m_vecDamageNormal.z > 0.6f)
+			if (bUsesCollision && !bHitSteepSlope && (!bHitSomethingLastFrame || m_vecDamageNormal.z > 0.6f)
 				&& m_fDistanceTravelled < CTimer::GetTimeStep() * 0.02 && m_vecMoveSpeed.MagnitudeSqr() < 0.01f) {
 
 				float angleSin = Sin(m_fRotationCur); // originally sin(DEGTORAD(RADTODEG(m_fRotationCur))) o_O
@@ -730,8 +723,7 @@ CPlayerPed::PlayerControl1stPersonRunAround(CPad *padUsed)
 			m_fMoveSpeed = 0.0f;
 		}
 	}
-	if (!(CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bHeavy)
-		&& padUsed->GetSprint()) {
+	if (!(CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bHeavy) && padUsed->GetSprint()) {
 		m_nMoveState = PEDMOVE_SPRINT;
 	}
 	if (m_nPedState != PED_FIGHT)
@@ -856,10 +848,9 @@ CPlayerPed::FindNextWeaponLockOnTarget(CEntity *previousTarget, bool lookToLeft)
 {
 	CEntity *nextTarget = nil;
 	float weaponRange = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_fRange;
-	// nextTarget = nil;
+	// nextTarget = nil; // duplicate
 	float lastCloseness = -10000.0f;
-	// unused
-	// CGeneral::GetATanOfXY(GetForward().x, GetForward().y);
+	// CGeneral::GetATanOfXY(GetForward().x, GetForward().y); // unused
 	CVector distVec = previousTarget->GetPosition() - GetPosition();
 	float referenceBeta = CGeneral::GetATanOfXY(distVec.x, distVec.y);
 
@@ -907,7 +898,7 @@ CPlayerPed::FindWeaponLockOnTarget(void)
 		}
 	}
 
-	// nextTarget = nil;
+	// nextTarget = nil; // duplicate
 	float lastCloseness = -10000.0f;
 	float referenceBeta = CGeneral::GetATanOfXY(GetForward().x, GetForward().y);
 	for (int h = CPools::GetPedPool()->GetSize() - 1; h >= 0; h--) {
@@ -1105,7 +1096,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 						m_fRotationCur += (limitedRotDest - m_fRotationCur) / 2;
 					}
 				}
-			} else if (weaponInfo->m_bCanAimWithArm)
+			} else if (weaponInfo->m_bCanAimWithArm && m_nPedState != PED_ATTACK)
 				ClearPointGunAt();
 		}
 	}
@@ -1212,8 +1203,7 @@ CPlayerPed::PlayerControlZelda(CPad *padUsed)
 
 	if (m_nPedState == PED_JUMP) {
 		if (bIsInTheAir) {
-			if (bUsesCollision && !bHitSteepSlope &&
-				(!bHitSomethingLastFrame || m_vecDamageNormal.z > 0.6f)
+			if (bUsesCollision && !bHitSteepSlope && (!bHitSomethingLastFrame || m_vecDamageNormal.z > 0.6f)
 				&& m_fDistanceTravelled < CTimer::GetTimeStep() * 0.02 && m_vecMoveSpeed.MagnitudeSqr() < 0.01f) {
 
 				float angleSin = Sin(m_fRotationCur); // originally sin(DEGTORAD(RADTODEG(m_fRotationCur))) o_O
@@ -1225,8 +1215,7 @@ CPlayerPed::PlayerControlZelda(CPad *padUsed)
 		}
 	}
 
-	if (!(CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bHeavy)
-		&& padUsed->GetSprint()) {
+	if (!(CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bHeavy) && padUsed->GetSprint()) {
 		m_nMoveState = PEDMOVE_SPRINT;
 	}
 	if (m_nPedState != PED_FIGHT)
@@ -1291,25 +1280,26 @@ CPlayerPed::ProcessControl(void)
 	if (m_nPedState == PED_DRIVING && m_objective != OBJECTIVE_LEAVE_CAR) {
 		if (m_pMyVehicle->IsCar() && ((CAutomobile*)m_pMyVehicle)->Damage.GetDoorStatus(DOOR_FRONT_LEFT) == DOOR_STATUS_SWINGING) {
 			CAnimBlendAssociation *rollDoorAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_ROLLDOOR);
-			if (!rollDoorAssoc) {
-				rollDoorAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_ROLLDOOR_LOW);
-			}
 
-			// These comparisons are wrong, they return uint16
-			if (m_pMyVehicle->m_nGettingOutFlags & CAR_DOOR_FLAG_LF || rollDoorAssoc || padUsed
-				&& (padUsed->GetAccelerate() != 0.0f || padUsed->GetSteeringLeftRight() != 0.0f
-					|| padUsed->GetBrake() != 0.0f)) {
-
+			if (m_pMyVehicle->m_nGettingOutFlags & CAR_DOOR_FLAG_LF || rollDoorAssoc || (rollDoorAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_ROLLDOOR_LOW))) {
 				if (rollDoorAssoc)
 					m_pMyVehicle->ProcessOpenDoor(CAR_DOOR_LF, ANIM_CAR_ROLLDOOR, rollDoorAssoc->currentTime);
-			} else {
-				m_pMyVehicle->m_nGettingOutFlags |= CAR_DOOR_FLAG_LF;
-				if (m_pMyVehicle->bLowVehicle)
-					rollDoorAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_ROLLDOOR_LOW);
-				else
-					rollDoorAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_ROLLDOOR);
 
-				rollDoorAssoc->SetFinishCallback(PedAnimDoorCloseRollingCB, this);
+			} else {
+				// These comparisons are wrong, they return uint16
+				if (padUsed && (padUsed->GetAccelerate() != 0.0f || padUsed->GetSteeringLeftRight() != 0.0f || padUsed->GetBrake() != 0.0f)) {
+					if (rollDoorAssoc)
+						m_pMyVehicle->ProcessOpenDoor(CAR_DOOR_LF, ANIM_CAR_ROLLDOOR, rollDoorAssoc->currentTime);
+
+				} else {
+					m_pMyVehicle->m_nGettingOutFlags |= CAR_DOOR_FLAG_LF;
+					if (m_pMyVehicle->bLowVehicle)
+						rollDoorAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_ROLLDOOR_LOW);
+					else
+						rollDoorAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_ROLLDOOR);
+
+					rollDoorAssoc->SetFinishCallback(PedAnimDoorCloseRollingCB, this);
+				}
 			}
 		}
 		return;
@@ -1338,12 +1328,18 @@ CPlayerPed::ProcessControl(void)
 		case PED_FIGHT:
 		case PED_AIM_GUN:
 			if (!RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_BLOCK)) {
-				if (TheCamera.Cams[0].Using3rdPersonMouseCam()) {
+				if (TheCamera.Cams[0].Using3rdPersonMouseCam()
+#ifdef FREE_CAM
+					&& !CCamera::bFreeCam
+#endif
+					) {
 					if (padUsed)
 						PlayerControl1stPersonRunAround(padUsed);
+
 				} else if (m_nPedState == PED_FIGHT) {
 					if (padUsed)
 						PlayerControlFighter(padUsed);
+
 				} else if (padUsed) {
 					PlayerControlZelda(padUsed);
 				}
@@ -1415,6 +1411,7 @@ CPlayerPed::ProcessControl(void)
 			if (FindPlayerPed()->GetWeapon()->m_eWeaponType == WEAPONTYPE_M16) {
 				if (padUsed)
 					PlayerControlM16(padUsed);
+
 			} else if (padUsed) {
 				PlayerControlSniper(padUsed);
 			}
@@ -1477,20 +1474,17 @@ CPlayerPed::ProcessControl(void)
 			m_lookTimer = 0;
 			float camAngle = CGeneral::LimitRadianAngle(TheCamera.Cams[TheCamera.ActiveCam].Front.Heading());
 			float angleBetweenPlayerAndCam = Abs(camAngle - m_fRotationCur);
-			if (m_nPedState != PED_ATTACK
-				&& angleBetweenPlayerAndCam > DEGTORAD(30.0f) && angleBetweenPlayerAndCam < DEGTORAD(330.0f)) {
+			if (m_nPedState != PED_ATTACK && angleBetweenPlayerAndCam > DEGTORAD(30.0f) && angleBetweenPlayerAndCam < DEGTORAD(330.0f)) {
 
 				if (angleBetweenPlayerAndCam > DEGTORAD(150.0f) && angleBetweenPlayerAndCam < DEGTORAD(210.0f)) {
 					float rightTurnAngle = CGeneral::LimitRadianAngle(m_fRotationCur - DEGTORAD(150.0f));
 					float leftTurnAngle = CGeneral::LimitRadianAngle(DEGTORAD(150.0f) + m_fRotationCur);
-					if (m_fLookDirection != 999999.0f) {
-						if (Abs(rightTurnAngle - m_fLookDirection) < Abs(leftTurnAngle - m_fLookDirection))
-							camAngle = rightTurnAngle;
-						else
-							camAngle = leftTurnAngle;
-					} else {
+					if (m_fLookDirection == 999999.0f)
 						camAngle = rightTurnAngle;
-					}
+					else if (Abs(rightTurnAngle - m_fLookDirection) < Abs(leftTurnAngle - m_fLookDirection))
+						camAngle = rightTurnAngle;
+					else
+						camAngle = leftTurnAngle;
 				}
 				SetLookFlag(camAngle, true);
 				SetLookTimer(CTimer::GetTimeStepInMilliseconds() * 5.0f);

@@ -972,9 +972,9 @@ CPed::ProcessObjective(void)
 				}
 				CWeaponInfo *wepInfo = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
 				float wepRange = wepInfo->m_fRange;
-				float wepRangeAdjusted;
+				float maxDistToKeep;
 				if (GetWeapon()->m_eWeaponType != WEAPONTYPE_UNARMED) {
-					wepRangeAdjusted = wepRange / 3.0f;
+					maxDistToKeep = wepRange / 3.0f;
 				} else {
 					if (m_nPedState == PED_FIGHT) {
 						if (!IsPlayer() && !(m_pedStats->m_flags & STAT_CAN_KICK))
@@ -982,10 +982,10 @@ CPed::ProcessObjective(void)
 					} else {
 						wepRange = 1.3f;
 					}
-					wepRangeAdjusted = wepRange;
+					maxDistToKeep = wepRange;
 				}
-				if (m_pedInObjective->m_getUpTimer > CTimer::GetTimeInMilliseconds() && wepRangeAdjusted < 2.5f) {
-					wepRangeAdjusted = 2.5f;
+				if (m_pedInObjective->m_getUpTimer > CTimer::GetTimeInMilliseconds() && maxDistToKeep < 2.5f) {
+					maxDistToKeep = 2.5f;
 				}
 				if (m_pedInObjective->IsPlayer() && m_nPedType != PEDTYPE_COP
 					&& CharCreatedBy != MISSION_CHAR && FindPlayerPed()->m_pWanted->m_CurrentCops) {
@@ -1086,7 +1086,7 @@ CPed::ProcessObjective(void)
 						|| distWithTargetSc > m_distanceToCountSeekDone && !CanSeeEntity(m_pedInObjective)) {
 
 						if (m_pedInObjective->EnteringCar())
-							wepRangeAdjusted = 2.0f;
+							maxDistToKeep = 2.0f;
 
 						if (bUsePedNodeSeek) {
 							CVector bestCoords(0.0f, 0.0f, 0.0f);
@@ -1100,7 +1100,7 @@ CPed::ProcessObjective(void)
 
 							SetSeek(m_vecSeekPos, m_distanceToCountSeekDone);
 						} else {
-							SetSeek(m_pedInObjective, wepRangeAdjusted);
+							SetSeek(m_pedInObjective, maxDistToKeep);
 						}
 						bCrouchWhenShooting = false;
 						if (m_pedInObjective->m_pCurrentPhysSurface && distWithTargetSc < 5.0f) {
@@ -1172,7 +1172,7 @@ CPed::ProcessObjective(void)
 							SetShootTimer(CGeneral::GetRandomNumberInRange(500.0f, 2000.0f));
 
 							int time;
-							if (distWithTargetSc <= wepRangeAdjusted)
+							if (distWithTargetSc <= maxDistToKeep)
 								time = CGeneral::GetRandomNumberInRange(100.0f, 500.0f);
 							else
 								time = CGeneral::GetRandomNumberInRange(1500.0f, 3000.0f);
@@ -1230,17 +1230,17 @@ CPed::ProcessObjective(void)
 							if (m_nPedType == PEDTYPE_COP) {
 								if (GetWeapon()->m_eWeaponType > WEAPONTYPE_COLT45
 									|| m_fleeFrom && m_fleeFrom->IsObject()) {
-									wepRangeAdjusted = 6.0f;
+									maxDistToKeep = 6.0f;
 								} else if (m_fleeFrom && m_fleeFrom->IsVehicle()) {
-									wepRangeAdjusted = 4.0f;
+									maxDistToKeep = 4.0f;
 								} else {
-									wepRangeAdjusted = 2.0f;
+									maxDistToKeep = 2.0f;
 								}
 							} else {
-								wepRangeAdjusted = 2.0f;
+								maxDistToKeep = 2.0f;
 							}
 						}
-						if (distWithTargetSc <= wepRangeAdjusted) {
+						if (distWithTargetSc <= maxDistToKeep) {
 							SetMoveState(PEDMOVE_STILL);
 							bIsPointingGunAt = true;
 							if (m_nPedState != PED_AIM_GUN && !bDuckAndCover) {
@@ -1251,7 +1251,7 @@ CPed::ProcessObjective(void)
 							if (m_nPedState != PED_SEEK_ENTITY && m_nPedState != PED_SEEK_POS
 								&& !bStopAndShoot && !killPlayerInNoPoliceZone && !bKindaStayInSamePlace) {
 								Say(SOUND_PED_ATTACK);
-								SetSeek(m_pedInObjective, wepRangeAdjusted);
+								SetSeek(m_pedInObjective, maxDistToKeep);
 								bIsRunning = true;
 							}
 						}
