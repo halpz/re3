@@ -60,7 +60,7 @@ Mueve el~h~ joystick analógico derecho~w~ hacia arriba para ~h~acelerar~w~.
 Pulsa ~h~~k~~VEHICLE_BRAKE~~w~ para ~h~frenar~w~ o para ~h~dar marcha atrás~w~ si el vehículo está detenido.
 
 [HELP5_D]
-Mueve el ~h~joystick analógico derecho~w~ para ~h~frenar~w~ o para ~h~dar marcha atrás~w~ si el vehículo está detenido.
+Mueve el ~h~joystick analógico derecho~w~ hacia atrás para ~h~frenar~w~ o para ~h~dar marcha atrás~w~ si el vehículo está detenido.
 
 [HELP6_A]
 Pulsa ~h~~k~~VEHICLE_HANDBRAKE~ ~w~para utilizar el ~h~freno de mano del vehículo~w~.
@@ -93,7 +93,7 @@ Cuantas más insignias tengas, mayor será tu nivel de búsqueda.
 En ocasiones necesitarás ir por caminos que no aparecen en el radar.
 
 [TIMER]
-Ésta es una misión cronometrada, debes completarla antes de que el temporizador llegue a cero.
+Ésta es una misión cronometrada, debes completarla antes de que el cronómetro llegue a cero.
 
 [MISTY1]
 ~r~¡Misty está para el arrastre!
@@ -4549,7 +4549,7 @@ Me llamo Chonks, Marty Chonks.
 Soy el dueño de la fábrica de comestibles Bitch'n' Dog que está a la vuelta de la esquina.
 
 [MEA1_D]
-Tengo problemas económicos, pero, ¿y quién no?
+Tengo problemas económicos, ¿pero y quién no?
 
 [MEA1_E]
 He quedado con el director de mi banco.
