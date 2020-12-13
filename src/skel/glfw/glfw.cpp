@@ -1231,15 +1231,15 @@ void InitialiseLanguage()
 		}
 	}
 
-	TheText.Unload();
-	TheText.Load();
-
 #ifndef _WIN32
 	// TODO this is needed for strcasecmp to work correctly across all languages, but can these cause other problems??
 	setlocale(LC_CTYPE, "C");
 	setlocale(LC_COLLATE, "C");
 	setlocale(LC_NUMERIC, "C");
 #endif
+
+	TheText.Unload();
+	TheText.Load();
 }
 
 /*
