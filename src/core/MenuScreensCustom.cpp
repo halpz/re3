@@ -718,10 +718,10 @@ CMenuScreenCustom aScreens[] = {
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 	// MENUPAGE_DETECT_JOYSTICK
-	{ "FEC_JOD", MENUPAGE_CONTROLLER_PC, nil, nil,
+	{ "FEC_JOD", MENUPAGE_CONTROLLER_PC, new CCustomScreenLayout({0, 0, 0, false, false, 30}), nil,
 
 		MENUACTION_LABEL,	"FEC_JPR", { nil, SAVESLOT_NONE, MENUPAGE_NONE }, 0, 0, 0,
-		MENUACTION_CFO_DYNAMIC,	"FEC_JDE", { new CCFODynamic(nil, nil, DetectJoystickDraw, nil) }, 40, 200, MENUALIGN_LEFT,
+		MENUACTION_CFO_DYNAMIC,	"FEC_JDE", { new CCFODynamic(nil, nil, DetectJoystickDraw, nil) }, 80, 200, MENUALIGN_LEFT,
 		MENUACTION_GOBACK,		"FEDS_TB", {nil, SAVESLOT_NONE, MENUPAGE_NONE}, 320, 225, MENUALIGN_CENTER,
 	},
 #endif
