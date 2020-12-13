@@ -938,8 +938,7 @@ RenderScene_new(void)
 }
 
 // TODO
-bool FredIsInFirstPersonCam(void) { return true; }	// this seems to give the best result in all cases
-
+bool FredIsInFirstPersonCam(void) { return false; }
 void
 RenderEffects_new(void)
 {
@@ -959,10 +958,11 @@ if(gbRenderWorld2)
 if(gbRenderVehicles)
 		CRenderer::RenderVehicles();
 	}else{
-if(gbRenderVehicles)
-		CRenderer::RenderVehicles();
+		// flipped these two, seems to give the best result
 if(gbRenderWorld2)
 		CRenderer::RenderWorld(2);	// transparent
+if(gbRenderVehicles)
+		CRenderer::RenderVehicles();
 	}
 	// better render these after transparent world
 if(gbRenderFadingInEntities)
