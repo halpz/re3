@@ -203,6 +203,10 @@ CVisibilityPlugins::InsertAtomicIntoSortedList(RpAtomic *a, float dist)
 	return ret;
 }
 
+// can't increase this yet unfortunately...
+// probably have to fix fading for this so material alpha isn't overwritten
+#define VEHICLE_LODDIST_MULTIPLIER (TheCamera.GenerationDistMultiplier)
+
 void
 CVisibilityPlugins::SetRenderWareCamera(RwCamera *camera)
 {
@@ -215,11 +219,11 @@ CVisibilityPlugins::SetRenderWareCamera(RwCamera *camera)
 	else
 		ms_cullCompsDist = sq(TheCamera.LODDistMultiplier * 20.0f);
 
-        ms_vehicleLod0Dist = sq(70.0f * TheCamera.GenerationDistMultiplier);
-        ms_vehicleLod1Dist = sq(90.0f * TheCamera.GenerationDistMultiplier);
-        ms_vehicleFadeDist = sq(100.0f * TheCamera.GenerationDistMultiplier);
-        ms_bigVehicleLod0Dist = sq(60.0f * TheCamera.GenerationDistMultiplier);
-        ms_bigVehicleLod1Dist = sq(150.0f * TheCamera.GenerationDistMultiplier);
+        ms_vehicleLod0Dist = sq(70.0f * VEHICLE_LODDIST_MULTIPLIER);
+        ms_vehicleLod1Dist = sq(90.0f * VEHICLE_LODDIST_MULTIPLIER);
+        ms_vehicleFadeDist = sq(100.0f * VEHICLE_LODDIST_MULTIPLIER);
+        ms_bigVehicleLod0Dist = sq(60.0f * VEHICLE_LODDIST_MULTIPLIER);
+        ms_bigVehicleLod1Dist = sq(150.0f * VEHICLE_LODDIST_MULTIPLIER);
         ms_pedLod0Dist = sq(25.0f * TheCamera.LODDistMultiplier);
         ms_pedLod1Dist = sq(60.0f * TheCamera.LODDistMultiplier);
         ms_pedFadeDist = sq(70.0f * TheCamera.LODDistMultiplier);
@@ -311,7 +315,12 @@ CVisibilityPlugins::RenderWheelAtomicCB(RpAtomic *atomic)
 	m = RwFrameGetLTM(RpAtomicGetFrame(atomic));
 	RwV3dSub(&view, RwMatrixGetPos(m), ms_pCameraPosn);
 	len = RwV3dLength(&view);
+#ifdef FIX_BUGS
+	// from VC
+	lodatm = mi->GetAtomicFromDistance(len * TheCamera.LODDistMultiplier / VEHICLE_LODDIST_MULTIPLIER);
+#else
 	lodatm = mi->GetAtomicFromDistance(len);
+#endif
 	if(lodatm){
 		if(RpAtomicGetGeometry(lodatm) != RpAtomicGetGeometry(atomic))
 			RpAtomicSetGeometry(atomic, RpAtomicGetGeometry(lodatm), rpATOMICSAMEBOUNDINGSPHERE);

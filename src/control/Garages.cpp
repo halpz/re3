@@ -179,10 +179,8 @@ void CGarages::Shutdown(void)
 void CGarages::Update(void)
 {
 	static int GarageToBeTidied = 0;
-#ifndef GTA_PS2
 	if (CReplay::IsPlayingBack())
 		return;
-#endif
 	bCamShouldBeOutisde = false;
 	TheCamera.pToGarageWeAreIn = nil;
 	TheCamera.pToGarageWeAreInForHackAvoidFirstPerson = nil;
