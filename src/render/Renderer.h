@@ -2,6 +2,14 @@
 
 class CEntity;
 
+#ifdef FIX_BUGS
+#define LOD_DISTANCE (300.0f*TheCamera.LODDistMultiplier)
+#else
+#define LOD_DISTANCE 300.0f
+#endif
+#define FADE_DISTANCE 20.0f
+#define STREAM_DISTANCE 30.0f
+
 extern bool gbShowCollisionPolys;
 extern bool gbShowCollisionLines;
 extern bool gbBigWhiteDebugLightSwitchedOn;

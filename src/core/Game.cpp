@@ -191,7 +191,7 @@ CGame::InitialiseRenderWare(void)
 	CVisibilityPlugins::Initialise();
 	
 	/* Create camera */
-	Scene.camera = CameraCreate(RsGlobal.width, RsGlobal.height, TRUE);
+	Scene.camera = CameraCreate(SCREEN_WIDTH, SCREEN_HEIGHT, TRUE);
 	ASSERT(Scene.camera != nil);
 	if (!Scene.camera)
 	{

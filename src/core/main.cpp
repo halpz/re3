@@ -890,18 +890,18 @@ void
 MattRenderScene(void)
 {
 	// this calls CMattRenderer::Render
-	CWorld::AdvanceCurrentScanCode();
+	/// CWorld::AdvanceCurrentScanCode();
 	// CMattRenderer::ResetRenderStates
-	CRenderer::ClearForFrame();
+	/// CRenderer::ClearForFrame();		// before ConstructRenderList
 	// CClock::CalcEnvMapTimeMultiplicator
 	CWaterLevel::RenderWater();	// actually CMattRenderer::RenderWater
 	// CClock::ms_EnvMapTimeMultiplicator = 1.0f;
 	// cWorldStream::ClearDynamics
-	CRenderer::ConstructRenderList();
+	/// CRenderer::ConstructRenderList();	// before PreRender
 if(gbRenderWorld0)
 	CRenderer::RenderWorld(0);	// roads
 	// CMattRenderer::ResetRenderStates
-	CRenderer::PreRender();
+	/// CRenderer::PreRender();	// has to be called before BeginUpdate because of cutscene shadows
 	CCoronas::RenderReflections();
 if(gbRenderWorld1)
 	CRenderer::RenderWorld(1);	// opaque
@@ -1213,13 +1213,16 @@ Idle(void *arg)
 		pos.y = SCREEN_HEIGHT / 2.0f;
 		RsMouseSetPos(&pos);
 #endif
-#ifdef NEW_RENDERER
-	if(!gbNewRenderer)
-#endif
-{
+
 		tbStartTimer(0, "CnstrRenderList");
 #ifdef PC_WATER
 		CWaterLevel::PreCalcWaterGeometry();
+#endif
+#ifdef NEW_RENDERER
+		if(gbNewRenderer){
+			CWorld::AdvanceCurrentScanCode();	// don't think this is even necessary
+			CRenderer::ClearForFrame();
+		}
 #endif
 		CRenderer::ConstructRenderList();
 		tbEndTimer("CnstrRenderList");
@@ -1227,7 +1230,6 @@ Idle(void *arg)
 		tbStartTimer(0, "PreRender");
 		CRenderer::PreRender();
 		tbEndTimer("PreRender");
-}
 
 #ifdef FIX_BUGS
 		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void *)FALSE); // TODO: temp? this fixes OpenGL render but there should be a better place for this

@@ -61,14 +61,6 @@ CVehicle *CRenderer::m_pFirstPersonVehicle;
 bool CRenderer::m_loadingPriority;
 float CRenderer::ms_lodDistScale = 1.2f;
 
-#ifdef FIX_BUGS
-#define LOD_DISTANCE (300.0f*TheCamera.LODDistMultiplier)
-#else
-#define LOD_DISTANCE 300.0f
-#endif
-#define FADE_DISTANCE 20.0f
-#define STREAM_DISTANCE 30.0f
-
 
 void
 CRenderer::Init(void)
@@ -711,11 +703,12 @@ CRenderer::RenderOneBuilding(CEntity *ent, float camdist)
 {
 	if(ent->m_rwObject == nil)
 		return;
+
+	ent->bImBeingRendered = true;	// TODO: this seems wrong, but do we even need it?
+
 	assert(RwObjectGetType(ent->m_rwObject) == rpATOMIC);
 	RpAtomic *atomic = (RpAtomic*)ent->m_rwObject;
 	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(ent->GetModelIndex());
-
-	ent->bImBeingRendered = true;	// TODO: this seems wrong, but do we even need it?
 
 	int pass = PASS_BLEND;
 	if(mi->m_additive)	// very questionable
