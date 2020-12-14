@@ -47,8 +47,8 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 	m_nSelectedWepSlot = WEAPONTYPE_UNARMED;
 	m_nSpeedTimer = 0;
 	m_bSpeedTimerFlag = false;
-	m_pPointGunAt = nil;
-	m_nPedState = PED_IDLE;
+	SetWeaponLockOnTarget(nil);
+	SetPedState(PED_IDLE);
 #ifndef FIX_BUGS
 	m_fCurrentStamina = m_fMaxStamina = 150.0f;
 #endif
@@ -73,7 +73,7 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 void CPlayerPed::ClearWeaponTarget()
 {
 	if (m_nPedType == PEDTYPE_PLAYER1) {
-		m_pPointGunAt = nil;
+		SetWeaponLockOnTarget(nil);
 		TheCamera.ClearPlayerWeaponMode();
 		CWeaponEffects::ClearCrossHair();
 	}
@@ -875,9 +875,7 @@ CPlayerPed::FindNextWeaponLockOnTarget(CEntity *previousTarget, bool lookToLeft)
 	if (!nextTarget)
 		return false;
 
-	m_pPointGunAt = nextTarget;
-	if (nextTarget)
-		nextTarget->RegisterReference((CEntity**)&m_pPointGunAt);
+	SetWeaponLockOnTarget(nextTarget);
 	SetPointGunAt(nextTarget);
 	return true;
 }
@@ -891,7 +889,7 @@ CPlayerPed::FindWeaponLockOnTarget(void)
 	if (m_pPointGunAt) {
 		CVector distVec = m_pPointGunAt->GetPosition() - GetPosition();
 		if (distVec.Magnitude2D() > weaponRange) {
-			m_pPointGunAt = nil;
+			SetWeaponLockOnTarget(nil);
 			return false;
 		} else {
 			return true;
@@ -922,9 +920,7 @@ CPlayerPed::FindWeaponLockOnTarget(void)
 	if (!nextTarget)
 		return false;
 
-	m_pPointGunAt = nextTarget;
-	if (nextTarget)
-		nextTarget->RegisterReference((CEntity**)&m_pPointGunAt);
+	SetWeaponLockOnTarget(nextTarget);
 	SetPointGunAt(nextTarget);
 	return true;
 }

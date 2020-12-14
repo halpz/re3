@@ -620,9 +620,7 @@ CPed::UpdateFromLeader(void)
 						m_pLookTarget->RegisterReference((CEntity **) &m_pLookTarget);
 						TurnBody();
 						if (m_attackTimer < CTimer::GetTimeInMilliseconds() && !GetWeapon()->IsTypeMelee()) {
-							m_pPointGunAt = m_threatEntity;
-							if (m_threatEntity)
-								m_threatEntity->RegisterReference((CEntity **) &m_pPointGunAt);
+							SetWeaponLockOnTarget(m_threatEntity);
 							SetAttack(m_threatEntity);
 						}
 					}
@@ -1026,10 +1024,7 @@ CPed::ProcessObjective(void)
 								CWorld::bIncludeDeadPeds = false;
 								if (foundEnt == vehOfTarget) {
 									SetAttack(vehOfTarget);
-									m_pPointGunAt = vehOfTarget;
-									if (vehOfTarget)
-										vehOfTarget->RegisterReference((CEntity **) &m_pPointGunAt);
-
+									SetWeaponLockOnTarget(vehOfTarget);
 									SetShootTimer(CGeneral::GetRandomNumberInRange(500, 2000));
 									if (distWithTargetSc <= m_distanceToCountSeekDone) {
 										SetAttackTimer(CGeneral::GetRandomNumberInRange(200, 500));
@@ -1162,10 +1157,7 @@ CPed::ProcessObjective(void)
 						CWorld::bIncludeDeadPeds = false;
 						if (foundEnt == m_pedInObjective) {
 							SetAttack(m_pedInObjective);
-							m_pPointGunAt = m_pedInObjective;
-							if (m_pedInObjective)
-								m_pedInObjective->RegisterReference((CEntity **) &m_pPointGunAt);
-
+							SetWeaponLockOnTarget(m_pedInObjective);
 							SetShootTimer(CGeneral::GetRandomNumberInRange(500.0f, 2000.0f));
 
 							int time;
@@ -1551,10 +1543,7 @@ CPed::ProcessObjective(void)
 					CWorld::bIncludeDeadPeds = false;
 					if (foundEnt == m_carInObjective) {
 						SetAttack(m_carInObjective);
-						m_pPointGunAt = m_carInObjective;
-						if (m_pPointGunAt)
-							m_pPointGunAt->RegisterReference((CEntity **) &m_pPointGunAt);
-
+						SetWeaponLockOnTarget(m_carInObjective);
 						SetShootTimer(CGeneral::GetRandomNumberInRange(500, 2000));
 						if (distWithTargetSc > 10.0f && !bKindaStayInSamePlace) {
 							SetAttackTimer(CGeneral::GetRandomNumberInRange(2000, 5000));

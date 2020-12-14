@@ -863,6 +863,13 @@ public:
 			SetMoveState(PEDMOVE_WALK);
 	}
 
+	inline void SetWeaponLockOnTarget(CEntity *target)
+	{
+		m_pPointGunAt = (CPed *)target;
+		if(target)
+			((CEntity *)target)->RegisterReference(&m_pPointGunAt);
+	}
+
 	// Using this to abstract nodes of skinned and non-skinned meshes
 	CVector GetNodePosition(int32 node)
 	{

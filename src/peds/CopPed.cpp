@@ -69,7 +69,7 @@ CCopPed::CCopPed(eCopType copType) : CPed(PEDTYPE_COP)
 	m_bStopAndShootDisabledZone = false;
 	m_bZoneDisabled = false;
 	field_1364 = -1;
-	m_pPointGunAt = nil;
+	SetWeaponLockOnTarget(nil);
 
 	// VC also initializes in here, but as nil
 #ifdef FIX_BUGS
@@ -472,10 +472,7 @@ CCopPed::CopAI(void)
 					if (!CWorld::ProcessLineOfSight(gunPos, playerOrHisVeh->GetPosition(), foundCol, foundEnt,
 						false, true, false, false, true, false, false)
 						|| foundEnt && foundEnt == playerOrHisVeh) {
-						m_pPointGunAt = playerOrHisVeh;
-						if (playerOrHisVeh)
-							playerOrHisVeh->RegisterReference((CEntity**) &m_pPointGunAt);
-
+						SetWeaponLockOnTarget(playerOrHisVeh);
 						SetAttack(playerOrHisVeh);
 						SetShootTimer(CGeneral::GetRandomNumberInRange(500, 1000));
 					}
