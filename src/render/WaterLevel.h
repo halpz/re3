@@ -4,6 +4,8 @@
 #define WATER_FINEBLOCK_SIZE HUGE_SECTOR_SIZE
 #define WATER_Z_OFFSET (1.5f)
 
+#define NO_WATER -128
+
 #define MAX_SMALL_SECTORS      128
 #define MAX_LARGE_SECTORS      64
 #define MAX_HUGE_SECTORS       32
@@ -23,6 +25,7 @@
 #define WATER_WIDTH		((WATER_END_X - WATER_START_X))
 #define WATER_HEIGHT	((WATER_END_Y - WATER_START_Y))
 
+#define SMALL_SECTOR_WIDTH (WATER_WIDTH/MAX_SMALL_SECTORS)
 
 #define WATER_UNSIGN_X(x)                   ( (x) + (WATER_WIDTH /2) )
 #define WATER_UNSIGN_Y(y)                   ( (y) + (WATER_HEIGHT/2) )
@@ -72,8 +75,8 @@ class CWaterLevel
 	static int32       ms_nNoOfWaterLevels;
 	static float       ms_aWaterZs[48];
 	static CRect       ms_aWaterRects[48];
-	static uint8       aWaterBlockList[WATER_BLOCK_SIZE][WATER_BLOCK_SIZE];
-	static uint8       aWaterFineBlockList[WATER_FINEBLOCK_SIZE][WATER_FINEBLOCK_SIZE];
+	static int8        aWaterBlockList[WATER_BLOCK_SIZE][WATER_BLOCK_SIZE];
+	static int8        aWaterFineBlockList[WATER_FINEBLOCK_SIZE][WATER_FINEBLOCK_SIZE];
 	static bool        WavesCalculatedThisFrame;
 	static RpAtomic   *ms_pWavyAtomic;
 	static RpGeometry *apGeomArray[MAX_BOAT_WAKES];
@@ -84,6 +87,10 @@ public:
 	static void    Shutdown();
 	static void    CreateWavyAtomic();
 	static void    DestroyWavyAtomic();
+	static void    AddWaterLevel(float fXLeft, float fYBottom, float fXRight, float fYTop, float fLevel);
+	static bool    WaterLevelAccordingToRectangles(float fX, float fY, float *pfOutLevel = nil);
+	static bool    TestVisibilityForFineWaterBlocks(const CVector &worldPos);
+	static void    RemoveIsolatedWater();
 	static bool    GetWaterLevel(float fX, float fY, float fZ, float *pfOutLevel, bool bDontCheckZ);
 	static bool    GetWaterLevel(CVector coors, float *pfOutLevel, bool bDontCheckZ) { return GetWaterLevel(coors.x, coors.y, coors.z, pfOutLevel, bDontCheckZ); }
 	static bool    GetWaterLevelNoWaves(float fX, float fY, float fZ, float *pfOutLevel);
