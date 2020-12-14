@@ -545,7 +545,14 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CStats::RegisterHighestScore(ScriptParams[0], ScriptParams[1]);
 		return 0;
 	//case COMMAND_WARP_CHAR_INTO_CAR_AS_PASSENGER:
-	//case COMMAND_IS_CAR_PASSENGER_SEAT_FREE:
+	case COMMAND_IS_CAR_PASSENGER_SEAT_FREE:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		script_assert(pVehicle);
+		UpdateCompareFlag(ScriptParams[1] < pVehicle->m_nNumMaxPassengers && pVehicle->pPassengers[ScriptParams[1]] == nil);
+		return 0;
+	}
 	case COMMAND_GET_CHAR_IN_CAR_PASSENGER_SEAT:
 	{
 		CollectParameters(&m_nIp, 2);
