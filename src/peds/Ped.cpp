@@ -812,8 +812,7 @@ CPed::RestorePreviousState(void)
 				SetWanderPath(m_nPedState == PED_FOLLOW_PATH ? m_nPathDir : CGeneral::GetRandomNumber() & 7);
 				break;
 			default:
-				PedState oldState = m_nLastPedState;
-				SetPedState(oldState);
+				SetPedState(m_nLastPedState);
 				SetMoveState((eMoveState) m_nPrevMoveState);
 				break;
 		}
@@ -1602,7 +1601,7 @@ CPed::ClearAll(void)
 		return;
 
 	SetPedState(PED_NONE);
-	m_nMoveState = PEDMOVE_NONE;
+	SetMoveState(PEDMOVE_NONE);
 	m_pSeekTarget = nil;
 	m_vecSeekPos = CVector(0.0f, 0.0f, 0.0f);
 	m_fleeFromPos = CVector2D(0.0f, 0.0f);
