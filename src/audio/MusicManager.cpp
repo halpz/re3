@@ -89,7 +89,7 @@ cMusicManager::DisplayRadioStationName()
 
 			if(gStreamedSound == STREAMED_SOUND_CITY_AMBIENT ||
 			   gStreamedSound == STREAMED_SOUND_WATER_AMBIENT) {
-				gStreamedSound = RADIO_OFF;
+				gStreamedSound = POLICE_RADIO; // which means OFF
 			} else {
 
 				if(gStreamedSound >
@@ -117,7 +117,7 @@ cMusicManager::DisplayRadioStationName()
 
 			if(gStreamedSound == STREAMED_SOUND_CITY_AMBIENT ||
 			   gStreamedSound == STREAMED_SOUND_WATER_AMBIENT) {
-				gStreamedSound = RADIO_OFF;
+				gStreamedSound = POLICE_RADIO; // which means OFF
 			} else {
 
 				if(gStreamedSound >
@@ -170,13 +170,13 @@ cMusicManager::DisplayRadioStationName()
 		case CHATTERBOX: string = TheText.Get("FEA_FM8"); break;
 		case USERTRACK: string = TheText.Get("FEA_FM9"); break;
 #ifdef RADIO_OFF_TEXT
-		case RADIO_OFF: string = TheText.Get("FEM_OFF"); break;
+		case RADIO_OFF: case POLICE_RADIO: string = TheText.Get("FEM_OFF"); break;
 #endif
 		default: return;
 		};
 
 #ifdef RADIO_OFF_TEXT
-		if(pRetune == USERTRACK && !SampleManager.IsMP3RadioChannelAvailable()) { return; }
+		if(pRetune == USERTRACK && !SampleManager.IsMP3RadioChannelAvailable()) { string = TheText.Get("FEM_OFF"); }
 #else
 		if(pRetune > CHATTERBOX && !SampleManager.IsMP3RadioChannelAvailable()) { return; }
 #endif
