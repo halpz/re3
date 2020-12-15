@@ -6413,7 +6413,7 @@ CPed::SetFollowPathStatic(void)
 				m_nLastPedState = oldLastState;
 
 			SetPedState(PED_FOLLOW_PATH);
-			m_nMoveState = m_followPathMoveState;
+			SetMoveState(m_followPathMoveState);
 		} else {
 			RestorePreviousState();
 			if (m_objective == OBJECTIVE_NONE) {
@@ -6793,7 +6793,7 @@ CPed::SetFollowPathDynamic(void)
 				m_nLastPedState = oldLastState;
 
 			SetPedState(PED_FOLLOW_PATH);
-			m_nMoveState = m_followPathMoveState;
+			SetMoveState(m_followPathMoveState);
 			return true;
 
 		} else {
