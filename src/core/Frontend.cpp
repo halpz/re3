@@ -80,6 +80,7 @@ const CRGBA TEXT_COLOR = CRGBA(150, 110, 30, 255); // PS2 option color
 #ifdef SCROLLABLE_PAGES
 #define MAX_VISIBLE_OPTION 12
 #define MAX_VISIBLE_OPTION_ON_SCREEN (hasNativeList(m_nCurrScreen) ? MAX_VISIBLE_LIST_ROW : MAX_VISIBLE_OPTION)
+#define SCREEN_HAS_AUTO_SCROLLBAR (m_nTotalListRow > MAX_VISIBLE_OPTION && !hasNativeList(m_nCurrScreen))
 
 int GetOptionCount(int screen)
 {
@@ -176,7 +177,6 @@ int8 CMenuManager::m_bFrontEnd_ReloadObrTxtGxt;
 int32 CMenuManager::m_PrefsMusicVolume = 102;
 int32 CMenuManager::m_PrefsSfxVolume = 102;
 
-
 char CMenuManager::m_PrefsSkinFile[256] = DEFAULT_SKIN_NAME;
 
 int32 CMenuManager::m_KeyPressedCode = -1;
@@ -208,7 +208,6 @@ bool CMenuManager::m_PrefsMarketing = false;
 bool CMenuManager::m_PrefsDisableTutorials = false;
 #endif // !MASTER
 
-// 0x5F311C
 const char* FrontendFilenames[][2] = {
 	{"fe2_mainpanel_ul", "" },
 	{"fe2_mainpanel_ur", "" },
@@ -477,7 +476,7 @@ CMenuManager::ThingsToDoBeforeGoingBack()
 	}
 
 #ifdef SCROLLABLE_PAGES
-	if (m_nTotalListRow > MAX_VISIBLE_OPTION && !hasNativeList(m_nCurrScreen)) {
+	if (SCREEN_HAS_AUTO_SCROLLBAR) {
 		m_nSelectedListRow = 0;
 		m_nFirstVisibleRowOnList = 0;
 		m_nScrollbarTopMargin = 0;
@@ -962,25 +961,25 @@ CMenuManager::DisplayHelperText()
 			int action = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action;
 			if (action != MENUACTION_CHANGEMENU && action != MENUACTION_KEYBOARDCTRLS && action != MENUACTION_RESTOREDEF) {
 				CFont::SetColor(CRGBA(255, 255, 255, 255));
-				CFont::PrintString(MENU_X_LEFT_ALIGNED(320.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), TheText.Get("FET_MIG"));
+				CFont::PrintString(MENU_X_LEFT_ALIGNED(HELPER_TEXT_LEFT_MARGIN), SCREEN_SCALE_FROM_BOTTOM(HELPER_TEXT_BOTTOM_MARGIN), TheText.Get("FET_MIG"));
 			}
 			break;
 		}
 		case 1:
 			CFont::SetColor(CRGBA(255, 255, 255, 255));
-			CFont::PrintString(MENU_X_LEFT_ALIGNED(320.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), TheText.Get("FET_APP"));
+			CFont::PrintString(MENU_X_LEFT_ALIGNED(HELPER_TEXT_LEFT_MARGIN), SCREEN_SCALE_FROM_BOTTOM(HELPER_TEXT_BOTTOM_MARGIN), TheText.Get("FET_APP"));
 			break;
 		case 2:
 			CFont::SetColor(CRGBA(255, 255, 255, alpha));
-			CFont::PrintString(MENU_X_LEFT_ALIGNED(320.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), TheText.Get("FET_HRD"));
+			CFont::PrintString(MENU_X_LEFT_ALIGNED(HELPER_TEXT_LEFT_MARGIN), SCREEN_SCALE_FROM_BOTTOM(HELPER_TEXT_BOTTOM_MARGIN), TheText.Get("FET_HRD"));
 			break;
 		case 3:
 			CFont::SetColor(CRGBA(255, 255, 255, alpha));
-			CFont::PrintString(MENU_X_LEFT_ALIGNED(320.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), TheText.Get("FET_RSO"));
+			CFont::PrintString(MENU_X_LEFT_ALIGNED(HELPER_TEXT_LEFT_MARGIN), SCREEN_SCALE_FROM_BOTTOM(HELPER_TEXT_BOTTOM_MARGIN), TheText.Get("FET_RSO"));
 			break;
 		case 4:
 			CFont::SetColor(CRGBA(255, 255, 255, alpha));
-			CFont::PrintString(MENU_X_LEFT_ALIGNED(320.0f), SCREEN_SCALE_FROM_BOTTOM(120.0f), TheText.Get("FET_RSC"));
+			CFont::PrintString(MENU_X_LEFT_ALIGNED(HELPER_TEXT_LEFT_MARGIN), SCREEN_SCALE_FROM_BOTTOM(HELPER_TEXT_BOTTOM_MARGIN), TheText.Get("FET_RSC"));
 			break;
 		default:
 			break;
@@ -1045,8 +1044,7 @@ CMenuManager::Draw()
 	CFont::SetCentreOff();
 	CFont::SetJustifyOn();
 	CFont::SetBackGroundOnlyTextOn();
-#if GTA_VERSION >= GTA3_PC_11
-#ifdef DRAW_MENU_VERSION_TEXT
+#if GTA_VERSION >= GTA3_PC_11 && defined(DRAW_MENU_VERSION_TEXT)
 	CFont::SetColor(CRGBA(LABEL_COLOR.r, LABEL_COLOR.g, LABEL_COLOR.b, FadeIn(255)));
 	CFont::SetRightJustifyOn();
 	CFont::SetFontStyle(FONT_HEADING);
@@ -1056,7 +1054,6 @@ CMenuManager::Draw()
 	strcpy(gString, "V1.1");
 	AsciiToUnicode(gString, gUString);
 	CFont::PrintString(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 45, gUString);
-#endif
 #endif
 	CFont::SetWrapx(MENU_X_RIGHT_ALIGNED(MENU_X_MARGIN));
 	CFont::SetRightJustifyWrap(MENU_X_LEFT_ALIGNED(MENU_X_MARGIN - 2.0f));
@@ -1297,11 +1294,12 @@ CMenuManager::Draw()
 #endif
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
+	// Thanks R*, for checking mouse hovering in Draw().
 	static int lastSelectedOpt = m_nCurrOption;
 #endif
 
 #ifdef SCROLLABLE_PAGES
-	int firstOption = m_nTotalListRow > MAX_VISIBLE_OPTION && !hasNativeList(m_nCurrScreen) ? m_nFirstVisibleRowOnList : 0;
+	int firstOption = SCREEN_HAS_AUTO_SCROLLBAR ? m_nFirstVisibleRowOnList : 0;
 	for (int i = firstOption; i < firstOption + MAX_VISIBLE_OPTION && i < NUM_MENUROWS; ++i) {
 #else
 	for (int i = 0; i < NUM_MENUROWS; ++i) {
@@ -1333,38 +1331,6 @@ CMenuManager::Draw()
 			} else {
 				leftText = TheText.Get(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName);
 			}
-
-#ifdef CUSTOM_FRONTEND_OPTIONS
-			if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action < MENUACTION_NOTHING) {  // CFO check
-				CMenuScreenCustom::CMenuEntry &option = aScreens[m_nCurrScreen].m_aEntries[i];
-				if (option.m_Action == MENUACTION_CFO_SELECT) {
-					if (option.m_CFOSelect->onlyApplyOnEnter){
-						if (m_nCurrOption != i) {
-							if (option.m_CFOSelect->displayedValue != option.m_CFOSelect->lastSavedValue)
-								SetHelperText(3); // Restored original value
-
-//							option.displayedValue = option.lastSavedValue = *option.m_CFO->value;
-
-						} else {
-							if (option.m_CFOSelect->displayedValue != *option.m_CFO->value)
-								SetHelperText(1); // Enter to apply
-							else if (m_nHelperTextMsgId == 1)
-								ResetHelperText(); // Applied
-						}
-					}
-				}
-
-				if (m_nCurrOption != lastSelectedOpt && lastSelectedOpt == i) {
-					CMenuScreenCustom::CMenuEntry &oldOption = aScreens[m_nCurrScreen].m_aEntries[lastSelectedOpt];
-					if (oldOption.m_Action == MENUACTION_CFO_DYNAMIC)
-						if(oldOption.m_CFODynamic->buttonPressFunc)
-							oldOption.m_CFODynamic->buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
-
-					if (oldOption.m_Action == MENUACTION_CFO_SELECT && oldOption.m_CFOSelect->onlyApplyOnEnter)
-						oldOption.m_CFOSelect->displayedValue = oldOption.m_CFOSelect->lastSavedValue = *oldOption.m_CFO->value;
-				}
-			}
-#endif
 
 			switch (aScreens[m_nCurrScreen].m_aEntries[i].m_Action) {
 			case MENUACTION_CHANGEMENU: {
@@ -1584,7 +1550,25 @@ CMenuManager::Draw()
 			case MENUACTION_CFO_SELECT:
 				CMenuScreenCustom::CMenuEntry &option = aScreens[m_nCurrScreen].m_aEntries[i];
 				if (option.m_Action == MENUACTION_CFO_SELECT) {
-					// To whom manipulate option.m_CFO->value of static options externally (like RestoreDef functions)
+
+					if (option.m_CFOSelect->onlyApplyOnEnter){
+						if (m_nCurrOption != i) {
+							if (option.m_CFOSelect->displayedValue != option.m_CFOSelect->lastSavedValue)
+								SetHelperText(3); // Restored original value
+
+							// If that was previously selected option, restore it to default value.
+							// if (m_nCurrOption != lastSelectedOpt && lastSelectedOpt == i)
+								option.m_CFOSelect->displayedValue = option.m_CFOSelect->lastSavedValue = *option.m_CFO->value;
+
+						} else {
+							if (option.m_CFOSelect->displayedValue != *option.m_CFO->value)
+								SetHelperText(1); // Enter to apply
+							else if (m_nHelperTextMsgId == 1)
+								ResetHelperText(); // Applied
+						}
+					}
+
+					// To whom manipulate option.m_CFO->value of select options externally (like RestoreDef functions)
 					if (*option.m_CFO->value != option.m_CFOSelect->lastSavedValue)
 						option.m_CFOSelect->displayedValue = option.m_CFOSelect->lastSavedValue = *option.m_CFO->value;
 
@@ -1594,6 +1578,11 @@ CMenuManager::Draw()
 					rightText = TheText.Get(option.m_CFOSelect->rightTexts[option.m_CFOSelect->displayedValue]);
 
 				} else if (option.m_Action == MENUACTION_CFO_DYNAMIC) {
+					if (m_nCurrOption != lastSelectedOpt && lastSelectedOpt == i) {
+						if(option.m_CFODynamic->buttonPressFunc)
+							option.m_CFODynamic->buttonPressFunc(FEOPTION_ACTION_FOCUSLOSS);
+					}
+
 					if (option.m_CFODynamic->drawFunc) {
 						rightText = option.m_CFODynamic->drawFunc(&isOptionDisabled, m_nCurrOption == i);
 					}
@@ -1730,7 +1719,9 @@ CMenuManager::Draw()
 			if (m_nPrefsAudio3DProviderIndex != DMAudio.GetCurrent3DProviderIndex()) {
 				if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEA_3DH") != 0
 					// To make assigning built-in actions to new custom options possible.
-#ifndef CUSTOM_FRONTEND_OPTIONS
+#ifdef CUSTOM_FRONTEND_OPTIONS
+					&& ScreenHasOption(m_nCurrScreen, "FEA_3DH")
+#else
 					&& m_nCurrScreen == MENUPAGE_SOUND_SETTINGS
 #endif
 					&& m_nPrefsAudio3DProviderIndex != -1) {
@@ -1807,21 +1798,21 @@ CMenuManager::Draw()
 #endif
 
 #ifdef SCROLLABLE_PAGES
-	#define SCROLLBAR_BOTTOM_X 125.0f // only for background, scrollbar's itself is calculated
+	#define SCROLLBAR_BOTTOM_Y 125.0f // only for background, scrollbar's itself is calculated
 	#define SCROLLBAR_RIGHT_X 36.0f
 	#define SCROLLBAR_WIDTH 9.5f
-	#define SCROLLBAR_TOP_X 64
+	#define SCROLLBAR_TOP_Y 64
 
-	if (m_nTotalListRow > MAX_VISIBLE_OPTION && !hasNativeList(m_nCurrScreen)) {
+	if (SCREEN_HAS_AUTO_SCROLLBAR) {
 		// Scrollbar background
-		CSprite2d::DrawRect(CRect(MENU_X_RIGHT_ALIGNED(SCROLLBAR_RIGHT_X - 2), MENU_Y(SCROLLBAR_TOP_X),
-			MENU_X_RIGHT_ALIGNED(SCROLLBAR_RIGHT_X - 2 - SCROLLBAR_WIDTH), SCREEN_SCALE_FROM_BOTTOM(SCROLLBAR_BOTTOM_X)), CRGBA(100, 100, 66, FadeIn(205)));
+		CSprite2d::DrawRect(CRect(MENU_X_RIGHT_ALIGNED(SCROLLBAR_RIGHT_X - 2), MENU_Y(SCROLLBAR_TOP_Y),
+			MENU_X_RIGHT_ALIGNED(SCROLLBAR_RIGHT_X - 2 - SCROLLBAR_WIDTH), SCREEN_SCALE_FROM_BOTTOM(SCROLLBAR_BOTTOM_Y)), CRGBA(100, 100, 66, FadeIn(205)));
 		
 		float scrollbarHeight = SCROLLBAR_MAX_HEIGHT / (m_nTotalListRow / (float) MAX_VISIBLE_OPTION);
 		float scrollbarBottom, scrollbarTop;
 
-		scrollbarBottom = MENU_Y(SCROLLBAR_TOP_X - 8 + m_nScrollbarTopMargin + scrollbarHeight);
-		scrollbarTop = MENU_Y(SCROLLBAR_TOP_X + m_nScrollbarTopMargin);
+		scrollbarBottom = MENU_Y(SCROLLBAR_TOP_Y - 8 + m_nScrollbarTopMargin + scrollbarHeight);
+		scrollbarTop = MENU_Y(SCROLLBAR_TOP_Y + m_nScrollbarTopMargin);
 		// Scrollbar shadow
 		CSprite2d::DrawRect(CRect(MENU_X_RIGHT_ALIGNED(SCROLLBAR_RIGHT_X - 4), scrollbarTop,
 			MENU_X_RIGHT_ALIGNED(SCROLLBAR_RIGHT_X - 1 - SCROLLBAR_WIDTH), scrollbarBottom + MENU_Y(1.0f)),
@@ -2132,7 +2123,7 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 		}
 
 		// Print bindings, including seperator (-) between them
-		CFont::SetScale(MENU_X(0.25f), MENU_Y(0.6f));
+		CFont::SetScale(MENU_X(0.25f), MENU_Y(SMALLESTTEXT_Y_SCALE));
 		for (; contSetOrder < MAX_SETORDERS && controllerAction != -1; contSetOrder++) {
 			wchar *settingText = ControlsManager.GetControllerSettingTextWithOrderNumber((e_ControllerAction)controllerAction, (eContSetOrder)contSetOrder);
 			if (settingText) {
@@ -3158,9 +3149,7 @@ CMenuManager::DrawPlayerSetupScreen()
 	CFont::PrintString(MENU_X_LEFT_ALIGNED(PLAYERSETUP_SKIN_COLUMN_LEFT), MENU_Y(PLAYERSETUP_LIST_TOP), TheText.Get("FES_SKN"));
 
 	// Skin list
-	CFont::SetRightJustifyOff();
-	CFont::SetScale(MENU_X(PLAYERSETUP_ROW_TEXT_X_SCALE), MENU_Y(PLAYERSETUP_ROW_TEXT_Y_SCALE));
-	CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
+	SET_FONT_FOR_LIST_ITEM
 	if (m_nSkinsTotal > 0) {
 		for (m_pSelectedSkin = m_pSkinListHead.nextSkin; m_pSelectedSkin->skinId != m_nFirstVisibleRowOnList;
 			m_pSelectedSkin = m_pSelectedSkin->nextSkin);
@@ -5175,7 +5164,7 @@ CMenuManager::ProcessButtonPresses(void)
 		increase = true;
 	} else if (
 #ifdef SCROLLABLE_PAGES
-		!(m_nTotalListRow > MAX_VISIBLE_OPTION && !hasNativeList(m_nCurrScreen)) &&
+		!SCREEN_HAS_AUTO_SCROLLBAR &&
 #endif
 		CPad::GetPad(0)->GetMouseWheelUpJustDown() && m_nCurrScreen != MENUPAGE_KEYBOARD_CONTROLS) {
 		increase = true;
@@ -5188,7 +5177,7 @@ CMenuManager::ProcessButtonPresses(void)
 		decrease = true;
 	} else if (
 #ifdef SCROLLABLE_PAGES
-		!(m_nTotalListRow > MAX_VISIBLE_OPTION && !hasNativeList(m_nCurrScreen)) &&
+		!SCREEN_HAS_AUTO_SCROLLBAR &&
 #endif
 		CPad::GetPad(0)->GetMouseWheelDownJustDown() && m_nCurrScreen != MENUPAGE_KEYBOARD_CONTROLS) {
 		decrease = true;
