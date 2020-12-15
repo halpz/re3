@@ -1,7 +1,5 @@
 #pragma once
 
-#define WATER_BLOCK_SIZE     LARGE_SECTOR_SIZE
-#define WATER_FINEBLOCK_SIZE HUGE_SECTOR_SIZE
 #define WATER_Z_OFFSET (1.5f)
 
 #define NO_WATER -128
@@ -24,8 +22,6 @@
 
 #define WATER_WIDTH		((WATER_END_X - WATER_START_X))
 #define WATER_HEIGHT	((WATER_END_Y - WATER_START_Y))
-
-#define SMALL_SECTOR_WIDTH (WATER_WIDTH/MAX_SMALL_SECTORS)
 
 #define WATER_UNSIGN_X(x)                   ( (x) + (WATER_WIDTH /2) )
 #define WATER_UNSIGN_Y(y)                   ( (y) + (WATER_HEIGHT/2) )
@@ -75,8 +71,8 @@ class CWaterLevel
 	static int32       ms_nNoOfWaterLevels;
 	static float       ms_aWaterZs[48];
 	static CRect       ms_aWaterRects[48];
-	static int8        aWaterBlockList[WATER_BLOCK_SIZE][WATER_BLOCK_SIZE];
-	static int8        aWaterFineBlockList[WATER_FINEBLOCK_SIZE][WATER_FINEBLOCK_SIZE];
+	static int8        aWaterBlockList[MAX_LARGE_SECTORS][MAX_LARGE_SECTORS];
+	static int8        aWaterFineBlockList[MAX_SMALL_SECTORS][MAX_SMALL_SECTORS];
 	static bool        WavesCalculatedThisFrame;
 	static RpAtomic   *ms_pWavyAtomic;
 	static RpGeometry *apGeomArray[MAX_BOAT_WAKES];
