@@ -768,7 +768,7 @@ CAutomobile::ProcessControl(void)
 					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_FRONT_LEFT].surfaceB);
 				WheelState[CARWHEEL_FRONT_LEFT] = m_aWheelState[CARWHEEL_FRONT_LEFT];
 
-				if(Damage.GetWheelStatus(VEHWHEEL_FRONT_LEFT) == WHEEL_STATUS_BURST)
+				if(Damage.GetWheelStatus(CARWHEEL_FRONT_LEFT) == WHEEL_STATUS_BURST)
 					ProcessWheel(wheelFwd, wheelRight,
 						contactSpeeds[CARWHEEL_FRONT_LEFT], contactPoints[CARWHEEL_FRONT_LEFT],
 						m_nWheelsOnGround, fThrust,
@@ -802,7 +802,7 @@ CAutomobile::ProcessControl(void)
 					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].surfaceB);
 				WheelState[CARWHEEL_FRONT_RIGHT] = m_aWheelState[CARWHEEL_FRONT_RIGHT];
 
-				if(Damage.GetWheelStatus(VEHWHEEL_FRONT_RIGHT) == WHEEL_STATUS_BURST)
+				if(Damage.GetWheelStatus(CARWHEEL_FRONT_RIGHT) == WHEEL_STATUS_BURST)
 					ProcessWheel(wheelFwd, wheelRight,
 						contactSpeeds[CARWHEEL_FRONT_RIGHT], contactPoints[CARWHEEL_FRONT_RIGHT],
 						m_nWheelsOnGround, fThrust,
@@ -883,7 +883,7 @@ CAutomobile::ProcessControl(void)
 					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_REAR_LEFT].surfaceB);
 				WheelState[CARWHEEL_REAR_LEFT] = m_aWheelState[CARWHEEL_REAR_LEFT];
 
-				if(Damage.GetWheelStatus(VEHWHEEL_REAR_LEFT) == WHEEL_STATUS_BURST)
+				if(Damage.GetWheelStatus(CARWHEEL_REAR_LEFT) == WHEEL_STATUS_BURST)
 					ProcessWheel(wheelFwd, wheelRight,
 						contactSpeeds[CARWHEEL_REAR_LEFT], contactPoints[CARWHEEL_REAR_LEFT],
 						m_nWheelsOnGround, fThrust,
@@ -917,7 +917,7 @@ CAutomobile::ProcessControl(void)
 					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_REAR_RIGHT].surfaceB);
 				WheelState[CARWHEEL_REAR_RIGHT] = m_aWheelState[CARWHEEL_REAR_RIGHT];
 
-				if(Damage.GetWheelStatus(VEHWHEEL_REAR_RIGHT) == WHEEL_STATUS_BURST)
+				if(Damage.GetWheelStatus(CARWHEEL_REAR_RIGHT) == WHEEL_STATUS_BURST)
 					ProcessWheel(wheelFwd, wheelRight,
 						contactSpeeds[CARWHEEL_REAR_RIGHT], contactPoints[CARWHEEL_REAR_RIGHT],
 						m_nWheelsOnGround, fThrust,
@@ -3946,10 +3946,10 @@ void
 CAutomobile::BurstTyre(uint8 wheel)
 {
 	switch(wheel){
-	case CAR_PIECE_WHEEL_LF: wheel = VEHWHEEL_FRONT_LEFT; break;
-	case CAR_PIECE_WHEEL_LR: wheel = VEHWHEEL_REAR_LEFT; break;
-	case CAR_PIECE_WHEEL_RF: wheel = VEHWHEEL_FRONT_RIGHT; break;
-	case CAR_PIECE_WHEEL_RR: wheel = VEHWHEEL_REAR_RIGHT; break;
+	case CAR_PIECE_WHEEL_LF: wheel = CARWHEEL_FRONT_LEFT; break;
+	case CAR_PIECE_WHEEL_RF: wheel = CARWHEEL_FRONT_RIGHT; break;
+	case CAR_PIECE_WHEEL_LR: wheel = CARWHEEL_REAR_LEFT; break;
+	case CAR_PIECE_WHEEL_RR: wheel = CARWHEEL_REAR_RIGHT; break;
 	}
 
 	int status = Damage.GetWheelStatus(wheel);
