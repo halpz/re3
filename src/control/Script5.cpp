@@ -1921,7 +1921,7 @@ void CTheScripts::CleanUpThisPed(CPed* pPed)
 	if (pPed->IsPedInControl())
 		pPed->SetWanderPath(CGeneral::GetRandomNumber() & 7);
 	if (flees) {
-		pPed->m_nPedState = state;
+		pPed->SetPedState(state);
 		pPed->SetMoveState(ms);
 	}
 	--CPopulation::ms_nTotalMissionPeds;
