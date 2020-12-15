@@ -7,8 +7,6 @@
 
 class CObject;
 
-// These are used for all the wheel arrays
-// DON'T confuse with VEHWHEEL, which are vehicle components
 enum {
 	CARWHEEL_FRONT_LEFT,
 	CARWHEEL_REAR_LEFT,

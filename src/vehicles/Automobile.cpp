@@ -938,7 +938,7 @@ CAutomobile::ProcessControl(void)
 					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_FRONT_LEFT].surfaceB);
 				WheelState[CARWHEEL_FRONT_LEFT] = m_aWheelState[CARWHEEL_FRONT_LEFT];
 
-				if(Damage.GetWheelStatus(VEHWHEEL_FRONT_LEFT) == WHEEL_STATUS_BURST)
+				if(Damage.GetWheelStatus(CARWHEEL_FRONT_LEFT) == WHEEL_STATUS_BURST)
 					ProcessWheel(wheelFwd, wheelRight,
 						contactSpeeds[CARWHEEL_FRONT_LEFT], contactPoints[CARWHEEL_FRONT_LEFT],
 						m_nWheelsOnGround, fThrust,
@@ -981,7 +981,7 @@ CAutomobile::ProcessControl(void)
 					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].surfaceB);
 				WheelState[CARWHEEL_FRONT_RIGHT] = m_aWheelState[CARWHEEL_FRONT_RIGHT];
 
-				if(Damage.GetWheelStatus(VEHWHEEL_FRONT_RIGHT) == WHEEL_STATUS_BURST)
+				if(Damage.GetWheelStatus(CARWHEEL_FRONT_RIGHT) == WHEEL_STATUS_BURST)
 					ProcessWheel(wheelFwd, wheelRight,
 						contactSpeeds[CARWHEEL_FRONT_RIGHT], contactPoints[CARWHEEL_FRONT_RIGHT],
 						m_nWheelsOnGround, fThrust,
@@ -1085,7 +1085,7 @@ CAutomobile::ProcessControl(void)
 					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_REAR_LEFT].surfaceB);
 				WheelState[CARWHEEL_REAR_LEFT] = m_aWheelState[CARWHEEL_REAR_LEFT];
 
-				if(Damage.GetWheelStatus(VEHWHEEL_REAR_LEFT) == WHEEL_STATUS_BURST)
+				if(Damage.GetWheelStatus(CARWHEEL_REAR_LEFT) == WHEEL_STATUS_BURST)
 					ProcessWheel(wheelFwd, wheelRight,
 						contactSpeeds[CARWHEEL_REAR_LEFT], contactPoints[CARWHEEL_REAR_LEFT],
 						m_nWheelsOnGround, fThrust,
@@ -1131,7 +1131,7 @@ CAutomobile::ProcessControl(void)
 					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_REAR_RIGHT].surfaceB);
 				WheelState[CARWHEEL_REAR_RIGHT] = m_aWheelState[CARWHEEL_REAR_RIGHT];
 
-				if(Damage.GetWheelStatus(VEHWHEEL_REAR_RIGHT) == WHEEL_STATUS_BURST)
+				if(Damage.GetWheelStatus(CARWHEEL_REAR_RIGHT) == WHEEL_STATUS_BURST)
 					ProcessWheel(wheelFwd, wheelRight,
 						contactSpeeds[CARWHEEL_REAR_RIGHT], contactPoints[CARWHEEL_REAR_RIGHT],
 						m_nWheelsOnGround, fThrust,
@@ -1226,7 +1226,7 @@ CAutomobile::ProcessControl(void)
 					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_FRONT_LEFT].surfaceB);
 				WheelState[CARWHEEL_FRONT_LEFT] = m_aWheelState[CARWHEEL_FRONT_LEFT];
 
-				if(Damage.GetWheelStatus(VEHWHEEL_FRONT_LEFT) == WHEEL_STATUS_BURST)
+				if(Damage.GetWheelStatus(CARWHEEL_FRONT_LEFT) == WHEEL_STATUS_BURST)
 					ProcessWheel(wheelFwd, wheelRight,
 						contactSpeeds[CARWHEEL_FRONT_LEFT], contactPoints[CARWHEEL_FRONT_LEFT],
 						m_nWheelsOnGround, fThrust,
@@ -1269,7 +1269,7 @@ CAutomobile::ProcessControl(void)
 					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].surfaceB);
 				WheelState[CARWHEEL_FRONT_RIGHT] = m_aWheelState[CARWHEEL_FRONT_RIGHT];
 
-				if(Damage.GetWheelStatus(VEHWHEEL_FRONT_RIGHT) == WHEEL_STATUS_BURST)
+				if(Damage.GetWheelStatus(CARWHEEL_FRONT_RIGHT) == WHEEL_STATUS_BURST)
 					ProcessWheel(wheelFwd, wheelRight,
 						contactSpeeds[CARWHEEL_FRONT_RIGHT], contactPoints[CARWHEEL_FRONT_RIGHT],
 						m_nWheelsOnGround, fThrust,
@@ -1720,11 +1720,11 @@ CAutomobile::PreRender(void)
 	int i, j, n;
 	CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex());
 
-	if(GetModelIndex() == MI_RHINO && m_aCarNodes[CAR_BONNET]){
+	if(GetModelIndex() == MI_RHINO && m_aCarNodes[CAR_WINDSCREEN]){
 		// Rotate Rhino turret
 		CMatrix m;
 		CVector p;
-		m.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_BONNET]));
+		m.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WINDSCREEN]));
 		p = m.GetPosition();
 		m.SetRotateZ(m_fCarGunLR);
 		m.Translate(p);
@@ -3188,7 +3188,11 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 
 	// Brake if player isn't in control
 	// BUG: game always uses pad 0 here
+#ifdef FIX_BUGS
 	if(CPad::GetPad(pad)->ArePlayerControlsDisabled()){
+#else
+	if(CPad::GetPad(0)->ArePlayerControlsDisabled()){
+#endif
 		m_fBrakePedal = 1.0f;
 		bIsHandbrakeOn = true;
 		m_fGasPedal = 0.0f;
@@ -3206,7 +3210,7 @@ void
 CAutomobile::FireTruckControl(void)
 {
 	if(this == FindPlayerVehicle()){
-		if(!CPad::GetPad(0)->GetWeapon())
+		if(!CPad::GetPad(0)->GetCarGunFired())
 			return;
 #ifdef FREE_CAM
 		if (!CCamera::bFreeCam)
@@ -3835,7 +3839,7 @@ CAutomobile::DoDriveByShootings(void)
 		return;
 
 	CWeapon *weapon = pDriver->GetWeapon();
-	if(CWeaponInfo::GetWeaponInfo(weapon->m_eWeaponType)->m_nWeaponSlot != 5)
+	if(CWeaponInfo::GetWeaponInfo(weapon->m_eWeaponType)->m_nWeaponSlot != WEAPONSLOT_SUBMACHINEGUN)
 		return;
 
 	weapon->Update(pDriver->m_audioEntityId, nil);
@@ -4862,10 +4866,10 @@ CAutomobile::BurstTyre(uint8 wheel, bool applyForces)
 		return;
 
 	switch(wheel){
-	case CAR_PIECE_WHEEL_LF: wheel = VEHWHEEL_FRONT_LEFT; break;
-	case CAR_PIECE_WHEEL_LR: wheel = VEHWHEEL_REAR_LEFT; break;
-	case CAR_PIECE_WHEEL_RF: wheel = VEHWHEEL_FRONT_RIGHT; break;
-	case CAR_PIECE_WHEEL_RR: wheel = VEHWHEEL_REAR_RIGHT; break;
+	case CAR_PIECE_WHEEL_LF: wheel = CARWHEEL_FRONT_LEFT; break;
+	case CAR_PIECE_WHEEL_RF: wheel = CARWHEEL_FRONT_RIGHT; break;
+	case CAR_PIECE_WHEEL_LR: wheel = CARWHEEL_REAR_LEFT; break;
+	case CAR_PIECE_WHEEL_RR: wheel = CARWHEEL_REAR_RIGHT; break;
 	}
 
 	int status = Damage.GetWheelStatus(wheel);
@@ -5074,7 +5078,7 @@ CAutomobile::BlowUpCarsInPath(void)
 			   m_aCollisionRecords[i]->GetModelIndex() != MI_RHINO &&
 			   !m_aCollisionRecords[i]->bRenderScorched){
 				if(this == FindPlayerVehicle())
-					CEventList::RegisterEvent(EVENT_EXPLOSION, EVENT_ENTITY_VEHICLE, this, FindPlayerPed(), 2000);
+					CEventList::RegisterEvent(EVENT_EXPLOSION, EVENT_ENTITY_VEHICLE, m_aCollisionRecords[i], FindPlayerPed(), 2000);
 				((CVehicle*)m_aCollisionRecords[i])->BlowUpCar(this);
 			}
 }
@@ -5764,7 +5768,7 @@ CAutomobile::PopBoot(void)
 	case DOOR_STATUS_OK:
 	case DOOR_STATUS_SMASHED:
 		Doors[DOOR_BOOT].m_fAngle = Doors[DOOR_BOOT].m_fMinAngle;
-		CMatrix mat(RwFrameGetMatrix(m_aCarNodes[DOOR_BOOT]));
+		CMatrix mat(RwFrameGetMatrix(m_aCarNodes[CAR_BOOT]));
 		CVector pos = mat.GetPosition();
 		float axes[3] = { 0.0f, 0.0f, 0.0f };
 		axes[Doors[DOOR_BOOT].m_nAxis] = Doors[DOOR_BOOT].m_fAngle;
