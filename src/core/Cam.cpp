@@ -2920,8 +2920,7 @@ CCam::Process_Sniper(const CVector &CameraTarget, float TargetOrientation, float
 	UseMouse = false;
 	int ZoomInButton = ControlsManager.GetMouseButtonAssociatedWithAction(PED_SNIPER_ZOOM_IN);
 	int ZoomOutButton = ControlsManager.GetMouseButtonAssociatedWithAction(PED_SNIPER_ZOOM_OUT);
-	// TODO: enum? this should be mouse wheel up and down
-	if(ZoomInButton == 4 || ZoomInButton == 5 || ZoomOutButton == 4 || ZoomOutButton == 5){
+	if(ZoomInButton == rsMOUSEWHEELUPBUTTON || ZoomInButton == rsMOUSEWHEELDOWNBUTTON || ZoomOutButton == rsMOUSEWHEELUPBUTTON || ZoomOutButton == rsMOUSEWHEELDOWNBUTTON){
 		if(CPad::GetPad(0)->GetMouseWheelUp() || CPad::GetPad(0)->GetMouseWheelDown()){
 			if(CPad::GetPad(0)->SniperZoomIn()){
 				TargetFOV = FOV - 10.0f;
@@ -4909,13 +4908,9 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 
 		if (FOV > DefaultFOV)
 			// 0.98f: CAR_FOV_FADE_MULT
-			FOV = pow(0.98f, CTimer::GetTimeStep()) * (FOV - DefaultFOV) + DefaultFOV;
+			FOV = Pow(0.98f, CTimer::GetTimeStep()) * (FOV - DefaultFOV) + DefaultFOV;
 
-		if (FOV <= DefaultFOV + 30.0f) {
-			if (FOV < DefaultFOV)
-				FOV = DefaultFOV;
-		} else
-			FOV = DefaultFOV + 30.0f;
+		FOV = clamp(FOV, DefaultFOV, DefaultFOV + 30.0f);
 	}
 
 	// WORKAROUND: I still don't know how looking behind works (m_bCamDirectlyInFront is unused in III, they seem to use m_bUseTransitionBeta)
@@ -5042,7 +5037,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 		targetAlpha = maxAlphaAllowed;
 	}
 	float maxAlphaBlendAmount = CTimer::GetTimeStep() * CARCAM_SET[camSetArrPos][6];
-	float targetAlphaBlendAmount = (1.0f - pow(CARCAM_SET[camSetArrPos][5], CTimer::GetTimeStep())) * (targetAlpha - Alpha);
+	float targetAlphaBlendAmount = (1.0f - Pow(CARCAM_SET[camSetArrPos][5], CTimer::GetTimeStep())) * (targetAlpha - Alpha);
 	if (targetAlphaBlendAmount <= maxAlphaBlendAmount) {
 		if (targetAlphaBlendAmount < -maxAlphaBlendAmount)
 			targetAlphaBlendAmount = -maxAlphaBlendAmount;
@@ -5134,7 +5129,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	float betaSpeedFromStickX = xMovement * CARCAM_SET[camSetArrPos][12];
 
 	float newAngleSpeedMaxBlendAmount = CARCAM_SET[camSetArrPos][9];
-	float angleChangeStep = pow(CARCAM_SET[camSetArrPos][8], CTimer::GetTimeStep());
+	float angleChangeStep = Pow(CARCAM_SET[camSetArrPos][8], CTimer::GetTimeStep());
 	float targetBetaWithStickBlendAmount = betaSpeedFromStickX + (targetBeta - Beta) / Max(CTimer::GetTimeStep(), 1.0f);
 
 	if (targetBetaWithStickBlendAmount < -newAngleSpeedMaxBlendAmount)
@@ -5246,75 +5241,76 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	// SA calls SetColVarsVehicle in here
 	if (nextDirectionIsForward) {
 
-		// This is new in LCS!
+		// LCS uses exactly the same collision code as FollowPedWithMouse, so we will do so.
+
+		// This is only in LCS!
 		float timestepFactor = Pow(0.99f, CTimer::GetTimeStep());
 		dontCollideWithCars = (timestepFactor * dontCollideWithCars) + ((1.0f - timestepFactor) * car->m_vecMoveSpeed.Magnitude());
 
 		// Our addition
 #define IS_TRAFFIC_LIGHT(ent) (ent->IsObject() && IsLightObject(ent->GetModelIndex()))
 
-		// Move cam if on collision
-		CColPoint foundCol;
-		CEntity* foundEnt;
+		// Clip Source and fix near clip
+		CColPoint colPoint;
+		CEntity* entity;
 		CWorld::pIgnoreEntity = CamTargetEntity;
-		if (CWorld::ProcessLineOfSight(TargetCoors, Source, foundCol, foundEnt, true, dontCollideWithCars < 0.1f, false, true, false, true, false) && !IS_TRAFFIC_LIGHT(foundEnt)) {
-			float obstacleTargetDist = (TargetCoors - foundCol.point).Magnitude();
-			float obstacleCamDist = newDistance - obstacleTargetDist;
-			if (!foundEnt->IsPed() || obstacleCamDist <= 1.0f) {
-				Source = foundCol.point;
-				if (obstacleTargetDist < 1.2f) {
-					RwCameraSetNearClipPlane(Scene.camera, Max(0.05f, obstacleTargetDist - 0.3f));
+		if(CWorld::ProcessLineOfSight(TargetCoors, Source, colPoint, entity, true, dontCollideWithCars < 0.1f, false, true, false, true, true) && !IS_TRAFFIC_LIGHT(entity)){
+			float PedColDist = (TargetCoors - colPoint.point).Magnitude();
+			float ColCamDist = newDistance - PedColDist;
+			if(entity->IsPed() && ColCamDist > DEFAULT_NEAR + 0.1f){
+				// Ped in the way but not clipping through
+				if(CWorld::ProcessLineOfSight(colPoint.point, Source, colPoint, entity, true, dontCollideWithCars < 0.1f, false, true, false, true, true) || IS_TRAFFIC_LIGHT(entity)){
+					PedColDist = (TargetCoors - colPoint.point).Magnitude();
+					Source = colPoint.point;
+					if(PedColDist < DEFAULT_NEAR + 0.3f)
+						RwCameraSetNearClipPlane(Scene.camera, Max(PedColDist-0.3f, 0.05f));
+				}else{
+					RwCameraSetNearClipPlane(Scene.camera, Min(ColCamDist-0.35f, DEFAULT_NEAR));
 				}
-			} else {
-				if (!CWorld::ProcessLineOfSight(foundCol.point, Source, foundCol, foundEnt, true, dontCollideWithCars < 0.1f, false, true, false, true, false) || IS_TRAFFIC_LIGHT(foundEnt)) {
-					float lessClip = obstacleCamDist - 0.35f;
-					if (lessClip <= DEFAULT_NEAR)
-						RwCameraSetNearClipPlane(Scene.camera, lessClip);
-					else
-						RwCameraSetNearClipPlane(Scene.camera, DEFAULT_NEAR);
-				} else {
-					obstacleTargetDist = (TargetCoors - foundCol.point).Magnitude();
-					Source = foundCol.point;
-					if (obstacleTargetDist < 1.2f) {
-						float lessClip = obstacleTargetDist - 0.3f;
-						if (lessClip >= 0.05f)
-							RwCameraSetNearClipPlane(Scene.camera, lessClip);
-						else
-							RwCameraSetNearClipPlane(Scene.camera, 0.05f);
-					}
-				}
+			}else{
+				Source = colPoint.point;
+				if(PedColDist < DEFAULT_NEAR + 0.3f)
+					RwCameraSetNearClipPlane(Scene.camera, Max(PedColDist-0.3f, 0.05f));
 			}
 		}
 		
 		CWorld::pIgnoreEntity = nil;
-		float nearClip = RwCameraGetNearClipPlane(Scene.camera);
-		float radius = Tan(DEGTORAD(FOV * 0.5f)) * CDraw::GetAspectRatio() * 1.1f;
 
 		// If we're seeing blue hell due to camera intersects some surface, fix it.
 		// SA and LCS have this unrolled.
-		for (int i = 0;
-			i <= 5 && (foundEnt = CWorld::TestSphereAgainstWorld((nearClip * Front) + Source, radius * nearClip, nil, true, true, false, true, false, false));
-			i++) {
 
-			if (IS_TRAFFIC_LIGHT(foundEnt))
+		float ViewPlaneHeight = Tan(DEGTORAD(FOV) / 2.0f);
+		float ViewPlaneWidth = ViewPlaneHeight * CDraw::CalculateAspectRatio() * fTweakFOV;
+		float Near = RwCameraGetNearClipPlane(Scene.camera);
+		float radius = ViewPlaneWidth*Near;
+		entity = CWorld::TestSphereAgainstWorld(Source + Front*Near, radius, nil, true, true, false, true, false, true);
+		int i = 0;
+		while(entity){
+
+			if (IS_TRAFFIC_LIGHT(entity))
 				break;
 
-			CVector surfaceCamDist = gaTempSphereColPoints->point - Source;
-			CVector frontButInvertedIfTouchesSurface = DotProduct(surfaceCamDist, Front) * Front;
-			float newNearClip = (surfaceCamDist - frontButInvertedIfTouchesSurface).Magnitude() / radius;
+			CVector CamToCol = gaTempSphereColPoints[0].point - Source;
+			float frontDist = DotProduct(CamToCol, Front);
+			float dist = (CamToCol - Front*frontDist).Magnitude() / ViewPlaneWidth;
 
-			if (newNearClip > nearClip)
-				newNearClip = nearClip;
-			if (newNearClip < 0.1f)
-				newNearClip = 0.1f;
-			if (nearClip > newNearClip)
-				RwCameraSetNearClipPlane(Scene.camera, newNearClip);
+			// Try to decrease near clip
+			dist = Max(Min(Near, dist), 0.1f);
+			if(dist < Near)
+				RwCameraSetNearClipPlane(Scene.camera, dist);
 
-			if (newNearClip == 0.1f)
-				Source += (TargetCoors - Source) * 0.3f;
+			// Move forward a bit
+			if(dist == 0.1f)
+				Source += (TargetCoors - Source)*0.3f;
 
-			nearClip = RwCameraGetNearClipPlane(Scene.camera);
-			radius = Tan(DEGTORAD(FOV * 0.5f)) * CDraw::GetAspectRatio() * 1.1f;
+			// Keep testing
+			Near = RwCameraGetNearClipPlane(Scene.camera);
+			radius = ViewPlaneWidth*Near;
+			entity = CWorld::TestSphereAgainstWorld(Source + Front*Near, radius, nil, true, true, false, true, false, true);
+
+			i++;
+			if(i > 5)
+				entity = nil;
 		}
 #undef IS_TRAFFIC_LIGHT
 	}
