@@ -974,7 +974,7 @@ public:
 	PedState GetPedState(void) { return m_nPedState; }
 	void SetPedState(PedState state) 
 	{
-		if (GetPedState() == PED_FOLLOW_PATH)
+		if (GetPedState() == PED_FOLLOW_PATH && state != PED_FOLLOW_PATH)
 			ClearFollowPath();
 		m_nPedState = state;
 	}

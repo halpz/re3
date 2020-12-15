@@ -2122,9 +2122,6 @@ void CTheScripts::CleanUpThisPed(CPed* pPed)
 	if (pPed->IsPedInControl())
 		pPed->SetWanderPath(CGeneral::GetRandomNumber() & 7);
 	if (flees) {
-		if (pPed->m_nPedState == PED_FOLLOW_PATH && state != PED_FOLLOW_PATH)
-			pPed->ClearFollowPath();
-
 		pPed->SetPedState(state);
 		pPed->SetMoveState(ms);
 	}

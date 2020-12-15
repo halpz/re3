@@ -2606,40 +2606,6 @@ CPed::ProcessControl(void)
 				case PED_WANDER_PATH:
 					WanderPath();
 					break;
-				case PED_SEEK_POS:
-				case PED_SEEK_ENTITY:
-				case PED_PURSUE:
-				case PED_SNIPER_MODE:
-				case PED_ROCKET_MODE:
-				case PED_DUMMY:
-				case PED_FACE_PHONE:
-				case PED_MAKE_CALL:
-				case PED_MUG:
-				case PED_AI_CONTROL:
-				case PED_FOLLOW_ROUTE:
-				case PED_CPR:
-				case PED_SOLICIT:
-				case PED_STEP_AWAY:
-				case PED_SUN_BATHE:
-				case PED_FLASH:
-				case PED_JOG:
-				case PED_UNKNOWN:
-				case PED_STATES_NO_AI:
-				case PED_ABSEIL:
-				case PED_SIT:
-				case PED_JUMP:
-				case PED_STAGGER:
-				case PED_DIVE_AWAY:
-				case PED_STATES_NO_ST:
-				case PED_ARREST_PLAYER:
-				case PED_PASSENGER:
-				case PED_TAXI_PASSENGER:
-				case PED_OPEN_DOOR:
-				case PED_DEAD:
-				case PED_DRAG_FROM_CAR:
-				case PED_STEAL_CAR:
-				case PED_EXIT_CAR:
-					break;
 				case PED_ENTER_CAR:
 				case PED_CARJACK:
 				{
@@ -6446,7 +6412,7 @@ CPed::SetFollowPathStatic(void)
 			if (m_nLastPedState == PED_NONE)
 				m_nLastPedState = oldLastState;
 
-			m_nPedState = PED_FOLLOW_PATH;
+			SetPedState(PED_FOLLOW_PATH);
 			m_nMoveState = m_followPathMoveState;
 		} else {
 			RestorePreviousState();
@@ -6826,7 +6792,7 @@ CPed::SetFollowPathDynamic(void)
 			if (m_nLastPedState == PED_NONE)
 				m_nLastPedState = oldLastState;
 
-			m_nPedState = PED_FOLLOW_PATH;
+			SetPedState(PED_FOLLOW_PATH);
 			m_nMoveState = m_followPathMoveState;
 			return true;
 

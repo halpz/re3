@@ -1787,46 +1787,6 @@ CPlayerPed::ProcessControl(void)
 			if (IsPedInControl() && m_nPedState != PED_ANSWER_MOBILE && padUsed)
 				ProcessPlayerWeapon(padUsed);
 			break;
-		case PED_LOOK_ENTITY:
-		case PED_LOOK_HEADING:
-		case PED_WANDER_RANGE:
-		case PED_WANDER_PATH:
-		case PED_PURSUE:
-		case PED_FOLLOW_PATH:
-		case PED_ROCKET_MODE:
-		case PED_DUMMY:
-		case PED_PAUSE:
-		case PED_FACE_PHONE:
-		case PED_MAKE_CALL:
-		case PED_CHAT:
-		case PED_MUG:
-		case PED_AI_CONTROL:
-		case PED_FOLLOW_ROUTE:
-		case PED_CPR:
-		case PED_SOLICIT:
-		case PED_BUY_ICECREAM:
-		case PED_INVESTIGATE:
-		case PED_STEP_AWAY:
-		case PED_ON_FIRE:
-		case PED_SUN_BATHE:
-		case PED_FLASH:
-		case PED_JOG:
-		case PED_UNKNOWN:
-		case PED_STATES_NO_AI:
-		case PED_ABSEIL:
-		case PED_SIT:
-		case PED_STAGGER:
-		case PED_DIVE_AWAY:
-		case PED_STATES_NO_ST:
-		case PED_ARREST_PLAYER:
-		case PED_DRIVING:
-		case PED_PASSENGER:
-		case PED_TAXI_PASSENGER:
-		case PED_OPEN_DOOR:
-		case PED_DIE:
-		case PED_DEAD:
-		case PED_HANDS_UP:
-			break;
 		case PED_SEEK_ENTITY:
 			m_vecSeekPos = m_pSeekTarget->GetPosition();
 
@@ -1905,6 +1865,8 @@ CPlayerPed::ProcessControl(void)
 		case PED_ARRESTED:
 			if (m_nLastPedState == PED_DRAG_FROM_CAR && m_pVehicleAnim)
 				BeingDraggedFromCar();
+			break;
+		default:
 			break;
 	}
 	if (padUsed && IsPedShootable() && m_nPedState != PED_ANSWER_MOBILE && m_nLastPedState != PED_ANSWER_MOBILE) {
