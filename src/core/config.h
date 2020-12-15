@@ -284,6 +284,7 @@ enum Config {
 // #define BETA_SLIDING_TEXT
 #define TRIANGULAR_BLIPS	// height indicating triangular radar blips, as in VC
 // #define XBOX_SUBTITLES	// the infamous outlines
+#define RADIO_OFF_TEXT
 #define PC_MENU
 
 #ifndef PC_MENU
@@ -348,6 +349,7 @@ enum Config {
 #define FREE_CAM		// Rotating cam
 
 // Audio
+#define RADIO_SCROLL_TO_PREV_STATION
 #ifndef AUDIO_OAL // is not working yet for openal
 #define AUDIO_CACHE // cache sound lengths to speed up the cold boot
 #endif
