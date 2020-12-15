@@ -228,7 +228,7 @@ CFireManager::StartFire(CEntity *entityOnFire, CEntity *fleeFrom, float strength
 				ped->bDrawLast = false;
 				ped->SetMoveState(PEDMOVE_SPRINT);
 				ped->SetMoveAnim();
-				ped->m_nPedState = PED_ON_FIRE;
+				ped->SetPedState(PED_ON_FIRE);
 			}
 			if (fleeFrom) {
 				if (ped->m_nPedType == PEDTYPE_COP) {
@@ -401,7 +401,7 @@ CFireManager::StartScriptFire(const CVector &pos, CEntity *target, float strengt
 				CVector2D pos = target->GetPosition();
 				ped->SetFlee(pos, 10000);
 				ped->SetMoveAnim();
-				ped->m_nPedState = PED_ON_FIRE;
+				ped->SetPedState(PED_ON_FIRE);
 			}
 		} else if (target->IsVehicle()) {
 			veh->m_pCarFire = fire;

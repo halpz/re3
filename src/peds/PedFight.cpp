@@ -164,7 +164,7 @@ CPed::SetPointGunAt(CEntity *to)
 	if (m_nPedState != PED_ATTACK)
 		SetStoredState();
 
-	m_nPedState = PED_AIM_GUN;
+	SetPedState(PED_AIM_GUN);
 	bIsPointingGunAt = true;
 	CWeaponInfo *curWeapon = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
 	SetMoveState(PEDMOVE_NONE);
@@ -222,7 +222,7 @@ CPed::ClearPointGunAt(void)
 		RestorePreviousState();
 #else
 	if (m_nPedState == PED_AIM_GUN || m_nPedState == PED_ATTACK) {
-		m_nPedState = PED_IDLE;
+		SetPedState(PED_IDLE);
 		RestorePreviousState();
 	}
 #endif
@@ -281,7 +281,7 @@ CPed::SetAttack(CEntity *victim)
 			(m_nPedState != PED_FIGHT && m_nMoveState != PEDMOVE_NONE && m_nMoveState != PEDMOVE_STILL && !(m_pedStats->m_flags & STAT_SHOPPING_BAGS))) {
 
 			if (m_nPedState != PED_ATTACK) {
-				m_nPedState = PED_ATTACK;
+				SetPedState(PED_ATTACK);
 				bIsAttacking = false;
 				animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, curWeapon->m_AnimToPlay, 8.0f);
 				animAssoc->SetRun();
@@ -348,7 +348,7 @@ CPed::SetAttack(CEntity *victim)
 			if (m_nPedState != PED_AIM_GUN)
 				SetStoredState();
 
-			m_nPedState = PED_ATTACK;
+			SetPedState(PED_ATTACK);
 			SetMoveState(PEDMOVE_NONE);
 			if (bCrouchWhenShooting) {
 				animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_RBLOCK_CSHOOT, 4.0f);
@@ -786,7 +786,7 @@ CPed::StartFightAttack(uint8 buttonPressure)
 		RestoreHeadingRate();
 	}
 
-	m_nPedState = PED_FIGHT;
+	SetPedState(PED_FIGHT);
 	m_fightButtonPressure = 0;
 	RpAnimBlendClumpRemoveAssociations(GetClump(), ASSOC_REPEAT);
 	CAnimBlendAssociation *animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WALK_START);
@@ -1062,7 +1062,7 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 					m_nWaitState = WAITSTATE_FALSE;
 					RestoreHeadingRate();
 				}
-				m_nPedState = PED_FIGHT;
+				SetPedState(PED_FIGHT);
 				m_fightButtonPressure = 0;
 				RpAnimBlendClumpRemoveAssociations(GetClump(), ASSOC_REPEAT);
 				CAnimBlendAssociation *walkStartAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WALK_START);
@@ -1796,7 +1796,7 @@ CPed::SetInvestigateEvent(eEventType event, CVector2D pos, float distanceToCount
 
 	SetStoredState();
 	bFindNewNodeAfterStateRestore = false;
-	m_nPedState = PED_INVESTIGATE;
+	SetPedState(PED_INVESTIGATE);
 	m_standardTimer = CTimer::GetTimeInMilliseconds() + time;
 	m_eventType = event;
 	m_eventOrThreat = pos;

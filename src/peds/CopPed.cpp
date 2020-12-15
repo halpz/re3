@@ -114,14 +114,14 @@ CCopPed::SetArrestPlayer(CPed *player)
 
 	} else if (player->m_nPedState != PED_DIE && player->m_nPedState != PED_DEAD && player->m_nPedState != PED_ARRESTED) {
 		player->m_nLastPedState = player->m_nPedState;
-		player->m_nPedState = PED_ARRESTED;
+		player->SetPedState(PED_ARRESTED);
 
 		FindPlayerPed()->m_bCanBeDamaged = false;
 		((CPlayerPed*)player)->m_pArrestingCop = this;
 		this->RegisterReference((CEntity**) &((CPlayerPed*)player)->m_pArrestingCop);
 	}
 
-	m_nPedState = PED_ARREST_PLAYER;
+	SetPedState(PED_ARREST_PLAYER);
 	SetObjective(OBJECTIVE_NONE);
 	m_prevObjective = OBJECTIVE_NONE;
 	bIsPointingGunAt = false;
@@ -229,7 +229,7 @@ CCopPed::ArrestPlayer(void)
 	CPed *suspect = (CPed*)m_pSeekTarget;
 	if (suspect) {
 		if (suspect->CanSetPedState())
-			suspect->m_nPedState = PED_ARRESTED;
+			suspect->SetPedState(PED_ARRESTED);
 
 		if (suspect->bInVehicle && m_pMyVehicle && suspect->m_pMyVehicle == m_pMyVehicle) {
 

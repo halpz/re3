@@ -419,7 +419,7 @@ CPlayerInfo::Process(void)
 
 							if (found)
 								sth.z = 1.0f + groundZ;
-							m_pPed->m_nPedState = PED_IDLE;
+							m_pPed->SetPedState(PED_IDLE);
 							m_pPed->SetMoveState(PEDMOVE_STILL);
 							CPed::PedSetOutCarCB(0, m_pPed);
 							CAnimManager::BlendAnimation(m_pPed->GetClump(), m_pPed->m_animGroup, ANIM_IDLE_STANCE, 100.0f);
