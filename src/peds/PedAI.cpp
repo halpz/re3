@@ -5290,7 +5290,7 @@ CPed::SetEnterTrain(CVehicle *train, uint32 unused)
 	m_pMyVehicle = train;
 	m_pMyVehicle->RegisterReference((CEntity **) &m_pMyVehicle);
 
-	m_nPedState = PED_ENTER_TRAIN;
+	SetPedState(PED_ENTER_TRAIN);
 	m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_TRAIN_GETIN, 4.0f);
 	m_pVehicleAnim->SetFinishCallback(PedSetInTrainCB, this);
 	bUsesCollision = false;
@@ -5364,7 +5364,7 @@ CPed::SetExitTrain(CVehicle* train)
 	CVector exitPos;
 	GetNearestTrainPedPosition(train, exitPos);
 	*/
-	m_nPedState = PED_EXIT_TRAIN;
+	SetPedState(PED_EXIT_TRAIN);
 	m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_TRAIN_GETOUT, 4.0f);
 	m_pVehicleAnim->SetFinishCallback(PedSetOutTrainCB, this);
 	bUsesCollision = false;
@@ -5390,7 +5390,7 @@ CPed::PedSetOutTrainCB(CAnimBlendAssociation *animAssoc, void *arg)
 	ped->bUsesCollision = true;
 	ped->m_pVehicleAnim = nil;
 	ped->bInVehicle = false;
-	ped->m_nPedState = PED_IDLE;
+	ped->SetPedState(PED_IDLE);
 	ped->RestorePreviousObjective();
 	ped->SetMoveState(PEDMOVE_STILL);
 

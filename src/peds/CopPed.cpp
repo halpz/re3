@@ -249,7 +249,7 @@ CCopPed::ArrestPlayer(void)
 	CPed *suspect = (CPed*)m_pSeekTarget;
 	if (suspect) {
 		if (suspect->CanSetPedState())
-			suspect->m_nPedState = PED_ARRESTED;
+			SetPedState(PED_ARRESTED);
 
 		if (suspect->bInVehicle && m_pMyVehicle && suspect->m_pMyVehicle == m_pMyVehicle) {
 

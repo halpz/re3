@@ -314,7 +314,7 @@ CCivilianPed::ProcessControl(void)
 				for (int j = 0; j < m_numNearPeds; ++j) {
 					CPed *nearPed = m_nearPeds[j];
 					if (nearPed->m_nPedType == m_nPedType && nearPed->m_nPedState == PED_WANDER_PATH) {
-						nearPed->m_nPedState = PED_UNKNOWN;
+						nearPed->SetPedState(PED_UNKNOWN);
 					}
 				}
 			}

@@ -2125,7 +2125,7 @@ void CTheScripts::CleanUpThisPed(CPed* pPed)
 		if (pPed->m_nPedState == PED_FOLLOW_PATH && state != PED_FOLLOW_PATH)
 			pPed->ClearFollowPath();
 
-		pPed->m_nPedState = state;
+		pPed->SetPedState(state);
 		pPed->SetMoveState(ms);
 	}
 	--CPopulation::ms_nTotalMissionPeds;

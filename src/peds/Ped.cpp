@@ -7070,7 +7070,7 @@ CPed::SetEvasiveDive(CPhysical *reason, uint8 onlyRandomJump)
 		ClearLookFlag();
 		ClearAimFlag();
 		SetStoredState();
-		m_nPedState = PED_DIVE_AWAY;
+		SetPedState(PED_DIVE_AWAY);
 		animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_EV_DIVE, 8.0f);
 		animAssoc->SetFinishCallback(PedEvadeCB, this);
 	}
