@@ -221,8 +221,8 @@ CWaterLevel::Initialise(Const char *pWaterDat)
 	int32 slot = CTxdStore::FindTxdSlot("particle");
 	CTxdStore::SetCurrentTxd(slot);
 	
-	if ( gpWaterTex == NULL )
-		gpWaterTex = RwTextureRead("water_old", NULL);
+	if ( gpWaterTex == nil )
+		gpWaterTex = RwTextureRead("water_old", nil);
 	gpWaterRaster = RwTextureGetRaster(gpWaterTex);
 	
 	CTxdStore::PopCurrentTxd();
@@ -239,10 +239,10 @@ CWaterLevel::Shutdown()
 	FreeBoatWakeArray();
 	DestroyWavyAtomic();
 
-	if ( gpWaterTex != NULL )
+	if ( gpWaterTex != nil )
 	{
 		RwTextureDestroy(gpWaterTex);
-		gpWaterTex = NULL;
+		gpWaterTex = nil;
 	}
 }
 
@@ -264,15 +264,15 @@ CWaterLevel::CreateWavyAtomic()
 													|rpGEOMETRYPRELIT
 													|rpGEOMETRYMODULATEMATERIALCOLOR);
 													
-		ASSERT(wavyGeometry != NULL);
+		ASSERT(wavyGeometry != nil);
 	
 	}
 	
 	{
 		wavyMaterial = RpMaterialCreate();
 		
-		ASSERT(wavyMaterial != NULL);
-		ASSERT(gpWaterTex   != NULL);
+		ASSERT(wavyMaterial != nil);
+		ASSERT(gpWaterTex   != nil);
 		
 		RpMaterialSetTexture(wavyMaterial, gpWaterTex);
 	}
@@ -280,7 +280,7 @@ CWaterLevel::CreateWavyAtomic()
 	{
 		wavyTriangles = RpGeometryGetTriangles(wavyGeometry);
 		
-		ASSERT(wavyTriangles != NULL);
+		ASSERT(wavyTriangles != nil);
 		/*  
 			[B]       [C]
 			 ***********
@@ -311,9 +311,9 @@ CWaterLevel::CreateWavyAtomic()
 
 	{
 		wavyMorphTarget = RpGeometryGetMorphTarget(wavyGeometry, 0);
-		ASSERT(wavyMorphTarget != NULL);
+		ASSERT(wavyMorphTarget != nil);
 		wavyVert = RpMorphTargetGetVertices(wavyMorphTarget);	
-		ASSERT(wavyVert != NULL);
+		ASSERT(wavyVert != nil);
 		
 		for ( int32 i = 0; i < 9; i++ )
 		{
@@ -333,10 +333,10 @@ CWaterLevel::CreateWavyAtomic()
 	
 	{
 		wavyFrame = RwFrameCreate();
-		ASSERT( wavyFrame != NULL );
+		ASSERT( wavyFrame != nil );
 		
 		ms_pWavyAtomic = RpAtomicCreate();		
-		ASSERT( ms_pWavyAtomic != NULL );
+		ASSERT( ms_pWavyAtomic != nil );
 		
 		RpAtomicSetGeometry(ms_pWavyAtomic, wavyGeometry, 0);
 		RpAtomicSetFrame(ms_pWavyAtomic, wavyFrame);
@@ -535,7 +535,7 @@ CWaterLevel::GetWaterLevel(float fX, float fY, float fZ, float *pfOutLevel, bool
 	if ( nBlock == NO_WATER )
 		return false;
 
-	ASSERT( pfOutLevel != NULL );
+	ASSERT( pfOutLevel != nil );
 	*pfOutLevel = ms_aWaterZs[nBlock];
 
 	float fAngle = (CTimer::GetTimeInMilliseconds() & 4095) * (TWOPI / 4096.0f);
@@ -574,7 +574,7 @@ CWaterLevel::GetWaterLevelNoWaves(float fX, float fY, float fZ, float *pfOutLeve
 	if ( nBlock == NO_WATER )
 		return false;
 	
-	ASSERT( pfOutLevel != NULL );
+	ASSERT( pfOutLevel != nil );
 	*pfOutLevel = ms_aWaterZs[nBlock];
 
 	return true;
@@ -1247,19 +1247,19 @@ CWaterLevel::RenderOneWavySector(float fX, float fY, float fZ, RwRGBA const &col
 		
 		CBoat::FillBoatList();
 		
-		ASSERT( ms_pWavyAtomic != NULL );
+		ASSERT( ms_pWavyAtomic != nil );
 
 		RpGeometry *geometry = RpAtomicGetGeometry(ms_pWavyAtomic);
 		
-		ASSERT( geometry != NULL );
+		ASSERT( geometry != nil );
 
 		RwRGBA      *wavyPreLights = RpGeometryGetPreLightColors(geometry);
 		RwTexCoords *wavyTexCoords = RpGeometryGetVertexTexCoords(geometry, rwTEXTURECOORDINATEINDEX0);
 		RwV3d       *wavyVertices  = RpMorphTargetGetVertices(RpGeometryGetMorphTarget(geometry, 0));
 		
-		ASSERT( wavyPreLights != NULL );
-		ASSERT( wavyTexCoords != NULL );
-		ASSERT( wavyVertices  != NULL );
+		ASSERT( wavyPreLights != nil );
+		ASSERT( wavyTexCoords != nil );
+		ASSERT( wavyVertices  != nil );
 
 		RpGeometryLock(geometry, rpGEOMETRYLOCKVERTICES
 								| rpGEOMETRYLOCKPRELIGHT
@@ -1282,7 +1282,7 @@ CWaterLevel::RenderOneWavySector(float fX, float fY, float fZ, RwRGBA const &col
 		RpGeometryUnlock(geometry);
 	}
 	
-	static CBoat *apBoatList[4] = { NULL };
+	static CBoat *apBoatList[4] = { nil };
 	
 	if ( apGeomArray[0]
 		&& nGeomUsed < MAX_BOAT_WAKES
@@ -1296,16 +1296,16 @@ CWaterLevel::RenderOneWavySector(float fX, float fY, float fZ, RwRGBA const &col
 		RpGeometry *wavyGeometry = RpAtomicGetGeometry(ms_pWavyAtomic);	
 		RpGeometry *geom  = apGeomArray[nGeomUsed++];
 		
-		ASSERT( wavyGeometry != NULL );
-		ASSERT( geom != NULL );
+		ASSERT( wavyGeometry != nil );
+		ASSERT( geom != nil );
 		
 		RpAtomic *atomic = RpAtomicCreate();
-		ASSERT( atomic != NULL );
+		ASSERT( atomic != nil );
 		
 		RpAtomicSetGeometry(atomic, geom, 0);
 		
 		RwFrame *frame = RwFrameCreate();
-		ASSERT( frame != NULL );
+		ASSERT( frame != nil );
 		
 		RwMatrixCopy(RwFrameGetMatrix(frame), RwFrameGetMatrix(RpAtomicGetFrame(ms_pWavyAtomic)));
 		RpAtomicSetFrame(atomic, frame);
@@ -1316,11 +1316,11 @@ CWaterLevel::RenderOneWavySector(float fX, float fY, float fZ, RwRGBA const &col
 		RwV3d  *geomVertices        = RpMorphTargetGetVertices(RpGeometryGetMorphTarget(geom, 0));
 		RwV3d  *wavyVertices        = RpMorphTargetGetVertices(RpGeometryGetMorphTarget(wavyGeometry, 0));
 		
-		ASSERT( geomTexCoords != NULL );
-		ASSERT( wavyTexCoord  != NULL );
-		ASSERT( geomPreLights != NULL );
-		ASSERT( geomVertices  != NULL );
-		ASSERT( wavyVertices  != NULL );
+		ASSERT( geomTexCoords != nil );
+		ASSERT( wavyTexCoord  != nil );
+		ASSERT( geomPreLights != nil );
+		ASSERT( geomVertices  != nil );
+		ASSERT( wavyVertices  != nil );
 
 		RpGeometryLock(geom, rpGEOMETRYLOCKVERTICES | rpGEOMETRYLOCKPRELIGHT | rpGEOMETRYLOCKTEXCOORDS);
 		
@@ -1337,7 +1337,7 @@ CWaterLevel::RenderOneWavySector(float fX, float fY, float fZ, RwRGBA const &col
 		
 				for ( int32 k = 0; k < 4; k++ )
 				{
-					if ( apBoatList[k] != NULL )
+					if ( apBoatList[k] != nil )
 						fDistMult += CBoat::IsVertexAffectedByWake(CVector(fVertexX, fVertexY, 0.0f), apBoatList[k]);
 				}
 				
@@ -1386,7 +1386,7 @@ CWaterLevel::RenderOneWavySector(float fX, float fY, float fZ, RwRGBA const &col
 		pos.y = fY;
 		pos.z = fZ;
 		
-		ASSERT( ms_pWavyAtomic != NULL );
+		ASSERT( ms_pWavyAtomic != nil );
 		
 		RwFrameTranslate(RpAtomicGetFrame(ms_pWavyAtomic), &pos, rwCOMBINEREPLACE);
 		
@@ -1441,7 +1441,7 @@ CWaterLevel::RenderAndEmptyRenderBuffer()
 	{
 		LittleTest();
 
-		if ( RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStored, NULL, rwIM3D_VERTEXUV) )
+		if ( RwIm3DTransform(TempBufferRenderVertices, TempBufferVerticesStored, nil, rwIM3D_VERTEXUV) )
 		{
 			RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, TempBufferRenderIndexList, TempBufferIndicesStored);
 			RwIm3DEnd();
@@ -1459,29 +1459,29 @@ CWaterLevel::AllocateBoatWakeArray()
 
 	PUSH_MEMID(MEMID_STREAM);
 
-	ASSERT(ms_pWavyAtomic != NULL );
+	ASSERT(ms_pWavyAtomic != nil );
 	
 	RpGeometry    *wavyGeometry    = RpAtomicGetGeometry(ms_pWavyAtomic);
-	ASSERT(wavyGeometry    != NULL );
+	ASSERT(wavyGeometry    != nil );
 	RpMorphTarget *wavyMorphTarget = RpGeometryGetMorphTarget(wavyGeometry, 0);
 	RpMaterial    *wavyMaterial    = RpGeometryGetMaterial(wavyGeometry, 0);
 
-	ASSERT(wavyMorphTarget != NULL );
-	ASSERT(wavyMaterial    != NULL );
+	ASSERT(wavyMorphTarget != nil );
+	ASSERT(wavyMaterial    != nil );
 
 	for ( int32 geom = 0; geom < MAX_BOAT_WAKES; geom++ )
 	{
-		if ( apGeomArray[geom] == NULL )
+		if ( apGeomArray[geom] == nil )
 		{
 			apGeomArray[geom] = RpGeometryCreate(9*9, 8*8*2, rpGEOMETRYTRISTRIP
 															| rpGEOMETRYPRELIT
 															| rpGEOMETRYMODULATEMATERIALCOLOR
 															| rpGEOMETRYTEXTURED);
-			ASSERT(apGeomArray[geom] != NULL);
+			ASSERT(apGeomArray[geom] != nil);
 
 			RpTriangle *geomTriangles = RpGeometryGetTriangles(apGeomArray[geom]);
 			
-			ASSERT( geomTriangles != NULL );
+			ASSERT( geomTriangles != nil );
 
 			for ( int32 i = 0; i < 8; i++ )
 			{
@@ -1515,8 +1515,8 @@ CWaterLevel::AllocateBoatWakeArray()
 			RpMorphTarget *geomMorphTarget = RpGeometryGetMorphTarget(apGeomArray[geom], 0);
 			RwV3d         *geomVertices    = RpMorphTargetGetVertices(geomMorphTarget);
 			
-			ASSERT( geomMorphTarget != NULL );
-			ASSERT( geomVertices != NULL );
+			ASSERT( geomMorphTarget != nil );
+			ASSERT( geomVertices != nil );
 
 			for ( int32 i = 0; i < 9; i++ )
 			{
@@ -1541,10 +1541,10 @@ CWaterLevel::FreeBoatWakeArray()
 {
 	for ( int32 i = 0; i < MAX_BOAT_WAKES; i++ )
 	{
-		if ( apGeomArray[i] != NULL )
+		if ( apGeomArray[i] != nil )
 		{
 			RpGeometryDestroy(apGeomArray[i]);
-			apGeomArray[i] = NULL;
+			apGeomArray[i] = nil;
 		}
 	}
 	
