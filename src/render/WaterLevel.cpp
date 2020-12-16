@@ -118,7 +118,7 @@ WaterLevelInitialise(Const char *pWaterDat)
 	CWaterLevel::ms_nNoOfWaterLevels = 0;
 	
 #ifdef MASTER
-	int32 hFile;
+	int32 hFile = -1;
 
 	do
 	{
