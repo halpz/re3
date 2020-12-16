@@ -1955,12 +1955,11 @@ CWorld::Process(void)
 	} else {
 		for(CPtrNode *node = ms_listMovingEntityPtrs.first; node; node = node->next) {
 			CEntity *movingEnt = (CEntity *)node->item;
-#ifdef SQUEEZE_PERFORMANCE
-			if (movingEnt->bRemoveFromWorld) {
-				RemoveEntityInsteadOfProcessingIt(movingEnt);
-			} else
-#endif
+#ifdef FIX_BUGS // from VC
+			if(!movingEnt->bRemoveFromWorld && movingEnt->m_rwObject && RwObjectGetType(movingEnt->m_rwObject) == rpCLUMP &&
+#else
 			if(movingEnt->m_rwObject && RwObjectGetType(movingEnt->m_rwObject) == rpCLUMP &&
+#endif
 			   RpAnimBlendClumpGetFirstAssociation(movingEnt->GetClump())) {
 				RpAnimBlendClumpUpdateAnimations(movingEnt->GetClump(),
 				                                 0.02f * (movingEnt->IsObject()
