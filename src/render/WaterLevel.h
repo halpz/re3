@@ -2,9 +2,9 @@
 
 #define WATER_X_OFFSET (400.0f)
 
-#define WATER_BLOCK_SECTORS     MAX_LARGE_SECTORS
-#define WATER_FINEBLOCK_SECTORS MAX_SMALL_SECTORS
 #define WATER_Z_OFFSET (0.5f)
+
+#define NO_WATER -128
 
 #define MAX_SMALL_SECTORS      128
 #define MAX_LARGE_SECTORS      64
@@ -25,7 +25,6 @@
 #define WATER_WIDTH		((WATER_END_X - WATER_START_X))
 #define WATER_HEIGHT	((WATER_END_Y - WATER_START_Y))
 
-
 #define WATER_UNSIGN_X(x)                   ( (x) + (WATER_WIDTH /2) )
 #define WATER_UNSIGN_Y(y)                   ( (y) + (WATER_HEIGHT/2) )
 #define WATER_SIGN_X(x)                     ( (x) - (WATER_WIDTH /2) )
@@ -38,7 +37,7 @@
 // 128x128 Small blocks 32x32 each
 #define WATER_TO_FINEBLOCK_X(x)         ( WATER_UNSIGN_X(x) / WATER_FINEBLOCK_SECTORS )
 #define WATER_TO_FINEBLOCK_Y(x)         ( WATER_UNSIGN_Y(x) / WATER_FINEBLOCK_SECTORS ) 
- 
+
 // 32
 #define WATER_SMALL_X(x)                    ( WATER_UNSIGN_X(x)					/ MAX_SMALL_SECTORS     )
 #define WATER_SMALL_Y(y)                    ( WATER_UNSIGN_Y(y)					/ MAX_SMALL_SECTORS     )
@@ -104,31 +103,35 @@ public:
 	static int32       ms_nNoOfWaterLevels;
 	static float       ms_aWaterZs[48];
 	static CRect       ms_aWaterRects[48];
-	static uint8       aWaterBlockList[WATER_BLOCK_SECTORS][WATER_BLOCK_SECTORS];				// 64x64 Large blocks 64x64 each
-	static uint8       aWaterFineBlockList[WATER_FINEBLOCK_SECTORS][WATER_FINEBLOCK_SECTORS];  // 128x128 Small blocks 32x32 each
+	static int8        aWaterBlockList[MAX_LARGE_SECTORS][MAX_LARGE_SECTORS];				// 64x64 Large blocks 64x64 each
+	static int8        aWaterFineBlockList[MAX_SMALL_SECTORS][MAX_SMALL_SECTORS];			// 128x128 Small blocks 32x32 each
 	static bool        WavesCalculatedThisFrame;
-	
+
 	static bool        RequireWavySector;
 	static bool        MaskCalculatedThisFrame;
 	static CVector     PreCalculatedMaskPosn;
 	static bool        m_bRenderSeaBed;
 	static int32       m_nRenderWaterLayers;
-	
+
 	static RpAtomic    *ms_pWavyAtomic;
 	static RpAtomic    *ms_pMaskAtomic;
 
 	static void    Shutdown();
-	
+
 	static void    CreateWavyAtomic();
 	static void    DestroyWavyAtomic();
-	
-	
+
+	static void    AddWaterLevel(float fXLeft, float fYBottom, float fXRight, float fYTop, float fLevel);
+	static bool    WaterLevelAccordingToRectangles(float fX, float fY, float *pfOutLevel = nil);
+	static bool    TestVisibilityForFineWaterBlocks(const CVector &worldPos);
+	static void    RemoveIsolatedWater();
+
 	static bool    GetWaterLevel(float fX, float fY, float fZ, float *pfOutLevel, bool bDontCheckZ);
 	static bool    GetWaterLevel(CVector coors, float *pfOutLevel, bool bDontCheckZ) { return GetWaterLevel(coors.x, coors.y, coors.z, pfOutLevel, bDontCheckZ); }
 	static bool    GetWaterLevelNoWaves(float fX, float fY, float fZ, float *pfOutLevel);
 	static float   GetWaterWavesOnly(short x, short y);	// unused
 	static CVector GetWaterNormal(float fX, float fY);
-	
+
 	static void    RenderWater();
 	static void    RenderTransparentWater(void);
 	// unused 
@@ -151,11 +154,11 @@ public:
 	static bool PreCalcWavySector(RwRGBA const &color);	//fucked up
 	static bool PreCalcWavyMask(float fX, float fY, float fZ, float fSectorX, float fSectorY, float fCamPosX, float fCamPosY, float fCamDirX, float fCamDirY, RwRGBA const&color);
 #endif
-		
-	
+
+
 	static void RenderBoatWakes(void);
 	static void RenderWakeSegment(CVector2D &vecA, CVector2D &vecB, CVector2D &vecC, CVector2D &vecD, float &fSizeA, float &fSizeB, float &fAlphaA, float &fAlphaB, float &fWakeZ);
-	
+
 	// unused
 	static void RenderOneSlopedUnderWaterPoly(float fX, float fY, float fZ, RwRGBA const&color); // UNUSED
 	static void RenderOneFlatSmallWaterPolyBlended(float fX, float fY, float fZ, float fCamX, float fCamY, RwRGBA const &color, RwRGBA const &colorTrans, float fDrawDist);
@@ -163,18 +166,18 @@ public:
 	static void RenderAndEmptyRenderBuffer();
 	
 	static bool GetGroundLevel(CVector const &vecPosn, float *pfOutLevel, ColData *pData, float fDistance);
-	
+
 	// unused
 	static bool IsLocationOutOfWorldBounds_WS(CVector const &vecPosn, int nOffset);
 	// unused
 	static bool GetGroundLevel_WS(CVector const & vecPosn, float *pfOutLevel, ColData *pData, float fDistance);
 	static bool GetWaterDepth(CVector const &vecPosn, float *pfDepth, float *pfLevelNoWaves, float *pfGroundLevel);
-	
+
 	static void RenderSeaBirds();
 	static void RenderShipsOnHorizon();
-	
+
 	static void HandleSeaLifeForms();
-	
+
 	static void HandleBeachToysStuff(void);
 	static CEntity *CreateBeachToy(CVector const &vec, eBeachToy beachtoy);
 };
