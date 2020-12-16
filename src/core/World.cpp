@@ -2025,7 +2025,8 @@ CWorld::Process(void)
 					if (csObj->IsObject())
 						RpAnimBlendClumpUpdateAnimations(csObj->GetClump(), 0.02f * CTimer::GetTimeStepNonClipped());
 					else {
-						csObj->bOffscreen = !csObj->GetIsOnScreen();
+						if (!csObj->bOffscreen)
+							csObj->bOffscreen = !csObj->GetIsOnScreen();
 						RpAnimBlendClumpUpdateAnimations(csObj->GetClump(), 0.02f * CTimer::GetTimeStep(), !csObj->bOffscreen);
 					}
 				}
@@ -2040,17 +2041,13 @@ CWorld::Process(void)
 	} else {
 		for(CPtrNode *node = ms_listMovingEntityPtrs.first; node; node = node->next) {
 			CEntity *movingEnt = (CEntity *)node->item;
-#ifdef SQUEEZE_PERFORMANCE
-			if (movingEnt->bRemoveFromWorld) {
-				RemoveEntityInsteadOfProcessingIt(movingEnt);
-			} else
-#endif
-			if(movingEnt->m_rwObject && RwObjectGetType(movingEnt->m_rwObject) == rpCLUMP &&
+			if(!movingEnt->bRemoveFromWorld && movingEnt->m_rwObject && RwObjectGetType(movingEnt->m_rwObject) == rpCLUMP &&
 			   RpAnimBlendClumpGetFirstAssociation(movingEnt->GetClump())) {
 				if (movingEnt->IsObject())
 					RpAnimBlendClumpUpdateAnimations(movingEnt->GetClump(), 0.02f * CTimer::GetTimeStepNonClipped());
 				else {
-					movingEnt->bOffscreen = !movingEnt->GetIsOnScreen();
+					if (!movingEnt->bOffscreen)
+						movingEnt->bOffscreen = !movingEnt->GetIsOnScreen();
 					RpAnimBlendClumpUpdateAnimations(movingEnt->GetClump(), 0.02f * CTimer::GetTimeStep(), !movingEnt->bOffscreen);
 				}
 			}

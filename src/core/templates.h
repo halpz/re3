@@ -129,12 +129,13 @@ public:
 	}
 	int GetJustIndex(T* entry) {
 		int index = GetJustIndex_NoFreeAssert(entry);
+		assert((U*)entry == (U*)&m_entries[index]); // cast is unsafe - check required
 		assert(!IsFreeSlot(index));
 		return index;
 	}
 	int GetJustIndex_NoFreeAssert(T* entry) {
 		int index = ((U*)entry - m_entries);
-		assert((U*)entry == (U*)&m_entries[index]); // cast is unsafe - check required
+		// Please don't add unsafe assert here, because at least one func. use this to check if entity is ped or vehicle.
 		return index;
 	}
 	int GetNoOfUsedSpaces(void) const {

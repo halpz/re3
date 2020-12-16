@@ -59,7 +59,6 @@ CEventList::Update(void)
 	}
 }
 
-// ok
 void
 CEventList::RegisterEvent(eEventType type, eEventEntity entityType, CEntity *ent, CPed *criminal, int32 timeout)
 {

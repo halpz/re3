@@ -1009,6 +1009,13 @@ public:
 			return GetPrimaryFireAnim(weapon);
 	}
 
+	static AnimationId Get3rdFireAnim(CWeaponInfo* weapon) {
+		if (!!weapon->m_bCop3rd)
+			return ANIM_WEAPON_FIRE_3RD;
+		else
+			return (AnimationId)0;
+	}
+
 	static AnimationId GetFireAnimGround(CWeaponInfo* weapon, bool kickFloorIfNone = true) {
 		if (!!weapon->m_bGround2nd)
 			return ANIM_WEAPON_CROUCHFIRE;
