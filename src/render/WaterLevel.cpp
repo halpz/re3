@@ -179,14 +179,10 @@ WaterLevelInitialise(Const char *pWaterDat)
 			int32 t = WATER_HUGE_Y(CWaterLevel::ms_aWaterRects[i].top);
 			int32 b = WATER_HUGE_Y(CWaterLevel::ms_aWaterRects[i].bottom) + 1.0f;
 
-#ifdef FIX_BUGS
-			// water.dat has rects that go out of bounds
-			// which causes memory corruption
 			l = clamp(l, 0, MAX_SMALL_SECTORS - 1);
 			r = clamp(r, 0, MAX_SMALL_SECTORS - 1);
 			t = clamp(t, 0, MAX_SMALL_SECTORS - 1);
 			b = clamp(b, 0, MAX_SMALL_SECTORS - 1);
-#endif
 
 			for (int32 x = l; x <= r; x++)
 			{
