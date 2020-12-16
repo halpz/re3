@@ -338,6 +338,34 @@ enum {
 
 static RwRGBAReal black;
 
+static void
+SetStencilState(int state)
+{
+	switch(state){
+	// disable stencil
+	case 0:
+		rw::SetRenderState(rw::STENCILENABLE, FALSE);
+		break;
+	// test against stencil
+	case 1:
+		rw::SetRenderState(rw::STENCILENABLE, TRUE);
+		rw::SetRenderState(rw::STENCILFUNCTION, rw::STENCILNOTEQUAL);
+		rw::SetRenderState(rw::STENCILPASS, rw::STENCILKEEP);
+		rw::SetRenderState(rw::STENCILFAIL, rw::STENCILKEEP);
+		rw::SetRenderState(rw::STENCILZFAIL, rw::STENCILKEEP);
+		rw::SetRenderState(rw::STENCILFUNCTIONMASK, 0xFF);
+		rw::SetRenderState(rw::STENCILFUNCTIONREF, 0xFF);
+		break;
+	// write to stencil
+	case 2:
+		rw::SetRenderState(rw::STENCILENABLE, TRUE);
+		rw::SetRenderState(rw::STENCILFUNCTION, rw::STENCILALWAYS);
+		rw::SetRenderState(rw::STENCILPASS, rw::STENCILREPLACE);
+		rw::SetRenderState(rw::STENCILFUNCTIONREF, 0xFF);
+		break;
+	}
+}
+
 #ifdef RW_D3D9
 struct BuildingInst
 {
@@ -348,34 +376,6 @@ struct BuildingInst
 };
 static BuildingInst blendInsts[3][2000];
 static int numBlendInsts[3];
-
-static void
-SetStencilState(int state)
-{
-	switch(state){
-	// disable stencil
-	case 0:
-		rw::d3d::setRenderState(D3DRS_STENCILENABLE, FALSE);
-		break;
-	// test against stencil
-	case 1:
-		rw::d3d::setRenderState(D3DRS_STENCILENABLE, TRUE);
-		rw::d3d::setRenderState(D3DRS_STENCILFUNC, D3DCMP_NOTEQUAL);
-		rw::d3d::setRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_KEEP);
-		rw::d3d::setRenderState(D3DRS_STENCILFAIL, D3DSTENCILOP_KEEP);
-		rw::d3d::setRenderState(D3DRS_STENCILZFAIL, D3DSTENCILOP_KEEP);
-		rw::d3d::setRenderState(D3DRS_STENCILMASK, 0xFF);
-		rw::d3d::setRenderState(D3DRS_STENCILREF, 0xFF);
-		break;
-	// write to stencil
-	case 2:
-		rw::d3d::setRenderState(D3DRS_STENCILENABLE, TRUE);
-		rw::d3d::setRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
-		rw::d3d::setRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE);
-		rw::d3d::setRenderState(D3DRS_STENCILREF, 0xFF);
-		break;
-	}
-}
 
 static void
 SetMatrix(BuildingInst *building, rw::Matrix *worldMat)
@@ -528,30 +528,6 @@ struct BuildingInst
 };
 static BuildingInst blendInsts[3][2000];
 static int numBlendInsts[3];
-
-static void
-SetStencilState(int state)
-{
-	switch(state){
-	// disable stencil
-	case 0:
-		glDisable(GL_STENCIL_TEST);    
-		break;
-	// test against stencil
-	case 1:
-		glEnable(GL_STENCIL_TEST);
-		glStencilFunc(GL_NOTEQUAL, 0xFF, 0xFF);
-		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-		glStencilMask(0xFF);
-		break;
-	// write to stencil
-	case 2:
-		glEnable(GL_STENCIL_TEST);    
-		glStencilFunc(GL_ALWAYS, 0xFF, 0xFF);
-		glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
-		break;
-	}
-}
 
 static bool
 IsTextureTransparent(RwTexture *tex)
