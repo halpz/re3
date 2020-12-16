@@ -5901,11 +5901,11 @@ CPed::Duck(void)
 		CWeaponInfo *weapon = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
 		CAnimBlendAssociation *attackAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCH);
 		if (!attackAssoc) {
-			if(!!weapon->m_bCrouchFire)
+			if(GetCrouchFireAnim(weapon))
 				attackAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchFireAnim(weapon));
 		}
 		if (!attackAssoc) {
-			if(!!weapon->m_bReload)
+			if(GetCrouchReloadAnim(weapon))
 				attackAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchReloadAnim(weapon));
 		}
 		if (!attackAssoc) {

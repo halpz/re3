@@ -341,7 +341,7 @@ CPlayerPed::SetRealMoveAnim(void)
 	if (!curIdleAssoc)
 		curIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_IDLE);
 	if (!curIdleAssoc)
-		curIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHRELOAD);
+		curIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_MELEE_IDLE_FIGHTMODE);
 
 	if (!((curRunStopAssoc && curRunStopAssoc->IsRunning()) || (curRunStopRAssoc && curRunStopRAssoc->IsRunning()))) {
 
@@ -414,7 +414,7 @@ CPlayerPed::SetRealMoveAnim(void)
 				delete RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_TIRED);
 				CAnimBlendAssociation *fightIdleAnim = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_IDLE);
 				if (!fightIdleAnim)
-					fightIdleAnim = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHRELOAD);
+					fightIdleAnim = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_MELEE_IDLE_FIGHTMODE);
 				delete fightIdleAnim;
 				delete curSprintAssoc;
 
@@ -1337,13 +1337,14 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 	if (CCamera::m_bUseMouse3rdPerson && CCamera::bFreeCam &&
 		m_nSelectedWepSlot == m_currentWeapon && m_nMoveState != PEDMOVE_SPRINT) {
 
+#define CAN_AIM_WITH_ARM (weaponInfo->m_bCanAimWithArm && !bIsDucking && !bCrouchWhenShooting)
 		// Weapons except throwable and melee ones
 		if (weaponInfo->m_nWeaponSlot > 2) {
-			if ((padUsed->GetTarget() && weaponInfo->m_bCanAimWithArm) || padUsed->GetWeapon()) {
+			if ((padUsed->GetTarget() && CAN_AIM_WITH_ARM) || padUsed->GetWeapon()) {
 				float limitedCam = CGeneral::LimitRadianAngle(-TheCamera.Orientation);
 
 				// On this one we can rotate arm.
-				if (weaponInfo->m_bCanAimWithArm) {
+				if (CAN_AIM_WITH_ARM) {
 					if (!padUsed->GetWeapon()) { // making this State != ATTACK still stops it after attack. Re-start it immediately!
 						SetWeaponLockOnTarget(nil);
 						bIsPointingGunAt = false; // to not stop after attack
@@ -1372,9 +1373,10 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 						m_fRotationCur += (limitedRotDest - m_fRotationCur) / 2;
 					}
 				}
-			} else if (weaponInfo->m_bCanAimWithArm && m_nPedState != PED_ATTACK)
+			} else if (CAN_AIM_WITH_ARM && m_nPedState != PED_ATTACK)
 				ClearPointGunAt();
 		}
+#undef CAN_AIM_WITH_ARM
 	}
 	if (changedHeadingRate == 1) {
 		changedHeadingRate = 0;

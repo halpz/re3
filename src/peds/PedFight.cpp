@@ -472,20 +472,20 @@ CPed::ClearAttackByRemovingAnim(void)
 	CAnimBlendAssociation *weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetPrimaryFireAnim(weapon));
 
 	if (!weaponAssoc) {
-		if (!!weapon->m_bCrouchFire)
+		if (GetCrouchFireAnim(weapon))
 			weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchFireAnim(weapon));
 	}
 	if (!weaponAssoc) {
-		if(!!weapon->m_bFinish3rd)
+		if(GetFinishingAttackAnim(weapon))
 			weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetFinishingAttackAnim(weapon));
 	}
 	if (!weaponAssoc) {
-		if(!!weapon->m_bUse2nd)
+		if(GetSecondFireAnim(weapon))
 			weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetSecondFireAnim(weapon));
 	}
 	if (!weaponAssoc) {
-		if(!!weapon->m_bCop3rd)
-			weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_SPECIAL);
+		if(Get3rdFireAnim(weapon))
+			weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), Get3rdFireAnim(weapon));
 	}
 	if (weaponAssoc) {
 		weaponAssoc->blendDelta = -8.0f;
@@ -507,10 +507,10 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 
 	if (ped->m_nPedState != PED_ATTACK) {
 		if (ped->bIsDucking && ped->IsPedInControl()) {
-			if (currentWeapon->m_bReload) {
+			if (GetCrouchReloadAnim(currentWeapon)) {
 				reloadAnimAssoc = RpAnimBlendClumpGetAssociation(ped->GetClump(), GetCrouchReloadAnim(currentWeapon));
 			}
-			if (currentWeapon->m_bCrouchFire && attackAssoc) {
+			if (GetCrouchFireAnim(currentWeapon) && attackAssoc) {
 				if (attackAssoc->animId == GetCrouchFireAnim(currentWeapon) && !reloadAnimAssoc) {
 					newAnim = CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_WEAPON_CROUCH, 8.0f);
 					newAnim->SetCurrentTime(newAnim->hierarchy->totalLength);
@@ -527,11 +527,12 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 			newAnim = CAnimManager::AddAnimation(ped->GetClump(), currentWeapon->m_AnimToPlay, ANIM_THROWABLE_THROW);
 		}
 		newAnim->SetFinishCallback(FinishedAttackCB, ped);
+
 	} else if (ped->bIsDucking && ped->bCrouchWhenShooting) {
-		if (currentWeapon->m_bReload) {
+		if (GetCrouchReloadAnim(currentWeapon)) {
 			reloadAnimAssoc = RpAnimBlendClumpGetAssociation(ped->GetClump(), GetCrouchReloadAnim(currentWeapon));
 		}
-		if (currentWeapon->m_bCrouchFire && attackAssoc) {
+		if (GetCrouchFireAnim(currentWeapon) && attackAssoc) {
 			if (attackAssoc->animId == GetCrouchFireAnim(currentWeapon) && !reloadAnimAssoc) {
 				newAnim = CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_WEAPON_CROUCH, 8.0f);
 				newAnim->SetCurrentTime(newAnim->hierarchy->totalLength);
@@ -1957,7 +1958,7 @@ CPed::EndFight(uint8 endType)
 	RestorePreviousState();
 	CAnimBlendAssociation *animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_IDLE);
 	if (!animAssoc)
-		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHRELOAD);
+		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_MELEE_IDLE_FIGHTMODE);
 
 	if (animAssoc)
 		animAssoc->flags |= ASSOC_DELETEFADEDOUT;
