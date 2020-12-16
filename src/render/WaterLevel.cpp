@@ -93,7 +93,11 @@ CWaterLevel::Initialise(Const char *pWaterDat)
 
 		while ((line = CFileLoader::LoadLine(hFile)))
 		{
+#ifdef FIX_BUGS
+			if (*line && *line != ';' && !strstr(line, "* ;end of file"))
+#else
 			if (*line && *line != ';')
+#endif
 			{
 				float z, l, b, r, t;
 				sscanf(line, "%f %f %f %f %f", &z, &l, &b, &r, &t);
