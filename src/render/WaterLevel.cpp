@@ -62,7 +62,11 @@ CWaterLevel::Initialise(Const char *pWaterDat)
 #ifdef MASTER
 	int32 hFile = -1;
 
-	while ((hFile = CFileMgr::OpenFile("DATA\\waterpro.dat", "rb")) < 0);
+	do
+	{
+		hFile = CFileMgr::OpenFile("DATA\\waterpro.dat", "rb");
+	}
+	while ( hFile < 0 );
 #else
 	int32 hFile = CFileMgr::OpenFile("DATA\\waterpro.dat", "rb");
 #endif
