@@ -415,6 +415,63 @@ PluginAttach(void)
 	return TRUE;
 }
 
+#ifdef GTA_PS2
+#define NUM_PREALLOC_ATOMICS 3245
+#define NUM_PREALLOC_CLUMPS 101
+#define NUM_PREALLOC_FRAMES 2821
+#define NUM_PREALLOC_GEOMETRIES 1404
+#define NUM_PREALLOC_TEXDICTS 106
+#define NUM_PREALLOC_TEXTURES 1900
+#define NUM_PREALLOC_MATERIALS 3300
+bool preAlloc;
+
+void
+PreAllocateRwObjects(void)
+{
+	int i;
+	void **tmp = new void*[0x8000];
+	preAlloc = true;
+
+	for(i = 0; i < NUM_PREALLOC_ATOMICS; i++)
+		tmp[i] = RpAtomicCreate();
+	for(i = 0; i < NUM_PREALLOC_ATOMICS; i++)
+		RpAtomicDestroy((RpAtomic*)tmp[i]);
+
+	for(i = 0; i < NUM_PREALLOC_CLUMPS; i++)
+		tmp[i] = RpClumpCreate();
+	for(i = 0; i < NUM_PREALLOC_CLUMPS; i++)
+		RpClumpDestroy((RpClump*)tmp[i]);
+
+	for(i = 0; i < NUM_PREALLOC_FRAMES; i++)
+		tmp[i] = RwFrameCreate();
+	for(i = 0; i < NUM_PREALLOC_FRAMES; i++)
+		RwFrameDestroy((RwFrame*)tmp[i]);
+
+	for(i = 0; i < NUM_PREALLOC_GEOMETRIES; i++)
+		tmp[i] = RpGeometryCreate(0, 0, 0);
+	for(i = 0; i < NUM_PREALLOC_GEOMETRIES; i++)
+		RpGeometryDestroy((RpGeometry*)tmp[i]);
+
+	for(i = 0; i < NUM_PREALLOC_TEXDICTS; i++)
+		tmp[i] = RwTexDictionaryCreate();
+	for(i = 0; i < NUM_PREALLOC_TEXDICTS; i++)
+		RwTexDictionaryDestroy((RwTexDictionary*)tmp[i]);
+
+	for(i = 0; i < NUM_PREALLOC_TEXTURES; i++)
+		tmp[i] = RwTextureCreate(RwRasterCreate(0, 0, 0, 0));
+	for(i = 0; i < NUM_PREALLOC_TEXDICTS; i++)
+		RwTextureDestroy((RwTexture*)tmp[i]);
+
+	for(i = 0; i < NUM_PREALLOC_MATERIALS; i++)
+		tmp[i] = RpMaterialCreate();
+	for(i = 0; i < NUM_PREALLOC_MATERIALS; i++)
+		RpMaterialDestroy((RpMaterial*)tmp[i]);
+
+	delete[] tmp;
+	preAlloc = false;
+}
+#endif
+
 static RwBool 
 Initialise3D(void *param)
 {
