@@ -1436,7 +1436,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 	if (m_pPointGunAt) {
 		CVector markPos;
 		if (m_pPointGunAt->IsPed()) {
-			((CPed*)m_pPointGunAt)->m_pedIK.GetComponentPosition(*(RwV3d *)&markPos, PED_MID);
+			((CPed*)m_pPointGunAt)->m_pedIK.GetComponentPosition(markPos, PED_MID);
 		} else {
 			markPos = m_pPointGunAt->GetPosition();
 		}

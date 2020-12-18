@@ -999,7 +999,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 				CVector vTestedPos(pTestedPed->GetPosition().x, pTestedPed->GetPosition().y, pTestedPed->GetPosition().z + 0.4);
 				CVector vScreenPos;
 				float w, h;
-				if (CSprite::CalcScreenCoors(vTestedPos, vScreenPos, &w, &h, false)) {
+				if (CSprite::CalcScreenCoors(vTestedPos, &vScreenPos, &w, &h, false)) {
 					CVector2D vCrosshairPosition(CCamera::m_f3rdPersonCHairMultX * RsGlobal.maximumWidth, CCamera::m_f3rdPersonCHairMultY * RsGlobal.maximumHeight);
 					float fScreenDistance = ((CVector2D)vScreenPos - vCrosshairPosition).Magnitude();
 					if (SCREEN_STRETCH_X(0.45f) > fScreenDistance / w) {

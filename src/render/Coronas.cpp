@@ -271,7 +271,7 @@ CCoronas::Render(void)
 
 		CVector spriteCoors;
 		float spritew, spriteh;
-		if(!CSprite::CalcScreenCoors(aCoronas[i].coors, spriteCoors, &spritew, &spriteh, true)){
+		if(!CSprite::CalcScreenCoors(aCoronas[i].coors, &spriteCoors, &spritew, &spriteh, true)){
 			aCoronas[i].offScreen = true;
 			aCoronas[i].sightClear = false;
 		}else{
@@ -478,7 +478,7 @@ CCoronas::RenderReflections(void)
 
 				CVector spriteCoors;
 				float spritew, spriteh;
-				if(CSprite::CalcScreenCoors(coors, spriteCoors, &spritew, &spriteh, true)){
+				if(CSprite::CalcScreenCoors(coors, &spriteCoors, &spritew, &spriteh, true)) {
 					float drawDist = 0.75f * aCoronas[i].drawDist;
 					drawDist = Min(drawDist, 55.0f);
 					if(spriteCoors.z < drawDist){
@@ -669,7 +669,7 @@ CCoronas::DoSunAndMoon(void)
 
 	CVector spriteCoors;
 	float spritew, spriteh;
-	if(CSprite::CalcScreenCoors(sunCoors, spriteCoors, &spritew, &spriteh, true)){
+	if(CSprite::CalcScreenCoors(sunCoors, &spriteCoors, &spritew, &spriteh, true)) {
 		SunScreenX = spriteCoors.x;
 		SunScreenY = spriteCoors.y;
 	}else{

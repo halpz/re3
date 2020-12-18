@@ -23,15 +23,6 @@ public:
 	void UpdateRW(void);
 	void operator=(CMatrix const &rhs);
 	CMatrix &operator+=(CMatrix const &rhs);
-#ifdef RWCORE_H
-	operator RwMatrix (void) const {
-		return m_matrix;
-	}
-	
-	operator RwMatrix *(void) {
-		return &m_matrix;
-	}
-#endif
 	CMatrix &operator*=(CMatrix const &rhs);
 
 	const CVector &GetPosition(void) const { return *(CVector*)&m_matrix.pos; }

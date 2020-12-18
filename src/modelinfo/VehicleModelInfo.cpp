@@ -549,7 +549,7 @@ CVehicleModelInfo::PreprocessHierarchy(void)
 
 		if(desc[i].flags & VEHICLE_FLAG_POS){
 			f = assoc.frame;
-			rwvec = (RwV3d*)&m_positions[desc[i].hierId];
+			rwvec = &m_positions[desc[i].hierId];
 			*rwvec = *RwMatrixGetPos(RwFrameGetMatrix(f));
 			for(f = RwFrameGetParent(f); f; f = RwFrameGetParent(f))
 				RwV3dTransformPoints(rwvec, rwvec, 1, RwFrameGetMatrix(f));

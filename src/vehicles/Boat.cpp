@@ -443,7 +443,7 @@ CBoat::ProcessControl(void)
 							CVector wakePos = GetPosition() + sternPos;
 							// no actual particles for player...
 						}else if(IsVisible() && ((CTimer::GetFrameCounter() + m_randomSeed) & 1) &&
-						         CVisibilityPlugins::GetDistanceSquaredFromCamera((RwV3d*)&propellerWorld) < SQR(70.0f * TheCamera.GenerationDistMultiplier)){
+						         CVisibilityPlugins::GetDistanceSquaredFromCamera(&propellerWorld) < SQR(70.0f * TheCamera.GenerationDistMultiplier)){
 							jetDir.z = 0.015f;
 							jetDir.x *= 3.5f;
 							jetDir.y *= 3.5f;
@@ -613,7 +613,7 @@ CBoat::ProcessControl(void)
 			splashDir.z += 0.0003f*m_nDeltaVolumeUnderWater;
 			CWaterLevel::GetWaterLevel(splashPos, &waterLevel, true);
 			if(splashPos.z-waterLevel < 3.0f &&
-			   CVisibilityPlugins::GetDistanceSquaredFromCamera((RwV3d*)&splashPos) < SQR(70.0f * TheCamera.GenerationDistMultiplier)){
+			   CVisibilityPlugins::GetDistanceSquaredFromCamera(&splashPos) < SQR(70.0f * TheCamera.GenerationDistMultiplier)){
 				splashPos.z = waterLevel + 0.1f;
 				CParticle::AddParticle(PARTICLE_CAR_SPLASH, splashPos, 0.75f*splashDir, nil, splashSize+0.1f,  splashColor,
 					CGeneral::GetRandomNumberInRange(0.0f, 10.0f), CGeneral::GetRandomNumberInRange(0.0f, 90.0f),
@@ -670,7 +670,7 @@ CBoat::ProcessControl(void)
 			splashDir.z += 0.0003f*m_nDeltaVolumeUnderWater;
 			CWaterLevel::GetWaterLevel(splashPos, &waterLevel, true);
 			if(splashPos.z-waterLevel < 3.0f &&
-			   CVisibilityPlugins::GetDistanceSquaredFromCamera((RwV3d*)&splashPos) < SQR(70.0f * TheCamera.GenerationDistMultiplier)){
+			   CVisibilityPlugins::GetDistanceSquaredFromCamera(&splashPos) < SQR(70.0f * TheCamera.GenerationDistMultiplier)){
 				splashPos.z = waterLevel + 0.1f;
 				CParticle::AddParticle(PARTICLE_CAR_SPLASH, splashPos, 0.75f*splashDir, nil, splashSize+0.1f,  splashColor,
 					CGeneral::GetRandomNumberInRange(0.0f, 10.0f), CGeneral::GetRandomNumberInRange(0.0f, 90.0f),

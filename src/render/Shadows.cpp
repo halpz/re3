@@ -2229,7 +2229,7 @@ CShadows::CastShadowEntityXYZ(CEntity *pEntity, CVector *pPosn,
 		sphere.Set(2.0f, center);
 
 		RwV3d point;
-		RwV3dTransformPoints(&point, center, 1, &invMatrix);
+		RwV3dTransformPoints(&point, &center, 1, &invMatrix);
 		
 		CColSphere colSphere;
 		colSphere.Set(2.0f, CVector(point), 0, 0);
@@ -2252,7 +2252,7 @@ CShadows::CastShadowEntityXYZ(CEntity *pEntity, CVector *pPosn,
 				p[1] += offset;
 				p[2] += offset;
 
-				if ( !ShadowRenderTriangleCB((RwV3d *)p, n, &proj) )
+				if ( !ShadowRenderTriangleCB(p, &n, &proj) )
 					break;
 			}
 			i++;

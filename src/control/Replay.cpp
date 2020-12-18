@@ -1218,10 +1218,10 @@ void CReplay::ProcessReplayCamera(void)
 		TheCamera.GetUp() = CVector(0.0f, 1.0f, 0.0f);
 		TheCamera.GetRight() = CVector(1.0f, 0.0f, 0.0f);
 		RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
-		pm->pos = *(RwV3d*)&TheCamera.GetPosition();
-		pm->at = *(RwV3d*)&TheCamera.GetForward();
-		pm->up = *(RwV3d*)&TheCamera.GetUp();
-		pm->right = *(RwV3d*)&TheCamera.GetRight();
+		pm->pos = TheCamera.GetPosition();
+		pm->at = TheCamera.GetForward();
+		pm->up = TheCamera.GetUp();
+		pm->right = TheCamera.GetRight();
 		break;
 	}
 	case REPLAYCAMMODE_FIXED:
@@ -1237,10 +1237,10 @@ void CReplay::ProcessReplayCamera(void)
 		TheCamera.GetMatrix().GetUp() = up;
 		TheCamera.GetMatrix().GetRight() = right;
 		RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
-		pm->pos = *(RwV3d*)&TheCamera.GetMatrix().GetPosition();
-		pm->at = *(RwV3d*)&TheCamera.GetMatrix().GetForward();
-		pm->up = *(RwV3d*)&TheCamera.GetMatrix().GetUp();
-		pm->right = *(RwV3d*)&TheCamera.GetMatrix().GetRight();
+		pm->pos = TheCamera.GetMatrix().GetPosition();
+		pm->at = TheCamera.GetMatrix().GetForward();
+		pm->up = TheCamera.GetMatrix().GetUp();
+		pm->right = TheCamera.GetMatrix().GetRight();
 		break;
 	}
 	default:
@@ -1840,10 +1840,10 @@ void CReplay::ProcessLookAroundCam(void)
 	TheCamera.GetRight() = right;
 	TheCamera.SetPosition(camera_pt);
 	RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
-	pm->pos = *(RwV3d*)&TheCamera.GetPosition();
-	pm->at = *(RwV3d*)&TheCamera.GetForward();
-	pm->up = *(RwV3d*)&TheCamera.GetUp();
-	pm->right = *(RwV3d*)&TheCamera.GetRight();
+	pm->pos = TheCamera.GetPosition();
+	pm->at = TheCamera.GetForward();
+	pm->up = TheCamera.GetUp();
+	pm->right = TheCamera.GetRight();
 	TheCamera.CalculateDerivedValues();
 	RwMatrixUpdate(RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)));
 	RwFrameUpdateObjects(RwCameraGetFrame(TheCamera.m_pRwCamera));

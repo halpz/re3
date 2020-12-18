@@ -506,7 +506,7 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 			if ( victimPed->bUsesCollision || victimPed->Dead() || victimPed->Driving() )
 			{
 				CVector victimPedPos = victimPed->GetPosition();
-				if ( SQR(victimPedRadius) > (victimPedPos-(*fireSource)).MagnitudeSqr() )
+				if ( SQR(victimPedRadius) > (victimPedPos-fireSource).MagnitudeSqr() )
 				{
 					CVector collisionDist;
 					CColModel* victimPedCol = &CTempColModels::ms_colModelPed1;
@@ -528,9 +528,9 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 						CColSphere *sphere = &victimPedCol->spheres[s];
 
 						if (useLocalPos)
-							collisionDist = sphere->center - (*fireSource);
+							collisionDist = sphere->center - fireSource;
 						else
-							collisionDist = victimPedPos + sphere->center - (*fireSource);
+							collisionDist = victimPedPos + sphere->center - fireSource;
 
 						if ( SQR(sphere->radius + info->m_fRadius) > collisionDist.MagnitudeSqr() )
 						{
@@ -873,7 +873,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 			CPed *threatAttack = (CPed*)shooterPed->m_pPointGunAt;
 			if ( threatAttack->IsPed() )
 			{
-				threatAttack->m_pedIK.GetComponentPosition(*(RwV3d *)&target, PED_MID);
+				threatAttack->m_pedIK.GetComponentPosition(target, PED_MID);
 				threatAttack->ReactToPointGun(shooter);
 			}
 			else
@@ -1703,7 +1703,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				{
 					CVector pos;
 					if (shooterPed->m_pPointGunAt->IsPed()) {
-						((CPed*)shooterPed->m_pPointGunAt)->m_pedIK.GetComponentPosition(*(RwV3d *)&pos, PED_MID);
+						((CPed*)shooterPed->m_pPointGunAt)->m_pedIK.GetComponentPosition(pos, PED_MID);
 					} else {
 						pos = ((CPed*)shooterPed->m_pPointGunAt)->GetPosition();
 					}
@@ -2167,7 +2167,7 @@ CWeapon::LaserScopeDot(CVector *pOutPos, float *pOutSize)
 		CVector pos = foundCol.point;
 		float w, h;
 		
-		if ( CSprite::CalcScreenCoors(foundCol.point, pos, &w, &h, true) )
+		if ( CSprite::CalcScreenCoors(foundCol.point, &pos, &w, &h, true) )
 		{
 			*pOutPos = pos;
 			*pOutSize = w * 0.05f;
@@ -2262,7 +2262,7 @@ CWeapon::TakePhotograph(CEntity *shooter)
 					CVector pos;
 					float w, h;
 					
-					if ( CSprite::CalcScreenCoors(pedPos, pos, &w, &h, false) )
+					if ( CSprite::CalcScreenCoors(pedPos, &pos, &w, &h, false) )
 					{
 						if (   SCREEN_WIDTH  * 0.1f < pos.x && SCREEN_WIDTH  * 0.9f > pos.x
 							&& SCREEN_HEIGHT * 0.1f < pos.y && SCREEN_HEIGHT * 0.9f > pos.y )

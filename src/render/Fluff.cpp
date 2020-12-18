@@ -756,7 +756,7 @@ void CScrollBar::Render()
 			// Render main coronas
 			if (m_MessageBar[i] & (1 << j))
 			{
-				if (CSprite::CalcScreenCoors(coronaCoord, screenCoord, &screenW, &screenH, true))
+				if (CSprite::CalcScreenCoors(coronaCoord, &screenCoord, &screenW, &screenH, true))
 				{
 					CSprite::RenderBufferedOneXLUSprite(
 						screenCoord.x, screenCoord.y, screenCoord.z,
@@ -768,7 +768,7 @@ void CScrollBar::Render()
 			// Render smaller and faded coronas for a trailing effect
 			else if (m_MessageBar[i - 1] & (1 << j))
 			{
-				if (CSprite::CalcScreenCoors(coronaCoord, screenCoord, &screenW, &screenH, true))
+				if (CSprite::CalcScreenCoors(coronaCoord, &screenCoord, &screenW, &screenH, true))
 				{
 					CSprite::RenderBufferedOneXLUSprite(
 						screenCoord.x, screenCoord.y, screenCoord.z,
