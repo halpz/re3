@@ -23,6 +23,4 @@ public:
 	void EnterVacantNearbyCars(void);
 	bool IsOnStealWishList(int32);
 };
-#ifndef PED_SKIN
-VALIDATE_SIZE(CCivilianPed, 0x53C);
-#endif
+//VALIDATE_SIZE(CCivilianPed, 0x53C);

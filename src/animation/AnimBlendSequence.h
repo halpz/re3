@@ -49,10 +49,6 @@ public:
 //	void CompressKeyframes(void);
 //	void RemoveUncompressedData(void);
 
-#ifdef PED_SKIN
 	void SetBoneTag(int tag) { boneTag = tag; }
-#endif
 };
-#ifndef PED_SKIN
-VALIDATE_SIZE(CAnimBlendSequence, 0x2C);
-#endif
+VALIDATE_SIZE(CAnimBlendSequence, 0x30);

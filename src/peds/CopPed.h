@@ -48,6 +48,4 @@ public:
 	void ProcessStingerCop(void);
 };
 
-#ifndef PED_SKIN
-VALIDATE_SIZE(CCopPed, 0x558);
-#endif
+VALIDATE_SIZE(CCopPed, 0x62C);

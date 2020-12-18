@@ -1255,13 +1255,10 @@ CAnimManager::CreateAnimAssocGroups(void)
 		group->firstAnimId = def->animDescs[0].animId;
 		group->CreateAssociations(def->blockName, clump, def->animNames, def->numAnims);
 		for(j = 0; j < group->numAssociations; j++)
-
 			// GetAnimation(i) in III (but it's in LoadAnimFiles), GetAnimation(group->animDesc[j].animId) in VC
 			group->GetAnimation(def->animDescs[j].animId)->flags |= def->animDescs[j].flags;
-#ifdef PED_SKIN
 		if(IsClumpSkinned(clump))
 			RpClumpForAllAtomics(clump, AtomicRemoveAnimFromSkinCB, nil);
-#endif
 		RpClumpDestroy(clump);
 	}
 }
@@ -1352,10 +1349,8 @@ CAnimManager::LoadAnimFile(RwStream *stream, bool compress, char (*somename)[32]
 			ROUNDSIZE(anim.size);
 			RwStreamRead(stream, buf, anim.size);
 			int numFrames = *(int*)(buf+28);
-#ifdef PED_SKIN
 			if(anim.size == 44)
 				seq->SetBoneTag(*(int*)(buf+40));
-#endif
 			seq->SetName(buf);
 			if(numFrames == 0)
 				continue;

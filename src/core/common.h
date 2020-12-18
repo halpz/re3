@@ -84,10 +84,8 @@ typedef uint16_t wchar;
 
 #include "config.h"
 
-#ifdef PED_SKIN
 #include <rphanim.h>
 #include <rpskin.h>
-#endif
 
 #ifdef __GNUC__
 #define TYPEALIGN(n) __attribute__ ((aligned (n)))

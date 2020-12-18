@@ -346,7 +346,6 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #define CAMERA_PICKUP
 
 // Peds
-#define PED_SKIN		// support for skinned geometry on peds
 #define CANCELLABLE_CAR_ENTER
 
 // Camera

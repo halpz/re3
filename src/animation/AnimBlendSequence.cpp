@@ -10,9 +10,7 @@ CAnimBlendSequence::CAnimBlendSequence(void)
 	numFrames = 0;
 	keyFrames = nil;
 	keyFramesCompressed = nil;
-#ifdef PED_SKIN
 	boneTag = -1;
-#endif
 }
 
 CAnimBlendSequence::~CAnimBlendSequence(void)

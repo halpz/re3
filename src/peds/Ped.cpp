@@ -264,9 +264,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bVehExitWillBeInstant = false;
 	bHasAlreadyBeenRecorded = false;
 	bFallenDown = false;
-#ifdef PED_SKIN
 	bDontAcceptIKLookAts = false;
-#endif
 	bReachedAttractorHeadingTarget = false;
 	bTurnedAroundOnAttractor = false;
 #ifdef KANGAROO_CHEAT
@@ -365,9 +363,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_vehicleInAccident = nil;
 	m_attractor = nil;
 	m_positionInQueue = -1;
-#ifdef PED_SKIN
 	m_pWeaponModel = nil;
-#endif
 	m_delayedSoundID = -1;
 	m_delayedSoundTimer = 0;
 	CPopulation::UpdatePedCount((ePedType)m_nPedType, false);
@@ -4797,11 +4793,7 @@ CPed::PreRender(void)
 		CTimeCycle::m_fShadowFrontX[CTimeCycle::m_CurrentStoredValue], CTimeCycle::m_fShadowFrontY[CTimeCycle::m_CurrentStoredValue],
 		CTimeCycle::m_fShadowSideX[CTimeCycle::m_CurrentStoredValue], CTimeCycle::m_fShadowSideY[CTimeCycle::m_CurrentStoredValue]);
 
-#ifdef PED_SKIN
-	if(IsClumpSkinned(GetClump())){
-		UpdateRpHAnim();
-	}
-#endif
+	UpdateRpHAnim();
 
 	bool bIsWindModifierTurnedOn = false;
 	float fAnyDirectionShift = 1.0f;

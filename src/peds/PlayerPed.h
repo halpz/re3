@@ -108,6 +108,4 @@ public:
 	static const uint32 nSaveStructSize;
 };
 
-#ifndef PED_SKIN
-VALIDATE_SIZE(CPlayerPed, 0x5F0);
-#endif
+//VALIDATE_SIZE(CPlayerPed, 0x5F0);

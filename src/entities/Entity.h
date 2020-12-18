@@ -171,9 +171,7 @@ public:
 	void PruneReferences(void);
 	void CleanUpOldReference(CEntity **pent);
 
-#ifdef PED_SKIN
 	void UpdateRpHAnim(void);
-#endif
 
 	void PreRenderForGlassWindow(void);
 	void AddSteamsFromGround(CVector *unused);
