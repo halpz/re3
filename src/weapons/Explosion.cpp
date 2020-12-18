@@ -220,7 +220,7 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 			} else if (veh->IsComponentPresent(CAR_BOOT)) {
 				veh->GetComponentWorldPosition(CAR_BOOT, componentPos);
 			}
-			if (componentPos != nil) {
+			if (componentPos.x != 0.0f) {
 				int rn = (CGeneral::GetRandomNumber() & 1) + 1;
 				for (int i = 0; i < rn; i++)
 					CParticle::AddJetExplosion(componentPos, (CGeneral::GetRandomNumber() & 7) / 7.0f  + 1.5f, 0.5f);

@@ -84,13 +84,12 @@ public:
 	bool m_bDriveByAllowed;
 	uint8 m_nBustedAudioStatus;
 	int16 m_nCurrentBustedAudio;
+#ifdef GTA_PC
 	char m_aSkinName[32];
 	RwTexture *m_pSkinTexture;
+#endif
 
 	void MakePlayerSafe(bool);
-	void LoadPlayerSkin();
-	void DeletePlayerSkin();
-	void SetPlayerSkin(char* skin);
 	const CVector &GetPos();
 	void Process(void);
 	void KillPlayer(void);
@@ -107,5 +106,19 @@ public:
 	void SavePlayerInfo(uint8 *buf, uint32* size);
 	void FindClosestCarSectorList(CPtrList&, CPed*, float, float, float, float, float*, CVehicle**);
 
-	~CPlayerInfo() { };
+#ifdef GTA_PC
+	void LoadPlayerSkin();
+	void SetPlayerSkin(const char *skin);
+	void DeletePlayerSkin();
+#endif
 };
+
+CPlayerPed *FindPlayerPed(void);
+CVehicle *FindPlayerVehicle(void);
+CVehicle *FindPlayerTrain(void);
+CEntity *FindPlayerEntity(void);
+CVector FindPlayerCoors(void);
+const CVector &FindPlayerSpeed(void);
+const CVector &FindPlayerCentreOfWorld(int32 player);
+const CVector &FindPlayerCentreOfWorld_NoSniperShift(void);
+float FindPlayerHeading(void);

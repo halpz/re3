@@ -941,7 +941,7 @@ CParticle *CParticle::AddParticle(tParticleType type, CVector const &vecPos, CVe
 		CVector screen;
 		float w, h;
 
-		if ( !CSprite::CalcScreenCoors(vecPos, screen, &w, &h, true) )
+		if ( !CSprite::CalcScreenCoors(vecPos, &screen, &w, &h, true) )
 			return nil;
 		
 		pParticle->m_vecPosition = screen;
@@ -2034,7 +2034,7 @@ void CParticle::Render()
 				float w;
 				float h;
 
-				if ( CSprite::CalcScreenCoors(particle->m_vecPosition, coors, &w, &h, true) )
+				if ( CSprite::CalcScreenCoors(particle->m_vecPosition, &coors, &w, &h, true) )
 				{
 					
 					if ( i == PARTICLE_ENGINE_STEAM
@@ -2189,7 +2189,7 @@ void CParticle::Render()
 								float fTrailLength;
 								CVector vecScreenPosition;
 								
-								if ( CSprite::CalcScreenCoors(vecPrevPos, vecScreenPosition, &fTrailLength, &fRotation, true) )
+								if ( CSprite::CalcScreenCoors(vecPrevPos, &vecScreenPosition, &fTrailLength, &fRotation, true) )
 								{
 									CVector2D vecDist
 									(

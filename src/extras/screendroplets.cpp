@@ -384,9 +384,9 @@ ScreenDroplets::ProcessCameraMovement(void)
 	ms_prevCamUp = camUp;
 	ms_prevCamPos = camPos;
 
-	ms_screenMoveDelta.x = -RwV3dDotProduct(&camMat->right, (RwV3d*)&ms_camMoveDelta);
-	ms_screenMoveDelta.y = RwV3dDotProduct(&camMat->up, (RwV3d*)&ms_camMoveDelta);
-	ms_screenMoveDelta.z = RwV3dDotProduct(&camMat->at, (RwV3d*)&ms_camMoveDelta);
+	ms_screenMoveDelta.x = -RwV3dDotProduct(&camMat->right, &ms_camMoveDelta);
+	ms_screenMoveDelta.y = RwV3dDotProduct(&camMat->up, &ms_camMoveDelta);
+	ms_screenMoveDelta.z = RwV3dDotProduct(&camMat->at, &ms_camMoveDelta);
 	ms_screenMoveDelta *= 10.0f;
 	ms_screenMoveDist = ms_screenMoveDelta.Magnitude2D();
 

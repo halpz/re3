@@ -2151,7 +2151,7 @@ CPed::FightStrike(CVector &touchedNodePos, bool fightWithWeapon)
 	if (m_fightState == FIGHTSTATE_NO_MOVE)
 		m_fightState = FIGHTSTATE_1;
 
-	m_vecHitLastPos = *touchedNodePos;
+	m_vecHitLastPos = touchedNodePos;
 	return false;
 }
 

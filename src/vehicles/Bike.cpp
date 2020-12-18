@@ -1597,7 +1597,7 @@ CBike::PreRender(void)
 		CVector forkAxis(0.0f, Sin(DEGTORAD(mi->m_bikeSteerAngle)), -Cos(DEGTORAD(mi->m_bikeSteerAngle)));
 		forkAxis.Normalise();	// as if that's not already the case
 		CQuaternion quat;
-		quat.Set((RwV3d*)&forkAxis, -m_fWheelAngle);
+		quat.Set(&forkAxis, -m_fWheelAngle);
 		quat.Get(rot.m_attachment);
 		rot.Update();
 

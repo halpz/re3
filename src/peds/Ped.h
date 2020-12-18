@@ -1119,7 +1119,7 @@ public:
 		RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
 		int32 idx = RpHAnimIDGetIndex(hier, m_pFrames[node]->nodeID);
 		RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
-		RwV3dTransformPoints((RwV3d*)&pos, (RwV3d*)&pos, 1, &mats[idx]);
+		RwV3dTransformPoints(&pos, &pos, 1, &mats[idx]);
 	}
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode
