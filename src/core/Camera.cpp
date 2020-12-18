@@ -1602,8 +1602,10 @@ CCamera::CamControl(void)
 					switchByJumpCut = true;
 			}
 		}
+#ifdef GTA_SCENE_EDIT
 		if(CSceneEdit::m_bEditOn)
 			ReqMode = CCam::MODE_EDITOR;
+#endif
 
 		if((m_uiTransitionState == 0 || switchByJumpCut) && ReqMode != Cams[ActiveCam].Mode){
 			if(switchByJumpCut){

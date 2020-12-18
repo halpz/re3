@@ -1558,15 +1558,8 @@ void CHud::DrawAfterFade()
 			CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 			CFont::SetDropShadowPosition(2);
 			CFont::SetDropColor(CRGBA(0, 0, 0, 255));
-#ifdef BETA_SLIDING_TEXT
-
-			CFont::SetColor(ODDJOB2_COLOR);
-			CFont::PrintString(SCREEN_WIDTH / 2 - SCREEN_SCALE_X(OddJob2XOffset), SCREEN_SCALE_Y(217.0f), m_BigMessage[5]);
-#else
-
 			CFont::SetColor(ODDJOB2_COLOR);
 			CFont::PrintString(SCREEN_WIDTH / 2, SCREEN_SCALE_Y(217.0f), m_BigMessage[5]);
-#endif
 		}
 	}
 
@@ -1615,11 +1608,7 @@ void CHud::DrawAfterFade()
 			CFont::SetDropShadowPosition(2);
 			CFont::SetDropColor(CRGBA(0, 0, 0, BigMessageAlpha[1]));
 			CFont::SetColor(CRGBA(MISSIONTITLE_COLOR.r, MISSIONTITLE_COLOR.g, MISSIONTITLE_COLOR.b, BigMessageAlpha[1]));
-#ifdef BETA_SLIDING_TEXT
 			CFont::PrintString(BigMessageX[1], SCREEN_SCALE_FROM_BOTTOM(140.0f), m_BigMessage[1]);
-#else
-			CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(140.0f), m_BigMessage[1]);
-#endif
 		} else {
 			m_ZoneFadeTimer = 0;
 			BigMessageX[1] = SCREEN_SCALE_FROM_RIGHT(DEFAULT_SCREEN_WIDTH + 60.0f);

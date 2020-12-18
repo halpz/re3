@@ -649,7 +649,9 @@ extern bool gbRenderWorld2;
 		DebugMenuAddVarBool8("Render", "Don't Render Water", &gbDontRenderWater, nil);
 
 		DebugMenuAddVarBool8("Debug", "pad 1 -> pad 2", &CPad::m_bMapPadOneToPadTwo, nil);
+#ifdef GTA_SCENE_EDIT
 		DebugMenuAddVarBool8("Debug", "Edit on", &CSceneEdit::m_bEditOn, nil);
+#endif
 #ifdef MAP_ENHANCEMENTS
 		DebugMenuAddCmd("Debug", "Teleport to map waypoint", TeleportToWaypoint);
 #endif

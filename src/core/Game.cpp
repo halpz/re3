@@ -427,7 +427,9 @@ bool CGame::Initialise(const char* datFile)
 	CAntennas::Init();
 	CGlass::Init();
 	gPhoneInfo.Initialise();
+#ifdef GTA_SCENE_EDIT
 	CSceneEdit::Initialise();
+#endif
 	LoadingScreen("Loading the Game", "Load scripts", nil);
 	CTheScripts::Init();
 	CGangs::Initialise();
@@ -781,7 +783,9 @@ void CGame::Process(void)
 		CSkidmarks::Update();
 		CAntennas::Update();
 		CGlass::Update();
+#ifdef GTA_SCENE_EDIT
 		CSceneEdit::Update();
+#endif
 		CSetPieces::Update();
 		CEventList::Update();
 		CParticle::Update();

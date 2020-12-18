@@ -36,7 +36,7 @@ enum Config {
 	NUMDUMMIES = 2340,
 	NUMAUDIOSCRIPTOBJECTS = 192,
 	NUMCOLMODELS = 4400,
-	NUMCUTSCENEOBJECTS = 50,	// does not exist in VC
+	NUMCUTSCENEOBJECTS = 50,	// not a pool in VC
 
 	NUMANIMBLOCKS = 35,
 	NUMANIMATIONS = 450,
@@ -146,10 +146,6 @@ enum Config {
 	NUM_SHORTCUT_START_POINTS = 16
 };
 
-// We'll use this once we're ready to become independent of the game
-// Use it to mark bugs in the code that will prevent the game from working then
-//#define STANDALONE
-
 // We don't expect to compile for PS2 or Xbox
 // but it might be interesting for documentation purposes
 #define GTA_PC
@@ -176,6 +172,19 @@ enum Config {
 #define FINAL
 #endif
 
+// Version defines
+#define GTAVC_PS2	400
+#define GTAVC_PC_10	410
+#define GTAVC_PC_11	411
+#define GTAVC_PC_JAP	412
+// TODO? maybe something for xbox or android?
+
+#define GTA_VERSION	GTAVC_PC_11
+
+// TODO(MIAMI): someone ought to find and check out uses of these defines:
+//#define GTA3_STEAM_PATCH
+//#define GTAVC_JP_PATCH
+
 // quality of life fixes that should also be in FINAL
 #define NASTY_GAME	// nasty game for all languages
 #define NO_CDCHECK
@@ -188,14 +197,13 @@ enum Config {
 #	define RANDOMSPLASH
 #	define VU_COLLISION
 #elif defined GTA_PC
-//#	define GTA3_STEAM_PATCH
-//# define GTAVC_JP_PATCH
 #	ifdef GTA_PS2_STUFF
 #		define USE_PS2_RAND
 #		define RANDOMSPLASH	// use random splash as on PS2
 #		define PS2_MATFX
 #	endif
 #	define GTA_REPLAY
+#	define GTA_SCENE_EDIT
 #elif defined GTA_XBOX
 #endif
 
@@ -259,8 +267,6 @@ enum Config {
 #endif
 
 // Water & Particle
-#define PC_PARTICLE
-//#define PS2_ALTERNATIVE_CARSPLASH // unused on PS2
 // #define PC_WATER
 #define WATER_CHEATS
 
@@ -283,7 +289,6 @@ enum Config {
 //#define BIND_VEHICLE_FIREWEAPON // Adds ability to rebind fire key for 'in vehicle' controls
 
 // Hud, frontend and radar
-//#define BETA_SLIDING_TEXT
 #define PC_MENU
 
 #ifndef PC_MENU
@@ -362,5 +367,4 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #ifdef SQUEEZE_PERFORMANCE
 	#undef PS2_ALPHA_TEST
 	#undef NO_ISLAND_LOADING
-	#define PC_PARTICLE
 #endif
