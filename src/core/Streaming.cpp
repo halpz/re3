@@ -32,6 +32,8 @@
 #include "ColStore.h"
 #include "DMAudio.h"
 #include "Script.h"
+#include "MemoryMgr.h"
+#include "MemoryHeap.h"
 
 //--MIAMI: file done (possibly bugs)
 

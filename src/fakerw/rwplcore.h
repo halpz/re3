@@ -141,15 +141,15 @@ RwUInt8 RwObjectGetType(const RwObject *obj);
  ***********************************************
  */
 
-struct RwMemoryFunctions;
-/*
+struct RwMemoryFunctions
 {
+	// NB: from RW 3.6 on the allocating functions take
+	// a hint parameter!
 	void *(*rwmalloc)(size_t size);
 	void  (*rwfree)(void *mem);
 	void *(*rwrealloc)(void *mem, size_t newSize);
 	void *(*rwcalloc)(size_t numObj, size_t sizeObj);
 };
-*/
 
 void *RwMalloc(size_t size);
 void  RwFree(void *mem);

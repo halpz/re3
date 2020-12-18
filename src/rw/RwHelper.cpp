@@ -63,45 +63,6 @@ void FlushObrsPrintfs()
 #endif
 }
 
-void *
-RwMallocAlign(RwUInt32 size, RwUInt32 align)
-{
-#ifdef FIX_BUGS
-	uintptr ptralign = align-1;
-	void *mem = (void *)malloc(size + sizeof(uintptr) + ptralign);
-
-	ASSERT(mem != nil);
-
-	void *addr = (void *)((((uintptr)mem) + sizeof(uintptr) + ptralign) & ~ptralign);
-
-	ASSERT(addr != nil);
-#else
-	void *mem = (void *)malloc(size + align);
-
-	ASSERT(mem != nil);
-
-	void *addr = (void *)((((uintptr)mem) + align) & ~(align - 1));
-
-	ASSERT(addr != nil);
-#endif
-
-	*(((void **)addr) - 1) = mem;
-
-	return addr;
-}
-
-void
-RwFreeAlign(void *mem)
-{
-	ASSERT(mem != nil);
-
-	void *addr = *(((void **)mem) - 1);
-
-	ASSERT(addr != nil);
-
-	free(addr);
-}
-
 void
 DefinedState(void)
 {

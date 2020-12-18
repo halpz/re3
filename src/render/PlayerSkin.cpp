@@ -14,6 +14,7 @@
 #include "RwHelper.h"
 #include "Timer.h"
 #include "Lights.h"
+#include "MemoryMgr.h"
 
 //--MIAMI: file done
 
