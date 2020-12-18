@@ -341,7 +341,7 @@ CMemoryHeap::TidyHeap(void)
 	}
 }
 
-// 
+// MIAMI: this is empty
 void
 CMemoryHeap::RegisterMemPointer(void *ptr)
 {
