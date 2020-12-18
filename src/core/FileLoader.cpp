@@ -1065,7 +1065,7 @@ CFileLoader::LoadMLOInstance(int id, const char *line)
 		&rot.x, &rot.y, &rot.z,
 		&angle);
 	float rad = Acos(angle) * 2.0f;
-	CInstance *inst = CModelInfo::GetMloInstanceStore().alloc();
+	CInstance *inst = CModelInfo::GetMloInstanceStore().Alloc();
 	minfo->lastInstance++;
 
 	RwMatrix *matrix = RwMatrixCreate();
@@ -1305,7 +1305,7 @@ CFileLoader::Load2dEffect(const char *line)
 	CTxdStore::SetCurrentTxd(CTxdStore::FindTxdSlot("particle"));
 
 	mi = CModelInfo::GetModelInfo(id);
-	effect = CModelInfo::Get2dEffectStore().alloc();
+	effect = CModelInfo::Get2dEffectStore().Alloc();
 	mi->Add2dEffect(effect);
 	effect->pos = CVector(x, y, z);
 	effect->col = CRGBA(r, g, b, a);
