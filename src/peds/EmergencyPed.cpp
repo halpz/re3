@@ -234,8 +234,8 @@ CEmergencyPed::MedicAI(void)
 				if (nearestAccident) {
 					m_pRevivedPed = nearestAccident->m_pVictim;
 					m_pRevivedPed->RegisterReference((CEntity**)&m_pRevivedPed);
-					m_pRevivedPed->m_pedIK.GetComponentPosition((RwV3d*)&midPos, PED_MID);
-					m_pRevivedPed->m_pedIK.GetComponentPosition((RwV3d*)&headPos, PED_HEAD);
+					m_pRevivedPed->m_pedIK.GetComponentPosition(midPos, PED_MID);
+					m_pRevivedPed->m_pedIK.GetComponentPosition(headPos, PED_HEAD);
 					SetSeek((headPos + midPos) * 0.5f, 1.0f);
 					SetObjective(OBJECTIVE_NONE);
 					bIsRunning = true;
@@ -274,8 +274,8 @@ CEmergencyPed::MedicAI(void)
 							m_nEmergencyPedState = EMERGENCY_PED_STOP;
 							break;
 						}
-						m_pRevivedPed->m_pedIK.GetComponentPosition((RwV3d*)&midPos, PED_MID);
-						m_pRevivedPed->m_pedIK.GetComponentPosition((RwV3d*)&headPos, PED_HEAD);
+						m_pRevivedPed->m_pedIK.GetComponentPosition(midPos, PED_MID);
+						m_pRevivedPed->m_pedIK.GetComponentPosition(headPos, PED_HEAD);
 						SetSeek((headPos + midPos) * 0.5f, nearestAccident->m_nMedicsPerformingCPR * 0.5f + 1.0f);
 						SetObjective(OBJECTIVE_NONE);
 						bIsRunning = true;
@@ -329,8 +329,8 @@ CEmergencyPed::MedicAI(void)
 				if (!m_pRevivedPed || m_pRevivedPed->m_fHealth > 0.0f)
 					m_nEmergencyPedState = EMERGENCY_PED_DETERMINE_NEXT_STATE;
 				else {
-					m_pRevivedPed->m_pedIK.GetComponentPosition((RwV3d*)&midPos, PED_MID);
-					m_pRevivedPed->m_pedIK.GetComponentPosition((RwV3d*)&headPos, PED_HEAD);
+					m_pRevivedPed->m_pedIK.GetComponentPosition(midPos, PED_MID);
+					m_pRevivedPed->m_pedIK.GetComponentPosition(headPos, PED_HEAD);
 					midPos = (headPos + midPos) * 0.5f;
 					m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(
 						midPos.x, midPos.y,
@@ -351,8 +351,8 @@ CEmergencyPed::MedicAI(void)
 					m_nEmergencyPedState = EMERGENCY_PED_DETERMINE_NEXT_STATE;
 					break;
 				}
-				m_pRevivedPed->m_pedIK.GetComponentPosition((RwV3d*)&midPos, PED_MID);
-				m_pRevivedPed->m_pedIK.GetComponentPosition((RwV3d*)&headPos, PED_HEAD);
+				m_pRevivedPed->m_pedIK.GetComponentPosition(midPos, PED_MID);
+				m_pRevivedPed->m_pedIK.GetComponentPosition(headPos, PED_HEAD);
 				midPos = (headPos + midPos) * 0.5f;
 				m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(
 					midPos.x, midPos.y,

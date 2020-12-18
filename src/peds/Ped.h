@@ -898,13 +898,13 @@ public:
 			RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
 			int32 idx = RpHAnimIDGetIndex(hier, m_pFrames[node]->nodeID);
 			RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
-			RwV3dTransformPoints((RwV3d*)&pos, (RwV3d*)&pos, 1, &mats[idx]);
+			RwV3dTransformPoints(&pos, &pos, 1, &mats[idx]);
 		}else
 #endif
 		{
 			RwFrame *frame;
 			for (frame = m_pFrames[node]->frame; frame; frame = RwFrameGetParent(frame))
-				RwV3dTransformPoints((RwV3d*)&pos, (RwV3d*)&pos, 1, RwFrameGetMatrix(frame));
+				RwV3dTransformPoints(&pos, &pos, 1, RwFrameGetMatrix(frame));
 		}
 	}
 

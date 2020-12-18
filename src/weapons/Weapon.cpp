@@ -385,7 +385,7 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 			if ( victimPed->bUsesCollision || victimPed->Dead() || victimPed->Driving() )
 			{
 				CVector victimPedPos = victimPed->GetPosition();
-				if ( SQR(victimPedRadius) > (victimPedPos-(*fireSource)).MagnitudeSqr() )
+				if ( SQR(victimPedRadius) > (victimPedPos-fireSource).MagnitudeSqr() )
 				{
 					CVector collisionDist;
 
@@ -393,7 +393,7 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 					while ( s < victimPedCol->numSpheres )
 					{
 						CColSphere *sphere = &victimPedCol->spheres[s];
-						collisionDist = victimPedPos+sphere->center-(*fireSource);
+						collisionDist = victimPedPos+sphere->center-fireSource;
 
 						if ( SQR(sphere->radius + info->m_fRadius) > collisionDist.MagnitudeSqr() )
 						{

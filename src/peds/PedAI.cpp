@@ -1141,7 +1141,7 @@ CPed::ProcessObjective(void)
 						CVector target;
 						CVector ourHead = GetMatrix() * CVector(0.5f, 0.0f, 0.6f);
 						if (m_pedInObjective->IsPed())
-							m_pedInObjective->m_pedIK.GetComponentPosition((RwV3d*)&target, PED_MID);
+							m_pedInObjective->m_pedIK.GetComponentPosition(target, PED_MID);
 						else
 							target = m_pedInObjective->GetPosition();
 

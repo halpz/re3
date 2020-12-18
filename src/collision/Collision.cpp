@@ -665,7 +665,7 @@ CCollision::TestLineOfSight(const CColLine &line, const CMatrix &matrix, CColMod
 	// transform line to model space
 	Invert(matrix, matTransform);
 	CVuVector newline[2];
-	TransformPoints(newline, 2, matTransform, (RwV3d*)&line.p0, sizeof(CColLine)/2);
+	TransformPoints(newline, 2, matTransform, &line.p0, sizeof(CColLine)/2);
 
 	// If we don't intersect with the bounding box, no chance on the rest
 	if(!TestLineBox(*(CColLine*)newline, model.boundingBox))
@@ -1474,7 +1474,7 @@ CCollision::ProcessLineOfSight(const CColLine &line,
 	// transform line to model space
 	Invert(matrix, matTransform);
 	CVuVector newline[2];
-	TransformPoints(newline, 2, matTransform, (RwV3d*)&line.p0, sizeof(CColLine)/2);
+	TransformPoints(newline, 2, matTransform, &line.p0, sizeof(CColLine)/2);
 
 	if(mindist < 1.0f)
 		newline[1] = newline[0] + (newline[1] - newline[0])*mindist;
@@ -1606,7 +1606,7 @@ CCollision::ProcessVerticalLine(const CColLine &line,
 	// transform line to model space
 	Invert(matrix, matTransform);
 	CVuVector newline[2];
-	TransformPoints(newline, 2, matTransform, (RwV3d*)&line.p0, sizeof(CColLine)/2);
+	TransformPoints(newline, 2, matTransform, &line.p0, sizeof(CColLine)/2);
 
 	if(mindist < 1.0f)
 		newline[1] = newline[0] + (newline[1] - newline[0])*mindist;
@@ -1806,16 +1806,16 @@ CCollision::ProcessColModels(const CMatrix &matrixA, CColModel &modelA,
 	matAB *= matrixA;
 
 	CVuVector bsphereAB;	// bounding sphere of A in B space
-	TransformPoint(bsphereAB, matAB, *(RwV3d*)modelA.boundingSphere.center);	// inlined
+	TransformPoint(bsphereAB, matAB, modelA.boundingSphere.center);	// inlined
 	bsphereAB.w = modelA.boundingSphere.radius;
 	if(!TestSphereBox(*(CColSphere*)&bsphereAB, modelB.boundingBox))
 		return 0;
 
 	// transform modelA's spheres and lines to B space
-	TransformPoints(aSpheresA, modelA.numSpheres, matAB, (RwV3d*)&modelA.spheres->center, sizeof(CColSphere));
+	TransformPoints(aSpheresA, modelA.numSpheres, matAB, &modelA.spheres->center, sizeof(CColSphere));
 	for(i = 0; i < modelA.numSpheres; i++)
 		aSpheresA[i].w = modelA.spheres[i].radius;
-	TransformPoints(aLinesA, modelA.numLines*2, matAB, (RwV3d*)&modelA.lines->p0, sizeof(CColLine)/2);
+	TransformPoints(aLinesA, modelA.numLines*2, matAB, &modelA.lines->p0, sizeof(CColLine)/2);
 
 	// Test them against model B's bounding volumes
 	int numSpheresA = 0;
@@ -1832,7 +1832,7 @@ CCollision::ProcessColModels(const CMatrix &matrixA, CColModel &modelA,
 	matBA *= matrixB;
 
 	// transform modelB's spheres to A space
-	TransformPoints(aSpheresB, modelB.numSpheres, matBA, (RwV3d*)&modelB.spheres->center, sizeof(CColSphere));
+	TransformPoints(aSpheresB, modelB.numSpheres, matBA, &modelB.spheres->center, sizeof(CColSphere));
 	for(i = 0; i < modelB.numSpheres; i++)
 		aSpheresB[i].w = modelB.spheres[i].radius;
 

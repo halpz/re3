@@ -157,14 +157,3 @@ public:
 
 extern CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];
 
-class CPlayerPed;
-class CVehicle;
-CPlayerPed *FindPlayerPed(void);
-CVehicle *FindPlayerVehicle(void);
-CVehicle *FindPlayerTrain(void);
-CEntity *FindPlayerEntity(void);
-CVector FindPlayerCoors(void);
-CVector &FindPlayerSpeed(void);
-const CVector &FindPlayerCentreOfWorld(int32 player);
-const CVector &FindPlayerCentreOfWorld_NoSniperShift(void);
-float FindPlayerHeading(void);

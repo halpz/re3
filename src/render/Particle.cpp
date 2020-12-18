@@ -1570,7 +1570,7 @@ void CParticle::Render()
 				float w;
 				float h;
 
-				if ( CSprite::CalcScreenCoors(particle->m_vecPosition, coors, &w, &h, true) )
+				if ( CSprite::CalcScreenCoors(particle->m_vecPosition, &coors, &w, &h, true) )
 				{
 #ifdef PC_PARTICLE
 					if ( (!particleBanned || SCREEN_WIDTH * fParticleScaleLimit >= w)
@@ -1650,7 +1650,7 @@ void CParticle::Render()
 							float fRotation;
 							float fTrailLength;
 							
-							if ( CSprite::CalcScreenCoors(vecPrevPos, particle->m_vecScreenPosition, &fTrailLength, &fRotation, true) )
+							if ( CSprite::CalcScreenCoors(vecPrevPos, &particle->m_vecScreenPosition, &fTrailLength, &fRotation, true) )
 							{
 								CVector2D vecDist
 								(

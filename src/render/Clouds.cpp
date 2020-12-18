@@ -133,7 +133,7 @@ CClouds::Render(void)
 	CSprite::InitSpriteBuffer();
 
 	int minute = CClock::GetHours()*60 + CClock::GetMinutes();
-	RwV3d campos = *(RwV3d*)&TheCamera.GetPosition();
+	RwV3d campos = TheCamera.GetPosition();
 
 	// Moon
 	int moonfadeout = Abs(minute - 180);	// fully visible at 3AM
