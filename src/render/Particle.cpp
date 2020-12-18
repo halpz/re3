@@ -213,19 +213,19 @@ RwTexture *gpSparkTex;
 RwTexture *gpNewspaperTex;
 RwTexture *gpGunSmokeTex;
 RwTexture *gpDotTex;
-RwTexture *gpHeathazeTex;
+RwTexture *gpHeatHazeTex;
 RwTexture *gpBeastieTex;
-RwTexture *gpRaindripTex1[MAX_RAINDRIP_FILES];
-RwTexture *gpRaindripTex2[MAX_RAINDRIP_FILES];
+RwTexture *gpRainDripTex[MAX_RAINDRIP_FILES];
+RwTexture *gpRainDripDarkTex[MAX_RAINDRIP_FILES];
 
 RwRaster *gpSparkRaster;
 RwRaster *gpNewspaperRaster;
 RwRaster *gpGunSmokeRaster;
 RwRaster *gpDotRaster;
-RwRaster *gpHeathazeRaster;
+RwRaster *gpHeatHazeRaster;
 RwRaster *gpBeastieRaster;
-RwRaster *gpRaindripRaster1[MAX_RAINDRIP_FILES];
-RwRaster *gpRaindripRaster2[MAX_RAINDRIP_FILES];
+RwRaster *gpRainDripRaster[MAX_RAINDRIP_FILES];
+RwRaster *gpRainDripDarkRaster[MAX_RAINDRIP_FILES];
 
 float      CParticle::ms_afRandTable[CParticle::RAND_TABLE_SIZE];
 CParticle *CParticle::m_pUnusedListHead;
@@ -465,23 +465,23 @@ void CParticle::Initialise()
 	gpDotTex = RwTextureRead("dot", nil);
 	gpDotRaster = RwTextureGetRaster(gpDotTex);
 	
-	gpHeathazeTex = RwTextureRead("heathaze", nil);
-	gpHeathazeRaster = RwTextureGetRaster(gpHeathazeTex);
+	gpHeatHazeTex = RwTextureRead("heathaze", nil);
+	gpHeatHazeRaster = RwTextureGetRaster(gpHeatHazeTex);
 	
 	gpBeastieTex = RwTextureRead("beastie", nil);
 	gpBeastieRaster = RwTextureGetRaster(gpBeastieTex);
 	
-	gpRaindripTex1[0] = RwTextureRead("raindrip64", nil);
-	gpRaindripRaster1[0] = RwTextureGetRaster(gpRaindripTex1[0]);
+	gpRainDripTex[0] = RwTextureRead("raindrip64", nil);
+	gpRainDripRaster[0] = RwTextureGetRaster(gpRainDripTex[0]);
 	
-	gpRaindripTex1[1] = RwTextureRead("raindripb64", nil);
-	gpRaindripRaster1[1] = RwTextureGetRaster(gpRaindripTex1[1]);
+	gpRainDripTex[1] = RwTextureRead("raindripb64", nil);
+	gpRainDripRaster[1] = RwTextureGetRaster(gpRainDripTex[1]);
 	
-	gpRaindripTex2[0] = RwTextureRead("raindrip64_d", nil);
-	gpRaindripRaster2[0] = RwTextureGetRaster(gpRaindripTex2[0]);
+	gpRainDripDarkTex[0] = RwTextureRead("raindrip64_d", nil);
+	gpRainDripDarkRaster[0] = RwTextureGetRaster(gpRainDripDarkTex[0]);
 	
-	gpRaindripTex2[1] = RwTextureRead("raindripb64_d", nil);
-	gpRaindripRaster2[1] = RwTextureGetRaster(gpRaindripTex2[1]);
+	gpRainDripDarkTex[1] = RwTextureRead("raindripb64_d", nil);
+	gpRainDripDarkRaster[1] = RwTextureGetRaster(gpRainDripDarkTex[1]);
 	
 	CTxdStore::PopCurrentTxd();
 	
@@ -586,7 +586,7 @@ void CParticle::Initialise()
 				break;
 			
 			case PARTICLE_TEARGAS:
-				entry->m_ppRaster = &gpHeathazeRaster;
+				entry->m_ppRaster = &gpHeatHazeRaster;
 				break;
 			
 			case PARTICLE_SHARD:
@@ -749,11 +749,11 @@ void CParticle::Shutdown()
 	
 	for ( int32 i = 0; i < MAX_RAINDRIP_FILES; i++ )
 	{
-		RwTextureDestroy(gpRaindripTex1[i]);
-		gpRaindripTex1[i] = nil;
+		RwTextureDestroy(gpRainDripTex[i]);
+		gpRainDripTex[i] = nil;
 
-		RwTextureDestroy(gpRaindripTex2[i]);
-		gpRaindripTex2[i] = nil;
+		RwTextureDestroy(gpRainDripDarkTex[i]);
+		gpRainDripDarkTex[i] = nil;
 	}
 	
 	RwTextureDestroy(gpBoatWakeTex);
@@ -812,8 +812,8 @@ void CParticle::Shutdown()
 	
 	RwTextureDestroy(gpDotTex);
 	gpDotTex = nil;
-	RwTextureDestroy(gpHeathazeTex);
-	gpHeathazeTex = nil;
+	RwTextureDestroy(gpHeatHazeTex);
+	gpHeatHazeTex = nil;
 	
 	RwTextureDestroy(gpBeastieTex);
 	gpBeastieTex = nil;
@@ -1913,9 +1913,9 @@ void CParticle::Render()
 					FxType fxtype;
 
 					if ( particle->m_nCurrentFrame != 0 )
-						fxtype = FXTYPE_1;
+						fxtype = FXTYPE_WATER2;
 					else
-						fxtype = FXTYPE_0;
+						fxtype = FXTYPE_WATER1;
 		
 					CMBlur::AddRenderFx(Scene.camera, &rect, screenZ, fxtype);
 					
@@ -1939,9 +1939,9 @@ void CParticle::Render()
 					FxType fxtype;
 					
 					if ( particle->m_nCurrentFrame )
-						fxtype = FXTYPE_3;
+						fxtype = FXTYPE_BLOOD2;
 					else
-						fxtype = FXTYPE_2;
+						fxtype = FXTYPE_BLOOD1;
 					
 					CMBlur::AddRenderFx(Scene.camera, &rect, screenZ, fxtype);
 					
@@ -1957,7 +1957,7 @@ void CParticle::Render()
 					rect.w = int32(particle->m_vecPosition.x + SCREEN_STRETCH_X(particle->m_fSize * stretchTexW));
 					rect.h = int32(particle->m_vecPosition.y + SCREEN_STRETCH_Y(particle->m_fSize * stretchTexH * 0.15f));
 					
-					CMBlur::AddRenderFx(Scene.camera, &rect, screenZ, FXTYPE_4);
+					CMBlur::AddRenderFx(Scene.camera, &rect, screenZ, FXTYPE_HEATHAZE);
 					
 					canDraw = false;
 				}
@@ -1993,7 +1993,7 @@ void CParticle::Render()
 							break;
 					}
 														 
-					CMBlur::AddRenderFx(Scene.camera, &rect, screenZ, FXTYPE_4);
+					CMBlur::AddRenderFx(Scene.camera, &rect, screenZ, FXTYPE_HEATHAZE);
 					
 					canDraw = false;
 				}
@@ -2115,7 +2115,7 @@ void CParticle::Render()
 								* (CSprite::GetFarScreenZ() - CSprite::GetNearScreenZ()) * CDraw::GetFarClipZ()
 								/ ( (CDraw::GetFarClipZ() - CDraw::GetNearClipZ()) * coors.z ) + CSprite::GetNearScreenZ();
 
-							CMBlur::AddRenderFx(Scene.camera, &rect, screenZ, FXTYPE_5);
+							CMBlur::AddRenderFx(Scene.camera, &rect, screenZ, FXTYPE_SPLASH1);
 						}
 						else
 						{
