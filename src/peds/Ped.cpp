@@ -2664,19 +2664,19 @@ CPed::ProcessControl(void)
 					Flee();
 					break;
 				case PED_FOLLOW_PATH:
-					CPed::FollowPath();
+					FollowPath();
 					break;
 				case PED_PAUSE:
-					CPed::Pause();
+					Pause();
 					break;
 				case PED_ATTACK:
-					CPed::Attack();
+					Attack();
 					break;
 				case PED_FIGHT:
-					CPed::Fight();
+					Fight();
 					break;
 				case PED_CHAT:
-					CPed::Chat();
+					Chat();
 					break;
 				case PED_AIM_GUN:
 					if (m_pPointGunAt && m_pPointGunAt->IsPed()
@@ -9695,17 +9695,6 @@ CPed::Say(uint16 audio, int32 time)
 		m_delayedSoundID = audio;
 		m_delayedSoundTimer = CTimer::GetTimeInMilliseconds() + time;
 	}
-}
-
-void
-CPed::SetWeaponLockOnTarget(CEntity *target)
-{
-	if (m_pPointGunAt)
-		m_pPointGunAt->CleanUpOldReference(&m_pPointGunAt);
-
-	m_pPointGunAt = (CPed*)target;
-	if (target)
-		((CEntity*)target)->RegisterReference(&m_pPointGunAt);
 }
 
 #ifdef COMPATIBLE_SAVES

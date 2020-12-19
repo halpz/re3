@@ -1,6 +1,6 @@
 #pragma once
 
-template<typename T, int n>
+template<typename T, int32 n>
 class CStore
 {
 public:

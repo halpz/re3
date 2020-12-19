@@ -2746,7 +2746,7 @@ CCam::Process_1rstPersonPedOnPC(const CVector&, float TargetOrientation, float, 
 		Source = HeadPos;
 
 		// unused:
-		// ((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(&MidPos, PED_MID);
+		// ((CPed*)CamTargetEntity)->m_pedIK.GetComponentPosition(MidPos, PED_MID);
 		// Source - MidPos;
 
 		// Look around
@@ -5053,7 +5053,6 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	float stickX = -(pad->GetCarGunLeftRight());
 	float stickY = pad->GetCarGunUpDown();
 
-	// In SA this checks for m_bUseMouse3rdPerson so num2/num8 do not move camera when Keyboard & Mouse controls are used.
 	if (CCamera::m_bUseMouse3rdPerson)
 		stickY = 0.0f;
 

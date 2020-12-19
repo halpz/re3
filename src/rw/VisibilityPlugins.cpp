@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include "RwHelper.h"
 #include "templates.h"
 #include "main.h"
 #include "Entity.h"
@@ -11,6 +12,7 @@
 #include "VisibilityPlugins.h"
 #include "World.h"
 #include "custompipes.h"
+#include "MemoryHeap.h"
 
 //--MIAMI: file done
 
@@ -837,7 +839,6 @@ CVisibilityPlugins::GetAtomicId(RpAtomic *atomic)
 	return ATOMICEXT(atomic)->flags;
 }
 
-// This is rather useless, but whatever
 void
 CVisibilityPlugins::SetAtomicRenderCallback(RpAtomic *atomic, RpAtomicCallBackRender cb)
 {

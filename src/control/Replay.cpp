@@ -1447,7 +1447,7 @@ void CReplay::RestoreStuffFromMem(void)
 		ped->m_rwObject = nil;
 		ped->m_modelIndex = -1;
 		ped->SetModelIndex(mi);
-		ped->m_pVehicleAnim = 0;
+		ped->m_pVehicleAnim = nil;
 		ped->m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, ped);
 		DMAudio.SetEntityStatus(ped->m_audioEntityId, true);
 		CPopulation::UpdatePedCount((ePedType)ped->m_nPedType, false);

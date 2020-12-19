@@ -18,6 +18,7 @@
 #include "HandlingMgr.h"
 #include "Heli.h"
 #include "Plane.h"
+#include "MemoryHeap.h"
 
 //--MIAMI: file done
 
@@ -564,7 +565,9 @@ CPlane::ProcessControl(void)
 		if(m_rwObject && RwObjectGetType(m_rwObject) == rpCLUMP){
 			DeleteRwObject();
 			if(mi->m_planeLodId != -1){
+				PUSH_MEMID(MEMID_WORLD);
 				m_rwObject = CModelInfo::GetModelInfo(mi->m_planeLodId)->CreateInstance();
+				POP_MEMID();
 				if(m_rwObject)
 					m_matrix.AttachRW(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic*)m_rwObject)));
 			}

@@ -22,7 +22,7 @@
 #include "Game.h"
 #include "World.h"
 #include "PlayerInfo.h"
-#include "FrontendControls.h"
+#include "FrontEndControls.h"
 #include "MemoryCard.h"
 
 #define CRect_SZ(x, y, w, h) CRect(x, y, x+w, y+h)

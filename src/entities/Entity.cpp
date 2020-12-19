@@ -32,6 +32,7 @@
 #include "Dummy.h"
 #include "WindModifiers.h"
 #include "Occlusion.h"
+#include "MemoryHeap.h"
 
 //--MIAMI: file done
 
@@ -301,7 +302,11 @@ CEntity::CreateRwObject(void)
 	CBaseModelInfo *mi;
 
 	mi = CModelInfo::GetModelInfo(m_modelIndex);
+
+	PUSH_MEMID(MEMID_WORLD);
 	m_rwObject = mi->CreateInstance();
+	POP_MEMID();
+
 	if(m_rwObject){
 		if(IsBuilding())
 			gBuildings++;

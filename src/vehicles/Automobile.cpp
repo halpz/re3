@@ -5249,7 +5249,6 @@ CPed::MakeTyresMuddySectorList(CPtrList &list)
 	}
 }
 
-
 void
 CAutomobile::SetBusDoorTimer(uint32 timer, uint8 type)
 {

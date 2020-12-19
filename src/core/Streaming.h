@@ -210,4 +210,6 @@ public:
 	static void MemoryCardLoad(uint8 *buffer, uint32 length);
 
 	static void UpdateForAnimViewer(void);
+
+	static void PrintStreamingBufferState();
 };

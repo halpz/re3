@@ -27,6 +27,8 @@
 
 //--MIAMI: file done
 
+bool gbShowPedRoadGroups;
+bool gbShowCarRoadGroups;
 bool gbShowCollisionPolys;
 bool gbShowCollisionLines;
 bool gbBigWhiteDebugLightSwitchedOn;
@@ -36,6 +38,10 @@ bool gbDontRenderBigBuildings;
 bool gbDontRenderPeds;
 bool gbDontRenderObjects;
 bool gbDontRenderVehicles;
+
+// unused
+int16 TestCloseThings;
+int16 TestBigThings;
 
 struct EntityInfo
 {
@@ -61,6 +67,10 @@ CVehicle *CRenderer::m_pFirstPersonVehicle;
 bool CRenderer::m_loadingPriority;
 float CRenderer::ms_lodDistScale = 1.2f;
 
+// unused
+BlockedRange CRenderer::aBlockedRanges[16];
+BlockedRange* CRenderer::pFullBlockedRanges;
+BlockedRange* CRenderer::pEmptyBlockedRanges;
 
 void
 CRenderer::Init(void)
@@ -1222,7 +1232,21 @@ CRenderer::ConstructRenderList(void)
 	ms_nNoOfInVisibleEntities = 0;
 }
 	ms_vecCameraPosition = TheCamera.GetPosition();
-	// TODO: blocked ranges, but unused
+
+	// unused
+	pFullBlockedRanges = nil;
+	pEmptyBlockedRanges = aBlockedRanges;
+	for(int i = 0; i < 16; i++){
+		aBlockedRanges[i].prev = &aBlockedRanges[i-1];
+		aBlockedRanges[i].next = &aBlockedRanges[i+1];
+	}
+	aBlockedRanges[0].prev = nil;
+	aBlockedRanges[15].next = nil;
+
+	// unused
+	TestCloseThings = 0;
+	TestBigThings = 0;
+
 	ScanWorld();
 }
 

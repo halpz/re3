@@ -405,13 +405,13 @@ CPlayerInfo::Process(void)
 		uint32 timeWithoutRemoteCar = CTimer::GetTimeInMilliseconds() - m_nTimeLostRemoteCar;
 		if (CTimer::GetPreviousTimeInMilliseconds() - m_nTimeLostRemoteCar < 1000 && timeWithoutRemoteCar >= 1000 && m_WBState == WBSTATE_PLAYING && field_D6) {
 			TheCamera.SetFadeColour(0, 0, 0);
-			TheCamera.Fade(1.0f, 0);
+			TheCamera.Fade(1.0f, FADE_OUT);
 		}
 		if (timeWithoutRemoteCar > 2000) {
 			if (m_WBState == WBSTATE_PLAYING && field_D6) {
 				TheCamera.RestoreWithJumpCut();
 				TheCamera.SetFadeColour(0, 0, 0);
-				TheCamera.Fade(1.0f, 1);
+				TheCamera.Fade(1.0f, FADE_IN);
 				TheCamera.Process();
 				CTimer::Stop();
 				CCullZones::ForceCullZoneCoors(TheCamera.GetPosition());
