@@ -3,6 +3,7 @@
 #include <dinput.h>
 #endif
 
+#define FORCE_PC_SCALING
 #define WITHWINDOWS
 #include "common.h"
 #ifndef PS2_MENU
