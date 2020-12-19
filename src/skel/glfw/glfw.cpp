@@ -70,9 +70,6 @@ static psGlobalType PsGlobal;
 
 #define PSGLOBAL(var) (((psGlobalType *)(RsGlobal.ps))->var)
 
-#undef MAKEPOINTS
-#define MAKEPOINTS(l)		(*((POINTS /*FAR*/ *)&(l)))
-
 size_t _dwMemAvailPhys;
 RwUInt32 gGameState;
 
@@ -870,6 +867,36 @@ void _InputInitialiseJoys()
 	PSGLOBAL(joy1id) = -1;
 	PSGLOBAL(joy2id) = -1;
 
+	// Load our gamepad mappings.
+#define SDL_GAMEPAD_DB_PATH "gamecontrollerdb.txt"
+	FILE *f = fopen(SDL_GAMEPAD_DB_PATH, "rb");
+	if (f) {
+		fseek(f, 0, SEEK_END);
+		size_t fsize = ftell(f);
+		fseek(f, 0, SEEK_SET);
+
+		char *db = (char*)malloc(fsize + 1);
+		if (fread(db, 1, fsize, f) == fsize) {
+			db[fsize] = '\0';
+
+			if (glfwUpdateGamepadMappings(db) == GLFW_FALSE)
+				Error("glfwUpdateGamepadMappings didn't succeed, check " SDL_GAMEPAD_DB_PATH ".\n");
+		} else
+			Error("fread on " SDL_GAMEPAD_DB_PATH " wasn't successful.\n");
+
+		free(db);
+		fclose(f);
+	} else
+		printf("You don't seem to have copied " SDL_GAMEPAD_DB_PATH " file from re3/gamefiles to GTA3 directory. Some gamepads may not be recognized.\n");
+
+#undef SDL_GAMEPAD_DB_PATH
+
+	// But always overwrite it with the one in SDL_GAMECONTROLLERCONFIG.
+	char const* EnvControlConfig = getenv("SDL_GAMECONTROLLERCONFIG");
+	if (EnvControlConfig != nil) {
+		glfwUpdateGamepadMappings(EnvControlConfig);
+	}
+
 	for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++) {
 		if (glfwJoystickPresent(i) && !IsThisJoystickBlacklisted(i)) {
 			if (PSGLOBAL(joy1id) == -1)
@@ -1175,15 +1202,15 @@ void InitialiseLanguage()
 		}
 	}
 
-	TheText.Unload();
-	TheText.Load();
-
 #ifndef _WIN32
 	// TODO this is needed for strcasecmp to work correctly across all languages, but can these cause other problems??
 	setlocale(LC_CTYPE, "C");
 	setlocale(LC_COLLATE, "C");
 	setlocale(LC_NUMERIC, "C");
 #endif
+
+	TheText.Unload();
+	TheText.Load();
 }
 
 /*
@@ -1230,17 +1257,11 @@ void resizeCB(GLFWwindow* window, int width, int height) {
 	* memory things don't work.
 	*/
 	/* redraw window */
-#ifndef MASTER
-	if (RwInitialised && (gGameState == GS_PLAYING_GAME || gGameState == GS_ANIMVIEWER))
-	{
-		RsEventHandler((gGameState == GS_PLAYING_GAME ? rsIDLE : rsANIMVIEWER), (void *)TRUE);
-	}
-#else
+
 	if (RwInitialised && gGameState == GS_PLAYING_GAME)
 	{
 		RsEventHandler(rsIDLE, (void *)TRUE);
 	}
-#endif
 
 	if (RwInitialised && height > 0 && width > 0) {
 		RwRect r;
@@ -1619,18 +1640,6 @@ main(int argc, char *argv[])
 		FrontEndMenuManager.DrawMemoryCardStartUpMenus();
 	}
 #endif
-
-	if (TurnOnAnimViewer)
-	{
-#ifndef MASTER
-		CAnimViewer::Initialise();
-#ifndef PS2_MENU
-		FrontEndMenuManager.m_bGameNotLoaded = false;
-#endif
-		gGameState = GS_ANIMVIEWER;
-		TurnOnAnimViewer = false;
-#endif
-	}
 	
 	initkeymap();
 
@@ -1650,6 +1659,18 @@ main(int argc, char *argv[])
 		* Enter the message processing loop...
 		*/
 
+#ifndef MASTER
+		if (gbModelViewer) {
+			// This is TheModelViewer in LCS, but not compiled on III Mobile.
+			LoadingScreen("Loading the ModelViewer", NULL, GetRandomSplashScreen());
+			CAnimViewer::Initialise();
+			CTimer::Update();
+#ifndef PS2_MENU
+			FrontEndMenuManager.m_bGameNotLoaded = false;
+#endif
+		}
+#endif
+
 #ifdef PS2_MENU
 		if (TheMemoryCard.m_bWantToLoad)
 			LoadSplash(GetLevelSplashScreen(CGame::currLevel));
@@ -1664,7 +1685,13 @@ main(int argc, char *argv[])
 #endif
 		{
 			glfwPollEvents();
-			if( ForegroundApp )
+#ifndef MASTER
+			if (gbModelViewer) {
+				// This is TheModelViewerCore in LCS, but TheModelViewer on other state-machine III-VCs.
+				TheModelViewer();
+			} else
+#endif
+			if ( ForegroundApp )
 			{
 				switch ( gGameState )
 				{
@@ -1867,18 +1894,6 @@ main(int argc, char *argv[])
 						}
 						break;
 					}
-#ifndef MASTER
-					case GS_ANIMVIEWER:
-					{
-						float ms = (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
-						if (RwInitialised)
-						{
-							if (!CMenuManager::m_PrefsFrameLimiter || (1000.0f / (float)RsGlobal.maxFPS) < ms)
-								RsEventHandler(rsANIMVIEWER, (void*)TRUE);
-						}
-						break;
-					}
-#endif
 				}
 			}
 			else
@@ -1950,12 +1965,13 @@ main(int argc, char *argv[])
 		}
 		else
 		{
+#ifndef MASTER
+			if ( gbModelViewer )
+				CAnimViewer::Shutdown();
+			else
+#endif
 			if ( gGameState == GS_PLAYING_GAME )
 				CGame::ShutDown();
-#ifndef MASTER
-			else if ( gGameState == GS_ANIMVIEWER )
-				CAnimViewer::Shutdown();
-#endif
 			
 			CTimer::Stop();
 			
@@ -1977,12 +1993,13 @@ main(int argc, char *argv[])
 	}
 	
 
+#ifndef MASTER
+	if ( gbModelViewer )
+		CAnimViewer::Shutdown();
+	else
+#endif
 	if ( gGameState == GS_PLAYING_GAME )
 		CGame::ShutDown();
-#ifndef MASTER
-	else if ( gGameState == GS_ANIMVIEWER )
-		CAnimViewer::Shutdown();
-#endif
 
 	DMAudio.Terminate();
 	

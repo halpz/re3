@@ -179,10 +179,8 @@ void CGarages::Shutdown(void)
 void CGarages::Update(void)
 {
 	static int GarageToBeTidied = 0;
-#ifndef GTA_PS2
 	if (CReplay::IsPlayingBack())
 		return;
-#endif
 	bCamShouldBeOutisde = false;
 	TheCamera.pToGarageWeAreIn = nil;
 	TheCamera.pToGarageWeAreInForHackAvoidFirstPerson = nil;
@@ -202,7 +200,7 @@ void CGarages::Update(void)
 		aGarages[GarageToBeTidied].TidyUpGarage();
 }
 
-int16 CGarages::AddOne(CVector p1, CVector p2, eGarageType type, int32 targetId)
+int16 CGarages::AddOne(CVector p1, CVector p2, uint8 type, int32 targetId)
 {
 	if (NumGarages >= NUM_GARAGES) {
 		assert(0);
@@ -285,7 +283,7 @@ int16 CGarages::AddOne(CVector p1, CVector p2, eGarageType type, int32 targetId)
 	return NumGarages++;
 }
 
-void CGarages::ChangeGarageType(int16 garage, eGarageType type, int32 mi)
+void CGarages::ChangeGarageType(int16 garage, uint8 type, int32 mi)
 {
 	CGarage* pGarage = &aGarages[garage];
 	pGarage->m_eGarageType = type;
@@ -2198,7 +2196,7 @@ void CGarages::CloseHideOutGaragesBeforeSave()
 	}
 }
 
-int32 CGarages::CountCarsInHideoutGarage(eGarageType type)
+int32 CGarages::CountCarsInHideoutGarage(uint8 type)
 {
 	int32 total = 0;
 	for (int i = 0; i < NUM_GARAGE_STORED_CARS; i++) {
@@ -2218,7 +2216,7 @@ int32 CGarages::CountCarsInHideoutGarage(eGarageType type)
 	return total;
 }
 
-int32 CGarages::FindMaxNumStoredCarsForGarage(eGarageType type)
+int32 CGarages::FindMaxNumStoredCarsForGarage(uint8 type)
 {
 	switch (type) {
 	case GARAGE_HIDEOUT_ONE:

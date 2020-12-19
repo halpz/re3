@@ -408,11 +408,6 @@ CCarCtrl::GenerateOneRandomCar()
 	float directionNextLinkX;
 	float directionNextLinkY;
 	if (positionBetweenNodes < 0.5f) {
-		float currentPathLinkForwardX = pVehicle->AutoPilot.m_nCurrentDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo].GetDirX();
-		float currentPathLinkForwardY = pVehicle->AutoPilot.m_nCurrentDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo].GetDirY();
-		float nextPathLinkForwardX = pVehicle->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo].GetDirX();
-		float nextPathLinkForwardY = pVehicle->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo].GetDirY();
-
 		pCurrentLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo];
 		pNextLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo];
 		positionOnCurrentLinkIncludingLane = CVector(
@@ -441,11 +436,6 @@ CCarCtrl::GenerateOneRandomCar()
 		PickNextNodeRandomly(pVehicle);
 		pVehicle->AutoPilot.m_nTimeEnteredCurve = CTimer::GetTimeInMilliseconds() -
 			(uint32)((positionBetweenNodes - 0.5f) * pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve);
-
-		float currentPathLinkForwardX = pVehicle->AutoPilot.m_nCurrentDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo].GetDirX();
-		float currentPathLinkForwardY = pVehicle->AutoPilot.m_nCurrentDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo].GetDirY();
-		float nextPathLinkForwardX = pVehicle->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo].GetDirX();
-		float nextPathLinkForwardY = pVehicle->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo].GetDirY();
 
 		pCurrentLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo];
 		pNextLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo];
@@ -2348,7 +2338,11 @@ void CCarCtrl::SteerAICarWithPhysicsFollowPath(CVehicle* pVehicle, float* pSwerv
 	switch (pVehicle->AutoPilot.m_nDrivingStyle) {
 	case DRIVINGSTYLE_STOP_FOR_CARS:
 	case DRIVINGSTYLE_SLOW_DOWN_FOR_CARS:
-		speedStyleMultiplier = FindMaximumSpeedForThisCarInTraffic(pVehicle) / pVehicle->AutoPilot.m_nCruiseSpeed;
+		speedStyleMultiplier = FindMaximumSpeedForThisCarInTraffic(pVehicle);
+#ifdef FIX_BUGS
+		if (pVehicle->AutoPilot.m_nCruiseSpeed != 0)
+#endif
+			speedStyleMultiplier /= pVehicle->AutoPilot.m_nCruiseSpeed;
 		break;
 	default:
 		speedStyleMultiplier = 1.0f;

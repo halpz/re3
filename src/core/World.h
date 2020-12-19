@@ -55,7 +55,7 @@ struct CStoredCollPoly;
 
 class CWorld
 {
-	static CPtrList ms_bigBuildingsList[4];
+	static CPtrList ms_bigBuildingsList[NUM_LEVELS];
 	static CPtrList ms_listMovingEntityPtrs;
 	static CSector ms_aSectors[NUMSECTORS_Y][NUMSECTORS_X];
 	static uint16 ms_nCurrentScanCode;
@@ -157,14 +157,3 @@ public:
 
 extern CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];
 
-class CPlayerPed;
-class CVehicle;
-CPlayerPed *FindPlayerPed(void);
-CVehicle *FindPlayerVehicle(void);
-CVehicle *FindPlayerTrain(void);
-CEntity *FindPlayerEntity(void);
-CVector FindPlayerCoors(void);
-CVector &FindPlayerSpeed(void);
-const CVector &FindPlayerCentreOfWorld(int32 player);
-const CVector &FindPlayerCentreOfWorld_NoSniperShift(void);
-float FindPlayerHeading(void);

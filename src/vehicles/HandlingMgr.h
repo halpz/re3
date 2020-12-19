@@ -65,7 +65,7 @@ enum tVehicleType
 	NUMHANDLINGS
 };
 
-enum tField : uint32 // most likely a handling field enum, never used so :shrug:
+enum tField // most likely a handling field enum, never used so :shrug:
 {
 
 };

@@ -69,7 +69,7 @@ CCopPed::CCopPed(eCopType copType) : CPed(PEDTYPE_COP)
 	m_bStopAndShootDisabledZone = false;
 	m_bZoneDisabled = false;
 	field_1364 = -1;
-	m_pPointGunAt = nil;
+	SetWeaponLockOnTarget(nil);
 
 	// VC also initializes in here, but as nil
 #ifdef FIX_BUGS
@@ -114,14 +114,14 @@ CCopPed::SetArrestPlayer(CPed *player)
 
 	} else if (player->m_nPedState != PED_DIE && player->m_nPedState != PED_DEAD && player->m_nPedState != PED_ARRESTED) {
 		player->m_nLastPedState = player->m_nPedState;
-		player->m_nPedState = PED_ARRESTED;
+		player->SetPedState(PED_ARRESTED);
 
 		FindPlayerPed()->m_bCanBeDamaged = false;
 		((CPlayerPed*)player)->m_pArrestingCop = this;
 		this->RegisterReference((CEntity**) &((CPlayerPed*)player)->m_pArrestingCop);
 	}
 
-	m_nPedState = PED_ARREST_PLAYER;
+	SetPedState(PED_ARREST_PLAYER);
 	SetObjective(OBJECTIVE_NONE);
 	m_prevObjective = OBJECTIVE_NONE;
 	bIsPointingGunAt = false;
@@ -229,7 +229,7 @@ CCopPed::ArrestPlayer(void)
 	CPed *suspect = (CPed*)m_pSeekTarget;
 	if (suspect) {
 		if (suspect->CanSetPedState())
-			suspect->m_nPedState = PED_ARRESTED;
+			suspect->SetPedState(PED_ARRESTED);
 
 		if (suspect->bInVehicle && m_pMyVehicle && suspect->m_pMyVehicle == m_pMyVehicle) {
 
@@ -244,7 +244,7 @@ CCopPed::ArrestPlayer(void)
 				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_ARREST_GUN, 4.0f);
 
 			CVector suspMidPos;
-			suspect->m_pedIK.GetComponentPosition((RwV3d*)suspMidPos, PED_MID);
+			suspect->m_pedIK.GetComponentPosition(suspMidPos, PED_MID);
 			m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(suspMidPos.x, suspMidPos.y,
 				GetPosition().x, GetPosition().y);
 
@@ -472,10 +472,7 @@ CCopPed::CopAI(void)
 					if (!CWorld::ProcessLineOfSight(gunPos, playerOrHisVeh->GetPosition(), foundCol, foundEnt,
 						false, true, false, false, true, false, false)
 						|| foundEnt && foundEnt == playerOrHisVeh) {
-						m_pPointGunAt = playerOrHisVeh;
-						if (playerOrHisVeh)
-							playerOrHisVeh->RegisterReference((CEntity**) &m_pPointGunAt);
-
+						SetWeaponLockOnTarget(playerOrHisVeh);
 						SetAttack(playerOrHisVeh);
 						SetShootTimer(CGeneral::GetRandomNumberInRange(500, 1000));
 					}

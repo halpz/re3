@@ -235,7 +235,7 @@ enum AudioEntityHandle {
 	AEHANDLE_ERROR_BADAUDIOTYPE = -1,
 };
 
-enum eAudioType : int32
+enum eAudioType
 {
 	AUDIOTYPE_PHYSICAL = 0,
 	AUDIOTYPE_EXPLOSION,

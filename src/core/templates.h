@@ -1,31 +1,31 @@
 #pragma once
 
-template<typename T, int n>
+template<typename T, int32 n>
 class CStore
 {
 public:
-	int allocPtr;
+	int32 allocPtr;
 	T store[n];
 
-	T *alloc(void){
-		if(this->allocPtr >= n){
+	T *Alloc(void){
+		if(allocPtr >= n){
 			printf("Size of this thing:%d needs increasing\n", n);
 			assert(0);
 		}
-		return &this->store[this->allocPtr++];
+		return &store[allocPtr++];
 	}
-	void clear(void){
-		this->allocPtr = 0;
+	void Clear(void){
+		allocPtr = 0;
 	}
-	int getIndex(T *item){
-		assert(item >= &this->store[0]);
-		assert(item < &this->store[n]);
-		return item - this->store;
+	int32 GetIndex(T *item){
+		assert(item >= &store[0]);
+		assert(item < &store[n]);
+		return item - store;
 	}
-	T *getItem(int index){
+	T *GetItem(int32 index){
 		assert(index >= 0);
 		assert(index < n);
-		return &this->store[index];
+		return &store[index];
 	}
 };
 
@@ -40,12 +40,11 @@ class CPool
 		};
 			uint8 u;
 	}     *m_flags;
-	int    m_size;
-	int    m_allocPtr;
+	int32  m_size;
+	int32  m_allocPtr;
 
 public:
-	CPool(int size){
-		// TODO: use new here
+	CPool(int32 size){
 		m_entries = (U*)new uint8[sizeof(U)*size];
 		m_flags = (Flags*)new uint8[sizeof(Flags)*size];
 		m_size = size;
@@ -69,7 +68,7 @@ public:
 			m_allocPtr = 0;
 		}
 	}
-	int GetSize(void) const { return m_size; }
+	int32 GetSize(void) const { return m_size; }
 	T *New(void){
 		bool wrapped = false;
 		do
@@ -93,12 +92,12 @@ public:
 		m_flags[m_allocPtr].id++;
 		return (T*)&m_entries[m_allocPtr];
 	}
-	T *New(int handle){
+	T *New(int32 handle){
 		T *entry = (T*)&m_entries[handle>>8];
 		SetNotFreeAt(handle);
 		return entry;
 	}
-	void SetNotFreeAt(int handle){
+	void SetNotFreeAt(int32 handle){
 		int idx = handle>>8;
 		m_flags[idx].free = 0;
 		m_flags[idx].id = handle & 0x7F;
@@ -123,21 +122,21 @@ public:
 		return m_flags[handle>>8].u == (handle & 0xFF) ?
 		       (T*)&m_entries[handle >> 8] : nil;
 	}
-	int GetIndex(T *entry){
+	int32 GetIndex(T *entry){
 		int i = GetJustIndex_NoFreeAssert(entry);
 		return m_flags[i].u + (i<<8);
 	}
-	int GetJustIndex(T *entry){
+	int32 GetJustIndex(T *entry){
 		int index = GetJustIndex_NoFreeAssert(entry);
 		assert(!IsFreeSlot(index));
 		return index;
 	}
-	int GetJustIndex_NoFreeAssert(T* entry){
+	int32 GetJustIndex_NoFreeAssert(T* entry){
 		int index = ((U*)entry - m_entries);
 		assert((U*)entry == (U*)&m_entries[index]); // cast is unsafe - check required
 		return index;
 	}
-	int GetNoOfUsedSpaces(void) const{
+	int32 GetNoOfUsedSpaces(void) const{
 		int i;
 		int n = 0;
 		for(i = 0; i < m_size; i++)
@@ -241,7 +240,7 @@ public:
 		link->Remove();		// remove from list
 		freeHead.Insert(link);	// insert into free list
 	}
-	int Count(void){
+	int32 Count(void){
 		int n = 0;
 		CLink<T> *lnk;
 		for(lnk = head.next; lnk != &tail; lnk = lnk->next)

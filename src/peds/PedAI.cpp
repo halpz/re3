@@ -620,9 +620,7 @@ CPed::UpdateFromLeader(void)
 						m_pLookTarget->RegisterReference((CEntity **) &m_pLookTarget);
 						TurnBody();
 						if (m_attackTimer < CTimer::GetTimeInMilliseconds() && !GetWeapon()->IsTypeMelee()) {
-							m_pPointGunAt = m_threatEntity;
-							if (m_threatEntity)
-								m_threatEntity->RegisterReference((CEntity **) &m_pPointGunAt);
+							SetWeaponLockOnTarget(m_threatEntity);
 							SetAttack(m_threatEntity);
 						}
 					}
@@ -811,10 +809,10 @@ CPed::ProcessObjective(void)
 				break;
 			}
 			case OBJECTIVE_WAIT_IN_CAR:
-				m_nPedState = PED_DRIVING;
+				SetPedState(PED_DRIVING);
 				break;
 			case OBJECTIVE_WAIT_IN_CAR_THEN_GET_OUT:
-				m_nPedState = PED_DRIVING;
+				SetPedState(PED_DRIVING);
 				break;
 			case OBJECTIVE_KILL_CHAR_ANY_MEANS:
 			{
@@ -972,9 +970,9 @@ CPed::ProcessObjective(void)
 				}
 				CWeaponInfo *wepInfo = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
 				float wepRange = wepInfo->m_fRange;
-				float wepRangeAdjusted;
+				float maxDistToKeep;
 				if (GetWeapon()->m_eWeaponType != WEAPONTYPE_UNARMED) {
-					wepRangeAdjusted = wepRange / 3.0f;
+					maxDistToKeep = wepRange / 3.0f;
 				} else {
 					if (m_nPedState == PED_FIGHT) {
 						if (!IsPlayer() && !(m_pedStats->m_flags & STAT_CAN_KICK))
@@ -982,10 +980,10 @@ CPed::ProcessObjective(void)
 					} else {
 						wepRange = 1.3f;
 					}
-					wepRangeAdjusted = wepRange;
+					maxDistToKeep = wepRange;
 				}
-				if (m_pedInObjective->m_getUpTimer > CTimer::GetTimeInMilliseconds() && wepRangeAdjusted < 2.5f) {
-					wepRangeAdjusted = 2.5f;
+				if (m_pedInObjective->m_getUpTimer > CTimer::GetTimeInMilliseconds() && maxDistToKeep < 2.5f) {
+					maxDistToKeep = 2.5f;
 				}
 				if (m_pedInObjective->IsPlayer() && m_nPedType != PEDTYPE_COP
 					&& CharCreatedBy != MISSION_CHAR && FindPlayerPed()->m_pWanted->m_CurrentCops) {
@@ -1015,21 +1013,18 @@ CPed::ProcessObjective(void)
 								// I hope so
 								CVector ourHead = GetMatrix() * CVector(0.5f, 0.0f, 0.6f);
 								CVector maxShotPos = vehOfTarget->GetPosition() - ourHead;
-								maxShotPos.Normalise();
-								maxShotPos = maxShotPos * wepInfo->m_fRange + ourHead;
+								maxShotPos *= wepInfo->m_fRange / maxShotPos.Magnitude();
+								maxShotPos += ourHead;
 
-								CWorld::bIncludeDeadPeds = true;
 								CColPoint foundCol;
 								CEntity *foundEnt;
-								CWorld::ProcessLineOfSight(ourHead, maxShotPos, foundCol, foundEnt,
-									true, true, true, true, false, true, false);
+
+								CWorld::bIncludeDeadPeds = true;
+								CWorld::ProcessLineOfSight(ourHead, maxShotPos, foundCol, foundEnt, true, true, true, true, false, true, false);
 								CWorld::bIncludeDeadPeds = false;
 								if (foundEnt == vehOfTarget) {
 									SetAttack(vehOfTarget);
-									m_pPointGunAt = vehOfTarget;
-									if (vehOfTarget)
-										vehOfTarget->RegisterReference((CEntity **) &m_pPointGunAt);
-
+									SetWeaponLockOnTarget(vehOfTarget);
 									SetShootTimer(CGeneral::GetRandomNumberInRange(500, 2000));
 									if (distWithTargetSc <= m_distanceToCountSeekDone) {
 										SetAttackTimer(CGeneral::GetRandomNumberInRange(200, 500));
@@ -1038,8 +1033,7 @@ CPed::ProcessObjective(void)
 										SetAttackTimer(CGeneral::GetRandomNumberInRange(2000, 5000));
 									}
 								}
-							}
-							else if (m_nPedState != PED_ATTACK && !bKindaStayInSamePlace && !killPlayerInNoPoliceZone) {
+							} else if (m_nPedState != PED_ATTACK && !bKindaStayInSamePlace && !killPlayerInNoPoliceZone) {
 								if (vehOfTarget) {
 									if (m_nPedType == PEDTYPE_COP || vehOfTarget->bIsBus) {
 										GoToNearestDoor(vehOfTarget);
@@ -1086,7 +1080,7 @@ CPed::ProcessObjective(void)
 						|| distWithTargetSc > m_distanceToCountSeekDone && !CanSeeEntity(m_pedInObjective)) {
 
 						if (m_pedInObjective->EnteringCar())
-							wepRangeAdjusted = 2.0f;
+							maxDistToKeep = 2.0f;
 
 						if (bUsePedNodeSeek) {
 							CVector bestCoords(0.0f, 0.0f, 0.0f);
@@ -1100,7 +1094,7 @@ CPed::ProcessObjective(void)
 
 							SetSeek(m_vecSeekPos, m_distanceToCountSeekDone);
 						} else {
-							SetSeek(m_pedInObjective, wepRangeAdjusted);
+							SetSeek(m_pedInObjective, maxDistToKeep);
 						}
 						bCrouchWhenShooting = false;
 						if (m_pedInObjective->m_pCurrentPhysSurface && distWithTargetSc < 5.0f) {
@@ -1147,32 +1141,27 @@ CPed::ProcessObjective(void)
 						CVector target;
 						CVector ourHead = GetMatrix() * CVector(0.5f, 0.0f, 0.6f);
 						if (m_pedInObjective->IsPed())
-							m_pedInObjective->m_pedIK.GetComponentPosition((RwV3d*)&target, PED_MID);
+							m_pedInObjective->m_pedIK.GetComponentPosition(target, PED_MID);
 						else
 							target = m_pedInObjective->GetPosition();
 
 						target -= ourHead;
-						target.Normalise();
-						target = target * wepInfo->m_fRange + ourHead;
+						target *= wepInfo->m_fRange / target.Magnitude();
+						target += ourHead;
+
+						CColPoint foundCol;
+						CEntity *foundEnt = nil;
 
 						CWorld::bIncludeDeadPeds = true;
-						CEntity *foundEnt = nil;
-						CColPoint foundCol;
-
-						CWorld::ProcessLineOfSight(
-							ourHead, target, foundCol, foundEnt,
-							true, true, true, false, true, false);
-						CWorld::bIncludeDeadPeds = 0;
+						CWorld::ProcessLineOfSight(ourHead, target, foundCol, foundEnt, true, true, true, true, false, true, false);
+						CWorld::bIncludeDeadPeds = false;
 						if (foundEnt == m_pedInObjective) {
 							SetAttack(m_pedInObjective);
-							m_pPointGunAt = m_pedInObjective;
-							if (m_pedInObjective)
-								m_pedInObjective->RegisterReference((CEntity **) &m_pPointGunAt);
-
+							SetWeaponLockOnTarget(m_pedInObjective);
 							SetShootTimer(CGeneral::GetRandomNumberInRange(500.0f, 2000.0f));
 
 							int time;
-							if (distWithTargetSc <= wepRangeAdjusted)
+							if (distWithTargetSc <= maxDistToKeep)
 								time = CGeneral::GetRandomNumberInRange(100.0f, 500.0f);
 							else
 								time = CGeneral::GetRandomNumberInRange(1500.0f, 3000.0f);
@@ -1180,25 +1169,27 @@ CPed::ProcessObjective(void)
 							SetAttackTimer(time);
 							bObstacleShowedUpDuringKillObjective = false;
 
-						} else if (foundEnt) {
-							if (foundEnt->IsPed()) {
-								SetAttackTimer(CGeneral::GetRandomNumberInRange(500.0f, 1000.0f));
-								bObstacleShowedUpDuringKillObjective = false;
-							} else {
-								if (foundEnt->IsObject()) {
-									SetAttackTimer(CGeneral::GetRandomNumberInRange(200.0f, 400.0f));
-									bObstacleShowedUpDuringKillObjective = true;
-								} else if (foundEnt->IsVehicle()) {
-									SetAttackTimer(CGeneral::GetRandomNumberInRange(400.0f, 600.0f));
-									bObstacleShowedUpDuringKillObjective = true;
+						} else {
+							if (foundEnt) {
+								if (foundEnt->IsPed()) {
+									SetAttackTimer(CGeneral::GetRandomNumberInRange(500.0f, 1000.0f));
+									bObstacleShowedUpDuringKillObjective = false;
 								} else {
-									SetAttackTimer(CGeneral::GetRandomNumberInRange(700.0f, 1200.0f));
-									bObstacleShowedUpDuringKillObjective = true;
+									if (foundEnt->IsObject()) {
+										SetAttackTimer(CGeneral::GetRandomNumberInRange(200.0f, 400.0f));
+										bObstacleShowedUpDuringKillObjective = true;
+									} else if (foundEnt->IsVehicle()) {
+										SetAttackTimer(CGeneral::GetRandomNumberInRange(400.0f, 600.0f));
+										bObstacleShowedUpDuringKillObjective = true;
+									} else {
+										SetAttackTimer(CGeneral::GetRandomNumberInRange(700.0f, 1200.0f));
+										bObstacleShowedUpDuringKillObjective = true;
+									}
 								}
-							}
 
-							m_fleeFrom = foundEnt;
-							m_fleeFrom->RegisterReference((CEntity**) &m_fleeFrom);
+								m_fleeFrom = foundEnt;
+								m_fleeFrom->RegisterReference((CEntity**) &m_fleeFrom);
+							}
 							SetPointGunAt(m_pedInObjective);
 						}
 					}
@@ -1230,17 +1221,17 @@ CPed::ProcessObjective(void)
 							if (m_nPedType == PEDTYPE_COP) {
 								if (GetWeapon()->m_eWeaponType > WEAPONTYPE_COLT45
 									|| m_fleeFrom && m_fleeFrom->IsObject()) {
-									wepRangeAdjusted = 6.0f;
+									maxDistToKeep = 6.0f;
 								} else if (m_fleeFrom && m_fleeFrom->IsVehicle()) {
-									wepRangeAdjusted = 4.0f;
+									maxDistToKeep = 4.0f;
 								} else {
-									wepRangeAdjusted = 2.0f;
+									maxDistToKeep = 2.0f;
 								}
 							} else {
-								wepRangeAdjusted = 2.0f;
+								maxDistToKeep = 2.0f;
 							}
 						}
-						if (distWithTargetSc <= wepRangeAdjusted) {
+						if (distWithTargetSc <= maxDistToKeep) {
 							SetMoveState(PEDMOVE_STILL);
 							bIsPointingGunAt = true;
 							if (m_nPedState != PED_AIM_GUN && !bDuckAndCover) {
@@ -1251,7 +1242,7 @@ CPed::ProcessObjective(void)
 							if (m_nPedState != PED_SEEK_ENTITY && m_nPedState != PED_SEEK_POS
 								&& !bStopAndShoot && !killPlayerInNoPoliceZone && !bKindaStayInSamePlace) {
 								Say(SOUND_PED_ATTACK);
-								SetSeek(m_pedInObjective, wepRangeAdjusted);
+								SetSeek(m_pedInObjective, maxDistToKeep);
 								bIsRunning = true;
 							}
 						}
@@ -1541,21 +1532,18 @@ CPed::ProcessObjective(void)
 					// I hope so
 					CVector ourHead = GetMatrix() * CVector(0.5f, 0.0f, 0.6f);
 					CVector maxShotPos = m_carInObjective->GetPosition() - ourHead;
-					maxShotPos.Normalise();
-					maxShotPos = maxShotPos * wepInfo->m_fRange + ourHead;
+					maxShotPos *= wepInfo->m_fRange / maxShotPos.Magnitude();
+					maxShotPos += ourHead;
 
-					CWorld::bIncludeDeadPeds = true;
 					CColPoint foundCol;
 					CEntity *foundEnt;
-					CWorld::ProcessLineOfSight(ourHead, maxShotPos, foundCol, foundEnt,
-						true, true, true, true, false, true, false);
+
+					CWorld::bIncludeDeadPeds = true;
+					CWorld::ProcessLineOfSight(ourHead, maxShotPos, foundCol, foundEnt, true, true, true, true, false, true, false);
 					CWorld::bIncludeDeadPeds = false;
 					if (foundEnt == m_carInObjective) {
 						SetAttack(m_carInObjective);
-						m_pPointGunAt = m_carInObjective;
-						if (m_pPointGunAt)
-							m_pPointGunAt->RegisterReference((CEntity **) &m_pPointGunAt);
-
+						SetWeaponLockOnTarget(m_carInObjective);
 						SetShootTimer(CGeneral::GetRandomNumberInRange(500, 2000));
 						if (distWithTargetSc > 10.0f && !bKindaStayInSamePlace) {
 							SetAttackTimer(CGeneral::GetRandomNumberInRange(2000, 5000));
@@ -2629,7 +2617,7 @@ CPed::PedAnimGetInCB(CAnimBlendAssociation *animAssoc, void *arg)
 	if (ped->IsPlayer() && ped->bGonnaKillTheCarJacker && ((CPlayerPed*)ped)->m_pArrestingCop) {
 		PedSetInCarCB(nil, ped);
 		ped->m_nLastPedState = ped->m_nPedState;
-		ped->m_nPedState = PED_ARRESTED;
+		ped->SetPedState(PED_ARRESTED);
 		ped->bGonnaKillTheCarJacker = false;
 		if (veh) {
 			veh->m_nNumGettingIn = 0;
@@ -2990,9 +2978,15 @@ CPed::PedAnimStepOutCarCB(CAnimBlendAssociation* animAssoc, void* arg)
 	}
 
 	if (ped->bFleeAfterExitingCar || ped->bGonnaKillTheCarJacker) {
-		// POTENTIAL BUG? Why DOOR_FRONT_LEFT instead of door variable? or vice versa?
+#ifdef FIX_BUGS
+		if (!veh->IsDoorMissing(door))
+			((CAutomobile*)veh)->Damage.SetDoorStatus(door, DOOR_STATUS_SWINGING);
+		PedSetOutCarCB(nil, ped);
+		return;
+#else
 		if (!veh->IsDoorMissing(door))
 			((CAutomobile*)veh)->Damage.SetDoorStatus(DOOR_FRONT_LEFT, DOOR_STATUS_SWINGING);
+#endif
 	} else {
 		switch (door) {
 			case DOOR_FRONT_LEFT:
@@ -3346,7 +3340,7 @@ CPed::SetCarJack_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
 
 	m_pSeekTarget = car;
 	m_pSeekTarget->RegisterReference((CEntity**)&m_pSeekTarget);
-	m_nPedState = PED_CARJACK;
+	SetPedState(PED_CARJACK);
 	car->bIsBeingCarJacked = true;
 	m_pMyVehicle = (CVehicle*)m_pSeekTarget;
 	m_pMyVehicle->RegisterReference((CEntity**)&m_pMyVehicle);
@@ -3393,7 +3387,7 @@ CPed::SetBeingDraggedFromCar(CVehicle *veh, uint32 vehEnterType, bool quickJack)
 	SetMoveState(PEDMOVE_NONE);
 	LineUpPedWithCar(LINE_UP_TO_CAR_START);
 	m_pVehicleAnim = nil;
-	m_nPedState = PED_DRAG_FROM_CAR;
+	SetPedState(PED_DRAG_FROM_CAR);
 	bChangedSeat = false;
 	bWillBeQuickJacked = quickJack;
 
@@ -3518,7 +3512,7 @@ CPed::SetEnterCar_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
 	m_pSeekTarget = car;
 	m_pSeekTarget->RegisterReference((CEntity **) &m_pSeekTarget);
 	m_vehEnterType = doorNode;
-	m_nPedState = PED_ENTER_CAR;
+	SetPedState(PED_ENTER_CAR);
 	if (m_vehEnterType == CAR_DOOR_RF && m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER && car->m_vehType != VEHICLE_TYPE_BIKE) {
 		car->bIsBeingCarJacked = true;
 	}
@@ -3680,14 +3674,14 @@ void
 CPed::SetExitBoat(CVehicle *boat)
 {
 #ifndef VC_PED_PORTS
-	m_nPedState = PED_IDLE;
+	SetPedState(PED_IDLE);
 	CVector firstPos = GetPosition();
 	CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 100.0f);
 	if (boat->GetModelIndex() == MI_SPEEDER && boat->IsUpsideDown()) {
 		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_CRAWLOUT_RHS, 8.0f);
 		m_pVehicleAnim->SetFinishCallback(PedSetOutCarCB, this);
 		m_vehEnterType = CAR_DOOR_RF;
-		m_nPedState = PED_EXIT_CAR;
+		SetPedState(PED_EXIT_CAR);
 	} else {
 		m_vehEnterType = CAR_DOOR_RF;
 		PedSetOutCarCB(nil, this);
@@ -3700,7 +3694,7 @@ CPed::SetExitBoat(CVehicle *boat)
 	m_vecMoveSpeed = boat->m_vecMoveSpeed;
 	bTryingToReachDryLand = true;
 #else
-	m_nPedState = PED_IDLE;
+	SetPedState(PED_IDLE);
 	CVector newPos = GetPosition();
 	RemoveInCarAnims();
 	CColModel* boatCol = boat->GetColModel();
@@ -3927,7 +3921,7 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 		m_pSeekTarget = veh;
 		m_pSeekTarget->RegisterReference((CEntity**) &m_pSeekTarget);
 		m_vehEnterType = optedDoorNode;
-		m_nPedState = PED_EXIT_CAR;
+		SetPedState(PED_EXIT_CAR);
 		if (m_pVehicleAnim && m_pVehicleAnim->flags & ASSOC_PARTIAL)
 			m_pVehicleAnim->blendDelta = -1000.0f;
 		SetMoveState(PEDMOVE_NONE);
@@ -4475,7 +4469,7 @@ CPed::PedSetDraggedOutCarPositionCB(CAnimBlendAssociation* animAssoc, void* arg)
 		ped->bGonnaKillTheCarJacker = false;
 		if (!ped->m_pedInObjective || !(CGeneral::GetRandomNumber() & 1)) {
 			if (!driver || driver == ped || driver->IsPlayer() && CTheScripts::IsPlayerOnAMission()) {
-				ped->m_nPedState = PED_NONE;
+				ped->SetPedState(PED_NONE);
 				ped->m_nLastPedState = PED_NONE;
 				ped->SetFlee(ped->m_pMyVehicle->GetPosition(), 4000);
 			} else {
@@ -4504,7 +4498,7 @@ CPed::PedSetDraggedOutCarPositionCB(CAnimBlendAssociation* animAssoc, void* arg)
 		else
 #endif
 		{
-			ped->m_nPedState = PED_NONE;
+			ped->SetPedState(PED_NONE);
 			ped->m_nLastPedState = PED_NONE;
 			ped->SetFindPathAndFlee(ped->m_pMyVehicle->GetPosition(), 10000);
 		}
@@ -4597,7 +4591,7 @@ CPed::PedSetInTrainCB(CAnimBlendAssociation* animAssoc, void* arg)
 		return;
 
 	ped->bInVehicle = true;
-	ped->m_nPedState = PED_DRIVING;
+	ped->SetPedState(PED_DRIVING);
 	ped->RestorePreviousObjective();
 	ped->SetMoveState(PEDMOVE_STILL);
 	veh->AddPassenger(ped);
@@ -4618,7 +4612,7 @@ CPed::SetEnterTrain(CVehicle *train, uint32 unused)
 	m_pMyVehicle = train;
 	m_pMyVehicle->RegisterReference((CEntity **) &m_pMyVehicle);
 
-	m_nPedState = PED_ENTER_TRAIN;
+	SetPedState(PED_ENTER_TRAIN);
 	m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_TRAIN_GETIN, 4.0f);
 	m_pVehicleAnim->SetFinishCallback(PedSetInTrainCB, this);
 	bUsesCollision = false;
@@ -4692,7 +4686,7 @@ CPed::SetExitTrain(CVehicle* train)
 	CVector exitPos;
 	GetNearestTrainPedPosition(train, exitPos);
 	*/
-	m_nPedState = PED_EXIT_TRAIN;
+	SetPedState(PED_EXIT_TRAIN);
 	m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_TRAIN_GETOUT, 4.0f);
 	m_pVehicleAnim->SetFinishCallback(PedSetOutTrainCB, this);
 	bUsesCollision = false;
@@ -4718,7 +4712,7 @@ CPed::PedSetOutTrainCB(CAnimBlendAssociation *animAssoc, void *arg)
 	ped->bUsesCollision = true;
 	ped->m_pVehicleAnim = nil;
 	ped->bInVehicle = false;
-	ped->m_nPedState = PED_IDLE;
+	ped->SetPedState(PED_IDLE);
 	ped->RestorePreviousObjective();
 	ped->SetMoveState(PEDMOVE_STILL);
 
@@ -5186,7 +5180,7 @@ CPed::SetSeekBoatPosition(CVehicle *boat)
 	m_pMyVehicle = boat;
 	m_pMyVehicle->RegisterReference((CEntity **) &m_pMyVehicle);
 	m_distanceToCountSeekDone = 0.5f;
-	m_nPedState = PED_SEEK_IN_BOAT;
+	SetPedState(PED_SEEK_IN_BOAT);
 }
 
 void

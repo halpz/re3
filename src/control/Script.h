@@ -396,7 +396,7 @@ private:
 	friend class CRunningScript;
 	friend class CHud;
 	friend void CMissionCleanup::Process();
-#ifdef FIX_BUGS
+#ifdef MISSION_REPLAY
 	friend void RetryMission(int, int);
 #endif
 

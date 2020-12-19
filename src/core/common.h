@@ -274,8 +274,14 @@ void re3_usererror(const char *format, ...);
 
 #define DEBUGBREAK() __debugbreak();
 
-#define debug(f, ...) re3_debug("[DBG]: " f, ## __VA_ARGS__)
+// Switch to enable development messages.
+#if 1 
+#define DEV(f, ...)
+#else
 #define DEV(f, ...)   re3_debug("[DEV]: " f, ## __VA_ARGS__)
+#endif
+
+#define debug(f, ...) re3_debug("[DBG]: " f, ## __VA_ARGS__)
 #define TRACE(f, ...) re3_trace(__FILE__, __LINE__, __FUNCTION__, f, ## __VA_ARGS__)
 #define Error(f, ...) re3_debug("[ERROR]: " f, ## __VA_ARGS__)
 #define USERERROR(f, ...) re3_usererror(f, ## __VA_ARGS__)

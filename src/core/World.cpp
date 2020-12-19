@@ -33,7 +33,7 @@
 
 CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];
 
-CPtrList CWorld::ms_bigBuildingsList[4];
+CPtrList CWorld::ms_bigBuildingsList[NUM_LEVELS];
 CPtrList CWorld::ms_listMovingEntityPtrs;
 CSector CWorld::ms_aSectors[NUMSECTORS_Y][NUMSECTORS_X];
 uint16 CWorld::ms_nCurrentScanCode;
@@ -1361,102 +1361,6 @@ CWorld::FindMissionEntitiesIntersectingCubeSectorList(CPtrList &list, const CVec
 	}
 }
 
-CPlayerPed *
-FindPlayerPed(void)
-{
-	return CWorld::Players[CWorld::PlayerInFocus].m_pPed;
-}
-
-CVehicle *
-FindPlayerVehicle(void)
-{
-	CPlayerPed *ped = FindPlayerPed();
-	if(ped && ped->InVehicle()) return ped->m_pMyVehicle;
-	return nil;
-}
-
-CVehicle *
-FindPlayerTrain(void)
-{
-	if(FindPlayerVehicle() && FindPlayerVehicle()->IsTrain())
-		return FindPlayerVehicle();
-	else
-		return nil;
-}
-
-CEntity *
-FindPlayerEntity(void)
-{
-	CPlayerPed *ped = FindPlayerPed();
-	if(ped->InVehicle())
-		return ped->m_pMyVehicle;
-	else
-		return ped;
-}
-
-CVector
-FindPlayerCoors(void)
-{
-#ifdef FIX_BUGS
-	if (CReplay::IsPlayingBack())
-		return TheCamera.GetPosition();
-#endif
-	CPlayerPed *ped = FindPlayerPed();
-	if(ped->InVehicle())
-		return ped->m_pMyVehicle->GetPosition();
-	else
-		return ped->GetPosition();
-}
-
-CVector &
-FindPlayerSpeed(void)
-{
-#ifdef FIX_BUGS
-	static CVector vecTmpVector(0.0f, 0.0f, 0.0f);
-	if (CReplay::IsPlayingBack())
-		return vecTmpVector;
-#endif
-	CPlayerPed *ped = FindPlayerPed();
-	if(ped->InVehicle())
-		return ped->m_pMyVehicle->m_vecMoveSpeed;
-	else
-		return ped->m_vecMoveSpeed;
-}
-
-const CVector &
-FindPlayerCentreOfWorld(int32 player)
-{
-#ifdef FIX_BUGS
-	if(CReplay::IsPlayingBack()) return TheCamera.GetPosition();
-#endif
-	if(CCarCtrl::bCarsGeneratedAroundCamera) return TheCamera.GetPosition();
-	if(CWorld::Players[player].m_pRemoteVehicle) return CWorld::Players[player].m_pRemoteVehicle->GetPosition();
-	if(FindPlayerVehicle()) return FindPlayerVehicle()->GetPosition();
-	return CWorld::Players[player].m_pPed->GetPosition();
-}
-
-const CVector &
-FindPlayerCentreOfWorld_NoSniperShift(void)
-{
-#ifdef FIX_BUGS
-	if (CReplay::IsPlayingBack()) return TheCamera.GetPosition();
-#endif
-	if(CCarCtrl::bCarsGeneratedAroundCamera) return TheCamera.GetPosition();
-	if(CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle)
-		return CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle->GetPosition();
-	if(FindPlayerVehicle()) return FindPlayerVehicle()->GetPosition();
-	return FindPlayerPed()->GetPosition();
-}
-
-float
-FindPlayerHeading(void)
-{
-	if(CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle)
-		return CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle->GetForward().Heading();
-	if(FindPlayerVehicle()) return FindPlayerVehicle()->GetForward().Heading();
-	return FindPlayerPed()->GetForward().Heading();
-}
-
 void
 CWorld::ClearCarsFromArea(float x1, float y1, float z1, float x2, float y2, float z2)
 {
@@ -1537,7 +1441,7 @@ CWorld::CallOffChaseForAreaSectorListVehicles(CPtrList &list, float x1, float y1
 		if(pVehicle->m_scanCode != GetCurrentScanCode()) {
 			pVehicle->m_scanCode = GetCurrentScanCode();
 			const CVector &vehiclePos = pVehicle->GetPosition();
-			eCarMission carMission = pVehicle->AutoPilot.m_nCarMission;
+			uint8 carMission = pVehicle->AutoPilot.m_nCarMission;
 			if(pVehicle != FindPlayerVehicle() && vehiclePos.x > fStartX && vehiclePos.x < fEndX &&
 			   vehiclePos.y > fStartY && vehiclePos.y < fEndY && pVehicle->bIsLawEnforcer &&
 			   (carMission == MISSION_RAMPLAYER_FARAWAY || carMission == MISSION_RAMPLAYER_CLOSE ||
@@ -1745,13 +1649,13 @@ CWorld::ShutDown(void)
 		pSector->m_lists[ENTITYLIST_DUMMIES_OVERLAP].Flush();
 #endif
 	}
-	for(int32 i = 0; i < 4; i++) {
-		for(CPtrNode *pNode = GetBigBuildingList((eLevelName)i).first; pNode; pNode = pNode->next) {
+	for(int32 i = 0; i < NUM_LEVELS; i++) {
+		for(CPtrNode *pNode = ms_bigBuildingsList[i].first; pNode; pNode = pNode->next) {
 			CEntity *pEntity = (CEntity *)pNode->item;
 			// Maybe remove from world here?
 			delete pEntity;
 		}
-		GetBigBuildingList((eLevelName)i).Flush();
+		ms_bigBuildingsList[i].Flush();
 	}
 	for(int i = 0; i < NUMSECTORS_X * NUMSECTORS_Y; i++) {
 		CSector *pSector = GetSector(i % NUMSECTORS_X, i / NUMSECTORS_Y);
@@ -1955,12 +1859,11 @@ CWorld::Process(void)
 	} else {
 		for(CPtrNode *node = ms_listMovingEntityPtrs.first; node; node = node->next) {
 			CEntity *movingEnt = (CEntity *)node->item;
-#ifdef SQUEEZE_PERFORMANCE
-			if (movingEnt->bRemoveFromWorld) {
-				RemoveEntityInsteadOfProcessingIt(movingEnt);
-			} else
-#endif
+#ifdef FIX_BUGS // from VC
+			if(!movingEnt->bRemoveFromWorld && movingEnt->m_rwObject && RwObjectGetType(movingEnt->m_rwObject) == rpCLUMP &&
+#else
 			if(movingEnt->m_rwObject && RwObjectGetType(movingEnt->m_rwObject) == rpCLUMP &&
+#endif
 			   RpAnimBlendClumpGetFirstAssociation(movingEnt->GetClump())) {
 				RpAnimBlendClumpUpdateAnimations(movingEnt->GetClump(),
 				                                 0.02f * (movingEnt->IsObject()

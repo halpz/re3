@@ -641,7 +641,7 @@ CPed::RestorePreviousState(void)
 		return;
 
 	if (InVehicle()) {
-		m_nPedState = PED_DRIVING;
+		SetPedState(PED_DRIVING);
 		m_nLastPedState = PED_NONE;
 	} else {
 		if (m_nLastPedState == PED_NONE) {
@@ -658,7 +658,7 @@ CPed::RestorePreviousState(void)
 				SetIdle();
 				break;
 			case PED_WANDER_PATH:
-				m_nPedState = PED_WANDER_PATH;
+				SetPedState(PED_WANDER_PATH);
 				bIsRunning = false;
 				if (bFindNewNodeAfterStateRestore) {
 					if (m_pNextPathNode) {
@@ -672,7 +672,7 @@ CPed::RestorePreviousState(void)
 				SetWanderPath(CGeneral::GetRandomNumber() & 7);
 				break;
 			default:
-				m_nPedState = m_nLastPedState;
+				SetPedState(m_nLastPedState);
 				SetMoveState((eMoveState) m_nPrevMoveState);
 				break;
 		}
@@ -960,7 +960,7 @@ CPed::MoveHeadToLook(void)
 		}
 
 		if (m_pLookTarget->IsPed()) {
-			((CPed*)m_pLookTarget)->m_pedIK.GetComponentPosition((RwV3d*) &lookPos, PED_MID);
+			((CPed*)m_pLookTarget)->m_pedIK.GetComponentPosition(lookPos, PED_MID);
 		} else {
 			lookPos = m_pLookTarget->GetPosition();
 		}
@@ -1511,8 +1511,8 @@ CPed::ClearAll(void)
 	if (!IsPedInControl() && m_nPedState != PED_DEAD)
 		return;
 
-	m_nPedState = PED_NONE;
-	m_nMoveState = PEDMOVE_NONE;
+	SetPedState(PED_NONE);
+	SetMoveState(PEDMOVE_NONE);
 	m_pSeekTarget = nil;
 	m_vecSeekPos = CVector(0.0f, 0.0f, 0.0f);
 	m_fleeFromPosX = 0.0f;
@@ -1585,7 +1585,7 @@ CPed::ProcessBuoyancy(void)
 						CParticleObject::AddObject(POBJECT_PED_WATER_SPLASH, pos, CVector(0.0f, 0.0f, 0.0f), 0.0f, 50, CRGBA(0, 0, 0, 0), true);
 #endif
 						m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
-						m_nPedState = PED_IDLE;
+						SetPedState(PED_IDLE);
 						return;
 					}
 				}
@@ -2691,36 +2691,6 @@ CPed::ProcessControl(void)
 					break;
 				case PED_WANDER_PATH:
 					WanderPath();
-					break;
-				case PED_SEEK_POS:
-				case PED_SEEK_ENTITY:
-				case PED_PURSUE:
-				case PED_SNIPER_MODE:
-				case PED_ROCKET_MODE:
-				case PED_DUMMY:
-				case PED_FACE_PHONE:
-				case PED_MAKE_CALL:
-				case PED_MUG:
-				case PED_AI_CONTROL:
-				case PED_FOLLOW_ROUTE:
-				case PED_CPR:
-				case PED_SOLICIT:
-				case PED_BUY_ICECREAM:
-				case PED_STEP_AWAY:
-				case PED_UNKNOWN:
-				case PED_STATES_NO_AI:
-				case PED_JUMP:
-				case PED_STAGGER:
-				case PED_DIVE_AWAY:
-				case PED_STATES_NO_ST:
-				case PED_ARREST_PLAYER:
-				case PED_PASSENGER:
-				case PED_TAXI_PASSENGER:
-				case PED_OPEN_DOOR:
-				case PED_DEAD:
-				case PED_DRAG_FROM_CAR:
-				case PED_EXIT_CAR:
-				case PED_STEAL_CAR:
 					break;
 				case PED_ENTER_CAR:
 				case PED_CARJACK:
@@ -4467,7 +4437,7 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 		if (!veh->bEngineOn)
 			veh->bEngineOn = true;
 
-		ped->m_nPedState = PED_DRIVING;
+		ped->SetPedState(PED_DRIVING);
 		ped->StopNonPartialAnims();
 		return;
 	}
@@ -4512,7 +4482,7 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 	else if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER) {
 		if (ped->m_nPedState == PED_CARJACK) {
 			veh->AddPassenger(ped, 0);
-			ped->m_nPedState = PED_DRIVING;
+			ped->SetPedState(PED_DRIVING);
 			ped->RestorePreviousObjective();
 			ped->SetObjective(OBJECTIVE_LEAVE_CAR, veh);
 		} else if (veh->pDriver && ped->CharCreatedBy == RANDOM_CHAR) {
@@ -4552,7 +4522,7 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 			veh->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
 			veh->AutoPilot.m_nCruiseSpeed = 25;
 		}
-		ped->m_nPedState = PED_DRIVING;
+		ped->SetPedState(PED_DRIVING);
 		if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER) {
 
 			if (ped->m_prevObjective == OBJECTIVE_RUN_TO_AREA || ped->m_prevObjective == OBJECTIVE_GOTO_CHAR_ON_FOOT || ped->m_prevObjective == OBJECTIVE_KILL_CHAR_ON_FOOT)
@@ -4580,7 +4550,7 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 				break;
 			}
 		}
-		ped->m_nPedState = PED_DRIVING;
+		ped->SetPedState(PED_DRIVING);
 		if (ped->m_prevObjective == OBJECTIVE_RUN_TO_AREA || ped->m_prevObjective == OBJECTIVE_GOTO_CHAR_ON_FOOT || ped->m_prevObjective == OBJECTIVE_KILL_CHAR_ON_FOOT)
 			ped->m_prevObjective = OBJECTIVE_NONE;
 
@@ -4967,7 +4937,7 @@ CPed::SetIdle(void)
 
 		m_nLastPedState = PED_NONE;
 #endif
-		m_nPedState = PED_IDLE;
+		SetPedState(PED_IDLE);
 		SetMoveState(PEDMOVE_STILL);
 	}
 	if (m_nWaitState == WAITSTATE_FALSE) {
@@ -5055,7 +5025,7 @@ CPed::SetFall(int extraTime, AnimationId animId, uint8 evenIfNotInControl)
 	ClearLookFlag();
 	ClearAimFlag();
 	SetStoredState();
-	m_nPedState = PED_FALL;
+	SetPedState(PED_FALL);
 	CAnimBlendAssociation *fallAssoc = RpAnimBlendClumpGetAssociation(GetClump(), animId);
 	
 	if (fallAssoc) {
@@ -5220,7 +5190,7 @@ CPed::SetGetUp(void)
 		}
 		if (m_nPedState != PED_GETUP) {
 			SetStoredState();
-			m_nPedState = PED_GETUP;
+			SetPedState(PED_GETUP);
 		}
 
 		CVehicle *collidingVeh = (CVehicle*)m_pCollidingEntity;
@@ -5375,7 +5345,7 @@ CPed::SetSeek(CVector pos, float distanceToCountDone)
 	if (m_nPedState != PED_SEEK_POS)
 		SetStoredState();
 
-	m_nPedState = PED_SEEK_POS;
+	SetPedState(PED_SEEK_POS);
 	m_distanceToCountSeekDone = distanceToCountDone;
 	m_vecSeekPos = pos;
 }
@@ -5395,7 +5365,7 @@ CPed::SetSeek(CEntity *seeking, float distanceToCountDone)
 	if (m_nPedState != PED_SEEK_ENTITY)
 		SetStoredState();
 
-	m_nPedState = PED_SEEK_ENTITY;
+	SetPedState(PED_SEEK_ENTITY);
 	m_distanceToCountSeekDone = distanceToCountDone;
 	m_pSeekTarget = seeking;
 	m_pSeekTarget->RegisterReference((CEntity **) &m_pSeekTarget);
@@ -5572,7 +5542,7 @@ CPed::SetFlee(CVector2D const &from, int time)
 
 	if (m_nPedState != PED_FLEE_ENTITY) {
 		SetStoredState();
-		m_nPedState = PED_FLEE_POS;
+		SetPedState(PED_FLEE_POS);
 		SetMoveState(PEDMOVE_RUN);
 		m_fleeFromPosX = from.x;
 		m_fleeFromPosY = from.y;
@@ -5601,7 +5571,7 @@ CPed::SetFlee(CEntity *fleeFrom, int time)
 		return;
 
 	SetStoredState();
-	m_nPedState = PED_FLEE_ENTITY;
+	SetPedState(PED_FLEE_ENTITY);
 	bUsePedNodeSeek = true;
 	SetMoveState(PEDMOVE_RUN);
 	m_fleeFrom = fleeFrom;
@@ -5862,7 +5832,7 @@ CPed::SetWanderPath(int8 pathStateDest)
 
 			// We did it, save next path state and return true
 			m_nPathDir = nextPathState;
-			m_nPedState = PED_WANDER_PATH;
+			SetPedState(PED_WANDER_PATH);
 			SetMoveState(PEDMOVE_WALK);
 			bIsRunning = false;
 			return true;
@@ -6047,7 +6017,7 @@ CPed::SetFollowPath(CVector dest)
 		return false;
 
 	SetStoredState();
-	m_nPedState = PED_FOLLOW_PATH;
+	SetPedState(PED_FOLLOW_PATH);
 	SetMoveState(PEDMOVE_WALK);
 	return true;
 }
@@ -6150,7 +6120,7 @@ CPed::SetEvasiveStep(CEntity *reason, uint8 animType)
 			m_fRotationCur = CGeneral::LimitRadianAngle(angleToFace);
 			ClearAimFlag();
 			SetStoredState();
-			m_nPedState = PED_STEP_AWAY;
+			SetPedState(PED_STEP_AWAY);
 		}
 	}
 }
@@ -6247,13 +6217,13 @@ CPed::SetEvasiveDive(CPhysical *reason, uint8 onlyRandomJump)
 		animAssoc->flags &= ~ASSOC_DELETEFADEDOUT;
 		animAssoc->SetFinishCallback(PedEvadeCB, this);
 		SetStoredState();
-		m_nPedState = PED_STEP_AWAY;
+		SetPedState(PED_STEP_AWAY);
 	} else {
 		m_fRotationCur = angleToFace;
 		ClearLookFlag();
 		ClearAimFlag();
 		SetStoredState();
-		m_nPedState = PED_DIVE_AWAY;
+		SetPedState(PED_DIVE_AWAY);
 		animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_EV_DIVE, 8.0f);
 		animAssoc->SetFinishCallback(PedEvadeCB, this);
 	}
@@ -6291,7 +6261,7 @@ CPed::PedEvadeCB(CAnimBlendAssociation* animAssoc, void* arg)
 		if (ped->m_nPedState == PED_DIVE_AWAY)
 		{
 			ped->m_getUpTimer = CTimer::GetTimeInMilliseconds() + 1;
-			ped->m_nPedState = PED_FALL;
+			ped->SetPedState(PED_FALL);
 		}
 		animAssoc->flags &= ~ASSOC_FADEOUTWHENDONE;
 		animAssoc->flags |= ASSOC_DELETEFADEDOUT;
@@ -6342,7 +6312,7 @@ CPed::SetDie(AnimationId animId, float delta, float speed)
 		QuitEnteringCar();
 	}
 
-	m_nPedState = PED_DIE;
+	SetPedState(PED_DIE);
 	if (animId == NUM_ANIMS) {
 		bIsPedDieAnimPlaying = false;
 	} else {
@@ -6384,7 +6354,7 @@ CPed::SetDead(void)
 	if (m_nPedState == PED_DRIVING)
 		bIsVisible = false;
 
-	m_nPedState = PED_DEAD;
+	SetPedState(PED_DEAD);
 	m_pVehicleAnim = nil;
 	m_pCollidingEntity = nil;
 
@@ -6417,7 +6387,7 @@ CPed::SetChat(CEntity *chatWith, uint32 time)
 	if(m_nPedState != PED_CHAT)
 		SetStoredState();
 
-	m_nPedState = PED_CHAT;
+	SetPedState(PED_CHAT);
 	SetMoveState(PEDMOVE_STILL);
 #if defined VC_PED_PORTS || defined FIX_BUGS
 	m_lookTimer = 0;
@@ -6658,7 +6628,7 @@ CPed::SetSeekCar(CVehicle *car, uint32 doorNode)
 	// m_pSeekTarget->RegisterReference((CEntity**) &m_pSeekTarget);
 	m_vehEnterType = doorNode;
 	m_distanceToCountSeekDone = 0.5f;
-	m_nPedState = PED_SEEK_CAR;
+	SetPedState(PED_SEEK_CAR);
 
 }
 
@@ -7683,10 +7653,11 @@ CPed::FlagToDestroyWhenNextProcessed(void)
 	}
 	bInVehicle = false;
 	m_pMyVehicle = nil;
+
 	if (CharCreatedBy == MISSION_CHAR)
-		m_nPedState = PED_DEAD;
+		SetPedState(PED_DEAD);
 	else
-		m_nPedState = PED_NONE;
+		SetPedState(PED_NONE);
 	m_pVehicleAnim = nil;
 }
 
@@ -7710,7 +7681,7 @@ CPed::SetSolicit(uint32 time)
 			if(!m_carInObjective->bIsVan && !m_carInObjective->bIsBus)
 				m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_HOOKERTALK, 4.0f);
 
-			m_nPedState = PED_SOLICIT;
+			SetPedState(PED_SOLICIT);
 		}
 	}
 }
@@ -7769,7 +7740,7 @@ CPed::SetBuyIceCream(void)
 	// Simulating BuyIceCream
 	CPed* driver = m_carInObjective->pDriver;
 	if (driver) {
-		m_nPedState = PED_BUY_ICECREAM;
+		SetPedState(PED_BUY_ICECREAM);
 		bFindNewNodeAfterStateRestore = true;
 		SetObjectiveTimer(8000);
 		SetChat(driver, 8000);
@@ -7783,7 +7754,7 @@ CPed::SetBuyIceCream(void)
 
 	if (Abs(m_fRotationDest - m_fRotationCur) < HALFPI) {
 		m_standardTimer = CTimer::GetTimeInMilliseconds() + 3000;
-		m_nPedState = PED_BUY_ICECREAM;
+		SetPedState(PED_BUY_ICECREAM);
 	}
 }
 
@@ -7985,7 +7956,7 @@ CPed::SetJump(void)
 #endif
 		(m_nSurfaceTouched != SURFACE_STEEP_CLIFF || DotProduct(GetForward(), m_vecDamageNormal) >= 0.0f)) {
 		SetStoredState();
-		m_nPedState = PED_JUMP;
+		SetPedState(PED_JUMP);
 		CAnimBlendAssociation *jumpAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_JUMP_LAUNCH, 8.0f);
 		jumpAssoc->SetFinishCallback(FinishLaunchCB, this);
 		m_fRotationDest = m_fRotationCur;
@@ -8287,7 +8258,7 @@ CPed::WarpPedIntoCar(CVehicle *car)
 	m_pMyVehicle->RegisterReference((CEntity **) &m_pMyVehicle);
 	m_carInObjective = car;
 	m_carInObjective->RegisterReference((CEntity **) &m_carInObjective);
-	m_nPedState = PED_DRIVING;
+	SetPedState(PED_DRIVING);
 	bUsesCollision = false;
 	bIsInTheAir = false;
 	bVehExitWillBeInstant = true;

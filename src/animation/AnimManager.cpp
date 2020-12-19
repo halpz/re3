@@ -841,54 +841,57 @@ CAnimManager::LoadAnimFile(int fd, bool compress)
 				ROUNDSIZE(anim.size);
 				CFileMgr::Read(fd, buf, anim.size);
 				int numFrames = *(int*)(buf+28);
+				seq->SetName(buf);
 #ifdef PED_SKIN
 				if(anim.size == 44)
 					seq->SetBoneTag(*(int*)(buf+40));
 #endif
-				seq->SetName(buf);
 				if(numFrames == 0)
 					continue;
 
+				bool hasScale = false;
+				bool hasTranslation = false;
 				CFileMgr::Read(fd, (char*)&info, sizeof(info));
-				if(strncmp(info.ident, "KR00", 4) == 0){
-					seq->SetNumFrames(numFrames, false);
-					KeyFrame *kf = seq->GetKeyFrame(0);
-					for(l = 0; l < numFrames; l++, kf++){
-						CFileMgr::Read(fd, buf, 0x14);
-						kf->rotation.x = -fbuf[0];
-						kf->rotation.y = -fbuf[1];
-						kf->rotation.z = -fbuf[2];
-						kf->rotation.w = fbuf[3];
-						kf->deltaTime = fbuf[4];	// absolute time here
-					}
+				if(strncmp(info.ident, "KRTS", 4) == 0){
+					hasScale = true;
+					seq->SetNumFrames(numFrames, true);
 				}else if(strncmp(info.ident, "KRT0", 4) == 0){
+					hasTranslation = true;
 					seq->SetNumFrames(numFrames, true);
-					KeyFrameTrans *kf = (KeyFrameTrans*)seq->GetKeyFrame(0);
-					for(l = 0; l < numFrames; l++, kf++){
-						CFileMgr::Read(fd, buf, 0x20);
-						kf->rotation.x = -fbuf[0];
-						kf->rotation.y = -fbuf[1];
-						kf->rotation.z = -fbuf[2];
-						kf->rotation.w = fbuf[3];
-						kf->translation.x = fbuf[4];
-						kf->translation.y = fbuf[5];
-						kf->translation.z = fbuf[6];
-						kf->deltaTime = fbuf[7];	// absolute time here
-					}
-				}else if(strncmp(info.ident, "KRTS", 4) == 0){
-					seq->SetNumFrames(numFrames, true);
-					KeyFrameTrans *kf = (KeyFrameTrans*)seq->GetKeyFrame(0);
-					for(l = 0; l < numFrames; l++, kf++){
+				}else if(strncmp(info.ident, "KR00", 4) == 0){
+					seq->SetNumFrames(numFrames, false);
+				}
+
+				for(l = 0; l < numFrames; l++){
+					if(hasScale){
 						CFileMgr::Read(fd, buf, 0x2C);
-						kf->rotation.x = -fbuf[0];
-						kf->rotation.y = -fbuf[1];
-						kf->rotation.z = -fbuf[2];
-						kf->rotation.w = fbuf[3];
-						kf->translation.x = fbuf[4];
-						kf->translation.y = fbuf[5];
-						kf->translation.z = fbuf[6];
+						CQuaternion rot(fbuf[0], fbuf[1], fbuf[2], fbuf[3]);
+						rot.Invert();
+						CVector trans(fbuf[4], fbuf[5], fbuf[6]);
+
+						KeyFrameTrans *kf = (KeyFrameTrans*)seq->GetKeyFrame(l);
+						kf->rotation = rot;
+						kf->translation = trans;
 						// scaling ignored
 						kf->deltaTime = fbuf[10];	// absolute time here
+					}else if(hasTranslation){
+						CFileMgr::Read(fd, buf, 0x20);
+						CQuaternion rot(fbuf[0], fbuf[1], fbuf[2], fbuf[3]);
+						rot.Invert();
+						CVector trans(fbuf[4], fbuf[5], fbuf[6]);
+
+						KeyFrameTrans *kf = (KeyFrameTrans*)seq->GetKeyFrame(l);
+						kf->rotation = rot;
+						kf->translation = trans;
+						kf->deltaTime = fbuf[7];	// absolute time here
+					}else{
+						CFileMgr::Read(fd, buf, 0x14);
+						CQuaternion rot(fbuf[0], fbuf[1], fbuf[2], fbuf[3]);
+						rot.Invert();
+
+						KeyFrame *kf = (KeyFrame*)seq->GetKeyFrame(l);
+						kf->rotation = rot;
+						kf->deltaTime = fbuf[4];	// absolute time here
 					}
 				}
 

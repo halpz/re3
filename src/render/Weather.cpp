@@ -359,7 +359,7 @@ void CWeather::AddRain()
 		RwCameraGetFarClipPlane(TheCamera.m_pRwCamera) / (RwCameraGetFarClipPlane(TheCamera.m_pRwCamera) * *(CVector2D*)RwCameraGetViewWindow(TheCamera.m_pRwCamera)).Magnitude();
 	splash_points[3] = 4.0f * CVector(RwCameraGetViewWindow(TheCamera.m_pRwCamera)->x, RwCameraGetViewWindow(TheCamera.m_pRwCamera)->y, 1.0f) *
 		RwCameraGetFarClipPlane(TheCamera.m_pRwCamera) / (RwCameraGetFarClipPlane(TheCamera.m_pRwCamera) * *(CVector2D*)RwCameraGetViewWindow(TheCamera.m_pRwCamera)).Magnitude();
-	RwV3dTransformPoints((RwV3d*)splash_points, (RwV3d*)splash_points, 4, RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)));
+	RwV3dTransformPoints(splash_points, splash_points, 4, RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)));
 	CVector fp = (splash_points[0] + splash_points[1] + splash_points[2] + splash_points[3]) / 4;
 	for (int i = 0; i < num_splash_attempts; i++) {
 		CColPoint point;
