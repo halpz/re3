@@ -1380,7 +1380,7 @@ cSampleManager::Terminate(void)
 bool
 cSampleManager::CheckForAnAudioFileOnCD(void)
 {
-#if !defined(GTA3_STEAM_PATCH) && !defined(NO_CDCHECK)
+#if !defined(NO_CDCHECK) // TODO: figure out defines
 	char filepath[MAX_PATH];
 	
 	strcpy(filepath, m_MiscomPath);
@@ -1406,7 +1406,7 @@ cSampleManager::CheckForAnAudioFileOnCD(void)
 	
 #else
 	return true;
-#endif // #if !defined(GTA3_STEAM_PATCH) && !defined(NO_CDCHECK)
+#endif // #if !defined(NO_CDCHECK)
 }
 
 char

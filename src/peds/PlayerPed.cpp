@@ -1496,8 +1496,7 @@ CPlayerPed::PlayerControlZelda(CPad *padUsed)
 
 	if (m_nPedState == PED_JUMP) {
 		if (bIsInTheAir) {
-			if (bUsesCollision && !bHitSteepSlope &&
-				(!bHitSomethingLastFrame || m_vecDamageNormal.z > 0.6f)
+			if (bUsesCollision && !bHitSteepSlope && (!bHitSomethingLastFrame || m_vecDamageNormal.z > 0.6f)
 				&& m_fDistanceTravelled < CTimer::GetTimeStep() * 0.02 && m_vecMoveSpeed.MagnitudeSqr() < 0.01f) {
 
 				float angleSin = Sin(m_fRotationCur); // originally sin(DEGTORAD(RADTODEG(m_fRotationCur))) o_O

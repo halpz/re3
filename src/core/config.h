@@ -195,6 +195,7 @@ enum Config {
 #if defined GTA_PS2
 #	define GTA_PS2_STUFF
 #	define RANDOMSPLASH
+//#	define USE_CUSTOM_ALLOCATOR
 #	define VU_COLLISION
 #elif defined GTA_PC
 #	ifdef GTA_PS2_STUFF
@@ -208,7 +209,7 @@ enum Config {
 #endif
 
 #ifdef VU_COLLISION
-#define COMPRESSED_COL_VECTORS	// current need compressed vectors in this code
+#define COMPRESSED_COL_VECTORS	// currently need compressed vectors in this code
 #endif
 
 #ifdef MASTER
@@ -287,6 +288,7 @@ enum Config {
 #define WALLCLIMB_CHEAT
 #define REGISTER_START_BUTTON
 //#define BIND_VEHICLE_FIREWEAPON // Adds ability to rebind fire key for 'in vehicle' controls
+#define BUTTON_ICONS // use textures to show controller buttons
 
 // Hud, frontend and radar
 #define PC_MENU
@@ -327,7 +329,7 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #endif
 //#define SIMPLIER_MISSIONS // apply simplifications from mobile
 #define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
-#define SCRIPT_LOG_FILE_LEVEL 1 // 0 == no log, 1 == overwrite every frame, 2 == full log
+#define SCRIPT_LOG_FILE_LEVEL 0 // 0 == no log, 1 == overwrite every frame, 2 == full log
 
 #ifndef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #define USE_BASIC_SCRIPT_DEBUG_OUTPUT
@@ -361,9 +363,15 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 // these are not supported with librw yet
 #	undef MULTISAMPLING
 #endif
+// IMG
+#define BIG_IMG // allows to read larger img files
 
 //#define SQUEEZE_PERFORMANCE
 #ifdef SQUEEZE_PERFORMANCE
 	#undef PS2_ALPHA_TEST
 	#undef NO_ISLAND_LOADING
+#endif
+
+#ifdef LIBRW
+// these are not supported with librw yet
 #endif

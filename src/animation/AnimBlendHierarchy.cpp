@@ -107,3 +107,14 @@ CAnimBlendHierarchy::RemoveUncompressedData(void)
 	// useless
 	compressed = 1;
 }
+
+#ifdef USE_CUSTOM_ALLOCATOR
+void
+CAnimBlendHierarchy::MoveMemory(bool onlyone)
+{
+	int i;
+	for(i = 0; i < numSequences; i++)
+		if(sequences[i].MoveMemory() && onlyone)
+			return;
+}
+#endif

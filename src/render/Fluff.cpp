@@ -744,7 +744,7 @@ void CScrollBar::Render()
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
 
 	CVector coronaCoord, screenCoord;
-	float   screenW, screenH;
+	float screenW, screenH;
 	for (int i = 1; i < ARRAY_SIZE(m_MessageBar); ++i)
 	{
 		for (int j = 0; j < 5; ++j)

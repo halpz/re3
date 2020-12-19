@@ -596,7 +596,10 @@ CPickup::Update(CPlayerPed *player, CVehicle *vehicle, int playerId)
 			bool explode = false;
 			if (CTimer::GetTimeInMilliseconds() > m_nTimer)
 				explode = true;
-			else {// added else here since vehicle lookup is useless
+#ifdef FIX_BUGS
+			else// added else here since vehicle lookup is useless
+#endif
+			{
 				for (int32 i = CPools::GetVehiclePool()->GetSize()-1; i >= 0; i--) {
 					CVehicle *vehicle = CPools::GetVehiclePool()->GetSlot(i);
 					if (vehicle != nil && vehicle->IsSphereTouchingVehicle(m_pObject->GetPosition().x, m_pObject->GetPosition().y, m_pObject->GetPosition().z, 1.5f)) {

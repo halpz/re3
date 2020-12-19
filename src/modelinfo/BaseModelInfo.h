@@ -58,9 +58,9 @@ public:
 	bool DoesOwnColModel(void) { return m_bOwnsColModel; }
 	void DeleteCollisionModel(void);
 	void ClearTexDictionary(void) { m_txdSlot = -1; }
-	short GetObjectID(void) { return m_objectId; }
+	int16 GetObjectID(void) { return m_objectId; }
 	void SetObjectID(int16 id) { m_objectId = id; }
-	short GetTxdSlot(void) { return m_txdSlot; }
+	int16 GetTxdSlot(void) { return m_txdSlot; }
 	void AddRef(void);
 	void RemoveRef(void);
 	void SetTexDictionary(const char *name);

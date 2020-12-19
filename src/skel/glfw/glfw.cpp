@@ -40,6 +40,7 @@
 #include "Sprite2d.h"
 #include "AnimViewer.h"
 #include "Font.h"
+#include "MemoryMgr.h"
 
 #define MAX_SUBSYSTEMS		(16)
 
@@ -279,7 +280,11 @@ psMouseSetPos(RwV2d *pos)
 RwMemoryFunctions*
 psGetMemoryFunctions(void)
 {
+#ifdef USE_CUSTOM_ALLOCATOR
+	return &memFuncs;
+#else
 	return nil;
+#endif
 }
 
 /*
@@ -1520,6 +1525,10 @@ main(int argc, char *argv[])
 #endif
 	RwV2d pos;
 	RwInt32 i;
+
+#ifdef USE_CUSTOM_ALLOCATOR
+	InitMemoryMgr();
+#endif
 
 #ifndef _WIN32
 	struct sigaction act;

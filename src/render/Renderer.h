@@ -10,8 +10,12 @@ class CEntity;
 #define FADE_DISTANCE 20.0f
 #define STREAM_DISTANCE 30.0f
 
+extern bool gbShowPedRoadGroups;
+extern bool gbShowCarRoadGroups;
 extern bool gbShowCollisionPolys;
 extern bool gbShowCollisionLines;
+extern bool gbShowCullZoneDebugStuff;
+extern bool gbDisableZoneCull;	// not original
 extern bool gbBigWhiteDebugLightSwitchedOn;
 
 extern bool gbDontRenderBuildings;
@@ -22,6 +26,13 @@ extern bool gbDontRenderVehicles;
 
 class CVehicle;
 class CPtrList;
+
+// unused
+struct BlockedRange
+{
+	float a, b;	// unknown
+	BlockedRange *prev, *next;
+};
 
 class CRenderer
 {
@@ -40,6 +51,10 @@ class CRenderer
 	static CVector ms_vecCameraPosition;
 	static CVehicle *m_pFirstPersonVehicle;
 
+	// unused
+	static BlockedRange aBlockedRanges[16];
+	static BlockedRange *pFullBlockedRanges;
+	static BlockedRange *pEmptyBlockedRanges;
 public:
 	static float ms_lodDistScale;
 	static bool m_loadingPriority;
@@ -58,6 +73,8 @@ public:
 	static void RenderFirstPersonVehicle(void);
 
 	static void RenderCollisionLines(void);
+	// unused
+	static void RenderBlockBuildingLines(void);
 
 	static int32 SetupEntityVisibility(CEntity *ent);
 	static int32 SetupBigBuildingVisibility(CEntity *ent);

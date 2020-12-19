@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include "main.h"
 
+#include "General.h"
 #include "Quaternion.h"
 #include "ModelInfo.h"
 #include "ModelIndices.h"
@@ -24,6 +25,7 @@
 #include "ZoneCull.h"
 #include "CdStream.h"
 #include "FileLoader.h"
+#include "MemoryHeap.h"
 #include "Streaming.h"
 #include "ColStore.h"
 #include "Occlusion.h"
@@ -74,11 +76,13 @@ CFileLoader::LoadLevel(const char *filename)
 		if(strncmp(line, "IMAGEPATH", 9) == 0){
 			RwImageSetPath(line + 10);
 		}else if(strncmp(line, "TEXDICTION", 10) == 0){
+			PUSH_MEMID(MEMID_TEXTURES);
 			strcpy(txdname, line+11);
 			LoadingScreenLoadingFile(txdname);
 			RwTexDictionary *txd = LoadTexDictionary(txdname);
 			AddTexDictionaries(savedTxd, txd);
 			RwTexDictionaryDestroy(txd);
+			POP_MEMID();
 		}else if(strncmp(line, "COLFILE", 7) == 0){
 			LoadingScreenLoadingFile(line+10);
 			LoadCollisionFile(line+10, 0);
@@ -94,6 +98,7 @@ CFileLoader::LoadLevel(const char *filename)
 		}else if(strncmp(line, "IPL", 3) == 0){
 			if(!objectsLoaded){
 				LoadingScreenLoadingFile("Collision");
+				POP_MEMID();
 				CObjectData::Initialise("DATA\\OBJECT.DAT");
 				CStreaming::Init();
 				CColStore::LoadAllCollision();
@@ -102,6 +107,7 @@ CFileLoader::LoadLevel(const char *filename)
 						CModelInfo::GetModelInfo(i)->ConvertAnimFileIndex();
 				objectsLoaded = true;
 			}
+			PUSH_MEMID(MEMID_WORLD);
 			LoadingScreenLoadingFile(line + 4);
 			LoadScene(line + 4);
 		}else if(strncmp(line, "SPLASH", 6) == 0){
@@ -172,6 +178,8 @@ CFileLoader::LoadCollisionFile(const char *filename, uint8 colSlot)
 	CBaseModelInfo *mi;
 	ColHeader header;
 
+	PUSH_MEMID(MEMID_COLLISION);
+
 	debug("Loading collision file %s\n", filename);
 	fd = CFileMgr::OpenFile(filename, "rb");
 	assert(fd > 0);
@@ -197,6 +205,8 @@ CFileLoader::LoadCollisionFile(const char *filename, uint8 colSlot)
 	}
 
 	CFileMgr::CloseFile(fd);
+
+	POP_MEMID();
 }
 
 
@@ -291,6 +301,7 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 44;
 	if(model.numSpheres > 0){
 		model.spheres = (CColSphere*)RwMalloc(model.numSpheres*sizeof(CColSphere));
+		REGISTER_MEMPTR(&model.spheres);
 		for(i = 0; i < model.numSpheres; i++){
 			model.spheres[i].Set(*(float*)buf, *(CVector*)(buf+4), buf[16], buf[17]);
 			buf += 20;
@@ -315,6 +326,7 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 4;
 	if(model.numBoxes > 0){
 		model.boxes = (CColBox*)RwMalloc(model.numBoxes*sizeof(CColBox));
+		REGISTER_MEMPTR(&model.boxes);
 		for(i = 0; i < model.numBoxes; i++){
 			model.boxes[i].Set(*(CVector*)buf, *(CVector*)(buf+12), buf[24], buf[25]);
 			buf += 28;
@@ -326,6 +338,7 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 4;
 	if(numVertices > 0){
 		model.vertices = (CompressedVector*)RwMalloc(numVertices*sizeof(CompressedVector));
+		REGISTER_MEMPTR(&model.vertices);
 		for(i = 0; i < numVertices; i++){
 			model.vertices[i].Set(*(float*)buf, *(float*)(buf+4), *(float*)(buf+8));
 #if 0
@@ -343,6 +356,7 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 4;
 	if(model.numTriangles > 0){
 		model.triangles = (CColTriangle*)RwMalloc(model.numTriangles*sizeof(CColTriangle));
+		REGISTER_MEMPTR(&model.triangles);
 		for(i = 0; i < model.numTriangles; i++){
 			model.triangles[i].Set(*(int32*)buf, *(int32*)(buf+4), *(int32*)(buf+8), buf[12]);
 			buf += 16;

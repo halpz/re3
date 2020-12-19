@@ -3193,7 +3193,7 @@ AddSample:
 
 #ifdef GTA_TRAIN
 bool
-cAudioManager::ProcessTrainNoise(cVehicleParams *params)
+cAudioManager::ProcessTrainNoise(cVehicleParams& params)
 {
 	const float SOUND_INTENSITY = 300.0f;
 
@@ -3201,12 +3201,12 @@ cAudioManager::ProcessTrainNoise(cVehicleParams *params)
 	uint8 emittingVol;
 	float speedMultipler;
 
-	if (params->m_fDistance >= SQR(SOUND_INTENSITY))
+	if (params.m_fDistance >= SQR(SOUND_INTENSITY))
 		return false;
 
-	if (params->m_fVelocityChange > 0.0f) {
-		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
-		train = (CTrain *)params->m_pVehicle;
+	if (params.m_fVelocityChange > 0.0f) {
+		CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
+		train = (CTrain *)params.m_pVehicle;
 		speedMultipler = Min(1.0f, train->m_fSpeed * 250.f / 51.f);
 		emittingVol = (75.f * speedMultipler);
 		if (train->m_fWagonPosition == 0.0f) {
@@ -3232,7 +3232,7 @@ cAudioManager::ProcessTrainNoise(cVehicleParams *params)
 			}
 		}
 		const float SOUND_INTENSITY = 70.0f;
-		if (params->m_fDistance < SQR(SOUND_INTENSITY)) {
+		if (params.m_fDistance < SQR(SOUND_INTENSITY)) {
 			m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume != 0) {
 				m_sQueueSample.m_nCounter = 33;
@@ -8229,14 +8229,14 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 		male.m_pPed = nil;
 		male.m_bDistanceCalculated = false;
 		male.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
-		SetupPedComments(&male, SOUND_INJURED_PED_MALE_OUCH);
+		SetupPedComments(male, SOUND_INJURED_PED_MALE_OUCH);
 		return;
 	case SCRIPT_SOUND_INJURED_PED_FEMALE_OUCH_S:
 	case SCRIPT_SOUND_INJURED_PED_FEMALE_OUCH_L:
 		female.m_pPed = nil;
 		female.m_bDistanceCalculated = false;
 		female.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
-		SetupPedComments(&female, SOUND_INJURED_PED_FEMALE);
+		SetupPedComments(female, SOUND_INJURED_PED_FEMALE);
 		return;
 	case SCRIPT_SOUND_GATE_START_CLUNK:
 	case SCRIPT_SOUND_GATE_STOP_CLUNK:
