@@ -90,12 +90,9 @@ cMusicManager::DisplayRadioStationName()
 			if(gStreamedSound == STREAMED_SOUND_CITY_AMBIENT ||
 			   gStreamedSound == STREAMED_SOUND_WATER_AMBIENT) {
 				gStreamedSound = POLICE_RADIO; // which means OFF
-			} else {
-
-				if(gStreamedSound >
-				   STREAMED_SOUND_RADIO_MP3_PLAYER)
-					return;
-			}
+				
+			} else if(gStreamedSound > STREAMED_SOUND_RADIO_MP3_PLAYER)
+				return;
 
 			gRetuneCounter = gNumRetunePresses;
 			pRetune = gStreamedSound;
@@ -118,12 +115,8 @@ cMusicManager::DisplayRadioStationName()
 			if(gStreamedSound == STREAMED_SOUND_CITY_AMBIENT ||
 			   gStreamedSound == STREAMED_SOUND_WATER_AMBIENT) {
 				gStreamedSound = POLICE_RADIO; // which means OFF
-			} else {
-
-				if(gStreamedSound >
-				   STREAMED_SOUND_RADIO_MP3_PLAYER)
-					return;
-			}
+			} else if(gStreamedSound > STREAMED_SOUND_RADIO_MP3_PLAYER)
+				return;
 
 			pRetune = gNumRetunePresses + gStreamedSound;
 
