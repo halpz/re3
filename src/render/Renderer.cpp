@@ -24,7 +24,6 @@
 #include "Occlusion.h"
 #include "Renderer.h"
 #include "custompipes.h"
-#include "Debug.h"
 
 //--MIAMI: file done
 
@@ -32,8 +31,6 @@ bool gbShowPedRoadGroups;
 bool gbShowCarRoadGroups;
 bool gbShowCollisionPolys;
 bool gbShowCollisionLines;
-bool gbShowCullZoneDebugStuff;
-bool gbDisableZoneCull;	// not original
 bool gbBigWhiteDebugLightSwitchedOn;
 
 bool gbDontRenderBuildings;
@@ -41,21 +38,6 @@ bool gbDontRenderBigBuildings;
 bool gbDontRenderPeds;
 bool gbDontRenderObjects;
 bool gbDontRenderVehicles;
-
-int32 EntitiesRendered;
-int32 EntitiesNotRendered;
-int32 RenderedBigBuildings;
-int32 RenderedBuildings;
-int32 RenderedCars;
-int32 RenderedPeds;
-int32 RenderedObjects;
-int32 RenderedDummies;
-int32 TestedBigBuildings;
-int32 TestedBuildings;
-int32 TestedCars;
-int32 TestedPeds;
-int32 TestedObjects;
-int32 TestedDummies;
 
 // unused
 int16 TestCloseThings;
@@ -1308,24 +1290,6 @@ CRenderer::ScanWorld(void)
 	RwMatrix *cammatrix;
 	RwV2d poly[3];
 
-#ifndef MASTER
-	// missing in game but has to be done somewhere
-	EntitiesRendered = 0;
-	EntitiesNotRendered = 0;
-	RenderedBigBuildings = 0;
-	RenderedBuildings = 0;
-	RenderedCars = 0;
-	RenderedPeds = 0;
-	RenderedObjects = 0;
-	RenderedDummies = 0;
-	TestedBigBuildings = 0;
-	TestedBuildings = 0;
-	TestedCars = 0;
-	TestedPeds = 0;
-	TestedObjects = 0;
-	TestedDummies = 0;
-#endif
-
 	memset(vectors, 0, sizeof(vectors));
 	vectors[CORNER_FAR_TOPLEFT].x = -vw.x * f;
 	vectors[CORNER_FAR_TOPLEFT].y = vw.y * f;
@@ -1445,19 +1409,6 @@ CRenderer::ScanWorld(void)
 			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_GENERIC));
 		}
 	}
-
-#ifndef MASTER
-	if(gbShowCullZoneDebugStuff){
-		sprintf(gString, "Rejected: %d/%d.", EntitiesNotRendered, EntitiesNotRendered + EntitiesRendered);
-		CDebug::PrintAt(gString, 10, 10);
-		sprintf(gString, "Tested:BBuild:%d Build:%d Peds:%d Cars:%d Obj:%d Dummies:%d",
-			TestedBigBuildings, TestedBuildings, TestedPeds, TestedCars, TestedObjects, TestedDummies);
-		CDebug::PrintAt(gString, 10, 11);
-		sprintf(gString, "Rendered:BBuild:%d Build:%d Peds:%d Cars:%d Obj:%d Dummies:%d",
-			RenderedBigBuildings, RenderedBuildings, RenderedPeds, RenderedCars, RenderedObjects, RenderedDummies);
-		CDebug::PrintAt(gString, 10, 12);
-	}
-#endif
 }
 
 void

@@ -14,8 +14,6 @@ extern bool gbShowPedRoadGroups;
 extern bool gbShowCarRoadGroups;
 extern bool gbShowCollisionPolys;
 extern bool gbShowCollisionLines;
-extern bool gbShowCullZoneDebugStuff;
-extern bool gbDisableZoneCull;	// not original
 extern bool gbBigWhiteDebugLightSwitchedOn;
 
 extern bool gbDontRenderBuildings;

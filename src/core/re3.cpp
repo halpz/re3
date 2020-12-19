@@ -655,8 +655,6 @@ extern bool gbRenderWorld2;
 		DebugMenuAddCmd("Debug", "Parse Heap", ParseHeap);
 #endif
 #endif
-		DebugMenuAddVarBool8("Debug", "Show cullzone debug stuff", &gbShowCullZoneDebugStuff, nil);
-		DebugMenuAddVarBool8("Debug", "Disable zone cull", &gbDisableZoneCull, nil);
 
 		DebugMenuAddVarBool8("Debug", "pad 1 -> pad 2", &CPad::m_bMapPadOneToPadTwo, nil);
 #ifdef GTA_SCENE_EDIT
