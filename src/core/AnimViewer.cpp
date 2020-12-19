@@ -47,7 +47,6 @@ CEntity *CAnimViewer::pTarget = nil;
 void
 CAnimViewer::Render(void) {
 	if (pTarget) {
-//		pTarget->GetPosition() = CVector(0.0f, 0.0f, 0.0f); // Only on Mobile
 		if (pTarget) {
 #ifdef FIX_BUGS
 			if(pTarget->IsPed())
@@ -113,7 +112,7 @@ CAnimViewer::Initialise(void) {
 	CTimeCycle::Initialise();
 	CCarCtrl::Init();
 	CPlayerPed *player = new CPlayerPed();
-	player->SetPosition(0.0f, 0.0f, 0.0f); // This is 1000.f for all axes on Xbox, but 0.f on mobile?
+	player->SetPosition(1000.0f, 1000.0f, 1000.0f);
 	CWorld::Players[0].m_pPed = player;
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;

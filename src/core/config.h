@@ -371,7 +371,3 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 	#undef PS2_ALPHA_TEST
 	#undef NO_ISLAND_LOADING
 #endif
-
-#ifdef LIBRW
-// these are not supported with librw yet
-#endif

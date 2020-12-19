@@ -1380,7 +1380,7 @@ cSampleManager::Terminate(void)
 bool
 cSampleManager::CheckForAnAudioFileOnCD(void)
 {
-#if !defined(NO_CDCHECK) // TODO: figure out defines
+#if !defined(NO_CDCHECK) // TODO: check steam, probably GTAVC_STEAM_PATCH needs to be added
 	char filepath[MAX_PATH];
 	
 	strcpy(filepath, m_MiscomPath);
