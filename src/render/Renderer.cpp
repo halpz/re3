@@ -911,14 +911,6 @@ CRenderer::RenderCollisionLines(void)
 	}
 }
 
-// unused
-void
-CRenderer::RenderBlockBuildingLines(void)
-{
-	for(BlockedRange *br = pFullBlockedRanges; br; br = br->next)
-		printf("Blocked: %f %f\n", br->a, br->b);
-}
-
 enum Visbility
 {
 	VIS_INVISIBLE,

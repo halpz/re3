@@ -71,8 +71,6 @@ public:
 	static void RenderFirstPersonVehicle(void);
 
 	static void RenderCollisionLines(void);
-	// unused
-	static void RenderBlockBuildingLines(void);
 
 	static int32 SetupEntityVisibility(CEntity *ent);
 	static int32 SetupBigBuildingVisibility(CEntity *ent);
