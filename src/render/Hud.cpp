@@ -1029,7 +1029,7 @@ void CHud::Draw()
 						CFont::SetRightJustifyWrap(0.0f);
 						CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 						CFont::SetColor(CRGBA(244, 20, 20, 255));
-						CFont::SetWrapx(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
+						CFont::SetWrapx(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
 						CFont::SetPropOff();
 						CFont::SetBackGroundOnlyTextOn();
 
@@ -1396,7 +1396,7 @@ void CHud::Draw()
 
 				// Appearently sliding text in here was abandoned very early, since this text is centered now.
 #ifdef FIX_BUGS
-				if (BigMessageX[0] >= SCALE_AND_CENTER_X(DEFAULT_SCREEN_HEIGHT-20))
+				if (BigMessageX[0] >= SCALE_AND_CENTER_X(DEFAULT_SCREEN_WIDTH-20))
 #else
 				if (BigMessageX[0] >= SCREEN_WIDTH-20)
 #endif

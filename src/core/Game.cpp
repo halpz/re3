@@ -116,8 +116,6 @@ void DoRWStuffEndOfFrame(void);
 #ifdef PS2_MENU
 void MessageScreen(char *msg)
 {
-	//TODO: stretch_screen
-	
 	CRect rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 	CRGBA color(255, 255, 255, 255);
 
@@ -129,20 +127,32 @@ void MessageScreen(char *msg)
 
 	CSprite2d *splash = LoadSplash(NULL);
 	splash->Draw(rect, color, color, color, color);
-	splash->DrawRect(CRect(SCREEN_SCALE_X(20.0f), SCREEN_SCALE_Y(110.0f), SCREEN_SCALE_X(620.0f), SCREEN_SCALE_Y(300.0f)), CRGBA(50, 50, 50, 192));
-	
+#ifdef FIX_BUGS
+	splash->DrawRect(CRect(SCREEN_SCALE_X(20.0f), SCREEN_SCALE_Y(110.0f), SCREEN_WIDTH-SCREEN_SCALE_X(20.0f), SCREEN_SCALE_Y(300.0f)), CRGBA(50, 50, 50, 192));
+#else
+	splash->DrawRect(CRect(20.0f, 110.0f, SCREEN_WIDTH-20.0f, 300.0f), CRGBA(50, 50, 50, 192));
+#endif
 	CFont::SetFontStyle(FONT_BANK);
 	CFont::SetBackgroundOff();
-	CFont::SetWrapx(SCREEN_SCALE_FROM_RIGHT(190.0f)); // 450.0f
+	CFont::SetWrapx(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH-190));
+#ifdef FIX_BUGS
 	CFont::SetScale(SCREEN_SCALE_X(1.0f), SCREEN_SCALE_Y(1.0f));
+#else
+	CFont::SetScale(1.0f, 1.0f);
+#endif
 	CFont::SetCentreOn();
-	CFont::SetCentreSize(SCREEN_SCALE_X(450.0f)); // 450.0f
+	CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - 190)); // 450.0f
 	CFont::SetJustifyOff();
 	CFont::SetColor(CRGBA(255, 255, 255, 255));
 	CFont::SetDropColor(CRGBA(32, 32, 32, 255));
 	CFont::SetDropShadowPosition(3);
+	CFont::SetBackGroundOnlyTextOff();
 	CFont::SetPropOn();
-	CFont::PrintString(SCREEN_SCALE_X(320.0f), SCREEN_SCALE_Y(130.0f), TheText.Get(msg));
+#ifdef FIX_BUGS
+	CFont::PrintString(SCREEN_WIDTH/2, SCREEN_SCALE_Y(130.0f), TheText.Get(msg));
+#else
+	CFont::PrintString(SCREEN_WIDTH/2, 130.0f, TheText.Get(msg));
+#endif
 	CFont::DrawFonts();
 	
 	DoRWStuffEndOfFrame();
@@ -889,12 +899,15 @@ void CGame::InitialiseWhenRestarting(void)
 				DefinedState();
 				
 				CSprite2d *splash = LoadSplash(NULL);
-				splash->Draw(rect, color, color, color, color);
-				splash->DrawRect(CRect(SCREEN_SCALE_X(20.0f), SCREEN_SCALE_Y(110.0f), SCREEN_SCALE_X(620.0f), SCREEN_SCALE_Y(300.0f)), CRGBA(50, 50, 50, 192));
-				
-				//CFont::SetFontStyle(?);
+				splash->Draw(rect, color, color, color, color);		
+#ifdef FIX_BUGS
+				splash->DrawRect(CRect(SCREEN_SCALE_X(20.0f), SCREEN_SCALE_Y(110.0f), SCREEN_WIDTH-SCREEN_SCALE_X(20.0f), SCREEN_SCALE_Y(300.0f)), CRGBA(50, 50, 50, 192));
+#else
+				splash->DrawRect(CRect(20.0f, 110.0f, SCREEN_WIDTH-20.0f, 300.0f), CRGBA(50, 50, 50, 192));
+#endif
+
 				CFont::SetBackgroundOff();
-				CFont::SetWrapx(SCREEN_SCALE_FROM_RIGHT(160.0f)); // 480.0f
+				CFont::SetWrapx(SCREEN_SCALE_X(480.0f));
 				CFont::SetScale(SCREEN_SCALE_X(1.0f), SCREEN_SCALE_Y(1.0f));
 				CFont::SetCentreOn();
 				CFont::SetCentreSize(SCREEN_SCALE_X(480.0f));
@@ -904,9 +917,15 @@ void CGame::InitialiseWhenRestarting(void)
 				CFont::SetDropColor(CRGBA(32, 32, 32, 255));
 				CFont::SetDropShadowPosition(3);
 				CFont::SetPropOn();
-				CFont::PrintString(SCREEN_SCALE_X(320.0f), SCREEN_SCALE_Y(130.0f), TheText.Get("MC_LDFL")); // Load Failed!
-				CFont::PrintString(SCREEN_SCALE_X(320.0f), SCREEN_SCALE_Y(170.0f), TheText.Get("FES_NOC")); // No Memory Card (PS2) in MEMORY CARD slot 1.
-				CFont::PrintString(SCREEN_SCALE_X(320.0f), SCREEN_SCALE_Y(240.0f), TheText.Get("MC_NWRE")); // Now Restarting Game.
+#ifdef FIX_BUGS
+				CFont::PrintString(SCREEN_WIDTH/2, SCREEN_SCALE_Y(130.0f), TheText.Get("MC_LDFL")); // Load Failed!
+				CFont::PrintString(SCREEN_WIDTH/2, SCREEN_SCALE_Y(170.0f), TheText.Get("FES_NOC")); // No Memory Card (PS2) in MEMORY CARD slot 1.
+				CFont::PrintString(SCREEN_WIDTH/2, SCREEN_SCALE_Y(240.0f), TheText.Get("MC_NWRE")); // Now Restarting Game.
+#else
+				CFont::PrintString(SCREEN_WIDTH/2, 130.0f, TheText.Get("MC_LDFL")); // Load Failed!
+				CFont::PrintString(SCREEN_WIDTH/2, 170.0f, TheText.Get("FES_NOC")); // No Memory Card (PS2) in MEMORY CARD slot 1.
+				CFont::PrintString(SCREEN_WIDTH/2, 240.0f, TheText.Get("MC_NWRE")); // Now Restarting Game.
+#endif
 				CFont::DrawFonts();
 				
 				DoRWStuffEndOfFrame();

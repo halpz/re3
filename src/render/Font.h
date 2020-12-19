@@ -173,23 +173,6 @@ public:
 	static void SetCentreOff(void) {
 		Details.centre = false;
 	}
-	static void SetAlignment(uint8 alignment) {
-		if (alignment == ALIGN_LEFT) {
-			CFont::Details.justify = true;
-			CFont::Details.centre = false;
-			CFont::Details.rightJustify = false;
-		}
-		else if (alignment == ALIGN_CENTER) {
-			CFont::Details.justify = false;
-			CFont::Details.centre = true;
-			CFont::Details.rightJustify = false;
-		}
-		else if (alignment == ALIGN_RIGHT) {
-			CFont::Details.justify = false;
-			CFont::Details.centre = false;
-			CFont::Details.rightJustify = true;
-		}
-	}
 	static void SetWrapx(float x) { Details.wrapX = x; }
 	static void SetCentreSize(float s) { Details.centreSize = s; }
 	static void SetBackgroundOn(void) { Details.background = true; }

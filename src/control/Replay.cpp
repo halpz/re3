@@ -1576,13 +1576,20 @@ void CReplay::Display()
 	TimeCount = (TimeCount + 1) % UINT16_MAX;
 	if ((TimeCount & 0x20) == 0)
 		return;
-	CFont::SetPropOn();
-	CFont::SetBackgroundOff();
+	
 	CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
-	CFont::SetAlignment(ALIGN_LEFT);
+	CFont::SetJustifyOff();
+	CFont::SetBackgroundOff();
+#ifdef FIX_BUGS
+	CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH-20));
+#else
+	CFont::SetCentreSize(SCREEN_WIDTH-20);
+#endif
+	CFont::SetCentreOff();
+	CFont::SetPropOn();
 	CFont::SetColor(CRGBA(255, 255, 200, 200));
 	CFont::SetFontStyle(FONT_BANK);
 	if (Mode == MODE_PLAYBACK)
-		CFont::PrintString(SCREEN_SCALE_X(63.5f), SCREEN_SCALE_Y(30.0f), TheText.Get("REPLAY"));
+		CFont::PrintString(SCREEN_WIDTH/15, SCREEN_HEIGHT/10, TheText.Get("REPLAY"));
 }
 #endif

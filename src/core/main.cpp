@@ -577,7 +577,12 @@ LoadingScreen(const char *str1, const char *str2, const char *splashscreen)
 		return;
 #endif
 
-	if(DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255)){
+#ifndef GTA_PS2
+	if(DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255))
+#else
+	DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
+#endif
+	{
 		CSprite2d::SetRecipNearClip();
 		CSprite2d::InitPerFrame();
 		CFont::InitPerFrame();
@@ -637,8 +642,13 @@ LoadingIslandScreen(const char *levelName)
 
 	splash = LoadSplash(nil);
 	name = TheText.Get(levelName);
+	
+#ifndef GTA_PS2
 	if(!DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255))
 		return;
+#else
+	DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
+#endif
 
 	CSprite2d::SetRecipNearClip();
 	CSprite2d::InitPerFrame();
@@ -665,20 +675,42 @@ LoadingIslandScreen(const char *levelName)
 	CFont::SetDropColor(CRGBA(0, 0, 0, 255));
 	CFont::SetDropShadowPosition(3);
 	CFont::SetColor(CRGBA(243, 237, 71, 255));
+#if !defined(PS2_HUD) && defined(GTA_PC)
 	CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.2f));
-#ifdef FIX_BUGS
-	CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(110.0f), TheText.Get("WELCOME"));
+#endif
+
+#ifdef PS2_HUD
+	#ifdef FIX_BUGS
+	CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(140.0f), TheText.Get("WELCOME"));
+	#else
+	CFont::PrintString(SCREEN_WIDTH - 20, SCREEN_HEIGHT - 140, TheText.Get("WELCOME"));
+	#endif
 #else
+	#ifdef FIX_BUGS
+	CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(110.0f), TheText.Get("WELCOME"));
+	#else
 	CFont::PrintString(SCREEN_WIDTH - 20, SCREEN_SCALE_FROM_BOTTOM(110.0f), TheText.Get("WELCOME"));
+	#endif
 #endif
 	TextCopy(wstr, name);
 	TheText.UpperCase(wstr);
 	CFont::SetColor(CRGBA(243, 237, 71, 255));
+#if !defined(PS2_HUD) && defined(GTA_PC)
 	CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.2f));
-#ifdef FIX_BUGS
-	CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(80.0f), wstr);
+#endif
+
+#ifdef PS2_HUD
+	#ifdef FIX_BUGS
+		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(110.0f), wstr);
+	#else
+		CFont::PrintString(SCREEN_WIDTH-20, SCREEN_HEIGHT - 110, wstr);
+	#endif
 #else
-	CFont::PrintString(SCREEN_WIDTH-20, SCREEN_SCALE_FROM_BOTTOM(80.0f), wstr);
+	#ifdef FIX_BUGS
+		CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(80.0f), wstr);
+	#else
+		CFont::PrintString(SCREEN_WIDTH-20, SCREEN_SCALE_FROM_BOTTOM(80.0f), wstr);
+	#endif
 #endif
 	CFont::DrawFonts();
 	DoRWStuffEndOfFrame();
@@ -1058,7 +1090,11 @@ DisplayGameDebugText()
 		// Let's not scale those numbers, they look better that way :eyes:
 		CFont::SetPropOff();
 		CFont::SetBackgroundOff();
+#ifdef FIX_BUGS
+		CFont::SetScale(SCREEN_SCALE_X(0.7f), SCREEN_SCALE_Y(1.5f));
+#else
 		CFont::SetScale(0.7f, 1.5f);
+#endif
 		CFont::SetCentreOff();
 		CFont::SetRightJustifyOff();
 		CFont::SetJustifyOff();

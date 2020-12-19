@@ -47,6 +47,8 @@ int16 CFont::Size[LANGSET_MAX][MAX_FONTS][193] = {
 #else
 int16 CFont::Size[MAX_FONTS][193] = {
 #endif
+
+#if !defined(GTA_PS2) || defined(FIX_BUGS)
 		{
 		13, 12, 31, 35, 23, 35, 31,  9, 14, 15, 25, 30, 11, 17, 13, 31,
 		23, 16, 22, 21, 24, 23, 23, 20, 23, 22, 10, 35, 26, 26, 26, 26,
@@ -94,6 +96,56 @@ int16 CFont::Size[MAX_FONTS][193] = {
 		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
 		19
 		}
+#else // #if defined(GTA_PS2) && !defined(FIX_BUGS)
+		{
+		13, 12, 31, 35, 23, 35, 31,  9, 14, 15, 25, 30, 11, 17, 13, 31,
+		23, 16, 22, 21, 24, 23, 23, 20, 23, 22, 10, 35, 26, 26, 26, 26,
+		30, 26, 24, 23, 24, 22, 21, 24, 26, 10, 20, 26, 22, 29, 26, 25,
+		24, 25, 24, 24, 22, 25, 24, 29, 29, 23, 25, 37, 22, 37, 35, 37,
+		35, 21, 22, 21, 21, 22, 13, 22, 21, 10, 16, 22, 11, 32, 21, 21,
+		23, 22, 16, 20, 14, 21, 20, 30, 25, 21, 21, 33, 33, 33, 33, 35,
+		27, 27, 27, 27, 32, 24, 23, 23, 23, 23, 11, 11, 11, 11, 26, 26,
+		26, 26, 26, 26, 26, 25, 26, 21, 21, 21, 21, 32, 23, 22, 22, 22,
+		22, 11, 11, 11, 11, 22, 22, 22, 22, 22, 22, 22, 22, 26, 21, 24,
+		12, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
+		26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 18, 26, 26,
+		26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
+		20
+		},
+
+		{
+		13,  9, 21, 35, 23, 35, 35, 11, 35, 35, 25, 35, 11, 17, 13, 33,
+		28, 14, 22, 21, 24, 23, 23, 21, 23, 22, 10, 35, 13, 35, 13, 33,
+		 5, 25, 22, 23, 24, 21, 21, 24, 24,  9, 20, 24, 21, 27, 25, 25,
+		22, 25, 23, 20, 23, 23, 23, 31, 23, 23, 23, 37, 33, 37, 35, 37,
+		35, 21, 19, 19, 21, 19, 17, 21, 21,  8, 17, 18, 14, 24, 21, 21,
+		20, 22, 19, 20, 20, 19, 20, 26, 21, 20, 21, 33, 33, 33, 33, 35,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+		16
+		},
+
+		{
+		15, 14, 16, 25, 19, 26, 22, 11, 18, 18, 27, 26, 13, 19,  9, 27,
+		19, 18, 19, 19, 21, 19, 20, 18, 19, 20, 12, 32, 15, 32, 15, 35,
+		15, 19, 19, 19, 19, 19, 16, 19, 20,  9, 19, 20, 14, 29, 19, 19,
+		19, 19, 19, 19, 21, 19, 20, 32, 20, 19, 19, 33, 31, 39, 37, 39,
+		37, 21, 21, 21, 23, 21, 19, 23, 23, 10, 19, 20, 16, 26, 23, 23,
+		20, 20, 20, 22, 21, 22, 22, 26, 22, 22, 23, 35, 35, 35, 35, 37,
+		19, 19, 19, 19, 29, 19, 19, 19, 19, 19,  9,  9,  9,  9, 19, 19,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 30, 19, 19, 19, 19, 19,
+		10, 10, 10, 10, 19, 19, 19, 19, 19, 19, 19, 19, 19, 23, 35, 12,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 11, 19, 19, 19,
+		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+		19
+		}
+#endif
+
 #ifdef MORE_LANGUAGES
 	},
 	{
@@ -455,18 +507,35 @@ CFont::PrintChar(float x, float y, wchar c)
 
 	if(Details.style == FONT_BANK || Details.style == FONT_HEADING){
 		if(Details.dropShadowPosition != 0){
-			CSprite2d::AddSpriteToBank(Details.bank + Details.style,	// BUG: game doesn't add bank
+			CSprite2d::AddSpriteToBank(
+#ifdef FIX_BUGS
+				Details.bank + Details.style,
+#else
+				Details.style, // BUG: game doesn't add bank
+#endif
+#ifdef FIX_BUGS
 				CRect(x + SCREEN_SCALE_X(Details.dropShadowPosition),
 				      y + SCREEN_SCALE_Y(Details.dropShadowPosition),
 				      x + SCREEN_SCALE_X(Details.dropShadowPosition) + 32.0f * Details.scaleX * 1.0f,
 				      y + SCREEN_SCALE_Y(Details.dropShadowPosition) + 40.0f * Details.scaleY * 0.5f),
+#else
+				CRect(x + Details.dropShadowPosition,
+				      y + Details.dropShadowPosition,
+				      x + Details.dropShadowPosition + 32.0f * Details.scaleX * 1.0f,
+				      y + Details.dropShadowPosition + 40.0f * Details.scaleY * 0.5f),
+#endif
 				Details.dropColor,
 				xoff/16.0f,                 yoff/12.8f,
 				(xoff+1.0f)/16.0f - 0.001f, yoff/12.8f,
 				xoff/16.0f,                 (yoff+1.0f)/12.8f,
 				(xoff+1.0f)/16.0f - 0.001f, (yoff+1.0f)/12.8f - 0.0001f);
 		}
-		CSprite2d::AddSpriteToBank(Details.bank + Details.style,	// BUG: game doesn't add bank
+		CSprite2d::AddSpriteToBank(
+#ifdef FIX_BUGS
+			Details.bank + Details.style,
+#else
+			Details.style, // BUG: game doesn't add bank
+#endif
 			CRect(x, y,
 			      x + 32.0f * Details.scaleX * 1.0f,
 			      y + 40.0f * Details.scaleY * 0.5f),
@@ -478,11 +547,23 @@ CFont::PrintChar(float x, float y, wchar c)
 #ifdef MORE_LANGUAGES
 	}else if (IsJapaneseFont()) {
 		if (Details.dropShadowPosition != 0) {
-			CSprite2d::AddSpriteToBank(Details.bank + Details.style,	// BUG: game doesn't add bank
+			CSprite2d::AddSpriteToBank(
+#ifdef FIX_BUGS
+				Details.bank + Details.style,
+#else
+				Details.style, // BUG: game doesn't add bank
+#endif
+#ifdef FIX_BUGS
 				CRect(x + SCREEN_SCALE_X(Details.dropShadowPosition),
 					y + SCREEN_SCALE_Y(Details.dropShadowPosition),
 					x + SCREEN_SCALE_X(Details.dropShadowPosition) + 32.0f * Details.scaleX * 1.0f,
 					y + SCREEN_SCALE_Y(Details.dropShadowPosition) + 40.0f * Details.scaleY / 2.75f),
+#else
+				CRect(x + Details.dropShadowPosition,
+					y + Details.dropShadowPosition,
+					x + Details.dropShadowPosition + 32.0f * Details.scaleX * 1.0f,
+					y + Details.dropShadowPosition + 40.0f * Details.scaleY / 2.75f),
+#endif
 				Details.dropColor,
 				xoff * w / 1024.0f, yoff / 25.6f,
 				xoff * w / 1024.0f + (1.0f / 48.0f) - 0.001f, yoff / 25.6f,
@@ -501,7 +582,12 @@ CFont::PrintChar(float x, float y, wchar c)
 #endif
 	}else
 	{
-		CSprite2d::AddSpriteToBank(Details.bank + Details.style,	// BUG: game doesn't add bank
+		CSprite2d::AddSpriteToBank(
+#ifdef FIX_BUGS
+			Details.bank + Details.style,
+#else
+			Details.style, // BUG: game doesn't add bank
+#endif
 			CRect(x, y,
 					x + 32.0f * Details.scaleX * w,
 					y + 32.0f * Details.scaleY * 0.5f),
@@ -793,7 +879,12 @@ CFont::GetTextRect(CRect *rect, float xstart, float ystart, wchar *s)
 		numLines = GetNumberLines(xstart, ystart, s);
 	}else{
 #endif
+
+#ifdef FIX_BUGS
 		if(Details.centre || Details.rightJustify)
+#else
+		if(Details.centre)
+#endif
 			x = 0.0f;
 		else
 			x = xstart;
@@ -811,7 +902,11 @@ CFont::GetTextRect(CRect *rect, float xstart, float ystart, wchar *s)
 				// reached end of line
 				if(x > maxlength)
 					maxlength = x;
+#ifdef FIX_BUGS
 				if(Details.centre || Details.rightJustify)
+#else
+				if(Details.centre)
+#endif
 					x = 0.0f;
 				else
 					x = xstart;
@@ -1291,14 +1386,14 @@ CFont::ParseToken(wchar *s, wchar*)
 		case 'n':
 			NewLine = 1;
 			break;
-		case 'b': SetColor(CRGBA(0x80, 0xA7, 0xF3, 0xFF)); break;
-		case 'g': SetColor(CRGBA(0x5F, 0xA0, 0x6A, 0xFF)); break;
-		case 'h': SetColor(CRGBA(0xE1, 0xE1, 0xE1, 0xFF)); break;
-		case 'l': SetColor(CRGBA(0x00, 0x00, 0x00, 0xFF)); break;
-		case 'p': SetColor(CRGBA(0xA8, 0x6E, 0xFC, 0xFF)); break;
-		case 'r': SetColor(CRGBA(0x71, 0x2B, 0x49, 0xFF)); break;
-		case 'w': SetColor(CRGBA(0xAF, 0xAF, 0xAF, 0xFF)); break;
-		case 'y': SetColor(CRGBA(0xD2, 0xC4, 0x6A, 0xFF)); break;
+		case 'b': SetColor(CRGBA(128, 167, 243, 255)); break;
+		case 'g': SetColor(CRGBA(95, 160, 106, 255)); break;
+		case 'h': SetColor(CRGBA(225, 225, 225, 255)); break;
+		case 'l': SetColor(CRGBA(0, 0, 0, 255)); break;
+		case 'p': SetColor(CRGBA(168, 110, 252, 255)); break;
+		case 'r': SetColor(CRGBA(113, 43, 73, 255)); break;
+		case 'w': SetColor(CRGBA(175, 175, 175, 255)); break;
+		case 'y': SetColor(CRGBA(210, 196, 106, 255)); break;
 #ifdef BUTTON_ICONS
 #if 0 // unused
 		case 'U': PS2Symbol = BUTTON_UP; break;
