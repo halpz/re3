@@ -1,7 +1,7 @@
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-if(${RE3_AUDIO} STREQUAL "OAL")
+if(${REVC_AUDIO} STREQUAL "OAL")
         find_package(OpenAL REQUIRED)
         find_package(MPG123 REQUIRED)
         find_package(SndFile REQUIRED)
@@ -46,7 +46,7 @@ add_executable(reVC ${Sources})
 target_link_libraries(reVC librw)
 target_link_libraries(reVC Threads::Threads)
 
-if(${RE3_AUDIO} STREQUAL "OAL")
+if(${REVC_AUDIO} STREQUAL "OAL")
         target_link_libraries(reVC ${OPENAL_LIBRARY})
         target_link_libraries(reVC ${MPG123_LIBRARIES})
         target_link_libraries(reVC ${SNDFILE_LIBRARIES})
@@ -61,7 +61,7 @@ target_compile_definitions(reVC
     PRIVATE
         "$<IF:$<CONFIG:DEBUG>,DEBUG,NDEBUG>"
     PUBLIC
-        "RW_${RE3_PLATFORM}"
+        "RW_${REVC_PLATFORM}"
     )
 
 target_compile_definitions(reVC PRIVATE LIBRW=1 AUDIO_OAL=1)
@@ -71,7 +71,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
         PRIVATE
             "-Wall"
         )
-    if (NOT RE3_PLATFORM_PS2)
+    if (NOT REVC_PLATFORM_PS2)
         target_compile_options(reVC
             PRIVATE
                 "-Wextra"
@@ -97,10 +97,10 @@ set_target_properties(reVC
         PREFIX ""
     )
 
-if(RE3_INSTALL)
+if(REVC_INSTALL)
     target_include_directories(reVC
         INTERFACE
-            $<INSTALL_INTERFACE:${RE3_INSTALL_INCLUDEDIR}>
+            $<INSTALL_INTERFACE:${REVC_INSTALL_INCLUDEDIR}>
         )
 
     install(
