@@ -28,7 +28,7 @@ CDummyPool *CPools::ms_pDummyPool;
 CAudioScriptObjectPool *CPools::ms_pAudioScriptObjectPool;
 CColModelPool *CPools::ms_pColModelPool;
 
-#ifdef GTA_PS2	// or USE_CUSTOM_ALLOCATOR
+#if defined GTA_PS2 && !defined MASTER	// or USE_CUSTOM_ALLOCATOR
 #define CHECKMEM(msg) CMemCheck::AllocateMemCheckBlock(msg)
 #else
 #define CHECKMEM(msg)

@@ -71,13 +71,6 @@ void CRecordDataForChase::ProcessControlCars(void)
 
 bool CRecordDataForChase::ShouldThisPadBeLeftAlone(uint8 pad)
 {
-	// may be wrong
-	if (Status == STATE_PLAYBACK_INIT) // this is useless but ps2 def checks if it's STATE_PLAYBACK_INIT
-		return false;
-
-	if (Status == STATE_RECORD)
-		return pad != 0;
-
 	return false;
 }
 
