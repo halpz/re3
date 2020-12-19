@@ -120,6 +120,11 @@ enum tVehicleType
 	NUMBOATHANDLINGS = HANDLING_SEAPLANE+1 - HANDLING_PREDATOR,
 };
 
+enum tField // most likely a handling field enum, never used so :shrug:
+{
+
+};
+
 enum
 {
 	HANDLING_1G_BOOST = 1,
@@ -239,6 +244,8 @@ struct  tFlyingHandlingData
 	CVector vecSpeedRes;
 };
 
+class CVehicle;
+
 class cHandlingDataMgr
 {
 	float field_0;	// unused it seems
@@ -258,6 +265,7 @@ public:
 	void Initialise(void);
 	void LoadHandlingData(void);
 	int FindExactWord(const char *word, const char *words, int wordLen, int numWords);
+	void ConvertDataToWorldUnits(tHandlingData *handling);
 	void ConvertDataToGameUnits(tHandlingData *handling);
 	void ConvertBikeDataToGameUnits(tBikeHandlingData *handling);
 	int32 GetHandlingId(const char *name);

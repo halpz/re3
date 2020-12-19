@@ -3,7 +3,7 @@
 #include "General.h"
 #include "ModelIndices.h"
 
-#define X(name, var) int16 var;
+#define X(name, var) int16 var = -1;
 	MODELINDICES
 #undef X
 

@@ -866,7 +866,6 @@ public:
 	void PositionAttachedPed();
 	bool CanUseTorsoWhenLooking();
 	void ScanForDelayedResponseThreats();
-	void SetWeaponLockOnTarget(CEntity*);
 
 	// Static methods
 	static CVector GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset);
@@ -1103,6 +1102,16 @@ public:
 			SetMoveState(PEDMOVE_WALK);
 	}
 	// --
+
+	inline void SetWeaponLockOnTarget(CEntity *target)
+	{
+		if (m_pPointGunAt)
+			m_pPointGunAt->CleanUpOldReference(&m_pPointGunAt);
+
+		m_pPointGunAt = (CPed*)target;
+		if (target)
+			((CEntity*)target)->RegisterReference(&m_pPointGunAt);
+	}
 
 	// Using this to abstract nodes of skinned and non-skinned meshes
 	CVector GetNodePosition(int32 node)

@@ -32,6 +32,7 @@
 #include "MBlur.h"
 #include "postfx.h"
 #include "custompipes.h"
+#include "MemoryHeap.h"
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 #include "FileMgr.h"
@@ -647,6 +648,13 @@ extern bool gbRenderWorld2;
 		DebugMenuAddVarBool8("Render", "Don't render Vehicles", &gbDontRenderVehicles, nil);
 		DebugMenuAddVarBool8("Render", "Don't render Objects", &gbDontRenderObjects, nil);
 		DebugMenuAddVarBool8("Render", "Don't Render Water", &gbDontRenderWater, nil);
+
+#ifndef FINAL
+		DebugMenuAddVarBool8("Debug", "Print Memory Usage", &gbPrintMemoryUsage, nil);
+#ifdef USE_CUSTOM_ALLOCATOR
+		DebugMenuAddCmd("Debug", "Parse Heap", ParseHeap);
+#endif
+#endif
 
 		DebugMenuAddVarBool8("Debug", "pad 1 -> pad 2", &CPad::m_bMapPadOneToPadTwo, nil);
 #ifdef GTA_SCENE_EDIT

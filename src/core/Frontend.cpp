@@ -53,6 +53,7 @@ const CRGBA DARKMENUOPTION_COLOR(195, 90, 165, 255);
 const CRGBA SLIDERON_COLOR(97, 194, 247, 255);
 const CRGBA SLIDEROFF_COLOR(27, 89, 130, 255);
 const CRGBA LIST_BACKGROUND_COLOR(49, 101, 148, 130);
+const CRGBA LIST_OPTION_COLOR(155, 155, 155, 255);
 const CRGBA RADIO_SELECTOR_COLOR = SLIDEROFF_COLOR;
 const CRGBA INACTIVE_RADIO_COLOR(100, 100, 255, 100);
 const CRGBA SCROLLBAR_COLOR = LABEL_COLOR;
@@ -969,6 +970,7 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 	uint8 section = 0; // 0: highlight trapezoid  1: texts
 
 	while (section < 2) {
+#endif
 
 #ifdef SCROLLABLE_PAGES
 		int firstOption = SCREEN_HAS_AUTO_SCROLLBAR ? m_nFirstVisibleRowOnList : 0;
@@ -2572,7 +2574,7 @@ CMenuManager::DrawPlayerSetupScreen(bool activeScreen)
 			} else if (!strcmp(m_PrefsSkinFile, m_pSelectedSkin->skinNameOriginal)) {
 				CFont::SetColor(CRGBA(255, 255, 155, FadeIn(255)));
 			} else {
-				CFont::SetColor(CRGBA(155, 155, 155, FadeIn(255)));
+				CFont::SetColor(CRGBA(LIST_OPTION_COLOR.r, LIST_OPTION_COLOR.g, LIST_OPTION_COLOR.b, FadeIn(LIST_OPTION_COLOR.a)));
 			}
 			wchar unicodeTemp[80];
 			AsciiToUnicode(m_pSelectedSkin->skinNameDisplayed, unicodeTemp);
@@ -2598,14 +2600,13 @@ CMenuManager::DrawPlayerSetupScreen(bool activeScreen)
 		CSprite2d::DrawRect(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 2), MENU_Y(PLAYERSETUP_LIST_TOP),
 			MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 2 - PLAYERSETUP_SCROLLBAR_WIDTH), SCREEN_SCALE_FROM_BOTTOM(PLAYERSETUP_LIST_BOTTOM)), CRGBA(100, 100, 66, FadeIn(205)));
 		
-		// Scrollbar
-		float scrollbarHeight = SCROLLBAR_MAX_HEIGHT / m_nSkinsTotal * (float) MAX_VISIBLE_LIST_ROW;
+		float scrollbarHeight = SCROLLBAR_MAX_HEIGHT / (m_nSkinsTotal / (float) MAX_VISIBLE_LIST_ROW);
 		float scrollbarBottom, scrollbarTop;
 		if (m_nSkinsTotal <= MAX_VISIBLE_LIST_ROW) {
 			scrollbarBottom = SCREEN_SCALE_FROM_BOTTOM(PLAYERSETUP_LIST_BOTTOM + PLAYERSETUP_SCROLLBUTTON_HEIGHT + 4.0f);
 			scrollbarTop = MENU_Y(PLAYERSETUP_LIST_BODY_TOP);
 
-			// Shadow
+			// Scrollbar shadow
 			CSprite2d::DrawRect(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 4), scrollbarTop,
 				MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 1 - PLAYERSETUP_SCROLLBAR_WIDTH), scrollbarBottom + MENU_Y(1.0f)), CRGBA(50, 50, 50, FadeIn(255)));
 		} else {
@@ -2616,12 +2617,13 @@ CMenuManager::DrawPlayerSetupScreen(bool activeScreen)
 			scrollbarBottom = MENU_Y(PLAYERSETUP_LIST_BODY_TOP - 4 + m_nScrollbarTopMargin + scrollbarHeight - SCROLLBAR_MAX_HEIGHT / m_nSkinsTotal);
 			scrollbarTop = MENU_Y(SCROLLBAR_MAX_HEIGHT / m_nSkinsTotal + PLAYERSETUP_LIST_BODY_TOP - 3 + m_nScrollbarTopMargin);
 #endif
-			// Shadow
+			// Scrollbar shadow
 			CSprite2d::DrawRect(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 4), scrollbarTop,
 				MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 1 - PLAYERSETUP_SCROLLBAR_WIDTH), scrollbarBottom + MENU_Y(1.0f)),
 				CRGBA(50, 50, 50, FadeIn(255)));
 
 		}
+		// Scrollbar
 		CSprite2d::DrawRect(CRect(MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - 4), scrollbarTop,
 			MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT - PLAYERSETUP_SCROLLBAR_WIDTH), scrollbarBottom),
 			CRGBA(SCROLLBAR_COLOR.r, SCROLLBAR_COLOR.g, SCROLLBAR_COLOR.b, FadeIn(255)));
@@ -5690,5 +5692,3 @@ uint8 CMenuManager::GetNumberOfMenuOptions()
 
 #undef GetBackJustUp
 #undef GetBackJustDown
-    
-#endif

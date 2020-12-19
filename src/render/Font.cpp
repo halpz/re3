@@ -3,6 +3,9 @@
 #include "Sprite2d.h"
 #include "TxdStore.h"
 #include "Font.h"
+#ifdef BUTTON_ICONS
+#include "FileMgr.h"
+#endif
 #include "Timer.h"
 
 void
@@ -224,6 +227,12 @@ union tFontRenderStatePointer
 tFontRenderStatePointer FontRenderStatePointer;
 uint8 FontRenderStateBuf[1024];
 
+#ifdef BUTTON_ICONS
+CSprite2d CFont::ButtonSprite[MAX_BUTTON_ICONS];
+int CFont::PS2Symbol = BUTTON_NONE;
+int CFont::ButtonsSlot = -1;
+#endif // BUTTON_ICONS
+
 void
 CFont::Initialise(void)
 {
@@ -279,6 +288,34 @@ CFont::Initialise(void)
 	SetAlphaFade(255.0f);
 	SetDropShadowPosition(0);
 	CTxdStore::PopCurrentTxd();
+
+#ifdef BUTTON_ICONS
+	if (int file = CFileMgr::OpenFile("MODELS/X360BTNS.TXD")) {
+		CFileMgr::CloseFile(file);
+		ButtonsSlot = CTxdStore::AddTxdSlot("buttons");
+		CTxdStore::LoadTxd(ButtonsSlot, "MODELS/X360BTNS.TXD");
+		CTxdStore::AddRef(ButtonsSlot);
+		CTxdStore::PushCurrentTxd();
+		CTxdStore::SetCurrentTxd(ButtonsSlot);
+#if 0  // unused
+		ButtonSprite[BUTTON_UP].SetTexture("up");
+		ButtonSprite[BUTTON_DOWN].SetTexture("down");
+		ButtonSprite[BUTTON_LEFT].SetTexture("left");
+		ButtonSprite[BUTTON_RIGHT].SetTexture("right");
+#endif
+		ButtonSprite[BUTTON_CROSS].SetTexture("cross");
+		ButtonSprite[BUTTON_CIRCLE].SetTexture("circle");
+		ButtonSprite[BUTTON_SQUARE].SetTexture("square");
+		ButtonSprite[BUTTON_TRIANGLE].SetTexture("triangle");
+		ButtonSprite[BUTTON_L1].SetTexture("l1");
+		ButtonSprite[BUTTON_L2].SetTexture("l2");
+		ButtonSprite[BUTTON_L3].SetTexture("l3");
+		ButtonSprite[BUTTON_R1].SetTexture("r1");
+		ButtonSprite[BUTTON_R2].SetTexture("r2");
+		ButtonSprite[BUTTON_R3].SetTexture("r3");
+		CTxdStore::PopCurrentTxd();
+	}
+#endif // BUTTON_ICONS
 }
 
 #ifdef MORE_LANGUAGES
@@ -327,6 +364,13 @@ CFont::ReloadFonts(uint8 set)
 void
 CFont::Shutdown(void)
 {
+#ifdef BUTTON_ICONS
+	if (ButtonsSlot != -1) {
+		for (int i = 0; i < MAX_BUTTON_ICONS; i++)
+			ButtonSprite[i].Delete();
+		CTxdStore::RemoveTxdSlot(ButtonsSlot);
+	}
+#endif
 	Sprite[0].Delete();
 	Sprite[1].Delete();
 #ifdef MORE_LANGUAGES
@@ -347,7 +391,33 @@ CFont::InitPerFrame(void)
 	FontRenderStatePointer.pRenderState = (CFontRenderState*)FontRenderStateBuf;
 	SetDropShadowPosition(0);
 	NewLine = 0;
+#ifdef BUTTON_ICONS
+	PS2Symbol = BUTTON_NONE;
+#endif
 }
+
+#ifdef BUTTON_ICONS
+void
+CFont::DrawButton(float x, float y)
+{
+	if (x <= 0.0f || x > SCREEN_WIDTH || y <= 0.0f || y > SCREEN_HEIGHT)
+		return;
+
+	if (PS2Symbol != BUTTON_NONE) {
+		CRect rect;
+		rect.left = x;
+		rect.top = Details.scaleY + Details.scaleY + y;
+		rect.right = Details.scaleY * 17.0f + x;
+		rect.bottom = Details.scaleY * 19.0f + y;
+
+		int vertexAlphaState;
+		RwRenderStateGet(rwRENDERSTATEVERTEXALPHAENABLE, &vertexAlphaState);
+		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);
+		ButtonSprite[PS2Symbol].Draw(rect, CRGBA(255, 255, 255, Details.color.a));
+		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)vertexAlphaState);
+	}
+}
+#endif
 
 void
 CFont::PrintChar(float x, float y, wchar c)
@@ -855,6 +925,15 @@ CFont::PrintString(float x, float y, wchar *start, wchar *&end, float spwidth, f
 		c = *s - ' ';
 		if (Details.slant != 0.0f && !IsJapanese())
 			y = (Details.slantRefX - x) * Details.slant + Details.slantRefY;
+
+#ifdef BUTTON_ICONS
+		if (PS2Symbol != BUTTON_NONE) {
+			DrawButton(x, y);
+			x += Details.scaleY * 17.0f;
+			PS2Symbol = BUTTON_NONE;
+		}
+#endif
+
 		PrintChar(x, y, c);
 		x += GetCharacterSize(c);
 		if (c == 0 && (!NewLine || !IsJapanese()))	// space
@@ -1045,6 +1124,30 @@ CFont::GetStringWidth(wchar *s, bool spaces)
 				do {
 					while (*s == '~' || *s == JAP_TERMINATION) {
 						s++;
+#ifdef BUTTON_ICONS
+						switch (*s) {
+#if 0 // unused
+						case 'U':
+						case 'D':
+						case '<':
+						case '>':
+#endif
+						case 'X':
+						case 'O':
+						case 'Q':
+						case 'T':
+						case 'K':
+						case 'M':
+						case 'A':
+						case 'J':
+						case 'V':
+						case 'C':
+							w += 17.0f * Details.scaleY;
+							break;
+						default:
+							break;
+						}
+#endif
 						while (!(*s == '~' || *s == JAP_TERMINATION)) s++;
 						s++;
 					}
@@ -1059,6 +1162,30 @@ CFont::GetStringWidth(wchar *s, bool spaces)
 		for (wchar c = *s; (c != ' ' || spaces) && c != '\0'; c = *(++s)) {
 			if (c == '~') {
 				s++;
+#ifdef BUTTON_ICONS
+				switch (*s) {
+#if 0 // unused
+				case 'U':
+				case 'D':
+				case '<':
+				case '>':
+#endif
+				case 'X':
+				case 'O':
+				case 'Q':
+				case 'T':
+				case 'K':
+				case 'M':
+				case 'A':
+				case 'J':
+				case 'V':
+				case 'C':
+					w += 17.0f * Details.scaleY;
+					break;
+				default:
+					break;
+				}
+#endif
 				while (*s != '~') {
 					s++;
 				}
@@ -1146,6 +1273,24 @@ CFont::ParseToken(wchar *s, bool japShit)
 		case 'r': SetColor(CRGBA(113, 43, 73, 255)); break;
 		case 'w': SetColor(CRGBA(175, 175, 175, 255)); break;
 		case 'y': SetColor(CRGBA(210, 196, 106, 255)); break;
+#ifdef BUTTON_ICONS
+#if 0 // unused
+		case 'U': PS2Symbol = BUTTON_UP; break;
+		case 'D': PS2Symbol = BUTTON_DOWN; break;
+		case '<': PS2Symbol = BUTTON_LEFT; break;
+		case '>': PS2Symbol = BUTTON_RIGHT; break;
+#endif
+		case 'X': PS2Symbol = BUTTON_CROSS; break;
+		case 'O': PS2Symbol = BUTTON_CIRCLE; break;
+		case 'Q': PS2Symbol = BUTTON_SQUARE; break;
+		case 'T': PS2Symbol = BUTTON_TRIANGLE; break;
+		case 'K': PS2Symbol = BUTTON_L1; break;
+		case 'M': PS2Symbol = BUTTON_L2; break;
+		case 'A': PS2Symbol = BUTTON_L3; break;
+		case 'J': PS2Symbol = BUTTON_R1; break;
+		case 'V': PS2Symbol = BUTTON_R2; break;
+		case 'C': PS2Symbol = BUTTON_R3; break;
+#endif
 		}
 	} else if (IsJapanese()) {
 		if ((*s & 0x7FFF) == 'N' || (*s & 0x7FFF) == 'n')
@@ -1190,6 +1335,24 @@ CFont::ParseToken(wchar *s)
 		case 'x': SetColor(CRGBA(132, 146, 197, 255)); Details.anonymous_23 = true; break;
 #endif
 		case 'y': SetColor(CRGBA(255, 227, 79, 255)); Details.anonymous_23 = true; break;
+#ifdef BUTTON_ICONS
+#if 0 // unused
+		case 'U': PS2Symbol = BUTTON_UP; break;
+		case 'D': PS2Symbol = BUTTON_DOWN; break;
+		case '<': PS2Symbol = BUTTON_LEFT; break;
+		case '>': PS2Symbol = BUTTON_RIGHT; break;
+#endif
+		case 'X': PS2Symbol = BUTTON_CROSS; break;
+		case 'O': PS2Symbol = BUTTON_CIRCLE; break;
+		case 'Q': PS2Symbol = BUTTON_SQUARE; break;
+		case 'T': PS2Symbol = BUTTON_TRIANGLE; break;
+		case 'K': PS2Symbol = BUTTON_L1; break;
+		case 'M': PS2Symbol = BUTTON_L2; break;
+		case 'A': PS2Symbol = BUTTON_L3; break;
+		case 'J': PS2Symbol = BUTTON_R1; break;
+		case 'V': PS2Symbol = BUTTON_R2; break;
+		case 'C': PS2Symbol = BUTTON_R3; break;
+#endif
 		}
 	while(*s != '~') s++;
 	if (*(++s) == '~')
