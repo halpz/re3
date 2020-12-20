@@ -264,9 +264,9 @@ CGame::InitialiseRenderWare(void)
 	CFont::Initialise();
 	CHud::Initialise();
 	POP_MEMID();
-#endif
 	// TODO: define
 	CPlayerSkin::Initialise();
+#endif
 	
 	return (true);
 }
@@ -317,8 +317,8 @@ bool CGame::InitialiseOnceAfterRW(void)
 	CSurfaceTable::Initialise("DATA\\SURFACE.DAT");
 	CPedStats::Initialise();
 	CTimeCycle::Initialise();
-#endif
 
+#ifndef GTA_PS2
 	if ( DMAudio.GetNum3DProvidersAvailable() == 0 )
 		FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = -1;
 
@@ -356,8 +356,9 @@ bool CGame::InitialiseOnceAfterRW(void)
 	DMAudio.SetEffectsMasterVolume(CMenuManager::m_PrefsSfxVolume);
 	DMAudio.SetEffectsFadeVol(127);
 	DMAudio.SetMusicFadeVol(127);
+#endif
 	CWorld::Players[0].SetPlayerSkin(CMenuManager::m_PrefsSkinFile);
-
+#endif
 	return true;
 }
 
@@ -457,28 +458,24 @@ bool CGame::Initialise(const char* datFile)
 	CCarCtrl::Init();
 	POP_MEMID();
 
+	PUSH_MEMID(MEMID_DEF_MODELS);
 #if GTA_VERSION > GTA3_PS2_160
 	InitModelIndices();
 #endif
-
-	PUSH_MEMID(MEMID_DEF_MODELS);
 	CModelInfo::Initialise();
-#if GTA_VERSION <= GTA3_PS2_160
-	CPedStats::Initialise();	// InitialiseOnceAfterRW
-#else
+
+#if GTA_VERSION > GTA3_PS2_160
 	// probably moved before LoadLevel for multiplayer maps?
 	CPickups::Init();
 	CTheCarGenerators::Init();
-#endif
 
-#ifndef GTA_PS2		// or GTA_VERSION?
 	CdStreamAddImage("MODELS\\GTA3.IMG");
-#endif
 
-#if GTA_VERSION > GTA3_PS2_160
 	CFileLoader::LoadLevel("DATA\\DEFAULT.DAT");
 	CFileLoader::LoadLevel(datFile);
 #else
+	CPedStats::Initialise();	// InitialiseOnceAfterRW
+
 	CFileLoader::LoadLevel("GTA3.DAT");
 #endif
 
@@ -520,7 +517,9 @@ bool CGame::Initialise(const char* datFile)
 	CStreaming::LoadInitialPeds();
 	CStreaming::RequestBigBuildings(LEVEL_GENERIC);
 	CStreaming::LoadAllRequestedModels(false);
+#if GTA_VERSION > GTA3_PS2_160
 	printf("Streaming uses %zuK of its memory", CStreaming::ms_memoryUsed / 1024); // original modifier was %d
+#endif
 
 	LoadingScreen("Loading the Game", "Load animations", GetRandomSplashScreen());
 	PUSH_MEMID(MEMID_ANIMATION);
@@ -618,11 +617,11 @@ bool CGame::Initialise(const char* datFile)
 	CRecordDataForChase::Init();
 	CReplay::Init();
 
+	LoadingScreen("Loading the Game", "Start script", nil);
 #ifdef PS2_MENU
 	if ( !TheMemoryCard.m_bWantToLoad )
 #endif
 	{
-		LoadingScreen("Loading the Game", "Start script", nil);
 		CTheScripts::StartTestScript();
 		CTheScripts::Process();
 		TheCamera.Process();
