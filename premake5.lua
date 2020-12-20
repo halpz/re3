@@ -234,6 +234,7 @@ project "re3"
 	files { addSrcFiles("src/audio") }
 	files { addSrcFiles("src/audio/eax") }
 	files { addSrcFiles("src/audio/oal") }
+	files { addSrcFiles("src/buildings") }
 	files { addSrcFiles("src/collision") }
 	files { addSrcFiles("src/control") }
 	files { addSrcFiles("src/core") }
@@ -257,6 +258,7 @@ project "re3"
 	includedirs { "src/audio" }
 	includedirs { "src/audio/eax" }
 	includedirs { "src/audio/oal" }
+	includedirs { "src/buildings" }
 	includedirs { "src/collision" }
 	includedirs { "src/control" }
 	includedirs { "src/core" }
