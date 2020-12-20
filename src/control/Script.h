@@ -1,5 +1,6 @@
 #pragma once
 #include "common.h"
+#include "Ped.h"
 #include "PedType.h"
 #include "Text.h"
 #include "Sprite2d.h"
@@ -10,7 +11,6 @@ class CVehicle;
 class CPed;
 class CObject;
 class CPlayerInfo;
-enum eObjective;
 
 class CRunningScript;
 
