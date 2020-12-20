@@ -1688,7 +1688,7 @@ void TheGame(void)
 
 	CTimer::Initialise();
 
-#ifdef GTA_PS2
+#if GTA_VERSION <= GTA3_PS2_160
 	CGame::Initialise();
 #else
 	CGame::Initialise("DATA\\GTA3.DAT");
@@ -1758,7 +1758,7 @@ void TheGame(void)
 
 			PUSH_MEMID(MEMID_RENDER);
 
-			if (!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bRenderGameInMenu == true && TheCamera.GetScreenFadeStatus() != FADE_2 )
+			if ((!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bRenderGameInMenu == true) && TheCamera.GetScreenFadeStatus() != FADE_2 )
 			{
 
 				PUSH_MEMID(MEMID_RENDERLIST);
@@ -1766,14 +1766,22 @@ void TheGame(void)
 				CRenderer::PreRender();
 				POP_MEMID();
 
+#ifdef FIX_BUGS
+				// This has to be done BEFORE RwCameraBeginUpdate
+				RwCameraSetFarClipPlane(Scene.camera, CTimeCycle::GetFarClip());
+				RwCameraSetFogDistance(Scene.camera, CTimeCycle::GetFogStart());
+#endif
+
 				if (CWeather::LightningFlash && !CCullZones::CamNoRain())
 					DoRWStuffStartOfFrame_Horizon(255, 255, 255, 255, 255, 255, 255);
 				else
 					DoRWStuffStartOfFrame_Horizon(CTimeCycle::GetSkyTopRed(), CTimeCycle::GetSkyTopGreen(), CTimeCycle::GetSkyTopBlue(), CTimeCycle::GetSkyBottomRed(), CTimeCycle::GetSkyBottomGreen(), CTimeCycle::GetSkyBottomBlue(), 255);
 
 				DefinedState();
+#ifndef FIX_BUGS
 				RwCameraSetFarClipPlane(Scene.camera, CTimeCycle::GetFarClip());
 				RwCameraSetFogDistance(Scene.camera, CTimeCycle::GetFogStart());
+#endif
 
 				RenderScene();
 				RenderDebugShit();
@@ -1794,8 +1802,7 @@ void TheGame(void)
 #endif
 				CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 				RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
-				if (!RsCameraBeginUpdate(Scene.camera))
-					break;
+				RsCameraBeginUpdate(Scene.camera);
 			}
 
 			RenderMenus();

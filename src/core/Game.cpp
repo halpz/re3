@@ -371,7 +371,11 @@ CGame::FinalShutdown(void)
 	CdStreamShutdown();
 }
 
+#if GTA_VERSION <= GTA3_PS2_160
+bool CGame::Initialise(void)
+#else
 bool CGame::Initialise(const char* datFile)
+#endif
 {
 #ifdef GTA_PS2
 	// TODO: upload VU0 collision code here
