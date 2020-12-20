@@ -85,7 +85,7 @@ bool gbModelViewer;
 bool gbShowTimebars;
 #endif
 
-int32 frameCount;
+volatile int32 frameCount;
 
 RwRGBA gColourTop;
 
@@ -482,11 +482,11 @@ Initialise3D(void *param)
 		DebugMenuPopulate();
 #endif // !DEBUGMENU
 #ifdef CUSTOM_FRONTEND_OPTIONS
-	// Apparently this func. can be run multiple times at the start.
-	if (numCustomFrontendOptions == 0 && numCustomFrontendScreens == 0) {
-		// needs stored language and TheText to be loaded, and last TheText reload is at the start of here
-		CustomFrontendOptionsPopulate();
-	}
+		// Apparently this func. can be run multiple times at the start.
+		if (numCustomFrontendOptions == 0 && numCustomFrontendScreens == 0) {
+			// needs stored language and TheText to be loaded, and last TheText reload is at the start of here
+			CustomFrontendOptionsPopulate();
+		}
 #endif
 		bool ret = CGame::InitialiseRenderWare();
 #ifdef EXTENDED_PIPELINES
@@ -1981,6 +1981,20 @@ void SystemInit()
 #endif
 }
 
+int VBlankCounter(int ca)
+{
+	frameCount++;
+	ExitHandler();
+	return 0;
+}
+
+// linked against by RW!
+extern "C" void WaitVBlank(void)
+{
+	int32 startFrame = frameCount;
+	while(startFrame == frameCount);
+}
+
 void GameInit()
 {
 	if ( !gameAlreadyInitialised )
@@ -2024,11 +2038,16 @@ void GameInit()
 			"\\MODELS\\MISC.TXD;1",
 			"\\MODELS\\GENERIC.TXD;1",
 			"\\MODELS\\GTA3.DIR;1",
+			// TODO: japanese?
+#ifdef GTA_PAL
 			"\\TEXT\\ENGLISH.GXT;1",
 			"\\TEXT\\FRENCH.GXT;1",
 			"\\TEXT\\GERMAN.GXT;1",
 			"\\TEXT\\ITALIAN.GXT;1",
 			"\\TEXT\\SPANISH.GXT;1",
+#else
+			"\\TEXT\\AMERICAN.GXT;1",
+#endif
 			"\\TXD\\LOADSC0.TXD;1",
 			"\\TXD\\LOADSC1.TXD;1",
 			"\\TXD\\LOADSC2.TXD;1",
@@ -2142,6 +2161,36 @@ void GameInit()
 	}
 }
 
+void PlayIntroMPEGs()
+{
+#ifdef GTA_PS2
+	if (gameAlreadyInitialised)
+		RpSkySuspend();
+
+	InitMPEGPlayer();
+
+#ifdef GTA_PAL
+	PlayMPEG("cdrom0:\\MOVIES\\DMAPAL.PSS;1", false);
+
+	if (CGame::frenchGame || CGame::germanGame)
+		PlayMPEG("cdrom0:\\MOVIES\\INTROPAF.PSS;1", true);
+	else
+		PlayMPEG("cdrom0:\\MOVIES\\INTROPAL.PSS;1", true);
+#else
+	PlayMPEG("cdrom0:\\MOVIES\\DMANTSC.PSS;1", false);
+
+	PlayMPEG("cdrom0:\\MOVIES\\INTRNTSC.PSS;1", true);
+#endif
+
+	ShutdownMPEGPlayer();
+
+	if ( gameAlreadyInitialised )
+		RpSkyResume();
+#else
+	//TODO
+#endif
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -2168,35 +2217,8 @@ main(int argc, char *argv[])
 		// eh?
 	}
 #endif
-	
-#ifdef GTA_PS2
-	{
-		if (gameAlreadyInitialised)
-			RpSkySuspend();
 
-		InitMPEGPlayer();
-
-#ifdef GTA_PAL
-		PlayMPEG("cdrom0:\\MOVIES\\DMAPAL.PSS;1", false);
-
-		if (CGame::frenchGame || CGame::germanGame)
-			PlayMPEG("cdrom0:\\MOVIES\\INTROPAF.PSS;1", true);
-		else
-			PlayMPEG("cdrom0:\\MOVIES\\INTROPAL.PSS;1", true);
-#else
-		PlayMPEG("cdrom0:\\MOVIES\\DMANTSC.PSS;1", false);
-
-		PlayMPEG("cdrom0:\\MOVIES\\INTRNTSC.PSS;1", true);
-#endif
-
-		ShutdownMPEGPlayer();
-
-		if ( gameAlreadyInitialised )
-			RpSkyResume();
-	}
-#else
-	//TODO
-#endif
+	PlayIntroMPEGs();
 
 	GameInit();
 
