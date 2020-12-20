@@ -1331,7 +1331,9 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 
 #ifdef FREE_CAM
 	static int8 changedHeadingRate = 0;
+	static int8 pointedGun = 0;
 	if (changedHeadingRate == 2) changedHeadingRate = 1;
+	if (pointedGun == 2) pointedGun = 1;
 
 	// Rotate player/arm when shooting. We don't have auto-rotation anymore
 	if (CCamera::m_bUseMouse3rdPerson && CCamera::bFreeCam &&
@@ -1349,7 +1351,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 						SetWeaponLockOnTarget(nil);
 						bIsPointingGunAt = false; // to not stop after attack
 					}
-
+					pointedGun = 2;
 					SetLookFlag(limitedCam, true);
 					SetAimFlag(limitedCam);
 					SetLookTimer(INT32_MAX); // removing this makes head move for real, but I experinced some bugs.
@@ -1373,14 +1375,17 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 						m_fRotationCur += (limitedRotDest - m_fRotationCur) / 2;
 					}
 				}
-			} else if (CAN_AIM_WITH_ARM && m_nPedState != PED_ATTACK)
-				ClearPointGunAt();
+			}
 		}
 #undef CAN_AIM_WITH_ARM
 	}
 	if (changedHeadingRate == 1) {
 		changedHeadingRate = 0;
 		RestoreHeadingRate();
+	}
+	if (pointedGun == 1 && m_nPedState != PED_ATTACK) {
+		pointedGun = 0;
+		ClearPointGunAt();
 	}
 #endif
 
