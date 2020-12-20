@@ -1129,6 +1129,7 @@ CMenuManager::Draw()
 #endif
 	}
 
+	// Not a bug, we just want HFoV+ on menu
 #ifdef ASPECT_RATIO_SCALE
 	CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
 #else

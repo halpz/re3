@@ -161,6 +161,8 @@ cMusicManager::DisplayRadioStationName()
 		CFont::SetPropOn();
 		CFont::SetFontStyle(FONT_HEADING);
 		CFont::SetCentreOn();
+		// Reminder: Game doesn't have "scaling" at all, it just stretches, and it's team's decision here to not let centered text occupy all the screen.
+		//				Disable ASPECT_RATIO_SCALE and it'll go back to default behaviour; stretching.
 		CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
 		CFont::SetColor(CRGBA(0, 0, 0, 255));
 #ifdef FIX_BUGS

@@ -516,9 +516,9 @@ void CHud::Draw()
 		
 		Sprites[WeaponType].Draw(
 			CRect(
-				SCREEN_WIDTH-SCREEN_SCALE_X(WEAPON_X),
+				SCREEN_SCALE_FROM_RIGHT(WEAPON_X),
 				SCREEN_SCALE_Y(27.0f),
-				SCREEN_WIDTH-SCREEN_SCALE_X(WEAPON_X)+SCREEN_SCALE_X(64.0f),
+				SCREEN_SCALE_FROM_RIGHT(WEAPON_X)+SCREEN_SCALE_X(64.0f),
 				SCREEN_SCALE_Y(27.0f)+SCREEN_SCALE_Y(64.0f)),
 			CRGBA(255, 255, 255, 255),
 			0.015f,
@@ -1029,7 +1029,7 @@ void CHud::Draw()
 						CFont::SetRightJustifyWrap(0.0f);
 						CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
 						CFont::SetColor(CRGBA(244, 20, 20, 255));
-						CFont::SetWrapx(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
+						CFont::SetWrapx(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
 						CFont::SetPropOff();
 						CFont::SetBackGroundOnlyTextOn();
 
@@ -1171,7 +1171,7 @@ void CHud::Draw()
 			CFont::SetRightJustifyOff();
 			CFont::SetBackgroundOff();
 			CFont::SetCentreOff();
-			CFont::SetWrapx(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
+			CFont::SetWrapx(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
 			CFont::SetJustifyOff();
 			CFont::SetPropOff();
 			CFont::SetFontStyle(FONT_PAGER);
@@ -1809,7 +1809,12 @@ void CHud::DrawAfterFade()
 			CFont::SetScale(SCREEN_SCALE_X(1.0f), SCREEN_SCALE_Y(1.2f));
 			CFont::SetCentreOn();
 			CFont::SetPropOn();
-			CFont::SetCentreSize(SCREEN_WIDTH-SCREEN_SCALE_X(20.0f));
+			// Not bug, we just want these kind of texts to be wrapped at the center.
+#ifdef ASPECT_RATIO_SCALE
+			CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - 20.0f));
+#else
+			CFont::SetCentreSize(SCREEN_SCALE_FROM_RIGHT(20.0f));
+#endif
 			CFont::SetColor(CRGBA(0, 0, 0, 255));
 			CFont::SetFontStyle(FONT_LOCALE(FONT_BANK));
 

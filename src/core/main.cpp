@@ -1146,7 +1146,6 @@ DisplayGameDebugText()
 		
 		AsciiToUnicode(str, ustr);
 		
-		// Let's not scale those numbers, they look better that way :eyes:
 		CFont::SetPropOff();
 		CFont::SetBackgroundOff();
 #ifdef FIX_BUGS
@@ -1159,7 +1158,7 @@ DisplayGameDebugText()
 		CFont::SetJustifyOff();
 		CFont::SetBackGroundOnlyTextOff();
 #ifdef FIX_BUGS
-		CFont::SetWrapx(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH));
+		CFont::SetWrapx(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
 #else
 		CFont::SetWrapx(DEFAULT_SCREEN_WIDTH);
 #endif
