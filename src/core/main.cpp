@@ -406,19 +406,21 @@ PluginAttach(void)
 }
 
 #ifdef GTA_PS2
-#define NUM_PREALLOC_ATOMICS 3245
-#define NUM_PREALLOC_CLUMPS 101
-#define NUM_PREALLOC_FRAMES 2821
-#define NUM_PREALLOC_GEOMETRIES 1404
-#define NUM_PREALLOC_TEXDICTS 106
-#define NUM_PREALLOC_TEXTURES 1900
-#define NUM_PREALLOC_MATERIALS 3300
+#define NUM_PREALLOC_ATOMICS 1800
+#define NUM_PREALLOC_CLUMPS 80
+#define NUM_PREALLOC_FRAMES 2600
+#define NUM_PREALLOC_GEOMETRIES 850
+#define NUM_PREALLOC_TEXDICTS 121
+#define NUM_PREALLOC_TEXTURES 1700
+#define NUM_PREALLOC_MATERIALS 2600
 bool preAlloc;
 
 void
 PreAllocateRwObjects(void)
 {
 	int i;
+
+	PUSH_MEMID(MEMID_PRE_ALLOC);
 	void **tmp = new void*[0x8000];
 	preAlloc = true;
 
@@ -459,6 +461,7 @@ PreAllocateRwObjects(void)
 
 	delete[] tmp;
 	preAlloc = false;
+	POP_MEMID();
 }
 #endif
 
@@ -1378,9 +1381,7 @@ RenderMenus(void)
 {
 	if (FrontEndMenuManager.m_bMenuActive)
 	{
-		PUSH_MEMID(MEMID_FRONTEND);
 		FrontEndMenuManager.DrawFrontEnd();
-		POP_MEMID();
 	}
 }
 
@@ -1722,17 +1723,14 @@ void TheGame(void)
 
 	CTimer::Initialise();
 
-#ifdef GTA_PS2
-	CGame::Initialise();
-#else
 	CGame::Initialise("DATA\\GTA3.DAT");
-#endif
 
 	Const char *splash = GetRandomSplashScreen(); // inlined here
 
 	LoadingScreen("Starting Game", NULL, splash);
 
 #ifdef GTA_PS2
+	// TODO(MIAMI): not checked yet
 	if (   TheMemoryCard.CheckCardInserted(CARD_ONE) == CMemoryCard::NO_ERR_SUCCESS
 		&& TheMemoryCard.ChangeDirectory(CARD_ONE, TheMemoryCard.Cards[CARD_ONE].dir)
 		&& TheMemoryCard.FindMostRecentFileName(CARD_ONE, TheMemoryCard.MostRecentFile) == true
@@ -1756,7 +1754,7 @@ void TheGame(void)
 
 	while (true)
 	{
-		if (WANT_TO_LOAD)
+		if (FOUND_GAME_TO_LOAD)
 		{
 			Const char *splash1 = GetLevelSplashScreen(CGame::currLevel);
 			LoadSplash(splash1);
@@ -1792,14 +1790,18 @@ void TheGame(void)
 
 			PUSH_MEMID(MEMID_RENDER);
 
-			// m_bRenderGameInMenu is there in III PS2 but I don't know about VC PS2.
-			if (!FrontEndMenuManager.m_bMenuActive || /*FrontEndMenuManager.m_bRenderGameInMenu == true && */TheCamera.GetScreenFadeStatus() != FADE_2 )
-			{
+			CRenderer::ConstructRenderList();
 
-				PUSH_MEMID(MEMID_RENDERLIST);
-				CRenderer::ConstructRenderList();
+			if ((!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bRenderGameInMenu == true) && TheCamera.GetScreenFadeStatus() != FADE_2 )
+			{
 				CRenderer::PreRender();
-				POP_MEMID();
+				// TODO(MIAMI): something ps2all specific
+
+#ifdef FIX_BUGS
+				// This has to be done BEFORE RwCameraBeginUpdate
+				RwCameraSetFarClipPlane(Scene.camera, CTimeCycle::GetFarClip());
+				RwCameraSetFogDistance(Scene.camera, CTimeCycle::GetFogStart());
+#endif
 
 				if (CWeather::LightningFlash && !CCullZones::CamNoRain())
 					DoRWStuffStartOfFrame_Horizon(255, 255, 255, 255, 255, 255, 255);
@@ -1807,8 +1809,10 @@ void TheGame(void)
 					DoRWStuffStartOfFrame_Horizon(CTimeCycle::GetSkyTopRed(), CTimeCycle::GetSkyTopGreen(), CTimeCycle::GetSkyTopBlue(), CTimeCycle::GetSkyBottomRed(), CTimeCycle::GetSkyBottomGreen(), CTimeCycle::GetSkyBottomBlue(), 255);
 
 				DefinedState();
+#ifndef FIX_BUGS
 				RwCameraSetFarClipPlane(Scene.camera, CTimeCycle::GetFarClip());
 				RwCameraSetFogDistance(Scene.camera, CTimeCycle::GetFogStart());
+#endif
 
 				RenderScene();
 				RenderDebugShit();
@@ -1825,8 +1829,7 @@ void TheGame(void)
 				CameraSize(Scene.camera, NULL, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 				CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
 				RwCameraClear(Scene.camera, &gColourTop, CLEARMODE);
-				if (!RsCameraBeginUpdate(Scene.camera))
-					break;
+				RsCameraBeginUpdate(Scene.camera);
 			}
 
 			RenderMenus();
