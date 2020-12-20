@@ -758,8 +758,7 @@ void CGame::InitialiseWhenRestarting(void)
 	if ( FrontEndMenuManager.m_bWantToLoad == true )
 	{
 		FrontEndMenuManager.m_bWantToLoad = false;
-		// TODO(Miami)
-		//InitRadioStationPositionList();
+		InitRadioStationPositionList();
 		if ( GenericLoad() == true )
 		{
 			DMAudio.ResetTimers(CTimer::GetTimeInMilliseconds());
