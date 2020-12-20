@@ -465,8 +465,11 @@ PreAllocateRwObjects(void)
 static RwBool 
 Initialise3D(void *param)
 {
+	PUSH_MEMID(MEMID_RENDER);
+
 	if (RsRwInitialize(param))
 	{
+		POP_MEMID();
 #ifdef DEBUGMENU
 		DebugMenuInit();
 		DebugMenuPopulate();
@@ -485,8 +488,10 @@ Initialise3D(void *param)
 #ifdef SCREEN_DROPLETS
 		ScreenDroplets::InitDraw();
 #endif
+
 		return ret;
 	}
+	POP_MEMID();
 
 	return (FALSE);
 }

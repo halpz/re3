@@ -191,8 +191,6 @@ CGame::InitialiseRenderWare(void)
 	CTxdStore::Initialise();
 	CVisibilityPlugins::Initialise();
 
-	//InitialiseScene(Scene);	// PS2 only, only clears Scene.camera
-
 #ifdef GTA_PS2
 	RpSkySelectTrueTSClipper(TRUE);
 	RpSkySelectTrueTLClipper(TRUE);
@@ -255,14 +253,12 @@ CGame::InitialiseRenderWare(void)
 	PUSH_MEMID(MEMID_TEXTURES);
 	CFont::Initialise();
 	CHud::Initialise();
+	CPlayerSkin::Initialise();
 	POP_MEMID();
 
-	CPlayerSkin::Initialise();
-	
 	return (true);
 }
 
-// missing altogether on PS2
 void CGame::ShutdownRenderWare(void)
 {
 	DestroySplashScreen();
@@ -272,7 +268,6 @@ void CGame::ShutdownRenderWare(void)
 	for ( int32 i = 0; i < NUMPLAYERS; i++ )
 		CWorld::Players[i].DeletePlayerSkin();
 
-	// TODO: define
 	CPlayerSkin::Shutdown();
 	
 	DestroyDebugFont();
@@ -295,7 +290,6 @@ void CGame::ShutdownRenderWare(void)
 #endif
 }
 
-// missing altogether on PS2
 bool CGame::InitialiseOnceAfterRW(void)
 {
 	TheText.Load();
@@ -305,7 +299,12 @@ bool CGame::InitialiseOnceAfterRW(void)
 	CSurfaceTable::Initialise("DATA\\SURFACE.DAT");
 	CPedStats::Initialise();
 	CTimeCycle::Initialise();
+#ifdef GTA_PS2
+	LoadingScreen("Loading the Game", "Initialising audio", GetRandomSplashScreen());
+#endif
 	DMAudio.Initialise();
+
+#ifndef GTA_PS2
 	if ( DMAudio.GetNum3DProvidersAvailable() == 0 )
 		FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = NO_AUDIO_PROVIDER;
 
@@ -322,10 +321,10 @@ bool CGame::InitialiseOnceAfterRW(void)
 	DMAudio.SetEffectsMasterVolume(FrontEndMenuManager.m_PrefsSfxVolume);
 	DMAudio.SetEffectsFadeVol(127);
 	DMAudio.SetMusicFadeVol(127);
+#endif
 	return true;
 }
 
-// missing altogether on PS2
 void
 CGame::FinalShutdown(void)
 {	
@@ -336,12 +335,13 @@ CGame::FinalShutdown(void)
 
 bool CGame::Initialise(const char* datFile)
 {
+	ResetLoadingScreenBar();
+	strcpy(aDatFile, datFile);
+
 #ifdef GTA_PS2
 	// TODO: upload VU0 collision code here
 #endif
 
-	ResetLoadingScreenBar();
-	strcpy(aDatFile, datFile);
 	CPools::Initialise();
 
 #ifndef GTA_PS2
@@ -408,9 +408,8 @@ bool CGame::Initialise(const char* datFile)
 	CCarCtrl::Init();
 	POP_MEMID();
 
-	InitModelIndices();
-
 	PUSH_MEMID(MEMID_DEF_MODELS);
+	InitModelIndices();
 	CModelInfo::Initialise();
 	CPickups::Init();
 	CTheCarGenerators::Init();
@@ -428,17 +427,21 @@ bool CGame::Initialise(const char* datFile)
 	CVehicleModelInfo::LoadVehicleColours();
 	CVehicleModelInfo::LoadEnvironmentMaps();
 	CTheZones::PostZoneCreation();
+	POP_MEMID();
+
 	LoadingScreen("Loading the Game", "Setup paths", nil);
 	ThePaths.PreparePathData();
 	for (int i = 0; i < NUMPLAYERS; i++)
 		CWorld::Players[i].Clear();
 	CWorld::Players[0].LoadPlayerSkin();
 	TestModelIndices();
+
 	LoadingScreen("Loading the Game", "Setup water", nil);
 	WaterLevelInitialise("DATA\\WATER.DAT");
 	TheConsole.Init();
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;
+
 	LoadingScreen("Loading the Game", "Setup streaming", nil);
 	CStreaming::LoadInitialVehicles();
 	CStreaming::LoadInitialPeds();
@@ -446,10 +449,12 @@ bool CGame::Initialise(const char* datFile)
 	CStreaming::LoadAllRequestedModels(false);
 	CStreaming::RemoveIslandsNotUsed(currLevel);
 	printf("Streaming uses %zuK of its memory", CStreaming::ms_memoryUsed / 1024); // original modifier was %d
-	LoadingScreen("Loading the Game", "Load animations", GetRandomSplashScreen());
 
+	LoadingScreen("Loading the Game", "Load animations", GetRandomSplashScreen());
 	PUSH_MEMID(MEMID_ANIMATION);
 	CAnimManager::LoadAnimFiles();
+	POP_MEMID();
+
 	CStreaming::LoadInitialWeapons();
 	CStreaming::LoadAllRequestedModels(0);
 	CPed::Initialise();
@@ -483,6 +488,7 @@ bool CGame::Initialise(const char* datFile)
 #ifdef GTA_SCENE_EDIT
 	CSceneEdit::Initialise();
 #endif
+
 	LoadingScreen("Loading the Game", "Load scripts", nil);
 	PUSH_MEMID(MEMID_SCRIPT);
 	CTheScripts::Init();
@@ -514,11 +520,11 @@ bool CGame::Initialise(const char* datFile)
 	CRecordDataForChase::Init();
 	CReplay::Init();
 
+	LoadingScreen("Loading the Game", "Start script", nil);
 #ifdef PS2_MENU
 	if ( !TheMemoryCard.m_bWantToLoad )
 #endif
 	{
-		LoadingScreen("Loading the Game", "Start script", nil);
 		CTheScripts::StartTestScript();
 		CTheScripts::Process();
 		TheCamera.Process();
@@ -801,9 +807,9 @@ void CGame::Process(void)
 #endif
 	CCutsceneMgr::Update();
 
-	PUSH_MEMID(MEMID_FRONTEND);
 	if (!CCutsceneMgr::IsCutsceneProcessing() && !CTimer::GetIsCodePaused())
 		FrontEndMenuManager.Process();
+
 	CTheZones::Update();
 	// DRM call in here
 	uint32 startTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond();
@@ -884,11 +890,13 @@ void CGame::Process(void)
 		gPhoneInfo.Update();
 		if (!CReplay::IsPlayingBack())
 		{
+			PUSH_MEMID(MEMID_CARS);
 			if (processTime < 2)
 				CCarCtrl::GenerateRandomCars();
 			CRoadBlocks::GenerateRoadBlocks();
 			CCarCtrl::RemoveDistantCars();
 			CCarCtrl::RemoveCarsIfThePoolGetsFull();
+			POP_MEMID();
 		}
 	}
 #ifdef GTA_PS2
@@ -897,6 +905,8 @@ void CGame::Process(void)
 }
 
 #ifdef USE_CUSTOM_ALLOCATOR
+
+// TODO(MIAMI)
 
 int32 gNumMemMoved;
 
