@@ -1348,14 +1348,14 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 				// On this one we can rotate arm.
 				if (CAN_AIM_WITH_ARM) {
 					if (!padUsed->GetWeapon()) { // making this State != ATTACK still stops it after attack. Re-start it immediately!
-						SetWeaponLockOnTarget(nil);
+						SetPointGunAt(nil);
 						bIsPointingGunAt = false; // to not stop after attack
 					}
 					pointedGun = 2;
 					SetLookFlag(limitedCam, true);
 					SetAimFlag(limitedCam);
 					SetLookTimer(INT32_MAX); // removing this makes head move for real, but I experinced some bugs.
-
+					
 				} else {
 					m_fRotationDest = limitedCam;
 					changedHeadingRate = 2;
