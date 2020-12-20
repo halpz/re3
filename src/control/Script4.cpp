@@ -244,7 +244,12 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		pPed->SetObjective(OBJECTIVE_CATCH_TRAIN);
 		return 0;
 	}
-	//case COMMAND_SET_COLL_OBJ_CATCH_TRAIN:
+#ifdef GTA_SCRIPT_COLLECTIVE
+	case COMMAND_SET_COLL_OBJ_CATCH_TRAIN:
+		CollectParameters(&m_nIp, 1);
+		CTheScripts::SetObjectiveForAllPedsInCollective(ScriptParams[0], OBJECTIVE_CATCH_TRAIN);
+		return 0;
+#endif
 	case COMMAND_SET_PLAYER_NEVER_GETS_TIRED:
 	{
 		CollectParameters(&m_nIp, 2);
@@ -1090,7 +1095,12 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 	case COMMAND_GIVE_PLAYER_DETONATOR:
 		CGarages::GivePlayerDetonator();
 		return 0;
-	//case COMMAND_SET_COLL_OBJ_STEAL_ANY_CAR:
+#ifdef GTA_SCRIPT_COLLECTIVE
+	case COMMAND_SET_COLL_OBJ_STEAL_ANY_CAR:
+		CollectParameters(&m_nIp, 1);
+		CTheScripts::SetObjectiveForAllPedsInCollective(ScriptParams[0], OBJECTIVE_STEAL_ANY_CAR);
+		return 0;
+#endif
 	case COMMAND_SET_OBJECT_VELOCITY:
 	{
 		CollectParameters(&m_nIp, 4);
