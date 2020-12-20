@@ -136,7 +136,7 @@ public:
 	static CAnimBlendAssociation *BlendAnimation(RpClump *clump, AssocGroupId groupId, AnimationId animId, float delta);
 	static void LoadAnimFiles(void);
 	static void LoadAnimFile(const char *filename);
-	static void LoadAnimFile(RwStream *stream, bool compress, char (*somename)[32] = nil);
+	static void LoadAnimFile(RwStream *stream, bool compress, char (*uncompressedAnims)[32] = nil);
 	static void CreateAnimAssocGroups(void);
 	static void RemoveLastAnimFile(void);
 	static CAnimBlendAssocGroup* GetAnimAssocGroups(void) { return ms_aAnimAssocGroups; }

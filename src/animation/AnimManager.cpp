@@ -992,7 +992,7 @@ CAnimManager::Shutdown(void)
 void
 CAnimManager::UncompressAnimation(CAnimBlendHierarchy *hier)
 {
-	if(hier->compressed2){
+	if(hier->keepCompressed){
 		if(hier->totalLength == 0.0f)
 			hier->CalcTotalTimeCompressed();
 	}else{
@@ -1275,7 +1275,7 @@ CAnimManager::LoadAnimFile(const char *filename)
 
 //--MIAMI: done
 void
-CAnimManager::LoadAnimFile(RwStream *stream, bool compress, char (*somename)[32])
+CAnimManager::LoadAnimFile(RwStream *stream, bool compress, char (*uncompressedAnims)[32])
 {
 	#define ROUNDSIZE(x) if((x) & 3) (x) += 4 - ((x)&3)
 	struct IfpHeader {
@@ -1320,16 +1320,22 @@ CAnimManager::LoadAnimFile(RwStream *stream, bool compress, char (*somename)[32]
 		RwStreamRead(stream, buf, name.size);
 		hier->SetName(buf);
 
-		// Unimplemented uncompressed anim thing
-		if (somename) {
-			for (int i = 0; somename[i][0]; i++) {
-				if (!CGeneral::faststricmp(somename[i], hier->name))
+#ifdef ANIM_COMPRESSION
+		bool compressHier = compress;
+#else
+		bool compressHier = false;
+#endif
+		if (uncompressedAnims) {
+			for (int i = 0; uncompressedAnims[i][0]; i++) {
+				if (!CGeneral::faststricmp(uncompressedAnims[i], hier->name)){
 					debug("Loading %s uncompressed\n", hier->name);
+					compressHier = false;
+				}
 			}
 		}
 
-		hier->compressed = false;
-		hier->compressed2 = false;
+		hier->compressed = compressHier;
+		hier->keepCompressed = false;
 
 		// DG info has number of nodes/sequences
 		RwStreamRead(stream, (char*)&dgan, sizeof(IfpHeader));
@@ -1349,67 +1355,86 @@ CAnimManager::LoadAnimFile(RwStream *stream, bool compress, char (*somename)[32]
 			ROUNDSIZE(anim.size);
 			RwStreamRead(stream, buf, anim.size);
 			int numFrames = *(int*)(buf+28);
+			seq->SetName(buf);
 			if(anim.size == 44)
 				seq->SetBoneTag(*(int*)(buf+40));
-			seq->SetName(buf);
 			if(numFrames == 0)
 				continue;
 
+			bool hasScale = false;
+			bool hasTranslation = false;
 			RwStreamRead(stream, &info, sizeof(info));
-			if(strncmp(info.ident, "KR00", 4) == 0){
-				seq->SetNumFrames(numFrames, false, false);
-				KeyFrame *kf = seq->GetKeyFrame(0);
-				if (strstr(seq->name, "L Toe"))
-					debug("anim %s has toe keyframes\n", hier->name); // , seq->name);
-
-				for(l = 0; l < numFrames; l++, kf++){
-					RwStreamRead(stream, buf, 0x14);
-					kf->rotation.x = -fbuf[0];
-					kf->rotation.y = -fbuf[1];
-					kf->rotation.z = -fbuf[2];
-					kf->rotation.w = fbuf[3];
-					kf->deltaTime = fbuf[4];	// absolute time here
-				}
+			if(strncmp(info.ident, "KRTS", 4) == 0){
+				hasScale = true;
+				seq->SetNumFrames(numFrames, true, compressHier);
 			}else if(strncmp(info.ident, "KRT0", 4) == 0){
-				seq->SetNumFrames(numFrames, true, false);
-				KeyFrameTrans *kf = (KeyFrameTrans*)seq->GetKeyFrame(0);
-				if (strstr(seq->name, "L Toe"))
-					debug("anim %s has toe keyframes\n", hier->name); // , seq->name);
+				hasTranslation = true;
+				seq->SetNumFrames(numFrames, true, compressHier);
+			}else if(strncmp(info.ident, "KR00", 4) == 0){
+				seq->SetNumFrames(numFrames, false, compressHier);
+			}
+			if(strstr(seq->name, "L Toe"))
+				debug("anim %s has toe keyframes\n", hier->name); // BUG: seq->name
 
-				for(l = 0; l < numFrames; l++, kf++){
-					RwStreamRead(stream, buf, 0x20);
-					kf->rotation.x = -fbuf[0];
-					kf->rotation.y = -fbuf[1];
-					kf->rotation.z = -fbuf[2];
-					kf->rotation.w = fbuf[3];
-					kf->translation.x = fbuf[4];
-					kf->translation.y = fbuf[5];
-					kf->translation.z = fbuf[6];
-					kf->deltaTime = fbuf[7];	// absolute time here
-				}
-			}else if(strncmp(info.ident, "KRTS", 4) == 0){
-				seq->SetNumFrames(numFrames, true, false);
-				KeyFrameTrans *kf = (KeyFrameTrans*)seq->GetKeyFrame(0);
-				if (strstr(seq->name, "L Toe"))
-					debug("anim %s has toe keyframes\n", hier->name); // , seq->name);
-
-				for(l = 0; l < numFrames; l++, kf++){
+			for(l = 0; l < numFrames; l++){
+				if(hasScale){
 					RwStreamRead(stream, buf, 0x2C);
-					kf->rotation.x = -fbuf[0];
-					kf->rotation.y = -fbuf[1];
-					kf->rotation.z = -fbuf[2];
-					kf->rotation.w = fbuf[3];
-					kf->translation.x = fbuf[4];
-					kf->translation.y = fbuf[5];
-					kf->translation.z = fbuf[6];
-					// scaling ignored
-					kf->deltaTime = fbuf[10];	// absolute time here
+					CQuaternion rot(fbuf[0], fbuf[1], fbuf[2], fbuf[3]);
+					rot.Invert();
+					CVector trans(fbuf[4], fbuf[5], fbuf[6]);
+
+					if(compressHier){
+						KeyFrameTransCompressed *kf = (KeyFrameTransCompressed*)seq->GetKeyFrameCompressed(l);
+						kf->SetRotation(rot);
+						kf->SetTranslation(trans);
+						// scaling ignored
+						kf->SetTime(fbuf[10]);	// absolute time here
+					}else{
+						KeyFrameTrans *kf = (KeyFrameTrans*)seq->GetKeyFrame(l);
+						kf->rotation = rot;
+						kf->translation = trans;
+						// scaling ignored
+						kf->deltaTime = fbuf[10];	// absolute time here
+					}
+				}else if(hasTranslation){
+					RwStreamRead(stream, buf, 0x20);
+					CQuaternion rot(fbuf[0], fbuf[1], fbuf[2], fbuf[3]);
+					rot.Invert();
+					CVector trans(fbuf[4], fbuf[5], fbuf[6]);
+
+					if(compressHier){
+						KeyFrameTransCompressed *kf = (KeyFrameTransCompressed*)seq->GetKeyFrameCompressed(l);
+						kf->SetRotation(rot);
+						kf->SetTranslation(trans);
+						kf->SetTime(fbuf[7]);	// absolute time here
+					}else{
+						KeyFrameTrans *kf = (KeyFrameTrans*)seq->GetKeyFrame(l);
+						kf->rotation = rot;
+						kf->translation = trans;
+						kf->deltaTime = fbuf[7];	// absolute time here
+					}
+				}else{
+					RwStreamRead(stream, buf, 0x14);
+					CQuaternion rot(fbuf[0], fbuf[1], fbuf[2], fbuf[3]);
+					rot.Invert();
+
+					if(compressHier){
+						KeyFrameCompressed *kf = (KeyFrameCompressed*)seq->GetKeyFrameCompressed(l);
+						kf->SetRotation(rot);
+						kf->SetTime(fbuf[4]);	// absolute time here
+					}else{
+						KeyFrame *kf = (KeyFrame*)seq->GetKeyFrame(l);
+						kf->rotation = rot;
+						kf->deltaTime = fbuf[4];	// absolute time here
+					}
 				}
 			}
 		}
 
-		hier->RemoveQuaternionFlips();
-		hier->CalcTotalTime();
+		if(!compressHier){
+			hier->RemoveQuaternionFlips();
+			hier->CalcTotalTime();
+		}
 	}
 	if(animIndex > ms_numAnimations)
 		ms_numAnimations = animIndex;

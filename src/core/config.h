@@ -192,6 +192,11 @@ enum Config {
 // those infamous texts
 #define DRAW_GAME_VERSION_TEXT
 
+// Memory allocation and compression
+// #define USE_CUSTOM_ALLOCATOR		// use CMemoryHeap for allocation. use with care, not finished yet
+//#define COMPRESSED_COL_VECTORS	// use compressed vectors for collision vertices
+//#define ANIM_COMPRESSION	// only keep most recently used anims uncompressed
+
 #if defined GTA_PS2
 #	define GTA_PS2_STUFF
 #	define RANDOMSPLASH

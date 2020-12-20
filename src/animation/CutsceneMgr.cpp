@@ -291,12 +291,15 @@ CCutsceneMgr::SetupCutsceneToStart(void)
 			if (ms_pCutsceneObjects[i]->m_pAttachTo != nil) {
 				pAnimBlendAssoc->flags &= (~ASSOC_HAS_TRANSLATION);
 			} else {
-				KeyFrameTrans* keyFrames;
-				if (pAnimBlendAssoc->hierarchy->IsCompressed())
-					keyFrames = ((KeyFrameTrans*)pAnimBlendAssoc->hierarchy->sequences[0].GetKeyFrameCompressed(0));
-				else
-					keyFrames = ((KeyFrameTrans*)pAnimBlendAssoc->hierarchy->sequences[0].GetKeyFrame(0));
-				ms_pCutsceneObjects[i]->SetPosition(ms_cutsceneOffset + keyFrames->translation);
+				if (pAnimBlendAssoc->hierarchy->IsCompressed()){
+					KeyFrameTransCompressed *keyFrames = ((KeyFrameTransCompressed*)pAnimBlendAssoc->hierarchy->sequences[0].GetKeyFrameCompressed(0));
+					CVector trans;
+					keyFrames->GetTranslation(&trans);
+					ms_pCutsceneObjects[i]->SetPosition(ms_cutsceneOffset + trans);
+				}else{
+					KeyFrameTrans *keyFrames = ((KeyFrameTrans*)pAnimBlendAssoc->hierarchy->sequences[0].GetKeyFrame(0));
+					ms_pCutsceneObjects[i]->SetPosition(ms_cutsceneOffset + keyFrames->translation);
+				}
 			}
 			pAnimBlendAssoc->SetRun();
 		} else {
@@ -331,7 +334,7 @@ CCutsceneMgr::SetCutsceneAnim(const char *animName, CObject *pObject)
 	}
 
 	if (pNewAnim->hierarchy->IsCompressed())
-		pNewAnim->hierarchy->compressed2 = true;
+		pNewAnim->hierarchy->keepCompressed = true;
 
 	CStreaming::ImGonnaUseStreamingMemory();
 	pNewAnim = ms_cutsceneAssociations.CopyAnimation(animName);
@@ -344,8 +347,8 @@ CCutsceneMgr::SetCutsceneAnim(const char *animName, CObject *pObject)
 	pAnimBlendClumpData = *RPANIMBLENDCLUMPDATA(pObject->m_rwObject);
 	pAnimBlendClumpData->link.Prepend(&pNewAnim->link);
 
-	if (pNewAnim->hierarchy->compressed2)
-		pAnimBlendClumpData->frames->flag |= AnimBlendFrameData::UNK_COMPRESSED;
+	if (pNewAnim->hierarchy->keepCompressed)
+		pAnimBlendClumpData->frames->flag |= AnimBlendFrameData::COMPRESSED;
 }
 
 void

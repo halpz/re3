@@ -20,13 +20,17 @@ public:
 
 	void Init(void);
 	bool Update(CVector &trans, CQuaternion &rot, float weight);
+	bool UpdateCompressed(CVector &trans, CQuaternion &rot, float weight);
 	bool NextKeyFrame(void);
+	bool NextKeyFrameCompressed(void);
 	bool FindKeyFrame(float t);
 	bool SetupKeyFrameCompressed(void);
 	void CalcDeltas(void);
 	void CalcDeltasCompressed(void);
 	void GetCurrentTranslation(CVector &trans, float weight);
+	void GetCurrentTranslationCompressed(CVector &trans, float weight);
 	void GetEndTranslation(CVector &trans, float weight);
+	void GetEndTranslationCompressed(CVector &trans, float weight);
 };
 
 
