@@ -929,6 +929,8 @@ void
 CPlayerPed::ProcessAnimGroups(void)
 {
 	AssocGroupId groupToSet;
+
+#ifdef PC_PLAYER_CONTROLS
 	if ((m_fWalkAngle <= -DEGTORAD(50.0f) || m_fWalkAngle >= DEGTORAD(50.0f))
 		&& TheCamera.Cams[TheCamera.ActiveCam].Using3rdPersonMouseCam()
 		&& CanStrafeOrMouseControl()) {
@@ -951,7 +953,9 @@ CPlayerPed::ProcessAnimGroups(void)
 			else
 				groupToSet = ASSOCGRP_PLAYERBACK;
 		}
-	} else {
+	} else
+#endif
+	{
 		if (GetWeapon()->m_eWeaponType == WEAPONTYPE_ROCKETLAUNCHER) {
 			groupToSet = ASSOCGRP_PLAYERROCKET;
 		} else {

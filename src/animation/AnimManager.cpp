@@ -57,6 +57,9 @@ AnimAssocDesc aStdAnimDescs[] = {
 	{ ANIM_HIT_BACK, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
 	{ ANIM_HIT_RIGHT, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_FLOOR_HIT, ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
+#if GTA_VERSION <= GTA3_PS2_160
+	{ ANIM_HIT_BODY, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+#endif
 	{ ANIM_HIT_BODYBLOW, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
 	{ ANIM_HIT_CHEST, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
 	{ ANIM_HIT_HEAD, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
@@ -78,6 +81,8 @@ AnimAssocDesc aStdAnimDescs[] = {
 	{ ANIM_BOMBER, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK  },
 	{ ANIM_HGUN_RELOAD, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK  },
 	{ ANIM_AK_RELOAD, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_NOWALK  },
+#ifdef PC_PLAYER_CONTROLS
+	// maybe wrong define, but unused anyway
 	{ ANIM_FPS_PUNCH, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_FPS_BAT, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_FPS_UZI, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
@@ -85,6 +90,7 @@ AnimAssocDesc aStdAnimDescs[] = {
 	{ ANIM_FPS_AK, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_FPS_M16, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_FPS_ROCKET, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
+#endif
 	{ ANIM_FIGHT_IDLE, ASSOC_REPEAT },
 	{ ANIM_FIGHT2_IDLE, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_FIGHT_SH_F, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL | ASSOC_HAS_TRANSLATION },
@@ -193,6 +199,7 @@ AnimAssocDesc aStdAnimDescs[] = {
 	{ ANIM_PHONE_OUT, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_PHONE_TALK, ASSOC_REPEAT | ASSOC_DELETEFADEDOUT | ASSOC_PARTIAL },
 };
+#ifdef PC_PLAYER_CONTROLS
 AnimAssocDesc aStdAnimDescsSide[] = {
 	{ ANIM_WALK, ASSOC_REPEAT | ASSOC_MOVEMENT | ASSOC_HAS_TRANSLATION | ASSOC_WALK | ASSOC_HAS_X_TRANSLATION },
 	{ ANIM_RUN, ASSOC_REPEAT | ASSOC_MOVEMENT | ASSOC_HAS_TRANSLATION | ASSOC_WALK | ASSOC_HAS_X_TRANSLATION },
@@ -200,6 +207,7 @@ AnimAssocDesc aStdAnimDescsSide[] = {
 	{ ANIM_IDLE_STANCE, ASSOC_REPEAT },
 	{ ANIM_WALK_START, ASSOC_HAS_TRANSLATION | ASSOC_HAS_X_TRANSLATION },
 };
+#endif
 char const *aStdAnimations[] = {
 	"walk_civi",
 	"run_civi",
@@ -239,6 +247,9 @@ char const *aStdAnimations[] = {
 	"HIT_back",
 	"HIT_R",
 	"FLOOR_hit",
+#if GTA_VERSION <= GTA3_PS2_160
+	"HIT_body",
+#endif
 	"HIT_bodyblow",
 	"HIT_chest",
 	"HIT_head",
@@ -260,6 +271,8 @@ char const *aStdAnimations[] = {
 	"bomber",
 	"WEAPON_hgun_rload",
 	"WEAPON_AK_rload",
+#ifdef PC_PLAYER_CONTROLS
+	// maybe wrong define, but unused anyway
 	"FPS_PUNCH",
 	"FPS_BAT",
 	"FPS_UZI",
@@ -267,6 +280,7 @@ char const *aStdAnimations[] = {
 	"FPS_AK",
 	"FPS_M16",
 	"FPS_ROCKET",
+#endif
 	"FIGHTIDLE",
 	"FIGHT2IDLE",
 	"FIGHTsh_F",
@@ -488,6 +502,7 @@ char const *aPanicChunkyAnimations[] = {
 	"woman_runpanic",
 	"idle_stance",
 };
+#ifdef PC_PLAYER_CONTROLS
 char const *aPlayerStrafeBackAnimations[] = {
 	"walk_player_back",
 	"run_player_back",
@@ -530,6 +545,7 @@ char const *aRocketStrafeRightAnimations[] = {
 	"idle_rocket",
 	"walkst_rocket_right",
 };
+#endif
 
 #define awc(a) ARRAY_SIZE(a), a
 const AnimAssocDefinition CAnimManager::ms_aAnimAssocDefinitions[NUM_ANIM_ASSOC_GROUPS] = {
@@ -552,12 +568,14 @@ const AnimAssocDefinition CAnimManager::ms_aAnimAssocDefinitions[NUM_ANIM_ASSOC_
 	{ "oldwoman", "ped", MI_COP, awc(aOldWomanAnimations), aStdAnimDescs },
 	{ "fatwoman", "ped", MI_COP, awc(aFatWomanAnimations), aStdAnimDescs },
 	{ "panicchunky", "ped", MI_COP, awc(aPanicChunkyAnimations), aStdAnimDescs },
+#ifdef PC_PLAYER_CONTROLS
 	{ "playerback", "ped", MI_COP, awc(aPlayerStrafeBackAnimations), aStdAnimDescs },
 	{ "playerleft", "ped", MI_COP, awc(aPlayerStrafeLeftAnimations), aStdAnimDescsSide },
 	{ "playerright", "ped", MI_COP, awc(aPlayerStrafeRightAnimations), aStdAnimDescsSide },
 	{ "rocketback", "ped", MI_COP, awc(aRocketStrafeBackAnimations), aStdAnimDescs },
 	{ "rocketleft", "ped", MI_COP, awc(aRocketStrafeLeftAnimations), aStdAnimDescsSide },
 	{ "rocketright", "ped", MI_COP, awc(aRocketStrafeRightAnimations), aStdAnimDescsSide },
+#endif
 };
 #undef awc
 

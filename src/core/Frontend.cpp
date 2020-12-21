@@ -1023,7 +1023,9 @@ CMenuManager::DisplaySlider(float x, float y, float mostLeftBarSize, float mostR
 void
 CMenuManager::DoSettingsBeforeStartingAGame()
 {
+#ifdef PC_PLAYER_CONTROLS
 	CCamera::m_bUseMouse3rdPerson = m_ControlMethod == CONTROL_STANDARD;
+#endif
 	if (m_PrefsVsyncDisp != m_PrefsVsync)
 		m_PrefsVsync = m_PrefsVsyncDisp;
 
@@ -4064,7 +4066,9 @@ CMenuManager::Process(void)
 #ifdef USE_DEBUG_SCRIPT_LOADER
 				scriptToLoad = 0;
 #endif
+#ifdef PC_PLAYER_CONTROLS
 				TheCamera.m_bUseMouse3rdPerson = m_ControlMethod == CONTROL_STANDARD;
+#endif
 				if (m_PrefsVsyncDisp != m_PrefsVsync)
 					m_PrefsVsync = m_PrefsVsyncDisp;
 				DMAudio.Service();
