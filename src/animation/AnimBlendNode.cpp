@@ -308,9 +308,9 @@ CAnimBlendNode::GetEndTranslationCompressed(CVector &trans, float weight)
 	if(blend > 0.0f){
 		KeyFrameTransCompressed *kf = (KeyFrameTransCompressed*)sequence->GetKeyFrameCompressed(sequence->numFrames-1);
 		if(sequence->type & CAnimBlendSequence::KF_TRANS){
-			CVector trans;
-			kf->GetTranslation(&trans);
-			trans = trans * blend;
+			CVector pos;
+			kf->GetTranslation(&pos);
+			trans = pos * blend;
 		}
 	}
 }
