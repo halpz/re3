@@ -5899,17 +5899,21 @@ CPed::Duck(void)
 		ClearDuck();
 	else if (bIsDucking && bCrouchWhenShooting) {
 		CWeaponInfo *weapon = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
-		CAnimBlendAssociation *attackAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCH);
-		if (!attackAssoc) {
+		CAnimBlendAssociation *crouchAnim = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCH);
+		if (!crouchAnim) {
 			if(GetCrouchFireAnim(weapon))
-				attackAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchFireAnim(weapon));
+				crouchAnim = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchFireAnim(weapon));
 		}
-		if (!attackAssoc) {
+		if (!crouchAnim) {
 			if(GetCrouchReloadAnim(weapon))
-				attackAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchReloadAnim(weapon));
+				crouchAnim = RpAnimBlendClumpGetAssociation(GetClump(), GetCrouchReloadAnim(weapon));
 		}
-		if (!attackAssoc) {
+		if (!crouchAnim) {
 			bIsDucking = false;
+#if defined FIX_BUGS || defined FREE_CAM
+			if (IsPlayer())
+				bCrouchWhenShooting = false;
+#endif
 		}
 	}
 }
