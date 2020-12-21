@@ -480,6 +480,14 @@ GetObjectName(int streamId)
 	return objname;
 }
 
+#ifdef USE_CUSTOM_ALLOCATOR
+RpAtomic*
+RegisterAtomicMemPtrsCB(RpAtomic *atomic, void *data)
+{
+	// empty because we expect models to be pre-instanced
+	return atomic;
+}
+#endif
 
 bool
 CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
@@ -514,9 +522,10 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 
 		// Set Txd and anims to use
 		CTxdStore::AddRef(mi->GetTxdSlot());
+#if GTA_VERSION > GTAVC_PS2
 		if(animId != -1)
 			CAnimManager::AddAnimBlockRef(animId);
-		CTxdStore::SetCurrentTxd(mi->GetTxdSlot());
+#endif
 
 		PUSH_MEMID(MEMID_STREAM_MODELS);
 		CTxdStore::SetCurrentTxd(mi->GetTxdSlot());
@@ -542,8 +551,10 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 		// Txd and anims no longer needed unless we only read part of the file
 		if(ms_aInfoForModel[streamId].m_loadState != STREAMSTATE_STARTED){
 			CTxdStore::RemoveRefWithoutDelete(mi->GetTxdSlot());
+#if GTA_VERSION > GTAVC_PS2
 			if(animId != -1)
 				CAnimManager::RemoveAnimBlockRefWithoutDelete(animId);
+#endif
 		}
 
 		if(!success){
@@ -580,7 +591,10 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 			return false;
 		}
 	}else if(streamId >= STREAM_OFFSET_COL && streamId < STREAM_OFFSET_ANIM){
-		if(!CColStore::LoadCol(streamId-STREAM_OFFSET_COL, mem.start, mem.length)){
+		PUSH_MEMID(MEMID_STREAM_COLLISION);
+		bool success = CColStore::LoadCol(streamId-STREAM_OFFSET_COL, mem.start, mem.length);
+		POP_MEMID();
+		if(!success){
 			debug("Failed to load %s.col\n", CColStore::GetColName(streamId - STREAM_OFFSET_COL));
 			RemoveModel(streamId);
 			ReRequestModel(streamId);
@@ -595,8 +609,10 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 			RwStreamClose(stream, &mem);
 			return false;
 		}
+		PUSH_MEMID(MEMID_STREAM_ANIMATION);
 		CAnimManager::LoadAnimFile(stream, true, nil);
 		CAnimManager::CreateAnimAssocGroups();
+		POP_MEMID();
 	}
 
 	RwStreamClose(stream, &mem);
@@ -678,8 +694,10 @@ CStreaming::FinishLoadingLargeFile(int8 *buf, int32 streamId)
 		POP_MEMID();
 		mi->RemoveRef();
 		CTxdStore::RemoveRefWithoutDelete(mi->GetTxdSlot());
+#if GTA_VERSION > GTAVC_PS2
 		if(mi->GetAnimFileIndex() != -1)
 			CAnimManager::RemoveAnimBlockRefWithoutDelete(mi->GetAnimFileIndex());
+#endif
 	}else if(streamId >= STREAM_OFFSET_TXD && streamId < STREAM_OFFSET_COL){
 		// Txd
 		CTxdStore::AddRef(streamId - STREAM_OFFSET_TXD);
@@ -693,7 +711,7 @@ CStreaming::FinishLoadingLargeFile(int8 *buf, int32 streamId)
 
 	RwStreamClose(stream, &mem);
 
-	ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_LOADED;	// only done if success on PS2
+	ms_aInfoForModel[streamId].m_loadState = STREAMSTATE_LOADED;
 #ifndef USE_CUSTOM_ALLOCATOR
 	ms_memoryUsed += ms_aInfoForModel[streamId].GetCdSize() * CDSTREAM_SECTOR_SIZE;
 #endif
@@ -701,11 +719,11 @@ CStreaming::FinishLoadingLargeFile(int8 *buf, int32 streamId)
 	if(!success){
 		RemoveModel(streamId);
 		ReRequestModel(streamId);
-		UpdateMemoryUsed();	// directly after pop on PS2
+		UpdateMemoryUsed();
 		return false;
 	}
 
-	UpdateMemoryUsed();	// directly after pop on PS2
+	UpdateMemoryUsed();
 
 	endTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond();
 	timeDiff = endTime - startTime;
@@ -2471,7 +2489,9 @@ CStreaming::UpdateMemoryUsed(void)
 	ms_memoryUsed =
 		gMainHeap.GetMemoryUsed(MEMID_STREAM) +
 		gMainHeap.GetMemoryUsed(MEMID_STREAM_MODELS) +
-		gMainHeap.GetMemoryUsed(MEMID_STREAM_TEXUTRES);
+		gMainHeap.GetMemoryUsed(MEMID_STREAM_TEXUTRES) +
+		gMainHeap.GetMemoryUsed(MEMID_STREAM_COLLISION) +
+		gMainHeap.GetMemoryUsed(MEMID_STREAM_ANIMATION);
 #endif
 }
 

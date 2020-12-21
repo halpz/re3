@@ -891,7 +891,7 @@ return;
 	CFont::PrintString(24.0f, y, gUString);
 	y += 12.0f;
 
-	sprintf(gString, "Render List: %d blocks, %d bytes", gMainHeap.GetBlocksUsed(MEMID_RENDERLIST), gMainHeap.GetMemoryUsed(MEMID_RENDERLIST));
+	sprintf(gString, "PreAlloc: %d blocks, %d bytes", gMainHeap.GetBlocksUsed(MEMID_PRE_ALLOC), gMainHeap.GetMemoryUsed(MEMID_PRE_ALLOC));
 	AsciiToUnicode(gString, gUString);
 	CFont::PrintString(24.0f, y, gUString);
 	y += 12.0f;
@@ -916,7 +916,27 @@ return;
 	CFont::PrintString(24.0f, y, gUString);
 	y += 12.0f;
 
+	sprintf(gString, "Streamed LODs: %d blocks, %d bytes", gMainHeap.GetBlocksUsed(MEMID_STREAM_LODS), gMainHeap.GetMemoryUsed(MEMID_STREAM_LODS));
+	AsciiToUnicode(gString, gUString);
+	CFont::PrintString(24.0f, y, gUString);
+	y += 12.0f;
+
 	sprintf(gString, "Streamed Textures: %d blocks, %d bytes", gMainHeap.GetBlocksUsed(MEMID_STREAM_TEXUTRES), gMainHeap.GetMemoryUsed(MEMID_STREAM_TEXUTRES));
+	AsciiToUnicode(gString, gUString);
+	CFont::PrintString(24.0f, y, gUString);
+	y += 12.0f;
+
+	sprintf(gString, "Streamed Collision: %d blocks, %d bytes", gMainHeap.GetBlocksUsed(MEMID_STREAM_COLLISION), gMainHeap.GetMemoryUsed(MEMID_STREAM_COLLISION));
+	AsciiToUnicode(gString, gUString);
+	CFont::PrintString(24.0f, y, gUString);
+	y += 12.0f;
+
+	sprintf(gString, "Streamed Animation: %d blocks, %d bytes", gMainHeap.GetBlocksUsed(MEMID_STREAM_ANIMATION), gMainHeap.GetMemoryUsed(MEMID_STREAM_ANIMATION));
+	AsciiToUnicode(gString, gUString);
+	CFont::PrintString(24.0f, y, gUString);
+	y += 12.0f;
+
+	sprintf(gString, "Ped Attr: %d blocks, %d bytes", gMainHeap.GetBlocksUsed(MEMID_PED_ATTR), gMainHeap.GetMemoryUsed(MEMID_PED_ATTR));
 	AsciiToUnicode(gString, gUString);
 	CFont::PrintString(24.0f, y, gUString);
 	y += 12.0f;
@@ -947,11 +967,6 @@ return;
 	y += 12.0f;
 
 	sprintf(gString, "Cars: %d blocks, %d bytes", gMainHeap.GetBlocksUsed(MEMID_CARS), gMainHeap.GetMemoryUsed(MEMID_CARS));
-	AsciiToUnicode(gString, gUString);
-	CFont::PrintString(24.0f, y, gUString);
-	y += 12.0f;
-
-	sprintf(gString, "Frontend: %d blocks, %d bytes", gMainHeap.GetBlocksUsed(MEMID_FRONTEND), gMainHeap.GetMemoryUsed(MEMID_FRONTEND));
 	AsciiToUnicode(gString, gUString);
 	CFont::PrintString(24.0f, y, gUString);
 	y += 12.0f;

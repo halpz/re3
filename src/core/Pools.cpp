@@ -29,6 +29,7 @@ CAudioScriptObjectPool *CPools::ms_pAudioScriptObjectPool;
 CColModelPool *CPools::ms_pColModelPool;
 
 #if defined GTA_PS2 && !defined MASTER	// or USE_CUSTOM_ALLOCATOR
+// not in VC. perhaps ifdef'ed away
 #define CHECKMEM(msg) CMemCheck::AllocateMemCheckBlock(msg)
 #else
 #define CHECKMEM(msg)

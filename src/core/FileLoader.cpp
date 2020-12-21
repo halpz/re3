@@ -98,10 +98,13 @@ CFileLoader::LoadLevel(const char *filename)
 		}else if(strncmp(line, "IPL", 3) == 0){
 			if(!objectsLoaded){
 				LoadingScreenLoadingFile("Collision");
-				POP_MEMID();
+				PUSH_MEMID(MEMID_WORLD);
 				CObjectData::Initialise("DATA\\OBJECT.DAT");
 				CStreaming::Init();
+				POP_MEMID();
+				PUSH_MEMID(MEMID_COLLISION);
 				CColStore::LoadAllCollision();
+				POP_MEMID();
 				for(int i = 0; i < MODELINFOSIZE; i++)
 					if(CModelInfo::GetModelInfo(i))
 						CModelInfo::GetModelInfo(i)->ConvertAnimFileIndex();
@@ -110,12 +113,15 @@ CFileLoader::LoadLevel(const char *filename)
 			PUSH_MEMID(MEMID_WORLD);
 			LoadingScreenLoadingFile(line + 4);
 			LoadScene(line + 4);
+			POP_MEMID();
 		}else if(strncmp(line, "SPLASH", 6) == 0){
 #ifndef DISABLE_LOADING_SCREEN
 			LoadSplash(GetRandomSplashScreen());
 #endif
+#ifndef GTA_PS2
 		}else if(strncmp(line, "CDIMAGE", 7) == 0){
 			CdStreamAddImage(line + 8);
+#endif
 		}
 	}
 

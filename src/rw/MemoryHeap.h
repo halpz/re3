@@ -17,7 +17,6 @@
 
 enum {
 	MEMID_FREE,
-	// IDs from LCS:
 	MEMID_GAME = 1,	// "Game"
 	MEMID_WORLD = 2,	// "World"
 	MEMID_ANIMATION = 3,	// "Animation"
