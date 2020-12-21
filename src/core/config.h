@@ -208,6 +208,7 @@ enum Config {
 #		define RANDOMSPLASH	// use random splash as on PS2
 #		define PS2_MATFX
 #	endif
+#	define PC_PLAYER_CONTROLS	// mouse player/cam mode
 #	define GTA_REPLAY
 #	define GTA_SCENE_EDIT
 #elif defined GTA_XBOX

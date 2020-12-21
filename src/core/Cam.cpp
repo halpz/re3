@@ -180,9 +180,11 @@ CCam::Process(void)
 		Process_BehindCar(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		break;
 	case MODE_FOLLOWPED:
+#ifdef PC_PLAYER_CONTROLS
 		if(CCamera::m_bUseMouse3rdPerson)
 			Process_FollowPedWithMouse(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		else
+#endif
 #ifdef FREE_CAM
 			if(CCamera::bFreeCam)
 				Process_FollowPed_Rotation(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
@@ -3735,6 +3737,7 @@ CCam::Process_Fixed(const CVector &CameraTarget, float, float, float)
 		}
 	}
 
+#ifdef PC_PLAYER_CONTROLS
 	if(FrontEndMenuManager.m_ControlMethod == CONTROL_STANDARD && Using3rdPersonMouseCam()){
 		CPed *player = FindPlayerPed();
 		if(player && player->CanStrafeOrMouseControl()){
@@ -3745,6 +3748,7 @@ CCam::Process_Fixed(const CVector &CameraTarget, float, float, float)
 			TheCamera.pTargetEntity->GetMatrix().UpdateRW();
 		}
 	}
+#endif
 }
 
 void

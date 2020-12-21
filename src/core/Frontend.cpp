@@ -493,7 +493,11 @@ CMenuManager::CMenuManager()
 	m_PrefsDMA = 1;
 	OS_Language = LANG_ENGLISH;
 	m_ControlMethod = CONTROL_STANDARD;
+#ifdef PC_PLAYER_CONTROLS
 	CCamera::m_bUseMouse3rdPerson = true;
+#else
+	CCamera::m_bUseMouse3rdPerson = false;
+#endif
 	m_lastWorking3DAudioProvider = 0;
 	m_nFirstVisibleRowOnList = 0;
 	m_nScrollbarTopMargin = 0.0f;
@@ -3019,7 +3023,9 @@ CMenuManager::LoadSettings()
 	CFileMgr::CloseFile(fileHandle);
 	CFileMgr::SetDir("");
 
+#ifdef PC_PLAYER_CONTROLS
 	CCamera::m_bUseMouse3rdPerson = m_ControlMethod == CONTROL_STANDARD;
+#endif
 #ifdef LEGACY_MENU_OPTIONS
 	m_PrefsVsync = m_PrefsVsyncDisp;
 #endif

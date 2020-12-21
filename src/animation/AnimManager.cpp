@@ -287,6 +287,7 @@ AnimAssocDesc aStripAnimDescs[] = {
 	{ ANIM_STRIP_F, ASSOC_REPEAT | ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 	{ ANIM_STRIP_G, ASSOC_FADEOUTWHENDONE | ASSOC_PARTIAL },
 };
+#ifdef PC_PLAYER_CONTROLS
 AnimAssocDesc aStdAnimDescsSide[] = {
 	{ ANIM_WALK, ASSOC_REPEAT | ASSOC_MOVEMENT | ASSOC_HAS_TRANSLATION | ASSOC_HAS_X_TRANSLATION | ASSOC_WALK },
 	{ ANIM_RUN, ASSOC_REPEAT | ASSOC_MOVEMENT | ASSOC_HAS_TRANSLATION | ASSOC_HAS_X_TRANSLATION | ASSOC_WALK },
@@ -294,7 +295,7 @@ AnimAssocDesc aStdAnimDescsSide[] = {
 	{ ANIM_IDLE_STANCE, ASSOC_REPEAT },
 	{ ANIM_WALK_START, ASSOC_HAS_TRANSLATION | ASSOC_HAS_X_TRANSLATION },
 };
-
+#endif
 char const* aStdAnimations[] = {
 	"walk_civi",
 	"run_civi",
@@ -834,6 +835,7 @@ char const* aSkateAnimations[] = {
 	"skate_sprint",
 	"skate_idle",
 };
+#ifdef PC_PLAYER_CONTROLS
 char const* aPlayerStrafeBackAnimations[] = {
 	"walk_back",
 	"run_back",
@@ -897,7 +899,7 @@ char const* aChainsawStrafeRightAnimations[] = {
 	"idle_csaw",
 	"walkst_csaw_right",
 };
-
+#endif
 
 #define awc(a) ARRAY_SIZE(a), a
 const AnimAssocDefinition CAnimManager::ms_aAnimAssocDefinitions[NUM_ANIM_ASSOC_GROUPS] = {
@@ -953,6 +955,7 @@ const AnimAssocDefinition CAnimManager::ms_aAnimAssocDefinitions[NUM_ANIM_ASSOC_
 	{ "jogwoman", "ped", MI_COP, awc(aJoggerWomanAnimations), aStdAnimDescs },
 	{ "panicchunky", "ped", MI_COP, awc(aPanicChunkyAnimations), aStdAnimDescs },
 	{ "skate", "skate", MI_COP, awc(aSkateAnimations), aStdAnimDescs },
+#ifdef PC_PLAYER_CONTROLS
 	{ "playerback", "ped", MI_COP, awc(aPlayerStrafeBackAnimations), aStdAnimDescs },
 	{ "playerleft", "ped", MI_COP, awc(aPlayerStrafeLeftAnimations), aStdAnimDescsSide },
 	{ "playerright", "ped", MI_COP, awc(aPlayerStrafeRightAnimations), aStdAnimDescsSide },
@@ -962,6 +965,7 @@ const AnimAssocDefinition CAnimManager::ms_aAnimAssocDefinitions[NUM_ANIM_ASSOC_
 	{ "csawback", "ped", MI_COP, awc(aChainsawStrafeBackAnimations), aStdAnimDescs },
 	{ "csawleft", "ped", MI_COP, awc(aChainsawStrafeLeftAnimations), aStdAnimDescsSide },
 	{ "csawright", "ped", MI_COP, awc(aChainsawStrafeRightAnimations), aStdAnimDescsSide },
+#endif
 };
 #undef awc
 

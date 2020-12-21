@@ -69,7 +69,11 @@ enum
 // NB: removed explicit TheCamera from all functions
 
 CCamera TheCamera;
+#ifdef PC_PLAYER_CONTROLS
 bool CCamera::m_bUseMouse3rdPerson = true;
+#else
+bool CCamera::m_bUseMouse3rdPerson = false;
+#endif
 bool bDidWeProcessAnyCinemaCam;
 static bool bSwitchedToObbeCam;
 float CCamera::m_fMouseAccelHorzntl;
