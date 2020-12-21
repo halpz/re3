@@ -120,8 +120,10 @@ CFileLoader::LoadLevel(const char *filename)
 #ifndef DISABLE_LOADING_SCREEN
 			LoadSplash(GetRandomSplashScreen());
 #endif
+#ifndef GTA_PS2
 		}else if(strncmp(line, "CDIMAGE", 7) == 0){
 			CdStreamAddImage(line + 8);
+#endif
 		}
 	}
 
