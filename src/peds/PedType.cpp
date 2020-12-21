@@ -47,7 +47,7 @@ CPedType::LoadPedData(void)
 	char *buf;
 	char line[256];
 	char word[32];
-	size_t bp, buflen;
+	ssize_t bp, buflen;
 	int lp, linelen;
 	int type;
 	uint32 flags;
@@ -56,9 +56,9 @@ CPedType::LoadPedData(void)
 	type = NUM_PEDTYPES;
 	buf = new char[16 * 1024];
 
-        CFileMgr::SetDir("DATA");
-        buflen = CFileMgr::LoadFile("PED.DAT", (uint8*)buf, 16 * 1024, "r");
-        CFileMgr::SetDir("");
+	CFileMgr::SetDir("DATA");
+	buflen = CFileMgr::LoadFile("PED.DAT", (uint8*)buf, 16 * 1024, "r");
+	CFileMgr::SetDir("");
 
 	for(bp = 0; bp < buflen; ){
 		// read file line by line
@@ -248,7 +248,7 @@ CPedStats::LoadPedStats(void)
 	char *buf;
 	char line[256];
 	char name[32];
-	size_t bp, buflen;
+	ssize_t bp, buflen;
 	int lp, linelen;
 	int type;
 	float fleeDist, headingChangeRate, attackStrength, defendWeakness;
