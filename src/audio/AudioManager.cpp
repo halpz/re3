@@ -20,7 +20,7 @@ const int allChannels = channels + 2;
 cAudioManager::cAudioManager()
 {
 	m_bIsInitialised = false;
-	field_1 = 1;
+	m_bReverb = true;
 	m_fSpeedOfSound = 6.86f;
 	m_nTimeSpent = 50;
 	m_nActiveSamples = NUM_SOUNDS_SAMPLES_SLOTS;
@@ -426,7 +426,8 @@ cAudioManager::CheckForAnAudioFileOnCD() const
 uint8
 cAudioManager::GetCDAudioDriveLetter() const
 {
-	return SampleManager.GetCDAudioDriveLetter();
+	if(m_bIsInitialised) return SampleManager.GetCDAudioDriveLetter();
+	return 0;
 }
 
 bool
@@ -456,7 +457,7 @@ cAudioManager::ServiceSoundEffects()
 		ClearActiveSamples();
 	}
 	m_nActiveSampleQueue = m_nActiveSampleQueue == 1 ? 0 : 1;
-	ProcessReverb();
+	if(m_bReverb) ProcessReverb();
 	ProcessSpecial();
 	ClearRequestedQueue();
 	InterrogateAudioEntities();
