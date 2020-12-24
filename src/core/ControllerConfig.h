@@ -188,6 +188,10 @@ public:
 	void DeleteMatching1rstPersonControls       (e_ControllerAction action, int32 key, eControllerType type);
 	void DeleteMatchingActionInitiators         (e_ControllerAction action, int32 key, eControllerType type);
 
+#ifdef RADIO_SCROLL_TO_PREV_STATION
+	bool IsAnyVehicleActionAssignedToMouseKey(int32 key);
+#endif 
+
 	bool GetIsKeyBlank(int32 key, eControllerType type);
 	e_ControllerActionType GetActionType(e_ControllerAction action);
 
