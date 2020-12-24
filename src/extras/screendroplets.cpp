@@ -79,8 +79,10 @@ ScreenDroplets::Initialise(void)
 void
 ScreenDroplets::InitDraw(void)
 {
-	if(CustomPipes::neoTxd)
-		ms_maskTex = CustomPipes::neoTxd->find("dropmask");
+	if(CustomPipes::neoTxd == nil)
+		return;
+
+	ms_maskTex = CustomPipes::neoTxd->find("dropmask");
 
 	ms_screenTex = RwTextureCreate(nil);
 	RwTextureSetFilterMode(ms_screenTex, rwFILTERLINEAR);
@@ -136,6 +138,10 @@ ScreenDroplets::Shutdown(void)
 void
 ScreenDroplets::Process(void)
 {
+	// no need to do anything if we can't render
+	if(CustomPipes::neoTxd == nil)
+		return;
+
 	ProcessCameraMovement();
 	SprayDrops();
 	ProcessMoving();
@@ -172,6 +178,9 @@ void
 ScreenDroplets::Render(void)
 {
 	ScreenDrop *drop;
+
+	if(CustomPipes::neoTxd == nil)
+		return;
 
 	DefinedState();
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(ms_maskTex));
