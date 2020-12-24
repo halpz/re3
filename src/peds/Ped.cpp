@@ -4246,7 +4246,9 @@ CPed::PedSetOutCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 		veh->m_nGettingOutFlags &= ~GetCarDoorFlag(ped->m_vehEnterType);
 		if (veh->pDriver == ped) {
 			veh->RemoveDriver();
+#ifndef FIX_BUGS // RemoveDriver does it anyway
 			veh->SetStatus(STATUS_ABANDONED);
+#endif
 			if (veh->m_nDoorLock == CARLOCK_LOCKED_INITIALLY)
 				veh->m_nDoorLock = CARLOCK_UNLOCKED;
 			if (ped->m_nPedType == PEDTYPE_COP && veh->IsLawEnforcementVehicle())
