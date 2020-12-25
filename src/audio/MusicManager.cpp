@@ -223,8 +223,8 @@ void
 cMusicManager::SetRadioChannelByScript(uint32 station, int32 pos)
 {
 	if (m_bIsInitialised) {
-		if (station == USERTRACK)
-			station = RADIO_OFF;
+		if (station == STREAMED_SOUND_RADIO_MP3_PLAYER)
+			station = STREAMED_SOUND_CITY_AMBIENT;
 		if (station <= STREAMED_SOUND_RADIO_POLICE) {
 			m_bRadioSetByScript = true;
 			m_nRadioStation = station;
@@ -564,8 +564,8 @@ cMusicManager::ServiceGameMode()
 						gRetuneCounter = 0;
 						return;
 					}
-					if (m_nAnnouncement == NO_TRACK)
-					{
+					if(m_nAnnouncement == NO_TRACK) {
+						m_nStreamedTrack = NO_TRACK;
 						m_nFrontendTrack = GetCarTuning();
 						field_2 = false;
 						gRetuneCounter = 0;
