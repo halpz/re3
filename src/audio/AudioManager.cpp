@@ -128,7 +128,7 @@ cAudioManager::CreateEntity(eAudioType type, void *entity)
 	for (uint32 i = 0; i < ARRAY_SIZE(m_asAudioEntities); i++) {
 		if (!m_asAudioEntities[i].m_bIsUsed) {
 			m_asAudioEntities[i].m_bIsUsed = true;
-			m_asAudioEntities[i].m_nStatus = 0;
+			m_asAudioEntities[i].m_bStatus = false;
 			m_asAudioEntities[i].m_nType = type;
 			m_asAudioEntities[i].m_pEntity = entity;
 			m_asAudioEntities[i].m_awAudioEvent[0] = SOUND_NO_SOUND;
@@ -163,7 +163,7 @@ void
 cAudioManager::SetEntityStatus(int32 id, uint8 status)
 {
 	if (m_bIsInitialised && id >= 0 && id < NUM_AUDIOENTITIES && m_asAudioEntities[id].m_bIsUsed)
-		m_asAudioEntities[id].m_nStatus = status;
+		m_asAudioEntities[id].m_bStatus = status;
 }
 
 void

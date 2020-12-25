@@ -152,7 +152,7 @@ void CGarages::Init(void)
 	}
 	hGarages = DMAudio.CreateEntity(AUDIOTYPE_GARAGE, (void*)1);
 	if (hGarages >= 0)
-		DMAudio.SetEntityStatus(hGarages, 1);
+		DMAudio.SetEntityStatus(hGarages, true);
 }
 
 void CGarages::Shutdown(void)

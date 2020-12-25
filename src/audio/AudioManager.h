@@ -49,7 +49,7 @@ public:
 	eAudioType m_nType;
 	void *m_pEntity;
 	bool m_bIsUsed;
-	uint8 m_nStatus;
+	uint8 m_bStatus;
 	int16 m_awAudioEvent[NUM_AUDIOENTITY_EVENTS];
 	float m_afVolume[NUM_AUDIOENTITY_EVENTS];
 	uint8 m_AudioEvents;

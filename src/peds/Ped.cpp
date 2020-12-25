@@ -319,7 +319,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 		bCanGiveUpSunbathing = true;
 
 	m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, this);
-	DMAudio.SetEntityStatus(m_audioEntityId, 1);
+	DMAudio.SetEntityStatus(m_audioEntityId, true);
 	m_fearFlags = CPedType::GetThreats(m_nPedType);
 	m_threatEntity = nil;
 	m_eventOrThreat = CVector2D(0.0f, 0.0f);

@@ -123,31 +123,31 @@ cAudioManager::PostInitialiseGameSpecificSetup()
 {
 	m_nFireAudioEntity = CreateEntity(AUDIOTYPE_FIRE, &gFireManager);
 	if (m_nFireAudioEntity >= 0)
-		SetEntityStatus(m_nFireAudioEntity, 1);
+		SetEntityStatus(m_nFireAudioEntity, true);
 
 	m_nCollisionEntity = CreateEntity(AUDIOTYPE_COLLISION, (void *)1);
 	if (m_nCollisionEntity >= 0)
-		SetEntityStatus(m_nCollisionEntity, 1);
+		SetEntityStatus(m_nCollisionEntity, true);
 
 	m_nFrontEndEntity = CreateEntity(AUDIOTYPE_FRONTEND, (void *)1);
 	if (m_nFrontEndEntity >= 0)
-		SetEntityStatus(m_nFrontEndEntity, 1);
+		SetEntityStatus(m_nFrontEndEntity, true);
 
 	m_nProjectileEntity = CreateEntity(AUDIOTYPE_PROJECTILE, (void *)1);
 	if (m_nProjectileEntity >= 0)
-		SetEntityStatus(m_nProjectileEntity, 1);
+		SetEntityStatus(m_nProjectileEntity, true);
 
 	m_nWaterCannonEntity = CreateEntity(AUDIOTYPE_WATERCANNON, (void *)1);
 	if (m_nWaterCannonEntity >= 0)
-		SetEntityStatus(m_nWaterCannonEntity, 1);
+		SetEntityStatus(m_nWaterCannonEntity, true);
 
 	m_nPoliceChannelEntity = CreateEntity(AUDIOTYPE_POLICERADIO, (void *)1);
 	if (m_nPoliceChannelEntity >= 0)
-		SetEntityStatus(m_nPoliceChannelEntity, 1);
+		SetEntityStatus(m_nPoliceChannelEntity, true);
 #ifdef GTA_BRIDGE
 	m_nBridgeEntity = CreateEntity(AUDIOTYPE_BRIDGE, (void*)1);
 	if (m_nBridgeEntity >= 0)
-		SetEntityStatus(m_nBridgeEntity, 1);
+		SetEntityStatus(m_nBridgeEntity, true);
 #endif // GTA_BRIDGE
 	m_nEscalatorEntity = CreateEntity(AUDIOTYPE_ESCALATOR, (void*)1);
 	if (m_nEscalatorEntity >= 0)
@@ -261,7 +261,7 @@ cAudioManager::ProcessReverb() const
 	if (SampleManager.UpdateReverb() && m_bDynamicAcousticModelingStatus) {
 		for (uint32 i = 0; i < numChannels; i++) {
 			if (m_asActiveSamples[i].m_bReverbFlag)
-				SampleManager.SetChannelReverbFlag(i, 1);
+				SampleManager.SetChannelReverbFlag(i, true);
 		}
 	}
 }
@@ -350,7 +350,7 @@ cAudioManager::ProcessSpecial()
 		if (playerPed != nil) {
 			if (playerPed->m_audioEntityId >= 0 && m_asAudioEntities[playerPed->m_audioEntityId].m_bIsUsed) {
 				if (playerPed->EnteringCar()) {
-					if(!playerPed->bInVehicle&& CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle == nil)
+					if(!playerPed->bInVehicle && CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle == nil)
 						SampleManager.StopChannel(m_nActiveSamples);
 				}
 			}
@@ -361,7 +361,7 @@ cAudioManager::ProcessSpecial()
 void
 cAudioManager::ProcessEntity(int32 id)
 {
-	if (m_asAudioEntities[id].m_nStatus != STATUS_PLAYER) {
+	if (m_asAudioEntities[id].m_bStatus) {
 		m_sQueueSample.m_nEntityIndex = id;
 		switch (m_asAudioEntities[id].m_nType) {
 		case AUDIOTYPE_PHYSICAL:
