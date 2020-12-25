@@ -149,16 +149,27 @@ public:
 class cVehicleParams
 {
 public:
-	uint8 m_VehicleType;
+	int32 m_VehicleType;
 	bool m_bDistanceCalculated;
 	float m_fDistance;
 	CVehicle *m_pVehicle;
 	cTransmission *m_pTransmission;
 	int32 m_nIndex;
 	float m_fVelocityChange;
+
+	cVehicleParams()
+	{
+		m_VehicleType = -1;
+		m_bDistanceCalculated = false;
+		m_fDistance = 0.0f;
+		m_pVehicle = 0;
+		m_pTransmission = nil;
+		m_nIndex = 0;
+		m_fVelocityChange = 0.0f;
+	}
 };
 
-VALIDATE_SIZE(cVehicleParams, 0x18);
+VALIDATE_SIZE(cVehicleParams, 0x1C);
 
 enum {
 	REFLECTION_NORTH = 0,
