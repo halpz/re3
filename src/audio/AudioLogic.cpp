@@ -5076,7 +5076,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_bRequireReflection = true;
 			break;
 		case SOUND_SHIRT_WIND_FLAP:
-			if (params.m_pPed->IsPlayer()) {
+			if (params.m_pPed->IsPlayer() && params.m_pPed->m_pMyVehicle) {
 				if (m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i] > 0.0f) {
 					if (m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i] > 1.0f)
 						m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i] = 1.0f;
