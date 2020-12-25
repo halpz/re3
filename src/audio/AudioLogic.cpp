@@ -3220,25 +3220,128 @@ cAudioManager::ProcessBoatEngine(cVehicleParams& params)
 {
 	CBoat *boat;
 	float padRelativeAccerate;
-	float gasPedal;
-	int32 padAccelerate;
-	uint8 emittingVol;
-	float oneShotVol;
 
-	static uint16 LastAccel = 0;
-	static uint8 LastVol = 0;
+	bool isV12 = false;
+	static int32 LastFreq = 2000;
+	static int8 LastVol = 0;
 
-	static const int intensity = 90;
+	static const float intensity = 90.0f;
 
 	if (params.m_fDistance < SQR(intensity)) {
 		boat = (CBoat *)params.m_pVehicle;
-		if (params.m_nIndex == REEFER) {
+		if(boat->GetStatus() == STATUS_WRECKED)
+			return true;
+
+		float freqModificator;
+		float volModificator;
+		int BaseVol;
+		int BaseFreq;
+
+		switch(boat->GetModelIndex()) {
+		case MI_RIO:
+			freqModificator = 490.0f;
+			volModificator = 60.0f;
+			BaseVol = 20;
+			BaseFreq = 1888;
+			break;
+		case MI_PREDATOR:
+		case MI_SQUALO:
+		case MI_SPEEDER:
+		case MI_COASTG:
+		case MI_DINGHY:
+		case MI_JETMAX:
+			freqModificator = 6000.0f;
+			volModificator = 60.0f;
+			isV12 = true;
+			BaseFreq = 9000;
+			BaseVol = 20;
+			break;
+		case MI_REEFER:
+			freqModificator = 715.0f;
+			volModificator = 80.0f;
+			BaseVol = 0;
+			BaseFreq = 3775;
+			break;
+		case MI_TROPIC:
+		case MI_MARQUIS:
+			freqModificator = 463.0f;
+			volModificator = 60.0f;
+			BaseVol = 20;
+			BaseFreq = 1782;
+			break;
+		default:
+			return true;
+		}
+
+		bool bIsPlayerVeh;
+
+		if(FindPlayerVehicle() == params.m_pVehicle) {
+			float padAccelerate = Max(Pads[0].GetAccelerate(), Pads[0].GetBrake());
+			padRelativeAccerate = padAccelerate / 255.0f;
+			bIsPlayerVeh = true;
+		} else {
+			padRelativeAccerate = Max(params.m_pVehicle->m_fGasPedal, params.m_pVehicle->m_fBrakePedal);
+			bIsPlayerVeh = false;
+		}
+
+		int Freq = BaseFreq + (padRelativeAccerate * freqModificator);
+		int Vol = BaseVol + (padRelativeAccerate * volModificator);
+
+		if(!boat->bPropellerInWater)
+			Freq = (9 * Freq) / 8;
+
+		if(bIsPlayerVeh) {
+			if(Freq > LastFreq) {
+				if(isV12)
+					Freq = Min(Freq, LastFreq + 100);
+				else
+					Freq = Min(Freq, LastFreq + 15);
+			} else {
+				if(isV12)
+					Freq = Max(Freq, LastFreq - 100);
+				else
+					Freq = Max(Freq, LastFreq - 15);
+			}
+			if(Vol > LastVol)
+				Vol = Min(Vol, LastVol + 3);
+			else
+				Vol = Max(Vol, LastVol - 3);
+		}
+
+		if (Vol > 0) {
 			CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
-			m_sQueueSample.m_nVolume = ComputeVolume(80, 50.f, m_sQueueSample.m_fDistance);
+			m_sQueueSample.m_nVolume = ComputeVolume(Vol, intensity, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume != 0) {
+				m_sQueueSample.m_nFrequency = Freq;
+				m_sQueueSample.m_nCounter = 40;
+				if (isV12)
+					m_sQueueSample.m_nSampleIndex = SFX_BOAT_V12_LOOP;
+				else
+					m_sQueueSample.m_nSampleIndex = SFX_BOAT_CRUISER_LOOP;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_nReleasingVolumeModificator = 3;
+				m_sQueueSample.m_nLoopCount = 0;
+				m_sQueueSample.m_nEmittingVolume = Vol;
+				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+				m_sQueueSample.m_fSpeedMultiplier = 2.0f;
+				m_sQueueSample.m_fSoundIntensity = intensity;
+				m_sQueueSample.m_bReleasingSoundFlag = false;
+				m_sQueueSample.m_nReleasingVolumeDivider = 7;
+				m_sQueueSample.m_bReverbFlag = true;
+				m_sQueueSample.m_bRequireReflection = false;
+				AddSampleToRequestedQueue();
+			}
+		}
+
+		if(boat->GetModelIndex() == MI_REEFER) {
+			CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
+			m_sQueueSample.m_nVolume = ComputeVolume(80, intensity, m_sQueueSample.m_fDistance);
+			if (m_sQueueSample.m_nVolume != 0) {
+				m_sQueueSample.m_nFrequency = 6000;
 				m_sQueueSample.m_nCounter = 39;
 				m_sQueueSample.m_nSampleIndex = SFX_FISHING_BOAT_IDLE;
-				m_sQueueSample.m_nFrequency = 10386;
 				m_sQueueSample.m_nFrequency += (m_sQueueSample.m_nEntityIndex * 65536) % 1000;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				m_sQueueSample.m_bIs2D = false;
@@ -3255,102 +3358,11 @@ cAudioManager::ProcessBoatEngine(cVehicleParams& params)
 				m_sQueueSample.m_bRequireReflection = false;
 				AddSampleToRequestedQueue();
 			}
-			if (FindPlayerVehicle() == params.m_pVehicle) {
-				padAccelerate = Max(Pads[0].GetAccelerate(), Pads[0].GetBrake());
-				padRelativeAccerate = padAccelerate / 255;
-				emittingVol = (100.f * padRelativeAccerate) + 15;
-				m_sQueueSample.m_nFrequency = (3000.f * padRelativeAccerate) + 6000;
-				if (!boat->m_bIsAnchored)
-					m_sQueueSample.m_nFrequency = 11 * m_sQueueSample.m_nFrequency / 10;
-			} else {
-				gasPedal = Abs(boat->m_fGasPedal);
-				if (gasPedal > 0.0f) {
-					m_sQueueSample.m_nFrequency = 6000;
-					emittingVol = 15;
-				} else {
-					emittingVol = (100.f * gasPedal) + 15;
-					m_sQueueSample.m_nFrequency = (3000.f * gasPedal) + 6000;
-					if (!boat->m_bIsAnchored)
-						m_sQueueSample.m_nFrequency = 11 * m_sQueueSample.m_nFrequency / 10;
-				}
-			}
-			m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, 50.f, m_sQueueSample.m_fDistance);
-			if (!m_sQueueSample.m_nVolume)
-				return true;
-			m_sQueueSample.m_nCounter = 40;
-			m_sQueueSample.m_nSampleIndex = SFX_FISHING_BOAT_IDLE;
-			m_sQueueSample.m_nFrequency += (m_sQueueSample.m_nEntityIndex * 65536) % 1000;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_nLoopCount = 0;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-			m_sQueueSample.m_fSoundIntensity = intensity;
-			m_sQueueSample.m_bReleasingSoundFlag = false;
-			m_sQueueSample.m_nReleasingVolumeDivider = 7;
-			m_sQueueSample.m_bReverbFlag = true;
-			m_sQueueSample.m_bRequireReflection = false;
-		} else {
-			if (FindPlayerVehicle() == params.m_pVehicle) {
-				padAccelerate = Max(Pads[0].GetAccelerate(), Pads[0].GetBrake());
-				if (padAccelerate <= 20) {
-					emittingVol = 45 - 45 * padAccelerate / 40;
-					m_sQueueSample.m_nFrequency = 100 * padAccelerate + 11025;
-					m_sQueueSample.m_nCounter = 39;
-					m_sQueueSample.m_nSampleIndex = SFX_FISHING_BOAT_IDLE;
-					if (LastAccel > 20) {
-						oneShotVol = LastVol;
-						PlayOneShot(m_sQueueSample.m_nEntityIndex, SOUND_BOAT_SLOWDOWN, oneShotVol);
-					}
-				} else {
-					emittingVol = 105 * padAccelerate / 255 + 15;
-					m_sQueueSample.m_nFrequency = 4000 * padAccelerate / 255 + 8000;
-					if (!boat->m_bIsAnchored)
-						m_sQueueSample.m_nFrequency = 11 * m_sQueueSample.m_nFrequency / 10;
-					m_sQueueSample.m_nCounter = 40;
-					m_sQueueSample.m_nSampleIndex = SFX_FISHING_BOAT_IDLE;
-				}
-				LastVol = emittingVol;
-				LastAccel = padAccelerate;
-			} else {
-				gasPedal = Abs(boat->m_fGasPedal);
-				if (gasPedal > 0.0f) {
-					m_sQueueSample.m_nFrequency = 11025;
-					emittingVol = 45;
-					m_sQueueSample.m_nCounter = 39;
-					m_sQueueSample.m_nSampleIndex = SFX_FISHING_BOAT_IDLE;
-				} else {
-					emittingVol = (105.f * gasPedal) + 15;
-					m_sQueueSample.m_nFrequency = (4000.f * gasPedal) + 8000;
-					if (!boat->m_bIsAnchored)
-						m_sQueueSample.m_nFrequency = 11 * m_sQueueSample.m_nFrequency / 10;
-					m_sQueueSample.m_nCounter = 40;
-					m_sQueueSample.m_nSampleIndex = SFX_FISHING_BOAT_IDLE;
-				}
-			}
-			CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
-			m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, 50.f, m_sQueueSample.m_fDistance);
-			if (!m_sQueueSample.m_nVolume)
-				return true;
-			m_sQueueSample.m_nFrequency += (m_sQueueSample.m_nEntityIndex * 65536) % 1000;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_nLoopCount = 0;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-			m_sQueueSample.m_fSoundIntensity = intensity;
-			m_sQueueSample.m_bReleasingSoundFlag = false;
-			m_sQueueSample.m_nReleasingVolumeDivider = 7;
-			m_sQueueSample.m_bReverbFlag = true;
-			m_sQueueSample.m_bRequireReflection = false;
 		}
-		AddSampleToRequestedQueue();
+		if(bIsPlayerVeh) {
+			LastFreq = Freq;
+			LastVol = Vol;
+		}
 		return true;
 	}
 	return false;
