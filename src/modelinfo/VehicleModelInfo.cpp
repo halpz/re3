@@ -293,7 +293,7 @@ CVehicleModelInfo::SetAtomicRendererCB(RpAtomic *atomic, void *data)
 	name = GetFrameNodeName(RpAtomicGetFrame(atomic));
 	alpha = false;
 	RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), HasAlphaMaterialCB, &alpha);
-	if(strstr(name, "_hi") || strncmp(name, "extra", 5) == 0){
+	if(strstr(name, "_hi") || !CGeneral::faststrncmp(name, "extra", 5)) {
 		if(alpha || strncmp(name, "windscreen", 10) == 0)
 			CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleHiDetailAlphaCB);
 		else
@@ -319,7 +319,7 @@ CVehicleModelInfo::SetAtomicRendererCB_BigVehicle(RpAtomic *atomic, void *data)
 	name = GetFrameNodeName(RpAtomicGetFrame(atomic));
 	alpha = false;
 	RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), HasAlphaMaterialCB, &alpha);
-	if(strstr(name, "_hi") || strncmp(name, "extra", 5) == 0){
+	if(strstr(name, "_hi") || !CGeneral::faststrncmp(name, "extra", 5)) {
 		if(alpha)
 			CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleHiDetailAlphaCB_BigVehicle);
 		else
@@ -367,7 +367,7 @@ CVehicleModelInfo::SetAtomicRendererCB_Boat(RpAtomic *atomic, void *data)
 
 	clump = (RpClump*)data;
 	name = GetFrameNodeName(RpAtomicGetFrame(atomic));
-	if(strcmp(name, "boat_hi") == 0 || strncmp(name, "extra", 5) == 0)
+	if(strcmp(name, "boat_hi") == 0 || !CGeneral::faststrncmp(name, "extra", 5))
 		CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleHiDetailCB_Boat);
 	else if(strstr(name, "_hi"))
 		CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleHiDetailCB);
@@ -914,11 +914,11 @@ CVehicleModelInfo::LoadVehicleColours(void)
 			continue;
 
 		if(section == NONE){
-			if(strncmp(&line[start], "col", 3) == 0)
+			if(line[start] == 'c' && line[start + 1] == 'o' && line[start + 2] == 'l')
 				section = COLOURS;
-			else if(strncmp(&line[start], "car", 3) == 0)
+			else if(line[start] == 'c' && line[start + 1] == 'a' && line[start + 2] == 'r')
 				section = CARS;
-		}else if(strncmp(&line[start], "end", 3) == 0){
+		}else if(line[start] == 'e' && line[start + 1] == 'n' && line[start + 2] == 'd'){
 			section = NONE;
 		}else if(section == COLOURS){
 			sscanf(&line[start],	// BUG: games doesn't add start

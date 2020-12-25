@@ -72,7 +72,11 @@ CFileLoader::LoadLevel(const char *filename)
 		if(*line == '#')
 			continue;
 
-		if(strncmp(line, "EXIT", 9) == 0)	// BUG: 9?
+#ifdef FIX_BUGS
+		if(strncmp(line, "EXIT", 4) == 0)
+#else
+		if(strncmp(line, "EXIT", 9) == 0)
+#endif
 			break;
 
 		if(strncmp(line, "IMAGEPATH", 9) == 0){
@@ -191,7 +195,7 @@ CFileLoader::LoadTexDictionary(const char *filename)
 
 struct ColHeader
 {
-	char ident[4];
+	uint32 ident;
 	uint32 size;
 };
 
@@ -209,7 +213,7 @@ CFileLoader::LoadCollisionFile(const char *filename)
 	fd = CFileMgr::OpenFile(filename, "rb");
 
 	while(CFileMgr::Read(fd, (char*)&header, sizeof(header))){
-		assert(strncmp(header.ident, "COLL", 4) == 0);
+		assert(header.ident == 'LLOC');
 		CFileMgr::Read(fd, (char*)work_buff, header.size);
 		memcpy(modelname, work_buff, 24);
 
@@ -863,6 +867,9 @@ CFileLoader::AddTexDictionaries(RwTexDictionary *dst, RwTexDictionary *src)
 	RwTexDictionaryForAllTextures(src, MoveTexturesCB, dst);
 }
 
+#define isLine3(l, a, b, c) ((l[0] == a) && (l[1] == b) && (l[2] == c))
+#define isLine4(l, a, b, c, d) ((l[0] == a) && (l[1] == b) && (l[2] == c) && (l[3] == d))
+
 void
 CFileLoader::LoadObjectTypes(const char *filename)
 {
@@ -896,18 +903,18 @@ CFileLoader::LoadObjectTypes(const char *filename)
 			continue;
 
 		if(section == NONE){
-			if(strncmp(line, "objs", 4) == 0) section = OBJS;
-			else if(strncmp(line, "tobj", 4) == 0) section = TOBJ;
-			else if(strncmp(line, "hier", 4) == 0) section = HIER;
-			else if(strncmp(line, "cars", 4) == 0) section = CARS;
-			else if(strncmp(line, "peds", 4) == 0) section = PEDS;
-			else if(strncmp(line, "path", 4) == 0) section = PATH;
-			else if(strncmp(line, "2dfx", 4) == 0) section = TWODFX;
-		}else if(strncmp(line, "end", 3) == 0){
+			if(isLine4(line, 'o','b','j','s')) section = OBJS;
+			else if(isLine4(line, 't','o','b','j')) section = TOBJ;
+			else if(isLine4(line, 'h','i','e','r')) section = HIER;
+			else if(isLine4(line, 'c','a','r','s')) section = CARS;
+			else if(isLine4(line, 'p','e','d','s')) section = PEDS;
+			else if(isLine4(line, 'p','a','t','h')) section = PATH;
+			else if(isLine4(line, '2','d','f','x')) section = TWODFX;
+		}else if(isLine3(line, 'e','n','d')){
 			section = section == MLO ? OBJS : NONE;
 		}else switch(section){
 		case OBJS:
-			if(strncmp(line, "sta", 3) == 0)
+			if(isLine3(line, 's','t','a'))
 				mlo = LoadMLO(line);
 			else
 				LoadObject(line);
@@ -930,9 +937,9 @@ CFileLoader::LoadObjectTypes(const char *filename)
 		case PATH:
 			if(pathIndex == -1){
 				id = LoadPathHeader(line, pathTypeStr);
-				if(strncmp(pathTypeStr, "ped", 4) == 0)
+				if(strcmp(pathTypeStr, "ped") == 0)
 					pathType = 1;
-				else if(strncmp(pathTypeStr, "car", 4) == 0)
+				else if(strcmp(pathTypeStr, "car") == 0)
 					pathType = 0;
 				pathIndex = 0;
 			}else{
@@ -1173,21 +1180,21 @@ CFileLoader::LoadVehicleObject(const char *line)
 	mi->m_level = level;
 	mi->m_compRules = comprules;
 
-	if(strncmp(type, "car", 4) == 0){
+	if(strcmp(type, "car") == 0){
 		mi->m_wheelId = misc;
 		mi->m_wheelScale = wheelScale;
 		mi->m_vehicleType = VEHICLE_TYPE_CAR;
-	}else if(strncmp(type, "boat", 5) == 0){
+	}else if(strcmp(type, "boat") == 0){
 		mi->m_vehicleType = VEHICLE_TYPE_BOAT;
-	}else if(strncmp(type, "train", 6) == 0){
+	}else if(strcmp(type, "train") == 0){
 		mi->m_vehicleType = VEHICLE_TYPE_TRAIN;
-	}else if(strncmp(type, "heli", 5) == 0){
+	}else if(strcmp(type, "heli") == 0){
 		mi->m_vehicleType = VEHICLE_TYPE_HELI;
-	}else if(strncmp(type, "plane", 6) == 0){
+	}else if(strcmp(type, "plane") == 0){
 		mi->m_planeLodId = misc;
 		mi->m_wheelScale = 1.0f;
 		mi->m_vehicleType = VEHICLE_TYPE_PLANE;
-	}else if(strncmp(type, "bike", 5) == 0){
+	}else if(strcmp(type, "bike") == 0){
 		mi->m_bikeSteerAngle = misc;
 		mi->m_wheelScale = wheelScale;
 		mi->m_vehicleType = VEHICLE_TYPE_BIKE;
@@ -1197,31 +1204,31 @@ CFileLoader::LoadVehicleObject(const char *line)
 	mi->m_handlingId = mod_HandlingManager.GetHandlingId(handlingId);
 
 	// Well this is kinda dumb....
-	if(strncmp(vehclass, "poorfamily", 11) == 0){
+	if(strcmp(vehclass, "poorfamily") == 0){
 		mi->m_vehicleClass = CCarCtrl::POOR;
 		while(frequency-- > 0)
 			CCarCtrl::AddToCarArray(id, CCarCtrl::POOR);
-	}else if(strncmp(vehclass, "richfamily", 11) == 0){
+	}else if(strcmp(vehclass, "richfamily") == 0){
 		mi->m_vehicleClass = CCarCtrl::RICH;
 		while(frequency-- > 0)
 			CCarCtrl::AddToCarArray(id, CCarCtrl::RICH);
-	}else if(strncmp(vehclass, "executive", 10) == 0){
+	}else if(strcmp(vehclass, "executive") == 0){
 		mi->m_vehicleClass = CCarCtrl::EXEC;
 		while(frequency-- > 0)
 			CCarCtrl::AddToCarArray(id, CCarCtrl::EXEC);
-	}else if(strncmp(vehclass, "worker", 7) == 0){
+	}else if(strcmp(vehclass, "worker") == 0){
 		mi->m_vehicleClass = CCarCtrl::WORKER;
 		while(frequency-- > 0)
 			CCarCtrl::AddToCarArray(id, CCarCtrl::WORKER);
-	}else if(strncmp(vehclass, "special", 8) == 0){
+	}else if(strcmp(vehclass, "special") == 0){
 		mi->m_vehicleClass = CCarCtrl::SPECIAL;
 		while(frequency-- > 0)
 			CCarCtrl::AddToCarArray(id, CCarCtrl::SPECIAL);
-	}else if(strncmp(vehclass, "big", 4) == 0){
+	}else if(strcmp(vehclass, "big") == 0){
 		mi->m_vehicleClass = CCarCtrl::BIG;
 		while(frequency-- > 0)
 			CCarCtrl::AddToCarArray(id, CCarCtrl::BIG);
-	}else if(strncmp(vehclass, "taxi", 5) == 0){
+	}else if(strcmp(vehclass, "taxi") == 0){
 		mi->m_vehicleClass = CCarCtrl::TAXI;
 		while(frequency-- > 0)
 			CCarCtrl::AddToCarArray(id, CCarCtrl::TAXI);
@@ -1402,12 +1409,12 @@ CFileLoader::LoadScene(const char *filename)
 			continue;
 
 		if(section == NONE){
-			if(strncmp(line, "inst", 4) == 0) section = INST;
-			else if(strncmp(line, "zone", 4) == 0) section = ZONE;
-			else if(strncmp(line, "cull", 4) == 0) section = CULL;
-			else if(strncmp(line, "pick", 4) == 0) section = PICK;
-			else if(strncmp(line, "path", 4) == 0) section = PATH;
-		}else if(strncmp(line, "end", 3) == 0){
+			if(isLine4(line, 'i','n','s','t')) section = INST;
+			else if(isLine4(line, 'z','o','n','e')) section = ZONE;
+			else if(isLine4(line, 'c','u','l','l')) section = CULL;
+			else if(isLine4(line, 'p','i','c','k')) section = PICK;
+			else if(isLine4(line, 'p','a','t','h')) section = PATH;
+		}else if(isLine3(line, 'e','n','d')){
 			section = NONE;
 		}else switch(section){
 		case INST:
@@ -1427,6 +1434,7 @@ CFileLoader::LoadScene(const char *filename)
 			// unfinished in the game
 			if(pathIndex == -1){
 				LoadPathHeader(line, pathTypeStr);
+				strcmp(pathTypeStr, "ped");
 				// type not set
 				pathIndex = 0;
 			}else{
@@ -1564,8 +1572,8 @@ CFileLoader::LoadMapZones(const char *filename)
 			continue;
 
 		if(section == NONE){
-			if(strncmp(line, "zone", 4) == 0) section = ZONE;
-		}else if(strncmp(line, "end", 3) == 0){
+			if(isLine4(line, 'z','o','n','e')) section = ZONE;
+		}else if(isLine3(line, 'e','n','d')){
 			section = NONE;
 		}else switch(section){
 		case ZONE: {
@@ -1607,20 +1615,20 @@ CFileLoader::ReloadPaths(const char *filename)
 			continue;
 
 		if (section == NONE) {
-			if (strncmp(line, "path", 4) == 0) {
+			if (isLine4(line, 'p','a','t','h')) {
 				section = PATH;
 				ThePaths.AllocatePathFindInfoMem(4500);
 			}
-		} else if (strncmp(line, "end", 3) == 0) {
+		} else if (isLine3(line, 'e','n','d')) {
 			section = NONE;
 		} else {
 			switch (section) {
 				case PATH:
 					if (pathIndex == -1) {
 						id = LoadPathHeader(line, pathTypeStr);
-						if (strncmp(pathTypeStr, "ped", 4) == 0)
+						if (strcmp(pathTypeStr, "ped") == 0)
 							pathType = 1;
-						else if (strncmp(pathTypeStr, "car", 4) == 0)
+						else if (strcmp(pathTypeStr, "car") == 0)
 							pathType = 0;
 						pathIndex = 0;
 					} else {
@@ -1663,10 +1671,10 @@ CFileLoader::ReloadObjectTypes(const char *filename)
 			continue;
 
 		if (section == NONE) {
-			if (strncmp(line, "objs", 4) == 0) section = OBJS;
-			else if (strncmp(line, "tobj", 4) == 0) section = TOBJ;
-			else if (strncmp(line, "2dfx", 4) == 0) section = TWODFX;
-		} else if (strncmp(line, "end", 3) == 0) {
+			if (isLine4(line, 'o','b','j','s')) section = OBJS;
+			else if (isLine4(line, 't','o','b','j')) section = TOBJ;
+			else if (isLine4(line, '2','d','f','x')) section = TWODFX;
+		} else if (isLine3(line, 'e','n','d')) {
 			section = NONE;
 		} else {
 			switch (section) {
@@ -1738,7 +1746,11 @@ CFileLoader::ReLoadScene(const char *filename)
 		if (*line == '#')
 			continue;
 
-		if (strncmp(line, "EXIT", 9) == 0)	// BUG: 9?
+#ifdef FIX_BUGS
+		if (strncmp(line, "EXIT", 4) == 0)
+#else
+		if (strncmp(line, "EXIT", 9) == 0)
+#endif
 			break;
 
 		if (strncmp(line, "IDE", 3) == 0) {

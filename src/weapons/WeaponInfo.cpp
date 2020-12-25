@@ -136,7 +136,7 @@ CWeaponInfo::LoadWeaponData(void)
 		animAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, animToPlay);
 		animId = static_cast<AnimationId>(animAssoc->animId);
 
-		if (strncmp(anim2ToPlay, "null", 4) != 0) {
+		if (strcmp(anim2ToPlay, "null") != 0) {
 			animAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, anim2ToPlay);
 			ms_apWeaponInfos[weaponType].m_Anim2ToPlay = (AnimationId) animAssoc->animId;
 		}

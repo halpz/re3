@@ -1314,7 +1314,7 @@ CMenuManager::Draw()
 #endif
 		// Hide back button
 #ifdef PS2_LIKE_MENU
-		if ((i == NUM_MENUROWS - 1 || aScreens[m_nCurrScreen].m_aEntries[i+1].m_EntryName[0] == '\0') && strncmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FEDS_TB", 8) == 0)
+		if ((i == NUM_MENUROWS - 1 || aScreens[m_nCurrScreen].m_aEntries[i+1].m_EntryName[0] == '\0') && strcmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FEDS_TB") == 0)
 			break;
 #endif
 		if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action != MENUACTION_LABEL && aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName[0] != '\0') {
@@ -1611,7 +1611,7 @@ CMenuManager::Draw()
 					// Hide back button
 #ifdef PS2_LIKE_MENU
 					if ((rowToCheck == NUM_MENUROWS - 1 || aScreens[m_nCurrScreen].m_aEntries[rowToCheck+1].m_EntryName[0] == '\0') &&
-						strncmp(aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_EntryName, "FEDS_TB", 8) == 0)
+						strcmp(aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_EntryName, "FEDS_TB") == 0)
 						break;
 #endif
 
@@ -3061,7 +3061,7 @@ CMenuManager::DrawPlayerSetupScreen()
 		SYSTEMTIME SystemTime;
 		HANDLE handle = FindFirstFile("skins\\*.bmp", &FindFileData);
 		for (int i = 1; handle != INVALID_HANDLE_VALUE && i; i = FindNextFile(handle, &FindFileData)) {
-			if (strncmp(FindFileData.cFileName, DEFAULT_SKIN_NAME, 5) != 0) {
+			if (strcmp(FindFileData.cFileName, DEFAULT_SKIN_NAME) != 0) {
 				m_pSelectedSkin->nextSkin = new tSkinInfo;
 				m_pSelectedSkin = m_pSelectedSkin->nextSkin;
 				m_pSelectedSkin->skinId = nextSkinId;
@@ -4645,15 +4645,15 @@ CMenuManager::ProcessButtonPresses(void)
 
 	// Hide back button
 #ifdef PS2_LIKE_MENU
-	if ((goUp || goDown) && m_nCurrScreen != MENUPAGE_MULTIPLAYER_FIND_GAME && strncmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEDS_TB", 8) == 0)
+	if ((goUp || goDown) && m_nCurrScreen != MENUPAGE_MULTIPLAYER_FIND_GAME && strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEDS_TB") == 0)
 		m_nCurrOption = goUp ? m_nCurrOption - 1 : (aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL);
 #endif
 
 	if (optionSelected) {
 		int option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action;
 		if ((option == MENUACTION_CHANGEMENU) || (option == MENUACTION_POPULATESLOTS_CHANGEMENU)) {
-			if (strncmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEDS_TB", 8) != 0 &&
-				strncmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FESZ_CA", 8) != 0) {
+			if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEDS_TB") != 0 &&
+				strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FESZ_CA") != 0) {
 
 				if (m_nCurrScreen == MENUPAGE_CHOOSE_DELETE_SLOT) {
 					if (Slots[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_SaveSlot - 1] == SLOT_EMPTY)
@@ -4810,7 +4810,7 @@ CMenuManager::ProcessButtonPresses(void)
 						}
 					}
 					if (changeMenu) {
-						if (strncmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEDS_TB", 8) == 0) {
+						if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEDS_TB") == 0) {
 #ifndef TIDY_UP_PBP
 							ResetHelperText();
 							ChangeScreen(!m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_PreviousPage[1] : aScreens[m_nCurrScreen].m_PreviousPage[0],

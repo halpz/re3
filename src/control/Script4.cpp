@@ -2012,10 +2012,10 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_PRINT_HELP:
 	{
 		if (CCamera::m_bUseMouse3rdPerson && (
-			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "HELP15", 7) == 0 ||
-			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_2A", 7) == 0 ||
-			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_3A", 7) == 0 ||
-			strncmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_4A", 7) == 0)) {
+			strcmp((char*)&CTheScripts::ScriptSpace[m_nIp], "HELP15") == 0 ||
+			strcmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_2A") == 0 ||
+			strcmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_3A") == 0 ||
+			strcmp((char*)&CTheScripts::ScriptSpace[m_nIp], "GUN_4A") == 0)) {
 			m_nIp += KEY_LENGTH_IN_SCRIPT;
 			return 0;
 		}

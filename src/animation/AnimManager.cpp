@@ -810,11 +810,11 @@ CAnimManager::LoadAnimFile(int fd, bool compress)
 	float *fbuf = (float*)buf;
 
 	CFileMgr::Read(fd, (char*)&anpk, sizeof(IfpHeader));
-	if(strncmp(anpk.ident, "ANLF", 4) == 0){
+	if(!CGeneral::faststrncmp(anpk.ident, "ANLF", 4)) {
 		ROUNDSIZE(anpk.size);
 		CFileMgr::Read(fd, buf, anpk.size);
 		numANPK = *(int*)buf;
-	}else if(strncmp(anpk.ident, "ANPK", 4) == 0){
+	} else if(!CGeneral::faststrncmp(anpk.ident, "ANPK", 4)) {
 		CFileMgr::Seek(fd, -8, 1);
 		numANPK = 1;
 	}
@@ -870,13 +870,13 @@ CAnimManager::LoadAnimFile(int fd, bool compress)
 				bool hasScale = false;
 				bool hasTranslation = false;
 				CFileMgr::Read(fd, (char*)&info, sizeof(info));
-				if(strncmp(info.ident, "KRTS", 4) == 0){
+				if(!CGeneral::faststrncmp(info.ident, "KRTS", 4)) {
 					hasScale = true;
 					seq->SetNumFrames(numFrames, true);
-				}else if(strncmp(info.ident, "KRT0", 4) == 0){
+				}else if(!CGeneral::faststrncmp(info.ident, "KRT0", 4)) {
 					hasTranslation = true;
 					seq->SetNumFrames(numFrames, true);
-				}else if(strncmp(info.ident, "KR00", 4) == 0){
+				}else if(!CGeneral::faststrncmp(info.ident, "KR00", 4)){
 					seq->SetNumFrames(numFrames, false);
 				}
 
