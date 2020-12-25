@@ -2393,8 +2393,8 @@ CPed::LoadFightData(void)
 				break;
 		}
 
-		if (strncmp(animName, "default", 8) != 0) {
-			if (strncmp(animName, "null", 5) != 0) {
+		if (strcmp(animName, "default") != 0) {
+			if (strcmp(animName, "null") != 0) {
 				animAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, animName);
 				tFightMoves[moveId].animId = (AnimationId)animAssoc->animId;
 			} else {

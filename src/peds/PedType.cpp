@@ -81,7 +81,7 @@ CPedType::LoadPedData(void)
 		// Game uses just "line" here since sscanf already trims whitespace, but this is safer
 		sscanf(&line[lp], "%s", word);
 
-		if(strncmp(word, "Threat", 7) == 0){
+		if(strcmp(word, "Threat") == 0){
 			flags = 0;
 			lp += 7;
 			while(sscanf(&line[lp], "%s", word) == 1 && lp <= linelen){
@@ -94,7 +94,7 @@ CPedType::LoadPedData(void)
 					lp++;
 			}
 			ms_apPedType[type]->m_threats = flags;
-		}else if(strncmp(word, "Avoid", 6) == 0){
+		}else if(strcmp(word, "Avoid") == 0){
 			flags = 0;
 			lp += 6;
 			while(sscanf(&line[lp], "%s", word) == 1 && lp <= linelen){

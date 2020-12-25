@@ -172,7 +172,7 @@ cHandlingDataMgr::LoadHandlingData(void)
 		end = start+1;
 
 		// yeah, this is kinda crappy
-		if(strncmp(line, ";the end", 9) == 0)
+		if(strcmp(line, ";the end") == 0)
 			keepGoing = 0;
 		else if(line[0] != ';'){
 			if(line[0] == '!'){

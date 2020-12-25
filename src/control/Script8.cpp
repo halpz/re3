@@ -132,11 +132,12 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
 		char key[KEY_LENGTH_IN_SCRIPT];
+		memset(key, 0, KEY_LENGTH_IN_SCRIPT);
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CVector pos = pPlayerInfo->GetPos();
 		CZone *infoZone = CTheZones::FindInformationZoneForPosition(&pos);
-		UpdateCompareFlag(strncmp(key, infoZone->name, 8) == 0);
+		UpdateCompareFlag(strncmp(key, infoZone->name, 8) == 0); // original code doesn't seem to be using strncmp in here and compare 2 ints instead
 		return 0;
 	}
 	case COMMAND_CLEAR_CHAR_ICE_CREAM_PURCHASE:

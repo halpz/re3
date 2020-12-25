@@ -1048,7 +1048,7 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 				}
 
 				if (m_nPrefsAudio3DProviderIndex == NO_AUDIO_PROVIDER) {
-					if (strncmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FEO_AUD", 8) == 0) {
+					if (strcmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FEO_AUD") == 0) {
 						CFont::SetColor(CRGBA(DARKMENUOPTION_COLOR.r, DARKMENUOPTION_COLOR.g, DARKMENUOPTION_COLOR.b, FadeIn(255)));
 					}
 				}
@@ -2431,7 +2431,7 @@ CMenuManager::DrawPlayerSetupScreen(bool activeScreen)
 		SYSTEMTIME SystemTime;
 		HANDLE handle = FindFirstFile("skins\\*.bmp", &FindFileData);
 		for (int i = 1; handle != INVALID_HANDLE_VALUE && i; i = FindNextFile(handle, &FindFileData)) {
-			if (strncmp(FindFileData.cFileName, DEFAULT_SKIN_NAME, 5) != 0) {
+			if (strcmp(FindFileData.cFileName, DEFAULT_SKIN_NAME) != 0) {
 				m_pSelectedSkin->nextSkin = new tSkinInfo;
 				m_pSelectedSkin = m_pSelectedSkin->nextSkin;
 				m_pSelectedSkin->skinId = nextSkinId;

@@ -2,6 +2,7 @@
 
 #include "Camera.h"
 #include "ModelInfo.h"
+#include "General.h"
 
 CTimeModelInfo*
 CTimeModelInfo::FindOtherTimeModel(void)
@@ -23,7 +24,7 @@ CTimeModelInfo::FindOtherTimeModel(void)
 	for(i = 0; i < MODELINFOSIZE; i++){
 		CBaseModelInfo *mi = CModelInfo::GetModelInfo(i);
 		if (mi && mi->GetModelType() == MITYPE_TIME &&
-		   strncmp(name, mi->GetName(), 24) == 0){
+		   !CGeneral::faststrncmp(name, mi->GetName(), MAX_MODEL_NAME)){
 			m_otherTimeModelID = i;
 			return (CTimeModelInfo*)mi;
 		}
