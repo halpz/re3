@@ -1213,14 +1213,46 @@ void CPad::AddToCheatString(char c)
 
 int Cheat_strncmp(char* sourceStr, char* origCheatStr)
 {
-	char cheatCodeVals[] = { 3,5,7,1,13,27,3,7,1,11,13,8,7,32,13,6,28,19,10,3,3,5,7,1,13,27,3,7 };
-
-	for (uint32 i = 0; i < strlen(origCheatStr); i++) {
-		if ((sourceStr[i] != origCheatStr[i] - cheatCodeVals[i]) || i >= ARRAY_SIZE(cheatCodeVals)) {
-			return 1;
+#define ccmp(n) if((uint8)sourceStr[i] != (uint8)origCheatStr[i] - n) return 1;
+	int i = 0;
+	while(origCheatStr[i])
+	{
+		switch(i)
+		{
+		case 0: ccmp(3); break;
+		case 1: ccmp(5); break;
+		case 2: ccmp(7); break;
+		case 3: ccmp(1); break;
+		case 4: ccmp(13); break;
+		case 5: ccmp(27); break;
+		case 6: ccmp(3); break;
+		case 7: ccmp(7); break;
+		case 8: ccmp(1); break;
+		case 9: ccmp(11); break;
+		case 10: ccmp(13); break;
+		case 11: ccmp(8); break;
+		case 12: ccmp(7); break;
+		case 13: ccmp(32); break;
+		case 14: ccmp(13); break;
+		case 15: ccmp(6); break;
+		case 16: ccmp(28); break;
+		case 17: ccmp(19); break;
+		case 18: ccmp(10); break;
+		case 19: ccmp(3); break;
+		case 20: ccmp(3); break;
+		case 21: ccmp(5); break;
+		case 22: ccmp(7); break;
+		case 23: ccmp(1); break;
+		case 24: ccmp(13); break;
+		case 25: ccmp(27); break;
+		case 26: ccmp(3); break;
+		case 27: ccmp(7); break;
+		default: return 1;
 		}
+		i++;
 	}
 	return 0;
+#undef ccmp
 }
 
 // TODO(Miami): Mobile has changed some of the cheats to include debugging things
