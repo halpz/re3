@@ -2232,7 +2232,6 @@ cAudioManager::ProcessVehicleHorn(cVehicleParams& params)
 	if (veh->m_modelIndex == MI_MRWHOOP)
 		return true;
 
-	veh->m_nAlarmState;
 	if (veh->IsAlarmOn())
 		return true;
 
@@ -4455,8 +4454,6 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_bRequireReflection = true;
 			break;
 		}
-		// TODO: breaks the game right now, probably needs AudioManager.cpp to be done first 
-		/*
 		case SOUND_WEAPON_CHAINSAW_ATTACK:
 			if (FindVehicleOfPlayer())
 				continue;
@@ -4491,7 +4488,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_nLoopCount = 0;
 			emittingVol = 100;
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_CAR_AFTER_ACCEL_13);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopStartOffset(SFX_CAR_AFTER_ACCEL_13);
+			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_CAR_AFTER_ACCEL_13);
 			m_sQueueSample.m_nEmittingVolume = 100;
 			m_sQueueSample.m_bIs2D = false;
 			m_sQueueSample.m_bReleasingSoundFlag = false;
@@ -4513,13 +4510,12 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_nLoopCount = 0;
 			emittingVol = 100;
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_CAR_AFTER_ACCEL_13);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopStartOffset(SFX_CAR_AFTER_ACCEL_13);
+			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_CAR_AFTER_ACCEL_13);
 			m_sQueueSample.m_nEmittingVolume = 100;
 			m_sQueueSample.m_bIs2D = false;
 			m_sQueueSample.m_bReleasingSoundFlag = false;
 			m_sQueueSample.m_nReleasingVolumeDivider = 5;
 			break;
-		*/
 		case SOUND_WEAPON_SHOT_FIRED:
 			weapon = ped->GetWeapon();
 			if (!weapon)
