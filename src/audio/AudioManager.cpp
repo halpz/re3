@@ -803,7 +803,7 @@ cAudioManager::AddReleasingSounds()
 					if (sample.m_nReleasingVolumeModificator < 20)
 						++sample.m_nReleasingVolumeModificator;
 				}
-				sample.m_bReleasingSoundFlag = 0;
+				sample.m_bReleasingSoundFlag = false;
 			}
 			memcpy(&m_sQueueSample, &sample, sizeof(tSound));
 			AddSampleToRequestedQueue();
