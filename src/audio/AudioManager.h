@@ -150,6 +150,16 @@ public:
 	cTransmission *m_pTransmission;
 	int32 m_nIndex;
 	float m_fVelocityChange;
+
+	cVehicleParams()
+	{
+		m_bDistanceCalculated = false;
+		m_fDistance = 0.0f;
+		m_pVehicle = 0;
+		m_pTransmission = nil;
+		m_nIndex = 0;
+		m_fVelocityChange = 0.0f;
+	}
 };
 
 VALIDATE_SIZE(cVehicleParams, 0x18);

@@ -579,14 +579,13 @@ cAudioManager::ProcessVehicle(CVehicle *veh)
 	m_sQueueSample.m_vecPos = veh->GetPosition();
 
 	params.m_bDistanceCalculated = false;
-	params.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	params.m_pVehicle = veh;
-	params.m_pTransmission = nil;
-	params.m_nIndex = 0;
-	params.m_fVelocityChange = 0.0f;
+	params.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
 
 	if (handling != nil)
 		params.m_pTransmission = &handling->Transmission;
+	else
+		params.m_pTransmission = nil;
 
 	params.m_nIndex = veh->GetModelIndex() - MI_FIRST_VEHICLE;
 	if (params.m_pVehicle->GetStatus() == STATUS_SIMPLE)
