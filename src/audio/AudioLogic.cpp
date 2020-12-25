@@ -2572,12 +2572,8 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 	bool noReflections;
 	bool isHeli;
 	float maxDist;
-	cPedParams pedParams;
 	static uint8 GunIndex = 53;
 
-	pedParams.m_pPed = nil;
-	pedParams.m_bDistanceCalculated = false;
-	pedParams.m_fDistance = 0.0f;
 	for (int i = 0; i < m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_AudioEvents; i++) {
 		noReflections = false;
 		isHeli = false;
@@ -3017,6 +3013,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 			break;
 		}
 		case SOUND_PED_HELI_PLAYER_FOUND: {
+			cPedParams pedParams;
 			pedParams.m_bDistanceCalculated = params.m_bDistanceCalculated;
 			pedParams.m_fDistance = params.m_fDistance;
 			SetupPedComments(pedParams, SOUND_PED_HELI_PLAYER_FOUND);
@@ -3031,6 +3028,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 			SetupPedComments(&pedParams, SOUND_PED_BODYCAST_HIT);
 			continue; */
 		case SOUND_PED_VCPA_PLAYER_FOUND: {
+			cPedParams pedParams;
 			pedParams.m_bDistanceCalculated = params.m_bDistanceCalculated;
 			pedParams.m_fDistance = params.m_fDistance;
 			SetupPedComments(pedParams, SOUND_PED_VCPA_PLAYER_FOUND);
@@ -4120,13 +4118,9 @@ cAudioManager::ProcessPed(CPhysical *ped)
 {
 	cPedParams params;
 
-	params.m_pPed = nil;
-	params.m_bDistanceCalculated = false;
-	params.m_fDistance = 0.0f;
-
 	m_sQueueSample.m_vecPos = ped->GetPosition();
 
-	//params.m_bDistanceCalculated = false;
+	params.m_bDistanceCalculated = false;
 	params.m_pPed = (CPed *)ped;
 	params.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	ProcessPedOneShots(params);
@@ -8167,9 +8161,6 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 	uint8 emittingVolume;
 	float distSquared;
 
-	cPedParams male;
-	cPedParams female;
-
 	static uint8 iSound = 0;
 
 	switch (sound) {
@@ -8223,19 +8214,19 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 		m_sQueueSample.m_bRequireReflection = false;
 		break;
 	case SCRIPT_SOUND_MALE_AMBULANCE_OUCH:
-		male.m_bDistanceCalculated = false;
-		male.m_fDistance = 0.0f;
-		male.m_pPed = nil;
-		male.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
-		SetupPedComments(male, SOUND_INJURED_PED_MALE_OUCH);
+	{
+		cPedParams pedParams;
+		pedParams.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
+		SetupPedComments(pedParams, SOUND_INJURED_PED_MALE_OUCH);
 		return;
+	}
 	case SCRIPT_SOUND_FEMALE_AMBULANCE_OUCH:
-		female.m_bDistanceCalculated = false;
-		female.m_fDistance = 0.0f;
-		female.m_pPed = nil;
-		female.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
-		SetupPedComments(female, SOUND_INJURED_PED_FEMALE);
+	{
+		cPedParams pedParams;
+		pedParams.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
+		SetupPedComments(pedParams, SOUND_INJURED_PED_FEMALE);
 		return;
+	}
 	case SCRIPT_SOUND_SEAPLANE_LOW_FUEL:
 		m_sQueueSample.m_fSoundIntensity = 1000.0f;
 		m_sQueueSample.m_nSampleIndex = SFX_SEAPLANE_LOW;
