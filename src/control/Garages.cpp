@@ -1094,6 +1094,7 @@ void CGarage::Update()
 				m_eGarageState = GS_CLOSING;
 				m_bClosingWithoutTargetCar = false;
 			}
+			break;
 		case GS_CLOSING:
 			m_fDoorPos = Max(0.0f, m_fDoorPos - (m_bRotatedDoor ? ROTATED_DOOR_CLOSE_SPEED : DEFAULT_DOOR_CLOSE_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == 0.0f) {
@@ -1101,6 +1102,8 @@ void CGarage::Update()
 				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
 				CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_GARAGE);
 			}
+			UpdateDoorsHeight();
+			break;
 		case GS_FULLYCLOSED:
 			break;
 		case GS_OPENING:
