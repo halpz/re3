@@ -2400,7 +2400,7 @@ cAudioManager::ProcessBoatEngine(cVehicleParams& params)
 	CBoat *boat;
 	float padRelativeAccerate;
 	float gasPedal;
-	int32 padAccelerate;
+	float padAccelerate;
 	uint8 emittingVol;
 	float oneShotVol;
 
@@ -2436,10 +2436,10 @@ cAudioManager::ProcessBoatEngine(cVehicleParams& params)
 			}
 			if (FindPlayerVehicle() == params.m_pVehicle) {
 				padAccelerate = Max(Pads[0].GetAccelerate(), Pads[0].GetBrake());
-				padRelativeAccerate = padAccelerate / 255;
+				padRelativeAccerate = padAccelerate / 255.0f;
 				emittingVol = (100.f * padRelativeAccerate) + 15;
 				m_sQueueSample.m_nFrequency = (3000.f * padRelativeAccerate) + 6000;
-				if (!boat->m_bIsAnchored)
+				if (!boat->bPropellerInWater)
 					m_sQueueSample.m_nFrequency = 11 * m_sQueueSample.m_nFrequency / 10;
 			} else {
 				gasPedal = Abs(boat->m_fGasPedal);
@@ -2449,7 +2449,7 @@ cAudioManager::ProcessBoatEngine(cVehicleParams& params)
 				} else {
 					emittingVol = (100.f * gasPedal) + 15;
 					m_sQueueSample.m_nFrequency = (3000.f * gasPedal) + 6000;
-					if (!boat->m_bIsAnchored)
+					if (!boat->bPropellerInWater)
 						m_sQueueSample.m_nFrequency = 11 * m_sQueueSample.m_nFrequency / 10;
 				}
 			}
