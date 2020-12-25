@@ -318,7 +318,7 @@ CKeyArray::Load(size_t length, int file, size_t* offset)
 	entries = new CKeyEntry[numEntries];
 	rawbytes = (char*)entries;
 
-#if DUMB
+#if THIS_IS_STUPID
 	for (uint32 i = 0; i < length; i++) {
 		CFileMgr::Read(file, &rawbytes[i], 1);
 		(*offset)++;
@@ -412,7 +412,7 @@ CData::Load(size_t length, int file, size_t * offset)
 	chars = new wchar[numChars];
 	rawbytes = (char*)chars;
 
-#if DUMB
+#if THIS_IS_STUPID
 	for(uint32 i = 0; i < length; i++){
 		CFileMgr::Read(file, &rawbytes[i], 1);
 		(*offset)++;
@@ -434,7 +434,7 @@ CData::Unload(void)
 void
 CMissionTextOffsets::Load(size_t table_size, int file, size_t *offset, int)
 {
-#if DUMB
+#if THIS_IS_STUPID
 	size_t num_of_entries = table_size / sizeof(CMissionTextOffsets::Entry);
 	for (size_t mi = 0; mi < num_of_entries; mi++) {
 		for (uint32 i = 0; i < sizeof(data[mi].szMissionName); i++) {

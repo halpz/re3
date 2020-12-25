@@ -209,6 +209,9 @@ CTheZones::PostZoneCreation(void)
 	for(i = 1; i < TotalNumberOfNavigationZones; i++)
 		InsertZoneIntoZoneHierarchy(&NavigationZoneArray[i]);
 	InitialiseAudioZoneArray();
+#ifndef MASTER
+	CheckZonesForOverlap();
+#endif
 }
 
 void
@@ -222,8 +225,7 @@ CTheZones::CheckZonesForOverlap(void)
 		
 		for(j = 1; j < TotalNumberOfInfoZones; j++)
 			if(i != j && ZoneIsEntirelyContainedWithinOtherZone(&InfoZoneArray[i], &InfoZoneArray[j]))
-				sprintf(str, "Info zone %s contains %s\n",
-						&InfoZoneArray[j].name, &InfoZoneArray[i].name);
+				sprintf(str, "Info zone %s contains %s\n", InfoZoneArray[j].name, InfoZoneArray[i].name);
 	}
 }
 

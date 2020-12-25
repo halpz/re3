@@ -105,7 +105,6 @@ CWeaponInfo::GetWeaponInfo(eWeaponType weaponType)
 	return &ms_apWeaponInfos[weaponType];
 }
 
-// --MIAMI: done except WEAPONTYPE_TOTALWEAPONS value
 void
 CWeaponInfo::Initialise(void)
 {
@@ -142,7 +141,6 @@ CWeaponInfo::Initialise(void)
 	debug("CWeaponInfo ready\n");
 }
 
-// --MIAMI: Done, commented parts wait for weapons port
 void
 CWeaponInfo::LoadWeaponData(void)
 {
