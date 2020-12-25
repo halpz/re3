@@ -2002,27 +2002,11 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 					}
 				} else {
 					nCruising = 1;
-					params.m_pVehicle->bAudioChangingGear = true;
-					bAccelSampleStopped = true;
-					SampleManager.StopChannel(m_nActiveSamples);
-					if (isMoped || accelerateState >= 150 && wheelsOnGround && brakeState <= 0 && !params.m_pVehicle->bIsHandbrakeOn
-						&& !lostTraction && currentGear >= params.m_pTransmission->nNumberOfGears - 1) {
-						if (accelerateState >= 220 && params.m_fVelocityChange + 0.001f >= velocityChangeForAudio) {
-							if (nCruising < 800)
-								++nCruising;
-						} else if (nCruising > 3) {
-							--nCruising;
-						}
-						freq = 27 * nCruising + freqModifier + 22050;
-						if (engineSoundType == SFX_BANK_TRUCK)
-							freq /= 2;
-						AudioManager.AddPlayerCarSample(120, freq, soundOffset + SFX_CAR_AFTER_ACCEL_1, engineSoundType, 64, true);
-					} else {
-						nCruising = 0;
-					}
+					goto PlayCruising;
 				}
 			}
 		} else {
+PlayCruising:
 			bAccelSampleStopped = true;
 			SampleManager.StopChannel(m_nActiveSamples);
 			if (isMoped || accelerateState >= 150 && wheelsOnGround && brakeState <= 0 && !params.m_pVehicle->bIsHandbrakeOn
@@ -2036,7 +2020,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 				freq = 27 * nCruising + freqModifier + 22050;
 				if (engineSoundType == SFX_BANK_TRUCK)
 					freq /= 2;
-				AudioManager.AddPlayerCarSample(120, freq, soundOffset + SFX_CAR_AFTER_ACCEL_1, engineSoundType, 64, true);
+				AddPlayerCarSample(120, freq, soundOffset + SFX_CAR_AFTER_ACCEL_1, engineSoundType, 64, true);
 			} else {
 				nCruising = 0;
 			}
