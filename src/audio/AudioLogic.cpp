@@ -123,39 +123,39 @@ cAudioManager::PostInitialiseGameSpecificSetup()
 {
 	m_nFireAudioEntity = CreateEntity(AUDIOTYPE_FIRE, &gFireManager);
 	if (m_nFireAudioEntity >= 0)
-		SetEntityStatus(m_nFireAudioEntity, 1);
+		SetEntityStatus(m_nFireAudioEntity, true);
 
 	m_nCollisionEntity = CreateEntity(AUDIOTYPE_COLLISION, (void *)1);
 	if (m_nCollisionEntity >= 0)
-		SetEntityStatus(m_nCollisionEntity, 1);
+		SetEntityStatus(m_nCollisionEntity, true);
 
 	m_nFrontEndEntity = CreateEntity(AUDIOTYPE_FRONTEND, (void *)1);
 	if (m_nFrontEndEntity >= 0)
-		SetEntityStatus(m_nFrontEndEntity, 1);
+		SetEntityStatus(m_nFrontEndEntity, true);
 
 	m_nProjectileEntity = CreateEntity(AUDIOTYPE_PROJECTILE, (void *)1);
 	if (m_nProjectileEntity >= 0)
-		SetEntityStatus(m_nProjectileEntity, 1);
+		SetEntityStatus(m_nProjectileEntity, true);
 
 	m_nWaterCannonEntity = CreateEntity(AUDIOTYPE_WATERCANNON, (void *)1);
 	if (m_nWaterCannonEntity >= 0)
-		SetEntityStatus(m_nWaterCannonEntity, 1);
+		SetEntityStatus(m_nWaterCannonEntity, true);
 
 	m_nPoliceChannelEntity = CreateEntity(AUDIOTYPE_POLICERADIO, (void *)1);
 	if (m_nPoliceChannelEntity >= 0)
-		SetEntityStatus(m_nPoliceChannelEntity, 1);
+		SetEntityStatus(m_nPoliceChannelEntity, true);
 #ifdef GTA_BRIDGE
 	m_nBridgeEntity = CreateEntity(AUDIOTYPE_BRIDGE, (void*)1);
 	if (m_nBridgeEntity >= 0)
-		SetEntityStatus(m_nBridgeEntity, 1);
+		SetEntityStatus(m_nBridgeEntity, true);
 #endif // GTA_BRIDGE
 	m_nEscalatorEntity = CreateEntity(AUDIOTYPE_ESCALATOR, (void*)1);
 	if (m_nEscalatorEntity >= 0)
-		SetEntityStatus(m_nEscalatorEntity, 1);
+		SetEntityStatus(m_nEscalatorEntity, true);
 
 	m_nExtraSoundsEntity = CreateEntity(AUDIOTYPE_EXTRA_SOUNDS, (void*)1);
 	if (m_nExtraSoundsEntity >= 0)
-		SetEntityStatus(m_nExtraSoundsEntity, 1);
+		SetEntityStatus(m_nExtraSoundsEntity, true);
 
 
 	m_sMissionAudio.m_nSampleIndex[0] = NO_SAMPLE;
@@ -261,7 +261,7 @@ cAudioManager::ProcessReverb() const
 	if (SampleManager.UpdateReverb() && m_bDynamicAcousticModelingStatus) {
 		for (uint32 i = 0; i < numChannels; i++) {
 			if (m_asActiveSamples[i].m_bReverbFlag)
-				SampleManager.SetChannelReverbFlag(i, 1);
+				SampleManager.SetChannelReverbFlag(i, true);
 		}
 	}
 }
@@ -350,7 +350,7 @@ cAudioManager::ProcessSpecial()
 		if (playerPed != nil) {
 			if (playerPed->m_audioEntityId >= 0 && m_asAudioEntities[playerPed->m_audioEntityId].m_bIsUsed) {
 				if (playerPed->EnteringCar()) {
-					if(!playerPed->bInVehicle&& CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle == nil)
+					if(!playerPed->bInVehicle && CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle == nil)
 						SampleManager.StopChannel(m_nActiveSamples);
 				}
 			}
@@ -361,7 +361,7 @@ cAudioManager::ProcessSpecial()
 void
 cAudioManager::ProcessEntity(int32 id)
 {
-	if (m_asAudioEntities[id].m_nStatus != STATUS_PLAYER) {
+	if (m_asAudioEntities[id].m_bStatus) {
 		m_sQueueSample.m_nEntityIndex = id;
 		switch (m_asAudioEntities[id].m_nType) {
 		case AUDIOTYPE_PHYSICAL:
@@ -2002,27 +2002,11 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 					}
 				} else {
 					nCruising = 1;
-					params.m_pVehicle->bAudioChangingGear = true;
-					bAccelSampleStopped = true;
-					SampleManager.StopChannel(m_nActiveSamples);
-					if (isMoped || accelerateState >= 150 && wheelsOnGround && brakeState <= 0 && !params.m_pVehicle->bIsHandbrakeOn
-						&& !lostTraction && currentGear >= params.m_pTransmission->nNumberOfGears - 1) {
-						if (accelerateState >= 220 && params.m_fVelocityChange + 0.001f >= velocityChangeForAudio) {
-							if (nCruising < 800)
-								++nCruising;
-						} else if (nCruising > 3) {
-							--nCruising;
-						}
-						freq = 27 * nCruising + freqModifier + 22050;
-						if (engineSoundType == SFX_BANK_TRUCK)
-							freq /= 2;
-						AudioManager.AddPlayerCarSample(120, freq, soundOffset + SFX_CAR_AFTER_ACCEL_1, engineSoundType, 64, true);
-					} else {
-						nCruising = 0;
-					}
+					goto PlayCruising;
 				}
 			}
 		} else {
+PlayCruising:
 			bAccelSampleStopped = true;
 			SampleManager.StopChannel(m_nActiveSamples);
 			if (isMoped || accelerateState >= 150 && wheelsOnGround && brakeState <= 0 && !params.m_pVehicle->bIsHandbrakeOn
@@ -2036,7 +2020,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 				freq = 27 * nCruising + freqModifier + 22050;
 				if (engineSoundType == SFX_BANK_TRUCK)
 					freq /= 2;
-				AudioManager.AddPlayerCarSample(120, freq, soundOffset + SFX_CAR_AFTER_ACCEL_1, engineSoundType, 64, true);
+				AddPlayerCarSample(120, freq, soundOffset + SFX_CAR_AFTER_ACCEL_1, engineSoundType, 64, true);
 			} else {
 				nCruising = 0;
 			}
@@ -2232,7 +2216,6 @@ cAudioManager::ProcessVehicleHorn(cVehicleParams& params)
 	if (veh->m_modelIndex == MI_MRWHOOP)
 		return true;
 
-	veh->m_nAlarmState;
 	if (veh->IsAlarmOn())
 		return true;
 
@@ -4455,8 +4438,6 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_bRequireReflection = true;
 			break;
 		}
-		// TODO: breaks the game right now, probably needs AudioManager.cpp to be done first 
-		/*
 		case SOUND_WEAPON_CHAINSAW_ATTACK:
 			if (FindVehicleOfPlayer())
 				continue;
@@ -4491,7 +4472,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_nLoopCount = 0;
 			emittingVol = 100;
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_CAR_AFTER_ACCEL_13);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopStartOffset(SFX_CAR_AFTER_ACCEL_13);
+			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_CAR_AFTER_ACCEL_13);
 			m_sQueueSample.m_nEmittingVolume = 100;
 			m_sQueueSample.m_bIs2D = false;
 			m_sQueueSample.m_bReleasingSoundFlag = false;
@@ -4513,13 +4494,12 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_nLoopCount = 0;
 			emittingVol = 100;
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_CAR_AFTER_ACCEL_13);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopStartOffset(SFX_CAR_AFTER_ACCEL_13);
+			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_CAR_AFTER_ACCEL_13);
 			m_sQueueSample.m_nEmittingVolume = 100;
 			m_sQueueSample.m_bIs2D = false;
 			m_sQueueSample.m_bReleasingSoundFlag = false;
 			m_sQueueSample.m_nReleasingVolumeDivider = 5;
 			break;
-		*/
 		case SOUND_WEAPON_SHOT_FIRED:
 			weapon = ped->GetWeapon();
 			if (!weapon)
