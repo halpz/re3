@@ -5020,7 +5020,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			uint8 param1 = soundParams & 0xFF;
 			uint32 param2 = soundParams >> 8;
 			m_sQueueSample.m_nSampleIndex = (m_anRandomTable[3] & 1) + SFX_SKATE_1;
-			m_sQueueSample.m_nBankIndex = 0;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_nCounter = iSound;
 			stereo = true;
 			++iSound;
@@ -8448,7 +8448,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_BANK_ALARM_LOOP:
 		m_sQueueSample.m_fSoundIntensity = 80.0f;
 		m_sQueueSample.m_nSampleIndex = SFX_BUILDINGS_BANK_ALARM;
-		m_sQueueSample.m_nBankIndex = 0;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_BANK_ALARM;
 		emittingVolume = 90;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_BUILDINGS_BANK_ALARM);
 		m_sQueueSample.m_nReleasingVolumeModificator = 2;
@@ -8460,7 +8460,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_GARAGE_DOOR_SLIDING_LOOP:
 		m_sQueueSample.m_fSoundIntensity = 80.0f;
 		m_sQueueSample.m_nSampleIndex = SFX_GARAGE_DOOR_LOOP;
-		m_sQueueSample.m_nBankIndex = 0;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 		emittingVolume = 90;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_GARAGE_DOOR_LOOP);
 		m_sQueueSample.m_nReleasingVolumeModificator = 3;
@@ -8471,7 +8471,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_SNORING_LOOP:
 		m_sQueueSample.m_fSoundIntensity = 6.0f;
 		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_SNORE;
-		m_sQueueSample.m_nBankIndex = 0;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_SNORING;
 		emittingVolume = 25;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_BUILDING_SNORE);
 		m_sQueueSample.m_nReleasingVolumeModificator = 6;
@@ -8482,7 +8482,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_SHOOTING_RANGE_TARGET_MOVING_LOOP:
 		m_sQueueSample.m_fSoundIntensity = 40.0f;
 		m_sQueueSample.m_nSampleIndex = SFX_TANK_TURRET;
-		m_sQueueSample.m_nBankIndex = 0;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 		emittingVolume = 60;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_TANK_TURRET);
 		m_sQueueSample.m_nReleasingVolumeModificator = 4;
@@ -8492,7 +8492,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 		break;
 	case SCRIPT_SOUND_NEW_BUILDING_BAR_1:
 		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_BAR_1;
-		m_sQueueSample.m_nBankIndex = 0;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_BAR_1;
 		m_sQueueSample.m_fSoundIntensity = 80.0f;
 		emittingVolume = 127;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
@@ -8503,7 +8503,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 		break;
 	case SCRIPT_SOUND_NEW_BUILDING_BAR_2:
 		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_BAR_2;
-		m_sQueueSample.m_nBankIndex = 0;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_BAR_2;
 		m_sQueueSample.m_fSoundIntensity = 80.0f;
 		emittingVolume = 127;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
@@ -8514,7 +8514,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 		break;
 	case SCRIPT_SOUND_NEW_BUILDING_BAR_3:
 		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_BAR_3;
-		m_sQueueSample.m_nBankIndex = 0;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_BAR_3;
 		m_sQueueSample.m_fSoundIntensity = 80.0f;
 		emittingVolume = 127;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
@@ -8525,7 +8525,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 		break;
 	case SCRIPT_SOUND_NEW_BUILDING_BAR_4:
 		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_BAR_4;
-		m_sQueueSample.m_nBankIndex = 0;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_BAR_4;
 		m_sQueueSample.m_fSoundIntensity = 80.0f;
 		emittingVolume = 127;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
@@ -8537,7 +8537,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_NEW_BUILDING_MALIBU_1:
 		if(MusicManager.m_nPlayingTrack == STREAMED_SOUND_MALIBU_AMBIENT) return;
 		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_MAL1;
-		m_sQueueSample.m_nBankIndex = 0;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_MALIBU_1;
 		MusicManager.SetMalibuClubTrackPos(SCRIPT_SOUND_NEW_BUILDING_MALIBU_1);
 		m_sQueueSample.m_fSoundIntensity = 80.0f;
 		emittingVolume = 127;
@@ -8550,7 +8550,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_NEW_BUILDING_MALIBU_2:
 		if(MusicManager.m_nPlayingTrack == STREAMED_SOUND_MALIBU_AMBIENT) return;
 		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_MAL2;
-		m_sQueueSample.m_nBankIndex = 0;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_MALIBU_2;
 		MusicManager.SetMalibuClubTrackPos(SCRIPT_SOUND_NEW_BUILDING_MALIBU_2);
 		m_sQueueSample.m_fSoundIntensity = 80.0f;
 		emittingVolume = 127;
@@ -8563,7 +8563,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_NEW_BUILDING_MALIBU_3:
 		if(MusicManager.m_nPlayingTrack == STREAMED_SOUND_MALIBU_AMBIENT) return;
 		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_MAL3;
-		m_sQueueSample.m_nBankIndex = 0;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_MALIBU_3;
 		MusicManager.SetMalibuClubTrackPos(SCRIPT_SOUND_NEW_BUILDING_MALIBU_3);
 		m_sQueueSample.m_fSoundIntensity = 80.0f;
 		emittingVolume = 127;
@@ -8576,7 +8576,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_NEW_BUILDING_STRIP_1:
 		if(MusicManager.m_nPlayingTrack == STREAMED_SOUND_STRIPCLUB_AMBIENT) return;
 		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_STR1;
-		m_sQueueSample.m_nBankIndex = 0;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_STRIP_1;
 		MusicManager.SetStripClubTrackPos(SCRIPT_SOUND_NEW_BUILDING_STRIP_1);
 		m_sQueueSample.m_fSoundIntensity = 80.0f;
 		emittingVolume = 127;
@@ -8589,7 +8589,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_NEW_BUILDING_STRIP_2:
 		if(MusicManager.m_nPlayingTrack == STREAMED_SOUND_STRIPCLUB_AMBIENT) return;
 		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_STR2;
-		m_sQueueSample.m_nBankIndex = 0;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_STRIP_2;
 		MusicManager.SetStripClubTrackPos(SCRIPT_SOUND_NEW_BUILDING_STRIP_2);
 		m_sQueueSample.m_fSoundIntensity = 80.0f;
 		emittingVolume = 127;
@@ -8602,7 +8602,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	case SCRIPT_SOUND_NEW_BUILDING_STRIP_3:
 		if(MusicManager.m_nPlayingTrack == STREAMED_SOUND_STRIPCLUB_AMBIENT) return;
 		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_STR3;
-		m_sQueueSample.m_nBankIndex = 0;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_STRIP_3;
 		MusicManager.SetStripClubTrackPos(SCRIPT_SOUND_NEW_BUILDING_STRIP_3);
 		m_sQueueSample.m_fSoundIntensity = 80.0f;
 		emittingVolume = 127;
@@ -8614,7 +8614,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 		break;
 	case SCRIPT_SOUND_NEW_BUILDING_CHURCH:
 		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_CHURCH;
-		m_sQueueSample.m_nBankIndex = 0;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_CHURCH;
 		m_sQueueSample.m_fSoundIntensity = 80.0f;
 		emittingVolume = 127;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
@@ -8627,7 +8627,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 		emittingVolume = 30;
 		m_sQueueSample.m_fSoundIntensity = 80.0f;
 		m_sQueueSample.m_nSampleIndex = SFX_BOAT_WATER_LOOP;
-		m_sQueueSample.m_nBankIndex = 0;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 		m_sQueueSample.m_nFrequency = 20812;
 		m_sQueueSample.m_nReleasingVolumeModificator = 4;
 		m_sQueueSample.m_nReleasingVolumeDivider = 9;
