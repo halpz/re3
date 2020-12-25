@@ -512,7 +512,7 @@ cMusicManager::ServiceGameMode()
 		gRetuneCounter = 0;
 		field_2 = false;
 	} else if (ped) {
-		if (ped->m_objective != OBJECTIVE_WAIT_ON_FOOT_AT_ICE_CREAM_VAN && ped->m_objective != OBJ_55) {
+		if(!ped->DyingOrDead()) {
 #ifdef GTA_PC
 			if (SampleManager.IsMP3RadioChannelAvailable()
 				&& vehicle->m_nRadioStation < USERTRACK
