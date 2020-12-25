@@ -228,7 +228,7 @@ CFileLoader::LoadCollisionFileFirstTime(uint8 *buffer, uint32 size, uint8 colSlo
 	while(size > 8){
 		header = (ColHeader*)buffer;
 		modelsize = header->size;
-		if(header->ident == 'LLOC')
+		if(header->ident != 'LLOC')
 			return size-8 < CDSTREAM_SECTOR_SIZE;
 		memcpy(modelname, buffer+8, 24);
 		memcpy(work_buff, buffer+32, modelsize-24);
@@ -262,7 +262,7 @@ CFileLoader::LoadCollisionFile(uint8 *buffer, uint32 size, uint8 colSlot)
 	while(size > 8){
 		header = (ColHeader*)buffer;
 		modelsize = header->size;
-		if(header->ident == 'LLOC')
+		if(header->ident != 'LLOC')
 			return size-8 < CDSTREAM_SECTOR_SIZE;
 		memcpy(modelname, buffer+8, 24);
 		memcpy(work_buff, buffer+32, modelsize-24);
