@@ -151,11 +151,11 @@ cAudioManager::PostInitialiseGameSpecificSetup()
 #endif // GTA_BRIDGE
 	m_nEscalatorEntity = CreateEntity(AUDIOTYPE_ESCALATOR, (void*)1);
 	if (m_nEscalatorEntity >= 0)
-		SetEntityStatus(m_nEscalatorEntity, 1);
+		SetEntityStatus(m_nEscalatorEntity, true);
 
 	m_nExtraSoundsEntity = CreateEntity(AUDIOTYPE_EXTRA_SOUNDS, (void*)1);
 	if (m_nExtraSoundsEntity >= 0)
-		SetEntityStatus(m_nExtraSoundsEntity, 1);
+		SetEntityStatus(m_nExtraSoundsEntity, true);
 
 
 	m_sMissionAudio.m_nSampleIndex[0] = NO_SAMPLE;
