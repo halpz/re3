@@ -277,8 +277,7 @@ cAudioManager::ProcessSpecial()
 		}
 		CPlayerPed *playerPed = FindPlayerPed();
 		if (playerPed) {
-			const PedState &state = playerPed->m_nPedState;
-			if (state != PED_ENTER_CAR && state != PED_STEAL_CAR && !playerPed->bInVehicle)
+			if(playerPed->EnteringCar() && !playerPed->bInVehicle)
 				SampleManager.StopChannel(m_nActiveSamples);
 		}
 	}
