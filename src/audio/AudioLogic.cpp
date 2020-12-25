@@ -1903,7 +1903,6 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 	float vol;
 	bool noReflections;
 	float maxDist;
-	cPedParams pedParams;
 
 	static uint8 WaveIndex = 41;
 	static uint8 GunIndex = 53;
@@ -2242,21 +2241,21 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 			break;
 		}
 		case SOUND_PED_HELI_PLAYER_FOUND:
-			pedParams.m_pPed = nil;
-			pedParams.m_bDistanceCalculated = false;
-			pedParams.m_fDistance = 0.0f;
+		{
+			cPedParams pedParams;
 			pedParams.m_bDistanceCalculated = params.m_bDistanceCalculated;
 			pedParams.m_fDistance = params.m_fDistance;
 			SetupPedComments(pedParams, SOUND_PED_HELI_PLAYER_FOUND);
 			continue;
+		}
 		case SOUND_PED_BODYCAST_HIT:
-			pedParams.m_pPed = nil;
-			pedParams.m_bDistanceCalculated = false;
-			pedParams.m_fDistance = 0.0f;
+		{
+			cPedParams pedParams;
 			pedParams.m_bDistanceCalculated = params.m_bDistanceCalculated;
 			pedParams.m_fDistance = params.m_fDistance;
 			SetupPedComments(pedParams, SOUND_PED_BODYCAST_HIT);
 			continue;
+		}
 		case SOUND_WATER_FALL: {
 			const float SOUND_INTENSITY = 40.0f;
 			m_sQueueSample.m_nSampleIndex = SFX_SPLASH_1;
@@ -2954,13 +2953,9 @@ cAudioManager::ProcessPed(CPhysical *ped)
 {
 	cPedParams params;
 
-	params.m_pPed = nil;
-	params.m_bDistanceCalculated = false;
-	params.m_fDistance = 0.0f;
-
 	m_sQueueSample.m_vecPos = ped->GetPosition();
 
-	// params.m_bDistanceCalculated = false;
+	params.m_bDistanceCalculated = false;
 	params.m_pPed = (CPed *)ped;
 	params.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	if (ped->GetModelIndex() == MI_FATMALE02)
@@ -6362,26 +6357,25 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 	uint8 emittingVolume;
 	float distSquared;
 
-	cPedParams male;
-	cPedParams female;
-
 	static uint8 iSound = 0;
 
 	switch (sound) {
 	case SCRIPT_SOUND_INJURED_PED_MALE_OUCH_S:
 	case SCRIPT_SOUND_INJURED_PED_MALE_OUCH_L:
-		male.m_pPed = nil;
-		male.m_bDistanceCalculated = false;
-		male.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
-		SetupPedComments(male, SOUND_INJURED_PED_MALE_OUCH);
+	{
+		cPedParams pedParams;
+		pedParams.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
+		SetupPedComments(pedParams, SOUND_INJURED_PED_MALE_OUCH);
 		return;
+	}
 	case SCRIPT_SOUND_INJURED_PED_FEMALE_OUCH_S:
 	case SCRIPT_SOUND_INJURED_PED_FEMALE_OUCH_L:
-		female.m_pPed = nil;
-		female.m_bDistanceCalculated = false;
-		female.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
-		SetupPedComments(female, SOUND_INJURED_PED_FEMALE);
+	{
+		cPedParams pedParams;
+		pedParams.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
+		SetupPedComments(pedParams, SOUND_INJURED_PED_FEMALE);
 		return;
+	}
 	case SCRIPT_SOUND_GATE_START_CLUNK:
 	case SCRIPT_SOUND_GATE_STOP_CLUNK:
 		m_sQueueSample.m_fSoundIntensity = 40.0f;
@@ -6536,36 +6530,20 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 				m_sQueueSample.m_nSampleIndex = SFX_BULLET_SHELL_HIT_GROUND_2;
 				m_sQueueSample.m_nFrequency = RandomDisplacement(500) + 11000;
 				m_sQueueSample.m_nReleasingVolumeModificator = 18;
-				m_sQueueSample.m_fSoundIntensity = 20.0f;
-				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-				m_sQueueSample.m_bIs2D = false;
-				emittingVolume = m_anRandomTable[2] % 20 + 30;
-				distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
-				if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
-					m_sQueueSample.m_fDistance = Sqrt(distSquared);
-					m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
-					if (m_sQueueSample.m_nVolume != 0) {
-						m_sQueueSample.m_nCounter = iSound++;
-						m_sQueueSample.m_nLoopCount = 1;
-						m_sQueueSample.m_bReleasingSoundFlag = true;
-						m_sQueueSample.m_nEmittingVolume = emittingVolume;
-						m_sQueueSample.m_nLoopStart = 0;
-						m_sQueueSample.m_nLoopEnd = -1;
-						m_sQueueSample.m_bReverbFlag = true;
-						AddSampleToRequestedQueue();
-					}
-				}
-				return;
+				break;
 			case SURFACE_WATER:
 				return;
 			default:
+				m_sQueueSample.m_nSampleIndex = SFX_BULLET_SHELL_HIT_GROUND_1;
+				m_sQueueSample.m_nFrequency = RandomDisplacement(750) + 18000;
+				m_sQueueSample.m_nReleasingVolumeModificator = 15;
 				break;
 			}
+		} else {
+			m_sQueueSample.m_nSampleIndex = SFX_BULLET_SHELL_HIT_GROUND_1;
+			m_sQueueSample.m_nFrequency = RandomDisplacement(750) + 18000;
+			m_sQueueSample.m_nReleasingVolumeModificator = 15;
 		}
-		m_sQueueSample.m_nSampleIndex = SFX_BULLET_SHELL_HIT_GROUND_1;
-		m_sQueueSample.m_nFrequency = RandomDisplacement(750) + 18000;
-		m_sQueueSample.m_nReleasingVolumeModificator = 15;
 		m_sQueueSample.m_fSoundIntensity = 20.0f;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 		m_sQueueSample.m_fSpeedMultiplier = 0.0f;
@@ -7714,7 +7692,6 @@ cAudioManager::ProcessPoliceCellBeatingScriptObject(uint8 sound)
 	int32 sampleIndex;
 	uint8 emittingVol;
 	float distSquared;
-	cPedParams params;
 
 	static uint8 iSound = 0;
 
@@ -7755,9 +7732,9 @@ cAudioManager::ProcessPoliceCellBeatingScriptObject(uint8 sound)
 				m_sQueueSample.m_bReverbFlag = true;
 				m_sQueueSample.m_bRequireReflection = false;
 				AddSampleToRequestedQueue();
+				cPedParams params;
 				params.m_bDistanceCalculated = true;
 				params.m_fDistance = distSquared;
-				params.m_pPed = nil;
 				SetupPedComments(params, SOUND_INJURED_PED_MALE_PRISON);
 			}
 			gCellNextTime = time + 500 + m_anRandomTable[3] % 1500;
