@@ -517,6 +517,8 @@ public:
 	void SetPedTalkingStatus(CPed *ped, uint8 status); // done
 	void SetPlayersMood(uint8 mood, uint32 time);      // done
 
+	float Sqrt(float v) const { return v <= 0.0f ? 0.0f : ::Sqrt(v); }
+
 #ifdef GTA_PC
 	// only used in pc
 	void AdjustSamplesVolume();                                                     // done (inlined)
