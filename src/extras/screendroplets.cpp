@@ -10,7 +10,7 @@
 #include "General.h"
 #include "Main.h"
 #include "RwHelper.h"
-#include "Main.h"
+#include "main.h"
 #include "Timer.h"
 #include "Camera.h"
 #include "ZoneCull.h"
