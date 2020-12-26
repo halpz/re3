@@ -201,7 +201,7 @@ CPed::PointGunAt(void)
 		weaponAssoc->SetCurrentTime(weaponInfo->m_fAnimLoopStart);
 		weaponAssoc->flags &= ~ASSOC_RUNNING;
 
-		if (weaponInfo->m_bCanAimWithArm)
+		if (weaponInfo->IsFlagSet(WEAPONFLAG_CANAIM_WITHARM))
 			m_pedIK.m_flags |= CPedIK::AIMS_WITH_ARM;
 		else
 			m_pedIK.m_flags &= ~CPedIK::AIMS_WITH_ARM;
@@ -300,7 +300,7 @@ CPed::SetAttack(CEntity *victim)
 	if (m_pSeekTarget)
 		m_pSeekTarget->RegisterReference((CEntity **) &m_pSeekTarget);
 
-	if (curWeapon->m_bCanAim) {
+	if (curWeapon->IsFlagSet(WEAPONFLAG_CANAIM)) {
 		CVector aimPos = GetRight() * 0.1f + GetForward() * 0.2f + GetPosition();
 		CEntity *obstacle = CWorld::TestSphereAgainstWorld(aimPos, 0.2f, nil, true, false, false, true, false, false);
 		if (obstacle)
@@ -342,7 +342,7 @@ CPed::SetAttack(CEntity *victim)
 			if (pointBlankStatus == POINT_BLANK_FOR_WANTED_PED || !victimPed)
 				StartFightAttack(200);
 		} else {
-			if (!curWeapon->m_bCanAim)
+			if (!curWeapon->IsFlagSet(WEAPONFLAG_CANAIM))
 				m_pSeekTarget = nil;
 
 			if (m_nPedState != PED_AIM_GUN)
@@ -417,7 +417,7 @@ CPed::ClearAttackByRemovingAnim(void)
 	if (!weaponAssoc) {
 		weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), weapon->m_Anim2ToPlay);
 
-		if (!weaponAssoc && weapon->m_bThrow)
+		if (!weaponAssoc && weapon->IsFlagSet(WEAPONFLAG_THROW))
 			weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_THROWU);
 
 		if (!weaponAssoc) {
@@ -569,7 +569,7 @@ CPed::Attack(void)
 		delayBetweenAnimAndFire = ourWeapon->m_fAnim2FrameFire;
 
 		// Long throw granade, molotov
-		if (!weaponAnimAssoc && ourWeapon->m_bThrow) {
+		if (!weaponAnimAssoc && ourWeapon->IsFlagSet(WEAPONFLAG_THROW)) {
 			weaponAnimAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_THROWU);
 			delayBetweenAnimAndFire = 0.2f;
 		}
@@ -605,7 +605,7 @@ CPed::Attack(void)
 	animStart = ourWeapon->m_fAnimLoopStart;
 	weaponAnimTime = weaponAnimAssoc->currentTime;
 	if (weaponAnimTime > animStart && weaponAnimTime - weaponAnimAssoc->timeStep <= animStart) {
-		if (ourWeapon->m_bCanAimWithArm)
+		if (ourWeapon->IsFlagSet(WEAPONFLAG_CANAIM_WITHARM))
 			m_pedIK.m_flags |= CPedIK::AIMS_WITH_ARM;
 		else
 			m_pedIK.m_flags &= ~CPedIK::AIMS_WITH_ARM;

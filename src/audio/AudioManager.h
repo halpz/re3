@@ -135,9 +135,9 @@ public:
 
 	cPedParams()
 	{
-		m_pPed = nil;
 		m_bDistanceCalculated = false;
 		m_fDistance = 0.0f;
+		m_pPed = nil;
 	}
 };
 
@@ -155,7 +155,7 @@ public:
 	{
 		m_bDistanceCalculated = false;
 		m_fDistance = 0.0f;
-		m_pVehicle = 0;
+		m_pVehicle = nil;
 		m_pTransmission = nil;
 		m_nIndex = 0;
 		m_fVelocityChange = 0.0f;

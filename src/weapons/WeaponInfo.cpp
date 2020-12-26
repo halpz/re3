@@ -39,11 +39,7 @@ CWeaponInfo::Initialise(void)
 		ms_apWeaponInfos[i].m_eWeaponFire = WEAPON_FIRE_INSTANT_HIT;
 		ms_apWeaponInfos[i].m_AnimToPlay = ANIM_PUNCH_R;
 		ms_apWeaponInfos[i].m_Anim2ToPlay = NUM_ANIMS;
-		ms_apWeaponInfos[i].m_bUseGravity = 1;
-		ms_apWeaponInfos[i].m_bSlowsDown = 1;
-		ms_apWeaponInfos[i].m_bRandSpeed = 1;
-		ms_apWeaponInfos[i].m_bExpands = 1;
-		ms_apWeaponInfos[i].m_bExplodes = 1;
+		ms_apWeaponInfos[i].m_Flags = WEAPONFLAG_USE_GRAVITY | WEAPONFLAG_SLOWS_DOWN | WEAPONFLAG_RAND_SPEED | WEAPONFLAG_EXPANDS | WEAPONFLAG_EXPLODES;
 	}
 	debug("Loading weapon data...\n");
 	LoadWeaponData();
@@ -160,17 +156,7 @@ CWeaponInfo::LoadWeaponData(void)
 		ms_apWeaponInfos[weaponType].m_fAnimFrameFire = delayBetweenAnimAndFire / 30.0f;
 		ms_apWeaponInfos[weaponType].m_fAnim2FrameFire = delayBetweenAnim2AndFire / 30.0f;
 		ms_apWeaponInfos[weaponType].m_nModelId = modelId;
-		ms_apWeaponInfos[weaponType].m_bUseGravity = flags & 1;
-		ms_apWeaponInfos[weaponType].m_bSlowsDown = (flags >> 1) & 1;
-		ms_apWeaponInfos[weaponType].m_bDissipates = (flags >> 2) & 1;
-		ms_apWeaponInfos[weaponType].m_bRandSpeed = (flags >> 3) & 1;
-		ms_apWeaponInfos[weaponType].m_bExpands = (flags >> 4) & 1;
-		ms_apWeaponInfos[weaponType].m_bExplodes = (flags >> 5) & 1;
-		ms_apWeaponInfos[weaponType].m_bCanAim = (flags >> 6) & 1;
-		ms_apWeaponInfos[weaponType].m_bCanAimWithArm = (flags >> 7) & 1;
-		ms_apWeaponInfos[weaponType].m_b1stPerson = (flags >> 8) & 1;
-		ms_apWeaponInfos[weaponType].m_bHeavy = (flags >> 9) & 1;
-		ms_apWeaponInfos[weaponType].m_bThrow = (flags >> 10) & 1;
+		ms_apWeaponInfos[weaponType].m_Flags = flags;
 	}
 }
 
