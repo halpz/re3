@@ -8,9 +8,8 @@
 #endif
 
 #include "General.h"
-#include "Main.h"
-#include "RwHelper.h"
 #include "main.h"
+#include "RwHelper.h"
 #include "Timer.h"
 #include "Camera.h"
 #include "ZoneCull.h"
