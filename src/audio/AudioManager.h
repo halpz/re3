@@ -144,6 +144,13 @@ public:
 	bool m_bDistanceCalculated;
 	float m_fDistance;
 	CPed *m_pPed;
+
+	cPedParams()
+	{
+		m_bDistanceCalculated = false;
+		m_fDistance = 0.0f;
+		m_pPed = nil;
+	}
 };
 
 class cVehicleParams
@@ -162,7 +169,7 @@ public:
 		m_VehicleType = -1;
 		m_bDistanceCalculated = false;
 		m_fDistance = 0.0f;
-		m_pVehicle = 0;
+		m_pVehicle = nil;
 		m_pTransmission = nil;
 		m_nIndex = 0;
 		m_fVelocityChange = 0.0f;
