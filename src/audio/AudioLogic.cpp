@@ -8783,6 +8783,8 @@ cAudioManager::ProcessFrontEnd()
 		case SOUND_GARAGE_BOMB1_SET:
 		case SOUND_GARAGE_BOMB2_SET:
 		case SOUND_GARAGE_BOMB3_SET:
+		case SOUND_PICKUP_WEAPON_BOUGHT:
+		case SOUND_PICKUP_WEAPON:
 			center = true;
 			processedPickup = true;
 			m_sQueueSample.m_nSampleIndex = SFX_WEAPON_LEFT;
