@@ -18,7 +18,7 @@ bool gPS2alphaTest = true;
 #else
 bool gPS2alphaTest = false;
 #endif
-bool gBackfaceCulling;
+bool gBackfaceCulling = true;
 
 #if !defined(FINAL) || defined(DEBUGMENU)
 static bool charsetOpen;

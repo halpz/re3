@@ -578,7 +578,7 @@ public:
 	int32 field_54;
 	int8 m_bLanguageLoaded;
 	uint8 m_PrefsAllowNastyGame;
-	uint8 m_PrefsMP3BoostVolume;
+	int8 m_PrefsMP3BoostVolume;
 	uint8 m_ControlMethod;
 	int32 m_nPrefsVideoMode;
 	int32 m_nDisplayVideoMode;

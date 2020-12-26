@@ -195,6 +195,7 @@ void LoadINISettings()
 	CustomPipes::LightmapMult = CheckAndReadIniFloat("CustomPipesValues", "LightmapMult", CustomPipes::LightmapMult);
 	CustomPipes::GlossMult = CheckAndReadIniFloat("CustomPipesValues", "GlossMult", CustomPipes::GlossMult);
 #endif
+	gBackfaceCulling = CheckAndReadIniInt("Rendering", "BackfaceCulling", gBackfaceCulling);
 }
 
 void SaveINISettings()
@@ -233,6 +234,7 @@ void SaveINISettings()
 	CheckAndSaveIniFloat("CustomPipesValues", "LightmapMult", CustomPipes::LightmapMult, changed);
 	CheckAndSaveIniFloat("CustomPipesValues", "GlossMult", CustomPipes::GlossMult, changed);
 #endif
+	CheckAndSaveIniInt("Rendering", "BackfaceCulling", gBackfaceCulling, changed);
 
 	if (changed)
 		cfg.write_file("reVC.ini");

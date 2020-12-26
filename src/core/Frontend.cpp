@@ -472,7 +472,11 @@ CMenuManager::CMenuManager()
 	m_PrefsMP3BoostVolume = 0;
 	m_PrefsShowSubtitles = 0;
 	m_PrefsShowLegends = 1;
+#ifdef ASPECT_RATIO_SCALE
+	m_PrefsUseWideScreen = AR_AUTO;
+#else
 	m_PrefsUseWideScreen = 0;
+#endif
 	m_PrefsVsync = 0;
 	m_PrefsVsyncDisp = 1;
 	m_PrefsFrameLimiter = 1;
@@ -703,6 +707,9 @@ CMenuManager::CheckSliderMovement(int value)
 	case MENUACTION_MOUSESENS:
 		TheCamera.m_fMouseAccelHorzntl += value * 1.0f/200.0f/15.0f;	// ???
 		TheCamera.m_fMouseAccelHorzntl = clamp(TheCamera.m_fMouseAccelHorzntl, 1.0f/3200.0f, 1.0f/200.0f);
+#ifdef FIX_BUGS
+		TheCamera.m_fMouseAccelVertical = TheCamera.m_fMouseAccelHorzntl + 0.0005f;
+#endif
 		break;
 	default:
 		return;
@@ -3023,6 +3030,9 @@ CMenuManager::LoadSettings()
 	CFileMgr::CloseFile(fileHandle);
 	CFileMgr::SetDir("");
 
+#ifdef FIX_BUGS
+	TheCamera.m_fMouseAccelVertical = TheCamera.m_fMouseAccelHorzntl + 0.0005f;
+#endif
 #ifdef PC_PLAYER_CONTROLS
 	CCamera::m_bUseMouse3rdPerson = m_ControlMethod == CONTROL_STANDARD;
 #endif
@@ -4721,7 +4731,11 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 #endif
 					CRenderer::ms_lodDistScale = m_PrefsLOD;
 					m_PrefsShowSubtitles = false;
+#ifdef ASPECT_RATIO_SCALE
+					m_PrefsUseWideScreen = AR_AUTO;
+#else
 					m_PrefsUseWideScreen = false;
+#endif
 					m_PrefsShowLegends = true;
 					m_PrefsVsyncDisp = true;
 					m_PrefsFrameLimiter = true;
@@ -4757,6 +4771,9 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 #endif
 					MousePointerStateHelper.bInvertVertically = true;
 					TheCamera.m_bHeadBob = false;
+#ifdef FIX_BUGS
+					TheCamera.m_fMouseAccelVertical = 0.003f;
+#endif
 					TheCamera.m_fMouseAccelHorzntl = 0.0025f;
 					CVehicle::m_bDisableMouseSteering = true;
 					m_ControlMethod = CONTROL_STANDARD;
