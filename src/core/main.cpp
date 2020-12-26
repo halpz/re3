@@ -125,6 +125,10 @@ bool gbPrintMemoryUsage;
 
 #ifdef NEW_RENDERER
 bool gbNewRenderer;
+#endif
+#ifdef FIX_BUGS
+// need to clear stencil for mblur fx. no idea why it works in the original game
+// also for clearing out water rects in new renderer
 #define CLEARMODE (rwCAMERACLEARZ | rwCAMERACLEARSTENCIL)
 #else
 #define CLEARMODE (rwCAMERACLEARZ)

@@ -651,7 +651,7 @@ CMBlur::OverlayRenderFx(RwCamera *cam, RwRaster *frontBuf)
 			RwD3D8SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE);
 #endif
 			RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-			RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+			RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
 			RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, verts, 4, Index, 6);
 
 			if(RwRasterGetDepth(RwCameraGetRaster(cam)) != 16){
