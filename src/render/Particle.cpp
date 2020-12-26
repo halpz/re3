@@ -388,9 +388,11 @@ void CParticle::Initialise()
 
 	gpFlame5Tex = RwTextureRead("flame5", nil);
 	
-#ifdef FIX_BUGS
+//#ifdef FIX_BUGS
+#if 0
 	gpFlame5Raster = RwTextureGetRaster(gpFlame5Tex);
 #else
+	// this seems to have become more of a design choice
 	gpFlame5Raster = RwTextureGetRaster(gpFlame1Tex);	// copy-paste bug ?
 #endif
 
