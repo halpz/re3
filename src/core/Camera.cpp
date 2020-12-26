@@ -1137,27 +1137,31 @@ CCamera::CamControl(void)
 						}else{
 							whichDoor = 1;
 							garageDoorPos1 = Cams[ActiveCam].Source;
-							garageCenter = CVector((stairsZone->minx+stairsZone->maxx)/2.0f, (stairsZone->miny+stairsZone->maxy)/2.0f, 0.0f);
-							if(pTargetEntity->GetPosition().x > 376.0f && pTargetEntity->GetPosition().x < 383.0f &&
-							   pTargetEntity->GetPosition().y > -496.0f && pTargetEntity->GetPosition().y < -489.0f &&
-							   pTargetEntity->GetPosition().z > 11.6f && pTargetEntity->GetPosition().z < 13.6f){
-//							if((garageCenter-garageDoorPos1).Magnitude() > 15.0f){
-								bool bClearViewOutside = true;
-								CVector dirOutside = pTargetEntity->GetPosition() - garageCenter;
-								dirOutside.z = 0.0f;
-								dirOutside.Normalise();
-								float zoneDim = stairsZone->maxx - stairsZone->minx;
-								if(zoneDim < stairsZone->maxy - stairsZone->miny)
-									zoneDim = stairsZone->maxy - stairsZone->miny;
-								zoneDim *= 2.0f;
-								CVector posOutside = pTargetEntity->GetPosition() + zoneDim*dirOutside;
-								if(!CWorld::GetIsLineOfSightClear(pTargetEntity->GetPosition(), posOutside, true, false, false, false, false, false, true)){
-									posOutside = pTargetEntity->GetPosition() - zoneDim*dirOutside;
-									if(!CWorld::GetIsLineOfSightClear(pTargetEntity->GetPosition(), posOutside, true, false, false, false, false, false, true))
-										bClearViewOutside = false;
+
+							if(stairsZone){	// always true
+								garageCenter = CVector((stairsZone->minx+stairsZone->maxx)/2, (stairsZone->miny+stairsZone->maxy)/2, 0.0f);
+								if(pTargetEntity->GetPosition().x > 376.0f && pTargetEntity->GetPosition().x < 383.0f &&
+								   pTargetEntity->GetPosition().y > -496.0f && pTargetEntity->GetPosition().y < -489.0f &&
+								   pTargetEntity->GetPosition().z > 11.6f && pTargetEntity->GetPosition().z < 13.6f){
+									garageDoorPos1 = CVector(382.6f, -489.6f, 13.1f);
+								}else{
+									bool bClearViewOutside = true;
+									CVector dirOutside = pTargetEntity->GetPosition() - garageCenter;
+									dirOutside.z = 0.0f;
+									dirOutside.Normalise();
+									float zoneDim = stairsZone->maxx - stairsZone->minx;
+									if(zoneDim < stairsZone->maxy - stairsZone->miny)
+										zoneDim = stairsZone->maxy - stairsZone->miny;
+									zoneDim *= 2.0f;
+									CVector posOutside = pTargetEntity->GetPosition() + zoneDim*dirOutside;
+									if(!CWorld::GetIsLineOfSightClear(pTargetEntity->GetPosition(), posOutside, true, false, false, false, false, false, true)){
+										posOutside = pTargetEntity->GetPosition() - zoneDim*dirOutside;
+										if(!CWorld::GetIsLineOfSightClear(pTargetEntity->GetPosition(), posOutside, true, false, false, false, false, false, true))
+											bClearViewOutside = false;
+									}
+									if(bClearViewOutside)
+										garageDoorPos1 = posOutside;
 								}
-								if(bClearViewOutside)
-									garageDoorPos1 = posOutside;
 							}
 						}
 
@@ -1167,7 +1171,7 @@ CCamera::CamControl(void)
 							garageCenter.z = 0.0f;
 						}else{
 							garageDoorPos1.z = 0.0f;
-							if(stairs == nil)	// how can this be true?
+							if(!stairs)	// how can this be true?
 								garageCenter = CVector(pTargetEntity->GetPosition().x, pTargetEntity->GetPosition().y, 0.0f);
 						}
 						if(whichDoor == 1)

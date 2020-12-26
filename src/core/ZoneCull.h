@@ -17,12 +17,12 @@ enum eZoneAttribs
 
 struct CAttributeZone
 {
-	float minx;
-	float maxx;
-	float miny;
-	float maxy;
-	float minz;
-	float maxz;
+	int16 minx;
+	int16 maxx;
+	int16 miny;
+	int16 maxy;
+	int16 minz;
+	int16 maxz;
 	int16 attributes;
 	int16 wantedLevel;
 };
