@@ -205,6 +205,8 @@ float fDAxisY = 1000.0f;
 float fInAirXRes = 0.98f;
 float fFlySpeedMult = -0.6f;
 
+#pragma optimize("", off) // a workaround for another compiler bug =P, original had optimize off for this function too though
+
 void
 CBike::ProcessControl(void)
 {
@@ -1256,6 +1258,8 @@ CBike::ProcessControl(void)
 		}
 	}
 }
+
+#pragma optimize("", on)
 
 void
 CBike::Teleport(CVector pos)
