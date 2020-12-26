@@ -499,7 +499,7 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 			bool collided = false;
 
 			if (victimPed->m_nPedState == PED_DRIVING && (m_eWeaponType == WEAPONTYPE_UNARMED || m_eWeaponType == WEAPONTYPE_BRASSKNUCKLE
-				|| info->m_bFightMode))
+				|| info->IsFlagSet(WEAPONFLAG_FIGHTMODE)))
 				continue;
 
 			float victimPedRadius = victimPed->GetBoundRadius() + info->m_fRadius;
@@ -1008,7 +1008,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 			target.y += rotOffset.y * info->m_fRange;
 
 			CParticle::HandleShootableBirdsStuff(shooter, *fireSource);
-			if (shooter->IsPed() && ((CPed*)shooter)->bDoomAim && (shooter != FindPlayerPed() || !info->m_bCanAim))
+			if (shooter->IsPed() && ((CPed*)shooter)->bDoomAim && (shooter != FindPlayerPed() || !info->IsFlagSet(WEAPONFLAG_CANAIM)))
 			{
 				CWeapon::DoDoomAiming(shooter, fireSource, &target);
 			}

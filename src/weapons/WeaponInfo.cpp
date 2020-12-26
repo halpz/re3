@@ -129,12 +129,8 @@ CWeaponInfo::Initialise(void)
 		ms_apWeaponInfos[i].m_fAnim2LoopEnd = 0.0f;
 		ms_apWeaponInfos[i].m_fAnim2FrameFire = 0.0f;
 		ms_apWeaponInfos[i].m_fAnimBreakout = 0.0f;
-		ms_apWeaponInfos[i].m_bUseGravity = 1;
-		ms_apWeaponInfos[i].m_bSlowsDown = 1;
-		ms_apWeaponInfos[i].m_bRandSpeed = 1;
-		ms_apWeaponInfos[i].m_bExpands = 1;
-		ms_apWeaponInfos[i].m_bExplodes = 1;
-		ms_apWeaponInfos[i].m_nWeaponSlot = 0;
+		ms_apWeaponInfos[i].m_Flags = WEAPONFLAG_USE_GRAVITY | WEAPONFLAG_SLOWS_DOWN | WEAPONFLAG_RAND_SPEED | WEAPONFLAG_EXPANDS | WEAPONFLAG_EXPLODES;
+		ms_apWeaponInfos[i].m_nWeaponSlot = WEAPONSLOT_UNARMED;
 	}
 	debug("Loading weapon data...\n");
 	LoadWeaponData();
@@ -246,30 +242,7 @@ CWeaponInfo::LoadWeaponData(void)
 		ms_apWeaponInfos[weaponType].m_fAnimBreakout = animBreakout / 30.0f;
 		ms_apWeaponInfos[weaponType].m_nModelId = modelId;
 		ms_apWeaponInfos[weaponType].m_nModel2Id = modelId2;
-
-		ms_apWeaponInfos[weaponType].m_bUseGravity = flags & 1;
-		ms_apWeaponInfos[weaponType].m_bSlowsDown = (flags >> 1) & 1;
-		ms_apWeaponInfos[weaponType].m_bDissipates = (flags >> 2) & 1;
-		ms_apWeaponInfos[weaponType].m_bRandSpeed = (flags >> 3) & 1;
-		ms_apWeaponInfos[weaponType].m_bExpands = (flags >> 4) & 1;
-		ms_apWeaponInfos[weaponType].m_bExplodes = (flags >> 5) & 1;
-		ms_apWeaponInfos[weaponType].m_bCanAim = (flags >> 6) & 1;
-		ms_apWeaponInfos[weaponType].m_bCanAimWithArm = (flags >> 7) & 1;
-		ms_apWeaponInfos[weaponType].m_b1stPerson = (flags >> 8) & 1;
-		ms_apWeaponInfos[weaponType].m_bHeavy = (flags >> 9) & 1;
-		ms_apWeaponInfos[weaponType].m_bThrow = (flags >> 10) & 1;
-		ms_apWeaponInfos[weaponType].m_bReloadLoop2Start = (flags >> 11) & 1;
-		ms_apWeaponInfos[weaponType].m_bUse2nd = (flags >> 12) & 1;
-		ms_apWeaponInfos[weaponType].m_bGround2nd = (flags >> 13) & 1;
-		ms_apWeaponInfos[weaponType].m_bFinish3rd = (flags >> 14) & 1;
-		ms_apWeaponInfos[weaponType].m_bReload = (flags >> 15) & 1;
-		ms_apWeaponInfos[weaponType].m_bFightMode = (flags >> 16) & 1;
-		ms_apWeaponInfos[weaponType].m_bCrouchFire = (flags >> 17) & 1;
-		ms_apWeaponInfos[weaponType].m_bCop3rd = (flags >> 18) & 1;
-		ms_apWeaponInfos[weaponType].m_bGround3rd = (flags >> 19) & 1;
-		ms_apWeaponInfos[weaponType].m_bPartialAttack = (flags >> 20) & 1;
-		ms_apWeaponInfos[weaponType].m_bAnimDetonate = (flags >> 21) & 1;
-
+		ms_apWeaponInfos[weaponType].m_Flags = flags;
 		ms_apWeaponInfos[weaponType].m_nWeaponSlot = weaponSlot;
 
 		if (animLoopEnd < 98.0f && weaponType != WEAPONTYPE_FLAMETHROWER && !CWeapon::IsShotgun(weaponType))

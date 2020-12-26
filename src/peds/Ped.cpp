@@ -1183,7 +1183,7 @@ CPed::SetAimFlag(float angle)
 	if (bIsDucking)
 		m_pedIK.m_flags &= ~CPedIK::AIMS_WITH_ARM;
 
-	if (CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bCanAimWithArm)
+	if (CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->IsFlagSet(WEAPONFLAG_CANAIM_WITHARM))
 		m_pedIK.m_flags |= CPedIK::AIMS_WITH_ARM;
 	else
 		m_pedIK.m_flags &= ~CPedIK::AIMS_WITH_ARM;
@@ -1273,7 +1273,7 @@ CPed::RestoreGunPosition(void)
 bool
 CPed::CanWeRunAndFireWithWeapon(void)
 {
-	return CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bCanAimWithArm;
+	return CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->IsFlagSet(WEAPONFLAG_CANAIM_WITHARM);
 }
 
 // --MIAMI: Done
@@ -5597,7 +5597,7 @@ CPed::SetSeek(CVector pos, float distanceToCountDone)
 		|| (m_nPedState == PED_SEEK_POS && m_vecSeekPos.x == pos.x && m_vecSeekPos.y == pos.y) || m_nPedState == PED_FOLLOW_PATH)
 		return;
 
-	if (!CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bCanAimWithArm) {
+	if (!CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->IsFlagSet(WEAPONFLAG_CANAIM_WITHARM)) {
 		ClearPointGunAt();
 	}
 

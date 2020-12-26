@@ -1002,23 +1002,23 @@ public:
 
 	// My names. Inlined in VC
 	AnimationId GetFireAnimNotDucking(CWeaponInfo* weapon) {
-		if (m_nPedType == PEDTYPE_COP && !!weapon->m_bCop3rd)
+		if (m_nPedType == PEDTYPE_COP && weapon->IsFlagSet(WEAPONFLAG_COP3_RD))
 			return ANIM_WEAPON_FIRE_3RD;
 		else
 			return GetPrimaryFireAnim(weapon);
 	}
 
 	static AnimationId Get3rdFireAnim(CWeaponInfo* weapon) {
-		if (!!weapon->m_bCop3rd)
+		if (weapon->IsFlagSet(WEAPONFLAG_COP3_RD))
 			return ANIM_WEAPON_FIRE_3RD;
 		else
 			return (AnimationId)0;
 	}
 
 	static AnimationId GetFireAnimGround(CWeaponInfo* weapon, bool kickFloorIfNone = true) {
-		if (!!weapon->m_bGround2nd)
+		if (weapon->IsFlagSet(WEAPONFLAG_GROUND_2ND))
 			return ANIM_WEAPON_CROUCHFIRE;
-		else if (!!weapon->m_bGround3rd)
+		else if (weapon->IsFlagSet(WEAPONFLAG_GROUND_3RD))
 			return ANIM_WEAPON_FIRE_3RD;
 		else if (kickFloorIfNone)
 			return ANIM_KICK_FLOOR;
@@ -1027,57 +1027,65 @@ public:
 	}
 
 	static AnimationId GetPrimaryFireAnim(CWeaponInfo* weapon) {
-		if (weapon->m_bAnimDetonate)
+		if (weapon->IsFlagSet(WEAPONFLAG_ANIMDETONATE))
 			return ANIM_BOMBER;
 		else
 			return ANIM_WEAPON_FIRE;
 	}
 
 	static AnimationId GetCrouchReloadAnim(CWeaponInfo* weapon) {
-		if (!!weapon->m_bReload)
+		if (weapon->IsFlagSet(WEAPONFLAG_RELOAD))
 			return ANIM_WEAPON_CROUCHRELOAD;
 		else
 			return (AnimationId)0;
 	}
 
 	static AnimationId GetCrouchFireAnim(CWeaponInfo* weapon) {
-		if (!!weapon->m_bCrouchFire)
+		if (weapon->IsFlagSet(WEAPONFLAG_CROUCHFIRE))
 			return ANIM_WEAPON_CROUCHFIRE;
 		else
 			return (AnimationId)0;
 	}
 
 	static AnimationId GetReloadAnim(CWeaponInfo* weapon) {
-		if (!!weapon->m_bReload)
+		if (weapon->IsFlagSet(WEAPONFLAG_RELOAD))
 			return ANIM_WEAPON_RELOAD;
 		else
 			return (AnimationId)0;
 	}
 
 	static AnimationId GetFightIdleWithMeleeAnim(CWeaponInfo* weapon) {
-		if (!!weapon->m_bFightMode)
+		if (weapon->IsFlagSet(WEAPONFLAG_FIGHTMODE))
 			return ANIM_MELEE_IDLE_FIGHTMODE;
 		else
 			return (AnimationId)0;
 	}
 
 	static AnimationId GetFinishingAttackAnim(CWeaponInfo* weapon) {
-		if (!!weapon->m_bFinish3rd)
+		if (weapon->IsFlagSet(WEAPONFLAG_FINISH_3RD))
 			return ANIM_MELEE_ATTACK_FINISH;
 		else
 			return (AnimationId)0;
 	}
 
 	static AnimationId GetSecondFireAnim(CWeaponInfo* weapon) {
-		if (!!weapon->m_bUse2nd)
+		if (weapon->IsFlagSet(WEAPONFLAG_USE_2ND))
 			return ANIM_WEAPON_FIRE_2ND; // or ANIM_MELEE_ATTACK_2ND
 		else
 			return (AnimationId)0;
 	}
 	
 	static AnimationId GetMeleeStartAnim(CWeaponInfo* weapon) {
-		if (!!weapon->m_bPartialAttack)
+		if (weapon->IsFlagSet(WEAPONFLAG_PARTIALATTACK))
 			return ANIM_MELEE_ATTACK_START;
+		else
+			return (AnimationId)0;
+	}
+
+	static AnimationId GetThrowAnim(CWeaponInfo *weapon)
+	{
+		if (weapon->IsFlagSet(WEAPONFLAG_THROW))
+			return ANIM_THROWABLE_START_THROW;
 		else
 			return (AnimationId)0;
 	}
