@@ -821,7 +821,7 @@ CPed::Attack(void)
 		}
 	}
 
-	float animStart = ourWeapon->m_fAnimLoopStart * 0.4f;
+	float animStart = animLoopStart * 0.4f;
 	weaponAnimTime = weaponAnimAssoc->currentTime;
 	if (weaponAnimTime > animStart && weaponAnimTime - weaponAnimAssoc->timeStep <= animStart) {
 		if (!bIsDucking && !(m_nPedType == PEDTYPE_COP && ourWeapon->m_bCop3rd && weaponAnimAssoc->animId == ANIM_WEAPON_FIRE_3RD) && ourWeapon->m_bCanAimWithArm)
@@ -843,7 +843,7 @@ CPed::Attack(void)
 		} else {
 			firePos = ourWeapon->m_vecFireOffset;
 
-			if (ourWeaponType != WEAPONTYPE_KATANA && ourWeaponType != WEAPONTYPE_CHAINSAW) {
+			if(ourWeapon->m_AnimToPlay != ASSOCGRP_BASEBALLBAT && ourWeapon->m_AnimToPlay != ASSOCGRP_GOLFCLUB) {
 				if (ourWeapon->m_eWeaponFire != WEAPON_FIRE_MELEE) {
 					TransformToNode(firePos, (weaponAnimAssoc->animId == ANIM_MELEE_ATTACK_2ND && ourWeapon->m_AnimToPlay == ASSOCGRP_UNARMED) ? PED_FOOTR : PED_HANDR);
 				} else {
