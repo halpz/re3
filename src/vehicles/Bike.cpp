@@ -478,7 +478,7 @@ CBike::ProcessControl(void)
 
 		if(m_vecMoveSpeedAvg.MagnitudeSqr() <= sq(moveSpeedLimit*CTimer::GetTimeStep()) &&
 		   m_vecTurnSpeedAvg.MagnitudeSqr() <= sq(turnSpeedLimit*CTimer::GetTimeStep()) &&
-		   m_fDistanceTravelled < distanceLimit &&
+		   m_fDistanceTravelled < distanceLimit ||
 		   makeStatic){
 			m_nStaticFrames++;
 
@@ -1146,7 +1146,12 @@ CBike::ProcessControl(void)
 		float suspChange = m_aSuspensionSpringRatioPrev[i] - m_aSuspensionSpringRatio[i];
 		if(suspChange > 0.3f && (i == BIKESUSP_F1 || i == BIKESUSP_R1) && speedsq > 0.04f){
 			if(GetStatus() == STATUS_PLAYER || GetStatus() == STATUS_PHYSICS){
+#ifdef FIX_BUGS
+				// only two wheels but 4 suspensions
+				if(m_wheelStatus[i/2] == WHEEL_STATUS_BURST)
+#else
 				if(m_wheelStatus[i] == WHEEL_STATUS_BURST)
+#endif
 					DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_JUMP_2, suspChange);
 				else
 					DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_JUMP, suspChange);
