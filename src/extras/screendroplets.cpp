@@ -8,7 +8,7 @@
 #endif
 
 #include "General.h"
-#include "Main.h"
+#include "main.h"
 #include "RwHelper.h"
 #include "Main.h"
 #include "Timer.h"
