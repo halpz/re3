@@ -76,13 +76,36 @@ ScreenDroplets::Initialise(void)
 	ms_splashObject = nil;
 }
 
+// Create white circle mask for rain drops
+static RwTexture*
+CreateDropMask(int32 size)
+{
+	RwImage *img = RwImageCreate(size, size, 32);
+	RwImageAllocatePixels(img);
+
+	uint8 *pixels = RwImageGetPixels(img);
+	int32 stride = RwImageGetStride(img);
+
+	for(int y = 0; y < size; y++){
+		float yf = ((y + 0.5f)/size - 0.5f)*2.0f;
+		for(int x = 0; x < size; x++){
+			float xf = ((x + 0.5f)/size - 0.5f)*2.0f;
+			memset(&pixels[y*stride + x*4], xf*xf + yf*yf < 1.0f ? 0xFF : 0x00, 4);
+		}
+	}
+
+	int32 width, height, depth, format;
+	RwImageFindRasterFormat(img, rwRASTERTYPETEXTURE, &width, &height, &depth, &format);
+	RwRaster *ras = RwRasterCreate(width, height, depth, format);
+	RwRasterSetFromImage(ras, img);
+	RwImageDestroy(img);
+	return RwTextureCreate(ras);
+}
+
 void
 ScreenDroplets::InitDraw(void)
 {
-	if(CustomPipes::neoTxd == nil)
-		return;
-
-	ms_maskTex = CustomPipes::neoTxd->find("dropmask");
+	ms_maskTex = CreateDropMask(64);
 
 	ms_screenTex = RwTextureCreate(nil);
 	RwTextureSetFilterMode(ms_screenTex, rwFILTERLINEAR);
@@ -138,10 +161,6 @@ ScreenDroplets::Shutdown(void)
 void
 ScreenDroplets::Process(void)
 {
-	// no need to do anything if we can't render
-	if(CustomPipes::neoTxd == nil)
-		return;
-
 	ProcessCameraMovement();
 	SprayDrops();
 	ProcessMoving();
@@ -178,9 +197,6 @@ void
 ScreenDroplets::Render(void)
 {
 	ScreenDrop *drop;
-
-	if(CustomPipes::neoTxd == nil)
-		return;
 
 	DefinedState();
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(ms_maskTex));
