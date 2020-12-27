@@ -2283,7 +2283,7 @@ Esta mano de pintura es gratuita.
 No nos interesa ese modelo.
 
 [GA_20]
-Tenemos de esos más de los que necesitamos. Lo siento, tío, no hay trato.
+De ese modelo tenemos más de los que podemos colocar. Lo siento, tío, no hay trato.
 
 [CR_1]
 La grúa no puede levantar este vehículo.
@@ -2554,10 +2554,10 @@ CTheScripts::DbgFlag
 Cambiar luz blanca grande de depuración
 
 [FED_SPR]
-Mostrar grupos de peatones en carretera
+Mostrar rutas de aceras
 
 [FED_SCR]
-Mostrar grupos de vehículos en carretera
+Mostrar rutas de carreteras
 
 [FED_SCZ]
 Mostrar zonas de máscara selectiva
@@ -3499,7 +3499,7 @@ Pulsa ~h~~k~~TOGGLE_SUBMISSIONS~~w~ para activar o desactivar las misiones de ju
 ~r~¡Tu falta de rapidez ha sido fatal para el paciente!
 
 [A_FAIL3]
-~r~¡El paciente está muerto!
+~r~¡Tu paciente ha muerto!
 
 [A_PASS]
 ¡Paciente a salvo!
@@ -4009,7 +4009,7 @@ Distancia recorrida en coche (metros)
 ''Caos en el aparcamiento'' en segundos
 
 [FEST_LS]
-Gente salvada con una ambulancia
+Personas salvadas con una ambulancia
 
 [FEST_CC]
 Criminales asesinados en misiones de justiciero
@@ -4033,7 +4033,7 @@ Misiones superadas
 ''Corre a por la pasta'':
 
 [FEST_H0]
-Máximo de puntos de control
+Puntos de control alcanzados
 
 [FEST_GC]
 Coches de bandas destruidos:
@@ -5934,7 +5934,7 @@ ALLAN WALKER
 LAZLOW
 
 [CRED227]
-GUIÓN DE LOCUTORES Y ANUNCIOS
+GUIÓN DE LOCUTORES Y CUÑAS
 
 [CRED228]
 DAN HOUSER
@@ -6060,7 +6060,7 @@ STEVE K.
 GREG LAU
 
 [CINCAM]
-Vista cinematográfica
+Cámara cinematográfica
 
 [KM1_13]
 ¡Mete el vehículo en el garaje!
@@ -7333,7 +7333,7 @@ ELEGIR MAPA
 TIPO DE JUEGO
 
 [FET_CTL]
-AJUSTES DEL MANDO
+AJUSTES DE CONTROL
 
 [FET_OPT]
 OPCIONES
@@ -7495,7 +7495,7 @@ Espacios de partida disponibles:
 ¿Guardar la partida actual?
 
 [FES_LCG]
-¿Cargar partida y seguir jugando?
+¿Cargar la partida y seguir jugando?
 
 [FEC_FIR]
 Disparar
@@ -7819,7 +7819,7 @@ ESTELAS
 DISTANCIA DE DIBUJADO
 
 [FEM_VSC]
-SINCRONÍA DE IMAGEN
+SINCRONIZAR IMAGEN
 
 [FEM_FRM]
 LIMITADOR DE FOTOGRAMAS
@@ -8046,7 +8046,7 @@ BORDES EN CINEMÁTICAS
 FORMATO DE IMAGEN
 
 [FEM_ISL]
-USO DE MEMORIA
+USO DE MEMORIA DEL MAPA
 
 [FEM_LOW]
 BAJO
