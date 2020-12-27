@@ -108,7 +108,7 @@ struct tHandlingData
 	float fSteeringLock;
 	float fTractionLoss;
 	float fTractionBias;
-	float fABS; // should be VC leftover
+	float fUnused;
 	float fSuspensionForceLevel;
 	float fSuspensionDampingLevel;
 	float fSuspensionUpperLimit;
