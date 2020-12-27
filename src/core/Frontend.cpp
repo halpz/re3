@@ -5375,6 +5375,10 @@ CMenuManager::SwitchMenuOnAndOff()
 				Initialise();
 				LoadAllTextures();
 			} else {
+#ifdef EXTENDED_COLOURFILTER
+				// we always expect CPostFX to be open
+				CMBlur::BlurOn = true;
+#endif
 				if (CMBlur::BlurOn)
 					CMBlur::MotionBlurOpen(Scene.camera);
 				else
