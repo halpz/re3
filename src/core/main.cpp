@@ -71,7 +71,6 @@
 #include "Ropes.h"
 #include "postfx.h"
 #include "custompipes.h"
-#include "frontendoption.h"
 #include "screendroplets.h"
 
 GlobalScene Scene;
@@ -482,13 +481,6 @@ Initialise3D(void *param)
 		DebugMenuInit();
 		DebugMenuPopulate();
 #endif // !DEBUGMENU
-#ifdef CUSTOM_FRONTEND_OPTIONS
-		// Apparently this func. can be run multiple times at the start.
-		if (numCustomFrontendOptions == 0 && numCustomFrontendScreens == 0) {
-			// needs stored language and TheText to be loaded, and last TheText reload is at the start of here
-			CustomFrontendOptionsPopulate();
-		}
-#endif
 		bool ret = CGame::InitialiseRenderWare();
 #ifdef EXTENDED_PIPELINES
 		CustomPipes::CustomPipeInit();	// need Scene.world for this

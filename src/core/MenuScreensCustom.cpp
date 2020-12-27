@@ -67,16 +67,6 @@
 	#define POSTFX_SELECTORS
 #endif	
 
-#ifdef EXTENDED_PIPELINES
-	#define PIPELINES_SELECTOR \
-		MENUACTION_CFO_SELECT, "FED_VPL", { new CCFOSelect((int8*)&CustomPipes::VehiclePipeSwitch, "VehiclePipeline", vehPipelineNames, ARRAY_SIZE(vehPipelineNames), false, nil) }, 0, 0, MENUALIGN_LEFT, \
-		MENUACTION_CFO_SELECT, "FED_PRM", { new CCFOSelect((int8*)&CustomPipes::RimlightEnable, "NeoRimLight", off_on, 2, false, nil) }, 0, 0, MENUALIGN_LEFT, \
-		MENUACTION_CFO_SELECT, "FED_WLM", { new CCFOSelect((int8*)&CustomPipes::LightmapEnable, "NeoLightMaps", off_on, 2, false, nil) }, 0, 0, MENUALIGN_LEFT, \
-		MENUACTION_CFO_SELECT, "FED_RGL", { new CCFOSelect((int8*)&CustomPipes::GlossEnable, "NeoRoadGloss", off_on, 2, false, nil) }, 0, 0, MENUALIGN_LEFT,
-#else
-	#define PIPELINES_SELECTOR
-#endif
-
 #ifdef INVERT_LOOK_FOR_PAD
 	#define INVERT_PAD_SELECTOR MENUACTION_CFO_SELECT, "FEC_ILU", { new CCFOSelect((int8*)&CPad::bInvertLook4Pad, nil, off_on, 2, false, nil) }, 150, 0, MENUALIGN_LEFT,
 #else
@@ -84,7 +74,6 @@
 #endif
 
 const char *filterNames[] = { "FEM_NON", "FEM_SIM", "FEM_NRM", "FEM_MOB" };
-const char *vehPipelineNames[] = { "FED_MFX", "FED_NEO" };
 const char *off_on[] = { "FEM_OFF", "FEM_ON" };
 
 void RestoreDefGraphics(int8 action) {
@@ -385,7 +374,7 @@ CMenuScreenCustom aScreens[] = {
 		CUTSCENE_BORDERS_TOGGLE
 		FREE_CAM_TOGGLE
 		POSTFX_SELECTORS
-		PIPELINES_SELECTOR
+		// re3.cpp inserts here pipeline selectors if neo/neo.txd exists and EXTENDED_PIPELINES defined
 		MENUACTION_RESTOREDEF,	"FET_DEF", {nil, SAVESLOT_NONE, MENUPAGE_DISPLAY_SETTINGS}, 320, 0, MENUALIGN_CENTER,
 		MENUACTION_GOBACK,		"FEDS_TB", {nil, SAVESLOT_NONE, MENUPAGE_NONE}, 320, 0, MENUALIGN_CENTER,
 	},
@@ -696,14 +685,14 @@ CMenuScreenCustom aScreens[] = {
 #endif
 		MENUACTION_FRAMELIMIT,	"FEM_FRM", { nil, SAVESLOT_NONE, MENUPAGE_GRAPHICS_SETTINGS }, 0, 0, MENUALIGN_LEFT,
 		MULTISAMPLING_SELECTOR
+		ISLAND_LOADING_SELECTOR
+		DUALPASS_SELECTOR
 #ifdef EXTENDED_COLOURFILTER
 		POSTFX_SELECTORS
 #elif defined LEGACY_MENU_OPTIONS
 		MENUACTION_TRAILS,		"FED_TRA", { nil, SAVESLOT_NONE, MENUPAGE_GRAPHICS_SETTINGS }, 0, 0, MENUALIGN_LEFT,
 #endif
-		PIPELINES_SELECTOR
-		ISLAND_LOADING_SELECTOR
-		DUALPASS_SELECTOR
+		// re3.cpp inserts here pipeline selectors if neo/neo.txd exists and EXTENDED_PIPELINES defined
 		MENUACTION_CFO_DYNAMIC,	"FET_DEF", { new CCFODynamic(nil, nil, nil, RestoreDefGraphics) }, 320, 0, MENUALIGN_CENTER,
 		MENUACTION_GOBACK,		"FEDS_TB", {nil, SAVESLOT_NONE, MENUPAGE_NONE}, 320, 0, MENUALIGN_CENTER,
 	},

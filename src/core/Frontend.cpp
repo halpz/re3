@@ -3079,6 +3079,13 @@ CMenuManager::LoadSettings()
 		strcpy(m_PrefsSkinFile, DEFAULT_SKIN_NAME);
 		strcpy(m_aSkinName, DEFAULT_SKIN_NAME);
 	}
+	
+#ifdef CUSTOM_FRONTEND_OPTIONS
+		// Apparently this func. can be run multiple times at the start.
+		if (numCustomFrontendOptions == 0 && numCustomFrontendScreens == 0) {
+			CustomFrontendOptionsPopulate();
+		}
+#endif
 #ifdef LOAD_INI_SETTINGS
 	LoadINISettings(); // needs frontend options to be loaded
 #endif
