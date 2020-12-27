@@ -2964,20 +2964,57 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 				isHeli = true;
 				break;
 			default:
+			{
 				maxDist = SQR(SOUND_INTENSITY);
+#ifdef FIX_BUGS
+				int32 sampleIndex;
+				int32 frequency;
+				CPed *pPed = params.m_pVehicle->pDriver;
+				if(!pPed->HasWeaponSlot(WEAPONSLOT_SUBMACHINEGUN)) {
+					sampleIndex = SFX_UZI_LEFT;
+					frequency = SampleManager.GetSampleBaseFrequency(sampleIndex);
+					frequency += RandomDisplacement(frequency / 32);
+				} else
+					switch(pPed->GetWeapon(WEAPONSLOT_SUBMACHINEGUN).m_eWeaponType) {
+					case WEAPONTYPE_TEC9:
+						sampleIndex = SFX_TEC_LEFT;
+						frequency = RandomDisplacement(500) + 17000;
+						break;
+					case WEAPONTYPE_SILENCED_INGRAM:
+						sampleIndex = SFX_TEC_LEFT;
+						frequency = RandomDisplacement(1000) + 34000;
+						break;
+					case WEAPONTYPE_MP5:
+						sampleIndex = SFX_MP5_LEFT;
+						frequency = SampleManager.GetSampleBaseFrequency(sampleIndex);
+						frequency += RandomDisplacement(frequency / 32);
+						break;
+					default:
+						sampleIndex = SFX_UZI_LEFT;
+						frequency = SampleManager.GetSampleBaseFrequency(sampleIndex);
+						frequency += RandomDisplacement(frequency / 32);
+						break;
+					}
+				m_sQueueSample.m_nSampleIndex = sampleIndex;
+#else
 				m_sQueueSample.m_nSampleIndex = SFX_UZI_LEFT;
+#endif
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				m_sQueueSample.m_nCounter = GunIndex++;
 				emittingVol = m_anRandomTable[2] % 15 + 65;
-				if (GunIndex > 58)
-					GunIndex = 53;
+				if(GunIndex > 58) GunIndex = 53;
+#ifdef FIX_BUGS
+				m_sQueueSample.m_nFrequency = frequency;
+#else
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_UZI_LEFT);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 16);
+#endif
 				m_sQueueSample.m_nReleasingVolumeModificator = 3;
 				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
 				m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 				m_sQueueSample.m_bRequireReflection = true;
 				break;
+			}
 			}
 			break;
 		}
