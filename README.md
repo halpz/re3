@@ -41,15 +41,16 @@ Please read the [Coding Style](https://github.com/GTAmodding/re3/blob/master/COD
 ### Unreversed / incomplete classes (at least the ones we know)
 The following classes have only unused or practically unused code left:
 ```
-CMemoryHeap - only on PS2
 NameGrid.cpp - only on mobile (a player name grid, either a very early player name code ala GTA1 or a multiplayer leftover)
 PedDebug.cpp - only on mobile (debug code)
 HandlingMgr.cpp - debug functions from mobile
+CFormationInfo - unused PedAI class that could be found on mobile
 CVehicle::ProcessBikeWheel - early bike code (only on mobile)
 CAutomobile::DebugCode - debug function from mobile
 CBoat::DebugCode - debug function from mobile
 CBoat::ModifyHandlingValue - debug function from mobile
 CBoat::DisplayHandlingData - debug function from mobile
-TexturePools - only on PC (slight RW modification that we don't actually need)
+CStreaming::PrintRequestList - debug function from mobile
+d3d8raster.c - only on PC (slight RW modification that we don't actually need)
 ```
 
