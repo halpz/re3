@@ -936,12 +936,12 @@ CVisibilityPlugins::FrameCopyConstructor(void *dst, const void *src, int32, int3
 }
 
 void
-CVisibilityPlugins::SetFrameHierarchyId(RwFrame *frame, uintptr id)
+CVisibilityPlugins::SetFrameHierarchyId(RwFrame *frame, intptr id)
 {
 	FRAMEEXT(frame)->id = id;
 }
 
-uintptr
+intptr
 CVisibilityPlugins::GetFrameHierarchyId(RwFrame *frame)
 {
 	return FRAMEEXT(frame)->id;
@@ -978,7 +978,7 @@ void
 CVisibilityPlugins::SetClumpModelInfo(RpClump *clump, CClumpModelInfo *modelInfo)
 {
 	CVehicleModelInfo *vmi;
-	SetFrameHierarchyId(RpClumpGetFrame(clump), (uintptr)modelInfo);
+	SetFrameHierarchyId(RpClumpGetFrame(clump), (intptr)modelInfo);
 
 	// Unused
 	switch (modelInfo->GetModelType()) {

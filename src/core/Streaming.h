@@ -140,7 +140,7 @@ public:
 	static bool RemoveLeastUsedModel(void);
 	static void RemoveAllUnusedModels(void);
 	static void RemoveUnusedModelsInLoadedList(void);
-	static bool RemoveReferencedTxds(size_t mem);
+	static bool RemoveReferencedTxds(size_t mem); // originally signed
 	static int32 GetAvailableVehicleSlot(void);
 	static bool IsTxdUsedByRequestedModels(int32 txdId);
 	static bool AddToLoadedVehiclesList(int32 modelId);
@@ -176,11 +176,11 @@ public:
 	static void DeleteFarAwayRwObjects(const CVector &pos);
 	static void DeleteAllRwObjects(void);
 	static void DeleteRwObjectsAfterDeath(const CVector &pos);
-	static void DeleteRwObjectsBehindCamera(size_t mem);
+	static void DeleteRwObjectsBehindCamera(size_t mem); // originally signed
 	static void DeleteRwObjectsInSectorList(CPtrList &list);
 	static void DeleteRwObjectsInOverlapSectorList(CPtrList &list, int32 x, int32 y);
-	static bool DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, size_t mem);
-	static bool DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, size_t mem);
+	static bool DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, size_t mem); // originally signed
+	static bool DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, size_t mem); // originally signed
 
 	static void LoadScene(const CVector &pos);
 

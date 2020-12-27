@@ -23,7 +23,7 @@ CText::Load(void)
 {
 	uint8 *filedata;
 	char filename[32], type[4];
-	intptr_t offset, length;
+	ssize_t offset, length;
 	size_t sectlen;
 
 	Unload();
@@ -176,7 +176,7 @@ CText::UpperCase(wchar *s)
 
 
 void
-CKeyArray::Load(size_t length, uint8 *data, intptr_t *offset)
+CKeyArray::Load(size_t length, uint8 *data, ssize_t *offset)
 {
 	size_t i;
 	uint8 *rawbytes;
@@ -256,7 +256,7 @@ CKeyArray::Search(const char *key)
 
 
 void
-CData::Load(size_t length, uint8 *data, intptr_t *offset)
+CData::Load(size_t length, uint8 *data, ssize_t *offset)
 {
 	size_t i;
 	uint8 *rawbytes;
