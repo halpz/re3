@@ -33,7 +33,6 @@
 #include "postfx.h"
 #include "custompipes.h"
 #include "MemoryHeap.h"
-#include "custompipes.h"
 #include "FileMgr.h"
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
