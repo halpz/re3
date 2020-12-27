@@ -527,6 +527,10 @@ CMenuManager::CMenuManager()
 	m_fMapCenterY = MENU_Y(225.0f);
 	DMAudio.SetMusicMasterVolume(m_PrefsMusicVolume);
 	DMAudio.SetEffectsMasterVolume(m_PrefsSfxVolume);
+
+#ifdef NO_ISLAND_LOADING
+	m_PrefsIslandLoading = ISLAND_LOADING_LOW;
+#endif
 }
 
 void

@@ -310,7 +310,7 @@ enum Config {
 
 #	ifdef CUSTOM_FRONTEND_OPTIONS
 #		define GRAPHICS_MENU_OPTIONS // otherwise Display settings will be scrollable
-//#		define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
+#		define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
 #		define CUTSCENE_BORDERS_SWITCH
 //#		define MULTISAMPLING		// adds MSAA option
 #		define INVERT_LOOK_FOR_PAD // enable the hidden option

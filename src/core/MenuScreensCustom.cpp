@@ -100,12 +100,10 @@ void RestoreDefGraphics(int8 action) {
 	#ifdef NO_ISLAND_LOADING
 	    	if (!FrontEndMenuManager.m_bGameNotLoaded) {
 	    		FrontEndMenuManager.m_PrefsIslandLoading = FrontEndMenuManager.ISLAND_LOADING_LOW;
-			CCollision::bAlreadyLoaded = false;
-			CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
-			CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
-			CStreaming::RemoveUnusedBuildings(CGame::currLevel);
-			CStreaming::RequestIslands(CGame::currLevel);
-			CStreaming::LoadAllRequestedModels(true);
+				CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
+				CStreaming::RemoveUnusedBuildings(CGame::currLevel);
+				CStreaming::RequestIslands(CGame::currLevel);
+		        CStreaming::LoadAllRequestedModels(true);
 	    	} else
 	    		FrontEndMenuManager.m_PrefsIslandLoading = FrontEndMenuManager.ISLAND_LOADING_LOW;
 	#endif
@@ -151,16 +149,11 @@ void IslandLoadingAfterChange(int8 before, int8 after) {
 		if (after > FrontEndMenuManager.ISLAND_LOADING_LOW) {
 		    FrontEndMenuManager.m_PrefsIslandLoading = before; // calls below needs previous mode :shrug:
 		    
-		    if (after == FrontEndMenuManager.ISLAND_LOADING_HIGH)
-			    CStreaming::RemoveIslandsNotUsed(LEVEL_GENERIC);
+		    if (after == FrontEndMenuManager.ISLAND_LOADING_HIGH) {
+			    CStreaming::RemoveIslandsNotUsed(LEVEL_BEACH);
+			    CStreaming::RemoveIslandsNotUsed(LEVEL_MAINLAND);
+			}
 		    if (before == FrontEndMenuManager.ISLAND_LOADING_LOW) {
-			    if (CGame::currLevel != LEVEL_INDUSTRIAL)
-				    CFileLoader::LoadCollisionFromDatFile(LEVEL_INDUSTRIAL);
-			    if (CGame::currLevel != LEVEL_COMMERCIAL)
-				    CFileLoader::LoadCollisionFromDatFile(LEVEL_COMMERCIAL);
-			    if (CGame::currLevel != LEVEL_SUBURBAN)
-				    CFileLoader::LoadCollisionFromDatFile(LEVEL_SUBURBAN);
-			    CCollision::bAlreadyLoaded = true;
 			    FrontEndMenuManager.m_PrefsIslandLoading = after;
 			    CStreaming::RequestBigBuildings(CGame::currLevel);
 			    
@@ -171,8 +164,6 @@ void IslandLoadingAfterChange(int8 before, int8 after) {
 		    	    FrontEndMenuManager.m_PrefsIslandLoading = after;
 		    	    
 		} else { // low
-		    CCollision::bAlreadyLoaded = false;
-		    CModelInfo::RemoveColModelsFromOtherLevels(CGame::currLevel);
 		    CStreaming::RemoveUnusedBigBuildings(CGame::currLevel);
 		    CStreaming::RemoveUnusedBuildings(CGame::currLevel);
 		    CStreaming::RequestIslands(CGame::currLevel);

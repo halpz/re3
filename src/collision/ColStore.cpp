@@ -173,7 +173,7 @@ CColStore::LoadCollision(const CVector2D &pos)
 
 		if(GetBoundingBox(i).IsPointInside(pos) ||
 		   bLoadAtSecondPosition && GetBoundingBox(i).IsPointInside(secondPosition, -119.0f) ||
-		   CGeneral::faststrcmp(GetColName(i), "yacht") == 0){
+		   strcmp(GetColName(i), "yacht") == 0){
 			wantThisOne = true;
 		}else{
 			for (int j = 0; j < MAX_CLEANUP; j++) {

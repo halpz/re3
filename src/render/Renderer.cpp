@@ -24,6 +24,7 @@
 #include "Occlusion.h"
 #include "Renderer.h"
 #include "custompipes.h"
+#include "Frontend.h"
 
 //--MIAMI: file done
 
@@ -1396,8 +1397,19 @@ CRenderer::ScanWorld(void)
 				poly[2].y = CWorld::GetSectorY(vectors[CORNER_FAR_TOPRIGHT].y);
 				ScanSectorPoly(poly, 3, ScanSectorList);
 			}
-
-			ScanBigBuildingList(CWorld::GetBigBuildingList(CGame::currLevel));
+			
+#ifdef NO_ISLAND_LOADING
+			if (FrontEndMenuManager.m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_HIGH) {
+				ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_BEACH));
+				ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_MAINLAND));
+			} else 
+#endif
+			{
+#ifdef FIX_BUGS
+			if(CCollision::ms_collisionInMemory != LEVEL_GENERIC)
+#endif
+				ScanBigBuildingList(CWorld::GetBigBuildingList(CGame::currLevel));
+			}
 			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_GENERIC));
 		}
 	}

@@ -35,6 +35,7 @@
 #include "MemoryMgr.h"
 #include "MemoryHeap.h"
 #include "Font.h"
+#include "Frontend.h"
 
 //--MIAMI: file done (possibly bugs)
 
@@ -797,7 +798,15 @@ CStreaming::RequestBigBuildings(eLevelName level)
 	n = CPools::GetBuildingPool()->GetSize()-1;
 	for(i = n; i >= 0; i--){
 		b = CPools::GetBuildingPool()->GetSlot(i);
-		if(b && b->bIsBIGBuilding && b->m_level == level)
+		if(b && b->bIsBIGBuilding
+#ifdef NO_ISLAND_LOADING
+		   && (((FrontEndMenuManager.m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_LOW) && (b != pIslandLODmainlandEntity) &&
+		        (b != pIslandLODbeachEntity)) ||
+		       (b->m_level == level))
+#else
+		   && b->m_level == level
+#endif
+			)
 			if(!b->bStreamBIGBuilding)
 				RequestModel(b->GetModelIndex(), BIGBUILDINGFLAGS);
 	}
@@ -814,8 +823,11 @@ CStreaming::RequestBigBuildings(eLevelName level, const CVector &pos)
 	for(i = n; i >= 0; i--){
 		b = CPools::GetBuildingPool()->GetSlot(i);
 		if(b && b->bIsBIGBuilding
-#ifndef NO_ISLAND_LOADING
-		    && b->m_level == level
+#ifdef NO_ISLAND_LOADING
+		    && (((FrontEndMenuManager.m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_LOW) && (b != pIslandLODmainlandEntity) && (b != pIslandLODbeachEntity)
+				) || (b->m_level == level))
+#else
+		   && b->m_level == level
 #endif
 		)
 			if(b->bStreamBIGBuilding){
@@ -885,7 +897,7 @@ CStreaming::InstanceLoadedModels(const CVector &pos)
 void
 CStreaming::RequestIslands(eLevelName level)
 {
-#ifndef NO_ISLAND_LOADING
+	ISLAND_LOADING_ISNT(HIGH)
 	switch(level){
 	case LEVEL_MAINLAND:
 		if(islandLODbeach != -1)
@@ -897,7 +909,6 @@ CStreaming::RequestIslands(eLevelName level)
 		break;
 	default: break;
 	}
-#endif
 }
 
 static char *IGnames[] = {
@@ -1227,12 +1238,13 @@ CStreaming::RemoveBuildingsNotInArea(int32 area)
 void
 CStreaming::RemoveUnusedBigBuildings(eLevelName level)
 {
-#ifndef NO_ISLAND_LOADING
+	ISLAND_LOADING_IS(LOW)
+	{
 	if(level != LEVEL_BEACH)
 		RemoveBigBuildings(LEVEL_BEACH);
 	if(level != LEVEL_MAINLAND)
 		RemoveBigBuildings(LEVEL_MAINLAND);
-#endif
+	}
 	RemoveIslandsNotUsed(level);
 }
 
@@ -1252,7 +1264,6 @@ DeleteIsland(CEntity *island)
 void
 CStreaming::RemoveIslandsNotUsed(eLevelName level)
 {
-#ifndef NO_ISLAND_LOADING
 	int i;
 	if(pIslandLODmainlandEntity == nil)
 	for(i = CPools::GetBuildingPool()->GetSize()-1; i >= 0; i--){
@@ -1264,7 +1275,12 @@ CStreaming::RemoveIslandsNotUsed(eLevelName level)
 		if(building->GetModelIndex() == islandLODbeach)
 			pIslandLODbeachEntity = building;
 	}
-
+#ifdef NO_ISLAND_LOADING
+	if(FrontEndMenuManager.m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_HIGH) {
+		DeleteIsland(pIslandLODmainlandEntity);
+		DeleteIsland(pIslandLODbeachEntity);
+	} else
+#endif
 	switch(level){
 	case LEVEL_MAINLAND:
 		DeleteIsland(pIslandLODmainlandEntity);
@@ -1274,7 +1290,6 @@ CStreaming::RemoveIslandsNotUsed(eLevelName level)
 
 		break;
 	}
-#endif // !NO_ISLAND_LOADING
 }
 
 void
@@ -1875,26 +1890,36 @@ CStreaming::LoadBigBuildingsWhenNeeded(void)
 
 	CTimer::Suspend();
 	CGame::currLevel = CTheZones::m_CurrLevel;
-	DMAudio.SetEffectsFadeVol(0);
-	CPad::StopPadsShaking();
-	CCollision::LoadCollisionScreen(CGame::currLevel);
-	DMAudio.Service();
+	ISLAND_LOADING_IS(LOW)
+	{
+		DMAudio.SetEffectsFadeVol(0);
+		CPad::StopPadsShaking();
+		CCollision::LoadCollisionScreen(CGame::currLevel);
+		DMAudio.Service();
 
-	RemoveUnusedBigBuildings(CGame::currLevel);
-	RemoveUnusedBuildings(CGame::currLevel);
-	RemoveUnusedModelsInLoadedList();
-	CGame::TidyUpMemory(true, true);
-
+		RemoveUnusedBigBuildings(CGame::currLevel);
+		RemoveUnusedBuildings(CGame::currLevel);
+		RemoveUnusedModelsInLoadedList();
+		CGame::TidyUpMemory(true, true);
+	}
 	CReplay::EmptyReplayBuffer();
 	if(CGame::currLevel != LEVEL_GENERIC)
 		LoadSplash(GetLevelSplashScreen(CGame::currLevel));
 
-	CStreaming::RequestBigBuildings(CGame::currLevel, TheCamera.GetPosition());
+	ISLAND_LOADING_IS(LOW)
+		CStreaming::RequestBigBuildings(CGame::currLevel, TheCamera.GetPosition());
+	else if(FrontEndMenuManager.m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_MEDIUM) {
+		RemoveIslandsNotUsed(CGame::currLevel);
+		CStreaming::RequestIslands(CGame::currLevel);
+	}
+
 	CStreaming::LoadAllRequestedModels(false);
 
 	CGame::TidyUpMemory(true, true);
 	CTimer::Resume();
-	DMAudio.SetEffectsFadeVol(127);
+
+	ISLAND_LOADING_IS(LOW)
+		DMAudio.SetEffectsFadeVol(127);
 }
 
 

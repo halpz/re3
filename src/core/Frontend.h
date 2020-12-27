@@ -698,10 +698,10 @@ public:
 		ISLAND_LOADING_HIGH
 	};
 
-	static int8 m_PrefsIslandLoading;
+	int8 m_PrefsIslandLoading;
 
-	#define ISLAND_LOADING_IS(p) if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_##p)
-	#define ISLAND_LOADING_ISNT(p) if (CMenuManager::m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_##p)
+	#define ISLAND_LOADING_IS(p) if (FrontEndMenuManager.m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_##p)
+	#define ISLAND_LOADING_ISNT(p) if (FrontEndMenuManager.m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_##p)
 #else
 	#define ISLAND_LOADING_IS(p)
 	#define ISLAND_LOADING_ISNT(p)
