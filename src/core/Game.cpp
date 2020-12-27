@@ -32,6 +32,7 @@
 #include "Fluff.h"
 #include "Font.h"
 #include "Frontend.h"
+#include "frontendoption.h"
 #include "GameLogic.h"
 #include "Garages.h"
 #include "GenericGameStorage.h"
@@ -167,6 +168,11 @@ CGame::InitialiseOnceBeforeRW(void)
 	debug("size of dummy %d\n", sizeof(CDummy));
 #ifdef EXTENDED_COLOURFILTER
 	CPostFX::InitOnce();
+#endif
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	// Not needed here but may be needed in future
+	// if (numCustomFrontendOptions == 0 && numCustomFrontendScreens == 0)
+	CustomFrontendOptionsPopulate();
 #endif
 	return true;
 }
