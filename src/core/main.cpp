@@ -1158,6 +1158,7 @@ MattRenderScene(void)
 	// CMattRenderer::ResetRenderStates
 	/// CRenderer::ClearForFrame();		// before ConstructRenderList
 	// CClock::CalcEnvMapTimeMultiplicator
+	RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
 	CWaterLevel::RenderWater();	// actually CMattRenderer::RenderWater
 	// CClock::ms_EnvMapTimeMultiplicator = 1.0f;
 	// cWorldStream::ClearDynamics
@@ -1179,6 +1180,7 @@ if(gbRenderBoats)
 	CRenderer::RenderBoats();
 if(gbRenderFadingInUnderwaterEntities)
 	CRenderer::RenderFadingInUnderwaterEntities();
+	RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
 if(gbRenderWater)
 	CRenderer::RenderTransparentWater();
 
