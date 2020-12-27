@@ -848,14 +848,18 @@ CPed::ScanForThreats(void)
 		}
 	}
 
-	CPed *deadPed = nil;
+	CPed *deadPed;
 	if (fearFlags & PED_FLAG_DEADPEDS && CharCreatedBy != MISSION_CHAR
-		&& (deadPed = CheckForDeadPeds()) != nil && (deadPed->GetPosition() - ourPos).MagnitudeSqr() < sq(20.0f)) {
+		&& (deadPed = CheckForDeadPeds()) != nil && (deadPed->GetPosition() - ourPos).MagnitudeSqr() < sq(20.0f)
+#ifdef FIX_BUGS
+		&& !deadPed->bIsInWater
+#endif
+		) {
 		m_pEventEntity = deadPed;
 		m_pEventEntity->RegisterReference((CEntity **) &m_pEventEntity);
 		return PED_FLAG_DEADPEDS;
 	} else {
-		uint32 flagsOfSomePed = 0;
+		uint32 flagsOfNearPed = 0;
 
 		CPed *pedToFearFrom = nil;
 		bool weSawOurEnemy = false;
@@ -868,10 +872,11 @@ CPed::ScanForThreats(void)
 						continue;
 				}
 
-				// BUG: Explained at the same occurence of this bug above. Fixed at the bottom of the function.
-				flagsOfSomePed = CPedType::GetFlag(m_nearPeds[i]->m_nPedType);
+				// BUG: Putting this here will result in returning the flags of farthest ped to us, since m_nearPeds is sorted by distance.
+				// 		Fixed at the bottom of the function.
+				flagsOfNearPed = CPedType::GetFlag(m_nearPeds[i]->m_nPedType);
 
-				if (flagsOfSomePed & fearFlags) {
+				if (flagsOfNearPed & fearFlags) {
 					if (m_nearPeds[i]->m_fHealth > 0.0f) {
 						if (OurPedCanSeeThisOne(m_nearPeds[i], !!bIgnoreThreatsBehindObjects)) {
 							if (m_nearPeds[i]->m_nPedState == PED_ATTACK) {
@@ -939,8 +944,8 @@ CPed::ScanForThreats(void)
 			if (driver) {
 
 				// BUG: Same bug as above. Fixed at the bottom of function.
-				flagsOfSomePed = CPedType::GetFlag(driver->m_nPedType);
-				if (CPedType::GetFlag(driver->m_nPedType) & fearFlags) {
+				flagsOfNearPed = CPedType::GetFlag(driver->m_nPedType);
+				if (flagsOfNearPed & fearFlags) {
 
 					if (driver->m_fHealth > 0.0f && OurPedCanSeeThisOne(nearVeh->pDriver)) {
 						// FIX: Taken from VC
@@ -963,12 +968,12 @@ CPed::ScanForThreats(void)
 
 #ifdef FIX_BUGS
 		if (pedToFearFrom)
-			flagsOfSomePed = CPedType::GetFlag(((CPed*)m_threatEntity)->m_nPedType);
+			flagsOfNearPed = CPedType::GetFlag(((CPed*)m_threatEntity)->m_nPedType);
 		else
-			flagsOfSomePed = 0;
+			flagsOfNearPed = 0;
 #endif
 
-		return flagsOfSomePed;
+		return flagsOfNearPed;
 	}
 }
 
