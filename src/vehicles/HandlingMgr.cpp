@@ -2,6 +2,7 @@
 
 #include "main.h"
 #include "FileMgr.h"
+#include "Physical.h"
 #include "HandlingMgr.h"
 
 cHandlingDataMgr mod_HandlingManager;
@@ -189,17 +190,17 @@ cHandlingDataMgr::FindExactWord(const char *word, const char *words, int wordLen
 void
 cHandlingDataMgr::ConvertDataToGameUnits(tHandlingData *handling)
 {
-	// TODO: figure out what exactly is being converted here
+	// acceleration is in ms^-2, but we need mf^-2 where f is one frame time (50fps)
 	float velocity, a, b, specificVolume;
 
-	handling->Transmission.fEngineAcceleration /= 2500.0f;
-	handling->Transmission.fMaxVelocity /= 180.0f;
-	handling->fBrakeDeceleration /= 2500.0f;
+	handling->Transmission.fEngineAcceleration *= 1.0f/(50.0f*50.0f);
+	handling->Transmission.fMaxVelocity *= 1000.0f/(60.0f*60.0f * 50.0f);
+	handling->fBrakeDeceleration *= 1.0f/(50.0f*50.0f);
 	handling->fTurnMass = (sq(handling->Dimension.x) + sq(handling->Dimension.y)) * handling->fMass / 12.0f;
 	if(handling->fTurnMass < 10.0f)
 		handling->fTurnMass *= 5.0f;
 	handling->fInvMass = 1.0f/handling->fMass;
-	handling->fBuoyancy = 100.0f/handling->nPercentSubmerged * 0.008f*handling->fMass;
+	handling->fBuoyancy = 100.0f/handling->nPercentSubmerged * GRAVITY*handling->fMass;
 
 	// What the hell is going on here?
 	specificVolume = handling->Dimension.x*handling->Dimension.z*0.5f / handling->fMass;	// ?
