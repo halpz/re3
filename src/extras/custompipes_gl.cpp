@@ -253,6 +253,7 @@ worldRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 		drawInst(header, inst);
 		inst++;
 	}
+	setTexture(1, nil);
 #ifndef RW_GL_USE_VAOS
 	disableAttribPointers(header->attribDesc, header->numAttribs);
 #endif
