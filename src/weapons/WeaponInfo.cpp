@@ -164,10 +164,9 @@ CWeaponInfo::LoadWeaponData(void)
 		line[linelen] = '\0';
 
 		// skip white space
-		for (lp = 0; line[lp] <= ' '; lp++);
+		for (lp = 0; line[lp] <= ' ' && line[lp] != '\0'; lp++);
 
-		if (lp >= linelen ||		// FIX: game uses == here, but this is safer if we have empty lines
-			line[lp] == '#')
+		if (line[lp] == '\0' || line[lp] == '#')
 			continue;
 
 		spread = 0.0f;
