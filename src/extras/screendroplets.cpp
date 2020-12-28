@@ -12,6 +12,7 @@
 #include "RwHelper.h"
 #include "Timer.h"
 #include "Camera.h"
+#include "World.h"
 #include "ZoneCull.h"
 #include "Weather.h"
 #include "ParticleObject.h"
@@ -416,7 +417,8 @@ ScreenDroplets::ProcessCameraMovement(void)
 
 	uint16 mode = TheCamera.Cams[TheCamera.ActiveCam].Mode;
 	bool isTopDown = mode == CCam::MODE_TOPDOWN || mode == CCam::MODE_GTACLASSIC || mode == CCam::MODE_TOP_DOWN_PED;
-	bool isLookingInDirection = CPad::GetPad(0)->GetLookBehindForCar() || CPad::GetPad(0)->GetLookLeft() || CPad::GetPad(0)->GetLookRight();
+	bool isLookingInDirection = FindPlayerVehicle() && mode == CCam::MODE_1STPERSON &&
+		(CPad::GetPad(0)->GetLookBehindForCar() || CPad::GetPad(0)->GetLookLeft() || CPad::GetPad(0)->GetLookRight());
 	ms_enabled = !isTopDown && !isLookingInDirection;
 	ms_movingEnabled = !isTopDown && !isLookingInDirection;
 
