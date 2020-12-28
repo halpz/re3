@@ -1055,6 +1055,7 @@ CFont::GetCharacterWidth(wchar c)
 	else
 		return Size[LanguageSet][Details.style][192];
 #else
+
 	if (Details.proportional)
 		return Size[Details.style][c];
 	else
@@ -1100,6 +1101,11 @@ CFont::GetCharacterSize(wchar c)
 	else
 		return Size[LanguageSet][Details.style][209] * Details.scaleX;
 #else
+
+#ifdef FIX_BUGS
+	// PS2 don't call FindNewCharacter in here at all, and also uses different chars for some symbols
+	if (!Details.bFontHalfTexture && c == 30) c = 61; // wanted star
+#endif
 	if (Details.bFontHalfTexture)
 		c = FindNewCharacter(c);
 	if (Details.proportional)
@@ -1523,6 +1529,10 @@ CFont::RenderFontBuffer()
 			PrintChar(textPosX + 2.0f, textPosY, c);
 			textPosX += 2.0f;
 		}
+#ifdef FIX_BUGS
+		// PS2 uses different chars for some symbols
+		if (!RenderState.bFontHalfTexture && c == 30) c = 61; // wanted star
+#endif
 		textPosX += RenderState.scaleX * (RenderState.proportional ? Size[RenderState.style][c] : Size[RenderState.style][209]);
 		if (c == '\0')
 			textPosX += RenderState.fExtraSpace;
