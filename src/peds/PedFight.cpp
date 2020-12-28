@@ -972,20 +972,12 @@ CPed::Attack(void)
 	// Anim loop end, either start the loop again or finish the attack
 	if (weaponAnimTime > animLoopEnd || !weaponAnimAssoc->IsRunning() && ourWeaponFire != WEAPON_FIRE_PROJECTILE) {
 		if (GetWeapon()->m_eWeaponState == WEAPONSTATE_RELOADING) {
-			if (ourWeapon->IsFlagSet(WEAPONFLAG_RELOAD) && !reloadAnimAssoc) {
+			if (GetReloadAnim(ourWeapon) && !reloadAnimAssoc) {
 				if (!CWorld::Players[CWorld::PlayerInFocus].m_bFastReload) {
-					CAnimBlendAssociation *newReloadAssoc;
-					if (bIsDucking) {
-						newReloadAssoc = CAnimManager::BlendAnimation(
-							GetClump(), ourWeapon->m_AnimToPlay,
-							GetCrouchReloadAnim(ourWeapon),
-							8.0f);
-					} else {
-						newReloadAssoc = CAnimManager::BlendAnimation(
-							GetClump(), ourWeapon->m_AnimToPlay,
-							GetReloadAnim(ourWeapon),
-							8.0f);
-					}
+					CAnimBlendAssociation *newReloadAssoc = CAnimManager::BlendAnimation(
+						GetClump(), ourWeapon->m_AnimToPlay,
+						bIsDucking && GetCrouchReloadAnim(ourWeapon) ? GetCrouchReloadAnim(ourWeapon) : GetReloadAnim(ourWeapon),
+						8.0f);
 					newReloadAssoc->SetFinishCallback(FinishedReloadCB, this);
 				}
 				ClearLookFlag();
@@ -1029,23 +1021,23 @@ CPed::Attack(void)
 				weaponAnimAssoc->SetCurrentTime(animLoopStart);
 				weaponAnimAssoc->SetRun();
 			}
-		}
-	} else if (IsPlayer() && m_pPointGunAt && bIsAimingGun && GetWeapon()->m_eWeaponState != WEAPONSTATE_RELOADING) {
-		weaponAnimAssoc->SetCurrentTime(animLoopEnd);
-		weaponAnimAssoc->flags &= ~ASSOC_RUNNING;
-		SetPointGunAt(m_pPointGunAt);
-	} else {
-		ClearAimFlag();
-
-		// Echoes of bullets, at the end of the attack. (Bug: doesn't play while reloading)
-		if (weaponAnimAssoc->currentTime - weaponAnimAssoc->timeStep < animLoopEnd) 
-			DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, ourWeaponType);
-
-		// Fun fact: removing this part leds to reloading flamethrower
-		if (ourWeaponType == WEAPONTYPE_FLAMETHROWER && weaponAnimAssoc->IsRunning()) {
-			weaponAnimAssoc->flags |= ASSOC_DELETEFADEDOUT;
+		} else if (IsPlayer() && m_pPointGunAt && bIsAimingGun && GetWeapon()->m_eWeaponState != WEAPONSTATE_RELOADING) {
+			weaponAnimAssoc->SetCurrentTime(animLoopEnd);
 			weaponAnimAssoc->flags &= ~ASSOC_RUNNING;
-			weaponAnimAssoc->blendDelta = -4.0f;
+			SetPointGunAt(m_pPointGunAt);
+		} else {
+			ClearAimFlag();
+
+			// Echoes of bullets, at the end of the attack. (Bug: doesn't play while reloading)
+			if (weaponAnimAssoc->currentTime - weaponAnimAssoc->timeStep < animLoopEnd) 
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, ourWeaponType);
+
+			// Fun fact: removing this part leds to reloading flamethrower
+			if (ourWeaponType == WEAPONTYPE_FLAMETHROWER && weaponAnimAssoc->IsRunning()) {
+				weaponAnimAssoc->flags |= ASSOC_DELETEFADEDOUT;
+				weaponAnimAssoc->flags &= ~ASSOC_RUNNING;
+				weaponAnimAssoc->blendDelta = -4.0f;
+			}
 		}
 	}
 
