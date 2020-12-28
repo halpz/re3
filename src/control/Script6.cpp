@@ -3,6 +3,7 @@
 #include "Script.h"
 #include "ScriptCommands.h"
 
+#include "Bike.h"
 #include "CarCtrl.h"
 #include "Cranes.h"
 #include "Credits.h"
@@ -415,8 +416,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 			((CAutomobile*)pVehicle)->m_fTraction = fTraction;
 		else
 			// this is certainly not a boat, trane, heli or plane field
-			//((CBike*)pVehicle)->m_fTraction = fTraction;
-			*(float*)(((char*)pVehicle) + 1088) = fTraction;
+			((CBike*)pVehicle)->m_fTraction = fTraction;
 		return 0;
 	}
 	case COMMAND_ARE_MEASUREMENTS_IN_METRES:

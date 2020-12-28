@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Vehicle.h"
+
 // some miami bike leftovers
 
 enum eBikeNodes {
@@ -22,4 +24,22 @@ public:
 	AnimationId m_bikeSitAnimation;
 	uint8 unk2[180];
 	float m_aSuspensionSpringRatio[4];
+
+	/* copied from VC, one of the floats here is gone, assuming m_bike_unused1 */
+	float m_aSuspensionSpringRatioPrev[4];
+	float m_aWheelTimer[4];
+	//float m_bike_unused1;
+	int m_aWheelSkidmarkType[2];
+	bool m_aWheelSkidmarkBloody[2];
+	bool m_aWheelSkidmarkUnk[2];
+	float m_aWheelRotation[2];
+	float m_aWheelSpeed[2];
+	float m_aWheelPosition[2];
+	float m_aWheelBasePosition[2];
+	float m_aSuspensionSpringLength[4];
+	float m_aSuspensionLineLength[4];
+	float m_fHeightAboveRoad;
+	/**/
+
+	float m_fTraction;
 };
