@@ -13,3 +13,13 @@ enum eBikeNodes {
 	BIKE_HANDLEBARS,
 	BIKE_NUM_NODES
 };
+
+class CBike : public CVehicle
+{
+public:
+	RwFrame *m_aBikeNodes[BIKE_NUM_NODES]; // assuming
+	uint8 unk1[96];
+	AnimationId m_bikeSitAnimation;
+	uint8 unk2[180];
+	float m_aSuspensionSpringRatio[4];
+};

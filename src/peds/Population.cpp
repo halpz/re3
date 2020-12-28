@@ -22,6 +22,7 @@
 #include "DummyObject.h"
 #include "Script.h"
 #include "Shadows.h"
+#include "Bike.h"
 
 #define MIN_CREATION_DIST		40.0f // not for start of the game (look at the GeneratePedsAtStartOfGame)
 #define CREATION_RANGE			10.0f // added over the MIN_CREATION_DIST.
@@ -833,11 +834,11 @@ CPopulation::AddPedInCar(CVehicle* car)
 		newPed->SetCurrentWeapon(WEAPONTYPE_COLT45);
 		newPed->RemoveWeaponModel(CWeaponInfo::GetWeaponInfo(newPed->GetWeapon()->m_eWeaponType)->m_nModelId);
 	}
-	/*
+	
 	// Miami leftover
 	if (car->m_vehType == VEHICLE_TYPE_BIKE) {
-		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, *((CBike*)car + 308h), 100.0f);
-	} else */
+		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, ((CBike*)car)->m_bikeSitAnimation, 100.0f);
+	} else 
 
 	// FIX: Make peds comfortable while driving car/boat
 #ifdef FIX_BUGS
