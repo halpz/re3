@@ -73,7 +73,11 @@ CdStreamInitThread(void)
 	gChannelRequestQ.size = gNumChannels + 1;
 	ASSERT(gChannelRequestQ.items != nil );
 	
+#ifdef FIX_BUGS
+	gCdStreamSema = CreateSemaphore(nil, 0, 5, nil);
+#else
 	gCdStreamSema = CreateSemaphore(nil, 0, 5, "CdStream");
+#endif
 	
 	if ( gCdStreamSema == nil )
 	{
