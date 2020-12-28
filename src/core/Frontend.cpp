@@ -4595,8 +4595,8 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 			{
 				int saveSlot = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_SaveSlot;
 
-				if (saveSlot >= 2 && saveSlot <= 9) {
-					m_nCurrSaveSlot = saveSlot - 2;
+				if (saveSlot >= SAVESLOT_1 && saveSlot <= SAVESLOT_8) {
+					m_nCurrSaveSlot = saveSlot - SAVESLOT_1;
 					if (Slots[m_nCurrSaveSlot] != SLOT_EMPTY && Slots[m_nCurrSaveSlot] != SLOT_CORRUPTED) {
 						if (m_nCurrScreen == MENUPAGE_CHOOSE_LOAD_SLOT) {
 							SwitchToNewScreen(MENUPAGE_LOAD_SLOT_CONFIRM);
@@ -4829,7 +4829,7 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 		if (!goBack) {
 			int saveSlot = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_SaveSlot;
 
-			if (saveSlot >= 2 && saveSlot <= 9 && Slots[m_nCurrOption] != SLOT_OK)
+			if (saveSlot >= SAVESLOT_1 && saveSlot <= SAVESLOT_8 && Slots[m_nCurrOption] != SLOT_OK)
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_FAIL, 0);
 			else
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_ENTER_OR_ADJUST, 0);
