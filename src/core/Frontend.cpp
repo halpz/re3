@@ -142,7 +142,7 @@ int8 CMenuManager::m_nDisplayMSAALevel = 0;
 #endif
 
 #ifdef ASPECT_RATIO_SCALE
-int32 CMenuManager::m_PrefsSpriteScalingMode = 0;
+int32 CMenuManager::m_PrefsSpriteScalingMode = SCL_AUTO;
 #endif
 
 #ifdef NO_ISLAND_LOADING
@@ -1463,27 +1463,34 @@ CMenuManager::Draw()
 #else
 				switch (m_PrefsUseWideScreen) {
 				case AR_AUTO:
-					sprintf(asciiTemp, "AUTO");
+					rightText = TheText.Get("FEM_AUT");
 					break;
 				case AR_4_3:
 					sprintf(asciiTemp, "4:3");
+					AsciiToUnicode(asciiTemp, unicodeTemp);
+					rightText = unicodeTemp;
 					break;
 				case AR_5_4:
 					sprintf(asciiTemp, "5:4");
+					AsciiToUnicode(asciiTemp, unicodeTemp);
+					rightText = unicodeTemp;
 					break;
 				case AR_16_10:
 					sprintf(asciiTemp, "16:10");
+					AsciiToUnicode(asciiTemp, unicodeTemp);
+					rightText = unicodeTemp;
 					break;
 				case AR_16_9:
 					sprintf(asciiTemp, "16:9");
+					AsciiToUnicode(asciiTemp, unicodeTemp);
+					rightText = unicodeTemp;
 					break;
 				case AR_21_9:
 					sprintf(asciiTemp, "21:9");
+					AsciiToUnicode(asciiTemp, unicodeTemp);
+					rightText = unicodeTemp;
 					break;
 				}
-
-				AsciiToUnicode(asciiTemp, unicodeTemp);
-				rightText = unicodeTemp;
 #endif
 				break;
 			case MENUACTION_RADIO:
