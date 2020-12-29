@@ -1600,14 +1600,24 @@ CWorld::ExtinguishAllCarFiresInArea(CVector point, float range)
 	}
 }
 
+inline void 
+AddSteamsFromGround(CPtrList& list) 
+{
+	CPtrNode *pNode = list.first;
+	while (pNode) {
+		((CEntity*)pNode->item)->AddSteamsFromGround(nil);
+		pNode = pNode->next;
+	}
+}
+
 void
 CWorld::AddParticles(void)
 {
 	for(int32 y = 0; y < NUMSECTORS_Y; y++) {
 		for(int32 x = 0; x < NUMSECTORS_X; x++) {
 			CSector *pSector = GetSector(x, y);
-			CEntity::AddSteamsFromGround(pSector->m_lists[ENTITYLIST_BUILDINGS]);
-			CEntity::AddSteamsFromGround(pSector->m_lists[ENTITYLIST_DUMMIES]);
+			AddSteamsFromGround(pSector->m_lists[ENTITYLIST_BUILDINGS]);
+			AddSteamsFromGround(pSector->m_lists[ENTITYLIST_DUMMIES]);
 		}
 	}
 }
