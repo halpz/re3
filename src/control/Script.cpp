@@ -58,7 +58,7 @@ int32 CTheScripts::StoreVehicleIndex;
 bool CTheScripts::StoreVehicleWasRandom;
 CRunningScript *CTheScripts::pIdleScripts;
 CRunningScript *CTheScripts::pActiveScripts;
-uint32 CTheScripts::NextFreeCollectiveIndex;
+int32 CTheScripts::NextFreeCollectiveIndex;
 int32 CTheScripts::LastRandomPedId;
 uint16 CTheScripts::NumberOfUsedObjects;
 bool CTheScripts::bAlreadyRunningAMissionScript;
@@ -1810,8 +1810,8 @@ void CTheScripts::Init()
 		OnAMissionForContactFlag[i] = 0;
 	}
 	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++){
-		CollectiveArray[i].index = -1;
-		CollectiveArray[i].unk_data = 0;
+		CollectiveArray[i].colIndex = -1;
+		CollectiveArray[i].pedIndex = 0;
 	}
 	NextFreeCollectiveIndex = 0;
 	LastRandomPedId = -1;

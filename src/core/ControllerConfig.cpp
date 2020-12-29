@@ -132,6 +132,10 @@ void CControllerConfigManager::LoadSettings(int32 file)
 {
 	bool bValid = true;
 
+#ifdef BIND_VEHICLE_FIREWEAPON
+	bool skipVehicleFireWeapon = false;
+#endif
+
 	if (file)
 	{
 		char buff[29];
@@ -139,18 +143,55 @@ void CControllerConfigManager::LoadSettings(int32 file)
 
 		if (!strncmp(buff, TopLineEmptyFile, sizeof(TopLineEmptyFile)-1))
 			bValid = false;
-		else
+		else {
 			CFileMgr::Seek(file, 0, 0);
+			
+#ifdef BIND_VEHICLE_FIREWEAPON
+			// HACK!
+			// All of this is hacky as fuck.
+			// We are checking the file size to read the .set file correctly.
+			// But because .set file is opened in text mode we have to read
+			// the WHOLE file to get the size we should be working with.
+			// Joy, ain't it?
+			char tempBuf[0x1000];
+			size_t fileSize = 0, blockSize;
+			do
+			{
+				blockSize = CFileMgr::Read(file, tempBuf, sizeof(tempBuf));
+				fileSize += blockSize;
+			} while (blockSize == sizeof(tempBuf));
+
+			CFileMgr::Seek(file, 0, 0);
+
+			if (fileSize == 0x671)
+				skipVehicleFireWeapon = true;
+#endif
+		}
 	}
 
 	if (bValid)
 	{
 		ControlsManager.MakeControllerActionsBlank();
 
+#ifdef BIND_VEHICLE_FIREWEAPON
+		// Set the default settings of VEHICLE_FIREWEAPON
+		if (skipVehicleFireWeapon) {
+			SetControllerKeyAssociatedWithAction(VEHICLE_FIREWEAPON, rsPADINS, KEYBOARD);
+			SetControllerKeyAssociatedWithAction(VEHICLE_FIREWEAPON, rsLCTRL, OPTIONAL_EXTRA);
+			if (m_bMouseAssociated)
+				SetMouseButtonAssociatedWithAction(VEHICLE_FIREWEAPON, 1);
+		}
+#endif
+
 		for (int32 i = 0; i < MAX_CONTROLLERTYPES; i++)
 		{
 			for (int32 j = 0; j < MAX_CONTROLLERACTIONS; j++)
 			{
+#ifdef BIND_VEHICLE_FIREWEAPON
+				// Skip file read
+				if (skipVehicleFireWeapon && j == VEHICLE_FIREWEAPON)
+					continue;
+#endif
 				CFileMgr::Read(file, (char *)&ControlsManager.m_aSettings[j][i], sizeof(tControllerConfigBind));
 			}
 		}
@@ -1717,6 +1758,52 @@ void CControllerConfigManager::DeleteMatching1rstPersonControls(e_ControllerActi
 }
 
 #undef CLEAR_ACTION_IF_NEEDED
+
+#ifdef RADIO_SCROLL_TO_PREV_STATION
+#define CHECK_ACTION(action) \
+if (key == GetControllerKeyAssociatedWithAction(action, type))\
+	return true;
+
+bool CControllerConfigManager::IsAnyVehicleActionAssignedToMouseKey(int32 key)
+{
+	const eControllerType type = MOUSE;
+	if (!GetIsKeyBlank(key, type))
+	{
+#ifdef BIND_VEHICLE_FIREWEAPON
+		CHECK_ACTION(VEHICLE_FIREWEAPON);
+#endif
+		CHECK_ACTION(VEHICLE_LOOKBEHIND);
+		CHECK_ACTION(VEHICLE_LOOKLEFT);
+		CHECK_ACTION(VEHICLE_LOOKRIGHT);
+		CHECK_ACTION(VEHICLE_LOOKBEHIND); // note: duplicate
+		CHECK_ACTION(VEHICLE_HORN);
+		CHECK_ACTION(VEHICLE_HANDBRAKE);
+		CHECK_ACTION(VEHICLE_ACCELERATE);
+		CHECK_ACTION(VEHICLE_BRAKE);
+		CHECK_ACTION(VEHICLE_CHANGE_RADIO_STATION);
+		CHECK_ACTION(TOGGLE_SUBMISSIONS);
+		CHECK_ACTION(VEHICLE_TURRETLEFT);
+		CHECK_ACTION(VEHICLE_TURRETRIGHT);
+		CHECK_ACTION(VEHICLE_TURRETUP);
+		CHECK_ACTION(VEHICLE_TURRETDOWN);
+		CHECK_ACTION(VEHICLE_ENTER_EXIT);
+		CHECK_ACTION(CAMERA_CHANGE_VIEW_ALL_SITUATIONS);
+#ifndef BIND_VEHICLE_FIREWEAPON
+		CHECK_ACTION(PED_FIREWEAPON);
+#endif
+		CHECK_ACTION(GO_LEFT);
+		CHECK_ACTION(GO_RIGHT);
+		CHECK_ACTION(NETWORK_TALK);
+		CHECK_ACTION(SWITCH_DEBUG_CAM_ON);
+		CHECK_ACTION(TOGGLE_DPAD);
+		CHECK_ACTION(TAKE_SCREEN_SHOT);
+		CHECK_ACTION(SHOW_MOUSE_POINTER_TOGGLE);
+	}
+	return false;
+}
+
+#undef CHECK_ACTION
+#endif
 
 void CControllerConfigManager::DeleteMatchingActionInitiators(e_ControllerAction action, int32 key, eControllerType type)
 {

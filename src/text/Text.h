@@ -26,7 +26,7 @@ public:
 
 	CKeyArray(void) : entries(nil), numEntries(0) {}
 	~CKeyArray(void) { Unload(); }
-	void Load(size_t length, uint8 *data, intptr_t *offset);
+	void Load(size_t length, uint8 *data, ssize_t *offset);
 	void Unload(void);
 	void Update(wchar *chars);
 	CKeyEntry *BinarySearch(const char *key, CKeyEntry *entries, int16 low, int16 high);
@@ -45,7 +45,7 @@ public:
 
 	CData(void) : chars(nil), numChars(0) {}
 	~CData(void) { Unload(); }
-	void Load(size_t length, uint8 *data, intptr_t *offset);
+	void Load(size_t length, uint8 *data, ssize_t *offset);
 	void Unload(void);
 };
 

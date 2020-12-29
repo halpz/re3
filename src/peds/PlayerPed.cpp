@@ -192,7 +192,7 @@ CPlayerPed::MakeChangesForNewWeapon(int8 weapon)
 
 	GetWeapon()->m_nAmmoInClip = Min(GetWeapon()->m_nAmmoTotal, CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_nAmountofAmmunition);
 
-	if (!(CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bCanAim))
+	if (!CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->IsFlagSet(WEAPONFLAG_CANAIM))
 		ClearWeaponTarget();
 
 	CAnimBlendAssociation *weaponAnim = RpAnimBlendClumpGetAssociation(GetClump(), CWeaponInfo::GetWeaponInfo(WEAPONTYPE_SNIPERRIFLE)->m_AnimToPlay);
@@ -299,7 +299,7 @@ CPlayerPed::SetRealMoveAnim(void)
 			
 			RestoreHeadingRate();
 			if (!curIdleAssoc) {
-				if (m_fCurrentStamina < 0.0f && !CWorld::TestSphereAgainstWorld(GetPosition(), 0.0f,
+				if (m_fCurrentStamina < 0.0f && !CWorld::TestSphereAgainstWorld(GetPosition(), 0.5f,
 						nil, true, false, false, false, false, false)) {
 					curIdleAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_TIRED, 8.0f);
 
@@ -313,7 +313,7 @@ CPlayerPed::SetRealMoveAnim(void)
 
 		} else if (m_fMoveSpeed == 0.0f && !curSprintAssoc) {
 			if (!curIdleAssoc) {
-				if (m_fCurrentStamina < 0.0f && !CWorld::TestSphereAgainstWorld(GetPosition(), 0.0f,
+				if (m_fCurrentStamina < 0.0f && !CWorld::TestSphereAgainstWorld(GetPosition(), 0.5f,
 						nil, true, false, false, false, false, false)) {
 					curIdleAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_TIRED, 4.0f);
 					
@@ -329,7 +329,7 @@ CPlayerPed::SetRealMoveAnim(void)
 
 			} else if (m_nPedState != PED_FIGHT) {
 				if (m_fCurrentStamina < 0.0f && curIdleAssoc->animId != ANIM_IDLE_TIRED
-					&& !CWorld::TestSphereAgainstWorld(GetPosition(), 0.0f, nil, true, false, false, false, false, false)) {
+					&& !CWorld::TestSphereAgainstWorld(GetPosition(), 0.5f, nil, true, false, false, false, false, false)) {
 					CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_TIRED, 4.0f);
 
 				} else if (curIdleAssoc->animId != ANIM_IDLE_STANCE) {
@@ -685,7 +685,7 @@ CPlayerPed::PlayerControlFighter(CPad *padUsed)
 			bIsAttacking = false;
 	}
 
-	if (!CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bHeavy && padUsed->JumpJustDown()) {
+	if (!CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->IsFlagSet(WEAPONFLAG_HEAVY) && padUsed->JumpJustDown()) {
 		if (m_nEvadeAmount != 0 && m_pEvadingFrom) {
 			SetEvasiveDive((CPhysical*)m_pEvadingFrom, 1);
 			m_nEvadeAmount = 0;
@@ -723,13 +723,13 @@ CPlayerPed::PlayerControl1stPersonRunAround(CPad *padUsed)
 			m_fMoveSpeed = 0.0f;
 		}
 	}
-	if (!(CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bHeavy) && padUsed->GetSprint()) {
+	if (!CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->IsFlagSet(WEAPONFLAG_HEAVY) && padUsed->GetSprint()) {
 		m_nMoveState = PEDMOVE_SPRINT;
 	}
 	if (m_nPedState != PED_FIGHT)
 		SetRealMoveAnim();
 
-	if (!bIsInTheAir && !(CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bHeavy)
+	if (!bIsInTheAir && !(CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->IsFlagSet(WEAPONFLAG_HEAVY))
 		&& padUsed->JumpJustDown() && m_nPedState != PED_JUMP) {
 		ClearAttack();
 		ClearWeaponTarget();
@@ -1061,12 +1061,12 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 		m_nSelectedWepSlot == m_currentWeapon && m_nMoveState != PEDMOVE_SPRINT) {
 
 		// Weapons except throwable and melee ones
-		if (weaponInfo->m_bCanAim || weaponInfo->m_b1stPerson || weaponInfo->m_bExpands) {
-			if ((padUsed->GetTarget() && weaponInfo->m_bCanAimWithArm) || padUsed->GetWeapon()) {
+		if (weaponInfo->IsFlagSet(WEAPONFLAG_CANAIM) || weaponInfo->IsFlagSet(WEAPONFLAG_1ST_PERSON) || weaponInfo->IsFlagSet(WEAPONFLAG_EXPANDS)) {
+			if ((padUsed->GetTarget() && weaponInfo->IsFlagSet(WEAPONFLAG_CANAIM_WITHARM)) || padUsed->GetWeapon()) {
 				float limitedCam = CGeneral::LimitRadianAngle(-TheCamera.Orientation);
 
 				// On this one we can rotate arm.
-				if (weaponInfo->m_bCanAimWithArm) {
+				if (weaponInfo->IsFlagSet(WEAPONFLAG_CANAIM_WITHARM)) {
 					if (!padUsed->GetWeapon()) { // making this State != ATTACK still stops it after attack. Re-start it immediately!
 						SetPointGunAt(nil);
 						bIsPointingGunAt = false; // to not stop after attack
@@ -1083,7 +1083,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 					m_headingRate = 50.0f;
 
 					// Anim. fix for shotgun, ak47 and m16 (we must finish rot. it quickly)
-					if (weaponInfo->m_bCanAim && padUsed->WeaponJustDown()) {
+					if (weaponInfo->IsFlagSet(WEAPONFLAG_CANAIM) && padUsed->WeaponJustDown()) {
 						m_fRotationCur = CGeneral::LimitRadianAngle(m_fRotationCur);
 						float limitedRotDest = m_fRotationDest;
 
@@ -1096,7 +1096,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 						m_fRotationCur += (limitedRotDest - m_fRotationCur) / 2;
 					}
 				}
-			} else if (weaponInfo->m_bCanAimWithArm && m_nPedState != PED_ATTACK)
+			} else if (weaponInfo->IsFlagSet(WEAPONFLAG_CANAIM_WITHARM) && m_nPedState != PED_ATTACK)
 				ClearPointGunAt();
 		}
 	}
@@ -1133,7 +1133,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 			TheCamera.UpdateAimingCoors(m_pPointGunAt->GetPosition());
 		}
 #ifdef FREE_CAM
-		else if ((CCamera::bFreeCam && weaponInfo->m_eWeaponFire == WEAPON_FIRE_MELEE) || (weaponInfo->m_bCanAim && !CCamera::m_bUseMouse3rdPerson)) {
+		else if ((CCamera::bFreeCam && weaponInfo->m_eWeaponFire == WEAPON_FIRE_MELEE) || (weaponInfo->IsFlagSet(WEAPONFLAG_CANAIM) && !CCamera::m_bUseMouse3rdPerson)) {
 #else
 		else if (weaponInfo->m_bCanAim && !CCamera::m_bUseMouse3rdPerson) {
 #endif
@@ -1215,13 +1215,13 @@ CPlayerPed::PlayerControlZelda(CPad *padUsed)
 		}
 	}
 
-	if (!(CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bHeavy) && padUsed->GetSprint()) {
+	if (!CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->IsFlagSet(WEAPONFLAG_HEAVY) && padUsed->GetSprint()) {
 		m_nMoveState = PEDMOVE_SPRINT;
 	}
 	if (m_nPedState != PED_FIGHT)
 		SetRealMoveAnim();
 
-	if (!bIsInTheAir && !(CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bHeavy)
+	if (!bIsInTheAir && !(CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->IsFlagSet(WEAPONFLAG_HEAVY))
 		&& padUsed->JumpJustDown() && m_nPedState != PED_JUMP) {
 		ClearAttack();
 		ClearWeaponTarget();

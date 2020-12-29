@@ -174,7 +174,12 @@ bool CMenuManager::m_PrefsAllowNastyGame = true;
 bool CMenuManager::m_bStartUpFrontEndRequested;
 bool CMenuManager::m_bShutDownFrontEndRequested;
 
+#ifdef ASPECT_RATIO_SCALE
+int8 CMenuManager::m_PrefsUseWideScreen = AR_AUTO;
+#else
 int8 CMenuManager::m_PrefsUseWideScreen;
+#endif
+
 int8 CMenuManager::m_PrefsRadioStation;
 int32 CMenuManager::m_PrefsBrightness = 256;
 float CMenuManager::m_PrefsLOD = CRenderer::ms_lodDistScale;
@@ -921,7 +926,11 @@ CMenuManager::CheckSliderMovement(int value)
 	case MENUACTION_MOUSESENS:
 		TheCamera.m_fMouseAccelHorzntl += value * 1.0f/200.0f/15.0f;	// ???
 		TheCamera.m_fMouseAccelHorzntl = clamp(TheCamera.m_fMouseAccelHorzntl, 1.0f/3200.0f, 1.0f/200.0f);
+#ifdef FIX_BUGS
+		TheCamera.m_fMouseAccelVertical = TheCamera.m_fMouseAccelHorzntl + 0.0005f;
+#else
 		TheCamera.m_fMouseAccelVertical = TheCamera.m_fMouseAccelHorzntl;
+#endif
 		break;
 	default:
 		return;
@@ -1318,7 +1327,7 @@ CMenuManager::Draw()
 #endif
 		// Hide back button
 #ifdef PS2_LIKE_MENU
-		if ((i == NUM_MENUROWS - 1 || aScreens[m_nCurrScreen].m_aEntries[i+1].m_EntryName[0] == '\0') && strncmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FEDS_TB", 8) == 0)
+		if ((i == NUM_MENUROWS - 1 || aScreens[m_nCurrScreen].m_aEntries[i+1].m_EntryName[0] == '\0') && strcmp(aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName, "FEDS_TB") == 0)
 			break;
 #endif
 		if (aScreens[m_nCurrScreen].m_aEntries[i].m_Action != MENUACTION_LABEL && aScreens[m_nCurrScreen].m_aEntries[i].m_EntryName[0] != '\0') {
@@ -1624,7 +1633,7 @@ CMenuManager::Draw()
 					// Hide back button
 #ifdef PS2_LIKE_MENU
 					if ((rowToCheck == NUM_MENUROWS - 1 || aScreens[m_nCurrScreen].m_aEntries[rowToCheck+1].m_EntryName[0] == '\0') &&
-						strncmp(aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_EntryName, "FEDS_TB", 8) == 0)
+						strcmp(aScreens[m_nCurrScreen].m_aEntries[rowToCheck].m_EntryName, "FEDS_TB") == 0)
 						break;
 #endif
 
@@ -3074,7 +3083,7 @@ CMenuManager::DrawPlayerSetupScreen()
 		SYSTEMTIME SystemTime;
 		HANDLE handle = FindFirstFile("skins\\*.bmp", &FindFileData);
 		for (int i = 1; handle != INVALID_HANDLE_VALUE && i; i = FindNextFile(handle, &FindFileData)) {
-			if (strncmp(FindFileData.cFileName, DEFAULT_SKIN_NAME, 5) != 0) {
+			if (strcmp(FindFileData.cFileName, DEFAULT_SKIN_NAME) != 0) {
 				m_pSelectedSkin->nextSkin = new tSkinInfo;
 				m_pSelectedSkin = m_pSelectedSkin->nextSkin;
 				m_pSelectedSkin->skinId = nextSkinId;
@@ -3748,6 +3757,7 @@ CMenuManager::LoadSettings()
 		strcpy(m_PrefsSkinFile, DEFAULT_SKIN_NAME);
 		strcpy(m_aSkinName, DEFAULT_SKIN_NAME);
 	}
+	
 #ifdef LOAD_INI_SETTINGS
 	LoadINISettings(); // needs frontend options to be loaded
 #endif
@@ -4479,13 +4489,21 @@ CMenuManager::ProcessButtonPresses(void)
 			case HOVEROPTION_INCREASE_MOUSESENS:
 				TheCamera.m_fMouseAccelHorzntl += (1.0f / 3000);
 				TheCamera.m_fMouseAccelHorzntl = clamp(TheCamera.m_fMouseAccelHorzntl, 1.0f / 3200, 1.0f / 200);
+#ifdef FIX_BUGS
+				TheCamera.m_fMouseAccelVertical = TheCamera.m_fMouseAccelHorzntl + 0.0005f;
+#else
 				TheCamera.m_fMouseAccelVertical = TheCamera.m_fMouseAccelHorzntl;
+#endif
 				SaveSettings();
 				break;
 			case HOVEROPTION_DECREASE_MOUSESENS:
 				TheCamera.m_fMouseAccelHorzntl -= (1.0f / 3000);
 				TheCamera.m_fMouseAccelHorzntl = clamp(TheCamera.m_fMouseAccelHorzntl, 1.0f / 3200, 1.0f / 200);
+#ifdef FIX_BUGS
+				TheCamera.m_fMouseAccelVertical = TheCamera.m_fMouseAccelHorzntl + 0.0005f;
+#else
 				TheCamera.m_fMouseAccelVertical = TheCamera.m_fMouseAccelHorzntl;
+#endif
 				SaveSettings();
 				break;
 			}
@@ -4658,15 +4676,15 @@ CMenuManager::ProcessButtonPresses(void)
 
 	// Hide back button
 #ifdef PS2_LIKE_MENU
-	if ((goUp || goDown) && m_nCurrScreen != MENUPAGE_MULTIPLAYER_FIND_GAME && strncmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEDS_TB", 8) == 0)
+	if ((goUp || goDown) && m_nCurrScreen != MENUPAGE_MULTIPLAYER_FIND_GAME && strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEDS_TB") == 0)
 		m_nCurrOption = goUp ? m_nCurrOption - 1 : (aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL);
 #endif
 
 	if (optionSelected) {
 		int option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action;
 		if ((option == MENUACTION_CHANGEMENU) || (option == MENUACTION_POPULATESLOTS_CHANGEMENU)) {
-			if (strncmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEDS_TB", 8) != 0 &&
-				strncmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FESZ_CA", 8) != 0) {
+			if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEDS_TB") != 0 &&
+				strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FESZ_CA") != 0) {
 
 				if (m_nCurrScreen == MENUPAGE_CHOOSE_DELETE_SLOT) {
 					if (Slots[aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_SaveSlot - 1] == SLOT_EMPTY)
@@ -4823,7 +4841,7 @@ CMenuManager::ProcessButtonPresses(void)
 						}
 					}
 					if (changeMenu) {
-						if (strncmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEDS_TB", 8) == 0) {
+						if (strcmp(aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_EntryName, "FEDS_TB") == 0) {
 #ifndef TIDY_UP_PBP
 							ResetHelperText();
 							ChangeScreen(!m_bGameNotLoaded ? aScreens[m_nCurrScreen].m_PreviousPage[1] : aScreens[m_nCurrScreen].m_PreviousPage[0],
@@ -4982,7 +5000,11 @@ CMenuManager::ProcessButtonPresses(void)
 						m_PrefsLOD = 1.2f;
 						m_PrefsVsync = true;
 						CRenderer::ms_lodDistScale = 1.2f;
+#ifdef ASPECT_RATIO_SCALE
+						m_PrefsUseWideScreen = AR_AUTO;
+#else
 						m_PrefsUseWideScreen = false;
+#endif
 						m_PrefsShowSubtitles = true;
 						m_nDisplayVideoMode = m_nPrefsVideoMode;
 #if GTA_VERSION >= GTA3_PC_11
@@ -5023,7 +5045,12 @@ CMenuManager::ProcessButtonPresses(void)
 						}
 #endif
 						m_ControlMethod = CONTROL_STANDARD;
+#ifdef FIX_BUGS
+						MousePointerStateHelper.bInvertVertically = true;
+						TheCamera.m_fMouseAccelVertical = 0.003f;
+#else
 						MousePointerStateHelper.bInvertVertically = false;
+#endif
 						TheCamera.m_fMouseAccelHorzntl = 0.0025f;
 						CVehicle::m_bDisableMouseSteering = true;
 						TheCamera.m_bHeadBob = false;
@@ -6085,7 +6112,7 @@ CMenuManager::PrintMap(void)
 	CFont::PrintString(nextX, SCREEN_SCALE_FROM_BOTTOM(nextY), TheText.Get("FEC_MOV")); nextX = MENU_X(30.0f); nextY -= 11.0f;
 	TEXT_PIECE("FEC_MSR", 2.0f);
 	TEXT_PIECE("FEC_IBT", 1.0f);
-	CFont::PrintString(nextX, SCREEN_SCALE_FROM_BOTTOM(nextY), TheText.Get("FEC_TAR"));
+	CFont::PrintString(nextX, SCREEN_SCALE_FROM_BOTTOM(nextY), TheText.Get("FEM_TWP"));
 #undef TEXT_PIECE
 }
 

@@ -243,7 +243,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 		bHasACamera = true;
 
 	m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, this);
-	DMAudio.SetEntityStatus(m_audioEntityId, 1);
+	DMAudio.SetEntityStatus(m_audioEntityId, true);
 	m_fearFlags = CPedType::GetThreats(m_nPedType);
 	m_threatEntity = nil;
 	m_eventOrThreat = CVector2D(0.0f, 0.0f);
@@ -707,14 +707,18 @@ CPed::ScanForThreats(void)
 		}
 	}
 
-	CPed *deadPed = nil;
+	CPed *deadPed;
 	if (fearFlags & PED_FLAG_DEADPEDS && CharCreatedBy != MISSION_CHAR
-		&& (deadPed = CheckForDeadPeds()) != nil && (deadPed->GetPosition() - ourPos).MagnitudeSqr() < sq(20.0f)) {
+		&& (deadPed = CheckForDeadPeds()) != nil && (deadPed->GetPosition() - ourPos).MagnitudeSqr() < sq(20.0f)
+#ifdef FIX_BUGS
+		&& !deadPed->bIsInWater
+#endif
+		) {
 		m_pEventEntity = deadPed;
 		m_pEventEntity->RegisterReference((CEntity **) &m_pEventEntity);
 		return PED_FLAG_DEADPEDS;
 	} else {
-		uint32 flagsOfSomePed = 0;
+		uint32 flagsOfNearPed = 0;
 
 		CPed *pedToFearFrom = nil;
 #ifndef VC_PED_PORTS
@@ -724,9 +728,9 @@ CPed::ScanForThreats(void)
 
 				// BUG: WTF Rockstar?! Putting this here will result in returning the flags of farthest ped to us, since m_nearPeds is sorted by distance.
 				// Fixed at the bottom of the function.
-				flagsOfSomePed = CPedType::GetFlag(nearPed->m_nPedType);
+				flagsOfNearPed = CPedType::GetFlag(nearPed->m_nPedType);
 
-				if (CPedType::GetFlag(nearPed->m_nPedType) & fearFlags) {
+				if (flagsOfNearPed & fearFlags) {
 					if (nearPed->m_fHealth > 0.0f && OurPedCanSeeThisOne(m_nearPeds[i])) {
 						// FIX: Taken from VC
 #ifdef FIX_BUGS
@@ -754,9 +758,9 @@ CPed::ScanForThreats(void)
 				}
 
 				// BUG: Explained at the same occurence of this bug above. Fixed at the bottom of the function.
-				flagsOfSomePed = CPedType::GetFlag(m_nearPeds[i]->m_nPedType);
+				flagsOfNearPed = CPedType::GetFlag(m_nearPeds[i]->m_nPedType);
 
-				if (flagsOfSomePed & fearFlags) {
+				if (flagsOfNearPed & fearFlags) {
 					if (m_nearPeds[i]->m_fHealth > 0.0f) {
 
 						// VC also has ability to include objects to line of sight check here (via last bit of flagsL)
@@ -827,8 +831,8 @@ CPed::ScanForThreats(void)
 			if (driver) {
 
 				// BUG: Same bug as above. Fixed at the bottom of function.
-				flagsOfSomePed = CPedType::GetFlag(driver->m_nPedType);
-				if (CPedType::GetFlag(driver->m_nPedType) & fearFlags) {
+				flagsOfNearPed = CPedType::GetFlag(driver->m_nPedType);
+				if (flagsOfNearPed & fearFlags) {
 					if (driver->m_fHealth > 0.0f && OurPedCanSeeThisOne(nearVeh->pDriver)) {
 						// FIX: Taken from VC
 #ifdef FIX_BUGS
@@ -850,12 +854,12 @@ CPed::ScanForThreats(void)
 
 #ifdef FIX_BUGS
 		if (pedToFearFrom)
-			flagsOfSomePed = CPedType::GetFlag(((CPed*)m_threatEntity)->m_nPedType);
+			flagsOfNearPed = CPedType::GetFlag(((CPed*)m_threatEntity)->m_nPedType);
 		else
-			flagsOfSomePed = 0;
+			flagsOfNearPed = 0;
 #endif
 
-		return flagsOfSomePed;
+		return flagsOfNearPed;
 	}
 }
 
@@ -1046,7 +1050,7 @@ CPed::SetAimFlag(float angle)
 	m_lookTimer = 0;
 	m_pLookTarget = nil;
 	m_pSeekTarget = nil;
-	if (CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_bCanAimWithArm)
+	if (CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->IsFlagSet(WEAPONFLAG_CANAIM_WITHARM))
 		m_pedIK.m_flags |= CPedIK::AIMS_WITH_ARM;
 	else
 		m_pedIK.m_flags &= ~CPedIK::AIMS_WITH_ARM;
@@ -4246,7 +4250,9 @@ CPed::PedSetOutCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 		veh->m_nGettingOutFlags &= ~GetCarDoorFlag(ped->m_vehEnterType);
 		if (veh->pDriver == ped) {
 			veh->RemoveDriver();
+#ifndef FIX_BUGS // RemoveDriver does it anyway
 			veh->SetStatus(STATUS_ABANDONED);
+#endif
 			if (veh->m_nDoorLock == CARLOCK_LOCKED_INITIALLY)
 				veh->m_nDoorLock = CARLOCK_UNLOCKED;
 			if (ped->m_nPedType == PEDTYPE_COP && veh->IsLawEnforcementVehicle())

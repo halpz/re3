@@ -921,6 +921,19 @@ CRenderer::RequestObjectsInFrustum(void)
 }
 
 bool
+CEntity::SetupLighting(void)
+{
+	DeActivateDirectional();
+	SetAmbientColours();
+	return false;
+}
+
+void
+CEntity::RemoveLighting(bool)
+{
+}
+
+bool
 CPed::SetupLighting(void)
 {
 	ActivateDirectional();

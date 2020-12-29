@@ -93,7 +93,7 @@ cAudioManager::InitialisePoliceRadio()
 	for (int32 i = 0; i < ARRAY_SIZE(m_sPoliceRadioQueue.crimes); i++)
 		m_sPoliceRadioQueue.crimes[i].type = CRIME_NONE;
 
-	SampleManager.SetChannelReverbFlag(policeChannel, 0);
+	SampleManager.SetChannelReverbFlag(policeChannel, false);
 	gSpecialSuspectLastSeenReport = false;
 	for (int32 i = 0; i < ARRAY_SIZE(gMinTimeToNextReport); i++)
 		gMinTimeToNextReport[i] = m_FrameCounter;

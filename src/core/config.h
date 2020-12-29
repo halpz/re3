@@ -249,16 +249,13 @@ enum Config {
 #define DISABLE_VSYNC_ON_TEXTURE_CONVERSION // make texture conversion work faster by disabling vsync
 //#define USE_TEXTURE_POOL
 #ifdef LIBRW
-//#define EXTENDED_COLOURFILTER		// more options for colour filter (replaces mblur)
-//#define EXTENDED_PIPELINES		// custom render pipelines (includes Neo)
-//#define SCREEN_DROPLETS			// neo water droplets
+#define EXTENDED_COLOURFILTER		// more options for colour filter (replaces mblur)
+#define EXTENDED_PIPELINES		// custom render pipelines (includes Neo)
+#define SCREEN_DROPLETS			// neo water droplets
 #endif
 
 #ifndef EXTENDED_COLOURFILTER
 #undef SCREEN_DROPLETS		// we need the backbuffer for this effect
-#endif
-#ifndef EXTENDED_PIPELINES
-#undef SCREEN_DROPLETS		// we need neo.txd
 #endif
 
 // Particle
@@ -277,7 +274,7 @@ enum Config {
 #define ALLCARSHELI_CHEAT
 #define ALT_DODO_CHEAT
 #define REGISTER_START_BUTTON
-//#define BIND_VEHICLE_FIREWEAPON // Adds ability to rebind fire key for 'in vehicle' controls
+#define BIND_VEHICLE_FIREWEAPON // Adds ability to rebind fire key for 'in vehicle' controls
 #define BUTTON_ICONS // use textures to show controller buttons
 
 // Hud, frontend and radar
@@ -286,6 +283,7 @@ enum Config {
 // #define BETA_SLIDING_TEXT
 #define TRIANGULAR_BLIPS	// height indicating triangular radar blips, as in VC
 // #define XBOX_SUBTITLES	// the infamous outlines
+#define RADIO_OFF_TEXT
 #define PC_MENU
 
 #ifndef PC_MENU
@@ -350,6 +348,7 @@ enum Config {
 #define FREE_CAM		// Rotating cam
 
 // Audio
+#define RADIO_SCROLL_TO_PREV_STATION
 #ifndef AUDIO_OAL // is not working yet for openal
 #define AUDIO_CACHE // cache sound lengths to speed up the cold boot
 #endif

@@ -1171,7 +1171,10 @@ CVehicle::AddPassenger(CPed *passenger, uint8 n)
 void
 CVehicle::RemoveDriver(void)
 {
-	SetStatus(STATUS_ABANDONED);
+#ifdef FIX_BUGS
+	if (GetStatus() != STATUS_WRECKED)
+#endif
+		SetStatus(STATUS_ABANDONED);
 	pDriver = nil;
 }
 

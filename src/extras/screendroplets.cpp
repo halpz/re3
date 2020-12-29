@@ -8,11 +8,11 @@
 #endif
 
 #include "General.h"
-#include "Main.h"
+#include "main.h"
 #include "RwHelper.h"
-#include "Main.h"
 #include "Timer.h"
 #include "Camera.h"
+#include "World.h"
 #include "ZoneCull.h"
 #include "Weather.h"
 #include "ParticleObject.h"
@@ -76,11 +76,36 @@ ScreenDroplets::Initialise(void)
 	ms_splashObject = nil;
 }
 
+// Create white circle mask for rain drops
+static RwTexture*
+CreateDropMask(int32 size)
+{
+	RwImage *img = RwImageCreate(size, size, 32);
+	RwImageAllocatePixels(img);
+
+	uint8 *pixels = RwImageGetPixels(img);
+	int32 stride = RwImageGetStride(img);
+
+	for(int y = 0; y < size; y++){
+		float yf = ((y + 0.5f)/size - 0.5f)*2.0f;
+		for(int x = 0; x < size; x++){
+			float xf = ((x + 0.5f)/size - 0.5f)*2.0f;
+			memset(&pixels[y*stride + x*4], xf*xf + yf*yf < 1.0f ? 0xFF : 0x00, 4);
+		}
+	}
+
+	int32 width, height, depth, format;
+	RwImageFindRasterFormat(img, rwRASTERTYPETEXTURE, &width, &height, &depth, &format);
+	RwRaster *ras = RwRasterCreate(width, height, depth, format);
+	RwRasterSetFromImage(ras, img);
+	RwImageDestroy(img);
+	return RwTextureCreate(ras);
+}
+
 void
 ScreenDroplets::InitDraw(void)
 {
-	if(CustomPipes::neoTxd)
-		ms_maskTex = CustomPipes::neoTxd->find("dropmask");
+	ms_maskTex = CreateDropMask(64);
 
 	ms_screenTex = RwTextureCreate(nil);
 	RwTextureSetFilterMode(ms_screenTex, rwFILTERLINEAR);
@@ -392,7 +417,8 @@ ScreenDroplets::ProcessCameraMovement(void)
 
 	uint16 mode = TheCamera.Cams[TheCamera.ActiveCam].Mode;
 	bool isTopDown = mode == CCam::MODE_TOPDOWN || mode == CCam::MODE_GTACLASSIC || mode == CCam::MODE_TOP_DOWN_PED;
-	bool isLookingInDirection = CPad::GetPad(0)->GetLookBehindForCar() || CPad::GetPad(0)->GetLookLeft() || CPad::GetPad(0)->GetLookRight();
+	bool isLookingInDirection = FindPlayerVehicle() && mode == CCam::MODE_1STPERSON &&
+		(CPad::GetPad(0)->GetLookBehindForCar() || CPad::GetPad(0)->GetLookLeft() || CPad::GetPad(0)->GetLookRight());
 	ms_enabled = !isTopDown && !isLookingInDirection;
 	ms_movingEnabled = !isTopDown && !isLookingInDirection;
 

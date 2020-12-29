@@ -16,6 +16,7 @@
 #include "DMAudio.h"
 #include "Automobile.h"
 #include "Physical.h"
+#include "Bike.h"
 
 CPhysical::CPhysical(void)
 {
@@ -1917,7 +1918,11 @@ CPhysical::ProcessCollision(void)
 				car->m_aSuspensionSpringRatio[2] = 1.0f;
 				car->m_aSuspensionSpringRatio[3] = 1.0f;
 			}else if(veh->m_vehType == VEHICLE_TYPE_BIKE){
-				assert(0 && "TODO - but unused");
+				CBike* bike = (CBike*)this;
+				bike->m_aSuspensionSpringRatio[0] = 1.0f;
+				bike->m_aSuspensionSpringRatio[1] = 1.0f;
+				bike->m_aSuspensionSpringRatio[2] = 1.0f;
+				bike->m_aSuspensionSpringRatio[3] = 1.0f;
 			}
 		}
 	}

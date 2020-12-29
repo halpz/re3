@@ -83,18 +83,40 @@ cMusicManager::DisplayRadioStationName()
 		if(m_bPlayerInCar && !m_bPreviousPlayerInCar)
 			pCurrentStation = nil;
 
+#ifdef RADIO_SCROLL_TO_PREV_STATION
+		if(gNumRetunePresses < 0) {
+			gStreamedSound = m_nCurrentStreamedSound;
+
+			if(gStreamedSound == STREAMED_SOUND_CITY_AMBIENT ||
+			   gStreamedSound == STREAMED_SOUND_WATER_AMBIENT) {
+				gStreamedSound = POLICE_RADIO; // which means OFF
+				
+			} else if(gStreamedSound > STREAMED_SOUND_RADIO_MP3_PLAYER)
+				return;
+
+			gRetuneCounter = gNumRetunePresses;
+			pRetune = gStreamedSound;
+
+			while(gRetuneCounter < 0) {
+				if(pRetune == HEAD_RADIO) {
+					pRetune = RADIO_OFF;
+				} else if(pRetune == RADIO_OFF || pRetune == POLICE_RADIO) {
+					pRetune =  SampleManager.IsMP3RadioChannelAvailable() ? USERTRACK : USERTRACK - 1;
+				} else
+					pRetune--;
+
+				++gRetuneCounter;
+			}
+		} else
+#endif
 		if(SampleManager.IsMP3RadioChannelAvailable()) {
 			gStreamedSound = m_nCurrentStreamedSound;
 
 			if(gStreamedSound == STREAMED_SOUND_CITY_AMBIENT ||
 			   gStreamedSound == STREAMED_SOUND_WATER_AMBIENT) {
-				gStreamedSound = STREAMED_SOUND_RADIO_POLICE;
-			} else {
-
-				if(gStreamedSound >
-				   STREAMED_SOUND_RADIO_MP3_PLAYER)
-					return;
-			}
+				gStreamedSound = POLICE_RADIO; // which means OFF
+			} else if(gStreamedSound > STREAMED_SOUND_RADIO_MP3_PLAYER)
+				return;
 
 			pRetune = gNumRetunePresses + gStreamedSound;
 
@@ -140,10 +162,17 @@ cMusicManager::DisplayRadioStationName()
 		case FLASHBACK: string = TheText.Get("FEA_FM7"); break;
 		case CHATTERBOX: string = TheText.Get("FEA_FM8"); break;
 		case USERTRACK: string = TheText.Get("FEA_FM9"); break;
+#ifdef RADIO_OFF_TEXT
+		case RADIO_OFF: case POLICE_RADIO: string = TheText.Get("FEM_OFF"); break;
+#endif
 		default: return;
 		};
 
+#ifdef RADIO_OFF_TEXT
+		if(pRetune == USERTRACK && !SampleManager.IsMP3RadioChannelAvailable()) { string = TheText.Get("FEM_OFF"); }
+#else
 		if(pRetune > CHATTERBOX && !SampleManager.IsMP3RadioChannelAvailable()) { return; }
+#endif
 
 		if(string && pCurrentStation != string ||
 		   m_nCurrentStreamedSound == STREAMED_SOUND_RADIO_MP3_PLAYER &&
@@ -448,17 +477,31 @@ cMusicManager::ServiceGameMode()
 	if (m_bPlayerInCar) {
 		if (FindPlayerPed() != nil
 			&& !FindPlayerPed()->DyingOrDead()
-			&& CPad::GetPad(0)->ChangeStationJustDown()
 			&& !CReplay::IsPlayingBack()
 			&& FindPlayerVehicle() != nil
 			&& !UsesPoliceRadio(FindPlayerVehicle())) {
-				gRetuneCounter = 30;
-				gNumRetunePresses++;
-				AudioManager.PlayOneShot(AudioManager.m_nFrontEndEntity, SOUND_FRONTEND_RADIO_CHANGE, 1.0f);
-				if (SampleManager.IsMP3RadioChannelAvailable()) {
-					if (gNumRetunePresses > RADIO_OFF)
-						gNumRetunePresses -= RADIO_OFF;
+
+				if (CPad::GetPad(0)->ChangeStationJustDown()) {
+					gRetuneCounter = 30;
+					gNumRetunePresses++;
+					AudioManager.PlayOneShot(AudioManager.m_nFrontEndEntity, SOUND_FRONTEND_RADIO_CHANGE, 1.0f);
+					if (SampleManager.IsMP3RadioChannelAvailable()) {
+						if (gNumRetunePresses > RADIO_OFF)
+							gNumRetunePresses -= RADIO_OFF;
+					}
 				}
+#ifdef RADIO_SCROLL_TO_PREV_STATION
+				else if(CPad::GetPad(0)->GetMouseWheelDownJustDown() || CPad::GetPad(0)->GetMouseWheelUpJustDown()) {
+					int scrollNext = ControlsManager.GetControllerKeyAssociatedWithAction(VEHICLE_CHANGE_RADIO_STATION, MOUSE);
+					int scrollPrev = scrollNext == rsMOUSEWHEELUPBUTTON ? rsMOUSEWHEELDOWNBUTTON : scrollNext == rsMOUSEWHEELDOWNBUTTON ? rsMOUSEWHEELUPBUTTON : -1;
+
+					if (scrollPrev != -1 && !ControlsManager.IsAnyVehicleActionAssignedToMouseKey(scrollPrev)) {
+						gRetuneCounter = 30;
+						gNumRetunePresses--;
+						AudioManager.PlayOneShot(AudioManager.m_nFrontEndEntity, SOUND_FRONTEND_RADIO_CHANGE, 1.0f);
+					}
+				}
+#endif
 		}
 	} else {
 		nFramesSinceCutsceneEnded = -1;
@@ -500,10 +543,22 @@ cMusicManager::ServiceGameMode()
 			gNumRetunePresses = 0;
 			m_bSetNextStation = false;
 		}
+		// Because when you switch radio back and forth, gNumRetunePresses will be 0 but gRetuneCounter won't.
+#ifdef RADIO_SCROLL_TO_PREV_STATION
+		if (gRetuneCounter != 0) {
+			if (gRetuneCounter > 1) gRetuneCounter--;
+			else if (gRetuneCounter == 1) gRetuneCounter = -1;
+			else if (gRetuneCounter == -1) {
+				m_bSetNextStation = true;
+				gRetuneCounter = 0;
+			}
+		}
+#else
 		if (gNumRetunePresses) {
 			if (gRetuneCounter != 0) gRetuneCounter--;
 			else m_bSetNextStation = true;
 		}
+#endif
 		if (gRetuneCounter)
 			AudioManager.DoPoliceRadioCrackle();
 		if (m_bSetNextStation) {
@@ -869,6 +924,20 @@ cMusicManager::GetNextCarTuning()
 	if (veh == nil) return RADIO_OFF;
 	if (UsesPoliceRadio(veh)) return POLICE_RADIO;
 	if (gNumRetunePresses != 0) {
+#ifdef RADIO_SCROLL_TO_PREV_STATION
+		if (gNumRetunePresses < 0) {
+			while (gNumRetunePresses < 0) {
+				if(veh->m_nRadioStation == HEAD_RADIO) {
+					veh->m_nRadioStation = RADIO_OFF;
+				} else if(veh->m_nRadioStation == RADIO_OFF || veh->m_nRadioStation == POLICE_RADIO) {
+					veh->m_nRadioStation = SampleManager.IsMP3RadioChannelAvailable() ? USERTRACK : USERTRACK - 1;
+				} else
+					veh->m_nRadioStation--;
+
+				++gNumRetunePresses;
+			}
+		} else
+#endif
 		if (SampleManager.IsMP3RadioChannelAvailable()) {
 			if (veh->m_nRadioStation == RADIO_OFF)
 				veh->m_nRadioStation = POLICE_RADIO;

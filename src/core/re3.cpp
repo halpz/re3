@@ -30,9 +30,9 @@
 #include "postfx.h"
 #include "custompipes.h"
 #include "MemoryHeap.h"
+#include "FileMgr.h"
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
-#include "FileMgr.h"
 #include "ControllerConfig.h"
 #endif
 
@@ -79,6 +79,30 @@ void
 CustomFrontendOptionsPopulate(void)
 {
 	// Moved to an array in MenuScreensCustom.cpp, but APIs are still available. see frontendoption.h
+
+	// These work only if we have neo folder, so they're dynamically added
+#ifdef EXTENDED_PIPELINES
+	const char *vehPipelineNames[] = { "FED_MFX", "FED_NEO" };
+	const char *off_on[] = { "FEM_OFF", "FEM_ON" };
+	int fd = CFileMgr::OpenFile("neo/neo.txd","r");
+	if (fd) {
+#ifdef GRAPHICS_MENU_OPTIONS
+		FrontendOptionSetCursor(MENUPAGE_GRAPHICS_SETTINGS, -3, false);
+		FrontendOptionAddSelect("FED_VPL", vehPipelineNames, ARRAY_SIZE(vehPipelineNames), (int8*)&CustomPipes::VehiclePipeSwitch, false, nil, "VehiclePipeline");
+		FrontendOptionAddSelect("FED_PRM", off_on, 2, (int8*)&CustomPipes::RimlightEnable, false, nil, "NeoRimLight");
+		FrontendOptionAddSelect("FED_WLM", off_on, 2, (int8*)&CustomPipes::LightmapEnable, false, nil, "NeoLightMaps");
+		FrontendOptionAddSelect("FED_RGL", off_on, 2, (int8*)&CustomPipes::GlossEnable, false, nil, "NeoRoadGloss");
+#else
+		FrontendOptionSetCursor(MENUPAGE_DISPLAY_SETTINGS, -3, false);
+		FrontendOptionAddSelect("FED_VPL", vehPipelineNames, ARRAY_SIZE(vehPipelineNames), (int8*)&CustomPipes::VehiclePipeSwitch, false, nil, "VehiclePipeline");
+		FrontendOptionAddSelect("FED_PRM", off_on, 2, (int8*)&CustomPipes::RimlightEnable, false, nil, "NeoRimLight");
+		FrontendOptionAddSelect("FED_WLM", off_on, 2, (int8*)&CustomPipes::LightmapEnable, false, nil, "NeoLightMaps");
+		FrontendOptionAddSelect("FED_RGL", off_on, 2, (int8*)&CustomPipes::GlossEnable, false, nil, "NeoRoadGloss");
+#endif
+		CFileMgr::CloseFile(fd);
+	}
+#endif
+
 }
 #endif
 

@@ -171,8 +171,8 @@ RwFrame     *RwCameraGetFrame(const RwCamera *camera) { return camera->getFrame(
 
 RwImage     *RwImageCreate(RwInt32 width, RwInt32 height, RwInt32 depth) { return Image::create(width, height, depth); }
 RwBool       RwImageDestroy(RwImage * image) { image->destroy(); return true; }
-RwImage     *RwImageAllocatePixels(RwImage * image);
-RwImage     *RwImageFreePixels(RwImage * image);
+RwImage     *RwImageAllocatePixels(RwImage * image) { image->allocate(); return image; }
+RwImage     *RwImageFreePixels(RwImage * image) { image->free(); return image; }
 RwImage     *RwImageCopy(RwImage * destImage, const RwImage * sourceImage);
 RwImage     *RwImageResize(RwImage * image, RwInt32 width, RwInt32 height);
 RwImage     *RwImageApplyMask(RwImage * image, const RwImage * mask);
@@ -187,10 +187,10 @@ RwImage     *RwImageSetPixels(RwImage * image, RwUInt8 * pixels) { image->pixels
 RwImage     *RwImageSetPalette(RwImage * image, RwRGBA * palette) { image->palette = (uint8*)palette; return image; }
 RwInt32      RwImageGetWidth(const RwImage * image) { return image->width; }
 RwInt32      RwImageGetHeight(const RwImage * image) { return image->height; }
-RwInt32      RwImageGetDepth(const RwImage * image);
-RwInt32      RwImageGetStride(const RwImage * image);
-RwUInt8     *RwImageGetPixels(const RwImage * image);
-RwRGBA      *RwImageGetPalette(const RwImage * image);
+RwInt32      RwImageGetDepth(const RwImage * image) { return image->depth; }
+RwInt32      RwImageGetStride(const RwImage * image) { return image->stride; }
+RwUInt8     *RwImageGetPixels(const RwImage * image) { return image->pixels; }
+RwRGBA      *RwImageGetPalette(const RwImage * image) { return (RwRGBA*)image->palette; }
 RwUInt32     RwRGBAToPixel(RwRGBA * rgbIn, RwInt32 rasterFormat);
 RwRGBA      *RwRGBASetFromPixel(RwRGBA * rgbOut, RwUInt32 pixelValue, RwInt32 rasterFormat);
 RwBool       RwImageSetGamma(RwReal gammaValue);

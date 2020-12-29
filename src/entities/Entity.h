@@ -111,8 +111,8 @@ public:
 
 	virtual void Add(void);
 	virtual void Remove(void);
-	virtual void SetModelIndex(uint32 id) { m_modelIndex = id; CreateRwObject(); }
-	virtual void SetModelIndexNoCreate(uint32 id) { m_modelIndex = id; }
+	virtual void SetModelIndex(uint32 id);
+	virtual void SetModelIndexNoCreate(uint32 id);
 	virtual void CreateRwObject(void);
 	virtual void DeleteRwObject(void);
 	virtual CRect GetBoundRect(void);
@@ -123,7 +123,7 @@ public:
 	virtual void PreRender(void);
 	virtual void Render(void);
 	virtual bool SetupLighting(void);
-	virtual void RemoveLighting(bool) {}
+	virtual void RemoveLighting(bool);
 	virtual void FlagToDestroyWhenNextProcessed(void) {}
 
 	bool IsBuilding(void) { return m_type == ENTITY_TYPE_BUILDING; }
@@ -142,14 +142,14 @@ public:
 	}
 
 	void GetBoundCentre(CVector &out);
-	CVector GetBoundCentre(void) { CVector v; GetBoundCentre(v); return v; }
-	float GetBoundRadius(void) { return CModelInfo::GetModelInfo(m_modelIndex)->GetColModel()->boundingSphere.radius; }
-	float GetDistanceFromCentreOfMassToBaseOfModel(void) { return -CModelInfo::GetModelInfo(m_modelIndex)->GetColModel()->boundingBox.min.z; }
+	CVector GetBoundCentre(void);
+	float GetBoundRadius(void);
+	float GetDistanceFromCentreOfMassToBaseOfModel(void);
 	bool GetIsTouching(CVector const &center, float r);
 	bool GetIsOnScreen(void);
 	bool GetIsOnScreenComplex(void);
-	bool IsVisible(void) { return m_rwObject && bIsVisible && GetIsOnScreen(); }
-	bool IsVisibleComplex(void) { return m_rwObject && bIsVisible && GetIsOnScreenComplex(); }
+	bool IsVisible(void);
+	bool IsVisibleComplex(void);
 	int16 GetModelIndex(void) const { return m_modelIndex; }
 	void UpdateRwFrame(void);
 	void SetupBigBuilding(void);
@@ -170,8 +170,6 @@ public:
 	void ModifyMatrixForTreeInWind(void);
 	void ModifyMatrixForBannerInWind(void);
 	void ProcessLightsForEntity(void);
-
-	static void AddSteamsFromGround(CPtrList& list);
 };
 
 VALIDATE_SIZE(CEntity, 0x64);
