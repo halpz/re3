@@ -262,11 +262,25 @@ CGame::InitialiseRenderWare(void)
 	CPlayerSkin::Initialise();
 	POP_MEMID();
 
+#ifdef EXTENDED_PIPELINES
+	CustomPipes::CustomPipeInit();	// need Scene.world for this
+#endif
+#ifdef SCREEN_DROPLETS
+	ScreenDroplets::InitDraw();
+#endif
+
 	return (true);
 }
 
 void CGame::ShutdownRenderWare(void)
 {
+#ifdef SCREEN_DROPLETS
+	ScreenDroplets::Shutdown();
+#endif
+#ifdef EXTENDED_PIPELINES
+	CustomPipes::CustomPipeShutdown();
+#endif
+
 	DestroySplashScreen();
 	CHud::Shutdown();
 	CFont::Shutdown();

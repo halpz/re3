@@ -481,15 +481,7 @@ Initialise3D(void *param)
 		DebugMenuInit();
 		DebugMenuPopulate();
 #endif // !DEBUGMENU
-		bool ret = CGame::InitialiseRenderWare();
-#ifdef EXTENDED_PIPELINES
-		CustomPipes::CustomPipeInit();	// need Scene.world for this
-#endif
-#ifdef SCREEN_DROPLETS
-		ScreenDroplets::InitDraw();
-#endif
-
-		return ret;
+		return CGame::InitialiseRenderWare();
 	}
 	POP_MEMID();
 
@@ -499,12 +491,6 @@ Initialise3D(void *param)
 static void 
 Terminate3D(void)
 {
-#ifdef SCREEN_DROPLETS
-	ScreenDroplets::Shutdown();
-#endif
-#ifdef EXTENDED_PIPELINES
-	CustomPipes::CustomPipeShutdown();
-#endif
 	CGame::ShutdownRenderWare();
 #ifdef DEBUGMENU
 	DebugMenuShutdown();

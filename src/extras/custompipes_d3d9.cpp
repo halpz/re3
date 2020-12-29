@@ -172,6 +172,9 @@ DestroyVehiclePipe(void)
 	rw::d3d::destroyVertexShader(neoVehicle_VS);
 	neoVehicle_VS = nil;
 
+	rw::d3d::destroyPixelShader(neoVehicle_PS);
+	neoVehicle_PS = nil;
+
 	((rw::d3d9::ObjPipeline*)vehiclePipe)->destroy();
 	vehiclePipe = nil;
 }
@@ -363,6 +366,12 @@ CreateGlossPipe(void)
 void
 DestroyGlossPipe(void)
 {
+	rw::d3d::destroyVertexShader(neoGloss_VS);
+	neoGloss_VS = nil;
+
+	rw::d3d::destroyPixelShader(neoGloss_PS);
+	neoGloss_PS = nil;
+
 	((rw::d3d9::ObjPipeline*)glossPipe)->destroy();
 	glossPipe = nil;
 }
