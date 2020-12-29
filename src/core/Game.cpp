@@ -274,12 +274,26 @@ CGame::InitialiseRenderWare(void)
 	CPlayerSkin::Initialise();
 #endif
 	
+#ifdef EXTENDED_PIPELINES
+	CustomPipes::CustomPipeInit();	// need Scene.world for this
+#endif
+#ifdef SCREEN_DROPLETS
+	ScreenDroplets::InitDraw();
+#endif
+
 	return (true);
 }
 
 // missing altogether on PS2
 void CGame::ShutdownRenderWare(void)
 {
+#ifdef SCREEN_DROPLETS
+	ScreenDroplets::Shutdown();
+#endif
+#ifdef EXTENDED_PIPELINES
+	CustomPipes::CustomPipeShutdown();
+#endif
+
 	CMBlur::MotionBlurClose();
 	DestroySplashScreen();
 	CHud::Shutdown();
