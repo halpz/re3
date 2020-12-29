@@ -285,8 +285,8 @@ project "re3"
 
 	filter "platforms:*mss"
 		defines { "AUDIO_MSS" }
-		includedirs { "sdk/milessdk/include" }
-		libdirs { "sdk/milessdk/lib" }
+		includedirs { "vendor/milessdk/include" }
+		libdirs { "vendor/milessdk/lib" }
 	
 	if _OPTIONS["with-opus"] then
 		filter "platforms:win*"
