@@ -8070,11 +8070,9 @@ AUTO
 [FEC_IVP]
 INVERT PAD VERTICALLY
 
-[FEM_TWP]
-Toggle Waypoint
-
 [FEC_SCL]
 SPRITE SCALING MODE
+
 
 { end of file }
 
