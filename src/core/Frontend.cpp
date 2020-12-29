@@ -4552,6 +4552,9 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 		}
 
 		int option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action;
+#ifdef FIX_BUGS
+		int currScreen = m_nCurrScreen;
+#endif
 		switch (option) {
 			case MENUACTION_CHANGEMENU:
 			case MENUACTION_YES:
@@ -4827,7 +4830,11 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 		}
 		ProcessOnOffMenuOptions();
 		if (!goBack) {
+#ifdef FIX_BUGS
+			int saveSlot = aScreens[currScreen].m_aEntries[m_nCurrOption].m_SaveSlot;
+#else
 			int saveSlot = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_SaveSlot;
+#endif
 
 			if (saveSlot >= SAVESLOT_1 && saveSlot <= SAVESLOT_8 && Slots[m_nCurrOption] != SLOT_OK)
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_FAIL, 0);
