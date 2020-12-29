@@ -877,7 +877,6 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 	}
 
 	if(fwd != 0.0f || right != 0.0f){
-#if 1
 		CVector totalSpeed = fwd*wheelFwd + right*wheelRight;
 
 		CVector turnDirection = totalSpeed;
@@ -911,17 +910,6 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 
 		ApplyMoveForce(impulse * direction);
 		ApplyTurnForce(turnImpulse * direction, wheelContactPoint);
-#else
-		CVector direction = fwd*wheelFwd + right*wheelRight;
-		float speed = direction.Magnitude();
-		direction.Normalise();
-
-		float impulse = speed*m_fMass;
-		float turnImpulse = speed*GetMass(wheelContactPoint, direction);
-
-		ApplyMoveForce(impulse * direction);
-		ApplyTurnForce(turnImpulse * direction, wheelContactPoint);
-#endif
 	}
 }
 
