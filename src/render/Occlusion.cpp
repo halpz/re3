@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include "main.h"
+#include "Entity.h"
 #include "Occlusion.h"
 #include "Game.h"
 #include "Camera.h"
@@ -493,3 +494,36 @@ void COcclusion::Render() {
 	DefinedState();
 }
 #endif
+
+bool CEntity::IsEntityOccluded(void) {
+
+	CVector coors;
+	float width, height;
+
+	if (COcclusion::NumActiveOccluders == 0 || !CalcScreenCoors(GetBoundCentre(), &coors, &width, &height))
+		return false;
+
+	float area = Max(width, height) * GetBoundRadius() * 0.9f;
+
+	for (int i = 0; i < COcclusion::NumActiveOccluders; i++) {
+		if (coors.z - (GetBoundRadius() * 0.85f) > COcclusion::aActiveOccluders[i].radius) {
+			if (COcclusion::aActiveOccluders[i].IsPointWithinOcclusionArea(coors.x, coors.y, area)) {
+				return true;
+			}
+
+			if (COcclusion::aActiveOccluders[i].IsPointWithinOcclusionArea(coors.x, coors.y, 0.0f)) {
+				CVector min = m_matrix * CModelInfo::GetModelInfo(GetModelIndex())->GetColModel()->boundingBox.min;
+				CVector max = m_matrix * CModelInfo::GetModelInfo(GetModelIndex())->GetColModel()->boundingBox.max;
+
+				if (CalcScreenCoors(min, &coors) && !COcclusion::aActiveOccluders[i].IsPointWithinOcclusionArea(coors.x, coors.y, 0.0f)) continue;
+				if (CalcScreenCoors(CVector(max.x, max.y, min.z), &coors) && !COcclusion::aActiveOccluders[i].IsPointWithinOcclusionArea(coors.x, coors.y, 0.0f)) continue;
+				if (CalcScreenCoors(CVector(max.x, min.y, max.z), &coors) && !COcclusion::aActiveOccluders[i].IsPointWithinOcclusionArea(coors.x, coors.y, 0.0f)) continue;
+				if (CalcScreenCoors(CVector(min.x, max.y, max.z), &coors) && !COcclusion::aActiveOccluders[i].IsPointWithinOcclusionArea(coors.x, coors.y, 0.0f)) continue;
+
+				return true;
+			}
+		}
+	}
+
+	return false;
+}

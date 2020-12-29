@@ -2,6 +2,7 @@
 
 #include "main.h"
 #include "General.h"
+#include "Entity.h"
 #include "RenderBuffer.h"
 #include "TxdStore.h"
 #include "Camera.h"
@@ -12,6 +13,10 @@
 #include "Collision.h"
 #include "Timecycle.h"
 #include "Coronas.h"
+#include "PointLights.h"
+#include "Shadows.h"
+#include "Clock.h"
+#include "Bridge.h"
 
 //--MIAMI: file done
 
@@ -714,4 +719,235 @@ CRegisteredCorona::Update(void)
 		id = 0;
 	firstUpdate = false;
 	registeredThisFrame = false;
+}
+
+void
+CEntity::ProcessLightsForEntity(void)
+{
+	int i, n;
+	C2dEffect *effect;
+	CVector pos;
+	bool lightOn, lightFlickering;
+	uint32 flashTimer1, flashTimer2, flashTimer3;
+
+	if(bRenderDamaged || !bIsVisible || GetUp().z < 0.96f)
+		return;
+
+	flashTimer1 = 0;
+	flashTimer2 = 0;
+	flashTimer3 = 0;
+
+	n = CModelInfo::GetModelInfo(GetModelIndex())->GetNum2dEffects();
+	for(i = 0; i < n; i++, flashTimer1 += 0x80, flashTimer2 += 0x100, flashTimer3 += 0x200){
+		effect = CModelInfo::GetModelInfo(GetModelIndex())->Get2dEffect(i);
+
+		switch(effect->type){
+		case EFFECT_LIGHT:
+			pos = GetMatrix() * effect->pos;
+
+			lightOn = false;
+			lightFlickering = false;
+			switch(effect->light.lightType){
+			case LIGHT_ON:
+				lightOn = true;
+				break;
+			case LIGHT_ON_NIGHT:
+				if(CClock::GetHours() > 18 || CClock::GetHours() < 7)
+					lightOn = true;
+				break;
+			case LIGHT_FLICKER:
+				if((CTimer::GetTimeInMilliseconds() ^ m_randomSeed) & 0x60)
+					lightOn = true;
+				else
+					lightFlickering = true;
+				if((CTimer::GetTimeInMilliseconds()>>11 ^ m_randomSeed) & 3)
+					lightOn = true;
+				break;
+			case LIGHT_FLICKER_NIGHT:
+				if(CClock::GetHours() > 18 || CClock::GetHours() < 7 || CWeather::WetRoads > 0.5f){
+					if((CTimer::GetTimeInMilliseconds() ^ m_randomSeed) & 0x60)
+						lightOn = true;
+					else
+						lightFlickering = true;
+					if((CTimer::GetTimeInMilliseconds()>>11 ^ m_randomSeed) & 3)
+						lightOn = true;
+				}
+				break;
+			case LIGHT_FLASH1:
+				if((CTimer::GetTimeInMilliseconds() + flashTimer1) & 0x200)
+					lightOn = true;
+				break;
+			case LIGHT_FLASH1_NIGHT:
+				if(CClock::GetHours() > 18 || CClock::GetHours() < 7)
+					if((CTimer::GetTimeInMilliseconds() + flashTimer1) & 0x200)
+						lightOn = true;
+				break;
+			case LIGHT_FLASH2:
+				if((CTimer::GetTimeInMilliseconds() + flashTimer2) & 0x400)
+					lightOn = true;
+				break;
+			case LIGHT_FLASH2_NIGHT:
+				if(CClock::GetHours() > 18 || CClock::GetHours() < 7)
+					if((CTimer::GetTimeInMilliseconds() + flashTimer2) & 0x400)
+						lightOn = true;
+				break;
+			case LIGHT_FLASH3:
+				if((CTimer::GetTimeInMilliseconds() + flashTimer3) & 0x800)
+					lightOn = true;
+				break;
+			case LIGHT_FLASH3_NIGHT:
+				if(CClock::GetHours() > 18 || CClock::GetHours() < 7)
+					if((CTimer::GetTimeInMilliseconds() + flashTimer3) & 0x800)
+						lightOn = true;
+				break;
+			case LIGHT_RANDOM_FLICKER:
+				if(m_randomSeed > 16)
+					lightOn = true;
+				else{
+					if((CTimer::GetTimeInMilliseconds() ^ m_randomSeed*8) & 0x60)
+						lightOn = true;
+					else
+						lightFlickering = true;
+					if((CTimer::GetTimeInMilliseconds()>>11 ^ m_randomSeed*8) & 3)
+						lightOn = true;
+				}
+				break;
+			case LIGHT_RANDOM_FLICKER_NIGHT:
+				if(CClock::GetHours() > 18 || CClock::GetHours() < 7){
+					if(m_randomSeed > 16)
+						lightOn = true;
+					else{
+						if((CTimer::GetTimeInMilliseconds() ^ m_randomSeed*8) & 0x60)
+							lightOn = true;
+						else
+							lightFlickering = true;
+						if((CTimer::GetTimeInMilliseconds()>>11 ^ m_randomSeed*8) & 3)
+							lightOn = true;
+					}
+				}
+				break;
+			case LIGHT_BRIDGE_FLASH1:
+				if(CBridge::ShouldLightsBeFlashing() && CTimer::GetTimeInMilliseconds() & 0x200)
+					lightOn = true;
+				break;
+			case LIGHT_BRIDGE_FLASH2:
+				if(CBridge::ShouldLightsBeFlashing() && (CTimer::GetTimeInMilliseconds() & 0x1FF) < 60)
+					lightOn = true;
+				break;
+			}
+
+			if(effect->light.flags & LIGHTFLAG_HIDE_OBJECT){
+				if(lightOn)
+					bDoNotRender = false;
+				else
+					bDoNotRender = true;
+				return;
+			}
+
+			// Corona
+			if(lightOn)
+				CCoronas::RegisterCorona((uintptr)this + i,
+					effect->col.r, effect->col.g, effect->col.b, 255,
+					pos, effect->light.size, effect->light.dist,
+					effect->light.corona, effect->light.flareType, effect->light.roadReflection,
+					effect->light.flags&LIGHTFLAG_LOSCHECK, CCoronas::STREAK_OFF, 0.0f,
+					!!(effect->light.flags&LIGHTFLAG_LONG_DIST));
+			else if(lightFlickering)
+				CCoronas::RegisterCorona((uintptr)this + i,
+					0, 0, 0, 255,
+					pos, effect->light.size, effect->light.dist,
+					effect->light.corona, effect->light.flareType, effect->light.roadReflection,
+					effect->light.flags&LIGHTFLAG_LOSCHECK, CCoronas::STREAK_OFF, 0.0f,
+					!!(effect->light.flags&LIGHTFLAG_LONG_DIST));
+
+			// Pointlight
+			bool alreadyProcessedFog;
+			alreadyProcessedFog = false;
+			if(effect->light.range != 0.0f && lightOn){
+				if(effect->col.r == 0 && effect->col.g == 0 && effect->col.b == 0){
+					CPointLights::AddLight(CPointLights::LIGHT_POINT,
+						pos, CVector(0.0f, 0.0f, 0.0f),
+						effect->light.range,
+						0.0f, 0.0f, 0.0f,
+						CPointLights::FOG_NONE, true);
+				}else{
+					CPointLights::AddLight(CPointLights::LIGHT_POINT,
+						pos, CVector(0.0f, 0.0f, 0.0f),
+						effect->light.range,
+						effect->col.r*CTimeCycle::GetSpriteBrightness()/255.0f,
+						effect->col.g*CTimeCycle::GetSpriteBrightness()/255.0f,
+						effect->col.b*CTimeCycle::GetSpriteBrightness()/255.0f,
+						(effect->light.flags & LIGHTFLAG_FOG) >> 1,
+						true);
+					alreadyProcessedFog = true; 
+				}
+			}
+
+			if(!alreadyProcessedFog){
+				if(effect->light.flags & LIGHTFLAG_FOG_ALWAYS){
+					CPointLights::AddLight(CPointLights::LIGHT_FOGONLY_ALWAYS,
+						pos, CVector(0.0f, 0.0f, 0.0f),
+						0.0f,
+						effect->col.r/255.0f, effect->col.g/255.0f, effect->col.b/255.0f,
+						CPointLights::FOG_ALWAYS, true);
+				}else if(effect->light.flags & LIGHTFLAG_FOG_NORMAL && lightOn && effect->light.range == 0.0f){
+					CPointLights::AddLight(CPointLights::LIGHT_FOGONLY,
+						pos, CVector(0.0f, 0.0f, 0.0f),
+						0.0f,
+						effect->col.r/255.0f, effect->col.g/255.0f, effect->col.b/255.0f,
+						CPointLights::FOG_NORMAL, true);
+				}
+			}
+
+			// Light shadow
+			if(effect->light.shadowSize != 0.0f){
+				if(lightOn){
+					CShadows::StoreStaticShadow((uintptr)this + i, SHADOWTYPE_ADDITIVE,
+						effect->light.shadow, &pos,
+						effect->light.shadowSize, 0.0f,
+						0.0f, -effect->light.shadowSize,
+						128,
+						effect->col.r*CTimeCycle::GetSpriteBrightness()*effect->light.shadowIntensity/255.0f,
+						effect->col.g*CTimeCycle::GetSpriteBrightness()*effect->light.shadowIntensity/255.0f,
+						effect->col.b*CTimeCycle::GetSpriteBrightness()*effect->light.shadowIntensity/255.0f,
+						15.0f, 1.0f, 40.0f, false, 0.0f);
+				}else if(lightFlickering){
+					CShadows::StoreStaticShadow((uintptr)this + i, SHADOWTYPE_ADDITIVE,
+						effect->light.shadow, &pos,
+						effect->light.shadowSize, 0.0f,
+						0.0f, -effect->light.shadowSize,
+						0, 0.0f, 0.0f, 0.0f,
+						15.0f, 1.0f, 40.0f, false, 0.0f);
+				}
+			}
+			break;
+
+		case EFFECT_SUNGLARE:
+			if(CWeather::SunGlare >= 0.0f){
+				CVector pos = GetMatrix() * effect->pos;
+				CVector glareDir = pos - GetPosition();
+				glareDir.Normalise();
+				CVector camDir = TheCamera.GetPosition() - pos;
+				float dist = camDir.Magnitude();
+				camDir *= 2.0f/dist;
+				glareDir += camDir;
+				glareDir.Normalise();
+				float camAngle = -DotProduct(glareDir, CTimeCycle::GetSunDirection());
+				if(camAngle > 0.0f){
+					float intens = Sqrt(camAngle) * CWeather::SunGlare;
+					pos += camDir;
+					CCoronas::RegisterCorona((uintptr)this + 33 + i,
+						intens * (CTimeCycle::GetSunCoreRed() + 2*255)/3.0f,
+						intens * (CTimeCycle::GetSunCoreGreen() + 2*255)/3.0f,
+						intens * (CTimeCycle::GetSunCoreBlue() + 2*255)/3.0f,
+						255,
+						pos, 0.5f*CWeather::SunGlare*Sqrt(dist), 120.0f,
+						CCoronas::TYPE_STAR, CCoronas::FLARE_NONE,
+						CCoronas::REFLECTION_OFF, CCoronas::LOSCHECK_OFF,
+						CCoronas::STREAK_OFF, 0.0f);
+				}
+			}
+			break;
+		}
+	}
 }

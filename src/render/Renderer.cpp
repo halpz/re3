@@ -1497,6 +1497,17 @@ CRenderer::RequestObjectsInFrustum(void)
 	}
 }
 
+bool
+CEntity::SetupLighting(void)
+{
+	return false;
+}
+
+void
+CEntity::RemoveLighting(bool)
+{
+}
+
 // --MIAMI: Done
 bool
 CPed::SetupLighting(void)

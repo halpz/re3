@@ -130,7 +130,7 @@ public:
 	virtual void PreRender(void);
 	virtual void Render(void);
 	virtual bool SetupLighting(void);
-	virtual void RemoveLighting(bool) {}
+	virtual void RemoveLighting(bool);
 	virtual void FlagToDestroyWhenNextProcessed(void) {}
 
 	bool IsBuilding(void) { return m_type == ENTITY_TYPE_BUILDING; }
@@ -149,14 +149,14 @@ public:
 	}
 
 	void GetBoundCentre(CVector &out);
-	CVector GetBoundCentre(void) { CVector v; GetBoundCentre(v); return v; }
-	float GetBoundRadius(void) { return CModelInfo::GetModelInfo(m_modelIndex)->GetColModel()->boundingSphere.radius; }
-	float GetDistanceFromCentreOfMassToBaseOfModel(void) { return -CModelInfo::GetModelInfo(m_modelIndex)->GetColModel()->boundingBox.min.z; }
+	CVector GetBoundCentre(void);
+	float GetBoundRadius(void);
+	float GetDistanceFromCentreOfMassToBaseOfModel(void);
 	bool GetIsTouching(CVector const &center, float r);
 	bool GetIsOnScreen(void);
 	bool GetIsOnScreenComplex(void);
-	bool IsVisible(void) { return m_rwObject && bIsVisible && GetIsOnScreen(); }
-	bool IsVisibleComplex(void) { return m_rwObject && bIsVisible && GetIsOnScreenComplex(); }
+	bool IsVisible(void);
+	bool IsVisibleComplex(void);
 	bool IsEntityOccluded(void);
 	int16 GetModelIndex(void) const { return m_modelIndex; }
 	void UpdateRwFrame(void);
@@ -179,8 +179,6 @@ public:
 	void ModifyMatrixForBannerInWind(void);
 	void ProcessLightsForEntity(void);
 	void SetRwObjectAlpha(int32 alpha);
-
-	static void AddSteamsFromGround(CPtrList& list);
 };
 
 bool IsEntityPointerValid(CEntity*);
