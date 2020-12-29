@@ -8058,21 +8058,14 @@ NEO
 [FEM_PS2]
 PS2
 
-[FEM_PC]
-PC
-
 [FEM_XBX]
 XBOX
-
-[FEM_AUT]
-AUTO
 
 [FEC_IVP]
 INVERT PAD VERTICALLY
 
-[FEC_SCL]
-SPRITE SCALING MODE
-
+[FEM_TWP]
+Toggle Waypoint
 
 { end of file }
 
