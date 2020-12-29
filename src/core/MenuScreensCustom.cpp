@@ -74,7 +74,7 @@
 #endif
 
 #ifdef ASPECT_RATIO_SCALE
-	#define HUD_ASPECT_RATIO_SELECTOR MENUACTION_CFO_SELECT, "FEC_SCL", { new CCFOSelect((int8*)&CMenuManager::m_PrefsSpriteScalingMode, "HudAspectRatio", SpriteScalingModes, ARRAY_SIZE(SpriteScalingModes), false, nil) },
+	#define HUD_ASPECT_RATIO_SELECTOR MENUACTION_CFO_SELECT, "FEC_SCL", { new CCFOSelect((int8*)&CMenuManager::m_PrefsSpriteScalingMode, "SpriteScaling", SpriteScalingModes, ARRAY_SIZE(SpriteScalingModes), false, nil) },
 #else
 	#define HUD_ASPECT_RATIO_SELECTOR
 #endif
