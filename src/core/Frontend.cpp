@@ -141,6 +141,10 @@ int8 CMenuManager::m_nPrefsMSAALevel = 0;
 int8 CMenuManager::m_nDisplayMSAALevel = 0;
 #endif
 
+#ifdef ASPECT_RATIO_SCALE
+int32 CMenuManager::m_PrefsSpriteScalingMode = 0;
+#endif
+
 #ifdef NO_ISLAND_LOADING
 int8 CMenuManager::m_PrefsIslandLoading = ISLAND_LOADING_LOW;
 #endif
@@ -1455,8 +1459,17 @@ CMenuManager::Draw()
 				case AR_4_3:
 					sprintf(asciiTemp, "4:3");
 					break;
+				case AR_5_4:
+					sprintf(asciiTemp, "5:4");
+					break;
+				case AR_16_10:
+					sprintf(asciiTemp, "16:10");
+					break;
 				case AR_16_9:
 					sprintf(asciiTemp, "16:9");
+					break;
+				case AR_21_9:
+					sprintf(asciiTemp, "21:9");
 					break;
 				}
 
@@ -5221,12 +5234,12 @@ CMenuManager::ProcessButtonPresses(void)
 			case MENUACTION_WIDESCREEN:
 				if (changeValueBy > 0) {
 					m_PrefsUseWideScreen++;
-					if (m_PrefsUseWideScreen > 2)
+					if (m_PrefsUseWideScreen > AR_MAX-1)
 						m_PrefsUseWideScreen = 0;
 				} else {
 					m_PrefsUseWideScreen--;
 					if (m_PrefsUseWideScreen < 0)
-						m_PrefsUseWideScreen = 2;
+						m_PrefsUseWideScreen = AR_MAX-1;
 				}
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 				SaveSettings();

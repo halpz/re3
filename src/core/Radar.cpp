@@ -1297,10 +1297,16 @@ void CRadar::TransformRadarPointToScreenSpace(CVector2D &out, const CVector2D &i
 	} else
 #endif
 	{
-#ifdef FIX_BUGS
-		out.x = (in.x + 1.0f) * 0.5f * SCREEN_SCALE_X(RADAR_WIDTH) + SCREEN_SCALE_X(RADAR_LEFT);
+#ifdef ASPECT_RATIO_SCALE
+#define _RADAR_WIDTH ((CMenuManager::m_PrefsSpriteScalingMode==SCL_AUTO) ? (RADAR_HEIGHT) : (RADAR_WIDTH))
 #else
-		out.x = (in.x + 1.0f) * 0.5f * SCREEN_SCALE_X(RADAR_WIDTH) + RADAR_LEFT;
+#define _RADAR_WIDTH RADAR_WIDTH
+#endif
+
+#ifdef FIX_BUGS
+		out.x = (in.x + 1.0f) * 0.5f * SCREEN_SCALE_X(_RADAR_WIDTH) + SCREEN_SCALE_X(RADAR_LEFT);
+#else
+		out.x = (in.x + 1.0f) * 0.5f * SCREEN_SCALE_X(_RADAR_WIDTH) + RADAR_LEFT;
 #endif
 		out.y = (1.0f - in.y) * 0.5f * SCREEN_SCALE_Y(RADAR_HEIGHT) + SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT);
 	}

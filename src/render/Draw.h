@@ -5,9 +5,21 @@ enum eAspectRatio
 	// Make sure these work the same as FrontEndMenuManager.m_PrefsUseWideScreen
 	// without widescreen support
 	AR_4_3,
+	AR_5_4,
+	AR_16_10,
 	AR_16_9,
+	AR_21_9,
 
 	AR_AUTO,
+	
+	AR_MAX,
+};
+
+enum eSpriteScalingMode 
+{
+	SCL_PC,
+	SCL_PS2,
+	SCL_AUTO,
 };
 
 class CDraw
@@ -51,5 +63,9 @@ public:
 	static void SetAspectRatio(float ratio) { ms_fAspectRatio = ratio; }
 #else
 	static float GetAspectRatio(void) { return FindAspectRatio(); }
+#endif
+
+#ifdef ASPECT_RATIO_SCALE
+	static float ScaleY(float y);
 #endif
 };

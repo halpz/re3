@@ -5,6 +5,10 @@
 #include "Camera.h"
 #include "Sprite.h"
 
+#ifdef ASPECT_RATIO_SCALE
+#include "Frontend.h"
+#endif
+
 float CSprite::m_f2DNearScreenZ;
 float CSprite::m_f2DFarScreenZ;
 float CSprite::m_fRecipNearClipPlane;
@@ -35,6 +39,11 @@ CSprite::CalcScreenCoors(const RwV3d &in, RwV3d *out, float *outw, float *outh, 
 
 	*outw = fovScale * SCREEN_SCALE_AR(recip) * SCREEN_WIDTH;
 	*outh = fovScale * recip * SCREEN_HEIGHT;
+	
+#ifdef ASPECT_RATIO_SCALE
+	if ( CMenuManager::m_PrefsSpriteScalingMode==SCL_AUTO )
+		*outw = fovScale * recip * SCREEN_HEIGHT;
+#endif
 
 	return true;
 }

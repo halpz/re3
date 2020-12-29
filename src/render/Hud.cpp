@@ -1186,9 +1186,14 @@ void CHud::Draw()
 		/*
 			DrawRadar
 		*/
+#ifdef ASPECT_RATIO_SCALE
+#define _RADAR_WIDTH ((CMenuManager::m_PrefsSpriteScalingMode==SCL_AUTO) ? (RADAR_HEIGHT) : (RADAR_WIDTH))
+#else
+#define _RADAR_WIDTH RADAR_WIDTH
+#endif
 		if (m_ItemToFlash == ITEM_RADAR && CTimer::GetFrameCounter() & 8 || m_ItemToFlash != ITEM_RADAR) {
 			CRadar::DrawMap();
-			CRect rect(0.0f, 0.0f, SCREEN_SCALE_X(RADAR_WIDTH), SCREEN_SCALE_Y(RADAR_HEIGHT));
+			CRect rect(0.0f, 0.0f, SCREEN_SCALE_X(_RADAR_WIDTH), SCREEN_SCALE_Y(RADAR_HEIGHT));
 #ifdef FIX_BUGS
 			rect.Translate(SCREEN_SCALE_X(RADAR_LEFT), SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
 #else
