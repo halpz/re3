@@ -132,6 +132,10 @@ void CControllerConfigManager::LoadSettings(int32 file)
 {
 	bool bValid = true;
 
+#ifdef BIND_VEHICLE_FIREWEAPON
+	bool skipVehicleFireWeapon = false;
+#endif
+
 	if (file)
 	{
 		char buff[29];
@@ -139,18 +143,55 @@ void CControllerConfigManager::LoadSettings(int32 file)
 
 		if (!strncmp(buff, TopLineEmptyFile, sizeof(TopLineEmptyFile)-1))
 			bValid = false;
-		else
+		else {
 			CFileMgr::Seek(file, 0, 0);
+			
+#ifdef BIND_VEHICLE_FIREWEAPON
+			// HACK!
+			// All of this is hacky as fuck.
+			// We are checking the file size to read the .set file correctly.
+			// But because .set file is opened in text mode we have to read
+			// the WHOLE file to get the size we should be working with.
+			// Joy, ain't it?
+			char tempBuf[0x1000];
+			size_t fileSize = 0, blockSize;
+			do
+			{
+				blockSize = CFileMgr::Read(file, tempBuf, sizeof(tempBuf));
+				fileSize += blockSize;
+			} while (blockSize == sizeof(tempBuf));
+
+			CFileMgr::Seek(file, 0, 0);
+
+			if (fileSize == 0x671)
+				skipVehicleFireWeapon = true;
+#endif
+		}
 	}
 
 	if (bValid)
 	{
 		ControlsManager.MakeControllerActionsBlank();
 
+#ifdef BIND_VEHICLE_FIREWEAPON
+		// Set the default settings of VEHICLE_FIREWEAPON
+		if (skipVehicleFireWeapon) {
+			SetControllerKeyAssociatedWithAction(VEHICLE_FIREWEAPON, rsPADINS, KEYBOARD);
+			SetControllerKeyAssociatedWithAction(VEHICLE_FIREWEAPON, rsLCTRL, OPTIONAL_EXTRA);
+			if (m_bMouseAssociated)
+				SetMouseButtonAssociatedWithAction(VEHICLE_FIREWEAPON, 1);
+		}
+#endif
+
 		for (int32 i = 0; i < MAX_CONTROLLERTYPES; i++)
 		{
 			for (int32 j = 0; j < MAX_CONTROLLERACTIONS; j++)
 			{
+#ifdef BIND_VEHICLE_FIREWEAPON
+				// Skip file read
+				if (skipVehicleFireWeapon && j == VEHICLE_FIREWEAPON)
+					continue;
+#endif
 				CFileMgr::Read(file, (char *)&ControlsManager.m_aSettings[j][i], sizeof(tControllerConfigBind));
 			}
 		}
