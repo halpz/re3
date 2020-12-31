@@ -809,7 +809,7 @@ CAutomobile::ProcessControl(void)
 
 		// dampen springs
 		for(i = 0; i < 4; i++)
-			if(m_aSuspensionSpringRatio[i] < 1.0f)
+			if(m_aSuspensionSpringRatio[i] < 0.99999f)
 				ApplySpringDampening(pHandling->fSuspensionDampingLevel,
 					springDirections[i], contactPoints[i], contactSpeeds[i]);
 
@@ -850,7 +850,7 @@ CAutomobile::ProcessControl(void)
 		brake = m_fBrakePedal * pHandling->fBrakeDeceleration * CTimer::GetTimeStep();
 		bool neutralHandling = GetStatus() != STATUS_PLAYER && GetStatus() != STATUS_PLAYER_REMOTE && (pHandling->Flags & HANDLING_NEUTRALHANDLING);
 		float brakeBiasFront = neutralHandling ? 1.0f : 2.0f*pHandling->fBrakeBias;
-		float brakeBiasRear  = neutralHandling ? 1.0f : 2.0f*(1.0f-pHandling->fBrakeBias);
+		float brakeBiasRear  = neutralHandling ? 1.0f : 2.0f-pHandling->fBrakeBias;	// looks like a bug, but it was correct in III...
 		float tractionBiasFront = neutralHandling ? 1.0f : 2.0f*pHandling->fTractionBias;
 		float tractionBiasRear  = neutralHandling ? 1.0f : 2.0f-tractionBiasFront;
 
@@ -1042,7 +1042,7 @@ CAutomobile::ProcessControl(void)
 
 		if(m_aWheelTimer[CARWHEEL_REAR_LEFT] > 0.0f || m_aWheelTimer[CARWHEEL_REAR_RIGHT] > 0.0f){
 			CVector wheelFwd = GetForward();
-			CVector wheelRight = GetRight();
+			CVector wheelRight = GetRight();	// overwritten for resp. wheel
 
 			float rearBrake = brake;
 			float rearTraction = traction;
@@ -1073,7 +1073,6 @@ CAutomobile::ProcessControl(void)
 				else
 					fThrust = acceleration;
 
-				wheelFwd = GetForward();
 				wheelFwd -= DotProduct(wheelFwd, m_aWheelColPoints[CARWHEEL_REAR_LEFT].normal)*m_aWheelColPoints[CARWHEEL_REAR_LEFT].normal;
 				wheelFwd.Normalise();
 				wheelRight = CrossProduct(wheelFwd, m_aWheelColPoints[CARWHEEL_REAR_LEFT].normal);
@@ -1110,7 +1109,7 @@ CAutomobile::ProcessControl(void)
 #ifdef FIX_BUGS
 			// Shouldn't we reset these after the left wheel?
 			wheelFwd = GetForward();
-			wheelRight = GetRight();
+			wheelRight = GetRight();	// actually useless
 #endif
 
 			if(m_aWheelTimer[CARWHEEL_REAR_RIGHT] > 0.0f){
@@ -1119,7 +1118,6 @@ CAutomobile::ProcessControl(void)
 				else
 					fThrust = acceleration;
 
-				wheelFwd = GetForward();
 				wheelFwd -= DotProduct(wheelFwd, m_aWheelColPoints[CARWHEEL_REAR_RIGHT].normal)*m_aWheelColPoints[CARWHEEL_REAR_RIGHT].normal;
 				wheelFwd.Normalise();
 				wheelRight = CrossProduct(wheelFwd, m_aWheelColPoints[CARWHEEL_REAR_RIGHT].normal);
@@ -1167,7 +1165,9 @@ CAutomobile::ProcessControl(void)
 
 		if(!IsRealHeli()){
 			if(m_aWheelTimer[CARWHEEL_REAR_LEFT] <= 0.0f){
-				if(mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier) || acceleration == 0.0f)
+				if(bIsHandbrakeOn)
+					m_aWheelSpeed[CARWHEEL_REAR_LEFT] = 0.0f;
+				else if(mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier) || acceleration == 0.0f)
 					m_aWheelSpeed[CARWHEEL_REAR_LEFT] *= 0.95f;
 				else{
 					if(acceleration > 0.0f){
@@ -1181,7 +1181,9 @@ CAutomobile::ProcessControl(void)
 				m_aWheelRotation[CARWHEEL_REAR_LEFT] += m_aWheelSpeed[CARWHEEL_REAR_LEFT];
 			}
 			if(m_aWheelTimer[CARWHEEL_REAR_RIGHT] <= 0.0f){
-				if(mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier) || acceleration == 0.0f)
+				if(bIsHandbrakeOn)
+					m_aWheelSpeed[CARWHEEL_REAR_RIGHT] = 0.0f;
+				else if(mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier) || acceleration == 0.0f)
 					m_aWheelSpeed[CARWHEEL_REAR_RIGHT] *= 0.95f;
 				else{
 					if(acceleration > 0.0f){
