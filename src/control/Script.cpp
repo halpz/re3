@@ -4767,10 +4767,10 @@ void CRunningScript::Save(uint8*& buf)
 #endif
 	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
 		WriteSaveBuf<int32>(buf, m_anLocalVariables[i]);
+	WriteSaveBuf<bool>(buf, m_bIsActive);
 	WriteSaveBuf<bool>(buf, m_bCondResult);
 	WriteSaveBuf<bool>(buf, m_bIsMissionScript);
 	WriteSaveBuf<bool>(buf, m_bSkipWakeTime);
-	SkipSaveBuf(buf, 1);
 	WriteSaveBuf<uint32>(buf, m_nWakeTime);
 	WriteSaveBuf<uint16>(buf, m_nAndOrState);
 	WriteSaveBuf<bool>(buf, m_bNotFlag);
@@ -4802,10 +4802,10 @@ void CRunningScript::Load(uint8*& buf)
 #endif
 	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
 		m_anLocalVariables[i] = ReadSaveBuf<int32>(buf);
+	m_bIsActive = ReadSaveBuf<bool>(buf);
 	m_bCondResult = ReadSaveBuf<bool>(buf);
 	m_bIsMissionScript = ReadSaveBuf<bool>(buf);
 	m_bSkipWakeTime = ReadSaveBuf<bool>(buf);
-	SkipSaveBuf(buf, 1);
 	m_nWakeTime = ReadSaveBuf<uint32>(buf);
 	m_nAndOrState = ReadSaveBuf<uint16>(buf);
 	m_bNotFlag = ReadSaveBuf<bool>(buf);

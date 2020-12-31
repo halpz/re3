@@ -1722,10 +1722,10 @@ void CGarage::FindDoorsEntities()
 {
 	m_pDoor1 = nil;
 	m_pDoor2 = nil;
-	int xstart = Max(0, CWorld::GetSectorIndexX(GetGarageCenterX()));
-	int xend = Min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(m_fSupX));
-	int ystart = Max(0, CWorld::GetSectorIndexY(GetGarageCenterY()));
-	int yend = Min(NUMSECTORS_Y - 1, CWorld::GetSectorIndexY(m_fSupY));
+	int xstart = Max(0, CWorld::GetSectorIndexX(GetGarageCenterX() - 100.0f));
+	int xend = Min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(GetGarageCenterX() + 100.0f));
+	int ystart = Max(0, CWorld::GetSectorIndexY(GetGarageCenterY() - 100.0f));
+	int yend = Min(NUMSECTORS_Y - 1, CWorld::GetSectorIndexY(GetGarageCenterY() + 100.0f));
 	assert(xstart <= xend);
 	assert(ystart <= yend);
 
