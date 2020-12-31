@@ -1100,11 +1100,11 @@ void CHud::Draw()
 	if (!CTimer::GetIsUserPaused()) {
 		for (int i = 0; i < ARRAY_SIZE(CTheScripts::IntroTextLines); i++) {
 			if (CTheScripts::IntroTextLines[i].m_Text[0] && CTheScripts::IntroTextLines[i].m_bTextBeforeFade) {
-				CFont::SetScale(SCREEN_SCALE_X_PC(CTheScripts::IntroTextLines[i].m_fScaleX), SCREEN_SCALE_Y_PC(CTheScripts::IntroTextLines[i].m_fScaleY 
+				CFont::SetScale(SCREEN_SCALE_X_PC(CTheScripts::IntroTextLines[i].m_fScaleX), SCREEN_SCALE_Y_PC(CTheScripts::IntroTextLines[i].m_fScaleY) 
 #if !defined(PS2_HUD) || defined(FIX_BUGS)
 					* 0.5f
 #endif
-				));
+				);
 
 				CFont::SetColor(CTheScripts::IntroTextLines[i].m_sColor);
 
