@@ -1937,11 +1937,11 @@ CWorld::Process(void)
 				if(csObj->m_rwObject && RwObjectGetType(csObj->m_rwObject) == rpCLUMP &&
 				   RpAnimBlendClumpGetFirstAssociation(csObj->GetClump())) {
 					if (csObj->IsObject())
-						RpAnimBlendClumpUpdateAnimations(csObj->GetClump(), 0.02f * CTimer::GetTimeStepNonClipped());
+						RpAnimBlendClumpUpdateAnimations(csObj->GetClump(), CTimer::GetTimeStepNonClippedInSeconds());
 					else {
 						if (!csObj->bOffscreen)
 							csObj->bOffscreen = !csObj->GetIsOnScreen();
-						RpAnimBlendClumpUpdateAnimations(csObj->GetClump(), 0.02f * CTimer::GetTimeStep(), !csObj->bOffscreen);
+						RpAnimBlendClumpUpdateAnimations(csObj->GetClump(), CTimer::GetTimeStepInSeconds(), !csObj->bOffscreen);
 					}
 				}
 				csObj->ProcessControl();
@@ -1958,11 +1958,11 @@ CWorld::Process(void)
 			if(!movingEnt->bRemoveFromWorld && movingEnt->m_rwObject && RwObjectGetType(movingEnt->m_rwObject) == rpCLUMP &&
 			   RpAnimBlendClumpGetFirstAssociation(movingEnt->GetClump())) {
 				if (movingEnt->IsObject())
-					RpAnimBlendClumpUpdateAnimations(movingEnt->GetClump(), 0.02f * CTimer::GetTimeStepNonClipped());
+					RpAnimBlendClumpUpdateAnimations(movingEnt->GetClump(), CTimer::GetTimeStepNonClippedInSeconds());
 				else {
 					if (!movingEnt->bOffscreen)
 						movingEnt->bOffscreen = !movingEnt->GetIsOnScreen();
-					RpAnimBlendClumpUpdateAnimations(movingEnt->GetClump(), 0.02f * CTimer::GetTimeStep(), !movingEnt->bOffscreen);
+					RpAnimBlendClumpUpdateAnimations(movingEnt->GetClump(), CTimer::GetTimeStepInSeconds(), !movingEnt->bOffscreen);
 				}
 			}
 		}

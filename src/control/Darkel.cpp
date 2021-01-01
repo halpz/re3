@@ -73,13 +73,21 @@ CDarkel::DrawMessages()
 		{
 			CFont::SetJustifyOff();
 			CFont::SetBackgroundOff();
-			CFont::SetCentreSize(SCREEN_SCALE_X(610.0f));
+#ifdef FIX_BUGS
+			CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - 30));
+#else
+			CFont::SetCentreSize(SCREEN_WIDTH - 30);
+#endif
 			CFont::SetCentreOn();
 			CFont::SetPropOn();
 			uint32 timePassedSinceStart = CTimer::GetTimeInMilliseconds() - TimeOfFrenzyStart;
 			if (bStandardSoundAndMessages) {
 				if (timePassedSinceStart >= 3000 && timePassedSinceStart < 11000) {
+#ifdef FIX_BUGS
 					CFont::SetScale(SCREEN_SCALE_X(1.3f), SCREEN_SCALE_Y(1.3f));
+#else
+					CFont::SetScale(1.3f, 1.3f);
+#endif
 					CFont::SetJustifyOff();
 					CFont::SetColor(CRGBA(255, 255, 128, CalcFade(timePassedSinceStart, 3000, 11000)));
 					CFont::SetFontStyle(FONT_STANDARD);
@@ -89,7 +97,11 @@ CDarkel::DrawMessages()
 				}
 			} else {
 				if (timePassedSinceStart < 8000) {
+#ifdef FIX_BUGS
 					CFont::SetScale(SCREEN_SCALE_X(1.3f), SCREEN_SCALE_Y(1.3f));
+#else
+					CFont::SetScale(1.3f, 1.3f);
+#endif
 					CFont::SetJustifyOff();
 					CFont::SetColor(CRGBA(255, 255, 128, CalcFade(timePassedSinceStart, 0, 8000)));
 					CFont::SetFontStyle(FONT_STANDARD);
@@ -98,7 +110,11 @@ CDarkel::DrawMessages()
 					}
 				}
 			}
+#ifdef FIX_BUGS
 			CFont::SetScale(SCREEN_SCALE_X(0.75f), SCREEN_SCALE_Y(1.5f));
+#else
+			CFont::SetScale(0.75f, 1.5f);
+#endif
 			CFont::SetCentreOff();
 			CFont::SetRightJustifyOn();
 			CFont::SetFontStyle(FONT_HEADING);
@@ -127,13 +143,25 @@ CDarkel::DrawMessages()
 				uint32 timePassedSinceStart = CTimer::GetTimeInMilliseconds() - TimeOfFrenzyStart;
 				if (CTimer::GetTimeInMilliseconds() - TimeOfFrenzyStart < 5000) {
 					CFont::SetBackgroundOff();
-					CFont::SetCentreSize(SCREEN_SCALE_X(620.0f));
+#ifdef FIX_BUGS
+					CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - 20));
+#else
+					CFont::SetCentreSize(SCREEN_WIDTH - 20);
+#endif
 					CFont::SetCentreOn();
+#ifdef FIX_BUGS
 					CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
+#else
+					CFont::SetScale(1.5f, 1.5f);
+#endif
 					CFont::SetJustifyOff();
 					CFont::SetColor(CRGBA(128, 255, 128, CalcFade(timePassedSinceStart, 0, 5000)));
 					CFont::SetFontStyle(FONT_STANDARD);
+#ifdef FIX_BUGS
 					int y = SCREEN_HEIGHT / 2 + SCREEN_SCALE_Y(25.0f - timePassedSinceStart * 0.01f);
+#else
+					int y = (SCREEN_HEIGHT / 2 + 25) - (timePassedSinceStart * 0.01f);
+#endif
 					CFont::PrintString(SCREEN_WIDTH / 2, y, TheText.Get("KF_3"));
 				}
 			}

@@ -1395,7 +1395,11 @@ void CGarages::PrintMessages()
 		CFont::SetPropOn();
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-		CFont::SetCentreSize(SCREEN_SCALE_X(590.0f));
+#ifdef FIX_BUGS
+		CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - 50));
+#else
+		CFont::SetCentreSize(SCREEN_WIDTH - 50);
+#endif
 		CFont::SetCentreOn();
 		CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 		CFont::SetColor(CRGBA(27, 89, 130, 255));
