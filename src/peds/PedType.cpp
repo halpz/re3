@@ -254,13 +254,12 @@ CPedStats::LoadPedStats(void)
 	float fleeDist, headingChangeRate, attackStrength, defendWeakness;
 	int fear, temper, lawfullness, sexiness, flags;
 
-
 	type = 0;
 	buf = new char[16 * 1024];
 
-        CFileMgr::SetDir("DATA");
-        buflen = CFileMgr::LoadFile("PEDSTATS.DAT", (uint8*)buf, 16 * 1024, "r");
-        CFileMgr::SetDir("");
+	CFileMgr::SetDir("DATA");
+	buflen = CFileMgr::LoadFile("PEDSTATS.DAT", (uint8*)buf, 16 * 1024, "r");
+	CFileMgr::SetDir("");
 
 	for(bp = 0; bp < buflen; ){
 		// read file line by line

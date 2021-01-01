@@ -72,7 +72,7 @@ int32 CTheScripts::StoreVehicleIndex;
 bool CTheScripts::StoreVehicleWasRandom;
 CRunningScript *CTheScripts::pIdleScripts;
 CRunningScript *CTheScripts::pActiveScripts;
-uint32 CTheScripts::NextFreeCollectiveIndex;
+int32 CTheScripts::NextFreeCollectiveIndex;
 int32 CTheScripts::LastRandomPedId;
 uint16 CTheScripts::NumberOfUsedObjects;
 bool CTheScripts::bAlreadyRunningAMissionScript;
@@ -1673,7 +1673,7 @@ void CMissionCleanup::Init()
 	}
 }
 
-CMissionCleanupEntity* CMissionCleanup::FindFree()
+cleanup_entity_struct* CMissionCleanup::FindFree()
 {
 	for (int i = 0; i < MAX_CLEANUP; i++){
 		if (m_sEntities[i].type == CLEANUP_UNUSED)
@@ -1685,7 +1685,7 @@ CMissionCleanupEntity* CMissionCleanup::FindFree()
 
 void CMissionCleanup::AddEntityToList(int32 id, uint8 type)
 {
-	CMissionCleanupEntity* pNew = FindFree();
+	cleanup_entity_struct* pNew = FindFree();
 	if (!pNew)
 		return;
 	pNew->id = id;

@@ -1347,13 +1347,18 @@ CMoneyMessage::Render()
 		RwV3d vecOut;
 		float fDistX, fDistY;
 		if (CSprite::CalcScreenCoors(m_vecPosition + CVector(0.0f, 0.0f, fLifeTime), &vecOut, &fDistX, &fDistY, true)) {
-			fDistX *= (0.7 * fLifeTime + 2.0) * m_fSize;
-			fDistY *= (0.7 * fLifeTime + 2.0) * m_fSize;
+			fDistX *= (0.7f * fLifeTime + 2.0f) * m_fSize;
+			fDistY *= (0.7f * fLifeTime + 2.0f) * m_fSize;
 			CFont::SetPropOn();
 			CFont::SetBackgroundOff();
 			float fScaleY = Min(fDistY / 100.0f, MAX_SCALE);
 			float fScaleX = Min(fDistX / 100.0f, MAX_SCALE);
-			CFont::SetScale(fScaleX, fScaleY); // maybe use SCREEN_SCALE_X and SCREEN_SCALE_Y here?
+
+#ifdef FIX_BUGS
+			CFont::SetScale(SCREEN_SCALE_X(fScaleX), SCREEN_SCALE_Y(fScaleY));
+#else
+			CFont::SetScale(fScaleX, fScaleY);
+#endif
 			CFont::SetCentreOn();
 			CFont::SetCentreSize(SCREEN_WIDTH);
 			CFont::SetJustifyOff();
