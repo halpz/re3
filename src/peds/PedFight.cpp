@@ -2021,9 +2021,9 @@ CPed::PlayHitSound(CPed *hitTo)
 	if (weaponInfo->m_AnimToPlay == ASSOCGRP_KNIFE) {
 		if (m_curFightMove >= FIGHTMOVE_MELEE1) {
 			if (m_curFightMove == FIGHTMOVE_MELEE3) {
-				DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_BAT_ATTACK, (weapon << 8) | 3);
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_BAT_ATTACK, (weapon << 8) | ENTITY_TYPE_PED);
 			} else {
-				DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_KNIFE_ATTACK, (weapon << 8) | 3);
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_KNIFE_ATTACK, (weapon << 8) | ENTITY_TYPE_PED);
 			}
 			return;
 		}
@@ -2048,7 +2048,7 @@ CPed::PlayHitSound(CPed *hitTo)
 	}
 
 	if (soundId != NO_SND)
-		DMAudio.PlayOneShot(m_audioEntityId, soundId, (weapon << 8) | 3);
+		DMAudio.PlayOneShot(m_audioEntityId, soundId, (weapon << 8) | ENTITY_TYPE_PED);
 }
 
 // --MIAMI: Done
@@ -3567,7 +3567,7 @@ CPed::CollideWithPed(CPed *collideWith)
 					animAssoc->flags |= ASSOC_FADEOUTWHENDONE;
 					collideWith->m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 1000;
 					if (m_nPedState == PED_ATTACK)
-						DMAudio.PlayOneShot(m_audioEntityId, SOUND_FIGHT_46, 0.0f);
+						DMAudio.PlayOneShot(m_audioEntityId, SOUND_49, 0.0f);
 				}
 			} else {
 				// We're at his right side
