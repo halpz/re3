@@ -803,8 +803,14 @@ CCredits::Render(void)
 	if(TheCamera.m_WideScreenOn)
 		TheCamera.DrawBordersForWideScreen();
 
+#ifdef FIX_BUGS
 	if(lineoffset + DEFAULT_SCREEN_HEIGHT - scrolloffset < -10.0f)
+#else
+	if(lineoffset + SCREEN_HEIGHT - scrolloffset < -10.0f)
+#endif
+	{
 		bCreditsGoing = false;
+	}
 }
 
 bool CCredits::AreCreditsDone(void)

@@ -1,5 +1,6 @@
 #pragma once
 #include "common.h"
+#include "Ped.h"
 #include "PedType.h"
 #include "Text.h"
 #include "Sprite2d.h"
@@ -39,6 +40,8 @@ void FlushLog();
 #endif
 
 #define KEY_LENGTH_IN_SCRIPT 8
+
+//#define GTA_SCRIPT_COLLECTIVE
 
 struct intro_script_rectangle 
 {
@@ -131,7 +134,7 @@ enum {
 	CLEANUP_OBJECT
 };
 
-struct CMissionCleanupEntity
+struct cleanup_entity_struct
 {
 	uint8 type;
 	int32 id;
@@ -145,14 +148,14 @@ enum {
 
 class CMissionCleanup
 {
-	CMissionCleanupEntity m_sEntities[MAX_CLEANUP];
+	cleanup_entity_struct m_sEntities[MAX_CLEANUP];
 	uint8 m_nCount;
 
 public:
 	CMissionCleanup();
 
 	void Init();
-	CMissionCleanupEntity* FindFree();
+	cleanup_entity_struct* FindFree();
 	void AddEntityToList(int32, uint8);
 	void RemoveEntityFromList(int32, uint8);
 	void Process();
@@ -217,8 +220,8 @@ enum {
 
 struct tCollectiveData
 {
-	int32 index;
-	uint32 unk_data;
+	int32 colIndex;
+	int32 pedIndex;
 };
 
 enum {
@@ -289,7 +292,7 @@ class CTheScripts
 	static bool StoreVehicleWasRandom;
 	static CRunningScript *pIdleScripts;
 	static CRunningScript *pActiveScripts;
-	static uint32 NextFreeCollectiveIndex;
+	static int32 NextFreeCollectiveIndex;
 	static int32 LastRandomPedId;
 	static uint16 NumberOfUsedObjects;
 	static bool bAlreadyRunningAMissionScript;
@@ -413,6 +416,25 @@ public:
 	static void SwitchToMission(int32 mission);
 #endif
 
+#ifdef GTA_SCRIPT_COLLECTIVE
+	static void AdvanceCollectiveIndex()
+	{
+		if (NextFreeCollectiveIndex == INT32_MAX)
+			NextFreeCollectiveIndex = 0;
+		else
+			NextFreeCollectiveIndex++;
+	}
+
+	static int AddPedsInVehicleToCollective(int);
+	static int AddPedsInAreaToCollective(float, float, float, float);
+	static int FindFreeSlotInCollectiveArray();
+	static void SetObjectiveForAllPedsInCollective(int, eObjective, int16, int16);
+	static void SetObjectiveForAllPedsInCollective(int, eObjective, CVector, float);
+	static void SetObjectiveForAllPedsInCollective(int, eObjective, CVector);
+	static void SetObjectiveForAllPedsInCollective(int, eObjective, void*);
+	static void SetObjectiveForAllPedsInCollective(int, eObjective);
+#endif
+
 	friend class CRunningScript;
 	friend class CHud;
 	friend void CMissionCleanup::Process();
@@ -531,6 +553,14 @@ private:
 	void CarInAreaCheckCommand(int32, uint32*);
 	void LocateObjectCommand(int32, uint32*);
 	void ObjectInAreaCheckCommand(int32, uint32*);
+
+#ifdef GTA_SCRIPT_COLLECTIVE
+	void LocateCollectiveCommand(int32, uint32*);
+	void LocateCollectiveCharCommand(int32, uint32*);
+	void LocateCollectiveCarCommand(int32, uint32*);
+	void LocateCollectivePlayerCommand(int32, uint32*);
+	void CollectiveInAreaCheckCommand(int32, uint32*);
+#endif
 
 #ifdef MISSION_REPLAY
 	bool CanAllowMissionReplay();

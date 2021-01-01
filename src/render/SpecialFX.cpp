@@ -849,7 +849,7 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 			} else {
 				pMarker->m_fStdSize = size;
 			}
-		} else {
+		} else if (type == MARKERTYPE_CYLINDER) {
 			if (dist < size + 12.0f) {
 				if (dist > size + 1.0f)
 					pMarker->m_Color.alpha = (1.0f - (size + 12.0f - dist) * 0.7f / 11.0f) * (float)a;
@@ -862,8 +862,14 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 		float someSin = Sin(TWOPI * (float)((pMarker->m_nPulsePeriod - 1) & (CTimer::GetTimeInMilliseconds() - pMarker->m_nStartTime)) / (float)pMarker->m_nPulsePeriod);
 		pMarker->m_fSize = pMarker->m_fStdSize - pulseFraction * pMarker->m_fStdSize * someSin;
 
-		if (type == MARKERTYPE_ARROW)
+		if (type == MARKERTYPE_ARROW) {
 			pos.z += 0.25f * pMarker->m_fStdSize * someSin;
+		} else if (type == MARKERTYPE_0) {
+			if (someSin > 0.0f)
+				pMarker->m_Color.alpha = (float)a * 0.7f * someSin + a;
+			else
+				pMarker->m_Color.alpha = (float)a * 0.4f * someSin + a;
+		}
 		if (pMarker->m_nRotateRate != 0) {
 			RwV3d pos = pMarker->m_Matrix.m_matrix.pos;
 			pMarker->m_Matrix.RotateZ(DEGTORAD(pMarker->m_nRotateRate * CTimer::GetTimeStep()));
@@ -888,7 +894,7 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 		pMarker->DeleteMarkerObject();
 
 	pMarker->AddMarker(identifier, type, size, r, g, b, a, pulsePeriod, pulseFraction, rotateRate);
-	if (type == MARKERTYPE_CYLINDER) {
+	if (type == MARKERTYPE_CYLINDER || type == MARKERTYPE_0 || type == MARKERTYPE_2) {
 		if ((playerPos - pos).MagnitudeSqr() < sq(100.f) && CColStore::HasCollisionLoaded(CVector2D(pos))) {
 			float z = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z + 1.0f, nil);
 			if (z != 0.0f)
@@ -899,6 +905,10 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 		}
 	}
 	pMarker->m_Matrix.SetTranslate(pos.x, pos.y, pos.z);
+	if (type == MARKERTYPE_2) {
+		pMarker->m_Matrix.RotateX(PI);
+		pMarker->m_Matrix.GetPosition() = pos;
+	}
 	pMarker->m_Matrix.UpdateRW();
 	if (type == MARKERTYPE_ARROW) {
 		if (dist < 25.0f) {
@@ -909,7 +919,7 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 		} else {
 			pMarker->m_fStdSize = size;
 		}
-	} else {
+	} else if (type == MARKERTYPE_CYLINDER) {
 		if (dist < size + 12.0f) {
 			if (dist > size + 1.0f)
 				pMarker->m_Color.alpha = (1.0f - (size + 12.0f - dist) * 0.7f / 11.0f) * (float)a;
@@ -1347,13 +1357,18 @@ CMoneyMessage::Render()
 		RwV3d vecOut;
 		float fDistX, fDistY;
 		if (CSprite::CalcScreenCoors(m_vecPosition + CVector(0.0f, 0.0f, fLifeTime), &vecOut, &fDistX, &fDistY, true)) {
-			fDistX *= (0.7 * fLifeTime + 2.0) * m_fSize;
-			fDistY *= (0.7 * fLifeTime + 2.0) * m_fSize;
+			fDistX *= (0.7f * fLifeTime + 2.0f) * m_fSize;
+			fDistY *= (0.7f * fLifeTime + 2.0f) * m_fSize;
 			CFont::SetPropOn();
 			CFont::SetBackgroundOff();
 			float fScaleY = Min(fDistY / 100.0f, MAX_SCALE);
 			float fScaleX = Min(fDistX / 100.0f, MAX_SCALE);
-			CFont::SetScale(fScaleX, fScaleY); // maybe use SCREEN_SCALE_X and SCREEN_SCALE_Y here?
+
+#ifdef FIX_BUGS
+			CFont::SetScale(SCREEN_SCALE_X(fScaleX), SCREEN_SCALE_Y(fScaleY));
+#else
+			CFont::SetScale(fScaleX, fScaleY);
+#endif
 			CFont::SetCentreOn();
 			CFont::SetCentreSize(SCREEN_WIDTH);
 			CFont::SetJustifyOff();

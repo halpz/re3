@@ -1914,7 +1914,10 @@ CVehicle::AddPassenger(CPed *passenger, uint8 n)
 void
 CVehicle::RemoveDriver(void)
 {
-	SetStatus(STATUS_ABANDONED);
+#ifdef FIX_BUGS
+	if (GetStatus() != STATUS_WRECKED)
+#endif
+		SetStatus(STATUS_ABANDONED);
 	if(pDriver == FindPlayerPed()){
 		if(GetModelIndex() == MI_POLICE && CStreaming::HasModelLoaded(MI_SHOTGUN)){
 			if(bFreebies){

@@ -3,6 +3,7 @@
 #include "Script.h"
 #include "ScriptCommands.h"
 
+#include "Bike.h"
 #include "CarCtrl.h"
 #include "Cranes.h"
 #include "Credits.h"
@@ -31,7 +32,6 @@
 #include "Weather.h"
 #include "Zones.h"
 #include "main.h"
-#include "Bike.h"
 #include "GameLogic.h"
 #include "Sprite.h"
 #include "CarAI.h"
