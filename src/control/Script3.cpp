@@ -1343,7 +1343,6 @@ int8 CRunningScript::ProcessCommands600To699(int32 command)
 		return 0;
 	}
 #endif
-	/*
 	case COMMAND_IS_PLAYER_STOPPED:
 	{
 		CollectParameters(&m_nIp, 1);
