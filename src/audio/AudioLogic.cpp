@@ -47,8 +47,8 @@ const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
 const int policeChannel = channels + 1;
 const int allChannels = channels + 2;
 
-enum PLAY_STATUS : uint8 { PLAY_STATUS_STOPPED = 0, PLAY_STATUS_PLAYING, PLAY_STATUS_FINISHED };
-enum LOADING_STATUS : uint8 { LOADING_STATUS_NOT_LOADED = 0, LOADING_STATUS_LOADED, LOADING_STATUS_FAILED };
+enum PLAY_STATUS { PLAY_STATUS_STOPPED = 0, PLAY_STATUS_PLAYING, PLAY_STATUS_FINISHED };
+enum LOADING_STATUS { LOADING_STATUS_NOT_LOADED = 0, LOADING_STATUS_LOADED, LOADING_STATUS_FAILED };
 
 void
 cAudioManager::PreInitialiseGameSpecificSetup() const
@@ -123,39 +123,39 @@ cAudioManager::PostInitialiseGameSpecificSetup()
 {
 	m_nFireAudioEntity = CreateEntity(AUDIOTYPE_FIRE, &gFireManager);
 	if (m_nFireAudioEntity >= 0)
-		SetEntityStatus(m_nFireAudioEntity, 1);
+		SetEntityStatus(m_nFireAudioEntity, true);
 
 	m_nCollisionEntity = CreateEntity(AUDIOTYPE_COLLISION, (void *)1);
 	if (m_nCollisionEntity >= 0)
-		SetEntityStatus(m_nCollisionEntity, 1);
+		SetEntityStatus(m_nCollisionEntity, true);
 
 	m_nFrontEndEntity = CreateEntity(AUDIOTYPE_FRONTEND, (void *)1);
 	if (m_nFrontEndEntity >= 0)
-		SetEntityStatus(m_nFrontEndEntity, 1);
+		SetEntityStatus(m_nFrontEndEntity, true);
 
 	m_nProjectileEntity = CreateEntity(AUDIOTYPE_PROJECTILE, (void *)1);
 	if (m_nProjectileEntity >= 0)
-		SetEntityStatus(m_nProjectileEntity, 1);
+		SetEntityStatus(m_nProjectileEntity, true);
 
 	m_nWaterCannonEntity = CreateEntity(AUDIOTYPE_WATERCANNON, (void *)1);
 	if (m_nWaterCannonEntity >= 0)
-		SetEntityStatus(m_nWaterCannonEntity, 1);
+		SetEntityStatus(m_nWaterCannonEntity, true);
 
 	m_nPoliceChannelEntity = CreateEntity(AUDIOTYPE_POLICERADIO, (void *)1);
 	if (m_nPoliceChannelEntity >= 0)
-		SetEntityStatus(m_nPoliceChannelEntity, 1);
+		SetEntityStatus(m_nPoliceChannelEntity, true);
 #ifdef GTA_BRIDGE
 	m_nBridgeEntity = CreateEntity(AUDIOTYPE_BRIDGE, (void*)1);
 	if (m_nBridgeEntity >= 0)
-		SetEntityStatus(m_nBridgeEntity, 1);
+		SetEntityStatus(m_nBridgeEntity, true);
 #endif // GTA_BRIDGE
 	m_nEscalatorEntity = CreateEntity(AUDIOTYPE_ESCALATOR, (void*)1);
 	if (m_nEscalatorEntity >= 0)
-		SetEntityStatus(m_nEscalatorEntity, 1);
+		SetEntityStatus(m_nEscalatorEntity, true);
 
 	m_nExtraSoundsEntity = CreateEntity(AUDIOTYPE_EXTRA_SOUNDS, (void*)1);
 	if (m_nExtraSoundsEntity >= 0)
-		SetEntityStatus(m_nExtraSoundsEntity, 1);
+		SetEntityStatus(m_nExtraSoundsEntity, true);
 
 
 	m_sMissionAudio.m_nSampleIndex[0] = NO_SAMPLE;
@@ -261,7 +261,7 @@ cAudioManager::ProcessReverb() const
 	if (SampleManager.UpdateReverb() && m_bDynamicAcousticModelingStatus) {
 		for (uint32 i = 0; i < numChannels; i++) {
 			if (m_asActiveSamples[i].m_bReverbFlag)
-				SampleManager.SetChannelReverbFlag(i, 1);
+				SampleManager.SetChannelReverbFlag(i, true);
 		}
 	}
 }
@@ -277,10 +277,7 @@ void
 cAudioManager::CalculateDistance(bool &distCalculated, float dist)
 {
 	if (!distCalculated) {
-		if (dist > 0.0f)
-			m_sQueueSample.m_fDistance = Sqrt(dist);
-		else
-			m_sQueueSample.m_fDistance = 0.0f;
+		m_sQueueSample.m_fDistance = Sqrt(dist);
 		distCalculated = true;
 	}
 }
@@ -317,7 +314,6 @@ cAudioManager::ProcessPlayerMood()
 				return;
 			}
 
-			//lastMissionPassedTime = CTheScripts::GetLastMissionPassedTime();
 			if (lastMissionPassedTime != -1) {
 				if (curTime < lastMissionPassedTime) {
 					lastMissionPassedTime = curTime;
@@ -350,7 +346,7 @@ cAudioManager::ProcessSpecial()
 		if (playerPed != nil) {
 			if (playerPed->m_audioEntityId >= 0 && m_asAudioEntities[playerPed->m_audioEntityId].m_bIsUsed) {
 				if (playerPed->EnteringCar()) {
-					if(!playerPed->bInVehicle&& CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle == nil)
+					if(!playerPed->bInVehicle && CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle == nil)
 						SampleManager.StopChannel(m_nActiveSamples);
 				}
 			}
@@ -361,7 +357,7 @@ cAudioManager::ProcessSpecial()
 void
 cAudioManager::ProcessEntity(int32 id)
 {
-	if (m_asAudioEntities[id].m_nStatus != STATUS_PLAYER) {
+	if (m_asAudioEntities[id].m_bStatus) {
 		m_sQueueSample.m_nEntityIndex = id;
 		switch (m_asAudioEntities[id].m_nType) {
 		case AUDIOTYPE_PHYSICAL:
@@ -1403,7 +1399,7 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams& params)
 			} else if (params.m_fVelocityChange == 0.0f) {
 				traction = 0.9f;
 			}
-			if (transmission->fMaxVelocity <= 0.0) {
+			if (transmission->fMaxVelocity <= 0.0f) {
 				relativeChange = 0.0f;
 				modificator = 0.0f;
 			} else {
@@ -1421,7 +1417,7 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams& params)
 					}
 					modificator = relativeChange;
 				} else {
-					modificator = Min(1.0, Abs(params.m_fVelocityChange / transmission->fMaxVelocity > 1.0f));
+					modificator = Min(1.0f, Abs(params.m_fVelocityChange / transmission->fMaxVelocity > 1.0f));
 				}
 			}
 		} else {
@@ -1506,14 +1502,10 @@ cAudioManager::UpdateGasPedalAudio(CVehicle* veh, int vehType)
 	float gasPedal = Abs(veh->m_fGasPedal);
 	float* gasPealAudioPtr;
 
-	switch (vehType) {
-	case VEHICLE_TYPE_CAR:
-		gasPealAudioPtr = &((CAutomobile*)veh)->m_fGasPedalAudio;
-	case VEHICLE_TYPE_BIKE:
-		gasPealAudioPtr = &((CBike*)veh)->m_fGasPedalAudio;
-	default:
-		return;
-		break;
+	switch(vehType) {
+	case VEHICLE_TYPE_CAR: gasPealAudioPtr = &((CAutomobile *)veh)->m_fGasPedalAudio; break;
+	case VEHICLE_TYPE_BIKE: gasPealAudioPtr = &((CBike *)veh)->m_fGasPedalAudio; break;
+	default: return;
 	}
 	if (*gasPealAudioPtr < gasPedal)
 		*gasPealAudioPtr = Min(*gasPealAudioPtr + 0.09f, gasPedal);
@@ -1568,29 +1560,12 @@ cAudioManager::AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sampl
 }
 
 void
-cAudioManager::ProcessCesna(cVehicleParams& params)
+cAudioManager::ProcessCesna(cVehicleParams &params)
 {
-	static uint8 nAccel = 0;
-
-	//((CAutomobile *)params.m_pVehicle)->Damage.GetEngineStatus();
-
-	if (FindPlayerVehicle() == params.m_pVehicle) {
-		if (params.m_nIndex == DODO) {
-			if (Pads[0].GetAccelerate() <= 0) {
-				if (nAccel != 0)
-					--nAccel;
-			} else if (nAccel < 60) {
-				++nAccel;
-			}
-			AddPlayerCarSample(85 * (60 - nAccel) / 60 + 20, 8500 * nAccel / 60 + 17000, SFX_CESNA_IDLE, SFX_BANK_0, 52, true);
-			AddPlayerCarSample(85 * nAccel / 60 + 20, 8500 * nAccel / 60 + 17000, SFX_CESNA_REV, SFX_BANK_0, 2, true);
-		}
-	} else if (params.m_nIndex == DODO) {
-		AddPlayerCarSample(105, 17000, SFX_CESNA_IDLE, SFX_BANK_0, 52, true);
-	} else if (params.m_fDistance < SQR(200)) {
+	if(params.m_fDistance < SQR(200)) {
 		CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
 		m_sQueueSample.m_nVolume = ComputeVolume(80, 200.f, m_sQueueSample.m_fDistance);
-		if (m_sQueueSample.m_nVolume != 0) {
+		if(m_sQueueSample.m_nVolume != 0) {
 			m_sQueueSample.m_nCounter = 52;
 			m_sQueueSample.m_nSampleIndex = SFX_CESNA_IDLE;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
@@ -1602,28 +1577,28 @@ cAudioManager::ProcessCesna(cVehicleParams& params)
 			m_sQueueSample.m_nEmittingVolume = 80;
 			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_fSpeedMultiplier = 8.0f;
+			m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 			m_sQueueSample.m_fSoundIntensity = 200.0f;
 			m_sQueueSample.m_bReleasingSoundFlag = false;
 			m_sQueueSample.m_bReverbFlag = true;
 			m_sQueueSample.m_bRequireReflection = false;
 			AddSampleToRequestedQueue();
 		}
-		if (params.m_fDistance < SQR(90)) {
+		if(params.m_fDistance < SQR(90)) {
 			m_sQueueSample.m_nVolume = ComputeVolume(80, 90.f, m_sQueueSample.m_fDistance);
-			if (m_sQueueSample.m_nVolume != 0) {
+			if(m_sQueueSample.m_nVolume != 0) {
 				m_sQueueSample.m_nCounter = 2;
 				m_sQueueSample.m_nSampleIndex = SFX_CESNA_REV;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				m_sQueueSample.m_bIs2D = false;
-				m_sQueueSample.m_nReleasingVolumeModificator = 0;
+				m_sQueueSample.m_nReleasingVolumeModificator = 3;
 				m_sQueueSample.m_nFrequency = 25000;
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_nReleasingVolumeDivider = 4;
 				m_sQueueSample.m_nEmittingVolume = 80;
 				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_fSpeedMultiplier = 8.0f;
+				m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 				m_sQueueSample.m_fSoundIntensity = 90.0f;
 				m_sQueueSample.m_bReleasingSoundFlag = false;
 				m_sQueueSample.m_bReverbFlag = true;
@@ -2002,27 +1977,11 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 					}
 				} else {
 					nCruising = 1;
-					params.m_pVehicle->bAudioChangingGear = true;
-					bAccelSampleStopped = true;
-					SampleManager.StopChannel(m_nActiveSamples);
-					if (isMoped || accelerateState >= 150 && wheelsOnGround && brakeState <= 0 && !params.m_pVehicle->bIsHandbrakeOn
-						&& !lostTraction && currentGear >= params.m_pTransmission->nNumberOfGears - 1) {
-						if (accelerateState >= 220 && params.m_fVelocityChange + 0.001f >= velocityChangeForAudio) {
-							if (nCruising < 800)
-								++nCruising;
-						} else if (nCruising > 3) {
-							--nCruising;
-						}
-						freq = 27 * nCruising + freqModifier + 22050;
-						if (engineSoundType == SFX_BANK_TRUCK)
-							freq /= 2;
-						AudioManager.AddPlayerCarSample(120, freq, soundOffset + SFX_CAR_AFTER_ACCEL_1, engineSoundType, 64, true);
-					} else {
-						nCruising = 0;
-					}
+					goto PlayCruising;
 				}
 			}
 		} else {
+PlayCruising:
 			bAccelSampleStopped = true;
 			SampleManager.StopChannel(m_nActiveSamples);
 			if (isMoped || accelerateState >= 150 && wheelsOnGround && brakeState <= 0 && !params.m_pVehicle->bIsHandbrakeOn
@@ -2036,7 +1995,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 				freq = 27 * nCruising + freqModifier + 22050;
 				if (engineSoundType == SFX_BANK_TRUCK)
 					freq /= 2;
-				AudioManager.AddPlayerCarSample(120, freq, soundOffset + SFX_CAR_AFTER_ACCEL_1, engineSoundType, 64, true);
+				AddPlayerCarSample(120, freq, soundOffset + SFX_CAR_AFTER_ACCEL_1, engineSoundType, 64, true);
 			} else {
 				nCruising = 0;
 			}
@@ -2232,7 +2191,6 @@ cAudioManager::ProcessVehicleHorn(cVehicleParams& params)
 	if (veh->m_modelIndex == MI_MRWHOOP)
 		return true;
 
-	veh->m_nAlarmState;
 	if (veh->IsAlarmOn())
 		return true;
 
@@ -2614,12 +2572,8 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 	bool noReflections;
 	bool isHeli;
 	float maxDist;
-	cPedParams pedParams;
 	static uint8 GunIndex = 53;
 
-	pedParams.m_pPed = nil;
-	pedParams.m_bDistanceCalculated = false;
-	pedParams.m_fDistance = 0.0f;
 	for (int i = 0; i < m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_AudioEvents; i++) {
 		noReflections = false;
 		isHeli = false;
@@ -3010,20 +2964,57 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 				isHeli = true;
 				break;
 			default:
+			{
 				maxDist = SQR(SOUND_INTENSITY);
+#ifdef FIX_BUGS
+				int32 sampleIndex;
+				int32 frequency;
+				CPed *pPed = params.m_pVehicle->pDriver;
+				if(!pPed->HasWeaponSlot(WEAPONSLOT_SUBMACHINEGUN)) {
+					sampleIndex = SFX_UZI_LEFT;
+					frequency = SampleManager.GetSampleBaseFrequency(sampleIndex);
+					frequency += RandomDisplacement(frequency / 32);
+				} else
+					switch(pPed->GetWeapon(WEAPONSLOT_SUBMACHINEGUN).m_eWeaponType) {
+					case WEAPONTYPE_TEC9:
+						sampleIndex = SFX_TEC_LEFT;
+						frequency = RandomDisplacement(500) + 17000;
+						break;
+					case WEAPONTYPE_SILENCED_INGRAM:
+						sampleIndex = SFX_TEC_LEFT;
+						frequency = RandomDisplacement(1000) + 34000;
+						break;
+					case WEAPONTYPE_MP5:
+						sampleIndex = SFX_MP5_LEFT;
+						frequency = SampleManager.GetSampleBaseFrequency(sampleIndex);
+						frequency += RandomDisplacement(frequency / 32);
+						break;
+					default:
+						sampleIndex = SFX_UZI_LEFT;
+						frequency = SampleManager.GetSampleBaseFrequency(sampleIndex);
+						frequency += RandomDisplacement(frequency / 32);
+						break;
+					}
+				m_sQueueSample.m_nSampleIndex = sampleIndex;
+#else
 				m_sQueueSample.m_nSampleIndex = SFX_UZI_LEFT;
+#endif
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				m_sQueueSample.m_nCounter = GunIndex++;
 				emittingVol = m_anRandomTable[2] % 15 + 65;
-				if (GunIndex > 58)
-					GunIndex = 53;
+				if(GunIndex > 58) GunIndex = 53;
+#ifdef FIX_BUGS
+				m_sQueueSample.m_nFrequency = frequency;
+#else
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_UZI_LEFT);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 16);
+#endif
 				m_sQueueSample.m_nReleasingVolumeModificator = 3;
 				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
 				m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 				m_sQueueSample.m_bRequireReflection = true;
 				break;
+			}
 			}
 			break;
 		}
@@ -3059,9 +3050,10 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 			break;
 		}
 		case SOUND_PED_HELI_PLAYER_FOUND: {
+			cPedParams pedParams;
 			pedParams.m_bDistanceCalculated = params.m_bDistanceCalculated;
 			pedParams.m_fDistance = params.m_fDistance;
-			SetupPedComments(&pedParams, SOUND_PED_HELI_PLAYER_FOUND);
+			SetupPedComments(pedParams, SOUND_PED_HELI_PLAYER_FOUND);
 			continue;
 		}
 		/* case SOUND_PED_BODYCAST_HIT:
@@ -3073,9 +3065,11 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 			SetupPedComments(&pedParams, SOUND_PED_BODYCAST_HIT);
 			continue; */
 		case SOUND_PED_VCPA_PLAYER_FOUND: {
+			cPedParams pedParams;
 			pedParams.m_bDistanceCalculated = params.m_bDistanceCalculated;
 			pedParams.m_fDistance = params.m_fDistance;
-			SetupPedComments(&pedParams, SOUND_PED_VCPA_PLAYER_FOUND);
+			SetupPedComments(pedParams, SOUND_PED_VCPA_PLAYER_FOUND);
+			continue;
 		}
 		case SOUND_WATER_FALL: {
 			const float SOUND_INTENSITY = 40.0f;
@@ -3161,7 +3155,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 						m_sQueueSample.m_nCounter = GunIndex++;
 						if (GunIndex > 58)
 							GunIndex = 53;
-						m_sQueueSample.m_bRequireReflection = 0;
+						m_sQueueSample.m_bRequireReflection = false;
 						AddSampleToRequestedQueue();
 						continue;
 #endif
@@ -3193,7 +3187,7 @@ AddSample:
 
 #ifdef GTA_TRAIN
 bool
-cAudioManager::ProcessTrainNoise(cVehicleParams *params)
+cAudioManager::ProcessTrainNoise(cVehicleParams& params)
 {
 	const float SOUND_INTENSITY = 300.0f;
 
@@ -3201,12 +3195,12 @@ cAudioManager::ProcessTrainNoise(cVehicleParams *params)
 	uint8 emittingVol;
 	float speedMultipler;
 
-	if (params->m_fDistance >= SQR(SOUND_INTENSITY))
+	if (params.m_fDistance >= SQR(SOUND_INTENSITY))
 		return false;
 
-	if (params->m_fVelocityChange > 0.0f) {
-		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
-		train = (CTrain *)params->m_pVehicle;
+	if (params.m_fVelocityChange > 0.0f) {
+		CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
+		train = (CTrain *)params.m_pVehicle;
 		speedMultipler = Min(1.0f, train->m_fSpeed * 250.f / 51.f);
 		emittingVol = (75.f * speedMultipler);
 		if (train->m_fWagonPosition == 0.0f) {
@@ -3232,7 +3226,7 @@ cAudioManager::ProcessTrainNoise(cVehicleParams *params)
 			}
 		}
 		const float SOUND_INTENSITY = 70.0f;
-		if (params->m_fDistance < SQR(SOUND_INTENSITY)) {
+		if (params.m_fDistance < SQR(SOUND_INTENSITY)) {
 			m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume != 0) {
 				m_sQueueSample.m_nCounter = 33;
@@ -3263,25 +3257,128 @@ cAudioManager::ProcessBoatEngine(cVehicleParams& params)
 {
 	CBoat *boat;
 	float padRelativeAccerate;
-	float gasPedal;
-	int32 padAccelerate;
-	uint8 emittingVol;
-	float oneShotVol;
 
-	static uint16 LastAccel = 0;
-	static uint8 LastVol = 0;
+	bool isV12 = false;
+	static int32 LastFreq = 2000;
+	static int8 LastVol = 0;
 
-	static const int intensity = 50;
+	static const float intensity = 90.0f;
 
 	if (params.m_fDistance < SQR(intensity)) {
 		boat = (CBoat *)params.m_pVehicle;
-		if (params.m_nIndex == REEFER) {
+		if(boat->GetStatus() == STATUS_WRECKED)
+			return true;
+
+		float freqModificator;
+		float volModificator;
+		int BaseVol;
+		int BaseFreq;
+
+		switch(boat->GetModelIndex()) {
+		case MI_RIO:
+			freqModificator = 490.0f;
+			volModificator = 60.0f;
+			BaseVol = 20;
+			BaseFreq = 1888;
+			break;
+		case MI_PREDATOR:
+		case MI_SQUALO:
+		case MI_SPEEDER:
+		case MI_COASTG:
+		case MI_DINGHY:
+		case MI_JETMAX:
+			freqModificator = 6000.0f;
+			volModificator = 60.0f;
+			isV12 = true;
+			BaseFreq = 9000;
+			BaseVol = 20;
+			break;
+		case MI_REEFER:
+			freqModificator = 715.0f;
+			volModificator = 80.0f;
+			BaseVol = 0;
+			BaseFreq = 3775;
+			break;
+		case MI_TROPIC:
+		case MI_MARQUIS:
+			freqModificator = 463.0f;
+			volModificator = 60.0f;
+			BaseVol = 20;
+			BaseFreq = 1782;
+			break;
+		default:
+			return true;
+		}
+
+		bool bIsPlayerVeh;
+
+		if(FindPlayerVehicle() == params.m_pVehicle) {
+			float padAccelerate = Max(Pads[0].GetAccelerate(), Pads[0].GetBrake());
+			padRelativeAccerate = padAccelerate / 255.0f;
+			bIsPlayerVeh = true;
+		} else {
+			padRelativeAccerate = Max(params.m_pVehicle->m_fGasPedal, params.m_pVehicle->m_fBrakePedal);
+			bIsPlayerVeh = false;
+		}
+
+		int Freq = BaseFreq + (padRelativeAccerate * freqModificator);
+		int Vol = BaseVol + (padRelativeAccerate * volModificator);
+
+		if(!boat->bPropellerInWater)
+			Freq = (9 * Freq) / 8;
+
+		if(bIsPlayerVeh) {
+			if(Freq > LastFreq) {
+				if(isV12)
+					Freq = Min(Freq, LastFreq + 100);
+				else
+					Freq = Min(Freq, LastFreq + 15);
+			} else {
+				if(isV12)
+					Freq = Max(Freq, LastFreq - 100);
+				else
+					Freq = Max(Freq, LastFreq - 15);
+			}
+			if(Vol > LastVol)
+				Vol = Min(Vol, LastVol + 3);
+			else
+				Vol = Max(Vol, LastVol - 3);
+		}
+
+		if (Vol > 0) {
 			CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
-			m_sQueueSample.m_nVolume = ComputeVolume(80, 50.f, m_sQueueSample.m_fDistance);
+			m_sQueueSample.m_nVolume = ComputeVolume(Vol, intensity, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume != 0) {
+				m_sQueueSample.m_nFrequency = Freq;
+				m_sQueueSample.m_nCounter = 40;
+				if (isV12)
+					m_sQueueSample.m_nSampleIndex = SFX_BOAT_V12_LOOP;
+				else
+					m_sQueueSample.m_nSampleIndex = SFX_BOAT_CRUISER_LOOP;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_nReleasingVolumeModificator = 3;
+				m_sQueueSample.m_nLoopCount = 0;
+				m_sQueueSample.m_nEmittingVolume = Vol;
+				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+				m_sQueueSample.m_fSpeedMultiplier = 2.0f;
+				m_sQueueSample.m_fSoundIntensity = intensity;
+				m_sQueueSample.m_bReleasingSoundFlag = false;
+				m_sQueueSample.m_nReleasingVolumeDivider = 7;
+				m_sQueueSample.m_bReverbFlag = true;
+				m_sQueueSample.m_bRequireReflection = false;
+				AddSampleToRequestedQueue();
+			}
+		}
+
+		if(boat->GetModelIndex() == MI_REEFER) {
+			CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
+			m_sQueueSample.m_nVolume = ComputeVolume(80, intensity, m_sQueueSample.m_fDistance);
+			if (m_sQueueSample.m_nVolume != 0) {
+				m_sQueueSample.m_nFrequency = 6000;
 				m_sQueueSample.m_nCounter = 39;
 				m_sQueueSample.m_nSampleIndex = SFX_FISHING_BOAT_IDLE;
-				m_sQueueSample.m_nFrequency = 10386;
 				m_sQueueSample.m_nFrequency += (m_sQueueSample.m_nEntityIndex * 65536) % 1000;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				m_sQueueSample.m_bIs2D = false;
@@ -3298,102 +3395,11 @@ cAudioManager::ProcessBoatEngine(cVehicleParams& params)
 				m_sQueueSample.m_bRequireReflection = false;
 				AddSampleToRequestedQueue();
 			}
-			if (FindPlayerVehicle() == params.m_pVehicle) {
-				padAccelerate = Max(Pads[0].GetAccelerate(), Pads[0].GetBrake());
-				padRelativeAccerate = padAccelerate / 255;
-				emittingVol = (100.f * padRelativeAccerate) + 15;
-				m_sQueueSample.m_nFrequency = (3000.f * padRelativeAccerate) + 6000;
-				if (!boat->m_bIsAnchored)
-					m_sQueueSample.m_nFrequency = 11 * m_sQueueSample.m_nFrequency / 10;
-			} else {
-				gasPedal = Abs(boat->m_fGasPedal);
-				if (gasPedal > 0.0f) {
-					m_sQueueSample.m_nFrequency = 6000;
-					emittingVol = 15;
-				} else {
-					emittingVol = (100.f * gasPedal) + 15;
-					m_sQueueSample.m_nFrequency = (3000.f * gasPedal) + 6000;
-					if (!boat->m_bIsAnchored)
-						m_sQueueSample.m_nFrequency = 11 * m_sQueueSample.m_nFrequency / 10;
-				}
-			}
-			m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, 50.f, m_sQueueSample.m_fDistance);
-			if (!m_sQueueSample.m_nVolume)
-				return true;
-			m_sQueueSample.m_nCounter = 40;
-			m_sQueueSample.m_nSampleIndex = SFX_FISHING_BOAT_IDLE;
-			m_sQueueSample.m_nFrequency += (m_sQueueSample.m_nEntityIndex * 65536) % 1000;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_nLoopCount = 0;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-			m_sQueueSample.m_fSoundIntensity = intensity;
-			m_sQueueSample.m_bReleasingSoundFlag = false;
-			m_sQueueSample.m_nReleasingVolumeDivider = 7;
-			m_sQueueSample.m_bReverbFlag = true;
-			m_sQueueSample.m_bRequireReflection = false;
-		} else {
-			if (FindPlayerVehicle() == params.m_pVehicle) {
-				padAccelerate = Max(Pads[0].GetAccelerate(), Pads[0].GetBrake());
-				if (padAccelerate <= 20) {
-					emittingVol = 45 - 45 * padAccelerate / 40;
-					m_sQueueSample.m_nFrequency = 100 * padAccelerate + 11025;
-					m_sQueueSample.m_nCounter = 39;
-					m_sQueueSample.m_nSampleIndex = SFX_FISHING_BOAT_IDLE;
-					if (LastAccel > 20) {
-						oneShotVol = LastVol;
-						PlayOneShot(m_sQueueSample.m_nEntityIndex, SOUND_BOAT_SLOWDOWN, oneShotVol);
-					}
-				} else {
-					emittingVol = 105 * padAccelerate / 255 + 15;
-					m_sQueueSample.m_nFrequency = 4000 * padAccelerate / 255 + 8000;
-					if (!boat->m_bIsAnchored)
-						m_sQueueSample.m_nFrequency = 11 * m_sQueueSample.m_nFrequency / 10;
-					m_sQueueSample.m_nCounter = 40;
-					m_sQueueSample.m_nSampleIndex = SFX_FISHING_BOAT_IDLE;
-				}
-				LastVol = emittingVol;
-				LastAccel = padAccelerate;
-			} else {
-				gasPedal = Abs(boat->m_fGasPedal);
-				if (gasPedal > 0.0f) {
-					m_sQueueSample.m_nFrequency = 11025;
-					emittingVol = 45;
-					m_sQueueSample.m_nCounter = 39;
-					m_sQueueSample.m_nSampleIndex = SFX_FISHING_BOAT_IDLE;
-				} else {
-					emittingVol = (105.f * gasPedal) + 15;
-					m_sQueueSample.m_nFrequency = (4000.f * gasPedal) + 8000;
-					if (!boat->m_bIsAnchored)
-						m_sQueueSample.m_nFrequency = 11 * m_sQueueSample.m_nFrequency / 10;
-					m_sQueueSample.m_nCounter = 40;
-					m_sQueueSample.m_nSampleIndex = SFX_FISHING_BOAT_IDLE;
-				}
-			}
-			CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
-			m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, 50.f, m_sQueueSample.m_fDistance);
-			if (!m_sQueueSample.m_nVolume)
-				return true;
-			m_sQueueSample.m_nFrequency += (m_sQueueSample.m_nEntityIndex * 65536) % 1000;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_nLoopCount = 0;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-			m_sQueueSample.m_fSoundIntensity = intensity;
-			m_sQueueSample.m_bReleasingSoundFlag = false;
-			m_sQueueSample.m_nReleasingVolumeDivider = 7;
-			m_sQueueSample.m_bReverbFlag = true;
-			m_sQueueSample.m_bRequireReflection = false;
 		}
-		AddSampleToRequestedQueue();
+		if(bIsPlayerVeh) {
+			LastFreq = Freq;
+			LastVol = Vol;
+		}
 		return true;
 	}
 	return false;
@@ -3432,7 +3438,7 @@ cAudioManager::ProcessBoatMovingOverWater(cVehicleParams& params)
 		m_sQueueSample.m_fSpeedMultiplier = 2.0f;
 		m_sQueueSample.m_fSoundIntensity = 50.0f;
 		m_sQueueSample.m_bReleasingSoundFlag = false;
-		m_sQueueSample.m_nReleasingVolumeDivider = 3;
+		m_sQueueSample.m_nReleasingVolumeDivider = 6;
 		m_sQueueSample.m_bReverbFlag = true;
 		m_sQueueSample.m_bRequireReflection = false;
 		AddSampleToRequestedQueue();
@@ -3630,7 +3636,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 
 	//after accel rotor sound
 	emittingVol = ((cameraAngle + 1.0f) * volumeModifier * 127.0f) / 2.0f;
-	m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, 140.0, m_sQueueSample.m_fDistance);
+	m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, 140.0f, m_sQueueSample.m_fDistance);
 	if (m_sQueueSample.m_nVolume != 0) {
 		m_sQueueSample.m_nCounter = 1;
 		if (hunterBool) {
@@ -3677,7 +3683,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 		if (automobile->bEngineOn) {
 			if (propellerSpeed < 1.0f) {
 				emittingVol = (1.0f - propellerSpeed / 2.0f) * 70.0f;
-				m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, 30.0, m_sQueueSample.m_fDistance);
+				m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, 30.0f, m_sQueueSample.m_fDistance);
 				if (m_sQueueSample.m_nVolume) {
 					if (hunterBool) {
 						m_sQueueSample.m_nSampleIndex = SFX_HELI_APACHE_4;
@@ -3718,7 +3724,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 					m_sQueueSample.m_nFrequency = 18000 + Min(1.0f, (Max(accelerateState, brakeState) / 255.0f) * freqModifier) * 2204;
 				else
 					m_sQueueSample.m_nFrequency = 14287 + Min(1.0f, freqModifier) * 3713;
-				if (propellerSpeed < 1.0)
+				if (propellerSpeed < 1.0f)
 					m_sQueueSample.m_nFrequency = (propellerSpeed + 1) * (m_sQueueSample.m_nFrequency / 2.0f);
 				m_sQueueSample.m_nFrequency = clamp2(m_sQueueSample.m_nFrequency, freqSkimmerPrev, 197);
 				freqSkimmerPrev = m_sQueueSample.m_nFrequency;
@@ -3761,7 +3767,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 				m_sQueueSample.m_nCounter = 2;
 				m_sQueueSample.m_nSampleIndex = hunterBool ? SFX_HELI_APACHE_3 : SFX_CAR_HELI_REA;
 				m_sQueueSample.m_nBankIndex = 0;
-				m_sQueueSample.m_bIs2D = 0;
+				m_sQueueSample.m_bIs2D = false;
 				m_sQueueSample.m_nReleasingVolumeModificator = 1;
 				m_sQueueSample.m_nFrequency = (volumeModifier + 1.0f) * 16000;
 				m_sQueueSample.m_nLoopCount = 0;
@@ -3880,8 +3886,8 @@ cAudioManager::ProcessJumbo(cVehicleParams& params)
 	CPlane *plane;
 	float position;
 
-	//if (params.m_fDistance >= SQR(440))
-	//	return;
+	 if (params.m_fDistance >= SQR(440))
+		return;
 
 	CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
 	plane = (CPlane*)params.m_pVehicle;
@@ -4083,27 +4089,26 @@ bool
 cAudioManager::SetupJumboFlySound(uint8 emittingVol)
 {
 	const float SOUND_INTENSITY = 440.0f;
-	if (m_sQueueSample.m_fDistance >= SOUND_INTENSITY)
-		return false;
+	if(m_sQueueSample.m_fDistance >= SOUND_INTENSITY) return false;
 
 	int32 vol = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
 	m_sQueueSample.m_nVolume = vol;
-	if (m_sQueueSample.m_nVolume != 0) {
-		m_sQueueSample.m_nSampleIndex = SFX_JUMBO_DIST_FLY;
+	if(m_sQueueSample.m_nVolume != 0) {
 		m_sQueueSample.m_nCounter = 0;
+		m_sQueueSample.m_nSampleIndex = SFX_JUMBO_DIST_FLY;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 		m_sQueueSample.m_bIs2D = false;
 		m_sQueueSample.m_nReleasingVolumeModificator = 1;
-		m_sQueueSample.m_nEmittingVolume = emittingVol;
-		m_sQueueSample.m_nLoopCount = 0;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_JUMBO_DIST_FLY);
+		m_sQueueSample.m_nLoopCount = 0;
+		m_sQueueSample.m_nEmittingVolume = emittingVol;
 		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
-		m_sQueueSample.m_bReleasingSoundFlag = false;
-		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
-		m_sQueueSample.m_bReverbFlag = true;
-		m_sQueueSample.m_nReleasingVolumeDivider = 5;
 		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
+		m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
+		m_sQueueSample.m_nReleasingVolumeDivider = 5;
+		m_sQueueSample.m_bReverbFlag = true;
+		m_sQueueSample.m_bRequireReflection = false; // todo port fix to re3
 		AddSampleToRequestedQueue();
 	}
 	return true;
@@ -4149,7 +4154,7 @@ cAudioManager::SetupJumboRumbleSound(uint8 emittingVol)
 int32
 cAudioManager::GetJumboTaxiFreq() const
 {
-	return (60.833f * m_sQueueSample.m_fDistance) + 22050;
+	return (1.f / 180 * 10950 * m_sQueueSample.m_fDistance) + 22050; // todo port fix to re3
 }
 
 #pragma endregion Some jumbo crap
@@ -4162,49 +4167,46 @@ cAudioManager::ProcessPed(CPhysical *ped)
 {
 	cPedParams params;
 
-	params.m_pPed = nil;
-	params.m_bDistanceCalculated = false;
-	params.m_fDistance = 0.0f;
-
 	m_sQueueSample.m_vecPos = ped->GetPosition();
 
-	//params.m_bDistanceCalculated = false;
+	params.m_bDistanceCalculated = false;
 	params.m_pPed = (CPed *)ped;
 	params.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
-	ProcessPedOneShots(&params);
+	ProcessPedOneShots(params);
 }
 
 void
-cAudioManager::ProcessPedOneShots(cPedParams *params)
+cAudioManager::ProcessPedOneShots(cPedParams &params)
 {
 	uint8 emittingVol;
 	int32 sampleIndex;
 
-	CPed *ped = params->m_pPed;
+	CPed *ped = params.m_pPed;
 
-	bool stereo;
+	bool narrowSoundRange;
 	int16 sound;
-	bool noReflection;
+	bool stereo;
 	CWeapon *weapon;
 	float maxDist = 0.f; // uninitialized variable
 
 	static uint8 iSound = 21;
+	static uint32 iSplashFrame = 0;
 
-	weapon = params->m_pPed->GetWeapon();
+	weapon = params.m_pPed->GetWeapon();
 	for (uint32 i = 0; i < m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_AudioEvents; i++) {
-		noReflection = false;
 		stereo = false;
+		narrowSoundRange = false;
 		m_sQueueSample.m_bRequireReflection = false;
 		sound = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i];
 		switch (sound) {
 		case SOUND_STEP_START:
 		case SOUND_STEP_END:
-			if (!params->m_pPed->bIsLooking) {
+			if (!params.m_pPed->bIsLooking) {
 				emittingVol = m_anRandomTable[3] % 15 + 45;
 				if (FindPlayerPed() != m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_pEntity)
 					emittingVol /= 2;
 				maxDist = 400.f;
-				switch (params->m_pPed->m_nSurfaceTouched) {
+				switch (params.m_pPed->m_nSurfaceTouched) {
 				case SURFACE_GRASS:
 					sampleIndex = m_anRandomTable[1] % 5 + SFX_FOOTSTEP_GRASS_1;
 					break;
@@ -4245,10 +4247,10 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 				}
 				m_sQueueSample.m_nSampleIndex = sampleIndex;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				m_sQueueSample.m_nCounter = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i] - 28;
+				m_sQueueSample.m_nCounter = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i] - 32;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 17);
-				switch (params->m_pPed->m_nMoveState) {
+				switch (params.m_pPed->m_nMoveState) {
 				case PEDMOVE_WALK:
 					emittingVol /= 4;
 					m_sQueueSample.m_nFrequency = 9 * m_sQueueSample.m_nFrequency / 10;
@@ -4306,229 +4308,83 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 		case SOUND_FIGHT_37:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_1;
 			m_sQueueSample.m_nFrequency = 18000;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_38:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_1;
 			m_sQueueSample.m_nFrequency = 16500;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_39:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_1;
 			m_sQueueSample.m_nFrequency = 20000;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_40:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_2;
 			m_sQueueSample.m_nFrequency = 18000;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_41:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_2;
 			m_sQueueSample.m_nFrequency = 16500;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_42:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_2;
 			m_sQueueSample.m_nFrequency = 20000;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_43:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_4;
 			m_sQueueSample.m_nFrequency = 18000;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_44:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_4;
 			m_sQueueSample.m_nFrequency = 16500;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_45:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_4;
 			m_sQueueSample.m_nFrequency = 20000;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_46:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_5;
 			m_sQueueSample.m_nFrequency = 18000;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_47:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_5;
 			m_sQueueSample.m_nFrequency = 16500;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
-			++iSound;
-			m_sQueueSample.m_nReleasingVolumeModificator = 3;
-			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 30.0f;
-			maxDist = SQR(30);
-			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
-			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReleasingSoundFlag = true;
-			m_sQueueSample.m_bRequireReflection = true;
-			break;
+			goto AddFightSound;
 		case SOUND_FIGHT_48:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_5;
 			m_sQueueSample.m_nFrequency = 20000;
+		AddFightSound:
+			{
+				uint32 soundParams = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i]; // wtf? stroring int as float
+				uint8 damagerType = soundParams & 0xFF;
+				uint32 weaponType = soundParams >> 8;
+
+				if (damagerType == ENTITY_TYPE_PED) {
+					if (weaponType == WEAPONTYPE_BRASSKNUCKLE) {
+						CPed* ped = params.m_pPed;
+						uint32 fightMove = ped->m_curFightMove;
+						if (fightMove == FIGHTMOVE_BACKLEFT || fightMove == FIGHTMOVE_STDPUNCH || fightMove == FIGHTMOVE_PUNCH ||
+							ped->m_nPedState == PED_ATTACK) {
+							CEntity* damageEntity = ped->m_pDamageEntity;
+							if (!damageEntity)
+								m_sQueueSample.m_nSampleIndex = m_anRandomTable[3] % 2 + SFX_HAMMER_HIT_1;
+							else if (damageEntity->GetType() != ENTITY_TYPE_PED)
+								m_sQueueSample.m_nSampleIndex = m_anRandomTable[3] % 2 + SFX_HAMMER_HIT_1;
+							else if (((CPed*)damageEntity)->m_curFightMove != FIGHTMOVE_HITHEAD)
+								m_sQueueSample.m_nSampleIndex = m_anRandomTable[3] % 2 + SFX_HAMMER_HIT_1;
+							else
+								m_sQueueSample.m_nSampleIndex = SFX_HAMMER_HIT_1;
+						}
+					}
+				}
+				else {
+					m_sQueueSample.m_nSampleIndex = m_anRandomTable[4] % 6 + SFX_COL_CAR_PANEL_1;
+					m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+					m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 16);
+				}
+			}
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_nCounter = iSound;
-			stereo = true;
+			narrowSoundRange = true;
 			++iSound;
 			m_sQueueSample.m_nReleasingVolumeModificator = 3;
 			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
@@ -4544,11 +4400,48 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			m_sQueueSample.m_bRequireReflection = true;
 			break;
 		case SOUND_WEAPON_BAT_ATTACK:
-			m_sQueueSample.m_nSampleIndex = SFX_BAT_HIT_LEFT;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+		case SOUND_WEAPON_KNIFE_ATTACK:
+		{
+			uint32 soundParams = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i]; // wtf? stroring int as float
+			uint8 damagerType = soundParams & 0xFF;
+			uint32 weaponType = soundParams >> 8;
+			if (damagerType == ENTITY_TYPE_PED) {
+				switch (weaponType) {
+				case WEAPONTYPE_SCREWDRIVER:
+				case WEAPONTYPE_KNIFE:
+				case WEAPONTYPE_CLEAVER:
+				case WEAPONTYPE_MACHETE:
+				case WEAPONTYPE_KATANA:
+					if (sound == SOUND_WEAPON_KNIFE_ATTACK)
+						m_sQueueSample.m_nSampleIndex = SFX_KNIFE_SLASH;
+					else
+						m_sQueueSample.m_nSampleIndex = SFX_KNIFE_STAB;
+					m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+					m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+					m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
+					break;
+				case WEAPONTYPE_HAMMER:
+					m_sQueueSample.m_nSampleIndex = m_anRandomTable[3] % 2 + SFX_HAMMER_HIT_1;
+					m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+					m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+					m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
+					break;
+				default:
+					m_sQueueSample.m_nSampleIndex = SFX_BAT_HIT_LEFT;
+					m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+					m_sQueueSample.m_nFrequency = RandomDisplacement(2000) + 22000;
+					stereo = true;
+					break;
+				}
+			}
+			else {
+				m_sQueueSample.m_nSampleIndex = m_anRandomTable[4] % 6 + SFX_COL_CAR_PANEL_1;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 16);
+			}
 			m_sQueueSample.m_nCounter = iSound++;
-			stereo = true;
-			m_sQueueSample.m_nFrequency = RandomDisplacement(2000) + 22000;
+			narrowSoundRange = true;
 			m_sQueueSample.m_nReleasingVolumeModificator = 3;
 			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
 			m_sQueueSample.m_fSoundIntensity = 30.0f;
@@ -4560,151 +4453,88 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
 			m_sQueueSample.m_bIs2D = false;
 			m_sQueueSample.m_bReleasingSoundFlag = true;
-			if (m_bDynamicAcousticModelingStatus)
-				m_sQueueSample.m_bRequireReflection = true;
-			else
-				noReflection = true;
+			m_sQueueSample.m_bRequireReflection = true;
+			break;
+		}
+		case SOUND_WEAPON_CHAINSAW_ATTACK:
+			if (FindVehicleOfPlayer())
+				continue;
+			m_sQueueSample.m_nSampleIndex = SFX_CAR_ACCEL_13;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0; // SFX_BANK_CAR_CHAINSAW
+			m_sQueueSample.m_nCounter = 64;
+			m_sQueueSample.m_nFrequency = 27000;
+			m_sQueueSample.m_nReleasingVolumeModificator = 3;
+			m_sQueueSample.m_fSpeedMultiplier = 3.0f;
+			m_sQueueSample.m_fSoundIntensity = 50.0f;
+			maxDist = SQR(50);
+			m_sQueueSample.m_nLoopCount = 0;
+			emittingVol = 100;
+			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_CAR_ACCEL_13);
+			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_CAR_ACCEL_13);
+			m_sQueueSample.m_nEmittingVolume = 100;
+			m_sQueueSample.m_bIs2D = false;
+			m_sQueueSample.m_bReverbFlag = false;
+			m_sQueueSample.m_nReleasingVolumeDivider = 5;
+			break;
+		case SOUND_WEAPON_CHAINSAW_IDLE:
+			if (FindVehicleOfPlayer())
+				continue;
+			m_sQueueSample.m_nSampleIndex = SFX_CAR_AFTER_ACCEL_13;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0; // SFX_BANK_CAR_CHAINSAW
+			m_sQueueSample.m_nCounter = 68;
+			m_sQueueSample.m_nFrequency = 27000;
+			m_sQueueSample.m_nReleasingVolumeModificator = 2;
+			m_sQueueSample.m_fSpeedMultiplier = 3.0f;
+			m_sQueueSample.m_fSoundIntensity = 60.0f;
+			maxDist = SQR(60);
+			m_sQueueSample.m_nLoopCount = 0;
+			emittingVol = 100;
+			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_CAR_AFTER_ACCEL_13);
+			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_CAR_AFTER_ACCEL_13);
+			m_sQueueSample.m_nEmittingVolume = 100;
+			m_sQueueSample.m_bIs2D = false;
+			m_sQueueSample.m_bReleasingSoundFlag = false;
+			m_sQueueSample.m_nReleasingVolumeDivider = 5;
+			break;
+		case SOUND_WEAPON_CHAINSAW_MADECONTACT:
+			if (FindVehicleOfPlayer())
+				continue;
+			if ((int32)m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i] != ENTITY_TYPE_PED)
+				ReportCollision(params.m_pPed, params.m_pPed, SURFACE_CAR, SURFACE_TARMAC, 0.0f, 0.09f);
+			m_sQueueSample.m_nSampleIndex = SFX_CAR_AFTER_ACCEL_13;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0; // SFX_BANK_CAR_CHAINSAW
+			m_sQueueSample.m_nCounter = 68;
+			m_sQueueSample.m_nFrequency = RandomDisplacement(500) + 22000;
+			m_sQueueSample.m_nReleasingVolumeModificator = 2;
+			m_sQueueSample.m_fSpeedMultiplier = 3.0f;
+			m_sQueueSample.m_fSoundIntensity = 60.0f;
+			maxDist = SQR(60);
+			m_sQueueSample.m_nLoopCount = 0;
+			emittingVol = 100;
+			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_CAR_AFTER_ACCEL_13);
+			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_CAR_AFTER_ACCEL_13);
+			m_sQueueSample.m_nEmittingVolume = 100;
+			m_sQueueSample.m_bIs2D = false;
+			m_sQueueSample.m_bReleasingSoundFlag = false;
+			m_sQueueSample.m_nReleasingVolumeDivider = 5;
 			break;
 		case SOUND_WEAPON_SHOT_FIRED:
 			weapon = ped->GetWeapon();
+			if (!weapon)
+				continue;
 			switch (weapon->m_eWeaponType) {
-			case WEAPONTYPE_COLT45:
-				m_sQueueSample.m_nSampleIndex = SFX_COLT45_LEFT;
-				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				m_sQueueSample.m_nCounter = iSound++;
-				stereo = true;
-				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_COLT45_LEFT);
-				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
-				m_sQueueSample.m_nReleasingVolumeModificator = 3;
-				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-				m_sQueueSample.m_fSoundIntensity = 50.0f;
-				maxDist = SQR(50);
-				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
-				m_sQueueSample.m_nLoopEnd = -1;
-				emittingVol = m_anRandomTable[1] % 10 + 90;
-				m_sQueueSample.m_nEmittingVolume = emittingVol;
-				m_sQueueSample.m_bIs2D = false;
-				m_sQueueSample.m_bReleasingSoundFlag = true;
-				if (m_bDynamicAcousticModelingStatus)
-					m_sQueueSample.m_bRequireReflection = true;
-				else
-					noReflection = true;
-				break;
-			case WEAPONTYPE_UZI:
-				m_sQueueSample.m_nSampleIndex = SFX_UZI_LEFT;
-				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				m_sQueueSample.m_nCounter = iSound++;
-				stereo = true;
-				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_UZI_LEFT);
-				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
-				m_sQueueSample.m_nReleasingVolumeModificator = 3;
-				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-				m_sQueueSample.m_fSoundIntensity = 80.0f;
-				maxDist = SQR(80);
-				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
-				emittingVol = m_anRandomTable[3] % 15 + 70;
-				m_sQueueSample.m_nLoopEnd = -1;
-				m_sQueueSample.m_nEmittingVolume = emittingVol;
-				m_sQueueSample.m_bIs2D = false;
-				m_sQueueSample.m_bReleasingSoundFlag = true;
-				break;
-			case WEAPONTYPE_SHOTGUN:
-				m_sQueueSample.m_nSampleIndex = SFX_SHOTGUN_LEFT;
-				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				m_sQueueSample.m_nCounter = iSound++;
-				stereo = true;
-				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_SHOTGUN_LEFT);
-				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
-				m_sQueueSample.m_nReleasingVolumeModificator = 3;
-				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-				m_sQueueSample.m_fSoundIntensity = 60.0f;
-				maxDist = SQR(60);
-				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
-				m_sQueueSample.m_nLoopEnd = -1;
-				emittingVol = m_anRandomTable[2] % 10 + 100;
-				m_sQueueSample.m_nEmittingVolume = emittingVol;
-				m_sQueueSample.m_bIs2D = false;
-				m_sQueueSample.m_bReleasingSoundFlag = true;
-				if (m_bDynamicAcousticModelingStatus)
-					m_sQueueSample.m_bRequireReflection = true;
-				else
-					noReflection = true;
-				break;
-			case WEAPONTYPE_RUGER:
-				m_sQueueSample.m_nSampleIndex = SFX_AK47_LEFT;
-				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				m_sQueueSample.m_nCounter = iSound++;
-				stereo = true;
-				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_AK47_LEFT);
-				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
-				m_sQueueSample.m_nReleasingVolumeModificator = 3;
-				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-				m_sQueueSample.m_fSoundIntensity = 80.0f;
-				maxDist = SQR(80);
-				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
-				emittingVol = m_anRandomTable[1] % 15 + 70;
-				m_sQueueSample.m_nLoopEnd = -1;
-				m_sQueueSample.m_nEmittingVolume = emittingVol;
-				m_sQueueSample.m_bIs2D = false;
-				m_sQueueSample.m_bReleasingSoundFlag = true;
-				break;
-			case WEAPONTYPE_M4:
-				m_sQueueSample.m_nSampleIndex = SFX_M60_LEFT;
-				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				m_sQueueSample.m_nCounter = iSound++;
-				stereo = true;
-				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_M60_LEFT);
-				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
-				m_sQueueSample.m_nReleasingVolumeModificator = 3;
-				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-				m_sQueueSample.m_fSoundIntensity = 80.0f;
-				maxDist = SQR(80);
-				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
-				emittingVol = m_anRandomTable[4] % 15 + 70;
-				m_sQueueSample.m_nLoopEnd = -1;
-				m_sQueueSample.m_nEmittingVolume = emittingVol;
-				m_sQueueSample.m_bIs2D = false;
-				m_sQueueSample.m_bReleasingSoundFlag = true;
-				break;
-			case WEAPONTYPE_SNIPERRIFLE:
-				m_sQueueSample.m_nSampleIndex = SFX_SNIPER_LEFT;
-				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				m_sQueueSample.m_nCounter = iSound++;
-				stereo = true;
-				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_SNIPER_LEFT);
-				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
-				m_sQueueSample.m_nReleasingVolumeModificator = 3;
-				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-				m_sQueueSample.m_fSoundIntensity = 60.0f;
-				maxDist = SQR(60);
-				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
-				m_sQueueSample.m_nLoopEnd = -1;
-				emittingVol = m_anRandomTable[4] % 10 + 110;
-				m_sQueueSample.m_nEmittingVolume = emittingVol;
-				m_sQueueSample.m_bIs2D = false;
-				m_sQueueSample.m_bReleasingSoundFlag = true;
-				if (m_bDynamicAcousticModelingStatus)
-					m_sQueueSample.m_bRequireReflection = true;
-				else
-					noReflection = true;
-				break;
+			case WEAPONTYPE_ROCKET:
 			case WEAPONTYPE_ROCKETLAUNCHER:
 				m_sQueueSample.m_nSampleIndex = SFX_ROCKET_LEFT;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				m_sQueueSample.m_nCounter = iSound++;
-				stereo = true;
+				narrowSoundRange = true;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_ROCKET_LEFT);
 				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
 				m_sQueueSample.m_nReleasingVolumeModificator = 1;
 				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-				m_sQueueSample.m_fSoundIntensity = 90.0f;
-				maxDist = SQR(90);
+				m_sQueueSample.m_fSoundIntensity = 120.0f;
+				maxDist = SQR(120);
 				m_sQueueSample.m_nLoopCount = 1;
 				m_sQueueSample.m_nLoopStart = 0;
 				m_sQueueSample.m_nLoopEnd = -1;
@@ -4712,10 +4542,236 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
 				m_sQueueSample.m_bIs2D = false;
 				m_sQueueSample.m_bReleasingSoundFlag = true;
-				if (m_bDynamicAcousticModelingStatus)
-					m_sQueueSample.m_bRequireReflection = true;
+				m_sQueueSample.m_bRequireReflection = true;
+				stereo = true;
+				break;
+			case WEAPONTYPE_COLT45:
+				m_sQueueSample.m_nSampleIndex = SFX_COLT45_LEFT;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nCounter = iSound++;
+				narrowSoundRange = true;
+				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_COLT45_LEFT);
+				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
+				m_sQueueSample.m_nReleasingVolumeModificator = 3;
+				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+				m_sQueueSample.m_fSoundIntensity = 120.0f;
+				maxDist = SQR(120);
+				m_sQueueSample.m_nLoopCount = 1;
+				m_sQueueSample.m_nLoopStart = 0;
+				m_sQueueSample.m_nLoopEnd = -1;
+				emittingVol = m_anRandomTable[1] % 10 + 90;
+				m_sQueueSample.m_nEmittingVolume = emittingVol;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_bReleasingSoundFlag = true;
+				m_sQueueSample.m_bRequireReflection = true;
+				stereo = true;
+				break;
+			case WEAPONTYPE_PYTHON:
+				m_sQueueSample.m_nSampleIndex = SFX_PYTHON_LEFT;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nCounter = iSound++;
+				narrowSoundRange = true;
+				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_PYTHON_LEFT);
+				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
+				m_sQueueSample.m_nReleasingVolumeModificator = 3;
+				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+				m_sQueueSample.m_fSoundIntensity = 120.0f;
+				maxDist = SQR(120);
+				m_sQueueSample.m_nLoopCount = 1;
+				m_sQueueSample.m_nLoopStart = 0;
+				m_sQueueSample.m_nLoopEnd = -1;
+				emittingVol = 127;
+				m_sQueueSample.m_nEmittingVolume = emittingVol;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_bReleasingSoundFlag = true;
+				m_sQueueSample.m_bRequireReflection = true;
+				stereo = true;
+				break;
+			case WEAPONTYPE_SHOTGUN:
+			case WEAPONTYPE_STUBBY_SHOTGUN:
+				m_sQueueSample.m_nSampleIndex = SFX_SHOTGUN_LEFT;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nCounter = iSound++;
+				narrowSoundRange = true;
+				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_SHOTGUN_LEFT);
+				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
+				m_sQueueSample.m_nReleasingVolumeModificator = 3;
+				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+				m_sQueueSample.m_fSoundIntensity = 120.0f;
+				maxDist = SQR(120);
+				m_sQueueSample.m_nLoopCount = 1;
+				m_sQueueSample.m_nLoopStart = 0;
+				m_sQueueSample.m_nLoopEnd = -1;
+				emittingVol = m_anRandomTable[2] % 10 + 100;
+				m_sQueueSample.m_nEmittingVolume = emittingVol;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_bReleasingSoundFlag = true;
+				m_sQueueSample.m_bRequireReflection = true;
+				stereo = true;
+				break;
+			case WEAPONTYPE_SPAS12_SHOTGUN:
+				m_sQueueSample.m_nSampleIndex = SFX_SPAS12_LEFT;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nCounter = iSound++;
+				narrowSoundRange = true;
+				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_SPAS12_LEFT);
+				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
+				m_sQueueSample.m_nReleasingVolumeModificator = 3;
+				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+				m_sQueueSample.m_fSoundIntensity = 120.0f;
+				maxDist = SQR(120);
+				m_sQueueSample.m_nLoopCount = 1;
+				m_sQueueSample.m_nLoopStart = 0;
+				m_sQueueSample.m_nLoopEnd = -1;
+				emittingVol = m_anRandomTable[2] % 10 + 100;
+				m_sQueueSample.m_nEmittingVolume = emittingVol;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_bReleasingSoundFlag = true;
+				m_sQueueSample.m_bRequireReflection = true;
+				stereo = true;
+				break;
+			case WEAPONTYPE_TEC9:
+				m_sQueueSample.m_nSampleIndex = SFX_TEC_LEFT;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nCounter = iSound++;
+				narrowSoundRange = true;
+				m_sQueueSample.m_nFrequency = RandomDisplacement(500) + 17000;
+				m_sQueueSample.m_nReleasingVolumeModificator = 3;
+				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+				m_sQueueSample.m_fSoundIntensity = 120.0f;
+				maxDist = SQR(120);
+				m_sQueueSample.m_nLoopCount = 1;
+				m_sQueueSample.m_nLoopStart = 0;
+				emittingVol = m_anRandomTable[3] % 15 + 70;
+				m_sQueueSample.m_nLoopEnd = -1;
+				m_sQueueSample.m_nEmittingVolume = emittingVol;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_bReleasingSoundFlag = true;
+				stereo = true;
+				break;
+			case WEAPONTYPE_UZI:
+			case WEAPONTYPE_MINIGUN:
+				m_sQueueSample.m_nSampleIndex = SFX_UZI_LEFT;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nCounter = iSound++;
+				narrowSoundRange = true;
+				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_UZI_LEFT);
+				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
+				m_sQueueSample.m_nReleasingVolumeModificator = 3;
+				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+				m_sQueueSample.m_fSoundIntensity = 120.0f;
+				maxDist = SQR(120);
+				m_sQueueSample.m_nLoopCount = 1;
+				m_sQueueSample.m_nLoopStart = 0;
+				emittingVol = m_anRandomTable[3] % 15 + 70;
+				m_sQueueSample.m_nLoopEnd = -1;
+				m_sQueueSample.m_nEmittingVolume = emittingVol;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_bReleasingSoundFlag = true;
+				stereo = true;
+				break;
+			case WEAPONTYPE_SILENCED_INGRAM:
+				m_sQueueSample.m_nSampleIndex = SFX_TEC_LEFT;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nCounter = iSound++;
+				narrowSoundRange = true;
+				m_sQueueSample.m_nFrequency = RandomDisplacement(1000) + 34000;
+				m_sQueueSample.m_nReleasingVolumeModificator = 3;
+				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+				m_sQueueSample.m_fSoundIntensity = 120.0f;
+				maxDist = SQR(120);
+				m_sQueueSample.m_nLoopCount = 1;
+				m_sQueueSample.m_nLoopStart = 0;
+				emittingVol = m_anRandomTable[3] % 15 + 70;
+				m_sQueueSample.m_nLoopEnd = -1;
+				m_sQueueSample.m_nEmittingVolume = emittingVol;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_bReleasingSoundFlag = true;
+				stereo = true;
+				break;
+			case WEAPONTYPE_MP5:
+				m_sQueueSample.m_nSampleIndex = SFX_MP5_LEFT;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nCounter = iSound++;
+				narrowSoundRange = true;
+				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_MP5_LEFT);
+				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
+				m_sQueueSample.m_nReleasingVolumeModificator = 3;
+				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+				m_sQueueSample.m_fSoundIntensity = 120.0f;
+				maxDist = SQR(120);
+				m_sQueueSample.m_nLoopCount = 1;
+				m_sQueueSample.m_nLoopStart = 0;
+				emittingVol = m_anRandomTable[3] % 15 + 70;
+				m_sQueueSample.m_nLoopEnd = -1;
+				m_sQueueSample.m_nEmittingVolume = emittingVol;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_bReleasingSoundFlag = true;
+				stereo = true;
+				break;
+			case WEAPONTYPE_M4:
+				m_sQueueSample.m_nSampleIndex = SFX_RUGER_LEFT;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nCounter = iSound++;
+				narrowSoundRange = true;
+				m_sQueueSample.m_nFrequency = RandomDisplacement(1000) + 43150;
+				m_sQueueSample.m_nReleasingVolumeModificator = 3;
+				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+				m_sQueueSample.m_fSoundIntensity = 120.0f;
+				maxDist = SQR(120);
+				m_sQueueSample.m_nLoopCount = 1;
+				m_sQueueSample.m_nLoopStart = 0;
+				emittingVol = m_anRandomTable[3] % 15 + 90;
+				m_sQueueSample.m_nLoopEnd = -1;
+				m_sQueueSample.m_nEmittingVolume = emittingVol;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_bReleasingSoundFlag = true;
+				stereo = true;
+				break;
+			case WEAPONTYPE_RUGER:
+				m_sQueueSample.m_nSampleIndex = SFX_RUGER_LEFT;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nCounter = iSound++;
+				narrowSoundRange = true;
+				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RUGER_LEFT);
+				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
+				m_sQueueSample.m_nReleasingVolumeModificator = 3;
+				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+				m_sQueueSample.m_fSoundIntensity = 120.0f;
+				maxDist = SQR(120);
+				m_sQueueSample.m_nLoopCount = 1;
+				m_sQueueSample.m_nLoopStart = 0;
+				emittingVol = m_anRandomTable[3] % 15 + 90;
+				m_sQueueSample.m_nLoopEnd = -1;
+				m_sQueueSample.m_nEmittingVolume = emittingVol;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_bReleasingSoundFlag = true;
+				stereo = true;
+				break;
+			case WEAPONTYPE_SNIPERRIFLE:
+			case WEAPONTYPE_LASERSCOPE:
+				m_sQueueSample.m_nSampleIndex = SFX_SNIPER_LEFT;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nCounter = iSound++;
+				narrowSoundRange = true;
+				if (weapon->m_eWeaponType == WEAPONTYPE_SNIPERRIFLE)
+					m_sQueueSample.m_nFrequency = 25472;
 				else
-					noReflection = true;
+					m_sQueueSample.m_nFrequency = 20182;
+				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
+				m_sQueueSample.m_nReleasingVolumeModificator = 3;
+				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+				m_sQueueSample.m_fSoundIntensity = 120.0f;
+				maxDist = SQR(120);
+				m_sQueueSample.m_nLoopCount = 1;
+				m_sQueueSample.m_nLoopStart = 0;
+				m_sQueueSample.m_nLoopEnd = -1;
+				emittingVol = m_anRandomTable[4] % 10 + 110;
+				m_sQueueSample.m_nEmittingVolume = emittingVol;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_bReleasingSoundFlag = true;
+				m_sQueueSample.m_bRequireReflection = true;
+				stereo = true;
 				break;
 			case WEAPONTYPE_FLAMETHROWER:
 				m_sQueueSample.m_nSampleIndex = SFX_FLAMETHROWER_LEFT;
@@ -4734,53 +4790,73 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 				m_sQueueSample.m_bIs2D = false;
 				m_sQueueSample.m_bReleasingSoundFlag = false;
 				m_sQueueSample.m_nReleasingVolumeDivider = 6;
-				if (m_bDynamicAcousticModelingStatus)
-					m_sQueueSample.m_bRequireReflection = true;
-				else
-					noReflection = true;
+				stereo = true;
+				break;
+			case WEAPONTYPE_M60:
+			case WEAPONTYPE_HELICANNON:
+				m_sQueueSample.m_nSampleIndex = SFX_M60_LEFT;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nCounter = iSound++;
+				narrowSoundRange = true;
+				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_M60_LEFT);
+				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
+				m_sQueueSample.m_nReleasingVolumeModificator = 3;
+				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+				m_sQueueSample.m_fSoundIntensity = 120.0f;
+				maxDist = SQR(120);
+				m_sQueueSample.m_nLoopCount = 1;
+				m_sQueueSample.m_nLoopStart = 0;
+				m_sQueueSample.m_nLoopEnd = -1;
+				emittingVol = 127;
+				m_sQueueSample.m_nEmittingVolume = 127;
+				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_bReleasingSoundFlag = true;
+				stereo = true;
 				break;
 			default:
 				continue;
 			}
-
 			break;
 		case SOUND_WEAPON_RELOAD:
-			weapon = &ped->m_weapons[ped->m_currentWeapon];
-			switch (weapon->m_eWeaponType) {
-			case WEAPONTYPE_COLT45:
-				m_sQueueSample.m_nSampleIndex = SFX_PISTOL_RELOAD;
-				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_PISTOL_RELOAD) + RandomDisplacement(300);
-				break;
-			case WEAPONTYPE_UZI:
-				m_sQueueSample.m_nSampleIndex = SFX_AK47_RELOAD;
-				m_sQueueSample.m_nFrequency = 39243;
-				break;
-			case WEAPONTYPE_SHOTGUN:
-				m_sQueueSample.m_nSampleIndex = SFX_AK47_RELOAD;
-				m_sQueueSample.m_nFrequency = 30290;
-				break;
-			case WEAPONTYPE_RUGER:
-				m_sQueueSample.m_nSampleIndex = SFX_AK47_RELOAD;
-				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_AK47_RELOAD);
-				break;
-			case WEAPONTYPE_M4:
-				m_sQueueSample.m_nSampleIndex = SFX_AK47_RELOAD;
-				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_AK47_RELOAD);
-				break;
-			case WEAPONTYPE_SNIPERRIFLE:
-				m_sQueueSample.m_nSampleIndex = SFX_RIFLE_RELOAD;
-				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RIFLE_RELOAD);
-				break;
+			switch ((int32)m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i]) {
+			case WEAPONTYPE_ROCKET:
 			case WEAPONTYPE_ROCKETLAUNCHER:
 				m_sQueueSample.m_nSampleIndex = SFX_ROCKET_RELOAD;
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_ROCKET_RELOAD);
+				break;
+			case WEAPONTYPE_COLT45:
+			case WEAPONTYPE_PYTHON:
+				m_sQueueSample.m_nSampleIndex = SFX_PISTOL_RELOAD;
+				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_PISTOL_RELOAD) + RandomDisplacement(300);
+				break;
+			case WEAPONTYPE_SHOTGUN:
+			case WEAPONTYPE_SPAS12_SHOTGUN:
+			case WEAPONTYPE_STUBBY_SHOTGUN:
+			case WEAPONTYPE_RUGER:
+				m_sQueueSample.m_nSampleIndex = SFX_AK47_RELOAD;
+				m_sQueueSample.m_nFrequency = 30290;
+				break;
+			case WEAPONTYPE_TEC9:
+			case WEAPONTYPE_UZI:
+			case WEAPONTYPE_SILENCED_INGRAM:
+			case WEAPONTYPE_MP5:
+			case WEAPONTYPE_M4:
+			case WEAPONTYPE_M60:
+			case WEAPONTYPE_HELICANNON:
+				m_sQueueSample.m_nSampleIndex = SFX_AK47_RELOAD;
+				m_sQueueSample.m_nFrequency = 39243;
+				break;
+			case WEAPONTYPE_SNIPERRIFLE:
+			case WEAPONTYPE_LASERSCOPE:
+				m_sQueueSample.m_nSampleIndex = SFX_RIFLE_RELOAD;
+				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RIFLE_RELOAD);
 				break;
 			default:
 				continue;
 			}
 			emittingVol = 75;
 			m_sQueueSample.m_nCounter = iSound++;
-			stereo = true;
+			narrowSoundRange = true;
 			m_sQueueSample.m_nFrequency += RandomDisplacement(300);
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_nReleasingVolumeModificator = 5;
@@ -4796,28 +4872,71 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			m_sQueueSample.m_bRequireReflection = true;
 			break;
 		case SOUND_WEAPON_AK47_BULLET_ECHO:
-			m_sQueueSample.m_nSampleIndex = SFX_UZI_END_LEFT;
+		{
+			uint32 weaponType = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i];
+			switch (weaponType) {
+			case WEAPONTYPE_SPAS12_SHOTGUN:
+				m_sQueueSample.m_nSampleIndex = SFX_SPAS12_TAIL_LEFT;
+				break;
+			case WEAPONTYPE_TEC9:
+			case WEAPONTYPE_SILENCED_INGRAM:
+				m_sQueueSample.m_nSampleIndex = SFX_TEC_TAIL;
+				break;
+			case WEAPONTYPE_UZI:
+			case WEAPONTYPE_MP5:
+				m_sQueueSample.m_nSampleIndex = SFX_UZI_END_LEFT;
+				break;
+			case WEAPONTYPE_M4:
+			case WEAPONTYPE_RUGER:
+			case WEAPONTYPE_SNIPERRIFLE:
+			case WEAPONTYPE_LASERSCOPE:
+				m_sQueueSample.m_nSampleIndex = SFX_RUGER_TAIL;
+				break;
+			case WEAPONTYPE_M60:
+			case WEAPONTYPE_HELICANNON:
+				m_sQueueSample.m_nSampleIndex = SFX_M60_TAIL_LEFT;
+				break;
+			default:
+				continue;
+			}
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_nCounter = iSound++;
-			stereo = true;
-			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_UZI_END_LEFT);
+			narrowSoundRange = true;
+			switch (weaponType) {
+			case WEAPONTYPE_TEC9:
+				m_sQueueSample.m_nFrequency = 13000;
+				break;
+			case WEAPONTYPE_SILENCED_INGRAM:
+				m_sQueueSample.m_nFrequency = 26000;
+				break;
+			case WEAPONTYPE_M4:
+				m_sQueueSample.m_nFrequency = 15600;
+				break;
+			case WEAPONTYPE_SNIPERRIFLE:
+				m_sQueueSample.m_nFrequency = 9959;
+				break;
+			case WEAPONTYPE_LASERSCOPE:
+				m_sQueueSample.m_nFrequency = 7904;
+				break;
+			default:
+				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+				break;
+			}
 			m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 16);
 			m_sQueueSample.m_nReleasingVolumeModificator = 3;
 			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-			m_sQueueSample.m_fSoundIntensity = 80.0f;
-			maxDist = SQR(80);
+			m_sQueueSample.m_fSoundIntensity = 120.0f;
+			maxDist = SQR(120);
 			m_sQueueSample.m_nLoopCount = 1;
 			m_sQueueSample.m_nLoopStart = 0;
 			m_sQueueSample.m_nLoopEnd = -1;
-			emittingVol = m_anRandomTable[4] % 10 + 40;
+			emittingVol = m_anRandomTable[4] % 10 + 80;
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
 			m_sQueueSample.m_bIs2D = false;
 			m_sQueueSample.m_bReleasingSoundFlag = true;
-			if (m_bDynamicAcousticModelingStatus)
-				m_sQueueSample.m_bRequireReflection = true;
-			else
-				noReflection = true;
+			m_sQueueSample.m_bRequireReflection = true;
 			break;
+		}
 		case SOUND_WEAPON_FLAMETHROWER_FIRE:
 			m_sQueueSample.m_nSampleIndex = SFX_FLAMETHROWER_START_LEFT;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
@@ -4840,7 +4959,7 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			m_sQueueSample.m_nSampleIndex = SFX_BULLET_PED;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_nCounter = iSound++;
-			stereo = true;
+			narrowSoundRange = true;
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_BULLET_PED);
 			m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 8);
 			m_sQueueSample.m_nReleasingVolumeModificator = 7;
@@ -4856,10 +4975,13 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			m_sQueueSample.m_bReleasingSoundFlag = true;
 			break;
 		case SOUND_SPLASH:
+			if (m_FrameCounter <= iSplashFrame)
+				continue;
+			iSplashFrame = m_FrameCounter + 6;
 			m_sQueueSample.m_nSampleIndex = SFX_SPLASH_1;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_nCounter = iSound++;
-			stereo = true;
+			narrowSoundRange = true;
 			m_sQueueSample.m_nFrequency = RandomDisplacement(1400) + 20000;
 			m_sQueueSample.m_nReleasingVolumeModificator = 1;
 			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
@@ -4874,28 +4996,192 @@ cAudioManager::ProcessPedOneShots(cPedParams *params)
 			m_sQueueSample.m_bReleasingSoundFlag = true;
 			m_sQueueSample.m_bRequireReflection = true;
 			break;
+		case SOUND_MELEE_ATTACK_START:
+		{
+			uint32 weaponType = ((uint32)m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i]) >> 8;
+			switch (weaponType)
+			{
+			case WEAPONTYPE_SCREWDRIVER:
+			case WEAPONTYPE_KNIFE:
+			case WEAPONTYPE_CLEAVER:
+			case WEAPONTYPE_MACHETE:
+			case WEAPONTYPE_KATANA:
+				m_sQueueSample.m_nSampleIndex = SFX_KNIFE_SWING;
+				break;
+			default:
+				m_sQueueSample.m_nSampleIndex = SFX_GOLF_CLUB_SWING;
+				break;
+			}
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+			m_sQueueSample.m_nCounter = iSound++;
+			narrowSoundRange = true;
+			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 16);
+			m_sQueueSample.m_nReleasingVolumeModificator = 3;
+			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+			m_sQueueSample.m_fSoundIntensity = 30.0f;
+			if (weaponType == WEAPONTYPE_UNARMED || weaponType == WEAPONTYPE_BRASSKNUCKLE)
+				emittingVol = m_anRandomTable[1] % 10 + 35;
+			else
+				emittingVol = m_anRandomTable[2] % 20 + 70;
+			maxDist = SQR(30);
+			m_sQueueSample.m_nLoopCount = 1;
+			m_sQueueSample.m_nLoopStart = 0;
+			m_sQueueSample.m_nLoopEnd = -1;
+			m_sQueueSample.m_nEmittingVolume = emittingVol;
+			m_sQueueSample.m_bIs2D = false;
+			m_sQueueSample.m_bReleasingSoundFlag = true;
+			m_sQueueSample.m_bRequireReflection = true;
+			break;
+		}
+		case SOUND_SKATING:
+		{
+			uint32 soundParams = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i];
+			uint8 param1 = soundParams & 0xFF;
+			uint32 param2 = soundParams >> 8;
+			m_sQueueSample.m_nSampleIndex = (m_anRandomTable[3] & 1) + SFX_SKATE_1;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+			m_sQueueSample.m_nCounter = iSound;
+			stereo = true;
+			++iSound;
+			m_sQueueSample.m_nFrequency = m_anRandomTable[1] % 1000 + 17000;
+			if (param2 == 0)
+				m_sQueueSample.m_nFrequency = (3 * m_sQueueSample.m_nFrequency) / 4;
+			m_sQueueSample.m_nReleasingVolumeModificator = 6;
+			m_sQueueSample.m_fSpeedMultiplier = 3.0f;
+			m_sQueueSample.m_fSoundIntensity = 20.0f;
+			maxDist = SQR(20);
+			m_sQueueSample.m_nLoopCount = 1;
+			m_sQueueSample.m_nLoopStart = 0;
+			m_sQueueSample.m_nLoopEnd = -1;
+			emittingVol = (m_anRandomTable[2] % 20 + 70) * param1 / 127;
+			m_sQueueSample.m_nEmittingVolume = emittingVol;
+			m_sQueueSample.m_bIs2D = false;
+			m_sQueueSample.m_bReleasingSoundFlag = true;
+			m_sQueueSample.m_bRequireReflection = true;
+			break;
+		}
+		case SOUND_WEAPON_MINIGUN_ATTACK:
+			m_sQueueSample.m_nSampleIndex = SFX_MINIGUN_FIRE_LEFT;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+			m_sQueueSample.m_nCounter = 68;
+			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_MINIGUN_FIRE_LEFT);
+			m_sQueueSample.m_nReleasingVolumeModificator = 2;
+			m_sQueueSample.m_fSpeedMultiplier = 3.0f;
+			m_sQueueSample.m_fSoundIntensity = 150.0f;
+			emittingVol = 127;
+			maxDist = SQR(150);
+			m_sQueueSample.m_nLoopCount = 0;
+			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_MINIGUN_FIRE_LEFT);
+			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_MINIGUN_FIRE_LEFT);
+			m_sQueueSample.m_nEmittingVolume = 127;
+			m_sQueueSample.m_bIs2D = false;
+			m_sQueueSample.m_bReleasingSoundFlag = false;
+			m_sQueueSample.m_nReleasingVolumeDivider = 3;
+			break;
+		case SOUND_WEAPON_MINIGUN_2:
+			m_sQueueSample.m_nSampleIndex = SFX_MINIGUN_FIRE_RIGHT;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+			m_sQueueSample.m_nCounter = 69;
+			m_sQueueSample.m_nFrequency = 18569;
+			m_sQueueSample.m_nReleasingVolumeModificator = 2;
+			m_sQueueSample.m_fSpeedMultiplier = 3.0f;
+			m_sQueueSample.m_fSoundIntensity = 150.0f;
+			emittingVol = 127.0f * m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i];
+			maxDist = SQR(150);
+			m_sQueueSample.m_nLoopCount = 0;
+			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_MINIGUN_FIRE_RIGHT);
+			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_MINIGUN_FIRE_RIGHT);
+			m_sQueueSample.m_nEmittingVolume = emittingVol;
+			m_sQueueSample.m_bIs2D = false;
+			m_sQueueSample.m_bReleasingSoundFlag = false;
+			m_sQueueSample.m_nReleasingVolumeDivider = 3;
+			break;
+		case SOUND_WEAPON_MINIGUN_3:
+			m_sQueueSample.m_nSampleIndex = SFX_MINIGUN_STOP;
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+			m_sQueueSample.m_nCounter = 69;
+			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_MINIGUN_STOP);
+			m_sQueueSample.m_nReleasingVolumeModificator = 4;
+			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+			m_sQueueSample.m_fSoundIntensity = 150.0f;
+			maxDist = SQR(150);
+			m_sQueueSample.m_nLoopCount = 1;
+			m_sQueueSample.m_nLoopStart = 0;
+			m_sQueueSample.m_nLoopEnd = -1;
+			emittingVol = 127;
+			m_sQueueSample.m_nEmittingVolume = 127;
+			m_sQueueSample.m_bIs2D = false;
+			m_sQueueSample.m_bReleasingSoundFlag = true;
+			m_sQueueSample.m_bRequireReflection = true;
+			break;
+		case SOUND_SHIRT_WIND_FLAP:
+			if (params.m_pPed->IsPlayer() && params.m_pPed->m_pMyVehicle) {
+				if (m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i] > 0.0f) {
+					if (m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i] > 1.0f)
+						m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i] = 1.0f;
+
+					emittingVol = 90.0f * m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i];
+
+					switch (params.m_pPed->m_pMyVehicle->GetModelIndex())
+					{
+					case MI_ANGEL:
+					case MI_FREEWAY:
+						m_sQueueSample.m_nSampleIndex = SFX_CAR_WIND_17;
+						break;
+					case MI_PIZZABOY:
+					case MI_FAGGIO:
+						m_sQueueSample.m_nSampleIndex = SFX_CAR_WIND_18;
+						break;
+					case MI_PCJ600:
+						m_sQueueSample.m_nSampleIndex = SFX_CAR_WIND_20;
+						break;
+					case MI_SANCHEZ:
+						m_sQueueSample.m_nSampleIndex = SFX_CAR_WIND_19;
+						break;
+					default:
+						continue;
+					};
+
+					m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+					m_sQueueSample.m_nCounter = 71;
+					m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+					m_sQueueSample.m_nReleasingVolumeModificator = 3;
+					m_sQueueSample.m_fSpeedMultiplier = 3.0f;
+					m_sQueueSample.m_fSoundIntensity = 15.0f;
+					maxDist = SQR(15);
+					m_sQueueSample.m_nLoopCount = 0;
+					m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+					m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+					m_sQueueSample.m_nEmittingVolume = emittingVol;
+					m_sQueueSample.m_bIs2D = false;
+					m_sQueueSample.m_bReleasingSoundFlag = false;
+					m_sQueueSample.m_nReleasingVolumeDivider = 3;
+				}
+			}
+			break;
 		default:
 			SetupPedComments(params, sound);
 			continue;
 		}
 
-		if (stereo && iSound > 60)
+		if (narrowSoundRange && iSound > 60)
 			iSound = 21;
-		if (params->m_fDistance < maxDist) {
-			CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
+		if (params.m_fDistance < maxDist) {
+			CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
 			m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume != 0) {
-				if (noReflection) {
+				if (stereo) {
 					if (m_sQueueSample.m_fDistance < 0.2f * m_sQueueSample.m_fSoundIntensity) {
 						m_sQueueSample.m_bIs2D = true;
 						m_sQueueSample.m_nOffset = 0;
 					} else {
-						noReflection = false;
+						stereo = false;
 					}
 				}
 				m_sQueueSample.m_bReverbFlag = true;
 				AddSampleToRequestedQueue();
-				if (noReflection) {
+				if (stereo) {
 					m_sQueueSample.m_nOffset = 127;
 					++m_sQueueSample.m_nSampleIndex;
 					if (m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i] != SOUND_WEAPON_SHOT_FIRED ||
@@ -4933,9 +5219,9 @@ cAudioManager::SetPlayersMood(uint8 mood, uint32 time)
 }
 
 void
-cAudioManager::SetupPedComments(cPedParams *params, uint32 sound)
+cAudioManager::SetupPedComments(cPedParams &params, uint16 sound)
 {
-	CPed *ped = params->m_pPed;
+	CPed *ped = params.m_pPed;
 	uint8 emittingVol;
 	float soundIntensity;
 	tPedComment pedComment;
@@ -4974,8 +5260,8 @@ cAudioManager::SetupPedComments(cPedParams *params, uint32 sound)
 		}
 	}
 
-	if(params->m_fDistance < SQR(soundIntensity)) {
-		CalculateDistance(params->m_bDistanceCalculated, params->m_fDistance);
+	if(params.m_fDistance < SQR(soundIntensity)) {
+		CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
 		if(CWorld::GetIsLineOfSightClear(TheCamera.GetPosition(), m_sQueueSample.m_vecPos, true, false, false, false, false, false))
 			emittingVol = MAX_VOLUME;
 		else
@@ -5161,7 +5447,7 @@ cAudioManager::GetPlayerTalkSfx(CPed *ped, int16 sound)
 {
 	uint32 sfx;
 
-	if(this->m_bIsPlayerShutUp) return NO_SAMPLE;
+	if(m_bIsPlayerShutUp) return NO_SAMPLE;
 	switch(sound) {
 	case SOUND_PED_DEATH: return 9796;
 	case SOUND_PED_DAMAGE:
@@ -7672,7 +7958,7 @@ cAudioManager::ProcessExplosions(int32 explosion)
 			m_sQueueSample.m_vecPos = *CExplosion::GetExplosionPosition(i);
 			distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 			if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
-				m_sQueueSample.m_fDistance = distSquared <= 0.0f ? 0.0f : Sqrt(distSquared);
+				m_sQueueSample.m_fDistance = Sqrt(distSquared);
 				m_sQueueSample.m_nVolume = ComputeVolume(MAX_VOLUME, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 				if (m_sQueueSample.m_nVolume != 0) {
 					m_sQueueSample.m_nCounter = i;
@@ -7737,7 +8023,7 @@ cAudioManager::ProcessFires(int32)
 			m_sQueueSample.m_vecPos = gFireManager.m_aFires[i].m_vecPos;
 			distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 			if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
-				m_sQueueSample.m_fDistance = distSquared < 0.0f ? 0.0f : Sqrt(distSquared);
+				m_sQueueSample.m_fDistance = Sqrt(distSquared);
 				m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 				if (m_sQueueSample.m_nVolume != 0) {
 					m_sQueueSample.m_nCounter = i;
@@ -7793,7 +8079,7 @@ cAudioManager::ProcessWaterCannon(int32)
 			m_sQueueSample.m_vecPos = CWaterCannons::aCannons[0].m_avecPos[CWaterCannons::aCannons[i].m_nCur];
 			float distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 			if (distSquared < SQR(SOUND_INTENSITY)) {
-				m_sQueueSample.m_fDistance = distSquared <= 0.0f ? 0.0f : Sqrt(distSquared);
+				m_sQueueSample.m_fDistance = Sqrt(distSquared);
 				m_sQueueSample.m_nVolume = ComputeVolume(50, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
 				if (m_sQueueSample.m_nVolume != 0) {
 					m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
@@ -7834,10 +8120,7 @@ cAudioManager::ProcessExtraSounds()
 		m_sQueueSample.m_vecPos = aVecExtraSoundPosition[i];
 		distance = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		if (distance < SQR(SOUND_INTENSITY)) {
-			if (distance > 0.0f)
-				m_sQueueSample.m_fDistance = Sqrt(distance);
-			else
-				m_sQueueSample.m_fDistance = 0.0f;
+			m_sQueueSample.m_fDistance = Sqrt(distance);
 			m_sQueueSample.m_nVolume = ComputeVolume(EMITTING_VOLUME, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume != 0) {
 				m_sQueueSample.m_nCounter = i;
@@ -7876,10 +8159,7 @@ cAudioManager::ProcessEscalators()
 		m_sQueueSample.m_vecPos = CEscalators::GetEscalator(i).GetPosition();
 		distance = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		if (distance < SQR(SOUND_INTENSITY)) {
-			if (distance > 0.0f)
-				m_sQueueSample.m_fDistance = Sqrt(distance);
-			else
-				m_sQueueSample.m_fDistance = 0.0f;
+			m_sQueueSample.m_fDistance = Sqrt(distance);
 			m_sQueueSample.m_nVolume = ComputeVolume(EMITTING_VOLUME, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume != 0) {
 				m_sQueueSample.m_nSampleIndex = SFX_BOAT_V12_LOOP;
@@ -7930,41 +8210,34 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 	uint8 emittingVolume;
 	float distSquared;
 
-	cPedParams male;
-	cPedParams female;
-
 	static uint8 iSound = 0;
 
 	switch (sound) {
-	/*case SCRIPT_SOUND_INJURED_PED_MALE_OUCH_S:
-	case SCRIPT_SOUND_INJURED_PED_MALE_OUCH_L:
-		male.m_pPed = nil;
-		male.m_bDistanceCalculated = false;
-		male.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
-		SetupPedComments(&male, SOUND_INJURED_PED_MALE_OUCH);
-		return;
-	case SCRIPT_SOUND_INJURED_PED_FEMALE_OUCH_S:
-	case SCRIPT_SOUND_INJURED_PED_FEMALE_OUCH_L:
-		female.m_pPed = nil;
-		female.m_bDistanceCalculated = false;
-		female.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
-		SetupPedComments(&female, SOUND_INJURED_PED_FEMALE);
-		return;
-	case SCRIPT_SOUND_GATE_START_CLUNK:
-	case SCRIPT_SOUND_GATE_STOP_CLUNK:
+	case SCRIPT_SOUND_POLICE_CELL_DOOR_CLUNK:
 		m_sQueueSample.m_fSoundIntensity = 40.0f;
 		m_sQueueSample.m_nSampleIndex = SFX_COL_GATE;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-		if (sound == SCRIPT_SOUND_GATE_START_CLUNK)
-			m_sQueueSample.m_nFrequency = 10600;
-		else
-			m_sQueueSample.m_nFrequency = 9000;
-		m_sQueueSample.m_nReleasingVolumeModificator = 1;
+		m_sQueueSample.m_nFrequency = 10600;
+		m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
+		m_sQueueSample.m_nReleasingVolumeModificator = 3;
+		emittingVolume = 60;
 		m_sQueueSample.m_fSpeedMultiplier = 0.0f;
 		m_sQueueSample.m_bIs2D = false;
 		m_sQueueSample.m_bRequireReflection = true;
-		emittingVolume = RandomDisplacement(10) + 50;
-		break;*/
+		break;
+	case SCRIPT_SOUND_GARAGE_DOOR_CLUNK:
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = SFX_COL_CAR_PANEL_2; // huh?
+		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+		m_sQueueSample.m_nFrequency = 22000;
+		m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
+		m_sQueueSample.m_nReleasingVolumeModificator = 4;
+		emittingVolume = 60;
+		m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+		m_sQueueSample.m_bIs2D = false;
+		m_sQueueSample.m_bRequireReflection = true;
+		break;
+	case SCRIPT_SOUND_SHOOTING_RANGE_TARGET_HIT:
 	case SCRIPT_SOUND_BULLET_HIT_GROUND_1:
 	case SCRIPT_SOUND_BULLET_HIT_GROUND_2:
 	case SCRIPT_SOUND_BULLET_HIT_GROUND_3:
@@ -7978,20 +8251,42 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 		m_sQueueSample.m_bIs2D = false;
 		emittingVolume = m_anRandomTable[2] % 20 + 90;
 		break;
-	/*
-	case SCRIPT_SOUND_TRAIN_ANNOUNCEMENT_1:
-	case SCRIPT_SOUND_TRAIN_ANNOUNCEMENT_2:
-		if (!SampleManager.IsSampleBankLoaded(SAMPLEBANK_TRAIN))
-			return;
-		m_sQueueSample.m_fSoundIntensity = 80.0f;
-		m_sQueueSample.m_nSampleIndex = SFX_TRAIN_STATION_ANNOUNCE;
-		m_sQueueSample.m_nBankIndex = SAMPLEBANK_TRAIN;
-		emittingVolume = MAX_VOLUME;
-		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_TRAIN_STATION_ANNOUNCE);
-		m_sQueueSample.m_nReleasingVolumeModificator = 0;
-		m_sQueueSample.m_fSpeedMultiplier = 2.0f;
+	case SCRIPT_SOUND_WILLIE_CARD_SWIPE:
+		emittingVolume = 70;
+		m_sQueueSample.m_fSoundIntensity = 40.0f;
+		m_sQueueSample.m_nSampleIndex = SFX_BOMB_BEEP;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+		m_sQueueSample.m_nFrequency = 20159;
+		m_sQueueSample.m_nReleasingVolumeModificator = 1;
+		m_sQueueSample.m_fSpeedMultiplier = 1.0f;
 		m_sQueueSample.m_bIs2D = false;
-		break;*/
+		m_sQueueSample.m_bRequireReflection = false;
+		break;
+	case SCRIPT_SOUND_MALE_AMBULANCE_OUCH:
+	{
+		cPedParams pedParams;
+		pedParams.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
+		SetupPedComments(pedParams, SOUND_INJURED_PED_MALE_OUCH);
+		return;
+	}
+	case SCRIPT_SOUND_FEMALE_AMBULANCE_OUCH:
+	{
+		cPedParams pedParams;
+		pedParams.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
+		SetupPedComments(pedParams, SOUND_INJURED_PED_FEMALE);
+		return;
+	}
+	case SCRIPT_SOUND_SEAPLANE_LOW_FUEL:
+		m_sQueueSample.m_fSoundIntensity = 1000.0f;
+		m_sQueueSample.m_nSampleIndex = SFX_SEAPLANE_LOW;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+		emittingVolume = 100;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CAR_HORN_JEEP); // BUG?
+		m_sQueueSample.m_nReleasingVolumeModificator = 1;
+		m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+		m_sQueueSample.m_bIs2D = true;
+		m_sQueueSample.m_bRequireReflection = false;
+		break;
 	case SCRIPT_SOUND_PAYPHONE_RINGING:
 		m_sQueueSample.m_fSoundIntensity = 80.0f;
 		m_sQueueSample.m_nSampleIndex = SFX_PHONE_RING;
@@ -8090,6 +8385,18 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 		m_sQueueSample.m_bRequireReflection = true;
 		emittingVolume = m_anRandomTable[2] % 30 + 60;
 		break;
+	case SCRIPT_SOUND_HIT_BALL:
+		m_sQueueSample.m_fSoundIntensity = 60.0f;
+		m_sQueueSample.m_nSampleIndex = SFX_HIT_BALL;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 16);
+		m_sQueueSample.m_nReleasingVolumeModificator = 5;
+		m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+		m_sQueueSample.m_bIs2D = false;
+		m_sQueueSample.m_bRequireReflection = true;
+		emittingVolume = m_anRandomTable[2] % 30 + 60;
+		break;
 	case SCRIPT_SOUND_GUNSHELL_DROP:
 		playerPed = FindPlayerPed();
 		if (playerPed) {
@@ -8102,39 +8409,24 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 			case SURFACE_SAND:
 			case SURFACE_RUBBER:
 			case SURFACE_HEDGE:
+			case SURFACE_SAND_BEACH:
 				m_sQueueSample.m_nSampleIndex = SFX_BULLET_SHELL_HIT_GROUND_2;
-				m_sQueueSample.m_nFrequency = RandomDisplacement(500) + 11000;
+				m_sQueueSample.m_nFrequency = RandomDisplacement(600) + 10600;
 				m_sQueueSample.m_nReleasingVolumeModificator = 18;
-				m_sQueueSample.m_fSoundIntensity = 20.0f;
-				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-				m_sQueueSample.m_bIs2D = false;
-				emittingVolume = m_anRandomTable[2] % 20 + 30;
-				distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
-				if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
-					m_sQueueSample.m_fDistance = Sqrt(distSquared);
-					m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
-					if (m_sQueueSample.m_nVolume != 0) {
-						m_sQueueSample.m_nCounter = iSound++;
-						m_sQueueSample.m_nLoopCount = 1;
-						m_sQueueSample.m_bReleasingSoundFlag = true;
-						m_sQueueSample.m_nEmittingVolume = emittingVolume;
-						m_sQueueSample.m_nLoopStart = 0;
-						m_sQueueSample.m_nLoopEnd = -1;
-						m_sQueueSample.m_bReverbFlag = true;
-						AddSampleToRequestedQueue();
-					}
-				}
-				return;
+				break;
 			case SURFACE_WATER:
 				return;
 			default:
+				m_sQueueSample.m_nSampleIndex = SFX_BULLET_SHELL_HIT_GROUND_1;
+				m_sQueueSample.m_nFrequency = RandomDisplacement(1500) + 30000;
+				m_sQueueSample.m_nReleasingVolumeModificator = 15;
 				break;
 			}
+		} else {
+			m_sQueueSample.m_nSampleIndex = SFX_BULLET_SHELL_HIT_GROUND_1;
+			m_sQueueSample.m_nFrequency = RandomDisplacement(1500) + 30000;
+			m_sQueueSample.m_nReleasingVolumeModificator = 15;
 		}
-		m_sQueueSample.m_nSampleIndex = SFX_BULLET_SHELL_HIT_GROUND_1;
-		m_sQueueSample.m_nFrequency = RandomDisplacement(750) + 18000;
-		m_sQueueSample.m_nReleasingVolumeModificator = 15;
 		m_sQueueSample.m_fSoundIntensity = 20.0f;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 		m_sQueueSample.m_fSpeedMultiplier = 0.0f;
@@ -8178,116 +8470,204 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	uint8 emittingVolume;
 	float distSquared;
 
-	switch (sound) {
-	/*case SCRIPT_SOUND_PARTY_1_LOOP_S:
-		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
-		m_sQueueSample.m_nSampleIndex = SFX_CLUB_1;
-		m_sQueueSample.m_nBankIndex = SFX_BANK_0;//SAMPLEBANK_BUILDING_CLUB_1;
-		emittingVolume = MAX_VOLUME;
-		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_1);
-		m_sQueueSample.m_nReleasingVolumeModificator = 3;
+	switch(sound) {
+	case SCRIPT_SOUND_BANK_ALARM_LOOP:
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = SFX_BUILDINGS_BANK_ALARM;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_BANK_ALARM;
+		emittingVolume = 90;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_BUILDINGS_BANK_ALARM);
+		m_sQueueSample.m_nReleasingVolumeModificator = 2;
 		m_sQueueSample.m_nReleasingVolumeDivider = 3;
 		m_sQueueSample.m_fSpeedMultiplier = 2.0f;
+		m_sQueueSample.m_bIs2D = false;
 		break;
-	case SCRIPT_SOUND_PARTY_1_LOOP_L:
-		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
-		m_sQueueSample.m_nSampleIndex = SFX_CLUB_1;
-		m_sQueueSample.m_nBankIndex = SFX_BANK_0;//SAMPLEBANK_BUILDING_CLUB_1;
-		emittingVolume = MAX_VOLUME;
-		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_1);
-		m_sQueueSample.m_nReleasingVolumeModificator = 3;
-		m_sQueueSample.m_nReleasingVolumeDivider = 3;
-		m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-		break;
-	case SCRIPT_SOUND_PARTY_2_LOOP_S:
-		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
-		m_sQueueSample.m_nSampleIndex = SFX_CLUB_2;
-		m_sQueueSample.m_nBankIndex = SFX_BANK_0;//SAMPLEBANK_BUILDING_CLUB_2;
-		emittingVolume = MAX_VOLUME;
-		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_2);
-		m_sQueueSample.m_nReleasingVolumeModificator = 3;
-		m_sQueueSample.m_nReleasingVolumeDivider = 3;
-		m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-		break;
-	case SCRIPT_SOUND_PARTY_2_LOOP_L:
-		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
-		m_sQueueSample.m_nSampleIndex = SFX_CLUB_2;
-		m_sQueueSample.m_nBankIndex = SFX_BANK_0;//SAMPLEBANK_BUILDING_CLUB_2;
-		emittingVolume = MAX_VOLUME;
-		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_2);
-		m_sQueueSample.m_nReleasingVolumeModificator = 3;
-		m_sQueueSample.m_nReleasingVolumeDivider = 3;
-		m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-		break;
-	case SCRIPT_SOUND_PARTY_3_LOOP_S:
-		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
-		m_sQueueSample.m_nSampleIndex = SFX_CLUB_3;
-		m_sQueueSample.m_nBankIndex = SFX_BANK_0;//SAMPLEBANK_BUILDING_CLUB_3;
-		emittingVolume = MAX_VOLUME;
-		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_3);
-		m_sQueueSample.m_nReleasingVolumeModificator = 3;
-		m_sQueueSample.m_nReleasingVolumeDivider = 3;
-		m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-		break;
-	case SCRIPT_SOUND_PARTY_3_LOOP_L:
-		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
-		m_sQueueSample.m_nSampleIndex = SFX_CLUB_3;
-		m_sQueueSample.m_nBankIndex = SFX_BANK_0;//SAMPLEBANK_BUILDING_CLUB_3;
-		emittingVolume = MAX_VOLUME;
-		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_3);
-		m_sQueueSample.m_nReleasingVolumeModificator = 3;
-		m_sQueueSample.m_nReleasingVolumeDivider = 3;
-		m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-		break;
-	case SCRIPT_SOUND_PARTY_4_LOOP_S:
-		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_S;
-		m_sQueueSample.m_nSampleIndex = SFX_CLUB_4;
-		m_sQueueSample.m_nBankIndex = SFX_BANK_0;//SAMPLEBANK_BUILDING_CLUB_4;
-		emittingVolume = MAX_VOLUME;
-		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_4);
-		m_sQueueSample.m_nReleasingVolumeModificator = 3;
-		m_sQueueSample.m_nReleasingVolumeDivider = 3;
-		m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-		break;
-	case SCRIPT_SOUND_PARTY_4_LOOP_L:
-		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
-		m_sQueueSample.m_nSampleIndex = SFX_CLUB_4;
-		m_sQueueSample.m_nBankIndex = SFX_BANK_0;//SAMPLEBANK_BUILDING_CLUB_4;
-		emittingVolume = MAX_VOLUME;
-		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_4);
-		m_sQueueSample.m_nReleasingVolumeModificator = 3;
-		m_sQueueSample.m_nReleasingVolumeDivider = 3;
-		m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-		break;
-	case SCRIPT_SOUND_PARTY_1_LOOP:
-		m_sQueueSample.m_fSoundIntensity = SCRIPT_OBJECT_INTENSITY_L;
-		m_sQueueSample.m_nSampleIndex = SFX_CLUB_1;
-		m_sQueueSample.m_nBankIndex = SFX_BANK_0;//SAMPLEBANK_BUILDING_CLUB_1;
-		emittingVolume = MAX_VOLUME;
-		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_1);
-		m_sQueueSample.m_nReleasingVolumeModificator = 3;
-		m_sQueueSample.m_nReleasingVolumeDivider = 3;
-		m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-		break;
-	case SCRIPT_SOUND_PRETEND_FIRE_LOOP:
-		m_sQueueSample.m_fSoundIntensity = 50.0f;
-		m_sQueueSample.m_nSampleIndex = SFX_CAR_ON_FIRE;
+	case SCRIPT_SOUND_POLICE_CELL_DOOR_SLIDING_LOOP:
+	case SCRIPT_SOUND_GARAGE_DOOR_SLIDING_LOOP:
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = SFX_GARAGE_DOOR_LOOP;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-		emittingVolume = 80;
-		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CAR_ON_FIRE);
-		m_sQueueSample.m_nReleasingVolumeModificator = 8;
-		m_sQueueSample.m_nReleasingVolumeDivider = 10;
+		emittingVolume = 90;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_GARAGE_DOOR_LOOP);
+		m_sQueueSample.m_nReleasingVolumeModificator = 3;
+		m_sQueueSample.m_nReleasingVolumeDivider = 3;
 		m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-		break;*/
-	default:
-		return;
+		m_sQueueSample.m_bIs2D = false;
+		break;
+	case SCRIPT_SOUND_SNORING_LOOP:
+		m_sQueueSample.m_fSoundIntensity = 6.0f;
+		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_SNORE;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_SNORING;
+		emittingVolume = 25;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_BUILDING_SNORE);
+		m_sQueueSample.m_nReleasingVolumeModificator = 6;
+		m_sQueueSample.m_nReleasingVolumeDivider = 3;
+		m_sQueueSample.m_fSpeedMultiplier = 3.0f;
+		m_sQueueSample.m_bIs2D = false;
+		break;
+	case SCRIPT_SOUND_SHOOTING_RANGE_TARGET_MOVING_LOOP:
+		m_sQueueSample.m_fSoundIntensity = 40.0f;
+		m_sQueueSample.m_nSampleIndex = SFX_TANK_TURRET;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+		emittingVolume = 60;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_TANK_TURRET);
+		m_sQueueSample.m_nReleasingVolumeModificator = 4;
+		m_sQueueSample.m_nReleasingVolumeDivider = 3;
+		m_sQueueSample.m_fSpeedMultiplier = 2.0f;
+		m_sQueueSample.m_bIs2D = false;
+		break;
+	case SCRIPT_SOUND_NEW_BUILDING_BAR_1:
+		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_BAR_1;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_BAR_1;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nReleasingVolumeModificator = 3;
+		m_sQueueSample.m_nReleasingVolumeDivider = 15;
+		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
+		m_sQueueSample.m_bIs2D = false;
+		break;
+	case SCRIPT_SOUND_NEW_BUILDING_BAR_2:
+		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_BAR_2;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_BAR_2;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nReleasingVolumeModificator = 3;
+		m_sQueueSample.m_nReleasingVolumeDivider = 15;
+		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
+		m_sQueueSample.m_bIs2D = false;
+		break;
+	case SCRIPT_SOUND_NEW_BUILDING_BAR_3:
+		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_BAR_3;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_BAR_3;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nReleasingVolumeModificator = 3;
+		m_sQueueSample.m_nReleasingVolumeDivider = 15;
+		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
+		m_sQueueSample.m_bIs2D = false;
+		break;
+	case SCRIPT_SOUND_NEW_BUILDING_BAR_4:
+		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_BAR_4;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_BAR_4;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nReleasingVolumeModificator = 3;
+		m_sQueueSample.m_nReleasingVolumeDivider = 15;
+		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
+		m_sQueueSample.m_bIs2D = false;
+		break;
+	case SCRIPT_SOUND_NEW_BUILDING_MALIBU_1:
+		if(MusicManager.m_nPlayingTrack == STREAMED_SOUND_MALIBU_AMBIENT) return;
+		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_MAL1;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_MALIBU_1;
+		MusicManager.SetMalibuClubTrackPos(SCRIPT_SOUND_NEW_BUILDING_MALIBU_1);
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nReleasingVolumeModificator = 3;
+		m_sQueueSample.m_nReleasingVolumeDivider = 15;
+		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
+		m_sQueueSample.m_bIs2D = false;
+		break;
+	case SCRIPT_SOUND_NEW_BUILDING_MALIBU_2:
+		if(MusicManager.m_nPlayingTrack == STREAMED_SOUND_MALIBU_AMBIENT) return;
+		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_MAL2;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_MALIBU_2;
+		MusicManager.SetMalibuClubTrackPos(SCRIPT_SOUND_NEW_BUILDING_MALIBU_2);
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nReleasingVolumeModificator = 3;
+		m_sQueueSample.m_nReleasingVolumeDivider = 15;
+		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
+		m_sQueueSample.m_bIs2D = false;
+		break;
+	case SCRIPT_SOUND_NEW_BUILDING_MALIBU_3:
+		if(MusicManager.m_nPlayingTrack == STREAMED_SOUND_MALIBU_AMBIENT) return;
+		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_MAL3;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_MALIBU_3;
+		MusicManager.SetMalibuClubTrackPos(SCRIPT_SOUND_NEW_BUILDING_MALIBU_3);
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nReleasingVolumeModificator = 3;
+		m_sQueueSample.m_nReleasingVolumeDivider = 15;
+		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
+		m_sQueueSample.m_bIs2D = false;
+		break;
+	case SCRIPT_SOUND_NEW_BUILDING_STRIP_1:
+		if(MusicManager.m_nPlayingTrack == STREAMED_SOUND_STRIPCLUB_AMBIENT) return;
+		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_STR1;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_STRIP_1;
+		MusicManager.SetStripClubTrackPos(SCRIPT_SOUND_NEW_BUILDING_STRIP_1);
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nReleasingVolumeModificator = 3;
+		m_sQueueSample.m_nReleasingVolumeDivider = 15;
+		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
+		m_sQueueSample.m_bIs2D = false;
+		break;
+	case SCRIPT_SOUND_NEW_BUILDING_STRIP_2:
+		if(MusicManager.m_nPlayingTrack == STREAMED_SOUND_STRIPCLUB_AMBIENT) return;
+		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_STR2;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_STRIP_2;
+		MusicManager.SetStripClubTrackPos(SCRIPT_SOUND_NEW_BUILDING_STRIP_2);
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nReleasingVolumeModificator = 3;
+		m_sQueueSample.m_nReleasingVolumeDivider = 15;
+		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
+		m_sQueueSample.m_bIs2D = false;
+		break;
+	case SCRIPT_SOUND_NEW_BUILDING_STRIP_3:
+		if(MusicManager.m_nPlayingTrack == STREAMED_SOUND_STRIPCLUB_AMBIENT) return;
+		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_STR3;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_STRIP_3;
+		MusicManager.SetStripClubTrackPos(SCRIPT_SOUND_NEW_BUILDING_STRIP_3);
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nReleasingVolumeModificator = 3;
+		m_sQueueSample.m_nReleasingVolumeDivider = 15;
+		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
+		m_sQueueSample.m_bIs2D = false;
+		break;
+	case SCRIPT_SOUND_NEW_BUILDING_CHURCH:
+		m_sQueueSample.m_nSampleIndex = SFX_BUILDING_CHURCH;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_CHURCH;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		emittingVolume = 127;
+		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nReleasingVolumeModificator = 3;
+		m_sQueueSample.m_nReleasingVolumeDivider = 15;
+		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
+		m_sQueueSample.m_bIs2D = false;
+		break;
+	case SCRIPT_SOUND_NEW_WATERFALL:
+		emittingVolume = 30;
+		m_sQueueSample.m_fSoundIntensity = 80.0f;
+		m_sQueueSample.m_nSampleIndex = SFX_BOAT_WATER_LOOP;
+		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+		m_sQueueSample.m_nFrequency = 20812;
+		m_sQueueSample.m_nReleasingVolumeModificator = 4;
+		m_sQueueSample.m_nReleasingVolumeDivider = 9;
+		m_sQueueSample.m_fSpeedMultiplier = 2.0f;
+		m_sQueueSample.m_bIs2D = false;
+		break;
+	default: return;
 	}
 
 	distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
-	if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
+	if(distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
 		m_sQueueSample.m_fDistance = Sqrt(distSquared);
 		m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
-		if (m_sQueueSample.m_nVolume != 0) {
+		if(m_sQueueSample.m_nVolume != 0) {
 			m_sQueueSample.m_nCounter = 0;
 			m_sQueueSample.m_bIs2D = false;
 			m_sQueueSample.m_nLoopCount = 0;
@@ -8369,7 +8749,7 @@ cAudioManager::ProcessWeather(int32 id)
 	modifier = Max(Abs(x), Abs(y)) * 10.0f;
 	modifier = Min(1.0f, modifier);
 	wind = Max(CWeather::Wind, modifier);
-	if (wind > 0.0f && CObject::fDistToNearestTree < 75.0) {
+	if (wind > 0.0f && CObject::fDistToNearestTree < 75.0f) {
 		m_sQueueSample.m_nSampleIndex = SFX_PALM_TREE_LO;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_PALM_TREE_LO);
 		m_sQueueSample.m_nVolume = (m_anRandomTable[1] % 10 + 45.0f) * (75.0f - CObject::fDistToNearestTree) * (4.0f / 300.0f) * wind;
@@ -8440,6 +8820,8 @@ cAudioManager::ProcessFrontEnd()
 		case SOUND_GARAGE_BOMB1_SET:
 		case SOUND_GARAGE_BOMB2_SET:
 		case SOUND_GARAGE_BOMB3_SET:
+		case SOUND_PICKUP_WEAPON_BOUGHT:
+		case SOUND_PICKUP_WEAPON:
 			center = true;
 			processedPickup = true;
 			m_sQueueSample.m_nSampleIndex = SFX_WEAPON_LEFT;
@@ -8707,7 +9089,7 @@ cAudioManager::ProcessProjectiles()
 			m_sQueueSample.m_vecPos = CProjectileInfo::ms_apProjectile[i]->GetPosition();
 			distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 			if (distSquared < SQR(m_sQueueSample.m_fSoundIntensity)) {
-				m_sQueueSample.m_fDistance = distSquared <= 0.0f ? 0.0f : Sqrt(distSquared);
+				m_sQueueSample.m_fDistance = Sqrt(distSquared);
 				m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 				if (m_sQueueSample.m_nVolume != 0) {
 					m_sQueueSample.m_nCounter = i;
@@ -8732,7 +9114,7 @@ cAudioManager::ProcessGarages()
 	const float SOUND_INTENSITY = 80.0f;
 
 	CEntity *entity;
-	eGarageState state;
+	uint8 state;
 	uint32 sampleIndex;
 	uint8 j;
 	float distSquared;
@@ -8856,7 +9238,7 @@ cAudioManager::ProcessFireHydrant()
 	const float SOUND_INTENSITY = 35;
 
 	float distSquared;
-	bool distCalculated = 0;
+	bool distCalculated = false;
 
 	m_sQueueSample.m_vecPos = ((CEntity *)m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_pEntity)->GetPosition();
 	distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
@@ -9653,7 +10035,7 @@ cAudioManager::ProcessMissionAudioSlot(uint8 slot)
 		}
 		break;
 	case LOADING_STATUS_FAILED:
-		if (++nFramesUntilFailedLoad[slot] >= 90) {
+		if (++nFramesUntilFailedLoad[slot] >= 120) {
 			nFramesForPretendPlaying[slot] = 0;
 			g_bMissionAudioLoadFailed[slot] = true;
 			nFramesUntilFailedLoad[slot] = 0;

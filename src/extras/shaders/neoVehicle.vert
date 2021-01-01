@@ -8,16 +8,13 @@ uniform vec4 u_specColor[5];
 #define shininess (u_reflProps.z)
 #define specularity (u_reflProps.w)
 
-layout(location = 0) in vec3 in_pos;
-layout(location = 1) in vec3 in_normal;
-layout(location = 2) in vec4 in_color;
-layout(location = 3) in vec2 in_tex0;
+VSIN(ATTRIB_POS)	vec3 in_pos;
 
-out vec4 v_color;
-out vec4 v_reflcolor;
-out vec2 v_tex0;
-out vec2 v_tex1;
-out float v_fog;
+VSOUT vec4 v_color;
+VSOUT vec4 v_reflcolor;
+VSOUT vec2 v_tex0;
+VSOUT vec2 v_tex1;
+VSOUT float v_fog;
 
 vec3 DoDirLightSpec(vec3 Ldir, vec3 Lcol, vec3 N, vec3 V, float power)
 {

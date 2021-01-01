@@ -1,6 +1,7 @@
 #include "common.h"
 #include "main.h"
 #include "FileMgr.h"
+#include "FileLoader.h"
 #include "TxdStore.h"
 #include "Timer.h"
 #include "Weather.h"
@@ -17,6 +18,7 @@
 #include "ParticleMgr.h"
 #include "RwHelper.h"
 #include "Streaming.h"
+#include "ColStore.h"
 #include "CdStream.h"
 #include "Pad.h"
 #include "RenderBuffer.h"
@@ -43,8 +45,8 @@ float _TEXTURE_WAKE_ADDV;
 int32 CWaterLevel::ms_nNoOfWaterLevels;
 float CWaterLevel::ms_aWaterZs[48];
 CRect CWaterLevel::ms_aWaterRects[48];
-uint8 CWaterLevel::aWaterBlockList[WATER_BLOCK_SECTORS][WATER_BLOCK_SECTORS];
-uint8 CWaterLevel::aWaterFineBlockList[WATER_FINEBLOCK_SECTORS][WATER_FINEBLOCK_SECTORS];
+int8 CWaterLevel::aWaterBlockList[MAX_LARGE_SECTORS][MAX_LARGE_SECTORS];
+int8 CWaterLevel::aWaterFineBlockList[MAX_SMALL_SECTORS][MAX_SMALL_SECTORS];
 bool CWaterLevel::WavesCalculatedThisFrame;
 
 
@@ -115,15 +117,19 @@ WaterLevelInitialise(Const char *pWaterDat)
 {
 	CWaterLevel::ms_nNoOfWaterLevels = 0;
 	
-	int32 hFile;
-	
+#ifdef MASTER
+	int32 hFile = -1;
+
 	do
 	{
 		hFile = CFileMgr::OpenFile("DATA\\waterpro.dat", "rb");
 	}
 	while ( hFile < 0 );
+#else
+	int32 hFile = CFileMgr::OpenFile("DATA\\waterpro.dat", "rb");
+#endif
 	
-	if ( hFile > 0 )
+	if (hFile > 0)
 	{
 		CFileMgr::Read(hFile, (char *)&CWaterLevel::ms_nNoOfWaterLevels, sizeof(CWaterLevel::ms_nNoOfWaterLevels));
 		CFileMgr::Read(hFile, (char *)CWaterLevel::ms_aWaterZs,	sizeof(CWaterLevel::ms_aWaterZs));
@@ -132,6 +138,142 @@ WaterLevelInitialise(Const char *pWaterDat)
 		CFileMgr::Read(hFile, (char *)CWaterLevel::aWaterFineBlockList, sizeof(CWaterLevel::aWaterFineBlockList));
 		CFileMgr::CloseFile(hFile);
 	}
+#ifndef MASTER
+	else
+	{
+		printf("Init waterlevels\n");
+
+		// collision is streamed in VC
+		CColStore::LoadAllCollision();
+
+		CFileMgr::SetDir("");
+		hFile = CFileMgr::OpenFile(pWaterDat, "r");
+
+		char *line;
+
+		while ((line = CFileLoader::LoadLine(hFile)))
+		{
+			if (*line && *line != ';' && !strstr(line, "* ;end of file"))
+			{
+				float z, l, b, r, t;
+				sscanf(line, "%f %f %f %f %f", &z, &l, &b, &r, &t);
+				CWaterLevel::AddWaterLevel(l, b, r, t, z);
+			}
+		}
+
+		CFileMgr::CloseFile(hFile);
+
+		for (int32 x = 0; x < MAX_SMALL_SECTORS; x++)
+		{
+			for (int32 y = 0; y < MAX_SMALL_SECTORS; y++)
+			{
+				CWaterLevel::aWaterFineBlockList[x][y] = NO_WATER;
+			}
+		}
+
+		// rasterize water rects read from file
+		for (int32 i = 0; i < CWaterLevel::ms_nNoOfWaterLevels; i++)
+		{
+			int32 l = WATER_HUGE_X(CWaterLevel::ms_aWaterRects[i].left + WATER_X_OFFSET);
+			int32 r = WATER_HUGE_X(CWaterLevel::ms_aWaterRects[i].right + WATER_X_OFFSET) + 1.0f;
+			int32 t = WATER_HUGE_Y(CWaterLevel::ms_aWaterRects[i].top);
+			int32 b = WATER_HUGE_Y(CWaterLevel::ms_aWaterRects[i].bottom) + 1.0f;
+
+			l = clamp(l, 0, MAX_SMALL_SECTORS - 1);
+			r = clamp(r, 0, MAX_SMALL_SECTORS - 1);
+			t = clamp(t, 0, MAX_SMALL_SECTORS - 1);
+			b = clamp(b, 0, MAX_SMALL_SECTORS - 1);
+
+			for (int32 x = l; x <= r; x++)
+			{
+				for (int32 y = t; y <= b; y++)
+				{
+					CWaterLevel::aWaterFineBlockList[x][y] = i;
+				}
+			}
+		}
+
+		// remove tiles that are obscured by land
+		for (int32 x = 0; x < MAX_SMALL_SECTORS; x++)
+		{
+			float worldX = WATER_START_X + x * SMALL_SECTOR_SIZE - WATER_X_OFFSET;
+
+			for (int32 y = 0; y < MAX_SMALL_SECTORS; y++)
+			{
+				if (CWaterLevel::aWaterFineBlockList[x][y] >= 0)
+				{
+					float worldY = WATER_START_Y + y * SMALL_SECTOR_SIZE;
+
+					int32 i;
+					for (i = 0; i <= 8; i++)
+					{
+						for (int32 j = 0; j <= 8; j++)
+						{
+							CVector worldPos = CVector(worldX + i * (SMALL_SECTOR_SIZE / 8), worldY + j * (SMALL_SECTOR_SIZE / 8), CWaterLevel::ms_aWaterZs[CWaterLevel::aWaterFineBlockList[x][y]]);
+
+							if ((worldPos.x > WORLD_MIN_X && worldPos.x < WORLD_MAX_X) && (worldPos.y > WORLD_MIN_Y && worldPos.y < WORLD_MAX_Y) &&
+								(!CWaterLevel::WaterLevelAccordingToRectangles(worldPos.x, worldPos.y) || CWaterLevel::TestVisibilityForFineWaterBlocks(worldPos)))
+								continue;
+
+							// at least one point in the tile wasn't blocked, so don't remove water
+							i = 1000;
+							break;
+						}
+					}
+
+					if (i < 1000)
+						CWaterLevel::aWaterFineBlockList[x][y] = NO_WATER;
+				}
+			}
+		}
+
+		CWaterLevel::RemoveIsolatedWater();
+
+		// calculate coarse tiles from fine tiles
+		for (int32 x = 0; x < MAX_LARGE_SECTORS; x++)
+		{
+			for (int32 y = 0; y < MAX_LARGE_SECTORS; y++)
+			{
+				if (CWaterLevel::aWaterFineBlockList[x * 2][y * 2] >= 0)
+				{
+					CWaterLevel::aWaterBlockList[x][y] = CWaterLevel::aWaterFineBlockList[x * 2][y * 2];
+				}
+				else if (CWaterLevel::aWaterFineBlockList[x * 2 + 1][y * 2] >= 0)
+				{
+					CWaterLevel::aWaterBlockList[x][y] = CWaterLevel::aWaterFineBlockList[x * 2 + 1][y * 2];
+				}
+				else if (CWaterLevel::aWaterFineBlockList[x * 2][y * 2 + 1] >= 0)
+				{
+					CWaterLevel::aWaterBlockList[x][y] = CWaterLevel::aWaterFineBlockList[x * 2][y * 2 + 1];
+				}
+				else if (CWaterLevel::aWaterFineBlockList[x * 2 + 1][y * 2 + 1] >= 0)
+				{
+					CWaterLevel::aWaterBlockList[x][y] = CWaterLevel::aWaterFineBlockList[x * 2 + 1][y * 2 + 1];
+				}
+				else
+				{
+					CWaterLevel::aWaterBlockList[x][y] = NO_WATER;
+				}
+			}
+		}
+
+		hFile = CFileMgr::OpenFileForWriting("data\\waterpro.dat");
+
+		if (hFile > 0)
+		{
+			CFileMgr::Write(hFile, (char *)&CWaterLevel::ms_nNoOfWaterLevels, sizeof(CWaterLevel::ms_nNoOfWaterLevels));
+			CFileMgr::Write(hFile, (char *)CWaterLevel::ms_aWaterZs, sizeof(CWaterLevel::ms_aWaterZs));
+			CFileMgr::Write(hFile, (char *)CWaterLevel::ms_aWaterRects, sizeof(CWaterLevel::ms_aWaterRects));
+			CFileMgr::Write(hFile, (char *)CWaterLevel::aWaterBlockList, sizeof(CWaterLevel::aWaterBlockList));
+			CFileMgr::Write(hFile, (char *)CWaterLevel::aWaterFineBlockList, sizeof(CWaterLevel::aWaterFineBlockList));
+
+			CFileMgr::CloseFile(hFile);
+		}
+
+		// collision is streamed in VC
+		CColStore::RemoveAllCollision();
+	}
+#endif
 	
 	CTxdStore::PushCurrentTxd();
 
@@ -397,6 +539,170 @@ CWaterLevel::DestroyWavyAtomic()
 #undef _DELETE_ATOMIC
 }
 
+#ifndef MASTER
+void
+CWaterLevel::AddWaterLevel(float fXLeft, float fYBottom, float fXRight, float fYTop, float fLevel)
+{
+	ms_aWaterRects[ms_nNoOfWaterLevels] = CRect(fXLeft, fYBottom, fXRight, fYTop);
+	ms_aWaterZs[ms_nNoOfWaterLevels] = fLevel;
+	ms_nNoOfWaterLevels++;
+}
+
+bool
+CWaterLevel::WaterLevelAccordingToRectangles(float fX, float fY, float *pfOutLevel)
+{
+	if (ms_nNoOfWaterLevels <= 0) return false;
+
+	for (int32 i = 0; i < ms_nNoOfWaterLevels; i++)
+	{
+		if (fX >= ms_aWaterRects[i].left && fX <= ms_aWaterRects[i].right
+			&& fY >= ms_aWaterRects[i].top && fY <= ms_aWaterRects[i].bottom)
+		{
+			if (pfOutLevel) *pfOutLevel = ms_aWaterZs[i];
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool
+CWaterLevel::TestVisibilityForFineWaterBlocks(const CVector &worldPos)
+{
+	static CVector2D tab[] =
+	{
+		{ 50.0f, 50.0f },
+		{ -50.0f, 50.0f },
+		{ -50.0f, -50.0f },
+		{ 50.0f, -50.0f },
+		{ 50.0f, 0.0f },
+		{ -50.0f, 0.0f },
+		{ 0.0f, -50.0f },
+		{ 0.0f, 50.0f },
+	};
+
+	CEntity *entity;
+	CColPoint col;
+	CVector lineStart, lineEnd;
+
+	lineStart = worldPos;
+
+	if (!CWorld::ProcessVerticalLine(lineStart, lineStart.z + 100.0f, col, entity, true, false, false, false, true, false, nil))
+	{
+		lineStart.x += 0.4f;
+		lineStart.y += 0.4f;
+
+		if (!CWorld::ProcessVerticalLine(lineStart, lineStart.z + 100.0f, col, entity, true, false, false, false, true, false, nil))
+		{
+			return false;
+		}
+	}
+
+	for (int32 i = 0; i < ARRAY_SIZE(tab); i++)
+	{
+		lineStart = worldPos;
+		lineEnd = worldPos;
+
+		lineEnd.x += tab[i].x;
+		lineEnd.y += tab[i].y;
+		lineEnd.z += 100.0f;
+
+		if ((lineEnd.x > WORLD_MIN_X && lineEnd.x < WORLD_MAX_X) && (lineEnd.y > WORLD_MIN_Y && lineEnd.y < WORLD_MAX_Y))
+		{
+			if (!CWorld::ProcessLineOfSight(lineStart, lineEnd, col, entity, true, false, false, false, true, false, nil))
+			{
+				lineStart.x += 0.4f;
+				lineStart.y += 0.4f;
+				lineEnd.x += 0.4f;
+				lineEnd.y += 0.4f;
+
+				if (!CWorld::ProcessLineOfSight(lineStart, lineEnd, col, entity, true, false, false, false, true, false, nil))
+				{
+					return false;
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+void
+CWaterLevel::RemoveIsolatedWater()
+{
+	bool (*isConnected)[MAX_SMALL_SECTORS] = new bool[MAX_SMALL_SECTORS][MAX_SMALL_SECTORS];
+
+	for (int32 x = 0; x < MAX_SMALL_SECTORS; x++)
+	{
+		for (int32 y = 0; y < MAX_SMALL_SECTORS; y++)
+		{
+			isConnected[x][y] = false;
+		}
+	}
+
+	isConnected[0][0] = true;
+	bool keepGoing;
+
+	do
+	{
+		keepGoing = false;
+
+		for (int32 x = 0; x < MAX_SMALL_SECTORS; x++)
+		{
+			for (int32 y = 0; y < MAX_SMALL_SECTORS; y++)
+			{
+				if (aWaterFineBlockList[x][y] < 0 || isConnected[x][y])
+					continue;
+
+				if (x > 0 && isConnected[x - 1][y])
+				{
+					isConnected[x][y] = true;
+					keepGoing = true;
+				}
+
+				if (y > 0 && isConnected[x][y - 1])
+				{
+					isConnected[x][y] = true;
+					keepGoing = true;
+				}
+
+				if (x + 1 < MAX_SMALL_SECTORS && isConnected[x + 1][y])
+				{
+					isConnected[x][y] = true;
+					keepGoing = true;
+				}
+
+				if (y + 1 < MAX_SMALL_SECTORS && isConnected[x][y + 1])
+				{
+					isConnected[x][y] = true;
+					keepGoing = true;
+				}
+			}
+		}
+	}
+	while (keepGoing);
+
+	int32 numRemoved = 0;
+
+	for (int32 x = 0; x < MAX_SMALL_SECTORS; x++)
+	{
+		for (int32 y = 0; y < MAX_SMALL_SECTORS; y++)
+		{
+			if (aWaterFineBlockList[x][y] >= 0 && !isConnected[x][y] && ms_aWaterZs[aWaterFineBlockList[x][y]] == 6.0f)
+			{
+				numRemoved++;
+				aWaterFineBlockList[x][y] = NO_WATER;
+			}
+		}
+	}
+
+	printf("Removed %d isolated patches of water\n", numRemoved);
+
+	delete[] isConnected;
+}
+#endif
+
 bool
 CWaterLevel::GetWaterLevel(float fX, float fY, float fZ, float *pfOutLevel, bool bDontCheckZ)
 {
@@ -542,38 +848,38 @@ inline bool
 _IsColideWithBlock(int32 x, int32 y, int32 &block)
 {
 	block = CWaterLevel::aWaterFineBlockList[x + 0][y + 0];
-	if (!(block & 0x80))
+	if (block >= 0)
 		return true;
 
 	block = CWaterLevel::aWaterFineBlockList[x + 0][y + 1];
-	if (!(block & 0x80))
+	if (block >= 0)
 	{
 		block = CWaterLevel::aWaterFineBlockList[x + 0][y + 2];
-		if (!(block & 0x80))
+		if (block >= 0)
 			return true;
 	}
 
 	block = CWaterLevel::aWaterFineBlockList[x + 1][y + 0];
-	if (!(block & 0x80))
+	if (block >= 0)
 		return true;
 
 	block = CWaterLevel::aWaterFineBlockList[x + 1][y + 1];
-	if (!(block & 0x80))
+	if (block >= 0)
 	{
 		block = CWaterLevel::aWaterFineBlockList[x + 1][y + 2];
-		if (!(block & 0x80))
+		if (block >= 0)
 			return true;
 	}
 
 	block = CWaterLevel::aWaterFineBlockList[x + 2][y + 0];
-	if (!(block & 0x80))
+	if (block >= 0)
 		return true;
 
 	block = CWaterLevel::aWaterFineBlockList[x + 2][y + 1];
-	if (!(block & 0x80))
+	if (block >= 0)
 	{
 		block = CWaterLevel::aWaterFineBlockList[x + 2][y + 2];
-		if (!(block & 0x80))
+		if (block >= 0)
 			return true;
 	}
 
@@ -693,10 +999,10 @@ CWaterLevel::RenderWater()
 	{
 		for ( int32 y = nStartY; y <= nEndY; y++ )
 		{
-			if (   !(aWaterBlockList[2*x+0][2*y+0] & 0x80)
-				|| !(aWaterBlockList[2*x+1][2*y+0] & 0x80)
-				|| !(aWaterBlockList[2*x+0][2*y+1] & 0x80)
-				|| !(aWaterBlockList[2*x+1][2*y+1] & 0x80) )
+			if (   aWaterBlockList[2*x+0][2*y+0] >= 0
+				|| aWaterBlockList[2*x+1][2*y+0] >= 0
+				|| aWaterBlockList[2*x+0][2*y+1] >= 0
+				|| aWaterBlockList[2*x+1][2*y+1] >= 0 )
 			{
 				float fX = WATER_FROM_HUGE_SECTOR_X(x) - WATER_X_OFFSET;
 				float fY = WATER_FROM_HUGE_SECTOR_Y(y);
@@ -716,16 +1022,16 @@ CWaterLevel::RenderWater()
 
 						float fZ;
 
-						if ( !(aWaterBlockList[2*x+0][2*y+0] & 0x80) )
+						if ( aWaterBlockList[2*x+0][2*y+0] >= 0 )
 							fZ = ms_aWaterZs[ aWaterBlockList[2*x+0][2*y+0] ];
 
-						if ( !(aWaterBlockList[2*x+1][2*y+0] & 0x80) )
+						if ( aWaterBlockList[2*x+1][2*y+0] >= 0 )
 							fZ = ms_aWaterZs[ aWaterBlockList[2*x+1][2*y+0] ];
 
-						if ( !(aWaterBlockList[2*x+0][2*y+1] & 0x80) )
+						if ( aWaterBlockList[2*x+0][2*y+1] >= 0 )
 							fZ = ms_aWaterZs[ aWaterBlockList[2*x+0][2*y+1] ];
 
-						if ( !(aWaterBlockList[2*x+1][2*y+1] & 0x80) )
+						if ( aWaterBlockList[2*x+1][2*y+1] >= 0 )
 							fZ = ms_aWaterZs[ aWaterBlockList[2*x+1][2*y+1] ];
 						
 						if ( fHugeSectorDistToCamSqr >= SQR(500.0f) )
@@ -960,10 +1266,10 @@ CWaterLevel::RenderTransparentWater(void)
 	{
 		for ( int32 y = nStartY; y <= nEndY; y++ )
 		{
-			if (   !(aWaterBlockList[2*x+0][2*y+0] & 0x80)
-				|| !(aWaterBlockList[2*x+1][2*y+0] & 0x80)
-				|| !(aWaterBlockList[2*x+0][2*y+1] & 0x80)
-				|| !(aWaterBlockList[2*x+1][2*y+1] & 0x80) )
+			if (   aWaterBlockList[2*x+0][2*y+0] >= 0
+				|| aWaterBlockList[2*x+1][2*y+0] >= 0
+				|| aWaterBlockList[2*x+0][2*y+1] >= 0
+				|| aWaterBlockList[2*x+1][2*y+1] >= 0 )
 			{
 				float fX = WATER_FROM_HUGE_SECTOR_X(x) - WATER_X_OFFSET;
 				float fY = WATER_FROM_HUGE_SECTOR_Y(y);
@@ -991,7 +1297,7 @@ CWaterLevel::RenderTransparentWater(void)
 							{
 								for ( int32 y2 = 2*y; y2 <= 2*y+1; y2++ )
 								{
-									if ( !(aWaterBlockList[x2][y2] & 0x80) )
+									if ( aWaterBlockList[x2][y2] >= 0 )
 									{
 										float fLargeX = WATER_FROM_LARGE_SECTOR_X(x2) - WATER_X_OFFSET;
 										float fLargeY = WATER_FROM_LARGE_SECTOR_Y(y2);
@@ -1025,7 +1331,7 @@ CWaterLevel::RenderTransparentWater(void)
 													float fZ;
 													
 													// WS
-													if ( !(aWaterFineBlockList[2*x2+0][2*y2+0] & 0x80) )
+													if ( aWaterFineBlockList[2*x2+0][2*y2+0] >= 0 )
 													{
 														float fSmallX = fLargeX;
 														float fSmallY = fLargeY;
@@ -1042,7 +1348,7 @@ CWaterLevel::RenderTransparentWater(void)
 													}
 													
 													// SE
-													if ( !(aWaterFineBlockList[2*x2+1][2*y2+0] & 0x80) )
+													if ( aWaterFineBlockList[2*x2+1][2*y2+0] >= 0 )
 													{
 														float fSmallX = fLargeX + (LARGE_SECTOR_SIZE/2);
 														float fSmallY = fLargeY;
@@ -1059,7 +1365,7 @@ CWaterLevel::RenderTransparentWater(void)
 													}
 													
 													// WN
-													if ( !(aWaterFineBlockList[2*x2+0][2*y2+1] & 0x80) )
+													if ( aWaterFineBlockList[2*x2+0][2*y2+1] >= 0 )
 													{
 														float fSmallX = fLargeX;
 														float fSmallY = fLargeY + (LARGE_SECTOR_SIZE/2);
@@ -1076,7 +1382,7 @@ CWaterLevel::RenderTransparentWater(void)
 													}
 													
 													//NE
-													if ( !(aWaterFineBlockList[2*x2+1][2*y2+1] & 0x80) )
+													if ( aWaterFineBlockList[2*x2+1][2*y2+1] >= 0 )
 													{
 														float fSmallX = fLargeX + (LARGE_SECTOR_SIZE/2);
 														float fSmallY = fLargeY + (LARGE_SECTOR_SIZE/2);
@@ -2588,7 +2894,7 @@ CWaterLevel::CalcDistanceToWater(float fX, float fY)
 	{
 		for ( int32 y = nStartY; y <= nEndY; y++ )
 		{
-			if ( !(aWaterFineBlockList[x][y] & 0x80) )
+			if ( aWaterFineBlockList[x][y] >= 0 )
 			{				
 				float fSectorX = WATER_FROM_SMALL_SECTOR_X(x) - WATER_X_OFFSET;
 				float fSectorY = WATER_FROM_SMALL_SECTOR_Y(y);

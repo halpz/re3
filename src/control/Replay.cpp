@@ -1,5 +1,5 @@
 #include "common.h"
-
+#ifdef GTA_REPLAY
 #include "AnimBlendAssocGroup.h"
 #include "AnimBlendAssociation.h"
 #include "Bike.h"
@@ -794,10 +794,19 @@ void CReplay::StoreBikeUpdate(CVehicle* vehicle, int id)
 	vp->matrix.CompressFromFullMatrix(vehicle->GetMatrix());
 	vp->health = vehicle->m_fHealth / 4.0f; /* Not anticipated that health can be > 1000. */
 	vp->acceleration = vehicle->m_fGasPedal * 100.0f;
+#ifdef FIX_BUGS // originally it's undefined behaviour - different fields are copied on PC and mobile
+	for (int i = 0; i < 2; i++)
+		vp->wheel_rotation[i] = 128.0f / PI * bike->m_aWheelRotation[i];
+	for (int i = 0; i < 2; i++)
+		vp->wheel_rotation[i + 2] = 128.0f / PI * bike->m_aWheelSpeed[i];
+	for (int i = 0; i < 4; i++)
+		vp->wheel_susp_dist[i] = 50.0f * bike->m_aSuspensionSpringRatio[i];
+#else
 	for (int i = 0; i < 4; i++) {
 		vp->wheel_susp_dist[i] = 50.0f * bike->m_aSuspensionSpringRatio[i];
 		vp->wheel_rotation[i] = 128.0f / PI * bike->m_aWheelRotation[i];
 	}
+#endif
 	vp->velocityX = 8000.0f * Max(-4.0f, Min(4.0f, vehicle->GetMoveSpeed().x)); /* 8000!? */
 	vp->velocityY = 8000.0f * Max(-4.0f, Min(4.0f, vehicle->GetMoveSpeed().y));
 	vp->velocityZ = 8000.0f * Max(-4.0f, Min(4.0f, vehicle->GetMoveSpeed().z));
@@ -902,12 +911,19 @@ void CReplay::ProcessBikeUpdate(CVehicle* vehicle, float interpolation, CAddress
 	vehicle->m_vecMoveSpeed = CVector(vp->velocityX / 8000.0f, vp->velocityY / 8000.0f, vp->velocityZ / 8000.0f);
 	vehicle->m_fSteerAngle = vp->wheel_state / 50.0f;
 	vehicle->bEngineOn = true;
+#ifdef FIX_BUGS
+	for (int i = 0; i < 2; i++)
+		bike->m_aWheelRotation[i] = vp->wheel_rotation[i] / (128.0f / PI);
+	for (int i = 0; i < 2; i++)
+		bike->m_aWheelSpeed[i] = vp->wheel_rotation[i + 2] / (128.0f / PI);
+	for (int i = 0; i < 4; i++)
+		bike->m_aSuspensionSpringRatio[i] = vp->wheel_susp_dist[i] / 50.0f;
+#else
 	for (int i = 0; i < 4; i++) {
 		bike->m_aSuspensionSpringRatio[i] = vp->wheel_susp_dist[i] / 50.0f;
 		bike->m_aWheelRotation[i] = vp->wheel_rotation[i] / (128.0f / PI);
-		// NB: technically last assignment overflows - there are 2 wheels of bike
-		// however it saves two useful fields; this looks like unrolled loop, not sequential assignments
 	}
+#endif
 	bike->m_fLeanLRAngle = vp->lean_angle / 50.0f;
 	bike->m_fWheelAngle = vp->wheel_angle / 50.0f;
 	bike->bLeanMatrixClean = false;
@@ -1218,10 +1234,10 @@ void CReplay::ProcessReplayCamera(void)
 		TheCamera.GetUp() = CVector(0.0f, 1.0f, 0.0f);
 		TheCamera.GetRight() = CVector(1.0f, 0.0f, 0.0f);
 		RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
-		pm->pos = *(RwV3d*)&TheCamera.GetPosition();
-		pm->at = *(RwV3d*)&TheCamera.GetForward();
-		pm->up = *(RwV3d*)&TheCamera.GetUp();
-		pm->right = *(RwV3d*)&TheCamera.GetRight();
+		pm->pos = TheCamera.GetPosition();
+		pm->at = TheCamera.GetForward();
+		pm->up = TheCamera.GetUp();
+		pm->right = TheCamera.GetRight();
 		break;
 	}
 	case REPLAYCAMMODE_FIXED:
@@ -1237,10 +1253,10 @@ void CReplay::ProcessReplayCamera(void)
 		TheCamera.GetMatrix().GetUp() = up;
 		TheCamera.GetMatrix().GetRight() = right;
 		RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
-		pm->pos = *(RwV3d*)&TheCamera.GetMatrix().GetPosition();
-		pm->at = *(RwV3d*)&TheCamera.GetMatrix().GetForward();
-		pm->up = *(RwV3d*)&TheCamera.GetMatrix().GetUp();
-		pm->right = *(RwV3d*)&TheCamera.GetMatrix().GetRight();
+		pm->pos = TheCamera.GetMatrix().GetPosition();
+		pm->at = TheCamera.GetMatrix().GetForward();
+		pm->up = TheCamera.GetMatrix().GetUp();
+		pm->right = TheCamera.GetMatrix().GetRight();
 		break;
 	}
 	default:
@@ -1447,7 +1463,7 @@ void CReplay::RestoreStuffFromMem(void)
 		ped->m_rwObject = nil;
 		ped->m_modelIndex = -1;
 		ped->SetModelIndex(mi);
-		ped->m_pVehicleAnim = 0;
+		ped->m_pVehicleAnim = nil;
 		ped->m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, ped);
 		DMAudio.SetEntityStatus(ped->m_audioEntityId, true);
 		CPopulation::UpdatePedCount((ePedType)ped->m_nPedType, false);
@@ -1840,10 +1856,10 @@ void CReplay::ProcessLookAroundCam(void)
 	TheCamera.GetRight() = right;
 	TheCamera.SetPosition(camera_pt);
 	RwMatrix* pm = RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera));
-	pm->pos = *(RwV3d*)&TheCamera.GetPosition();
-	pm->at = *(RwV3d*)&TheCamera.GetForward();
-	pm->up = *(RwV3d*)&TheCamera.GetUp();
-	pm->right = *(RwV3d*)&TheCamera.GetRight();
+	pm->pos = TheCamera.GetPosition();
+	pm->at = TheCamera.GetForward();
+	pm->up = TheCamera.GetUp();
+	pm->right = TheCamera.GetRight();
 	TheCamera.CalculateDerivedValues();
 	RwMatrixUpdate(RwFrameGetMatrix(RwCameraGetFrame(TheCamera.m_pRwCamera)));
 	RwFrameUpdateObjects(RwCameraGetFrame(TheCamera.m_pRwCamera));
@@ -1887,3 +1903,4 @@ void CReplay::Display()
 	if (Mode == MODE_PLAYBACK)
 		CFont::PrintString(SCREEN_SCALE_X(63.5f), SCREEN_SCALE_Y(30.0f), TheText.Get("REPLAY"));
 }
+#endif

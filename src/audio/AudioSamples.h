@@ -2,7 +2,8 @@
 
 #include "common.h"
 
-enum eSfxSample : uint32 {
+enum eSfxSample
+{
 	SFX_CAR_HORN_JEEP = 0,
 	SFX_CAR_HORN_BMW328,
 	SFX_CAR_HORN_BUS,

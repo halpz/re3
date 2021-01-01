@@ -4,6 +4,7 @@
 #include "General.h"
 #include "Vehicle.h"
 #include "World.h"
+#include "MemoryHeap.h"
 
 const int gcMaxSizeOfAtmQueue = 1;
 const int gcMaxSizeOfSeatQueue = 1;
@@ -18,8 +19,18 @@ std::vector<CVector> CPedShelterAttractor::ms_displacements;
 
 CPedAttractorManager* GetPedAttractorManager()
 {
-	static CPedAttractorManager manager;
-	return &manager;
+// mobile just has a static here:
+/*
+	static CPedAttractorManager pedAttrMgr;
+	return &pedAttrMgr;
+*/
+	static CPedAttractorManager *pedAttrMgr;
+	if(pedAttrMgr == nil){
+		PUSH_MEMID(MEMID_PED_ATTR);
+		pedAttrMgr = new CPedAttractorManager;
+		POP_MEMID();
+	}
+	return pedAttrMgr;
 }
 
 CVehicleToEffect::CVehicleToEffect(CVehicle* pVehicle) : m_pVehicle(pVehicle)
@@ -100,8 +111,10 @@ const C2dEffect* CPedAttractorManager::GetEffectForIceCreamVan(CVehicle* pVehicl
 				return assoc->ChooseEffect(pos);
 		}
 	}
+	PUSH_MEMID(MEMID_PED_ATTR);
 	CVehicleToEffect effect(pVehicle);
 	vVehicleToEffect.push_back(effect);
+	POP_MEMID();
 	return effect.ChooseEffect(pos);
 }
 
@@ -645,6 +658,7 @@ CPedAttractor* CPedAttractorManager::RegisterPed(CPed* pPed, C2dEffect* pEffect,
 			pRegisteredAttractor->RegisterPed(pPed);
 		return pRegisteredAttractor;
 	}
+	PUSH_MEMID(MEMID_PED_ATTR);
 	switch (pEffect->pedattr.type) {
 	case ATTRACTOR_ATM: vecAttractors.push_back(new CPedAtmAttractor(pEffect, matrix, gcMaxSizeOfAtmQueue, 1.0f, 30000.0f, 3000.0f, 0.2f, 0.15f, 0.1f, 0.1f)); break;
 	case ATTRACTOR_SEAT: vecAttractors.push_back(new CPedSeatAttractor(pEffect, matrix, gcMaxSizeOfSeatQueue, 1.0f, 30000.0f, 3000.0f, 0.125f, 0.1f, 0.1f, 0.1f)); break;
@@ -653,6 +667,7 @@ CPedAttractor* CPedAttractorManager::RegisterPed(CPed* pPed, C2dEffect* pEffect,
 	case ATTRACTOR_SHELTER: vecAttractors.push_back(new CPedShelterAttractor(pEffect, matrix, gcMaxSizeOfShelterQueue, 1.0f, 30000.0f, 3000.0f, 0.5f, 6.28f, 0.1f, 0.1f)); break;
 	case ATTRACTOR_ICECREAM: vecAttractors.push_back(new CPedIceCreamAttractor(pEffect, matrix, gcMaxSizeOfIceCreamQueue, 1.0f, 30000.0f, 3000.0f, 0.2f, 0.3f, 0.1f, 0.1f)); break;
 	}
+	POP_MEMID();
 	if (pRegisteredAttractor)
 		pRegisteredAttractor->RegisterPed(pPed);
 	return pRegisteredAttractor;

@@ -153,12 +153,3 @@ CPed::Say(uint16 audio)
 		}
 	}
 }
-
-void
-CPed::Say(uint16 audio, int32 time)
-{
-	if (m_delayedSoundID == -1) {
-		m_delayedSoundID = audio;
-		m_delayedSoundTimer = CTimer::GetTimeInMilliseconds() + time;
-	}
-}

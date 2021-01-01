@@ -12,6 +12,10 @@ enum eWinVersion
     OS_WINXP,
 };
 
+#if !defined(_MSC_VER) && !defined(__CWCC__)
+char *_strdate(char *buf);
+#endif
+
 #ifdef _WIN32
 
 // As long as WITHWINDOWS isn't defined / <Windows.h> isn't included, we only need type definitions so let's include <IntSafe.h>.
@@ -83,9 +87,6 @@ enum eGameState
     GS_FRONTEND,
     GS_INIT_PLAYING_GAME,
     GS_PLAYING_GAME,
-#ifndef MASTER
-    GS_ANIMVIEWER,
-#endif
 };
 extern RwUInt32 gGameState;
 

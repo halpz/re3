@@ -2,6 +2,10 @@
 
 #include "templates.h"
 
+#ifdef MoveMemory
+#undef MoveMemory	// windows shit
+#endif
+
 class CAnimBlendSequence;
 
 // A collection of sequences
@@ -11,8 +15,8 @@ public:
 	char name[24];
 	CAnimBlendSequence *sequences;
 	int16 numSequences;
-	bool compressed;	// not really used
-	bool compressed2;	// not really used
+	bool compressed;
+	bool keepCompressed;
 	float totalLength;
 	CLink<CAnimBlendHierarchy*> *linkPtr;
 
@@ -25,6 +29,7 @@ public:
 	void RemoveAnimSequences(void);
 	void Uncompress(void);
 	void RemoveUncompressedData(void);
+	void MoveMemory(bool onlyone = false);
 	bool IsCompressed() { return !!compressed; };
 };
 

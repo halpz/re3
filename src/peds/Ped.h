@@ -5,7 +5,7 @@
 #include "Crime.h"
 #include "EventList.h"
 #include "PedIK.h"
-#include "PedStats.h"
+#include "PedType.h"
 #include "Physical.h"
 #include "Weapon.h"
 #include "WeaponInfo.h"
@@ -15,6 +15,7 @@
 #define FEET_OFFSET	1.04f
 #define CHECK_NEARBY_THINGS_MAX_DIST	15.0f
 #define ENTER_CAR_MAX_DIST	30.0f
+#define CAN_SEE_ENTITY_ANGLE_THRESHOLD	DEGTORAD(60.0f)
 
 class CAccident;
 class CObject;
@@ -51,7 +52,7 @@ enum eFormation
 	FORMATION_FRONT
 };
 
-enum FightState : int8 {
+enum FightState {
 	FIGHTSTATE_MOVE_FINISHED = -2,
 	FIGHTSTATE_JUST_ATTACKED,
 	FIGHTSTATE_NO_MOVE,
@@ -186,7 +187,7 @@ enum eWaitState {
 	WAITSTATE_PLAYANIM_HANDSUP_SIMPLE,
 };
 
-enum eObjective : uint32 {
+enum eObjective {
 	OBJECTIVE_NONE,
 	OBJECTIVE_WAIT_ON_FOOT,
 	OBJECTIVE_WAIT_ON_FOOT_FOR_COP,
@@ -253,7 +254,7 @@ enum eObjective : uint32 {
 enum {
 	RANDOM_CHAR = 1,
 	MISSION_CHAR,
-	TODO_CHAR, // TODO(Miami)
+	UNK_CHAR,
 };
 
 enum PedLineUpPhase {
@@ -270,7 +271,7 @@ enum PedOnGroundState {
 	PED_DEAD_ON_THE_FLOOR
 };
 
-enum PointBlankNecessity : uint8 {
+enum PointBlankNecessity {
 	NO_POINT_BLANK_PED,
 	POINT_BLANK_FOR_WANTED_PED,
 	POINT_BLANK_FOR_SOMEONE_ELSE
@@ -597,7 +598,7 @@ public:
 	uint32 m_curFightMove;
 	uint32 m_lastFightMove;
 	uint8 m_fightButtonPressure;
-	FightState m_fightState;
+	int8 m_fightState;
 	bool m_takeAStepAfterAttack;
 	uint8 m_bleedCounter;
 	CFire *m_pFire;
@@ -641,8 +642,8 @@ public:
 	uint16 m_queuedSound;
 	bool m_canTalk;
 	uint32 m_lastComment;
-	CVector m_vecSeekPosEx; // used for OBJECTIVE_GUARD_SPOT
-	float m_distanceToCountSeekDoneEx; // used for OBJECTIVE_GUARD_SPOT
+	CVector m_vecSpotToGuard;
+	float m_radiusToGuard;
 
 	static void *operator new(size_t);
 	static void *operator new(size_t, int);
@@ -652,6 +653,7 @@ public:
 	CPed(uint32 pedType);
 	~CPed(void);
 
+	void DeleteRwObject();
 	void SetModelIndex(uint32 mi);
 	void ProcessControl(void);
 	void Teleport(CVector);
@@ -701,7 +703,7 @@ public:
 	void CalculateNewOrientation(void);
 	float WorkOutHeadingForMovingFirstPerson(float);
 	void CalculateNewVelocity(void);
-	bool CanSeeEntity(CEntity*, float);
+	bool CanSeeEntity(CEntity*, float threshold = CAN_SEE_ENTITY_ANGLE_THRESHOLD);
 	void RestorePreviousObjective(void);
 	void SetIdle(void);
 #ifdef _MSC_VER
@@ -727,7 +729,7 @@ public:
 	CPed *CheckForDeadPeds(void);
 	bool CheckForExplosions(CVector2D &area);
 	CPed *CheckForGunShots(void);
-	PointBlankNecessity CheckForPointBlankPeds(CPed*);
+	uint8 CheckForPointBlankPeds(CPed*);
 	bool CheckIfInTheAir(void);
 	void ClearAll(void);
 	void SetPointGunAt(CEntity*);
@@ -771,6 +773,7 @@ public:
 	void SetFall(int, AnimationId, uint8);
 	void SetFlee(CEntity*, int);
 	void SetFlee(CVector2D const &, int);
+	void RemoveDrivebyAnims(void);
 	void RemoveInCarAnims(void);
 	void CollideWithPed(CPed*);
 	void SetDirectionToWalkAroundObject(CEntity*);
@@ -907,7 +910,7 @@ public:
 	static void PedAnimShuffleCB(CAnimBlendAssociation *assoc, void *arg);
 	static void PedSetGetInCarPositionCB(CAnimBlendAssociation* assoc, void* arg);
 
-	bool IsPlayer(void);
+	bool IsPlayer(void) const;
 	bool IsFemale(void) { return m_nPedType == PEDTYPE_CIVFEMALE || m_nPedType == PEDTYPE_PROSTITUTE; }
 	bool UseGroundColModel(void);
 	bool CanSetPedState(void);
@@ -927,7 +930,7 @@ public:
 	void SetStoredObjective(void);
 	void SetLeader(CEntity* leader);
 	void SetPedStats(ePedStats);
-	bool IsGangMember(void);
+	bool IsGangMember(void) const;
 	void Die(void);
 #ifdef GTA_TRAIN
 	void EnterTrain(void);
@@ -953,7 +956,7 @@ public:
 	void UpdatePosition(void);
 	CObject *SpawnFlyingComponent(int, int8);
 	void SetCarJack_AllClear(CVehicle*, uint32, uint32);
-	bool CanPedJumpThis(CEntity*, CVector*);
+	bool CanPedJumpThis(CEntity *unused, CVector *damageNormal = nil);
 	void SetNewAttraction(CPedAttractor* pAttractor, const CVector& pos, float, float, int);
 	void ClearWaitState(void);
 	void Undress(const char*);
@@ -970,7 +973,7 @@ public:
 	PedState GetPedState(void) { return m_nPedState; }
 	void SetPedState(PedState state) 
 	{
-		if (GetPedState() == PED_FOLLOW_PATH)
+		if (GetPedState() == PED_FOLLOW_PATH && state != PED_FOLLOW_PATH)
 			ClearFollowPath();
 		m_nPedState = state;
 	}
@@ -983,7 +986,7 @@ public:
 	bool Driving(void) { return m_nPedState == PED_DRIVING; }
 	bool InVehicle(void) { return bInVehicle && m_pMyVehicle; } // True when ped is sitting/standing in vehicle, not in enter/exit state.
 	bool EnteringCar(void) { return m_nPedState == PED_ENTER_CAR || m_nPedState == PED_CARJACK; }
-	bool HasAttractor(void) { return m_attractor != nil; }
+	bool HasAttractor(void);
 	bool IsUseAttractorObjective(eObjective obj) {
 		return obj == OBJECTIVE_GOTO_ATM_ON_FOOT || obj == OBJECTIVE_GOTO_ICE_CREAM_VAN_ON_FOOT ||
 			obj == OBJECTIVE_GOTO_PIZZA_ON_FOOT || obj == OBJECTIVE_GOTO_SEAT_ON_FOOT ||
@@ -992,20 +995,30 @@ public:
 
 	void ReplaceWeaponWhenExitingVehicle(void);
 	void RemoveWeaponWhenEnteringVehicle(void);
-	bool IsNotInWreckedVehicle();
+	bool IsNotInWreckedVehicle()
+	{
+		return m_pMyVehicle != nil && ((CEntity*)m_pMyVehicle)->GetStatus() != STATUS_WRECKED;
+	}
 
 	// My names. Inlined in VC
 	AnimationId GetFireAnimNotDucking(CWeaponInfo* weapon) {
-		if (m_nPedType == PEDTYPE_COP && !!weapon->m_bCop3rd)
+		if (m_nPedType == PEDTYPE_COP && weapon->IsFlagSet(WEAPONFLAG_COP3_RD))
 			return ANIM_WEAPON_FIRE_3RD;
 		else
 			return GetPrimaryFireAnim(weapon);
 	}
 
+	static AnimationId Get3rdFireAnim(CWeaponInfo* weapon) {
+		if (weapon->IsFlagSet(WEAPONFLAG_COP3_RD))
+			return ANIM_WEAPON_FIRE_3RD;
+		else
+			return (AnimationId)0;
+	}
+
 	static AnimationId GetFireAnimGround(CWeaponInfo* weapon, bool kickFloorIfNone = true) {
-		if (!!weapon->m_bGround2nd)
+		if (weapon->IsFlagSet(WEAPONFLAG_GROUND_2ND))
 			return ANIM_WEAPON_CROUCHFIRE;
-		else if (!!weapon->m_bGround3rd)
+		else if (weapon->IsFlagSet(WEAPONFLAG_GROUND_3RD))
 			return ANIM_WEAPON_FIRE_3RD;
 		else if (kickFloorIfNone)
 			return ANIM_KICK_FLOOR;
@@ -1014,50 +1027,65 @@ public:
 	}
 
 	static AnimationId GetPrimaryFireAnim(CWeaponInfo* weapon) {
-		if (weapon->m_bAnimDetonate)
+		if (weapon->IsFlagSet(WEAPONFLAG_ANIMDETONATE))
 			return ANIM_BOMBER;
 		else
 			return ANIM_WEAPON_FIRE;
 	}
 
 	static AnimationId GetCrouchReloadAnim(CWeaponInfo* weapon) {
-		if (!!weapon->m_bReload)
+		if (weapon->IsFlagSet(WEAPONFLAG_RELOAD))
 			return ANIM_WEAPON_CROUCHRELOAD;
 		else
 			return (AnimationId)0;
 	}
 
 	static AnimationId GetCrouchFireAnim(CWeaponInfo* weapon) {
-		if (!!weapon->m_bCrouchFire)
+		if (weapon->IsFlagSet(WEAPONFLAG_CROUCHFIRE))
 			return ANIM_WEAPON_CROUCHFIRE;
 		else
 			return (AnimationId)0;
 	}
 
 	static AnimationId GetReloadAnim(CWeaponInfo* weapon) {
-		if (!!weapon->m_bReload)
+		if (weapon->IsFlagSet(WEAPONFLAG_RELOAD))
 			return ANIM_WEAPON_RELOAD;
 		else
 			return (AnimationId)0;
 	}
 
 	static AnimationId GetFightIdleWithMeleeAnim(CWeaponInfo* weapon) {
-		if (!!weapon->m_bFightMode)
+		if (weapon->IsFlagSet(WEAPONFLAG_FIGHTMODE))
 			return ANIM_MELEE_IDLE_FIGHTMODE;
 		else
 			return (AnimationId)0;
 	}
 
 	static AnimationId GetFinishingAttackAnim(CWeaponInfo* weapon) {
-		if (!!weapon->m_bFinish3rd)
+		if (weapon->IsFlagSet(WEAPONFLAG_FINISH_3RD))
 			return ANIM_MELEE_ATTACK_FINISH;
 		else
 			return (AnimationId)0;
 	}
 
 	static AnimationId GetSecondFireAnim(CWeaponInfo* weapon) {
-		if (!!weapon->m_bUse2nd)
+		if (weapon->IsFlagSet(WEAPONFLAG_USE_2ND))
 			return ANIM_WEAPON_FIRE_2ND; // or ANIM_MELEE_ATTACK_2ND
+		else
+			return (AnimationId)0;
+	}
+	
+	static AnimationId GetMeleeStartAnim(CWeaponInfo* weapon) {
+		if (weapon->IsFlagSet(WEAPONFLAG_PARTIALATTACK))
+			return ANIM_MELEE_ATTACK_START;
+		else
+			return (AnimationId)0;
+	}
+
+	static AnimationId GetThrowAnim(CWeaponInfo *weapon)
+	{
+		if (weapon->IsFlagSet(WEAPONFLAG_THROW))
+			return ANIM_THROWABLE_START_THROW;
 		else
 			return (AnimationId)0;
 	}
@@ -1083,6 +1111,16 @@ public:
 	}
 	// --
 
+	inline void SetWeaponLockOnTarget(CEntity *target)
+	{
+		if (m_pPointGunAt)
+			m_pPointGunAt->CleanUpOldReference(&m_pPointGunAt);
+
+		m_pPointGunAt = (CPed*)target;
+		if (target)
+			((CEntity*)target)->RegisterReference(&m_pPointGunAt);
+	}
+
 	// Using this to abstract nodes of skinned and non-skinned meshes
 	CVector GetNodePosition(int32 node)
 	{
@@ -1098,7 +1136,7 @@ public:
 		RpHAnimHierarchy *hier = GetAnimHierarchyFromSkinClump(GetClump());
 		int32 idx = RpHAnimIDGetIndex(hier, m_pFrames[node]->nodeID);
 		RwMatrix *mats = RpHAnimHierarchyGetMatrixArray(hier);
-		RwV3dTransformPoints((RwV3d*)&pos, (RwV3d*)&pos, 1, &mats[idx]);
+		RwV3dTransformPoints(&pos, &pos, 1, &mats[idx]);
 	}
 
 	// set by 0482:set_threat_reaction_range_multiplier opcode
@@ -1141,10 +1179,7 @@ void FinishTalkingOnMobileCB(CAnimBlendAssociation* assoc, void* arg);
 void StartTalkingOnMobileCB(CAnimBlendAssociation* assoc, void* arg);
 void PlayRandomAnimationsFromAnimBlock(CPed* ped, AssocGroupId animGroup, uint32 first, uint32 amount);
 
-// TODO(Miami): Change those when Ped struct is done
-#ifndef PED_SKIN
-VALIDATE_SIZE(CPed, 0x53C);
-#endif
+VALIDATE_SIZE(CPed, 0x5F4);
 
 bool IsPedPointerValid(CPed*);
 bool IsPedPointerValid_NotInWorld(CPed*);

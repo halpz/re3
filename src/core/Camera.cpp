@@ -69,7 +69,11 @@ enum
 // NB: removed explicit TheCamera from all functions
 
 CCamera TheCamera;
+#ifdef PC_PLAYER_CONTROLS
 bool CCamera::m_bUseMouse3rdPerson = true;
+#else
+bool CCamera::m_bUseMouse3rdPerson = false;
+#endif
 bool bDidWeProcessAnyCinemaCam;
 static bool bSwitchedToObbeCam;
 float CCamera::m_fMouseAccelHorzntl;
@@ -612,7 +616,7 @@ CCamera::Process(void)
 
 	// LOD dist
 	if(!CCutsceneMgr::IsRunning() || CCutsceneMgr::UseLodMultiplier()){
-		LODDistMultiplier = 70.0f/CDraw::GetFOV() * CDraw::GetAspectRatio()/(4.0f/3.0f);
+		LODDistMultiplier = 70.0f/CDraw::GetFOV();
 
 		if(GetPosition().z > 55.0f && FindPlayerVehicle() && FindPlayerVehicle()->pHandling->Flags & (HANDLING_IS_HELI|HANDLING_IS_PLANE) ||
 		   FindPlayerPed()->m_attachedTo){
@@ -1008,21 +1012,25 @@ CCamera::CamControl(void)
 			ReqMode = CCam::MODE_FOLLOWPED;
 
 			// Check 1st person mode
-			if(m_bLookingAtPlayer && pTargetEntity->IsPed() && !m_WideScreenOn && !Cams[0].Using3rdPersonMouseCam()
+			if((m_bLookingAtPlayer || m_bEnable1rstPersonCamCntrlsScript) && pTargetEntity->IsPed() &&
+			   (!m_WideScreenOn || m_bEnable1rstPersonCamCntrlsScript) && !Cams[0].Using3rdPersonMouseCam()
 #ifdef FREE_CAM
-			   && !CCamera::bFreeCam
+			   && (!CCamera::bFreeCam || m_bEnable1rstPersonCamCntrlsScript)
 #endif
 			   ){
 				// See if we want to enter first person mode
 				if(CPad::GetPad(0)->LookAroundLeftRight() || CPad::GetPad(0)->LookAroundUpDown()){
 					m_uiFirstPersonCamLastInputTime = CTimer::GetTimeInMilliseconds();
 					m_bFirstPersonBeingUsed = true;
-				}else if(m_bFirstPersonBeingUsed){
+				}
+				if(m_bFirstPersonBeingUsed){
 					// Or if we want to go back to 3rd person
 					if(CPad::GetPad(0)->GetPedWalkLeftRight() || CPad::GetPad(0)->GetPedWalkUpDown() ||
 					   CPad::GetPad(0)->GetSquare() || CPad::GetPad(0)->GetTriangle() ||
 					   CPad::GetPad(0)->GetCross() || CPad::GetPad(0)->GetCircle() ||
 					   CTimer::GetTimeInMilliseconds() - m_uiFirstPersonCamLastInputTime > 2850.0f){
+						m_bFirstPersonBeingUsed = false;
+					}else if(CPad::GetPad(0)->TargetJustDown()){
 						m_bFirstPersonBeingUsed = false;
 						m_bJustJumpedOutOf1stPersonBecauseOfTarget = true;
 					}
@@ -1129,27 +1137,31 @@ CCamera::CamControl(void)
 						}else{
 							whichDoor = 1;
 							garageDoorPos1 = Cams[ActiveCam].Source;
-							garageCenter = CVector((stairsZone->minx+stairsZone->maxx)/2.0f, (stairsZone->miny+stairsZone->maxy)/2.0f, 0.0f);
-							if(pTargetEntity->GetPosition().x > 376.0f && pTargetEntity->GetPosition().x < 383.0f &&
-							   pTargetEntity->GetPosition().y > -496.0f && pTargetEntity->GetPosition().y < -489.0f &&
-							   pTargetEntity->GetPosition().z > 11.6f && pTargetEntity->GetPosition().z < 13.6f){
-//							if((garageCenter-garageDoorPos1).Magnitude() > 15.0f){
-								bool bClearViewOutside = true;
-								CVector dirOutside = pTargetEntity->GetPosition() - garageCenter;
-								dirOutside.z = 0.0f;
-								dirOutside.Normalise();
-								float zoneDim = stairsZone->maxx - stairsZone->minx;
-								if(zoneDim < stairsZone->maxy - stairsZone->miny)
-									zoneDim = stairsZone->maxy - stairsZone->miny;
-								zoneDim *= 2.0f;
-								CVector posOutside = pTargetEntity->GetPosition() + zoneDim*dirOutside;
-								if(!CWorld::GetIsLineOfSightClear(pTargetEntity->GetPosition(), posOutside, true, false, false, false, false, false, true)){
-									posOutside = pTargetEntity->GetPosition() - zoneDim*dirOutside;
-									if(!CWorld::GetIsLineOfSightClear(pTargetEntity->GetPosition(), posOutside, true, false, false, false, false, false, true))
-										bClearViewOutside = false;
+
+							if(stairsZone){	// always true
+								garageCenter = CVector((stairsZone->minx+stairsZone->maxx)/2, (stairsZone->miny+stairsZone->maxy)/2, 0.0f);
+								if(pTargetEntity->GetPosition().x > 376.0f && pTargetEntity->GetPosition().x < 383.0f &&
+								   pTargetEntity->GetPosition().y > -496.0f && pTargetEntity->GetPosition().y < -489.0f &&
+								   pTargetEntity->GetPosition().z > 11.6f && pTargetEntity->GetPosition().z < 13.6f){
+									garageDoorPos1 = CVector(382.6f, -489.6f, 13.1f);
+								}else{
+									bool bClearViewOutside = true;
+									CVector dirOutside = pTargetEntity->GetPosition() - garageCenter;
+									dirOutside.z = 0.0f;
+									dirOutside.Normalise();
+									float zoneDim = stairsZone->maxx - stairsZone->minx;
+									if(zoneDim < stairsZone->maxy - stairsZone->miny)
+										zoneDim = stairsZone->maxy - stairsZone->miny;
+									zoneDim *= 2.0f;
+									CVector posOutside = pTargetEntity->GetPosition() + zoneDim*dirOutside;
+									if(!CWorld::GetIsLineOfSightClear(pTargetEntity->GetPosition(), posOutside, true, false, false, false, false, false, true)){
+										posOutside = pTargetEntity->GetPosition() - zoneDim*dirOutside;
+										if(!CWorld::GetIsLineOfSightClear(pTargetEntity->GetPosition(), posOutside, true, false, false, false, false, false, true))
+											bClearViewOutside = false;
+									}
+									if(bClearViewOutside)
+										garageDoorPos1 = posOutside;
 								}
-								if(bClearViewOutside)
-									garageDoorPos1 = posOutside;
 							}
 						}
 
@@ -1159,7 +1171,7 @@ CCamera::CamControl(void)
 							garageCenter.z = 0.0f;
 						}else{
 							garageDoorPos1.z = 0.0f;
-							if(stairs == nil)	// how can this be true?
+							if(!stairs)	// how can this be true?
 								garageCenter = CVector(pTargetEntity->GetPosition().x, pTargetEntity->GetPosition().y, 0.0f);
 						}
 						if(whichDoor == 1)
@@ -1598,8 +1610,10 @@ CCamera::CamControl(void)
 					switchByJumpCut = true;
 			}
 		}
+#ifdef GTA_SCENE_EDIT
 		if(CSceneEdit::m_bEditOn)
 			ReqMode = CCam::MODE_EDITOR;
+#endif
 
 		if((m_uiTransitionState == 0 || switchByJumpCut) && ReqMode != Cams[ActiveCam].Mode){
 			if(switchByJumpCut){
@@ -1698,7 +1712,7 @@ CCamera::CamControl(void)
 			StartTransitionWhenNotFinishedInter(ReqMode);
 			pTargetEntity->RegisterReference(&pTargetEntity);
 			Cams[ActiveCam].CamTargetEntity->RegisterReference(&Cams[ActiveCam].CamTargetEntity);
-		}else if(m_bStartInterScript && m_iTypeOfSwitch == JUMP_CUT){
+		}else if(m_bStartInterScript && m_iTypeOfSwitch == JUMP_CUT || jumpCutTo1stPrs){
 			m_uiTransitionState = 0;
 			m_vecDoingSpecialInterPolation = false;
 			if(m_bEnable1rstPersonCamCntrlsScript && ReqMode == CCam::MODE_1STPERSON)
@@ -3385,12 +3399,12 @@ CCamera::LoadTrainCamNodes(char const *name)
 	char token[16] = { 0 };
 	char filename[16] = { 0 };
 	uint8 *buf;
-	size_t bufpos = 0;
+	ssize_t bufpos = 0;
 	int field = 0;
 	int tokpos = 0;
 	char c;
 	int i;
-	size_t len;
+	ssize_t len;
 
 	strcpy(filename, name);
 	len = (int)strlen(filename);
@@ -3617,6 +3631,8 @@ CCamera::LoadPathSplines(int file)
 			m_arrPathArray[i].m_arr_PathData[j] = atof(token);
 			i++;
 			j = 0;
+			if (i == MAX_NUM_OF_SPLINETYPES)
+				reading = false;
 			memset(token, 0, 32);
 			n = 0;
 		}

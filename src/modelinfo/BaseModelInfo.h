@@ -4,7 +4,7 @@
 
 #define MAX_MODEL_NAME (21)
 
-enum ModelInfoType : uint8
+enum ModelInfoType
 {
 	MITYPE_NA,
 	MITYPE_SIMPLE,
@@ -17,7 +17,6 @@ enum ModelInfoType : uint8
 	MITYPE_XTRACOMPS,	// unused but still in enum
 	MITYPE_HAND	// xbox and mobile
 };
-VALIDATE_SIZE(ModelInfoType, 1);
 
 class C2dEffect;
 
@@ -25,7 +24,7 @@ class CBaseModelInfo
 {
 protected:
 	char         m_name[MAX_MODEL_NAME];
-	ModelInfoType m_type;
+	uint8        m_type;
 	uint8        m_num2dEffects;
 	bool         m_bOwnsColModel;
 	CColModel   *m_colModel;
@@ -47,7 +46,7 @@ public:
 	virtual int GetAnimFileIndex(void) { return -1; }
 
 	// one day it becomes virtual
-	ModelInfoType GetModelType() const { return m_type; }
+	uint8 GetModelType() const { return m_type; }
 	bool IsBuilding(void) { return m_type == MITYPE_SIMPLE || m_type == MITYPE_TIME; }
 	bool IsSimple(void) { return m_type == MITYPE_SIMPLE || m_type == MITYPE_TIME || m_type == MITYPE_WEAPON; }
 	bool IsClump(void) { return m_type == MITYPE_CLUMP || m_type == MITYPE_PED || m_type == MITYPE_VEHICLE;	}
@@ -59,9 +58,9 @@ public:
 	bool DoesOwnColModel(void) { return m_bOwnsColModel; }
 	void DeleteCollisionModel(void);
 	void ClearTexDictionary(void) { m_txdSlot = -1; }
-	short GetObjectID(void) { return m_objectId; }
+	int16 GetObjectID(void) { return m_objectId; }
 	void SetObjectID(int16 id) { m_objectId = id; }
-	short GetTxdSlot(void) { return m_txdSlot; }
+	int16 GetTxdSlot(void) { return m_txdSlot; }
 	void AddRef(void);
 	void RemoveRef(void);
 	void SetTexDictionary(const char *name);

@@ -65,10 +65,10 @@ CAnimBlendHierarchy::CalcTotalTimeCompressed(void)
 			continue;
 #endif
 
-		totalLength = Max(totalLength, sequences[i].GetKeyFrameCompressed(sequences[i].numFrames-1)->deltaTime/60.0f);
+		totalLength = Max(totalLength, sequences[i].GetKeyFrameCompressed(sequences[i].numFrames-1)->GetDeltaTime());
 		for(j = sequences[i].numFrames-1; j >= 1; j--){
-			KeyFrame *kf1 = sequences[i].GetKeyFrameCompressed(j);
-			KeyFrame *kf2 = sequences[i].GetKeyFrameCompressed(j-1);
+			KeyFrameCompressed *kf1 = sequences[i].GetKeyFrameCompressed(j);
+			KeyFrameCompressed *kf2 = sequences[i].GetKeyFrameCompressed(j-1);
 			kf1->deltaTime -= kf2->deltaTime;
 		}
 	}
@@ -94,6 +94,12 @@ CAnimBlendHierarchy::RemoveAnimSequences(void)
 void
 CAnimBlendHierarchy::Uncompress(void)
 {
+#ifdef ANIM_COMPRESSION
+	int i;
+	assert(compressed);
+	for(i = 0; i < numSequences; i++)
+		sequences[i].Uncompress();
+#endif
 	compressed = 0;
 	if(totalLength == 0.0f){
 		RemoveQuaternionFlips();
@@ -104,6 +110,22 @@ CAnimBlendHierarchy::Uncompress(void)
 void
 CAnimBlendHierarchy::RemoveUncompressedData(void)
 {
-	// useless
+#ifdef ANIM_COMPRESSION
+	int i;
+	assert(!compressed);
+	for(i = 0; i < numSequences; i++)
+		sequences[i].RemoveUncompressedData();
+#endif
 	compressed = 1;
 }
+
+#ifdef USE_CUSTOM_ALLOCATOR
+void
+CAnimBlendHierarchy::MoveMemory(bool onlyone)
+{
+	int i;
+	for(i = 0; i < numSequences; i++)
+		if(sequences[i].MoveMemory() && onlyone)
+			return;
+}
+#endif

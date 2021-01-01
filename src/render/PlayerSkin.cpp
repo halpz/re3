@@ -14,6 +14,7 @@
 #include "RwHelper.h"
 #include "Timer.h"
 #include "Lights.h"
+#include "MemoryMgr.h"
 
 //--MIAMI: file done
 
@@ -75,6 +76,7 @@ LoadPlayerDff(void)
 void
 CPlayerSkin::Initialise(void)
 {
+	// empty on PS2
 	m_txdSlot = CTxdStore::AddTxdSlot("skin");
 	CTxdStore::Create(m_txdSlot);
 	CTxdStore::AddRef(m_txdSlot);
@@ -83,6 +85,7 @@ CPlayerSkin::Initialise(void)
 void
 CPlayerSkin::Shutdown(void)
 {
+	// empty on PS2
 	CTxdStore::RemoveTxdSlot(m_txdSlot);
 }
 

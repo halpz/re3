@@ -97,11 +97,7 @@ CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType
 		pCopPed->m_nRoadblockVeh->RegisterReference((CEntity**)&pCopPed->m_nRoadblockVeh);
 		pCopPed->bCrouchWhenShooting = roadBlockType == 2 ? false : true;
 		if (pEntityToAttack) {
-			if (pCopPed->m_pPointGunAt)
-				pCopPed->m_pPointGunAt->CleanUpOldReference(&pCopPed->m_pPointGunAt);
-			pCopPed->m_pPointGunAt = pEntityToAttack;
-			if (pEntityToAttack)
-				pEntityToAttack->RegisterReference(&pCopPed->m_pPointGunAt);
+			pCopPed->SetWeaponLockOnTarget(pEntityToAttack);
 			pCopPed->SetAttack(pEntityToAttack);
 		}
 		pCopPed->m_pMyVehicle = pVehicle;

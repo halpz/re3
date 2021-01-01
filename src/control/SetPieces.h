@@ -5,7 +5,7 @@
 class CVehicle;
 class CCopPed;
 
-enum eSetPieceType : uint8
+enum eSetPieceType
 {
 	SETPIECE_NONE = 0,
 	SETPIECE_TWOCOPCARSINALLEY,
@@ -20,7 +20,7 @@ enum eSetPieceType : uint8
 class CSetPiece
 {
 public:
-	eSetPieceType m_nType;
+	uint8 m_nType;
 	uint32 m_nLastTimeCreated;
 	CVector2D m_vTriggerInf;
 	CVector2D m_vTriggerSup;

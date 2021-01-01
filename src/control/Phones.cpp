@@ -58,7 +58,7 @@ CPhoneInfo::Update(void)
 		} else {
 			CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_PHONE);
 			if (player->m_nPedState == PED_MAKE_CALL)
-				player->m_nPedState = PED_IDLE;
+				player->SetPedState(PED_IDLE);
 		}
 	}
 	bool notInCar;
@@ -105,7 +105,7 @@ CPhoneInfo::Update(void)
 								player->m_fRotationCur = angleToFace;
 								player->m_fRotationDest = angleToFace;
 								player->SetHeading(angleToFace);
-								player->m_nPedState = PED_MAKE_CALL;
+								player->SetPedState(PED_MAKE_CALL);
 								CPad::GetPad(0)->SetDisablePlayerControls(PLAYERCONTROL_PHONE);
 								TheCamera.SetWideScreenOn();
 								playerInfo->MakePlayerSafe(true);
@@ -308,7 +308,7 @@ INITSAVEBUF
 
 		// Convert entity pointer to building pool index while saving
 		if (phone->m_pEntity) {
-			phone->m_pEntity = (CEntity*) (CPools::GetBuildingPool()->GetJustIndex((CBuilding*)phone->m_pEntity) + 1);
+			phone->m_pEntity = (CEntity*) (CPools::GetBuildingPool()->GetJustIndex_NoFreeAssert((CBuilding*)phone->m_pEntity) + 1);
 		}
 	}
 VALIDATESAVEBUF(*size)
@@ -333,7 +333,7 @@ PhonePutDownCB(CAnimBlendAssociation *assoc, void *arg)
 		ped->bUpdateAnimHeading = true;
 
 	if (ped->m_nPedState == PED_MAKE_CALL)
-		ped->m_nPedState = PED_IDLE;
+		ped->SetPedState(PED_IDLE);
 }
 
 void

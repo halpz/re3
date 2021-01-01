@@ -36,9 +36,6 @@
 #include "Sprite.h"
 #include "Pickups.h"
 
-// TODO(Miami)
-#define AUDIO_NOT_READY
-
 float fReloadAnimSampleFraction[5] = {  0.5f,  0.7f,  0.75f,  0.75f,  0.7f };
 float fSeaSparrowAimingAngle = 10.0f;
 float fHunterAimingAngle = 30.0f;
@@ -502,14 +499,14 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 			bool collided = false;
 
 			if (victimPed->m_nPedState == PED_DRIVING && (m_eWeaponType == WEAPONTYPE_UNARMED || m_eWeaponType == WEAPONTYPE_BRASSKNUCKLE
-				|| info->m_bFightMode))
+				|| info->IsFlagSet(WEAPONFLAG_FIGHTMODE)))
 				continue;
 
 			float victimPedRadius = victimPed->GetBoundRadius() + info->m_fRadius;
 			if ( victimPed->bUsesCollision || victimPed->Dead() || victimPed->Driving() )
 			{
 				CVector victimPedPos = victimPed->GetPosition();
-				if ( SQR(victimPedRadius) > (victimPedPos-(*fireSource)).MagnitudeSqr() )
+				if ( SQR(victimPedRadius) > (victimPedPos-fireSource).MagnitudeSqr() )
 				{
 					CVector collisionDist;
 					CColModel* victimPedCol = &CTempColModels::ms_colModelPed1;
@@ -531,9 +528,9 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 						CColSphere *sphere = &victimPedCol->spheres[s];
 
 						if (useLocalPos)
-							collisionDist = sphere->center - (*fireSource);
+							collisionDist = sphere->center - fireSource;
 						else
-							collisionDist = victimPedPos + sphere->center - (*fireSource);
+							collisionDist = victimPedPos + sphere->center - fireSource;
 
 						if ( SQR(sphere->radius + info->m_fRadius) > collisionDist.MagnitudeSqr() )
 						{
@@ -876,7 +873,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 			CPed *threatAttack = (CPed*)shooterPed->m_pPointGunAt;
 			if ( threatAttack->IsPed() )
 			{
-				threatAttack->m_pedIK.GetComponentPosition(*(RwV3d *)&target, PED_MID);
+				threatAttack->m_pedIK.GetComponentPosition(target, PED_MID);
 				threatAttack->ReactToPointGun(shooter);
 			}
 			else
@@ -1011,7 +1008,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 			target.y += rotOffset.y * info->m_fRange;
 
 			CParticle::HandleShootableBirdsStuff(shooter, *fireSource);
-			if (shooter->IsPed() && ((CPed*)shooter)->bDoomAim && (shooter != FindPlayerPed() || !info->m_bCanAim))
+			if (shooter->IsPed() && ((CPed*)shooter)->bDoomAim && (shooter != FindPlayerPed() || !info->IsFlagSet(WEAPONFLAG_CANAIM)))
 			{
 				CWeapon::DoDoomAiming(shooter, fireSource, &target);
 			}
@@ -1460,7 +1457,8 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 
 #ifndef FIX_BUGS
 					CVector dist = point->point - (*source);
-					CVector smokePos = point->point - Max(0.1f * dist.Magnitude(), 0.2f) / dist.Magnitude();
+					float distMagnitude = dist.Magnitude();
+					CVector smokePos = point->point - Max(distMagnitude / 10.0f, 0.2f) * dist / distMagnitude;
 #else
 				    CVector smokePos = point->point;
 #endif // !FIX_BUGS
@@ -1475,7 +1473,7 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 				}
 				case ENTITY_TYPE_VEHICLE:
 				{
-					if (point->pieceB >= SURFACE_LAMP_POST && point->pieceB <= SURFACE_METAL_CHAIN_FENCE) {
+					if (point->pieceB >= CAR_PIECE_WHEEL_LF && point->pieceB <= CAR_PIECE_WHEEL_RR) {
 						((CVehicle*)victim)->BurstTyre(point->pieceB, true);
 
 						for (int32 i = 0; i < 4; i++)
@@ -1489,9 +1487,9 @@ CWeapon::DoBulletImpact(CEntity *shooter, CEntity *victim,
 							CParticle::AddParticle(PARTICLE_SPARK, point->point, point->normal * 0.05f);
 
 #ifndef FIX_BUGS
-						CVector dist = point.point - (*fireSource);
+						CVector dist = point->point - (*source);
 						CVector offset = dist - Max(0.2f * dist.Magnitude(), 0.5f) * CVector(ahead.x, ahead.y, 0.0f);
-						CVector smokePos = *fireSource + offset;
+						CVector smokePos = *source + offset;
 #else
 						CVector smokePos = point->point;
 #endif
@@ -1705,7 +1703,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				{
 					CVector pos;
 					if (shooterPed->m_pPointGunAt->IsPed()) {
-						((CPed*)shooterPed->m_pPointGunAt)->m_pedIK.GetComponentPosition(*(RwV3d *)&pos, PED_MID);
+						((CPed*)shooterPed->m_pPointGunAt)->m_pedIK.GetComponentPosition(pos, PED_MID);
 					} else {
 						pos = ((CPed*)shooterPed->m_pPointGunAt)->GetPosition();
 					}
@@ -1869,7 +1867,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				{
 					case ENTITY_TYPE_VEHICLE:
 					{
-						if (point.pieceB >= SURFACE_LAMP_POST && point.pieceB <= SURFACE_METAL_CHAIN_FENCE) {
+						if (point.pieceB >= CAR_PIECE_WHEEL_LF && point.pieceB <= CAR_PIECE_WHEEL_RR) {
 							((CVehicle*)victim)->BurstTyre(point.pieceB, true);
 
 							for (int32 i = 0; i < 4; i++)
@@ -2169,7 +2167,7 @@ CWeapon::LaserScopeDot(CVector *pOutPos, float *pOutSize)
 		CVector pos = foundCol.point;
 		float w, h;
 		
-		if ( CSprite::CalcScreenCoors(foundCol.point, pos, &w, &h, true) )
+		if ( CSprite::CalcScreenCoors(foundCol.point, &pos, &w, &h, true) )
 		{
 			*pOutPos = pos;
 			*pOutSize = w * 0.05f;
@@ -2264,7 +2262,7 @@ CWeapon::TakePhotograph(CEntity *shooter)
 					CVector pos;
 					float w, h;
 					
-					if ( CSprite::CalcScreenCoors(pedPos, pos, &w, &h, false) )
+					if ( CSprite::CalcScreenCoors(pedPos, &pos, &w, &h, false) )
 					{
 						if (   SCREEN_WIDTH  * 0.1f < pos.x && SCREEN_WIDTH  * 0.9f > pos.x
 							&& SCREEN_HEIGHT * 0.1f < pos.y && SCREEN_HEIGHT * 0.9f > pos.y )
@@ -2899,26 +2897,15 @@ CWeapon::Update(int32 audioEntity, CPed *pedToAdjustSound)
 						default:
 							break;
 					}
-					if (reloadAssoc->GetProgress() >= soundStart && (reloadAssoc->currentTime - reloadAssoc->timeStep) / reloadAssoc->hierarchy->totalLength < soundStart) {
-#ifdef AUDIO_NOT_READY
-						DMAudio.PlayOneShot(audioEntity, SOUND_WEAPON_RELOAD, 0.0f);
-#else
+					if (reloadAssoc->GetProgress() >= soundStart && (reloadAssoc->currentTime - reloadAssoc->timeStep) / reloadAssoc->hierarchy->totalLength < soundStart)
 						DMAudio.PlayOneShot(audioEntity, SOUND_WEAPON_RELOAD, m_eWeaponType);
-#endif
-					}
 					if (CTimer::GetTimeInMilliseconds() > m_nTimer && reloadAssoc->GetProgress() < 0.9f) {
 						m_nTimer = CTimer::GetTimeInMilliseconds();
 					}
 				} else {
 					uint32 timePassed = m_nTimer - CWeaponInfo::ms_aReloadSampleTime[m_eWeaponType];
 					if (CTimer::GetPreviousTimeInMilliseconds() < timePassed && CTimer::GetTimeInMilliseconds() >= timePassed)
-					{
-#ifdef AUDIO_NOT_READY
-						DMAudio.PlayOneShot(audioEntity, SOUND_WEAPON_RELOAD, 0.0f);
-#else
 						DMAudio.PlayOneShot(audioEntity, SOUND_WEAPON_RELOAD, m_eWeaponType);
-#endif
-					}
 				}
 			}
 
@@ -3169,6 +3156,21 @@ CWeapon::HasWeaponAmmoToBeUsed(void)
 		return true;
 	else
 		return m_nAmmoTotal != 0;
+}
+
+// --MIAMI: Done
+bool
+CPed::IsPedDoingDriveByShooting(void)
+{
+#ifdef FIX_BUGS
+	if (FindPlayerPed() == this && CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_nWeaponSlot == 5) {
+#else
+	if (FindPlayerPed() == this && GetWeapon()->m_eWeaponType == WEAPONTYPE_UZI) {
+#endif
+		if (TheCamera.Cams[TheCamera.ActiveCam].LookingLeft || TheCamera.Cams[TheCamera.ActiveCam].LookingRight)
+			return true;
+	}
+	return false;
 }
 
 bool

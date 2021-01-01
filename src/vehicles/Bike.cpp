@@ -93,9 +93,9 @@ CBike::CBike(int32 id, uint8 CreatedBy)
 
 	SetModelIndex(id);
 
-	pHandling = mod_HandlingManager.GetHandlingData((eHandlingId)mi->m_handlingId);
-	pBikeHandling = mod_HandlingManager.GetBikePointer((eHandlingId)mi->m_handlingId);
-	pFlyingHandling = mod_HandlingManager.GetFlyingPointer((eHandlingId)mi->m_handlingId);
+	pHandling = mod_HandlingManager.GetHandlingData((tVehicleType)mi->m_handlingId);
+	pBikeHandling = mod_HandlingManager.GetBikePointer((tVehicleType)mi->m_handlingId);
+	pFlyingHandling = mod_HandlingManager.GetFlyingPointer((tVehicleType)mi->m_handlingId);
 
 	m_bike_unused1 = 20.0f;
 	m_bike_unused2 = 0;
@@ -202,8 +202,10 @@ CVector vecTestResistance(0.9995f, 0.9f, 0.95f);
 float fDAxisX = 1.0f;
 float fDAxisXExtra = 100.0f;
 float fDAxisY = 1000.0f;
-float fInAirXRes = 0.88f;
+float fInAirXRes = 0.98f;
 float fFlySpeedMult = -0.6f;
+
+#pragma optimize("", off) // a workaround for another compiler bug =P, original had optimize off for this function too though
 
 void
 CBike::ProcessControl(void)
@@ -476,7 +478,7 @@ CBike::ProcessControl(void)
 
 		if(m_vecMoveSpeedAvg.MagnitudeSqr() <= sq(moveSpeedLimit*CTimer::GetTimeStep()) &&
 		   m_vecTurnSpeedAvg.MagnitudeSqr() <= sq(turnSpeedLimit*CTimer::GetTimeStep()) &&
-		   m_fDistanceTravelled < distanceLimit &&
+		   m_fDistanceTravelled < distanceLimit ||
 		   makeStatic){
 			m_nStaticFrames++;
 
@@ -1144,7 +1146,12 @@ CBike::ProcessControl(void)
 		float suspChange = m_aSuspensionSpringRatioPrev[i] - m_aSuspensionSpringRatio[i];
 		if(suspChange > 0.3f && (i == BIKESUSP_F1 || i == BIKESUSP_R1) && speedsq > 0.04f){
 			if(GetStatus() == STATUS_PLAYER || GetStatus() == STATUS_PHYSICS){
+#ifdef FIX_BUGS
+				// only two wheels but 4 suspensions
+				if(m_wheelStatus[i/2] == WHEEL_STATUS_BURST)
+#else
 				if(m_wheelStatus[i] == WHEEL_STATUS_BURST)
+#endif
 					DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_JUMP_2, suspChange);
 				else
 					DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_JUMP, suspChange);
@@ -1213,7 +1220,8 @@ CBike::ProcessControl(void)
 
 	// Balance bike
 	if(bBalancedByRider || bIsBeingPickedUp || bIsStanding){
-		float onSideness = clamp(DotProduct(GetRight(), m_vecAvgSurfaceNormal), -1.0f, 1.0f);
+		float onSideness = DotProduct(GetRight(), m_vecAvgSurfaceNormal);
+		onSideness = clamp(onSideness, -1.0f, 1.0f);
 		CVector worldCOM = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
 		// Keep bike upright
 		if(bBalancedByRider){
@@ -1255,6 +1263,8 @@ CBike::ProcessControl(void)
 		}
 	}
 }
+
+#pragma optimize("", on)
 
 void
 CBike::Teleport(CVector pos)
@@ -1596,7 +1606,7 @@ CBike::PreRender(void)
 		CVector forkAxis(0.0f, Sin(DEGTORAD(mi->m_bikeSteerAngle)), -Cos(DEGTORAD(mi->m_bikeSteerAngle)));
 		forkAxis.Normalise();	// as if that's not already the case
 		CQuaternion quat;
-		quat.Set((RwV3d*)&forkAxis, -m_fWheelAngle);
+		quat.Set(&forkAxis, -m_fWheelAngle);
 		quat.Get(rot.m_attachment);
 		rot.Update();
 

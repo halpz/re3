@@ -2,7 +2,7 @@
 
 #include "Transmission.h"
 
-enum eHandlingId
+enum tVehicleType
 {
 	HANDLING_LANDSTAL,
 	HANDLING_IDAHO,
@@ -120,6 +120,11 @@ enum eHandlingId
 	NUMBOATHANDLINGS = HANDLING_SEAPLANE+1 - HANDLING_PREDATOR,
 };
 
+enum tField // most likely a handling field enum, never used so :shrug:
+{
+
+};
+
 enum
 {
 	HANDLING_1G_BOOST = 1,
@@ -154,7 +159,7 @@ enum
 
 struct tHandlingData
 {
-	eHandlingId nIdentifier;
+	tVehicleType nIdentifier;
 	float fMass;
 	float fInvMass;
 	float fTurnMass;
@@ -170,7 +175,7 @@ struct tHandlingData
 	float fSteeringLock;
 	float fTractionLoss;
 	float fTractionBias;
-	float fABS; // should be VC leftover
+	float fUnused;
 	float fSuspensionForceLevel;
 	float fSuspensionDampingLevel;
 	float fSuspensionUpperLimit;
@@ -187,7 +192,7 @@ struct tHandlingData
 
 struct tBikeHandlingData
 {
-	eHandlingId nIdentifier;
+	tVehicleType nIdentifier;
 	float fLeanFwdCOM;
 	float fLeanFwdForce;
 	float fLeanBakCOM;
@@ -207,7 +212,7 @@ struct tBikeHandlingData
 
 struct tBoatHandlingData
 {
-	eHandlingId nIdentifier;
+	tVehicleType nIdentifier;
 	float fThrustY;
 	float fThrustZ;
 	float fThrustAppZ;
@@ -222,7 +227,7 @@ struct tBoatHandlingData
 
 struct  tFlyingHandlingData
 {
-	eHandlingId nIdentifier;
+	tVehicleType nIdentifier;
 	float fThrust;
 	float fThrustFallOff;
 	float fYaw;
@@ -238,6 +243,8 @@ struct  tFlyingHandlingData
 	CVector vecTurnRes;
 	CVector vecSpeedRes;
 };
+
+class CVehicle;
 
 class cHandlingDataMgr
 {
@@ -258,14 +265,15 @@ public:
 	void Initialise(void);
 	void LoadHandlingData(void);
 	int FindExactWord(const char *word, const char *words, int wordLen, int numWords);
+	void ConvertDataToWorldUnits(tHandlingData *handling);
 	void ConvertDataToGameUnits(tHandlingData *handling);
 	void ConvertBikeDataToGameUnits(tBikeHandlingData *handling);
 	int32 GetHandlingId(const char *name);
-	tHandlingData *GetHandlingData(eHandlingId id) { return &HandlingData[id]; }
+	tHandlingData *GetHandlingData(tVehicleType id) { return &HandlingData[id]; }
 	tBikeHandlingData *GetBikePointer(uint8 id) { return &BikeHandlingData[id-HANDLING_BIKE]; }
 	tFlyingHandlingData *GetFlyingPointer(uint8 id);
 	tBoatHandlingData *GetBoatPointer(uint8 id);
-	bool HasRearWheelDrive(eHandlingId id) { return HandlingData[id].Transmission.nDriveType == 'R'; }
-	bool HasFrontWheelDrive(eHandlingId id) { return HandlingData[id].Transmission.nDriveType == 'F'; }
+	bool HasRearWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType == 'R'; }
+	bool HasFrontWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType == 'F'; }
 };
 extern cHandlingDataMgr mod_HandlingManager;

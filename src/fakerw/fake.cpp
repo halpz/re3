@@ -16,9 +16,14 @@ using namespace rw;
 RwUInt8 RwObjectGetType(const RwObject *obj) { return obj->type; }
 
 
-void *RwMalloc(size_t size) { return malloc(size); }
-void *RwCalloc(size_t numObj, size_t sizeObj) { return calloc(numObj, sizeObj); }
-void  RwFree(void *mem) { free(mem); }
+void *RwMalloc(size_t size) { return engine->memfuncs.rwmalloc(size, 0); }
+void *RwCalloc(size_t numObj, size_t sizeObj) {
+	void *mem = RwMalloc(numObj*sizeObj);
+	if(mem)
+		memset(mem, 0, numObj*sizeObj);
+	return mem;
+}
+void  RwFree(void *mem) { engine->memfuncs.rwfree(mem); }
 
 
 //RwReal RwV3dNormalize(RwV3d * out, const RwV3d * in);
@@ -166,8 +171,8 @@ RwFrame     *RwCameraGetFrame(const RwCamera *camera) { return camera->getFrame(
 
 RwImage     *RwImageCreate(RwInt32 width, RwInt32 height, RwInt32 depth) { return Image::create(width, height, depth); }
 RwBool       RwImageDestroy(RwImage * image) { image->destroy(); return true; }
-RwImage     *RwImageAllocatePixels(RwImage * image);
-RwImage     *RwImageFreePixels(RwImage * image);
+RwImage     *RwImageAllocatePixels(RwImage * image) { image->allocate(); return image; }
+RwImage     *RwImageFreePixels(RwImage * image) { image->free(); return image; }
 RwImage     *RwImageCopy(RwImage * destImage, const RwImage * sourceImage);
 RwImage     *RwImageResize(RwImage * image, RwInt32 width, RwInt32 height);
 RwImage     *RwImageApplyMask(RwImage * image, const RwImage * mask);
@@ -182,10 +187,10 @@ RwImage     *RwImageSetPixels(RwImage * image, RwUInt8 * pixels) { image->pixels
 RwImage     *RwImageSetPalette(RwImage * image, RwRGBA * palette) { image->palette = (uint8*)palette; return image; }
 RwInt32      RwImageGetWidth(const RwImage * image) { return image->width; }
 RwInt32      RwImageGetHeight(const RwImage * image) { return image->height; }
-RwInt32      RwImageGetDepth(const RwImage * image);
-RwInt32      RwImageGetStride(const RwImage * image);
-RwUInt8     *RwImageGetPixels(const RwImage * image);
-RwRGBA      *RwImageGetPalette(const RwImage * image);
+RwInt32      RwImageGetDepth(const RwImage * image) { return image->depth; }
+RwInt32      RwImageGetStride(const RwImage * image) { return image->stride; }
+RwUInt8     *RwImageGetPixels(const RwImage * image) { return image->pixels; }
+RwRGBA      *RwImageGetPalette(const RwImage * image) { return (RwRGBA*)image->palette; }
 RwUInt32     RwRGBAToPixel(RwRGBA * rgbIn, RwInt32 rasterFormat);
 RwRGBA      *RwRGBASetFromPixel(RwRGBA * rgbOut, RwUInt32 pixelValue, RwInt32 rasterFormat);
 RwBool       RwImageSetGamma(RwReal gammaValue);
@@ -537,8 +542,27 @@ RwBool RwRenderStateSet(RwRenderState state, void *value)
 	}
 }
 
+static rw::MemoryFunctions gMemfuncs;
+static void *(*real_malloc)(size_t size);
+static void *(*real_realloc)(void *mem, size_t newSize);
+static void *mallocWrap(size_t sz, uint32 hint) { if(sz == 0) return nil; return real_malloc(sz); }
+static void *reallocWrap(void *p, size_t sz, uint32 hint) { return real_realloc(p, sz); }
+
+
 // WARNING: unused parameters
-RwBool RwEngineInit(RwMemoryFunctions *memFuncs, RwUInt32 initFlags, RwUInt32 resArenaSize) { Engine::init(); return true; }
+RwBool RwEngineInit(RwMemoryFunctions *memFuncs, RwUInt32 initFlags, RwUInt32 resArenaSize) {
+	if(memFuncs){
+		real_malloc = memFuncs->rwmalloc;
+		real_realloc = memFuncs->rwrealloc;
+		gMemfuncs.rwmalloc = mallocWrap;
+		gMemfuncs.rwrealloc = reallocWrap;
+		gMemfuncs.rwfree = memFuncs->rwfree;
+		Engine::init(&gMemfuncs);
+	}else{
+		Engine::init(nil);
+	}
+	return true;
+}
 // TODO: this is platform dependent
 RwBool RwEngineOpen(RwEngineOpenParams *initParams) {
 	static EngineOpenParams openParams;
@@ -577,6 +601,9 @@ RwInt32 RwEngineGetMaxTextureSize(void);
 void RwD3D8EngineSetRefreshRate(RwUInt32 refreshRate) {}
 RwBool RwD3D8DeviceSupportsDXTTexture(void) { return true; }
 
+
+void RwD3D8EngineSetMultiSamplingLevels(RwUInt32 level) { Engine::setMultiSamplingLevels(level); }
+RwUInt32 RwD3D8EngineGetMaxMultiSamplingLevels(void) { return Engine::getMaxMultiSamplingLevels(); }
 
 
 RpMaterial *RpMaterialCreate(void) { return Material::create(); }
@@ -936,16 +963,3 @@ RtCharset   *RtCharsetSetColors(RtCharset * charSet, const RwRGBA * foreGround, 
 RtCharset   *RtCharsetGetDesc(RtCharset * charset, RtCharsetDesc * desc) { *desc = charset->desc; return charset; }
 RtCharset   *RtCharsetCreate(const RwRGBA * foreGround, const RwRGBA * backGround) { return Charset::create(foreGround, backGround); }
 RwBool       RtCharsetDestroy(RtCharset * charSet) { charSet->destroy(); return true; }
-
-
-
-// fake shit
-RwInt32 _rwD3D8FindCorrectRasterFormat(RwRasterType type, RwInt32 flags)
-{
-#ifdef RW_GL3
-	if(flags & (rwRASTERFORMATPAL8 | rwRASTERFORMAT8888))
-		return 'NOPE';
-	return 'YUP';
-#endif
-	return flags & 0xF00;
-}

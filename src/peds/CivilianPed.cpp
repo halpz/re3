@@ -18,7 +18,7 @@
 #include <float.h>
 #endif
 
-// --MIAMI: file done except TODOs
+// --MIAMI: file done
 
 CCivilianPed::CCivilianPed(ePedType pedtype, uint32 mi) : CPed(pedtype)
 {
@@ -228,7 +228,7 @@ CCivilianPed::CivilianAI(void)
 void
 CCivilianPed::ProcessControl(void)
 {
-	if (CharCreatedBy == TODO_CHAR)
+	if (CharCreatedBy == UNK_CHAR)
 		return;
 
 	CPed::ProcessControl();
@@ -314,7 +314,7 @@ CCivilianPed::ProcessControl(void)
 				for (int j = 0; j < m_numNearPeds; ++j) {
 					CPed *nearPed = m_nearPeds[j];
 					if (nearPed->m_nPedType == m_nPedType && nearPed->m_nPedState == PED_WANDER_PATH) {
-						nearPed->m_nPedState = PED_UNKNOWN;
+						nearPed->SetPedState(PED_UNKNOWN);
 					}
 				}
 			}
@@ -418,6 +418,32 @@ CCivilianPed::ProcessControl(void)
 
 	if (m_moved.Magnitude() > 0.0f)
 		Avoid();
+}
+
+// --MIAMI: Done
+bool
+CPed::RunToReportCrime(eCrimeType crimeToReport)
+{
+	// They changed true into false to make this function unusable. So running to phone actually starts but first frame after that cancels it.
+	if (m_nPedState == PED_SEEK_POS)
+		return false;
+
+	CVector pos = GetPosition();
+	int phoneId = gPhoneInfo.FindNearestFreePhone(&pos);
+
+	if (phoneId == -1)
+		return false;
+
+	CPhone* phone = &gPhoneInfo.m_aPhones[phoneId];
+	if (phone->m_nState != PHONE_STATE_FREE)
+		return false;
+
+	bRunningToPhone = true;
+	SetSeek(phone->m_vecPos, 0.3f);
+	SetMoveState(PEDMOVE_RUN);
+	m_phoneId = phoneId;
+	m_crimeToReportOnPhone = crimeToReport;
+	return true;
 }
 
 const int32 gFrequencyOfAttractorAttempt = 11;

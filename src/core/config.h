@@ -7,7 +7,7 @@ enum Config {
 	MAX_CDIMAGES = 8, // additional cdimages
 	MAX_CDCHANNELS = 5,
 
-	MODELINFOSIZE = 6500,
+	MODELINFOSIZE = 6500,	// 4900 on PS2
 	TXDSTORESIZE = 1385,
 	COLSTORESIZE = 31,
 	EXTRADIRSIZE = 256,
@@ -36,7 +36,7 @@ enum Config {
 	NUMDUMMIES = 2340,
 	NUMAUDIOSCRIPTOBJECTS = 192,
 	NUMCOLMODELS = 4400,
-	NUMCUTSCENEOBJECTS = 50,	// does not exist in VC
+	NUMCUTSCENEOBJECTS = 50,	// not a pool in VC
 
 	NUMANIMBLOCKS = 35,
 	NUMANIMATIONS = 450,
@@ -146,10 +146,6 @@ enum Config {
 	NUM_SHORTCUT_START_POINTS = 16
 };
 
-// We'll use this once we're ready to become independent of the game
-// Use it to mark bugs in the code that will prevent the game from working then
-//#define STANDALONE
-
 // We don't expect to compile for PS2 or Xbox
 // but it might be interesting for documentation purposes
 #define GTA_PC
@@ -176,6 +172,19 @@ enum Config {
 #define FINAL
 #endif
 
+// Version defines
+#define GTAVC_PS2	400
+#define GTAVC_PC_10	410
+#define GTAVC_PC_11	411
+#define GTAVC_PC_JAP	412
+// TODO? maybe something for xbox or android?
+
+#define GTA_VERSION	GTAVC_PC_11
+
+// TODO(MIAMI): someone ought to find and check out uses of these defines:
+//#define GTA3_STEAM_PATCH
+//#define GTAVC_JP_PATCH
+
 // quality of life fixes that should also be in FINAL
 #define NASTY_GAME	// nasty game for all languages
 #define NO_CDCHECK
@@ -183,23 +192,30 @@ enum Config {
 // those infamous texts
 #define DRAW_GAME_VERSION_TEXT
 
+// Memory allocation and compression
+// #define USE_CUSTOM_ALLOCATOR		// use CMemoryHeap for allocation. use with care, not finished yet
+//#define COMPRESSED_COL_VECTORS	// use compressed vectors for collision vertices
+//#define ANIM_COMPRESSION	// only keep most recently used anims uncompressed
+
 #if defined GTA_PS2
 #	define GTA_PS2_STUFF
 #	define RANDOMSPLASH
+//#	define USE_CUSTOM_ALLOCATOR
 #	define VU_COLLISION
 #elif defined GTA_PC
-//#	define GTA3_STEAM_PATCH
-//# define GTAVC_JP_PATCH
 #	ifdef GTA_PS2_STUFF
 #		define USE_PS2_RAND
 #		define RANDOMSPLASH	// use random splash as on PS2
 #		define PS2_MATFX
 #	endif
+#	define PC_PLAYER_CONTROLS	// mouse player/cam mode
+#	define GTA_REPLAY
+#	define GTA_SCENE_EDIT
 #elif defined GTA_XBOX
 #endif
 
 #ifdef VU_COLLISION
-#define COMPRESSED_COL_VECTORS	// current need compressed vectors in this code
+#define COMPRESSED_COL_VECTORS	// currently need compressed vectors in this code
 #endif
 
 #ifdef MASTER
@@ -225,6 +241,7 @@ enum Config {
 #define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more
 //#define MORE_LANGUAGES		// Add more translations to the game
 #define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
+#define LOAD_INI_SETTINGS // as the name suggests. fundamental for CUSTOM_FRONTEND_OPTIONS
 #define FIX_HIGH_FPS_BUGS_ON_FRONTEND
 
 // Just debug menu entries
@@ -240,24 +257,20 @@ enum Config {
 #define PS2_ALPHA_TEST		// emulate ps2 alpha test 
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
 #define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
-//#define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
+#define DISABLE_VSYNC_ON_TEXTURE_CONVERSION // make texture conversion work faster by disabling vsync
 //#define USE_TEXTURE_POOL
-//#define CUTSCENE_BORDERS_SWITCH
 #ifdef LIBRW
-//#define EXTENDED_COLOURFILTER		// more options for colour filter (replaces mblur)
-//#define EXTENDED_PIPELINES		// custom render pipelines (includes Neo)
-//#define NEW_RENDERER		// leeds-like world rendering, needs librw
+#define EXTENDED_COLOURFILTER		// more options for colour filter (replaces mblur)
+#define EXTENDED_PIPELINES		// custom render pipelines (includes Neo)
+#define SCREEN_DROPLETS			// neo water droplets
+#define NEW_RENDERER		// leeds-like world rendering, needs librw
 #endif
-//#define MULTISAMPLING		// adds MSAA option TODO
 
-#ifdef LIBRW
-// these are not supported with librw yet
-#	undef MULTISAMPLING
+#ifndef EXTENDED_COLOURFILTER
+#undef SCREEN_DROPLETS		// we need the backbuffer for this effect
 #endif
 
 // Water & Particle
-#define PC_PARTICLE
-//#define PS2_ALTERNATIVE_CARSPLASH // unused on PS2
 // #define PC_WATER
 #define WATER_CHEATS
 
@@ -278,32 +291,48 @@ enum Config {
 #define WALLCLIMB_CHEAT
 #define REGISTER_START_BUTTON
 //#define BIND_VEHICLE_FIREWEAPON // Adds ability to rebind fire key for 'in vehicle' controls
+#define BUTTON_ICONS // use textures to show controller buttons
 
 // Hud, frontend and radar
-//#define BETA_SLIDING_TEXT
 #define PC_MENU
 
 #ifndef PC_MENU
 #	define PS2_MENU
 //#	define PS2_MENU_USEALLPAGEICONS
 #else
-#	define MAP_ENHANCEMENTS			// Adding waypoint etc.
+#	define MAP_ENHANCEMENTS			// Adding waypoint and better mouse support
 #	define TRIANGLE_BACK_BUTTON
 //#	define CIRCLE_BACK_BUTTON
-//#define CUSTOM_FRONTEND_OPTIONS
-#	define GRAPHICS_MENU_OPTIONS
-#define LEGACY_MENU_OPTIONS
+#define LEGACY_MENU_OPTIONS			// i.e. frame sync(vsync)
 #define MUCH_SHORTER_OUTRO_SCREEN
+// #define XBOX_MESSAGE_SCREEN			// Blue background, no "saved successfully press OK" screen etc.
+#	define CUSTOM_FRONTEND_OPTIONS
+
+#	ifdef CUSTOM_FRONTEND_OPTIONS
+#		define GRAPHICS_MENU_OPTIONS // otherwise Display settings will be scrollable
+#		define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
+#		define CUTSCENE_BORDERS_SWITCH
+//#		define MULTISAMPLING		// adds MSAA option
+#		define INVERT_LOOK_FOR_PAD // enable the hidden option
+#	endif
+#endif
 
 // Script
 #define USE_DEBUG_SCRIPT_LOADER	// Loads main.scm by default. Hold R for main_freeroam.scm and D for main_d.scm
 #define USE_MEASUREMENTS_IN_METERS // makes game use meters instead of feet in script
 #define USE_PRECISE_MEASUREMENT_CONVERTION // makes game convert feet to meeters more precisely
+#define SUPPORT_JAPANESE_SCRIPT
+//#define SUPPORT_XBOX_SCRIPT
+//#define SUPPORT_MOBILE_SCRIPT
+#if (defined SUPPORT_XBOX_SCRIPT && defined SUPPORT_MOBILE_SCRIPT)
+static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually exclusive");
+#endif
+#ifdef PC_MENU
 //#define MISSION_REPLAY // mobile feature
 #endif
 //#define SIMPLIER_MISSIONS // apply simplifications from mobile
 #define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
-#define SCRIPT_LOG_FILE_LEVEL 1 // 0 == no log, 1 == overwrite every frame, 2 == full log
+#define SCRIPT_LOG_FILE_LEVEL 0 // 0 == no log, 1 == overwrite every frame, 2 == full log
 
 #ifndef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #define USE_BASIC_SCRIPT_DEBUG_OUTPUT
@@ -322,9 +351,6 @@ enum Config {
 #define CAMERA_PICKUP
 
 // Peds
-#define PED_SKIN		// support for skinned geometry on peds
-#define ANIMATE_PED_COL_MODEL
-#define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
 #define CANCELLABLE_CAR_ENTER
 
 // Camera
@@ -336,10 +362,15 @@ enum Config {
 //#define PS2_AUDIO   // changes audio paths for cutscenes and radio to PS2 paths, needs vbdec to support VB with MSS
 
 
+#ifdef LIBRW
+// these are not supported with librw yet
+#	undef MULTISAMPLING
+#endif
+// IMG
+#define BIG_IMG // allows to read larger img files
+
 //#define SQUEEZE_PERFORMANCE
 #ifdef SQUEEZE_PERFORMANCE
 	#undef PS2_ALPHA_TEST
 	#undef NO_ISLAND_LOADING
-	#define PC_PARTICLE
-	#define VC_PED_PORTS // To not process collisions always. But should be tested if that's really beneficial
 #endif

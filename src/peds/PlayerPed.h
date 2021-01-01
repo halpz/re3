@@ -31,12 +31,12 @@ public:
 	bool m_bAdrenalineActive;
 	bool m_bHasLockOnTarget;
 	bool m_bCanBeDamaged;
-	bool m_bDrunkVisualsWearOff; // TODO(Miami): That may be something else
+	bool m_bNoPosForMeleeAttack;
+	bool unk1;
 	CVector m_vecSafePos[6]; // safe places from the player, for example behind a tree
 	CPed *m_pPedAtSafePos[6];
 	CPed *m_pMeleeList[6]; // reachable peds at each direction(6)
-	char unused1;
-	int16 m_nCheckPlayersIndex;
+	int16 m_nAttackDirToCheck;
 	float m_fWalkAngle; //angle between heading and walking direction
 	float m_fFPSMoveHeading;
 	RpAtomic* m_pMinigunTopAtomic; //atomic for the spinning part of the minigun model
@@ -44,6 +44,8 @@ public:
 	float m_fGunSpinAngle;
 	unsigned int m_nPadDownPressedInMilliseconds;
 	unsigned int m_nLastBusFareCollected;
+
+	static bool bDontAllowWeaponChange;
 
 	CPlayerPed();
 	~CPlayerPed();
@@ -64,18 +66,18 @@ public:
 	class CPlayerInfo *GetPlayerInfoForThisPlayerPed();
 	void SetRealMoveAnim(void);
 	void RestoreSprintEnergy(float);
-	bool DoWeaponSmoothSpray(void);
+	float DoWeaponSmoothSpray(void);
 	void DoStuffToGoOnFire(void);
 	bool DoesTargetHaveToBeBroken(CVector, CWeapon*);
 	void RunningLand(CPad*);
-	bool IsThisPedAttackingPlayer(CPed*);
+	bool IsThisPedAnAimingPriority(CPed*);
 	void PlayerControlSniper(CPad*);
 	void PlayerControlM16(CPad*);
 	void PlayerControlFighter(CPad*);
 	void ProcessWeaponSwitch(CPad*);
 	void MakeObjectTargettable(int32);
 	void PlayerControl1stPersonRunAround(CPad *padUsed);
-	void EvaluateNeighbouringTarget(CEntity*, CEntity**, float*, float, float, bool);
+	void EvaluateNeighbouringTarget(CEntity*, CEntity**, float*, float, float, bool, bool);
 	void EvaluateTarget(CEntity*, CEntity**, float*, float, float, bool);
 	bool FindNextWeaponLockOnTarget(CEntity*, bool);
 	bool FindWeaponLockOnTarget(void);
@@ -87,6 +89,12 @@ public:
 	void RemovePedFromMeleeList(CPed*);
 	void GetMeleeAttackCoords(CVector&, int8, float);
 	int32 FindMeleeAttackPoint(CPed*, CVector&, uint32&);
+	bool CanIKReachThisTarget(CVector, CWeapon*, bool);
+	void RotatePlayerToTrackTarget(void);
+	bool MovementDisabledBecauseOfTargeting(void);
+	void FindNewAttackPoints(void);
+	void SetNearbyPedsToInteractWithPlayer(void);
+	void UpdateMeleeAttackers(void);
 
 	static void SetupPlayerPed(int32);
 	static void DeactivatePlayerPed(int32);
@@ -100,6 +108,4 @@ public:
 	static const uint32 nSaveStructSize;
 };
 
-#ifndef PED_SKIN
-VALIDATE_SIZE(CPlayerPed, 0x5F0);
-#endif
+//VALIDATE_SIZE(CPlayerPed, 0x5F0);

@@ -5,7 +5,7 @@
 #include "RpAnimBlend.h"
 #include "AnimManager.h"
 #include "AnimBlendAssociation.h"
-#include "RwHelper.h"
+#include "MemoryMgr.h"
 
 //--MIAMI: file done
 
@@ -139,11 +139,15 @@ CAnimBlendAssociation::SetCurrentTime(float time)
 		}
 
 	CAnimManager::UncompressAnimation(hierarchy);
-	if(hierarchy->compressed2){
+#ifdef ANIM_COMPRESSION
+	// strangely PC has this but android doesn't
+	if(hierarchy->keepCompressed){
 		for(i = 0; i < numNodes; i++)
 			if(nodes[i].sequence)
 				nodes[i].SetupKeyFrameCompressed();
-	}else{
+	}else
+#endif
+	{
 		for(i = 0; i < numNodes; i++)
 			if(nodes[i].sequence)
 				nodes[i].FindKeyFrame(currentTime);

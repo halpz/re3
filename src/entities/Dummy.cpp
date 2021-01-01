@@ -58,7 +58,7 @@ IsDummyPointerValid(CDummy* pDummy)
 {
 	if (!pDummy)
 		return false;
-	int index = CPools::GetDummyPool()->GetJustIndex(pDummy);
+	int index = CPools::GetDummyPool()->GetJustIndex_NoFreeAssert(pDummy);
 #ifdef FIX_BUGS
 	if (index < 0 || index >= CPools::GetDummyPool()->GetSize())
 #else

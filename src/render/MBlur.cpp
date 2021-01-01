@@ -7,10 +7,15 @@
 #include <d3d8caps.h>
 #endif
 
+#include "General.h"
 #include "RwHelper.h"
 #include "Camera.h"
-#include "MBlur.h"
+#include "Timecycle.h"
+#include "Particle.h"
 #include "Timer.h"
+#include "Hud.h"
+#include "Frontend.h"
+#include "MBlur.h"
 #include "postfx.h"
 
 // Originally taken from RW example 'mblur'
@@ -20,6 +25,8 @@ bool CMBlur::ms_bJustInitialised;
 bool CMBlur::ms_bScaledBlur;
 bool CMBlur::BlurOn;
 float CMBlur::Drunkness;
+
+int32 CMBlur::pBufVertCount;
 
 static RwIm2DVertex Vertex[4];
 static RwIm2DVertex Vertex2[4];
@@ -244,6 +251,84 @@ CMBlur::CreateImmediateModeData(RwCamera *cam, RwRect *rect)
 }
 
 void
+CMBlur::CreateImmediateModeData(RwCamera *cam, RwRect *rect, RwIm2DVertex *verts, RwRGBA color, float u1Off, float v1Off, float u2Off, float v2Off, float z, int fullTexture)
+{
+	float x1 = rect->x;
+	float y1 = rect->y;
+	float x2 = rect->w;
+	float y2 = rect->h;
+
+	float u1, v1, u2, v2;
+	if(fullTexture){
+		u1 = 0.0f;
+		v1 = 0.0f;
+		u2 = 1.0f;
+		v2 = 1.0f;
+	}else{
+		if(RwRasterGetDepth(RwCameraGetRaster(cam)) == 16){
+			x1 += HALFPX;
+			y1 += HALFPX;
+			x2 += HALFPX;
+			y2 += HALFPX;
+		}else{
+			x1 -= HALFPX;
+			y1 -= HALFPX;
+			x2 -= HALFPX;
+			y2 -= HALFPX;
+		}
+
+		int32 width  = Pow(2.0f, int32(log2(RwRasterGetWidth (RwCameraGetRaster(cam))))+1);
+		int32 height = Pow(2.0f, int32(log2(RwRasterGetHeight(RwCameraGetRaster(cam))))+1);
+		u1 = x1/width + u1Off;
+		v1 = y1/height + v1Off;
+		u2 = x2/width + u2Off;
+		v2 = y2/height + v2Off;
+		u1 = clamp(u1, 0.0f, 1.0f);
+		v1 = clamp(v1, 0.0f, 1.0f);
+		u2 = clamp(u2, 0.0f, 1.0f);
+		v2 = clamp(v2, 0.0f, 1.0f);
+	}
+
+	float recipz = 1.0f/z;
+	// TODO: CameraZ is wrong, what should we do?
+	RwIm2DVertexSetScreenX(&verts[0], x1);
+	RwIm2DVertexSetScreenY(&verts[0], y1);
+	RwIm2DVertexSetScreenZ(&verts[0], z);
+	RwIm2DVertexSetCameraZ(&verts[0], RwCameraGetNearClipPlane(cam));
+	RwIm2DVertexSetRecipCameraZ(&verts[0], recipz);
+	RwIm2DVertexSetU(&verts[0], u1, recipz);
+	RwIm2DVertexSetV(&verts[0], v1, recipz);
+	RwIm2DVertexSetIntRGBA(&verts[0], color.red, color.green, color.blue, color.alpha);
+
+	RwIm2DVertexSetScreenX(&verts[1], x1);
+	RwIm2DVertexSetScreenY(&verts[1], y2);
+	RwIm2DVertexSetScreenZ(&verts[1], z);
+	RwIm2DVertexSetCameraZ(&verts[1], RwCameraGetNearClipPlane(cam));
+	RwIm2DVertexSetRecipCameraZ(&verts[1], recipz);
+	RwIm2DVertexSetU(&verts[1], u1, recipz);
+	RwIm2DVertexSetV(&verts[1], v2, recipz);
+	RwIm2DVertexSetIntRGBA(&verts[1], color.red, color.green, color.blue, color.alpha);
+
+	RwIm2DVertexSetScreenX(&verts[2], x2);
+	RwIm2DVertexSetScreenY(&verts[2], y2);
+	RwIm2DVertexSetScreenZ(&verts[2], z);
+	RwIm2DVertexSetCameraZ(&verts[2], RwCameraGetNearClipPlane(cam));
+	RwIm2DVertexSetRecipCameraZ(&verts[2], recipz);
+	RwIm2DVertexSetU(&verts[2], u2, recipz);
+	RwIm2DVertexSetV(&verts[2], v2, recipz);
+	RwIm2DVertexSetIntRGBA(&verts[2], color.red, color.green, color.blue, color.alpha);
+
+	RwIm2DVertexSetScreenX(&verts[3], x2);
+	RwIm2DVertexSetScreenY(&verts[3], y1);
+	RwIm2DVertexSetScreenZ(&verts[3], z);
+	RwIm2DVertexSetCameraZ(&verts[3], RwCameraGetNearClipPlane(cam));
+	RwIm2DVertexSetRecipCameraZ(&verts[3], recipz);
+	RwIm2DVertexSetU(&verts[3], u2, recipz);
+	RwIm2DVertexSetV(&verts[3], v1, recipz);
+	RwIm2DVertexSetIntRGBA(&verts[3], color.red, color.green, color.blue, color.alpha);
+}
+
+void
 CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blur, int32 type, uint32 bluralpha)
 {
 #ifdef EXTENDED_COLOURFILTER
@@ -415,7 +500,8 @@ CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type,
 		RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, Vertex, 4, Index, 6);
 	}
 
-	// TODO(MIAMI): OverlayRenderFx
+	if(type != MOTION_BLUR_SNIPER)
+		OverlayRenderFx(cam, pFrontBuffer);
 
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
@@ -437,4 +523,277 @@ CMBlur::ClearDrunkBlur()
 {
 	Drunkness = 0.0f;
 	CTimer::SetTimeScale(1.0f);
+}
+
+#define NUM_RENDER_FX 64
+
+static RwRect fxRect[NUM_RENDER_FX];
+static FxType fxType[NUM_RENDER_FX];
+static float fxZ[NUM_RENDER_FX];
+
+bool
+CMBlur::PosInside(RwRect *rect, float x1, float y1, float x2, float y2)
+{
+	if((rect->x < x1 - 10.0f || rect->x > x2 + 10.0f || rect->y < y1 - 10.0f || rect->y > y2 + 10.0f) &&
+	   (rect->w < x1 - 10.0f || rect->w > x2 + 10.0f || rect->h < y1 - 10.0f || rect->h > y2 + 10.0f) &&
+	   (rect->x < x1 - 10.0f || rect->x > x2 + 10.0f || rect->h < y1 - 10.0f || rect->h > y2 + 10.0f) &&
+	   (rect->w < x1 - 10.0f || rect->w > x2 + 10.0f || rect->y < y1 - 10.0f || rect->y > y2 + 10.0f))
+		return false;
+	return true;
+}
+
+bool
+CMBlur::AddRenderFx(RwCamera *cam, RwRect *rect, float z, FxType type)
+{
+	if(pBufVertCount >= NUM_RENDER_FX)
+		return false;
+
+	rect->x = Max(rect->x, 0);
+	rect->y = Max(rect->y, 0);
+	rect->w = Min(rect->w, SCREEN_WIDTH);
+	rect->h = Min(rect->h, SCREEN_HEIGHT);
+	if(rect->x >= rect->w || rect->y >= rect->h)
+		return false;
+
+	switch(type){
+	case FXTYPE_WATER1:
+	case FXTYPE_WATER2:
+	case FXTYPE_BLOOD1:
+	case FXTYPE_BLOOD2:
+	case FXTYPE_HEATHAZE:	// code seems to be duplicated for this case
+		for(int i = 0; i < pBufVertCount; i++)
+			if(fxType[i] == type && PosInside(rect, fxRect[i].x-10.0f, fxRect[i].y-10.0f, fxRect[i].w+10.0f, fxRect[i].h+10.0f))
+				return false;
+		// TODO: fix aspect ratio scaling
+		// radar
+		if(PosInside(rect, 40.0f, SCREEN_SCALE_FROM_BOTTOM(116.0f), 40.0f + SCREEN_SCALE_X(94.0f), SCREEN_SCALE_FROM_BOTTOM(116.0f - 76.0f)))
+			return false;
+		// HUD
+		if(PosInside(rect, 400.0f, 0.0f, SCREEN_WIDTH, 90.0f))
+			return false;
+		// vehicle name
+		if(CHud::m_VehicleState != 0 && PosInside(rect, SCREEN_WIDTH/2, 350.0f, SCREEN_WIDTH, SCREEN_HEIGHT))
+			return false;
+		// zone name
+		if(CHud::m_ZoneState != 0 && PosInside(rect, SCREEN_WIDTH/2, 350.0f, SCREEN_WIDTH, SCREEN_HEIGHT))
+			return false;
+		break;
+	}
+
+	fxRect[pBufVertCount] = *rect;
+	fxZ[pBufVertCount] = z;
+	fxType[pBufVertCount] = type;
+	pBufVertCount++;
+
+	return true;
+}
+
+void
+CMBlur::OverlayRenderFx(RwCamera *cam, RwRaster *frontBuf)
+{
+	bool drawWaterDrops = false;
+	RwIm2DVertex verts[4];
+	int red = (0.75f*CTimeCycle::GetDirectionalRed() + CTimeCycle::GetAmbientRed())*0.55f * 255;
+	int green = (0.75f*CTimeCycle::GetDirectionalGreen() + CTimeCycle::GetAmbientGreen())*0.55f * 255;
+	int blue = (0.75f*CTimeCycle::GetDirectionalBlue() + CTimeCycle::GetAmbientBlue())*0.55f * 255;
+	red = clamp(red, 0, 255);
+	green = clamp(green, 0, 255);
+	blue = clamp(blue, 0, 255);
+
+	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+
+#ifdef LIBRW
+	rw::SetRenderState(rw::STENCILENABLE, TRUE);
+#else
+	RwD3D8SetRenderState(D3DRS_STENCILENABLE, TRUE);
+#endif
+
+	for(int i = 0; i < pBufVertCount; i++)
+		switch(fxType[i]){
+		case FXTYPE_WATER1:
+		case FXTYPE_WATER2:
+		case FXTYPE_BLOOD1:
+		case FXTYPE_BLOOD2: {
+			drawWaterDrops = true;
+			int32 width  = Pow(2.0f, int32(log2(RwRasterGetWidth (RwCameraGetRaster(cam))))+1);
+			int32 height = Pow(2.0f, int32(log2(RwRasterGetHeight(RwCameraGetRaster(cam))))+1);
+
+			float u1Off = (fxRect[i].w - fxRect[i].x)/width;
+			float u2Off = u1Off - (fxRect[i].w - fxRect[i].x + 0.5f)*0.66f/width;
+			float halfHeight = (fxRect[i].h - fxRect[i].y + 0.5f)*0.25f/height;
+
+			if(RwRasterGetDepth(RwCameraGetRaster(cam)) == 16){
+				if(fxType[i] == FXTYPE_BLOOD1 || fxType[i] == FXTYPE_BLOOD2)
+					CreateImmediateModeData(cam, &fxRect[i], verts, CRGBA(255, 0, 0, 128), 0.0f, 0.0f, 0.0f, 0.0f, fxZ[i], true);
+				else
+					CreateImmediateModeData(cam, &fxRect[i], verts, CRGBA(32, 32, 32, 225), 0.0f, 0.0f, 0.0f, 0.0f, fxZ[i], true);
+			}else{
+				CreateImmediateModeData(cam, &fxRect[i], verts, CRGBA(32, 32, 32, 225), 0.0f, 0.0f, 0.0f, 0.0f, fxZ[i], true);
+			}
+
+			RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpDotRaster);
+#ifdef LIBRW
+			rw::SetRenderState(rw::STENCILFUNCTION, rw::STENCILALWAYS);
+			rw::SetRenderState(rw::STENCILFUNCTIONREF, 1);
+			rw::SetRenderState(rw::STENCILFUNCTIONMASK, 0xFFFFFFFF);
+			rw::SetRenderState(rw::STENCILFUNCTIONWRITEMASK, 0xFFFFFFFF);
+			rw::SetRenderState(rw::STENCILZFAIL, rw::STENCILKEEP);
+			rw::SetRenderState(rw::STENCILFAIL, rw::STENCILKEEP);
+			rw::SetRenderState(rw::STENCILPASS, rw::STENCILREPLACE);
+#else
+			RwD3D8SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
+			RwD3D8SetRenderState(D3DRS_STENCILREF, 1);
+			RwD3D8SetRenderState(D3DRS_STENCILMASK, 0xFFFFFFFF);
+			RwD3D8SetRenderState(D3DRS_STENCILWRITEMASK, 0xFFFFFFFF);
+			RwD3D8SetRenderState(D3DRS_STENCILZFAIL, D3DSTENCILOP_KEEP);
+			RwD3D8SetRenderState(D3DRS_STENCILFAIL, D3DSTENCILOP_KEEP);
+			RwD3D8SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE);
+#endif
+			RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+			RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+			RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, verts, 4, Index, 6);
+
+			if(RwRasterGetDepth(RwCameraGetRaster(cam)) != 16){
+				RwRenderStateSet(rwRENDERSTATETEXTURERASTER, frontBuf);
+#ifdef LIBRW
+				rw::SetRenderState(rw::STENCILFUNCTION, rw::STENCILEQUAL);
+				rw::SetRenderState(rw::STENCILPASS, rw::STENCILKEEP);
+#else
+				RwD3D8SetRenderState(D3DRS_STENCILFUNC, D3DCMP_EQUAL);
+				RwD3D8SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_KEEP);
+#endif
+				if(BlurOn){
+					if(fxType[i] == FXTYPE_BLOOD1 || fxType[i] == FXTYPE_BLOOD2)
+						CreateImmediateModeData(cam, &fxRect[i], verts, CRGBA(255, 0, 0, 255), u1Off, 0.0f+halfHeight, u2Off, 0.0f-halfHeight, fxZ[i], false);
+					else
+						CreateImmediateModeData(cam, &fxRect[i], verts, CRGBA(225, 225, 225, 160), u1Off, 0.0f+halfHeight, u2Off, 0.0f-halfHeight, fxZ[i], false);
+					RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDDESTALPHA);
+					RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVDESTALPHA);
+				}else{
+					if(fxType[i] == FXTYPE_BLOOD1 || fxType[i] == FXTYPE_BLOOD2)
+						CreateImmediateModeData(cam, &fxRect[i], verts, CRGBA(255, 0, 0, 128), u1Off, 0.0f+halfHeight, u2Off, 0.0f-halfHeight, fxZ[i], false);
+					else
+						CreateImmediateModeData(cam, &fxRect[i], verts, CRGBA(128, 128, 128, 32), u1Off, 0.0f+halfHeight, u2Off, 0.0f-halfHeight, fxZ[i], false);
+					RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+					RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+				}
+				RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, verts, 4, Index, 6);
+			}
+			break;
+		}
+		case FXTYPE_SPLASH1:
+		case FXTYPE_SPLASH2:
+		case FXTYPE_SPLASH3:
+			drawWaterDrops = true;
+			break;
+
+		case FXTYPE_HEATHAZE:
+			if(TheCamera.GetScreenFadeStatus() == FADE_0 && frontBuf){
+				int alpha = FrontEndMenuManager.m_PrefsBrightness > 255 ?
+					FrontEndMenuManager.m_PrefsBrightness - 90 :
+					FrontEndMenuManager.m_PrefsBrightness - 130;
+				alpha = clamp(alpha, 16, 200)/2;
+
+				CreateImmediateModeData(cam, &fxRect[i], verts, CRGBA(0, 0, 0, alpha), 0.0f, 0.0f, 0.0f, 0.0f, fxZ[i], true);
+				RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpHeatHazeRaster);
+#ifdef LIBRW
+				rw::SetRenderState(rw::STENCILFUNCTION, rw::STENCILALWAYS);
+				rw::SetRenderState(rw::STENCILFUNCTIONREF, 1);
+				rw::SetRenderState(rw::STENCILFUNCTIONMASK, 0xFFFFFFFF);
+				rw::SetRenderState(rw::STENCILFUNCTIONWRITEMASK, 0xFFFFFFFF);
+				rw::SetRenderState(rw::STENCILZFAIL, rw::STENCILKEEP);
+				rw::SetRenderState(rw::STENCILFAIL, rw::STENCILKEEP);
+				rw::SetRenderState(rw::STENCILPASS, rw::STENCILREPLACE);
+#else
+				RwD3D8SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
+				RwD3D8SetRenderState(D3DRS_STENCILREF, 1);
+				RwD3D8SetRenderState(D3DRS_STENCILMASK, 0xFFFFFFFF);
+				RwD3D8SetRenderState(D3DRS_STENCILWRITEMASK, 0xFFFFFFFF);
+				RwD3D8SetRenderState(D3DRS_STENCILZFAIL, D3DSTENCILOP_KEEP);
+				RwD3D8SetRenderState(D3DRS_STENCILFAIL, D3DSTENCILOP_KEEP);
+				RwD3D8SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE);
+#endif
+				RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+				RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+				RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, verts, 4, Index, 6);
+
+				CreateImmediateModeData(cam, &fxRect[i], verts, CRGBA(255, 255, 255, alpha),
+					CGeneral::GetRandomNumberInRange(-0.002f, 0.002f),
+					CGeneral::GetRandomNumberInRange(-0.002f, 0.002f),
+					CGeneral::GetRandomNumberInRange(-0.002f, 0.002f),
+					CGeneral::GetRandomNumberInRange(-0.002f, 0.002f),
+					fxZ[i], false);
+				RwRenderStateSet(rwRENDERSTATETEXTURERASTER, frontBuf);
+#ifdef LIBRW
+				rw::SetRenderState(rw::STENCILFUNCTION, rw::STENCILEQUAL);
+				rw::SetRenderState(rw::STENCILPASS, rw::STENCILKEEP);
+#else
+				RwD3D8SetRenderState(D3DRS_STENCILFUNC, D3DCMP_EQUAL);
+				RwD3D8SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_KEEP);
+#endif
+				RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+				RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+				RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, verts, 4, Index, 6);
+			}
+			break;
+		}
+#ifdef LIBRW
+	rw::SetRenderState(rw::STENCILENABLE, FALSE);
+#else
+	RwD3D8SetRenderState(D3DRS_STENCILENABLE, FALSE);
+#endif
+
+	if(drawWaterDrops){
+		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+
+		// Draw drops
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpRainDripRaster[0]);
+		for(int i = 0; i < pBufVertCount; i++)
+			if(fxType[i] == FXTYPE_WATER1 || fxType[i] == FXTYPE_BLOOD1){
+				CreateImmediateModeData(cam, &fxRect[i], verts, CRGBA(red, green, blue, fxType[i] == FXTYPE_BLOOD1 ? 255 : 192),
+					0.0f, 0.0f, 0.0f, 0.0f, fxZ[i], true);
+				RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, verts, 4, Index, 6);
+			}
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpRainDripRaster[1]);
+		for(int i = 0; i < pBufVertCount; i++)
+			if(fxType[i] == FXTYPE_WATER2 || fxType[i] == FXTYPE_BLOOD2){
+				CreateImmediateModeData(cam, &fxRect[i], verts, CRGBA(red, green, blue, fxType[i] == FXTYPE_BLOOD2 ? 255 : 192),
+					0.0f, 0.0f, 0.0f, 0.0f, fxZ[i], true);
+				RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, verts, 4, Index, 6);
+			}
+
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpCarSplashRaster[0]);
+		for(int i = 0; i < pBufVertCount; i++)
+			if(fxType[i] == FXTYPE_SPLASH1 || fxType[i] == FXTYPE_SPLASH2 || fxType[i] == FXTYPE_SPLASH3){
+				CreateImmediateModeData(cam, &fxRect[i], verts, CRGBA(200, 200, 200, 255),
+					0.0f, 0.0f, 0.0f, 0.0f, fxZ[i], true);
+				RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, verts, 4, Index, 6);
+			}
+
+		// Darken the water drops
+		int alpha = 192*0.5f;
+		RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpRainDripDarkRaster[0]);
+		for(int i = 0; i < pBufVertCount; i++)
+			if(fxType[i] == FXTYPE_WATER1){
+				CreateImmediateModeData(cam, &fxRect[i], verts, CRGBA(red, green, blue, alpha),
+					0.0f, 0.0f, 0.0f, 0.0f, fxZ[i], true);
+				RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, verts, 4, Index, 6);
+			}
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpRainDripDarkRaster[1]);
+		for(int i = 0; i < pBufVertCount; i++)
+			if(fxType[i] == FXTYPE_WATER2){
+				CreateImmediateModeData(cam, &fxRect[i], verts, CRGBA(red, green, blue, alpha),
+					0.0f, 0.0f, 0.0f, 0.0f, fxZ[i], true);
+				RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, verts, 4, Index, 6);
+			}
+	}
+
+	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+	pBufVertCount = 0;
 }

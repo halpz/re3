@@ -22,8 +22,8 @@ public:
 	static void TellOccupantsToFleeCar(CVehicle*);
 	static void TellCarToRamOtherCar(CVehicle*, CVehicle*);
 	static void TellCarToBlockOtherCar(CVehicle*, CVehicle*);
-	static eCarMission FindPoliceCarMissionForWantedLevel();
-	static eCarMission FindPoliceBoatMissionForWantedLevel();
+	static uint8 FindPoliceCarMissionForWantedLevel();
+	static uint8 FindPoliceBoatMissionForWantedLevel();
 	static int32 FindPoliceCarSpeedForWantedLevel(CVehicle*);
 	static void MellowOutChaseSpeed(CVehicle*);
 	static void MellowOutChaseSpeedBoat(CVehicle*);

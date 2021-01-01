@@ -59,7 +59,6 @@ CEventList::Update(void)
 	}
 }
 
-// ok
 void
 CEventList::RegisterEvent(eEventType type, eEventEntity entityType, CEntity *ent, CPed *criminal, int32 timeout)
 {
@@ -121,7 +120,7 @@ CEventList::RegisterEvent(eEventType type, eEventEntity entityType, CEntity *ent
 	}
 
 	if(criminal == FindPlayerPed())
-		ReportCrimeForEvent(type, (uintptr)ent, copsDontCare);
+		ReportCrimeForEvent(type, (intptr)ent, copsDontCare);
 }
 
 void
@@ -199,7 +198,7 @@ CEventList::FindClosestEvent(eEventType type, CVector posn, int32 *event)
 }
 
 void
-CEventList::ReportCrimeForEvent(eEventType type, size_t crimeId, bool copsDontCare)
+CEventList::ReportCrimeForEvent(eEventType type, intptr crimeId, bool copsDontCare)
 {
 	eCrimeType crime;
 	switch(type){

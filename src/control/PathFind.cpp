@@ -286,6 +286,8 @@ CPathFind::AllocatePathFindInfoMem(int16 numPathGroups)
 	DetachedInfoForTilePeds = new CPathInfoForObject[12*NUMDETACHED_PEDS];
 	memset(DetachedInfoForTilePeds, 0, 12*NUMDETACHED_PEDS*sizeof(CPathInfoForObject));
 
+	delete[] TempExternalNodes;
+	TempExternalNodes = nil;
 	TempExternalNodes = new CTempNodeExternal[NUMTEMPEXTERNALNODES];
 	memset(TempExternalNodes, 0, NUMTEMPEXTERNALNODES*sizeof(CTempNodeExternal));
 	NumTempExternalNodes = 0;
@@ -1766,10 +1768,18 @@ CPathFind::TestCoorsCloseness(CVector target, uint8 type, CVector start)
 		DoPathSearch(type, start, -1, target, pNodeList, &DummyResult, 32, nil, &dist, 999999.88f, -1);
 	else
 		DoPathSearch(type, start, -1, target, nil, &DummyResult2, 0, nil, &dist, 50.0f, -1);
+#ifdef FIX_BUGS
+	// dist has GenerationDistMultiplier as a factor, so our reference dist should have it too
+	if(type == PATH_CAR)
+		return dist < 150.0f*TheCamera.GenerationDistMultiplier;
+	else
+		return dist < 100.0f*TheCamera.GenerationDistMultiplier;
+#else
 	if(type == PATH_CAR)
 		return dist < 150.0f;
 	else
 		return dist < 100.0f;
+#endif
 }
 
 void

@@ -26,6 +26,7 @@
 #include "AnimBlendAssociation.h"
 #include "RpAnimBlend.h"
 #include "Record.h"
+#include "Shadows.h"
 
 //--MIAMI: file done
 
@@ -63,9 +64,9 @@ CBoat::CBoat(int mi, uint8 owner) : CVehicle(owner)
 	m_nPoliceShoutTimer = CTimer::GetTimeInMilliseconds();
 	SetModelIndex(mi);
 
-	pHandling = mod_HandlingManager.GetHandlingData((eHandlingId)minfo->m_handlingId);
-	pFlyingHandling = mod_HandlingManager.GetFlyingPointer((eHandlingId)minfo->m_handlingId);
-	pBoatHandling = mod_HandlingManager.GetBoatPointer((eHandlingId)minfo->m_handlingId);
+	pHandling = mod_HandlingManager.GetHandlingData((tVehicleType)minfo->m_handlingId);
+	pFlyingHandling = mod_HandlingManager.GetFlyingPointer((tVehicleType)minfo->m_handlingId);
+	pBoatHandling = mod_HandlingManager.GetBoatPointer((tVehicleType)minfo->m_handlingId);
 	minfo->ChooseVehicleColour(m_currentColour1, m_currentColour2);
 
 	m_fMass = pHandling->fMass;
@@ -442,7 +443,7 @@ CBoat::ProcessControl(void)
 							CVector wakePos = GetPosition() + sternPos;
 							// no actual particles for player...
 						}else if(IsVisible() && ((CTimer::GetFrameCounter() + m_randomSeed) & 1) &&
-						         CVisibilityPlugins::GetDistanceSquaredFromCamera((RwV3d*)&propellerWorld) < SQR(70.0f * TheCamera.GenerationDistMultiplier)){
+						         CVisibilityPlugins::GetDistanceSquaredFromCamera(&propellerWorld) < SQR(70.0f * TheCamera.GenerationDistMultiplier)){
 							jetDir.z = 0.015f;
 							jetDir.x *= 3.5f;
 							jetDir.y *= 3.5f;
@@ -612,7 +613,7 @@ CBoat::ProcessControl(void)
 			splashDir.z += 0.0003f*m_nDeltaVolumeUnderWater;
 			CWaterLevel::GetWaterLevel(splashPos, &waterLevel, true);
 			if(splashPos.z-waterLevel < 3.0f &&
-			   CVisibilityPlugins::GetDistanceSquaredFromCamera((RwV3d*)&splashPos) < SQR(70.0f * TheCamera.GenerationDistMultiplier)){
+			   CVisibilityPlugins::GetDistanceSquaredFromCamera(&splashPos) < SQR(70.0f * TheCamera.GenerationDistMultiplier)){
 				splashPos.z = waterLevel + 0.1f;
 				CParticle::AddParticle(PARTICLE_CAR_SPLASH, splashPos, 0.75f*splashDir, nil, splashSize+0.1f,  splashColor,
 					CGeneral::GetRandomNumberInRange(0.0f, 10.0f), CGeneral::GetRandomNumberInRange(0.0f, 90.0f),
@@ -669,7 +670,7 @@ CBoat::ProcessControl(void)
 			splashDir.z += 0.0003f*m_nDeltaVolumeUnderWater;
 			CWaterLevel::GetWaterLevel(splashPos, &waterLevel, true);
 			if(splashPos.z-waterLevel < 3.0f &&
-			   CVisibilityPlugins::GetDistanceSquaredFromCamera((RwV3d*)&splashPos) < SQR(70.0f * TheCamera.GenerationDistMultiplier)){
+			   CVisibilityPlugins::GetDistanceSquaredFromCamera(&splashPos) < SQR(70.0f * TheCamera.GenerationDistMultiplier)){
 				splashPos.z = waterLevel + 0.1f;
 				CParticle::AddParticle(PARTICLE_CAR_SPLASH, splashPos, 0.75f*splashDir, nil, splashSize+0.1f,  splashColor,
 					CGeneral::GetRandomNumberInRange(0.0f, 10.0f), CGeneral::GetRandomNumberInRange(0.0f, 90.0f),
@@ -1006,7 +1007,7 @@ CBoat::PreRender(void)
 			if(atomic)
 				SetComponentAtomicAlpha(atomic, Max(150-alpha, 0));
 		}
-		//CShadows::StoreShadowForVehicle(this);
+		CShadows::StoreShadowForVehicle(this, VEH_SHD_TYPE_SEAPLANE);
 	}else if(GetModelIndex() == MI_COASTG || GetModelIndex() == MI_DINGHY || GetModelIndex() == MI_RIO ||
 	         GetModelIndex() == MI_SQUALO || GetModelIndex() == MI_MARQUIS){
 		if(m_aBoatNodes[BOAT_RUDDER]){

@@ -18,7 +18,7 @@ bool gPS2alphaTest = true;
 #else
 bool gPS2alphaTest = false;
 #endif
-bool gBackfaceCulling;
+bool gBackfaceCulling = true;
 
 #if !defined(FINAL) || defined(DEBUGMENU)
 static bool charsetOpen;
@@ -61,45 +61,6 @@ void FlushObrsPrintfs()
 #ifndef FINAL
 	RtCharsetBufferFlush();
 #endif
-}
-
-void *
-RwMallocAlign(RwUInt32 size, RwUInt32 align)
-{
-#ifdef FIX_BUGS
-	uintptr ptralign = align-1;
-	void *mem = (void *)malloc(size + sizeof(uintptr) + ptralign);
-
-	ASSERT(mem != nil);
-
-	void *addr = (void *)((((uintptr)mem) + sizeof(uintptr) + ptralign) & ~ptralign);
-
-	ASSERT(addr != nil);
-#else
-	void *mem = (void *)malloc(size + align);
-
-	ASSERT(mem != nil);
-
-	void *addr = (void *)((((uintptr)mem) + align) & ~(align - 1));
-
-	ASSERT(addr != nil);
-#endif
-
-	*(((void **)addr) - 1) = mem;
-
-	return addr;
-}
-
-void
-RwFreeAlign(void *mem)
-{
-	ASSERT(mem != nil);
-
-	void *addr = *(((void **)mem) - 1);
-
-	ASSERT(addr != nil);
-
-	free(addr);
 }
 
 void
@@ -326,26 +287,6 @@ HAnimAnimationCreateForHierarchy(RpHAnimHierarchy *hier)
 		frame->prevFrame = nil;
 	}
 	return anim;
-}
-
-RpAtomic*
-AtomicRemoveAnimFromSkinCB(RpAtomic *atomic, void *data)
-{
-	if(RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic))){
-		RpHAnimHierarchy *hier = RpSkinAtomicGetHAnimHierarchy(atomic);
-#ifdef LIBRW
-		if(hier && hier->interpolator->currentAnim){
-			RpHAnimAnimationDestroy(hier->interpolator->currentAnim);
-			hier->interpolator->currentAnim = nil;
-		}
-#else
-		if(hier && hier->currentAnim){
-			RpHAnimAnimationDestroy(hier->currentAnim->pCurrentAnim);
-			hier->currentAnim = nil;
-		}
-#endif
-	}
-	return atomic;
 }
 
 void
@@ -726,13 +667,6 @@ CameraCreate(RwInt32 width, RwInt32 height, RwBool zBuffer)
 	CameraDestroy(camera);
 	return (nil);
 }
-
-#ifdef USE_TEXTURE_POOL
-WRAPPER void _TexturePoolsInitialise() { EAXJMP(0x6271E0); }
-WRAPPER void _TexturePoolsShutdown() { EAXJMP(0x627080); }
-WRAPPER void _TexturePoolsFinalShutdown() { EAXJMP(0x626F80); }
-WRAPPER void _TexturePoolsUnknown(bool) { EAXJMP(0x626F70); }
-#endif
 
 #ifdef LIBRW
 #include <rpmatfx.h>

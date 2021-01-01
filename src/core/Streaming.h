@@ -197,11 +197,11 @@ public:
 	static void DeleteFarAwayRwObjects(const CVector &pos);
 	static void DeleteAllRwObjects(void);
 	static void DeleteRwObjectsAfterDeath(const CVector &pos);
-	static void DeleteRwObjectsBehindCamera(size_t mem);
+	static void DeleteRwObjectsBehindCamera(size_t mem); // originally signed
 	static void DeleteRwObjectsInSectorList(CPtrList &list);
 	static void DeleteRwObjectsInOverlapSectorList(CPtrList &list, int32 x, int32 y);
-	static bool DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, size_t mem);
-	static bool DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, size_t mem);
+	static bool DeleteRwObjectsBehindCameraInSectorList(CPtrList &list, size_t mem); // originally signed
+	static bool DeleteRwObjectsNotInFrustumInSectorList(CPtrList &list, size_t mem); // originally signed
 
 	static void LoadScene(const CVector &pos);
 	static void LoadSceneCollision(const CVector &pos);
@@ -210,4 +210,6 @@ public:
 	static void MemoryCardLoad(uint8 *buffer, uint32 length);
 
 	static void UpdateForAnimViewer(void);
+
+	static void PrintStreamingBufferState();
 };

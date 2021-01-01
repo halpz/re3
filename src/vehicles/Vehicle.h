@@ -102,14 +102,6 @@ enum eLights
 	VEHLIGHT_REAR_RIGHT,
 };
 
-enum eWheels
-{
-	VEHWHEEL_FRONT_LEFT,
-	VEHWHEEL_FRONT_RIGHT,
-	VEHWHEEL_REAR_LEFT,
-	VEHWHEEL_REAR_RIGHT,
-};
-
 enum
 {
 	CAR_PIECE_BONNET = 1,
@@ -248,8 +240,9 @@ public:
 	uint8 bRestingOnPhysical : 1; // Dont go static cause car is sitting on a physical object that might get removed
 	uint8 bParking : 1;
 	uint8 bCanPark : 1;
-
+#if (!defined GTA_PS2 || defined FIX_BUGS)
 	uint8 m_bombType : 3;
+#endif
 	uint8 bDriverLastFrame : 1;
 
 	int8 m_numPedsUseItAsCover;
@@ -259,7 +252,9 @@ public:
 	float m_fHealth;           // 1000.0f = full health. 250.0f = fire. 0 -> explode
 	uint8 m_nCurrentGear;
 	float m_fChangeGearTime;
+#if (!defined GTA_PS2 || defined FIX_BUGS)
 	CEntity* m_pBombRigger;
+#endif
 	uint32 m_nSetPieceExtendedRangeTime;
 	uint32 m_nGunFiringTime;    // last time when gun on vehicle was fired (used on boats)
 	uint32 m_nTimeOfDeath;
@@ -281,7 +276,7 @@ public:
 	int8 m_comedyControlState;
 	CStoredCollPoly m_aCollPolys[2];     // poly which is under front/rear part of car
 	float m_fSteerInput;
-	eVehicleType m_vehType;
+	uint8 m_vehType;
 
 	static void *operator new(size_t);
 	static void *operator new(size_t sz, int slot);

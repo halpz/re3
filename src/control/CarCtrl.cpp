@@ -464,6 +464,11 @@ CCarCtrl::GenerateOneRandomCar()
 	pVehicle->GetRight() = CVector(forwardY, -forwardX, 0.0f);
 	pVehicle->GetUp() = CVector(0.0f, 0.0f, 1.0f);
 
+	float currentPathLinkForwardX = pVehicle->AutoPilot.m_nCurrentDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo].GetDirX();
+	float currentPathLinkForwardY = pVehicle->AutoPilot.m_nCurrentDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo].GetDirY();
+	float nextPathLinkForwardX = pVehicle->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo].GetDirX();
+	float nextPathLinkForwardY = pVehicle->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo].GetDirY();
+
 #ifdef FIX_BUGS
 	CCarPathLink* pCurrentLink;
 	CCarPathLink* pNextLink;
@@ -474,11 +479,6 @@ CCarCtrl::GenerateOneRandomCar()
 	float directionNextLinkX;
 	float directionNextLinkY;
 	if (positionBetweenNodes < 0.5f) {
-		float currentPathLinkForwardX = pVehicle->AutoPilot.m_nCurrentDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo].GetDirX();
-		float currentPathLinkForwardY = pVehicle->AutoPilot.m_nCurrentDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo].GetDirY();
-		float nextPathLinkForwardX = pVehicle->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo].GetDirX();
-		float nextPathLinkForwardY = pVehicle->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo].GetDirY();
-
 		pCurrentLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo];
 		pNextLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo];
 		positionOnCurrentLinkIncludingLane = CVector(
@@ -507,11 +507,6 @@ CCarCtrl::GenerateOneRandomCar()
 		PickNextNodeRandomly(pVehicle);
 		pVehicle->AutoPilot.m_nTimeEnteredCurve = CTimer::GetTimeInMilliseconds() -
 			(uint32)((positionBetweenNodes - 0.5f) * pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve);
-
-		float currentPathLinkForwardX = pVehicle->AutoPilot.m_nCurrentDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo].GetDirX();
-		float currentPathLinkForwardY = pVehicle->AutoPilot.m_nCurrentDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo].GetDirY();
-		float nextPathLinkForwardX = pVehicle->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo].GetDirX();
-		float nextPathLinkForwardY = pVehicle->AutoPilot.m_nNextDirection * ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo].GetDirY();
 
 		pCurrentLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo];
 		pNextLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo];
@@ -1917,7 +1912,6 @@ void CCarCtrl::PickNextNodeRandomly(CVehicle* pVehicle)
 	}
 	if (pVehicle->AutoPilot.m_bStayInFastLane)
 		pVehicle->AutoPilot.m_nNextLane = 0;
-#ifdef FIX_BUGS
 	CVector positionOnCurrentLinkIncludingLane(
 		pCurLink->GetX() + ((pVehicle->AutoPilot.m_nCurrentLane + pCurLink->OneWayLaneOffset()) * LANE_WIDTH)
 #ifdef FIX_BUGS
@@ -1932,16 +1926,6 @@ void CCarCtrl::PickNextNodeRandomly(CVehicle* pVehicle)
 #endif
 		,pNextLink->GetY() - ((pVehicle->AutoPilot.m_nNextLane + pNextLink->OneWayLaneOffset()) * LANE_WIDTH) * nextPathLinkForwardX,
 		0.0f);
-#else
-	CVector positionOnCurrentLinkIncludingLane(
-		pCurLink->GetX() + ((pVehicle->AutoPilot.m_nCurrentLane + pCurLink->OneWayLaneOffset()) * LANE_WIDTH),
-		pCurLink->GetY() - ((pVehicle->AutoPilot.m_nCurrentLane + pCurLink->OneWayLaneOffset()) * LANE_WIDTH) * currentPathLinkForwardX,
-		0.0f);
-	CVector positionOnNextLinkIncludingLane(
-		pNextLink->GetX() + ((pVehicle->AutoPilot.m_nNextLane + pNextLink->OneWayLaneOffset()) * LANE_WIDTH) * nextPathLinkForwardY,
-		pNextLink->GetY() - ((pVehicle->AutoPilot.m_nNextLane + pNextLink->OneWayLaneOffset()) * LANE_WIDTH) * nextPathLinkForwardX,
-		0.0f);
-#endif
 	float directionCurrentLinkX = pCurLink->GetDirX() * pVehicle->AutoPilot.m_nCurrentDirection;
 	float directionCurrentLinkY = pCurLink->GetDirY() * pVehicle->AutoPilot.m_nCurrentDirection;
 	float directionNextLinkX = pNextLink->GetDirX() * pVehicle->AutoPilot.m_nNextDirection;
@@ -2898,7 +2882,13 @@ void CCarCtrl::SteerAICarWithPhysicsFollowPath(CVehicle* pVehicle, float* pSwerv
 	case DRIVINGSTYLE_STOP_FOR_CARS:
 	case DRIVINGSTYLE_SLOW_DOWN_FOR_CARS:
 	case DRIVINGSTYLE_STOP_FOR_CARS_IGNORE_LIGHTS:
-		speedStyleMultiplier = FindMaximumSpeedForThisCarInTraffic(pVehicle) / pVehicle->AutoPilot.m_nCruiseSpeed;
+		speedStyleMultiplier = FindMaximumSpeedForThisCarInTraffic(pVehicle);
+#ifdef FIX_BUGS
+		if (pVehicle->AutoPilot.GetCruiseSpeed() != 0)
+			speedStyleMultiplier /= pVehicle->AutoPilot.GetCruiseSpeed();
+#else
+		speedStyleMultiplier /= pVehicle->AutoPilot.m_nCruiseSpeed;
+#endif
 		break;
 	default:
 		speedStyleMultiplier = 1.0f;
@@ -3242,7 +3232,7 @@ void CCarCtrl::GenerateEmergencyServicesCar(void)
 			float distance = 30.0f;
 			CFire* pNearestFire = gFireManager.FindNearestFire(FindPlayerCoors(), &distance);
 			if (pNearestFire) {
-				if (CountCarsOfType(MI_FIRETRUCK) < 2 && CTimer::GetTimeInMilliseconds() > LastTimeFireTruckCreated + 30000){
+				if (CountCarsOfType(MI_FIRETRUCK) < 2 && CTimer::GetTimeInMilliseconds() > LastTimeFireTruckCreated + 35000){
 					CStreaming::RequestModel(MI_FIRETRUCK, STREAMFLAGS_DEPENDENCY);
 					CStreaming::RequestModel(MI_FIREMAN, STREAMFLAGS_DONT_REMOVE);
 					if (CStreaming::HasModelLoaded(MI_FIRETRUCK) && CStreaming::HasModelLoaded(MI_FIREMAN)){

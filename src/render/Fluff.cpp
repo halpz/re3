@@ -744,7 +744,7 @@ void CScrollBar::Render()
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
 
 	CVector coronaCoord, screenCoord;
-	float   screenW, screenH;
+	float screenW, screenH;
 	for (int i = 1; i < ARRAY_SIZE(m_MessageBar); ++i)
 	{
 		for (int j = 0; j < 5; ++j)
@@ -756,7 +756,7 @@ void CScrollBar::Render()
 			// Render main coronas
 			if (m_MessageBar[i] & (1 << j))
 			{
-				if (CSprite::CalcScreenCoors(coronaCoord, screenCoord, &screenW, &screenH, true))
+				if (CSprite::CalcScreenCoors(coronaCoord, &screenCoord, &screenW, &screenH, true))
 				{
 					CSprite::RenderBufferedOneXLUSprite(
 						screenCoord.x, screenCoord.y, screenCoord.z,
@@ -768,7 +768,7 @@ void CScrollBar::Render()
 			// Render smaller and faded coronas for a trailing effect
 			else if (m_MessageBar[i - 1] & (1 << j))
 			{
-				if (CSprite::CalcScreenCoors(coronaCoord, screenCoord, &screenW, &screenH, true))
+				if (CSprite::CalcScreenCoors(coronaCoord, &screenCoord, &screenW, &screenH, true))
 				{
 					CSprite::RenderBufferedOneXLUSprite(
 						screenCoord.x, screenCoord.y, screenCoord.z,
@@ -1291,7 +1291,7 @@ INITSAVEBUF
 
 		for (int32 j = 0; j < 6; j++) {
 			if (pPath->m_pObjects[j] != nil)
-				pPath->m_pObjects[j] = (CObject*)(CPools::GetObjectPool()->GetJustIndex(pPath->m_pObjects[j]) + 1);
+				pPath->m_pObjects[j] = (CObject*)(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert(pPath->m_pObjects[j]) + 1);
 		}
 
 		for (int32 j = 0; j < aArray[i].m_numNodes; j++) {

@@ -14,13 +14,31 @@ class CPlayerInfo;
 
 class CRunningScript;
 
-#define KEY_LENGTH_IN_SCRIPT 8
+extern int32 ScriptParams[32];
+
+void FlushLog();
+#define script_assert(_Expression) FlushLog(); assert(_Expression);
+
+#define PICKUP_PLACEMENT_OFFSET 0.5f
+#define PED_FIND_Z_OFFSET 5.0f
+#define COP_PED_FIND_Z_OFFSET 10.0f
+
 #define SPHERE_MARKER_R 252
 #define SPHERE_MARKER_G 138
 #define SPHERE_MARKER_B 242
 #define SPHERE_MARKER_A 228
 #define SPHERE_MARKER_PULSE_PERIOD 2048
 #define SPHERE_MARKER_PULSE_FRACTION 0.1f
+
+#ifdef USE_PRECISE_MEASUREMENT_CONVERTION
+#define METERS_IN_FOOT 0.3048f
+#define FEET_IN_METER 3.28084f
+#else
+#define METERS_IN_FOOT 0.3f
+#define FEET_IN_METER 3.33f
+#endif
+
+#define KEY_LENGTH_IN_SCRIPT 8
 
 struct intro_script_rectangle 
 {
@@ -288,6 +306,15 @@ class CTheScripts
 	static uint16 ScriptsUpdated;
 	static uint32 LastMissionPassedTime;
 	static uint16 NumberOfExclusiveMissionScripts;
+#if (defined GTA_PC && !defined GTAVC_JP_PATCH || defined GTA_XBOX || defined SUPPORT_XBOX_SCRIPT || defined GTA_MOBILE || defined SUPPORT_MOBILE_SCRIPT)
+#define CARDS_IN_SUIT (13)
+#define NUM_SUITS (4)
+#define MAX_DECKS (6)
+#define CARDS_IN_DECK (CARDS_IN_SUIT * NUM_SUITS)
+#define CARDS_IN_STACK (CARDS_IN_DECK * MAX_DECKS)
+	static int16 CardStack[CARDS_IN_STACK];
+	static int16 CardStackPosition;
+#endif
 public:
 	static bool bPlayerIsInTheStatium;
 	static uint8 RiotIntensity;
@@ -516,28 +543,7 @@ private:
 
 	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
 
-	bool ThisIsAValidRandomPed(uint32 pedtype, int civ, int gang, int criminal) {
-		switch (pedtype) {
-		case PEDTYPE_CIVMALE:
-		case PEDTYPE_CIVFEMALE:
-			return civ;
-		case PEDTYPE_GANG1:
-		case PEDTYPE_GANG2:
-		case PEDTYPE_GANG3:
-		case PEDTYPE_GANG4:
-		case PEDTYPE_GANG5:
-		case PEDTYPE_GANG6:
-		case PEDTYPE_GANG7:
-		case PEDTYPE_GANG8:
-		case PEDTYPE_GANG9:
-			return gang;
-		case PEDTYPE_CRIMINAL:
-		case PEDTYPE_PROSTITUTE:
-			return criminal;
-		default:
-			return false;
-		}
-	}
+	bool ThisIsAValidRandomPed(uint32 pedtype, int civ, int gang, int criminal);
 
 	bool CheckDamagedWeaponType(int32 actual, int32 type);
 	
@@ -550,12 +556,16 @@ private:
 extern int scriptToLoad;
 #endif
 #ifdef MISSION_REPLAY
+static_assert(false, "Mission replay is not supported");
 extern int AllowMissionReplay;
 extern uint32 WaitForMissionActivate;
 extern uint32 WaitForSave;
 extern uint32 MissionStartTime;
 extern int missionRetryScriptIndex;
 extern bool doingMissionRetry;
+extern bool gbTryingPorn4Again;
+extern int IsInAmmunation;
+extern int MissionSkipLevel;
 
 uint32 AddExtraDeathDelay();
 void RetryMission(int, int);

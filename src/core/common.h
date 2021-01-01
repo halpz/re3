@@ -73,10 +73,15 @@ typedef int16_t int16;
 typedef uint32_t uint32;
 typedef int32_t int32;
 typedef uintptr_t uintptr;
+typedef intptr_t intptr;
 typedef uint64_t uint64;
 typedef int64_t int64;
 // hardcode ucs-2
 typedef uint16_t wchar;
+
+#if defined(_MSC_VER)
+typedef ptrdiff_t ssize_t;
+#endif
 
 #ifndef nil
 #define nil NULL
@@ -84,10 +89,8 @@ typedef uint16_t wchar;
 
 #include "config.h"
 
-#ifdef PED_SKIN
 #include <rphanim.h>
 #include <rpskin.h>
-#endif
 
 #ifdef __GNUC__
 #define TYPEALIGN(n) __attribute__ ((aligned (n)))
@@ -220,6 +223,8 @@ extern int strcasecmp(const char *str1, const char *str2);
 extern int strncasecmp(const char *str1, const char *str2, size_t len);
 #endif
 
+extern wchar *AllocUnicode(const char*src);
+
 #define clamp(v, low, high) ((v)<(low) ? (low) : (v)>(high) ? (high) : (v))
 
 #define clamp2(v, center, radius) ((v) < (center) ? Max(v, center - radius) : Min(v, center + radius))
@@ -249,8 +254,14 @@ void re3_usererror(const char *format, ...);
 
 #define DEBUGBREAK() __debugbreak();
 
-#define debug(f, ...) re3_debug("[DBG]: " f, ## __VA_ARGS__)
+// Switch to enable development messages.
+#if 1 
+#define DEV(f, ...)
+#else
 #define DEV(f, ...)   re3_debug("[DEV]: " f, ## __VA_ARGS__)
+#endif
+
+#define debug(f, ...) re3_debug("[DBG]: " f, ## __VA_ARGS__)
 #define TRACE(f, ...) re3_trace(__FILE__, __LINE__, __FUNCTION__, f, ## __VA_ARGS__)
 #define Error(f, ...) re3_debug("[ERROR]: " f, ## __VA_ARGS__)
 #define USERERROR(f, ...) re3_usererror(f, ## __VA_ARGS__)

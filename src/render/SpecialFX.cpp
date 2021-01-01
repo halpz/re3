@@ -1384,21 +1384,25 @@ CMoneyMessages::Render()
 void
 CMoneyMessages::RegisterOne(CVector vecPos, const char *pText, uint8 bRed, uint8 bGreen, uint8 bBlue, float fSize, float fOpacity)
 {
-	uint32 nIndex = 0;
-	while (aMoneyMessages[nIndex].m_nTimeRegistered != 0) {
-		if (++nIndex >= NUMMONEYMESSAGES) return;
+	uint32 i;
+#ifdef FIX_BUGS
+	for(i = 0; i < NUMMONEYMESSAGES && aMoneyMessages[i].m_nTimeRegistered != 0; i++);
+#else
+	for(i = 0; aMoneyMessages[i].m_nTimeRegistered != 0 && i < NUMMONEYMESSAGES; i++);
+#endif
+
+	if(i < NUMMONEYMESSAGES) {
+		// Add data of this money message to the array
+		AsciiToUnicode(pText, aMoneyMessages[i].m_aText);
+
+		aMoneyMessages[i].m_nTimeRegistered = CTimer::GetTimeInMilliseconds();
+		aMoneyMessages[i].m_vecPosition = vecPos;
+		aMoneyMessages[i].m_Colour.red = bRed;
+		aMoneyMessages[i].m_Colour.green = bGreen;
+		aMoneyMessages[i].m_Colour.blue = bBlue;
+		aMoneyMessages[i].m_fSize = fSize;
+		aMoneyMessages[i].m_fOpacity = fOpacity;
 	}
-
-	// Add data of this money message to the array
-	AsciiToUnicode(pText, aMoneyMessages[nIndex].m_aText);
-
-	aMoneyMessages[nIndex].m_nTimeRegistered = CTimer::GetTimeInMilliseconds();
-	aMoneyMessages[nIndex].m_vecPosition = vecPos;
-	aMoneyMessages[nIndex].m_Colour.red = bRed;
-	aMoneyMessages[nIndex].m_Colour.green = bGreen;
-	aMoneyMessages[nIndex].m_Colour.blue = bBlue;
-	aMoneyMessages[nIndex].m_fSize = fSize;
-	aMoneyMessages[nIndex].m_fOpacity = fOpacity;
 }
 
 CRGBA FoamColour(255, 255, 255, 255);

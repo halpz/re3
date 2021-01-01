@@ -2,6 +2,7 @@
 
 #include "main.h"
 #include "FileMgr.h"
+#include "Physical.h"
 #include "HandlingMgr.h"
 
 //--MIAMI: done
@@ -172,7 +173,7 @@ cHandlingDataMgr::LoadHandlingData(void)
 		end = start+1;
 
 		// yeah, this is kinda crappy
-		if(strncmp(line, ";the end", 9) == 0)
+		if(strcmp(line, ";the end") == 0)
 			keepGoing = 0;
 		else if(line[0] != ';'){
 			if(line[0] == '!'){
@@ -187,7 +188,7 @@ cHandlingDataMgr::LoadHandlingData(void)
 						handlingId = FindExactWord(word, (const char*)VehicleNames, 14, NUMHANDLINGS);
 						assert(handlingId >= 0 && handlingId < NUMHANDLINGS);
 						bikeHandling = GetBikePointer(handlingId);
-						bikeHandling->nIdentifier = (eHandlingId)handlingId;
+						bikeHandling->nIdentifier = (tVehicleType)handlingId;
 						break;
 					case  2: bikeHandling->fLeanFwdCOM = atof(word); break;
 					case  3: bikeHandling->fLeanFwdForce = atof(word); break;
@@ -220,7 +221,7 @@ cHandlingDataMgr::LoadHandlingData(void)
 						handlingId = FindExactWord(word, (const char*)VehicleNames, 14, NUMHANDLINGS);
 						assert(handlingId >= 0 && handlingId < NUMHANDLINGS);
 						flyingHandling = GetFlyingPointer(handlingId);
-						flyingHandling->nIdentifier = (eHandlingId)handlingId;
+						flyingHandling->nIdentifier = (tVehicleType)handlingId;
 						break;
 					case  2: flyingHandling->fThrust = atof(word); break;
 					case  3: flyingHandling->fThrustFallOff = atof(word); break;
@@ -255,7 +256,7 @@ cHandlingDataMgr::LoadHandlingData(void)
 						handlingId = FindExactWord(word, (const char*)VehicleNames, 14, NUMHANDLINGS);
 						assert(handlingId >= 0 && handlingId < NUMHANDLINGS);
 						boatHandling = GetBoatPointer(handlingId);
-						boatHandling->nIdentifier = (eHandlingId)handlingId;
+						boatHandling->nIdentifier = (tVehicleType)handlingId;
 						break;
 					case  2: boatHandling->fThrustY = atof(word); break;
 					case  3: boatHandling->fThrustZ = atof(word); break;
@@ -284,7 +285,7 @@ cHandlingDataMgr::LoadHandlingData(void)
 						handlingId = FindExactWord(word, (const char*)VehicleNames, 14, NUMHANDLINGS);
 						assert(handlingId >= 0 && handlingId < NUMHANDLINGS);
 						handling = &HandlingData[handlingId];
-						handling->nIdentifier = (eHandlingId)handlingId;
+						handling->nIdentifier = (tVehicleType)handlingId;
 						break;
 					case  1: handling->fMass = atof(word); break;
 					case  2: handling->Dimension.x = atof(word); break;
@@ -348,18 +349,18 @@ cHandlingDataMgr::FindExactWord(const char *word, const char *words, int wordLen
 void
 cHandlingDataMgr::ConvertDataToGameUnits(tHandlingData *handling)
 {
-	// TODO: figure out what exactly is being converted here
+	// convert distance to m, time to 1/50s
 	float velocity, a, b, specificVolume;
 
-	handling->Transmission.fEngineAcceleration /= 2500.0f;
-	handling->Transmission.fMaxVelocity /= 180.0f;
-	handling->fBrakeDeceleration /= 2500.0f;
+	handling->Transmission.fEngineAcceleration *= 1.0f/(50.0f*50.0f);
+	handling->Transmission.fMaxVelocity *= 1000.0f/(60.0f*60.0f * 50.0f);
+	handling->fBrakeDeceleration *= 1.0f/(50.0f*50.0f);
 	handling->fTurnMass = (sq(handling->Dimension.x) + sq(handling->Dimension.y)) * handling->fMass / 12.0f;
 	if(handling->fTurnMass < 10.0f)
 		handling->fTurnMass *= 5.0f;
 	handling->fInvMass = 1.0f/handling->fMass;
 	handling->fCollisionDamageMultiplier *= 2000.0f/handling->fMass;
-	handling->fBuoyancy = 100.0f/handling->nPercentSubmerged * 0.008f*handling->fMass;
+	handling->fBuoyancy = 100.0f/handling->nPercentSubmerged * GRAVITY*handling->fMass;
 
 	// What the hell is going on here?
 	specificVolume = handling->Dimension.x*handling->Dimension.z*0.5f / handling->fMass;	// ?

@@ -24,9 +24,12 @@
 #include "Occlusion.h"
 #include "Renderer.h"
 #include "custompipes.h"
+#include "Frontend.h"
 
 //--MIAMI: file done
 
+bool gbShowPedRoadGroups;
+bool gbShowCarRoadGroups;
 bool gbShowCollisionPolys;
 bool gbShowCollisionLines;
 bool gbBigWhiteDebugLightSwitchedOn;
@@ -36,6 +39,10 @@ bool gbDontRenderBigBuildings;
 bool gbDontRenderPeds;
 bool gbDontRenderObjects;
 bool gbDontRenderVehicles;
+
+// unused
+int16 TestCloseThings;
+int16 TestBigThings;
 
 struct EntityInfo
 {
@@ -61,14 +68,10 @@ CVehicle *CRenderer::m_pFirstPersonVehicle;
 bool CRenderer::m_loadingPriority;
 float CRenderer::ms_lodDistScale = 1.2f;
 
-#ifdef FIX_BUGS
-#define LOD_DISTANCE (300.0f*TheCamera.LODDistMultiplier)
-#else
-#define LOD_DISTANCE 300.0f
-#endif
-#define FADE_DISTANCE 20.0f
-#define STREAM_DISTANCE 30.0f
-
+// unused
+BlockedRange CRenderer::aBlockedRanges[16];
+BlockedRange* CRenderer::pFullBlockedRanges;
+BlockedRange* CRenderer::pEmptyBlockedRanges;
 
 void
 CRenderer::Init(void)
@@ -346,6 +349,34 @@ enum {
 
 static RwRGBAReal black;
 
+static void
+SetStencilState(int state)
+{
+	switch(state){
+	// disable stencil
+	case 0:
+		rw::SetRenderState(rw::STENCILENABLE, FALSE);
+		break;
+	// test against stencil
+	case 1:
+		rw::SetRenderState(rw::STENCILENABLE, TRUE);
+		rw::SetRenderState(rw::STENCILFUNCTION, rw::STENCILNOTEQUAL);
+		rw::SetRenderState(rw::STENCILPASS, rw::STENCILKEEP);
+		rw::SetRenderState(rw::STENCILFAIL, rw::STENCILKEEP);
+		rw::SetRenderState(rw::STENCILZFAIL, rw::STENCILKEEP);
+		rw::SetRenderState(rw::STENCILFUNCTIONMASK, 0xFF);
+		rw::SetRenderState(rw::STENCILFUNCTIONREF, 0xFF);
+		break;
+	// write to stencil
+	case 2:
+		rw::SetRenderState(rw::STENCILENABLE, TRUE);
+		rw::SetRenderState(rw::STENCILFUNCTION, rw::STENCILALWAYS);
+		rw::SetRenderState(rw::STENCILPASS, rw::STENCILREPLACE);
+		rw::SetRenderState(rw::STENCILFUNCTIONREF, 0xFF);
+		break;
+	}
+}
+
 #ifdef RW_D3D9
 struct BuildingInst
 {
@@ -356,34 +387,6 @@ struct BuildingInst
 };
 static BuildingInst blendInsts[3][2000];
 static int numBlendInsts[3];
-
-static void
-SetStencilState(int state)
-{
-	switch(state){
-	// disable stencil
-	case 0:
-		rw::d3d::setRenderState(D3DRS_STENCILENABLE, FALSE);
-		break;
-	// test against stencil
-	case 1:
-		rw::d3d::setRenderState(D3DRS_STENCILENABLE, TRUE);
-		rw::d3d::setRenderState(D3DRS_STENCILFUNC, D3DCMP_NOTEQUAL);
-		rw::d3d::setRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_KEEP);
-		rw::d3d::setRenderState(D3DRS_STENCILFAIL, D3DSTENCILOP_KEEP);
-		rw::d3d::setRenderState(D3DRS_STENCILZFAIL, D3DSTENCILOP_KEEP);
-		rw::d3d::setRenderState(D3DRS_STENCILMASK, 0xFF);
-		rw::d3d::setRenderState(D3DRS_STENCILREF, 0xFF);
-		break;
-	// write to stencil
-	case 2:
-		rw::d3d::setRenderState(D3DRS_STENCILENABLE, TRUE);
-		rw::d3d::setRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
-		rw::d3d::setRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE);
-		rw::d3d::setRenderState(D3DRS_STENCILREF, 0xFF);
-		break;
-	}
-}
 
 static void
 SetMatrix(BuildingInst *building, rw::Matrix *worldMat)
@@ -537,30 +540,6 @@ struct BuildingInst
 static BuildingInst blendInsts[3][2000];
 static int numBlendInsts[3];
 
-static void
-SetStencilState(int state)
-{
-	switch(state){
-	// disable stencil
-	case 0:
-		glDisable(GL_STENCIL_TEST);    
-		break;
-	// test against stencil
-	case 1:
-		glEnable(GL_STENCIL_TEST);
-		glStencilFunc(GL_NOTEQUAL, 0xFF, 0xFF);
-		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-		glStencilMask(0xFF);
-		break;
-	// write to stencil
-	case 2:
-		glEnable(GL_STENCIL_TEST);    
-		glStencilFunc(GL_ALWAYS, 0xFF, 0xFF);
-		glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
-		break;
-	}
-}
-
 static bool
 IsTextureTransparent(RwTexture *tex)
 {
@@ -711,11 +690,12 @@ CRenderer::RenderOneBuilding(CEntity *ent, float camdist)
 {
 	if(ent->m_rwObject == nil)
 		return;
+
+	ent->bImBeingRendered = true;	// TODO: this seems wrong, but do we even need it?
+
 	assert(RwObjectGetType(ent->m_rwObject) == rpATOMIC);
 	RpAtomic *atomic = (RpAtomic*)ent->m_rwObject;
 	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(ent->GetModelIndex());
-
-	ent->bImBeingRendered = true;	// TODO: this seems wrong, but do we even need it?
 
 	int pass = PASS_BLEND;
 	if(mi->m_additive)	// very questionable
@@ -1188,7 +1168,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 		if(RpAtomicGetGeometry(a) != RpAtomicGetGeometry(rwobj))
 			RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
 		mi->IncreaseAlpha();
-		if(!ent->IsVisibleComplex() || ent->IsEntityOccluded()){
+		if(!ent->IsVisible() || !ent->GetIsOnScreenComplex() || ent->IsEntityOccluded()){
 			mi->m_alpha = 255;
 			return VIS_INVISIBLE;
 		}
@@ -1232,7 +1212,7 @@ CRenderer::SetupBigBuildingVisibility(CEntity *ent)
 	if(RpAtomicGetGeometry(a) != RpAtomicGetGeometry(rwobj))
 		RpAtomicSetGeometry(rwobj, RpAtomicGetGeometry(a), rpATOMICSAMEBOUNDINGSPHERE); // originally 5 (mistake?)
 	mi->IncreaseAlpha();
-	if(!ent->IsVisibleComplex() || ent->IsEntityOccluded()){
+	if(!ent->IsVisible() || !ent->GetIsOnScreenComplex() || ent->IsEntityOccluded()){
 		mi->m_alpha = 255;
 		return VIS_INVISIBLE;
 	}
@@ -1253,7 +1233,21 @@ CRenderer::ConstructRenderList(void)
 	ms_nNoOfInVisibleEntities = 0;
 }
 	ms_vecCameraPosition = TheCamera.GetPosition();
-	// TODO: blocked ranges, but unused
+
+	// unused
+	pFullBlockedRanges = nil;
+	pEmptyBlockedRanges = aBlockedRanges;
+	for(int i = 0; i < 16; i++){
+		aBlockedRanges[i].prev = &aBlockedRanges[i-1];
+		aBlockedRanges[i].next = &aBlockedRanges[i+1];
+	}
+	aBlockedRanges[0].prev = nil;
+	aBlockedRanges[15].next = nil;
+
+	// unused
+	TestCloseThings = 0;
+	TestBigThings = 0;
+
 	ScanWorld();
 }
 
@@ -1333,7 +1327,7 @@ CRenderer::ScanWorld(void)
 	vectors[CORNER_PRIO_RIGHT].x = vectors[CORNER_LOD_RIGHT].x * 0.2f;
 	vectors[CORNER_PRIO_RIGHT].y = vectors[CORNER_LOD_RIGHT].y * 0.2f;
 	vectors[CORNER_PRIO_RIGHT].z = vectors[CORNER_LOD_RIGHT].z;
-	RwV3dTransformPoints((RwV3d*)vectors, (RwV3d*)vectors, 9, cammatrix);
+	RwV3dTransformPoints(vectors, vectors, 9, cammatrix);
 
 	m_loadingPriority = false;
 	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN ||
@@ -1403,8 +1397,19 @@ CRenderer::ScanWorld(void)
 				poly[2].y = CWorld::GetSectorY(vectors[CORNER_FAR_TOPRIGHT].y);
 				ScanSectorPoly(poly, 3, ScanSectorList);
 			}
-
-			ScanBigBuildingList(CWorld::GetBigBuildingList(CGame::currLevel));
+			
+#ifdef NO_ISLAND_LOADING
+			if (FrontEndMenuManager.m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_HIGH) {
+				ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_BEACH));
+				ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_MAINLAND));
+			} else 
+#endif
+			{
+#ifdef FIX_BUGS
+			if(CCollision::ms_collisionInMemory != LEVEL_GENERIC)
+#endif
+				ScanBigBuildingList(CWorld::GetBigBuildingList(CGame::currLevel));
+			}
 			ScanBigBuildingList(CWorld::GetBigBuildingList(LEVEL_GENERIC));
 		}
 	}
@@ -1453,7 +1458,7 @@ CRenderer::RequestObjectsInFrustum(void)
 	vectors[CORNER_PRIO_RIGHT].x = vectors[CORNER_LOD_RIGHT].x * 0.2f;
 	vectors[CORNER_PRIO_RIGHT].y = vectors[CORNER_LOD_RIGHT].y * 0.2f;
 	vectors[CORNER_PRIO_RIGHT].z = vectors[CORNER_LOD_RIGHT].z;
-	RwV3dTransformPoints((RwV3d*)vectors, (RwV3d*)vectors, 9, cammatrix);
+	RwV3dTransformPoints(vectors, vectors, 9, cammatrix);
 
 	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN ||
 #ifdef FIX_BUGS
@@ -1490,6 +1495,56 @@ CRenderer::RequestObjectsInFrustum(void)
 		poly[2].y = CWorld::GetSectorY(vectors[CORNER_LOD_RIGHT].y);
 		ScanSectorPoly(poly, 3, ScanSectorList_RequestModels);
 	}
+}
+
+bool
+CEntity::SetupLighting(void)
+{
+	return false;
+}
+
+void
+CEntity::RemoveLighting(bool)
+{
+}
+
+// --MIAMI: Done
+bool
+CPed::SetupLighting(void)
+{
+	ActivateDirectional();
+	SetAmbientColoursForPedsCarsAndObjects();
+
+#ifndef MASTER
+	// Originally this was being called through iteration of Sectors, but putting it here is better.
+	if (GetDebugDisplay() != 0 && !IsPlayer())
+		DebugRenderOnePedText();
+#endif
+
+	if (bRenderScorched) {
+		WorldReplaceNormalLightsWithScorched(Scene.world, 0.1f);
+	} else {
+		// Note that this lightMult is only affected by LIGHT_DARKEN. If there's no LIGHT_DARKEN, it will be 1.0.
+		float lightMult = CPointLights::GenerateLightsAffectingObject(&GetPosition());
+		if (lightMult != 1.0f) {
+			SetAmbientAndDirectionalColours(lightMult);
+			return true;
+		}
+	}
+	return false;
+}
+
+// --MIAMI: Done
+void
+CPed::RemoveLighting(bool reset)
+{
+	if (!bRenderScorched) {
+		CRenderer::RemoveVehiclePedLights(this, reset);
+		if (reset)
+			ReSetAmbientAndDirectionalColours();
+	}
+	SetAmbientColours();
+	DeActivateDirectional();
 }
 
 float

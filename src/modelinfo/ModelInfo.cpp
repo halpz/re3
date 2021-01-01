@@ -33,13 +33,13 @@ CModelInfo::Initialise(void)
 
 	for(i = 0; i < MODELINFOSIZE; i++)
 		ms_modelInfoPtrs[i] = nil;
-	ms_2dEffectStore.clear();
-	ms_simpleModelStore.clear();
-	ms_timeModelStore.clear();
-	ms_weaponModelStore.clear();
-	ms_clumpModelStore.clear();
-	ms_pedModelStore.clear();
-	ms_vehicleModelStore.clear();
+	ms_2dEffectStore.Clear();
+	ms_simpleModelStore.Clear();
+	ms_timeModelStore.Clear();
+	ms_weaponModelStore.Clear();
+	ms_clumpModelStore.Clear();
+	ms_pedModelStore.Clear();
+	ms_vehicleModelStore.Clear();
 
 	m = AddSimpleModel(MI_CAR_DOOR);
 	m->SetColModel(&CTempColModels::ms_colModelDoor1);
@@ -109,20 +109,20 @@ CModelInfo::ShutDown(void)
 	for(i = 0; i < ms_2dEffectStore.allocPtr; i++)
 		ms_2dEffectStore.store[i].Shutdown();
 
-	ms_2dEffectStore.clear();
-	ms_simpleModelStore.clear();
-	ms_timeModelStore.clear();
-	ms_weaponModelStore.clear();
-	ms_pedModelStore.clear();
-	ms_clumpModelStore.clear();
-	ms_vehicleModelStore.clear();
+	ms_2dEffectStore.Clear();
+	ms_simpleModelStore.Clear();
+	ms_timeModelStore.Clear();
+	ms_weaponModelStore.Clear();
+	ms_pedModelStore.Clear();
+	ms_clumpModelStore.Clear();
+	ms_vehicleModelStore.Clear();
 }
 
 CSimpleModelInfo*
 CModelInfo::AddSimpleModel(int id)
 {
 	CSimpleModelInfo *modelinfo;
-	modelinfo = CModelInfo::ms_simpleModelStore.alloc();
+	modelinfo = CModelInfo::ms_simpleModelStore.Alloc();
 	CModelInfo::ms_modelInfoPtrs[id] = modelinfo;
 	modelinfo->Init();
 	return modelinfo;
@@ -132,7 +132,7 @@ CTimeModelInfo*
 CModelInfo::AddTimeModel(int id)
 {
 	CTimeModelInfo *modelinfo;
-	modelinfo = CModelInfo::ms_timeModelStore.alloc();
+	modelinfo = CModelInfo::ms_timeModelStore.Alloc();
 	CModelInfo::ms_modelInfoPtrs[id] = modelinfo;
 	modelinfo->Init();
 	return modelinfo;
@@ -142,7 +142,7 @@ CWeaponModelInfo*
 CModelInfo::AddWeaponModel(int id)
 {
 	CWeaponModelInfo *modelinfo;
-	modelinfo = CModelInfo::ms_weaponModelStore.alloc();
+	modelinfo = CModelInfo::ms_weaponModelStore.Alloc();
 	CModelInfo::ms_modelInfoPtrs[id] = modelinfo;
 	modelinfo->Init();
 	return modelinfo;
@@ -152,7 +152,7 @@ CClumpModelInfo*
 CModelInfo::AddClumpModel(int id)
 {
 	CClumpModelInfo *modelinfo;
-	modelinfo = CModelInfo::ms_clumpModelStore.alloc();
+	modelinfo = CModelInfo::ms_clumpModelStore.Alloc();
 	CModelInfo::ms_modelInfoPtrs[id] = modelinfo;
 	modelinfo->m_clump = nil;
 	return modelinfo;
@@ -162,7 +162,7 @@ CPedModelInfo*
 CModelInfo::AddPedModel(int id)
 {
 	CPedModelInfo *modelinfo;
-	modelinfo = CModelInfo::ms_pedModelStore.alloc();
+	modelinfo = CModelInfo::ms_pedModelStore.Alloc();
 	CModelInfo::ms_modelInfoPtrs[id] = modelinfo;
 	modelinfo->m_clump = nil;
 	return modelinfo;
@@ -172,7 +172,7 @@ CVehicleModelInfo*
 CModelInfo::AddVehicleModel(int id)
 {
 	CVehicleModelInfo *modelinfo;
-	modelinfo = CModelInfo::ms_vehicleModelStore.alloc();
+	modelinfo = CModelInfo::ms_vehicleModelStore.Alloc();
 	CModelInfo::ms_modelInfoPtrs[id] = modelinfo;
 	modelinfo->m_clump = nil;
 	modelinfo->m_vehicleType = -1;
@@ -251,7 +251,7 @@ CModelInfo::IsPlaneModel(int32 id)
 void
 CModelInfo::ReInit2dEffects()
 {
-	ms_2dEffectStore.clear();
+	ms_2dEffectStore.Clear();
 
 	for (int i = 0; i < MODELINFOSIZE; i++) {
 		if (ms_modelInfoPtrs[i])

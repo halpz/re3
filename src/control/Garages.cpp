@@ -4,9 +4,7 @@
 #include "main.h"
 
 #include "Bike.h"
-#ifdef FIX_BUGS
 #include "Boat.h"
-#endif
 #include "DMAudio.h"
 #include "General.h"
 #include "Font.h"
@@ -47,7 +45,7 @@
 
 // Distances
 #define DISTANCE_TO_CALL_OFF_CHASE (10.0f)
-#define DISTANCE_FOR_MRWHOOP_HACK (4.0f)
+#define DISTANCE_FOR_MRWHOOP_HACK (0.5f)
 #define DISTANCE_TO_ACTIVATE_GARAGE (8.0f)
 #define DISTANCE_TO_ACTIVATE_KEEPCAR_GARAGE (17.0f)
 #define DISTANCE_TO_CLOSE_MISSION_GARAGE (30.0f)
@@ -126,8 +124,8 @@ uint32 CGarages::MessageEndTime;
 uint32 CGarages::NumGarages;
 bool CGarages::PlayerInGarage;
 int32 CGarages::PoliceCarsCollected;
-CStoredCar CGarages::aCarsInSafeHouses[TOTAL_HIDEOUT_GARAGES][CGarages::MAX_NUM_CARS_IN_HIDEOUT_GARAGE];
-int32 CGarages::AudioEntity = AEHANDLE_NONE;
+CStoredCar CGarages::aCarsInSafeHouses[TOTAL_HIDEOUT_GARAGES][NUM_GARAGE_STORED_CARS];
+int32 hGarages = AEHANDLE_NONE;
 CGarage CGarages::aGarages[NUM_GARAGES];
 bool CGarages::bCamShouldBeOutisde;
 
@@ -148,41 +146,47 @@ void CGarages::Init(void)
 	for (int i = 0; i < TOTAL_COLLECTCARS_GARAGES; i++)
 		CarTypesCollected[i] = 0;
 	LastTimeHelpMessage = 0;
-	for (int i = 0; i < TOTAL_HIDEOUT_GARAGES; i++) {
-		for (int j = 0; j < MAX_NUM_CARS_IN_HIDEOUT_GARAGE; j++)
-			aCarsInSafeHouses[i][j].Init();
+	for (int i = 0; i < NUM_GARAGE_STORED_CARS; i++) {
+		for (int j = 0; j < TOTAL_HIDEOUT_GARAGES; j++)
+			aCarsInSafeHouses[j][i].Init();
 	}
-	AudioEntity = DMAudio.CreateEntity(AUDIOTYPE_GARAGE, (void*)1);
-	if (AudioEntity >= 0)
-		DMAudio.SetEntityStatus(AudioEntity, 1);
+	hGarages = DMAudio.CreateEntity(AUDIOTYPE_GARAGE, (void*)1);
+	if (hGarages >= 0)
+		DMAudio.SetEntityStatus(hGarages, true);
 }
 
 void CGarages::Shutdown(void)
 {
 	NumGarages = 0;
-	if (AudioEntity < 0)
+	if (hGarages < 0)
 		return;
-	DMAudio.DestroyEntity(AudioEntity);
-	AudioEntity = AEHANDLE_NONE;
+	DMAudio.DestroyEntity(hGarages);
+	hGarages = AEHANDLE_NONE;
 }
 
 void CGarages::Update(void)
 {
-	static int GarageToBeTidied = 0;
-#ifndef PS2
+	static uint32 GarageToBeTidied = 0;
 	if (CReplay::IsPlayingBack())
 		return;
-#endif
 	bCamShouldBeOutisde = false;
 	TheCamera.pToGarageWeAreIn = nil;
 	TheCamera.pToGarageWeAreInForHackAvoidFirstPerson = nil;
+#ifdef FIX_BUGS
+	for (uint32 i = 0; i < NumGarages; i++) {
+#else
 	for (int i = 0; i < NUM_GARAGES; i++) {
+#endif
 		if (aGarages[i].IsUsed())
 			aGarages[i].Update();
 	}
 	if ((CTimer::GetFrameCounter() & 0xF) != 0xC)
 		return;
+#ifdef FIX_BUGS
+	if (++GarageToBeTidied >= NumGarages)
+#else
 	if (++GarageToBeTidied >= NUM_GARAGES)
+#endif
 		GarageToBeTidied = 0;
 	if (!aGarages[GarageToBeTidied].IsUsed())
 		return;
@@ -192,7 +196,7 @@ void CGarages::Update(void)
 		aGarages[GarageToBeTidied].TidyUpGarage();
 }
 
-int16 CGarages::AddOne(float X1, float Y1, float Z1, float X2, float Y2, float X3, float Y3, float Z2, eGarageType type, int32 targetId)
+int16 CGarages::AddOne(float X1, float Y1, float Z1, float X2, float Y2, float X3, float Y3, float Z2, uint8 type, int32 targetId)
 {
 	if (NumGarages >= NUM_GARAGES) {
 		assert(0);
@@ -293,7 +297,7 @@ int16 CGarages::AddOne(float X1, float Y1, float Z1, float X2, float Y2, float X
 	return NumGarages++;
 }
 
-void CGarages::ChangeGarageType(int16 garage, eGarageType type, int32 mi)
+void CGarages::ChangeGarageType(int16 garage, uint8 type, int32 mi)
 {
 	CGarage* pGarage = &aGarages[garage];
 	pGarage->m_eGarageType = type;
@@ -339,6 +343,43 @@ void CGarage::Update()
 	}
 	if (m_bDeactivated && m_eGarageState == GS_FULLYCLOSED)
 		return;
+	if (m_bRotatedDoor) {
+#ifdef GTA_PS2
+		if (m_eGarageState == GS_OPENING) {
+			if (m_pDoor1) {
+				if (FindPlayerPed()->m_pCurrentPhysSurface == m_pDoor1)
+					m_pDoor1->bUsesCollision = false;
+			}
+			if (m_pDoor2) {
+				if (FindPlayerPed()->m_pCurrentPhysSurface == m_pDoor2)
+					m_pDoor2->bUsesCollision = false;
+			}
+		}
+		else if (m_eGarageState == GS_OPENED) {
+			if (m_pDoor1)
+				m_pDoor1->bUsesCollision = true;
+			if (m_pDoor2)
+				m_pDoor2->bUsesCollision = true;
+		}
+#else
+		if (m_eGarageState == GS_OPENING || m_eGarageState == GS_OPENED) {
+			if (m_pDoor1) {
+				if (FindPlayerPed()->m_pCurrentPhysSurface == m_pDoor1 || FindPlayerPed()->GetPedState() == PED_JUMP || FindPlayerPed()->GetPedState() == PED_FALL || !FindPlayerPed()->bIsStanding)
+					m_pDoor1->bUsesCollision = false;
+			}
+			if (m_pDoor2) {
+				if (FindPlayerPed()->m_pCurrentPhysSurface == m_pDoor2 || FindPlayerPed()->GetPedState() == PED_JUMP || FindPlayerPed()->GetPedState() == PED_FALL || !FindPlayerPed()->bIsStanding)
+					m_pDoor2->bUsesCollision = false;
+			}
+		}
+		else {
+			if (m_pDoor1)
+				m_pDoor1->bUsesCollision = true;
+			if (m_pDoor2)
+				m_pDoor2->bUsesCollision = true;
+		}
+#endif
+	}
 	switch (m_eGarageType) {
 	case GARAGE_RESPRAY:
 		switch (m_eGarageState) {
@@ -378,7 +419,7 @@ void CGarage::Update()
 			if (m_fDoorPos == 0.0f) {
 				m_eGarageState = GS_FULLYCLOSED;
 				m_nTimeToStartAction = CTimer::GetTimeInMilliseconds() + TIME_TO_RESPRAY;
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
 				CStats::CheckPointReachedSuccessfully();
 			}
 			UpdateDoorsHeight();
@@ -482,7 +523,7 @@ void CGarage::Update()
 			m_fDoorPos = Min(m_fDoorHeight, m_fDoorPos + (m_bRotatedDoor ? ROTATED_DOOR_OPEN_SPEED : DEFAULT_DOOR_OPEN_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == m_fDoorHeight) {
 				m_eGarageState = GS_OPENEDCONTAINSCAR;
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_OPENED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_OPENED, 1.0f);
 			}
 			UpdateDoorsHeight();
 			break;
@@ -526,7 +567,7 @@ void CGarage::Update()
 			if (m_fDoorPos == 0.0f) {
 				m_eGarageState = GS_FULLYCLOSED;
 				m_nTimeToStartAction = CTimer::GetTimeInMilliseconds() + TIME_TO_SETUP_BOMB;
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
 			}
 			UpdateDoorsHeight();
 			if (m_eGarageType == GARAGE_BOMBSHOP3)
@@ -539,14 +580,18 @@ void CGarage::Update()
 					case GARAGE_BOMBSHOP1: DMAudio.PlayFrontEndSound(SOUND_GARAGE_BOMB1_SET, 1); break;
 					case GARAGE_BOMBSHOP2: DMAudio.PlayFrontEndSound(SOUND_GARAGE_BOMB2_SET, 1); break;
 					case GARAGE_BOMBSHOP3: DMAudio.PlayFrontEndSound(SOUND_GARAGE_BOMB3_SET, 1); break;
-				default: break;
 					}
 					m_eGarageState = GS_OPENING;
 					if (!CGarages::BombsAreFree)
 						CWorld::Players[CWorld::PlayerInFocus].m_nMoney = Max(0, CWorld::Players[CWorld::PlayerInFocus].m_nMoney - BOMB_PRICE);
 					if (FindPlayerVehicle() && (FindPlayerVehicle()->IsCar() || FindPlayerVehicle()->IsBike())) {
+#if (!defined GTA_PS2 || defined FIX_BUGS)
 						FindPlayerVehicle()->m_bombType = CGarages::GetBombTypeForGarageType(m_eGarageType);
 						FindPlayerVehicle()->m_pBombRigger = FindPlayerPed();
+#else // PS2 version contained a bug: CBike was casted to CAutomobile, but due to coincidence it didn't corrupt memory
+						((CAutomobile*)(FindPlayerVehicle()))->m_bombType = CGarages::GetBombTypeForGarageType(m_eGarageType);
+						((CAutomobile*)(FindPlayerVehicle()))->m_pBombRigger = FindPlayerPed();
+#endif
 						if (m_eGarageType == GARAGE_BOMBSHOP3)
 							CGarages::GivePlayerDetonator();
 						CStats::KgsOfExplosivesUsed += KGS_OF_EXPLOSIVES_IN_BOMB;
@@ -584,7 +629,6 @@ void CGarage::Update()
 					case GARAGE_BOMBSHOP3:
 						CHud::SetHelpMessage(TheText.Get("GA_8"), false); // Use the detonator to activate the bomb.
 						break;
-				default: break;
 					}
 					CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_GARAGE);
 					FindPlayerPed()->m_pWanted->m_bIgnoredByCops = false;
@@ -598,7 +642,7 @@ void CGarage::Update()
 			m_fDoorPos = Min(m_fDoorHeight, m_fDoorPos + (m_bRotatedDoor ? ROTATED_DOOR_OPEN_SPEED : DEFAULT_DOOR_OPEN_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == m_fDoorHeight) {
 				m_eGarageState = GS_OPENEDCONTAINSCAR;
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_OPENED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_OPENED, 1.0f);
 			}
 			UpdateDoorsHeight();
 			break;
@@ -616,13 +660,17 @@ void CGarage::Update()
 		switch (m_eGarageState) {
 		case GS_OPENED:
 			if (((CVector2D)FindPlayerCoors() - CVector2D(GetGarageCenterX(), GetGarageCenterY())).MagnitudeSqr() > SQR(DISTANCE_TO_CLOSE_MISSION_GARAGE)) {
-				if ((CTimer::GetFrameCounter() & 0x1F) == 0 && !IsAnyOtherCarTouchingGarage(nil)) {
+				if ((CTimer::GetFrameCounter() & 0x1F) == 0 
+#ifndef GTA_PS2
+					&& (!m_pTarget || IsEntityTouching3D(m_pTarget))
+#endif
+					) {
 					m_eGarageState = GS_CLOSING;
 					m_bClosingWithoutTargetCar = true;
 				}
 			}
 			else if (!FindPlayerVehicle() && m_pTarget && IsEntityEntirelyInside3D(m_pTarget, 0.0f) &&
-				!IsAnyOtherCarTouchingGarage(m_pTarget) && IsEntityEntirelyOutside(FindPlayerPed(), 2.0f)) {
+				IsEntityEntirelyOutside(FindPlayerVehicle() ? (CEntity*)FindPlayerVehicle() : (CEntity*)FindPlayerPed(), 2.0f)) {
 				CPad::GetPad(0)->SetDisablePlayerControls(PLAYERCONTROL_GARAGE);
 				FindPlayerPed()->m_pWanted->m_bIgnoredByCops = true;
 				m_eGarageState = GS_CLOSING;
@@ -634,7 +682,7 @@ void CGarage::Update()
 				ThrowCarsNearDoorOutOfGarage(m_pTarget);
 			m_fDoorPos = Max(0.0f, m_fDoorPos - (m_bRotatedDoor ? ROTATED_DOOR_CLOSE_SPEED : DEFAULT_DOOR_CLOSE_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == 0.0f) {
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
 				if (m_bClosingWithoutTargetCar)
 					m_eGarageState = GS_FULLYCLOSED;
 				else {
@@ -664,7 +712,7 @@ void CGarage::Update()
 			m_fDoorPos = Min(m_fDoorHeight, m_fDoorPos + (m_bRotatedDoor ? ROTATED_DOOR_OPEN_SPEED : DEFAULT_DOOR_OPEN_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == m_fDoorHeight) {
 				m_eGarageState = GS_OPENED;
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_OPENED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_OPENED, 1.0f);
 			}
 			UpdateDoorsHeight();
 			break;
@@ -717,7 +765,7 @@ void CGarage::Update()
 			m_fDoorPos = Max(0.0f, m_fDoorPos - (m_bRotatedDoor ? ROTATED_DOOR_CLOSE_SPEED : DEFAULT_DOOR_CLOSE_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == 0.0f) {
 				m_eGarageState = GS_FULLYCLOSED;
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
 				if (m_pTarget) {
 					MarkThisCarAsCollectedForCraig(m_pTarget->GetModelIndex());
 					DestroyVehicleAndDriverAndPassengers(m_pTarget);
@@ -757,7 +805,7 @@ void CGarage::Update()
 			m_fDoorPos = Min(m_fDoorHeight, m_fDoorPos + (m_bRotatedDoor ? ROTATED_DOOR_OPEN_SPEED : DEFAULT_DOOR_OPEN_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == m_fDoorHeight) {
 				m_eGarageState = GS_OPENED;
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_OPENED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_OPENED, 1.0f);
 			}
 			UpdateDoorsHeight();
 			break;
@@ -778,7 +826,7 @@ void CGarage::Update()
 			m_fDoorPos = Max(0.0f, m_fDoorPos - (m_bRotatedDoor ? ROTATED_DOOR_CLOSE_SPEED : DEFAULT_DOOR_CLOSE_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == 0.0f) {
 				m_eGarageState = GS_FULLYCLOSED;
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
 			}
 			if (!IsGarageEmpty())
 				m_eGarageState = GS_OPENING;
@@ -789,7 +837,7 @@ void CGarage::Update()
 			m_fDoorPos = Min(m_fDoorHeight, m_fDoorPos + (m_bRotatedDoor ? ROTATED_DOOR_OPEN_SPEED : DEFAULT_DOOR_OPEN_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == m_fDoorHeight) {
 				m_eGarageState = GS_OPENED;
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_OPENED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_OPENED, 1.0f);
 			}
 			UpdateDoorsHeight();
 			break;
@@ -823,7 +871,7 @@ void CGarage::Update()
 				ThrowCarsNearDoorOutOfGarage(m_pTarget);
 			m_fDoorPos = Max(0.0f, m_fDoorPos - (m_bRotatedDoor ? ROTATED_DOOR_CLOSE_SPEED : DEFAULT_DOOR_CLOSE_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == 0.0f) {
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
 				if (m_bClosingWithoutTargetCar)
 					m_eGarageState = GS_FULLYCLOSED;
 				else {
@@ -852,7 +900,7 @@ void CGarage::Update()
 			m_fDoorPos = Min(m_fDoorHeight, m_fDoorPos + (m_bRotatedDoor ? ROTATED_DOOR_OPEN_SPEED : DEFAULT_DOOR_OPEN_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == m_fDoorHeight) {
 				m_eGarageState = GS_OPENED;
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_OPENED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_OPENED, 1.0f);
 			}
 			UpdateDoorsHeight();
 			break;
@@ -872,7 +920,7 @@ void CGarage::Update()
 			m_fDoorPos = Min(m_fDoorHeight, m_fDoorPos + (m_bRotatedDoor ? ROTATED_DOOR_OPEN_SPEED : DEFAULT_DOOR_OPEN_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == m_fDoorHeight) {
 				m_eGarageState = GS_OPENED;
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_OPENED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_OPENED, 1.0f);
 			}
 			UpdateDoorsHeight();
 			break;
@@ -892,7 +940,7 @@ void CGarage::Update()
 			m_fDoorPos = Max(0.0f, m_fDoorPos - (m_bRotatedDoor ? ROTATED_DOOR_CLOSE_SPEED : DEFAULT_DOOR_CLOSE_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == 0.0f) {
 				m_eGarageState = GS_FULLYCLOSED;
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
 			}
 			UpdateDoorsHeight();
 			break;
@@ -900,7 +948,7 @@ void CGarage::Update()
 			m_fDoorPos = Min(m_fDoorHeight, m_fDoorPos + (m_bRotatedDoor ? ROTATED_DOOR_OPEN_SPEED : DEFAULT_DOOR_OPEN_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == m_fDoorHeight) {
 				m_eGarageState = GS_OPENED;
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_OPENED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_OPENED, 1.0f);
 			}
 			UpdateDoorsHeight();
 			break;
@@ -932,8 +980,8 @@ void CGarage::Update()
 			// Close car doors either if player is far, or if he is in vehicle and garage is full,
 			// or if player is very very far so that we can remove whatever is blocking garage door without him noticing
 			if ((distance > SQR(DISTANCE_TO_CLOSE_HIDEOUT_GARAGE_IN_CAR) ||
-				!FindPlayerVehicle() && distance > SQR(DISTANCE_TO_CLOSE_HIDEOUT_GARAGE_ON_FOOT) &&
-				!IsAnyCarBlockingDoor()))
+				!FindPlayerVehicle() && distance > SQR(DISTANCE_TO_CLOSE_HIDEOUT_GARAGE_ON_FOOT)) &&
+				!IsAnyCarBlockingDoor())
 				m_eGarageState = GS_CLOSING;
 			else if (FindPlayerVehicle() &&
 				CountCarsWithCenterPointWithinGarage(FindPlayerVehicle()) >=
@@ -951,7 +999,7 @@ void CGarage::Update()
 			if (!IsPlayerOutsideGarage())
 				m_eGarageState = GS_OPENING;
 			else if (m_fDoorPos == 0.0f) {
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
 				m_eGarageState = GS_FULLYCLOSED;
 				StoreAndRemoveCarsForThisHideout(CGarages::aCarsInSafeHouses[CGarages::FindSafeHouseIndexForGarageType(m_eGarageType)], NUM_GARAGE_STORED_CARS);
 			}
@@ -982,7 +1030,7 @@ void CGarage::Update()
 			m_fDoorPos = Min(m_fDoorHeight, m_fDoorPos + HIDEOUT_DOOR_SPEED_COEFFICIENT * (m_bRotatedDoor ? ROTATED_DOOR_OPEN_SPEED : DEFAULT_DOOR_OPEN_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == m_fDoorHeight) {
 				m_eGarageState = GS_OPENED;
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_OPENED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_OPENED, 1.0f);
 			}
 			UpdateDoorsHeight();
 			break;
@@ -1009,7 +1057,7 @@ void CGarage::Update()
 			m_fDoorPos = Max(0.0f, m_fDoorPos - (m_bRotatedDoor ? ROTATED_DOOR_CLOSE_SPEED : DEFAULT_DOOR_CLOSE_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == 0.0f) {
 				m_eGarageState = GS_FULLYCLOSED;
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
 			}
 			UpdateDoorsHeight();
 			break;
@@ -1025,7 +1073,7 @@ void CGarage::Update()
 			m_fDoorPos = Min(m_fDoorHeight, m_fDoorPos + (m_bRotatedDoor ? ROTATED_DOOR_OPEN_SPEED : DEFAULT_DOOR_OPEN_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == m_fDoorHeight) {
 				m_eGarageState = GS_OPENED;
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_OPENED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_OPENED, 1.0f);
 			}
 			UpdateDoorsHeight();
 			break;
@@ -1036,8 +1084,8 @@ void CGarage::Update()
 			break;
 		}
 		break;
-		//case GARAGE_COLLECTORSITEMS:
-		//case GARAGE_60SECONDS:
+	//case GARAGE_COLLECTORSITEMS:
+	//case GARAGE_60SECONDS:
 	case GARAGE_FOR_SCRIPT_TO_OPEN_FOR_CAR:
 		switch (m_eGarageState) {
 		case GS_OPENED:
@@ -1046,20 +1094,23 @@ void CGarage::Update()
 				m_eGarageState = GS_CLOSING;
 				m_bClosingWithoutTargetCar = false;
 			}
+			break;
 		case GS_CLOSING:
 			m_fDoorPos = Max(0.0f, m_fDoorPos - (m_bRotatedDoor ? ROTATED_DOOR_CLOSE_SPEED : DEFAULT_DOOR_CLOSE_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == 0.0f) {
 				m_eGarageState = GS_FULLYCLOSED;
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
 				CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_GARAGE);
 			}
+			UpdateDoorsHeight();
+			break;
 		case GS_FULLYCLOSED:
 			break;
 		case GS_OPENING:
 			m_fDoorPos = Min(m_fDoorHeight, m_fDoorPos + (m_bRotatedDoor ? ROTATED_DOOR_OPEN_SPEED : DEFAULT_DOOR_OPEN_SPEED) * CTimer::GetTimeStep());
 			if (m_fDoorPos == m_fDoorHeight) {
 				m_eGarageState = GS_OPENED;
-				DMAudio.PlayOneShot(CGarages::AudioEntity, SOUND_GARAGE_DOOR_OPENED, 1.0f);
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_OPENED, 1.0f);
 			}
 			UpdateDoorsHeight();
 			break;
@@ -1071,28 +1122,6 @@ void CGarage::Update()
 		}
 	default:
 		break;
-	}
-}
-
-void CGarage::ThrowCarsNearDoorOutOfGarage(CVehicle* pException)
-{
-	uint32 i = CPools::GetVehiclePool()->GetSize();
-	while (i--) {
-		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
-		if (!pVehicle || pVehicle == pException)
-			continue;
-		if (!IsEntityTouching3D(pVehicle))
-			continue;
-		CColModel* pColModel = pVehicle->GetColModel();
-		for (int i = 0; i < pColModel->numSpheres; i++) {
-			CVector pos = pVehicle->GetMatrix() * pColModel->spheres[i].center;
-			float radius = pColModel->spheres[i].radius;
-			if (!IsPointInsideGarage(pos, 0.0f)) {
-				CVector vecDirectionAway(pVehicle->GetPosition().x - GetGarageCenterX(), pVehicle->GetPosition().y - GetGarageCenterY(), 0.0f);
-				vecDirectionAway.Normalise();
-				pVehicle->AddToMoveSpeed(vecDirectionAway * CTimer::GetTimeStepInSeconds());
-			}
-		}
 	}
 }
 
@@ -1160,7 +1189,7 @@ bool CGarage::IsPointInsideGarage(CVector pos, float m_fMargin)
 	return true;
 }
 
-bool CGarage::IsEntityEntirelyInside3D(CEntity * pEntity, float fMargin)
+bool CGarage::IsEntityEntirelyInside3D(CEntity* pEntity, float fMargin)
 {
 	if (pEntity->GetPosition().x < m_fInfX - fMargin || pEntity->GetPosition().x > m_fSupX + fMargin ||
 		pEntity->GetPosition().y < m_fInfY - fMargin || pEntity->GetPosition().y > m_fSupY + fMargin ||
@@ -1212,12 +1241,12 @@ bool CGarage::IsPlayerOutsideGarage()
 	return IsEntityEntirelyOutside(FindPlayerPed(), 0.0f);
 }
 
-bool CGarage::IsEntityTouching3D(CEntity * pEntity)
+bool CGarage::IsEntityTouching3D(CEntity* pEntity)
 {
 	float radius = pEntity->GetBoundRadius();
-	if (pEntity->GetPosition().x - radius < m_fInfX || pEntity->GetPosition().x + radius > m_fSupX ||
-		pEntity->GetPosition().y - radius < m_fInfY || pEntity->GetPosition().y + radius > m_fSupY ||
-		pEntity->GetPosition().z - radius < m_fInfZ || pEntity->GetPosition().z + radius > m_fSupZ)
+	if (m_fInfX - radius > pEntity->GetPosition().x || m_fSupX + radius < pEntity->GetPosition().x ||
+		m_fInfY - radius > pEntity->GetPosition().y || m_fSupY + radius < pEntity->GetPosition().y ||
+		m_fInfZ - radius > pEntity->GetPosition().z || m_fSupZ + radius < pEntity->GetPosition().z)
 		return false;
 	CColModel* pColModel = pEntity->GetColModel();
 	for (int i = 0; i < pColModel->numSpheres; i++) {
@@ -1259,6 +1288,28 @@ bool CGarage::IsAnyOtherCarTouchingGarage(CVehicle * pException)
 		}
 	}
 	return false;
+}
+
+void CGarage::ThrowCarsNearDoorOutOfGarage(CVehicle* pException)
+{
+	uint32 i = CPools::GetVehiclePool()->GetSize();
+	while (i--) {
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
+		if (!pVehicle || pVehicle == pException)
+			continue;
+		if (!IsEntityTouching3D(pVehicle))
+			continue;
+		CColModel* pColModel = pVehicle->GetColModel();
+		for (int i = 0; i < pColModel->numSpheres; i++) {
+			CVector pos = pVehicle->GetMatrix() * pColModel->spheres[i].center;
+			float radius = pColModel->spheres[i].radius;
+			if (!IsPointInsideGarage(pos, 0.0f)) {
+				CVector vecDirectionAway(pVehicle->GetPosition().x - GetGarageCenterX(), pVehicle->GetPosition().y - GetGarageCenterY(), 0.0f);
+				vecDirectionAway.Normalise();
+				pVehicle->AddToMoveSpeed(vecDirectionAway * CTimer::GetTimeStepInSeconds());
+			}
+		}
+	}
 }
 
 bool CGarage::IsAnyOtherPedTouchingGarage(CPed * pException)
@@ -1328,7 +1379,9 @@ void CGarage::RemoveCarsBlockingDoorNotInside()
 			if (!pVehicle->bIsLocked && pVehicle->CanBeDeleted()) {
 				CWorld::Remove(pVehicle);
 				delete pVehicle;
-				return; // WHY?
+#ifndef FIX_BUGS
+				return;
+#endif
 			}
 		}
 	}
@@ -1337,43 +1390,34 @@ void CGarage::RemoveCarsBlockingDoorNotInside()
 void CGarages::PrintMessages()
 {
 	if (CTimer::GetTimeInMilliseconds() > MessageStartTime && CTimer::GetTimeInMilliseconds() < MessageEndTime) {
-		CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.5f)); // BUG: game doesn't use macro here.
+		CFont::DrawFonts();
+		CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.5f));
 		CFont::SetPropOn();
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
 		CFont::SetCentreSize(SCREEN_SCALE_X(590.0f));
 		CFont::SetCentreOn();
 		CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
-		CFont::SetColor(CRGBA(0, 0, 0, 255));
+		CFont::SetColor(CRGBA(27, 89, 130, 255));
+		CFont::SetDropShadowPosition(2);
+		CFont::SetDropColor(CRGBA(0, 0, 0, 255));
 
-#if defined(PS2) || defined (FIX_BUGS)
-		float y_offset = SCREEN_HEIGHT / 3; // THIS is PS2 calculation
+#if defined(GTA_PS2) || defined (FIX_BUGS)
+		float y_offset = SCREEN_HEIGHT / 3 - SCREEN_SCALE_Y(40.0f); // THIS is PS2 calculation
 #else
 		float y_offset = SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(84.0f); // This is PC and results in text being written over some HUD elements
 #endif
 
-		if (MessageNumberInString2 < 0) {
-			if (MessageNumberInString < 0) {
-				CFont::PrintString(SCREEN_WIDTH / 2 - SCREEN_SCALE_X(2.0f), y_offset - SCREEN_SCALE_Y(2.0f), TheText.Get(MessageIDString));
-
-				CFont::SetColor(CRGBA(27, 89, 130, 255));
-				CFont::PrintString(SCREEN_WIDTH / 2, y_offset, TheText.Get(MessageIDString));
-			}
-			else {
-				CMessages::InsertNumberInString(TheText.Get(MessageIDString), MessageNumberInString, -1, -1, -1, -1, -1, gUString);
-
-				CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f), y_offset - SCREEN_SCALE_Y(40.0f) + SCREEN_SCALE_Y(2.0f), gUString);
-
-				CFont::SetColor(CRGBA(27, 89, 130, 255));
-				CFont::PrintString(SCREEN_WIDTH / 2, y_offset - SCREEN_SCALE_Y(40.0f), gUString);
-			}
+		if (MessageNumberInString2 >= 0) {
+			CMessages::InsertNumberInString(TheText.Get(MessageIDString), MessageNumberInString, MessageNumberInString2, -1, -1, -1, -1, gUString);
+			CFont::PrintString(SCREEN_WIDTH / 2, y_offset - SCREEN_SCALE_Y(30.0f), gUString);
+		}
+		else if (MessageNumberInString >= 0) {
+			CMessages::InsertNumberInString(TheText.Get(MessageIDString), MessageNumberInString, -1, -1, -1, -1, -1, gUString);
+			CFont::PrintString(SCREEN_WIDTH / 2, y_offset - SCREEN_SCALE_Y(30.0f), gUString);
 		}
 		else {
-			CMessages::InsertNumberInString(TheText.Get(MessageIDString), MessageNumberInString, MessageNumberInString2, -1, -1, -1, -1, gUString);
-			CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f), y_offset - SCREEN_SCALE_Y(40.0f) + SCREEN_SCALE_Y(2.0f), gUString);
-
-			CFont::SetColor(CRGBA(27, 89, 130, 255));
-			CFont::PrintString(SCREEN_WIDTH / 2, y_offset - SCREEN_SCALE_Y(40.0f), gUString);
+			CFont::PrintString(SCREEN_WIDTH / 2, y_offset, TheText.Get(MessageIDString));
 		}
 	}
 }
@@ -1390,7 +1434,9 @@ bool CGarages::IsCarSprayable(CVehicle * pVehicle)
 	case MI_BARRACKS:
 	case MI_DODO:
 	case MI_COACH:
+#ifndef GTA_PS2
 	case MI_FBIRANCH:
+#endif
 		return false;
 	default:
 		break;
@@ -1462,41 +1508,54 @@ void CGarage::UpdateCrusherShake(float X, float Y)
 	m_pDoor2->GetMatrix().GetPosition().y -= Y;
 }
 
-// This is dumb but there is no way to avoid goto. What was there originally even?
-static bool DoINeedToRefreshPointer(CEntity * pDoor, bool bIsDummy, uint8 nIndex)
-{
-	bool bNeedToFindDoorEntities = false;
-	if (pDoor) {
-		if (bIsDummy) {
-			if (CPools::GetDummyPool()->IsFreeSlot(CPools::GetDummyPool()->GetJustIndex((CDummy*)pDoor)))
-				return true;
-			if (nIndex != (CPools::GetDummyPool()->GetIndex((CDummy*)pDoor) & 0x7F))
-				bNeedToFindDoorEntities = true;
-			if (!CGarages::IsModelIndexADoor(pDoor->GetModelIndex()))
-				return true;
-		}
-		else {
-			if (CPools::GetObjectPool()->IsFreeSlot(CPools::GetObjectPool()->GetJustIndex((CObject*)pDoor)))
-				return true;
-			if (nIndex != (CPools::GetObjectPool()->GetIndex((CObject*)pDoor) & 0x7F))
-				bNeedToFindDoorEntities = true;
-			if (!CGarages::IsModelIndexADoor(pDoor->GetModelIndex()))
-				return true;
-		}
-	}
-	return bNeedToFindDoorEntities;
-}
-
 void CGarage::RefreshDoorPointers(bool bCreate)
 {
-	bool bNeedToFindDoorEntities = true;
-	if (!bCreate && !m_bRecreateDoorOnNextRefresh)
-		bNeedToFindDoorEntities = false;
+	bool bNeedToFindDoorEntities = bCreate || m_bRecreateDoorOnNextRefresh;
 	m_bRecreateDoorOnNextRefresh = false;
-	if (DoINeedToRefreshPointer(m_pDoor1, m_bDoor1IsDummy, m_bDoor1PoolIndex))
-		bNeedToFindDoorEntities = true;
-	if (DoINeedToRefreshPointer(m_pDoor2, m_bDoor2IsDummy, m_bDoor2PoolIndex))
-		bNeedToFindDoorEntities = true;
+	if (m_pDoor1) {
+		if (m_bDoor1IsDummy) {
+			if (CPools::GetDummyPool()->IsFreeSlot(CPools::GetDummyPool()->GetJustIndex_NoFreeAssert((CDummy*)m_pDoor1)))
+				bNeedToFindDoorEntities = true;
+			else {
+				if (m_bDoor1PoolIndex != (CPools::GetDummyPool()->GetIndex((CDummy*)m_pDoor1) & 0x7F))
+					bNeedToFindDoorEntities = true;
+				if (!CGarages::IsModelIndexADoor(m_pDoor1->GetModelIndex()))
+					bNeedToFindDoorEntities = true;
+			}
+		}
+		else {
+			if (CPools::GetObjectPool()->IsFreeSlot(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert((CObject*)m_pDoor1)))
+				bNeedToFindDoorEntities = true;
+			else {
+				if (m_bDoor1PoolIndex != (CPools::GetObjectPool()->GetIndex((CObject*)m_pDoor1) & 0x7F))
+					bNeedToFindDoorEntities = true;
+				if (!CGarages::IsModelIndexADoor(m_pDoor1->GetModelIndex()))
+					bNeedToFindDoorEntities = true;
+			}
+		}
+	}
+	if (m_pDoor2) {
+		if (m_bDoor2IsDummy) {
+			if (CPools::GetDummyPool()->IsFreeSlot(CPools::GetDummyPool()->GetJustIndex_NoFreeAssert((CDummy*)m_pDoor2)))
+				bNeedToFindDoorEntities = true;
+			else {
+				if (m_bDoor2PoolIndex != (CPools::GetDummyPool()->GetIndex((CDummy*)m_pDoor2) & 0x7F))
+					bNeedToFindDoorEntities = true;
+				if (!CGarages::IsModelIndexADoor(m_pDoor2->GetModelIndex()))
+					bNeedToFindDoorEntities = true;
+			}
+		}
+		else {
+			if (CPools::GetObjectPool()->IsFreeSlot(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert((CObject*)m_pDoor2)))
+				bNeedToFindDoorEntities = true;
+			else {
+				if (m_bDoor2PoolIndex != (CPools::GetObjectPool()->GetIndex((CObject*)m_pDoor2) & 0x7F))
+					bNeedToFindDoorEntities = true;
+				if (!CGarages::IsModelIndexADoor(m_pDoor2->GetModelIndex()))
+					bNeedToFindDoorEntities = true;
+			}
+		}
+	}
 	if (bNeedToFindDoorEntities)
 		FindDoorsEntities();
 }
@@ -1520,7 +1579,7 @@ void CGarages::TriggerMessage(const char* text, int16 num1, uint16 time, int16 n
 	MessageNumberInString2 = num2;
 }
 
-void CGarages::SetTargetCarForMissonGarage(int16 garage, CVehicle * pVehicle)
+void CGarages::SetTargetCarForMissonGarage(int16 garage, CVehicle* pVehicle)
 {
 	assert(garage >= 0 && garage < NUM_GARAGES);
 	if (pVehicle) {
@@ -1663,10 +1722,10 @@ void CGarage::FindDoorsEntities()
 {
 	m_pDoor1 = nil;
 	m_pDoor2 = nil;
-	int xstart = Max(0, CWorld::GetSectorIndexX(m_fInfX));
-	int xend = Min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(m_fSupX));
-	int ystart = Max(0, CWorld::GetSectorIndexY(m_fInfY));
-	int yend = Min(NUMSECTORS_Y - 1, CWorld::GetSectorIndexY(m_fSupY));
+	int xstart = Max(0, CWorld::GetSectorIndexX(GetGarageCenterX() - 100.0f));
+	int xend = Min(NUMSECTORS_X - 1, CWorld::GetSectorIndexX(GetGarageCenterX() + 100.0f));
+	int ystart = Max(0, CWorld::GetSectorIndexY(GetGarageCenterY() - 100.0f));
+	int yend = Min(NUMSECTORS_Y - 1, CWorld::GetSectorIndexY(GetGarageCenterY() + 100.0f));
 	assert(xstart <= xend);
 	assert(ystart <= yend);
 
@@ -1779,8 +1838,8 @@ void CStoredCar::StoreCar(CVehicle* pVehicle)
 	m_bExplosionproof = pVehicle->bExplosionProof;
 	m_bCollisionproof = pVehicle->bCollisionProof;
 	m_bMeleeproof = pVehicle->bMeleeProof;
-	if (pVehicle->IsCar())
-		m_nCarBombType = ((CAutomobile*)pVehicle)->m_bombType;
+	if (pVehicle->IsCar() || pVehicle->IsBike())
+		m_nCarBombType = ((CAutomobile*)pVehicle)->m_bombType; // NB: cast to CAutomobile is original behaviour
 }
 
 CVehicle* CStoredCar::RestoreCar()
@@ -1817,9 +1876,7 @@ CVehicle* CStoredCar::RestoreCar()
 	pVehicle->m_currentColour2 = m_nSecondaryColor;
 	pVehicle->m_nRadioStation = m_nRadioStation;
 	pVehicle->bFreebies = false;
-#ifdef FIX_BUGS
 	if (pVehicle->IsCar())
-#endif
 	{
 		((CAutomobile*)pVehicle)->m_bombType = m_nCarBombType;
 #ifdef FIX_BUGS
@@ -1882,7 +1939,11 @@ bool CGarage::RestoreCarsForThisHideout(CStoredCar* aCars)
 
 bool CGarages::IsPointInAGarageCameraZone(CVector point)
 {
+#ifdef FIX_BUGS
+	for (uint32 i = 0; i < NumGarages; i++) {
+#else
 	for (int i = 0; i < NUM_GARAGES; i++) {
+#endif
 		switch (aGarages[i].m_eGarageType) {
 		case GARAGE_NONE:
 			break;
@@ -1909,8 +1970,13 @@ bool CGarages::CameraShouldBeOutside()
 
 void CGarages::GivePlayerDetonator()
 {
-	FindPlayerPed()->GiveWeapon(WEAPONTYPE_DETONATOR, 1);
-	FindPlayerPed()->GetWeapon(FindPlayerPed()->GetWeaponSlot(WEAPONTYPE_DETONATOR)).m_eWeaponState = WEAPONSTATE_READY;
+	CPlayerPed* pPed = FindPlayerPed();
+	int slot = CWeaponInfo::GetWeaponInfo(WEAPONTYPE_DETONATOR)->m_nWeaponSlot;
+	pPed->GiveWeapon(WEAPONTYPE_DETONATOR, 1);
+	pPed->GetWeapon(pPed->GetWeaponSlot(WEAPONTYPE_DETONATOR)).m_eWeaponState = WEAPONSTATE_READY;
+	pPed->m_nSelectedWepSlot = slot;
+	if (pPed->m_storedWeapon != WEAPONTYPE_UNIDENTIFIED)
+		pPed->m_storedWeapon = WEAPONTYPE_DETONATOR;
 }
 
 float CGarages::FindDoorHeightForMI(int32 mi)
@@ -1923,12 +1989,12 @@ void CGarage::TidyUpGarage()
 	uint32 i = CPools::GetVehiclePool()->GetSize();
 	while (i--) {
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
-		if (!pVehicle || !pVehicle->IsCar())
-			continue;
-		if (IsPointInsideGarage(pVehicle->GetPosition())) {
-			if (pVehicle->GetStatus() == STATUS_WRECKED || pVehicle->GetUp().z < 0.5f) {
-				CWorld::Remove(pVehicle);
-				delete pVehicle;
+		if (pVehicle && (pVehicle->IsCar() || pVehicle->IsBike())) {
+			if (IsPointInsideGarage(pVehicle->GetPosition())) {
+				if (pVehicle->GetStatus() == STATUS_WRECKED || pVehicle->GetUp().z < 0.5f) {
+					CWorld::Remove(pVehicle);
+					delete pVehicle;
+				}
 			}
 		}
 	}
@@ -1939,9 +2005,9 @@ void CGarage::TidyUpGarageClose()
 	uint32 i = CPools::GetVehiclePool()->GetSize();
 	while (i--) {
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
-		if (!pVehicle || !pVehicle->IsCar())
+		if (!pVehicle)
 			continue;
-		if (!pVehicle->IsCar() || pVehicle->GetStatus() != STATUS_WRECKED || !IsEntityTouching3D(pVehicle))
+		if ((!pVehicle->IsCar() && !pVehicle->IsBike()) || pVehicle->GetStatus() != STATUS_WRECKED || !IsEntityTouching3D(pVehicle))
 			continue;
 		bool bRemove = false;
 		if (m_eGarageState != GS_FULLYCLOSED) {
@@ -1966,7 +2032,11 @@ void CGarage::TidyUpGarageClose()
 void CGarages::PlayerArrestedOrDied()
 {
 	static int GarageToBeTidied = 0; // lol
+#ifdef FIX_BUGS
+	for (uint32 i = 0; i < NumGarages; i++) {
+#else
 	for (int i = 0; i < NUM_GARAGES; i++) {
+#endif
 		if (aGarages[i].m_eGarageType != GARAGE_NONE)
 			aGarages[i].PlayerArrestedOrDied();
 	}
@@ -2061,20 +2131,24 @@ void CGarage::CenterCarInGarage(CVehicle* pVehicle)
 
 void CGarages::CloseHideOutGaragesBeforeSave()
 {
+#ifdef FIX_BUGS
+	for (uint32 i = 0; i < NumGarages; i++) {
+#else
 	for (int i = 0; i < NUM_GARAGES; i++) {
+#endif
 		if (!IsThisGarageTypeSafehouse(aGarages[i].m_eGarageType))
 			continue;
 		if (aGarages[i].m_eGarageState != GS_FULLYCLOSED) {
 			aGarages[i].m_eGarageState = GS_FULLYCLOSED;
 			aGarages[i].StoreAndRemoveCarsForThisHideout(aCarsInSafeHouses[FindSafeHouseIndexForGarageType(aGarages[i].m_eGarageType)], NUM_GARAGE_STORED_CARS);
 			aGarages[i].RemoveCarsBlockingDoorNotInside();
+			aGarages[i].m_fDoorPos = 0.0f;
+			aGarages[i].UpdateDoorsHeight();
 		}
-		aGarages[i].m_fDoorPos = 0.0f;
-		aGarages[i].UpdateDoorsHeight();
 	}
 }
 
-int32 CGarages::CountCarsInHideoutGarage(eGarageType type)
+int32 CGarages::CountCarsInHideoutGarage(uint8 type)
 {
 	int32 total = 0;
 	for (int i = 0; i < NUM_GARAGE_STORED_CARS; i++) {
@@ -2085,11 +2159,24 @@ int32 CGarages::CountCarsInHideoutGarage(eGarageType type)
 
 bool CGarages::IsPointWithinHideOutGarage(Const CVector& point)
 {
+#ifdef FIX_BUGS
+	for (uint32 i = 0; i < NumGarages; i++) {
+#else
 	for (int i = 0; i < NUM_GARAGES; i++) {
+#endif
 		switch (aGarages[i].m_eGarageType) {
 		case GARAGE_HIDEOUT_ONE:
 		case GARAGE_HIDEOUT_TWO:
 		case GARAGE_HIDEOUT_THREE:
+		case GARAGE_HIDEOUT_FOUR:
+		case GARAGE_HIDEOUT_FIVE:
+		case GARAGE_HIDEOUT_SIX:
+		case GARAGE_HIDEOUT_SEVEN:
+		case GARAGE_HIDEOUT_EIGHT:
+		case GARAGE_HIDEOUT_NINE:
+		case GARAGE_HIDEOUT_TEN:
+		case GARAGE_HIDEOUT_ELEVEN:
+		case GARAGE_HIDEOUT_TWELVE:
 			if (aGarages[i].IsPointInsideGarage(point))
 				return true;
 		default: break;
@@ -2100,7 +2187,11 @@ bool CGarages::IsPointWithinHideOutGarage(Const CVector& point)
 
 bool CGarages::IsPointWithinAnyGarage(Const CVector& point)
 {
+#ifdef FIX_BUGS
+	for (uint32 i = 0; i < NumGarages; i++) {
+#else
 	for (int i = 0; i < NUM_GARAGES; i++) {
+#endif
 		switch (aGarages[i].m_eGarageType) {
 		case GARAGE_NONE:
 			continue;
@@ -2114,7 +2205,11 @@ bool CGarages::IsPointWithinAnyGarage(Const CVector& point)
 
 void CGarages::SetAllDoorsBackToOriginalHeight()
 {
+#ifdef FIX_BUGS
+	for (uint32 i = 0; i < NumGarages; i++) {
+#else
 	for (int i = 0; i < NUM_GARAGES; i++) {
+#endif
 		switch (aGarages[i].m_eGarageType) {
 		case GARAGE_NONE:
 			continue;

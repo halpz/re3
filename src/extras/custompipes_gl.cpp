@@ -133,6 +133,8 @@ vehicleRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 		inst++;
 	}
 
+	setTexture(1, nil);
+
 	SetRenderState(SRCBLEND, BLENDSRCALPHA);
 
 #ifndef RW_GL_USE_VAOS
@@ -146,7 +148,7 @@ CreateVehiclePipe(void)
 	using namespace rw;
 	using namespace rw::gl3;
 
-	if(CFileMgr::LoadFile("neo/carTweakingTable.dat", work_buff, sizeof(work_buff), "r") == 0)
+	if(CFileMgr::LoadFile("neo/carTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
 		printf("Error: couldn't open 'neo/carTweakingTable.dat'\n");
 	else{
 		char *fp = (char*)work_buff;
@@ -158,13 +160,8 @@ CreateVehiclePipe(void)
 
 
 	{
-#ifdef RW_GLES2
-#include "gl2_shaders/neoVehicle_fs_gl2.inc"
-#include "gl2_shaders/neoVehicle_vs_gl2.inc"
-#else
-#include "shaders/neoVehicle_fs_gl3.inc"
-#include "shaders/neoVehicle_vs_gl3.inc"
-#endif
+#include "shaders/neoVehicle_fs_gl.inc"
+#include "shaders/neoVehicle_vs_gl.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, neoVehicle_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, neoVehicle_frag_src, nil };
 	neoVehicleShader = Shader::create(vs, fs);
@@ -256,6 +253,7 @@ worldRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 		drawInst(header, inst);
 		inst++;
 	}
+	setTexture(1, nil);
 #ifndef RW_GL_USE_VAOS
 	disableAttribPointers(header->attribDesc, header->numAttribs);
 #endif
@@ -267,19 +265,14 @@ CreateWorldPipe(void)
 	using namespace rw;
 	using namespace rw::gl3;
 
-	if(CFileMgr::LoadFile("neo/worldTweakingTable.dat", work_buff, sizeof(work_buff), "r") == 0)
+	if(CFileMgr::LoadFile("neo/worldTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
 		printf("Error: couldn't open 'neo/worldTweakingTable.dat'\n");
 	else
 		ReadTweakValueTable((char*)work_buff, WorldLightmapBlend);
 
 	{
-#ifdef RW_GLES2
-#include "gl2_shaders/neoWorldIII_fs_gl2.inc"
-#include "gl2_shaders/default_UV2_gl2.inc"
-#else
-#include "shaders/neoWorldVC_fs_gl3.inc"
-#include "shaders/default_UV2_gl3.inc"
-#endif
+#include "shaders/neoWorldVC_fs_gl.inc"
+#include "shaders/default_UV2_gl.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, default_UV2_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, neoWorldVC_frag_src, nil };
 	neoWorldShader = Shader::create(vs, fs);
@@ -381,13 +374,8 @@ CreateGlossPipe(void)
 	using namespace rw::gl3;
 
 	{
-#ifdef RW_GLES2
-#include "gl2_shaders/neoGloss_fs_gl2.inc"
-#include "gl2_shaders/neoGloss_vs_gl2.inc"
-#else
-#include "shaders/neoGloss_fs_gl3.inc"
-#include "shaders/neoGloss_vs_gl3.inc"
-#endif
+#include "shaders/neoGloss_fs_gl.inc"
+#include "shaders/neoGloss_vs_gl.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, neoGloss_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, neoGloss_frag_src, nil };
 	neoGlossShader = Shader::create(vs, fs);
@@ -546,7 +534,7 @@ CreateRimLightPipes(void)
 {
 	using namespace rw::gl3;
 
-	if(CFileMgr::LoadFile("neo/rimTweakingTable.dat", work_buff, sizeof(work_buff), "r") == 0)
+	if(CFileMgr::LoadFile("neo/rimTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
 		printf("Error: couldn't open 'neo/rimTweakingTable.dat'\n");
 	else{
 		char *fp = (char*)work_buff;
@@ -558,13 +546,8 @@ CreateRimLightPipes(void)
 	}
 
 	{
-#ifdef RW_GLES2
-#include "gl2_shaders/simple_fs_gl2.inc"
-#include "gl2_shaders/neoRimSkin_gl2.inc"
-#else
-#include "shaders/simple_fs_gl3.inc"
-#include "shaders/neoRimSkin_gl3.inc"
-#endif
+#include "shaders/simple_fs_gl.inc"
+#include "shaders/neoRimSkin_gl.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, neoRimSkin_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, simple_frag_src, nil };
 	neoRimSkinShader = Shader::create(vs, fs);
@@ -572,13 +555,8 @@ CreateRimLightPipes(void)
 	}
 
 	{
-#ifdef RW_GLES2
-#include "gl2_shaders/simple_fs_gl2.inc"
-#include "gl2_shaders/neoRim_gl2.inc"
-#else
-#include "shaders/simple_fs_gl3.inc"
-#include "shaders/neoRim_gl3.inc"
-#endif
+#include "shaders/simple_fs_gl.inc"
+#include "shaders/neoRim_gl.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, neoRim_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, simple_frag_src, nil };
 	neoRimShader = Shader::create(vs, fs);

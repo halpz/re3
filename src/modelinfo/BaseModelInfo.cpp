@@ -88,7 +88,7 @@ CBaseModelInfo::Add2dEffect(C2dEffect *fx)
 	if(m_2dEffectsID >= 0)
 		m_num2dEffects++;
 	else{
-		m_2dEffectsID = CModelInfo::Get2dEffectStore().getIndex(fx);
+		m_2dEffectsID = CModelInfo::Get2dEffectStore().GetIndex(fx);
 		m_num2dEffects = 1;
 	}
 }
@@ -97,7 +97,7 @@ C2dEffect*
 CBaseModelInfo::Get2dEffect(int n)
 {
 	if(m_2dEffectsID >= 0)
-		return CModelInfo::Get2dEffectStore().getItem(m_2dEffectsID+n);
+		return CModelInfo::Get2dEffectStore().GetItem(m_2dEffectsID+n);
 	else
 		return nil;
 }

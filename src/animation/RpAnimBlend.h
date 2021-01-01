@@ -43,3 +43,6 @@ extern CAnimBlendClumpData *gpAnimBlendClump;
 void FrameUpdateCallBackNonSkinned(AnimBlendFrameData *frame, void *arg);
 void FrameUpdateCallBackSkinned(AnimBlendFrameData *frame, void *arg);
 void FrameUpdateCallBackOffscreen(AnimBlendFrameData *frame, void *arg);
+
+void FrameUpdateCallBackNonSkinnedCompressed(AnimBlendFrameData *frame, void *arg);
+void FrameUpdateCallBackSkinnedCompressed(AnimBlendFrameData *frame, void *arg);

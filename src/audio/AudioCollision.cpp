@@ -71,31 +71,33 @@ cAudioManager::GetCollisionOneShotRatio(int32 a, float b) const
 	case SURFACE_TARMAC:
 	case SURFACE_PAVEMENT:
 	case SURFACE_STEEP_CLIFF:
-	case SURFACE_TRANSPARENT_STONE: result = GetCollisionRatio(b, 10.f, 60.f, 50.f); break;
+	case SURFACE_TRANSPARENT_STONE:
+	case SURFACE_CONCRETE_BEACH: result = GetCollisionRatio(b, 10.f, 60.f, 50.f); break;
 	case SURFACE_GRASS:
+	case SURFACE_GRAVEL:
+	case SURFACE_MUD_DRY:
 	case SURFACE_CARDBOARDBOX: result = GetCollisionRatio(b, 0.f, 2.f, 2.f); break;
-	case SURFACE_GRAVEL: result = GetCollisionRatio(b, 0.f, 2.f, 2.f); break;
-	case SURFACE_MUD_DRY: result = GetCollisionRatio(b, 0.f, 2.f, 2.f); break;
 	case SURFACE_CAR: result = GetCollisionRatio(b, 6.f, 50.f, 44.f); break;
-	case SURFACE_GLASS: result = GetCollisionRatio(b, 0.1f, 10.f, 9.9f); break;
+	case SURFACE_GLASS:
+	case SURFACE_METAL_CHAIN_FENCE: result = GetCollisionRatio(b, 0.1f, 10.f, 9.9f); break;
 	case SURFACE_TRANSPARENT_CLOTH:
 	case SURFACE_THICK_METAL_PLATE: result = GetCollisionRatio(b, 30.f, 130.f, 100.f); break;
 	case SURFACE_GARAGE_DOOR: result = GetCollisionRatio(b, 20.f, 100.f, 80.f); break;
 	case SURFACE_CAR_PANEL: result = GetCollisionRatio(b, 0.f, 4.f, 4.f); break;
 	case SURFACE_SCAFFOLD_POLE:
-	case SURFACE_METAL_GATE: result = GetCollisionRatio(b, 1.f, 10.f, 9.f); break;
+	case SURFACE_METAL_GATE: 
 	case SURFACE_LAMP_POST: result = GetCollisionRatio(b, 1.f, 10.f, 9.f); break;
 	case SURFACE_FIRE_HYDRANT: result = GetCollisionRatio(b, 1.f, 15.f, 14.f); break;
 	case SURFACE_GIRDER: result = GetCollisionRatio(b, 8.f, 50.f, 42.f); break;
-	case SURFACE_METAL_CHAIN_FENCE: result = GetCollisionRatio(b, 0.1f, 10.f, 9.9f); break;
 	case SURFACE_PED: result = GetCollisionRatio(b, 0.f, 20.f, 20.f); break;
-	case SURFACE_SAND: result = GetCollisionRatio(b, 0.f, 10.f, 10.f); break;
-	case SURFACE_WATER: result = GetCollisionRatio(b, 0.f, 10.f, 10.f); break;
+	case SURFACE_SAND:
+	case SURFACE_WATER:
+	case SURFACE_RUBBER:
+	case SURFACE_WHEELBASE:
+	case SURFACE_SAND_BEACH: result = GetCollisionRatio(b, 0.f, 10.f, 10.f); break;
 	case SURFACE_WOOD_CRATES: result = GetCollisionRatio(b, 1.f, 4.f, 3.f); break;
 	case SURFACE_WOOD_BENCH: result = GetCollisionRatio(b, 0.1f, 5.f, 4.9f); break;
 	case SURFACE_WOOD_SOLID: result = GetCollisionRatio(b, 0.1f, 40.f, 39.9f); break;
-	case SURFACE_RUBBER:
-	case SURFACE_WHEELBASE: result = GetCollisionRatio(b, 0.f, 10.f, 10.f); break;
 	case SURFACE_PLASTIC: result = GetCollisionRatio(b, 0.1f, 4.f, 3.9f); break;
 	case SURFACE_HEDGE: result = GetCollisionRatio(b, 0.f, 0.5f, 0.5f); break;
 	case SURFACE_CONTAINER: result = GetCollisionRatio(b, 4.f, 40.f, 36.f); break;
@@ -135,8 +137,8 @@ cAudioManager::SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollisio
 		m_sQueueSample.m_nSampleIndex = SFX_BOAT_WATER_LOOP;
 		m_sQueueSample.m_nFrequency = 6050.f * ratio + 16000;
 		vol = 30.f * ratio;
-	} else if(surface1 == SURFACE_GRAVEL || surface2 == SURFACE_GRAVEL || surface1 == SURFACE_MUD_DRY ||
-		surface2 == SURFACE_MUD_DRY || surface1 == SURFACE_SAND || surface2 == SURFACE_SAND) {
+	} else if(surface1 == SURFACE_GRAVEL || surface2 == SURFACE_GRAVEL || surface1 == SURFACE_MUD_DRY || surface2 == SURFACE_MUD_DRY ||
+	          surface1 == SURFACE_SAND || surface2 == SURFACE_SAND || surface1 == SURFACE_SAND_BEACH || surface2 == SURFACE_SAND_BEACH) {
 		ratio = GetCollisionRatio(audioCollision.m_fIntensity2, 0.0001f, 0.09f, 0.0899f);
 		m_sQueueSample.m_nSampleIndex = SFX_GRAVEL_SKID;
 		m_sQueueSample.m_nFrequency = 6000.f * ratio + 10000;
@@ -156,12 +158,12 @@ cAudioManager::SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollisio
 void
 cAudioManager::SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 counter)
 {
+    bool distCalculated = false;
 	if(col.m_fIntensity2 > 0.0016f) {
 		uint8 emittingVol = SetLoopingCollisionRequestedSfxFreqAndGetVol(col);
 		if(emittingVol) {
-			m_sQueueSample.m_fDistance = Sqrt(col.m_fDistance);
-			m_sQueueSample.m_nVolume =
-			    ComputeVolume(emittingVol, CollisionSoundIntensity, m_sQueueSample.m_fDistance);
+			CalculateDistance(distCalculated, m_sQueueSample.m_fDistance);
+			m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, CollisionSoundIntensity, m_sQueueSample.m_fDistance);
 			if(m_sQueueSample.m_nVolume) {
 				m_sQueueSample.m_nCounter = counter;
 				m_sQueueSample.m_vecPos = col.m_vecPosition;
@@ -266,7 +268,7 @@ cAudioManager::SetUpOneShotCollisionSound(const cAudioCollision &col)
 					m_sQueueSample.m_nSampleIndex += m_anRandomTable[3] % 4;
 					break;
 				case SFX_COL_PED_1:
-					m_sQueueSample.m_nSampleIndex += m_anRandomTable[4] % 5;
+					m_sQueueSample.m_nSampleIndex += m_anRandomTable[4] % 2;
 					break;
 				case SFX_COL_WOOD_CRATES_1:
 					m_sQueueSample.m_nSampleIndex += m_anRandomTable[4] % 4;

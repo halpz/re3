@@ -13,6 +13,7 @@
 #include "Streaming.h"
 #include "Wanted.h"
 #include "World.h"
+#include "MemoryHeap.h"
 
 //--MIAMI: file done
 
@@ -27,19 +28,39 @@ CDummyPool *CPools::ms_pDummyPool;
 CAudioScriptObjectPool *CPools::ms_pAudioScriptObjectPool;
 CColModelPool *CPools::ms_pColModelPool;
 
+#if defined GTA_PS2 && !defined MASTER	// or USE_CUSTOM_ALLOCATOR
+// not in VC. perhaps ifdef'ed away
+#define CHECKMEM(msg) CMemCheck::AllocateMemCheckBlock(msg)
+#else
+#define CHECKMEM(msg)
+#endif
+
 void
 CPools::Initialise(void)
 {
+	PUSH_MEMID(MEMID_POOLS);
+	CHECKMEM("before pools");
 	ms_pPtrNodePool = new CCPtrNodePool(NUMPTRNODES, "PtrNode");
+	CHECKMEM("after CPtrNodePool");
 	ms_pEntryInfoNodePool = new CEntryInfoNodePool(NUMENTRYINFOS, "EntryInfoNode");
+	CHECKMEM("after CEntryInfoNodePool");
 	ms_pPedPool = new CPedPool(NUMPEDS, "Peds");
+	CHECKMEM("after CPedPool");
 	ms_pVehiclePool = new CVehiclePool(NUMVEHICLES, "Vehicles");
+	CHECKMEM("after CVehiclePool");
 	ms_pBuildingPool = new CBuildingPool(NUMBUILDINGS, "Buildings");
+	CHECKMEM("after CBuildingPool");
 	ms_pTreadablePool = new CTreadablePool(NUMTREADABLES, "Treadables");
+	CHECKMEM("after CTreadablePool");
 	ms_pObjectPool = new CObjectPool(NUMOBJECTS, "Objects");
+	CHECKMEM("after CObjectPool");
 	ms_pDummyPool = new CDummyPool(NUMDUMMIES, "Dummys");
+	CHECKMEM("after CDummyPool");
 	ms_pAudioScriptObjectPool = new CAudioScriptObjectPool(NUMAUDIOSCRIPTOBJECTS, "AudioScriptObj");
+	CHECKMEM("after cAudioScriptObjectPool");
 	ms_pColModelPool = new CColModelPool(NUMCOLMODELS, "ColModel");
+	CHECKMEM("after pools");
+	POP_MEMID();
 }
 
 void

@@ -40,6 +40,7 @@
 #include "Sprite2d.h"
 #include "AnimViewer.h"
 #include "Font.h"
+#include "MemoryMgr.h"
 
 #define MAX_SUBSYSTEMS		(16)
 
@@ -69,9 +70,6 @@ static psGlobalType PsGlobal;
 
 
 #define PSGLOBAL(var) (((psGlobalType *)(RsGlobal.ps))->var)
-
-#undef MAKEPOINTS
-#define MAKEPOINTS(l)		(*((POINTS /*FAR*/ *)&(l)))
 
 size_t _dwMemAvailPhys;
 RwUInt32 gGameState;
@@ -249,8 +247,10 @@ double
 psTimer(void)
 {
 	struct timespec start; 
-#ifdef __linux__
+#if defined(CLOCK_MONOTONIC_RAW)
 	clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+#elif defined(CLOCK_MONOTONIC_FAST)
+	clock_gettime(CLOCK_MONOTONIC_FAST, &start);
 #else
 	clock_gettime(CLOCK_MONOTONIC, &start);
 #endif
@@ -280,7 +280,11 @@ psMouseSetPos(RwV2d *pos)
 RwMemoryFunctions*
 psGetMemoryFunctions(void)
 {
+#ifdef USE_CUSTOM_ALLOCATOR
+	return &memFuncs;
+#else
 	return nil;
+#endif
 }
 
 /*
@@ -839,7 +843,10 @@ psSelectDevice()
 		
 		PSGLOBAL(fullScreen) = !FrontEndMenuManager.m_nPrefsWindowed;
 #endif
-	
+
+#ifdef MULTISAMPLING
+	RwD3D8EngineSetMultiSamplingLevels(1 << FrontEndMenuManager.m_nPrefsMSAALevel);
+#endif
 	return TRUE;
 }
 
@@ -873,6 +880,36 @@ void _InputInitialiseJoys()
 	PSGLOBAL(joy1id) = -1;
 	PSGLOBAL(joy2id) = -1;
 
+	// Load our gamepad mappings.
+#define SDL_GAMEPAD_DB_PATH "gamecontrollerdb.txt"
+	FILE *f = fopen(SDL_GAMEPAD_DB_PATH, "rb");
+	if (f) {
+		fseek(f, 0, SEEK_END);
+		size_t fsize = ftell(f);
+		fseek(f, 0, SEEK_SET);
+
+		char *db = (char*)malloc(fsize + 1);
+		if (fread(db, 1, fsize, f) == fsize) {
+			db[fsize] = '\0';
+
+			if (glfwUpdateGamepadMappings(db) == GLFW_FALSE)
+				Error("glfwUpdateGamepadMappings didn't succeed, check " SDL_GAMEPAD_DB_PATH ".\n");
+		} else
+			Error("fread on " SDL_GAMEPAD_DB_PATH " wasn't successful.\n");
+
+		free(db);
+		fclose(f);
+	} else
+		printf("You don't seem to have copied " SDL_GAMEPAD_DB_PATH " file from re3/gamefiles to GTA3 directory. Some gamepads may not be recognized.\n");
+
+#undef SDL_GAMEPAD_DB_PATH
+
+	// But always overwrite it with the one in SDL_GAMECONTROLLERCONFIG.
+	char const* EnvControlConfig = getenv("SDL_GAMECONTROLLERCONFIG");
+	if (EnvControlConfig != nil) {
+		glfwUpdateGamepadMappings(EnvControlConfig);
+	}
+
 	for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++) {
 		if (glfwJoystickPresent(i) && !IsThisJoystickBlacklisted(i)) {
 			if (PSGLOBAL(joy1id) == -1)
@@ -894,9 +931,12 @@ void _InputInitialiseJoys()
 	}
 }
 
+int lastCursorMode = GLFW_CURSOR_HIDDEN;
 long _InputInitialiseMouse(bool exclusive)
 {
-	glfwSetInputMode(PSGLOBAL(window), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	// Disabled = keep cursor centered and hide
+	lastCursorMode = exclusive ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_HIDDEN;
+	glfwSetInputMode(PSGLOBAL(window), GLFW_CURSOR, lastCursorMode);
 	return 0;
 }
 
@@ -905,10 +945,17 @@ void _InputShutdownMouse()
 	// Not needed
 }
 
+// Not "needs exclusive" on GLFW, but more like "needs to change mode"
 bool _InputMouseNeedsExclusive()
 {
-	// That was the cause of infamous mouse bug on Win. Not supported on glfw anyway
-	return false;
+	// That was the cause of infamous mouse bug on Win.
+	
+	RwVideoMode vm;
+	RwEngineGetVideoModeInfo(&vm, GcurSelVM);
+
+	// If windowed, free the cursor on menu(where this func. is called and DISABLED-HIDDEN transition is done accordingly)
+	// If it's fullscreen, be sure that it didn't stuck on HIDDEN.
+	return !(vm.flags & rwVIDEOMODEEXCLUSIVE) || lastCursorMode == GLFW_CURSOR_HIDDEN;
 }
 
 void psPostRWinit(void)
@@ -917,7 +964,7 @@ void psPostRWinit(void)
 	RwEngineGetVideoModeInfo(&vm, GcurSelVM);
 
 	glfwSetKeyCallback(PSGLOBAL(window), keypressCB);
-	glfwSetWindowSizeCallback(PSGLOBAL(window), resizeCB);
+	glfwSetFramebufferSizeCallback(PSGLOBAL(window), resizeCB);
 	glfwSetScrollCallback(PSGLOBAL(window), scrollCB);
 	glfwSetCursorPosCallback(PSGLOBAL(window), cursorCB);
 	glfwSetCursorEnterCallback(PSGLOBAL(window), cursorEnterCB);
@@ -1189,15 +1236,15 @@ void InitialiseLanguage()
 		}
 	}
 
-	TheText.Unload();
-	TheText.Load();
-
 #ifndef _WIN32
 	// TODO this is needed for strcasecmp to work correctly across all languages, but can these cause other problems??
 	setlocale(LC_CTYPE, "C");
 	setlocale(LC_COLLATE, "C");
 	setlocale(LC_NUMERIC, "C");
 #endif
+
+	TheText.Unload();
+	TheText.Load();
 }
 
 /*
@@ -1244,17 +1291,11 @@ void resizeCB(GLFWwindow* window, int width, int height) {
 	* memory things don't work.
 	*/
 	/* redraw window */
-#ifndef MASTER
-	if (RwInitialised && (gGameState == GS_PLAYING_GAME || gGameState == GS_ANIMVIEWER))
-	{
-		RsEventHandler((gGameState == GS_PLAYING_GAME ? rsIDLE : rsANIMVIEWER), (void *)TRUE);
-	}
-#else
+
 	if (RwInitialised && gGameState == GS_PLAYING_GAME)
 	{
 		RsEventHandler(rsIDLE, (void *)TRUE);
 	}
-#endif
 
 	if (RwInitialised && height > 0 && width > 0) {
 		RwRect r;
@@ -1438,8 +1479,13 @@ _InputTranslateShiftKeyUpDown(RsKeyCodes *rs) {
 // TODO this only works in frontend(and luckily only frontend use this). Fun fact: if I get pos manually in game, glfw reports that it's > 32000
 void
 cursorCB(GLFWwindow* window, double xpos, double ypos) {
-	FrontEndMenuManager.m_nMouseTempPosX = xpos;
-	FrontEndMenuManager.m_nMouseTempPosY = ypos;
+	if (!FrontEndMenuManager.m_bMenuActive)
+		return;
+	
+	int winw, winh;
+	glfwGetWindowSize(PSGLOBAL(window), &winw, &winh);
+	FrontEndMenuManager.m_nMouseTempPosX = xpos * (RsGlobal.maximumWidth / winw);
+	FrontEndMenuManager.m_nMouseTempPosY = ypos * (RsGlobal.maximumHeight / winh);
 }
 
 void
@@ -1462,12 +1508,14 @@ WinMain(HINSTANCE instance,
 	RwChar** argv;
 	SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, nil, SPIF_SENDCHANGE);
 
-#if 1
-	// TODO: make this an option somewhere
-	AllocConsole();
-	freopen("CONIN$", "r", stdin);
-	freopen("CONOUT$", "w", stdout);
-	freopen("CONOUT$", "w", stderr);
+#ifndef MASTER
+	if (strstr(cmdLine, "-console"))
+	{
+		AllocConsole();
+		freopen("CONIN$", "r", stdin);
+		freopen("CONOUT$", "w", stdout);
+		freopen("CONOUT$", "w", stderr);
+	}
 #endif
 
 #else
@@ -1477,6 +1525,10 @@ main(int argc, char *argv[])
 #endif
 	RwV2d pos;
 	RwInt32 i;
+
+#ifdef USE_CUSTOM_ALLOCATOR
+	InitMemoryMgr();
+#endif
 
 #ifndef _WIN32
 	struct sigaction act;
@@ -1622,18 +1674,6 @@ main(int argc, char *argv[])
 		FrontEndMenuManager.DrawMemoryCardStartUpMenus();
 	}
 #endif
-
-	if (TurnOnAnimViewer)
-	{
-#ifndef MASTER
-		CAnimViewer::Initialise();
-#ifndef PS2_MENU
-		FrontEndMenuManager.m_bGameNotLoaded = false;
-#endif
-		gGameState = GS_ANIMVIEWER;
-		TurnOnAnimViewer = false;
-#endif
-	}
 	
 	initkeymap();
 
@@ -1653,6 +1693,18 @@ main(int argc, char *argv[])
 		* Enter the message processing loop...
 		*/
 
+#ifndef MASTER
+		if (gbModelViewer) {
+			// This is TheModelViewer in LCS
+			LoadingScreen("Loading the ModelViewer", NULL, GetRandomSplashScreen());
+			CAnimViewer::Initialise();
+			CTimer::Update();
+#ifndef PS2_MENU
+			FrontEndMenuManager.m_bGameNotLoaded = false;
+#endif
+		}
+#endif
+
 #ifdef PS2_MENU
 		if (TheMemoryCard.m_bWantToLoad)
 			LoadSplash(GetLevelSplashScreen(CGame::currLevel));
@@ -1667,7 +1719,13 @@ main(int argc, char *argv[])
 #endif
 		{
 			glfwPollEvents();
-			if( ForegroundApp )
+#ifndef MASTER
+			if (gbModelViewer) {
+				// This is TheModelViewerCore in LCS
+				TheModelViewer();
+			} else
+#endif
+			if ( ForegroundApp )
 			{
 				switch ( gGameState )
 				{
@@ -1871,18 +1929,6 @@ main(int argc, char *argv[])
 						}
 						break;
 					}
-#ifndef MASTER
-					case GS_ANIMVIEWER:
-					{
-						float ms = (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
-						if (RwInitialised)
-						{
-							if (!FrontEndMenuManager.m_PrefsFrameLimiter || (1000.0f / (float)RsGlobal.maxFPS) < ms)
-								RsEventHandler(rsANIMVIEWER, (void*)TRUE);
-						}
-						break;
-					}
-#endif
 				}
 			}
 			else
@@ -1954,12 +2000,13 @@ main(int argc, char *argv[])
 		}
 		else
 		{
+#ifndef MASTER
+			if ( gbModelViewer )
+				CAnimViewer::Shutdown();
+			else
+#endif
 			if ( gGameState == GS_PLAYING_GAME )
 				CGame::ShutDown();
-#ifndef MASTER
-			else if ( gGameState == GS_ANIMVIEWER )
-				CAnimViewer::Shutdown();
-#endif
 			
 			CTimer::Stop();
 			
@@ -1980,13 +2027,13 @@ main(int argc, char *argv[])
 #endif
 	}
 	
-
+#ifndef MASTER
+	if ( gbModelViewer )
+		CAnimViewer::Shutdown();
+	else
+#endif
 	if ( gGameState == GS_PLAYING_GAME )
 		CGame::ShutDown();
-#ifndef MASTER
-	else if ( gGameState == GS_ANIMVIEWER )
-		CAnimViewer::Shutdown();
-#endif
 
 	DMAudio.Terminate();
 	

@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include "main.h"
 
+#include "General.h"
 #include "Quaternion.h"
 #include "ModelInfo.h"
 #include "ModelIndices.h"
@@ -11,7 +12,6 @@
 #include "HandlingMgr.h"
 #include "CarCtrl.h"
 #include "PedType.h"
-#include "PedStats.h"
 #include "AnimManager.h"
 #include "Game.h"
 #include "RwHelper.h"
@@ -25,6 +25,7 @@
 #include "ZoneCull.h"
 #include "CdStream.h"
 #include "FileLoader.h"
+#include "MemoryHeap.h"
 #include "Streaming.h"
 #include "ColStore.h"
 #include "Occlusion.h"
@@ -69,17 +70,19 @@ CFileLoader::LoadLevel(const char *filename)
 		if(*line == '#')
 			continue;
 
-		if(strncmp(line, "EXIT", 9) == 0)	// BUG: 9?
+		if(strncmp(line, "EXIT", 4) == 0)
 			break;
 
 		if(strncmp(line, "IMAGEPATH", 9) == 0){
 			RwImageSetPath(line + 10);
 		}else if(strncmp(line, "TEXDICTION", 10) == 0){
+			PUSH_MEMID(MEMID_TEXTURES);
 			strcpy(txdname, line+11);
 			LoadingScreenLoadingFile(txdname);
 			RwTexDictionary *txd = LoadTexDictionary(txdname);
 			AddTexDictionaries(savedTxd, txd);
 			RwTexDictionaryDestroy(txd);
+			POP_MEMID();
 		}else if(strncmp(line, "COLFILE", 7) == 0){
 			LoadingScreenLoadingFile(line+10);
 			LoadCollisionFile(line+10, 0);
@@ -95,22 +98,30 @@ CFileLoader::LoadLevel(const char *filename)
 		}else if(strncmp(line, "IPL", 3) == 0){
 			if(!objectsLoaded){
 				LoadingScreenLoadingFile("Collision");
+				PUSH_MEMID(MEMID_WORLD);
 				CObjectData::Initialise("DATA\\OBJECT.DAT");
 				CStreaming::Init();
+				POP_MEMID();
+				PUSH_MEMID(MEMID_COLLISION);
 				CColStore::LoadAllCollision();
+				POP_MEMID();
 				for(int i = 0; i < MODELINFOSIZE; i++)
 					if(CModelInfo::GetModelInfo(i))
 						CModelInfo::GetModelInfo(i)->ConvertAnimFileIndex();
 				objectsLoaded = true;
 			}
+			PUSH_MEMID(MEMID_WORLD);
 			LoadingScreenLoadingFile(line + 4);
 			LoadScene(line + 4);
+			POP_MEMID();
 		}else if(strncmp(line, "SPLASH", 6) == 0){
 #ifndef DISABLE_LOADING_SCREEN
 			LoadSplash(GetRandomSplashScreen());
 #endif
+#ifndef GTA_PS2
 		}else if(strncmp(line, "CDIMAGE", 7) == 0){
 			CdStreamAddImage(line + 8);
+#endif
 		}
 	}
 
@@ -161,7 +172,7 @@ CFileLoader::LoadTexDictionary(const char *filename)
 
 struct ColHeader
 {
-	char ident[4];
+	uint32 ident;
 	uint32 size;
 };
 
@@ -173,12 +184,14 @@ CFileLoader::LoadCollisionFile(const char *filename, uint8 colSlot)
 	CBaseModelInfo *mi;
 	ColHeader header;
 
+	PUSH_MEMID(MEMID_COLLISION);
+
 	debug("Loading collision file %s\n", filename);
 	fd = CFileMgr::OpenFile(filename, "rb");
 	assert(fd > 0);
 
 	while(CFileMgr::Read(fd, (char*)&header, sizeof(header))){
-		assert(strncmp(header.ident, "COLL", 4) == 0);
+		assert(header.ident == 'LLOC');
 		CFileMgr::Read(fd, (char*)work_buff, header.size);
 		memcpy(modelname, work_buff, 24);
 
@@ -198,6 +211,8 @@ CFileLoader::LoadCollisionFile(const char *filename, uint8 colSlot)
 	}
 
 	CFileMgr::CloseFile(fd);
+
+	POP_MEMID();
 }
 
 
@@ -213,7 +228,7 @@ CFileLoader::LoadCollisionFileFirstTime(uint8 *buffer, uint32 size, uint8 colSlo
 	while(size > 8){
 		header = (ColHeader*)buffer;
 		modelsize = header->size;
-		if(strncmp(header->ident, "COLL", 4) != 0)
+		if(header->ident != 'LLOC')
 			return size-8 < CDSTREAM_SECTOR_SIZE;
 		memcpy(modelname, buffer+8, 24);
 		memcpy(work_buff, buffer+32, modelsize-24);
@@ -247,7 +262,7 @@ CFileLoader::LoadCollisionFile(uint8 *buffer, uint32 size, uint8 colSlot)
 	while(size > 8){
 		header = (ColHeader*)buffer;
 		modelsize = header->size;
-		if(strncmp(header->ident, "COLL", 4) != 0)
+		if(header->ident != 'LLOC')
 			return size-8 < CDSTREAM_SECTOR_SIZE;
 		memcpy(modelname, buffer+8, 24);
 		memcpy(work_buff, buffer+32, modelsize-24);
@@ -292,6 +307,7 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 44;
 	if(model.numSpheres > 0){
 		model.spheres = (CColSphere*)RwMalloc(model.numSpheres*sizeof(CColSphere));
+		REGISTER_MEMPTR(&model.spheres);
 		for(i = 0; i < model.numSpheres; i++){
 			model.spheres[i].Set(*(float*)buf, *(CVector*)(buf+4), buf[16], buf[17]);
 			buf += 20;
@@ -316,6 +332,7 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 4;
 	if(model.numBoxes > 0){
 		model.boxes = (CColBox*)RwMalloc(model.numBoxes*sizeof(CColBox));
+		REGISTER_MEMPTR(&model.boxes);
 		for(i = 0; i < model.numBoxes; i++){
 			model.boxes[i].Set(*(CVector*)buf, *(CVector*)(buf+12), buf[24], buf[25]);
 			buf += 28;
@@ -327,6 +344,7 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 4;
 	if(numVertices > 0){
 		model.vertices = (CompressedVector*)RwMalloc(numVertices*sizeof(CompressedVector));
+		REGISTER_MEMPTR(&model.vertices);
 		for(i = 0; i < numVertices; i++){
 			model.vertices[i].Set(*(float*)buf, *(float*)(buf+4), *(float*)(buf+8));
 #if 0
@@ -344,6 +362,7 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 4;
 	if(model.numTriangles > 0){
 		model.triangles = (CColTriangle*)RwMalloc(model.numTriangles*sizeof(CColTriangle));
+		REGISTER_MEMPTR(&model.triangles);
 		for(i = 0; i < model.numTriangles; i++){
 			model.triangles[i].Set(*(int32*)buf, *(int32*)(buf+4), *(int32*)(buf+8), buf[12]);
 			buf += 16;
@@ -567,6 +586,9 @@ CFileLoader::AddTexDictionaries(RwTexDictionary *dst, RwTexDictionary *src)
 	RwTexDictionaryForAllTextures(src, MoveTexturesCB, dst);
 }
 
+#define isLine3(l, a, b, c) ((l[0] == a) && (l[1] == b) && (l[2] == c))
+#define isLine4(l, a, b, c, d) ((l[0] == a) && (l[1] == b) && (l[2] == c) && (l[3] == d))
+
 void
 CFileLoader::LoadObjectTypes(const char *filename)
 {
@@ -602,15 +624,15 @@ CFileLoader::LoadObjectTypes(const char *filename)
 			continue;
 
 		if(section == NONE){
-			if(strncmp(line, "objs", 4) == 0) section = OBJS;
-			else if(strncmp(line, "tobj", 4) == 0) section = TOBJ;
-			else if(strncmp(line, "weap", 4) == 0) section = WEAP;
-			else if(strncmp(line, "hier", 4) == 0) section = HIER;
-			else if(strncmp(line, "cars", 4) == 0) section = CARS;
-			else if(strncmp(line, "peds", 4) == 0) section = PEDS;
-			else if(strncmp(line, "path", 4) == 0) section = PATH;
-			else if(strncmp(line, "2dfx", 4) == 0) section = TWODFX;
-		}else if(strncmp(line, "end", 3) == 0){
+			if(isLine4(line, 'o','b','j','s')) section = OBJS;
+			else if(isLine4(line, 't','o','b','j')) section = TOBJ;
+			else if(isLine4(line, 'w','e','a','p')) section = WEAP;
+			else if(isLine4(line, 'h','i','e','r')) section = HIER;
+			else if(isLine4(line, 'c','a','r','s')) section = CARS;
+			else if(isLine4(line, 'p','e','d','s')) section = PEDS;
+			else if(isLine4(line, 'p','a','t','h')) section = PATH;
+			else if(isLine4(line, '2','d','f','x')) section = TWODFX;
+		}else if(isLine3(line, 'e','n','d')){
 			section = NONE;
 		}else switch(section){
 		case OBJS:
@@ -843,21 +865,21 @@ CFileLoader::LoadVehicleObject(const char *line)
 	mi->m_level = level;
 	mi->m_compRules = comprules;
 
-	if(strncmp(type, "car", 4) == 0){
+	if(strcmp(type, "car") == 0){
 		mi->m_wheelId = misc;
 		mi->m_wheelScale = wheelScale;
 		mi->m_vehicleType = VEHICLE_TYPE_CAR;
-	}else if(strncmp(type, "boat", 5) == 0){
+	}else if(strcmp(type, "boat") == 0){
 		mi->m_vehicleType = VEHICLE_TYPE_BOAT;
-	}else if(strncmp(type, "train", 6) == 0){
+	}else if(strcmp(type, "train") == 0){
 		mi->m_vehicleType = VEHICLE_TYPE_TRAIN;
-	}else if(strncmp(type, "heli", 5) == 0){
+	}else if(strcmp(type, "heli") == 0){
 		mi->m_vehicleType = VEHICLE_TYPE_HELI;
-	}else if(strncmp(type, "plane", 6) == 0){
+	}else if(strcmp(type, "plane") == 0){
 		mi->m_planeLodId = misc;
 		mi->m_wheelScale = 1.0f;
 		mi->m_vehicleType = VEHICLE_TYPE_PLANE;
-	}else if(strncmp(type, "bike", 5) == 0){
+	}else if(strcmp(type, "bike") == 0){
 		mi->m_bikeSteerAngle = misc;
 		mi->m_wheelScale = wheelScale;
 		mi->m_vehicleType = VEHICLE_TYPE_BIKE;
@@ -866,29 +888,29 @@ CFileLoader::LoadVehicleObject(const char *line)
 
 	mi->m_handlingId = mod_HandlingManager.GetHandlingId(handlingId);
 
-	if(strncmp(vehclass, "normal", 7) == 0)
+	if(strcmp(vehclass, "normal") == 0)
 		mi->m_vehicleClass = CCarCtrl::NORMAL;
-	else if(strncmp(vehclass, "poorfamily", 11) == 0)
+	else if(strcmp(vehclass, "poorfamily") == 0)
 		mi->m_vehicleClass = CCarCtrl::POOR;
-	else if(strncmp(vehclass, "richfamily", 11) == 0)
+	else if(strcmp(vehclass, "richfamily") == 0)
 		mi->m_vehicleClass = CCarCtrl::RICH;
-	else if(strncmp(vehclass, "executive", 10) == 0)
+	else if(strcmp(vehclass, "executive") == 0)
 		mi->m_vehicleClass = CCarCtrl::EXEC;
-	else if(strncmp(vehclass, "worker", 7) == 0)
+	else if(strcmp(vehclass, "worker") == 0)
 		mi->m_vehicleClass = CCarCtrl::WORKER;
-	else if(strncmp(vehclass, "big", 4) == 0)
+	else if(strcmp(vehclass, "big") == 0)
 		mi->m_vehicleClass = CCarCtrl::BIG;
-	else if(strncmp(vehclass, "taxi", 5) == 0)
+	else if(strcmp(vehclass, "taxi") == 0)
 		mi->m_vehicleClass = CCarCtrl::TAXI;
-	else if(strncmp(vehclass, "moped", 6) == 0)
+	else if(strcmp(vehclass, "moped") == 0)
 		mi->m_vehicleClass = CCarCtrl::MOPED;
-	else if(strncmp(vehclass, "motorbike", 10) == 0)
+	else if(strcmp(vehclass, "motorbike") == 0)
 		mi->m_vehicleClass = CCarCtrl::MOTORBIKE;
-	else if(strncmp(vehclass, "leisureboat", 12) == 0)
+	else if(strcmp(vehclass, "leisureboat") == 0)
 		mi->m_vehicleClass = CCarCtrl::LEISUREBOAT;
-	else if(strncmp(vehclass, "workerboat", 11) == 0)
+	else if(strcmp(vehclass, "workerboat") == 0)
 		mi->m_vehicleClass = CCarCtrl::WORKERBOAT;
-	else if(strncmp(vehclass, "ignore", 11) == 0){
+	else if(strcmp(vehclass, "ignore") == 0) {
 		mi->m_vehicleClass = -1;
 		return;
 	}
@@ -995,7 +1017,7 @@ CFileLoader::Load2dEffect(const char *line)
 	CTxdStore::SetCurrentTxd(CTxdStore::FindTxdSlot("particle"));
 
 	mi = CModelInfo::GetModelInfo(id);
-	effect = CModelInfo::Get2dEffectStore().alloc();
+	effect = CModelInfo::Get2dEffectStore().Alloc();
 	mi->Add2dEffect(effect);
 	effect->pos = CVector(x, y, z);
 	effect->col = CRGBA(r, g, b, a);
@@ -1103,13 +1125,13 @@ CFileLoader::LoadScene(const char *filename)
 			continue;
 
 		if(section == NONE){
-			if(strncmp(line, "inst", 4) == 0) section = INST;
-			else if(strncmp(line, "zone", 4) == 0) section = ZONE;
-			else if(strncmp(line, "cull", 4) == 0) section = CULL;
-			else if(strncmp(line, "pick", 4) == 0) section = PICK;
-			else if(strncmp(line, "path", 4) == 0) section = PATH;
-			else if(strncmp(line, "occl", 4) == 0) section = OCCL;
-		}else if(strncmp(line, "end", 3) == 0){
+			if(isLine4(line, 'i','n','s','t')) section = INST;
+			else if(isLine4(line, 'z','o','n','e')) section = ZONE;
+			else if(isLine4(line, 'c','u','l','l')) section = CULL;
+			else if(isLine4(line, 'p','i','c','k')) section = PICK;
+			else if(isLine4(line, 'p','a','t','h')) section = PATH;
+			else if(isLine4(line, 'o','c','c','l')) section = OCCL;
+		}else if(isLine3(line, 'e','n','d')){
 			section = NONE;
 		}else switch(section){
 		case INST:
@@ -1307,11 +1329,11 @@ CFileLoader::ReloadPaths(const char *filename)
 			continue;
 
 		if (section == NONE) {
-			if (strncmp(line, "path", 4) == 0) {
+			if (isLine4(line, 'p','a','t','h')) {
 				section = PATH;
 				ThePaths.AllocatePathFindInfoMem(4500);
 			}
-		} else if (strncmp(line, "end", 3) == 0) {
+		} else if (isLine3(line, 'e','n','d')) {
 			section = NONE;
 		} else {
 			switch (section) {
@@ -1362,10 +1384,10 @@ CFileLoader::ReloadObjectTypes(const char *filename)
 			continue;
 
 		if (section == NONE) {
-			if (strncmp(line, "objs", 4) == 0) section = OBJS;
-			else if (strncmp(line, "tobj", 4) == 0) section = TOBJ;
-			else if (strncmp(line, "2dfx", 4) == 0) section = TWODFX;
-		} else if (strncmp(line, "end", 3) == 0) {
+			if (isLine4(line, 'o','b','j','s')) section = OBJS;
+			else if (isLine4(line, 't','o','b','j')) section = TOBJ;
+			else if (isLine4(line, '2','d','f','x')) section = TWODFX;
+		} else if (isLine3(line, 'e','n','d')) {
 			section = NONE;
 		} else {
 			switch (section) {
@@ -1438,7 +1460,7 @@ CFileLoader::ReLoadScene(const char *filename)
 		if (*line == '#')
 			continue;
 
-		if (strncmp(line, "EXIT", 9) == 0)	// BUG: 9?
+		if (strncmp(line, "EXIT", 4) == 0)
 			break;
 
 		if (strncmp(line, "IDE", 3) == 0) {

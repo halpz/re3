@@ -99,5 +99,10 @@ public:
 
 extern bool clearWaterDrop;
 extern int32 numWaterDropOnScreen;
+extern RwRaster *gpCarSplashRaster[];
+extern RwRaster *gpHeatHazeRaster;
+extern RwRaster *gpDotRaster;
+extern RwRaster *gpRainDripRaster[];
+extern RwRaster *gpRainDripDarkRaster[];
 
 VALIDATE_SIZE(CParticle, 0x58);

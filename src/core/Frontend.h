@@ -4,13 +4,14 @@
 #else
 
 #include "Sprite2d.h"
+#include "Timer.h"
 
 #define MENUHEADER_POS_X 10.0f
 #define MENUHEADER_POS_Y 10.0f
 #define MENUHEADER_HEIGHT 2.0f
 #define MENUHEADER_WIDTH 1.0f
 
-#define MENU_UNK_X_MARGIN 10.0f
+#define MENU_X_MARGIN 10.0f
 
 #define MENUACTION_SCALE_MULT 0.9f
 
@@ -22,23 +23,35 @@
 #define MENU_DEFAULT_CONTENT_Y 100
 #define MENU_DEFAULT_LINE_HEIGHT 29
 
-#define MENURADIO_ICON_SCALE 60.0f
+#define RIGHT_ALIGNED_TEXT_RIGHT_MARGIN(xMargin) (xMargin + 30.0f)
+
+#define MENURADIO_ICON_FIRST_X 238.f
+#define MENURADIO_ICON_Y 288.0f
+#define MENURADIO_ICON_SIZE 60.0f
+#define MENURADIO_SELECTOR_START_Y 285.f // other options should leave room on the screen
+#define MENURADIO_SELECTOR_HEIGHT 65.f
 
 #define MENUSLIDER_X 500.0f
 #define MENUSLIDER_UNK 100.0f
 #define MENUSLIDER_SMALLEST_BAR 8.0f
 #define MENUSLIDER_BIGGEST_BAR 25.0f
 
-#define BIGTEXT2_X_SCALE 0.6f
+#define BIGTEXT2_X_SCALE 0.6f // For FONT_STANDARD
 #define BIGTEXT2_Y_SCALE 1.2f
-#define BIGTEXT_X_SCALE 0.6f
+#define BIGTEXT_X_SCALE 0.6f // For FONT_HEADING
 #define BIGTEXT_Y_SCALE 1.0f
-#define MEDIUMTEXT_X_SCALE 0.48f
+#define MEDIUMTEXT_X_SCALE 0.48f // For FONT_STANDARD
 #define MEDIUMTEXT_Y_SCALE 1.0f
-#define SMALLTEXT_X_SCALE 0.42f
+#define SMALLTEXT_X_SCALE 0.42f // For FONT_STANDARD
 #define SMALLTEXT_Y_SCALE 0.9f
-#define SMALLESTTEXT_X_SCALE 0.3f
+#define SMALLESTTEXT_X_SCALE 0.3f // For FONT_STANDARD
 #define SMALLESTTEXT_Y_SCALE 0.7f
+
+#define LISTITEM_X_SCALE 0.4f // Only unproportional and commonly used scale for FONT_STANDARD
+#define LISTITEM_Y_SCALE 0.6f
+
+#define HELPER_TEXT_RIGHT_MARGIN MENU_X_MARGIN
+#define HELPER_TEXT_BOTTOM_MARGIN 18.f
 
 #define PLAYERSETUP_LIST_TOP 58.0f
 #define PLAYERSETUP_LIST_BOTTOM 95.0f
@@ -51,8 +64,6 @@
 #endif
 #define PLAYERSETUP_SCROLLBUTTON_HEIGHT 17.0f
 #define PLAYERSETUP_SCROLLBUTTON_TXD_DIMENSION 64
-#define PLAYERSETUP_ROW_TEXT_X_SCALE 0.4f
-#define PLAYERSETUP_ROW_TEXT_Y_SCALE 0.6f
 #define PLAYERSETUP_SKIN_COLUMN_LEFT 220.0f
 #define PLAYERSETUP_DATE_COLUMN_RIGHT 56.0f
 #define PLAYERSETUP_LIST_BODY_TOP 77
@@ -80,16 +91,15 @@
 #define CONTSETUP_CLASSIC_ROW_HEIGHT 9.0f
 #define CONTSETUP_BOUND_HIGHLIGHT_HEIGHT 10
 #define CONTSETUP_BOUND_COLUMN_WIDTH 190.0f
-#define CONTSETUP_LIST_HEADER_HEIGHT 20.0f
-#define CONTSETUP_LIST_TOP 28.0f
+#define CONTSETUP_LIST_TOP 58.0f
 #define CONTSETUP_LIST_RIGHT 18.0f
-#define CONTSETUP_LIST_BOTTOM 120.0f
-#define CONTSETUP_LIST_LEFT 18.0f
+#define CONTSETUP_LIST_BOTTOM 78.0f
+#define CONTSETUP_LIST_LEFT 30.0f
 #define CONTSETUP_COLUMN_1_X 40.0f
 #define CONTSETUP_COLUMN_2_X 210.0f
 #define CONTSETUP_COLUMN_3_X (CONTSETUP_COLUMN_2_X + CONTSETUP_BOUND_COLUMN_WIDTH + 10.0f)
 #define CONTSETUP_BACK_RIGHT 35.0f
-#define CONTSETUP_BACK_BOTTOM 122.0f
+#define CONTSETUP_BACK_BOTTOM 82.0f
 #define CONTSETUP_BACK_HEIGHT 25.0f
 
 enum
@@ -182,7 +192,6 @@ enum eMenuScreen
 	MENUPAGE_MOUSE_CONTROLS = 31,
 	MENUPAGE_PAUSE_MENU = 32,
 	MENUPAGE_NONE = 33, // Then chooses main menu or pause menu 
-	MENUPAGE_OUTRO = 34,
 #ifdef LEGACY_MENU_OPTIONS
 	MENUPAGE_CONTROLLER_SETTINGS,
 	MENUPAGE_DEBUG_MENU,
@@ -192,14 +201,26 @@ enum eMenuScreen
 	MENUPAGE_CONTROLLER_PC_OLD4,
 	MENUPAGE_CONTROLLER_DEBUG,
 #endif
+#ifdef CUSTOM_FRONTEND_OPTIONS
+
 #ifdef GRAPHICS_MENU_OPTIONS
 	MENUPAGE_GRAPHICS_SETTINGS,
 #endif
+#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+	MENUPAGE_DETECT_JOYSTICK,
+#endif
+
+#endif
+	MENUPAGE_OUTRO, // Originally 34, but CFO needs last screen to be empty to count number of menu pages
 	MENUPAGES
 };
 
 enum eMenuAction
 {
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	MENUACTION_CFO_SELECT = -2,
+	MENUACTION_CFO_DYNAMIC = -1,
+#endif
 	MENUACTION_NOTHING,
 	MENUACTION_LABEL,
 	MENUACTION_YES,
@@ -254,28 +275,9 @@ enum eMenuAction
 	MENUACTION_DRAWDIST,
 	MENUACTION_MOUSESENS,
 	MENUACTION_MP3VOLUMEBOOST,
-#ifdef IMPROVED_VIDEOMODE
-	MENUACTION_SCREENFORMAT,
-#endif
 #ifdef LEGACY_MENU_OPTIONS
 	MENUACTION_CTRLVIBRATION,
 	MENUACTION_CTRLCONFIG,
-#endif
-#ifdef ANISOTROPIC_FILTERING
-	MENUACTION_MIPMAPS,
-	MENUACTION_TEXTURE_FILTERING,
-#endif
-#ifdef MULTISAMPLING
-	MENUACTION_MULTISAMPLING,
-#endif
-#ifdef NO_ISLAND_LOADING
-	MENUACTION_ISLANDLOADING,
-#endif
-#ifdef PS2_ALPHA_TEST
-	MENUACTION_PS2_ALPHA_TEST,
-#endif
-#ifdef CUTSCENE_BORDERS_SWITCH
-	MENUACTION_CUTSCENEBORDERS,
 #endif
 };
 
@@ -303,16 +305,8 @@ enum eCheckHover
 	HOVEROPTION_LIST, // also layer in controller setup and skin menu
 	HOVEROPTION_SKIN,
 	HOVEROPTION_USESKIN, // also layer in controller setup and skin menu
-	HOVEROPTION_RADIO_0,
-	HOVEROPTION_RADIO_1,
-	HOVEROPTION_RADIO_2,
-	HOVEROPTION_RADIO_3,
-	HOVEROPTION_RADIO_4,
-	HOVEROPTION_RADIO_5,
-	HOVEROPTION_RADIO_6,
-	HOVEROPTION_RADIO_7,
-	HOVEROPTION_RADIO_8,
-	HOVEROPTION_RADIO_9,
+	HOVEROPTION_NEXT_RADIO,
+	HOVEROPTION_PREV_RADIO,
 	HOVEROPTION_INCREASE_BRIGHTNESS,
 	HOVEROPTION_DECREASE_BRIGHTNESS,
 	HOVEROPTION_INCREASE_DRAWDIST,
@@ -330,8 +324,8 @@ enum eCheckHover
 
 enum
 {
-#ifdef LEGACY_MENU_OPTIONS
-	NUM_MENUROWS = 14,
+#if defined LEGACY_MENU_OPTIONS || defined CUSTOM_FRONTEND_OPTIONS
+	NUM_MENUROWS = 18,
 #else
 	NUM_MENUROWS = 12,
 #endif
@@ -347,7 +341,7 @@ enum eControlMethod
 enum ControllerSetupColumn
 {
 	CONTSETUP_PED_COLUMN = 0,
-	CONTSETUP_VEHICLE_COLUMN = 14,
+	CONTSETUP_VEHICLE_COLUMN = 16,
 };
 
 struct tSkinInfo
@@ -365,6 +359,7 @@ struct BottomBarOption
 	int32 screenId;
 };
 
+#ifndef CUSTOM_FRONTEND_OPTIONS
 struct CMenuScreen
 {
 	char m_ScreenName[8];
@@ -382,6 +377,88 @@ struct CMenuScreen
 		uint8 m_Align;
 	} m_aEntries[NUM_MENUROWS];
 };
+extern CMenuScreen aScreens[MENUPAGES];
+#else
+#include "frontendoption.h"
+struct CCustomScreenLayout {
+	int startX; // not used at all if first entry has X and Y values
+	int startY; // not used at all if first entry has X and Y values
+	int lineHeight; // used to determine next entry's Y coordinate, if it has 0-0 as coordinates
+	bool showLeftRightHelper;
+	bool noInvasiveBorders; // not needed on pages already handled by game
+	int xMargin; // useful for two part texts - 0/empty = MENU_X_MARGIN
+};
+
+struct CCFO
+{
+	int8 *value;
+	const char *save;
+};
+
+struct CCFOSelect : CCFO
+{
+	char** rightTexts;
+	int8 numRightTexts;
+	bool onlyApplyOnEnter;
+	int8 displayedValue; // only if onlyApplyOnEnter enabled for now
+	int8 lastSavedValue; // only if onlyApplyOnEnter enabled
+	ChangeFunc changeFunc;
+
+	CCFOSelect() {};
+	CCFOSelect(int8* value, const char* save, const char** rightTexts, int8 numRightTexts, bool onlyApplyOnEnter, ChangeFunc changeFunc){
+		this->value = value;
+		if (value)
+			this->lastSavedValue = this->displayedValue = *value;
+
+		this->save = save;
+		this->rightTexts = (char**)rightTexts;
+		this->numRightTexts = numRightTexts;
+		this->onlyApplyOnEnter = onlyApplyOnEnter;
+		this->changeFunc = changeFunc;
+	}
+};
+
+struct CCFODynamic : CCFO
+{
+	DrawFunc drawFunc;
+	ButtonPressFunc buttonPressFunc;
+
+	CCFODynamic() {};
+	CCFODynamic(int8* value, const char* save, DrawFunc drawFunc, ButtonPressFunc buttonPressFunc){
+		this->value = value;
+		this->save = save;
+		this->drawFunc = drawFunc;
+		this->buttonPressFunc = buttonPressFunc;
+	}
+};
+
+struct CMenuScreenCustom
+{
+	char m_ScreenName[8];
+	int32 m_PreviousPage; // eMenuScreen
+	CCustomScreenLayout *layout;
+	ReturnPrevPageFunc returnPrevPageFunc;
+	
+	struct CMenuEntry
+	{
+		int32 m_Action; // eMenuAction - below zero is CFO
+		char m_EntryName[8];
+		struct {
+			union {
+				CCFO *m_CFO; // for initializing
+				CCFOSelect *m_CFOSelect;
+				CCFODynamic *m_CFODynamic;
+			};
+			int32 m_SaveSlot; // eSaveSlot
+			int32 m_TargetMenu; // eMenuScreen
+		};
+		uint16 m_X;
+		uint16 m_Y;
+		uint8 m_Align;
+	} m_aEntries[NUM_MENUROWS];
+};
+extern CMenuScreenCustom aScreens[MENUPAGES];
+#endif
 
 struct MenuTrapezoid
 {
@@ -473,7 +550,7 @@ public:
 	int8 m_PrefsShowSubtitles;
 	int8 m_PrefsShowLegends;
 	int8 m_PrefsUseWideScreen;
-	int8 m_PrefsVsync; // TODO(Miami): Are we sure?
+	int8 m_PrefsVsync;
 	int8 m_PrefsVsyncDisp;
 	int8 m_PrefsFrameLimiter;
 	int8 m_nPrefsAudio3DProviderIndex;
@@ -481,7 +558,7 @@ public:
 	int8 m_PrefsDMA;
 	int8 m_PrefsSfxVolume;
 	int8 m_PrefsMusicVolume;
-	uint8 m_PrefsRadioStation;
+	int8 m_PrefsRadioStation;
 	uint8 m_PrefsStereoMono; // unused except restore settings
 	int32 m_nCurrOption;
 	bool m_bQuitGameNoCD;
@@ -501,7 +578,7 @@ public:
 	int32 field_54;
 	int8 m_bLanguageLoaded;
 	uint8 m_PrefsAllowNastyGame;
-	uint8 m_PrefsMP3BoostVolume;
+	int8 m_PrefsMP3BoostVolume;
 	uint8 m_ControlMethod;
 	int32 m_nPrefsVideoMode;
 	int32 m_nDisplayVideoMode;
@@ -514,10 +591,10 @@ public:
 	uint8 field_74[4];
 	int32 *pControlEdit;
 	bool m_OnlySaveMenu;
-	int32 m_menuTransitionProgress;
+	int32 m_firstStartCounter;
 	CSprite2d m_aFrontEndSprites[NUM_MENU_SPRITES];
 	bool m_bSpritesLoaded;
-	int32 field_F0;
+	int32 m_LeftMostRadioX;
 	int32 m_ScrollRadioBy;
 	int32 m_nCurrScreen;
 	int32 m_nPrevScreen;
@@ -621,20 +698,34 @@ public:
 		ISLAND_LOADING_HIGH
 	};
 
-	static int8 m_DisplayIslandLoading;
-	static int8 m_PrefsIslandLoading;
+	int8 m_PrefsIslandLoading;
 
-	#define ISLAND_LOADING_IS(p) if (CMenuManager::m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_##p)
-	#define ISLAND_LOADING_ISNT(p) if (CMenuManager::m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_##p)
+	#define ISLAND_LOADING_IS(p) if (FrontEndMenuManager.m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_##p)
+	#define ISLAND_LOADING_ISNT(p) if (FrontEndMenuManager.m_PrefsIslandLoading != CMenuManager::ISLAND_LOADING_##p)
 #else
 	#define ISLAND_LOADING_IS(p)
 	#define ISLAND_LOADING_ISNT(p)
 #endif
 
+#ifdef XBOX_MESSAGE_SCREEN
+	static uint32 m_nDialogHideTimer;
+	static PauseModeTime m_nDialogHideTimerPauseMode;
+	static bool m_bDialogOpen;
+	static wchar *m_pDialogText;
+	static bool m_bSaveWasSuccessful;
+
+	static void SetDialogText(const char*);
+	static bool DialogTextCmp(const char*);
+	static void ToggleDialog(bool);
+	static void SetDialogTimer(uint32);
+	void ProcessDialogTimer(void);
+	void DrawOverlays(void);
+	void CloseDialog(void);
+#endif
+
 	void Initialise();
 	void PrintMap();
 	void SetFrontEndRenderStates();
-	static void BuildStatLine(Const char *text, void *stat, bool itsFloat, void *stat2);
 	static void CentreMousePointer();
 	void CheckCodesForControls(int);
 	bool CheckHover(int x1, int x2, int y1, int y2);
@@ -651,7 +742,6 @@ public:
 	void DrawBackground(bool transitionCall);
 	void DrawPlayerSetupScreen(bool);
 	int FadeIn(int alpha);
-	void FilterOutColorMarkersFromString(wchar*);
 	int GetStartOptionsCntrlConfigScreens();
 	void InitialiseChangedLanguageSettings();
 	void LoadAllTextures();
@@ -665,7 +755,7 @@ public:
 	void ProcessList(bool &optionSelected, bool &goBack);
 	void UserInput();
 	void ProcessUserInput(uint8, uint8, uint8, uint8, int8);
-	void ChangeRadioStation(uint8);
+	void ChangeRadioStation(int8);
 	void ProcessFileActions();
 	void ProcessOnOffMenuOptions();
 	void RequestFrontEndShutDown();
@@ -679,8 +769,10 @@ public:
 	void UnloadTextures();
 	void WaitForUserCD();
 	int GetNumOptionsCntrlConfigScreens();
-	int ConstructStatLine(int);
 	void SwitchToNewScreen(int8);
+	void AdditionalOptionInput(bool &goBack);
+	void ExportStats(void);
+	void PrintRadioSelector(void);
 
 	// New (not in function or inlined in the game)
 	void ThingsToDoBeforeLeavingPage();
@@ -698,6 +790,5 @@ VALIDATE_SIZE(CMenuManager, 0x688);
 #endif
 
 extern CMenuManager FrontEndMenuManager;
-extern CMenuScreen aScreens[];
 
 #endif

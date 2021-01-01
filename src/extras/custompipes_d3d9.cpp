@@ -132,13 +132,15 @@ vehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 		inst++;
 	}
 
+	d3d::setTexture(1, nil);
+
 	SetRenderState(SRCBLEND, BLENDSRCALPHA);
 }
 
 void
 CreateVehiclePipe(void)
 {
-	if(CFileMgr::LoadFile("neo/carTweakingTable.dat", work_buff, sizeof(work_buff), "r") == 0)
+	if(CFileMgr::LoadFile("neo/carTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
 		printf("Error: couldn't open 'neo/carTweakingTable.dat'\n");
 	else{
 		char *fp = (char*)work_buff;
@@ -169,6 +171,9 @@ DestroyVehiclePipe(void)
 {
 	rw::d3d::destroyVertexShader(neoVehicle_VS);
 	neoVehicle_VS = nil;
+
+	rw::d3d::destroyPixelShader(neoVehicle_PS);
+	neoVehicle_PS = nil;
 
 	((rw::d3d9::ObjPipeline*)vehiclePipe)->destroy();
 	vehiclePipe = nil;
@@ -244,12 +249,13 @@ worldRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 		drawInst(header, inst);
 		inst++;
 	}
+	d3d::setTexture(1, nil);
 }
 
 void
 CreateWorldPipe(void)
 {
-	if(CFileMgr::LoadFile("neo/worldTweakingTable.dat", work_buff, sizeof(work_buff), "r") == 0)
+	if(CFileMgr::LoadFile("neo/worldTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
 		printf("Error: couldn't open 'neo/worldTweakingTable.dat'\n");
 	else
 		ReadTweakValueTable((char*)work_buff, WorldLightmapBlend);
@@ -360,6 +366,12 @@ CreateGlossPipe(void)
 void
 DestroyGlossPipe(void)
 {
+	rw::d3d::destroyVertexShader(neoGloss_VS);
+	neoGloss_VS = nil;
+
+	rw::d3d::destroyPixelShader(neoGloss_PS);
+	neoGloss_PS = nil;
+
 	((rw::d3d9::ObjPipeline*)glossPipe)->destroy();
 	glossPipe = nil;
 }
@@ -489,7 +501,7 @@ rimSkinRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 void
 CreateRimLightPipes(void)
 {
-	if(CFileMgr::LoadFile("neo/rimTweakingTable.dat", work_buff, sizeof(work_buff), "r") == 0)
+	if(CFileMgr::LoadFile("neo/rimTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
 		printf("Error: couldn't open 'neo/rimTweakingTable.dat'\n");
 	else{
 		char *fp = (char*)work_buff;

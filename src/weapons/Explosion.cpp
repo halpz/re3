@@ -121,7 +121,12 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 #endif
 
 	int n = 0;
+#ifdef FIX_BUGS
+	while (n < ARRAY_SIZE(gaExplosion) && gaExplosion[n].m_nIteration != 0)
+#else
+	// array overrun is UB
 	while (gaExplosion[n].m_nIteration != 0 && n < ARRAY_SIZE(gaExplosion))
+#endif
 		n++;
 	if (n == ARRAY_SIZE(gaExplosion))
 		return false;
@@ -220,7 +225,7 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 			} else if (veh->IsComponentPresent(CAR_BOOT)) {
 				veh->GetComponentWorldPosition(CAR_BOOT, componentPos);
 			}
-			if (componentPos != nil) {
+			if (componentPos.x != 0.0f) {
 				int rn = (CGeneral::GetRandomNumber() & 1) + 1;
 				for (int i = 0; i < rn; i++)
 					CParticle::AddJetExplosion(componentPos, (CGeneral::GetRandomNumber() & 7) / 7.0f  + 1.5f, 0.5f);

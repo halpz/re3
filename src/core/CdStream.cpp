@@ -5,6 +5,7 @@
 #include "CdStream.h"
 #include "rwcore.h"
 #include "RwHelper.h"
+#include "MemoryMgr.h"
 
 #define CDDEBUG(f, ...)   debug ("%s: " f "\n", "cdvd_stream", ## __VA_ARGS__)
 #define CDTRACE(f, ...)   printf("%s: " f "\n", "cdvd_stream", ## __VA_ARGS__)
@@ -72,7 +73,11 @@ CdStreamInitThread(void)
 	gChannelRequestQ.size = gNumChannels + 1;
 	ASSERT(gChannelRequestQ.items != nil );
 	
+#ifdef FIX_BUGS
+	gCdStreamSema = CreateSemaphore(nil, 0, 5, nil);
+#else
 	gCdStreamSema = CreateSemaphore(nil, 0, 5, "CdStream");
+#endif
 	
 	if ( gCdStreamSema == nil )
 	{
@@ -242,8 +247,15 @@ CdStreamRead(int32 channel, void *buffer, uint32 offset, uint32 size)
 		else
 			return STREAM_SUCCESS;
 	}
-	
+
+#ifdef BIG_IMG
+	LARGE_INTEGER liDistanceToMove;
+	liDistanceToMove.QuadPart = _GET_OFFSET(offset);
+	liDistanceToMove.QuadPart *= CDSTREAM_SECTOR_SIZE;
+	SetFilePointerEx(hImage, liDistanceToMove, nil, FILE_BEGIN);
+#else
 	SetFilePointer(hImage, _GET_OFFSET(offset) * CDSTREAM_SECTOR_SIZE, nil, FILE_BEGIN);
+#endif
 	
 	DWORD NumberOfBytesRead;
 	
