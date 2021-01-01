@@ -956,33 +956,37 @@ cSampleManager::Initialise(void)
 #ifdef AUDIO_CACHE
 	FILE *cacheFile = fcaseopen("audio\\sound.cache", "rb");
 	if (cacheFile) {
+		debug("Loadind audio cache (If game crashes around here, then your cache is corrupted, remove audio/sound.cache)\n");
 		fread(nStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
 		fclose(cacheFile);
 	} else
-#endif
 	{
-	
-		for ( int32 i = 0; i < TOTAL_STREAMED_SOUNDS; i++ )
-		{	
+		debug("Cannot load audio cache\n");
+#endif
+
+		for(int32 i = 0; i < TOTAL_STREAMED_SOUNDS; i++) {
 			aStream[0] = new CStream(StreamedNameTable[i], ALStreamSources[0], ALStreamBuffers[0]);
-			
-			if ( aStream[0] && aStream[0]->IsOpened() )
-			{
+
+			if(aStream[0] && aStream[0]->IsOpened()) {
 				uint32 tatalms = aStream[0]->GetLengthMS();
 				delete aStream[0];
 				aStream[0] = NULL;
-				
+
 				nStreamLength[i] = tatalms;
-			}
-			else
+			} else
 				USERERROR("Can't open '%s'\n", StreamedNameTable[i]);
 		}
 #ifdef AUDIO_CACHE
 		cacheFile = fcaseopen("audio\\sound.cache", "wb");
-		fwrite(nStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
-		fclose(cacheFile);
-#endif
+		if(cacheFile) {
+			debug("Saving audio cache\n");
+			fwrite(nStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
+			fclose(cacheFile);
+		} else {
+			debug("Cannot save audio cache\n");
+		}
 	}
+#endif
 
 	{
 		if ( !InitialiseSampleBanks() )
