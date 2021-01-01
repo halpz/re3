@@ -785,10 +785,10 @@ CWorld::FindObjectsOfTypeInRange(uint32 modelId, const CVector &position, float 
 	*nEntitiesFound = 0;
 	const CVector2D vecSectorStartPos(position.x - radius, position.y - radius);
 	const CVector2D vecSectorEndPos(position.x + radius, position.y + radius);
-	const int32 nStartX = Max(CWorld::GetSectorIndexX(vecSectorStartPos.x), 0);
-	const int32 nStartY = Max(CWorld::GetSectorIndexY(vecSectorStartPos.y), 0);
-	const int32 nEndX = Min(CWorld::GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X - 1);
-	const int32 nEndY = Min(CWorld::GetSectorIndexY(vecSectorEndPos.y), NUMSECTORS_Y - 1);
+	const int32 nStartX = Max(GetSectorIndexX(vecSectorStartPos.x), 0);
+	const int32 nStartY = Max(GetSectorIndexY(vecSectorStartPos.y), 0);
+	const int32 nEndX = Min(GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X - 1);
+	const int32 nEndY = Min(GetSectorIndexY(vecSectorEndPos.y), NUMSECTORS_Y - 1);
 	for(int32 y = nStartY; y <= nEndY; y++) {
 		for(int32 x = nStartX; x <= nEndX; x++) {
 			CSector *pSector = GetSector(x, y);
@@ -1056,10 +1056,10 @@ CWorld::FindObjectsKindaColliding(const CVector &position, float radius, bool bC
 	*nCollidingEntities = 0;
 	const CVector2D vecSectorStartPos(position.x - radius, position.y - radius);
 	const CVector2D vecSectorEndPos(position.x + radius, position.y + radius);
-	const int32 nStartX = Max(CWorld::GetSectorIndexX(vecSectorStartPos.x), 0);
-	const int32 nStartY = Max(CWorld::GetSectorIndexY(vecSectorStartPos.y), 0);
-	const int32 nEndX = Min(CWorld::GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X - 1);
-	const int32 nEndY = Min(CWorld::GetSectorIndexY(vecSectorEndPos.y), NUMSECTORS_Y - 1);
+	const int32 nStartX = Max(GetSectorIndexX(vecSectorStartPos.x), 0);
+	const int32 nStartY = Max(GetSectorIndexY(vecSectorStartPos.y), 0);
+	const int32 nEndX = Min(GetSectorIndexX(vecSectorEndPos.x), NUMSECTORS_X - 1);
+	const int32 nEndY = Min(GetSectorIndexY(vecSectorEndPos.y), NUMSECTORS_Y - 1);
 	for(int32 y = nStartY; y <= nEndY; y++) {
 		for(int32 x = nStartX; x <= nEndX; x++) {
 			CSector *pSector = GetSector(x, y);
@@ -1135,10 +1135,10 @@ CWorld::FindObjectsIntersectingCube(const CVector &vecStartPos, const CVector &v
 {
 	AdvanceCurrentScanCode();
 	*nIntersecting = 0;
-	const int32 nStartX = Max(CWorld::GetSectorIndexX(vecStartPos.x), 0);
-	const int32 nStartY = Max(CWorld::GetSectorIndexY(vecStartPos.y), 0);
-	const int32 nEndX = Min(CWorld::GetSectorIndexX(vecEndPos.x), NUMSECTORS_X - 1);
-	const int32 nEndY = Min(CWorld::GetSectorIndexY(vecEndPos.y), NUMSECTORS_Y - 1);
+	const int32 nStartX = Max(GetSectorIndexX(vecStartPos.x), 0);
+	const int32 nStartY = Max(GetSectorIndexY(vecStartPos.y), 0);
+	const int32 nEndX = Min(GetSectorIndexX(vecEndPos.x), NUMSECTORS_X - 1);
+	const int32 nEndY = Min(GetSectorIndexY(vecEndPos.y), NUMSECTORS_Y - 1);
 	for(int32 y = nStartY; y <= nEndY; y++) {
 		for(int32 x = nStartX; x <= nEndX; x++) {
 			CSector *pSector = GetSector(x, y);
@@ -1216,10 +1216,10 @@ CWorld::FindObjectsIntersectingAngledCollisionBox(const CColBox &boundingBox, co
 {
 	AdvanceCurrentScanCode();
 	*nEntitiesFound = 0;
-	const int32 nStartX = Max(CWorld::GetSectorIndexX(fStartX), 0);
-	const int32 nStartY = Max(CWorld::GetSectorIndexY(fStartY), 0);
-	const int32 nEndX = Min(CWorld::GetSectorIndexX(fEndX), NUMSECTORS_X - 1);
-	const int32 nEndY = Min(CWorld::GetSectorIndexY(fEndY), NUMSECTORS_Y - 1);
+	const int32 nStartX = Max(GetSectorIndexX(fStartX), 0);
+	const int32 nStartY = Max(GetSectorIndexY(fStartY), 0);
+	const int32 nEndX = Min(GetSectorIndexX(fEndX), NUMSECTORS_X - 1);
+	const int32 nEndY = Min(GetSectorIndexY(fEndY), NUMSECTORS_Y - 1);
 	for(int32 y = nStartY; y <= nEndY; y++) {
 		for(int32 x = nStartX; x <= nEndX; x++) {
 			CSector *pSector = GetSector(x, y);
@@ -1296,10 +1296,10 @@ CWorld::FindMissionEntitiesIntersectingCube(const CVector &vecStartPos, const CV
 {
 	AdvanceCurrentScanCode();
 	*nIntersecting = 0;
-	const int32 nStartX = Max(CWorld::GetSectorIndexX(vecStartPos.x), 0);
-	const int32 nStartY = Max(CWorld::GetSectorIndexY(vecStartPos.y), 0);
-	const int32 nEndX = Min(CWorld::GetSectorIndexX(vecEndPos.x), NUMSECTORS_X - 1);
-	const int32 nEndY = Min(CWorld::GetSectorIndexY(vecEndPos.y), NUMSECTORS_Y - 1);
+	const int32 nStartX = Max(GetSectorIndexX(vecStartPos.x), 0);
+	const int32 nStartY = Max(GetSectorIndexY(vecStartPos.y), 0);
+	const int32 nEndX = Min(GetSectorIndexX(vecEndPos.x), NUMSECTORS_X - 1);
+	const int32 nEndY = Min(GetSectorIndexY(vecEndPos.y), NUMSECTORS_Y - 1);
 	for(int32 y = nStartY; y <= nEndY; y++) {
 		for(int32 x = nStartX; x <= nEndX; x++) {
 			CSector *pSector = GetSector(x, y);
@@ -1414,10 +1414,10 @@ CWorld::CallOffChaseForArea(float x1, float y1, float x2, float y2)
 	float fStartY = y1 - 10.0f;
 	float fEndX = x2 + 10.0f;
 	float fEndY = y2 + 10.0f;
-	const int32 nStartX = Max(CWorld::GetSectorIndexX(fStartX), 0);
-	const int32 nStartY = Max(CWorld::GetSectorIndexY(fStartY), 0);
-	const int32 nEndX = Min(CWorld::GetSectorIndexX(fEndX), NUMSECTORS_X - 1);
-	const int32 nEndY = Min(CWorld::GetSectorIndexY(fEndY), NUMSECTORS_Y - 1);
+	const int32 nStartX = Max(GetSectorIndexX(fStartX), 0);
+	const int32 nStartY = Max(GetSectorIndexY(fStartY), 0);
+	const int32 nEndX = Min(GetSectorIndexX(fEndX), NUMSECTORS_X - 1);
+	const int32 nEndY = Min(GetSectorIndexY(fEndY), NUMSECTORS_Y - 1);
 	for(int32 y = nStartY; y <= nEndY; y++) {
 		for(int32 x = nStartX; x <= nEndX; x++) {
 			CSector *pSector = GetSector(x, y);
@@ -1854,9 +1854,9 @@ CWorld::Process(void)
 				if(csObj->m_rwObject && RwObjectGetType(csObj->m_rwObject) == rpCLUMP &&
 				   RpAnimBlendClumpGetFirstAssociation(csObj->GetClump())) {
 					RpAnimBlendClumpUpdateAnimations(csObj->GetClump(),
-					                                 0.02f * (csObj->IsObject()
-					                                              ? CTimer::GetTimeStepNonClipped()
-					                                              : CTimer::GetTimeStep()));
+					                                 csObj->IsObject()
+					                                              ? CTimer::GetTimeStepNonClippedInSeconds()
+					                                              : CTimer::GetTimeStepInSeconds());
 				}
 				csObj->ProcessControl();
 				csObj->ProcessCollision();
@@ -1876,9 +1876,9 @@ CWorld::Process(void)
 #endif
 			   RpAnimBlendClumpGetFirstAssociation(movingEnt->GetClump())) {
 				RpAnimBlendClumpUpdateAnimations(movingEnt->GetClump(),
-				                                 0.02f * (movingEnt->IsObject()
-				                                              ? CTimer::GetTimeStepNonClipped()
-				                                              : CTimer::GetTimeStep()));
+				                                 movingEnt->IsObject()
+				                                              ? CTimer::GetTimeStepNonClippedInSeconds()
+				                                              : CTimer::GetTimeStepInSeconds());
 			}
 		}
 		for(CPtrNode *node = ms_listMovingEntityPtrs.first; node; node = node->next) {
@@ -2020,10 +2020,10 @@ CWorld::TriggerExplosion(const CVector &position, float fRadius, float fPower, C
 {
 	CVector2D vecStartPos(position.x - fRadius, position.y - fRadius);
 	CVector2D vecEndPos(position.x + fRadius, position.y + fRadius);
-	const int32 nStartX = Max(CWorld::GetSectorIndexX(vecStartPos.x), 0);
-	const int32 nStartY = Max(CWorld::GetSectorIndexY(vecStartPos.y), 0);
-	const int32 nEndX = Min(CWorld::GetSectorIndexX(vecEndPos.x), NUMSECTORS_X - 1);
-	const int32 nEndY = Min(CWorld::GetSectorIndexY(vecEndPos.y), NUMSECTORS_Y - 1);
+	const int32 nStartX = Max(GetSectorIndexX(vecStartPos.x), 0);
+	const int32 nStartY = Max(GetSectorIndexY(vecStartPos.y), 0);
+	const int32 nEndX = Min(GetSectorIndexX(vecEndPos.x), NUMSECTORS_X - 1);
+	const int32 nEndY = Min(GetSectorIndexY(vecEndPos.y), NUMSECTORS_Y - 1);
 	for(int32 y = nStartY; y <= nEndY; y++) {
 		for(int32 x = nStartX; x <= nEndX; x++) {
 			CSector *pSector = GetSector(x, y);
