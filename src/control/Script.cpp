@@ -1340,7 +1340,7 @@ void CMissionCleanup::Init()
 	}
 }
 
-CMissionCleanupEntity* CMissionCleanup::FindFree()
+cleanup_entity_struct* CMissionCleanup::FindFree()
 {
 	for (int i = 0; i < MAX_CLEANUP; i++){
 		if (m_sEntities[i].type == CLEANUP_UNUSED)
@@ -1352,7 +1352,7 @@ CMissionCleanupEntity* CMissionCleanup::FindFree()
 
 void CMissionCleanup::AddEntityToList(int32 id, uint8 type)
 {
-	CMissionCleanupEntity* pNew = FindFree();
+	cleanup_entity_struct* pNew = FindFree();
 	if (!pNew)
 		return;
 	pNew->id = id;

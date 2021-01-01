@@ -134,7 +134,7 @@ enum {
 	CLEANUP_OBJECT
 };
 
-struct CMissionCleanupEntity
+struct cleanup_entity_struct
 {
 	uint8 type;
 	int32 id;
@@ -148,14 +148,14 @@ enum {
 
 class CMissionCleanup
 {
-	CMissionCleanupEntity m_sEntities[MAX_CLEANUP];
+	cleanup_entity_struct m_sEntities[MAX_CLEANUP];
 	uint8 m_nCount;
 
 public:
 	CMissionCleanup();
 
 	void Init();
-	CMissionCleanupEntity* FindFree();
+	cleanup_entity_struct* FindFree();
 	void AddEntityToList(int32, uint8);
 	void RemoveEntityFromList(int32, uint8);
 	void Process();
