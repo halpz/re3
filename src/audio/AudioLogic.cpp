@@ -4354,7 +4354,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_nFrequency = 20000;
 		AddFightSound:
 			{
-				uint32 soundParams = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i]; // wtf? stroring int as float
+				uint32 soundParams = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i]; // wtf? storing int as float
 				uint8 damagerType = soundParams & 0xFF;
 				uint32 weaponType = soundParams >> 8;
 
@@ -4402,7 +4402,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 		case SOUND_WEAPON_BAT_ATTACK:
 		case SOUND_WEAPON_KNIFE_ATTACK:
 		{
-			uint32 soundParams = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i]; // wtf? stroring int as float
+			uint32 soundParams = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i]; // wtf? storing int as float
 			uint8 damagerType = soundParams & 0xFF;
 			uint32 weaponType = soundParams >> 8;
 			if (damagerType == ENTITY_TYPE_PED) {
