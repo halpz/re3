@@ -2694,7 +2694,7 @@ CBike::KnockOffRider(eWeaponType weapon, uint8 direction, CPed *ped, bool bGetBa
 		switch(direction){
 		case 0: anim = ANIM_KO_SKID_BACK; break;
 		case 1: anim = ANIM_KD_RIGHT; break;
-		case 2: anim = ANIM_KO_SKID_FRONT; break;
+		case 2: anim = ANIM_BIKE_FALL_R; break;
 		case 3: anim = ANIM_KD_LEFT; break;
 		}
 		if(m_nWheelsOnGround == 0)
