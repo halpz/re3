@@ -1673,6 +1673,23 @@ void CMissionCleanup::Init()
 	}
 }
 
+static void SleepThisPed(cleanup_entity_struct* pCleanup, CPed* pPed)
+{
+	printf("*** SLEEPING PED %i %i\n", pCleanup->id, pPed->GetModelIndex());
+	if (!pPed->GetIsStatic())
+		pPed->RemoveFromMovingList();
+	pPed->bIsStaticWaitingForCollision = true;
+}
+
+static void WakeThisPed(cleanup_entity_struct* pCleanup, CPed* pPed)
+{
+	printf("*** WAKING UP PED %i %i\n", pCleanup->id, pPed->GetModelIndex());
+	pPed->bIsStaticWaitingForCollision = false;
+	if (!pPed->bIsStatic)
+		pPed->AddToMovingList();
+
+}
+
 cleanup_entity_struct* CMissionCleanup::FindFree()
 {
 	for (int i = 0; i < MAX_CLEANUP; i++){
