@@ -363,7 +363,7 @@ cHandlingDataMgr::ConvertDataToGameUnits(tHandlingData *handling)
 	handling->fBuoyancy = 100.0f/handling->nPercentSubmerged * GRAVITY*handling->fMass;
 
 	// What the hell is going on here?
-	specificVolume = handling->Dimension.z * (handling->Dimension.x / 2.f) / handling->fMass;	// ?
+	specificVolume = handling->Dimension.x*handling->Dimension.z*0.5f / handling->fMass;	// ?
 	a = 0.0f;
 	b = 100.0f;
 	velocity = handling->Transmission.fMaxVelocity;
