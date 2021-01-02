@@ -659,7 +659,7 @@ CVehicle::InflictDamage(CEntity* damagedBy, eWeaponType weaponType, float damage
 			if (m_randomSeed < DAMAGE_FLEE_IN_CAR_PROBABILITY_VALUE) {
 				CCarCtrl::SwitchVehicleToRealPhysics(this);
 				AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
-				AutoPilot.m_nCruiseSpeed = GAME_SPEED_TO_CARAI_SPEED * pHandling->Transmission.fUnkMaxVelocity;
+				AutoPilot.m_nCruiseSpeed = GAME_SPEED_TO_CARAI_SPEED * pHandling->Transmission.fMaxCruiseVelocity;
 				SetStatus(STATUS_PHYSICS);
 			}
 		}

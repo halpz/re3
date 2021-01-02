@@ -3582,9 +3582,9 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		car->AutoPilot.m_nCruiseSpeed = *(float*)&ScriptParams[1];
 		if (missionRetryScriptIndex == 40 && car->GetModelIndex() == MI_CHEETAH) // Turismo
 			car->AutoPilot.m_nCruiseSpeed = 8 * car->AutoPilot.m_nCruiseSpeed / 10;
-		car->AutoPilot.m_nCruiseSpeed = Min(car->AutoPilot.m_nCruiseSpeed, 60.0f * car->pHandling->Transmission.fUnkMaxVelocity);
+		car->AutoPilot.m_nCruiseSpeed = Min(car->AutoPilot.m_nCruiseSpeed, 60.0f * car->pHandling->Transmission.fMaxCruiseVelocity);
 #else
-		car->AutoPilot.m_nCruiseSpeed = Min(*(float*)&ScriptParams[1], 60.0f * car->pHandling->Transmission.fUnkMaxVelocity);
+		car->AutoPilot.m_nCruiseSpeed = Min(*(float*)&ScriptParams[1], 60.0f * car->pHandling->Transmission.fMaxCruiseVelocity);
 #endif
 		return 0;
 	}
