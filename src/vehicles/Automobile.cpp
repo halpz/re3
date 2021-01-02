@@ -252,6 +252,8 @@ CVector vecHunterRocketPos(2.5f, 1.0f, -0.5f);
 CVector vecDAMAGE_ENGINE_POS_SMALL(-0.1f, -0.1f, 0.0f);
 CVector vecDAMAGE_ENGINE_POS_BIG(-0.5f, -0.3f, 0.0f);
 
+#pragma optimize("", off) // a workaround for another compiler bug
+
 void
 CAutomobile::ProcessControl(void)
 {
@@ -835,11 +837,16 @@ CAutomobile::ProcessControl(void)
 
 		if(bAudioChangingGear && m_fGasPedal > 0.4f && m_fBrakePedal < 0.1f && fwdSpeed > 0.15f &&
 		   this == FindPlayerVehicle() && TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::MODE_1STPERSON){
-			if(GetStatus() == STATUS_PLAYER && pHandling->Flags & HANDLING_IS_BUS){
+			if(GetStatus() == STATUS_PLAYER && !(pHandling->Flags & HANDLING_IS_BUS)){
 				if(m_nBusDoorTimerEnd == 0)
 					m_nBusDoorTimerEnd = 1000;
-				else if(m_nBusDoorTimerEnd > CTimer::GetTimeStepInMilliseconds())
-					m_nBusDoorTimerEnd -= CTimer::GetTimeStepInMilliseconds();
+				else {
+					uint32 timeStepInMs = CTimer::GetTimeStepInMilliseconds();
+					if(m_nBusDoorTimerEnd > timeStepInMs)
+						m_nBusDoorTimerEnd -= timeStepInMs;
+					else
+						m_nBusDoorTimerEnd = 0;
+				}
 			}
 
 			if((m_aSuspensionSpringRatio[0] < 1.0f || m_aSuspensionSpringRatio[2] < 1.0f) &&
@@ -1676,8 +1683,8 @@ CAutomobile::ProcessControl(void)
 		   Abs(m_vecMoveSpeed.y) < 0.005f &&
 		   Abs(m_vecMoveSpeed.z) < 0.005f &&
 		   !(m_fDamageImpulse > 0.0f && m_pDamageEntity == FindPlayerPed()) &&
-		   (m_aSuspensionSpringRatioPrev[0] < 1.0f && m_aSuspensionSpringRatioPrev[1] < 1.0f &&
-		    m_aSuspensionSpringRatioPrev[2] < 1.0f && m_aSuspensionSpringRatioPrev[3] < 1.0f)){
+		   (m_aSuspensionSpringRatioPrev[0] < 1.0f || m_aSuspensionSpringRatioPrev[1] < 1.0f ||
+		    m_aSuspensionSpringRatioPrev[2] < 1.0f || m_aSuspensionSpringRatioPrev[3] < 1.0f)){
 			m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
 			m_vecTurnSpeed.z = 0.0f;
 		}
@@ -1700,6 +1707,8 @@ CAutomobile::ProcessControl(void)
 			}
 	}
 }
+
+#pragma optimize("", on)
 
 void
 CAutomobile::Teleport(CVector pos)

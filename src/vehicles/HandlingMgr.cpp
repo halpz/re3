@@ -300,7 +300,7 @@ cHandlingDataMgr::LoadHandlingData(void)
 					case 11: handling->fTractionBias = atof(word); break;
 					case 12: handling->Transmission.nNumberOfGears = atoi(word); break;
 					case 13: handling->Transmission.fMaxVelocity = atof(word); break;
-					case 14: handling->Transmission.fEngineAcceleration = atof(word) * 0.4f; break;
+					case 14: handling->Transmission.fEngineAcceleration = atof(word) * 0.4; break;
 					case 15: handling->Transmission.nDriveType = word[0]; break;
 					case 16: handling->Transmission.nEngineType = word[0]; break;
 					case 17: handling->fBrakeDeceleration = atof(word); break;
@@ -363,7 +363,7 @@ cHandlingDataMgr::ConvertDataToGameUnits(tHandlingData *handling)
 	handling->fBuoyancy = 100.0f/handling->nPercentSubmerged * GRAVITY*handling->fMass;
 
 	// What the hell is going on here?
-	specificVolume = handling->Dimension.x*handling->Dimension.z*0.5f / handling->fMass;	// ?
+	specificVolume = handling->Dimension.z * (handling->Dimension.x / 2.f) / handling->fMass;	// ?
 	a = 0.0f;
 	b = 100.0f;
 	velocity = handling->Transmission.fMaxVelocity;

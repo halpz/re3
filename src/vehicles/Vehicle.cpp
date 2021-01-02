@@ -836,11 +836,11 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 				if(IsBike())
 					brake = 0.6f * mod_HandlingManager.fWheelFriction / (pHandling->fMass + 200.0f);
 				else if(pHandling->fMass < 500.0f)
-					brake = mod_HandlingManager.fWheelFriction / m_fMass;
+					brake = mod_HandlingManager.fWheelFriction / pHandling->fMass;
 				else if(GetModelIndex() == MI_RCBANDIT)
-					brake = 0.2f * mod_HandlingManager.fWheelFriction / m_fMass;
+					brake = 0.2f * mod_HandlingManager.fWheelFriction / pHandling->fMass;
 				else
-					brake = mod_HandlingManager.fWheelFriction / m_fMass;
+					brake = mod_HandlingManager.fWheelFriction / pHandling->fMass;
 #ifdef FIX_BUGS
 				brake *= CTimer::GetTimeStepFix();
 #endif
