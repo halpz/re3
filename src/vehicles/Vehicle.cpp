@@ -48,6 +48,9 @@ bool CVehicle::bAllTaxisHaveNitro;
 bool CVehicle::m_bDisableMouseSteering = true;
 bool CVehicle::bDisableRemoteDetonation;
 bool CVehicle::bDisableRemoteDetonationOnContact;
+#ifndef MASTER
+bool CVehicle::m_bDisplayHandlingInfo;
+#endif
 
 void *CVehicle::operator new(size_t sz) { return CPools::GetVehiclePool()->New();  }
 void *CVehicle::operator new(size_t sz, int handle) { return CPools::GetVehiclePool()->New(handle); }

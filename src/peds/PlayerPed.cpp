@@ -22,10 +22,14 @@
 #include "Script.h"
 #include "Replay.h"
 #include "PedPlacement.h"
+#include "VarConsole.h"
 
 #define PAD_MOVE_TO_GAME_WORLD_MOVE 60.0f
 
 bool CPlayerPed::bDontAllowWeaponChange;
+#ifndef MASTER
+bool CPlayerPed::bDebugPlayerInfo;
+#endif
 
 const uint32 CPlayerPed::nSaveStructSize =
 #ifdef COMPATIBLE_SAVES
@@ -182,6 +186,11 @@ CPlayerPed::SetupPlayerPed(int32 index)
 
 	CWorld::Add(player);
 	player->m_wepAccuracy = 100;
+
+#ifndef MASTER
+	VarConsole.Add("Debug PlayerPed", &CPlayerPed::bDebugPlayerInfo, true);
+	VarConsole.Add("Tweak Vehicle Handling", &CVehicle::m_bDisplayHandlingInfo, true);
+#endif
 }
 
 // --MIAMI: Done

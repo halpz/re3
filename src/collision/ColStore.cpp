@@ -11,8 +11,12 @@
 #include "Frontend.h"
 #include "Physical.h"
 #include "ColStore.h"
+#include "VarConsole.h"
 
 CPool<ColDef,ColDef> *CColStore::ms_pColPool;
+#ifndef MASTER
+bool bDispColInMem;
+#endif
 
 void
 CColStore::Initialise(void)
@@ -20,6 +24,9 @@ CColStore::Initialise(void)
 	if(ms_pColPool == nil)
 		ms_pColPool = new CPool<ColDef,ColDef>(COLSTORESIZE, "CollisionFiles");
 	AddColSlot("generic");	// slot 0. not streamed
+#ifndef MASTER
+	VarConsole.Add("Display collision in memory", &bDispColInMem, true);
+#endif
 }
 
 void

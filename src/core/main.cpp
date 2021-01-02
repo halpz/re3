@@ -72,6 +72,7 @@
 #include "postfx.h"
 #include "custompipes.h"
 #include "screendroplets.h"
+#include "VarConsole.h"
 
 GlobalScene Scene;
 
@@ -132,6 +133,9 @@ bool gbNewRenderer;
 #else
 #define CLEARMODE (rwCAMERACLEARZ)
 #endif
+
+bool bDisplayNumPfAtomicsRendered = false;
+bool bDisplayPosn = false;
 
 void
 ValidateVersion()
@@ -472,6 +476,11 @@ static RwBool
 Initialise3D(void *param)
 {
 	PUSH_MEMID(MEMID_RENDER);
+
+#ifndef MASTER
+	VarConsole.Add("Display number of atomics rendered", &bDisplayNumPfAtomicsRendered, true);
+	VarConsole.Add("Display posn and framerate", &bDisplayPosn, true);
+#endif
 
 	if (RsRwInitialize(param))
 	{
@@ -1008,7 +1017,6 @@ return;
 void
 DisplayGameDebugText()
 {
-	static bool bDisplayPosn = false;
 	static bool bDisplayCheatStr = false; // custom
 
 #ifndef FINAL
@@ -1382,6 +1390,10 @@ RenderMenus(void)
 	{
 		FrontEndMenuManager.DrawFrontEnd();
 	}
+#ifndef MASTER
+	else
+		VarConsole.Check();
+#endif
 }
 
 void
