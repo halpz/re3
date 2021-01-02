@@ -1112,7 +1112,7 @@ void CPad::UpdatePads(void)
 		GetPad(0)->Update(0);
 
 #ifndef MASTER
-	GetPad(1)->Update(0);
+	GetPad(1)->Update(1);
 #else
 	GetPad(1)->NewState.Clear();
 	GetPad(1)->OldState.Clear();
