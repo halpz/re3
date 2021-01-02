@@ -380,14 +380,14 @@ cHandlingDataMgr::ConvertDataToGameUnits(tHandlingData *handling)
 	}
 
 	if(handling->nIdentifier == HANDLING_RCBANDIT){
-		handling->Transmission.fUnkMaxVelocity = handling->Transmission.fMaxVelocity;
+		handling->Transmission.fMaxCruiseVelocity = handling->Transmission.fMaxVelocity;
 		handling->Transmission.fMaxReverseVelocity = -handling->Transmission.fMaxVelocity;
 	}else if(handling->nIdentifier >= HANDLING_BIKE && handling->nIdentifier <= HANDLING_FREEWAY){
-		handling->Transmission.fUnkMaxVelocity = velocity;
+		handling->Transmission.fMaxCruiseVelocity = velocity;
 		handling->Transmission.fMaxVelocity = velocity * 1.2f;
 		handling->Transmission.fMaxReverseVelocity = -0.05f;
 	}else{
-		handling->Transmission.fUnkMaxVelocity = velocity;
+		handling->Transmission.fMaxCruiseVelocity = velocity;
 		handling->Transmission.fMaxVelocity = velocity * 1.2f;
 		handling->Transmission.fMaxReverseVelocity = -0.2f;
 	}

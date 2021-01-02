@@ -3985,7 +3985,7 @@ CPed::DriveVehicle(void)
 			}
 			if (neededAngForWheelie >= 0.15f) {
 				if (bike->m_fBrakePedal <= 0.5f || velocityFwdDotProd <= 0.01f) {
-					if (bike->m_fGasPedal > 0.5f && targetUDLean <= 0.0f && 0.3f * bike->pHandling->Transmission.fUnkMaxVelocity > velocityFwdDotProd) {
+					if (bike->m_fGasPedal > 0.5f && targetUDLean <= 0.0f && 0.3f * bike->pHandling->Transmission.fMaxCruiseVelocity > velocityFwdDotProd) {
 						targetUDLean = Min(0.1f, targetUDLean);
 					}
 				} else {
