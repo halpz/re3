@@ -1109,14 +1109,11 @@ void CPad::UpdatePads(void)
 		bUpdate = false;
 
 	if ( bUpdate )
-	{
 		GetPad(0)->Update(0);
-#ifndef SQUEEZE_PERFORMANCE
-		GetPad(1)->Update(0);
-#endif
-	}
 
-#if defined(MASTER) && !defined(XINPUT)
+#ifndef MASTER
+	GetPad(1)->Update(0);
+#else
 	GetPad(1)->NewState.Clear();
 	GetPad(1)->OldState.Clear();
 #endif
