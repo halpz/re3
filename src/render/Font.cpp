@@ -297,12 +297,10 @@ CFont::Initialise(void)
 		CTxdStore::AddRef(ButtonsSlot);
 		CTxdStore::PushCurrentTxd();
 		CTxdStore::SetCurrentTxd(ButtonsSlot);
-#if 0  // unused
-		ButtonSprite[BUTTON_UP].SetTexture("up");
-		ButtonSprite[BUTTON_DOWN].SetTexture("down");
-		ButtonSprite[BUTTON_LEFT].SetTexture("left");
-		ButtonSprite[BUTTON_RIGHT].SetTexture("right");
-#endif
+		ButtonSprite[BUTTON_UP].SetTexture("thumblyu");
+		ButtonSprite[BUTTON_DOWN].SetTexture("thumblyd");
+		ButtonSprite[BUTTON_LEFT].SetTexture("thumblxl");
+		ButtonSprite[BUTTON_RIGHT].SetTexture("thumblxr");
 		ButtonSprite[BUTTON_CROSS].SetTexture("cross");
 		ButtonSprite[BUTTON_CIRCLE].SetTexture("circle");
 		ButtonSprite[BUTTON_SQUARE].SetTexture("square");
@@ -313,6 +311,8 @@ CFont::Initialise(void)
 		ButtonSprite[BUTTON_R1].SetTexture("r1");
 		ButtonSprite[BUTTON_R2].SetTexture("r2");
 		ButtonSprite[BUTTON_R3].SetTexture("r3");
+		ButtonSprite[BUTTON_RSTICK_LEFT].SetTexture("thumbrxl");
+		ButtonSprite[BUTTON_RSTICK_RIGHT].SetTexture("thumbrxr");
 		CTxdStore::PopCurrentTxd();
 	}
 #endif // BUTTON_ICONS
@@ -411,9 +411,12 @@ CFont::DrawButton(float x, float y)
 		rect.bottom = Details.scaleY * 19.0f + y;
 
 		int vertexAlphaState;
+		void *raster;
 		RwRenderStateGet(rwRENDERSTATEVERTEXALPHAENABLE, &vertexAlphaState);
+		RwRenderStateGet(rwRENDERSTATETEXTURERASTER, &raster);
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);
 		ButtonSprite[PS2Symbol].Draw(rect, CRGBA(255, 255, 255, Details.color.a));
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, raster);
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)vertexAlphaState);
 	}
 }
@@ -926,14 +929,6 @@ CFont::PrintString(float x, float y, wchar *start, wchar *&end, float spwidth, f
 		if (Details.slant != 0.0f && !IsJapanese())
 			y = (Details.slantRefX - x) * Details.slant + Details.slantRefY;
 
-#ifdef BUTTON_ICONS
-		if (PS2Symbol != BUTTON_NONE) {
-			DrawButton(x, y);
-			x += Details.scaleY * 17.0f;
-			PS2Symbol = BUTTON_NONE;
-		}
-#endif
-
 		PrintChar(x, y, c);
 		x += GetCharacterSize(c);
 		if (c == 0 && (!NewLine || !IsJapanese()))	// space
@@ -1132,12 +1127,10 @@ CFont::GetStringWidth(wchar *s, bool spaces)
 						s++;
 #ifdef BUTTON_ICONS
 						switch (*s) {
-#if 0 // unused
 						case 'U':
 						case 'D':
 						case '<':
 						case '>':
-#endif
 						case 'X':
 						case 'O':
 						case 'Q':
@@ -1148,6 +1141,8 @@ CFont::GetStringWidth(wchar *s, bool spaces)
 						case 'J':
 						case 'V':
 						case 'C':
+						case '(':
+						case ')':
 							w += 17.0f * Details.scaleY;
 							break;
 						default:
@@ -1170,12 +1165,10 @@ CFont::GetStringWidth(wchar *s, bool spaces)
 				s++;
 #ifdef BUTTON_ICONS
 				switch (*s) {
-#if 0 // unused
 				case 'U':
 				case 'D':
 				case '<':
 				case '>':
-#endif
 				case 'X':
 				case 'O':
 				case 'Q':
@@ -1186,6 +1179,8 @@ CFont::GetStringWidth(wchar *s, bool spaces)
 				case 'J':
 				case 'V':
 				case 'C':
+				case '(':
+				case ')':
 					w += 17.0f * Details.scaleY;
 					break;
 				default:
@@ -1280,12 +1275,10 @@ CFont::ParseToken(wchar *s, bool japShit)
 		case 'w': SetColor(CRGBA(175, 175, 175, 255)); break;
 		case 'y': SetColor(CRGBA(210, 196, 106, 255)); break;
 #ifdef BUTTON_ICONS
-#if 0 // unused
 		case 'U': PS2Symbol = BUTTON_UP; break;
 		case 'D': PS2Symbol = BUTTON_DOWN; break;
 		case '<': PS2Symbol = BUTTON_LEFT; break;
 		case '>': PS2Symbol = BUTTON_RIGHT; break;
-#endif
 		case 'X': PS2Symbol = BUTTON_CROSS; break;
 		case 'O': PS2Symbol = BUTTON_CIRCLE; break;
 		case 'Q': PS2Symbol = BUTTON_SQUARE; break;
@@ -1296,6 +1289,8 @@ CFont::ParseToken(wchar *s, bool japShit)
 		case 'J': PS2Symbol = BUTTON_R1; break;
 		case 'V': PS2Symbol = BUTTON_R2; break;
 		case 'C': PS2Symbol = BUTTON_R3; break;
+		case '(': PS2Symbol = BUTTON_RSTICK_LEFT; break;
+		case ')': PS2Symbol = BUTTON_RSTICK_RIGHT; break;
 #endif
 		}
 	} else if (IsJapanese()) {
@@ -1342,12 +1337,10 @@ CFont::ParseToken(wchar *s)
 #endif
 		case 'y': SetColor(CRGBA(255, 227, 79, 255)); Details.anonymous_23 = true; break;
 #ifdef BUTTON_ICONS
-#if 0 // unused
 		case 'U': PS2Symbol = BUTTON_UP; break;
 		case 'D': PS2Symbol = BUTTON_DOWN; break;
 		case '<': PS2Symbol = BUTTON_LEFT; break;
 		case '>': PS2Symbol = BUTTON_RIGHT; break;
-#endif
 		case 'X': PS2Symbol = BUTTON_CROSS; break;
 		case 'O': PS2Symbol = BUTTON_CIRCLE; break;
 		case 'Q': PS2Symbol = BUTTON_SQUARE; break;
@@ -1358,6 +1351,8 @@ CFont::ParseToken(wchar *s)
 		case 'J': PS2Symbol = BUTTON_R1; break;
 		case 'V': PS2Symbol = BUTTON_R2; break;
 		case 'C': PS2Symbol = BUTTON_R3; break;
+		case '(': PS2Symbol = BUTTON_RSTICK_LEFT; break;
+		case ')': PS2Symbol = BUTTON_RSTICK_RIGHT; break;
 #endif
 		}
 	while(*s != '~') s++;
@@ -1450,6 +1445,24 @@ CFont::ParseToken(wchar* str, CRGBA &color, bool &flash, bool &bold)
 			color.g = 227;
 			color.b = 79;
 			break;
+#ifdef BUTTON_ICONS
+		case 'U': PS2Symbol = BUTTON_UP; break;
+		case 'D': PS2Symbol = BUTTON_DOWN; break;
+		case '<': PS2Symbol = BUTTON_LEFT; break;
+		case '>': PS2Symbol = BUTTON_RIGHT; break;
+		case 'X': PS2Symbol = BUTTON_CROSS; break;
+		case 'O': PS2Symbol = BUTTON_CIRCLE; break;
+		case 'Q': PS2Symbol = BUTTON_SQUARE; break;
+		case 'T': PS2Symbol = BUTTON_TRIANGLE; break;
+		case 'K': PS2Symbol = BUTTON_L1; break;
+		case 'M': PS2Symbol = BUTTON_L2; break;
+		case 'A': PS2Symbol = BUTTON_L3; break;
+		case 'J': PS2Symbol = BUTTON_R1; break;
+		case 'V': PS2Symbol = BUTTON_R2; break;
+		case 'C': PS2Symbol = BUTTON_R3; break;
+		case '(': PS2Symbol = BUTTON_RSTICK_LEFT; break;
+		case ')': PS2Symbol = BUTTON_RSTICK_RIGHT; break;
+#endif
 		default:
 			break;
 		}
@@ -1503,7 +1516,17 @@ CFont::RenderFontBuffer()
 			color = RenderState.color;
 		}
 		if (*pRenderStateBufPointer.pStr == '~') {
+#ifdef BUTTON_ICONS
+			PS2Symbol = BUTTON_NONE;
+#endif
 			pRenderStateBufPointer.pStr = ParseToken(pRenderStateBufPointer.pStr, color, bFlash, bBold);
+#ifdef BUTTON_ICONS
+			if(PS2Symbol != BUTTON_NONE) {
+				DrawButton(textPosX, textPosY);
+				textPosX += Details.scaleY * 17.0f;
+				PS2Symbol = BUTTON_NONE;
+			}
+#endif
 			if (bFlash) {
 				if (CTimer::GetTimeInMilliseconds() - Details.nFlashTimer > 300) {
 					Details.bFlashState = !Details.bFlashState;
