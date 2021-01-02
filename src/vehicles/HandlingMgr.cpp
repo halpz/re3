@@ -202,15 +202,21 @@ cHandlingDataMgr::ConvertDataToGameUnits(tHandlingData *handling)
 	handling->fInvMass = 1.0f/handling->fMass;
 	handling->fBuoyancy = 100.0f/handling->nPercentSubmerged * GRAVITY*handling->fMass;
 
-	// What the hell is going on here?
-	specificVolume = handling->Dimension.x*handling->Dimension.z*0.5f / handling->fMass;	// ?
+	// Don't quite understand this. What seems to be going on is that
+	// we calculate a drag (air resistance) deceleration for a given velocity and
+	// find the intersection between that and the max engine acceleration.
+	// at that point the car cannot accelerate any further and we've found the max velocity.
 	a = 0.0f;
 	b = 100.0f;
 	velocity = handling->Transmission.fMaxVelocity;
 	while(a < b && velocity > 0.0f){
 		velocity -= 0.01f;
+		// what's the 1/6?
 		a = handling->Transmission.fEngineAcceleration/6.0f;
-		b = -velocity * (1.0f/(specificVolume * sq(velocity) + 1.0f) - 1.0f);
+		// no density or drag coefficient here...
+		float a_drag = 0.5f*SQR(velocity) * handling->Dimension.x*handling->Dimension.z / handling->fMass;
+		// can't make sense of this... maybe  v - v/(drag + 1)  ? but that doesn't make so much sense either
+		b = -velocity * (1.0f/(a_drag + 1.0f) - 1.0f);
 	}
 
 	if(handling->nIdentifier == HANDLING_RCBANDIT){
