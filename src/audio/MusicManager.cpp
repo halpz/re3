@@ -25,7 +25,7 @@ cMusicManager MusicManager;
 int32 gNumRetunePresses;
 int32 gRetuneCounter;
 bool g_bAnnouncementReadPosAlready;
-uint8 RadioStaticCounter;
+uint8 RadioStaticCounter = 5;
 uint32 RadioStaticTimer;
 
 CVector vecRiotPosition(300.7f, -322.0f, 12.0f);
