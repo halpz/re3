@@ -143,7 +143,7 @@ cHandlingDataMgr::LoadHandlingData(void)
 				case 11: handling->fTractionBias = strtod(word, nil); break;
 				case 12: handling->Transmission.nNumberOfGears = atoi(word); break;
 				case 13: handling->Transmission.fMaxVelocity = strtod(word, nil); break;
-				case 14: handling->Transmission.fEngineAcceleration = strtod(word, nil) * 0.4f; break;
+				case 14: handling->Transmission.fEngineAcceleration = strtod(word, nil) * 0.4; break;
 				case 15: handling->Transmission.nDriveType = word[0]; break;
 				case 16: handling->Transmission.nEngineType = word[0]; break;
 				case 17: handling->fBrakeDeceleration = strtod(word, nil); break;
