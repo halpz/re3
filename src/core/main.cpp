@@ -134,7 +134,7 @@ bool gbNewRenderer;
 #define CLEARMODE (rwCAMERACLEARZ)
 #endif
 
-bool bDisplayNumPfAtomicsRendered = false;
+bool bDisplayNumOfAtomicsRendered = false;
 bool bDisplayPosn = false;
 
 void
@@ -478,7 +478,7 @@ Initialise3D(void *param)
 	PUSH_MEMID(MEMID_RENDER);
 
 #ifndef MASTER
-	VarConsole.Add("Display number of atomics rendered", &bDisplayNumPfAtomicsRendered, true);
+	VarConsole.Add("Display number of atomics rendered", &bDisplayNumOfAtomicsRendered, true);
 	VarConsole.Add("Display posn and framerate", &bDisplayPosn, true);
 #endif
 
