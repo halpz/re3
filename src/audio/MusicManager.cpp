@@ -991,6 +991,7 @@ cMusicManager::ServiceTrack(CVehicle *veh, CPed *ped)
 		}
 	} else if (AudioManager.ShouldDuckMissionAudio(0) || AudioManager.ShouldDuckMissionAudio(1)) {
 		SampleManager.SetStreamedVolumeAndPan(Min(m_nCurrentVolume, 25), 63, 0, 0);
+		nFramesSinceCutsceneEnded = 0;
 	} else {
 		if (nFramesSinceCutsceneEnded == -1)
 			volume = m_nCurrentVolume;
