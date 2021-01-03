@@ -26,8 +26,6 @@ find_library(mpg123_LIBRARIES NAMES mpg123 mpg123-0
 
 set(mpg123_CFLAGS "${PKG_MPG123_CFLAGS_OTHER}" CACHE STRING "CFLAGS of mpg123")
 
-# handle the QUIETLY and REQUIRED arguments and set mpg123_FOUND to TRUE if
-# all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(mpg123 DEFAULT_MSG mpg123_LIBRARIES mpg123_INCLUDE_DIR)
 

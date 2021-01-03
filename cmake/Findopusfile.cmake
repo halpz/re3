@@ -52,9 +52,6 @@ if (OPUSFILE_INCLUDE_DIRS AND OPUSFILE_LIBRARIES)
 set(OPUSFILE_FOUND TRUE)
 endif (OPUSFILE_INCLUDE_DIRS AND OPUSFILE_LIBRARIES)
 
-
-# handle the QUIETLY and REQUIRED arguments and set Opusfile_FOUND to TRUE if
-# all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(opusfile DEFAULT_MSG OPUSFILE_INCLUDE_DIRS OPUSFILE_LIBRARIES)
 

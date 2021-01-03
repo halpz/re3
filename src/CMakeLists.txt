@@ -36,6 +36,13 @@ target_compile_definitions(re3
         RE3_NO_AUTOLINK
 )
 
+if(LIBRW_PLATFORM_D3D9)
+    target_compile_definitions(re3
+        PUBLIC
+            USE_D3D9
+    )
+endif()
+
 if(RE3_AUDIO STREQUAL "OAL")
     find_package(OpenAL REQUIRED)
     target_include_directories(re3 PRIVATE ${OPENAL_INCLUDE_DIR})
@@ -43,7 +50,9 @@ if(RE3_AUDIO STREQUAL "OAL")
     target_compile_definitions(re3 PRIVATE ${OPENAL_DEFINITIONS})
     target_compile_definitions(re3 PRIVATE AUDIO_OAL)
 elseif(RE3_AUDIO STREQUAL "MSS")
+    find_package(MilesSDK REQUIRED)
     target_compile_definitions(re3 PRIVATE AUDIO_MSS)
+    target_link_libraries(re3 PRIVATE MilesSDK::MilesSDK)
 endif()
 
 if(RE3_WITH_OPUS)
