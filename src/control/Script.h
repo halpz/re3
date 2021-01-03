@@ -1,5 +1,6 @@
 #pragma once
 #include "common.h"
+#include "Font.h"
 #include "Ped.h"
 #include "PedType.h"
 #include "Text.h"
@@ -99,7 +100,7 @@ struct intro_text_line
 		m_sBackgroundColor = CRGBA(128, 128, 128, 128);
 		m_bTextProportional = true;
 		m_bTextBeforeFade = false;
-		m_nFont = 2; /* enum? */
+		m_nFont = FONT_STANDARD;
 		m_fAtX = 0.0f;
 		m_fAtY = 0.0f;
 		memset(&m_Text, 0, sizeof(m_Text));
