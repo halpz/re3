@@ -95,7 +95,7 @@ jobs:
           conan export re3mss miles-sdk/master@
       - name: "Download/build dependencies (conan install)"
         run: |
-          conan install ${{ github.workspace }} re3/master@ -if build -o re3:audio=${{ matrix.audio }} -o librw:platform=${{ matrix.platform }} -o librw:gl3_gfxlib=${{ matrix.gl3_gfxlib || 'glfw' }} --build missing -pr:h ./host_profile -pr:b default
+          conan install ${{ github.workspace }} re3/master@ -if build -o re3:audio=${{ matrix.audio }} -o librw:platform=${{ matrix.platform }} -o librw:gl3_gfxlib=${{ matrix.gl3_gfxlib || 'glfw' }} --build missing -pr:h ./host_profile -pr:b default -s re3:build_type=RelWithDebInfo -s librw:build_type=RelWithDebInfo
         env:
           CONAN_SYSREQUIRES_MODE: enabled
       - name: "Build re3 (conan build)"
@@ -107,7 +107,7 @@ jobs:
       - name: "Create binary package (cpack)"
         working-directory: ./build
         run: |
-          cpack
+          cpack -C RelWithDebInfo
       - name: "Archive binary package (github artifacts)"
         uses: actions/upload-artifact@v2
         with:

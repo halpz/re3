@@ -109,7 +109,7 @@ class Re3Conan(ConanFile):
                            project(cmake_wrapper)
     
                            include("{}/conanbuildinfo.cmake")
-                           conan_basic_setup(TARGETS)
+                           conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
     
                            add_subdirectory("{}" re3)
                            """).format(self.install_folder.replace("\\", "/"),

@@ -115,4 +115,7 @@ if(RE3_INSTALL)
         EXPORT re3-targets
         RUNTIME DESTINATION "."
     )
+    if(MSVC)
+        install(FILES $<TARGET_PDB_FILE:re3> DESTINATION "." OPTIONAL)
+    endif()
 endif()
