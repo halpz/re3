@@ -4,6 +4,7 @@
 #include "Pad.h"
 #include "Clock.h"
 #include "Stats.h"
+#include "VarConsole.h"
 
 // --MIAMI: File done
 
@@ -20,6 +21,10 @@ uint32 CClock::ms_nMillisecondsPerGameMinute;
 uint32  CClock::ms_nLastClockTick;
 bool   CClock::ms_bClockHasBeenStored;
 
+#ifndef MASTER
+bool gbFreezeTime;
+#endif
+
 void
 CClock::Initialise(uint32 scale)
 {
@@ -31,6 +36,10 @@ CClock::Initialise(uint32 scale)
 	ms_nLastClockTick = CTimer::GetTimeInMilliseconds();
 	ms_bClockHasBeenStored = false;
 	debug("CClock ready\n");
+#ifndef MASTER
+	VarConsole.Add("Time (hour of day)", &ms_nGameClockHours, 1, 0, 23, true);
+	VarConsole.Add("Freeze time", &gbFreezeTime, true);
+#endif
 }
 
 void
@@ -50,6 +59,10 @@ CClock::Update(void)
 		}
 		
 	}
+#ifndef MASTER
+	else if (gbFreezeTime)
+		ms_nLastClockTick = CTimer::GetTimeInMilliseconds();
+#endif
 	else if(CTimer::GetTimeInMilliseconds() - ms_nLastClockTick > ms_nMillisecondsPerGameMinute || gbFastTime)
 	{
 		ms_nGameClockMinutes++;

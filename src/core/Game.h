@@ -48,6 +48,11 @@ public:
 	static bool playingIntro;
 	static char aDatFile[32];
 
+#ifndef MASTER
+	static CVector PlayerCoords;
+	static bool8 VarUpdatePlayerCoords;
+#endif
+
 	static bool InitialiseOnceBeforeRW(void);
 	static bool InitialiseRenderWare(void);
 	static void ShutdownRenderWare(void);

@@ -24,6 +24,7 @@
 #include "Stats.h"
 #include "main.h"
 #include "General.h"
+#include "VarConsole.h"
 
 // --MIAMI: file done
 
@@ -1760,6 +1761,9 @@ void CHud::Initialise()
 	m_LastWanted = 0;
 	m_LastWeapon = 0;
 
+#ifndef MASTER
+	VarConsole.Add("Draw HUD", &m_Wants_To_Draw_Hud, false);
+#endif
 	CTxdStore::PopCurrentTxd();
 }
 

@@ -10,6 +10,7 @@
 #include "Vehicle.h"
 #include "Wanted.h"
 #include "World.h"
+#include "VarConsole.h"
 
 #define TIME_BETWEEN_SETPIECE_SPAWNS 20000
 
@@ -23,6 +24,9 @@ void CSetPieces::Init(void)
 {
 	bDebug = false;
 	NumSetPieces = 0;
+#ifndef MASTER
+	VarConsole.Add("Show set pieces", &bDebug, true);
+#endif
 }
 
 void CSetPieces::AddOne(uint8 type, CVector2D vTriggerInf, CVector2D vTriggerSup, CVector2D vSpawn1, CVector2D vTarget1, CVector2D vSpawn2, CVector2D vTarget2)
@@ -47,6 +51,9 @@ void CSetPieces::Update(void)
 	int nLast = NumSetPieces * (CTimer::GetFrameCounter() % 8 + 1) / 8;
 	for (int i = nFirst; i < nLast; i++)
 		aSetPieces[i].Update();
+#ifndef MASTER
+	// TODO: debug code from mobile
+#endif // !MASTER
 }
 
 void CSetPieces::Save(uint8* buf, uint32* size)

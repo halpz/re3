@@ -58,5 +58,5 @@ bool CalcScreenCoors(CVector const &in, CVector *out, float *outw, float *outh);
 bool CalcScreenCoors(CVector const &in, CVector *out);
 
 #ifndef MASTER
-extern bool bDisplayOccDebugStuff;
+extern bool bDispayOccDebugStuff;
 #endif

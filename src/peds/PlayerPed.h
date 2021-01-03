@@ -46,6 +46,9 @@ public:
 	unsigned int m_nLastBusFareCollected;
 
 	static bool bDontAllowWeaponChange;
+#ifndef MASTER
+	static bool bDebugPlayerInfo;
+#endif
 
 	CPlayerPed();
 	~CPlayerPed();

@@ -647,7 +647,7 @@ extern bool gbRenderWorld2;
 #endif
 		DebugMenuAddVar("Render", "Drunkness", &CMBlur::Drunkness, nil, 0.05f, 0, 1.0f);
 #ifndef MASTER
-		DebugMenuAddVarBool8("Render", "Occlusion debug", &bDisplayOccDebugStuff, nil);
+		DebugMenuAddVarBool8("Render", "Occlusion debug", &bDispayOccDebugStuff, nil);
 #endif
 #ifdef EXTENDED_PIPELINES
 		static const char *vehpipenames[] = { "MatFX", "Neo" };

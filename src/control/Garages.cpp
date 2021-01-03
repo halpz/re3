@@ -23,6 +23,7 @@
 #include "Vehicle.h"
 #include "Wanted.h"
 #include "World.h"
+#include "VarConsole.h"
 
 //--MIAMI: file done
 
@@ -129,8 +130,15 @@ int32 hGarages = AEHANDLE_NONE;
 CGarage CGarages::aGarages[NUM_GARAGES];
 bool CGarages::bCamShouldBeOutisde;
 
+#ifndef MASTER
+bool bPrintNearestObject;
+#endif
+
 void CGarages::Init(void)
 {
+#ifndef MASTER
+	VarConsole.Add("Print nearest object", &bPrintNearestObject, true);
+#endif
 	CrushedCarId = -1;
 	NumGarages = 0;
 	MessageEndTime = 0;
