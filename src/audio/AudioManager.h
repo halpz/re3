@@ -185,7 +185,7 @@ class cAudioManager
 {
 public:
 	bool m_bIsInitialised;
-	uint8 field_1; // unused
+	bool m_bReverb; // unused
 	bool m_bFifthFrameFlag;
 	uint8 m_nActiveSamples;
 	uint8 field_4; // unused

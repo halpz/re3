@@ -17,12 +17,15 @@ const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
 const int policeChannel = channels + 1;
 const int allChannels = channels + 2;
 
+#define SPEED_OF_SOUND 343.f
+#define TIME_SPENT 50
+
 cAudioManager::cAudioManager()
 {
 	m_bIsInitialised = false;
-	field_1 = 1;
-	m_fSpeedOfSound = 6.86f;
-	m_nTimeSpent = 50;
+	m_bReverb = true;
+	m_fSpeedOfSound = SPEED_OF_SOUND / TIME_SPENT;
+	m_nTimeSpent = TIME_SPENT;
 	m_nActiveSamples = NUM_SOUNDS_SAMPLES_SLOTS;
 	m_nActiveSampleQueue = 1;
 	ClearRequestedQueue();
