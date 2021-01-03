@@ -1,7 +1,7 @@
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-file(GLOB_RECURSE RE3_SOURCES "*.cpp" "*.h")
+file(GLOB_RECURSE RE3_SOURCES "*.cpp" "*.h" "*.rc")
 
 function(header_directories RETURN_LIST)
     file(GLOB_RECURSE ALL_SRCS *.h *.cpp *.c)
@@ -17,7 +17,10 @@ endfunction()
 
 header_directories(RE3_INCLUDES)
 
-add_executable(re3 WIN32 ${RE3_SOURCES})
+add_executable(re3 WIN32
+    ${RE3_SOURCES}
+)
+
 target_link_libraries(re3 PRIVATE
     librw::librw
     Threads::Threads
