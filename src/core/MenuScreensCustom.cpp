@@ -24,7 +24,7 @@
 #ifdef CUSTOM_FRONTEND_OPTIONS
 
 #ifdef IMPROVED_VIDEOMODE
-	#define VIDEOMODE_SELECTOR MENUACTION_CFO_SELECT, "FEM_SCF", { new CCFOSelect((int8*)&FrontEndMenuManager.m_nPrefsWindowed, nil, screenModes, 2, true, ScreenModeAfterChange) },
+	#define VIDEOMODE_SELECTOR MENUACTION_CFO_SELECT, "FEM_SCF", { new CCFOSelect((int8*)&FrontEndMenuManager.m_nPrefsWindowed, nil, screenModes, 2, true, ScreenModeAfterChange, true) },
 #else
 	#define VIDEOMODE_SELECTOR
 #endif
@@ -36,19 +36,19 @@
 #endif
 
 #ifdef CUTSCENE_BORDERS_SWITCH
-	#define CUTSCENE_BORDERS_TOGGLE MENUACTION_CFO_SELECT, "FEM_CSB", { new CCFOSelect((int8 *)&CMenuManager::m_PrefsCutsceneBorders, "CutsceneBorders", off_on, 2, false, nil) },
+	#define CUTSCENE_BORDERS_TOGGLE MENUACTION_CFO_SELECT, "FEM_CSB", { new CCFOSelect((int8 *)&CMenuManager::m_PrefsCutsceneBorders, "CutsceneBorders", off_on, 2, false) },
 #else
 	#define CUTSCENE_BORDERS_TOGGLE
 #endif
 
 #ifdef FREE_CAM
-	#define FREE_CAM_TOGGLE MENUACTION_CFO_SELECT, "FEC_FRC", { new CCFOSelect((int8*)&TheCamera.bFreeCam, "FreeCam", off_on, 2, false, nil) },
+	#define FREE_CAM_TOGGLE MENUACTION_CFO_SELECT, "FEC_FRC", { new CCFOSelect((int8*)&TheCamera.bFreeCam, "FreeCam", off_on, 2, false) },
 #else
 	#define FREE_CAM_TOGGLE
 #endif
 
 #ifdef PS2_ALPHA_TEST
-	#define DUALPASS_SELECTOR MENUACTION_CFO_SELECT, "FEM_2PR", { new CCFOSelect((int8*)&gPS2alphaTest, "PS2AlphaTest", off_on, 2, false, nil) },
+	#define DUALPASS_SELECTOR MENUACTION_CFO_SELECT, "FEM_2PR", { new CCFOSelect((int8*)&gPS2alphaTest, "PS2AlphaTest", off_on, 2, false) },
 #else
 	#define DUALPASS_SELECTOR 
 #endif
@@ -61,14 +61,14 @@
 
 #ifdef EXTENDED_COLOURFILTER
 	#define POSTFX_SELECTORS \
-		MENUACTION_CFO_SELECT, "FED_CLF", { new CCFOSelect((int8*)&CPostFX::EffectSwitch, "ColourFilter", filterNames, ARRAY_SIZE(filterNames), false, nil) }, \
-		MENUACTION_CFO_SELECT, "FED_MBL", { new CCFOSelect((int8*)&CPostFX::MotionBlurOn, "MotionBlur", off_on, 2, false, nil) },
+		MENUACTION_CFO_SELECT, "FED_CLF", { new CCFOSelect((int8*)&CPostFX::EffectSwitch, "ColourFilter", filterNames, ARRAY_SIZE(filterNames), false) }, \
+		MENUACTION_CFO_SELECT, "FED_MBL", { new CCFOSelect((int8*)&CPostFX::MotionBlurOn, "MotionBlur", off_on, 2, false) },
 #else
 	#define POSTFX_SELECTORS
 #endif	
 
 #ifdef INVERT_LOOK_FOR_PAD
-	#define INVERT_PAD_SELECTOR MENUACTION_CFO_SELECT, "FEC_IVP", { new CCFOSelect((int8*)&CPad::bInvertLook4Pad, "InvertPad", off_on, 2, false, nil) },
+	#define INVERT_PAD_SELECTOR MENUACTION_CFO_SELECT, "FEC_IVP", { new CCFOSelect((int8*)&CPad::bInvertLook4Pad, "InvertPad", off_on, 2, false) },
 #else
 	#define INVERT_PAD_SELECTOR
 #endif

@@ -1564,6 +1564,7 @@ CMenuManager::Draw()
 				CMenuScreenCustom::CMenuEntry &option = aScreens[m_nCurrScreen].m_aEntries[i];
 				if (option.m_Action == MENUACTION_CFO_SELECT) {
 
+					isOptionDisabled = option.m_CFOSelect->disableIfGameLoaded && !m_bGameNotLoaded;
 					if (option.m_CFOSelect->onlyApplyOnEnter){
 						if (m_nCurrOption != i) {
 							if (option.m_CFOSelect->displayedValue != option.m_CFOSelect->lastSavedValue)
@@ -5081,6 +5082,9 @@ CMenuManager::ProcessButtonPresses(void)
 				case MENUACTION_CFO_DYNAMIC:
 					CMenuScreenCustom::CMenuEntry &option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption];
 					if (option.m_Action == MENUACTION_CFO_SELECT) {
+						if (option.m_CFOSelect->disableIfGameLoaded && !m_bGameNotLoaded)
+							break;
+
 						if (!option.m_CFOSelect->onlyApplyOnEnter) {
 							option.m_CFOSelect->displayedValue++;
 							if (option.m_CFOSelect->displayedValue >= option.m_CFOSelect->numRightTexts || option.m_CFOSelect->displayedValue < 0)
@@ -5307,6 +5311,9 @@ CMenuManager::ProcessButtonPresses(void)
 			case MENUACTION_CFO_DYNAMIC:
 				CMenuScreenCustom::CMenuEntry &option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption];
 				if (option.m_Action == MENUACTION_CFO_SELECT) {
+					if (option.m_CFOSelect->disableIfGameLoaded && !m_bGameNotLoaded)
+						break;
+					
 					if (changeValueBy > 0) {
 						option.m_CFOSelect->displayedValue++;
 						if (option.m_CFOSelect->displayedValue >= option.m_CFOSelect->numRightTexts)
