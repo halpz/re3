@@ -254,6 +254,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		pPed->SetObjective(OBJECTIVE_CATCH_TRAIN);
 		return 0;
 	}
+	*/
 #ifdef GTA_SCRIPT_COLLECTIVE
 	case COMMAND_SET_COLL_OBJ_CATCH_TRAIN:
 		CollectParameters(&m_nIp, 1);
