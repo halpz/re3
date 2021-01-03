@@ -3653,7 +3653,7 @@ Port 1 Fichier Protégé.
 ~1~ sur 12!
 
 [T4X4_2C]
-~y~ Passe le premier point de passage pour déclencher le chrono. ~y~ Chaque point de passage te rapportera ~y~10 secondes~g~.
+~y~Passe le premier point de passage pour déclencher le chrono. ~y~ Chaque point de passage te rapportera ~y~10 secondes~g~.
 
 [T4X4_3A]
 ~g~Tu as ~y~5 minutes~g~ pour franchir ~y~20~g~ points de passage. ~g~Tu peux les franchir dans ~y~n'importe quel ordre.
@@ -5045,7 +5045,7 @@ Tu as prouvé que tu étais un bon investissement, ce qui est rare en ces jours 
 ~w~Merci Chico. A plus tard.
 
 [FM1_W]
-. ~w~Ok Fido, tu attends ici et tu surveilles la caisse pendant que je vais m'éclater.
+~w~Ok Fido, tu attends ici et tu surveilles la caisse pendant que je vais m'éclater.
 
 [FM1_X]
 ~w~Ok Fido, tirons-nous d'ici. Ouuulaa!

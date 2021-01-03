@@ -2084,7 +2084,7 @@ Die Yakuza werden das als Kriegserklãrung des Kartells auffassen.
 ~r~Die Yakuza haben dich erkannt!
 
 [LOVE2_6]
-~r~ Du hast alle Zeugen aus dem Weg gerãumt!!
+~r~Du hast alle Zeugen aus dem Weg gerãumt!!
 
 [LOVE3_A]
 In scheinheiligen Zeiten wie diesen sind bestimmte wertvolle Waren schwer zu importieren.
@@ -3245,7 +3245,7 @@ Wollen sehen, ob du so gut bist, wie du sagst.
 ~w~Hepburn Heights. Knöpf dir ein paar Diablos vor.
 
 [YD2_G2]
-~w~ Aber denk dran, ~r~du steigst nicht aus dem Wagen!!
+~w~Aber denk dran, ~r~du steigst nicht aus dem Wagen!!
 
 [YD2_H]
 ~w~Okay, fahr uns zurück auf Yardie-Gebiet! LOS, LOS, LOS!!
@@ -5054,7 +5054,7 @@ Und stiehl ein paar Sachen, damit ich die Versicherung kassieren kann.
 ~w~Ah, mein Junge!
 
 [TM3_N2]
-~w~ Hallo, Paps.
+~w~Hallo, Paps.
 
 [TM3_O]
 ~w~Hast du endlich eine Frau gefunden?
@@ -5198,13 +5198,13 @@ Du bist eine sichere Bank. So etwas ist selten in diesen schlechten Zeiten.
 ~w~Okay, Fiffi, lass uns 'nen Abgang machen. Huuh!
 
 [FM1_Q]
-~w~ Hey, Maria! Meine Traumfrau!
+~w~Hey, Maria! Meine Traumfrau!
 
 [FM1_S1]
 ~w~Vielleicht solltest du mal die Party in der Lagerhalle am Ostende von Atlantic Quays auschecken.
 
 [FM1_U]
-~w~ Gracias. Und viel Spaß. Ist gutes Zeug.
+~w~Gracias. Und viel Spaß. Ist gutes Zeug.
 
 [FM1_V]
 ~w~Na los, Fiffi, sehen wir uns mal die Party an!
@@ -6263,7 +6263,7 @@ Die Kolumbianer müssen jeden Moment hier sein!
 Verdammt, da sind sie!! LOS, LADEN!!
 
 [LOVE2_7]
-~g~ Jetzt lass den Wagen stehen!
+~g~Jetzt lass den Wagen stehen!
 
 [LOVE2_8]
 ~g~Jetzt verschwinde aus Newport!
