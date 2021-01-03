@@ -95,8 +95,8 @@ struct intro_text_line
 		m_bCentered = false;
 		m_bBackground = false;
 		m_bBackgroundOnly = false;
-		m_fWrapX = 182.0f; /* TODO: scaling as bugfix */
-		m_fCenterSize = 640.0f; /* --||-- */
+		m_fWrapX = 182.0f;
+		m_fCenterSize = 640.0f;
 		m_sBackgroundColor = CRGBA(128, 128, 128, 128);
 		m_bTextProportional = true;
 		m_bTextBeforeFade = false;
