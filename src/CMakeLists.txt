@@ -83,20 +83,20 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
     target_compile_options(re3
         PRIVATE
             "-Wall"
-        )
+    )
     if (NOT LIBRW_PLATFORM_PS2)
         target_compile_options(re3
             PRIVATE
                 -Wextra
                 -Wdouble-promotion
                 -Wpedantic
-            )
+        )
     endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(re3
         PUBLIC
             /Zc:sizedDealloc-
-        )
+    )
 endif()
 
 set_target_properties(re3
@@ -107,14 +107,12 @@ set_target_properties(re3
         CXX_STANDARD 11
         CXX_EXTENSIONS OFF
         CXX_STANDARD_REQUIRED ON
-    )
+)
 
 if(RE3_INSTALL)
     install(
         TARGETS re3
         EXPORT re3-targets
-        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-        )
+        RUNTIME DESTINATION "."
+    )
 endif()

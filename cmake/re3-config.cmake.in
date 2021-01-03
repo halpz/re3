@@ -1,5 +1,0 @@
-include("${CMAKE_CURRENT_LIST_DIR}/re3-targets.cmake")
-
-set(RE3_AUDIO "@RE3_AUDIO@")
-set(RE3_AUDIOS "@RE3_AUDIOS@")
-set(RE3_PLATFORM @LIBRW_PLATFORM@)

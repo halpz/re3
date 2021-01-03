@@ -21,11 +21,6 @@ if(NOT RE3_AUDIO IN_LIST RE3_AUDIOS)
     message(FATAL_ERROR "Illegal RE3_AUDIO=${RE3_AUDIO}")
 endif()
 
-if(RE3_INSTALL)
-    include(GNUInstallDirs)
-    set(RE3_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}/re3")
-endif()
-
 option(RE3_VENDORED_LIBRW "Use vendored librw" ON)
 if(RE3_VENDORED_LIBRW)
     add_subdirectory(vendor/librw)
@@ -35,19 +30,7 @@ endif()
 add_subdirectory(src)
 
 if(RE3_INSTALL)
-    include(CMakePackageConfigHelpers)
-    configure_package_config_file(cmake/re3-config.cmake.in re3-config.cmake
-        INSTALL_DESTINATION "${CMAKE_INSTALL_PREFIX}"
-        )
-    install(
-        FILES "${CMAKE_CURRENT_BINARY_DIR}/re3-config.cmake"
-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
-        )
-    install(
-        EXPORT re3-targets
-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
-        )
-
+    install(DIRECTORY gamefiles/ DESTINATION ".")
     if(LIBRW_PLATFORM_NULL)
         set(platform "-null")
     elseif(LIBRW_PLATFORM_PS2)
