@@ -14,6 +14,7 @@
 using namespace rw;
 
 RwUInt8 RwObjectGetType(const RwObject *obj) { return obj->type; }
+RwFrame* rwObjectGetParent(const RwObject *obj) { return (RwFrame*)obj->parent; }
 
 
 void *RwMalloc(size_t size) { return engine->memfuncs.rwmalloc(size, 0); }
