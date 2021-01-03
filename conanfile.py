@@ -81,38 +81,41 @@ class Re3Conan(ConanFile):
     def build(self):
         if self.source_folder == self.build_folder:
             raise Exception("cannot build with source_folder == build_folder")
-        os.unlink(os.path.join(self.install_folder, "Findlibrw.cmake"))
-        tools.save("FindOpenAL.cmake",
-                   textwrap.dedent(
-                       """
-                       set(OPENAL_FOUND ON)
-                       set(OPENAL_INCLUDE_DIR ${OpenAL_INCLUDE_DIRS})
-                       set(OPENAL_LIBRARY ${OpenAL_LIBRARIES})
-                       set(OPENAL_DEFINITIONS ${OpenAL_DEFINITIONS})
-                       """), append=True)
-        if self.options["librw"].platform == "gl3" and self.options["librw"].gl3_gfxlib == "glfw":
-            tools.save("Findglfw3.cmake",
+        try:
+            os.unlink(os.path.join(self.install_folder, "Findlibrw.cmake"))
+            tools.save("FindOpenAL.cmake",
                        textwrap.dedent(
                            """
-                           if(NOT TARGET glfw)
-                             message(STATUS "Creating glfw TARGET")
-                             add_library(glfw INTERFACE IMPORTED)
-                             set_target_properties(glfw PROPERTIES
-                                INTERFACE_LINK_LIBRARIES CONAN_PKG::glfw)
-                           endif()
+                           set(OPENAL_FOUND ON)
+                           set(OPENAL_INCLUDE_DIR ${OpenAL_INCLUDE_DIRS})
+                           set(OPENAL_LIBRARY ${OpenAL_LIBRARIES})
+                           set(OPENAL_DEFINITIONS ${OpenAL_DEFINITIONS})
                            """), append=True)
-        tools.save("CMakeLists.txt",
-                   textwrap.dedent(
-                       """
-                       cmake_minimum_required(VERSION 3.0)
-                       project(cmake_wrapper)
-
-                       include("{}/conanbuildinfo.cmake")
-                       conan_basic_setup(TARGETS)
-
-                       add_subdirectory("{}" re3)
-                       """).format(self.install_folder.replace("\\", "/"),
-                                   self.source_folder.replace("\\", "/")))
+            if self.options["librw"].platform == "gl3" and self.options["librw"].gl3_gfxlib == "glfw":
+                tools.save("Findglfw3.cmake",
+                           textwrap.dedent(
+                               """
+                               if(NOT TARGET glfw)
+                                 message(STATUS "Creating glfw TARGET")
+                                 add_library(glfw INTERFACE IMPORTED)
+                                 set_target_properties(glfw PROPERTIES
+                                    INTERFACE_LINK_LIBRARIES CONAN_PKG::glfw)
+                               endif()
+                               """), append=True)
+            tools.save("CMakeLists.txt",
+                       textwrap.dedent(
+                           """
+                           cmake_minimum_required(VERSION 3.0)
+                           project(cmake_wrapper)
+    
+                           include("{}/conanbuildinfo.cmake")
+                           conan_basic_setup(TARGETS)
+    
+                           add_subdirectory("{}" re3)
+                           """).format(self.install_folder.replace("\\", "/"),
+                                       self.source_folder.replace("\\", "/")))
+        except FileNotFoundError:
+            pass
         cmake = CMake(self)
         cmake.definitions["RE3_AUDIO"] = self._re3_audio
         cmake.definitions["RE3_WITH_OPUS"] = self.options.with_opus
