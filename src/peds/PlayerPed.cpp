@@ -61,7 +61,7 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 	m_pWanted->Initialise();
 	m_pArrestingCop = nil;
 	m_currentWeapon = WEAPONTYPE_UNARMED;
-	m_nSelectedWepSlot = 0;
+	m_nSelectedWepSlot = WEAPONSLOT_UNARMED;
 	m_nSpeedTimer = 0;
 	m_bSpeedTimerFlag = false;
 	SetWeaponLockOnTarget(nil);
@@ -300,7 +300,7 @@ CPlayerPed::SetInitialState(void)
 	m_nLastPedState = PED_NONE;
 	m_animGroup = ASSOCGRP_PLAYER;
 	m_fMoveSpeed = 0.0f;
-	m_nSelectedWepSlot = WEAPONTYPE_UNARMED;
+	m_nSelectedWepSlot = WEAPONSLOT_UNARMED;
 	m_nEvadeAmount = 0;
 	m_pEvadingFrom = nil;
 	bIsPedDieAnimPlaying = false;
@@ -748,17 +748,20 @@ CPlayerPed::ProcessWeaponSwitch(CPad *padUsed)
 				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER
 				&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_CAMERA) {
 
-				for (m_nSelectedWepSlot = m_currentWeapon - 1; ; --m_nSelectedWepSlot) {
+				// I don't know what kind of loop that was
+				m_nSelectedWepSlot = m_currentWeapon - 1;
+				do {
 					if (m_nSelectedWepSlot < 0)
 						m_nSelectedWepSlot = TOTAL_WEAPON_SLOTS - 1;
 
-					if (m_nSelectedWepSlot == 0)
+					if (m_nSelectedWepSlot == WEAPONSLOT_UNARMED)
 						break;
 
-					if (HasWeaponSlot(m_nSelectedWepSlot) && GetWeapon(m_nSelectedWepSlot).HasWeaponAmmoToBeUsed()) {
+					if (HasWeaponSlot(m_nSelectedWepSlot) && GetWeapon(m_nSelectedWepSlot).HasWeaponAmmoToBeUsed())
 						break;
-					}
-				}
+					
+					--m_nSelectedWepSlot;
+				} while (m_nSelectedWepSlot != WEAPONSLOT_UNARMED);
 			}
 		}
 	}
@@ -772,17 +775,17 @@ spentAmmoCheck:
 				|| TheCamera.PlayerWeaponMode.Mode == CCam::MODE_ROCKETLAUNCHER)
 				return;
 
-			if (GetWeapon()->m_eWeaponType != WEAPONTYPE_DETONATOR
-				|| GetWeapon(2).m_eWeaponType != WEAPONTYPE_DETONATOR_GRENADE)
-				m_nSelectedWepSlot = m_currentWeapon - 1;
+			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_DETONATOR
+				&& GetWeapon(WEAPONSLOT_PROJECTILE).m_eWeaponType == WEAPONTYPE_DETONATOR_GRENADE)
+				m_nSelectedWepSlot = WEAPONSLOT_PROJECTILE;
 			else
-				m_nSelectedWepSlot = 2;
+				m_nSelectedWepSlot = m_currentWeapon - 1;
 
-			for (; m_nSelectedWepSlot >= 0; --m_nSelectedWepSlot) {
+			for (; m_nSelectedWepSlot >= WEAPONSLOT_UNARMED; --m_nSelectedWepSlot) {
 
 				// BUG: m_nSelectedWepSlot and GetWeapon(..) takes slot in VC but they compared them against weapon types in whole condition! jeez
 #ifdef FIX_BUGS
-				if (m_nSelectedWepSlot == 1 || GetWeapon(m_nSelectedWepSlot).m_nAmmoTotal > 0 && m_nSelectedWepSlot != 2) {
+				if (m_nSelectedWepSlot == WEAPONSLOT_MELEE || GetWeapon(m_nSelectedWepSlot).m_nAmmoTotal > 0 && m_nSelectedWepSlot != WEAPONSLOT_PROJECTILE) {
 #else
 				if (m_nSelectedWepSlot == WEAPONTYPE_BASEBALLBAT && GetWeapon(WEAPONTYPE_BASEBALLBAT).m_eWeaponType == WEAPONTYPE_BASEBALLBAT
 					|| GetWeapon(m_nSelectedWepSlot).m_nAmmoTotal > 0
@@ -791,15 +794,16 @@ spentAmmoCheck:
 					goto switchDetectDone;
 				}
 			}
-			m_nSelectedWepSlot = 0;
+			m_nSelectedWepSlot = WEAPONSLOT_UNARMED;
 		}
 	}
 
 switchDetectDone:
 	if (m_nSelectedWepSlot != m_currentWeapon) {
-		if (m_nPedState != PED_ATTACK && m_nPedState != PED_AIM_GUN && m_nPedState != PED_FIGHT)
+		if (m_nPedState != PED_ATTACK && m_nPedState != PED_AIM_GUN && m_nPedState != PED_FIGHT) {
 			RemoveWeaponAnims(m_currentWeapon, -1000.0f);
 			MakeChangesForNewWeapon(m_nSelectedWepSlot);
+		}
 	}
 }
 

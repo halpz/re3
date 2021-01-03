@@ -2147,10 +2147,10 @@ CPed::SelectGunIfArmed(void)
 		if (GetWeapon(i).m_nAmmoTotal > 0) {
 			eWeaponType weaponType = GetWeapon(i).m_eWeaponType;
 
-			if (weaponType == WEAPONTYPE_COLT45 || weaponType == WEAPONTYPE_PYTHON || weaponType == WEAPONTYPE_SHOTGUN ||
+			if (weaponType == WEAPONTYPE_COLT45 || weaponType == WEAPONTYPE_UZI || weaponType == WEAPONTYPE_MP5 || weaponType == WEAPONTYPE_M4 ||
+				weaponType == WEAPONTYPE_COLT45 || weaponType == WEAPONTYPE_PYTHON || weaponType == WEAPONTYPE_SHOTGUN ||
 				weaponType == WEAPONTYPE_SPAS12_SHOTGUN || weaponType == WEAPONTYPE_STUBBY_SHOTGUN ||
-				weaponType == WEAPONTYPE_UZI || weaponType == WEAPONTYPE_M4 || weaponType == WEAPONTYPE_MP5 ||
-				weaponType == WEAPONTYPE_ROCKETLAUNCHER || weaponType == WEAPONTYPE_FLAMETHROWER || weaponType == WEAPONTYPE_SNIPERRIFLE) {
+				weaponType == WEAPONTYPE_ROCKETLAUNCHER || weaponType == WEAPONTYPE_SNIPERRIFLE || weaponType == WEAPONTYPE_FLAMETHROWER) {
 				SetCurrentWeapon(i);
 				return true;
 			}

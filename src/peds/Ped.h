@@ -1003,7 +1003,7 @@ public:
 	// My names. Inlined in VC
 	AnimationId GetFireAnimNotDucking(CWeaponInfo* weapon) {
 		if (m_nPedType == PEDTYPE_COP && weapon->IsFlagSet(WEAPONFLAG_COP3_RD))
-			return ANIM_WEAPON_FIRE_3RD;
+			return Get3rdFireAnim(weapon);
 		else
 			return GetPrimaryFireAnim(weapon);
 	}

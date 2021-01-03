@@ -661,9 +661,7 @@ CPed::Attack(void)
 {
 	CAnimBlendAssociation *weaponAnimAssoc;
 	int32 weaponAnim;
-	eWeaponType ourWeaponType;
 	float weaponAnimTime;
-	eWeaponFire ourWeaponFire;
 	float animLoopEnd;
 	CWeaponInfo *ourWeapon;
 	bool attackShouldContinue;
@@ -673,9 +671,7 @@ CPed::Attack(void)
 	float animLoopStart;
 	CVector firePos;
 
-	ourWeaponType = GetWeapon()->m_eWeaponType;
-	ourWeapon = CWeaponInfo::GetWeaponInfo(ourWeaponType);
-	ourWeaponFire = ourWeapon->m_eWeaponFire;
+	ourWeapon = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
 	weaponAnimAssoc = nil;
 	attackShouldContinue = !!bIsAttacking;
 	reloadAnimAssoc = nil;
@@ -694,14 +690,15 @@ CPed::Attack(void)
 				delayBetweenAnimAndFire = ourWeapon->m_fAnim2FrameFire;
 			}
 		}
-	} else {
-		AnimationId anim = GetFireAnimNotDucking(ourWeapon);
-		weaponAnimAssoc = RpAnimBlendClumpGetAssociation(GetClump(), anim);
-		if (anim == ANIM_WEAPON_FIRE_3RD && weaponAnimAssoc) {
+	} else if (m_nPedType == PEDTYPE_COP && Get3rdFireAnim(ourWeapon)){
+		weaponAnimAssoc = RpAnimBlendClumpGetAssociation(GetClump(), Get3rdFireAnim(ourWeapon));
+		if (weaponAnimAssoc) {
 			animLoopStart = 11.f/30.f;
 			animLoopEnd = 19.f/30.f;
 			delayBetweenAnimAndFire = 14.f/30.f;
 		}
+	} else {
+		weaponAnimAssoc = RpAnimBlendClumpGetAssociation(GetClump(), GetPrimaryFireAnim(ourWeapon));
 	}
 
 	if (GetReloadAnim(ourWeapon)) {
@@ -778,15 +775,15 @@ CPed::Attack(void)
 	if (!weaponAnimAssoc) {
 		if (!throwAssoc) {
 			if (attackShouldContinue) {
-				if (ourWeaponFire != WEAPON_FIRE_PROJECTILE || !IsPlayer() || ((CPlayerPed*)this)->m_bHaveTargetSelected) {
+				if (ourWeapon->m_eWeaponFire != WEAPON_FIRE_PROJECTILE || !IsPlayer() || ((CPlayerPed*)this)->m_bHaveTargetSelected) {
 					if (bCrouchWhenShooting && bIsDucking && GetCrouchFireAnim(ourWeapon)) {
 						weaponAnimAssoc = CAnimManager::BlendAnimation(GetClump(), ourWeapon->m_AnimToPlay, GetCrouchFireAnim(ourWeapon), 8.0f);
 
 					} else if(GetSecondFireAnim(ourWeapon) && CGeneral::GetRandomNumber() & 1){
 						weaponAnimAssoc = CAnimManager::BlendAnimation(GetClump(), ourWeapon->m_AnimToPlay, GetSecondFireAnim(ourWeapon), 8.0f);
 
-					} else if(!CGame::nastyGame || ourWeaponFire != WEAPON_FIRE_MELEE ||
-					          GetFireAnimGround(ourWeapon) || 
+					} else if(!CGame::nastyGame || ourWeapon->m_eWeaponFire != WEAPON_FIRE_MELEE ||
+					          !GetFireAnimGround(ourWeapon, false) || 
 						 CheckForPedsOnGroundToAttack(this, nil) < PED_ON_THE_FLOOR) {
 
 						weaponAnimAssoc = CAnimManager::BlendAnimation(GetClump(), ourWeapon->m_AnimToPlay, GetFireAnimNotDucking(ourWeapon), 8.0f);
@@ -831,11 +828,11 @@ CPed::Attack(void)
 			m_pedIK.m_flags &= ~CPedIK::AIMS_WITH_ARM;
 	}
 
-	if (ourWeaponType != WEAPONTYPE_CHAINSAW
+	if (GetWeapon()->m_eWeaponType != WEAPONTYPE_CHAINSAW
 		|| !meleeAttackStarted && delayBetweenAnimAndFire - 0.5f >= weaponAnimAssoc->currentTime
 		|| weaponAnimAssoc->currentTime - weaponAnimAssoc->timeStep > delayBetweenAnimAndFire) {
 
-		if (ourWeaponType == WEAPONTYPE_CHAINSAW) {
+		if (GetWeapon()->m_eWeaponType == WEAPONTYPE_CHAINSAW) {
 			DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_CHAINSAW_ATTACK, 0.0f);
 		} else if (weaponAnimTime <= delayBetweenAnimAndFire || weaponAnimTime - weaponAnimAssoc->timeStep > delayBetweenAnimAndFire || !weaponAnimAssoc->IsRunning()) {
 			if (weaponAnimAssoc->speed < 1.0f)
@@ -859,11 +856,11 @@ CPed::Attack(void)
 			
 			GetWeapon()->Fire(this, &firePos);
 
-			if (ourWeaponType == WEAPONTYPE_MOLOTOV || ourWeaponType == WEAPONTYPE_GRENADE || ourWeaponType == WEAPONTYPE_DETONATOR_GRENADE ||
-				ourWeaponType == WEAPONTYPE_TEARGAS) {
+			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_MOLOTOV || GetWeapon()->m_eWeaponType == WEAPONTYPE_GRENADE || GetWeapon()->m_eWeaponType == WEAPONTYPE_DETONATOR_GRENADE ||
+				GetWeapon()->m_eWeaponType == WEAPONTYPE_TEARGAS) {
 				RemoveWeaponModel(CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->m_nModelId);
 			}
-			if (!GetWeapon()->m_nAmmoTotal && ourWeaponFire != WEAPON_FIRE_MELEE && FindPlayerPed() != this) {
+			if (GetWeapon()->m_nAmmoTotal == 0 && ourWeapon->m_eWeaponFire != WEAPON_FIRE_MELEE && FindPlayerPed() != this) {
 				SelectGunIfArmed();
 			}
 
@@ -875,13 +872,13 @@ CPed::Attack(void)
 				switch (ourWeapon->m_AnimToPlay) {
 					case ASSOCGRP_UNARMED:
 						if (weaponAnimAssoc->animId == ANIM_MELEE_ATTACK || weaponAnimAssoc->animId == ANIM_MELEE_ATTACK_START) 
-							DMAudio.PlayOneShot(m_audioEntityId, SOUND_FIGHT_46, (damagerType | (ourWeaponType << 8)));
+							DMAudio.PlayOneShot(m_audioEntityId, SOUND_FIGHT_46, (damagerType | (GetWeapon()->m_eWeaponType << 8)));
 						break;
 					case ASSOCGRP_KNIFE:
 					case ASSOCGRP_BASEBALLBAT:
 					case ASSOCGRP_GOLFCLUB:
 					case ASSOCGRP_CHAINSAW:
-						DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_BAT_ATTACK, (damagerType | (ourWeaponType << 8)));
+						DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_BAT_ATTACK, (damagerType | (GetWeapon()->m_eWeaponType << 8)));
 						break;
 					default:
 						break;
@@ -944,14 +941,13 @@ CPed::Attack(void)
 	}
 
 	if (IsPlayer()) {
-		eWeaponType weaponType = GetWeapon()->m_eWeaponType;
-		if (weaponType == WEAPONTYPE_BASEBALLBAT || weaponType == WEAPONTYPE_GOLFCLUB || weaponType == WEAPONTYPE_KATANA) {
+		if (GetWeapon()->m_eWeaponType == WEAPONTYPE_BASEBALLBAT || GetWeapon()->m_eWeaponType == WEAPONTYPE_GOLFCLUB || GetWeapon()->m_eWeaponType == WEAPONTYPE_KATANA) {
 			float loopEndWithDelay = animLoopEnd;
 			if (loopEndWithDelay >= 98.0f)
 				loopEndWithDelay = (14.0f / 30.0f) + delayBetweenAnimAndFire;
 			if (weaponAnimAssoc->flags & ASSOC_RUNNING) {
 				if (weaponAnimAssoc->currentTime >= animLoopStart && weaponAnimAssoc->currentTime <= loopEndWithDelay)
-					CSpecialFX::AddWeaponStreak(weaponType);
+					CSpecialFX::AddWeaponStreak(GetWeapon()->m_eWeaponType);
 			}
 		}
 	}
@@ -970,7 +966,7 @@ CPed::Attack(void)
 	weaponAnimTime = weaponAnimAssoc->currentTime;
 
 	// Anim loop end, either start the loop again or finish the attack
-	if (weaponAnimTime > animLoopEnd || !weaponAnimAssoc->IsRunning() && ourWeaponFire != WEAPON_FIRE_PROJECTILE) {
+	if (weaponAnimTime > animLoopEnd || !weaponAnimAssoc->IsRunning() && ourWeapon->m_eWeaponFire != WEAPON_FIRE_PROJECTILE) {
 		if (GetWeapon()->m_eWeaponState == WEAPONSTATE_RELOADING) {
 			if (GetReloadAnim(ourWeapon) && !reloadAnimAssoc) {
 				if (!CWorld::Players[CWorld::PlayerInFocus].m_bFastReload) {
@@ -997,7 +993,7 @@ CPed::Attack(void)
 			PedOnGroundState pedOnGroundState;
 			if (ourWeapon->m_eWeaponFire == WEAPON_FIRE_MELEE &&
 				(CGame::nastyGame && ((pedOnGroundState = CheckForPedsOnGroundToAttack(this, nil)) > PED_IN_FRONT_OF_ATTACKER)
-				|| ourWeaponType == WEAPONTYPE_BASEBALLBAT && pedOnGroundState == NO_PED && bIsStanding && m_pCurSurface && m_pCurSurface->IsVehicle())) {
+				|| GetWeapon()->m_eWeaponType == WEAPONTYPE_BASEBALLBAT && pedOnGroundState == NO_PED && bIsStanding && m_pCurSurface && m_pCurSurface->IsVehicle())) {
 
 				AnimationId fireAnim = GetFireAnimGround(ourWeapon, false);
 				if (weaponAnimAssoc->animId == fireAnim)
@@ -1030,10 +1026,10 @@ CPed::Attack(void)
 
 			// Echoes of bullets, at the end of the attack. (Bug: doesn't play while reloading)
 			if (weaponAnimAssoc->currentTime - weaponAnimAssoc->timeStep < animLoopEnd) 
-				DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, ourWeaponType);
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_AK47_BULLET_ECHO, GetWeapon()->m_eWeaponType);
 
 			// Fun fact: removing this part leds to reloading flamethrower
-			if (ourWeaponType == WEAPONTYPE_FLAMETHROWER && weaponAnimAssoc->IsRunning()) {
+			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER && weaponAnimAssoc->IsRunning()) {
 				weaponAnimAssoc->flags |= ASSOC_DELETEFADEDOUT;
 				weaponAnimAssoc->flags &= ~ASSOC_RUNNING;
 				weaponAnimAssoc->blendDelta = -4.0f;
