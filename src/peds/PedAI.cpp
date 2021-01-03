@@ -2037,7 +2037,8 @@ CPed::SelectGunIfArmed(void)
 	for (int i = 0; i < m_maxWeaponTypeAllowed; i++) {
 		if (GetWeapon(i).m_nAmmoTotal > 0) {
 			eWeaponType weaponType = GetWeapon(i).m_eWeaponType;
-			if (weaponType >= WEAPONTYPE_COLT45 && weaponType != WEAPONTYPE_M16 && weaponType <= WEAPONTYPE_FLAMETHROWER) {
+			if (weaponType == WEAPONTYPE_BASEBALLBAT || weaponType == WEAPONTYPE_COLT45 || weaponType == WEAPONTYPE_UZI || weaponType == WEAPONTYPE_SHOTGUN ||
+				weaponType == WEAPONTYPE_M16 || weaponType == WEAPONTYPE_SNIPERRIFLE || weaponType == WEAPONTYPE_ROCKETLAUNCHER) {
 				SetCurrentWeapon(i);
 				return true;
 			}

@@ -522,9 +522,7 @@ CPed::Attack(void)
 	CAnimBlendAssociation *weaponAnimAssoc;
 	int32 weaponAnim;
 	float animStart;
-	eWeaponType ourWeaponType;
 	float weaponAnimTime;
-	eWeaponFire ourWeaponFire;
 	float animLoopEnd;
 	CWeaponInfo *ourWeapon;
 	bool attackShouldContinue;
@@ -533,9 +531,7 @@ CPed::Attack(void)
 	float delayBetweenAnimAndFire;
 	CVector firePos;
 
-	ourWeaponType = GetWeapon()->m_eWeaponType;
-	ourWeapon = CWeaponInfo::GetWeaponInfo(ourWeaponType);
-	ourWeaponFire = ourWeapon->m_eWeaponFire;
+	ourWeapon = CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType);
 	weaponAnimAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ourWeapon->m_AnimToPlay);
 	attackShouldContinue = bIsAttacking;
 	reloadAnimAssoc = nil;
@@ -576,8 +572,8 @@ CPed::Attack(void)
 
 		if (!weaponAnimAssoc) {
 			if (attackShouldContinue) {
-				if (ourWeaponFire != WEAPON_FIRE_PROJECTILE || !IsPlayer() || ((CPlayerPed*)this)->m_bHaveTargetSelected) {
-					if (!CGame::nastyGame || ourWeaponFire != WEAPON_FIRE_MELEE || CheckForPedsOnGroundToAttack(this, nil) < PED_ON_THE_FLOOR) {
+				if (ourWeapon->m_eWeaponFire != WEAPON_FIRE_PROJECTILE || !IsPlayer() || ((CPlayerPed*)this)->m_bHaveTargetSelected) {
+					if (!CGame::nastyGame || ourWeapon->m_eWeaponFire != WEAPON_FIRE_MELEE || CheckForPedsOnGroundToAttack(this, nil) < PED_ON_THE_FLOOR) {
 						weaponAnimAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ourWeapon->m_AnimToPlay, 8.0f);
 					}
 					else {
@@ -617,12 +613,12 @@ CPed::Attack(void)
 
 	} else {
 		firePos = ourWeapon->m_vecFireOffset;
-		if (ourWeaponType == WEAPONTYPE_BASEBALLBAT) {
+		if (GetWeapon()->m_eWeaponType == WEAPONTYPE_BASEBALLBAT) {
 			if (weaponAnimAssoc->animId == ourWeapon->m_Anim2ToPlay)
 				firePos.z = 0.7f * ourWeapon->m_fRadius - 1.0f;
 
 			firePos = GetMatrix() * firePos;
-		} else if (ourWeaponType != WEAPONTYPE_UNARMED) {
+		} else if (GetWeapon()->m_eWeaponType != WEAPONTYPE_UNARMED) {
 			TransformToNode(firePos, weaponAnimAssoc->animId == ANIM_KICK_FLOOR ? PED_FOOTR : PED_HANDR);
 		} else {
 			firePos = GetMatrix() * firePos;
@@ -630,10 +626,10 @@ CPed::Attack(void)
 			
 		GetWeapon()->Fire(this, &firePos);
 
-		if (ourWeaponType == WEAPONTYPE_MOLOTOV || ourWeaponType == WEAPONTYPE_GRENADE) {
+		if (GetWeapon()->m_eWeaponType == WEAPONTYPE_MOLOTOV || GetWeapon()->m_eWeaponType == WEAPONTYPE_GRENADE) {
 			RemoveWeaponModel(ourWeapon->m_nModelId);
 		}
-		if (!GetWeapon()->m_nAmmoTotal && ourWeaponFire != WEAPON_FIRE_MELEE && FindPlayerPed() != this) {
+		if (!GetWeapon()->m_nAmmoTotal && ourWeapon->m_eWeaponFire != WEAPON_FIRE_MELEE && FindPlayerPed() != this) {
 			SelectGunIfArmed();
 		}
 
@@ -666,7 +662,7 @@ CPed::Attack(void)
 		attackShouldContinue = false;
 	}
 
-	if (ourWeaponType == WEAPONTYPE_SHOTGUN) {
+	if (GetWeapon()->m_eWeaponType == WEAPONTYPE_SHOTGUN) {
 		weaponAnimTime = weaponAnimAssoc->currentTime;
 		firePos = ourWeapon->m_vecFireOffset;
 
@@ -692,7 +688,7 @@ CPed::Attack(void)
 	if (IsPlayer()) {
 		if (CPad::GetPad(0)->GetSprint()) {
 			// animBreakout is a member of WeaponInfo in VC, so it's me that added the below line.
-			float animBreakOut = ((ourWeaponType == WEAPONTYPE_FLAMETHROWER || ourWeaponType == WEAPONTYPE_UZI || ourWeaponType == WEAPONTYPE_SHOTGUN) ? 25 / 30.0f : 99 / 30.0f);
+			float animBreakOut = ((GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER || GetWeapon()->m_eWeaponType == WEAPONTYPE_UZI || GetWeapon()->m_eWeaponType == WEAPONTYPE_SHOTGUN) ? 25 / 30.0f : 99 / 30.0f);
 			if (!attackShouldContinue && weaponAnimAssoc->currentTime > animBreakOut) {
 				weaponAnimAssoc->blendDelta = -4.0f;
 				FinishedAttackCB(nil, this);
@@ -702,20 +698,20 @@ CPed::Attack(void)
 	}
 #endif
 	animLoopEnd = ourWeapon->m_fAnimLoopEnd;
-	if (ourWeaponFire == WEAPON_FIRE_MELEE && weaponAnimAssoc->animId == ourWeapon->m_Anim2ToPlay)
+	if (ourWeapon->m_eWeaponFire == WEAPON_FIRE_MELEE && weaponAnimAssoc->animId == ourWeapon->m_Anim2ToPlay)
 		animLoopEnd = 3.4f/6.0f;
 
 	weaponAnimTime = weaponAnimAssoc->currentTime;
 
 	// Anim loop end, either start the loop again or finish the attack
-	if (weaponAnimTime > animLoopEnd || !weaponAnimAssoc->IsRunning() && ourWeaponFire != WEAPON_FIRE_PROJECTILE) {
+	if (weaponAnimTime > animLoopEnd || !weaponAnimAssoc->IsRunning() && ourWeapon->m_eWeaponFire != WEAPON_FIRE_PROJECTILE) {
 
 		if (weaponAnimTime - 2.0f * weaponAnimAssoc->timeStep <= animLoopEnd
 			&& (bIsAttacking || CTimer::GetTimeInMilliseconds() < m_shootTimer)
 			&& GetWeapon()->m_eWeaponState != WEAPONSTATE_RELOADING) {
 
 			weaponAnim = weaponAnimAssoc->animId;
-			if (ourWeaponFire != WEAPON_FIRE_MELEE || CheckForPedsOnGroundToAttack(this, nil) < PED_ON_THE_FLOOR) {
+			if (ourWeapon->m_eWeaponFire != WEAPON_FIRE_MELEE || CheckForPedsOnGroundToAttack(this, nil) < PED_ON_THE_FLOOR) {
 				if (weaponAnim != ourWeapon->m_Anim2ToPlay || weaponAnim == ANIM_RBLOCK_CSHOOT) {
 					weaponAnimAssoc->Start(ourWeapon->m_fAnimLoopStart);
 				} else {
@@ -738,7 +734,7 @@ CPed::Attack(void)
 
 			// Echoes of bullets, at the end of the attack. (Bug: doesn't play while reloading)
 			if (weaponAnimAssoc->currentTime - weaponAnimAssoc->timeStep <= ourWeapon->m_fAnimLoopEnd) {
-				switch (ourWeaponType) {
+				switch (GetWeapon()->m_eWeaponType) {
 					case WEAPONTYPE_UZI:
 						DMAudio.PlayOneShot(m_audioEntityId, SOUND_WEAPON_UZI_BULLET_ECHO, 0.0f);
 						break;
@@ -754,7 +750,7 @@ CPed::Attack(void)
 			}
 
 			// Fun fact: removing this part leds to reloading flamethrower
-			if (ourWeaponType == WEAPONTYPE_FLAMETHROWER && weaponAnimAssoc->IsRunning()) {
+			if (GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER && weaponAnimAssoc->IsRunning()) {
 				weaponAnimAssoc->flags |= ASSOC_DELETEFADEDOUT;
 				weaponAnimAssoc->flags &= ~ASSOC_RUNNING;
 				weaponAnimAssoc->blendDelta = -4.0f;
