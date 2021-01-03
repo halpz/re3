@@ -435,7 +435,7 @@ cMusicManager::ServiceFrontEndMode()
 			else {
 				if (m_nCurrentVolume < m_nMaxVolume)
 					m_nCurrentVolume = Min(m_nMaxVolume, m_nCurrentVolume + 6);
-				SampleManager.SetStreamedVolumeAndPan(m_nCurrentVolume, 63u, 0, 0);
+				SampleManager.SetStreamedVolumeAndPan(m_nCurrentVolume, 63, 0, 0);
 			}
 		} else {
 			if (m_nPlayingTrack == STREAMED_SOUND_RADIO_MP3_PLAYER)
