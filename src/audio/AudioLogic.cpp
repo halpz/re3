@@ -9938,7 +9938,7 @@ cAudioManager::ProcessMissionAudioSlot(uint8 slot)
 			} else {
 				if (m_nUserPause)
 					SampleManager.PauseStream(1, slot + 1);
-				if (m_sMissionAudio.m_bPredefinedProperties) {
+				if (m_sMissionAudio.m_bPredefinedProperties[slot]) {
 					if (m_sMissionAudio.m_nSampleIndex[slot] == STREAMED_SOUND_MISSION_CAMERAL)
 						SampleManager.SetStreamedVolumeAndPan(80, 0, 1, slot + 1);
 					else if (m_sMissionAudio.m_nSampleIndex[slot] == STREAMED_SOUND_MISSION_CAMERAR)
@@ -9992,7 +9992,7 @@ cAudioManager::ProcessMissionAudioSlot(uint8 slot)
 					else
 					{
 						SampleManager.PauseStream(0, slot + 1);
-						if (!m_sMissionAudio.m_bPredefinedProperties) {
+						if (!m_sMissionAudio.m_bPredefinedProperties[slot]) {
 							distSquared = GetDistanceSquared(m_sMissionAudio.m_vecPos[slot]);
 							if (distSquared >= SQR(80.0f)) {
 								emittingVol = 0;
