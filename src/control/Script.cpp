@@ -1673,6 +1673,16 @@ void CMissionCleanup::Init()
 	}
 }
 
+cleanup_entity_struct* CMissionCleanup::FindFree()
+{
+	for (int i = 0; i < MAX_CLEANUP; i++){
+		if (m_sEntities[i].type == CLEANUP_UNUSED)
+			return &m_sEntities[i];
+	}
+	script_assert(0);
+	return nil;
+}
+
 static void SleepThisPed(cleanup_entity_struct* pCleanup, CPed* pPed)
 {
 	printf("*** SLEEPING PED %i %i\n", pCleanup->id, pPed->GetModelIndex());
@@ -1688,16 +1698,6 @@ static void WakeThisPed(cleanup_entity_struct* pCleanup, CPed* pPed)
 	if (!pPed->bIsStatic)
 		pPed->AddToMovingList();
 
-}
-
-cleanup_entity_struct* CMissionCleanup::FindFree()
-{
-	for (int i = 0; i < MAX_CLEANUP; i++){
-		if (m_sEntities[i].type == CLEANUP_UNUSED)
-			return &m_sEntities[i];
-	}
-	script_assert(0);
-	return nil;
 }
 
 void CMissionCleanup::AddEntityToList(int32 id, uint8 type)
