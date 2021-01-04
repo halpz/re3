@@ -126,6 +126,7 @@ CEntity::CreateRwObject(void)
 			m_matrix.AttachRW(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic*)m_rwObject)), false);
 		else if(RwObjectGetType(m_rwObject) == rpCLUMP)
 			m_matrix.AttachRW(RwFrameGetMatrix(RpClumpGetFrame((RpClump*)m_rwObject)), false);
+
 		mi->AddRef();
 	}
 }
@@ -139,6 +140,7 @@ CEntity::AttachToRwObject(RwObject *obj)
 			m_matrix.Attach(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic*)m_rwObject)), false);
 		else if(RwObjectGetType(m_rwObject) == rpCLUMP)
 			m_matrix.Attach(RwFrameGetMatrix(RpClumpGetFrame((RpClump*)m_rwObject)), false);
+
 		CModelInfo::GetModelInfo(m_modelIndex)->AddRef();
 	}
 }
@@ -239,12 +241,8 @@ CEntity::GetBoundRadius(void)
 void
 CEntity::UpdateRwFrame(void)
 {
-	if(m_rwObject){
-		if(RwObjectGetType(m_rwObject) == rpATOMIC)
-			RwFrameUpdateObjects(RpAtomicGetFrame((RpAtomic*)m_rwObject));
-		else if(RwObjectGetType(m_rwObject) == rpCLUMP)
-			RwFrameUpdateObjects(RpClumpGetFrame((RpClump*)m_rwObject));
-	}
+	if(m_rwObject)
+		RwFrameUpdateObjects(rwObjectGetParent(m_rwObject));
 }
 
 void
