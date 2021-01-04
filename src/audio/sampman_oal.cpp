@@ -1542,10 +1542,11 @@ cSampleManager::SetChannelEmittingVolume(uint32 nChannel, uint32 nVolume)
 	
 	nChannelVolume[nChannel] = vol;
 	
-	if (   MusicManager.GetMusicMode()    == MUSICMODE_CUTSCENE
-		&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_CUTSCENE_FINALE )
-	{
-		nChannelVolume[nChannel] = vol / 4;
+	if (MusicManager.GetMusicMode() == MUSICMODE_CUTSCENE ) {
+		if (MusicManager.GetCurrentTrack() == STREAMED_SOUND_CUTSCENE_FINALE)
+			nChannelVolume[nChannel] = 0;
+		else
+			nChannelVolume[nChannel] >>= 2;
 	}
 
 	// no idea, does this one looks like a bug or it's SetChannelVolume ?
@@ -1936,7 +1937,7 @@ cSampleManager::SetStreamedVolumeAndPan(uint8 nVolume, uint8 nPan, uint8 nEffect
 	{
 		if ( nEffectFlag ) {
 			if ( nStream == 1 || nStream == 2 )
-				stream->SetVolume(128*nVolume*m_nEffectsVolume >> 14);
+				stream->SetVolume(2*128*nVolume*m_nEffectsVolume >> 14); // double the volume for now as it plays too quiet
 			else
 				stream->SetVolume(m_nEffectsFadeVolume*nVolume*m_nEffectsVolume >> 14);
 		}
