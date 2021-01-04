@@ -3,7 +3,7 @@
 #ifdef AUDIO_OAL
 #include <AL/al.h>
 
-#define NUM_STREAMBUFFERS 4
+#define NUM_STREAMBUFFERS 8
 
 class IDecoder
 {

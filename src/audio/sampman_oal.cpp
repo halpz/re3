@@ -102,7 +102,7 @@ CChannel aChannel[MAXCHANNELS+MAX2DCHANNELS];
 uint8 nChannelVolume[MAXCHANNELS+MAX2DCHANNELS];
 
 uint32 nStreamLength[TOTAL_STREAMED_SOUNDS];
-ALuint ALStreamSources[MAX_STREAMS*2];
+ALuint ALStreamSources[MAX_STREAMS][2];
 ALuint ALStreamBuffers[MAX_STREAMS][NUM_STREAMBUFFERS];
 
 struct tMP3Entry
@@ -247,7 +247,7 @@ release_existing()
 		
 		alDeleteBuffers(NUM_STREAMBUFFERS, ALStreamBuffers[i]);
 	}
-	alDeleteSources(MAX_STREAMS*2, ALStreamSources);
+	alDeleteSources(MAX_STREAMS*2, ALStreamSources[0]);
 	
 	CChannel::DestroyChannels();
 	
@@ -323,16 +323,16 @@ set_new_provider(int index)
 			alGenEffects(1, &ALEffect);
 		}
 
-		alGenSources(MAX_STREAMS*2, ALStreamSources);
+		alGenSources(MAX_STREAMS*2, ALStreamSources[0]);
 		for ( int32 i = 0; i < MAX_STREAMS; i++ )
 		{
 			alGenBuffers(NUM_STREAMBUFFERS, ALStreamBuffers[i]);
-			alSourcei(ALStreamSources[i*2], AL_SOURCE_RELATIVE, AL_TRUE);
-			alSource3f(ALStreamSources[i*2], AL_POSITION, 0.0f, 0.0f, 0.0f);
-			alSourcef(ALStreamSources[i*2], AL_GAIN, 1.0f);
-			alSourcei(ALStreamSources[i*2+1], AL_SOURCE_RELATIVE, AL_TRUE);
-			alSource3f(ALStreamSources[i*2+1], AL_POSITION, 0.0f, 0.0f, 0.0f);
-			alSourcef(ALStreamSources[i*2+1], AL_GAIN, 1.0f);
+			alSourcei(ALStreamSources[i][0], AL_SOURCE_RELATIVE, AL_TRUE);
+			alSource3f(ALStreamSources[i][0], AL_POSITION, 0.0f, 0.0f, 0.0f);
+			alSourcef(ALStreamSources[i][0], AL_GAIN, 1.0f);
+			alSourcei(ALStreamSources[i][1], AL_SOURCE_RELATIVE, AL_TRUE);
+			alSource3f(ALStreamSources[i][1], AL_POSITION, 0.0f, 0.0f, 0.0f);
+			alSourcef(ALStreamSources[i][1], AL_GAIN, 1.0f);
 			
 			CStream *stream = aStream[i];
 			if (stream)
@@ -612,7 +612,7 @@ _FindMP3s(void)
 	} else
 		bShortcut = false;
 	
-	aStream[0] = new CStream(filepath, &ALStreamSources[0], ALStreamBuffers[0]);
+	aStream[0] = new CStream(filepath, ALStreamSources[0], ALStreamBuffers[0]);
 
 	if (aStream[0] && aStream[0]->IsOpened())
 	{
@@ -686,7 +686,7 @@ _FindMP3s(void)
 						continue;
 					}
 				}
-				aStream[0] = new CStream(filepath, &ALStreamSources[0], ALStreamBuffers[0]);
+				aStream[0] = new CStream(filepath, ALStreamSources[0], ALStreamBuffers[0]);
 
 				if (aStream[0] && aStream[0]->IsOpened())
 				{
@@ -746,7 +746,7 @@ _FindMP3s(void)
 				} else
 					bShortcut = false;
 				
-				aStream[0] = new CStream(filepath, &ALStreamSources[0], ALStreamBuffers[0]);
+				aStream[0] = new CStream(filepath, ALStreamSources[0], ALStreamBuffers[0]);
 
 				if (aStream[0] && aStream[0]->IsOpened())
 				{
@@ -998,7 +998,7 @@ cSampleManager::Initialise(void)
 	
 		for ( int32 i = 0; i < TOTAL_STREAMED_SOUNDS; i++ )
 		{	
-			aStream[0] = new CStream(StreamedNameTable[i], &ALStreamSources[0], ALStreamBuffers[0]);
+			aStream[0] = new CStream(StreamedNameTable[i], ALStreamSources[0], ALStreamBuffers[0]);
 			
 			if ( aStream[0] && aStream[0]->IsOpened() )
 			{
@@ -1681,7 +1681,7 @@ cSampleManager::PreloadStreamedFile(uint32 nFile, uint8 nStream)
 		
 		strcpy(filename, StreamedNameTable[nFile]);
 		
-		CStream *stream = new CStream(filename, &ALStreamSources[nStream*2], ALStreamBuffers[nStream]);
+		CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
 		ASSERT(stream != NULL);
 		
 		aStream[nStream] = stream;
@@ -1756,7 +1756,7 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 							nFile = 0;
 							strcat(filename, StreamedNameTable[nFile]);
 
-							CStream* stream = new CStream(filename, &ALStreamSources[nStream*2], ALStreamBuffers[nStream]);
+							CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
 							ASSERT(stream != NULL);
 
 							aStream[nStream] = stream;
@@ -1780,12 +1780,12 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 					}
 
 					if (mp3->pLinkPath != NULL)
-						aStream[nStream] = new CStream(mp3->pLinkPath, &ALStreamSources[nStream*2], ALStreamBuffers[nStream]);
+						aStream[nStream] = new CStream(mp3->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream]);
 					else {
 						strcpy(filename, _mp3DirectoryPath);
 						strcat(filename, mp3->aFilename);
 
-						aStream[nStream] = new CStream(filename, &ALStreamSources[nStream*2], ALStreamBuffers[nStream]);
+						aStream[nStream] = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
 					}
 
 					if (aStream[nStream]->IsOpened()) {
@@ -1812,7 +1812,7 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 					{
 						nFile = 0;
 						strcat(filename, StreamedNameTable[nFile]);
-						CStream* stream = new CStream(filename, &ALStreamSources[nStream*2], ALStreamBuffers[nStream]);
+						CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
 						ASSERT(stream != NULL);
 
 						aStream[nStream] = stream;
@@ -1836,12 +1836,12 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 				}
 
 				if (e->pLinkPath != NULL)
-					aStream[nStream] = new CStream(e->pLinkPath, &ALStreamSources[nStream*2], ALStreamBuffers[nStream]);
+					aStream[nStream] = new CStream(e->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream]);
 				else {
 					strcpy(filename, _mp3DirectoryPath);
 					strcat(filename, e->aFilename);
 
-					aStream[nStream] = new CStream(filename, &ALStreamSources[nStream*2], ALStreamBuffers[nStream]);
+					aStream[nStream] = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
 				}
 
 				if (aStream[nStream]->IsOpened()) {
@@ -1869,7 +1869,7 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 
 		strcpy(filename, StreamedNameTable[nFile]);
 		
-		CStream *stream = new CStream(filename, &ALStreamSources[nStream*2], ALStreamBuffers[nStream]);
+		CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
 		ASSERT(stream != NULL);
 
 		aStream[nStream] = stream;
