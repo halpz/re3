@@ -3038,7 +3038,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 		switch (sound) {
 		case SOUND_STEP_START:
 		case SOUND_STEP_END:
-			if (!params.m_pPed->bIsInTheAir)
+			if (params.m_pPed->bIsInTheAir)
 				continue;
 			emittingVol = m_anRandomTable[3] % 15 + 45;
 			if (FindPlayerPed() != m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_pEntity)
@@ -3116,31 +3116,31 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			break;
 		case SOUND_FALL_LAND:
 		case SOUND_FALL_COLLAPSE:
-			if (!ped->bIsLooking) {
-				maxDist = SQR(30);
-				emittingVol = m_anRandomTable[3] % 20 + 80;
-				if (ped->m_nSurfaceTouched == SURFACE_WATER) {
-					m_sQueueSample.m_nSampleIndex = (m_anRandomTable[3] & 3) + SFX_FOOTSTEP_WATER_1;
-				} else if (sound == SOUND_FALL_LAND) {
-					m_sQueueSample.m_nSampleIndex = SFX_BODY_LAND;
-				} else {
-					m_sQueueSample.m_nSampleIndex = SFX_BODY_LAND_AND_FALL;
-				}
-				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				m_sQueueSample.m_nCounter = 1;
-				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 17);
-				m_sQueueSample.m_nReleasingVolumeModificator = 2;
-				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
-				m_sQueueSample.m_fSoundIntensity = 30.0f;
-				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
-				m_sQueueSample.m_nLoopEnd = -1;
-				m_sQueueSample.m_nEmittingVolume = emittingVol;
-				m_sQueueSample.m_bIs2D = false;
-				m_sQueueSample.m_bReleasingSoundFlag = true;
-				m_sQueueSample.m_bRequireReflection = true;
+			if (ped->bIsInTheAir)
+				continue;
+			maxDist = SQR(30);
+			emittingVol = m_anRandomTable[3] % 20 + 80;
+			if (ped->m_nSurfaceTouched == SURFACE_WATER) {
+				m_sQueueSample.m_nSampleIndex = (m_anRandomTable[3] & 3) + SFX_FOOTSTEP_WATER_1;
+			} else if (sound == SOUND_FALL_LAND) {
+				m_sQueueSample.m_nSampleIndex = SFX_BODY_LAND;
+			} else {
+				m_sQueueSample.m_nSampleIndex = SFX_BODY_LAND_AND_FALL;
 			}
+			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+			m_sQueueSample.m_nCounter = 1;
+			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
+			m_sQueueSample.m_nFrequency += RandomDisplacement(m_sQueueSample.m_nFrequency / 17);
+			m_sQueueSample.m_nReleasingVolumeModificator = 2;
+			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+			m_sQueueSample.m_fSoundIntensity = 30.0f;
+			m_sQueueSample.m_nLoopCount = 1;
+			m_sQueueSample.m_nLoopStart = 0;
+			m_sQueueSample.m_nLoopEnd = -1;
+			m_sQueueSample.m_nEmittingVolume = emittingVol;
+			m_sQueueSample.m_bIs2D = false;
+			m_sQueueSample.m_bReleasingSoundFlag = true;
+			m_sQueueSample.m_bRequireReflection = true;
 			break;
 		case SOUND_FIGHT_PUNCH_33:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_1;
