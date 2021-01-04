@@ -4789,7 +4789,11 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 					TheCamera.m_fMouseAccelHorzntl = 0.0025f;
 					CVehicle::m_bDisableMouseSteering = true;
 					m_ControlMethod = CONTROL_STANDARD;
+#ifdef PC_PLAYER_CONTROLS
 					TheCamera.m_bUseMouse3rdPerson = true;
+#else
+					TheCamera.m_bUseMouse3rdPerson = false;
+#endif
 					SaveSettings();
 				}
 				SetHelperText(2);
