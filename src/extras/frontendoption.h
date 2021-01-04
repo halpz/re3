@@ -78,7 +78,7 @@ void FrontendOptionSetCursor(int screen, int8 option, bool overwrite = false);
 
 // var is optional in AddDynamic, enables you to save them in an INI file(also needs passing char array to saveName param. obv), otherwise pass nil/0
 void FrontendOptionAddBuiltinAction(const char* gxtKey, uint16 x, uint16 y, uint8 align, int action, int targetMenu = MENUPAGE_NONE, int saveSlot = SAVESLOT_NONE);
-void FrontendOptionAddSelect(const char* gxtKey, uint16 x, uint16 y, uint8 align, const char** rightTexts, int8 numRightTexts, int8 *var, bool onlyApplyOnEnter, ChangeFunc changeFunc, const char* saveName = nil);
+void FrontendOptionAddSelect(const char* gxtKey, uint16 x, uint16 y, uint8 align, const char** rightTexts, int8 numRightTexts, int8 *var, bool onlyApplyOnEnter, ChangeFunc changeFunc, const char* saveName = nil, bool disableIfGameLoaded = false);
 void FrontendOptionAddDynamic(const char* gxtKey, uint16 x, uint16 y, uint8 align, DrawFunc rightTextDrawFunc, int8 *var, ButtonPressFunc buttonPressFunc, const char* saveName = nil);
 
 // lineHeight = 0 means game will use MENU_DEFAULT_LINE_HEIGHT

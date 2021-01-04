@@ -111,7 +111,7 @@ void FrontendOptionAddBuiltinAction(const char* gxtKey, uint16 x, uint16 y, uint
 	option.m_TargetMenu = targetMenu;
 }
 
-void FrontendOptionAddSelect(const char* gxtKey, uint16 x, uint16 y, uint8 align, const char** rightTexts, int8 numRightTexts, int8 *var, bool onlyApplyOnEnter, ChangeFunc changeFunc, const char* saveName)
+void FrontendOptionAddSelect(const char* gxtKey, uint16 x, uint16 y, uint8 align, const char** rightTexts, int8 numRightTexts, int8 *var, bool onlyApplyOnEnter, ChangeFunc changeFunc, const char* saveName, bool disableIfGameLoaded)
 {	
 	int8 screenOptionOrder = RegisterNewOption();
 
@@ -133,6 +133,7 @@ void FrontendOptionAddSelect(const char* gxtKey, uint16 x, uint16 y, uint8 align
 	option.m_CFOSelect->save = saveName;
 	option.m_CFOSelect->onlyApplyOnEnter = onlyApplyOnEnter;
 	option.m_CFOSelect->changeFunc = changeFunc;
+	option.m_CFOSelect->disableIfGameLoaded = disableIfGameLoaded;
 }
 
 void FrontendOptionAddDynamic(const char* gxtKey, uint16 x, uint16 y, uint8 align, DrawFunc drawFunc, int8 *var, ButtonPressFunc buttonPressFunc, const char* saveName)
