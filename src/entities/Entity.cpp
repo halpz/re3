@@ -228,12 +228,8 @@ CEntity::GetBoundRadius(void)
 void
 CEntity::UpdateRwFrame(void)
 {
-	if(m_rwObject){
-		if(RwObjectGetType(m_rwObject) == rpATOMIC)
-			RwFrameUpdateObjects(RpAtomicGetFrame((RpAtomic*)m_rwObject));
-		else if(RwObjectGetType(m_rwObject) == rpCLUMP)
-			RwFrameUpdateObjects(RpClumpGetFrame((RpClump*)m_rwObject));
-	}
+	if(m_rwObject)
+		RwFrameUpdateObjects(rwObjectGetParent(m_rwObject));
 }
 
 #ifdef PED_SKIN

@@ -303,14 +303,15 @@ CPhysical::GetHasCollidedWith(CEntity *ent)
 void
 CPhysical::RemoveRefsToEntity(CEntity *ent)
 {
-	int i, j;
+	int i = 0, j;
 
-	for(i = 0; i < m_nCollisionRecords; i++){
+	while(i < m_nCollisionRecords) {
 		if(m_aCollisionRecords[i] == ent){
 			for(j = i; j < m_nCollisionRecords-1; j++)
 				m_aCollisionRecords[j] = m_aCollisionRecords[j+1];
 			m_nCollisionRecords--;
-		}
+		} else
+			i++;
 	}
 }
 
@@ -518,12 +519,11 @@ CPhysical::ApplyAirResistance(void)
 		m_vecMoveSpeed *= f;
 		m_vecTurnSpeed *= f;
 	}else{
-		float f = Pow(1.0f/(m_fAirResistance*0.5f*m_vecMoveSpeed.MagnitudeSqr() + 1.0f), CTimer::GetTimeStep());
+		float f = Pow(1.0f/Abs(m_fAirResistance*0.5f*m_vecMoveSpeed.MagnitudeSqr() + 1.0f), CTimer::GetTimeStep());
 		m_vecMoveSpeed *= f;
 		m_vecTurnSpeed *= 0.99f;
 	}
 }
-
 
 bool
 CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, float &impulseB)
@@ -888,7 +888,11 @@ CPhysical::ApplyFriction(CPhysical *B, float adhesiveLimit, CColPoint &colpoint)
 			impulseB = (speedSum - fOtherSpeedB) * B->m_fMass;
 			impulseLimit = adhesiveLimit*CTimer::GetTimeStep();
 			if(impulseA < -impulseLimit) impulseA = -impulseLimit;
-			if(impulseB > impulseLimit) impulseB = impulseLimit;		// BUG: game has A's clamp again here, but this can't be right
+#ifdef FIX_BUGS
+			if(impulseB > impulseLimit) impulseB = impulseLimit;
+#else
+			if(impulseA < -impulseLimit) impulseA = -impulseLimit; // duplicate
+#endif
 			A->ApplyFrictionMoveForce(frictionDir*impulseA);
 			B->ApplyFrictionMoveForce(frictionDir*impulseB);
 			return true;
@@ -1020,7 +1024,7 @@ CPhysical::ApplyFriction(float adhesiveLimit, CColPoint &colpoint)
 		if(fOtherSpeed > 0.0f){
 			frictionDir = vOtherSpeed * (1.0f/fOtherSpeed);
 			fImpulse = -fOtherSpeed * m_fMass;
-			impulseLimit = adhesiveLimit*CTimer::GetTimeStep() * 1.5f;
+			impulseLimit = adhesiveLimit*CTimer::GetTimeStep() * 1.5;
 			if(fImpulse < -impulseLimit) fImpulse = -impulseLimit;
 			ApplyFrictionMoveForce(frictionDir*fImpulse);
 			ApplyFrictionTurnForce(frictionDir*fImpulse, pointpos);
@@ -1111,7 +1115,8 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 						skipShift = true;
 						Aobj->m_pCollidingEntity = B;
 					}
-				}
+				} else
+					skipShift = true;
 			}else if(B->IsObject() && A->IsVehicle()){
 				CObject *Bobj = (CObject*)B;
 				if(Bobj->ObjectCreatedBy != TEMP_OBJECT &&
@@ -1126,7 +1131,8 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 					if(size.z < A->GetPosition().z ||
 					   (Invert(A->GetMatrix(), inv) * size).z < 0.0f)
 						skipShift = true;
-				}
+				} else
+					skipShift = true;
 			}else if(IsBodyPart(A->GetModelIndex()) && B->IsPed())
 				skipShift = true;
 			else if(A->IsPed() && IsBodyPart(B->GetModelIndex()))
