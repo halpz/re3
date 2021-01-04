@@ -2370,8 +2370,10 @@ CCam::Process_M16_1stPerson(const CVector &CameraTarget, float, float, float)
 		Beta += SQR(LookLeftRight/100.0f)*xdir*0.8f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
 		Alpha += SQR(LookUpDown/150.0f)*ydir*1.0f/14.0f * FOV/80.0f * CTimer::GetTimeStep();
 	}
-	while(Beta >= PI) Beta -= 2*PI;
-	while(Beta < -PI) Beta += 2*PI;
+	if (!isAttached) {
+		while(Beta >= TWOPI) Beta -= TWOPI;
+		while(Beta < 0) Beta += TWOPI;
+	}
 	if(Alpha > DEGTORAD(60.0f)) Alpha = DEGTORAD(60.0f);
 	else if(Alpha < -DEGTORAD(89.5f)) Alpha = -DEGTORAD(89.5f);
 
@@ -2414,13 +2416,14 @@ CCam::Process_M16_1stPerson(const CVector &CameraTarget, float, float, float)
 				}
 			}
 		}else{
-			while(Beta < -PI) Beta += 2*PI;
-			while(Beta >= PI) Beta -= 2*PI;
+			while(Beta < -PI) Beta += TWOPI;
+			while(Beta >= PI) Beta -= TWOPI;
 		}
 
 		mat = TargetPed->m_attachedTo->GetMatrix();
 		rot.SetRotateX(Alpha);
 		switch(TargetPed->m_attachType){
+		case 0: rot.RotateZ(Beta); break;
 		case 1: rot.RotateZ(Beta + HALFPI); break;
 		case 2: rot.RotateZ(Beta + PI); break;
 		case 3: rot.RotateZ(Beta - HALFPI); break;
