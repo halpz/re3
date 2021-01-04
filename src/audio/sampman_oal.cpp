@@ -102,7 +102,7 @@ CChannel aChannel[MAXCHANNELS+MAX2DCHANNELS];
 uint8 nChannelVolume[MAXCHANNELS+MAX2DCHANNELS];
 
 uint32 nStreamLength[TOTAL_STREAMED_SOUNDS];
-ALuint ALStreamSources[MAX_STREAMS];
+ALuint ALStreamSources[MAX_STREAMS][2];
 ALuint ALStreamBuffers[MAX_STREAMS][NUM_STREAMBUFFERS];
 
 struct tMP3Entry
@@ -245,9 +245,9 @@ release_existing()
 		if (stream)
 			stream->ProviderTerm();
 		
-		alDeleteSources(1, &ALStreamSources[i]);
 		alDeleteBuffers(NUM_STREAMBUFFERS, ALStreamBuffers[i]);
 	}
+	alDeleteSources(MAX_STREAMS*2, ALStreamSources[0]);
 	
 	CChannel::DestroyChannels();
 	
@@ -287,7 +287,10 @@ set_new_provider(int index)
 		//TODO:
 		_maxSamples = MAXCHANNELS;
 		
-		ALCint attr[] = {ALC_FREQUENCY,MAX_FREQ,0};
+		ALCint attr[] = {ALC_FREQUENCY,MAX_FREQ,
+						ALC_MONO_SOURCES, MAX_STREAMS * 2 + MAXCHANNELS,
+						0,
+						};
 		
 		ALDevice  = alcOpenDevice(providers[index].id);
 		ASSERT(ALDevice != NULL);
@@ -319,11 +322,17 @@ set_new_provider(int index)
 			alGenAuxiliaryEffectSlots(1, &ALEffectSlot);
 			alGenEffects(1, &ALEffect);
 		}
-		
+
+		alGenSources(MAX_STREAMS*2, ALStreamSources[0]);
 		for ( int32 i = 0; i < MAX_STREAMS; i++ )
 		{
-			alGenSources(1, &ALStreamSources[i]);
 			alGenBuffers(NUM_STREAMBUFFERS, ALStreamBuffers[i]);
+			alSourcei(ALStreamSources[i][0], AL_SOURCE_RELATIVE, AL_TRUE);
+			alSource3f(ALStreamSources[i][0], AL_POSITION, 0.0f, 0.0f, 0.0f);
+			alSourcef(ALStreamSources[i][0], AL_GAIN, 1.0f);
+			alSourcei(ALStreamSources[i][1], AL_SOURCE_RELATIVE, AL_TRUE);
+			alSource3f(ALStreamSources[i][1], AL_POSITION, 0.0f, 0.0f, 0.0f);
+			alSourcef(ALStreamSources[i][1], AL_GAIN, 1.0f);
 			
 			CStream *stream = aStream[i];
 			if (stream)
@@ -1937,7 +1946,7 @@ cSampleManager::SetStreamedVolumeAndPan(uint8 nVolume, uint8 nPan, uint8 nEffect
 	{
 		if ( nEffectFlag ) {
 			if ( nStream == 1 || nStream == 2 )
-				stream->SetVolume(2*128*nVolume*m_nEffectsVolume >> 14); // double the volume for now as it plays too quiet
+				stream->SetVolume(128*nVolume*m_nEffectsVolume >> 14);
 			else
 				stream->SetVolume(m_nEffectsFadeVolume*nVolume*m_nEffectsVolume >> 14);
 		}

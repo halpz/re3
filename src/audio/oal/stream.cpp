@@ -19,6 +19,64 @@
 #include "crossplatform.h"
 #endif
 
+/*
+As we ran onto an issue of having different volume levels for mono streams
+and stereo streams we are now handling all the stereo panning ourselves.
+Each stream now has two sources - one panned to the left and one to the right,
+and uses two separate buffers to store data for each individual channel.
+For that we also have to reshuffle all decoded PCM stereo data from LRLRLRLR to
+LLLLRRRR (handled by CSortStereoBuffer).
+*/
+
+class CSortStereoBuffer
+{
+	uint16* PcmBuf;
+	size_t BufSize;
+public:
+	CSortStereoBuffer() : PcmBuf(nil), BufSize(0) {}
+	~CSortStereoBuffer()
+	{
+		if (PcmBuf)
+			free(PcmBuf);
+	}
+
+	uint16* GetBuffer(size_t size)
+	{
+		if (size == 0) return nil;
+		if (!PcmBuf)
+		{
+			BufSize = size;
+			PcmBuf = (uint16*)malloc(BufSize);
+		}
+		else if (BufSize < size)
+		{
+			BufSize = size;
+			PcmBuf = (uint16*)realloc(PcmBuf, size);
+		}
+		return PcmBuf;
+	}
+
+	void SortStereo(void* buf, size_t size)
+	{
+		uint16* InBuf = (uint16*)buf;
+		uint16* OutBuf = GetBuffer(size);
+
+		if (!OutBuf) return;
+
+		size_t rightStart = size / 4;
+		for (size_t i = 0; i < size / 4; i++)
+		{
+			OutBuf[i] = InBuf[i*2];
+			OutBuf[i+rightStart] = InBuf[i*2+1];
+		}
+
+		memcpy(InBuf, OutBuf, size);
+	}
+
+};
+
+CSortStereoBuffer SortStereoBuffer;
+
 #ifndef AUDIO_OPUS
 class CSndFile : public IDecoder
 {
@@ -81,7 +139,11 @@ public:
 	uint32 Decode(void *buffer)
 	{
 		if ( !IsOpened() ) return 0;
-		return sf_read_short(m_pfSound, (short *)buffer, GetBufferSamples()) * GetSampleSize();
+
+		size_t size = sf_read_short(m_pfSound, (short*)buffer, GetBufferSamples()) * GetSampleSize();
+		if (GetChannels()==2)
+			SortStereoBuffer.SortStereo(buffer, size);
+		return size;
 	}
 };
 
@@ -108,6 +170,8 @@ public:
 		m_pMH = mpg123_new(nil, nil);
 		if ( m_pMH )
 		{
+			mpg123_param(m_pMH, MPG123_FLAGS, MPG123_FUZZY | MPG123_SEEKBUFFER | MPG123_GAPLESS, 0.0);
+
 			long rate = 0;
 			int channels = 0;
 			int encoding = 0;
@@ -183,6 +247,8 @@ public:
 		assert("We can't handle audio files more then 2 GB yet :shrug:" && (size < UINT32_MAX));
 #endif
 		if (err != MPG123_OK && err != MPG123_DONE) return 0;
+		if (GetChannels() == 2)
+			SortStereoBuffer.SortStereo(buffer, size);
 		return (uint32)size;
 	}
 };
@@ -274,6 +340,9 @@ public:
 		if (size < 0)
 			return 0;
 
+		if (GetChannels() == 2)
+			SortStereoBuffer.SortStereo(buffer, size * m_nChannels * GetSampleSize());
+
 		return size * m_nChannels * GetSampleSize();
 	}
 };
@@ -285,7 +354,7 @@ class CADFFile : public CMP3File
 	{
 		size_t bytesRead = fread(buf, 1, size, (FILE*)fh);
 		uint8* _buf = (uint8*)buf;
-		for (int i = 0; i < size; i++)
+		for (size_t i = 0; i < size; i++)
 			_buf[i] ^= 0x22;
 		return bytesRead;
 	}
@@ -304,6 +373,7 @@ public:
 		m_pMH = mpg123_new(nil, nil);
 		if (m_pMH)
 		{
+			mpg123_param(m_pMH, MPG123_FLAGS, MPG123_FUZZY | MPG123_SEEKBUFFER | MPG123_GAPLESS, 0.0);
 			long rate = 0;
 			int channels = 0;
 			int encoding = 0;
@@ -338,8 +408,8 @@ void CStream::Terminate()
 #endif
 }
 
-CStream::CStream(char *filename, ALuint &source, ALuint (&buffers)[NUM_STREAMBUFFERS]) :
-	m_alSource(source),
+CStream::CStream(char *filename, ALuint *sources, ALuint (&buffers)[NUM_STREAMBUFFERS]) :
+	m_pAlSources(sources),
 	m_alBuffers(buffers),
 	m_pBuffer(nil),
 	m_bPaused(false),
@@ -422,7 +492,7 @@ void CStream::Delete()
 
 bool CStream::HasSource()
 {
-	return m_alSource != AL_NONE;
+	return (m_pAlSources[0] != AL_NONE) && (m_pAlSources[1] != AL_NONE);
 }
 
 bool CStream::IsOpened()
@@ -436,9 +506,10 @@ bool CStream::IsPlaying()
 	
 	if ( !m_bPaused )
 	{
-		ALint sourceState;
-		alGetSourcei(m_alSource, AL_SOURCE_STATE, &sourceState);
-		if ( m_bActive || sourceState == AL_PLAYING )
+		ALint sourceState[2];
+		alGetSourcei(m_pAlSources[0], AL_SOURCE_STATE, &sourceState[0]);
+		alGetSourcei(m_pAlSources[1], AL_SOURCE_STATE, &sourceState[1]);
+		if ( m_bActive || sourceState[0] == AL_PLAYING || sourceState[1] == AL_PLAYING)
 			return true;
 	}
 	
@@ -449,9 +520,12 @@ void CStream::Pause()
 {
 	if ( !HasSource() ) return;
 	ALint sourceState = AL_PAUSED;
-	alGetSourcei(m_alSource, AL_SOURCE_STATE, &sourceState);
+	alGetSourcei(m_pAlSources[0], AL_SOURCE_STATE, &sourceState);
 	if (sourceState != AL_PAUSED )
-		alSourcePause(m_alSource);
+		alSourcePause(m_pAlSources[0]);
+	alGetSourcei(m_pAlSources[1], AL_SOURCE_STATE, &sourceState);
+	if (sourceState != AL_PAUSED)
+		alSourcePause(m_pAlSources[1]);
 }
 
 void CStream::SetPause(bool bPause)
@@ -473,19 +547,21 @@ void CStream::SetPause(bool bPause)
 void CStream::SetPitch(float pitch)
 {
 	if ( !HasSource() ) return;
-	alSourcef(m_alSource, AL_PITCH, pitch);
+	alSourcef(m_pAlSources[0], AL_PITCH, pitch);
+	alSourcef(m_pAlSources[1], AL_PITCH, pitch);
 }
 
 void CStream::SetGain(float gain)
 {
 	if ( !HasSource() ) return;
-	alSourcef(m_alSource, AL_GAIN, gain);
+	alSourcef(m_pAlSources[0], AL_GAIN, gain);
+	alSourcef(m_pAlSources[1], AL_GAIN, gain);
 }
 
-void CStream::SetPosition(float x, float y, float z)
+void CStream::SetPosition(int i, float x, float y, float z)
 {
 	if ( !HasSource() ) return;
-	alSource3f(m_alSource, AL_POSITION, x, y, z);
+	alSource3f(m_pAlSources[i], AL_POSITION, x, y, z);
 }
 
 void CStream::SetVolume(uint32 nVol)
@@ -496,8 +572,13 @@ void CStream::SetVolume(uint32 nVol)
 
 void CStream::SetPan(uint8 nPan)
 {
+	m_nPan = clamp((int8)nPan - 63, 0, 63);
+	SetPosition(0, (m_nPan - 63) / 64.0f, 0.0f, Sqrt(1.0f - SQR((m_nPan - 63) / 64.0f)));
+
+	m_nPan = clamp((int8)nPan + 64, 64, 127);
+	SetPosition(1, (m_nPan - 63) / 64.0f, 0.0f, Sqrt(1.0f - SQR((m_nPan - 63) / 64.0f)));
+
 	m_nPan = nPan;
-	SetPosition((nPan - 63)/64.0f, 0.0f, Sqrt(1.0f-SQR((nPan-63)/64.0f)));
 }
 
 void CStream::SetPosMS(uint32 nPos)
@@ -514,10 +595,10 @@ uint32 CStream::GetPosMS()
 	
 	ALint offset;
 	//alGetSourcei(m_alSource, AL_SAMPLE_OFFSET, &offset);
-	alGetSourcei(m_alSource, AL_BYTE_OFFSET, &offset);
+	alGetSourcei(m_pAlSources[0], AL_BYTE_OFFSET, &offset);
 
 	return m_pSoundFile->Tell()
-		- m_pSoundFile->samples2ms(m_pSoundFile->GetBufferSamples() * (NUM_STREAMBUFFERS-1)) / m_pSoundFile->GetChannels()
+		- m_pSoundFile->samples2ms(m_pSoundFile->GetBufferSamples() * (NUM_STREAMBUFFERS/2-1)) / m_pSoundFile->GetChannels()
 		+ m_pSoundFile->samples2ms(offset/m_pSoundFile->GetSampleSize()) / m_pSoundFile->GetChannels();
 }
 
@@ -527,33 +608,41 @@ uint32 CStream::GetLengthMS()
 	return m_pSoundFile->GetLength();
 }
 
-bool CStream::FillBuffer(ALuint alBuffer)
+bool CStream::FillBuffer(ALuint *alBuffer)
 {
 	if ( !HasSource() )
 		return false;
 	if ( !IsOpened() )
 		return false;
-	if ( !(alBuffer != AL_NONE && alIsBuffer(alBuffer)) )
+	if ( !(alBuffer[0] != AL_NONE && alIsBuffer(alBuffer[0])) )
+		return false;
+	if ( !(alBuffer[1] != AL_NONE && alIsBuffer(alBuffer[1])) )
 		return false;
 	
 	uint32 size = m_pSoundFile->Decode(m_pBuffer);
 	if( size == 0 )
 		return false;
 	
-	alBufferData(alBuffer, m_pSoundFile->GetChannels() == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-		m_pBuffer, size, m_pSoundFile->GetSampleRate());
-	
+	uint32 channelSize = size / m_pSoundFile->GetChannels();
+
+	alBufferData(alBuffer[0], AL_FORMAT_MONO16, m_pBuffer, channelSize, m_pSoundFile->GetSampleRate());
+	// TODO: use just one buffer if we play mono
+	if (m_pSoundFile->GetChannels() == 1)
+		alBufferData(alBuffer[1], AL_FORMAT_MONO16, m_pBuffer, channelSize, m_pSoundFile->GetSampleRate());
+	else
+		alBufferData(alBuffer[1], AL_FORMAT_MONO16, (uint8*)m_pBuffer + channelSize, channelSize, m_pSoundFile->GetSampleRate());
 	return true;
 }
 
 int32 CStream::FillBuffers()
 {
 	int32 i = 0;
-	for ( i = 0; i < NUM_STREAMBUFFERS; i++ )
+	for ( i = 0; i < NUM_STREAMBUFFERS/2; i++ )
 	{
-		if ( !FillBuffer(m_alBuffers[i]) )
+		if ( !FillBuffer(&m_alBuffers[i*2]) )
 			break;
-		alSourceQueueBuffers(m_alSource, 1, &m_alBuffers[i]);
+		alSourceQueueBuffers(m_pAlSources[0], 1, &m_alBuffers[i*2]);
+		alSourceQueueBuffers(m_pAlSources[1], 1, &m_alBuffers[i*2+1]);
 	}
 	
 	return i;
@@ -563,12 +652,15 @@ void CStream::ClearBuffers()
 {
 	if ( !HasSource() ) return;
 	
-	ALint buffersQueued;
-	alGetSourcei(m_alSource, AL_BUFFERS_QUEUED, &buffersQueued);
+	ALint buffersQueued[2];
+	alGetSourcei(m_pAlSources[0], AL_BUFFERS_QUEUED, &buffersQueued[0]);
+	alGetSourcei(m_pAlSources[1], AL_BUFFERS_QUEUED, &buffersQueued[1]);
 
 	ALuint value;
-	while (buffersQueued--)
-		alSourceUnqueueBuffers(m_alSource, 1, &value);
+	while (buffersQueued[0]--)
+		alSourceUnqueueBuffers(m_pAlSources[0], 1, &value);
+	while (buffersQueued[1]--)
+		alSourceUnqueueBuffers(m_pAlSources[1], 1, &value);
 }
 
 bool CStream::Setup()
@@ -576,7 +668,6 @@ bool CStream::Setup()
 	if ( IsOpened() )
 	{
 		m_pSoundFile->Seek(0);
-		alSourcei(m_alSource, AL_SOURCE_RELATIVE, AL_TRUE);
 		//SetPosition(0.0f, 0.0f, 0.0f);
 		SetPitch(1.0f);
 		//SetPan(m_nPan);
@@ -592,17 +683,29 @@ void CStream::SetPlay(bool state)
 	if ( state )
 	{
 		ALint sourceState = AL_PLAYING;
-		alGetSourcei(m_alSource, AL_SOURCE_STATE, &sourceState);
+		alGetSourcei(m_pAlSources[0], AL_SOURCE_STATE, &sourceState);
 		if (sourceState != AL_PLAYING )
-			alSourcePlay(m_alSource);
+			alSourcePlay(m_pAlSources[0]);
+
+		sourceState = AL_PLAYING;
+		alGetSourcei(m_pAlSources[1], AL_SOURCE_STATE, &sourceState);
+		if (sourceState != AL_PLAYING)
+			alSourcePlay(m_pAlSources[1]);
+
 		m_bActive = true;
 	}
 	else
 	{
 		ALint sourceState = AL_STOPPED;
-		alGetSourcei(m_alSource, AL_SOURCE_STATE, &sourceState);
+		alGetSourcei(m_pAlSources[0], AL_SOURCE_STATE, &sourceState);
 		if (sourceState != AL_STOPPED )
-			alSourceStop(m_alSource);
+			alSourceStop(m_pAlSources[0]);
+
+		sourceState = AL_STOPPED;
+		alGetSourcei(m_pAlSources[1], AL_SOURCE_STATE, &sourceState);
+		if (sourceState != AL_STOPPED)
+			alSourceStop(m_pAlSources[1]);
+
 		m_bActive = false;
 	}
 }
@@ -633,35 +736,48 @@ void CStream::Update()
 	
 	if ( !m_bPaused )
 	{
-		ALint sourceState;
-		ALint buffersProcessed = 0;
+		ALint sourceState[2];
+		ALint buffersProcessed[2] = { 0, 0 };
 		
-		alGetSourcei(m_alSource, AL_SOURCE_STATE, &sourceState);
-		alGetSourcei(m_alSource, AL_BUFFERS_PROCESSED, &buffersProcessed);
+		// Relying a lot on left buffer states in here
+
+		//alSourcef(m_pAlSources[0], AL_ROLLOFF_FACTOR, 0.0f);
+		alGetSourcei(m_pAlSources[0], AL_SOURCE_STATE, &sourceState[0]);
+		alGetSourcei(m_pAlSources[0], AL_BUFFERS_PROCESSED, &buffersProcessed[0]);
+		//alSourcef(m_pAlSources[1], AL_ROLLOFF_FACTOR, 0.0f);
+		alGetSourcei(m_pAlSources[1], AL_SOURCE_STATE, &sourceState[1]);
+		alGetSourcei(m_pAlSources[1], AL_BUFFERS_PROCESSED, &buffersProcessed[1]);
 		
 		ALint looping = AL_FALSE;
-		alGetSourcei(m_alSource, AL_LOOPING, &looping);
+		alGetSourcei(m_pAlSources[0], AL_LOOPING, &looping);
 		
 		if ( looping == AL_TRUE )
 		{
 			TRACE("stream set looping");
-			alSourcei(m_alSource, AL_LOOPING, AL_TRUE);
+			alSourcei(m_pAlSources[0], AL_LOOPING, AL_TRUE);
+			alSourcei(m_pAlSources[1], AL_LOOPING, AL_TRUE);
 		}
 		
-		while( buffersProcessed-- )
+		assert(buffersProcessed[0] == buffersProcessed[1]);
+
+		while( buffersProcessed[0]-- )
 		{
-			ALuint buffer;
+			ALuint buffer[2];
 			
-			alSourceUnqueueBuffers(m_alSource, 1, &buffer);
+			alSourceUnqueueBuffers(m_pAlSources[0], 1, &buffer[0]);
+			alSourceUnqueueBuffers(m_pAlSources[1], 1, &buffer[1]);
 			
-			if ( m_bActive && FillBuffer(buffer) )
-				alSourceQueueBuffers(m_alSource, 1, &buffer);
+			if (m_bActive && FillBuffer(buffer))
+			{
+				alSourceQueueBuffers(m_pAlSources[0], 1, &buffer[0]);
+				alSourceQueueBuffers(m_pAlSources[1], 1, &buffer[1]);
+			}
 		}
 		
-		if ( sourceState != AL_PLAYING )
+		if ( sourceState[0] != AL_PLAYING )
 		{
-			alGetSourcei(m_alSource, AL_BUFFERS_PROCESSED, &buffersProcessed);
-			SetPlay(buffersProcessed!=0);
+			alGetSourcei(m_pAlSources[0], AL_BUFFERS_PROCESSED, &buffersProcessed[0]);
+			SetPlay(buffersProcessed[0]!=0);
 		}
 	}
 }
