@@ -242,7 +242,7 @@ void
 CEntity::UpdateRwFrame(void)
 {
 	if(m_rwObject)
-		RwFrameUpdateObjects(rwObjectGetParent(m_rwObject));
+		RwFrameUpdateObjects((RwFrame*)rwObjectGetParent(m_rwObject));
 }
 
 void
