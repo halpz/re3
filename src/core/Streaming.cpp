@@ -1921,10 +1921,12 @@ CStreaming::LoadBigBuildingsWhenNeeded(void)
 
 	ISLAND_LOADING_IS(LOW)
 		CStreaming::RequestBigBuildings(CGame::currLevel, TheCamera.GetPosition());
+#ifdef NO_ISLAND_LOADING
 	else if(FrontEndMenuManager.m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_MEDIUM) {
 		RemoveIslandsNotUsed(CGame::currLevel);
 		CStreaming::RequestIslands(CGame::currLevel);
 	}
+#endif
 
 	CStreaming::LoadAllRequestedModels(false);
 
