@@ -10,6 +10,7 @@
 #include "sampman.h"
 #include "Camera.h"
 #include "World.h"
+#include "ZoneCull.h"
 
 cAudioManager AudioManager;
 
@@ -589,7 +590,7 @@ cAudioManager::AddSampleToRequestedQueue()
 		}
 		m_sQueueSample.m_nCalculatedVolume = calculatedVolume;
 		m_sQueueSample.m_bLoopEnded = false;
-		if (m_sQueueSample.m_bIs2D) {
+		if (m_sQueueSample.m_bIs2D || CCullZones::InRoomForAudio()) {
 			m_sQueueSample.m_bRequireReflection = false;
 			m_sQueueSample.m_nLoopsRemaining = 0;
 		}
@@ -600,6 +601,9 @@ cAudioManager::AddSampleToRequestedQueue()
 			m_sQueueSample.m_nLoopsRemaining = 0;
 		}
 		m_sQueueSample.m_bRequireReflection = false;
+
+		if ( m_bReverb && m_sQueueSample.m_bIs2D )
+			m_sQueueSample.field_4C = 30;
 
 		if (!m_bDynamicAcousticModelingStatus)
 			m_sQueueSample.m_bReverbFlag = false;
@@ -647,9 +651,9 @@ cAudioManager::AddReflectionsToRequestedQueue()
 		emittingVolume = m_sQueueSample.m_nVolume;
 		oldFreq = m_sQueueSample.m_nFrequency;
 	} else {
-		emittingVolume = (m_sQueueSample.m_nVolume / 2) + (m_sQueueSample.m_nVolume / 16);
+		emittingVolume = (9 * m_sQueueSample.m_nVolume) / 16;
 	}
-	m_sQueueSample.m_fSoundIntensity = m_sQueueSample.m_fSoundIntensity / 2.f;
+	m_sQueueSample.m_fSoundIntensity /= 2.f;
 
 	int halfOldFreq = oldFreq >> 1;
 

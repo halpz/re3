@@ -521,7 +521,7 @@ void CStream::Pause()
 	if ( !HasSource() ) return;
 	ALint sourceState = AL_PAUSED;
 	alGetSourcei(m_pAlSources[0], AL_SOURCE_STATE, &sourceState);
-	if (sourceState != AL_PAUSED )
+	if (sourceState != AL_PAUSED)
 		alSourcePause(m_pAlSources[0]);
 	alGetSourcei(m_pAlSources[1], AL_SOURCE_STATE, &sourceState);
 	if (sourceState != AL_PAUSED)
