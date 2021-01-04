@@ -24,6 +24,7 @@ cAudioManager::cAudioManager()
 {
 	m_bIsInitialised = false;
 	m_bReverb = true;
+	field_6 = 0;
 	m_fSpeedOfSound = SPEED_OF_SOUND / TIME_SPENT;
 	m_nTimeSpent = TIME_SPENT;
 	m_nActiveSamples = NUM_SOUNDS_SAMPLES_SLOTS;
