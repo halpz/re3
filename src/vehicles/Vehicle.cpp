@@ -1876,7 +1876,7 @@ CVehicle::AddPassenger(CPed *passenger)
 	int i;
 
 	if(IsBike())
-		ApplyTurnForce(-0.2f*passenger->m_fMass * GetUp(), -0.1f*GetForward());
+		ApplyTurnForce(-0.02f*passenger->m_fMass * GetUp(), -0.1f*GetForward());
 	else
 		ApplyTurnForce(0.0f, 0.0f, -0.2f*passenger->m_fMass,
 			passenger->GetPosition().x - GetPosition().x,
@@ -1899,7 +1899,7 @@ CVehicle::AddPassenger(CPed *passenger, uint8 n)
 		return AddPassenger(passenger);
 
 	if(IsBike())
-		ApplyTurnForce(-0.2f*passenger->m_fMass * GetUp(), -0.1f*GetForward());
+		ApplyTurnForce(-0.02f*passenger->m_fMass * GetUp(), -0.1f*GetForward());
 	else
 		ApplyTurnForce(0.0f, 0.0f, -0.2f*passenger->m_fMass,
 			passenger->GetPosition().x - GetPosition().x,
