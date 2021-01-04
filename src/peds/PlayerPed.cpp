@@ -1788,7 +1788,7 @@ CPlayerPed::ProcessControl(void)
 			if (!RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_BLOCK) && !m_attachedTo) {
 				if (TheCamera.Using1stPersonWeaponMode()) {
 					if (padUsed)
-						PlayerControlFighter(padUsed);
+						PlayerControlSniper(padUsed);
 
 				} else if (TheCamera.Cams[0].Using3rdPersonMouseCam()
 #ifdef FREE_CAM
