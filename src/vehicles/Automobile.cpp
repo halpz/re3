@@ -5795,7 +5795,7 @@ CAutomobile::PopBootUsingPhysics(void)
 	case DOOR_STATUS_OK:
 	case DOOR_STATUS_SMASHED:
 		Damage.SetDoorStatus(DOOR_BOOT, DOOR_STATUS_SWINGING);
-	Doors[DOOR_BOOT].m_fAngle = -2.0f;
+	Doors[DOOR_BOOT].m_fAngVel = -2.0f;
 }
 
 void
