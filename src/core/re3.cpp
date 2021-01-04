@@ -219,7 +219,6 @@ void LoadINISettings()
 void SaveINISettings()
 {
 	bool changed = false;
-	char temp[4];
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 	if (strncmp(cfg.get("DetectJoystick", "JoystickName", "").c_str(), gSelectedJoystickName, strlen(gSelectedJoystickName)) != 0) {
