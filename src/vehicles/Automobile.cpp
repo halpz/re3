@@ -224,6 +224,7 @@ CAutomobile::ProcessControl(void)
 	int i;
 	float wheelRot;
 	CColModel *colModel;
+	float brake = 0.0f;
 
 	if(bUsingSpecialColModel)
 		colModel = &CWorld::Players[CWorld::PlayerInFocus].m_ColModel;
@@ -539,7 +540,6 @@ CAutomobile::ProcessControl(void)
 		break;
 	}
 
-	float brake;
 	if(skipPhysics){
 		bHasContacted = false;
 		bIsInSafePosition = false;
@@ -725,7 +725,7 @@ CAutomobile::ProcessControl(void)
 			traction *= 4.0f;
 
 		if(FindPlayerVehicle() && FindPlayerVehicle() == this){
-			if(CPad::GetPad(0)->WeaponJustDown()){
+			if(CPad::GetPad(0)->CarGunJustDown()){
 				if(m_bombType == CARBOMB_TIMED){
 					m_bombType = CARBOMB_TIMEDACTIVE;
 					m_nBombTimer = 7000;
