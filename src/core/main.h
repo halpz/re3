@@ -48,3 +48,8 @@ void TheModelViewer(void);
 void LoadINISettings();
 void SaveINISettings();
 #endif
+
+#ifdef NEW_RENDERER
+extern bool gbNewRenderer;
+bool FredIsInFirstPersonCam(void);
+#endif

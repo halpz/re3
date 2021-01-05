@@ -121,6 +121,13 @@ bool gbPrintMemoryUsage;
 #define FOUND_GAME_TO_LOAD b_FoundRecentSavedGameWantToLoad
 #endif
 
+#ifdef NEW_RENDERER
+bool gbNewRenderer;
+#define CLEARMODE (rwCAMERACLEARZ | rwCAMERACLEARSTENCIL)
+#else
+#define CLEARMODE (rwCAMERACLEARZ)
+#endif
+
 void
 ValidateVersion()
 {
@@ -168,7 +175,7 @@ DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomR
 	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 #endif
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-	RwCameraClear(Scene.camera, &TopColor.rwRGBA, rwCAMERACLEARZ);
+	RwCameraClear(Scene.camera, &TopColor.rwRGBA, CLEARMODE);
 
 	if(!RsCameraBeginUpdate(Scene.camera))
 		return false;
@@ -190,7 +197,7 @@ DoRWStuffStartOfFrame_Horizon(int16 TopRed, int16 TopGreen, int16 TopBlue, int16
 	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, SCREEN_ASPECT_RATIO);
 #endif
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+	RwCameraClear(Scene.camera, &gColourTop, CLEARMODE);
 
 	if(!RsCameraBeginUpdate(Scene.camera))
 		return false;
@@ -1160,9 +1167,126 @@ DisplayGameDebugText()
 }
 #endif
 
+#ifdef NEW_RENDERER
+bool gbRenderRoads = true;
+bool gbRenderEverythingBarRoads = true;
+//bool gbRenderFadingInUnderwaterEntities = true;
+bool gbRenderFadingInEntities = true;
+bool gbRenderWater = true;
+bool gbRenderBoats = true;
+bool gbRenderVehicles = true;
+bool gbRenderWorld0 = true;
+bool gbRenderWorld1 = true;
+bool gbRenderWorld2 = true;
+
+void
+MattRenderScene(void)
+{
+	// this calls CMattRenderer::Render
+	/// CWorld::AdvanceCurrentScanCode();
+	// CMattRenderer::ResetRenderStates
+	/// CRenderer::ClearForFrame();		// before ConstructRenderList
+	// CClock::CalcEnvMapTimeMultiplicator
+if(gbRenderWater)
+	CRenderer::RenderWater();	// actually CMattRenderer::RenderWater
+	// CClock::ms_EnvMapTimeMultiplicator = 1.0f;
+	// cWorldStream::ClearDynamics
+	/// CRenderer::ConstructRenderList();	// before PreRender
+if(gbRenderWorld0)
+	CRenderer::RenderWorld(0);	// roads
+	// CMattRenderer::ResetRenderStates
+	/// CRenderer::PreRender();	// has to be called before BeginUpdate because of cutscene shadows
+	CCoronas::RenderReflections();
+if(gbRenderWorld1)
+	CRenderer::RenderWorld(1);	// opaque
+if(gbRenderRoads)
+	CRenderer::RenderRoads();
+
+	CRenderer::RenderPeds();
+
+if(gbRenderBoats)
+	CRenderer::RenderBoats();
+//if(gbRenderFadingInUnderwaterEntities)
+//	CRenderer::RenderFadingInUnderwaterEntities();
+
+if(gbRenderEverythingBarRoads)
+	CRenderer::RenderEverythingBarRoads();
+	// get env map here?
+	// moved this:
+	// CRenderer::RenderFadingInEntities();
+}
+
+void
+RenderScene_new(void)
+{
+	CClouds::Render();
+	DoRWRenderHorizon();
+
+	MattRenderScene();
+	DefinedState();
+	// CMattRenderer::ResetRenderStates
+	// moved CRenderer::RenderBoats to before transparent water
+}
+
+// TODO
+bool FredIsInFirstPersonCam(void) { return false; }
+void
+RenderEffects_new(void)
+{
+	CShadows::RenderStaticShadows();
+	// CRenderer::GenerateEnvironmentMap
+	CShadows::RenderStoredShadows();
+	CSkidmarks::Render();
+	CRubbish::Render();
+
+	// these aren't really effects
+	DefinedState();
+	if(FredIsInFirstPersonCam()){
+		DefinedState();
+		C3dMarkers::Render();	// normally rendered in CSpecialFX::Render()
+if(gbRenderWorld2)
+		CRenderer::RenderWorld(2);	// transparent
+if(gbRenderVehicles)
+		CRenderer::RenderVehicles();
+	}else{
+		// flipped these two, seems to give the best result
+if(gbRenderWorld2)
+		CRenderer::RenderWorld(2);	// transparent
+if(gbRenderVehicles)
+		CRenderer::RenderVehicles();
+	}
+	// better render these after transparent world
+if(gbRenderFadingInEntities)
+	CRenderer::RenderFadingInEntities();
+
+	// actual effects here
+	CGlass::Render();
+	// CMattRenderer::ResetRenderStates
+	DefinedState();
+	CWeather::RenderRainStreaks();
+	// CWeather::AddSnow
+	CWaterCannons::Render();
+	CAntennas::Render();
+	CSpecialFX::Render();
+	CCoronas::Render();
+	CParticle::Render();
+	CPacManPickups::Render();
+	CWeaponEffects::Render();
+	CPointLights::RenderFogEffect();
+	CMovingThings::Render();
+	CRenderer::RenderFirstPersonVehicle();
+}
+#endif
+
 void
 RenderScene(void)
 {
+#ifdef NEW_RENDERER
+	if(gbNewRenderer){
+		RenderScene_new();
+		return;
+	}
+#endif
 	CClouds::Render();
 	DoRWRenderHorizon();
 	CRenderer::RenderRoads();
@@ -1195,6 +1319,12 @@ RenderDebugShit(void)
 void
 RenderEffects(void)
 {
+#ifdef NEW_RENDERER
+	if(gbNewRenderer){
+		RenderEffects_new();
+		return;
+	}
+#endif
 	CGlass::Render();
 	CWaterCannons::Render();
 	CSpecialFX::Render();
@@ -1390,6 +1520,12 @@ Idle(void *arg)
 
 		PUSH_MEMID(MEMID_RENDERLIST);
 		tbStartTimer(0, "CnstrRenderList");
+#ifdef NEW_RENDERER
+		if(gbNewRenderer){
+			CWorld::AdvanceCurrentScanCode();	// don't think this is even necessary
+			CRenderer::ClearForFrame();
+		}
+#endif
 		CRenderer::ConstructRenderList();
 		tbEndTimer("CnstrRenderList");
 
@@ -1457,7 +1593,7 @@ Idle(void *arg)
 		CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
 #endif
 		CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-		RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+		RwCameraClear(Scene.camera, &gColourTop, CLEARMODE);
 		if(!RsCameraBeginUpdate(Scene.camera))
 			goto popret;
 	}
@@ -1523,7 +1659,7 @@ FrontendIdle(void)
 	CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
 #endif
 	CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-	RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+	RwCameraClear(Scene.camera, &gColourTop, CLEARMODE);
 	if(!RsCameraBeginUpdate(Scene.camera))
 		return;
 
@@ -1780,7 +1916,7 @@ void TheGame(void)
 				CameraSize(Scene.camera, nil, SCREEN_VIEWWINDOW, DEFAULT_ASPECT_RATIO);
 #endif
 				CVisibilityPlugins::SetRenderWareCamera(Scene.camera);
-				RwCameraClear(Scene.camera, &gColourTop, rwCAMERACLEARZ);
+				RwCameraClear(Scene.camera, &gColourTop, CLEARMODE);
 				RsCameraBeginUpdate(Scene.camera);
 			}
 
