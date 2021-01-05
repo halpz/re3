@@ -4279,7 +4279,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			break;
 		case SOUND_FALL_LAND:
 		case SOUND_FALL_COLLAPSE:
-			if (params.m_pPed->bIsInTheAir)
+			if (ped->bIsInTheAir)
 				continue;
 			maxDist = SQR(30);
 			emittingVol = m_anRandomTable[3] % 20 + 80;
@@ -4474,7 +4474,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_CAR_ACCEL_13);
 			m_sQueueSample.m_nEmittingVolume = 100;
 			m_sQueueSample.m_bIs2D = false;
-			m_sQueueSample.m_bReverbFlag = false;
+			m_sQueueSample.m_bReleasingSoundFlag = false;
 			m_sQueueSample.m_nReleasingVolumeDivider = 5;
 			break;
 		case SOUND_WEAPON_CHAINSAW_IDLE:
