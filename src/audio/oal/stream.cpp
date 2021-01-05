@@ -575,8 +575,6 @@ public:
 };
 #endif
 
-#ifdef MP3_USE_FUZZY_SEEK
-#endif
 void CStream::Initialise()
 {
 #ifndef AUDIO_OPUS
