@@ -147,6 +147,12 @@ public:
 	}
 };
 
+#ifdef _WIN32
+// fuzzy seek eliminates stutter when playing ADF but spams errors a lot (nothing breaks though)
+#define MP3_USE_FUZZY_SEEK
+#endif // _WIN32
+
+
 class CMP3File : public IDecoder
 {
 protected:
@@ -170,8 +176,9 @@ public:
 		m_pMH = mpg123_new(nil, nil);
 		if ( m_pMH )
 		{
+#ifdef MP3_USE_FUZZY_SEEK
 			mpg123_param(m_pMH, MPG123_FLAGS, MPG123_FUZZY | MPG123_SEEKBUFFER | MPG123_GAPLESS, 0.0);
-
+#endif
 			long rate = 0;
 			int channels = 0;
 			int encoding = 0;
@@ -250,6 +257,233 @@ public:
 		if (GetChannels() == 2)
 			SortStereoBuffer.SortStereo(buffer, size);
 		return (uint32)size;
+	}
+};
+
+#define VAG_LINE_SIZE (0x10)
+#define VAG_SAMPLES_IN_LINE (28)
+
+class CVagDecoder
+{
+	const double f[5][2] = { { 0.0, 0.0 },
+					{  60.0 / 64.0,  0.0 },
+					{  115.0 / 64.0, -52.0 / 64.0 },
+					{  98.0 / 64.0, -55.0 / 64.0 },
+					{  122.0 / 64.0, -60.0 / 64.0 } };
+
+	double s_1;
+	double s_2;
+public:
+	CVagDecoder()
+	{
+		ResetState();
+	}
+
+	void ResetState()
+	{
+		s_1 = s_2 = 0.0;
+	}
+
+	static short quantize(double sample)
+	{
+		int a = int(sample + 0.5);
+		return short(clamp(int(sample + 0.5), -32768, 32767));
+	}
+
+	void Decode(void* _inbuf, int16* _outbuf, size_t size)
+	{
+		uint8* inbuf = (uint8*)_inbuf;
+		int16* outbuf = _outbuf;
+		size &= ~(VAG_LINE_SIZE - 1);
+
+		while (size > 0) {
+			double samples[VAG_SAMPLES_IN_LINE];
+
+			int predict_nr, shift_factor, flags;
+			predict_nr = *(inbuf++);
+			shift_factor = predict_nr & 0xf;
+			predict_nr >>= 4;
+			flags = *(inbuf++);
+			if (flags == 7) // TODO: ignore?
+				break;
+			for (int i = 0; i < VAG_SAMPLES_IN_LINE; i += 2) {
+				int d = *(inbuf++);
+				int16 s = int16((d & 0xf) << 12);
+				samples[i] = (double)(s >> shift_factor);
+				s = int16((d & 0xf0) << 8);
+				samples[i + 1] = (double)(s >> shift_factor);
+			}
+
+			for (int i = 0; i < VAG_SAMPLES_IN_LINE; i++) {
+				samples[i] = samples[i] + s_1 * f[predict_nr][0] + s_2 * f[predict_nr][1];
+				s_2 = s_1;
+				s_1 = samples[i];
+				*(outbuf++) = quantize(samples[i] + 0.5);
+			}
+			size -= VAG_LINE_SIZE;
+		}
+	}
+};
+
+#define VB_BLOCK_SIZE (0x2000)
+#define NUM_VAG_LINES_IN_BLOCK (VB_BLOCK_SIZE / VAG_LINE_SIZE)
+#define NUM_VAG_SAMPLES_IN_BLOCK (NUM_VAG_LINES_IN_BLOCK * VAG_SAMPLES_IN_LINE)
+
+class CVbFile : public IDecoder
+{
+	FILE* pFile;
+	size_t m_FileSize;
+	size_t m_nNumberOfBlocks;
+	CVagDecoder* decoders;
+
+	uint32 m_nSampleRate;
+	uint8 m_nChannels;
+	bool m_bBlockRead;
+	uint16 m_LineInBlock;
+	size_t m_CurrentBlock;
+
+	uint8** ppTempBuffers;
+
+	void ReadBlock(int32 block = -1)
+	{
+		// just read next block if -1
+		if (block != -1)
+			fseek(pFile, block * m_nChannels * VB_BLOCK_SIZE, SEEK_SET);
+
+		for (int i = 0; i < m_nChannels; i++)
+			fread(ppTempBuffers[i], VB_BLOCK_SIZE, 1, pFile);
+		m_bBlockRead = true;
+	}
+
+public:
+	CVbFile(const char* path, uint32 nSampleRate = 32000, uint8 nChannels = 2) : m_nSampleRate(nSampleRate), m_nChannels(nChannels)
+	{
+		pFile = fopen(path, "rb");
+		if (pFile) {
+			fseek(pFile, 0, SEEK_END);
+			m_FileSize = ftell(pFile);
+			fseek(pFile, 0, SEEK_SET);
+			m_nNumberOfBlocks = m_FileSize / (nChannels * VB_BLOCK_SIZE);
+			decoders = new CVagDecoder[nChannels];
+			m_CurrentBlock = 0;
+			m_LineInBlock = 0;
+			m_bBlockRead = false;
+			ppTempBuffers = new uint8 * [nChannels];
+			for (uint8 i = 0; i < nChannels; i++)
+				ppTempBuffers[i] = new uint8[VB_BLOCK_SIZE];
+		}
+	}
+
+	~CVbFile()
+	{
+		if (pFile)
+		{
+			fclose(pFile);
+			delete decoders;
+			for (int i = 0; i < m_nChannels; i++)
+				delete ppTempBuffers[i];
+			delete ppTempBuffers;
+		}
+	}
+
+	bool IsOpened()
+	{
+		return pFile != nil;
+	}
+
+	uint32 GetSampleSize()
+	{
+		return sizeof(uint16);
+	}
+
+	uint32 GetSampleCount()
+	{
+		if (!IsOpened()) return 0;
+		return m_nNumberOfBlocks * NUM_VAG_LINES_IN_BLOCK * VAG_SAMPLES_IN_LINE;
+	}
+
+	uint32 GetSampleRate()
+	{
+		return m_nSampleRate;
+	}
+
+	uint32 GetChannels()
+	{
+		return m_nChannels;
+	}
+
+	void Seek(uint32 milliseconds)
+	{
+		if (!IsOpened()) return;
+		uint32 samples = ms2samples(milliseconds);
+		int32 block = samples / NUM_VAG_SAMPLES_IN_BLOCK;
+		if (block > m_nNumberOfBlocks)
+		{
+			samples = 0;
+			block = 0;
+		}
+		if (block != m_CurrentBlock)
+			ReadBlock(block);
+
+		uint32 remainingSamples = samples - block * NUM_VAG_SAMPLES_IN_BLOCK;
+		uint32 newLine = remainingSamples / VAG_SAMPLES_IN_LINE / VAG_LINE_SIZE;
+
+		if (m_CurrentBlock != block || m_LineInBlock != newLine)
+		{
+			m_CurrentBlock = block;
+			m_LineInBlock = newLine;
+			for (int i = 0; i < GetChannels(); i++)
+				decoders[i].ResetState();
+		}
+
+	}
+
+	uint32 Tell()
+	{
+		if (!IsOpened()) return 0;
+		uint32 pos = (m_CurrentBlock * NUM_VAG_LINES_IN_BLOCK + m_LineInBlock) * VAG_SAMPLES_IN_LINE;
+		return samples2ms(pos);
+	}
+
+	uint32 Decode(void* buffer)
+	{
+		if (!IsOpened()) return 0;
+
+		if (!m_bBlockRead)
+			ReadBlock(m_CurrentBlock);
+
+		if (m_CurrentBlock == m_nNumberOfBlocks) return 0;
+		int size = 0;
+
+		int numberOfRequiredLines = GetBufferSamples() / GetChannels() / VAG_SAMPLES_IN_LINE;
+		int numberOfRemainingLines = (m_nNumberOfBlocks - m_CurrentBlock) * NUM_VAG_LINES_IN_BLOCK - m_LineInBlock;
+		int bufSizePerChannel = Min(numberOfRequiredLines, numberOfRemainingLines) * VAG_SAMPLES_IN_LINE * GetSampleSize();
+
+		if (numberOfRequiredLines > numberOfRemainingLines)
+			numberOfRemainingLines = numberOfRemainingLines;
+
+		int16* buffers[2] = { (int16*)buffer, &((int16*)buffer)[bufSizePerChannel / GetSampleSize()] };
+
+		while (size < bufSizePerChannel)
+		{
+			for (int i = 0; i < GetChannels(); i++)
+			{
+				decoders[i].Decode(ppTempBuffers[i] + m_LineInBlock * VAG_LINE_SIZE, buffers[i], VAG_LINE_SIZE);
+				buffers[i] += VAG_SAMPLES_IN_LINE;
+			}
+			size += VAG_SAMPLES_IN_LINE * GetSampleSize();
+			m_LineInBlock++;
+			if (m_LineInBlock >= NUM_VAG_LINES_IN_BLOCK)
+			{
+				m_CurrentBlock++;
+				if (m_CurrentBlock >= m_nNumberOfBlocks)
+					break;
+				m_LineInBlock = 0;
+				ReadBlock();
+			}
+		}
+
+		return bufSizePerChannel * GetChannels();
 	}
 };
 #else
@@ -373,7 +607,9 @@ public:
 		m_pMH = mpg123_new(nil, nil);
 		if (m_pMH)
 		{
+#ifdef MP3_USE_FUZZY_SEEK
 			mpg123_param(m_pMH, MPG123_FLAGS, MPG123_FUZZY | MPG123_SEEKBUFFER | MPG123_GAPLESS, 0.0);
+#endif
 			long rate = 0;
 			int channels = 0;
 			int encoding = 0;
@@ -408,7 +644,7 @@ void CStream::Terminate()
 #endif
 }
 
-CStream::CStream(char *filename, ALuint *sources, ALuint (&buffers)[NUM_STREAMBUFFERS]) :
+CStream::CStream(char *filename, ALuint *sources, ALuint (&buffers)[NUM_STREAMBUFFERS], uint32 overrideSampleRate) :
 	m_pAlSources(sources),
 	m_alBuffers(buffers),
 	m_pBuffer(nil),
@@ -443,6 +679,8 @@ CStream::CStream(char *filename, ALuint *sources, ALuint (&buffers)[NUM_STREAMBU
 		m_pSoundFile = new CSndFile(m_aFilename);
 	else if (!strcasecmp(&m_aFilename[strlen(m_aFilename) - strlen(".adf")], ".adf"))
 		m_pSoundFile = new CADFFile(m_aFilename);
+	else if (!strcasecmp(&m_aFilename[strlen(m_aFilename) - strlen(".vb")], ".VB"))
+		m_pSoundFile = new CVbFile(m_aFilename, overrideSampleRate);
 #else
 	if (!strcasecmp(&m_aFilename[strlen(m_aFilename) - strlen(".opus")], ".opus"))
 		m_pSoundFile = new COpusFile(m_aFilename);
