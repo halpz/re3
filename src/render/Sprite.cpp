@@ -41,7 +41,7 @@ CSprite::CalcScreenCoors(const RwV3d &in, RwV3d *out, float *outw, float *outh, 
 	*outh = fovScale * recip * SCREEN_HEIGHT;
 	
 #ifdef ASPECT_RATIO_SCALE
-	if ( CMenuManager::m_PrefsSpriteScalingMode==SCL_AUTO )
+	if ( CDraw::ms_bFixSprites )
 		*outw = fovScale * recip * SCREEN_HEIGHT;
 #endif
 

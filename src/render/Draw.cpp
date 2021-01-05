@@ -20,6 +20,12 @@ uint8 CDraw::FadeRed;
 uint8 CDraw::FadeGreen;
 uint8 CDraw::FadeBlue;
 
+#ifdef ASPECT_RATIO_SCALE
+int32 CDraw::ms_nScalingMode = SCL_PS2;
+int32 CDraw::ms_bFixRadar = true;
+int32 CDraw::ms_bFixSprites = true;
+#endif
+
 float
 CDraw::FindAspectRatio(void)
 {
@@ -80,7 +86,7 @@ CDraw::SetFOV(float fov)
 #ifdef ASPECT_RATIO_SCALE
 float CDraw::ScaleY(float y)
 {
-	switch ( CMenuManager::m_PrefsSpriteScalingMode )
+	switch ( ms_nScalingMode )
 	{
 		case SCL_PC: return y * ((float)DEFAULT_SCREEN_HEIGHT/SCREEN_HEIGHT_NTSC);
 		default:

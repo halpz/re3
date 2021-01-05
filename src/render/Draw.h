@@ -18,7 +18,6 @@ enum eSpriteScalingMode
 {
 	SCL_PC,
 	SCL_PS2,
-	SCL_AUTO,
 };
 
 class CDraw
@@ -41,6 +40,11 @@ public:
 	static uint8 FadeRed;
 	static uint8 FadeGreen;
 	static uint8 FadeBlue;
+#ifdef ASPECT_RATIO_SCALE
+	static int32 ms_nScalingMode;
+	static int32 ms_bFixRadar;
+	static int32 ms_bFixSprites;
+#endif
 
 	static void SetNearClipZ(float nearclip) { ms_fNearClipZ = nearclip; }
 	static float GetNearClipZ(void) { return ms_fNearClipZ; }

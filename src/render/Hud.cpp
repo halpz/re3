@@ -1060,14 +1060,17 @@ void CHud::Draw()
 			DrawRadar
 		*/
 #ifdef ASPECT_RATIO_SCALE
-#define _RADAR_WIDTH ((CMenuManager::m_PrefsSpriteScalingMode==SCL_AUTO) ? (RADAR_HEIGHT) : (RADAR_WIDTH))
+// The values are from from an early screenshot taken before R* broke radar
+#define _RADAR_WIDTH ((CDraw::ms_bFixRadar)  ? (82.0f) : (RADAR_WIDTH))
+#define _RADAR_HEIGHT ((CDraw::ms_bFixRadar) ? (82.0f) : (RADAR_HEIGHT))
 #else
 #define _RADAR_WIDTH RADAR_WIDTH
+#define _RADAR_HEIGHT RADAR_HEIGHT
 #endif
 		if (m_ItemToFlash == ITEM_RADAR && CTimer::GetFrameCounter() & 8 || m_ItemToFlash != ITEM_RADAR) {
 			CRadar::DrawMap();
-			CRect rect(0.0f, 0.0f, SCREEN_SCALE_X(_RADAR_WIDTH), SCREEN_SCALE_Y(RADAR_HEIGHT));
-			rect.Translate(SCREEN_SCALE_X_FIX(RADAR_LEFT), SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
+			CRect rect(0.0f, 0.0f, SCREEN_SCALE_X(_RADAR_WIDTH), SCREEN_SCALE_Y(_RADAR_HEIGHT));
+			rect.Translate(SCREEN_SCALE_X_FIX(RADAR_LEFT), SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + _RADAR_HEIGHT));
 
 #ifdef PS2_HUD
 	#ifdef FIX_BUGS

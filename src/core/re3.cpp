@@ -214,6 +214,12 @@ void LoadINISettings()
 	CustomPipes::LightmapMult = CheckAndReadIniFloat("CustomPipesValues", "LightmapMult", CustomPipes::LightmapMult);
 	CustomPipes::GlossMult = CheckAndReadIniFloat("CustomPipesValues", "GlossMult", CustomPipes::GlossMult);
 #endif
+
+#ifdef ASPECT_RATIO_SCALE
+	CDraw::ms_nScalingMode = CheckAndReadIniInt("Draw", "ScalingMode", CDraw::ms_nScalingMode);
+	CDraw::ms_bFixRadar    = CheckAndReadIniInt("Draw", "FixRadar", CDraw::ms_bFixRadar);
+	CDraw::ms_bFixSprites  = CheckAndReadIniInt("Draw", "FixSpritesAspectRatio", CDraw::ms_bFixSprites);
+#endif
 }
 
 void SaveINISettings()
@@ -251,6 +257,12 @@ void SaveINISettings()
 	CheckAndSaveIniFloat("CustomPipesValues", "RimlightMult", CustomPipes::RimlightMult, changed);
 	CheckAndSaveIniFloat("CustomPipesValues", "LightmapMult", CustomPipes::LightmapMult, changed);
 	CheckAndSaveIniFloat("CustomPipesValues", "GlossMult", CustomPipes::GlossMult, changed);
+#endif
+
+#ifdef ASPECT_RATIO_SCALE
+	CheckAndSaveIniInt("Draw", "ScalingMode", CDraw::ms_nScalingMode, changed);
+	CheckAndSaveIniInt("Draw", "FixRadar", CDraw::ms_bFixRadar, changed);
+	CheckAndSaveIniInt("Draw", "FixSpritesAspectRatio", CDraw::ms_bFixSprites, changed);
 #endif
 
 	if (changed)

@@ -636,9 +636,6 @@ public:
 	static int8 m_nDisplayMSAALevel;
 #endif
 
-#ifdef ASPECT_RATIO_SCALE
-	static int32 m_PrefsSpriteScalingMode;
-#endif
 	enum LANGUAGE
 	{
 		LANGUAGE_AMERICAN,

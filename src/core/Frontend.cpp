@@ -141,10 +141,6 @@ int8 CMenuManager::m_nPrefsMSAALevel = 0;
 int8 CMenuManager::m_nDisplayMSAALevel = 0;
 #endif
 
-#ifdef ASPECT_RATIO_SCALE
-int32 CMenuManager::m_PrefsSpriteScalingMode = SCL_AUTO;
-#endif
-
 #ifdef NO_ISLAND_LOADING
 int8 CMenuManager::m_PrefsIslandLoading = ISLAND_LOADING_LOW;
 #endif
