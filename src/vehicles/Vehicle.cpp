@@ -149,6 +149,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_nAlarmState = 0;
 	m_nDoorLock = CARLOCK_UNLOCKED;
 	m_nLastWeaponDamage = -1;
+	m_pLastDamageEntity = nil;
 	m_fMapObjectHeightAhead = m_fMapObjectHeightBehind = 0.0f;
 	m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, this);
 	if(m_audioEntityId >= 0)
@@ -839,7 +840,7 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 				if(IsBike())
 					brake = 0.6f * mod_HandlingManager.fWheelFriction / (pHandling->fMass + 200.0f);
 				else if(pHandling->fMass < 500.0f)
-					brake = mod_HandlingManager.fWheelFriction / pHandling->fMass;
+					brake = 0.2f * mod_HandlingManager.fWheelFriction / pHandling->fMass;
 				else if(GetModelIndex() == MI_RCBANDIT)
 					brake = 0.2f * mod_HandlingManager.fWheelFriction / pHandling->fMass;
 				else

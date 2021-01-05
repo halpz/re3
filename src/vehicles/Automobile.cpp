@@ -260,6 +260,7 @@ CAutomobile::ProcessControl(void)
 	int i;
 	float wheelRot;
 	CColModel *colModel;
+	float brake = 0.0f;
 
 	if(bUsingSpecialColModel)
 		colModel = &CWorld::Players[CWorld::PlayerInFocus].m_ColModel;
@@ -450,7 +451,7 @@ CAutomobile::ProcessControl(void)
 			m_fBrakePedal = 1.0f;
 			m_fGasPedal = 0.0f;
 		}
-		if(CPad::GetPad(0)->WeaponJustDown())
+		if(CPad::GetPad(0)->CarGunJustDown())
 			ActivateBomb();
 		break;
 
@@ -682,7 +683,6 @@ CAutomobile::ProcessControl(void)
 		   AutoPilot.m_nCarMission == MISSION_PLANE_FLYTOCOORS)
 			skipPhysics = true;
 
-	float brake;
 	if(skipPhysics){
 		bHasContacted = false;
 		bIsInSafePosition = false;
