@@ -393,6 +393,12 @@ set_new_provider(int index)
 	return false;
 }
 
+static bool
+IsThisTrackAt16KHz(uint32 track)
+{
+	return track == STREAMED_SOUND_RADIO_CHAT;
+}
+
 cSampleManager::cSampleManager(void)
 {
 	;
@@ -974,7 +980,7 @@ cSampleManager::Initialise(void)
 #endif
 
 		for(int32 i = 0; i < TOTAL_STREAMED_SOUNDS; i++) {
-			aStream[0] = new CStream(StreamedNameTable[i], ALStreamSources[0], ALStreamBuffers[0]);
+			aStream[0] = new CStream(StreamedNameTable[i], ALStreamSources[0], ALStreamBuffers[0], IsThisTrackAt16KHz(i) ? 16000 : 32000);
 
 			if(aStream[0] && aStream[0]->IsOpened()) {
 				uint32 tatalms = aStream[0]->GetLengthMS();
@@ -1661,7 +1667,7 @@ cSampleManager::PreloadStreamedFile(uint8 nFile, uint8 nStream)
 		
 		strcpy(filename, StreamedNameTable[nFile]);
 		
-		CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+		CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 		ASSERT(stream != NULL);
 		
 		aStream[nStream] = stream;
@@ -1736,7 +1742,7 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 							nFile = 0;
 							strcat(filename, StreamedNameTable[nFile]);
 
-							CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+							CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 							ASSERT(stream != NULL);
 
 							aStream[nStream] = stream;
@@ -1760,12 +1766,12 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 					}
 
 					if (mp3->pLinkPath != NULL)
-						aStream[nStream] = new CStream(mp3->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+						aStream[nStream] = new CStream(mp3->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 					else {
 						strcpy(filename, _mp3DirectoryPath);
 						strcat(filename, mp3->aFilename);
 
-						aStream[nStream] = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+						aStream[nStream] = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 					}
 
 					if (aStream[nStream]->IsOpened()) {
@@ -1792,7 +1798,7 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 					{
 						nFile = 0;
 						strcat(filename, StreamedNameTable[nFile]);
-						CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+						CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 						ASSERT(stream != NULL);
 
 						aStream[nStream] = stream;
@@ -1816,7 +1822,7 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 				}
 
 				if (e->pLinkPath != NULL)
-					aStream[nStream] = new CStream(e->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+					aStream[nStream] = new CStream(e->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 				else {
 					strcpy(filename, _mp3DirectoryPath);
 					strcat(filename, e->aFilename);
@@ -1849,7 +1855,7 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 
 		strcpy(filename, StreamedNameTable[nFile]);
 		
-		CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+		CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 		ASSERT(stream != NULL);
 
 		aStream[nStream] = stream;
