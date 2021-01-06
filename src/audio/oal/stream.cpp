@@ -664,11 +664,11 @@ public:
 		if (pFile)
 		{
 			fclose(pFile);
-			delete decoders;
+			delete[] decoders;
 			for (int i = 0; i < m_nChannels; i++)
-				delete ppTempBuffers[i];
-			delete ppTempBuffers;
-			delete buffers;
+				delete[] ppTempBuffers[i];
+			delete[] ppTempBuffers;
+			delete[] buffers;
 		}
 	}
 
