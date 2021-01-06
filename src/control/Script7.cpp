@@ -576,11 +576,11 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
 		ScriptParams[0] = pPlayerInfo->m_nLastTimeCarSpentOnTwoWheels;
-		ScriptParams[1] = *(int*)&pPlayerInfo->m_nLastDistanceCarTravelledOnTwoWheels;
+		*(float*)&ScriptParams[1] = pPlayerInfo->m_nLastDistanceCarTravelledOnTwoWheels;
 		ScriptParams[2] = pPlayerInfo->m_nLastTimeSpentOnWheelie;
-		ScriptParams[3] = *(int*)&pPlayerInfo->m_nLastDistanceTravelledOnWheelie;
+		*(float*)&ScriptParams[3] = pPlayerInfo->m_nLastDistanceTravelledOnWheelie;
 		ScriptParams[4] = pPlayerInfo->m_nLastTimeSpentOnStoppie;
-		ScriptParams[5] = *(int*)&pPlayerInfo->m_nLastDistanceTravelledOnStoppie;
+		*(float*)&ScriptParams[5] = pPlayerInfo->m_nLastDistanceTravelledOnStoppie;
 		StoreParameters(&m_nIp, 6);
 		pPlayerInfo->m_nLastTimeCarSpentOnTwoWheels = 0;
 		pPlayerInfo->m_nLastDistanceCarTravelledOnTwoWheels = 0.0f;
