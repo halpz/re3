@@ -1298,7 +1298,7 @@ void CRadar::TransformRadarPointToScreenSpace(CVector2D &out, const CVector2D &i
 #endif
 	{
 #ifdef ASPECT_RATIO_SCALE
-// The values are from from an early screenshot taken before R* broke radar
+// The values are from an early screenshot taken before R* broke radar
 #define _RADAR_WIDTH ((CDraw::ms_bFixRadar)  ? (82.0f) : (RADAR_WIDTH))
 #define _RADAR_HEIGHT ((CDraw::ms_bFixRadar) ? (82.0f) : (RADAR_HEIGHT))
 #else
