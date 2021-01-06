@@ -125,11 +125,9 @@ workspace "reVC"
 	
 	filter { "platforms:*x86*" }
 		architecture "x86"
-		floatingpoint "Fast"
 		
 	filter { "platforms:*amd64*" }
 		architecture "amd64"
-		floatingpoint "Fast"
 
 	filter { "platforms:*arm*" }
 		architecture "ARM"
@@ -192,11 +190,9 @@ project "librw"
 	
 	filter { "platforms:*x86*" }
 		architecture "x86"
-		floatingpoint "Fast"
 
 	filter { "platforms:*amd64*" }
 		architecture "amd64"
-		floatingpoint "Fast"
 
 	filter "platforms:win*"
 		staticruntime "on"
