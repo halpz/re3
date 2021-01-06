@@ -174,35 +174,45 @@ class CWavFile : public IDecoder
 		tFormatHeader() { memset(this, 0, sizeof(*this)); }
 	};
 
-	FILE* pFile;
-	bool bIsOpen;
-	tFormatHeader FormatHeader;
+	FILE *m_pFile;
+	bool  m_bIsOpen;
 
-	uint32 DataStartOffset;
-	uint32 SampleCount;
-	uint32 SamplesPerBlock;
+	tFormatHeader m_FormatHeader;
+
+	uint32 m_DataStartOffset; // TODO: 64 bit?
+	uint32 m_nSampleCount;
+	uint32 m_nSamplesPerBlock;
 
 	// ADPCM things
-	uint8 *AdpcmBlock;
-	int16 **buffers;
-	CImaADPCMDecoder* decoders;
+	uint8            *m_pAdpcmBuffer;
+	int16           **m_ppPcmBuffers;
+	CImaADPCMDecoder *m_pAdpcmDecoders;
 
 	void Close()
 	{
-		if (pFile) {
-			fclose(pFile);
-			pFile = nil;
+		if (m_pFile) {
+			fclose(m_pFile);
+			m_pFile = nil;
 		}
-		if (AdpcmBlock) delete[] AdpcmBlock;
-		if (buffers) delete[] buffers;
-		if (decoders) delete[] decoders;
+		delete[] m_pAdpcmBuffer;
+		delete[] m_ppPcmBuffers;
+		delete[] m_pAdpcmDecoders;
+	}
+
+	uint32 GetCurrentSample() const
+	{
+		// TODO: 64 bit?
+		uint32 FilePos = ftell(m_pFile);
+		if (FilePos <= m_DataStartOffset)
+			return 0;
+		return (FilePos - m_DataStartOffset) / m_FormatHeader.BlockAlign * m_nSamplesPerBlock;
 	}
 
 public:
-	CWavFile(const char* path) : bIsOpen(false), DataStartOffset(0), SampleCount(0), SamplesPerBlock(0), AdpcmBlock(nil), buffers(nil), decoders(nil)
+	CWavFile(const char* path) : m_bIsOpen(false), m_DataStartOffset(0), m_nSampleCount(0), m_nSamplesPerBlock(0), m_pAdpcmBuffer(nil), m_ppPcmBuffers(nil), m_pAdpcmDecoders(nil)
 	{
-		pFile = fopen(path, "rb");
-		if (!pFile) return;
+		m_pFile = fopen(path, "rb");
+		if (!m_pFile) return;
 
 #define CLOSE_ON_ERROR(op)\
 			if (op) { \
@@ -212,52 +222,58 @@ public:
 
 		tDataHeader DataHeader;
 
-		CLOSE_ON_ERROR(fread(&DataHeader, sizeof(DataHeader), 1, pFile) == 0);
+		CLOSE_ON_ERROR(fread(&DataHeader, sizeof(DataHeader), 1, m_pFile) == 0);
 		CLOSE_ON_ERROR(DataHeader.ID != 'FFIR');
 
+		// TODO? validate filesizes
+
 		int WAVE;
-		CLOSE_ON_ERROR(fread(&WAVE, 4, 1, pFile) == 0);
+		CLOSE_ON_ERROR(fread(&WAVE, 4, 1, m_pFile) == 0);
 		CLOSE_ON_ERROR(WAVE != 'EVAW')
-		CLOSE_ON_ERROR(fread(&DataHeader, sizeof(DataHeader), 1, pFile) == 0);
+		CLOSE_ON_ERROR(fread(&DataHeader, sizeof(DataHeader), 1, m_pFile) == 0);
 		CLOSE_ON_ERROR(DataHeader.ID != ' tmf');
 
-		CLOSE_ON_ERROR(fread(&FormatHeader, Min(DataHeader.Size, sizeof(tFormatHeader)), 1, pFile) == 0);
+		CLOSE_ON_ERROR(fread(&m_FormatHeader, Min(DataHeader.Size, sizeof(tFormatHeader)), 1, m_pFile) == 0);
 		CLOSE_ON_ERROR(DataHeader.Size > sizeof(tFormatHeader));
 
-		switch (FormatHeader.AudioFormat)
+		switch (m_FormatHeader.AudioFormat)
 		{
 		case WAVEFMT_XBOX_ADPCM:
-			FormatHeader.AudioFormat = WAVEFMT_IMA_ADPCM;
+			m_FormatHeader.AudioFormat = WAVEFMT_IMA_ADPCM;
 		case WAVEFMT_IMA_ADPCM:
-			SamplesPerBlock = (FormatHeader.BlockAlign / FormatHeader.NumChannels - 4) * 2 + 1;
-			AdpcmBlock = new uint8[FormatHeader.BlockAlign];
-			buffers = new int16*[FormatHeader.NumChannels];
-			decoders = new CImaADPCMDecoder[FormatHeader.NumChannels];
+			m_nSamplesPerBlock = (m_FormatHeader.BlockAlign / m_FormatHeader.NumChannels - 4) * 2 + 1;
+			m_pAdpcmBuffer = new uint8[m_FormatHeader.BlockAlign];
+			m_ppPcmBuffers = new int16*[m_FormatHeader.NumChannels];
+			m_pAdpcmDecoders = new CImaADPCMDecoder[m_FormatHeader.NumChannels];
 			break;
 		case WAVEFMT_PCM:
-			SamplesPerBlock = 1;
-			if (FormatHeader.BitsPerSample != 16)
+			m_nSamplesPerBlock = 1;
+			if (m_FormatHeader.BitsPerSample != 16)
 			{
-				debug("Unsupported PCM (%d bits), only signed 16-bit is supported (%s)\n", FormatHeader.BitsPerSample, path);
+				debug("Unsupported PCM (%d bits), only signed 16-bit is supported (%s)\n", m_FormatHeader.BitsPerSample, path);
+				Close();
 				return;
 			}
 			break;
 		default:
-			debug("Unsupported wav format 0x%x (%s)\n", FormatHeader.AudioFormat, path);
+			debug("Unsupported wav format 0x%x (%s)\n", m_FormatHeader.AudioFormat, path);
+			Close();
 			return;
 		}
 
 		while (true) {
-			CLOSE_ON_ERROR(fread(&DataHeader, sizeof(DataHeader), 1, pFile) == 0);
+			CLOSE_ON_ERROR(fread(&DataHeader, sizeof(DataHeader), 1, m_pFile) == 0);
 			if (DataHeader.ID == 'atad')
 				break;
-			fseek(pFile, DataHeader.Size, SEEK_CUR);
+			fseek(m_pFile, DataHeader.Size, SEEK_CUR);
+			// TODO? validate data size
+			// maybe check if there no extreme custom headers that might break this
 		}
 		
-		DataStartOffset = ftell(pFile);
-		SampleCount = DataHeader.Size / FormatHeader.BlockAlign * SamplesPerBlock;
+		m_DataStartOffset = ftell(m_pFile);
+		m_nSampleCount = DataHeader.Size / m_FormatHeader.BlockAlign * m_nSamplesPerBlock;
 
-		bIsOpen = true;
+		m_bIsOpen = true;
 #undef CLOSE_ON_ERROR
 	}
 
@@ -268,7 +284,7 @@ public:
 
 	bool IsOpened()
 	{
-		return bIsOpen;
+		return m_bIsOpen;
 	}
 
 	uint32 GetSampleSize()
@@ -278,29 +294,29 @@ public:
 
 	uint32 GetSampleCount()
 	{
-		return SampleCount;
+		return m_nSampleCount;
 	}
 
 	uint32 GetSampleRate()
 	{
-		return FormatHeader.SampleRate;
+		return m_FormatHeader.SampleRate;
 	}
 
 	uint32 GetChannels()
 	{
-		return FormatHeader.NumChannels;
+		return m_FormatHeader.NumChannels;
 	}
 
 	void Seek(uint32 milliseconds)
 	{
 		if (!IsOpened()) return;
-		fseek(pFile, DataStartOffset + ms2samples(milliseconds) / SamplesPerBlock * FormatHeader.BlockAlign, SEEK_SET);
+		fseek(m_pFile, m_DataStartOffset + ms2samples(milliseconds) / m_nSamplesPerBlock * m_FormatHeader.BlockAlign, SEEK_SET);
 	}
 
 	uint32 Tell()
 	{
 		if (!IsOpened()) return 0;
-		return samples2ms((ftell(pFile) - DataStartOffset) / FormatHeader.BlockAlign * SamplesPerBlock);
+		return samples2ms(GetCurrentSample());
 	}
 
 #define SAMPLES_IN_LINE (8)
@@ -309,52 +325,61 @@ public:
 	{
 		if (!IsOpened()) return 0;
 		
-		if (FormatHeader.AudioFormat == WAVEFMT_PCM)
+		if (m_FormatHeader.AudioFormat == WAVEFMT_PCM)
 		{
-			uint32 size = fread(buffer, 1, GetBufferSize(), pFile);
-			if (FormatHeader.NumChannels == 2)
+			// just read the file and sort the samples
+			uint32 size = fread(buffer, 1, GetBufferSize(), m_pFile);
+			if (m_FormatHeader.NumChannels == 2)
 				SortStereoBuffer.SortStereo(buffer, size);
 			return size;
 		}
-		else if (FormatHeader.AudioFormat == WAVEFMT_IMA_ADPCM)
+		else if (m_FormatHeader.AudioFormat == WAVEFMT_IMA_ADPCM)
 		{
-			uint32 MaxSamples = GetBufferSamples() / FormatHeader.NumChannels;
-			uint32 CurSample = (ftell(pFile) - DataStartOffset) / FormatHeader.BlockAlign * SamplesPerBlock;
+			// trim the buffer size if we're at the end of our file
+			uint32 nMaxSamples = GetBufferSamples() / m_FormatHeader.NumChannels;
+			uint32 nSamplesLeft = m_nSampleCount - GetCurrentSample();
+			nMaxSamples = Min(nMaxSamples, nSamplesLeft);
 
-			MaxSamples = Min(MaxSamples, SampleCount - CurSample);
-			MaxSamples = MaxSamples / SamplesPerBlock * SamplesPerBlock;
-			uint32 OutBufSizePerChannel = MaxSamples * GetSampleSize();
-			uint32 OutBufSize = OutBufSizePerChannel * FormatHeader.NumChannels;
-			int16** buffers = new int16*[FormatHeader.NumChannels];
-			CImaADPCMDecoder* decoders = new CImaADPCMDecoder[FormatHeader.NumChannels];
-			for (uint32 i = 0; i < FormatHeader.NumChannels; i++)
-				buffers[i] = (int16*)((int8*)buffer + OutBufSizePerChannel * i);
+			// align sample count to our block
+			nMaxSamples = nMaxSamples / m_nSamplesPerBlock * m_nSamplesPerBlock;
+
+			// count the size of output buffer
+			uint32 OutBufSizePerChannel = nMaxSamples * GetSampleSize();
+			uint32 OutBufSize = OutBufSizePerChannel * m_FormatHeader.NumChannels;
+
+			// calculate the pointers to individual channel buffers
+			for (uint32 i = 0; i < m_FormatHeader.NumChannels; i++)
+				m_ppPcmBuffers[i] = (int16*)((int8*)buffer + OutBufSizePerChannel * i);
 
 			uint32 samplesRead = 0;
-			while (samplesRead < MaxSamples)
+			while (samplesRead < nMaxSamples)
 			{
-				uint8* AdpcmBuf = AdpcmBlock;
-				if (fread(AdpcmBlock, 1, FormatHeader.BlockAlign, pFile) == 0)
+				// read the file
+				uint8 *pAdpcmBuf = m_pAdpcmBuffer;
+				if (fread(m_pAdpcmBuffer, 1, m_FormatHeader.BlockAlign, m_pFile) == 0)
 					return 0;
 
-				for (uint32 i = 0; i < FormatHeader.NumChannels; i++)
+				// get the first sample in adpcm block and initialise the decoder(s)
+				for (uint32 i = 0; i < m_FormatHeader.NumChannels; i++)
 				{
-					int16 Sample = *(int16*)AdpcmBuf;
-					AdpcmBuf += sizeof(int16);
-					int16 Step = *(int16*)AdpcmBuf;
-					AdpcmBuf += sizeof(int16);
-					decoders[i].Init(Sample, Step);
-					*(buffers[i]) = Sample;
-					buffers[i]++;
+					int16 Sample = *(int16*)pAdpcmBuf;
+					pAdpcmBuf += sizeof(int16);
+					int16 Step = *(int16*)pAdpcmBuf;
+					pAdpcmBuf += sizeof(int16);
+					m_pAdpcmDecoders[i].Init(Sample, Step);
+					*(m_ppPcmBuffers[i]) = Sample;
+					m_ppPcmBuffers[i]++;
 				}
 				samplesRead++;
-				for (uint32 s = 1; s < SamplesPerBlock; s += SAMPLES_IN_LINE)
+
+				// decode the rest of the block
+				for (uint32 s = 1; s < m_nSamplesPerBlock; s += SAMPLES_IN_LINE)
 				{
-					for (uint32 i = 0; i < FormatHeader.NumChannels; i++)
+					for (uint32 i = 0; i < m_FormatHeader.NumChannels; i++)
 					{
-						decoders[i].Decode(AdpcmBuf, buffers[i], SAMPLES_IN_LINE / 2);
-						AdpcmBuf += SAMPLES_IN_LINE / 2;
-						buffers[i] += SAMPLES_IN_LINE;
+						m_pAdpcmDecoders[i].Decode(pAdpcmBuf, m_ppPcmBuffers[i], SAMPLES_IN_LINE / 2);
+						pAdpcmBuf += SAMPLES_IN_LINE / 2;
+						m_ppPcmBuffers[i] += SAMPLES_IN_LINE;
 					}
 					samplesRead += SAMPLES_IN_LINE;
 				}
@@ -620,68 +645,68 @@ public:
 
 class CVbFile : public IDecoder
 {
-	FILE* pFile;
-	size_t m_FileSize;
-	size_t m_nNumberOfBlocks;
-	CVagDecoder* decoders;
+	FILE        *m_pFile;
+	CVagDecoder *m_pVagDecoders;
 
-	uint32 m_nSampleRate;
-	uint8 m_nChannels;
-	bool m_bBlockRead;
-	uint16 m_LineInBlock;
-	size_t m_CurrentBlock;
+	size_t  m_FileSize;
+	size_t  m_nNumberOfBlocks;
 
-	uint8** ppTempBuffers;
-	int16** buffers;
+	uint32  m_nSampleRate;
+	uint8   m_nChannels;
+	bool    m_bBlockRead;
+	uint16  m_LineInBlock;
+	size_t  m_CurrentBlock;
+
+	uint8 **m_ppVagBuffers; // buffers that cache actual ADPCM file data
+	int16 **m_ppPcmBuffers;
 
 	void ReadBlock(int32 block = -1)
 	{
 		// just read next block if -1
 		if (block != -1)
-			fseek(pFile, block * m_nChannels * VB_BLOCK_SIZE, SEEK_SET);
+			fseek(m_pFile, block * m_nChannels * VB_BLOCK_SIZE, SEEK_SET);
 
 		for (int i = 0; i < m_nChannels; i++)
-			fread(ppTempBuffers[i], VB_BLOCK_SIZE, 1, pFile);
+			fread(m_ppVagBuffers[i], VB_BLOCK_SIZE, 1, m_pFile);
 		m_bBlockRead = true;
 	}
 
 public:
-	CVbFile(const char* path, uint32 nSampleRate = 32000, uint8 nChannels = 2) : m_nSampleRate(nSampleRate), m_nChannels(nChannels), decoders(nil), ppTempBuffers(nil), buffers(nil),
+	CVbFile(const char* path, uint32 nSampleRate = 32000, uint8 nChannels = 2) : m_nSampleRate(nSampleRate), m_nChannels(nChannels), m_pVagDecoders(nil), m_ppVagBuffers(nil), m_ppPcmBuffers(nil),
 		m_FileSize(0), m_nNumberOfBlocks(0), m_bBlockRead(false), m_LineInBlock(0), m_CurrentBlock(0)
 	{
-		pFile = fopen(path, "rb");
-		if (!pFile) return;
+		m_pFile = fopen(path, "rb");
+		if (!m_pFile) return;
 
-		fseek(pFile, 0, SEEK_END);
-		m_FileSize = ftell(pFile);
-		fseek(pFile, 0, SEEK_SET);
+		fseek(m_pFile, 0, SEEK_END);
+		m_FileSize = ftell(m_pFile);
+		fseek(m_pFile, 0, SEEK_SET);
+
 		m_nNumberOfBlocks = m_FileSize / (nChannels * VB_BLOCK_SIZE);
-		decoders = new CVagDecoder[nChannels];
-		m_CurrentBlock = 0;
-		m_LineInBlock = 0;
-		m_bBlockRead = false;
-		ppTempBuffers = new uint8*[nChannels];
-		buffers = new int16*[nChannels];
+		m_pVagDecoders = new CVagDecoder[nChannels];
+		m_ppVagBuffers = new uint8*[nChannels];
+		m_ppPcmBuffers = new int16*[nChannels];
 		for (uint8 i = 0; i < nChannels; i++)
-			ppTempBuffers[i] = new uint8[VB_BLOCK_SIZE];
+			m_ppVagBuffers[i] = new uint8[VB_BLOCK_SIZE];
 	}
 
 	~CVbFile()
 	{
-		if (pFile)
+		if (m_pFile)
 		{
-			fclose(pFile);
-			delete[] decoders;
+			fclose(m_pFile);
+
+			delete[] m_pVagDecoders;
 			for (int i = 0; i < m_nChannels; i++)
-				delete[] ppTempBuffers[i];
-			delete[] ppTempBuffers;
-			delete[] buffers;
+				delete[] m_ppVagBuffers[i];
+			delete[] m_ppVagBuffers;
+			delete[] m_ppPcmBuffers;
 		}
 	}
 
 	bool IsOpened()
 	{
-		return pFile != nil;
+		return m_pFile != nil;
 	}
 
 	uint32 GetSampleSize()
@@ -709,6 +734,8 @@ public:
 	{
 		if (!IsOpened()) return;
 		uint32 samples = ms2samples(milliseconds);
+
+		// find the block of our sample
 		uint32 block = samples / NUM_VAG_SAMPLES_IN_BLOCK;
 		if (block > m_nNumberOfBlocks)
 		{
@@ -718,6 +745,7 @@ public:
 		if (block != m_CurrentBlock)
 			m_bBlockRead = false;
 
+		// find a line of our sample within our block
 		uint32 remainingSamples = samples - block * NUM_VAG_SAMPLES_IN_BLOCK;
 		uint32 newLine = remainingSamples / VAG_SAMPLES_IN_LINE / VAG_LINE_SIZE;
 
@@ -726,7 +754,7 @@ public:
 			m_CurrentBlock = block;
 			m_LineInBlock = newLine;
 			for (uint32 i = 0; i < GetChannels(); i++)
-				decoders[i].ResetState();
+				m_pVagDecoders[i].ResetState();
 		}
 
 	}
@@ -742,35 +770,38 @@ public:
 	{
 		if (!IsOpened()) return 0;
 
+		if (m_CurrentBlock >= m_nNumberOfBlocks) return 0;
+
+		// cache current ADPCM block
 		if (!m_bBlockRead)
 			ReadBlock(m_CurrentBlock);
 
-		if (m_CurrentBlock == m_nNumberOfBlocks) return 0;
-		int size = 0;
-
+		// trim the buffer size if we're at the end of our file
 		int numberOfRequiredLines = GetBufferSamples() / m_nChannels / VAG_SAMPLES_IN_LINE;
 		int numberOfRemainingLines = (m_nNumberOfBlocks - m_CurrentBlock) * NUM_VAG_LINES_IN_BLOCK - m_LineInBlock;
 		int bufSizePerChannel = Min(numberOfRequiredLines, numberOfRemainingLines) * VAG_SAMPLES_IN_LINE * GetSampleSize();
 
-		if (numberOfRequiredLines > numberOfRemainingLines)
-			numberOfRemainingLines = numberOfRemainingLines;
-
+		// calculate the pointers to individual channel buffers
 		for (uint32 i = 0; i < m_nChannels; i++)
-			buffers[i] = (int16*)((int8*)buffer + bufSizePerChannel * i);
+			m_ppPcmBuffers[i] = (int16*)((int8*)buffer + bufSizePerChannel * i);
 
+		int size = 0;
 		while (size < bufSizePerChannel)
 		{
+			// decode the VAG lines
 			for (uint32 i = 0; i < m_nChannels; i++)
 			{
-				decoders[i].Decode(ppTempBuffers[i] + m_LineInBlock * VAG_LINE_SIZE, buffers[i], VAG_LINE_SIZE);
-				buffers[i] += VAG_SAMPLES_IN_LINE;
+				m_pVagDecoders[i].Decode(m_ppVagBuffers[i] + m_LineInBlock * VAG_LINE_SIZE, m_ppPcmBuffers[i], VAG_LINE_SIZE);
+				m_ppPcmBuffers[i] += VAG_SAMPLES_IN_LINE;
 			}
 			size += VAG_SAMPLES_IN_LINE * GetSampleSize();
 			m_LineInBlock++;
+
+			// block is over, read the next block
 			if (m_LineInBlock >= NUM_VAG_LINES_IN_BLOCK)
 			{
 				m_CurrentBlock++;
-				if (m_CurrentBlock >= m_nNumberOfBlocks)
+				if (m_CurrentBlock >= m_nNumberOfBlocks) // end of file
 					break;
 				m_LineInBlock = 0;
 				ReadBlock();
