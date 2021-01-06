@@ -193,9 +193,9 @@ class CWavFile : public IDecoder
 			fclose(pFile);
 			pFile = nil;
 		}
-		if (AdpcmBlock) delete AdpcmBlock;
-		if (buffers) delete buffers;
-		if (decoders) delete decoders;
+		if (AdpcmBlock) delete[] AdpcmBlock;
+		if (buffers) delete[] buffers;
+		if (decoders) delete[] decoders;
 	}
 
 public:
