@@ -352,6 +352,7 @@ enum Config {
 #define RADIO_SCROLL_TO_PREV_STATION
 #define AUDIO_CACHE
 //#define PS2_AUDIO   // changes audio paths for cutscenes and radio to PS2 paths, needs vbdec to support VB with MSS
+//#define AUDIO_OAL_USE_SNDFILE // use libsndfile to decode WAVs instead of our internal decoder
 
 // IMG
 #define BIG_IMG // allows to read larger img files
