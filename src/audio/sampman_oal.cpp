@@ -396,7 +396,7 @@ set_new_provider(int index)
 static bool
 IsThisTrackAt16KHz(uint32 track)
 {
-	return track == STREAMED_SOUND_RADIO_KCHAT || track == STREAMED_SOUND_RADIO_VCPR || track == STREAMED_SOUND_AMBSIL_AMBIENT;
+	return track == STREAMED_SOUND_RADIO_KCHAT || track == STREAMED_SOUND_RADIO_VCPR || track == STREAMED_SOUND_RADIO_POLICE;
 }
 
 cSampleManager::cSampleManager(void)
