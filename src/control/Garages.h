@@ -93,6 +93,7 @@ VALIDATE_SIZE(CStoredCar, 0x28);
 
 class CGarage
 {
+public:
 	uint8 m_eGarageType;
 	uint8 m_eGarageState;
 	uint8 m_nMaxStoredCars;
@@ -189,9 +190,6 @@ class CGarage
 
 	int32 FindMaxNumStoredCarsForGarage() { return Min(NUM_GARAGE_STORED_CARS, m_nMaxStoredCars); }
 
-	friend class CGarages;
-	friend class cAudioManager;
-	friend class CCamera;
 };
 
 class CGarages
@@ -199,6 +197,7 @@ class CGarages
 	enum {
 		MESSAGE_LENGTH = 8,
 	};
+public:
 	static int32 BankVansCollected;
 	static bool BombsAreFree;
 	static bool RespraysAreFree;
@@ -218,7 +217,6 @@ class CGarages
 	static CStoredCar aCarsInSafeHouses[TOTAL_HIDEOUT_GARAGES][NUM_GARAGE_STORED_CARS];
 	static bool bCamShouldBeOutisde;
 
-public:
 	static void Init(void);
 #ifndef PS2
 	static void Shutdown(void);
@@ -259,7 +257,6 @@ public:
 	static void SetFreeResprays(bool bValue) { RespraysAreFree = bValue; }
 	static void SetMaxNumStoredCarsForGarage(int16 garage, uint8 num) { aGarages[garage].m_nMaxStoredCars = num; }
 
-private:
 	static bool IsCarSprayable(CVehicle*);
 	static float FindDoorHeightForMI(int32);
 	static void CloseHideOutGaragesBeforeSave(void);
@@ -296,7 +293,4 @@ private:
 	}
 	static bool IsThisGarageTypeSafehouse(uint8 type) { return FindSafeHouseIndexForGarageType(type) >= 0; }
 
-	friend class cAudioManager;
-	friend class CReplay;
-	friend class CGarage;
 };

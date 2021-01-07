@@ -96,6 +96,7 @@
 #include "postfx.h"
 #include "custompipes.h"
 #include "screendroplets.h"
+#include "VarConsole.h"
 #ifdef USE_TEXTURE_POOL
 #include "TexturePools.h"
 #endif
@@ -112,6 +113,10 @@ char CGame::aDatFile[32];
 #ifdef MORE_LANGUAGES
 bool CGame::russianGame = false;
 bool CGame::japaneseGame = false;
+#endif
+#ifndef MASTER
+CVector CGame::PlayerCoords;
+bool8 CGame::VarUpdatePlayerCoords;
 #endif
 
 int gameTxdSlot;
@@ -557,6 +562,16 @@ bool CGame::Initialise(const char* datFile)
 #ifdef USE_TEXTURE_POOL
 	_TexturePoolsUnknown(true);
 #endif
+
+#ifndef MASTER
+	PlayerCoords = FindPlayerCoors();
+	VarConsole.Add("X PLAYER COORD", &PlayerCoords.x, 10.0f, -10000.0f, 10000.0f, true);
+	VarConsole.Add("Y PLAYER COORD", &PlayerCoords.y, 10.0f, -10000.0f, 10000.0f, true);
+	VarConsole.Add("Z PLAYER COORD", &PlayerCoords.z, 10.0f, -10000.0f, 10000.0f, true);
+	VarConsole.Add("UPDATE PLAYER COORD", &VarUpdatePlayerCoords, true);
+#endif
+
+
 	DMAudio.SetStartingTrackPositions(true);
 	DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 	return true;
@@ -837,6 +852,12 @@ void CGame::Process(void)
 	CWindModifiers::Number = 0;
 	if (!CTimer::GetIsPaused())
 	{
+#ifndef MASTER
+		if (VarUpdatePlayerCoords) {
+			FindPlayerPed()->Teleport(PlayerCoords);
+			VarUpdatePlayerCoords = false;
+		}
+#endif
 		CSprite2d::SetRecipNearClip();
 		CSprite2d::InitPerFrame();
 		CFont::InitPerFrame();

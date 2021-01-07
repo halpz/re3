@@ -36,6 +36,7 @@
 #include "MemoryHeap.h"
 #include "Font.h"
 #include "Frontend.h"
+#include "VarConsole.h"
 
 //--MIAMI: file done (possibly bugs)
 
@@ -81,6 +82,12 @@ CEntity *pIslandLODmainlandEntity;
 CEntity *pIslandLODbeachEntity;
 int32 islandLODmainland;
 int32 islandLODbeach;
+
+#ifndef MASTER
+bool gbPrintStats;
+bool gbPrintVehiclesInMemory;  // TODO
+bool gbPrintStreamingBuffer; // TODO
+#endif
 
 bool
 CStreamingInfo::GetCdPosnAndSize(uint32 &posn, uint32 &size)
@@ -237,8 +244,14 @@ CStreaming::Init2(void)
 	pIslandLODbeachEntity = nil;
 	islandLODmainland = -1;
 	islandLODbeach = -1;
-        CModelInfo::GetModelInfo("IslandLODmainland", &islandLODmainland);
-        CModelInfo::GetModelInfo("IslandLODbeach", &islandLODbeach);
+	CModelInfo::GetModelInfo("IslandLODmainland", &islandLODmainland);
+	CModelInfo::GetModelInfo("IslandLODbeach", &islandLODbeach);
+
+#ifndef MASTER
+	VarConsole.Add("Streaming Debug", &gbPrintStats, true);
+	VarConsole.Add("Streaming Vehicle Debug", &gbPrintVehiclesInMemory, true);
+	VarConsole.Add("Printf Streaming Buffer contents", &gbPrintStreamingBuffer, true);
+#endif
 }
 
 void
@@ -1908,10 +1921,12 @@ CStreaming::LoadBigBuildingsWhenNeeded(void)
 
 	ISLAND_LOADING_IS(LOW)
 		CStreaming::RequestBigBuildings(CGame::currLevel, TheCamera.GetPosition());
+#ifdef NO_ISLAND_LOADING
 	else if(FrontEndMenuManager.m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_MEDIUM) {
 		RemoveIslandsNotUsed(CGame::currLevel);
 		CStreaming::RequestIslands(CGame::currLevel);
 	}
+#endif
 
 	CStreaming::LoadAllRequestedModels(false);
 

@@ -25,7 +25,7 @@ cMusicManager MusicManager;
 int32 gNumRetunePresses;
 int32 gRetuneCounter;
 bool g_bAnnouncementReadPosAlready;
-uint8 RadioStaticCounter;
+uint8 RadioStaticCounter = 5;
 uint32 RadioStaticTimer;
 
 CVector vecRiotPosition(300.7f, -322.0f, 12.0f);
@@ -435,7 +435,7 @@ cMusicManager::ServiceFrontEndMode()
 			else {
 				if (m_nCurrentVolume < m_nMaxVolume)
 					m_nCurrentVolume = Min(m_nMaxVolume, m_nCurrentVolume + 6);
-				SampleManager.SetStreamedVolumeAndPan(m_nCurrentVolume, 63u, 0, 0);
+				SampleManager.SetStreamedVolumeAndPan(m_nCurrentVolume, 63, 0, 0);
 			}
 		} else {
 			if (m_nPlayingTrack == STREAMED_SOUND_RADIO_MP3_PLAYER)
@@ -991,6 +991,7 @@ cMusicManager::ServiceTrack(CVehicle *veh, CPed *ped)
 		}
 	} else if (AudioManager.ShouldDuckMissionAudio(0) || AudioManager.ShouldDuckMissionAudio(1)) {
 		SampleManager.SetStreamedVolumeAndPan(Min(m_nCurrentVolume, 25), 63, 0, 0);
+		nFramesSinceCutsceneEnded = 0;
 	} else {
 		if (nFramesSinceCutsceneEnded == -1)
 			volume = m_nCurrentVolume;

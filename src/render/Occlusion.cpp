@@ -9,6 +9,7 @@
 #include "Draw.h"
 #include "Timer.h"
 #include "RwHelper.h"
+#include "VarConsole.h"
 
 int32 COcclusion::NumOccludersOnMap;
 int16 COcclusion::FarAwayList;
@@ -31,20 +32,20 @@ CVector gOccluderCoorsOnScreen[8];
 CVector gOccluderCoors[8];
 
 #ifndef MASTER
-bool bDisplayOccDebugStuff;
+bool bDispayOccDebugStuff; // disPAY, yeah
 #endif
 
 void
 COcclusion::Init(void)
 {
 	NumOccludersOnMap = 0;
+#ifndef MASTER
+	VarConsole.Add("Occlusion debug", &bDispayOccDebugStuff, true);
+#endif
 	FarAwayList = -1;
 	NearbyList = -1;
 	ListWalkThroughFA = -1;
 	PreviousListWalkThroughFA = -1;
-#ifndef MASTER
-	bDisplayOccDebugStuff = false;
-#endif
 }
 
 void
@@ -458,7 +459,7 @@ bool COcclusion::IsPositionOccluded(CVector pos, float side) {
 RwIm2DVertex vertexbufferT[2];
 
 void COcclusion::Render() {
-	if (!bDisplayOccDebugStuff || !(CTimer::GetTimeInMilliseconds() & 0x200))
+	if (!bDispayOccDebugStuff || !(CTimer::GetTimeInMilliseconds() & 0x200))
 		return;
 
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);

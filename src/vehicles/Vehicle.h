@@ -402,6 +402,9 @@ public:
 	static bool m_bDisableMouseSteering;
 	static bool bDisableRemoteDetonation;
 	static bool bDisableRemoteDetonationOnContact;
+#ifndef MASTER
+	static bool m_bDisplayHandlingInfo;
+#endif
 };
 
 void DestroyVehicleAndDriverAndPassengers(CVehicle* pVehicle);

@@ -226,15 +226,15 @@ void CWeather::Update(void)
 	// Rain
 	float fNewRain;
 	if (NewWeatherType == WEATHER_RAINY || NewWeatherType == WEATHER_HURRICANE) {
-		// if raining for >1 hour, values: 0, 0.33, 0.66, 0.99, switching every ~16.5s
-		fNewRain = ((uint16)CTimer::GetTimeInMilliseconds() >> 14) * 0.33f;
+		// if raining for >1 hour, values: 0, 0.33, switching every ~16.5s
+		fNewRain = (((uint16)CTimer::GetTimeInMilliseconds() >> 14) & 1) * 0.33f;
 		if (OldWeatherType != WEATHER_RAINY && OldWeatherType != WEATHER_HURRICANE) {
 			if (InterpolationValue < 0.4f)
 				// if rain has just started (<24 minutes), always 0.5
 				fNewRain = 0.5f;
 			else
-				// if rain is ongoing for >24 minutes, values: 0.25, 0.5, 0.75, 1.0, switching every ~16.5s
-				fNewRain = 0.25f + ((uint16)CTimer::GetTimeInMilliseconds() >> 14) * 0.25f;
+				// if rain is ongoing for >24 minutes, values: 0.25, 0.5, switching every ~16.5s
+				fNewRain = 0.25f + (((uint16)CTimer::GetTimeInMilliseconds() >> 14) & 1) * 0.25f;
 		}
 		fNewRain = Max(fNewRain, 0.5f);
 	}

@@ -25,6 +25,7 @@
 #include "CutsceneObject.h"
 #include "CutsceneShadow.h"
 #include "Clock.h"
+#include "VarConsole.h"
 
 #ifdef DEBUGMENU
 SETTWEAKPATH("Shadows");
@@ -57,6 +58,9 @@ CStaticShadow    CShadows::aStaticShadows   [MAX_STATICSHADOWS];
 CPolyBunch      *CShadows::pEmptyBunchList;
 CPermanentShadow CShadows::aPermanentShadows[MAX_PERMAMENTSHADOWS];
 
+#ifndef MASTER
+bool gbCountPolysInShadow;
+#endif
 
 void
 CShadows::Init(void)
@@ -154,6 +158,10 @@ CShadows::Init(void)
 	{
 		aPermanentShadows[i].m_nType = SHADOWTYPE_NONE;
 	}
+
+#ifndef MASTER
+	VarConsole.Add("Count polys in shadow", &gbCountPolysInShadow, true);
+#endif
 }
 
 void

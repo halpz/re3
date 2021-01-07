@@ -703,7 +703,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		ScriptParams[0] = CPools::GetVehiclePool()->GetIndex(pVehicle);
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_CAR);
+			CTheScripts::MissionCleanUp.AddEntityToList(ScriptParams[0], CLEANUP_CAR);
 		return 0;
 	}
 	case COMMAND_START_BOAT_FOAM_ANIMATION:
@@ -1191,7 +1191,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		CollectParameters(&m_nIp, 8);
 		CPed *pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		CVehicle *pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
-		pPed->AttachPedToEntity(pVehicle, *(CVector*)&ScriptParams[2], ScriptParams[5], DEGTORAD(ScriptParams[6]), (eWeaponType)ScriptParams[7]);
+		pPed->AttachPedToEntity(pVehicle, *(CVector*)&ScriptParams[2], ScriptParams[5], DEGTORAD(*(float*)&ScriptParams[6]), (eWeaponType)ScriptParams[7]);
 		return 0;
 	}
 	case COMMAND_DETACH_CHAR_FROM_CAR:
@@ -1272,7 +1272,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 			pPed->bRespondsToThreats = false;
 			++CPopulation::ms_nTotalMissionPeds;
 			if (m_bIsMissionScript)
-				CTheScripts::MissionCleanup.AddEntityToList(ped_handle, CLEANUP_CHAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(ped_handle, CLEANUP_CHAR);
 		}
 		ScriptParams[0] = ped_handle;
 		StoreParameters(&m_nIp, 1);
@@ -1320,7 +1320,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 			pPed->bRespondsToThreats = false;
 			++CPopulation::ms_nTotalMissionPeds;
 			if (m_bIsMissionScript)
-				CTheScripts::MissionCleanup.AddEntityToList(ped_handle, CLEANUP_CHAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(ped_handle, CLEANUP_CHAR);
 		}
 		ScriptParams[0] = ped_handle;
 		StoreParameters(&m_nIp, 1);

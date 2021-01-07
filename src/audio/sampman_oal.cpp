@@ -102,7 +102,7 @@ CChannel aChannel[MAXCHANNELS+MAX2DCHANNELS];
 uint8 nChannelVolume[MAXCHANNELS+MAX2DCHANNELS];
 
 uint32 nStreamLength[TOTAL_STREAMED_SOUNDS];
-ALuint ALStreamSources[MAX_STREAMS];
+ALuint ALStreamSources[MAX_STREAMS][2];
 ALuint ALStreamBuffers[MAX_STREAMS][NUM_STREAMBUFFERS];
 
 struct tMP3Entry
@@ -245,9 +245,9 @@ release_existing()
 		if (stream)
 			stream->ProviderTerm();
 		
-		alDeleteSources(1, &ALStreamSources[i]);
 		alDeleteBuffers(NUM_STREAMBUFFERS, ALStreamBuffers[i]);
 	}
+	alDeleteSources(MAX_STREAMS*2, ALStreamSources[0]);
 	
 	CChannel::DestroyChannels();
 	
@@ -287,7 +287,10 @@ set_new_provider(int index)
 		//TODO:
 		_maxSamples = MAXCHANNELS;
 		
-		ALCint attr[] = {ALC_FREQUENCY,MAX_FREQ,0};
+		ALCint attr[] = {ALC_FREQUENCY,MAX_FREQ,
+						ALC_MONO_SOURCES, MAX_STREAMS * 2 + MAXCHANNELS,
+						0,
+						};
 		
 		ALDevice  = alcOpenDevice(providers[index].id);
 		ASSERT(ALDevice != NULL);
@@ -319,11 +322,17 @@ set_new_provider(int index)
 			alGenAuxiliaryEffectSlots(1, &ALEffectSlot);
 			alGenEffects(1, &ALEffect);
 		}
-		
+
+		alGenSources(MAX_STREAMS*2, ALStreamSources[0]);
 		for ( int32 i = 0; i < MAX_STREAMS; i++ )
 		{
-			alGenSources(1, &ALStreamSources[i]);
 			alGenBuffers(NUM_STREAMBUFFERS, ALStreamBuffers[i]);
+			alSourcei(ALStreamSources[i][0], AL_SOURCE_RELATIVE, AL_TRUE);
+			alSource3f(ALStreamSources[i][0], AL_POSITION, 0.0f, 0.0f, 0.0f);
+			alSourcef(ALStreamSources[i][0], AL_GAIN, 1.0f);
+			alSourcei(ALStreamSources[i][1], AL_SOURCE_RELATIVE, AL_TRUE);
+			alSource3f(ALStreamSources[i][1], AL_POSITION, 0.0f, 0.0f, 0.0f);
+			alSourcef(ALStreamSources[i][1], AL_GAIN, 1.0f);
 			
 			CStream *stream = aStream[i];
 			if (stream)
@@ -382,6 +391,12 @@ set_new_provider(int index)
 	}
 	
 	return false;
+}
+
+static bool
+IsThisTrackAt16KHz(uint32 track)
+{
+	return track == STREAMED_SOUND_RADIO_KCHAT || track == STREAMED_SOUND_RADIO_VCPR || track == STREAMED_SOUND_RADIO_POLICE;
 }
 
 cSampleManager::cSampleManager(void)
@@ -989,7 +1004,7 @@ cSampleManager::Initialise(void)
 	
 		for ( int32 i = 0; i < TOTAL_STREAMED_SOUNDS; i++ )
 		{	
-			aStream[0] = new CStream(StreamedNameTable[i], ALStreamSources[0], ALStreamBuffers[0]);
+			aStream[0] = new CStream(StreamedNameTable[i], ALStreamSources[0], ALStreamBuffers[0], IsThisTrackAt16KHz(i) ? 16000 : 32000);
 			
 			if ( aStream[0] && aStream[0]->IsOpened() )
 			{
@@ -1542,10 +1557,11 @@ cSampleManager::SetChannelEmittingVolume(uint32 nChannel, uint32 nVolume)
 	
 	nChannelVolume[nChannel] = vol;
 	
-	if (   MusicManager.GetMusicMode()    == MUSICMODE_CUTSCENE
-		&& MusicManager.GetCurrentTrack() != STREAMED_SOUND_CUTSCENE_FINALE )
-	{
-		nChannelVolume[nChannel] = vol / 4;
+	if (MusicManager.GetMusicMode() == MUSICMODE_CUTSCENE ) {
+		if (MusicManager.GetCurrentTrack() == STREAMED_SOUND_CUTSCENE_FINALE)
+			nChannelVolume[nChannel] = 0;
+		else
+			nChannelVolume[nChannel] >>= 2;
 	}
 
 	// no idea, does this one looks like a bug or it's SetChannelVolume ?
@@ -1671,7 +1687,7 @@ cSampleManager::PreloadStreamedFile(uint32 nFile, uint8 nStream)
 		
 		strcpy(filename, StreamedNameTable[nFile]);
 		
-		CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+		CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 		ASSERT(stream != NULL);
 		
 		aStream[nStream] = stream;
@@ -1746,7 +1762,7 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 							nFile = 0;
 							strcat(filename, StreamedNameTable[nFile]);
 
-							CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+							CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 							ASSERT(stream != NULL);
 
 							aStream[nStream] = stream;
@@ -1770,12 +1786,12 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 					}
 
 					if (mp3->pLinkPath != NULL)
-						aStream[nStream] = new CStream(mp3->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+						aStream[nStream] = new CStream(mp3->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 					else {
 						strcpy(filename, _mp3DirectoryPath);
 						strcat(filename, mp3->aFilename);
 
-						aStream[nStream] = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+						aStream[nStream] = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 					}
 
 					if (aStream[nStream]->IsOpened()) {
@@ -1802,7 +1818,7 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 					{
 						nFile = 0;
 						strcat(filename, StreamedNameTable[nFile]);
-						CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+						CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 						ASSERT(stream != NULL);
 
 						aStream[nStream] = stream;
@@ -1826,7 +1842,7 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 				}
 
 				if (e->pLinkPath != NULL)
-					aStream[nStream] = new CStream(e->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+					aStream[nStream] = new CStream(e->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 				else {
 					strcpy(filename, _mp3DirectoryPath);
 					strcat(filename, e->aFilename);
@@ -1859,7 +1875,7 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 
 		strcpy(filename, StreamedNameTable[nFile]);
 		
-		CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+		CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 		ASSERT(stream != NULL);
 
 		aStream[nStream] = stream;

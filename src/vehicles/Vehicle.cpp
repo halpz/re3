@@ -48,6 +48,9 @@ bool CVehicle::bAllTaxisHaveNitro;
 bool CVehicle::m_bDisableMouseSteering = true;
 bool CVehicle::bDisableRemoteDetonation;
 bool CVehicle::bDisableRemoteDetonationOnContact;
+#ifndef MASTER
+bool CVehicle::m_bDisplayHandlingInfo;
+#endif
 
 void *CVehicle::operator new(size_t sz) { return CPools::GetVehiclePool()->New();  }
 void *CVehicle::operator new(size_t sz, int handle) { return CPools::GetVehiclePool()->New(handle); }
@@ -146,6 +149,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_nAlarmState = 0;
 	m_nDoorLock = CARLOCK_UNLOCKED;
 	m_nLastWeaponDamage = -1;
+	m_pLastDamageEntity = nil;
 	m_fMapObjectHeightAhead = m_fMapObjectHeightBehind = 0.0f;
 	m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, this);
 	if(m_audioEntityId >= 0)
@@ -836,11 +840,11 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 				if(IsBike())
 					brake = 0.6f * mod_HandlingManager.fWheelFriction / (pHandling->fMass + 200.0f);
 				else if(pHandling->fMass < 500.0f)
-					brake = mod_HandlingManager.fWheelFriction / m_fMass;
+					brake = 0.2f * mod_HandlingManager.fWheelFriction / pHandling->fMass;
 				else if(GetModelIndex() == MI_RCBANDIT)
-					brake = 0.2f * mod_HandlingManager.fWheelFriction / m_fMass;
+					brake = 0.2f * mod_HandlingManager.fWheelFriction / pHandling->fMass;
 				else
-					brake = mod_HandlingManager.fWheelFriction / m_fMass;
+					brake = mod_HandlingManager.fWheelFriction / pHandling->fMass;
 #ifdef FIX_BUGS
 				brake *= CTimer::GetTimeStepFix();
 #endif
@@ -1232,7 +1236,7 @@ CVehicle::InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage
 			if (m_randomSeed < DAMAGE_FLEE_IN_CAR_PROBABILITY_VALUE) {
 				CCarCtrl::SwitchVehicleToRealPhysics(this);
 				AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_AVOID_CARS;
-				AutoPilot.m_nCruiseSpeed = GAME_SPEED_TO_CARAI_SPEED * pHandling->Transmission.fUnkMaxVelocity;
+				AutoPilot.m_nCruiseSpeed = GAME_SPEED_TO_CARAI_SPEED * pHandling->Transmission.fMaxCruiseVelocity;
 				SetStatus(STATUS_PHYSICS);
 			}
 		}
@@ -1873,7 +1877,7 @@ CVehicle::AddPassenger(CPed *passenger)
 	int i;
 
 	if(IsBike())
-		ApplyTurnForce(-0.2f*passenger->m_fMass * GetUp(), -0.1f*GetForward());
+		ApplyTurnForce(-0.02f*passenger->m_fMass * GetUp(), -0.1f*GetForward());
 	else
 		ApplyTurnForce(0.0f, 0.0f, -0.2f*passenger->m_fMass,
 			passenger->GetPosition().x - GetPosition().x,
@@ -1896,7 +1900,7 @@ CVehicle::AddPassenger(CPed *passenger, uint8 n)
 		return AddPassenger(passenger);
 
 	if(IsBike())
-		ApplyTurnForce(-0.2f*passenger->m_fMass * GetUp(), -0.1f*GetForward());
+		ApplyTurnForce(-0.02f*passenger->m_fMass * GetUp(), -0.1f*GetForward());
 	else
 		ApplyTurnForce(0.0f, 0.0f, -0.2f*passenger->m_fMass,
 			passenger->GetPosition().x - GetPosition().x,

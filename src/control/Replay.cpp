@@ -1508,12 +1508,12 @@ void CReplay::RestoreStuffFromMem(void)
 				tmp1.UpdateRW();
 			}
 			else if (mi == MI_HUNTER) {
-				RpAtomicSetFlags((RpAtomic*)GetFirstObject(car->m_aCarNodes[CAR_WHEEL_LF]), 0);
-				RpAtomicSetFlags((RpAtomic*)GetFirstObject(car->m_aCarNodes[CAR_WHEEL_RF]), 0);
 				RpAtomicSetFlags((RpAtomic*)GetFirstObject(car->m_aCarNodes[CAR_WHEEL_LB]), 0);
 				RpAtomicSetFlags((RpAtomic*)GetFirstObject(car->m_aCarNodes[CAR_WHEEL_RB]), 0);
 			}
 			else if (vehicle->IsRealHeli()) {
+				RpAtomicSetFlags((RpAtomic*)GetFirstObject(car->m_aCarNodes[CAR_WHEEL_LF]), 0);
+				RpAtomicSetFlags((RpAtomic*)GetFirstObject(car->m_aCarNodes[CAR_WHEEL_RF]), 0);
 				RpAtomicSetFlags((RpAtomic*)GetFirstObject(car->m_aCarNodes[CAR_WHEEL_LB]), 0);
 				RpAtomicSetFlags((RpAtomic*)GetFirstObject(car->m_aCarNodes[CAR_WHEEL_RB]), 0);
 			}

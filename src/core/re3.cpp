@@ -225,7 +225,6 @@ void LoadINISettings()
 void SaveINISettings()
 {
 	bool changed = false;
-	char temp[4];
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 	if (strncmp(cfg.get("DetectJoystick", "JoystickName", "").c_str(), gSelectedJoystickName, strlen(gSelectedJoystickName)) != 0) {
@@ -647,7 +646,7 @@ extern bool gbRenderWorld2;
 #endif
 		DebugMenuAddVar("Render", "Drunkness", &CMBlur::Drunkness, nil, 0.05f, 0, 1.0f);
 #ifndef MASTER
-		DebugMenuAddVarBool8("Render", "Occlusion debug", &bDisplayOccDebugStuff, nil);
+		DebugMenuAddVarBool8("Render", "Occlusion debug", &bDispayOccDebugStuff, nil);
 #endif
 #ifdef EXTENDED_PIPELINES
 		static const char *vehpipenames[] = { "MatFX", "Neo" };

@@ -576,11 +576,11 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
 		ScriptParams[0] = pPlayerInfo->m_nLastTimeCarSpentOnTwoWheels;
-		ScriptParams[1] = *(int*)&pPlayerInfo->m_nLastDistanceCarTravelledOnTwoWheels;
+		*(float*)&ScriptParams[1] = pPlayerInfo->m_nLastDistanceCarTravelledOnTwoWheels;
 		ScriptParams[2] = pPlayerInfo->m_nLastTimeSpentOnWheelie;
-		ScriptParams[3] = *(int*)&pPlayerInfo->m_nLastDistanceTravelledOnWheelie;
+		*(float*)&ScriptParams[3] = pPlayerInfo->m_nLastDistanceTravelledOnWheelie;
 		ScriptParams[4] = pPlayerInfo->m_nLastTimeSpentOnStoppie;
-		ScriptParams[5] = *(int*)&pPlayerInfo->m_nLastDistanceTravelledOnStoppie;
+		*(float*)&ScriptParams[5] = pPlayerInfo->m_nLastDistanceTravelledOnStoppie;
 		StoreParameters(&m_nIp, 6);
 		pPlayerInfo->m_nLastTimeCarSpentOnTwoWheels = 0;
 		pPlayerInfo->m_nLastDistanceCarTravelledOnTwoWheels = 0.0f;
@@ -1201,7 +1201,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(pPed);
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
+			CTheScripts::MissionCleanUp.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_CREATE_RANDOM_CHAR_AS_PASSENGER:
@@ -1231,7 +1231,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(pPed);
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
+			CTheScripts::MissionCleanUp.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_IGNORE_THREATS_BEHIND_OBJECTS:

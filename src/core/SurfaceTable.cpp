@@ -138,7 +138,7 @@ CSurfaceTable::GetWetMultiplier(uint8 surfaceType)
 
 	case SURFACE_SAND:
 	case SURFACE_SAND_BEACH:
-		return 1.0f - CWeather::WetRoads*0.5f;
+		return 1.0f + CWeather::WetRoads*0.5f;
 
 	default:
 		return 1.0f;

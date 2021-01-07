@@ -85,7 +85,7 @@ uint16 CTheScripts::NumScriptDebugLines;
 uint16 CTheScripts::NumberOfIntroRectanglesThisFrame;
 uint16 CTheScripts::NumberOfIntroTextLinesThisFrame;
 uint8 CTheScripts::UseTextCommands;
-CMissionCleanup CTheScripts::MissionCleanup;
+CMissionCleanup CTheScripts::MissionCleanUp;
 CUpsideDownCarCheck CTheScripts::UpsideDownCars;
 CStuckCarCheck CTheScripts::StuckCars;
 uint16 CTheScripts::CommandsExecuted;
@@ -1751,19 +1751,6 @@ void CMissionCleanup::AddEntityToList(int32 id, uint8 type)
 	m_nCount++;
 }
 
-// done(LCS)
-static void PossiblyWakeThisEntity(CPhysical* pEntity, bool ifColLoaded = false)
-{
-	if (!pEntity->bIsStaticWaitingForCollision)
-		return;
-	if (!ifColLoaded || CColStore::HasCollisionLoaded(pEntity->GetPosition())) {
-		pEntity->bIsStaticWaitingForCollision = false;
-		if (!pEntity->GetIsStatic())
-			pEntity->AddToMovingList();
-	}
-}
-
-// done(LCS)
 void CMissionCleanup::RemoveEntityFromList(int32 id, uint8 type)
 {
 	for (int i = 0; i < MAX_CLEANUP; i++){
@@ -1771,23 +1758,38 @@ void CMissionCleanup::RemoveEntityFromList(int32 id, uint8 type)
 			switch (m_sEntities[i].type) {
 			case CLEANUP_CAR:
 			{
-				CVehicle* v = CPools::GetVehiclePool()->GetAt(m_sEntities[i].id);
-				if (v)
-					PossiblyWakeThisEntity(v);
+				CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(m_sEntities[i].id);
+				if (pVehicle) {
+					if (pVehicle->bIsStaticWaitingForCollision) {
+						pVehicle->bIsStaticWaitingForCollision = false;
+						if (!pVehicle->GetIsStatic())
+							pVehicle->AddToMovingList();
+					}
+				}
 				break;
 			}
 			case CLEANUP_CHAR:
 			{
-				CPed* p = CPools::GetPedPool()->GetAt(m_sEntities[i].id);
-				if (p)
-					PossiblyWakeThisEntity(p);
+				CPed* pPed = CPools::GetPedPool()->GetAt(m_sEntities[i].id);
+				if (pPed) {
+					if (pPed->bIsStaticWaitingForCollision) {
+						pPed->bIsStaticWaitingForCollision = false;
+						if (!pPed->GetIsStatic())
+							pPed->AddToMovingList();
+					}
+				}
 				break;
 			}
 			case CLEANUP_OBJECT:
 			{
-				CObject* o = CPools::GetObjectPool()->GetAt(m_sEntities[i].id);
-				if (o)
-					PossiblyWakeThisEntity(o);
+				CObject* pObject = CPools::GetObjectPool()->GetAt(m_sEntities[i].id);
+				if (pObject) {
+					if (pObject->bIsStaticWaitingForCollision) {
+						pObject->bIsStaticWaitingForCollision = false;
+						if (!pObject->GetIsStatic())
+							pObject->AddToMovingList();
+					}
+				}
 				break;
 			}
 			default:
@@ -1895,23 +1897,6 @@ void CMissionCleanup::CheckIfCollisionHasLoadedForMissionObjects()
 	}
 }
 
-// TODO(LCS)
-CPhysical* CMissionCleanup::DoesThisEntityWaitForCollision(int i)
-{
-	if (m_sEntities[i].type == CLEANUP_CAR) {
-		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(m_sEntities[i].id);
-		if (pVehicle && pVehicle->GetStatus() != STATUS_WRECKED)
-			return pVehicle;
-	}
-	else if (m_sEntities[i].type == CLEANUP_CHAR) {
-		CPed* pPed = CPools::GetPedPool()->GetAt(m_sEntities[i].id);
-		if (pPed && !pPed->DyingOrDead())
-			return pPed;
-	}
-	return nil;
-}
-
-// done(LCS) except TODO
 void CMissionCleanup::Process()
 {
 	CPopulation::m_AllRandomPedsThisType = -1;
@@ -2012,13 +1997,18 @@ void CUpsideDownCarCheck::Init()
 // done(LCS)
 bool CUpsideDownCarCheck::IsCarUpsideDown(int32 id)
 {
-	CVehicle* v = CPools::GetVehiclePool()->GetAt(id);
-	return v->GetUp().z <= -0.97f &&
-		v->GetMoveSpeed().Magnitude() < 0.01f &&
-		v->GetTurnSpeed().Magnitude() < 0.02f;
+	CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(id);
+	return IsCarUpsideDown(pVehicle);
 }
 
-// done(LCS)
+bool CUpsideDownCarCheck::IsCarUpsideDown(CVehicle* pVehicle)
+{
+	assert(pVehicle);
+	return pVehicle->GetUp().z <= UPSIDEDOWN_UP_THRESHOLD &&
+		pVehicle->GetMoveSpeed().Magnitude() < UPSIDEDOWN_MOVE_SPEED_THRESHOLD &&
+		pVehicle->GetTurnSpeed().Magnitude() < UPSIDEDOWN_TURN_SPEED_THRESHOLD;
+}
+
 void CUpsideDownCarCheck::UpdateTimers()
 {
 	uint32 timeStep = CTimer::GetTimeStepInMilliseconds();
@@ -2040,7 +2030,7 @@ void CUpsideDownCarCheck::UpdateTimers()
 bool CUpsideDownCarCheck::AreAnyCarsUpsideDown()
 {
 	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
-		if (m_sCars[i].m_nVehicleIndex >= 0 && m_sCars[i].m_nUpsideDownTimer > 1000)
+		if (m_sCars[i].m_nVehicleIndex >= 0 && m_sCars[i].m_nUpsideDownTimer > UPSIDEDOWN_TIMER_THRESHOLD)
 			return true;
 	}
 	return false;
@@ -2052,8 +2042,10 @@ void CUpsideDownCarCheck::AddCarToCheck(int32 id)
 	uint16 index = 0;
 	while (index < MAX_UPSIDEDOWN_CAR_CHECKS && m_sCars[index].m_nVehicleIndex >= 0)
 		index++;
+#ifdef FIX_BUGS
 	if (index >= MAX_UPSIDEDOWN_CAR_CHECKS)
 		return;
+#endif
 	m_sCars[index].m_nVehicleIndex = id;
 	m_sCars[index].m_nUpsideDownTimer = 0;
 }
@@ -2074,7 +2066,7 @@ bool CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile(int32 id)
 {
 	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
 		if (m_sCars[i].m_nVehicleIndex == id)
-			return m_sCars[i].m_nUpsideDownTimer > 1000;
+			return m_sCars[i].m_nUpsideDownTimer > UPSIDEDOWN_TIMER_THRESHOLD;
 	}
 	return false;
 }
@@ -2124,7 +2116,10 @@ void CStuckCarCheck::AddCarToCheck(int32 id, float radius, uint32 time)
 	int index = 0;
 	while (index < MAX_STUCK_CAR_CHECKS && m_sCars[index].m_nVehicleIndex >= 0)
 		index++;
-	/* Would be nice to return if index >= MAX_STUCK_CAR_CHECKS... */
+#ifdef FIX_BUGS
+	if (index >= MAX_STUCK_CAR_CHECKS)
+		return;
+#endif
 	m_sCars[index].m_nVehicleIndex = id;
 	m_sCars[index].m_vecPos = pv->GetPosition();
 	m_sCars[index].m_nLastCheck = CTimer::GetTimeInMilliseconds();
@@ -2356,7 +2351,7 @@ void CTheScripts::Init()
 		ScriptsArray[i].Init();
 		ScriptsArray[i].AddScriptToList(&pIdleScripts);
 	}
-	MissionCleanup.Init();
+	MissionCleanUp.Init();
 	UpsideDownCars.Init();
 	StuckCars.Init();
 	CFileMgr::SetDir("data");
@@ -2484,7 +2479,7 @@ void CTheScripts::Process()
 	float timeStep = CTimer::GetTimeStepInMilliseconds();
 	UpsideDownCars.UpdateTimers();
 	StuckCars.Process();
-	MissionCleanup.CheckIfCollisionHasLoadedForMissionObjects();
+	MissionCleanUp.CheckIfCollisionHasLoadedForMissionObjects();
 	DrawScriptSpheres();
 	if (FailCurrentMission)
 		--FailCurrentMission;
@@ -3808,7 +3803,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(ped);
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
+			CTheScripts::MissionCleanUp.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_DELETE_CHAR:
@@ -3817,7 +3812,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		CPed* ped = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		CTheScripts::RemoveThisPed(ped);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_CHAR);
+			CTheScripts::MissionCleanUp.RemoveEntityFromList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_CHAR_WANDER_DIR:
@@ -4038,7 +4033,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		ScriptParams[0] = handle;
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(handle, CLEANUP_CAR);
+			CTheScripts::MissionCleanUp.AddEntityToList(handle, CLEANUP_CAR);
 		return 0;
 	}
 	case COMMAND_DELETE_CAR:
@@ -4051,7 +4046,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			delete car;
 		}
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_CAR);
+			CTheScripts::MissionCleanUp.RemoveEntityFromList(ScriptParams[0], CLEANUP_CAR);
 		return 0;
 	}
 	case COMMAND_CAR_GOTO_COORDINATES:
@@ -4171,9 +4166,9 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		car->AutoPilot.m_nCruiseSpeed = *(float*)&ScriptParams[1];
 		if (missionRetryScriptIndex == 40 && car->GetModelIndex() == MI_CHEETAH) // Turismo
 			car->AutoPilot.m_nCruiseSpeed = 8 * car->AutoPilot.m_nCruiseSpeed / 10;
-		car->AutoPilot.m_nCruiseSpeed = Min(car->AutoPilot.m_nCruiseSpeed, 60.0f * car->pHandling->Transmission.fUnkMaxVelocity);
+		car->AutoPilot.m_nCruiseSpeed = Min(car->AutoPilot.m_nCruiseSpeed, 60.0f * car->pHandling->Transmission.fMaxCruiseVelocity);
 #else
-		car->AutoPilot.m_nCruiseSpeed = Min(*(float*)&ScriptParams[1], 60.0f * car->pHandling->Transmission.fUnkMaxVelocity);
+		car->AutoPilot.m_nCruiseSpeed = Min(*(float*)&ScriptParams[1], 60.0f * car->pHandling->Transmission.fMaxCruiseVelocity);
 #endif
 		return 0;
 	}
@@ -4366,7 +4361,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 	{
 		if (!m_bIsMissionScript)
 			return 0;
-		CTheScripts::MissionCleanup.Process();
+		CTheScripts::MissionCleanUp.Process();
 		return 0;
 	}
 	case COMMAND_STORE_CAR_CHAR_IS_IN:
@@ -4389,7 +4384,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 					pOld->bIsLocked = false;
 					CCarCtrl::NumRandomCars++;
 					CCarCtrl::NumMissionCars--;
-					CTheScripts::MissionCleanup.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+					CTheScripts::MissionCleanUp.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
 				}
 			}
 
@@ -4400,14 +4395,14 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 				CCarCtrl::NumMissionCars++;
 				CCarCtrl::NumRandomCars--;
 				CTheScripts::StoreVehicleWasRandom = true;
-				CTheScripts::MissionCleanup.AddEntityToList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
 				break;
 			case PARKED_VEHICLE:
 				pCurrent->VehicleCreatedBy = MISSION_VEHICLE;
 				CCarCtrl::NumMissionCars++;
 				CCarCtrl::NumParkedCars--;
 				CTheScripts::StoreVehicleWasRandom = true;
-				CTheScripts::MissionCleanup.AddEntityToList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
 				break;
 			case MISSION_VEHICLE:
 			case PERMANENT_VEHICLE:
@@ -4440,7 +4435,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 					pOld->bIsLocked = false;
 					CCarCtrl::NumRandomCars++;
 					CCarCtrl::NumMissionCars--;
-					CTheScripts::MissionCleanup.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+					CTheScripts::MissionCleanUp.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
 				}
 			}
 
@@ -4451,14 +4446,14 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 				CCarCtrl::NumMissionCars++;
 				CCarCtrl::NumRandomCars--;
 				CTheScripts::StoreVehicleWasRandom = true;
-				CTheScripts::MissionCleanup.AddEntityToList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
 				break;
 			case PARKED_VEHICLE:
 				pCurrent->VehicleCreatedBy = MISSION_VEHICLE;
 				CCarCtrl::NumMissionCars++;
 				CCarCtrl::NumParkedCars--;
 				CTheScripts::StoreVehicleWasRandom = true;
-				CTheScripts::MissionCleanup.AddEntityToList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
 				break;
 			case MISSION_VEHICLE:
 			case PERMANENT_VEHICLE:
@@ -4607,7 +4602,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		ScriptParams[0] = CPools::GetObjectPool()->GetIndex(pObj);
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_OBJECT);
+			CTheScripts::MissionCleanUp.AddEntityToList(ScriptParams[0], CLEANUP_OBJECT);
 		return 0;
 	}
 	case COMMAND_DELETE_OBJECT:
@@ -4620,7 +4615,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 			delete pObj;
 		}
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_OBJECT);
+			CTheScripts::MissionCleanUp.RemoveEntityFromList(ScriptParams[0], CLEANUP_OBJECT);
 		return 0;
 	}
 	case COMMAND_ADD_SCORE:
@@ -4836,7 +4831,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(pPed);
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
+			CTheScripts::MissionCleanUp.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_WARP_PLAYER_FROM_CAR_TO_COORD:
@@ -4886,81 +4881,6 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 	return -1;
 }
 
-
-void CRunningScript::Save(uint8*& buf)
-{
-#ifdef COMPATIBLE_SAVES
-	SkipSaveBuf(buf, 8);
-	for (int i = 0; i < 8; i++)
-		WriteSaveBuf<char>(buf, m_abScriptName[i]);
-	WriteSaveBuf<uint32>(buf, m_nIp);
-#ifdef CHECK_STRUCT_SIZES
-	static_assert(MAX_STACK_DEPTH == 6, "Compatibility loss: MAX_STACK_DEPTH != 6");
-#endif
-	for (int i = 0; i < MAX_STACK_DEPTH; i++)
-		WriteSaveBuf<uint32>(buf, m_anStack[i]);
-	WriteSaveBuf<uint16>(buf, m_nStackPointer);
-	SkipSaveBuf(buf, 2);
-#ifdef CHECK_STRUCT_SIZES
-	static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
-#endif
-	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
-		WriteSaveBuf<int32>(buf, m_anLocalVariables[i]);
-	WriteSaveBuf<bool>(buf, m_bIsActive);
-	WriteSaveBuf<bool>(buf, m_bCondResult);
-	WriteSaveBuf<bool>(buf, m_bIsMissionScript);
-	WriteSaveBuf<bool>(buf, m_bSkipWakeTime);
-	WriteSaveBuf<uint32>(buf, m_nWakeTime);
-	WriteSaveBuf<uint16>(buf, m_nAndOrState);
-	WriteSaveBuf<bool>(buf, m_bNotFlag);
-	WriteSaveBuf<bool>(buf, m_bDeatharrestEnabled);
-	WriteSaveBuf<bool>(buf, m_bDeatharrestExecuted);
-	WriteSaveBuf<bool>(buf, m_bMissionFlag);
-	SkipSaveBuf(buf, 2);
-#else
-	WriteSaveBuf(buf, *this);
-#endif
-}
-
-void CRunningScript::Load(uint8*& buf)
-{
-#ifdef COMPATIBLE_SAVES
-	SkipSaveBuf(buf, 8);
-	for (int i = 0; i < 8; i++)
-		m_abScriptName[i] = ReadSaveBuf<char>(buf);
-	m_nIp = ReadSaveBuf<uint32>(buf);
-#ifdef CHECK_STRUCT_SIZES
-	static_assert(MAX_STACK_DEPTH == 6, "Compatibility loss: MAX_STACK_DEPTH != 6");
-#endif
-	for (int i = 0; i < MAX_STACK_DEPTH; i++)
-		m_anStack[i] = ReadSaveBuf<uint32>(buf);
-	m_nStackPointer = ReadSaveBuf<uint16>(buf);
-	SkipSaveBuf(buf, 2);
-#ifdef CHECK_STRUCT_SIZES
-	static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
-#endif
-	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
-		m_anLocalVariables[i] = ReadSaveBuf<int32>(buf);
-	m_bIsActive = ReadSaveBuf<bool>(buf);
-	m_bCondResult = ReadSaveBuf<bool>(buf);
-	m_bIsMissionScript = ReadSaveBuf<bool>(buf);
-	m_bSkipWakeTime = ReadSaveBuf<bool>(buf);
-	m_nWakeTime = ReadSaveBuf<uint32>(buf);
-	m_nAndOrState = ReadSaveBuf<uint16>(buf);
-	m_bNotFlag = ReadSaveBuf<bool>(buf);
-	m_bDeatharrestEnabled = ReadSaveBuf<bool>(buf);
-	m_bDeatharrestExecuted = ReadSaveBuf<bool>(buf);
-	m_bMissionFlag = ReadSaveBuf<bool>(buf);
-	SkipSaveBuf(buf, 2);
-#else
-	CRunningScript* n = next;
-	CRunningScript* p = prev;
-	*this = ReadSaveBuf<CRunningScript>(buf);
-	next = n;
-	prev = p;
-#endif
-}
-
 #ifdef MISSION_REPLAY
 
 bool CRunningScript::CanAllowMissionReplay()
@@ -4995,7 +4915,7 @@ void RetryMission(int type, int unk)
 	else if (type == 2) {
 		doingMissionRetry = false;
 		AllowMissionReplay = 6;
-		CTheScripts::MissionCleanup.Process();
+		CTheScripts::MissionCleanUp.Process();
 	}
 }
 

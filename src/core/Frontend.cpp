@@ -1280,6 +1280,9 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 				case MENUACTION_CFO_SELECT:
 					CMenuScreenCustom::CMenuEntry &option = aScreens[m_nCurrScreen].m_aEntries[i];
 					if (option.m_Action == MENUACTION_CFO_SELECT) {
+						if (option.m_CFOSelect->disableIfGameLoaded && !m_bGameNotLoaded)
+							CFont::SetColor(CRGBA(DARKMENUOPTION_COLOR.r, DARKMENUOPTION_COLOR.g, DARKMENUOPTION_COLOR.b, FadeIn(255)));
+
 						// To whom manipulate option.m_CFO->value of static options externally (like RestoreDef functions)
 						if (*option.m_CFO->value != option.m_CFOSelect->lastSavedValue)
 							option.m_CFOSelect->displayedValue = option.m_CFOSelect->lastSavedValue = *option.m_CFO->value;
@@ -4786,7 +4789,11 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 					TheCamera.m_fMouseAccelHorzntl = 0.0025f;
 					CVehicle::m_bDisableMouseSteering = true;
 					m_ControlMethod = CONTROL_STANDARD;
+#ifdef PC_PLAYER_CONTROLS
 					TheCamera.m_bUseMouse3rdPerson = true;
+#else
+					TheCamera.m_bUseMouse3rdPerson = false;
+#endif
 					SaveSettings();
 				}
 				SetHelperText(2);
@@ -4806,6 +4813,9 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 			case MENUACTION_CFO_DYNAMIC:
 				CMenuScreenCustom::CMenuEntry &option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption];
 				if (option.m_Action == MENUACTION_CFO_SELECT) {
+					if (option.m_CFOSelect->disableIfGameLoaded && !m_bGameNotLoaded)
+							break;
+
 					if (!option.m_CFOSelect->onlyApplyOnEnter) {
 						option.m_CFOSelect->displayedValue++;
 						if (option.m_CFOSelect->displayedValue >= option.m_CFOSelect->numRightTexts || option.m_CFOSelect->displayedValue < 0)
@@ -4954,6 +4964,9 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 			case MENUACTION_CFO_DYNAMIC:
 				CMenuScreenCustom::CMenuEntry &option = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption];
 				if (option.m_Action == MENUACTION_CFO_SELECT) {
+					if (option.m_CFOSelect->disableIfGameLoaded && !m_bGameNotLoaded)
+						break;
+					
 					if (changeAmount > 0) {
 						option.m_CFOSelect->displayedValue++;
 						if (option.m_CFOSelect->displayedValue >= option.m_CFOSelect->numRightTexts)

@@ -2354,15 +2354,15 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 #define VFB(b)
 #endif
 
-#define CONTROLLER_BUTTONS(T, O, X, Q, L1, L2, L3, R1, R2, R3, SELECT)                                                                                         \
+#define CONTROLLER_BUTTONS(T, O, X, Q, L1, L2, L3, R1, R2, R3, SELECT, RSL, RSR)                                                                                         \
 	{{                                                                                                                                                         \
 	     O,      /* PED_FIREWEAPON */                                                                                                                          \
 	     R2,     /* PED_CYCLE_WEAPON_RIGHT */                                                                                                                  \
 	     L2,     /* PED_CYCLE_WEAPON_LEFT */                                                                                                                   \
 	     nil,    /* GO_FORWARD */                                                                                                                              \
 	     nil,    /* GO_BACK */                                                                                                                                 \
-	     nil,    /* GO_LEFT */                                                                                                                                 \
-	     nil,    /* GO_RIGHT */                                                                                                                                \
+	     LEFT,    /* GO_LEFT */                                                                                                                                 \
+	     RIGHT,    /* GO_RIGHT */                                                                                                                                \
 	     Q,      /* PED_SNIPER_ZOOM_IN */                                                                                                                      \
 	     X,      /* PED_SNIPER_ZOOM_OUT */                                                                                                                     \
 	     T,      /* VEHICLE_ENTER_EXIT */                                                                                                                      \
@@ -2370,6 +2370,8 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     Q,      /* PED_JUMPING */                                                                                                                             \
 	     X,      /* PED_SPRINT */                                                                                                                              \
 	     R3,     /* PED_LOOKBEHIND */                                                                                                                          \
+	     L3,     /* PED_DUCK */                                                                                                                                \
+	     L1,     /* PED_ANSWER_PHONE */                                                                                                                        \
 	     VFB(O)  /* VEHICLE_FIREWEAPON */                                                                                                                      \
 	     X,      /* VEHICLE_ACCELERATE */                                                                                                                      \
 	     Q,      /* VEHICLE_BRAKE */                                                                                                                           \
@@ -2382,10 +2384,10 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     L2,     /* VEHICLE_LOOKLEFT */                                                                                                                        \
 	     R2,     /* VEHICLE_LOOKRIGHT */                                                                                                                       \
 	     nil,    /* VEHICLE_LOOKBEHIND */                                                                                                                      \
-	     nil,    /* VEHICLE_TURRETLEFT */                                                                                                                      \
-	     nil,    /* VEHICLE_TURRETRIGHT */                                                                                                                     \
-	     nil,    /* VEHICLE_TURRETUP */                                                                                                                        \
-	     nil,    /* VEHICLE_TURRETDOWN */                                                                                                                      \
+	     RSL,    /* VEHICLE_TURRETLEFT */                                                                                                                      \
+	     RSR,    /* VEHICLE_TURRETRIGHT */                                                                                                                     \
+	     UP,    /* VEHICLE_TURRETUP */                                                                                                                        \
+	     DOWN,    /* VEHICLE_TURRETDOWN */                                                                                                                      \
 	     L2,     /* PED_CYCLE_TARGET_LEFT */                                                                                                                   \
 	     R2,     /* PED_CYCLE_TARGET_RIGHT */                                                                                                                  \
 	     L1,     /* PED_CENTER_CAMERA_BEHIND_PLAYER */                                                                                                         \
@@ -2397,6 +2399,7 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     nil,    /* TOGGLE_DPAD */                                                                                                                             \
 	     nil,    /* SWITCH_DEBUG_CAM_ON */                                                                                                                     \
 	     nil,    /* TAKE_SCREEN_SHOT */                                                                                                                        \
+	     nil,    /* UNKNOWN_ACTION */                                                                                                                          \
 	     nil,    /* SHOW_MOUSE_POINTER_TOGGLE */                                                                                                               \
 	 },                                                                                                                                                        \
 	 {                                                                                                                                                         \
@@ -2405,8 +2408,8 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     L2,     /* PED_CYCLE_WEAPON_LEFT */                                                                                                                   \
 	     nil,    /* GO_FORWARD */                                                                                                                              \
 	     nil,    /* GO_BACK */                                                                                                                                 \
-	     nil,    /* GO_LEFT */                                                                                                                                 \
-	     nil,    /* GO_RIGHT */                                                                                                                                \
+	     LEFT,   /* GO_LEFT */                                                                                                                                 \
+	     RIGHT,  /* GO_RIGHT */                                                                                                                                \
 	     Q,      /* PED_SNIPER_ZOOM_IN */                                                                                                                      \
 	     X,      /* PED_SNIPER_ZOOM_OUT */                                                                                                                     \
 	     T,      /* VEHICLE_ENTER_EXIT */                                                                                                                      \
@@ -2414,6 +2417,8 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     Q,      /* PED_JUMPING */                                                                                                                             \
 	     X,      /* PED_SPRINT */                                                                                                                              \
 	     R3,     /* PED_LOOKBEHIND */                                                                                                                          \
+	     L3,     /* PED_DUCK */                                                                                                                                \
+	     L1,     /* PED_ANSWER_PHONE */                                                                                                                        \
 	     VFB(O)  /* VEHICLE_FIREWEAPON */                                                                                                                      \
 	     X,      /* VEHICLE_ACCELERATE */                                                                                                                      \
 	     Q,      /* VEHICLE_BRAKE */                                                                                                                           \
@@ -2426,10 +2431,10 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     L2,     /* VEHICLE_LOOKLEFT */                                                                                                                        \
 	     R2,     /* VEHICLE_LOOKRIGHT */                                                                                                                       \
 	     nil,    /* VEHICLE_LOOKBEHIND */                                                                                                                      \
-	     nil,    /* VEHICLE_TURRETLEFT */                                                                                                                      \
-	     nil,    /* VEHICLE_TURRETRIGHT */                                                                                                                     \
-	     nil,    /* VEHICLE_TURRETUP */                                                                                                                        \
-	     nil,    /* VEHICLE_TURRETDOWN */                                                                                                                      \
+	     RSL,    /* VEHICLE_TURRETLEFT */                                                                                                                      \
+	     RSR,    /* VEHICLE_TURRETRIGHT */                                                                                                                     \
+	     UP,    /* VEHICLE_TURRETUP */                                                                                                                        \
+	     DOWN,    /* VEHICLE_TURRETDOWN */                                                                                                                      \
 	     L2,     /* PED_CYCLE_TARGET_LEFT */                                                                                                                   \
 	     R2,     /* PED_CYCLE_TARGET_RIGHT */                                                                                                                  \
 	     L1,     /* PED_CENTER_CAMERA_BEHIND_PLAYER */                                                                                                         \
@@ -2441,6 +2446,7 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     nil,    /* TOGGLE_DPAD */                                                                                                                             \
 	     nil,    /* SWITCH_DEBUG_CAM_ON */                                                                                                                     \
 	     nil,    /* TAKE_SCREEN_SHOT */                                                                                                                        \
+	     nil,    /* UNKNOWN_ACTION */                                                                                                                          \
 	     nil,    /* SHOW_MOUSE_POINTER_TOGGLE */                                                                                                               \
 	 },                                                                                                                                                        \
 	 {                                                                                                                                                         \
@@ -2449,8 +2455,8 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     L2,     /* PED_CYCLE_WEAPON_LEFT */                                                                                                                   \
 	     nil,    /* GO_FORWARD */                                                                                                                              \
 	     nil,    /* GO_BACK */                                                                                                                                 \
-	     nil,    /* GO_LEFT */                                                                                                                                 \
-	     nil,    /* GO_RIGHT */                                                                                                                                \
+	     LEFT,   /* GO_LEFT */                                                                                                                                 \
+	     RIGHT,  /* GO_RIGHT */                                                                                                                                \
 	     T,      /* PED_SNIPER_ZOOM_IN */                                                                                                                      \
 	     Q,      /* PED_SNIPER_ZOOM_OUT */                                                                                                                     \
 	     L1,     /* VEHICLE_ENTER_EXIT */                                                                                                                      \
@@ -2458,6 +2464,8 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     Q,      /* PED_JUMPING */                                                                                                                             \
 	     O,      /* PED_SPRINT */                                                                                                                              \
 	     R3,     /* PED_LOOKBEHIND */                                                                                                                          \
+	     L3,     /* PED_DUCK */                                                                                                                                \
+	     L1,     /* PED_ANSWER_PHONE */                                                                                                                        \
 	     VFB(O)  /* VEHICLE_FIREWEAPON */                                                                                                                      \
 	     X,      /* VEHICLE_ACCELERATE */                                                                                                                      \
 	     Q,      /* VEHICLE_BRAKE */                                                                                                                           \
@@ -2470,10 +2478,10 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     L2,     /* VEHICLE_LOOKLEFT */                                                                                                                        \
 	     R2,     /* VEHICLE_LOOKRIGHT */                                                                                                                       \
 	     nil,    /* VEHICLE_LOOKBEHIND */                                                                                                                      \
-	     nil,    /* VEHICLE_TURRETLEFT */                                                                                                                      \
-	     nil,    /* VEHICLE_TURRETRIGHT */                                                                                                                     \
-	     nil,    /* VEHICLE_TURRETUP */                                                                                                                        \
-	     nil,    /* VEHICLE_TURRETDOWN */                                                                                                                      \
+	     RSL,    /* VEHICLE_TURRETLEFT */                                                                                                                      \
+	     RSR,    /* VEHICLE_TURRETRIGHT */                                                                                                                     \
+	     UP,    /* VEHICLE_TURRETUP */                                                                                                                        \
+	     DOWN,    /* VEHICLE_TURRETDOWN */                                                                                                                      \
 	     L2,     /* PED_CYCLE_TARGET_LEFT */                                                                                                                   \
 	     R2,     /* PED_CYCLE_TARGET_RIGHT */                                                                                                                  \
 	     T,      /* PED_CENTER_CAMERA_BEHIND_PLAYER */                                                                                                         \
@@ -2485,6 +2493,7 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     nil,    /* TOGGLE_DPAD */                                                                                                                             \
 	     nil,    /* SWITCH_DEBUG_CAM_ON */                                                                                                                     \
 	     nil,    /* TAKE_SCREEN_SHOT */                                                                                                                        \
+	     nil,    /* UNKNOWN_ACTION */                                                                                                                          \
 	     nil,    /* SHOW_MOUSE_POINTER_TOGGLE */                                                                                                               \
 	 },                                                                                                                                                        \
 	 {                                                                                                                                                         \
@@ -2493,8 +2502,8 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     L2,     /* PED_CYCLE_WEAPON_LEFT */                                                                                                                   \
 	     nil,    /* GO_FORWARD */                                                                                                                              \
 	     nil,    /* GO_BACK */                                                                                                                                 \
-	     nil,    /* GO_LEFT */                                                                                                                                 \
-	     nil,    /* GO_RIGHT */                                                                                                                                \
+	     LEFT,   /* GO_LEFT */                                                                                                                                 \
+	     RIGHT,  /* GO_RIGHT */                                                                                                                                \
 	     Q,      /* PED_SNIPER_ZOOM_IN */                                                                                                                      \
 	     X,      /* PED_SNIPER_ZOOM_OUT */                                                                                                                     \
 	     T,      /* VEHICLE_ENTER_EXIT */                                                                                                                      \
@@ -2502,6 +2511,8 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     Q,      /* PED_JUMPING */                                                                                                                             \
 	     X,      /* PED_SPRINT */                                                                                                                              \
 	     R3,     /* PED_LOOKBEHIND */                                                                                                                          \
+	     L3,     /* PED_DUCK */                                                                                                                                \
+	     L1,     /* PED_ANSWER_PHONE */                                                                                                                        \
 	     VFB(R1) /* VEHICLE_FIREWEAPON */                                                                                                                      \
 	     nil,    /* VEHICLE_ACCELERATE */                                                                                                                      \
 	     nil,    /* VEHICLE_BRAKE */                                                                                                                           \
@@ -2514,10 +2525,10 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     L2,     /* VEHICLE_LOOKLEFT */                                                                                                                        \
 	     R2,     /* VEHICLE_LOOKRIGHT */                                                                                                                       \
 	     nil,    /* VEHICLE_LOOKBEHIND */                                                                                                                      \
-	     nil,    /* VEHICLE_TURRETLEFT */                                                                                                                      \
-	     nil,    /* VEHICLE_TURRETRIGHT */                                                                                                                     \
-	     nil,    /* VEHICLE_TURRETUP */                                                                                                                        \
-	     nil,    /* VEHICLE_TURRETDOWN */                                                                                                                      \
+	     RSL,    /* VEHICLE_TURRETLEFT */                                                                                                                      \
+	     RSR,    /* VEHICLE_TURRETRIGHT */                                                                                                                     \
+	     UP,    /* VEHICLE_TURRETUP */                                                                                                                        \
+	     DOWN,    /* VEHICLE_TURRETDOWN */                                                                                                                      \
 	     L2,     /* PED_CYCLE_TARGET_LEFT */                                                                                                                   \
 	     R2,     /* PED_CYCLE_TARGET_RIGHT */                                                                                                                  \
 	     O,      /* PED_CENTER_CAMERA_BEHIND_PLAYER */                                                                                                         \
@@ -2529,14 +2540,26 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     nil,    /* TOGGLE_DPAD */                                                                                                                             \
 	     nil,    /* SWITCH_DEBUG_CAM_ON */                                                                                                                     \
 	     nil,    /* TAKE_SCREEN_SHOT */                                                                                                                        \
+	     nil,    /* UNKNOWN_ACTION */                                                                                                                          \
 	     nil,    /* SHOW_MOUSE_POINTER_TOGGLE */                                                                                                               \
 	 }}
 
+#ifdef BUTTON_ICONS
+#define UP "~U~"
+#define DOWN "~D~"
+#define LEFT "~<~"
+#define RIGHT "~>~"
+#else
+#define UP "UP"
+#define DOWN "DOWN"
+#define LEFT "LEFT"
+#define RIGHT "RIGHT"
+#endif
 
-const char *XboxButtons_noIcons[][MAX_CONTROLLERACTIONS] = CONTROLLER_BUTTONS("Y", "B", "A", "X", "LB", "LT", "LS", "RB", "RT", "RS", "BACK");
+const char *XboxButtons_noIcons[][MAX_CONTROLLERACTIONS] = CONTROLLER_BUTTONS("Y", "B", "A", "X", "LB", "LT", "LS", "RB", "RT", "RS", "BACK", "right stick left", "right stick right");
 
 #ifdef BUTTON_ICONS
-const char *XboxButtons[][MAX_CONTROLLERACTIONS] = CONTROLLER_BUTTONS("~T~", "~O~", "~X~", "~Q~", "~K~", "~M~", "~A~", "~J~", "~V~", "~C~", "BACK");
+const char *XboxButtons[][MAX_CONTROLLERACTIONS] = CONTROLLER_BUTTONS("~T~", "~O~", "~X~", "~Q~", "~K~", "~M~", "~A~", "~J~", "~V~", "~C~", "BACK", "~(~", "~)~");
 #endif
 
 
@@ -2558,17 +2581,22 @@ const char *XboxButtons[][MAX_CONTROLLERACTIONS] = CONTROLLER_BUTTONS("~T~", "~O
 #endif
 
 const char *PlayStationButtons_noIcons[][MAX_CONTROLLERACTIONS] =
-    CONTROLLER_BUTTONS(PS2_TRIANGLE, PS2_CIRCLE, PS2_CROSS, PS2_SQUARE, "L1", "L2", "L3", "R1", "R2", "R3", "SELECT");
+    CONTROLLER_BUTTONS(PS2_TRIANGLE, PS2_CIRCLE, PS2_CROSS, PS2_SQUARE, "L1", "L2", "L3", "R1", "R2", "R3", "SELECT", "right stick left", "right stick right");
 
 #ifdef BUTTON_ICONS
 const char *PlayStationButtons[][MAX_CONTROLLERACTIONS] =
-    CONTROLLER_BUTTONS(PS2_TRIANGLE, PS2_CIRCLE, PS2_CROSS, PS2_SQUARE, "~K~", "~M~", "~A~", "~J~", "~V~", "~C~", "SELECT");
+    CONTROLLER_BUTTONS(PS2_TRIANGLE, PS2_CIRCLE, PS2_CROSS, PS2_SQUARE, "~K~", "~M~", "~A~", "~J~", "~V~", "~C~", "SELECT", "~(~", "~)~");
 #endif
 
 #undef PS2_TRIANGLE
 #undef PS2_CIRCLE
 #undef PS2_CROSS
 #undef PS2_SQUARE
+
+#undef UP
+#undef DOWN
+#undef LEFT
+#undef RIGHT
 
 #undef CONTROLLER_BUTTONS
 #undef VFB

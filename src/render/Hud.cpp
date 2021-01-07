@@ -24,6 +24,7 @@
 #include "Stats.h"
 #include "main.h"
 #include "General.h"
+#include "VarConsole.h"
 
 // --MIAMI: file done
 
@@ -1119,7 +1120,7 @@ void CHud::Draw()
 					CFont::SetPropOff();
 
 				CFont::SetFontStyle(FONT_LOCALE(CTheScripts::IntroTextLines[i].m_nFont));
-				CFont::PrintString(SCALE_AND_CENTER_X(DEFAULT_SCREEN_WIDTH - CTheScripts::IntroTextLines[i].m_fAtX), SCREEN_SCALE_Y(DEFAULT_SCREEN_HEIGHT - CTheScripts::IntroTextLines[i].m_fAtY), CTheScripts::IntroTextLines[i].m_Text);
+				CFont::PrintString(SCREEN_WIDTH - SCALE_AND_CENTER_X(DEFAULT_SCREEN_WIDTH - CTheScripts::IntroTextLines[i].m_fAtX), SCREEN_HEIGHT - SCREEN_SCALE_Y(DEFAULT_SCREEN_HEIGHT - CTheScripts::IntroTextLines[i].m_fAtY), CTheScripts::IntroTextLines[i].m_Text);
 			}
 		}
 		for (int i = 0; i < ARRAY_SIZE(CTheScripts::IntroRectangles); i++) {
@@ -1461,7 +1462,7 @@ void CHud::DrawAfterFade()
 				CFont::SetPropOff();
 
 			CFont::SetFontStyle(line.m_nFont);
-			CFont::PrintString(SCALE_AND_CENTER_X(DEFAULT_SCREEN_WIDTH - line.m_fAtX), SCREEN_SCALE_Y(DEFAULT_SCREEN_HEIGHT - line.m_fAtY), line.m_Text);
+			CFont::PrintString(SCREEN_WIDTH - SCALE_AND_CENTER_X(DEFAULT_SCREEN_WIDTH - line.m_fAtX), SCREEN_HEIGHT - SCREEN_SCALE_Y(DEFAULT_SCREEN_HEIGHT - line.m_fAtY), line.m_Text);
 		}
 	}
 	for (int i = 0; i < ARRAY_SIZE(CTheScripts::IntroRectangles); i++) {
@@ -1760,6 +1761,9 @@ void CHud::Initialise()
 	m_LastWanted = 0;
 	m_LastWeapon = 0;
 
+#ifndef MASTER
+	VarConsole.Add("Draw HUD", &m_Wants_To_Draw_Hud, false);
+#endif
 	CTxdStore::PopCurrentTxd();
 }
 

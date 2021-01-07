@@ -15,7 +15,7 @@ public:
 	float m_fCurrentStamina;
 	float m_fMaxStamina;
 	float m_fStaminaProgress;
-	int8 m_nSelectedWepSlot;	// eWeaponType
+	int8 m_nSelectedWepSlot;
 	bool m_bSpeedTimerFlag;
 	uint8 m_nEvadeAmount;
 	uint32 m_nSpeedTimer; // m_nStandStillTimer?
@@ -46,6 +46,9 @@ public:
 	unsigned int m_nLastBusFareCollected;
 
 	static bool bDontAllowWeaponChange;
+#ifndef MASTER
+	static bool bDebugPlayerInfo;
+#endif
 
 	CPlayerPed();
 	~CPlayerPed();
