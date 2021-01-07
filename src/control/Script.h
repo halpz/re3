@@ -21,26 +21,31 @@ extern int32 ScriptParams[32];
 void FlushLog();
 #define script_assert(_Expression) FlushLog(); assert(_Expression);
 
-#define PICKUP_PLACEMENT_OFFSET 0.5f
-#define PED_FIND_Z_OFFSET 5.0f
-#define COP_PED_FIND_Z_OFFSET 10.0f
+#define PICKUP_PLACEMENT_OFFSET (0.5f)
+#define PED_FIND_Z_OFFSET (5.0f)
+#define COP_PED_FIND_Z_OFFSET (10.0f)
 
-#define SPHERE_MARKER_R 252
-#define SPHERE_MARKER_G 138
-#define SPHERE_MARKER_B 242
-#define SPHERE_MARKER_A 228
+#define UPSIDEDOWN_UP_THRESHOLD (-0.97f)
+#define UPSIDEDOWN_MOVE_SPEED_THRESHOLD (0.01f)
+#define UPSIDEDOWN_TURN_SPEED_THRESHOLD (0.02f)
+#define UPSIDEDOWN_TIMER_THRESHOLD (1000)
+
+#define SPHERE_MARKER_R (252)
+#define SPHERE_MARKER_G (138)
+#define SPHERE_MARKER_B (242)
+#define SPHERE_MARKER_A (228)
 #define SPHERE_MARKER_PULSE_PERIOD 2048
 #define SPHERE_MARKER_PULSE_FRACTION 0.1f
 
 #ifdef USE_PRECISE_MEASUREMENT_CONVERTION
-#define METERS_IN_FOOT 0.3048f
-#define FEET_IN_METER 3.28084f
+#define METERS_IN_FOOT (0.3048f)
+#define FEET_IN_METER (3.28084f)
 #else
-#define METERS_IN_FOOT 0.3f
-#define FEET_IN_METER 3.33f
+#define METERS_IN_FOOT (0.3f)
+#define FEET_IN_METER (3.33f)
 #endif
 
-#define KEY_LENGTH_IN_SCRIPT 8
+#define KEY_LENGTH_IN_SCRIPT (8)
 
 //#define GTA_SCRIPT_COLLECTIVE
 
@@ -96,7 +101,7 @@ struct intro_text_line
 		m_bBackground = false;
 		m_bBackgroundOnly = false;
 		m_fWrapX = 182.0f;
-		m_fCenterSize = 640.0f;
+		m_fCenterSize = DEFAULT_SCREEN_WIDTH;
 		m_sBackgroundColor = CRGBA(128, 128, 128, 128);
 		m_bTextProportional = true;
 		m_bTextBeforeFade = false;
@@ -149,10 +154,10 @@ enum {
 
 class CMissionCleanup
 {
+public:
 	cleanup_entity_struct m_sEntities[MAX_CLEANUP];
 	uint8 m_nCount;
 
-public:
 	CMissionCleanup();
 
 	void Init();
@@ -161,10 +166,9 @@ public:
 	void RemoveEntityFromList(int32, uint8);
 	void Process();
 	void CheckIfCollisionHasLoadedForMissionObjects();
-	CPhysical* DoesThisEntityWaitForCollision(int i);
 };
 
-struct CUpsideDownCarCheckEntry
+struct upsidedown_car_data
 {
 	int32 m_nVehicleIndex;
 	uint32 m_nUpsideDownTimer;
@@ -172,11 +176,12 @@ struct CUpsideDownCarCheckEntry
 
 class CUpsideDownCarCheck
 {
-	CUpsideDownCarCheckEntry m_sCars[MAX_UPSIDEDOWN_CAR_CHECKS];
+	upsidedown_car_data m_sCars[MAX_UPSIDEDOWN_CAR_CHECKS];
 
 public:
 	void Init();
 	bool IsCarUpsideDown(int32);
+	bool IsCarUpsideDown(CVehicle*);
 	void UpdateTimers();
 	bool AreAnyCarsUpsideDown();
 	void AddCarToCheck(int32);
@@ -194,7 +199,7 @@ struct stuck_car_data
 	bool m_bStuck;
 
 	stuck_car_data() { }
-	inline void Reset();
+	void Reset();
 };
 
 class CStuckCarCheck
@@ -273,6 +278,7 @@ enum {
 
 class CTheScripts
 {
+public:
 	static uint8 ScriptSpace[SIZE_SCRIPT_SPACE];
 	static CRunningScript ScriptsArray[MAX_NUM_SCRIPTS];
 	static intro_text_line IntroTextLines[MAX_NUM_INTRO_TEXT_LINES];
@@ -286,7 +292,7 @@ class CTheScripts
 	static CStoredLine aStoredLines[MAX_NUM_STORED_LINES];
 	static bool DbgFlag;
 	static uint32 OnAMissionFlag;
-	static CMissionCleanup MissionCleanup;
+	static CMissionCleanup MissionCleanUp;
 	static CStuckCarCheck StuckCars;
 	static CUpsideDownCarCheck UpsideDownCars;
 	static int32 StoreVehicleIndex;
@@ -319,11 +325,10 @@ class CTheScripts
 	static int16 CardStack[CARDS_IN_STACK];
 	static int16 CardStackPosition;
 #endif
-public:
 	static bool bPlayerIsInTheStatium;
 	static uint8 RiotIntensity;
 	static bool bPlayerHasMetDebbieHarry;
-public:
+
 	static void Init();
 	static void Process();
 
@@ -376,8 +381,6 @@ public:
 		uint32 tmp = 3;
 		return Read4BytesFromScript(&tmp);
 	}
-
-private:
 
 	static CRunningScript* StartNewScript(uint32);
 
@@ -436,18 +439,11 @@ public:
 	static void SetObjectiveForAllPedsInCollective(int, eObjective);
 #endif
 
-	friend class CRunningScript;
-	friend class CHud;
-	friend void CMissionCleanup::Process();
-	friend class CColStore;
-#ifdef FIX_BUGS
-	friend void RetryMission(int, int);
-#endif
 };
 
 
 enum {
-	MAX_STACK_DEPTH = 6, // 4 PS2
+	MAX_STACK_DEPTH = 6,
 	NUM_LOCAL_VARS = 16,
 	NUM_TIMERS = 2
 };
@@ -474,6 +470,7 @@ class CRunningScript
 		ORS_8
 	};
 
+public:
 	CRunningScript* next;
 	CRunningScript* prev;
 	char m_abScriptName[8];
@@ -512,7 +509,6 @@ public:
 
 	static const uint32 nSaveStructSize;
 
-private:
 	void CollectParameters(uint32*, int16);
 	int32 CollectNextParameterWithoutIncreasingPC(uint32);
 	int32* GetPointerToScriptVariable(uint32*, int16);
@@ -580,7 +576,6 @@ private:
 	
 	static bool ThisIsAValidRandomCop(int32 mi, bool cop, bool swat, bool fbi, bool army, bool miami);
 
-	friend class CTheScripts;
 };
 
 #ifdef USE_DEBUG_SCRIPT_LOADER

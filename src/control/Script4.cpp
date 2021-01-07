@@ -155,7 +155,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			++CCarCtrl::NumMissionCars;
 			--CCarCtrl::NumRandomCars;
 			if (m_bIsMissionScript)
-				CTheScripts::MissionCleanup.AddEntityToList(handle, CLEANUP_CAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(handle, CLEANUP_CAR);
 		}
 		ScriptParams[0] = handle;
 		StoreParameters(&m_nIp, 1);
@@ -188,7 +188,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			++CCarCtrl::NumMissionCars;
 			--CCarCtrl::NumRandomCars;
 			if (m_bIsMissionScript)
-				CTheScripts::MissionCleanup.AddEntityToList(handle, CLEANUP_CAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(handle, CLEANUP_CAR);
 		}
 		ScriptParams[0] = handle;
 		StoreParameters(&m_nIp, 1);
@@ -609,7 +609,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			}
 		}
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_CHAR);
+			CTheScripts::MissionCleanUp.RemoveEntityFromList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_STAY_IN_SAME_PLACE:
@@ -1056,7 +1056,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(ped);
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
+			CTheScripts::MissionCleanUp.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_OBJ_STEAL_ANY_CAR:

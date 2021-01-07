@@ -325,11 +325,11 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		CollectParameters(&m_nIp, 1);
 		UpdateCompareFlag(CGarages::HasCarBeenDroppedOffYet(ScriptParams[0]));
 		return 0;
+/*
 	case COMMAND_SET_FREE_BOMBS:
 		CollectParameters(&m_nIp, 1);
 		CGarages::SetFreeBombs(ScriptParams[0] != 0);
 		return 0;
-#ifdef GTA_PS2
 	case COMMAND_SET_POWERPOINT:
 	{
 		CollectParameters(&m_nIp, 7);
@@ -363,8 +363,6 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 
 		return 0;
 	}
-#endif // GTA_PS2
-	/*
 	case COMMAND_SET_ALL_TAXI_LIGHTS:
 		CollectParameters(&m_nIp, 1);
 		CAutomobile::SetAllTaxiLights(ScriptParams[0] != 0);
@@ -1279,7 +1277,7 @@ int8 CRunningScript::ProcessCommands600To699(int32 command)
 		ScriptParams[0] = CPools::GetObjectPool()->GetIndex(pObj);
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_OBJECT);
+			CTheScripts::MissionCleanUp.AddEntityToList(ScriptParams[0], CLEANUP_OBJECT);
 		return 0;
 	}
 	/*
@@ -1834,7 +1832,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 			pPed->bRespondsToThreats = false;
 			++CPopulation::ms_nTotalMissionPeds;
 			if (m_bIsMissionScript)
-				CTheScripts::MissionCleanup.AddEntityToList(ped_handle, CLEANUP_CHAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(ped_handle, CLEANUP_CHAR);
 		}
 		ScriptParams[0] = ped_handle;
 		StoreParameters(&m_nIp, 1);
@@ -1889,7 +1887,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 			pPed->bRespondsToThreats = false;
 			++CPopulation::ms_nTotalMissionPeds;
 			if (m_bIsMissionScript)
-				CTheScripts::MissionCleanup.AddEntityToList(ped_handle, CLEANUP_CHAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(ped_handle, CLEANUP_CHAR);
 		}
 		ScriptParams[0] = ped_handle;
 		StoreParameters(&m_nIp, 1);

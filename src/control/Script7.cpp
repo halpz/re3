@@ -1201,7 +1201,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(pPed);
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
+			CTheScripts::MissionCleanUp.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_CREATE_RANDOM_CHAR_AS_PASSENGER:
@@ -1231,7 +1231,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(pPed);
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
+			CTheScripts::MissionCleanUp.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_IGNORE_THREATS_BEHIND_OBJECTS:
