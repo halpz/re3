@@ -491,7 +491,7 @@ public:
 		if ( m_pMH )
 		{
 #ifdef MP3_USE_FUZZY_SEEK
-			mpg123_param(m_pMH, MPG123_FLAGS, MPG123_FUZZY | MPG123_SEEKBUFFER | MPG123_GAPLESS, 0.0);
+			mpg123_param(m_pMH, MPG123_FLAGS, MPG123_FUZZY | MPG123_SEEKBUFFER | MPG123_GAPLESS | MPG123_QUIET, 0.0);
 #endif
 			long rate = 0;
 			int channels = 0;
