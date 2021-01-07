@@ -154,10 +154,10 @@ enum {
 
 class CMissionCleanup
 {
+public:
 	cleanup_entity_struct m_sEntities[MAX_CLEANUP];
 	uint8 m_nCount;
 
-public:
 	CMissionCleanup();
 
 	void Init();
@@ -292,7 +292,7 @@ public:
 	static CStoredLine aStoredLines[MAX_NUM_STORED_LINES];
 	static bool DbgFlag;
 	static uint32 OnAMissionFlag;
-	static CMissionCleanup MissionCleanup;
+	static CMissionCleanup MissionCleanUp;
 	static CStuckCarCheck StuckCars;
 	static CUpsideDownCarCheck UpsideDownCars;
 	static int32 StoreVehicleIndex;

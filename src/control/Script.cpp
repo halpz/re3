@@ -73,7 +73,7 @@ uint16 CTheScripts::NumScriptDebugLines;
 uint16 CTheScripts::NumberOfIntroRectanglesThisFrame;
 uint16 CTheScripts::NumberOfIntroTextLinesThisFrame;
 uint8 CTheScripts::UseTextCommands;
-CMissionCleanup CTheScripts::MissionCleanup;
+CMissionCleanup CTheScripts::MissionCleanUp;
 CUpsideDownCarCheck CTheScripts::UpsideDownCars;
 CStuckCarCheck CTheScripts::StuckCars;
 uint16 CTheScripts::CommandsExecuted;
@@ -1801,7 +1801,7 @@ void CTheScripts::Init()
 		ScriptsArray[i].Init();
 		ScriptsArray[i].AddScriptToList(&pIdleScripts);
 	}
-	MissionCleanup.Init();
+	MissionCleanUp.Init();
 	UpsideDownCars.Init();
 	StuckCars.Init();
 	CFileMgr::SetDir("data");
@@ -3217,7 +3217,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(ped);
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
+			CTheScripts::MissionCleanUp.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_DELETE_CHAR:
@@ -3243,7 +3243,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			--CPopulation::ms_nTotalMissionPeds;
 		}
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_CHAR);
+			CTheScripts::MissionCleanUp.RemoveEntityFromList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_CHAR_WANDER_DIR:
@@ -3462,7 +3462,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		ScriptParams[0] = handle;
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(handle, CLEANUP_CAR);
+			CTheScripts::MissionCleanUp.AddEntityToList(handle, CLEANUP_CAR);
 		return 0;
 	}
 	case COMMAND_DELETE_CAR:
@@ -3475,7 +3475,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 			delete car;
 		}
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_CAR);
+			CTheScripts::MissionCleanUp.RemoveEntityFromList(ScriptParams[0], CLEANUP_CAR);
 		return 0;
 	}
 	case COMMAND_CAR_GOTO_COORDINATES:
@@ -3792,7 +3792,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 			return 0;
 		if (strcmp(m_abScriptName, "love3") == 0) /* A Drop in the Ocean */
 			CPickups::RemoveAllFloatingPickups();
-		CTheScripts::MissionCleanup.Process();
+		CTheScripts::MissionCleanUp.Process();
 		return 0;
 	}
 	case COMMAND_STORE_CAR_CHAR_IS_IN:
@@ -3815,7 +3815,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 					pOld->bIsLocked = false;
 					CCarCtrl::NumRandomCars++;
 					CCarCtrl::NumMissionCars--;
-					CTheScripts::MissionCleanup.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+					CTheScripts::MissionCleanUp.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
 				}
 			}
 
@@ -3826,14 +3826,14 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 				CCarCtrl::NumMissionCars++;
 				CCarCtrl::NumRandomCars--;
 				CTheScripts::StoreVehicleWasRandom = true;
-				CTheScripts::MissionCleanup.AddEntityToList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
 				break;
 			case PARKED_VEHICLE:
 				pCurrent->VehicleCreatedBy = MISSION_VEHICLE;
 				CCarCtrl::NumMissionCars++;
 				CCarCtrl::NumParkedCars--;
 				CTheScripts::StoreVehicleWasRandom = true;
-				CTheScripts::MissionCleanup.AddEntityToList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
 				break;
 			case MISSION_VEHICLE:
 			case PERMANENT_VEHICLE:
@@ -3866,7 +3866,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 					pOld->bIsLocked = false;
 					CCarCtrl::NumRandomCars++;
 					CCarCtrl::NumMissionCars--;
-					CTheScripts::MissionCleanup.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+					CTheScripts::MissionCleanUp.RemoveEntityFromList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
 				}
 			}
 
@@ -3877,14 +3877,14 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 				CCarCtrl::NumMissionCars++;
 				CCarCtrl::NumRandomCars--;
 				CTheScripts::StoreVehicleWasRandom = true;
-				CTheScripts::MissionCleanup.AddEntityToList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
 				break;
 			case PARKED_VEHICLE:
 				pCurrent->VehicleCreatedBy = MISSION_VEHICLE;
 				CCarCtrl::NumMissionCars++;
 				CCarCtrl::NumParkedCars--;
 				CTheScripts::StoreVehicleWasRandom = true;
-				CTheScripts::MissionCleanup.AddEntityToList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
+				CTheScripts::MissionCleanUp.AddEntityToList(CTheScripts::StoreVehicleIndex, CLEANUP_CAR);
 				break;
 			case MISSION_VEHICLE:
 			case PERMANENT_VEHICLE:
@@ -4035,7 +4035,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		ScriptParams[0] = CPools::GetObjectPool()->GetIndex(pObj);
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_OBJECT);
+			CTheScripts::MissionCleanUp.AddEntityToList(ScriptParams[0], CLEANUP_OBJECT);
 		return 0;
 	}
 	case COMMAND_DELETE_OBJECT:
@@ -4048,7 +4048,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 			delete pObj;
 		}
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.RemoveEntityFromList(ScriptParams[0], CLEANUP_OBJECT);
+			CTheScripts::MissionCleanUp.RemoveEntityFromList(ScriptParams[0], CLEANUP_OBJECT);
 		return 0;
 	}
 	case COMMAND_ADD_SCORE:
@@ -4273,7 +4273,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		ScriptParams[0] = CPools::GetPedPool()->GetIndex(pPed);
 		StoreParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
-			CTheScripts::MissionCleanup.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
+			CTheScripts::MissionCleanUp.AddEntityToList(ScriptParams[0], CLEANUP_CHAR);
 		return 0;
 	}
 	case COMMAND_WARP_PLAYER_FROM_CAR_TO_COORD:
@@ -4359,7 +4359,7 @@ void RetryMission(int type, int unk)
 	else if (type == 2) {
 		doingMissionRetry = false;
 		AllowMissionReplay = 6;
-		CTheScripts::MissionCleanup.Process();
+		CTheScripts::MissionCleanUp.Process();
 	}
 }
 
