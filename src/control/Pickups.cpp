@@ -1336,7 +1336,7 @@ CPickups::RenderPickUpText()
 #ifdef FIX_BUGS
 		const float MAX_SCALE = SCREEN_WIDTH / DEFAULT_SCREEN_WIDTH;
 #else
-		const float MAX_SCALE = RsGlobal.width / DEFAULT_SCREEN_WIDTH;
+		float MAX_SCALE = RsGlobal.width / DEFAULT_SCREEN_WIDTH;
 #endif
 
 		float fScaleY = aMessages[i].m_dist.y / 30.0f;
@@ -1345,11 +1345,7 @@ CPickups::RenderPickUpText()
 		float fScaleX = aMessages[i].m_dist.x / 30.0f;
 		if (fScaleX > MAX_SCALE) fScaleX = MAX_SCALE;
 
-#ifdef FIX_BUGS
-		CFont::SetScale(SCREEN_SCALE_X(fScaleX), SCREEN_SCALE_Y(fScaleY));
-#else
-		CFont::SetScale(fScaleX, fScaleY);
-#endif
+		CFont::SetScale(fScaleX, fScaleY); // this shouldn't be scaled
 		CFont::SetCentreOn();
 		CFont::SetCentreSize(SCREEN_WIDTH);
 		CFont::SetJustifyOff();
