@@ -1693,17 +1693,6 @@ void CMissionCleanup::AddEntityToList(int32 id, uint8 type)
 	m_nCount++;
 }
 
-static void PossiblyWakeThisEntity(CPhysical* pEntity, bool ifColLoaded = false)
-{
-	if (!pEntity->bIsStaticWaitingForCollision)
-		return;
-	if (!ifColLoaded || CColStore::HasCollisionLoaded(pEntity->GetPosition())) {
-		pEntity->bIsStaticWaitingForCollision = false;
-		if (!pEntity->GetIsStatic())
-			pEntity->AddToMovingList();
-	}
-}
-
 void CMissionCleanup::RemoveEntityFromList(int32 id, uint8 type)
 {
 	for (int i = 0; i < MAX_CLEANUP; i++){
