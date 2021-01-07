@@ -186,7 +186,7 @@ CSpecialFX::Render2DFXs(void)
 		CFont::SetCentreOff();
 		CFont::SetPropOn();
 		CFont::SetColor(CRGBA(0, 255, 0, 200));
-		FONT_LOCALE(FONT_STANDARD);
+		CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 		sprintf(gString, "%d", CTimer::GetFrameCounter() & 0x3F); // mb % 63
 		AsciiToUnicode(gString, gUString);
 		CFont::PrintString(SCREEN_WIDTH * 8 / 10, SCREEN_HEIGHT * 8 / 10, gUString);
@@ -211,7 +211,7 @@ CSpecialFX::Render2DFXs(void)
 		CFont::SetCentreOff();
 		CFont::SetPropOn();
 		CFont::SetColor(CRGBA(100, 100, 100, 200));
-		FONT_LOCALE(FONT_STANDARD);
+		CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 		CFont::PrintString(SCREEN_WIDTH * 8 / 10, SCREEN_HEIGHT * 8 / 10, gUString);
 		for (int32 i = 0; i < SCREEN_HEIGHT; i += 4) {
 			RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
