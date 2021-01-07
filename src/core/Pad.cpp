@@ -872,6 +872,30 @@ void CPad::AddToCheatString(char c)
 	// "S1CD13TR1X"		-	SQUARE L1 CIRCLE DOWN L1 R1 TRIANGLE RIGHT L1 CROSS
 	else if ( !_CHEATCMP("X1RT31DC1S") )
 		NastyLimbsCheat();
+
+#ifdef KANGAROO_CHEAT
+	// "X1DUC3RLS3"		-	R1 SQUARE LEFT RIGHT R1 CIRCLE UP DOWN L1 CROSS
+	else if (!_CHEATCMP("X1DUC3RLS3"))
+		KangarooCheat();
+#endif
+
+#ifndef MASTER
+	// "31UD13XUD"		-	DOWN UP CROSS R1 L1 DOWN UP L1 R1
+	else if (!_CHEATCMP("31UD13XUD"))
+		CPed::SwitchDebugDisplay();
+#endif
+
+#ifdef ALLCARSHELI_CHEAT
+	// "UCCL3R1TT"		-	TRIANGLE TRIANGLE L1 RIGHT R1 LEFT CIRCLE CIRCLE UP
+	else if (!_CHEATCMP("UCCL3R1TT"))
+		AllCarsHeliCheat();
+#endif
+
+#ifdef ALT_DODO_CHEAT
+	// "DUU31XX13"		-	R1 L1 CROSS CROSS L1 R1 UP UP DOWN
+	else if (!_CHEATCMP("DUU31XX13"))
+		AltDodoCheat();
+#endif
 #undef _CHEATCMP
 }
 #endif
