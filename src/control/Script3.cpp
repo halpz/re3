@@ -342,7 +342,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CGarages::SetFreeBombs(ScriptParams[0] != 0);
 		return 0;
-#ifdef GTA_PS2
+#if GTA_VERSION <= GTA3_PS2_160
 	case COMMAND_SET_POWERPOINT:
 	{
 		CollectParameters(&m_nIp, 7);
@@ -376,7 +376,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 
 		return 0;
 	}
-#endif // GTA_PS2
+#endif // GTA_VERSION <= GTA3_PS2_160
 	case COMMAND_SET_ALL_TAXI_LIGHTS:
 		CollectParameters(&m_nIp, 1);
 		CAutomobile::SetAllTaxiLights(ScriptParams[0] != 0);

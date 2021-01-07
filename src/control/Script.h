@@ -20,27 +20,32 @@ extern int32 ScriptParams[32];
 void FlushLog();
 #define script_assert(_Expression) FlushLog(); assert(_Expression);
 
-#define PICKUP_PLACEMENT_OFFSET 0.5f
-#define PED_FIND_Z_OFFSET 5.0f
+#define PICKUP_PLACEMENT_OFFSET (0.5f)
+#define PED_FIND_Z_OFFSET (5.0f)
 
-#define SPHERE_MARKER_R 0
-#define SPHERE_MARKER_G 128
-#define SPHERE_MARKER_B 255
-#define SPHERE_MARKER_A 128
-#define SPHERE_MARKER_PULSE_PERIOD 2048
-#define SPHERE_MARKER_PULSE_FRACTION 0.1f
+#define UPSIDEDOWN_UP_THRESHOLD (-0.97f)
+#define UPSIDEDOWN_MOVE_SPEED_THRESHOLD (0.01f)
+#define UPSIDEDOWN_TURN_SPEED_THRESHOLD (0.02f)
+#define UPSIDEDOWN_TIMER_THRESHOLD (1000)
+
+#define SPHERE_MARKER_R (0)
+#define SPHERE_MARKER_G (128)
+#define SPHERE_MARKER_B (255)
+#define SPHERE_MARKER_A (128)
+#define SPHERE_MARKER_PULSE_PERIOD (2048)
+#define SPHERE_MARKER_PULSE_FRACTION (0.1f)
 
 #ifdef USE_PRECISE_MEASUREMENT_CONVERTION
-#define METERS_IN_FOOT 0.3048f
-#define FEET_IN_METER 3.28084f
+#define METERS_IN_FOOT (0.3048f)
+#define FEET_IN_METER (3.28084f)
 #else
-#define METERS_IN_FOOT 0.3f
-#define FEET_IN_METER 3.33f
+#define METERS_IN_FOOT (0.3f)
+#define FEET_IN_METER (3.33f)
 #endif
 
-#define KEY_LENGTH_IN_SCRIPT 8
+#define KEY_LENGTH_IN_SCRIPT (8)
 
-#if GTA_VERSION <= GTA_PS2_160
+#if GTA_VERSION <= GTA3_PS2_160
 #define GTA_SCRIPT_COLLECTIVE
 #endif
 
@@ -95,8 +100,8 @@ struct intro_text_line
 		m_bCentered = false;
 		m_bBackground = false;
 		m_bBackgroundOnly = false;
-		m_fWrapX = 182.0f; /* TODO: scaling as bugfix */
-		m_fCenterSize = 640.0f; /* --||-- */
+		m_fWrapX = 182.0f;
+		m_fCenterSize = DEFAULT_SCREEN_WIDTH;
 		m_sBackgroundColor = CRGBA(128, 128, 128, 128);
 		m_bTextProportional = true;
 		m_bTextBeforeFade = false;
@@ -162,7 +167,7 @@ public:
 	void Process();
 };
 
-struct CUpsideDownCarCheckEntry
+struct upsidedown_car_data
 {
 	int32 m_nVehicleIndex;
 	uint32 m_nUpsideDownTimer;
@@ -170,11 +175,12 @@ struct CUpsideDownCarCheckEntry
 
 class CUpsideDownCarCheck
 {
-	CUpsideDownCarCheckEntry m_sCars[MAX_UPSIDEDOWN_CAR_CHECKS];
+	upsidedown_car_data m_sCars[MAX_UPSIDEDOWN_CAR_CHECKS];
 
 public:
 	void Init();
 	bool IsCarUpsideDown(int32);
+	bool IsCarUpsideDown(CVehicle*);
 	void UpdateTimers();
 	bool AreAnyCarsUpsideDown();
 	void AddCarToCheck(int32);
@@ -192,7 +198,7 @@ struct stuck_car_data
 	bool m_bStuck;
 
 	stuck_car_data() { }
-	inline void Reset();
+	void Reset();
 };
 
 class CStuckCarCheck
@@ -269,6 +275,7 @@ enum {
 
 class CTheScripts
 {
+public:
 	static uint8 ScriptSpace[SIZE_SCRIPT_SPACE];
 	static CRunningScript ScriptsArray[MAX_NUM_SCRIPTS];
 	static int32 BaseBriefIdForContact[MAX_NUM_CONTACTS];
@@ -310,7 +317,6 @@ class CTheScripts
 	static uint16 CommandsExecuted;
 	static uint16 ScriptsUpdated;
 
-public:
 	static void Init();
 	static void Process();
 
@@ -367,8 +373,6 @@ public:
 		return Read4BytesFromScript(&tmp);
 	}
 
-private:
-
 	static CRunningScript* StartNewScript(uint32);
 
 	static void CleanUpThisVehicle(CVehicle*);
@@ -418,13 +422,6 @@ private:
 	static void SetObjectiveForAllPedsInCollective(int, eObjective);
 #endif
 
-	friend class CRunningScript;
-	friend class CHud;
-	friend void CMissionCleanup::Process();
-#ifdef MISSION_REPLAY
-	friend void RetryMission(int, int);
-#endif
-
 #ifdef MISSION_SWITCHER
 public:
 	static void SwitchToMission(int32 mission);
@@ -433,7 +430,11 @@ public:
 
 
 enum {
-	MAX_STACK_DEPTH = 6, // 4 PS2
+#if GTA_VERSION > GTA3_PS2_160
+	MAX_STACK_DEPTH = 6,
+#else
+	MAX_STACK_DEPTH = 4,
+#endif
 	NUM_LOCAL_VARS = 16,
 	NUM_TIMERS = 2
 };
@@ -460,6 +461,7 @@ class CRunningScript
 		ORS_8
 	};
 
+public:
 	CRunningScript* next;
 	CRunningScript* prev;
 	char m_abScriptName[8];
@@ -497,7 +499,6 @@ public:
 
 	static const uint32 nSaveStructSize;
 
-private:
 	void CollectParameters(uint32*, int16);
 	int32 CollectNextParameterWithoutIncreasingPC(uint32);
 	int32* GetPointerToScriptVariable(uint32*, int16);
@@ -519,7 +520,7 @@ private:
 	int8 ProcessCommands800To899(int32);
 	int8 ProcessCommands900To999(int32);
 	int8 ProcessCommands1000To1099(int32);
-#ifndef GTA_PS2
+#if GTA_VERSION > GTA3_PS2_160
 	int8 ProcessCommands1100To1199(int32);
 #endif
 	void LocatePlayerCommand(int32, uint32*);
@@ -575,8 +576,6 @@ private:
 			return false;
 		}
 	}
-
-	friend class CTheScripts;
 };
 
 #ifdef MISSION_REPLAY

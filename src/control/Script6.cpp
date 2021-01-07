@@ -33,9 +33,12 @@
 #include "Zones.h"
 #include "main.h"
 
+// NB: on PS2 this file did not exist; ProcessCommands1000To1099 was in Script5.cpp and ProcessCommands1100To1199 was only added on PC
+// however to avoid redundant copies of code, Script6.cpp is used with PS2 defines
+
 int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 {
-#ifdef GTA_PS2
+#if GTA_VERSION <= GTA3_PS2_160
 	char tmp[48];
 #endif
 	switch (command) {
@@ -746,7 +749,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 			pPed->m_objective != OBJECTIVE_ENTER_CAR_AS_DRIVER);
 		return 0;
 	}
-#ifndef GTA_PS2
+#if GTA_VERSION > GTA3_PS2_160
 	default:
 		script_assert(0);
 	}
@@ -838,8 +841,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	case COMMAND_ENABLE_PLAYER_CONTROL_CAMERA:
 		CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_CAMERA);
 		return 0;
-#ifndef GTA_PS2
-	// To be precise, on PS2 previous handlers were in 1000-1099 function
+#if GTA_VERSION > GTA3_PS2_160
 	// These are "beta" VC commands (with bugs)
 	case COMMAND_SET_OBJECT_ROTATION:
 	{

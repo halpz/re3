@@ -1225,7 +1225,7 @@ const tScriptCommandData commands[] = {
 	REGISTER_COMMAND(COMMAND_SET_JAMES_CAR_ON_PATH_TO_PLAYER, INPUT_ARGUMENTS(ARGTYPE_INT,), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_LOAD_END_OF_GAME_TUNE, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_ENABLE_PLAYER_CONTROL_CAMERA, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
-#ifndef GTA_PS2
+#if GTA_VERSION > GTA3_PS2_160
 	REGISTER_COMMAND(COMMAND_SET_OBJECT_ROTATION, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT,), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_GET_DEBUG_CAMERA_COORDINATES, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT,), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_GET_DEBUG_CAMERA_FRONT_VECTOR, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT,), false, -1, ""),
@@ -1444,10 +1444,16 @@ void CUpsideDownCarCheck::Init()
 
 bool CUpsideDownCarCheck::IsCarUpsideDown(int32 id)
 {
-	CVehicle* v = CPools::GetVehiclePool()->GetAt(id);
-	return v->GetUp().z <= -0.97f &&
-		v->GetMoveSpeed().Magnitude() < 0.01f &&
-		v->GetTurnSpeed().Magnitude() < 0.02f;
+	CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(id);
+	return IsCarUpsideDown(pVehicle);
+}
+
+bool CUpsideDownCarCheck::IsCarUpsideDown(CVehicle* pVehicle)
+{
+	assert(pVehicle);
+	return pVehicle->GetUp().z <= UPSIDEDOWN_UP_THRESHOLD &&
+		pVehicle->GetMoveSpeed().Magnitude() < UPSIDEDOWN_MOVE_SPEED_THRESHOLD &&
+		pVehicle->GetTurnSpeed().Magnitude() < UPSIDEDOWN_TURN_SPEED_THRESHOLD;
 }
 
 void CUpsideDownCarCheck::UpdateTimers()
@@ -1470,7 +1476,7 @@ void CUpsideDownCarCheck::UpdateTimers()
 bool CUpsideDownCarCheck::AreAnyCarsUpsideDown()
 {
 	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
-		if (m_sCars[i].m_nVehicleIndex >= 0 && m_sCars[i].m_nUpsideDownTimer > 1000)
+		if (m_sCars[i].m_nVehicleIndex >= 0 && m_sCars[i].m_nUpsideDownTimer > UPSIDEDOWN_TIMER_THRESHOLD)
 			return true;
 	}
 	return false;
@@ -1481,8 +1487,10 @@ void CUpsideDownCarCheck::AddCarToCheck(int32 id)
 	uint16 index = 0;
 	while (index < MAX_UPSIDEDOWN_CAR_CHECKS && m_sCars[index].m_nVehicleIndex >= 0)
 		index++;
+#ifdef FIX_BUGS
 	if (index >= MAX_UPSIDEDOWN_CAR_CHECKS)
 		return;
+#endif
 	m_sCars[index].m_nVehicleIndex = id;
 	m_sCars[index].m_nUpsideDownTimer = 0;
 }
@@ -1501,7 +1509,7 @@ bool CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile(int32 id)
 {
 	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
 		if (m_sCars[i].m_nVehicleIndex == id)
-			return m_sCars[i].m_nUpsideDownTimer > 1000;
+			return m_sCars[i].m_nUpsideDownTimer > UPSIDEDOWN_TIMER_THRESHOLD;
 	}
 	return false;
 }
@@ -1551,7 +1559,10 @@ void CStuckCarCheck::AddCarToCheck(int32 id, float radius, uint32 time)
 	int index = 0;
 	while (index < MAX_STUCK_CAR_CHECKS && m_sCars[index].m_nVehicleIndex >= 0)
 		index++;
-	/* Would be nice to return if index >= MAX_STUCK_CAR_CHECKS... */
+#ifdef FIX_BUGS
+	if (index >= MAX_STUCK_CAR_CHECKS)
+		return;
+#endif
 	m_sCars[index].m_nVehicleIndex = id;
 	m_sCars[index].m_vecPos = pv->GetPosition();
 	m_sCars[index].m_nLastCheck = CTimer::GetTimeInMilliseconds();
@@ -2098,7 +2109,7 @@ int8 CRunningScript::ProcessOneCommand()
 		retval = ProcessCommands800To899(command);
 	else if (command < 1000)
 		retval = ProcessCommands900To999(command);
-#ifdef GTA_PS2
+#if GTA_VERSION <= GTA3_PS2_160
 	else if (command < 1200)
 		retval = ProcessCommands1000To1099(command);
 #else
@@ -4312,81 +4323,6 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		break;
 	}
 	return -1;
-}
-
-
-void CRunningScript::Save(uint8*& buf)
-{
-#ifdef COMPATIBLE_SAVES
-	SkipSaveBuf(buf, 8);
-	for (int i = 0; i < 8; i++)
-		WriteSaveBuf<char>(buf, m_abScriptName[i]);
-	WriteSaveBuf<uint32>(buf, m_nIp);
-#ifdef CHECK_STRUCT_SIZES
-	static_assert(MAX_STACK_DEPTH == 6, "Compatibility loss: MAX_STACK_DEPTH != 6");
-#endif
-	for (int i = 0; i < MAX_STACK_DEPTH; i++)
-		WriteSaveBuf<uint32>(buf, m_anStack[i]);
-	WriteSaveBuf<uint16>(buf, m_nStackPointer);
-	SkipSaveBuf(buf, 2);
-#ifdef CHECK_STRUCT_SIZES
-	static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
-#endif
-	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
-		WriteSaveBuf<int32>(buf, m_anLocalVariables[i]);
-	WriteSaveBuf<bool>(buf, m_bCondResult);
-	WriteSaveBuf<bool>(buf, m_bIsMissionScript);
-	WriteSaveBuf<bool>(buf, m_bSkipWakeTime);
-	SkipSaveBuf(buf, 1);
-	WriteSaveBuf<uint32>(buf, m_nWakeTime);
-	WriteSaveBuf<uint16>(buf, m_nAndOrState);
-	WriteSaveBuf<bool>(buf, m_bNotFlag);
-	WriteSaveBuf<bool>(buf, m_bDeatharrestEnabled);
-	WriteSaveBuf<bool>(buf, m_bDeatharrestExecuted);
-	WriteSaveBuf<bool>(buf, m_bMissionFlag);
-	SkipSaveBuf(buf, 2);
-#else
-	WriteSaveBuf(buf, *this);
-#endif
-}
-
-void CRunningScript::Load(uint8*& buf)
-{
-#ifdef COMPATIBLE_SAVES
-	SkipSaveBuf(buf, 8);
-	for (int i = 0; i < 8; i++)
-		m_abScriptName[i] = ReadSaveBuf<char>(buf);
-	m_nIp = ReadSaveBuf<uint32>(buf);
-#ifdef CHECK_STRUCT_SIZES
-	static_assert(MAX_STACK_DEPTH == 6, "Compatibility loss: MAX_STACK_DEPTH != 6");
-#endif
-	for (int i = 0; i < MAX_STACK_DEPTH; i++)
-		m_anStack[i] = ReadSaveBuf<uint32>(buf);
-	m_nStackPointer = ReadSaveBuf<uint16>(buf);
-	SkipSaveBuf(buf, 2);
-#ifdef CHECK_STRUCT_SIZES
-	static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
-#endif
-	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
-		m_anLocalVariables[i] = ReadSaveBuf<int32>(buf);
-	m_bCondResult = ReadSaveBuf<bool>(buf);
-	m_bIsMissionScript = ReadSaveBuf<bool>(buf);
-	m_bSkipWakeTime = ReadSaveBuf<bool>(buf);
-	SkipSaveBuf(buf, 1);
-	m_nWakeTime = ReadSaveBuf<uint32>(buf);
-	m_nAndOrState = ReadSaveBuf<uint16>(buf);
-	m_bNotFlag = ReadSaveBuf<bool>(buf);
-	m_bDeatharrestEnabled = ReadSaveBuf<bool>(buf);
-	m_bDeatharrestExecuted = ReadSaveBuf<bool>(buf);
-	m_bMissionFlag = ReadSaveBuf<bool>(buf);
-	SkipSaveBuf(buf, 2);
-#else
-	CRunningScript* n = next;
-	CRunningScript* p = prev;
-	*this = ReadSaveBuf<CRunningScript>(buf);
-	next = n;
-	prev = p;
-#endif
 }
 
 #ifdef MISSION_REPLAY
