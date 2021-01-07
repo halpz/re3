@@ -267,7 +267,8 @@ enum {
 	MAX_NUM_MISSION_SCRIPTS = 120,
 	MAX_NUM_BUILDING_SWAPS = 25,
 	MAX_NUM_INVISIBILITY_SETTINGS = 20,
-	MAX_NUM_STORED_LINES = 1024
+	MAX_NUM_STORED_LINES = 1024,
+	MAX_ALLOWED_COLLISIONS = 2
 };
 
 class CTheScripts
@@ -317,6 +318,8 @@ class CTheScripts
 #define CARDS_IN_STACK (CARDS_IN_DECK * MAX_DECKS)
 	static int16 CardStack[CARDS_IN_STACK];
 	static int16 CardStackPosition;
+
+	static int AllowedCollision[MAX_ALLOWED_COLLISIONS];
 #endif
 public:
 	static bool bPlayerIsInTheStatium;
