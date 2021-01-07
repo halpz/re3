@@ -356,9 +356,21 @@ enum Config {
 // Audio
 #define RADIO_SCROLL_TO_PREV_STATION
 #define AUDIO_CACHE
-//#define PS2_AUDIO   // changes audio paths for cutscenes and radio to PS2 paths, needs vbdec to support VB with MSS
+//#define PS2_AUDIO_PATHS // changes audio paths for cutscenes and radio to PS2 paths (needs vbdec on MSS builds)
 //#define AUDIO_OAL_USE_SNDFILE // use libsndfile to decode WAVs instead of our internal decoder
+#define AUDIO_OAL_USE_MPG123 // use mpg123 to support mp3 files
 
+#ifdef AUDIO_OPUS
+#define AUDIO_OAL_USE_OPUS // enable support of opus files
+#define OPUS_AUDIO_PATHS // changes audio paths to opus paths (doesn't work if AUDIO_OAL_USE_OPUS isn't enabled)
+#define OPUS_SFX  // enable if your sfx.raw is encoded with opus (doesn't work if AUDIO_OAL_USE_OPUS isn't enabled)
+
+#ifndef AUDIO_OAL_USE_OPUS
+#undef OPUS_AUDIO_PATHS
+#undef OPUS_SFX
+#endif
+
+#endif
 // IMG
 #define BIG_IMG // allows to read larger img files
 
