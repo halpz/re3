@@ -54,12 +54,12 @@ namespace base
 	}
 };
 
-void* operator new(uint32 size)
+void* operator new(size_t size)
 {
 	return base::cMainMemoryManager::Instance()->Allocate(size);
 }
 
-void* operator new[](uint32 size)
+void* operator new[](size_t size)
 {
 	return base::cMainMemoryManager::Instance()->Allocate(size);
 }

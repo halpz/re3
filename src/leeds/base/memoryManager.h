@@ -33,7 +33,7 @@ namespace base
 	};
 }
 
-void* operator new(uint32 size);
-void* operator new[](uint32 size);
+void* operator new(size_t size);
+void* operator new[](size_t size);
 void operator delete(void* buf);
 void operator delete[](void* buf);
