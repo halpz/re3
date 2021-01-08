@@ -167,7 +167,7 @@ CSimpleModelInfo::FindRelatedModel(int32 minID, int32 maxID)
 	for(i = minID; i <= maxID; i++){
 		mi = CModelInfo::GetModelInfo(i);
 		if(mi && mi != this &&
-		   !CGeneral::faststrcmp(GetName()+3, mi->GetName()+3)){
+		   !CGeneral::faststrcmp(GetModelName()+3, mi->GetModelName()+3)){
 			assert(mi->IsSimple());
 			this->SetRelatedModel((CSimpleModelInfo*)mi);
 			return;
@@ -189,7 +189,7 @@ CSimpleModelInfo::SetupBigBuilding(int32 minID, int32 maxID)
 			m_lodDistances[2] = related->GetLargestLodDistance()/TheCamera.LODDistMultiplier;
 			if(m_drawLast){
 				m_drawLast = false;
-				debug("%s was draw last\n", GetName());
+				debug("%s was draw last\n", GetModelName());
 			}
 		}else
 			m_lodDistances[2] = NEAR_DRAW_DIST;

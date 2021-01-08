@@ -189,7 +189,7 @@ CModelInfo::GetModelInfo(const char *name, int *id)
 	CBaseModelInfo *modelinfo;
 	for(int i = 0; i < MODELINFOSIZE; i++){
 		modelinfo = CModelInfo::ms_modelInfoPtrs[i];
-	 	if(modelinfo && !CGeneral::faststricmp(modelinfo->GetName(), name)){
+	 	if(modelinfo && !CGeneral::faststricmp(modelinfo->GetModelName(), name)){
 			if(id)
 				*id = i;
 			return modelinfo;
@@ -207,7 +207,7 @@ CModelInfo::GetModelInfo(const char *name, int minIndex, int maxIndex)
 	CBaseModelInfo *modelinfo;
 	for(int i = minIndex; i <= maxIndex; i++){
 		modelinfo = CModelInfo::ms_modelInfoPtrs[i];
-	 	if(modelinfo && !CGeneral::faststricmp(modelinfo->GetName(), name))
+	 	if(modelinfo && !CGeneral::faststricmp(modelinfo->GetModelName(), name))
 			return modelinfo;
 	}
 	return nil;

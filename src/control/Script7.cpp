@@ -625,7 +625,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 			key[i] = tolower(key[i]);
 		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
 		script_assert(pPed);
-		UpdateCompareFlag(strcmp(key, CModelInfo::GetModelInfo(pPed->GetModelIndex())->GetName()) == 0);
+		UpdateCompareFlag(strcmp(key, CModelInfo::GetModelInfo(pPed->GetModelIndex())->GetModelName()) == 0);
 		return 0;
 	}
 	case COMMAND_SET_PLAYER_CAN_DO_DRIVE_BY:
