@@ -1,6 +1,7 @@
 #pragma once
 #include "PathFind.h"
 #include "Boat.h"
+#include "General.h"
 #include "Vehicle.h"
 
 #define GAME_SPEED_TO_METERS_PER_SECOND 50.0f
@@ -130,6 +131,10 @@ public:
 	static void SteerAIBoatWithPhysicsAttackingPlayer(CVehicle*, float*, float*, float*, bool*);
 	static void SteerAICarBlockingPlayerForwardAndBack(CVehicle*, float*, float*, float*, bool*);
 
+	static bool OkToCreateVehicleAtThisPosition(const CVector&);
+	static void RenderDebugInfo(CVehicle*);
+	static float GetATanOfXY(float x, float y) { float t = CGeneral::GetATanOfXY(x, y); if (t < 0.0f) t += TWOPI; return t; }
+
 	static float GetPositionAlongCurrentCurve(CVehicle* pVehicle)
 	{
 		uint32 timeInCurve = CTimer::GetTimeInMilliseconds() - pVehicle->AutoPilot.m_nTimeEnteredCurve;
@@ -138,11 +143,7 @@ public:
 
 	static float LimitRadianAngle(float angle)
 	{
-		while (angle < -PI)
-			angle += TWOPI;
-		while (angle > PI)
-			angle -= TWOPI;
-		return angle;
+		return CGeneral::LimitRadianAngle(angle);
 	}
 
 	static bool bMadDriversCheat;

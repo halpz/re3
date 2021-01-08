@@ -216,9 +216,12 @@ public:
 
 enum {
 	ARGUMENT_END = 0,
+	ARGUMENT_INT_ZERO,
+	ARGUMENT_FLOAT_ZERO,
+	ARGUMENT_FLOAT_1BYTE,
+	ARGUMENT_FLOAT_2BYTES,
+	ARGUMENT_FLOAT_3BYTES,
 	ARGUMENT_INT32,
-	ARGUMENT_GLOBALVAR,
-	ARGUMENT_LOCALVAR,
 	ARGUMENT_INT8,
 	ARGUMENT_INT16,
 	ARGUMENT_FLOAT
@@ -273,7 +276,8 @@ enum {
 	MAX_NUM_MISSION_SCRIPTS = 120,
 	MAX_NUM_BUILDING_SWAPS = 25,
 	MAX_NUM_INVISIBILITY_SETTINGS = 20,
-	MAX_NUM_STORED_LINES = 1024
+	MAX_NUM_STORED_LINES = 1024,
+	MAX_ALLOWED_COLLISIONS = 2
 };
 
 class CTheScripts
@@ -324,6 +328,8 @@ public:
 #define CARDS_IN_STACK (CARDS_IN_DECK * MAX_DECKS)
 	static int16 CardStack[CARDS_IN_STACK];
 	static int16 CardStackPosition;
+
+	static int AllowedCollision[MAX_ALLOWED_COLLISIONS];
 #endif
 	static bool bPlayerIsInTheStatium;
 	static uint8 RiotIntensity;
@@ -448,6 +454,8 @@ enum {
 	NUM_TIMERS = 2
 };
 
+extern int ScriptParams[32];
+
 class CRunningScript
 {
 	enum {
@@ -509,7 +517,7 @@ public:
 
 	static const uint32 nSaveStructSize;
 
-	void CollectParameters(uint32*, int16);
+	void CollectParameters(uint32*, int16, int* pParams = (int*)&ScriptParams);
 	int32 CollectNextParameterWithoutIncreasingPC(uint32);
 	int32* GetPointerToScriptVariable(uint32*, int16);
 	void StoreParameters(uint32*, int16);
