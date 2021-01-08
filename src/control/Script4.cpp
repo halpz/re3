@@ -68,7 +68,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CPed* pLeader = CWorld::Players[ScriptParams[1]].m_pPed;
 		script_assert(pPed);
 		script_assert(pLeader);
-		UpdateCompareFlag(pPed->m_leader == pLeader);
+		UpdateCompareFlag(pPed->m_leader == pLeader && !pPed->bWaitForLeaderToComeCloser);
 		return 0;
 	}
 	case COMMAND_EXPLODE_CHAR_HEAD:
