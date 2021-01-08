@@ -28,6 +28,16 @@
 
 // --MIAMI: file done
 
+#if defined(FIX_BUGS)
+	#define SCREEN_SCALE_X_FIX(a) SCREEN_SCALE_X(a)
+	#define SCREEN_SCALE_Y_FIX(a) SCREEN_SCALE_Y(a)
+	#define SCALE_AND_CENTER_X_FIX(a) SCALE_AND_CENTER_X(a)
+#else
+	#define SCREEN_SCALE_X_FIX(a) (a)
+	#define SCREEN_SCALE_Y_FIX(a) (a)
+	#define SCALE_AND_CENTER_X_FIX(a) (a)
+#endif
+
 // Game has colors inlined in code.
 // For easier modification we collect them here:
 CRGBA MONEY_COLOR(0, 207, 133, 255);
@@ -1052,16 +1062,17 @@ void CHud::Draw()
 			CRadar::DrawMap();
 			if (FrontEndMenuManager.m_PrefsRadarMode != 1) {
 				CRect rect(0.0f, 0.0f, SCREEN_SCALE_X(RADAR_WIDTH), SCREEN_SCALE_Y(RADAR_HEIGHT));
-#ifdef FIX_BUGS
-				rect.Translate(SCREEN_SCALE_X(RADAR_LEFT), SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
-#else
-				rect.Translate(RADAR_LEFT, SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
-#endif
+				
+				rect.Translate(SCREEN_SCALE_X_FIX(RADAR_LEFT), SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT));
 
+#ifdef FIX_BUGS
+				rect.Grow(SCREEN_SCALE_X(6.0f), SCREEN_SCALE_X(6.0f), SCREEN_SCALE_Y(6.0f), SCREEN_SCALE_Y(6.0f));
+#else
 				rect.Grow(6.0f);
-				rect.Translate(0.0f, 2.0f);
+#endif
+				rect.Translate(SCREEN_SCALE_X_FIX(0.0f), SCREEN_SCALE_Y_FIX(2.0f));
 				Sprites[HUD_RADARDISC].Draw(rect, CRGBA(0, 0, 0, 255));
-				rect.Translate(0.0f, -2.0f);
+				rect.Translate(SCREEN_SCALE_X_FIX(0.0f), SCREEN_SCALE_Y_FIX(-2.0f));
 				Sprites[HUD_RADARDISC].Draw(rect, RADARDISC_COLOR);
 			}
 			CRadar::DrawBlips();

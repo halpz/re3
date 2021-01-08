@@ -123,17 +123,43 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 #include "skeleton.h"
 #include "Draw.h"
 
-#define DEFAULT_SCREEN_WIDTH (640)
-#define DEFAULT_SCREEN_HEIGHT (448)
-#define DEFAULT_SCREEN_HEIGHT_PAL (512)
-#define DEFAULT_SCREEN_HEIGHT_NTSC (448)
+#if defined(PROPER_SCALING)
+	#ifdef FORCE_PC_SCALING
+		#define DEFAULT_SCREEN_WIDTH  (640)
+		#define DEFAULT_SCREEN_HEIGHT (448)
+	#else
+		#define DEFAULT_SCREEN_WIDTH  (640)
+		#define DEFAULT_SCREEN_HEIGHT (480)
+	#endif
+#elif defined(GTA_PS2)
+		#define DEFAULT_SCREEN_WIDTH  (640)
+		#define DEFAULT_SCREEN_HEIGHT (480)
+#else //elif defined(GTA_PC)
+		#define DEFAULT_SCREEN_WIDTH  (640)
+		#define DEFAULT_SCREEN_HEIGHT (448)
+#endif
+
 #define DEFAULT_ASPECT_RATIO (4.0f/3.0f)
 #define DEFAULT_VIEWWINDOW (0.7f)
 
 // game uses maximumWidth/Height, but this probably won't work
 // with RW windowed mode
-#define SCREEN_WIDTH ((float)RsGlobal.width)
+#ifdef GTA_PS2
+	#ifdef GTA_PAL
+		#define SCREEN_WIDTH  ((float)640)
+		#define SCREEN_HEIGHT ((float)512)
+	#else
+		#define SCREEN_WIDTH  ((float)640)
+		#define SCREEN_HEIGHT ((float)448)
+	#endif
+#else
+#define SCREEN_WIDTH  ((float)RsGlobal.width)
 #define SCREEN_HEIGHT ((float)RsGlobal.height)
+#endif
+
+#define SCREEN_HEIGHT_PAL ((float)512)
+#define SCREEN_HEIGHT_NTSC ((float)448)
+
 #define SCREEN_ASPECT_RATIO (CDraw::GetAspectRatio())
 #define SCREEN_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetScaledFOV() * 0.5f)))
 
@@ -151,8 +177,13 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 
 #ifdef ASPECT_RATIO_SCALE
 #define SCREEN_SCALE_AR(a) ((a) * DEFAULT_ASPECT_RATIO / SCREEN_ASPECT_RATIO)
-extern float ScaleAndCenterX(float x);
-#define SCALE_AND_CENTER_X(x) ScaleAndCenterX(x)
+#define SCALE_AND_CENTER_X(x) ((SCREEN_WIDTH == DEFAULT_SCREEN_WIDTH) ? (x) : (SCREEN_WIDTH - SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH)) / 2 + SCREEN_SCALE_X((x)))
+#ifdef PROPER_SCALING
+	#ifndef FORCE_PC_SCALING			
+		#undef SCREEN_SCALE_Y	
+		#define SCREEN_SCALE_Y(a) CDraw::ScaleY(SCREEN_STRETCH_Y(a))	
+	#endif
+#endif
 #else
 #define SCREEN_SCALE_AR(a) (a)
 #define SCALE_AND_CENTER_X(x) SCREEN_STRETCH_X(x)
