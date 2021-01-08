@@ -350,7 +350,7 @@ void
 cHandlingDataMgr::ConvertDataToGameUnits(tHandlingData *handling)
 {
 	// convert distance to m, time to 1/50s
-	float velocity, a, b, specificVolume;
+	float velocity, a, b;
 
 	handling->Transmission.fEngineAcceleration *= 1.0f/(50.0f*50.0f);
 	handling->Transmission.fMaxVelocity *= 1000.0f/(60.0f*60.0f * 50.0f);

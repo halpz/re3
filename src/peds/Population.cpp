@@ -558,11 +558,8 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 	// Taxi side mission
 	if (CTheScripts::IsPlayerOnAMission()) {
 		CPed *player = FindPlayerPed();
-		if (player && player->InVehicle()) {
-			int32 model = player->m_pMyVehicle->GetModelIndex();
-			if (model == MI_TAXI || model == MI_CABBIE || model == MI_ZEBRA || model == MI_KAUFMAN)
-				missionAndWeatherMult = 1.0f;
-		}
+		if (player && player->InVehicle() && player->m_pMyVehicle->IsTaxi())
+			missionAndWeatherMult = 1.0f;
 	}
 	if (CDarkel::FrenzyOnGoing())
 		missionAndWeatherMult = 1.0f;
@@ -843,7 +840,7 @@ CPopulation::AddPedInCar(CVehicle* car, bool isDriver)
 			pedType = PEDTYPE_COP;
 			break;
 		default:
-			if (car->GetModelIndex() == MI_TAXI || car->GetModelIndex() == MI_CABBIE || car->GetModelIndex() == MI_ZEBRA || car->GetModelIndex() == MI_KAUFMAN) {
+			if (car->IsTaxi()) {
 				if (isDriver) {
 					pedType = PEDTYPE_CIVMALE;
 					preferredModel = MI_TAXI_D;
