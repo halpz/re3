@@ -1641,13 +1641,13 @@ CAutomobile::ProcessControl(void)
 	// TODO: make the numbers defines
 
 	float heading;
-	if(GetPosition().x > 1950.0f-400.0f){
+	if(GetPosition().x > 1950.0f){
 		if(m_vecMoveSpeed.x > 0.0f)
 			m_vecMoveSpeed.x *= -1.0f;
 		heading = GetForward().Heading();
 		if(heading > 0.0f)	// going west
 			SetHeading(-heading);
-	}else if(GetPosition().x < -1950.0f-400.0f){
+	}else if(GetPosition().x < -1950.0f){
 		if(m_vecMoveSpeed.x < 0.0f)
 			m_vecMoveSpeed.x *= -1.0f;
 		heading = GetForward().Heading();
