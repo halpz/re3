@@ -526,7 +526,12 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 
 		// Txd and anim have to be loaded
 		int animId = mi->GetAnimFileIndex();
+#ifdef FIX_BUGS
+		if(!HasTxdLoaded(mi->GetTxdSlot()) ||
+#else
+		// texDict will exist even if only first part has loaded
 		if(CTxdStore::GetSlot(mi->GetTxdSlot())->texDict == nil ||
+#endif
 		   animId != -1 && !CAnimManager::GetAnimationBlock(animId)->isLoaded){
 			RemoveModel(streamId);
 			ReRequestModel(streamId);

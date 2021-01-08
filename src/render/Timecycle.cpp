@@ -172,8 +172,9 @@ CTimeCycle::Initialise(void)
 	for(w = 0; w < NUMWEATHERS; w++)
 		for(h = 0; h < NUMHOURS; h++){
 			li = 0;
-			while(work_buff[bi] == '/'){
-				while(work_buff[bi] != '\n')
+			while(work_buff[bi] == '/' || work_buff[bi] == '\n' ||
+			      work_buff[bi] == '\0' || work_buff[bi] == ' ' || work_buff[bi] == '\r'){
+				while(work_buff[bi] != '\n' && work_buff[bi] != '\0' && work_buff[bi] != '\r')
 					bi++;
 				bi++;
 			}
