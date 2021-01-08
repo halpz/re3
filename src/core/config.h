@@ -197,6 +197,8 @@ enum Config {
 //#define COMPRESSED_COL_VECTORS	// use compressed vectors for collision vertices
 //#define ANIM_COMPRESSION	// only keep most recently used anims uncompressed
 
+#define GTA_TRAIN
+
 #if defined GTA_PS2
 #	define GTA_PS2_STUFF
 #	define RANDOMSPLASH

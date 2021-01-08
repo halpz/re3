@@ -459,11 +459,11 @@ CTrain::InitTrains(void)
 	CStreaming::LoadAllRequestedModels(false);
 
 	// El-Train wagons
-	float wagonPositions[] = { 0.0f, 20.0f, 40.0f,  0.0f, 20.0f };
-	int8 firstWagon[]  = { 1, 0, 0,  1, 0 };
-	int8 lastWagon[]   = { 0, 0, 1,  0, 1 };
-	int16 wagonGroup[] = { 0, 0, 0,  1, 1 };
-	for(i = 0; i < 5; i++){
+	float wagonPositions[] = { 0.0f, 20.0f,  0.0f, 20.0f };
+	int8 firstWagon[]  = { 1, 0,  1, 0 };
+	int8 lastWagon[]   = { 0, 1,  0, 1 };
+	int16 wagonGroup[] = { 0, 0,  1, 1 };
+	for(i = 0; i < 4; i++){
 		train = new CTrain(MI_TRAIN, PERMANENT_VEHICLE);
 		train->GetMatrix().SetTranslate(0.0f, 0.0f, 0.0f);
 		train->SetStatus(STATUS_ABANDONED);
@@ -650,52 +650,6 @@ CTrain::ReadAndInterpretTrackFile(Const char *filename, CTrainNode **nodes, int1
 }
 
 void
-PlayAnnouncement(uint8 sound, uint8 station)
-{
-	// this was gone in a PC version but inlined on PS2
-	cAudioScriptObject *obj = new cAudioScriptObject;
-	obj->AudioId = sound;
-	obj->Posn = CTrain::aStationCoors[station];
-	obj->AudioEntity = AEHANDLE_NONE;
-	DMAudio.CreateOneShotScriptObject(obj);
-}
-
-void
-ProcessTrainAnnouncements(void)
-{
-#ifdef GTA_TRAIN
-	for (int i = 0; i < ARRAY_SIZE(StationDist); i++) {
-		for (int j = 0; j < ARRAY_SIZE(EngineTrackPosition); j++) {
-			if (!bTrainArrivalAnnounced[i]) {
-				float preDist = StationDist[i] - 100.0f;
-				if (preDist < 0.0f)
-					preDist += TotalLengthOfTrack;
-				if (EngineTrackPosition[j] > preDist && EngineTrackPosition[j] < StationDist[i]) {
-					bTrainArrivalAnnounced[i] = true;
-					PlayAnnouncement(SCRIPT_SOUND_TRAIN_ANNOUNCEMENT_1, i);
-					break;
-				}
-			} else {
-				float postDist = StationDist[i] + 10.0f;
-#ifdef FIX_BUGS
-				if (postDist > TotalLengthOfTrack)
-					postDist -= TotalLengthOfTrack;
-#else
-				if (postDist < 0.0f) // does this even make sense here?
-					postDist += TotalLengthOfTrack;
-#endif
-				if (EngineTrackPosition[j] > StationDist[i] && EngineTrackPosition[j] < postDist) {
-					bTrainArrivalAnnounced[i] = false;
-					PlayAnnouncement(SCRIPT_SOUND_TRAIN_ANNOUNCEMENT_2, i);
-					break;
-				}
-			}
-		}
-	}
-#endif
-}
-
-void
 CTrain::UpdateTrains(void)
 {
 #ifdef GTA_TRAIN
@@ -732,8 +686,6 @@ CTrain::UpdateTrains(void)
 			// time offset for each train
 			time += 0x20000/2;
 		}
-
-		ProcessTrainAnnouncements();
 	}
 
 	// Update Subway
