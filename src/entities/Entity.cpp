@@ -582,7 +582,7 @@ CEntity::SetupBigBuilding(void)
 	if(m_level == LEVEL_GENERIC){
 		if(mi->GetTxdSlot() != CTxdStore::FindTxdSlot("generic")){
 			mi->SetTexDictionary("generic");
-			printf("%d:%s txd has been set to generic\n", m_modelIndex, mi->GetName());
+			printf("%d:%s txd has been set to generic\n", m_modelIndex, mi->GetModelName());
 		}
 	}
 	if(mi->m_lodDistances[0] > 2000.0f)

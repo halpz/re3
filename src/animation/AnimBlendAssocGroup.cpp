@@ -111,7 +111,7 @@ GetModelFromName(const char *name)
 	for(i = 0; i < MODELINFOSIZE; i++){
 		mi = CModelInfo::GetModelInfo(i);
 		if(mi && mi->GetRwObject() && RwObjectGetType(mi->GetRwObject()) == rpCLUMP &&
-		   strcmpIgnoringDigits(mi->GetName(), name))
+		   strcmpIgnoringDigits(mi->GetModelName(), name))
 			return mi;
 	}
 	return nil;
@@ -134,7 +134,7 @@ CAnimBlendAssocGroup::CreateAssociations(const char *name)
 		CAnimBlendHierarchy *anim = CAnimManager::GetAnimation(animBlock->firstIndex + i);
 		CBaseModelInfo *model = GetModelFromName(anim->name);
 		assert(model);
-		printf("Associated anim %s with model %s\n", anim->name, model->GetName());
+		printf("Associated anim %s with model %s\n", anim->name, model->GetModelName());
 		RpClump *clump = (RpClump*)model->CreateInstance();
 #ifdef PED_SKIN
 		if(IsClumpSkinned(clump))

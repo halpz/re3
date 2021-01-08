@@ -515,7 +515,7 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 		// texDict will exist even if only first part has loaded
 		if(CTxdStore::GetSlot(mi->GetTxdSlot())->texDict == nil){
 #endif
-			debug("failed to load %s because TXD %s is not in memory\n", mi->GetName(), CTxdStore::GetTxdName(mi->GetTxdSlot()));
+			debug("failed to load %s because TXD %s is not in memory\n", mi->GetModelName(), CTxdStore::GetTxdName(mi->GetTxdSlot()));
 			RemoveModel(streamId);
 #ifndef FIX_BUGS
 			// if we're just waiting for it to load, don't remove this
@@ -557,7 +557,7 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 			CTxdStore::RemoveRefWithoutDelete(mi->GetTxdSlot());
 
 		if(!success){
-			debug("Failed to load %s\n", CModelInfo::GetModelInfo(streamId)->GetName());
+			debug("Failed to load %s\n", CModelInfo::GetModelInfo(streamId)->GetModelName());
 			RemoveModel(streamId);
 			ReRequestModel(streamId);
 			RwStreamClose(stream, &mem);
@@ -598,7 +598,7 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 	if(!success){
 		ReRequestModel(streamId);
 		if(streamId < STREAM_OFFSET_TXD)
-			debug("Failed to load %s.dff\n", mi->GetName());
+			debug("Failed to load %s.dff\n", mi->GetModelName());
 		else
 			debug("Failed to load %s.txd\n", CTxdStore::GetTxdName(streamId - STREAM_OFFSET_TXD));
 		return false;
@@ -639,7 +639,7 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 	timeDiff = endTime - startTime;
 	if(timeDiff > 5){
 		if(streamId < STREAM_OFFSET_TXD)
-			debug("model %s took %d ms\n", CModelInfo::GetModelInfo(streamId)->GetName(), timeDiff);
+			debug("model %s took %d ms\n", CModelInfo::GetModelInfo(streamId)->GetModelName(), timeDiff);
 		else
 			debug("txd %s took %d ms\n", CTxdStore::GetTxdName(streamId - STREAM_OFFSET_TXD), timeDiff);
 	}
@@ -713,7 +713,7 @@ CStreaming::FinishLoadingLargeFile(int8 *buf, int32 streamId)
 	timeDiff = endTime - startTime;
 	if(timeDiff > 5){
 		if(streamId < STREAM_OFFSET_TXD)
-			debug("finish model %s took %d ms\n", CModelInfo::GetModelInfo(streamId)->GetName(), timeDiff);
+			debug("finish model %s took %d ms\n", CModelInfo::GetModelInfo(streamId)->GetModelName(), timeDiff);
 		else
 			debug("finish txd %s took %d ms\n", CTxdStore::GetTxdName(streamId - STREAM_OFFSET_TXD), timeDiff);
 	}
@@ -867,14 +867,14 @@ CStreaming::RequestSpecialModel(int32 modelId, const char *modelName, int32 flag
 	uint32 pos, size;
 
 	mi = CModelInfo::GetModelInfo(modelId);
-	if(!CGeneral::faststrcmp(mi->GetName(), modelName)){
+	if(!CGeneral::faststrcmp(mi->GetModelName(), modelName)){
 		// Already have the correct name, just request it
 		RequestModel(modelId, flags);
 		return;
 	}
 
-	strcpy(oldName, mi->GetName());
-	mi->SetName(modelName);
+	strcpy(oldName, mi->GetModelName());
+	mi->SetModelName(modelName);
 
 	// What exactly is going on here?
 	if(CModelInfo::GetModelInfo(oldName, nil)){
@@ -2775,7 +2775,7 @@ CStreaming::PrintStreamingBufferState()
 						sprintf(str, "txd %s, refs %d, size %dK, flags 0x%x", CTxdStore::GetTxdName(modelIndex - STREAM_OFFSET_TXD),
 						        CTxdStore::GetNumRefs(modelIndex - STREAM_OFFSET_TXD), 2 * size, streamingInfo->m_flags);
 					else
-						sprintf(str, "model %d,%s, refs%d, size%dK, flags%x", modelIndex, modelInfo->GetName(), modelInfo->GetNumRefs(), 2 * size,
+						sprintf(str, "model %d,%s, refs%d, size%dK, flags%x", modelIndex, modelInfo->GetModelName(), modelInfo->GetNumRefs(), 2 * size,
 						        streamingInfo->m_flags);
 					AsciiToUnicode(str, wstr);
 					CFont::PrintString(24.0f, y, wstr);

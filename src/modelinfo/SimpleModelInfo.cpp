@@ -143,7 +143,7 @@ CSimpleModelInfo::FindRelatedModel(void)
 	for(i = 0; i < MODELINFOSIZE; i++){
 		mi = CModelInfo::GetModelInfo(i);
 		if(mi && mi != this &&
-		   !CGeneral::faststrcmp(GetName()+3, mi->GetName()+3)){
+		   !CGeneral::faststrcmp(GetModelName()+3, mi->GetModelName()+3)){
 			assert(mi->IsSimple());
 			this->SetRelatedModel((CSimpleModelInfo*)mi);
 			return;

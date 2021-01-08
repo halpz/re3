@@ -5788,7 +5788,7 @@ cAudioManager::GetCasualMaleOldTalkSfx(int16 sound)
 uint32
 cAudioManager::GetSpecialCharacterTalkSfx(int32 modelIndex, int32 sound)
 {
-	char *modelName = CModelInfo::GetModelInfo(modelIndex)->GetName();
+	char *modelName = CModelInfo::GetModelInfo(modelIndex)->GetModelName();
 	if (!CGeneral::faststricmp(modelName, "eight") || !CGeneral::faststricmp(modelName, "eight2")) {
 		return GetEightTalkSfx(sound);
 	}
