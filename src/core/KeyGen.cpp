@@ -79,7 +79,7 @@ CKeyGen::GetKey(const char *str, int size)
 {
 	uint32 key = 0xffffffff;
 	for (int i = 0; i < size; i++)
-		key ^= keyTable[str[i]];
+		key = keyTable[(key ^ str[i]) & 0xFF] ^ (key >> 8);
 	return key;
 }
 
@@ -88,7 +88,7 @@ CKeyGen::GetKey(const char *str)
 {
 	uint32 key = 0xffffffff;
 	while(*str != '\0')
-		key ^= keyTable[*(str++)];
+		key = keyTable[(key ^ *(str++)) & 0xFF] ^ (key >> 8);
 	return key;
 }
 
@@ -97,7 +97,7 @@ CKeyGen::GetUppercaseKey(const char *str)
 {
 	uint32 key = 0xffffffff;
 	while (*str != '\0')
-		key ^= keyTable[toupper(*(str++))];
+		key = keyTable[(key ^ toupper(*(str++))) & 0xFF] ^ (key >> 8);
 	return key;
 }
 
@@ -105,6 +105,6 @@ uint32
 CKeyGen::AppendStringToKey(uint32 key, const char *str)
 {
 	while (*str != '\0')
-		key ^= keyTable[*(str++)];
+		key = keyTable[(key ^ *(str++)) & 0xFF] ^ (key >> 8);
 	return key;
 }
