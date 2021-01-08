@@ -509,10 +509,18 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 		mi = CModelInfo::GetModelInfo(streamId);
 
 		// Txd has to be loaded
+#ifdef FIX_BUGS
+		if(!HasTxdLoaded(mi->GetTxdSlot())){
+#else
+		// texDict will exist even if only first part has loaded
 		if(CTxdStore::GetSlot(mi->GetTxdSlot())->texDict == nil){
+#endif
 			debug("failed to load %s because TXD %s is not in memory\n", mi->GetName(), CTxdStore::GetTxdName(mi->GetTxdSlot()));
 			RemoveModel(streamId);
+#ifndef FIX_BUGS
+			// if we're just waiting for it to load, don't remove this
 			RemoveTxd(mi->GetTxdSlot());
+#endif
 			ReRequestModel(streamId);
 			RwStreamClose(stream, &mem);
 			return false;
