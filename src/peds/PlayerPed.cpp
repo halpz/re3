@@ -1172,7 +1172,8 @@ void
 CPlayerPed::ProcessAnimGroups(void)
 {
 	AssocGroupId groupToSet;
-#ifdef PC_PLAYER_CONTROLS
+//#ifdef PC_PLAYER_CONTROLS
+#if 0	// chainsaw anims missing in LCS
 	if ((m_fWalkAngle <= -DEGTORAD(50.0f) || m_fWalkAngle >= DEGTORAD(50.0f))
 		&& TheCamera.Cams[TheCamera.ActiveCam].Using3rdPersonMouseCam()
 		&& CanStrafeOrMouseControl()) {
