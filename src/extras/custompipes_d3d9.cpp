@@ -36,7 +36,13 @@ enum {
 	VSLOC_eye = rw::d3d::VSLOC_afterLights,
 
 	VSLOC_reflProps,
-	VSLOC_specLights
+	VSLOC_specLights,
+
+	// Leeds building
+	VSLOC_emissive = rw::d3d::VSLOC_afterLights,
+	VSLOC_ambient,
+
+	PSLOC_colorscale = 1
 };
 
 /*
@@ -182,11 +188,11 @@ DestroyVehiclePipe(void)
 
 
 /*
- * Neo World pipe
+ * Leeds World pipe
  */
 
-static void *neoWorld_VS;
-static void *neoWorldVC_PS;
+static void *leedsBuilding_VS;
+static void *scale_PS;
 
 static void
 worldRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
@@ -195,79 +201,67 @@ worldRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	using namespace rw::d3d;
 	using namespace rw::d3d9;
 
-	if(!LightmapEnable){
-		defaultRenderCB_Shader(atomic, header);
-		return;
-	}
-
 	int vsBits;
 	setStreamSource(0, header->vertexStream[0].vertexBuffer, 0, header->vertexStream[0].stride);
 	setIndices(header->indexBuffer);
 	setVertexDeclaration(header->vertexDeclaration);
 
-	vsBits = lightingCB_Shader(atomic);
+	setVertexShader(leedsBuilding_VS);
+	setPixelShader(scale_PS);
+
 	uploadMatrices(atomic->getFrame()->getLTM());
 
+	RGBAf amb, emiss;
+	amb.red = CTimeCycle::GetAmbientRed();
+	amb.green = CTimeCycle::GetAmbientGreen();
+	amb.blue = CTimeCycle::GetAmbientBlue();
+	amb.alpha = 1.0f;
+	emiss = pAmbient->color;
 
-	float lightfactor[4];
+	d3ddevice->SetVertexShaderConstantF(VSLOC_ambient, (float*)&amb, 1);
+	d3ddevice->SetVertexShaderConstantF(VSLOC_emissive, (float*)&emiss, 1);
+
+	float colorscale[4];
+	colorscale[3] = 1.0f;
 
 	InstanceData *inst = header->inst;
 	for(rw::uint32 i = 0; i < header->numMeshes; i++){
 		Material *m = inst->material;
 
-		if(MatFX::getEffects(m) == MatFX::DUAL){
-			setVertexShader(neoWorld_VS);
-
-			MatFX *matfx = MatFX::get(m);
-			Texture *dualtex = matfx->getDualTexture();
-			if(dualtex == nil)
-				goto notex;
-			d3d::setTexture(1, dualtex);
-			lightfactor[0] = lightfactor[1] = lightfactor[2] = WorldLightmapBlend.Get()*LightmapMult;
-		}else{
-		notex:
-			setVertexShader(default_amb_VS);
-
-			d3d::setTexture(1, nil);
-			lightfactor[0] = lightfactor[1] = lightfactor[2] = 0.0f;
-		}
-		lightfactor[3] = m->color.alpha/255.0f;
-		d3d::setTexture(0, m->texture);
-		d3ddevice->SetPixelShaderConstantF(1, lightfactor, 1);
-
-		SetRenderState(VERTEXALPHA, inst->vertexAlpha || m->color.alpha != 255);
-
-		RGBA color = { 255, 255, 255, m->color.alpha };
-		setMaterial(color, m->surfaceProps);
+		float cs = 1.0f;
+		if(m->texture)
+			cs = 255/128.0f;
+		colorscale[0] = colorscale[1] = colorscale[2] = cs;
+		d3ddevice->SetPixelShaderConstantF(PSLOC_colorscale, colorscale, 1);
 
 		if(m->texture)
 			d3d::setTexture(0, m->texture);
 		else
-			d3d::setTexture(0, gpWhiteTexture);
-		setPixelShader(neoWorldVC_PS);
+			d3d::setTexture(0, gpWhiteTexture);	// actually we don't even render this
+
+		setMaterial(m->color, m->surfaceProps, 0.5f);
+
+		SetRenderState(VERTEXALPHA, inst->vertexAlpha || m->color.alpha != 255);
 
 		drawInst(header, inst);
 		inst++;
 	}
-	d3d::setTexture(1, nil);
 }
 
 void
 CreateWorldPipe(void)
 {
-	if(CFileMgr::LoadFile("neo/worldTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
-		printf("Error: couldn't open 'neo/worldTweakingTable.dat'\n");
-	else
-		ReadTweakValueTable((char*)work_buff, WorldLightmapBlend);
+//	if(CFileMgr::LoadFile("neo/worldTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
+//		printf("Error: couldn't open 'neo/worldTweakingTable.dat'\n");
+//	else
+//		ReadTweakValueTable((char*)work_buff, WorldLightmapBlend);
 
-#include "shaders/default_UV2_VS.inc"
-	neoWorld_VS = rw::d3d::createVertexShader(default_UV2_VS_cso);
-	assert(neoWorld_VS);
-
-#include "shaders/neoWorldVC_PS.inc"
-	neoWorldVC_PS = rw::d3d::createPixelShader(neoWorldVC_PS_cso);
-	assert(neoWorldVC_PS);
-
+#include "shaders/leedsBuilding_VS.inc"
+	leedsBuilding_VS = rw::d3d::createVertexShader(leedsBuilding_VS_cso);
+	assert(leedsBuilding_VS);
+#include "shaders/scale_PS.inc"
+	scale_PS = rw::d3d::createPixelShader(scale_PS_cso);
+	assert(scale_PS);
 
 	rw::d3d9::ObjPipeline *pipe = rw::d3d9::ObjPipeline::create();
 	pipe->instanceCB = rw::d3d9::defaultInstanceCB;
@@ -279,10 +273,10 @@ CreateWorldPipe(void)
 void
 DestroyWorldPipe(void)
 {
-	rw::d3d::destroyVertexShader(neoWorld_VS);
-	neoWorld_VS = nil;
-	rw::d3d::destroyPixelShader(neoWorldVC_PS);
-	neoWorldVC_PS = nil;
+	rw::d3d::destroyVertexShader(leedsBuilding_VS);
+	leedsBuilding_VS = nil;
+	rw::d3d::destroyPixelShader(scale_PS);
+	scale_PS = nil;
 
 
 	((rw::d3d9::ObjPipeline*)worldPipe)->destroy();

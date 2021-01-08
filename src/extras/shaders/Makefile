@@ -1,19 +1,20 @@
 all: im2d_gl.inc simple_fs_gl.inc default_UV2_gl.inc \
-	colourfilterVC_fs_gl.inc contrast_fs_gl.inc \
+	colourfilterLCS_fs_gl.inc contrast_fs_gl.inc \
 	neoRim_gl.inc neoRimSkin_gl.inc \
 	neoWorldVC_fs_gl.inc neoGloss_vs_gl.inc neoGloss_fs_gl.inc \
 	neoVehicle_vs_gl.inc neoVehicle_fs_gl.inc \
-	im2d_UV2_gl.inc screenDroplet_fs_gl.inc
+	im2d_UV2_gl.inc screenDroplet_fs_gl.inc \
+	leedsBuilding_vs_gl.inc scale_fs_gl.inc
 
 im2d_gl.inc: im2d.vert
 	(echo 'const char *im2d_vert_src =';\
 	 sed 's/..*/"&\\n"/' im2d.vert;\
 	 echo ';') >im2d_gl.inc
 
-colourfilterVC_fs_gl.inc: colourfilterVC.frag
-	(echo 'const char *colourfilterVC_frag_src =';\
-	 sed 's/..*/"&\\n"/' colourfilterVC.frag;\
-	 echo ';') >colourfilterVC_fs_gl.inc
+colourfilterLCS_fs_gl.inc: colourfilterLCS.frag
+	(echo 'const char *colourfilterLCS_frag_src =';\
+	 sed 's/..*/"&\\n"/' colourfilterLCS.frag;\
+	 echo ';') >colourfilterLCS_fs_gl.inc
 simple_fs_gl.inc: simple.frag
 	(echo 'const char *simple_frag_src =';\
 	 sed 's/..*/"&\\n"/' simple.frag;\
@@ -76,3 +77,13 @@ screenDroplet_fs_gl.inc: screenDroplet.frag
 	(echo 'const char *screenDroplet_frag_src =';\
 	 sed 's/..*/"&\\n"/' screenDroplet.frag;\
 	 echo ';') >screenDroplet_fs_gl.inc
+
+leedsBuilding_vs_gl.inc: leedsBuilding.vert
+	(echo 'const char *leedsBuilding_vert_src =';\
+	 sed 's/..*/"&\\n"/' leedsBuilding.vert;\
+	 echo ';') >leedsBuilding_vs_gl.inc
+
+scale_fs_gl.inc: scale.frag
+	(echo 'const char *scale_frag_src =';\
+	 sed 's/..*/"&\\n"/' scale.frag;\
+	 echo ';') >scale_fs_gl.inc

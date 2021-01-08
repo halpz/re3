@@ -33,6 +33,10 @@ static int32 u_reflProps;
 static int32 u_specDir;
 static int32 u_specColor;
 
+static int32 u_amb;
+static int32 u_emiss;
+static int32 u_colorscale;
+
 #define U(i) currentShader->uniformLocations[i]
 
 /*
@@ -189,10 +193,10 @@ DestroyVehiclePipe(void)
 
 
 /*
- * Neo World pipe
+ * Leeds World pipe
  */
 
-rw::gl3::Shader *neoWorldShader;
+rw::gl3::Shader *leedsWorldShader;
 
 static void
 worldRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
@@ -200,15 +204,9 @@ worldRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	using namespace rw;
 	using namespace rw::gl3;
 
-	if(!LightmapEnable){
-		gl3::defaultRenderCB(atomic, header);
-		return;
-	}
-
 	Material *m;
 
 	setWorldMatrix(atomic->getFrame()->getLTM());
-	lightingCB(atomic);
 
 #ifdef RW_GL_USE_VAOS
 	glBindVertexArray(header->vao);
@@ -221,39 +219,39 @@ worldRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	InstanceData *inst = header->inst;
 	rw::int32 n = header->numMeshes;
 
-	neoWorldShader->use();
+	leedsWorldShader->use();
 
-	float lightfactor[4];
+	RGBAf amb, emiss;
+	amb.red = CTimeCycle::GetAmbientRed();
+	amb.green = CTimeCycle::GetAmbientGreen();
+	amb.blue = CTimeCycle::GetAmbientBlue();
+	amb.alpha = 1.0f;
+	emiss = pAmbient->color;
+
+	glUniform4fv(U(u_amb), 1, (float*)&amb);
+	glUniform4fv(U(u_emiss), 1, (float*)&emiss);
+
+	float colorscale[4];
+	colorscale[3] = 1.0f;
 
 	while(n--){
 		m = inst->material;
 
-		if(MatFX::getEffects(m) == MatFX::DUAL){
-			MatFX *matfx = MatFX::get(m);
-			Texture *dualtex = matfx->getDualTexture();
-			if(dualtex == nil)
-				goto notex;
-			setTexture(1, dualtex);
-			lightfactor[0] = lightfactor[1] = lightfactor[2] = WorldLightmapBlend.Get()*LightmapMult;
-		}else{
-		notex:
-			setTexture(1, nil);
-			lightfactor[0] = lightfactor[1] = lightfactor[2] = 0.0f;
-		}
-		lightfactor[3] = m->color.alpha/255.0f;
-		glUniform4fv(U(u_lightMap), 1, lightfactor);
-
-		RGBA color = { 255, 255, 255, m->color.alpha };
-		setMaterial(color, m->surfaceProps);
+		float cs = 1.0f;
+		if(m->texture)
+			cs = 255/128.0f;
+		colorscale[0] = colorscale[1] = colorscale[2] = cs;
+		glUniform4fv(U(u_colorscale), 1, colorscale);
 
 		setTexture(0, m->texture);
+
+		setMaterial(m->color, m->surfaceProps);
 
 		rw::SetRenderState(VERTEXALPHA, inst->vertexAlpha || m->color.alpha != 0xFF);
 
 		drawInst(header, inst);
 		inst++;
 	}
-	setTexture(1, nil);
 #ifndef RW_GL_USE_VAOS
 	disableAttribPointers(header->attribDesc, header->numAttribs);
 #endif
@@ -265,18 +263,18 @@ CreateWorldPipe(void)
 	using namespace rw;
 	using namespace rw::gl3;
 
-	if(CFileMgr::LoadFile("neo/worldTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
-		printf("Error: couldn't open 'neo/worldTweakingTable.dat'\n");
-	else
-		ReadTweakValueTable((char*)work_buff, WorldLightmapBlend);
+//	if(CFileMgr::LoadFile("neo/worldTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
+//		printf("Error: couldn't open 'neo/worldTweakingTable.dat'\n");
+//	else
+//		ReadTweakValueTable((char*)work_buff, WorldLightmapBlend);
 
 	{
-#include "shaders/neoWorldVC_fs_gl.inc"
-#include "shaders/default_UV2_gl.inc"
-	const char *vs[] = { shaderDecl, header_vert_src, default_UV2_vert_src, nil };
-	const char *fs[] = { shaderDecl, header_frag_src, neoWorldVC_frag_src, nil };
-	neoWorldShader = Shader::create(vs, fs);
-	assert(neoWorldShader);
+#include "shaders/scale_fs_gl.inc"
+#include "shaders/leedsBuilding_vs_gl.inc"
+	const char *vs[] = { shaderDecl, header_vert_src, leedsBuilding_vert_src, nil };
+	const char *fs[] = { shaderDecl, header_frag_src, scale_frag_src, nil };
+	leedsWorldShader = Shader::create(vs, fs);
+	assert(leedsWorldShader);
 	}
 
 
@@ -290,8 +288,8 @@ CreateWorldPipe(void)
 void
 DestroyWorldPipe(void)
 {
-	neoWorldShader->destroy();
-	neoWorldShader = nil;
+	leedsWorldShader->destroy();
+	leedsWorldShader = nil;
 
 	((rw::gl3::ObjPipeline*)worldPipe)->destroy();
 	worldPipe = nil;
@@ -609,6 +607,10 @@ CustomPipeRegisterGL(void)
 	u_reflProps = rw::gl3::registerUniform("u_reflProps");
 	u_specDir = rw::gl3::registerUniform("u_specDir");
 	u_specColor = rw::gl3::registerUniform("u_specColor");
+
+	u_amb = rw::gl3::registerUniform("u_amb");
+	u_emiss = rw::gl3::registerUniform("u_emiss");
+	u_colorscale = rw::gl3::registerUniform("u_colorscale");
 }
 
 

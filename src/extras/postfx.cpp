@@ -25,14 +25,14 @@ static RwIm2DVertex Vertex2[4];
 static RwImVertexIndex Index[6] = { 0, 1, 2, 0, 2, 3 };
 
 #ifdef RW_D3D9
-void *colourfilterVC_PS;
+void *colourfilterLCS_PS;
 void *contrast_PS;
 #endif
 #ifdef RW_OPENGL
 int32 u_blurcolor;
 int32 u_contrastAdd;
 int32 u_contrastMult;
-rw::gl3::Shader *colourFilterVC;
+rw::gl3::Shader *colourFilterLCS;
 rw::gl3::Shader *contrast;
 #endif
 
@@ -143,8 +143,8 @@ CPostFX::Open(RwCamera *cam)
 
 
 #ifdef RW_D3D9
-#include "shaders/colourfilterVC_PS.inc"
-	colourfilterVC_PS = rw::d3d::createPixelShader(colourfilterVC_PS_cso);
+#include "shaders/colourfilterLCS_PS.inc"
+	colourfilterLCS_PS = rw::d3d::createPixelShader(colourfilterLCS_PS_cso);
 #include "shaders/contrastPS.inc"
 	contrast_PS = rw::d3d::createPixelShader(contrastPS_cso);
 #endif
@@ -153,11 +153,11 @@ CPostFX::Open(RwCamera *cam)
 
 	{
 #include "shaders/im2d_gl.inc"
-#include "shaders/colourfilterVC_fs_gl.inc"
+#include "shaders/colourfilterLCS_fs_gl.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, im2d_vert_src, nil };
-	const char *fs[] = { shaderDecl, header_frag_src, colourfilterVC_frag_src, nil };
-	colourFilterVC = Shader::create(vs, fs);
-	assert(colourFilterVC);
+	const char *fs[] = { shaderDecl, header_frag_src, colourfilterLCS_frag_src, nil };
+	colourFilterLCS = Shader::create(vs, fs);
+	assert(colourFilterLCS);
 	}
 
 	{
@@ -184,9 +184,9 @@ CPostFX::Close(void)
 		pBackBuffer = nil;
 	}
 #ifdef RW_D3D9
-	if(colourfilterVC_PS){
-		rw::d3d::destroyPixelShader(colourfilterVC_PS);
-		colourfilterVC_PS = nil;
+	if(colourfilterLCS_PS){
+		rw::d3d::destroyPixelShader(colourfilterLCS_PS);
+		colourfilterLCS_PS = nil;
 	}
 	if(contrast_PS){
 		rw::d3d::destroyPixelShader(contrast_PS);
@@ -194,9 +194,9 @@ CPostFX::Close(void)
 	}
 #endif
 #ifdef RW_OPENGL
-	if(colourFilterVC){
-		colourFilterVC->destroy();
-		colourFilterVC = nil;
+	if(colourFilterLCS){
+		colourFilterLCS->destroy();
+		colourFilterLCS = nil;
 	}
 	if(contrast){
 		contrast->destroy();
@@ -294,12 +294,12 @@ CPostFX::RenderOverlayShader(RwCamera *cam, int32 r, int32 g, int32 b, int32 a)
 		blurcolors[3] = 30/255.0f;
 #ifdef RW_D3D9
 		rw::d3d::d3ddevice->SetPixelShaderConstantF(10, blurcolors, 1);
-		rw::d3d::im2dOverridePS = colourfilterVC_PS;
+		rw::d3d::im2dOverridePS = colourfilterLCS_PS;
 #endif
 #ifdef RW_OPENGL
-		rw::gl3::im2dOverrideShader = colourFilterVC;
-		colourFilterVC->use();
-		glUniform4fv(colourFilterVC->uniformLocations[u_blurcolor], 1, blurcolors);
+		rw::gl3::im2dOverrideShader = colourFilterLCS;
+		colourFilterLCS->use();
+		glUniform4fv(colourFilterLCS->uniformLocations[u_blurcolor], 1, blurcolors);
 #endif
 	}
 	RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, Vertex, 4, Index, 6);

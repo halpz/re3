@@ -26,12 +26,7 @@ RwRGBAReal DirectionalLightColourForFrame;
 RwRGBAReal AmbientLightColour;
 RwRGBAReal DirectionalLightColour;
 
-#ifdef EXTENDED_COLOURFILTER
-#include "postfx.h"
-#define USEBLURCOLORS CPostFX::UseBlurColours()
-#else
-#define USEBLURCOLORS CMBlur::BlurOn
-#endif
+#define USEBLURCOLORS true	// actually CMBlur::BlurOn, but that's always supposed to be on
 
 void
 SetLightsWithTimeOfDayColour(RpWorld *)

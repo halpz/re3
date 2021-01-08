@@ -136,6 +136,61 @@ float CTimeCycle::m_fShadowSideY[16];
 float CTimeCycle::m_fShadowDisplacementX[16];
 float CTimeCycle::m_fShadowDisplacementY[16];
 
+
+
+static float tmp_nAmbientRed[NUMHOURS][NUMWEATHERS];
+static float tmp_nAmbientGreen[NUMHOURS][NUMWEATHERS];
+static float tmp_nAmbientBlue[NUMHOURS][NUMWEATHERS];
+static float tmp_nAmbientRed_Obj[NUMHOURS][NUMWEATHERS];
+static float tmp_nAmbientGreen_Obj[NUMHOURS][NUMWEATHERS];
+static float tmp_nAmbientBlue_Obj[NUMHOURS][NUMWEATHERS];
+static float tmp_nAmbientRed_Bl[NUMHOURS][NUMWEATHERS];
+static float tmp_nAmbientGreen_Bl[NUMHOURS][NUMWEATHERS];
+static float tmp_nAmbientBlue_Bl[NUMHOURS][NUMWEATHERS];
+static float tmp_nAmbientRed_Obj_Bl[NUMHOURS][NUMWEATHERS];
+static float tmp_nAmbientGreen_Obj_Bl[NUMHOURS][NUMWEATHERS];
+static float tmp_nAmbientBlue_Obj_Bl[NUMHOURS][NUMWEATHERS];
+static float tmp_nDirectionalRed[NUMHOURS][NUMWEATHERS];
+static float tmp_nDirectionalGreen[NUMHOURS][NUMWEATHERS];
+static float tmp_nDirectionalBlue[NUMHOURS][NUMWEATHERS];
+static float tmp_nSkyTopRed[NUMHOURS][NUMWEATHERS];
+static float tmp_nSkyTopGreen[NUMHOURS][NUMWEATHERS];
+static float tmp_nSkyTopBlue[NUMHOURS][NUMWEATHERS];
+static float tmp_nSkyBottomRed[NUMHOURS][NUMWEATHERS];
+static float tmp_nSkyBottomGreen[NUMHOURS][NUMWEATHERS];
+static float tmp_nSkyBottomBlue[NUMHOURS][NUMWEATHERS];
+static float tmp_nSunCoreRed[NUMHOURS][NUMWEATHERS];
+static float tmp_nSunCoreGreen[NUMHOURS][NUMWEATHERS];
+static float tmp_nSunCoreBlue[NUMHOURS][NUMWEATHERS];
+static float tmp_nSunCoronaRed[NUMHOURS][NUMWEATHERS];
+static float tmp_nSunCoronaGreen[NUMHOURS][NUMWEATHERS];
+static float tmp_nSunCoronaBlue[NUMHOURS][NUMWEATHERS];
+static float tmp_fSunSize[NUMHOURS][NUMWEATHERS];
+static float tmp_fSpriteSize[NUMHOURS][NUMWEATHERS];
+static float tmp_fSpriteBrightness[NUMHOURS][NUMWEATHERS];
+static float tmp_nShadowStrength[NUMHOURS][NUMWEATHERS];
+static float tmp_nLightShadowStrength[NUMHOURS][NUMWEATHERS];
+static float tmp_nPoleShadowStrength[NUMHOURS][NUMWEATHERS];
+static float tmp_fFogStart[NUMHOURS][NUMWEATHERS];
+static float tmp_fFarClip[NUMHOURS][NUMWEATHERS];
+static float tmp_fLightsOnGroundBrightness[NUMHOURS][NUMWEATHERS];
+static float tmp_nLowCloudsRed[NUMHOURS][NUMWEATHERS];
+static float tmp_nLowCloudsGreen[NUMHOURS][NUMWEATHERS];
+static float tmp_nLowCloudsBlue[NUMHOURS][NUMWEATHERS];
+static float tmp_nFluffyCloudsTopRed[NUMHOURS][NUMWEATHERS];
+static float tmp_nFluffyCloudsTopGreen[NUMHOURS][NUMWEATHERS];
+static float tmp_nFluffyCloudsTopBlue[NUMHOURS][NUMWEATHERS];
+static float tmp_nFluffyCloudsBottomRed[NUMHOURS][NUMWEATHERS];
+static float tmp_nFluffyCloudsBottomGreen[NUMHOURS][NUMWEATHERS];
+static float tmp_nFluffyCloudsBottomBlue[NUMHOURS][NUMWEATHERS];
+static float tmp_fBlurRed[NUMHOURS][NUMWEATHERS];
+static float tmp_fBlurGreen[NUMHOURS][NUMWEATHERS];
+static float tmp_fBlurBlue[NUMHOURS][NUMWEATHERS];
+static float tmp_fWaterRed[NUMHOURS][NUMWEATHERS];
+static float tmp_fWaterGreen[NUMHOURS][NUMWEATHERS];
+static float tmp_fWaterBlue[NUMHOURS][NUMWEATHERS];
+static float tmp_fWaterAlpha[NUMHOURS][NUMWEATHERS];
+
 void
 CTimeCycle::Initialise(void)
 {
@@ -172,8 +227,9 @@ CTimeCycle::Initialise(void)
 	for(w = 0; w < NUMWEATHERS; w++)
 		for(h = 0; h < NUMHOURS; h++){
 			li = 0;
-			while(work_buff[bi] == '/'){
-				while(work_buff[bi] != '\n')
+			while(work_buff[bi] == '/' || work_buff[bi] == '\n' ||
+			      work_buff[bi] == '\0' || work_buff[bi] == '\r'){
+				while(work_buff[bi] != '\n' && work_buff[bi] != '\0' && work_buff[bi] != '\r')
 					bi++;
 				bi++;
 			}
@@ -208,63 +264,178 @@ CTimeCycle::Initialise(void)
 				 &blurR, &blurG, &blurB,
 				 &waterR, &waterG, &waterB, &waterA);
 
-			m_nAmbientRed[h][w] = ambR;
-			m_nAmbientGreen[h][w] = ambG;
-			m_nAmbientBlue[h][w] = ambB;
-			m_nAmbientRed_Obj[h][w] = ambobjR;
-			m_nAmbientGreen_Obj[h][w] = ambobjG;
-			m_nAmbientBlue_Obj[h][w] = ambobjB;
-			m_nAmbientRed_Bl[h][w] = ambblR;
-			m_nAmbientGreen_Bl[h][w] = ambblG;
-			m_nAmbientBlue_Bl[h][w] = ambblB;
-			m_nAmbientRed_Obj_Bl[h][w] = ambobjblR;
-			m_nAmbientGreen_Obj_Bl[h][w] = ambobjblG;
-			m_nAmbientBlue_Obj_Bl[h][w] = ambobjblB;
-			m_nDirectionalRed[h][w] = dirR;
-			m_nDirectionalGreen[h][w] = dirG;
-			m_nDirectionalBlue[h][w] = dirB;
-			m_nSkyTopRed[h][w] = skyTopR;
-			m_nSkyTopGreen[h][w] = skyTopG;
-			m_nSkyTopBlue[h][w] = skyTopB;
-			m_nSkyBottomRed[h][w] = skyBotR;
-			m_nSkyBottomGreen[h][w] = skyBotG;
-			m_nSkyBottomBlue[h][w] = skyBotB;
-			m_nSunCoreRed[h][w] = sunCoreR;
-			m_nSunCoreGreen[h][w] = sunCoreG;
-			m_nSunCoreBlue[h][w] = sunCoreB;
-			m_nSunCoronaRed[h][w] = sunCoronaR;
-			m_nSunCoronaGreen[h][w] = sunCoronaG;
-			m_nSunCoronaBlue[h][w] = sunCoronaB;
-			m_fSunSize[h][w] = sunSz * 10.0f;
-			m_fSpriteSize[h][w] = sprSz * 10.0f;
-			m_fSpriteBrightness[h][w] = sprBght * 10.0f;
-			m_nShadowStrength[h][w] = shad;
-			m_nLightShadowStrength[h][w] = lightShad;
-			m_nPoleShadowStrength[h][w] = poleShad;
-			m_fFarClip[h][w] = farClp;
-			m_fFogStart[h][w] = fogSt;
-			m_fLightsOnGroundBrightness[h][w] = lightGnd * 10.0f;
-			m_nLowCloudsRed[h][w] = cloudR;
-			m_nLowCloudsGreen[h][w] = cloudG;
-			m_nLowCloudsBlue[h][w] = cloudB;
-			m_nFluffyCloudsTopRed[h][w] = fluffyTopR;
-			m_nFluffyCloudsTopGreen[h][w] = fluffyTopG;
-			m_nFluffyCloudsTopBlue[h][w] = fluffyTopB;
-			m_nFluffyCloudsBottomRed[h][w] = fluffyBotR;
-			m_nFluffyCloudsBottomGreen[h][w] = fluffyBotG;
-			m_nFluffyCloudsBottomBlue[h][w] = fluffyBotB;
-			m_fBlurRed[h][w] = blurR;
-			m_fBlurGreen[h][w] = blurG;
-			m_fBlurBlue[h][w] = blurB;
-			m_fWaterRed[h][w] = waterR;
-			m_fWaterGreen[h][w] = waterG;
-			m_fWaterBlue[h][w] = waterB;
-			m_fWaterAlpha[h][w] = waterA;
+			tmp_nAmbientRed[h][w] = ambR;
+			tmp_nAmbientGreen[h][w] = ambG;
+			tmp_nAmbientBlue[h][w] = ambB;
+			tmp_nAmbientRed_Obj[h][w] = ambobjR;
+			tmp_nAmbientGreen_Obj[h][w] = ambobjG;
+			tmp_nAmbientBlue_Obj[h][w] = ambobjB;
+			tmp_nAmbientRed_Bl[h][w] = ambblR;
+			tmp_nAmbientGreen_Bl[h][w] = ambblG;
+			tmp_nAmbientBlue_Bl[h][w] = ambblB;
+			tmp_nAmbientRed_Obj_Bl[h][w] = ambobjblR;
+			tmp_nAmbientGreen_Obj_Bl[h][w] = ambobjblG;
+			tmp_nAmbientBlue_Obj_Bl[h][w] = ambobjblB;
+			tmp_nDirectionalRed[h][w] = dirR;
+			tmp_nDirectionalGreen[h][w] = dirG;
+			tmp_nDirectionalBlue[h][w] = dirB;
+			tmp_nSkyTopRed[h][w] = skyTopR;
+			tmp_nSkyTopGreen[h][w] = skyTopG;
+			tmp_nSkyTopBlue[h][w] = skyTopB;
+			tmp_nSkyBottomRed[h][w] = skyBotR;
+			tmp_nSkyBottomGreen[h][w] = skyBotG;
+			tmp_nSkyBottomBlue[h][w] = skyBotB;
+			tmp_nSunCoreRed[h][w] = sunCoreR;
+			tmp_nSunCoreGreen[h][w] = sunCoreG;
+			tmp_nSunCoreBlue[h][w] = sunCoreB;
+			tmp_nSunCoronaRed[h][w] = sunCoronaR;
+			tmp_nSunCoronaGreen[h][w] = sunCoronaG;
+			tmp_nSunCoronaBlue[h][w] = sunCoronaB;
+			if(sunSz == -1)
+				tmp_fSunSize[h][w] = -1;
+			else
+				tmp_fSunSize[h][w] = sunSz * 10.0f;
+			if(sprSz == -1)
+				tmp_fSpriteSize[h][w] = -1;
+			else
+				tmp_fSpriteSize[h][w] = sprSz * 10.0f;
+			if(sprBght == -1)
+				tmp_fSpriteBrightness[h][w] = -1;
+			else
+				tmp_fSpriteBrightness[h][w] = sprBght * 10.0f;
+			tmp_nShadowStrength[h][w] = shad;
+			tmp_nLightShadowStrength[h][w] = lightShad;
+			tmp_nPoleShadowStrength[h][w] = poleShad;
+			tmp_fFarClip[h][w] = farClp;
+			tmp_fFogStart[h][w] = fogSt;
+			if(lightGnd == -1)
+				tmp_fLightsOnGroundBrightness[h][w] = -1;
+			else
+				tmp_fLightsOnGroundBrightness[h][w] = lightGnd * 10.0f;
+			tmp_nLowCloudsRed[h][w] = cloudR;
+			tmp_nLowCloudsGreen[h][w] = cloudG;
+			tmp_nLowCloudsBlue[h][w] = cloudB;
+			tmp_nFluffyCloudsTopRed[h][w] = fluffyTopR;
+			tmp_nFluffyCloudsTopGreen[h][w] = fluffyTopG;
+			tmp_nFluffyCloudsTopBlue[h][w] = fluffyTopB;
+			tmp_nFluffyCloudsBottomRed[h][w] = fluffyBotR;
+			tmp_nFluffyCloudsBottomGreen[h][w] = fluffyBotG;
+			tmp_nFluffyCloudsBottomBlue[h][w] = fluffyBotB;
+			tmp_fBlurRed[h][w] = blurR;
+			tmp_fBlurGreen[h][w] = blurG;
+			tmp_fBlurBlue[h][w] = blurB;
+			tmp_fWaterRed[h][w] = waterR;
+			tmp_fWaterGreen[h][w] = waterG;
+			tmp_fWaterBlue[h][w] = waterB;
+			tmp_fWaterAlpha[h][w] = waterA;
 		}
+
+	UpdateArrays();
 
 	m_FogReduction = 0;
 
 	debug("CTimeCycle ready\n");
+}
+
+template<typename T> void
+FillGaps(T (*out)[NUMWEATHERS], float (*in)[NUMWEATHERS])
+{
+	int w;
+	for(w = 0; w < NUMWEATHERS; w++){
+		for(int h = 0; h < NUMHOURS; h++)
+			out[h][w] = in[h][w];
+
+#define NEXT(h) (((h)+1)%NUMHOURS)
+#define PREV(h) (((h)+NUMHOURS-1)%NUMHOURS)
+		int hend, h1, h2;
+		for(hend = 0; hend < NUMHOURS; hend++)
+			if(in[hend][w] != -1.0f)
+				goto foundstart;
+		return;	// this should never happen
+foundstart:
+		// Found the start of a block of filled in entries
+		for(h1 = NEXT(hend); h1 != hend; h1 = h2){
+			// Skip filled in entries
+			for(; h1 != hend; h1 = NEXT(h1))
+				if(in[h1][w] == -1.0f)
+					goto foundfirst;
+			break;	// all filled in already
+foundfirst:
+			// h1 is now the first -1 after n filled in values
+			for(h2 = NEXT(h1); ; h2 = NEXT(h2))
+				if(in[h2][w] != -1.0f)
+					goto foundlast;
+			break;
+foundlast:
+			// h2 is now the first entry after a row of -1s
+			h1 = PREV(h1);	// make h1 the first before a row of -1s
+			int n = (h2-h1 + NUMHOURS) % NUMHOURS;
+			if(n == 0) n = NUMHOURS;	// can't happen
+			float step = (in[h2][w] - in[h1][w])/n;
+
+			for(int i = 1; i < n; i++){
+				float f = (float)i/n;
+				out[(h1+i)%NUMHOURS][w] = in[h2][w]*f + in[h1][w]*(1.0f-f);
+			}
+		}
+	}
+}
+
+void
+CTimeCycle::UpdateArrays(void)
+{
+	FillGaps(m_nAmbientRed, tmp_nAmbientRed);
+	FillGaps(m_nAmbientGreen, tmp_nAmbientGreen);
+	FillGaps(m_nAmbientBlue, tmp_nAmbientBlue);
+	FillGaps(m_nAmbientRed_Obj, tmp_nAmbientRed_Obj);
+	FillGaps(m_nAmbientGreen_Obj, tmp_nAmbientGreen_Obj);
+	FillGaps(m_nAmbientBlue_Obj, tmp_nAmbientBlue_Obj);
+	FillGaps(m_nAmbientRed_Bl, tmp_nAmbientRed_Bl);
+	FillGaps(m_nAmbientGreen_Bl, tmp_nAmbientGreen_Bl);
+	FillGaps(m_nAmbientBlue_Bl, tmp_nAmbientBlue_Bl);
+	FillGaps(m_nAmbientRed_Obj_Bl, tmp_nAmbientRed_Obj_Bl);
+	FillGaps(m_nAmbientGreen_Obj_Bl, tmp_nAmbientGreen_Obj_Bl);
+	FillGaps(m_nAmbientBlue_Obj_Bl, tmp_nAmbientBlue_Obj_Bl);
+	FillGaps(m_nDirectionalRed, tmp_nDirectionalRed);
+	FillGaps(m_nDirectionalGreen, tmp_nDirectionalGreen);
+	FillGaps(m_nDirectionalBlue, tmp_nDirectionalBlue);
+	FillGaps(m_nSkyTopRed, tmp_nSkyTopRed);
+	FillGaps(m_nSkyTopGreen, tmp_nSkyTopGreen);
+	FillGaps(m_nSkyTopBlue, tmp_nSkyTopBlue);
+	FillGaps(m_nSkyBottomRed, tmp_nSkyBottomRed);
+	FillGaps(m_nSkyBottomGreen, tmp_nSkyBottomGreen);
+	FillGaps(m_nSkyBottomBlue, tmp_nSkyBottomBlue);
+	FillGaps(m_nSunCoreRed, tmp_nSunCoreRed);
+	FillGaps(m_nSunCoreGreen, tmp_nSunCoreGreen);
+	FillGaps(m_nSunCoreBlue, tmp_nSunCoreBlue);
+	FillGaps(m_nSunCoronaRed, tmp_nSunCoronaRed);
+	FillGaps(m_nSunCoronaGreen, tmp_nSunCoronaGreen);
+	FillGaps(m_nSunCoronaBlue, tmp_nSunCoronaBlue);
+	FillGaps(m_fSunSize, tmp_fSunSize);
+	FillGaps(m_fSpriteSize, tmp_fSpriteSize);
+	FillGaps(m_fSpriteBrightness, tmp_fSpriteBrightness);
+	FillGaps(m_nShadowStrength, tmp_nShadowStrength);
+	FillGaps(m_nLightShadowStrength, tmp_nLightShadowStrength);
+	FillGaps(m_nPoleShadowStrength, tmp_nPoleShadowStrength);
+	FillGaps(m_fFogStart, tmp_fFogStart);
+	FillGaps(m_fFarClip, tmp_fFarClip);
+	FillGaps(m_fLightsOnGroundBrightness, tmp_fLightsOnGroundBrightness);
+	FillGaps(m_nLowCloudsRed, tmp_nLowCloudsRed);
+	FillGaps(m_nLowCloudsGreen, tmp_nLowCloudsGreen);
+	FillGaps(m_nLowCloudsBlue, tmp_nLowCloudsBlue);
+	FillGaps(m_nFluffyCloudsTopRed, tmp_nFluffyCloudsTopRed);
+	FillGaps(m_nFluffyCloudsTopGreen, tmp_nFluffyCloudsTopGreen);
+	FillGaps(m_nFluffyCloudsTopBlue, tmp_nFluffyCloudsTopBlue);
+	FillGaps(m_nFluffyCloudsBottomRed, tmp_nFluffyCloudsBottomRed);
+	FillGaps(m_nFluffyCloudsBottomGreen, tmp_nFluffyCloudsBottomGreen);
+	FillGaps(m_nFluffyCloudsBottomBlue, tmp_nFluffyCloudsBottomBlue);
+	FillGaps(m_fBlurRed, tmp_fBlurRed);
+	FillGaps(m_fBlurGreen, tmp_fBlurGreen);
+	FillGaps(m_fBlurBlue, tmp_fBlurBlue);
+	FillGaps(m_fWaterRed, tmp_fWaterRed);
+	FillGaps(m_fWaterGreen, tmp_fWaterGreen);
+	FillGaps(m_fWaterBlue, tmp_fWaterBlue);
+	FillGaps(m_fWaterAlpha, tmp_fWaterAlpha);
 }
 
 static float interp_c0, interp_c1, interp_c2, interp_c3;

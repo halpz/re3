@@ -76,7 +76,7 @@
 
 GlobalScene Scene;
 
-uint8 work_buff[55000];
+uint8 work_buff[55000 * 2];
 char gString[256];
 char gString2[512];
 wchar gUString[256];
