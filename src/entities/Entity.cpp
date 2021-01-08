@@ -626,7 +626,7 @@ CEntity::SetupBigBuilding(void)
 	if(mi->m_lodDistances[0] > 2500.0f || mi->m_ignoreDrawDist)
 		m_level = LEVEL_GENERIC;
 	else if(m_level == LEVEL_GENERIC)
-		printf("%s isn't in a level\n", mi->GetName());
+		printf("%s isn't in a level\n", mi->GetModelName());
 }
 
 float WindTabel[] = {

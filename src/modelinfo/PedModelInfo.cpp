@@ -48,7 +48,7 @@ CPedModelInfo::SetClump(RpClump *clump)
 	if(m_hitColModel == nil)
 		CreateHitColModelSkinned(clump);
 	RpClumpForAllAtomics(m_clump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPedCB);
-	if(strcmp(GetName(), "player") == 0)
+	if(strcmp(GetModelName(), "player") == 0)
 		RpClumpForAllAtomics(m_clump, SetAtomicRendererCB, (void*)CVisibilityPlugins::RenderPlayerCB);
 }
 
