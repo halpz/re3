@@ -2251,6 +2251,80 @@ VALIDATESAVEBUF(size)
 
 #undef SCRIPT_DATA_SIZE
 
+void CRunningScript::Save(uint8*& buf)
+{
+#ifdef COMPATIBLE_SAVES
+	SkipSaveBuf(buf, 8);
+	for (int i = 0; i < 8; i++)
+		WriteSaveBuf<char>(buf, m_abScriptName[i]);
+	WriteSaveBuf<uint32>(buf, m_nIp);
+#ifdef CHECK_STRUCT_SIZES
+	static_assert(MAX_STACK_DEPTH == 6, "Compatibility loss: MAX_STACK_DEPTH != 6");
+#endif
+	for (int i = 0; i < MAX_STACK_DEPTH; i++)
+		WriteSaveBuf<uint32>(buf, m_anStack[i]);
+	WriteSaveBuf<uint16>(buf, m_nStackPointer);
+	SkipSaveBuf(buf, 2);
+#ifdef CHECK_STRUCT_SIZES
+	static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
+#endif
+	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
+		WriteSaveBuf<int32>(buf, m_anLocalVariables[i]);
+	WriteSaveBuf<bool>(buf, m_bIsActive);
+	WriteSaveBuf<bool>(buf, m_bCondResult);
+	WriteSaveBuf<bool>(buf, m_bIsMissionScript);
+	WriteSaveBuf<bool>(buf, m_bSkipWakeTime);
+	WriteSaveBuf<uint32>(buf, m_nWakeTime);
+	WriteSaveBuf<uint16>(buf, m_nAndOrState);
+	WriteSaveBuf<bool>(buf, m_bNotFlag);
+	WriteSaveBuf<bool>(buf, m_bDeatharrestEnabled);
+	WriteSaveBuf<bool>(buf, m_bDeatharrestExecuted);
+	WriteSaveBuf<bool>(buf, m_bMissionFlag);
+	SkipSaveBuf(buf, 2);
+#else
+	WriteSaveBuf(buf, *this);
+#endif
+}
+
+void CRunningScript::Load(uint8*& buf)
+{
+#ifdef COMPATIBLE_SAVES
+	SkipSaveBuf(buf, 8);
+	for (int i = 0; i < 8; i++)
+		m_abScriptName[i] = ReadSaveBuf<char>(buf);
+	m_nIp = ReadSaveBuf<uint32>(buf);
+#ifdef CHECK_STRUCT_SIZES
+	static_assert(MAX_STACK_DEPTH == 6, "Compatibility loss: MAX_STACK_DEPTH != 6");
+#endif
+	for (int i = 0; i < MAX_STACK_DEPTH; i++)
+		m_anStack[i] = ReadSaveBuf<uint32>(buf);
+	m_nStackPointer = ReadSaveBuf<uint16>(buf);
+	SkipSaveBuf(buf, 2);
+#ifdef CHECK_STRUCT_SIZES
+	static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
+#endif
+	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
+		m_anLocalVariables[i] = ReadSaveBuf<int32>(buf);
+	m_bIsActive = ReadSaveBuf<bool>(buf);
+	m_bCondResult = ReadSaveBuf<bool>(buf);
+	m_bIsMissionScript = ReadSaveBuf<bool>(buf);
+	m_bSkipWakeTime = ReadSaveBuf<bool>(buf);
+	m_nWakeTime = ReadSaveBuf<uint32>(buf);
+	m_nAndOrState = ReadSaveBuf<uint16>(buf);
+	m_bNotFlag = ReadSaveBuf<bool>(buf);
+	m_bDeatharrestEnabled = ReadSaveBuf<bool>(buf);
+	m_bDeatharrestExecuted = ReadSaveBuf<bool>(buf);
+	m_bMissionFlag = ReadSaveBuf<bool>(buf);
+	SkipSaveBuf(buf, 2);
+#else
+	CRunningScript* n = next;
+	CRunningScript* p = prev;
+	*this = ReadSaveBuf<CRunningScript>(buf);
+	next = n;
+	prev = p;
+#endif
+}
+
 void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* pEntity)
 {
 	static CColPoint aTempColPoints[MAX_COLLISION_POINTS];

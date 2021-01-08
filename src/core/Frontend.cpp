@@ -3639,7 +3639,7 @@ CMenuManager::ExportStats()
 			char *statValue = UnicodeToAscii(gUString2);
 			for (int j = 0; statValue[j] != '\0'; ++j) {
 				if (statValue[j] == '_')
-					statValue[j] = 0xBA; // This is degree symbol, but my editors keeps messing up with it so I wrote hex representation
+					statValue[j] = '\xBA'; // This is degree symbol, but my editors keeps messing up with it so I wrote hex representation
 			}
 			if (statValue)
 				fprintf(txtFile, "%s\n\n", statValue);
@@ -3701,7 +3701,7 @@ CMenuManager::ExportStats()
 			char *statValue = UnicodeToAscii(gUString2);
 			for (int l = 0; statValue[l] != '\0'; ++l) {
 				if (statValue[l] == '_')
-					statValue[l] = 0xBA; // This is degree symbol, but my editors keeps messing up with it so I wrote hex representation
+					statValue[l] = '\xBA'; // This is degree symbol, but my editors keeps messing up with it so I wrote hex representation
 			}
 			if (statValue)
 				fprintf(htmlFile, "%s", statValue);

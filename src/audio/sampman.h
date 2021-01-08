@@ -240,7 +240,7 @@ public:
 extern cSampleManager SampleManager;
 extern uint32 BankStartOffset[MAX_SFX_BANKS];
 
-#ifdef AUDIO_OPUS
+#if defined(OPUS_AUDIO_PATHS)
 static char StreamedNameTable[][25] = {
     "AUDIO\\HEAD.OPUS",    "AUDIO\\CLASS.OPUS",   "AUDIO\\KJAH.OPUS",    "AUDIO\\RISE.OPUS",    "AUDIO\\LIPS.OPUS",    "AUDIO\\GAME.OPUS",
     "AUDIO\\MSX.OPUS",     "AUDIO\\FLASH.OPUS",   "AUDIO\\CHAT.OPUS",    "AUDIO\\HEAD.OPUS",    "AUDIO\\POLICE.OPUS",  "AUDIO\\CITY.OPUS",
@@ -275,8 +275,7 @@ static char StreamedNameTable[][25] = {
     "AUDIO\\h5_b.OPUS",    "AUDIO\\h5_c.OPUS",    "AUDIO\\ammu_a.OPUS",  "AUDIO\\ammu_b.OPUS",  "AUDIO\\ammu_c.OPUS",  "AUDIO\\door_1.OPUS",
     "AUDIO\\door_2.OPUS",  "AUDIO\\door_3.OPUS",  "AUDIO\\door_4.OPUS",  "AUDIO\\door_5.OPUS",  "AUDIO\\door_6.OPUS",  "AUDIO\\t3_a.OPUS",
     "AUDIO\\t3_b.OPUS",    "AUDIO\\t3_c.OPUS",    "AUDIO\\k1_b.OPUS",    "AUDIO\\cat1.OPUS"};
-#else
-#ifdef PS2_AUDIO
+#elif defined(PS2_AUDIO_PATHS)
 static char StreamedNameTable[][40] =
 {
 	"AUDIO\\MUSIC\\WILD.VB",
@@ -1611,4 +1610,3 @@ static char StreamedNameTable[][25] =
 	"AUDIO\\BUST_27.WAV",
 	"AUDIO\\BUST_28.WAV",
 };
-#endif

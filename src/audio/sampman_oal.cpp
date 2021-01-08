@@ -30,7 +30,7 @@
 #include "MusicManager.h"
 #include "Frontend.h"
 #include "Timer.h"
-#ifdef AUDIO_OPUS
+#ifdef AUDIO_OAL_USE_OPUS
 #include <opusfile.h>
 #endif
 
@@ -83,7 +83,7 @@ char SampleBankDescFilename[] = "audio/sfx.SDT";
 char SampleBankDataFilename[] = "audio/sfx.RAW";
 
 FILE *fpSampleDescHandle;
-#ifdef AUDIO_OPUS
+#ifdef OPUS_SFX
 OggOpusFile *fpSampleDataHandle;
 #else
 FILE *fpSampleDataHandle;
@@ -396,7 +396,7 @@ set_new_provider(int index)
 static bool
 IsThisTrackAt16KHz(uint32 track)
 {
-	return track == STREAMED_SOUND_RADIO_KCHAT || track == STREAMED_SOUND_RADIO_VCPR || track == STREAMED_SOUND_AMBSIL_AMBIENT;
+	return track == STREAMED_SOUND_RADIO_KCHAT || track == STREAMED_SOUND_RADIO_VCPR || track == STREAMED_SOUND_RADIO_POLICE;
 }
 
 cSampleManager::cSampleManager(void)
@@ -1245,7 +1245,7 @@ cSampleManager::LoadSampleBank(uint8 nBank)
 		return false;
 	}
 	
-#ifdef AUDIO_OPUS
+#ifdef OPUS_SFX
 	int samplesRead = 0;
 	int samplesSize = nSampleBankSize[nBank] / 2;
 	op_pcm_seek(fpSampleDataHandle, 0);
@@ -1350,7 +1350,7 @@ cSampleManager::LoadPedComment(uint32 nComment)
 		}
 	}
 
-#ifdef AUDIO_OPUS
+#ifdef OPUS_SFX
 	int samplesRead = 0;
 	int samplesSize = m_aSamples[nComment].nSize / 2;
 	op_pcm_seek(fpSampleDataHandle, m_aSamples[nComment].nOffset / 2);
@@ -2007,7 +2007,7 @@ cSampleManager::InitialiseSampleBanks(void)
 	fpSampleDescHandle = fcaseopen(SampleBankDescFilename, "rb");
 	if ( fpSampleDescHandle == NULL )
 		return false;
-#ifndef AUDIO_OPUS
+#ifndef OPUS_SFX
 	fpSampleDataHandle = fcaseopen(SampleBankDataFilename, "rb");
 	if ( fpSampleDataHandle == NULL )
 	{
@@ -2025,7 +2025,7 @@ cSampleManager::InitialiseSampleBanks(void)
 	fpSampleDataHandle = op_open_file(SampleBankDataFilename, &e);
 #endif
 	fread(m_aSamples, sizeof(tSample), TOTAL_AUDIO_SAMPLES, fpSampleDescHandle);
-#ifdef AUDIO_OPUS
+#ifdef OPUS_SFX
 	int32 _nSampleDataEndOffset = m_aSamples[TOTAL_AUDIO_SAMPLES - 1].nOffset + m_aSamples[TOTAL_AUDIO_SAMPLES - 1].nSize;
 #endif
 	fclose(fpSampleDescHandle);

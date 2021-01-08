@@ -219,7 +219,9 @@ static const int32 gOneShotCol[] = {SFX_COL_TARMAC_1,
                                     SFX_TYRE_BUMP,
                                     SFX_COL_CARDBOARD_1,
                                     SFX_COL_TARMAC_1,
-                                    SFX_COL_GATE};
+                                    SFX_COL_GATE,
+                                    SFX_COL_SAND_1,
+                                    SFX_COL_TARMAC_1 };
 
 void
 cAudioManager::SetUpOneShotCollisionSound(const cAudioCollision &col)

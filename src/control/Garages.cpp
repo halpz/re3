@@ -1414,11 +1414,7 @@ void CGarages::PrintMessages()
 		CFont::SetDropShadowPosition(2);
 		CFont::SetDropColor(CRGBA(0, 0, 0, 255));
 
-#if defined(GTA_PS2) || defined (FIX_BUGS)
-		float y_offset = SCREEN_HEIGHT / 3 - SCREEN_SCALE_Y(40.0f); // THIS is PS2 calculation
-#else
-		float y_offset = SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(84.0f); // This is PC and results in text being written over some HUD elements
-#endif
+		float y_offset = SCREEN_SCALE_Y(140.0f);
 
 		if (MessageNumberInString2 >= 0) {
 			CMessages::InsertNumberInString(TheText.Get(MessageIDString), MessageNumberInString, MessageNumberInString2, -1, -1, -1, -1, gUString);

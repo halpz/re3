@@ -12,6 +12,7 @@
 #include "Physical.h"
 #include "ColStore.h"
 #include "VarConsole.h"
+#include "Pools.h"
 
 CPool<ColDef,ColDef> *CColStore::ms_pColPool;
 #ifndef MASTER
@@ -184,7 +185,18 @@ CColStore::LoadCollision(const CVector2D &pos)
 			wantThisOne = true;
 		}else{
 			for (int j = 0; j < MAX_CLEANUP; j++) {
-				CPhysical* pEntity = CTheScripts::MissionCleanup.DoesThisEntityWaitForCollision(j);
+				CPhysical* pEntity = nil;
+				cleanup_entity_struct* pCleanup = &CTheScripts::MissionCleanUp.m_sEntities[i];
+				if (pCleanup->type == CLEANUP_CAR) {
+					pEntity = CPools::GetVehiclePool()->GetAt(pCleanup->id);
+					if (!pEntity || pEntity->GetStatus() == STATUS_WRECKED)
+						continue;
+				}
+				else if (pCleanup->type == CLEANUP_CHAR) {
+					pEntity = CPools::GetPedPool()->GetAt(pCleanup->id);
+					if (!pEntity || ((CPed*)pEntity)->DyingOrDead())
+						continue;
+				}
 				if (pEntity && !pEntity->bDontLoadCollision && !pEntity->bIsFrozen) {
 					if (GetBoundingBox(i).IsPointInside(pEntity->GetPosition(), -80.0f))
 						wantThisOne = true;
