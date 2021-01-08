@@ -2556,7 +2556,7 @@ void CTheScripts::UpdateObjectIndices()
 			CBaseModelInfo* pModel = CModelInfo::GetModelInfo(j);
 			if (!pModel)
 				continue;
-			strcpy(name, pModel->GetName());
+			strcpy(name, pModel->GetModelName());
 #ifdef FIX_BUGS
 			for (int k = 0; k < USED_OBJECT_NAME_LENGTH && name[k]; k++)
 #else

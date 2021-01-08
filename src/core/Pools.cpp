@@ -485,7 +485,7 @@ INITSAVEBUF
 #endif
 			CopyToBuf(buf, CWanted::MaximumWantedLevel);
 			CopyToBuf(buf, CWanted::nMaximumWantedLevel);
-			memcpy(buf, CModelInfo::GetModelInfo(pPed->GetModelIndex())->GetName(), MAX_MODEL_NAME);
+			memcpy(buf, CModelInfo::GetModelInfo(pPed->GetModelIndex())->GetModelName(), MAX_MODEL_NAME);
 			SkipSaveBuf(buf, MAX_MODEL_NAME);
 		}
 	}
