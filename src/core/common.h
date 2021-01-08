@@ -92,6 +92,7 @@ typedef ptrdiff_t ssize_t;
 #endif
 
 #include "config.h"
+#include "memoryManager.h"
 
 #include <rphanim.h>
 #include <rpskin.h>
