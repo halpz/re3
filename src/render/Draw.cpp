@@ -21,13 +21,13 @@ uint8 CDraw::FadeGreen;
 uint8 CDraw::FadeBlue;
 
 #ifdef PROPER_SCALING	
-int32 CDraw::ms_bProperScaling = true;
+bool CDraw::ms_bProperScaling = true;
+#endif
+#ifdef  FIX_RADAR
+bool CDraw::ms_bFixRadar = true;	
 #endif
 #ifdef FIX_SPRITES
-int32 CDraw::ms_bFixRadar = true;	
-#endif
-#ifdef FIX_RADAR
-int32 CDraw::ms_bFixSprites = true;	
+bool CDraw::ms_bFixSprites = true;	
 #endif
 
 float

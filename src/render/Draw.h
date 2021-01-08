@@ -36,13 +36,13 @@ public:
 	static uint8 FadeBlue;
 	
 #ifdef PROPER_SCALING	
-	static int32 ms_bProperScaling;
-#endif
-#ifdef FIX_SPRITES
-	static int32 ms_bFixRadar;	
+	static bool ms_bProperScaling;
 #endif
 #ifdef FIX_RADAR
-	static int32 ms_bFixSprites;	
+	static bool ms_bFixRadar;	
+#endif
+#ifdef FIX_SPRITES
+	static bool ms_bFixSprites;	
 #endif
 
 	static void SetNearClipZ(float nearclip) { ms_fNearClipZ = nearclip; }
