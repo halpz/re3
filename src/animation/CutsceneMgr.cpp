@@ -383,7 +383,7 @@ CCutsceneMgr::CreateCutsceneObject(int modelId)
 	CCutsceneObject *pCutsceneObject;
 
 	CStreaming::ImGonnaUseStreamingMemory();
-	debug("Created cutscene object %s\n", CModelInfo::GetModelInfo(modelId)->GetName());
+	debug("Created cutscene object %s\n", CModelInfo::GetModelInfo(modelId)->GetModelName());
 	if (modelId >= MI_CUTOBJ01 && modelId <= MI_CUTOBJ05) {
 		pModelInfo = CModelInfo::GetModelInfo(modelId);
 		pColModel = &CTempColModels::ms_colModelCutObj[modelId - MI_CUTOBJ01];
@@ -569,7 +569,7 @@ CCutsceneMgr::AttachObjectToParent(CObject *pObject, CEntity *pAttachTo)
 	((CCutsceneObject*)pObject)->m_pAttachmentObject = nil;
 	((CCutsceneObject*)pObject)->m_pAttachTo = RpClumpGetFrame(pAttachTo->GetClump());
 
-	debug("Attach %s to %s\n", CModelInfo::GetModelInfo(pObject->GetModelIndex())->GetName(), CModelInfo::GetModelInfo(pAttachTo->GetModelIndex())->GetName());
+	debug("Attach %s to %s\n", CModelInfo::GetModelInfo(pObject->GetModelIndex())->GetModelName(), CModelInfo::GetModelInfo(pAttachTo->GetModelIndex())->GetModelName());
 }
 
 void
@@ -578,9 +578,9 @@ CCutsceneMgr::AttachObjectToFrame(CObject *pObject, CEntity *pAttachTo, const ch
 	((CCutsceneObject*)pObject)->m_pAttachmentObject = nil;
 	((CCutsceneObject*)pObject)->m_pAttachTo = RpAnimBlendClumpFindFrame(pAttachTo->GetClump(), frame)->frame;
 	debug("Attach %s to component %s of %s\n",
-		CModelInfo::GetModelInfo(pObject->GetModelIndex())->GetName(),
+		CModelInfo::GetModelInfo(pObject->GetModelIndex())->GetModelName(),
 		frame,
-		CModelInfo::GetModelInfo(pAttachTo->GetModelIndex())->GetName());
+		CModelInfo::GetModelInfo(pAttachTo->GetModelIndex())->GetModelName());
 	if (RwObjectGetType(pObject->m_rwObject) == rpCLUMP) {
 		RpClump *clump = (RpClump*)pObject->m_rwObject;
 		if (IsClumpSkinned(clump))
@@ -597,8 +597,8 @@ CCutsceneMgr::AttachObjectToBone(CObject *pObject, CObject *pAttachTo, int bone)
 	((CCutsceneObject*)pObject)->m_pAttachmentObject = pAttachTo;
 	((CCutsceneObject*)pObject)->m_pAttachTo = &matrixArray[id];
 	debug("Attach %s to %s\n",
-		CModelInfo::GetModelInfo(pObject->GetModelIndex())->GetName(),
-		CModelInfo::GetModelInfo(pAttachTo->GetModelIndex())->GetName());
+		CModelInfo::GetModelInfo(pObject->GetModelIndex())->GetModelName(),
+		CModelInfo::GetModelInfo(pAttachTo->GetModelIndex())->GetModelName());
 }
 
 void
