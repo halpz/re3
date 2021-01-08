@@ -846,14 +846,15 @@ CFileLoader::LoadVehicleObject(const char *line)
 	char type[8], handlingId[16], gamename[32], animFile[16], vehclass[12];
 	uint32 frequency, comprules;
 	int32 level, misc;
-	float wheelScale;
+	float wheelScale, normalSplay;
 	CVehicleModelInfo *mi;
 	char *p;
 
-	sscanf(line, "%d %s %s %s %s %s %s %s %d %d %x %d %f",
+	sscanf(line, "%d %s %s %s %s %s %s %s %d %d %x %d %f %f",
 		&id, model, txd,
 		type, handlingId, gamename, animFile, vehclass,
-		&frequency, &level, &comprules, &misc, &wheelScale);
+		&frequency, &level, &comprules, &misc, &wheelScale,
+		&normalSplay);
 
 	mi = CModelInfo::AddVehicleModel(id);
 	mi->SetName(model);
@@ -873,6 +874,8 @@ CFileLoader::LoadVehicleObject(const char *line)
 		mi->m_vehicleType = VEHICLE_TYPE_BOAT;
 	}else if(strcmp(type, "train") == 0){
 		mi->m_vehicleType = VEHICLE_TYPE_TRAIN;
+	}else if(strcmp(type, "ferry") == 0){
+		mi->m_vehicleType = VEHICLE_TYPE_FERRY;
 	}else if(strcmp(type, "heli") == 0){
 		mi->m_vehicleType = VEHICLE_TYPE_HELI;
 	}else if(strcmp(type, "plane") == 0){

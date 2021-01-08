@@ -1817,6 +1817,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 				continue;
 			if (CModelInfo::IsCarModel(model) || CModelInfo::IsBikeModel(model)) {
 				switch (model) {
+				// TODO(LCS): do it right
 				case MI_LANDSTAL:
 				case MI_LINERUN:
 				case MI_RIO:
@@ -1842,13 +1843,13 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 				case MI_ANGEL:
 				case MI_COACH:
 				case MI_RCBANDIT:
-				case MI_ROMERO:
-				case MI_PACKER:
-				case MI_SENTXS:
+				//case MI_ROMERO:
+				//case MI_PACKER:
+				//case MI_SENTXS:
 				case MI_SQUALO:
 				case MI_SEASPAR:
 				case MI_PIZZABOY:
-				case MI_GANGBUR:
+				//case MI_GANGBUR:
 				case MI_AIRTRAIN:
 				case MI_DEADDODO:
 				case MI_SPEEDER:
@@ -1857,44 +1858,44 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 				case MI_FLATBED:
 				case MI_YANKEE:
 				case MI_CADDY:
-				case MI_ZEBRA:
+				//case MI_ZEBRA:
 				case MI_TOPFUN:
 				case MI_SKIMMER:
 				case MI_RCBARON:
 				case MI_RCRAIDER:
 				case MI_SPARROW:
 				case MI_PATRIOT:
-				case MI_LOVEFIST:
+				//case MI_LOVEFIST:
 				case MI_COASTG:
 				case MI_DINGHY:
-				case MI_HERMES:
-				case MI_SABRETUR:
+				//case MI_HERMES:
+				//case MI_SABRETUR:
 				case MI_PHEONIX:
-				case MI_WALTON:
+				//case MI_WALTON:
 				case MI_COMET:
-				case MI_DELUXO:
-				case MI_BURRITO:
-				case MI_SPAND:
+				//case MI_DELUXO:
+				//case MI_BURRITO:
+				//case MI_SPAND:
 				case MI_MARQUIS:
 				case MI_BAGGAGE:
-				case MI_KAUFMAN:
+				//case MI_KAUFMAN:
 				case MI_MAVERICK:
 				case MI_VCNMAV:
-				case MI_RANCHER:
+				//case MI_RANCHER:
 				case MI_FBIRANCH:
 				case MI_JETMAX:
-				case MI_HOTRING:
+				//case MI_HOTRING:
 				case MI_SANDKING:
-				case MI_BLISTAC:
+				//case MI_BLISTAC:
 				case MI_POLMAV:
-				case MI_BOXVILLE:
-				case MI_BENSON:
-				case MI_MESA:
+				//case MI_BOXVILLE:
+				//case MI_BENSON:
+				//case MI_MESA:
 				case MI_RCGOBLIN:
-				case MI_HOTRINA:
-				case MI_HOTRINB:
-				case MI_BLOODRA:
-				case MI_BLOODRB:
+				//case MI_HOTRINA:
+				//case MI_HOTRINB:
+				//case MI_BLOODRA:
+				//case MI_BLOODRB:
 				case MI_VICECHEE:
 					model = -1;
 					break;
@@ -1909,23 +1910,23 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 				case MI_MOONBEAM:
 				case MI_ESPERANT:
 				case MI_TAXI:
-				case MI_WASHING:
+				//case MI_WASHING:
 				case MI_BOBCAT:
 				case MI_BANSHEE:
 				case MI_CABBIE:
 				case MI_STALLION:
 				case MI_RUMPO:
-				case MI_ADMIRAL:
+				//case MI_ADMIRAL:
 				case MI_PCJ600:
 				case MI_FAGGIO:
 				case MI_FREEWAY:
-				case MI_GLENDALE:
-				case MI_OCEANIC:
+				//case MI_GLENDALE:
+				//case MI_OCEANIC:
 				case MI_SANCHEZ:
-				case MI_SABRE:
-				case MI_REGINA:
-				case MI_VIRGO:
-				case MI_GREENWOO:
+				//case MI_SABRE:
+				//case MI_REGINA:
+				//case MI_VIRGO:
+				//case MI_GREENWOO:
 					break;
 				default:
 					printf("CREATE_RANDOM_CAR_FOR_CAR_PARK - Unknown car model %d\n", CStreaming::ms_vehiclesLoaded[index]);

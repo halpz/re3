@@ -62,6 +62,7 @@ void CCranes::InitCranes(void)
 			}
 		}
 	}
+/*	// TODO(LCS)
 	for (CPtrNode* pNode = CWorld::GetBigBuildingList(LEVEL_MAINLAND).first; pNode; pNode = pNode->next) {
 		CEntity* pEntity = (CEntity*)pNode->item;
 		if (MODELID_CRANE_1 == pEntity->GetModelIndex() ||
@@ -72,6 +73,7 @@ void CCranes::InitCranes(void)
 			MODELID_CRANE_6 == pEntity->GetModelIndex())
 			AddThisOneCrane(pEntity);
 	}
+*/
 }
 
 void CCranes::AddThisOneCrane(CEntity* pEntity)

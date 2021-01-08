@@ -58,7 +58,7 @@ function getarch(a)
 	return a
 end
 
-workspace "reVC"
+workspace "reLCS"
 	language "C++"
 	configurations { "Debug", "Release" }
 	location "build"
@@ -225,9 +225,9 @@ local function addSrcFiles( prefix )
 	return prefix .. "/*cpp", prefix .. "/*.h", prefix .. "/*.c", prefix .. "/*.ico", prefix .. "/*.rc"
 end
 
-project "reVC"
+project "reLCS"
 	kind "WindowedApp"
-	targetname "reVC"
+	targetname "reLCS"
 	targetdir "bin/%{cfg.platform}/%{cfg.buildcfg}"
 	defines { "MIAMI" }
 
@@ -303,8 +303,8 @@ project "reVC"
 		defines { "AUDIO_OAL" }
 
 	filter {}
-	if(os.getenv("GTA_VC_RE_DIR")) then
-		setpaths("$(GTA_VC_RE_DIR)/", "%(cfg.buildtarget.name)", "")
+	if(os.getenv("GTA_LCS_RE_DIR")) then
+		setpaths("$(GTA_LCS_RE_DIR)/", "%(cfg.buildtarget.name)", "")
 	end
 	
 	filter "platforms:win*"

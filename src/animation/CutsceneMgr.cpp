@@ -633,8 +633,8 @@ CCutsceneMgr::RemoveEverythingFromTheWorldForTheBiggestFuckoffCutsceneEver()
 	CStreaming::RemoveCurrentZonesModels();
 	CStreaming::SetModelIsDeletable(MI_MALE01);
 	CStreaming::SetModelTxdIsDeletable(MI_MALE01);
-	CStreaming::SetModelIsDeletable(MI_HMOCA);
-	CStreaming::SetModelTxdIsDeletable(MI_HMOCA);
+	CStreaming::SetModelIsDeletable(MI_TAXI_D);
+	CStreaming::SetModelTxdIsDeletable(MI_TAXI_D);
 	CStreaming::SetModelIsDeletable(MI_NIGHTSTICK);
 	CStreaming::SetModelTxdIsDeletable(MI_NIGHTSTICK);
 	CStreaming::SetModelIsDeletable(MI_MISSILE);

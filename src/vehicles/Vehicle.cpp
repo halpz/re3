@@ -1841,8 +1841,7 @@ CVehicle::SetDriver(CPed *driver)
 
 		case MI_TAXI:
 		case MI_CABBIE:
-		case MI_ZEBRA:
-		case MI_KAUFMAN:
+		case MI_BORGNINE:
 			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 12;
 			break;
 

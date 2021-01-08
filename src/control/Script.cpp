@@ -2201,7 +2201,7 @@ int open_script()
 #endif
 	switch (scriptToLoad) {
 	case 0: scriptfile = "main.scm"; break;
-	case 1: scriptfile = "freeroam_miami.scm"; break;
+	case 1: scriptfile = "freeroam_lcs.scm"; break;
 	case 2: scriptfile = "main_d.scm"; break;
 	}
 	return CFileMgr::OpenFile(scriptfile, "rb");

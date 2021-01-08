@@ -157,7 +157,7 @@ void CheckAndSaveIniFloat(const char *cat, const char *key, float val, bool &cha
 
 void LoadINISettings()
 {
-	cfg.load_file("reVC.ini");
+	cfg.load_file("reLCS.ini");
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 	// Written by assuming the codes below will run after _InputInitialiseJoys().
@@ -260,7 +260,7 @@ void SaveINISettings()
 	CheckAndSaveIniInt("Rendering", "BackfaceCulling", gBackfaceCulling, changed);
 
 	if (changed)
-		cfg.write_file("reVC.ini");
+		cfg.write_file("reLCS.ini");
 }
 
 #endif
@@ -290,7 +290,6 @@ void FastWeatherCheat();
 void OnlyRenderWheelsCheat();
 void ChittyChittyBangBangCheat();
 void StrongGripCheat();
-void SpecialCarCheats();
 void PickUpChicksCheat();
 
 DebugMenuEntry *carCol1;
@@ -561,7 +560,6 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Cheats", "Only render wheels", OnlyRenderWheelsCheat);
 		DebugMenuAddCmd("Cheats", "Chitty chitty bang bang", ChittyChittyBangBangCheat);
 		DebugMenuAddCmd("Cheats", "Strong grip", StrongGripCheat);
-		DebugMenuAddCmd("Cheats", "Special car", SpecialCarCheats);
 		DebugMenuAddCmd("Cheats", "Pickup chicks", PickUpChicksCheat);
 
 		static int spawnCarId = MI_LANDSTAL;

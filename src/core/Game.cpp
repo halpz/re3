@@ -375,7 +375,7 @@ bool CGame::Initialise(const char* datFile)
 #ifdef USE_TEXTURE_POOL
 	_TexturePoolsUnknown(false);
 #endif
-	currLevel = LEVEL_BEACH;
+	currLevel = LEVEL_INDUSTRIAL;
 	currArea = AREA_MAIN_MAP;
 
 	PUSH_MEMID(MEMID_TEXTURES);
@@ -441,7 +441,7 @@ bool CGame::Initialise(const char* datFile)
 
 	CdStreamAddImage("MODELS\\GTA3.IMG");
 
-	CFileLoader::LoadLevel("DATA\\DEFAULT.DAT");
+//	CFileLoader::LoadLevel("DATA\\DEFAULT.DAT");
 	CFileLoader::LoadLevel(datFile);
 #ifdef EXTENDED_PIPELINES
 	// for generic fallback
@@ -661,8 +661,9 @@ void CGame::ReInitGameObjectVariables(void)
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;
 	CStreaming::RequestBigBuildings(LEVEL_GENERIC);
-	CStreaming::RemoveIslandsNotUsed(LEVEL_BEACH);
-	CStreaming::RemoveIslandsNotUsed(LEVEL_MAINLAND);
+	CStreaming::RemoveIslandsNotUsed(LEVEL_INDUSTRIAL);
+	CStreaming::RemoveIslandsNotUsed(LEVEL_COMMERCIAL);
+	CStreaming::RemoveIslandsNotUsed(LEVEL_SUBURBAN);
 	CStreaming::LoadAllRequestedModels(false);
 	currArea = AREA_MAIN_MAP;
 	CPed::Initialise();

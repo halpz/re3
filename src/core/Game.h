@@ -3,10 +3,11 @@
 enum eLevelName {
 	LEVEL_IGNORE = -1, // beware, this is only used in CPhysical's m_nZoneLevel
 	LEVEL_GENERIC = 0,
-	LEVEL_BEACH,
-	LEVEL_MAINLAND,
+	LEVEL_INDUSTRIAL,
+	LEVEL_COMMERCIAL,
+	LEVEL_SUBURBAN,
 
-	NUM_LEVELS
+	NUM_LEVELS	// LCS: should be 5 eventually...
 };
 
 enum eAreaName {

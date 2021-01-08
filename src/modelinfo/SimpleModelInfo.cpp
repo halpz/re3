@@ -175,7 +175,7 @@ CSimpleModelInfo::FindRelatedModel(int32 minID, int32 maxID)
 	}
 }
 
-#define NEAR_DRAW_DIST 0.0f	// 100.0f in liberty city
+#define NEAR_DRAW_DIST 100.0f	// 0.0f in vice city
 
 void
 CSimpleModelInfo::SetupBigBuilding(int32 minID, int32 maxID)

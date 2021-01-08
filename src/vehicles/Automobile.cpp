@@ -2193,8 +2193,7 @@ CAutomobile::PreRender(void)
 
 	case MI_TAXI:
 	case MI_CABBIE:
-	case MI_ZEBRA:
-	case MI_KAUFMAN:
+	case MI_BORGNINE:
 		if(bTaxiLight){
 			CVector pos = GetPosition() + GetUp()*0.95f;
 			CCoronas::RegisterCorona((uintptr)this + 21,

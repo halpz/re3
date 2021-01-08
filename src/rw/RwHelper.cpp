@@ -18,7 +18,7 @@ bool gPS2alphaTest = true;
 #else
 bool gPS2alphaTest = false;
 #endif
-bool gBackfaceCulling = true;
+bool gBackfaceCulling = false;	// can we ever enable this in LCS even?
 
 #if !defined(FINAL) || defined(DEBUGMENU)
 static bool charsetOpen;

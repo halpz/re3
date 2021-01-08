@@ -88,20 +88,20 @@ CTheZones::Init(void)
 	TotalNumberOfInfoZones = 1;
 
 	strcpy(InfoZoneArray[0].name, "CITYINF");
-	InfoZoneArray[0].minx = -2400.0f;
+	InfoZoneArray[0].minx = -2000.0f;
 	InfoZoneArray[0].miny = -2000.0f;
 	InfoZoneArray[0].minz = -500.0f;
-	InfoZoneArray[0].maxx =  1600.0f;
+	InfoZoneArray[0].maxx =  2000.0f;
 	InfoZoneArray[0].maxy =  2000.0f;
 	InfoZoneArray[0].maxz =  500.0f;
 	InfoZoneArray[0].level = LEVEL_GENERIC;
 	InfoZoneArray[0].type = ZONE_INFO;
 
 	strcpy(NavigationZoneArray[0].name, "VICE_C");
-	NavigationZoneArray[0].minx = -2400.0f;
+	NavigationZoneArray[0].minx = -2000.0f;
 	NavigationZoneArray[0].miny = -2000.0f;
 	NavigationZoneArray[0].minz = -500.0f;
-	NavigationZoneArray[0].maxx =  1600.0f;
+	NavigationZoneArray[0].maxx =  2000.0f;
 	NavigationZoneArray[0].maxy =  2000.0f;
 	NavigationZoneArray[0].maxz =  500.0f;
 	NavigationZoneArray[0].level = LEVEL_GENERIC;
@@ -115,10 +115,10 @@ CTheZones::Init(void)
 	}
 	TotalNumberOfMapZones = 1;
 	strcpy(MapZoneArray[0].name, "THEMAP");
-	MapZoneArray[0].minx = -2400.0f;
+	MapZoneArray[0].minx = -2000.0f;
 	MapZoneArray[0].miny = -2000.0f;
 	MapZoneArray[0].minz = -500.0f;
-	MapZoneArray[0].maxx =  1600.0f;
+	MapZoneArray[0].maxx =  2000.0f;
 	MapZoneArray[0].maxy =  2000.0f;
 	MapZoneArray[0].maxz =  500.0f;
 	MapZoneArray[0].level = LEVEL_GENERIC;

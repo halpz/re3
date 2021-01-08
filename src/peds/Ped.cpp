@@ -9433,7 +9433,7 @@ CPed::SetRadioStation(void)
 	if (IsPlayer() || !m_pMyVehicle || m_pMyVehicle->pDriver != this)
 		return;
 
-	if (GetModelIndex() != MI_PGA && GetModelIndex() != MI_PGB) {
+	if (GetModelIndex() != MI_GANG13 && GetModelIndex() != MI_GANG14) {
 		if (m_pMyVehicle->m_nRadioStation != modelInfo->radio1 && m_pMyVehicle->m_nRadioStation != modelInfo->radio2) {
 			if (CGeneral::GetRandomTrueFalse())
 				m_pMyVehicle->m_nRadioStation = modelInfo->radio1;

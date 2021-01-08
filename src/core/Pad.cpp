@@ -97,6 +97,7 @@ extern bool gbFastTime;
 extern bool gGravityCheat;
 #endif
 
+/* LCS: removed
 void SpecialCarCheats()
 {
 	if ( !CVehicle::bCheat9 )
@@ -145,6 +146,7 @@ void SpecialCarCheats()
 		CPad::bHasPlayerCheated = true;
 	}
 }
+*/
 
 void PickUpChicksCheat()
 {
@@ -370,7 +372,7 @@ void ChangePlayerCheat()
 		do
 		{
 			do {
-				modelId = CGeneral::GetRandomNumberInRange(0, MI_PGA);
+				modelId = CGeneral::GetRandomNumberInRange(0, MI_GANG18);
 				anotherModelId = modelId+1;
 			} while (!CModelInfo::GetModelInfo(anotherModelId));
 		} while (anotherModelId >= MI_SPECIAL01 && anotherModelId <= MI_SPECIAL04 || modelId == MI_TAXI_D);
@@ -589,16 +591,18 @@ void SuicideCheat(void) {
 }
 
 void DoChicksWithGunsCheat(void) {
+/*	// broken in LCS
 	CHud::SetHelpMessage(TheText.Get("CHEAT1"), true);
 	CStreaming::SetModelIsDeletable(CGangs::GetGangPedModel1(GANG_PLAYER));
 	CStreaming::SetModelIsDeletable(CGangs::GetGangPedModel2(GANG_PLAYER));
 	CStreaming::SetModelTxdIsDeletable(CGangs::GetGangPedModel1(GANG_PLAYER));
 	CStreaming::SetModelTxdIsDeletable(CGangs::GetGangPedModel2(GANG_PLAYER));
 	CStreaming::RemoveCurrentZonesModels();
-	CGangs::SetGangPedModels(GANG_PLAYER, MI_HFYBE, MI_WFYBE);
+	CGangs::SetGangPedModels(GANG_PLAYER, MI_CAS_WOM, MI_HOS_WOM);
 	CGangs::SetGangWeapons(GANG_PLAYER, WEAPONTYPE_M4, WEAPONTYPE_M4);
 	CStats::CheatedCount += 1000;
 	CPad::bHasPlayerCheated = true;
+*/
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1420,6 +1424,8 @@ void CPad::AddToPCCheatString(char c)
 		KeyBoardCheatString[0] = ' ';
 		BlackCarsCheat();
 	}
+/*
+	// LCS: removed for now
 	// "TRAVELINSTYLE"
 	else if (!Cheat_strncmp(KeyBoardCheatString, "HQ`U`iLSFaNZ[")) {
 		KeyBoardCheatString[0] = ' ';
@@ -1515,6 +1521,7 @@ void CPad::AddToPCCheatString(char c)
 		KeyBoardCheatString[0] = ' ';
 		ChangePlayerModel("igdiaz");
 	}
+*/
 	// DEEPFRIEDMARSBARS
 	else if (!Cheat_strncmp(KeyBoardCheatString, "VWHC`mDTEPVZMpRK")) {
 		KeyBoardCheatString[0] = ' ';
@@ -1530,11 +1537,13 @@ void CPad::AddToPCCheatString(char c)
 		KeyBoardCheatString[0] = ' ';
 		BackToTheFuture();
 	}
+/*	LCS: removed
 	// LOADSOFLITTLETHINGS
 	else if (!Cheat_strncmp(KeyBoardCheatString, "VLUJUoHSU_VTMo`J]bV")) {
 		KeyBoardCheatString[0] = ' ';
 		SpecialCarCheats();
 	}
+*/
 	// HOPINGIRL
 	else if (!Cheat_strncmp(KeyBoardCheatString, "OWPH[dSVI")) {
 		KeyBoardCheatString[0] = ' ';

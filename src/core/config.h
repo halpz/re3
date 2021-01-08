@@ -7,15 +7,15 @@ enum Config {
 	MAX_CDIMAGES = 8, // additional cdimages
 	MAX_CDCHANNELS = 5,
 
-	MODELINFOSIZE = 6500,	// 4900 on PS2
-	TXDSTORESIZE = 1385,
-	COLSTORESIZE = 31,
+	MODELINFOSIZE = 6500,	// only 4900
+	TXDSTORESIZE = 1385,	// only 1200
+	COLSTORESIZE = 31,	// only 15
 	EXTRADIRSIZE = 256,
 	CUTSCENEDIRSIZE = 512,
 
 	SIMPLEMODELSIZE = 3885,
 	TIMEMODELSIZE = 385,
-	CLUMPMODELSIZE = 5,
+	CLUMPMODELSIZE = 10,
 	WEAPONMODELSIZE = 37,
 	PEDMODELSIZE = 130,
 	VEHICLEMODELSIZE = 110,
@@ -26,19 +26,19 @@ enum Config {
 	NUMOBJECTINFO = 210,
 
 	// Pool sizes
-	NUMPTRNODES = 50000,
-	NUMENTRYINFOS = 3200,
-	NUMPEDS = 140,
-	NUMVEHICLES = 110,
-	NUMBUILDINGS = 7000,
-	NUMTREADABLES = 1,
-	NUMOBJECTS = 460,
-	NUMDUMMIES = 2340,
+	NUMPTRNODES = 50000,	// only 30100
+	NUMENTRYINFOS = 4000,
+	NUMPEDS = 140,		// only 70
+	NUMVEHICLES = 110,	// only 70
+	NUMBUILDINGS = 7000,	// only 6757
+	NUMTREADABLES = 1300,
+	NUMOBJECTS = 475,
+	NUMDUMMIES = 3000,
 	NUMAUDIOSCRIPTOBJECTS = 192,
 	NUMCOLMODELS = 4400,
 	NUMCUTSCENEOBJECTS = 50,	// not a pool in VC
 
-	NUMANIMBLOCKS = 35,
+	NUMANIMBLOCKS = 60,
 	NUMANIMATIONS = 450,
 
 	NUMTEMPOBJECTS = 40,
@@ -58,13 +58,13 @@ enum Config {
 	NUMREFERENCES = 800,
 
 	// Zones
-	NUMAUDIOZONES = 14,
+	NUMAUDIOZONES = 36,
 	NUMINFOZONES = 169,
-	NUMMAPZONES = 39,
-	NUMNAVIGZONES = 20,
+	NUMMAPZONES = 110,
+	NUMNAVIGZONES = 70,
 
 	// Cull zones
-	NUMATTRIBZONES = 704,
+	NUMATTRIBZONES = 900,
 
 	NUMOCCLUSIONVOLUMES = 350,
 	NUMACTIVEOCCLUDERS = 48,
@@ -208,7 +208,7 @@ enum Config {
 #		define RANDOMSPLASH	// use random splash as on PS2
 #		define PS2_MATFX
 #	endif
-#	define PC_PLAYER_CONTROLS	// mouse player/cam mode
+//#	define PC_PLAYER_CONTROLS	// mouse player/cam mode
 #	define GTA_REPLAY
 #	define GTA_SCENE_EDIT
 #elif defined GTA_XBOX
@@ -256,7 +256,7 @@ enum Config {
 #define USE_TXD_CDIMAGE		// generate and load textures from txd.img
 #define PS2_ALPHA_TEST		// emulate ps2 alpha test 
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
-#define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
+//#define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
 #define DISABLE_VSYNC_ON_TEXTURE_CONVERSION // make texture conversion work faster by disabling vsync
 //#define USE_TEXTURE_POOL
 #ifdef LIBRW
@@ -310,7 +310,7 @@ enum Config {
 
 #	ifdef CUSTOM_FRONTEND_OPTIONS
 #		define GRAPHICS_MENU_OPTIONS // otherwise Display settings will be scrollable
-#		define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
+//#		define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
 #		define CUTSCENE_BORDERS_SWITCH
 //#		define MULTISAMPLING		// adds MSAA option
 #		define INVERT_LOOK_FOR_PAD // enable the hidden option

@@ -5296,6 +5296,7 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 		case MI_MEDIC: return GetMedicTalkSfx(ped, sound);
 		case MI_FIREMAN: return GetFiremanTalkSfx(ped, sound);
 		case MI_MALE01: return GetDefaultTalkSfx(ped, sound);
+/*	LCS: removed for now
 		case MI_HFYST: return GetHFYSTTalkSfx(ped, sound);
 		case MI_HFOST: return GetHFOSTTalkSfx(ped, sound);
 		case MI_HMYST: return GetHMYSTTalkSfx(ped, sound);
@@ -5384,6 +5385,7 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 		case MI_BKB: return GetBKTalkSfx(ped, sound);
 		case MI_PGA:
 		case MI_PGB: return GetPGTalkSfx(ped, sound);
+*/
 		case MI_VICE1:
 		case MI_VICE2:
 		case MI_VICE3:
@@ -7567,7 +7569,8 @@ cAudioManager::GetSGTalkSfx(CPed *ped, int16 sound)
 	case SOUND_PED_CHAT: GetPhrase(sfx, ped->m_lastComment, 1064, 12); break;
 	default: return GetGenericMaleTalkSfx(ped, sound);
 	}
-	if(ped->GetModelIndex() == MI_SGB) sfx += 93;
+// LCS removed for now
+//	if(ped->GetModelIndex() == MI_SGB) sfx += 93;
 	return sfx;
 }
 

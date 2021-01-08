@@ -384,8 +384,8 @@ public:
 
 	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1 && GetStatus() != STATUS_WRECKED; }
 	CVehicleModelInfo* GetModelInfo() { return (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()); }
-	bool IsTaxi(void) { return GetModelIndex() == MI_TAXI || GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_ZEBRA || GetModelIndex() == MI_KAUFMAN; }
-	bool IsLimo(void) { return GetModelIndex() == MI_STRETCH || GetModelIndex() == MI_LOVEFIST; }
+	bool IsTaxi(void) { return GetModelIndex() == MI_TAXI || GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_BORGNINE; }
+	bool IsLimo(void) { return GetModelIndex() == MI_STRETCH; }
 	bool IsRealHeli(void) { return !!(pHandling->Flags & HANDLING_IS_HELI); }
 	bool IsRealPlane(void) { return !!(pHandling->Flags & HANDLING_IS_PLANE); }
 

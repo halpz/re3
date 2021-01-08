@@ -558,11 +558,8 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 	// Taxi side mission
 	if (CTheScripts::IsPlayerOnAMission()) {
 		CPed *player = FindPlayerPed();
-		if (player && player->InVehicle()) {
-			int32 model = player->m_pMyVehicle->GetModelIndex();
-			if (model == MI_TAXI || model == MI_CABBIE || model == MI_ZEBRA || model == MI_KAUFMAN)
-				missionAndWeatherMult = 1.0f;
-		}
+		if (player && player->InVehicle() && player->m_pMyVehicle->IsTaxi())
+			missionAndWeatherMult = 1.0f;
 	}
 	if (CDarkel::FrenzyOnGoing())
 		missionAndWeatherMult = 1.0f;
@@ -843,7 +840,7 @@ CPopulation::AddPedInCar(CVehicle* car, bool isDriver)
 			pedType = PEDTYPE_COP;
 			break;
 		default:
-			if (car->GetModelIndex() == MI_TAXI || car->GetModelIndex() == MI_CABBIE || car->GetModelIndex() == MI_ZEBRA || car->GetModelIndex() == MI_KAUFMAN) {
+			if (car->IsTaxi()) {
 				if (isDriver) {
 					pedType = PEDTYPE_CIVMALE;
 					preferredModel = MI_TAXI_D;
@@ -1210,10 +1207,11 @@ CPopulation::IsSkateable(CVector const& pos)
 	return foundCol.surfaceB == SURFACE_TARMAC || foundCol.surfaceB == SURFACE_PAVEMENT;
 }
 
+//--LCS: done
 bool
 CPopulation::CanJeerAtStripper(int32 model)
 {
-	return model == MI_WMOBE || model == MI_WMYBE || model == MI_WMOST || model == MI_BMYBB;
+	return false;
 }
 
 void
@@ -1245,46 +1243,38 @@ bool
 CPopulation::IsMale(int32 model)
 {
 	switch (model) {
-		case MI_HMYST:
-		case MI_HMOST:
-		case MI_HMYRI:
-		case MI_HMORI:
-		case MI_HMYBE:
-		case MI_HMOBE:
-		case MI_HMOTR:
-		case MI_HMYAP:
-		case MI_HMOCA:
-		case MI_BMODK:
-		case MI_BMYKR:
-		case MI_BMYST:
-		case MI_BMOST:
-		case MI_BMYRI:
-		case MI_BMYBE:
-		case MI_BMOBE:
-		case MI_BMYBU:
-		case MI_BMOTR:
-		case MI_BMYPI:
-		case MI_BMYBB:
-		case MI_WMYCR:
-		case MI_WMYST:
-		case MI_WMOST:
-		case MI_WMYRI:
-		case MI_WMORI:
-		case MI_WMYBE:
-		case MI_WMOBE:
-		case MI_WMYCW:
-		case MI_WMYGO:
-		case MI_WMOGO:
-		case MI_WMYLG:
-		case MI_WMYBU:
-		case MI_WMOBU:
-		case MI_WMOTR:
-		case MI_WMYPI:
-		case MI_WMOCA:
-		case MI_WMYJG:
-		case MI_WMYSK:
-
-		// BUG? Why no JMOTO?
+		// TODO(LCS): do this right
+		case MI_TAXI_D:
+		case MI_PIMP:
+		case MI_CRIMINAL01:
+		case MI_CRIMINAL02:
+		case MI_MALE02:
+		case MI_MALE03:
+		case MI_P_MAN1:
+		case MI_P_MAN2:
+		case MI_CT_MAN1:
+		case MI_CT_MAN2:
+		case MI_LI_MAN1:
+		case MI_LI_MAN2:
+		case MI_DOCKER1:
+		case MI_DOCKER2:
+		case MI_SCUM_MAN:
+		case MI_WORKER1:
+		case MI_WORKER2:
+		case MI_B_MAN1:
+		case MI_B_MAN2:
+		case MI_B_MAN3:
+		case MI_MOD_MAN:
+		case MI_ST_MAN:
+		case MI_FAN_MAN1:
+		case MI_FAN_MAN2:
+		case MI_HOS_MAN:
+		case MI_CONST1:
+		case MI_CONST2:
+		case MI_STUD_MAN:
+		case MI_CAS_MAN:
+		case MI_CAMP_MAN:
+		case MI_HITMAN:
 			return true;
 		default:
 			return false;
@@ -1295,41 +1285,34 @@ bool
 CPopulation::IsFemale(int32 model)
 {
 	switch (model) {
-		case MI_HFYST:
-		case MI_HFOST:
-		case MI_HFYRI:
-		case MI_HFORI:
-		case MI_HFYBE:
-		case MI_HFOBE:
-		case MI_HFYBU:
-		case MI_HFYMD:
-		case MI_HFYCG:
-		case MI_HFYPR:
-		case MI_HFOTR:
-		case MI_BFYST:
-		case MI_BFOST:
-		case MI_BFYRI:
-		case MI_BFORI:
-		case MI_BFYBE:
-		case MI_BFOBE:
-		case MI_BFYPR:
-		case MI_BFOTR:
-		case MI_WFYST:
-		case MI_WFOST:
-		case MI_WFYRI:
-		case MI_WFORI:
-		case MI_WFYBE:
-		case MI_WFOBE:
-		case MI_WFOGO:
-		case MI_WFYLG:
-		case MI_WFYBU:
-		case MI_WFYPR:
-		case MI_WFOTR:
-		case MI_WFYJG:
-		case MI_WFYSK:
-		case MI_WFYSH:
-		case MI_WFOSH:
-		case MI_JFOTO:
+		// TODO(LCS): do this right
+		case MI_FEMALE01:
+		case MI_FEMALE02:
+		case MI_FEMALE03:
+		case MI_FATFEMALE01:
+		case MI_FATFEMALE02:
+		case MI_PROSTITUTE:
+		case MI_PROSTITUTE2:
+		case MI_P_WOM1:
+		case MI_P_WOM2:
+		case MI_CT_WOM1:
+		case MI_CT_WOM2:
+		case MI_LI_WOM1:
+		case MI_LI_WOM2:
+		case MI_SCUM_WOM:
+		case MI_B_WOM1:
+		case MI_B_WOM2:
+		case MI_B_WOM3:
+		case MI_MOD_WOM:
+		case MI_ST_WOM:
+		case MI_FAN_WOM:
+		case MI_HOS_WOM:
+		case MI_SHOPPER1:
+		case MI_SHOPPER2:
+		case MI_SHOPPER3:
+		case MI_STUD_WOM:
+		case MI_CAS_WOM:
+		case MI_CAMP_WOM:
 			return true;
 		default:
 			return false;
@@ -1339,23 +1322,7 @@ CPopulation::IsFemale(int32 model)
 bool
 CPopulation::IsSunbather(int32 model)
 {
-	switch (model) {
-		case MI_HFYBE:
-		case MI_HFOBE:
-		case MI_HMYBE:
-		case MI_HMOBE:
-		case MI_BFYBE:
-		case MI_BMYBE:
-		case MI_BFOBE:
-		case MI_BMOBE:
-		case MI_WFYBE:
-		case MI_WMYBE:
-		case MI_WFOBE:
-		case MI_WMOBE:
-			return true;
-		default:
-			return false;
-	}
+	return false;
 }
 
 int32
@@ -1367,13 +1334,13 @@ CPopulation::ComputeRandomisedGangSize(void)
 bool
 CPopulation::CanSolicitPlayerInCar(int32 model)
 {
-	return model == MI_HFYPR || model == MI_BFYPR || model == MI_WFYPR;
+	return model == MI_PROSTITUTE || model == MI_PROSTITUTE2;
 }
 
 bool
 CPopulation::CanSolicitPlayerOnFoot(int32 model)
 {
-	return model == MI_HFYMD || model == MI_HFYCG || model == MI_BFOTR || model == MI_BMOTR || model == MI_WFOTR || model == MI_WMOTR;
+	return model == MI_B_WOM3 || model == MI_FEMALE01 || model == MI_FEMALE02 || model == MI_FEMALE03;
 }
 
 bool

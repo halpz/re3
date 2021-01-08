@@ -420,7 +420,7 @@ CGameLogic::SetUpShortCut(CVector vStartPos, float fStartAngle, CVector vEndPos,
 	ShortCutStartOrientation = fStartAngle;
 	ShortCutDestination = vEndPos;
 	ShortCutDestinationOrientation = fEndAngle;
-	CStreaming::RequestModel(MI_KAUFMAN, 0);
+	CStreaming::RequestModel(MI_CABBIE, 0);
 }
 
 void
@@ -452,11 +452,11 @@ CGameLogic::UpdateShortCut()
 {
 	switch (ShortCutState) {
 	case SHORTCUT_INIT:
-		if (!CStreaming::HasModelLoaded(MI_KAUFMAN)) {
-			CStreaming::RequestModel(MI_KAUFMAN, 0);
+		if (!CStreaming::HasModelLoaded(MI_CABBIE)) {
+			CStreaming::RequestModel(MI_CABBIE, 0);
 			return;
 		}
-		pShortCutTaxi = new CAutomobile(MI_KAUFMAN, RANDOM_VEHICLE);
+		pShortCutTaxi = new CAutomobile(MI_CABBIE, RANDOM_VEHICLE);
 		if (!pShortCutTaxi)
 			return;
 		pShortCutTaxi->SetPosition(ShortCutStart);

@@ -632,8 +632,9 @@ CVisibilityPlugins::RenderVehicleTailRotorAlphaCB(RpAtomic *atomic)
 RpAtomic*
 CVisibilityPlugins::RenderPlayerCB(RpAtomic *atomic)
 {
-	if(CWorld::Players[0].m_pSkinTexture)
-		RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), SetTextureCB, CWorld::Players[0].m_pSkinTexture);
+// LCS: removed
+//	if(CWorld::Players[0].m_pSkinTexture)
+//		RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), SetTextureCB, CWorld::Players[0].m_pSkinTexture);
 	RENDERCALLBACK(atomic);
 	return atomic;
 }

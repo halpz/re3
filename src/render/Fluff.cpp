@@ -417,8 +417,9 @@ void CMovingThings::Init()
 		}
 	}
 
-	CEscalators::Init();
-	aScrollBars[0].Init(CVector(-1069.209f, 1320.126f, 18.848f), CVector(-1069.209f, 1342.299f, 22.612f), SCROLL_ARENA_STRING, 128, 255, 0, 0.3f);
+// LCS: removed
+//	CEscalators::Init();
+//	aScrollBars[0].Init(CVector(-1069.209f, 1320.126f, 18.848f), CVector(-1069.209f, 1342.299f, 22.612f), SCROLL_ARENA_STRING, 128, 255, 0, 0.3f);
 }
 
 void CMovingThings::Shutdown()

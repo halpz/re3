@@ -1,6 +1,6 @@
 #pragma once
 
-#define WATER_X_OFFSET (400.0f)
+#define WATER_X_OFFSET (0.0f)
 
 #define WATER_Z_OFFSET (0.5f)
 

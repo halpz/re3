@@ -44,6 +44,7 @@ const char VehicleNames[NUMHANDLINGS][14] = {
 	"RHINO",
 	"BARRACKS",
 	"TRAIN",
+	"FERRY",
 	"HELI",
 	"DODO",
 	"COACH",
@@ -56,66 +57,40 @@ const char VehicleNames[NUMHANDLINGS][14] = {
 	"DEADDODO",
 	"FLATBED",
 	"YANKEE",
-	"GOLFCART",
-	"VOODOO",
-	"WASHING",
-	"CUBAN",
-	"ROMERO",
-	"PACKER",
-	"ADMIRAL",
-	"GANGBUR",
-	"ZEBRA",
-	"TOPFUN",
-	"GLENDALE",
-	"OCEANIC",
-	"HERMES",
-	"SABRE1",
-	"SABRETUR",
-	"PHEONIX",
-	"WALTON",
-	"REGINA",
-	"COMET",
-	"DELUXO",
-	"BURRITO",
-	"SPAND",
-	"BAGGAGE",
-	"KAUFMAN",
-	"RANCHER",
-	"FBIRANCH",
-	"VIRGO",
-	"GREENWOO",
-	"HOTRING",
-	"SANDKING",
-	"BLISTAC",
-	"BOXVILLE",
-	"BENSON",
-	"DESPERAD",
-	"LOVEFIST",
-	"BLOODRA",
-	"BLOODRB",
+	"BLISTA",
+	"BELLYUP",
+	"MRWONGS",
+	"YARDIE",
+	"YAKUZA",
+	"DIABLOS",
+	"COLUMB",
+	"HOODS",
+	"PANLANT",
+	"BORGNINE",
+	"CAMPVAN",
+	"BALLOT",
+	"SPIDER",
+	"SHELBY",
+	"PONTIAC",
+	"ESPRIT",
+	"MINI",
+	"HOTROD",
+	"SINDACCO",
+	"FORELLI",
 	"BIKE",
 	"MOPED",
 	"DIRTBIKE",
 	"ANGEL",
+	"DIRTBIK2",
+	"ANGE2",
 	"FREEWAY",
 	"PREDATOR",
 	"SPEEDER",
 	"REEFER",
-	"RIO",
-	"SQUALO",
-	"TROPIC",
-	"COASTGRD",
-	"DINGHY",
-	"MARQUIS",
-	"CUPBOAT",
-	"SEAPLANE",
-	"SPARROW",
-	"SEASPAR",
 	"MAVERICK",
 	"COASTMAV",
 	"POLMAV",
 	"HUNTER",
-	"RCBARON",
 	"RCGOBLIN",
 	"RCCOPTER"
 };
@@ -350,7 +325,7 @@ void
 cHandlingDataMgr::ConvertDataToGameUnits(tHandlingData *handling)
 {
 	// convert distance to m, time to 1/50s
-	float velocity, a, b, specificVolume;
+	float velocity, a, b;
 
 	handling->Transmission.fEngineAcceleration *= 1.0f/(50.0f*50.0f);
 	handling->Transmission.fMaxVelocity *= 1000.0f/(60.0f*60.0f * 50.0f);
@@ -422,15 +397,15 @@ cHandlingDataMgr::GetHandlingId(const char *name)
 tFlyingHandlingData*
 cHandlingDataMgr::GetFlyingPointer(uint8 id)
 {
-	if(id >= HANDLING_SEAPLANE && id <= HANDLING_RCCOPTER)
-		return &FlyingHandlingData[id-HANDLING_SEAPLANE];
+	if(id >= HANDLING_MAVERICK && id <= HANDLING_RCCOPTER)
+		return &FlyingHandlingData[id-HANDLING_MAVERICK];
 	return &FlyingHandlingData[0];
 }
 
 tBoatHandlingData*
 cHandlingDataMgr::GetBoatPointer(uint8 id)
 {
-	if(id >= HANDLING_PREDATOR && id <= HANDLING_SEAPLANE)
+	if(id >= HANDLING_PREDATOR && id <= HANDLING_MAVERICK)
 		return &BoatHandlingData[id-HANDLING_PREDATOR];
 	return &BoatHandlingData[0];
 }

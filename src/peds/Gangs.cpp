@@ -22,23 +22,24 @@ CGangInfo::CGangInfo() :
 
 void CGangs::Initialise(void)
 {
-	SetGangPedModels(GANG_CUBAN, MI_CBA, MI_CBB);
-	SetGangPedModels(GANG_HAITIAN, MI_HNA, MI_HNB);
-	SetGangPedModels(GANG_STREET, MI_SGA, MI_SGB);
-	SetGangPedModels(GANG_DIAZ, MI_CLA, MI_CLB);
-	SetGangPedModels(GANG_SECURITY, MI_GDA, MI_GDB);
-	SetGangPedModels(GANG_BIKER, MI_BKA, MI_BKB);
-	SetGangPedModels(GANG_PLAYER, MI_PGA, MI_PGB);
-	SetGangPedModels(GANG_GOLFER, MI_WFOGO, MI_WMOGO);
-	SetGangVehicleModel(GANG_CUBAN, MI_CUBAN);
-	SetGangVehicleModel(GANG_HAITIAN, MI_VOODOO);
-	SetGangVehicleModel(GANG_STREET, MI_GANGBUR);
-	SetGangVehicleModel(GANG_DIAZ, -1);
-	SetGangVehicleModel(GANG_SECURITY, -1);
-	SetGangVehicleModel(GANG_BIKER, MI_ANGEL);
-	SetGangVehicleModel(GANG_PLAYER, -1);
-	SetGangVehicleModel(GANG_GOLFER, MI_CADDY);
-	SetGangWeapons(GANG_GOLFER, WEAPONTYPE_GOLFCLUB, WEAPONTYPE_GOLFCLUB);
+	SetGangPedModels(GANG_MAFIA, MI_GANG01, MI_GANG02);
+	SetGangPedModels(GANG_TRIAD, MI_GANG03, MI_GANG04);
+	SetGangPedModels(GANG_DIABLOS, MI_GANG05, MI_GANG06);
+	SetGangPedModels(GANG_YAKUZA, MI_GANG07, MI_GANG08);
+	SetGangPedModels(GANG_YARDIE, MI_GANG09, MI_GANG10);
+	SetGangPedModels(GANG_COLUMB, MI_GANG11, MI_GANG12);
+	SetGangPedModels(GANG_HOODS, MI_GANG13, MI_GANG14);
+	SetGangPedModels(GANG_FORELLI, MI_GANG15, MI_GANG16);
+	SetGangPedModels(GANG_SINDACCO, MI_GANG17, MI_GANG18);
+	SetGangVehicleModel(GANG_MAFIA, MI_MAFIA);
+	SetGangVehicleModel(GANG_TRIAD, MI_BELLYUP);
+	SetGangVehicleModel(GANG_DIABLOS, MI_DIABLOS);
+	SetGangVehicleModel(GANG_YAKUZA, MI_YAKUZA);
+	SetGangVehicleModel(GANG_YARDIE, MI_YARDIE);
+	SetGangVehicleModel(GANG_COLUMB, MI_COLUMB);
+	SetGangVehicleModel(GANG_HOODS, MI_HOODS);
+	SetGangVehicleModel(GANG_FORELLI, MI_FORELLI_CAR);
+	SetGangVehicleModel(GANG_SINDACCO, MI_SINDACCO_CAR);
 #ifdef FIX_BUGS
 	for (int i = 0; i < NUM_GANGS; i++)
 		SetGangPedModelOverride(i, -1);

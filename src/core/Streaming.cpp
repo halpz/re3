@@ -78,10 +78,16 @@ size_t CStreaming::ms_memoryAvailable;
 
 int32 desiredNumVehiclesLoaded = 12;
 
-CEntity *pIslandLODmainlandEntity;
-CEntity *pIslandLODbeachEntity;
-int32 islandLODmainland;
-int32 islandLODbeach;
+CEntity *pIslandLODindustEntity;
+CEntity *pIslandLODcomIndEntity;
+CEntity *pIslandLODcomSubEntity;
+CEntity *pIslandLODsubIndEntity;
+CEntity *pIslandLODsubComEntity;
+int32 islandLODindust;
+int32 islandLODcomInd;
+int32 islandLODcomSub;
+int32 islandLODsubInd;
+int32 islandLODsubCom;
 
 #ifndef MASTER
 bool gbPrintStats;
@@ -240,12 +246,21 @@ CStreaming::Init2(void)
 
 	// find island LODs
 
-	pIslandLODmainlandEntity = nil;
-	pIslandLODbeachEntity = nil;
-	islandLODmainland = -1;
-	islandLODbeach = -1;
-	CModelInfo::GetModelInfo("IslandLODmainland", &islandLODmainland);
-	CModelInfo::GetModelInfo("IslandLODbeach", &islandLODbeach);
+	pIslandLODindustEntity = nil;
+	pIslandLODcomIndEntity = nil;
+	pIslandLODcomSubEntity = nil;
+	pIslandLODsubIndEntity = nil;
+	pIslandLODsubComEntity = nil;
+	islandLODindust = -1;
+	islandLODcomInd = -1;
+	islandLODcomSub = -1;
+	islandLODsubInd = -1;
+	islandLODsubCom = -1;
+        CModelInfo::GetModelInfo("IslandLODInd", &islandLODindust);
+        CModelInfo::GetModelInfo("IslandLODcomIND", &islandLODcomInd);
+        CModelInfo::GetModelInfo("IslandLODcomSUB", &islandLODcomSub);
+        CModelInfo::GetModelInfo("IslandLODsubIND", &islandLODsubInd);
+        CModelInfo::GetModelInfo("IslandLODsubCOM", &islandLODsubCom);
 
 #ifndef MASTER
 	VarConsole.Add("Streaming Debug", &gbPrintStats, true);
@@ -912,13 +927,17 @@ CStreaming::RequestIslands(eLevelName level)
 {
 	ISLAND_LOADING_ISNT(HIGH)
 	switch(level){
-	case LEVEL_MAINLAND:
-		if(islandLODbeach != -1)
-			RequestModel(islandLODbeach, BIGBUILDINGFLAGS);
+	case LEVEL_INDUSTRIAL:
+		RequestModel(islandLODcomInd, BIGBUILDINGFLAGS);
+		RequestModel(islandLODsubInd, BIGBUILDINGFLAGS);
 		break;
-	case LEVEL_BEACH:
-		if(islandLODmainland != -1)
-			RequestModel(islandLODmainland, BIGBUILDINGFLAGS);
+	case LEVEL_COMMERCIAL:
+		RequestModel(islandLODindust, BIGBUILDINGFLAGS);
+		RequestModel(islandLODsubCom, BIGBUILDINGFLAGS);
+		break;
+	case LEVEL_SUBURBAN:
+		RequestModel(islandLODindust, BIGBUILDINGFLAGS);
+		RequestModel(islandLODcomSub, BIGBUILDINGFLAGS);
 		break;
 	default: break;
 	}
@@ -1127,10 +1146,12 @@ CStreaming::RemoveModel(int32 id)
 void
 CStreaming::RemoveUnusedBuildings(eLevelName level)
 {
-	if(level != LEVEL_BEACH)
-		RemoveBuildings(LEVEL_BEACH);
-	if(level != LEVEL_MAINLAND)
-		RemoveBuildings(LEVEL_MAINLAND);
+	if(level != LEVEL_INDUSTRIAL)
+		RemoveBuildings(LEVEL_INDUSTRIAL);
+	if(level != LEVEL_COMMERCIAL)
+		RemoveBuildings(LEVEL_COMMERCIAL);
+	if(level != LEVEL_SUBURBAN)
+		RemoveBuildings(LEVEL_SUBURBAN);
 }
 
 void
@@ -1253,10 +1274,12 @@ CStreaming::RemoveUnusedBigBuildings(eLevelName level)
 {
 	ISLAND_LOADING_IS(LOW)
 	{
-	if(level != LEVEL_BEACH)
-		RemoveBigBuildings(LEVEL_BEACH);
-	if(level != LEVEL_MAINLAND)
-		RemoveBigBuildings(LEVEL_MAINLAND);
+	if(level != LEVEL_INDUSTRIAL)
+		RemoveBigBuildings(LEVEL_INDUSTRIAL);
+	if(level != LEVEL_COMMERCIAL)
+		RemoveBigBuildings(LEVEL_COMMERCIAL);
+	if(level != LEVEL_SUBURBAN)
+		RemoveBigBuildings(LEVEL_SUBURBAN);
 	}
 	RemoveIslandsNotUsed(level);
 }
@@ -1278,15 +1301,21 @@ void
 CStreaming::RemoveIslandsNotUsed(eLevelName level)
 {
 	int i;
-	if(pIslandLODmainlandEntity == nil)
+	if(pIslandLODindustEntity == nil)
 	for(i = CPools::GetBuildingPool()->GetSize()-1; i >= 0; i--){
 		CBuilding *building = CPools::GetBuildingPool()->GetSlot(i);
 		if(building == nil)
 			continue;
-		if(building->GetModelIndex() == islandLODmainland)
-			pIslandLODmainlandEntity = building;
-		if(building->GetModelIndex() == islandLODbeach)
-			pIslandLODbeachEntity = building;
+		if(building->GetModelIndex() == islandLODindust)
+			pIslandLODindustEntity = building;
+		else if(building->GetModelIndex() == islandLODcomInd)
+			pIslandLODcomIndEntity = building;
+		else if(building->GetModelIndex() == islandLODcomSub)
+			pIslandLODcomSubEntity = building;
+		else if(building->GetModelIndex() == islandLODsubInd)
+			pIslandLODsubIndEntity = building;
+		else if(building->GetModelIndex() == islandLODsubCom)
+			pIslandLODsubComEntity = building;
 	}
 #ifdef NO_ISLAND_LOADING
 	if(FrontEndMenuManager.m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_HIGH) {
@@ -1295,12 +1324,27 @@ CStreaming::RemoveIslandsNotUsed(eLevelName level)
 	} else
 #endif
 	switch(level){
-	case LEVEL_MAINLAND:
-		DeleteIsland(pIslandLODmainlandEntity);
+	case LEVEL_INDUSTRIAL:
+		DeleteIsland(pIslandLODindustEntity);
+		DeleteIsland(pIslandLODcomSubEntity);
+		DeleteIsland(pIslandLODsubComEntity);
 		break;
-	case LEVEL_BEACH:
-		DeleteIsland(pIslandLODbeachEntity);
-
+	case LEVEL_COMMERCIAL:
+		DeleteIsland(pIslandLODcomIndEntity);
+		DeleteIsland(pIslandLODcomSubEntity);
+		DeleteIsland(pIslandLODsubIndEntity);
+		break;
+	case LEVEL_SUBURBAN:
+		DeleteIsland(pIslandLODsubIndEntity);
+		DeleteIsland(pIslandLODsubComEntity);
+		DeleteIsland(pIslandLODcomIndEntity);
+		break;
+	default:
+		DeleteIsland(pIslandLODindustEntity);
+		DeleteIsland(pIslandLODcomIndEntity);
+		DeleteIsland(pIslandLODcomSubEntity);
+		DeleteIsland(pIslandLODsubIndEntity);
+		DeleteIsland(pIslandLODsubComEntity);
 		break;
 	}
 }
@@ -1562,6 +1606,7 @@ CStreaming::IsObjectInCdImage(int32 id)
 void
 CStreaming::SetModelIsDeletable(int32 id)
 {
+	assert(id >= 0);	// guard against fake IDs
 	ms_aInfoForModel[id].m_flags &= ~STREAMFLAGS_DONT_REMOVE;
 	if ((id >= STREAM_OFFSET_TXD && id < STREAM_OFFSET_COL || CModelInfo::GetModelInfo(id)->GetModelType() != MITYPE_VEHICLE) &&
 	   (ms_aInfoForModel[id].m_flags & STREAMFLAGS_SCRIPTOWNED) == 0){
@@ -1640,11 +1685,11 @@ CStreaming::StreamVehiclesAndPeds(void)
 	}
 
 	if(FindPlayerPed()->m_pWanted->AreFbiRequired()){
-		RequestModel(MI_FBIRANCH, STREAMFLAGS_DONT_REMOVE);
+		RequestModel(MI_FBICAR, STREAMFLAGS_DONT_REMOVE);
 		RequestModel(MI_FBI, STREAMFLAGS_DONT_REMOVE);
 	}else{
-		SetModelIsDeletable(MI_FBIRANCH);
-		if(!HasModelLoaded(MI_FBIRANCH))
+		SetModelIsDeletable(MI_FBICAR);
+		if(!HasModelLoaded(MI_FBICAR))
 			SetModelIsDeletable(MI_FBI);
 	}
 
@@ -1664,6 +1709,7 @@ CStreaming::StreamVehiclesAndPeds(void)
 	else
 		SetModelIsDeletable(MI_CHOPPER);
 
+/*	LCS: removed
 	if (FindPlayerPed()->m_pWanted->AreMiamiViceRequired()) {
 		SetModelIsDeletable(MI_VICE1);
 		SetModelIsDeletable(MI_VICE2);
@@ -1705,6 +1751,7 @@ CStreaming::StreamVehiclesAndPeds(void)
 		SetModelIsDeletable(MI_VICE7);
 		SetModelIsDeletable(MI_VICE8);
 	}
+*/
 
 	if(timeBeforeNextLoad >= 0)
 		timeBeforeNextLoad--;
