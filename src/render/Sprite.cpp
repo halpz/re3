@@ -37,13 +37,12 @@ CSprite::CalcScreenCoors(const RwV3d &in, RwV3d *out, float *outw, float *outh, 
 	// this is used to scale correctly if you zoom in with sniper rifle
 	float fovScale = fov / CDraw::GetFOV();
 
+#ifdef FIX_SPRITES
+	*outw = fovScale * recip * SCREEN_HEIGHT;
+#else
 	*outw = fovScale * SCREEN_SCALE_AR(recip) * SCREEN_WIDTH;
-	*outh = fovScale * recip * SCREEN_HEIGHT;
-	
-#ifdef ASPECT_RATIO_SCALE
-	if ( CDraw::ms_bFixSprites )
-		*outw = fovScale * recip * SCREEN_HEIGHT;
 #endif
+	*outh = fovScale * recip * SCREEN_HEIGHT;
 
 	return true;
 }

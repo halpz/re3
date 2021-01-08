@@ -14,12 +14,6 @@ enum eAspectRatio
 	AR_MAX,
 };
 
-enum eSpriteScalingMode 
-{
-	SCL_PC,
-	SCL_PS2,
-};
-
 class CDraw
 {
 private:
@@ -40,11 +34,6 @@ public:
 	static uint8 FadeRed;
 	static uint8 FadeGreen;
 	static uint8 FadeBlue;
-#ifdef ASPECT_RATIO_SCALE
-	static int32 ms_nScalingMode;
-	static int32 ms_bFixRadar;
-	static int32 ms_bFixSprites;
-#endif
 
 	static void SetNearClipZ(float nearclip) { ms_fNearClipZ = nearclip; }
 	static float GetNearClipZ(void) { return ms_fNearClipZ; }
@@ -66,9 +55,5 @@ public:
 	static void SetAspectRatio(float ratio) { ms_fAspectRatio = ratio; }
 #else
 	static float GetAspectRatio(void) { return FindAspectRatio(); }
-#endif
-
-#ifdef ASPECT_RATIO_SCALE
-	static float ScaleY(float y);
 #endif
 };

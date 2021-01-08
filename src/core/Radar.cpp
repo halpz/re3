@@ -1297,21 +1297,12 @@ void CRadar::TransformRadarPointToScreenSpace(CVector2D &out, const CVector2D &i
 	} else
 #endif
 	{
-#ifdef ASPECT_RATIO_SCALE
-// The values are from an early screenshot taken before R* broke radar
-#define _RADAR_WIDTH ((CDraw::ms_bFixRadar)  ? (82.0f) : (RADAR_WIDTH))
-#define _RADAR_HEIGHT ((CDraw::ms_bFixRadar) ? (82.0f) : (RADAR_HEIGHT))
-#else
-#define _RADAR_WIDTH RADAR_WIDTH
-#define _RADAR_HEIGHT RADAR_HEIGHT
-#endif
-
 #ifdef FIX_BUGS
-		out.x = (in.x + 1.0f) * 0.5f * SCREEN_SCALE_X(_RADAR_WIDTH) + SCREEN_SCALE_X(RADAR_LEFT);
+		out.x = (in.x + 1.0f) * 0.5f * SCREEN_SCALE_X(RADAR_WIDTH) + SCREEN_SCALE_X(RADAR_LEFT);
 #else
-		out.x = (in.x + 1.0f) * 0.5f * SCREEN_SCALE_X(_RADAR_WIDTH) + RADAR_LEFT;
+		out.x = (in.x + 1.0f) * 0.5f * SCREEN_SCALE_X(RADAR_WIDTH) + RADAR_LEFT;
 #endif
-		out.y = (1.0f - in.y) * 0.5f * SCREEN_SCALE_Y(_RADAR_HEIGHT) + SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + _RADAR_HEIGHT);
+		out.y = (1.0f - in.y) * 0.5f * SCREEN_SCALE_Y(RADAR_HEIGHT) + SCREEN_SCALE_FROM_BOTTOM(RADAR_BOTTOM + RADAR_HEIGHT);
 	}
 }
 
