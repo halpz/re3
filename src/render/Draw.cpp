@@ -35,8 +35,14 @@ CDraw::FindAspectRatio(void)
 	default:
 	case AR_4_3:
 		return 4.0f / 3.0f;
+	case AR_5_4:
+		return 5.0f / 4.0f;
+	case AR_16_10:
+		return 16.0f / 10.0f;
 	case AR_16_9:
 		return 16.0f / 9.0f;
+	case AR_21_9:
+		return 21.0f / 9.0f;
 	};
 #endif
 }
@@ -70,14 +76,3 @@ CDraw::SetFOV(float fov)
 #endif
 	ms_fFOV = fov;
 }
-
-#ifdef ASPECT_RATIO_SCALE
-float
-ScaleAndCenterX(float x)
-{
-	if (SCREEN_WIDTH == DEFAULT_SCREEN_WIDTH)
-		return x;
-	else
-		return (SCREEN_WIDTH - SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH)) / 2 + SCREEN_SCALE_X(x);
-}
-#endif

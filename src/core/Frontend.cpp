@@ -1459,18 +1459,34 @@ CMenuManager::Draw()
 #else
 				switch (m_PrefsUseWideScreen) {
 				case AR_AUTO:
-					sprintf(asciiTemp, "AUTO");
+					rightText = TheText.Get("FEM_AUT");
 					break;
 				case AR_4_3:
 					sprintf(asciiTemp, "4:3");
+					AsciiToUnicode(asciiTemp, unicodeTemp);
+					rightText = unicodeTemp;
+					break;
+				case AR_5_4:
+					sprintf(asciiTemp, "5:4");
+					AsciiToUnicode(asciiTemp, unicodeTemp);
+					rightText = unicodeTemp;
+					break;
+				case AR_16_10:
+					sprintf(asciiTemp, "16:10");
+					AsciiToUnicode(asciiTemp, unicodeTemp);
+					rightText = unicodeTemp;
 					break;
 				case AR_16_9:
 					sprintf(asciiTemp, "16:9");
+					AsciiToUnicode(asciiTemp, unicodeTemp);
+					rightText = unicodeTemp;
+					break;
+				case AR_21_9:
+					sprintf(asciiTemp, "21:9");
+					AsciiToUnicode(asciiTemp, unicodeTemp);
+					rightText = unicodeTemp;
 					break;
 				}
-
-				AsciiToUnicode(asciiTemp, unicodeTemp);
-				rightText = unicodeTemp;
 #endif
 				break;
 			case MENUACTION_RADIO:
@@ -5252,12 +5268,12 @@ CMenuManager::ProcessButtonPresses(void)
 			case MENUACTION_WIDESCREEN:
 				if (changeValueBy > 0) {
 					m_PrefsUseWideScreen++;
-					if (m_PrefsUseWideScreen > 2)
+					if (m_PrefsUseWideScreen > AR_MAX-1)
 						m_PrefsUseWideScreen = 0;
 				} else {
 					m_PrefsUseWideScreen--;
 					if (m_PrefsUseWideScreen < 0)
-						m_PrefsUseWideScreen = 2;
+						m_PrefsUseWideScreen = AR_MAX-1;
 				}
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);
 				SaveSettings();

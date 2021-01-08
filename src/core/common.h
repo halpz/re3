@@ -121,7 +121,7 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 #include "skeleton.h"
 #include "Draw.h"
 
-#if defined(USE_PROPER_SCALING)
+#if defined(PROPER_SCALING) || defined(PS2_HUD)
 	#ifdef FORCE_PC_SCALING
 		#define DEFAULT_SCREEN_WIDTH  (640)
 		#define DEFAULT_SCREEN_HEIGHT (448)
@@ -155,8 +155,8 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 #define SCREEN_HEIGHT ((float)RsGlobal.height)
 #endif
 
-#define SCREEN_HEIGHT_PAL (512)
-#define SCREEN_HEIGHT_NTSC (448)
+#define SCREEN_HEIGHT_PAL ((float)512)
+#define SCREEN_HEIGHT_NTSC ((float)448)
 
 #define SCREEN_ASPECT_RATIO (CDraw::GetAspectRatio())
 #define SCREEN_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetScaledFOV() * 0.5f)))
@@ -175,8 +175,7 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 
 #ifdef ASPECT_RATIO_SCALE
 #define SCREEN_SCALE_AR(a) ((a) * DEFAULT_ASPECT_RATIO / SCREEN_ASPECT_RATIO)
-extern float ScaleAndCenterX(float x);
-#define SCALE_AND_CENTER_X(x) ScaleAndCenterX(x)
+#define SCALE_AND_CENTER_X(x) ((SCREEN_WIDTH == DEFAULT_SCREEN_WIDTH) ? (x) : (SCREEN_WIDTH - SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH)) / 2 + SCREEN_SCALE_X((x)))
 #else
 #define SCREEN_SCALE_AR(a) (a)
 #define SCALE_AND_CENTER_X(x) SCREEN_STRETCH_X(x)
