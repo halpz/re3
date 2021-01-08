@@ -80,7 +80,7 @@ void CCarAI::UpdateCarAI(CVehicle* pVehicle)
 			pVehicle->SetStatus(STATUS_PHYSICS);
 		CColPoint colPoint;
 		CEntity* pEntity;
-		if (pVehicle->m_randomSeed & 0x3F == CTimer::GetFrameCounter() & 0x3F &&
+		if ((pVehicle->m_randomSeed & 0x3F) == (CTimer::GetFrameCounter() & 0x3F) &&
 			!CWorld::ProcessVerticalLine(pVehicle->GetPosition(), -2.0f, colPoint, pEntity, true, false, false, false, true, false, nil)) {
 			debug("FLOATING CAR TURNED INTO PHYSICS CAR!\n");
 			pVehicle->SetStatus(STATUS_PHYSICS);

@@ -100,6 +100,7 @@ bool CTheScripts::bPlayerIsInTheStatium;
 int16 CTheScripts::CardStack[CARDS_IN_DECK * MAX_DECKS];
 int16 CTheScripts::CardStackPosition;
 #endif
+int CTheScripts::AllowedCollision[MAX_ALLOWED_COLLISIONS];
 
 #ifdef MISSION_REPLAY
 
@@ -1706,41 +1707,6 @@ void WakeThisPed(cleanup_entity_struct* pCleanup, CPed* pPed)
 }
 
 // done(LCS)
-void SleepThisVehicle(cleanup_entity_struct* pCleanup, CVehicle* pVehicle)
-{
-	printf("*** SLEEPING VEHICLE %i %i\n", pCleanup->id, pVehicle->GetModelIndex());
-	if (!pVehicle->GetIsStatic())
-		pVehicle->RemoveFromMovingList();
-	pVehicle->bIsStaticWaitingForCollision = true;
-}
-
-// done(LCS)
-void WakeThisVehicle(cleanup_entity_struct* pCleanup, CVehicle* pVehicle)
-{
-	printf("*** WAKING UP VEHICLE %i %i\n", pCleanup->id, pVehicle->GetModelIndex());
-	pVehicle->bIsStaticWaitingForCollision = false;
-	if (!pVehicle->bIsStatic)
-		pVehicle->AddToMovingList();
-}
-
-// done(LCS)
-void SleepThisObject(cleanup_entity_struct* pCleanup, CObject* pObject)
-{
-	if (!pObject->GetIsStatic())
-		pObject->RemoveFromMovingList();
-	pObject->bIsStaticWaitingForCollision = true;
-}
-
-// done(LCS)
-void WakeThisObject(cleanup_entity_struct* pCleanup, CObject* pObject)
-{
-	pObject->bIsStaticWaitingForCollision = false;
-	if (!pObject->bIsStatic)
-		pObject->AddToMovingList();
-
-}
-
-// done(LCS)
 void CMissionCleanup::AddEntityToList(int32 id, uint8 type)
 {
 	cleanup_entity_struct* pNew = FindFree();
@@ -1751,6 +1717,7 @@ void CMissionCleanup::AddEntityToList(int32 id, uint8 type)
 	m_nCount++;
 }
 
+// done(LCS)
 void CMissionCleanup::RemoveEntityFromList(int32 id, uint8 type)
 {
 	for (int i = 0; i < MAX_CLEANUP; i++){
@@ -1818,13 +1785,20 @@ void CMissionCleanup::CheckIfCollisionHasLoadedForMissionObjects()
 					if (!pVehicle->bIsStaticWaitingForCollision) {
 						if (!pVehicle->IsHeli() && !pVehicle->IsPlane() && pVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_HELI &&
 							pVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_BOAT && pVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_PLANE) {
-							SleepThisVehicle(&m_sEntities[i], pVehicle);
+							printf("*** SLEEPING VEHICLE %i %i\n", m_sEntities[i].id, pVehicle->GetModelIndex());
+							if (!pVehicle->GetIsStatic())
+								pVehicle->RemoveFromMovingList();
+							pVehicle->bIsStaticWaitingForCollision = true;
 						}
 					}
 				}
 				else {
-					if (pVehicle->bIsStaticWaitingForCollision)
-						WakeThisVehicle(&m_sEntities[i], pVehicle);
+					if (pVehicle->bIsStaticWaitingForCollision) {
+						printf("*** WAKING UP VEHICLE %i %i\n", m_sEntities[i].id, pVehicle->GetModelIndex());
+						pVehicle->bIsStaticWaitingForCollision = false;
+						if (!pVehicle->bIsStatic)
+							pVehicle->AddToMovingList();
+					}
 				}
 			}
 		}
@@ -1837,12 +1811,17 @@ void CMissionCleanup::CheckIfCollisionHasLoadedForMissionObjects()
 					level = CGame::currLevel;
 				if (!CColStore::HasCollisionLoaded(level)) {
 					if (!pObject->bIsStaticWaitingForCollision) {
-						SleepThisObject(&m_sEntities[i], pObject);
+						if (!pObject->GetIsStatic())
+							pObject->RemoveFromMovingList();
+						pObject->bIsStaticWaitingForCollision = true;
 					}
 				}
 				else {
-					if (pObject->bIsStaticWaitingForCollision)
-						WakeThisObject(&m_sEntities[i], pObject);
+					if (pObject->bIsStaticWaitingForCollision) {
+						pObject->bIsStaticWaitingForCollision = false;
+						if (!pObject->bIsStatic)
+							pObject->AddToMovingList();
+					}
 				}
 			}
 		}
@@ -1897,6 +1876,7 @@ void CMissionCleanup::CheckIfCollisionHasLoadedForMissionObjects()
 	}
 }
 
+// done(LCS) except TODO
 void CMissionCleanup::Process()
 {
 	CPopulation::m_AllRandomPedsThisType = -1;
@@ -2001,6 +1981,7 @@ bool CUpsideDownCarCheck::IsCarUpsideDown(int32 id)
 	return IsCarUpsideDown(pVehicle);
 }
 
+// done(LCS)
 bool CUpsideDownCarCheck::IsCarUpsideDown(CVehicle* pVehicle)
 {
 	assert(pVehicle);
@@ -2009,6 +1990,7 @@ bool CUpsideDownCarCheck::IsCarUpsideDown(CVehicle* pVehicle)
 		pVehicle->GetTurnSpeed().Magnitude() < UPSIDEDOWN_TURN_SPEED_THRESHOLD;
 }
 
+// done(LCS)
 void CUpsideDownCarCheck::UpdateTimers()
 {
 	uint32 timeStep = CTimer::GetTimeStepInMilliseconds();
@@ -2071,6 +2053,7 @@ bool CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile(int32 id)
 	return false;
 }
 
+// done(LCS)
 void stuck_car_data::Reset()
 {
 	m_nVehicleIndex = -1;
@@ -2081,6 +2064,7 @@ void stuck_car_data::Reset()
 	m_bStuck = false;
 }
 
+// done(LCS)
 void CStuckCarCheck::Init()
 {
 	for (int i = 0; i < MAX_STUCK_CAR_CHECKS; i++) {
@@ -2088,6 +2072,7 @@ void CStuckCarCheck::Init()
 	}
 }
 
+// done(LCS)
 void CStuckCarCheck::Process()
 {
 	uint32 timer = CTimer::GetTimeInMilliseconds();
@@ -2108,6 +2093,7 @@ void CStuckCarCheck::Process()
 	}
 }
 
+// done(LCS)
 void CStuckCarCheck::AddCarToCheck(int32 id, float radius, uint32 time)
 {
 	CVehicle* pv = CPools::GetVehiclePool()->GetAt(id);
@@ -2128,6 +2114,7 @@ void CStuckCarCheck::AddCarToCheck(int32 id, float radius, uint32 time)
 	m_sCars[index].m_bStuck = false;
 }
 
+// done(LCS)
 void CStuckCarCheck::RemoveCarFromCheck(int32 id)
 {
 	for (int i = 0; i < MAX_STUCK_CAR_CHECKS; i++){
@@ -2137,6 +2124,7 @@ void CStuckCarCheck::RemoveCarFromCheck(int32 id)
 	}
 }
 
+// done(LCS)
 bool CStuckCarCheck::HasCarBeenStuckForAWhile(int32 id)
 {
 	for (int i = 0; i < MAX_STUCK_CAR_CHECKS; i++){
@@ -2146,36 +2134,45 @@ bool CStuckCarCheck::HasCarBeenStuckForAWhile(int32 id)
 	return false;
 }
 
-void CRunningScript::CollectParameters(uint32* pIp, int16 total)
+void CRunningScript::CollectParameters(uint32* pIp, int16 total, int* pParameters)
 {
-	for (int16 i = 0; i < total; i++){
+	while (total--){
 		uint16 varIndex;
 		switch (CTheScripts::Read1ByteFromScript(pIp))
 		{
+		case ARGUMENT_END:
+			return;
+		case ARGUMENT_INT_ZERO:
+			*pParameters = 0;
+			break;
+		case ARGUMENT_FLOAT_ZERO:
+			*pParameters = 0;
+			break;
+		case ARGUMENT_FLOAT_1BYTE:
+			*pParameters = (uint32)(uint8)CTheScripts::Read1ByteFromScript(pIp) << 24;
+			break;
+		case ARGUMENT_FLOAT_2BYTES:
+			*pParameters = (uint32)(uint8)CTheScripts::Read2BytesFromScript(pIp) << 16;
+			break;
+		case ARGUMENT_FLOAT_3BYTES:
+			*pParameters = (uint32)(uint8)CTheScripts::Read1ByteFromScript(pIp) << 8;
+			*pParameters |= (uint32)(uint16)CTheScripts::Read2BytesFromScript(pIp) << 16;
+			break;
 		case ARGUMENT_INT32:
 		case ARGUMENT_FLOAT:
-			ScriptParams[i] = CTheScripts::Read4BytesFromScript(pIp);
-			break;
-		case ARGUMENT_GLOBALVAR:
-			varIndex = CTheScripts::Read2BytesFromScript(pIp);
-			script_assert(varIndex >= 8 && varIndex < CTheScripts::GetSizeOfVariableSpace());
-			ScriptParams[i] = *((int32*)&CTheScripts::ScriptSpace[varIndex]);
-			break;
-		case ARGUMENT_LOCALVAR:
-			varIndex = CTheScripts::Read2BytesFromScript(pIp);
-			script_assert(varIndex >= 0 && varIndex < ARRAY_SIZE(m_anLocalVariables));
-			ScriptParams[i] = m_anLocalVariables[varIndex];
+			*pParameters = CTheScripts::Read4BytesFromScript(pIp);
 			break;
 		case ARGUMENT_INT8:
-			ScriptParams[i] = CTheScripts::Read1ByteFromScript(pIp);
+			*pParameters = CTheScripts::Read1ByteFromScript(pIp);
 			break;
 		case ARGUMENT_INT16:
-			ScriptParams[i] = CTheScripts::Read2BytesFromScript(pIp);
+			*pParameters = CTheScripts::Read2BytesFromScript(pIp);
 			break;
 		default:
-			script_assert(0);
+			*pParameters = *GetPointerToScriptVariable(pIp, 0);
 			break;
 		}
+		pParameters++;
 	}
 }
 
@@ -2185,11 +2182,24 @@ int CRunningScript::CollectParameterForDebug(char* buf, bool& var)
 	uint16 varIndex;
 	char tmpstr[24];
 	var = false;
+	int tmp;
 	switch (CTheScripts::Read1ByteFromScript(&m_nIp))
 	{
-	case ARGUMENT_INT32:
-	case ARGUMENT_FLOAT:
-		return CTheScripts::Read4BytesFromScript(&m_nIp);
+	case ARGUMENT_END:
+		return 0; // TODO(LCS)
+	case ARGUMENT_INT_ZERO:
+		return 0;
+	case ARGUMENT_FLOAT_ZERO:
+		return 0;
+	case ARGUMENT_FLOAT_1BYTE:
+		return (uint32)(uint8)CTheScripts::Read1ByteFromScript(&m_nIp) << 24;
+	case ARGUMENT_FLOAT_2BYTES:
+		return (uint32)(uint8)CTheScripts::Read2BytesFromScript(&m_nIp) << 16;
+	case ARGUMENT_FLOAT_3BYTES:
+		tmp = (uint32)(uint8)CTheScripts::Read1ByteFromScript(&m_nIp) << 8;
+		tmp |= (uint32)(uint16)CTheScripts::Read2BytesFromScript(&m_nIp) << 16;
+		return tmp;
+		/*
 	case ARGUMENT_GLOBALVAR:
 		varIndex = CTheScripts::Read2BytesFromScript(&m_nIp);
 		script_assert(varIndex >= 8 && varIndex < CTheScripts::GetSizeOfVariableSpace());
@@ -2204,13 +2214,19 @@ int CRunningScript::CollectParameterForDebug(char* buf, bool& var)
 		sprintf(tmpstr, " %d@", varIndex);
 		strcat(buf, tmpstr);
 		return m_anLocalVariables[varIndex];
+		*/
+	case ARGUMENT_INT32:
+	case ARGUMENT_FLOAT:
+		return CTheScripts::Read4BytesFromScript(&m_nIp);
+		break;
 	case ARGUMENT_INT8:
 		return CTheScripts::Read1ByteFromScript(&m_nIp);
+		break;
 	case ARGUMENT_INT16:
 		return CTheScripts::Read2BytesFromScript(&m_nIp);
+		break;
 	default:
-		PrintToLog("%s - script assertion failed in CollectParameterForDebug", buf);
-		script_assert(0);
+		// TODO(LCS): GetPointerToScriptVariableForDebug();
 		break;
 	}
 	return 0;
@@ -2221,6 +2237,7 @@ void CRunningScript::GetStoredParameterForDebug(char* buf)
 	uint16 varIndex;
 	char tmpstr[24];
 	switch (CTheScripts::Read1ByteFromScript(&m_nIp)) {
+		/*
 	case ARGUMENT_GLOBALVAR:
 		varIndex = CTheScripts::Read2BytesFromScript(&m_nIp);
 		sprintf(tmpstr, " $%d", varIndex / 4);
@@ -2231,6 +2248,7 @@ void CRunningScript::GetStoredParameterForDebug(char* buf)
 		sprintf(tmpstr, " %d@", varIndex);
 		strcat(buf, tmpstr);
 		break;
+		*/
 	default:
 		PrintToLog("%s - script_assertion failed in GetStoredParameterForDebug", buf);
 		script_assert(0);
@@ -2241,14 +2259,25 @@ void CRunningScript::GetStoredParameterForDebug(char* buf)
 int32 CRunningScript::CollectNextParameterWithoutIncreasingPC(uint32 ip)
 {
 	uint32* pIp = &ip;
+	int tmp;
 	switch (CTheScripts::Read1ByteFromScript(pIp))
 	{
+	case ARGUMENT_END:
+		return 0; // TODO(LCS)
+	case ARGUMENT_INT_ZERO:
+		return 0;
+	case ARGUMENT_FLOAT_ZERO:
+		return 0;
+	case ARGUMENT_FLOAT_1BYTE:
+		return (uint32)(uint8)CTheScripts::Read1ByteFromScript(&m_nIp) << 24;
+	case ARGUMENT_FLOAT_2BYTES:
+		return (uint32)(uint8)CTheScripts::Read2BytesFromScript(&m_nIp) << 16;
+	case ARGUMENT_FLOAT_3BYTES:
+		tmp = (uint32)(uint8)CTheScripts::Read1ByteFromScript(&m_nIp) << 8;
+		tmp |= (uint32)(uint16)CTheScripts::Read2BytesFromScript(&m_nIp) << 16;
+		return tmp;
 	case ARGUMENT_INT32:
 		return CTheScripts::Read4BytesFromScript(pIp);
-	case ARGUMENT_GLOBALVAR:
-		return *((int32*)&CTheScripts::ScriptSpace[(uint16)CTheScripts::Read2BytesFromScript(pIp)]);
-	case ARGUMENT_LOCALVAR:
-		return m_anLocalVariables[CTheScripts::Read2BytesFromScript(pIp)];
 	case ARGUMENT_INT8:
 		return CTheScripts::Read1ByteFromScript(pIp);
 	case ARGUMENT_INT16:
@@ -2256,7 +2285,7 @@ int32 CRunningScript::CollectNextParameterWithoutIncreasingPC(uint32 ip)
 	case ARGUMENT_FLOAT:
 		return CTheScripts::Read4BytesFromScript(pIp);
 	default:
-		script_assert(0);
+		return *GetPointerToScriptVariable(pIp, 0);
 	}
 	return -1;
 }
@@ -2264,33 +2293,17 @@ int32 CRunningScript::CollectNextParameterWithoutIncreasingPC(uint32 ip)
 void CRunningScript::StoreParameters(uint32* pIp, int16 number)
 {
 	for (int16 i = 0; i < number; i++){
-		switch (CTheScripts::Read1ByteFromScript(pIp)) {
-		case ARGUMENT_GLOBALVAR:
-			*(int32*)&CTheScripts::ScriptSpace[(uint16)CTheScripts::Read2BytesFromScript(pIp)] = ScriptParams[i];
-			break;
-		case ARGUMENT_LOCALVAR:
-			m_anLocalVariables[CTheScripts::Read2BytesFromScript(pIp)] = ScriptParams[i];
-			break;
-		default:
-			script_assert(0);
-		}
+		*GetPointerToScriptVariable(pIp, 0) = ScriptParams[i];
 	}
+}
+
+int32* GetPointerToScriptVariable(CRunningScript* pScript, uint32* pIp)
+{
 }
 
 int32 *CRunningScript::GetPointerToScriptVariable(uint32* pIp, int16 type)
 {
-	switch (CTheScripts::Read1ByteFromScript(pIp))
-	{
-	case ARGUMENT_GLOBALVAR:
-		script_assert(type == VAR_GLOBAL);
-		return (int32*)&CTheScripts::ScriptSpace[(uint16)CTheScripts::Read2BytesFromScript(pIp)];
-	case ARGUMENT_LOCALVAR:
-		script_assert(type == VAR_LOCAL);
-		return &m_anLocalVariables[CTheScripts::Read2BytesFromScript(pIp)];
-	default:
-		script_assert(0);
-	}
-	return nil;
+	return ::GetPointerToScriptVariable(this, pIp);
 }
 
 void CRunningScript::Init()

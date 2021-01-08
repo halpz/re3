@@ -216,9 +216,12 @@ public:
 
 enum {
 	ARGUMENT_END = 0,
+	ARGUMENT_INT_ZERO,
+	ARGUMENT_FLOAT_ZERO,
+	ARGUMENT_FLOAT_1BYTE,
+	ARGUMENT_FLOAT_2BYTES,
+	ARGUMENT_FLOAT_3BYTES,
 	ARGUMENT_INT32,
-	ARGUMENT_GLOBALVAR,
-	ARGUMENT_LOCALVAR,
 	ARGUMENT_INT8,
 	ARGUMENT_INT16,
 	ARGUMENT_FLOAT
@@ -451,6 +454,8 @@ enum {
 	NUM_TIMERS = 2
 };
 
+extern int ScriptParams[32];
+
 class CRunningScript
 {
 	enum {
@@ -512,7 +517,7 @@ public:
 
 	static const uint32 nSaveStructSize;
 
-	void CollectParameters(uint32*, int16);
+	void CollectParameters(uint32*, int16, int* pParams = (int*)&ScriptParams);
 	int32 CollectNextParameterWithoutIncreasingPC(uint32);
 	int32* GetPointerToScriptVariable(uint32*, int16);
 	void StoreParameters(uint32*, int16);
