@@ -49,18 +49,20 @@
 #include "Timecycle.h"
 #include "TxdStore.h"
 #include "Bike.h"
+#include "memoryManager.h"
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #include <stdarg.h>
 #endif
 
 //--MIAMI: file done
 
-uint8 CTheScripts::ScriptSpace[SIZE_SCRIPT_SPACE];
+uint8* CTheScripts::ScriptSpace;
 CRunningScript CTheScripts::ScriptsArray[MAX_NUM_SCRIPTS];
 intro_text_line CTheScripts::IntroTextLines[MAX_NUM_INTRO_TEXT_LINES];
 intro_script_rectangle CTheScripts::IntroRectangles[MAX_NUM_INTRO_RECTANGLES];
 CSprite2d CTheScripts::ScriptSprites[MAX_NUM_SCRIPT_SRPITES];
 script_sphere_struct CTheScripts::ScriptSphereArray[MAX_NUM_SCRIPT_SPHERES];
+tCollectiveData CTheScripts::CollectiveArray[MAX_NUM_COLLECTIVES];
 tUsedObject CTheScripts::UsedObjectArray[MAX_NUM_USED_OBJECTS];
 int32 CTheScripts::MultiScriptArray[MAX_NUM_MISSION_SCRIPTS];
 tBuildingSwap CTheScripts::BuildingSwapArray[MAX_NUM_BUILDING_SWAPS];
@@ -101,6 +103,13 @@ int16 CTheScripts::CardStack[CARDS_IN_DECK * MAX_DECKS];
 int16 CTheScripts::CardStackPosition;
 #endif
 int CTheScripts::AllowedCollision[MAX_ALLOWED_COLLISIONS];
+bool CTheScripts::FSDestroyedFlag;
+short* CTheScripts::SavedVarIndices;
+int CTheScripts::NumSaveVars;
+int gScriptsFile = -1;
+int CTheScripts::NextProcessId = 1;
+bool CTheScripts::InTheScripts;
+CRunningScript* pCurrent;
 
 #ifdef MISSION_REPLAY
 
@@ -226,7 +235,7 @@ const tScriptCommandData commands[] = {
 	REGISTER_COMMAND(COMMAND_GOSUB, INPUT_ARGUMENTS(ARGTYPE_LABEL,), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_RETURN, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_LINE, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_INT, ARGTYPE_INT, ARGTYPE_INT, ARGTYPE_INT, ARGTYPE_INT,), OUTPUT_ARGUMENTS(), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_CREATE_PLAYER, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT,), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_CREATE_PLAYER, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT,), OUTPUT_ARGUMENTS(ARGTYPE_INT,), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_GET_PLAYER_COORDINATES, INPUT_ARGUMENTS(ARGTYPE_INT,), OUTPUT_ARGUMENTS(ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT,), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_SET_PLAYER_COORDINATES, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT,), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_IS_PLAYER_IN_AREA_2D, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_BOOL,), OUTPUT_ARGUMENTS(), true, -1, ""),
@@ -357,6 +366,11 @@ const tScriptCommandData commands[] = {
 	REGISTER_COMMAND(COMMAND_WHILE, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_WHILENOT, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_ENDWHILE, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_214, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_215, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_216, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_217, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_218, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_ANDOR, INPUT_ARGUMENTS(ARGTYPE_ANDOR,), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_LAUNCH_MISSION, INPUT_ARGUMENTS(ARGTYPE_LABEL,), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_MISSION_HAS_FINISHED, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
@@ -2134,10 +2148,10 @@ bool CStuckCarCheck::HasCarBeenStuckForAWhile(int32 id)
 	return false;
 }
 
+// done(LCS)
 void CRunningScript::CollectParameters(uint32* pIp, int16 total, int* pParameters)
 {
 	while (total--){
-		uint16 varIndex;
 		switch (CTheScripts::Read1ByteFromScript(pIp))
 		{
 		case ARGUMENT_END:
@@ -2152,7 +2166,7 @@ void CRunningScript::CollectParameters(uint32* pIp, int16 total, int* pParameter
 			*pParameters = (uint32)(uint8)CTheScripts::Read1ByteFromScript(pIp) << 24;
 			break;
 		case ARGUMENT_FLOAT_2BYTES:
-			*pParameters = (uint32)(uint8)CTheScripts::Read2BytesFromScript(pIp) << 16;
+			*pParameters = (uint32)(uint16)CTheScripts::Read2BytesFromScript(pIp) << 16;
 			break;
 		case ARGUMENT_FLOAT_3BYTES:
 			*pParameters = (uint32)(uint8)CTheScripts::Read1ByteFromScript(pIp) << 8;
@@ -2169,6 +2183,7 @@ void CRunningScript::CollectParameters(uint32* pIp, int16 total, int* pParameter
 			*pParameters = CTheScripts::Read2BytesFromScript(pIp);
 			break;
 		default:
+			*pIp -= 1;
 			*pParameters = *GetPointerToScriptVariable(pIp, 0);
 			break;
 		}
@@ -2177,10 +2192,54 @@ void CRunningScript::CollectParameters(uint32* pIp, int16 total, int* pParameter
 }
 
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+// done(LCS)
+int32* GetPointerToScriptVariableForDebug(CRunningScript* pScript, uint32* pIp, char* buf)
+{
+	char tmpstr[24];
+	uint8 type = CTheScripts::Read1ByteFromScript(pIp);
+	if (type >= ARGUMENT_GLOBAL_ARRAY) {
+		uint8 index_in_block = CTheScripts::Read1ByteFromScript(pIp);
+		uint8 index_id = CTheScripts::Read1ByteFromScript(pIp);
+		uint8 size = CTheScripts::Read1ByteFromScript(pIp);
+		script_assert(size > 0);
+		script_assert(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id] < size);
+		uint8 index = Min(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id], size - 1);
+		sprintf(tmpstr, " $%d[%d@]", ((int)(type - ARGUMENT_GLOBAL_ARRAY) << 8) + index_in_block, index_id);
+		strcat(buf, tmpstr);
+		return (int32*)&CTheScripts::ScriptSpace[4 * (((int)(type - ARGUMENT_GLOBAL_ARRAY) << 8) + index + index_in_block)];
+	}
+	else if (type >= ARGUMENT_GLOBAL) {
+		uint8 index_in_block = CTheScripts::Read1ByteFromScript(pIp);
+		sprintf(tmpstr, " $%d", ((int)(type - ARGUMENT_GLOBAL) << 8) + index_in_block);
+		strcat(buf, tmpstr);
+		return (int32*)&CTheScripts::ScriptSpace[4 * (((int)(type - ARGUMENT_GLOBAL) << 8) + index_in_block)];
+	}
+	else if (type >= ARGUMENT_LOCAL_ARRAY) {
+		uint8 index_id = CTheScripts::Read1ByteFromScript(pIp);
+		uint8 size = CTheScripts::Read1ByteFromScript(pIp);
+		script_assert(size > 0);
+		script_assert(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id] < size);
+		uint8 index = Min(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id], size - 1);
+		sprintf(tmpstr, " %d@[%d@]", (type - ARGUMENT_LOCAL_ARRAY), index_id);
+		strcat(buf, tmpstr);
+		return &pScript->m_anLocalVariables[pScript->m_nLocalsPointer + (type - ARGUMENT_LOCAL_ARRAY) + index];
+	}
+	else if (type >= ARGUMENT_LOCAL) {
+		sprintf(tmpstr, " %d@", (type - ARGUMENT_LOCAL));
+		strcat(buf, tmpstr);
+		return &pScript->m_anLocalVariables[pScript->m_nLocalsPointer + (type - ARGUMENT_LOCAL)];
+	}
+	else {
+		assert(type >= ARGUMENT_TIMER);
+		sprintf(tmpstr, " TIMER%d@", (type - ARGUMENT_LOCAL_ARRAY));
+		strcat(buf, tmpstr);
+		return &pScript->m_anLocalVariables[NUM_LOCAL_VARS + 8 + (type - ARGUMENT_TIMER)]; // why 8?
+	}
+}
+
+// done(LCS)
 int CRunningScript::CollectParameterForDebug(char* buf, bool& var)
 {
-	uint16 varIndex;
-	char tmpstr[24];
 	var = false;
 	int tmp;
 	switch (CTheScripts::Read1ByteFromScript(&m_nIp))
@@ -2194,27 +2253,11 @@ int CRunningScript::CollectParameterForDebug(char* buf, bool& var)
 	case ARGUMENT_FLOAT_1BYTE:
 		return (uint32)(uint8)CTheScripts::Read1ByteFromScript(&m_nIp) << 24;
 	case ARGUMENT_FLOAT_2BYTES:
-		return (uint32)(uint8)CTheScripts::Read2BytesFromScript(&m_nIp) << 16;
+		return (uint32)(uint16)CTheScripts::Read2BytesFromScript(&m_nIp) << 16;
 	case ARGUMENT_FLOAT_3BYTES:
 		tmp = (uint32)(uint8)CTheScripts::Read1ByteFromScript(&m_nIp) << 8;
 		tmp |= (uint32)(uint16)CTheScripts::Read2BytesFromScript(&m_nIp) << 16;
 		return tmp;
-		/*
-	case ARGUMENT_GLOBALVAR:
-		varIndex = CTheScripts::Read2BytesFromScript(&m_nIp);
-		script_assert(varIndex >= 8 && varIndex < CTheScripts::GetSizeOfVariableSpace());
-		var = true;
-		sprintf(tmpstr, " $%d", varIndex / 4);
-		strcat(buf, tmpstr);
-		return *((int32*)&CTheScripts::ScriptSpace[varIndex]);
-	case ARGUMENT_LOCALVAR:
-		varIndex = CTheScripts::Read2BytesFromScript(&m_nIp);
-		script_assert(varIndex >= 0 && varIndex < ARRAY_SIZE(m_anLocalVariables));
-		var = true;
-		sprintf(tmpstr, " %d@", varIndex);
-		strcat(buf, tmpstr);
-		return m_anLocalVariables[varIndex];
-		*/
 	case ARGUMENT_INT32:
 	case ARGUMENT_FLOAT:
 		return CTheScripts::Read4BytesFromScript(&m_nIp);
@@ -2226,36 +2269,22 @@ int CRunningScript::CollectParameterForDebug(char* buf, bool& var)
 		return CTheScripts::Read2BytesFromScript(&m_nIp);
 		break;
 	default:
-		// TODO(LCS): GetPointerToScriptVariableForDebug();
+		var = true;
+		--m_nIp;
+		GetPointerToScriptVariableForDebug(this, &m_nIp, buf);
 		break;
 	}
 	return 0;
 }
 
+// done(LCS)
 void CRunningScript::GetStoredParameterForDebug(char* buf)
 {
-	uint16 varIndex;
-	char tmpstr[24];
-	switch (CTheScripts::Read1ByteFromScript(&m_nIp)) {
-		/*
-	case ARGUMENT_GLOBALVAR:
-		varIndex = CTheScripts::Read2BytesFromScript(&m_nIp);
-		sprintf(tmpstr, " $%d", varIndex / 4);
-		strcat(buf, tmpstr);
-		break;
-	case ARGUMENT_LOCALVAR:
-		varIndex = CTheScripts::Read2BytesFromScript(&m_nIp);
-		sprintf(tmpstr, " %d@", varIndex);
-		strcat(buf, tmpstr);
-		break;
-		*/
-	default:
-		PrintToLog("%s - script_assertion failed in GetStoredParameterForDebug", buf);
-		script_assert(0);
-	}
+	GetPointerToScriptVariableForDebug(this, &m_nIp, buf);
 }
 #endif
 
+// done(LCS)
 int32 CRunningScript::CollectNextParameterWithoutIncreasingPC(uint32 ip)
 {
 	uint32* pIp = &ip;
@@ -2271,7 +2300,7 @@ int32 CRunningScript::CollectNextParameterWithoutIncreasingPC(uint32 ip)
 	case ARGUMENT_FLOAT_1BYTE:
 		return (uint32)(uint8)CTheScripts::Read1ByteFromScript(&m_nIp) << 24;
 	case ARGUMENT_FLOAT_2BYTES:
-		return (uint32)(uint8)CTheScripts::Read2BytesFromScript(&m_nIp) << 16;
+		return (uint32)(uint16)CTheScripts::Read2BytesFromScript(&m_nIp) << 16;
 	case ARGUMENT_FLOAT_3BYTES:
 		tmp = (uint32)(uint8)CTheScripts::Read1ByteFromScript(&m_nIp) << 8;
 		tmp |= (uint32)(uint16)CTheScripts::Read2BytesFromScript(&m_nIp) << 16;
@@ -2285,11 +2314,13 @@ int32 CRunningScript::CollectNextParameterWithoutIncreasingPC(uint32 ip)
 	case ARGUMENT_FLOAT:
 		return CTheScripts::Read4BytesFromScript(pIp);
 	default:
+		pIp--;
 		return *GetPointerToScriptVariable(pIp, 0);
 	}
 	return -1;
 }
 
+// done(LCS)
 void CRunningScript::StoreParameters(uint32* pIp, int16 number)
 {
 	for (int16 i = 0; i < number; i++){
@@ -2297,18 +2328,60 @@ void CRunningScript::StoreParameters(uint32* pIp, int16 number)
 	}
 }
 
+// done(LCS)
 int32* GetPointerToScriptVariable(CRunningScript* pScript, uint32* pIp)
 {
+	uint8 type = CTheScripts::Read1ByteFromScript(pIp);
+	if (type >= ARGUMENT_GLOBAL_ARRAY) {
+		uint8 index_in_block = CTheScripts::Read1ByteFromScript(pIp);
+		uint8 index_id = CTheScripts::Read1ByteFromScript(pIp);
+		uint8 size = CTheScripts::Read1ByteFromScript(pIp);
+		script_assert(size > 0);
+		script_assert(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id] < size);
+		uint8 index = Min(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id], size - 1);
+		return (int32*)&CTheScripts::ScriptSpace[((int)(type - ARGUMENT_GLOBAL_ARRAY) << 8) + index + index_in_block];
+	}
+	else if (type >= ARGUMENT_GLOBAL) {
+		uint8 index_in_block = CTheScripts::Read1ByteFromScript(pIp);
+		return (int32*)&CTheScripts::ScriptSpace[((int)(type - ARGUMENT_GLOBAL) << 8) + index_in_block];
+	}
+	else if (type >= ARGUMENT_LOCAL_ARRAY) {
+		uint8 index_id = CTheScripts::Read1ByteFromScript(pIp);
+		uint8 size = CTheScripts::Read1ByteFromScript(pIp);
+		script_assert(size > 0);
+		script_assert(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id] < size);
+		uint8 index = Min(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id], size - 1);
+		return &pScript->m_anLocalVariables[pScript->m_nLocalsPointer + (type - ARGUMENT_LOCAL_ARRAY) + index];
+	}
+	else if (type >= ARGUMENT_LOCAL) {
+		return &pScript->m_anLocalVariables[pScript->m_nLocalsPointer + (type - ARGUMENT_LOCAL)];
+	}
+	else {
+		assert(type >= ARGUMENT_TIMER);
+		return &pScript->m_anLocalVariables[NUM_LOCAL_VARS + 8 + (type - ARGUMENT_TIMER)];
+	}
 }
 
+// done(LCS)
 int32 *CRunningScript::GetPointerToScriptVariable(uint32* pIp, int16 type)
 {
 	return ::GetPointerToScriptVariable(this, pIp);
 }
 
+// done(LCS)
+int CTheScripts::GetSaveVarIndex(int var)
+{
+	for (int i = 0; i < NumSaveVars; i++) {
+		if (SavedVarIndices[i] == var)
+			return i;
+	}
+	return -1;
+}
+
+// done(LCS)
 void CRunningScript::Init()
 {
-	strcpy(m_abScriptName, "noname");
+	sprintf(m_abScriptName, "id%02i", m_nId);
 	next = prev = nil;
 	SetIP(0);
 	for (int i = 0; i < MAX_STACK_DEPTH; i++)
@@ -2319,13 +2392,29 @@ void CRunningScript::Init()
 	m_bCondResult = false;
 	m_bIsMissionScript = false;
 	m_bSkipWakeTime = false;
-	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
+	for (int i = 0; i < NUM_LOCAL_VARS + 8 + NUM_TIMERS; i++)
 		m_anLocalVariables[i] = 0;
 	m_nAndOrState = 0;
 	m_bNotFlag = false;
 	m_bDeatharrestEnabled = true;
 	m_bDeatharrestExecuted = false;
 	m_bMissionFlag = false;
+	m_nLocalsPointer = 0;
+}
+
+// done(LCS)
+void CTheScripts::Shutdown()
+{
+	if (gScriptsFile != -1) {
+		CFileMgr::CloseFile(gScriptsFile);
+		gScriptsFile = -1;
+	}
+	if (ScriptSpace) {
+		base::cMainMemoryManager::Instance()->Free(ScriptSpace);
+		ScriptSpace = nil;
+		FSDestroyedFlag = false;
+		OnAMissionFlag = 0;
+	}
 }
 
 #ifdef USE_DEBUG_SCRIPT_LOADER
@@ -2355,10 +2444,11 @@ int open_script()
 }
 #endif
 
-void CTheScripts::Init()
+// done(LCS)
+bool CTheScripts::Init(bool loaddata)
 {
-	for (int i = 0; i < SIZE_SCRIPT_SPACE; i++)
-		ScriptSpace[i] = 0;
+	bool retval = false;
+	printf("CTheScripts::Init\n");
 	pActiveScripts = pIdleScripts = nil;
 	for (int i = 0; i < MAX_NUM_SCRIPTS; i++){
 		ScriptsArray[i].Init();
@@ -2367,25 +2457,39 @@ void CTheScripts::Init()
 	MissionCleanUp.Init();
 	UpsideDownCars.Init();
 	StuckCars.Init();
-	CFileMgr::SetDir("data");
-#ifdef USE_DEBUG_SCRIPT_LOADER
-	int mainf = open_script();
-#else
-	int mainf = CFileMgr::OpenFile("main.scm", "rb");
-#endif
-	CFileMgr::Read(mainf, (char*)ScriptSpace, SIZE_MAIN_SCRIPT);
-	CFileMgr::CloseFile(mainf);
-	CFileMgr::SetDir("");
 	StoreVehicleIndex = -1;
 	StoreVehicleWasRandom = true;
 	OnAMissionFlag = 0;
 	LastMissionPassedTime = (uint32)-1;
+	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++) {
+		CollectiveArray[i].colIndex = -1;
+		CollectiveArray[i].pedIndex = 0;
+	}
+	NextFreeCollectiveIndex = 0;
 	LastRandomPedId = -1;
 	for (int i = 0; i < MAX_NUM_USED_OBJECTS; i++){
 		memset(&UsedObjectArray[i].name, 0, sizeof(UsedObjectArray[i].name));
 		UsedObjectArray[i].index = 0;
 	}
 	NumberOfUsedObjects = 0;
+	if (ScriptSpace)
+		Shutdown();
+	CFileMgr::SetDir("DATA");
+#ifdef USE_DEBUG_SCRIPT_LOADER
+	int mainf = open_script();
+#else
+	int mainf = CFileMgr::OpenFile("main.scm", "rb");
+#endif
+	CFileMgr::Read(mainf, (char*)&MainScriptSize, sizeof(MainScriptSize));
+	int nLargestMissionSize = 0;
+	CFileMgr::Read(mainf, (char*)&nLargestMissionSize, sizeof(nLargestMissionSize));
+	// some cSmallHeap shit - TODO
+	ScriptSpace = (uint8*)base::cMainMemoryManager::Instance()->Allocate(MainScriptSize + nLargestMissionSize);
+	memset(ScriptSpace, 0, MainScriptSize + nLargestMissionSize);
+	CFileMgr::Read(mainf, (char*)ScriptSpace, MainScriptSize);
+	gScriptsFile = mainf;
+	CFileMgr::CloseFile(mainf);
+	CFileMgr::SetDir("");
 	ReadObjectNamesFromScript();
 	UpdateObjectIndices();
 	bAlreadyRunningAMissionScript = false;
@@ -2395,11 +2499,10 @@ void CTheScripts::Init()
 	NumberOfExclusiveMissionScripts = 0;
 	NumberOfMissionScripts = 0;
 	LargestMissionScriptSize = 0;
-	MainScriptSize = 0;
 	ReadMultiScriptFileOffsetsFromScript();
 	FailCurrentMission = 0;
 	DbgFlag = false;
-	NumScriptDebugLines = 0;
+	//NumScriptDebugLines = 0;
 	RiotIntensity = 0;
 	bPlayerHasMetDebbieHarry = false;
 	bPlayerIsInTheStatium = false;
@@ -2423,7 +2526,7 @@ void CTheScripts::Init()
 		IntroRectangles[i].m_sColor = CRGBA(255, 255, 255, 255);
 	}
 	NumberOfIntroRectanglesThisFrame = 0;
-	RemoveScriptTextureDictionary();
+	RemoveScriptTextureDictionary(); // TODO(LCS) - probably not needed
 	for (int i = 0; i < MAX_NUM_BUILDING_SWAPS; i++){
 		BuildingSwapArray[i].m_pBuilding = nil;
 		BuildingSwapArray[i].m_nNewModel = -1;
@@ -2431,6 +2534,12 @@ void CTheScripts::Init()
 	}
 	for (int i = 0; i < MAX_NUM_INVISIBILITY_SETTINGS; i++)
 		InvisibilitySettingArray[i] = nil;
+	if (loaddata) {
+		printf("loaddata = true\n");
+		retval = GenericLoad();
+	}
+	for (int i = 0; i < MAX_ALLOWED_COLLISIONS; i++)
+		AllowedCollision[i] = 0;
 
 #if defined USE_ADVANCED_SCRIPT_DEBUG_OUTPUT && SCRIPT_LOG_FILE_LEVEL == 2
 	CFileMgr::SetDirMyDocuments();
@@ -2441,8 +2550,10 @@ void CTheScripts::Init()
 	PrintToLog(init_msg);
 	CFileMgr::SetDir("");
 #endif
+	return retval;
 }
 
+// LCS - to remove?
 void CTheScripts::RemoveScriptTextureDictionary()
 {
 	for (int i = 0; i < ARRAY_SIZE(CTheScripts::ScriptSprites); i++)
@@ -2452,6 +2563,7 @@ void CTheScripts::RemoveScriptTextureDictionary()
 		CTxdStore::RemoveTxd(slot);
 }
 
+// done(LCS)
 void CRunningScript::RemoveScriptFromList(CRunningScript** ppScript)
 {
 	if (prev)
@@ -2462,6 +2574,7 @@ void CRunningScript::RemoveScriptFromList(CRunningScript** ppScript)
 		next->prev = prev;
 }
 
+// done(LCS)
 void CRunningScript::AddScriptToList(CRunningScript** ppScript)
 {
 	next = *ppScript;
@@ -2471,11 +2584,13 @@ void CRunningScript::AddScriptToList(CRunningScript** ppScript)
 	*ppScript = this;
 }
 
+// done(LCS)
 CRunningScript* CTheScripts::StartNewScript(uint32 ip)
 {
 	CRunningScript* pNew = pIdleScripts;
 	script_assert(pNew);
 	pNew->RemoveScriptFromList(&pIdleScripts);
+	pNew->m_nId = NextProcessId++;
 	pNew->Init();
 	pNew->SetIP(ip);
 	pNew->AddScriptToList(&pActiveScripts);
@@ -2486,6 +2601,8 @@ CRunningScript* CTheScripts::StartNewScript(uint32 ip)
 void CTheScripts::Process()
 {
 	if (CReplay::IsPlayingBack())
+		return;
+	if (!ScriptSpace)
 		return;
 	CommandsExecuted = 0;
 	ScriptsUpdated = 0;
@@ -2508,6 +2625,8 @@ void CTheScripts::Process()
 		if (UseTextCommands == 1)
 			UseTextCommands = 0;
 	}
+
+	// TODO: mCoronas
 
 #ifdef MISSION_REPLAY
 	static uint32 TimeToWaitTill;
@@ -2558,6 +2677,7 @@ void CTheScripts::Process()
 #endif
 
 	CRunningScript* script = pActiveScripts;
+	InTheScripts = true;
 	while (script != nil){
 		CRunningScript* next = script->GetNext();
 		++ScriptsUpdated;
@@ -2577,21 +2697,25 @@ void CTheScripts::Process()
 #endif
 }
 
+// done(LCS)
 CRunningScript* CTheScripts::StartTestScript()
 {
 	return StartNewScript(0);
 }
 
+// done(LCS)
 bool CTheScripts::IsPlayerOnAMission()
 {
 	return OnAMissionFlag && *(int32*)&ScriptSpace[OnAMissionFlag] == 1;
 }
 
+// done(LCS)
 void CRunningScript::Process()
 {
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 	PrintToLog("\n\nProcessing script %s (id %d)\n\n", m_abScriptName, this - CTheScripts::ScriptsArray);
 #endif
+	pCurrent = this;
 	if (m_bIsMissionScript)
 		DoDeatharrestCheck();
 	if (m_bMissionFlag && CTheScripts::FailCurrentMission == 1 && m_nStackPointer == 1)
@@ -2660,32 +2784,36 @@ int8 CRunningScript::ProcessOneCommand()
 		retval = ProcessCommands0To99(command);
 	else if (command < 200)
 		retval = ProcessCommands100To199(command);
-	else if (command < 300)
+	else if (command < 305)
 		retval = ProcessCommands200To299(command);
-	else if (command < 400)
+	else if (command < 405)
 		retval = ProcessCommands300To399(command);
-	else if (command < 500)
+	else if (command < 505)
 		retval = ProcessCommands400To499(command);
-	else if (command < 600)
+	else if (command < 605)
 		retval = ProcessCommands500To599(command);
-	else if (command < 700)
+	else if (command < 705)
 		retval = ProcessCommands600To699(command);
-	else if (command < 800)
+	else if (command < 805)
 		retval = ProcessCommands700To799(command);
-	else if (command < 900)
+	else if (command < 905)
 		retval = ProcessCommands800To899(command);
-	else if (command < 1000)
+	else if (command < 1005)
 		retval = ProcessCommands900To999(command);
-	else if (command < 1100)
+	else if (command < 1105)
 		retval = ProcessCommands1000To1099(command);
-	else if (command < 1200)
+	else if (command < 1205)
 		retval = ProcessCommands1100To1199(command);
-	else if (command < 1300)
+	else if (command < 1305)
 		retval = ProcessCommands1200To1299(command);
-	else if (command < 1400)
+	else if (command < 1405)
 		retval = ProcessCommands1300To1399(command);
-	else if (command < 1500)
+	else if (command < 1497)
 		retval = ProcessCommands1400To1499(command);
+	//else if (command < 1600) // TODO
+	//	retval = ProcessCommands1500To1599(command);
+	//else if (command < 1700)
+	//	retval = ProcessCommands1600To1699(command);
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 	if (command < ARRAY_SIZE(commands)) {
 		if (commands[command].cond || commands[command].output[0] != ARGTYPE_NONE) {
@@ -3242,12 +3370,12 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 			case ARGUMENT_INT32:
 				pNew->m_anLocalVariables[i] = CTheScripts::Read4BytesFromScript(&m_nIp);
 				break;
-			case ARGUMENT_GLOBALVAR:
-				pNew->m_anLocalVariables[i] = *(int32*)&CTheScripts::ScriptSpace[(uint16)CTheScripts::Read2BytesFromScript(&m_nIp)];
-				break;
-			case ARGUMENT_LOCALVAR:
-				pNew->m_anLocalVariables[i] = m_anLocalVariables[CTheScripts::Read2BytesFromScript(&m_nIp)];
-				break;
+			//case ARGUMENT_GLOBALVAR:
+			//	pNew->m_anLocalVariables[i] = *(int32*)&CTheScripts::ScriptSpace[(uint16)CTheScripts::Read2BytesFromScript(&m_nIp)];
+			//	break;
+			//case ARGUMENT_LOCALVAR:
+			//	pNew->m_anLocalVariables[i] = m_anLocalVariables[CTheScripts::Read2BytesFromScript(&m_nIp)];
+			//	break;
 			case ARGUMENT_INT8:
 				pNew->m_anLocalVariables[i] = CTheScripts::Read1ByteFromScript(&m_nIp);
 				break;
