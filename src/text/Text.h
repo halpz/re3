@@ -58,7 +58,7 @@ public:
 		uint32 offset;
 	};
 
-	enum {MAX_MISSION_TEXTS = 90}; // beware that LCS has more
+	enum {MAX_MISSION_TEXTS = 200};
 
 	Entry data[MAX_MISSION_TEXTS];
 	uint16 size; // You can make this size_t if you want to exceed 32-bit boundaries, everything else should be ready.
@@ -84,6 +84,9 @@ class CText
 	bool bIsMissionTextLoaded;
 	char szMissionTableName[8];
 	CMissionTextOffsets MissionTextOffsets;
+	bool bIsLoaded;
+
+	static CText *msInstance;
 public:
 	CText(void);
 	void Load(void);
@@ -94,6 +97,15 @@ public:
 	void GetNameOfLoadedMissionText(char *outName);
 	void ReadChunkHeader(ChunkHeader *buf, int32 file, size_t *bytes_read);
 	void LoadMissionText(char *MissionTableName);
+	bool IsLoaded();
+	void GetUTF8(const char*, char*, int); // TODO but unused
+
+	static CText &Instance()
+	{
+		if (!msInstance)
+			msInstance = new CText;
+		return *msInstance;
+	}
 };
 
-extern CText TheText;
+#define TheText CText::Instance()
