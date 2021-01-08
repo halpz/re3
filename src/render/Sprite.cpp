@@ -38,7 +38,7 @@ CSprite::CalcScreenCoors(const RwV3d &in, RwV3d *out, float *outw, float *outh, 
 	float fovScale = fov / CDraw::GetFOV();
 
 #ifdef FIX_SPRITES
-	*outw = fovScale * recip * SCREEN_HEIGHT;
+	*outw = CDraw::ms_bFixSprites ? (fovScale * recip * SCREEN_HEIGHT) : (fovScale * SCREEN_SCALE_AR(recip) * SCREEN_WIDTH);
 #else
 	*outw = fovScale * SCREEN_SCALE_AR(recip) * SCREEN_WIDTH;
 #endif

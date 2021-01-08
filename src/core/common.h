@@ -176,6 +176,12 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 #ifdef ASPECT_RATIO_SCALE
 #define SCREEN_SCALE_AR(a) ((a) * DEFAULT_ASPECT_RATIO / SCREEN_ASPECT_RATIO)
 #define SCALE_AND_CENTER_X(x) ((SCREEN_WIDTH == DEFAULT_SCREEN_WIDTH) ? (x) : (SCREEN_WIDTH - SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH)) / 2 + SCREEN_SCALE_X((x)))
+#ifdef PROPER_SCALING
+	#ifndef FORCE_PC_SCALING			
+		#undef SCREEN_SCALE_Y	
+		#define SCREEN_SCALE_Y(a) CDraw::ScaleY(SCREEN_STRETCH_Y(a))	
+	#endif
+#endif
 #else
 #define SCREEN_SCALE_AR(a) (a)
 #define SCALE_AND_CENTER_X(x) SCREEN_STRETCH_X(x)

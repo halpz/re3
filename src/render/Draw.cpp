@@ -20,6 +20,16 @@ uint8 CDraw::FadeRed;
 uint8 CDraw::FadeGreen;
 uint8 CDraw::FadeBlue;
 
+#ifdef PROPER_SCALING	
+int32 CDraw::ms_bProperScaling = true;
+#endif
+#ifdef FIX_SPRITES
+int32 CDraw::ms_bFixRadar = true;	
+#endif
+#ifdef FIX_RADAR
+int32 CDraw::ms_bFixSprites = true;	
+#endif
+
 float
 CDraw::FindAspectRatio(void)
 {
@@ -76,3 +86,10 @@ CDraw::SetFOV(float fov)
 #endif
 	ms_fFOV = fov;
 }
+
+#ifdef PROPER_SCALING	
+float CDraw::ScaleY(float y)
+{
+	return ms_bProperScaling ? y : y * ((float)DEFAULT_SCREEN_HEIGHT/SCREEN_HEIGHT_NTSC);
+}
+#endif 
