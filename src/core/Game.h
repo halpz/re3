@@ -6,8 +6,9 @@ enum eLevelName {
 	LEVEL_INDUSTRIAL,
 	LEVEL_COMMERCIAL,
 	LEVEL_SUBURBAN,
+	LEVEL_UNDERGROUND,
 
-	NUM_LEVELS	// LCS: should be 5 eventually...
+	NUM_LEVELS
 };
 
 enum eAreaName {

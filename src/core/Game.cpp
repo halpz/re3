@@ -587,7 +587,7 @@ bool CGame::ShutDown(void)
 	CPlane::Shutdown();
 	CTrain::Shutdown();
 	CScriptPaths::Shutdown();
-	CWaterCreatures::RemoveAll();
+	//CWaterCreatures::RemoveAll();
 	CSpecialFX::Shutdown();
 	CGarages::Shutdown();
 	CMovingThings::Shutdown();
@@ -749,7 +749,7 @@ void CGame::ShutDownForRestart(void)
 	CRadar::RemoveRadarSections();
 	FrontEndMenuManager.UnloadTextures();
 	CParticleObject::RemoveAllExpireableParticleObjects();
-	CWaterCreatures::RemoveAll(); 
+	//CWaterCreatures::RemoveAll(); 
 	CSetPieces::Init();
 	CPedType::Shutdown();
 	CSpecialFX::Shutdown();

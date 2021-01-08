@@ -661,8 +661,8 @@ public:
 	int32 m_nSelectedScreenMode;
 #endif
 #ifdef MULTISAMPLING
-	static int8 m_nPrefsMSAALevel;
-	static int8 m_nDisplayMSAALevel;
+	int8 m_nPrefsMSAALevel;
+	int8 m_nDisplayMSAALevel;
 #endif
 
 	enum LANGUAGE
