@@ -443,7 +443,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
-		*(CVector*)ScriptParams[0] = GAME_SPEED_TO_METERS_PER_SECOND * pObject->GetMoveSpeed();
+		*(CVector*)&ScriptParams[0] = GAME_SPEED_TO_METERS_PER_SECOND * pObject->GetMoveSpeed();
 		StoreParameters(&m_nIp, 3);
 		return 0;
 	}
@@ -454,7 +454,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	{
 		CollectParameters(&m_nIp, 4);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
-		CVector newSpeed = pObject->GetTurnSpeed() + *(CVector*)ScriptParams[1] / GAME_SPEED_TO_METERS_PER_SECOND;
+		CVector newSpeed = pObject->GetTurnSpeed() + *(CVector*)&ScriptParams[1] / GAME_SPEED_TO_METERS_PER_SECOND;
 		if (pObject->bIsStatic) {
 			pObject->SetIsStatic(false);
 			pObject->AddToMovingList();
@@ -466,7 +466,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	{
 		CollectParameters(&m_nIp, 4);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
-		CVector newSpeed = *(CVector*)ScriptParams[1] / GAME_SPEED_TO_METERS_PER_SECOND;
+		CVector newSpeed = *(CVector*)&ScriptParams[1] / GAME_SPEED_TO_METERS_PER_SECOND;
 		if (pObject->bIsStatic) {
 			pObject->SetIsStatic(false);
 			pObject->AddToMovingList();
@@ -484,13 +484,13 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_GET_ANGLE_BETWEEN_2D_VECTORS:
 	{
 		CollectParameters(&m_nIp, 4);
-		CVector2D v1 = *(CVector2D*)ScriptParams[0];
-		CVector2D v2 = *(CVector2D*)ScriptParams[2];
+		CVector2D v1 = *(CVector2D*)&ScriptParams[0];
+		CVector2D v2 = *(CVector2D*)&ScriptParams[2];
 		float c = DotProduct2D(v1, v2) / (v1.Magnitude() * v2.Magnitude());
 #ifdef FIX_BUGS // command is a SA leftover where it was fixed to this
-		*(float*)ScriptParams[0] = RADTODEG(Acos(c));
+		*(float*)&ScriptParams[0] = RADTODEG(Acos(c));
 #else
-		*(float*)ScriptParams[0] = Acos(c);
+		*(float*)&ScriptParams[0] = Acos(c);
 #endif
 		return 0;
 	}
@@ -521,7 +521,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
-		*(CVector*)ScriptParams[0] = pObject->GetTurnSpeed() * GAME_SPEED_TO_METERS_PER_SECOND;
+		*(CVector*)&ScriptParams[0] = pObject->GetTurnSpeed() * GAME_SPEED_TO_METERS_PER_SECOND;
 		StoreParameters(&m_nIp, 3);
 		return 0;
 	}
@@ -552,7 +552,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
-		*(float*)ScriptParams[0] = pObject->GetMoveSpeed().Magnitude() * GAME_SPEED_TO_METERS_PER_SECOND;
+		*(float*)&ScriptParams[0] = pObject->GetMoveSpeed().Magnitude() * GAME_SPEED_TO_METERS_PER_SECOND;
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
