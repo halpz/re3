@@ -699,10 +699,6 @@ RenderBlendPass(int pass)
 		setIndices(building->instHeader->indexBuffer);
 		setVertexDeclaration(building->instHeader->vertexDeclaration);
 		d3ddevice->SetVertexShaderConstantF(VSLOC_combined, (float*)&building->combinedMat, 4);
-		if(building->lighting)
-			setAmbient(pAmbient->color);
-		else
-			setAmbient(black);
 
 		InstanceData *inst = building->instHeader->inst;
 		for(rw::uint32 j = 0; j < building->instHeader->numMeshes; j++, inst++){
@@ -723,7 +719,7 @@ RenderBlendPass(int pass)
 
 			rw::RGBA color = m->color;
 			color.alpha = (color.alpha * building->fadeAlpha)/255;
-			setMaterial(m->color, m->surfaceProps, 0.5f);
+			setMaterial(color, m->surfaceProps, 0.5f);
 
 			drawInst(building->instHeader, inst);
 		}

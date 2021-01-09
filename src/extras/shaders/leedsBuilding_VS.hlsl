@@ -11,14 +11,12 @@ struct VS_in
 	float4 Position		: POSITION;
 	float3 Normal		: NORMAL;
 	float2 TexCoord		: TEXCOORD0;
-	float2 TexCoord1	: TEXCOORD1;
 	float4 Prelight		: COLOR0;
 };
 
 struct VS_out {
 	float4 Position		: POSITION;
 	float3 TexCoord0	: TEXCOORD0;	// also fog
-	float2 TexCoord1	: TEXCOORD1;
 	float4 Color		: COLOR0;
 };
 
@@ -32,7 +30,6 @@ VS_out main(in VS_in input)
 	float3 Normal = mul(normalMat, input.Normal);
 
 	output.TexCoord0.xy = input.TexCoord;
-	output.TexCoord1.xy = input.TexCoord1;
 
 	output.Color = input.Prelight;
 	output.Color.rgb *= ambient.rgb;
