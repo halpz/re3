@@ -33,6 +33,7 @@ public:
 	static void RequestCollision(const CVector2D &pos);
 	static void EnsureCollisionIsInMemory(const CVector2D &pos);
 	static bool HasCollisionLoaded(const CVector2D &pos);
+	static bool HasCollisionLoaded(eLevelName level) { return true; }; // TODO
 
 	static ColDef *GetSlot(int slot) {
 		assert(slot >= 0);

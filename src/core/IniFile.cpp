@@ -10,7 +10,7 @@
 // --MIAMI: file done
 
 float CIniFile::PedNumberMultiplier = 0.6f;
-float CIniFile::CarNumberMultiplier = 0.6f;
+float CIniFile::CarNumberMultiplier = 0.8f;
 
 void CIniFile::LoadIniFile()
 {
@@ -27,5 +27,5 @@ void CIniFile::LoadIniFile()
 	}
 	CPopulation::MaxNumberOfPedsInUse = 25.0f * PedNumberMultiplier;
 	CPopulation::MaxNumberOfPedsInUseInterior = 40.0f * PedNumberMultiplier;
-	CCarCtrl::MaxNumberOfCarsInUse = 12.0f * CarNumberMultiplier;
+	CCarCtrl::MaxNumberOfCarsInUse = 30.0f * CarNumberMultiplier;
 }

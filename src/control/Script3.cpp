@@ -1639,7 +1639,6 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		UpdateCompareFlag(TheCamera.IsSphereVisible(pObject->GetBoundCentre(), pObject->GetBoundRadius()));
 		return 0;
 	}
-	/*
 	case COMMAND_GOSUB_FILE:
 	{
 		CollectParameters(&m_nIp, 2);
@@ -1649,7 +1648,6 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		// ScriptParams[1] == filename
 		return 0;
 	}
-	*/
 	case COMMAND_GET_GROUND_Z_FOR_3D_COORD:
 	{
 		CollectParameters(&m_nIp, 3);
@@ -2126,7 +2124,6 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CGarages::ChangeGarageType(ScriptParams[0], ScriptParams[1], 0);
 		return 0;
-	/*
 	case COMMAND_ACTIVATE_CRUSHER_CRANE:
 	{
 		CollectParameters(&m_nIp, 10);
@@ -2148,6 +2145,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 			*(float*)&ScriptParams[0], *(float*)&ScriptParams[1]);
 		return 0;
 	}
+	/*
 	case COMMAND_PRINT_WITH_2_NUMBERS:
 	{
 		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);

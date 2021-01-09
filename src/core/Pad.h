@@ -164,6 +164,8 @@ public:
 	int32 LastTimeTouched;
 	int32 AverageWeapon;
 	int32 AverageEntries;
+	float unk_B4;
+	float unk_B8;
 
 #ifdef DETECT_PAD_INPUT_SWITCH
 	static bool IsAffectedByController;

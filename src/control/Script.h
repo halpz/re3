@@ -47,7 +47,7 @@ void FlushLog();
 
 #define KEY_LENGTH_IN_SCRIPT (8)
 
-//#define GTA_SCRIPT_COLLECTIVE
+#define GTA_SCRIPT_COLLECTIVE
 
 struct intro_script_rectangle 
 {
@@ -215,14 +215,32 @@ public:
 };
 
 enum {
+	MAX_STACK_DEPTH = 16,
+	NUM_LOCAL_VARS = 96,
+	NUM_TIMERS = 2,
+	NUM_GLOBAL_SLOTS = 26
+};
+
+enum {
 	ARGUMENT_END = 0,
+	ARGUMENT_INT_ZERO,
+	ARGUMENT_FLOAT_ZERO,
+	ARGUMENT_FLOAT_1BYTE,
+	ARGUMENT_FLOAT_2BYTES,
+	ARGUMENT_FLOAT_3BYTES,
 	ARGUMENT_INT32,
-	ARGUMENT_GLOBALVAR,
-	ARGUMENT_LOCALVAR,
 	ARGUMENT_INT8,
 	ARGUMENT_INT16,
-	ARGUMENT_FLOAT
+	ARGUMENT_FLOAT,
+	ARGUMENT_TIMER,
+	ARGUMENT_LOCAL = ARGUMENT_TIMER + NUM_TIMERS,
+	ARGUMENT_LOCAL_ARRAY = ARGUMENT_LOCAL + NUM_LOCAL_VARS,
+	ARGUMENT_GLOBAL = ARGUMENT_LOCAL_ARRAY + NUM_LOCAL_VARS,
+	ARGUMENT_GLOBAL_ARRAY = ARGUMENT_GLOBAL + NUM_GLOBAL_SLOTS,
+	MAX_ARGUMENT = ARGUMENT_GLOBAL_ARRAY + NUM_GLOBAL_SLOTS
 };
+
+static_assert(MAX_ARGUMENT <= 256, "MAX_ARGUMENT must be less or equal to 256");
 
 struct tCollectiveData
 {
@@ -254,37 +272,30 @@ enum {
 };
 
 enum {
-#ifdef PS2
-	SIZE_MAIN_SCRIPT = 205512,
-#else
-	SIZE_MAIN_SCRIPT = 225512,
-#endif
-	SIZE_MISSION_SCRIPT = 35000,
-	SIZE_SCRIPT_SPACE = SIZE_MAIN_SCRIPT + SIZE_MISSION_SCRIPT
-};
-
-enum {
 	MAX_NUM_SCRIPTS = 128,
 	MAX_NUM_INTRO_TEXT_LINES = 48,
 	MAX_NUM_INTRO_RECTANGLES = 16,
 	MAX_NUM_SCRIPT_SRPITES = 16,
 	MAX_NUM_SCRIPT_SPHERES = 16,
-	MAX_NUM_USED_OBJECTS = 220,
-	MAX_NUM_MISSION_SCRIPTS = 120,
-	MAX_NUM_BUILDING_SWAPS = 25,
-	MAX_NUM_INVISIBILITY_SETTINGS = 20,
-	MAX_NUM_STORED_LINES = 1024
+	MAX_NUM_COLLECTIVES = 32,
+	MAX_NUM_USED_OBJECTS = 305,
+	MAX_NUM_MISSION_SCRIPTS = 150,
+	MAX_NUM_BUILDING_SWAPS = 80,
+	MAX_NUM_INVISIBILITY_SETTINGS = 52,
+	MAX_NUM_STORED_LINES = 1024,
+	MAX_ALLOWED_COLLISIONS = 2
 };
 
 class CTheScripts
 {
 public:
-	static uint8 ScriptSpace[SIZE_SCRIPT_SPACE];
+	static uint8* ScriptSpace;
 	static CRunningScript ScriptsArray[MAX_NUM_SCRIPTS];
 	static intro_text_line IntroTextLines[MAX_NUM_INTRO_TEXT_LINES];
 	static intro_script_rectangle IntroRectangles[MAX_NUM_INTRO_RECTANGLES];
 	static CSprite2d ScriptSprites[MAX_NUM_SCRIPT_SRPITES];
 	static script_sphere_struct ScriptSphereArray[MAX_NUM_SCRIPT_SPHERES];
+	static tCollectiveData CollectiveArray[MAX_NUM_COLLECTIVES];
 	static tUsedObject UsedObjectArray[MAX_NUM_USED_OBJECTS];
 	static int32 MultiScriptArray[MAX_NUM_MISSION_SCRIPTS];
 	static tBuildingSwap BuildingSwapArray[MAX_NUM_BUILDING_SWAPS];
@@ -316,20 +327,22 @@ public:
 	static uint16 ScriptsUpdated;
 	static uint32 LastMissionPassedTime;
 	static uint16 NumberOfExclusiveMissionScripts;
-#if (defined GTA_PC && !defined GTAVC_JP_PATCH || defined GTA_XBOX || defined SUPPORT_XBOX_SCRIPT || defined GTA_MOBILE || defined SUPPORT_MOBILE_SCRIPT)
-#define CARDS_IN_SUIT (13)
-#define NUM_SUITS (4)
-#define MAX_DECKS (6)
-#define CARDS_IN_DECK (CARDS_IN_SUIT * NUM_SUITS)
-#define CARDS_IN_STACK (CARDS_IN_DECK * MAX_DECKS)
-	static int16 CardStack[CARDS_IN_STACK];
-	static int16 CardStackPosition;
-#endif
+
 	static bool bPlayerIsInTheStatium;
 	static uint8 RiotIntensity;
 	static bool bPlayerHasMetDebbieHarry;
 
-	static void Init();
+	static int AllowedCollision[MAX_ALLOWED_COLLISIONS];
+	static short* SavedVarIndices;
+	static int NumSaveVars;
+	static bool FSDestroyedFlag;
+	static int NextProcessId;
+	static bool InTheScripts;
+	static CRunningScript* pCurrent;
+	static uint16 NumTrueGlobals;
+	static uint16 MostGlobals;
+
+	static bool Init(bool loaddata = false);
 	static void Process();
 
 	static CRunningScript* StartTestScript();
@@ -420,6 +433,9 @@ public:
 	static void SwitchToMission(int32 mission);
 #endif
 
+	static int GetSaveVarIndex(int);
+	static void Shutdown(void);
+
 #ifdef GTA_SCRIPT_COLLECTIVE
 	static void AdvanceCollectiveIndex()
 	{
@@ -441,12 +457,9 @@ public:
 
 };
 
+extern int ScriptParams[32];
 
-enum {
-	MAX_STACK_DEPTH = 6,
-	NUM_LOCAL_VARS = 16,
-	NUM_TIMERS = 2
-};
+VALIDATE_SIZE(uStackReturnValue, 4);
 
 class CRunningScript
 {
@@ -470,14 +483,25 @@ class CRunningScript
 		ORS_8
 	};
 
+	enum {
+		STACKVALUE_IP_BITS = 22,
+		STACKVALUE_INVERT_RETURN_BIT = STACKVALUE_IP_BITS,
+		STACKVALUE_IS_FUNCTION_CALL_BIT,
+		STACKVALUE_IP_PARAMS_OFFSET,
+
+		STACKVALUE_IP_MASK = ((1 << STACKVALUE_IP_BITS) - 1)
+	};
+
 public:
 	CRunningScript* next;
 	CRunningScript* prev;
+	int m_nId;
 	char m_abScriptName[8];
 	uint32 m_nIp;
 	uint32 m_anStack[MAX_STACK_DEPTH];
 	uint16 m_nStackPointer;
-	int32 m_anLocalVariables[NUM_LOCAL_VARS + NUM_TIMERS];
+	int32 m_anLocalVariables[NUM_LOCAL_VARS + 8 + NUM_TIMERS]; // TODO(LCS): figure out why 106
+	int32 m_nLocalsPointer;
 	bool m_bIsActive;
 	bool m_bCondResult;
 	bool m_bIsMissionScript;
@@ -497,8 +521,8 @@ public:
 	void Load(uint8*& buf);
 
 	void UpdateTimers(float timeStep) {
-		m_anLocalVariables[NUM_LOCAL_VARS] += timeStep;
-		m_anLocalVariables[NUM_LOCAL_VARS + 1] += timeStep;
+		for (int i = 0; i < NUM_TIMERS; i++)
+			m_anLocalVariables[NUM_LOCAL_VARS + 8 + i] += timeStep;
 	}
 
 	void Init();
@@ -509,7 +533,7 @@ public:
 
 	static const uint32 nSaveStructSize;
 
-	void CollectParameters(uint32*, int16);
+	void CollectParameters(uint32*, int16, int* pParams = (int*)&ScriptParams);
 	int32 CollectNextParameterWithoutIncreasingPC(uint32);
 	int32* GetPointerToScriptVariable(uint32*, int16);
 	void StoreParameters(uint32*, int16);
@@ -534,6 +558,8 @@ public:
 	int8 ProcessCommands1200To1299(int32);
 	int8 ProcessCommands1300To1399(int32);
 	int8 ProcessCommands1400To1499(int32);
+	int8 ProcessCommands1500To1599(int32);
+	int8 ProcessCommands1600To1699(int32);
 
 	void LocatePlayerCommand(int32, uint32*);
 	void LocatePlayerCharCommand(int32, uint32*);
@@ -571,10 +597,10 @@ public:
 	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
 
 	bool ThisIsAValidRandomPed(uint32 pedtype, int civ, int gang, int criminal);
-
-	bool CheckDamagedWeaponType(int32 actual, int32 type);
-	
+	bool CheckDamagedWeaponType(int32 actual, int32 type);	
 	static bool ThisIsAValidRandomCop(int32 mi, bool cop, bool swat, bool fbi, bool army, bool miami);
+
+	void ReturnFromGosubOrFunction();
 
 };
 
@@ -600,3 +626,6 @@ void RetryMission(int, int);
 #ifdef USE_DEBUG_SCRIPT_LOADER
 extern int scriptToLoad;
 #endif
+
+extern int gScriptsFile;
+
