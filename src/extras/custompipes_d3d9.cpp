@@ -2,8 +2,6 @@
 #include "common.h"
 
 #ifdef RW_D3D9
-#ifdef EXTENDED_PIPELINES
-
 #include "main.h"
 #include "RwHelper.h"
 #include "Lights.h"
@@ -15,6 +13,8 @@
 #include "Renderer.h"
 #include "World.h"
 #include "custompipes.h"
+
+#ifdef EXTENDED_PIPELINES
 
 #ifndef LIBRW
 #error "Need librw for EXTENDED_PIPELINES"
@@ -554,4 +554,168 @@ DestroyRimLightPipes(void)
 }
 
 #endif
+
+#ifdef NEW_RENDERER
+#ifndef LIBRW
+#error "Need librw for NEW_PIPELINES"
+#endif
+
+namespace WorldRender
+{
+
+struct BuildingInst
+{
+	rw::RawMatrix combinedMat;
+	rw::d3d9::InstanceDataHeader *instHeader;
+	uint8 fadeAlpha;
+	bool lighting;
+};
+BuildingInst blendInsts[3][2000];
+int numBlendInsts[3];
+
+static RwRGBAReal black;
+
+static void
+SetMatrix(BuildingInst *building, rw::Matrix *worldMat)
+{
+	using namespace rw;
+	RawMatrix world, worldview;
+	Camera *cam = engine->currentCamera;
+	convMatrix(&world, worldMat);
+	RawMatrix::mult(&worldview, &world, &cam->devView);
+	RawMatrix::mult(&building->combinedMat, &worldview, &cam->devProj);
+}
+
+static bool
+IsTextureTransparent(RwTexture *tex)
+{
+	if(tex == nil || tex->raster == nil)
+		return false;
+	return PLUGINOFFSET(rw::d3d::D3dRaster, tex->raster, rw::d3d::nativeRasterOffset)->hasAlpha;
+}
+
+// Render all opaque meshes and put atomics that needs blending
+// into the deferred list.
+void
+AtomicFirstPass(RpAtomic *atomic, int pass)
+{
+	using namespace rw;
+	using namespace rw::d3d;
+	using namespace rw::d3d9;
+
+	BuildingInst *building = &blendInsts[pass][numBlendInsts[pass]];
+
+	atomic->getPipeline()->instance(atomic);
+	building->instHeader = (d3d9::InstanceDataHeader*)atomic->geometry->instData;
+	assert(building->instHeader != nil);
+	assert(building->instHeader->platform == PLATFORM_D3D9);
+	building->fadeAlpha = 255;
+	building->lighting = !!(atomic->geometry->flags & rw::Geometry::LIGHT);
+
+	bool setupDone = false;
+	bool defer = false;
+	SetMatrix(building, atomic->getFrame()->getLTM());
+
+	InstanceData *inst = building->instHeader->inst;
+	for(rw::uint32 i = 0; i < building->instHeader->numMeshes; i++, inst++){
+		Material *m = inst->material;
+
+		if(inst->vertexAlpha || m->color.alpha != 255 ||
+		   IsTextureTransparent(m->texture)){
+			defer = true;
+			continue;
+		}
+
+		// alright we're rendering this atomic
+		if(!setupDone){
+			setStreamSource(0, building->instHeader->vertexStream[0].vertexBuffer, 0, building->instHeader->vertexStream[0].stride);
+			setIndices(building->instHeader->indexBuffer);
+			setVertexDeclaration(building->instHeader->vertexDeclaration);
+			setVertexShader(default_amb_VS);
+			d3ddevice->SetVertexShaderConstantF(VSLOC_combined, (float*)&building->combinedMat, 4);
+			if(building->lighting)
+				setAmbient(pAmbient->color);
+			else
+				setAmbient(black);
+			setupDone = true;
+		}
+
+		setMaterial(m->color, m->surfaceProps);
+
+		if(m->texture){
+			d3d::setTexture(0, m->texture);
+			setPixelShader(default_tex_PS);
+		}else
+			setPixelShader(default_PS);
+
+		drawInst(building->instHeader, inst);
+	}
+	if(defer)
+		numBlendInsts[pass]++;
+}
+
+void
+AtomicFullyTransparent(RpAtomic *atomic, int pass, int fadeAlpha)
+{
+	using namespace rw;
+	using namespace rw::d3d;
+	using namespace rw::d3d9;
+
+	BuildingInst *building = &blendInsts[pass][numBlendInsts[pass]];
+
+	atomic->getPipeline()->instance(atomic);
+	building->instHeader = (d3d9::InstanceDataHeader*)atomic->geometry->instData;
+	assert(building->instHeader != nil);
+	assert(building->instHeader->platform == PLATFORM_D3D9);
+	building->fadeAlpha = fadeAlpha;
+	building->lighting = !!(atomic->geometry->flags & rw::Geometry::LIGHT);
+	SetMatrix(building, atomic->getFrame()->getLTM());
+	numBlendInsts[pass]++;
+}
+
+void
+RenderBlendPass(int pass)
+{
+	using namespace rw;
+	using namespace rw::d3d;
+	using namespace rw::d3d9;
+
+	setVertexShader(default_amb_VS);
+
+	int i;
+	for(i = 0; i < numBlendInsts[pass]; i++){
+		BuildingInst *building = &blendInsts[pass][i];
+
+		setStreamSource(0, building->instHeader->vertexStream[0].vertexBuffer, 0, building->instHeader->vertexStream[0].stride);
+		setIndices(building->instHeader->indexBuffer);
+		setVertexDeclaration(building->instHeader->vertexDeclaration);
+		d3ddevice->SetVertexShaderConstantF(VSLOC_combined, (float*)&building->combinedMat, 4);
+		if(building->lighting)
+			setAmbient(pAmbient->color);
+		else
+			setAmbient(black);
+
+		InstanceData *inst = building->instHeader->inst;
+		for(rw::uint32 j = 0; j < building->instHeader->numMeshes; j++, inst++){
+			Material *m = inst->material;
+			if(!inst->vertexAlpha && m->color.alpha == 255 && !IsTextureTransparent(m->texture) && building->fadeAlpha == 255)
+				continue;	// already done this one
+
+			rw::RGBA color = m->color;
+			color.alpha = (color.alpha * building->fadeAlpha)/255;
+			setMaterial(color, m->surfaceProps);
+
+			if(m->texture){
+				d3d::setTexture(0, m->texture);
+				setPixelShader(default_tex_PS);
+			}else
+				setPixelShader(default_PS);
+
+			drawInst(building->instHeader, inst);
+		}
+	}
+}
+}
+#endif
+
 #endif

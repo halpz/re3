@@ -134,4 +134,12 @@ void AttachRimPipe(rw::Clump *clump);
 }
 
 #endif
+
+namespace WorldRender{
+extern int numBlendInsts[3];
+void AtomicFirstPass(RpAtomic *atomic, int pass);
+void AtomicFullyTransparent(RpAtomic *atomic, int pass, int fadeAlpha);
+void RenderBlendPass(int pass);
+}
+
 #endif
