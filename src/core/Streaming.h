@@ -213,3 +213,10 @@ public:
 
 	static void PrintStreamingBufferState();
 };
+
+// LCS(TODO): put them into CStreaming::mspInst
+extern int32 islandLODindust;
+extern int32 islandLODcomInd;
+extern int32 islandLODcomSub;
+extern int32 islandLODsubInd;
+extern int32 islandLODsubCom;
