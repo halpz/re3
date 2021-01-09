@@ -272,16 +272,6 @@ enum {
 };
 
 enum {
-#ifdef PS2
-	SIZE_MAIN_SCRIPT = 205512,
-#else
-	SIZE_MAIN_SCRIPT = 225512,
-#endif
-	SIZE_MISSION_SCRIPT = 35000,
-	SIZE_SCRIPT_SPACE = SIZE_MAIN_SCRIPT + SIZE_MISSION_SCRIPT
-};
-
-enum {
 	MAX_NUM_SCRIPTS = 128,
 	MAX_NUM_INTRO_TEXT_LINES = 48,
 	MAX_NUM_INTRO_RECTANGLES = 16,
@@ -337,15 +327,6 @@ public:
 	static uint16 ScriptsUpdated;
 	static uint32 LastMissionPassedTime;
 	static uint16 NumberOfExclusiveMissionScripts;
-#if (defined GTA_PC && !defined GTAVC_JP_PATCH || defined GTA_XBOX || defined SUPPORT_XBOX_SCRIPT || defined GTA_MOBILE || defined SUPPORT_MOBILE_SCRIPT)
-#define CARDS_IN_SUIT (13)
-#define NUM_SUITS (4)
-#define MAX_DECKS (6)
-#define CARDS_IN_DECK (CARDS_IN_SUIT * NUM_SUITS)
-#define CARDS_IN_STACK (CARDS_IN_DECK * MAX_DECKS)
-	static int16 CardStack[CARDS_IN_STACK];
-	static int16 CardStackPosition;
-#endif
 
 	static bool bPlayerIsInTheStatium;
 	static uint8 RiotIntensity;
@@ -358,6 +339,8 @@ public:
 	static int NextProcessId;
 	static bool InTheScripts;
 	static CRunningScript* pCurrent;
+	static uint16 NumTrueGlobals;
+	static uint16 MostGlobals;
 
 	static bool Init(bool loaddata = false);
 	static void Process();
@@ -476,6 +459,8 @@ public:
 
 extern int ScriptParams[32];
 
+VALIDATE_SIZE(uStackReturnValue, 4);
+
 class CRunningScript
 {
 	enum {
@@ -496,6 +481,15 @@ class CRunningScript
 		ORS_6,
 		ORS_7,
 		ORS_8
+	};
+
+	enum {
+		STACKVALUE_IP_BITS = 22,
+		STACKVALUE_INVERT_RETURN_BIT = STACKVALUE_IP_BITS,
+		STACKVALUE_IS_FUNCTION_CALL_BIT,
+		STACKVALUE_IP_PARAMS_OFFSET,
+
+		STACKVALUE_IP_MASK = ((1 << STACKVALUE_IP_BITS) - 1)
 	};
 
 public:
@@ -564,6 +558,8 @@ public:
 	int8 ProcessCommands1200To1299(int32);
 	int8 ProcessCommands1300To1399(int32);
 	int8 ProcessCommands1400To1499(int32);
+	int8 ProcessCommands1500To1599(int32);
+	int8 ProcessCommands1600To1699(int32);
 
 	void LocatePlayerCommand(int32, uint32*);
 	void LocatePlayerCharCommand(int32, uint32*);
@@ -601,10 +597,10 @@ public:
 	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
 
 	bool ThisIsAValidRandomPed(uint32 pedtype, int civ, int gang, int criminal);
-
-	bool CheckDamagedWeaponType(int32 actual, int32 type);
-	
+	bool CheckDamagedWeaponType(int32 actual, int32 type);	
 	static bool ThisIsAValidRandomCop(int32 mi, bool cop, bool swat, bool fbi, bool army, bool miami);
+
+	void ReturnFromGosubOrFunction();
 
 };
 
