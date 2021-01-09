@@ -2556,7 +2556,7 @@ void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective ob
 			}
 			else {
 				pPed->bScriptObjectiveCompleted = false;
-				pPed->SetObjective(objective, p1, p2);
+				//pPed->SetObjective(objective, p1, p2); TODO!
 			}
 		}
 	}
@@ -2740,6 +2740,9 @@ void CTheScripts::ReadObjectNamesFromScript()
 {
 	int32 varSpace = GetSizeOfVariableSpace();
 	uint32 ip = varSpace + 8;
+	NumSaveVars = Read4BytesFromScript(&ip);
+	SavedVarIndices = (short*)&ScriptParams[ip];
+	ip += 2 * NumSaveVars;
 	NumberOfUsedObjects = Read2BytesFromScript(&ip);
 	ip += 2;
 	for (uint16 i = 0; i < NumberOfUsedObjects; i++) {
@@ -2759,7 +2762,7 @@ void CTheScripts::UpdateObjectIndices()
 			CBaseModelInfo* pModel = CModelInfo::GetModelInfo(j);
 			if (!pModel)
 				continue;
-			strcpy(name, pModel->GetName());
+			strcpy(name, pModel->GetModelName());
 #ifdef FIX_BUGS
 			for (int k = 0; k < USED_OBJECT_NAME_LENGTH && name[k]; k++)
 #else
@@ -2784,7 +2787,8 @@ void CTheScripts::ReadMultiScriptFileOffsetsFromScript()
 	uint32 ip = varSpace + 3;
 	int32 objectSize = Read4BytesFromScript(&ip);
 	ip = objectSize + 8;
-	MainScriptSize = Read4BytesFromScript(&ip);
+	NumTrueGlobals = Read2BytesFromScript(&ip);
+	MostGlobals = Read2BytesFromScript(&ip);
 	LargestMissionScriptSize = Read4BytesFromScript(&ip);
 	NumberOfMissionScripts = Read2BytesFromScript(&ip);
 	NumberOfExclusiveMissionScripts = Read2BytesFromScript(&ip);

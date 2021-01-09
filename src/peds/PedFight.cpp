@@ -33,6 +33,7 @@ RpClump* flyingClumpTemp;
 
 FightMove tFightMoves[NUM_FIGHTMOVES] =
 {
+/*
   { NUM_STD_ANIMS,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
   { ANIM_PUNCH_R, 0.2f, 8.f/30.f, 0.0f, 0.3f, 1.0f, HITLEVEL_HIGH, 1, 0 },
   { ANIM_FIGHT_IDLE,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
@@ -65,6 +66,7 @@ FightMove tFightMoves[NUM_FIGHTMOVES] =
   { ANIM_WEAPON_CROUCHFIRE, 4.f/30.f, 7.f/30.f, 10.f/30.f, 0.4f, 1.0f, HITLEVEL_HIGH, 1, 0 },
   { ANIM_WEAPON_SPECIAL, 4.f / 30.f, 7.f / 30.f, 10.f / 30.f, 0.4f, 1.0f, HITLEVEL_HIGH, 1, 0 },
   { ANIM_FIGHT2_IDLE,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 }
+*/
 };
 
 static PedOnGroundState
@@ -1115,10 +1117,7 @@ CPed::StartFightAttack(uint8 buttonPressure)
 					break;
 			}
 		} else {
-			if (m_curFightMove == FIGHTMOVE_BACKKICK)
-				animAssoc->speed = 1.15f;
-			else
-				animAssoc->speed = 0.8f;
+			animAssoc->speed = 0.8f;
 		}
 		if (IsPlayer())
 			animAssoc->SetCurrentTime(0.08f);
@@ -1227,12 +1226,14 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 					default:
 						if (hitLevel == HITLEVEL_LOW) {
 							hitAnim = ANIM_KO_SHOT_STOM;
+/*	LCS: removed
 						} else if (CGeneral::GetRandomNumber() & 1) {
 							fall = false;
 							hitAnim = ANIM_HIT_WALK;
 						} else if (CGeneral::GetRandomNumber() & 1) {
 							fall = false;
 							hitAnim = ANIM_HIT_HEAD;
+*/
 						} else {
 							hitAnim = ANIM_KO_SHOT_FACE;
 						}
@@ -1267,7 +1268,7 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 						Say(SOUND_PED_DEFEND);
 						return;
 					}	
-					m_curFightMove = FIGHTMOVE_HITBODY;
+					m_curFightMove = FIGHTMOVE_HITFRONT;	// LCS
 					break;
 				case HITLEVEL_HIGH:
 					switch (direction) {
@@ -1281,10 +1282,12 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 							m_curFightMove = FIGHTMOVE_HITRIGHT;
 							break;
 						default:
-							if (unk <= 5)
-								m_curFightMove = FIGHTMOVE_HITHEAD;
-							else
-								m_curFightMove = FIGHTMOVE_HITBIGSTEP;
+							// LCS: removed
+							//if (unk <= 5)
+							//	m_curFightMove = FIGHTMOVE_HITHEAD;
+							//else
+							//	m_curFightMove = FIGHTMOVE_HITBIGSTEP;
+							m_curFightMove = FIGHTMOVE_HITFRONT;
 							break;
 					}
 					break;
@@ -1300,10 +1303,12 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 							m_curFightMove = FIGHTMOVE_HITRIGHT;
 							break;
 						default:
-							if (unk <= 5)
-								m_curFightMove = FIGHTMOVE_HITCHEST;
-							else
-								m_curFightMove = FIGHTMOVE_HITBIGSTEP;
+							// LCS: removed
+							//if (unk <= 5)
+							//	m_curFightMove = FIGHTMOVE_HITCHEST;
+							//else
+							//	m_curFightMove = FIGHTMOVE_HITBIGSTEP;
+							m_curFightMove = FIGHTMOVE_HITFRONT;
 							break;
 					}
 					break;
@@ -1457,30 +1462,30 @@ CPed::Fight(void)
 			CVector touchingNodePos(0.0f, 0.0f, 0.0f);
 
 			switch (m_curFightMove) {
-				case FIGHTMOVE_KNEE:
-					TransformToNode(touchingNodePos, PED_LOWERLEGR);
-					break;
-				case FIGHTMOVE_PUNCHHOOK:
-				case FIGHTMOVE_PUNCHJAB:
-					TransformToNode(touchingNodePos, PED_HANDL);
-					break;
+			//	case FIGHTMOVE_KNEE:
+			//		TransformToNode(touchingNodePos, PED_LOWERLEGR);
+			//		break;
+			//	case FIGHTMOVE_PUNCHHOOK:
+			//	case FIGHTMOVE_PUNCHJAB:
+			//		TransformToNode(touchingNodePos, PED_HANDL);
+			//		break;
 				case FIGHTMOVE_LONGKICK:
 				case FIGHTMOVE_ROUNDHOUSE:
-				case FIGHTMOVE_FWDLEFT:
-				case FIGHTMOVE_BACKRIGHT:
+			//	case FIGHTMOVE_FWDLEFT:
+			//	case FIGHTMOVE_BACKRIGHT:
 				case FIGHTMOVE_GROUNDKICK:
 					TransformToNode(touchingNodePos, PED_FOOTR);
 					break;
 				case FIGHTMOVE_FWDRIGHT:
 					TransformToNode(touchingNodePos, PED_HEAD);
 					break;
-				case FIGHTMOVE_BACKKICK:
-				case FIGHTMOVE_BACKFLIP:
-					TransformToNode(touchingNodePos, PED_FOOTL);
-					break;
-				case FIGHTMOVE_BACKLEFT:
-					TransformToNode(touchingNodePos, PED_UPPERARML);
-					break;
+			//	case FIGHTMOVE_BACKKICK:
+			//	case FIGHTMOVE_BACKFLIP:
+			//		TransformToNode(touchingNodePos, PED_FOOTL);
+			//		break;
+			//	case FIGHTMOVE_BACKLEFT:
+			//		TransformToNode(touchingNodePos, PED_UPPERARML);
+			//		break;
 				default:
 					TransformToNode(touchingNodePos, PED_HANDR);
 					break;
@@ -1532,10 +1537,7 @@ CPed::Fight(void)
 				tFightMoves[m_curFightMove].animId, 8.0f);
 
 			if (weaponInfo->m_AnimToPlay != ASSOCGRP_KNIFE || m_curFightMove < FIGHTMOVE_MELEE1) {
-				if (m_curFightMove == FIGHTMOVE_BACKKICK)
-					animAssoc->speed = 1.15f;
-				else
-					animAssoc->speed = 0.8f;
+				animAssoc->speed = 0.8f;
 			} else {
 				switch (GetWeapon()->m_eWeaponType) {
 					case WEAPONTYPE_SCREWDRIVER:
@@ -1676,8 +1678,9 @@ CPed::ChooseAttackAI(uint8 buttonPressure, bool fightWithWeapon)
 					return FIGHTMOVE_IDLE;
 				}
 			}
-			if (dist < 0.95f && canKneeHead)
-				return FIGHTMOVE_KNEE;
+			// LCS: removed
+			//if (dist < 0.95f && canKneeHead)
+			//	return FIGHTMOVE_KNEE;
 			if (dist < 1.4f)
 				return FIGHTMOVE_PUNCH;
 			if (dist < 2.f && canKick) {
@@ -1796,9 +1799,11 @@ CPed::ChooseAttackPlayer(uint8 buttonPressure, bool fightWithWeapon)
 		switch (dir) {
 			case 0: // forward
 				if (fightWithWeapon) {
-					if (distToVictim < 0.95f - 0.2f && m_nPedState == PED_FIGHT) {
-						choosenMove = FIGHTMOVE_KNEE;
-					} else {
+					// LCS: removed
+					//if (distToVictim < 0.95f - 0.2f && m_nPedState == PED_FIGHT) {
+					//	choosenMove = FIGHTMOVE_KNEE;
+					//} else
+					{
 						if (GetWeapon()->m_eWeaponType == WEAPONTYPE_CLEAVER) {
 							if (distToVictim < 0.85f * weaponInfo->m_fRange)
 								choosenMove = FIGHTMOVE_MELEE1;
@@ -1821,18 +1826,20 @@ CPed::ChooseAttackPlayer(uint8 buttonPressure, bool fightWithWeapon)
 							}
 						}
 					}
-				} else if (distToVictim < 0.95f && m_nPedState == PED_FIGHT) {
-					choosenMove = FIGHTMOVE_KNEE;
+				// LCS: removed
+				//} else if (distToVictim < 0.95f && m_nPedState == PED_FIGHT) {
+				//	choosenMove = FIGHTMOVE_KNEE;
 
 				} else if (distToVictim < 1.4f) {
-					if (m_curFightMove == FIGHTMOVE_PUNCHJAB) {
+					// LCS: removed
+					/*if (m_curFightMove == FIGHTMOVE_PUNCHJAB) {
 						choosenMove = FIGHTMOVE_PUNCH;
 
-					} else if (m_curFightMove != FIGHTMOVE_PUNCH || randVal != 1) {
-						if (randVal == 2)
+					} else*/ if (m_curFightMove != FIGHTMOVE_PUNCH || randVal != 1) {
+						//if (randVal == 2)
 							choosenMove = FIGHTMOVE_PUNCH;
-						else
-							choosenMove = FIGHTMOVE_PUNCHJAB;
+						//else
+						//	choosenMove = FIGHTMOVE_PUNCHJAB;
 					} else {
 						choosenMove = FIGHTMOVE_LONGKICK;
 					}
@@ -1840,6 +1847,7 @@ CPed::ChooseAttackPlayer(uint8 buttonPressure, bool fightWithWeapon)
 					choosenMove = FIGHTMOVE_LONGKICK;
 				}
 				break;
+/*	LCS: removed
 			case 1:
 				choosenMove = FIGHTMOVE_FWDLEFT;
 				break;
@@ -1852,6 +1860,7 @@ CPed::ChooseAttackPlayer(uint8 buttonPressure, bool fightWithWeapon)
 			case 4:
 				choosenMove = FIGHTMOVE_BACKRIGHT;
 				break;
+*/
 			default:
 				choosenMove = FIGHTMOVE_FWDRIGHT;
 				break;
@@ -1917,20 +1926,22 @@ CPed::ChooseAttackPlayer(uint8 buttonPressure, bool fightWithWeapon)
 #else
 		switch (CGeneral::GetRandomNumberInRange(0,3)) {
 #endif
-			case 0:
-				choosenMove = FIGHTMOVE_PUNCHJAB;
-				break;
+		// LCS: hack hack
+		//	case 0:
+		//		choosenMove = FIGHTMOVE_PUNCHJAB;
+		//		break;
+			default:
 			case 1:
 				choosenMove = FIGHTMOVE_PUNCH;
 				break;
 			case 2:
 				choosenMove = FIGHTMOVE_LONGKICK;
 				break;
-			case 3:
-				choosenMove = FIGHTMOVE_KNEE;
-				break;
-			default:
-				break;
+		//	case 3:
+		//		choosenMove = FIGHTMOVE_KNEE;
+		//		break;
+		//	default:
+		//		break;
 		}
 	}
 	return choosenMove;
@@ -1975,6 +1986,7 @@ CPed::EndFight(uint8 endType)
 void
 CPed::PlayHitSound(CPed *hitTo)
 {
+#if 0	// LCS: temporarily removed
 	// That was very complicated to reverse for me...
 	// First index is our fight move ID (from 1 to 17, total 17), second is the one of we fight with (from 18 to 27, total 10).
 	enum {
@@ -2045,6 +2057,7 @@ CPed::PlayHitSound(CPed *hitTo)
 
 	if (soundId != NO_SND)
 		DMAudio.PlayOneShot(m_audioEntityId, soundId, (weapon << 8) | ENTITY_TYPE_PED);
+#endif
 }
 
 // --MIAMI: Done
@@ -2178,8 +2191,9 @@ CPed::FightHitPed(CPed *victim, CVector &touchPoint, CVector &dir, int16 piece)
 
 	bool brassKnucklePunch = false;
 	if (GetWeapon()->m_eWeaponType == WEAPONTYPE_BRASSKNUCKLE) {
-		if (m_curFightMove == FIGHTMOVE_PUNCHHOOK || m_curFightMove == FIGHTMOVE_PUNCHJAB || m_curFightMove == FIGHTMOVE_BACKLEFT ||
-			m_curFightMove == FIGHTMOVE_STDPUNCH || m_curFightMove == FIGHTMOVE_PUNCH) {
+		// LCS: removed
+		if (/*m_curFightMove == FIGHTMOVE_PUNCHHOOK || m_curFightMove == FIGHTMOVE_PUNCHJAB || m_curFightMove == FIGHTMOVE_BACKLEFT ||
+			m_curFightMove == FIGHTMOVE_STDPUNCH ||*/ m_curFightMove == FIGHTMOVE_PUNCH) {
 			brassKnucklePunch = true;
 			damageMult *= 1.5f;
 		}

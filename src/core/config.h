@@ -97,7 +97,7 @@ enum Config {
 	NUMPACMANPICKUPS = 256,
 	NUMEVENTS = 64,
 
-	NUM_CARGENS = 185,
+	NUM_CARGENS = 500,
 
 	NUM_PATH_NODES_IN_AUTOPILOT = 8,
 
@@ -196,6 +196,8 @@ enum Config {
 // #define USE_CUSTOM_ALLOCATOR		// use CMemoryHeap for allocation. use with care, not finished yet
 //#define COMPRESSED_COL_VECTORS	// use compressed vectors for collision vertices
 //#define ANIM_COMPRESSION	// only keep most recently used anims uncompressed
+
+#define GTA_TRAIN
 
 #if defined GTA_PS2
 #	define GTA_PS2_STUFF
@@ -312,7 +314,7 @@ enum Config {
 #		define GRAPHICS_MENU_OPTIONS // otherwise Display settings will be scrollable
 //#		define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
 #		define CUTSCENE_BORDERS_SWITCH
-//#		define MULTISAMPLING		// adds MSAA option
+#		define MULTISAMPLING		// adds MSAA option
 #		define INVERT_LOOK_FOR_PAD // enable the hidden option
 #	endif
 #endif
@@ -382,7 +384,6 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 
 #ifdef LIBRW
 // these are not supported with librw yet
-#	undef MULTISAMPLING
 #endif
 // IMG
 #define BIG_IMG // allows to read larger img files

@@ -1641,13 +1641,13 @@ CAutomobile::ProcessControl(void)
 	// TODO: make the numbers defines
 
 	float heading;
-	if(GetPosition().x > 1950.0f-400.0f){
+	if(GetPosition().x > 1950.0f){
 		if(m_vecMoveSpeed.x > 0.0f)
 			m_vecMoveSpeed.x *= -1.0f;
 		heading = GetForward().Heading();
 		if(heading > 0.0f)	// going west
 			SetHeading(-heading);
-	}else if(GetPosition().x < -1950.0f-400.0f){
+	}else if(GetPosition().x < -1950.0f){
 		if(m_vecMoveSpeed.x < 0.0f)
 			m_vecMoveSpeed.x *= -1.0f;
 		heading = GetForward().Heading();
@@ -5615,7 +5615,7 @@ CAutomobile::SetBumperDamage(int32 component, ePanels panel, bool noFlyingCompon
 	int status = Damage.GetPanelStatus(panel);
 	if(m_aCarNodes[component] == nil){
 		printf("Trying to damage component %d of %s\n",
-			component, CModelInfo::GetModelInfo(GetModelIndex())->GetName());
+			component, CModelInfo::GetModelInfo(GetModelIndex())->GetModelName());
 		return;
 	}
 	if(status == PANEL_STATUS_SMASHED1){
@@ -5635,7 +5635,7 @@ CAutomobile::SetDoorDamage(int32 component, eDoors door, bool noFlyingComponents
 	int status = Damage.GetDoorStatus(door);
 	if(m_aCarNodes[component] == nil){
 		printf("Trying to damage component %d of %s\n",
-			component, CModelInfo::GetModelInfo(GetModelIndex())->GetName());
+			component, CModelInfo::GetModelInfo(GetModelIndex())->GetModelName());
 		return;
 	}
 

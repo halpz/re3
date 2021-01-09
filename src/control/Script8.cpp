@@ -384,7 +384,6 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		}
 		return 0;
 	}
-#if (defined GTAVC_JP_PATCH || defined SUPPORT_JAPANESE_SCRIPT)
 	case COMMAND_IS_JAPANESE_GAME:
 #ifdef MORE_LANGUAGES
 		UpdateCompareFlag(FrontEndMenuManager.m_PrefsLanguage == LANGUAGE_JAPANESE);
@@ -394,218 +393,697 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		UpdateCompareFlag(false);
 #endif
 		return 0;
-#elif (!defined GTA_PS2)
-	case COMMAND_SET_ONSCREEN_COUNTER_FLASH_WHEN_FIRST_DISPLAYED:
-		script_assert(CTheScripts::ScriptSpace[m_nIp++] == ARGUMENT_GLOBALVAR);
-		uint16 var = CTheScripts::Read2BytesFromScript(&m_nIp);
+	case COMMAND_1442:
+		script_assert(false);
+		return 0;
+	case COMMAND_1443:
+		script_assert(false);
+		return 0;
+	case COMMAND_1444:
+		script_assert(false);
+		return 0;
+	case COMMAND_1445:
+		script_assert(false);
+		return 0;
+	case COMMAND_1446:
+		script_assert(false);
+		return 0;
+	case COMMAND_1447:
+		script_assert(false);
+		return 0;
+	case COMMAND_1448:
+		script_assert(false);
+		return 0;
+	case COMMAND_1449:
+		script_assert(false);
+		return 0;
+	case COMMAND_1450:
+		script_assert(false);
+		return 0;
+	case COMMAND_1451:
+		script_assert(false);
+		return 0;
+	case COMMAND_1452:
+		script_assert(false);
+		return 0;
+	case COMMAND_1453:
+		script_assert(false);
+		return 0;
+	case COMMAND_CALL:
+	case COMMAND_NOTCALL:
+	{
+		m_anStack[m_nStackPointer++] = m_nIp | BIT(STACKVALUE_IS_FUNCTION_CALL_BIT) | ((command == COMMAND_NOTCALL) ? BIT(STACKVALUE_INVERT_RETURN_BIT) : 0);
+		uint8 nInputParams = CTheScripts::Read1ByteFromScript(&m_nIp);
+		uint8 nOutputParameters = CTheScripts::Read1ByteFromScript(&m_nIp);
+		uint8 nLocalsOffset = CTheScripts::Read1ByteFromScript(&m_nIp);
+		uint32 nIPBeforeParameters = m_nIp;
 		CollectParameters(&m_nIp, 1);
-		//CUserDisplay::OnscnTimer.SetCounterFlashWhenFirstDisplayed(var, ScriptParams[0]);
-		break;
-#endif
-#if (defined GTA_PC && !defined GTAVC_JP_PATCH || defined GTA_XBOX || defined SUPPORT_XBOX_SCRIPT || defined GTA_MOBILE || defined SUPPORT_MOBILE_SCRIPT)
-	case COMMAND_SHUFFLE_CARD_DECKS:
-	{
-		CollectParameters(&m_nIp, 1);
-		script_assert(ScriptParams[0] >= 0 && ScriptParams[0] <= 6);
-		for (int i = 0; i < CARDS_IN_STACK; i++)
-			CTheScripts::CardStack[i] = 0;
-		int16 seq[CARDS_IN_STACK];
-		for (int i = 0; i < MAX_DECKS * CARDS_IN_DECK; i++)
-			seq[i] = i;
-		int cards_left = CARDS_IN_DECK * ScriptParams[0];
-		for (int k = 1; k < CARDS_IN_DECK + 1; k++) {
-			for (int deck = 0; deck < ScriptParams[0]; deck++) {
-				int index = CGeneral::GetRandomNumberInRange(0, cards_left);
-				CTheScripts::CardStack[seq[index]] = k;
-				for (int l = index; l < cards_left; l++) {
-					if (l + 1 < CARDS_IN_STACK)
-						seq[l] = seq[l + 1];
-					else
-						seq[l] = 0;
-				}
-				--cards_left;
-			}
-		}
-		CTheScripts::CardStackPosition = 0;
-		return 0;
-	}
-	case COMMAND_FETCH_NEXT_CARD:
-	{
-		if (CTheScripts::CardStack[CTheScripts::CardStackPosition] == 0)
-			CTheScripts::CardStackPosition = 0;
-		ScriptParams[0] = CTheScripts::CardStack[CTheScripts::CardStackPosition++];
-		if (CTheScripts::CardStackPosition == CARDS_IN_DECK * MAX_DECKS)
-			CTheScripts::CardStackPosition = 0;
-		StoreParameters(&m_nIp, 1);
-		return 0;
-	}
-	case COMMAND_GET_OBJECT_VELOCITY:
-	{
-		CollectParameters(&m_nIp, 1);
-		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
-		*(CVector*)ScriptParams[0] = GAME_SPEED_TO_METERS_PER_SECOND * pObject->GetMoveSpeed();
-		StoreParameters(&m_nIp, 3);
-		return 0;
-	}
-	case COMMAND_IS_DEBUG_CAMERA_ON:
-		UpdateCompareFlag(TheCamera.WorldViewerBeingUsed);
-		return 0;
-	case COMMAND_ADD_TO_OBJECT_ROTATION_VELOCITY:
-	{
-		CollectParameters(&m_nIp, 4);
-		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
-		CVector newSpeed = pObject->GetTurnSpeed() + *(CVector*)ScriptParams[1] / GAME_SPEED_TO_METERS_PER_SECOND;
-		if (pObject->bIsStatic) {
-			pObject->SetIsStatic(false);
-			pObject->AddToMovingList();
-		}
-		pObject->SetTurnSpeed(newSpeed.x, newSpeed.y, newSpeed.z);
-		return 0;
-	}
-	case COMMAND_SET_OBJECT_ROTATION_VELOCITY:
-	{
-		CollectParameters(&m_nIp, 4);
-		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
-		CVector newSpeed = *(CVector*)ScriptParams[1] / GAME_SPEED_TO_METERS_PER_SECOND;
-		if (pObject->bIsStatic) {
-			pObject->SetIsStatic(false);
-			pObject->AddToMovingList();
-		}
-		pObject->SetTurnSpeed(newSpeed.x, newSpeed.y, newSpeed.z);
-		return 0;
-	}
-	case COMMAND_IS_OBJECT_STATIC:
-	{
-		CollectParameters(&m_nIp, 1);
-		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
-		UpdateCompareFlag(pObject->GetIsStatic());
-		return 0;
-	}
-	case COMMAND_GET_ANGLE_BETWEEN_2D_VECTORS:
-	{
-		CollectParameters(&m_nIp, 4);
-		CVector2D v1 = *(CVector2D*)ScriptParams[0];
-		CVector2D v2 = *(CVector2D*)ScriptParams[2];
-		float c = DotProduct2D(v1, v2) / (v1.Magnitude() * v2.Magnitude());
-#ifdef FIX_BUGS // command is a SA leftover where it was fixed to this
-		*(float*)ScriptParams[0] = RADTODEG(Acos(c));
-#else
-		*(float*)ScriptParams[0] = Acos(c);
-#endif
-		return 0;
-	}
-	case COMMAND_DO_2D_RECTANGLES_COLLIDE:
-	{
-		CollectParameters(&m_nIp, 8);
-		float infX1 = *(float*)&ScriptParams[0] - *(float*)&ScriptParams[2] * 0.5; // NB: not float
-		float supX1 = *(float*)&ScriptParams[0] + *(float*)&ScriptParams[2] * 0.5;
-		float infX2 = *(float*)&ScriptParams[4] - *(float*)&ScriptParams[6] * 0.5;
-		float supX2 = *(float*)&ScriptParams[4] + *(float*)&ScriptParams[6] * 0.5;
-		float infY1 = *(float*)&ScriptParams[1] - *(float*)&ScriptParams[3] * 0.5;
-		float supY1 = *(float*)&ScriptParams[1] + *(float*)&ScriptParams[3] * 0.5;
-		float infY2 = *(float*)&ScriptParams[5] - *(float*)&ScriptParams[7] * 0.5;
-		float supY2 = *(float*)&ScriptParams[5] + *(float*)&ScriptParams[7] * 0.5;
-		bool collide = true;
-		if (infY2 > supY1)
-			collide = false;
-		if (infY1 > supY2)
-			collide = false;
-		if (infX2 > supX1)
-			collide = false;
-		if (infX1 > supX2)
-			collide = false;
-		UpdateCompareFlag(collide);
-		return 0;
-	}
-	case COMMAND_GET_OBJECT_ROTATION_VELOCITY:
-	{
-		CollectParameters(&m_nIp, 1);
-		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
-		*(CVector*)ScriptParams[0] = pObject->GetTurnSpeed() * GAME_SPEED_TO_METERS_PER_SECOND;
-		StoreParameters(&m_nIp, 3);
-		return 0;
-	}
-	case COMMAND_ADD_VELOCITY_RELATIVE_TO_OBJECT_VELOCITY:
-	{
-		CollectParameters(&m_nIp, 4);
-		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
-		CVector vecAddition = *(CVector*)&ScriptParams[1] * CTimer::GetTimeStep() / GAME_SPEED_TO_METERS_PER_SECOND;
-		if (!pObject->bIsStatic) {
-			CVector vecCurrSpeed = pObject->GetSpeed();
-			vecCurrSpeed.Normalise();
-			if (vecCurrSpeed.z != 1.0) { // NB: not float!
-				CVector vx = CrossProduct(vecCurrSpeed, CVector(0.0f, 0.0f, 1.0f));
-				vx.Normalise();
-				CVector vz = CrossProduct(vx, vecCurrSpeed);
-				vz.Normalise();
-				CVector vecNewSpeed = pObject->GetSpeed() + vecAddition.x * vx + vecAddition.y * vecCurrSpeed + vecAddition.z * vecCurrSpeed;
-				if (pObject->bIsStatic) {
-					pObject->SetIsStatic(false);
-					pObject->AddToMovingList();
-				}
-				pObject->SetMoveSpeed(vecNewSpeed);
-			}
-		}
-		return 0;
-	}
-	case COMMAND_GET_OBJECT_SPEED:
-	{
-		CollectParameters(&m_nIp, 1);
-		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
-		*(float*)ScriptParams[0] = pObject->GetMoveSpeed().Magnitude() * GAME_SPEED_TO_METERS_PER_SECOND;
-		StoreParameters(&m_nIp, 1);
-		return 0;
-	}
-#endif
-#if (defined GTA_MOBILE || defined SUPPORT_MOBILE_SCRIPT)
-	case COMMAND_IS_MISSION_SKIP:
-#ifdef MISSION_REPLAY
-		ScriptParams[0] = MissionSkipLevel;
-#else
-		ScriptParams[0] = 0;
-#endif
-		StoreParameters(&m_nIp, 1);
-		return 0;
-	case COMMAND_SET_IN_AMMUNATION:
-		CollectParameters(&m_nIp, 1);
-#ifdef MISSION_REPLAY
-		IsInAmmunation = ScriptParams[0];
-#endif
-		return 0;
-	case COMMAND_DO_SAVE_GAME:
-		CollectParameters(&m_nIp, 1);
-#ifdef MISSION_REPLAY
-		SaveGameForPause(ScriptParams[0]);
-#endif
-		return 0;
-	case COMMAND_IS_RETRY:
-#ifdef MISSION_REPLAY
-		if (strcmp(m_abScriptName, "porno4") != 0)
-			ScriptParams[0] = AllowMissionReplay;
-#ifdef FIX_BUGS
+		if (nInputParams)
+			CollectParameters(&m_nIp, nInputParams, &m_anLocalVariables[m_nLocalsPointer + nLocalsOffset]);
+		m_nLocalsPointer += nLocalsOffset;
+		m_anStack[m_nStackPointer - 1] |= (m_nIp - nIPBeforeParameters) << STACKVALUE_IP_PARAMS_OFFSET;
+		if (ScriptParams[0] < 0)
+			m_nIp = CTheScripts::MainScriptSize - ScriptParams[0];
 		else
-			ScriptParams[0] = gbTryingPorn4Again;
-#else
-		else if (gbTryingPorn4Again)
-			ScriptParams[0] = 1;
-#endif
-#else
-		ScriptParams[0] = 0;
-#endif
-		StoreParameters(&m_nIp, 1);
+			m_nIp = ScriptParams[0];
 		return 0;
-	case COMMAND_DUMMY:
+	}
+	case COMMAND_1456:
+		script_assert(false);
 		return 0;
-#endif
-#if (defined GTA_XBOX || defined SUPPORT_XBOX_SCRIPT || defined GTA_MOBILE || defined SUPPORT_MOBILE_SCRIPT)
-	// it is unknown what these commands do but they don't take parameters
-	case COMMAND_MARK_CUTSCENE_START:
+	case COMMAND_1457:
+		script_assert(false);
 		return 0;
-	case COMMAND_MARK_CUTSCENE_END:
+	case COMMAND_1458:
+		script_assert(false);
 		return 0;
-	case COMMAND_CUTSCENE_SCROLL:
+	case COMMAND_1459:
+		script_assert(false);
 		return 0;
-#endif
+	case COMMAND_1460:
+		script_assert(false);
+		return 0;
+	case COMMAND_1461:
+		script_assert(false);
+		return 0;
+	case COMMAND_1462:
+		script_assert(false);
+		return 0;
+	case COMMAND_1463:
+		script_assert(false);
+		return 0;
+	case COMMAND_1464:
+		script_assert(false);
+		return 0;
+	case COMMAND_1465:
+		script_assert(false);
+		return 0;
+	case COMMAND_1466:
+		script_assert(false);
+		return 0;
+	case COMMAND_1467:
+		script_assert(false);
+		return 0;
+	case COMMAND_1468:
+		script_assert(false);
+		return 0;
+	case COMMAND_1469:
+		script_assert(false);
+		return 0;
+	case COMMAND_1470:
+		script_assert(false);
+		return 0;
+	case COMMAND_1471:
+		script_assert(false);
+		return 0;
+	case COMMAND_1472:
+		script_assert(false);
+		return 0;
+	case COMMAND_1473:
+		script_assert(false);
+		return 0;
+	case COMMAND_1474:
+		script_assert(false);
+		return 0;
+	case COMMAND_1475:
+		script_assert(false);
+		return 0;
+	case COMMAND_1476:
+		script_assert(false);
+		return 0;
+	case COMMAND_1477:
+		script_assert(false);
+		return 0;
+	case COMMAND_1478:
+		script_assert(false);
+		return 0;
+	case COMMAND_1479:
+		script_assert(false);
+		return 0;
+	case COMMAND_1480:
+		script_assert(false);
+		return 0;
+	case COMMAND_1481:
+		script_assert(false);
+		return 0;
+	case COMMAND_1482:
+		script_assert(false);
+		return 0;
+	case COMMAND_1483:
+		script_assert(false);
+		return 0;
+	case COMMAND_1484:
+		script_assert(false);
+		return 0;
+	case COMMAND_1485:
+		script_assert(false);
+		return 0;
+	case COMMAND_1486:
+		script_assert(false);
+		return 0;
+	case COMMAND_1487:
+		script_assert(false);
+		return 0;
+	case COMMAND_1488:
+		script_assert(false);
+		return 0;
+	case COMMAND_1489:
+		script_assert(false);
+		return 0;
+	case COMMAND_1490:
+		script_assert(false);
+		return 0;
+	case COMMAND_1491:
+		script_assert(false);
+		return 0;
+	case COMMAND_1492:
+		script_assert(false);
+		return 0;
+	case COMMAND_1493:
+		script_assert(false);
+		return 0;
+	case COMMAND_1494:
+		script_assert(false);
+		return 0;
+	case COMMAND_1495:
+		script_assert(false);
+		return 0;
+	case COMMAND_1496:
+		script_assert(false);
+		return 0;
+	case COMMAND_1497:
+		script_assert(false);
+		return 0;
+	case COMMAND_1498:
+		script_assert(false);
+		return 0;
+	case COMMAND_1499:
+		script_assert(false);
+		return 0;
+	default:
+		script_assert(0);
+	}
+	return -1;
+}
+
+int8 CRunningScript::ProcessCommands1500To1599(int32 command)
+{
+	switch (command) {
+	case COMMAND_1500:
+		script_assert(false);
+		return 0;
+	case COMMAND_1501:
+		script_assert(false);
+		return 0;
+	case COMMAND_1502:
+		script_assert(false);
+		return 0;
+	case COMMAND_1503:
+		script_assert(false);
+		return 0;
+	case COMMAND_1504:
+		script_assert(false);
+		return 0;
+	case COMMAND_1505:
+		script_assert(false);
+		return 0;
+	case COMMAND_1506:
+		script_assert(false);
+		return 0;
+	case COMMAND_1507:
+		script_assert(false);
+		return 0;
+	case COMMAND_1508:
+		script_assert(false);
+		return 0;
+	case COMMAND_1509:
+		script_assert(false);
+		return 0;
+	case COMMAND_1510:
+		script_assert(false);
+		return 0;
+	case COMMAND_1511:
+		script_assert(false);
+		return 0;
+	case COMMAND_1512:
+		script_assert(false);
+		return 0;
+	case COMMAND_1513:
+		script_assert(false);
+		return 0;
+	case COMMAND_1514:
+		script_assert(false);
+		return 0;
+	case COMMAND_1515:
+		script_assert(false);
+		return 0;
+	case COMMAND_1516:
+		script_assert(false);
+		return 0;
+	case COMMAND_1517:
+		script_assert(false);
+		return 0;
+	case COMMAND_1518:
+		script_assert(false);
+		return 0;
+	case COMMAND_1519:
+		CollectParameters(&m_nIp, 1);
+		// TODO (SET_NUMBER_USJ_FOUND?)
+		return 0;
+	case COMMAND_1520:
+		CollectParameters(&m_nIp, 1);
+		// TODO (SET_TOTAL_HIDDEN_PACKAGES?)
+		return 0;
+	case COMMAND_1521:
+		script_assert(false);
+		return 0;
+	case COMMAND_1522:
+		script_assert(false);
+		return 0;
+	case COMMAND_1523:
+		script_assert(false);
+		return 0;
+	case COMMAND_1524:
+		script_assert(false);
+		return 0;
+	case COMMAND_1525:
+		script_assert(false);
+		return 0;
+	case COMMAND_1526:
+		script_assert(false);
+		return 0;
+	case COMMAND_1527:
+		script_assert(false);
+		return 0;
+	case COMMAND_1528:
+		script_assert(false);
+		return 0;
+	case COMMAND_1529:
+		script_assert(false);
+		return 0;
+	case COMMAND_1530:
+		script_assert(false);
+		return 0;
+	case COMMAND_1531:
+		script_assert(false);
+		return 0;
+	case COMMAND_1532:
+		script_assert(false);
+		return 0;
+	case COMMAND_1533:
+		script_assert(false);
+		return 0;
+	case COMMAND_1534:
+		script_assert(false);
+		return 0;
+	case COMMAND_1535:
+		script_assert(false);
+		return 0;
+	case COMMAND_1536:
+		script_assert(false);
+		return 0;
+	case COMMAND_1537:
+		script_assert(false);
+		return 0;
+	case COMMAND_1538:
+		script_assert(false);
+		return 0;
+	case COMMAND_1539:
+		script_assert(false);
+		return 0;
+	case COMMAND_1540:
+		script_assert(false);
+		return 0;
+	case COMMAND_1541:
+		script_assert(false);
+		return 0;
+	case COMMAND_1542:
+		script_assert(false);
+		return 0;
+	case COMMAND_1543:
+		script_assert(false);
+		return 0;
+	case COMMAND_1544:
+		script_assert(false);
+		return 0;
+	case COMMAND_1545:
+		script_assert(false);
+		return 0;
+	case COMMAND_1546:
+		script_assert(false);
+		return 0;
+	case COMMAND_1547:
+		script_assert(false);
+		return 0;
+	case COMMAND_1548:
+		script_assert(false);
+		return 0;
+	case COMMAND_1549:
+		CollectParameters(&m_nIp, 1);
+		// TODO (SET_ONFOOT_CAMERA_MODE?)
+		return 0;
+	case COMMAND_1550:
+		script_assert(false);
+		return 0;
+	case COMMAND_1551:
+		script_assert(false);
+		return 0;
+	case COMMAND_1552:
+		script_assert(false);
+		return 0;
+	case COMMAND_1553:
+		script_assert(false);
+		return 0;
+	case COMMAND_1554:
+		script_assert(false);
+		return 0;
+	case COMMAND_1555:
+		CollectParameters(&m_nIp, 1);
+		// TODO (FREEZE_ONFOOT_CAMERA_MODE?)
+		return 0;
+	case COMMAND_1556:
+		script_assert(false);
+		return 0;
+	case COMMAND_1557:
+		script_assert(false);
+		return 0;
+	case COMMAND_1558:
+		script_assert(false);
+		return 0;
+	case COMMAND_1559:
+		script_assert(false);
+		return 0;
+	case COMMAND_1560:
+		// TODO (IS_E3_BUILD?)
+		UpdateCompareFlag(false);
+		return 0;
+	case COMMAND_1561:
+		script_assert(false);
+		return 0;
+	case COMMAND_1562:
+		script_assert(false);
+		return 0;
+	case COMMAND_1563:
+		script_assert(false);
+		return 0;
+	case COMMAND_1564:
+		script_assert(false);
+		return 0;
+	case COMMAND_1565:
+		script_assert(false);
+		return 0;
+	case COMMAND_1566:
+		script_assert(false);
+		return 0;
+	case COMMAND_1567:
+		script_assert(false);
+		return 0;
+	case COMMAND_1568:
+		script_assert(false);
+		return 0;
+	case COMMAND_1569:
+		// TODO (IS_MULTIPLAYER_ACTIVE?)
+		UpdateCompareFlag(false);
+		return 0;
+	case COMMAND_1570:
+		script_assert(false);
+		return 0;
+	case COMMAND_1571:
+		script_assert(false);
+		return 0;
+	case COMMAND_1572:
+		script_assert(false);
+		return 0;
+	case COMMAND_1573:
+		script_assert(false);
+		return 0;
+	case COMMAND_1574:
+		script_assert(false);
+		return 0;
+	case COMMAND_1575:
+		script_assert(false);
+		return 0;
+	case COMMAND_1576:
+		script_assert(false);
+		return 0;
+	case COMMAND_1577:
+		script_assert(false);
+		return 0;
+	case COMMAND_1578:
+		script_assert(false);
+		return 0;
+	case COMMAND_1579:
+		script_assert(false);
+		return 0;
+	case COMMAND_1580:
+		script_assert(false);
+		return 0;
+	case COMMAND_1581:
+		script_assert(false);
+		return 0;
+	case COMMAND_1582:
+		script_assert(false);
+		return 0;
+	case COMMAND_1583:
+		script_assert(false);
+		return 0;
+	case COMMAND_1584:
+		script_assert(false);
+		return 0;
+	case COMMAND_1585:
+		script_assert(false);
+		return 0;
+	case COMMAND_1586:
+		script_assert(false);
+		return 0;
+	case COMMAND_1587:
+		script_assert(false);
+		return 0;
+	case COMMAND_1588:
+		script_assert(false);
+		return 0;
+	case COMMAND_1589:
+		CollectParameters(&m_nIp, 2);
+		// TODO (SWAP_BUILDING?)
+		return 0;
+	case COMMAND_1590:
+		script_assert(false);
+		return 0;
+	case COMMAND_1591:
+		script_assert(false);
+		return 0;
+	case COMMAND_1592:
+		script_assert(false);
+		return 0;
+	case COMMAND_1593:
+		script_assert(false);
+		return 0;
+	case COMMAND_1594:
+		script_assert(false);
+		return 0;
+	case COMMAND_1595:
+		script_assert(false);
+		return 0;
+	case COMMAND_1596:
+		script_assert(false);
+		return 0;
+	case COMMAND_1597:
+		script_assert(false);
+		return 0;
+	case COMMAND_1598:
+		script_assert(false);
+		return 0;
+	case COMMAND_1599:
+		script_assert(false);
+		return 0;
+	default:
+		script_assert(0);
+	}
+	return -1;
+}
+
+int8 CRunningScript::ProcessCommands1600To1699(int32 command)
+{
+	switch (command) {
+	case COMMAND_1600:
+		script_assert(false);
+		return 0;
+	case COMMAND_1601:
+		script_assert(false);
+		return 0;
+	case COMMAND_1602:
+		script_assert(false);
+		return 0;
+	case COMMAND_1603:
+		script_assert(false);
+		return 0;
+	case COMMAND_1604:
+		script_assert(false);
+		return 0;
+	case COMMAND_1605:
+		script_assert(false);
+		return 0;
+	case COMMAND_1606:
+		script_assert(false);
+		return 0;
+	case COMMAND_1607:
+		script_assert(false);
+		return 0;
+	case COMMAND_1608:
+		script_assert(false);
+		return 0;
+	case COMMAND_1609:
+		script_assert(false);
+		return 0;
+	case COMMAND_1610:
+		script_assert(false);
+		return 0;
+	case COMMAND_1611:
+		script_assert(false);
+		return 0;
+	case COMMAND_1612:
+		script_assert(false);
+		return 0;
+	case COMMAND_1613:
+		script_assert(false);
+		return 0;
+	case COMMAND_1614:
+		script_assert(false);
+		return 0;
+	case COMMAND_1615:
+		script_assert(false);
+		return 0;
+	case COMMAND_1616:
+		script_assert(false);
+		return 0;
+	case COMMAND_1617:
+		script_assert(false);
+		return 0;
+	case COMMAND_1618:
+		script_assert(false);
+		return 0;
+	case COMMAND_1619:
+		script_assert(false);
+		return 0;
+	case COMMAND_1620:
+		script_assert(false);
+		return 0;
+	case COMMAND_1621:
+		script_assert(false);
+		return 0;
+	case COMMAND_1622:
+		script_assert(false);
+		return 0;
+	case COMMAND_1623:
+		script_assert(false);
+		return 0;
+	case COMMAND_1624:
+		script_assert(false);
+		return 0;
+	case COMMAND_1625:
+		script_assert(false);
+		return 0;
+	case COMMAND_1626:
+		script_assert(false);
+		return 0;
+	case COMMAND_1627:
+		script_assert(false);
+		return 0;
+	case COMMAND_1628:
+		script_assert(false);
+		return 0;
+	case COMMAND_1629:
+		script_assert(false);
+		return 0;
+	case COMMAND_1630:
+		script_assert(false);
+		return 0;
+	case COMMAND_1631:
+		script_assert(false);
+		return 0;
+	case COMMAND_1632:
+		script_assert(false);
+		return 0;
+	case COMMAND_1633:
+		script_assert(false);
+		return 0;
+	case COMMAND_1634:
+		script_assert(false);
+		return 0;
+	case COMMAND_1635:
+	{
+		char tmp[12]; // TODO
+		CTheScripts::ReadTextLabelFromScript(&m_nIp, tmp);
+		m_nIp += KEY_LENGTH_IN_SCRIPT;
+		// TODO (CHANGE_STORED_PLAYER_OUTFIT?)
+		return 0;
+	}
+	case COMMAND_1636:
+		script_assert(false);
+		return 0;
+	case COMMAND_1637:
+		script_assert(false);
+		return 0;
+	case COMMAND_1638:
+		script_assert(false);
+		return 0;
+	case COMMAND_1639:
+		script_assert(false);
+		return 0;
+	case COMMAND_1640:
+		CollectParameters(&m_nIp, 2);
+		// TODO (LOCK_GARAGE?)
+		return 0;
+	case COMMAND_1641:
+		script_assert(false);
+		return 0;
+	case COMMAND_1642:
+		script_assert(false);
+		return 0;
+	case COMMAND_1643:
+		script_assert(false);
+		return 0;
+	case COMMAND_1644:
+		script_assert(false);
+		return 0;
+	case COMMAND_1645:
+		script_assert(false);
+		return 0;
+	case COMMAND_1646:
+		CollectParameters(&m_nIp, 1);
+		// TODO (DISABLE_PAUSE_MENU?)
+		return 0;
+	case COMMAND_1647:
+		script_assert(false);
+		return 0;
+	case COMMAND_1648:
+		CollectParameters(&m_nIp, 3);
+		// TODO (SET_CLOCK_EVENT_WARNING);
+		return 0;
+	case COMMAND_1649:
+		script_assert(false);
+		return 0;
+	case COMMAND_1650:
+		script_assert(false);
+		return 0;
+	case COMMAND_1651:
+		script_assert(false);
+		return 0;
+	case COMMAND_1652:
+		script_assert(false);
+		return 0;
+	case COMMAND_1653:
+		script_assert(false);
+		return 0;
+	case COMMAND_1654:
+		script_assert(false);
+		return 0;
+	case COMMAND_1655:
+		script_assert(false);
+		return 0;
+	case COMMAND_1656:
+		script_assert(false);
+		return 0;
 	default:
 		script_assert(0);
 	}

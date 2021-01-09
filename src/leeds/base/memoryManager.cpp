@@ -64,12 +64,12 @@ void* operator new[](size_t size)
 	return base::cMainMemoryManager::Instance()->Allocate(size);
 }
 
-void operator delete(void* buf)
+void operator delete(void* buf) noexcept
 {
 	base::cMainMemoryManager::Instance()->Free(buf);
 }
 
-void operator delete[](void* buf)
+void operator delete[](void* buf) noexcept
 {
 	base::cMainMemoryManager::Instance()->Free(buf);
 }

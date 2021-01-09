@@ -168,7 +168,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	*/
 	case COMMAND_DISPLAY_ONSCREEN_TIMER:
 	{
-		script_assert(CTheScripts::ScriptSpace[m_nIp] == ARGUMENT_GLOBALVAR);
+		//script_assert(CTheScripts::ScriptSpace[m_nIp] == ARGUMENT_GLOBALVAR);
 		m_nIp++;
 		uint16 offset = CTheScripts::Read2BytesFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 1);
@@ -177,14 +177,14 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	}
 	case COMMAND_CLEAR_ONSCREEN_TIMER:
 	{
-		script_assert(CTheScripts::ScriptSpace[m_nIp] == ARGUMENT_GLOBALVAR);
+		//script_assert(CTheScripts::ScriptSpace[m_nIp] == ARGUMENT_GLOBALVAR);
 		m_nIp++;
 		CUserDisplay::OnscnTimer.ClearClock((uint16)CTheScripts::Read2BytesFromScript(&m_nIp));
 		return 0;
 	}
 	case COMMAND_DISPLAY_ONSCREEN_COUNTER:
 	{
-		script_assert(CTheScripts::ScriptSpace[m_nIp] == ARGUMENT_GLOBALVAR);
+		//script_assert(CTheScripts::ScriptSpace[m_nIp] == ARGUMENT_GLOBALVAR);
 		m_nIp++;
 		int16 counter = CTheScripts::Read2BytesFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 1);
@@ -193,7 +193,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	}
 	case COMMAND_CLEAR_ONSCREEN_COUNTER:
 	{
-		script_assert(CTheScripts::ScriptSpace[m_nIp] == ARGUMENT_GLOBALVAR);
+		//script_assert(CTheScripts::ScriptSpace[m_nIp] == ARGUMENT_GLOBALVAR);
 		m_nIp++;
 		CUserDisplay::OnscnTimer.ClearCounter((uint16)CTheScripts::Read2BytesFromScript(&m_nIp));
 		return 0;
@@ -590,7 +590,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	//case COMMAND_MOVE_CAMERA_ALONG_SPLINE:
 	//case COMMAND_GET_CAMERA_POSITION_ALONG_SPLINE:
 	case COMMAND_DECLARE_MISSION_FLAG:
-		CTheScripts::OnAMissionFlag = (uint16)CTheScripts::Read2BytesFromScript(&++m_nIp);
+		CTheScripts::OnAMissionFlag = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) - (int32*)CTheScripts::ScriptSpace;
 		return 0;
 	case COMMAND_DECLARE_MISSION_FLAG_FOR_CONTACT:
 		return 0;

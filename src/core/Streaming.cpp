@@ -497,7 +497,7 @@ GetObjectName(int streamId)
 {
 	static char objname[32];
 	if(streamId < STREAM_OFFSET_TXD)
-		sprintf(objname, "%s.dff", CModelInfo::GetModelInfo(streamId)->GetName());
+		sprintf(objname, "%s.dff", CModelInfo::GetModelInfo(streamId)->GetModelName());
 	else if(streamId >= STREAM_OFFSET_TXD && streamId < STREAM_OFFSET_COL)
 		sprintf(objname, "%s.txd", CTxdStore::GetTxdName(streamId-STREAM_OFFSET_TXD));
 	else if(streamId >= STREAM_OFFSET_COL && streamId < STREAM_OFFSET_ANIM)
@@ -592,7 +592,7 @@ CStreaming::ConvertBufferToObject(int8 *buf, int32 streamId)
 		}
 
 		if(!success){
-			debug("Failed to load %s\n", CModelInfo::GetModelInfo(streamId)->GetName());
+			debug("Failed to load %s\n", CModelInfo::GetModelInfo(streamId)->GetModelName());
 			RemoveModel(streamId);
 			ReRequestModel(streamId);
 			RwStreamClose(stream, &mem);
@@ -1009,7 +1009,7 @@ CStreaming::RequestSpecialModel(int32 modelId, const char *modelName, int32 flag
 
 	mi = CModelInfo::GetModelInfo(modelId);
 	if(strncasecmp("CSPlay", modelName, 6) == 0){
-		char *curname = CModelInfo::GetModelInfo(MI_PLAYER)->GetName();
+		char *curname = CModelInfo::GetModelInfo(MI_PLAYER)->GetModelName();
 		for(int i = 0; CSnames[i][0]; i++){
 			if(strcasecmp(curname, IGnames[i]) == 0){
 				modelName = CSnames[i];
@@ -1017,7 +1017,7 @@ CStreaming::RequestSpecialModel(int32 modelId, const char *modelName, int32 flag
 			}
 		}
 	}
-	if(!CGeneral::faststrcmp(mi->GetName(), modelName)){
+	if(!CGeneral::faststrcmp(mi->GetModelName(), modelName)){
 		// Already have the correct name, just request it
 		RequestModel(modelId, flags);
 		return;
@@ -1042,8 +1042,8 @@ CStreaming::RequestSpecialModel(int32 modelId, const char *modelName, int32 flag
 		}
 	}
 
-	strcpy(oldName, mi->GetName());
-	mi->SetName(modelName);
+	strcpy(oldName, mi->GetModelName());
+	mi->SetModelName(modelName);
 
 	// What exactly is going on here?
 	if(CModelInfo::GetModelInfo(oldName, nil)){
@@ -1151,12 +1151,9 @@ CStreaming::RemoveModel(int32 id)
 void
 CStreaming::RemoveUnusedBuildings(eLevelName level)
 {
-	if(level != LEVEL_INDUSTRIAL)
-		RemoveBuildings(LEVEL_INDUSTRIAL);
-	if(level != LEVEL_COMMERCIAL)
-		RemoveBuildings(LEVEL_COMMERCIAL);
-	if(level != LEVEL_SUBURBAN)
-		RemoveBuildings(LEVEL_SUBURBAN);
+	for(int i = LEVEL_INDUSTRIAL; i < NUM_LEVELS; i++)
+		if(level != i)
+			RemoveBuildings((eLevelName)i);
 }
 
 void
@@ -1279,12 +1276,9 @@ CStreaming::RemoveUnusedBigBuildings(eLevelName level)
 {
 	ISLAND_LOADING_IS(LOW)
 	{
-	if(level != LEVEL_INDUSTRIAL)
-		RemoveBigBuildings(LEVEL_INDUSTRIAL);
-	if(level != LEVEL_COMMERCIAL)
-		RemoveBigBuildings(LEVEL_COMMERCIAL);
-	if(level != LEVEL_SUBURBAN)
-		RemoveBigBuildings(LEVEL_SUBURBAN);
+	for(int i = LEVEL_INDUSTRIAL; i < NUM_LEVELS; i++)
+		if(level != i)
+			RemoveBuildings((eLevelName)i);
 	}
 	RemoveIslandsNotUsed(level);
 }
@@ -1324,8 +1318,11 @@ CStreaming::RemoveIslandsNotUsed(eLevelName level)
 	}
 #ifdef NO_ISLAND_LOADING
 	if(FrontEndMenuManager.m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_HIGH) {
-		DeleteIsland(pIslandLODmainlandEntity);
-		DeleteIsland(pIslandLODbeachEntity);
+		DeleteIsland(pIslandLODindustEntity);
+		DeleteIsland(pIslandLODcomIndEntity);
+		DeleteIsland(pIslandLODcomSubEntity);
+		DeleteIsland(pIslandLODsubIndEntity);
+		DeleteIsland(pIslandLODsubComEntity);
 	} else
 #endif
 	switch(level){
@@ -1842,11 +1839,11 @@ CStreaming::StreamZoneModels(const CVector &pos)
 			int newMI = CPopulation::ms_pPedGroups[ms_currentPedGrp].models[j];
 			if(newMI != oldMI){
 				RequestModel(newMI, STREAMFLAGS_DEPENDENCY);
-				debug("Request Ped %s\n", CModelInfo::GetModelInfo(newMI)->GetName());
+				debug("Request Ped %s\n", CModelInfo::GetModelInfo(newMI)->GetModelName());
 				if(ms_numPedsLoaded == MAXZONEPEDSLOADED){
 					SetModelIsDeletable(oldMI);
 					SetModelTxdIsDeletable(oldMI);
-					debug("Remove Ped %s\n", CModelInfo::GetModelInfo(oldMI)->GetName());
+					debug("Remove Ped %s\n", CModelInfo::GetModelInfo(oldMI)->GetModelName());
 				}else
 					ms_numPedsLoaded++;
 				timeBeforeNextLoad = 300;
@@ -3242,7 +3239,7 @@ CStreaming::PrintStreamingBufferState()
 						sprintf(str, "txd %s, refs %d, size %dK, flags 0x%x", CTxdStore::GetTxdName(modelIndex - STREAM_OFFSET_TXD),
 						        CTxdStore::GetNumRefs(modelIndex - STREAM_OFFSET_TXD), 2 * size, streamingInfo->m_flags);
 					else
-						sprintf(str, "model %d,%s, refs%d, size%dK, flags%x", modelIndex, modelInfo->GetName(), modelInfo->GetNumRefs(), 2 * size,
+						sprintf(str, "model %d,%s, refs%d, size%dK, flags%x", modelIndex, modelInfo->GetModelName(), modelInfo->GetNumRefs(), 2 * size,
 						        streamingInfo->m_flags);
 					AsciiToUnicode(str, wstr);
 					CFont::PrintString(24.0f, y, wstr);

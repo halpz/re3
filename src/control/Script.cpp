@@ -49,18 +49,20 @@
 #include "Timecycle.h"
 #include "TxdStore.h"
 #include "Bike.h"
+#include "memoryManager.h"
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #include <stdarg.h>
 #endif
 
 //--MIAMI: file done
 
-uint8 CTheScripts::ScriptSpace[SIZE_SCRIPT_SPACE];
+uint8* CTheScripts::ScriptSpace;
 CRunningScript CTheScripts::ScriptsArray[MAX_NUM_SCRIPTS];
 intro_text_line CTheScripts::IntroTextLines[MAX_NUM_INTRO_TEXT_LINES];
 intro_script_rectangle CTheScripts::IntroRectangles[MAX_NUM_INTRO_RECTANGLES];
 CSprite2d CTheScripts::ScriptSprites[MAX_NUM_SCRIPT_SRPITES];
 script_sphere_struct CTheScripts::ScriptSphereArray[MAX_NUM_SCRIPT_SPHERES];
+tCollectiveData CTheScripts::CollectiveArray[MAX_NUM_COLLECTIVES];
 tUsedObject CTheScripts::UsedObjectArray[MAX_NUM_USED_OBJECTS];
 int32 CTheScripts::MultiScriptArray[MAX_NUM_MISSION_SCRIPTS];
 tBuildingSwap CTheScripts::BuildingSwapArray[MAX_NUM_BUILDING_SWAPS];
@@ -96,10 +98,16 @@ uint32 CTheScripts::LastMissionPassedTime;
 uint16 CTheScripts::NumberOfExclusiveMissionScripts;
 bool CTheScripts::bPlayerHasMetDebbieHarry;
 bool CTheScripts::bPlayerIsInTheStatium;
-#if (defined GTA_PC && !defined GTAVC_JP_PATCH || defined GTA_XBOX || defined SUPPORT_XBOX_SCRIPT || defined GTA_MOBILE || defined SUPPORT_MOBILE_SCRIPT)
-int16 CTheScripts::CardStack[CARDS_IN_DECK * MAX_DECKS];
-int16 CTheScripts::CardStackPosition;
-#endif
+int CTheScripts::AllowedCollision[MAX_ALLOWED_COLLISIONS];
+bool CTheScripts::FSDestroyedFlag;
+short* CTheScripts::SavedVarIndices;
+int CTheScripts::NumSaveVars;
+int gScriptsFile = -1;
+int CTheScripts::NextProcessId = 1;
+bool CTheScripts::InTheScripts;
+CRunningScript* pCurrent;
+uint16 CTheScripts::NumTrueGlobals;
+uint16 CTheScripts::MostGlobals;
 
 #ifdef MISSION_REPLAY
 
@@ -225,7 +233,7 @@ const tScriptCommandData commands[] = {
 	REGISTER_COMMAND(COMMAND_GOSUB, INPUT_ARGUMENTS(ARGTYPE_LABEL,), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_RETURN, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_LINE, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_INT, ARGTYPE_INT, ARGTYPE_INT, ARGTYPE_INT, ARGTYPE_INT,), OUTPUT_ARGUMENTS(), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_CREATE_PLAYER, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT,), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_CREATE_PLAYER, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT,), OUTPUT_ARGUMENTS(ARGTYPE_INT,), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_GET_PLAYER_COORDINATES, INPUT_ARGUMENTS(ARGTYPE_INT,), OUTPUT_ARGUMENTS(ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT,), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_SET_PLAYER_COORDINATES, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT,), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_IS_PLAYER_IN_AREA_2D, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_BOOL,), OUTPUT_ARGUMENTS(), true, -1, ""),
@@ -356,6 +364,11 @@ const tScriptCommandData commands[] = {
 	REGISTER_COMMAND(COMMAND_WHILE, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_WHILENOT, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_ENDWHILE, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_214, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_215, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_216, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_217, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_218, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_ANDOR, INPUT_ARGUMENTS(ARGTYPE_ANDOR,), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_LAUNCH_MISSION, INPUT_ARGUMENTS(ARGTYPE_LABEL,), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_MISSION_HAS_FINISHED, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
@@ -1578,39 +1591,222 @@ const tScriptCommandData commands[] = {
 	REGISTER_COMMAND(COMMAND_REGISTER_FIRE_LEVEL, INPUT_ARGUMENTS(ARGTYPE_INT, ), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_IS_AUSTRALIAN_GAME, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), true, -1, ""),
 	REGISTER_COMMAND(COMMAND_DISARM_CAR_BOMB, INPUT_ARGUMENTS(ARGTYPE_INT, ), OUTPUT_ARGUMENTS(), false, -1, ""),
-#if (defined GTAVC_JP_PATCH || defined SUPPORT_JAPANESE_SCRIPT)
 	REGISTER_COMMAND(COMMAND_IS_JAPANESE_GAME, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), true, -1, ""),
-#elif (!defined GTA_PS2)
-	REGISTER_COMMAND(COMMAND_SET_ONSCREEN_COUNTER_FLASH_WHEN_FIRST_DISPLAYED, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_INT, ), OUTPUT_ARGUMENTS(), false, -1, ""),
-#endif
-#if (defined GTA_PC && !defined GTAVC_JP_PATCH || defined GTA_XBOX || defined SUPPORT_XBOX_SCRIPT || defined GTA_MOBILE || defined SUPPORT_MOBILE_SCRIPT)
-	REGISTER_COMMAND(COMMAND_SHUFFLE_CARD_DECKS, INPUT_ARGUMENTS(ARGTYPE_INT, ), OUTPUT_ARGUMENTS(), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_FETCH_NEXT_CARD, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(ARGTYPE_INT, ), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_GET_OBJECT_VELOCITY, INPUT_ARGUMENTS(ARGTYPE_INT, ), OUTPUT_ARGUMENTS(ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_IS_DEBUG_CAMERA_ON, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), true, -1, ""),
-	REGISTER_COMMAND(COMMAND_ADD_TO_OBJECT_ROTATION_VELOCITY, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ), OUTPUT_ARGUMENTS(), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_SET_OBJECT_ROTATION_VELOCITY, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ), OUTPUT_ARGUMENTS(), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_IS_OBJECT_STATIC, INPUT_ARGUMENTS(ARGTYPE_INT, ), OUTPUT_ARGUMENTS(), true, -1, ""),
-	REGISTER_COMMAND(COMMAND_GET_ANGLE_BETWEEN_2D_VECTORS, INPUT_ARGUMENTS(ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ), OUTPUT_ARGUMENTS(ARGTYPE_FLOAT, ), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_DO_2D_RECTANGLES_COLLIDE, INPUT_ARGUMENTS(ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ), OUTPUT_ARGUMENTS(), true, -1, ""),
-	REGISTER_COMMAND(COMMAND_GET_OBJECT_ROTATION_VELOCITY, INPUT_ARGUMENTS(ARGTYPE_INT, ), OUTPUT_ARGUMENTS(ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_ADD_VELOCITY_RELATIVE_TO_OBJECT_VELOCITY, INPUT_ARGUMENTS(ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ), OUTPUT_ARGUMENTS(), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_GET_OBJECT_SPEED, INPUT_ARGUMENTS(ARGTYPE_INT, ), OUTPUT_ARGUMENTS(ARGTYPE_FLOAT, ), false, -1, ""),
-#endif
-#if (defined GTA_XBOX || defined SUPPORT_XBOX_SCRIPT)
-	REGISTER_COMMAND(COMMAND_MARK_CUTSCENE_START, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_MARK_CUTSCENE_END, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_CUTSCENE_SCROLL, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
-#elif (defined GTA_MOBILE || defined SUPPORT_MOBILE_SCRIPT)
-	REGISTER_COMMAND(COMMAND_IS_MISSION_SKIP, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(ARGTYPE_INT, ), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_SET_IN_AMMUNATION, INPUT_ARGUMENTS(ARGTYPE_INT, ), OUTPUT_ARGUMENTS(), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_DO_SAVE_GAME, INPUT_ARGUMENTS(ARGTYPE_INT, ), OUTPUT_ARGUMENTS(), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_IS_RETRY, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(ARGTYPE_INT, ), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_DUMMY, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_MARK_CUTSCENE_START, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_MARK_CUTSCENE_END, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_CUTSCENE_SCROLL, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
-#endif
+	REGISTER_COMMAND(COMMAND_1442, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1443, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1444, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1445, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1446, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1447, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1448, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1449, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1450, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1451, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1452, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1453, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_CALL, INPUT_ARGUMENTS(ARGTYPE_FUNCTION, ), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_NOTCALL, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1456, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1457, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1458, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1459, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1460, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1461, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1462, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1463, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1464, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1465, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1466, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1467, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1468, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1469, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1470, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1471, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1472, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1473, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1474, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1475, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1476, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1477, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1478, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1479, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1480, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1481, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1482, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1483, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1484, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1485, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1486, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1487, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1488, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1489, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1490, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1491, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1492, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1493, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1494, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1495, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1496, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1497, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1498, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1499, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1500, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1501, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1502, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1503, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1504, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1505, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1506, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1507, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1508, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1509, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1510, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1511, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1512, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1513, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1514, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1515, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1516, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1517, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1518, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1519, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1520, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1521, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1522, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1523, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1524, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1525, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1526, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1527, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1528, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1529, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1530, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1531, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1532, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1533, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1534, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1535, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1536, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1537, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1538, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1539, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1540, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1541, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1542, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1543, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1544, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1545, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1546, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1547, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1548, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1549, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1550, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1551, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1552, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1553, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1554, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1555, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1556, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1557, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1558, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1559, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1560, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), true, -1, ""),
+	REGISTER_COMMAND(COMMAND_1561, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1562, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1563, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1564, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1565, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1566, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1567, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1568, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1569, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), true, -1, ""),
+	REGISTER_COMMAND(COMMAND_1570, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1571, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1572, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1573, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1574, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1575, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1576, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1577, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1578, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1579, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1580, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1581, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1582, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1583, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1584, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1585, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1586, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1587, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1588, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1589, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1590, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1591, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1592, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1593, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1594, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1595, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1596, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1597, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1598, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1599, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1600, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1601, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1602, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1603, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1604, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1605, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1606, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1607, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1608, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1609, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1610, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1611, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1612, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1613, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1614, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1615, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1616, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1617, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1618, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1619, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1620, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1621, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1622, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1623, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1624, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1625, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1626, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1627, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1628, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1629, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1630, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1631, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1632, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1633, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1634, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1635, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1636, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1637, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1638, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1639, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1640, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1641, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1642, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1643, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1644, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1645, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1646, INPUT_ARGUMENTS(ARGTYPE_INT, ), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1647, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1648, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_INT, ARGTYPE_INT, ), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1649, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1650, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1651, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1652, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1653, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1654, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1655, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_1656, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
 };
 #undef REGISTER_COMMAND
 #undef INPUT_ARGUMENTS
@@ -1659,11 +1855,13 @@ const uint32 CRunningScript::nSaveStructSize =
 	sizeof(CRunningScript);
 #endif
 
+// done(LCS)
 CMissionCleanup::CMissionCleanup()
 {
 	Init();
 }
 
+// done(LCS)
 void CMissionCleanup::Init()
 {
 	m_nCount = 0;
@@ -1673,6 +1871,7 @@ void CMissionCleanup::Init()
 	}
 }
 
+// done(LCS)
 cleanup_entity_struct* CMissionCleanup::FindFree()
 {
 	for (int i = 0; i < MAX_CLEANUP; i++){
@@ -1683,6 +1882,26 @@ cleanup_entity_struct* CMissionCleanup::FindFree()
 	return nil;
 }
 
+// done(LCS)
+void SleepThisPed(cleanup_entity_struct* pCleanup, CPed* pPed)
+{
+	printf("*** SLEEPING PED %i %i\n", pCleanup->id, pPed->GetModelIndex());
+	if (!pPed->GetIsStatic())
+		pPed->RemoveFromMovingList();
+	pPed->bIsStaticWaitingForCollision = true;
+}
+
+// done(LCS)
+void WakeThisPed(cleanup_entity_struct* pCleanup, CPed* pPed)
+{
+	printf("*** WAKING UP PED %i %i\n", pCleanup->id, pPed->GetModelIndex());
+	pPed->bIsStaticWaitingForCollision = false;
+	if (!pPed->bIsStatic)
+		pPed->AddToMovingList();
+
+}
+
+// done(LCS)
 void CMissionCleanup::AddEntityToList(int32 id, uint8 type)
 {
 	cleanup_entity_struct* pNew = FindFree();
@@ -1693,6 +1912,7 @@ void CMissionCleanup::AddEntityToList(int32 id, uint8 type)
 	m_nCount++;
 }
 
+// done(LCS)
 void CMissionCleanup::RemoveEntityFromList(int32 id, uint8 type)
 {
 	for (int i = 0; i < MAX_CLEANUP; i++){
@@ -1744,6 +1964,7 @@ void CMissionCleanup::RemoveEntityFromList(int32 id, uint8 type)
 	}
 }
 
+// done(LCS)
 void CMissionCleanup::CheckIfCollisionHasLoadedForMissionObjects()
 {
 	for (int i = 0; i < MAX_CLEANUP; i++) {
@@ -1752,50 +1973,105 @@ void CMissionCleanup::CheckIfCollisionHasLoadedForMissionObjects()
 		{
 			CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(m_sEntities[i].id);
 			if (pVehicle) {
-				if (pVehicle->bIsStaticWaitingForCollision) {
-					if (CColStore::HasCollisionLoaded(pVehicle->GetPosition())) {
-						pVehicle->bIsStaticWaitingForCollision = false;
+				eLevelName level = CTheZones::GetLevelFromPosition(&pVehicle->GetPosition());
+				if (level == LEVEL_GENERIC)
+					level = CGame::currLevel;
+				if (!CColStore::HasCollisionLoaded(level)) {
+					if (!pVehicle->bIsStaticWaitingForCollision) {
+						if (!pVehicle->IsHeli() && !pVehicle->IsPlane() && pVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_HELI &&
+							pVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_BOAT && pVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_PLANE) {
+							printf("*** SLEEPING VEHICLE %i %i\n", m_sEntities[i].id, pVehicle->GetModelIndex());
 							if (!pVehicle->GetIsStatic())
-								pVehicle->AddToMovingList();
+								pVehicle->RemoveFromMovingList();
+							pVehicle->bIsStaticWaitingForCollision = true;
+						}
+					}
+				}
+				else {
+					if (pVehicle->bIsStaticWaitingForCollision) {
+						printf("*** WAKING UP VEHICLE %i %i\n", m_sEntities[i].id, pVehicle->GetModelIndex());
+						pVehicle->bIsStaticWaitingForCollision = false;
+						if (!pVehicle->bIsStatic)
+							pVehicle->AddToMovingList();
 					}
 				}
 			}
-			break;
 		}
-		case CLEANUP_CHAR:
-		{
-			CPed* pPed = CPools::GetPedPool()->GetAt(m_sEntities[i].id);
-			if (pPed) {
-				if (pPed->bIsStaticWaitingForCollision) {
-					if (CColStore::HasCollisionLoaded(pPed->GetPosition())) {
-						pPed->bIsStaticWaitingForCollision = false;
-						if (!pPed->GetIsStatic())
-							pPed->AddToMovingList();
-					}
-				}
-			}
-			break;
-		}
+		break;
 		case CLEANUP_OBJECT:
-		{
 			CObject* pObject = CPools::GetObjectPool()->GetAt(m_sEntities[i].id);
 			if (pObject) {
-				if (pObject->bIsStaticWaitingForCollision) {
-					if (CColStore::HasCollisionLoaded(pObject->GetPosition())) {
-						pObject->bIsStaticWaitingForCollision = false;
+				eLevelName level = CTheZones::GetLevelFromPosition(&pObject->GetPosition());
+				if (level == LEVEL_GENERIC)
+					level = CGame::currLevel;
+				if (!CColStore::HasCollisionLoaded(level)) {
+					if (!pObject->bIsStaticWaitingForCollision) {
 						if (!pObject->GetIsStatic())
+							pObject->RemoveFromMovingList();
+						pObject->bIsStaticWaitingForCollision = true;
+					}
+				}
+				else {
+					if (pObject->bIsStaticWaitingForCollision) {
+						pObject->bIsStaticWaitingForCollision = false;
+						if (!pObject->bIsStatic)
 							pObject->AddToMovingList();
 					}
 				}
 			}
-			break;
 		}
-		default:
-			break;
+	}
+	for (int i = 0; i < MAX_CLEANUP; i++) {
+		switch (m_sEntities[i].type) {
+		case CLEANUP_CHAR:
+		{
+			CPed* pPed = CPools::GetPedPool()->GetAt(m_sEntities[i].id);
+			if (pPed) {
+				eLevelName level = CTheZones::GetLevelFromPosition(&pPed->GetPosition());
+				if (level == LEVEL_GENERIC)
+					level = CGame::currLevel;
+				if (!pPed->bIsStaticWaitingForCollision) {
+					if (pPed->bInVehicle) {
+						if (pPed->m_pMyVehicle->GetIsStatic()) {
+							SleepThisPed(&m_sEntities[i], pPed);
+							continue;
+						}
+					}
+					if (!CColStore::HasCollisionLoaded(level)) {
+						if (pPed->bInVehicle && pPed->m_pMyVehicle->GetIsStatic() ||
+							pPed->m_attachedTo && pPed->m_attachedTo->GetIsStatic())
+							SleepThisPed(&m_sEntities[i], pPed);
+					}
+				}
+				else {
+					if (!pPed->bInVehicle) {
+						if (CColStore::HasCollisionLoaded(level)) {
+							if (!(pPed->bInVehicle && pPed->m_pMyVehicle->GetIsStatic() ||
+								pPed->m_attachedTo && pPed->m_attachedTo->GetIsStatic()))
+								WakeThisPed(&m_sEntities[i], pPed);
+						}
+					}
+					else {
+						if (!pPed->m_pMyVehicle->GetIsStatic()) {
+							WakeThisPed(&m_sEntities[i], pPed);
+							continue;
+						}
+						if (CColStore::HasCollisionLoaded(level)) {
+							if (!(pPed->bInVehicle && pPed->m_pMyVehicle->GetIsStatic() ||
+								pPed->m_attachedTo && pPed->m_attachedTo->GetIsStatic()))
+								WakeThisPed(&m_sEntities[i], pPed);
+						}
+					}
+				}
+
+			}
+		}
+		break;
 		}
 	}
 }
 
+// done(LCS) except TODO
 void CMissionCleanup::Process()
 {
 	CPopulation::m_AllRandomPedsThisType = -1;
@@ -1803,6 +2079,8 @@ void CMissionCleanup::Process()
 	CCarCtrl::CarDensityMultiplier = 1.0f;
 	CPed::nThreatReactionRangeMultiplier = 1;
 	CPed::nEnterCarRangeMultiplier = 1;
+	for (int i = 0; i < MAX_ALLOWED_COLLISIONS; i++)
+		CTheScripts::AllowedCollision[i] = 0;
 	FindPlayerPed()->m_pWanted->m_fCrimeSensitivity = 1.0f;
 	CRoadBlocks::ClearScriptRoadBlocks();
 	CRouteNode::Initialise();
@@ -1810,20 +2088,19 @@ void CMissionCleanup::Process()
 		TheCamera.Restore();
 	TheCamera.SetWideScreenOff();
 	CSpecialFX::bLiftCam = false;
-	CSpecialFX::bVideoCam = false;
-	CTimeCycle::StopExtraColour(0);
+	// TODO(LCS): CHud::m_ClockEventWarningMinutes = 0;
+	// TODO(LCS): CHud::m_ClockEventFlashTimer = 0;
+	CTimeCycle::StopExtraColour(0); // TODO: thiscall
 	for (int i = 0; i < MISSION_AUDIO_SLOTS; i++)
 		DMAudio.ClearMissionAudio(i);
 	CWeather::ReleaseWeather();
 	for (int i = 0; i < NUM_OF_SPECIAL_CHARS; i++)
 		CStreaming::SetMissionDoesntRequireSpecialChar(i);
-	for (int i = 0; i < NUM_OF_CUTSCENE_OBJECTS; i++)
-		CStreaming::SetMissionDoesntRequireModel(MI_CUTOBJ01 + i);
 	CStreaming::ms_disableStreaming = false;
-	CHud::m_ItemToFlash = -1;
-	CHud::SetHelpMessage(nil, false);
+	if (CHud::m_ItemToFlash != ITEM_ARMOUR && CHud::m_ItemToFlash != ITEM_HEALTH)
+		CHud::m_ItemToFlash = -1;
+	CHud::SetHelpMessage(nil, false); // nil, false, false, true TODO(LCS)
 	CUserDisplay::OnscnTimer.m_bDisabled = false;
-	CTheScripts::RemoveScriptTextureDictionary();
 	CWorld::Players[0].m_pPed->m_pWanted->m_bIgnoredByCops = false;
 	CWorld::Players[0].m_pPed->m_pWanted->m_bIgnoredByEveryone = false;
 	CWorld::Players[0].MakePlayerSafe(false);
@@ -1831,10 +2108,11 @@ void CMissionCleanup::Process()
 	CWorld::Players[0].m_pPed->m_nDrunkCountdown = 0;
 	CPad::GetPad(0)->SetDrunkInputDelay(0);
 	CWorld::Players[0].m_bDriveByAllowed = true;
+	CPad::GetPad(0)->unk_B4 = 1.0f;
+	CPad::GetPad(0)->unk_B8 = 0.5f;
 	DMAudio.ShutUpPlayerTalking(0);
 	CVehicle::bDisableRemoteDetonation = false;
 	CVehicle::bDisableRemoteDetonationOnContact = false;
-	CGameLogic::ClearShortCut();
 	CTheScripts::RiotIntensity = 0;
 	CTheScripts::StoreVehicleIndex = -1;
 	CTheScripts::StoreVehicleWasRandom = true;
@@ -1872,12 +2150,17 @@ void CMissionCleanup::Process()
 		m_sEntities[i].type = CLEANUP_UNUSED;
 		m_nCount--;
 	}
+	for (int i = 1; i < NUMSTREAMINFO; i++) {
+		if (CStreaming::IsScriptOwnedModel(i))
+			CStreaming::SetMissionDoesntRequireModel(i);
+	}
 }
 
 /* NB: CUpsideDownCarCheck is not used by actual script at all
  * It has a weird usage: AreAnyCarsUpsideDown would fail any mission
  * just like death or arrest. */
 
+ // done(LCS) except TODO
 void CUpsideDownCarCheck::Init()
 {
 	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
@@ -1886,12 +2169,14 @@ void CUpsideDownCarCheck::Init()
 	}
 }
 
+// done(LCS)
 bool CUpsideDownCarCheck::IsCarUpsideDown(int32 id)
 {
 	CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(id);
 	return IsCarUpsideDown(pVehicle);
 }
 
+// done(LCS)
 bool CUpsideDownCarCheck::IsCarUpsideDown(CVehicle* pVehicle)
 {
 	assert(pVehicle);
@@ -1900,6 +2185,7 @@ bool CUpsideDownCarCheck::IsCarUpsideDown(CVehicle* pVehicle)
 		pVehicle->GetTurnSpeed().Magnitude() < UPSIDEDOWN_TURN_SPEED_THRESHOLD;
 }
 
+// done(LCS)
 void CUpsideDownCarCheck::UpdateTimers()
 {
 	uint32 timeStep = CTimer::GetTimeStepInMilliseconds();
@@ -1917,6 +2203,7 @@ void CUpsideDownCarCheck::UpdateTimers()
 	}
 }
 
+// done(LCS)
 bool CUpsideDownCarCheck::AreAnyCarsUpsideDown()
 {
 	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
@@ -1926,6 +2213,7 @@ bool CUpsideDownCarCheck::AreAnyCarsUpsideDown()
 	return false;
 }
 
+// done(LCS)
 void CUpsideDownCarCheck::AddCarToCheck(int32 id)
 {
 	uint16 index = 0;
@@ -1939,6 +2227,7 @@ void CUpsideDownCarCheck::AddCarToCheck(int32 id)
 	m_sCars[index].m_nUpsideDownTimer = 0;
 }
 
+// done(LCS)
 void CUpsideDownCarCheck::RemoveCarFromCheck(int32 id)
 {
 	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
@@ -1949,6 +2238,7 @@ void CUpsideDownCarCheck::RemoveCarFromCheck(int32 id)
 	}
 }
 
+// done(LCS)
 bool CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile(int32 id)
 {
 	for (int i = 0; i < MAX_UPSIDEDOWN_CAR_CHECKS; i++){
@@ -1958,6 +2248,7 @@ bool CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile(int32 id)
 	return false;
 }
 
+// done(LCS)
 void stuck_car_data::Reset()
 {
 	m_nVehicleIndex = -1;
@@ -1968,6 +2259,7 @@ void stuck_car_data::Reset()
 	m_bStuck = false;
 }
 
+// done(LCS)
 void CStuckCarCheck::Init()
 {
 	for (int i = 0; i < MAX_STUCK_CAR_CHECKS; i++) {
@@ -1975,6 +2267,7 @@ void CStuckCarCheck::Init()
 	}
 }
 
+// done(LCS)
 void CStuckCarCheck::Process()
 {
 	uint32 timer = CTimer::GetTimeInMilliseconds();
@@ -1995,6 +2288,7 @@ void CStuckCarCheck::Process()
 	}
 }
 
+// done(LCS)
 void CStuckCarCheck::AddCarToCheck(int32 id, float radius, uint32 time)
 {
 	CVehicle* pv = CPools::GetVehiclePool()->GetAt(id);
@@ -2015,6 +2309,7 @@ void CStuckCarCheck::AddCarToCheck(int32 id, float radius, uint32 time)
 	m_sCars[index].m_bStuck = false;
 }
 
+// done(LCS)
 void CStuckCarCheck::RemoveCarFromCheck(int32 id)
 {
 	for (int i = 0; i < MAX_STUCK_CAR_CHECKS; i++){
@@ -2024,6 +2319,7 @@ void CStuckCarCheck::RemoveCarFromCheck(int32 id)
 	}
 }
 
+// done(LCS)
 bool CStuckCarCheck::HasCarBeenStuckForAWhile(int32 id)
 {
 	for (int i = 0; i < MAX_STUCK_CAR_CHECKS; i++){
@@ -2033,109 +2329,161 @@ bool CStuckCarCheck::HasCarBeenStuckForAWhile(int32 id)
 	return false;
 }
 
-void CRunningScript::CollectParameters(uint32* pIp, int16 total)
+// done(LCS)
+void CRunningScript::CollectParameters(uint32* pIp, int16 total, int* pParameters)
 {
-	for (int16 i = 0; i < total; i++){
-		uint16 varIndex;
+	while (total--){
 		switch (CTheScripts::Read1ByteFromScript(pIp))
 		{
+		case ARGUMENT_END:
+			return;
+		case ARGUMENT_INT_ZERO:
+			*pParameters = 0;
+			break;
+		case ARGUMENT_FLOAT_ZERO:
+			*pParameters = 0;
+			break;
+		case ARGUMENT_FLOAT_1BYTE:
+			*pParameters = (uint32)(uint8)CTheScripts::Read1ByteFromScript(pIp) << 24;
+			break;
+		case ARGUMENT_FLOAT_2BYTES:
+			*pParameters = (uint32)(uint16)CTheScripts::Read2BytesFromScript(pIp) << 16;
+			break;
+		case ARGUMENT_FLOAT_3BYTES:
+			*pParameters = (uint32)(uint8)CTheScripts::Read1ByteFromScript(pIp) << 8;
+			*pParameters |= (uint32)(uint16)CTheScripts::Read2BytesFromScript(pIp) << 16;
+			break;
 		case ARGUMENT_INT32:
 		case ARGUMENT_FLOAT:
-			ScriptParams[i] = CTheScripts::Read4BytesFromScript(pIp);
-			break;
-		case ARGUMENT_GLOBALVAR:
-			varIndex = CTheScripts::Read2BytesFromScript(pIp);
-			script_assert(varIndex >= 8 && varIndex < CTheScripts::GetSizeOfVariableSpace());
-			ScriptParams[i] = *((int32*)&CTheScripts::ScriptSpace[varIndex]);
-			break;
-		case ARGUMENT_LOCALVAR:
-			varIndex = CTheScripts::Read2BytesFromScript(pIp);
-			script_assert(varIndex >= 0 && varIndex < ARRAY_SIZE(m_anLocalVariables));
-			ScriptParams[i] = m_anLocalVariables[varIndex];
+			*pParameters = CTheScripts::Read4BytesFromScript(pIp);
 			break;
 		case ARGUMENT_INT8:
-			ScriptParams[i] = CTheScripts::Read1ByteFromScript(pIp);
+			*pParameters = CTheScripts::Read1ByteFromScript(pIp);
 			break;
 		case ARGUMENT_INT16:
-			ScriptParams[i] = CTheScripts::Read2BytesFromScript(pIp);
+			*pParameters = CTheScripts::Read2BytesFromScript(pIp);
 			break;
 		default:
-			script_assert(0);
+			*pIp -= 1;
+			*pParameters = *GetPointerToScriptVariable(pIp, 0);
 			break;
 		}
+		pParameters++;
 	}
 }
 
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+// done(LCS)
+int32* GetPointerToScriptVariableForDebug(CRunningScript* pScript, uint32* pIp, char* buf)
+{
+	char tmpstr[24];
+	uint8 type = CTheScripts::Read1ByteFromScript(pIp);
+	if (type >= ARGUMENT_GLOBAL_ARRAY) {
+		uint8 index_in_block = CTheScripts::Read1ByteFromScript(pIp);
+		uint8 index_id = CTheScripts::Read1ByteFromScript(pIp);
+		uint8 size = CTheScripts::Read1ByteFromScript(pIp);
+		script_assert(size > 0);
+		script_assert(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id] < size);
+		uint8 index = Min(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id], size - 1);
+		sprintf(tmpstr, " $%d[%d@]", ((int)(type - ARGUMENT_GLOBAL_ARRAY) << 8) + index_in_block, index_id);
+		strcat(buf, tmpstr);
+		return (int32*)&CTheScripts::ScriptSpace[4 * (((int)(type - ARGUMENT_GLOBAL_ARRAY) << 8) + index + index_in_block)];
+	}
+	else if (type >= ARGUMENT_GLOBAL) {
+		uint8 index_in_block = CTheScripts::Read1ByteFromScript(pIp);
+		sprintf(tmpstr, " $%d", ((int)(type - ARGUMENT_GLOBAL) << 8) + index_in_block);
+		strcat(buf, tmpstr);
+		return (int32*)&CTheScripts::ScriptSpace[4 * (((int)(type - ARGUMENT_GLOBAL) << 8) + index_in_block)];
+	}
+	else if (type >= ARGUMENT_LOCAL_ARRAY) {
+		uint8 index_id = CTheScripts::Read1ByteFromScript(pIp);
+		uint8 size = CTheScripts::Read1ByteFromScript(pIp);
+		script_assert(size > 0);
+		script_assert(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id] < size);
+		uint8 index = Min(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id], size - 1);
+		sprintf(tmpstr, " %d@[%d@]", (type - ARGUMENT_LOCAL_ARRAY), index_id);
+		strcat(buf, tmpstr);
+		return &pScript->m_anLocalVariables[pScript->m_nLocalsPointer + (type - ARGUMENT_LOCAL_ARRAY) + index];
+	}
+	else if (type >= ARGUMENT_LOCAL) {
+		sprintf(tmpstr, " %d@", (type - ARGUMENT_LOCAL));
+		strcat(buf, tmpstr);
+		return &pScript->m_anLocalVariables[pScript->m_nLocalsPointer + (type - ARGUMENT_LOCAL)];
+	}
+	else {
+		assert(type >= ARGUMENT_TIMER);
+		sprintf(tmpstr, " TIMER%d@", (type - ARGUMENT_LOCAL_ARRAY));
+		strcat(buf, tmpstr);
+		return &pScript->m_anLocalVariables[NUM_LOCAL_VARS + 8 + (type - ARGUMENT_TIMER)]; // why 8?
+	}
+}
+
+// done(LCS)
 int CRunningScript::CollectParameterForDebug(char* buf, bool& var)
 {
-	uint16 varIndex;
-	char tmpstr[24];
 	var = false;
+	int tmp;
 	switch (CTheScripts::Read1ByteFromScript(&m_nIp))
 	{
+	case ARGUMENT_END:
+		return 0; // TODO(LCS)
+	case ARGUMENT_INT_ZERO:
+		return 0;
+	case ARGUMENT_FLOAT_ZERO:
+		return 0;
+	case ARGUMENT_FLOAT_1BYTE:
+		return (uint32)(uint8)CTheScripts::Read1ByteFromScript(&m_nIp) << 24;
+	case ARGUMENT_FLOAT_2BYTES:
+		return (uint32)(uint16)CTheScripts::Read2BytesFromScript(&m_nIp) << 16;
+	case ARGUMENT_FLOAT_3BYTES:
+		tmp = (uint32)(uint8)CTheScripts::Read1ByteFromScript(&m_nIp) << 8;
+		tmp |= (uint32)(uint16)CTheScripts::Read2BytesFromScript(&m_nIp) << 16;
+		return tmp;
 	case ARGUMENT_INT32:
 	case ARGUMENT_FLOAT:
 		return CTheScripts::Read4BytesFromScript(&m_nIp);
-	case ARGUMENT_GLOBALVAR:
-		varIndex = CTheScripts::Read2BytesFromScript(&m_nIp);
-		script_assert(varIndex >= 8 && varIndex < CTheScripts::GetSizeOfVariableSpace());
-		var = true;
-		sprintf(tmpstr, " $%d", varIndex / 4);
-		strcat(buf, tmpstr);
-		return *((int32*)&CTheScripts::ScriptSpace[varIndex]);
-	case ARGUMENT_LOCALVAR:
-		varIndex = CTheScripts::Read2BytesFromScript(&m_nIp);
-		script_assert(varIndex >= 0 && varIndex < ARRAY_SIZE(m_anLocalVariables));
-		var = true;
-		sprintf(tmpstr, " %d@", varIndex);
-		strcat(buf, tmpstr);
-		return m_anLocalVariables[varIndex];
 	case ARGUMENT_INT8:
 		return CTheScripts::Read1ByteFromScript(&m_nIp);
 	case ARGUMENT_INT16:
 		return CTheScripts::Read2BytesFromScript(&m_nIp);
 	default:
-		PrintToLog("%s - script assertion failed in CollectParameterForDebug", buf);
-		script_assert(0);
-		break;
+		var = true;
+		--m_nIp;
+		return *GetPointerToScriptVariableForDebug(this, &m_nIp, buf);
 	}
 	return 0;
 }
 
+// done(LCS)
 void CRunningScript::GetStoredParameterForDebug(char* buf)
 {
-	uint16 varIndex;
-	char tmpstr[24];
-	switch (CTheScripts::Read1ByteFromScript(&m_nIp)) {
-	case ARGUMENT_GLOBALVAR:
-		varIndex = CTheScripts::Read2BytesFromScript(&m_nIp);
-		sprintf(tmpstr, " $%d", varIndex / 4);
-		strcat(buf, tmpstr);
-		break;
-	case ARGUMENT_LOCALVAR:
-		varIndex = CTheScripts::Read2BytesFromScript(&m_nIp);
-		sprintf(tmpstr, " %d@", varIndex);
-		strcat(buf, tmpstr);
-		break;
-	default:
-		PrintToLog("%s - script_assertion failed in GetStoredParameterForDebug", buf);
-		script_assert(0);
-	}
+	GetPointerToScriptVariableForDebug(this, &m_nIp, buf);
 }
 #endif
 
+// done(LCS)
 int32 CRunningScript::CollectNextParameterWithoutIncreasingPC(uint32 ip)
 {
 	uint32* pIp = &ip;
+	int tmp;
 	switch (CTheScripts::Read1ByteFromScript(pIp))
 	{
+	case ARGUMENT_END:
+		return 0; // TODO(LCS)
+	case ARGUMENT_INT_ZERO:
+		return 0;
+	case ARGUMENT_FLOAT_ZERO:
+		return 0;
+	case ARGUMENT_FLOAT_1BYTE:
+		return (uint32)(uint8)CTheScripts::Read1ByteFromScript(pIp) << 24;
+	case ARGUMENT_FLOAT_2BYTES:
+		return (uint32)(uint16)CTheScripts::Read2BytesFromScript(pIp) << 16;
+	case ARGUMENT_FLOAT_3BYTES:
+		tmp = (uint32)(uint8)CTheScripts::Read1ByteFromScript(pIp) << 8;
+		tmp |= (uint32)(uint16)CTheScripts::Read2BytesFromScript(pIp) << 16;
+		return tmp;
 	case ARGUMENT_INT32:
 		return CTheScripts::Read4BytesFromScript(pIp);
-	case ARGUMENT_GLOBALVAR:
-		return *((int32*)&CTheScripts::ScriptSpace[(uint16)CTheScripts::Read2BytesFromScript(pIp)]);
-	case ARGUMENT_LOCALVAR:
-		return m_anLocalVariables[CTheScripts::Read2BytesFromScript(pIp)];
 	case ARGUMENT_INT8:
 		return CTheScripts::Read1ByteFromScript(pIp);
 	case ARGUMENT_INT16:
@@ -2143,46 +2491,74 @@ int32 CRunningScript::CollectNextParameterWithoutIncreasingPC(uint32 ip)
 	case ARGUMENT_FLOAT:
 		return CTheScripts::Read4BytesFromScript(pIp);
 	default:
-		script_assert(0);
+		(*pIp)--;
+		return *GetPointerToScriptVariable(pIp, 0);
 	}
 	return -1;
 }
 
+// done(LCS)
 void CRunningScript::StoreParameters(uint32* pIp, int16 number)
 {
 	for (int16 i = 0; i < number; i++){
-		switch (CTheScripts::Read1ByteFromScript(pIp)) {
-		case ARGUMENT_GLOBALVAR:
-			*(int32*)&CTheScripts::ScriptSpace[(uint16)CTheScripts::Read2BytesFromScript(pIp)] = ScriptParams[i];
-			break;
-		case ARGUMENT_LOCALVAR:
-			m_anLocalVariables[CTheScripts::Read2BytesFromScript(pIp)] = ScriptParams[i];
-			break;
-		default:
-			script_assert(0);
-		}
+		*GetPointerToScriptVariable(pIp, 0) = ScriptParams[i];
 	}
 }
 
+// done(LCS)
+int32* GetPointerToScriptVariable(CRunningScript* pScript, uint32* pIp)
+{
+	uint8 type = CTheScripts::Read1ByteFromScript(pIp);
+	if (type >= ARGUMENT_GLOBAL_ARRAY) {
+		uint8 index_in_block = CTheScripts::Read1ByteFromScript(pIp);
+		uint8 index_id = CTheScripts::Read1ByteFromScript(pIp);
+		uint8 size = CTheScripts::Read1ByteFromScript(pIp);
+		script_assert(size > 0);
+		script_assert(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id] < size);
+		uint8 index = Min(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id], size - 1);
+		return (int32*)&CTheScripts::ScriptSpace[4 * (((int)(type - ARGUMENT_GLOBAL_ARRAY) << 8) + index + index_in_block)];
+	}
+	else if (type >= ARGUMENT_GLOBAL) {
+		uint8 index_in_block = CTheScripts::Read1ByteFromScript(pIp);
+		return (int32*)&CTheScripts::ScriptSpace[4 * (((int)(type - ARGUMENT_GLOBAL) << 8) + index_in_block)];
+	}
+	else if (type >= ARGUMENT_LOCAL_ARRAY) {
+		uint8 index_id = CTheScripts::Read1ByteFromScript(pIp);
+		uint8 size = CTheScripts::Read1ByteFromScript(pIp);
+		script_assert(size > 0);
+		script_assert(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id] < size);
+		uint8 index = Min(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id], size - 1);
+		return &pScript->m_anLocalVariables[pScript->m_nLocalsPointer + (type - ARGUMENT_LOCAL_ARRAY) + index];
+	}
+	else if (type >= ARGUMENT_LOCAL) {
+		return &pScript->m_anLocalVariables[pScript->m_nLocalsPointer + (type - ARGUMENT_LOCAL)];
+	}
+	else {
+		assert(type >= ARGUMENT_TIMER);
+		return &pScript->m_anLocalVariables[NUM_LOCAL_VARS + 8 + (type - ARGUMENT_TIMER)];
+	}
+}
+
+// done(LCS)
 int32 *CRunningScript::GetPointerToScriptVariable(uint32* pIp, int16 type)
 {
-	switch (CTheScripts::Read1ByteFromScript(pIp))
-	{
-	case ARGUMENT_GLOBALVAR:
-		script_assert(type == VAR_GLOBAL);
-		return (int32*)&CTheScripts::ScriptSpace[(uint16)CTheScripts::Read2BytesFromScript(pIp)];
-	case ARGUMENT_LOCALVAR:
-		script_assert(type == VAR_LOCAL);
-		return &m_anLocalVariables[CTheScripts::Read2BytesFromScript(pIp)];
-	default:
-		script_assert(0);
-	}
-	return nil;
+	return ::GetPointerToScriptVariable(this, pIp);
 }
 
+// done(LCS)
+int CTheScripts::GetSaveVarIndex(int var)
+{
+	for (int i = 0; i < NumSaveVars; i++) {
+		if (SavedVarIndices[i] == var)
+			return i;
+	}
+	return -1;
+}
+
+// done(LCS)
 void CRunningScript::Init()
 {
-	strcpy(m_abScriptName, "noname");
+	sprintf(m_abScriptName, "id%02i", m_nId);
 	next = prev = nil;
 	SetIP(0);
 	for (int i = 0; i < MAX_STACK_DEPTH; i++)
@@ -2193,13 +2569,29 @@ void CRunningScript::Init()
 	m_bCondResult = false;
 	m_bIsMissionScript = false;
 	m_bSkipWakeTime = false;
-	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
+	for (int i = 0; i < NUM_LOCAL_VARS + 8 + NUM_TIMERS; i++)
 		m_anLocalVariables[i] = 0;
 	m_nAndOrState = 0;
 	m_bNotFlag = false;
 	m_bDeatharrestEnabled = true;
 	m_bDeatharrestExecuted = false;
 	m_bMissionFlag = false;
+	m_nLocalsPointer = 0;
+}
+
+// done(LCS)
+void CTheScripts::Shutdown()
+{
+	if (gScriptsFile != -1) {
+		CFileMgr::CloseFile(gScriptsFile);
+		gScriptsFile = -1;
+	}
+	if (ScriptSpace) {
+		base::cMainMemoryManager::Instance()->Free(ScriptSpace);
+		ScriptSpace = nil;
+		FSDestroyedFlag = false;
+		OnAMissionFlag = 0;
+	}
 }
 
 #ifdef USE_DEBUG_SCRIPT_LOADER
@@ -2229,10 +2621,11 @@ int open_script()
 }
 #endif
 
-void CTheScripts::Init()
+// done(LCS)
+bool CTheScripts::Init(bool loaddata)
 {
-	for (int i = 0; i < SIZE_SCRIPT_SPACE; i++)
-		ScriptSpace[i] = 0;
+	bool retval = false;
+	printf("CTheScripts::Init\n");
 	pActiveScripts = pIdleScripts = nil;
 	for (int i = 0; i < MAX_NUM_SCRIPTS; i++){
 		ScriptsArray[i].Init();
@@ -2241,25 +2634,38 @@ void CTheScripts::Init()
 	MissionCleanUp.Init();
 	UpsideDownCars.Init();
 	StuckCars.Init();
-	CFileMgr::SetDir("data");
-#ifdef USE_DEBUG_SCRIPT_LOADER
-	int mainf = open_script();
-#else
-	int mainf = CFileMgr::OpenFile("main.scm", "rb");
-#endif
-	CFileMgr::Read(mainf, (char*)ScriptSpace, SIZE_MAIN_SCRIPT);
-	CFileMgr::CloseFile(mainf);
-	CFileMgr::SetDir("");
 	StoreVehicleIndex = -1;
 	StoreVehicleWasRandom = true;
 	OnAMissionFlag = 0;
 	LastMissionPassedTime = (uint32)-1;
+	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++) {
+		CollectiveArray[i].colIndex = -1;
+		CollectiveArray[i].pedIndex = 0;
+	}
+	NextFreeCollectiveIndex = 0;
 	LastRandomPedId = -1;
 	for (int i = 0; i < MAX_NUM_USED_OBJECTS; i++){
 		memset(&UsedObjectArray[i].name, 0, sizeof(UsedObjectArray[i].name));
 		UsedObjectArray[i].index = 0;
 	}
 	NumberOfUsedObjects = 0;
+	if (ScriptSpace)
+		Shutdown();
+	CFileMgr::SetDir("DATA");
+#ifdef USE_DEBUG_SCRIPT_LOADER
+	int mainf = open_script();
+#else
+	int mainf = CFileMgr::OpenFile("main.scm", "rb");
+#endif
+	CFileMgr::Read(mainf, (char*)&MainScriptSize, sizeof(MainScriptSize));
+	int nLargestMissionSize = 0;
+	CFileMgr::Read(mainf, (char*)&nLargestMissionSize, sizeof(nLargestMissionSize));
+	// some cSmallHeap shit - TODO
+	ScriptSpace = (uint8*)base::cMainMemoryManager::Instance()->Allocate(MainScriptSize + nLargestMissionSize);
+	memset(ScriptSpace, 0, MainScriptSize + nLargestMissionSize);
+	CFileMgr::Read(mainf, (char*)ScriptSpace, MainScriptSize);
+	gScriptsFile = mainf;
+	CFileMgr::SetDir("");
 	ReadObjectNamesFromScript();
 	UpdateObjectIndices();
 	bAlreadyRunningAMissionScript = false;
@@ -2269,11 +2675,10 @@ void CTheScripts::Init()
 	NumberOfExclusiveMissionScripts = 0;
 	NumberOfMissionScripts = 0;
 	LargestMissionScriptSize = 0;
-	MainScriptSize = 0;
 	ReadMultiScriptFileOffsetsFromScript();
 	FailCurrentMission = 0;
 	DbgFlag = false;
-	NumScriptDebugLines = 0;
+	//NumScriptDebugLines = 0;
 	RiotIntensity = 0;
 	bPlayerHasMetDebbieHarry = false;
 	bPlayerIsInTheStatium = false;
@@ -2297,7 +2702,7 @@ void CTheScripts::Init()
 		IntroRectangles[i].m_sColor = CRGBA(255, 255, 255, 255);
 	}
 	NumberOfIntroRectanglesThisFrame = 0;
-	RemoveScriptTextureDictionary();
+	RemoveScriptTextureDictionary(); // TODO(LCS) - probably not needed
 	for (int i = 0; i < MAX_NUM_BUILDING_SWAPS; i++){
 		BuildingSwapArray[i].m_pBuilding = nil;
 		BuildingSwapArray[i].m_nNewModel = -1;
@@ -2305,6 +2710,12 @@ void CTheScripts::Init()
 	}
 	for (int i = 0; i < MAX_NUM_INVISIBILITY_SETTINGS; i++)
 		InvisibilitySettingArray[i] = nil;
+	if (loaddata) {
+		printf("loaddata = true\n");
+		//retval = GenericLoad(); // TODO
+	}
+	for (int i = 0; i < MAX_ALLOWED_COLLISIONS; i++)
+		AllowedCollision[i] = 0;
 
 #if defined USE_ADVANCED_SCRIPT_DEBUG_OUTPUT && SCRIPT_LOG_FILE_LEVEL == 2
 	CFileMgr::SetDirMyDocuments();
@@ -2315,8 +2726,10 @@ void CTheScripts::Init()
 	PrintToLog(init_msg);
 	CFileMgr::SetDir("");
 #endif
+	return retval;
 }
 
+// LCS - to remove?
 void CTheScripts::RemoveScriptTextureDictionary()
 {
 	for (int i = 0; i < ARRAY_SIZE(CTheScripts::ScriptSprites); i++)
@@ -2326,6 +2739,7 @@ void CTheScripts::RemoveScriptTextureDictionary()
 		CTxdStore::RemoveTxd(slot);
 }
 
+// done(LCS)
 void CRunningScript::RemoveScriptFromList(CRunningScript** ppScript)
 {
 	if (prev)
@@ -2336,6 +2750,7 @@ void CRunningScript::RemoveScriptFromList(CRunningScript** ppScript)
 		next->prev = prev;
 }
 
+// done(LCS)
 void CRunningScript::AddScriptToList(CRunningScript** ppScript)
 {
 	next = *ppScript;
@@ -2345,11 +2760,13 @@ void CRunningScript::AddScriptToList(CRunningScript** ppScript)
 	*ppScript = this;
 }
 
+// done(LCS)
 CRunningScript* CTheScripts::StartNewScript(uint32 ip)
 {
 	CRunningScript* pNew = pIdleScripts;
 	script_assert(pNew);
 	pNew->RemoveScriptFromList(&pIdleScripts);
+	pNew->m_nId = NextProcessId++;
 	pNew->Init();
 	pNew->SetIP(ip);
 	pNew->AddScriptToList(&pActiveScripts);
@@ -2357,9 +2774,12 @@ CRunningScript* CTheScripts::StartNewScript(uint32 ip)
 	return pNew;
 }
 
+// done(LCS)
 void CTheScripts::Process()
 {
 	if (CReplay::IsPlayingBack())
+		return;
+	if (!ScriptSpace)
 		return;
 	CommandsExecuted = 0;
 	ScriptsUpdated = 0;
@@ -2382,6 +2802,8 @@ void CTheScripts::Process()
 		if (UseTextCommands == 1)
 			UseTextCommands = 0;
 	}
+
+	// TODO: mCoronas
 
 #ifdef MISSION_REPLAY
 	static uint32 TimeToWaitTill;
@@ -2432,6 +2854,7 @@ void CTheScripts::Process()
 #endif
 
 	CRunningScript* script = pActiveScripts;
+	InTheScripts = true;
 	while (script != nil){
 		CRunningScript* next = script->GetNext();
 		++ScriptsUpdated;
@@ -2451,21 +2874,25 @@ void CTheScripts::Process()
 #endif
 }
 
+// done(LCS)
 CRunningScript* CTheScripts::StartTestScript()
 {
 	return StartNewScript(0);
 }
 
+// done(LCS)
 bool CTheScripts::IsPlayerOnAMission()
 {
 	return OnAMissionFlag && *(int32*)&ScriptSpace[OnAMissionFlag] == 1;
 }
 
+// done(LCS)
 void CRunningScript::Process()
 {
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 	PrintToLog("\n\nProcessing script %s (id %d)\n\n", m_abScriptName, this - CTheScripts::ScriptsArray);
 #endif
+	pCurrent = this;
 	if (m_bIsMissionScript)
 		DoDeatharrestCheck();
 	if (m_bMissionFlag && CTheScripts::FailCurrentMission == 1 && m_nStackPointer == 1)
@@ -2488,6 +2915,7 @@ void CRunningScript::Process()
 		CMessages::BriefMessages[0].m_nStartTime = 0;
 }
 
+// done(LCS)
 int8 CRunningScript::ProcessOneCommand()
 {
 	int8 retval = -1;
@@ -2498,32 +2926,57 @@ int8 CRunningScript::ProcessOneCommand()
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 	char commandInfo[1024];
 	uint32 ip = m_nIp;
+	uint8 nInputParams;
+	uint8 nOutputParameters;
+	uint8 nLocalsOffset;
 	if (command < ARRAY_SIZE(commands)) {
 		script_assert(commands[command].id == command);
-		sprintf(commandInfo, m_nIp >= SIZE_MAIN_SCRIPT ? "M<%5d> " : "<%6d> ", m_nIp >= SIZE_MAIN_SCRIPT ? m_nIp - SIZE_MAIN_SCRIPT : m_nIp);
+		sprintf(commandInfo, m_nIp >= CTheScripts::MainScriptSize ? "M<%5d> " : "<%6d> ", m_nIp >= CTheScripts::MainScriptSize ? m_nIp - CTheScripts::MainScriptSize : m_nIp);
 		if (m_bNotFlag)
 			strcat(commandInfo, "NOT ");
 		if (commands[command].position == -1)
 			strcat(commandInfo, commands[command].name + sizeof("COMMAND_") - 1);
-		for (int i = 0; commands[command].input[i] != ARGTYPE_NONE; i++) {
+		if (commands[command].input[0] == ARGTYPE_FUNCTION) {
 			char tmp[32];
 			bool var = false;
-			int value;
-			switch (commands[command].input[i]) {
-			case ARGTYPE_INT:
-			case ARGTYPE_PED_HANDLE:
-			case ARGTYPE_VEHICLE_HANDLE: 
-			case ARGTYPE_OBJECT_HANDLE: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%d)" : " %d", value); break;
-			case ARGTYPE_FLOAT: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%.3f)" : " %.3f", *(float*)&value); break;
-			case ARGTYPE_STRING: sprintf(tmp, " '%s'", (const char*)&CTheScripts::ScriptSpace[m_nIp]); m_nIp += KEY_LENGTH_IN_SCRIPT; break;
-			case ARGTYPE_LABEL: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%s(%d))" : " %s(%d)", value >= 0 ? "G" : "L", abs(value)); break;
-			case ARGTYPE_BOOL: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%s)" : " %s", value ? "TRUE" : "FALSE"); break;
-			case ARGTYPE_ANDOR: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, " %d %ss", (value + 1) % 10, value / 10 == 0 ? "AND" : "OR"); break;
-			default: script_assert(0);
-			}
+			nInputParams = CTheScripts::Read1ByteFromScript(&m_nIp);
+			nOutputParameters = CTheScripts::Read1ByteFromScript(&m_nIp);
+			nLocalsOffset = CTheScripts::Read1ByteFromScript(&m_nIp);
+			int value = CollectParameterForDebug(commandInfo, var);
+			sprintf(tmp, var ? " (%s(%d))" : " %s(%d)", value >= 0 ? "G" : "L", abs(value));
 			strcat(commandInfo, tmp);
-			if (commands[command].position == i)
-				strcat(commandInfo, commands[command].name_override);
+			strcat(commandInfo, "{");
+			for (int i = 0; i < nInputParams; i++) {
+				if (i != 0)
+					strcat(commandInfo, ", ");
+				value = CollectParameterForDebug(commandInfo, var);
+				sprintf(tmp, var ? "(%d)" : "%d", value);
+				strcat(commandInfo, tmp);
+
+			}
+			strcat(commandInfo, "}");
+		}
+		else {
+			for (int i = 0; commands[command].input[i] != ARGTYPE_NONE; i++) {
+				char tmp[32];
+				bool var = false;
+				int value;
+				switch (commands[command].input[i]) {
+				case ARGTYPE_INT:
+				case ARGTYPE_PED_HANDLE:
+				case ARGTYPE_VEHICLE_HANDLE:
+				case ARGTYPE_OBJECT_HANDLE: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%d)" : " %d", value); break;
+				case ARGTYPE_FLOAT: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%.3f)" : " %.3f", *(float*)&value); break;
+				case ARGTYPE_STRING: sprintf(tmp, " '%s'", (const char*)&CTheScripts::ScriptSpace[m_nIp]); m_nIp += KEY_LENGTH_IN_SCRIPT; break;
+				case ARGTYPE_LABEL: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%s(%d))" : " %s(%d)", value >= 0 ? "G" : "L", abs(value)); break;
+				case ARGTYPE_BOOL: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%s)" : " %s", value ? "TRUE" : "FALSE"); break;
+				case ARGTYPE_ANDOR: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, " %d %ss", (value + 1) % 10, value / 10 == 0 ? "AND" : "OR"); break;
+				default: script_assert(0);
+				}
+				strcat(commandInfo, tmp);
+				if (commands[command].position == i)
+					strcat(commandInfo, commands[command].name_override);
+			}
 		}
 		uint32 t = m_nIp;
 		m_nIp = ip;
@@ -2534,32 +2987,36 @@ int8 CRunningScript::ProcessOneCommand()
 		retval = ProcessCommands0To99(command);
 	else if (command < 200)
 		retval = ProcessCommands100To199(command);
-	else if (command < 300)
+	else if (command < 305)
 		retval = ProcessCommands200To299(command);
-	else if (command < 400)
+	else if (command < 405)
 		retval = ProcessCommands300To399(command);
-	else if (command < 500)
+	else if (command < 505)
 		retval = ProcessCommands400To499(command);
-	else if (command < 600)
+	else if (command < 605)
 		retval = ProcessCommands500To599(command);
-	else if (command < 700)
+	else if (command < 705)
 		retval = ProcessCommands600To699(command);
-	else if (command < 800)
+	else if (command < 805)
 		retval = ProcessCommands700To799(command);
-	else if (command < 900)
+	else if (command < 905)
 		retval = ProcessCommands800To899(command);
-	else if (command < 1000)
+	else if (command < 1005)
 		retval = ProcessCommands900To999(command);
-	else if (command < 1100)
+	else if (command < 1105)
 		retval = ProcessCommands1000To1099(command);
-	else if (command < 1200)
+	else if (command < 1205)
 		retval = ProcessCommands1100To1199(command);
-	else if (command < 1300)
+	else if (command < 1305)
 		retval = ProcessCommands1200To1299(command);
-	else if (command < 1400)
+	else if (command < 1405)
 		retval = ProcessCommands1300To1399(command);
-	else if (command < 1500)
+	else if (command < 1497)
 		retval = ProcessCommands1400To1499(command);
+	else if (command < 1600)
+		retval = ProcessCommands1500To1599(command);
+	else if (command < 1700)
+		retval = ProcessCommands1600To1699(command);
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 	if (command < ARRAY_SIZE(commands)) {
 		if (commands[command].cond || commands[command].output[0] != ARGTYPE_NONE) {
@@ -2569,15 +3026,17 @@ int8 CRunningScript::ProcessOneCommand()
 			uint32 t = m_nIp;
 			m_nIp = ip;
 			ip = t;
-			for (int i = 0; commands[command].output[i] != ARGTYPE_NONE; i++) {
-				char tmp[32];
-				switch (commands[command].output[i]) {
-				case ARGTYPE_INT:
-				case ARGTYPE_PED_HANDLE:
-				case ARGTYPE_VEHICLE_HANDLE:
-				case ARGTYPE_OBJECT_HANDLE: GetStoredParameterForDebug(commandInfo); sprintf(tmp, " (%d)", ScriptParams[i]); strcat(commandInfo, tmp); break;
-				case ARGTYPE_FLOAT: GetStoredParameterForDebug(commandInfo); sprintf(tmp, " (%8.3f)", *(float*)&ScriptParams[i]); strcat(commandInfo, tmp); break;
-				default: script_assert(0 && "Script only returns INTs and FLOATs");
+			if (commands[command].input[0] != ARGTYPE_FUNCTION) {
+				for (int i = 0; commands[command].output[i] != ARGTYPE_NONE; i++) {
+					char tmp[32];
+					switch (commands[command].output[i]) {
+					case ARGTYPE_INT:
+					case ARGTYPE_PED_HANDLE:
+					case ARGTYPE_VEHICLE_HANDLE:
+					case ARGTYPE_OBJECT_HANDLE: GetStoredParameterForDebug(commandInfo); sprintf(tmp, " (%d)", ScriptParams[i]); strcat(commandInfo, tmp); break;
+					case ARGTYPE_FLOAT: GetStoredParameterForDebug(commandInfo); sprintf(tmp, " (%8.3f)", *(float*)&ScriptParams[i]); strcat(commandInfo, tmp); break;
+					default: script_assert(0 && "Script only returns INTs and FLOATs");
+					}
 				}
 			}
 			m_nIp = ip;
@@ -2615,7 +3074,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 		return 1;
 	case COMMAND_GOTO:
 		CollectParameters(&m_nIp, 1);
-		SetIP(ScriptParams[0] >= 0 ? ScriptParams[0] : SIZE_MAIN_SCRIPT - ScriptParams[0]);
+		SetIP(ScriptParams[0] >= 0 ? ScriptParams[0] : CTheScripts::MainScriptSize - ScriptParams[0]);
 		/* Known issue: GOTO to 0. It might have been "better" to use > instead of >= */
 		/* simply because it never makes sense to jump to start of the script */
 		/* but jumping to start of a custom mission is an issue for simple mission-like scripts */
@@ -3070,17 +3529,15 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 	//case COMMAND_IS_FLOAT_VAR_NOT_EQUAL_TO_FLOAT_VAR:
 	//case COMMAND_IS_FLOAT_LVAR_NOT_EQUAL_TO_FLOAT_LVAR:
 	//case COMMAND_IS_FLOAT_VAR_NOT_EQUAL_TO_FLOAT_LVAR:
-	/*
 	case COMMAND_GOTO_IF_TRUE:
 		CollectParameters(&m_nIp, 1);
 		if (m_bCondResult)
-			SetIP(ScriptParams[0] >= 0 ? ScriptParams[0] : SIZE_MAIN_SCRIPT - ScriptParams[0]);
+			SetIP(ScriptParams[0] >= 0 ? ScriptParams[0] : CTheScripts::MainScriptSize - ScriptParams[0]);
 		return 0;
-	*/
 	case COMMAND_GOTO_IF_FALSE:
 		CollectParameters(&m_nIp, 1);
 		if (!m_bCondResult)
-			SetIP(ScriptParams[0] >= 0 ? ScriptParams[0] : SIZE_MAIN_SCRIPT - ScriptParams[0]);
+			SetIP(ScriptParams[0] >= 0 ? ScriptParams[0] : CTheScripts::MainScriptSize - ScriptParams[0]);
 		/* Check COMMAND_GOTO note. */
 		return 0;
 	case COMMAND_TERMINATE_THIS_SCRIPT:
@@ -3108,45 +3565,17 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 		CollectParameters(&m_nIp, 1);
 		script_assert(ScriptParams[0] >= 0);
 		CRunningScript* pNew = CTheScripts::StartNewScript(ScriptParams[0]);
-		m_bIsActive = true;
-		int8 type = CTheScripts::Read1ByteFromScript(&m_nIp);
-		float tmp;
-		for (int i = 0; type != ARGUMENT_END; type = CTheScripts::Read1ByteFromScript(&m_nIp), i++) {
-			switch (type) {
-			case ARGUMENT_INT32:
-				pNew->m_anLocalVariables[i] = CTheScripts::Read4BytesFromScript(&m_nIp);
-				break;
-			case ARGUMENT_GLOBALVAR:
-				pNew->m_anLocalVariables[i] = *(int32*)&CTheScripts::ScriptSpace[(uint16)CTheScripts::Read2BytesFromScript(&m_nIp)];
-				break;
-			case ARGUMENT_LOCALVAR:
-				pNew->m_anLocalVariables[i] = m_anLocalVariables[CTheScripts::Read2BytesFromScript(&m_nIp)];
-				break;
-			case ARGUMENT_INT8:
-				pNew->m_anLocalVariables[i] = CTheScripts::Read1ByteFromScript(&m_nIp);
-				break;
-			case ARGUMENT_INT16:
-				pNew->m_anLocalVariables[i] = CTheScripts::Read2BytesFromScript(&m_nIp);
-				break;
-			case ARGUMENT_FLOAT:
-				tmp = CTheScripts::ReadFloatFromScript(&m_nIp);
-				pNew->m_anLocalVariables[i] = *(int32*)&tmp;
-				break;
-			default:
-				break;
-			}
-		}
+		CollectParameters(&m_nIp, NUM_LOCAL_VARS, pNew->m_anLocalVariables);
 		return 0;
 	}
 	case COMMAND_GOSUB:
 		CollectParameters(&m_nIp, 1);
 		script_assert(m_nStackPointer < MAX_STACK_DEPTH);
 		m_anStack[m_nStackPointer++] = m_nIp;
-		SetIP(ScriptParams[0] >= 0 ? ScriptParams[0] : SIZE_MAIN_SCRIPT - ScriptParams[0]);
+		SetIP(ScriptParams[0] >= 0 ? ScriptParams[0] : CTheScripts::MainScriptSize - ScriptParams[0]);
 		return 0;
 	case COMMAND_RETURN:
-		script_assert(m_nStackPointer > 0); /* No more SSU */
-		SetIP(m_anStack[--m_nStackPointer]);
+		ReturnFromGosubOrFunction();
 		return 0;
 	case COMMAND_LINE:
 		CollectParameters(&m_nIp, 6);
@@ -3180,7 +3609,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 	{
 		CVector pos;
 		CollectParameters(&m_nIp, 1);
-		if (CWorld::Players[ScriptParams[0]].m_pPed->bInVehicle)
+		if (CWorld::Players[ScriptParams[0]].m_pPed->bInVehicle && CWorld::Players[ScriptParams[0]].m_pPed->m_pMyVehicle)
 			pos = CWorld::Players[ScriptParams[0]].m_pPed->m_pMyVehicle->GetPosition();
 		else
 			pos = CWorld::Players[ScriptParams[0]].m_pPed->GetPosition();
@@ -3196,7 +3625,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		CPlayerPed* ped = CWorld::Players[index].m_pPed;
-		if (ped->bInVehicle) {
+		if (ped->bInVehicle && ped->m_pMyVehicle) {
 			pos.z += ped->m_pMyVehicle->GetDistanceFromCentreOfMassToBaseOfModel();
 			ped->m_pMyVehicle->Teleport(pos); // removed dumb stuff that was present here
 			CTheScripts::ClearSpaceForMissionEntity(pos, ped->m_pMyVehicle);
@@ -4187,14 +4616,14 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 	case COMMAND_DEBUG_OFF:
 		CTheScripts::DbgFlag = false;
 		return 0;
-	/*
 	case COMMAND_RETURN_TRUE:
 		UpdateCompareFlag(true);
+		ReturnFromGosubOrFunction();
 		return 0;
 	case COMMAND_RETURN_FALSE:
 		UpdateCompareFlag(false);
+		ReturnFromGosubOrFunction();
 		return 0;
-	*/
 	//case COMMAND_VAR_INT:
 	default:
 		script_assert(0);
@@ -4768,6 +5197,24 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 	return -1;
 }
 
+void CRunningScript::ReturnFromGosubOrFunction()
+{
+	uint32 val = m_nIp = m_anStack[--m_nStackPointer];
+	if (!(m_nIp & BIT(STACKVALUE_IS_FUNCTION_CALL_BIT)))
+		return;
+	if (m_nIp & BIT(STACKVALUE_INVERT_RETURN_BIT))
+		m_bCondResult = !m_bCondResult;
+	m_nIp = m_nIp & STACKVALUE_IP_MASK;
+	uint8 nInputParameters = CTheScripts::Read1ByteFromScript(&m_nIp);
+	uint8 nOutputParameters = CTheScripts::Read1ByteFromScript(&m_nIp);
+	uint8 nLocalsOffset = CTheScripts::Read1ByteFromScript(&m_nIp);
+	for (int i = 0; i < nOutputParameters; i++)
+		ScriptParams[i] = m_anLocalVariables[m_nLocalsPointer + nInputParameters];
+	m_nIp += val >> STACKVALUE_IP_PARAMS_OFFSET;
+	m_nLocalsPointer -= nLocalsOffset;
+	StoreParameters(&m_nIp, nOutputParameters);
+}
+
 #ifdef MISSION_REPLAY
 
 bool CRunningScript::CanAllowMissionReplay()
@@ -4848,9 +5295,9 @@ CTheScripts::SwitchToMission(int32 mission)
 	int handle = CFileMgr::OpenFile("data\\main.scm", "rb");
 #endif
 	CFileMgr::Seek(handle, offset, 0);
-	CFileMgr::Read(handle, (const char*)&CTheScripts::ScriptSpace[SIZE_MAIN_SCRIPT], SIZE_MISSION_SCRIPT);
+	CFileMgr::Read(handle, (const char*)&CTheScripts::ScriptSpace[CTheScripts::MainScriptSize], CTheScripts::MainScriptSize);
 	CFileMgr::CloseFile(handle);
-	CRunningScript* pMissionScript = CTheScripts::StartNewScript(SIZE_MAIN_SCRIPT);
+	CRunningScript* pMissionScript = CTheScripts::StartNewScript(CTheScripts::MainScriptSize);
 	CTimer::Resume();
 	pMissionScript->m_bIsMissionScript = true;
 	pMissionScript->m_bMissionFlag = true;

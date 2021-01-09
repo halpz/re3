@@ -540,7 +540,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_DISPLAY_NTH_ONSCREEN_COUNTER_WITH_STRING:
 	{
 		char onscreen_str[12];
-		script_assert(CTheScripts::ScriptSpace[m_nIp++] == ARGUMENT_GLOBALVAR);
+		//script_assert(CTheScripts::ScriptSpace[m_nIp++] == ARGUMENT_GLOBALVAR);
 		uint16 var = CTheScripts::Read2BytesFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 2);
 		wchar* text = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]); // ???
@@ -625,7 +625,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 			key[i] = tolower(key[i]);
 		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
 		script_assert(pPed);
-		UpdateCompareFlag(strcmp(key, CModelInfo::GetModelInfo(pPed->GetModelIndex())->GetName()) == 0);
+		UpdateCompareFlag(strcmp(key, CModelInfo::GetModelInfo(pPed->GetModelIndex())->GetModelName()) == 0);
 		return 0;
 	}
 	case COMMAND_SET_PLAYER_CAN_DO_DRIVE_BY:

@@ -123,6 +123,7 @@ public:
 	static bool HasColLoaded(int32 id) { return HasModelLoaded(id+STREAM_OFFSET_COL); }
 	static bool HasAnimLoaded(int32 id) { return HasModelLoaded(id+STREAM_OFFSET_ANIM); }
 	static bool CanRemoveModel(int32 id) { return (ms_aInfoForModel[id].m_flags & STREAMFLAGS_CANT_REMOVE) == 0; }
+	static bool IsScriptOwnedModel(int32 id) { return (ms_aInfoForModel[id].m_flags & STREAMFLAGS_SCRIPTOWNED); }
 	static bool CanRemoveTxd(int32 id) { return CanRemoveModel(id+STREAM_OFFSET_TXD); }
 	static bool CanRemoveCol(int32 id) { return CanRemoveModel(id+STREAM_OFFSET_COL); }
 	static bool CanRemoveAnim(int32 id) { return CanRemoveModel(id+STREAM_OFFSET_ANIM); }
@@ -213,3 +214,10 @@ public:
 
 	static void PrintStreamingBufferState();
 };
+
+// LCS(TODO): put them into CStreaming::mspInst
+extern int32 islandLODindust;
+extern int32 islandLODcomInd;
+extern int32 islandLODcomSub;
+extern int32 islandLODsubInd;
+extern int32 islandLODsubCom;

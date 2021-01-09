@@ -4914,8 +4914,8 @@ CPed::SetAnimOffsetForEnterOrExitVehicle(void)
 			vecPedVanRearDoorAnimOffset = lastFrame->translation;
 		}
 	}
-	// I think this is leftover and ANIM_TRAIN_GETOUT
-	enterAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, ANIM_IDLE_STANCE3)->hierarchy;
+
+	enterAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, ANIM_TRAIN_GETOUT)->hierarchy;
 	seq = enterAssoc->sequences;
 	CAnimManager::UncompressAnimation(enterAssoc);
 	if (seq->numFrames > 0) {

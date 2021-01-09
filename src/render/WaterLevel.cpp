@@ -1175,13 +1175,13 @@ CWaterLevel::RenderWater()
 	if ( WavesCalculatedThisFrame )
 	{
 		RenderSeaBirds();
-		RenderShipsOnHorizon();
-		CParticle::HandleShipsAtHorizonStuff();
-		HandleBeachToysStuff();
+		//RenderShipsOnHorizon();
+		//CParticle::HandleShipsAtHorizonStuff();
+		//HandleBeachToysStuff();
 	}
 	
-	if ( _bSeaLife )
-		HandleSeaLifeForms();
+	//if ( _bSeaLife )
+	//	HandleSeaLifeForms();
 
 	DefinedState();
 }
@@ -3105,6 +3105,7 @@ CWaterLevel::RenderShipsOnHorizon()
 	}
 }
 
+/*
 void
 CWaterLevel::HandleSeaLifeForms()
 {
@@ -3145,7 +3146,7 @@ CWaterLevel::HandleSeaLifeForms()
 	}
 	
 	CWaterCreatures::UpdateAll();
-}
+}*/
 
 void
 CWaterLevel::HandleBeachToysStuff(void)
