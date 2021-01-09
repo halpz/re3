@@ -3829,11 +3829,11 @@ CCam::Process_Debug(const CVector&, float, float, float)
 	}
 
 	// stay inside sectors
-	while(CWorld::GetSectorX(Source.x) > 95.0f)
+	while(CWorld::GetSectorX(Source.x) > NUMSECTORS_X-5.0f)
 		Source.x -= 1.0f;
 	while(CWorld::GetSectorX(Source.x) < 5.0f)
 		Source.x += 1.0f;
-	while(CWorld::GetSectorY(Source.y) > 95.0f)
+	while(CWorld::GetSectorY(Source.y) > NUMSECTORS_X-5.0f)
 		Source.y -= 1.0f;
 	while(CWorld::GetSectorY(Source.y) < 5.0f)
 		Source.y += 1.0f;
@@ -3900,11 +3900,11 @@ CCam::Process_Debug(const CVector&, float, float, float)
 	}
 
 	// stay inside sectors
-	while(CWorld::GetSectorX(Source.x) > 95.0f)
+	while(CWorld::GetSectorX(Source.x) > NUMSECTORS_X-5.0f)
 		Source.x -= 1.0f;
 	while(CWorld::GetSectorX(Source.x) < 5.0f)
 		Source.x += 1.0f;
-	while(CWorld::GetSectorY(Source.y) > 95.0f)
+	while(CWorld::GetSectorY(Source.y) > NUMSECTORS_X-5.0f)
 		Source.y -= 1.0f;
 	while(CWorld::GetSectorY(Source.y) < 5.0f)
 		Source.y += 1.0f;
@@ -3981,11 +3981,11 @@ CCam::Process_Editor(const CVector&, float, float, float)
 	}
 
 	// stay inside sectors
-	while(CWorld::GetSectorX(Source.x) > 95.0f)
+	while(CWorld::GetSectorX(Source.x) > NUMSECTORS_X-5.0f)
 		Source.x -= 1.0f;
 	while(CWorld::GetSectorX(Source.x) < 5.0f)
 		Source.x += 1.0f;
-	while(CWorld::GetSectorY(Source.y) > 95.0f)
+	while(CWorld::GetSectorY(Source.y) > NUMSECTORS_X-5.0f)
 		Source.y -= 1.0f;
 	while(CWorld::GetSectorY(Source.y) < 5.0f)
 		Source.y += 1.0f;
