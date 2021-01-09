@@ -725,6 +725,9 @@ CBrightLights::Render(void)
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
 
+	TempBufferVerticesStored = 0;
+	TempBufferIndicesStored = 0;
+
 	for(i = 0; i < NumBrightLights; i++){
 		if(TempBufferIndicesStored > TEMPBUFFERINDEXSIZE-40 || TempBufferVerticesStored > TEMPBUFFERVERTSIZE-40)
 			RenderOutGeometryBuffer();

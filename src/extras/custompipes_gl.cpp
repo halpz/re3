@@ -1,8 +1,6 @@
 #include "common.h"
 
 #ifdef RW_OPENGL
-#ifdef EXTENDED_PIPELINES
-
 #include "main.h"
 #include "RwHelper.h"
 #include "Lights.h"
@@ -14,6 +12,8 @@
 #include "Renderer.h"
 #include "World.h"
 #include "custompipes.h"
+
+#ifdef EXTENDED_PIPELINES
 
 #ifndef LIBRW
 #error "Need librw for EXTENDED_PIPELINES"
@@ -614,4 +614,171 @@ CustomPipeRegisterGL(void)
 }
 
 #endif
+
+#ifdef NEW_RENDERER
+#ifndef LIBRW
+#error "Need librw for NEW_PIPELINES"
+#endif
+
+namespace WorldRender
+{
+
+struct BuildingInst
+{
+	rw::Matrix matrix;
+	rw::gl3::InstanceDataHeader *instHeader;
+	uint8 fadeAlpha;
+	bool lighting;
+};
+BuildingInst blendInsts[3][2000];
+int numBlendInsts[3];
+
+static RwRGBAReal black;
+
+static bool
+IsTextureTransparent(RwTexture *tex)
+{
+	if(tex == nil || tex->raster == nil)
+		return false;
+	return PLUGINOFFSET(rw::gl3::Gl3Raster, tex->raster, rw::gl3::nativeRasterOffset)->hasAlpha;
+}
+
+// Render all opaque meshes and put atomics that needs blending
+// into the deferred list.
+void
+AtomicFirstPass(RpAtomic *atomic, int pass)
+{
+	using namespace rw;
+	using namespace rw::gl3;
+
+	BuildingInst *building = &blendInsts[pass][numBlendInsts[pass]];
+
+	atomic->getPipeline()->instance(atomic);
+	building->instHeader = (gl3::InstanceDataHeader*)atomic->geometry->instData;
+	assert(building->instHeader != nil);
+	assert(building->instHeader->platform == PLATFORM_GL3);
+	building->fadeAlpha = 255;
+	building->lighting = !!(atomic->geometry->flags & rw::Geometry::LIGHT);
+
+	WorldLights lights;
+	lights.numAmbients = 1;
+	lights.numDirectionals = 0;
+	lights.numLocals = 0;
+	if(building->lighting)
+		lights.ambient = pAmbient->color;
+	else
+		lights.ambient = black;
+
+	bool setupDone = false;
+	bool defer = false;
+	building->matrix = *atomic->getFrame()->getLTM();
+
+	InstanceData *inst = building->instHeader->inst;
+	for(rw::uint32 i = 0; i < building->instHeader->numMeshes; i++, inst++){
+		Material *m = inst->material;
+
+		if(inst->vertexAlpha || m->color.alpha != 255 ||
+		   IsTextureTransparent(m->texture)){
+			defer = true;
+			continue;
+		}
+
+		// alright we're rendering this atomic
+		if(!setupDone){
+			defaultShader->use();
+			setWorldMatrix(&building->matrix);
+#ifdef RW_GL_USE_VAOS
+			glBindVertexArray(building->instHeader->vao);
+#else
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, building->instHeader->ibo);
+			glBindBuffer(GL_ARRAY_BUFFER, building->instHeader->vbo);
+			setAttribPointers(building->instHeader->attribDesc, building->instHeader->numAttribs);
+#endif
+			setLights(&lights);
+			setupDone = true;
+		}
+
+		setMaterial(m->color, m->surfaceProps);
+
+		setTexture(0, m->texture);
+
+		drawInst(building->instHeader, inst);
+	}
+#ifndef RW_GL_USE_VAOS
+	disableAttribPointers(building->instHeader->attribDesc, building->instHeader->numAttribs);
+#endif
+	if(defer)
+		numBlendInsts[pass]++;
+}
+
+void
+AtomicFullyTransparent(RpAtomic *atomic, int pass, int fadeAlpha)
+{
+	using namespace rw;
+	using namespace rw::gl3;
+
+	BuildingInst *building = &blendInsts[pass][numBlendInsts[pass]];
+
+	atomic->getPipeline()->instance(atomic);
+	building->instHeader = (gl3::InstanceDataHeader*)atomic->geometry->instData;
+	assert(building->instHeader != nil);
+	assert(building->instHeader->platform == PLATFORM_GL3);
+	building->fadeAlpha = fadeAlpha;
+	building->lighting = !!(atomic->geometry->flags & rw::Geometry::LIGHT);
+	building->matrix = *atomic->getFrame()->getLTM();
+	numBlendInsts[pass]++;
+}
+
+void
+RenderBlendPass(int pass)
+{
+	using namespace rw;
+	using namespace rw::gl3;
+
+	defaultShader->use();
+	WorldLights lights;
+	lights.numAmbients = 1;
+	lights.numDirectionals = 0;
+	lights.numLocals = 0;
+
+	int i;
+	for(i = 0; i < numBlendInsts[pass]; i++){
+		BuildingInst *building = &blendInsts[pass][i];
+
+#ifdef RW_GL_USE_VAOS
+		glBindVertexArray(building->instHeader->vao);
+#else
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, building->instHeader->ibo);
+		glBindBuffer(GL_ARRAY_BUFFER, building->instHeader->vbo);
+		setAttribPointers(building->instHeader->attribDesc, building->instHeader->numAttribs);
+#endif
+		setWorldMatrix(&building->matrix);
+		if(building->lighting)
+			lights.ambient = pAmbient->color;
+		else
+			lights.ambient = black;
+		setLights(&lights);
+
+		InstanceData *inst = building->instHeader->inst;
+		for(rw::uint32 j = 0; j < building->instHeader->numMeshes; j++, inst++){
+			Material *m = inst->material;
+			if(!inst->vertexAlpha && m->color.alpha == 255 && !IsTextureTransparent(m->texture) && building->fadeAlpha == 255)
+				continue;	// already done this one
+
+			rw::RGBA color = m->color;
+			color.alpha = (color.alpha * building->fadeAlpha)/255;
+			setMaterial(color, m->surfaceProps);
+
+			setTexture(0, m->texture);
+
+			drawInst(building->instHeader, inst);
+		}
+#ifndef RW_GL_USE_VAOS
+		disableAttribPointers(building->instHeader->attribDesc, building->instHeader->numAttribs);
+#endif
+	}
+}
+}
+#endif
+
 #endif
