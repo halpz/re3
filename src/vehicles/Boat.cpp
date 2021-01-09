@@ -22,14 +22,14 @@
 
 #define INVALID_ORIENTATION (-9999.99f)
 
-float fShapeLength = 0.4f;
-float fShapeTime = 0.05f;
-float fRangeMult = 0.75f; //0.6f; // 0.75f gta 3
-float fTimeMult;
-
 float MAX_WAKE_LENGTH = 50.0f;
 float MIN_WAKE_INTERVAL = 1.0f;
 float WAKE_LIFETIME = 400.0f;
+
+float fShapeLength = 0.4f;
+float fShapeTime = 0.05f;
+float fRangeMult = 0.75f;
+float fTimeMult = 1.0f/WAKE_LIFETIME;
 
 CBoat *CBoat::apFrameWakeGeneratingBoats[4];
 
