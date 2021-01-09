@@ -39,7 +39,7 @@ float CBoat::WAKE_LIFETIME = 150.0f;
 float fShapeLength = 0.4f;
 float fShapeTime = 0.05f;
 float fRangeMult = 0.6f;
-float fTimeMult = 1.0/CBoat::WAKE_LIFETIME;
+float fTimeMult = 1.2f/CBoat::WAKE_LIFETIME;
 
 CBoat *CBoat::apFrameWakeGeneratingBoats[4];
 
