@@ -32,14 +32,14 @@
 
 #define INVALID_ORIENTATION (-9999.99f)
 
-float fShapeLength = 0.4f;
-float fShapeTime = 0.05f;
-float fRangeMult = 0.6f;
-float fTimeMult;
-
 float CBoat::MAX_WAKE_LENGTH = 50.0f;
 float CBoat::MIN_WAKE_INTERVAL = 2.0f;
 float CBoat::WAKE_LIFETIME = 150.0f;
+
+float fShapeLength = 0.4f;
+float fShapeTime = 0.05f;
+float fRangeMult = 0.6f;
+float fTimeMult = 1.0/CBoat::WAKE_LIFETIME;
 
 CBoat *CBoat::apFrameWakeGeneratingBoats[4];
 
