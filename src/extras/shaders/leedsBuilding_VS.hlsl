@@ -1,5 +1,8 @@
 #include "standardConstants.h"
 
+#define surfEmissive (surfProps.w)
+
+
 float4		emissive	: register(c41);
 float4		ambient		: register(c42);
 
@@ -33,7 +36,7 @@ VS_out main(in VS_in input)
 
 	output.Color = input.Prelight;
 	output.Color.rgb *= ambient.rgb;
-	output.Color.rgb += emissive.rgb;
+	output.Color.rgb += emissive.rgb*surfEmissive;
 
 	output.Color = clamp(output.Color, 0.0, 1.0);
 	output.Color.a *= matCol.a;

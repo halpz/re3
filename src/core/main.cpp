@@ -124,7 +124,7 @@ bool gbPrintMemoryUsage;
 #endif
 
 #ifdef NEW_RENDERER
-bool gbNewRenderer;
+bool gbNewRenderer = true;
 #endif
 #ifdef FIX_BUGS
 // need to clear stencil for mblur fx. no idea why it works in the original game
