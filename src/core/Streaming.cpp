@@ -1151,12 +1151,9 @@ CStreaming::RemoveModel(int32 id)
 void
 CStreaming::RemoveUnusedBuildings(eLevelName level)
 {
-	if(level != LEVEL_INDUSTRIAL)
-		RemoveBuildings(LEVEL_INDUSTRIAL);
-	if(level != LEVEL_COMMERCIAL)
-		RemoveBuildings(LEVEL_COMMERCIAL);
-	if(level != LEVEL_SUBURBAN)
-		RemoveBuildings(LEVEL_SUBURBAN);
+	for(int i = LEVEL_INDUSTRIAL; i < NUM_LEVELS; i++)
+		if(level != i)
+			RemoveBuildings((eLevelName)i);
 }
 
 void
@@ -1279,12 +1276,9 @@ CStreaming::RemoveUnusedBigBuildings(eLevelName level)
 {
 	ISLAND_LOADING_IS(LOW)
 	{
-	if(level != LEVEL_INDUSTRIAL)
-		RemoveBigBuildings(LEVEL_INDUSTRIAL);
-	if(level != LEVEL_COMMERCIAL)
-		RemoveBigBuildings(LEVEL_COMMERCIAL);
-	if(level != LEVEL_SUBURBAN)
-		RemoveBigBuildings(LEVEL_SUBURBAN);
+	for(int i = LEVEL_INDUSTRIAL; i < NUM_LEVELS; i++)
+		if(level != i)
+			RemoveBuildings((eLevelName)i);
 	}
 	RemoveIslandsNotUsed(level);
 }
@@ -1324,8 +1318,11 @@ CStreaming::RemoveIslandsNotUsed(eLevelName level)
 	}
 #ifdef NO_ISLAND_LOADING
 	if(FrontEndMenuManager.m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_HIGH) {
-		DeleteIsland(pIslandLODmainlandEntity);
-		DeleteIsland(pIslandLODbeachEntity);
+		DeleteIsland(pIslandLODindustEntity);
+		DeleteIsland(pIslandLODcomIndEntity);
+		DeleteIsland(pIslandLODcomSubEntity);
+		DeleteIsland(pIslandLODsubIndEntity);
+		DeleteIsland(pIslandLODsubComEntity);
 	} else
 #endif
 	switch(level){

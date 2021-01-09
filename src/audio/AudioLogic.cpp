@@ -4363,14 +4363,18 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 					if (weaponType == WEAPONTYPE_BRASSKNUCKLE) {
 						CPed* ped = params.m_pPed;
 						uint32 fightMove = ped->m_curFightMove;
-						if (fightMove == FIGHTMOVE_BACKLEFT || fightMove == FIGHTMOVE_STDPUNCH || fightMove == FIGHTMOVE_PUNCH ||
+						// LCS:removed for now
+						//if (fightMove == FIGHTMOVE_BACKLEFT || fightMove == FIGHTMOVE_STDPUNCH || fightMove == FIGHTMOVE_PUNCH ||
+						if (
 							ped->m_nPedState == PED_ATTACK) {
 							CEntity* damageEntity = ped->m_pDamageEntity;
 							if (!damageEntity)
 								m_sQueueSample.m_nSampleIndex = m_anRandomTable[3] % 2 + SFX_HAMMER_HIT_1;
 							else if (damageEntity->GetType() != ENTITY_TYPE_PED)
 								m_sQueueSample.m_nSampleIndex = m_anRandomTable[3] % 2 + SFX_HAMMER_HIT_1;
-							else if (((CPed*)damageEntity)->m_curFightMove != FIGHTMOVE_HITHEAD)
+							// LCS:removed for now
+							//else if (((CPed*)damageEntity)->m_curFightMove != FIGHTMOVE_HITHEAD)
+							else if(1)
 								m_sQueueSample.m_nSampleIndex = m_anRandomTable[3] % 2 + SFX_HAMMER_HIT_1;
 							else
 								m_sQueueSample.m_nSampleIndex = SFX_HAMMER_HIT_1;
