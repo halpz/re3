@@ -2740,6 +2740,9 @@ void CTheScripts::ReadObjectNamesFromScript()
 {
 	int32 varSpace = GetSizeOfVariableSpace();
 	uint32 ip = varSpace + 8;
+	NumSaveVars = Read4BytesFromScript(&ip);
+	SavedVarIndices = (short*)&ScriptParams[ip];
+	ip += 2 * NumSaveVars;
 	NumberOfUsedObjects = Read2BytesFromScript(&ip);
 	ip += 2;
 	for (uint16 i = 0; i < NumberOfUsedObjects; i++) {
@@ -2784,7 +2787,8 @@ void CTheScripts::ReadMultiScriptFileOffsetsFromScript()
 	uint32 ip = varSpace + 3;
 	int32 objectSize = Read4BytesFromScript(&ip);
 	ip = objectSize + 8;
-	MainScriptSize = Read4BytesFromScript(&ip);
+	NumTrueGlobals = Read2BytesFromScript(&ip);
+	MostGlobals = Read2BytesFromScript(&ip);
 	LargestMissionScriptSize = Read4BytesFromScript(&ip);
 	NumberOfMissionScripts = Read2BytesFromScript(&ip);
 	NumberOfExclusiveMissionScripts = Read2BytesFromScript(&ip);
