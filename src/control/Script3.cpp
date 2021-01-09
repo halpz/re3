@@ -836,7 +836,6 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 	case COMMAND_RESTORE_CLOCK:
 		CClock::RestoreClock();
 		return 0;
-	/*
 	case COMMAND_RESTART_CRITICAL_MISSION:
 	{
 		CollectParameters(&m_nIp, 4);
@@ -849,7 +848,6 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		CWorld::Players[CWorld::PlayerInFocus].PlayerFailedCriticalMission();
 		return 0;
 	}
-	*/
 	case COMMAND_IS_PLAYER_PLAYING:
 	{
 		CollectParameters(&m_nIp, 1);
@@ -1357,12 +1355,14 @@ int8 CRunningScript::ProcessCommands600To699(int32 command)
 		UpdateCompareFlag(CTheScripts::IsPedStopped(pPed));
 		return 0;
 	}
+	*/
 	case COMMAND_MESSAGE_WAIT:
 		CollectParameters(&m_nIp, 2);
 		m_nWakeTime = CTimer::GetTimeInMilliseconds() + ScriptParams[0];
 		if (ScriptParams[1] != 0)
 			m_bSkipWakeTime = true;
 		return 1;
+	/*
 	case COMMAND_ADD_PARTICLE_EFFECT:
 	{
 		CollectParameters(&m_nIp, 5);

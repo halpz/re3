@@ -2179,7 +2179,7 @@ bool CUpsideDownCarCheck::IsCarUpsideDown(int32 id)
 // done(LCS)
 bool CUpsideDownCarCheck::IsCarUpsideDown(CVehicle* pVehicle)
 {
-	assert(pVehicle);
+	script_assert(pVehicle);
 	return pVehicle->GetUp().z <= UPSIDEDOWN_UP_THRESHOLD &&
 		pVehicle->GetMoveSpeed().Magnitude() < UPSIDEDOWN_MOVE_SPEED_THRESHOLD &&
 		pVehicle->GetTurnSpeed().Magnitude() < UPSIDEDOWN_TURN_SPEED_THRESHOLD;
@@ -2411,7 +2411,7 @@ int32* GetPointerToScriptVariableForDebug(CRunningScript* pScript, uint32* pIp, 
 		return &pScript->m_anLocalVariables[pScript->m_nLocalsPointer + (type - ARGUMENT_LOCAL)];
 	}
 	else {
-		assert(type >= ARGUMENT_TIMER);
+		script_assert(type >= ARGUMENT_TIMER);
 		sprintf(tmpstr, " TIMER%d@", (type - ARGUMENT_TIMER));
 		strcat(buf, tmpstr);
 		return &pScript->m_anLocalVariables[NUM_LOCAL_VARS + 8 + (type - ARGUMENT_TIMER)]; // why 8?
@@ -2534,7 +2534,7 @@ int32* GetPointerToScriptVariable(CRunningScript* pScript, uint32* pIp)
 		return &pScript->m_anLocalVariables[pScript->m_nLocalsPointer + (type - ARGUMENT_LOCAL)];
 	}
 	else {
-		assert(type >= ARGUMENT_TIMER);
+		script_assert(type >= ARGUMENT_TIMER);
 		return &pScript->m_anLocalVariables[NUM_LOCAL_VARS + 8 + (type - ARGUMENT_TIMER)];
 	}
 }
@@ -4998,7 +4998,10 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		return 0;
 	}
 	//case COMMAND_ADD_AMMO_TO_CAR:
-	//case COMMAND_IS_PLAYER_STILL_ALIVE:
+	case COMMAND_IS_PLAYER_STILL_ALIVE:
+		CollectParameters(&m_nIp, 1);
+		UpdateCompareFlag(CWorld::Players[ScriptParams[0]].m_WBState != WBSTATE_WASTED);
+		return 0;
 	case COMMAND_IS_PLAYER_DEAD:
 		CollectParameters(&m_nIp, 1);
 		UpdateCompareFlag(CWorld::Players[ScriptParams[0]].m_WBState == WBSTATE_WASTED);
