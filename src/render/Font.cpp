@@ -432,7 +432,7 @@ CFont::PrintChar(float x, float y, wchar c)
 
 	bDontPrint = c == '\0';
 	float w = GetCharacterWidth(c) / 32.0f;
-	if (Details.bFontHalfTexture && c == 208)
+	if (RenderState.bFontHalfTexture && c == 208)
 		c = '\0';
 	float xoff = c % 16;
 	float yoff = c / 16;
@@ -444,7 +444,7 @@ CFont::PrintChar(float x, float y, wchar c)
 	}
 #endif
 
-	if(Details.style == FONT_BANK || Details.style == FONT_STANDARD){
+	if(RenderState.style == FONT_BANK || RenderState.style == FONT_STANDARD){
 		if (bDontPrint) return;
 		if (RenderState.slant == 0.0f) {
 #ifdef FIX_BUGS
