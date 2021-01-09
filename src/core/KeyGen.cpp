@@ -1,10 +1,6 @@
 #include "common.h"
 #include "KeyGen.h"
-#if defined _WIN32 && !defined __MINGW32__
-#include "ctype.h"
-#else
-#include <cwctype>
-#endif
+#include <ctype.h>
 
 uint32 CKeyGen::keyTable[256] = 
 {
