@@ -3108,7 +3108,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 		CollectParameters(&m_nIp, 1);
 		script_assert(ScriptParams[0] >= 0);
 		CRunningScript* pNew = CTheScripts::StartNewScript(ScriptParams[0]);
-		m_bIsActive = true;
+		pNew->m_bIsActive = true;
 		int8 type = CTheScripts::Read1ByteFromScript(&m_nIp);
 		float tmp;
 		for (int i = 0; type != ARGUMENT_END; type = CTheScripts::Read1ByteFromScript(&m_nIp), i++) {
