@@ -2712,7 +2712,7 @@ bool CTheScripts::Init(bool loaddata)
 		InvisibilitySettingArray[i] = nil;
 	if (loaddata) {
 		printf("loaddata = true\n");
-		retval = GenericLoad();
+		//retval = GenericLoad(); // TODO
 	}
 	for (int i = 0; i < MAX_ALLOWED_COLLISIONS; i++)
 		AllowedCollision[i] = 0;
