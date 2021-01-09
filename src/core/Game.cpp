@@ -901,7 +901,7 @@ void CGame::Process(void)
 		if (!CReplay::IsPlayingBack())
 			CCranes::UpdateCranes();
 		CClouds::Update();
-		CMovingThings::Update();
+		//CMovingThings::Update(); // TODO
 		CWaterCannons::Update();
 		CUserDisplay::Process();
 		CReplay::Update();

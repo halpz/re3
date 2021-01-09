@@ -2385,7 +2385,7 @@ int32* GetPointerToScriptVariableForDebug(CRunningScript* pScript, uint32* pIp, 
 		script_assert(size > 0);
 		script_assert(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id] < size);
 		uint8 index = Min(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id], size - 1);
-		sprintf(tmpstr, " $%d[%d@]", ((int)(type - ARGUMENT_GLOBAL_ARRAY) << 8) + index_in_block, index_id);
+		sprintf(tmpstr, " $%d[%d@ (%d)]", ((int)(type - ARGUMENT_GLOBAL_ARRAY) << 8) + index_in_block, index_id, pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id]);
 		strcat(buf, tmpstr);
 		return (int32*)&CTheScripts::ScriptSpace[4 * (((int)(type - ARGUMENT_GLOBAL_ARRAY) << 8) + index + index_in_block)];
 	}
@@ -2401,7 +2401,7 @@ int32* GetPointerToScriptVariableForDebug(CRunningScript* pScript, uint32* pIp, 
 		script_assert(size > 0);
 		script_assert(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id] < size);
 		uint8 index = Min(pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id], size - 1);
-		sprintf(tmpstr, " %d@[%d@]", (type - ARGUMENT_LOCAL_ARRAY), index_id);
+		sprintf(tmpstr, " %d@[%d@ (%d)]", (type - ARGUMENT_LOCAL_ARRAY), index_id, pScript->m_anLocalVariables[pScript->m_nLocalsPointer + index_id]);
 		strcat(buf, tmpstr);
 		return &pScript->m_anLocalVariables[pScript->m_nLocalsPointer + (type - ARGUMENT_LOCAL_ARRAY) + index];
 	}
@@ -2412,7 +2412,7 @@ int32* GetPointerToScriptVariableForDebug(CRunningScript* pScript, uint32* pIp, 
 	}
 	else {
 		assert(type >= ARGUMENT_TIMER);
-		sprintf(tmpstr, " TIMER%d@", (type - ARGUMENT_LOCAL_ARRAY));
+		sprintf(tmpstr, " TIMER%d@", (type - ARGUMENT_TIMER));
 		strcat(buf, tmpstr);
 		return &pScript->m_anLocalVariables[NUM_LOCAL_VARS + 8 + (type - ARGUMENT_TIMER)]; // why 8?
 	}

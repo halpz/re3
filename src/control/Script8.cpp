@@ -421,7 +421,10 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		script_assert(false);
 		return 0;
 	case COMMAND_1451:
-		script_assert(false);
+		CollectParameters(&m_nIp, 1);
+		// TODO (GET_PAD_BUTTON_STATE)
+		ScriptParams[0] = 0;
+		StoreParameters(&m_nIp, 1);
 		return 0;
 	case COMMAND_1452:
 		script_assert(false);
@@ -518,7 +521,8 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		script_assert(false);
 		return 0;
 	case COMMAND_1479:
-		script_assert(false);
+		CollectParameters(&m_nIp, 2);
+		// TODO (SET_CHAR_ONLY_ENTER_BACK_DOOR)
 		return 0;
 	case COMMAND_1480:
 		script_assert(false);
@@ -644,7 +648,8 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 		script_assert(false);
 		return 0;
 	case COMMAND_1518:
-		script_assert(false);
+		// TODO (?)
+		UpdateCompareFlag(true);
 		return 0;
 	case COMMAND_1519:
 		CollectParameters(&m_nIp, 1);
@@ -768,7 +773,8 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 		script_assert(false);
 		return 0;
 	case COMMAND_1558:
-		script_assert(false);
+		UpdateCompareFlag(false);
+		// TODO
 		return 0;
 	case COMMAND_1559:
 		script_assert(false);
@@ -778,7 +784,8 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 		UpdateCompareFlag(false);
 		return 0;
 	case COMMAND_1561:
-		script_assert(false);
+		// TODO (check, SET_FS_DESTROYED_FLAG)
+		CTheScripts::FSDestroyedFlag = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) - (int32*)CTheScripts::ScriptSpace;
 		return 0;
 	case COMMAND_1562:
 		script_assert(false);
@@ -796,7 +803,8 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 		script_assert(false);
 		return 0;
 	case COMMAND_1567:
-		script_assert(false);
+		CollectParameters(&m_nIp, 1);
+		// TODO (BUILD_WORLD_GEOMETRY)
 		return 0;
 	case COMMAND_1568:
 		script_assert(false);
@@ -927,7 +935,8 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 		script_assert(false);
 		return 0;
 	case COMMAND_1607:
-		script_assert(false);
+		CollectParameters(&m_nIp, 1);
+		// TODO (SET_TOTAL_CARS_FOR_EXPORT)
 		return 0;
 	case COMMAND_1608:
 		script_assert(false);
@@ -951,10 +960,11 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 		script_assert(false);
 		return 0;
 	case COMMAND_1615:
-		script_assert(false);
+		// TODO (GET_DEVELOPER_FLAG?)
+		UpdateCompareFlag(false);
 		return 0;
 	case COMMAND_1616:
-		script_assert(false);
+		// TODO (SET_DEVELOPER_FLAG)
 		return 0;
 	case COMMAND_1617:
 		script_assert(false);
@@ -969,8 +979,12 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 		script_assert(false);
 		return 0;
 	case COMMAND_1621:
-		script_assert(false);
+	{
+		wchar* key = CTheScripts::GetTextByKeyFromScript(&m_nIp);
+		CollectParameters(&m_nIp, 2);
+		// TODO (SET_SUBTITLE_TEXT)
 		return 0;
+	}
 	case COMMAND_1622:
 		script_assert(false);
 		return 0;
@@ -1035,7 +1049,8 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 		// TODO (LOCK_GARAGE?)
 		return 0;
 	case COMMAND_1641:
-		script_assert(false);
+		// TODO
+		UpdateCompareFlag(true);
 		return 0;
 	case COMMAND_1642:
 		script_assert(false);
@@ -1054,14 +1069,17 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 		// TODO (DISABLE_PAUSE_MENU?)
 		return 0;
 	case COMMAND_1647:
-		script_assert(false);
+		CollectParameters(&m_nIp, 1);
+		// TODO (IS_CHANNEL_PLAYING?)
+		UpdateCompareFlag(false);
 		return 0;
 	case COMMAND_1648:
 		CollectParameters(&m_nIp, 3);
 		// TODO (SET_CLOCK_EVENT_WARNING);
 		return 0;
 	case COMMAND_1649:
-		script_assert(false);
+		CollectParameters(&m_nIp, 3);
+		// TODO (SET_EXTRA_COLOUR_DIRECTION)
 		return 0;
 	case COMMAND_1650:
 		script_assert(false);

@@ -1787,10 +1787,9 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		pBoat->AutoPilot.m_nCruiseSpeed = *(float*)&ScriptParams[1];
 		return 0;
 	}
-	/*
 	case COMMAND_GET_RANDOM_CHAR_IN_AREA:
 	{
-		CollectParameters(&m_nIp, 4);
+		CollectParameters(&m_nIp, 7);
 		int ped_handle = -1;
 		CVector pos = FindPlayerCoors();
 		float x1 = *(float*)&ScriptParams[0];
@@ -1814,7 +1813,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 				continue;
 //			if (pPed->GetModelIndex() == MI_SCUM_WOM || pPed->GetModelIndex() == MI_SCUM_MAN)
 //				continue;
-			if (!ThisIsAValidRandomPed(pPed->m_nPedType))
+			if (!ThisIsAValidRandomPed(pPed->m_nPedType, ScriptParams[5], ScriptParams[6], ScriptParams[7])) // TODO
 				continue;
 			if (pPed->bIsLeader || pPed->m_leader)
 				continue;
@@ -1836,7 +1835,6 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
-	*/
 	case COMMAND_GET_RANDOM_CHAR_IN_ZONE:
 	{
 		char zone[KEY_LENGTH_IN_SCRIPT];

@@ -954,7 +954,10 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		pPed->WarpPedIntoCar(pVehicle);
 		return 0;
 	}
-	//case COMMAND_SWITCH_CAR_RADIO:
+	case COMMAND_SWITCH_CAR_RADIO:
+		CollectParameters(&m_nIp, 1);
+		DMAudio.ChangeMusicMode(ScriptParams[0]);
+		return 0;
 	//case COMMAND_SET_AUDIO_STREAM:
 	case COMMAND_PRINT_WITH_2_NUMBERS_BIG:
 	{
@@ -1418,7 +1421,6 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		pVehicle->m_bSirenOrAlarm = ScriptParams[1] != 0;
 		return 0;
 	}
-	/*
 	case COMMAND_SWITCH_PED_ROADS_ON_ANGLED:
 	{
 		CollectParameters(&m_nIp, 7);
@@ -1441,7 +1443,6 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		ThePaths.SwitchRoadsInAngledArea(*(float*)&ScriptParams[0], *(float*)&ScriptParams[1], *(float*)&ScriptParams[2],
 			*(float*)&ScriptParams[3], *(float*)&ScriptParams[4], *(float*)&ScriptParams[5], *(float*)&ScriptParams[6], 1, 0);
 		return 0;
-	*/
 	case COMMAND_SET_CAR_WATERTIGHT:
 	{
 		CollectParameters(&m_nIp, 2);
@@ -1967,12 +1968,10 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CWorld::Add(car);
 		return 0;
 	}
-	/*
 	case COMMAND_IS_COLLISION_IN_MEMORY:
 		CollectParameters(&m_nIp, 1);
 		UpdateCompareFlag(CCollision::ms_collisionInMemory == ScriptParams[0]);
 		return 0;
-	*/
 	case COMMAND_SET_WANTED_MULTIPLIER:
 		CollectParameters(&m_nIp, 1);
 		FindPlayerPed()->m_pWanted->m_fCrimeSensitivity = *(float*)&ScriptParams[0];
@@ -2042,7 +2041,8 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_HAS_MISSION_AUDIO_LOADED:
 	{
 		CollectParameters(&m_nIp, 1);
-		UpdateCompareFlag(DMAudio.GetMissionAudioLoadingStatus(ScriptParams[0] - 1) == 1);
+		//UpdateCompareFlag(DMAudio.GetMissionAudioLoadingStatus(ScriptParams[0] - 1) == 1);
+		UpdateCompareFlag(true); // TODO
 		return 0;
 	}
 	case COMMAND_PLAY_MISSION_AUDIO:
@@ -2052,7 +2052,8 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_HAS_MISSION_AUDIO_FINISHED:
 	{
 		CollectParameters(&m_nIp, 1);
-		UpdateCompareFlag(DMAudio.IsMissionAudioSampleFinished(ScriptParams[0] - 1));
+		//UpdateCompareFlag(DMAudio.IsMissionAudioSampleFinished(ScriptParams[0] - 1)); // TODO
+		UpdateCompareFlag(true);
 		return 0;
 	}
 	case COMMAND_GET_CLOSEST_CAR_NODE_WITH_HEADING:

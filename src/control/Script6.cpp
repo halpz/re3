@@ -83,7 +83,6 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 {
 	switch (command) {
 	//case COMMAND_FLASH_RADAR_BLIP:
-	/*
 	case COMMAND_IS_CHAR_IN_CONTROL:
 	{
 		CollectParameters(&m_nIp, 1);
@@ -91,7 +90,6 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		UpdateCompareFlag(pPed->IsPedInControl());
 		return 0;
 	}
-	*/
 	case COMMAND_SET_GENERATE_CARS_AROUND_CAMERA:
 		CollectParameters(&m_nIp, 1);
 		CCarCtrl::bCarsGeneratedAroundCamera = (ScriptParams[0] != 0);
@@ -525,7 +523,6 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
-	/*
 	case COMMAND_MARK_ROADS_BETWEEN_LEVELS:
 	{
 		CollectParameters(&m_nIp, 6);
@@ -574,7 +571,6 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		ThePaths.PedMarkRoadsBetweenLevelsInArea(infX, supX, infY, supY, infZ, supZ);
 		return 0;
 	}
-	*/
 	case COMMAND_SET_CAR_AVOID_LEVEL_TRANSITIONS:
 	{
 		CollectParameters(&m_nIp, 2);

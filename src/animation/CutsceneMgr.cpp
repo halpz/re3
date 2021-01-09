@@ -431,6 +431,7 @@ CCutsceneMgr::DeleteCutsceneData(void)
 	}
 	ms_numCutsceneObjs = 0;
 
+	/* TODO!!! tmp hack
 	for (int i = MI_SPECIAL01; i < MI_SPECIAL21; i++) {
 		CBaseModelInfo *minfo = CModelInfo::GetModelInfo(i);
 		CColModel *colModel = minfo->GetColModel();
@@ -439,6 +440,7 @@ CCutsceneMgr::DeleteCutsceneData(void)
 			minfo->SetColModel(&CTempColModels::ms_colModelPed1);
 		}
 	}
+	*/
 
 	if (ms_animLoaded)
 		CAnimManager::RemoveLastAnimFile();
