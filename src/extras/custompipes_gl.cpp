@@ -805,6 +805,9 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 	for(rw::uint32 i = 0; i < building->instHeader->numMeshes; i++, inst++){
 		Material *m = inst->material;
 
+		if(m->texture == nil)
+			continue;
+
 		if(inst->vertexAlpha || m->color.alpha != 255 ||
 		   IsTextureTransparent(m->texture)){
 			defer = true;
@@ -913,6 +916,8 @@ RenderBlendPass(int pass)
 		InstanceData *inst = building->instHeader->inst;
 		for(rw::uint32 j = 0; j < building->instHeader->numMeshes; j++, inst++){
 			Material *m = inst->material;
+			if(m->texture == nil)
+				continue;
 			if(!inst->vertexAlpha && m->color.alpha == 255 && !IsTextureTransparent(m->texture) && building->fadeAlpha == 255)
 				continue;	// already done this one
 
@@ -921,7 +926,7 @@ RenderBlendPass(int pass)
 			setMaterial(color, m->surfaceProps, 0.5f);
 
 			float cs = 1.0f;
-			if(m->texture)
+			if(m->texture)	// always true
 				cs = 255/128.0f;
 			colorscale[0] = colorscale[1] = colorscale[2] = cs;
 			glUniform4fv(U(CustomPipes::u_colorscale), 1, colorscale);

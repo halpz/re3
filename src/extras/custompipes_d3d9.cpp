@@ -733,6 +733,9 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 	for(rw::uint32 i = 0; i < building->instHeader->numMeshes; i++, inst++){
 		Material *m = inst->material;
 
+		if(m->texture == nil)
+			continue;
+
 		if(inst->vertexAlpha || m->color.alpha != 255 ||
 		   IsTextureTransparent(m->texture)){
 			defer = true;
@@ -769,10 +772,7 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 		colorscale[0] = colorscale[1] = colorscale[2] = cs;
 		d3ddevice->SetPixelShaderConstantF(CustomPipes::PSLOC_colorscale, colorscale, 1);
 
-		if(m->texture)
-			d3d::setTexture(0, m->texture);
-		else
-			d3d::setTexture(0, gpWhiteTexture);	// actually we don't even render this
+		d3d::setTexture(0, m->texture);
 
 		setMaterial(m->color, m->surfaceProps, 0.5f);
 
@@ -836,19 +836,18 @@ RenderBlendPass(int pass)
 		InstanceData *inst = building->instHeader->inst;
 		for(rw::uint32 j = 0; j < building->instHeader->numMeshes; j++, inst++){
 			Material *m = inst->material;
+			if(m->texture == nil)
+				continue;
 			if(!inst->vertexAlpha && m->color.alpha == 255 && !IsTextureTransparent(m->texture) && building->fadeAlpha == 255)
 				continue;	// already done this one
 
 			float cs = 1.0f;
-			if(m->texture)
+			if(m->texture)	// always true
 				cs = 255/128.0f;
 			colorscale[0] = colorscale[1] = colorscale[2] = cs;
 			d3ddevice->SetPixelShaderConstantF(CustomPipes::PSLOC_colorscale, colorscale, 1);
 
-			if(m->texture)
-				d3d::setTexture(0, m->texture);
-			else
-				d3d::setTexture(0, gpWhiteTexture);	// actually we don't even render this
+			d3d::setTexture(0, m->texture);
 
 			rw::RGBA color = m->color;
 			color.alpha = (color.alpha * building->fadeAlpha)/255;
