@@ -2,6 +2,13 @@
 
 #define surfEmissive (surfProps.w)
 
+#define vertContrast (1.5)
+#define vertBrightness (0.25)
+#define ambientContrast (1.2)
+#define ambientBrightness (0.1)
+#define emissiveContrast (1.25)
+#define emissiveBrightness (0.05)
+
 float4		emissive	: register(c41);
 float4		ambient		: register(c42);
 
@@ -30,9 +37,23 @@ VS_out main(in VS_in input)
 
 	output.TexCoord0.xy = input.TexCoord;
 
-	output.Color = input.Prelight;
-	output.Color.rgb *= ambient.rgb;
-	output.Color.rgb += emissive.rgb*surfEmissive;
+	float4 vertCol = input.Prelight;
+	float4 amb = ambient;
+	float4 emiss = emissive;
+
+	vertCol.xyz = ((vertCol.xyz - 0.5) * max(vertContrast, 0.0)) + 0.5;
+	vertCol.xyz += vertBrightness;
+	vertCol.xyz = max(vertCol.xyz, float3(0.0,0.0,0.0));
+	
+	amb.xyz = ((amb.xyz - 0.5) * max(ambientContrast, 0.0)) + 0.5;
+	amb.xyz += ambientBrightness;
+	amb.xyz = max(amb.xyz, float3(0.0,0.0,0.0));
+	
+	emiss.xyz = ((emiss.xyz - 0.5) * max(emissiveContrast, 0.0)) + 0.5;
+	emiss.xyz += emissiveBrightness;
+	emiss.xyz = max(emiss.xyz, float3(0.0,0.0,0.0));
+	output.Color.xyz = emiss.xyz + (vertCol.xyz * amb.xyz);
+	output.Color.w = vertCol.w;
 
 	output.Color = clamp(output.Color, 0.0, 1.0);
 	output.Color.a *= matCol.a;

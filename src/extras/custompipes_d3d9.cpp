@@ -315,6 +315,7 @@ DestroyVehiclePipe(void)
  */
 
 static void *leedsBuilding_VS;
+static void *leedsBuilding_mobile_VS;
 static void *scale_PS;
 
 static void
@@ -328,7 +329,10 @@ worldRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	setIndices(header->indexBuffer);
 	setVertexDeclaration(header->vertexDeclaration);
 
-	setVertexShader(leedsBuilding_VS);
+	if(CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_MOBILE)
+		setVertexShader(CustomPipes::leedsBuilding_mobile_VS);
+	else
+		setVertexShader(CustomPipes::leedsBuilding_VS);
 	setPixelShader(scale_PS);
 
 	uploadMatrices(atomic->getFrame()->getLTM());
@@ -351,7 +355,7 @@ worldRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 		Material *m = inst->material;
 
 		float cs = 1.0f;
-		if(m->texture)
+		if(WorldPipeSwitch == WORLDPIPE_PS2 && m->texture)
 			cs = 255/128.0f;
 		colorscale[0] = colorscale[1] = colorscale[2] = cs;
 		d3ddevice->SetPixelShaderConstantF(PSLOC_colorscale, colorscale, 1);
@@ -361,7 +365,7 @@ worldRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 		else
 			d3d::setTexture(0, gpWhiteTexture);	// actually we don't even render this
 
-		setMaterial(m->color, m->surfaceProps, 0.5f);
+		setMaterial(m->color, m->surfaceProps, WorldPipeSwitch == WORLDPIPE_PS2 ? 0.5f : 1.0f);
 
 		SetRenderState(VERTEXALPHA, inst->vertexAlpha || m->color.alpha != 255);
 
@@ -381,6 +385,9 @@ CreateWorldPipe(void)
 #include "shaders/leedsBuilding_VS.inc"
 	leedsBuilding_VS = rw::d3d::createVertexShader(leedsBuilding_VS_cso);
 	assert(leedsBuilding_VS);
+#include "shaders/leedsBuilding_mobile_VS.inc"
+	leedsBuilding_mobile_VS = rw::d3d::createVertexShader(leedsBuilding_mobile_VS_cso);
+	assert(leedsBuilding_mobile_VS);
 #include "shaders/scale_PS.inc"
 	scale_PS = rw::d3d::createPixelShader(scale_PS_cso);
 	assert(scale_PS);
@@ -397,6 +404,8 @@ DestroyWorldPipe(void)
 {
 	rw::d3d::destroyVertexShader(leedsBuilding_VS);
 	leedsBuilding_VS = nil;
+	rw::d3d::destroyVertexShader(leedsBuilding_mobile_VS);
+	leedsBuilding_mobile_VS = nil;
 	rw::d3d::destroyPixelShader(scale_PS);
 	scale_PS = nil;
 
@@ -747,7 +756,10 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 			setStreamSource(0, building->instHeader->vertexStream[0].vertexBuffer, 0, building->instHeader->vertexStream[0].stride);
 			setIndices(building->instHeader->indexBuffer);
 			setVertexDeclaration(building->instHeader->vertexDeclaration);
-			setVertexShader(CustomPipes::leedsBuilding_VS);
+			if(CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_MOBILE)
+				setVertexShader(CustomPipes::leedsBuilding_mobile_VS);
+			else
+				setVertexShader(CustomPipes::leedsBuilding_VS);
 			setPixelShader(CustomPipes::scale_PS);
 			d3ddevice->SetVertexShaderConstantF(VSLOC_combined, (float*)&building->combinedMat, 4);
 
@@ -767,7 +779,7 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 		}
 
 		float cs = 1.0f;
-		if(m->texture)
+		if(CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_PS2 && m->texture)
 			cs = 255/128.0f;
 		colorscale[0] = colorscale[1] = colorscale[2] = cs;
 		d3ddevice->SetPixelShaderConstantF(CustomPipes::PSLOC_colorscale, colorscale, 1);
@@ -808,7 +820,10 @@ RenderBlendPass(int pass)
 	using namespace rw::d3d;
 	using namespace rw::d3d9;
 
-	setVertexShader(CustomPipes::leedsBuilding_VS);
+	if(CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_MOBILE)
+		setVertexShader(CustomPipes::leedsBuilding_mobile_VS);
+	else
+		setVertexShader(CustomPipes::leedsBuilding_VS);
 	setPixelShader(CustomPipes::scale_PS);
 
 	RGBAf amb, emiss;
@@ -842,7 +857,7 @@ RenderBlendPass(int pass)
 				continue;	// already done this one
 
 			float cs = 1.0f;
-			if(m->texture)	// always true
+			if(CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_PS2 && m->texture)
 				cs = 255/128.0f;
 			colorscale[0] = colorscale[1] = colorscale[2] = cs;
 			d3ddevice->SetPixelShaderConstantF(CustomPipes::PSLOC_colorscale, colorscale, 1);

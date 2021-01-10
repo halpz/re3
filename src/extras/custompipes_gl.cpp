@@ -331,6 +331,7 @@ DestroyVehiclePipe(void)
  */
 
 rw::gl3::Shader *leedsWorldShader;
+rw::gl3::Shader *leedsWorldShader_mobile;
 
 static void
 worldRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
@@ -353,7 +354,10 @@ worldRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	InstanceData *inst = header->inst;
 	rw::int32 n = header->numMeshes;
 
-	leedsWorldShader->use();
+	if(CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_MOBILE)
+		CustomPipes::leedsWorldShader_mobile->use();
+	else
+		CustomPipes::leedsWorldShader->use();
 
 	RGBAf amb, emiss;
 	amb.red = CTimeCycle::GetAmbientRed();
@@ -372,7 +376,7 @@ worldRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 		m = inst->material;
 
 		float cs = 1.0f;
-		if(m->texture)
+		if(WorldPipeSwitch == WORLDPIPE_PS2 && m->texture)
 			cs = 255/128.0f;
 		colorscale[0] = colorscale[1] = colorscale[2] = cs;
 		glUniform4fv(U(u_colorscale), 1, colorscale);
@@ -405,10 +409,14 @@ CreateWorldPipe(void)
 	{
 #include "shaders/scale_fs_gl.inc"
 #include "shaders/leedsBuilding_vs_gl.inc"
+#include "shaders/leedsBuilding_mobile_vs_gl.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, leedsBuilding_vert_src, nil };
+	const char *vs_mobile[] = { shaderDecl, header_vert_src, leedsBuilding_mobile_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, scale_frag_src, nil };
 	leedsWorldShader = Shader::create(vs, fs);
 	assert(leedsWorldShader);
+	leedsWorldShader_mobile = Shader::create(vs_mobile, fs);
+	assert(leedsWorldShader_mobile);
 	}
 
 
@@ -424,6 +432,8 @@ DestroyWorldPipe(void)
 {
 	leedsWorldShader->destroy();
 	leedsWorldShader = nil;
+	leedsWorldShader_mobile->destroy();
+	leedsWorldShader_mobile = nil;
 
 	((rw::gl3::ObjPipeline*)worldPipe)->destroy();
 	worldPipe = nil;
@@ -816,8 +826,10 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 
 		// alright we're rendering this atomic
 		if(!setupDone){
-			CustomPipes::leedsWorldShader->use();
-//			defaultShader->use();
+			if(CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_MOBILE)
+				CustomPipes::leedsWorldShader_mobile->use();
+			else
+				CustomPipes::leedsWorldShader->use();
 			setWorldMatrix(&building->matrix);
 #ifdef RW_GL_USE_VAOS
 			glBindVertexArray(building->instHeader->vao);
@@ -845,7 +857,7 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 		setMaterial(m->color, m->surfaceProps, 0.5f);
 
 		float cs = 1.0f;
-		if(m->texture)
+		if(CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_PS2 && m->texture)
 			cs = 255/128.0f;
 		colorscale[0] = colorscale[1] = colorscale[2] = cs;
 		glUniform4fv(U(CustomPipes::u_colorscale), 1, colorscale);
@@ -885,7 +897,10 @@ RenderBlendPass(int pass)
 	using namespace rw;
 	using namespace rw::gl3;
 
-	CustomPipes::leedsWorldShader->use();
+	if(CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_MOBILE)
+		CustomPipes::leedsWorldShader_mobile->use();
+	else
+		CustomPipes::leedsWorldShader->use();
 
 	RGBAf amb, emiss;
 	amb.red = CTimeCycle::GetAmbientRed();
@@ -926,7 +941,7 @@ RenderBlendPass(int pass)
 			setMaterial(color, m->surfaceProps, 0.5f);
 
 			float cs = 1.0f;
-			if(m->texture)	// always true
+			if(CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_PS2 && m->texture)
 				cs = 255/128.0f;
 			colorscale[0] = colorscale[1] = colorscale[2] = cs;
 			glUniform4fv(U(CustomPipes::u_colorscale), 1, colorscale);

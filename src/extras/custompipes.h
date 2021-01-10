@@ -102,6 +102,11 @@ void DestroyVehiclePipe(void);
 void AttachVehiclePipe(rw::Atomic *atomic);
 void AttachVehiclePipe(rw::Clump *clump);
 
+enum {
+	WORLDPIPE_PS2,
+	WORLDPIPE_MOBILE
+};
+extern int32 WorldPipeSwitch;
 extern bool LightmapEnable;
 extern float LightmapMult;
 extern InterpolatedFloat WorldLightmapBlend;

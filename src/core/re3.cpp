@@ -600,6 +600,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Spawn", "Spawn Freeway", [](){ SpawnCar(MI_FREEWAY); });
 
 		DebugMenuAddVarBool8("Render", "Draw hud", &CHud::m_Wants_To_Draw_Hud, nil);
+		DebugMenuAddVar("Render", "Brightness", &FrontEndMenuManager.m_PrefsBrightness, nil, 16, 0, 700, nil);
 		DebugMenuAddVarBool8("Render", "Backface Culling", &gBackfaceCulling, nil);
 		DebugMenuAddVarBool8("Render", "PS2 Alpha test Emu", &gPS2alphaTest, nil);
 		DebugMenuAddVarBool8("Render", "Frame limiter", &FrontEndMenuManager.m_PrefsFrameLimiter, nil);
@@ -630,8 +631,8 @@ extern bool gbRenderWorld2;
 #endif
 
 #ifdef EXTENDED_COLOURFILTER
-		static const char *filternames[] = { "None", "Simple", "Normal", "Mobile" };
-		e = DebugMenuAddVar("Render", "Colourfilter", &CPostFX::EffectSwitch, nil, 1, CPostFX::POSTFX_OFF, CPostFX::POSTFX_MOBILE, filternames);
+		static const char *filternames[] = { "None", "PS2" };
+		e = DebugMenuAddVar("Render", "Colourfilter", &CPostFX::EffectSwitch, nil, 1, CPostFX::POSTFX_OFF, CPostFX::POSTFX_NORMAL, filternames);
 		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddVar("Render", "Intensity", &CPostFX::Intensity, nil, 0.05f, 0, 10.0f);
 		DebugMenuAddVarBool8("Render", "Blur", &CPostFX::BlurOn, nil);
@@ -642,6 +643,10 @@ extern bool gbRenderWorld2;
 		DebugMenuAddVarBool8("Render", "Occlusion debug", &bDispayOccDebugStuff, nil);
 #endif
 #ifdef EXTENDED_PIPELINES
+		static const char *worldpipenames[] = { "PS2", "Mobile" };
+		e = DebugMenuAddVar("Render", "World Rendering", &CustomPipes::WorldPipeSwitch, nil,
+			1, CustomPipes::WORLDPIPE_PS2, CustomPipes::WORLDPIPE_MOBILE, worldpipenames);
+		DebugMenuEntrySetWrap(e, true);
 		static const char *vehpipenames[] = { "MatFX", "Neo" };
 		e = DebugMenuAddVar("Render", "Vehicle Pipeline", &CustomPipes::VehiclePipeSwitch, nil,
 			1, CustomPipes::VEHICLEPIPE_MATFX, CustomPipes::VEHICLEPIPE_NEO, vehpipenames);

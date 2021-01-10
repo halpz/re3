@@ -7,9 +7,13 @@ class CPostFX
 public:
 	enum {
 		POSTFX_OFF,
-		POSTFX_SIMPLE,
+//		POSTFX_SIMPLE,
 		POSTFX_NORMAL,
-		POSTFX_MOBILE
+//		POSTFX_MOBILE
+
+		// not so sensible for the moment
+		POSTFX_SIMPLE = -1,
+		POSTFX_MOBILE = -2
 	};
 	static RwRaster *pFrontBuffer;
 	static RwRaster *pBackBuffer;

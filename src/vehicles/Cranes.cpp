@@ -466,7 +466,7 @@ bool CCranes::DoesMilitaryCraneHaveThisOneAlready(uint32 mi)
 	case MI_FIRETRUCK: return (CarsCollectedMilitaryCrane & 1);
 	case MI_AMBULAN: return (CarsCollectedMilitaryCrane & 2);
 	case MI_ENFORCER: return (CarsCollectedMilitaryCrane & 4);
-	case MI_FBIRANCH: return (CarsCollectedMilitaryCrane & 8);
+	case (uint32)MI_FBIRANCH: return (CarsCollectedMilitaryCrane & 8);
 	case MI_RHINO: return (CarsCollectedMilitaryCrane & 0x10);
 	case MI_BARRACKS: return (CarsCollectedMilitaryCrane & 0x20);
 	case MI_POLICE: return (CarsCollectedMilitaryCrane & 0x40);
@@ -481,7 +481,7 @@ void CCranes::RegisterCarForMilitaryCrane(uint32 mi)
 	case MI_FIRETRUCK: CarsCollectedMilitaryCrane |= 1; break;
 	case MI_AMBULAN: CarsCollectedMilitaryCrane |= 2; break;
 	case MI_ENFORCER: CarsCollectedMilitaryCrane |= 4; break;
-	case MI_FBIRANCH: CarsCollectedMilitaryCrane |= 8; break;
+	case (uint32)MI_FBIRANCH: CarsCollectedMilitaryCrane |= 8; break;
 	case MI_RHINO: CarsCollectedMilitaryCrane |= 0x10; break;
 	case MI_BARRACKS: CarsCollectedMilitaryCrane |= 0x20; break;
 	case MI_POLICE: CarsCollectedMilitaryCrane |= 0x40; break;

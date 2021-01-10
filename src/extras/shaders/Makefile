@@ -4,7 +4,7 @@ all: im2d_gl.inc simple_fs_gl.inc default_UV2_gl.inc \
 	neoWorldVC_fs_gl.inc neoGloss_vs_gl.inc neoGloss_fs_gl.inc \
 	neoVehicle_vs_gl.inc neoVehicle_fs_gl.inc \
 	im2d_UV2_gl.inc screenDroplet_fs_gl.inc \
-	leedsBuilding_vs_gl.inc scale_fs_gl.inc \
+	leedsBuilding_vs_gl.inc leedsBuilding_mobile_vs_gl.inc scale_fs_gl.inc \
 	leedsVehicle_vs_gl.inc leedsVehicle_add_gl.inc leedsVehicle_blend_gl.inc
 
 im2d_gl.inc: im2d.vert
@@ -83,6 +83,11 @@ leedsBuilding_vs_gl.inc: leedsBuilding.vert
 	(echo 'const char *leedsBuilding_vert_src =';\
 	 sed 's/..*/"&\\n"/' leedsBuilding.vert;\
 	 echo ';') >leedsBuilding_vs_gl.inc
+
+leedsBuilding_mobile_vs_gl.inc: leedsBuilding_mobile.vert
+	(echo 'const char *leedsBuilding_mobile_vert_src =';\
+	 sed 's/..*/"&\\n"/' leedsBuilding_mobile.vert;\
+	 echo ';') >leedsBuilding_mobile_vs_gl.inc
 
 scale_fs_gl.inc: scale.frag
 	(echo 'const char *scale_frag_src =';\
