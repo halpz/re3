@@ -647,6 +647,8 @@ extern bool gbRenderWorld2;
 			1, CustomPipes::VEHICLEPIPE_MATFX, CustomPipes::VEHICLEPIPE_NEO, vehpipenames);
 		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddVarBool8("Render", "Chrome cheat", &CustomPipes::bChromeCheat, nil);
+extern bool gbRenderDebugEnvMap;
+		DebugMenuAddVarBool8("Render", "Show Env map", &gbRenderDebugEnvMap, nil);
 		DebugMenuAddVar("Render", "Neo Vehicle Shininess", &CustomPipes::VehicleShininess, nil, 0.1f, 0, 1.0f);
 		DebugMenuAddVar("Render", "Neo Vehicle Specularity", &CustomPipes::VehicleSpecularity, nil, 0.1f, 0, 1.0f);
 		DebugMenuAddVarBool8("Render", "Neo Ped Rim light enable", &CustomPipes::RimlightEnable, nil);
