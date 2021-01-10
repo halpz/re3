@@ -75,11 +75,14 @@ void CustomPipeInit(void);
 void CustomPipeShutdown(void);
 void SetTxdFindCallback(void);
 
+extern bool bChromeCheat;
 extern bool bRenderingEnvMap;
 extern int32 EnvMapSize;
 extern rw::Camera *EnvMapCam;
 extern rw::Texture *EnvMapTex;
 extern rw::Texture *EnvMaskTex;
+extern rw::RWDEVICE::Im2DVertex EnvScreenQuad[4];
+extern int16 QuadIndices[6];
 void EnvMapRender(void);
 
 enum {

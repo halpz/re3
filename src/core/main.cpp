@@ -1159,6 +1159,8 @@ if(gbRenderWorld1)
 if(gbRenderRoads)
 	CRenderer::RenderRoads();
 
+	CRenderer::GenerateEnvironmentMap();	// should be after static shadows, but that's weird
+
 	CRenderer::RenderPeds();
 
 	// not sure where to put these since LCS has no underwater entities
@@ -1172,7 +1174,7 @@ if(gbRenderWater)
 
 if(gbRenderEverythingBarRoads)
 	CRenderer::RenderEverythingBarRoads();
-	// get env map here?
+	// seam fixer
 	// moved this:
 	// CRenderer::RenderFadingInEntities();
 }
@@ -1195,7 +1197,6 @@ void
 RenderEffects_new(void)
 {
 	CShadows::RenderStaticShadows();
-	// CRenderer::GenerateEnvironmentMap
 	CShadows::RenderStoredShadows();
 	CSkidmarks::Render();
 	CRubbish::Render();

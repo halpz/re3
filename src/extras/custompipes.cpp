@@ -46,13 +46,14 @@ CustomMatCopy(void *dst, void *src, int32, int32)
 
 rw::TexDictionary *neoTxd;
 
+bool bChromeCheat;
 bool bRenderingEnvMap;
 int32 EnvMapSize = 128;
 rw::Camera *EnvMapCam;
 rw::Texture *EnvMapTex;
 rw::Texture *EnvMaskTex;
-static rw::RWDEVICE::Im2DVertex EnvScreenQuad[4];
-static int16 QuadIndices[6] = { 0, 1, 2, 0, 2, 3 };
+rw::RWDEVICE::Im2DVertex EnvScreenQuad[4];
+int16 QuadIndices[6] = { 0, 1, 2, 0, 2, 3 };
 
 static rw::Camera*
 CreateEnvMapCam(rw::World *world)
