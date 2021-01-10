@@ -432,7 +432,7 @@ CFont::PrintChar(float x, float y, wchar c)
 
 	bDontPrint = c == '\0';
 	float w = GetCharacterWidth(c) / 32.0f;
-	if (RenderState.bFontHalfTexture && c == 208)
+	if (Details.bFontHalfTexture && c == 208)
 		c = '\0';
 	float xoff = c % 16;
 	float yoff = c / 16;
@@ -1051,10 +1051,10 @@ CFont::GetCharacterWidth(wchar c)
 		return Size[LanguageSet][Details.style][192];
 #else
 
-	if (Details.proportional)
-		return Size[Details.style][c];
+	if (RenderState.proportional)
+		return Size[RenderState.style][c];
 	else
-		return Size[Details.style][209];
+		return Size[RenderState.style][209];
 #endif // MORE_LANGUAGES
 }
 
