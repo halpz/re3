@@ -744,6 +744,7 @@ public:
 	void SetObjective(eObjective);
 	void SetObjective(eObjective, int16, int16);
 	void SetObjective(eObjective, CVector);
+	void SetObjective(eObjective, CVector, float);
 	void SetObjective(eObjective, float, const CVector&);
 	void ClearChat(void);
 	void InformMyGangOfAttack(CEntity*);

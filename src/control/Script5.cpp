@@ -2556,7 +2556,7 @@ void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective ob
 			}
 			else {
 				pPed->bScriptObjectiveCompleted = false;
-				//pPed->SetObjective(objective, p1, p2); TODO!
+				pPed->SetObjective(objective, p1, p2);
 			}
 		}
 	}
