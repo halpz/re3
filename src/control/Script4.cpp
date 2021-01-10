@@ -1357,11 +1357,13 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CTxdStore::AddRef(slot);
 		return 0;
 	}
+	/*
 	case COMMAND_REMOVE_TEXTURE_DICTIONARY:
 	{
 		CTheScripts::RemoveScriptTextureDictionary();
 		return 0;
 	}
+	*/
 	case COMMAND_SET_OBJECT_DYNAMIC:
 	{
 		CollectParameters(&m_nIp, 2);
