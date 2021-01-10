@@ -1211,7 +1211,7 @@ if(gbRenderBoats)
 
 if(gbRenderEverythingBarRoads)
 	CRenderer::RenderEverythingBarRoads();
-	// get env map here?
+	// seam fixer
 	// moved this:
 	// CRenderer::RenderFadingInEntities();
 }
