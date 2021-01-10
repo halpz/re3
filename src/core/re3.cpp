@@ -420,17 +420,15 @@ SwitchToMission(void)
 #endif
 
 static const char *carnames[] = {
-	"landstal", "idaho", "stinger", "linerun", "peren", "sentinel", "rio", "firetruk", "trash", "stretch", "manana",
-	"infernus", "voodoo", "pony", "mule", "cheetah", "ambulan", "fbicar", "moonbeam", "esperant", "taxi", "washing",
-	"bobcat", "mrwhoop", "bfinject", "hunter", "police", "enforcer", "securica", "banshee", "predator", "bus",
-	"rhino", "barracks", "cuban", "chopper", "angel", "coach", "cabbie", "stallion", "rumpo", "rcbandit", "romero",
-	"packer", "sentxs", "admiral", "squalo", "seaspar", "pizzaboy", "gangbur", "airtrain", "deaddodo", "speeder",
-	"reefer", "tropic", "flatbed", "yankee", "caddy", "zebra", "topfun", "skimmer", "pcj600", "faggio", "freeway",
-	"rcbaron", "rcraider", "glendale", "oceanic", "sanchez", "sparrow", "patriot", "lovefist", "coastg", "dinghy",
-	"hermes", "sabre", "sabretur", "pheonix", "walton", "regina", "comet", "deluxo", "burrito", "spand", "marquis",
-	"baggage", "kaufman", "maverick", "vcnmav", "rancher", "fbiranch", "virgo", "greenwoo", "jetmax", "hotring",
-	"sandking", "blistac", "polmav", "boxville", "benson", "mesa", "rcgoblin", "hotrina", "hotrinb",
-	"bloodra", "bloodrb", "vicechee"
+	"spider", "landstal", "idaho", "stinger", "linerun", "peren", "sentinel", "patriot", "firetruk", "trash", "stretch",
+	"manana", "infernus", "blista", "pony", "mule", "cheetah", "ambulan", "fbicar", "moonbeam", "esperant", "taxi",
+	"kuruma", "bobcat", "mrwhoop", "bfinject", "hearse", "police", "enforcer", "securica", "banshee", "bus", "rhino",
+	"barracks", "dodo", "coach", "cabbie", "stallion", "rumpo", "rcbandit", "bellyup", "mrwongs", "mafia", "yardie",
+	"yakuza", "diablos", "columb", "hoods", "panlant", "flatbed", "yankee", "borgnine", "toyz", "campvan", "ballot",
+	"shelby", "pontiac", "esprit", "ammotruk", "hotrod", "Sindacco_Car", "Forelli_Car", "ferry", "ghost", "speeder",
+	"reefer", "predator", "train", "escape", "chopper", "airtrain", "deaddodo", "angel", "pizzaboy", "noodleboy",
+	"pcj600", "faggio", "freeway", "angel2", "sanchez2", "sanchez", "rcgoblin", "rcraider", "hunter", "maverick",
+	"polmav", "vcnmav"
 };
 
 static CTweakVar** TweakVarsList;
@@ -563,7 +561,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Cheats", "Pickup chicks", PickUpChicksCheat);
 
 		static int spawnCarId = MI_LANDSTAL;
-		e = DebugMenuAddVar("Spawn", "Spawn Car ID", &spawnCarId, nil, 1, MI_LANDSTAL, MI_VICECHEE, carnames);
+		e = DebugMenuAddVar("Spawn", "Spawn Car ID", &spawnCarId, nil, 1, MI_SPIDER, MI_VCNMAV, carnames);
 		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddCmd("Spawn", "Spawn Car", [](){
 			if(spawnCarId == MI_CHOPPER ||
