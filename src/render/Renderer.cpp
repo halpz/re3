@@ -1809,6 +1809,7 @@ CRenderer::GenerateEnvironmentMap(void)
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, CPostFX::pBackBuffer);
+	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
 	RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, Screen2EnvQuad, 4, EnvQuadIndices, 6);
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);

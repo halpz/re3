@@ -48,7 +48,7 @@ rw::TexDictionary *neoTxd;
 
 bool bChromeCheat;
 bool bRenderingEnvMap;
-int32 EnvMapSize = 128;
+int32 EnvMapSize = 256;
 rw::Camera *EnvMapCam;
 rw::Texture *EnvMapTex;
 rw::Texture *EnvMaskTex;
