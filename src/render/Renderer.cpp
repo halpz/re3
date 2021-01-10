@@ -2,6 +2,7 @@
 #include "common.h"
 
 #include "main.h"
+#include "General.h"
 #include "Lights.h"
 #include "ModelInfo.h"
 #include "Treadable.h"
@@ -20,6 +21,7 @@
 #include "ModelIndices.h"
 #include "Streaming.h"
 #include "Shadows.h"
+#include "Coronas.h"
 #include "PointLights.h"
 #include "Occlusion.h"
 #include "Renderer.h"
@@ -39,6 +41,8 @@ bool gbDontRenderBigBuildings;
 bool gbDontRenderPeds;
 bool gbDontRenderObjects;
 bool gbDontRenderVehicles;
+
+bool gbRenderDebugEnvMap;
 
 // unused
 int16 TestCloseThings;
@@ -1641,4 +1645,185 @@ CRenderer::RemoveVehiclePedLights(CEntity *ent, bool reset)
 	}
 	SetAmbientColours();
 	DeActivateDirectional();
+}
+
+
+#include "postfx.h"
+
+static RwIm2DVertex Screen2EnvQuad[4];
+static RwImVertexIndex EnvQuadIndices[6] = { 0, 1, 2, 0, 2, 3 };
+
+static void
+SetQuadVertices(RwRaster *env, RwRaster *screen, float z)
+{
+	uint32 width  = RwRasterGetWidth(env);
+	uint32 height = RwRasterGetHeight(env);
+
+	float zero, xmax, ymax;
+
+	zero = -HALFPX;
+	xmax = width - HALFPX;
+	ymax = height - HALFPX;
+
+	float recipz = 1.0f/z;
+	float umax = (float)SCREEN_WIDTH/RwRasterGetWidth(screen);
+	float vmax = (float)SCREEN_HEIGHT/RwRasterGetHeight(screen);
+
+	RwIm2DVertexSetScreenX(&Screen2EnvQuad[0], zero);
+	RwIm2DVertexSetScreenY(&Screen2EnvQuad[0], zero);
+	RwIm2DVertexSetScreenZ(&Screen2EnvQuad[0], RwIm2DGetNearScreenZ());
+	RwIm2DVertexSetCameraZ(&Screen2EnvQuad[0], z);
+	RwIm2DVertexSetRecipCameraZ(&Screen2EnvQuad[0], recipz);
+	RwIm2DVertexSetU(&Screen2EnvQuad[0], 0.0f, recipz);
+	RwIm2DVertexSetV(&Screen2EnvQuad[0], 0.0f, recipz);
+	RwIm2DVertexSetIntRGBA(&Screen2EnvQuad[0], 255, 255, 255, 255);
+
+	RwIm2DVertexSetScreenX(&Screen2EnvQuad[1], zero);
+	RwIm2DVertexSetScreenY(&Screen2EnvQuad[1], ymax);
+	RwIm2DVertexSetScreenZ(&Screen2EnvQuad[1], RwIm2DGetNearScreenZ());
+	RwIm2DVertexSetCameraZ(&Screen2EnvQuad[1], z);
+	RwIm2DVertexSetRecipCameraZ(&Screen2EnvQuad[1], recipz);
+	RwIm2DVertexSetU(&Screen2EnvQuad[1], 0.0f, recipz);
+	RwIm2DVertexSetV(&Screen2EnvQuad[1], vmax, recipz);
+	RwIm2DVertexSetIntRGBA(&Screen2EnvQuad[1], 255, 255, 255, 255);
+
+	RwIm2DVertexSetScreenX(&Screen2EnvQuad[2], xmax);
+	RwIm2DVertexSetScreenY(&Screen2EnvQuad[2], ymax);
+	RwIm2DVertexSetScreenZ(&Screen2EnvQuad[2], RwIm2DGetNearScreenZ());
+	RwIm2DVertexSetCameraZ(&Screen2EnvQuad[2], z);
+	RwIm2DVertexSetRecipCameraZ(&Screen2EnvQuad[2], recipz);
+	RwIm2DVertexSetU(&Screen2EnvQuad[2], umax, recipz);
+	RwIm2DVertexSetV(&Screen2EnvQuad[2], vmax, recipz);
+	RwIm2DVertexSetIntRGBA(&Screen2EnvQuad[2], 255, 255, 255, 255);
+
+	RwIm2DVertexSetScreenX(&Screen2EnvQuad[3], xmax);
+	RwIm2DVertexSetScreenY(&Screen2EnvQuad[3], zero);
+	RwIm2DVertexSetScreenZ(&Screen2EnvQuad[3], RwIm2DGetNearScreenZ());
+	RwIm2DVertexSetCameraZ(&Screen2EnvQuad[3], z);
+	RwIm2DVertexSetRecipCameraZ(&Screen2EnvQuad[3], recipz);
+	RwIm2DVertexSetU(&Screen2EnvQuad[3], umax, recipz);
+	RwIm2DVertexSetV(&Screen2EnvQuad[3], 0.0f, recipz);
+	RwIm2DVertexSetIntRGBA(&Screen2EnvQuad[3], 255, 255, 255, 255);
+}
+
+static RwIm2DVertex coronaVerts[4*4];
+static RwImVertexIndex coronaIndices[6*4];
+static int numCoronaVerts, numCoronaIndices;
+
+static void
+AddCorona(float x, float y, float sz)
+{
+	float nearz, recipz;
+	RwIm2DVertex *v;
+	nearz = RwIm2DGetNearScreenZ();
+	float z = RwCameraGetNearClipPlane(RwCameraGetCurrentCamera());
+	recipz = 1.0f/z;
+
+	v = &coronaVerts[numCoronaVerts];
+	RwIm2DVertexSetScreenX(&v[0], x);
+	RwIm2DVertexSetScreenY(&v[0], y);
+	RwIm2DVertexSetScreenZ(&v[0], z);
+	RwIm2DVertexSetScreenZ(&v[0], nearz);
+	RwIm2DVertexSetRecipCameraZ(&v[0], recipz);
+	RwIm2DVertexSetU(&v[0], 0.0f, recipz);
+	RwIm2DVertexSetV(&v[0], 0.0f, recipz);
+	RwIm2DVertexSetIntRGBA(&v[0], 255, 255, 255, 255);
+
+	RwIm2DVertexSetScreenX(&v[1], x);
+	RwIm2DVertexSetScreenY(&v[1], y + sz);
+	RwIm2DVertexSetScreenZ(&v[1], z);
+	RwIm2DVertexSetScreenZ(&v[1], nearz);
+	RwIm2DVertexSetRecipCameraZ(&v[1], recipz);
+	RwIm2DVertexSetU(&v[1], 0.0f, recipz);
+	RwIm2DVertexSetV(&v[1], 1.0f, recipz);
+	RwIm2DVertexSetIntRGBA(&v[1], 255, 255, 255, 255);
+
+	RwIm2DVertexSetScreenX(&v[2], x + sz);
+	RwIm2DVertexSetScreenY(&v[2], y + sz);
+	RwIm2DVertexSetScreenZ(&v[2], z);
+	RwIm2DVertexSetScreenZ(&v[2], nearz);
+	RwIm2DVertexSetRecipCameraZ(&v[2], recipz);
+	RwIm2DVertexSetU(&v[2], 1.0f, recipz);
+	RwIm2DVertexSetV(&v[2], 1.0f, recipz);
+	RwIm2DVertexSetIntRGBA(&v[2], 255, 255, 255, 255);
+
+	RwIm2DVertexSetScreenX(&v[3], x + sz);
+	RwIm2DVertexSetScreenY(&v[3], y);
+	RwIm2DVertexSetScreenZ(&v[3], z);
+	RwIm2DVertexSetScreenZ(&v[3], nearz);
+	RwIm2DVertexSetRecipCameraZ(&v[3], recipz);
+	RwIm2DVertexSetU(&v[3], 1.0f, recipz);
+	RwIm2DVertexSetV(&v[3], 0.0f, recipz);
+	RwIm2DVertexSetIntRGBA(&v[3], 255, 255, 255, 255);
+
+
+	coronaIndices[numCoronaIndices++] = numCoronaVerts;
+	coronaIndices[numCoronaIndices++] = numCoronaVerts + 1;
+	coronaIndices[numCoronaIndices++] = numCoronaVerts + 2;
+	coronaIndices[numCoronaIndices++] = numCoronaVerts;
+	coronaIndices[numCoronaIndices++] = numCoronaVerts + 2;
+	coronaIndices[numCoronaIndices++] = numCoronaVerts + 3;
+	numCoronaVerts += 4;
+}
+#include "Debug.h"
+
+static void
+DrawEnvMapCoronas(float heading)
+{
+	RwRaster *rt = RwTextureGetRaster(CustomPipes::EnvMapTex);
+	const float BIG = 89.0f * RwRasterGetWidth(rt)/128.0f;
+	const float SMALL = 38.0f * RwRasterGetHeight(rt)/128.0f;
+
+	float x;
+	numCoronaVerts = 0;
+	numCoronaIndices = 0;
+	x = (heading - PI)/TWOPI;// - 1.0f;
+	x *= BIG+SMALL;
+	AddCorona(x, 0.0f, BIG);	x += BIG;
+	AddCorona(x, 12.0f, SMALL);	x += SMALL;
+	AddCorona(x, 0.0f, BIG);	x += BIG;
+	AddCorona(x, 12.0f, SMALL);	x += SMALL;
+
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(gpCoronaTexture[CCoronas::TYPE_STAR]));
+	RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, coronaVerts, numCoronaVerts, coronaIndices, numCoronaIndices);
+	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+}
+
+void
+CRenderer::GenerateEnvironmentMap(void)
+{
+	// We'll probably do this differently eventually
+	// re-using all sorts of stuff here...
+
+	CPostFX::GetBackBuffer(Scene.camera);
+
+	RwCameraBeginUpdate(CustomPipes::EnvMapCam);
+
+	// get current scene
+	SetQuadVertices(RwTextureGetRaster(CustomPipes::EnvMapTex), CPostFX::pBackBuffer, RwCameraGetNearClipPlane(RwCameraGetCurrentCamera()));
+	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
+	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, CPostFX::pBackBuffer);
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+	RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, Screen2EnvQuad, 4, EnvQuadIndices, 6);
+	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+
+	// Draw coronas
+	DrawEnvMapCoronas(TheCamera.GetForward().Heading());
+
+	RwCameraEndUpdate(CustomPipes::EnvMapCam);
+
+
+	RwCameraBeginUpdate(Scene.camera);
+
+	if(gbRenderDebugEnvMap){
+		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(CustomPipes::EnvMapTex));
+		RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, CustomPipes::EnvScreenQuad, 4, (RwImVertexIndex*)CustomPipes::QuadIndices, 6);
+	}
 }

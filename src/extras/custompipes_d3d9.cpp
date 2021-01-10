@@ -4,6 +4,8 @@
 #ifdef RW_D3D9
 #ifdef EXTENDED_PIPELINES
 
+#include "rpmatfx.h"
+
 #include "main.h"
 #include "RwHelper.h"
 #include "Lights.h"
@@ -42,12 +44,111 @@ enum {
 	VSLOC_emissive = rw::d3d::VSLOC_afterLights,
 	VSLOC_ambient,
 
-	PSLOC_colorscale = 1
+	PSLOC_colorscale = 1,
+
+	// Leed vehicle
+	VSLOC_texMat = rw::d3d::VSLOC_afterLights,
+
+	PSLOC_shininess = 1,
+
 };
 
 /*
- * Neo Vehicle pipe
+ * Leeds & Neo Vehicle pipe
  */
+
+static void *leedsVehicle_VS;
+static void *leedsVehicle_blend_PS;
+static void *leedsVehicle_add_PS;
+
+static rw::RawMatrix normal2texcoord_flipU = {
+	{ -0.5f,  0.0f, 0.0f }, 0.0f,
+	{ 0.0f, -0.5f, 0.0f }, 0.0f,
+	{ 0.0f,  0.0f, 1.0f }, 0.0f,
+	{ 0.5f,  0.5f, 0.0f }, 1.0f
+};
+
+void
+uploadEnvMatrix(rw::Frame *frame)
+{
+	using namespace rw;
+	Matrix invMat;
+	if(frame == nil)
+		frame = engine->currentCamera->getFrame();
+
+	RawMatrix envMtx, invMtx;
+	Matrix tmp = *frame->getLTM();
+	// Now the weird part: we remove the camera pitch
+	tmp.at.z = 0.0f;
+	tmp.at = normalize(tmp.at);
+	tmp.right.x = -tmp.at.y;
+	tmp.right.y = tmp.at.x;
+	tmp.right.z = 0.0f;;
+	tmp.up.set(0.0f, 0.0f, 1.0f);
+	tmp.pos.set(0.0f, 0.0f, 0.0f);
+	tmp.flags = Matrix::TYPEORTHONORMAL;
+
+	Matrix::invert(&invMat, &tmp);
+	convMatrix(&invMtx, &invMat);
+	RawMatrix::mult(&envMtx, &invMtx, &normal2texcoord_flipU);
+	d3d::d3ddevice->SetVertexShaderConstantF(VSLOC_texMat, (float*)&envMtx, 4);
+}
+
+void
+leedsVehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
+{
+	using namespace rw;
+	using namespace rw::d3d;
+	using namespace rw::d3d9;
+
+	int vsBits;
+	setStreamSource(0, header->vertexStream[0].vertexBuffer, 0, header->vertexStream[0].stride);
+	setIndices(header->indexBuffer);
+	setVertexDeclaration(header->vertexDeclaration);
+
+	vsBits = lightingCB_Shader(atomic);
+	uploadMatrices(atomic->getFrame()->getLTM());
+
+	setVertexShader(leedsVehicle_VS);
+	if(bChromeCheat)
+		setPixelShader(leedsVehicle_blend_PS);
+	else
+		setPixelShader(leedsVehicle_add_PS);
+
+	d3d::setTexture(1, EnvMapTex);
+	uploadEnvMatrix(nil);
+
+	SetRenderState(SRCBLEND, BLENDONE);
+
+	InstanceData *inst = header->inst;
+	for(rw::uint32 i = 0; i < header->numMeshes; i++){
+		Material *m = inst->material;
+
+		SetRenderState(VERTEXALPHA, inst->vertexAlpha || m->color.alpha != 255);
+
+		float coef = 0.0f;
+		if(RpMatFXMaterialGetEffects(m) == rpMATFXEFFECTENVMAP)
+			coef = RpMatFXMaterialGetEnvMapCoefficient(m);
+		coef *= 0.5f;
+		if(bChromeCheat && coef > 0.0f)
+			coef = 1.0f;
+		d3ddevice->SetPixelShaderConstantF(PSLOC_shininess, (float*)&coef, 1);
+
+		setMaterial(m->color, m->surfaceProps);
+
+		if(m->texture)
+			d3d::setTexture(0, m->texture);
+		else
+			d3d::setTexture(0, gpWhiteTexture);
+
+		drawInst(header, inst);
+		inst++;
+	}
+
+	d3d::setTexture(1, nil);
+
+	SetRenderState(SRCBLEND, BLENDSRCALPHA);
+}
 
 static void *neoVehicle_VS;
 static void *neoVehicle_PS;
@@ -90,7 +191,8 @@ vehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 
 	// TODO: make this less of a kludge
 	if(VehiclePipeSwitch == VEHICLEPIPE_MATFX){
-		matFXGlobals.pipelines[rw::platform]->render(atomic);
+		leedsVehicleRenderCB(atomic, header);
+	//	matFXGlobals.pipelines[rw::platform]->render(atomic);
 		return;
 	}
 
@@ -164,6 +266,18 @@ CreateVehiclePipe(void)
 	neoVehicle_PS = rw::d3d::createPixelShader(neoVehicle_PS_cso);
 	assert(neoVehicle_PS);
 
+#include "shaders/leedsVehicle_VS.inc"
+	leedsVehicle_VS = rw::d3d::createVertexShader(leedsVehicle_VS_cso);
+	assert(leedsVehicle_VS);
+
+#include "shaders/leedsVehicle_blend_PS.inc"
+	leedsVehicle_blend_PS = rw::d3d::createPixelShader(leedsVehicle_blend_PS_cso);
+	assert(leedsVehicle_blend_PS);
+
+#include "shaders/leedsVehicle_add_PS.inc"
+	leedsVehicle_add_PS = rw::d3d::createPixelShader(leedsVehicle_add_PS_cso);
+	assert(leedsVehicle_add_PS);
+
 
 	rw::d3d9::ObjPipeline *pipe = rw::d3d9::ObjPipeline::create();
 	pipe->instanceCB = rw::d3d9::defaultInstanceCB;
@@ -180,6 +294,15 @@ DestroyVehiclePipe(void)
 
 	rw::d3d::destroyPixelShader(neoVehicle_PS);
 	neoVehicle_PS = nil;
+
+	rw::d3d::destroyVertexShader(leedsVehicle_VS);
+	leedsVehicle_VS = nil;
+
+	rw::d3d::destroyPixelShader(leedsVehicle_blend_PS);
+	leedsVehicle_blend_PS = nil;
+
+	rw::d3d::destroyPixelShader(leedsVehicle_add_PS);
+	leedsVehicle_add_PS = nil;
 
 	((rw::d3d9::ObjPipeline*)vehiclePipe)->destroy();
 	vehiclePipe = nil;
@@ -687,6 +810,16 @@ RenderBlendPass(int pass)
 
 	setVertexShader(CustomPipes::leedsBuilding_VS);
 	setPixelShader(CustomPipes::scale_PS);
+
+	RGBAf amb, emiss;
+	amb.red = CTimeCycle::GetAmbientRed();
+	amb.green = CTimeCycle::GetAmbientGreen();
+	amb.blue = CTimeCycle::GetAmbientBlue();
+	amb.alpha = 1.0f;
+	emiss = pAmbient->color;
+
+	d3ddevice->SetVertexShaderConstantF(CustomPipes::VSLOC_ambient, (float*)&amb, 1);
+	d3ddevice->SetVertexShaderConstantF(CustomPipes::VSLOC_emissive, (float*)&emiss, 1);
 
 	float colorscale[4];
 	colorscale[3] = 1.0f;
