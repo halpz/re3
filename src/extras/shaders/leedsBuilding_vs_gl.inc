@@ -2,6 +2,8 @@ const char *leedsBuilding_vert_src =
 "uniform vec4 u_amb;\n"
 "uniform vec4 u_emiss;\n"
 
+"#define surfEmissive (u_surfProps.w)\n"
+
 "VSIN(ATTRIB_POS)	vec3 in_pos;\n"
 
 "VSOUT vec4 v_color;\n"
@@ -19,7 +21,7 @@ const char *leedsBuilding_vert_src =
 
 "	v_color = in_color;\n"
 "	v_color.rgb *= u_amb.rgb;\n"
-"	v_color.rgb += u_emiss.rgb;\n"
+"	v_color.rgb += u_emiss.rgb*surfEmissive;\n"
 "	v_color = clamp(v_color, 0.0, 1.0);\n"
 "	v_color.a *= u_matColor.a;\n"
 

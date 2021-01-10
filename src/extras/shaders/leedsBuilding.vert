@@ -1,6 +1,8 @@
 uniform vec4 u_amb;
 uniform vec4 u_emiss;
 
+#define surfEmissive (u_surfProps.w)
+
 VSIN(ATTRIB_POS)	vec3 in_pos;
 
 VSOUT vec4 v_color;
@@ -18,7 +20,7 @@ main(void)
 
 	v_color = in_color;
 	v_color.rgb *= u_amb.rgb;
-	v_color.rgb += u_emiss.rgb;
+	v_color.rgb += u_emiss.rgb*surfEmissive;
 	v_color = clamp(v_color, 0.0, 1.0);
 	v_color.a *= u_matColor.a;
 

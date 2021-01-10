@@ -104,6 +104,11 @@ CSprite2d *CRadar::RadarSprites[RADAR_SPRITE_COUNT] = {
 	&RadioVCPRSprite,
 	&RadioEspantosoSprite,
 	&RadioEmotionSprite,
+	&RadioWaveSprite, // tmp hack
+	&RadioWaveSprite,
+	&RadioWaveSprite,
+	&RadioWaveSprite,
+	&RadioWaveSprite,
 	&RadioWaveSprite
 };
 
@@ -1689,6 +1694,7 @@ CRadar::DrawLegend(int32 x, int32 y, int32 sprite)
 			text = TheText.Get("LG_34");
 		break;
 		default:
+			text = TheText.Get("LG_34"); // tmp hack
 		break;
 	}
 	CFont::PrintString(SCREEN_SCALE_X(20.f) + x, SCREEN_SCALE_Y(3.0f) + y, text);

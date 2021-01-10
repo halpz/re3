@@ -714,7 +714,7 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 		script_assert(false);
 		return 0;
 	case COMMAND_1539:
-		script_assert(false);
+		//TODO (REGISTER_OUTFIT_CHANGE)
 		return 0;
 	case COMMAND_1540:
 		script_assert(false);
@@ -741,7 +741,9 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 		script_assert(false);
 		return 0;
 	case COMMAND_1548:
-		script_assert(false);
+		// TODO (GET_ONFOOT_CAMERA_MODE)
+		ScriptParams[0] = 0;
+		StoreParameters(&m_nIp, 1);
 		return 0;
 	case COMMAND_1549:
 		CollectParameters(&m_nIp, 1);
@@ -847,8 +849,11 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 		script_assert(false);
 		return 0;
 	case COMMAND_1581:
-		script_assert(false);
+	{
+		// TODO (SET_HELP_MESSAGE?)
+		wchar* key = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		return 0;
+	}
 	case COMMAND_1582:
 		script_assert(false);
 		return 0;
@@ -1062,8 +1067,15 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 		script_assert(false);
 		return 0;
 	case COMMAND_1645:
-		script_assert(false);
+	{
+		CollectParameters(&m_nIp, 1);
+		// TODO (GET_STORED_WEAPON?)
+		CPed* pPed = CWorld::Players[ScriptParams[0]].m_pPed;
+		script_assert(pPed);
+		ScriptParams[0] = pPed->m_storedWeapon;
+		StoreParameters(&m_nIp, 1);
 		return 0;
+	}
 	case COMMAND_1646:
 		CollectParameters(&m_nIp, 1);
 		// TODO (DISABLE_PAUSE_MENU?)
@@ -1100,7 +1112,8 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 		script_assert(false);
 		return 0;
 	case COMMAND_1656:
-		script_assert(false);
+		CollectParameters(&m_nIp, 2);
+		// TODO (?)
 		return 0;
 	default:
 		script_assert(0);
