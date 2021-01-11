@@ -394,7 +394,7 @@ RwStream *RwStreamOpen(RwStreamType type, RwStreamAccessType accessType, const v
 		return nil;
 	}
 }
-RwBool RwStreamClose(RwStream * stream, void *pData) { stream->close(); rwFree(stream); return true; }
+RwBool RwStreamClose(RwStream * stream, void *pData) { if (!stream) return false; stream->close(); rwFree(stream); return true; }
 RwUInt32 RwStreamRead(RwStream * stream, void *buffer, RwUInt32 length) { return stream->read8(buffer, length); }
 RwStream *RwStreamWrite(RwStream * stream, const void *buffer, RwUInt32 length) { stream->write8(buffer, length); return stream; }
 RwStream *RwStreamSkip(RwStream * stream, RwUInt32 offset) { stream->seek(offset); return stream; }

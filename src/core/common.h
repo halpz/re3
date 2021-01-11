@@ -93,6 +93,7 @@ typedef ptrdiff_t ssize_t;
 
 #include "config.h"
 #include "memoryManager.h"
+#include "relocatableChunk.h"
 
 #include <rphanim.h>
 #include <rpskin.h>

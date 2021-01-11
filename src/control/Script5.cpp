@@ -2754,30 +2754,16 @@ void CTheScripts::ReadObjectNamesFromScript()
 
 void CTheScripts::UpdateObjectIndices()
 {
-	char name[USED_OBJECT_NAME_LENGTH];
 	char error[112];
 	for (int i = 1; i < NumberOfUsedObjects; i++) {
-		bool found = false;
-		for (int j = 0; j < MODELINFOSIZE && !found; j++) {
-			CBaseModelInfo* pModel = CModelInfo::GetModelInfo(j);
-			if (!pModel)
-				continue;
-			strcpy(name, pModel->GetModelName());
-#ifdef FIX_BUGS
-			for (int k = 0; k < USED_OBJECT_NAME_LENGTH && name[k]; k++)
-#else
-			for (int k = 0; k < USED_OBJECT_NAME_LENGTH; k++)
-#endif
-				name[k] = toupper(name[k]);
-			if (strcmp(name, UsedObjectArray[i].name) == 0) {
-				found = true;
-				UsedObjectArray[i].index = j;
-			}
-		}
-		if (!found) {
+		UsedObjectArray[i].index = -1;
+		CModelInfo::GetModelInfo(UsedObjectArray[i].name, &UsedObjectArray[i].index);
+#ifndef FINAL
+		if (UsedObjectArray[i].index == -1) {
 			sprintf(error, "CTheScripts::UpdateObjectIndices - Couldn't find %s", UsedObjectArray[i].name);
 			debug("%s\n", error);
 		}
+#endif
 	}
 }
 

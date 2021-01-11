@@ -82,6 +82,10 @@ char gString2[512];
 wchar gUString[256];
 wchar gUString2[256];
 
+// leeds
+bool gMakeResources = true;
+bool gUseChunkFiles = false;
+
 float FramesPerSecond = 30.0f;
 
 bool gbPrintShite = false;

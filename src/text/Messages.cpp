@@ -815,3 +815,12 @@ CMessages::ClearAllMessagesDisplayedByGame()
 	CHud::GetRidOfAllHudMessages();
 	CUserDisplay::Pager.ClearMessages();
 }
+
+void
+CMessages::ClearThisBigPrintNow(uint32 id)
+{
+	if (BIGMessages[id].m_Stack[0].m_pText)
+		ClearThisBigPrint(BIGMessages[id].m_Stack[0].m_pText);
+	CHud::m_BigMessage[id][0] = '\0';
+	BigMessageInUse[id] = 0.0f;
+}

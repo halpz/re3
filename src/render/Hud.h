@@ -47,6 +47,8 @@ enum eSprites
 	NUM_HUD_SPRITES = 69,
 };
 
+extern float BigMessageInUse[6];
+
 class CHud
 {
 public:
@@ -82,7 +84,6 @@ public:
 	static int32 m_ClockState;
 
 	// These aren't really in CHud
-	static float BigMessageInUse[6];
 	static float BigMessageAlpha[6];
 	static float BigMessageX[6];
 	static float OddJob2OffTimer;

@@ -77,7 +77,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_PLAY_ANNOUNCEMENT:
 	{
 		CollectParameters(&m_nIp, 1);
-		DMAudio.PlayRadioAnnouncement(ScriptParams[0] + STREAMED_SOUND_ANNOUNCE_BRIDGE_CLOSED);
+		//DMAudio.PlayRadioAnnouncement(ScriptParams[0] + STREAMED_SOUND_ANNOUNCE_BRIDGE_CLOSED);
 		return 0;
 	}
 	case COMMAND_SET_PLAYER_IS_IN_STADIUM:

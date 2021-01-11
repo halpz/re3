@@ -61,6 +61,7 @@ public:
 	static void ClearThisPrint(wchar *str);
 	static void ClearThisBigPrint(wchar *str);
 	static void ClearAllMessagesDisplayedByGame(void);
+	static void ClearThisBigPrintNow(uint32 id);
 
 	// unused or cut
 	//static void AddMessageSoonWithString(wchar*, uint32, uint16, wchar*);

@@ -81,7 +81,7 @@ bool CHud::m_HideRadar;
 int32 CHud::m_ClockState;
 
 // These aren't really in CHud
-float CHud::BigMessageInUse[6];
+float BigMessageInUse[6];
 float CHud::BigMessageAlpha[6];
 float CHud::BigMessageX[6];
 float CHud::OddJob2OffTimer;

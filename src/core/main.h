@@ -24,6 +24,10 @@ extern bool gbShowTimebars;
 extern bool gbPrintMemoryUsage;
 #endif
 
+// leeds
+extern bool gMakeResources;
+extern bool gUseChunkFiles;
+
 class CSprite2d;
 
 bool DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha);
