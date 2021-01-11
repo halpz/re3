@@ -51,6 +51,7 @@ float CWeather::WindClipped;
 float CWeather::TrafficLightBrightness;
 
 bool CWeather::bScriptsForceRain;
+bool CWeather::Stored_StateStored;
 float CWeather::Stored_InterpolationValue;
 int16 CWeather::Stored_OldWeatherType;
 int16 CWeather::Stored_NewWeatherType;
