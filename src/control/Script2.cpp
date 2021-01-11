@@ -33,35 +33,35 @@
 int8 CRunningScript::ProcessCommands300To399(int32 command)
 {
 	switch (command) {
-		//case COMMAND_SET_CHAR_INVINCIBLE:
-		//case COMMAND_SET_PLAYER_INVINCIBLE:
-		//case COMMAND_SET_CHAR_GRAPHIC_TYPE:
-		//case COMMAND_SET_PLAYER_GRAPHIC_TYPE:
+	//case COMMAND_SET_CHAR_INVINCIBLE:
+	//case COMMAND_SET_PLAYER_INVINCIBLE:
+	//case COMMAND_SET_CHAR_GRAPHIC_TYPE:
+	//case COMMAND_SET_PLAYER_GRAPHIC_TYPE:
 	case COMMAND_HAS_PLAYER_BEEN_ARRESTED:
 		CollectParameters(&m_nIp, 1);
 		UpdateCompareFlag(CWorld::Players[GET_INTEGER_PARAM(0)].m_WBState == WBSTATE_BUSTED);
 		return 0;
-		//case COMMAND_STOP_CHAR_DRIVING:
-		//case COMMAND_KILL_CHAR:
-		//case COMMAND_SET_FAVOURITE_CAR_MODEL_FOR_CHAR:
-		//case COMMAND_SET_CHAR_OCCUPATION:
-		/*
-		case COMMAND_CHANGE_CAR_LOCK:
-		{
-			CollectParameters(&m_nIp, 2);
-			CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
-			script_assert(pVehicle);
-			pVehicle->m_nDoorLock = (eCarLock)GET_INTEGER_PARAM(1);
-			return 0;
-		}
-		case COMMAND_SHAKE_CAM_WITH_POINT:
-			CollectParameters(&m_nIp, 4);
-			TheCamera.CamShake(GET_INTEGER_PARAM(0) / 1000.0f,
-				GET_FLOAT_PARAM(1),
-				GET_FLOAT_PARAM(2),
-				GET_FLOAT_PARAM(3));
-			return 0;
-		*/
+	//case COMMAND_STOP_CHAR_DRIVING:
+	//case COMMAND_KILL_CHAR:
+	//case COMMAND_SET_FAVOURITE_CAR_MODEL_FOR_CHAR:
+	//case COMMAND_SET_CHAR_OCCUPATION:
+	/*
+	case COMMAND_CHANGE_CAR_LOCK:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
+		script_assert(pVehicle);
+		pVehicle->m_nDoorLock = (eCarLock)GET_INTEGER_PARAM(1);
+		return 0;
+	}
+	case COMMAND_SHAKE_CAM_WITH_POINT:
+		CollectParameters(&m_nIp, 4);
+		TheCamera.CamShake(GET_INTEGER_PARAM(0) / 1000.0f,
+			GET_FLOAT_PARAM(1),
+			GET_FLOAT_PARAM(2),
+			GET_FLOAT_PARAM(3));
+		return 0;
+	*/
 	case COMMAND_IS_CAR_MODEL:
 	{
 		CollectParameters(&m_nIp, 2);
