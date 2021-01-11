@@ -26,10 +26,11 @@
 #include "Messages.h"
 #include "Population.h"
 #include "CarCtrl.h"
-#include "TimeCycle.h"
+#include "Timecycle.h"
 #include "Rubbish.h"
 #include "Text.h"
 #include "Hud.h"
+#include "crossplatform.h"
 
 const struct {
 	const char *szTrackName;
