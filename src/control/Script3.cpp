@@ -2400,7 +2400,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		CPed* pLeader = CPools::GetPedPool()->GetAt(ScriptParams[1]);
 		script_assert(pPed);
 		script_assert(pLeader);
-		UpdateCompareFlag(pPed->m_leader == pLeader);
+		UpdateCompareFlag(pPed->m_leader == pLeader && !pPed->bWaitForLeaderToComeCloser);
 		return 0;
 	}
 	default:
