@@ -12,6 +12,7 @@ endif()
 set(RE3_AUDIO "OAL" CACHE STRING "Audio")
 
 option(RE3_WITH_OPUS "Build re3 with opus support" ON)
+option(RE3_WITH_LIBSNDFILE "Build re3 with libsndfile (instead of internal decoder)" OFF)
 
 set_property(CACHE RE3_AUDIO PROPERTY STRINGS ${RE3_AUDIOS})
 message(STATUS "RE3_AUDIO = ${RE3_AUDIO} (choices=${RE3_AUDIOS})")

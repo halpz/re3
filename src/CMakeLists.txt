@@ -55,19 +55,23 @@ elseif(RE3_AUDIO STREQUAL "MSS")
     target_link_libraries(re3 PRIVATE MilesSDK::MilesSDK)
 endif()
 
+find_package(mpg123 REQUIRED)
+target_link_libraries(re3 PRIVATE
+    MPG123::libmpg123
+)
 if(RE3_WITH_OPUS)
     find_package(opusfile REQUIRED)
     target_link_libraries(re3 PRIVATE
         opusfile::opusfile
     )
     target_compile_definitions(re3 PRIVATE AUDIO_OPUS)
-else()
-    find_package(mpg123 REQUIRED)
+endif()
+if(RE3_WITH_LIBSNDFILE)
     find_package(SndFile REQUIRED)
     target_link_libraries(re3 PRIVATE
-        MPG123::libmpg123
         SndFile::SndFile
     )
+    target_compile_definitions(re3 PRIVATE AUDIO_OAL_USE_SNDFILE)
 endif()
 
 target_compile_definitions(re3 PRIVATE )

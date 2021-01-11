@@ -13,25 +13,26 @@ class Re3Conan(ConanFile):
     generators = "cmake", "cmake_find_package"
     options = {
         "audio": ["openal", "miles"],
+        "with_libsndfile": [True, False],
         "with_opus": [True, False],
     }
     default_options = {
         "audio": "openal",
+        "with_libsndfile": False,
         "with_opus": True,
-        "libsndfile:with_external_libs": False,
-        "mpg123:flexible_resampling": False,
-        "mpg123:network": False,
-        "mpg123:icy": False,
-        "mpg123:id3v2": False,
-        "mpg123:ieeefloat": False,
-        "mpg123:layer1": False,
-        "mpg123:layer2": False,
-        "mpg123:layer3": False,
-        "mpg123:moreinfo": False,
-        "mpg123:seektable": False,
-        "sdl2:vulkan": False,
-        "sdl2:opengl": True,
-        "sdl2:sdl2main": True,
+        # "libsndfile:with_external_libs": False,
+        # "mpg123:flexible_resampling": False,
+        # "mpg123:network": False,
+        # "mpg123:icy": False,
+        # "mpg123:id3v2": False,
+        # "mpg123:ieeefloat": False,
+        # "mpg123:layer1": False,
+        # "mpg123:layer2": False,
+        # "mpg123:layer3": False,
+        # "mpg123:moreinfo": False,
+        # "sdl2:vulkan": False,
+        # "sdl2:opengl": True,
+        # "sdl2:sdl2main": True,
     }
     no_copy_source = True
 
@@ -42,17 +43,21 @@ class Re3Conan(ConanFile):
         except ConanException:
             return False
 
+    def configure(self):
+        if self.options.audio != "openal":
+            self.options.with_libsndfile = False
+
     def requirements(self):
         self.requires("librw/{}".format(self.version))
+        self.requires("mpg123/1.26.4")
         if self.options.audio == "openal":
             self.requires("openal/1.21.0")
+        elif self.options.audio == "miles":
+            self.requires("miles-sdk/{}".format(self.version))
+        if self.options.with_libsndfile:
+            self.requires("libsndfile/1.0.30")
         if self.options.with_opus:
             self.requires("opusfile/0.12")
-        else:
-            self.requires("mpg123/1.26.4")
-            self.requires("libsndfile/1.0.30")
-        if self.options.audio == "miles":
-            self.requires("miles-sdk/{}".format(self.version))
 
     def export_sources(self):
         for d in ("cmake", "src"):
