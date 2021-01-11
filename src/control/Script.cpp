@@ -4873,9 +4873,6 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		pObj->SetOrientation(0.0f, 0.0f, 0.0f);
 		pObj->GetMatrix().UpdateRW();
 		pObj->UpdateRwFrame();
-		CBaseModelInfo* pModelInfo = CModelInfo::GetModelInfo(mi);
-		if (pModelInfo->IsBuilding() && ((CSimpleModelInfo*)pModelInfo)->m_isBigBuilding)
-			pObj->SetupBigBuilding();
 		CTheScripts::ClearSpaceForMissionEntity(pos, pObj);
 		CWorld::Add(pObj);
 		SET_INTEGER_PARAM(0, CPools::GetObjectPool()->GetIndex(pObj));
