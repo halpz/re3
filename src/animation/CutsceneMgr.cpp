@@ -22,6 +22,7 @@
 #include "ColStore.h"
 #include "Radar.h"
 #include "Pools.h"
+#include "crossplatform.h"
 
 //--MIAMI: file done
 

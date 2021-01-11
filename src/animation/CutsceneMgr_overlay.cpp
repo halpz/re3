@@ -420,7 +420,7 @@ CCutsceneMgr::LoadCutsceneData_loading()
 	for (int i = 0; i < ms_numLoadObjectNames; i++) {
 		if (!ms_bRepeatObject[i])
 			cutsceneObject = CreateCutsceneObject(ms_iModelIndex[i]);
-		if (ms_cLoadAnimName[i] != '\0')
+		if (ms_cLoadAnimName[i][0] != '\0')
 			SetCutsceneAnim(ms_cLoadAnimName[i], cutsceneObject);
 	}
 
@@ -475,7 +475,7 @@ CCutsceneMgr::LoadCutsceneData_postload(bool b)
 			RwStreamClose(stream, nil);
 
 			int file = CFileMgr::OpenFile("ANIM\\CUTS.IMG", "rb");
-			sprintf(gString, "%s.DAT", &ms_cutsceneName);
+			sprintf(gString, "%s.DAT", ms_cutsceneName);
 			if (file) {
 				if (ms_pCutsceneDir->FindItem(gString, offset, size))
 				{
