@@ -128,8 +128,7 @@ leedsVehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 
 		float coef = 0.0f;
 		if(RpMatFXMaterialGetEffects(m) == rpMATFXEFFECTENVMAP)
-			coef = RpMatFXMaterialGetEnvMapCoefficient(m);
-		coef *= 0.5f;
+			coef = CClock::ms_EnvMapTimeMultiplicator * RpMatFXMaterialGetEnvMapCoefficient(m)*0.5f;
 		if(bChromeCheat && coef > 0.0f)
 			coef = 1.0f;
 		d3ddevice->SetPixelShaderConstantF(PSLOC_shininess, (float*)&coef, 1);

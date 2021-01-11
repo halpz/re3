@@ -1143,10 +1143,10 @@ MattRenderScene(void)
 	/// CWorld::AdvanceCurrentScanCode();
 	// CMattRenderer::ResetRenderStates
 	/// CRenderer::ClearForFrame();		// before ConstructRenderList
-	// CClock::CalcEnvMapTimeMultiplicator
+	CClock::CalcEnvMapTimeMultiplicator();
 	RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
 	CWaterLevel::RenderWater();	// actually CMattRenderer::RenderWater
-	// CClock::ms_EnvMapTimeMultiplicator = 1.0f;
+	CClock::ms_EnvMapTimeMultiplicator = 1.0f;
 	// cWorldStream::ClearDynamics
 	/// CRenderer::ConstructRenderList();	// before PreRender
 if(gbRenderWorld0)
