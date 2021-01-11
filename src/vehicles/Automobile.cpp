@@ -288,7 +288,7 @@ CAutomobile::ProcessControl(void)
 	// Improve grip of vehicles in certain cases
 	bool strongGrip1 = false;
 	bool strongGrip2 = false;
-	if(FindPlayerVehicle() && this != FindPlayerVehicle() && FindPlayerPed()->m_pWanted->m_nWantedLevel > 3 &&
+	if(FindPlayerVehicle() && this != FindPlayerVehicle() && FindPlayerPed()->m_pWanted->GetWantedLevel() > 3 &&
 	   (AutoPilot.m_nCarMission == MISSION_RAMPLAYER_FARAWAY || AutoPilot.m_nCarMission == MISSION_RAMPLAYER_CLOSE ||
 	    AutoPilot.m_nCarMission == MISSION_BLOCKPLAYER_FARAWAY || AutoPilot.m_nCarMission == MISSION_BLOCKPLAYER_CLOSE) &&
 		FindPlayerSpeed().Magnitude() > 0.3f){
