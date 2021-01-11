@@ -51,6 +51,10 @@ float CWeather::WindClipped;
 float CWeather::TrafficLightBrightness;
 
 bool CWeather::bScriptsForceRain;
+float CWeather::Stored_InterpolationValue;
+int16 CWeather::Stored_OldWeatherType;
+int16 CWeather::Stored_NewWeatherType;
+float CWeather::Stored_Rain;
 
 tRainStreak Streaks[NUM_RAIN_STREAKS];
 
@@ -646,4 +650,24 @@ void CWeather::RenderRainStreaks(void)
 	}
 	TempBufferVerticesStored = 0;
 	TempBufferIndicesStored = 0;
+}
+
+void CWeather::StoreWeatherState()
+{
+	Stored_StateStored = true;
+	Stored_InterpolationValue = InterpolationValue;
+	Stored_Rain = Rain;
+	Stored_NewWeatherType = NewWeatherType;
+	Stored_OldWeatherType = OldWeatherType;
+}
+
+void CWeather::RestoreWeatherState()
+{
+#ifdef FIX_BUGS // it's not used anyway though
+	Stored_StateStored = false;
+#endif
+	InterpolationValue = Stored_InterpolationValue;
+	Rain = Stored_Rain;
+	NewWeatherType = Stored_NewWeatherType;
+	OldWeatherType = Stored_OldWeatherType;
 }
