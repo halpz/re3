@@ -521,7 +521,13 @@ public:
 	uint32 bCollectBusFare : 1;
 	uint32 bBoughtIceCream : 1;
 	uint32 bDonePositionOutOfCollision : 1;
-	uint32 bCanAttackPlayerWithCops : 1;
+
+	uint32 bCanAttackPlayerWithCops : 1; // 1A1_1 on PS2
+	uint32 b1A1_2 : 1;
+	uint32 b1A1_4 : 1;
+	uint32 b1A1_8 : 1;
+	uint32 b1A1_10 : 1;
+	uint32 b1A1_20 : 1;
 
 	// our own flags
 	uint32 m_ped_flagI80 : 1; // KANGAROO_CHEAT define makes use of this as cheat toggle 
