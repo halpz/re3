@@ -913,7 +913,7 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 		float turnImpulse = turnSpeed*GetMass(wheelContactPoint, turnDirection);
 
 		ApplyMoveForce(impulse * direction);
-		ApplyTurnForce(turnImpulse * direction, wheelContactPoint);
+		ApplyTurnForce(turnImpulse * turnDirection, wheelContactPoint);
 	}
 }
 
