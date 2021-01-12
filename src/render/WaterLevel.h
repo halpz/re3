@@ -116,6 +116,7 @@ public:
 	static RpAtomic    *ms_pWavyAtomic;
 	static RpAtomic    *ms_pMaskAtomic;
 
+	static void    Initialise(Const char *pWaterDat); // out of class in III PC and later because of SecuROM
 	static void    Shutdown();
 
 	static void    CreateWavyAtomic();
@@ -181,5 +182,3 @@ public:
 	static void HandleBeachToysStuff(void);
 	static CEntity *CreateBeachToy(CVector const &vec, eBeachToy beachtoy);
 };
-
-extern void WaterLevelInitialise(Const char *datFile);
