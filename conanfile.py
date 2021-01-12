@@ -67,9 +67,9 @@ class Re3Conan(ConanFile):
     def validate(self):
         if self.options["librw"].platform == "gl3" and self.options["librw"].gl3_gfxlib != "glfw":
             raise ConanInvalidConfiguration("Only `glfw` is supported as gl3_gfxlib.")
-        if not self.options.with_opus:
-            if not self.options["libsndfile"].with_external_libs:
-                raise ConanInvalidConfiguration("re3 with opus support requires a libsndfile built with external libs (=ogg/flac/opus/vorbis)")
+        #if not self.options.with_opus:
+        #    if not self.options["libsndfile"].with_external_libs:
+        #        raise ConanInvalidConfiguration("re3 with opus support requires a libsndfile built with external libs (=ogg/flac/opus/vorbis)")
 
     @property
     def _re3_audio(self):
