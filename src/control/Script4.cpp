@@ -106,7 +106,10 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			printf("Couldn't find zone - %s\n", zone);
 			return 0;
 		}
-		CTheZones::SetPedGroup(zone_id, ScriptParams[0], ScriptParams[1]);
+		while (zone_id >= 0) {
+			CTheZones::SetPedGroup(zone_id, ScriptParams[0], ScriptParams[1]);
+			zone_id = CTheZones::FindNextZoneByLabelAndReturnIndex(zone, ZONE_INFO);
+		}
 		return 0;
 	}
 	case COMMAND_START_CAR_FIRE:
