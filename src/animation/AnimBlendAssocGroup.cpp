@@ -14,6 +14,7 @@
 #include "RpAnimBlend.h"
 #include "AnimBlendAssociation.h"
 #include "AnimBlendAssocGroup.h"
+#include "KeyGen.h"
 
 //--MIAMI: file done
 
@@ -109,27 +110,34 @@ strcmpIgnoringDigits(const char *s1, const char *s2)
 	}
 }
 
+extern const char* csPlayerNames[];
+extern const char* playerNames[];
+
 CBaseModelInfo*
 GetModelFromName(const char *name)
 {
 	int i;
-	CBaseModelInfo *mi;
-	char playername[32];
-
-	if(strncasecmp(name, "CSplay", 6) == 0 &&
-	   strncasecmp(CModelInfo::GetModelInfo(MI_PLAYER)->GetModelName(), "ig", 2) == 0){
-		strcpy(playername, CModelInfo::GetModelInfo(MI_PLAYER)->GetModelName());
-		playername[0] = 'C';
-		playername[1] = 'S';
-		name = playername;
+	CBaseModelInfo* mi;
+	if (CKeyGen::GetUppercaseKey(name) == CKeyGen::GetUppercaseKey("cstoni_a")) {
+		i = 0;
+		while (csPlayerNames[i][0] != '\0') {
+			if (CModelInfo::GetModelInfo(0)->GetNameHashKey() == CKeyGen::GetUppercaseKey(playerNames[i])) {
+				name = csPlayerNames[i];
+				break;
+			}
+			i++;
+		}
 	}
 
-	for(i = 0; i < MODELINFOSIZE; i++){
+	uint32 hashKey = CKeyGen::GetUppercaseKey(name);
+	for (i = 0; i < MODELINFOSIZE; i++) {
 		mi = CModelInfo::GetModelInfo(i);
-		if(mi && mi->GetRwObject() && RwObjectGetType(mi->GetRwObject()) == rpCLUMP &&
-		   strcmpIgnoringDigits(mi->GetModelName(), name))
+		if (mi && mi->GetRwObject()
+			&& RwObjectGetType(mi->GetRwObject()) == rpCLUMP &&
+			hashKey == mi->GetNameHashKey())
 			return mi;
 	}
+
 	return nil;
 }
 
@@ -182,4 +190,46 @@ CAnimBlendAssocGroup::CreateAssociations(const char *blockName, RpClump *clump, 
 		assocList[i].groupId = groupId;
 	}
 	numAssociations = numAssocs;
+}
+
+void
+CAnimBlendAssocGroup::CreateAssociations(const char *blockName, const char *animNames, const char *objectNames, int numChars)
+{
+	if (!objectNames) {
+		CreateAssociations(blockName);
+		return;
+	}
+
+	if (assocList)
+		DestroyAssociations();
+
+	animBlock = CAnimManager::GetAnimationBlock(blockName);
+	assocList = new CAnimBlendAssociation[animBlock->numAnims];
+
+	numAssociations = 0;
+	if (animBlock->numAnims > 0)
+	{
+		int i, j;
+		for (i = 0; i < animBlock->numAnims; i++) {
+			int animId = -1;
+			for (j = 0; j != animBlock->numAnims; j++)
+				if (strcmp(CAnimManager::GetAnimation(i + animBlock->firstIndex)->name, animNames + numChars * j) == 0)
+					animId = j;
+
+			if (animId != -1) {
+				CBaseModelInfo* minfo = GetModelFromName(objectNames + numChars * animId);
+				if (minfo)
+				{
+					RpClump* clump = (RpClump*)minfo->CreateInstance();
+					RpAnimBlendClumpInit(clump);
+					assocList[numAssociations].Init(clump, CAnimManager::GetAnimation(i + animBlock->firstIndex));
+					if (IsClumpSkinned(clump))
+						RpClumpForAllAtomics(clump, AtomicRemoveAnimFromSkinCB, nil);
+					RpClumpDestroy(clump);
+					assocList[numAssociations].animId = i + numAssociations;
+					assocList[numAssociations++].groupId = groupId;
+				}
+			}
+		}
+	}
 }

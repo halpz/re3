@@ -10,7 +10,7 @@ CColModel CTempColModels::ms_colModelWheel1;
 CColModel CTempColModels::ms_colModelPanel1;
 CColModel CTempColModels::ms_colModelBodyPart2;
 CColModel CTempColModels::ms_colModelBodyPart1;
-CColModel CTempColModels::ms_colModelCutObj[5];
+CColModel CTempColModels::ms_colModelCutObj[10];
 CColModel CTempColModels::ms_colModelPedGroundHit;
 CColModel CTempColModels::ms_colModelBoot1;
 CColModel CTempColModels::ms_colModelDoor1;

@@ -1018,7 +1018,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		return 0;
 	case COMMAND_REMOVE_EVERYTHING_FOR_HUGE_CUTSCENE:
 	{
-		CCutsceneMgr::RemoveEverythingFromTheWorldForTheBiggestFuckoffCutsceneEver();
+		//CCutsceneMgr::RemoveEverythingFromTheWorldForTheBiggestFuckoffCutsceneEver();
 		return 0;
 	}
 	case COMMAND_IS_PLAYER_TOUCHING_VEHICLE:

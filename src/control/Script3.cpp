@@ -1984,7 +1984,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		return 0;
 	}
 	case COMMAND_START_CUTSCENE:
-		CCutsceneMgr::ms_cutsceneLoadStatus = 1;
+		CCutsceneMgr::StartCutscene();
 		return 0;
 	case COMMAND_GET_CUTSCENE_TIME:
 		SET_INTEGER_PARAM(0, CCutsceneMgr::GetCutsceneTimeInMilleseconds());

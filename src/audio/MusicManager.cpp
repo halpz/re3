@@ -160,8 +160,8 @@ cMusicManager::SetStartingTrackPositions(uint8 isNewGameTimer)
 
 			if (i < STREAMED_SOUND_CITY_AMBIENT && isNewGameTimer)
 				m_aTracks[i].m_nPosition = NewGameRadioTimers[i];
-			else if (i < STREAMED_SOUND_ANNOUNCE_BRIDGE_CLOSED)
-				m_aTracks[i].m_nPosition = (pos * AudioManager.GetRandomNumber(i % 5)) % m_aTracks[i].m_nLength;
+			//else if (i < STREAMED_SOUND_ANNOUNCE_BRIDGE_CLOSED)
+			//	m_aTracks[i].m_nPosition = (pos * AudioManager.GetRandomNumber(i % 5)) % m_aTracks[i].m_nLength;
 			else
 				m_aTracks[i].m_nPosition = 0;
 			
@@ -658,7 +658,7 @@ cMusicManager::ServiceGameMode()
 		}
 		if (vehicle == nil)
 		{
-			m_nFrontendTrack = STREAMED_SOUND_RADIO_WAVE; // huh?
+			m_nFrontendTrack = STREAMED_SOUND_RADIO_LCFR; // huh?
 			return;
 		}
 		if (m_bRadioSetByScript)
@@ -712,7 +712,7 @@ cMusicManager::SetUpCorrectAmbienceTrack()
 		else if (TheCamera.DistanceToWater <= 90.0f) {
 			if (CCullZones::bAtBeachForAudio) {
 				if (CWeather::OldWeatherType != WEATHER_HURRICANE && CWeather::NewWeatherType != WEATHER_HURRICANE || CWeather::Wind <= 1.0f)
-					m_nFrontendTrack = STREAMED_SOUND_BEACH_AMBIENT;
+					m_nFrontendTrack = STREAMED_SOUND_SAWMILL;
 				else
 					m_nFrontendTrack = STREAMED_SOUND_HAVANA_BEACH_AMBIENT;
 			}
