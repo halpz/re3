@@ -19,7 +19,7 @@ class Re3Conan(ConanFile):
     default_options = {
         "audio": "openal",
         "with_libsndfile": False,
-        "with_opus": True,
+        "with_opus": False,
         # "libsndfile:with_external_libs": False,
         # "mpg123:flexible_resampling": False,
         # "mpg123:network": False,
