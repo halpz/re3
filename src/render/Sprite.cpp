@@ -10,6 +10,19 @@ float CSprite::m_f2DFarScreenZ;
 float CSprite::m_fRecipNearClipPlane;
 int32 CSprite::m_bFlushSpriteBufferSwitchZTest;
 
+float CalcScreenZ(float z)
+{
+	// LCS TODO: check 
+
+	if ( z == 0.0f )
+		return CSprite::GetNearScreenZ();
+					   
+	return (z - CDraw::GetNearClipZ())
+		* (CSprite::GetFarScreenZ() - CSprite::GetNearScreenZ()) * CDraw::GetFarClipZ()
+		/ ( (CDraw::GetFarClipZ() - CDraw::GetNearClipZ()) * z )
+		+ CSprite::GetNearScreenZ();
+}
+
 float 
 CSprite::CalcHorizonCoors(void)
 {

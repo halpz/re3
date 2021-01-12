@@ -76,7 +76,7 @@
 
 GlobalScene Scene;
 
-uint8 work_buff[55000];
+uint8 work_buff[102400];
 char gString[256];
 char gString2[512];
 wchar gUString[256];
@@ -102,6 +102,7 @@ float NumberOfChunksLoaded;
 bool g_SlowMode = false;
 char version_name[64];
 
+bool gMakeResources = true;
 
 void GameInit(void);
 void SystemInit(void);

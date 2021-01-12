@@ -7,7 +7,7 @@ struct GlobalScene
 };
 extern GlobalScene Scene;
 
-extern uint8 work_buff[55000];
+extern uint8 work_buff[102400];
 extern char gString[256];
 extern char gString2[512];
 extern wchar gUString[256];
@@ -23,6 +23,8 @@ extern bool gbShowTimebars;
 #ifndef FINAL
 extern bool gbPrintMemoryUsage;
 #endif
+
+extern bool gMakeResources;
 
 class CSprite2d;
 

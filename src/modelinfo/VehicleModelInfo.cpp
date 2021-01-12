@@ -1139,11 +1139,11 @@ CVehicleModelInfo::LoadEnvironmentMaps(void)
 	txdslot = CTxdStore::FindTxdSlot("particle");
 	CTxdStore::PushCurrentTxd();
 	CTxdStore::SetCurrentTxd(txdslot);
-	if(gpWhiteTexture == nil){
+	/*if(gpWhiteTexture == nil){
 		gpWhiteTexture = RwTextureRead("white", nil);
 		RwTextureGetName(gpWhiteTexture)[0] = '@';
 		RwTextureSetFilterMode(gpWhiteTexture, rwFILTERLINEAR);
-	}
+	}*/
 	CTxdStore::PopCurrentTxd();
 }
 
