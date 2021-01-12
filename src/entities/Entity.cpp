@@ -139,6 +139,7 @@ CEntity::DetachFromRwObject(void)
 	m_matrix.Detach();
 }
 
+#ifdef PED_SKIN
 RpAtomic*
 AtomicRemoveAnimFromSkinCB(RpAtomic *atomic, void *data)
 {
@@ -158,6 +159,7 @@ AtomicRemoveAnimFromSkinCB(RpAtomic *atomic, void *data)
 	}
 	return atomic;
 }
+#endif
 
 void
 CEntity::DeleteRwObject(void)

@@ -2,6 +2,7 @@
 #define WITHD3D
 #endif
 #include "common.h"
+#include <rpskin.h>
 
 #include "RwHelper.h"
 #include "Timecycle.h"
