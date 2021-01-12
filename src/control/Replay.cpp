@@ -1729,7 +1729,7 @@ void CReplay::SaveReplayToHD(void)
 	CFileMgr::SetDir("");
 }
 
-void PlayReplayFromHD(void)
+void CReplay::PlayReplayFromHD(void)
 {
 	CFileMgr::SetDirMyDocuments();
 	int fr = CFileMgr::OpenFile("replay.rep", "rb");
