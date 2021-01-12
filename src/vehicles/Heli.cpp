@@ -800,7 +800,7 @@ CHeli::GenerateHeli(bool catalina)
 		id++;
 		found = true;
 		for(i = 0; i < 4; i++)
-			if(CHeli::pHelis[i] && CHeli::pHelis[i]->m_nHeliId == id)
+			if(pHelis[i] && pHelis[i]->m_nHeliId == id)
 				found = false;
 	}
 	heli->m_nHeliId = id;
