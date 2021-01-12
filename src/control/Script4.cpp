@@ -1811,8 +1811,8 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 			return 0;
 		int attempts;
 		int model = -1;
-		int index = CGeneral::GetRandomNumberInRange(0, 50);
-		for (attempts = 0; attempts < 50; attempts++) {
+		int index = CGeneral::GetRandomNumberInRange(0, MAXVEHICLESLOADED);
+		for (attempts = 0; attempts < MAXVEHICLESLOADED; attempts++) {
 			if (model != -1)
 				break;
 			model = CStreaming::ms_vehiclesLoaded[index];
