@@ -102,7 +102,6 @@ float NumberOfChunksLoaded;
 bool g_SlowMode = false;
 char version_name[64];
 
-bool gMakeResources = true;
 
 void GameInit(void);
 void SystemInit(void);
