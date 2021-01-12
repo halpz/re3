@@ -785,7 +785,7 @@ CHeli::InitHelis(void)
 }
 
 CHeli*
-GenerateHeli(bool catalina)
+CHeli::GenerateHeli(bool catalina)
 {
 	CHeli *heli;
 	CVector heliPos;
