@@ -44,8 +44,8 @@ public:
 	virtual ~CBaseModelInfo() {}
 	virtual void Shutdown(void);
 	virtual void DeleteRwObject(void) = 0;
-	virtual RwObject *CreateInstance(RwMatrix *) = 0;
 	virtual RwObject *CreateInstance(void) = 0;
+	virtual RwObject *CreateInstance(RwMatrix *) = 0;
 	virtual RwObject *GetRwObject(void) = 0;
 
 	// one day it becomes virtual
