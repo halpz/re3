@@ -5,7 +5,8 @@ all: im2d_gl.inc simple_fs_gl.inc default_UV2_gl.inc \
 	neoVehicle_vs_gl.inc neoVehicle_fs_gl.inc \
 	im2d_UV2_gl.inc screenDroplet_fs_gl.inc \
 	leedsBuilding_vs_gl.inc leedsBuilding_mobile_vs_gl.inc scale_fs_gl.inc \
-	leedsVehicle_vs_gl.inc leedsVehicle_add_gl.inc leedsVehicle_blend_gl.inc
+	leedsVehicle_vs_gl.inc leedsVehicle_add_gl.inc leedsVehicle_blend_gl.inc \
+	leedsVehicle_mobile_vs_gl.inc leedsVehicle_mobile_fs_gl.inc
 
 im2d_gl.inc: im2d.vert
 	(echo 'const char *im2d_vert_src =';\
@@ -108,3 +109,13 @@ leedsVehicle_blend_gl.inc: leedsVehicle_blend.frag
 	(echo 'const char *leedsVehicle_blend_frag_src =';\
 	 sed 's/..*/"&\\n"/' leedsVehicle_blend.frag;\
 	 echo ';') >leedsVehicle_blend_gl.inc
+
+leedsVehicle_mobile_vs_gl.inc: leedsVehicle_mobile.vert
+	(echo 'const char *leedsVehicle_mobile_vert_src =';\
+	 sed 's/..*/"&\\n"/' leedsVehicle_mobile.vert;\
+	 echo ';') >leedsVehicle_mobile_vs_gl.inc
+
+leedsVehicle_mobile_fs_gl.inc: leedsVehicle_mobile.frag
+	(echo 'const char *leedsVehicle_mobile_frag_src =';\
+	 sed 's/..*/"&\\n"/' leedsVehicle_mobile.frag;\
+	 echo ';') >leedsVehicle_mobile_fs_gl.inc

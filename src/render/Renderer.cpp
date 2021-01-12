@@ -1816,7 +1816,8 @@ CRenderer::GenerateEnvironmentMap(void)
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
 
 	// Draw coronas
-	DrawEnvMapCoronas(TheCamera.GetForward().Heading());
+	if(CustomPipes::VehiclePipeSwitch != CustomPipes::VEHICLEPIPE_MOBILE)
+		DrawEnvMapCoronas(TheCamera.GetForward().Heading());
 
 	RwCameraEndUpdate(CustomPipes::EnvMapCam);
 

@@ -123,6 +123,7 @@ CCam::Process(void)
 		else
 			TargetOrientation = CGeneral::GetATanOfXY(CamTargetEntity->GetForward().x, CamTargetEntity->GetForward().y);
 
+/* LCS: removed
 		CVector Fwd(0.0f, 0.0f, 0.0f);
 		Fwd.x = CamTargetEntity->GetForward().x;
 		Fwd.y = CamTargetEntity->GetForward().y;
@@ -140,6 +141,9 @@ CCam::Process(void)
 		else
 			TargetSpeedVar = -Min(Sqrt(SQR(FwdSpeedX) + SQR(FwdSpeedY))/1.8f, 0.5f);
 		SpeedVar = 0.895f*SpeedVar + 0.105*TargetSpeedVar;
+*/
+		SpeedVar = 0.0f;
+		TargetSpeedVar = 0.0f;
 	}else{
 		if(CamTargetEntity == FindPlayerPed()){
 			// Some fancy smoothing of player position and speed

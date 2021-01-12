@@ -42,6 +42,9 @@ static int32 u_colorscale;
 static int32 u_texMatrix;
 static int32 u_fxparams;
 
+static int32 u_skyTop;
+static int32 u_skyBot;
+
 #define U(i) currentShader->uniformLocations[i]
 
 /*
@@ -50,6 +53,7 @@ static int32 u_fxparams;
 
 rw::gl3::Shader *leedsVehicleShader_add;
 rw::gl3::Shader *leedsVehicleShader_blend;
+rw::gl3::Shader *leedsVehicleShader_mobile;
 
 rw::gl3::Shader *neoVehicleShader;
 
@@ -157,6 +161,80 @@ leedsVehicleRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 #endif
 }
 
+static void
+leedsVehicleRenderCB_mobile(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
+{
+	using namespace rw;
+	using namespace rw::gl3;
+
+	Material *m;
+
+	setWorldMatrix(atomic->getFrame()->getLTM());
+	lightingCB(atomic);
+
+#ifdef RW_GL_USE_VAOS
+	glBindVertexArray(header->vao);
+#else
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, header->ibo);
+	glBindBuffer(GL_ARRAY_BUFFER, header->vbo);
+	setAttribPointers(header->attribDesc, header->numAttribs);
+#endif
+
+	InstanceData *inst = header->inst;
+	rw::int32 n = header->numMeshes;
+
+	leedsVehicleShader_mobile->use();
+
+	RGBAf amb, emiss;
+	amb.red = CTimeCycle::GetAmbientRed();
+	amb.green = CTimeCycle::GetAmbientGreen();
+	amb.blue = CTimeCycle::GetAmbientBlue();
+	amb.alpha = 1.0f;
+	emiss = pAmbient->color;
+
+	glUniform4fv(U(u_amb), 1, (float*)&amb);
+	glUniform4fv(U(u_emiss), 1, (float*)&emiss);
+
+	RGBAf skyTop, skyBot;
+	skyTop.red = CTimeCycle::GetSkyTopRed()/255.0f;
+	skyTop.green = CTimeCycle::GetSkyTopGreen()/255.0f;
+	skyTop.blue = CTimeCycle::GetSkyTopBlue()/255.0f;
+	skyBot.red = CTimeCycle::GetSkyBottomRed()/255.0f;
+	skyBot.green = CTimeCycle::GetSkyBottomGreen()/255.0f;
+	skyBot.blue = CTimeCycle::GetSkyBottomBlue()/255.0f;
+
+	glUniform3fv(U(u_skyTop), 1, (float*)&skyTop);
+	glUniform3fv(U(u_skyBot), 1, (float*)&skyBot);
+
+	setTexture(1, EnvMapTex);
+
+	while(n--){
+		m = inst->material;
+
+		rw::SetRenderState(VERTEXALPHA, inst->vertexAlpha || m->color.alpha != 0xFF);
+
+		float coef = 0.0f;
+		if(RpMatFXMaterialGetEffects(m) == rpMATFXEFFECTENVMAP){
+			coef = CClock::ms_EnvMapTimeMultiplicator * RpMatFXMaterialGetEnvMapCoefficient(m)*0.5f;
+			if(bChromeCheat)
+				coef = 1.0f;
+		}
+		glUniform1f(U(u_fxparams), coef);
+
+		setMaterial(m->color, m->surfaceProps);
+
+		setTexture(0, m->texture);
+
+		drawInst(header, inst);
+		inst++;
+	}
+
+	setTexture(1, nil);
+
+#ifndef RW_GL_USE_VAOS
+	disableAttribPointers(header->attribDesc, header->numAttribs);
+#endif
+}
 
 static void
 uploadSpecLights(void)
@@ -197,9 +275,13 @@ vehicleRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	using namespace rw::gl3;
 
 	// TODO: make this less of a kludge
-	if(VehiclePipeSwitch == VEHICLEPIPE_MATFX){
+	if(VehiclePipeSwitch == VEHICLEPIPE_PS2){
 		leedsVehicleRenderCB(atomic, header);
 //		matFXGlobals.pipelines[rw::platform]->render(atomic);
+		return;
+	}
+	if(VehiclePipeSwitch == VEHICLEPIPE_MOBILE){
+		leedsVehicleRenderCB_mobile(atomic, header);
 		return;
 	}
 
@@ -266,15 +348,15 @@ CreateVehiclePipe(void)
 	using namespace rw;
 	using namespace rw::gl3;
 
-	if(CFileMgr::LoadFile("neo/carTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
-		printf("Error: couldn't open 'neo/carTweakingTable.dat'\n");
-	else{
-		char *fp = (char*)work_buff;
-		fp = ReadTweakValueTable(fp, Fresnel);
-		fp = ReadTweakValueTable(fp, Power);
-		fp = ReadTweakValueTable(fp, DiffColor);
-		fp = ReadTweakValueTable(fp, SpecColor);
-	}
+//	if(CFileMgr::LoadFile("neo/carTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
+//		printf("Error: couldn't open 'neo/carTweakingTable.dat'\n");
+//	else{
+//		char *fp = (char*)work_buff;
+//		fp = ReadTweakValueTable(fp, Fresnel);
+//		fp = ReadTweakValueTable(fp, Power);
+//		fp = ReadTweakValueTable(fp, DiffColor);
+//		fp = ReadTweakValueTable(fp, SpecColor);
+//	}
 
 
 	{
@@ -299,6 +381,15 @@ CreateVehiclePipe(void)
 	assert(leedsVehicleShader_blend);
 	}
 
+	{
+#include "shaders/leedsVehicle_mobile_fs_gl.inc"
+#include "shaders/leedsVehicle_mobile_vs_gl.inc"
+	const char *vs[] = { shaderDecl, header_vert_src, leedsVehicle_mobile_vert_src, nil };
+	const char *fs[] = { shaderDecl, header_frag_src, leedsVehicle_mobile_frag_src, nil };
+	leedsVehicleShader_mobile = Shader::create(vs, fs);
+	assert(leedsVehicleShader_mobile);
+	}
+
 
 	rw::gl3::ObjPipeline *pipe = rw::gl3::ObjPipeline::create();
 	pipe->instanceCB = rw::gl3::defaultInstanceCB;
@@ -318,6 +409,9 @@ DestroyVehiclePipe(void)
 
 	leedsVehicleShader_blend->destroy();
 	leedsVehicleShader_blend = nil;
+
+	leedsVehicleShader_mobile->destroy();
+	leedsVehicleShader_mobile = nil;
 
 	((rw::gl3::ObjPipeline*)vehiclePipe)->destroy();
 	vehiclePipe = nil;
@@ -757,6 +851,9 @@ CustomPipeRegisterGL(void)
 
 	u_texMatrix = rw::gl3::registerUniform("u_texMatrix");
 	u_fxparams = rw::gl3::registerUniform("u_fxparams");
+
+	u_skyTop = rw::gl3::registerUniform("u_skyTop");
+	u_skyBot = rw::gl3::registerUniform("u_skyBot");
 }
 
 

@@ -40,17 +40,19 @@ enum {
 	VSLOC_reflProps,
 	VSLOC_specLights,
 
-	// Leeds building
+	// Leeds building, Leeds vehicle mobile
 	VSLOC_emissive = rw::d3d::VSLOC_afterLights,
 	VSLOC_ambient,
+	VSLOC_viewMat,	// only vehicle
 
 	PSLOC_colorscale = 1,
 
-	// Leed vehicle
+	// Leeds vehicle PS2
 	VSLOC_texMat = rw::d3d::VSLOC_afterLights,
 
 	PSLOC_shininess = 1,
-
+	PSLOC_skyTop,
+	PSLOC_skyBot
 };
 
 /*
@@ -58,8 +60,10 @@ enum {
  */
 
 static void *leedsVehicle_VS;
+static void *leedsVehicle_mobile_VS;
 static void *leedsVehicle_blend_PS;
 static void *leedsVehicle_add_PS;
+static void *leedsVehicle_mobile_PS;
 
 static rw::RawMatrix normal2texcoord_flipU = {
 	{ -0.5f,  0.0f, 0.0f }, 0.0f,
@@ -149,6 +153,77 @@ leedsVehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	SetRenderState(SRCBLEND, BLENDSRCALPHA);
 }
 
+void
+leedsVehicleRenderCB_mobile(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
+{
+	using namespace rw;
+	using namespace rw::d3d;
+	using namespace rw::d3d9;
+
+	int vsBits;
+	setStreamSource(0, header->vertexStream[0].vertexBuffer, 0, header->vertexStream[0].stride);
+	setIndices(header->indexBuffer);
+	setVertexDeclaration(header->vertexDeclaration);
+
+	vsBits = lightingCB_Shader(atomic);
+	uploadMatrices(atomic->getFrame()->getLTM());
+
+	setVertexShader(leedsVehicle_mobile_VS);
+	setPixelShader(leedsVehicle_mobile_PS);
+
+	RGBAf amb, emiss;
+	amb.red = CTimeCycle::GetAmbientRed();
+	amb.green = CTimeCycle::GetAmbientGreen();
+	amb.blue = CTimeCycle::GetAmbientBlue();
+	amb.alpha = 1.0f;
+	emiss = pAmbient->color;
+
+	d3ddevice->SetVertexShaderConstantF(VSLOC_ambient, (float*)&amb, 1);
+	d3ddevice->SetVertexShaderConstantF(VSLOC_emissive, (float*)&emiss, 1);
+
+	RGBAf skyTop, skyBot;
+	skyTop.red = CTimeCycle::GetSkyTopRed()/255.0f;
+	skyTop.green = CTimeCycle::GetSkyTopGreen()/255.0f;
+	skyTop.blue = CTimeCycle::GetSkyTopBlue()/255.0f;
+	skyBot.red = CTimeCycle::GetSkyBottomRed()/255.0f;
+	skyBot.green = CTimeCycle::GetSkyBottomGreen()/255.0f;
+	skyBot.blue = CTimeCycle::GetSkyBottomBlue()/255.0f;
+
+	d3ddevice->SetPixelShaderConstantF(PSLOC_skyTop, (float*)&skyTop, 1);
+	d3ddevice->SetPixelShaderConstantF(PSLOC_skyBot, (float*)&skyBot, 1);
+
+	d3ddevice->SetVertexShaderConstantF(VSLOC_viewMat, (float*)&rw::engine->currentCamera->devView, 4);
+
+	d3d::setTexture(1, EnvMapTex);
+
+	InstanceData *inst = header->inst;
+	for(rw::uint32 i = 0; i < header->numMeshes; i++){
+		Material *m = inst->material;
+
+		SetRenderState(VERTEXALPHA, inst->vertexAlpha || m->color.alpha != 255);
+
+		float coef = 0.0f;
+		if(RpMatFXMaterialGetEffects(m) == rpMATFXEFFECTENVMAP){
+			coef = CClock::ms_EnvMapTimeMultiplicator * RpMatFXMaterialGetEnvMapCoefficient(m)*0.5f;
+			if(bChromeCheat)
+				coef = 1.0f;
+		}
+		d3ddevice->SetPixelShaderConstantF(PSLOC_shininess, (float*)&coef, 1);
+
+		setMaterial(m->color, m->surfaceProps);
+
+		if(m->texture)
+			d3d::setTexture(0, m->texture);
+		else
+			d3d::setTexture(0, gpWhiteTexture);
+
+		drawInst(header, inst);
+		inst++;
+	}
+
+	d3d::setTexture(1, nil);
+}
+
 static void *neoVehicle_VS;
 static void *neoVehicle_PS;
 
@@ -189,9 +264,13 @@ vehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	using namespace rw::d3d9;
 
 	// TODO: make this less of a kludge
-	if(VehiclePipeSwitch == VEHICLEPIPE_MATFX){
+	if(VehiclePipeSwitch == VEHICLEPIPE_PS2){
 		leedsVehicleRenderCB(atomic, header);
 	//	matFXGlobals.pipelines[rw::platform]->render(atomic);
+		return;
+	}
+	if(VehiclePipeSwitch == VEHICLEPIPE_MOBILE){
+		leedsVehicleRenderCB_mobile(atomic, header);
 		return;
 	}
 
@@ -247,15 +326,15 @@ vehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 void
 CreateVehiclePipe(void)
 {
-	if(CFileMgr::LoadFile("neo/carTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
-		printf("Error: couldn't open 'neo/carTweakingTable.dat'\n");
-	else{
-		char *fp = (char*)work_buff;
-		fp = ReadTweakValueTable(fp, Fresnel);
-		fp = ReadTweakValueTable(fp, Power);
-		fp = ReadTweakValueTable(fp, DiffColor);
-		fp = ReadTweakValueTable(fp, SpecColor);
-	}
+//	if(CFileMgr::LoadFile("neo/carTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
+//		printf("Error: couldn't open 'neo/carTweakingTable.dat'\n");
+//	else{
+//		char *fp = (char*)work_buff;
+//		fp = ReadTweakValueTable(fp, Fresnel);
+//		fp = ReadTweakValueTable(fp, Power);
+//		fp = ReadTweakValueTable(fp, DiffColor);
+//		fp = ReadTweakValueTable(fp, SpecColor);
+//	}
 
 #include "shaders/neoVehicle_VS.inc"
 	neoVehicle_VS = rw::d3d::createVertexShader(neoVehicle_VS_cso);
@@ -269,6 +348,10 @@ CreateVehiclePipe(void)
 	leedsVehicle_VS = rw::d3d::createVertexShader(leedsVehicle_VS_cso);
 	assert(leedsVehicle_VS);
 
+#include "shaders/leedsVehicle_mobile_VS.inc"
+	leedsVehicle_mobile_VS = rw::d3d::createVertexShader(leedsVehicle_mobile_VS_cso);
+	assert(leedsVehicle_mobile_VS);
+
 #include "shaders/leedsVehicle_blend_PS.inc"
 	leedsVehicle_blend_PS = rw::d3d::createPixelShader(leedsVehicle_blend_PS_cso);
 	assert(leedsVehicle_blend_PS);
@@ -276,6 +359,10 @@ CreateVehiclePipe(void)
 #include "shaders/leedsVehicle_add_PS.inc"
 	leedsVehicle_add_PS = rw::d3d::createPixelShader(leedsVehicle_add_PS_cso);
 	assert(leedsVehicle_add_PS);
+
+#include "shaders/leedsVehicle_mobile_PS.inc"
+	leedsVehicle_mobile_PS = rw::d3d::createPixelShader(leedsVehicle_mobile_PS_cso);
+	assert(leedsVehicle_mobile_PS);
 
 
 	rw::d3d9::ObjPipeline *pipe = rw::d3d9::ObjPipeline::create();

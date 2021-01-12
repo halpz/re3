@@ -48,7 +48,7 @@ rw::TexDictionary *neoTxd;
 
 bool bChromeCheat;
 bool bRenderingEnvMap;
-int32 EnvMapSize = 256;
+int32 EnvMapSize = 512;
 rw::Camera *EnvMapCam;
 rw::Texture *EnvMapTex;
 rw::Texture *EnvMaskTex;
@@ -342,7 +342,7 @@ ReadTweakValueTable(char *fp, InterpolatedValue &interp)
  * Neo Vehicle pipe
  */
 
-int32 VehiclePipeSwitch = VEHICLEPIPE_MATFX;
+int32 VehiclePipeSwitch = VEHICLEPIPE_PS2;
 float VehicleShininess = 1.0f;
 float VehicleSpecularity = 1.0f;
 InterpolatedFloat Fresnel(0.4f);

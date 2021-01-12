@@ -86,8 +86,11 @@ extern int16 QuadIndices[6];
 void EnvMapRender(void);
 
 enum {
-	VEHICLEPIPE_MATFX,
-	VEHICLEPIPE_NEO
+	VEHICLEPIPE_PS2,
+	VEHICLEPIPE_MOBILE,
+
+//	maybe later again...
+	VEHICLEPIPE_NEO = -1
 };
 extern int32 VehiclePipeSwitch;
 extern float VehicleShininess;
