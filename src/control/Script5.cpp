@@ -2531,7 +2531,7 @@ int CTheScripts::FindFreeSlotInCollectiveArray()
 void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective objective, int16 p1, int16 p2)
 {
 	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++) {
-		if (CollectiveArray[i].colIndex = colIndex) {
+		if (CollectiveArray[i].colIndex == colIndex) {
 			CPed* pPed = CPools::GetPedPool()->GetAt(CollectiveArray[i].pedIndex);
 			if (pPed == nil) {
 				CollectiveArray[i].colIndex = -1;
@@ -2548,7 +2548,7 @@ void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective ob
 void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective objective, CVector p1, float p2)
 {
 	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++) {
-		if (CollectiveArray[i].colIndex = colIndex) {
+		if (CollectiveArray[i].colIndex == colIndex) {
 			CPed* pPed = CPools::GetPedPool()->GetAt(CollectiveArray[i].pedIndex);
 			if (pPed == nil) {
 				CollectiveArray[i].colIndex = -1;
@@ -2565,7 +2565,7 @@ void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective ob
 void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective objective, CVector p1)
 {
 	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++) {
-		if (CollectiveArray[i].colIndex = colIndex) {
+		if (CollectiveArray[i].colIndex == colIndex) {
 			CPed* pPed = CPools::GetPedPool()->GetAt(CollectiveArray[i].pedIndex);
 			if (pPed == nil) {
 				CollectiveArray[i].colIndex = -1;
@@ -2582,7 +2582,7 @@ void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective ob
 void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective objective, void* p1)
 {
 	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++) {
-		if (CollectiveArray[i].colIndex = colIndex) {
+		if (CollectiveArray[i].colIndex == colIndex) {
 			CPed* pPed = CPools::GetPedPool()->GetAt(CollectiveArray[i].pedIndex);
 			if (pPed == nil) {
 				CollectiveArray[i].colIndex = -1;
@@ -2599,7 +2599,7 @@ void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective ob
 void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective objective)
 {
 	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++) {
-		if (CollectiveArray[i].colIndex = colIndex) {
+		if (CollectiveArray[i].colIndex == colIndex) {
 			CPed* pPed = CPools::GetPedPool()->GetAt(CollectiveArray[i].pedIndex);
 			if (pPed == nil) {
 				CollectiveArray[i].colIndex = -1;
