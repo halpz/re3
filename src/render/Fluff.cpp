@@ -936,7 +936,7 @@ CEscalator::AddThisOne(CVector pos0, CVector pos1, CVector pos2, CVector pos3, b
 	m_lowerEnd = magnitudes[0] / length;
 	m_upperEnd = (magnitudes[0] + magnitudes[1]) / length;
 
-	m_stepsCount = Max(24.0f, length / 0.6f);
+	m_stepsCount = Min(24.0f, length / 0.6f);
 
 	CVector direction(m_pos0.x - m_pos1.x, m_pos0.y - m_pos1.y, 0.0f);
 	direction.Normalise();

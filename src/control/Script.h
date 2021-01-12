@@ -443,6 +443,7 @@ public:
 
 	static int GetSaveVarIndex(int);
 	static void Shutdown(void);
+	static void SwapNearestBuildingModel(float, float, float, float, int, int);
 
 #ifdef GTA_SCRIPT_COLLECTIVE
 	static void AdvanceCollectiveIndex()
