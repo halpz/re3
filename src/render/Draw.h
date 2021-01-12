@@ -30,6 +30,16 @@ public:
 	static uint8 FadeRed;
 	static uint8 FadeGreen;
 	static uint8 FadeBlue;
+	
+#ifdef PROPER_SCALING	
+	static bool ms_bProperScaling;
+#endif
+#ifdef FIX_RADAR
+	static bool ms_bFixRadar;	
+#endif
+#ifdef FIX_SPRITES
+	static bool ms_bFixSprites;	
+#endif
 
 	static void SetNearClipZ(float nearclip) { ms_fNearClipZ = nearclip; }
 	static float GetNearClipZ(void) { return ms_fNearClipZ; }
@@ -50,4 +60,7 @@ public:
 #endif
 	static float GetAspectRatio(void) { return ms_fAspectRatio; }
 	static void SetAspectRatio(float ratio) { ms_fAspectRatio = ratio; }
+#ifdef PROPER_SCALING	
+	static float ScaleY(float y);
+#endif 
 };

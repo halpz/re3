@@ -34,6 +34,11 @@ newoption {
 	description = "Build with opus"
 }
 
+newoption {
+	trigger     = "lto",
+	description = "Use link time optimization"
+}
+
 if(_OPTIONS["with-librw"]) then
 	Librw = "vendor/librw"
 else
@@ -61,6 +66,7 @@ end
 workspace "reLCS"
 	language "C++"
 	configurations { "Debug", "Release" }
+	startproject "reLCS"
 	location "build"
 	symbols "Full"
 	staticruntime "off"
@@ -109,7 +115,10 @@ workspace "reLCS"
 		
 	filter "configurations:Release"
 		defines { "NDEBUG" }
-		optimize "On"
+		optimize "Speed"
+		if(_OPTIONS["lto"]) then
+			flags { "LinkTimeOptimization" }
+		end
 
 	filter { "platforms:win*" }
 		system "windows"
@@ -167,7 +176,7 @@ workspace "reLCS"
        scriptspath = scriptspath or ""
        if (gamepath) then
           postbuildcommands {
-             '{COPY} "%{cfg.buildtarget.abspath}" "' .. gamepath .. scriptspath .. '%{cfg.buildtarget.name}"'
+             '{COPYFILE} "%{cfg.buildtarget.abspath}" "' .. gamepath .. scriptspath .. '%{cfg.buildtarget.name}"'
           }
           debugdir (gamepath)
           if (exepath) then

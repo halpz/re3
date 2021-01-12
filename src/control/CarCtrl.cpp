@@ -2961,7 +2961,7 @@ void CCarCtrl::SteerAICarWithPhysicsHeadingForTarget(CVehicle* pVehicle, CPhysic
 			*pHandbrake = true;
 	float maxAngle = FindMaxSteerAngle(pVehicle);
 	steerAngle = Min(maxAngle, Max(-maxAngle, steerAngle));
-	float speedMultiplier = FindSpeedMultiplier(angleToTarget - angleForward,
+	float speedMultiplier = FindSpeedMultiplier(CGeneral::GetATanOfXY(targetX - pVehicle->GetPosition().x, targetY - pVehicle->GetPosition().y) - angleForward,
 		MIN_ANGLE_FOR_SPEED_LIMITING, MAX_ANGLE_FOR_SPEED_LIMITING, MIN_LOWERING_SPEED_COEFFICIENT);
 	float speedTarget = pVehicle->AutoPilot.m_nCruiseSpeed * speedMultiplier;
 	float currentSpeed = pVehicle->GetMoveSpeed().Magnitude() * GAME_SPEED_TO_CARAI_SPEED;

@@ -220,6 +220,16 @@ void LoadINISettings()
 	CustomPipes::GlossMult = CheckAndReadIniFloat("CustomPipesValues", "GlossMult", CustomPipes::GlossMult);
 #endif
 	gBackfaceCulling = CheckAndReadIniInt("Rendering", "BackfaceCulling", gBackfaceCulling);
+	
+#ifdef PROPER_SCALING
+	CDraw::ms_bProperScaling = CheckAndReadIniInt("Draw", "ProperScaling", CDraw::ms_bProperScaling);	
+#endif
+#ifdef FIX_RADAR
+	CDraw::ms_bFixRadar      = CheckAndReadIniInt("Draw", "FixRadar", CDraw::ms_bFixRadar);	
+#endif
+#ifdef FIX_SPRITES
+	CDraw::ms_bFixSprites    = CheckAndReadIniInt("Draw", "FixSprites", CDraw::ms_bFixSprites);	
+#endif
 }
 
 void SaveINISettings()
@@ -258,6 +268,16 @@ void SaveINISettings()
 	CheckAndSaveIniFloat("CustomPipesValues", "GlossMult", CustomPipes::GlossMult, changed);
 #endif
 	CheckAndSaveIniInt("Rendering", "BackfaceCulling", gBackfaceCulling, changed);
+
+#ifdef PROPER_SCALING	
+	CheckAndSaveIniInt("Draw", "ProperScaling", CDraw::ms_bProperScaling, changed);	
+#endif
+#ifdef FIX_RADAR
+	CheckAndSaveIniInt("Draw", "FixRadar", CDraw::ms_bFixRadar, changed);
+#endif
+#ifdef FIX_SPRITES
+	CheckAndSaveIniInt("Draw", "FixSprites", CDraw::ms_bFixSprites, changed);	
+#endif
 
 	if (changed)
 		cfg.write_file("reLCS.ini");
@@ -672,6 +692,16 @@ extern bool gbRenderDebugEnvMap;
 		DebugMenuAddVarBool8("Render", "Don't render Vehicles", &gbDontRenderVehicles, nil);
 		DebugMenuAddVarBool8("Render", "Don't render Objects", &gbDontRenderObjects, nil);
 		DebugMenuAddVarBool8("Render", "Don't Render Water", &gbDontRenderWater, nil);
+		
+#ifdef PROPER_SCALING	
+		DebugMenuAddVarBool8("Draw", "Proper Scaling", &CDraw::ms_bProperScaling, nil);
+#endif
+#ifdef FIX_RADAR
+		DebugMenuAddVarBool8("Draw", "Fix Radar", &CDraw::ms_bFixRadar, nil);
+#endif
+#ifdef FIX_SPRITES
+		DebugMenuAddVarBool8("Draw", "Fix Sprites", &CDraw::ms_bFixSprites, nil);
+#endif
 
 #ifndef FINAL
 		DebugMenuAddVarBool8("Debug", "Print Memory Usage", &gbPrintMemoryUsage, nil);

@@ -444,7 +444,7 @@ CFont::PrintChar(float x, float y, wchar c)
 	}
 #endif
 
-	if(Details.style == FONT_BANK || Details.style == FONT_STANDARD){
+	if(RenderState.style == FONT_BANK || RenderState.style == FONT_STANDARD){
 		if (bDontPrint) return;
 		if (RenderState.slant == 0.0f) {
 #ifdef FIX_BUGS
@@ -1051,10 +1051,10 @@ CFont::GetCharacterWidth(wchar c)
 		return Size[LanguageSet][Details.style][192];
 #else
 
-	if (Details.proportional)
-		return Size[Details.style][c];
+	if (RenderState.proportional)
+		return Size[RenderState.style][c];
 	else
-		return Size[Details.style][209];
+		return Size[RenderState.style][209];
 #endif // MORE_LANGUAGES
 }
 
