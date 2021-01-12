@@ -175,7 +175,7 @@ CCarCtrl::GenerateOneRandomCar()
 	}
 	float frontX, frontY;
 	float preferredDistance, angleLimit;
-	float requestMultiplier;
+	float requestMultiplier = 1.0f;
 	bool invertAngleLimitTest;
 	CVector spawnPosition;
 	int32 curNodeId, nextNodeId;
