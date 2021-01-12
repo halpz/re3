@@ -321,84 +321,101 @@ void CParticle::Initialise()
 	for ( int32 i = 0; i < MAX_SMOKE_FILES; i++ )
 	{
 		gpSmokeTex[i] = RwTextureRead(SmokeFiles[i], nil);
+		ASSERT(gpSmokeTex[i] != nil);
 		gpSmokeRaster[i] = RwTextureGetRaster(gpSmokeTex[i]);
 	}
 	
 	gpSmoke2Tex = RwTextureRead("smokeII_3", nil);
+	ASSERT(gpSmoke2Tex != nil);
 	gpSmoke2Raster = RwTextureGetRaster(gpSmoke2Tex);
 	
 	for ( int32 i = 0; i < MAX_RUBBER_FILES; i++ )
 	{
 		gpRubberTex[i] = RwTextureRead(RubberFiles[i], nil);
+		ASSERT(gpRubberTex[i] != nil);
 		gpRubberRaster[i] = RwTextureGetRaster(gpRubberTex[i]);
 	}
 	
 	for ( int32 i = 0; i < MAX_RAINSPLASH_FILES; i++ )
 	{
 		gpRainSplashTex[i] = RwTextureRead(RainSplashFiles[i], nil);
+		ASSERT(gpRainSplashTex[i] != nil);
 		gpRainSplashRaster[i] = RwTextureGetRaster(gpRainSplashTex[i]);
 	}
 	
 	for ( int32 i = 0; i < MAX_WATERSPRAY_FILES; i++ )
 	{
 		gpWatersprayTex[i] = RwTextureRead(WatersprayFiles[i], nil);
+		ASSERT(gpWatersprayTex[i] != nil);
 		gpWatersprayRaster[i] = RwTextureGetRaster(gpWatersprayTex[i]);
 	}
 	
 	for ( int32 i = 0; i < MAX_EXPLOSIONMEDIUM_FILES; i++ )
 	{
 		gpExplosionMediumTex[i] = RwTextureRead(ExplosionMediumFiles[i], nil);
+		ASSERT(gpExplosionMediumTex[i] != nil);
 		gpExplosionMediumRaster[i] = RwTextureGetRaster(gpExplosionMediumTex[i]);
 	}
 	
 	for ( int32 i = 0; i < MAX_GUNFLASH_FILES; i++ )
 	{
 		gpGunFlashTex[i] = RwTextureRead(GunFlashFiles[i], nil);
+		ASSERT(gpGunFlashTex[i] != nil);
 		gpGunFlashRaster[i] = RwTextureGetRaster(gpGunFlashTex[i]);
 	}
 	
 	gpRainDropTex = RwTextureRead("raindrop4", nil);
+	ASSERT(gpRainDropTex != nil);
 	gpRainDropRaster = RwTextureGetRaster(gpRainDropTex);
 	
 	for ( int32 i = 0; i < MAX_RAINSPLASHUP_FILES; i++ )
 	{
 		gpRainSplashupTex[i] = RwTextureRead(RainSplashupFiles[i], nil);
+		ASSERT(gpRainSplashupTex[i] != nil);
 		gpRainSplashupRaster[i] = RwTextureGetRaster(gpRainSplashupTex[i]);
 	}
 	
 	for ( int32 i = 0; i < MAX_BIRDFRONT_FILES; i++ )
 	{
 		gpBirdfrontTex[i] = RwTextureRead(BirdfrontFiles[i], nil);
+		ASSERT(gpBirdfrontTex[i] != nil);
 		gpBirdfrontRaster[i] = RwTextureGetRaster(gpBirdfrontTex[i]);
 	}
 	
 	for ( int32 i = 0; i < MAX_BOAT_FILES; i++ )
 	{
 		gpBoatTex[i] = RwTextureRead(BoatFiles[i], nil);
+		ASSERT(gpBoatTex[i] != nil);
 		gpBoatRaster[i] = RwTextureGetRaster(gpBoatTex[i]);
 	}
 	
 	for ( int32 i = 0; i < MAX_CARDEBRIS_FILES; i++ )
 	{
 		gpCarDebrisTex[i] = RwTextureRead(CardebrisFiles[i], nil);
+		ASSERT(gpCarDebrisTex[i] != nil);
 		gpCarDebrisRaster[i] = RwTextureGetRaster(gpCarDebrisTex[i]);
 	}
 	
 	for ( int32 i = 0; i < MAX_CARSPLASH_FILES; i++ )
 	{
 		gpCarSplashTex[i] = RwTextureRead(CarsplashFiles[i], nil);
+		ASSERT(gpCarSplashTex[i] != nil);
 		gpCarSplashRaster[i] = RwTextureGetRaster(gpCarSplashTex[i]);
 	}
 
 	gpBoatWakeTex = RwTextureRead("boatwake2", nil);
+	ASSERT(gpBoatWakeTex != nil);
 	gpBoatWakeRaster = RwTextureGetRaster(gpBoatWakeTex);
 	
 	gpFlame1Tex = RwTextureRead("flame1", nil);
+	ASSERT(gpFlame1Tex != nil);
 	gpFlame1Raster = RwTextureGetRaster(gpFlame1Tex);
 
 	gpFlame5Tex = RwTextureRead("flame5", nil);
+	ASSERT(gpFlame5Tex != nil);
 	
-#ifdef FIX_BUGS
+//#ifdef FIX_BUGS
+#if 0
 	gpFlame5Raster = RwTextureGetRaster(gpFlame5Tex);
 #else
 	// this seems to have become more of a design choice
@@ -406,68 +423,91 @@ void CParticle::Initialise()
 #endif
 
 	gpRainDropSmallTex = RwTextureRead("rainsmall", nil);
+	ASSERT(gpRainDropSmallTex != nil);
 	gpRainDropSmallRaster = RwTextureGetRaster(gpRainDropSmallTex);
 
 	gpBloodTex = RwTextureRead("blood", nil);
+	ASSERT(gpBloodTex != nil);
 	gpBloodRaster = RwTextureGetRaster(gpBloodTex);
 
 	gpLeafTex = RwTextureRead("gameleaf01_64", nil);
+	ASSERT(gpLeafTex != nil);
 	gpLeafRaster = RwTextureGetRaster(gpLeafTex);
 	
 	gpLetterTex = RwTextureRead("letter", nil);
+	ASSERT(gpLetterTex != nil);
 	gpLetterRaster = RwTextureGetRaster(gpLetterTex);
 
 	gpCloudTex1 = RwTextureRead("cloud3", nil);
+	ASSERT(gpCloudTex1 != nil);
 	gpCloudRaster1 = RwTextureGetRaster(gpCloudTex1);
 
 	gpCloudTex4 = RwTextureRead("cloudmasked", nil);
+	ASSERT(gpCloudTex4 != nil);
 	gpCloudRaster4 = RwTextureGetRaster(gpCloudTex4);
 
 	gpBloodSmallTex = RwTextureRead("bloodsplat2", nil);
+	ASSERT(gpBloodSmallTex != nil);
 	gpBloodSmallRaster = RwTextureGetRaster(gpBloodSmallTex);
 
 	gpGungeTex = RwTextureRead("gunge", nil);
+	ASSERT(gpGungeTex != nil);
 	gpGungeRaster = RwTextureGetRaster(gpGungeTex);
 
 	gpCollisionSmokeTex = RwTextureRead("collisionsmoke", nil);
+	ASSERT(gpCollisionSmokeTex != nil);
 	gpCollisionSmokeRaster = RwTextureGetRaster(gpCollisionSmokeTex);
 
 	gpBulletHitTex = RwTextureRead("bullethitsmoke", nil);
+	ASSERT(gpBulletHitTex != nil);
 	gpBulletHitRaster = RwTextureGetRaster(gpBulletHitTex);
 
 	gpGunShellTex = RwTextureRead("gunshell", nil);
+	ASSERT(gpGunShellTex != nil);
 	gpGunShellRaster = RwTextureGetRaster(gpGunShellTex);
 
 	gpPointlightTex = RwTextureRead("smoke5", nil);
+	ASSERT(gpPointlightTex != nil);
 	gpPointlightRaster = RwTextureGetRaster(gpPointlightTex);
 	
 	gpSparkTex = RwTextureRead("spark", nil);
+	ASSERT(gpSparkTex != nil);
 	gpSparkRaster = RwTextureGetRaster(gpSparkTex);
 	
 	gpNewspaperTex = RwTextureRead("ballot_paper", nil);
+	ASSERT(gpNewspaperTex != nil);
 	gpNewspaperRaster = RwTextureGetRaster(gpNewspaperTex);
 	
 	gpGunSmokeTex = RwTextureRead("gunsmoke3", nil);
+	ASSERT(gpGunSmokeTex != nil);
 	gpGunSmokeRaster = RwTextureGetRaster(gpGunSmokeTex);
 	
 	gpHeatHazeTex = RwTextureRead("heathaze", nil);
+	ASSERT(gpHeatHazeTex != nil);
 	gpHeatHazeRaster = RwTextureGetRaster(gpHeatHazeTex);
 	
 	gpBeastieTex = RwTextureRead("beastie", nil);
+	ASSERT(gpBeastieTex != nil);
 	gpBeastieRaster = RwTextureGetRaster(gpBeastieTex);
 	
 	gpRainDripTex[0] = RwTextureRead("raindrip64", nil);
+	ASSERT(gpRainDripTex[0] != nil);
 	gpRainDripRaster[0] = RwTextureGetRaster(gpRainDripTex[0]);
 	
 	gpRainDripTex[1] = RwTextureRead("raindripb64", nil);
+	ASSERT(gpRainDripTex[1] != nil);
 	gpRainDripRaster[1] = RwTextureGetRaster(gpRainDripTex[1]);
 	
 	gpRainDripDarkTex[0] = RwTextureRead("raindrip64_d", nil);
+	ASSERT(gpRainDripDarkTex[0] != nil);
 	gpRainDripDarkRaster[0] = RwTextureGetRaster(gpRainDripDarkTex[0]);
 	
 	gpMultiPlayerHitTex = RwTextureRead("mphit", nil);
+	ASSERT(gpMultiPlayerHitTex != nil);
 	gpMultiPlayerHitRaster = RwTextureGetRaster(gpMultiPlayerHitTex);
+	
 	gpFireHoseTex = RwTextureRead("firehose", nil);
+	ASSERT(gpFireHoseTex != nil);
 	gpFireHoseRaster = RwTextureGetRaster(gpFireHoseTex);
 	
 	CTxdStore::PopCurrentTxd();
