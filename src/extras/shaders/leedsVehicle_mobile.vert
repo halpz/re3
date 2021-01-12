@@ -26,11 +26,9 @@ main(void)
 
 	v_color = in_color;
 	vec4 combinedAmbient = mix(u_emiss, u_amb, Normal.z);
-//	v_color.rgb += u_ambLight.rgb*surfAmbient;
 	v_color.rgb += combinedAmbient.rgb*surfAmbient;
 	v_color.rgb += DoDynamicLight(Vertex.xyz, Normal)*surfDiffuse;
 	v_lightingCont = max(0.5, (v_color.r + v_color.g + v_color.b) / 3.0);
-//	v_color = clamp(v_color, 0.0, 1.0);
 	v_color *= u_matColor;
 
 	// for fresnel

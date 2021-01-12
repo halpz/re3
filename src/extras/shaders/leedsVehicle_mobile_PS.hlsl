@@ -45,7 +45,6 @@ float4 main(VS_out input) : COLOR
 
 	float opacity = lerp(minOpacity, maxOpacity, fresnel)*pass1.a;
 	float4 color = pass1 + float4(reflectivity * envOut, 0.0);
-//float4 color = float4(reflectivity, reflectivity, reflectivity, reflectivity);
 	color.a = opacity;
 
 	color.rgb = lerp(fogColor.rgb, color.rgb, input.TexCoord0.z);

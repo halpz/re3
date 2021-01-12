@@ -46,7 +46,7 @@ CustomMatCopy(void *dst, void *src, int32, int32)
 
 rw::TexDictionary *neoTxd;
 
-bool bChromeCheat;
+bool gGlassCarsCheat;
 bool bRenderingEnvMap;
 int32 EnvMapSize = 512;
 rw::Camera *EnvMapCam;

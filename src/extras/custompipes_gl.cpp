@@ -122,7 +122,7 @@ leedsVehicleRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	InstanceData *inst = header->inst;
 	rw::int32 n = header->numMeshes;
 
-	if(bChromeCheat)
+	if(gGlassCarsCheat)
 		leedsVehicleShader_blend->use();
 	else
 		leedsVehicleShader_add->use();
@@ -138,10 +138,11 @@ leedsVehicleRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 		rw::SetRenderState(VERTEXALPHA, inst->vertexAlpha || m->color.alpha != 0xFF);
 
 		float coef = 0.0f;
-		if(RpMatFXMaterialGetEffects(m) == rpMATFXEFFECTENVMAP)
+		if(RpMatFXMaterialGetEffects(m) == rpMATFXEFFECTENVMAP){
 			coef = CClock::ms_EnvMapTimeMultiplicator * RpMatFXMaterialGetEnvMapCoefficient(m)*0.5f;
-		if(bChromeCheat && coef > 0.0f)
-			coef = 1.0f;
+			if(gGlassCarsCheat)
+				coef = 1.0f;
+		}
 		glUniform1f(U(u_fxparams), coef);
 
 		setMaterial(m->color, m->surfaceProps);
@@ -216,7 +217,7 @@ leedsVehicleRenderCB_mobile(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *hea
 		float coef = 0.0f;
 		if(RpMatFXMaterialGetEffects(m) == rpMATFXEFFECTENVMAP){
 			coef = CClock::ms_EnvMapTimeMultiplicator * RpMatFXMaterialGetEnvMapCoefficient(m)*0.5f;
-			if(bChromeCheat)
+			if(gGlassCarsCheat)
 				coef = 1.0f;
 		}
 		glUniform1f(U(u_fxparams), coef);

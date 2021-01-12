@@ -38,15 +38,12 @@ VS_out main(in VS_in input)
 
 	output.Color = input.Prelight;
 	float4 combinedAmbient = lerp(emissive, ambient, N.z);
-//	output.Color.rgb += ambientLight.rgb * surfAmbient;
 	output.Color.rgb += combinedAmbient.rgb * surfAmbient;
 
 	int i;
 	for(i = 0; i < numDirLights; i++)
 		output.Color.xyz += DoDirLight(lights[i+firstDirLight], N)*surfDiffuse;
 	lightingCont = max(0.5, (output.Color.r + output.Color.g + output.Color.b) / 3.0);
-	// PS2 clamps before material color
-//	output.Color = clamp(output.Color, 0.0, 1.0);
 	output.Color *= matCol;
 
 	// for fresnel

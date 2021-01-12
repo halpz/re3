@@ -27,11 +27,9 @@ const char *leedsVehicle_mobile_vert_src =
 
 "	v_color = in_color;\n"
 "	vec4 combinedAmbient = mix(u_emiss, u_amb, Normal.z);\n"
-"//	v_color.rgb += u_ambLight.rgb*surfAmbient;\n"
 "	v_color.rgb += combinedAmbient.rgb*surfAmbient;\n"
 "	v_color.rgb += DoDynamicLight(Vertex.xyz, Normal)*surfDiffuse;\n"
 "	v_lightingCont = max(0.5, (v_color.r + v_color.g + v_color.b) / 3.0);\n"
-"//	v_color = clamp(v_color, 0.0, 1.0);\n"
 "	v_color *= u_matColor;\n"
 
 "	// for fresnel\n"

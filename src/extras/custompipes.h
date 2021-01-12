@@ -75,7 +75,7 @@ void CustomPipeInit(void);
 void CustomPipeShutdown(void);
 void SetTxdFindCallback(void);
 
-extern bool bChromeCheat;
+extern bool gGlassCarsCheat;
 extern bool bRenderingEnvMap;
 extern int32 EnvMapSize;
 extern rw::Camera *EnvMapCam;

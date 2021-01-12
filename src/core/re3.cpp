@@ -669,7 +669,7 @@ extern bool gbRenderWorld2;
 		e = DebugMenuAddVar("Render", "Vehicle Pipeline", &CustomPipes::VehiclePipeSwitch, nil,
 			1, CustomPipes::VEHICLEPIPE_PS2, CustomPipes::VEHICLEPIPE_MOBILE, vehpipenames);
 		DebugMenuEntrySetWrap(e, true);
-		DebugMenuAddVarBool8("Render", "Chrome cheat", &CustomPipes::bChromeCheat, nil);
+		DebugMenuAddVarBool8("Render", "Glass Cars cheat", &CustomPipes::gGlassCarsCheat, nil);
 extern bool gbRenderDebugEnvMap;
 		DebugMenuAddVarBool8("Render", "Show Env map", &gbRenderDebugEnvMap, nil);
 //		DebugMenuAddVar("Render", "Neo Vehicle Shininess", &CustomPipes::VehicleShininess, nil, 0.1f, 0, 1.0f);
