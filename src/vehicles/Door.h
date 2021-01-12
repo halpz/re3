@@ -67,3 +67,22 @@ public:
 	float RetTranslationWhenOpen(void);
 	void Open(float ratio);
 };
+
+
+class CFerryDoor {
+private:
+	float m_fClosedPosn;
+	float m_fOpenPosn;
+	int8 m_nDirn;
+	int8 m_nAxis;
+	int8 m_nDoorState;
+	float m_fPosn;
+	float m_fPrevPosn;
+public:
+	bool	IsInUse(void);
+	float	RetTranslationWhenClosed(void);
+	float	RetTranslationWhenOpen(void);
+	bool	IsClosed(void);
+	bool	IsFullyOpen(void);
+	void	Open(float ratio);
+};

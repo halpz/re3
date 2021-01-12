@@ -16,9 +16,9 @@
 #define OBJECTBLIP_MARKER_COLOR_B 242
 #define OBJECTBLIP_MARKER_COLOR_A 255
 
-#define COORDBLIP_MARKER_COLOR_R 252
-#define COORDBLIP_MARKER_COLOR_G 138
-#define COORDBLIP_MARKER_COLOR_B 242
+#define COORDBLIP_MARKER_COLOR_R 255
+#define COORDBLIP_MARKER_COLOR_G 255
+#define COORDBLIP_MARKER_COLOR_B 128
 #define COORDBLIP_MARKER_COLOR_A 228
 
 #define NUM_MAP_LEGENDS 75
@@ -92,6 +92,11 @@ enum eRadarSprite
 	RADAR_SPRITE_RADIO_ESPANTOSO,
 	RADAR_SPRITE_RADIO_EMOTION,
 	RADAR_SPRITE_RADIO_WAVE,
+	RADAR_SPRITE_40, // tmp
+	RADAR_SPRITE_41,
+	RADAR_SPRITE_42,
+	RADAR_SPRITE_43,
+	RADAR_SPRITE_44,
 
 	RADAR_SPRITE_COUNT
 };
@@ -156,8 +161,28 @@ struct sRadarTraceSave
 // Values for screen space
 #define RADAR_LEFT (40.0f)
 #define RADAR_BOTTOM (40.0f)
+
+#ifdef FIX_RADAR
+/*
+	The values are from an early screenshot taken before R* broke radar
+		#define RADAR_WIDTH (82.0f)
+		#define RADAR_HEIGHT (82.0f)
+*/
+#define RADAR_WIDTH ((CDraw::ms_bFixRadar)  ? (82.0f) : (94.0f))	
+#define RADAR_HEIGHT ((CDraw::ms_bFixRadar) ? (82.0f) : (76.0f))
+#else
+/*
+	broken since forever, someone tried to fix size for 640x512(PAL)
+		http://aap.rockstarvision.com/pics/gta3/ps2screens/gta3_interface.jpg
+	but failed:
+		http://aap.rockstarvision.com/pics/gta3/artwork/gta3_artwork_16.jpg
+	most likely the guy used something like this:
+		int y = 82 * (640.0/512.0)/(640.0/480.0);
+		int x = y * (640.0/512.0);
+*/
 #define RADAR_WIDTH (94.0f)
 #define RADAR_HEIGHT (76.0f)
+#endif
 
 class CRadar
 {

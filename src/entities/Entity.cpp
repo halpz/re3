@@ -4,6 +4,7 @@
 #include "RwHelper.h"
 #include "ModelIndices.h"
 #include "Timer.h"
+#include "Streaming.h"
 #include "Entity.h"
 #include "Object.h"
 #include "World.h"
@@ -623,10 +624,15 @@ CEntity::SetupBigBuilding(void)
 	m_level = CTheZones::GetLevelFromPosition(&GetPosition());
 	if(mi->m_lodDistances[0] <= 2000.0f)
 		bStreamBIGBuilding = true;
-	if(mi->m_lodDistances[0] > 2500.0f || mi->m_ignoreDrawDist)
+	if(m_modelIndex == islandLODindust ||
+	   m_modelIndex == islandLODcomInd ||
+	   m_modelIndex == islandLODcomSub ||
+	   m_modelIndex == islandLODsubInd ||
+	   m_modelIndex == islandLODsubCom ||
+	   mi->m_lodDistances[0] > 5000.0f || mi->m_ignoreDrawDist)
 		m_level = LEVEL_GENERIC;
-	else if(m_level == LEVEL_GENERIC)
-		printf("%s isn't in a level\n", mi->GetModelName());
+//	else if(m_level == LEVEL_GENERIC)
+//		printf("%s isn't in a level\n", mi->GetModelName());
 }
 
 float WindTabel[] = {

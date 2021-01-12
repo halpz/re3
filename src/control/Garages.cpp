@@ -1494,9 +1494,9 @@ void CGarage::BuildRotatedDoorMatrix(CEntity * pDoor, float fPosition)
 void CGarage::UpdateCrusherAngle()
 {
 	RefreshDoorPointers(false);
-	m_pDoor2->GetMatrix().SetRotateXOnly(TWOPI - m_fDoorPos);
-	m_pDoor2->GetMatrix().UpdateRW();
-	m_pDoor2->UpdateRwFrame();
+	//m_pDoor2->GetMatrix().SetRotateXOnly(TWOPI - m_fDoorPos); TODO
+	//m_pDoor2->GetMatrix().UpdateRW();
+	//m_pDoor2->UpdateRwFrame();
 }
 
 void CGarage::UpdateCrusherShake(float X, float Y)

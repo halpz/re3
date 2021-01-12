@@ -247,7 +247,7 @@ CText::LoadMissionText(char *MissionTableName)
 	CFileMgr::SetDir("TEXT");
 	switch (FrontEndMenuManager.m_PrefsLanguage) {
 	case CMenuManager::LANGUAGE_AMERICAN:
-		sprintf(filename, "AMERICAN.GXT");
+		sprintf(filename, "ENGLISH.GXT");
 		break;
 	case CMenuManager::LANGUAGE_FRENCH:
 		sprintf(filename, "FRENCH.GXT");

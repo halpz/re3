@@ -37,6 +37,7 @@
 #include "Font.h"
 #include "Frontend.h"
 #include "VarConsole.h"
+#include "KeyGen.h"
 
 //--MIAMI: file done (possibly bugs)
 
@@ -948,53 +949,45 @@ CStreaming::RequestIslands(eLevelName level)
 	}
 }
 
-static char *IGnames[] = {
-	"player",
-	"player2",
-	"player3",
-	"player4",
-	"player5",
-	"player6",
-	"player7",
-	"player8",
-	"player9",
-	"play10",
-	"play11",
-	"igken",
-	"igcandy",
-	"igsonny",
-	"igbuddy",
-	"igjezz",
-	"ighlary",
-	"igphil",
-	"igmerc",
-	"igdick",
-	"igdiaz",
+const char *csPlayerNames[] =
+{
+	"csplr",
+	"csplr2",
+	"csplr3",
+	"csplr4",
+	"csplr5",
+	"csplr6",
+	"csplr7",
+	"csplr8",
+	"csplr9",
+	"csplr10",
+	"csplr11",
+	"csplr12",
+	"csplr13",
+	"csplr14",
+	"csplr15",
+	"csplr16",
 	""
 };
 
-static char *CSnames[] = {
-	"csplay",
-	"csplay2",
-	"csplay3",
-	"csplay4",
-	"csplay5",
-	"csplay6",
-	"csplay7",
-	"csplay8",
-	"csplay9",
-	"csplay10",
-	"csplay11",
-	"csken",
-	"cscandy",
-	"cssonny",
-	"csbuddy",
-	"csjezz",
-	"cshlary",
-	"csphil",
-	"csmerc",
-	"csdick",
-	"csdiaz",
+const char* playerNames[] =
+{
+	"plr",
+	"plr2",
+	"plr3",
+	"plr4",
+	"plr5",
+	"plr6",
+	"plr7",
+	"plr8",
+	"plr9",
+	"plr10",
+	"plr11",
+	"plr12",
+	"plr13",
+	"plr14",
+	"plr15",
+	"plr16",
 	""
 };
 
@@ -1008,15 +1001,17 @@ CStreaming::RequestSpecialModel(int32 modelId, const char *modelName, int32 flag
 	int i, n;
 
 	mi = CModelInfo::GetModelInfo(modelId);
-	if(strncasecmp("CSPlay", modelName, 6) == 0){
-		char *curname = CModelInfo::GetModelInfo(MI_PLAYER)->GetModelName();
-		for(int i = 0; CSnames[i][0]; i++){
-			if(strcasecmp(curname, IGnames[i]) == 0){
-				modelName = CSnames[i];
+	if (CKeyGen::GetUppercaseKey(modelName) == CKeyGen::GetUppercaseKey("cstoni_a")) {
+		i = 0;
+		while (csPlayerNames[i][0] != '\0') {
+			if (CModelInfo::GetModelInfo(0)->GetNameHashKey() == CKeyGen::GetUppercaseKey(playerNames[i])) {
+				modelName = csPlayerNames[i];
 				break;
 			}
+			i++;
 		}
 	}
+
 	if(!CGeneral::faststrcmp(mi->GetModelName(), modelName)){
 		// Already have the correct name, just request it
 		RequestModel(modelId, flags);
@@ -1151,12 +1146,9 @@ CStreaming::RemoveModel(int32 id)
 void
 CStreaming::RemoveUnusedBuildings(eLevelName level)
 {
-	if(level != LEVEL_INDUSTRIAL)
-		RemoveBuildings(LEVEL_INDUSTRIAL);
-	if(level != LEVEL_COMMERCIAL)
-		RemoveBuildings(LEVEL_COMMERCIAL);
-	if(level != LEVEL_SUBURBAN)
-		RemoveBuildings(LEVEL_SUBURBAN);
+	for(int i = LEVEL_INDUSTRIAL; i < NUM_LEVELS; i++)
+		if(level != i)
+			RemoveBuildings((eLevelName)i);
 }
 
 void
@@ -1279,12 +1271,9 @@ CStreaming::RemoveUnusedBigBuildings(eLevelName level)
 {
 	ISLAND_LOADING_IS(LOW)
 	{
-	if(level != LEVEL_INDUSTRIAL)
-		RemoveBigBuildings(LEVEL_INDUSTRIAL);
-	if(level != LEVEL_COMMERCIAL)
-		RemoveBigBuildings(LEVEL_COMMERCIAL);
-	if(level != LEVEL_SUBURBAN)
-		RemoveBigBuildings(LEVEL_SUBURBAN);
+	for(int i = LEVEL_INDUSTRIAL; i < NUM_LEVELS; i++)
+		if(level != i)
+			RemoveBuildings((eLevelName)i);
 	}
 	RemoveIslandsNotUsed(level);
 }
@@ -1324,8 +1313,11 @@ CStreaming::RemoveIslandsNotUsed(eLevelName level)
 	}
 #ifdef NO_ISLAND_LOADING
 	if(FrontEndMenuManager.m_PrefsIslandLoading == CMenuManager::ISLAND_LOADING_HIGH) {
-		DeleteIsland(pIslandLODmainlandEntity);
-		DeleteIsland(pIslandLODbeachEntity);
+		DeleteIsland(pIslandLODindustEntity);
+		DeleteIsland(pIslandLODcomIndEntity);
+		DeleteIsland(pIslandLODcomSubEntity);
+		DeleteIsland(pIslandLODsubIndEntity);
+		DeleteIsland(pIslandLODsubComEntity);
 	} else
 #endif
 	switch(level){

@@ -521,12 +521,23 @@ public:
 	uint32 bCollectBusFare : 1;
 	uint32 bBoughtIceCream : 1;
 	uint32 bDonePositionOutOfCollision : 1;
-	uint32 bCanAttackPlayerWithCops : 1;
 
+	uint32 bCanAttackPlayerWithCops : 1; // 1A1_1 on PS2
+	uint32 b1A1_2 : 1;
+	uint32 b1A1_4 : 1;
+	uint32 b1A1_8 : 1;
+	uint32 b1A1_10 : 1;
+	uint32 b1A1_20 : 1;
+
+#ifdef KANGAROO_CHEAT
 	// our own flags
 	uint32 m_ped_flagI80 : 1; // KANGAROO_CHEAT define makes use of this as cheat toggle 
+#endif
 
 	uint8 m_gangFlags;
+	uint8 m_unused15D; // these 3 can't be padding but had to actually have been members ...
+	uint8 m_unused15E;
+	uint8 m_unused15F;
 	uint8 CharCreatedBy;
 	eObjective m_objective;
 	eObjective m_prevObjective;
@@ -567,7 +578,7 @@ public:
 	uint32 m_pathNodeTimer;
 	CPathNode m_pathNodeObjPool[8];
 	CPathNode* m_pCurPathNode;
-	char m_nPathDir;
+	int8 m_nPathDir;
 	CPathNode* m_pLastPathNode;
 	CPathNode* m_pNextPathNode;
 	CVector m_followPathDestPos;
@@ -744,6 +755,7 @@ public:
 	void SetObjective(eObjective);
 	void SetObjective(eObjective, int16, int16);
 	void SetObjective(eObjective, CVector);
+	void SetObjective(eObjective, CVector, float);
 	void SetObjective(eObjective, float, const CVector&);
 	void ClearChat(void);
 	void InformMyGangOfAttack(CEntity*);

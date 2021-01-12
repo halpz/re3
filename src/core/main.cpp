@@ -82,6 +82,10 @@ char gString2[512];
 wchar gUString[256];
 wchar gUString2[256];
 
+// leeds
+bool gMakeResources = true;
+bool gUseChunkFiles = false;
+
 float FramesPerSecond = 30.0f;
 
 bool gbPrintShite = false;
@@ -124,7 +128,7 @@ bool gbPrintMemoryUsage;
 #endif
 
 #ifdef NEW_RENDERER
-bool gbNewRenderer;
+bool gbNewRenderer = true;
 #endif
 #ifdef FIX_BUGS
 // need to clear stencil for mblur fx. no idea why it works in the original game
@@ -1143,10 +1147,10 @@ MattRenderScene(void)
 	/// CWorld::AdvanceCurrentScanCode();
 	// CMattRenderer::ResetRenderStates
 	/// CRenderer::ClearForFrame();		// before ConstructRenderList
-	// CClock::CalcEnvMapTimeMultiplicator
+	CClock::CalcEnvMapTimeMultiplicator();
 	RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
 	CWaterLevel::RenderWater();	// actually CMattRenderer::RenderWater
-	// CClock::ms_EnvMapTimeMultiplicator = 1.0f;
+	CClock::ms_EnvMapTimeMultiplicator = 1.0f;
 	// cWorldStream::ClearDynamics
 	/// CRenderer::ConstructRenderList();	// before PreRender
 if(gbRenderWorld0)
@@ -1158,6 +1162,8 @@ if(gbRenderWorld1)
 	CRenderer::RenderWorld(1);	// opaque
 if(gbRenderRoads)
 	CRenderer::RenderRoads();
+
+	CRenderer::GenerateEnvironmentMap();	// should be after static shadows, but that's weird
 
 	CRenderer::RenderPeds();
 
@@ -1172,7 +1178,7 @@ if(gbRenderWater)
 
 if(gbRenderEverythingBarRoads)
 	CRenderer::RenderEverythingBarRoads();
-	// get env map here?
+	// seam fixer
 	// moved this:
 	// CRenderer::RenderFadingInEntities();
 }
@@ -1195,7 +1201,6 @@ void
 RenderEffects_new(void)
 {
 	CShadows::RenderStaticShadows();
-	// CRenderer::GenerateEnvironmentMap
 	CShadows::RenderStoredShadows();
 	CSkidmarks::Render();
 	CRubbish::Render();

@@ -540,7 +540,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_DISPLAY_NTH_ONSCREEN_COUNTER_WITH_STRING:
 	{
 		char onscreen_str[12];
-		script_assert(CTheScripts::ScriptSpace[m_nIp++] == ARGUMENT_GLOBALVAR);
+		//script_assert(CTheScripts::ScriptSpace[m_nIp++] == ARGUMENT_GLOBALVAR);
 		uint16 var = CTheScripts::Read2BytesFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 2);
 		wchar* text = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]); // ???
@@ -816,7 +816,12 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	//case COMMAND_HAS_CHAR_BEEN_DAMAGED_BY_CAR:
 	//case COMMAND_HAS_CAR_BEEN_DAMAGED_BY_CHAR:
 	//case COMMAND_HAS_CAR_BEEN_DAMAGED_BY_CAR:
-	//case COMMAND_GET_RADIO_CHANNEL:
+	case COMMAND_GET_RADIO_CHANNEL:
+	{
+		// TODO
+		ScriptParams[0] = -1;
+		StoreParameters(&m_nIp, 1);
+	}
 	//case COMMAND_DISPLAY_TEXT_WITH_3_NUMBERS:
 	//case COMMAND_IS_CAR_DROWNING_IN_WATER:
 	case COMMAND_IS_CHAR_DROWNING_IN_WATER:
@@ -1013,7 +1018,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		return 0;
 	case COMMAND_REMOVE_EVERYTHING_FOR_HUGE_CUTSCENE:
 	{
-		CCutsceneMgr::RemoveEverythingFromTheWorldForTheBiggestFuckoffCutsceneEver();
+		//CCutsceneMgr::RemoveEverythingFromTheWorldForTheBiggestFuckoffCutsceneEver();
 		return 0;
 	}
 	case COMMAND_IS_PLAYER_TOUCHING_VEHICLE:
@@ -1327,7 +1332,19 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		CollectParameters(&m_nIp, 1);
 		UpdateCompareFlag(CPools::GetPedPool()->GetAt(ScriptParams[0]) != 0);
 		return 0;
-	//case COMMAND_DOES_VEHICLE_EXIST:
+	case COMMAND_DOES_VEHICLE_EXIST:
+	{
+		// TODO
+		CollectParameters(&m_nIp, 1);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
+		bool bExist = false;
+		if (pVehicle) {
+			int index = CPools::GetVehiclePool()->GetJustIndex_NoFreeAssert(pVehicle);
+			bExist = (index >= 0 && index <= NUMVEHICLES); // TODO: FIX_BUGS
+		}
+		UpdateCompareFlag(bExist);
+		return 0;
+	}
 	//case COMMAND_ADD_SHORT_RANGE_BLIP_FOR_CONTACT_POINT:
 	case COMMAND_ADD_SHORT_RANGE_SPRITE_BLIP_FOR_CONTACT_POINT:
 	{

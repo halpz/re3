@@ -132,7 +132,7 @@ CPlayerInfo::Process(void)
 		CAutomobile *car = (CAutomobile*)m_pPed->m_pMyVehicle;
 
 		if (car->m_nWheelsOnGround < 3)
-			m_nTimeNotFullyOnGround += CTimer::GetTimeInMilliseconds();
+			m_nTimeNotFullyOnGround += CTimer::GetTimeStepInMilliseconds();
 		else
 			m_nTimeNotFullyOnGround = 0;
 

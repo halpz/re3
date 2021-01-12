@@ -24,7 +24,6 @@ CColModel::CColModel(void)
 CColModel::~CColModel(void)
 {
 	RemoveCollisionVolumes();
-	RemoveTrianglePlanes();
 }
 
 void*

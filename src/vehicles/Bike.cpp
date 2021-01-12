@@ -83,7 +83,7 @@ CBike::CBike(int32 id, uint8 CreatedBy)
 	case MI_SANCHEZ:
 		m_bikeAnimType = ASSOCGRP_BIKE_DIRT;
 		break;
-	default: assert(0 && "invalid bike model ID");
+	default: m_bikeAnimType = ASSOCGRP_BIKE_STANDARD; //assert(0 && "invalid bike model ID"); // TODO
 	}
 	m_vehType = VEHICLE_TYPE_BIKE;
 

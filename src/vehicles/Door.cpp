@@ -168,3 +168,58 @@ CTrainDoor::IsClosed(void)
 {
 	return m_fPosn == RetTranslationWhenClosed();
 }
+
+bool 
+CFerryDoor::IsInUse(void) 
+{
+	float translationDifference = m_fPrevPosn - m_fPosn;
+	m_fPrevPosn = m_fPosn;
+	return Abs(translationDifference) > 0.002f;
+}
+
+float 
+CFerryDoor::RetTranslationWhenClosed(void) 
+{
+	if(Abs(m_fClosedPosn) < Abs(m_fOpenPosn))
+		return m_fClosedPosn;
+	else
+		return m_fOpenPosn;
+}
+
+bool 
+CFerryDoor::IsClosed(void) 
+{
+	return m_fPosn == RetTranslationWhenClosed();
+}
+
+float 
+CFerryDoor::RetTranslationWhenOpen(void) 
+{
+	if(Abs(m_fClosedPosn) < Abs(m_fOpenPosn))
+		return m_fOpenPosn;
+	else
+		return m_fClosedPosn;
+}
+
+bool 
+CFerryDoor::IsFullyOpen(void) 
+{
+	if(Abs(m_fPosn) < Abs(RetTranslationWhenOpen()) - 0.5f)
+		return false;
+	return true;
+}
+
+void 
+CFerryDoor::Open(float ratio) 
+{
+	float open;
+
+	m_fPrevPosn = m_fPosn;
+	open = RetTranslationWhenOpen();
+	if(ratio < 1.0f){
+		m_fPosn = open*ratio;
+	}else{
+		m_nDoorState = DOORST_OPEN;
+		m_fPosn = open;
+	}
+}

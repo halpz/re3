@@ -80,4 +80,4 @@ public:
 	static void ProcessTidyUpMemory(void);
 };
 
-inline bool IsAreaVisible(int area) { return area == CGame::currArea || area == AREA_EVERYWHERE; }
+inline bool IsAreaVisible(int area) { return true; }

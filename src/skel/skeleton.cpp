@@ -399,7 +399,7 @@ RsInitialize(void)
 	 */
 	RwBool              result;
 
-	RsGlobal.appName = RWSTRING("GTA: Vice City");
+	RsGlobal.appName = RWSTRING("GTA: Liberty City Stories");
 	RsGlobal.maximumWidth = DEFAULT_SCREEN_WIDTH;
 	RsGlobal.maximumHeight = DEFAULT_SCREEN_HEIGHT;
 	RsGlobal.width = DEFAULT_SCREEN_WIDTH;

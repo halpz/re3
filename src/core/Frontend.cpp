@@ -3,6 +3,7 @@
 #include <dinput.h>
 #endif
 
+#define FORCE_PC_SCALING
 #define WITHWINDOWS
 #include "common.h"
 #ifndef PS2_MENU
@@ -57,6 +58,19 @@ const CRGBA LIST_OPTION_COLOR(155, 155, 155, 255);
 const CRGBA RADIO_SELECTOR_COLOR = SLIDEROFF_COLOR;
 const CRGBA INACTIVE_RADIO_COLOR(100, 100, 255, 100);
 const CRGBA SCROLLBAR_COLOR = LABEL_COLOR;
+
+#if 0
+// Mobile
+#define DEFAULT_BRIGHTNESS 0x150
+#define MIN_BRIGHTNESS 180
+#define MAX_BRIGHTNESS 700
+#else
+// PS2
+// 8 bars (32 step)
+#define DEFAULT_BRIGHTNESS 0x120
+#define MIN_BRIGHTNESS 0x80
+#define MAX_BRIGHTNESS 0x180
+#endif
 
 #define MAP_MIN_SIZE 162.f
 #define MAP_SIZE_TO_ALLOW_X_MOVE 297.f
@@ -465,7 +479,7 @@ CMenuManager::CMenuManager()
 	m_PrefsMusicVolume = 49;
 	m_PrefsRadioStation = 0;
 	m_PrefsStereoMono = 1;
-	m_PrefsBrightness = 256;
+	m_PrefsBrightness = DEFAULT_BRIGHTNESS;
 	m_PrefsLOD = CRenderer::ms_lodDistScale;
 	m_KeyPressedCode = -1;
 	m_bFrontEnd_ReloadObrTxtGxt = false;
@@ -674,8 +688,8 @@ CMenuManager::CheckSliderMovement(int value)
 {
 	switch (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action) {
 	case MENUACTION_BRIGHTNESS:
-		m_PrefsBrightness += value * 24.19f;
-		m_PrefsBrightness = clamp(m_PrefsBrightness, 0, 384);
+		m_PrefsBrightness += value * 32.0f;
+		m_PrefsBrightness = clamp(m_PrefsBrightness, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
 		break;
 	case MENUACTION_DRAWDIST:
 		if(value > 0)
@@ -1464,7 +1478,7 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 					int lastActiveBarX;
 					switch (aScreens[m_nCurrScreen].m_aEntries[i].m_Action) {
 						case MENUACTION_BRIGHTNESS:
-							ProcessSlider(m_PrefsBrightness / 384.0f, 70.0f, HOVEROPTION_INCREASE_BRIGHTNESS, HOVEROPTION_DECREASE_BRIGHTNESS, SCREEN_WIDTH, true);
+							ProcessSlider((float)(m_PrefsBrightness - MIN_BRIGHTNESS) / (MAX_BRIGHTNESS - MIN_BRIGHTNESS), 70.0f, HOVEROPTION_INCREASE_BRIGHTNESS, HOVEROPTION_DECREASE_BRIGHTNESS, SCREEN_WIDTH, true);
 							break;
 						case MENUACTION_DRAWDIST:
 							ProcessSlider((m_PrefsLOD - 0.925f) / 0.875f, 99.0f, HOVEROPTION_INCREASE_DRAWDIST, HOVEROPTION_DECREASE_DRAWDIST, SCREEN_WIDTH, true);
@@ -4736,7 +4750,7 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 					DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
 					SaveSettings();
 				} else if (m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
-					m_PrefsBrightness = 256;
+					m_PrefsBrightness = DEFAULT_BRIGHTNESS;
 					m_PrefsLOD = 1.2f;
 #ifdef LEGACY_MENU_OPTIONS
 					m_PrefsVsync = true;

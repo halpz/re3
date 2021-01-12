@@ -4,6 +4,8 @@
 #ifdef RW_D3D9
 #ifdef EXTENDED_PIPELINES
 
+#include "rpmatfx.h"
+
 #include "main.h"
 #include "RwHelper.h"
 #include "Lights.h"
@@ -38,16 +40,190 @@ enum {
 	VSLOC_reflProps,
 	VSLOC_specLights,
 
-	// Leeds building
+	// Leeds building, Leeds vehicle mobile
 	VSLOC_emissive = rw::d3d::VSLOC_afterLights,
 	VSLOC_ambient,
+	VSLOC_viewMat,	// only vehicle
 
-	PSLOC_colorscale = 1
+	PSLOC_colorscale = 1,
+
+	// Leeds vehicle PS2
+	VSLOC_texMat = rw::d3d::VSLOC_afterLights,
+
+	PSLOC_shininess = 1,
+	PSLOC_skyTop,
+	PSLOC_skyBot
 };
 
 /*
- * Neo Vehicle pipe
+ * Leeds & Neo Vehicle pipe
  */
+
+static void *leedsVehicle_VS;
+static void *leedsVehicle_mobile_VS;
+static void *leedsVehicle_blend_PS;
+static void *leedsVehicle_add_PS;
+static void *leedsVehicle_mobile_PS;
+
+static rw::RawMatrix normal2texcoord_flipU = {
+	{ -0.5f,  0.0f, 0.0f }, 0.0f,
+	{ 0.0f, -0.5f, 0.0f }, 0.0f,
+	{ 0.0f,  0.0f, 1.0f }, 0.0f,
+	{ 0.5f,  0.5f, 0.0f }, 1.0f
+};
+
+void
+uploadEnvMatrix(rw::Frame *frame)
+{
+	using namespace rw;
+	Matrix invMat;
+	if(frame == nil)
+		frame = engine->currentCamera->getFrame();
+
+	RawMatrix envMtx, invMtx;
+	Matrix tmp = *frame->getLTM();
+	// Now the weird part: we remove the camera pitch
+	tmp.at.z = 0.0f;
+	tmp.at = normalize(tmp.at);
+	tmp.right.x = -tmp.at.y;
+	tmp.right.y = tmp.at.x;
+	tmp.right.z = 0.0f;;
+	tmp.up.set(0.0f, 0.0f, 1.0f);
+	tmp.pos.set(0.0f, 0.0f, 0.0f);
+	tmp.flags = Matrix::TYPEORTHONORMAL;
+
+	Matrix::invert(&invMat, &tmp);
+	convMatrix(&invMtx, &invMat);
+	RawMatrix::mult(&envMtx, &invMtx, &normal2texcoord_flipU);
+	d3d::d3ddevice->SetVertexShaderConstantF(VSLOC_texMat, (float*)&envMtx, 4);
+}
+
+void
+leedsVehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
+{
+	using namespace rw;
+	using namespace rw::d3d;
+	using namespace rw::d3d9;
+
+	int vsBits;
+	setStreamSource(0, header->vertexStream[0].vertexBuffer, 0, header->vertexStream[0].stride);
+	setIndices(header->indexBuffer);
+	setVertexDeclaration(header->vertexDeclaration);
+
+	vsBits = lightingCB_Shader(atomic);
+	uploadMatrices(atomic->getFrame()->getLTM());
+
+	setVertexShader(leedsVehicle_VS);
+	if(gGlassCarsCheat)
+		setPixelShader(leedsVehicle_blend_PS);
+	else
+		setPixelShader(leedsVehicle_add_PS);
+
+	d3d::setTexture(1, EnvMapTex);
+	uploadEnvMatrix(nil);
+
+	SetRenderState(SRCBLEND, BLENDONE);
+
+	InstanceData *inst = header->inst;
+	for(rw::uint32 i = 0; i < header->numMeshes; i++){
+		Material *m = inst->material;
+
+		SetRenderState(VERTEXALPHA, inst->vertexAlpha || m->color.alpha != 255);
+
+		float coef = 0.0f;
+		if(RpMatFXMaterialGetEffects(m) == rpMATFXEFFECTENVMAP){
+			coef = CClock::ms_EnvMapTimeMultiplicator * RpMatFXMaterialGetEnvMapCoefficient(m)*0.5f;
+			if(gGlassCarsCheat)
+				coef = 1.0f;
+		}
+		d3ddevice->SetPixelShaderConstantF(PSLOC_shininess, (float*)&coef, 1);
+
+		setMaterial(m->color, m->surfaceProps);
+
+		if(m->texture)
+			d3d::setTexture(0, m->texture);
+		else
+			d3d::setTexture(0, gpWhiteTexture);
+
+		drawInst(header, inst);
+		inst++;
+	}
+
+	d3d::setTexture(1, nil);
+
+	SetRenderState(SRCBLEND, BLENDSRCALPHA);
+}
+
+void
+leedsVehicleRenderCB_mobile(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
+{
+	using namespace rw;
+	using namespace rw::d3d;
+	using namespace rw::d3d9;
+
+	int vsBits;
+	setStreamSource(0, header->vertexStream[0].vertexBuffer, 0, header->vertexStream[0].stride);
+	setIndices(header->indexBuffer);
+	setVertexDeclaration(header->vertexDeclaration);
+
+	vsBits = lightingCB_Shader(atomic);
+	uploadMatrices(atomic->getFrame()->getLTM());
+
+	setVertexShader(leedsVehicle_mobile_VS);
+	setPixelShader(leedsVehicle_mobile_PS);
+
+	RGBAf amb, emiss;
+	amb.red = CTimeCycle::GetAmbientRed();
+	amb.green = CTimeCycle::GetAmbientGreen();
+	amb.blue = CTimeCycle::GetAmbientBlue();
+	amb.alpha = 1.0f;
+	emiss = pAmbient->color;
+
+	d3ddevice->SetVertexShaderConstantF(VSLOC_ambient, (float*)&amb, 1);
+	d3ddevice->SetVertexShaderConstantF(VSLOC_emissive, (float*)&emiss, 1);
+
+	RGBAf skyTop, skyBot;
+	skyTop.red = CTimeCycle::GetSkyTopRed()/255.0f;
+	skyTop.green = CTimeCycle::GetSkyTopGreen()/255.0f;
+	skyTop.blue = CTimeCycle::GetSkyTopBlue()/255.0f;
+	skyBot.red = CTimeCycle::GetSkyBottomRed()/255.0f;
+	skyBot.green = CTimeCycle::GetSkyBottomGreen()/255.0f;
+	skyBot.blue = CTimeCycle::GetSkyBottomBlue()/255.0f;
+
+	d3ddevice->SetPixelShaderConstantF(PSLOC_skyTop, (float*)&skyTop, 1);
+	d3ddevice->SetPixelShaderConstantF(PSLOC_skyBot, (float*)&skyBot, 1);
+
+	d3ddevice->SetVertexShaderConstantF(VSLOC_viewMat, (float*)&rw::engine->currentCamera->devView, 4);
+
+	d3d::setTexture(1, EnvMapTex);
+
+	InstanceData *inst = header->inst;
+	for(rw::uint32 i = 0; i < header->numMeshes; i++){
+		Material *m = inst->material;
+
+		SetRenderState(VERTEXALPHA, inst->vertexAlpha || m->color.alpha != 255);
+
+		float coef = 0.0f;
+		if(RpMatFXMaterialGetEffects(m) == rpMATFXEFFECTENVMAP){
+			coef = CClock::ms_EnvMapTimeMultiplicator * RpMatFXMaterialGetEnvMapCoefficient(m)*0.5f;
+			if(gGlassCarsCheat)
+				coef = 1.0f;
+		}
+		d3ddevice->SetPixelShaderConstantF(PSLOC_shininess, (float*)&coef, 1);
+
+		setMaterial(m->color, m->surfaceProps);
+
+		if(m->texture)
+			d3d::setTexture(0, m->texture);
+		else
+			d3d::setTexture(0, gpWhiteTexture);
+
+		drawInst(header, inst);
+		inst++;
+	}
+
+	d3d::setTexture(1, nil);
+}
 
 static void *neoVehicle_VS;
 static void *neoVehicle_PS;
@@ -89,8 +265,13 @@ vehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	using namespace rw::d3d9;
 
 	// TODO: make this less of a kludge
-	if(VehiclePipeSwitch == VEHICLEPIPE_MATFX){
-		matFXGlobals.pipelines[rw::platform]->render(atomic);
+	if(VehiclePipeSwitch == VEHICLEPIPE_PS2){
+		leedsVehicleRenderCB(atomic, header);
+	//	matFXGlobals.pipelines[rw::platform]->render(atomic);
+		return;
+	}
+	if(VehiclePipeSwitch == VEHICLEPIPE_MOBILE){
+		leedsVehicleRenderCB_mobile(atomic, header);
 		return;
 	}
 
@@ -146,15 +327,15 @@ vehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 void
 CreateVehiclePipe(void)
 {
-	if(CFileMgr::LoadFile("neo/carTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
-		printf("Error: couldn't open 'neo/carTweakingTable.dat'\n");
-	else{
-		char *fp = (char*)work_buff;
-		fp = ReadTweakValueTable(fp, Fresnel);
-		fp = ReadTweakValueTable(fp, Power);
-		fp = ReadTweakValueTable(fp, DiffColor);
-		fp = ReadTweakValueTable(fp, SpecColor);
-	}
+//	if(CFileMgr::LoadFile("neo/carTweakingTable.dat", work_buff, sizeof(work_buff), "r") <= 0)
+//		printf("Error: couldn't open 'neo/carTweakingTable.dat'\n");
+//	else{
+//		char *fp = (char*)work_buff;
+//		fp = ReadTweakValueTable(fp, Fresnel);
+//		fp = ReadTweakValueTable(fp, Power);
+//		fp = ReadTweakValueTable(fp, DiffColor);
+//		fp = ReadTweakValueTable(fp, SpecColor);
+//	}
 
 #include "shaders/neoVehicle_VS.inc"
 	neoVehicle_VS = rw::d3d::createVertexShader(neoVehicle_VS_cso);
@@ -163,6 +344,26 @@ CreateVehiclePipe(void)
 #include "shaders/neoVehicle_PS.inc"
 	neoVehicle_PS = rw::d3d::createPixelShader(neoVehicle_PS_cso);
 	assert(neoVehicle_PS);
+
+#include "shaders/leedsVehicle_VS.inc"
+	leedsVehicle_VS = rw::d3d::createVertexShader(leedsVehicle_VS_cso);
+	assert(leedsVehicle_VS);
+
+#include "shaders/leedsVehicle_mobile_VS.inc"
+	leedsVehicle_mobile_VS = rw::d3d::createVertexShader(leedsVehicle_mobile_VS_cso);
+	assert(leedsVehicle_mobile_VS);
+
+#include "shaders/leedsVehicle_blend_PS.inc"
+	leedsVehicle_blend_PS = rw::d3d::createPixelShader(leedsVehicle_blend_PS_cso);
+	assert(leedsVehicle_blend_PS);
+
+#include "shaders/leedsVehicle_add_PS.inc"
+	leedsVehicle_add_PS = rw::d3d::createPixelShader(leedsVehicle_add_PS_cso);
+	assert(leedsVehicle_add_PS);
+
+#include "shaders/leedsVehicle_mobile_PS.inc"
+	leedsVehicle_mobile_PS = rw::d3d::createPixelShader(leedsVehicle_mobile_PS_cso);
+	assert(leedsVehicle_mobile_PS);
 
 
 	rw::d3d9::ObjPipeline *pipe = rw::d3d9::ObjPipeline::create();
@@ -181,6 +382,15 @@ DestroyVehiclePipe(void)
 	rw::d3d::destroyPixelShader(neoVehicle_PS);
 	neoVehicle_PS = nil;
 
+	rw::d3d::destroyVertexShader(leedsVehicle_VS);
+	leedsVehicle_VS = nil;
+
+	rw::d3d::destroyPixelShader(leedsVehicle_blend_PS);
+	leedsVehicle_blend_PS = nil;
+
+	rw::d3d::destroyPixelShader(leedsVehicle_add_PS);
+	leedsVehicle_add_PS = nil;
+
 	((rw::d3d9::ObjPipeline*)vehiclePipe)->destroy();
 	vehiclePipe = nil;
 }
@@ -192,6 +402,7 @@ DestroyVehiclePipe(void)
  */
 
 static void *leedsBuilding_VS;
+static void *leedsBuilding_mobile_VS;
 static void *scale_PS;
 
 static void
@@ -201,12 +412,14 @@ worldRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	using namespace rw::d3d;
 	using namespace rw::d3d9;
 
-	int vsBits;
 	setStreamSource(0, header->vertexStream[0].vertexBuffer, 0, header->vertexStream[0].stride);
 	setIndices(header->indexBuffer);
 	setVertexDeclaration(header->vertexDeclaration);
 
-	setVertexShader(leedsBuilding_VS);
+	if(CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_MOBILE)
+		setVertexShader(CustomPipes::leedsBuilding_mobile_VS);
+	else
+		setVertexShader(CustomPipes::leedsBuilding_VS);
 	setPixelShader(scale_PS);
 
 	uploadMatrices(atomic->getFrame()->getLTM());
@@ -229,7 +442,7 @@ worldRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 		Material *m = inst->material;
 
 		float cs = 1.0f;
-		if(m->texture)
+		if(WorldPipeSwitch == WORLDPIPE_PS2 && m->texture)
 			cs = 255/128.0f;
 		colorscale[0] = colorscale[1] = colorscale[2] = cs;
 		d3ddevice->SetPixelShaderConstantF(PSLOC_colorscale, colorscale, 1);
@@ -239,7 +452,7 @@ worldRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 		else
 			d3d::setTexture(0, gpWhiteTexture);	// actually we don't even render this
 
-		setMaterial(m->color, m->surfaceProps, 0.5f);
+		setMaterial(m->color, m->surfaceProps, WorldPipeSwitch == WORLDPIPE_PS2 ? 0.5f : 1.0f);
 
 		SetRenderState(VERTEXALPHA, inst->vertexAlpha || m->color.alpha != 255);
 
@@ -259,6 +472,9 @@ CreateWorldPipe(void)
 #include "shaders/leedsBuilding_VS.inc"
 	leedsBuilding_VS = rw::d3d::createVertexShader(leedsBuilding_VS_cso);
 	assert(leedsBuilding_VS);
+#include "shaders/leedsBuilding_mobile_VS.inc"
+	leedsBuilding_mobile_VS = rw::d3d::createVertexShader(leedsBuilding_mobile_VS_cso);
+	assert(leedsBuilding_mobile_VS);
 #include "shaders/scale_PS.inc"
 	scale_PS = rw::d3d::createPixelShader(scale_PS_cso);
 	assert(scale_PS);
@@ -275,6 +491,8 @@ DestroyWorldPipe(void)
 {
 	rw::d3d::destroyVertexShader(leedsBuilding_VS);
 	leedsBuilding_VS = nil;
+	rw::d3d::destroyVertexShader(leedsBuilding_mobile_VS);
+	leedsBuilding_mobile_VS = nil;
 	rw::d3d::destroyPixelShader(scale_PS);
 	scale_PS = nil;
 
@@ -546,6 +764,203 @@ DestroyRimLightPipes(void)
 }
 
 }
+
+#ifdef NEW_RENDERER
+
+namespace WorldRender
+{
+
+struct BuildingInst
+{
+	rw::RawMatrix combinedMat;
+	rw::d3d9::InstanceDataHeader *instHeader;
+	uint8 fadeAlpha;
+	bool lighting;
+};
+BuildingInst blendInsts[3][2000];
+int numBlendInsts[3];
+
+static RwRGBAReal black;
+
+static void
+SetMatrix(BuildingInst *building, rw::Matrix *worldMat)
+{
+	using namespace rw;
+	RawMatrix world, worldview;
+	Camera *cam = engine->currentCamera;
+	convMatrix(&world, worldMat);
+	RawMatrix::mult(&worldview, &world, &cam->devView);
+	RawMatrix::mult(&building->combinedMat, &worldview, &cam->devProj);
+}
+
+static bool
+IsTextureTransparent(RwTexture *tex)
+{
+	if(tex == nil || tex->raster == nil)
+		return false;
+	return PLUGINOFFSET(rw::d3d::D3dRaster, tex->raster, rw::d3d::nativeRasterOffset)->hasAlpha;
+}
+
+// Render all opaque meshes and put atomics that needs blending
+// into the deferred list.
+void
+AtomicFirstPass(RpAtomic *atomic, int pass)
+{
+	using namespace rw;
+	using namespace rw::d3d;
+	using namespace rw::d3d9;
+
+	BuildingInst *building = &blendInsts[pass][numBlendInsts[pass]];
+
+	atomic->getPipeline()->instance(atomic);
+	building->instHeader = (d3d9::InstanceDataHeader*)atomic->geometry->instData;
+	assert(building->instHeader != nil);
+	assert(building->instHeader->platform == PLATFORM_D3D9);
+	building->fadeAlpha = 255;
+	building->lighting = !!(atomic->geometry->flags & rw::Geometry::LIGHT);
+
+	bool setupDone = false;
+	bool defer = false;
+	SetMatrix(building, atomic->getFrame()->getLTM());
+
+	float colorscale[4];
+
+	InstanceData *inst = building->instHeader->inst;
+	for(rw::uint32 i = 0; i < building->instHeader->numMeshes; i++, inst++){
+		Material *m = inst->material;
+
+		if(m->texture == nil)
+			continue;
+
+		if(inst->vertexAlpha || m->color.alpha != 255 ||
+		   IsTextureTransparent(m->texture)){
+			defer = true;
+			continue;
+		}
+
+		// alright we're rendering this atomic
+		if(!setupDone){
+			setStreamSource(0, building->instHeader->vertexStream[0].vertexBuffer, 0, building->instHeader->vertexStream[0].stride);
+			setIndices(building->instHeader->indexBuffer);
+			setVertexDeclaration(building->instHeader->vertexDeclaration);
+			if(CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_MOBILE)
+				setVertexShader(CustomPipes::leedsBuilding_mobile_VS);
+			else
+				setVertexShader(CustomPipes::leedsBuilding_VS);
+			setPixelShader(CustomPipes::scale_PS);
+			d3ddevice->SetVertexShaderConstantF(VSLOC_combined, (float*)&building->combinedMat, 4);
+
+			RGBAf amb, emiss;
+			amb.red = CTimeCycle::GetAmbientRed();
+			amb.green = CTimeCycle::GetAmbientGreen();
+			amb.blue = CTimeCycle::GetAmbientBlue();
+			amb.alpha = 1.0f;
+			emiss = pAmbient->color;
+
+			d3ddevice->SetVertexShaderConstantF(CustomPipes::VSLOC_ambient, (float*)&amb, 1);
+			d3ddevice->SetVertexShaderConstantF(CustomPipes::VSLOC_emissive, (float*)&emiss, 1);
+
+			colorscale[3] = 1.0f;
+
+			setupDone = true;
+		}
+
+		float cs = 1.0f;
+		if(CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_PS2 && m->texture)
+			cs = 255/128.0f;
+		colorscale[0] = colorscale[1] = colorscale[2] = cs;
+		d3ddevice->SetPixelShaderConstantF(CustomPipes::PSLOC_colorscale, colorscale, 1);
+
+		d3d::setTexture(0, m->texture);
+
+		setMaterial(m->color, m->surfaceProps, 0.5f);
+
+		drawInst(building->instHeader, inst);
+	}
+	if(defer)
+		numBlendInsts[pass]++;
+}
+
+void
+AtomicFullyTransparent(RpAtomic *atomic, int pass, int fadeAlpha)
+{
+	using namespace rw;
+	using namespace rw::d3d;
+	using namespace rw::d3d9;
+
+	BuildingInst *building = &blendInsts[pass][numBlendInsts[pass]];
+
+	atomic->getPipeline()->instance(atomic);
+	building->instHeader = (d3d9::InstanceDataHeader*)atomic->geometry->instData;
+	assert(building->instHeader != nil);
+	assert(building->instHeader->platform == PLATFORM_D3D9);
+	building->fadeAlpha = fadeAlpha;
+	building->lighting = !!(atomic->geometry->flags & rw::Geometry::LIGHT);
+	SetMatrix(building, atomic->getFrame()->getLTM());
+	numBlendInsts[pass]++;
+}
+
+void
+RenderBlendPass(int pass)
+{
+	using namespace rw;
+	using namespace rw::d3d;
+	using namespace rw::d3d9;
+
+	if(CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_MOBILE)
+		setVertexShader(CustomPipes::leedsBuilding_mobile_VS);
+	else
+		setVertexShader(CustomPipes::leedsBuilding_VS);
+	setPixelShader(CustomPipes::scale_PS);
+
+	RGBAf amb, emiss;
+	amb.red = CTimeCycle::GetAmbientRed();
+	amb.green = CTimeCycle::GetAmbientGreen();
+	amb.blue = CTimeCycle::GetAmbientBlue();
+	amb.alpha = 1.0f;
+	emiss = pAmbient->color;
+
+	d3ddevice->SetVertexShaderConstantF(CustomPipes::VSLOC_ambient, (float*)&amb, 1);
+	d3ddevice->SetVertexShaderConstantF(CustomPipes::VSLOC_emissive, (float*)&emiss, 1);
+
+	float colorscale[4];
+	colorscale[3] = 1.0f;
+
+	int i;
+	for(i = 0; i < numBlendInsts[pass]; i++){
+		BuildingInst *building = &blendInsts[pass][i];
+
+		setStreamSource(0, building->instHeader->vertexStream[0].vertexBuffer, 0, building->instHeader->vertexStream[0].stride);
+		setIndices(building->instHeader->indexBuffer);
+		setVertexDeclaration(building->instHeader->vertexDeclaration);
+		d3ddevice->SetVertexShaderConstantF(VSLOC_combined, (float*)&building->combinedMat, 4);
+
+		InstanceData *inst = building->instHeader->inst;
+		for(rw::uint32 j = 0; j < building->instHeader->numMeshes; j++, inst++){
+			Material *m = inst->material;
+			if(m->texture == nil)
+				continue;
+			if(!inst->vertexAlpha && m->color.alpha == 255 && !IsTextureTransparent(m->texture) && building->fadeAlpha == 255)
+				continue;	// already done this one
+
+			float cs = 1.0f;
+			if(CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_PS2 && m->texture)
+				cs = 255/128.0f;
+			colorscale[0] = colorscale[1] = colorscale[2] = cs;
+			d3ddevice->SetPixelShaderConstantF(CustomPipes::PSLOC_colorscale, colorscale, 1);
+
+			d3d::setTexture(0, m->texture);
+
+			rw::RGBA color = m->color;
+			color.alpha = (color.alpha * building->fadeAlpha)/255;
+			setMaterial(color, m->surfaceProps, 0.5f);
+
+			drawInst(building->instHeader, inst);
+		}
+	}
+}
+}
+#endif
 
 #endif
 #endif

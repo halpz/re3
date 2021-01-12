@@ -1,10 +1,12 @@
 #include "common.h"
 
 #include "templates.h"
+#include "main.h"
 #include "TxdStore.h"
 #include "2dEffect.h"
 #include "BaseModelInfo.h"
 #include "ModelInfo.h"
+#include "KeyGen.h"
 
 //--MIAMI: file done
 
@@ -18,6 +20,7 @@ CBaseModelInfo::CBaseModelInfo(ModelInfoType type)
 	m_type = type;
 	m_num2dEffects = 0;
 	m_bOwnsColModel = false;
+	m_name = new char[MAX_MODEL_NAME];
 }
 
 void
@@ -100,4 +103,13 @@ CBaseModelInfo::Get2dEffect(int n)
 		return CModelInfo::Get2dEffectStore().GetItem(m_2dEffectsID+n);
 	else
 		return nil;
+}
+
+
+void
+CBaseModelInfo::SetModelName(const char *name)
+{
+	m_nameKey = CKeyGen::GetUppercaseKey(name);
+	if (!gUseChunkFiles)
+		strcpy(m_name, name);
 }

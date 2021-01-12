@@ -2531,7 +2531,7 @@ int CTheScripts::FindFreeSlotInCollectiveArray()
 void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective objective, int16 p1, int16 p2)
 {
 	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++) {
-		if (CollectiveArray[i].colIndex = colIndex) {
+		if (CollectiveArray[i].colIndex == colIndex) {
 			CPed* pPed = CPools::GetPedPool()->GetAt(CollectiveArray[i].pedIndex);
 			if (pPed == nil) {
 				CollectiveArray[i].colIndex = -1;
@@ -2548,7 +2548,7 @@ void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective ob
 void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective objective, CVector p1, float p2)
 {
 	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++) {
-		if (CollectiveArray[i].colIndex = colIndex) {
+		if (CollectiveArray[i].colIndex == colIndex) {
 			CPed* pPed = CPools::GetPedPool()->GetAt(CollectiveArray[i].pedIndex);
 			if (pPed == nil) {
 				CollectiveArray[i].colIndex = -1;
@@ -2565,7 +2565,7 @@ void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective ob
 void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective objective, CVector p1)
 {
 	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++) {
-		if (CollectiveArray[i].colIndex = colIndex) {
+		if (CollectiveArray[i].colIndex == colIndex) {
 			CPed* pPed = CPools::GetPedPool()->GetAt(CollectiveArray[i].pedIndex);
 			if (pPed == nil) {
 				CollectiveArray[i].colIndex = -1;
@@ -2582,7 +2582,7 @@ void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective ob
 void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective objective, void* p1)
 {
 	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++) {
-		if (CollectiveArray[i].colIndex = colIndex) {
+		if (CollectiveArray[i].colIndex == colIndex) {
 			CPed* pPed = CPools::GetPedPool()->GetAt(CollectiveArray[i].pedIndex);
 			if (pPed == nil) {
 				CollectiveArray[i].colIndex = -1;
@@ -2599,7 +2599,7 @@ void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective ob
 void CTheScripts::SetObjectiveForAllPedsInCollective(int colIndex, eObjective objective)
 {
 	for (int i = 0; i < MAX_NUM_COLLECTIVES; i++) {
-		if (CollectiveArray[i].colIndex = colIndex) {
+		if (CollectiveArray[i].colIndex == colIndex) {
 			CPed* pPed = CPools::GetPedPool()->GetAt(CollectiveArray[i].pedIndex);
 			if (pPed == nil) {
 				CollectiveArray[i].colIndex = -1;
@@ -2740,6 +2740,9 @@ void CTheScripts::ReadObjectNamesFromScript()
 {
 	int32 varSpace = GetSizeOfVariableSpace();
 	uint32 ip = varSpace + 8;
+	NumSaveVars = Read4BytesFromScript(&ip);
+	SavedVarIndices = (short*)&ScriptParams[ip];
+	ip += 2 * NumSaveVars;
 	NumberOfUsedObjects = Read2BytesFromScript(&ip);
 	ip += 2;
 	for (uint16 i = 0; i < NumberOfUsedObjects; i++) {
@@ -2751,30 +2754,16 @@ void CTheScripts::ReadObjectNamesFromScript()
 
 void CTheScripts::UpdateObjectIndices()
 {
-	char name[USED_OBJECT_NAME_LENGTH];
 	char error[112];
 	for (int i = 1; i < NumberOfUsedObjects; i++) {
-		bool found = false;
-		for (int j = 0; j < MODELINFOSIZE && !found; j++) {
-			CBaseModelInfo* pModel = CModelInfo::GetModelInfo(j);
-			if (!pModel)
-				continue;
-			strcpy(name, pModel->GetModelName());
-#ifdef FIX_BUGS
-			for (int k = 0; k < USED_OBJECT_NAME_LENGTH && name[k]; k++)
-#else
-			for (int k = 0; k < USED_OBJECT_NAME_LENGTH; k++)
-#endif
-				name[k] = toupper(name[k]);
-			if (strcmp(name, UsedObjectArray[i].name) == 0) {
-				found = true;
-				UsedObjectArray[i].index = j;
-			}
-		}
-		if (!found) {
+		UsedObjectArray[i].index = -1;
+		CModelInfo::GetModelInfo(UsedObjectArray[i].name, &UsedObjectArray[i].index);
+#ifndef FINAL
+		if (UsedObjectArray[i].index == -1) {
 			sprintf(error, "CTheScripts::UpdateObjectIndices - Couldn't find %s", UsedObjectArray[i].name);
 			debug("%s\n", error);
 		}
+#endif
 	}
 }
 
@@ -2784,7 +2773,8 @@ void CTheScripts::ReadMultiScriptFileOffsetsFromScript()
 	uint32 ip = varSpace + 3;
 	int32 objectSize = Read4BytesFromScript(&ip);
 	ip = objectSize + 8;
-	MainScriptSize = Read4BytesFromScript(&ip);
+	NumTrueGlobals = Read2BytesFromScript(&ip);
+	MostGlobals = Read2BytesFromScript(&ip);
 	LargestMissionScriptSize = Read4BytesFromScript(&ip);
 	NumberOfMissionScripts = Read2BytesFromScript(&ip);
 	NumberOfExclusiveMissionScripts = Read2BytesFromScript(&ip);

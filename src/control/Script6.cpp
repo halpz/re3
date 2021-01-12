@@ -83,7 +83,6 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 {
 	switch (command) {
 	//case COMMAND_FLASH_RADAR_BLIP:
-	/*
 	case COMMAND_IS_CHAR_IN_CONTROL:
 	{
 		CollectParameters(&m_nIp, 1);
@@ -91,7 +90,6 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		UpdateCompareFlag(pPed->IsPedInControl());
 		return 0;
 	}
-	*/
 	case COMMAND_SET_GENERATE_CARS_AROUND_CAMERA:
 		CollectParameters(&m_nIp, 1);
 		CCarCtrl::bCarsGeneratedAroundCamera = (ScriptParams[0] != 0);
@@ -374,32 +372,30 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 
-		if (CTheScripts::NumberOfExclusiveMissionScripts > 0 && ScriptParams[0] <= UINT16_MAX - 2)
-			return 0;
+		if (CTheScripts::NumberOfExclusiveMissionScripts > 0) {
+			if (ScriptParams[0] < UINT16_MAX - 1)
+				return 0;
+			ScriptParams[0] = UINT16_MAX - ScriptParams[0];
+		}
 #ifdef MISSION_REPLAY
 		missionRetryScriptIndex = ScriptParams[0];
 		if (missionRetryScriptIndex == 19)
 			CStats::LastMissionPassedName[0] = '\0';
 #endif
 		CTimer::Suspend();
-		int offset = CTheScripts::MultiScriptArray[ScriptParams[0]];
-#ifdef USE_DEBUG_SCRIPT_LOADER
-		CFileMgr::ChangeDir("\\data\\");
-		int handle = CFileMgr::OpenFile(scriptfile, "rb");
-		CFileMgr::ChangeDir("\\");
-#else
-		CFileMgr::ChangeDir("\\");
-		int handle = CFileMgr::OpenFile("data\\main.scm", "rb");
-#endif
-		CFileMgr::Seek(handle, offset, 0);
-		CFileMgr::Read(handle, (const char*)&CTheScripts::ScriptSpace[SIZE_MAIN_SCRIPT], SIZE_MISSION_SCRIPT);
-		CFileMgr::CloseFile(handle);
-		CRunningScript* pMissionScript = CTheScripts::StartNewScript(SIZE_MAIN_SCRIPT);
+		int offset = CTheScripts::MultiScriptArray[ScriptParams[0]] + 8;
+		int size = CTheScripts::MultiScriptArray[ScriptParams[0] + 1] - CTheScripts::MultiScriptArray[ScriptParams[0]];
+		if (size <= 0)
+			size = CTheScripts::LargestMissionScriptSize;
+		CFileMgr::Seek(gScriptsFile, offset, 0);
+		CFileMgr::Read(gScriptsFile, (const char*)&CTheScripts::ScriptSpace[CTheScripts::MainScriptSize], size); // TODO
+		CRunningScript* pMissionScript = CTheScripts::StartNewScript(CTheScripts::MainScriptSize);
 		CTimer::Resume();
 		pMissionScript->m_bIsMissionScript = true;
 		pMissionScript->m_bMissionFlag = true;
 		CTheScripts::bAlreadyRunningAMissionScript = true;
-		CGameLogic::ClearShortCut();
+		memset(&CTheScripts::ScriptSpace[CTheScripts::NumTrueGlobals * 4 + 8], 0, CTheScripts::MostGlobals * 4);
+		pMissionScript->Process();
 		return 0;
 	}
 	case COMMAND_SET_OBJECT_DRAW_LAST:
@@ -527,7 +523,6 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
-	/*
 	case COMMAND_MARK_ROADS_BETWEEN_LEVELS:
 	{
 		CollectParameters(&m_nIp, 6);
@@ -576,7 +571,6 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		ThePaths.PedMarkRoadsBetweenLevelsInArea(infX, supX, infY, supY, infZ, supZ);
 		return 0;
 	}
-	*/
 	case COMMAND_SET_CAR_AVOID_LEVEL_TRANSITIONS:
 	{
 		CollectParameters(&m_nIp, 2);

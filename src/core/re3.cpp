@@ -220,6 +220,16 @@ void LoadINISettings()
 	CustomPipes::GlossMult = CheckAndReadIniFloat("CustomPipesValues", "GlossMult", CustomPipes::GlossMult);
 #endif
 	gBackfaceCulling = CheckAndReadIniInt("Rendering", "BackfaceCulling", gBackfaceCulling);
+	
+#ifdef PROPER_SCALING
+	CDraw::ms_bProperScaling = CheckAndReadIniInt("Draw", "ProperScaling", CDraw::ms_bProperScaling);	
+#endif
+#ifdef FIX_RADAR
+	CDraw::ms_bFixRadar      = CheckAndReadIniInt("Draw", "FixRadar", CDraw::ms_bFixRadar);	
+#endif
+#ifdef FIX_SPRITES
+	CDraw::ms_bFixSprites    = CheckAndReadIniInt("Draw", "FixSprites", CDraw::ms_bFixSprites);	
+#endif
 }
 
 void SaveINISettings()
@@ -258,6 +268,16 @@ void SaveINISettings()
 	CheckAndSaveIniFloat("CustomPipesValues", "GlossMult", CustomPipes::GlossMult, changed);
 #endif
 	CheckAndSaveIniInt("Rendering", "BackfaceCulling", gBackfaceCulling, changed);
+
+#ifdef PROPER_SCALING	
+	CheckAndSaveIniInt("Draw", "ProperScaling", CDraw::ms_bProperScaling, changed);	
+#endif
+#ifdef FIX_RADAR
+	CheckAndSaveIniInt("Draw", "FixRadar", CDraw::ms_bFixRadar, changed);
+#endif
+#ifdef FIX_SPRITES
+	CheckAndSaveIniInt("Draw", "FixSprites", CDraw::ms_bFixSprites, changed);	
+#endif
 
 	if (changed)
 		cfg.write_file("reLCS.ini");
@@ -420,17 +440,15 @@ SwitchToMission(void)
 #endif
 
 static const char *carnames[] = {
-	"landstal", "idaho", "stinger", "linerun", "peren", "sentinel", "rio", "firetruk", "trash", "stretch", "manana",
-	"infernus", "voodoo", "pony", "mule", "cheetah", "ambulan", "fbicar", "moonbeam", "esperant", "taxi", "washing",
-	"bobcat", "mrwhoop", "bfinject", "hunter", "police", "enforcer", "securica", "banshee", "predator", "bus",
-	"rhino", "barracks", "cuban", "chopper", "angel", "coach", "cabbie", "stallion", "rumpo", "rcbandit", "romero",
-	"packer", "sentxs", "admiral", "squalo", "seaspar", "pizzaboy", "gangbur", "airtrain", "deaddodo", "speeder",
-	"reefer", "tropic", "flatbed", "yankee", "caddy", "zebra", "topfun", "skimmer", "pcj600", "faggio", "freeway",
-	"rcbaron", "rcraider", "glendale", "oceanic", "sanchez", "sparrow", "patriot", "lovefist", "coastg", "dinghy",
-	"hermes", "sabre", "sabretur", "pheonix", "walton", "regina", "comet", "deluxo", "burrito", "spand", "marquis",
-	"baggage", "kaufman", "maverick", "vcnmav", "rancher", "fbiranch", "virgo", "greenwoo", "jetmax", "hotring",
-	"sandking", "blistac", "polmav", "boxville", "benson", "mesa", "rcgoblin", "hotrina", "hotrinb",
-	"bloodra", "bloodrb", "vicechee"
+	"spider", "landstal", "idaho", "stinger", "linerun", "peren", "sentinel", "patriot", "firetruk", "trash", "stretch",
+	"manana", "infernus", "blista", "pony", "mule", "cheetah", "ambulan", "fbicar", "moonbeam", "esperant", "taxi",
+	"kuruma", "bobcat", "mrwhoop", "bfinject", "hearse", "police", "enforcer", "securica", "banshee", "bus", "rhino",
+	"barracks", "dodo", "coach", "cabbie", "stallion", "rumpo", "rcbandit", "bellyup", "mrwongs", "mafia", "yardie",
+	"yakuza", "diablos", "columb", "hoods", "panlant", "flatbed", "yankee", "borgnine", "toyz", "campvan", "ballot",
+	"shelby", "pontiac", "esprit", "ammotruk", "hotrod", "Sindacco_Car", "Forelli_Car", "ferry", "ghost", "speeder",
+	"reefer", "predator", "train", "escape", "chopper", "airtrain", "deaddodo", "angel", "pizzaboy", "noodleboy",
+	"pcj600", "faggio", "freeway", "angel2", "sanchez2", "sanchez", "rcgoblin", "rcraider", "hunter", "maverick",
+	"polmav", "vcnmav"
 };
 
 static CTweakVar** TweakVarsList;
@@ -563,7 +581,7 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Cheats", "Pickup chicks", PickUpChicksCheat);
 
 		static int spawnCarId = MI_LANDSTAL;
-		e = DebugMenuAddVar("Spawn", "Spawn Car ID", &spawnCarId, nil, 1, MI_LANDSTAL, MI_VICECHEE, carnames);
+		e = DebugMenuAddVar("Spawn", "Spawn Car ID", &spawnCarId, nil, 1, MI_SPIDER, MI_VCNMAV, carnames);
 		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddCmd("Spawn", "Spawn Car", [](){
 			if(spawnCarId == MI_CHOPPER ||
@@ -578,22 +596,19 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Spawn", "Spawn Stinger", [](){ SpawnCar(MI_STINGER); });
 		DebugMenuAddCmd("Spawn", "Spawn Infernus", [](){ SpawnCar(MI_INFERNUS); });
 		DebugMenuAddCmd("Spawn", "Spawn Cheetah", [](){ SpawnCar(MI_CHEETAH); });
-		DebugMenuAddCmd("Spawn", "Spawn Phoenix", [](){ SpawnCar(MI_PHEONIX); });
+		DebugMenuAddCmd("Spawn", "Spawn Esprit", [](){ SpawnCar(MI_ESPRIT); });
 		DebugMenuAddCmd("Spawn", "Spawn Banshee", [](){ SpawnCar(MI_BANSHEE); });
 		DebugMenuAddCmd("Spawn", "Spawn Esperanto", [](){ SpawnCar(MI_ESPERANT); });
 		DebugMenuAddCmd("Spawn", "Spawn Stallion", [](){ SpawnCar(MI_STALLION); });
-		DebugMenuAddCmd("Spawn", "Spawn Admiral", [](){ SpawnCar(MI_ADMIRAL); });
-		DebugMenuAddCmd("Spawn", "Spawn Washington", [](){ SpawnCar(MI_WASHING); });
+		DebugMenuAddCmd("Spawn", "Spawn Mafia", [](){ SpawnCar(MI_MAFIA); });
+		DebugMenuAddCmd("Spawn", "Spawn Kuruma", [](){ SpawnCar(MI_KURUMA); });
 		DebugMenuAddCmd("Spawn", "Spawn Taxi", [](){ SpawnCar(MI_TAXI); });
 		DebugMenuAddCmd("Spawn", "Spawn Police", [](){ SpawnCar(MI_POLICE); });
 		DebugMenuAddCmd("Spawn", "Spawn Enforcer", [](){ SpawnCar(MI_ENFORCER); });
-		DebugMenuAddCmd("Spawn", "Spawn Cuban", [](){ SpawnCar(MI_CUBAN); });
-		DebugMenuAddCmd("Spawn", "Spawn Voodoo", [](){ SpawnCar(MI_VOODOO); });
+		DebugMenuAddCmd("Spawn", "Spawn Diablo", [](){ SpawnCar(MI_DIABLOS); });
+		DebugMenuAddCmd("Spawn", "Spawn Yardie", [](){ SpawnCar(MI_YARDIE); });
 		DebugMenuAddCmd("Spawn", "Spawn BF injection", [](){ SpawnCar(MI_BFINJECT); });
 		DebugMenuAddCmd("Spawn", "Spawn Maverick", [](){ SpawnCar(MI_MAVERICK); });
-		DebugMenuAddCmd("Spawn", "Spawn VCN Maverick", [](){ SpawnCar(MI_VCNMAV); });
-		DebugMenuAddCmd("Spawn", "Spawn Sparrow", [](){ SpawnCar(MI_SPARROW); });
-		DebugMenuAddCmd("Spawn", "Spawn Sea Sparrow", [](){ SpawnCar(MI_SEASPAR); });
 		DebugMenuAddCmd("Spawn", "Spawn Hunter", [](){ SpawnCar(MI_HUNTER); });
 		DebugMenuAddCmd("Spawn", "Spawn Rhino", [](){ SpawnCar(MI_RHINO); });
 		DebugMenuAddCmd("Spawn", "Spawn Firetruck", [](){ SpawnCar(MI_FIRETRUCK); });
@@ -601,10 +616,9 @@ DebugMenuPopulate(void)
 		DebugMenuAddCmd("Spawn", "Spawn PCJ 600", [](){ SpawnCar(MI_PCJ600); });
 		DebugMenuAddCmd("Spawn", "Spawn Faggio", [](){ SpawnCar(MI_FAGGIO); });
 		DebugMenuAddCmd("Spawn", "Spawn Freeway", [](){ SpawnCar(MI_FREEWAY); });
-		DebugMenuAddCmd("Spawn", "Spawn Squalo", [](){ SpawnCar(MI_SQUALO); });
-		DebugMenuAddCmd("Spawn", "Spawn Skimmer", [](){ SpawnCar(MI_SKIMMER); });
 
 		DebugMenuAddVarBool8("Render", "Draw hud", &CHud::m_Wants_To_Draw_Hud, nil);
+		DebugMenuAddVar("Render", "Brightness", &FrontEndMenuManager.m_PrefsBrightness, nil, 16, 0, 700, nil);
 		DebugMenuAddVarBool8("Render", "Backface Culling", &gBackfaceCulling, nil);
 		DebugMenuAddVarBool8("Render", "PS2 Alpha test Emu", &gPS2alphaTest, nil);
 		DebugMenuAddVarBool8("Render", "Frame limiter", &FrontEndMenuManager.m_PrefsFrameLimiter, nil);
@@ -635,8 +649,8 @@ extern bool gbRenderWorld2;
 #endif
 
 #ifdef EXTENDED_COLOURFILTER
-		static const char *filternames[] = { "None", "Simple", "Normal", "Mobile" };
-		e = DebugMenuAddVar("Render", "Colourfilter", &CPostFX::EffectSwitch, nil, 1, CPostFX::POSTFX_OFF, CPostFX::POSTFX_MOBILE, filternames);
+		static const char *filternames[] = { "None", "PS2" };
+		e = DebugMenuAddVar("Render", "Colourfilter", &CPostFX::EffectSwitch, nil, 1, CPostFX::POSTFX_OFF, CPostFX::POSTFX_NORMAL, filternames);
 		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddVar("Render", "Intensity", &CPostFX::Intensity, nil, 0.05f, 0, 10.0f);
 		DebugMenuAddVarBool8("Render", "Blur", &CPostFX::BlurOn, nil);
@@ -647,18 +661,25 @@ extern bool gbRenderWorld2;
 		DebugMenuAddVarBool8("Render", "Occlusion debug", &bDispayOccDebugStuff, nil);
 #endif
 #ifdef EXTENDED_PIPELINES
-		static const char *vehpipenames[] = { "MatFX", "Neo" };
-		e = DebugMenuAddVar("Render", "Vehicle Pipeline", &CustomPipes::VehiclePipeSwitch, nil,
-			1, CustomPipes::VEHICLEPIPE_MATFX, CustomPipes::VEHICLEPIPE_NEO, vehpipenames);
+		static const char *worldpipenames[] = { "PS2", "Mobile" };
+		e = DebugMenuAddVar("Render", "World Rendering", &CustomPipes::WorldPipeSwitch, nil,
+			1, CustomPipes::WORLDPIPE_PS2, CustomPipes::WORLDPIPE_MOBILE, worldpipenames);
 		DebugMenuEntrySetWrap(e, true);
-		DebugMenuAddVar("Render", "Neo Vehicle Shininess", &CustomPipes::VehicleShininess, nil, 0.1f, 0, 1.0f);
-		DebugMenuAddVar("Render", "Neo Vehicle Specularity", &CustomPipes::VehicleSpecularity, nil, 0.1f, 0, 1.0f);
+		static const char *vehpipenames[] = { "PS2", "Mobile", "Neo" };
+		e = DebugMenuAddVar("Render", "Vehicle Pipeline", &CustomPipes::VehiclePipeSwitch, nil,
+			1, CustomPipes::VEHICLEPIPE_PS2, CustomPipes::VEHICLEPIPE_MOBILE, vehpipenames);
+		DebugMenuEntrySetWrap(e, true);
+		DebugMenuAddVarBool8("Render", "Glass Cars cheat", &CustomPipes::gGlassCarsCheat, nil);
+extern bool gbRenderDebugEnvMap;
+		DebugMenuAddVarBool8("Render", "Show Env map", &gbRenderDebugEnvMap, nil);
+//		DebugMenuAddVar("Render", "Neo Vehicle Shininess", &CustomPipes::VehicleShininess, nil, 0.1f, 0, 1.0f);
+//		DebugMenuAddVar("Render", "Neo Vehicle Specularity", &CustomPipes::VehicleSpecularity, nil, 0.1f, 0, 1.0f);
 		DebugMenuAddVarBool8("Render", "Neo Ped Rim light enable", &CustomPipes::RimlightEnable, nil);
 		DebugMenuAddVar("Render", "Mult", &CustomPipes::RimlightMult, nil, 0.1f, 0, 1.0f);
-		DebugMenuAddVarBool8("Render", "Neo World Lightmaps enable", &CustomPipes::LightmapEnable, nil);
-		DebugMenuAddVar("Render", "Mult", &CustomPipes::LightmapMult, nil, 0.1f, 0, 1.0f);
-		DebugMenuAddVarBool8("Render", "Neo Road Gloss enable", &CustomPipes::GlossEnable, nil);
-		DebugMenuAddVar("Render", "Mult", &CustomPipes::GlossMult, nil, 0.1f, 0, 1.0f);
+//		DebugMenuAddVarBool8("Render", "Neo World Lightmaps enable", &CustomPipes::LightmapEnable, nil);
+//		DebugMenuAddVar("Render", "Mult", &CustomPipes::LightmapMult, nil, 0.1f, 0, 1.0f);
+//		DebugMenuAddVarBool8("Render", "Neo Road Gloss enable", &CustomPipes::GlossEnable, nil);
+//		DebugMenuAddVar("Render", "Mult", &CustomPipes::GlossMult, nil, 0.1f, 0, 1.0f);
 #endif
 		DebugMenuAddVarBool8("Render", "Show Ped Paths", &gbShowPedPaths, nil);
 		DebugMenuAddVarBool8("Render", "Show Car Paths", &gbShowCarPaths, nil);
@@ -671,6 +692,16 @@ extern bool gbRenderWorld2;
 		DebugMenuAddVarBool8("Render", "Don't render Vehicles", &gbDontRenderVehicles, nil);
 		DebugMenuAddVarBool8("Render", "Don't render Objects", &gbDontRenderObjects, nil);
 		DebugMenuAddVarBool8("Render", "Don't Render Water", &gbDontRenderWater, nil);
+		
+#ifdef PROPER_SCALING	
+		DebugMenuAddVarBool8("Draw", "Proper Scaling", &CDraw::ms_bProperScaling, nil);
+#endif
+#ifdef FIX_RADAR
+		DebugMenuAddVarBool8("Draw", "Fix Radar", &CDraw::ms_bFixRadar, nil);
+#endif
+#ifdef FIX_SPRITES
+		DebugMenuAddVarBool8("Draw", "Fix Sprites", &CDraw::ms_bFixSprites, nil);
+#endif
 
 #ifndef FINAL
 		DebugMenuAddVarBool8("Debug", "Print Memory Usage", &gbPrintMemoryUsage, nil);
