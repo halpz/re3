@@ -4346,7 +4346,7 @@ CCam::ProcessArrestCamOne(void)
 			((CPed*)TheCamera.pTargetEntity)->m_pedIK.GetComponentPosition(TargetPos, PED_MID);
 			if(FindPlayerPed() && FindPlayerPed()->m_pArrestingCop)
 				cop = FindPlayerPed()->m_pArrestingCop;
-			if(cop && CGeneral::GetRandomNumberInRange(0.0f, 0.1f) > 0.5f){
+			if(cop && CGeneral::GetRandomNumberInRange(0.0f, 1.0f) > 0.5f){
 				ArrestModes[0] = ARRESTCAM_OVERSHOULDER;
 				ArrestModes[1] = ARRESTCAM_ALONGGROUND;
 				ArrestModes[2] = ARRESTCAM_OVERSHOULDER;
@@ -4368,7 +4368,7 @@ CCam::ProcessArrestCamOne(void)
 
 			if(FindPlayerPed() && FindPlayerPed()->m_pArrestingCop)
 				cop = FindPlayerPed()->m_pArrestingCop;
-			if(cop && CGeneral::GetRandomNumberInRange(0.0f, 0.1f) > 0.65f){
+			if(cop && CGeneral::GetRandomNumberInRange(0.0f, 1.0f) > 0.65f){
 				ArrestModes[0] = ARRESTCAM_OVERSHOULDER;
 				ArrestModes[1] = ARRESTCAM_LAMPPOST;
 				ArrestModes[2] = ARRESTCAM_ALONGGROUND;
@@ -4438,6 +4438,7 @@ CCam::ProcessArrestCamOne(void)
 				pStoredCopPed = nil;
 		}
 
+		Source = CamSource;
 		CVector OrigSource = Source;
 		TheCamera.AvoidTheGeometry(OrigSource, TargetPos, Source, FOV);
 		Front = TargetPos - Source;
@@ -4464,8 +4465,9 @@ CCam::ProcessArrestCamOne(void)
 
 	if(nUsingWhichCamera == ARRESTCAM_OVERSHOULDER && pStoredCopPed){
 		foundPos = GetLookOverShoulderPos(TheCamera.pTargetEntity, pStoredCopPed, TargetPos, CamSource);
-		if(CamSource.z > Source.z + ARRESTCAM_S_ROTATION_UP*CTimer::GetTimeStep())
-			CamSource.z = Source.z + ARRESTCAM_S_ROTATION_UP*CTimer::GetTimeStep();
+		float newZ = Source.z + ARRESTCAM_S_ROTATION_UP*CTimer::GetTimeStep();
+		if(CamSource.z > newZ)
+			CamSource.z = newZ;
 	}else if(nUsingWhichCamera >= ARRESTCAM_ALONGGROUND_RIGHT && nUsingWhichCamera <= ARRESTCAM_ALONGGROUND_LEFT_UP){
 		CamSource = Source;
 		Front = TargetPos - CamSource;
