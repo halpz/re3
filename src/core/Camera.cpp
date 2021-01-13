@@ -2212,7 +2212,7 @@ CCamera::StartTransition(int16 newMode)
 		while(deltaBeta < -PI) deltaBeta += 2*PI;
 		deltaBeta = Abs(deltaBeta);
 
-		door = FindPlayerPed()->m_vehEnterType;
+		door = FindPlayerPed()->m_vehDoor;
 		if(deltaBeta > HALFPI){
 			if(((CPed*)pTargetEntity)->m_carInObjective){
 				if(((CPed*)pTargetEntity)->m_carInObjective->IsUpsideDown()){
@@ -2293,7 +2293,7 @@ CCamera::StartTransition(int16 newMode)
 		}
 #endif
 
-		door = FindPlayerPed()->m_vehEnterType;
+		door = FindPlayerPed()->m_vehDoor;
 		if(deltaBeta > HALFPI){
 			if(((CVehicle*)pTargetEntity)->IsUpsideDown()){
 				if(door == CAR_DOOR_LF || door == CAR_DOOR_LR)	// BUG: game checks LF twice

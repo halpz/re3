@@ -443,7 +443,7 @@ public:
 	float m_fRotationCur;
 	float m_fRotationDest;
 	float m_headingRate;
-	uint16 m_vehEnterType;
+	uint16 m_vehDoor;
 	int16 m_walkAroundType;
 	CPhysical *m_pCurrentPhysSurface;
 	CVector m_vecOffsetFromPhysSurface;

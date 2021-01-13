@@ -1038,19 +1038,19 @@ CPed::ProcessObjective(void)
 									if (m_nPedType == PEDTYPE_COP || vehOfTarget->bIsBus) {
 										GoToNearestDoor(vehOfTarget);
 									} else {
-										m_vehEnterType = 0;
+										m_vehDoor = 0;
 										if (m_pedInObjective == vehOfTarget->pDriver || vehOfTarget->bIsBus) {
-											m_vehEnterType = CAR_DOOR_LF;
+											m_vehDoor = CAR_DOOR_LF;
 										} else if (m_pedInObjective == vehOfTarget->pPassengers[0]) {
-											m_vehEnterType = CAR_DOOR_RF;
+											m_vehDoor = CAR_DOOR_RF;
 										} else if (m_pedInObjective == vehOfTarget->pPassengers[1]) {
-											m_vehEnterType = CAR_DOOR_LR;
+											m_vehDoor = CAR_DOOR_LR;
 										} else if (m_pedInObjective == vehOfTarget->pPassengers[2]) {
-											m_vehEnterType = CAR_DOOR_RR;
+											m_vehDoor = CAR_DOOR_RR;
 										}
 										// Unused
-										// GetPositionToOpenCarDoor(vehOfTarget, m_vehEnterType);
-										SetSeekCar(vehOfTarget, m_vehEnterType);
+										// GetPositionToOpenCarDoor(vehOfTarget, m_vehDoor);
+										SetSeekCar(vehOfTarget, m_vehDoor);
 										SetMoveState(PEDMOVE_RUN);
 									}
 								}
@@ -1381,26 +1381,26 @@ CPed::ProcessObjective(void)
 									if (m_carInObjective->pPassengers[2] || m_carInObjective->m_nGettingInFlags & CAR_DOOR_FLAG_RR) {
 										foundSeat = false;
 									} else {
-										m_vehEnterType = CAR_DOOR_RR;
+										m_vehDoor = CAR_DOOR_RR;
 										foundSeat = true;
 									}
 								} else {
-									m_vehEnterType = CAR_DOOR_LR;
+									m_vehDoor = CAR_DOOR_LR;
 									foundSeat = true;
 								}
 							} else {
-								m_vehEnterType = CAR_DOOR_RF;
+								m_vehDoor = CAR_DOOR_RF;
 								foundSeat = true;
 							}
 							for (int i = 2; i < m_carInObjective->m_nNumMaxPassengers; ++i) {
 								if (!m_carInObjective->pPassengers[i] && !(m_carInObjective->m_nGettingInFlags & CAR_DOOR_FLAG_RF)) {
-									m_vehEnterType = CAR_DOOR_RF;
+									m_vehDoor = CAR_DOOR_RF;
 									foundSeat = true;
 								}
 							}
 							if (foundSeat) {
-								SetPosition(GetPositionToOpenCarDoor(m_carInObjective, m_vehEnterType));
-								SetEnterCar(m_carInObjective, m_vehEnterType);
+								SetPosition(GetPositionToOpenCarDoor(m_carInObjective, m_vehDoor));
+								SetEnterCar(m_carInObjective, m_vehDoor);
 							}
 						}
 						m_objectiveTimer = 0;
@@ -2228,7 +2228,7 @@ CPed::PedAnimAlignCB(CAnimBlendAssociation *animAssoc, void *arg)
 	eDoors enterDoor;
 	AnimationId enterAnim;
 
-	switch (ped->m_vehEnterType) {
+	switch (ped->m_vehDoor) {
 		case CAR_DOOR_RF:
 			itsVan = false;
 			enterDoor = DOOR_FRONT_RIGHT;
@@ -2305,7 +2305,7 @@ CPed::PedAnimAlignCB(CAnimBlendAssociation *animAssoc, void *arg)
 
 					ped->m_pVehicleAnim = CAnimManager::AddAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_CAR_QJACK);
 					ped->m_pVehicleAnim->SetFinishCallback(PedAnimGetInCB, ped);
-					veh->pDriver->SetBeingDraggedFromCar(veh, ped->m_vehEnterType, true);
+					veh->pDriver->SetBeingDraggedFromCar(veh, ped->m_vehDoor, true);
 
 					if (veh->pDriver->IsGangMember())
 						veh->pDriver->RegisterThreatWithGangPeds(ped);
@@ -2351,7 +2351,7 @@ CPed::PedAnimDoorOpenCB(CAnimBlendAssociation* animAssoc, void* arg)
 
 	eDoors door;
 	CPed *pedInSeat = nil;
-	switch (ped->m_vehEnterType) {
+	switch (ped->m_vehDoor) {
 		case CAR_DOOR_RF: door = DOOR_FRONT_RIGHT; pedInSeat = veh->pPassengers[0]; break;
 		case CAR_DOOR_RR: door = DOOR_REAR_RIGHT; pedInSeat = veh->pPassengers[2]; break;
 		case CAR_DOOR_LF: door = DOOR_FRONT_LEFT; pedInSeat = veh->pDriver; break;
@@ -2392,21 +2392,21 @@ CPed::PedAnimDoorOpenCB(CAnimBlendAssociation* animAssoc, void* arg)
 
 	if (veh->m_vecMoveSpeed.Magnitude() > 0.2f) {
 		ped->QuitEnteringCar();
-		if (ped->m_vehEnterType != CAR_DOOR_LF && ped->m_vehEnterType != CAR_DOOR_LR)
+		if (ped->m_vehDoor != CAR_DOOR_LF && ped->m_vehDoor != CAR_DOOR_LR)
 			ped->SetFall(1000, ANIM_KO_SPIN_R, false);
 		else
 			ped->SetFall(1000, ANIM_KO_SPIN_L, false);
 		
 		return;
 	}
-	veh->ProcessOpenDoor(ped->m_vehEnterType, ANIM_CAR_OPEN_LHS, 1.0f);
+	veh->ProcessOpenDoor(ped->m_vehDoor, ANIM_CAR_OPEN_LHS, 1.0f);
 
-	if (ped->m_vehEnterType == CAR_DOOR_LF || ped->m_vehEnterType == CAR_DOOR_RF)
+	if (ped->m_vehDoor == CAR_DOOR_LF || ped->m_vehDoor == CAR_DOOR_RF)
 		isVan = false;
 
 	if (ped->m_nPedState != PED_CARJACK || isBus) {
 		AnimationId animToPlay;
-		if (ped->m_vehEnterType != CAR_DOOR_LF && ped->m_vehEnterType != CAR_DOOR_LR) {
+		if (ped->m_vehDoor != CAR_DOOR_LF && ped->m_vehDoor != CAR_DOOR_LR) {
 
 			if (isVan) {
 				animToPlay = ANIM_VAN_GETIN;
@@ -2430,7 +2430,7 @@ CPed::PedAnimDoorOpenCB(CAnimBlendAssociation* animAssoc, void* arg)
 		ped->m_pVehicleAnim->SetFinishCallback(PedAnimGetInCB, ped);
 	} else {
 		CPed *pedToDragOut = nil;
-		switch (ped->m_vehEnterType) {
+		switch (ped->m_vehDoor) {
 			case CAR_DOOR_RF: pedToDragOut = veh->pPassengers[0]; break;
 			case CAR_DOOR_RR: pedToDragOut = veh->pPassengers[2]; break;
 			case CAR_DOOR_LF: pedToDragOut = veh->pDriver; break;
@@ -2444,7 +2444,7 @@ CPed::PedAnimDoorOpenCB(CAnimBlendAssociation* animAssoc, void* arg)
 				((CCopPed*)ped)->SetArrestPlayer(ped->m_pedInObjective);
 		}
 
-		if (ped->m_vehEnterType != CAR_DOOR_LF && ped->m_vehEnterType != CAR_DOOR_LR) {
+		if (ped->m_vehDoor != CAR_DOOR_LF && ped->m_vehDoor != CAR_DOOR_LR) {
 			if (pedToDragOut && !pedToDragOut->bDontDragMeOutCar) {
 				if (pedToDragOut->m_nPedState != PED_DRIVING) {
 					ped->QuitEnteringCar();
@@ -2500,7 +2500,7 @@ CPed::PedAnimDoorOpenCB(CAnimBlendAssociation* animAssoc, void* arg)
 		}
 
 		if (pedToDragOut) {
-			pedToDragOut->SetBeingDraggedFromCar(veh, ped->m_vehEnterType, false);
+			pedToDragOut->SetBeingDraggedFromCar(veh, ped->m_vehDoor, false);
 			if (pedToDragOut->IsGangMember())
 				pedToDragOut->RegisterThreatWithGangPeds(ped);
 		}
@@ -2575,7 +2575,7 @@ CPed::PedAnimPullPedOutCB(CAnimBlendAssociation* animAssoc, void* arg)
 
 		if (ped->m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER) {
 			AnimationId animToPlay;
-			if (ped->m_vehEnterType != CAR_DOOR_LF && ped->m_vehEnterType != CAR_DOOR_LR) {
+			if (ped->m_vehDoor != CAR_DOOR_LF && ped->m_vehDoor != CAR_DOOR_LR) {
 				if (isLow)
 					animToPlay = ANIM_CAR_GETIN_LOW_RHS;
 				else
@@ -2628,7 +2628,7 @@ CPed::PedAnimGetInCB(CAnimBlendAssociation *animAssoc, void *arg)
 		}
 		return;
 	}
-	if (ped->IsPlayer() && ped->m_vehEnterType == CAR_DOOR_LF
+	if (ped->IsPlayer() && ped->m_vehDoor == CAR_DOOR_LF
 		&& (Pads[0].GetAccelerate() >= 255.0f || Pads[0].GetBrake() >= 255.0f)
 		&& veh->IsCar()) {
 		if (((CAutomobile*)veh)->Damage.GetDoorStatus(DOOR_FRONT_LEFT) != DOOR_STATUS_MISSING)
@@ -2641,7 +2641,7 @@ CPed::PedAnimGetInCB(CAnimBlendAssociation *animAssoc, void *arg)
 	bool isBus = !!veh->bIsBus;
 	bool isLow = !!veh->bLowVehicle;
 	eDoors enterDoor;
-	switch (ped->m_vehEnterType) {
+	switch (ped->m_vehDoor) {
 		case CAR_DOOR_RF:
 			isVan = false;
 			enterDoor = DOOR_FRONT_RIGHT;
@@ -2682,7 +2682,7 @@ CPed::PedAnimGetInCB(CAnimBlendAssociation *animAssoc, void *arg)
 			ped->m_leaveCarTimer = CTimer::GetTimeInMilliseconds() + 400;
 			return;
 		}
-		if (driver != ped && ped->m_vehEnterType != CAR_DOOR_LF) {
+		if (driver != ped && ped->m_vehDoor != CAR_DOOR_LF) {
 			if (!driver->IsPlayer()) {
 				driver->bUsePedNodeSeek = true;
 				driver->m_pLastPathNode = nil;
@@ -2749,10 +2749,10 @@ CPed::PedAnimDoorCloseCB(CAnimBlendAssociation *animAssoc, void *arg)
 		bool isLow = !!veh->bLowVehicle;
 
 		if (!veh->bIsBus)
-			veh->ProcessOpenDoor(ped->m_vehEnterType, ANIM_CAR_CLOSEDOOR_LHS, 1.0f);
+			veh->ProcessOpenDoor(ped->m_vehDoor, ANIM_CAR_CLOSEDOOR_LHS, 1.0f);
 
 		eDoors door;
-		switch (ped->m_vehEnterType) {
+		switch (ped->m_vehDoor) {
 			case CAR_DOOR_RF: door = DOOR_FRONT_RIGHT; break;
 			case CAR_DOOR_RR: door = DOOR_REAR_RIGHT; break;
 			case CAR_DOOR_LF: door = DOOR_FRONT_LEFT; break;
@@ -2765,7 +2765,7 @@ CPed::PedAnimDoorCloseCB(CAnimBlendAssociation *animAssoc, void *arg)
 
 		if (door == DOOR_FRONT_LEFT || ped->m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER || veh->bIsBus) {
 			PedSetInCarCB(nil, ped);
-		} else if (ped->m_vehEnterType == CAR_DOOR_RF
+		} else if (ped->m_vehDoor == CAR_DOOR_RF
 				&& (veh->m_nGettingInFlags & CAR_DOOR_FLAG_LF ||
 					(veh->pDriver != nil && 
 						(veh->pDriver->m_objective != OBJECTIVE_LEAVE_CAR
@@ -2902,7 +2902,7 @@ CPed::PedAnimStepOutCarCB(CAnimBlendAssociation* animAssoc, void* arg)
 	veh->m_vecMoveSpeed += CVector(0.001f, 0.001f, 0.001f);
 	veh->m_vecTurnSpeed += CVector(0.001f, 0.001f, 0.001f);
 	if (!veh->bIsBus)
-		veh->ProcessOpenDoor(ped->m_vehEnterType, ANIM_CAR_GETOUT_LHS, 1.0f);
+		veh->ProcessOpenDoor(ped->m_vehDoor, ANIM_CAR_GETOUT_LHS, 1.0f);
 
 	/* 
 	// Duplicate and only in PC for some reason
@@ -2912,7 +2912,7 @@ CPed::PedAnimStepOutCarCB(CAnimBlendAssociation* animAssoc, void* arg)
 	}
 	*/
 	eDoors door;
-	switch (ped->m_vehEnterType) {
+	switch (ped->m_vehDoor) {
 		case CAR_DOOR_RF:
 			door = DOOR_FRONT_RIGHT;
 			break;
@@ -3052,7 +3052,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 	if (veh->GetUp().z <= -0.8f)
 		vehIsUpsideDown = true;
 
-	if (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR) {
+	if (m_vehDoor == CAR_DOOR_RF || m_vehDoor == CAR_DOOR_RR) {
 		if (vehIsUpsideDown) {
 			m_fRotationDest = -PI + veh->GetForward().Heading();
 		} else if (veh->bIsBus) {
@@ -3060,7 +3060,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 		} else {
 			m_fRotationDest = veh->GetForward().Heading();
 		}
-	} else if (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR) {
+	} else if (m_vehDoor == CAR_DOOR_LF || m_vehDoor == CAR_DOOR_LR) {
 		if (vehIsUpsideDown) {
 			m_fRotationDest = veh->GetForward().Heading();
 		} else if (veh->bIsBus) {
@@ -3163,7 +3163,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 	if (phase == LINE_UP_TO_CAR_2) {
 		neededPos = GetPosition();
 	} else {
-		neededPos = GetPositionToOpenCarDoor(veh, m_vehEnterType, seatPosMult);
+		neededPos = GetPositionToOpenCarDoor(veh, m_vehDoor, seatPosMult);
 	}
 
 	CVector autoZPos = neededPos;
@@ -3273,7 +3273,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 		SetHeading(m_fRotationCur);
 	} else {
 		CMatrix vehDoorMat(veh->GetMatrix());
-		vehDoorMat.GetPosition() += Multiply3x3(vehDoorMat, GetLocalPositionToOpenCarDoor(veh, m_vehEnterType, 0.0f));
+		vehDoorMat.GetPosition() += Multiply3x3(vehDoorMat, GetLocalPositionToOpenCarDoor(veh, m_vehDoor, 0.0f));
 		// VC couch anims are inverted, so they're fixing it here.
 		GetMatrix() = vehDoorMat;
 	}
@@ -3290,7 +3290,7 @@ CPed::SetCarJack(CVehicle* car)
 	if (car->IsBoat())
 		return;
 
-	switch (m_vehEnterType) {
+	switch (m_vehDoor) {
 		case CAR_DOOR_RF:
 			doorFlag = CAR_DOOR_FLAG_RF;
 			door = DOOR_FRONT_RIGHT;
@@ -3329,7 +3329,7 @@ CPed::SetCarJack(CVehicle* car)
 			if (m_nPedState != PED_CARJACK && !m_pVehicleAnim)
 				if ((car->IsDoorReady(door) || car->IsDoorFullyOpen(door)))
 					if (!car->bIsBeingCarJacked && !(doorFlag & car->m_nGettingInFlags) && !(doorFlag & car->m_nGettingOutFlags))
-						SetCarJack_AllClear(car, m_vehEnterType, doorFlag);
+						SetCarJack_AllClear(car, m_vehDoor, doorFlag);
 }
 
 void
@@ -3349,7 +3349,7 @@ CPed::SetCarJack_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
 
 	Say(m_nPedType == PEDTYPE_COP ? SOUND_PED_ARREST_COP : SOUND_PED_CAR_JACKING);
 	CVector carEnterPos;
-	carEnterPos = GetPositionToOpenCarDoor(car, m_vehEnterType);
+	carEnterPos = GetPositionToOpenCarDoor(car, m_vehDoor);
 
 	car->m_nGettingInFlags |= doorFlag;
 	m_vecOffsetSeek = carEnterPos - GetPosition();
@@ -3357,7 +3357,7 @@ CPed::SetCarJack_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
 	float zDiff = Max(0.0f, carEnterPos.z - GetPosition().z);
 	bUsesCollision = false;
 
-	if (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)
+	if (m_vehDoor == CAR_DOOR_LF || m_vehDoor == CAR_DOOR_LR)
 		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, zDiff > 4.4f ? ANIM_CAR_ALIGNHI_LHS : ANIM_CAR_ALIGN_LHS, 4.0f);
 	else
 		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, zDiff > 4.4f ? ANIM_CAR_ALIGNHI_RHS : ANIM_CAR_ALIGN_RHS, 4.0f);
@@ -3377,8 +3377,8 @@ CPed::SetBeingDraggedFromCar(CVehicle *veh, uint32 vehEnterType, bool quickJack)
 	SetMoveState(PEDMOVE_STILL);
 	m_pSeekTarget = veh;
 	m_pSeekTarget->RegisterReference((CEntity **) &m_pSeekTarget);
-	m_vehEnterType = vehEnterType;
-	if (m_vehEnterType == CAR_DOOR_LF) {
+	m_vehDoor = vehEnterType;
+	if (m_vehDoor == CAR_DOOR_LF) {
 		if (veh->pDriver && veh->pDriver->IsPlayer())
 			veh->SetStatus(STATUS_PLAYER_DISABLED);
 		else
@@ -3396,7 +3396,7 @@ CPed::SetBeingDraggedFromCar(CVehicle *veh, uint32 vehEnterType, bool quickJack)
 
 	Say(SOUND_PED_CAR_JACKED);
 	SetRadioStation();
-	veh->m_nGettingOutFlags |= GetCarDoorFlag(m_vehEnterType);
+	veh->m_nGettingOutFlags |= GetCarDoorFlag(m_vehDoor);
 }
 
 void
@@ -3421,7 +3421,7 @@ CPed::BeingDraggedFromCar(void)
 		if (animAssoc)
 			animAssoc->blendDelta = -1000.0f;
 
-		if (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR) {
+		if (m_vehDoor == CAR_DOOR_LF || m_vehDoor == CAR_DOOR_LR) {
 			if (bWillBeQuickJacked) {
 				enterAnim = ANIM_CAR_QJACKED;
 			} else if (m_pMyVehicle->bLowVehicle) {
@@ -3429,7 +3429,7 @@ CPed::BeingDraggedFromCar(void)
 			} else {
 				enterAnim = ANIM_CAR_JACKED_LHS;
 			}
-		} else if (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR) {
+		} else if (m_vehDoor == CAR_DOOR_RF || m_vehDoor == CAR_DOOR_RR) {
 			if (m_pMyVehicle->bLowVehicle)
 				enterAnim = ANIM_CAR_LJACKED_RHS;
 			else
@@ -3454,7 +3454,7 @@ CPed::BeingDraggedFromCar(void)
 #ifdef VC_PED_PORTS
 	if (m_objective == OBJECTIVE_LEAVE_CAR_AND_DIE) {
 		if (m_pMyVehicle) {
-			m_pMyVehicle->ProcessOpenDoor(m_vehEnterType, NUM_ANIMS, m_pVehicleAnim->currentTime * 5.0f);
+			m_pMyVehicle->ProcessOpenDoor(m_vehDoor, NUM_ANIMS, m_pVehicleAnim->currentTime * 5.0f);
 		}
 	}
 #endif
@@ -3469,7 +3469,7 @@ CPed::SetEnterCar(CVehicle *car, uint32 unused)
 	} else {
 		uint8 doorFlag;
 		eDoors door;
-		switch (m_vehEnterType) {
+		switch (m_vehDoor) {
 			case CAR_DOOR_RF:
 				doorFlag = CAR_DOOR_FLAG_RF;
 				door = DOOR_FRONT_RIGHT;
@@ -3496,7 +3496,7 @@ CPed::SetEnterCar(CVehicle *car, uint32 unused)
 			|| doorFlag && !car->IsDoorReady(door) && !car->IsDoorFullyOpen(door))
 			SetMoveState(PEDMOVE_STILL);
 		else
-			SetEnterCar_AllClear(car, m_vehEnterType, doorFlag);
+			SetEnterCar_AllClear(car, m_vehDoor, doorFlag);
 	}
 }
 
@@ -3512,9 +3512,9 @@ CPed::SetEnterCar_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
 
 	m_pSeekTarget = car;
 	m_pSeekTarget->RegisterReference((CEntity **) &m_pSeekTarget);
-	m_vehEnterType = doorNode;
+	m_vehDoor = doorNode;
 	SetPedState(PED_ENTER_CAR);
-	if (m_vehEnterType == CAR_DOOR_RF && m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER && car->m_vehType != VEHICLE_TYPE_BIKE) {
+	if (m_vehDoor == CAR_DOOR_RF && m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER && car->m_vehType != VEHICLE_TYPE_BIKE) {
 		car->bIsBeingCarJacked = true;
 	}
 
@@ -3522,7 +3522,7 @@ CPed::SetEnterCar_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
 	m_pMyVehicle->RegisterReference((CEntity**) &m_pMyVehicle);
 	((CVehicle*)m_pSeekTarget)->m_nNumGettingIn++;
 	bUsesCollision = false;
-	CVector doorOpenPos = GetPositionToOpenCarDoor(car, m_vehEnterType);
+	CVector doorOpenPos = GetPositionToOpenCarDoor(car, m_vehDoor);
 
 	// Because buses have stairs
 	if (!m_pMyVehicle->bIsBus)
@@ -3554,13 +3554,13 @@ CPed::SetEnterCar_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
 			CWaterLevel::AllocateBoatWakeArray();
 	} else {
 		if (zDiff > 4.4f) {
-			if (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR)
+			if (m_vehDoor == CAR_DOOR_RF || m_vehDoor == CAR_DOOR_RR)
 				m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_ALIGNHI_RHS, 4.0f);
 			else
 				m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_ALIGNHI_LHS, 4.0f);
 
 		} else {
-			if (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR)
+			if (m_vehDoor == CAR_DOOR_RF || m_vehDoor == CAR_DOOR_RR)
 				m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_ALIGN_RHS, 4.0f);
 			else
 				m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_ALIGN_LHS, 4.0f);
@@ -3577,11 +3577,11 @@ CPed::EnterCar(void)
 		CVehicle *veh = (CVehicle*)m_pSeekTarget;
 
 		// Not used.
-		// CVector posForDoor = GetPositionToOpenCarDoor(veh, m_vehEnterType);
+		// CVector posForDoor = GetPositionToOpenCarDoor(veh, m_vehDoor);
 
 		if (veh->CanPedOpenLocks(this)) {
-			if (m_vehEnterType && m_pVehicleAnim) {
-				veh->ProcessOpenDoor(m_vehEnterType, m_pVehicleAnim->animId, m_pVehicleAnim->currentTime);
+			if (m_vehDoor && m_pVehicleAnim) {
+				veh->ProcessOpenDoor(m_vehDoor, m_pVehicleAnim->animId, m_pVehicleAnim->currentTime);
 			}
 		}
 		bIsInTheAir = false;
@@ -3616,7 +3616,7 @@ CPed::QuitEnteringCar(void)
 			RestorePreviousObjective();
 #endif
 
-		veh->m_nGettingInFlags &= ~GetCarDoorFlag(m_vehEnterType);
+		veh->m_nGettingInFlags &= ~GetCarDoorFlag(m_vehDoor);
 	}
 
 	bUsesCollision = true;
@@ -3681,10 +3681,10 @@ CPed::SetExitBoat(CVehicle *boat)
 	if (boat->GetModelIndex() == MI_SPEEDER && boat->IsUpsideDown()) {
 		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_CRAWLOUT_RHS, 8.0f);
 		m_pVehicleAnim->SetFinishCallback(PedSetOutCarCB, this);
-		m_vehEnterType = CAR_DOOR_RF;
+		m_vehDoor = CAR_DOOR_RF;
 		SetPedState(PED_EXIT_CAR);
 	} else {
-		m_vehEnterType = CAR_DOOR_RF;
+		m_vehDoor = CAR_DOOR_RF;
 		PedSetOutCarCB(nil, this);
 		bIsStanding = true;
 		m_pCurSurface = boat;
@@ -3703,7 +3703,7 @@ CPed::SetExitBoat(CVehicle *boat)
 		newPos = { 0.0f, 0.0f, boatCol->boundingBox.min.z };
 		newPos = boat->GetMatrix() * newPos;
 		newPos.z += 1.0f;
-		m_vehEnterType = CAR_DOOR_RF;
+		m_vehDoor = CAR_DOOR_RF;
 		PedSetOutCarCB(nil, this);
 		bIsStanding = true;
 		m_pCurSurface = boat;
@@ -3714,7 +3714,7 @@ CPed::SetExitBoat(CVehicle *boat)
 			if (boat->m_modelIndex == MI_SKIMMER)
 				newPos.z += 2.0f
 */
-			m_vehEnterType = CAR_DOOR_RF;
+			m_vehDoor = CAR_DOOR_RF;
 			PedSetOutCarCB(nil, this);
 			bIsStanding = true;
 			m_pCurSurface = boat;
@@ -3726,7 +3726,7 @@ CPed::SetExitBoat(CVehicle *boat)
 				newPos.z = FEET_OFFSET + foundCol.point.z;
 /*		// VC specific
 		} else {
-			m_vehEnterType = CAR_DOOR_RF;
+			m_vehDoor = CAR_DOOR_RF;
 			PedSetOutCarCB(nil, this);
 			bIsStanding = true;
 			SetMoveState(PEDMOVE_STILL);
@@ -3921,7 +3921,7 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 		bUsesCollision = false;
 		m_pSeekTarget = veh;
 		m_pSeekTarget->RegisterReference((CEntity**) &m_pSeekTarget);
-		m_vehEnterType = optedDoorNode;
+		m_vehDoor = optedDoorNode;
 		SetPedState(PED_EXIT_CAR);
 		if (m_pVehicleAnim && m_pVehicleAnim->flags & ASSOC_PARTIAL)
 			m_pVehicleAnim->blendDelta = -1000.0f;
@@ -3963,7 +3963,7 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 				if (veh->GetModelIndex() == MI_YARDIE)
 					addDoorSmoke = true;
 
-				switch (m_vehEnterType) {
+				switch (m_vehDoor) {
 					case CAR_DOOR_RF:
 						if (veh->bIsBus) {
 							m_pVehicleAnim = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_COACH_OUT_L);
@@ -4012,7 +4012,7 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 						break;
 				}
 				if (!bBusJacked) {
-					switch (m_vehEnterType) {
+					switch (m_vehDoor) {
 						case CAR_DOOR_RF:
 							veh->m_nGettingOutFlags |= CAR_DOOR_FLAG_RF;
 							break;
@@ -4031,9 +4031,9 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 				}
 				m_pVehicleAnim->SetFinishCallback(PedAnimStepOutCarCB, this);
 			} else {
-				if (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR) {
+				if (m_vehDoor == CAR_DOOR_RF || m_vehDoor == CAR_DOOR_RR) {
 					m_pVehicleAnim = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_CRAWLOUT_RHS2);
-				} else if (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR) {
+				} else if (m_vehDoor == CAR_DOOR_LF || m_vehDoor == CAR_DOOR_LR) {
 					m_pVehicleAnim = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_CRAWLOUT_RHS);
 				}
 				m_pVehicleAnim->SetFinishCallback(PedSetOutCarCB, this);
@@ -4062,7 +4062,7 @@ CPed::ExitCar(void)
 	AnimationId exitAnim = (AnimationId) m_pVehicleAnim->animId;
 	float animTime = m_pVehicleAnim->currentTime;
 
-	m_pMyVehicle->ProcessOpenDoor(m_vehEnterType, exitAnim, animTime);
+	m_pMyVehicle->ProcessOpenDoor(m_vehDoor, exitAnim, animTime);
 
 	if (m_pSeekTarget) {
 		// Car is upside down
@@ -4123,10 +4123,10 @@ void
 CPed::GetNearestDoor(CVehicle *veh, CVector &posToOpen)
 {
 	CVector *enterOffset = nil;
-	if (m_vehEnterType == CAR_DOOR_LF && veh->pDriver
-		|| m_vehEnterType == CAR_DOOR_RF && veh->pPassengers[0]
-		|| m_vehEnterType == CAR_DOOR_LR && veh->pPassengers[1]
-		|| m_vehEnterType == CAR_DOOR_RR && veh->pPassengers[2])
+	if (m_vehDoor == CAR_DOOR_LF && veh->pDriver
+		|| m_vehDoor == CAR_DOOR_RF && veh->pPassengers[0]
+		|| m_vehDoor == CAR_DOOR_LR && veh->pPassengers[1]
+		|| m_vehDoor == CAR_DOOR_RR && veh->pPassengers[2])
 	{
 		enterOffset = &vecPedQuickDraggedOutCarAnimOffset;
 	}
@@ -4138,10 +4138,10 @@ CPed::GetNearestDoor(CVehicle *veh, CVector &posToOpen)
 	if ((lfPos - GetPosition()).MagnitudeSqr2D() < (rfPos - GetPosition()).MagnitudeSqr2D()) {
 
 		if (veh->IsRoomForPedToLeaveCar(CAR_DOOR_LF, enterOffset)) {
-			m_vehEnterType = CAR_DOOR_LF;
+			m_vehDoor = CAR_DOOR_LF;
 			posToOpen = lfPos;
 		} else if (veh->IsRoomForPedToLeaveCar(CAR_DOOR_RF, enterOffset)) {
-			m_vehEnterType = CAR_DOOR_RF;
+			m_vehDoor = CAR_DOOR_RF;
 			posToOpen = rfPos;
 		}
 	} else {
@@ -4154,14 +4154,14 @@ CPed::GetNearestDoor(CVehicle *veh, CVector &posToOpen)
 					&& veh->IsRoomForPedToLeaveCar(CAR_DOOR_LF, enterOffset)
 				|| (veh->m_nGettingInFlags & CAR_DOOR_FLAG_RF) && veh->IsRoomForPedToLeaveCar(CAR_DOOR_LF, enterOffset)) {
 
-				m_vehEnterType = CAR_DOOR_LF;
+				m_vehDoor = CAR_DOOR_LF;
 				posToOpen = lfPos;
 			} else {
-				m_vehEnterType = CAR_DOOR_RF;
+				m_vehDoor = CAR_DOOR_RF;
 				posToOpen = rfPos;
 			}
 		} else if (veh->IsRoomForPedToLeaveCar(CAR_DOOR_LF, enterOffset)) {
-			m_vehEnterType = CAR_DOOR_LF;
+			m_vehDoor = CAR_DOOR_LF;
 			posToOpen = lfPos;
 		}
 	}
@@ -4177,7 +4177,7 @@ CPed::GetNearestPassengerDoor(CVehicle *veh, CVector &posToOpen)
 
 	switch (veh->GetModelIndex()) {
 		case MI_BUS:
-			m_vehEnterType = CAR_DOOR_RF;
+			m_vehDoor = CAR_DOOR_RF;
 			posToOpen = GetPositionToOpenCarDoor(veh, CAR_DOOR_RF);
 			return true;
 		case MI_RHINO:
@@ -4220,15 +4220,15 @@ CPed::GetNearestPassengerDoor(CVehicle *veh, CVector &posToOpen)
 
 	CVector2D nextToCompare = rfPosDist;
 	posToOpen = rfPos;
-	m_vehEnterType = CAR_DOOR_RF;
+	m_vehDoor = CAR_DOOR_RF;
 	if (lrPosDist.MagnitudeSqr() < nextToCompare.MagnitudeSqr()) {
-		m_vehEnterType = CAR_DOOR_LR;
+		m_vehDoor = CAR_DOOR_LR;
 		posToOpen = lrPos;
 		nextToCompare = lrPosDist;
 	}
 
 	if (rrPosDist.MagnitudeSqr() < nextToCompare.MagnitudeSqr()) {
-		m_vehEnterType = CAR_DOOR_RR;
+		m_vehDoor = CAR_DOOR_RR;
 		posToOpen = rrPos;
 	}
 	return canEnter;
@@ -4335,7 +4335,7 @@ CPed::PedSetQuickDraggedOutCarPositionCB(CAnimBlendAssociation *animAssoc, void 
 	ped->bUsesCollision = true;
 	ped->RestartNonPartialAnims();
 	draggedOutOffset = vecPedQuickDraggedOutCarAnimOffset;
-	if (ped->m_vehEnterType == CAR_DOOR_RF || ped->m_vehEnterType == CAR_DOOR_RR)
+	if (ped->m_vehDoor == CAR_DOOR_RF || ped->m_vehDoor == CAR_DOOR_RR)
 		draggedOutOffset.x = -draggedOutOffset.x;
 
 	finalPos = Multiply3x3(pedMat, draggedOutOffset) + ped->GetPosition();
@@ -4348,7 +4348,7 @@ CPed::PedSetQuickDraggedOutCarPositionCB(CAnimBlendAssociation *animAssoc, void 
 		ped->m_fRotationCur = ped->m_fRotationDest;
 		ped->CalculateNewOrientation();
 
-		if (!veh->IsRoomForPedToLeaveCar(ped->m_vehEnterType, &vecPedQuickDraggedOutCarAnimOffset))
+		if (!veh->IsRoomForPedToLeaveCar(ped->m_vehDoor, &vecPedQuickDraggedOutCarAnimOffset))
 			ped->PositionPedOutOfCollision();
 	}
 
@@ -4425,7 +4425,7 @@ CPed::PedSetDraggedOutCarPositionCB(CAnimBlendAssociation* animAssoc, void* arg)
 	ped->RestartNonPartialAnims();
 	bool itsRearDoor = false;
 
-	if (ped->m_vehEnterType == CAR_DOOR_RF || ped->m_vehEnterType == CAR_DOOR_RR)
+	if (ped->m_vehDoor == CAR_DOOR_RF || ped->m_vehDoor == CAR_DOOR_RR)
 		itsRearDoor = true;
 
 	CMatrix pedMat(ped->GetMatrix());
@@ -4438,7 +4438,7 @@ CPed::PedSetDraggedOutCarPositionCB(CAnimBlendAssociation* animAssoc, void* arg)
 	ped->m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
 	ped->SetPosition(posAfterBeingDragged);
 
-	if (ped->m_pMyVehicle && !ped->m_pMyVehicle->IsRoomForPedToLeaveCar(ped->m_vehEnterType, &vecPedDraggedOutCarAnimOffset)) {
+	if (ped->m_pMyVehicle && !ped->m_pMyVehicle->IsRoomForPedToLeaveCar(ped->m_vehDoor, &vecPedDraggedOutCarAnimOffset)) {
 		ped->PositionPedOutOfCollision();
 	}
 
@@ -4516,7 +4516,7 @@ CPed::GetNearestTrainDoor(CVehicle *train, CVector &doorPos)
 	CVehicleModelInfo* trainModel = (CVehicleModelInfo*)CModelInfo::GetModelInfo(train->m_modelIndex);
 	CMatrix trainMat = CMatrix(train->GetMatrix());
 
-	doorPos = trainModel->m_positions[m_vehEnterType];
+	doorPos = trainModel->m_positions[m_vehDoor];
 	doorPos.x -= 1.5f;
 	doorPos = Multiply3x3(trainMat, doorPos);
 	doorPos += train->GetPosition();
@@ -4566,17 +4566,17 @@ CPed::GetNearestTrainPedPosition(CVehicle *train, CVector &enterPos)
 	if (distMidEntry < distLeftEntry) {
 		if (distMidEntry < distRightEntry) {
 			enterPos = midEntryPos;
-			m_vehEnterType = TRAIN_POS_MID_ENTRY;
+			m_vehDoor = TRAIN_POS_MID_ENTRY;
 		} else {
 			enterPos = rightEntryPos;
-			m_vehEnterType = TRAIN_POS_RIGHT_ENTRY;
+			m_vehDoor = TRAIN_POS_RIGHT_ENTRY;
 		}
 	} else if (distRightEntry < distLeftEntry) {
 		enterPos = rightEntryPos;
-		m_vehEnterType = TRAIN_POS_RIGHT_ENTRY;
+		m_vehDoor = TRAIN_POS_RIGHT_ENTRY;
 	} else {
 		enterPos = leftEntryPos;
-		m_vehEnterType = TRAIN_POS_LEFT_ENTRY;
+		m_vehDoor = TRAIN_POS_LEFT_ENTRY;
 	}
 
 	return 1;
@@ -5198,7 +5198,7 @@ CPed::SeekBoatPosition(void)
 		m_vecSeekPos = boatMat * enterOffset;
 		if (Seek()) {
 			// We arrived to the boat
-			m_vehEnterType = 0;
+			m_vehDoor = 0;
 			SetEnterCar(m_carInObjective, 0);
 		}
 	} else

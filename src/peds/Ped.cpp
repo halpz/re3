@@ -105,7 +105,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_fRotationCur = 0.0f;
 	m_headingRate = 15.0f;
 	m_fRotationDest = 0.0f;
-	m_vehEnterType = CAR_DOOR_LF;
+	m_vehDoor = CAR_DOOR_LF;
 	m_walkAroundType = 0;
 	m_pCurrentPhysSurface = nil;
 	m_vecOffsetFromPhysSurface = CVector(0.0f, 0.0f, 0.0f);
@@ -288,7 +288,7 @@ CPed::~CPed(void)
 	CWorld::Remove(this);
 	CRadar::ClearBlipForEntity(BLIP_CHAR, CPools::GetPedPool()->GetIndex(this));
 	if (InVehicle()){
-		uint8 door_flag = GetCarDoorFlag(m_vehEnterType);
+		uint8 door_flag = GetCarDoorFlag(m_vehDoor);
 		if (m_pMyVehicle->pDriver == this)
 			m_pMyVehicle->pDriver = nil;
 		else {
@@ -3642,11 +3642,11 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 #ifdef NEW_WALK_AROUND_ALGORITHM
 			else {
 				CVector tl = obj->GetMatrix() * CVector(adjustedColMin.x, adjustedColMax.y, 0.0f) - GetPosition();
-				if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)) {
+				if (goingToEnterCar && (m_vehDoor == CAR_DOOR_LF || m_vehDoor == CAR_DOOR_LR)) {
 					cornerToGo = tl;
 					m_walkAroundType = 1;
 
-					if (m_vehEnterType == CAR_DOOR_LR)
+					if (m_vehDoor == CAR_DOOR_LR)
 						iWouldPreferGoingBack = 1;
 				} else if(CanWeSeeTheCorner(tl, GetForward())){
 					cornerToGo = tl;
@@ -3680,11 +3680,11 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 			else {
 				CVector tr = obj->GetMatrix() * CVector(adjustedColMax.x, adjustedColMax.y, 0.0f) - GetPosition();
 				if (tr.Magnitude2D() < cornerToGo.Magnitude2D()) {
-					if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR)) {
+					if (goingToEnterCar && (m_vehDoor == CAR_DOOR_RF || m_vehDoor == CAR_DOOR_RR)) {
 						cornerToGo = tr;
 						m_walkAroundType = 2;
 
-						if (m_vehEnterType == CAR_DOOR_RR)
+						if (m_vehDoor == CAR_DOOR_RR)
 							iWouldPreferGoingBack = 2;
 					} else if (CanWeSeeTheCorner(tr, GetForward())) {
 						cornerToGo = tr;
@@ -3721,7 +3721,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 				if (iWouldPreferGoingBack == 2)
 					m_walkAroundType = 4;
 				else if (br.Magnitude2D() < cornerToGo.Magnitude2D()) {
-					if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR)) {
+					if (goingToEnterCar && (m_vehDoor == CAR_DOOR_RF || m_vehDoor == CAR_DOOR_RR)) {
 						cornerToGo = br;
 						m_walkAroundType = 5;
 					} else if (CanWeSeeTheCorner(br, GetForward())) {
@@ -3759,7 +3759,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 				if (iWouldPreferGoingBack == 1)
 					m_walkAroundType = 7;
 				else if (bl.Magnitude2D() < cornerToGo.Magnitude2D()) {
-					if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)) {
+					if (goingToEnterCar && (m_vehDoor == CAR_DOOR_LF || m_vehDoor == CAR_DOOR_LR)) {
 						cornerToGo = bl;
 						m_walkAroundType = 6;
 					} else if (CanWeSeeTheCorner(bl, GetForward())) {
@@ -3789,7 +3789,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 			if (Abs(angleDiffBtwObjCenterAndForward) >= objTopRightHeading) {
 				if (PI - objTopRightHeading >= Abs(angleDiffBtwObjCenterAndForward)) {
 					if ((angleDiffBtwObjCenterAndForward <= 0.0f || objUpsideDown) && (angleDiffBtwObjCenterAndForward < 0.0f || !objUpsideDown)) {
-						if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_RF || m_vehEnterType == CAR_DOOR_RR)) {
+						if (goingToEnterCar && (m_vehDoor == CAR_DOOR_RF || m_vehDoor == CAR_DOOR_RR)) {
 							m_walkAroundType = 0;
 						} else {
 							if (CGeneral::LimitRadianAngle(m_fRotationDest - angleToFaceObjCenter) >= 0.0f) {
@@ -3807,7 +3807,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 							}
 						}
 					} else {
-						if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)) {
+						if (goingToEnterCar && (m_vehDoor == CAR_DOOR_LF || m_vehDoor == CAR_DOOR_LR)) {
 							m_walkAroundType = 0;
 						} else {
 							if (CGeneral::LimitRadianAngle(m_fRotationDest - angleToFaceObjCenter) <= 0.0f) {
@@ -3825,7 +3825,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 							}
 						}
 					}
-				} else if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)
+				} else if (goingToEnterCar && (m_vehDoor == CAR_DOOR_LF || m_vehDoor == CAR_DOOR_LR)
 					|| CGeneral::LimitRadianAngle(m_fRotationDest - angleToFaceObjCenter) < 0.0f) {
 					if (entityOnTopLeftOfObj == 1 || entityOnTopLeftOfObj && !entityOnTopRightOfObj && !entityOnBottomRightOfObj) {
 						m_walkAroundType = 3;
@@ -3833,7 +3833,7 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 				} else if (entityOnTopRightOfObj == 1 || entityOnTopRightOfObj && !entityOnTopLeftOfObj && !entityOnBottomLeftOfObj) {
 					m_walkAroundType = 4;
 				}
-			} else if (goingToEnterCar && (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR)
+			} else if (goingToEnterCar && (m_vehDoor == CAR_DOOR_LF || m_vehDoor == CAR_DOOR_LR)
 				|| CGeneral::LimitRadianAngle(m_fRotationDest - angleToFaceObjCenter) > 0.0f) {
 				if (entityOnBottomLeftOfObj == 1 || entityOnBottomLeftOfObj && !entityOnTopRightOfObj && !entityOnBottomRightOfObj) {
 					m_walkAroundType = 2;
@@ -3866,13 +3866,13 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 			nextWalkAround = 7;
 	}
 
-	CVector nextPosToHead = objMat * LocalPosForWalkAround(adjustedColMin, adjustedColMax, nextWalkAround, goingToEnterCar ? m_vehEnterType : 0, goingToEnterCarAndItsVan);
+	CVector nextPosToHead = objMat * LocalPosForWalkAround(adjustedColMin, adjustedColMax, nextWalkAround, goingToEnterCar ? m_vehDoor : 0, goingToEnterCarAndItsVan);
 	bool nextRouteIsClear = CWorld::GetIsLineOfSightClear(GetPosition(), nextPosToHead, true, true, true, true, true, true, false);
 
 	if(nextRouteIsClear)
 		m_walkAroundType = nextWalkAround;
 	else {
-		CVector posToHead = objMat * LocalPosForWalkAround(adjustedColMin, adjustedColMax, m_walkAroundType, goingToEnterCar ? m_vehEnterType : 0, goingToEnterCarAndItsVan);
+		CVector posToHead = objMat * LocalPosForWalkAround(adjustedColMin, adjustedColMax, m_walkAroundType, goingToEnterCar ? m_vehDoor : 0, goingToEnterCarAndItsVan);
 		bool currentRouteIsClear = CWorld::GetIsLineOfSightClear(GetPosition(), posToHead,
 			true, true, true, true, true, true, false);
 
@@ -3902,15 +3902,15 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 		}
 	}
 
-	localPosToHead = LocalPosForWalkAround(adjustedColMin, adjustedColMax, m_walkAroundType, goingToEnterCar ? m_vehEnterType : 0, goingToEnterCarAndItsVan);
+	localPosToHead = LocalPosForWalkAround(adjustedColMin, adjustedColMax, m_walkAroundType, goingToEnterCar ? m_vehDoor : 0, goingToEnterCarAndItsVan);
 #else
 	if (Abs(angleDiffBtwObjCenterAndForward) < objTopRightHeading) {
 		if (goingToEnterCar) {
 			if (goingToEnterCarAndItsVan) {
-				if (m_vehEnterType == CAR_DOOR_LR || m_vehEnterType == CAR_DOOR_RR)
+				if (m_vehDoor == CAR_DOOR_LR || m_vehDoor == CAR_DOOR_RR)
 					return;
 			}
-			if (m_vehEnterType != CAR_DOOR_LF && m_vehEnterType != CAR_DOOR_LR && (!entityOnBottomRightOfObj || entityOnBottomLeftOfObj)) {
+			if (m_vehDoor != CAR_DOOR_LF && m_vehDoor != CAR_DOOR_LR && (!entityOnBottomRightOfObj || entityOnBottomLeftOfObj)) {
 				m_fRotationDest = CGeneral::LimitRadianAngle(dirToSet - HALFPI);
 				localPosToHead.x = adjustedColMax.x;
 				localPosToHead.z = 0.0f;
@@ -3939,9 +3939,9 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 	} else {
 		if (PI - objTopRightHeading >= Abs(angleDiffBtwObjCenterAndForward)) {
 			if (angleDiffBtwObjCenterAndForward <= 0.0f) {
-				if (!goingToEnterCar || !goingToEnterCarAndItsVan || m_vehEnterType != CAR_DOOR_LR && m_vehEnterType != CAR_DOOR_RR) {
+				if (!goingToEnterCar || !goingToEnterCarAndItsVan || m_vehDoor != CAR_DOOR_LR && m_vehDoor != CAR_DOOR_RR) {
 					if (goingToEnterCar) {
-						if (m_vehEnterType == CAR_DOOR_RF || (m_vehEnterType == CAR_DOOR_RR && !goingToEnterCarAndItsVan))
+						if (m_vehDoor == CAR_DOOR_RF || (m_vehDoor == CAR_DOOR_RR && !goingToEnterCarAndItsVan))
 							return;
 					}
 					if (m_walkAroundType == 4 || m_walkAroundType == 3
@@ -3963,14 +3963,14 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 					localPosToHead.z = 0.0f;
 					localPosToHead.y = adjustedColMin.y;
 				}
-			} else if (goingToEnterCar && goingToEnterCarAndItsVan && (m_vehEnterType == CAR_DOOR_LR || m_vehEnterType == CAR_DOOR_RR)) {
+			} else if (goingToEnterCar && goingToEnterCarAndItsVan && (m_vehDoor == CAR_DOOR_LR || m_vehDoor == CAR_DOOR_RR)) {
 				m_fRotationDest = CGeneral::LimitRadianAngle(PI + dirToSet);
 				localPosToHead.x = adjustedColMin.x;
 				localPosToHead.z = 0.0f;
 				localPosToHead.y = adjustedColMin.y;
 			} else {
 				if (goingToEnterCar) {
-					if (m_vehEnterType == CAR_DOOR_LF || m_vehEnterType == CAR_DOOR_LR && !goingToEnterCarAndItsVan)
+					if (m_vehDoor == CAR_DOOR_LF || m_vehDoor == CAR_DOOR_LR && !goingToEnterCarAndItsVan)
 						return;
 				}
 				if (m_walkAroundType == 1 || m_walkAroundType == 2
@@ -3988,8 +3988,8 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 				}
 			}
 		} else {
-			if (goingToEnterCar && (!goingToEnterCarAndItsVan || m_vehEnterType != CAR_DOOR_LR && m_vehEnterType != CAR_DOOR_RR)) {
-				if (m_vehEnterType != CAR_DOOR_LF && m_vehEnterType != CAR_DOOR_LR && (!entityOnTopRightOfObj || entityOnTopLeftOfObj)) {
+			if (goingToEnterCar && (!goingToEnterCarAndItsVan || m_vehDoor != CAR_DOOR_LR && m_vehDoor != CAR_DOOR_RR)) {
+				if (m_vehDoor != CAR_DOOR_LF && m_vehDoor != CAR_DOOR_LR && (!entityOnTopRightOfObj || entityOnTopLeftOfObj)) {
 
 					m_fRotationDest = CGeneral::LimitRadianAngle(dirToSet - HALFPI);
 					localPosToHead.x = adjustedColMax.x;
@@ -4162,7 +4162,7 @@ CPed::PedSetOutCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 #endif
 
 	ped->bInVehicle = false;
-	if (veh && veh->IsCar() && !veh->IsRoomForPedToLeaveCar(ped->m_vehEnterType, nil)) {
+	if (veh && veh->IsCar() && !veh->IsRoomForPedToLeaveCar(ped->m_vehDoor, nil)) {
 		ped->PositionPedOutOfCollision();
 	}
 
@@ -4247,7 +4247,7 @@ CPed::PedSetOutCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 				}
 			}
 		}
-		veh->m_nGettingOutFlags &= ~GetCarDoorFlag(ped->m_vehEnterType);
+		veh->m_nGettingOutFlags &= ~GetCarDoorFlag(ped->m_vehDoor);
 		if (veh->pDriver == ped) {
 			veh->RemoveDriver();
 #ifndef FIX_BUGS // RemoveDriver does it anyway
@@ -4263,7 +4263,7 @@ CPed::PedSetOutCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 
 		if (veh->bIsBus && !veh->IsUpsideDown() && !veh->IsOnItsSide()) {
 			float angleAfterExit;
-			if (ped->m_vehEnterType == CAR_DOOR_LF) {
+			if (ped->m_vehDoor == CAR_DOOR_LF) {
 				angleAfterExit = HALFPI + veh->GetForward().Heading();
 			} else {
 				angleAfterExit = veh->GetForward().Heading() - HALFPI;
@@ -4321,7 +4321,7 @@ CPed::PedSetDraggedOutCarCB(CAnimBlendAssociation *dragAssoc, void *arg)
 	vehicle = ped->m_pMyVehicle;
 
 	if (vehicle) {
-		vehicle->m_nGettingOutFlags &= ~GetCarDoorFlag(ped->m_vehEnterType);
+		vehicle->m_nGettingOutFlags &= ~GetCarDoorFlag(ped->m_vehDoor);
 
 		if (vehicle->pDriver == ped) {
 			vehicle->RemoveDriver();
@@ -4541,7 +4541,7 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 		if (veh->bIsBus) {
 			veh->AddPassenger(ped);
 		} else {
-			switch (ped->m_vehEnterType) {
+			switch (ped->m_vehDoor) {
 				case CAR_DOOR_RF:
 					veh->AddPassenger(ped, 0);
 					break;
@@ -4567,7 +4567,7 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 #endif
 	}
 
-	veh->m_nGettingInFlags &= ~GetCarDoorFlag(ped->m_vehEnterType);
+	veh->m_nGettingInFlags &= ~GetCarDoorFlag(ped->m_vehDoor);
 
 	if (veh->bIsBus && !veh->m_nGettingInFlags)
 		((CAutomobile*)veh)->SetBusDoorTimer(1000, 1);
@@ -4955,13 +4955,13 @@ void
 CPed::Idle(void)
 {
 	CVehicle *veh = m_pMyVehicle;
-	if (veh && veh->m_nGettingOutFlags && m_vehEnterType) {
+	if (veh && veh->m_nGettingOutFlags && m_vehDoor) {
 
-		if (veh->m_nGettingOutFlags & GetCarDoorFlag(m_vehEnterType)) {
+		if (veh->m_nGettingOutFlags & GetCarDoorFlag(m_vehDoor)) {
 
 			if (m_objective != OBJECTIVE_KILL_CHAR_ON_FOOT) {
 
-				CVector doorPos = GetPositionToOpenCarDoor(veh, m_vehEnterType);
+				CVector doorPos = GetPositionToOpenCarDoor(veh, m_vehDoor);
 				CVector doorDist = GetPosition() - doorPos;
 
 				if (doorDist.MagnitudeSqr() < sq(0.5f)) {
@@ -6632,7 +6632,7 @@ CPed::SetSeekCar(CVehicle *car, uint32 doorNode)
 	m_pMyVehicle = car;
 	m_pMyVehicle->RegisterReference((CEntity**) &m_pMyVehicle);
 	// m_pSeekTarget->RegisterReference((CEntity**) &m_pSeekTarget);
-	m_vehEnterType = doorNode;
+	m_vehDoor = doorNode;
 	m_distanceToCountSeekDone = 0.5f;
 	SetPedState(PED_SEEK_CAR);
 
@@ -6649,9 +6649,9 @@ CPed::SeekCar(void)
 	}
 
 	if (m_objective != OBJECTIVE_ENTER_CAR_AS_PASSENGER) {
-		if (m_vehEnterType && m_objective != OBJECTIVE_ENTER_CAR_AS_DRIVER) {
+		if (m_vehDoor && m_objective != OBJECTIVE_ENTER_CAR_AS_DRIVER) {
 			if (IsRoomToBeCarJacked()) {
-				dest = GetPositionToOpenCarDoor(vehToSeek, m_vehEnterType);
+				dest = GetPositionToOpenCarDoor(vehToSeek, m_vehDoor);
 			} else if (m_nPedType == PEDTYPE_COP) {
 				dest = GetPositionToOpenCarDoor(vehToSeek, CAR_DOOR_RF);
 			} else {
@@ -6736,7 +6736,7 @@ CPed::SeekCar(void)
 	else if (2.0f * vehToSeek->GetColModel()->boundingBox.max.x > distToDestSqr)
 		bCanPedEnterSeekedCar = true;
 
-	if (vehToSeek->m_nGettingInFlags & GetCarDoorFlag(m_vehEnterType))
+	if (vehToSeek->m_nGettingInFlags & GetCarDoorFlag(m_vehDoor))
 		bVehEnterDoorIsBlocked = true;
 	else
 		bVehEnterDoorIsBlocked = false;
@@ -6746,7 +6746,7 @@ CPed::SeekCar(void)
 		if (!foundBetterPosToSeek) {
 			if (1.5f + GetPosition().z > dest.z && GetPosition().z - 0.5f < dest.z) {
 				if (vehToSeek->IsTrain()) {
-					SetEnterTrain(vehToSeek, m_vehEnterType);
+					SetEnterTrain(vehToSeek, m_vehDoor);
 				} else {
 					m_fRotationCur = m_fRotationDest;
 					if (!bVehEnterDoorIsBlocked) {
@@ -6764,24 +6764,24 @@ CPed::SeekCar(void)
 								case STATUS_PHYSICS:
 								case STATUS_PLAYER_DISABLED:
 									if (!vehToSeek->bIsBus && (!m_leader || m_leader != vehToSeek->pDriver) &&
-										(m_vehEnterType == CAR_DOOR_LF && vehToSeek->pDriver || m_vehEnterType == CAR_DOOR_RF && vehToSeek->pPassengers[0] || m_vehEnterType == CAR_DOOR_LR && vehToSeek->pPassengers[1] || m_vehEnterType == CAR_DOOR_RR && vehToSeek->pPassengers[2])) {
+										(m_vehDoor == CAR_DOOR_LF && vehToSeek->pDriver || m_vehDoor == CAR_DOOR_RF && vehToSeek->pPassengers[0] || m_vehDoor == CAR_DOOR_LR && vehToSeek->pPassengers[1] || m_vehDoor == CAR_DOOR_RR && vehToSeek->pPassengers[2])) {
 										SetCarJack(vehToSeek);
-										if (m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER && m_vehEnterType != CAR_DOOR_LF)
+										if (m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER && m_vehDoor != CAR_DOOR_LF)
 											vehToSeek->pDriver->bFleeAfterExitingCar = true;
 									} else {
-										SetEnterCar(vehToSeek, m_vehEnterType);
+										SetEnterCar(vehToSeek, m_vehDoor);
 									}
 									break;
 								case STATUS_ABANDONED:
-									if (m_vehEnterType == CAR_DOOR_RF && vehToSeek->pPassengers[0]) {
+									if (m_vehDoor == CAR_DOOR_RF && vehToSeek->pPassengers[0]) {
 										if (vehToSeek->pPassengers[0]->bDontDragMeOutCar) {
 											if (IsPlayer())
-												SetEnterCar(vehToSeek, m_vehEnterType);
+												SetEnterCar(vehToSeek, m_vehDoor);
 										} else {
 											SetCarJack(vehToSeek);
 										}
 									} else {
-										SetEnterCar(vehToSeek, m_vehEnterType);
+										SetEnterCar(vehToSeek, m_vehDoor);
 									}
 									break;
 								case STATUS_WRECKED:
@@ -7675,7 +7675,7 @@ CPed::SetSolicit(uint32 time)
 
 	if (CharCreatedBy != MISSION_CHAR && m_carInObjective->m_nNumGettingIn == 0
 		&& CTimer::GetTimeInMilliseconds() < m_objectiveTimer) {
-		if (m_vehEnterType == CAR_DOOR_LF) {
+		if (m_vehDoor == CAR_DOOR_LF) {
 			m_fRotationDest = m_carInObjective->GetForward().Heading() - HALFPI;
 		} else {
 			m_fRotationDest = m_carInObjective->GetForward().Heading() + HALFPI;
@@ -7696,7 +7696,7 @@ void
 CPed::Solicit(void)
 {
 	if (m_standardTimer >= CTimer::GetTimeInMilliseconds() && m_carInObjective) {
-		CVector doorPos = GetPositionToOpenCarDoor(m_carInObjective, m_vehEnterType, 0.0f);
+		CVector doorPos = GetPositionToOpenCarDoor(m_carInObjective, m_vehDoor, 0.0f);
 		SetMoveState(PEDMOVE_STILL);
 
 		// Game uses GetAngleBetweenPoints and converts it to radian
@@ -7826,7 +7826,7 @@ CPed::PossiblyFindBetterPosToSeekCar(CVector *pos, CVehicle *veh)
 		bool canHeadToRf = NTVF_RF <= 0.0f || NTVF_RF >= HALFPI;
 
 		// Only order of conditions are different among enterTypes.
-		if (m_vehEnterType == CAR_DOOR_RR) {
+		if (m_vehDoor == CAR_DOOR_RR) {
 			if (canHeadToRr) {
 				foundPos = rightRearPos;
 				foundIt = true;
@@ -7840,7 +7840,7 @@ CPed::PossiblyFindBetterPosToSeekCar(CVector *pos, CVehicle *veh)
 				foundPos = leftFrontPos;
 				foundIt = true;
 			}
-		} else if(m_vehEnterType == CAR_DOOR_RF) {
+		} else if(m_vehDoor == CAR_DOOR_RF) {
 			if (canHeadToRf) {
 				foundPos = rightFrontPos;
 				foundIt = true;
@@ -7854,7 +7854,7 @@ CPed::PossiblyFindBetterPosToSeekCar(CVector *pos, CVehicle *veh)
 				foundPos = leftRearPos;
 				foundIt = true;
 			}
-		} else if (m_vehEnterType == CAR_DOOR_LF) {
+		} else if (m_vehDoor == CAR_DOOR_LF) {
 			if (canHeadToLf) {
 				foundPos = leftFrontPos;
 				foundIt = true;
@@ -7868,7 +7868,7 @@ CPed::PossiblyFindBetterPosToSeekCar(CVector *pos, CVehicle *veh)
 				foundPos = rightRearPos;
 				foundIt = true;
 			}
-		} else if (m_vehEnterType == CAR_DOOR_LR) {
+		} else if (m_vehDoor == CAR_DOOR_LR) {
 			if (canHeadToLr) {
 				foundPos = leftRearPos;
 				foundIt = true;
