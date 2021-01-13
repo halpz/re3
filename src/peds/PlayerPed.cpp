@@ -1136,7 +1136,7 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 #ifdef FREE_CAM
 		else if ((CCamera::bFreeCam && weaponInfo->m_eWeaponFire == WEAPON_FIRE_MELEE) || (weaponInfo->IsFlagSet(WEAPONFLAG_CANAIM) && !CCamera::m_bUseMouse3rdPerson)) {
 #else
-		else if (weaponInfo->m_bCanAim && !CCamera::m_bUseMouse3rdPerson) {
+		else if (weaponInfo->IsFlagSet(WEAPONFLAG_CANAIM) && !CCamera::m_bUseMouse3rdPerson) {
 #endif
 			if (padUsed->TargetJustDown())
 				FindWeaponLockOnTarget();
