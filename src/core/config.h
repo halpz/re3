@@ -240,11 +240,15 @@ enum Config {
 #	define TIMEBARS		// print debug timers
 #endif
 
-#define FIX_BUGS		// fixes bugs that we've came across during reversing, TODO: use this more
+#define FIX_BUGS		// fixes bugs that we've came across during reversing. You can undefine this only on release builds.
 //#define MORE_LANGUAGES		// Add more translations to the game
 #define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
 #define LOAD_INI_SETTINGS // as the name suggests. fundamental for CUSTOM_FRONTEND_OPTIONS
 #define FIX_HIGH_FPS_BUGS_ON_FRONTEND
+
+#if defined(__LP64__) || defined(_WIN64)
+#define FIX_BUGS_64 // Must have fixes to be able to run 64 bit build
+#endif
 
 // Just debug menu entries
 #ifdef DEBUGMENU

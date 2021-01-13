@@ -2418,7 +2418,7 @@ CPed::SetInvestigateEvent(eEventType event, CVector2D pos, float distanceToCount
 	SetStoredState();
 	bFindNewNodeAfterStateRestore = false;
 	SetPedState(PED_INVESTIGATE);
-	m_standardTimer = CTimer::GetTimeInMilliseconds() + time;
+	m_chatTimer = CTimer::GetTimeInMilliseconds() + time;
 	m_eventType = event;
 	m_eventOrThreat = pos;
 	m_distanceToCountSeekDone = distanceToCountDone;
@@ -2442,13 +2442,13 @@ CPed::InvestigateEvent(void)
 	if (m_nWaitState == WAITSTATE_TURN180)
 		return;
 
-	if (CTimer::GetTimeInMilliseconds() > m_standardTimer) {
+	if (CTimer::GetTimeInMilliseconds() > m_chatTimer) {
 
-		if (m_standardTimer) {
+		if (m_chatTimer) {
 			if (m_eventType < EVENT_UNK)
 				SetWaitState(WAITSTATE_TURN180, nil);
 
-			m_standardTimer = 0;
+			m_chatTimer = 0;
 		} else {
 			ClearInvestigateEvent();
 		}
@@ -2509,7 +2509,7 @@ CPed::InvestigateEvent(void)
 							Say(SOUND_PED_CHAT_EVENT);
 
 					} else {
-						m_standardTimer = 0;
+						m_chatTimer = 0;
 					}
 
 				} else if (CTimer::GetTimeInMilliseconds() > m_lookTimer) {
@@ -2653,7 +2653,7 @@ CPed::ClearInvestigateEvent(void)
 		animAssoc->flags |= ASSOC_DELETEFADEDOUT;
 	}
 	if (m_eventType > EVENT_EXPLOSION)
-		m_standardTimer = CTimer::GetTimeInMilliseconds() + 15000;
+		m_chatTimer = CTimer::GetTimeInMilliseconds() + 15000;
 
 	bGonnaInvestigateEvent = false;
 	m_pEventEntity = nil;
