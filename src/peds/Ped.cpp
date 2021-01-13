@@ -113,9 +113,9 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_attackTimer = 0;
 	m_timerUnused = 0;
 	m_lookTimer = 0;
-	m_standardTimer = 0;
+	m_chatTimer = 0;
 	m_shootTimer = 0;
-	m_hitRecoverTimer = 0;
+	m_carJackTimer = 0;
 	m_duckAndCoverTimer = 0;
 	m_moved = CVector2D(0.0f, 0.0f);
 	m_fRotationCur = 0.0f;
@@ -1298,7 +1298,8 @@ CPed::ScanForInterestingStuff(void)
 	if (LookForInterestingNodes())
 		return;
 
-	if (m_nPedType == PEDTYPE_CRIMINAL && m_hitRecoverTimer < CTimer::GetTimeInMilliseconds()) {
+	if (m_nPedType == PEDTYPE_CRIMINAL && m_carJackTimer < CTimer::GetTimeInMilliseconds()) {
+		// Find a car to steal or a ped to mug if we haven't already decided to steal a car
 		if (CGeneral::GetRandomNumber() % 100 < 10) {
 			int mostExpensiveVehAround = -1;
 			int bestMonetaryValue = 0;
@@ -1321,10 +1322,10 @@ CPed::ScanForInterestingStuff(void)
 			}
 			if (bestMonetaryValue > 2000 && mostExpensiveVehAround != -1 && vehicles[mostExpensiveVehAround]) {
 				SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, vehicles[mostExpensiveVehAround]);
-				m_hitRecoverTimer = CTimer::GetTimeInMilliseconds() + 5000;
+				m_carJackTimer = CTimer::GetTimeInMilliseconds() + 5000;
 				return;
 			}
-			m_hitRecoverTimer = CTimer::GetTimeInMilliseconds() + 5000;
+			m_carJackTimer = CTimer::GetTimeInMilliseconds() + 5000;
 		} else if (m_objective != OBJECTIVE_MUG_CHAR && !(CGeneral::GetRandomNumber() & 7)) {
 			CPed *charToMug = nil;
 			for (int i = 0; i < m_numNearPeds; ++i) {
@@ -1346,13 +1347,13 @@ CPed::ScanForInterestingStuff(void)
 			if (charToMug)
 				SetObjective(OBJECTIVE_MUG_CHAR, charToMug);
 
-			m_hitRecoverTimer = CTimer::GetTimeInMilliseconds() + 5000;
+			m_carJackTimer = CTimer::GetTimeInMilliseconds() + 5000;
 		}
 	}
 
 	if (m_nPedState == PED_WANDER_PATH) {
 		if (CGeneral::GetRandomNumberInRange(0.0f, 1.0f) < 0.5f) {
-			if (CTimer::GetTimeInMilliseconds() > m_standardTimer) {
+			if (CTimer::GetTimeInMilliseconds() > m_chatTimer) {
 				for (int i = 0; i < m_numNearPeds; i ++) {
 					if (m_nearPeds[i] && m_nearPeds[i]->m_nPedState == PED_WANDER_PATH) {
 						if ((GetPosition() - m_nearPeds[i]->GetPosition()).Magnitude() < 1.8f
@@ -1368,7 +1369,7 @@ CPed::ScanForInterestingStuff(void)
 				}
 			}
 		} else {
-			m_standardTimer = CTimer::GetTimeInMilliseconds() + 200;
+			m_chatTimer = CTimer::GetTimeInMilliseconds() + 200;
 		}
 	}
 }
@@ -5885,7 +5886,7 @@ CPed::ClearFlee(void)
 {
 	RestorePreviousState();
 	bUsePedNodeSeek = false;
-	m_standardTimer = 0;
+	m_chatTimer = 0;
 	m_fleeTimer = 0;
 }
 
@@ -5931,7 +5932,7 @@ CPed::Flee(void)
 		if (m_nPedStateTimer < CTimer::GetTimeInMilliseconds()
 			&& m_collidingThingTimer < CTimer::GetTimeInMilliseconds()) {
 
-			if (m_pNextPathNode && CTimer::GetTimeInMilliseconds() > m_standardTimer)  {
+			if (m_pNextPathNode && CTimer::GetTimeInMilliseconds() > m_chatTimer)  {
 
 				curDirectionShouldBe = CGeneral::GetNodeHeadingFromVector(GetPosition().x - ms_vec2DFleePosition.x, GetPosition().y - ms_vec2DFleePosition.y);
 				if (m_nPathDir < curDirectionShouldBe)
@@ -5974,7 +5975,7 @@ CPed::Flee(void)
 			
 			if (m_pNextPathNode && m_pNextPathNode != realLastNode && m_pNextPathNode != m_pLastPathNode && curDirectionShouldBe - nextDirection != 4) {
 				m_nPathDir = nextDirection;
-				m_standardTimer = CTimer::GetTimeInMilliseconds() + 2000;
+				m_chatTimer = CTimer::GetTimeInMilliseconds() + 2000;
 			} else {
 				bUsePedNodeSeek = false;
 				SetMoveState(PEDMOVE_RUN);
@@ -7214,7 +7215,7 @@ CPed::SetChat(CEntity *chatWith, uint32 time)
 	SetMoveState(PEDMOVE_STILL);
 	m_lookTimer = 0;
 	SetLookFlag(chatWith, true);
-	m_standardTimer = CTimer::GetTimeInMilliseconds() + time;
+	m_chatTimer = CTimer::GetTimeInMilliseconds() + time;
 	m_lookTimer = CTimer::GetTimeInMilliseconds() + 3000;
 }
 
@@ -7235,7 +7236,7 @@ CPed::Chat(void)
 
 	if (partner->m_nPedState != PED_CHAT) {
 		ClearChat();
-		m_standardTimer = CTimer::GetTimeInMilliseconds() + 30000;
+		m_chatTimer = CTimer::GetTimeInMilliseconds() + 30000;
 		if (partner->m_pedInObjective) {
 			if (partner->m_objective == OBJECTIVE_KILL_CHAR_ON_FOOT ||
 				partner->m_objective == OBJECTIVE_FLEE_CHAR_ON_FOOT_TILL_SAFE)
@@ -7268,9 +7269,9 @@ CPed::Chat(void)
 			Say(SOUND_PED_CHAT);
 		}
 	}
-	if (m_standardTimer && CTimer::GetTimeInMilliseconds() > m_standardTimer) {
+	if (m_chatTimer && CTimer::GetTimeInMilliseconds() > m_chatTimer) {
 		ClearChat();
-		m_standardTimer = CTimer::GetTimeInMilliseconds() + 30000;
+		m_chatTimer = CTimer::GetTimeInMilliseconds() + 30000;
 	}
 }
 
@@ -7508,7 +7509,7 @@ CPed::SeekCar(void)
 		} else
 			GetNearestDoor(vehToSeek, dest);
 	} else {
-		if (m_hitRecoverTimer > CTimer::GetTimeInMilliseconds()) {
+		if (m_carJackTimer > CTimer::GetTimeInMilliseconds()) {
 			SetMoveState(PEDMOVE_STILL);
 			return;
 		}
@@ -7552,7 +7553,7 @@ CPed::SeekCar(void)
 			if (IsPlayer()) {
 				ClearObjective();
 			} else if (CharCreatedBy == RANDOM_CHAR) {
-				m_hitRecoverTimer = CTimer::GetTimeInMilliseconds() + 30000;
+				m_carJackTimer = CTimer::GetTimeInMilliseconds() + 30000;
 			}
 			SetMoveState(PEDMOVE_STILL);
 			TheCamera.ClearPlayerWeaponMode();
@@ -7965,7 +7966,7 @@ CPed::LookForInterestingNodes(void)
 	C2dEffect *effect;
 	CMatrix *objMat;
 
-	if ((CTimer::GetFrameCounter() + (m_randomSeed % 256)) & 7 || CTimer::GetTimeInMilliseconds() <= m_standardTimer) {
+	if ((CTimer::GetFrameCounter() + (m_randomSeed % 256)) & 7 || CTimer::GetTimeInMilliseconds() <= m_chatTimer) {
 		return false;
 	}
 	bool found = false;
@@ -8075,7 +8076,7 @@ CPed::LookForInterestingNodes(void)
 	float angleToFace = CGeneral::GetRadianAngleBetweenPoints(effectFrontLocal.x, effectFrontLocal.y, 0.0f, 0.0f);
 	randVal = CGeneral::GetRandomNumber() % 256;
 	if (randVal <= m_randomSeed % 256) {
-		m_standardTimer = CTimer::GetTimeInMilliseconds() + 2000;
+		m_chatTimer = CTimer::GetTimeInMilliseconds() + 2000;
 		SetLookFlag(angleToFace, true);
 		SetLookTimer(1000);
 		return false;
@@ -8298,7 +8299,7 @@ CPed::SetWaitState(eWaitState state, void *time)
 			if (m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER && CharCreatedBy == RANDOM_CHAR && m_nPedState == PED_SEEK_CAR) {
 				ClearObjective();
 				RestorePreviousState();
-				m_hitRecoverTimer = CTimer::GetTimeInMilliseconds() + 30000;
+				m_carJackTimer = CTimer::GetTimeInMilliseconds() + 30000;
 			}
 			break;
 		case WAITSTATE_TURN180:
@@ -8327,7 +8328,7 @@ CPed::SetWaitState(eWaitState state, void *time)
 			if (m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER && CharCreatedBy == RANDOM_CHAR && m_nPedState == PED_SEEK_CAR) {
 				ClearObjective();
 				RestorePreviousState();
-				m_hitRecoverTimer = CTimer::GetTimeInMilliseconds() + 30000;
+				m_carJackTimer = CTimer::GetTimeInMilliseconds() + 30000;
 			}
 			break;
 		case WAITSTATE_LOOK_ABOUT:
@@ -8986,7 +8987,7 @@ CPed::SetSolicit(uint32 time)
 		}
 
 		if (Abs(m_fRotationDest - m_fRotationCur) < HALFPI) {
-			m_standardTimer = CTimer::GetTimeInMilliseconds() + time;
+			m_chatTimer = CTimer::GetTimeInMilliseconds() + time;
 
 			if(!m_carInObjective->bIsVan && !m_carInObjective->bIsBus)
 				m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_HOOKERTALK, 4.0f);
@@ -9000,7 +9001,7 @@ CPed::SetSolicit(uint32 time)
 void
 CPed::Solicit(void)
 {
-	if (m_standardTimer >= CTimer::GetTimeInMilliseconds() && m_carInObjective) {
+	if (m_chatTimer >= CTimer::GetTimeInMilliseconds() && m_carInObjective) {
 		CVector doorPos = GetPositionToOpenCarDoor(m_carInObjective, m_vehDoor, 0.0f);
 		Say(SOUND_PED_SOLICIT);
 		if (FindPlayerVehicle() == m_carInObjective) {
@@ -9061,7 +9062,7 @@ CPed::BuyIceCream(void)
 {
 	if (m_carInObjective) {
 		CPed *driver = m_carInObjective->pDriver;
-		if (driver && CTimer::GetTimeInMilliseconds() > m_standardTimer) {
+		if (driver && CTimer::GetTimeInMilliseconds() > m_chatTimer) {
 			SetChat(driver, 8000);
 			driver->SetChat(this, 8000);
 			return;

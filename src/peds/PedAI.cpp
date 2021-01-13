@@ -1520,7 +1520,7 @@ CPed::ProcessObjective(void)
 				if (bInVehicle) {
 					bScriptObjectiveCompleted = true;
 					RestorePreviousObjective();
-				} else if (m_hitRecoverTimer < CTimer::GetTimeInMilliseconds()) {
+				} else if (m_carJackTimer < CTimer::GetTimeInMilliseconds()) {
 					CVehicle *carToSteal = nil;
 					float closestCarDist = nEnterCarRangeMultiplier * ENTER_CAR_MAX_DIST;
 					CVector pos = GetPosition();
@@ -1545,7 +1545,7 @@ CPed::ProcessObjective(void)
 					}
 					if (carToSteal) {
 						SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, carToSteal);
-						m_hitRecoverTimer = CTimer::GetTimeInMilliseconds() + 5000;
+						m_carJackTimer = CTimer::GetTimeInMilliseconds() + 5000;
 					} else {
 						RestorePreviousObjective();
 						RestorePreviousState();
