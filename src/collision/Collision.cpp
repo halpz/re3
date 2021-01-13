@@ -2296,7 +2296,6 @@ CCollision::DrawColModel(const CMatrix &mat, const CColModel &colModel)
 	}
 
 	for(i = 0; i < colModel.numBoxes; i++){
-if(IsShootThrough(colModel.boxes[i].surface)) continue;
 		min = colModel.boxes[i].min;
 		max = colModel.boxes[i].max;
 
