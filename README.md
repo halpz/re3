@@ -18,7 +18,7 @@ such that we have a working game at all times.
 
 ## Building from Source  
 
-Before starting you may want to point GTA_III_RE_DIR environment variable to GTA3 root folder, if you want executable to be moved there via post-build script.
+Before starting you may want to point GTA_III_RE_DIR environment variable to GTA3 root folder, if you want executable to be moved there via post-build script. (premake)
 
 <details><summary>Linux Premake</summary>
 
