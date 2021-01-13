@@ -434,8 +434,7 @@ CPed::SetModelIndex(uint32 mi)
 	if (!CanUseTorsoWhenLooking())
 		m_pedIK.m_flags |= CPedIK::LOOKAROUND_HEAD_ONLY;
 
-	// This is a mistake by R*, velocity is CVector, whereas m_vecAnimMoveDelta is CVector2D. 
-	(*RPANIMBLENDCLUMPDATA(m_rwObject))->velocity = (CVector*) &m_vecAnimMoveDelta;
+	(*RPANIMBLENDCLUMPDATA(m_rwObject))->velocity2d = &m_vecAnimMoveDelta;
 
 	if(modelInfo->GetHitColModel() == nil)
 		modelInfo->CreateHitColModelSkinned(GetClump());
