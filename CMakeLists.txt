@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 
-set(EXECUTABLE reVC)
-set(PROJECT REVC)
+set(EXECUTABLE reLCS)
+set(PROJECT RELCS)
 
 project(${EXECUTABLE} C CXX)
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
