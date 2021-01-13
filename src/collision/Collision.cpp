@@ -507,12 +507,14 @@ CCollision::TestLineOfSight(const CColLine &line, const CMatrix &matrix, CColMod
 
 	for(i = 0; i < model.numSpheres; i++){
 		if(ignoreSeeThrough && IsSeeThrough(model.spheres[i].surface)) continue;
+		if(ignoreShootThrough && IsShootThrough(model.spheres[i].surface)) continue;
 		if(TestLineSphere(*(CColLine*)newline, model.spheres[i]))
 			return true;
 	}
 
 	for(i = 0; i < model.numBoxes; i++){
 		if(ignoreSeeThrough && IsSeeThrough(model.boxes[i].surface)) continue;
+		if(ignoreShootThrough && IsShootThrough(model.boxes[i].surface)) continue;
 		if(TestLineBox(*(CColLine*)newline, model.boxes[i]))
 			return true;
 	}
@@ -522,6 +524,7 @@ CCollision::TestLineOfSight(const CColLine &line, const CMatrix &matrix, CColMod
 	VuTriangle vutri;
 	for(i = 0; i < model.numTriangles; i++){
 		if(ignoreSeeThrough && IsSeeThrough(model.triangles[i].surface)) continue;
+		if(ignoreShootThrough && IsShootThrough(model.triangles[i].surface)) continue;
 
 		CColTriangle *tri = &model.triangles[i];
 		model.vertices[tri->a].Unpack(vutri.v0);
@@ -539,6 +542,7 @@ CCollision::TestLineOfSight(const CColLine &line, const CMatrix &matrix, CColMod
 #endif
 	for(; i < model.numTriangles; i++){
 		if(ignoreSeeThrough && IsSeeThrough(model.triangles[i].surface)) continue;
+		if(ignoreShootThrough && IsShootThrough(model.triangles[i].surface)) continue;
 
 		CColTriangle *tri = &model.triangles[i];
 		model.vertices[tri->a].Unpack(vutri.v0);
@@ -1333,6 +1337,7 @@ CCollision::ProcessLineOfSight(const CColLine &line,
 	float coldist = 1.0f;
 	for(i = 0; i < model.numSpheres; i++){
 		if(ignoreSeeThrough && IsSeeThrough(model.spheres[i].surface)) continue;
+		if(ignoreShootThrough && IsShootThrough(model.spheres[i].surface)) continue;
 		if(ProcessLineSphere(*(CColLine*)newline, model.spheres[i], point, coldist))
 			point.Set(0, 0, model.spheres[i].surface, model.spheres[i].piece);
 	}
@@ -1348,6 +1353,7 @@ CCollision::ProcessLineOfSight(const CColLine &line,
 	CColTriangle *lasttri = nil;
 	for(i = 0; i < model.numTriangles; i++){
 		if(ignoreSeeThrough && IsSeeThrough(model.triangles[i].surface)) continue;
+		if(ignoreShootThrough && IsShootThrough(model.triangles[i].surface)) continue;
 
 		CColTriangle *tri = &model.triangles[i];
 		model.vertices[tri->a].Unpack(vutri.v0);
@@ -1367,6 +1373,7 @@ CCollision::ProcessLineOfSight(const CColLine &line,
 	float dist;
 	for(; i < model.numTriangles; i++){
 		if(ignoreSeeThrough && IsSeeThrough(model.triangles[i].surface)) continue;
+		if(ignoreShootThrough && IsShootThrough(model.triangles[i].surface)) continue;
 
 		CColTriangle *tri = &model.triangles[i];
 		model.vertices[tri->a].Unpack(vutri.v0);
@@ -1466,13 +1473,13 @@ CCollision::ProcessVerticalLine(const CColLine &line,
 
 	float coldist = 1.0f;
 	for(i = 0; i < model.numSpheres; i++){
-		if(ignoreSeeThrough && IsSeeThrough(model.spheres[i].surface)) continue;
+		if(ignoreSeeThrough && IsSeeThroughVertical(model.spheres[i].surface)) continue;
 		if(ProcessLineSphere(*(CColLine*)newline, model.spheres[i], point, coldist))
 			point.Set(0, 0, model.spheres[i].surface, model.spheres[i].piece);
 	}
 
 	for(i = 0; i < model.numBoxes; i++){
-		if(ignoreSeeThrough && IsSeeThrough(model.boxes[i].surface)) continue;
+		if(ignoreSeeThrough && IsSeeThroughVertical(model.boxes[i].surface)) continue;
 		if(ProcessLineBox(*(CColLine*)newline, model.boxes[i], point, coldist))
 			point.Set(0, 0, model.boxes[i].surface, model.boxes[i].piece);
 	}
@@ -1484,7 +1491,7 @@ CCollision::ProcessVerticalLine(const CColLine &line,
 		CColTriangle *lasttri = nil;
 		VuTriangle vutri;
 		for(i = 0; i < model.numTriangles; i++){
-			if(ignoreSeeThrough && IsSeeThrough(model.triangles[i].surface)) continue;
+			if(ignoreSeeThrough && IsSeeThroughVertical(model.triangles[i].surface)) continue;
 
 			CColTriangle *tri = &model.triangles[i];
 			model.vertices[tri->a].Unpack(vutri.v0);
@@ -1503,7 +1510,7 @@ CCollision::ProcessVerticalLine(const CColLine &line,
 		CVuVector pnt, normal;
 		float dist;
 		for(; i < model.numTriangles; i++){
-			if(ignoreSeeThrough && IsSeeThrough(model.triangles[i].surface)) continue;
+			if(ignoreSeeThrough && IsSeeThroughVertical(model.triangles[i].surface)) continue;
 
 			CColTriangle *tri = &model.triangles[i];
 			model.vertices[tri->a].Unpack(vutri.v0);
@@ -2289,6 +2296,7 @@ CCollision::DrawColModel(const CMatrix &mat, const CColModel &colModel)
 	}
 
 	for(i = 0; i < colModel.numBoxes; i++){
+if(IsShootThrough(colModel.boxes[i].surface)) continue;
 		min = colModel.boxes[i].min;
 		max = colModel.boxes[i].max;
 
