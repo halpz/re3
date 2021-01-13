@@ -762,7 +762,7 @@ CHeli::InitHelis(void)
 }
 
 CHeli*
-CHeli::GenerateHeli(bool catalina)
+GenerateHeli(bool catalina)
 {
 	CHeli *heli;
 	CVector heliPos;
@@ -800,7 +800,7 @@ CHeli::GenerateHeli(bool catalina)
 		id++;
 		found = true;
 		for(i = 0; i < 4; i++)
-			if(pHelis[i] && pHelis[i]->m_nHeliId == id)
+			if(CHeli::pHelis[i] && CHeli::pHelis[i]->m_nHeliId == id)
 				found = false;
 	}
 	heli->m_nHeliId = id;

@@ -437,7 +437,7 @@ RpAnimBlendNodeUpdateKeyframes(AnimBlendFrameData *frames, AnimBlendFrameUpdateD
 		CAnimBlendAssociation *a = (*node)->association;
 		for(i = 0; i < numNodes; i++)
 			if((frames[i].flag & AnimBlendFrameData::VELOCITY_EXTRACTION) == 0 ||
-			   gpAnimBlendClump->velocity2d == nil){
+			   gpAnimBlendClump->velocity == nil){
 				if((*node)[i].sequence)
 					(*node)[i].FindKeyFrame(a->currentTime - a->timeStep);
 			}

@@ -462,7 +462,7 @@ bool CGame::Initialise(const char* datFile)
 	TestModelIndices();
 
 	LoadingScreen("Loading the Game", "Setup water", nil);
-	CWaterLevel::Initialise("DATA\\WATER.DAT");
+	WaterLevelInitialise("DATA\\WATER.DAT");
 	TheConsole.Init();
 	CDraw::SetFOV(120.0f);
 	CDraw::ms_fLODDistance = 500.0f;

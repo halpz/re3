@@ -93,7 +93,7 @@ MemoryMgrFree(void *ptr)
 void *
 RwMallocAlign(RwUInt32 size, RwUInt32 align)
 {
-#if defined (FIX_BUGS) || defined(FIX_BUGS_64)
+#ifdef FIX_BUGS
 	uintptr ptralign = align-1;
 	void *mem = (void *)MemoryMgrMalloc(size + sizeof(uintptr) + ptralign);
 

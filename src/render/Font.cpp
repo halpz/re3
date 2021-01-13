@@ -274,13 +274,13 @@ CFont::Initialise(void)
 	SetScale(1.0f, 1.0f);
 	SetSlantRefPoint(SCREEN_WIDTH, 0.0f);
 	SetSlant(0.0f);
-	SetColor(CRGBA(255, 255, 255, 0));
+	SetColor(CRGBA(0xFF, 0xFF, 0xFF, 0));
 	SetJustifyOff();
 	SetCentreOff();
 	SetWrapx(SCREEN_WIDTH);
 	SetCentreSize(SCREEN_WIDTH);
 	SetBackgroundOff();
-	SetBackgroundColor(CRGBA(128, 128, 128, 128));
+	SetBackgroundColor(CRGBA(0x80, 0x80, 0x80, 0x80));
 	SetBackGroundOnlyTextOff();
 	SetPropOn();
 	SetFontStyle(FONT_BANK);
@@ -614,10 +614,10 @@ CFont::PrintString(float xstart, float ystart, wchar *s)
 						x = xstart;
 #ifdef MORE_LANGUAGES
 					if (IsJapaneseFont())
-						y += 32.0f * Details.scaleY / 2.75f + 2.0f * Details.scaleY;
+						y += 32.0f * CFont::Details.scaleY / 2.75f + 2.0f * CFont::Details.scaleY;
 					else
 #endif
-						y += 32.0f * Details.scaleY * 0.5f + 2.0f * Details.scaleY;
+						y += 32.0f * CFont::Details.scaleY * 0.5f + 2.0f * CFont::Details.scaleY;
 					start = s;
 				}else
 					break;
@@ -653,7 +653,7 @@ CFont::PrintString(float xstart, float ystart, wchar *s)
 					else
 						x = 0.0f;
 
-					y += 32.0f * Details.scaleY / 2.75f + 2.0f * Details.scaleY;
+					y += 32.0f * CFont::Details.scaleY / 2.75f + 2.0f * CFont::Details.scaleY;
 					numSpaces = 0;
 					first = true;
 					lineLength = 0.0f;
@@ -676,7 +676,7 @@ CFont::PrintString(float xstart, float ystart, wchar *s)
 				x = xstart;
 			else
 				x = 0.0f;
-			y += 32.0f * Details.scaleY / 2.75f + 2.0f * Details.scaleY;
+			y += 32.0f * CFont::Details.scaleY / 2.75f + 2.0f * CFont::Details.scaleY;
 			numSpaces = 0;
 			first = true;
 			lineLength = 0.0f;
@@ -753,10 +753,10 @@ CFont::GetNumberLines(float xstart, float ystart, wchar *s)
 			// Why even?
 #ifdef MORE_LANGUAGES
 			if (IsJapanese())
-				y += 32.0f * Details.scaleY / 2.75f + 2.0f * Details.scaleY;
+				y += 32.0f * CFont::Details.scaleY / 2.75f + 2.0f * CFont::Details.scaleY;
 			else
 #endif
-				y += 32.0f * Details.scaleY * 0.5f + 2.0f * Details.scaleY;
+				y += 32.0f * CFont::Details.scaleY * 0.5f + 2.0f * CFont::Details.scaleY;
 		}else{
 			// still space in current line
 			t = GetNextSpace(s);
@@ -827,7 +827,7 @@ CFont::GetTextRect(CRect *rect, float xstart, float ystart, wchar *s)
 				else
 					x = xstart;
 				numLines++;
-				y += 32.0f * Details.scaleY * 0.5f + 2.0f * Details.scaleY;
+				y += 32.0f * CFont::Details.scaleY * 0.5f + 2.0f * CFont::Details.scaleY;
 			}else{
 				// still space in current line
 				t = GetNextSpace(s);
@@ -855,11 +855,11 @@ CFont::GetTextRect(CRect *rect, float xstart, float ystart, wchar *s)
 			rect->right = xstart + maxlength/2 + 4.0f;
 #ifdef MORE_LANGUAGES
 			if (IsJapaneseFont()) {
-				rect->bottom = (32.0f * Details.scaleY / 2.75f + 2.0f * Details.scaleY) * numLines + ystart + (4.0f / 2.75f);
+				rect->bottom = (32.0f * CFont::Details.scaleY / 2.75f + 2.0f * CFont::Details.scaleY) * numLines + ystart + (4.0f / 2.75f);
 				rect->top = ystart - (4.0f / 2.75f);
 			} else {
 #endif
-				rect->bottom = (32.0f * Details.scaleY * 0.5f + 2.0f * Details.scaleY) * numLines + ystart + 2.0f;
+				rect->bottom = (32.0f * CFont::Details.scaleY * 0.5f + 2.0f * CFont::Details.scaleY) * numLines + ystart + 2.0f;
 				rect->top = ystart - 2.0f;
 #ifdef MORE_LANGUAGES
 			}
@@ -869,11 +869,11 @@ CFont::GetTextRect(CRect *rect, float xstart, float ystart, wchar *s)
 			rect->right = xstart + Details.centreSize*0.5f + 4.0f;
 #ifdef MORE_LANGUAGES
 			if (IsJapaneseFont()) {
-				rect->bottom = (32.0f * Details.scaleY / 2.75f + 2.0f * Details.scaleY) * numLines + ystart + (4.0f / 2.75f);
+				rect->bottom = (32.0f * CFont::Details.scaleY / 2.75f + 2.0f * CFont::Details.scaleY) * numLines + ystart + (4.0f / 2.75f);
 				rect->top = ystart - (4.0f / 2.75f);
 			} else {
 #endif
-				rect->bottom = (32.0f * Details.scaleY * 0.5f + 2.0f * Details.scaleY) * numLines + ystart + 2.0f;
+				rect->bottom = (32.0f * CFont::Details.scaleY * 0.5f + 2.0f * CFont::Details.scaleY) * numLines + ystart + 2.0f;
 				rect->top = ystart - 2.0f;
 #ifdef MORE_LANGUAGES
 			}
@@ -886,10 +886,10 @@ CFont::GetTextRect(CRect *rect, float xstart, float ystart, wchar *s)
 		rect->bottom = ystart - 4.0f + 4.0f;
 #ifdef MORE_LANGUAGES
 		if (IsJapaneseFont())
-			rect->top = (32.0f * Details.scaleY / 2.75f + 2.0f * Details.scaleY) * numLines + ystart + 2.0f + (4.0f / 2.75f);
+			rect->top = (32.0f * CFont::Details.scaleY / 2.75f + 2.0f * CFont::Details.scaleY) * numLines + ystart + 2.0f + (4.0f / 2.75f);
 		else
 #endif
-			rect->top = (32.0f * Details.scaleY * 0.5f + 2.0f * Details.scaleY) * numLines + ystart + 2.0f + 2.0f;
+			rect->top = (32.0f * CFont::Details.scaleY * 0.5f + 2.0f * CFont::Details.scaleY) * numLines + ystart + 2.0f + 2.0f;
 	}
 }
 
@@ -1315,89 +1315,27 @@ CFont::ParseToken(wchar *s)
 		case 'n':
 			NewLine = 1;
 			break;
-		case 'b':
-			Details.color.r = 27;
-			Details.color.g = 89;
-			Details.color.b = 130;
-			Details.anonymous_23 = true;
-			break;
+		case 'b': SetColor(CRGBA(27, 89, 130, 255)); Details.anonymous_23 = true; break;
 		case 'f':
 			Details.bFlash = !Details.bFlash;
 			if (!Details.bFlash)
 				Details.color.a = 255;
 			break;
-		case 'g':
-			Details.color.r = 255;
-			Details.color.g = 150;
-			Details.color.b = 225;
-			Details.anonymous_23 = true;
-			break;
-		case 'h':
-			Details.color.r = 225;
-			Details.color.g = 225;
-			Details.color.b = 225;
-			Details.anonymous_23 = true;
-			break;
-		case 'l':
-			Details.color.r = 0;
-			Details.color.g = 0;
-			Details.color.b = 0;
-			Details.anonymous_23 = true;
-			break;
-		case 'o':
-			Details.color.r = 229;
-			Details.color.g = 125;
-			Details.color.b = 126;
-			Details.anonymous_23 = true;
-			break;
-		case 'p':
-			Details.color.r = 168;
-			Details.color.g = 110;
-			Details.color.b = 252;
-			Details.anonymous_23 = true;
-			break;
-		case 'q':
-			Details.color.r = 199;
-			Details.color.g = 144;
-			Details.color.b = 203;
-			Details.anonymous_23 = true;
-			break;
-		case 'r':
-			Details.color.r = 255;
-			Details.color.g = 150;
-			Details.color.b = 225;
-			Details.anonymous_23 = true;
-			break;
-		case 't':
-			Details.color.r = 86;
-			Details.color.g = 212;
-			Details.color.b = 146;
-			Details.anonymous_23 = true;
-			break;
-		case 'w':
-			Details.color.r = 175;
-			Details.color.g = 175;
-			Details.color.b = 175;
-			Details.anonymous_23 = true;
-			break;
-		case 'x':
+		case 'g': SetColor(CRGBA(255, 150, 225, 255)); Details.anonymous_23 = true; break;
+		case 'h': SetColor(CRGBA(225, 225, 225, 255)); Details.anonymous_23 = true; break;
+		case 'l': SetColor(CRGBA(0, 0, 0, 255)); Details.anonymous_23 = true; break;
+		case 'o': SetColor(CRGBA(229, 125, 126, 255)); Details.anonymous_23 = true; break;
+		case 'p': SetColor(CRGBA(168, 110, 252, 255)); Details.anonymous_23 = true; break;
+		case 'q': SetColor(CRGBA(199, 144, 203, 255)); Details.anonymous_23 = true; break;
+		case 'r': SetColor(CRGBA(255, 150, 225, 255)); Details.anonymous_23 = true; break;
+		case 't': SetColor(CRGBA(86, 212, 146, 255)); Details.anonymous_23 = true; break;
+		case 'w': SetColor(CRGBA(175, 175, 175, 255)); Details.anonymous_23 = true; break;
 #ifdef FIX_BUGS
-			Details.color.r = 0;
-			Details.color.g = 255;
-			Details.color.b = 255;
+		case 'x': SetColor(CRGBA(0, 255, 255, 255)); Details.anonymous_23 = true; break;
 #else
-			Details.color.r = 132;
-			Details.color.g = 146;
-			Details.color.b = 197;
+		case 'x': SetColor(CRGBA(132, 146, 197, 255)); Details.anonymous_23 = true; break;
 #endif
-			Details.anonymous_23 = true;
-			break;
-		case 'y':
-			Details.color.r = 255;
-			Details.color.g = 227;
-			Details.color.b = 79;
-			Details.anonymous_23 = true;
-			break;
+		case 'y': SetColor(CRGBA(255, 227, 79, 255)); Details.anonymous_23 = true; break;
 #ifdef BUTTON_ICONS
 		case 'U': PS2Symbol = BUTTON_UP; break;
 		case 'D': PS2Symbol = BUTTON_DOWN; break;
@@ -1604,7 +1542,7 @@ CFont::RenderFontBuffer()
 		if (RenderState.bFontHalfTexture) 
 			c = FindNewCharacter(c); 
 		else if (c > 155) 
-			c = '\0'; 
+			c = 0; 
 
 		if (RenderState.slant != 0.0f)
 			textPosY = (RenderState.slantRefX - textPosX) * RenderState.slant + RenderState.slantRefY;
@@ -1618,7 +1556,7 @@ CFont::RenderFontBuffer()
 		// PS2 uses different chars for some symbols
 		if (!RenderState.bFontHalfTexture && c == 30) c = 61; // wanted star
 #endif
-		textPosX += RenderState.scaleX * GetCharacterWidth(c);
+		textPosX += RenderState.scaleX * (RenderState.proportional ? Size[RenderState.style][c] : Size[RenderState.style][209]);
 		if (c == '\0')
 			textPosX += RenderState.fExtraSpace;
 	}

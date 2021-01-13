@@ -172,10 +172,11 @@ workspace "reLCS"
 
 	filter  {}
 		
-    function setpaths (gamepath, exepath)
+    function setpaths (gamepath, exepath, scriptspath)
+       scriptspath = scriptspath or ""
        if (gamepath) then
           postbuildcommands {
-             '{COPYFILE} "%{cfg.buildtarget.abspath}" "' .. gamepath .. '%{cfg.buildtarget.name}"'
+             '{COPYFILE} "%{cfg.buildtarget.abspath}" "' .. gamepath .. scriptspath .. '%{cfg.buildtarget.name}"'
           }
           debugdir (gamepath)
           if (exepath) then
@@ -185,6 +186,7 @@ workspace "reLCS"
              debugdir (gamepath .. (dir or ""))
           end
        end
+       --targetdir ("bin/%{prj.name}/" .. scriptspath)
     end
 
 if(_OPTIONS["with-librw"]) then

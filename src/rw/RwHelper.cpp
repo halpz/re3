@@ -255,8 +255,7 @@ SkinGetBonePositionsToTable(RpClump *clump, RwV3d *boneTable)
 			parent = stack[sp--];
 		else
 			parent = i;
-
-		//assert(parent >= 0 && parent < numBones);
+		assert(parent >= 0 && parent < numBones);
 	}
 }
 
@@ -264,7 +263,7 @@ RpHAnimAnimation*
 HAnimAnimationCreateForHierarchy(RpHAnimHierarchy *hier)
 {
 	int i;
-#if defined FIX_BUGS || defined LIBRW
+#ifdef FIX_BUGS
 	int numNodes = hier->numNodes*2;	// you're supposed to have at least two KFs per node
 #else
 	int numNodes = hier->numNodes;
@@ -278,7 +277,7 @@ HAnimAnimationCreateForHierarchy(RpHAnimHierarchy *hier)
 		frame->q.real = 1.0f;
 		frame->q.imag.x = frame->q.imag.y = frame->q.imag.z = 0.0f;
 		frame->t.x = frame->t.y = frame->t.z = 0.0f;
-#if defined FIX_BUGS || defined LIBRW
+#ifdef FIX_BUGS
 		// times are subtracted and divided giving NaNs
 		// so they can't both be 0
 		frame->time = i/hier->numNodes;
@@ -484,7 +483,7 @@ CameraSize(RwCamera * camera, RwRect * rect,
 			RwRaster           *zRaster;
 
 			// BUG: game just changes camera raster's sizes, but this is a hack
-#if defined FIX_BUGS || defined LIBRW
+#ifdef FIX_BUGS
 			/*
 			 * Destroy rasters...
 			 */

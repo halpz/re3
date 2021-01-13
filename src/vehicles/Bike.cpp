@@ -2609,7 +2609,7 @@ CBike::KnockOffRider(eWeaponType weapon, uint8 direction, CPed *ped, bool bGetBa
 
 	ped->SetPedState(PED_IDLE);
 	CAnimManager::BlendAnimation(ped->GetClump(), ped->m_animGroup, ANIM_IDLE_STANCE, 100.0f);
-	ped->m_vehDoor = CAR_DOOR_LF;
+	ped->m_vehEnterType = CAR_DOOR_LF;
 	CPed::PedSetOutCarCB(nil, ped);
 	ped->SetMoveState(PEDMOVE_STILL);
 	if(GetUp().z < 0.0f)

@@ -1729,7 +1729,7 @@ void CReplay::SaveReplayToHD(void)
 	CFileMgr::SetDir("");
 }
 
-void CReplay::PlayReplayFromHD(void)
+void PlayReplayFromHD(void)
 {
 	CFileMgr::SetDirMyDocuments();
 	int fr = CFileMgr::OpenFile("replay.rep", "rb");
@@ -1748,17 +1748,17 @@ void CReplay::PlayReplayFromHD(void)
 		return;
 	}
 	int slot;
-	for (slot = 0; CFileMgr::Read(fr, (char*)Buffers[slot], sizeof(Buffers[slot])); slot++)
-		BufferStatus[slot] = REPLAYBUFFER_PLAYBACK;
-	BufferStatus[slot - 1] = REPLAYBUFFER_RECORD;
-	while (slot < NUM_REPLAYBUFFERS)
-		BufferStatus[slot++] = REPLAYBUFFER_UNUSED;
+	for (slot = 0; CFileMgr::Read(fr, (char*)CReplay::Buffers[slot], sizeof(CReplay::Buffers[slot])); slot++)
+		CReplay::BufferStatus[slot] = CReplay::REPLAYBUFFER_PLAYBACK;
+	CReplay::BufferStatus[slot - 1] = CReplay::REPLAYBUFFER_RECORD;
+	while (slot < CReplay::NUM_REPLAYBUFFERS)
+		CReplay::BufferStatus[slot++] = CReplay::REPLAYBUFFER_UNUSED;
 	CFileMgr::CloseFile(fr);
 	CFileMgr::SetDir("");
-	TriggerPlayback(REPLAYCAMMODE_ASSTORED, 0.0f, 0.0f, 0.0f, false);
-	bPlayingBackFromFile = true;
-	bAllowLookAroundCam = true;
-	StreamAllNecessaryCarsAndPeds();
+	CReplay::TriggerPlayback(CReplay::REPLAYCAMMODE_ASSTORED, 0.0f, 0.0f, 0.0f, false);
+	CReplay::bPlayingBackFromFile = true;
+	CReplay::bAllowLookAroundCam = true;
+	CReplay::StreamAllNecessaryCarsAndPeds();
 }
 
 void CReplay::StreamAllNecessaryCarsAndPeds(void)

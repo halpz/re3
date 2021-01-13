@@ -785,20 +785,20 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 			}else{
 				pPed->m_pMyVehicle->RemovePassenger(pPed);
 			}
-			if (pPed->m_vehDoor) {
+			if (pPed->m_vehEnterType) {
 				if (pPed->GetPedState() == PED_EXIT_CAR || pPed->GetPedState() == PED_DRAG_FROM_CAR) {
 					uint8 flags = 0;
 					if (pPed->m_pMyVehicle->IsBike()) {
-						if (pPed->m_vehDoor == CAR_DOOR_LF ||
-							pPed->m_vehDoor == CAR_DOOR_RF ||
-							pPed->m_vehDoor == CAR_WINDSCREEN)
+						if (pPed->m_vehEnterType == CAR_DOOR_LF ||
+							pPed->m_vehEnterType == CAR_DOOR_RF ||
+							pPed->m_vehEnterType == CAR_WINDSCREEN)
 							flags = CAR_DOOR_FLAG_LF | CAR_DOOR_FLAG_RF;
-						else if (pPed->m_vehDoor == CAR_DOOR_LR ||
-							pPed->m_vehDoor == CAR_DOOR_RR)
+						else if (pPed->m_vehEnterType == CAR_DOOR_LR ||
+							pPed->m_vehEnterType == CAR_DOOR_RR)
 							flags = CAR_DOOR_FLAG_LR | CAR_DOOR_FLAG_RR;
 					}
 					else {
-						switch (pPed->m_vehDoor) {
+						switch (pPed->m_vehEnterType) {
 						case CAR_DOOR_LF:
 							flags = pPed->m_pMyVehicle->m_nNumMaxPassengers != 0 ? CAR_DOOR_FLAG_LF : CAR_DOOR_FLAG_LF | CAR_DOOR_FLAG_LR;
 							break;
@@ -814,7 +814,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 						}
 					}
 					pPed->m_pMyVehicle->m_nGettingOutFlags &= ~flags;
-					pPed->m_pMyVehicle->ProcessOpenDoor(pPed->m_vehDoor, NUM_STD_ANIMS, 0.0f);
+					pPed->m_pMyVehicle->ProcessOpenDoor(pPed->m_vehEnterType, NUM_STD_ANIMS, 0.0f);
 				}
 			}
 		}

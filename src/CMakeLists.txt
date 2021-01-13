@@ -1,105 +1,92 @@
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-file(GLOB_RECURSE ${PROJECT}_SOURCES "*.cpp" "*.h" "*.rc")
+if(${REVC_AUDIO} STREQUAL "OAL")
+        find_package(OpenAL REQUIRED)
+        find_package(MPG123 REQUIRED)
+        find_package(SndFile REQUIRED)
+endif()
 
-function(header_directories RETURN_LIST)
-    file(GLOB_RECURSE ALL_SRCS *.h *.cpp *.c)
-    set(RELDIRS)
-    foreach(SRC ${ALL_SRCS})
-        file(RELATIVE_PATH RELSRC "${CMAKE_CURRENT_SOURCE_DIR}" "${SRC}")
-        get_filename_component(RELDIR "${RELSRC}" DIRECTORY)
-        list(APPEND RELDIRS ${RELDIR})
-    endforeach()
-    list(REMOVE_DUPLICATES RELDIRS)
-    set(${RETURN_LIST} ${RELDIRS} PARENT_SCOPE)
-endfunction()
+file(GLOB_RECURSE Sources "*.cpp" "*.h")
 
-header_directories(${PROJECT}_INCLUDES)
+MACRO(HEADER_DIRECTORIES return_list)
+    FILE(GLOB_RECURSE new_list *.cpp)
+    SET(dir_list "animation"
+            "audio"
+            "collision"
+            "control"
+            "core"
+            "entities"
+            "extras"
+            "fakerw"
+            "math"
+            "modelinfo"
+            "objects"
+            "peds"
+            "render"
+            "rw"
+            "save"
+            "skel"
+            "text"
+            "vehicles"
+            "weapons")
+    FOREACH(file_path ${new_list})
+        GET_FILENAME_COMPONENT(dir_path ${file_path} PATH)
+        SET(dir_list ${dir_list} ${dir_path})
+    ENDFOREACH()
+    LIST(REMOVE_DUPLICATES dir_list)
+    SET(${return_list} ${dir_list})
+ENDMACRO()
 
-add_executable(${EXECUTABLE} WIN32
-    ${${PROJECT}_SOURCES}
-)
+HEADER_DIRECTORIES(header_list)
+include_directories(${header_list})
 
-target_link_libraries(${EXECUTABLE} PRIVATE
-    librw::librw
-    Threads::Threads
-)
 
-target_include_directories(${EXECUTABLE}
-    PRIVATE
+add_executable(reVC ${Sources})
+target_link_libraries(reVC librw)
+target_link_libraries(reVC Threads::Threads)
+
+if(${REVC_AUDIO} STREQUAL "OAL")
+        target_link_libraries(reVC ${OPENAL_LIBRARY})
+        target_link_libraries(reVC ${MPG123_LIBRARIES})
+        target_link_libraries(reVC ${SNDFILE_LIBRARIES})
+endif()
+
+target_include_directories(reVC
+    INTERFACE
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-        $<BUILD_INTERFACE:${${PROJECT}_INCLUDES}>
-)
+    )
 
-target_compile_definitions(${EXECUTABLE}
+target_compile_definitions(reVC
     PRIVATE
-        $<IF:$<CONFIG:DEBUG>,DEBUG,NDEBUG>
-        LIBRW
-        ${PROJECT}_NO_AUTOLINK
-)
-
-if(LIBRW_PLATFORM_D3D9)
-    target_compile_definitions(${EXECUTABLE}
-        PUBLIC
-            USE_D3D9
+        "$<IF:$<CONFIG:DEBUG>,DEBUG,NDEBUG>"
+    PUBLIC
+        "RW_${REVC_PLATFORM}"
     )
-endif()
 
-if(${PROJECT}_AUDIO STREQUAL "OAL")
-    find_package(OpenAL REQUIRED)
-    target_include_directories(${EXECUTABLE} PRIVATE ${OPENAL_INCLUDE_DIR})
-    target_link_libraries(${EXECUTABLE} PRIVATE ${OPENAL_LIBRARY})
-    target_compile_definitions(${EXECUTABLE} PRIVATE ${OPENAL_DEFINITIONS})
-    target_compile_definitions(${EXECUTABLE} PRIVATE AUDIO_OAL)
-elseif(${PROJECT}_AUDIO STREQUAL "MSS")
-    find_package(MilesSDK REQUIRED)
-    target_compile_definitions(${EXECUTABLE} PRIVATE AUDIO_MSS)
-    target_link_libraries(${EXECUTABLE} PRIVATE MilesSDK::MilesSDK)
-endif()
-
-find_package(mpg123 REQUIRED)
-target_link_libraries(${EXECUTABLE} PRIVATE
-    MPG123::libmpg123
-)
-if(${PROJECT}_WITH_OPUS)
-    find_package(opusfile REQUIRED)
-    target_link_libraries(${EXECUTABLE} PRIVATE
-        opusfile::opusfile
-    )
-    target_compile_definitions(${EXECUTABLE} PRIVATE AUDIO_OPUS)
-endif()
-if(${PROJECT}_WITH_LIBSNDFILE)
-    find_package(SndFile REQUIRED)
-    target_link_libraries(${EXECUTABLE} PRIVATE
-        SndFile::SndFile
-    )
-    target_compile_definitions(${EXECUTABLE} PRIVATE AUDIO_OAL_USE_SNDFILE)
-endif()
-
-target_compile_definitions(${EXECUTABLE} PRIVATE )
+target_compile_definitions(reVC PRIVATE LIBRW=1 AUDIO_OAL=1)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-    target_compile_options(${EXECUTABLE}
+    target_compile_options(reVC
         PRIVATE
             "-Wall"
-    )
-    if (NOT LIBRW_PLATFORM_PS2)
-        target_compile_options(${EXECUTABLE}
-            PRIVATE
-                -Wextra
-                -Wdouble-promotion
-                -Wpedantic
         )
+    if (NOT REVC_PLATFORM_PS2)
+        target_compile_options(reVC
+            PRIVATE
+                "-Wextra"
+                "-Wdouble-promotion"
+                "-Wpedantic"
+            )
     endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(${EXECUTABLE}
+    target_compile_options(reVC
         PUBLIC
-            /Zc:sizedDealloc-
-    )
+            /wd4996 /wd4244
+        )
 endif()
 
-set_target_properties(${EXECUTABLE}
+set_target_properties(reVC
     PROPERTIES
         C_STANDARD 11
         C_EXTENSIONS OFF
@@ -107,15 +94,20 @@ set_target_properties(${EXECUTABLE}
         CXX_STANDARD 11
         CXX_EXTENSIONS OFF
         CXX_STANDARD_REQUIRED ON
-)
-
-if(${PROJECT}_INSTALL)
-    install(
-        TARGETS ${EXECUTABLE}
-        EXPORT ${EXECUTABLE}-targets
-        RUNTIME DESTINATION "."
+        PREFIX ""
     )
-    if(MSVC)
-        install(FILES $<TARGET_PDB_FILE:${EXECUTABLE}> DESTINATION "." OPTIONAL)
-    endif()
+
+if(REVC_INSTALL)
+    target_include_directories(reVC
+        INTERFACE
+            $<INSTALL_INTERFACE:${REVC_INSTALL_INCLUDEDIR}>
+        )
+
+    install(
+        TARGETS reVC
+        EXPORT reVC-targets
+        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        )
 endif()

@@ -390,8 +390,8 @@ CPlayerInfo::Process(void)
 						m_pPed->SetObjective(OBJECTIVE_ENTER_CAR_AS_PASSENGER, carBelow);
 					} else if (carBelow->IsBoat()) {
 						if (!carBelow->pDriver) {
-							m_pPed->m_vehDoor = 0;
-							m_pPed->SetEnterCar(carBelow, m_pPed->m_vehDoor);
+							m_pPed->m_vehEnterType = 0;
+							m_pPed->SetEnterCar(carBelow, m_pPed->m_vehEnterType);
 						}
 					} else {
 						m_pPed->SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, carBelow);

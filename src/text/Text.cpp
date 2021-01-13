@@ -113,14 +113,14 @@ wchar*
 CText::Get(const char *key)
 {
 	uint8 result = false;
-#if defined (FIX_BUGS) || defined(FIX_BUGS_64)
+#ifdef FIX_BUGS
 	wchar *outstr = keyArray.Search(key, data.chars, &result);
 #else
 	wchar *outstr = keyArray.Search(key, &result);
 #endif
 
 	if (!result && bHasMissionTextOffsets && bIsMissionTextLoaded)
-#if defined (FIX_BUGS) || defined(FIX_BUGS_64)
+#ifdef FIX_BUGS
 		outstr = mission_keyArray.Search(key, mission_data.chars, &result);
 #else
 		outstr = mission_keyArray.Search(key, &result);
@@ -347,7 +347,7 @@ CKeyArray::Unload(void)
 void
 CKeyArray::Update(wchar *chars)
 {
-#if !defined(FIX_BUGS) && !defined(FIX_BUGS_64)
+#ifndef FIX_BUGS
 	int i;
 	for(i = 0; i < numEntries; i++)
 		entries[i].value = (wchar*)((uint8*)chars + (uintptr)entries[i].value);
@@ -375,7 +375,7 @@ CKeyArray::BinarySearch(const char *key, CKeyEntry *entries, int16 low, int16 hi
 }
 
 wchar*
-#if defined (FIX_BUGS) || defined(FIX_BUGS_64)
+#ifdef FIX_BUGS
 CKeyArray::Search(const char *key, wchar *data, uint8 *result)
 #else
 CKeyArray::Search(const char *key, uint8 *result)
@@ -385,7 +385,7 @@ CKeyArray::Search(const char *key, uint8 *result)
 	char errstr[25];
 	int i;
 
-#if defined (FIX_BUGS) || defined(FIX_BUGS_64)
+#ifdef FIX_BUGS
 	found = BinarySearch(key, entries, 0, numEntries-1);
 	if (found) {
 		*result = true;

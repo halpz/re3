@@ -3,6 +3,7 @@
 #include "AnimBlendList.h"
 
 
+// TODO: put somewhere else
 struct AnimBlendFrameData
 {
 	enum {
@@ -30,10 +31,7 @@ class CAnimBlendClumpData
 public:
 	CAnimBlendLink link;
 	int32 numFrames;
-	union {
-		CVector2D *velocity2d;
-		CVector *velocity3d;
-	};
+	CVector *velocity;
 	// order of frames is determined by RW hierarchy
 	AnimBlendFrameData *frames;
 

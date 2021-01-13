@@ -7,7 +7,7 @@ void TextCopy(wchar *dst, const wchar *src);
 
 struct CKeyEntry
 {
-#if defined(FIX_BUGS) || defined(FIX_BUGS_64)
+#ifdef FIX_BUGS
 	uint32 valueOffset;
 #else
 	wchar *value;
@@ -30,7 +30,7 @@ public:
 	void Unload(void);
 	void Update(wchar *chars);
 	CKeyEntry *BinarySearch(const char *key, CKeyEntry *entries, int16 low, int16 high);
-#if defined (FIX_BUGS) || defined(FIX_BUGS_64)
+#ifdef FIX_BUGS
 	wchar *Search(const char *key, wchar *data, uint8 *result);
 #else
 	wchar *Search(const char *key, uint8* result);
