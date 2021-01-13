@@ -172,11 +172,10 @@ workspace "reVC"
 
 	filter  {}
 		
-    function setpaths (gamepath, exepath, scriptspath)
-       scriptspath = scriptspath or ""
+    function setpaths (gamepath, exepath)
        if (gamepath) then
           postbuildcommands {
-             '{COPYFILE} "%{cfg.buildtarget.abspath}" "' .. gamepath .. scriptspath .. '%{cfg.buildtarget.name}"'
+             '{COPYFILE} "%{cfg.buildtarget.abspath}" "' .. gamepath .. '%{cfg.buildtarget.name}"'
           }
           debugdir (gamepath)
           if (exepath) then
@@ -186,7 +185,6 @@ workspace "reVC"
              debugdir (gamepath .. (dir or ""))
           end
        end
-       --targetdir ("bin/%{prj.name}/" .. scriptspath)
     end
 
 if(_OPTIONS["with-librw"]) then
@@ -309,7 +307,7 @@ project "reVC"
 
 	filter {}
 	if(os.getenv("GTA_VC_RE_DIR")) then
-		setpaths("$(GTA_VC_RE_DIR)/", "%(cfg.buildtarget.name)", "")
+		setpaths("$(GTA_VC_RE_DIR)/", "%(cfg.buildtarget.name)")
 	end
 	
 	filter "platforms:win*"
