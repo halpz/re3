@@ -19,7 +19,9 @@ such that we have a working game at all times.
 ## Building from Source
 
 <details><summary>Linux Premake</summary>
-- For Linux using premake, proceed: [Building on Linux](https://github.com/GTAmodding/re3/wiki/Building-on-Linux)
+
+For Linux using premake, proceed: [Building on Linux](https://github.com/GTAmodding/re3/wiki/Building-on-Linux)
+
 </details>
 
 <details><summary>Linux Conan</summary>
@@ -42,10 +44,13 @@ conan build ..
 </details>
 
 <details><summary>FreeBSD</summary>
-- For FreeBSD using premake, proceed: [Building on FreeBSD](https://github.com/GTAmodding/re3/wiki/Building-on-FreeBSD) 
+
+For FreeBSD using premake, proceed: [Building on FreeBSD](https://github.com/GTAmodding/re3/wiki/Building-on-FreeBSD)
+
 </details>
 
 <details><summary>Windows</summary>
+
 You may want to point GTA_III_RE_DIR environment variable to GTA3 root folder if you want executable to be moved there via post-build script.
 
 - For Windows, assuming you have Visual Studio:
