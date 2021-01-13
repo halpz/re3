@@ -5823,7 +5823,7 @@ CAutomobile::KnockPedOutCar(eWeaponType weapon, uint16 door, CPed *ped)
 	if(ped == nil)
 		return;
 
-	ped->m_vehEnterType = door;
+	ped->m_vehDoor = door;
 	ped->SetPedState(PED_IDLE);
 	CAnimManager::BlendAnimation(ped->GetClump(), ped->m_animGroup, ANIM_IDLE_STANCE, 100.0f);
 	CPed::PedSetOutCarCB(nil, ped);
