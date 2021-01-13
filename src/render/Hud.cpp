@@ -449,10 +449,10 @@ void CHud::Draw()
 		}
 		if (m_WeaponState != FADED_OUT) {
 			CWeapon *weapon = playerPed->GetWeapon();
-			uint32 AmmoAmount = CWeaponInfo::GetWeaponInfo((eWeaponType)WeaponType)->m_nAmountofAmmunition;
-			uint32 AmmoInClip = weapon->m_nAmmoInClip;
-			uint32 TotalAmmo = weapon->m_nAmmoTotal;
-			uint32 Ammo, Clip;
+			int32 AmmoAmount = CWeaponInfo::GetWeaponInfo((eWeaponType)WeaponType)->m_nAmountofAmmunition;
+			int32 AmmoInClip = weapon->m_nAmmoInClip;
+			int32 TotalAmmo = weapon->m_nAmmoTotal;
+			int32 Ammo, Clip;
 
 			if (AmmoAmount <= 1 || AmmoAmount >= 1000)
 				sprintf(sTemp, "%d", TotalAmmo);
