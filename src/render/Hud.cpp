@@ -509,10 +509,10 @@ void CHud::Draw()
 		/*
 			DrawAmmo
 		*/
-		uint32 AmmoAmount = CWeaponInfo::GetWeaponInfo(FindPlayerPed()->GetWeapon()->m_eWeaponType)->m_nAmountofAmmunition;
-		uint32 AmmoInClip = FindPlayerPed()->m_weapons[FindPlayerPed()->m_currentWeapon].m_nAmmoInClip;
-		uint32 TotalAmmo = FindPlayerPed()->m_weapons[FindPlayerPed()->m_currentWeapon].m_nAmmoTotal;
-		uint32 Ammo, Clip;
+		int32 AmmoAmount = CWeaponInfo::GetWeaponInfo(FindPlayerPed()->GetWeapon()->m_eWeaponType)->m_nAmountofAmmunition;
+		int32 AmmoInClip = FindPlayerPed()->m_weapons[FindPlayerPed()->m_currentWeapon].m_nAmmoInClip;
+		int32 TotalAmmo = FindPlayerPed()->m_weapons[FindPlayerPed()->m_currentWeapon].m_nAmmoTotal;
+		int32 Ammo, Clip;
 
 		if (AmmoAmount <= 1 || AmmoAmount >= 1000)
 			sprintf(sTemp, "%d", TotalAmmo);
@@ -520,18 +520,12 @@ void CHud::Draw()
 			if (WeaponType == WEAPONTYPE_FLAMETHROWER) {
 				Clip = AmmoInClip / 10;
 
-				if ((TotalAmmo - AmmoInClip) / 10 <= 9999)
-					Ammo = (TotalAmmo - AmmoInClip) / 10;
-				else
-					Ammo = 9999;
+				Ammo = Min((TotalAmmo - AmmoInClip) / 10, 9999);
 			}
 			else {
 				Clip = AmmoInClip;
 
-				if ((TotalAmmo - AmmoInClip) > 9999)
-					Ammo = 9999;
-				else
-					Ammo = TotalAmmo - AmmoInClip;
+				Ammo = Min(TotalAmmo - AmmoInClip, 9999);
 			}
 
 			sprintf(sTemp, "%d-%d", Ammo, Clip);
