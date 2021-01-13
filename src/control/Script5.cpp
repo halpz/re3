@@ -81,7 +81,7 @@ void CRunningScript::LocatePlayerCommand(int32 command, uint32* pIp)
 	CVector pos = pPlayerInfo->GetPos();
 	if (!decided) {
 		result = false;
-		if (Abs(pos.x - X) < dX && Abs(pos.y - Y) < dY && (b3D || Abs(pos.z - Z) < dZ)) {
+		if (Abs(pos.x - X) < dX && Abs(pos.y - Y) < dY && (!b3D || Abs(pos.z - Z) < dZ)) {
 			switch (command) {
 			case COMMAND_LOCATE_PLAYER_ANY_MEANS_2D:
 			case COMMAND_LOCATE_PLAYER_ANY_MEANS_3D:
@@ -107,8 +107,8 @@ void CRunningScript::LocatePlayerCommand(int32 command, uint32* pIp)
 			}
 		}
 	}
-	UpdateCompareFlag(result && Abs(pos.x - X) < 80.0f && Abs(pos.y - Y) > 80.0f);
-	if (debug)
+	UpdateCompareFlag(result);
+	if (debug && Abs(pos.x - X) < 80.0f && Abs(pos.y - Y) < 80.0f)
 		CTheScripts::HighlightImportantArea(id, X - dX, Y - dY, X + dX, Y + dY, b3D ? Z : MAP_Z_LOW_LIMIT);
 	/*
 	if (CTheScripts::DbgFlag) {
