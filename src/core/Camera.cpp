@@ -2353,7 +2353,7 @@ CCamera::StartTransition(int16 newMode)
 		while(deltaBeta < -PI) deltaBeta += 2*PI;
 		deltaBeta = Abs(deltaBeta);
 
-		door = FindPlayerPed()->m_vehEnterType;
+		door = FindPlayerPed()->m_vehDoor;
 		if(deltaBeta > HALFPI){
 			if(((CPed*)pTargetEntity)->m_carInObjective){
 				if(((CPed*)pTargetEntity)->m_carInObjective->IsUpsideDown()){

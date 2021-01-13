@@ -883,9 +883,13 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 				if(B->GetStatus() == STATUS_PLAYER)
 					pointposB *= 0.8f;
 				if(CWorld::bNoMoreCollisionTorque){
-					// BUG: the game actually uses A here, but this can't be right
+#ifdef FIX_BUGS
 					B->ApplyFrictionMoveForce(fB*-0.3f);
 					B->ApplyFrictionTurnForce(fB*-0.3f, pointposB);
+#else
+					A->ApplyFrictionMoveForce(fB*-0.3f);
+					A->ApplyFrictionTurnForce(fB*-0.3f, pointposB);
+#endif
 				}
 			}
 			if(!A->bInfiniteMass){
@@ -1054,7 +1058,13 @@ CPhysical::ApplyFriction(CPhysical *B, float adhesiveLimit, CColPoint &colpoint)
 		fOtherSpeedA = vOtherSpeedA.Magnitude();
 		fOtherSpeedB = vOtherSpeedB.Magnitude();
 
+#ifdef FIX_BUGS // division by 0
+		frictionDir = vOtherSpeedA;
+		frictionDir.Normalise();
+#else
 		frictionDir = vOtherSpeedA * (1.0f/fOtherSpeedA);
+#endif
+
 		speedSum = (B->m_fMass*fOtherSpeedB + A->m_fMass*fOtherSpeedA)/(B->m_fMass + A->m_fMass);
 		if(fOtherSpeedA > speedSum){
 			impulseA = (speedSum - fOtherSpeedA) * A->m_fMass;
@@ -1084,7 +1094,12 @@ CPhysical::ApplyFriction(CPhysical *B, float adhesiveLimit, CColPoint &colpoint)
 		fOtherSpeedA = vOtherSpeedA.Magnitude();
 		fOtherSpeedB = vOtherSpeedB.Magnitude();
 
+#ifdef FIX_BUGS // division by 0
+		frictionDir = vOtherSpeedA;
+		frictionDir.Normalise();
+#else
 		frictionDir = vOtherSpeedA * (1.0f/fOtherSpeedA);
+#endif
 		float massB = B->GetMass(pointposB, frictionDir);
 		speedSum = (massB*fOtherSpeedB + A->m_fMass*fOtherSpeedA)/(massB + A->m_fMass);
 		if(fOtherSpeedA > speedSum){
@@ -1112,7 +1127,12 @@ CPhysical::ApplyFriction(CPhysical *B, float adhesiveLimit, CColPoint &colpoint)
 		fOtherSpeedA = vOtherSpeedA.Magnitude();
 		fOtherSpeedB = vOtherSpeedB.Magnitude();
 
+#ifdef FIX_BUGS // division by 0
+		frictionDir = vOtherSpeedA;
+		frictionDir.Normalise();
+#else
 		frictionDir = vOtherSpeedA * (1.0f/fOtherSpeedA);
+#endif
 		float massA = A->GetMass(pointposA, frictionDir);
 		speedSum = (B->m_fMass*fOtherSpeedB + massA*fOtherSpeedA)/(B->m_fMass + massA);
 		if(fOtherSpeedA > speedSum){
@@ -1140,7 +1160,12 @@ CPhysical::ApplyFriction(CPhysical *B, float adhesiveLimit, CColPoint &colpoint)
 		fOtherSpeedA = vOtherSpeedA.Magnitude();
 		fOtherSpeedB = vOtherSpeedB.Magnitude();
 
+#ifdef FIX_BUGS // division by 0
+		frictionDir = vOtherSpeedA;
+		frictionDir.Normalise();
+#else
 		frictionDir = vOtherSpeedA * (1.0f/fOtherSpeedA);
+#endif
 		float massA = A->GetMass(pointposA, frictionDir);
 		float massB = B->GetMass(pointposB, frictionDir);
 		speedSum = (massB*fOtherSpeedB + massA*fOtherSpeedA)/(massB + massA);
@@ -1178,7 +1203,12 @@ CPhysical::ApplyFriction(float adhesiveLimit, CColPoint &colpoint)
 
 		fOtherSpeed = vOtherSpeed.Magnitude();
 		if(fOtherSpeed > 0.0f){
+#ifdef FIX_BUGS // division by 0
+			frictionDir = vOtherSpeed;
+			frictionDir.Normalise();
+#else
 			frictionDir = vOtherSpeed * (1.0f/fOtherSpeed);
+#endif
 			// not really impulse but speed
 			// maybe use ApplyFrictionMoveForce instead?
 			fImpulse = -fOtherSpeed;
@@ -1196,7 +1226,12 @@ CPhysical::ApplyFriction(float adhesiveLimit, CColPoint &colpoint)
 
 		fOtherSpeed = vOtherSpeed.Magnitude();
 		if(fOtherSpeed > 0.0f){
+#ifdef FIX_BUGS // division by 0
+			frictionDir = vOtherSpeed;
+			frictionDir.Normalise();
+#else
 			frictionDir = vOtherSpeed * (1.0f/fOtherSpeed);
+#endif
 			fImpulse = -fOtherSpeed * m_fMass;
 			impulseLimit = adhesiveLimit*CTimer::GetTimeStep() * 1.5;
 			if(fImpulse < -impulseLimit) fImpulse = -impulseLimit;

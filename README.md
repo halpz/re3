@@ -35,6 +35,13 @@ There are various settings at the very bottom of [config.h](https://github.com/G
 ## Contributing
 Please read the [Coding Style](https://github.com/GTAmodding/re3/blob/master/CODING_STYLE.md) Document
 
-### Unreversed / incomplete classes (at least the ones we know)
-See [VC todo list](https://github.com/GTAmodding/re3/wiki/VC-todo)
+### Unreversed / incomplete classes  
+
+PS2/Mobile stuff:
+
+	src/core/Pad.cpp
+	src/core/main.cpp
+	src/core/Frontend_PS2.cpp
+	src/core/FrontEndControls.cpp
+	src/save/MemoryCard.cpp
 
