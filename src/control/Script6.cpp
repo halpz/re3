@@ -426,7 +426,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 #ifdef USE_MEASUREMENTS_IN_METERS
 		UpdateCompareFlag(true);
 #else
-		UpdateCompareFlag(false)
+		UpdateCompareFlag(false);
 #endif
 		return 0;
 	case COMMAND_CONVERT_METRES_TO_FEET:
