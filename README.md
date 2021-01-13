@@ -12,16 +12,42 @@ such that we have a working game at all times.
 ## How can I try it?
 
 - re3 requires game assets to work, so you **must** own [a copy of GTA III](https://store.steampowered.com/app/12100/Grand_Theft_Auto_III/).
-- Build re3 or download it from one of the above links (Debug or Release).
+- Build re3 or download [the latest nightly build](https://github.com/GTAmodding/re3/actions) (You must be logged in.)
 - (Optional) If you want to use optional features like Russian language or menu map, copy the files in /gamefiles folder to your game root folder.
 - Move re3.exe to GTA 3 directory and run it.
 
-## Preparing the environment for building
+## Building from Source
 
+<details><summary>Linux Premake</summary>
+- For Linux using premake, proceed: [Building on Linux](https://github.com/GTAmodding/re3/wiki/Building-on-Linux)
+</details>
+
+<details><summary>Linux Conan</summary>
+
+Obtain souce code.
+```
+git clone https://github.com/GTAmodding/re3.git
+cd re3
+git submodule init
+git submodule update --recursive
+```
+Install python and conan, and then run build.
+```
+conan export vendor/librw librw/master@
+mkdir build
+cd build
+conan install .. re3/master@ -if build -o re3:audio=openal -o librw:platform=gl3 -o librw:gl3_gfxlib=glfw --build missing -s re3:build_type=RelWithDebInfo -s librw:build_type=RelWithDebInfo
+conan build ..
+```
+</details>
+
+<details><summary>FreeBSD</summary>
+- For FreeBSD using premake, proceed: [Building on FreeBSD](https://github.com/GTAmodding/re3/wiki/Building-on-FreeBSD) 
+</details>
+
+<details><summary>Windows</summary>
 You may want to point GTA_III_RE_DIR environment variable to GTA3 root folder if you want executable to be moved there via post-build script.
 
-- For Linux, proceed: [Building on Linux](https://github.com/GTAmodding/re3/wiki/Building-on-Linux)
-- For FreeBSD, proceed: [Building on FreeBSD](https://github.com/GTAmodding/re3/wiki/Building-on-FreeBSD) 
 - For Windows, assuming you have Visual Studio:
     - Clone the repo using the argument `--recursive`.
     - Run one of the `premake-vsXXXX.cmd` variants on root folder.
@@ -29,9 +55,10 @@ You may want to point GTA_III_RE_DIR environment variable to GTA3 root folder if
     
 **If you use 64-bit D3D9**: We don't ship 64-bit Dx9 SDK. You need to download it from Microsoft if you don't have it(although it should come pre-installed after some Windows version)  
 
-There are various settings at the very bottom of [config.h](https://github.com/GTAmodding/re3/tree/master/src/core/config.h), you may want to take a look there. i.e. FIX_BUGS define fixes the bugs we've come across.
+**If you choose OpenAL on Windows** You must read [Running OpenAL build on Windows](https://github.com/GTAmodding/re3/wiki/Running-OpenAL-build-on-Windows).
+</details>
 
-> :information_source: **If you choose OpenAL on Windows** You must read [Running OpenAL build on Windows](https://github.com/GTAmodding/re3/wiki/Running-OpenAL-build-on-Windows).
+> :information_source: There are various settings at the very bottom of [config.h](https://github.com/GTAmodding/re3/tree/master/src/core/config.h), you may want to take a look there. i.e. FIX_BUGS define fixes the bugs we've come across.
 
 > :information_source: **Did you notice librw?** re3 uses completely homebrew RenderWare-replacement rendering engine; [librw](https://github.com/aap/librw/). librw comes as submodule of re3, but you also can use LIBRW enviorenment variable to specify path to your own librw.
 
