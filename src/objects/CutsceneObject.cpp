@@ -150,9 +150,9 @@ CCutsceneObject::PreRender(void)
 void
 CCutsceneObject::Render(void)
 {
-	RwRenderStateSet(rwRENDERSTATECULLMODE, (void *)rwCULLMODECULLNONE);
+	SetCullMode(rwCULLMODECULLNONE);
 	CObject::Render();
-	RwRenderStateSet(rwRENDERSTATECULLMODE, (void *)rwCULLMODECULLBACK);
+	SetCullMode(rwCULLMODECULLBACK);
 }
 
 bool
