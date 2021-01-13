@@ -26,7 +26,7 @@ For Linux using premake, proceed: [Building on Linux](https://github.com/GTAmodd
 
 <details><summary>Linux Conan</summary>
 
-Obtain souce code.
+Obtain source code.
 ```
 git clone https://github.com/GTAmodding/re3.git
 cd re3
