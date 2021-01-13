@@ -16,7 +16,9 @@ such that we have a working game at all times.
 - (Optional) If you want to use optional features like Russian language or menu map, copy the files in /gamefiles folder to your game root folder.
 - Move re3.exe to GTA 3 directory and run it.
 
-## Building from Source
+## Building from Source  
+
+Before starting you may want to point GTA_III_RE_DIR environment variable to GTA3 root folder, if you want executable to be moved there via post-build script.
 
 <details><summary>Linux Premake</summary>
 
@@ -51,12 +53,10 @@ For FreeBSD using premake, proceed: [Building on FreeBSD](https://github.com/GTA
 
 <details><summary>Windows</summary>
 
-You may want to point GTA_III_RE_DIR environment variable to GTA3 root folder if you want executable to be moved there via post-build script.
-
-- For Windows, assuming you have Visual Studio:
-    - Clone the repo using the argument `--recursive`.
-    - Run one of the `premake-vsXXXX.cmd` variants on root folder.
-    - Open the project via Visual Studio  
+Assuming you have Visual Studio:
+- Clone the repo using the argument `--recursive`.
+- Run one of the `premake-vsXXXX.cmd` variants on root folder.
+- Open the project via Visual Studio  
     
 **If you use 64-bit D3D9**: We don't ship 64-bit Dx9 SDK. You need to download it from Microsoft if you don't have it(although it should come pre-installed after some Windows version)  
 
