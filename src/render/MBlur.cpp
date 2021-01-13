@@ -442,7 +442,7 @@ CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type,
 			RwIm2DVertexSetIntRGBA(&Vertex2[3], r, g, b, 80);
 			RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
 			RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
-			// TODO(MIAMI): pBufVertCount = 0;
+			pBufVertCount = 0;
 		}else{
 			RwIm2DVertexSetIntRGBA(&Vertex2[0], r*2, g*2, b*2, 30);
 			RwIm2DVertexSetIntRGBA(&Vertex2[1], r*2, g*2, b*2, 30);

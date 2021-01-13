@@ -1426,11 +1426,13 @@ Idle(void *arg)
 	CSprite2d::InitPerFrame();
 	CFont::InitPerFrame();
 
+	PUSH_MEMID(MEMID_GAME_PROCESS);
 	CPointLights::InitPerFrame();
 
 	tbStartTimer(0, "CGame::Process");
 	CGame::Process();
 	tbEndTimer("CGame::Process");
+	POP_MEMID();
 
 	tbStartTimer(0, "DMAudio.Service");
 	DMAudio.Service();
@@ -1451,6 +1453,8 @@ Idle(void *arg)
 
 	if(arg == nil)
 		return;
+
+	PUSH_MEMID(MEMID_RENDER);
 
 	if(!FrontEndMenuManager.m_bMenuActive && TheCamera.GetScreenFadeStatus() != FADE_2)
 	{
