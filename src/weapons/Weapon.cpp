@@ -911,7 +911,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 				CWorld::bIncludeDeadPeds = true;
 
 			CWorld::bIncludeBikers = true;
-			CWorld::ProcessLineOfSight(*fireSource, target, point, victim, true, true, true, true, true, false, false, true);
+			ProcessLineOfSight(*fireSource, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, false, false);
 			CWorld::bIncludeDeadPeds = false;
 			CWorld::bIncludeBikers = false;
 		}
@@ -924,7 +924,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 			shooterPed->TransformToNode(target, PED_HANDR);
 
 			CWorld::bIncludeBikers = true;
-			CWorld::ProcessLineOfSight(*fireSource, target, point, victim, true, true, true, true, true, false, false, true);
+			ProcessLineOfSight(*fireSource, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, false, false);
 			CWorld::bIncludeBikers = false;
 		}
 	}
@@ -935,7 +935,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 		CWorld::bIncludeBikers = true;
 		CWorld::bIncludeDeadPeds = true;
 		CWorld::bIncludeCarTyres = true;
-		CWorld::ProcessLineOfSight(source, target, point, victim, true, true, true, true, true, false, false, true);
+		ProcessLineOfSight(source, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, false, false);
 		CWorld::bIncludeBikers = false;
 		CWorld::bIncludeDeadPeds = false;
 		CWorld::bIncludeCarTyres = false;
@@ -981,7 +981,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 			target *= info->m_fRange;
 			target += *fireSource;
 			CWorld::pIgnoreEntity = shooter;
-			CWorld::ProcessLineOfSight(*fireSource, target, point, victim, true, true, true, true, true, false, false, true);
+			ProcessLineOfSight(*fireSource, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, true, false);
 			CWorld::pIgnoreEntity = nil;
 
 			int32 rotSpeed = 1;
@@ -1014,7 +1014,7 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 			}
 
 			CWorld::bIncludeBikers = true;
-			CWorld::ProcessLineOfSight(*fireSource, target, point, victim, true, true, true, true, true, false, false, true);
+			ProcessLineOfSight(*fireSource, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, false, false);
 			CWorld::bIncludeBikers = false;
 
 			int32 rotSpeed = 1;
@@ -1683,7 +1683,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 			CWorld::bIncludeCarTyres = true;
 			CWorld::bIncludeBikers = true;
 			CWorld::bIncludeDeadPeds = true;
-			CWorld::ProcessLineOfSight(source, target, point, victim, true, true, true, true, true, false, false, true);
+			ProcessLineOfSight(source, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, false, false);
 			CWorld::bIncludeDeadPeds = false;
 			CWorld::bIncludeCarTyres = false;
 		}
@@ -1716,7 +1716,7 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 				CWorld::bIncludeDeadPeds = true;
 
 			CWorld::bIncludeBikers = true;
-			CWorld::ProcessLineOfSight(*fireSource, target, point, victim, true, true, true, true, true, false, false, true);
+			ProcessLineOfSight(*fireSource, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, false, false);
 			CWorld::bIncludeDeadPeds = false;
 		}
 		CWorld::bIncludeBikers = false;
@@ -2329,7 +2329,7 @@ CWeapon::FireM16_1stPerson(CEntity *shooter)
 	CVector source = cam->Source;
 	CVector target = cam->Front*info->m_fRange + source;
 
-	if (CWorld::ProcessLineOfSight(source, target, point, victim, true, true, true, true, true, false, false, true)) {
+	if (ProcessLineOfSight(source, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, true, false)) {
 		CheckForShootingVehicleOccupant(&victim, &point, m_eWeaponType, source, target);
 	}
 	CWorld::pIgnoreEntity = nil;
@@ -3176,7 +3176,7 @@ CPed::IsPedDoingDriveByShooting(void)
 bool
 CWeapon::ProcessLineOfSight(CVector const &point1, CVector const &point2, CColPoint &point, CEntity *&entity, eWeaponType type, CEntity *shooter, bool checkBuildings, bool checkVehicles, bool checkPeds, bool checkObjects, bool checkDummies, bool ignoreSeeThrough, bool ignoreSomeObjects)
 {
-	return CWorld::ProcessLineOfSight(point1, point2, point, entity, checkBuildings, checkVehicles, checkPeds, checkObjects, checkDummies, ignoreSeeThrough, ignoreSomeObjects);
+	return CWorld::ProcessLineOfSight(point1, point2, point, entity, checkBuildings, checkVehicles, checkPeds, checkObjects, checkDummies, false, ignoreSomeObjects, true);
 }
 
 
