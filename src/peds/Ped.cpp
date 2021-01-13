@@ -330,8 +330,7 @@ CPed::SetModelIndex(uint32 mi)
 	m_animGroup = (AssocGroupId) modelInfo->m_animGroup;
 	CAnimManager::AddAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE);
 
-	// This is a mistake by R*, velocity is CVector, whereas m_vecAnimMoveDelta is CVector2D. 
-	(*RPANIMBLENDCLUMPDATA(m_rwObject))->velocity = (CVector*) &m_vecAnimMoveDelta;
+	(*RPANIMBLENDCLUMPDATA(m_rwObject))->velocity2d = &m_vecAnimMoveDelta;
 
 #ifdef PED_SKIN
 	if(modelInfo->GetHitColModel() == nil)
