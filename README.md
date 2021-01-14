@@ -18,7 +18,7 @@ such that we have a working game at all times.
 
 ## Building from Source  
 
-Before starting you may want to point GTA_III_RE_DIR environment variable to GTA3 root folder, if you want executable to be moved there via post-build script. (premake)
+If you gonna use premake, then pefore starting you may want to point GTA_III_RE_DIR environment variable to GTA3 root folder, if you want executable to be moved there via post-build script.
 
 <details><summary>Linux Premake</summary>
 
@@ -41,7 +41,7 @@ conan export vendor/librw librw/master@
 mkdir build
 cd build
 conan install .. re3/master@ -if build -o re3:audio=openal -o librw:platform=gl3 -o librw:gl3_gfxlib=glfw --build missing -s re3:build_type=RelWithDebInfo -s librw:build_type=RelWithDebInfo
-conan build ..
+conan build .. -if build -bf build -pf package
 ```
 </details>
 
