@@ -1299,9 +1299,9 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		script_assert(pPed);
-		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(ScriptParams[1]);
+		CObject* pObject = CPools::GetObjectPool()->GetAt(ScriptParams[1]);
 		pPed->bScriptObjectiveCompleted = false;
-		pPed->SetObjective(OBJECTIVE_DESTROY_OBJECT, pVehicle);
+		pPed->SetObjective(OBJECTIVE_DESTROY_OBJECT, pObject);
 		return 0;
 	}
 	case COMMAND_SET_CHAR_OBJ_DESTROY_CAR:
