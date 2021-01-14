@@ -38,7 +38,7 @@
 //TODO: max channels
 //TODO: loop count
 
-#if defined _MSC_VER && !defined RE3_NO_AUTOLINK
+#if defined _MSC_VER && !defined CMAKE_NO_AUTOLINK
 #pragma comment( lib, "OpenAL32.lib" )
 #endif
 

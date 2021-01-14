@@ -32,7 +32,7 @@
 
 #define WM_GRAPHNOTIFY	WM_USER+13
 
-#if defined _MSC_VER && !defined RE3_NO_AUTOLINK
+#if defined _MSC_VER && !defined CMAKE_NO_AUTOLINK
 #ifndef USE_D3D9
 #pragma comment( lib, "d3d8.lib" )
 #endif
