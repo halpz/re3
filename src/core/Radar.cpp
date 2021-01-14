@@ -476,6 +476,10 @@ void CRadar::Draw3dMarkers()
 void CRadar::DrawBlips()
 {
 	if (!TheCamera.m_WideScreenOn && CHud::m_Wants_To_Draw_Hud) {
+#ifdef SECUROM
+		extern uint8 roadBlocksPirateCheck;
+		if (roadBlocksPirateCheck == 2) return;
+#endif
 		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 		RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);

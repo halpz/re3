@@ -55,6 +55,8 @@ public:
 	static void AddRain();
 	static void AddHeatHaze();
 	static void AddBeastie();
+
+	static void ForceHurricaneWeather();
 };
 
 enum {
