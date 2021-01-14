@@ -10,13 +10,11 @@
 #include "crossplatform.h"
 #include "platform.h"
 #ifdef XINPUT
-#if defined _MSC_VER && !defined CMAKE_NO_AUTOLINK
 #include <xinput.h>
 #if !defined(PSAPI_VERSION) || (PSAPI_VERSION > 1)
 #pragma comment( lib, "Xinput9_1_0.lib" )
 #else
 #pragma comment( lib, "Xinput.lib" )
-#endif
 #endif
 #endif
 
