@@ -1,4 +1,4 @@
-name: re3 premake amd64
+name: reVC premake amd64
 
 on:
   pull_request:
