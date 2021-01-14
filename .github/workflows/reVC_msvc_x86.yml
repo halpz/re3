@@ -1,4 +1,4 @@
-name: reVC_msvc_x86
+name: reVC premake x86
 
 on:
   pull_request:
