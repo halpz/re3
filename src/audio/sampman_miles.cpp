@@ -18,7 +18,9 @@
 #include "Timer.h"
 #include "crossplatform.h"
 
+#if defined _MSC_VER && !defined RE3_NO_AUTOLINK
 #pragma comment( lib, "mss32.lib" )
+#endif
 
 // --MIAMI: file done
 

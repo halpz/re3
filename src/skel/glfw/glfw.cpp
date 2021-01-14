@@ -223,7 +223,7 @@ psGrabScreen(RwCamera *pCamera)
 /*
  *****************************************************************************
  */
-#ifdef _WIN32
+#if defined _MSC_VER && !defined RE3_NO_AUTOLINK
 #pragma comment( lib, "Winmm.lib" ) // Needed for time
 RwUInt32
 psTimer(void)

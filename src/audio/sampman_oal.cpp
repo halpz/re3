@@ -38,7 +38,7 @@
 //TODO: max channels
 //TODO: loop count
 
-#ifdef _WIN32
+#if defined _MSC_VER && !defined RE3_NO_AUTOLINK
 #pragma comment( lib, "OpenAL32.lib" )
 #endif
 
