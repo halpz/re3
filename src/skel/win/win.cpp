@@ -2142,6 +2142,7 @@ WinMain(HINSTANCE instance,
 	ShowWindow(PSGLOBAL(window), cmdShow);
 	UpdateWindow(PSGLOBAL(window));
 	
+	// This part is needed because controller initialisation overwrites loaded settings.
 	{
 		CFileMgr::SetDirMyDocuments();
 		
@@ -2154,6 +2155,10 @@ WinMain(HINSTANCE instance,
 		}
 		
 		CFileMgr::SetDir("");
+
+#ifdef LOAD_INI_SETTINGS
+		LoadINIControllerSettings();
+#endif
 	}
 	
 	SetErrorMode(SEM_FAILCRITICALERRORS);
