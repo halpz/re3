@@ -309,7 +309,7 @@ project "reLCS"
 
 	filter {}
 	if(os.getenv("GTA_LCS_RE_DIR")) then
-		setpaths("$(GTA_LCS_RE_DIR)/", "%(cfg.buildtarget.name)", "")
+		setpaths("$(GTA_LCS_RE_DIR)/", "%(cfg.buildtarget.name)")
 	end
 	
 	filter "platforms:win*"

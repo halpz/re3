@@ -1,4 +1,4 @@
-name: reLCS_msvc_x86
+name: reLCS premake x86
 
 on:
   pull_request:
