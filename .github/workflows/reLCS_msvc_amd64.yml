@@ -1,4 +1,4 @@
-name: reLCS_msvc_amd64
+name: reLCS premake amd64
 
 on:
   pull_request:
