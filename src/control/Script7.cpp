@@ -95,8 +95,8 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		script_assert(pPed);
-		ScriptParams[0] = pPed->GetWeapon(ScriptParams[1]).m_eWeaponType;
-		ScriptParams[1] = pPed->GetWeapon(ScriptParams[1]).m_nAmmoTotal;
+		ScriptParams[0] = pPed->GetWeapon(ScriptParams[1] - 1).m_eWeaponType;
+		ScriptParams[1] = pPed->GetWeapon(ScriptParams[1] - 1).m_nAmmoTotal;
 		ScriptParams[2] = CPickups::ModelForWeapon((eWeaponType)ScriptParams[0]);
 		StoreParameters(&m_nIp, 3);
 		return 0;

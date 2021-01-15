@@ -66,7 +66,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		return 0;
 	case COMMAND_WANTED_STARS_ARE_FLASHING:
 	{
-		CWanted *pWanted = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted;
+		CWanted* pWanted = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted;
 		UpdateCompareFlag(pWanted->m_nMinWantedLevel - pWanted->m_nWantedLevel > 0);
 		return 0;
 	}
@@ -136,7 +136,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CVector pos = pPlayerInfo->GetPos();
-		CZone *infoZone = CTheZones::FindInformationZoneForPosition(&pos);
+		CZone* infoZone = CTheZones::FindInformationZoneForPosition(&pos);
 		UpdateCompareFlag(strncmp(key, infoZone->name, 8) == 0); // original code doesn't seem to be using strncmp in here and compare 2 ints instead
 		return 0;
 	}
@@ -352,7 +352,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_CREATE_DUST_EFFECT_FOR_CUTSCENE_HELI:
 	{
 		CollectParameters(&m_nIp, 3);
-		CObject *pHeli = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
+		CObject* pHeli = CPools::GetObjectPool()->GetAt(ScriptParams[0]);
 		bool found = false;
 		float waterLevel = -1000.0f;
 		CVector pos = pHeli->GetPosition();
