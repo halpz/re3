@@ -20,8 +20,7 @@ cParticleSystemMgr::cParticleSystemMgr()
 cParticleSystemMgr::~cParticleSystemMgr()
 {
 #ifdef FIX_BUGS
-	if ( m_aParticles )
-		delete [] m_aParticles;
+	delete [] m_aParticles;
 #endif
 }
 
@@ -37,8 +36,7 @@ void cParticleSystemMgr::Initialise()
 void cParticleSystemMgr::LoadParticleData()
 {
 #ifdef FIX_BUGS
-	if ( m_aParticles )
-		delete [] m_aParticles;
+	delete [] m_aParticles;
 #endif
 	m_aParticles = new tParticleSystemData[MAX_PARTICLES];
 	
