@@ -4106,6 +4106,7 @@ cAudioManager::SetupJumboFlySound(uint8 emittingVol)
 		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 		m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
+		m_sQueueSample.m_bReleasingSoundFlag = false;
 		m_sQueueSample.m_nReleasingVolumeDivider = 5;
 		m_sQueueSample.m_bReverbFlag = true;
 		m_sQueueSample.m_bRequireReflection = false; // todo port fix to re3
