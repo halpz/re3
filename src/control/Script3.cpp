@@ -34,6 +34,7 @@
 #include "Zones.h"
 #include "GameLogic.h"
 #include "Bike.h"
+#include "Wanted.h"
 
 int8 CRunningScript::ProcessCommands500To599(int32 command)
 {
