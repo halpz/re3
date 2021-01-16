@@ -37,6 +37,10 @@ struct CFontDetails
 	int nFlashTimer;
 	bool anonymous_23;
 	uint32 anonymous_25;
+	uint32 anonymous_26;
+	CRGBA outlineColor;
+	int32 bOutlineOn;
+	uint32 line;
 };
 
 struct CFontRenderState
@@ -64,10 +68,7 @@ enum {
 	FONT_BANK,
 	FONT_STANDARD,
 	FONT_HEADING,
-#ifdef MORE_LANGUAGES
-	FONT_JAPANESE,
-#endif
-	MAX_FONTS = FONT_HEADING
+	MAX_FONTS
 };
 
 enum {
@@ -123,7 +124,7 @@ class CFont
 	static uint8 LanguageSet;
 	static int32 Slot;
 #else
-	static int16 Size[MAX_FONTS][210];
+	static int16 Size[MAX_FONTS][419];
 #endif
 	static int16 NewLine;
 public:
@@ -237,7 +238,12 @@ public:
 	static void SetBackgroundColor(CRGBA col);
 	static void SetColor(CRGBA col);
 	static void SetDropColor(CRGBA col);
-	static wchar FindNewCharacter(wchar c);
+
+	static void SetOutlineColor(CRGBA col);
+	static void SetOutlineOn(int on) { Details.bOutlineOn = on; }
+	static void SetNewLineAdd(int line) { Details.line = line; }
+
+	static int16 FindNewCharacter(int16 c);
 	static void FilterOutTokensFromString(wchar*);
 #ifdef MORE_LANGUAGES
 	static void ReloadFonts(uint8 set);
