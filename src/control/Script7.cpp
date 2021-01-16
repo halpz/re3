@@ -835,6 +835,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
 		script_assert(pVehicle);
 		pVehicle->bIsFrozen = GET_INTEGER_PARAM(1);
+		pVehicle->bInfiniteMass = GET_INTEGER_PARAM(1);
 		return 0;
 	}
 	case COMMAND_HAS_CHAR_BEEN_DAMAGED_BY_CHAR:
@@ -1151,6 +1152,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		CObject* pObject = CPools::GetObjectPool()->GetAt(GET_INTEGER_PARAM(0));
 		script_assert(pObject);
 		pObject->bIsFrozen = GET_INTEGER_PARAM(1);
+		pObject->bInfiniteMass = GET_INTEGER_PARAM(1);
 		return 0;
 	}
 	case COMMAND_SET_PLAYER_HAS_MET_DEBBIE_HARRY:
