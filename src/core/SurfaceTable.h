@@ -81,6 +81,7 @@ inline bool
 IsShootThrough(uint8 surfType)
 {
 	switch(surfType)
+	case SURFACE_TRANSPARENT_CLOTH:
 	case SURFACE_METAL_CHAIN_FENCE:
 	case SURFACE_TRANSPARENT_STONE:
 	case SURFACE_SCAFFOLD_POLE:
