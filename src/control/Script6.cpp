@@ -50,8 +50,7 @@ bool CRunningScript::ThisIsAValidRandomCop(uint32 mi, int cop, int swat, int fbi
 	case MI_SWAT: if (swat) return true; break;
 	case MI_FBI: if (fbi) return true; break;
 	case MI_ARMY: if (army) return true; break;
-	default:
-		return miami && (mi >= MI_VICE1 && mi <= MI_VICE8);
+	default: if (mi >= MI_VICE1 && mi <= MI_VICE8 && miami) return true; break;
 	}
 	return false;
 }
