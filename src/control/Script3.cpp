@@ -36,6 +36,8 @@
 #include "GameLogic.h"
 #include "Bike.h"
 
+// LCS: file done except TODOs
+
 int8 CRunningScript::ProcessCommands500To599(int32 command)
 {
 	switch (command) {

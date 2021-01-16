@@ -406,7 +406,7 @@ public:
 	float m_fCollisionSpeed;
 
 	// cf. https://github.com/DK22Pac/plugin-sdk/blob/master/plugin_sa/game_sa/CPed.h from R*
-	uint32 bIsStanding : 1;
+	uint32 bIsStanding : 1; // 0x194 on PS2, 0x1A4 on android
 	uint32 bWasStanding : 1;
 	uint32 bIsAttacking : 1;		// doesn't reset after fist fight
 	uint32 bIsPointingGunAt : 1;

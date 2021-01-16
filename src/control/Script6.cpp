@@ -77,6 +77,7 @@ bool CRunningScript::ThisIsAValidRandomCop(int32 mi, bool cop, bool swat, bool f
 	default:
 		return miami && (mi >= MI_VICE1 && mi <= MI_VICE8);
 	}
+	return false;
 }
 
 int8 CRunningScript::ProcessCommands1000To1099(int32 command)

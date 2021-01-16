@@ -17,6 +17,8 @@
 #include "World.h"
 #include "main.h"
 
+// LCS: file done except TODOs
+
 uint32 CRunningScript::CollectLocateParameters(uint32* pIp, bool b3D)
 {
 	CollectParameters(pIp, 1);
@@ -2133,6 +2135,9 @@ INITSAVEBUF
 	WriteSaveBuf(buf, script_data_size);
 	WriteSaveBuf(buf, OnAMissionFlag);
 	WriteSaveBuf(buf, LastMissionPassedTime);
+	for (uint32 i = 0; i < MAX_NUM_COLLECTIVES; i++)
+		WriteSaveBuf(buf, CollectiveArray[i]);
+	WriteSaveBuf(buf, NextFreeCollectiveIndex);
 	for (uint32 i = 0; i < MAX_NUM_BUILDING_SWAPS; i++) {
 		CBuilding* pBuilding = BuildingSwapArray[i].m_pBuilding;
 		uint32 type, handle;
@@ -2194,14 +2199,26 @@ INITSAVEBUF
 VALIDATESAVEBUF(*size)
 }
 
-void CTheScripts::LoadAllScripts(uint8* buf, uint32 size)
+// TODO: I don't really understand how script loading works, so I leave it the VC way for now.
+bool CTheScripts::LoadAllScripts(uint8* buf, uint32 size)
 {
-	Init();
+	Init(); // TODO: in LCS CTheScripts::Init call GenericLoad, which then calls LoadAllScripts
 INITSAVEBUF
 	CheckSaveHeader(buf, 'S', 'C', 'R', '\0', size - SAVE_HEADER_SIZE);
 	uint32 varSpace = ReadSaveBuf<uint32>(buf);
-	for (uint32 i = 0; i < varSpace; i++)
-		ScriptSpace[i] = ReadSaveBuf<uint8>(buf);
+	if (*(int32*)&ScriptSpace[0] != *(int32*)&buf[0] || *(int32*)&ScriptSpace[4] != *(int32*)&buf[4]) {
+		printf("\n===================================================\nSave Game Mismatch!!!\n");
+		return false;
+	}
+	for (uint32 i = 0; i < varSpace; i++) { // this is not exactly what function does
+		if (i < 8)
+			ScriptSpace[i] = ReadSaveBuf<uint8>(buf);
+		else if (GetSaveVarIndex(i / 4 * 4) != -1)
+			ScriptSpace[i] = ReadSaveBuf<uint8>(buf);
+		else
+			ReadSaveBuf<uint8>(buf);
+	}
+	// everything else is... gone? TODO
 	script_assert(ReadSaveBuf<uint32>(buf) == SCRIPT_DATA_SIZE);
 	OnAMissionFlag = ReadSaveBuf<uint32>(buf);
 	LastMissionPassedTime = ReadSaveBuf<uint32>(buf);
@@ -2270,6 +2287,7 @@ void CRunningScript::Save(uint8*& buf)
 {
 #ifdef COMPATIBLE_SAVES
 	SkipSaveBuf(buf, 8);
+	WriteSaveBuf<int32>(buf, m_nId);
 	for (int i = 0; i < 8; i++)
 		WriteSaveBuf<char>(buf, m_abScriptName[i]);
 	WriteSaveBuf<uint32>(buf, m_nIp);
@@ -2281,10 +2299,11 @@ void CRunningScript::Save(uint8*& buf)
 	WriteSaveBuf<uint16>(buf, m_nStackPointer);
 	SkipSaveBuf(buf, 2);
 #ifdef CHECK_STRUCT_SIZES
-	static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
+	static_assert(NUM_LOCAL_VARS + 8 + NUM_TIMERS == 106, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 106");
 #endif
-	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
+	for (int i = 0; i < NUM_LOCAL_VARS + 8 + NUM_TIMERS; i++)
 		WriteSaveBuf<int32>(buf, m_anLocalVariables[i]);
+	WriteSaveBuf<int32>(buf, m_nLocalsPointer);
 	WriteSaveBuf<bool>(buf, m_bIsActive);
 	WriteSaveBuf<bool>(buf, m_bCondResult);
 	WriteSaveBuf<bool>(buf, m_bIsMissionScript);
@@ -2305,6 +2324,7 @@ void CRunningScript::Load(uint8*& buf)
 {
 #ifdef COMPATIBLE_SAVES
 	SkipSaveBuf(buf, 8);
+	m_nId = ReadSaveBuf<int32>(buf);
 	for (int i = 0; i < 8; i++)
 		m_abScriptName[i] = ReadSaveBuf<char>(buf);
 	m_nIp = ReadSaveBuf<uint32>(buf);
@@ -2316,10 +2336,11 @@ void CRunningScript::Load(uint8*& buf)
 	m_nStackPointer = ReadSaveBuf<uint16>(buf);
 	SkipSaveBuf(buf, 2);
 #ifdef CHECK_STRUCT_SIZES
-	static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
+	static_assert(NUM_LOCAL_VARS + 8 + NUM_TIMERS == 106, "Compatibility loss: NUM_LOCAL_VARS + 8 + NUM_TIMERS != 106");
 #endif
-	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
+	for (int i = 0; i < NUM_LOCAL_VARS + 8 + NUM_TIMERS; i++)
 		m_anLocalVariables[i] = ReadSaveBuf<int32>(buf);
+	m_nLocalsPointer = ReadSaveBuf<int32>(buf);
 	m_bIsActive = ReadSaveBuf<bool>(buf);
 	m_bCondResult = ReadSaveBuf<bool>(buf);
 	m_bIsMissionScript = ReadSaveBuf<bool>(buf);
@@ -2698,8 +2719,14 @@ void CTheScripts::CleanUpThisPed(CPed* pPed)
 		}
 		else {
 			if (pPed->m_pMyVehicle->m_vehType == VEHICLE_TYPE_CAR) {
-				pPed->SetObjective(OBJECTIVE_LEAVE_CAR, pPed->m_pMyVehicle);
-				pPed->bWanderPathAfterExitingCar = true;
+				if ((pPed->m_fHealth < 1.0f && !pPed->IsPedHeadAbovePos(-0.3f)) || pPed->bBodyPartJustCameOff) {
+					pPed->SetObjective(OBJECTIVE_LEAVE_CAR_AND_DIE, pPed->m_pMyVehicle);
+					pPed->bWanderPathAfterExitingCar = false;
+				}
+				else {
+					pPed->SetObjective(OBJECTIVE_LEAVE_CAR, pPed->m_pMyVehicle);
+					pPed->bWanderPathAfterExitingCar = true;
+				}
 			}
 		}
 	}
@@ -2712,6 +2739,7 @@ void CTheScripts::CleanUpThisPed(CPed* pPed)
 		flees = true;
 	}
 	pPed->ClearObjective();
+	pPed->SetWaitState(WAITSTATE_FALSE, nil); // third parameter is 0 TODO?
 	pPed->bRespondsToThreats = true;
 	pPed->bScriptObjectiveCompleted = false;
 	pPed->bKindaStayInSamePlace = false;
@@ -2756,7 +2784,7 @@ void CTheScripts::ReadObjectNamesFromScript()
 	int32 varSpace = GetSizeOfVariableSpace();
 	uint32 ip = varSpace + 8;
 	NumSaveVars = Read4BytesFromScript(&ip);
-	SavedVarIndices = (short*)&ScriptParams[ip];
+	SavedVarIndices = (short*)&ScriptSpace[ip];
 	ip += 2 * NumSaveVars;
 	NumberOfUsedObjects = Read2BytesFromScript(&ip);
 	ip += 2;

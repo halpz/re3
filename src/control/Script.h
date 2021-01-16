@@ -366,7 +366,7 @@ public:
 	*/
 
 	static void SaveAllScripts(uint8*, uint32*);
-	static void LoadAllScripts(uint8*, uint32);
+	static bool LoadAllScripts(uint8*, uint32);
 
 	static bool IsDebugOn() { return DbgFlag; };
 	static void InvertDebugFlag() { DbgFlag = !DbgFlag; }
@@ -508,7 +508,7 @@ class CRunningScript
 public:
 	CRunningScript* next;
 	CRunningScript* prev;
-	int m_nId;
+	int32 m_nId;
 	char m_abScriptName[8];
 	uint32 m_nIp;
 	uint32 m_anStack[MAX_STACK_DEPTH];

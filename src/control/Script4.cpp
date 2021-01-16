@@ -40,6 +40,8 @@
 #include "Zones.h"
 #include "Bike.h"
 
+// LCS: file done except TODOs
+
 #ifdef FIX_BUGS
 static bool IsSlideObjectUsedWrongByScript(const CVector& posTarget, const CVector& slideBy)
 {
