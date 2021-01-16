@@ -570,12 +570,11 @@ public:
 
 	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
 
+	bool ThisIsAValidRandomCop(uint32 mi, int cop, int swat, int fbi, int army, int miami);
 	bool ThisIsAValidRandomPed(uint32 pedtype, int civ, int gang, int criminal);
 
 	bool CheckDamagedWeaponType(int32 actual, int32 type);
 	
-	static bool ThisIsAValidRandomCop(int32 mi, bool cop, bool swat, bool fbi, bool army, bool miami);
-
 };
 
 #ifdef USE_DEBUG_SCRIPT_LOADER
