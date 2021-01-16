@@ -9447,8 +9447,10 @@ CPed::SetRadioStation(void)
 
 // --MIAMI: Done
 void
-CPed::WarpPedIntoCar(CVehicle *car)
+CPed::WarpPedIntoCar(CVehicle *car) // LCS TODO: remove passenger logic
 {
+	if (GetPedState() == PED_FACE_PHONE)
+		QuitEnteringCar();
 	bInVehicle = true;
 	m_pMyVehicle = car;
 	m_pMyVehicle->RegisterReference((CEntity **) &m_pMyVehicle);
@@ -9508,6 +9510,77 @@ CPed::WarpPedIntoCar(CVehicle *car)
 	RemoveWeaponWhenEnteringVehicle();
 
 	if (car->bIsBus)
+		bRenderPedInCar = false;
+
+	bChangedSeat = true;
+}
+
+void
+CPed::WarpPedIntoCarAsPassenger(CVehicle* pVehicle, int32 position)
+{
+	if (GetPedState() == PED_FACE_PHONE)
+		QuitEnteringCar();
+	bInVehicle = true;
+	m_pMyVehicle = pVehicle;
+	m_pMyVehicle->RegisterReference((CEntity**)&m_pMyVehicle);
+	m_carInObjective = pVehicle;
+	m_carInObjective->RegisterReference((CEntity**)&m_carInObjective);
+	SetPedState(PED_DRIVING); // TODO: this is PED_PASSENGER, but it needs to have some logic applied first
+	bUsesCollision = false;
+	bIsInTheAir = false;
+	bVehExitWillBeInstant = true;
+	if (pVehicle->IsBike() && !pVehicle->pPassengers[0]) {
+		pVehicle->pPassengers[0] = this;
+		pVehicle->pPassengers[0]->RegisterReference((CEntity**)&pVehicle->pPassengers[0]);
+	}
+	if (position >= 0) {
+		if (!pVehicle->pPassengers[position]) {
+			pVehicle->pPassengers[position] = this;
+			pVehicle->pPassengers[position]->RegisterReference((CEntity**)&pVehicle->pPassengers[position]);
+		}
+	}
+	else {
+		for (int i = 0; i < 4; i++) {
+			if (!pVehicle->pPassengers[i]) {
+				pVehicle->pPassengers[i] = this;
+				pVehicle->pPassengers[i]->RegisterReference((CEntity**)&pVehicle->pPassengers[i]);
+				break;
+			}
+		}
+	}
+
+	if (IsPlayer()) {
+		pVehicle->SetStatus(STATUS_PLAYER);
+		AudioManager.PlayerJustGotInCar();
+		CCarCtrl::RegisterVehicleOfInterest(pVehicle);
+	}
+	else {
+		pVehicle->SetStatus(STATUS_PHYSICS);
+	}
+
+	CWorld::Remove(this);
+	SetPosition(pVehicle->GetPosition());
+	CWorld::Add(this);
+
+	if (pVehicle->bIsAmbulanceOnDuty) {
+		pVehicle->bIsAmbulanceOnDuty = false;
+		--CCarCtrl::NumAmbulancesOnDuty;
+	}
+	if (pVehicle->bIsFireTruckOnDuty) {
+		pVehicle->bIsFireTruckOnDuty = false;
+		--CCarCtrl::NumFiretrucksOnDuty;
+	}
+	if (!pVehicle->bEngineOn) {
+		pVehicle->bEngineOn = true;
+		DMAudio.PlayOneShot(pVehicle->m_audioEntityId, SOUND_CAR_ENGINE_START, 1.0f);
+	}
+
+	RpAnimBlendClumpSetBlendDeltas(GetClump(), ASSOC_PARTIAL, -1000.0f);
+
+	AddInCarAnims(pVehicle, pVehicle->pDriver == this);
+	RemoveWeaponWhenEnteringVehicle();
+
+	if (pVehicle->bIsBus)
 		bRenderPedInCar = false;
 
 	bChangedSeat = true;

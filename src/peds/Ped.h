@@ -888,6 +888,7 @@ public:
 	void SetSolicit(uint32 time);
 	void ScanForInterestingStuff(void);
 	void WarpPedIntoCar(CVehicle*);
+	void WarpPedIntoCarAsPassenger(CVehicle*, int32);
 	void SetCarJack(CVehicle*);
 	bool WarpPedToNearLeaderOffScreen(void);
 	void Solicit(void);
@@ -1041,6 +1042,16 @@ public:
 	bool IsNotInWreckedVehicle()
 	{
 		return m_pMyVehicle != nil && ((CEntity*)m_pMyVehicle)->GetStatus() != STATUS_WRECKED;
+	}
+	bool CanStartMission() // used in CAN_PLAYER_START_MISSION and can looks like inlined function
+	{
+		if (m_nPedState >= PED_WANDER_RANGE && m_nPedState < PED_STATES_NO_AI && m_nPedState != PED_ANSWER_MOBILE)
+			return false;
+		if (m_nPedState >= PED_JUMP && m_nPedState < PED_STATES_NO_ST)
+			return false;
+		if (m_nPedState >= PED_ENTER_TRAIN && m_nPedState < PED_DEPLOY_STINGER)
+			return false;
+		return !bIsInTheAir && !bIsLanding && m_fHealth > 0.0f;
 	}
 
 	// My names. Inlined in VC
