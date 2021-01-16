@@ -79,6 +79,10 @@ typedef int64_t int64;
 // hardcode ucs-2
 typedef uint16_t wchar;
 
+typedef uint8 bool8;
+typedef uint16 bool16;
+typedef uint32 bool32;
+
 #if defined(_MSC_VER)
 typedef ptrdiff_t ssize_t;
 #endif
