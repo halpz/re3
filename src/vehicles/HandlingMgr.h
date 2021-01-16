@@ -93,7 +93,7 @@ enum tVehicleType
 
 	NUMBIKEHANDLINGS = HANDLING_FREEWAY+1 - HANDLING_BIKE,
 	NUMFLYINGHANDLINGS = HANDLING_RCCOPTER+1 - HANDLING_MAVERICK,
-	NUMBOATHANDLINGS = HANDLING_COASTMAV+1 - HANDLING_PREDATOR,
+	NUMBOATHANDLINGS = HANDLING_REEFER+1 - HANDLING_PREDATOR,
 };
 
 enum tField // most likely a handling field enum, never used so :shrug:
@@ -131,19 +131,21 @@ enum
 	HANDLING_NARROW_FRONTW = 0x2000000,
 	HANDLING_GOOD_INSAND = 0x4000000,
 	HANDLING_UNKNOWN = 0x8000000,	// something for helis and planes
+	HANDLING_FORCE_GRND_CLR = 0x10000000
 };
 
 struct tHandlingData
 {
-	tVehicleType nIdentifier;
 	float fMass;
-	float fInvMass;
 	float fTurnMass;
-	CVector Dimension;
+	float fTractionMultiplier;
+	float fCollisionDamageMultiplier;
+	tVehicleType nIdentifier;
+	float fInvMass;
+	float fDragMult;
 	CVector CentreOfMass;
 	int8 nPercentSubmerged;
 	float fBuoyancy;
-	float fTractionMultiplier;
 	cTransmission Transmission;
 	float fBrakeDeceleration;
 	float fBrakeBias;
@@ -158,12 +160,17 @@ struct tHandlingData
 	float fSuspensionLowerLimit;
 	float fSuspensionBias;
 	float fSuspensionAntidiveMultiplier;
-	float fCollisionDamageMultiplier;
 	uint32 Flags;
 	float fSeatOffsetDistance;
 	int32 nMonetaryValue;
 	int8 FrontLights;
 	int8 RearLights;
+	int unk[4];
+
+	float GetMass(void) const { return fMass; }
+	float GetTurnMass(void) const { return fTurnMass; }
+	float GetTractionMultiplier(void) const { return fTractionMultiplier; }
+	float GetCollisionDamageMultiplier(void) const { return fCollisionDamageMultiplier; }
 };
 
 struct tBikeHandlingData
@@ -249,7 +256,7 @@ public:
 	tBikeHandlingData *GetBikePointer(uint8 id) { return &BikeHandlingData[id-HANDLING_BIKE]; }
 	tFlyingHandlingData *GetFlyingPointer(uint8 id);
 	tBoatHandlingData *GetBoatPointer(uint8 id);
-	bool HasRearWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType == 'R'; }
-	bool HasFrontWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType == 'F'; }
+	bool HasRearWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType != 'F'; }
+	bool HasFrontWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType != 'R'; }
 };
 extern cHandlingDataMgr mod_HandlingManager;

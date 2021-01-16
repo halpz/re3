@@ -72,7 +72,7 @@ CBoat::CBoat(int mi, uint8 owner) : CVehicle(owner)
 	m_fMass = pHandling->fMass;
 	m_fTurnMass = pHandling->fTurnMass / 2.0f;
 	m_vecCentreOfMass = pHandling->CentreOfMass;
-	m_fAirResistance = pHandling->Dimension.x * pHandling->Dimension.z / m_fMass;
+	m_fAirResistance = pHandling->fDragMult > 0.01f ? pHandling->fDragMult*0.0005f : pHandling->fDragMult;
 	m_fElasticity = 0.1f;
 	m_fBuoyancy = pHandling->fBuoyancy;
 	m_fSteerAngle = 0.0f;

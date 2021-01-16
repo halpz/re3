@@ -26,6 +26,8 @@ public:
 	float m_aSuspensionSpringRatioPrev[4];
 	float m_aWheelTimer[4];		// set to 4.0 when wheel is touching ground, then decremented
 	float m_auto_unused1;
+	float m_fEngineInertiaVar1;
+	float m_fEngineInertiaVar2;
 	eSkidmarkType m_aWheelSkidmarkType[4];
 	bool m_aWheelSkidmarkBloody[4];
 	bool m_aWheelSkidmarkUnk[4];
@@ -114,6 +116,7 @@ public:
 	float GetHeightAboveRoad(void);
 	void PlayCarHorn(void);
 
+	void ProcessCarWheelPair(int leftWheel, int rightWheel, float steerAngle, CVector *contactSpeeds, CVector *contactPoints, float traction, float acceleration, float brake, bool bFront);
 	void FireTruckControl(void);
 	void TankControl(void);
 	void HydraulicControl(void);

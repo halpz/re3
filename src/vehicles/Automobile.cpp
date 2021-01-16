@@ -50,8 +50,6 @@
 #include "Automobile.h"
 #include "Bike.h"
 
-//--MIAMI: file done
-
 bool bAllCarCheat;
 
 RwObject *GetCurrentAtomicObjectCB(RwObject *object, void *data);
@@ -103,6 +101,8 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	pHandling = mod_HandlingManager.GetHandlingData((tVehicleType)mi->m_handlingId);
 	pFlyingHandling =  mod_HandlingManager.GetFlyingPointer((tVehicleType)mi->m_handlingId);
 
+	m_fEngineInertiaVar1 = 0.0f;
+	m_fEngineInertiaVar2 = 0.0f;
 	m_auto_unused1 = 20.0f;
 	m_auto_unused2 = 0;
 
@@ -151,7 +151,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	m_fMass = pHandling->fMass;
 	m_fTurnMass = pHandling->fTurnMass;
 	m_vecCentreOfMass = pHandling->CentreOfMass;
-	m_fAirResistance = pHandling->Dimension.x*pHandling->Dimension.z/m_fMass;
+	m_fAirResistance = pHandling->fDragMult > 0.01f ? pHandling->fDragMult*0.0005f : pHandling->fDragMult;
 	m_fElasticity = 0.05f;
 	m_fBuoyancy = pHandling->fBuoyancy;
 
@@ -191,12 +191,6 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 	m_fHeightAboveRoad = 0.0f;
 	m_fTraction = 1.0f;
 	m_fTireTemperature = 1.0f;
-
-	CColModel *colModel = mi->GetColModel();
-	if(colModel->lines == nil){
-		colModel->lines = (CColLine*)RwMalloc(4*sizeof(CColLine));
-		colModel->numLines = 4;
-	}
 
 	SetupSuspensionLines();
 
@@ -257,6 +251,10 @@ CVector vecDAMAGE_ENGINE_POS_BIG(-0.5f, -0.3f, 0.0f);
 void
 CAutomobile::ProcessControl(void)
 {
+	// TODO(LCS):
+	// TheCamera can remove service vehicles
+	// some audio (?) stuff
+
 	int i;
 	float wheelRot;
 	CColModel *colModel;
@@ -311,7 +309,7 @@ CAutomobile::ProcessControl(void)
 	if(GetStatus() != STATUS_ABANDONED && GetStatus() != STATUS_WRECKED &&
 	   GetStatus() != STATUS_PLAYER && GetStatus() != STATUS_PLAYER_REMOTE && GetStatus() != STATUS_PLAYER_DISABLED){
 		switch(GetModelIndex())
-		case MI_FBIRANCH:
+		case MI_FBICAR:
 		case MI_POLICE:
 		case MI_ENFORCER:
 		case MI_SECURICA:
@@ -320,16 +318,18 @@ CAutomobile::ProcessControl(void)
 			ScanForCrimes();
 	}
 
+	// TODO(LCS): the fields used by this function are weird
+	ActivateBombWhenEntered();
+
 	// Process driver
-	if(pDriver)
+	if(pDriver){
 		if(IsUpsideDown() && CanPedEnterCar()){
 			if(!pDriver->IsPlayer() &&
 			   !(pDriver->m_leader && pDriver->m_leader->bInVehicle) &&
 			   pDriver->CharCreatedBy != MISSION_CHAR)
 				pDriver->SetObjective(OBJECTIVE_LEAVE_CAR, this);
 		}
-
-	ActivateBombWhenEntered();
+	}
 
 	// Process passengers
 	if(m_nNumPassengers != 0 && IsUpsideDown() && CanPedEnterCar()){
@@ -352,7 +352,7 @@ CAutomobile::ProcessControl(void)
 	if(strongGrip1 || bCheat3)
 		m_vecCentreOfMass.z = 0.3f*m_aSuspensionSpringLength[0] + -1.0f*m_fHeightAboveRoad;
 	else if(pHandling->Flags & HANDLING_NONPLAYER_STABILISER && GetStatus() == STATUS_PHYSICS)
-		m_vecCentreOfMass.z = pHandling->CentreOfMass.z - 0.2f*pHandling->Dimension.z;
+		m_vecCentreOfMass.z = pHandling->CentreOfMass.z + (colModel->boundingBox.min.z - pHandling->CentreOfMass.z)*0.4f;
 	else
 		m_vecCentreOfMass = pHandling->CentreOfMass;
 
@@ -372,7 +372,7 @@ CAutomobile::ProcessControl(void)
 	bool playerRemote = false;
 	switch(GetStatus()){
 	case STATUS_PLAYER_REMOTE:
-		if(CPad::GetPad(0)->WeaponJustDown() && !bDisableRemoteDetonation){
+		if(CPad::GetPad(0)->CarGunJustDown() && !bDisableRemoteDetonation){
 			BlowUpCar(FindPlayerPed());
 			CRemote::TakeRemoteControlledCarFromPlayer();
 		}
@@ -391,6 +391,7 @@ CAutomobile::ProcessControl(void)
 		// fall through
 	case STATUS_PLAYER:
 		if(playerRemote ||
+			// TODO(LCS): ped state 64
 		   pDriver && pDriver->GetPedState() != PED_EXIT_CAR && pDriver->GetPedState() != PED_DRAG_FROM_CAR && pDriver->GetPedState() != PED_ARRESTED){
 			// process control input if controlled by player
 			if(playerRemote || pDriver->m_nPedType == PEDTYPE_PLAYER1)
@@ -415,6 +416,8 @@ CAutomobile::ProcessControl(void)
 				}
 			}else
 				m_vecCentreOfMass.z = pHandling->CentreOfMass.z;
+
+			// TODO(LCS): some in air handling?
 
 			if(bHoverCheat)
 				DoHoverSuspensionRatios();
@@ -451,8 +454,6 @@ CAutomobile::ProcessControl(void)
 			m_fBrakePedal = 1.0f;
 			m_fGasPedal = 0.0f;
 		}
-		if(CPad::GetPad(0)->CarGunJustDown())
-			ActivateBomb();
 		break;
 
 	case STATUS_SIMPLE:
@@ -492,7 +493,7 @@ CAutomobile::ProcessControl(void)
 		   m_aSuspensionSpringRatio[1] < 1.0f && CSurfaceTable::GetAdhesionGroup(m_aWheelColPoints[1].surfaceB) == ADHESIVE_SAND ||
 		   m_aSuspensionSpringRatio[2] < 1.0f && CSurfaceTable::GetAdhesionGroup(m_aWheelColPoints[2].surfaceB) == ADHESIVE_SAND ||
 		   m_aSuspensionSpringRatio[3] < 1.0f && CSurfaceTable::GetAdhesionGroup(m_aWheelColPoints[3].surfaceB) == ADHESIVE_SAND){
-			if(GetModelIndex() != MI_RCBANDIT && GetModelIndex() != MI_SANDKING && GetModelIndex() != MI_BFINJECT){
+			if(GetModelIndex() != MI_RCBANDIT /*&& GetModelIndex() != MI_SANDKING*/ && GetModelIndex() != MI_BFINJECT){
 				bStuckInSand = true;
 				if(CWeather::WetRoads > 0.0f)
 					ApplyMoveForce(m_vecMoveSpeed * -CTimer::GetTimeStep()*SAND_SLOWDOWN*m_fMass * (1.0f-CWeather::WetRoads));
@@ -527,8 +528,10 @@ CAutomobile::ProcessControl(void)
 
 		m_fSteerAngle = 0.0f;
 		m_fGasPedal = 0.0f;
-		if(!IsAlarmOn())
-			m_nCarHornTimer = 0;
+		m_nCarHornTimer = 0;
+		// TODO(LCS):
+		// CWeapon::::RemovePlayersRemoteDetonatorForThisVehicle
+		m_pBombRigger = nil;
 		break;
 
 	case STATUS_PLAYER_DISABLED:
@@ -622,14 +625,13 @@ CAutomobile::ProcessControl(void)
 
 	// special control
 	switch(GetModelIndex()){
-	case MI_FIRETRUCK:
-		FireTruckControl();
-		break;
+		// FireTruckControl in PreRender now
 	case MI_RHINO:
 		TankControl();
 		BlowUpCarsInPath();
 		break;
-	case MI_VOODOO:
+	// LCS: this is gone but i'm keeping it!
+	case MI_YARDIE:
 		HydraulicControl();
 		break;
 	default:
@@ -719,7 +721,7 @@ CAutomobile::ProcessControl(void)
 				ApplyTurnSpeed();
 			}
 			bIsInSafePosition = true;
-			bIsStuck = false;			
+			bIsStuck = false;		
 		}
 
 		CPhysical::ProcessControl();
@@ -737,7 +739,8 @@ CAutomobile::ProcessControl(void)
 		float fwdSpeed = Abs(DotProduct(m_vecMoveSpeed, GetForward()));
 		CVector contactPoints[4];	// relative to model
 		CVector contactSpeeds[4];	// speed at contact points
-		CVector springDirections[4];	// normalized, in model space
+		CVector springDirections[4];	// normalized, in world space
+		float springForces[4];
 
 		for(i = 0; i < 4; i++){
 			// Set spring under certain circumstances
@@ -761,10 +764,13 @@ CAutomobile::ProcessControl(void)
 			}
 
 			// get points and directions if spring is compressed
+			springDirections[i] = -GetUp();	// springs are always pointing down anyway
 			if(m_aSuspensionSpringRatio[i] < 1.0f){
 				contactPoints[i] = m_aWheelColPoints[i].point - GetPosition();
-				springDirections[i] = Multiply3x3(GetMatrix(), colModel->lines[i].p1 - colModel->lines[i].p0);
-				springDirections[i].Normalise();
+//				springDirections[i] = Multiply3x3(GetMatrix(), colModel->lines[i].p1 - colModel->lines[i].p0);
+//				springDirections[i].Normalise();
+			}else{
+				contactPoints[i] = CVector(0.0f, 0.0f, 0.0f);
 			}
 		}
 
@@ -777,7 +783,7 @@ CAutomobile::ProcessControl(void)
 
 				ApplySpringCollisionAlt(pHandling->fSuspensionForceLevel,
 					springDirections[i], contactPoints[i],
-					m_aSuspensionSpringRatio[i], bias, m_aWheelColPoints[i].normal);
+					m_aSuspensionSpringRatio[i], bias, m_aWheelColPoints[i].normal, springForces[i]);
 
 				m_aWheelSkidmarkUnk[i] = false;
 				if(m_aWheelColPoints[i].surfaceB == SURFACE_GRASS ||
@@ -789,8 +795,8 @@ CAutomobile::ProcessControl(void)
 					m_aWheelSkidmarkUnk[i] = true;
 				}else
 					m_aWheelSkidmarkType[i] = SKIDMARK_NORMAL;
-			}else{
-				contactPoints[i] = Multiply3x3(GetMatrix(), colModel->lines[i].p1);
+//			}else{
+//				contactPoints[i] = Multiply3x3(GetMatrix(), colModel->lines[i].p1);
 			}
 		}
 
@@ -812,7 +818,7 @@ CAutomobile::ProcessControl(void)
 		// dampen springs
 		for(i = 0; i < 4; i++)
 			if(m_aSuspensionSpringRatio[i] < 0.99999f)
-				ApplySpringDampening(pHandling->fSuspensionDampingLevel,
+				ApplySpringDampening(pHandling->fSuspensionDampingLevel, springForces[i],
 					springDirections[i], contactPoints[i], contactSpeeds[i]);
 
 		// Get speed at contact points again
@@ -824,42 +830,6 @@ CAutomobile::ProcessControl(void)
 				m_aGroundPhysical[i] = nil;
 			}
 		}
-
-		bool gripCheat = true;
-		fwdSpeed = DotProduct(m_vecMoveSpeed, GetForward());
-		if(!strongGrip1 && !CVehicle::bCheat3)
-			gripCheat = false;
-		float acceleration = pHandling->Transmission.CalculateDriveAcceleration(m_fGasPedal, m_nCurrentGear, m_fChangeGearTime, fwdSpeed, gripCheat);
-		acceleration /= m_fForceMultiplier;
-
-		if(IsRealHeli() || IsRealPlane())
-			acceleration = 0.0f;
-
-		if(bAudioChangingGear && m_fGasPedal > 0.4f && m_fBrakePedal < 0.1f && fwdSpeed > 0.15f &&
-		   this == FindPlayerVehicle() && TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::MODE_1STPERSON){
-			if(GetStatus() == STATUS_PLAYER && !(pHandling->Flags & HANDLING_IS_BUS)){
-				if(m_nBusDoorTimerEnd == 0)
-					m_nBusDoorTimerEnd = 1000;
-				else {
-					uint32 timeStepInMs = CTimer::GetTimeStepInMilliseconds();
-					if(m_nBusDoorTimerEnd > timeStepInMs)
-						m_nBusDoorTimerEnd -= timeStepInMs;
-					else
-						m_nBusDoorTimerEnd = 0;
-				}
-			}
-
-			if((m_aSuspensionSpringRatio[0] < 1.0f || m_aSuspensionSpringRatio[2] < 1.0f) &&
-			   (m_aSuspensionSpringRatio[1] < 1.0f || m_aSuspensionSpringRatio[3] < 1.0f))
-				ApplyTurnForce(-GRAVITY*Min(m_fTurnMass, 2500.0f)*GetUp(), -1.0f*GetForward());
-		}
-
-		brake = m_fBrakePedal * pHandling->fBrakeDeceleration * CTimer::GetTimeStep();
-		bool neutralHandling = GetStatus() != STATUS_PLAYER && GetStatus() != STATUS_PLAYER_REMOTE && (pHandling->Flags & HANDLING_NEUTRALHANDLING);
-		float brakeBiasFront = neutralHandling ? 1.0f : 2.0f*pHandling->fBrakeBias;
-		float brakeBiasRear  = neutralHandling ? 1.0f : 2.0f-pHandling->fBrakeBias;	// looks like a bug, but it was correct in III...
-		float tractionBiasFront = neutralHandling ? 1.0f : 2.0f*pHandling->fTractionBias;
-		float tractionBiasRear  = neutralHandling ? 1.0f : 2.0f-tractionBiasFront;
 
 		// Count how many wheels are touching the ground
 
@@ -891,15 +861,35 @@ CAutomobile::ProcessControl(void)
 			}
 		}
 
+		bool gripCheat = true;
+		fwdSpeed = DotProduct(m_vecMoveSpeed, GetForward());
+		if(!strongGrip1 && !CVehicle::bCheat3)
+			gripCheat = false;
+		float acceleration = pHandling->Transmission.CalculateDriveAcceleration(m_fGasPedal, m_nCurrentGear, m_fChangeGearTime, fwdSpeed,
+					&m_fEngineInertiaVar1, &m_fEngineInertiaVar2, m_nDriveWheelsOnGround, gripCheat);
+		acceleration /= m_fForceMultiplier;
+
+		if(IsRealHeli() || IsRealPlane())
+			acceleration = 0.0f;
+
+		if(Abs(acceleration) > 0.0f)
+			m_fEngineEnergy += Abs(acceleration);
+		else
+			m_fEngineEnergy = 0.0f;
+
 		float traction;
 		if(GetStatus() == STATUS_PHYSICS)
 			traction = 0.004f * m_fTraction;
 		else
 			traction = 0.004f;
-		traction *= pHandling->fTractionMultiplier / 4.0f;
+		traction *= pHandling->GetTractionMultiplier() / 4.0f;
 		traction /= m_fForceMultiplier;
 		if(CVehicle::bCheat3)
 			traction *= 4.0f;
+
+		if(FindPlayerVehicle() && FindPlayerVehicle() == this)
+			if(CPad::GetPad(0)->CarGunJustDown())
+				ActivateBomb();
 
 		if(FindPlayerVehicle() != this && (strongGrip1 || CVehicle::bCheat3)){
 			traction *= 1.2f;
@@ -910,447 +900,72 @@ CAutomobile::ProcessControl(void)
 			}
 		}
 
-		static float fThrust;
-		static tWheelState WheelState[4];
-
-		bool rearWheelsFirst = !!(pHandling->Flags & HANDLING_REARWHEEL_1ST);
-
-		// Process front wheels on ground - first try
-
-		if(!rearWheelsFirst){
-		if(m_aWheelTimer[CARWHEEL_FRONT_LEFT] > 0.0f || m_aWheelTimer[CARWHEEL_FRONT_RIGHT] > 0.0f){
-			float s = Sin(m_fSteerAngle);
-			float c = Cos(m_fSteerAngle);
-
-			CVector wheelFwd, wheelRight, tmp;
-
-			if(m_aWheelTimer[CARWHEEL_FRONT_LEFT] > 0.0f){
-				if(mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier))
-					fThrust = 0.0f;
-				else
-					fThrust = acceleration;
-
-				wheelFwd = GetForward();
-				wheelFwd -= DotProduct(wheelFwd, m_aWheelColPoints[CARWHEEL_FRONT_LEFT].normal)*m_aWheelColPoints[CARWHEEL_FRONT_LEFT].normal;
-				wheelFwd.Normalise();
-				wheelRight = CrossProduct(wheelFwd, m_aWheelColPoints[CARWHEEL_FRONT_LEFT].normal);
-				wheelRight.Normalise();
-				tmp = c*wheelFwd - s*wheelRight;
-				wheelRight = s*wheelFwd + c*wheelRight;
-				wheelFwd = tmp;
-
-				m_aWheelColPoints[CARWHEEL_FRONT_LEFT].surfaceA = SURFACE_WHEELBASE;
-				float adhesion = CSurfaceTable::GetAdhesiveLimit(m_aWheelColPoints[CARWHEEL_FRONT_LEFT])*traction;
-				if(GetStatus() == STATUS_PLAYER)
-					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_FRONT_LEFT].surfaceB);
-				WheelState[CARWHEEL_FRONT_LEFT] = m_aWheelState[CARWHEEL_FRONT_LEFT];
-
-				if(Damage.GetWheelStatus(CARWHEEL_FRONT_LEFT) == WHEEL_STATUS_BURST)
-					ProcessWheel(wheelFwd, wheelRight,
-						contactSpeeds[CARWHEEL_FRONT_LEFT], contactPoints[CARWHEEL_FRONT_LEFT],
-						m_nWheelsOnGround, fThrust,
-						brake*brakeBiasFront,
-						adhesion*tractionBiasFront*Damage.m_fWheelDamageEffect,
-						CARWHEEL_FRONT_LEFT,
-						&m_aWheelSpeed[CARWHEEL_FRONT_LEFT],
-						&WheelState[CARWHEEL_FRONT_LEFT],
-						WHEEL_STATUS_BURST);
-				else
-					ProcessWheel(wheelFwd, wheelRight,
-						contactSpeeds[CARWHEEL_FRONT_LEFT], contactPoints[CARWHEEL_FRONT_LEFT],
-						m_nWheelsOnGround, fThrust,
-						brake*brakeBiasFront,
-						adhesion*tractionBiasFront,
-						CARWHEEL_FRONT_LEFT,
-						&m_aWheelSpeed[CARWHEEL_FRONT_LEFT],
-						&WheelState[CARWHEEL_FRONT_LEFT],
-						WHEEL_STATUS_OK);
-			}
-
-			if(m_aWheelTimer[CARWHEEL_FRONT_RIGHT] > 0.0f){
-				if(mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier))
-					fThrust = 0.0f;
-				else
-					fThrust = acceleration;
-
-				wheelFwd = GetForward();
-				wheelFwd -= DotProduct(wheelFwd, m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].normal)*m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].normal;
-				wheelFwd.Normalise();
-				wheelRight = CrossProduct(wheelFwd, m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].normal);
-				wheelRight.Normalise();
-				tmp = c*wheelFwd - s*wheelRight;
-				wheelRight = s*wheelFwd + c*wheelRight;
-				wheelFwd = tmp;
-
-				m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].surfaceA = SURFACE_WHEELBASE;
-				float adhesion = CSurfaceTable::GetAdhesiveLimit(m_aWheelColPoints[CARWHEEL_FRONT_RIGHT])*traction;
-				if(GetStatus() == STATUS_PLAYER)
-					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].surfaceB);
-				WheelState[CARWHEEL_FRONT_RIGHT] = m_aWheelState[CARWHEEL_FRONT_RIGHT];
-
-				if(Damage.GetWheelStatus(CARWHEEL_FRONT_RIGHT) == WHEEL_STATUS_BURST)
-					ProcessWheel(wheelFwd, wheelRight,
-						contactSpeeds[CARWHEEL_FRONT_RIGHT], contactPoints[CARWHEEL_FRONT_RIGHT],
-						m_nWheelsOnGround, fThrust,
-						brake*brakeBiasFront,
-						adhesion*tractionBiasFront*Damage.m_fWheelDamageEffect,
-						CARWHEEL_FRONT_RIGHT,
-						&m_aWheelSpeed[CARWHEEL_FRONT_RIGHT],
-						&WheelState[CARWHEEL_FRONT_RIGHT],
-						WHEEL_STATUS_BURST);
-				else
-					ProcessWheel(wheelFwd, wheelRight,
-						contactSpeeds[CARWHEEL_FRONT_RIGHT], contactPoints[CARWHEEL_FRONT_RIGHT],
-						m_nWheelsOnGround, fThrust,
-						brake*brakeBiasFront,
-						adhesion*tractionBiasFront,
-						CARWHEEL_FRONT_RIGHT,
-						&m_aWheelSpeed[CARWHEEL_FRONT_RIGHT],
-						&WheelState[CARWHEEL_FRONT_RIGHT],
-						WHEEL_STATUS_OK);
-			}
-		}
-
-		// Process front wheels off ground
-
-		if(!IsRealHeli()){
-			if(m_aWheelTimer[CARWHEEL_FRONT_LEFT] <= 0.0f){
-				if(mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier) || acceleration == 0.0f)
-					m_aWheelSpeed[CARWHEEL_FRONT_LEFT] *= 0.95f;
-				else{
-					if(acceleration > 0.0f){
-						if(m_aWheelSpeed[CARWHEEL_FRONT_LEFT] < 2.0f)
-							m_aWheelSpeed[CARWHEEL_FRONT_LEFT] -= 0.2f;
-					}else{
-						if(m_aWheelSpeed[CARWHEEL_FRONT_LEFT] > -2.0f)
-							m_aWheelSpeed[CARWHEEL_FRONT_LEFT] += 0.1f;
-					}
+		// TODO(LCS): where did this go?
+/*
+		if(bAudioChangingGear && m_fGasPedal > 0.4f && m_fBrakePedal < 0.1f && fwdSpeed > 0.15f &&
+		   this == FindPlayerVehicle() && TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::MODE_1STPERSON){
+			if(GetStatus() == STATUS_PLAYER && !(pHandling->Flags & HANDLING_IS_BUS)){
+				if(m_nBusDoorTimerEnd == 0)
+					m_nBusDoorTimerEnd = 1000;
+				else {
+					uint32 timeStepInMs = CTimer::GetTimeStepInMilliseconds();
+					if(m_nBusDoorTimerEnd > timeStepInMs)
+						m_nBusDoorTimerEnd -= timeStepInMs;
+					else
+						m_nBusDoorTimerEnd = 0;
 				}
-				m_aWheelRotation[CARWHEEL_FRONT_LEFT] += m_aWheelSpeed[CARWHEEL_FRONT_LEFT];
 			}
-			if(m_aWheelTimer[CARWHEEL_FRONT_RIGHT] <= 0.0f){
-				if(mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier) || acceleration == 0.0f)
-					m_aWheelSpeed[CARWHEEL_FRONT_RIGHT] *= 0.95f;
-				else{
-					if(acceleration > 0.0f){
-						if(m_aWheelSpeed[CARWHEEL_FRONT_RIGHT] < 2.0f)
-							m_aWheelSpeed[CARWHEEL_FRONT_RIGHT] -= 0.2f;
-					}else{
-						if(m_aWheelSpeed[CARWHEEL_FRONT_RIGHT] > -2.0f)
-							m_aWheelSpeed[CARWHEEL_FRONT_RIGHT] += 0.1f;
-					}
-				}
-				m_aWheelRotation[CARWHEEL_FRONT_RIGHT] += m_aWheelSpeed[CARWHEEL_FRONT_RIGHT];
-			}
+
+			if((m_aSuspensionSpringRatio[0] < 1.0f || m_aSuspensionSpringRatio[2] < 1.0f) &&
+			   (m_aSuspensionSpringRatio[1] < 1.0f || m_aSuspensionSpringRatio[3] < 1.0f))
+				ApplyTurnForce(-GRAVITY*Min(m_fTurnMass, 2500.0f)*GetUp(), -1.0f*GetForward());
 		}
-		}
+*/
 
-		// Process rear wheels
+		float steerRange;
+		if(fwdSpeed > 0.01f && m_aWheelTimer[CARWHEEL_FRONT_LEFT] > 0.0f && m_aWheelTimer[CARWHEEL_FRONT_RIGHT] > 0.0f && GetStatus() == STATUS_PLAYER){
+			CColPoint point;
+			point.surfaceA = SURFACE_WHEELBASE;
+			point.surfaceB = SURFACE_TARMAC;
+			float rightSpeed = DotProduct(m_vecMoveSpeed, GetRight());
+			float adhesion = CSurfaceTable::GetAdhesiveLimit(point);
+			// i have no idea what's going on here
+			float magic = traction * adhesion * 16.0f / SQR(fwdSpeed);
+			magic = clamp(magic, -1.0f, 1.0f);
+			magic = Asin(magic);
+			if(m_fSteerAngle < 0.0f && rightSpeed > 0.05f ||
+			   m_fSteerAngle > 0.0f && rightSpeed < -0.05f ||
+			   bIsHandbrakeOn)
+				steerRange = 1.0f;
+			else
+				steerRange = Min(magic/DEGTORAD(pHandling->fSteeringLock), 1.0f);
+		
+		}else
+			steerRange = 1.0f;
+		m_fSteerAngle *= steerRange;
 
-		if(m_aWheelTimer[CARWHEEL_REAR_LEFT] > 0.0f || m_aWheelTimer[CARWHEEL_REAR_RIGHT] > 0.0f){
-			CVector wheelFwd = GetForward();
-			CVector wheelRight = GetRight();	// overwritten for resp. wheel
+		brake = m_fBrakePedal * pHandling->fBrakeDeceleration * CTimer::GetTimeStep();
 
-			float rearBrake = brake;
-			float rearTraction = traction;
-			if(bIsHandbrakeOn){
-#ifdef FIX_BUGS
-				// Not sure if this is needed, but brake usually has timestep as a factor
-				rearBrake = 20000.0f * CTimer::GetTimeStepFix();
-#else
-				rearBrake = 20000.0f;
-#endif
-				if(fwdSpeed > 0.1f && pHandling->Flags & HANDLING_HANDBRAKE_TYRE){
-					m_fTireTemperature += 0.005*CTimer::GetTimeStep();
-					if(m_fTireTemperature > 2.0f)
-						m_fTireTemperature = 2.0f;
-				}
-			}else if(m_doingBurnout && !mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier)){
-				rearBrake = 0.0f;
-				rearTraction = 0.0f;
-				// BUG: missing timestep
-				ApplyTurnForce(contactPoints[CARWHEEL_REAR_LEFT], -0.001f*m_fTurnMass*m_fSteerAngle*GetRight());
-			}else if(m_fTireTemperature > 1.0f){
-				rearTraction *= m_fTireTemperature;
-			}
-
-			if(m_aWheelTimer[CARWHEEL_REAR_LEFT] > 0.0f){
-				if(mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier))
-					fThrust = 0.0f;
-				else
-					fThrust = acceleration;
-
-				wheelFwd -= DotProduct(wheelFwd, m_aWheelColPoints[CARWHEEL_REAR_LEFT].normal)*m_aWheelColPoints[CARWHEEL_REAR_LEFT].normal;
-				wheelFwd.Normalise();
-				wheelRight = CrossProduct(wheelFwd, m_aWheelColPoints[CARWHEEL_REAR_LEFT].normal);
-				wheelRight.Normalise();
-
-				m_aWheelColPoints[CARWHEEL_REAR_LEFT].surfaceA = SURFACE_WHEELBASE;
-				float adhesion = CSurfaceTable::GetAdhesiveLimit(m_aWheelColPoints[CARWHEEL_REAR_LEFT])*rearTraction;
-				if(GetStatus() == STATUS_PLAYER)
-					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_REAR_LEFT].surfaceB);
-				WheelState[CARWHEEL_REAR_LEFT] = m_aWheelState[CARWHEEL_REAR_LEFT];
-
-				if(Damage.GetWheelStatus(CARWHEEL_REAR_LEFT) == WHEEL_STATUS_BURST)
-					ProcessWheel(wheelFwd, wheelRight,
-						contactSpeeds[CARWHEEL_REAR_LEFT], contactPoints[CARWHEEL_REAR_LEFT],
-						m_nWheelsOnGround, fThrust,
-						rearBrake*brakeBiasRear,
-						adhesion*tractionBiasRear*Damage.m_fWheelDamageEffect,
-						CARWHEEL_REAR_LEFT,
-						&m_aWheelSpeed[CARWHEEL_REAR_LEFT],
-						&WheelState[CARWHEEL_REAR_LEFT],
-						WHEEL_STATUS_BURST);
-				else
-					ProcessWheel(wheelFwd, wheelRight,
-						contactSpeeds[CARWHEEL_REAR_LEFT], contactPoints[CARWHEEL_REAR_LEFT],
-						m_nWheelsOnGround, fThrust,
-						rearBrake*brakeBiasRear,
-						adhesion*tractionBiasRear,
-						CARWHEEL_REAR_LEFT,
-						&m_aWheelSpeed[CARWHEEL_REAR_LEFT],
-						&WheelState[CARWHEEL_REAR_LEFT],
-						WHEEL_STATUS_OK);
-			}
-
-#ifdef FIX_BUGS
-			// Shouldn't we reset these after the left wheel?
-			wheelFwd = GetForward();
-			wheelRight = GetRight();	// actually useless
-#endif
-
-			if(m_aWheelTimer[CARWHEEL_REAR_RIGHT] > 0.0f){
-				if(mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier))
-					fThrust = 0.0f;
-				else
-					fThrust = acceleration;
-
-				wheelFwd -= DotProduct(wheelFwd, m_aWheelColPoints[CARWHEEL_REAR_RIGHT].normal)*m_aWheelColPoints[CARWHEEL_REAR_RIGHT].normal;
-				wheelFwd.Normalise();
-				wheelRight = CrossProduct(wheelFwd, m_aWheelColPoints[CARWHEEL_REAR_RIGHT].normal);
-				wheelRight.Normalise();
-
-				m_aWheelColPoints[CARWHEEL_REAR_RIGHT].surfaceA = SURFACE_WHEELBASE;
-				float adhesion = CSurfaceTable::GetAdhesiveLimit(m_aWheelColPoints[CARWHEEL_REAR_RIGHT])*rearTraction;
-				if(GetStatus() == STATUS_PLAYER)
-					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_REAR_RIGHT].surfaceB);
-				WheelState[CARWHEEL_REAR_RIGHT] = m_aWheelState[CARWHEEL_REAR_RIGHT];
-
-				if(Damage.GetWheelStatus(CARWHEEL_REAR_RIGHT) == WHEEL_STATUS_BURST)
-					ProcessWheel(wheelFwd, wheelRight,
-						contactSpeeds[CARWHEEL_REAR_RIGHT], contactPoints[CARWHEEL_REAR_RIGHT],
-						m_nWheelsOnGround, fThrust,
-						rearBrake*brakeBiasRear,
-						adhesion*tractionBiasRear*Damage.m_fWheelDamageEffect,
-						CARWHEEL_REAR_RIGHT,
-						&m_aWheelSpeed[CARWHEEL_REAR_RIGHT],
-						&WheelState[CARWHEEL_REAR_RIGHT],
-						WHEEL_STATUS_BURST);
-				else
-					ProcessWheel(wheelFwd, wheelRight,
-						contactSpeeds[CARWHEEL_REAR_RIGHT], contactPoints[CARWHEEL_REAR_RIGHT],
-						m_nWheelsOnGround, fThrust,
-						rearBrake*brakeBiasRear,
-						adhesion*tractionBiasRear,
-						CARWHEEL_REAR_RIGHT,
-						&m_aWheelSpeed[CARWHEEL_REAR_RIGHT],
-						&WheelState[CARWHEEL_REAR_RIGHT],
-						WHEEL_STATUS_OK);
-			}
-		}
-
-		if(m_doingBurnout && !mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier) &&
-	           (m_aWheelState[CARWHEEL_REAR_LEFT] == WHEEL_STATE_SPINNING || m_aWheelState[CARWHEEL_REAR_RIGHT] == WHEEL_STATE_SPINNING)){
-			m_fTireTemperature += 0.001f*CTimer::GetTimeStep();
-			if(m_fTireTemperature > 3.0f)
-				m_fTireTemperature = 3.0f;
-		}else if(m_fTireTemperature > 1.0f){
-			m_fTireTemperature = (m_fTireTemperature - 1.0f)*Pow(0.995f, CTimer::GetTimeStep()) + 1.0f;
-		}
-
-		// Process rear wheels off ground
-
-		if(!IsRealHeli()){
-			if(m_aWheelTimer[CARWHEEL_REAR_LEFT] <= 0.0f){
-				if(bIsHandbrakeOn)
-					m_aWheelSpeed[CARWHEEL_REAR_LEFT] = 0.0f;
-				else if(mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier) || acceleration == 0.0f)
-					m_aWheelSpeed[CARWHEEL_REAR_LEFT] *= 0.95f;
-				else{
-					if(acceleration > 0.0f){
-						if(m_aWheelSpeed[CARWHEEL_REAR_LEFT] < 2.0f)
-							m_aWheelSpeed[CARWHEEL_REAR_LEFT] -= 0.2f;
-					}else{
-						if(m_aWheelSpeed[CARWHEEL_REAR_LEFT] > -2.0f)
-							m_aWheelSpeed[CARWHEEL_REAR_LEFT] += 0.1f;
-					}
-				}
-				m_aWheelRotation[CARWHEEL_REAR_LEFT] += m_aWheelSpeed[CARWHEEL_REAR_LEFT];
-			}
-			if(m_aWheelTimer[CARWHEEL_REAR_RIGHT] <= 0.0f){
-				if(bIsHandbrakeOn)
-					m_aWheelSpeed[CARWHEEL_REAR_RIGHT] = 0.0f;
-				else if(mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier) || acceleration == 0.0f)
-					m_aWheelSpeed[CARWHEEL_REAR_RIGHT] *= 0.95f;
-				else{
-					if(acceleration > 0.0f){
-						if(m_aWheelSpeed[CARWHEEL_REAR_RIGHT] < 2.0f)
-							m_aWheelSpeed[CARWHEEL_REAR_RIGHT] -= 0.2f;
-					}else{
-						if(m_aWheelSpeed[CARWHEEL_REAR_RIGHT] > -2.0f)
-							m_aWheelSpeed[CARWHEEL_REAR_RIGHT] += 0.1f;
-					}
-				}
-				m_aWheelRotation[CARWHEEL_REAR_RIGHT] += m_aWheelSpeed[CARWHEEL_REAR_RIGHT];
-			}
-		}
-
-		// Process front wheels on ground - second try
-
-		if(rearWheelsFirst){
-		if(m_aWheelTimer[CARWHEEL_FRONT_LEFT] > 0.0f || m_aWheelTimer[CARWHEEL_FRONT_RIGHT] > 0.0f){
-			float s = Sin(m_fSteerAngle);
-			float c = Cos(m_fSteerAngle);
-
-			CVector wheelFwd, wheelRight, tmp;
-
-			if(m_aWheelTimer[CARWHEEL_FRONT_LEFT] > 0.0f){
-				if(mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier))
-					fThrust = 0.0f;
-				else
-					fThrust = acceleration;
-
-				wheelFwd = GetForward();
-				wheelFwd -= DotProduct(wheelFwd, m_aWheelColPoints[CARWHEEL_FRONT_LEFT].normal)*m_aWheelColPoints[CARWHEEL_FRONT_LEFT].normal;
-				wheelFwd.Normalise();
-				wheelRight = CrossProduct(wheelFwd, m_aWheelColPoints[CARWHEEL_FRONT_LEFT].normal);
-				wheelRight.Normalise();
-				tmp = c*wheelFwd - s*wheelRight;
-				wheelRight = s*wheelFwd + c*wheelRight;
-				wheelFwd = tmp;
-
-				m_aWheelColPoints[CARWHEEL_FRONT_LEFT].surfaceA = SURFACE_WHEELBASE;
-				float adhesion = CSurfaceTable::GetAdhesiveLimit(m_aWheelColPoints[CARWHEEL_FRONT_LEFT])*traction;
-				if(GetStatus() == STATUS_PLAYER)
-					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_FRONT_LEFT].surfaceB);
-				WheelState[CARWHEEL_FRONT_LEFT] = m_aWheelState[CARWHEEL_FRONT_LEFT];
-
-				if(Damage.GetWheelStatus(CARWHEEL_FRONT_LEFT) == WHEEL_STATUS_BURST)
-					ProcessWheel(wheelFwd, wheelRight,
-						contactSpeeds[CARWHEEL_FRONT_LEFT], contactPoints[CARWHEEL_FRONT_LEFT],
-						m_nWheelsOnGround, fThrust,
-						brake*brakeBiasFront,
-						adhesion*tractionBiasFront*Damage.m_fWheelDamageEffect,
-						CARWHEEL_FRONT_LEFT,
-						&m_aWheelSpeed[CARWHEEL_FRONT_LEFT],
-						&WheelState[CARWHEEL_FRONT_LEFT],
-						WHEEL_STATUS_BURST);
-				else
-					ProcessWheel(wheelFwd, wheelRight,
-						contactSpeeds[CARWHEEL_FRONT_LEFT], contactPoints[CARWHEEL_FRONT_LEFT],
-						m_nWheelsOnGround, fThrust,
-						brake*brakeBiasFront,
-						adhesion*tractionBiasFront,
-						CARWHEEL_FRONT_LEFT,
-						&m_aWheelSpeed[CARWHEEL_FRONT_LEFT],
-						&WheelState[CARWHEEL_FRONT_LEFT],
-						WHEEL_STATUS_OK);
-			}
-
-			if(m_aWheelTimer[CARWHEEL_FRONT_RIGHT] > 0.0f){
-				if(mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier))
-					fThrust = 0.0f;
-				else
-					fThrust = acceleration;
-
-				wheelFwd = GetForward();
-				wheelFwd -= DotProduct(wheelFwd, m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].normal)*m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].normal;
-				wheelFwd.Normalise();
-				wheelRight = CrossProduct(wheelFwd, m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].normal);
-				wheelRight.Normalise();
-				tmp = c*wheelFwd - s*wheelRight;
-				wheelRight = s*wheelFwd + c*wheelRight;
-				wheelFwd = tmp;
-
-				m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].surfaceA = SURFACE_WHEELBASE;
-				float adhesion = CSurfaceTable::GetAdhesiveLimit(m_aWheelColPoints[CARWHEEL_FRONT_RIGHT])*traction;
-				if(GetStatus() == STATUS_PLAYER)
-					adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].surfaceB);
-				WheelState[CARWHEEL_FRONT_RIGHT] = m_aWheelState[CARWHEEL_FRONT_RIGHT];
-
-				if(Damage.GetWheelStatus(CARWHEEL_FRONT_RIGHT) == WHEEL_STATUS_BURST)
-					ProcessWheel(wheelFwd, wheelRight,
-						contactSpeeds[CARWHEEL_FRONT_RIGHT], contactPoints[CARWHEEL_FRONT_RIGHT],
-						m_nWheelsOnGround, fThrust,
-						brake*brakeBiasFront,
-						adhesion*tractionBiasFront*Damage.m_fWheelDamageEffect,
-						CARWHEEL_FRONT_RIGHT,
-						&m_aWheelSpeed[CARWHEEL_FRONT_RIGHT],
-						&WheelState[CARWHEEL_FRONT_RIGHT],
-						WHEEL_STATUS_BURST);
-				else
-					ProcessWheel(wheelFwd, wheelRight,
-						contactSpeeds[CARWHEEL_FRONT_RIGHT], contactPoints[CARWHEEL_FRONT_RIGHT],
-						m_nWheelsOnGround, fThrust,
-						brake*brakeBiasFront,
-						adhesion*tractionBiasFront,
-						CARWHEEL_FRONT_RIGHT,
-						&m_aWheelSpeed[CARWHEEL_FRONT_RIGHT],
-						&WheelState[CARWHEEL_FRONT_RIGHT],
-						WHEEL_STATUS_OK);
-			}
-		}
-
-		// Process front wheels off ground
-
-		if (!IsRealHeli()) {
-			if(m_aWheelTimer[CARWHEEL_FRONT_LEFT] <= 0.0f){
-				if(mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier) || acceleration == 0.0f)
-					m_aWheelSpeed[CARWHEEL_FRONT_LEFT] *= 0.95f;
-				else{
-					if(acceleration > 0.0f){
-						if(m_aWheelSpeed[CARWHEEL_FRONT_LEFT] < 2.0f)
-							m_aWheelSpeed[CARWHEEL_FRONT_LEFT] -= 0.2f;
-					}else{
-						if(m_aWheelSpeed[CARWHEEL_FRONT_LEFT] > -2.0f)
-							m_aWheelSpeed[CARWHEEL_FRONT_LEFT] += 0.1f;
-					}
-				}
-				m_aWheelRotation[CARWHEEL_FRONT_LEFT] += m_aWheelSpeed[CARWHEEL_FRONT_LEFT];
-			}
-			if(m_aWheelTimer[CARWHEEL_FRONT_RIGHT] <= 0.0f){
-				if(mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier) || acceleration == 0.0f)
-					m_aWheelSpeed[CARWHEEL_FRONT_RIGHT] *= 0.95f;
-				else{
-					if(acceleration > 0.0f){
-						if(m_aWheelSpeed[CARWHEEL_FRONT_RIGHT] < 2.0f)
-							m_aWheelSpeed[CARWHEEL_FRONT_RIGHT] -= 0.2f;
-					}else{
-						if(m_aWheelSpeed[CARWHEEL_FRONT_RIGHT] > -2.0f)
-							m_aWheelSpeed[CARWHEEL_FRONT_RIGHT] += 0.1f;
-					}
-				}
-				m_aWheelRotation[CARWHEEL_FRONT_RIGHT] += m_aWheelSpeed[CARWHEEL_FRONT_RIGHT];
-			}
-		}
+		if(pHandling->Flags & HANDLING_REARWHEEL_1ST){
+			ProcessCarWheelPair(CARWHEEL_REAR_LEFT, CARWHEEL_REAR_RIGHT, -999.0f, contactSpeeds, contactPoints,
+				traction, acceleration, brake, false);
+			ProcessCarWheelPair(CARWHEEL_FRONT_LEFT, CARWHEEL_FRONT_RIGHT, m_fSteerAngle, contactSpeeds, contactPoints,
+				traction, acceleration, brake, true);
+		}else{
+			ProcessCarWheelPair(CARWHEEL_FRONT_LEFT, CARWHEEL_FRONT_RIGHT, m_fSteerAngle, contactSpeeds, contactPoints,
+				traction, acceleration, brake, true);
+			ProcessCarWheelPair(CARWHEEL_REAR_LEFT, CARWHEEL_REAR_RIGHT, -999.0f, contactSpeeds, contactPoints,
+				traction, acceleration, brake, false);
 		}
 
 		for(i = 0; i < 4; i++){
 			float wheelPos = colModel->lines[i].p0.z;
 			if(m_aSuspensionSpringRatio[i] > 0.0f)
 				wheelPos -= m_aSuspensionSpringRatio[i]*m_aSuspensionSpringLength[i];
-			if(GetModelIndex() == MI_VOODOO && bUsingSpecialColModel)
+			if(GetModelIndex() == MI_YARDIE && bUsingSpecialColModel)	// not original LCS
 				m_aWheelPosition[i] = wheelPos;
 			else
 				m_aWheelPosition[i] += (wheelPos - m_aWheelPosition[i])*0.75f;
-		}
-		for(i = 0; i < 4; i++)
-			m_aWheelState[i] = WheelState[i];
-		if(m_fGasPedal < 0.0f){
-			if(m_aWheelState[CARWHEEL_REAR_LEFT] == WHEEL_STATE_SPINNING)
-				m_aWheelState[CARWHEEL_REAR_LEFT] = WHEEL_STATE_NORMAL;
-			if(m_aWheelState[CARWHEEL_REAR_RIGHT] == WHEEL_STATE_SPINNING)
-				m_aWheelState[CARWHEEL_REAR_RIGHT] = WHEEL_STATE_NORMAL;
 		}
 
 		// Process horn
@@ -1710,6 +1325,207 @@ CAutomobile::ProcessControl(void)
 
 #pragma optimize("", on)
 
+//--LCS: done
+void
+CAutomobile::ProcessCarWheelPair(int leftWheel, int rightWheel, float steerAngle, CVector *contactSpeeds, CVector *contactPoints, float traction, float acceleration, float brake, bool bFront)
+{
+	bool driveWheels;
+	float suspensionBias;
+
+	if(bFront){
+		driveWheels = mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier);
+		suspensionBias = 2.0f*pHandling->fSuspensionBias;
+	}else{
+		driveWheels = mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier);
+		suspensionBias = 2.0f*(1.0f-pHandling->fSuspensionBias);
+
+		float fwdSpeed = DotProduct(m_vecMoveSpeed, GetForward());	
+		if(bIsHandbrakeOn && Abs(fwdSpeed) > 0.1f){
+#ifdef FIX_BUGS
+			// Not sure if this is needed, but brake usually has timestep as a factor
+			brake = 20000.0f * CTimer::GetTimeStepFix();
+#else
+			brake = 20000.0f;
+#endif
+/*
+			if(fwdSpeed > 0.1f && pHandling->Flags & HANDLING_HANDBRAKE_TYRE){
+				m_fTireTemperature += 0.005*CTimer::GetTimeStep();
+				if(m_fTireTemperature > 2.0f)
+					m_fTireTemperature = 2.0f;
+			}
+*/
+		}else if(driveWheels && m_doingBurnout){
+			brake = 0.0f;
+			traction = 0.0f;
+			// BUG: missing timestep
+			ApplyTurnForce(contactPoints[leftWheel], -0.003f*m_fTurnMass*Min(3000.0f/m_fTurnMass, 1.0f)*m_fSteerAngle*GetRight());
+		}else if(mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier)){
+			traction *= m_fTireTemperature;
+		}
+	}
+
+	// Wheels on ground
+	if(m_aWheelTimer[leftWheel] > 0.0f || m_aWheelTimer[rightWheel] > 0.0f){
+		CVector wheelFwd, wheelRight;
+		float s, c;
+		bool canSteer = steerAngle > -100.0f;
+		if(canSteer){
+			s = Sin(steerAngle);
+			c = Cos(steerAngle);
+		}
+
+		bool neutralHandling = GetStatus() != STATUS_PLAYER && GetStatus() != STATUS_PLAYER_REMOTE && (pHandling->Flags & HANDLING_NEUTRALHANDLING);
+		float brakeBias, tractionBias;
+		if(bFront){
+			brakeBias = neutralHandling ? 1.0f : 2.0f*pHandling->fBrakeBias;
+			tractionBias = neutralHandling ? 1.0f : 2.0f*pHandling->fTractionBias;
+		}else{
+			brakeBias = neutralHandling ? 1.0f : 2.0f*(1.0f-pHandling->fBrakeBias);
+			tractionBias = neutralHandling ? 1.0f : 2.0f*(1.0f-pHandling->fTractionBias);
+		}
+
+		if(m_aWheelTimer[leftWheel] > 0.0f){
+			float fThrust = driveWheels ? acceleration : 0.0f;
+
+			wheelFwd = GetForward();
+			wheelFwd -= DotProduct(wheelFwd, m_aWheelColPoints[leftWheel].normal)*m_aWheelColPoints[leftWheel].normal;
+			wheelFwd.Normalise();
+			wheelRight = CrossProduct(wheelFwd, m_aWheelColPoints[leftWheel].normal);
+			wheelRight.Normalise();
+			if(canSteer){
+				CVector tmp = c*wheelFwd - s*wheelRight;
+				wheelRight = s*wheelFwd + c*wheelRight;
+				wheelFwd = tmp;
+			}
+
+			m_aWheelColPoints[leftWheel].surfaceA = SURFACE_WHEELBASE;
+			float adhesion = CSurfaceTable::GetAdhesiveLimit(m_aWheelColPoints[leftWheel])*traction;
+			if(GetStatus() == STATUS_PLAYER){
+				adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[leftWheel].surfaceB);
+				adhesion *= Min(suspensionBias*pHandling->fSuspensionForceLevel*4.0f*(1.0f-m_aSuspensionSpringRatio[leftWheel]), 2.0f);
+			}
+			tWheelState WheelState = m_aWheelState[leftWheel];
+			if(Damage.GetWheelStatus(leftWheel) == WHEEL_STATUS_BURST)
+				ProcessWheel(wheelFwd, wheelRight,
+					contactSpeeds[leftWheel], contactPoints[leftWheel],
+					m_nWheelsOnGround, fThrust,
+					brake*brakeBias,
+					adhesion*tractionBias*Damage.m_fWheelDamageEffect,
+					leftWheel,
+					&m_aWheelRotation[leftWheel],
+					&WheelState,
+					WHEEL_STATUS_BURST);
+			else
+				ProcessWheel(wheelFwd, wheelRight,
+					contactSpeeds[leftWheel], contactPoints[leftWheel],
+					m_nWheelsOnGround, fThrust,
+					brake*brakeBias,
+					adhesion*tractionBias,
+					leftWheel,
+					&m_aWheelRotation[leftWheel],
+					&WheelState,
+					WHEEL_STATUS_OK);
+
+			if(driveWheels && m_fGasPedal < 0.0f && WheelState == WHEEL_STATE_SPINNING)
+				m_aWheelState[leftWheel] = WHEEL_STATE_NORMAL;
+			else
+				m_aWheelState[leftWheel] = WheelState;
+		}
+
+		if(m_aWheelTimer[rightWheel] > 0.0f){
+			float fThrust = driveWheels ? acceleration : 0.0f;
+
+			wheelFwd = GetForward();
+			wheelFwd -= DotProduct(wheelFwd, m_aWheelColPoints[rightWheel].normal)*m_aWheelColPoints[rightWheel].normal;
+			wheelFwd.Normalise();
+			wheelRight = CrossProduct(wheelFwd, m_aWheelColPoints[rightWheel].normal);
+			wheelRight.Normalise();
+			if(canSteer){
+				CVector tmp = c*wheelFwd - s*wheelRight;
+				wheelRight = s*wheelFwd + c*wheelRight;
+				wheelFwd = tmp;
+			}
+
+			m_aWheelColPoints[rightWheel].surfaceA = SURFACE_WHEELBASE;
+			float adhesion = CSurfaceTable::GetAdhesiveLimit(m_aWheelColPoints[rightWheel])*traction;
+			if(GetStatus() == STATUS_PLAYER){
+				adhesion *= CSurfaceTable::GetWetMultiplier(m_aWheelColPoints[rightWheel].surfaceB);
+				adhesion *= Min(suspensionBias*pHandling->fSuspensionForceLevel*4.0f*(1.0f-m_aSuspensionSpringRatio[rightWheel]), 2.0f);
+			}
+			tWheelState WheelState = m_aWheelState[rightWheel];
+			if(Damage.GetWheelStatus(rightWheel) == WHEEL_STATUS_BURST)
+				ProcessWheel(wheelFwd, wheelRight,
+					contactSpeeds[rightWheel], contactPoints[rightWheel],
+					m_nWheelsOnGround, fThrust,
+					brake*brakeBias,
+					adhesion*tractionBias*Damage.m_fWheelDamageEffect,
+					rightWheel,
+					&m_aWheelRotation[rightWheel],
+					&WheelState,
+					WHEEL_STATUS_BURST);
+			else
+				ProcessWheel(wheelFwd, wheelRight,
+					contactSpeeds[rightWheel], contactPoints[rightWheel],
+					m_nWheelsOnGround, fThrust,
+					brake*brakeBias,
+					adhesion*tractionBias,
+					rightWheel,
+					&m_aWheelRotation[rightWheel],
+					&WheelState,
+					WHEEL_STATUS_OK);
+
+			if(driveWheels && m_fGasPedal < 0.0f && WheelState == WHEEL_STATE_SPINNING)
+				m_aWheelState[rightWheel] = WHEEL_STATE_NORMAL;
+			else
+				m_aWheelState[rightWheel] = WheelState;
+		}
+	}
+
+	if(!bFront){
+		if(m_doingBurnout && driveWheels &&
+		   (m_aWheelState[CARWHEEL_REAR_LEFT] == WHEEL_STATE_SPINNING || m_aWheelState[CARWHEEL_REAR_RIGHT] == WHEEL_STATE_SPINNING)){
+			m_fTireTemperature += 0.001f*CTimer::GetTimeStep();
+			if(m_fTireTemperature > 3.0f)
+				m_fTireTemperature = 3.0f;
+		}else if(m_fTireTemperature > 1.0f){
+			m_fTireTemperature = (m_fTireTemperature - 1.0f)*Pow(0.995f, CTimer::GetTimeStep()) + 1.0f;
+		}
+	}
+
+	// Process wheels off ground
+
+	if(!IsRealHeli()){
+		if(m_aWheelTimer[leftWheel] <= 0.0f){
+			if(driveWheels && acceleration != 0.0f){
+				if(acceleration > 0.0f){
+					if(m_aWheelSpeed[leftWheel] < 1.0f)
+						m_aWheelSpeed[leftWheel] -= 0.1f;
+				}else{
+					if(m_aWheelSpeed[leftWheel] > -1.0f)
+						m_aWheelSpeed[leftWheel] += 0.05f;
+				}
+			}else{
+				m_aWheelSpeed[leftWheel] *= 0.95f;
+			}
+			m_aWheelRotation[leftWheel] += m_aWheelSpeed[leftWheel]*CTimer::GetTimeStep();
+		}
+		if(m_aWheelTimer[rightWheel] <= 0.0f){
+			if(driveWheels && acceleration != 0.0f){
+				if(acceleration > 0.0f){
+					if(m_aWheelSpeed[rightWheel] < 1.0f)
+						m_aWheelSpeed[rightWheel] -= 0.1f;
+				}else{
+					if(m_aWheelSpeed[rightWheel] > -1.0f)
+						m_aWheelSpeed[rightWheel] += 0.05f;
+				}
+			}else{
+				m_aWheelSpeed[rightWheel] *= 0.95f;
+			}
+			m_aWheelRotation[rightWheel] += m_aWheelSpeed[rightWheel]*CTimer::GetTimeStep();
+		}
+	}
+}
+
 void
 CAutomobile::Teleport(CVector pos)
 {
@@ -1730,6 +1546,11 @@ CAutomobile::PreRender(void)
 {
 	int i, j, n;
 	CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex());
+
+	if(GetModelIndex() == MI_FIRETRUCK)
+		FireTruckControl();
+
+	CVehicle::PreRender();
 
 	if(GetModelIndex() == MI_RHINO && m_aCarNodes[CAR_WINDSCREEN]){
 		// Rotate Rhino turret
@@ -3009,6 +2830,7 @@ CAutomobile::Render(void)
 		CEntity::Render();
 }
 
+//--LCS: done
 int32
 CAutomobile::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 {
@@ -3080,9 +2902,13 @@ static float fMouseCentreRange = 0.35f;
 static float fMouseSteerSens = -0.0035f;
 static float fMouseCentreMult = 0.975f;
 
+//--LCS: done except TODO
 void
 CAutomobile::ProcessControlInputs(uint8 pad)
 {
+	if(this == FindPlayerVehicle() && CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle)
+		return;
+
 	float speed = DotProduct(m_vecMoveSpeed, GetForward());
 
 	if(!CPad::GetPad(pad)->GetExitVehicle() ||
@@ -3093,6 +2919,7 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 		bIsHandbrakeOn = true;
 
 	// Steer left/right
+#if 0	// LCS: removed, need mouse for free cam
 	if(CCamera::m_bUseMouse3rdPerson && !CVehicle::m_bDisableMouseSteering){
 		if(CPad::GetPad(pad)->GetMouseX() != 0.0f){
 			m_fSteerInput += fMouseSteerSens*CPad::GetPad(pad)->GetMouseX();
@@ -3105,7 +2932,9 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 				0.2f*CTimer::GetTimeStep();
 			nLastControlInput = 0;
 		}
-	}else{
+	}else
+#endif
+	{
 		m_fSteerInput += (-CPad::GetPad(pad)->GetSteeringLeftRight()/128.0f - m_fSteerInput)*
 			0.2f*CTimer::GetTimeStep();
 		nLastControlInput = 0;
@@ -3198,6 +3027,7 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 
 	// Brake if player isn't in control
 	// BUG: game always uses pad 0 here
+	// TODO(LCS): more conditions here
 #ifdef FIX_BUGS
 	if(CPad::GetPad(pad)->ArePlayerControlsDisabled()){
 #else
@@ -3920,6 +3750,7 @@ CAutomobile::DoDriveByShootings(void)
 	}
 }
 
+//--LCS: done
 void
 CAutomobile::DoHoverSuspensionRatios(void)
 {
@@ -5016,6 +4847,7 @@ CAutomobile::ResetSuspension(void)
 	}
 }
 
+//--LCS: done
 void
 CAutomobile::SetupSuspensionLines(void)
 {
@@ -5023,6 +4855,14 @@ CAutomobile::SetupSuspensionLines(void)
 	CVector posn;
 	CVehicleModelInfo *mi = (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex());
 	CColModel *colModel = mi->GetColModel();
+
+	bool adjustColModel;
+	if(colModel->lines == nil){
+		adjustColModel = true;
+		colModel->lines = new CColLine[4];
+		colModel->numLines = 4;
+	}else
+		adjustColModel = false;
 
 	// Each suspension line starts at the uppermost wheel position
 	// and extends down to the lowermost point on the tyre
@@ -5062,6 +4902,21 @@ CAutomobile::SetupSuspensionLines(void)
 		colModel->boundingSphere.radius = 2.0f;
 		for(i = 0; i < colModel->numSpheres; i++)
 			colModel->spheres[i].radius = 0.3f;
+	}
+
+	if(pHandling->Flags & HANDLING_FORCE_GRND_CLR && adjustColModel){
+		// 0.25 is the min distance between ground and col spheres, everything above it is safe
+		float safePos = 0.25f - m_fHeightAboveRoad;
+		for(i = 0; i < colModel->numSpheres; i++){
+			CColSphere *sph = &colModel->spheres[i];
+			if(sph->center.z - sph->radius < safePos){
+				// sphere extends too far down, so move it up
+				// or decrease the radius for bigger spheres
+				if(radius > 0.4f)
+					sph->radius = Max(sph->center.z - safePos, 0.4f);
+				sph->center.z = safePos + sph->radius;
+			}
+		}
 	}
 }
 

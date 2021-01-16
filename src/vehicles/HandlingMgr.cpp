@@ -115,18 +115,17 @@ void
 cHandlingDataMgr::LoadHandlingData(void)
 {
 	char *start, *end;
-	char line[201];	// weird value
+	char line[300];
 	char delim[4];	// not sure
 	char *word;
 	int field, handlingId;
-	int keepGoing;
 	tHandlingData *handling;
 	tFlyingHandlingData *flyingHandling;
 	tBoatHandlingData *boatHandling;
 	tBikeHandlingData *bikeHandling;
 
 	CFileMgr::SetDir("DATA");
-	CFileMgr::LoadFile(HandlingFilename, work_buff, sizeof(work_buff), "r");
+	ssize_t filesz = CFileMgr::LoadFile(HandlingFilename, work_buff, sizeof(work_buff), "r");
 	CFileMgr::SetDir("");
 
 	start = (char*)work_buff;
@@ -135,21 +134,18 @@ cHandlingDataMgr::LoadHandlingData(void)
 	flyingHandling = nil;
 	boatHandling = nil;
 	bikeHandling = nil;
-	keepGoing = 1;
 
-	while(keepGoing){
+	while(start < (char*)&work_buff[filesz]){
 		// find end of line
 		while(*end != '\n') end++;
 
 		// get line
 		strncpy(line, start, end - start);
 		line[end - start] = '\0';
-		start = end+1;
-		end = start+1;
 
 		// yeah, this is kinda crappy
 		if(strcmp(line, ";the end") == 0)
-			keepGoing = 0;
+			break;
 		else if(line[0] != ';'){
 			if(line[0] == '!'){
 				// Bike data
@@ -263,19 +259,19 @@ cHandlingDataMgr::LoadHandlingData(void)
 						handling->nIdentifier = (tVehicleType)handlingId;
 						break;
 					case  1: handling->fMass = atof(word); break;
-					case  2: handling->Dimension.x = atof(word); break;
-					case  3: handling->Dimension.y = atof(word); break;
-					case  4: handling->Dimension.z = atof(word); break;
-					case  5: handling->CentreOfMass.x = atof(word); break;
-					case  6: handling->CentreOfMass.y = atof(word); break;
-					case  7: handling->CentreOfMass.z = atof(word); break;
-					case  8: handling->nPercentSubmerged = atoi(word); break;
-					case  9: handling->fTractionMultiplier = atof(word); break;
-					case 10: handling->fTractionLoss = atof(word); break;
-					case 11: handling->fTractionBias = atof(word); break;
-					case 12: handling->Transmission.nNumberOfGears = atoi(word); break;
-					case 13: handling->Transmission.fMaxVelocity = atof(word); break;
-					case 14: handling->Transmission.fEngineAcceleration = atof(word) * 0.4; break;
+					case  2: handling->fTurnMass = atof(word); break;
+					case  3: handling->fDragMult = atof(word); break;
+					case  4: handling->CentreOfMass.x = atof(word); break;
+					case  5: handling->CentreOfMass.y = atof(word); break;
+					case  6: handling->CentreOfMass.z = atof(word); break;
+					case  7: handling->nPercentSubmerged = atoi(word); break;
+					case  8: handling->fTractionMultiplier = atof(word); break;
+					case  9: handling->fTractionLoss = atof(word); break;
+					case 10: handling->fTractionBias = atof(word); break;
+					case 11: handling->Transmission.nNumberOfGears = atoi(word); break;
+					case 12: handling->Transmission.fMaxVelocity = atof(word); break;
+					case 13: handling->Transmission.fEngineAcceleration = atof(word) * 0.4; break;
+					case 14: handling->Transmission.fEngineInertia = atof(word); break;
 					case 15: handling->Transmission.nDriveType = word[0]; break;
 					case 16: handling->Transmission.nEngineType = word[0]; break;
 					case 17: handling->fBrakeDeceleration = atof(word); break;
@@ -284,25 +280,28 @@ cHandlingDataMgr::LoadHandlingData(void)
 					case 20: handling->fSteeringLock = atof(word); break;
 					case 21: handling->fSuspensionForceLevel = atof(word); break;
 					case 22: handling->fSuspensionDampingLevel = atof(word); break;
-					case 23: handling->fSeatOffsetDistance = atof(word); break;
-					case 24: handling->fCollisionDamageMultiplier = atof(word); break;
-					case 25: handling->nMonetaryValue = atoi(word); break;
-					case 26: handling->fSuspensionUpperLimit = atof(word); break;
-					case 27: handling->fSuspensionLowerLimit = atof(word); break;
-					case 28: handling->fSuspensionBias = atof(word); break;
-					case 29: handling->fSuspensionAntidiveMultiplier = atof(word); break;
-					case 30:
+					// case 23:	// fSuspensionHighSpdComDamp unused
+					case 24: handling->fSuspensionUpperLimit = atof(word); break;
+					case 25: handling->fSuspensionLowerLimit = atof(word); break;
+					case 26: handling->fSuspensionBias = atof(word); break;
+					case 27: handling->fSuspensionAntidiveMultiplier = atof(word); break;
+					case 28: handling->fSeatOffsetDistance = atof(word); break;
+					case 29: handling->fCollisionDamageMultiplier = atof(word); break;
+					case 30: handling->nMonetaryValue = atoi(word); break;
+					case 31:
 						sscanf(word, "%x", &handling->Flags);
-						handling->Transmission.Flags = handling->Flags;
+					//	handling->Transmission.Flags = handling->Flags;
 						break;
-					case 31: handling->FrontLights = atoi(word); break;
-					case 32: handling->RearLights = atoi(word); break;
+					case 32: handling->FrontLights = atoi(word); break;
+					case 33: handling->RearLights = atoi(word); break;
 					}
 					field++;
 				}
 				ConvertDataToGameUnits(handling);
 			}
 		}
+		start = end+1;
+		end = start+1;
 	}
 }
 
@@ -330,12 +329,9 @@ cHandlingDataMgr::ConvertDataToGameUnits(tHandlingData *handling)
 	handling->Transmission.fEngineAcceleration *= 1.0f/(50.0f*50.0f);
 	handling->Transmission.fMaxVelocity *= 1000.0f/(60.0f*60.0f * 50.0f);
 	handling->fBrakeDeceleration *= 1.0f/(50.0f*50.0f);
-	handling->fTurnMass = (sq(handling->Dimension.x) + sq(handling->Dimension.y)) * handling->fMass / 12.0f;
-	if(handling->fTurnMass < 10.0f)
-		handling->fTurnMass *= 5.0f;
-	handling->fInvMass = 1.0f/handling->fMass;
-	handling->fCollisionDamageMultiplier *= 2000.0f/handling->fMass;
-	handling->fBuoyancy = 100.0f/handling->nPercentSubmerged * GRAVITY*handling->fMass;
+	handling->fInvMass = 1.0f/handling->GetMass();
+	handling->fCollisionDamageMultiplier = handling->GetCollisionDamageMultiplier() * 2000.0f/handling->GetMass();
+	handling->fBuoyancy = 100.0f/handling->nPercentSubmerged * GRAVITY*handling->GetMass();
 
 	// Don't quite understand this. What seems to be going on is that
 	// we calculate a drag (air resistance) deceleration for a given velocity and
@@ -348,10 +344,13 @@ cHandlingDataMgr::ConvertDataToGameUnits(tHandlingData *handling)
 		velocity -= 0.01f;
 		// what's the 1/6?
 		a = handling->Transmission.fEngineAcceleration/6.0f;
-		// no density or drag coefficient here...
-		float a_drag = 0.5f*SQR(velocity) * handling->Dimension.x*handling->Dimension.z / handling->fMass;
-		// can't make sense of this... maybe  v - v/(drag + 1)  ? but that doesn't make so much sense either
-		b = -velocity * (1.0f/(a_drag + 1.0f) - 1.0f);
+		// no idea what's happening here
+		float drag;
+		if(handling->fDragMult < 0.01f)
+			drag = 1.0f - 1.0f/(SQR(velocity)*handling->fDragMult + 1.0f);
+		else
+			drag = 0.0005f*handling->fDragMult * velocity;
+		b = velocity * drag;
 	}
 
 	if(handling->nIdentifier == HANDLING_RCBANDIT){
