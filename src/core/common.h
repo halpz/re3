@@ -29,9 +29,9 @@
 		#define WITH_D3D // librw includes d3d9 itself via this right now
 	#else
 		#ifndef USE_D3D9
-		#include <d3d8types.h>
+		#include <d3d8.h>
 		#else
-		#include <d3d9types.h>
+		#include <d3d9.h>
 		#endif
 	#endif
 #endif
