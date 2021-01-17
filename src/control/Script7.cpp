@@ -32,6 +32,8 @@
 #include "World.h"
 #include "Zones.h"
 
+// LCS: file done except TODOs
+
 int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 {
 	switch (command) {
@@ -856,14 +858,68 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		UpdateCompareFlag(result);
 		return 0;
 	}
-	//case COMMAND_HAS_CHAR_BEEN_DAMAGED_BY_CAR:
-	//case COMMAND_HAS_CAR_BEEN_DAMAGED_BY_CHAR:
-	//case COMMAND_HAS_CAR_BEEN_DAMAGED_BY_CAR:
+	case COMMAND_HAS_CHAR_BEEN_DAMAGED_BY_CAR:
+	{
+		CollectParameters(&m_nIp, 2);
+		CPed* pPed = CPools::GetPedPool()->GetAt(GET_INTEGER_PARAM(0));
+		CVehicle* pTestedVehicle = CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(1));
+		bool result = false;
+		if (pPed) {
+			if (pPed->m_lastDamEntity) {
+				if (pPed->m_lastDamEntity == pTestedVehicle)
+					result = true;
+			}
+		}
+		else
+			debug("HAS_CHAR_BEEN_DAMAGED_BY_CAR - Character doesn't exist\n");
+		UpdateCompareFlag(result);
+		return 0;
+	}
+	case COMMAND_HAS_CAR_BEEN_DAMAGED_BY_CHAR:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
+		CPed* pTestedPed = CPools::GetPedPool()->GetAt(GET_INTEGER_PARAM(1));
+		bool result = false;
+		if (pVehicle) {
+			if (pVehicle->m_pLastDamageEntity) {
+				if (pVehicle->m_pLastDamageEntity == pTestedPed)
+					result = true;
+				if (pTestedPed->bInVehicle && pVehicle->m_pLastDamageEntity == pTestedPed->m_pMyVehicle)
+					result = true;
+			}
+		}
+		else
+			debug("HAS_CAR_BEEN_DAMAGED_BY_CHAR - Car doesn't exist\n");
+		UpdateCompareFlag(result);
+		return 0;
+	}
+	case COMMAND_HAS_CAR_BEEN_DAMAGED_BY_CAR:
+	{
+		CollectParameters(&m_nIp, 2);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
+		CVehicle* pTestedVehicle = CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(1));
+		bool result = false;
+		if (pVehicle) {
+			if (pVehicle->m_pLastDamageEntity) {
+				if (pVehicle->m_pLastDamageEntity == pTestedVehicle)
+					result = true;
+			}
+		}
+		else
+			debug("HAS_CAR_BEEN_DAMAGED_BY_CAR - First car doesn't exist\n");
+		UpdateCompareFlag(result);
+		return 0;
+	}
 	case COMMAND_GET_RADIO_CHANNEL:
 	{
-		// TODO
-		SET_INTEGER_PARAM(0, -1);
+		uint8 radio = DMAudio.GetRadioInCar();
+		if (radio < NUM_RADIOS || radio == STREAMED_SOUND_MISSION_COMPLETED)
+			SET_INTEGER_PARAM(0, radio);
+		else
+			SET_INTEGER_PARAM(0, -1);
 		StoreParameters(&m_nIp, 1);
+		return 0;
 	}
 	//case COMMAND_DISPLAY_TEXT_WITH_3_NUMBERS:
 	//case COMMAND_IS_CAR_DROWNING_IN_WATER:
@@ -924,7 +980,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		return 0;
 	case COMMAND_ADD_MONEY_SPENT_ON_PROPERTY:
 		CollectParameters(&m_nIp, 1);
-		CStats::MoneySpentOnProperty(GET_INTEGER_PARAM(0));
+		//CStats::MoneySpentOnProperty(GET_INTEGER_PARAM(0));
 		return 0;
 	//case COMMAND_ADD_MONEY_SPENT_ON_AUTO_PAINTING:
 	case COMMAND_SET_CHAR_ANSWERING_MOBILE:
@@ -953,12 +1009,12 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	//case COMMAND_ADD_LOAN_SHARK_VISITS:
 	case COMMAND_ADD_STORES_KNOCKED_OFF:
 		CollectParameters(&m_nIp, 1);
-		CStats::NumOfStoresKnockedOff(GET_INTEGER_PARAM(0));
+		//CStats::NumOfStoresKnockedOff(GET_INTEGER_PARAM(0));
 		return 0;
 	//case COMMAND_ADD_MOVIE_STUNTS:
 	case COMMAND_ADD_NUMBER_OF_ASSASSINATIONS:
 		CollectParameters(&m_nIp, 1);
-		CStats::NumOfAssassinations(GET_INTEGER_PARAM(0));
+		//CStats::NumOfAssassinations(GET_INTEGER_PARAM(0));
 		return 0;
 	case COMMAND_ADD_PIZZAS_DELIVERED:
 		CollectParameters(&m_nIp, 1);
@@ -1145,7 +1201,16 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 			debug("CLEAR_CHAR_LAST_DAMAGE_ENTITY - Character doesn't exist\n");
 		return 0;
 	}
-	//case COMMAND_CLEAR_CAR_LAST_DAMAGE_ENTITY:
+	case COMMAND_CLEAR_CAR_LAST_DAMAGE_ENTITY:
+	{
+		CollectParameters(&m_nIp, 1);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
+		if (pVehicle)
+			pVehicle->m_pLastDamageEntity = nil;
+		else
+			debug("CLEAR_CAR_LAST_DAMAGE_ENTITY - Car doesn't exist\n");
+		return 0;
+	}
 	case COMMAND_FREEZE_OBJECT_POSITION:
 	{
 		CollectParameters(&m_nIp, 2);
@@ -1180,6 +1245,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 	}
 	case COMMAND_CLEAR_TAXI_SHORTCUT:
 		CGameLogic::ClearShortCut();
+		CGameLogic::RemoveShortCutDropOffPointForMission();
 		return 0;
 	//case COMMAND_SET_CHAR_OBJ_GOTO_CAR_ON_FOOT:
 	//case COMMAND_GET_CLOSEST_WATER_NODE:
@@ -1194,7 +1260,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + PICKUP_PLACEMENT_OFFSET;
 		CPickups::GetActualPickupIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
-		SET_INTEGER_PARAM(0, CPickups::GenerateNewOne(pos, MI_PICKUP_CLOTHES, PICKUP_ON_STREET, GET_INTEGER_PARAM(3)));
+		SET_INTEGER_PARAM(0, CPickups::GenerateNewOne(pos, MI_PICKUP_CLOTHES, PICKUP_ON_STREET, GET_INTEGER_PARAM(3))); // TODO: gpModelIndices
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
@@ -1212,6 +1278,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		CPlayerInfo* pPlayerInfo = &CWorld::Players[GET_INTEGER_PARAM(0)];
 		pPlayerInfo->m_nMaxHealth += GET_INTEGER_PARAM(1);
 		pPlayerInfo->m_pPed->m_fHealth = pPlayerInfo->m_nMaxHealth;
+		CHud::m_ItemToFlash = ITEM_HEALTH;
 		return 0;
 	}
 	case COMMAND_INCREASE_PLAYER_MAX_ARMOUR:
@@ -1220,6 +1287,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		CPlayerInfo* pPlayerInfo = &CWorld::Players[GET_INTEGER_PARAM(0)];
 		pPlayerInfo->m_nMaxArmour += GET_INTEGER_PARAM(1);
 		pPlayerInfo->m_pPed->m_fArmour = pPlayerInfo->m_nMaxArmour;
+		CHud::m_ItemToFlash = ITEM_ARMOUR;
 		return 0;
 	}
 	case COMMAND_CREATE_RANDOM_CHAR_AS_DRIVER:
@@ -1378,13 +1446,16 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		return 0;
 	case COMMAND_DOES_VEHICLE_EXIST:
 	{
-		// TODO
 		CollectParameters(&m_nIp, 1);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
 		bool bExist = false;
 		if (pVehicle) {
-			int index = CPools::GetVehiclePool()->GetJustIndex_NoFreeAssert(pVehicle);
-			bExist = (index >= 0 && index <= NUMVEHICLES); // TODO: FIX_BUGS
+			int index = GET_INTEGER_PARAM(0) >> 8;
+#ifdef FIX_BUGS
+			bExist = (index >= 0 && index < NUMVEHICLES); // epic fail
+#else
+			bExist = (index > 0 && index < NUMVEHICLES);
+#endif
 		}
 		UpdateCompareFlag(bExist);
 		return 0;

@@ -2278,6 +2278,7 @@ INITSAVEBUF
 	uint32 runningScripts = ReadSaveBuf<uint32>(buf);
 	for (uint32 i = 0; i < runningScripts; i++)
 		StartNewScript(0)->Load(buf);
+	return true;
 VALIDATESAVEBUF(size)
 }
 

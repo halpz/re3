@@ -499,7 +499,7 @@ public:
 	uint32 bIsDrowning : 1;
 	uint32 bDrownsInWater : 1;
 	uint32 bWaitForLeaderToComeCloser : 1;
-	uint32 bHeldHostageInCar : 1;
+	uint32 bHeldHostageInCar : 1; // one flag was added somewhere after this one (TODO: figure out where and which)
 	uint32 bIsPlayerFriend : 1;
 	uint32 bHeadStuckInCollision : 1;
 	uint32 bDeadPedInFrontOfCar : 1;
@@ -512,7 +512,7 @@ public:
 	uint32 bMakeFleeScream : 1;
 	uint32 bPushedAlongByCar : 1;
 	uint32 bRemoveMeWhenIGotIntoCar : 1;
-	uint32 bIgnoreThreatsBehindObjects : 1;
+	uint32 bIgnoreThreatsBehindObjects : 1; // one flag was added somewhere before this one (TODO: figure out where and which)
 
 	uint32 bNeverEverTargetThisPed : 1;
 	uint32 bCrouchWhenScared : 1;
@@ -523,8 +523,8 @@ public:
 	uint32 bDonePositionOutOfCollision : 1;
 
 	uint32 bCanAttackPlayerWithCops : 1; // 1A1_1 on PS2
-	uint32 b1A1_2 : 1;
-	uint32 b1A1_4 : 1;
+	uint32 bOnlyAllowedToSitBehind : 1;
+	uint32 bOnlyAllowedToSitInFront : 1;
 	uint32 b1A1_8 : 1;
 	uint32 b1A1_10 : 1;
 	uint32 b1A1_20 : 1;
@@ -534,11 +534,29 @@ public:
 	uint32 m_ped_flagI80 : 1; // KANGAROO_CHEAT define makes use of this as cheat toggle 
 #endif
 
-	uint8 m_gangFlags;
-	uint8 m_unused15D; // these 3 can't be padding but had to actually have been members ...
-	uint8 m_unused15E;
-	uint8 m_unused15F;
-	uint8 CharCreatedBy;
+	uint16 m_gangFlags; // <- this one is uint16
+
+	uint8 b1A4_1 : 1;
+	uint8 b1A4_2 : 1;
+	uint8 b1A4_4 : 1;
+	uint8 b1A4_8 : 1;
+	uint8 b1A4_10 : 1;
+	uint8 b1A4_20 : 1;
+	uint8 b1A4_40 : 1;
+	uint8 b1A4_80 : 1;
+
+	uint8 b1A5_1 : 1;
+	uint8 b1A5_2 : 1;
+	uint8 b1A5_4 : 1;
+	uint8 b1A5_8 : 1;
+	uint8 b1A5_10 : 1;
+	uint8 b1A5_20 : 1;
+	uint8 b1A5_40 : 1;
+	uint8 b1A5_80 : 1;
+
+	uint8 unk_1A6; // <- init with 100 in constructor
+
+	uint8 CharCreatedBy; // 1AC
 	eObjective m_objective;
 	eObjective m_prevObjective;
 	CPed *m_pedInObjective;
