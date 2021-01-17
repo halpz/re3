@@ -27,7 +27,7 @@ uint32 CRunningScript::CollectLocateParameters(uint32* pIp, bool b3D)
 	uint8 type = CTheScripts::Read1ByteFromScript(&ip);
 	if (type >= ARGUMENT_LOCAL) {
 		ip--;
-		id = (uint32)GetPointerToScriptVariable(&ip, 0);
+		id = (uint32)(uintptr)GetPointerToScriptVariable(&ip, 0);
 	}
 	CollectParameters(pIp, b3D ? 7 : 5, &(ScriptParams[1]));
 	return id;
