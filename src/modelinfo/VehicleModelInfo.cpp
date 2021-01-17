@@ -1108,6 +1108,7 @@ CVehicleModelInfo::SetEnvironmentMapCB(RpAtomic *atomic, void *data)
 void
 CVehicleModelInfo::SetEnvironmentMap(void)
 {
+/*
 	CSimpleModelInfo *wheelmi;
 	int32 i;
 
@@ -1125,6 +1126,7 @@ CVehicleModelInfo::SetEnvironmentMap(void)
 		for(i = 0; i < wheelmi->m_numAtomics; i++)
 			SetEnvironmentMapCB(wheelmi->m_atomics[i], nil);
 	}
+*/
 
 #ifdef EXTENDED_PIPELINES
 	CustomPipes::AttachVehiclePipe(m_clump);
@@ -1139,21 +1141,23 @@ CVehicleModelInfo::LoadEnvironmentMaps(void)
 	txdslot = CTxdStore::FindTxdSlot("particle");
 	CTxdStore::PushCurrentTxd();
 	CTxdStore::SetCurrentTxd(txdslot);
-	if(gpWhiteTexture == nil){
+	/*if(gpWhiteTexture == nil){
 		gpWhiteTexture = RwTextureRead("white", nil);
 		RwTextureGetName(gpWhiteTexture)[0] = '@';
 		RwTextureSetFilterMode(gpWhiteTexture, rwFILTERLINEAR);
-	}
+	}*/
 	CTxdStore::PopCurrentTxd();
 }
 
 void
 CVehicleModelInfo::ShutdownEnvironmentMaps(void)
 {
+/*
 	RwTextureDestroy(gpWhiteTexture);
 	gpWhiteTexture = nil;
 	RwFrameDestroy(pMatFxIdentityFrame);
 	pMatFxIdentityFrame = nil;
+*/
 }
 
 int

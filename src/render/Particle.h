@@ -18,11 +18,6 @@ public:
 	uint32    m_nTimeWhenWillBeDestroyed;
 	uint32    m_nTimeWhenColorWillBeChanged;
 	float     m_fZGround;
-	CVector   m_vecParticleMovementOffset;
-	int16     m_nCurrentZRotation;
-	uint16    m_nZRotationTimer;
-	float     m_fCurrentZRadius;
-	uint16    m_nZRadiusTimer;
 	uint8     m_nColorIntensity;
 	uint8     m_nAlpha;
 	float     m_fSize;
@@ -35,12 +30,20 @@ public:
 	uint8     m_nCurrentFrame;
 	RwRGBA    m_Color;
 	CParticle *m_pNext;
+
+	//CVector   m_vecParticleMovementOffset;
+	//int16     m_nCurrentZRotation;
+	//uint16    m_nZRotationTimer;
+	//float     m_fCurrentZRadius;
+	//uint16    m_nZRadiusTimer;
 	
+	int32     field_4C;
+
 	CParticle()
 	{
 		;
 	}
-	
+		
 	~CParticle()
 	{
 		;
@@ -97,12 +100,9 @@ public:
 	static void HandleShootableBirdsStuff(CEntity *entity, CVector const&camPos);
 };
 
-extern bool clearWaterDrop;
-extern int32 numWaterDropOnScreen;
 extern RwRaster *gpCarSplashRaster[];
 extern RwRaster *gpHeatHazeRaster;
-extern RwRaster *gpDotRaster;
 extern RwRaster *gpRainDripRaster[];
 extern RwRaster *gpRainDripDarkRaster[];
 
-VALIDATE_SIZE(CParticle, 0x58);
+VALIDATE_SIZE(CParticle, 0x50);

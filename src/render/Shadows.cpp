@@ -76,14 +76,14 @@ CShadows::Init(void)
 	gpShadowBikeTex       = RwTextureRead("shad_bike",    nil);
 	gpShadowBaronTex      = RwTextureRead("shad_rcbaron", nil);
 	gpShadowExplosionTex  = RwTextureRead("shad_exp",     nil);
-	gpShadowHeadLightsTex = RwTextureRead("headlight",    nil);
+	gpShadowHeadLightsTex = RwTextureRead("headlight_single",    nil);
 	gpOutline1Tex         = RwTextureRead("outline_64",   nil);
 	gpOutline2Tex         = RwTextureRead("outline2_64",  nil);
 	gpOutline3Tex         = RwTextureRead("outline3_64",  nil);
 	gpBloodPoolTex        = RwTextureRead("bloodpool_64", nil);
-	gpReflectionTex       = RwTextureRead("reflection01", nil);
+	//gpReflectionTex       = RwTextureRead("reflection01", nil);
 	gpWalkDontTex         = RwTextureRead("walk_dont",    nil);
-	gpCrackedGlassTex     = RwTextureRead("wincrack_32",  nil);
+	//gpCrackedGlassTex     = RwTextureRead("wincrack_32",  nil);
 	gpPostShadowTex       = RwTextureRead("lamp_shad_64", nil);
 
 	CTxdStore::PopCurrentTxd();
@@ -99,9 +99,9 @@ CShadows::Init(void)
 	ASSERT(gpOutline2Tex != nil);
 	ASSERT(gpOutline3Tex != nil);
 	ASSERT(gpBloodPoolTex != nil);
-	ASSERT(gpReflectionTex != nil);
+	//ASSERT(gpReflectionTex != nil);
 	ASSERT(gpWalkDontTex != nil);
-	ASSERT(gpCrackedGlassTex != nil);
+	//ASSERT(gpCrackedGlassTex != nil);
 	ASSERT(gpPostShadowTex != nil);
 
 
@@ -178,9 +178,9 @@ CShadows::Shutdown(void)
 	ASSERT(gpOutline2Tex != nil);
 	ASSERT(gpOutline3Tex != nil);
 	ASSERT(gpBloodPoolTex != nil);
-	ASSERT(gpReflectionTex != nil);
+	//ASSERT(gpReflectionTex != nil);
 	ASSERT(gpWalkDontTex != nil);
-	ASSERT(gpCrackedGlassTex != nil);
+	//ASSERT(gpCrackedGlassTex != nil);
 	ASSERT(gpPostShadowTex != nil);
 
 	RwTextureDestroy(gpShadowCarTex);
@@ -194,9 +194,9 @@ CShadows::Shutdown(void)
 	RwTextureDestroy(gpOutline2Tex);
 	RwTextureDestroy(gpOutline3Tex);
 	RwTextureDestroy(gpBloodPoolTex);
-	RwTextureDestroy(gpReflectionTex);
+	//RwTextureDestroy(gpReflectionTex);
 	RwTextureDestroy(gpWalkDontTex);
-	RwTextureDestroy(gpCrackedGlassTex);
+	//RwTextureDestroy(gpCrackedGlassTex);
 	RwTextureDestroy(gpPostShadowTex);
 }
 

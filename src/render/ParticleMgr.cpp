@@ -4,18 +4,30 @@
 #include "FileMgr.h"
 #include "ParticleMgr.h"
 
+// --LCS: File done
+
 cParticleSystemMgr mod_ParticleSystemManager;
 
 const char *ParticleFilename = "PARTICLE.CFG";
 
 cParticleSystemMgr::cParticleSystemMgr()
 {
-	memset(this, 0, sizeof(*this));
+#ifdef FIX_BUGS
+	m_aParticles = nil;
+#endif
+}
+
+cParticleSystemMgr::~cParticleSystemMgr()
+{
+#ifdef FIX_BUGS
+	delete [] m_aParticles;
+#endif
 }
 
 void cParticleSystemMgr::Initialise()
 {
-	LoadParticleData();
+	if ( gMakeResources )
+		LoadParticleData();
 	
 	for ( int32 i = 0; i < MAX_PARTICLES; i++ )
 		m_aParticles[i].m_pParticles = nil;
@@ -23,20 +35,30 @@ void cParticleSystemMgr::Initialise()
 
 void cParticleSystemMgr::LoadParticleData()
 {
-	CFileMgr::SetDir("DATA");
-	CFileMgr::LoadFile(ParticleFilename, work_buff, ARRAY_SIZE(work_buff), "r");
+#ifdef FIX_BUGS
+	delete [] m_aParticles;
+#endif
+	m_aParticles = new tParticleSystemData[MAX_PARTICLES];
+	
+	memset(m_aParticles, 0, sizeof(tParticleSystemData)*MAX_PARTICLES);
+	
+	CFileMgr::SetDir("Data");
+	ssize_t len = CFileMgr::LoadFile(ParticleFilename, work_buff, ARRAY_SIZE(work_buff), "r");
 	CFileMgr::SetDir("");
+	
+	ASSERT(!(len <= 0));
 	
 	tParticleSystemData *entry = nil;
 	int32 type = PARTICLE_FIRST;
 	
+	char *buffEnd = (char *)&work_buff[len];
 	char *lineStart = (char *)work_buff;
 	char *lineEnd = lineStart + 1;
 	
 	char line[500];
 	char delims[4];
 
-	while ( true )
+	while ( lineStart < buffEnd )
 	{
 		ASSERT(lineStart != nil);
 		ASSERT(lineEnd != nil);

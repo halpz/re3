@@ -1724,7 +1724,7 @@ CBike::PreRender(void)
 						   TheCamera.GetLookDirection() == LOOKING_RIGHT)
 							pos1 -= 0.2f*GetForward();
 
-						CParticle::AddParticle(PARTICLE_HEATHAZE, pos1, CVector(0.0f, 0.0f, 0.0f));
+						//CParticle::AddParticle(PARTICLE_HEATHAZE, pos1, CVector(0.0f, 0.0f, 0.0f));
 					}
 				}
 			}
