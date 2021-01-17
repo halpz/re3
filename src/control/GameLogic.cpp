@@ -393,7 +393,7 @@ CGameLogic::RestorePlayerStuffDuringResurrection(CPlayerPed *pPlayerPed, CVector
 	CWorld::Add(pPlayerPed);
 	CHud::ResetWastedText();
 	CStreaming::StreamZoneModels(pos);
-	clearWaterDrop = true;
+	//clearWaterDrop = true;
 }
 
 void

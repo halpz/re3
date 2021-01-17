@@ -330,6 +330,7 @@ void CWeather::Update(void)
 
 void CWeather::AddHeatHaze()
 {
+	/*
 	if(TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOPDOWN ||
 	   TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_TOP_DOWN_PED)
 		return;
@@ -341,6 +342,7 @@ void CWeather::AddHeatHaze()
 		pos.y = CGeneral::GetRandomNumberInRange(SCREEN_HEIGHT*0.4f, SCREEN_HEIGHT*0.9f);
 	pos.z = 100.0f;
 	CParticle::AddParticle(PARTICLE_HEATHAZE_IN_DIST, pos, CVector(0.0f, 0.0f, 0.0f));
+	*/
 }
 
 void CWeather::AddBeastie()

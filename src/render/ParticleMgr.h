@@ -124,15 +124,18 @@ class cParticleSystemMgr
 	};
 
 public:
-	tParticleSystemData m_aParticles[MAX_PARTICLES];
+	tParticleSystemData *m_aParticles;//[MAX_PARTICLES];
 
 	cParticleSystemMgr();
+#ifdef FIX_BUGS
+	~cParticleSystemMgr();
+#endif
 
 	void Initialise();
 	void LoadParticleData();
 	void RangeCheck(tParticleSystemData *pData) { }
 };
 
-VALIDATE_SIZE(cParticleSystemMgr, 0x2FFC);
+VALIDATE_SIZE(cParticleSystemMgr, 0x4);
 
 extern cParticleSystemMgr mod_ParticleSystemManager;
