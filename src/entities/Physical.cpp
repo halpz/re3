@@ -547,21 +547,21 @@ CPhysical::ApplyGravity(void)
 		return;
 #ifdef WALLCLIMB_CHEAT
 	if (gGravityCheat && this == FindPlayerVehicle()) {
-		static CVector v1(0.0f, 0.0f, 1.0f), v2(0.0f, 0.0f, 1.0f);
-		CVector prop = GetPosition() - (GetUp() + GetUp());
+		static CVector gravityUp(0.0f, 0.0f, 1.0f), surfaceUp(0.0f, 0.0f, 1.0f);
+		CVector belowCar = GetPosition() - 2.0f*GetUp();
 		CColPoint point;
 		CEntity* entity;
-		if (CWorld::ProcessLineOfSight(GetPosition(), prop, point, entity, true, false, false, false, false, false))
-			v2 = point.normal;
+		if (CWorld::ProcessLineOfSight(GetPosition(), belowCar, point, entity, true, false, false, false, false, false))
+			surfaceUp = point.normal;
 		else
-			v2 = CVector(0.0f, 0.0f, 1.0f);
-		float coef = clamp(CTimer::GetTimeStep() * 0.5f, 0.05f, 0.8f);
-		v1 = v1 * (1.0f - coef) + v2 * coef;
-		if (v1.MagnitudeSqr() < 0.1f)
-			v1 = CVector(0.0f, 0.0f, 1.0f);
+			surfaceUp = CVector(0.0f, 0.0f, 1.0f);
+		float t = clamp(CTimer::GetTimeStep() * 0.5f, 0.05f, 0.8f);
+		gravityUp = gravityUp * (1.0f - t) + surfaceUp * t;
+		if (gravityUp.MagnitudeSqr() < 0.1f)
+			gravityUp = CVector(0.0f, 0.0f, 1.0f);
 		else
-			v1.Normalise();
-		m_vecMoveSpeed -= GRAVITY * CTimer::GetTimeStep() * v1;
+			gravityUp.Normalise();
+		m_vecMoveSpeed -= GRAVITY * CTimer::GetTimeStep() * gravityUp;
 		return;
 	}
 #endif

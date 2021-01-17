@@ -273,7 +273,7 @@ public:
 	tBikeHandlingData *GetBikePointer(uint8 id) { return &BikeHandlingData[id-HANDLING_BIKE]; }
 	tFlyingHandlingData *GetFlyingPointer(uint8 id);
 	tBoatHandlingData *GetBoatPointer(uint8 id);
-	bool HasRearWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType == 'R'; }
-	bool HasFrontWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType == 'F'; }
+	bool HasRearWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType != 'F'; }
+	bool HasFrontWheelDrive(tVehicleType id) { return HandlingData[id].Transmission.nDriveType != 'R'; }
 };
 extern cHandlingDataMgr mod_HandlingManager;
