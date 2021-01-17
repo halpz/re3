@@ -904,9 +904,14 @@ void CParticle::Shutdown()
 	{
 		RwTextureDestroy(gpRainDripTex[i]);
 		gpRainDripTex[i] = nil;
-		
-		RwTextureDestroy(gpRainDripDarkTex[i]); // hmm, i think gpRainDripDarkTex[1(one)] can crash, let's wait for report hehe
-		gpRainDripDarkTex[i] = nil;
+
+#ifdef FIX_BUGS
+		if (gpRainDripDarkTex[i])
+#endif
+		{
+			RwTextureDestroy(gpRainDripDarkTex[i]);
+			gpRainDripDarkTex[i] = nil;
+		}
 	}
 	
 	RwTextureDestroy(gpBoatWakeTex);
