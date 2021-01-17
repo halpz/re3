@@ -406,7 +406,7 @@ public:
 	float m_fCollisionSpeed;
 
 	// cf. https://github.com/DK22Pac/plugin-sdk/blob/master/plugin_sa/game_sa/CPed.h from R*
-	uint32 bIsStanding : 1;
+	uint32 bIsStanding : 1; // 0x194 on PS2, 0x1A4 on android
 	uint32 bWasStanding : 1;
 	uint32 bIsAttacking : 1;		// doesn't reset after fist fight
 	uint32 bIsPointingGunAt : 1;
@@ -499,7 +499,7 @@ public:
 	uint32 bIsDrowning : 1;
 	uint32 bDrownsInWater : 1;
 	uint32 bWaitForLeaderToComeCloser : 1;
-	uint32 bHeldHostageInCar : 1;
+	uint32 bHeldHostageInCar : 1; // one flag was added somewhere after this one (TODO: figure out where and which)
 	uint32 bIsPlayerFriend : 1;
 	uint32 bHeadStuckInCollision : 1;
 	uint32 bDeadPedInFrontOfCar : 1;
@@ -512,7 +512,7 @@ public:
 	uint32 bMakeFleeScream : 1;
 	uint32 bPushedAlongByCar : 1;
 	uint32 bRemoveMeWhenIGotIntoCar : 1;
-	uint32 bIgnoreThreatsBehindObjects : 1;
+	uint32 bIgnoreThreatsBehindObjects : 1; // one flag was added somewhere before this one (TODO: figure out where and which)
 
 	uint32 bNeverEverTargetThisPed : 1;
 	uint32 bCrouchWhenScared : 1;
@@ -523,8 +523,8 @@ public:
 	uint32 bDonePositionOutOfCollision : 1;
 
 	uint32 bCanAttackPlayerWithCops : 1; // 1A1_1 on PS2
-	uint32 b1A1_2 : 1;
-	uint32 b1A1_4 : 1;
+	uint32 bOnlyAllowedToSitBehind : 1;
+	uint32 bOnlyAllowedToSitInFront : 1;
 	uint32 b1A1_8 : 1;
 	uint32 b1A1_10 : 1;
 	uint32 b1A1_20 : 1;
@@ -534,11 +534,29 @@ public:
 	uint32 m_ped_flagI80 : 1; // KANGAROO_CHEAT define makes use of this as cheat toggle 
 #endif
 
-	uint8 m_gangFlags;
-	uint8 m_unused15D; // these 3 can't be padding but had to actually have been members ...
-	uint8 m_unused15E;
-	uint8 m_unused15F;
-	uint8 CharCreatedBy;
+	uint16 m_gangFlags; // <- this one is uint16
+
+	uint8 b1A4_1 : 1;
+	uint8 b1A4_2 : 1;
+	uint8 b1A4_4 : 1;
+	uint8 b1A4_8 : 1;
+	uint8 b1A4_10 : 1;
+	uint8 b1A4_20 : 1;
+	uint8 b1A4_40 : 1;
+	uint8 b1A4_80 : 1;
+
+	uint8 b1A5_1 : 1;
+	uint8 b1A5_2 : 1;
+	uint8 b1A5_4 : 1;
+	uint8 b1A5_8 : 1;
+	uint8 b1A5_10 : 1;
+	uint8 b1A5_20 : 1;
+	uint8 b1A5_40 : 1;
+	uint8 b1A5_80 : 1;
+
+	uint8 unk_1A6; // <- init with 100 in constructor
+
+	uint8 CharCreatedBy; // 1AC
 	eObjective m_objective;
 	eObjective m_prevObjective;
 	CPed *m_pedInObjective;
@@ -888,6 +906,7 @@ public:
 	void SetSolicit(uint32 time);
 	void ScanForInterestingStuff(void);
 	void WarpPedIntoCar(CVehicle*);
+	void WarpPedIntoCarAsPassenger(CVehicle*, int32);
 	void SetCarJack(CVehicle*);
 	bool WarpPedToNearLeaderOffScreen(void);
 	void Solicit(void);
@@ -1041,6 +1060,16 @@ public:
 	bool IsNotInWreckedVehicle()
 	{
 		return m_pMyVehicle != nil && ((CEntity*)m_pMyVehicle)->GetStatus() != STATUS_WRECKED;
+	}
+	bool CanStartMission() // used in CAN_PLAYER_START_MISSION and can looks like inlined function
+	{
+		if (m_nPedState >= PED_WANDER_RANGE && m_nPedState < PED_STATES_NO_AI && m_nPedState != PED_ANSWER_MOBILE)
+			return false;
+		if (m_nPedState >= PED_JUMP && m_nPedState < PED_STATES_NO_ST)
+			return false;
+		if (m_nPedState >= PED_ENTER_TRAIN && m_nPedState < PED_DEPLOY_STINGER)
+			return false;
+		return !bIsInTheAir && !bIsLanding && m_fHealth > 0.0f;
 	}
 
 	// My names. Inlined in VC

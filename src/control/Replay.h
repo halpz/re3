@@ -46,7 +46,7 @@ enum {
 
 struct CStoredDetailedAnimationState
 {
-	uint8 aAnimId[NUM_MAIN_ANIMS_IN_REPLAY];
+	uint16 aAnimId[NUM_MAIN_ANIMS_IN_REPLAY];
 	uint8 aCurTime[NUM_MAIN_ANIMS_IN_REPLAY];
 	uint8 aSpeed[NUM_MAIN_ANIMS_IN_REPLAY];
 	uint8 aBlendAmount[NUM_MAIN_ANIMS_IN_REPLAY];
@@ -54,7 +54,7 @@ struct CStoredDetailedAnimationState
 	uint8 aFunctionCallbackID[NUM_MAIN_ANIMS_IN_REPLAY];
 	uint16 aFlags[NUM_MAIN_ANIMS_IN_REPLAY];
 	uint8 aGroupId[NUM_MAIN_ANIMS_IN_REPLAY];
-	uint8 aAnimId2[NUM_PARTIAL_ANIMS_IN_REPLAY];
+	uint16 aAnimId2[NUM_PARTIAL_ANIMS_IN_REPLAY];
 	uint8 aCurTime2[NUM_PARTIAL_ANIMS_IN_REPLAY];
 	uint8 aSpeed2[NUM_PARTIAL_ANIMS_IN_REPLAY];
 	uint8 aBlendAmount2[NUM_PARTIAL_ANIMS_IN_REPLAY];
