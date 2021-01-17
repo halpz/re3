@@ -592,7 +592,7 @@ CAutomobile::ProcessControl(void)
 		float fwdSpeed = Abs(DotProduct(m_vecMoveSpeed, GetForward()));
 		CVector contactPoints[4];	// relative to model
 		CVector contactSpeeds[4];	// speed at contact points
-		CVector springDirections[4];	// normalized, in model space
+		CVector springDirections[4];	// normalized, in world space
 
 		for(i = 0; i < 4; i++){
 			// Set spring under certain circumstances
@@ -759,10 +759,10 @@ CAutomobile::ProcessControl(void)
 			CVector wheelRight = Multiply3x3(GetMatrix(), CVector(c, s, 0.0f));
 
 			if(m_aWheelTimer[CARWHEEL_FRONT_LEFT] > 0.0f){
-				if(mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier))
-					fThrust = 0.0f;
-				else
+				if(mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier))
 					fThrust = acceleration;
+				else
+					fThrust = 0.0f;
 
 				m_aWheelColPoints[CARWHEEL_FRONT_LEFT].surfaceA = SURFACE_WHEELBASE;
 				float adhesion = CSurfaceTable::GetAdhesiveLimit(m_aWheelColPoints[CARWHEEL_FRONT_LEFT])*traction;
@@ -793,10 +793,10 @@ CAutomobile::ProcessControl(void)
 			}
 
 			if(m_aWheelTimer[CARWHEEL_FRONT_RIGHT] > 0.0f){
-				if(mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier))
-					fThrust = 0.0f;
-				else
+				if(mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier))
 					fThrust = acceleration;
+				else
+					fThrust = 0.0f;
 
 				m_aWheelColPoints[CARWHEEL_FRONT_RIGHT].surfaceA = SURFACE_WHEELBASE;
 				float adhesion = CSurfaceTable::GetAdhesiveLimit(m_aWheelColPoints[CARWHEEL_FRONT_RIGHT])*traction;
@@ -830,9 +830,7 @@ CAutomobile::ProcessControl(void)
 		// Process front wheels off ground
 
 		if(m_aWheelTimer[CARWHEEL_FRONT_LEFT] <= 0.0f){
-			if(mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier) || acceleration == 0.0f)
-				m_aWheelSpeed[CARWHEEL_FRONT_LEFT] *= 0.95f;
-			else{
+			if(mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier) && acceleration != 0.0f){
 				if(acceleration > 0.0f){
 					if(m_aWheelSpeed[CARWHEEL_FRONT_LEFT] < 2.0f)
 						m_aWheelSpeed[CARWHEEL_FRONT_LEFT] -= 0.2f;
@@ -840,13 +838,13 @@ CAutomobile::ProcessControl(void)
 					if(m_aWheelSpeed[CARWHEEL_FRONT_LEFT] > -2.0f)
 						m_aWheelSpeed[CARWHEEL_FRONT_LEFT] += 0.1f;
 				}
+			}else{
+				m_aWheelSpeed[CARWHEEL_FRONT_LEFT] *= 0.95f;
 			}
 			m_aWheelRotation[CARWHEEL_FRONT_LEFT] += m_aWheelSpeed[CARWHEEL_FRONT_LEFT];
 		}
 		if(m_aWheelTimer[CARWHEEL_FRONT_RIGHT] <= 0.0f){
-			if(mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier) || acceleration == 0.0f)
-				m_aWheelSpeed[CARWHEEL_FRONT_RIGHT] *= 0.95f;
-			else{
+			if(mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier) && acceleration != 0.0f){
 				if(acceleration > 0.0f){
 					if(m_aWheelSpeed[CARWHEEL_FRONT_RIGHT] < 2.0f)
 						m_aWheelSpeed[CARWHEEL_FRONT_RIGHT] -= 0.2f;
@@ -854,6 +852,8 @@ CAutomobile::ProcessControl(void)
 					if(m_aWheelSpeed[CARWHEEL_FRONT_RIGHT] > -2.0f)
 						m_aWheelSpeed[CARWHEEL_FRONT_RIGHT] += 0.1f;
 				}
+			}else{
+				m_aWheelSpeed[CARWHEEL_FRONT_RIGHT] *= 0.95f;
 			}
 			m_aWheelRotation[CARWHEEL_FRONT_RIGHT] += m_aWheelSpeed[CARWHEEL_FRONT_RIGHT];
 		}
@@ -874,10 +874,10 @@ CAutomobile::ProcessControl(void)
 #endif
 
 			if(m_aWheelTimer[CARWHEEL_REAR_LEFT] > 0.0f){
-				if(mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier))
-					fThrust = 0.0f;
-				else
+				if(mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier))
 					fThrust = acceleration;
+				else
+					fThrust = 0.0f;
 
 				m_aWheelColPoints[CARWHEEL_REAR_LEFT].surfaceA = SURFACE_WHEELBASE;
 				float adhesion = CSurfaceTable::GetAdhesiveLimit(m_aWheelColPoints[CARWHEEL_REAR_LEFT])*traction;
@@ -908,10 +908,10 @@ CAutomobile::ProcessControl(void)
 			}
 
 			if(m_aWheelTimer[CARWHEEL_REAR_RIGHT] > 0.0f){
-				if(mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier))
-					fThrust = 0.0f;
-				else
+				if(mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier))
 					fThrust = acceleration;
+				else
+					fThrust = 0.0f;
 
 				m_aWheelColPoints[CARWHEEL_REAR_RIGHT].surfaceA = SURFACE_WHEELBASE;
 				float adhesion = CSurfaceTable::GetAdhesiveLimit(m_aWheelColPoints[CARWHEEL_REAR_RIGHT])*traction;
@@ -945,9 +945,7 @@ CAutomobile::ProcessControl(void)
 		// Process rear wheels off ground
 
 		if(m_aWheelTimer[CARWHEEL_REAR_LEFT] <= 0.0f){
-			if(mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier) || acceleration == 0.0f)
-				m_aWheelSpeed[CARWHEEL_REAR_LEFT] *= 0.95f;
-			else{
+			if(mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier) && acceleration != 0.0f){
 				if(acceleration > 0.0f){
 					if(m_aWheelSpeed[CARWHEEL_REAR_LEFT] < 2.0f)
 						m_aWheelSpeed[CARWHEEL_REAR_LEFT] -= 0.2f;
@@ -955,13 +953,13 @@ CAutomobile::ProcessControl(void)
 					if(m_aWheelSpeed[CARWHEEL_REAR_LEFT] > -2.0f)
 						m_aWheelSpeed[CARWHEEL_REAR_LEFT] += 0.1f;
 				}
+			}else{
+				m_aWheelSpeed[CARWHEEL_REAR_LEFT] *= 0.95f;
 			}
 			m_aWheelRotation[CARWHEEL_REAR_LEFT] += m_aWheelSpeed[CARWHEEL_REAR_LEFT];
 		}
 		if(m_aWheelTimer[CARWHEEL_REAR_RIGHT] <= 0.0f){
-			if(mod_HandlingManager.HasFrontWheelDrive(pHandling->nIdentifier) || acceleration == 0.0f)
-				m_aWheelSpeed[CARWHEEL_REAR_RIGHT] *= 0.95f;
-			else{
+			if(mod_HandlingManager.HasRearWheelDrive(pHandling->nIdentifier) && acceleration != 0.0f){
 				if(acceleration > 0.0f){
 					if(m_aWheelSpeed[CARWHEEL_REAR_RIGHT] < 2.0f)
 						m_aWheelSpeed[CARWHEEL_REAR_RIGHT] -= 0.2f;
@@ -969,6 +967,8 @@ CAutomobile::ProcessControl(void)
 					if(m_aWheelSpeed[CARWHEEL_REAR_RIGHT] > -2.0f)
 						m_aWheelSpeed[CARWHEEL_REAR_RIGHT] += 0.1f;
 				}
+			}else{
+				m_aWheelSpeed[CARWHEEL_REAR_RIGHT] *= 0.95f;
 			}
 			m_aWheelRotation[CARWHEEL_REAR_RIGHT] += m_aWheelSpeed[CARWHEEL_REAR_RIGHT];
 		}
