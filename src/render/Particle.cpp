@@ -531,7 +531,7 @@ void CParticle::Initialise()
 				break;
 				
 			case PARTICLE_WHEEL_DIRT:
-				entry->m_ppRaster = &gpRubberRaster[4];
+				entry->m_ppRaster = &gpSmoke2Raster;
 				break;
 				
 			case PARTICLE_SAND:
@@ -597,15 +597,15 @@ void CParticle::Initialise()
 			case PARTICLE_CIGARETTE_SMOKE:
 				entry->m_ppRaster = &gpGunSmokeRaster;
 				break;
-				
+			
+			case PARTICLE_TEARGAS:
+				entry->m_ppRaster = &gpHeatHazeRaster;
+				break;
+
 			case PARTICLE_SMOKE:
 			case PARTICLE_SMOKE_SLOWMOTION:
 			case PARTICLE_DRY_ICE:
 				entry->m_ppRaster = gpSmokeRaster;
-				break;
-				
-			case PARTICLE_TEARGAS:
-				entry->m_ppRaster = &gpHeatHazeRaster;
 				break;
 			
 			case PARTICLE_GARAGEPAINT_SPRAY:
@@ -662,6 +662,10 @@ void CParticle::Initialise()
 			
 			case PARTICLE_WATERSPRAY:
 				entry->m_ppRaster = gpWatersprayRaster;
+				break;
+			
+			case PARTICLE_RAINDROP_2D:
+				entry->m_ppRaster = &gpRainDropRaster;
 				break;
 		
 			case PARTICLE_EXPLOSION_MEDIUM:
@@ -725,7 +729,7 @@ void CParticle::Initialise()
 				break;
 			
 			case PARTICLE_ENGINE_SMOKE:
-				entry->m_ppRaster = &gpSmokeRaster[4];
+				entry->m_ppRaster = &gpCloudRaster4;
 				break;
 			
 			case PARTICLE_ENGINE_SMOKE2:
@@ -734,7 +738,7 @@ void CParticle::Initialise()
 				break;
 			
 			case PARTICLE_CARFLAME_SMOKE:
-				entry->m_ppRaster= &gpCloudRaster4;
+				entry->m_ppRaster = &gpCloudRaster4;
 				break;
 			
 			case PARTICLE_FIREBALL_SMOKE:
@@ -780,7 +784,7 @@ void CParticle::Initialise()
 				break;
 			
 			case PARTICLE_GUNSHELL:
-				entry->m_ppRaster= &gpGunShellRaster;
+				entry->m_ppRaster = &gpGunShellRaster;
 				break;
 			
 			case PARTICLE_GUNSHELL_BUMP1:
@@ -792,7 +796,7 @@ void CParticle::Initialise()
 				break;
 			
 			case PARTICLE_TEST:
-				entry->m_ppRaster = &gpSmokeRaster[4];
+				entry->m_ppRaster = &gpCloudRaster4;
 				break;
 			
 			case PARTICLE_BIRD_FRONT:
@@ -800,23 +804,19 @@ void CParticle::Initialise()
 				break;
 			
 			case PARTICLE_SHIP_SIDE:
-				entry->m_ppRaster= gpBoatRaster;
+				entry->m_ppRaster = gpBoatRaster;
 				break;
 			
 			case PARTICLE_BEASTIE:
 				entry->m_ppRaster = &gpBeastieRaster;
 				break;
 			
-			case PARTICLE_RAINDROP_2D:
-				entry->m_ppRaster= &gpRainDropRaster;
-				break;
-			
 			case PARTICLE_FERRY_CHIM_SMOKE:
-				entry->m_ppRaster= gpSmokeRaster;
+				entry->m_ppRaster = gpSmokeRaster;
 				break;
 			
 			case PARTICLE_MULTIPLAYER_HIT:
-				entry->m_ppRaster= &gpMultiPlayerHitRaster;
+				entry->m_ppRaster = &gpMultiPlayerHitRaster;
 				break;
 		}
 	}
@@ -904,9 +904,14 @@ void CParticle::Shutdown()
 	{
 		RwTextureDestroy(gpRainDripTex[i]);
 		gpRainDripTex[i] = nil;
-		
-		RwTextureDestroy(gpRainDripDarkTex[i]); // hmm, i think gpRainDripDarkTex[1(one)] can crash, let's wait for report hehe
-		gpRainDripDarkTex[i] = nil;
+
+#ifdef FIX_BUGS
+		if (gpRainDripDarkTex[i])
+#endif
+		{
+			RwTextureDestroy(gpRainDripDarkTex[i]);
+			gpRainDripDarkTex[i] = nil;
+		}
 	}
 	
 	RwTextureDestroy(gpBoatWakeTex);
