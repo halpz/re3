@@ -334,6 +334,9 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		float fSteerLR = CPad::GetPad(0)->GetSteeringLeftRight() / 128.0f;
 		float fSteerUD = -CPad::GetPad(0)->GetSteeringUpDown() / 128.0f;
 		float fGunUD = Abs(CPad::GetPad(0)->GetCarGunUpDown());
+#ifdef FREE_CAM
+		if(!CCamera::bFreeCam || (CCamera::bFreeCam && !CPad::IsAffectedByController))
+#endif
 		if(fGunUD > 1.0f)
 			fSteerUD = -CPad::GetPad(0)->GetCarGunUpDown() / 128.0f;
 
@@ -507,9 +510,15 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 			fYaw = CPad::GetPad(0)->GetLookRight();
 			if (CPad::GetPad(0)->GetLookLeft())
 				fYaw = -1.0f;
+#ifdef FREE_CAM
+			if (!CCamera::bFreeCam || (CCamera::bFreeCam && !CPad::IsAffectedByController))
+#endif
 			if(Abs(CPad::GetPad(0)->GetCarGunLeftRight()) > 1.0f)
 				fYaw = CPad::GetPad(0)->GetCarGunLeftRight() / 128.0f;
 		}
+#ifdef FREE_CAM
+		if(!CCamera::bFreeCam || (CCamera::bFreeCam && !CPad::IsAffectedByController))
+#endif
 		if(Abs(CPad::GetPad(0)->GetCarGunUpDown()) > 1.0f)
 			fPitch = -CPad::GetPad(0)->GetCarGunUpDown() / 128.0f;
 		if (CPad::GetPad(0)->GetHorn()) {

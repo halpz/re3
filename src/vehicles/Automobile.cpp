@@ -1424,7 +1424,12 @@ CAutomobile::ProcessControl(void)
 					if (GetModelIndex() == MI_RCRAIDER || GetModelIndex() == MI_RCGOBLIN)
 						FlyingControl(FLIGHT_MODEL_RCHELI);
 					else if (m_nWheelsOnGround < 4 && !(GetModelIndex() == MI_SEASPAR && bTouchingWater) ||
-						CPad::GetPad(0)->GetAccelerate() != 0 || CPad::GetPad(0)->GetCarGunUpDown() > 1.0f ||
+						CPad::GetPad(0)->GetAccelerate() != 0 ||
+#ifndef FREE_CAM
+						CPad::GetPad(0)->GetCarGunUpDown() > 1.0f ||
+#else
+						((!CCamera::bFreeCam || (CCamera::bFreeCam && !CPad::IsAffectedByController)) && CPad::GetPad(0)->GetCarGunUpDown() > 1.0f) ||
+#endif
 						Abs(m_vecMoveSpeed.x) > 0.02f ||
 						Abs(m_vecMoveSpeed.y) > 0.02f ||
 						Abs(m_vecMoveSpeed.z) > 0.02f)
