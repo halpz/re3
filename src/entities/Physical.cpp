@@ -21,11 +21,7 @@
 #include "Pickups.h"
 #include "Physical.h"
 
-//--MIAMI: file done
-
-#ifdef WALLCLIMB_CHEAT
 bool gGravityCheat;
-#endif
 
 
 CPhysical::CPhysical(void)
@@ -359,7 +355,7 @@ CPhysical::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 	return numSpheres;
 }
 
-// --MIAMI: Proof-read once
+//--LCS: done
 void
 CPhysical::ProcessControl(void)
 {
@@ -427,7 +423,7 @@ CPhysical::GetSpeed(const CVector &r)
 	return m_vecMoveSpeed + m_vecMoveFriction + CrossProduct(m_vecTurnFriction + m_vecTurnSpeed, r);
 }
 
-// --MIAMI: Proof-read once
+//--LCS: done
 void
 CPhysical::ApplyMoveSpeed(void)
 {
@@ -437,13 +433,13 @@ CPhysical::ApplyMoveSpeed(void)
 		GetMatrix().Translate(m_vecMoveSpeed * CTimer::GetTimeStep());
 }
 
-// --MIAMI: Proof-read once
+//--LCS: done
 void
 CPhysical::ApplyTurnSpeed(void)
 {
 	if(bIsFrozen){
 		m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
-	}else{
+	}else if(!m_vecTurnSpeed.IsZero()){
 		// Move the coordinate axes by their speed
 		// Note that this denormalizes the matrix
 		CVector turnvec = m_vecTurnSpeed*CTimer::GetTimeStep();
@@ -453,29 +449,36 @@ CPhysical::ApplyTurnSpeed(void)
 	}
 }
 
-// --MIAMI: Proof-read once
+//--LCS: done
 void
 CPhysical::ApplyMoveForce(float jx, float jy, float jz)
 {
 	m_vecMoveSpeed += CVector(jx, jy, jz)*(1.0f/m_fMass);
+	m_vecTurnSpeed.x = clamp(m_vecTurnSpeed.x, -4.0f, 4.0f);
+	m_vecTurnSpeed.y = clamp(m_vecTurnSpeed.y, -4.0f, 4.0f);
+	m_vecTurnSpeed.z = clamp(m_vecTurnSpeed.z, -4.0f, 4.0f);
 }
 
-// --MIAMI: Proof-read once
+//--LCS: done
 void
 CPhysical::ApplyTurnForce(float jx, float jy, float jz, float px, float py, float pz)
 {
 	CVector com = Multiply3x3(m_matrix, m_vecCentreOfMass);
 	CVector turnimpulse = CrossProduct(CVector(px, py, pz)-com, CVector(jx, jy, jz));
 	m_vecTurnSpeed += turnimpulse*(1.0f/m_fTurnMass);
+	m_vecTurnSpeed.x = clamp(m_vecTurnSpeed.x, -4.0f, 4.0f);
+	m_vecTurnSpeed.y = clamp(m_vecTurnSpeed.y, -4.0f, 4.0f);
+	m_vecTurnSpeed.z = clamp(m_vecTurnSpeed.z, -4.0f, 4.0f);
 }
 
+//--LCS: done
 void
 CPhysical::ApplyFrictionMoveForce(float jx, float jy, float jz)
 {
 	m_vecMoveFriction += CVector(jx, jy, jz)*(1.0f/m_fMass);
 }
 
-// --MIAMI: Proof-read once
+//--LCS: done
 void
 CPhysical::ApplyFrictionTurnForce(float jx, float jy, float jz, float px, float py, float pz)
 {
@@ -484,7 +487,7 @@ CPhysical::ApplyFrictionTurnForce(float jx, float jy, float jz, float px, float 
 	m_vecTurnFriction += turnimpulse*(1.0f/m_fTurnMass);
 }
 
-// --MIAMI: Proof-read once
+//--LCS: done
 bool
 CPhysical::ApplySpringCollision(float springConst, CVector &springDir, CVector &point, float springRatio, float bias)
 {
@@ -498,16 +501,16 @@ CPhysical::ApplySpringCollision(float springConst, CVector &springDir, CVector &
 	return true;
 }
 
-// --MIAMI: Proof-read once
+//--LCS: done
 bool
-CPhysical::ApplySpringCollisionAlt(float springConst, CVector &springDir, CVector &point, float springRatio, float bias, CVector &forceDir)
+CPhysical::ApplySpringCollisionAlt(float springConst, CVector &springDir, CVector &point, float springRatio, float bias, CVector &forceDir, float &impulse)
 {
 	float compression = 1.0f - springRatio;
 	if(compression > 0.0f){
 		if(DotProduct(springDir, forceDir) > 0.0f)
 			forceDir *= -1.0f;
 		float step = Min(CTimer::GetTimeStep(), 3.0f);
-		float impulse = GRAVITY*m_fMass*step * springConst * compression * bias*2.0f;
+		impulse = GRAVITY*m_fMass*step * springConst * compression * bias*2.0f;
 		if(bIsHeavy)
 			impulse *= 0.75f;
 		ApplyMoveForce(forceDir*impulse);
@@ -516,58 +519,75 @@ CPhysical::ApplySpringCollisionAlt(float springConst, CVector &springDir, CVecto
 	return true;
 }
 
-// --MIAMI: Proof-read once
+float DAMPING_LIMIT_OF_SPRING_FORCE = 0.999f;
+float DAMPING_LIMIT_IN_FRAME= 0.25f;
+
+//--LCS: done
 // What exactly is speed?
 bool
-CPhysical::ApplySpringDampening(float damping, CVector &springDir, CVector &point, CVector &speed)
+CPhysical::ApplySpringDampening(float damping, float dampingLimit, CVector &springDir, CVector &point, CVector &speed)
 {
 	float speedA = DotProduct(speed, springDir);
 	float speedB = DotProduct(GetSpeed(point), springDir);
 	float step = Min(CTimer::GetTimeStep(), 3.0f);
-	float impulse = -damping * (speedA + speedB)/2.0f * m_fMass * step * 0.53f;
+	damping *= step;
 	if(bIsHeavy)
-		impulse *= 2.0f;
+		damping *= 2.0f;
+	damping = clamp(damping, -DAMPING_LIMIT_IN_FRAME, DAMPING_LIMIT_IN_FRAME);
 
 	// what is this?
-	float a = m_fTurnMass / ((point.MagnitudeSqr() + 1.0f) * 2.0f * m_fMass);
-	a = Min(a, 1.0f);
-	float b = Abs(impulse / (speedB * m_fMass));
-	if(a < b)
-		impulse *= a/b;
+	float fSpeed = -speedA * damping;
+	if(fSpeed > 0.0f && fSpeed+speedB > 0.0f){
+		if(speedB < 0.0f)
+			fSpeed = -speedB;
+		else
+			fSpeed = 0.0f;
+	}else if(fSpeed < 0.0f && fSpeed+speedB < 0.0f){
+		if(speedB > 0.0f)
+			fSpeed = -speedB;
+		else
+			fSpeed = 0.0f;
+	}
+
+	CVector com = Multiply3x3(m_matrix, m_vecCentreOfMass);
+	float impulse = fSpeed*GetMass(point-com, springDir);
+	float limit = Abs(dampingLimit)*DAMPING_LIMIT_OF_SPRING_FORCE;
+	if(impulse > limit)
+		impulse = limit;
 
 	ApplyMoveForce(springDir*impulse);
 	ApplyTurnForce(springDir*impulse, point);
 	return true;
 }
 
+//--LCS: done
 void
 CPhysical::ApplyGravity(void)
 {
 	if (!bAffectedByGravity)
 		return;
-#ifdef WALLCLIMB_CHEAT
 	if (gGravityCheat && this == FindPlayerVehicle()) {
-		static CVector v1(0.0f, 0.0f, 1.0f), v2(0.0f, 0.0f, 1.0f);
-		CVector prop = GetPosition() - (GetUp() + GetUp());
+		static CVector gravityUp(0.0f, 0.0f, 1.0f), surfaceUp(0.0f, 0.0f, 1.0f);
+		CVector belowCar = GetPosition() - 2.0f*GetUp();
 		CColPoint point;
 		CEntity* entity;
-		if (CWorld::ProcessLineOfSight(GetPosition(), prop, point, entity, true, false, false, false, false, false))
-			v2 = point.normal;
+		if (CWorld::ProcessLineOfSight(GetPosition(), belowCar, point, entity, true, false, false, false, false, false))
+			surfaceUp = point.normal;
 		else
-			v2 = CVector(0.0f, 0.0f, 1.0f);
-		float coef = clamp(CTimer::GetTimeStep() * 0.5f, 0.05f, 0.8f);
-		v1 = v1 * (1.0f - coef) + v2 * coef;
-		if (v1.MagnitudeSqr() < 0.1f)
-			v1 = CVector(0.0f, 0.0f, 1.0f);
+			surfaceUp = CVector(0.0f, 0.0f, 1.0f);
+		float t = clamp(CTimer::GetTimeStep() * 0.5f, 0.05f, 0.8f);
+		gravityUp = gravityUp * (1.0f - t) + surfaceUp * t;
+		if (gravityUp.MagnitudeSqr() < 0.1f)
+			gravityUp = CVector(0.0f, 0.0f, 1.0f);
 		else
-			v1.Normalise();
-		m_vecMoveSpeed -= GRAVITY * CTimer::GetTimeStep() * v1;
+			gravityUp.Normalise();
+		m_vecMoveSpeed -= GRAVITY * CTimer::GetTimeStep() * gravityUp;
 		return;
 	}
-#endif
 	m_vecMoveSpeed.z -= GRAVITY * CTimer::GetTimeStep();
 }
 
+//--LCS: done
 void
 CPhysical::ApplyFriction(void)
 {
@@ -577,7 +597,7 @@ CPhysical::ApplyFriction(void)
 	m_vecTurnFriction = CVector(0.0f, 0.0f, 0.0f);
 }
 
-// --MIAMI: Proof-read once
+//--LCS: done
 void
 CPhysical::ApplyAirResistance(void)
 {
@@ -585,8 +605,8 @@ CPhysical::ApplyAirResistance(void)
 		float f = Pow(m_fAirResistance, CTimer::GetTimeStep());
 		m_vecMoveSpeed *= f;
 		m_vecTurnSpeed *= f;
-	}else if(GetStatus() != STATUS_GHOST){ 
-		float f = Pow(1.0f/Abs(1.0f + m_fAirResistance*0.5f*m_vecMoveSpeed.MagnitudeSqr()), CTimer::GetTimeStep());
+	}else{
+		float f = Pow(1.0f - m_fAirResistance*m_vecMoveSpeed.Magnitude(), CTimer::GetTimeStep());
 		m_vecMoveSpeed *= f;
 		m_vecTurnSpeed *= 0.99f;
 	}
@@ -2309,4 +2329,45 @@ CPhysical::ProcessCollision(void)
 	bIsInSafePosition = true;
 	m_fElasticity = savedElasticity;
 	RemoveAndAdd();
+}
+
+
+
+// TEMP old VC code until bikes are done
+bool
+CPhysical::ApplySpringCollisionAlt(float springConst, CVector &springDir, CVector &point, float springRatio, float bias, CVector &forceDir)
+{
+	float compression = 1.0f - springRatio;
+	if(compression > 0.0f){
+		if(DotProduct(springDir, forceDir) > 0.0f)
+			forceDir *= -1.0f;
+		float step = Min(CTimer::GetTimeStep(), 3.0f);
+		float impulse = GRAVITY*m_fMass*step * springConst * compression * bias*2.0f;
+		if(bIsHeavy)
+			impulse *= 0.75f;
+		ApplyMoveForce(forceDir*impulse);
+		ApplyTurnForce(forceDir*impulse, point);
+	}
+	return true;
+}
+bool
+CPhysical::ApplySpringDampening(float damping, CVector &springDir, CVector &point, CVector &speed)
+{
+	float speedA = DotProduct(speed, springDir);
+	float speedB = DotProduct(GetSpeed(point), springDir);
+	float step = Min(CTimer::GetTimeStep(), 3.0f);
+	float impulse = -damping * (speedA + speedB)/2.0f * m_fMass * step * 0.53f;
+	if(bIsHeavy)
+		impulse *= 2.0f;
+
+	// what is this?
+	float a = m_fTurnMass / ((point.MagnitudeSqr() + 1.0f) * 2.0f * m_fMass);
+	a = Min(a, 1.0f);
+	float b = Abs(impulse / (speedB * m_fMass));
+	if(a < b)
+		impulse *= a/b;
+
+	ApplyMoveForce(springDir*impulse);
+	ApplyTurnForce(springDir*impulse, point);
+	return true;
 }
