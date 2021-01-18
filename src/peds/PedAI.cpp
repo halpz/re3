@@ -6488,7 +6488,7 @@ CPed::KillCharOnFootArmed(CVector &ourPos, CVector &targetPos, CVector &distWith
 		}
 	}
 	if (m_pedInObjective->IsPlayer() && m_nPedType != PEDTYPE_COP
-		&& CharCreatedBy != MISSION_CHAR && FindPlayerPed()->m_pWanted->m_CurrentCops != 0) {
+		&& CharCreatedBy != MISSION_CHAR && FindPlayerPed()->m_pWanted->m_CurrentCops != 0/* TODO: && !bAttacksPlayerWithCops*/) {
 		SetObjective(OBJECTIVE_FLEE_ON_FOOT_TILL_SAFE);
 
 		return CANT_ATTACK;

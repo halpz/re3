@@ -733,7 +733,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(GET_INTEGER_PARAM(0));
 		script_assert(pPed);
 		pPed->m_animGroup = (AssocGroupId)GET_INTEGER_PARAM(1);
-		pPed->b1A1_20 = false;
+		pPed->bOverrideMoveAnim = false;
 		return 0;
 	}
 	/*

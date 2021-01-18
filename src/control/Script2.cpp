@@ -175,27 +175,27 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	*/
 	case COMMAND_DISPLAY_ONSCREEN_TIMER:
 	{
-		uint16 offset = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) - (int32*)CTheScripts::ScriptSpace;
+		uint16 offset = (uint8*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) - CTheScripts::ScriptSpace;
 		CollectParameters(&m_nIp, 1);
 		CUserDisplay::OnscnTimer.AddClock(offset, nil, GET_INTEGER_PARAM(0) != 0);
 		return 0;
 	}
 	case COMMAND_CLEAR_ONSCREEN_TIMER:
 	{
-		uint16 offset = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) - (int32*)CTheScripts::ScriptSpace;
+		uint16 offset = (uint8*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) - CTheScripts::ScriptSpace;
 		CUserDisplay::OnscnTimer.ClearClock(offset);
 		return 0;
 	}
 	case COMMAND_DISPLAY_ONSCREEN_COUNTER:
 	{
-		uint16 counter = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) - (int32*)CTheScripts::ScriptSpace;
+		uint16 counter = (uint8*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) - CTheScripts::ScriptSpace;
 		CollectParameters(&m_nIp, 1);
 		CUserDisplay::OnscnTimer.AddCounter(counter, GET_INTEGER_PARAM(0), nil, 0);
 		return 0;
 	}
 	case COMMAND_CLEAR_ONSCREEN_COUNTER:
 	{
-		uint16 counter = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) - (int32*)CTheScripts::ScriptSpace;
+		uint16 counter = (uint8*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) - CTheScripts::ScriptSpace;
 		CUserDisplay::OnscnTimer.ClearCounter(counter);
 		return 0;
 	}
@@ -624,7 +624,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	//case COMMAND_MOVE_CAMERA_ALONG_SPLINE:
 	//case COMMAND_GET_CAMERA_POSITION_ALONG_SPLINE:
 	case COMMAND_DECLARE_MISSION_FLAG:
-		CTheScripts::OnAMissionFlag = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) - (int32*)CTheScripts::ScriptSpace;
+		CTheScripts::OnAMissionFlag = (uint8*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) - CTheScripts::ScriptSpace;
 		return 0;
 	case COMMAND_DECLARE_MISSION_FLAG_FOR_CONTACT:
 		return 0;
@@ -1452,7 +1452,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 	{
 		wchar* text = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 		CollectParameters(&m_nIp, 3);
-		CMessages::AddMessageJumpQWithNumber(text, GET_INTEGER_PARAM(1), GET_INTEGER_PARAM(2), GET_INTEGER_PARAM(0), -1, -1, -1, -1, -1);
+		CMessages::AddMessageJumpQWithNumber(text, GET_INTEGER_PARAM(1), GET_INTEGER_PARAM(2), GET_INTEGER_PARAM(0), -1, -1, -1, -1, -1); // 1
 		return 0;
 	}
 	case COMMAND_PRINT_WITH_NUMBER_SOON:

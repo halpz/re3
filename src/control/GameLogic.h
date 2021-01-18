@@ -48,4 +48,5 @@ public:
 	static CVector ShortCutDropOffForMission;
 	static float ShortCutDropOffOrientationForMission;
 	static bool MissionDropOffReadyToBeUsed;
+	static char mStoredPlayerOutfit[8];
 };

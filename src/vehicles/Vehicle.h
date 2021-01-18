@@ -245,6 +245,8 @@ public:
 #endif
 	uint8 bDriverLastFrame : 1;
 
+	uint8 bAllowGarageToStore : 1; // <- many LCS flags before
+
 	int8 m_numPedsUseItAsCover;
 	uint8 m_nAmmoInClip;    // Used to make the guns on boat do a reload (20 by default)
 	int8 m_nPacManPickupsCarried;

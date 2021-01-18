@@ -45,6 +45,7 @@ float CGameLogic::AfterDeathStartPointOrientation[NUM_SHORTCUT_START_POINTS];
 CVector CGameLogic::ShortCutDropOffForMission;
 float CGameLogic::ShortCutDropOffOrientationForMission;
 bool CGameLogic::MissionDropOffReadyToBeUsed;
+char CGameLogic::mStoredPlayerOutfit[8] = "plr3";
 
 //--MIAMI: file done
 
@@ -90,7 +91,7 @@ CGameLogic::SortOutStreamingAndMemory(const CVector &pos)
 	CStreaming::DeleteRwObjectsAfterDeath(pos);
 	CStreaming::RemoveUnusedModelsInLoadedList();
 	CGame::DrasticTidyUpMemory(true);
-	CWorld::Players[CWorld::PlayerInFocus].m_pPed->Undress("player");
+	CWorld::Players[CWorld::PlayerInFocus].m_pPed->Undress(mStoredPlayerOutfit);
 	CStreaming::LoadSceneCollision(pos);
 	CStreaming::LoadScene(pos);
 	CWorld::Players[CWorld::PlayerInFocus].m_pPed->Dress();

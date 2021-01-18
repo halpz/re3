@@ -565,7 +565,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	{
 		char onscreen_str[12];
 		//script_assert(CTheScripts::ScriptSpace[m_nIp++] == ARGUMENT_GLOBALVAR);
-		uint16 var = CTheScripts::Read2BytesFromScript(&m_nIp);
+		uint16 var = (uint8*)GetPointerToScriptVariable(&m_nIp, 0) - CTheScripts::ScriptSpace;
 		CollectParameters(&m_nIp, 2);
 		wchar* text = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]); // ???
 		strncpy(onscreen_str, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);

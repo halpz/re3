@@ -527,7 +527,7 @@ public:
 	uint32 bOnlyAllowedToSitInFront : 1;
 	uint32 b1A1_8 : 1;
 	uint32 b1A1_10 : 1;
-	uint32 b1A1_20 : 1;
+	uint32 bOverrideMoveAnim : 1;
 
 #ifdef KANGAROO_CHEAT
 	// our own flags
@@ -536,16 +536,16 @@ public:
 
 	uint16 m_gangFlags; // <- this one is uint16
 
-	uint8 b1A4_1 : 1;
+	uint8 bDropsWeaponsOnDeath : 1;
 	uint8 b1A4_2 : 1;
-	uint8 b1A4_4 : 1;
+	uint8 bAttacksPlayerWithCops : 1;
 	uint8 b1A4_8 : 1;
 	uint8 b1A4_10 : 1;
 	uint8 b1A4_20 : 1;
 	uint8 b1A4_40 : 1;
 	uint8 b1A4_80 : 1;
 
-	uint8 b1A5_1 : 1;
+	uint8 bCanBeTargettedByLeader : 1;
 	uint8 b1A5_2 : 1;
 	uint8 b1A5_4 : 1;
 	uint8 b1A5_8 : 1;
@@ -605,6 +605,8 @@ public:
 	float m_fHealth;
 	float m_fArmour;
 	uint32 m_nExtendedRangeTimer;
+	uint32 m_nScriptShootTimer;
+	uint32 m_nScriptAttackTimer;
 	int16 m_routeLastPoint;
 	uint16 m_routeStartPoint;
 	int16 m_routePointsPassed;
@@ -704,6 +706,7 @@ public:
 	uint32 m_lastComment;
 	CVector m_vecSpotToGuard;
 	float m_radiusToGuard;
+	float m_fMaxHealth;
 
 	static void *operator new(size_t);
 	static void *operator new(size_t, int);
