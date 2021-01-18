@@ -1638,7 +1638,7 @@ const tScriptCommandData commands[] = {
 	REGISTER_COMMAND(COMMAND_SET_CHAR_ONLY_ALLOWED_TO_SIT_IN_FRONT, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_INT, ), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_SET_CAR_TILTED_BY_CHAR, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_INT, ), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_GET_WEAPON_TYPE_FOR_PICKUP_IN_AREA, INPUT_ARGUMENTS(ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ), OUTPUT_ARGUMENTS(ARGTYPE_INT, ), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_IS_USING_FIRST_PERSON_WEAPON_CAMERA, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), true, -1, ""),
+	REGISTER_COMMAND(COMMAND_IS_PLAYER_USING_FIRST_PERSON_WEAPON_CAMERA, INPUT_ARGUMENTS(ARGTYPE_INT, ), OUTPUT_ARGUMENTS(), true, -1, ""),
 	REGISTER_COMMAND(COMMAND_1489, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_1490, INPUT_ARGUMENTS(), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_1491, INPUT_ARGUMENTS(ARGTYPE_INT, ), OUTPUT_ARGUMENTS(), false, -1, ""),
@@ -2977,6 +2977,8 @@ int8 CRunningScript::ProcessOneCommand()
 		retval = ProcessCommands1500To1599(command);
 	else if (command < 1700)
 		retval = ProcessCommands1600To1699(command);
+	else
+		script_assert(false);
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 	if (command < ARRAY_SIZE(commands)) {
 		if (commands[command].cond || commands[command].output[0] != ARGTYPE_NONE) {
@@ -5170,7 +5172,7 @@ void CRunningScript::ReturnFromGosubOrFunction()
 	uint8 nOutputParameters = CTheScripts::Read1ByteFromScript(&m_nIp);
 	uint8 nLocalsOffset = CTheScripts::Read1ByteFromScript(&m_nIp);
 	for (int i = 0; i < nOutputParameters; i++)
-		ScriptParams[i] = m_anLocalVariables[m_nLocalsPointer + nInputParameters];
+		ScriptParams[i] = m_anLocalVariables[m_nLocalsPointer + nInputParameters + i];
 	m_nIp += val >> STACKVALUE_IP_PARAMS_OFFSET;
 	m_nLocalsPointer -= nLocalsOffset;
 	StoreParameters(&m_nIp, nOutputParameters);

@@ -19,7 +19,7 @@ class CRunningScript;
 extern int32 ScriptParams[32];
 
 void FlushLog();
-#define script_assert(_Expression) FlushLog(); assert(_Expression);
+#define script_assert(_Expression) { FlushLog(); assert(_Expression); }
 
 #define PICKUP_PLACEMENT_OFFSET (0.5f)
 #define PED_FIND_Z_OFFSET (5.0f)

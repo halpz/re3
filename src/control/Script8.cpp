@@ -674,7 +674,8 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		SET_INTEGER_PARAM(0, model);
 		StoreParameters(&m_nIp, 1);
 	}
-	case COMMAND_IS_USING_FIRST_PERSON_WEAPON_CAMERA:
+	case COMMAND_IS_PLAYER_USING_FIRST_PERSON_WEAPON_CAMERA:
+		CollectParameters(&m_nIp, 1);
 		UpdateCompareFlag(TheCamera.Using1stPersonWeaponMode());
 		return 0;
 	//case COMMAND_1489:
