@@ -1,7 +1,7 @@
 #pragma once
 
-#ifdef EXTENDED_PIPELINES
 #ifdef LIBRW
+#ifdef EXTENDED_PIPELINES
 
 namespace CustomPipes {
 

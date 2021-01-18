@@ -1,22 +1,30 @@
 #if defined RW_GL3 && !defined LIBRW_SDL2
 
 #ifdef _WIN32
-#include <windows.h>
+#include <shlobj.h>
+#include <basetsd.h>
 #include <mmsystem.h>
+#include <regstr.h>
 #include <shellapi.h>
 #include <windowsx.h>
-#include <basetsd.h>
-#include <regstr.h>
-#include <shlobj.h>
+
+DWORD _dwOperatingSystemVersion;
+#include "resource.h"
+#else
+long _dwOperatingSystemVersion;
+#ifndef __APPLE__
+#include <sys/sysinfo.h>
+#else
+#include <mach/mach_host.h>
+#include <sys/sysctl.h>
+#endif
+#include <errno.h>
+#include <locale.h>
+#include <signal.h>
+#include <stddef.h>
 #endif
 
-#define WITHWINDOWS
 #include "common.h"
-
-#pragma warning( push )
-#pragma warning( disable : 4005)
-#pragma warning( pop )
-
 #if (defined(_MSC_VER))
 #include <tchar.h>
 #endif /* (defined(_MSC_VER)) */
@@ -72,23 +80,6 @@ static psGlobalType PsGlobal;
 
 size_t _dwMemAvailPhys;
 RwUInt32 gGameState;
-
-#ifdef _WIN32
-DWORD _dwOperatingSystemVersion;
-#include "resource.h"
-#else
-long _dwOperatingSystemVersion;
-#ifndef __APPLE__
-#include <sys/sysinfo.h>
-#else
-#include <mach/mach_host.h>
-#include <sys/sysctl.h>
-#endif
-#include <stddef.h>
-#include <locale.h>
-#include <signal.h>
-#include <errno.h>
-#endif
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 char gSelectedJoystickName[128] = "";
@@ -1607,6 +1598,7 @@ main(int argc, char *argv[])
 	SystemParametersInfo(SPI_SETSTICKYKEYS, sizeof(STICKYKEYS), &NewStickyKeys, SPIF_SENDCHANGE);
 #endif
 
+	// This part is needed because controller initialisation overwrites loaded settings.
 	{
 		CFileMgr::SetDirMyDocuments();
 		
@@ -1619,6 +1611,10 @@ main(int argc, char *argv[])
 		}
 		
 		CFileMgr::SetDir("");
+
+#ifdef LOAD_INI_SETTINGS
+		LoadINIControllerSettings();
+#endif
 	}
 	
 #ifdef _WIN32

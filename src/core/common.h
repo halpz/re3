@@ -11,17 +11,34 @@
 #include <string.h>
 #include <math.h>
 
-#if defined _WIN32 && defined WITHWINDOWS 
+#if !defined RW_D3D9 && defined LIBRW
+#undef WITHD3D
+#undef WITHDINPUT
+#endif
+
+#if (defined WITHD3D && !defined LIBRW)
+#define WITHWINDOWS
+#endif
+
+#if defined _WIN32 && defined WITHWINDOWS && !defined _INC_WINDOWS
 #include <windows.h>
 #endif
 
-#if defined _WIN32 && defined WITHD3D
-#include <windows.h>
-#ifndef USE_D3D9
-#include <d3d8types.h>
-#else
-#include <d3d9types.h>
+#ifdef WITHD3D
+	#ifdef LIBRW
+		#define WITH_D3D // librw includes d3d9 itself via this right now
+	#else
+		#ifndef USE_D3D9
+		#include <d3d8.h>
+		#else
+		#include <d3d9.h>
+		#endif
+	#endif
 #endif
+
+#ifdef WITHDINPUT
+#define DIRECTINPUT_VERSION 0x0800
+#include <dinput.h>
 #endif
 
 #include <rwcore.h>
@@ -52,14 +69,6 @@
 
 #define rwVENDORID_ROCKSTAR 0x0253F2
 
-// Get rid of bullshit windows definitions, we're not running on an 8086
-#ifdef far
-#undef far
-#endif
-#ifdef near
-#undef near
-#endif
-
 #define Max(a,b) ((a) > (b) ? (a) : (b))
 #define Min(a,b) ((a) < (b) ? (a) : (b))
 
@@ -78,6 +87,10 @@ typedef uint64_t uint64;
 typedef int64_t int64;
 // hardcode ucs-2
 typedef uint16_t wchar;
+
+typedef uint8 bool8;
+typedef uint16 bool16;
+typedef uint32 bool32;
 
 #if defined(_MSC_VER)
 typedef ptrdiff_t ssize_t;

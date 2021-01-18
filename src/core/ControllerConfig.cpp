@@ -1,11 +1,7 @@
-#if defined RW_D3D9 || defined RWLIBS
-#define DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
-#endif
-
+#define WITHDINPUT
 #include "common.h"
 #include "platform.h"
-#include "crossplatform.h" // for Windows version
+#include "crossplatform.h"
 #include "ControllerConfig.h"
 #include "Pad.h"
 #include "FileMgr.h"
@@ -2801,7 +2797,7 @@ void CControllerConfigManager::ResetSettingOrder(e_ControllerAction action)
 			for (int32 k = 0; k < MAX_CONTROLLERTYPES; k++)
 			{
 				int32 setorder = m_aSettings[action][k].m_ContSetOrder;
-				if (setorder > i && setorder != KEYBOARD)
+				if (setorder > i && setorder != 0)
 				{
 					if (init)
 					{
