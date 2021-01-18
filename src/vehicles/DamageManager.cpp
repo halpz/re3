@@ -10,7 +10,8 @@ float G_aComponentDamage[] = { 2.5f, 1.25f, 3.2f, 1.4f, 2.5f, 2.8f, 0.5f };
 CDamageManager::CDamageManager(void)
 {
 	ResetDamageStatus();
-	m_fWheelDamageEffect = 0.5f;
+	m_fWheelDamageEffect = 0.65f;
+	m_bSmashedDoorDoesntClose = false;
 	field_18 = 1;
 }
 
@@ -136,6 +137,8 @@ void
 CDamageManager::SetDoorStatus(int32 door, uint32 status)
 {
 	m_doorStatus[door] = status;
+	if(m_bSmashedDoorDoesntClose && door != DOOR_BONNET && status == DOOR_STATUS_SMASHED)
+		m_doorStatus[door] = DOOR_STATUS_SWINGING;
 }
 
 int32

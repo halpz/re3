@@ -3,8 +3,8 @@
 #include "ClumpModelInfo.h"
 
 enum {
-	NUM_FIRST_MATERIALS = 24,
-	NUM_SECOND_MATERIALS = 20,
+	NUM_FIRST_MATERIALS = 25,
+	NUM_SECOND_MATERIALS = 25,
 	NUM_VEHICLE_COLOURS = 8,
 };
 
@@ -98,7 +98,7 @@ public:
 	uint8 m_lastColorVariation;
 	uint8 m_currentColour1;
 	uint8 m_currentColour2;
-	RpAtomic *m_comps[6];
+	RpAtomic *m_comps[6];	// LCS(TODO): pointer
 	// This is stupid, CClumpModelInfo already has it!
 	union {
 		int32 m_animFileIndex;
