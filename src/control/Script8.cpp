@@ -26,6 +26,8 @@
 #include "World.h"
 #include "Zones.h"
 
+// LCS: file done except TODOs (also check commented out strings)
+
 int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 {
 	switch (command) {
@@ -37,7 +39,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		CPed* pPed = CPools::GetPedPool()->GetAt(GET_INTEGER_PARAM(0));
-		if (pPed && pPed->GetPedState() != PED_DRIVING && !pPed->GetPedState() != PED_AIM_GUN) {
+		if (pPed && pPed->GetPedState() != PED_DRIVING && pPed->GetPedState() != PED_AIM_GUN) {
 			pPed->m_pVehicleAnim = nil;
 			pPed->RestartNonPartialAnims();
 			RpAnimBlendClumpRemoveAllAssociations(pPed->GetClump());
@@ -606,6 +608,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		}
 		SET_INTEGER_PARAM(0, -1);
 		StoreParameters(&m_nIp, 1);
+		return 0;
 	}
 	case COMMAND_REMOVE_SCRIPT_CORONA:
 		CollectParameters(&m_nIp, 1);

@@ -1676,3 +1676,19 @@ CPed::CreateDeadPedPickupCoors(float *x, float *y, float *z)
 	*z = GetPosition().z + 0.4f;
 #undef NUMBER_OF_ATTEMPTS
 }
+
+float CPickups::GetValue(int index)
+{
+	int i = GetActualPickupIndex(index);
+	if (i == -1)
+		return 0.0f;
+	return aPickUps[i].m_fRevenue;
+}
+
+void CPickups::SetValue(int index, float value)
+{
+	int i = GetActualPickupIndex(index);
+	if (i == -1)
+		return;
+	aPickUps[i].m_fRevenue = value;
+}

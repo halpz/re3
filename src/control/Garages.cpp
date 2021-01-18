@@ -857,7 +857,79 @@ void CGarage::Update()
 		}
 		break;
 	case GARAGE_CRUSHER:
+	{
+		// for now version from III
+		switch (m_eGarageState) {
+		case GS_OPENED:
+		{
+			int i = CPools::GetVehiclePool()->GetSize() * (CTimer::GetFrameCounter() % CRUSHER_VEHICLE_TEST_SPAN) / CRUSHER_VEHICLE_TEST_SPAN;
+			int end = CPools::GetVehiclePool()->GetSize() * (CTimer::GetFrameCounter() % CRUSHER_VEHICLE_TEST_SPAN + 1) / CRUSHER_VEHICLE_TEST_SPAN;
+			for (; i < end; i++) {
+				CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
+				if (!pVehicle)
+					continue;
+				if (pVehicle->IsCar() && IsEntityEntirelyInside3D(pVehicle, 0.0f)) {
+					m_eGarageState = GS_CLOSING;
+					m_pTarget = pVehicle;
+					m_pTarget->RegisterReference((CEntity**)&m_pTarget);
+				}
+			}
+			break;
+		}
+		case GS_CLOSING:
+			if (m_pTarget) {
+				m_fDoorPos = Max(0.0f, m_fDoorPos - CRUSHER_CRANE_SPEED * CTimer::GetTimeStep());
+				if (m_fDoorPos < TWOPI / 5) {
+					m_pTarget->bUsesCollision = false;
+					m_pTarget->bAffectedByGravity = false;
+					m_pTarget->SetMoveSpeed(0.0f, 0.0f, 0.0f);
+				}
+				else {
+					m_pTarget->SetMoveSpeed(m_pTarget->GetMoveSpeed() * Pow(0.8f, CTimer::GetTimeStep()));
+				}
+				if (m_fDoorPos == 0.0f) {
+					CGarages::CrushedCarId = CPools::GetVehiclePool()->GetIndex(m_pTarget);
+					float reward = Min(CRUSHER_MAX_REWARD, CRUSHER_MIN_REWARD + m_pTarget->pHandling->nMonetaryValue * m_pTarget->m_fHealth * CRUSHER_REWARD_COEFFICIENT);
+					CWorld::Players[CWorld::PlayerInFocus].m_nMoney += reward;
+					DestroyVehicleAndDriverAndPassengers(m_pTarget);
+					//++CStats::CarsCrushed;
+					m_pTarget = nil;
+					m_eGarageState = GS_AFTERDROPOFF;
+					m_nTimeToStartAction = CTimer::GetTimeInMilliseconds() + TIME_TO_CRUSH_CAR;
+					DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
+				}
+			}
+			else
+				m_eGarageState = GS_OPENING;
+			UpdateCrusherAngle();
+			break;
+		case GS_AFTERDROPOFF:
+			if (CTimer::GetTimeInMilliseconds() <= m_nTimeToStartAction) {
+				UpdateCrusherShake((myrand() & 0xFF - 128) * 0.0002f, (myrand() & 0xFF - 128) * 0.0002f);
+			}
+			else {
+				UpdateCrusherShake(0.0f, 0.0f);
+				m_eGarageState = GS_OPENING;
+			}
+			break;
+		case GS_OPENING:
+			m_fDoorPos = Min(HALFPI, m_fDoorPos + CTimer::GetTimeStep() * CRUSHER_CRANE_SPEED);
+			if (m_fDoorPos == HALFPI) {
+				m_eGarageState = GS_OPENED;
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_OPENED, 1.0f);
+			}
+			UpdateCrusherAngle();
+			break;
+			//case GS_FULLYCLOSED:
+			//case GS_CLOSEDCONTAINSCAR:
+			//case GS_OPENEDCONTAINSCAR:
+		default:
+			break;
+		}
+		if (!FindPlayerVehicle() && (CTimer::GetFrameCounter() & 0x1F) == 0x17 && IsEntityEntirelyInside3D(FindPlayerPed(), 0.0f))
+			FindPlayerPed()->InflictDamage(nil, WEAPONTYPE_RAMMEDBYCAR, 300.0f, PEDPIECE_TORSO, 0);
 		break;
+	}
 	case GARAGE_MISSION_KEEPCAR:
 	case GARAGE_MISSION_KEEPCAR_REMAINCLOSED:
 		switch (m_eGarageState) {
@@ -1494,13 +1566,14 @@ void CGarage::BuildRotatedDoorMatrix(CEntity * pDoor, float fPosition)
 void CGarage::UpdateCrusherAngle()
 {
 	RefreshDoorPointers(false);
-	//m_pDoor2->GetMatrix().SetRotateXOnly(TWOPI - m_fDoorPos); TODO
-	//m_pDoor2->GetMatrix().UpdateRW();
-	//m_pDoor2->UpdateRwFrame();
+	m_pDoor1->GetMatrix().SetRotateXOnly(TWOPI - m_fDoorPos);
+	m_pDoor1->GetMatrix().UpdateRW();
+	m_pDoor1->UpdateRwFrame();
 }
 
 void CGarage::UpdateCrusherShake(float X, float Y)
 {
+	/*
 	RefreshDoorPointers(false);
 	m_pDoor1->GetMatrix().GetPosition().x += X;
 	m_pDoor1->GetMatrix().GetPosition().y += Y;
@@ -1514,6 +1587,7 @@ void CGarage::UpdateCrusherShake(float X, float Y)
 	m_pDoor2->UpdateRwFrame();
 	m_pDoor2->GetMatrix().GetPosition().x -= X;
 	m_pDoor2->GetMatrix().GetPosition().y -= Y;
+	*/
 }
 
 void CGarage::RefreshDoorPointers(bool bCreate)
@@ -1749,15 +1823,17 @@ void CGarage::FindDoorsEntities()
 		}
 	}
 	if (m_pDoor1 && m_pDoor2) {
-		CVector2D vecDoor1ToGarage(m_pDoor1->GetPosition().x - GetGarageCenterX(), m_pDoor1->GetPosition().y - GetGarageCenterY());
-		CVector2D vecDoor2ToGarage(m_pDoor2->GetPosition().x - GetGarageCenterX(), m_pDoor2->GetPosition().y - GetGarageCenterY());
-		if (DotProduct2D(vecDoor1ToGarage, vecDoor2ToGarage) > 0.0f) {
-			if (vecDoor1ToGarage.MagnitudeSqr() >= vecDoor2ToGarage.MagnitudeSqr()) {
-				m_pDoor1 = m_pDoor2;
-				m_bDoor1IsDummy = m_bDoor2IsDummy;
+		if (m_pDoor1->GetModelIndex() != MI_LCS_GARAGEDOOR39 && m_pDoor1->GetModelIndex() != MI_LCS_GARAGEDOOR40) {
+			CVector2D vecDoor1ToGarage(m_pDoor1->GetPosition().x - GetGarageCenterX(), m_pDoor1->GetPosition().y - GetGarageCenterY());
+			CVector2D vecDoor2ToGarage(m_pDoor2->GetPosition().x - GetGarageCenterX(), m_pDoor2->GetPosition().y - GetGarageCenterY());
+			if (DotProduct2D(vecDoor1ToGarage, vecDoor2ToGarage) > 0.0f) {
+				if (vecDoor1ToGarage.MagnitudeSqr() >= vecDoor2ToGarage.MagnitudeSqr()) {
+					m_pDoor1 = m_pDoor2;
+					m_bDoor1IsDummy = m_bDoor2IsDummy;
+				}
+				m_pDoor2 = nil;
+				m_bDoor2IsDummy = false;
 			}
-			m_pDoor2 = nil;
-			m_bDoor2IsDummy = false;
 		}
 	}
 	if (m_pDoor1)
@@ -2331,27 +2407,44 @@ void CGarages::Load(uint8* buf, uint32 size)
 bool
 CGarages::IsModelIndexADoor(uint32 id)
 {
-	return id == MI_GARAGEDOOR2 ||
-		id == MI_GARAGEDOOR3 ||
-		id == MI_GARAGEDOOR4 ||
-		id == MI_GARAGEDOOR5 ||
-		id == MI_GARAGEDOOR6 ||
-		id == MI_GARAGEDOOR7 ||
-		id == MI_GARAGEDOOR9 ||
-		id == MI_GARAGEDOOR10 ||
-		id == MI_GARAGEDOOR11 ||
-		id == MI_GARAGEDOOR12 ||
-		id == MI_GARAGEDOOR13 ||
-		id == MI_GARAGEDOOR14 ||
-		id == MI_GARAGEDOOR15 ||
-		id == MI_GARAGEDOOR16 ||
-		id == MI_GARAGEDOOR18 ||
-		id == MI_GARAGEDOOR19 ||
-		id == MI_GARAGEDOOR20 ||
-		id == MI_GARAGEDOOR21 ||
-		id == MI_GARAGEDOOR22 ||
-		id == MI_GARAGEDOOR23 ||
-		id == MI_GARAGEDOOR24 ||
-		id == MI_GARAGEDOOR25 ||
-		id == MI_GARAGEDOOR26;
+	return id == MI_LCS_GARAGEDOOR01 ||
+		id == MI_LCS_GARAGEDOOR02 ||
+		id == MI_LCS_GARAGEDOOR03 ||
+		id == MI_LCS_GARAGEDOOR04 ||
+		id == MI_LCS_GARAGEDOOR05 ||
+		id == MI_LCS_GARAGEDOOR06 ||
+		id == MI_LCS_GARAGEDOOR07 ||
+		id == MI_LCS_GARAGEDOOR08 ||
+		id == MI_LCS_GARAGEDOOR09 ||
+		id == MI_LCS_GARAGEDOOR10 ||
+		id == MI_LCS_GARAGEDOOR11 ||
+		id == MI_LCS_GARAGEDOOR12 ||
+		id == MI_LCS_GARAGEDOOR13 ||
+		id == MI_LCS_GARAGEDOOR14 ||
+		id == MI_LCS_GARAGEDOOR15 ||
+		id == MI_LCS_GARAGEDOOR16 ||
+		id == MI_LCS_GARAGEDOOR17 ||
+		id == MI_LCS_GARAGEDOOR18 ||
+		id == MI_LCS_GARAGEDOOR19 ||
+		id == MI_LCS_GARAGEDOOR20 ||
+		id == MI_LCS_GARAGEDOOR21 ||
+		id == MI_LCS_GARAGEDOOR22 ||
+		id == MI_LCS_GARAGEDOOR23 ||
+		id == MI_LCS_GARAGEDOOR24 ||
+		id == MI_LCS_GARAGEDOOR25 ||
+		id == MI_LCS_GARAGEDOOR26 ||
+		id == MI_LCS_GARAGEDOOR27 ||
+		id == MI_LCS_GARAGEDOOR28 ||
+		id == MI_LCS_GARAGEDOOR29 ||
+		id == MI_LCS_GARAGEDOOR30 ||
+		id == MI_LCS_GARAGEDOOR31 ||
+		id == MI_LCS_GARAGEDOOR32 ||
+		id == MI_LCS_GARAGEDOOR33 ||
+		id == MI_LCS_GARAGEDOOR34 ||
+		id == MI_LCS_GARAGEDOOR35 ||
+		id == MI_LCS_GARAGEDOOR36 ||
+		id == MI_LCS_GARAGEDOOR37 ||
+		id == MI_LCS_GARAGEDOOR38 ||
+		id == MI_LCS_GARAGEDOOR39 ||
+		id == MI_LCS_GARAGEDOOR40;
 }

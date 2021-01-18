@@ -112,6 +112,8 @@ int32 CCarCtrl::LoadedCarsArray[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
 CVehicle* apCarsToKeep[MAX_CARS_TO_KEEP];
 uint32 aCarsToKeepTime[MAX_CARS_TO_KEEP];
 
+bool gbEmergencyVehiclesEnabled = true;
+
 //--MIAMI: done except heli/plane functions
 
 void
@@ -3205,7 +3207,7 @@ void CCarCtrl::GenerateEmergencyServicesCar(void)
 	if (NumFiretrucksOnDuty + NumAmbulancesOnDuty + NumParkedCars + NumMissionCars +
 		NumLawEnforcerCars + NumRandomCars > MaxNumberOfCarsInUse)
 		return;
-	if (NumAmbulancesOnDuty == 0 /* TODO(LCS): && gbEmergencyVehiclesEnabled */){
+	if (NumAmbulancesOnDuty == 0 && gbEmergencyVehiclesEnabled){
 		if (gAccidentManager.CountActiveAccidents() < 2){
 			if (CStreaming::HasModelLoaded(MI_AMBULAN))
 				CStreaming::SetModelIsDeletable(MI_MEDIC);
@@ -3224,7 +3226,7 @@ void CCarCtrl::GenerateEmergencyServicesCar(void)
 			}
 		}
 	}
-	if (NumFiretrucksOnDuty == 0 /* TODO(LCS): && gbEmergencyVehiclesEnabled */){
+	if (NumFiretrucksOnDuty == 0 && gbEmergencyVehiclesEnabled){
 		if (gFireManager.GetTotalActiveFires() < 3){
 			if (CStreaming::HasModelLoaded(MI_FIRETRUCK))
 				CStreaming::SetModelIsDeletable(MI_FIREMAN);

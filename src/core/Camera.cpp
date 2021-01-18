@@ -114,6 +114,7 @@ CCamera::Init(void)
 	m_1rstPersonRunCloseToAWall = false;
 	m_fPositionAlongSpline = 0.0f;
 	m_bCameraJustRestored = false;
+	m_bFreezePedZoomSwitch = false;
 	Cams[0].Init();
 	Cams[1].Init();
 	Cams[2].Init();
@@ -985,7 +986,7 @@ CCamera::CamControl(void)
 			// Change user selected mode
 			if(CPad::GetPad(0)->CycleCameraModeUpJustDown() && !CReplay::IsPlayingBack() &&
 			   (m_bLookingAtPlayer || WhoIsInControlOfTheCamera == CAMCONTROL_OBBE) &&
-			   !m_WideScreenOn && !m_bFailedCullZoneTestPreviously && !m_bFirstPersonBeingUsed){
+			   !m_WideScreenOn && !m_bFailedCullZoneTestPreviously && !m_bFirstPersonBeingUsed && !m_bFreezePedZoomSwitch){
 				if(FrontEndMenuManager.m_ControlMethod == CONTROL_STANDARD){
 					if(PedZoomIndicator == CAM_ZOOM_3)
 						PedZoomIndicator = CAM_ZOOM_1;

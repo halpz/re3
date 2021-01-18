@@ -1754,7 +1754,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	*/
 	case COMMAND_DISPLAY_ONSCREEN_TIMER_WITH_STRING:
 	{
-		uint16 var = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) - (int32*)CTheScripts::ScriptSpace;
+		uint16 var = (uint8*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) - CTheScripts::ScriptSpace;
 		CollectParameters(&m_nIp, 1);
 		wchar* text = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]); // ???
 		strncpy(onscreen_str, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
@@ -1764,7 +1764,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	}
 	case COMMAND_DISPLAY_ONSCREEN_COUNTER_WITH_STRING:
 	{
-		uint16 var = GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) - (int32*)CTheScripts::ScriptSpace;
+		uint16 var = (uint8*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) - CTheScripts::ScriptSpace;
 		CollectParameters(&m_nIp, 1);
 		wchar* text = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]); // ???
 		strncpy(onscreen_str, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);

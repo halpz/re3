@@ -283,8 +283,8 @@ public:
 	int16 GuiRight() { return GetAnaloguePadRight() || GetDPadRightJustDown(); }
 	int16 GuiUp() { return GetAnaloguePadUp() || GetDPadUpJustDown(); }
 	int16 GuiDown() { return GetAnaloguePadDown() || GetDPadDownJustDown(); }
-	int16 GuiSelect() { return GetSelect(); }
-	int16 GuiBack() { return GetStart(); }
+	int16 GuiSelect() { return GetCrossJustDown(); }
+	int16 GuiBack() { return GetTriangleJustDown(); }
 	int16 GetSkipCutscene() { return GetCrossJustDown(); }
 
 #ifdef XINPUT
