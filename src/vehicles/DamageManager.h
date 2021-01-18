@@ -81,6 +81,7 @@ class CDamageManager
 public:
 
 	float m_fWheelDamageEffect;
+	bool m_bSmashedDoorDoesntClose;
 	uint8 m_engineStatus;
 	uint8 m_wheelStatus[4];
 	uint8 m_doorStatus[6];

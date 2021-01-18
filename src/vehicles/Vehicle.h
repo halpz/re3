@@ -252,6 +252,7 @@ public:
 	int8 m_nPacManPickupsCarried;
 	uint8 m_nRoadblockType;
 	float m_fHealth;           // 1000.0f = full health. 250.0f = fire. 0 -> explode
+	float m_fEngineEnergy;	// TODO(LCS): better name. it adds up acceleration force, so possibly kinetic energy??
 	uint8 m_nCurrentGear;
 	float m_fChangeGearTime;
 #if (!defined GTA_PS2 || defined FIX_BUGS)
@@ -290,6 +291,7 @@ public:
 	~CVehicle(void);
 	// from CEntity
 	void SetModelIndex(uint32 id);
+	void PreRender(void) {}
 	bool SetupLighting(void);
 	void RemoveLighting(bool);
 	void FlagToDestroyWhenNextProcessed(void) {}
