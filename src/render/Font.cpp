@@ -50,7 +50,7 @@ UnicodeMakeUpperCase(wchar *dst, const wchar *src) //idk what to do with it, see
 }
 
 CFontDetails CFont::Details;
-int16 CFont::NewLine;
+bool16 CFont::NewLine;
 CSprite2d CFont::Sprite[MAX_FONTS];
 CFontRenderState CFont::RenderState;
 
@@ -274,7 +274,7 @@ CFont::InitPerFrame(void)
 	Details.anonymous_25 = 0;
 	FontRenderStatePointer.pRenderState = (CFontRenderState*)FontRenderStateBuf;
 	SetDropShadowPosition(0);
-	NewLine = 0;
+	NewLine = false;
 #ifdef BUTTON_ICONS
 	PS2Symbol = BUTTON_NONE;
 #endif
@@ -1277,7 +1277,7 @@ CFont::ParseToken(wchar *s)
 			break;
 		case 'N':
 		case 'n':
-			NewLine = 1;
+			NewLine = true;
 			break;
 		case 'b':
 			Details.color.r = 27;

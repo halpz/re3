@@ -29,3 +29,5 @@ public:
 	static void RenderBufferedOneXLUSprite2D_Rotate_Dimension(float x, float y, float w, float h, const RwRGBA &colour, int16 intens, float rotation, uint8 alpha);
 
 };
+
+extern float CalcScreenZ(float z);

@@ -2037,6 +2037,7 @@ CAutomobile::PreRender(void)
 						if(DotProduct(GetForward(), camDist) > 0.0f ||
 						   TheCamera.GetLookDirection() == LOOKING_LEFT ||
 						   TheCamera.GetLookDirection() == LOOKING_RIGHT){
+							/*
 							CParticle::AddParticle(PARTICLE_HEATHAZE, pos1, CVector(0.0f, 0.0f, 0.0f));
 							if(pHandling->Flags & HANDLING_DBL_EXHAUST)
 								CParticle::AddParticle(PARTICLE_HEATHAZE, pos2, CVector(0.0f, 0.0f, 0.0f));
@@ -2044,6 +2045,7 @@ CAutomobile::PreRender(void)
 							CParticle::AddParticle(PARTICLE_HEATHAZE, pos1, CVector(0.0f, 0.0f, 0.0f));
 							if(pHandling->Flags & HANDLING_DBL_EXHAUST)
 								CParticle::AddParticle(PARTICLE_HEATHAZE, pos2, CVector(0.0f, 0.0f, 0.0f));
+							*/
 						}
 					}
 

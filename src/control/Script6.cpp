@@ -42,6 +42,19 @@
 extern const char* scriptfile;
 #endif
 
+bool CRunningScript::ThisIsAValidRandomCop(uint32 mi, int cop, int swat, int fbi, int army, int miami)
+{
+	switch (mi)
+	{
+	case MI_COP: if (cop) return true; break;
+	case MI_SWAT: if (swat) return true; break;
+	case MI_FBI: if (fbi) return true; break;
+	case MI_ARMY: if (army) return true; break;
+	default: if (mi >= MI_VICE1 && mi <= MI_VICE8 && miami) return true; break;
+	}
+	return false;
+}
+
 bool CRunningScript::ThisIsAValidRandomPed(uint32 pedtype, int civ, int gang, int criminal)
 {
     switch (pedtype) {
@@ -64,19 +77,6 @@ bool CRunningScript::ThisIsAValidRandomPed(uint32 pedtype, int civ, int gang, in
     default:
         return false;
     }
-}
-
-bool CRunningScript::ThisIsAValidRandomCop(int32 mi, bool cop, bool swat, bool fbi, bool army, bool miami)
-{
-	switch (mi)
-	{
-	case MI_COP: if (cop) return true;
-	case MI_SWAT: if (swat) return true;
-	case MI_FBI: if (fbi) return true;
-	case MI_ARMY: if (army) return true;
-	default:
-		return miami && (mi >= MI_VICE1 && mi <= MI_VICE8);
-	}
 }
 
 int8 CRunningScript::ProcessCommands1000To1099(int32 command)

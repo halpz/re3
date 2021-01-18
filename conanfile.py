@@ -5,8 +5,8 @@ import shutil
 import textwrap
 
 
-class ReVCConan(ConanFile):
-    name = "reVC"
+class ReLCSConan(ConanFile):
+    name = "reLCS"
     version = "master"
     license = "???"  # FIXME: https://github.com/GTAmodding/re3/issues/794
     settings = "os", "arch", "compiler", "build_type"
@@ -69,10 +69,10 @@ class ReVCConan(ConanFile):
             raise ConanInvalidConfiguration("Only `glfw` is supported as gl3_gfxlib.")
         #if not self.options.with_opus:
         #    if not self.options["libsndfile"].with_external_libs:
-        #        raise ConanInvalidConfiguration("reVC with opus support requires a libsndfile built with external libs (=ogg/flac/opus/vorbis)")
+        #        raise ConanInvalidConfiguration("reLCS with opus support requires a libsndfile built with external libs (=ogg/flac/opus/vorbis)")
 
     @property
-    def _reVC_audio(self):
+    def _reLCS_audio(self):
         return {
             "miles": "MSS",
             "openal": "OAL",
@@ -111,16 +111,16 @@ class ReVCConan(ConanFile):
                            include("{}/conanbuildinfo.cmake")
                            conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
     
-                           add_subdirectory("{}" reVC)
+                           add_subdirectory("{}" reLCS)
                            """).format(self.install_folder.replace("\\", "/"),
                                        self.source_folder.replace("\\", "/")))
         except FileNotFoundError:
             pass
         cmake = CMake(self)
-        cmake.definitions["REVC_AUDIO"] = self._reVC_audio
-        cmake.definitions["REVC_WITH_OPUS"] = self.options.with_opus
-        cmake.definitions["REVC_INSTALL"] = True
-        cmake.definitions["REVC_VENDORED_LIBRW"] = False
+        cmake.definitions["RELCS_AUDIO"] = self._reLCS_audio
+        cmake.definitions["RELCS_WITH_OPUS"] = self.options.with_opus
+        cmake.definitions["RELCS_INSTALL"] = True
+        cmake.definitions["RELCS_VENDORED_LIBRW"] = False
         env = {}
         if self._os_is_playstation2:
             cmake.definitions["CMAKE_TOOLCHAIN_FILE"] = self.deps_user_info["ps2dev-cmaketoolchain"].cmake_toolchain_file

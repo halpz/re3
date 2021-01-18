@@ -55,10 +55,10 @@ struct CFontRenderState
 	float slant;
 	float slantRefX;
 	float slantRefY;
-	bool bIsShadow;
-	bool bFontHalfTexture;
-	bool proportional;
-	bool anonymous_14;
+	bool8 bIsShadow;
+	bool8 bFontHalfTexture;
+	bool8 proportional;
+	bool8 anonymous_14;
 	int16 style;
 };
 
@@ -126,7 +126,7 @@ class CFont
 #else
 	static int16 Size[MAX_FONTS][419];
 #endif
-	static int16 NewLine;
+	static bool16 NewLine;
 public:
 	static CSprite2d Sprite[MAX_FONTS];
 	static CFontDetails Details;
@@ -169,7 +169,7 @@ public:
 	static uint16 *ParseToken(wchar *s, bool japShit = false);
 #else
 	static uint16 *ParseToken(wchar *s);
-	static uint16* ParseToken(wchar *s, CRGBA &color, bool &flash, bool &bold);
+	static uint16 *ParseToken(wchar *s, CRGBA &color, bool &flash, bool &bold);
 #endif
 	static void DrawFonts(void);
 	static void RenderFontBuffer(void);
