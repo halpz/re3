@@ -587,7 +587,7 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 				pMarker->m_Color.alpha = (float)a * 0.4f * someSin + a;
 		}
 		if (pMarker->m_nRotateRate) {
-			RwV3d pos = pMarker->m_Matrix.m_matrix.pos;
+			CVector pos = pMarker->m_Matrix.GetPosition();
 			pMarker->m_Matrix.RotateZ(DEGTORAD(pMarker->m_nRotateRate * CTimer::GetTimeStep()));
 			pMarker->m_Matrix.GetPosition() = pos;
 		}
