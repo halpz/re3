@@ -1495,7 +1495,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
 		script_assert(pVehicle);
 		const CVector& pos = pVehicle->GetPosition();
-		float heading = CGeneral::GetATanOfXY(pos.y - GET_FLOAT_PARAM(2), pos.x - GET_FLOAT_PARAM(1)) + HALFPI;
+		float heading = CGeneral::GetATanOfXY(pos.x - GET_FLOAT_PARAM(1), pos.y - GET_FLOAT_PARAM(2)) + HALFPI;
 		if (heading > TWOPI)
 			heading -= TWOPI;
 		pVehicle->SetHeading(heading);
