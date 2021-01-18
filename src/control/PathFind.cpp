@@ -1820,6 +1820,12 @@ CPathFind::Load(uint8 *buf, uint32 size)
 			m_pathNodes[i].bBetweenLevels = true;
 		else
 			m_pathNodes[i].bBetweenLevels = false;
+
+#ifdef SECUROM
+	// if pirated game
+	for(i = 0; i < m_numPathNodes; i++)
+		m_pathNodes[i].bDisabled = true;
+#endif
 }
 
 void

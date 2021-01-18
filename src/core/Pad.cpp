@@ -151,7 +151,7 @@ void PickUpChicksCheat()
 	if ( FindPlayerVehicle() && (FindPlayerVehicle()->IsCar() || FindPlayerVehicle()->IsBike()) )
 	{
 		CVehicle *vehicle = FindPlayerVehicle();
-		if ( FindPlayerVehicle()->m_vehType == 5 )
+		if ( FindPlayerVehicle()->IsBike() )
 		{
 			if ( vehicle->pPassengers[0] )
 				vehicle->pPassengers[0]->SetObjective(OBJECTIVE_LEAVE_CAR, vehicle);

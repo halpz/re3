@@ -177,6 +177,10 @@ void CGarages::Update(void)
 	static uint32 GarageToBeTidied = 0;
 	if (CReplay::IsPlayingBack())
 		return;
+#ifdef SECUROM
+	extern uint8 gameProcessPirateCheck;
+	if (gameProcessPirateCheck == 2) return;
+#endif
 	bCamShouldBeOutisde = false;
 	TheCamera.pToGarageWeAreIn = nil;
 	TheCamera.pToGarageWeAreInForHackAvoidFirstPerson = nil;

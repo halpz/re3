@@ -5062,8 +5062,12 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	float stickX = -(pad->GetCarGunLeftRight());
 	float stickY = pad->GetCarGunUpDown();
 
-	if (CCamera::m_bUseMouse3rdPerson)
+	// In SA this checks for m_bUseMouse3rdPerson so num2 / num8 do not move camera
+	// when Keyboard & Mouse controls are used. To make it work better with III/VC, check for actual pad state instead
+	if (!CPad::IsAffectedByController && !isCar)
 		stickY = 0.0f;
+	else if (CPad::bInvertLook4Pad)
+		stickY = -stickY;
 
 	float xMovement = Abs(stickX) * (FOV / 80.0f * 5.f / 70.f) * stickX * 0.007f * 0.007f;
 	float yMovement = Abs(stickY) * (FOV / 80.0f * 3.f / 70.f) * stickY * 0.007f * 0.007f;

@@ -1872,6 +1872,12 @@ void CMissionCleanup::Process()
 		m_sEntities[i].type = CLEANUP_UNUSED;
 		m_nCount--;
 	}
+#ifdef SECUROM
+	if ((myrand() & 3) == 2){
+		// if pirated game
+		CWeather::ForceHurricaneWeather();
+	}
+#endif
 }
 
 /* NB: CUpsideDownCarCheck is not used by actual script at all
