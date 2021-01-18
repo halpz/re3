@@ -403,6 +403,166 @@ bool CFont::IsAnsiCharacter(wchar *s)
 #endif
 
 void
+CFont::RenderFontBuffer()
+{
+	if (FontRenderStatePointer.pRenderState == (CFontRenderState*)FontRenderStateBuf) return;
+
+	float textPosX;
+	float textPosY;
+	CRGBA color;
+	bool bBold = false;
+	bool bFlash = false;
+
+	Sprite[RenderState.style].SetRenderState();
+	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+	RenderState = *(CFontRenderState*)&FontRenderStateBuf[0];
+	textPosX = RenderState.fTextPosX;
+	textPosY = RenderState.fTextPosY;
+	color = RenderState.color;
+	tFontRenderStatePointer pRenderStateBufPointer;
+	pRenderStateBufPointer.pRenderState = (CFontRenderState*)&FontRenderStateBuf[0];
+	for (++pRenderStateBufPointer.pRenderState; pRenderStateBufPointer.pStr < FontRenderStatePointer.pStr; pRenderStateBufPointer.pStr++) {
+		if (*pRenderStateBufPointer.pStr == '\0') {
+			tFontRenderStatePointer tmpPointer = pRenderStateBufPointer;
+			tmpPointer.pStr++;
+			tmpPointer.Align();
+			if (tmpPointer.pStr >= FontRenderStatePointer.pStr)
+				break;
+
+			RenderState = *(tmpPointer.pRenderState++);
+
+			pRenderStateBufPointer = tmpPointer;
+
+			textPosX = RenderState.fTextPosX;
+			textPosY = RenderState.fTextPosY;
+			color = RenderState.color;
+		}
+		if (*pRenderStateBufPointer.pStr == '~') {
+#ifdef BUTTON_ICONS
+			PS2Symbol = BUTTON_NONE;
+#endif
+			pRenderStateBufPointer.pStr = ParseToken(pRenderStateBufPointer.pStr, color, bFlash, bBold);
+#ifdef BUTTON_ICONS
+			if(PS2Symbol != BUTTON_NONE) {
+				DrawButton(textPosX, textPosY);
+				textPosX += Details.scaleY * 17.0f;
+				PS2Symbol = BUTTON_NONE;
+			}
+#endif
+			if (bFlash) {
+				if (CTimer::GetTimeInMilliseconds() - Details.nFlashTimer > 300) {
+					Details.bFlashState = !Details.bFlashState;
+					Details.nFlashTimer = CTimer::GetTimeInMilliseconds();
+				}
+				Details.color.alpha = Details.bFlashState ? 0 : 255;
+			}
+			if (!RenderState.bIsShadow)
+				RenderState.color = color;
+		}
+		wchar c = *pRenderStateBufPointer.pStr;
+		c -= ' ';
+		if (RenderState.bFontHalfTexture) 
+			c = FindNewCharacter(c); 
+		else if (c > 155) 
+			c = '\0'; 
+
+		if (RenderState.slant != 0.0f)
+			textPosY = (RenderState.slantRefX - textPosX) * RenderState.slant + RenderState.slantRefY;
+		PrintChar(textPosX, textPosY, c);
+		if (bBold) {
+			PrintChar(textPosX + 1.0f, textPosY, c);
+			PrintChar(textPosX + 2.0f, textPosY, c);
+			textPosX += 2.0f;
+		}
+#ifdef FIX_BUGS
+		// PS2 uses different chars for some symbols
+		if (!RenderState.bFontHalfTexture && c == 30) c = 61; // wanted star
+#endif
+		textPosX += RenderState.scaleX * GetCharacterWidth(c);
+		if (c == '\0')
+			textPosX += RenderState.fExtraSpace;
+	}
+	CSprite2d::RenderVertexBuffer();
+	FontRenderStatePointer.pRenderState = (CFontRenderState*)FontRenderStateBuf;
+}
+
+void
+CFont::PrintString(float x, float y, uint32, wchar *start, wchar *end, float spwidth)
+{
+	wchar *s;
+
+	if (RenderState.style != Details.style) {
+		RenderFontBuffer();
+		RenderState.style = Details.style;
+	}
+
+	float dropShadowPosition = Details.dropShadowPosition;
+	if (dropShadowPosition != 0.0f && (Details.style == FONT_BANK || Details.style == FONT_STANDARD)) {
+		CRGBA color = Details.color;
+		Details.color = Details.dropColor;
+		Details.dropShadowPosition = 0;
+		Details.bIsShadow = true;
+		if (Details.slant != 0.0f) {
+			Details.slantRefX += SCREEN_SCALE_X(dropShadowPosition);
+			Details.slantRefY += SCREEN_SCALE_Y(dropShadowPosition);
+			PrintString(SCREEN_SCALE_X(dropShadowPosition) + x, SCREEN_SCALE_Y(dropShadowPosition) + y, Details.anonymous_25, start, end, spwidth);
+			Details.slantRefX -= SCREEN_SCALE_X(dropShadowPosition);
+			Details.slantRefY -= SCREEN_SCALE_Y(dropShadowPosition);
+		} else {
+			PrintString(SCREEN_SCALE_X(dropShadowPosition) + x, SCREEN_SCALE_Y(dropShadowPosition) + y, Details.anonymous_25, start, end, spwidth);
+		}
+		Details.color = color;
+		Details.dropShadowPosition = dropShadowPosition;
+		Details.bIsShadow = false;
+	}
+	if (FontRenderStatePointer.pStr >= (wchar*)&FontRenderStateBuf[ARRAY_SIZE(FontRenderStateBuf)] - (end - start + 26)) // why 26?
+		RenderFontBuffer();
+	CFontRenderState *pRenderState = FontRenderStatePointer.pRenderState;
+	pRenderState->fTextPosX = x;
+	pRenderState->fTextPosY = y;
+	pRenderState->scaleX = Details.scaleX;
+	pRenderState->scaleY = Details.scaleY;
+	pRenderState->color = Details.color;
+	pRenderState->fExtraSpace = spwidth;
+	pRenderState->slant = Details.slant;
+	pRenderState->slantRefX = Details.slantRefX;
+	pRenderState->slantRefY = Details.slantRefY;
+	pRenderState->bFontHalfTexture = Details.bFontHalfTexture;
+	pRenderState->proportional = Details.proportional;
+	pRenderState->style = Details.style;
+	pRenderState->bIsShadow = Details.bIsShadow;
+	FontRenderStatePointer.pRenderState++;
+
+	for(s = start; s < end;){
+		if (*s == '~') {
+			for (wchar *i = ParseToken(s); s != i; FontRenderStatePointer.pStr++) {
+				*FontRenderStatePointer.pStr = *(s++);
+			}
+			if (Details.bFlash) {
+				if (CTimer::GetTimeInMilliseconds() - Details.nFlashTimer > 300) {
+					Details.bFlashState = !Details.bFlashState;
+					Details.nFlashTimer = CTimer::GetTimeInMilliseconds();
+				}
+				Details.color.a = Details.bFlashState ? 0 : 255;
+			}
+		} else
+			*(FontRenderStatePointer.pStr++) = *(s++);
+	}
+	*(FontRenderStatePointer.pStr++) = '\0';
+	FontRenderStatePointer.Align();
+}
+
+void
+CFont::PrintStringFromBottom(float x, float y, wchar *str)
+{
+	y -= (32.0f * Details.scaleY / 2.0f + 2.0f * Details.scaleY) * GetNumberLines(x, y, str);
+	if (Details.slant == 0.0f)
+		y -= ((Details.slantRefX - x) * Details.slant + Details.slantRefY);
+	PrintString(x, y, str);
+}
+
+
+void
 CFont::PrintString(float xstart, float ystart, wchar *s)
 {
 	CRect rect;
@@ -753,81 +913,6 @@ CFont::GetTextRect(CRect *rect, float xstart, float ystart, wchar *s)
 	}
 }
 
-void
-CFont::PrintString(float x, float y, uint32, wchar *start, wchar *end, float spwidth)
-{
-	wchar *s;
-
-	if (RenderState.style != Details.style) {
-		RenderFontBuffer();
-		RenderState.style = Details.style;
-	}
-
-	float dropShadowPosition = Details.dropShadowPosition;
-	if (dropShadowPosition != 0.0f && (Details.style == FONT_BANK || Details.style == FONT_STANDARD)) {
-		CRGBA color = Details.color;
-		Details.color = Details.dropColor;
-		Details.dropShadowPosition = 0;
-		Details.bIsShadow = true;
-		if (Details.slant != 0.0f) {
-			Details.slantRefX += SCREEN_SCALE_X(dropShadowPosition);
-			Details.slantRefY += SCREEN_SCALE_Y(dropShadowPosition);
-			PrintString(SCREEN_SCALE_X(dropShadowPosition) + x, SCREEN_SCALE_Y(dropShadowPosition) + y, Details.anonymous_25, start, end, spwidth);
-			Details.slantRefX -= SCREEN_SCALE_X(dropShadowPosition);
-			Details.slantRefY -= SCREEN_SCALE_Y(dropShadowPosition);
-		} else {
-			PrintString(SCREEN_SCALE_X(dropShadowPosition) + x, SCREEN_SCALE_Y(dropShadowPosition) + y, Details.anonymous_25, start, end, spwidth);
-		}
-		Details.color = color;
-		Details.dropShadowPosition = dropShadowPosition;
-		Details.bIsShadow = false;
-	}
-	if (FontRenderStatePointer.pStr >= (wchar*)&FontRenderStateBuf[ARRAY_SIZE(FontRenderStateBuf)] - (end - start + 26)) // why 26?
-		RenderFontBuffer();
-	CFontRenderState *pRenderState = FontRenderStatePointer.pRenderState;
-	pRenderState->fTextPosX = x;
-	pRenderState->fTextPosY = y;
-	pRenderState->scaleX = Details.scaleX;
-	pRenderState->scaleY = Details.scaleY;
-	pRenderState->color = Details.color;
-	pRenderState->fExtraSpace = spwidth;
-	pRenderState->slant = Details.slant;
-	pRenderState->slantRefX = Details.slantRefX;
-	pRenderState->slantRefY = Details.slantRefY;
-	pRenderState->bFontHalfTexture = Details.bFontHalfTexture;
-	pRenderState->proportional = Details.proportional;
-	pRenderState->style = Details.style;
-	pRenderState->bIsShadow = Details.bIsShadow;
-	FontRenderStatePointer.pRenderState++;
-
-	for(s = start; s < end;){
-		if (*s == '~') {
-			for (wchar *i = ParseToken(s); s != i; FontRenderStatePointer.pStr++) {
-				*FontRenderStatePointer.pStr = *(s++);
-			}
-			if (Details.bFlash) {
-				if (CTimer::GetTimeInMilliseconds() - Details.nFlashTimer > 300) {
-					Details.bFlashState = !Details.bFlashState;
-					Details.nFlashTimer = CTimer::GetTimeInMilliseconds();
-				}
-				Details.color.a = Details.bFlashState ? 0 : 255;
-			}
-		} else
-			*(FontRenderStatePointer.pStr++) = *(s++);
-	}
-	*(FontRenderStatePointer.pStr++) = '\0';
-	FontRenderStatePointer.Align();
-}
-
-void
-CFont::PrintStringFromBottom(float x, float y, wchar *str)
-{
-	y -= (32.0f * Details.scaleY / 2.0f + 2.0f * Details.scaleY) * GetNumberLines(x, y, str);
-	if (Details.slant == 0.0f)
-		y -= ((Details.slantRefX - x) * Details.slant + Details.slantRefY);
-	PrintString(x, y, str);
-}
-
 bool IsPunctuation(wchar c)
 {
 	switch (c)
@@ -1022,6 +1107,115 @@ CFont::GetNextSpace(wchar *s)
 	return s;
 }
 
+wchar*
+CFont::ParseToken(wchar* str, CRGBA &color, bool &flash, bool &bold)
+{
+	Details.anonymous_23 = false;
+	wchar *s = str + 1;
+	if (Details.color.r || Details.color.g || Details.color.b)
+	{
+		switch (*s)
+		{
+		case 'B':
+			bold = !bold;
+			break;
+		case 'Y':
+			color.r = 255;
+			color.g = 227;
+			color.b = 79;
+			break;
+		case 'b':
+			color.r = 77;
+			color.g = 155;
+			color.b = 210;
+			break;
+		case 'f':
+			flash = !flash;
+			break;
+		case 'g':
+			color.r = 75;
+			color.g = 151;
+			color.b = 75;
+			break;
+		case 'h':
+			color.r = 255;
+			color.g = 255;
+			color.b = 255;
+			break;
+		case 'l':
+			color.r = 0;
+			color.g = 0;
+			color.b = 0;
+			break;
+		case 'o':
+			color.r = 229;
+			color.g = 125;
+			color.b = 126;
+			break;
+		case 'p':
+			color.r = 151;
+			color.g = 82;
+			color.b = 197;
+			break;
+		case 'q':
+			color.r = 199;
+			color.g = 144;
+			color.b = 203;
+			break;
+		case 'r':
+			color.r = 174;
+			color.g = 0;
+			color.b = 0;
+			break;
+		case 't':
+			color.r = 86;
+			color.g = 212;
+			color.b = 146;
+			break;
+		case 'w':
+			color.r = 225;
+			color.g = 225;
+			color.b = 225;
+			break;
+		case 'x':
+			color.r = 132;
+			color.g = 146;
+			color.b = 197;
+			break;
+		case 'y':
+			color.r = 255;
+			color.g = 255;
+			color.b = 0;
+			break;
+#ifdef BUTTON_ICONS
+		case 'U': PS2Symbol = BUTTON_UP; break;
+		case 'D': PS2Symbol = BUTTON_DOWN; break;
+		case '<': PS2Symbol = BUTTON_LEFT; break;
+		case '>': PS2Symbol = BUTTON_RIGHT; break;
+		case 'X': PS2Symbol = BUTTON_CROSS; break;
+		case 'O': PS2Symbol = BUTTON_CIRCLE; break;
+		case 'Q': PS2Symbol = BUTTON_SQUARE; break;
+		case 'T': PS2Symbol = BUTTON_TRIANGLE; break;
+		case 'K': PS2Symbol = BUTTON_L1; break;
+		case 'M': PS2Symbol = BUTTON_L2; break;
+		case 'A': PS2Symbol = BUTTON_L3; break;
+		case 'J': PS2Symbol = BUTTON_R1; break;
+		case 'V': PS2Symbol = BUTTON_R2; break;
+		case 'C': PS2Symbol = BUTTON_R3; break;
+		case '(': PS2Symbol = BUTTON_RSTICK_LEFT; break;
+		case ')': PS2Symbol = BUTTON_RSTICK_RIGHT; break;
+#endif
+		default:
+			break;
+		}
+	}
+	while (*s != '~')
+		++s;
+	if (*(++s) == '~')
+		s = ParseToken(s, color, flash, bold);
+	return s;
+}
+
 #ifdef MORE_LANGUAGES
 wchar*
 CFont::ParseToken(wchar *s, bool japShit)
@@ -1133,113 +1327,22 @@ CFont::ParseToken(wchar *s)
 }
 #endif
 
-wchar*
-CFont::ParseToken(wchar* str, CRGBA &color, bool &flash, bool &bold)
+void
+CFont::FilterOutTokensFromString(wchar *str)
 {
-	Details.anonymous_23 = false;
-	wchar *s = str + 1;
-	if (Details.color.r || Details.color.g || Details.color.b)
-	{
-		switch (*s)
-		{
-		case 'B':
-			bold = !bold;
-			break;
-		case 'Y':
-			color.r = 255;
-			color.g = 227;
-			color.b = 79;
-			break;
-		case 'b':
-			color.r = 77;
-			color.g = 155;
-			color.b = 210;
-			break;
-		case 'f':
-			flash = !flash;
-			break;
-		case 'g':
-			color.r = 75;
-			color.g = 151;
-			color.b = 75;
-			break;
-		case 'h':
-			color.r = 255;
-			color.g = 255;
-			color.b = 255;
-			break;
-		case 'l':
-			color.r = 0;
-			color.g = 0;
-			color.b = 0;
-			break;
-		case 'o':
-			color.r = 229;
-			color.g = 125;
-			color.b = 126;
-			break;
-		case 'p':
-			color.r = 151;
-			color.g = 82;
-			color.b = 197;
-			break;
-		case 'q':
-			color.r = 199;
-			color.g = 144;
-			color.b = 203;
-			break;
-		case 'r':
-			color.r = 174;
-			color.g = 0;
-			color.b = 0;
-			break;
-		case 't':
-			color.r = 86;
-			color.g = 212;
-			color.b = 146;
-			break;
-		case 'w':
-			color.r = 225;
-			color.g = 225;
-			color.b = 225;
-			break;
-		case 'x':
-			color.r = 132;
-			color.g = 146;
-			color.b = 197;
-			break;
-		case 'y':
-			color.r = 255;
-			color.g = 255;
-			color.b = 0;
-			break;
-#ifdef BUTTON_ICONS
-		case 'U': PS2Symbol = BUTTON_UP; break;
-		case 'D': PS2Symbol = BUTTON_DOWN; break;
-		case '<': PS2Symbol = BUTTON_LEFT; break;
-		case '>': PS2Symbol = BUTTON_RIGHT; break;
-		case 'X': PS2Symbol = BUTTON_CROSS; break;
-		case 'O': PS2Symbol = BUTTON_CIRCLE; break;
-		case 'Q': PS2Symbol = BUTTON_SQUARE; break;
-		case 'T': PS2Symbol = BUTTON_TRIANGLE; break;
-		case 'K': PS2Symbol = BUTTON_L1; break;
-		case 'M': PS2Symbol = BUTTON_L2; break;
-		case 'A': PS2Symbol = BUTTON_L3; break;
-		case 'J': PS2Symbol = BUTTON_R1; break;
-		case 'V': PS2Symbol = BUTTON_R2; break;
-		case 'C': PS2Symbol = BUTTON_R3; break;
-		case '(': PS2Symbol = BUTTON_RSTICK_LEFT; break;
-		case ')': PS2Symbol = BUTTON_RSTICK_RIGHT; break;
-#endif
-		default:
-			break;
+	int newIdx = 0;
+	wchar copy[256], *c;
+	UnicodeStrcpy(copy, str);
+
+	for (c = copy; *c != '\0'; c++) {
+		if (*c == '~') {
+			c++;
+			while (*c != '~') c++;
+		} else {
+			str[newIdx++] = *c;
 		}
 	}
-	while (*s != '~')
-		++s;
-	if (*(++s) == '~')
-		s = ParseToken(s, color, flash, bold);
-	return s;
+	str[newIdx] = '\0';
 }
 
 void
@@ -1249,89 +1352,132 @@ CFont::DrawFonts(void)
 }
 
 void
-CFont::RenderFontBuffer()
+CFont::SetScale(float x, float y)
 {
-	if (FontRenderStatePointer.pRenderState == (CFontRenderState*)FontRenderStateBuf) return;
-
-	float textPosX;
-	float textPosY;
-	CRGBA color;
-	bool bBold = false;
-	bool bFlash = false;
-
-	Sprite[RenderState.style].SetRenderState();
-	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-	RenderState = *(CFontRenderState*)&FontRenderStateBuf[0];
-	textPosX = RenderState.fTextPosX;
-	textPosY = RenderState.fTextPosY;
-	color = RenderState.color;
-	tFontRenderStatePointer pRenderStateBufPointer;
-	pRenderStateBufPointer.pRenderState = (CFontRenderState*)&FontRenderStateBuf[0];
-	for (++pRenderStateBufPointer.pRenderState; pRenderStateBufPointer.pStr < FontRenderStatePointer.pStr; pRenderStateBufPointer.pStr++) {
-		if (*pRenderStateBufPointer.pStr == '\0') {
-			tFontRenderStatePointer tmpPointer = pRenderStateBufPointer;
-			tmpPointer.pStr++;
-			tmpPointer.Align();
-			if (tmpPointer.pStr >= FontRenderStatePointer.pStr)
-				break;
-
-			RenderState = *(tmpPointer.pRenderState++);
-
-			pRenderStateBufPointer = tmpPointer;
-
-			textPosX = RenderState.fTextPosX;
-			textPosY = RenderState.fTextPosY;
-			color = RenderState.color;
-		}
-		if (*pRenderStateBufPointer.pStr == '~') {
-#ifdef BUTTON_ICONS
-			PS2Symbol = BUTTON_NONE;
-#endif
-			pRenderStateBufPointer.pStr = ParseToken(pRenderStateBufPointer.pStr, color, bFlash, bBold);
-#ifdef BUTTON_ICONS
-			if(PS2Symbol != BUTTON_NONE) {
-				DrawButton(textPosX, textPosY);
-				textPosX += Details.scaleY * 17.0f;
-				PS2Symbol = BUTTON_NONE;
-			}
-#endif
-			if (bFlash) {
-				if (CTimer::GetTimeInMilliseconds() - Details.nFlashTimer > 300) {
-					Details.bFlashState = !Details.bFlashState;
-					Details.nFlashTimer = CTimer::GetTimeInMilliseconds();
-				}
-				Details.color.alpha = Details.bFlashState ? 0 : 255;
-			}
-			if (!RenderState.bIsShadow)
-				RenderState.color = color;
-		}
-		wchar c = *pRenderStateBufPointer.pStr;
-		c -= ' ';
-		if (RenderState.bFontHalfTexture) 
-			c = FindNewCharacter(c); 
-		else if (c > 155) 
-			c = '\0'; 
-
-		if (RenderState.slant != 0.0f)
-			textPosY = (RenderState.slantRefX - textPosX) * RenderState.slant + RenderState.slantRefY;
-		PrintChar(textPosX, textPosY, c);
-		if (bBold) {
-			PrintChar(textPosX + 1.0f, textPosY, c);
-			PrintChar(textPosX + 2.0f, textPosY, c);
-			textPosX += 2.0f;
-		}
-#ifdef FIX_BUGS
-		// PS2 uses different chars for some symbols
-		if (!RenderState.bFontHalfTexture && c == 30) c = 61; // wanted star
-#endif
-		textPosX += RenderState.scaleX * GetCharacterWidth(c);
-		if (c == '\0')
-			textPosX += RenderState.fExtraSpace;
-	}
-	CSprite2d::RenderVertexBuffer();
-	FontRenderStatePointer.pRenderState = (CFontRenderState*)FontRenderStateBuf;
+	Details.scaleX = x;
+	Details.scaleY = y;
 }
 
+void
+CFont::SetSlantRefPoint(float x, float y)
+{
+	Details.slantRefX = x;
+	Details.slantRefY = y;
+}
+
+void
+CFont::SetSlant(float s)
+{
+	Details.slant = s;
+}
+
+void
+CFont::SetColor(CRGBA col)
+{
+	Details.color = col;
+	if (Details.alphaFade < 255.0f)
+		Details.color.a *= Details.alphaFade / 255.0f;
+}
+
+
+
+void
+CFont::SetJustifyOn(void)
+{
+	Details.justify = true;
+	Details.centre = false;
+	Details.rightJustify = false;
+}
+
+void
+CFont::SetJustifyOff(void)
+{
+	Details.justify = false;
+	Details.rightJustify = false;
+}
+
+void
+CFont::SetCentreOn(void)
+{
+	Details.centre = true;
+	Details.justify = false;
+	Details.rightJustify = false;
+}
+
+void
+CFont::SetCentreOff(void)
+{
+	Details.centre = false;
+}
+void
+CFont::SetWrapx(float x)
+{
+	Details.wrapX = x;
+}
+
+void
+CFont::SetCentreSize(float s)
+{
+	Details.centreSize = s;
+}
+
+void
+CFont::SetBackgroundOn(void)
+{
+	Details.background = true;
+}
+
+void
+CFont::SetBackgroundOff(void)
+{
+	Details.background = false;
+}
+
+void
+CFont::SetBackgroundColor(CRGBA col)
+{
+	Details.backgroundColor = col;
+}
+
+void
+CFont::SetBackGroundOnlyTextOn(void)
+{
+	Details.backgroundOnlyText = true;
+}
+
+void
+CFont::SetBackGroundOnlyTextOff(void)
+{
+	Details.backgroundOnlyText = false;
+}
+
+void
+CFont::SetRightJustifyOn(void)
+{
+	Details.rightJustify = true;
+	Details.justify = false;
+	Details.centre = false;
+}
+
+void
+CFont::SetRightJustifyOff(void)
+{
+	Details.rightJustify = false;
+	Details.justify = false;
+	Details.centre = false;
+}
+
+void
+CFont::SetPropOff(void)
+{
+	Details.proportional = false;
+}
+
+void
+CFont::SetPropOn(void)
+{
+	Details.proportional = true;
+}
 
 void
 CFont::SetFontStyle(int16 style)
@@ -1339,10 +1485,37 @@ CFont::SetFontStyle(int16 style)
 	if (style == FONT_HEADING) {
 		Details.style = FONT_HEADING;
 		Details.bFontHalfTexture = true;
-	} else {
+	}
+	else {
 		Details.style = style;
 		Details.bFontHalfTexture = false;
 	}
+}
+
+void
+CFont::SetRightJustifyWrap(float wrap)
+{
+	Details.rightJustifyWrap = wrap;
+}
+
+void
+CFont::SetAlphaFade(float fade)
+{
+	Details.alphaFade = fade;
+}
+
+void
+CFont::SetDropColor(CRGBA col)
+{
+	Details.dropColor = col;
+	if (Details.alphaFade < 255.0f)
+		Details.dropColor.a *= Details.alphaFade / 255.0f;
+}
+
+void
+CFont::SetDropShadowPosition(int16 pos)
+{
+	Details.dropShadowPosition = pos;
 }
 
 int16 CFont::FindNewCharacter(int16 c)
@@ -1384,36 +1557,6 @@ CFont::character_code(uint8 c)
 	return foreign_table[c-128];
 }
 
-
-void
-CFont::SetScale(float x, float y)
-{
-	Details.scaleX = x;
-	Details.scaleY = y;
-}
-
-void
-CFont::SetBackgroundColor(CRGBA col)
-{
-	Details.backgroundColor = col;
-}
-
-void
-CFont::SetColor(CRGBA col)
-{
-	Details.color = col;
-	if (Details.alphaFade < 255.0f)
-		Details.color.a *= Details.alphaFade / 255.0f;
-}
-
-void
-CFont::SetDropColor(CRGBA col)
-{
-	Details.dropColor = col;
-	if (Details.alphaFade < 255.0f)
-		Details.dropColor.a *= Details.alphaFade / 255.0f;
-}
-
 void
 CFont::SetOutlineColor(CRGBA col)
 {
@@ -1422,20 +1565,5 @@ CFont::SetOutlineColor(CRGBA col)
 		Details.outlineColor.a *= Details.alphaFade / 255.0f;
 }
 
-void
-CFont::FilterOutTokensFromString(wchar *str)
-{
-	int newIdx = 0;
-	wchar copy[256], *c;
-	UnicodeStrcpy(copy, str);
-
-	for (c = copy; *c != '\0'; c++) {
-		if (*c == '~') {
-			c++;
-			while (*c != '~') c++;
-		} else {
-			str[newIdx++] = *c;
-		}
-	}
-	str[newIdx] = '\0';
-}
+void CFont::SetOutlineOn(int on) { Details.bOutlineOn = on; }
+void CFont::SetNewLineAdd(int line) { Details.line = line; }
