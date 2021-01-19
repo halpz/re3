@@ -1,3 +1,6 @@
+#if !defined(GTA_PS2_STUFF) && defined(RWLIBS)
+#define WITHD3D
+#endif
 #include "config.h"
 #include "common.h"
 
