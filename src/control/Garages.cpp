@@ -1539,7 +1539,7 @@ void CGarage::RefreshDoorPointers(bool bCreate)
 	m_bRecreateDoorOnNextRefresh = false;
 	if (m_pDoor1) {
 		if (m_bDoor1IsDummy) {
-			if (CPools::GetDummyPool()->IsFreeSlot(CPools::GetDummyPool()->GetJustIndex_NoFreeAssert((CDummy*)m_pDoor1)))
+			if (CPools::GetDummyPool()->GetIsFree(CPools::GetDummyPool()->GetJustIndex_NoFreeAssert((CDummy*)m_pDoor1)))
 				bNeedToFindDoorEntities = true;
 			else {
 				if (m_bDoor1PoolIndex != (CPools::GetDummyPool()->GetIndex((CDummy*)m_pDoor1) & 0x7F))
@@ -1549,7 +1549,7 @@ void CGarage::RefreshDoorPointers(bool bCreate)
 			}
 		}
 		else {
-			if (CPools::GetObjectPool()->IsFreeSlot(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert((CObject*)m_pDoor1)))
+			if (CPools::GetObjectPool()->GetIsFree(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert((CObject*)m_pDoor1)))
 				bNeedToFindDoorEntities = true;
 			else {
 				if (m_bDoor1PoolIndex != (CPools::GetObjectPool()->GetIndex((CObject*)m_pDoor1) & 0x7F))
@@ -1561,7 +1561,7 @@ void CGarage::RefreshDoorPointers(bool bCreate)
 	}
 	if (m_pDoor2) {
 		if (m_bDoor2IsDummy) {
-			if (CPools::GetDummyPool()->IsFreeSlot(CPools::GetDummyPool()->GetJustIndex_NoFreeAssert((CDummy*)m_pDoor2)))
+			if (CPools::GetDummyPool()->GetIsFree(CPools::GetDummyPool()->GetJustIndex_NoFreeAssert((CDummy*)m_pDoor2)))
 				bNeedToFindDoorEntities = true;
 			else {
 				if (m_bDoor2PoolIndex != (CPools::GetDummyPool()->GetIndex((CDummy*)m_pDoor2) & 0x7F))
@@ -1571,7 +1571,7 @@ void CGarage::RefreshDoorPointers(bool bCreate)
 			}
 		}
 		else {
-			if (CPools::GetObjectPool()->IsFreeSlot(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert((CObject*)m_pDoor2)))
+			if (CPools::GetObjectPool()->GetIsFree(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert((CObject*)m_pDoor2)))
 				bNeedToFindDoorEntities = true;
 			else {
 				if (m_bDoor2PoolIndex != (CPools::GetObjectPool()->GetIndex((CObject*)m_pDoor2) & 0x7F))

@@ -102,7 +102,7 @@ CPools::CheckPoolsEmpty()
 void
 CPools::MakeSureSlotInObjectPoolIsEmpty(int32 slot)
 {
-	if (ms_pObjectPool->IsFreeSlot(slot)) return;
+	if (ms_pObjectPool->GetIsFree(slot)) return;
 
 	CObject *object = ms_pObjectPool->GetSlot(slot);
 	if (object->ObjectCreatedBy == TEMP_OBJECT) {
