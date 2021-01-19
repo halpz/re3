@@ -3863,7 +3863,7 @@ CCamera::GetScreenFadeStatus(void)
 }
 
 
-
+//--LCS: TODO
 void
 CCamera::RenderMotionBlur(void)
 {
@@ -3872,7 +3872,8 @@ CCamera::RenderMotionBlur(void)
 
 	CMBlur::MotionBlurRender(m_pRwCamera,
 		m_BlurRed, m_BlurGreen, m_BlurBlue,
-		m_motionBlur, m_BlurType, m_imotionBlurAddAlpha);
+//		m_motionBlur, m_BlurType, m_imotionBlurAddAlpha);
+		m_motionBlur, m_BlurType, 32);	// hack hack
 }
 
 void

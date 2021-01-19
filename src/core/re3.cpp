@@ -651,8 +651,8 @@ extern bool gbRenderWorld2;
 #endif
 
 #ifdef EXTENDED_COLOURFILTER
-		static const char *filternames[] = { "None", "PS2" };
-		e = DebugMenuAddVar("Render", "Colourfilter", &CPostFX::EffectSwitch, nil, 1, CPostFX::POSTFX_OFF, CPostFX::POSTFX_NORMAL, filternames);
+		static const char *filternames[] = { "None", "PSP", "PS2" };
+		e = DebugMenuAddVar("Render", "Colourfilter", &CPostFX::EffectSwitch, nil, 1, CPostFX::POSTFX_OFF, CPostFX::POSTFX_PS2, filternames);
 		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddVar("Render", "Intensity", &CPostFX::Intensity, nil, 0.05f, 0, 10.0f);
 		DebugMenuAddVarBool8("Render", "Blur", &CPostFX::BlurOn, nil);
