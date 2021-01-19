@@ -1,5 +1,8 @@
 #pragma once
 
+// disable (most) stuff that wasn't in original gta3.exe - check section at the bottom of this file
+#define VANILLA_DEFINES
+
 enum Config {
 	NUMPLAYERS = 1,	// 4 on PS2
 
@@ -8,8 +11,11 @@ enum Config {
 	MAX_CDCHANNELS = 5,
 
 	MODELINFOSIZE = 5500,	// 3150 on PS2
-//	TXDSTORESIZE = 850,
+#if defined __MWERKS__ || defined VANILLA_DEFINES
+	TXDSTORESIZE = 850,
+#else
 	TXDSTORESIZE = 1024,	// for Xbox map
+#endif
 	EXTRADIRSIZE = 128,
 	CUTSCENEDIRSIZE = 512,
 
@@ -235,6 +241,12 @@ enum Config {
 #define FIX_BUGS_64 // Must have fixes to be able to run 64 bit build
 #endif
 
+#define ASCII_STRCMP // use faster ascii str comparisons
+
+#if !defined _WIN32 || defined __MWERKS__ || defined __MINGW32__
+#undef ASCII_STRCMP
+#endif
+
 // Just debug menu entries
 #ifdef DEBUGMENU
 #define MISSION_SWITCHER // from debug menu
@@ -393,4 +405,87 @@ enum Config {
 
 #ifdef LIBRW
 // these are not supported with librw yet
+#endif
+
+#if defined __MWERKS__ || defined VANILLA_DEFINES
+#define FINAL
+#undef CHATTYSPLASH
+#undef TIMEBARS
+//#define USE_MY_DOCUMENTS
+
+#define MASTER
+#undef VALIDATE_SAVE_SIZE
+#undef NO_MOVIES
+#undef DEBUGMENU
+
+#undef DRAW_GAME_VERSION_TEXT
+#undef DRAW_MENU_VERSION_TEXT
+
+#undef GTA_PS2_STUFF
+#undef USE_PS2_RAND
+#undef RANDOMSPLASH
+#undef PS2_MATFX
+
+#undef FIX_BUGS
+#undef THIS_IS_STUPID
+#undef MORE_LANGUAGES
+#undef MORE_LANGUAGES
+#undef COMPATIBLE_SAVES
+#undef LOAD_INI_SETTINGS
+
+#undef ASPECT_RATIO_SCALE
+#undef PROPER_SCALING
+#undef DEFAULT_NATIVE_RESOLUTION
+#undef PS2_ALPHA_TEST
+#undef IMPROVED_VIDEOMODE
+#undef DISABLE_LOADING_SCREEN
+#undef DISABLE_VSYNC_ON_TEXTURE_CONVERSION
+//#define USE_TEXTURE_POOL // not possible because R* used custom RW33
+
+#undef FIX_SPRITES
+
+#define PC_PARTICLE
+
+#undef XINPUT
+#undef DETECT_PAD_INPUT_SWITCH
+#undef KANGAROO_CHEAT
+#undef ALLCARSHELI_CHEAT
+#undef ALT_DODO_CHEAT
+#undef REGISTER_START_BUTTON
+#undef BIND_VEHICLE_FIREWEAPON
+#undef BUTTON_ICONS
+
+#undef HUD_ENHANCEMENTS
+#undef TRIANGULAR_BLIPS
+#undef FIX_RADAR
+#undef RADIO_OFF_TEXT
+
+#undef MENU_MAP
+#undef SCROLLABLE_STATS_PAGE
+#undef CUSTOM_FRONTEND_OPTIONS
+
+#undef GRAPHICS_MENU_OPTIONS
+#undef NO_ISLAND_LOADING
+#undef CUTSCENE_BORDERS_SWITCH
+#undef MULTISAMPLING
+#undef INVERT_LOOK_FOR_PAD
+
+#undef USE_DEBUG_SCRIPT_LOADER
+#undef USE_MEASUREMENTS_IN_METERS // TODO
+#undef USE_PRECISE_MEASUREMENT_CONVERTION
+#undef MISSION_REPLAY
+#undef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+#undef USE_BASIC_SCRIPT_DEBUG_OUTPUT
+
+#define DONT_FIX_REPLAY_BUGS
+
+#undef EXPLODING_AIRTRAIN
+#undef CAMERA_PICKUP
+#undef PED_SKIN
+#undef ANIMATE_PED_COL_MODEL
+#undef CANCELLABLE_CAR_ENTER
+#undef IMPROVED_CAMERA
+#undef FREE_CAM
+#undef RADIO_SCROLL_TO_PREV_STATION
+#undef BIG_IMG
 #endif

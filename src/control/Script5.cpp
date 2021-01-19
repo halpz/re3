@@ -1924,7 +1924,7 @@ INITSAVEBUF
 	for (uint32 i = 0; i < varSpace; i++)
 		WriteSaveBuf(buf, ScriptSpace[i]);
 #ifdef CHECK_STRUCT_SIZES
-	static_assert(SCRIPT_DATA_SIZE == 968, "CTheScripts::SaveAllScripts");
+	re3_static_assert(SCRIPT_DATA_SIZE == 968, "CTheScripts::SaveAllScripts");
 #endif
 	uint32 script_data_size = SCRIPT_DATA_SIZE;
 	WriteSaveBuf(buf, script_data_size);
@@ -2083,14 +2083,14 @@ void CRunningScript::Save(uint8*& buf)
 		WriteSaveBuf<char>(buf, m_abScriptName[i]);
 	WriteSaveBuf<uint32>(buf, m_nIp);
 #ifdef CHECK_STRUCT_SIZES
-	static_assert(MAX_STACK_DEPTH == 6, "Compatibility loss: MAX_STACK_DEPTH != 6");
+	re3_static_assert(MAX_STACK_DEPTH == 6, "Compatibility loss: MAX_STACK_DEPTH != 6");
 #endif
 	for (int i = 0; i < MAX_STACK_DEPTH; i++)
 		WriteSaveBuf<uint32>(buf, m_anStack[i]);
 	WriteSaveBuf<uint16>(buf, m_nStackPointer);
 	SkipSaveBuf(buf, 2);
 #ifdef CHECK_STRUCT_SIZES
-	static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
+	re3_static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
 #endif
 	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
 		WriteSaveBuf<int32>(buf, m_anLocalVariables[i]);
@@ -2118,14 +2118,14 @@ void CRunningScript::Load(uint8*& buf)
 		m_abScriptName[i] = ReadSaveBuf<char>(buf);
 	m_nIp = ReadSaveBuf<uint32>(buf);
 #ifdef CHECK_STRUCT_SIZES
-	static_assert(MAX_STACK_DEPTH == 6, "Compatibility loss: MAX_STACK_DEPTH != 6");
+	re3_static_assert(MAX_STACK_DEPTH == 6, "Compatibility loss: MAX_STACK_DEPTH != 6");
 #endif
 	for (int i = 0; i < MAX_STACK_DEPTH; i++)
 		m_anStack[i] = ReadSaveBuf<uint32>(buf);
 	m_nStackPointer = ReadSaveBuf<uint16>(buf);
 	SkipSaveBuf(buf, 2);
 #ifdef CHECK_STRUCT_SIZES
-	static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
+	re3_static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
 #endif
 	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
 		m_anLocalVariables[i] = ReadSaveBuf<int32>(buf);
@@ -2442,7 +2442,7 @@ bool CTheScripts::IsPedStopped(CPed* pPed)
 {
 	if (pPed->bInVehicle)
 		return IsVehicleStopped(pPed->m_pMyVehicle);
-	return pPed->m_nMoveState == eMoveState::PEDMOVE_NONE || pPed->m_nMoveState == eMoveState::PEDMOVE_STILL;
+	return pPed->m_nMoveState == PEDMOVE_NONE || pPed->m_nMoveState == PEDMOVE_STILL;
 }
 
 bool CTheScripts::IsPlayerStopped(CPlayerInfo* pPlayer)
@@ -2455,7 +2455,7 @@ bool CTheScripts::IsPlayerStopped(CPlayerInfo* pPlayer)
 		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_JUMP_LAUNCH) ||
 		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_JUMP_GLIDE))
 		return false;
-	return pPed->m_nMoveState == eMoveState::PEDMOVE_NONE || pPed->m_nMoveState == eMoveState::PEDMOVE_STILL;
+	return pPed->m_nMoveState == PEDMOVE_NONE || pPed->m_nMoveState == PEDMOVE_STILL;
 }
 
 bool CTheScripts::IsVehicleStopped(CVehicle* pVehicle)

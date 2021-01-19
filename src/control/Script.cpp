@@ -1282,7 +1282,7 @@ const tScriptCommandData commands[] = {
 #undef INPUT_ARGUMENTS
 #undef OUTPUT_ARGUMENTS
 
-static_assert(ARRAY_SIZE(commands) == LAST_SCRIPT_COMMAND, "commands array not filled");
+re3_static_assert(ARRAY_SIZE(commands) == LAST_SCRIPT_COMMAND, "commands array not filled");
 
 #if SCRIPT_LOG_FILE_LEVEL == 1 || SCRIPT_LOG_FILE_LEVEL == 2
 static FILE* dbg_log;

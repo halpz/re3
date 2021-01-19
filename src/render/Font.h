@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Sprite2d.h"
+
 void AsciiToUnicode(const char *src, wchar *dst);
 void UnicodeStrcpy(wchar *dst, const wchar *src);
 void UnicodeStrcat(wchar *dst, wchar *append);

@@ -17,7 +17,11 @@ enum eWinVersion
 // As long as WITHWINDOWS isn't defined / <Windows.h> isn't included, we only need type definitions so let's include <IntSafe.h>.
 // NOTE: It's perfectly fine to include <Windows.h> here, but it can increase build size and time in *some* conditions, and maybe substantially in future if we'll use crossplatform.h more.
 #ifndef _INC_WINDOWS
-    #include <IntSafe.h>
+    #ifndef __MWERKS__
+        #include <IntSafe.h>
+    #else
+        #include <Windows.h>
+    #endif
 #endif
 #if defined RW_D3D9 || defined RWLIBS
 #include "win.h"
@@ -114,6 +118,7 @@ struct SYSTEMTIME {
 
 void GetLocalTime_CP(SYSTEMTIME* out);
 #define GetLocalTime GetLocalTime_CP
+
 #define OutputDebugString(s) re3_debug("[DBG-2]: %s\n",s)
 #endif
 

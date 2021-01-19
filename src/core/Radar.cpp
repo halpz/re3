@@ -1,4 +1,4 @@
-#if !defined(GTA_PS2_STUFF) && defined(RWLIBS)
+#if (!defined(GTA_PS2_STUFF) && defined(RWLIBS)) || defined(__MWERKS__)
 #define WITHD3D
 #endif
 #include "config.h"
@@ -79,7 +79,7 @@ CSprite2d *CRadar::RadarSprites[RADAR_SPRITE_COUNT] = {
 
 #define RADAR_NUM_TILES (8)
 #define RADAR_TILE_SIZE (RADAR_SIZE_X / RADAR_NUM_TILES)
-static_assert(RADAR_TILE_SIZE == (RADAR_SIZE_Y / RADAR_NUM_TILES), "CRadar: not a square");
+re3_static_assert(RADAR_TILE_SIZE == (RADAR_SIZE_Y / RADAR_NUM_TILES), "CRadar: not a square");
 
 #define RADAR_MIN_RANGE (120.0f)
 #define RADAR_MAX_RANGE (350.0f)
@@ -298,10 +298,10 @@ void CRadar::ClearBlipForEntity(eBlipType type, int32 id)
 int CRadar::ClipRadarPoly(CVector2D *poly, const CVector2D *rect)
 {
 	CVector2D corners[4] = {
-		{  1.0f, -1.0f },	// top right
-		{  1.0f,  1.0f },	// bottom right
-		{ -1.0f,  1.0f },	// bottom left
-		{ -1.0f, -1.0f },	// top left
+		CVector2D(  1.0f, -1.0f ),	// top right
+		CVector2D(  1.0f,  1.0f ),	// bottom right
+		CVector2D( -1.0f,  1.0f ),	// bottom left
+		CVector2D( -1.0f, -1.0f ),	// top left
 	};
 	CVector2D tmp;
 	int i, j, n;

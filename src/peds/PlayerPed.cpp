@@ -229,7 +229,7 @@ CPlayerPed::SetInitialState(void)
 	m_nAdrenalineTime = 0;
 	CTimer::SetTimeScale(1.0f);
 	m_pSeekTarget = nil;
-	m_vecSeekPos = { 0.0f, 0.0f, 0.0f };
+	m_vecSeekPos = CVector(0.0f, 0.0f, 0.0f);
 	m_fleeFromPosX = 0.0f;
 	m_fleeFromPosY = 0.0f;
 	m_fleeFrom = nil;

@@ -1,7 +1,11 @@
 #include "common.h"
 
 #if defined _WIN32 && !defined __MINGW32__
+#if defined __MWERKS__
+#include <wctype.h>
+#else
 #include "ctype.h"
+#endif
 #else
 #include <cwctype>
 #endif
@@ -83,18 +87,18 @@ strcmpIgnoringDigits(const char *s1, const char *s2)
 		if(c1) s1++;
 		if(c2) s2++;
 		if(c1 == '\0' && c2 == '\0') return true;
-#if defined _WIN32 && !defined __MINGW32__
-		if(__ascii_iswdigit(c1) && __ascii_iswdigit(c2))
-#else
+#ifndef ASCII_STRCMP
 		if(iswdigit(c1) && iswdigit(c2))
+#else
+		if(__ascii_iswdigit(c1) && __ascii_iswdigit(c2))
 #endif
 			continue;
-#if defined _WIN32 && !defined __MINGW32__
-		c1 = __ascii_toupper(c1);
-		c2 = __ascii_toupper(c2);
-#else
+#ifndef ASCII_STRCMP
 		c1 = toupper(c1);
 		c2 = toupper(c2);
+#else
+		c1 = __ascii_toupper(c1);
+		c2 = __ascii_toupper(c2);
 #endif
 
 		if(c1 != c2)
