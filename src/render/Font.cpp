@@ -256,7 +256,7 @@ CFont::Shutdown(void)
 #endif
 	Sprite[0].Delete();
 	Sprite[1].Delete();
-    Sprite[2].Delete();
+	Sprite[2].Delete();
 #ifdef MORE_LANGUAGES
 	if (IsJapanese())
 		Sprite[3].Delete();
@@ -1512,6 +1512,31 @@ CFont::SetDropColor(CRGBA col)
 		Details.dropColor.a *= Details.alphaFade / 255.0f;
 }
 
+
+//--LCS: done
+void
+CFont::SetOutlineColor(CRGBA col)
+{
+	Details.outlineColor = col;
+	if (Details.alphaFade < 255.0f)
+		Details.outlineColor.a *= Details.alphaFade / 255.0f;
+}
+
+//--LCS: done
+void
+CFont::SetOutlineOn(int on)
+{
+	Details.bOutlineOn = on;
+}
+
+//--LCS: done
+void
+CFont::SetNewLineAdd(int line)
+{
+	Details.line = line;
+}
+
+//--LCS: done
 void
 CFont::SetDropShadowPosition(int16 pos)
 {
@@ -1556,14 +1581,3 @@ CFont::character_code(uint8 c)
 		return c;
 	return foreign_table[c-128];
 }
-
-void
-CFont::SetOutlineColor(CRGBA col)
-{
-	Details.outlineColor = col;
-	if (Details.alphaFade < 255.0f)
-		Details.outlineColor.a *= Details.alphaFade / 255.0f;
-}
-
-void CFont::SetOutlineOn(int on) { Details.bOutlineOn = on; }
-void CFont::SetNewLineAdd(int line) { Details.line = line; }

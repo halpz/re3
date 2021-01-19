@@ -37,10 +37,9 @@ struct CFontDetails
 	int nFlashTimer;
 	bool8 anonymous_23;
 	uint32 anonymous_25;
-	uint32 anonymous_26;
 	CRGBA outlineColor;
-	int32 bOutlineOn;
-	uint32 line;
+	int bOutlineOn;
+	int line;
 };
 
 struct CFontRenderState
