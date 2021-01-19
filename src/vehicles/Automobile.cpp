@@ -1345,7 +1345,7 @@ CAutomobile::ProcessCarWheelPair(int leftWheel, int rightWheel, float steerAngle
 		suspensionBias = 2.0f*(1.0f-pHandling->fSuspensionBias);
 
 		float fwdSpeed = DotProduct(m_vecMoveSpeed, GetForward());	
-		if(bIsHandbrakeOn && Abs(fwdSpeed) > 0.1f){
+		if(bIsHandbrakeOn && Abs(fwdSpeed) > 0.01f){
 #ifdef FIX_BUGS
 			// Not sure if this is needed, but brake usually has timestep as a factor
 			brake = 20000.0f * CTimer::GetTimeStepFix();
