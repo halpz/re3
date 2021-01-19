@@ -45,12 +45,11 @@ enum {
 	VSLOC_ambient,
 	VSLOC_viewMat,	// only vehicle
 
-	PSLOC_colorscale = 1,
-
 	// Leeds vehicle PS2
 	VSLOC_texMat = rw::d3d::VSLOC_afterLights,
 
-	PSLOC_shininess = 1,
+	PSLOC_colorscale = 1,
+	PSLOC_shininess,
 	PSLOC_skyTop,
 	PSLOC_skyBot
 };
@@ -124,6 +123,9 @@ leedsVehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 
 	SetRenderState(SRCBLEND, BLENDONE);
 
+	float colorscale[4];
+	colorscale[3] = 1.0f;
+
 	InstanceData *inst = header->inst;
 	for(rw::uint32 i = 0; i < header->numMeshes; i++){
 		Material *m = inst->material;
@@ -140,6 +142,13 @@ leedsVehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 
 		setMaterial(m->color, m->surfaceProps);
 
+		float cs = 1.0f;
+		// how does the PS2 handle this actually? probably scaled material color?
+		if(VehiclePipeSwitch == VEHICLEPIPE_PSP && m->texture)
+			cs = 2.0f;
+		colorscale[0] = colorscale[1] = colorscale[2] = cs;
+		d3ddevice->SetPixelShaderConstantF(PSLOC_colorscale, colorscale, 1);
+
 		if(m->texture)
 			d3d::setTexture(0, m->texture);
 		else
@@ -152,6 +161,24 @@ leedsVehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	d3d::setTexture(1, nil);
 
 	SetRenderState(SRCBLEND, BLENDSRCALPHA);
+}
+
+void
+uploadWorldLights(void)
+{
+	using namespace rw;
+	using namespace rw::d3d;
+	using namespace rw::d3d9;
+
+	RGBAf amb, emiss;
+	amb.red = CTimeCycle::GetAmbientRed();
+	amb.green = CTimeCycle::GetAmbientGreen();
+	amb.blue = CTimeCycle::GetAmbientBlue();
+	amb.alpha = 1.0f;
+	emiss = pAmbient->color;
+
+	d3ddevice->SetVertexShaderConstantF(VSLOC_ambient, (float*)&amb, 1);
+	d3ddevice->SetVertexShaderConstantF(VSLOC_emissive, (float*)&emiss, 1);
 }
 
 void
@@ -172,15 +199,7 @@ leedsVehicleRenderCB_mobile(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *he
 	setVertexShader(leedsVehicle_mobile_VS);
 	setPixelShader(leedsVehicle_mobile_PS);
 
-	RGBAf amb, emiss;
-	amb.red = CTimeCycle::GetAmbientRed();
-	amb.green = CTimeCycle::GetAmbientGreen();
-	amb.blue = CTimeCycle::GetAmbientBlue();
-	amb.alpha = 1.0f;
-	emiss = pAmbient->color;
-
-	d3ddevice->SetVertexShaderConstantF(VSLOC_ambient, (float*)&amb, 1);
-	d3ddevice->SetVertexShaderConstantF(VSLOC_emissive, (float*)&emiss, 1);
+	uploadWorldLights();
 
 	RGBAf skyTop, skyBot;
 	skyTop.red = CTimeCycle::GetSkyTopRed()/255.0f;
@@ -265,7 +284,7 @@ vehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	using namespace rw::d3d9;
 
 	// TODO: make this less of a kludge
-	if(VehiclePipeSwitch == VEHICLEPIPE_PS2){
+	if(VehiclePipeSwitch == VEHICLEPIPE_PSP || VehiclePipeSwitch == VEHICLEPIPE_PS2){
 		leedsVehicleRenderCB(atomic, header);
 	//	matFXGlobals.pipelines[rw::platform]->render(atomic);
 		return;
@@ -337,31 +356,31 @@ CreateVehiclePipe(void)
 //		fp = ReadTweakValueTable(fp, SpecColor);
 //	}
 
-#include "shaders/neoVehicle_VS.inc"
+#include "shaders/obj/neoVehicle_VS.inc"
 	neoVehicle_VS = rw::d3d::createVertexShader(neoVehicle_VS_cso);
 	assert(neoVehicle_VS);
 
-#include "shaders/neoVehicle_PS.inc"
+#include "shaders/obj/neoVehicle_PS.inc"
 	neoVehicle_PS = rw::d3d::createPixelShader(neoVehicle_PS_cso);
 	assert(neoVehicle_PS);
 
-#include "shaders/leedsVehicle_VS.inc"
-	leedsVehicle_VS = rw::d3d::createVertexShader(leedsVehicle_VS_cso);
+#include "shaders/obj/leedsDefault_ENV_VS.inc"
+	leedsVehicle_VS = rw::d3d::createVertexShader(leedsDefault_ENV_VS_cso);
 	assert(leedsVehicle_VS);
 
-#include "shaders/leedsVehicle_mobile_VS.inc"
+#include "shaders/obj/leedsVehicle_mobile_VS.inc"
 	leedsVehicle_mobile_VS = rw::d3d::createVertexShader(leedsVehicle_mobile_VS_cso);
 	assert(leedsVehicle_mobile_VS);
 
-#include "shaders/leedsVehicle_blend_PS.inc"
-	leedsVehicle_blend_PS = rw::d3d::createPixelShader(leedsVehicle_blend_PS_cso);
+#include "shaders/obj/leedsDefault_BLEND_PS.inc"
+	leedsVehicle_blend_PS = rw::d3d::createPixelShader(leedsDefault_BLEND_PS_cso);
 	assert(leedsVehicle_blend_PS);
 
-#include "shaders/leedsVehicle_add_PS.inc"
-	leedsVehicle_add_PS = rw::d3d::createPixelShader(leedsVehicle_add_PS_cso);
+#include "shaders/obj/leedsDefault_ADD_PS.inc"
+	leedsVehicle_add_PS = rw::d3d::createPixelShader(leedsDefault_ADD_PS_cso);
 	assert(leedsVehicle_add_PS);
 
-#include "shaders/leedsVehicle_mobile_PS.inc"
+#include "shaders/obj/leedsVehicle_mobile_PS.inc"
 	leedsVehicle_mobile_PS = rw::d3d::createPixelShader(leedsVehicle_mobile_PS_cso);
 	assert(leedsVehicle_mobile_PS);
 
@@ -424,15 +443,7 @@ worldRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 
 	uploadMatrices(atomic->getFrame()->getLTM());
 
-	RGBAf amb, emiss;
-	amb.red = CTimeCycle::GetAmbientRed();
-	amb.green = CTimeCycle::GetAmbientGreen();
-	amb.blue = CTimeCycle::GetAmbientBlue();
-	amb.alpha = 1.0f;
-	emiss = pAmbient->color;
-
-	d3ddevice->SetVertexShaderConstantF(VSLOC_ambient, (float*)&amb, 1);
-	d3ddevice->SetVertexShaderConstantF(VSLOC_emissive, (float*)&emiss, 1);
+	uploadWorldLights();
 
 	float colorscale[4];
 	colorscale[3] = 1.0f;
@@ -442,7 +453,7 @@ worldRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 		Material *m = inst->material;
 
 		float cs = 1.0f;
-		if(WorldPipeSwitch == WORLDPIPE_PS2 && m->texture)
+		if(WorldPipeSwitch != WORLDPIPE_MOBILE && m->texture)
 			cs = 255/128.0f;
 		colorscale[0] = colorscale[1] = colorscale[2] = cs;
 		d3ddevice->SetPixelShaderConstantF(PSLOC_colorscale, colorscale, 1);
@@ -469,13 +480,13 @@ CreateWorldPipe(void)
 //	else
 //		ReadTweakValueTable((char*)work_buff, WorldLightmapBlend);
 
-#include "shaders/leedsBuilding_VS.inc"
+#include "shaders/obj/leedsBuilding_VS.inc"
 	leedsBuilding_VS = rw::d3d::createVertexShader(leedsBuilding_VS_cso);
 	assert(leedsBuilding_VS);
-#include "shaders/leedsBuilding_mobile_VS.inc"
+#include "shaders/obj/leedsBuilding_mobile_VS.inc"
 	leedsBuilding_mobile_VS = rw::d3d::createVertexShader(leedsBuilding_mobile_VS_cso);
 	assert(leedsBuilding_mobile_VS);
-#include "shaders/scale_PS.inc"
+#include "shaders/obj/scale_PS.inc"
 	scale_PS = rw::d3d::createPixelShader(scale_PS_cso);
 	assert(scale_PS);
 
@@ -559,11 +570,11 @@ glossRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 void
 CreateGlossPipe(void)
 {
-#include "shaders/neoGloss_VS.inc"
+#include "shaders/obj/neoGloss_VS.inc"
 	neoGloss_VS = rw::d3d::createVertexShader(neoGloss_VS_cso);
 	assert(neoGloss_VS);
 
-#include "shaders/neoGloss_PS.inc"
+#include "shaders/obj/neoGloss_PS.inc"
 	neoGloss_PS = rw::d3d::createPixelShader(neoGloss_PS_cso);
 	assert(neoGloss_PS);
 
@@ -725,11 +736,11 @@ CreateRimLightPipes(void)
 	}
 
 
-#include "shaders/neoRim_VS.inc"
+#include "shaders/obj/neoRim_VS.inc"
 	neoRim_VS = rw::d3d::createVertexShader(neoRim_VS_cso);
 	assert(neoRim_VS);
 
-#include "shaders/neoRimSkin_VS.inc"
+#include "shaders/obj/neoRimSkin_VS.inc"
 	neoRimSkin_VS = rw::d3d::createVertexShader(neoRimSkin_VS_cso);
 	assert(neoRimSkin_VS);
 
@@ -850,15 +861,7 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 			setPixelShader(CustomPipes::scale_PS);
 			d3ddevice->SetVertexShaderConstantF(VSLOC_combined, (float*)&building->combinedMat, 4);
 
-			RGBAf amb, emiss;
-			amb.red = CTimeCycle::GetAmbientRed();
-			amb.green = CTimeCycle::GetAmbientGreen();
-			amb.blue = CTimeCycle::GetAmbientBlue();
-			amb.alpha = 1.0f;
-			emiss = pAmbient->color;
-
-			d3ddevice->SetVertexShaderConstantF(CustomPipes::VSLOC_ambient, (float*)&amb, 1);
-			d3ddevice->SetVertexShaderConstantF(CustomPipes::VSLOC_emissive, (float*)&emiss, 1);
+			CustomPipes::uploadWorldLights();
 
 			colorscale[3] = 1.0f;
 
@@ -866,14 +869,14 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 		}
 
 		float cs = 1.0f;
-		if(CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_PS2 && m->texture)
+		if(CustomPipes::WorldPipeSwitch != CustomPipes::WORLDPIPE_MOBILE && m->texture)
 			cs = 255/128.0f;
 		colorscale[0] = colorscale[1] = colorscale[2] = cs;
 		d3ddevice->SetPixelShaderConstantF(CustomPipes::PSLOC_colorscale, colorscale, 1);
 
 		d3d::setTexture(0, m->texture);
 
-		setMaterial(m->color, m->surfaceProps, 0.5f);
+		setMaterial(m->color, m->surfaceProps, CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_PS2 ? 0.5f : 1.0f);
 
 		drawInst(building->instHeader, inst);
 	}
@@ -913,15 +916,7 @@ RenderBlendPass(int pass)
 		setVertexShader(CustomPipes::leedsBuilding_VS);
 	setPixelShader(CustomPipes::scale_PS);
 
-	RGBAf amb, emiss;
-	amb.red = CTimeCycle::GetAmbientRed();
-	amb.green = CTimeCycle::GetAmbientGreen();
-	amb.blue = CTimeCycle::GetAmbientBlue();
-	amb.alpha = 1.0f;
-	emiss = pAmbient->color;
-
-	d3ddevice->SetVertexShaderConstantF(CustomPipes::VSLOC_ambient, (float*)&amb, 1);
-	d3ddevice->SetVertexShaderConstantF(CustomPipes::VSLOC_emissive, (float*)&emiss, 1);
+	CustomPipes::uploadWorldLights();
 
 	float colorscale[4];
 	colorscale[3] = 1.0f;
@@ -944,7 +939,7 @@ RenderBlendPass(int pass)
 				continue;	// already done this one
 
 			float cs = 1.0f;
-			if(CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_PS2 && m->texture)
+			if(CustomPipes::WorldPipeSwitch != CustomPipes::WORLDPIPE_MOBILE && m->texture)
 				cs = 255/128.0f;
 			colorscale[0] = colorscale[1] = colorscale[2] = cs;
 			d3ddevice->SetPixelShaderConstantF(CustomPipes::PSLOC_colorscale, colorscale, 1);
@@ -953,7 +948,7 @@ RenderBlendPass(int pass)
 
 			rw::RGBA color = m->color;
 			color.alpha = (color.alpha * building->fadeAlpha)/255;
-			setMaterial(color, m->surfaceProps, 0.5f);
+			setMaterial(color, m->surfaceProps, CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_PS2 ? 0.5f : 1.0f);
 
 			drawInst(building->instHeader, inst);
 		}

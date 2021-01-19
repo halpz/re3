@@ -87,19 +87,21 @@ CustomFrontendOptionsPopulate(void)
 
 	// These work only if we have neo folder, so they're dynamically added
 #ifdef EXTENDED_PIPELINES
-	const char *vehPipelineNames[] = { "FED_MFX", "FED_NEO" };
+	const char *pipelineNames[] = { "FED_PSP", "FED_PS2","FED_MOB" };
 	const char *off_on[] = { "FEM_OFF", "FEM_ON" };
 	int fd = CFileMgr::OpenFile("neo/neo.txd","r");
 	if (fd) {
 #ifdef GRAPHICS_MENU_OPTIONS
 		FrontendOptionSetCursor(MENUPAGE_GRAPHICS_SETTINGS, -3, false);
-		FrontendOptionAddSelect("FED_VPL", 0, 0, MENUALIGN_LEFT, vehPipelineNames, ARRAY_SIZE(vehPipelineNames), (int8*)&CustomPipes::VehiclePipeSwitch, false, nil, "VehiclePipeline");
+		FrontendOptionAddSelect("FED_VPL", 0, 0, MENUALIGN_LEFT, pipelineNames, ARRAY_SIZE(pipelineNames), (int8*)&CustomPipes::VehiclePipeSwitch, false, nil, "VehiclePipeline");
+		FrontendOptionAddSelect("FED_WPL", 0, 0, MENUALIGN_LEFT, pipelineNames, ARRAY_SIZE(pipelineNames), (int8*)&CustomPipes::WorldPipeSwitch, false, nil, "WorldPipeline");
 		FrontendOptionAddSelect("FED_PRM", 0, 0, MENUALIGN_LEFT, off_on, 2, (int8*)&CustomPipes::RimlightEnable, false, nil, "NeoRimLight");
 		FrontendOptionAddSelect("FED_WLM", 0, 0, MENUALIGN_LEFT, off_on, 2, (int8*)&CustomPipes::LightmapEnable, false, nil, "NeoLightMaps");
 		FrontendOptionAddSelect("FED_RGL", 0, 0, MENUALIGN_LEFT, off_on, 2, (int8*)&CustomPipes::GlossEnable, false, nil, "NeoRoadGloss");
 #else
 		FrontendOptionSetCursor(MENUPAGE_DISPLAY_SETTINGS, -3, false);
-		FrontendOptionAddSelect("FED_VPL", 0, 0, MENUALIGN_LEFT, vehPipelineNames, ARRAY_SIZE(vehPipelineNames), (int8*)&CustomPipes::VehiclePipeSwitch, false, nil, "VehiclePipeline");
+		FrontendOptionAddSelect("FED_VPL", 0, 0, MENUALIGN_LEFT, pipelineNames, ARRAY_SIZE(pipelineNames), (int8*)&CustomPipes::VehiclePipeSwitch, false, nil, "VehiclePipeline");
+		FrontendOptionAddSelect("FED_WPL", 0, 0, MENUALIGN_LEFT, pipelineNames, ARRAY_SIZE(pipelineNames), (int8*)&CustomPipes::WorldPipeSwitch, false, nil, "WorldPipeline");
 		FrontendOptionAddSelect("FED_PRM", 0, 0, MENUALIGN_LEFT, off_on, 2, (int8*)&CustomPipes::RimlightEnable, false, nil, "NeoRimLight");
 		FrontendOptionAddSelect("FED_WLM", 0, 0, MENUALIGN_LEFT, off_on, 2, (int8*)&CustomPipes::LightmapEnable, false, nil, "NeoLightMaps");
 		FrontendOptionAddSelect("FED_RGL", 0, 0, MENUALIGN_LEFT, off_on, 2, (int8*)&CustomPipes::GlossEnable, false, nil, "NeoRoadGloss");
@@ -661,13 +663,13 @@ extern bool gbRenderWorld2;
 		DebugMenuAddVarBool8("Render", "Occlusion debug", &bDispayOccDebugStuff, nil);
 #endif
 #ifdef EXTENDED_PIPELINES
-		static const char *worldpipenames[] = { "PS2", "Mobile" };
+		static const char *worldpipenames[] = { "PSP", "PS2", "Mobile" };
 		e = DebugMenuAddVar("Render", "World Rendering", &CustomPipes::WorldPipeSwitch, nil,
-			1, CustomPipes::WORLDPIPE_PS2, CustomPipes::WORLDPIPE_MOBILE, worldpipenames);
+			1, CustomPipes::WORLDPIPE_PSP, CustomPipes::WORLDPIPE_MOBILE, worldpipenames);
 		DebugMenuEntrySetWrap(e, true);
-		static const char *vehpipenames[] = { "PS2", "Mobile", "Neo" };
+		static const char *vehpipenames[] = { "PSP", "PS2", "Mobile" };
 		e = DebugMenuAddVar("Render", "Vehicle Pipeline", &CustomPipes::VehiclePipeSwitch, nil,
-			1, CustomPipes::VEHICLEPIPE_PS2, CustomPipes::VEHICLEPIPE_MOBILE, vehpipenames);
+			1, CustomPipes::VEHICLEPIPE_PSP, CustomPipes::VEHICLEPIPE_MOBILE, vehpipenames);
 		DebugMenuEntrySetWrap(e, true);
 		DebugMenuAddVarBool8("Render", "Glass Cars cheat", &CustomPipes::gGlassCarsCheat, nil);
 extern bool gbRenderDebugEnvMap;

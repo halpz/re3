@@ -143,17 +143,17 @@ CPostFX::Open(RwCamera *cam)
 
 
 #ifdef RW_D3D9
-#include "shaders/colourfilterLCS_PS.inc"
+#include "shaders/obj/colourfilterLCS_PS.inc"
 	colourfilterLCS_PS = rw::d3d::createPixelShader(colourfilterLCS_PS_cso);
-#include "shaders/contrastPS.inc"
+#include "shaders/obj/contrastPS.inc"
 	contrast_PS = rw::d3d::createPixelShader(contrastPS_cso);
 #endif
 #ifdef RW_OPENGL
 	using namespace rw::gl3;
 
 	{
-#include "shaders/im2d_gl.inc"
-#include "shaders/colourfilterLCS_fs_gl.inc"
+#include "shaders/obj/im2d_vert.inc"
+#include "shaders/obj/colourfilterLCS_frag.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, im2d_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, colourfilterLCS_frag_src, nil };
 	colourFilterLCS = Shader::create(vs, fs);
@@ -161,8 +161,8 @@ CPostFX::Open(RwCamera *cam)
 	}
 
 	{
-#include "shaders/im2d_gl.inc"
-#include "shaders/contrast_fs_gl.inc"
+#include "shaders/obj/im2d_vert.inc"
+#include "shaders/obj/contrast_frag.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, im2d_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, contrast_frag_src, nil };
 	contrast = Shader::create(vs, fs);

@@ -11,6 +11,7 @@ const char *scale_frag_src =
 "{\n"
 "	vec4 color;\n"
 "	color = v_color*texture(tex0, vec2(v_tex0.x, 1.0-v_tex0.y))*u_colorscale;\n"
+"	color.rgb = clamp(color.rgb, 0.0, 1.0);\n"
 "	color.rgb = mix(u_fogColor.rgb, color.rgb, v_fog);\n"
 "	DoAlphaTest(color.a);\n"
 

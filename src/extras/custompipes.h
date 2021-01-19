@@ -86,6 +86,7 @@ extern int16 QuadIndices[6];
 void EnvMapRender(void);
 
 enum {
+	VEHICLEPIPE_PSP,
 	VEHICLEPIPE_PS2,
 	VEHICLEPIPE_MOBILE,
 
@@ -106,6 +107,7 @@ void AttachVehiclePipe(rw::Atomic *atomic);
 void AttachVehiclePipe(rw::Clump *clump);
 
 enum {
+	WORLDPIPE_PSP,
 	WORLDPIPE_PS2,
 	WORLDPIPE_MOBILE
 };

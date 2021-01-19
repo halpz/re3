@@ -14,9 +14,9 @@ sampler2D envTex : register(s1);
 
 float4 fogColor : register(c0);
 
-float4 fxparams : register(c1);
-float3 skyTop : register(c2);
-float3 skyBot : register(c3);
+float4 fxparams : register(c2);
+float3 skyTop : register(c3);
+float3 skyBot : register(c4);
 
 #define shininess (fxparams.x)
 
