@@ -7,9 +7,8 @@ class CPostFX
 public:
 	enum {
 		POSTFX_OFF,
-//		POSTFX_SIMPLE,
-		POSTFX_NORMAL,
-//		POSTFX_MOBILE
+		POSTFX_PSP,
+		POSTFX_PS2,
 
 		// not so sensible for the moment
 		POSTFX_SIMPLE = -1,

@@ -65,7 +65,7 @@ const CRGBA SCROLLBAR_COLOR = LABEL_COLOR;
 #define MIN_BRIGHTNESS 180
 #define MAX_BRIGHTNESS 700
 #else
-// PS2
+// PS2, also PSP probably
 // 8 bars (32 step)
 #define DEFAULT_BRIGHTNESS 0x120
 #define MIN_BRIGHTNESS 0x80
