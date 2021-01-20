@@ -26,6 +26,10 @@ int16 CRoadBlocks::RoadBlockNodes[NUMROADBLOCKS];
 bool CRoadBlocks::InOrOut[NUMROADBLOCKS];
 CScriptRoadblock CRoadBlocks::aScriptRoadBlocks[NUM_SCRIPT_ROADBLOCKS];
 
+#ifdef SECUROM
+uint8 roadBlocksPirateCheck = 0;
+#endif
+
 void
 CRoadBlocks::Init(void)
 {
@@ -189,6 +193,13 @@ CRoadBlocks::RegisterScriptRoadBlock(CVector vInf, CVector vSup)
 void 
 CRoadBlocks::CreateRoadBlockBetween2Points(CVector point1, CVector point2)
 {
+#ifdef SECUROM
+	if (roadBlocksPirateCheck == 0)
+		// if not pirated game
+		// roadBlocksPirateCheck = 1;
+		// else
+		roadBlocksPirateCheck = 2;
+#endif
 	CMatrix tmp;
 	CVector forward = (point2 - point1);
 	float distBetween = forward.Magnitude();

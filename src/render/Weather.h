@@ -61,6 +61,7 @@ public:
 	static void AddHeatHaze();
 	static void AddBeastie();
 
+	static void ForceHurricaneWeather();
 	static void StoreWeatherState();
 	static void RestoreWeatherState();
 };

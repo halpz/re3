@@ -121,6 +121,10 @@ bool8 CGame::VarUpdatePlayerCoords;
 
 int gameTxdSlot;
 
+#ifdef SECUROM
+uint8 gameProcessPirateCheck = 0;
+#endif
+
 // --MIAMI: File done
 
 bool DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha);
@@ -846,7 +850,14 @@ void CGame::Process(void)
 		FrontEndMenuManager.Process();
 
 	CTheZones::Update();
-	// DRM call in here
+#ifdef SECUROM
+	if (CTimer::GetTimeInMilliseconds() >= (35 * 60 * 1000) && gameProcessPirateCheck == 0){
+		// if game not pirated
+		// gameProcessPirateCheck = 1;
+		// else
+		gameProcessPirateCheck = 2;
+	}
+#endif
 	uint32 startTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond();
 	CStreaming::Update();
 	uint32 processTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond() - startTime;

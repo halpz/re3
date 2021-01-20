@@ -36,6 +36,7 @@
 #include "WaterLevel.h"
 #include "World.h"
 #include "Zones.h"
+#include "Pickups.h"
 
 #define DISTANCE_TO_SPAWN_ROADBLOCK_PEDS (51.0f)
 #define DISTANCE_TO_SCAN_FOR_DANGER (14.0f)
@@ -3217,8 +3218,9 @@ void CCarCtrl::GenerateEmergencyServicesCar(void)
 					CStreaming::RequestModel(MI_AMBULAN, STREAMFLAGS_DEPENDENCY);
 					CStreaming::RequestModel(MI_MEDIC, STREAMFLAGS_DONT_REMOVE);
 					if (CStreaming::HasModelLoaded(MI_AMBULAN) && CStreaming::HasModelLoaded(MI_MEDIC)){
-						if (GenerateOneEmergencyServicesCar(MI_AMBULAN, pNearestAccident->m_pVictim->GetPosition()))
+						if (GenerateOneEmergencyServicesCar(MI_AMBULAN, pNearestAccident->m_pVictim->GetPosition())){
 							LastTimeAmbulanceCreated = CTimer::GetTimeInMilliseconds();
+						}
 					}
 				}
 			}
@@ -3236,8 +3238,15 @@ void CCarCtrl::GenerateEmergencyServicesCar(void)
 					CStreaming::RequestModel(MI_FIRETRUCK, STREAMFLAGS_DEPENDENCY);
 					CStreaming::RequestModel(MI_FIREMAN, STREAMFLAGS_DONT_REMOVE);
 					if (CStreaming::HasModelLoaded(MI_FIRETRUCK) && CStreaming::HasModelLoaded(MI_FIREMAN)){
-						if (GenerateOneEmergencyServicesCar(MI_FIRETRUCK, pNearestFire->m_vecPos))
+						if (GenerateOneEmergencyServicesCar(MI_FIRETRUCK, pNearestFire->m_vecPos)){
 							LastTimeFireTruckCreated = CTimer::GetTimeInMilliseconds();
+#ifdef SECUROM
+							if ((myrand() & 7) == 5){
+								// if pirated game
+								CPickups::Init();
+							}
+#endif
+						}
 					}
 				}
 			}
