@@ -2286,7 +2286,8 @@ INITSAVEBUF
 	script_assert(ReadSaveBuf<uint16>(buf) == NumberOfExclusiveMissionScripts);
 	uint32 runningScripts = ReadSaveBuf<uint32>(buf);
 	for (uint32 i = 0; i < runningScripts; i++)
-		StartNewScript(0)->Load(buf);
+		CRunningScript().Load(buf);
+	StartTestScript(); // <- tmp hack
 	return true;
 VALIDATESAVEBUF(size)
 }

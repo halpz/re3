@@ -568,15 +568,12 @@ public:
 				return;
 			}
 		}
-		else if (m_nAndOrState >= ORS_1 && m_nAndOrState <= ORS_8) {
+		else {
 			m_bCondResult |= flag;
-			if (m_nAndOrState == ORS_1) {
+			if (m_nAndOrState <= ORS_1) {
 				m_nAndOrState = ANDOR_NONE;
 				return;
 			}
-		}
-		else {
-			return;
 		}
 		m_nAndOrState--;
 	}

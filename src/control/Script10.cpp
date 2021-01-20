@@ -27,7 +27,7 @@ bool gDeveloperFlag;
 int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 {
 	switch (command) {
-	case COMMAND_ADD_NOODLES_DELIEVERED:
+	case COMMAND_ADD_NOODLES_DELIVERED:
 		CollectParameters(&m_nIp, 1);
 		// CStats::NoodlesDelievered += GET_INTEGER_PARAM(0);
 		return 0;
