@@ -573,7 +573,9 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 		CollectParameters(&m_nIp, 1);
 		// CPed::UnloadNonStandardPedAnim(SET_INTEGER_PARAM(0));
 		return 0;
-	//case COMMAND_1566:
+	case COMMAND_1566:
+		CollectParameters(&m_nIp, 1);
+		return 0;
 	case COMMAND_BUILD_WORLD_GEOMETRY:
 		CollectParameters(&m_nIp, 1);
 		if (/*gBuildWorldGeom*/ false) {

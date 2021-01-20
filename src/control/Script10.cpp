@@ -286,9 +286,9 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 		return 0;
 	case COMMAND_IS_FINAL_GAME:
 #ifdef FINAL
-		UpdateCompareFlag(false);
-#else
 		UpdateCompareFlag(true);
+#else
+		UpdateCompareFlag(false);
 #endif
 		return 0;
 	case COMMAND_SET_ALLOWED_COLLISION:
