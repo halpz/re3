@@ -741,7 +741,7 @@ void
 CFont::PrintStringFromBottom(float x, float y, wchar *str)
 {
 	y -= (32.0f * Details.scaleY / 2.0f + 2.0f * Details.scaleY) * GetNumberLines(x, y, str);
-	if (Details.slant == 0.0f)
+	if (Details.slant != 0.0f)
 		y -= ((Details.slantRefX - x) * Details.slant + Details.slantRefY);
 	PrintString(x, y, str);
 }
