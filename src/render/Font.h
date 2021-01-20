@@ -59,6 +59,9 @@ struct CFontRenderState
 	bool8 proportional;
 	bool8 anonymous_14;
 	int16 style;
+	int bOutlineOn;
+	int line;
+	bool8 rightJustify;
 };
 
 class CSprite2d;
@@ -146,7 +149,6 @@ public:
 	static void PrintChar(float x, float y, wchar c);
 	static void PrintString(float x, float y, wchar *s);
 #ifdef XBOX_SUBTITLES
-	static void PrintStringFromBottom(float x, float y, wchar *str);
 	static void PrintOutlinedString(float x, float y, wchar *str, float outlineStrength, bool fromBottom, CRGBA outlineColor);
 #endif
 	static int GetNumberLines(float xstart, float ystart, wchar *s);
@@ -157,7 +159,7 @@ public:
 	static void PrintString(float x, float y, uint32, wchar *start, wchar *end, float spwidth);
 #endif
 	static void PrintStringFromBottom(float x, float y, wchar *str);
-	static float GetCharacterWidth(wchar c);
+	static float GetCharacterWidth(wchar c, bool forceProportional = false);
 	static float GetCharacterSize(wchar c);
 	static float GetStringWidth(wchar *s, bool spaces = false);
 #ifdef MORE_LANGUAGES
@@ -189,6 +191,7 @@ public:
 	static void SetBackgroundOff(void);
 	static void SetBackGroundOnlyTextOn(void);
 	static void SetBackGroundOnlyTextOff(void);
+	static void SetFlashOff(void);
 	static void SetPropOn(void);
 	static void SetPropOff(void);
 	static void SetFontStyle(int16 style);
@@ -205,6 +208,7 @@ public:
 
 	static int16 FindNewCharacter(int16 c);
 	static void FilterOutTokensFromString(wchar*);
+	static bool16 CheckNewLine(wchar *s);
 #ifdef MORE_LANGUAGES
 	static void ReloadFonts(uint8 set);
 
