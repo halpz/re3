@@ -44,7 +44,7 @@
 // --MIAMI: file done
 
 #define BLOCK_COUNT 22
-#define SIZE_OF_SIMPLEVARS 0xE4
+#define SIZE_OF_SIMPLEVARS 0xE8
 
 const uint32 SIZE_OF_ONE_GAME_IN_BYTES = 201729;
 

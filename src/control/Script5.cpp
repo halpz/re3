@@ -2222,9 +2222,13 @@ INITSAVEBUF
 	script_assert(ReadSaveBuf<uint32>(buf) == SCRIPT_DATA_SIZE);
 	OnAMissionFlag = ReadSaveBuf<uint32>(buf);
 	LastMissionPassedTime = ReadSaveBuf<uint32>(buf);
+	for (uint32 i = 0; i < MAX_NUM_COLLECTIVES; i++)
+		CollectiveArray[i] = ReadSaveBuf<tCollectiveData>(buf);
+	NextFreeCollectiveIndex = ReadSaveBuf<int32>(buf);
 	for (uint32 i = 0; i < MAX_NUM_BUILDING_SWAPS; i++) {
 		uint32 type = ReadSaveBuf<uint32>(buf);
 		uint32 handle = ReadSaveBuf<uint32>(buf);
+		/*
 		switch (type) {
 		case 0:
 			BuildingSwapArray[i].m_pBuilding = nil;
@@ -2238,14 +2242,18 @@ INITSAVEBUF
 		default:
 			script_assert(false);
 		}
-		BuildingSwapArray[i].m_nNewModel = ReadSaveBuf<uint32>(buf);
-		BuildingSwapArray[i].m_nOldModel = ReadSaveBuf<uint32>(buf);
+		*/
+		/*BuildingSwapArray[i].m_nNewModel = */ReadSaveBuf<uint32>(buf);
+		/*BuildingSwapArray[i].m_nOldModel = */ReadSaveBuf<uint32>(buf);
+		/*
 		if (BuildingSwapArray[i].m_pBuilding)
 			BuildingSwapArray[i].m_pBuilding->ReplaceWithNewModel(BuildingSwapArray[i].m_nNewModel);
+		*/
 	}
 	for (uint32 i = 0; i < MAX_NUM_INVISIBILITY_SETTINGS; i++) {
 		uint32 type = ReadSaveBuf<uint32>(buf);
 		uint32 handle = ReadSaveBuf<uint32>(buf);
+		/*
 		switch (type) {
 		case 0:
 			InvisibilitySettingArray[i] = nil;
@@ -2267,9 +2275,10 @@ INITSAVEBUF
 		}
 		if (InvisibilitySettingArray[i])
 			InvisibilitySettingArray[i]->bIsVisible = false;
+		*/
 	}
 	script_assert(ReadSaveBuf<bool>(buf) == bUsingAMultiScriptFile);
-	bPlayerHasMetDebbieHarry = ReadSaveBuf<uint8>(buf);
+	/*bPlayerHasMetDebbieHarry = */ReadSaveBuf<uint8>(buf);
 	ReadSaveBuf<uint16>(buf);
 	script_assert(ReadSaveBuf<uint32>(buf) == MainScriptSize);
 	script_assert(ReadSaveBuf<uint32>(buf) == LargestMissionScriptSize);
@@ -2277,7 +2286,8 @@ INITSAVEBUF
 	script_assert(ReadSaveBuf<uint16>(buf) == NumberOfExclusiveMissionScripts);
 	uint32 runningScripts = ReadSaveBuf<uint32>(buf);
 	for (uint32 i = 0; i < runningScripts; i++)
-		StartNewScript(0)->Load(buf);
+		CRunningScript().Load(buf);
+	StartTestScript(); // <- tmp hack
 	return true;
 VALIDATESAVEBUF(size)
 }

@@ -681,7 +681,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	//case COMMAND_1489:
 	//case COMMAND_1490:
 	//case COMMAND_1491:
-	case COMMAND_SET_DEBUG_MENU_ACTUVE:
+	case COMMAND_SET_DEBUG_MENU_ACTIVE:
 		CollectParameters(&m_nIp, 1);
 		// this sets two values on PS2, but not on mobile - TODO?
 		return 0;
