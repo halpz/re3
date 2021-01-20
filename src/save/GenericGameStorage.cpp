@@ -326,6 +326,11 @@ GenericLoad()
 	ReadDataFromBufferPointer(buf, CWeather::OldWeatherType);
 	ReadDataFromBufferPointer(buf, CWeather::NewWeatherType);
 	ReadDataFromBufferPointer(buf, CWeather::ForcedWeatherType);
+#ifdef SECUROM
+	if (CTimer::m_FrameCounter > 72000){
+		buf += align4bytes(4);
+	}
+#endif
 	ReadDataFromBufferPointer(buf, CWeather::InterpolationValue);
 	ReadDataFromBufferPointer(buf, CWeather::WeatherTypeInList);
 #ifdef COMPATIBLE_SAVES

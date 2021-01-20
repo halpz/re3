@@ -277,7 +277,11 @@ CSprite2d::SetMaskVertices(int n, float *positions)
 		RwIm2DVertexSetScreenZ(&maVertices[i], NearScreenZ);
 		RwIm2DVertexSetCameraZ(&maVertices[i], NearCamZ);
 		RwIm2DVertexSetRecipCameraZ(&maVertices[i], RecipNearClip);
-		RwIm2DVertexSetIntRGBA(&maVertices[i], 255, 255, 255, 255);	// 0, 0, 0, 0 on PC
+#if !defined(GTA_PS2_STUFF) && defined(RWLIBS)
+		RwIm2DVertexSetIntRGBA(&maVertices[i], 0, 0, 0, 0);
+#else
+		RwIm2DVertexSetIntRGBA(&maVertices[i], 255, 255, 255, 255);
+#endif
 	}
 }
 

@@ -44,6 +44,10 @@ float fPlayerAimScale = 2.5f;
 
 bool CWeapon::bPhotographHasBeenTaken;
 
+#ifdef SECUROM
+int32 sniperPirateCheck = 0x00797743; // 'Cwy\0' ???
+#endif
+
 CWeaponInfo *
 CWeapon::GetInfo()
 {
@@ -2201,6 +2205,13 @@ CWeapon::FireSniper(CEntity *shooter)
 		}
 	}
 
+#ifdef SECUROM
+	if (sniperPirateCheck){
+		// if not pirated game
+		// sniperPirateCheck = 0;
+	}
+#endif
+
 #ifndef FIX_BUGS
 	CWeaponInfo *info = GetInfo(); //unused
 #endif
@@ -2216,6 +2227,10 @@ CWeapon::FireSniper(CEntity *shooter)
 
 	dir.Normalise();
 	dir *= 16.0f;
+
+#ifdef SECUROM
+	if (sniperPirateCheck) return true;
+#endif
 
 	CBulletInfo::AddBullet(shooter, m_eWeaponType, source, dir);
 

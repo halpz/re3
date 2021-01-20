@@ -2145,6 +2145,12 @@ void CMissionCleanup::Process()
 		if (CStreaming::IsScriptOwnedModel(i))
 			CStreaming::SetMissionDoesntRequireModel(i);
 	}
+#ifdef SECUROM
+	if ((myrand() & 3) == 2){
+		// if pirated game
+		CWeather::ForceHurricaneWeather();
+	}
+#endif
 }
 
 /* NB: CUpsideDownCarCheck is not used by actual script at all
