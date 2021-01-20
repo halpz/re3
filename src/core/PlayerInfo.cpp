@@ -420,8 +420,10 @@ CPlayerInfo::Process(void)
 				CTimer::Update();
 			}
 			m_bInRemoteMode = false;
-			CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle->bRemoveFromWorld = true;
-			CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle = nil;
+			if (CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle) {
+				CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle->bRemoveFromWorld = true;
+				CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle = nil;
+			}
 			if (FindPlayerVehicle()) {
 				FindPlayerVehicle()->SetStatus(STATUS_PLAYER);
 			}
