@@ -1,7 +1,7 @@
 #pragma once
 
-// disable (most) stuff that wasn't in original gta3.exe - check section at the bottom of this file
-#define VANILLA_DEFINES
+// disables (most) stuff that wasn't in original gta3.exe - check section at the bottom of this file
+//#define VANILLA_DEFINES
 
 enum Config {
 	NUMPLAYERS = 1,	// 4 on PS2
@@ -243,7 +243,7 @@ enum Config {
 
 #define ASCII_STRCMP // use faster ascii str comparisons
 
-#if !defined _WIN32 || defined __MWERKS__ || defined __MINGW32__
+#if !defined _WIN32 || defined __MWERKS__ || defined __MINGW32__ || defined VANILLA_DEFINES
 #undef ASCII_STRCMP
 #endif
 
@@ -429,7 +429,6 @@ enum Config {
 #undef FIX_BUGS
 #undef THIS_IS_STUPID
 #undef MORE_LANGUAGES
-#undef MORE_LANGUAGES
 #undef COMPATIBLE_SAVES
 #undef LOAD_INI_SETTINGS
 
@@ -471,7 +470,7 @@ enum Config {
 #undef INVERT_LOOK_FOR_PAD
 
 #undef USE_DEBUG_SCRIPT_LOADER
-#undef USE_MEASUREMENTS_IN_METERS // TODO
+#undef USE_MEASUREMENTS_IN_METERS
 #undef USE_PRECISE_MEASUREMENT_CONVERTION
 #undef MISSION_REPLAY
 #undef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT

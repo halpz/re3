@@ -79,7 +79,7 @@ CSprite2d *CRadar::RadarSprites[RADAR_SPRITE_COUNT] = {
 
 #define RADAR_NUM_TILES (8)
 #define RADAR_TILE_SIZE (RADAR_SIZE_X / RADAR_NUM_TILES)
-re3_static_assert(RADAR_TILE_SIZE == (RADAR_SIZE_Y / RADAR_NUM_TILES), "CRadar: not a square");
+static_assert(RADAR_TILE_SIZE == (RADAR_SIZE_Y / RADAR_NUM_TILES), "CRadar: not a square");
 
 #define RADAR_MIN_RANGE (120.0f)
 #define RADAR_MAX_RANGE (350.0f)

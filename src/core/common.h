@@ -357,21 +357,19 @@ __inline__ void TRACE(char *f, ...) { } // this is re3 only, and so the function
 #endif
 #define ASSERT assert
 
-#if defined DEBUG && !defined __MWERKS__
-#define re3_static_assert(bool_constexpr, message) static_assert(bool_constexpr, message)
-#else
-#define re3_static_assert(bool_constexpr, message)
+#ifdef __MWERKS__
+#define static_assert(bool_constexpr, message)
 #endif
 
 #define _TODO(x)
 #define _TODOCONST(x) (x)
 
 #ifdef CHECK_STRUCT_SIZES 
-#define VALIDATE_SIZE(struc, size) re3_static_assert(sizeof(struc) == size, "Invalid structure size of " #struc)
+#define VALIDATE_SIZE(struc, size) static_assert(sizeof(struc) == size, "Invalid structure size of " #struc)
 #else
 #define VALIDATE_SIZE(struc, size)
 #endif
-#define VALIDATE_OFFSET(struc, member, offset) re3_static_assert(offsetof(struc, member) == offset, "The offset of " #member " in " #struc " is not " #offset "...")
+#define VALIDATE_OFFSET(struc, member, offset) static_assert(offsetof(struc, member) == offset, "The offset of " #member " in " #struc " is not " #offset "...")
 
 #define PERCENT(x, p)                    ((float(x) * (float(p) / 100.0f)))
 #define ARRAY_SIZE(array)                (sizeof(array) / sizeof(array[0]))

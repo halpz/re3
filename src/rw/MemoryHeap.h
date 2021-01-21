@@ -95,7 +95,7 @@ struct HeapBlockDesc
 
 #ifdef USE_CUSTOM_ALLOCATOR
 // TODO: figure something out for 64 bit pointers
-re3_static_assert(sizeof(HeapBlockDesc) == 0x10, "HeapBlockDesc must have 0x10 size otherwise most of assumptions don't make sense");
+static_assert(sizeof(HeapBlockDesc) == 0x10, "HeapBlockDesc must have 0x10 size otherwise most of assumptions don't make sense");
 #endif
 
 struct HeapBlockList

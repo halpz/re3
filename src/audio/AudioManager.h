@@ -499,7 +499,7 @@ public:
 };
 
 #ifdef AUDIO_MSS
-re3_static_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");
+static_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");
 #endif
 
 extern cAudioManager AudioManager;

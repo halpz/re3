@@ -118,7 +118,6 @@ struct SYSTEMTIME {
 
 void GetLocalTime_CP(SYSTEMTIME* out);
 #define GetLocalTime GetLocalTime_CP
-
 #define OutputDebugString(s) re3_debug("[DBG-2]: %s\n",s)
 #endif
 

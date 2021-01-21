@@ -69,7 +69,7 @@ static const char* pCommandStrings[] = {
 };
 
 #ifdef CHECK_STRUCT_SIZES
-re3_static_assert(ARRAY_SIZE(pCommandStrings) == CSceneEdit::MOVIE_TOTAL_COMMANDS, "Scene edit: not all commands have names");
+static_assert(ARRAY_SIZE(pCommandStrings) == CSceneEdit::MOVIE_TOTAL_COMMANDS, "Scene edit: not all commands have names");
 #endif
 
 static int32 NextValidModelId(int32 mi, int32 step)
