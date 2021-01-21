@@ -1823,8 +1823,8 @@ main(int argc, char *argv[])
 						
 						printf("Into TheGame!!!\n");
 #else				
-						LoadingScreen(nil, nil, "loadsc0");
-						// LoadingScreen(nil, nil, "loadsc0"); // duplicate
+						LoadingScreen(nil, nil, "sceelee");
+						// LoadingScreen(nil, nil, "sceelee"); // duplicate
 #endif
 						if ( !CGame::InitialiseOnceAfterRW() )
 							RsGlobal.quit = TRUE;
@@ -1840,8 +1840,8 @@ main(int argc, char *argv[])
 #ifndef PS2_MENU
 					case GS_INIT_FRONTEND:
 					{
-						LoadingScreen(nil, nil, "loadsc0");
-						// LoadingScreen(nil, nil, "loadsc0"); // duplicate
+						LoadingScreen(nil, nil, "sceelee");
+						// LoadingScreen(nil, nil, "sceelee"); // duplicate
 						
 						FrontEndMenuManager.m_bGameNotLoaded = true;
 						
