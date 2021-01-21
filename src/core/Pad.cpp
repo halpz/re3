@@ -70,7 +70,7 @@ bool CPad::bOldDisplayNoControllerMessage;
 bool CPad::m_bMapPadOneToPadTwo;
 bool CPad::m_bDebugCamPCOn;
 bool CPad::bHasPlayerCheated;
-bool CPad::bInvertLook4Pad;
+bool CPad::bInvertLook4Pad = true;
 #ifdef GTA_PS2
 unsigned char act_direct[6];
 unsigned char act_align[6];
@@ -457,7 +457,7 @@ void ArmourCheat()
 void WantedLevelUpCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT5"), true);
-	FindPlayerPed()->m_pWanted->CheatWantedLevel(Min(FindPlayerPed()->m_pWanted->m_nWantedLevel + 2, 6));
+	FindPlayerPed()->m_pWanted->CheatWantedLevel(Min(FindPlayerPed()->m_pWanted->GetWantedLevel() + 2, 6));
 }
 
 void WantedLevelDownCheat()

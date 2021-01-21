@@ -347,7 +347,7 @@ GenericLoad()
 #endif
 	ReadDataFromBufferPointer(buf, CGame::currArea);
 	ReadDataFromBufferPointer(buf, CVehicle::bAllTaxisHaveNitro);
-	ReadDataFromBufferPointer(buf, CPad::bInvertLook4Pad);
+	buf += align4bytes(sizeof(CPad::bInvertLook4Pad));
 	ReadDataFromBufferPointer(buf, CTimeCycle::m_ExtraColour);
 	ReadDataFromBufferPointer(buf, CTimeCycle::m_bExtraColourOn);
 	ReadDataFromBufferPointer(buf, CTimeCycle::m_ExtraColourInter);

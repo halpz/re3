@@ -67,7 +67,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_WANTED_STARS_ARE_FLASHING:
 	{
 		CWanted* pWanted = CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted;
-		UpdateCompareFlag(pWanted->m_nMinWantedLevel - pWanted->m_nWantedLevel > 0);
+		UpdateCompareFlag(pWanted->m_nMinWantedLevel - pWanted->GetWantedLevel() > 0);
 		return 0;
 	}
 	case COMMAND_SET_ALLOW_HURRICANES:
