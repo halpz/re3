@@ -2783,7 +2783,7 @@ CCamera::TryToStartNewCamMode(int obbeMode)
 		if (CReplay::IsPlayingBack())
 			return false;
 #endif
-		if(FindPlayerPed()->m_pWanted->m_nWantedLevel < 1)
+		if(FindPlayerPed()->m_pWanted->GetWantedLevel() < 1)
 			return false;
 		if(FindPlayerVehicle() == nil)
 			return false;
@@ -2811,7 +2811,7 @@ CCamera::TryToStartNewCamMode(int obbeMode)
 		if (CReplay::IsPlayingBack())
 			return false;
 #endif
-		if(FindPlayerPed()->m_pWanted->m_nWantedLevel < 1)
+		if(FindPlayerPed()->m_pWanted->GetWantedLevel() < 1)
 			return false;
 		if(FindPlayerVehicle() == nil)
 			return false;

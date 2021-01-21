@@ -226,7 +226,7 @@ void ArmourCheat()
 void WantedLevelUpCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT5"), true);
-	FindPlayerPed()->SetWantedLevel(Min(FindPlayerPed()->m_pWanted->m_nWantedLevel + 2, 6));
+	FindPlayerPed()->SetWantedLevel(Min(FindPlayerPed()->m_pWanted->GetWantedLevel() + 2, 6));
 }
 
 void WantedLevelDownCheat()

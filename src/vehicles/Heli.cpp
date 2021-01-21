@@ -474,7 +474,7 @@ CHeli::ProcessControl(void)
 			// Shoot
 			int shootTimeout;
 			if (m_heliType == HELI_TYPE_RANDOM) {
-				switch (FindPlayerPed()->m_pWanted->m_nWantedLevel) {
+				switch (FindPlayerPed()->m_pWanted->GetWantedLevel()) {
 				case 0:
 				case 1:
 				case 2: shootTimeout = 999999; break;
