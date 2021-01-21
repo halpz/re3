@@ -193,7 +193,7 @@ CCam::Process(void)
 		break;
 	case MODE_CAM_ON_A_STRING:
 #ifdef FREE_CAM
-		if(CCamera::bFreeCam)
+		if(CCamera::bFreeCam && !CVehicle::bCheat5)
 			Process_FollowCar_SA(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		else
 #endif
@@ -5039,11 +5039,15 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 
 	// Using GetCarGun(LR/UD) will give us same unprocessed RightStick value as SA
 	float stickX = -(pad->GetCarGunLeftRight());
-	float stickY = pad->GetCarGunUpDown();
+	float stickY = -pad->GetCarGunUpDown();
 
 	// In SA this is for not let num2/num8 move camera when Keyboard & Mouse controls are used.
 	// if (CCamera::m_bUseMouse3rdPerson)
 	//	stickY = 0.0f;
+#ifdef INVERT_LOOK_FOR_PAD
+	if (CPad::bInvertLook4Pad)
+		stickY = -stickY;
+#endif
 
 	float xMovement = Abs(stickX) * (FOV / 80.0f * 5.f / 70.f) * stickX * 0.007f * 0.007f;
 	float yMovement = Abs(stickY) * (FOV / 80.0f * 3.f / 70.f) * stickY * 0.007f * 0.007f;
