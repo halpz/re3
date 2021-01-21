@@ -6289,7 +6289,6 @@ CPed::PositionAnyPedOutOfCollision(void)
 	int smallestDistNearVeh = 999;
 	int smallestDistSomewhereClose = 999;
 
-	CVector vehPos = m_pMyVehicle->GetPosition();
 	CVector potentialPos;
 	potentialPos.y = GetPosition().y - 3.5f;
 	potentialPos.z = GetPosition().z;
