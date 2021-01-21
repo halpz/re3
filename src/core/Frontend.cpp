@@ -1281,7 +1281,9 @@ CMenuManager::Draw()
 	float smallestSliderBar = lineHeight * 0.1f;
 	bool foundTheHoveringItem = false;
 	wchar unicodeTemp[64];
+#ifdef ASPECT_RATIO_SCALE
 	char asciiTemp[32];
+#endif
 
 #ifdef MENU_MAP
 	if (m_nCurrScreen == MENUPAGE_MAP) {

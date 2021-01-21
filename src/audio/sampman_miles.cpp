@@ -1,4 +1,4 @@
-#ifdef AUDIO_MSS
+#if defined(AUDIO_MSS) || defined (__MWERKS__)
 #include <shlobj.h>
 #include <shlguid.h>
 

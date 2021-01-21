@@ -128,6 +128,24 @@ bool gbNewRenderer;
 #define CLEARMODE (rwCAMERACLEARZ)
 #endif
 
+#ifdef __MWERKS__
+void
+debug(char *fmt, ...)
+{
+#ifndef MASTER
+	// TODO put something here
+#endif
+}
+
+void
+Error(char *fmt, ...)
+{
+#ifndef MASTER
+	// TODO put something here
+#endif
+}
+#endif
+
 void
 ValidateVersion()
 {
@@ -857,6 +875,7 @@ ProcessSlowMode(void)
 float FramesPerSecondCounter;
 int32 FrameSamples;
 
+#ifndef MASTER
 struct tZonePrint
 {
   char name[12];
@@ -876,8 +895,6 @@ tZonePrint ZonePrint[] =
 	{ "industse", CRect( 1070.3f, -473.0f,   1918.1f, -1331.5f) },
 	{ "no zone",  CRect( 0.0f,     0.0f,     0.0f,    0.0f)     }
 };
-
-#ifndef MASTER
 
 void
 PrintMemoryUsage(void)

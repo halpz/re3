@@ -983,9 +983,13 @@ extern bool gbRenderWorld2;
 }
 #endif
 
+#ifndef __MWERKS__
+#ifndef MASTER
 const int   re3_buffsize = 1024;
 static char re3_buff[re3_buffsize];
+#endif
 
+#ifndef MASTER
 void re3_assert(const char *expr, const char *filename, unsigned int lineno, const char *func)
 {
 #ifdef _WIN32
@@ -1039,9 +1043,11 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 	assert(false);
 #endif
 }
+#endif
 
 void re3_debug(const char *format, ...)
 {
+#ifndef MASTER
 	va_list va;
 	va_start(va, format);
 #ifdef _WIN32
@@ -1053,8 +1059,10 @@ void re3_debug(const char *format, ...)
 
 	printf("%s", re3_buff);
 	CDebug::DebugAddText(re3_buff);
+#endif
 }
 
+#ifndef MASTER
 void re3_trace(const char *filename, unsigned int lineno, const char *func, const char *format, ...)
 {
 	char buff[re3_buffsize *2];
@@ -1074,7 +1082,9 @@ void re3_trace(const char *filename, unsigned int lineno, const char *func, cons
 
 	OutputDebugString(buff);
 }
+#endif
 
+#ifndef MASTER
 void re3_usererror(const char *format, ...)
 {
 	va_list va;
@@ -1094,6 +1104,8 @@ void re3_usererror(const char *format, ...)
 	assert(false);
 #endif
 }
+#endif
+#endif
 
 #ifdef VALIDATE_SAVE_SIZE
 int32 _saveBufCount;
