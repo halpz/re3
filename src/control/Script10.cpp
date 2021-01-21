@@ -32,12 +32,15 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 		// CStats::NoodlesDelievered += GET_INTEGER_PARAM(0);
 		return 0;
 	case COMMAND_REGISTER_SCRAPYARD_CHALLENGE_SCORE:
+		CollectParameters(&m_nIp, 1);
 		//CStats::TopScrapyardChallengeScore = Max(CStats::TopScrapyardChallengeScore, GET_INTEGER_PARAM(0));
 		return 0;
 	case COMMAND_REGISTER_9MM_MAYHEM_SCORE:
+		CollectParameters(&m_nIp, 1);
 		//CStats::Top9mmMayhemScore = Max(CStats::Top9mmMayhemScore, GET_INTEGER_PARAM(0));
 		return 0;
 	case COMMAND_REGISTER_SCOOTER_SHOOTER_SCORE:
+		CollectParameters(&m_nIp, 1);
 		//CStats::TopScooterShooterScore = Max(CStats::TopScooterShooterScore, GET_INTEGER_PARAM(0));
 		return 0;
 	case COMMAND_ADD_MONEY_MADE_FROM_TOURIST:
@@ -65,6 +68,7 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 		// CStats::RegisterDirtBikeFastestTime(GET_INTEGER_PARAM(0), GET_INTEGER_PARAM(1));
 		return 0;
 	case COMMAND_REGISTER_DIRT_BIKE_AIR_TIME:
+		CollectParameters(&m_nIp, 1);
 		//CStats::DirtBikeMostAir = Max(CStats::DirtBikeMostAir, GET_INTEGER_PARAM(0));
 		return 0;
 	case COMMAND_ADD_ARROW_3D_MARKER:
