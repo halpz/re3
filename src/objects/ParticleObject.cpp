@@ -242,6 +242,16 @@ CParticleObject::AddObject(uint16 type, CVector const &pos, CVector const &targe
 			break;
 		}
 		
+		case POBJECT_FIRE_HYDRANT_STEAM:
+		{
+			pobj->m_ParticleType = PARTICLE_HYDRANT_STEAM;
+			pobj->m_nNumEffectCycles = 2;
+			pobj->m_nSkipFrames = 2;
+			pobj->m_nCreationChance = 8;
+			pobj->m_nRemoveTimer = CTimer::GetTimeInMilliseconds() + 5000;
+			break;
+		}
+		
 		case POBJECT_CAR_WATER_SPLASH:
 		case POBJECT_PED_WATER_SPLASH:
 		{
@@ -921,6 +931,7 @@ void CParticleObject::UpdateClose(void)
 							CParticle::AddParticle(PARTICLE_CAR_SPLASH, splashpos, splashvel, nil,
 								CGeneral::GetRandomNumberInRange(0.005f, 0.0075f), this->m_Color, 0, 0, 1, 300);
 						}
+						
 						for ( int32 i = 0; i < this->m_nNumEffectCycles; i++ )
 						{
 							CParticle::AddParticle(this->m_ParticleType, pos, vel, nil, 0.0f, this->m_Color);

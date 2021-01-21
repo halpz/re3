@@ -2161,8 +2161,8 @@ CWorld::TriggerExplosionSectorList(CPtrList &list, const CVector &position, floa
 								} else {
 									CVector pos = pEntity->GetPosition();
 									pos.z -= 0.5f;
-									CParticleObject::AddObject(POBJECT_FIRE_HYDRANT,
-									                           pos, true);
+									CParticleObject::AddObject(POBJECT_FIRE_HYDRANT, pos, true);
+									CParticleObject::AddObject(POBJECT_FIRE_HYDRANT_STEAM, pos, true);
 									pObject->bHasBeenDamaged = true;
 								}
 							}

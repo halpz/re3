@@ -15,6 +15,7 @@ enum eParticleObjectType
 	POBJECT_WALL_STEAM_SLOWMOTION,
 	POBJECT_DARK_SMOKE,
 	POBJECT_FIRE_HYDRANT,
+	POBJECT_FIRE_HYDRANT_STEAM,
 	POBJECT_CAR_WATER_SPLASH,
 	POBJECT_PED_WATER_SPLASH,
 	POBJECT_SPLASHES_AROUND,
@@ -49,14 +50,14 @@ public:
 	CParticleObject    *m_pNext;
 	CParticleObject    *m_pPrev;
 	CParticle          *m_pParticle;
-	uint32               m_nRemoveTimer;
+	uint32              m_nRemoveTimer;
 	eParticleObjectType m_Type;
 	tParticleType       m_ParticleType;
 	uint8               m_nNumEffectCycles;
 	uint8               m_nSkipFrames;
 	uint16              m_nFrameCounter;
 	uint16              m_nState;
-	CVector             m_vecTarget;
+	CVector             m_vecTarget; // CVuVector on PSP
 	float               m_fRandVal;
 	float               m_fSize;
 	CRGBA               m_Color;
