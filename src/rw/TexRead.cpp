@@ -5,7 +5,7 @@
 #define WITHD3D
 #endif
 #include "common.h"
-#ifndef LIBRW
+#ifdef ANISOTROPIC_FILTERING
 #include "rpanisot.h"
 #endif
 #include "crossplatform.h"
@@ -55,12 +55,9 @@ RwTextureGtaStreamRead(RwStream *stream)
 		texNumLoaded++;
 	}
 
-	if(tex == nil)
-		return nil;
-
-#ifndef LIBRW
-	if(RpAnisotTextureGetMaxAnisotropy(tex) > 1)
-		RpAnisotTextureSetMaxAnisotropy(tex, RpAnisotTextureGetMaxAnisotropy(tex));
+#ifdef ANISOTROPIC_FILTERING
+	if(tex && RpAnisotGetMaxSupportedMaxAnisotropy() > 1)	// BUG? this was RpAnisotTextureGetMaxAnisotropy, but that doesn't make much sense
+		RpAnisotTextureSetMaxAnisotropy(tex, RpAnisotGetMaxSupportedMaxAnisotropy());
 #endif
 
 	return tex;

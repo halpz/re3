@@ -3,7 +3,7 @@
 #include "rphanim.h"
 #include "rpskin.h"
 #include "rtbmp.h"
-#ifndef LIBRW
+#ifdef ANISOTROPIC_FILTERING
 #include "rpanisot.h"
 #endif
 
@@ -406,7 +406,7 @@ PluginAttach(void)
 		
 		return FALSE;
 	}
-#ifndef LIBRW
+#ifdef ANISOTROPIC_FILTERING
 	RpAnisotPluginAttach();
 #endif
 #ifdef EXTENDED_PIPELINES
