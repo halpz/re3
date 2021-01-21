@@ -962,3 +962,12 @@ RtCharset   *RtCharsetSetColors(RtCharset * charSet, const RwRGBA * foreGround, 
 RtCharset   *RtCharsetGetDesc(RtCharset * charset, RtCharsetDesc * desc) { *desc = charset->desc; return charset; }
 RtCharset   *RtCharsetCreate(const RwRGBA * foreGround, const RwRGBA * backGround) { return Charset::create(foreGround, backGround); }
 RwBool       RtCharsetDestroy(RtCharset * charSet) { charSet->destroy(); return true; }
+
+
+
+#include <rpanisot.h>
+
+RwInt8      RpAnisotGetMaxSupportedMaxAnisotropy(void) { return rw::getMaxSupportedMaxAnisotropy(); }
+RwTexture    *RpAnisotTextureSetMaxAnisotropy(RwTexture *tex, RwInt8 val) { tex->setMaxAnisotropy(val); return tex; }
+RwInt8       RpAnisotTextureGetMaxAnisotropy(RwTexture *tex) { return tex->getMaxAnisotropy(); }
+RwBool       RpAnisotPluginAttach(void) { rw::registerAnisotropyPlugin(); return true; }

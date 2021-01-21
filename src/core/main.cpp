@@ -3,6 +3,9 @@
 #include "rphanim.h"
 #include "rpskin.h"
 #include "rtbmp.h"
+#ifdef ANISOTROPIC_FILTERING
+#include "rpanisot.h"
+#endif
 
 #include "main.h"
 #include "CdStream.h"
@@ -432,6 +435,9 @@ PluginAttach(void)
 		
 		return FALSE;
 	}
+#ifdef ANISOTROPIC_FILTERING
+	RpAnisotPluginAttach();
+#endif
 #ifdef EXTENDED_PIPELINES
 	CustomPipes::CustomPipeRegister();
 #endif
@@ -440,7 +446,7 @@ PluginAttach(void)
 }
 
 #ifdef GTA_PS2
-#define NUM_PREALLOC_ATOMICS 3245
+#define NUM_PREALLOC_ATOMICS 32455
 #define NUM_PREALLOC_CLUMPS 101
 #define NUM_PREALLOC_FRAMES 2821
 #define NUM_PREALLOC_GEOMETRIES 1404
