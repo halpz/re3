@@ -1133,6 +1133,7 @@ void CRadar::SetRadarMarkerState(int32 counter, bool flag)
 }
 
 void CRadar::ShowRadarMarker(CVector pos, uint32 color, float radius) {
+	/*
 	float f1 = radius * 1.4f;
 	float f2 = radius * 0.5f;
 	CVector p1, p2;
@@ -1152,6 +1153,7 @@ void CRadar::ShowRadarMarker(CVector pos, uint32 color, float radius) {
 	p1 = pos - TheCamera.GetRight()*f1;
 	p2 = pos - TheCamera.GetRight()*f2;
 	CTheScripts::ScriptDebugLine3D(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, color, color);
+	*/
 }
 
 void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha)

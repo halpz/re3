@@ -130,6 +130,8 @@ uint32 CHud::m_LastTimeEnergyLost;
 
 CSprite2d CHud::Sprites[NUM_HUD_SPRITES];
 
+wchar* CHud::gLastPrintForeverString;
+
 struct
 {
 	const char *name;

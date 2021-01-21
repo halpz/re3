@@ -277,6 +277,16 @@ public:
 	uint32 InputHowLongAgo(void);
 	void SetDrunkInputDelay(int32 delay) { DrunkDrivingBufferUsed = delay; }
 
+	// TODO(LCS): properly, this is just to get some estimation for script
+	int16 GetOddJobTrigger() { return GetRightShockJustDown(); }
+	int16 GuiLeft() { return GetAnaloguePadLeft() || GetDPadLeftJustDown(); }
+	int16 GuiRight() { return GetAnaloguePadRight() || GetDPadRightJustDown(); }
+	int16 GuiUp() { return GetAnaloguePadUp() || GetDPadUpJustDown(); }
+	int16 GuiDown() { return GetAnaloguePadDown() || GetDPadDownJustDown(); }
+	int16 GuiSelect() { return GetCrossJustDown(); }
+	int16 GuiBack() { return GetTriangleJustDown(); }
+	int16 GetSkipCutscene() { return GetCrossJustDown(); }
+
 #ifdef XINPUT
 	void AffectFromXinput(uint32 pad);
 #endif

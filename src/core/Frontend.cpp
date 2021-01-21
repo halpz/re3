@@ -3378,9 +3378,9 @@ CMenuManager::Process(void)
 #ifdef XBOX_MESSAGE_SCREEN
 	ProcessDialogTimer();
 #endif
-
-	if (TheCamera.GetScreenFadeStatus() != FADE_0)
-		return;
+	// tmp hack to get saving to work
+	//if (TheCamera.GetScreenFadeStatus() != FADE_0)
+	//	return;
 
 	InitialiseChangedLanguageSettings();
 

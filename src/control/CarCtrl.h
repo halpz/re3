@@ -173,3 +173,4 @@ public:
 };
 
 extern CVehicle* apCarsToKeep[MAX_CARS_TO_KEEP];
+extern bool gbEmergencyVehiclesEnabled;

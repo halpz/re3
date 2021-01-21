@@ -36,6 +36,8 @@
 #include "GameLogic.h"
 #include "Bike.h"
 
+// LCS: file done except TODOs
+
 int8 CRunningScript::ProcessCommands500To599(int32 command)
 {
 	switch (command) {
@@ -731,7 +733,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(GET_INTEGER_PARAM(0));
 		script_assert(pPed);
 		pPed->m_animGroup = (AssocGroupId)GET_INTEGER_PARAM(1);
-		pPed->b1A1_20 = false;
+		pPed->bOverrideMoveAnim = false;
 		return 0;
 	}
 	/*
@@ -1740,8 +1742,10 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		UpdateCompareFlag(pPed->bIsShooting && pPed->IsWithinArea(x1, y1, x2, y2));
 		if (GET_INTEGER_PARAM(5))
 			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		/*
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
+		*/
 		return 0;
 	}
 	case COMMAND_IS_CHAR_SHOOTING_IN_AREA:
@@ -1756,8 +1760,10 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		UpdateCompareFlag(pPed->bIsShooting && pPed->IsWithinArea(x1, y1, x2, y2));
 		if (GET_INTEGER_PARAM(5))
 			CTheScripts::HighlightImportantArea((uintptr)this + m_nIp, x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
+		/*
 		if (CTheScripts::DbgFlag)
 			CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
+		*/
 		return 0;
 	}
 	case COMMAND_IS_CURRENT_PLAYER_WEAPON:

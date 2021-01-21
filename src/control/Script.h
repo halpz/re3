@@ -19,7 +19,7 @@ class CRunningScript;
 extern int32 ScriptParams[32];
 
 void FlushLog();
-#define script_assert(_Expression) FlushLog(); assert(_Expression);
+#define script_assert(_Expression) { FlushLog(); assert(_Expression); }
 
 #define PICKUP_PLACEMENT_OFFSET (0.5f)
 #define PED_FIND_Z_OFFSET (5.0f)
@@ -360,11 +360,13 @@ public:
 	static void UndoBuildingSwaps();
 	static void UndoEntityInvisibilitySettings();
 
+	/*
 	static void ScriptDebugLine3D(float x1, float y1, float z1, float x2, float y2, float z2, uint32 col, uint32 col2);
 	static void RenderTheScriptDebugLines();
+	*/
 
 	static void SaveAllScripts(uint8*, uint32*);
-	static void LoadAllScripts(uint8*, uint32);
+	static bool LoadAllScripts(uint8*, uint32);
 
 	static bool IsDebugOn() { return DbgFlag; };
 	static void InvertDebugFlag() { DbgFlag = !DbgFlag; }
@@ -420,10 +422,12 @@ public:
 	static void DrawScriptSpheres();
 	static void HighlightImportantArea(uint32, float, float, float, float, float);
 	static void HighlightImportantAngledArea(uint32, float, float, float, float, float, float, float, float, float);
+	/*
 	static void DrawDebugSquare(float, float, float, float);
 	static void DrawDebugAngledSquare(float, float, float, float, float, float, float, float);
 	static void DrawDebugCube(float, float, float, float, float, float);
 	static void DrawDebugAngledCube(float, float, float, float, float, float, float, float, float, float);
+	*/
 
 	static void AddToInvisibilitySwapArray(CEntity*, bool);
 	static void AddToBuildingSwapArray(CBuilding*, int32, int32);
@@ -432,7 +436,7 @@ public:
 	static int32 AddScriptSphere(int32 id, CVector pos, float radius);
 	static int32 GetNewUniqueScriptSphereIndex(int32 index);
 	static void RemoveScriptSphere(int32 index);
-	static void RemoveScriptTextureDictionary();
+	//static void RemoveScriptTextureDictionary();
 public:
 	static void RemoveThisPed(CPed* pPed);
 
@@ -504,7 +508,7 @@ class CRunningScript
 public:
 	CRunningScript* next;
 	CRunningScript* prev;
-	int m_nId;
+	int32 m_nId;
 	char m_abScriptName[8];
 	uint32 m_nIp;
 	uint32 m_anStack[MAX_STACK_DEPTH];
@@ -549,7 +553,30 @@ public:
 
 	int8 ProcessOneCommand();
 	void DoDeatharrestCheck();
-	void UpdateCompareFlag(bool);
+	void UpdateCompareFlag(bool flag)
+	{
+		if (m_bNotFlag)
+			flag = !flag;
+		if (m_nAndOrState == ANDOR_NONE) {
+			m_bCondResult = flag;
+			return;
+		}
+		if (m_nAndOrState >= ANDS_1 && m_nAndOrState <= ANDS_8) {
+			m_bCondResult &= flag;
+			if (m_nAndOrState == ANDS_1) {
+				m_nAndOrState = ANDOR_NONE;
+				return;
+			}
+		}
+		else {
+			m_bCondResult |= flag;
+			if (m_nAndOrState <= ORS_1) {
+				m_nAndOrState = ANDOR_NONE;
+				return;
+			}
+		}
+		m_nAndOrState--;
+	}
 	int16 GetPadState(uint16, uint16);
 
 	int8 ProcessCommands0To99(int32);
@@ -570,6 +597,7 @@ public:
 	int8 ProcessCommands1500To1599(int32);
 	int8 ProcessCommands1600To1699(int32);
 
+	uint32 CollectLocateParameters(uint32*, bool);
 	void LocatePlayerCommand(int32, uint32*);
 	void LocatePlayerCharCommand(int32, uint32*);
 	void LocatePlayerCarCommand(int32, uint32*);
@@ -608,6 +636,7 @@ public:
 	bool ThisIsAValidRandomCop(uint32 mi, int cop, int swat, int fbi, int army, int miami);
 	bool ThisIsAValidRandomPed(uint32 pedtype, int civ, int gang, int criminal);
 	bool CheckDamagedWeaponType(int32 actual, int32 type);	
+
 	void ReturnFromGosubOrFunction();
 
 };

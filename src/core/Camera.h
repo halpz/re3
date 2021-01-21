@@ -368,6 +368,7 @@ public:
 	bool m_bVehicleSuspenHigh;
 	bool m_bEnable1rstPersonCamCntrlsScript;
 	bool m_bAllow1rstPersonWeaponsCamera;
+	bool m_bFreezePedZoomSwitch;
 	bool m_bFailedCullZoneTestPreviously;
 
 	bool m_FadeTargetIsSplashScreen;

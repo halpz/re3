@@ -138,7 +138,50 @@
 	X("blimp_night",	MI_BLIMP_NIGHT) \
 	X("blimp_day",		MI_BLIMP_DAY) \
 	X("yt_main_body",	MI_YT_MAIN_BODY) \
-	X("yt_main_body2",	MI_YT_MAIN_BODY2)
+	X("yt_main_body2",	MI_YT_MAIN_BODY2) \
+	X("oddjgaragdoor", MI_LCS_GARAGEDOOR01) \
+	X("bombdoor", MI_LCS_GARAGEDOOR02) \
+	X("door_bombshop", MI_LCS_GARAGEDOOR03) \
+	X("vheistlocdoor", MI_LCS_GARAGEDOOR04) \
+	X("door2_garage", MI_LCS_GARAGEDOOR05) \
+	X("ind_slidedoor", MI_LCS_GARAGEDOOR06) \
+	X("bankjobdoor", MI_LCS_GARAGEDOOR07) \
+	X("door_jmsgrage", MI_LCS_GARAGEDOOR08) \
+	X("ind_safeh_gdoor", MI_LCS_GARAGEDOOR09) \
+	X("door_sfehousegrge", MI_LCS_GARAGEDOOR10) \
+	X("shedgaragedoor", MI_LCS_GARAGEDOOR11) \
+	X("door4_garage", MI_LCS_GARAGEDOOR12) \
+	X("door_col_compnd_01", MI_LCS_GARAGEDOOR13) \
+	X("door_col_compnd_02", MI_LCS_GARAGEDOOR14) \
+	X("door_col_compnd_03", MI_LCS_GARAGEDOOR15) \
+	X("door_col_compnd_04", MI_LCS_GARAGEDOOR16) \
+	X("door_col_compnd_05", MI_LCS_GARAGEDOOR17) \
+	X("impex_door", MI_LCS_GARAGEDOOR18) \
+	X("SalvGarage", MI_LCS_GARAGEDOOR19) \
+	X("door3_garage", MI_LCS_GARAGEDOOR20) \
+	X("leveldoor2", MI_LCS_GARAGEDOOR21) \
+	X("double_garage_dr", MI_LCS_GARAGEDOOR22) \
+	X("amcogaragedoor", MI_LCS_GARAGEDOOR23) \
+	X("towergaragedoor1", MI_LCS_GARAGEDOOR24) \
+	X("towergaragedoor2", MI_LCS_GARAGEDOOR25) \
+	X("towergaragedoor3", MI_LCS_GARAGEDOOR26) \
+	X("plysve_gragedoor", MI_LCS_GARAGEDOOR27) \
+	X("impexpsubgrgdoor", MI_LCS_GARAGEDOOR28) \
+	X("Sub_sprayshopdoor", MI_LCS_GARAGEDOOR29) \
+	X("ind_plyrwoor", MI_LCS_GARAGEDOOR30) \
+	X("8ballsuburbandoor", MI_LCS_GARAGEDOOR31) \
+	X("door_nthgrage", MI_LCS_GARAGEDOOR32) \
+	X("hangardoor1", MI_LCS_GARAGEDOOR33) \
+	X("hangardoor2", MI_LCS_GARAGEDOOR34) \
+	X("neds_door", MI_LCS_GARAGEDOOR35) \
+	X("fs_wrhsedoor", MI_LCS_GARAGEDOOR36) \
+	X("jm_ContraGarage", MI_LCS_GARAGEDOOR37) \
+	X("jm_imp_SalvGarage", MI_LCS_GARAGEDOOR38) \
+	X("crushercrush", MI_LCS_GARAGEDOOR39) \
+	X("crushertop", MI_LCS_GARAGEDOOR40) \
+	X("crusher_crane", MI_LCS_CRANE01) \
+
+// NB: MI_LCS_ <- temporary stuff so that garages started somewhat working
 
 #define X(name, var) extern int16 var;
 	MODELINDICES

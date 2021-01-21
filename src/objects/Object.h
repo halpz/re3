@@ -71,6 +71,7 @@ public:
 	uint8 bIsWeapon : 1;
 	uint8 bIsStreetLight : 1;
 	int8 m_nBonusValue;
+	int8 m_nLastWeaponToDamage;
 	uint16 m_nCostValue;
 	float m_fCollisionDamageMultiplier;
 	uint8 m_nCollisionDamageEffect;

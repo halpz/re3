@@ -118,6 +118,8 @@ public:
 	static uint32 m_LastWeapon;
 	static uint32 m_LastTimeEnergyLost;
 
+	static wchar* gLastPrintForeverString;
+
 public:
 	static void Draw();
 	static void DrawAfterFade();

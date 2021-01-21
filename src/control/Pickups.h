@@ -117,6 +117,9 @@ public:
 	
 	static void RemoveAllPickupsOfACertainWeaponGroupWithNoAmmo(eWeaponType);
 	static CPickup *FindPickUpForThisObject(CEntity*);
+
+	static float GetValue(int);
+	static void SetValue(int, float);
 };
 
 extern uint16 AmmoForWeapon[WEAPONTYPE_TOTALWEAPONS + 1];

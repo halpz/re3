@@ -1279,7 +1279,7 @@ RenderScene(void)
 void
 RenderDebugShit(void)
 {
-	CTheScripts::RenderTheScriptDebugLines();
+	//CTheScripts::RenderTheScriptDebugLines();
 #ifndef FINAL
 	if(gbShowCollisionLines)
 		CRenderer::RenderCollisionLines();

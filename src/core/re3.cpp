@@ -741,24 +741,30 @@ extern bool gbRenderDebugEnvMap;
 #ifdef MISSION_SWITCHER
 		DebugMenuEntry *missionEntry;
 		static const char* missions[] = {
-			"Initial", "Intro", "An Old Friend", "The Party", "Back Alley Brawl", "Jury Fury", "Riot",
-			"Treacherous Swine", "Mall Shootout", "Guardian Angels", "Sir, Yes Sir!", "All Hands On Deck!",
-			"The Chase", "Phnom Penh '86", "The Fastest Boat", "Supply & Demand", "Rub Out", "Death Row",
-			"Four Iron", "Demolition Man", "Two Bit Hit", "No Escape?", "The Shootist", "The Driver",
-			"The Job", "Gun Runner", "Boomshine Saigon", "Recruitment Drive", "Dildo Dodo", "Martha's Mug Shot",
-			"G-spotlight", "Shakedown", "Bar Brawl", "Cop Land", "Spilling the Beans", "Hit the Courier",
-			"Printworks Buy", "Sunshine Autos", "Interglobal Films Buy", "Cherry Popper Icecreams Buy",
-			"Kaufman Cabs Buy", "Malibu Club Buy", "The Boatyard Buy", "Pole Position Club Buy", "El Swanko Casa Buy",
-			"Links View Apartment Buy", "Hyman Condo Buy", "Ocean Heighs Aprt. Buy", "1102 Washington Street Buy",
-			"Vice Point Buy", "Skumole Shack Buy", "Cap the Collector", "Keep your Friends Close...",
-			"Alloy Wheels of Steel", "Messing with the Man", "Hog Tied", "Stunt Boat Challenge", "Cannon Fodder",
-			"Naval Engagement", "Trojan Voodoo", "Juju Scramble", "Bombs Away!", "Dirty Lickin's", "Love Juice",
-			"Psycho Killer", "Publicity Tour", "Weapon Range", "Road Kill", "Waste the Wife", "Autocide",
-			"Check Out at the Check In", "Loose Ends", "V.I.P.", "Friendly Rivalry", "Cabmaggedon", "TAXI DRIVER",
-			"PARAMEDIC", "FIREFIGHTER", "VIGILANTE", "HOTRING", "BLOODRING", "DIRTRING", "Sunshine Autos Races",
-			"Distribution", "Downtown Chopper Checkpoint", "Ocean Beach Chopper Checkpoint", "Vice Point Chopper Checkpoint",
-			"Little Haiti Chopper Checkpoint", "Trial by Dirt", "Test Track", "PCJ Playground", "Cone Crazy",
-			"PIZZA BOY", "RC Raider Pickup", "RC Bandit Race", "RC Baron Race", "Checkpoint Charlie"
+			"initial: objects", "initial: hidden packages", "initial: car generators", "initial: pickups", "initial: unique stunt jumps",
+			"initial: player", "initial: general info", "initial: lods", "initial: weapons", "Home Sweet Home", "Taxi-Driver Sub-Mission",
+			"Paramedic Sub-Mission", "Vigilante Sub-Mission", "Karmageddon", "Firefighter Sub-Mission", "Trash Dash", "RC Triad Take-Down",
+			"Thrashin' RC", "Ragin' RC", "Chasin' RC", "GO GO Faggio", "Noodleboy", "Pizzaboy", "Wong Side Of The Tracks", "Bumps and Grinds: Course 1",
+			"Bumps and Grinds: Course 2", "Bumps and Grinds: Course 3", "Bumps and Grinds: Course 4", "Bumps and Grinds: Course 5", "Bumps and Grinds: Course 6",
+			"Bumps and Grinds: Course 7", "Bumps and Grinds: Course 8", "Bumps and Grinds: Course 9", "Bumps and Grinds: Course 10", "Car Salesman", "Bike Salesman",
+			"RACE: Low-Rider Rumble", "RACE: Deimos Dash", "RACE: Wi-Cheetah Run", "RACE: Red Light Racing", "RACE: Torrington TT", "RACE: Gangsta GP",
+			"Scooter Shooter", "AWOL Angel", "9mm Mayhem", "Scrapyard Challenge", "See the Sight Before your Flight", "SlashTV", "Slacker (Vincenzo)",
+			"Dealing Revenge (Vincenzo)", "Snuff (Vincenzo)", "Smash and Grab (Vincenzo)", "Hot Wheels (Vincenzo)", "The Portland Chainsaw Masquerade (Vincenzo)",
+			"The Offer (Salvatore)", "Ho Selecta! (Salvatore)", "Frighteners (Salvatore)", "Rollercoaster Ride (Salvatore)", "Contra-Banned (Salvatore)",
+			"Sindacco Sabotage (Salvatore)", "The Trouble with Triads (Salvatore)", "Driving Mr Leone (Salvatore)", "conversation (JD)", "Bone Voyeur! (JD)",
+			"Don in 60 Seconds (JD)", "A Volatile Situation (JD)", "Blow up 'Dolls' (JD)", "Salvatore's Salvation (JD)", "The Guns of Leone (JD)",
+			"Calm before the Storm (JD)", "The Made Man (JD)", "Snappy Dresser (Ma Cipriani)", "Big Rumble in Little China (Ma Cipriani)", "Grease Sucho (Ma Cipriani)",
+			"Dead Meat (Ma Cipriani)", "No Son of Mine (Ma Cipriani)", "Shop 'til you Strop (Maria)", "Taken for a Ride (Maria)", "Booby Prize (Maria)",
+			"Biker Heat (Maria)", "Overdose of Trouble (Maria)", "Making Toni (Salvatore)", "A Walk In The Park (Salvatore)", "Caught In The Act (Salvatore)",
+			"Search And Rescue (Salvatore)", "Taking The Peace (Salvatore)", "Shoot The Messenger (Salvatore)", "Sayonara Sindaccos (Leon McAffrey)",
+			"The Whole 9 Yardies (Leon McAffrey)", "Crazy '69' (Leon McAffrey)", "Night Of The Livid Dreads (Leon McAffrey)", "Munitions Dump (Leon McAffrey)",
+			"The Morgue Party Candidate (Donald Love)", "Steering The Vote (Donald Love)", "Cam-Pain (Donald Love)", "Friggin' The Riggin' (Donald Love)",
+			"Love & Bullets (Donald Love)", "Counterfeit Count (Donald Love)", "Love On The Rocks (Donald Love)", "L.C. Confidential (Church Confessional)",
+			"The Passion Of The Heist (Church Confessional)", "Karmageddon (Church Confessional)", "False Idols (Church Confessional)", "Rough Justice (Salvatore)",
+			"Dead Reckoning (Salvatore)", "Shogun Showdown (Salvatore)", "The Shoreside Redemption (Salvatore)", "The Sicilian Gambit (Salvatore)",
+			"Panlantic Land Grab (Donald Love)", "Stop the Press (Donald Love)", "Morgue Party Resurrection (Donald Love)", "No Money, Mo' Problems (Donald Love)",
+			"Bringing the House Down (Donald Love)", "Love on the Run (Donald Love)", "More Deadly than the Male (Toshiko Kasen)", "Cash Clash (Toshiko Kasen)",
+			"A Date with Death (Toshiko Kasen)", "Cash in Kazuki's Chips (Toshiko Kasen)"
 		};
 
 		missionEntry = DebugMenuAddVar("Debug", "Select mission", &nextMissionToSwitch, nil, 1, 0, 96, missions);
