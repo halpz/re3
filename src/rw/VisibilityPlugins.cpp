@@ -263,6 +263,7 @@ CVisibilityPlugins::RenderWheelAtomicCB(RpAtomic *atomic)
 
 	mi = GetAtomicModelInfo(atomic);
 	len = Sqrt(DistToCameraSq);
+	len *= 0.5f;	// HACK HACK, LOD wheels look shite
 	lodatm = mi->GetAtomicFromDistance(len * TheCamera.LODDistMultiplier / VEHICLE_LODDIST_MULTIPLIER);
 	if(lodatm){
 		if(RpAtomicGetGeometry(lodatm) != RpAtomicGetGeometry(atomic))
