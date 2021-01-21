@@ -55,11 +55,8 @@ RwTextureGtaStreamRead(RwStream *stream)
 		texNumLoaded++;
 	}
 
-	if(tex == nil)
-		return nil;
-
 #ifdef ANISOTROPIC_FILTERING
-	if(RpAnisotGetMaxSupportedMaxAnisotropy() > 1)	// BUG? this was RpAnisotTextureGetMaxAnisotropy, but that doesn't make much sense
+	if(tex && RpAnisotGetMaxSupportedMaxAnisotropy() > 1)	// BUG? this was RpAnisotTextureGetMaxAnisotropy, but that doesn't make much sense
 		RpAnisotTextureSetMaxAnisotropy(tex, RpAnisotGetMaxSupportedMaxAnisotropy());
 #endif
 
