@@ -65,7 +65,7 @@ const CRGBA SCROLLBAR_COLOR = LABEL_COLOR;
 #define MIN_BRIGHTNESS 180
 #define MAX_BRIGHTNESS 700
 #else
-// PS2
+// PS2, also PSP probably
 // 8 bars (32 step)
 #define DEFAULT_BRIGHTNESS 0x120
 #define MIN_BRIGHTNESS 0x80
@@ -3250,7 +3250,9 @@ CMenuManager::PrintBriefs()
 void
 CMenuManager::PrintStats()
 {
-	static uint8 pirateCheck = 0;
+#ifdef SECUROM
+	static uint8 statsPirateCheck = 0;
+#endif
 	static float scrollY = 0;
 
 	int rowNum = CStats::ConstructStatLine(99999);
@@ -3263,11 +3265,13 @@ CMenuManager::PrintStats()
 	CFont::SetPropOn();
 	CFont::SetDropShadowPosition(0);
 
-	if (pirateCheck == 0)
+#ifdef SECUROM
+	if (statsPirateCheck == 0)
 		// if not pirated game
-		pirateCheck = 46;
+		// statsPirateCheck = 46;
 		// else
-		// pirateCheck = 45;
+		statsPirateCheck = 45;
+#endif
 
 	if (m_PrefsLanguage == LANGUAGE_AMERICAN)
 		CFont::SetScale(MENU_X(0.43f), MENU_Y(0.75f));
@@ -3287,8 +3291,10 @@ CMenuManager::PrintStats()
 		lastCheck = CTimer::GetTimeInMillisecondsPauseMode();
 	}
 
-	if (pirateCheck == 45)
+#ifdef SECUROM
+	if (statsPirateCheck == 45)
 		return;
+#endif
 
 	float nextYChange, y, alpha;
 
