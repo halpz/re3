@@ -5571,7 +5571,7 @@ CMenuManager::DrawQuitGameScreen(void)
 	static CSprite2d *splash = nil;
 
 	if (splash == nil)
-		splash = LoadSplash("OUTRO");
+		splash = LoadSplash("sceelee");
 
 	m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(MENU_X(28.0f), MENU_Y(8.0f), MENU_X(157.0f), MENU_Y(138.0f)), CRGBA(255, 255, 255, -(m_nMenuFadeAlpha + 1)));
 
