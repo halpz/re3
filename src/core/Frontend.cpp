@@ -40,16 +40,16 @@
 #include "User.h"
 #include "sampman.h"
 
-// --MIAMI: file done
+// --LCS: changed a bit to have lcs feel, needs more work
 
 // Similar story to Hud.cpp:
 // Game has colors inlined in code.
 // For easier modification we collect them here:
-const CRGBA LABEL_COLOR(255, 150, 225, 255);
+const CRGBA LABEL_COLOR(115, 173, 216, 255);
 const CRGBA SELECTIONBORDER_COLOR(25, 130, 70, 255);
 const CRGBA MENUOPTION_COLOR = LABEL_COLOR;
-const CRGBA SELECTEDMENUOPTION_COLOR = LABEL_COLOR;
-const CRGBA HEADER_COLOR = LABEL_COLOR;
+const CRGBA SELECTEDMENUOPTION_COLOR(255, 255, 255, 255);
+const CRGBA HEADER_COLOR(197, 0, 0, 255);
 const CRGBA DARKMENUOPTION_COLOR(195, 90, 165, 255);
 const CRGBA SLIDERON_COLOR(97, 194, 247, 255);
 const CRGBA SLIDEROFF_COLOR(27, 89, 130, 255);
@@ -195,7 +195,7 @@ wchar* CMenuManager::m_pDialogText = nil;
 #endif
 
 #define SET_FONT_FOR_MENU_HEADER \
-	CFont::SetRightJustifyOn(); \
+	CFont::SetRightJustifyOff(); \
 	CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING)); \
 	CFont::SetScale(MENU_X(MENUHEADER_WIDTH), MENU_Y(MENUHEADER_HEIGHT)); \
 	CFont::SetDropShadowPosition(0);
@@ -932,11 +932,11 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 	if (aScreens[m_nCurrScreen].m_ScreenName[0] != '\0') {
 
 		SET_FONT_FOR_MENU_HEADER
-		CFont::SetColor(CRGBA(30, 30, 30, FadeIn(255)));
-		CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(MENUHEADER_POS_X) - MENU_X(7.f), SCREEN_SCALE_Y(MENUHEADER_POS_Y + 7.f), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
+		//CFont::SetColor(CRGBA(30, 30, 30, FadeIn(255)));
+		//CFont::PrintString(SCREEN_STRETCH_X(MENUHEADER_POS_X) - MENU_X(7.f), SCREEN_SCALE_Y(MENUHEADER_POS_Y + 7.f), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
 
 		CFont::SetColor(CRGBA(HEADER_COLOR.r, HEADER_COLOR.g, HEADER_COLOR.b, FadeIn(255)));
-		CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_Y(MENUHEADER_POS_Y), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
+		CFont::PrintString(SCREEN_STRETCH_X(MENUHEADER_POS_X), SCREEN_SCALE_Y(MENUHEADER_POS_Y), TheText.Get(aScreens[m_nCurrScreen].m_ScreenName));
 	}
 
 	// Label
@@ -1016,11 +1016,14 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 				CFont::SetScale(MENU_X(MEDIUMTEXT_X_SCALE), MENU_Y(MEDIUMTEXT_Y_SCALE));
 				CFont::SetDropShadowPosition(0);
 			} else {
-				CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
+				CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 				CFont::SetScale(MENU_X(BIGTEXT_X_SCALE), MENU_Y(BIGTEXT_Y_SCALE));
 				CFont::SetDropShadowPosition(2);
 				CFont::SetDropColor(CRGBA(0, 0, 0, FadeIn(255)));
-				CFont::SetColor(CRGBA(MENUOPTION_COLOR.r, MENUOPTION_COLOR.g, MENUOPTION_COLOR.b, FadeIn(255)));
+				if (i == m_nCurrOption && itemsAreSelectable)
+					CFont::SetColor(CRGBA(SELECTEDMENUOPTION_COLOR.r, SELECTEDMENUOPTION_COLOR.g, SELECTEDMENUOPTION_COLOR.b, FadeIn(255)));
+				else
+					CFont::SetColor(CRGBA(MENUOPTION_COLOR.r, MENUOPTION_COLOR.g, MENUOPTION_COLOR.b, FadeIn(255)));
 			}
 			if (aScreens[m_nCurrScreen].m_aEntries[i].m_Align == MENUALIGN_LEFT) {
 				CFont::SetCentreOff();
@@ -1361,7 +1364,7 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 					// Actually bottomRight and bottomLeft should be exchanged here(although this is original code).
 					// So this shows us either R* didn't use same struct for menu BG and highlight, or they just kept fields as x1,y1 etc. Yikes.
 
-					if (m_nOptionHighlightTransitionBlend == 0) {
+					/*if (m_nOptionHighlightTransitionBlend == 0) {
 						if (m_firstStartCounter == 255 && m_nMenuFadeAlpha == 255 && !bMenuChangeOngoing) {
 							CSprite2d::Draw2DPolygon(MENU_X_LEFT_ALIGNED(menuOptionHighlight.topLeft_x), MENU_Y(menuOptionHighlight.topLeft_y),
 								MENU_X_LEFT_ALIGNED(menuOptionHighlight.topRight_x), MENU_Y(menuOptionHighlight.topRight_y),
@@ -1397,7 +1400,7 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 								MENU_X_LEFT_ALIGNED(menuOptionHighlight.bottomRight_x), MENU_Y(menuOptionHighlight.bottomRight_y),
 								MENU_X_LEFT_ALIGNED(menuOptionHighlight.bottomLeft_x), MENU_Y(menuOptionHighlight.bottomLeft_y), SELECTIONBORDER_COLOR);
 						}
-					}
+					}*/
 
 					static PauseModeTime lastBlendChange = 0;
 					if (m_nOptionHighlightTransitionBlend <= 255) {
@@ -1427,7 +1430,7 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 							CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 							CFont::SetScale(MENU_X(MEDIUMTEXT_X_SCALE), MENU_Y(MEDIUMTEXT_Y_SCALE));
 						} else {
-							CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
+							CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 							CFont::SetScale(MENU_X(BIGTEXT_X_SCALE), MENU_Y(BIGTEXT_Y_SCALE));
 						}
 						CFont::PrintString(MENU_X_LEFT_ALIGNED(DEFAULT_SCREEN_WIDTH - RIGHT_ALIGNED_TEXT_RIGHT_MARGIN(xMargin)), MENU_Y(aScreens[m_nCurrScreen].m_aEntries[i].m_Y MINUS_SCROLL_OFFSET), rightText);
@@ -2000,18 +2003,18 @@ CMenuManager::DrawControllerSetupScreen()
 	// Shadow
 	CFont::SetColor(CRGBA(30, 30, 30, FadeIn(255)));
 
-	if (m_ControlMethod == CONTROL_STANDARD)
-		CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(MENUHEADER_POS_X) - MENU_X(7.f), SCREEN_SCALE_Y(MENUHEADER_POS_Y + 7.f), TheText.Get("FET_STI"));
-	else if (m_ControlMethod == CONTROL_CLASSIC)
-		CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(MENUHEADER_POS_X) - MENU_X(7.f), SCREEN_SCALE_Y(MENUHEADER_POS_Y + 7.f), TheText.Get("FET_CTI"));
+	//if (m_ControlMethod == CONTROL_STANDARD)
+	//	CFont::PrintString(SCREEN_STRETCH_X(MENUHEADER_POS_X) - MENU_X(7.f), SCREEN_SCALE_Y(MENUHEADER_POS_Y + 7.f), TheText.Get("FET_STI"));
+	//else if (m_ControlMethod == CONTROL_CLASSIC)
+	//	CFont::PrintString(SCREEN_STRETCH_X(MENUHEADER_POS_X) - MENU_X(7.f), SCREEN_SCALE_Y(MENUHEADER_POS_Y + 7.f), TheText.Get("FET_CTI"));
 
 	// Real header
 	CFont::SetColor(CRGBA(HEADER_COLOR.r, HEADER_COLOR.g, HEADER_COLOR.b, FadeIn(255)));
 
 	if (m_ControlMethod == CONTROL_STANDARD)
-		CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_Y(MENUHEADER_POS_Y), TheText.Get("FET_STI"));
+		CFont::PrintString(SCREEN_STRETCH_X(MENUHEADER_POS_X), SCREEN_SCALE_Y(MENUHEADER_POS_Y), TheText.Get("FET_STI"));
 	else if (m_ControlMethod == CONTROL_CLASSIC)
-		CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_Y(MENUHEADER_POS_Y), TheText.Get("FET_CTI"));
+		CFont::PrintString(SCREEN_STRETCH_X(MENUHEADER_POS_X), SCREEN_SCALE_Y(MENUHEADER_POS_Y), TheText.Get("FET_CTI"));
 
 	wchar *actionTexts[33];
 	actionTexts[0] = TheText.Get("FEC_FIR");
@@ -2164,7 +2167,7 @@ CMenuManager::DrawControllerSetupScreen()
 	}
 
 	// Back button and it's shadow
-	CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
+	CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 	CFont::SetScale(MENU_X(BIGTEXT_X_SCALE), MENU_Y(BIGTEXT_Y_SCALE));
 	CFont::SetRightJustifyOn();
 	CFont::SetDropShadowPosition(2);
@@ -2223,7 +2226,7 @@ CMenuManager::DrawBackground(bool transitionCall)
 				PrintMap();
 
 			// Left border
-			CSprite2d::Draw2DPolygon(SCREEN_STRETCH_X(menuBg.bottomLeft_x), SCREEN_STRETCH_Y(menuBg.bottomLeft_y), 0.0f, SCREEN_HEIGHT,
+			/*CSprite2d::Draw2DPolygon(SCREEN_STRETCH_X(menuBg.bottomLeft_x), SCREEN_STRETCH_Y(menuBg.bottomLeft_y), 0.0f, SCREEN_HEIGHT,
 				SCREEN_STRETCH_X(menuBg.topLeft_x), SCREEN_STRETCH_Y(menuBg.topLeft_y), 0.0f, 0.0f, CRGBA(0, 0, 0, 255));
 
 			// Top border
@@ -2236,7 +2239,7 @@ CMenuManager::DrawBackground(bool transitionCall)
 
 			// Right border
 			CSprite2d::Draw2DPolygon(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_STRETCH_X(menuBg.bottomRight_x), SCREEN_STRETCH_Y(menuBg.bottomRight_y),
-				SCREEN_WIDTH, 0.0f, SCREEN_STRETCH_X(menuBg.topRight_x), SCREEN_STRETCH_Y(menuBg.topRight_y), CRGBA(0, 0, 0, 255));
+				SCREEN_WIDTH, 0.0f, SCREEN_STRETCH_X(menuBg.topRight_x), SCREEN_STRETCH_Y(menuBg.topRight_y), CRGBA(0, 0, 0, 255));*/
 		} else {
 			m_nMenuFadeAlpha = 255;
 			m_firstStartCounter = 255;
@@ -2245,7 +2248,7 @@ CMenuManager::DrawBackground(bool transitionCall)
 				PrintMap();
 
 			// Left border
-			CSprite2d::Draw2DPolygon(SCREEN_STRETCH_X(menuBg.bottomLeft_x), SCREEN_STRETCH_Y(menuBg.bottomLeft_y), 0.0f, SCREEN_HEIGHT,
+			/*CSprite2d::Draw2DPolygon(SCREEN_STRETCH_X(menuBg.bottomLeft_x), SCREEN_STRETCH_Y(menuBg.bottomLeft_y), 0.0f, SCREEN_HEIGHT,
 				SCREEN_STRETCH_X(menuBg.topLeft_x), SCREEN_STRETCH_Y(menuBg.topLeft_y), 0.0f, 0.0f, CRGBA(0, 0, 0, 255));
 
 			// Top border
@@ -2258,7 +2261,7 @@ CMenuManager::DrawBackground(bool transitionCall)
 
 			// Right border
 			CSprite2d::Draw2DPolygon(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_STRETCH_X(menuBg.bottomRight_x), SCREEN_STRETCH_Y(menuBg.bottomRight_y),
-				SCREEN_WIDTH, 0.0f, SCREEN_STRETCH_X(menuBg.topRight_x), SCREEN_STRETCH_Y(menuBg.topRight_y), CRGBA(0, 0, 0, 255));
+				SCREEN_WIDTH, 0.0f, SCREEN_STRETCH_X(menuBg.topRight_x), SCREEN_STRETCH_Y(menuBg.topRight_y), CRGBA(0, 0, 0, 255));*/
 		}
 	} else {
 		menuBg.SaveCurrentCoors();
@@ -2350,9 +2353,9 @@ CMenuManager::DrawBackground(bool transitionCall)
 			|| forceFadeInCounter > 30
 #endif
 			) {
-			m_nMenuFadeAlpha += 20;
+			m_nMenuFadeAlpha += 50;
 			if (m_firstStartCounter < 255) {
-				m_firstStartCounter = Min(m_firstStartCounter + 20, 255);
+				m_firstStartCounter = Min(m_firstStartCounter + 50, 255);
 			}
 			LastFade = CTimer::GetTimeInMillisecondsPauseMode();
 		}
@@ -2404,12 +2407,12 @@ CMenuManager::DrawBackground(bool transitionCall)
 	CFont::DrawFonts();
 	SetFrontEndRenderStates();
 
-	if (m_nCurrScreen != MENUPAGE_OUTRO)
-		if (m_firstStartCounter == 255) {
-			m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(SCREEN_STRETCH_X(27.0f), MENU_Y(8.0f), SCREEN_STRETCH_X(27.0f) + MENU_X(130.f), MENU_Y(138.0f)), CRGBA(255, 255, 255, 255));
-		} else {
-			m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(SCREEN_STRETCH_X(27.0f), MENU_Y(8.0f), SCREEN_STRETCH_X(27.0f) + MENU_X(130.f), MENU_Y(138.0f)), CRGBA(255, 255, 255, FadeIn(255)));
-		}
+	//if (m_nCurrScreen != MENUPAGE_OUTRO)
+	//	if (m_firstStartCounter == 255) {
+	//		m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(SCREEN_STRETCH_X(27.0f), MENU_Y(8.0f), SCREEN_STRETCH_X(27.0f) + MENU_X(130.f), MENU_Y(138.0f)), CRGBA(255, 255, 255, 255));
+	//	} else {
+	//		m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(SCREEN_STRETCH_X(27.0f), MENU_Y(8.0f), SCREEN_STRETCH_X(27.0f) + MENU_X(130.f), MENU_Y(138.0f)), CRGBA(255, 255, 255, FadeIn(255)));
+	//	}
 
 	if (m_ShowEmptyBindingError) {
 		static PauseModeTime lastBindingError = CTimer::GetTimeInMillisecondsPauseMode();
@@ -2528,11 +2531,11 @@ CMenuManager::DrawPlayerSetupScreen(bool activeScreen)
 		MENU_X_RIGHT_ALIGNED(PLAYERSETUP_LIST_RIGHT), SCREEN_SCALE_FROM_BOTTOM(PLAYERSETUP_LIST_BOTTOM)), CRGBA(LIST_BACKGROUND_COLOR.r, LIST_BACKGROUND_COLOR.g, LIST_BACKGROUND_COLOR.b, FadeIn(LIST_BACKGROUND_COLOR.a)));
 
 	SET_FONT_FOR_MENU_HEADER
-	CFont::SetColor(CRGBA(30, 30, 30, FadeIn(255)));
-	CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(MENUHEADER_POS_X) - MENU_X(7.f), SCREEN_SCALE_Y(MENUHEADER_POS_Y + 7.f), TheText.Get("FET_PS"));
+	//CFont::SetColor(CRGBA(30, 30, 30, FadeIn(255)));
+	//CFont::PrintString(SCREEN_STRETCH_X(MENUHEADER_POS_X) - MENU_X(7.f), SCREEN_SCALE_Y(MENUHEADER_POS_Y + 7.f), TheText.Get("FET_PS"));
 
 	CFont::SetColor(CRGBA(HEADER_COLOR.r, HEADER_COLOR.g, HEADER_COLOR.b, FadeIn(255)));
-	CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(MENUHEADER_POS_X), SCREEN_SCALE_Y(MENUHEADER_POS_Y), TheText.Get("FET_PS"));
+	CFont::PrintString(SCREEN_STRETCH_X(MENUHEADER_POS_X), SCREEN_SCALE_Y(MENUHEADER_POS_Y), TheText.Get("FET_PS"));
 
 	// Header (Skin - Date)
 	if (m_nCurrExLayer == HOVEROPTION_LIST) {
@@ -2712,7 +2715,7 @@ CMenuManager::DrawPlayerSetupScreen(bool activeScreen)
 
 		// Big apply button
 		if (strcmp(m_aSkinName, m_PrefsSkinFile) != 0) {
-			CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
+			CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 			switch (m_PrefsLanguage) {
 				case LANGUAGE_FRENCH:
 					CFont::SetScale(MENU_X(1.1f), MENU_Y(1.9f));
@@ -2732,7 +2735,7 @@ CMenuManager::DrawPlayerSetupScreen(bool activeScreen)
 			CFont::SetRightJustifyOff();
 			CFont::PrintString(MENU_X_LEFT_ALIGNED(24.0f), MENU_Y(220.0f), TheText.Get("FET_APP"));
 		}
-		CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
+		CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 
 		CFont::SetScale(MENU_X(BIGTEXT_X_SCALE), MENU_Y(BIGTEXT_Y_SCALE));
 
@@ -2804,7 +2807,7 @@ CMenuManager::DrawPlayerSetupScreen(bool activeScreen)
 			m_nHoverOption = HOVEROPTION_NOT_HOVERING;
 		}
 	}
-	CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
+	CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 	CFont::SetScale(MENU_X(BIGTEXT_X_SCALE), MENU_Y(BIGTEXT_Y_SCALE));
 	CFont::SetRightJustifyOn();
 	CFont::SetColor(CRGBA(MENUOPTION_COLOR.r, MENUOPTION_COLOR.g, MENUOPTION_COLOR.b, FadeIn(255)));

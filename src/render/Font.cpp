@@ -538,7 +538,7 @@ CFont::PrintString(float x, float y, uint32, wchar *start, wchar *end, float spw
 			Details.bIsShadow = false;
 		}
 	}
-	if (FontRenderStatePointer.pStr >= (wchar*)&FontRenderStateBuf[ARRAY_SIZE(FontRenderStateBuf)] - (end - start + 26)) // why 26?
+	if ((uintptr)FontRenderStatePointer.pStr >= (uintptr)&FontRenderStateBuf[ARRAY_SIZE(FontRenderStateBuf)] - sizeof(wchar) * (end - start + 2) - sizeof(CFontRenderState))
 		RenderFontBuffer();
 	CFontRenderState *pRenderState = FontRenderStatePointer.pRenderState;
 	pRenderState->fTextPosX = x;
