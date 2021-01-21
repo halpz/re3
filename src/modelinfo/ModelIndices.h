@@ -35,7 +35,7 @@
 	X("veg_treea1",		MI_TREE3) \
 	X("veg_treeb1",		MI_TREE6) \
 	X("veg_treea3",		MI_TREE8) \
-	X("doc_crane_cab",	MODELID_CRANE_1) \
+	X("doc_crane_cab0",	MODELID_CRANE_1) \
 	X("doc_crane_cab01",	MODELID_CRANE_2) \
 	X("doc_crane_cab02",	MODELID_CRANE_3) \
 	X("doc_crane_cab03",	MODELID_CRANE_4) \

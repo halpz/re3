@@ -216,6 +216,10 @@ psGrabScreen(RwCamera *pCamera)
 		RwImageSetFromRaster(pImage, pRaster);
 		return pImage;
 	}
+#else
+	rw::Image *image = RwCameraGetRaster(pCamera)->toImage();
+	if(image)
+		return image;
 #endif
 	return nil;
 }
