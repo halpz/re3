@@ -305,7 +305,7 @@ void CReplay::RecordThisFrame(void)
 #endif
 	tGeneralPacket* general = (tGeneralPacket*)&Record.m_pBase[Record.m_nOffset];
 	general->type = REPLAYPACKET_GENERAL;
-	general->camera_pos.CopyOnlyMatrix(&TheCamera.GetMatrix());
+	general->camera_pos.CopyOnlyMatrix(TheCamera.GetMatrix());
 	general->player_pos = FindPlayerCoors();
 	general->in_rcvehicle = CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle ? true : false;
 	Record.m_nOffset += sizeof(*general);
