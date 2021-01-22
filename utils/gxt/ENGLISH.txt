@@ -1765,9 +1765,6 @@ Save File 6 Not Present
 [FEM_SL7]
 Save File 7 Not Present
 
-[FES_LOA]
-LOAD GAME
-
 [ST_TIME]
 Current playing time
 
@@ -2715,9 +2712,6 @@ Load Game
 
 [FES_DGA]
 DELETE SAVE DATA
-
-[FES_NGA]
-NEW GAME
 
 [FES_CAN]
 Cancel
@@ -17433,6 +17427,9 @@ Start New Game
 [FEH_STA]
 Stats
 
+[FEP_STA]
+Stats
+
 [FEH_BRI]
 Brief
 
@@ -17456,6 +17453,12 @@ Italian
 
 [FEL_SPA]
 Spanish
+
+[FES_NGA]
+New game
+
+[FES_LOA]
+Load game
 
 { reLCS - PC lines }
 [FEC_PED]
