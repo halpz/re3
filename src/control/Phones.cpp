@@ -40,7 +40,6 @@ bool
 isPhoneAvailable(int m_phoneId)
 {
 	return crimeReporters[m_phoneId] == nil || !crimeReporters[m_phoneId]->IsPointerValid() || crimeReporters[m_phoneId]->m_objective > OBJECTIVE_WAIT_ON_FOOT ||
-			crimeReporters[m_phoneId]->m_nLastPedState != PED_SEEK_POS &&
 			(crimeReporters[m_phoneId]->m_nPedState != PED_MAKE_CALL && crimeReporters[m_phoneId]->m_nPedState != PED_FACE_PHONE && crimeReporters[m_phoneId]->m_nPedState != PED_SEEK_POS);
 }
 #endif
