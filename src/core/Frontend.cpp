@@ -4687,7 +4687,8 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 				break;
 			case MENUACTION_CANCELGAME:
 				DMAudio.Service();
-				SwitchToNewScreen(MENUPAGE_OUTRO);
+				RsEventHandler(rsQUITAPP, nil);
+				//SwitchToNewScreen(MENUPAGE_OUTRO);
 				break;
 			case MENUACTION_RESUME:
 #ifdef LEGACY_MENU_OPTIONS
