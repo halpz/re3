@@ -135,7 +135,7 @@ CdStreamInit(int32 numChannels)
 	gpReadInfo = (CdReadInfo *)LocalAlloc(LMEM_ZEROINIT, sizeof(CdReadInfo) * numChannels);
 	ASSERT( gpReadInfo != nil );
 	
-	debug("%s: read info %p\n", gpReadInfo, "cdvd_stream");
+	debug("%s: read info %p\n", "cdvd_stream", gpReadInfo);
 	
 	CdStreamAddImage("MODELS\\GTA3.IMG");
 	
