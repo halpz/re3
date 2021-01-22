@@ -83,20 +83,38 @@ enum eRadarSprite
 	RADAR_SPRITE_TSHIRT,
 	RADAR_SPRITE_TOMMY,
 	RADAR_SPRITE_PHONE,
-	RADAR_SPRITE_RADIO_WILDSTYLE,
-	RADAR_SPRITE_RADIO_FLASH,
-	RADAR_SPRITE_RADIO_KCHAT,
-	RADAR_SPRITE_RADIO_FEVER,
-	RADAR_SPRITE_RADIO_VROCK,
-	RADAR_SPRITE_RADIO_VCPR,
-	RADAR_SPRITE_RADIO_ESPANTOSO,
-	RADAR_SPRITE_RADIO_EMOTION,
-	RADAR_SPRITE_RADIO_WAVE,
-	RADAR_SPRITE_40, // tmp
-	RADAR_SPRITE_41,
-	RADAR_SPRITE_42,
-	RADAR_SPRITE_43,
-	RADAR_SPRITE_44,
+	RADAR_SPRITE_EIGHTBALL,
+	RADAR_SPRITE_BURNER,
+	RADAR_SPRITE_CIPRIANI,
+	RADAR_SPRITE_DONALD,
+	RADAR_SPRITE_JOSEPH,
+	RADAR_SPRITE_LEONE,
+	RADAR_SPRITE_MARIA,
+	RADAR_SPRITE_MCRAY,
+	RADAR_SPRITE_TOSHIKO,
+	RADAR_SPRITE_VINCENZO, // tmp
+	RADAR_SPRITE_BOMB,
+	RADAR_SPRITE_CLOTHES,
+	RADAR_SPRITE_PROPERTY_RED,
+	RADAR_SPRITE_PHIL_CASSIDY,
+	RADAR_SPRITE_POWERUP,
+	RADAR_SPRITE_MPBASE,
+	RADAR_SPRITE_MPCHECKPOINT,
+	RADAR_SPRITE_MPPLAYER,
+	RADAR_SPRITE_MPOBJECTIVE,
+	RADAR_SPRITE_MPCAR,
+	RADAR_SPRITE_MPTANK,
+	RADAR_SPRITE_MPCARLOCKUP,
+	RADAR_SPRITE_MPTARGETPLAYER,
+	RADAR_SPRITE_MAPHERE0,
+	RADAR_SPRITE_MAPHERE1,
+	RADAR_SPRITE_MAPHERE2,
+	RADAR_SPRITE_MAPHERE3,
+	RADAR_SPRITE_MAPHERE4,
+	RADAR_SPRITE_MAPHERE5,
+	RADAR_SPRITE_MAPHERE6,
+	RADAR_SPRITE_MAPHERE7,
+	RADAR_SPRITE_MAPWAYPOINT,
 
 	RADAR_SPRITE_COUNT
 };
@@ -219,7 +237,7 @@ public:
 	static CSprite2d TShirtSprite;
 	static CSprite2d TommySprite;
 	static CSprite2d PhoneSprite;
-	static CSprite2d RadioWildstyleSprite;
+/*	static CSprite2d RadioWildstyleSprite;
 	static CSprite2d RadioFlashSprite;
 	static CSprite2d RadioKChatSprite;
 	static CSprite2d RadioFeverSprite;
@@ -227,7 +245,39 @@ public:
 	static CSprite2d RadioVCPRSprite;
 	static CSprite2d RadioEspantosoSprite;
 	static CSprite2d RadioEmotionSprite;
-	static CSprite2d RadioWaveSprite;
+	static CSprite2d RadioWaveSprite;*/
+	static CSprite2d EightBallSprite;
+	static CSprite2d BurnerSprite;
+	static CSprite2d CiprianiSprite;
+	static CSprite2d DonaldSprite;
+	static CSprite2d JosephSprite;
+	static CSprite2d LeoneSprite;
+	static CSprite2d MariaSprite;
+	static CSprite2d McraySprite;
+	static CSprite2d ToshikoSprite;
+	static CSprite2d VincenzoSprite;
+	static CSprite2d BombSprite;
+	static CSprite2d ClothesShopSprite;
+	static CSprite2d PropertyRedSprite;
+	static CSprite2d PhilCassidySprite;
+	static CSprite2d PowerupSprite;
+	static CSprite2d MPBase;
+	static CSprite2d MPCheckPoint;
+	static CSprite2d MPPlayer;
+	static CSprite2d MPObjective;
+	static CSprite2d MPCar;
+	static CSprite2d MPTank;
+	static CSprite2d MPCarLockup;
+	static CSprite2d MPTargetPlayer;
+	static CSprite2d MapHereSprite0;
+	static CSprite2d MapHereSprite1;
+	static CSprite2d MapHereSprite2;
+	static CSprite2d MapHereSprite3;
+	static CSprite2d MapHereSprite4;
+	static CSprite2d MapHereSprite5;
+	static CSprite2d MapHereSprite6;
+	static CSprite2d MapHereSprite7;
+	static CSprite2d MapWayPoint;
 	static CSprite2d *RadarSprites[RADAR_SPRITE_COUNT];
 	static float cachedCos;
 	static float cachedSin;
