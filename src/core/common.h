@@ -364,7 +364,7 @@ __inline__ void TRACE(char *f, ...) { } // this is re3 only, and so the function
 #define _TODO(x)
 #define _TODOCONST(x) (x)
 
-#if CHECK_STRUCT_SIZES
+#ifdef CHECK_STRUCT_SIZES
 template<int s, int t> struct check_size {
 	static_assert(s == t, "Invalid structure size");
 };
