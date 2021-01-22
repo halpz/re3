@@ -359,7 +359,7 @@ project "re3"
 	filter "platforms:*RW33*"
 		includedirs { "sdk/rwsdk/include/d3d8" }
 		libdirs { "sdk/rwsdk/lib/d3d8/release" }
-		links { "rwcore", "rpworld", "rpmatfx", "rpskin", "rphanim", "rtbmp", "rtquat", "rtcharse" }
+		links { "rwcore", "rpworld", "rpmatfx", "rpskin", "rphanim", "rtbmp", "rtquat", "rtcharse", "rpanisot" }
 		defines { "RWLIBS" }
 		linkoptions "/SECTION:_rwcseg,ER!W /MERGE:_rwcseg=.text"
 	

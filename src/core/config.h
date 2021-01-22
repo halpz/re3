@@ -440,6 +440,7 @@ enum Config {
 #undef IMPROVED_VIDEOMODE
 #undef DISABLE_LOADING_SCREEN
 #undef DISABLE_VSYNC_ON_TEXTURE_CONVERSION
+#undef ANISOTROPIC_FILTERING
 //#define USE_TEXTURE_POOL // not possible because R* used custom RW33
 
 #undef FIX_SPRITES
