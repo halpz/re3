@@ -49,7 +49,7 @@
 #include "Timecycle.h"
 #include "TxdStore.h"
 #include "Bike.h"
-#include "memoryManager.h"
+#include "smallHeap.h"
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #include <stdarg.h>
 #endif
@@ -2632,7 +2632,8 @@ bool CTheScripts::Init(bool loaddata)
 	CFileMgr::Read(mainf, (char*)&MainScriptSize, sizeof(MainScriptSize));
 	int nLargestMissionSize = 0;
 	CFileMgr::Read(mainf, (char*)&nLargestMissionSize, sizeof(nLargestMissionSize));
-	// some cSmallHeap shit - TODO
+	if (!cSmallHeap::msInstance.IsLocked())
+		cSmallHeap::msInstance.Lock();
 	ScriptSpace = (uint8*)base::cMainMemoryManager::Instance()->Allocate(MainScriptSize + nLargestMissionSize);
 	memset(ScriptSpace, 0, MainScriptSize + nLargestMissionSize);
 	CFileMgr::Read(mainf, (char*)ScriptSpace, MainScriptSize);
