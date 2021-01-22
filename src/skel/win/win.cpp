@@ -2142,12 +2142,18 @@ WinMain(HINSTANCE instance,
 	ShowWindow(PSGLOBAL(window), cmdShow);
 	UpdateWindow(PSGLOBAL(window));
 	
-	// This part is needed because controller initialisation overwrites loaded settings.
 	{
 		CFileMgr::SetDirMyDocuments();
 		
+#ifdef LOAD_INI_SETTINGS
+		// At this point InitDefaultControlConfigJoyPad must have set all bindings to default and ms_padButtonsInited to number of detected buttons.
+		// We will load stored bindings below, but let's cache ms_padButtonsInited before LoadINIControllerSettings and LoadSettings clears it,
+		// so we can add new joy bindings **on top of** stored bindings.
+		int connectedPadButtons = ControlsManager.ms_padButtonsInited;
+#endif
+
 		int32 gta3set = CFileMgr::OpenFile("gta_vc.set", "r");
-		
+
 		if ( gta3set )
 		{
 			ControlsManager.LoadSettings(gta3set);
@@ -2158,6 +2164,10 @@ WinMain(HINSTANCE instance,
 
 #ifdef LOAD_INI_SETTINGS
 		LoadINIControllerSettings();
+		if (connectedPadButtons != 0) {
+			ControlsManager.InitDefaultControlConfigJoyPad(connectedPadButtons);
+			SaveINIControllerSettings();
+		}
 #endif
 	}
 	

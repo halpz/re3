@@ -31,6 +31,9 @@ CControllerConfigManager::CControllerConfigManager()
 
 void CControllerConfigManager::MakeControllerActionsBlank()
 {
+#ifdef LOAD_INI_SETTINGS
+	ms_padButtonsInited = 0;
+#endif
 	for (int32 i = 0; i < MAX_CONTROLLERTYPES; i++)
 	{
 		for (int32 j = 0; j < MAX_CONTROLLERACTIONS; j++)
@@ -317,6 +320,10 @@ void CControllerConfigManager::InitDefaultControlConfigMouse(CMouseControllerSta
 	}
 }
 
+#ifdef LOAD_INI_SETTINGS
+uint32 CControllerConfigManager::ms_padButtonsInited = 0;
+#endif
+
 void CControllerConfigManager::InitDefaultControlConfigJoyPad(uint32 buttons)
 {
 	m_bFirstCapture = true;
@@ -324,6 +331,22 @@ void CControllerConfigManager::InitDefaultControlConfigJoyPad(uint32 buttons)
 	uint32 btn = buttons;
 	if (buttons > 16)
 		btn = 16;
+
+#ifdef LOAD_INI_SETTINGS
+	uint32 buttonMin = ms_padButtonsInited;
+	if (buttonMin >= btn)
+		return;
+
+	ms_padButtonsInited = btn;
+
+	#define IF_BTN_IN_RANGE(n) \
+		case n: \
+		if (n <= buttonMin) \
+			return;
+#else
+	#define IF_BTN_IN_RANGE(n) \
+		case n:
+#endif
 
 	// Now we use SDL Game Controller DB
 #if defined RW_D3D9 || defined RWLIBS
@@ -337,50 +360,50 @@ void CControllerConfigManager::InitDefaultControlConfigJoyPad(uint32 buttons)
 
 		switch (btn)
 		{
-		case 16:
+		IF_BTN_IN_RANGE(16)
 			SetControllerKeyAssociatedWithAction(GO_LEFT,                           16, JOYSTICK);
-		case 15:											                        
+		IF_BTN_IN_RANGE(15)											                        
 			SetControllerKeyAssociatedWithAction(GO_BACK,                           15, JOYSTICK);
-		case 14:											                        
+		IF_BTN_IN_RANGE(14)											                        
 			SetControllerKeyAssociatedWithAction(GO_RIGHT,                          14, JOYSTICK);
-		case 13:											                        
+		IF_BTN_IN_RANGE(13)											                        
 			SetControllerKeyAssociatedWithAction(GO_FORWARD,                        13, JOYSTICK);
-		case 12:													                
-		case 11:													                
+		IF_BTN_IN_RANGE(12)													                
+		IF_BTN_IN_RANGE(11)													                
 			SetControllerKeyAssociatedWithAction(PED_LOOKBEHIND,                    11, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(TOGGLE_SUBMISSIONS,                11, JOYSTICK);
-		case 10:
+		IF_BTN_IN_RANGE(10)
 			SetControllerKeyAssociatedWithAction(VEHICLE_HORN,                      10, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_DUCK,                          10, JOYSTICK);
-		case 9:
+		IF_BTN_IN_RANGE(9)
 			SetControllerKeyAssociatedWithAction(CAMERA_CHANGE_VIEW_ALL_SITUATIONS,  9, JOYSTICK);
-		case 8:
+		IF_BTN_IN_RANGE(8)
 			SetControllerKeyAssociatedWithAction(VEHICLE_HANDBRAKE,                  8, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_LOCK_TARGET,                    8, JOYSTICK);
-		case 7:
+		IF_BTN_IN_RANGE(7)
 			SetControllerKeyAssociatedWithAction(PED_ANSWER_PHONE,                   7, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(VEHICLE_CHANGE_RADIO_STATION,       7, JOYSTICK);
-		case 6:
+		IF_BTN_IN_RANGE(6)
 			SetControllerKeyAssociatedWithAction(PED_CYCLE_WEAPON_RIGHT,             6, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(VEHICLE_LOOKRIGHT,                  6, JOYSTICK);
-		case 5:
+		IF_BTN_IN_RANGE(5)
 			SetControllerKeyAssociatedWithAction(PED_CYCLE_WEAPON_LEFT,              5, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(VEHICLE_LOOKLEFT,                   5, JOYSTICK);
 		/*******************************************************************************************/
-		case 4:
+		IF_BTN_IN_RANGE(4)
 			SetControllerKeyAssociatedWithAction(VEHICLE_BRAKE,                      4, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_JUMPING,                        4, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_SNIPER_ZOOM_IN,                 4, JOYSTICK);
-		case 3:
+		IF_BTN_IN_RANGE(3)
 			SetControllerKeyAssociatedWithAction(VEHICLE_ACCELERATE,                 3, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_SPRINT,                         3, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_SNIPER_ZOOM_OUT,                3, JOYSTICK);
-		case 2:
+		IF_BTN_IN_RANGE(2)
 			SetControllerKeyAssociatedWithAction(PED_FIREWEAPON,                     2, JOYSTICK);
 #ifdef BIND_VEHICLE_FIREWEAPON	
 			SetControllerKeyAssociatedWithAction(VEHICLE_FIREWEAPON,                 2, JOYSTICK);
 #endif
-		case 1:
+		IF_BTN_IN_RANGE(1)
 			SetControllerKeyAssociatedWithAction(VEHICLE_ENTER_EXIT,                 1, JOYSTICK);
 		/*******************************************************************************************/
 		}
@@ -389,47 +412,47 @@ void CControllerConfigManager::InitDefaultControlConfigJoyPad(uint32 buttons)
 	{
 		switch (btn)
 		{
-		case 16:
+		IF_BTN_IN_RANGE(16)
 			SetControllerKeyAssociatedWithAction(GO_LEFT,                           16, JOYSTICK);
-		case 15:
+		IF_BTN_IN_RANGE(15)
 			SetControllerKeyAssociatedWithAction(GO_BACK,                           15, JOYSTICK);
-		case 14:
+		IF_BTN_IN_RANGE(14)
 			SetControllerKeyAssociatedWithAction(GO_RIGHT,                          14, JOYSTICK);
-		case 13:
+		IF_BTN_IN_RANGE(13)
 			SetControllerKeyAssociatedWithAction(GO_FORWARD,                        13, JOYSTICK);
-		case 12:
-		case 11:
+		IF_BTN_IN_RANGE(12)
+		IF_BTN_IN_RANGE(11)
 			SetControllerKeyAssociatedWithAction(PED_LOOKBEHIND,                    11, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(TOGGLE_SUBMISSIONS,                11, JOYSTICK);
-		case 10:
+		IF_BTN_IN_RANGE(10)
 			SetControllerKeyAssociatedWithAction(VEHICLE_HORN,                      10, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_DUCK,                          10, JOYSTICK);
-		case 9:
+		IF_BTN_IN_RANGE(9)
 			SetControllerKeyAssociatedWithAction(CAMERA_CHANGE_VIEW_ALL_SITUATIONS,  9, JOYSTICK);
-		case 8:
+		IF_BTN_IN_RANGE(8)
 			SetControllerKeyAssociatedWithAction(VEHICLE_HANDBRAKE,                  8, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_LOCK_TARGET,                    8, JOYSTICK);
-		case 7:
+		IF_BTN_IN_RANGE(7)
 			SetControllerKeyAssociatedWithAction(PED_ANSWER_PHONE,                   7, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(VEHICLE_CHANGE_RADIO_STATION,       7, JOYSTICK);
-		case 6:
+		IF_BTN_IN_RANGE(6)
 			SetControllerKeyAssociatedWithAction(PED_CYCLE_WEAPON_RIGHT,             6, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(VEHICLE_LOOKRIGHT,                  6, JOYSTICK);
-		case 5:
+		IF_BTN_IN_RANGE(5)
 			SetControllerKeyAssociatedWithAction(PED_CYCLE_WEAPON_LEFT,              5, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(VEHICLE_LOOKLEFT,                   5, JOYSTICK);
 		/*******************************************************************************************/
-		case 4:
+		IF_BTN_IN_RANGE(4)
 			SetControllerKeyAssociatedWithAction(VEHICLE_ENTER_EXIT,                 4, JOYSTICK);
-		case 3:
+		IF_BTN_IN_RANGE(3)
 			SetControllerKeyAssociatedWithAction(VEHICLE_BRAKE,                      3, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_JUMPING,                        3, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_SNIPER_ZOOM_IN,                 3, JOYSTICK);
-		case 2:
+		IF_BTN_IN_RANGE(2)
 			SetControllerKeyAssociatedWithAction(VEHICLE_ACCELERATE,                 2, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_SPRINT,                         2, JOYSTICK);
 			SetControllerKeyAssociatedWithAction(PED_SNIPER_ZOOM_OUT,                2, JOYSTICK);
-		case 1:
+		IF_BTN_IN_RANGE(1)
 			SetControllerKeyAssociatedWithAction(PED_FIREWEAPON,                     1, JOYSTICK);
 #ifdef BIND_VEHICLE_FIREWEAPON
 			SetControllerKeyAssociatedWithAction(VEHICLE_FIREWEAPON,                 1, JOYSTICK);
