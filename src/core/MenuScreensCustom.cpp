@@ -16,6 +16,7 @@
 #include "Collision.h"
 #include "ModelInfo.h"
 #include "Pad.h"
+#include "ControllerConfig.h"
 
 // Menu screens array is at the bottom of the file.
 
@@ -292,6 +293,7 @@ void ScreenModeAfterChange(int8 before, int8 after)
 
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 wchar selectedJoystickUnicode[128];
+int cachedButtonNum = -1;
 
 wchar* DetectJoystickDraw(bool* disabled, bool userHovering) {
 	int numButtons;
@@ -320,6 +322,7 @@ wchar* DetectJoystickDraw(bool* disabled, bool userHovering) {
 
 			strcpy(gSelectedJoystickName, joyname);
 			PSGLOBAL(joy1id) = found;
+			cachedButtonNum = numButtons;
 		}
 	}
 	if (PSGLOBAL(joy1id) == -1)
@@ -328,6 +331,18 @@ wchar* DetectJoystickDraw(bool* disabled, bool userHovering) {
 		AsciiToUnicode(gSelectedJoystickName, selectedJoystickUnicode);
 
 	return selectedJoystickUnicode;
+}
+
+void DetectJoystickGoBack() {
+	if (cachedButtonNum != -1) {
+#ifdef LOAD_INI_SETTINGS
+		ControlsManager.InitDefaultControlConfigJoyPad(cachedButtonNum);
+		SaveINIControllerSettings();
+#else
+		// Otherwise no way to save gSelectedJoystickName or ms_padButtonsInited anyway :shrug: Why do you even use this config.??
+#endif
+		cachedButtonNum = -1;
+	}
 }
 #endif
 
@@ -836,7 +851,7 @@ CMenuScreenCustom aScreens[MENUPAGES] = {
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 	// MENUPAGE_DETECT_JOYSTICK
 	{ "FEC_JOD", MENUPAGE_CONTROLLER_PC, MENUPAGE_CONTROLLER_PC,
-		new CCustomScreenLayout({MENUSPRITE_MAINMENU, 40, 60, 20, FONT_BANK, FESCREEN_LEFT_ALIGN, false, MEDIUMTEXT_X_SCALE, MEDIUMTEXT_Y_SCALE}), nil,
+		new CCustomScreenLayout({MENUSPRITE_MAINMENU, 40, 60, 20, FONT_BANK, FESCREEN_LEFT_ALIGN, false, MEDIUMTEXT_X_SCALE, MEDIUMTEXT_Y_SCALE}), DetectJoystickGoBack,
 
 		MENUACTION_LABEL,	"FEC_JPR", { nil, SAVESLOT_NONE, MENUPAGE_NONE },
 		MENUACTION_CFO_DYNAMIC,	"FEC_JDE", { new CCFODynamic(nil, nil, nil, DetectJoystickDraw, nil) },

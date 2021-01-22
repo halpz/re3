@@ -3730,8 +3730,13 @@ CMenuManager::LoadSettings()
 	CFileMgr::SetDir("");
 
 #ifdef LOAD_INI_SETTINGS
-	LoadINISettings();
-	LoadINIControllerSettings(); // Calling that after LoadINISettings is important because of gSelectedJoystickName loading
+	if (LoadINISettings()) {
+		LoadINIControllerSettings();
+	} else {
+		// no re3.ini, create it
+		SaveINISettings();
+		SaveINIControllerSettings();
+	}
 #endif
 
 	m_PrefsVsync = m_PrefsVsyncDisp;
@@ -3828,12 +3833,6 @@ CMenuManager::SaveSettings()
 	CFileMgr::SetDir("");
 
 #else
-	static bool firstTime = true;
-	// In other conditions we already call SaveINIControllerSettings explicitly.
-	if (firstTime) {
-		SaveINIControllerSettings();
-		firstTime = false;
-	}
 	SaveINISettings();
 #endif
 }
@@ -5605,6 +5604,9 @@ CMenuManager::SwitchMenuOnAndOff()
 #endif
 			ShutdownJustMenu();
 			SaveSettings();
+#ifdef LOAD_INI_SETTINGS
+			SaveINIControllerSettings();
+#endif
 			m_bStartUpFrontEndRequested = false;
 			pControlEdit = nil;
 			m_bShutDownFrontEndRequested = false;
