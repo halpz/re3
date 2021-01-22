@@ -32,8 +32,6 @@
 #include "Replay.h"
 #endif
 
-//--MIAMI: done
-
 enum
 {
 	HELI_STATUS_HOVER,

@@ -9,8 +9,6 @@
 #include "PlayerInfo.h"
 #include "Vehicle.h"
 
-//--MIAMI: file done
-
 void
 CRemote::GivePlayerRemoteControlledCar(float x, float y, float z, float rot, uint16 model)
 {

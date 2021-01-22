@@ -54,8 +54,6 @@
 #include "libpad.h"
 #endif
 
-// --MIAMI: file done except Mobile(see TODOs) and PS2 stuff
-
 CPad Pads[MAX_PADS];
 #ifdef GTA_PS2
 u_long128 pad_dma_buf[scePadDmaBufferMax] __attribute__((aligned(64)));

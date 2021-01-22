@@ -9,8 +9,6 @@
 #include "World.h"
 #include "Timer.h"
 
-//--MIAMI: file done
-
 eLevelName CTheZones::m_CurrLevel;
 int16 CTheZones::FindIndex;
 
@@ -544,7 +542,7 @@ CTheZones::SetZonePedInfo(uint16 zoneid, uint8 day, int16 pedDensity,
 	info->gangPedThreshold[8] += info->gangPedThreshold[7];
 }
 
-//--MIAMI: unused
+// unused
 void
 CTheZones::SetCarDensity(uint16 zoneid, uint8 day, uint16 cardensity)
 {
@@ -553,7 +551,7 @@ CTheZones::SetCarDensity(uint16 zoneid, uint8 day, uint16 cardensity)
 	ZoneInfoArray[day ? zone->zoneinfoDay : zone->zoneinfoNight].carDensity = cardensity;
 }
 
-//--MIAMI: unused
+// unused
 void
 CTheZones::SetPedDensity(uint16 zoneid, uint8 day, uint16 peddensity)
 {

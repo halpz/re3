@@ -20,8 +20,6 @@
 #include "Plane.h"
 #include "MemoryHeap.h"
 
-//--MIAMI: file done
-
 CPlaneNode *pPathNodes;
 CPlaneNode *pPath2Nodes;
 CPlaneNode *pPath3Nodes;
@@ -1004,7 +1002,7 @@ CPlane::TestRocketCollision(CVector *rocketPos)
 	return false;
 }
 
-//--MIAMI: unused
+// unused
 // BUG: not in CPlane in the game
 void
 CPlane::CreateIncomingCesna(void)
@@ -1028,7 +1026,7 @@ CPlane::CreateIncomingCesna(void)
         printf("CPlane::CreateIncomingCesna(void)\n");
 }
 
-//--MIAMI: unused
+// unused
 void
 CPlane::CreateDropOffCesna(void)
 {
@@ -1051,7 +1049,7 @@ CPlane::CreateDropOffCesna(void)
         printf("CPlane::CreateDropOffCesna(void)\n");
 }
 
-//--MIAMI: all unused
+// all unused
 const CVector CPlane::FindDrugPlaneCoordinates(void) { return pDrugRunCesna->GetPosition(); }
 const CVector CPlane::FindDropOffCesnaCoordinates(void) { return pDropOffCesna->GetPosition(); }
 bool CPlane::HasCesnaLanded(void) { return CesnaMissionStatus == CESNA_STATUS_LANDED; }

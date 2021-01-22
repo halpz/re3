@@ -9,8 +9,6 @@
 #include "OnscreenTimer.h"
 #include "Camera.h"
 
-// --MIAMI: file done
-
 void COnscreenTimer::Init() {
 	m_bDisabled = false;
 	for(uint32 i = 0; i < NUMONSCREENCOUNTERS; i++) {

@@ -7,8 +7,6 @@
 #include "Vehicle.h"
 #include "Floater.h"
 
-//--MIAMI: done
-
 cBuoyancy mod_Buoyancy;
 
 float fVolMultiplier = 1.0f;

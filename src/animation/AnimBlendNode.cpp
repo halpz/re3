@@ -3,8 +3,6 @@
 #include "AnimBlendAssociation.h"
 #include "AnimBlendNode.h"
 
-//--MIAMI: file done
-
 void 
 CAnimBlendNode::Init(void)
 {

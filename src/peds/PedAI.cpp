@@ -30,8 +30,6 @@
 #include "GameLogic.h"
 #include "Streaming.h"
 
-//--MIAMI: file done
-
 CVector vecPedCarDoorAnimOffset;
 CVector vecPedCarDoorLoAnimOffset;
 CVector vecPedVanRearDoorAnimOffset;
@@ -44,7 +42,6 @@ CVector vecPedHarleyBikeJumpRhsAnimOffset;
 CVector vecPedDirtBikeJumpRhsAnimOffset;
 CVector vecPedBikeKickAnimOffset;
 
-// --MIAMI: Done
 void
 CPed::SetObjectiveTimer(int time)
 {
@@ -55,7 +52,6 @@ CPed::SetObjectiveTimer(int time)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetStoredObjective(void)
 {
@@ -90,7 +86,6 @@ CPed::SetStoredObjective(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::ForceStoredObjective(eObjective objective)
 {
@@ -124,7 +119,6 @@ CPed::ForceStoredObjective(eObjective objective)
 	}
 }
 
-// --MIAMI: Done
 bool
 CPed::IsTemporaryObjective(eObjective objective)
 {
@@ -133,7 +127,6 @@ CPed::IsTemporaryObjective(eObjective objective)
 		objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER;
 }
 
-// --MIAMI: Done
 void
 CPed::SetObjective(eObjective newObj)
 {
@@ -180,7 +173,6 @@ CPed::SetObjective(eObjective newObj)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetObjective(eObjective newObj, void *entity)
 {
@@ -370,7 +362,6 @@ CPed::SetObjective(eObjective newObj, void *entity)
 	}
 }
 
-// --MIAMI: Done
 // Only used in 01E1: SET_CHAR_OBJ_FOLLOW_ROUTE opcode
 // IDA fails very badly in here, puts a fake loop and ignores SetFollowRoute call...
 void
@@ -403,7 +394,6 @@ CPed::SetObjective(eObjective newObj, int16 routePoint, int16 routeType)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetObjective(eObjective newObj, CVector dest)
 {
@@ -543,7 +533,6 @@ CPed::SetObjective(eObjective newObj, CVector dest)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetObjective(eObjective newObj, float heading, const CVector& pos)
 {
@@ -560,7 +549,6 @@ CPed::SetObjective(eObjective newObj, float heading, const CVector& pos)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::ClearObjective(void)
 {
@@ -586,7 +574,6 @@ CPed::ClearObjective(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::ClearLeader(void)
 {
@@ -606,7 +593,6 @@ CPed::ClearLeader(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::UpdateFromLeader(void)
 {
@@ -765,7 +751,6 @@ CPed::UpdateFromLeader(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::RestorePreviousObjective(void)
 {
@@ -788,7 +773,6 @@ CPed::RestorePreviousObjective(void)
 	bObjectiveCompleted = false;
 }
 
-// --MIAMI: Done
 void
 CPed::ProcessObjective(void)
 {
@@ -2060,7 +2044,6 @@ CPed::ProcessObjective(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetFollowRoute(int16 currentPoint, int16 routeType)
 {
@@ -2073,7 +2056,6 @@ CPed::SetFollowRoute(int16 currentPoint, int16 routeType)
 	m_nextRoutePointPos = CRouteNode::GetPointPosition(GetNextPointOnRoute());
 }
 
-// --MIAMI: Done
 int
 CPed::GetNextPointOnRoute(void)
 {
@@ -2101,7 +2083,6 @@ CPed::GetNextPointOnRoute(void)
 	return nextPoint;
 }
 
-// --MIAMI: Done
 bool
 CPed::HaveReachedNextPointOnRoute(float distToCountReached)
 {
@@ -2112,7 +2093,6 @@ CPed::HaveReachedNextPointOnRoute(float distToCountReached)
 	return false;
 }
 
-// --MIAMI: Done
 bool
 CPed::CanSeeEntity(CEntity *entity, float threshold)
 {
@@ -2138,7 +2118,6 @@ CPed::CanSeeEntity(CEntity *entity, float threshold)
 	return neededTurn < threshold || TWOPI - threshold < neededTurn;
 }
 
-// --MIAMI: Done
 // Only used while deciding which gun ped should switch to, if no ammo left.
 bool
 CPed::SelectGunIfArmed(void)
@@ -2159,7 +2138,6 @@ CPed::SelectGunIfArmed(void)
 	SetCurrentWeapon(WEAPONTYPE_UNARMED);
 	return false;
 }
-// --MIAMI: Done
 void
 CPed::ReactToPointGun(CEntity *entWithGun)
 {
@@ -2244,7 +2222,6 @@ CPed::ReactToPointGun(CEntity *entWithGun)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::ReactToAttack(CEntity *attacker)
 {
@@ -2317,7 +2294,6 @@ CPed::ReactToAttack(CEntity *attacker)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::PedAnimAlignCB(CAnimBlendAssociation *animAssoc, void *arg)
 {
@@ -2562,7 +2538,6 @@ CPed::PedAnimAlignCB(CAnimBlendAssociation *animAssoc, void *arg)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::PedAnimDoorOpenCB(CAnimBlendAssociation* animAssoc, void* arg)
 {
@@ -2782,7 +2757,6 @@ CPed::PedAnimDoorOpenCB(CAnimBlendAssociation* animAssoc, void* arg)
 	return;
 }
 
-// --MIAMI: Done
 void
 CPed::PedAnimPullPedOutCB(CAnimBlendAssociation* animAssoc, void* arg)
 {
@@ -2868,7 +2842,6 @@ CPed::PedAnimPullPedOutCB(CAnimBlendAssociation* animAssoc, void* arg)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::PedAnimGetInCB(CAnimBlendAssociation *animAssoc, void *arg)
 {
@@ -3018,7 +2991,6 @@ CPed::PedAnimGetInCB(CAnimBlendAssociation *animAssoc, void *arg)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::PedShuffle(void)
 {
@@ -3034,7 +3006,6 @@ CPed::PedShuffle(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::PedAnimDoorCloseCB(CAnimBlendAssociation *animAssoc, void *arg)
 {
@@ -3101,7 +3072,6 @@ CPed::PedAnimDoorCloseCB(CAnimBlendAssociation *animAssoc, void *arg)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::PedAnimShuffleCB(CAnimBlendAssociation* assoc, void* arg)
 {
@@ -3113,7 +3083,6 @@ CPed::PedAnimShuffleCB(CAnimBlendAssociation* assoc, void* arg)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetFormation(eFormation type)
 {
@@ -3137,7 +3106,6 @@ CPed::SetFormation(eFormation type)
 	m_pedFormation = type;
 }
 
-// --MIAMI: Done
 CVector
 CPed::GetFormationPosition(void)
 {
@@ -3186,7 +3154,6 @@ CPed::GetFormationPosition(void)
 	return m_pedInObjective->GetMatrix() * formationOffset;
 }
 
-// --MIAMI: Done
 void
 CPed::PedAnimStepOutCarCB(CAnimBlendAssociation* animAssoc, void* arg)
 {
@@ -3326,7 +3293,6 @@ CPed::PedAnimStepOutCarCB(CAnimBlendAssociation* animAssoc, void* arg)
 	return;
 }
 
-// --MIAMI: Done
 void
 CPed::LineUpPedWithCar(PedLineUpPhase phase)
 {
@@ -3663,7 +3629,6 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 
 }
 
-// --MIAMI: Done
 void
 CPed::SetCarJack(CVehicle* car)
 {
@@ -3746,7 +3711,6 @@ CPed::SetCarJack(CVehicle* car)
 						SetCarJack_AllClear(car, m_vehDoor, doorFlag);
 }
 
-// --MIAMI: Done
 void
 CPed::SetCarJack_AllClear(CVehicle* car, uint32 doorNode, uint32 doorFlag)
 {
@@ -3789,7 +3753,6 @@ CPed::SetCarJack_AllClear(CVehicle* car, uint32 doorNode, uint32 doorFlag)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetBeingDraggedFromCar(CVehicle *veh, uint32 vehEnterType, bool quickJack)
 {
@@ -3838,7 +3801,6 @@ CPed::SetBeingDraggedFromCar(CVehicle *veh, uint32 vehEnterType, bool quickJack)
 		veh->m_nGettingOutFlags |= GetCarDoorFlag(m_vehDoor);
 }
 
-// --MIAMI: Done
 void
 CPed::BeingDraggedFromCar(void)
 {
@@ -3904,7 +3866,6 @@ CPed::BeingDraggedFromCar(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetEnterCar(CVehicle *car, uint32 unused)
 {
@@ -3981,7 +3942,6 @@ CPed::SetEnterCar(CVehicle *car, uint32 unused)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetEnterCar_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
 {
@@ -4034,7 +3994,6 @@ CPed::SetEnterCar_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::EnterCar(void)
 {
@@ -4078,7 +4037,6 @@ CPed::EnterCar(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::QuitEnteringCar(void)
 {
@@ -4127,7 +4085,6 @@ CPed::QuitEnteringCar(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetExitBoat(CVehicle *boat)
 {
@@ -4185,7 +4142,6 @@ CPed::SetExitBoat(CVehicle *boat)
 	m_vecMoveSpeed = boat->m_vecMoveSpeed;
 }
 
-// --MIAMI: Done
 // wantedDoorNode = 0 means that func. will determine it
 void
 CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
@@ -4570,7 +4526,6 @@ CPed::SetExitCar(CVehicle *veh, uint32 wantedDoorNode)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::ExitCar(void)
 {
@@ -4642,7 +4597,6 @@ CPed::ExitCar(void)
 	}
 }
 
-// --MIAMI: Done
 CVector
 CPed::GetPositionToOpenCarDoor(CVehicle *veh, uint32 component)
 {
@@ -4655,7 +4609,6 @@ CPed::GetPositionToOpenCarDoor(CVehicle *veh, uint32 component)
 	return vehDoorPos;
 }
 
-// --MIAMI: Done
 void
 CPed::GetNearestDoor(CVehicle *veh, CVector &posToOpen)
 {
@@ -4724,7 +4677,6 @@ CPed::GetNearestDoor(CVehicle *veh, CVector &posToOpen)
 	}
 }
 
-// --MIAMI: Done
 bool
 CPed::GetNearestPassengerDoor(CVehicle *veh, CVector &posToOpen)
 {
@@ -4808,7 +4760,6 @@ CPed::GetNearestPassengerDoor(CVehicle *veh, CVector &posToOpen)
 	return canEnter;
 }
 
-// --MIAMI: Done
 void
 CPed::GoToNearestDoor(CVehicle *veh)
 {
@@ -4818,7 +4769,6 @@ CPed::GoToNearestDoor(CVehicle *veh)
 	SetMoveState(PEDMOVE_RUN);
 }
 
-// --MIAMI: Done
 // Unused
 void CPed::PedSetGetInCarPositionCB(CAnimBlendAssociation* assoc, void* arg)
 {
@@ -4832,7 +4782,6 @@ void CPed::PedSetGetInCarPositionCB(CAnimBlendAssociation* assoc, void* arg)
 	pPed->SetPosition(position);
 }
 
-// --MIAMI: Done
 void
 CPed::SetAnimOffsetForEnterOrExitVehicle(void)
 {
@@ -4994,7 +4943,6 @@ CPed::SetAnimOffsetForEnterOrExitVehicle(void)
 	CAnimManager::RemoveAnimBlockRef(bikedBlock);
 }
 
-// --MIAMI: Done
 void
 CPed::PedSetQuickDraggedOutCarPositionCB(CAnimBlendAssociation *animAssoc, void *arg)
 {
@@ -5083,7 +5031,6 @@ CPed::PedSetQuickDraggedOutCarPositionCB(CAnimBlendAssociation *animAssoc, void 
 		ped->m_nLastPedState = PED_WANDER_PATH;
 }
 
-// --MIAMI: Done
 void
 CPed::PedSetDraggedOutCarPositionCB(CAnimBlendAssociation* animAssoc, void* arg)
 {
@@ -5180,7 +5127,6 @@ CPed::PedSetDraggedOutCarPositionCB(CAnimBlendAssociation* animAssoc, void* arg)
 	ped->SetGetUp();
 }
 
-// --MIAMI: Done
 uint8
 CPed::GetNearestTrainDoor(CVehicle *train, CVector &doorPos)
 {
@@ -5198,7 +5144,6 @@ CPed::GetNearestTrainDoor(CVehicle *train, CVector &doorPos)
 	return 1;
 }
 
-// --MIAMI: Done
 uint8
 CPed::GetNearestTrainPedPosition(CVehicle *train, CVector &enterPos)
 {
@@ -5257,7 +5202,6 @@ CPed::GetNearestTrainPedPosition(CVehicle *train, CVector &enterPos)
 	return 1;
 }
 
-// --MIAMI: Done :D
 void
 CPed::PedSetInTrainCB(CAnimBlendAssociation* animAssoc, void* arg)
 {
@@ -5407,7 +5351,6 @@ CPed::PedSetOutTrainCB(CAnimBlendAssociation *animAssoc, void *arg)
 }
 #endif
 
-// --MIAMI: Done
 void
 CPed::RegisterThreatWithGangPeds(CEntity *attacker)
 {
@@ -5471,7 +5414,6 @@ CPed::RegisterThreatWithGangPeds(CEntity *attacker)
 	}
 }
 
-// --MIAMI: Done
 // Some helper function which doesn't exist in og game.
 inline void
 SelectClosestNodeForSeek(CPed *ped, CPathNode *node, CVector2D closeDist, CVector2D farDist, CPathNode *closeNode, CPathNode *closeNode2, int runCount = 3)
@@ -5501,7 +5443,6 @@ SelectClosestNodeForSeek(CPed *ped, CPathNode *node, CVector2D closeDist, CVecto
 	}
 }
 
-// --MIAMI: Done
 bool
 CPed::FindBestCoordsFromNodes(CVector unused, CVector *bestCoords)
 {
@@ -5542,7 +5483,6 @@ CPed::FindBestCoordsFromNodes(CVector unused, CVector *bestCoords)
 	return false;
 }
 
-// --MIAMI: Done
 bool
 CPed::DuckAndCover(void)
 {
@@ -5731,7 +5671,6 @@ CPed::DuckAndCover(void)
 	return false;
 }
 
-// --MIAMI: Done
 CVector
 CPed::GetPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset)
 {	
@@ -5779,7 +5718,6 @@ CPed::GetPositionToOpenCarDoor(CVehicle *veh, uint32 component, float offset)
 	return veh->GetPosition() + doorPos;
 }
 
-// --MIAMI: Done
 CVector
 CPed::GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float seatPosMult)
 {
@@ -5865,7 +5803,7 @@ CPed::GetLocalPositionToOpenCarDoor(CVehicle *veh, uint32 component, float seatP
 	}
 }
 
-// --MIAMI: Done, but what is this parameter for?
+// TODO: what is this parameter for?
 void
 CPed::SetDuck(uint32 time, bool sth)
 {
@@ -5891,7 +5829,6 @@ CPed::SetDuck(uint32 time, bool sth)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::Duck(void)
 {
@@ -5918,7 +5855,6 @@ CPed::Duck(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::ClearDuck(bool clearTimer)
 {
@@ -5941,7 +5877,6 @@ CPed::ClearDuck(bool clearTimer)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::InformMyGangOfAttack(CEntity *attacker)
 {
@@ -5976,7 +5911,6 @@ CPed::InformMyGangOfAttack(CEntity *attacker)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::PedAnimDoorCloseRollingCB(CAnimBlendAssociation* animAssoc, void* arg)
 {
@@ -5999,7 +5933,6 @@ CPed::PedAnimDoorCloseRollingCB(CAnimBlendAssociation* animAssoc, void* arg)
 		veh->Damage.SetDoorStatus(DOOR_FRONT_LEFT, DOOR_STATUS_OK);
 }
 
-// --MIAMI: Done
 void
 CPed::SetSeekBoatPosition(CVehicle *boat)
 {
@@ -6015,7 +5948,6 @@ CPed::SetSeekBoatPosition(CVehicle *boat)
 	SetPedState(PED_SEEK_IN_BOAT);
 }
 
-// --MIAMI: Done
 void
 CPed::SeekBoatPosition(void)
 {
@@ -6037,7 +5969,6 @@ CPed::SeekBoatPosition(void)
 		RestorePreviousState();
 }
 
-// --MIAMI: Done
 bool
 CPed::IsRoomToBeCarJacked(void)
 {
@@ -6061,7 +5992,6 @@ CPed::IsRoomToBeCarJacked(void)
 	return false;
 }
 
-// --MIAMI: Done
 void
 CPed::AddInCarAnims(CVehicle* car, bool isDriver)
 {
@@ -6096,7 +6026,6 @@ CPed::AddInCarAnims(CVehicle* car, bool isDriver)
 	StopNonPartialAnims();
 }
 
-// --MIAMI: Done
 void
 CPed::RemoveDrivebyAnims()
 {
@@ -6124,7 +6053,6 @@ CPed::RemoveDrivebyAnims()
 		animAssoc->blendDelta = -1000.0f;
 }
 
-// --MIAMI: Done
 void
 CPed::RemoveInCarAnims(void)
 {
@@ -6137,7 +6065,6 @@ CPed::RemoveInCarAnims(void)
 	}
 }
 
-// --MIAMI: Done
 bool
 CPed::PositionPedOutOfCollision(void)
 {
@@ -6276,7 +6203,6 @@ CPed::PositionPedOutOfCollision(void)
 	return true;
 }
 
-// --MIAMI: Done
 // "Any" means he shouldn't have to be in vehicle.
 bool
 CPed::PositionAnyPedOutOfCollision(void)
@@ -6332,7 +6258,6 @@ CPed::PositionAnyPedOutOfCollision(void)
 	return true;
 }
 
-// --MIAMI: Done
 bool
 CPed::WarpPedToNearLeaderOffScreen(void)
 {
@@ -6366,7 +6291,6 @@ CPed::WarpPedToNearLeaderOffScreen(void)
 	return teleported;
 }
 
-// --MIAMI: Done
 bool
 CPed::WarpPedToNearEntityOffScreen(CEntity *warpTo)
 {
@@ -6400,7 +6324,6 @@ CPed::WarpPedToNearEntityOffScreen(CEntity *warpTo)
 	return teleported;
 }
 
-// --MIAMI: Done
 int32
 CPed::KillCharOnFootArmed(CVector &ourPos, CVector &targetPos, CVector &distWithTarget)
 {
@@ -6675,7 +6598,6 @@ CPed::KillCharOnFootArmed(CVector &ourPos, CVector &targetPos, CVector &distWith
 	return ATTACK_IN_PROGRESS;
 }
 
-// --MIAMI: Done
 int32
 CPed::KillCharOnFootMelee(CVector &ourPos, CVector &targetPos, CVector &distWithTarget)
 {
@@ -6930,7 +6852,6 @@ CPed::KillCharOnFootMelee(CVector &ourPos, CVector &targetPos, CVector &distWith
 	}
 }
 
-// --MIAMI: Done
 bool
 CPed::CanBeDamagedByThisGangMember(CPed* who)
 {

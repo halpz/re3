@@ -26,8 +26,6 @@
 #include "Glass.h"
 #include "SpecialFX.h"
 
-//--MIAMI: file done
-
 uint16 nPlayerInComboMove;
 RpClump* flyingClumpTemp;
 
@@ -159,7 +157,6 @@ CheckForPedsOnGroundToAttack(CPed *attacker, CPed **pedOnGround)
 	return stateToReturn;
 }
 
-// --MIAMI: Done
 void
 CPed::SetPointGunAt(CEntity *to)
 {
@@ -202,7 +199,6 @@ CPed::SetPointGunAt(CEntity *to)
 		Say(SOUND_PED_ATTACK);
 }
 
-// --MIAMI: Done
 void
 CPed::PointGunAt(void)
 {
@@ -230,7 +226,6 @@ CPed::PointGunAt(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::ClearPointGunAt(void)
 {
@@ -257,7 +252,6 @@ CPed::ClearPointGunAt(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetAttack(CEntity *victim)
 {
@@ -440,7 +434,6 @@ CPed::SetAttack(CEntity *victim)
 	SetLookTimer(100);
 }
 
-// --MIAMI: Done
 void
 CPed::ClearAttack(void)
 {
@@ -461,7 +454,6 @@ CPed::ClearAttack(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::ClearAttackByRemovingAnim(void)
 {
@@ -497,7 +489,6 @@ CPed::ClearAttackByRemovingAnim(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 {
@@ -577,7 +568,6 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::FinishedReloadCB(CAnimBlendAssociation *reloadAssoc, void *arg)
 {
@@ -611,7 +601,6 @@ CPed::FinishedReloadCB(CAnimBlendAssociation *reloadAssoc, void *arg)
 	}
 }
 
-// --MIAMI: Done
 uint8
 CPed::CheckForPointBlankPeds(CPed *pedToVerify)
 {
@@ -655,7 +644,6 @@ CPed::CheckForPointBlankPeds(CPed *pedToVerify)
 	return NO_POINT_BLANK_PED;
 }
 
-// --MIAMI: Done except commented things
 void
 CPed::Attack(void)
 {
@@ -1043,7 +1031,6 @@ CPed::Attack(void)
 	bIsAttacking = attackShouldContinue;
 }
 
-// --MIAMI: Done
 void
 CPed::StartFightAttack(uint8 buttonPressure)
 {
@@ -1136,7 +1123,6 @@ CPed::StartFightAttack(uint8 buttonPressure)
 		nPlayerInComboMove = 0;
 }
 
-// --MIAMI: Done
 void
 CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 {
@@ -1380,7 +1366,6 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::Fight(void)
 {
@@ -1608,7 +1593,6 @@ CPed::Fight(void)
 	}
 }
 
-// --MIAMI: Done
 int32
 CPed::ChooseAttackAI(uint8 buttonPressure, bool fightWithWeapon)
 {
@@ -1695,7 +1679,6 @@ CPed::ChooseAttackAI(uint8 buttonPressure, bool fightWithWeapon)
 		return FIGHTMOVE_SHUFFLE_F;
 }
 
-// --MIAMI: Done
 int32
 CPed::ChooseAttackPlayer(uint8 buttonPressure, bool fightWithWeapon)
 {
@@ -1936,7 +1919,6 @@ CPed::ChooseAttackPlayer(uint8 buttonPressure, bool fightWithWeapon)
 	return choosenMove;
 }
 
-// --MIAMI: Done
 void
 CPed::EndFight(uint8 endType)
 {
@@ -1971,7 +1953,6 @@ CPed::EndFight(uint8 endType)
 	m_nWaitTimer = 0;
 }
 
-// --MIAMI: Done
 void
 CPed::PlayHitSound(CPed *hitTo)
 {
@@ -2047,7 +2028,6 @@ CPed::PlayHitSound(CPed *hitTo)
 		DMAudio.PlayOneShot(m_audioEntityId, soundId, (weapon << 8) | ENTITY_TYPE_PED);
 }
 
-// --MIAMI: Done
 bool
 CPed::FightStrike(CVector &touchedNodePos, bool fightWithWeapon)
 {
@@ -2144,7 +2124,6 @@ CPed::FightStrike(CVector &touchedNodePos, bool fightWithWeapon)
 	return false;
 }
 
-// --MIAMI: Done
 void
 CPed::FightHitPed(CPed *victim, CVector &touchPoint, CVector &dir, int16 piece)
 {
@@ -2294,7 +2273,6 @@ CPed::FightHitPed(CPed *victim, CVector &touchPoint, CVector &dir, int16 piece)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::FinishFightMoveCB(CAnimBlendAssociation *animAssoc, void *arg)
 {
@@ -2306,7 +2284,6 @@ CPed::FinishFightMoveCB(CAnimBlendAssociation *animAssoc, void *arg)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::LoadFightData(void)
 {
@@ -2394,7 +2371,6 @@ CPed::LoadFightData(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetInvestigateEvent(eEventType event, CVector2D pos, float distanceToCountDone, uint16 time, float angle)
 {
@@ -2417,7 +2393,6 @@ CPed::SetInvestigateEvent(eEventType event, CVector2D pos, float distanceToCount
 
 }
 
-// --MIAMI: Done
 void
 CPed::InvestigateEvent(void)
 {
@@ -2623,7 +2598,6 @@ CPed::InvestigateEvent(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::ClearInvestigateEvent(void)
 {
@@ -2649,7 +2623,6 @@ CPed::ClearInvestigateEvent(void)
 		SetMoveState(PEDMOVE_WALK);
 }
 
-// --MIAMI: Done
 bool
 CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPieceTypes pedPiece, uint8 direction)
 {
@@ -3221,7 +3194,6 @@ RecurseFrameChildrenToCloneCB(RwFrame *frame, void *data)
 	return newFrame;
 }
 
-// --MIAMI: Done
 void
 CPed::RemoveBodyPart(PedNode nodeId, int8 direction)
 {
@@ -3252,7 +3224,6 @@ CPed::RemoveBodyPart(PedNode nodeId, int8 direction)
 	}
 }
 
-// --MIAMI: Done
 CObject*
 CPed::SpawnFlyingComponent(int pedNode, int8 direction)
 {
@@ -3260,7 +3231,6 @@ CPed::SpawnFlyingComponent(int pedNode, int8 direction)
 	return nil;
 }
 
-// --MIAMI: Done
 // III leftover and unused
 void
 CPed::ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer)
@@ -3303,14 +3273,12 @@ CPed::ApplyHeadShot(eWeaponType weaponType, CVector pos, bool evenOnPlayer)
 	}
 }
 
-// --MIAMI: Done
 bool
 CPed::IsPedHeadAbovePos(float zOffset)
 {
 	return zOffset + GetPosition().z < GetNodePosition(PED_HEAD).z;
 }
 
-// --MIAMI: Done
 bool
 CPed::PlacePedOnDryLand(void)
 {
@@ -3362,7 +3330,6 @@ CPed::PlacePedOnDryLand(void)
 	return true;
 }
 
-// --MIAMI: Done
 void
 CPed::CollideWithPed(CPed *collideWith)
 {
@@ -3629,7 +3596,6 @@ CPed::CollideWithPed(CPed *collideWith)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::KillPedWithCar(CVehicle *car, float impulse)
 {
@@ -3867,7 +3833,6 @@ CPed::KillPedWithCar(CVehicle *car, float impulse)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::DriveVehicle(void)
 {
@@ -4175,7 +4140,6 @@ CPed::DriveVehicle(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::RemoveWeaponAnims(int unused, float animDelta)
 {	

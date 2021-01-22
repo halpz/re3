@@ -3,8 +3,6 @@
 #include "main.h"
 #include "PedRoutes.h"
 
-// --MIAMI: file done
-
 CRouteNode gaRoutes[NUMPEDROUTES];
 
 void

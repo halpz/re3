@@ -17,8 +17,6 @@
 #include "SpecialFX.h"
 #include "Font.h"
 
-// --MIAMI: file done
-
 float CRadar::m_radarRange;
 sRadarTrace CRadar::ms_RadarTrace[NUMRADARBLIPS];
 CVector2D vec2DRadarOrigin;

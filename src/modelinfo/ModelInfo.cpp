@@ -5,8 +5,6 @@
 #include "ModelIndices.h"
 #include "ModelInfo.h"
 
-// --MIAMI: file done
-
 CBaseModelInfo *CModelInfo::ms_modelInfoPtrs[MODELINFOSIZE];
 
 CStore<CSimpleModelInfo, SIMPLEMODELSIZE> CModelInfo::ms_simpleModelStore;

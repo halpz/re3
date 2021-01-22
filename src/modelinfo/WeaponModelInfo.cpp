@@ -4,8 +4,6 @@
 #include "AnimManager.h"
 #include "VisibilityPlugins.h"
 
-//--MIAMI: file done
-
 void
 CWeaponModelInfo::SetAnimFile(const char *file)
 {

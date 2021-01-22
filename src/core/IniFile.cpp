@@ -7,8 +7,6 @@
 #include "main.h"
 #include "Population.h"
 
-// --MIAMI: file done
-
 float CIniFile::PedNumberMultiplier = 0.6f;
 float CIniFile::CarNumberMultiplier = 0.6f;
 

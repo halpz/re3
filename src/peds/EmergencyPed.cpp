@@ -9,8 +9,6 @@
 #include "CarCtrl.h"
 #include "Accident.h"
 
-// --MIAMI: file done
-
 CEmergencyPed::CEmergencyPed(uint32 type) : CPed(type)
 {
 	switch (type){

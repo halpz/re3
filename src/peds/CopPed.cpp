@@ -20,8 +20,6 @@
 #include "Ropes.h"
 #include "Stinger.h"
 
-// --MIAMI: file done except TODOs
-
 CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 {
 	m_nCopType = copType;

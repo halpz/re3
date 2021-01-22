@@ -6,8 +6,6 @@
 #include "BaseModelInfo.h"
 #include "ModelInfo.h"
 
-//--MIAMI: file done
-
 CBaseModelInfo::CBaseModelInfo(ModelInfoType type)
 {
 	m_colModel = nil;

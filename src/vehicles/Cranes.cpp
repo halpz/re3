@@ -12,8 +12,6 @@
 #include "Object.h"
 #include "World.h"
 
-// --MIAMI: file done
-
 #define MAX_DISTANCE_TO_FIND_CRANE (10.0f)
 #define CRANE_UPDATE_RADIUS (300.0f)
 #define CRANE_MOVEMENT_PROCESSING_RADIUS (150.0f)

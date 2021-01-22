@@ -35,8 +35,6 @@
 #include "Automobile.h"
 #include "GameLogic.h"
 
-// --MIAMI: File done
-
 CVector lastPlayerPos;
 
 void

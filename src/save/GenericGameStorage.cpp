@@ -41,8 +41,6 @@
 #include "Timecycle.h"
 #include "Fluff.h"
 
-// --MIAMI: file done
-
 #define BLOCK_COUNT 22
 #define SIZE_OF_SIMPLEVARS 0xE4
 

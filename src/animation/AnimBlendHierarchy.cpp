@@ -4,8 +4,6 @@
 #include "AnimBlendHierarchy.h"
 #include "AnimManager.h"
 
-//--MIAMI: file done
-
 CAnimBlendHierarchy::CAnimBlendHierarchy(void)
 {
 	sequences = nil;

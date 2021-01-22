@@ -12,8 +12,6 @@
 #include "RpAnimBlend.h"
 #include "PedModelInfo.h"
 
-//--MIAMI: file done
-
 RwInt32 ClumpOffset;
 
 enum

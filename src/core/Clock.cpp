@@ -6,8 +6,6 @@
 #include "Stats.h"
 #include "VarConsole.h"
 
-// --MIAMI: File done
-
 _TODO("gbFastTime");
 bool gbFastTime;
 

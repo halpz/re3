@@ -9,8 +9,6 @@
 #include "Text.h"
 #include "Timer.h"
 
-//--MIAMI: file done
-
 static wchar WideErrorString[25];
 
 CText TheText;

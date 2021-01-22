@@ -20,8 +20,6 @@
 #include "WeaponInfo.h"
 #include "World.h"
 
-//--MIAMI: file done
-
 bool CSceneEdit::m_bEditOn;
 int32 CSceneEdit::m_bCameraFollowActor;
 bool CSceneEdit::m_bRecording;

@@ -15,8 +15,6 @@
 #include "AnimBlendAssociation.h"
 #include "AnimBlendAssocGroup.h"
 
-//--MIAMI: file done
-
 CAnimBlendAssocGroup::CAnimBlendAssocGroup(void)
 {
 	animBlock = nil;

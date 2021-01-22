@@ -115,8 +115,6 @@ float CStats::LongestWheelieDist;
 float CStats::LongestStoppieDist;
 float CStats::Longest2WheelDist;
 
-// --MIAMI: functions below are done, but there are some to be moved from Frontend
-
 void CStats::Init()
 {
 	PeopleKilledByOthers = 0;

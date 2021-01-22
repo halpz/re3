@@ -23,8 +23,6 @@
 #include "Radar.h"
 #include "Pools.h"
 
-//--MIAMI: file done
-
 const struct {
 	const char *szTrackName;
 	int iTrackId;

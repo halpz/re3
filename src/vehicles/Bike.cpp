@@ -37,8 +37,6 @@
 #include "Bike.h"
 #include "Debug.h"
 
-//--MIAMI: file done
-
 const uint32 CBike::nSaveStructSize =
 #ifdef COMPATIBLE_SAVES
 	1260;

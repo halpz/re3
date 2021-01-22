@@ -40,8 +40,6 @@
 #include "User.h"
 #include "sampman.h"
 
-// --MIAMI: file done
-
 // Similar story to Hud.cpp:
 // Game has colors inlined in code.
 // For easier modification we collect them here:

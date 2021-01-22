@@ -21,8 +21,6 @@
 #include "SpecialFX.h"
 #include "Replay.h"
 
-//--MIAMI: file done
-
 int32 CWeather::SoundHandle = -1;
 
 int32 CWeather::WeatherTypeInList;

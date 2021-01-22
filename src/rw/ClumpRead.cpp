@@ -1,7 +1,5 @@
 #include "common.h"
 
-//--MIAMI: done
-
 struct rpGeometryList
 {
 	RpGeometry **geometries;

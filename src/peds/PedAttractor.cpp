@@ -13,8 +13,6 @@ const int gcMaxSizeOfPizzaQueue = 5;
 const int gcMaxSizeOfShelterQueue = 5;
 const int gcMaxSizeOfIceCreamQueue = 1;
 
-//--MIAMI: file done
-
 std::vector<CVector> CPedShelterAttractor::ms_displacements;
 
 CPedAttractorManager* GetPedAttractorManager()

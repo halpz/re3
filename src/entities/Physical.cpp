@@ -21,8 +21,6 @@
 #include "Pickups.h"
 #include "Physical.h"
 
-//--MIAMI: file done
-
 #ifdef WALLCLIMB_CHEAT
 bool gGravityCheat;
 #endif

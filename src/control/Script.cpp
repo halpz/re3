@@ -53,8 +53,6 @@
 #include <stdarg.h>
 #endif
 
-//--MIAMI: file done
-
 uint8 CTheScripts::ScriptSpace[SIZE_SCRIPT_SPACE];
 CRunningScript CTheScripts::ScriptsArray[MAX_NUM_SCRIPTS];
 intro_text_line CTheScripts::IntroTextLines[MAX_NUM_INTRO_TEXT_LINES];

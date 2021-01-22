@@ -25,8 +25,6 @@
 #include "World.h"
 #include "VarConsole.h"
 
-//--MIAMI: file done
-
 #define CRUSHER_GARAGE_X1 (1135.5f)
 #define CRUSHER_GARAGE_Y1 (57.0f)
 #define CRUSHER_GARAGE_Z1 (-1.0f)

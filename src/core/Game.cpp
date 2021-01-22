@@ -125,8 +125,6 @@ int gameTxdSlot;
 uint8 gameProcessPirateCheck = 0;
 #endif
 
-// --MIAMI: File done
-
 bool DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha);
 void DoRWStuffEndOfFrame(void);
 #ifdef PS2_MENU

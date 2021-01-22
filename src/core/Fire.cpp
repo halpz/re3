@@ -18,8 +18,6 @@
 #include "GameLogic.h"
 #include "CarAI.h"
 
-// --MIAMI: file done
-
 CFireManager gFireManager;
 
 CFire::CFire()

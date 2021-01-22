@@ -3173,7 +3173,6 @@ CWeapon::HasWeaponAmmoToBeUsed(void)
 		return m_nAmmoTotal != 0;
 }
 
-// --MIAMI: Done
 bool
 CPed::IsPedDoingDriveByShooting(void)
 {

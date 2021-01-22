@@ -6,8 +6,6 @@
 #include "AnimBlendAssociation.h"
 #include "RpAnimBlend.h"
 
-//--MIAMI: file done
-
 CAnimBlendClumpData *gpAnimBlendClump;
 
 // PS2 names without "NonSkinned"

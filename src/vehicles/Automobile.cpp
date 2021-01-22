@@ -50,8 +50,6 @@
 #include "Automobile.h"
 #include "Bike.h"
 
-//--MIAMI: file done
-
 bool bAllCarCheat;
 
 RwObject *GetCurrentAtomicObjectCB(RwObject *object, void *data);
@@ -5130,7 +5128,6 @@ CAutomobile::HasCarStoppedBecauseOfLight(void)
 	return false;
 }
 
-// --MIAMI: Done
 void
 CPed::DeadPedMakesTyresBloody(void)
 {
@@ -5154,7 +5151,6 @@ CPed::DeadPedMakesTyresBloody(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::MakeTyresMuddySectorList(CPtrList &list)
 {

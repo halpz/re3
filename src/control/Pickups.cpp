@@ -34,8 +34,6 @@
 #include "Messages.h"
 #include "Streaming.h"
 
-// --MIAMI: file done
-
 CPickup CPickups::aPickUps[NUMPICKUPS];
 int16 CPickups::NumMessages;
 int32 CPickups::aPickUpsCollected[NUMCOLLECTEDPICKUPS];
@@ -1578,7 +1576,6 @@ CPacManPickups::ResetPowerPillsCarriedByPlayer()
 {
 }
 
-// --MIAMI: Done
 void
 CPed::CreateDeadPedMoney(void)
 {
@@ -1599,7 +1596,6 @@ CPed::CreateDeadPedMoney(void)
 	m_nPedMoney = 0;
 }
 
-// --MIAMI: Done
 void
 CPed::CreateDeadPedWeaponPickups(void)
 {
@@ -1625,7 +1621,6 @@ CPed::CreateDeadPedWeaponPickups(void)
 	ClearWeapons();
 }
 
-// --MIAMI: Done
 void
 CPed::CreateDeadPedPickupCoors(float *x, float *y, float *z)
 {

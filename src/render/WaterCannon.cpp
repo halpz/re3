@@ -13,8 +13,6 @@
 #include "Camera.h"
 #include "Particle.h"
 
-// --MIAMI: file done
-
 #define WATERCANNONVERTS 4
 #define WATERCANNONINDEXES 12
 

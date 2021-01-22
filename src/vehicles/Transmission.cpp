@@ -4,8 +4,6 @@
 #include "HandlingMgr.h"
 #include "Transmission.h"
 
-//--MIAMI: done
-
 void
 cTransmission::InitGearRatios(void)
 {

@@ -22,8 +22,6 @@
 
 #define DISTANCE_TO_SWITCH_DISTANCE_GOTO 20.0f
 
-//--MIAMI: file done
-
 float CCarAI::FindSwitchDistanceClose(CVehicle* pVehicle)
 {
 	return pVehicle->AutoPilot.m_nSwitchDistance;

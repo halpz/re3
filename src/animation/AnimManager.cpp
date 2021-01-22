@@ -12,8 +12,6 @@
 #include "AnimManager.h"
 #include "Streaming.h"
 
-//--MIAMI: file done
-
 CAnimBlock CAnimManager::ms_aAnimBlocks[NUMANIMBLOCKS];
 CAnimBlendHierarchy CAnimManager::ms_aAnimations[NUMANIMATIONS];
 int32 CAnimManager::ms_numAnimBlocks;
@@ -1277,7 +1275,6 @@ CAnimManager::LoadAnimFile(const char *filename)
 	RwStreamClose(stream, nil);
 }
 
-//--MIAMI: done
 void
 CAnimManager::LoadAnimFile(RwStream *stream, bool compress, char (*uncompressedAnims)[32])
 {

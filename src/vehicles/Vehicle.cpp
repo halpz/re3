@@ -33,8 +33,6 @@
 #include "Weather.h"
 #include "Coronas.h"
 
-//--MIAMI: done
-
 bool CVehicle::bWheelsOnlyCheat;
 bool CVehicle::bAllDodosCheat;
 bool CVehicle::bCheat3;

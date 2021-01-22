@@ -20,8 +20,6 @@
 
 #pragma comment( lib, "mss32.lib" )
 
-// --MIAMI: file done
-
 cSampleManager SampleManager;
 uint32 BankStartOffset[MAX_SFX_BANKS];
 ///////////////////////////////////////////////////////////////

@@ -51,7 +51,6 @@ CPlayerPed::~CPlayerPed()
 	delete m_pWanted;
 }
 
-// --MIAMI: Done
 CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 {
 	m_fMoveSpeed = 0.0f;
@@ -100,7 +99,6 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 	idleAnimBlockIndex = CAnimManager::GetAnimationBlockIndex("playidles");
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::ClearWeaponTarget()
 {
@@ -112,21 +110,18 @@ CPlayerPed::ClearWeaponTarget()
  	ClearPointGunAt();
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::SetWantedLevel(int32 level)
 {
 	m_pWanted->SetWantedLevel(level);
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::SetWantedLevelNoDrop(int32 level)
 {
 	m_pWanted->SetWantedLevelNoDrop(level);
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::MakeObjectTargettable(int32 handle)
 {
@@ -138,7 +133,6 @@ CPlayerPed::MakeObjectTargettable(int32 handle)
 	}
 }
 
-// --MIAMI: Done
 // I don't know the actual purpose of parameter
 void
 CPlayerPed::AnnoyPlayerPed(bool annoyedByPassingEntity)
@@ -152,7 +146,6 @@ CPlayerPed::AnnoyPlayerPed(bool annoyedByPassingEntity)
 	}
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::ClearAdrenaline(void)
 {
@@ -162,7 +155,6 @@ CPlayerPed::ClearAdrenaline(void)
 	}
 }
 
-// --MIAMI: Done
 CPlayerInfo *
 CPlayerPed::GetPlayerInfoForThisPlayerPed()
 {
@@ -172,7 +164,6 @@ CPlayerPed::GetPlayerInfoForThisPlayerPed()
 	return nil;
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::SetupPlayerPed(int32 index)
 {
@@ -193,21 +184,18 @@ CPlayerPed::SetupPlayerPed(int32 index)
 #endif
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::DeactivatePlayerPed(int32 index)
 {
 	CWorld::Remove(CWorld::Players[index].m_pPed);
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::ReactivatePlayerPed(int32 index)
 {
 	CWorld::Add(CWorld::Players[index].m_pPed);
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::UseSprintEnergy(void)
 {
@@ -224,7 +212,6 @@ CPlayerPed::UseSprintEnergy(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::MakeChangesForNewWeapon(eWeaponType weapon)
 {
@@ -249,7 +236,6 @@ CPlayerPed::MakeChangesForNewWeapon(eWeaponType weapon)
 	TheCamera.ClearPlayerWeaponMode();
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::MakeChangesForNewWeapon(int32 slot)
 {
@@ -257,7 +243,6 @@ CPlayerPed::MakeChangesForNewWeapon(int32 slot)
 		MakeChangesForNewWeapon(m_weapons[slot].m_eWeaponType);
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::ReApplyMoveAnims(void)
 {
@@ -277,7 +262,6 @@ CPlayerPed::ReApplyMoveAnims(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::SetInitialState(void)
 {
@@ -324,7 +308,6 @@ CPlayerPed::SetInitialState(void)
 	m_attachWepAmmo = 0;
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::SetRealMoveAnim(void)
 {
@@ -568,7 +551,6 @@ CPlayerPed::SetRealMoveAnim(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::RestoreSprintEnergy(float restoreSpeed)
 {
@@ -576,7 +558,6 @@ CPlayerPed::RestoreSprintEnergy(float restoreSpeed)
 		m_fCurrentStamina += restoreSpeed * CTimer::GetTimeStep() * 0.5f;
 }
 
-// --MIAMI: Done
 float
 CPlayerPed::DoWeaponSmoothSpray(void)
 {
@@ -626,7 +607,6 @@ CPlayerPed::DoWeaponSmoothSpray(void)
 		return -1.0f;
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::DoStuffToGoOnFire(void)
 {
@@ -634,7 +614,6 @@ CPlayerPed::DoStuffToGoOnFire(void)
 		TheCamera.ClearPlayerWeaponMode();
 }
 
-// --MIAMI: Done
 bool
 CPlayerPed::DoesTargetHaveToBeBroken(CVector target, CWeapon *weaponUsed)
 {
@@ -646,7 +625,6 @@ CPlayerPed::DoesTargetHaveToBeBroken(CVector target, CWeapon *weaponUsed)
 	return false;
 }
 
-// --MIAMI: Done
 // Cancels landing anim while running & jumping? I think
 void
 CPlayerPed::RunningLand(CPad *padUsed)
@@ -665,7 +643,6 @@ CPlayerPed::RunningLand(CPad *padUsed)
 	}
 }
 
-// --MIAMI: Done
 bool
 CPlayerPed::IsThisPedAnAimingPriority(CPed *suspect)
 {
@@ -688,7 +665,6 @@ CPlayerPed::IsThisPedAnAimingPriority(CPed *suspect)
 	return suspect->m_nPedState == PED_ABSEIL;
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::PlayerControlSniper(CPad *padUsed)
 {
@@ -725,7 +701,6 @@ CPlayerPed::PlayerControlSniper(CPad *padUsed)
 	GetWeapon()->Update(m_audioEntityId, nil);
 }
 
-// --MIAMI: Done
 // I think R* also used goto in here.
 void
 CPlayerPed::ProcessWeaponSwitch(CPad *padUsed)
@@ -816,7 +791,6 @@ switchDetectDone:
 	}
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::PlayerControlM16(CPad *padUsed)
 {
@@ -853,7 +827,6 @@ CPlayerPed::PlayerControlM16(CPad *padUsed)
 	GetWeapon()->Update(m_audioEntityId, nil);
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::PlayerControlFighter(CPad *padUsed)
 {
@@ -879,7 +852,6 @@ CPlayerPed::PlayerControlFighter(CPad *padUsed)
 	}
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::PlayerControl1stPersonRunAround(CPad *padUsed)
 {
@@ -940,7 +912,6 @@ CPlayerPed::PlayerControl1stPersonRunAround(CPad *padUsed)
 #endif
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::KeepAreaAroundPlayerClear(void)
 {
@@ -990,7 +961,6 @@ CPlayerPed::KeepAreaAroundPlayerClear(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::EvaluateNeighbouringTarget(CEntity *candidate, CEntity **targetPtr, float *lastCloseness, float distLimit, float angleOffset, bool lookToLeft, bool priority)
 {
@@ -1017,7 +987,6 @@ CPlayerPed::EvaluateNeighbouringTarget(CEntity *candidate, CEntity **targetPtr, 
 	}
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::EvaluateTarget(CEntity *candidate, CEntity **targetPtr, float *lastCloseness, float distLimit, float angleOffset, bool priority)
 {
@@ -1072,7 +1041,6 @@ CPlayerPed::RotatePlayerToTrackTarget(void)
 	}
 }
 
-// --MIAMI: Done
 bool
 CPlayerPed::FindNextWeaponLockOnTarget(CEntity *previousTarget, bool lookToLeft)
 {
@@ -1115,7 +1083,6 @@ CPlayerPed::FindNextWeaponLockOnTarget(CEntity *previousTarget, bool lookToLeft)
 	return true;
 }
 
-// --MIAMI: Done
 bool
 CPlayerPed::FindWeaponLockOnTarget(void)
 {
@@ -1167,7 +1134,6 @@ CPlayerPed::FindWeaponLockOnTarget(void)
 	return true;
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::ProcessAnimGroups(void)
 {
@@ -1476,7 +1442,6 @@ CPlayerPed::MovementDisabledBecauseOfTargeting(void)
 	return m_pPointGunAt && !CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->IsFlagSet(WEAPONFLAG_CANAIM_WITHARM);
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::PlayerControlZelda(CPad *padUsed)
 {
@@ -1952,7 +1917,6 @@ CPlayerPed::ProcessControl(void)
 		UpdateRpHAnim();
 }
 
-// --MIAMI: Done
 bool
 CPlayerPed::DoesPlayerWantNewWeapon(eWeaponType weapon, bool onlyIfSlotIsEmpty)
 {
@@ -2036,7 +2000,6 @@ CPlayerPed::PlayIdleAnimations(CPad *padUsed)
 	}
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::SetNearbyPedsToInteractWithPlayer(void)
 {
@@ -2071,7 +2034,6 @@ CPlayerPed::SetNearbyPedsToInteractWithPlayer(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::UpdateMeleeAttackers(void)
 {
@@ -2114,7 +2076,6 @@ CPlayerPed::UpdateMeleeAttackers(void)
 		&& m_pMeleeList[4] == this && m_pMeleeList[5] == this;
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::RemovePedFromMeleeList(CPed *ped)
 {
@@ -2127,7 +2088,6 @@ CPlayerPed::RemovePedFromMeleeList(CPed *ped)
 	ped->m_attackTimer = 0;
 }
 
-// --MIAMI: Done
 void
 CPlayerPed::GetMeleeAttackCoords(CVector& coords, int8 dir, float dist)
 {
@@ -2160,7 +2120,6 @@ CPlayerPed::GetMeleeAttackCoords(CVector& coords, int8 dir, float dist)
 	}
 }
 
-// --MIAMI: Done
 int32
 CPlayerPed::FindMeleeAttackPoint(CPed *victim, CVector &dist, uint32 &endOfAttackOut)
 {

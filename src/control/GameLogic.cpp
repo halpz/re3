@@ -46,8 +46,6 @@ CVector CGameLogic::ShortCutDropOffForMission;
 float CGameLogic::ShortCutDropOffOrientationForMission;
 bool CGameLogic::MissionDropOffReadyToBeUsed;
 
-//--MIAMI: file done
-
 #define SHORTCUT_TAXI_COST (9)
 #define TOTAL_BUSTED_AUDIO (28)
 

@@ -6,8 +6,6 @@
 #include "FileMgr.h"
 #include "ObjectData.h"
 
-//--MIAMI: file done
-
 CObjectInfo CObjectData::ms_aObjectInfo[NUMOBJECTINFO];
 
 // Another ugly file reader

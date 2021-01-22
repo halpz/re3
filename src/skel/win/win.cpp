@@ -53,8 +53,6 @@
 
 #define MAX_SUBSYSTEMS		(16)
 
-// --MIAMI: file done
-
 static RwBool		  ForegroundApp = TRUE;
 
 static RwBool		  RwInitialised = FALSE;

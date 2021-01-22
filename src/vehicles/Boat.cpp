@@ -28,8 +28,6 @@
 #include "Record.h"
 #include "Shadows.h"
 
-//--MIAMI: file done
-
 #define INVALID_ORIENTATION (-9999.99f)
 
 float CBoat::MAX_WAKE_LENGTH = 50.0f;
@@ -1253,7 +1251,7 @@ CBoat::Teleport(CVector v)
 	CWorld::Add(this);
 }
 
-//--MIAMI: unused
+// unused
 bool
 CBoat::IsSectorAffectedByWake(CVector2D sector, float fSize, CBoat **apBoats)
 {
@@ -1285,7 +1283,7 @@ CBoat::IsSectorAffectedByWake(CVector2D sector, float fSize, CBoat **apBoats)
 	return numVerts != 0;
 }
 
-//--MIAMI: unused
+// unused
 float
 CBoat::IsVertexAffectedByWake(CVector vecVertex, CBoat *pBoat)
 {

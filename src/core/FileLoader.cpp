@@ -30,8 +30,6 @@
 #include "ColStore.h"
 #include "Occlusion.h"
 
-//--MIAMI: file done
-
 char CFileLoader::ms_line[256];
 
 const char*
@@ -1309,7 +1307,7 @@ CFileLoader::LoadOcclusionVolume(const char *line)
 }
 
 
-//--MIAMI: unused
+// unused
 void
 CFileLoader::ReloadPaths(const char *filename)
 {

@@ -10,8 +10,6 @@
 #include "main.h"
 #include "Accident.h"
 
-// --MIAMI: file done
-
 int32 CEventList::ms_nFirstFreeSlotIndex;
 CEvent gaEvent[NUMEVENTS];
 

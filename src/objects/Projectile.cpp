@@ -2,8 +2,6 @@
 
 #include "Projectile.h"
 
-// --MIAMI: file done
-
 CProjectile::CProjectile(int32 model) : CObject()
 {
 	m_fMass = 1.0f;

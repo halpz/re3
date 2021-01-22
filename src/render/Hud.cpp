@@ -26,8 +26,6 @@
 #include "General.h"
 #include "VarConsole.h"
 
-// --MIAMI: file done
-
 #if defined(FIX_BUGS)
 	#define SCREEN_SCALE_X_FIX(a) SCREEN_SCALE_X(a)
 	#define SCREEN_SCALE_Y_FIX(a) SCREEN_SCALE_Y(a)
