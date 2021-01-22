@@ -359,6 +359,7 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 		return 0;
 	case COMMAND_HAS_OBJECT_BEEN_DAMAGED_BY_WEAPON:
 	{
+		CollectParameters(&m_nIp, 2);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(GET_INTEGER_PARAM(0));
 		bool result = false;
 		if (!pObject) {
