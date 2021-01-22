@@ -2283,7 +2283,7 @@ void CParticle::HandleShootableBirdsStuff(CEntity *entity, CVector const&camPos)
 }
 
 void
-CEntity::AddSteamsFromGround(CVector *unused) //todo
+CEntity::AddSteamsFromGround(CVector *unused)
 {
 	int i, n;
 	C2dEffect *effect;

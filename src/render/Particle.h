@@ -30,13 +30,6 @@ public:
 	uint8     m_nCurrentFrame;
 	RwRGBA    m_Color;
 	CParticle *m_pNext;
-
-	//CVector   m_vecParticleMovementOffset;
-	//int16     m_nCurrentZRotation;
-	//uint16    m_nZRotationTimer;
-	//float     m_fCurrentZRadius;
-	//uint16    m_nZRadiusTimer;
-	
 	int32     field_4C;
 
 	CParticle()

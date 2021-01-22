@@ -715,6 +715,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 						int16 model = B->GetModelIndex();
 						if(model == MI_FIRE_HYDRANT && !Bobj->bHasBeenDamaged){
 							CParticleObject::AddObject(POBJECT_FIRE_HYDRANT, B->GetPosition() - CVector(0.0f, 0.0f, 0.5f), true);
+							CParticleObject::AddObject(POBJECT_FIRE_HYDRANT_STEAM, B->GetPosition() - CVector(0.0f, 0.0f, 0.5f), true);
 							Bobj->bHasBeenDamaged = true;
 						}else if(model == MI_PARKINGMETER || model == MI_PARKINGMETER2){
 							CPickups::CreateSomeMoney(GetPosition(), CGeneral::GetRandomNumber()%100);
