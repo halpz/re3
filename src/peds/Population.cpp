@@ -537,7 +537,7 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 	CTheZones::GetZoneInfoForTimeOfDay(&playerCentreOfWorld, &zoneInfo);
 	CWanted *wantedInfo = playerInfo->m_pPed->m_pWanted;
 
-	if (wantedInfo->m_nWantedLevel > 2) {
+	if (wantedInfo->GetWantedLevel() > 2) {
 		if (!CGame::IsInInterior() && (CGeneral::GetRandomNumber() % 32 == 0) && FindPlayerVehicle())
 			forceAddingCop = true;
 

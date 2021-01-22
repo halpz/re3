@@ -1654,7 +1654,7 @@ CPlayerPed::ProcessControl(void)
 	if (m_nEvadeAmount == 0)
 		m_pEvadingFrom = nil;
 
-	if (m_pWanted->m_nWantedLevel > 0)
+	if (m_pWanted->GetWantedLevel() > 0)
 		FindNewAttackPoints();
 	
 	UpdateMeleeAttackers();
