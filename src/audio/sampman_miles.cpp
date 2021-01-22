@@ -1,4 +1,6 @@
-#if defined(AUDIO_MSS) || defined (__MWERKS__)
+#include "common.h"
+
+#ifdef AUDIO_MSS
 #include <shlobj.h>
 #include <shlguid.h>
 
@@ -8,7 +10,6 @@
 #include "eax-util.h"
 #include "mss.h"
 
-#include "common.h"
 #include "sampman.h"
 #include "AudioManager.h"
 #include "MusicManager.h"

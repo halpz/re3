@@ -16,6 +16,7 @@
 #include <math.h>
 
 #ifdef __MWERKS__
+#define AUDIO_MSS
 #define RWLIBS // codewarrior doesn't support project level defines - so not even this is enough, but still catches most ifdefs
 #endif
 
