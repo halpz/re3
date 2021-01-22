@@ -4,8 +4,6 @@
 #include "General.h"
 #include "Ped.h"
 
-// --MIAMI: file done
-
 // Corresponds to ped sounds (from SOUND_PED_DEATH to SOUND_PED_TAXI_CALL)
 PedAudioData CommentWaitTime[56] = {
   { 500, 800, 500, 2 },

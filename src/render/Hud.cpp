@@ -26,8 +26,6 @@
 #include "General.h"
 #include "VarConsole.h"
 
-// --MIAMI: file done
-
 #if defined(FIX_BUGS)
 	#define SCREEN_SCALE_X_FIX(a) SCREEN_SCALE_X(a)
 	#define SCREEN_SCALE_Y_FIX(a) SCREEN_SCALE_Y(a)
@@ -622,11 +620,11 @@ void CHud::Draw()
 		/*
 			DrawWantedLevel
 		*/
-		if (m_LastWanted == playerPed->m_pWanted->m_nWantedLevel) {
+		if (m_LastWanted == playerPed->m_pWanted->GetWantedLevel()) {
 			alpha = DrawFadeState(HUD_WANTED_FADING, 0);
 		} else {
 			alpha = DrawFadeState(HUD_WANTED_FADING, 1);
-			m_LastWanted = playerPed->m_pWanted->m_nWantedLevel;
+			m_LastWanted = playerPed->m_pWanted->GetWantedLevel();
 		}
 
 		if (m_WantedState != FADED_OUT) {
@@ -642,7 +640,7 @@ void CHud::Draw()
 
 			for (int i = 0; i < 6; i++) {
 				if (FrontEndMenuManager.m_PrefsShowHud) {
-					if (playerPed->m_pWanted->m_nWantedLevel > i
+					if (playerPed->m_pWanted->GetWantedLevel() > i
 						&& (CTimer::GetTimeInMilliseconds() > playerPed->m_pWanted->m_nLastWantedLevelChange
 							+ 2000 || CTimer::GetFrameCounter() & 4)) {
 
@@ -655,7 +653,7 @@ void CHud::Draw()
 						CFont::SetColor(WANTED_COLOR_FLASH);
 						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
 
-					} else if (playerPed->m_pWanted->m_nWantedLevel <= i) {
+					} else if (playerPed->m_pWanted->GetWantedLevel() <= i) {
 						NOTWANTED_COLOR.a = alpha;
 						CFont::SetColor(NOTWANTED_COLOR);
 						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);

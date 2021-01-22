@@ -16,8 +16,6 @@
 #include "Vehicle.h"
 #include "GameLogic.h"
 
-//--MIAMI: file done
-
 #define FRENZY_ANY_PED -1
 #define FRENZY_ANY_CAR -2
 

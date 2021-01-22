@@ -3,8 +3,6 @@
 #include "AnimBlendClumpData.h"
 #include "MemoryMgr.h"
 
-//--MIAMI: file done
-
 CAnimBlendClumpData::CAnimBlendClumpData(void)
 {
 	numFrames = 0;

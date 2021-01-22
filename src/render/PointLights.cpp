@@ -11,8 +11,6 @@
 #include "Timer.h"
 #include "PointLights.h"
 
-//--MIAMI: file done
-
 int16 CPointLights::NumLights;
 CRegisteredPointLight CPointLights::aLights[NUMPOINTLIGHTS];
 CVector CPointLights::aCachedMapReads[32];

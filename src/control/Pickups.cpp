@@ -34,8 +34,6 @@
 #include "Messages.h"
 #include "Streaming.h"
 
-// --MIAMI: file done
-
 CPickup CPickups::aPickUps[NUMPICKUPS];
 int16 CPickups::NumMessages;
 int32 CPickups::aPickUpsCollected[NUMCOLLECTEDPICKUPS];
@@ -278,7 +276,7 @@ CPickup::CanBePickedUp(CPlayerPed *player, int playerId)
 	bool cannotBePickedUp =
 		(m_pObject->GetModelIndex() == MI_PICKUP_BODYARMOUR && player->m_fArmour > CWorld::Players[playerId].m_nMaxArmour - 0.5f)
 		|| (m_pObject->GetModelIndex() == MI_PICKUP_HEALTH && player->m_fHealth > CWorld::Players[playerId].m_nMaxHealth - 0.5f)
-		|| (m_pObject->GetModelIndex() == MI_PICKUP_BRIBE && player->m_pWanted->m_nWantedLevel == 0)
+		|| (m_pObject->GetModelIndex() == MI_PICKUP_BRIBE && player->m_pWanted->GetWantedLevel() == 0)
 		|| (m_pObject->GetModelIndex() == MI_PICKUP_KILLFRENZY && (CTheScripts::IsPlayerOnAMission() || CDarkel::FrenzyOnGoing() || !CGame::nastyGame));
 	return !cannotBePickedUp;
 }
@@ -784,7 +782,7 @@ CPickups::GivePlayerGoodiesWithPickUpMI(int16 modelIndex, int playerIndex)
 		DMAudio.PlayFrontEndSound(SOUND_PICKUP_BONUS, 0);
 		return true;
 	} else if (modelIndex == MI_PICKUP_BRIBE) {
-		int32 level = Max(FindPlayerPed()->m_pWanted->m_nWantedLevel - 1, 0);
+		int32 level = Max(FindPlayerPed()->m_pWanted->GetWantedLevel() - 1, 0);
 		player->SetWantedLevel(level);
 		DMAudio.PlayFrontEndSound(SOUND_PICKUP_BONUS, 0);
 		return true;
@@ -1578,7 +1576,6 @@ CPacManPickups::ResetPowerPillsCarriedByPlayer()
 {
 }
 
-// --MIAMI: Done
 void
 CPed::CreateDeadPedMoney(void)
 {
@@ -1599,7 +1596,6 @@ CPed::CreateDeadPedMoney(void)
 	m_nPedMoney = 0;
 }
 
-// --MIAMI: Done
 void
 CPed::CreateDeadPedWeaponPickups(void)
 {
@@ -1625,7 +1621,6 @@ CPed::CreateDeadPedWeaponPickups(void)
 	ClearWeapons();
 }
 
-// --MIAMI: Done
 void
 CPed::CreateDeadPedPickupCoors(float *x, float *y, float *z)
 {

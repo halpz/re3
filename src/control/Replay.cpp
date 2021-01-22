@@ -53,8 +53,6 @@
 #include "Fluff.h"
 #include "WaterCreatures.h"
 
-//--MIAMI: file done
-
 uint8 CReplay::Mode;
 CAddressInReplayBuffer CReplay::Record;
 CAddressInReplayBuffer CReplay::Playback;

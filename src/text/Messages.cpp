@@ -13,8 +13,6 @@
 
 #include "Pad.h"
 
-// --MIAMI: file done
-
 tMessage CMessages::BriefMessages[NUMBRIEFMESSAGES];
 tPreviousBrief CMessages::PreviousBriefs[NUMPREVIOUSBRIEFS];
 tBigMessage CMessages::BIGMessages[NUMBIGMESSAGES];

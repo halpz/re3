@@ -18,8 +18,6 @@
 #include "Clock.h"
 #include "Bridge.h"
 
-//--MIAMI: file done
-
 struct FlareDef
 {
 	float position;

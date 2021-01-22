@@ -10,8 +10,6 @@
 #include "VehicleModelInfo.h"
 #include "World.h"
 
-//--MIAMI: file done
-
 uint16 CRecordDataForGame::RecordingState;
 
 void CRecordDataForGame::Init(void)

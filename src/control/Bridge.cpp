@@ -6,8 +6,6 @@
 #include "PathFind.h"
 #include "Stats.h"
 
-//--MIAMI: file done
-
 CEntity *CBridge::pLiftRoad;
 CEntity *CBridge::pLiftPart;
 CEntity *CBridge::pWeight;

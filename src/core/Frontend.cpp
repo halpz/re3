@@ -41,7 +41,6 @@
 #include "sampman.h"
 
 // --LCS: changed a bit to have lcs feel, needs more work
-
 // Similar story to Hud.cpp:
 // Game has colors inlined in code.
 // For easier modification we collect them here:

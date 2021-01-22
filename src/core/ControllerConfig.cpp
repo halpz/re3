@@ -21,8 +21,6 @@
 #include "Camera.h"
 #include "GenericGameStorage.h"
 
-// --MIAMI: file done
-
 CControllerConfigManager ControlsManager;
 
 CControllerConfigManager::CControllerConfigManager()

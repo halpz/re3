@@ -39,8 +39,6 @@
 #include "VarConsole.h"
 #include "KeyGen.h"
 
-//--MIAMI: file done (possibly bugs)
-
 bool CStreaming::ms_disableStreaming;
 bool CStreaming::ms_bLoadingBigModel;
 int32 CStreaming::ms_numModelsRequested;

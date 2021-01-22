@@ -4,8 +4,6 @@
 #include "World.h"
 #include "Dummy.h"
 
-// --MIAMI: file done
-
 void *CDummy::operator new(size_t sz) { return CPools::GetDummyPool()->New();  }
 void CDummy::operator delete(void *p, size_t sz) { CPools::GetDummyPool()->Delete((CDummy*)p); }
 

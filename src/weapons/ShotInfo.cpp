@@ -10,8 +10,6 @@
 #include "Ped.h"
 #include "Fire.h"
 
-// --MIAMI: file done
-
 CShotInfo gaShotInfo[NUMSHOTINFOS];
 float CShotInfo::ms_afRandTable[20];
 

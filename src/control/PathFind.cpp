@@ -8,8 +8,6 @@
 #include "Lines.h"	// for debug
 #include "PathFind.h"
 
-//--MIAMI: file done except mobile unused function
-
 bool gbShowPedPaths;
 bool gbShowCarPaths;
 bool gbShowCarPathsLinks;

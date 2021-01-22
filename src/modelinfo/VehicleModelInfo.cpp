@@ -21,8 +21,6 @@
 #include "ModelInfo.h"
 #include "custompipes.h"
 
-//--MIAMI: done
-
 int8 CVehicleModelInfo::ms_compsToUse[2] = { -2, -2 };
 int8 CVehicleModelInfo::ms_compsUsed[2];
 RwRGBA CVehicleModelInfo::ms_vehicleColourTable[256];
@@ -924,7 +922,7 @@ CVehicleModelInfo::AvoidSameVehicleColour(uint8 *col1, uint8 *col2)
 	}
 }
 
-//--MIAMI: unused
+// unused
 RwTexture*
 CreateCarColourTexture(uint8 r, uint8 g, uint8 b)
 {

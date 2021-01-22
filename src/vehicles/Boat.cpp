@@ -28,8 +28,6 @@
 #include "Record.h"
 #include "Shadows.h"
 
-//--MIAMI: file done
-
 #define INVALID_ORIENTATION (-9999.99f)
 
 float CBoat::MAX_WAKE_LENGTH = 50.0f;
@@ -135,9 +133,9 @@ CBoat::ProcessControl(void)
 		m_fBuoyancy *= 0.99f;
 
 #ifdef FIX_BUGS
-	if(FindPlayerPed() && FindPlayerPed()->m_pWanted->m_nWantedLevel > 0 && GetModelIndex() == MI_PREDATOR){
+	if(FindPlayerPed() && FindPlayerPed()->m_pWanted->GetWantedLevel() > 0 && GetModelIndex() == MI_PREDATOR){
 #else
-	if(FindPlayerPed()->m_pWanted->m_nWantedLevel > 0 && GetModelIndex() == MI_PREDATOR){
+	if(FindPlayerPed()->m_pWanted->GetWantedLevel() > 0 && GetModelIndex() == MI_PREDATOR){
 #endif
 		CVehicle *playerVeh = FindPlayerVehicle();
 		if(playerVeh && playerVeh->GetVehicleAppearance() == VEHICLE_APPEARANCE_BOAT &&
@@ -1254,7 +1252,7 @@ CBoat::Teleport(CVector v)
 	CWorld::Add(this);
 }
 
-//--MIAMI: unused
+// unused
 bool
 CBoat::IsSectorAffectedByWake(CVector2D sector, float fSize, CBoat **apBoats)
 {
@@ -1286,7 +1284,7 @@ CBoat::IsSectorAffectedByWake(CVector2D sector, float fSize, CBoat **apBoats)
 	return numVerts != 0;
 }
 
-//--MIAMI: unused
+// unused
 float
 CBoat::IsVertexAffectedByWake(CVector vecVertex, CBoat *pBoat)
 {

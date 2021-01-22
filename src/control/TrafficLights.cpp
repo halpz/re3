@@ -15,8 +15,6 @@
 #include "Weather.h"
 #include "World.h"
 
-//--MIAMI: file done
-
 bool CTrafficLights::bGreenLightsCheat;
 
 void

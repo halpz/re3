@@ -15,8 +15,6 @@
 #include "World.h"
 #include "MemoryHeap.h"
 
-//--MIAMI: file done
-
 CCPtrNodePool *CPools::ms_pPtrNodePool;
 CEntryInfoNodePool *CPools::ms_pEntryInfoNodePool;
 CPedPool *CPools::ms_pPedPool;

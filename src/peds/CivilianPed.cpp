@@ -18,8 +18,6 @@
 #include <float.h>
 #endif
 
-// --MIAMI: file done
-
 CCivilianPed::CCivilianPed(ePedType pedtype, uint32 mi) : CPed(pedtype)
 {
 	SetModelIndex(mi);
@@ -420,7 +418,6 @@ CCivilianPed::ProcessControl(void)
 		Avoid();
 }
 
-// --MIAMI: Done
 bool
 CPed::RunToReportCrime(eCrimeType crimeToReport)
 {

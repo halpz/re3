@@ -645,8 +645,6 @@ MarkerAtomicCB(RpAtomic *atomic, void *data)
 	return atomic;
 }
 
-// --MIAMI: C3dMarker and C3dMarkers done
-
 bool
 C3dMarker::AddMarker(uint32 identifier, uint16 type, float fSize, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate)
 {

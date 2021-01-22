@@ -16,8 +16,6 @@
 #include "Lights.h"
 #include "MemoryMgr.h"
 
-//--MIAMI: file done
-
 RpClump *gpPlayerClump;
 float gOldFov;
 

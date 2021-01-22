@@ -16,8 +16,6 @@
 #include "General.h"
 #include "Object.h"
 
-//--MIAMI: file done
-
 #define ROADBLOCKDIST (90.0f)
 #define ROADBLOCK_OBJECT_WIDTH (4.0f)
 

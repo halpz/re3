@@ -85,8 +85,6 @@
 #define MINIMAL_DISTANCE_TO_SPAWN_OFFSCREEN (40.0f)
 #define EXTENDED_RANGE_DESPAWN_MULTIPLIER (1.5f)
 
-//--MIAMI: file done
-
 bool CCarCtrl::bMadDriversCheat;
 int CCarCtrl::NumLawEnforcerCars;
 int CCarCtrl::NumAmbulancesOnDuty;
@@ -114,8 +112,6 @@ CVehicle* apCarsToKeep[MAX_CARS_TO_KEEP];
 uint32 aCarsToKeepTime[MAX_CARS_TO_KEEP];
 
 bool gbEmergencyVehiclesEnabled = true;
-
-//--MIAMI: done except heli/plane functions
 
 void
 CCarCtrl::GenerateRandomCars()
@@ -156,12 +152,12 @@ CCarCtrl::GenerateOneRandomCar()
 	CWanted* pWanted = pPlayer->m_pPed->m_pWanted;
 	int carClass;
 	int carModel;
-	if (pWanted->m_nWantedLevel > 1 && NumLawEnforcerCars < pWanted->m_MaximumLawEnforcerVehicles &&
+	if (pWanted->GetWantedLevel() > 1 && NumLawEnforcerCars < pWanted->m_MaximumLawEnforcerVehicles &&
 		pWanted->m_CurrentCops < pWanted->m_MaxCops && !CGame::IsInInterior() && (
-			pWanted->m_nWantedLevel > 3 ||
-			pWanted->m_nWantedLevel > 2 && CTimer::GetTimeInMilliseconds() > LastTimeLawEnforcerCreated + 5000 ||
-			pWanted->m_nWantedLevel > 1 && CTimer::GetTimeInMilliseconds() > LastTimeLawEnforcerCreated + 8000)) {
-		/* Last pWanted->m_nWantedLevel > 1 is unnecessary but I added it for better readability. */
+			pWanted->GetWantedLevel() > 3 ||
+			pWanted->GetWantedLevel() > 2 && CTimer::GetTimeInMilliseconds() > LastTimeLawEnforcerCreated + 5000 ||
+			pWanted->GetWantedLevel() > 1 && CTimer::GetTimeInMilliseconds() > LastTimeLawEnforcerCreated + 8000)) {
+		/* Last pWanted->GetWantedLevel() > 1 is unnecessary but I added it for better readability. */
 		/* Wouldn't be surprised it was there originally but was optimized out. */
 		carClass = COPS;
 		carModel = ChoosePoliceCarModel();
@@ -170,7 +166,7 @@ CCarCtrl::GenerateOneRandomCar()
 			carModel = ChooseModel(&zone, &carClass);
 			if (carModel == -1)
 				return;
-			if (!(carClass == COPS && pWanted->m_nWantedLevel >= 1))
+			if (!(carClass == COPS && pWanted->GetWantedLevel() >= 1))
 				/* All cop spawns with wanted level are handled by condition above. */
 				/* In particular it means that cop cars never spawn if player has wanted level of 1. */
 				break;
@@ -318,7 +314,7 @@ CCarCtrl::GenerateOneRandomCar()
 	}
 	if (!ThePaths.GenerateCarCreationCoors(vecTargetPos.x, vecTargetPos.y, frontX, frontY,
 		preferredDistance, angleLimit, invertAngleLimitTest, &spawnPosition, &curNodeId, &nextNodeId,
-		&positionBetweenNodes, carClass == COPS && pWanted->m_nWantedLevel >= 1))
+		&positionBetweenNodes, carClass == COPS && pWanted->GetWantedLevel() >= 1))
 		return;
 	CPathNode* pCurNode = &ThePaths.m_pathNodes[curNodeId];
 	CPathNode* pNextNode = &ThePaths.m_pathNodes[nextNodeId];
@@ -384,7 +380,7 @@ CCarCtrl::GenerateOneRandomCar()
 	switch (carClass) {
 	case COPS:
 		pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
-		if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->m_nWantedLevel != 0){
+		if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_pWanted->GetWantedLevel() != 0){
 			pVehicle->AutoPilot.m_nCruiseSpeed = CCarAI::FindPoliceCarSpeedForWantedLevel(pVehicle);
 			pVehicle->AutoPilot.m_fMaxTrafficSpeed = pVehicle->AutoPilot.m_nCruiseSpeed / 2;
 			pVehicle->AutoPilot.m_nCarMission = CCarAI::FindPoliceCarMissionForWantedLevel();
@@ -3199,7 +3195,7 @@ void CCarCtrl::FindLinksToGoWithTheseNodes(CVehicle* pVehicle)
 
 void CCarCtrl::GenerateEmergencyServicesCar(void)
 {
-	if (FindPlayerPed()->m_pWanted->m_nWantedLevel > 3)
+	if (FindPlayerPed()->m_pWanted->GetWantedLevel() > 3)
 		return;
 	if (CGame::IsInInterior())
 		return;

@@ -10,8 +10,6 @@
 #include "World.h"
 #include "Zones.h"
 
-// --MIAMI: file done
-
 CPlaceName CUserDisplay::PlaceName;
 COnscreenTimer CUserDisplay::OnscnTimer;
 CPager CUserDisplay::Pager;

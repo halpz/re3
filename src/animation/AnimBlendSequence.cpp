@@ -3,8 +3,6 @@
 #include "AnimBlendSequence.h"
 #include "MemoryHeap.h"
 
-//--MIAMI: file done
-
 CAnimBlendSequence::CAnimBlendSequence(void)
 {
 	type = 0;

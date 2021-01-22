@@ -2,8 +2,6 @@
 
 #include "Antennas.h"
 
-//--MIAMI: file done
-
 CAntenna CAntennas::aAntennas[NUMANTENNAS];
 
 void

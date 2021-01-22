@@ -4986,7 +4986,6 @@ CAutomobile::HasCarStoppedBecauseOfLight(void)
 	return false;
 }
 
-// --MIAMI: Done
 void
 CPed::DeadPedMakesTyresBloody(void)
 {
@@ -5010,7 +5009,6 @@ CPed::DeadPedMakesTyresBloody(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::MakeTyresMuddySectorList(CPtrList &list)
 {

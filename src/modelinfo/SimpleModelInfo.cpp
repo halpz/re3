@@ -6,8 +6,6 @@
 #include "AnimManager.h"
 #include "custompipes.h"
 
-//--MIAMI: file done
-
 #define LOD_DISTANCE (300.0f)
 
 void

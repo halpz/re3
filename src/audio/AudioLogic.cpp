@@ -305,11 +305,11 @@ cAudioManager::ProcessPlayerMood()
 		playerPed = FindPlayerPed();
 		if (playerPed != nil) {
 
-			if (playerPed->m_pWanted->m_nWantedLevel > 3) {
+			if (playerPed->m_pWanted->GetWantedLevel() > 3) {
 				m_nPlayerMood = PLAYER_MOOD_ANGRY;
 				return;
 			}
-			if (playerPed->m_pWanted->m_nWantedLevel > 1) {
+			if (playerPed->m_pWanted->GetWantedLevel() > 1) {
 				m_nPlayerMood = PLAYER_MOOD_PISSED_OFF;
 				return;
 			}
@@ -5684,7 +5684,7 @@ cAudioManager::GetCopTalkSfx(CPed *ped, int16 sound)
 	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, 8494, 4); break;
 	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, 8491, 3); break;
 	case SOUND_PED_PED_COLLISION:
-		if(FindPlayerPed()->m_pWanted->m_nWantedLevel <= 0) return NO_SAMPLE;
+		if(FindPlayerPed()->m_pWanted->GetWantedLevel() <= 0) return NO_SAMPLE;
 		GetPhrase(sfx, ped->m_lastComment, 8476, 5);
 		break;
 	default: return GetGenericMaleTalkSfx(ped, sound);

@@ -8,8 +8,6 @@
 #include "ModelInfo.h"
 #include "KeyGen.h"
 
-//--MIAMI: file done
-
 CBaseModelInfo::CBaseModelInfo(ModelInfoType type)
 {
 	m_colModel = nil;

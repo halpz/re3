@@ -6,8 +6,6 @@
 #include "Streaming.h"
 #include "Weapon.h"
 
-// --MIAMI: file done
-
 CGangInfo CGangs::Gang[NUM_GANGS];
 bool CGangs::GangAttackWithCops[NUM_GANGS];
 

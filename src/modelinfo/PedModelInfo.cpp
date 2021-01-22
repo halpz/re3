@@ -10,8 +10,6 @@
 #include "ModelInfo.h"
 #include "custompipes.h"
 
-//--MIAMI: file done
-
 void
 CPedModelInfo::DeleteRwObject(void)
 {

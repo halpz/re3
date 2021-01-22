@@ -11,8 +11,6 @@
 #include "Frontend.h"
 #include "MBlur.h"
 
-//--MIAMI: done
-
 RpLight *pAmbient;
 RpLight *pDirect;
 RpLight *pExtraDirectionals[4] = { nil };

@@ -29,8 +29,6 @@
 #include "WaterLevel.h"
 #include "World.h"
 
-// --MIAMI: file done
-
 #define OBJECT_REPOSITION_OFFSET_Z 2.0f
 
 CColPoint gaTempSphereColPoints[MAX_COLLISION_POINTS];

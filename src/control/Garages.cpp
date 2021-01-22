@@ -25,8 +25,6 @@
 #include "World.h"
 #include "VarConsole.h"
 
-//--MIAMI: file done
-
 #define CRUSHER_GARAGE_X1 (1135.5f)
 #define CRUSHER_GARAGE_Y1 (57.0f)
 #define CRUSHER_GARAGE_Z1 (-1.0f)
@@ -452,7 +450,7 @@ void CGarage::Update()
 				m_eGarageState = GS_OPENING;
 				DMAudio.PlayFrontEndSound(SOUND_GARAGE_OPENING, 1);
 				bool bTakeMoney = false;
-				if (FindPlayerPed()->m_pWanted->m_nWantedLevel != 0) {
+				if (FindPlayerPed()->m_pWanted->GetWantedLevel() != 0) {
 					bTakeMoney = true;
 					FindPlayerPed()->m_pWanted->Suspend();
 				}

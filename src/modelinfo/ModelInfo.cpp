@@ -6,8 +6,6 @@
 #include "ModelInfo.h"
 #include "KeyGen.h"
 
-// --MIAMI: file done
-
 CBaseModelInfo *CModelInfo::ms_modelInfoPtrs[MODELINFOSIZE];
 
 CStore<CSimpleModelInfo, SIMPLEMODELSIZE> CModelInfo::ms_simpleModelStore;

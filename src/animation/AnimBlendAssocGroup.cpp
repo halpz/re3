@@ -16,8 +16,6 @@
 #include "AnimBlendAssocGroup.h"
 #include "KeyGen.h"
 
-//--MIAMI: file done
-
 CAnimBlendAssocGroup::CAnimBlendAssocGroup(void)
 {
 	animBlock = nil;

@@ -517,7 +517,6 @@ Terminate3D(void)
 CSprite2d splash;
 int splashTxdId = -1;
 
-//--MIAMI: done
 CSprite2d*
 LoadSplash(const char *name)
 {
@@ -563,7 +562,6 @@ DestroySplashScreen(void)
 	splashTxdId = -1;
 }
 
-//--MIAMI: done
 Const char*
 GetRandomSplashScreen(void)
 {

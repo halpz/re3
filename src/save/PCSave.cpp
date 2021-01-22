@@ -12,8 +12,6 @@
 #include "PCSave.h"
 #include "Text.h"
 
-// --MIAMI: file done
-
 const char* _psGetUserFilesFolder();
 
 C_PcSave PcSaveHelper;

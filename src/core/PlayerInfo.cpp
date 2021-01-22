@@ -35,8 +35,6 @@
 #include "Automobile.h"
 #include "GameLogic.h"
 
-// --MIAMI: File done
-
 CVector lastPlayerPos;
 
 void
@@ -483,7 +481,7 @@ CPlayerInfo::Process(void)
 		CStats::DistanceTravelledOnFoot += FindPlayerPed()->m_fDistanceTravelled;
 	}
 
-	if (m_pPed->m_pWanted->m_nWantedLevel && !CTheScripts::IsPlayerOnAMission()) {
+	if (m_pPed->m_pWanted->GetWantedLevel() && !CTheScripts::IsPlayerOnAMission()) {
 		float maxDelta = 0.0f;
 		static bool movedSignificantly = true;
 		static bool thereIsACarPathNear = true;
@@ -495,7 +493,7 @@ CPlayerInfo::Process(void)
 			lastPlayerPos = FindPlayerCoors();
 			thereIsACarPathNear = ThePaths.FindNodeClosestToCoors(FindPlayerCoors(), PATH_CAR, 60.0f, true, false, false, false) != 0;
 		}
-		switch (m_pPed->m_pWanted->m_nWantedLevel) {
+		switch (m_pPed->m_pWanted->GetWantedLevel()) {
 			case 1:
 				maxDelta = 31.f;
 				break;

@@ -20,8 +20,6 @@
 #include "Ropes.h"
 #include "Stinger.h"
 
-// --MIAMI: file done except TODOs
-
 CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 {
 	m_nCopType = copType;
@@ -196,7 +194,7 @@ CCopPed::ClearPursuit(void)
 	m_bZoneDisabled = false;
 	ClearObjective();
 	if (IsPedInControl()) {
-		if (!m_pMyVehicle || wanted->m_nWantedLevel != 0)  {
+		if (!m_pMyVehicle || wanted->GetWantedLevel() != 0)  {
 			if (m_pMyVehicle && (m_pMyVehicle->GetPosition() - GetPosition()).MagnitudeSqr() < sq(5.0f)) {
 				m_nLastPedState = PED_IDLE;
 				SetSeek((CEntity*)m_pMyVehicle, 2.5f);
@@ -295,7 +293,7 @@ CCopPed::ScanForCrimes(void)
 	if (!m_bIsInPursuit) {
 		CPlayerPed *player = FindPlayerPed();
 		if ((m_objective == OBJECTIVE_ENTER_CAR_AS_DRIVER || m_objective == OBJECTIVE_ENTER_CAR_AS_PASSENGER)
-			&& player->m_pWanted->m_nWantedLevel == 0) {
+			&& player->m_pWanted->GetWantedLevel() == 0) {
 
 			if (player->m_pMyVehicle
 #ifdef FIX_BUGS
@@ -311,7 +309,7 @@ void
 CCopPed::CopAI(void)
 {
 	CWanted *wanted = FindPlayerPed()->m_pWanted;
-	int wantedLevel = wanted->m_nWantedLevel;
+	int wantedLevel = wanted->GetWantedLevel();
 	CPhysical *playerOrHisVeh = FindPlayerVehicle() ? (CPhysical*)FindPlayerVehicle() : (CPhysical*)FindPlayerPed();
 
 	if (wanted->m_bIgnoredByEveryone || wanted->m_bIgnoredByCops) {

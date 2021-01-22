@@ -7,8 +7,6 @@
 #include "ModelInfo.h"
 #include "AnimManager.h"
 
-//--MIAMI: file done
-
 void
 CClumpModelInfo::DeleteRwObject(void)
 {
@@ -150,7 +148,7 @@ CClumpModelInfo::FindFrameFromIdCB(RwFrame *frame, void *data)
 	return assoc->frame ? nil : frame;
 }
 
-//--MIAMI: unused
+// unused
 RwFrame*
 CClumpModelInfo::FindFrameFromNameCB(RwFrame *frame, void *data)
 {

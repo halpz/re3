@@ -24,8 +24,6 @@
 #include "Camera.h"
 #include "ColStore.h"
 
-//--MIAMI: file done
-
 #ifdef VU_COLLISION
 #include "VuCollision.h"
 
@@ -93,7 +91,7 @@ CCollision::Update(void)
 {
 }
 
-//--MIAMI: unused
+// unused
 eLevelName
 GetCollisionInSectorList(CPtrList &list)
 {
@@ -110,7 +108,7 @@ GetCollisionInSectorList(CPtrList &list)
 	return LEVEL_GENERIC;
 }
 
-//--MIAMI: unused
+// unused
 // Get a level this sector is in based on collision models
 eLevelName
 GetCollisionInSector(CSector &sect)
@@ -880,7 +878,7 @@ CCollision::ProcessLineSphere(const CColLine &line, const CColSphere &sphere, CC
 	return true;
 }
 
-//--MIAMI: unused
+// unused
 bool
 CCollision::ProcessVerticalLineTriangle(const CColLine &line,
 	const CompressedVector *verts, const CColTriangle &tri, const CColTrianglePlane &plane,

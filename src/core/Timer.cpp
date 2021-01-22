@@ -7,8 +7,6 @@
 #include "Timer.h"
 #include "SpecialFX.h"
 
-// --MIAMI: file done
-
 uint32 CTimer::m_snTimeInMilliseconds;
 PauseModeTime CTimer::m_snTimeInMillisecondsPauseMode = 1;
 

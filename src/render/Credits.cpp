@@ -9,8 +9,6 @@
 #include "Credits.h"
 #include "Pad.h"
 
-// --MIAMI: file done
-
 bool CCredits::bCreditsGoing;
 uint32 CCredits::CreditsStartTime;
 

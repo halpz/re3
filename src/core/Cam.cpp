@@ -30,8 +30,6 @@
 #include "Bike.h"
 #include "Pickups.h"
 
-//--MIAMI: file done
-
 bool PrintDebugCode = false;
 int16 DebugCamMode;
 
