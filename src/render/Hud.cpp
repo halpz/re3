@@ -188,24 +188,25 @@ struct
   { "", "" },
   { "", "" },
   { "radardisc", "radardisc" },
+  { "radardiscback", "" },
   { "", "" },
   { "", "" },
   { "", "" },
   { "", "" },
   { "", "" },
-  { "", "" },
-  { "", "" },
-  { "", "" },
-  { "", "" },
-  { "", "" },
-  { "", "" },
-  { "", "" },
+  { "bar_inside1dark", "" },
+  { "bar_inside2dark", "" },
+  { "hudnumbers", "" },
+  { "bar_inside1", "" },
+  { "bar_inside2", "" },
+  { "bar_outline", "" },
   { "sitesniper", "sitesniperm" },
   { "siteM16", "siteM16m" },
   { "sitelaser", "sitelaserm" },
   { "laserdot", "laserdotm" },
   { "viewfinder_128", "viewfinder_128m" },
-  { "bleeder", "" }
+  { "bleeder", "" },
+  { "gren_rem", "noMaskNeeded" }
 };
 
 RwTexture *gpSniperSightTex;

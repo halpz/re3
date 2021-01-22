@@ -44,7 +44,7 @@ enum eSprites
 	HUD_LASERDOT,
 	HUD_VIEWFINDER,
 	HUD_BLEEDER,
-	NUM_HUD_SPRITES = 69,
+	NUM_HUD_SPRITES = 70,
 };
 
 extern float BigMessageInUse[6];

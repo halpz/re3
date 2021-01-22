@@ -11,6 +11,8 @@
 
 #include "Font.h"
 
+#include "Pad.h"
+
 // --MIAMI: file done
 
 tMessage CMessages::BriefMessages[NUMBRIEFMESSAGES];
@@ -443,6 +445,64 @@ CMessages::InsertStringInString(wchar *str1, wchar *str2)
 		str1[i++] = '\0';
 }
 
+int
+CMessages::GetTokenPadKeyString(const wchar *in, wchar *out)
+{
+	wchar str[256];
+	memset(str, 0, sizeof(str));
+	str[0] = 'C';
+
+	// TODO: there was a switch here but that's stupid
+	str[1] = CPad::GetPad(0)->Mode + 48;
+
+	while (*in != '~') in++;
+	in++;
+
+	int i = 1;
+	while (*in != '~')
+		str[1+i++] = *(in++);
+
+	wchar *text = TheText.Get(UnicodeToAscii(str));
+	if (!text) return i;
+	while (text[0] != '\0')
+	{
+		if (text[0] == '~')
+		{
+			switch (text[1])
+			{
+			case 'L':
+				*(out++) = 'M';
+				break;
+			case 'N':
+				*(out++) = 'O';
+				break;
+			case 'O':
+				*(out++) = 227;
+				break;
+			case 'R':
+				*(out++) = 'S';
+				break;
+			case 'S':
+				*(out++) = 225;
+				break;
+			case 'T':
+				*(out++) = 224;
+				break;
+			case 'X':
+				*(out++) = 226;
+				break;
+			default:
+				break;
+			}
+			text += 3;
+		}
+		else {
+			*(out++) = *(text++);
+		}
+	}
+	return i;
+}
+
 void
 CMessages::InsertPlayerControlKeysInString(wchar *str)
 {
@@ -452,7 +512,7 @@ CMessages::InsertPlayerControlKeysInString(wchar *str)
 
 	if (!str) return;
 	uint16 strSize = GetWideStringLength(str);
-	memset(keybuf, 0, 256*sizeof(wchar));
+	memset(keybuf, 0, 256*sizeof(wchar)); // not memset? :O
 
 	wchar *_outstr = outstr;
 	for (i = 0; i < strSize;) {
@@ -462,9 +522,16 @@ CMessages::InsertPlayerControlKeysInString(wchar *str)
 #else
 		if (str[i] == '~' && str[i + 1] == 'k' && str[i + 2] == '~') {
 #endif
+			memset(keybuf, 0, 256 * sizeof(wchar));
 			i += 4;
-			bool done = false;
-			for (int32 cont = 0; cont < MAX_CONTROLLERACTIONS && !done; cont++) {
+			i += GetTokenPadKeyString(&str[i], keybuf) + 1;
+			uint16 keybuf_size = GetWideStringLength(keybuf);
+			for (uint16 j = 0; j < keybuf_size; j++) {
+				*(_outstr++) = keybuf[j];
+				keybuf[j] = '\0';
+			}
+
+			/*for (int32 cont = 0; cont < MAX_CONTROLLERACTIONS && !done; cont++) {
 				uint16 contSize = GetWideStringLength(ControlsManager.m_aActionNames[cont]);
 				if (contSize != 0) {
 					if (WideStringCompare(&str[i], ControlsManager.m_aActionNames[cont], contSize)) {
@@ -478,7 +545,7 @@ CMessages::InsertPlayerControlKeysInString(wchar *str)
 						i += contSize + 1;
 					}
 				}
-			}
+			}*/
 		} else {
 			*(_outstr++) = str[i++];
 		}
@@ -824,3 +891,4 @@ CMessages::ClearThisBigPrintNow(uint32 id)
 	CHud::m_BigMessage[id][0] = '\0';
 	BigMessageInUse[id] = 0.0f;
 }
+
