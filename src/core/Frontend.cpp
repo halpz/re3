@@ -50,7 +50,7 @@ const CRGBA SELECTIONBORDER_COLOR(25, 130, 70, 255);
 const CRGBA MENUOPTION_COLOR = LABEL_COLOR;
 const CRGBA SELECTEDMENUOPTION_COLOR(255, 255, 255, 255);
 const CRGBA HEADER_COLOR(197, 0, 0, 255);
-const CRGBA DARKMENUOPTION_COLOR(195, 90, 165, 255);
+const CRGBA DARKMENUOPTION_COLOR(115/2, 173/2, 216 / 2, 255);
 const CRGBA SLIDERON_COLOR(97, 194, 247, 255);
 const CRGBA SLIDEROFF_COLOR(27, 89, 130, 255);
 const CRGBA LIST_BACKGROUND_COLOR(49, 101, 148, 130);
@@ -909,14 +909,14 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 #endif
 
 	switch (m_nCurrScreen) {
-		case MENUPAGE_CHOOSE_LOAD_SLOT:
+		/*case MENUPAGE_CHOOSE_LOAD_SLOT:
 		case MENUPAGE_CHOOSE_DELETE_SLOT:
 		case MENUPAGE_CHOOSE_SAVE_SLOT:
 			CSprite2d::Draw2DPolygon(MENU_X_LEFT_ALIGNED(38.0f), MENU_Y(85.0f),
 				MENU_X_LEFT_ALIGNED(615.0f), MENU_Y(75.0f),
 				MENU_X_LEFT_ALIGNED(30.0f), MENU_Y(320.0f), 
 				MENU_X_LEFT_ALIGNED(605.0f), MENU_Y(330.0f), CRGBA(LIST_BACKGROUND_COLOR.r, LIST_BACKGROUND_COLOR.g, LIST_BACKGROUND_COLOR.b, FadeIn(LIST_BACKGROUND_COLOR.a)));
-			break;
+			break;*/
 		case MENUPAGE_SOUND_SETTINGS:
 			PrintRadioSelector();
 			break;
@@ -1010,12 +1010,12 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 #endif
 			wchar* rightText = nil;
 			wchar* leftText;
-			if (aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot >= SAVESLOT_1 && aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot <= SAVESLOT_8) {
+			/*if (aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot >= SAVESLOT_1 && aScreens[m_nCurrScreen].m_aEntries[i].m_SaveSlot <= SAVESLOT_8) {
 				CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255)));
 				CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 				CFont::SetScale(MENU_X(MEDIUMTEXT_X_SCALE), MENU_Y(MEDIUMTEXT_Y_SCALE));
 				CFont::SetDropShadowPosition(0);
-			} else {
+			} else {*/
 				CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 				CFont::SetScale(MENU_X(BIGTEXT_X_SCALE), MENU_Y(BIGTEXT_Y_SCALE));
 				CFont::SetDropShadowPosition(2);
@@ -1024,7 +1024,7 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 					CFont::SetColor(CRGBA(SELECTEDMENUOPTION_COLOR.r, SELECTEDMENUOPTION_COLOR.g, SELECTEDMENUOPTION_COLOR.b, FadeIn(255)));
 				else
 					CFont::SetColor(CRGBA(MENUOPTION_COLOR.r, MENUOPTION_COLOR.g, MENUOPTION_COLOR.b, FadeIn(255)));
-			}
+			//}
 			if (aScreens[m_nCurrScreen].m_aEntries[i].m_Align == MENUALIGN_LEFT) {
 				CFont::SetCentreOff();
 				CFont::SetRightJustifyOff();
@@ -3222,7 +3222,7 @@ CMenuManager::SmallMessageScreen(const char* text)
 void
 CMenuManager::PrintBriefs()
 {
-	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255)));
+	CFont::SetColor(CRGBA(255, 255, 255, FadeIn(255)));
 	CFont::SetRightJustifyOff();
 	CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 	CFont::SetScale(MENU_X(MEDIUMTEXT_X_SCALE), MENU_Y(MEDIUMTEXT_Y_SCALE));
