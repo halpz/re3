@@ -655,7 +655,7 @@ void CHud::Draw()
 			CFont::SetColor(CRGBA(0, 0, 0, 255));
 			CFont::PrintString(fStarsX + SCREEN_SCALE_X_FIX(2.0f), SCREEN_SCALE_Y(87.0f) + SCREEN_SCALE_Y_FIX(2.0f), sPrintIcon);
 
-			if (FindPlayerPed()->m_pWanted->m_nWantedLevel > i
+			if (FindPlayerPed()->m_pWanted->GetWantedLevel() > i
 				&& (CTimer::GetTimeInMilliseconds() > FindPlayerPed()->m_pWanted->m_nLastWantedLevelChange
 					+ 2000 || CTimer::GetFrameCounter() & 4)) {
 

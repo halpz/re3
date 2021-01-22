@@ -582,7 +582,7 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 	CVector playerCentreOfWorld = FindPlayerCentreOfWorld(CWorld::PlayerInFocus);
 	CTheZones::GetZoneInfoForTimeOfDay(&playerCentreOfWorld, &zoneInfo);
 	CWanted *wantedInfo = playerInfo->m_pPed->m_pWanted;
-	if (wantedInfo->m_nWantedLevel > 2) {
+	if (wantedInfo->GetWantedLevel() > 2) {
 		if (ms_nNumCop < wantedInfo->m_MaxCops && !playerInfo->m_pPed->bInVehicle
 			&& (CCarCtrl::NumLawEnforcerCars >= wantedInfo->m_MaximumLawEnforcerVehicles
 				|| CCarCtrl::NumRandomCars >= playerInfo->m_nTrafficMultiplier * CCarCtrl::CarDensityMultiplier
