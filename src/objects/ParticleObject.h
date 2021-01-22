@@ -57,7 +57,7 @@ public:
 	uint8               m_nSkipFrames;
 	uint16              m_nFrameCounter;
 	uint16              m_nState;
-	CVector             m_vecTarget; // CVuVector on PSP
+	CVector             m_vecTarget;
 	float               m_fRandVal;
 	float               m_fSize;
 	CRGBA               m_Color;
