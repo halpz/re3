@@ -157,7 +157,7 @@ enum Config {
 
 // This is enabled for all released games.
 // any debug stuff that isn't left in any game is not in FINAL
-#define FINAL
+//#define FINAL
 
 // This is enabled for all released games except mobile
 // any debug stuff that is only left in mobile, is not in MASTER
@@ -190,7 +190,7 @@ enum Config {
 #define NO_CDCHECK
 
 // those infamous texts
-//#define DRAW_GAME_VERSION_TEXT
+#define DRAW_GAME_VERSION_TEXT
 
 // Memory allocation and compression
 // #define USE_CUSTOM_ALLOCATOR		// use CMemoryHeap for allocation. use with care, not finished yet
@@ -226,7 +226,7 @@ enum Config {
 	#undef DRAW_GAME_VERSION_TEXT
 #else
 	// not in master builds
-//	#define VALIDATE_SAVE_SIZE
+	#define VALIDATE_SAVE_SIZE
 
 	#define NO_MOVIES	// disable intro videos
 	#define DEBUGMENU
@@ -234,7 +234,7 @@ enum Config {
 
 #ifdef FINAL
 	// in all games
-//#	define USE_MY_DOCUMENTS	// use my documents directory for user files
+#	define USE_MY_DOCUMENTS	// use my documents directory for user files
 #else
 	// not in any game
 #	define CHATTYSPLASH	// print what the game is loading
@@ -243,7 +243,7 @@ enum Config {
 
 #define FIX_BUGS		// fixes bugs that we've came across during reversing. You can undefine this only on release builds.
 //#define MORE_LANGUAGES		// Add more translations to the game
-//#define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
+#define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
 #define LOAD_INI_SETTINGS // as the name suggests. fundamental for CUSTOM_FRONTEND_OPTIONS
 #define FIX_HIGH_FPS_BUGS_ON_FRONTEND
 
@@ -314,8 +314,8 @@ enum Config {
 //#	define PS2_MENU_USEALLPAGEICONS
 #else
 #	define MAP_ENHANCEMENTS			// Adding waypoint and better mouse support
-//#	define TRIANGLE_BACK_BUTTON
-#	define CIRCLE_BACK_BUTTON
+#	define TRIANGLE_BACK_BUTTON
+//#	define CIRCLE_BACK_BUTTON
 #define LEGACY_MENU_OPTIONS			// i.e. frame sync(vsync)
 #define MUCH_SHORTER_OUTRO_SCREEN
 // #define XBOX_MESSAGE_SCREEN			// Blue background, no "saved successfully press OK" screen etc.
@@ -344,11 +344,11 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 //#define MISSION_REPLAY // mobile feature
 #endif
 //#define SIMPLIER_MISSIONS // apply simplifications from mobile
-// #define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+#define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #define SCRIPT_LOG_FILE_LEVEL 0 // 0 == no log, 1 == overwrite every frame, 2 == full log
 
 #ifndef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
-// #define USE_BASIC_SCRIPT_DEBUG_OUTPUT
+#define USE_BASIC_SCRIPT_DEBUG_OUTPUT
 #endif
 
 #ifdef MASTER
@@ -369,7 +369,7 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #define CAMERA_PICKUP
 
 // Peds
-//#define CANCELLABLE_CAR_ENTER
+#define CANCELLABLE_CAR_ENTER
 
 // Camera
 #define IMPROVED_CAMERA		// Better Debug cam, and maybe more in the future
@@ -377,7 +377,7 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 
 // Audio
 #define AUDIO_CACHE // cache sound lengths to speed up the cold boot
-#define PS2_AUDIO_PATHS // changes audio paths for cutscenes and radio to PS2 paths (needs vbdec on MSS builds)
+//#define PS2_AUDIO_PATHS // changes audio paths for cutscenes and radio to PS2 paths (needs vbdec on MSS builds)
 //#define AUDIO_OAL_USE_SNDFILE // use libsndfile to decode WAVs instead of our internal decoder
 #define AUDIO_OAL_USE_MPG123 // use mpg123 to support mp3 files
 
