@@ -404,10 +404,6 @@ enum Config {
 	#define VC_RAIN_NERF // Reduces number of rain particles
 #endif
 
-#ifdef LIBRW
-// these are not supported with librw yet
-#endif
-
 #if defined __MWERKS__ || defined VANILLA_DEFINES
 #define FINAL
 #undef CHATTYSPLASH
