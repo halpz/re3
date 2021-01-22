@@ -11,6 +11,7 @@
 #include "CivilianPed.h"
 #include "Clock.h"
 #include "CopPed.h"
+#include "Coronas.h"
 #include "Debug.h"
 #include "DMAudio.h"
 #include "EmergencyPed.h"
@@ -98,7 +99,7 @@ uint16 CTheScripts::NumberOfExclusiveMissionScripts;
 bool CTheScripts::bPlayerHasMetDebbieHarry;
 bool CTheScripts::bPlayerIsInTheStatium;
 int CTheScripts::AllowedCollision[MAX_ALLOWED_COLLISIONS];
-bool CTheScripts::FSDestroyedFlag;
+int CTheScripts::FSDestroyedFlag;
 short* CTheScripts::SavedVarIndices;
 int CTheScripts::NumSaveVars;
 int gScriptsFile = -1;
@@ -107,6 +108,9 @@ bool CTheScripts::InTheScripts;
 CRunningScript* pCurrent;
 uint16 CTheScripts::NumTrueGlobals;
 uint16 CTheScripts::MostGlobals;
+CVector gVectorSetInLua;
+int CTheScripts::NextScriptCoronaID;
+base::cSList<script_corona> CTheScripts::mCoronas;
 
 #ifdef MISSION_REPLAY
 
@@ -2620,6 +2624,14 @@ bool CTheScripts::Init(bool loaddata)
 		memset(&UsedObjectArray[i].name, 0, sizeof(UsedObjectArray[i].name));
 		UsedObjectArray[i].index = 0;
 	}
+#if defined FIX_BUGS || (!defined GTA_PS2 && !defined GTA_PSP)
+	for (base::cSList<script_corona>::tSItem* i = CTheScripts::mCoronas.first; i;) {
+		base::cSList<script_corona>::tSItem* next = i->next;
+		delete i;
+		i = next;
+	}
+	CTheScripts::mCoronas.first = nil;
+#endif
 	NumberOfUsedObjects = 0;
 	if (ScriptSpace)
 		Shutdown();
@@ -2772,8 +2784,6 @@ void CTheScripts::Process()
 			UseTextCommands = 0;
 	}
 
-	// TODO: mCoronas
-
 #ifdef MISSION_REPLAY
 	static uint32 TimeToWaitTill;
 	switch (AllowMissionReplay) {
@@ -2832,6 +2842,11 @@ void CTheScripts::Process()
 		script = next;
 		if (script && !script->m_bIsActive)
 			script = nil;
+	}
+	InTheScripts = false;
+	for (base::cSList<script_corona>::tSItem* i = CTheScripts::mCoronas.first; i; i = i->next) {
+		CCoronas::RegisterCorona((uint32)(uintptr)i, i->item.r, i->item.g, i->item.b, 255, CVector(i->item.x, i->item.y, i->item.z),
+			-i->item.size, 450.0f, i->item.type, i->item.flareType, 1, 0, 0, 0.0f);
 	}
 	DbgFlag = false;
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT

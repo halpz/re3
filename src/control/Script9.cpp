@@ -651,7 +651,7 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 		return 0;
 	}
 	case COMMAND_GET_VECTOR_FROM_MULTIPLAYER:
-		// SET_VECTOR_PARAM(0, gVectorSetInLua);
+		SET_VECTOR_PARAM(0, gVectorSetInLua);
 		StoreParameters(&m_nIp, 3);
 		return 0;
 	case COMMAND_PRINT_HELP_ALWAYS:

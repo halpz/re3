@@ -4,6 +4,7 @@
 #include "Ped.h"
 #include "PedType.h"
 #include "Text.h"
+#include "sList.h"
 #include "Sprite2d.h"
 
 class CEntity;
@@ -273,6 +274,20 @@ struct tBuildingSwap
 	int32 m_nOldModel;
 };
 
+struct script_corona
+{
+	int id;
+	float x;
+	float y;
+	float z;
+	float size;
+	uint8 r;
+	uint8 g;
+	uint8 b;
+	int type;
+	int flareType;
+};
+
 
 enum {
 	VAR_LOCAL = 1,
@@ -343,12 +358,14 @@ public:
 	static int AllowedCollision[MAX_ALLOWED_COLLISIONS];
 	static short* SavedVarIndices;
 	static int NumSaveVars;
-	static bool FSDestroyedFlag;
+	static int FSDestroyedFlag;
 	static int NextProcessId;
 	static bool InTheScripts;
 	static CRunningScript* pCurrent;
 	static uint16 NumTrueGlobals;
 	static uint16 MostGlobals;
+	static base::cSList<script_corona> mCoronas;
+	static int NextScriptCoronaID;
 
 	static bool Init(bool loaddata = false);
 	static void Process();
@@ -467,6 +484,8 @@ public:
 	static void SetObjectiveForAllPedsInCollective(int, eObjective, void*);
 	static void SetObjectiveForAllPedsInCollective(int, eObjective);
 #endif
+
+	bool IsFortStauntonDestroyed() { return *(int32*)&ScriptSpace[FSDestroyedFlag] == 1; }
 
 };
 
@@ -665,4 +684,5 @@ extern int scriptToLoad;
 #endif
 
 extern int gScriptsFile;
+extern CVector gVectorSetInLua;
 
