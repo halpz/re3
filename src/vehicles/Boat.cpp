@@ -27,6 +27,7 @@
 #include "RpAnimBlend.h"
 #include "Record.h"
 #include "Shadows.h"
+#include "Wanted.h"
 
 #define INVALID_ORIENTATION (-9999.99f)
 

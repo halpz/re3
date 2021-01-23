@@ -1,14 +1,13 @@
 #pragma once
 
 #include "2dEffect.h"
-#include "BaseModelInfo.h"
 #include "SimpleModelInfo.h"
 #include "TimeModelInfo.h"
 #include "WeaponModelInfo.h"
 #include "ClumpModelInfo.h"
 #include "PedModelInfo.h"
 #include "VehicleModelInfo.h"
-#include "Instance.h"
+#include "templates.h"
 
 class CModelInfo
 {

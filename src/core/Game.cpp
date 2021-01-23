@@ -1,6 +1,3 @@
-#pragma warning( push )
-#pragma warning( disable : 4005)
-#pragma warning( pop )
 #include "common.h"
 #include "platform.h"
 
@@ -10,7 +7,6 @@
 #include "Accident.h"
 #include "Antennas.h"
 #include "Bridge.h"
-#include "Camera.h"
 #include "CarCtrl.h"
 #include "CarGen.h"
 #include "CdStream.h"
@@ -69,7 +65,6 @@
 #include "Skidmarks.h"
 #include "SetPieces.h"
 #include "SpecialFX.h"
-#include "Sprite2d.h"
 #include "Stats.h"
 #include "Streaming.h"
 #include "SurfaceTable.h"

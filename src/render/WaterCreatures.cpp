@@ -1,10 +1,10 @@
+#include "common.h"
 #include "WaterCreatures.h"
 #include "ModelIndices.h"
 #include "World.h"
 #include "WaterLevel.h"
 #include "Camera.h"
 #include "PlayerPed.h"
-#include "config.h"
 #include "General.h"
 
 int CWaterCreatures::nNumActiveSeaLifeForms;

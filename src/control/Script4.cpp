@@ -39,6 +39,7 @@
 #include "World.h"
 #include "Zones.h"
 #include "Bike.h"
+#include "Wanted.h"
 
 #ifdef FIX_BUGS
 static bool IsSlideObjectUsedWrongByScript(const CVector& posTarget, const CVector& slideBy)
