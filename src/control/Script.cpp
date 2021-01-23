@@ -2059,7 +2059,9 @@ int8 CRunningScript::ProcessOneCommand()
 	uint32 ip = m_nIp;
 	if (command < ARRAY_SIZE(commands)) {
 		script_assert(commands[command].id == command);
+		m_nIp -= 2;
 		sprintf(commandInfo, m_nIp >= SIZE_MAIN_SCRIPT ? "M<%5d> " : "<%6d> ", m_nIp >= SIZE_MAIN_SCRIPT ? m_nIp - SIZE_MAIN_SCRIPT : m_nIp);
+		m_nIp += 2;
 		if (m_bNotFlag)
 			strcat(commandInfo, "NOT ");
 		if (commands[command].position == -1)
