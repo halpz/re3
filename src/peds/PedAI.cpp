@@ -4093,7 +4093,7 @@ CPed::SetExitBoat(CVehicle *boat)
 	RemoveInCarAnims();
 	CColModel* boatCol = boat->GetColModel();
 	if (boat->IsUpsideDown()) {
-		newPos = { 0.0f, 0.0f, boatCol->boundingBox.min.z };
+		newPos = CVector(0.0f, 0.0f, boatCol->boundingBox.min.z);
 		newPos = boat->GetMatrix() * newPos;
 		newPos.z += 1.0f;
 		m_vehDoor = CAR_DOOR_RF;

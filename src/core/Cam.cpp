@@ -947,7 +947,7 @@ CVector
 CCam::DoAverageOnVector(const CVector &vec)
 {
 	int i;
-	CVector Average = { 0.0f, 0.0f, 0.0f };
+	CVector Average = CVector(0.0f, 0.0f, 0.0f);
 
 	if(ResetStatics){
 		m_iRunningVectorArrayPos = 0;
@@ -4029,7 +4029,7 @@ CCam::Process_Debug(const CVector&, float, float, float)
 	if(CPad::GetPad(1)->GetLeftShockJustDown() && gbBigWhiteDebugLightSwitchedOn)
 		CShadows::StoreShadowToBeRendered(SHADOWTYPE_ADDITIVE, gpShadowExplosionTex, &Source,
 			12.0f, 0.0f, 0.0f, -12.0f,
-			128, 128, 128, 128, 1000.0f, false, 1.0f);
+			128, 128, 128, 128, 1000.0f, false, 1.0f, nil, 1.0f);
 
 	if(CHud::m_Wants_To_Draw_Hud){
 		char str[256];

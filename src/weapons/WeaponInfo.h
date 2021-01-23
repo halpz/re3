@@ -31,7 +31,6 @@ enum
 };
 
 class CWeaponInfo {
-	static CWeaponInfo ms_apWeaponInfos[WEAPONTYPE_TOTALWEAPONS];
 	static char ms_aWeaponNames[WEAPONTYPE_TOTALWEAPONS][32];
 public:
 	static uint16 ms_aReloadSampleTime[WEAPONTYPE_TOTALWEAPONS];

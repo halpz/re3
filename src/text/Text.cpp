@@ -203,7 +203,7 @@ CText::GetNameOfLoadedMissionText(char *outName)
 void
 CText::ReadChunkHeader(ChunkHeader *buf, int32 file, size_t *offset)
 {
-#if THIS_IS_STUPID
+#ifdef THIS_IS_STUPID
 	char *_buf = (char*)buf;
 	for (int i = 0; i < sizeof(ChunkHeader); i++) {
 		CFileMgr::Read(file, &_buf[i], 1);
@@ -316,7 +316,7 @@ CKeyArray::Load(size_t length, int file, size_t* offset)
 	entries = new CKeyEntry[numEntries];
 	rawbytes = (char*)entries;
 
-#if THIS_IS_STUPID
+#ifdef THIS_IS_STUPID
 	for (uint32 i = 0; i < length; i++) {
 		CFileMgr::Read(file, &rawbytes[i], 1);
 		(*offset)++;
@@ -391,7 +391,7 @@ CKeyArray::Search(const char *key, uint8 *result)
 #endif
 	*result = false;
 #ifdef MASTER
-	sprintf(errstr, "%");
+	sprintf(errstr, "");
 #else
 	sprintf(errstr, "%s missing", key);
 #endif // MASTER
@@ -410,7 +410,7 @@ CData::Load(size_t length, int file, size_t * offset)
 	chars = new wchar[numChars];
 	rawbytes = (char*)chars;
 
-#if THIS_IS_STUPID
+#ifdef THIS_IS_STUPID
 	for(uint32 i = 0; i < length; i++){
 		CFileMgr::Read(file, &rawbytes[i], 1);
 		(*offset)++;
@@ -432,7 +432,7 @@ CData::Unload(void)
 void
 CMissionTextOffsets::Load(size_t table_size, int file, size_t *offset, int)
 {
-#if THIS_IS_STUPID
+#ifdef THIS_IS_STUPID
 	size_t num_of_entries = table_size / sizeof(CMissionTextOffsets::Entry);
 	for (size_t mi = 0; mi < num_of_entries; mi++) {
 		for (uint32 i = 0; i < sizeof(data[mi].szMissionName); i++) {

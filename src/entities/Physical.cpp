@@ -1265,7 +1265,7 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 	int numCollisions;
 	int mostColliding;
 	CColPoint colpoints[MAX_COLLISION_POINTS];
-	CVector shift = { 0.0f, 0.0f, 0.0f };
+	CVector shift = CVector(0.0f, 0.0f, 0.0f);
 	bool doShift = false;
 	CEntity *boat = nil;
 
@@ -1724,8 +1724,8 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 				if(numCollisions <= 0)
 					continue;
 
-				CVector moveSpeed = { 0.0f, 0.0f, 0.0f };
-				CVector turnSpeed = { 0.0f, 0.0f, 0.0f };
+				CVector moveSpeed = CVector(0.0f, 0.0f, 0.0f);
+				CVector turnSpeed = CVector(0.0f, 0.0f, 0.0f);
 				float maxImpulseA = 0.0f;
 				numResponses = 0;
 				if(A->bHasContacted){
@@ -2209,8 +2209,8 @@ CPhysical::ProcessCollision(void)
 	}else if(IsObject() && ((CObject*)this)->ObjectCreatedBy != TEMP_OBJECT){
 		int responsecase = ((CObject*)this)->m_nSpecialCollisionResponseCases;
 		if(responsecase == COLLRESPONSE_LAMPOST){
-			CVector speedUp = { 0.0f, 0.0f, 0.0f };
-			CVector speedDown = { 0.0f, 0.0f, 0.0f };
+			CVector speedUp = CVector(0.0f, 0.0f, 0.0f);
+			CVector speedDown = CVector(0.0f, 0.0f, 0.0f);
 			CColModel *colModel = GetColModel();
 			speedUp.z = colModel->boundingBox.max.z;
 			speedDown.z = colModel->boundingBox.min.z;

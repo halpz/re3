@@ -144,7 +144,7 @@ public:
 
 class CPacManPickups
 {
-	friend CPacManPickup;
+	friend class CPacManPickup;
 
 	static CPacManPickup aPMPickUps[NUMPACMANPICKUPS];
 	static CVector LastPickUpCoors;
