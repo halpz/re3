@@ -477,7 +477,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		float fx = pObject->GetForward().x;
 		float fy = pObject->GetForward().y;
 		float heading = LimitAngleOnCircle(
-			RADTODEG(CGeneral::GetATanOfXY(pObject->GetForward().x, pObject->GetForward().y)));
+			RADTODEG(Atan2(-pObject->GetForward().x, pObject->GetForward().y)));
 		float headingTarget = GET_FLOAT_PARAM(1);
 #ifdef FIX_BUGS
 		float rotateBy = GET_FLOAT_PARAM(2) * CTimer::GetTimeStepFix();
