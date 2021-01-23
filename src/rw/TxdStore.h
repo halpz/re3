@@ -4,7 +4,8 @@
 
 struct TxdDef {
 	RwTexDictionary *texDict;
-	int refCount;
+	int16 refCount;
+	int16 refCountGu;
 	char name[20];
 };
 
@@ -26,13 +27,19 @@ public:
 	static void Create(int slot);
 	static int GetNumRefs(int slot);
 	static void AddRef(int slot);
+	static void AddRefEvenIfNotInMemory(int slot);
+	static void AddRefGu(int slot);
 	static void RemoveRef(int slot);
+	static void RemoveRefGu(int slot);
 	static void RemoveRefWithoutDelete(int slot);
 	static bool LoadTxd(int slot, RwStream *stream);
+	static bool LoadTxd(int slot, void *data, void *chunk);
 	static bool LoadTxd(int slot, const char *filename);
 	static bool StartLoadTxd(int slot, RwStream *stream);
 	static bool FinishLoadTxd(int slot, RwStream *stream);
-	static void RemoveTxd(int slot);
+	static void RemoveTxd(int slot, bool notChunk = false);
+
+	static void Load(RwTexDictionary *stored, CPool<TxdDef> *pool);
 
 	static TxdDef *GetSlot(int slot) {
 		assert(slot >= 0);
