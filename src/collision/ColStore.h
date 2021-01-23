@@ -9,11 +9,13 @@ struct ColDef {	// made up name
 	char name[20];
 	int16 minIndex;
 	int16 maxIndex;
+	void *chunk;
 };
 
 class CColStore
 {
 	static CPool<ColDef,ColDef> *ms_pColPool;
+	static bool m_onlyBB;
 
 public:
 	static void Initialise(void);
@@ -25,15 +27,18 @@ public:
 	static CRect &GetBoundingBox(int32 slot);
 	static void IncludeModelIndex(int32 slot, int32 modelIndex);
 	static bool LoadCol(int32 storeID, uint8 *buffer, int32 bufsize);
+	static void LoadColCHK(int32 slot, void *data, void *chunk);
 	static void RemoveCol(int32 slot);
-	static void AddCollisionNeededAtPosn(const CVector2D &pos);
+	static void AddCollisionNeededAtPosn(const CVector &pos);
 	static void LoadAllCollision(void);
 	static void RemoveAllCollision(void);
-	static void LoadCollision(const CVector2D &pos);
-	static void RequestCollision(const CVector2D &pos);
-	static void EnsureCollisionIsInMemory(const CVector2D &pos);
-	static bool HasCollisionLoaded(const CVector2D &pos);
-	static bool HasCollisionLoaded(eLevelName level) { return true; }; // TODO
+	static void LoadCollision(const CVector &pos, eLevelName level = LEVEL_GENERIC);
+	static void RequestCollision(const CVector &pos);
+	static void EnsureCollisionIsInMemory(const CVector &pos);
+	static bool DoScriptsWantThisIn(int32 slot);
+	static bool HasCollisionLoaded(eLevelName level);
+	static bool HasCollisionLoaded(const CVector &pos);
+	static void Load(bool, CPool<ColDef> *pool);
 
 	static ColDef *GetSlot(int slot) {
 		assert(slot >= 0);

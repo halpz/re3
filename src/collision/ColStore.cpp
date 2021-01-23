@@ -1,5 +1,7 @@
 #include "common.h"
 
+#include "main.h"
+#include "smallHeap.h"
 #include "templates.h"
 #include "General.h"
 #include "ModelInfo.h"
@@ -8,6 +10,9 @@
 #include "Script.h"
 #include "Timer.h"
 #include "Camera.h"
+#include "World.h"
+#include "Zones.h"
+#include "Garages.h"
 #include "Frontend.h"
 #include "Physical.h"
 #include "ColStore.h"
@@ -15,16 +20,55 @@
 #include "Pools.h"
 
 CPool<ColDef,ColDef> *CColStore::ms_pColPool;
+bool CColStore::m_onlyBB;
 #ifndef MASTER
 bool bDispColInMem;
 #endif
 
+// LCS: file done except unused:
+// CColStore::LoadCol(int,char const*)
+// CColStore::LoadAllBoundingBoxes(void)
+// CColStore::Write(base::cRelocatableChunkWriter &)
+
+const CVector&
+LevelPos(eLevelName level)
+{
+	static CVector pos[4] = {
+		CVector(1060.0f, -800.0f, 0.0f),
+		CVector(1060.0f, -800.0f, 0.0f),
+		CVector(350.0f, -624.0f, 0.0f),
+		CVector(-670.0f, -511.0f, 0.0f)
+	};
+	return pos[level];
+};
+
+static eLevelName
+PosLevel(const CVector &pos)
+{
+	static eLevelName lastPlayerLevel = LEVEL_INDUSTRIAL;
+	static eLevelName lastOtherLevel = LEVEL_INDUSTRIAL;
+
+	if(Abs(FindPlayerCoors().x - pos.x) < 5.0f &&
+	   Abs(FindPlayerCoors().y - pos.y) < 5.0f &&
+	   Abs(FindPlayerCoors().z - pos.z) < 5.0f){
+		if(CGame::currLevel != LEVEL_GENERIC)
+			lastPlayerLevel = CGame::currLevel;
+		return lastPlayerLevel;
+	}else{
+		eLevelName lvl = CTheZones::GetLevelFromPosition(&pos);
+		if(lvl != LEVEL_GENERIC)
+			lastOtherLevel = lvl;
+		return lastOtherLevel;
+	}
+}
+
 void
 CColStore::Initialise(void)
 {
-	if(ms_pColPool == nil)
+	if(ms_pColPool == nil){
 		ms_pColPool = new CPool<ColDef,ColDef>(COLSTORESIZE, "CollisionFiles");
-	AddColSlot("generic");	// slot 0. not streamed
+		AddColSlot("generic");	// slot 0. not streamed
+	}
 #ifndef MASTER
 	VarConsole.Add("Display collision in memory", &bDispColInMem, true);
 #endif
@@ -38,7 +82,9 @@ CColStore::Shutdown(void)
 		RemoveColSlot(i);
 	if(ms_pColPool)
 		delete ms_pColPool;
+#ifdef FIX_BUGS
 	ms_pColPool = nil;
+#endif
 }
 
 int
@@ -119,17 +165,57 @@ CColStore::LoadCol(int32 slot, uint8 *buffer, int32 bufsize)
 	return success;
 }
 
+struct ColChunkEntry
+{
+	int32 modelId;	// -1 marks end
+	CColModel *colModel;
+};
+
+void
+CColStore::LoadColCHK(int32 slot, void *data, void *chunk)
+{
+	ColDef *def = GetSlot(slot);
+	def->chunk = chunk;
+	CStreaming::RegisterPointer(&def->chunk, 1, true);
+	for(ColChunkEntry *entry = (ColChunkEntry*)data; entry->modelId != -1; entry++){
+		CBaseModelInfo *mi = CModelInfo::GetModelInfo(entry->modelId);
+		mi->SetColModel(entry->colModel, true);	// we own this? can that work?
+		CStreaming::RegisterPointer(&mi->m_colModel, 1, true);
+	}
+	def->isLoaded = true;
+}
+
+CColModel nullCollision;
+
 void
 CColStore::RemoveCol(int32 slot)
 {
 	int id;
-	GetSlot(slot)->isLoaded = false;
+	ColDef *def = GetSlot(slot);
+	def->isLoaded = false;
 	for(id = 0; id < MODELINFOSIZE; id++){
 		CBaseModelInfo *mi = CModelInfo::GetModelInfo(id);
 		if(mi){
 			CColModel *col = mi->GetColModel();
 			if(col && col->level == slot)
 				col->RemoveCollisionVolumes();
+		}
+	}
+	if(gUseChunkFiles){
+		for(id = 0; id < MODELINFOSIZE; id++){
+			CBaseModelInfo *mi = CModelInfo::GetModelInfo(id);
+			if(mi){
+				CColModel *col = mi->GetColModel();
+				if(col && col->level == slot){
+					mi->SetColModel(&nullCollision);
+					CStreaming::UnregisterPointer(&mi->m_colModel, 1);
+				}
+			}
+		}
+		if(def->chunk){
+			CStreaming::UnregisterPointer(&def->chunk, 1);
+			cSmallHeap::msInstance.Free(def->chunk);
+			def->chunk = nil;
 		}
 	}
 }
@@ -156,29 +242,49 @@ CColStore::RemoveAllCollision(void)
 }
 
 static bool bLoadAtSecondPosition;
-static CVector2D secondPosition;
+static CVector secondPosition;
 
 void
-CColStore::AddCollisionNeededAtPosn(const CVector2D &pos)
+CColStore::AddCollisionNeededAtPosn(const CVector &pos)
 {
 	bLoadAtSecondPosition = true;
 	secondPosition = pos;
 }
 
 void
-CColStore::LoadCollision(const CVector2D &pos)
+CColStore::LoadCollision(const CVector &pos, eLevelName level)
 {
 	int i;
 
 	if(CStreaming::ms_disableStreaming)
 		return;
 
+	if(level == LEVEL_GENERIC)
+		level = PosLevel(pos);
+
+	eLevelName allowedLevel = (eLevelName)CTheScripts::AllowedCollision[0];
+	if(allowedLevel == LEVEL_GENERIC)
+		allowedLevel = (eLevelName)CTheScripts::AllowedCollision[1];
+
+	bool requestedSomething = false;
+
 	for(i = 1; i < COLSTORESIZE; i++){
-		if(GetSlot(i) == nil)
+		if(GetSlot(i) == nil || !DoScriptsWantThisIn(i))
 			continue;
 
 		bool wantThisOne = false;
 
+		if(strcmp(GetColName(i), "indust") == 0){
+			if(allowedLevel != LEVEL_GENERIC && level != LEVEL_INDUSTRIAL)
+				wantThisOne = allowedLevel == LEVEL_INDUSTRIAL;
+			else
+				wantThisOne = level == LEVEL_INDUSTRIAL;
+		}else if(GetBoundingBox(i).IsPointInside(LevelPos(level)))
+			wantThisOne = true;
+		else if(allowedLevel != LEVEL_GENERIC && GetBoundingBox(i).IsPointInside(LevelPos(allowedLevel)))
+			wantThisOne = true;
+
+/*		// LCS: removed
 		if(GetBoundingBox(i).IsPointInside(pos) ||
 		   bLoadAtSecondPosition && GetBoundingBox(i).IsPointInside(secondPosition, -119.0f) ||
 		   strcmp(GetColName(i), "yacht") == 0){
@@ -203,28 +309,38 @@ CColStore::LoadCollision(const CVector2D &pos)
 				}
 			}
 		}
+*/
 
-		if(wantThisOne)
+		if(wantThisOne){
 			CStreaming::RequestCol(i, STREAMFLAGS_PRIORITY);
-		else
+			requestedSomething = true;
+		}else
 			CStreaming::RemoveCol(i);
+	}
+	if(requestedSomething){
+		CTimer::Suspend();
+		// BUG? request was done with priority but now loading non-priority?
+		CStreaming::LoadAllRequestedModels(false);
+		CGarages::SetupAnyGaragesForThisIsland();
+		CTimer::Resume();
 	}
 	bLoadAtSecondPosition = false;
 }
 
 void
-CColStore::RequestCollision(const CVector2D &pos)
+CColStore::RequestCollision(const CVector &pos)
 {
 	int i;
 
 	for(i = 1; i < COLSTORESIZE; i++)
-		if(GetSlot(i) && GetBoundingBox(i).IsPointInside(pos, -115.0f))
+		if(GetSlot(i) && DoScriptsWantThisIn(i) && GetBoundingBox(i).IsPointInside(LevelPos(PosLevel(pos)), -115.0f))
 			CStreaming::RequestCol(i, STREAMFLAGS_PRIORITY);
 }
 
 void
-CColStore::EnsureCollisionIsInMemory(const CVector2D &pos)
+CColStore::EnsureCollisionIsInMemory(const CVector &pos)
 {
+/*	// LCS: removed
 	int i;
 
 	if(CStreaming::ms_disableStreaming)
@@ -240,16 +356,48 @@ CColStore::EnsureCollisionIsInMemory(const CVector2D &pos)
 			CStreaming::LoadAllRequestedModels(false);
 			CTimer::Resume();
 		}
+*/
 }
 
 bool
-CColStore::HasCollisionLoaded(const CVector2D &pos)
+CColStore::DoScriptsWantThisIn(int32 slot)
+{
+	if(slot == 0)
+		return false;
+	ColDef *coldef = GetSlot(slot);
+	if(coldef == nil)
+		return false;
+	if(strcmp(coldef->name, "fortstaunton") == 0)
+		return !CTheScripts::IsFortStauntonDestroyed();
+	if(strcmp(coldef->name, "fortdestroyed") == 0)
+		return CTheScripts::IsFortStauntonDestroyed();
+	return true;
+}
+
+bool
+CColStore::HasCollisionLoaded(eLevelName level)
 {
 	int i;
 
+	const CVector &pos = LevelPos(level);
 	for(i = 1; i < COLSTORESIZE; i++)
-		if(GetSlot(i) && GetBoundingBox(i).IsPointInside(pos, -115.0f) &&
+		if(GetSlot(i) && DoScriptsWantThisIn(i) &&
+		   (!CGeneral::faststricmp(GetColName(i), "indust") && level == LEVEL_INDUSTRIAL ||
+		    GetBoundingBox(i).IsPointInside(pos)) &&
 		   !GetSlot(i)->isLoaded)
 			return false;
 	return true;
+}
+
+bool
+CColStore::HasCollisionLoaded(const CVector &pos)
+{
+	return HasCollisionLoaded(PosLevel(pos));
+}
+
+void
+CColStore::Load(bool onlyBB, CPool<ColDef> *pool)
+{
+	ms_pColPool = pool;
+	m_onlyBB = onlyBB;
 }

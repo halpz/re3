@@ -293,4 +293,6 @@ public:
 	}
 	static bool IsThisGarageTypeSafehouse(uint8 type) { return FindSafeHouseIndexForGarageType(type) >= 0; }
 
+	static void SetupAnyGaragesForThisIsland(void) {} // TODO(LCS)
+
 };

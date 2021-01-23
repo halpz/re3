@@ -485,7 +485,7 @@ public:
 	static void SetObjectiveForAllPedsInCollective(int, eObjective);
 #endif
 
-	bool IsFortStauntonDestroyed() { return *(int32*)&ScriptSpace[FSDestroyedFlag] == 1; }
+	static bool IsFortStauntonDestroyed() { return FSDestroyedFlag && *(int32*)&ScriptSpace[FSDestroyedFlag] == 1; }
 
 };
 

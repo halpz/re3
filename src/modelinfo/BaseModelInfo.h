@@ -29,7 +29,9 @@ protected:
 	uint8        m_type;
 	uint8        m_num2dEffects;
 	bool         m_bOwnsColModel;
+public:	// need this in colstore
 	CColModel   *m_colModel;
+protected:
 	int16        m_2dEffectsID;
 	int16        m_objectId;
 	uint16       m_refCount;

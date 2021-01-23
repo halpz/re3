@@ -3150,6 +3150,46 @@ CStreaming::LoadSceneCollision(const CVector &pos)
 	CStreaming::LoadAllRequestedModels(false);
 }
 
+//--LCS: TODO PSP and PS2
+// some things commented out that might be Rsl3D dependent
+void CStreaming::RegisterPointer(void *ptr, int, bool) {}
+RpAtomic *CStreaming::RegisterAtomic(RpAtomic *atomic, void *)
+{
+	return atomic;
+}
+void CStreaming::RegisterClump(RpClump *clump)
+{
+	RpClumpForAllAtomics(clump, RegisterAtomic, nil);
+}
+RpAtomic *CStreaming::RegisterInstance(RpAtomic *atomic, void *)
+{
+//	RegisterPointer(&atomic->geometry, 2, true);
+	return atomic;
+}
+void CStreaming::RegisterInstance(RpClump *clump)
+{
+	RpClumpForAllAtomics(clump, RegisterInstance, nil);
+}
+
+void CStreaming::UnregisterPointer(void *ptr, int) {}
+RpAtomic *CStreaming::UnregisterAtomic(RpAtomic *atomic, void *)
+{
+	return atomic;
+}
+void CStreaming::UnregisterClump(RpClump *clump)
+{
+	RpClumpForAllAtomics(clump, UnregisterAtomic, nil);
+}
+RpAtomic *CStreaming::UnregisterInstance(RpAtomic *atomic, void *)
+{
+//	UnregisterPointer(&atomic->geometry, 2);
+	return atomic;
+}
+void CStreaming::UnregisterInstance(RpClump *clump)
+{
+	RpClumpForAllAtomics(clump, UnregisterInstance, nil);
+}
+
 void
 CStreaming::MemoryCardSave(uint8 *buf, uint32 *size)
 {
