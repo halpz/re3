@@ -2140,7 +2140,7 @@ void CMissionCleanup::Process()
 		default:
 			break;
 		}
-		RemoveEntityFromList(i, m_sEntities[i].type);
+		RemoveEntityFromList(m_sEntities[i].id, m_sEntities[i].type);
 	}
 	for (int i = 1; i < NUMSTREAMINFO; i++) {
 		if (CStreaming::IsScriptOwnedModel(i))
