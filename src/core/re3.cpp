@@ -767,7 +767,7 @@ extern bool gbRenderDebugEnvMap;
 			"A Date with Death (Toshiko Kasen)", "Cash in Kazuki's Chips (Toshiko Kasen)"
 		};
 
-		missionEntry = DebugMenuAddVar("Debug", "Select mission", &nextMissionToSwitch, nil, 1, 0, 96, missions);
+		missionEntry = DebugMenuAddVar("Debug", "Select mission", &nextMissionToSwitch, nil, 1, 0, ARRAY_SIZE(missions) - 1, missions);
 		DebugMenuEntrySetWrap(missionEntry, true);
 		DebugMenuAddCmd("Debug", "Start selected mission ", SwitchToMission);
 #endif

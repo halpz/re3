@@ -935,6 +935,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		script_assert(pVehicle);
 		pPed->SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, pVehicle);
 		pPed->WarpPedIntoCar(pVehicle);
+		pPed->RestorePreviousObjective();
 		return 0;
 	}
 	case COMMAND_WARP_CHAR_INTO_CAR:

@@ -9,7 +9,7 @@
 #include "PlayerInfo.h"
 #include "Vehicle.h"
 
-void
+CVehicle*
 CRemote::GivePlayerRemoteControlledCar(float x, float y, float z, float rot, uint16 model)
 {
 	CAutomobile *car = new CAutomobile(model, MISSION_VEHICLE);
@@ -40,6 +40,7 @@ CRemote::GivePlayerRemoteControlledCar(float x, float y, float z, float rot, uin
 		TheCamera.SetZoomValueCamStringScript(0);
 	} else
 		TheCamera.TakeControl(car, CCam::MODE_BEHINDCAR, INTERPOLATION, CAMCONTROL_SCRIPT);
+	return car;
 }
 
 void

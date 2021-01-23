@@ -636,7 +636,7 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 	case COMMAND_ADD_POINT_3D_MARKER:
 	{
 		uint32 ip = m_nIp;
-		uint32 id = (uint32)(uintptr)GetPointerToScriptVariable(&m_nIp, 0);
+		uint32 id = (uint32)(uintptr)GetPointerToScriptVariable(&ip, 0);
 		static CVector vPreviousLocation;
 		CollectParameters(&m_nIp, 7);
 		CVector pos = GET_VECTOR_PARAM(0);
@@ -737,10 +737,10 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 	}
 	case COMMAND_SET_CHAR_ATTACKS_PLAYER_WITH_COPS:
 	{
-		CollectParameters(&m_nIp, 1);
+		CollectParameters(&m_nIp, 2);
 		CPed* pPed = CPools::GetPedPool()->GetAt(GET_INTEGER_PARAM(0));
 		script_assert(pPed);
-		pPed->bAttacksPlayerWithCops = (GET_INTEGER_PARAM(0) != 0);
+		pPed->bAttacksPlayerWithCops = (GET_INTEGER_PARAM(1) != 0);
 		return 0;
 	}
 	case COMMAND_REGISTER_FACE_PLANT_DISTANCE:
