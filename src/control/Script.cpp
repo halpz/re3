@@ -1866,9 +1866,7 @@ void CMissionCleanup::Process()
 		default:
 			break;
 		}
-		m_sEntities[i].id = 0;
-		m_sEntities[i].type = CLEANUP_UNUSED;
-		m_nCount--;
+		RemoveEntityFromList(m_sEntities[i].id, m_sEntities[i].type);
 	}
 #ifdef SECUROM
 	if ((myrand() & 3) == 2){
