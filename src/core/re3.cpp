@@ -352,12 +352,12 @@ void SaveINIControllerSettings()
 	StoreIni("Controller", "JoystickName", gSelectedJoystickName, 128);
 #endif
 	StoreIni("Controller", "PadButtonsInited", ControlsManager.ms_padButtonsInited);
-	cfg.write_file("reVC.ini");
+	cfg.write_file("reLCS.ini");
 }
 
 bool LoadINISettings()
 {
-	if (!cfg.load_file("reVC.ini"))
+	if (!cfg.load_file("reLCS.ini"))
 		return false;
 
 #ifdef IMPROVED_VIDEOMODE
