@@ -45,8 +45,8 @@ CRGBA ARMOUR_COLOR(185, 185, 185, 255);
 CRGBA NOTWANTED_COLOR(27, 89, 130, 255);
 CRGBA WANTED_COLOR_FLASH(62, 141, 181, 255);
 CRGBA WANTED_COLOR(97, 194, 247, 255);
-CRGBA ZONE_COLOR(45, 155, 90, 255);
-CRGBA VEHICLE_COLOR(97, 194, 247, 255);
+CRGBA ZONE_COLOR(255, 255, 255, 255);
+CRGBA VEHICLE_COLOR(255, 255, 255, 255);
 CRGBA CLOCK_COLOR(97, 194, 247, 255);
 CRGBA TIMER_COLOR(97, 194, 247, 255);
 CRGBA COUNTER_COLOR(97, 194, 247, 255);
@@ -785,14 +785,14 @@ void CHud::Draw()
 					CFont::SetPropOn();
 					CFont::SetBackgroundOff();
 
-					if (FrontEndMenuManager.m_PrefsLanguage == CMenuManager::LANGUAGE_SPANISH)
-						CFont::SetScale(SCREEN_SCALE_X(1.7f * 0.8f), SCREEN_SCALE_Y(1.8f));
+					if (FrontEndMenuManager.m_PrefsUseWideScreen)
+						CFont::SetScale(PSP_SCREEN_SCALE_X(0.42768f), PSP_SCREEN_SCALE_Y(0.88f));
 					else
-						CFont::SetScale(SCREEN_SCALE_X(1.7f), SCREEN_SCALE_Y(1.8f));
+						CFont::SetScale(PSP_SCREEN_SCALE_X(0.4752f), PSP_SCREEN_SCALE_Y(0.88f));
 
-					CFont::SetSlantRefPoint(SCREEN_SCALE_FROM_RIGHT(32.0f), SCREEN_SCALE_FROM_BOTTOM(128.0f));
-					CFont::SetSlant(0.15f);
-
+					//CFont::SetSlantRefPoint(SCREEN_SCALE_FROM_RIGHT(32.0f), SCREEN_SCALE_FROM_BOTTOM(128.0f));
+					//CFont::SetSlant(0.15f);
+					CFont::SetWrapx(SCREEN_WIDTH);
 					CFont::SetRightJustifyOn();
 					CFont::SetRightJustifyWrap(0.0f);
 					CFont::SetBackGroundOnlyTextOff();
@@ -802,9 +802,9 @@ void CHud::Draw()
 					CFont::SetColor(CRGBA(ZONE_COLOR.r, ZONE_COLOR.g, ZONE_COLOR.b, fZoneAlpha));
 
 					if (!CTheScripts::bPlayerIsInTheStatium)
-						CFont::PrintStringFromBottom(SCREEN_SCALE_FROM_RIGHT(32.0f), SCREEN_SCALE_FROM_BOTTOM(128.0f), m_ZoneToPrint);
+						CFont::PrintStringFromBottom(PSP_SCREEN_SCALE_FROM_RIGHT(24.0f), PSP_SCREEN_SCALE_FROM_BOTTOM(16.0f), m_ZoneToPrint);
 
-					CFont::SetSlant(0.f);
+					//CFont::SetSlant(0.f);
 				} else {
 					m_ZoneState = 3;
 				}
@@ -885,13 +885,14 @@ void CHud::Draw()
 					CFont::SetPropOn();
 					CFont::SetBackgroundOff();
 
-					if (FrontEndMenuManager.m_PrefsLanguage != CMenuManager::LANGUAGE_ITALIAN && FrontEndMenuManager.m_PrefsLanguage != CMenuManager::LANGUAGE_SPANISH)
-						CFont::SetScale(SCREEN_SCALE_X(1.7f), SCREEN_SCALE_Y(1.8f));
+					if (FrontEndMenuManager.m_PrefsUseWideScreen)
+						CFont::SetScale(PSP_SCREEN_SCALE_X(0.42768f), PSP_SCREEN_SCALE_Y(0.88f));
 					else
-						CFont::SetScale(SCREEN_SCALE_X(1.7f * 0.85f), SCREEN_SCALE_Y(1.8f));
+						CFont::SetScale(PSP_SCREEN_SCALE_X(0.4752f), PSP_SCREEN_SCALE_Y(0.88f));
 
-					CFont::SetSlantRefPoint(SCREEN_SCALE_FROM_RIGHT(32.0f), SCREEN_SCALE_FROM_BOTTOM(105.0f));
-					CFont::SetSlant(0.15f);
+					CFont::SetWrapx(SCREEN_WIDTH);
+					CFont::SetSlantRefPoint(PSP_SCREEN_SCALE_FROM_RIGHT(24.0f), PSP_SCREEN_SCALE_FROM_BOTTOM(35.6f));
+					CFont::SetSlant(0.f);
 
 					CFont::SetRightJustifyOn();
 					CFont::SetRightJustifyWrap(0.0f);
@@ -901,7 +902,7 @@ void CHud::Draw()
 					CFont::SetColor(CRGBA(VEHICLE_COLOR.r, VEHICLE_COLOR.g, VEHICLE_COLOR.b, fVehicleAlpha));
 					CFont::SetDropColor(CRGBA(0, 0, 0, fVehicleAlpha));
 
-					CFont::PrintStringFromBottom(SCREEN_SCALE_FROM_RIGHT(32.0f), SCREEN_SCALE_FROM_BOTTOM(105.0f), m_pVehicleNameToPrint);
+					CFont::PrintStringFromBottom(PSP_SCREEN_SCALE_FROM_RIGHT(24.0f), PSP_SCREEN_SCALE_FROM_BOTTOM(35.6f), m_pVehicleNameToPrint);
 
 					CFont::SetSlant(0.f);
 				}
