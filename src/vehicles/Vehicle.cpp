@@ -328,7 +328,7 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 	case FLIGHT_MODEL_PLANE:
 	{
 		float fSteerLR = CPad::GetPad(0)->GetSteeringLeftRight() / 128.0f;
-		float fSteerUD = -CPad::GetPad(0)->GetSteeringUpDown() / 128.0f;
+		float fSteerUD = CPad::GetPad(0)->GetSteeringUpDown() / 128.0f;
 		float fGunUD = Abs(CPad::GetPad(0)->GetCarGunUpDown());
 		if(fGunUD > 1.0f)
 			fSteerUD = -CPad::GetPad(0)->GetCarGunUpDown() / 128.0f;
