@@ -288,6 +288,7 @@ struct CModelIndices
 	int16 DOOR2_SJL;
 	int16 SJL_PORTACABIN;
 	int16 SJL_PORTACABINRED;
+	int16 advert_test; // txd
 };
 
 extern CModelIndices *gpModelIndices;
