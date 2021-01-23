@@ -1637,6 +1637,13 @@ main(int argc, char *argv[])
 	{
 		CFileMgr::SetDirMyDocuments();
 		
+#ifdef LOAD_INI_SETTINGS
+		// At this point InitDefaultControlConfigJoyPad must have set all bindings to default and ms_padButtonsInited to number of detected buttons.
+		// We will load stored bindings below, but let's cache ms_padButtonsInited before LoadINIControllerSettings and LoadSettings clears it,
+		// so we can add new joy bindings **on top of** stored bindings.
+		int connectedPadButtons = ControlsManager.ms_padButtonsInited;
+#endif
+
 		int32 gta3set = CFileMgr::OpenFile("gta_vc.set", "r");
 		
 		if ( gta3set )
@@ -1646,6 +1653,14 @@ main(int argc, char *argv[])
 		}
 		
 		CFileMgr::SetDir("");
+
+#ifdef LOAD_INI_SETTINGS
+		LoadINIControllerSettings();
+		if (connectedPadButtons != 0) {
+			ControlsManager.InitDefaultControlConfigJoyPad(connectedPadButtons);
+			SaveINIControllerSettings();
+		}
+#endif
 	}
 	
 #ifdef _WIN32
@@ -2158,6 +2173,12 @@ void joysChangeCB(int jid, int event)
 			PSGLOBAL(joy1id) = jid;
 #ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
 			strcpy(gSelectedJoystickName, glfwGetJoystickName(jid));
+#endif
+			// This is behind LOAD_INI_SETTINGS, because otherwise the Init call below will destroy/overwrite your bindings.
+#ifdef LOAD_INI_SETTINGS
+			int count;
+			glfwGetJoystickButtons(PSGLOBAL(joy1id), &count);
+			ControlsManager.InitDefaultControlConfigJoyPad(count);
 #endif
 		} else if (PSGLOBAL(joy2id) == -1)
 			PSGLOBAL(joy2id) = jid;

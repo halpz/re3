@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include "PlayerPed.h"
 #include "General.h"
+#include "Object.h"
 
 /*
 int CWaterCreatures::nNumActiveSeaLifeForms;
