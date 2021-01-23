@@ -563,13 +563,21 @@ CMenuManager::Initialise(void)
 	DMAudio.Service();
 	DMAudio.SetMusicMasterVolume(m_PrefsMusicVolume);
 	DMAudio.SetEffectsMasterVolume(m_PrefsSfxVolume);
+#ifdef FIX_BUGS
+	static bool firstTime = true;
+	if (firstTime) {
+		DMAudio.SetRadioInCar(m_PrefsRadioStation);
+		firstTime = false;
+	} else
+#endif
 	m_PrefsRadioStation = DMAudio.GetRadioInCar();
+
 	DMAudio.SetMP3BoostVolume(m_PrefsMP3BoostVolume);
 	if (DMAudio.IsMP3RadioChannelAvailable()) {
 		if (m_PrefsRadioStation < WILDSTYLE || m_PrefsRadioStation > USERTRACK)
-			m_PrefsRadioStation = CGeneral::GetRandomNumber() % 10;
+			m_PrefsRadioStation = CGeneral::GetRandomNumber() % (USERTRACK + 1);
 	} else if (m_PrefsRadioStation < WILDSTYLE || m_PrefsRadioStation > WAVE)
-		m_PrefsRadioStation = CGeneral::GetRandomNumber() % 9;
+		m_PrefsRadioStation = CGeneral::GetRandomNumber() % (WAVE + 1);
 
 	CFileMgr::SetDir("");
 	//CFileMgr::SetDir("");
@@ -653,7 +661,11 @@ CMenuManager::CheckCodesForControls(int typeOfControl)
 		m_bWaitingForNewKeyBind = false;
 		m_KeyPressedCode = -1;
 		m_bStartWaitingForKeyBind = false;
+#ifdef LOAD_INI_SETTINGS
+		SaveINIControllerSettings();
+#else
 		SaveSettings();
+#endif
 	}
 }
 
@@ -3032,6 +3044,11 @@ CMenuManager::LoadSettings()
 	CFileMgr::CloseFile(fileHandle);
 	CFileMgr::SetDir("");
 
+#ifdef LOAD_INI_SETTINGS
+	LoadINISettings();
+	LoadINIControllerSettings(); // Calling that after LoadINISettings is important because of gSelectedJoystickName loading
+#endif
+
 #ifdef FIX_BUGS
 	TheCamera.m_fMouseAccelVertical = TheCamera.m_fMouseAccelHorzntl + 0.0005f;
 #endif
@@ -3077,15 +3094,12 @@ CMenuManager::LoadSettings()
 		strcpy(m_PrefsSkinFile, DEFAULT_SKIN_NAME);
 		strcpy(m_aSkinName, DEFAULT_SKIN_NAME);
 	}
-	
-#ifdef LOAD_INI_SETTINGS
-	LoadINISettings(); // needs frontend options to be loaded
-#endif
 }
 
 void
 CMenuManager::SaveSettings()
 {
+#ifndef LOAD_INI_SETTINGS
 	static char RubbishString[48] = "stuffmorestuffevenmorestuff                 etc";
 	static int SomeVersion = 3;
 
@@ -3144,7 +3158,14 @@ CMenuManager::SaveSettings()
 	CFileMgr::CloseFile(fileHandle);
 	CFileMgr::SetDir("");
 	
-#ifdef LOAD_INI_SETTINGS
+#else
+	m_lastWorking3DAudioProvider = m_nPrefsAudio3DProviderIndex;
+	static bool firstTime = true;
+	// In other conditions we already call SaveINIControllerSettings explicitly.
+	if (firstTime) {
+		SaveINIControllerSettings();
+		firstTime = false;
+	}
 	SaveINISettings();
 #endif
 }
@@ -4424,19 +4445,19 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 			MouseButtonJustClicked = false;
 
 			if (CPad::GetPad(0)->GetLeftMouseJustDown())
-				MouseButtonJustClicked = 1;
+				MouseButtonJustClicked = rsMOUSELEFTBUTTON;
 			else if (CPad::GetPad(0)->GetRightMouseJustUp())
-				MouseButtonJustClicked = 3;
+				MouseButtonJustClicked = rsMOUSERIGHTBUTTON;
 			else if (CPad::GetPad(0)->GetMiddleMouseJustUp())
-				MouseButtonJustClicked = 2;
+				MouseButtonJustClicked = rsMOUSMIDDLEBUTTON;
 			else if (CPad::GetPad(0)->GetMouseWheelUpJustUp())
-				MouseButtonJustClicked = 4;
+				MouseButtonJustClicked = rsMOUSEWHEELUPBUTTON;
 			else if (CPad::GetPad(0)->GetMouseWheelDownJustUp())
-				MouseButtonJustClicked = 5;
+				MouseButtonJustClicked = rsMOUSEWHEELDOWNBUTTON;
 			else if (CPad::GetPad(0)->GetMouseX1JustUp())
-				MouseButtonJustClicked = 6;
+				MouseButtonJustClicked = rsMOUSEX1BUTTON;
 			else if (CPad::GetPad(0)->GetMouseX2JustUp())
-				MouseButtonJustClicked = 7;
+				MouseButtonJustClicked = rsMOUSEX2BUTTON;
 
 			JoyButtonJustClicked = ControlsManager.GetJoyButtonJustDown();
 
@@ -4796,6 +4817,9 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 					TheCamera.m_bUseMouse3rdPerson = false;
 #endif
 					SaveSettings();
+#ifdef LOAD_INI_SETTINGS
+					SaveINIControllerSettings();
+#endif
 				}
 				SetHelperText(2);
 				break;
@@ -4826,7 +4850,8 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 
 					*option.m_CFO->value = option.m_CFOSelect->lastSavedValue = option.m_CFOSelect->displayedValue;
 
-					if (option.m_CFOSelect->save)
+					// Now everything is saved in .ini, and LOAD_INI_SETTINGS is fundamental for CFO
+					// if (option.m_CFOSelect->save)
 						SaveSettings();
 
 					if (option.m_CFOSelect->displayedValue != oldValue && option.m_CFOSelect->changeFunc)
@@ -4982,7 +5007,8 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 
 						*option.m_CFO->value = option.m_CFOSelect->lastSavedValue = option.m_CFOSelect->displayedValue;
 
-						if (option.m_CFOSelect->save)
+						// Now everything is saved in .ini, and LOAD_INI_SETTINGS is fundamental for CFO
+						// if (option.m_CFOSelect->save)
 							SaveSettings();
 
 						if (option.m_CFOSelect->displayedValue != oldValue && option.m_CFOSelect->changeFunc)

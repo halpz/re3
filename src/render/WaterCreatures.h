@@ -1,5 +1,6 @@
 #pragma once
-#include "Object.h"
+
+class CObject;
 
 enum eFishSlotState {
 	WATER_CREATURE_INIT = 0,
