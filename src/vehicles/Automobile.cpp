@@ -49,6 +49,7 @@
 #include "Object.h"
 #include "Automobile.h"
 #include "Bike.h"
+#include "Wanted.h"
 
 bool bAllCarCheat;
 

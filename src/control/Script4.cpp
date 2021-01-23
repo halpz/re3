@@ -39,6 +39,7 @@
 #include "World.h"
 #include "Zones.h"
 #include "Bike.h"
+#include "Wanted.h"
 
 // LCS: file done except TODOs
 

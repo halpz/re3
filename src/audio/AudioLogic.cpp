@@ -41,7 +41,7 @@
 #include "WindModifiers.h"
 #include "Fluff.h"
 #include "Script.h"
-
+#include "Wanted.h"
 
 const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
 const int policeChannel = channels + 1;

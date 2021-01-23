@@ -1,10 +1,6 @@
-#if defined RW_D3D9 || defined RWLIBS
-#define DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
-#endif
-
 #define FORCE_PC_SCALING
 #define WITHWINDOWS
+#define WITHDINPUT
 #include "common.h"
 #ifndef PS2_MENU
 #include "crossplatform.h"
