@@ -392,6 +392,7 @@ struct CCustomScreenLayout {
 struct CCFO
 {
 	int8 *value;
+	const char *saveCat;
 	const char *save;
 };
 
@@ -406,11 +407,12 @@ struct CCFOSelect : CCFO
 	bool disableIfGameLoaded;
 
 	CCFOSelect() {};
-	CCFOSelect(int8* value, const char* save, const char** rightTexts, int8 numRightTexts, bool onlyApplyOnEnter, ChangeFunc changeFunc = nil, bool disableIfGameLoaded = false){
+	CCFOSelect(int8* value, const char* saveCat, const char* save, const char** rightTexts, int8 numRightTexts, bool onlyApplyOnEnter, ChangeFunc changeFunc = nil, bool disableIfGameLoaded = false){
 		this->value = value;
 		if (value)
 			this->lastSavedValue = this->displayedValue = *value;
 
+		this->saveCat = saveCat;
 		this->save = save;
 		this->rightTexts = (char**)rightTexts;
 		this->numRightTexts = numRightTexts;
@@ -426,8 +428,9 @@ struct CCFODynamic : CCFO
 	ButtonPressFunc buttonPressFunc;
 
 	CCFODynamic() {};
-	CCFODynamic(int8* value, const char* save, DrawFunc drawFunc, ButtonPressFunc buttonPressFunc){
+	CCFODynamic(int8* value, const char* saveCat, const char* save, DrawFunc drawFunc, ButtonPressFunc buttonPressFunc){
 		this->value = value;
+		this->saveCat = saveCat;
 		this->save = save;
 		this->drawFunc = drawFunc;
 		this->buttonPressFunc = buttonPressFunc;
@@ -581,7 +584,7 @@ public:
 	int8 m_bLanguageLoaded;
 	uint8 m_PrefsAllowNastyGame;
 	int8 m_PrefsMP3BoostVolume;
-	uint8 m_ControlMethod;
+	int8 m_ControlMethod;
 	int32 m_nPrefsVideoMode;
 	int32 m_nDisplayVideoMode;
 	int32 m_nMouseTempPosX;

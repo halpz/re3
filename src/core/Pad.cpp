@@ -1,11 +1,4 @@
-#pragma warning( push )
-#pragma warning( disable : 4005)
-#if defined RW_D3D9 || defined RWLIBS
-#define DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
-#endif
-#pragma warning( pop )
-
+#define WITHDINPUT
 #include "common.h"
 #include "crossplatform.h"
 #include "platform.h"
@@ -68,7 +61,7 @@ bool CPad::bOldDisplayNoControllerMessage;
 bool CPad::m_bMapPadOneToPadTwo;
 bool CPad::m_bDebugCamPCOn;
 bool CPad::bHasPlayerCheated;
-bool CPad::bInvertLook4Pad = true;
+bool CPad::bInvertLook4Pad;
 #ifdef GTA_PS2
 unsigned char act_direct[6];
 unsigned char act_align[6];

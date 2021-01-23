@@ -35,6 +35,7 @@
 #include "Zones.h"
 #include "GameLogic.h"
 #include "Bike.h"
+#include "Wanted.h"
 
 // LCS: file done except TODOs
 

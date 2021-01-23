@@ -1825,7 +1825,7 @@ void CGarage::FindDoorsEntities()
 		}
 	}
 	if (m_pDoor1 && m_pDoor2) {
-		if (m_pDoor1->GetModelIndex() != MI_LCS_GARAGEDOOR39 && m_pDoor1->GetModelIndex() != MI_LCS_GARAGEDOOR40) {
+		if (m_pDoor1->GetModelIndex() != MI_CRUSHERBODY && m_pDoor1->GetModelIndex() != MI_CRUSHERLID) {
 			CVector2D vecDoor1ToGarage(m_pDoor1->GetPosition().x - GetGarageCenterX(), m_pDoor1->GetPosition().y - GetGarageCenterY());
 			CVector2D vecDoor2ToGarage(m_pDoor2->GetPosition().x - GetGarageCenterX(), m_pDoor2->GetPosition().y - GetGarageCenterY());
 			if (DotProduct2D(vecDoor1ToGarage, vecDoor2ToGarage) > 0.0f) {
@@ -2409,46 +2409,85 @@ void CGarages::Load(uint8* buf, uint32 size)
 bool
 CGarages::IsModelIndexADoor(uint32 id)
 {
-	return id == MI_LCS_GARAGEDOOR01 ||
-		id == MI_LCS_GARAGEDOOR02 ||
-		id == MI_LCS_GARAGEDOOR03 ||
-		id == MI_LCS_GARAGEDOOR04 ||
-		id == MI_LCS_GARAGEDOOR05 ||
-		id == MI_LCS_GARAGEDOOR06 ||
-		id == MI_LCS_GARAGEDOOR07 ||
-		id == MI_LCS_GARAGEDOOR08 ||
-		id == MI_LCS_GARAGEDOOR09 ||
-		id == MI_LCS_GARAGEDOOR10 ||
-		id == MI_LCS_GARAGEDOOR11 ||
-		id == MI_LCS_GARAGEDOOR12 ||
-		id == MI_LCS_GARAGEDOOR13 ||
-		id == MI_LCS_GARAGEDOOR14 ||
-		id == MI_LCS_GARAGEDOOR15 ||
-		id == MI_LCS_GARAGEDOOR16 ||
-		id == MI_LCS_GARAGEDOOR17 ||
-		id == MI_LCS_GARAGEDOOR18 ||
-		id == MI_LCS_GARAGEDOOR19 ||
-		id == MI_LCS_GARAGEDOOR20 ||
-		id == MI_LCS_GARAGEDOOR21 ||
-		id == MI_LCS_GARAGEDOOR22 ||
-		id == MI_LCS_GARAGEDOOR23 ||
-		id == MI_LCS_GARAGEDOOR24 ||
-		id == MI_LCS_GARAGEDOOR25 ||
-		id == MI_LCS_GARAGEDOOR26 ||
-		id == MI_LCS_GARAGEDOOR27 ||
-		id == MI_LCS_GARAGEDOOR28 ||
-		id == MI_LCS_GARAGEDOOR29 ||
-		id == MI_LCS_GARAGEDOOR30 ||
-		id == MI_LCS_GARAGEDOOR31 ||
-		id == MI_LCS_GARAGEDOOR32 ||
-		id == MI_LCS_GARAGEDOOR33 ||
-		id == MI_LCS_GARAGEDOOR34 ||
-		id == MI_LCS_GARAGEDOOR35 ||
-		id == MI_LCS_GARAGEDOOR36 ||
-		id == MI_LCS_GARAGEDOOR37 ||
-		id == MI_LCS_GARAGEDOOR38 ||
-		id == MI_LCS_GARAGEDOOR39 ||
-		id == MI_LCS_GARAGEDOOR40;
+	return id == MI_GARAGEDOOR1 ||
+		id == MI_GARAGEDOOR17 ||
+		id == MI_GARAGEDOOR27 ||
+		id == MI_GARAGEDOOR28 ||
+		id == MI_GARAGEDOOR29 ||
+		id == MI_GARAGEDOOR30 ||
+		id == MI_GARAGEDOOR31 ||
+		id == MI_GARAGEDOOR32 ||
+		id == MI_GARAGEDOOR33 ||
+		id == MI_GARAGEDOOR34 ||
+		id == MI_GARAGEDOOR35 ||
+		id == MI_GARAGEDOOR36 ||
+		id == MI_GARAGEDOOR37 ||
+		id == MI_GARAGEDOOR38 ||
+		id == MI_GARAGEDOOR39 ||
+		id == MI_CRUSHERBODY ||
+		id == MI_CRUSHERLID ||
+		id == MI_GARAGEDOOR2 ||
+		id == MI_GARAGEDOOR3 ||
+		id == MI_GARAGEDOOR4 ||
+		id == MI_GARAGEDOOR5 ||
+		id == MI_GARAGEDOOR6 ||
+		id == MI_GARAGEDOOR7 ||
+		id == MI_GARAGEDOOR9 ||
+		id == MI_GARAGEDOOR10 ||
+		id == MI_GARAGEDOOR11 ||
+		id == MI_GARAGEDOOR12 ||
+		id == MI_GARAGEDOOR13 ||
+		id == MI_GARAGEDOOR14 ||
+		id == MI_GARAGEDOOR15 ||
+		id == MI_GARAGEDOOR16 ||
+		id == MI_GARAGEDOOR18 ||
+		id == MI_GARAGEDOOR19 ||
+		id == MI_GARAGEDOOR20 ||
+		id == MI_GARAGEDOOR21 ||
+		id == MI_GARAGEDOOR22 ||
+		id == MI_GARAGEDOOR23 ||
+		id == MI_GARAGEDOOR24 ||
+		id == MI_GARAGEDOOR25 ||
+		id == MI_GARAGEDOOR26 ||
+		id == MI_DOOR2_SJL;
+}
+
+void CGarages::StopCarFromBlowingUp(CAutomobile* pCar)
+{
+	pCar->m_fFireBlowUpTimer = 0.0f;
+	pCar->m_fHealth = Max(pCar->m_fHealth, 300.0f);
+	pCar->Damage.SetEngineStatus(Max(pCar->Damage.GetEngineStatus(), 275));
+}
+
+bool CGarage::Does60SecondsNeedThisCarAtAll(int mi)
+{
+	for (int i = 0; i < ARRAY_SIZE(gaCarsToCollectIn60Seconds); i++) {
+		if (gaCarsToCollectIn60Seconds[i] == mi)
+			return true;
+	}
+	return false;
+}
+
+bool CGarage::Does60SecondsNeedThisCar(int mi)
+{
+	for (int i = 0; i < ARRAY_SIZE(gaCarsToCollectIn60Seconds); i++) {
+		if (gaCarsToCollectIn60Seconds[i] == mi)
+			return m_bCollectedCarsState & BIT(i);
+	}
+	return false;
+}
+
+void CGarage::MarkThisCarAsCollectedFor60Seconds(int mi)
+{
+	for (int i = 0; i < ARRAY_SIZE(gaCarsToCollectIn60Seconds); i++) {
+		if (gaCarsToCollectIn60Seconds[i] == mi)
+			m_bCollectedCarsState |= BIT(i);
+	}
+}
+
+bool CGarage::IsPlayerEntirelyInsideGarage()
+{
+	return IsEntityEntirelyInside3D(FindPlayerVehicle() ? (CEntity*)FindPlayerVehicle() : (CEntity*)FindPlayerPed(), 0.0f);
 }
 
 void CGarages::StopCarFromBlowingUp(CAutomobile* pCar)
