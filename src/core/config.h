@@ -415,6 +415,9 @@ enum Config {
 #undef NO_MOVIES
 #undef DEBUGMENU
 
+//#undef NASTY_GAME
+//#undef NO_CDCHECK
+
 #undef DRAW_GAME_VERSION_TEXT
 #undef DRAW_MENU_VERSION_TEXT
 
@@ -424,7 +427,7 @@ enum Config {
 #undef PS2_MATFX
 
 #undef FIX_BUGS
-#undef THIS_IS_STUPID
+#define THIS_IS_STUPID
 #undef MORE_LANGUAGES
 #undef COMPATIBLE_SAVES
 #undef LOAD_INI_SETTINGS
