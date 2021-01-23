@@ -1788,56 +1788,35 @@ void
 CWorld::RepositionOneObject(CEntity *pEntity)
 {
 	int16 modelId = pEntity->GetModelIndex();
-	if (modelId == MI_PARKINGMETER || modelId == MI_PHONEBOOTH1 || modelId == MI_WASTEBIN ||
-		modelId == MI_BIN || modelId == MI_POSTBOX1 || modelId == MI_NEWSSTAND || modelId == MI_TRAFFICCONE ||
-		modelId == MI_DUMP1 || modelId == MI_ROADWORKBARRIER1 || modelId == MI_BUSSIGN1 || modelId == MI_NOPARKINGSIGN1 ||
-		modelId == MI_PHONESIGN || modelId == MI_FIRE_HYDRANT || modelId == MI_BOLLARDLIGHT ||
-		modelId == MI_PARKTABLE || modelId == MI_PARKINGMETER2 || modelId == MI_TELPOLE02 ||
-		modelId == MI_PARKBENCH || modelId == MI_BARRIER1 || IsTreeModel(modelId)
-		) {
+	if (IsLightThatNeedsRepositioning(modelId) || IsTreeModel(modelId) || modelId == MI_PARKINGMETER ||
+		modelId == MI_PHONEBOOTH1 || modelId == MI_WASTEBIN || modelId == MI_BIN || modelId == MI_POSTBOX1 ||
+		modelId == MI_NEWSSTAND || modelId == MI_TRAFFICCONE || modelId == MI_DUMP1 ||
+		modelId == MI_ROADWORKBARRIER1 || modelId == MI_BUSSIGN1 || modelId == MI_NOPARKINGSIGN1 ||
+		modelId == MI_PHONESIGN || modelId == MI_TAXISIGN || modelId == MI_FISHSTALL01 ||
+		modelId == MI_FISHSTALL02 || modelId == MI_FISHSTALL03 || modelId == MI_FISHSTALL04 ||
+		modelId == MI_BAGELSTAND2 || modelId == MI_FIRE_HYDRANT || modelId == MI_BOLLARDLIGHT ||
+		modelId == MI_PARKTABLE) {
 		CVector& position = pEntity->GetMatrix().GetPosition();
-		CColModel* pColModel = pEntity->GetColModel();
-		float fBoundingBoxMinZ = pColModel->boundingBox.min.z;
-		float fHeight = pColModel->boundingBox.max.z - pColModel->boundingBox.min.z;
-		if (fHeight < OBJECT_REPOSITION_OFFSET_Z) fHeight = OBJECT_REPOSITION_OFFSET_Z;
+		float fBoundingBoxMinZ = pEntity->GetColModel()->boundingBox.min.z;
 		position.z = FindGroundZFor3DCoord(position.x, position.y,
-			position.z + fHeight, nil) -
-			fBoundingBoxMinZ;
+		                                           position.z + OBJECT_REPOSITION_OFFSET_Z, nil) -
+		             fBoundingBoxMinZ;
 		pEntity->m_matrix.UpdateRW();
 		pEntity->UpdateRwFrame();
-	} else if(IsLightThatNeedsRepositioning(modelId)) {
-		CVector position = pEntity->GetMatrix().GetPosition();
-		CColModel* pColModel = pEntity->GetColModel();
-		float fBoundingBoxMinZ = pColModel->boundingBox.min.z;
-		float fHeight = pColModel->boundingBox.max.z - pColModel->boundingBox.min.z;
-		if (fHeight < OBJECT_REPOSITION_OFFSET_Z) fHeight = OBJECT_REPOSITION_OFFSET_Z;
-		if (pColModel->numBoxes == 1)
-			position = pEntity->GetMatrix() * CVector(
-				(pColModel->boxes[0].min.x + pColModel->boxes[0].max.x) / 2,
-				(pColModel->boxes[0].min.y + pColModel->boxes[0].max.y) / 2,
-				pColModel->boxes[0].min.z);
-		else if (pColModel->numSpheres > 0) {
-			position.z = 1000.0f;
-			for (int i = 0; i < pColModel->numSpheres; i++) {
-				if (pColModel->spheres[i].center.z < position.z)
-					position = pColModel->spheres[i].center;
-			}
-			if (position.z < 1000.0f)
-				position = pEntity->GetMatrix() * position;
-		}
-		pEntity->GetMatrix().GetPosition().z = FindGroundZFor3DCoord(position.x, position.y, pEntity->GetMatrix().GetPosition().z + fHeight, nil) - fBoundingBoxMinZ;
-		pEntity->GetMatrix().UpdateRW();
-		pEntity->UpdateRwFrame();
-		
-	}
-	if(modelId == MI_BUOY) {
+	} else if(modelId == MI_BUOY) {
+		float fWaterLevel = 0.0f;
 		bool bFound = true;
 		const CVector &position = pEntity->GetPosition();
 		float fGroundZ = FindGroundZFor3DCoord(position.x, position.y,
 		                                               position.z + OBJECT_REPOSITION_OFFSET_Z, &bFound);
-		CColModel *pColModel = pEntity->GetColModel();
-		float fHeight = pColModel->boundingBox.max.z - pColModel->boundingBox.min.z;
-		pEntity->GetMatrix().GetPosition().z = 0.2f * fHeight + 6.0f - 0.5f * fHeight;
+		if(CWaterLevel::GetWaterLevelNoWaves(position.x, position.y, position.z + OBJECT_REPOSITION_OFFSET_Z,
+		                                     &fWaterLevel)) {
+			if(!bFound || fWaterLevel > fGroundZ) {
+				CColModel *pColModel = pEntity->GetColModel();
+				float fHeight = pColModel->boundingBox.max.z - pColModel->boundingBox.min.z;
+				pEntity->GetMatrix().GetPosition().z = 0.2f * fHeight + fWaterLevel - 0.5f * fHeight;
+			}
+		}
 	}
 }
 
