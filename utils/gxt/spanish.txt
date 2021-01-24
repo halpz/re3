@@ -1229,7 +1229,7 @@ Instrucc.
 Controles
 
 [FEB_AUD]
-Sonido
+Audio
 
 [FEB_DIS]
 Pantalla
@@ -1237,11 +1237,8 @@ Pantalla
 [FEB_LAN]
 Idioma
 
-[FEP_STA]
-ESTADÍSTICAS
-
-[FEP_MAP]
-MAPA
+[FEP_AUD]
+AUDIO
 
 [FEP_BRI]
 INSTRUCCIONES
@@ -1249,14 +1246,29 @@ INSTRUCCIONES
 [FEP_CON]
 CONTROLES
 
-[FEP_AUD]
-SONIDO
-
 [FEP_DIS]
 PANTALLA
 
+[FEP_MAP]
+MAPA
+
 [FEP_LAN]
 IDIOMA:
+
+[FEP_OPT]
+OPCIONES
+
+[FEP_QUI]
+SALIR
+
+[FEP_RES]
+CONTINUAR
+
+[FEP_STA]
+ESTADÍSTICAS
+
+[FEP_STG]
+INICIAR JUEGO
 
 [FEF_ST1]
 ¿Quién es el malo?
@@ -1294,20 +1306,50 @@ Ajusta el juego a tu tele.
 [FEF_LA2]
 Elige el idioma que prefieras.
 
-[FEM_ON]
-SÍ
+[FEM_2PR]
+PS2 ALPHA TEST:
 
-[FEM_OFF]
-NO
+[FEM_CSB]
+BORDES EN CINEMÁTICAS:
 
-[FEM_YES]
-Sí
+[FEM_FRM]
+LIMITAR FPS:
+
+[FEM_LOD]
+DISTANCIA VISIBLE:
+
+[FEM_MM]
+INICIO
+
+[FEM_MOB]
+MÓVIL
 
 [FEM_NO]
 No
 
 [FEM_NON]
-Nada
+NINGUNO
+
+[FEM_NRM]
+NORMAL
+
+[FEM_OFF]
+NO
+
+[FEM_ON]
+SÍ
+
+[FEM_SCF]
+FORMATO:
+
+[FEM_SIM]
+SIMPLE
+
+[FEM_VSC]
+SINC. AUDIO/VIDEO:
+
+[FEM_YES]
+Sí
 
 [FEI_SEL]
 Seleccionar
@@ -1355,16 +1397,13 @@ ESTADÍSTICAS
 CONTROLES
 
 [FEH_AUD]
-SONIDO
+AUDIO
 
 [FEH_LAN]
 IDIOMA
 
 [FEH_SGA]
 INICIAR NUEVA PARTIDA
-
-[FET_SG]
-GUARDAR PARTIDA
 
 [FEH_BRI]
 INSTRUCCIONES
@@ -1378,14 +1417,14 @@ MAPA
 [FEM_OK]
 ACEPTAR
 
-[FEC_CRO]
-Agacharse
-
 [FE_MLG]
-LEYENDA DEL MAPA
+REFERENCIAS DEL MAPA
 
 [MAP_LEG]
 LEYENDA:
+
+[MAP_YAH]
+ESTÁS AQUÍ
 
 [LG_01]
 Posición del jugador
@@ -1493,25 +1532,70 @@ Objeto
 Objetivo del jugador
 
 [FEO_CON]
-Config. de controles
+Controles
 
 [FEO_AUD]
-Config. del sonido
+Audio
 
 [FEO_DIS]
-Config. de la pantalla
+Pantalla
 
 [FEO_LAN]
-Config. del idioma
-
-[FEO_PLA]
-Config. del jugador
+Idioma
 
 [FEB_PMB]
 Instrucciones de misiones previas:
 
+[FEC_NMN]
+~1~
+
+[FEC_FRC]
+CÁMARA LIBRE:
+
+[FEC_RED]
+REDEFINIR BOTONES
+
+[FEC_MOU]
+CONFIG. MOUSE
+
+[FEC_MSH]
+SENSIBILIDAD:
+
+[FEC_NUS]
+NO USADO
+
+[FEC_IVV]
+INVERTIR VERTICALMENTE:
+
 [FEC_NA]
 N/D
+
+[FEC_ACB]
+Acelerar/Frenar
+
+[FEC_ANS]
+Acción
+
+[FEC_BAC]
+Retroceder
+
+[FEC_CEN]
+Centrar Cámara
+
+[FEC_CLK]
+BLOQ MAYÚS.
+
+[FEC_CMP]
+COMBO: MIRAR I+D
+
+[FEC_CMR]
+Cámara
+
+[FEC_CRO]
+Agacharse
+
+[FEC_CT]
+Cambiar de objetivo
 
 [FEC_CWL]
 Cambiar de arma (izq.)
@@ -1522,11 +1606,167 @@ Cambiar de arma (der.)
 [FEC_CW]
 Cambiar de arma
 
-[FEC_CT]
-Cambiar de objetivo
+[FEC_DLL]
+SUPR.
+
+[FEC_DOT]
+NUM .
+
+[FEC_DWA]
+ABAJO
+
+[FEC_ETR]
+ENT
+
+[FEC_EEX]
+Entrar+Salir
+
+[FEC_FIR]
+Disparar/Atacar
+
+[FEC_FOR]
+Avanzar
+
+[FEC_HME]
+INICIO
+
+[FEC_HND]
+Freno de Mano
+
+[FEC_HRN]
+Claxon
+
+[FEC_IBT]
+-
+
+[FEC_IRT]
+INS
+
+[FEC_JMP]
+Saltar
+
+[FEC_LBA]
+Mirar (Atrás)
+
+[FEC_LDU]
+Mirar (Abajo)
+
+[FEC_LCT]
+CTRL IZQ.
+
+[FEC_LEF]
+Izquierda
+
+[FEC_LSF]
+SHIFT IZQ.
+
+[FEC_LOF]
+Mirar (Adelante)
+
+[FEC_LOL]
+Mirar (Izquierda)
+
+[FEC_LOR]
+Mirar (Derecha)
+
+[FEC_LUD]
+Mirar (Arriba)
+
+[FEC_MSL]
+CLICK IZQ.
+
+[FEC_MSM]
+CLICK RUEDA
+
+[FEC_MSR]
+CLICK DER.
+
+[FEC_MWB]
+RUEDA ABAJO
+
+[FEC_MWF]
+RUEDA ARRIBA
+
+[FEC_NTR]
+Objetivo (Siguiente)
+
+[FEC_NWE]
+Arma Siguiente
+
+[FEC_PGD]
+AVPÁG
+
+[FEC_PGU]
+REPÁG
+
+[FEC_PLS]
+NUM +
+
+[FEC_PWE]
+Arma Anterior
+
+[FEC_QUE]
+?????
+
+[FEC_PTT]
+Objetivo (Anterior)
+
+[FEC_RAD]
+Cambiar Emisora
+
+[FEC_RCT]
+CTRL DER.
+
+[FEC_RFA]
+DERECHA
+
+[FEC_RSF]
+SHIFT DER.
+
+[FEC_RIG]
+Derecha
+
+[FEC_RTN]
+ENTER
+
+[FEC_SPC]
+ESPACIO
+
+[FEC_SPN]
+Esprintar
+
+[FEC_SUB]
+Sub-Misión
+
+[FEC_TAB]
+TAB.
 
 [FEC_TAR]
 Apuntar
+
+[FEC_TFD]
+Torreta+Inclinar (Abajo)
+
+[FEC_TFL]
+Mirar+Torreta (Izq.)
+
+[FEC_TFR]
+Mirar+Torreta (Der.)
+
+[FEC_TFU]
+Torreta+Inclinar (Arriba)
+
+[FEC_UNB]
+NO DEFINIDO
+
+[FEC_UPA]
+ARRIBA
+
+[FEC_ZIN]
+Aumentar Zoom
+
+[FEC_ZOT]
+Alejar Zoom
 
 [FEC_MOV]
 Movimiento
@@ -1630,11 +1870,35 @@ pad analógico
 [FEC_DP]
 botones de dirección
 
-[FEA_SFX]
-VOLUMEN EFECTOS:
+[FEA_2SP]
+2 Altavoces
+
+[FEA_3DH]
+HARDWARE:
+
+[FEA_4SP]
+Más de 2 Altavoces
+
+[FEA_ADP]
+DETECTAR HARDWARE
+
+[FEA_EAR]
+Auriculares
+
+[FEA_MPB]
+VOL. ARCHIVOS MP3:
+
+[FEA_NM3]
+SIN ARCHIVOS
 
 [FEA_OUT]
 Salida:
+
+[FEA_SFX]
+VOL. AMBIENTE:
+
+[FEA_SPK]
+SALIDA:
 
 [FEA_ST]
 Estéreo
@@ -1643,7 +1907,7 @@ Estéreo
 Mono
 
 [FEA_CTD]
-¡Atención! Esta prestación necesita que se conecte hardware compatible con DTS. ¿Seguir?
+¡Atención! Esta función necesita que se conecte hardware compatible con DTS. ¿Continuar?
 
 [FEA_DTS]
 DTS
@@ -1652,25 +1916,40 @@ DTS
 EMISORA:
 
 [FEA_NON]
-Radio apagada
+Radio Apagada
+
+[FED_AAS]
+ANTI-ALIASING:
 
 [FED_BRI]
 BRILLO:
 
-[FED_TRA]
-RASTROS:
+[FED_CLF]
+FILTRO DE COLOR:
+
+[FED_FLS]
+PANTALLA COMPLETA
+
+[FED_RES]
+RESOLUCIÓN:
 
 [FED_RDR]
-MODO RADAR:
+RADAR:
+
+[FED_MBL]
+SUAVIZADO:
 
 [FED_HUD]
-MODO VISOR:
+INTERFAZ:
 
 [FED_RDM]
-MAPA Y PUNTOS
+MAPA E ÍCONOS
 
 [FED_RDB]
-SOLO PUNTOS
+SOLO ÍCONOS
+
+[FED_WND]
+VENTANA
 
 [FEL_ENG]
 INGLÉS
@@ -1775,28 +2054,37 @@ Test Delete:
 Ranura0
 
 [FEM_SL1]
-No hay archivo guardado 1
+Espacio Libre
 
 [FEM_SL2]
-No hay archivo guardado 2
+Espacio Libre
 
 [FEM_SL3]
-No hay archivo guardado 3
+Espacio Libre
 
 [FEM_SL4]
-No hay archivo guardado 4
+Espacio Libre
 
 [FEM_SL5]
-No hay archivo guardado 5
+Espacio Libre
 
 [FEM_SL6]
-No hay archivo guardado 6
+Espacio Libre
 
 [FEM_SL7]
-No hay archivo guardado 7
+Espacio Libre
 
 [FES_LOA]
-CARGAR PARTIDA
+CARGAR DATOS
+
+[FES_LCG]
+¿Cargar datos y seguir jugando?
+
+[FES_SKN]
+NOMBRE
+
+[FES_SET]
+APLICAR
 
 [ST_TIME]
 Tiempo de juego actual
@@ -2357,7 +2645,7 @@ Config. 4
 Volver
 
 [SOUND]
-SONIDO
+AUDIO
 
 [MUSVOL]
 Volumen música
@@ -2595,6 +2883,9 @@ ACEPTAR
 
 [FEH_MP]
 MULTIJUGADOR
+
+[FEH_MPH]
+MOUSE o FLECHAS para mover. REPÁG, AVPÁG o RUEDA DEL MOUSE para acercar/alejar. L para referencias.
 
 [FEMP_J]
 Unirse
@@ -4978,12 +5269,6 @@ Coche rojo:
 [RAMP_A]
 ~w~¡DESTRUCCIONES COMPLETADAS! ~1~ $
 
-[FET_SAV]
-Guardar partida
-
-[FET_WRN]
-¡Aviso! Se han activado uno o más trucos. Esto puede afectar a la partida guardada. Se recomienda que no guardes esta partida.
-
 [HELP39]
 ~w~Mueve~h~ ~k~ ~VEWEI~ ~w~para desplazar tu peso en la moto.
 
@@ -5072,7 +5357,7 @@ Por favor, espera...
 Mirar hacia delante
 
 [FEC_LFA]
-Mirar\precisión
+IZQUIERDA
 
 [MPHELP]
 AYUDA
@@ -5273,7 +5558,7 @@ Vuelve al coche de bomberos siempre que quieras e intenta batir tu mejor tiempo.
 GO GO Faggio
 
 [FEA_MUS]
-VOLUMEN DE LA RADIO:
+VOL. RADIO:
 
 [FEST_GO]
 Mejor tiempo en "Go Go Faggio"
@@ -6352,6 +6637,12 @@ NO
 [FED_POS]
 POSICIÓN DE LA PANTALLA
 
+[FEQ_SRE]
+¿Seguro que quieres salir? Todo el progreso que hiciste se perderá. ¿Continuar?
+
+[FEQ_SRW]
+¿Seguro que quieres salir?
+
 [FES_DSS]
 Selecciona partida guardada para borrar:
 
@@ -6362,7 +6653,7 @@ Selecciona partida guardada para cargar:
 Éxito al borrar. Selecciona ACEPTAR para continuar.
 
 [FES_DEL]
-Borrar partida
+BORRAR DATOS
 
 [FES_DGM]
 BORRAR PARTIDA
@@ -6370,8 +6661,83 @@ BORRAR PARTIDA
 [ITBEG]
 Al principio...
 
+[FET_APP]
+CLICK IZQ. o ENTER para aplicar cambios.
+
+[FET_CIG]
+RETROCESO para limpiar acción. CLICK IZQ. o ENTER para asignar/agregar.
+
+[FET_CCR]
+EN VEHÍCULO
+
+[FET_CFT]
+A PIE
+
+[FET_CTI]
+ESTILO: CLÁSICO
+
+[FET_CTL]
+CONTROLES
+
+[FET_DAM]
+MODELADO ACÚSTICO DINÁMICO:
+
+[FET_DEF]
+Reiniciar Ajustes
+
+[FET_DSN]
+Por Defecto.bmp
+
+[FET_EIG]
+No puedes elegir un botón para ésta acción.
+
+[FET_GRA]
+Gráficos
+
+[FET_HRD]
+Ajustes reiniciados.
+
 [FET_LG]
-CARGAR PARTIDA
+CARGAR DATOS
+
+[FET_MIG]
+IZQUIERDA, DERECHA, CLICK IZQ. o RUEDA DEL MOUSE para ajustar.
+
+[FET_MST]
+CONDUCC. CON MOUSE:
+
+[FET_OPT]
+OPCIONES
+
+[FET_PAU]
+PAUSA
+
+[FET_PS]
+Jugador
+
+[FET_QG]
+SALIR
+
+[FET_RIG]
+Elige un nuevo botón para ésta acción.
+
+[FET_RSC]
+Hardware no detectado. Ajuste reiniciado.
+
+[FET_SAV]
+Guardar partida
+
+[FET_SG]
+GUARDAR PARTIDA
+
+[FET_STI]
+ESTILO: ESTÁNDAR
+
+[FET_WRN]
+¡Aviso! Se han activado uno o más trucos. Esto puede afectar a la partida guardada. Se recomienda que no guardes esta partida.
+
+[FES_DAT]
+FECHA
 
 [FES_SCG]
 ¿Deseas guardar la partida?
@@ -6478,11 +6844,8 @@ joystick analógico izquierdo o botones de dirección
 [C3AMMOV]
 joystick analógico izquierdo o botones de dirección
 
-[FEC_ACB]
-Acelerar/Frenar
-
 [FEM_SL8]
-No hay archivo guardado 8
+Espacio Libre
 
 [FES_SAV]
 GUARDAR PARTIDA
