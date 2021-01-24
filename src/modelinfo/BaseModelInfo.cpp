@@ -56,7 +56,7 @@ void
 CBaseModelInfo::SetTexDictionary(const char *name)
 {
 	int slot = CTxdStore::FindTxdSlot(name);
-	if(slot < 0)
+	if(slot == -1)
 		slot = CTxdStore::AddTxdSlot(name);
 	m_txdSlot = slot;
 }

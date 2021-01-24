@@ -2,10 +2,9 @@
 
 #include "General.h"
 #include "Camera.h"
+#include "Renderer.h"
 #include "ModelInfo.h"
 #include "custompipes.h"
-
-#define LOD_DISTANCE (300.0f)
 
 void
 CSimpleModelInfo::DeleteRwObject(void)
