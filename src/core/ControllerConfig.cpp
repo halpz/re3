@@ -2755,9 +2755,10 @@ wchar *CControllerConfigManager::GetButtonComboText(e_ControllerAction action)
 void CControllerConfigManager::SetControllerKeyAssociatedWithAction(e_ControllerAction action, int32 key, eControllerType type)
 {
 	ResetSettingOrder(action);
+	int numOfSettings = GetNumOfSettingsForAction(action);
 	
 	m_aSettings[action][type].m_Key = key;
-	m_aSettings[action][type].m_ContSetOrder = GetNumOfSettingsForAction(action) + 1;
+	m_aSettings[action][type].m_ContSetOrder = numOfSettings + 1;
 }
 
 int32 CControllerConfigManager::GetMouseButtonAssociatedWithAction(e_ControllerAction action)
@@ -2767,8 +2768,10 @@ int32 CControllerConfigManager::GetMouseButtonAssociatedWithAction(e_ControllerA
 
 void CControllerConfigManager::SetMouseButtonAssociatedWithAction(e_ControllerAction action, int32 button)
 {
+	int numOfSettings = GetNumOfSettingsForAction(action);
+	
 	m_aSettings[action][MOUSE].m_Key = button;
-	m_aSettings[action][MOUSE].m_ContSetOrder = GetNumOfSettingsForAction(action) + 1;
+	m_aSettings[action][MOUSE].m_ContSetOrder = numOfSettings + 1;
 }
 
 void CControllerConfigManager::ResetSettingOrder(e_ControllerAction action)
