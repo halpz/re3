@@ -339,7 +339,7 @@ CVehicleModelInfo::SetAtomicRendererCB(RpAtomic *atomic, void *data)
 	}else if(strstr(name, "_lo")){
 		RpClumpRemoveAtomic(clump, atomic);
 		RpAtomicDestroy(atomic);
-		return atomic;		// BUG: not done by gta
+		return atomic;		// BUG: nil in gta
 	}else if(strstr(name, "_vlo"))
 		CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleReallyLowDetailCB);
 	else
@@ -402,21 +402,31 @@ CVehicleModelInfo::SetAtomicRendererCB_Boat(RpAtomic *atomic, void *data)
 {
 	RpClump *clump;
 	char *name;
+	bool alpha;
 
 	clump = (RpClump*)data;
 	name = GetFrameNodeName(RpAtomicGetFrame(atomic));
+	alpha = false;
+	RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), HasAlphaMaterialCB, &alpha);
 	if(strcmp(name, "boat_hi") == 0 || !CGeneral::faststrncmp(name, "extra", 5))
 		CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleHiDetailCB_Boat);
-	else if(strstr(name, "_hi"))
-		CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleHiDetailCB);
-	else if(strstr(name, "_lo")){
+	else if(strstr(name, "_hi")){
+		if(alpha)
+			CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleHiDetailAlphaCB_Boat);
+		else
+			CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleHiDetailCB);
+	}else if(strstr(name, "_lo")){
 		RpClumpRemoveAtomic(clump, atomic);
 		RpAtomicDestroy(atomic);
 		return atomic;		// BUG: not done by gta
 	}else if(strstr(name, "_vlo"))
-		CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleReallyLowDetailCB_BigVehicle);
-	else
-		CVisibilityPlugins::SetAtomicRenderCallback(atomic, nil);
+		CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleLoDetailCB_Boat);
+	else{
+		if(alpha)
+			CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleHiDetailAlphaCB_Boat);
+		else
+			CVisibilityPlugins::SetAtomicRenderCallback(atomic, nil);
+	}
 	HideDamagedAtomicCB(atomic, nil);
 	return atomic;
 }
@@ -459,7 +469,7 @@ CVehicleModelInfo::SetAtomicRendererCB_RealHeli(RpAtomic *atomic, void *data)
 	}else if(strstr(name, "_lo")){
 		RpClumpRemoveAtomic(clump, atomic);
 		RpAtomicDestroy(atomic);
-		return atomic;		// BUG: not done by gta
+		return atomic;		// BUG: nil in gta
 	}else if(strstr(name, "_vlo"))
 		CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleReallyLowDetailCB);
 	else
@@ -629,9 +639,9 @@ CVehicleModelInfo::SetVehicleComponentFlags(RwFrame *frame, uint32 flags)
 		SETFLAGS(ATOMIC_FLAG_FRONT);
 	else if(flags & VEHICLE_FLAG_REAR && (handling->Flags & HANDLING_IS_VAN || (flags & (VEHICLE_FLAG_LEFT|VEHICLE_FLAG_RIGHT)) == 0))
 		SETFLAGS(ATOMIC_FLAG_REAR);
-	if(flags & VEHICLE_FLAG_LEFT)
+	else if(flags & VEHICLE_FLAG_LEFT)
 		SETFLAGS(ATOMIC_FLAG_LEFT);
-	if(flags & VEHICLE_FLAG_RIGHT)
+	else if(flags & VEHICLE_FLAG_RIGHT)
 		SETFLAGS(ATOMIC_FLAG_RIGHT);
 
 	if(flags & VEHICLE_FLAG_REARDOOR)
@@ -796,7 +806,7 @@ struct editableMatCBData
 RpMaterial*
 CVehicleModelInfo::GetEditableMaterialListCB(RpMaterial *material, void *data)
 {
-	static RwRGBA white = { 255, 255, 255, 255 };
+	RwRGBA white = { 255, 255, 255, 255 };
 	const RwRGBA *col;
 	editableMatCBData *cbdata;
 
