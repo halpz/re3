@@ -316,7 +316,7 @@ bool CGame::InitialiseOnceAfterRW(void)
 {
 	TheText.Load();
 	CTimer::Initialise();
-	CTempColModels::Initialise();
+	gpTempColModels->Initialise();
 	mod_HandlingManager.Initialise();
 	CSurfaceTable::Initialise("DATA\\SURFACE.DAT");
 	CPedStats::Initialise();

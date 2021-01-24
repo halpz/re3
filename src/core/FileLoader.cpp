@@ -833,7 +833,7 @@ CFileLoader::LoadWeaponObject(const char *line)
 	mi->m_lodDistances[0] = dist;
 	mi->SetTexDictionary(txd);
 	mi->SetAnimFile(animFile);
-	mi->SetColModel(&CTempColModels::ms_colModelWeapon);
+	mi->SetColModel(&gpTempColModels->ms_colModelWeapon);
 	MatchModelString(model, id);
 	return id;
 }
@@ -849,7 +849,7 @@ CFileLoader::LoadClumpObject(const char *line)
 		mi = CModelInfo::AddClumpModel(id);
 		mi->SetModelName(model);
 		mi->SetTexDictionary(txd);
-		mi->SetColModel(&CTempColModels::ms_colModelBBox);
+		mi->SetColModel(&gpTempColModels->ms_colModelBBox);
 	}
 }
 
@@ -956,7 +956,7 @@ CFileLoader::LoadPedObject(const char *line)
 	mi->SetModelName(model);
 	mi->SetTexDictionary(txd);
 	mi->SetAnimFile(animFile);
-	mi->SetColModel(&CTempColModels::ms_colModelPed1);
+	mi->SetColModel(&gpTempColModels->ms_colModelPed1);
 	mi->m_pedType = CPedType::FindPedType(pedType);
 	mi->m_pedStatType = CPedStats::GetPedStatType(pedStats);
 	for(animGroupId = 0; animGroupId < NUM_ANIM_ASSOC_GROUPS; animGroupId++)

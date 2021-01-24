@@ -9,8 +9,7 @@
 #include "KeyGen.h"
 #include "Streaming.h"
 #include "smallHeap.h"
-
-// LCS: file done except for TODO
+#include "TempColModels.h"
 
 CBaseModelInfo::CBaseModelInfo(ModelInfoType type)
 {
@@ -146,12 +145,39 @@ CBaseModelInfo::DeleteChunk(void)
 	}
 }
 
+inline int
+GetColmodelID(CColModel *model)
+{
+	int colModelid = 0;
+	if(model == &gpTempColModels->ms_colModelBBox) colModelid = 1;
+	if(model == &gpTempColModels->ms_colModelPed1) colModelid = 2;
+	if(model == &gpTempColModels->ms_colModelWeapon) colModelid = 3;
+	if(model == &CTempColModels::ms_colModelPed2) colModelid = 4;
+	if(model == &CTempColModels::ms_colModelPedGroundHit) colModelid = 5;
+	if(model == &CTempColModels::ms_colModelDoor1) colModelid = 6;
+	if(model == &CTempColModels::ms_colModelBumper1) colModelid = 7;
+	if(model == &CTempColModels::ms_colModelPanel1) colModelid = 8;
+	if(model == &CTempColModels::ms_colModelBonnet1) colModelid = 9;
+	if(model == &CTempColModels::ms_colModelBoot1) colModelid = 10;
+	if(model == &CTempColModels::ms_colModelWheel1) colModelid = 11;
+	if(model == &CTempColModels::ms_colModelBodyPart1) colModelid = 12;
+	if(model == &CTempColModels::ms_colModelBodyPart2) colModelid = 13;
+	if(model == &CTempColModels::ms_colModelCutObj[0]) colModelid = 14;
+	if(model == &CTempColModels::ms_colModelCutObj[1]) colModelid = 15;
+	if(model == &CTempColModels::ms_colModelCutObj[2]) colModelid = 16;
+	if(model == &CTempColModels::ms_colModelCutObj[3]) colModelid = 17;
+	if(model == &CTempColModels::ms_colModelCutObj[4]) colModelid = 18;
+	return colModelid;
+}
+
 void
 CBaseModelInfo::Write(base::cRelocatableChunkWriter &writer)
 {
 	m_chunk = nil;
 	RcWriteThis(writer);
 	if(m_colModel){
-		assert(0 && "TODO");
+		if(m_bOwnsColModel || GetColmodelID(m_colModel) != 0)
+			m_colModel->Write(writer, true);
+		writer.AddPatch(&m_colModel);
 	}
 }
