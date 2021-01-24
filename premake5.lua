@@ -65,7 +65,7 @@ end
 
 workspace "re3"
 	language "C++"
-	configurations { "Debug", "Release" }
+	configurations { "Debug", "Release", "Vanilla" }
 	startproject "re3"
 	location "build"
 	symbols "Full"
@@ -113,12 +113,15 @@ workspace "re3"
 	filter "configurations:Debug"
 		defines { "DEBUG" }
 		
-	filter "configurations:Release"
+	filter "configurations:not Debug"
 		defines { "NDEBUG" }
 		optimize "Speed"
 		if(_OPTIONS["lto"]) then
 			flags { "LinkTimeOptimization" }
 		end
+
+	filter "configurations:Vanilla"
+		defines { "VANILLA_DEFINES" }
 
 	filter { "platforms:win*" }
 		system "windows"
