@@ -809,7 +809,7 @@ CFileLoader::LoadTimeObject(const char *line)
 	mi->m_firstDamaged = damaged;
 	mi->SetTimes(timeOn, timeOff);
 	mi->SetTexDictionary(txd);
-	other = mi->FindOtherTimeModel();
+	other = mi->FindOtherTimeModel(model);
 	if(other)
 		other->SetOtherTimeModel(id);
 	MatchModelString(model, id);

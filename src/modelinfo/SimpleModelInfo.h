@@ -57,7 +57,7 @@ public:
 	virtual void RcWriteThis(base::cRelocatableChunkWriter &writer);
 	virtual void RcWriteEmpty(base::cRelocatableChunkWriter &writer);
 
-	virtual void SetAtomic(int n, RpAtomic *atomic);	// TODO: remove this
+	/*virtual*/ void SetAtomic(int n, RpAtomic *atomic);
 
 	void Init(void);
 	void IncreaseAlpha(void);
