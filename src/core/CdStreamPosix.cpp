@@ -1,8 +1,8 @@
 #ifndef _WIN32
 #include "common.h"
 #include "crossplatform.h"
-#include <pthread.h>
 #include <signal.h>
+#include <pthread.h>
 #include <semaphore.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -13,7 +13,10 @@
 #include <fcntl.h>
 #include <sys/resource.h>
 #include <stdarg.h>
+
+#ifdef __linux__
 #include <sys/syscall.h>
+#endif
 
 #include "CdStream.h"
 #include "rwcore.h"
