@@ -366,6 +366,9 @@ bool CGame::Initialise(const char* datFile)
 
 	CPools::Initialise();
 
+	if(gMakeResources)
+		CVehicleModelInfo::Load(nil);
+
 #ifndef GTA_PS2
 	CIniFile::LoadIniFile();
 #endif

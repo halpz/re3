@@ -85,6 +85,9 @@ wchar gUString2[256];
 // leeds
 bool gMakeResources = true;
 bool gUseChunkFiles = false;
+bool gSecondExportPass;
+bool gUseModelResources;
+bool gUseResources;
 
 float FramesPerSecond = 30.0f;
 
