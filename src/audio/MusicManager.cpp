@@ -1237,11 +1237,12 @@ cMusicManager::DisplayRadioStationName()
 			case RADIO_ESPANTOSO: string = TheText.Get("FEA_FM6"); break;
 			case EMOTION: string = TheText.Get("FEA_FM7"); break;
 			case WAVE: string = TheText.Get("FEA_FM8"); break;
-			case USERTRACK:
+			case 9: string = TheText.Get("FEA_FM9"); break;
+			case 10:
 				if (!SampleManager.IsMP3RadioChannelAvailable())
 					return;
 				string = TheText.Get("FEA_MP3"); break;
-			default: return;
+			default: string = TheText.Get("FEA_NON"); break;
 			};
 
 			if (pCurrentStation != string) {
@@ -1255,21 +1256,22 @@ cMusicManager::DisplayRadioStationName()
 
 			CFont::SetJustifyOff();
 			CFont::SetBackgroundOff();
-			CFont::SetScale(SCREEN_SCALE_X(0.8f), SCREEN_SCALE_Y(1.35f));
+			CFont::SetDropShadowPosition(2);
+			CFont::SetScale(PSP_SCREEN_SCALE_X(0.5f), PSP_SCREEN_SCALE_Y(0.88f));
 			CFont::SetPropOn();
-			CFont::SetFontStyle(FONT_STANDARD);
+			CFont::SetFontStyle(FONT_BANK);
 			CFont::SetCentreOn();
-			CFont::SetCentreSize(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
-			CFont::SetColor(CRGBA(0, 0, 0, 255));
-			CFont::PrintString(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(2.0f), SCREEN_SCALE_Y(22.0f) + SCREEN_SCALE_Y(2.0f), pCurrentStation);
+			CFont::SetCentreSize(PSP_SCREEN_SCALE_X(260.0f));
+			CFont::SetDropColor(CRGBA(0, 0, 0, 255));
 
 			if (gNumRetunePresses)
-				CFont::SetColor(CRGBA(102, 133, 143, 255));
+				CFont::SetColor(CRGBA(77, 155, 210, 255));
 			else
-				CFont::SetColor(CRGBA(147, 196, 211, 255));
+				CFont::SetColor(CRGBA(77, 155, 210, 255));
 
-			CFont::PrintString(SCREEN_WIDTH / 2, SCREEN_SCALE_Y(22.0f), pCurrentStation);
+			CFont::PrintString(SCREEN_WIDTH / 2, PSP_SCREEN_SCALE_Y(7.0f), pCurrentStation);
 			CFont::DrawFonts();
+			CFont::SetCentreSize(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
 		}
 	}
 }
