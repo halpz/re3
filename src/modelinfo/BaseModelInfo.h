@@ -57,15 +57,15 @@ public:
 	virtual void ConvertAnimFileIndex(void) {}
 	virtual int GetAnimFileIndex(void) { return -1; }
 
-	virtual void LoadModel(void *model, const void *chunk) {};					// = 0;
+	virtual void LoadModel(void *model, const void *chunk) = 0;
 	virtual void DeleteChunk(void);
 	// this writes the modelinfo struct, possibly including actual RW models
 	virtual void Write(base::cRelocatableChunkWriter &writer);
 	// this writes the RW models
 	virtual void *WriteModel(base::cRelocatableChunkWriter &writer) { return nil; }		// = 0; // this is not in the vtable for some reason???
 	// these allocate the space for a modelinfo struct and patch the vtable pointer
-	virtual void RcWriteThis(base::cRelocatableChunkWriter &writer) {}		// = 0;
-	virtual void RcWriteEmpty(base::cRelocatableChunkWriter &writer) {}		// = 0;
+	virtual void RcWriteThis(base::cRelocatableChunkWriter &writer) = 0;
+	virtual void RcWriteEmpty(base::cRelocatableChunkWriter &writer) = 0;
 
 	// one day it becomes virtual
 	uint8 GetModelType() const { return m_type; }
