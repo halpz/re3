@@ -607,11 +607,14 @@ CFileLoader::LoadObjectTypes(const char *filename)
 	int section;
 	int pathIndex;
 	int id, pathType;
-	int minID, maxID;
+	//int minID, maxID;
+
+	for(int i = 0; i < ARRAY_SIZE(m_sTempIdeData); i++)
+		m_sTempIdeData[i].id = -1;
 
 	section = NONE;
-	minID = INT32_MAX;
-	maxID = -1;
+	//minID = INT32_MAX;
+	//maxID = -1;
 	pathIndex = -1;
 	debug("Loading object types from %s...\n", filename);
 
@@ -635,13 +638,13 @@ CFileLoader::LoadObjectTypes(const char *filename)
 		}else switch(section){
 		case OBJS:
 			id = LoadObject(line);
-			if(id > maxID) maxID = id;
-			if(id < minID) minID = id;
+			//if(id > maxID) maxID = id;
+			//if(id < minID) minID = id;
 			break;
 		case TOBJ:
 			id = LoadTimeObject(line);
-			if(id > maxID) maxID = id;
-			if(id < minID) minID = id;
+			//if(id > maxID) maxID = id;
+			//if(id < minID) minID = id;
 			break;
 		case WEAP:
 			LoadWeaponObject(line);
@@ -678,10 +681,10 @@ CFileLoader::LoadObjectTypes(const char *filename)
 	}
 	CFileMgr::CloseFile(fd);
 
-	for(id = minID; id <= maxID; id++){
+	for(id = 0; id < MODELINFOSIZE; id++){
 		CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(id);
 		if(mi && mi->IsBuilding())
-			mi->SetupBigBuilding(minID, maxID);
+			mi->SetupBigBuilding();
 	}
 }
 
@@ -713,6 +716,13 @@ CFileLoader::LoadObject(const char *line)
 
 	if(sscanf(line, "%d %s %s %d", &id, model, txd, &numObjs) != 4)
 		return 0;	// game returns return value
+
+	for(int i = 0; i < ARRAY_SIZE(m_sTempIdeData); i++)
+		if(m_sTempIdeData[i].id == -1){
+			m_sTempIdeData[i].id = id;
+			strcpy(m_sTempIdeData[i].name, model);
+			break;
+		}
 
 	switch(numObjs){
 	case 1:
@@ -761,6 +771,13 @@ CFileLoader::LoadTimeObject(const char *line)
 
 	if(sscanf(line, "%d %s %s %d", &id, model, txd, &numObjs) != 4)
 		return 0;	// game returns return value
+
+	for(int i = 0; i < ARRAY_SIZE(m_sTempIdeData); i++)
+		if(m_sTempIdeData[i].id < 0){
+			m_sTempIdeData[i].id = id;
+			strcpy(m_sTempIdeData[i].name, model);
+			break;
+		}
 
 	switch(numObjs){
 	case 1:
