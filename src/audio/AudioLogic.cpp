@@ -41,7 +41,7 @@
 #include "WindModifiers.h"
 #include "Fluff.h"
 #include "Script.h"
-
+#include "Wanted.h"
 
 const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
 const int policeChannel = channels + 1;
@@ -9311,7 +9311,8 @@ cAudioManager::ProcessBridge()
 void
 cAudioManager::ProcessBridgeWarning()
 {
-	if (CStats::CommercialPassed && m_sQueueSample.m_fDistance < 450.f) {
+	// TODO: LCS
+/*	if (CStats::CommercialPassed && m_sQueueSample.m_fDistance < 450.f) {
 		m_sQueueSample.m_nVolume = ComputeVolume(100, 450.f, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume != 0) {
 			m_sQueueSample.m_nCounter = 0;
@@ -9332,7 +9333,7 @@ cAudioManager::ProcessBridgeWarning()
 			m_sQueueSample.m_bRequireReflection = false;
 			AddSampleToRequestedQueue();
 		}
-	}
+	}*/
 }
 
 void

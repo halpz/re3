@@ -338,17 +338,17 @@ CPathFind::StoreNodeInfoCar(int16 id, int16 node, int8 type, int8 next, int16 x,
 	InfoForTileCars[i].x = x/16.0f;
 	InfoForTileCars[i].y = y/16.0f;
 	InfoForTileCars[i].z = z/16.0f;
-	InfoForTilePeds[i].width = 8.0f*Min(width, 15.0f);
+	InfoForTileCars[i].width = 8.0f*Min(width, 15.0f);
 	InfoForTileCars[i].numLeftLanes = numLeft;
 	InfoForTileCars[i].numRightLanes = numRight;
-	InfoForTilePeds[i].crossing = false;
-	InfoForTilePeds[i].speedLimit = 0;
-	InfoForTilePeds[i].roadBlock = false;
-	InfoForTilePeds[i].disabled = false;
-	InfoForTilePeds[i].waterPath = false;
-	InfoForTilePeds[i].onlySmallBoats = false;
-	InfoForTilePeds[i].betweenLevels = false;
-	InfoForTilePeds[i].spawnRate = Min(spawnRate, 15);
+	InfoForTileCars[i].crossing = false;
+	InfoForTileCars[i].speedLimit = 0;
+	InfoForTileCars[i].roadBlock = false;
+	InfoForTileCars[i].disabled = false;
+	InfoForTileCars[i].waterPath = false;
+	InfoForTileCars[i].onlySmallBoats = false;
+	InfoForTileCars[i].betweenLevels = false;
+	InfoForTileCars[i].spawnRate = Min(spawnRate, 15);
 
 	if(node == 11)
 		InfoForTileCars[id*12].SwapConnectionsToBeRightWayRound();
@@ -1763,18 +1763,18 @@ CPathFind::TestCoorsCloseness(CVector target, uint8 type, CVector start)
 	float dist;
 
 	if(type == PATH_CAR)
-		DoPathSearch(type, start, -1, target, pNodeList, &DummyResult, 32, nil, &dist, 999999.88f, -1);
+		DoPathSearch(type, start, -1, target, pNodeList, &DummyResult, 32, nil, &dist, 170.0f, -1);
 	else
 		DoPathSearch(type, start, -1, target, nil, &DummyResult2, 0, nil, &dist, 50.0f, -1);
 #ifdef FIX_BUGS
 	// dist has GenerationDistMultiplier as a factor, so our reference dist should have it too
 	if(type == PATH_CAR)
-		return dist < 150.0f*TheCamera.GenerationDistMultiplier;
+		return dist < 180.0f*TheCamera.GenerationDistMultiplier;
 	else
 		return dist < 100.0f*TheCamera.GenerationDistMultiplier;
 #else
 	if(type == PATH_CAR)
-		return dist < 150.0f;
+		return dist < 180.0f;
 	else
 		return dist < 100.0f;
 #endif

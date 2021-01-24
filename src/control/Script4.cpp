@@ -39,6 +39,7 @@
 #include "World.h"
 #include "Zones.h"
 #include "Bike.h"
+#include "Wanted.h"
 
 // LCS: file done except TODOs
 
@@ -477,7 +478,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		float fx = pObject->GetForward().x;
 		float fy = pObject->GetForward().y;
 		float heading = LimitAngleOnCircle(
-			RADTODEG(CGeneral::GetATanOfXY(pObject->GetForward().x, pObject->GetForward().y)));
+			RADTODEG(Atan2(-pObject->GetForward().x, pObject->GetForward().y)));
 		float headingTarget = GET_FLOAT_PARAM(1);
 #ifdef FIX_BUGS
 		float rotateBy = GET_FLOAT_PARAM(2) * CTimer::GetTimeStepFix();
@@ -935,6 +936,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		script_assert(pVehicle);
 		pPed->SetObjective(OBJECTIVE_ENTER_CAR_AS_DRIVER, pVehicle);
 		pPed->WarpPedIntoCar(pVehicle);
+		pPed->RestorePreviousObjective();
 		return 0;
 	}
 	case COMMAND_WARP_CHAR_INTO_CAR:

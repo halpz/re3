@@ -242,6 +242,7 @@ project "reLCS"
 	files { addSrcFiles("src/control") }
 	files { addSrcFiles("src/core") }
 	files { addSrcFiles("src/entities") }
+	files { addSrcFiles("src/leeds") }
 	files { addSrcFiles("src/leeds/base") }
 	files { addSrcFiles("src/math") }
 	files { addSrcFiles("src/modelinfo") }
@@ -267,6 +268,7 @@ project "reLCS"
 	includedirs { "src/control" }
 	includedirs { "src/core" }
 	includedirs { "src/entities" }
+	includedirs { "src/leeds" }
 	includedirs { "src/leeds/base" }
 	includedirs { "src/math" }
 	includedirs { "src/modelinfo" }

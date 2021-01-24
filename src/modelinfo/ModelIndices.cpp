@@ -2,17 +2,25 @@
 
 #include "General.h"
 #include "ModelIndices.h"
+#include "main.h"
 
-#define X(name, var) int16 var = -1;
+CModelIndices *gpModelIndices;
+
+/*#define X(name, var) int16 var = -1;
 	MODELINDICES
-#undef X
+#undef X*/
 
 void
 InitModelIndices(void)
 {
-#define X(name, var) var = -1;
+/*#define X(name, var) var = -1;
 	MODELINDICES
-#undef X
+#undef X*/
+	if (gMakeResources)
+	{
+		gpModelIndices = new CModelIndices;
+		memset(gpModelIndices, -1, sizeof(CModelIndices));
+	}
 }
 
 void

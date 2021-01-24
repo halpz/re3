@@ -601,19 +601,36 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	case COMMAND_CREATE_SCRIPT_CORONA:
 	{
 		CollectParameters(&m_nIp, 9);
-		static bool bShowed = false;
-		if (!bShowed) {
-			debug("CREATE_SCRIPT_CORONA not implemented");
-			bShowed = true;
-		}
-		SET_INTEGER_PARAM(0, -1);
+		base::cSList<script_corona>::tSItem* pCorona = new base::cSList<script_corona>::tSItem();
+		pCorona->item.x = GET_FLOAT_PARAM(0);
+		pCorona->item.y = GET_FLOAT_PARAM(1);
+		pCorona->item.z = GET_FLOAT_PARAM(2);
+		pCorona->item.id = CTheScripts::NextScriptCoronaID++;
+		if (pCorona->item.z <= MAP_Z_LOW_LIMIT)
+			pCorona->item.z = CWorld::FindGroundZForCoord(pCorona->item.x, pCorona->item.y);
+		pCorona->item.size = GET_FLOAT_PARAM(3);
+		pCorona->item.r = GET_INTEGER_PARAM(6);
+		pCorona->item.g = GET_INTEGER_PARAM(7);
+		pCorona->item.b = GET_INTEGER_PARAM(8);
+		pCorona->item.type = GET_INTEGER_PARAM(4);
+		pCorona->item.flareType = GET_INTEGER_PARAM(5);
+		SET_INTEGER_PARAM(0, pCorona->item.id);
+		CTheScripts::mCoronas.Insert(pCorona);
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
 	case COMMAND_REMOVE_SCRIPT_CORONA:
+	{
 		CollectParameters(&m_nIp, 1);
-		// TODO
+		for (base::cSList<script_corona>::tSItem* i = CTheScripts::mCoronas.first; i; i = i->next) {
+			if (i->item.id == GET_INTEGER_PARAM(0)) {
+				CTheScripts::mCoronas.Remove(i);
+				delete i;
+				break;
+			}
+		}
 		return 0;
+	}
 	case COMMAND_IS_BOAT_IN_WATER:
 	{
 		CollectParameters(&m_nIp, 1);

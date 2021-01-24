@@ -20,6 +20,7 @@ enum StreamFlags
 	STREAMFLAGS_40          = 0x40, // TODO(LCS): what's this
 	STREAMFLAGS_AMBIENT_SCRIPT_OWNED = 0x80,
 
+	// TODO(LCS): STREAMFLAGS_AMBIENT_SCRIPT_OWNED in STREAMFLAGS_CANT_REMOVE? check CColStore
 	STREAMFLAGS_CANT_REMOVE = STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_SCRIPTOWNED,
 	STREAMFLAGS_KEEP_IN_MEMORY = STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_SCRIPTOWNED|STREAMFLAGS_DEPENDENCY,
 };
@@ -208,6 +209,17 @@ public:
 
 	static void LoadScene(const CVector &pos);
 	static void LoadSceneCollision(const CVector &pos);
+
+	static void RegisterPointer(void *ptr, int, bool);
+	static RpAtomic *RegisterAtomic(RpAtomic *atomic, void *);
+	static void RegisterClump(RpClump *clump);
+	static RpAtomic *RegisterInstance(RpAtomic *atomic, void *);
+	static void RegisterInstance(RpClump *clump);
+	static void UnregisterPointer(void *ptr, int);
+	static RpAtomic *UnregisterAtomic(RpAtomic *atomic, void *);
+	static void UnregisterClump(RpClump *clump);
+	static RpAtomic *UnregisterInstance(RpAtomic *atomic, void *);
+	static void UnregisterInstance(RpClump *clump);
 
 	static void MemoryCardSave(uint8 *buffer, uint32 *length);
 	static void MemoryCardLoad(uint8 *buffer, uint32 length);

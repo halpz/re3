@@ -1,9 +1,9 @@
 #pragma once
-#include "common.h"
-#include "Font.h"
+#include "Font.h" 
 #include "Ped.h"
 #include "PedType.h"
 #include "Text.h"
+#include "sList.h"
 #include "Sprite2d.h"
 
 class CEntity;
@@ -38,9 +38,11 @@ void FlushLog();
 #define SPHERE_MARKER_PULSE_FRACTION 0.1f
 
 #ifdef USE_PRECISE_MEASUREMENT_CONVERTION
+#define MILES_IN_METER (0.000621371192f)
 #define METERS_IN_FOOT (0.3048f)
 #define FEET_IN_METER (3.28084f)
 #else
+#define MILES_IN_METER (1 / 1670.f)
 #define METERS_IN_FOOT (0.3f)
 #define FEET_IN_METER (3.33f)
 #endif
@@ -273,6 +275,20 @@ struct tBuildingSwap
 	int32 m_nOldModel;
 };
 
+struct script_corona
+{
+	int id;
+	float x;
+	float y;
+	float z;
+	float size;
+	uint8 r;
+	uint8 g;
+	uint8 b;
+	int type;
+	int flareType;
+};
+
 
 enum {
 	VAR_LOCAL = 1,
@@ -343,12 +359,14 @@ public:
 	static int AllowedCollision[MAX_ALLOWED_COLLISIONS];
 	static short* SavedVarIndices;
 	static int NumSaveVars;
-	static bool FSDestroyedFlag;
+	static int FSDestroyedFlag;
 	static int NextProcessId;
 	static bool InTheScripts;
 	static CRunningScript* pCurrent;
 	static uint16 NumTrueGlobals;
 	static uint16 MostGlobals;
+	static base::cSList<script_corona> mCoronas;
+	static int NextScriptCoronaID;
 
 	static bool Init(bool loaddata = false);
 	static void Process();
@@ -467,6 +485,8 @@ public:
 	static void SetObjectiveForAllPedsInCollective(int, eObjective, void*);
 	static void SetObjectiveForAllPedsInCollective(int, eObjective);
 #endif
+
+	static bool IsFortStauntonDestroyed() { return FSDestroyedFlag && *(int32*)&ScriptSpace[FSDestroyedFlag] == 1; }
 
 };
 
@@ -665,4 +685,5 @@ extern int scriptToLoad;
 #endif
 
 extern int gScriptsFile;
+extern CVector gVectorSetInLua;
 

@@ -2,6 +2,7 @@
 
 #include "Vehicle.h"
 #include "Skidmarks.h"
+#include "AnimManager.h"
 
 enum eBikeNodes {
 	BIKE_NODE_NONE,

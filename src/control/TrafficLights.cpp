@@ -114,6 +114,32 @@ CTrafficLights::DisplayActualLight(CEntity *ent)
 
 		CBrightLights::RegisterOne(pos1, ent->GetUp(), ent->GetRight(), CVector(0.0f, 0.0f, 0.0f), id + BRIGHTLIGHT_TRAFFIC_GREEN);
 		CBrightLights::RegisterOne(pos2, ent->GetUp(), -ent->GetRight(), CVector(0.0f, 0.0f, 0.0f), id + BRIGHTLIGHT_TRAFFIC_GREEN);
+
+		// TODO(LCS): check coordinates
+		static const float top = -0.127f;
+		static const float bot = -0.539f;
+		static const float mid = bot + (top - bot) / 3.0f;
+		static const float left = 1.256f;
+		static const float right = 0.706f;
+		phase = CTrafficLights::LightForPeds();
+		if (phase == PED_LIGHTS_DONT_WALK) {
+			CVector p0(2.7f, right, top);
+			CVector p1(2.7f, left, top);
+			CVector p2(2.7f, right, mid);
+			CVector p3(2.7f, left, mid);
+			CShinyTexts::RegisterOne(ent->GetMatrix() * p0, ent->GetMatrix() * p1, ent->GetMatrix() * p2, ent->GetMatrix() * p3,
+				1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+				SHINYTEXT_WALK, 255, 0, 0, 60.0f);
+		}
+		else if (phase == PED_LIGHTS_WALK || CTimer::GetTimeInMilliseconds() & 0x100) {
+			CVector p0(2.7f, right, mid);
+			CVector p1(2.7f, left, mid);
+			CVector p2(2.7f, right, bot);
+			CVector p3(2.7f, left, bot);
+			CShinyTexts::RegisterOne(ent->GetMatrix() * p0, ent->GetMatrix() * p1, ent->GetMatrix() * p2, ent->GetMatrix() * p3,
+				1.0f, 0.5f, 0.0f, 0.5f, 1.0f, 1.0f, 0.0f, 1.0f,
+				SHINYTEXT_WALK, 255, 255, 255, 60.0f);
+		}
 	}
 	else if (MI_TRAFFICLIGHTS_VERTICAL == m) {
 		CBaseModelInfo* mi = CModelInfo::GetModelInfo(ent->GetModelIndex());

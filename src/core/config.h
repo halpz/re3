@@ -198,7 +198,7 @@ enum Config {
 //#define ANIM_COMPRESSION	// only keep most recently used anims uncompressed
 
 #define GTA_TRAIN
-//#define GTA_BRIDGE
+#define GTA_BRIDGE
 
 #if defined GTA_PS2
 #	define GTA_PS2_STUFF
