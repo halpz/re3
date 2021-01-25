@@ -14,6 +14,7 @@ public:
 	int32 m_nId;
 	int16 m_nCur;
 	uint32 m_nTimeCreated;
+	int32 field_C;
 	CVector m_avecPos[NUM_SEGMENTPOINTS];
 	CVector m_avecVelocity[NUM_SEGMENTPOINTS];
 	bool m_abUsed[NUM_SEGMENTPOINTS];
@@ -25,7 +26,7 @@ public:
 	void PushPeds(void);
 };
 
-VALIDATE_SIZE(CWaterCannon, 412);
+VALIDATE_SIZE(CWaterCannon, 0x1A0);
 
 class CWaterCannons
 {

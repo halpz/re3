@@ -13,7 +13,15 @@
 #include "Camera.h"
 #include "Particle.h"
 
-// --MIAMI: file done
+// --LCS: file done
+
+#if 0
+	//PSP:
+	#define WATER_COLOR 255
+#else
+	//PS2:
+	#define WATER_COLOR 127
+#endif
 
 #define WATERCANNONVERTS 4
 #define WATERCANNONINDEXES 12
@@ -117,24 +125,34 @@ void CWaterCannon::Update_NewInput(CVector *pos, CVector *dir)
 	m_abUsed[m_nCur]       = true;
 }
 
+static float fWaterCannonU = 0.0f;
 void CWaterCannon::Render(void)
 {
+	extern RwRaster *gpFireHoseRaster;
+
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void *)FALSE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void *)TRUE);
-	RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void *)gpWaterRaster);
+	RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void *)gpFireHoseRaster);
 	
-	float v = float(CGeneral::GetRandomNumber() & 255) / 256;
-		
-	RwIm3DVertexSetV(&WaterCannonVertices[0], v);
-	RwIm3DVertexSetV(&WaterCannonVertices[1], v);
-	RwIm3DVertexSetV(&WaterCannonVertices[2], v);
-	RwIm3DVertexSetV(&WaterCannonVertices[3], v);
+	fWaterCannonU += CTimer::GetTimeStepInSeconds() * 6.0f;
 	
+	while ( fWaterCannonU >= 1.0f )
+		fWaterCannonU -= 1.0f;
+	
+	RwIm3DVertexSetU(&WaterCannonVertices[0], -fWaterCannonU);
+	RwIm3DVertexSetV(&WaterCannonVertices[0], 0.0f);
+	RwIm3DVertexSetU(&WaterCannonVertices[1], -fWaterCannonU);
+	RwIm3DVertexSetV(&WaterCannonVertices[1], 1.0f);
+	RwIm3DVertexSetU(&WaterCannonVertices[2], 1.0f - fWaterCannonU);
+	RwIm3DVertexSetV(&WaterCannonVertices[2], 0.0f);
+	RwIm3DVertexSetU(&WaterCannonVertices[3], 1.0f - fWaterCannonU);
+	RwIm3DVertexSetV(&WaterCannonVertices[3], 1.0f);
+
 	int16 pointA = m_nCur % NUM_SEGMENTPOINTS;
-	
 	int16 pointB = pointA - 1;
-	if ( (pointA - 1) < 0 )
+	int16 pointC = pointA;
+	if ( pointB < 0 )
 		pointB += NUM_SEGMENTPOINTS;
 
 	bool bInit = false;
@@ -144,6 +162,10 @@ void CWaterCannon::Render(void)
 	{
 		if ( m_abUsed[pointA] && m_abUsed[pointB] )
 		{
+			bool bFirst = false;
+			if ( i == 0 || m_abUsed[pointA] && !m_abUsed[pointC] )
+				bFirst = true;
+			
 			if ( !bInit )
 			{
 				CVector cp = CrossProduct(m_avecPos[pointB] - m_avecPos[pointA], TheCamera.GetForward());
@@ -151,26 +173,25 @@ void CWaterCannon::Render(void)
 				bInit = true;
 			}
 			
-			float dist       = float(i*i*i) / 300.0f + 1.0f;
 			float brightness = float(i) / NUM_SEGMENTPOINTS;
-			
 			int32 color = (int32)((1.0f - brightness*brightness) * 255.0f);
-			CVector offset = dist * norm;
 			
-			RwIm3DVertexSetRGBA(&WaterCannonVertices[0], color, color, color, color);
+			CVector offset = (float(i)+1.0f) * norm;
+			
+			RwIm3DVertexSetRGBA(&WaterCannonVertices[0], WATER_COLOR, WATER_COLOR, WATER_COLOR, bFirst ? 0 : color);
 			RwIm3DVertexSetPos (&WaterCannonVertices[0], m_avecPos[pointA].x - offset.x, m_avecPos[pointA].y - offset.y, m_avecPos[pointA].z - offset.z);
 				
-			RwIm3DVertexSetRGBA(&WaterCannonVertices[1], color, color, color, color);
+			RwIm3DVertexSetRGBA(&WaterCannonVertices[1], WATER_COLOR, WATER_COLOR, WATER_COLOR, bFirst ? 0 : color);
 			RwIm3DVertexSetPos (&WaterCannonVertices[1], m_avecPos[pointA].x + offset.x, m_avecPos[pointA].y + offset.y, m_avecPos[pointA].z + offset.z);
 			
-			RwIm3DVertexSetRGBA(&WaterCannonVertices[2], color, color, color, color);
+			offset = (float(i+1)+1.0f) * norm;
+			
+			RwIm3DVertexSetRGBA(&WaterCannonVertices[2], WATER_COLOR, WATER_COLOR, WATER_COLOR, color);
 			RwIm3DVertexSetPos (&WaterCannonVertices[2], m_avecPos[pointB].x - offset.x, m_avecPos[pointB].y - offset.y, m_avecPos[pointB].z - offset.z);
 			
-			RwIm3DVertexSetRGBA(&WaterCannonVertices[3], color, color, color, color);
+			RwIm3DVertexSetRGBA(&WaterCannonVertices[3], WATER_COLOR, WATER_COLOR, WATER_COLOR, color);
 			RwIm3DVertexSetPos (&WaterCannonVertices[3], m_avecPos[pointB].x + offset.x, m_avecPos[pointB].y + offset.y, m_avecPos[pointB].z + offset.z);
 			
-			LittleTest();
-
 			if ( RwIm3DTransform(WaterCannonVertices, WATERCANNONVERTS, NULL, rwIM3D_VERTEXUV) )
 			{
 				RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, WaterCannonIndexList, WATERCANNONINDEXES);
@@ -178,6 +199,7 @@ void CWaterCannon::Render(void)
 			}
 		}
 		
+		pointC = pointA;
 		pointA = pointB--;
 		if ( pointB < 0 )
 			pointB += NUM_SEGMENTPOINTS;
