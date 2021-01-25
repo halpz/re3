@@ -275,6 +275,10 @@ RemoveWheelCB(RwObject *object, void *arg)
 void
 CVehicleModelInfo::RemoveWheels(void)
 {
+#ifdef FIX_BUGS
+	if(m_clump == nil)
+		return;
+#endif
 	RwObjectNameIdAssocation *desc = ms_vehicleDescs[m_vehicleType];
 	for(int i = 0; desc[i].name; i++){
 		RwObjectIdAssociation assoc;
