@@ -1373,7 +1373,7 @@ Y si nos está vendiendo..., mátalo.
 Aquí viene nuestro amiguito. El señor Bocón en persona.
 
 [FM2_G]
-¿Te han seguido? Ya sabes que esto es nuestro secretito.
+¿Te siguieron? Ya sabes que esto es nuestro secretito.
 
 [FM2_H]
 No, no, no me han seguido. ¿Tienes lo mío?
@@ -8081,10 +8081,10 @@ REPETIR MISIÓN
 ¿REINTENTAR?
 
 [FED_VPL]
-FLUJO DE VEHÍCULOS
+RENDERIZADO DE VEHÍCULOS
 
 [FED_PRM]
-LUCES EN PEATONES
+ILUMINAR CONTORNOS DE PEATONES
 
 [FED_RGL]
 BRILLO DE CARRETERAS
@@ -8096,7 +8096,7 @@ FILTRO DE COLOR
 MAPAS DE LUZ DEL MUNDO
 
 [FED_MBL]
-DESENFOQ. MOVIMIENTO
+DESENFOQUE DE MOVIMIENTO
 
 [FEM_SIM]
 SIMPLE
@@ -8121,6 +8121,9 @@ XBOX
 
 [FEC_IVP]
 INVERTIR VERTICALIDAD MANDO
+
+[FEM_TWP]
+Poner o quitar punto de referencia
 
 { end of file }
 
