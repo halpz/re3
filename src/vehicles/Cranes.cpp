@@ -12,8 +12,6 @@
 #include "Object.h"
 #include "World.h"
 
-// --MIAMI: file done
-
 #define MAX_DISTANCE_TO_FIND_CRANE (100.0f)
 #define CRANE_UPDATE_RADIUS (300.0f)
 #define CRANE_MOVEMENT_PROCESSING_RADIUS (150.0f)
@@ -52,7 +50,12 @@ void CCranes::InitCranes(void)
 		for (int j = 0; j < NUMSECTORS_Y; j++) {
 			for (CPtrNode* pNode = CWorld::GetSector(i, j)->m_lists[ENTITYLIST_BUILDINGS].first; pNode; pNode = pNode->next) {
 				CEntity* pEntity = (CEntity*)pNode->item;
-				if (MI_LCS_CRANE01 == pEntity->GetModelIndex())
+				if (MODELID_CRANE_1 == pEntity->GetModelIndex() ||
+					MODELID_CRANE_2 == pEntity->GetModelIndex() ||
+					MODELID_CRANE_3 == pEntity->GetModelIndex() ||
+					MODELID_CRANE_4 == pEntity->GetModelIndex() ||
+					MODELID_CRANE_5 == pEntity->GetModelIndex() ||
+					MODELID_CRANE_6 == pEntity->GetModelIndex())
 					AddThisOneCrane(pEntity);
 			}
 		}
@@ -60,7 +63,12 @@ void CCranes::InitCranes(void)
 	// TODO(LCS)
 	for (CPtrNode* pNode = CWorld::GetBigBuildingList(LEVEL_INDUSTRIAL).first; pNode; pNode = pNode->next) {
 		CEntity* pEntity = (CEntity*)pNode->item;
-		if (MI_LCS_CRANE01 == pEntity->GetModelIndex())
+		if (MODELID_CRANE_1 == pEntity->GetModelIndex() ||
+			MODELID_CRANE_2 == pEntity->GetModelIndex() ||
+			MODELID_CRANE_3 == pEntity->GetModelIndex() ||
+			MODELID_CRANE_4 == pEntity->GetModelIndex() ||
+			MODELID_CRANE_5 == pEntity->GetModelIndex() ||
+			MODELID_CRANE_6 == pEntity->GetModelIndex())
 			AddThisOneCrane(pEntity);
 	}
 

@@ -24,8 +24,6 @@
 #include "Pools.h"
 #include "crossplatform.h"
 
-//--MIAMI: file done
-
 static bool bModelsRemovedForCutscene;
 static int32 NumberOfSavedWeapons;
 static eWeaponType SavedWeaponIDs[TOTAL_WEAPON_SLOTS];

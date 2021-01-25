@@ -513,7 +513,7 @@ CWeapon::FireMelee(CEntity *shooter, CVector &fireSource)
 				if ( SQR(victimPedRadius) > (victimPedPos-fireSource).MagnitudeSqr() )
 				{
 					CVector collisionDist;
-					CColModel* victimPedCol = &CTempColModels::ms_colModelPed1;
+					CColModel* victimPedCol = &gpTempColModels->ms_colModelPed1;
 					bool useLocalPos = false;
 					if (victimPed->m_nPedState == PED_FALL
 						|| victimPed->m_nPedState == PED_DIE && victimPed->bIsPedDieAnimPlaying
@@ -3173,7 +3173,6 @@ CWeapon::HasWeaponAmmoToBeUsed(void)
 		return m_nAmmoTotal != 0;
 }
 
-// --MIAMI: Done
 bool
 CPed::IsPedDoingDriveByShooting(void)
 {

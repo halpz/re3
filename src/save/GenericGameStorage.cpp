@@ -41,8 +41,6 @@
 #include "Timecycle.h"
 #include "Fluff.h"
 
-// --MIAMI: file done
-
 #define BLOCK_COUNT 22
 #define SIZE_OF_SIMPLEVARS 0xE8
 
@@ -347,7 +345,11 @@ GenericLoad()
 #endif
 	ReadDataFromBufferPointer(buf, CGame::currArea);
 	ReadDataFromBufferPointer(buf, CVehicle::bAllTaxisHaveNitro);
+#ifdef LOAD_INI_SETTINGS
+	buf += align4bytes(sizeof(CPad::bInvertLook4Pad));
+#else
 	ReadDataFromBufferPointer(buf, CPad::bInvertLook4Pad);
+#endif
 	ReadDataFromBufferPointer(buf, CTimeCycle::m_ExtraColour);
 	ReadDataFromBufferPointer(buf, CTimeCycle::m_bExtraColourOn);
 	ReadDataFromBufferPointer(buf, CTimeCycle::m_ExtraColourInter);

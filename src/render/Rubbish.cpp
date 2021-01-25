@@ -13,8 +13,6 @@
 #include "RenderBuffer.h"
 #include "Rubbish.h"
 
-//--MIAMI: file done
-
 #define RUBBISH_MAX_DIST (23.0f)
 #define RUBBISH_FADE_DIST (20.0f)
 

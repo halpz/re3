@@ -15,8 +15,6 @@
 int32 CWanted::MaximumWantedLevel = 6;
 int32 CWanted::nMaximumWantedLevel = 9600;
 
-// --MIAMI: File done except stats
-
 void
 CWanted::Initialise()
 {

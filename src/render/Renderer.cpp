@@ -1,4 +1,4 @@
-#define WITH_D3D
+#define WITHD3D
 #include "common.h"
 
 #include "main.h"
@@ -27,8 +27,6 @@
 #include "Renderer.h"
 #include "custompipes.h"
 #include "Frontend.h"
-
-//--MIAMI: file done
 
 bool gbShowPedRoadGroups;
 bool gbShowCarRoadGroups;
@@ -1202,7 +1200,6 @@ CEntity::RemoveLighting(bool)
 {
 }
 
-// --MIAMI: Done
 bool
 CPed::SetupLighting(void)
 {
@@ -1228,7 +1225,6 @@ CPed::SetupLighting(void)
 	return false;
 }
 
-// --MIAMI: Done
 void
 CPed::RemoveLighting(bool reset)
 {

@@ -358,7 +358,7 @@ CFont::PrintChar(float x, float y, wchar c)
 				CSprite2d::AddToBuffer(
 					CRect(x, y + RenderState.scaleY * 4.0f,
 						x + 32.0f * RenderState.scaleY * xScale * 0.96f,
-						y + 4.0f * RenderState.scaleY * + 16.0f * RenderState.scaleY),
+						y + 4.0f * RenderState.scaleY + 16.0f * RenderState.scaleY),
 					RenderState.color,
 					xoff / 16.0f, yoff / 12.8f + 0.0021f,
 					(xoff + 1.0f) / 16.0f - 0.001f, yoff / 12.8f + 0.0021f,

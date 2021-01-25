@@ -38,8 +38,7 @@
 #include "WindModifiers.h"
 #include "CutsceneShadow.h"
 #include "Clock.h"
-
-// --MIAMI: file done
+#include "Wanted.h"
 
 CPed *gapTempPedList[50];
 uint16 gnNumTempPedList;
@@ -61,7 +60,6 @@ void CPed::operator delete(void *p, int handle) { CPools::GetPedPool()->Delete((
 
 float gfTommyFatness = 1.0f;
 
-// --MIAMI: Done
 CPed::CPed(uint32 pedType) : m_pedIK(this)
 {
 #ifdef USE_CUTSCENE_SHADOW_FOR_PED
@@ -370,7 +368,6 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	m_lastComment = UINT32_MAX;
 }
 
-// --MIAMI: Done
 CPed::~CPed(void)
 {
 #ifdef USE_CUTSCENE_SHADOW_FOR_PED
@@ -407,7 +404,6 @@ CPed::~CPed(void)
 	DMAudio.DestroyEntity(m_audioEntityId);
 }
 
-// --MIAMI: Done
 void
 CPed::Initialise(void)
 {
@@ -418,7 +414,6 @@ CPed::Initialise(void)
 	debug("CPed ready\n");
 }
 
-// --MIAMI: Done
 void
 CPed::SetModelIndex(uint32 mi)
 {
@@ -450,21 +445,18 @@ CPed::SetModelIndex(uint32 mi)
 #endif
 }
 
-// --MIAMI: Done
 void
 CPed::SetPedStats(ePedStats pedStat)
 {
 	m_pedStats = CPedStats::ms_apPedStats[pedStat];
 }
 
-// --MIAMI: Done
 void
 CPed::DeleteRwObject()
 {
 	CEntity::DeleteRwObject();
 }
 
-// --MIAMI: Done
 void
 CPed::BuildPedLists(void)
 {
@@ -540,7 +532,6 @@ CPed::BuildPedLists(void)
 	}
 }
 
-// --MIAMI: Done
 bool
 CPed::OurPedCanSeeThisOne(CEntity *target, bool shootablesDoBlock)
 {
@@ -562,7 +553,6 @@ CPed::OurPedCanSeeThisOne(CEntity *target, bool shootablesDoBlock)
 		colpoint, ent, true, false, false, shootablesDoBlock, false, false, false, shootablesDoBlock);
 }
 
-// --MIAMI: Done
 // Some kind of binary sort
 void
 CPed::SortPeds(CPed **list, int min, int max)
@@ -600,14 +590,12 @@ CPed::SortPeds(CPed **list, int min, int max)
 	SortPeds(list, right, max);
 }
 
-// --MIAMI: Done
 void
 CPed::SetMoveState(eMoveState state)
 {
 	m_nMoveState = state;
 }
 
-// --MIAMI: Done
 void
 CPed::SetMoveAnim(void)
 {
@@ -721,7 +709,6 @@ CPed::SetMoveAnim(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::StopNonPartialAnims(void)
 {
@@ -733,7 +720,6 @@ CPed::StopNonPartialAnims(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::RestartNonPartialAnims(void)
 {
@@ -745,7 +731,6 @@ CPed::RestartNonPartialAnims(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetStoredState(void)
 {
@@ -764,7 +749,6 @@ CPed::SetStoredState(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::RestorePreviousState(void)
 {
@@ -815,7 +799,6 @@ CPed::RestorePreviousState(void)
 	}
 }
 
-// --MIAMI: Done
 uint32
 CPed::ScanForThreats(void)
 {
@@ -976,7 +959,6 @@ CPed::ScanForThreats(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::ScanForDelayedResponseThreats(void)
 {
@@ -996,7 +978,6 @@ CPed::ScanForDelayedResponseThreats(void)
 	m_threatCheckTimer = 0;
 }
 
-// --MIAMI: Done
 void
 CPed::CheckThreatValidity(void)
 {
@@ -1012,7 +993,6 @@ CPed::CheckThreatValidity(void)
 		m_threatFlags = 0;
 }
 
-// --MIAMI: Done
 bool
 CPed::CanUseTorsoWhenLooking(void)
 {
@@ -1023,7 +1003,6 @@ CPed::CanUseTorsoWhenLooking(void)
 	return false;
 }
 
-// --MIAMI: Done
 void
 CPed::SetLookFlag(float direction, bool keepTryingToLook, bool cancelPrevious)
 {
@@ -1040,7 +1019,6 @@ CPed::SetLookFlag(float direction, bool keepTryingToLook, bool cancelPrevious)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetLookFlag(CEntity *target, bool keepTryingToLook, bool cancelPrevious)
 {
@@ -1058,7 +1036,6 @@ CPed::SetLookFlag(CEntity *target, bool keepTryingToLook, bool cancelPrevious)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::ClearLookFlag(void) {
 	if (bIsLooking) {
@@ -1080,7 +1057,6 @@ CPed::ClearLookFlag(void) {
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::MoveHeadToLook(void)
 {
@@ -1159,7 +1135,6 @@ CPed::MoveHeadToLook(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::RestoreHeadPosition(void)
 {
@@ -1173,7 +1148,6 @@ CPed::RestoreHeadPosition(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetAimFlag(float angle)
 {
@@ -1193,7 +1167,6 @@ CPed::SetAimFlag(float angle)
 		m_pedIK.m_flags &= ~CPedIK::AIMS_WITH_ARM;
 }
 
-// --MIAMI: Done
 void
 CPed::SetAimFlag(CEntity *to)
 {
@@ -1210,7 +1183,6 @@ CPed::SetAimFlag(CEntity *to)
 	m_lookTimer = 0;
 }
 
-// --MIAMI: Done
 void
 CPed::ClearAimFlag(void)
 {
@@ -1225,7 +1197,6 @@ CPed::ClearAimFlag(void)
 		((CPlayerPed*)this)->m_fFPSMoveHeading = 0.0f;
 }
 
-// --MIAMI: Done
 void
 CPed::AimGun(void)
 {
@@ -1258,7 +1229,6 @@ CPed::AimGun(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::RestoreGunPosition(void)
 {
@@ -1273,14 +1243,12 @@ CPed::RestoreGunPosition(void)
 	}
 }
 
-// --MIAMI: Done
 bool
 CPed::CanWeRunAndFireWithWeapon(void)
 {
 	return CWeaponInfo::GetWeaponInfo(GetWeapon()->m_eWeaponType)->IsFlagSet(WEAPONFLAG_CANAIM_WITHARM);
 }
 
-// --MIAMI: Done
 void
 CPed::ScanForInterestingStuff(void)
 {
@@ -1374,7 +1342,6 @@ CPed::ScanForInterestingStuff(void)
 	}
 }
 
-// --MIAMI: Done
 bool
 CPed::WillChat(CPed *stranger)
 {
@@ -1400,7 +1367,6 @@ CPed::WillChat(CPed *stranger)
 	return true;
 }
 
-// --MIAMI: Done
 void
 CPed::CalculateNewVelocity(void)
 {
@@ -1492,7 +1458,6 @@ CPed::CalculateNewVelocity(void)
 	}
 }
 
-// --MIAMI: Done
 float
 CPed::WorkOutHeadingForMovingFirstPerson(float offset)
 {
@@ -1516,7 +1481,6 @@ CPed::WorkOutHeadingForMovingFirstPerson(float offset)
 	return CGeneral::LimitRadianAngle(offset + angle);
 }
 
-// --MIAMI: Done
 void
 CPed::UpdatePosition(void)
 {
@@ -1584,7 +1548,6 @@ CPed::UpdatePosition(void)
 	m_vecMoveSpeed.y += velocityChange.y;
 }
 
-// --MIAMI: Done
 void
 CPed::CalculateNewOrientation(void)
 {
@@ -1594,7 +1557,6 @@ CPed::CalculateNewOrientation(void)
 	SetHeading(m_fRotationCur);
 }
 
-// --MIAMI: Done
 void
 CPed::ClearAll(void)
 {
@@ -1618,7 +1580,6 @@ CPed::ClearAll(void)
 	m_pCollidingEntity = nil;
 }
 
-// --MIAMI: Done
 void
 CPed::ProcessBuoyancy(void)
 {
@@ -1737,7 +1698,6 @@ CPed::ProcessBuoyancy(void)
 		bTouchingWater = false;
 }
 
-// --MIAMI: Done?
 void
 CPed::ProcessControl(void)
 {
@@ -2878,7 +2838,6 @@ CPed::ProcessControl(void)
 		ServiceTalking();
 }
 
-// --MIAMI: Done
 int32
 CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 {
@@ -3084,7 +3043,6 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 	return ourCollidedSpheres;
 }
 
-// --MIAMI: Done
 static void
 particleProduceFootSplash(CPed *ped, CVector const &pos, float size, int times)
 {
@@ -3098,7 +3056,6 @@ particleProduceFootSplash(CPed *ped, CVector const &pos, float size, int times)
 	}
 }
 
-// --MIAMI: Done
 static void
 particleProduceFootDust(CPed *ped, CVector const &pos, float size, int times)
 {
@@ -3125,7 +3082,6 @@ particleProduceFootDust(CPed *ped, CVector const &pos, float size, int times)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::PlayFootSteps(void)
 {
@@ -3384,7 +3340,6 @@ CPed::PlayFootSteps(void)
 	}
 }
 
-// --MIAMI: Done
 // Actually GetLocalDirectionTo(Turn/Look)
 int
 CPed::GetLocalDirection(const CVector2D &posOffset)
@@ -3400,14 +3355,12 @@ CPed::GetLocalDirection(const CVector2D &posOffset)
 	return direction;
 }
 
-// --MIAMI: Done
 bool
 CPed::SetDirectionToWalkAroundVehicle(CVehicle* veh)
 {
 	return SetFollowPath(m_vecSeekPos, 0.0f, m_nMoveState, veh, m_pedInObjective, m_nMoveState == PEDMOVE_WALK ? 2000 : 250);
 }
 
-// --MIAMI: Done
 void
 CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 {
@@ -3860,7 +3813,6 @@ CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 	m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 280.0f * dist * checkIntervalInTime;
 }
 
-// --MIAMI: Done
 bool
 CPed::IsPedInControl(void)
 {
@@ -3869,14 +3821,12 @@ CPed::IsPedInControl(void)
 		&& m_fHealth > 0.0f;
 }
 
-// --MIAMI: Done
 bool
 CPed::IsPedShootable(void)
 {
 	return m_nPedState <= PED_STATES_NO_ST;
 }
 
-// --MIAMI: Done
 bool
 CPed::UseGroundColModel(void)
 {
@@ -3886,7 +3836,6 @@ CPed::UseGroundColModel(void)
 		m_nPedState == PED_DEAD;
 }
 
-// --MIAMI: Done
 bool
 CPed::CanPedReturnToState(void)
 {
@@ -3894,14 +3843,12 @@ CPed::CanPedReturnToState(void)
 		m_nPedState != PED_FIGHT && m_nPedState != PED_STEP_AWAY && m_nPedState != PED_SNIPER_MODE && m_nPedState != PED_LOOK_ENTITY;
 }
 
-// --MIAMI: Done
 bool
 CPed::CanSetPedState(void)
 {
 	return !DyingOrDead() && m_nPedState != PED_ARRESTED && !EnteringCar() && m_nPedState != PED_STEAL_CAR;
 }
 
-// --MIAMI: Done
 bool
 CPed::CanStrafeOrMouseControl(void)
 {
@@ -3913,7 +3860,6 @@ CPed::CanStrafeOrMouseControl(void)
 		m_nPedState == PED_ATTACK || m_nPedState == PED_FIGHT || m_nPedState == PED_AIM_GUN || m_nPedState == PED_JUMP || m_nPedState == PED_ANSWER_MOBILE;
 }
 
-// --MIAMI: Done
 void
 CPed::PedSetPreviousStateCB(CAnimBlendAssociation* assoc, void* arg)
 {
@@ -3922,7 +3868,6 @@ CPed::PedSetPreviousStateCB(CAnimBlendAssociation* assoc, void* arg)
 	ped->m_pVehicleAnim = nil;
 }
 
-// --MIAMI: Done
 void
 CPed::PedGetupCB(CAnimBlendAssociation* animAssoc, void* arg)
 {
@@ -3958,7 +3903,6 @@ CPed::PedGetupCB(CAnimBlendAssociation* animAssoc, void* arg)
 	ped->bGetUpAnimStarted = false;
 }
 
-// --MIAMI: Done
 void
 CPed::PedLandCB(CAnimBlendAssociation* animAssoc, void* arg)
 {
@@ -3971,7 +3915,6 @@ CPed::PedLandCB(CAnimBlendAssociation* animAssoc, void* arg)
 		ped->RestorePreviousState();
 }
 
-// --MIAMI: Done
 void
 CPed::PedStaggerCB(CAnimBlendAssociation* animAssoc, void* arg)
 {
@@ -3982,7 +3925,6 @@ CPed::PedStaggerCB(CAnimBlendAssociation* animAssoc, void* arg)
 		// nothing
 	*/
 }
-// --MIAMI: Done
 void
 CPed::PedSetOutCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 {
@@ -4163,7 +4105,6 @@ CPed::PedSetOutCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 	ped->bHeldHostageInCar = false;
 }
 
-// --MIAMI: Done
 void
 CPed::PedSetDraggedOutCarCB(CAnimBlendAssociation *dragAssoc, void *arg)
 {
@@ -4240,7 +4181,6 @@ CPed::PedSetDraggedOutCarCB(CAnimBlendAssociation *dragAssoc, void *arg)
 	ped->bVehExitWillBeInstant = false;
 }
 
-// --MIAMI: Done
 void
 CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 {
@@ -4499,7 +4439,6 @@ CPed::PedSetInCarCB(CAnimBlendAssociation *animAssoc, void *arg)
 	ped->bChangedSeat = true;
 }
 
-// --MIAMI: Done
 bool
 CPed::CanBeDeleted(void)
 {
@@ -4518,7 +4457,6 @@ CPed::CanBeDeleted(void)
 	}
 }
 
-//--MIAMI: done
 bool
 CPed::CanBeDeletedEvenInVehicle(void)
 {
@@ -4534,7 +4472,6 @@ CPed::CanBeDeletedEvenInVehicle(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::AddWeaponModel(int id)
 {
@@ -4562,7 +4499,6 @@ RemoveAllModelCB(RwObject *object, void *data)
 	return object;
 }
 
-// --MIAMI: Done
 void
 CPed::RemoveWeaponModel(int modelId)
 {
@@ -4590,7 +4526,6 @@ CPed::RemoveWeaponModel(int modelId)
 	m_wepModelID = -1;
 }
 
-// --MIAMI: Done
 void
 CPed::RequestDelayedWeapon()
 {
@@ -4610,7 +4545,6 @@ CPed::RequestDelayedWeapon()
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::GiveDelayedWeapon(eWeaponType weapon, uint32 ammo)
 {
@@ -4632,7 +4566,6 @@ CPed::GiveDelayedWeapon(eWeaponType weapon, uint32 ammo)
 	}
 }
 
-// --MIAMI: Done
 int32
 CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool unused)
 {
@@ -4669,14 +4602,12 @@ CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool unused)
 	return slot;
 }
 
-// --MIAMI: Done
 int
 CPed::GetWeaponSlot(eWeaponType weaponType)
 {
 	return CWeaponInfo::GetWeaponInfo(weaponType)->m_nWeaponSlot;
 }
 
-// --MIAMI: Done
 void
 CPed::SetCurrentWeapon(int slot)
 {
@@ -4699,14 +4630,12 @@ CPed::SetCurrentWeapon(int slot)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetCurrentWeapon(eWeaponType weaponType)
 {
 	SetCurrentWeapon(CWeaponInfo::GetWeaponInfo(weaponType)->m_nWeaponSlot);
 }
 
-// --MIAMI: Done
 void
 CPed::GrantAmmo(eWeaponType weaponType, uint32 ammo)
 {
@@ -4727,7 +4656,6 @@ CPed::GrantAmmo(eWeaponType weaponType, uint32 ammo)
 		GetWeapon(slot).m_eWeaponState = WEAPONSTATE_READY;
 }
 
-// --MIAMI: Done
 void
 CPed::SetAmmo(eWeaponType weaponType, uint32 ammo)
 {
@@ -4752,7 +4680,6 @@ CPed::SetAmmo(eWeaponType weaponType, uint32 ammo)
 		GetWeapon(slot).m_eWeaponState = WEAPONSTATE_READY;
 }
 
-// --MIAMI: Done
 void
 CPed::ClearWeapons(void)
 {
@@ -4763,7 +4690,6 @@ CPed::ClearWeapons(void)
 	SetCurrentWeapon(WEAPONTYPE_UNARMED);
 }
 
-// --MIAMI: Done
 void
 CPed::RemoveWeaponWhenEnteringVehicle(void)
 {
@@ -4776,14 +4702,13 @@ CPed::RemoveWeaponWhenEnteringVehicle(void)
 		RemoveWeaponModel(ourWeapon->m_nModelId);
 	}
 }
-// --MIAMI: Done, but enumarate weapon slots
 void
 CPed::ReplaceWeaponWhenExitingVehicle(void)
 {
 	eWeaponType weaponType = GetWeapon()->m_eWeaponType;
 
 	// If it's Uzi, we may have stored weapon. Uzi is the only gun we can use in car.
-	if (IsPlayer() && GetWeaponSlot(weaponType) == 5) {
+	if (IsPlayer() && GetWeaponSlot(weaponType) == WEAPONSLOT_SUBMACHINEGUN) {
 		if (m_storedWeapon != WEAPONTYPE_UNIDENTIFIED) {
 			SetCurrentWeapon(m_storedWeapon);
 			m_storedWeapon = WEAPONTYPE_UNIDENTIFIED;
@@ -4793,7 +4718,6 @@ CPed::ReplaceWeaponWhenExitingVehicle(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::PreRender(void)
 {
@@ -5028,7 +4952,6 @@ CPed::PreRender(void)
 
 CVector vecTestTemp(-1.0f, -1.0f, -1.0f);
 
-// --MIAMI: Done
 void
 CPed::Render(void)
 {
@@ -5078,7 +5001,6 @@ CPed::Render(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::CheckAroundForPossibleCollisions(void)
 {
@@ -5111,7 +5033,6 @@ CPed::CheckAroundForPossibleCollisions(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetIdle(void)
 {
@@ -5128,7 +5049,6 @@ CPed::SetIdle(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::Idle(void)
 {
@@ -5156,14 +5076,12 @@ CPed::Idle(void)
 	m_moved = CVector2D(0.0f, 0.0f);
 }
 
-// --MIAMI: Done
 void
 CPed::ClearPause(void)
 {
 	RestorePreviousState();
 }
 
-// --MIAMI: Done
 void
 CPed::Pause(void)
 {
@@ -5172,7 +5090,6 @@ CPed::Pause(void)
 		ClearPause();
 }
 
-// --MIAMI: Done
 void
 CPed::SetFall(int extraTime, AnimationId animId, uint8 evenIfNotInControl)
 {
@@ -5238,14 +5155,12 @@ CPed::SetFall(int extraTime, AnimationId animId, uint8 evenIfNotInControl)
 	bFallenDown = true;
 }
 
-// --MIAMI: Done
 void
 CPed::ClearFall(void)
 {
 	SetGetUp();
 }
 
-// --MIAMI: Done
 void
 CPed::Fall(void)
 {
@@ -5304,7 +5219,6 @@ CPed::Fall(void)
 	}
 }
 
-// --MIAMI: Done
 bool
 CPed::CheckIfInTheAir(void)
 {
@@ -5326,7 +5240,6 @@ CPed::CheckIfInTheAir(void)
 	return !foundGround;
 }
 
-// --MIAMI: Done
 void
 CPed::SetInTheAir(void)
 {
@@ -5345,7 +5258,6 @@ CPed::SetInTheAir(void)
 
 }
 
-// --MIAMI: Done
 void
 CPed::InTheAir(void)
 {
@@ -5369,7 +5281,6 @@ CPed::InTheAir(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetLanding(void)
 {
@@ -5405,7 +5316,6 @@ CPed::SetLanding(void)
 	bIsLanding = true;
 }
 
-// --MIAMI: Done
 void
 CPed::SetGetUp(void)
 {
@@ -5476,7 +5386,6 @@ CPed::SetGetUp(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::Mug(void)
 {
@@ -5498,7 +5407,6 @@ CPed::Mug(void)
 	}
 }
 
-// --MIAMI: Done
 // Unused
 void
 CPed::SetLook(float direction)
@@ -5510,7 +5418,6 @@ CPed::SetLook(float direction)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetLook(CEntity* to)
 {
@@ -5521,7 +5428,6 @@ CPed::SetLook(CEntity* to)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetLookTimer(int time)
 {
@@ -5530,7 +5436,6 @@ CPed::SetLookTimer(int time)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetAttackTimer(uint32 time)
 {
@@ -5538,7 +5443,6 @@ CPed::SetAttackTimer(uint32 time)
 		m_attackTimer = Max(m_shootTimer, CTimer::GetTimeInMilliseconds()) + time;
 }
 
-// --MIAMI: Done
 void
 CPed::SetShootTimer(uint32 time)
 {
@@ -5547,7 +5451,6 @@ CPed::SetShootTimer(uint32 time)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::ClearLook(void)
 {
@@ -5555,14 +5458,12 @@ CPed::ClearLook(void)
 	ClearLookFlag();
 }
 
-// --MIAMI: Done
 void
 CPed::Look(void)
 {
 	TurnBody();
 }
 
-// --MIAMI: Done
 bool
 CPed::TurnBody(void)
 {
@@ -5596,7 +5497,6 @@ CPed::TurnBody(void)
 	return turnDone;
 }
 
-// --MIAMI: Done
 void
 CPed::SetSeek(CVector pos, float distanceToCountDone)
 {
@@ -5615,7 +5515,6 @@ CPed::SetSeek(CVector pos, float distanceToCountDone)
 	m_distanceToCountSeekDone = distanceToCountDone;
 	m_vecSeekPos = pos;
 }
-// --MIAMI: Done
 void
 CPed::SetSeek(CEntity *seeking, float distanceToCountDone)
 {
@@ -5638,7 +5537,6 @@ CPed::SetSeek(CEntity *seeking, float distanceToCountDone)
 	SetMoveState(PEDMOVE_STILL);
 }
 
-// --MIAMI: Done
 void
 CPed::ClearSeek(void)
 {
@@ -5646,7 +5544,6 @@ CPed::ClearSeek(void)
 	bRunningToPhone = false;
 }
 
-// --MIAMI: Done
 bool
 CPed::Seek(void)
 {
@@ -5819,7 +5716,6 @@ CPed::Seek(void)
 	return true;
 }
 
-// --MIAMI: Done
 void
 CPed::SetFlee(CVector2D const &from, int time)
 {
@@ -5849,7 +5745,6 @@ CPed::SetFlee(CVector2D const &from, int time)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetFlee(CEntity *fleeFrom, int time)
 {
@@ -5880,7 +5775,6 @@ CPed::SetFlee(CEntity *fleeFrom, int time)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::ClearFlee(void)
 {
@@ -5890,7 +5784,6 @@ CPed::ClearFlee(void)
 	m_fleeTimer = 0;
 }
 
-// --MIAMI: Done
 void
 CPed::Flee(void)
 {
@@ -6078,7 +5971,6 @@ CPed::WanderRange(void)
 	}
 }
 
-// --MIAMI: Done
 bool
 CPed::SetWanderPath(int8 pathStateDest)
 {
@@ -6127,7 +6019,6 @@ CPed::SetWanderPath(int8 pathStateDest)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::WanderPath(void)
 {
@@ -6235,7 +6126,6 @@ CPed::WanderPath(void)
 		Say(SOUND_PED_WAIT_DOUBLEBACK);
 	}
 }
-// --MIAMI: Done
 void
 CPed::Avoid(void)
 {
@@ -6284,7 +6174,6 @@ CPed::Avoid(void)
 	}
 }
 
-// --MIAMI: Done
 CVector*
 CPed::SeekFollowingPath(void)
 {
@@ -6306,7 +6195,6 @@ CPed::SeekFollowingPath(void)
 		return &vecNextPathNode;
 }
 
-// --MIAMI: Done
 bool
 CPed::SetFollowPath(CVector dest, float radius, eMoveState state, CEntity* walkAroundEnt, CEntity* targetEnt, int time)
 {
@@ -6359,7 +6247,6 @@ CPed::SetFollowPath(CVector dest, float radius, eMoveState state, CEntity* walkA
 		return SetFollowPathStatic();
 }
 
-// --MIAMI: Done
 bool
 CPed::SetFollowPathStatic(void)
 {
@@ -6428,7 +6315,6 @@ CPed::SetFollowPathStatic(void)
 	return true;
 }
 
-// --MIAMI: Done
 bool
 CPed::SetFollowPathDynamic(void)
 {
@@ -6812,7 +6698,6 @@ CPed::SetFollowPathDynamic(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::ClearFollowPath()
 {
@@ -6823,7 +6708,6 @@ CPed::ClearFollowPath()
 	m_nCurPathNodeId = 0;
 }
 
-// --MIAMI: Done
 void
 CPed::FollowPath(void)
 {
@@ -6854,7 +6738,6 @@ CPed::FollowPath(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetEvasiveStep(CEntity *reason, uint8 animType)
 {
@@ -6930,7 +6813,6 @@ CPed::SetEvasiveStep(CEntity *reason, uint8 animType)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetEvasiveDive(CPhysical *reason, uint8 onlyRandomJump)
 {
@@ -7050,7 +6932,6 @@ CPed::SetEvasiveDive(CPhysical *reason, uint8 onlyRandomJump)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::PedEvadeCB(CAnimBlendAssociation* animAssoc, void* arg)
 {
@@ -7088,7 +6969,6 @@ CPed::PedEvadeCB(CAnimBlendAssociation* animAssoc, void* arg)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetDie(AnimationId animId, float delta, float speed)
 {
@@ -7152,7 +7032,6 @@ CPed::SetDie(AnimationId animId, float delta, float speed)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::FinishDieAnimCB(CAnimBlendAssociation *animAssoc, void *arg)
 {
@@ -7162,7 +7041,6 @@ CPed::FinishDieAnimCB(CAnimBlendAssociation *animAssoc, void *arg)
 		ped->bIsPedDieAnimPlaying = false;
 }
 
-// --MIAMI: Done
 void
 CPed::SetDead(void)
 {
@@ -7195,14 +7073,12 @@ CPed::SetDead(void)
 	CEventList::RegisterEvent(EVENT_DEAD_PED, EVENT_ENTITY_PED, this, nil, 1000);
 }
 
-// --MIAMI: Done
 void
 CPed::Die(void)
 {
 	// UNUSED: This is a perfectly empty function.
 }
 
-// --MIAMI: Done
 void
 CPed::SetChat(CEntity *chatWith, uint32 time)
 {
@@ -7219,7 +7095,6 @@ CPed::SetChat(CEntity *chatWith, uint32 time)
 	m_lookTimer = CTimer::GetTimeInMilliseconds() + 3000;
 }
 
-// --MIAMI: Done
 void
 CPed::Chat(void)
 {
@@ -7275,7 +7150,6 @@ CPed::Chat(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::ClearChat(void)
 {
@@ -7294,7 +7168,6 @@ CPed::ClearChat(void)
 	}
 }
 
-// --MIAMI: Done
 bool
 CPed::FacePhone(void)
 {
@@ -7343,7 +7216,6 @@ CPed::FacePhone(void)
 #endif
 }
 
-// --MIAMI: Done
 bool
 CPed::MakePhonecall(void)
 {
@@ -7356,7 +7228,6 @@ CPed::MakePhonecall(void)
 	return true;
 }
 
-// --MIAMI: Done
 void
 StartTalkingOnMobileCB(CAnimBlendAssociation* assoc, void* arg)
 {
@@ -7365,7 +7236,6 @@ StartTalkingOnMobileCB(CAnimBlendAssociation* assoc, void* arg)
 		CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_PHONE_TALK, 4.0f);
 }
 
-// --MIAMI: Done
 void
 FinishTalkingOnMobileCB(CAnimBlendAssociation *assoc, void *arg)
 {
@@ -7378,7 +7248,6 @@ FinishTalkingOnMobileCB(CAnimBlendAssociation *assoc, void *arg)
 	ped->m_lookTimer = 0;
 }
 
-// --MIAMI: Done
 void
 CPed::SetAnswerMobile(void)
 {
@@ -7395,7 +7264,6 @@ CPed::SetAnswerMobile(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::ClearAnswerMobile(void)
 {
@@ -7415,7 +7283,6 @@ CPed::ClearAnswerMobile(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::AnswerMobile(void)
 {
@@ -7448,7 +7315,6 @@ CPed::AnswerMobile(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::Teleport(CVector pos)
 {
@@ -7462,7 +7328,6 @@ CPed::Teleport(CVector pos)
 	CWorld::Add(this);
 }
 
-// --MIAMI: Done
 void
 CPed::SetSeekCar(CVehicle *car, uint32 doorNode)
 {
@@ -7486,7 +7351,6 @@ CPed::SetSeekCar(CVehicle *car, uint32 doorNode)
 
 }
 
-// --MIAMI: Done
 void
 CPed::SeekCar(void)
 {
@@ -7669,7 +7533,6 @@ CPed::SeekCar(void)
 	}
 }
 
-// --MIAMI: Done
 bool
 CPed::CheckForExplosions(CVector2D &area)
 {
@@ -7714,7 +7577,6 @@ CPed::CheckForExplosions(CVector2D &area)
 	return false;
 }
 
-// --MIAMI: Done
 CPed *
 CPed::CheckForGunShots(void)
 {
@@ -7730,7 +7592,6 @@ CPed::CheckForGunShots(void)
 	return nil;
 }
 
-// --MIAMI: Done
 CPed *
 CPed::CheckForDeadPeds(void)
 {
@@ -7746,7 +7607,6 @@ CPed::CheckForDeadPeds(void)
 	return nil;
 }
 
-// --MIAMI: Done
 bool
 CPed::IsPlayer(void) const
 {
@@ -7759,14 +7619,12 @@ CPed::IsPlayer(void) const
 #endif
 }
 
-// --MIAMI: Done
 bool
 CPed::IsGangMember(void) const
 {
 	return m_nPedType >= PEDTYPE_GANG1 && m_nPedType <= PEDTYPE_GANG9;
 }
 
-// --MIAMI: Done
 bool
 IsPedPointerValid(CPed* pPed)
 {
@@ -7777,7 +7635,6 @@ IsPedPointerValid(CPed* pPed)
 	return pPed->m_entryInfoList.first || pPed == FindPlayerPed();
 }
 
-// --MIAMI: Done
 bool
 IsPedPointerValid_NotInWorld(CPed* pPed)
 {
@@ -7793,7 +7650,6 @@ IsPedPointerValid_NotInWorld(CPed* pPed)
 	return true;
 }
 
-// --MIAMI: Done
 bool
 CPed::IsPointerValid(void)
 {
@@ -7807,7 +7663,6 @@ CPed::IsPointerValid(void)
 	return false;
 }
 
-// --MIAMI: Done
 void
 CPed::SetPedPositionInCar(void)
 {
@@ -7900,7 +7755,6 @@ CPed::SetPedPositionInCar(void)
 	GetMatrix() = newMat;
 }
 
-// --MIAMI: Done
 void
 CPed::LookForSexyPeds(void)
 {
@@ -7926,7 +7780,6 @@ CPed::LookForSexyPeds(void)
 	m_lookTimer = CTimer::GetTimeInMilliseconds() + 10000;
 }
 
-// --MIAMI: Done
 void
 CPed::LookForSexyCars(void)
 {
@@ -7956,7 +7809,6 @@ CPed::LookForSexyCars(void)
 	}
 }
 
-// --MIAMI: Done
 bool
 CPed::LookForInterestingNodes(void)
 {
@@ -8098,7 +7950,6 @@ CPed::LookForInterestingNodes(void)
 	return true;
 }
 
-// --MIAMI: Done
 void
 PlayRandomAnimationsFromAnimBlock(CPed* ped, AssocGroupId animGroup, uint32 first, uint32 amount)
 {
@@ -8135,7 +7986,6 @@ PlayRandomAnimationsFromAnimBlock(CPed* ped, AssocGroupId animGroup, uint32 firs
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::ClearWaitState(void)
 {
@@ -8239,7 +8089,6 @@ CPed::ClearWaitState(void)
 	m_nWaitState = WAITSTATE_FALSE;
 }
 
-// --MIAMI: Done
 void
 CPed::SetWaitState(eWaitState state, void *time)
 {
@@ -8459,7 +8308,6 @@ CPed::SetWaitState(eWaitState state, void *time)
 	m_nWaitState = state;
 }
 
-// --MIAMI: Done
 void
 CPed::Wait(void)
 {
@@ -8903,7 +8751,6 @@ CPed::Wait(void)
 		RestoreHeadingRate();
 }
 
-// --MIAMI: Done
 void
 CPed::DeleteSunbatheIdleAnimCB(CAnimBlendAssociation *assoc, void *arg)
 {
@@ -8922,7 +8769,6 @@ CPed::DeleteSunbatheIdleAnimCB(CAnimBlendAssociation *assoc, void *arg)
 	ped->Wait();
 }
 
-// --MIAMI: Done
 void
 CPed::FinishedWaitCB(CAnimBlendAssociation *animAssoc, void *arg)
 {
@@ -8933,21 +8779,18 @@ CPed::FinishedWaitCB(CAnimBlendAssociation *animAssoc, void *arg)
 	ped->Wait();
 }
 
-// --MIAMI: Done
 void
 CPed::RestoreHeadingRate(void)
 {
 	m_headingRate = m_pedStats->m_headingChangeRate;
 }
 
-// --MIAMI: Done
 void
 CPed::RestoreHeadingRateCB(CAnimBlendAssociation *assoc, void *arg)
 {
 	((CPed*)arg)->RestoreHeadingRate();
 }
 
-// --MIAMI: Done
 void
 CPed::FlagToDestroyWhenNextProcessed(void)
 {
@@ -8971,7 +8814,6 @@ CPed::FlagToDestroyWhenNextProcessed(void)
 	m_pVehicleAnim = nil;
 }
 
-// --MIAMI: Done
 void
 CPed::SetSolicit(uint32 time)
 {
@@ -8997,7 +8839,6 @@ CPed::SetSolicit(uint32 time)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::Solicit(void)
 {
@@ -9043,7 +8884,6 @@ CPed::Solicit(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::SetBuyIceCream(void)
 {
@@ -9056,7 +8896,6 @@ CPed::SetBuyIceCream(void)
 	SetPedState(PED_BUY_ICECREAM);
 }
 
-// --MIAMI: Done
 void
 CPed::BuyIceCream(void)
 {
@@ -9075,7 +8914,6 @@ CPed::BuyIceCream(void)
 	}
 }
 
-// --MIAMI: Done
 bool
 CPed::PossiblyFindBetterPosToSeekCar(CVector *pos, CVehicle *veh)
 {
@@ -9209,7 +9047,6 @@ CPed::PossiblyFindBetterPosToSeekCar(CVector *pos, CVehicle *veh)
 	return true;
 }
 
-// --MIAMI: Done
 void
 CPed::SetLeader(CEntity *leader)
 {
@@ -9221,7 +9058,6 @@ CPed::SetLeader(CEntity *leader)
 	}
 }
 
-// --MIAMI: Done
 bool
 CPed::CanPedJumpThis(CEntity *unused, CVector *damageNormal)
 {
@@ -9254,7 +9090,6 @@ CPed::CanPedJumpThis(CEntity *unused, CVector *damageNormal)
 	return CWorld::GetIsLineOfSightClear(pos, forwardPos, true, false, false, true, false, false, false);
 }
 
-// --MIAMI: Done
 void
 CPed::SetJump(void)
 {
@@ -9269,7 +9104,6 @@ CPed::SetJump(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::FinishLaunchCB(CAnimBlendAssociation *animAssoc, void *arg)
 {
@@ -9379,7 +9213,6 @@ CPed::FinishLaunchCB(CAnimBlendAssociation *animAssoc, void *arg)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::FinishJumpCB(CAnimBlendAssociation *animAssoc, void *arg)
 {
@@ -9391,7 +9224,6 @@ CPed::FinishJumpCB(CAnimBlendAssociation *animAssoc, void *arg)
 	animAssoc->blendDelta = -1000.0f;
 }
 
-// --MIAMI: Done
 void
 CPed::FinishHitHeadCB(CAnimBlendAssociation *animAssoc, void *arg)
 {
@@ -9408,7 +9240,6 @@ CPed::FinishHitHeadCB(CAnimBlendAssociation *animAssoc, void *arg)
 	ped->bIsLanding = false;
 }
 
-// --MIAMI: Done
 bool
 CPed::CanPedDriveOff(void)
 {
@@ -9424,7 +9255,6 @@ CPed::CanPedDriveOff(void)
 	}
 	return true;
 }
-// --MIAMI: Done
 void
 CPed::SetRadioStation(void)
 {
@@ -9445,7 +9275,6 @@ CPed::SetRadioStation(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::WarpPedIntoCar(CVehicle *car) // LCS TODO: remove passenger logic
 {
@@ -9586,14 +9415,12 @@ CPed::WarpPedIntoCarAsPassenger(CVehicle* pVehicle, int32 position)
 	bChangedSeat = true;
 }
 
-// --MIAMI: Done
 bool
 CPed::HasAttractor(void)
 {
 	return m_attractor != nil;
 }
 
-// --MIAMI: Done
 void
 CPed::SetNewAttraction(CPedAttractor* pAttractor, const CVector& pos, float heading, float time, int32 qid)
 {
@@ -9614,7 +9441,6 @@ CPed::SetNewAttraction(CPedAttractor* pAttractor, const CVector& pos, float head
 	m_positionInQueue = qid;
 }
 
-// --MIAMI: Done
 void
 CPed::AttachPedToEntity(CEntity *ent, CVector offset, uint16 type, float rot, eWeaponType weapon)
 {
@@ -9662,7 +9488,6 @@ CPed::AttachPedToEntity(CEntity *ent, CVector offset, uint16 type, float rot, eW
 	PositionAttachedPed();
 }
 
-// --MIAMI: Done
 void
 CPed::DettachPedFromEntity(void)
 {
@@ -9686,7 +9511,6 @@ CPed::DettachPedFromEntity(void)
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::PositionAttachedPed()
 {
@@ -9738,7 +9562,6 @@ CPed::PositionAttachedPed()
 	}
 }
 
-// --MIAMI: Done
 void
 CPed::Undress(const char* name)
 {
@@ -9754,7 +9577,6 @@ CPed::Undress(const char* name)
 	CWorld::Remove(this);
 }
 
-// --MIAMI: Done
 void
 CPed::Dress(void)
 {

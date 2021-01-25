@@ -26,4 +26,5 @@ public:
 	static bool ShouldLightsBeFlashing();
 	static void FindBridgeEntities();
 	static bool ThisIsABridgeObjectMovingUp(int);
+	static void ForceBridgeState(uint8 state);
 };

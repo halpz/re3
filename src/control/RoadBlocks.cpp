@@ -16,8 +16,6 @@
 #include "General.h"
 #include "Object.h"
 
-//--MIAMI: file done
-
 #define ROADBLOCKDIST (90.0f)
 #define ROADBLOCK_OBJECT_WIDTH (4.0f)
 
@@ -57,8 +55,8 @@ CRoadBlocks::Init(void)
 void
 CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType)
 {
-	static const CVector vecRoadBlockOffets[6] = { {-1.5, 1.8f, 0.0f}, {-1.5f, -1.8f, 0.0f}, {1.5f, 1.8f, 0.0f},
-	{1.5f, -1.8f, 0.0f}, {-1.5f, 0.0f, 0.0f}, {1.5, 0.0, 0.0} };
+	static const CVector vecRoadBlockOffets[6] = { CVector(-1.5, 1.8f, 0.0f), CVector(-1.5f, -1.8f, 0.0f), CVector(1.5f, 1.8f, 0.0f),
+	CVector(1.5f, -1.8f, 0.0f), CVector(-1.5f, 0.0f, 0.0f), CVector(1.5, 0.0, 0.0) };
 	CEntity* pEntityToAttack = (CEntity*)FindPlayerVehicle();
 	if (!pEntityToAttack)
 		pEntityToAttack = (CEntity*)FindPlayerPed();

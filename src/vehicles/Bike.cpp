@@ -37,8 +37,6 @@
 #include "Bike.h"
 #include "Debug.h"
 
-//--MIAMI: file done
-
 const uint32 CBike::nSaveStructSize =
 #ifdef COMPATIBLE_SAVES
 	1260;
@@ -81,6 +79,7 @@ CBike::CBike(int32 id, uint8 CreatedBy)
 		m_bikeAnimType = ASSOCGRP_BIKE_STANDARD;
 		break;
 	case MI_SANCHEZ:
+	case MI_SANCHEZ2:
 		m_bikeAnimType = ASSOCGRP_BIKE_DIRT;
 		break;
 	default: m_bikeAnimType = ASSOCGRP_BIKE_STANDARD; //assert(0 && "invalid bike model ID"); // TODO

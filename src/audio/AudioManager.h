@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "audio_enums.h"
 #include "AudioCollision.h"
@@ -544,8 +544,8 @@ public:
 #endif
 };
 
-#ifdef AUDIO_MSS
-static_assert(sizeof(cAudioManager) == 0x5558, "cAudioManager: error");
-#endif
+//#ifdef AUDIO_MSS
+//static_assert(sizeof(cAudioManager) == 0x5558, "cAudioManager: error");
+//#endif
 
 extern cAudioManager AudioManager;

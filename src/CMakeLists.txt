@@ -79,6 +79,21 @@ endif()
 
 target_compile_definitions(${EXECUTABLE} PRIVATE )
 
+option(${PROJECT}_WITH_SANITIZERS "Use UB sanitizers (better crash log)" OFF)
+option(${PROJECT}_WITH_ASAN "Use Address sanitizer (better crash log)" OFF)
+
+if(${PROJECT}_WITH_SANITIZERS)
+    target_compile_options(${EXECUTABLE} PUBLIC
+            -fsanitize=undefined,float-divide-by-zero,integer,implicit-conversion,implicit-integer-truncation,implicit-integer-arithmetic-value-change,local-bounds,nullability
+            -g3 -fno-omit-frame-pointer)
+    target_link_options(${EXECUTABLE} PUBLIC -fsanitize=undefined,float-divide-by-zero,integer,implicit-conversion,implicit-integer-truncation,implicit-integer-arithmetic-value-change,local-bounds,nullability)
+endif()
+
+if(${PROJECT}_WITH_ASAN)
+    target_compile_options(${EXECUTABLE} PUBLIC -fsanitize=address -g3 -fno-omit-frame-pointer)
+    target_link_options(${EXECUTABLE} PUBLIC -fsanitize=address)
+endif()
+
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     target_compile_options(${EXECUTABLE}
         PRIVATE

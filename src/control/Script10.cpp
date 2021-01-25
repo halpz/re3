@@ -74,7 +74,7 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 	case COMMAND_ADD_ARROW_3D_MARKER:
 	{
 		uint32 ip = m_nIp;
-		uint32 id = (uint32)(uintptr)GetPointerToScriptVariable(&m_nIp, 0);
+		uint32 id = (uint32)(uintptr)GetPointerToScriptVariable(&ip, 0);
 		CollectParameters(&m_nIp, 10);
 		CVector pos = GET_VECTOR_PARAM(0);
 		CVector dir = GET_VECTOR_PARAM(3);
@@ -213,7 +213,7 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 	case COMMAND_PRINT_WITH_2_NUMBERS_NOW_NO_BRIEF:
 	{
 		wchar* key = CTheScripts::GetTextByKeyFromScript(&m_nIp);
-		CollectParameters(&m_nIp, 3);
+		CollectParameters(&m_nIp, 4);
 		CMessages::AddMessageJumpQWithNumber(key, GET_INTEGER_PARAM(2), GET_INTEGER_PARAM(3), GET_INTEGER_PARAM(0), GET_INTEGER_PARAM(1), -1, -1, -1, -1); // 0
 		return 0;
 	}
@@ -321,6 +321,7 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 		strncpy(onscreen_str2, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CUserDisplay::OnscnTimer.AddCounter(var, GET_INTEGER_PARAM(1), onscreen_str1, 0); // TODO - second set of data
+		return 0;
 	}
 	case COMMAND_GET_PLAYER_STORED_WEAPON:
 	{

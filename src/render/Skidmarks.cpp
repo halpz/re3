@@ -6,8 +6,6 @@
 #include "Replay.h"
 #include "Skidmarks.h"
 
-//--MIAMI: file done
-
 CSkidmark CSkidmarks::aSkidmarks[NUMSKIDMARKS];
 
 RwImVertexIndex SkidmarkIndexList[SKIDMARK_LENGTH * 6];

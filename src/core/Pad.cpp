@@ -1,11 +1,4 @@
-#pragma warning( push )
-#pragma warning( disable : 4005)
-#if defined RW_D3D9 || defined RWLIBS
-#define DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
-#endif
-#pragma warning( pop )
-
+#define WITHDINPUT
 #include "common.h"
 #include "crossplatform.h"
 #include "platform.h"
@@ -53,8 +46,6 @@
 #include "eetypes.h"
 #include "libpad.h"
 #endif
-
-// --MIAMI: file done except Mobile(see TODOs) and PS2 stuff
 
 CPad Pads[MAX_PADS];
 #ifdef GTA_PS2
@@ -459,7 +450,7 @@ void ArmourCheat()
 void WantedLevelUpCheat()
 {
 	CHud::SetHelpMessage(TheText.Get("CHEAT5"), true);
-	FindPlayerPed()->m_pWanted->CheatWantedLevel(Min(FindPlayerPed()->m_pWanted->m_nWantedLevel + 2, 6));
+	FindPlayerPed()->m_pWanted->CheatWantedLevel(Min(FindPlayerPed()->m_pWanted->GetWantedLevel() + 2, 6));
 }
 
 void WantedLevelDownCheat()

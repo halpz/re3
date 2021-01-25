@@ -32,8 +32,6 @@
 #include "Replay.h"
 #endif
 
-//--MIAMI: done
-
 enum
 {
 	HELI_STATUS_HOVER,
@@ -480,7 +478,7 @@ CHeli::ProcessControl(void)
 			// Shoot
 			int shootTimeout;
 			if (m_heliType == HELI_TYPE_RANDOM) {
-				switch (FindPlayerPed()->m_pWanted->m_nWantedLevel) {
+				switch (FindPlayerPed()->m_pWanted->GetWantedLevel()) {
 				case 0:
 				case 1:
 				case 2: shootTimeout = 999999; break;
@@ -758,7 +756,7 @@ CHeli::InitHelis(void)
 	for(i = 0; i < NUM_HELIS; i++)
 		pHelis[i] = nil;
 
-	((CVehicleModelInfo*)CModelInfo::GetModelInfo(MI_CHOPPER))->SetColModel(&CTempColModels::ms_colModelPed1);
+	((CVehicleModelInfo*)CModelInfo::GetModelInfo(MI_CHOPPER))->SetColModel(&gpTempColModels->ms_colModelPed1);
 }
 
 CHeli*

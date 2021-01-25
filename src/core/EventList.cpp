@@ -10,8 +10,6 @@
 #include "main.h"
 #include "Accident.h"
 
-// --MIAMI: file done
-
 int32 CEventList::ms_nFirstFreeSlotIndex;
 CEvent gaEvent[NUMEVENTS];
 
@@ -220,7 +218,7 @@ CEventList::ReportCrimeForEvent(eEventType type, intptr crimeId, bool copsDontCa
 	default: crime = CRIME_NONE; break;
 	}
 	
-	if (crime == CRIME_HIT_PED && IsPedPointerValid((CPed*)crimeId) && FindPlayerPed()->m_pWanted->m_nWantedLevel == 0 && ((CPed*)crimeId)->bBeingChasedByPolice) {
+	if (crime == CRIME_HIT_PED && IsPedPointerValid((CPed*)crimeId) && FindPlayerPed()->m_pWanted->GetWantedLevel() == 0 && ((CPed*)crimeId)->bBeingChasedByPolice) {
 		if (!((CPed*)crimeId)->DyingOrDead()) {
 			CMessages::AddBigMessage(TheText.Get("GOODBOY"), 5000, 0);
 			CWorld::Players[CWorld::PlayerInFocus].m_nMoney += 50;

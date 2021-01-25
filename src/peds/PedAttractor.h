@@ -126,8 +126,8 @@ public:
 class CPedAtmAttractor : public CPedAttractor
 {
 public:
-	virtual ePedAttractorType GetType() const override { return ATTRACTOR_ATM; };
-	virtual void UpdatePedStateOnDeparture(CPed* pPed) const override;
+	virtual ePedAttractorType GetType() const { return ATTRACTOR_ATM; };
+	virtual void UpdatePedStateOnDeparture(CPed* pPed) const;
 	CPedAtmAttractor(C2dEffect* pEffect, const CMatrix& matrix, int32 maxpeds, float qdist, float waitTime, float approachTime, float distance, float headingdiff, float posdisp, float headdisp) :
 		CPedAttractor(pEffect, matrix, maxpeds, qdist, waitTime, approachTime, distance, headingdiff, posdisp, headdisp)
 	{};
@@ -136,9 +136,9 @@ public:
 class CPedIceCreamAttractor : public CPedAttractor
 {
 public:
-	virtual ~CPedIceCreamAttractor() override { GetPedAttractorManager()->RemoveIceCreamVanEffects(p2dEffect); }
-	virtual ePedAttractorType GetType() const override { return ATTRACTOR_ICECREAM; }
-	virtual void UpdatePedStateOnDeparture(CPed* pPed) const override {};
+	virtual ~CPedIceCreamAttractor() { GetPedAttractorManager()->RemoveIceCreamVanEffects(p2dEffect); }
+	virtual ePedAttractorType GetType() const { return ATTRACTOR_ICECREAM; }
+	virtual void UpdatePedStateOnDeparture(CPed* pPed) const {};
 	CPedIceCreamAttractor(C2dEffect* pEffect, const CMatrix& matrix, int32 maxpeds, float qdist, float waitTime, float approachTime, float distance, float headingdiff, float posdisp, float headdisp) :
 		CPedAttractor(pEffect, matrix, maxpeds, qdist, waitTime, approachTime, distance, headingdiff, posdisp, headdisp)
 	{};
@@ -147,9 +147,9 @@ public:
 class CPedPizzaAttractor : public CPedAttractor
 {
 public:
-	virtual float GetHeadOfQueueWaitTime() override { return 2000.0f; }
-	virtual ePedAttractorType GetType() const override { return ATTRACTOR_PIZZA; }
-	virtual void UpdatePedStateOnDeparture(CPed* pPed) const override;
+	virtual float GetHeadOfQueueWaitTime() { return 2000.0f; }
+	virtual ePedAttractorType GetType() const { return ATTRACTOR_PIZZA; }
+	virtual void UpdatePedStateOnDeparture(CPed* pPed) const;
 	CPedPizzaAttractor(C2dEffect* pEffect, const CMatrix& matrix, int32 maxpeds, float qdist, float waitTime, float approachTime, float distance, float headingdiff, float posdisp, float headdisp) :
 		CPedAttractor(pEffect, matrix, maxpeds, qdist, waitTime, approachTime, distance, headingdiff, posdisp, headdisp)
 	{};
@@ -158,8 +158,8 @@ public:
 class CPedSeatAttractor : public CPedAttractor
 {
 public:
-	virtual ePedAttractorType GetType() const override { return ATTRACTOR_SEAT; }
-	virtual void UpdatePedStateOnDeparture(CPed* pPed) const override {};
+	virtual ePedAttractorType GetType() const { return ATTRACTOR_SEAT; }
+	virtual void UpdatePedStateOnDeparture(CPed* pPed) const {};
 	CPedSeatAttractor(C2dEffect* pEffect, const CMatrix& matrix, int32 maxpeds, float qdist, float waitTime, float approachTime, float distance, float headingdiff, float posdisp, float headdisp) :
 		CPedAttractor(pEffect, matrix, maxpeds, qdist, waitTime, approachTime, distance, headingdiff, posdisp, headdisp)
 	{};
@@ -169,12 +169,12 @@ class CPedShelterAttractor : public CPedAttractor
 {
 	static std::vector<CVector> ms_displacements;
 public:
-	virtual ePedAttractorType GetType() const override { return ATTRACTOR_SHELTER; }
-	virtual bool BroadcastDeparture(CPed*) override;
-	virtual void UpdatePedStateOnDeparture(CPed* pPed) const override {};
-	virtual bool IsAtHeadOfQueue(CPed* pPed) const override { return true; }
-	virtual void ComputeAttractPos(int qid, CVector& pos) const override;
-	virtual void ComputeAttractHeading(int qid, float& heading) const override;
+	virtual ePedAttractorType GetType() const { return ATTRACTOR_SHELTER; }
+	virtual bool BroadcastDeparture(CPed*);
+	virtual void UpdatePedStateOnDeparture(CPed* pPed) const {};
+	virtual bool IsAtHeadOfQueue(CPed* pPed) const { return true; }
+	virtual void ComputeAttractPos(int qid, CVector& pos) const;
+	virtual void ComputeAttractHeading(int qid, float& heading) const;
 
 	CPedShelterAttractor(C2dEffect* pEffect, const CMatrix& matrix, int32 maxpeds, float qdist, float waitTime, float approachTime, float distance, float headingdiff, float posdisp, float headdisp) :
 		CPedAttractor(pEffect, matrix, maxpeds, qdist, waitTime, approachTime, distance, headingdiff, posdisp, headdisp)
@@ -187,8 +187,8 @@ public:
 class CPedStopAttractor : public CPedAttractor
 {
 public:
-	virtual ePedAttractorType GetType() const override { return ATTRACTOR_STOP; }
-	virtual void UpdatePedStateOnDeparture(CPed* pPed) const override {};
+	virtual ePedAttractorType GetType() const { return ATTRACTOR_STOP; }
+	virtual void UpdatePedStateOnDeparture(CPed* pPed) const {};
 
 	CPedStopAttractor(C2dEffect* pEffect, const CMatrix& matrix, int32 maxpeds, float qdist, float waitTime, float approachTime, float distance, float headingdiff, float posdisp, float headdisp) :
 		CPedAttractor(pEffect, matrix, maxpeds, qdist, waitTime, approachTime, distance, headingdiff, posdisp, headdisp)

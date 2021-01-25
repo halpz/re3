@@ -25,8 +25,6 @@
 #include "SurfaceTable.h"
 #include "Heli.h"
 
-// --MIAMI: file done
-
 #ifdef SQUEEZE_PERFORMANCE
 uint32 bulletInfoInUse;
 #endif

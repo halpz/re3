@@ -1,4 +1,4 @@
-﻿#include "common.h"
+#include "common.h"
 
 #include "AudioManager.h"
 #include "audio_enums.h"
@@ -41,9 +41,9 @@
 #include "WindModifiers.h"
 #include "Fluff.h"
 #include "Script.h"
+#include "Wanted.h"
 
-
-const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
+const int channels = ARRAY_SIZE(AudioManager.m_asActiveSamples);
 const int policeChannel = channels + 1;
 const int allChannels = channels + 2;
 
@@ -305,11 +305,11 @@ cAudioManager::ProcessPlayerMood()
 		playerPed = FindPlayerPed();
 		if (playerPed != nil) {
 
-			if (playerPed->m_pWanted->m_nWantedLevel > 3) {
+			if (playerPed->m_pWanted->GetWantedLevel() > 3) {
 				m_nPlayerMood = PLAYER_MOOD_ANGRY;
 				return;
 			}
-			if (playerPed->m_pWanted->m_nWantedLevel > 1) {
+			if (playerPed->m_pWanted->GetWantedLevel() > 1) {
 				m_nPlayerMood = PLAYER_MOOD_PISSED_OFF;
 				return;
 			}
@@ -5684,7 +5684,7 @@ cAudioManager::GetCopTalkSfx(CPed *ped, int16 sound)
 	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, 8494, 4); break;
 	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, 8491, 3); break;
 	case SOUND_PED_PED_COLLISION:
-		if(FindPlayerPed()->m_pWanted->m_nWantedLevel <= 0) return NO_SAMPLE;
+		if(FindPlayerPed()->m_pWanted->GetWantedLevel() <= 0) return NO_SAMPLE;
 		GetPhrase(sfx, ped->m_lastComment, 8476, 5);
 		break;
 	default: return GetGenericMaleTalkSfx(ped, sound);
@@ -8115,7 +8115,7 @@ cAudioManager::ProcessWaterCannon(int32)
 }
 
 //positon of arcade machines
-CVector aVecExtraSoundPosition[] = { {-1042.546f, 88.794f, 11.324f}, {-1004.476f, 181.697f, 11.324f} };
+CVector aVecExtraSoundPosition[] = { CVector(-1042.546f, 88.794f, 11.324f), CVector(-1004.476f, 181.697f, 11.324f) };
 
 void 
 cAudioManager::ProcessExtraSounds()
@@ -9311,7 +9311,8 @@ cAudioManager::ProcessBridge()
 void
 cAudioManager::ProcessBridgeWarning()
 {
-	if (CStats::CommercialPassed && m_sQueueSample.m_fDistance < 450.f) {
+	// TODO: LCS
+/*	if (CStats::CommercialPassed && m_sQueueSample.m_fDistance < 450.f) {
 		m_sQueueSample.m_nVolume = ComputeVolume(100, 450.f, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume != 0) {
 			m_sQueueSample.m_nCounter = 0;
@@ -9332,7 +9333,7 @@ cAudioManager::ProcessBridgeWarning()
 			m_sQueueSample.m_bRequireReflection = false;
 			AddSampleToRequestedQueue();
 		}
-	}
+	}*/
 }
 
 void

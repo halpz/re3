@@ -27,6 +27,9 @@ extern bool gbPrintMemoryUsage;
 // leeds
 extern bool gMakeResources;
 extern bool gUseChunkFiles;
+extern bool gSecondExportPass;
+extern bool gUseModelResources;
+extern bool gUseResources;
 
 class CSprite2d;
 
@@ -49,8 +52,10 @@ void TheModelViewer(void);
 #endif
 
 #ifdef LOAD_INI_SETTINGS
-void LoadINISettings();
+bool LoadINISettings();
 void SaveINISettings();
+void LoadINIControllerSettings();
+void SaveINIControllerSettings();
 #endif
 
 #ifdef NEW_RENDERER

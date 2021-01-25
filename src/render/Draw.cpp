@@ -5,8 +5,8 @@
 #include "Camera.h"
 #include "CutsceneMgr.h"
 
-#ifdef ASPECT_RATIO_SCALE
 float CDraw::ms_fAspectRatio = DEFAULT_ASPECT_RATIO;
+#ifdef ASPECT_RATIO_SCALE
 float CDraw::ms_fScaledFOV = 45.0f;
 #endif
 

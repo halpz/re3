@@ -19,6 +19,8 @@ namespace base
 		void* Shrink(void* data);
 	};
 
+#define VTABLE_ADDR(obj) ((void*)obj)	// TODO: make this portable
+
 	class cRelocatableChunkClassInfo
 	{
 	public:

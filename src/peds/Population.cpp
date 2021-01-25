@@ -29,8 +29,6 @@
 #include "Clock.h"
 #include "WaterLevel.h"
 
-// --MIAMI: File done
-
 #define MIN_CREATION_DIST		40.0f // not for start of the game (look at the GeneratePedsAtStartOfGame)
 #define CREATION_RANGE			10.0f // added over the MIN_CREATION_DIST.
 #define OFFSCREEN_CREATION_MULT	0.5f
@@ -537,7 +535,7 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 	CTheZones::GetZoneInfoForTimeOfDay(&playerCentreOfWorld, &zoneInfo);
 	CWanted *wantedInfo = playerInfo->m_pPed->m_pWanted;
 
-	if (wantedInfo->m_nWantedLevel > 2) {
+	if (wantedInfo->GetWantedLevel() > 2) {
 		if (!CGame::IsInInterior() && (CGeneral::GetRandomNumber() % 32 == 0) && FindPlayerVehicle())
 			forceAddingCop = true;
 

@@ -18,8 +18,6 @@
 #include "Zones.h"
 #include "Occlusion.h"
 
-// --MIAMI: file done
-
 uint8 CTheCarGenerators::ProcessCounter;
 uint32 CTheCarGenerators::NumOfCarGenerators;
 CCarGenerator CTheCarGenerators::CarGeneratorArray[NUM_CARGENS];

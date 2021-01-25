@@ -9,14 +9,12 @@
 #include "OnscreenTimer.h"
 #include "Camera.h"
 
-// --MIAMI: file done
-
 void COnscreenTimer::Init() {
 	m_bDisabled = false;
 	for(uint32 i = 0; i < NUMONSCREENCOUNTERS; i++) {
 		m_sCounters[i].m_nCounterOffset = 0;
 
-		for(uint32 j = 0; j < ARRAY_SIZE(COnscreenCounterEntry::m_aCounterText); j++) {
+		for(uint32 j = 0; j < ARRAY_SIZE(m_sCounters[0].m_aCounterText); j++) {
 			m_sCounters[i].m_aCounterText[j] = 0;
 		}
 
@@ -26,7 +24,7 @@ void COnscreenTimer::Init() {
 	for(uint32 i = 0; i < NUMONSCREENCLOCKS; i++) {
 		m_sClocks[i].m_nClockOffset = 0;
 
-		for(uint32 j = 0; j < ARRAY_SIZE(COnscreenTimerEntry::m_aClockText); j++) {
+		for(uint32 j = 0; j < ARRAY_SIZE(m_sClocks[0].m_aClockText); j++) {
 			m_sClocks[i].m_aClockText[j] = 0;
 		}
 
@@ -94,7 +92,7 @@ void COnscreenTimer::AddCounter(uint32 offset, uint16 type, char* text, uint16 p
 
 	m_sCounters[pos].m_nCounterOffset = offset;
 	if(text) {
-		strncpy(m_sCounters[pos].m_aCounterText, text, ARRAY_SIZE(COnscreenCounterEntry::m_aCounterText));
+		strncpy(m_sCounters[pos].m_aCounterText, text, ARRAY_SIZE(m_sCounters[0].m_aCounterText));
 	} else {
 		m_sCounters[pos].m_aCounterText[0] = 0;
 	}
@@ -116,7 +114,7 @@ void COnscreenTimer::AddClock(uint32 offset, char* text, bool bGoingDown) {
 	m_sClocks[i].m_nClockOffset = offset;
 	m_sClocks[i].m_bClockGoingDown = bGoingDown;
 	if(text) {
-		strncpy(m_sClocks[i].m_aClockText, text, ARRAY_SIZE(COnscreenTimerEntry::m_aClockText));
+		strncpy(m_sClocks[i].m_aClockText, text, ARRAY_SIZE(m_sClocks[0].m_aClockText));
 	} else {
 		m_sClocks[i].m_aClockText[0] = 0;
 	}

@@ -6,8 +6,6 @@
 #include "Collision.h"
 #include "SurfaceTable.h"
 
-//--MIAMI: file done
-
 float CSurfaceTable::ms_aAdhesiveLimitTable[NUMADHESIVEGROUPS][NUMADHESIVEGROUPS];
 
 void

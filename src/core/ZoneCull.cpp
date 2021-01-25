@@ -11,8 +11,6 @@
 #include "ZoneCull.h"
 #include "Zones.h"
 
-//--MIAMI: done
-
 int32     CCullZones::NumAttributeZones;
 CAttributeZone CCullZones::aAttributeZones[NUMATTRIBZONES];
 

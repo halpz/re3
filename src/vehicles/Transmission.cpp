@@ -5,7 +5,6 @@
 #include "Transmission.h"
 
 //--LCS: file done
-
 void
 cTransmission::InitGearRatios(void)
 {

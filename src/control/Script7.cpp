@@ -423,9 +423,10 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	case COMMAND_REQUEST_COLLISION:
 	{
 		CollectParameters(&m_nIp, 2);
-		CVector2D pos;
+		CVector pos;
 		pos.x = GET_FLOAT_PARAM(0);
 		pos.y = GET_FLOAT_PARAM(1);
+		pos.z = 0.0f;
 		CColStore::RequestCollision(pos);
 		return 0;
 	}

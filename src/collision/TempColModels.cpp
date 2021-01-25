@@ -1,10 +1,12 @@
 #include "common.h"
 
+#include "main.h"
 #include "TempColModels.h"
+#include "Game.h"
 
-CColModel CTempColModels::ms_colModelPed1;
+// LCS: haven't yet checked the numbers but they probably haven't changed
+
 CColModel CTempColModels::ms_colModelPed2;
-CColModel CTempColModels::ms_colModelBBox;
 CColModel CTempColModels::ms_colModelBumper1;
 CColModel CTempColModels::ms_colModelWheel1;
 CColModel CTempColModels::ms_colModelPanel1;
@@ -15,7 +17,9 @@ CColModel CTempColModels::ms_colModelPedGroundHit;
 CColModel CTempColModels::ms_colModelBoot1;
 CColModel CTempColModels::ms_colModelDoor1;
 CColModel CTempColModels::ms_colModelBonnet1;
-CColModel CTempColModels::ms_colModelWeapon;
+CColModel CTempColModels::ms_colModelFerryDocked;
+
+CTempColModels *gpTempColModels;
 
 
 CColSphere s_aPedSpheres[3];
@@ -33,6 +37,7 @@ CColSphere s_aBootSpheres[4];
 CColSphere s_aWheelSpheres[2];
 CColSphere s_aBodyPartSpheres1[2];
 CColSphere s_aBodyPartSpheres2[2];
+CColBox S_aFerryDockedBoxes[1];
 
 void
 CTempColModels::Initialise(void)
@@ -43,11 +48,26 @@ CTempColModels::Initialise(void)
 	colmodel.level = LEVEL_GENERIC;\
 	colmodel.ownsCollisionVolumes = false;
 
-	int i;
+	if(gMakeResources){
+		if(gpTempColModels == nil){
+			gpTempColModels = new CTempColModels;
+			gpTempColModels->Initialise();
+			return;
+		}
 
-	ms_colModelBBox.boundingSphere.Set(2.0f, CVector(0.0f, 0.0f, 0.0f));
-	ms_colModelBBox.boundingBox.Set(CVector(-2.0f, -2.0f, -2.0f), CVector(2.0f, 2.0f, 2.0f));
-	ms_colModelBBox.level = LEVEL_GENERIC;
+		ms_colModelBBox.boundingSphere.Set(2.0f, CVector(0.0f, 0.0f, 0.0f));
+		ms_colModelBBox.boundingBox.Set(CVector(-2.0f, -2.0f, -2.0f), CVector(2.0f, 2.0f, 2.0f));
+		ms_colModelBBox.level = LEVEL_GENERIC;
+
+		ms_colModelPed1.boundingSphere.Set(1.25f, CVector(0.0f, 0.0f, 0.0f));
+		ms_colModelPed1.boundingBox.Set(CVector(-0.35f, -0.35f, -1.0f), CVector(0.35f, 0.35f, 0.9f));
+		SET_COLMODEL_SPHERES(ms_colModelPed1, s_aPedSpheres);
+
+		ms_colModelWeapon.boundingSphere.Set(0.25f, CVector(0.0f, 0.0f, 0.0f));
+		ms_colModelWeapon.boundingBox.Set(CVector(-0.25f, -0.25f, -0.25f), CVector(0.25f, 0.25f, 0.25f));
+	}
+
+	int i;
 
 	for (i = 0; i < ARRAY_SIZE(ms_colModelCutObj); i++) {
 		ms_colModelCutObj[i].boundingSphere.Set(2.0f, CVector(0.0f, 0.0f, 0.0f));
@@ -72,10 +92,6 @@ CTempColModels::Initialise(void)
 		s_aPedSpheres[i].surface = SURFACE_PED;
 		s_aPedSpheres[i].piece = 0;
 	}
-
-	ms_colModelPed1.boundingSphere.Set(1.25f, CVector(0.0f, 0.0f, 0.0f));
-	ms_colModelPed1.boundingBox.Set(CVector(-0.35f, -0.35f, -1.0f), CVector(0.35f, 0.35f, 0.9f));
-	SET_COLMODEL_SPHERES(ms_colModelPed1, s_aPedSpheres);
 
 	// Ped 2 Spheres
 
@@ -293,13 +309,47 @@ CTempColModels::Initialise(void)
 
 	SET_COLMODEL_SPHERES(ms_colModelBodyPart2, s_aBodyPartSpheres2);
 
-	ms_colModelWeapon.boundingSphere.radius = 0.25f;
-	ms_colModelWeapon.boundingBox.min.x = -0.25f;
-	ms_colModelWeapon.boundingBox.min.y = -0.25f;
-	ms_colModelWeapon.boundingBox.min.z = -0.25f;
-	ms_colModelWeapon.boundingBox.max.x = 0.25f;
-	ms_colModelWeapon.boundingBox.max.y = 0.25f;
-	ms_colModelWeapon.boundingBox.max.z = 0.25f;
+	// Ferry Docked
+
+	S_aFerryDockedBoxes[0].Set(CVector(-6.3f, -22.78f, -2.0f), CVector(6.3f, 22.78f, 2.8f), SURFACE_THICK_METAL_PLATE, SURFACE_DEFAULT);
+
+	ms_colModelFerryDocked.boundingSphere.Set(35.0f, CVector(0.0f, -0.0f, 0.0f));
+	ms_colModelFerryDocked.boundingBox.Set(S_aFerryDockedBoxes[0].min, S_aFerryDockedBoxes[0].max);
+	ms_colModelFerryDocked.spheres = nil;
+	ms_colModelFerryDocked.numSpheres = 0;
+	ms_colModelFerryDocked.boxes = S_aFerryDockedBoxes;
+	ms_colModelFerryDocked.numBoxes = ARRAY_SIZE(S_aFerryDockedBoxes);
+	ms_colModelFerryDocked.level = LEVEL_GENERIC;
+	
 
 #undef SET_COLMODEL_SPHERES
+}
+
+void
+CTempColModels::Write(base::cRelocatableChunkWriter &writer)
+{
+	writer.AllocateRaw(this, sizeof(*this), 0x10, false, true);
+
+	ms_colModelBBox.Write(writer, false);
+	writer.AddPatch(&ms_colModelBBox);
+
+	ms_colModelPed1.Write(writer, false);
+	writer.AddPatch(&ms_colModelPed1);
+
+	ms_colModelWeapon.Write(writer, false);
+	writer.AddPatch(&ms_colModelWeapon);
+
+	for(int i = 0; i < ARRAY_SIZE(ms_colModelCutObj); i++)
+		ms_colModelCutObj[i].Write(writer, true);
+	ms_colModelPed2.Write(writer, true);
+	ms_colModelPedGroundHit.Write(writer, true);
+	ms_colModelDoor1.Write(writer, true);
+	ms_colModelBumper1.Write(writer, true);
+	ms_colModelPanel1.Write(writer, true);
+	ms_colModelBonnet1.Write(writer, true);
+	ms_colModelBoot1.Write(writer, true);
+	ms_colModelWheel1.Write(writer, true);
+	ms_colModelBodyPart1.Write(writer, true);
+	ms_colModelBodyPart2.Write(writer, true);
+	ms_colModelFerryDocked.Write(writer, true);
 }

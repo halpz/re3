@@ -1,3 +1,6 @@
+#if (!defined(GTA_PS2_STUFF) && defined(RWLIBS)) || defined(__MWERKS__)
+#define WITHD3D
+#endif
 #include "config.h"
 #include "common.h"
 
@@ -16,8 +19,6 @@
 #include "Streaming.h"
 #include "SpecialFX.h"
 #include "Font.h"
-
-// --MIAMI: file done
 
 float CRadar::m_radarRange;
 sRadarTrace CRadar::ms_RadarTrace[NUMRADARBLIPS];
@@ -54,7 +55,7 @@ CSprite2d CRadar::SpraySprite;
 CSprite2d CRadar::TShirtSprite;
 CSprite2d CRadar::TommySprite;
 CSprite2d CRadar::PhoneSprite;
-CSprite2d CRadar::RadioWildstyleSprite;
+/*CSprite2d CRadar::RadioWildstyleSprite;
 CSprite2d CRadar::RadioFlashSprite;
 CSprite2d CRadar::RadioKChatSprite;
 CSprite2d CRadar::RadioFeverSprite;
@@ -62,7 +63,39 @@ CSprite2d CRadar::RadioVRockSprite;
 CSprite2d CRadar::RadioVCPRSprite;
 CSprite2d CRadar::RadioEspantosoSprite;
 CSprite2d CRadar::RadioEmotionSprite;
-CSprite2d CRadar::RadioWaveSprite;
+CSprite2d CRadar::RadioWaveSprite;*/
+CSprite2d CRadar::EightBallSprite;
+CSprite2d CRadar::BurnerSprite;
+CSprite2d CRadar::CiprianiSprite;
+CSprite2d CRadar::DonaldSprite;
+CSprite2d CRadar::JosephSprite;
+CSprite2d CRadar::LeoneSprite;
+CSprite2d CRadar::MariaSprite;
+CSprite2d CRadar::McraySprite;
+CSprite2d CRadar::ToshikoSprite;
+CSprite2d CRadar::VincenzoSprite;
+CSprite2d CRadar::BombSprite;
+CSprite2d CRadar::ClothesShopSprite;
+CSprite2d CRadar::PropertyRedSprite;
+CSprite2d CRadar::PhilCassidySprite;
+CSprite2d CRadar::PowerupSprite;
+CSprite2d CRadar::MPBase;
+CSprite2d CRadar::MPCheckPoint;
+CSprite2d CRadar::MPPlayer;
+CSprite2d CRadar::MPObjective;
+CSprite2d CRadar::MPCar;
+CSprite2d CRadar::MPTank;
+CSprite2d CRadar::MPCarLockup;
+CSprite2d CRadar::MPTargetPlayer;
+CSprite2d CRadar::MapHereSprite0;
+CSprite2d CRadar::MapHereSprite1;
+CSprite2d CRadar::MapHereSprite2;
+CSprite2d CRadar::MapHereSprite3;
+CSprite2d CRadar::MapHereSprite4;
+CSprite2d CRadar::MapHereSprite5;
+CSprite2d CRadar::MapHereSprite6;
+CSprite2d CRadar::MapHereSprite7;
+CSprite2d CRadar::MapWayPoint;
 
 CSprite2d *CRadar::RadarSprites[RADAR_SPRITE_COUNT] = { 
 	nil,
@@ -96,20 +129,38 @@ CSprite2d *CRadar::RadarSprites[RADAR_SPRITE_COUNT] = {
 	&TShirtSprite,
 	&TommySprite,
 	&PhoneSprite,
-	&RadioWildstyleSprite,
-	&RadioFlashSprite,
-	&RadioKChatSprite,
-	&RadioFeverSprite,
-	&RadioVRockSprite,
-	&RadioVCPRSprite,
-	&RadioEspantosoSprite,
-	&RadioEmotionSprite,
-	&RadioWaveSprite, // tmp hack
-	&RadioWaveSprite,
-	&RadioWaveSprite,
-	&RadioWaveSprite,
-	&RadioWaveSprite,
-	&RadioWaveSprite
+	&EightBallSprite,
+	&BurnerSprite,
+	&CiprianiSprite,
+	&DonaldSprite,
+	&JosephSprite,
+	&LeoneSprite,
+	&MariaSprite,
+	&McraySprite,
+	&ToshikoSprite,
+	&VincenzoSprite,
+	&BombSprite,
+	&ClothesShopSprite,
+	&PropertyRedSprite,
+	&PhilCassidySprite,
+	&PowerupSprite,
+	&MPBase,
+	&MPCheckPoint,
+	&MPPlayer,
+	&MPObjective,
+	&MPCar,
+	&MPTank,
+	&MPCarLockup,
+	&MPTargetPlayer,
+	&MapHereSprite0,
+	&MapHereSprite1,
+	&MapHereSprite2,
+	&MapHereSprite3,
+	&MapHereSprite4,
+	&MapHereSprite5,
+	&MapHereSprite6,
+	&MapHereSprite7,
+	&MapWayPoint,
 };
 
 // Why this doesn't coincide with world coordinates i don't know
@@ -339,10 +390,10 @@ void CRadar::ClearBlipForEntity(eBlipType type, int32 id)
 int CRadar::ClipRadarPoly(CVector2D *poly, const CVector2D *rect)
 {
 	CVector2D corners[4] = {
-		{  1.0f, -1.0f },	// top right
-		{  1.0f,  1.0f },	// bottom right
-		{ -1.0f,  1.0f },	// bottom left
-		{ -1.0f, -1.0f },	// top left
+		CVector2D(  1.0f, -1.0f ),	// top right
+		CVector2D(  1.0f,  1.0f ),	// bottom right
+		CVector2D( -1.0f,  1.0f ),	// bottom left
+		CVector2D( -1.0f, -1.0f ),	// top left
 	};
 	CVector2D tmp;
 	int i, j, n;
@@ -1025,7 +1076,7 @@ CRadar::LoadTextures()
 	TShirtSprite.SetTexture("tshirt");
 	TommySprite.SetTexture("tommy");
 	PhoneSprite.SetTexture("phone");
-	RadioWildstyleSprite.SetTexture("RWildstyle");
+	/*RadioWildstyleSprite.SetTexture("RWildstyle");
 	RadioFlashSprite.SetTexture("RFlash");
 	RadioKChatSprite.SetTexture("RKchat");
 	RadioFeverSprite.SetTexture("RFever");
@@ -1033,7 +1084,39 @@ CRadar::LoadTextures()
 	RadioVCPRSprite.SetTexture("RVCPR");
 	RadioEspantosoSprite.SetTexture("REspantoso");
 	RadioEmotionSprite.SetTexture("REmotion");
-	RadioWaveSprite.SetTexture("RWave");
+	RadioWaveSprite.SetTexture("RWave");*/
+	EightBallSprite.SetTexture("radar_8Ball");
+	BurnerSprite.SetTexture("radar_Burner");
+	CiprianiSprite.SetTexture("radar_Cipriani");
+	DonaldSprite.SetTexture("radar_Donald");
+	JosephSprite.SetTexture("radar_Joseph");
+	LeoneSprite.SetTexture("radar_Leone");
+	MariaSprite.SetTexture("radar_Maria");
+	McraySprite.SetTexture("radar_McRay");
+	ToshikoSprite.SetTexture("radar_Toshiko");
+	VincenzoSprite.SetTexture("radar_Vincenzo");
+	BombSprite.SetTexture("radar_Bomb");
+	ClothesShopSprite.SetTexture("radar_cShop");
+	PropertyRedSprite.SetTexture("radar_propertyR");
+	PhilCassidySprite.SetTexture("radar_flag");
+	PowerupSprite.SetTexture("radar_powerup");
+	MPBase.SetTexture("mp_base");
+	MPCheckPoint.SetTexture("radar_mp_checkpoint");
+	MPPlayer.SetTexture("mp_player");
+	MPObjective.SetTexture("mp_objective");
+	MPCar.SetTexture("mp_car");
+	MPTank.SetTexture("mp_tank");
+	MPCarLockup.SetTexture("mp_carlockup");
+	MPTargetPlayer.SetTexture("mp_targetplayer");
+	MapHereSprite0.SetTexture("radar_arrow");
+	MapHereSprite1.SetTexture("radar_arrow_01");
+	MapHereSprite2.SetTexture("radar_arrow_02");
+	MapHereSprite3.SetTexture("radar_arrow_03");
+	MapHereSprite4.SetTexture("radar_arrow_04");
+	MapHereSprite5.SetTexture("radar_arrow_05");
+	MapHereSprite6.SetTexture("radar_arrow_06");
+	MapHereSprite7.SetTexture("radar_arrow_07");
+	MapWayPoint.SetTexture("radar_player_target");
 	CTxdStore::PopCurrentTxd();
 }
 
@@ -1221,7 +1304,39 @@ void CRadar::Shutdown()
 	TShirtSprite.Delete();
 	TommySprite.Delete();
 	PhoneSprite.Delete();
-	RadioWildstyleSprite.Delete();
+	EightBallSprite.Delete();
+	BurnerSprite.Delete();
+	CiprianiSprite.Delete();
+	DonaldSprite.Delete();
+	JosephSprite.Delete();
+	LeoneSprite.Delete();
+	MariaSprite.Delete();
+	McraySprite.Delete();
+	ToshikoSprite.Delete();
+	VincenzoSprite.Delete();
+	BombSprite.Delete();
+	ClothesShopSprite.Delete();
+	PropertyRedSprite.Delete();
+	PhilCassidySprite.Delete();
+	PowerupSprite.Delete();
+	MPBase.Delete();
+	MPCheckPoint.Delete();
+	MPPlayer.Delete();
+	MPObjective.Delete();
+	MPCar.Delete();
+	MPTank.Delete();
+	MPCarLockup.Delete();
+	MPTargetPlayer.Delete();
+	MapHereSprite0.Delete();
+	MapHereSprite1.Delete();
+	MapHereSprite2.Delete();
+	MapHereSprite3.Delete();
+	MapHereSprite4.Delete();
+	MapHereSprite5.Delete();
+	MapHereSprite6.Delete();
+	MapHereSprite7.Delete();
+	MapWayPoint.Delete();
+	/*RadioWildstyleSprite.Delete();
 	RadioFlashSprite.Delete();
 	RadioKChatSprite.Delete();
 	RadioFeverSprite.Delete();
@@ -1229,7 +1344,7 @@ void CRadar::Shutdown()
 	RadioVCPRSprite.Delete();
 	RadioEspantosoSprite.Delete();
 	RadioEmotionSprite.Delete();
-	RadioWaveSprite.Delete();
+	RadioWaveSprite.Delete();*/
 	RemoveRadarSections();
 }
 
@@ -1672,7 +1787,7 @@ CRadar::DrawLegend(int32 x, int32 y, int32 sprite)
 		case RADAR_SPRITE_PHONE:
 			text = TheText.Get("LG_25");
 		break;
-		case RADAR_SPRITE_RADIO_WILDSTYLE:
+		/*case RADAR_SPRITE_RADIO_WILDSTYLE:
 			text = TheText.Get("LG_26");
 		break;
 		case RADAR_SPRITE_RADIO_FLASH:
@@ -1698,7 +1813,7 @@ CRadar::DrawLegend(int32 x, int32 y, int32 sprite)
 		break;
 		case RADAR_SPRITE_RADIO_WAVE:
 			text = TheText.Get("LG_34");
-		break;
+		break;*/
 		default:
 			text = TheText.Get("LG_34"); // tmp hack
 		break;

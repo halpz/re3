@@ -4,8 +4,6 @@
 #include "FileMgr.h"
 #include "PedType.h"
 
-// --MIAMI: file done
-
 CPedType *CPedType::ms_apPedType[NUM_PEDTYPES];
 CPedStats *CPedStats::ms_apPedStats[NUM_PEDSTATS];
 

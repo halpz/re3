@@ -3,8 +3,6 @@
 #include "DummyObject.h"
 #include "Pools.h"
 
-// --MIAMI: file done
-
 CDummyObject::CDummyObject(CObject *obj)
 {
 	SetModelIndexNoCreate(obj->GetModelIndex());

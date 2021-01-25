@@ -2,11 +2,18 @@
 
 #include "BaseModelInfo.h"
 
+// For linking up models by name
+struct TempIdeData
+{
+	char name[24];
+	int16 id;
+};
+extern TempIdeData m_sTempIdeData[800];
+
 class CSimpleModelInfo : public CBaseModelInfo
 {
 public:
-	// atomics[2] is often a pointer to the non-LOD modelinfo
-	RpAtomic *m_atomics[3];
+	RpAtomic **m_atomics;
 	// m_lodDistances[2] holds the near distance for LODs
 	float  m_lodDistances[3];
 	uint8  m_numAtomics;
@@ -31,15 +38,26 @@ public:
 	uint16  m_isCodeGlass      : 1;
 	uint16  m_isArtistGlass    : 1;
 
+	CSimpleModelInfo *m_relatedModel;
+
+	static base::cRelocatableChunkClassInfo msClassInfo;
+	static CSimpleModelInfo msClassInstance;
+
 	CSimpleModelInfo(void) : CBaseModelInfo(MITYPE_SIMPLE) {}
 	CSimpleModelInfo(ModelInfoType id) : CBaseModelInfo(id) {}
 	~CSimpleModelInfo() {}
 	void DeleteRwObject(void);
 	RwObject *CreateInstance(void);
 	RwObject *CreateInstance(RwMatrix *);
-	RwObject *GetRwObject(void) { return (RwObject*)m_atomics[0]; }
+	RwObject *GetRwObject(void) { return m_atomics ? (RwObject*)m_atomics[0] : nil; }
 
-	virtual void SetAtomic(int n, RpAtomic *atomic);
+	virtual void LoadModel(void *atomics, const void *chunk);
+	virtual void Write(base::cRelocatableChunkWriter &writer);
+	virtual void *WriteModel(base::cRelocatableChunkWriter &writer);
+	virtual void RcWriteThis(base::cRelocatableChunkWriter &writer);
+	virtual void RcWriteEmpty(base::cRelocatableChunkWriter &writer);
+
+	/*virtual*/ void SetAtomic(int n, RpAtomic *atomic);
 
 	void Init(void);
 	void IncreaseAlpha(void);
@@ -47,15 +65,18 @@ public:
 	float GetLodDistance(int i);
 	float GetNearDistance(void);
 	float GetLargestLodDistance(void);
+	RpAtomic *GetLodAtomic(int n);
+	RpAtomic *GetLastAtomic(void);
+	RpAtomic *GetLastAtomic(float dist);
 	RpAtomic *GetAtomicFromDistance(float dist);
 	RpAtomic *GetFirstAtomicFromDistance(float dist);
-	void FindRelatedModel(int32 minID, int32 maxID);
-	void SetupBigBuilding(int32 minID, int32 maxID);
+	void FindRelatedModel(void);
+	void SetupBigBuilding(void);
 
 	void SetNumAtomics(int n) { m_numAtomics = n; }
 	CSimpleModelInfo *GetRelatedModel(void){
-		return (CSimpleModelInfo*)m_atomics[2]; }
+		return m_relatedModel; }
 	void SetRelatedModel(CSimpleModelInfo *m){
-		m_atomics[2] = (RpAtomic*)m; }
+		m_relatedModel = m; }
 };
 //static_assert(sizeof(CSimpleModelInfo) == 0x4C, "CSimpleModelInfo: error");

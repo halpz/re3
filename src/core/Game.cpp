@@ -1,6 +1,3 @@
-#pragma warning( push )
-#pragma warning( disable : 4005)
-#pragma warning( pop )
 #include "common.h"
 #include "platform.h"
 
@@ -10,7 +7,6 @@
 #include "Accident.h"
 #include "Antennas.h"
 #include "Bridge.h"
-#include "Camera.h"
 #include "CarCtrl.h"
 #include "CarGen.h"
 #include "CdStream.h"
@@ -69,7 +65,6 @@
 #include "Skidmarks.h"
 #include "SetPieces.h"
 #include "SpecialFX.h"
-#include "Sprite2d.h"
 #include "Stats.h"
 #include "Streaming.h"
 #include "SurfaceTable.h"
@@ -124,8 +119,6 @@ int gameTxdSlot;
 #ifdef SECUROM
 uint8 gameProcessPirateCheck = 0;
 #endif
-
-// --MIAMI: File done
 
 bool DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha);
 void DoRWStuffEndOfFrame(void);
@@ -323,7 +316,7 @@ bool CGame::InitialiseOnceAfterRW(void)
 {
 	TheText.Load();
 	CTimer::Initialise();
-	CTempColModels::Initialise();
+	gpTempColModels->Initialise();
 	mod_HandlingManager.Initialise();
 	CSurfaceTable::Initialise("DATA\\SURFACE.DAT");
 	CPedStats::Initialise();
@@ -372,6 +365,9 @@ bool CGame::Initialise(const char* datFile)
 #endif
 
 	CPools::Initialise();
+
+	if(gMakeResources)
+		CVehicleModelInfo::Load(nil);
 
 #ifndef GTA_PS2
 	CIniFile::LoadIniFile();
@@ -858,9 +854,9 @@ void CGame::Process(void)
 		gameProcessPirateCheck = 2;
 	}
 #endif
-	uint32 startTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond();
+	//uint32 startTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond();
 	CStreaming::Update();
-	uint32 processTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond() - startTime;
+	//uint32 processTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond() - startTime;
 	CWindModifiers::Number = 0;
 	if (!CTimer::GetIsPaused())
 	{
@@ -899,13 +895,13 @@ void CGame::Process(void)
 		CEventList::Update();
 		CParticle::Update();
 		gFireManager.Update();
-		if (processTime >= 2) {
-			CPopulation::Update(false);
-		} else {
-			uint32 startTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond();
+		//if (processTime >= 2) {
+		//	CPopulation::Update(false);
+		//} else {
+		//	uint32 startTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond();
 			CPopulation::Update(true);
-			processTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond() - startTime;
-		}
+		//	processTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond() - startTime;
+		//}
 		CWeapon::UpdateWeapons();
 		if (!CCutsceneMgr::IsRunning())
 			CTheCarGenerators::Process();
@@ -943,7 +939,7 @@ void CGame::Process(void)
 		if (!CReplay::IsPlayingBack())
 		{
 			PUSH_MEMID(MEMID_CARS);
-			if (processTime < 2)
+			//if (processTime < 2)
 				CCarCtrl::GenerateRandomCars();
 			CRoadBlocks::GenerateRoadBlocks();
 			CCarCtrl::RemoveDistantCars();

@@ -645,8 +645,6 @@ MarkerAtomicCB(RpAtomic *atomic, void *data)
 	return atomic;
 }
 
-// --MIAMI: C3dMarker and C3dMarkers done
-
 bool
 C3dMarker::AddMarker(uint32 identifier, uint16 type, float fSize, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate)
 {
@@ -879,7 +877,7 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 			pMarker->m_Matrix.GetPosition() = pos;
 
 		if (pMarker->m_bFindZOnNextPlacement) {
-			if ((playerPos - pos).MagnitudeSqr() < sq(100.f) && CColStore::HasCollisionLoaded(CVector2D(pos))) {
+			if ((playerPos - pos).MagnitudeSqr() < sq(100.f) && CColStore::HasCollisionLoaded(pos)) {
 				float z = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z + 1.0f, nil);
 				if (z != 0.0f)
 					pMarker->m_Matrix.GetPosition().z = z - 0.05f * size;
@@ -895,7 +893,7 @@ C3dMarkers::PlaceMarker(uint32 identifier, uint16 type, CVector &pos, float size
 
 	pMarker->AddMarker(identifier, type, size, r, g, b, a, pulsePeriod, pulseFraction, rotateRate);
 	if (type == MARKERTYPE_CYLINDER || type == MARKERTYPE_0 || type == MARKERTYPE_2) {
-		if ((playerPos - pos).MagnitudeSqr() < sq(100.f) && CColStore::HasCollisionLoaded(CVector2D(pos))) {
+		if ((playerPos - pos).MagnitudeSqr() < sq(100.f) && CColStore::HasCollisionLoaded(pos)) {
 			float z = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z + 1.0f, nil);
 			if (z != 0.0f)
 				pos.z = z - 0.05f * size;
@@ -1421,7 +1419,7 @@ CMoneyMessages::RegisterOne(CVector vecPos, const char *pText, uint8 bRed, uint8
 }
 
 CRGBA FoamColour(255, 255, 255, 255);
-unsigned int CSpecialParticleStuff::BoatFromStart;
+uint32 CSpecialParticleStuff::BoatFromStart;
 
 void
 CSpecialParticleStuff::CreateFoamAroundObject(CMatrix* pMatrix, float innerFw, float innerRg, float innerUp, int32 particles)

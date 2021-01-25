@@ -10,8 +10,6 @@
 #include "FileMgr.h"
 #include "Timecycle.h"
 
-//--MIAMI: done
-
 uint8 CTimeCycle::m_nAmbientRed[NUMHOURS][NUMWEATHERS];
 uint8 CTimeCycle::m_nAmbientGreen[NUMHOURS][NUMWEATHERS];
 uint8 CTimeCycle::m_nAmbientBlue[NUMHOURS][NUMWEATHERS];

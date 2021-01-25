@@ -1080,7 +1080,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CPlayerPed* pPed = CWorld::Players[GET_INTEGER_PARAM(0)].m_pPed;
 		script_assert(pPed);
-		SET_INTEGER_PARAM(0, pPed->m_pWanted->m_nWantedLevel);
+		SET_INTEGER_PARAM(0, pPed->m_pWanted->GetWantedLevel());
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}

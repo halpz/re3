@@ -1,6 +1,7 @@
 #include "common.h"
 #include <rpmatfx.h>
 
+#include "main.h"
 #include "RwHelper.h"
 #include "General.h"
 #include "NodeName.h"
@@ -20,16 +21,21 @@
 #include "ModelIndices.h"
 #include "ModelInfo.h"
 #include "custompipes.h"
+#include "Streaming.h"
+#include "Leeds.h"
 
-//--MIAMI: done
+base::cRelocatableChunkClassInfo CVehicleModelInfo::msClassInfo("CVehicleModelInfo", VTABLE_ADDR(&msClassInstance), sizeof(msClassInstance));
+CVehicleModelInfo CVehicleModelInfo::msClassInstance;
 
-int8 CVehicleModelInfo::ms_compsToUse[2] = { -2, -2 };
-int8 CVehicleModelInfo::ms_compsUsed[2];
-RwRGBA CVehicleModelInfo::ms_vehicleColourTable[256];
-RwTexture *CVehicleModelInfo::ms_colourTextureTable[256];
+//int8 CVehicleModelInfo::ms_compsToUse[2] = { -2, -2 };
+//int8 CVehicleModelInfo::ms_compsUsed[2];
+//RwRGBA CVehicleModelInfo::ms_vehicleColourTable[256];
+CVehicleModelInfo::Statics *CVehicleModelInfo::mspInfo;
 
-RwTexture *gpWhiteTexture;
-RwFrame *pMatFxIdentityFrame;
+//RwTexture *CVehicleModelInfo::ms_colourTextureTable[256];
+
+//RwTexture *gpWhiteTexture;
+//RwFrame *pMatFxIdentityFrame;
 
 enum {
 	VEHICLE_FLAG_COLLAPSE	= 0x2,
@@ -170,6 +176,29 @@ RwObjectNameIdAssocation *CVehicleModelInfo::ms_vehicleDescs[] = {
 bool gbBlackCars;
 bool gbPinkCars;
 
+void
+CVehicleModelInfo::Load(void *inst)
+{
+	if(inst)
+		mspInfo = (CVehicleModelInfo::Statics*)inst;
+	else{
+		mspInfo = new CVehicleModelInfo::Statics;
+		memset(mspInfo, 0, sizeof(*mspInfo));
+		mspInfo->ms_compsToUse[0] = -2;
+		mspInfo->ms_compsToUse[1] = -2;
+	}
+}
+
+void*
+CVehicleModelInfo::WriteStaticInfo(base::cRelocatableChunkWriter &writer)
+{
+	writer.AllocateRaw(mspInfo, sizeof(*mspInfo), sizeof(void*), false, true);
+	if(mspInfo->unknown)
+		writer.AddPatch(&mspInfo->unknown);
+	return mspInfo;
+	
+}
+
 CVehicleModelInfo::CVehicleModelInfo(void)
  : CClumpModelInfo(MITYPE_VEHICLE)
 {
@@ -180,7 +209,12 @@ CVehicleModelInfo::CVehicleModelInfo(void)
 		m_positions[i].z = 0.0f;
 	}
 	m_numColours = 0;
+	CClumpModelInfo::m_animFileIndex = -1;
+
+	memset(m_materials1, 0, sizeof(m_materials1));
+	memset(m_materials2, 0, sizeof(m_materials2));
 	m_animFileIndex = -1;
+	m_normalSplay = 0.3f;
 }
 
 void
@@ -189,13 +223,75 @@ CVehicleModelInfo::DeleteRwObject(void)
 	int32 i;
 	RwFrame *f;
 
-	for(i = 0; i < m_numComps; i++){
-		f = RpAtomicGetFrame(m_comps[i]);
-		RpAtomicDestroy(m_comps[i]);
-		RwFrameDestroy(f);
+	if(!gUseChunkFiles){
+		for(i = 0; i < m_numComps; i++){
+			f = RpAtomicGetFrame(m_comps[i]);
+			RpAtomicDestroy(m_comps[i]);
+			RwFrameDestroy(f);
+		}
+#ifdef FIX_BUGS
+		delete[] m_comps;
+		m_comps = nil;
+#endif
+		m_numComps = 0;
 	}
-	m_numComps = 0;
+
+	RemoveWheels();
+
+	for(i = 0; i < ARRAY_SIZE(m_materials1); i++)
+		CStreaming::UnregisterPointer(&m_materials1[i], 2);
+	for(i = 0; i < ARRAY_SIZE(m_materials2); i++)
+		CStreaming::UnregisterPointer(&m_materials2[i], 2);
+
+	if(m_numComps > 0){
+		CStreaming::UnregisterPointer(&m_comps, 2);
+		for(i = 0; i < m_numComps; i++)
+			CStreaming::UnregisterAtomic(m_comps[i], nil);
+		m_comps = nil;
+	}
+
 	CClumpModelInfo::DeleteRwObject();
+}
+
+RwObject*
+RemoveWheelCB(RwObject *object, void *arg)
+{
+	RpAtomic *atomic = (RpAtomic*)object;
+	if(RwObjectGetType(object) == rpATOMIC){
+		RpClumpRemoveAtomic((RpClump*)arg, atomic);
+#ifdef LIBRW
+		CStreaming::UnregisterPointer(&atomic->inClump.next, 2);
+		CStreaming::UnregisterPointer(&atomic->inClump.prev, 2);
+		CStreaming::UnregisterPointer(&atomic->object.object.parent, 2);
+		CStreaming::UnregisterPointer(&atomic->object.inFrame.next, 2);
+		CStreaming::UnregisterPointer(&atomic->object.inFrame.prev, 2);
+		CStreaming::UnregisterPointer(&atomic->clump, 2);
+#endif
+		RpAtomicDestroy(atomic);
+	}
+	return object;
+}
+
+void
+CVehicleModelInfo::RemoveWheels(void)
+{
+#ifdef FIX_BUGS
+	if(m_clump == nil)
+		return;
+#endif
+	RwObjectNameIdAssocation *desc = ms_vehicleDescs[m_vehicleType];
+	for(int i = 0; desc[i].name; i++){
+		RwObjectIdAssociation assoc;
+
+		if(desc[i].flags & (VEHICLE_FLAG_COMP|VEHICLE_FLAG_POS))
+			continue;
+		assoc.frame = nil;
+		assoc.id = desc[i].hierId;
+		RwFrameForAllChildren(RpClumpGetFrame(m_clump),
+			FindFrameFromIdCB, &assoc);
+		if(assoc.frame && desc[i].flags & VEHICLE_FLAG_ADD_WHEEL && m_wheelId != -1)
+			RwFrameForAllObjects(assoc.frame, RemoveWheelCB, m_clump);
+	}
 }
 
 RwObject*
@@ -207,7 +303,7 @@ CVehicleModelInfo::CreateInstance(void)
 	int32 comp1, comp2;
 
 	clump = (RpClump*)CClumpModelInfo::CreateInstance();
-	if(m_numComps != 0){
+	if(clump && m_numComps != 0 && strcmp(m_gameName, "POLICAR") != 0){
 		clumpframe = RpClumpGetFrame(clump);
 
 		comp1 = ChooseComponent();
@@ -221,7 +317,7 @@ CVehicleModelInfo::CreateInstance(void)
 			RpClumpAddAtomic(clump, atomic);
 			RwFrameAddChild(clumpframe, f);
 		}
-		ms_compsUsed[0] = comp1;
+		mspInfo->ms_compsUsed[0] = comp1;
 
 		comp2 = ChooseSecondComponent();
 		if(comp2 != -1 && m_comps[comp2]){
@@ -234,18 +330,27 @@ CVehicleModelInfo::CreateInstance(void)
 			RpClumpAddAtomic(clump, atomic);
 			RwFrameAddChild(clumpframe, f);
 		}
-		ms_compsUsed[1] = comp2;
+		mspInfo->ms_compsUsed[1] = comp2;
 	}else{
-		ms_compsUsed[0] = -1;
-		ms_compsUsed[1] = -1;
+		mspInfo->ms_compsUsed[0] = -1;
+		mspInfo->ms_compsUsed[1] = -1;
 	}
+	CStreaming::RegisterInstance(clump);
 	return (RwObject*)clump;
+}
+
+RpAtomic*
+SplayNormals(RpAtomic *atomic, void *arg)
+{
+	// PSP only?
+	return atomic;
 }
 
 void
 CVehicleModelInfo::SetClump(RpClump *clump)
 {
 	CClumpModelInfo::SetClump(clump);
+	RpClumpForAllAtomics((RpClump*)GetRwObject(), SplayNormals, this);
 	SetAtomicRenderCallbacks();
 	SetFrameIds(ms_vehicleDescs[m_vehicleType]);
 	PreprocessHierarchy();
@@ -341,7 +446,7 @@ CVehicleModelInfo::SetAtomicRendererCB(RpAtomic *atomic, void *data)
 	}else if(strstr(name, "_lo")){
 		RpClumpRemoveAtomic(clump, atomic);
 		RpAtomicDestroy(atomic);
-		return atomic;		// BUG: not done by gta
+		return atomic;		// BUG: nil in gta
 	}else if(strstr(name, "_vlo"))
 		CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleReallyLowDetailCB);
 	else
@@ -400,6 +505,33 @@ CVehicleModelInfo::SetAtomicRendererCB_Train(RpAtomic *atomic, void *data)
 }
 
 RpAtomic*
+CVehicleModelInfo::SetAtomicRendererCB_Ferry(RpAtomic *atomic, void *data)
+{
+	char *name;
+	bool alpha;
+
+	name = GetFrameNodeName(RpAtomicGetFrame(atomic));
+	alpha = false;
+	RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), HasAlphaMaterialCB, &alpha);
+	if(strstr(name, "_hi")){
+		if(alpha)
+			CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderTrainHiDetailAlphaCB);
+		else
+			CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderTrainHiDetailCB);
+	}else if(strstr(name, "_lo")){
+		if(alpha)
+			CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleLowDetailAlphaCB_BigVehicle);
+		else
+			CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleLowDetailCB_BigVehicle);
+	}else if(strstr(name, "_vlo"))
+		CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleReallyLowDetailCB_BigVehicle);
+	else
+		CVisibilityPlugins::SetAtomicRenderCallback(atomic, nil);
+	HideDamagedAtomicCB(atomic, nil);
+	return atomic;
+}
+
+RpAtomic*
 CVehicleModelInfo::SetAtomicRendererCB_Boat(RpAtomic *atomic, void *data)
 {
 	RpClump *clump;
@@ -416,7 +548,31 @@ CVehicleModelInfo::SetAtomicRendererCB_Boat(RpAtomic *atomic, void *data)
 		RpAtomicDestroy(atomic);
 		return atomic;		// BUG: not done by gta
 	}else if(strstr(name, "_vlo"))
-		CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleReallyLowDetailCB_BigVehicle);
+		CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleLoDetailCB_Boat);
+	else
+		CVisibilityPlugins::SetAtomicRenderCallback(atomic, nil);
+	HideDamagedAtomicCB(atomic, nil);
+	return atomic;
+}
+
+RpAtomic*
+CVehicleModelInfo::SetAtomicRendererCB_Boat_Far(RpAtomic *atomic, void *data)
+{
+	RpClump *clump;
+	char *name;
+
+	clump = (RpClump*)data;
+	name = GetFrameNodeName(RpAtomicGetFrame(atomic));
+	if(strcmp(name, "boat_hi") == 0 || !CGeneral::faststrncmp(name, "extra", 5))
+		CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleHiDetailCB_Boat_Far);
+	else if(strstr(name, "_hi"))
+		CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleHiDetailCB);
+	else if(strstr(name, "_lo")){
+		RpClumpRemoveAtomic(clump, atomic);
+		RpAtomicDestroy(atomic);
+		return atomic;		// BUG: not done by gta
+	}else if(strstr(name, "_vlo"))
+		CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleLoDetailCB_Boat_Far);
 	else
 		CVisibilityPlugins::SetAtomicRenderCallback(atomic, nil);
 	HideDamagedAtomicCB(atomic, nil);
@@ -426,6 +582,7 @@ CVehicleModelInfo::SetAtomicRendererCB_Boat(RpAtomic *atomic, void *data)
 RpAtomic*
 CVehicleModelInfo::SetAtomicRendererCB_Heli(RpAtomic *atomic, void *data)
 {
+/*	// LCS: gone, may be better to keep it though
 	char *name;
 
 	name = GetFrameNodeName(RpAtomicGetFrame(atomic));
@@ -434,6 +591,7 @@ CVehicleModelInfo::SetAtomicRendererCB_Heli(RpAtomic *atomic, void *data)
 	else if(strncmp(name, "rearrotor", 9) == 0)
 		CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleTailRotorAlphaCB);
 	else
+*/
 		CVisibilityPlugins::SetAtomicRenderCallback(atomic, nil);
 	return atomic;
 }
@@ -461,7 +619,7 @@ CVehicleModelInfo::SetAtomicRendererCB_RealHeli(RpAtomic *atomic, void *data)
 	}else if(strstr(name, "_lo")){
 		RpClumpRemoveAtomic(clump, atomic);
 		RpAtomicDestroy(atomic);
-		return atomic;		// BUG: not done by gta
+		return atomic;		// BUG: nil in gta
 	}else if(strstr(name, "_vlo"))
 		CVisibilityPlugins::SetAtomicRenderCallback(atomic, CVisibilityPlugins::RenderVehicleReallyLowDetailCB);
 	else
@@ -478,13 +636,18 @@ CVehicleModelInfo::SetAtomicRenderCallbacks(void)
 		RpClumpForAllAtomics(m_clump, SetAtomicRendererCB_Train, nil);
 	else
 #endif
-	if(m_vehicleType == VEHICLE_TYPE_HELI)
+	if(m_vehicleType == VEHICLE_TYPE_FERRY)
+		RpClumpForAllAtomics(m_clump, SetAtomicRendererCB_Ferry, nil);
+	else if(m_vehicleType == VEHICLE_TYPE_HELI)
 		RpClumpForAllAtomics(m_clump, SetAtomicRendererCB_Heli, nil);
 	else if(m_vehicleType == VEHICLE_TYPE_PLANE)
 		RpClumpForAllAtomics(m_clump, SetAtomicRendererCB_BigVehicle, nil);
-	else if(m_vehicleType == VEHICLE_TYPE_BOAT)
-		RpClumpForAllAtomics(m_clump, SetAtomicRendererCB_Boat, m_clump);
-	else if(mod_HandlingManager.GetHandlingData((tVehicleType)m_handlingId)->Flags & HANDLING_IS_HELI)
+	else if(m_vehicleType == VEHICLE_TYPE_BOAT){
+		if(strcmp(m_gameName, "REEFER") == 0)
+			RpClumpForAllAtomics(m_clump, SetAtomicRendererCB_Boat_Far, m_clump);
+		else
+			RpClumpForAllAtomics(m_clump, SetAtomicRendererCB_Boat, m_clump);
+	}else if(mod_HandlingManager.GetHandlingData((tVehicleType)m_handlingId)->Flags & HANDLING_IS_HELI)
 		RpClumpForAllAtomics(m_clump, SetAtomicRendererCB_RealHeli, m_clump);
 	else
 		RpClumpForAllAtomics(m_clump, SetAtomicRendererCB, m_clump);
@@ -531,6 +694,8 @@ CVehicleModelInfo::PreprocessHierarchy(void)
 	desc = ms_vehicleDescs[m_vehicleType];
 	m_numDoors = 0;
 	m_numComps = 0;
+
+	m_comps = new RpAtomic*[7];
 
 	for(i = 0; desc[i].name; i++){
 		RwObjectNameAssociation assoc;
@@ -589,21 +754,23 @@ CVehicleModelInfo::PreprocessHierarchy(void)
 
 		SetVehicleComponentFlags(assoc.frame, desc[i].flags);
 
-		if(desc[i].flags & VEHICLE_FLAG_ADD_WHEEL){
-			if(m_wheelId == -1)
-				RwFrameDestroy(assoc.frame);
-			else{
-				RwV3d scale;
-				atomic = (RpAtomic*)CModelInfo::GetModelInfo(m_wheelId)->CreateInstance();
-				RwFrameDestroy(RpAtomicGetFrame(atomic));
-				RpAtomicSetFrame(atomic, assoc.frame);
-				RpClumpAddAtomic(m_clump, atomic);
-				CVisibilityPlugins::SetAtomicRenderCallback(atomic,
-					CVisibilityPlugins::RenderWheelAtomicCB);
-				scale.x = m_wheelScale;
-				scale.y = m_wheelScale;
-				scale.z = m_wheelScale;
-				RwFrameScale(assoc.frame, &scale, rwCOMBINEPRECONCAT);
+		if(!(gMakeResources && gUseResources)){
+			if(desc[i].flags & VEHICLE_FLAG_ADD_WHEEL){
+				if(m_wheelId == -1)
+					RwFrameDestroy(assoc.frame);
+				else{
+					RwV3d scale;
+					atomic = (RpAtomic*)CModelInfo::GetModelInfo(m_wheelId)->CreateInstance();
+					RwFrameDestroy(RpAtomicGetFrame(atomic));
+					RpAtomicSetFrame(atomic, assoc.frame);
+					RpClumpAddAtomic(m_clump, atomic);
+					CVisibilityPlugins::SetAtomicRenderCallback(atomic,
+						CVisibilityPlugins::RenderWheelAtomicCB);
+					scale.x = m_wheelScale;
+					scale.y = m_wheelScale;
+					scale.z = m_wheelScale;
+					RwFrameScale(assoc.frame, &scale, rwCOMBINEPRECONCAT);
+				}
 			}
 		}
 	}
@@ -631,9 +798,9 @@ CVehicleModelInfo::SetVehicleComponentFlags(RwFrame *frame, uint32 flags)
 		SETFLAGS(ATOMIC_FLAG_FRONT);
 	else if(flags & VEHICLE_FLAG_REAR && (handling->Flags & HANDLING_IS_VAN || (flags & (VEHICLE_FLAG_LEFT|VEHICLE_FLAG_RIGHT)) == 0))
 		SETFLAGS(ATOMIC_FLAG_REAR);
-	if(flags & VEHICLE_FLAG_LEFT)
+	else if(flags & VEHICLE_FLAG_LEFT)
 		SETFLAGS(ATOMIC_FLAG_LEFT);
-	if(flags & VEHICLE_FLAG_RIGHT)
+	else if(flags & VEHICLE_FLAG_RIGHT)
 		SETFLAGS(ATOMIC_FLAG_RIGHT);
 
 	if(flags & VEHICLE_FLAG_REARDOOR)
@@ -748,7 +915,7 @@ CVehicleModelInfo::ChooseComponent(void)
 	int32 n;
 
 	comp = -1;
-	if(ms_compsToUse[0] == -2){
+	if(mspInfo->ms_compsToUse[0] == -2){
 		if(COMPRULE_RULE(m_compRules) && IsValidCompRule(COMPRULE_RULE(m_compRules)))
 			comp = ::ChooseComponent(COMPRULE_RULE(m_compRules), COMPRULE_COMPS(m_compRules));
 		else if(CGeneral::GetRandomNumberInRange(0, 3) < 2){
@@ -757,8 +924,8 @@ CVehicleModelInfo::ChooseComponent(void)
 				comp = comps[(int)CGeneral::GetRandomNumberInRange(0, n)];
 		}
 	}else{
-		comp = ms_compsToUse[0];
-		ms_compsToUse[0] = -2;
+		comp = mspInfo->ms_compsToUse[0];
+		mspInfo->ms_compsToUse[0] = -2;
 	}
 	return comp;
 }
@@ -771,7 +938,7 @@ CVehicleModelInfo::ChooseSecondComponent(void)
 	int32 n;
 
 	comp = -1;
-	if(ms_compsToUse[1] == -2){
+	if(mspInfo->ms_compsToUse[1] == -2){
 		if(COMPRULE2_RULE(m_compRules) && IsValidCompRule(COMPRULE2_RULE(m_compRules)))
 			comp = ::ChooseComponent(COMPRULE2_RULE(m_compRules), COMPRULE2_COMPS(m_compRules));
 		else if(COMPRULE_RULE(m_compRules) && IsValidCompRule(COMPRULE_RULE(m_compRules)) &&
@@ -782,8 +949,8 @@ CVehicleModelInfo::ChooseSecondComponent(void)
 				comp = comps[(int)CGeneral::GetRandomNumberInRange(0, n)];
 		}
 	}else{
-		comp = ms_compsToUse[1];
-		ms_compsToUse[1] = -2;
+		comp = mspInfo->ms_compsToUse[1];
+		mspInfo->ms_compsToUse[1] = -2;
 	}
 	return comp;
 }
@@ -798,7 +965,7 @@ struct editableMatCBData
 RpMaterial*
 CVehicleModelInfo::GetEditableMaterialListCB(RpMaterial *material, void *data)
 {
-	static RwRGBA white = { 255, 255, 255, 255 };
+	RwRGBA white = { 255, 255, 255, 255 };
 	const RwRGBA *col;
 	editableMatCBData *cbdata;
 
@@ -851,7 +1018,7 @@ CVehicleModelInfo::SetVehicleColour(uint8 c1, uint8 c2)
 	RpMaterial **matp;
 
 	if(c1 != m_currentColour1){
-		col = ms_vehicleColourTable[c1];
+		col = mspInfo->ms_vehicleColourTable[c1];
 		for(matp = m_materials1; *matp; matp++){
 			colp = (RwRGBA*)RpMaterialGetColor(*matp);	// get rid of const
 			colp->red = col.red;
@@ -862,7 +1029,7 @@ CVehicleModelInfo::SetVehicleColour(uint8 c1, uint8 c2)
 	}
 
 	if(c2 != m_currentColour2){
-		col = ms_vehicleColourTable[c2];
+		col = mspInfo->ms_vehicleColourTable[c2];
 		for(matp = m_materials2; *matp; matp++){
 			colp = (RwRGBA*)RpMaterialGetColor(*matp);	// get rid of const
 			colp->red = col.red;
@@ -924,7 +1091,7 @@ CVehicleModelInfo::AvoidSameVehicleColour(uint8 *col1, uint8 *col2)
 	}
 }
 
-//--MIAMI: unused
+// unused
 RwTexture*
 CreateCarColourTexture(uint8 r, uint8 g, uint8 b)
 {
@@ -987,8 +1154,8 @@ CVehicleModelInfo::LoadVehicleColours(void)
 	fd = CFileMgr::OpenFile("CARCOLS.DAT", "r");
 	CFileMgr::ChangeDir("\\");
 
-	for(i = 0; i < 256; i++)
-		ms_colourTextureTable[i] = nil;
+	//for(i = 0; i < 256; i++)
+	//	ms_colourTextureTable[i] = nil;
 
 	section = 0;
 	numCols = 0;
@@ -1020,10 +1187,10 @@ CVehicleModelInfo::LoadVehicleColours(void)
 		}else if(section == COLOURS){
 			sscanf(&line[start],	// BUG: games doesn't add start
 				"%d %d %d", &r, &g, &b);
-			ms_vehicleColourTable[numCols].red = r;
-			ms_vehicleColourTable[numCols].green = g;
-			ms_vehicleColourTable[numCols].blue = b;
-			ms_vehicleColourTable[numCols].alpha = 0xFF;
+			mspInfo->ms_vehicleColourTable[numCols].red = r;
+			mspInfo->ms_vehicleColourTable[numCols].green = g;
+			mspInfo->ms_vehicleColourTable[numCols].blue = b;
+			mspInfo->ms_vehicleColourTable[numCols].alpha = 0xFF;
 			numCols++;
 		}else if(section == CARS){
 			n = sscanf(&line[start],	// BUG: games doesn't add start
@@ -1053,6 +1220,7 @@ CVehicleModelInfo::LoadVehicleColours(void)
 void
 CVehicleModelInfo::DeleteVehicleColourTextures(void)
 {
+/*
 	int i;
 
 	for(i = 0; i < 256; i++){
@@ -1061,6 +1229,7 @@ CVehicleModelInfo::DeleteVehicleColourTextures(void)
 			ms_colourTextureTable[i] = nil;
 		}
 	}
+*/
 }
 
 RpMaterial*
@@ -1072,6 +1241,7 @@ CVehicleModelInfo::GetMatFXEffectMaterialCB(RpMaterial *material, void *data)
 	return nil;
 }
 
+/*
 RpMaterial*
 CVehicleModelInfo::SetDefaultEnvironmentMapCB(RpMaterial *material, void *data)
 {
@@ -1088,7 +1258,9 @@ CVehicleModelInfo::SetDefaultEnvironmentMapCB(RpMaterial *material, void *data)
 	}
 	return material;
 }
+*/
 
+/*
 RpAtomic*
 CVehicleModelInfo::SetEnvironmentMapCB(RpAtomic *atomic, void *data)
 {
@@ -1104,6 +1276,7 @@ CVehicleModelInfo::SetEnvironmentMapCB(RpAtomic *atomic, void *data)
 	}
 	return atomic;
 }
+*/
 
 void
 CVehicleModelInfo::SetEnvironmentMap(void)
@@ -1180,10 +1353,162 @@ CVehicleModelInfo::GetMaximumNumberOfPassengersFromNumberOfDoors(int id)
 	}
 
 	if(n == 0)
-		return id == MI_RCBANDIT || id == MI_PIZZABOY || id == MI_BAGGAGE ? 0 : 1;
+		return id == MI_RCBANDIT /*|| id == MI_PIZZABOY || id == MI_BAGGAGE*/ ? 0 : 1;
 
 	if(id == MI_COACH)
 		return 8;
 
 	return n - 1;
+}
+
+
+struct VehicleChunk
+{
+	RpClump *clump;
+	int32 numComps;
+	RpAtomic **comp;
+	RpMaterial *materials1[NUM_FIRST_MATERIALS];
+	RpMaterial *materials2[NUM_SECOND_MATERIALS];
+};
+
+void
+CVehicleModelInfo::LoadModel(void *data, const void *chunk)
+{
+	int i;
+	VehicleChunk *chk = (VehicleChunk*)data;
+	CClumpModelInfo::LoadModel(chk->clump, chunk);
+
+	// editable materials
+	for(i = 0; i < NUM_FIRST_MATERIALS; i++){
+		m_materials1[i] = chk->materials1[i];
+		if(m_materials1[i])
+			CStreaming::RegisterPointer(&m_materials1[i], 2, true);
+	}
+	for(i = 0; i < NUM_SECOND_MATERIALS; i++){
+		m_materials2[i] = chk->materials2[i];
+		if(m_materials2[i])
+			CStreaming::RegisterPointer(&m_materials2[i], 2, true);
+	}
+
+	// extra components
+	m_numComps = chk->numComps;
+	if(m_numComps > 0){
+		m_comps = chk->comp;
+		CStreaming::RegisterPointer(&m_comps, 2, true);
+		for(i = 0; i < m_numComps; i++){
+			LoadResource(m_comps[i]);
+			CStreaming::RegisterAtomic(m_comps[i], nil);
+		}
+	}else
+		m_comps = nil;
+
+	m_currentColour1 = -1;
+	m_currentColour2 = -1;
+
+	// add wheels
+	RwObjectNameIdAssocation *desc = ms_vehicleDescs[m_vehicleType];
+	for(i = 0; desc[i].name; i++){
+		RwObjectIdAssociation assoc;
+
+		if(desc[i].flags & (VEHICLE_FLAG_COMP|VEHICLE_FLAG_POS))
+			continue;
+		assoc.frame = nil;
+		assoc.id = desc[i].hierId;
+		RwFrameForAllChildren(RpClumpGetFrame(m_clump),
+			FindFrameFromIdCB, &assoc);
+		if(assoc.frame && desc[i].flags & VEHICLE_FLAG_ADD_WHEEL && m_wheelId != -1){
+			RwV3d scale;
+			RpAtomic *atomic = (RpAtomic*)CModelInfo::GetModelInfo(m_wheelId)->CreateInstance();
+			RwFrameDestroy(RpAtomicGetFrame(atomic));
+			RpAtomicSetFrame(atomic, assoc.frame);
+			RpClumpAddAtomic(m_clump, atomic);
+			CVisibilityPlugins::SetAtomicRenderCallback(atomic,
+				CVisibilityPlugins::RenderWheelAtomicCB);
+			scale.x = m_wheelScale;
+			scale.y = m_wheelScale;
+			scale.z = m_wheelScale;
+			RwFrameScale(assoc.frame, &scale, rwCOMBINEPRECONCAT);
+#ifdef LIBRW
+			CStreaming::RegisterPointer(&atomic->inClump.next, 2, true);
+			CStreaming::RegisterPointer(&atomic->inClump.prev, 2, true);
+			CStreaming::RegisterPointer(&atomic->object.object.parent, 2, true);
+			CStreaming::RegisterPointer(&atomic->object.inFrame.next, 2, true);
+			CStreaming::RegisterPointer(&atomic->object.inFrame.prev, 2, true);
+			CStreaming::RegisterPointer(&atomic->clump, 2, true);
+#endif
+		}
+	}
+}
+
+void
+CVehicleModelInfo::Write(base::cRelocatableChunkWriter &writer)
+{
+	CClumpModelInfo::Write(writer);
+}
+
+void*
+CVehicleModelInfo::WriteModel(base::cRelocatableChunkWriter &writer)
+{
+	if(GetRwObject() == nil)
+		return nil;
+
+	int i;
+	VehicleChunk *chk = new VehicleChunk;
+	memset(chk, 0, sizeof(*chk));
+	writer.AllocateRaw(chk, sizeof(*chk), sizeof(void*), false, true);
+
+	// clump
+	chk->clump = (RpClump*)CClumpModelInfo::WriteModel(writer);
+	if(chk->clump)
+		writer.AddPatch(&chk->clump);
+
+	// materials
+	for(i = 0; i < NUM_FIRST_MATERIALS; i++){
+		if(m_materials1[i] == nil || m_vehicleType == VEHICLE_TYPE_FERRY)
+			chk->materials1[i] = nil;
+		else{
+			SaveResource(m_materials1[i], writer);
+			chk->materials1[i] = m_materials1[i];
+			writer.AddPatch(&chk->materials1[i]);
+		}
+	}
+	for(i = 0; i < NUM_SECOND_MATERIALS; i++){
+		if(m_materials2[i] == nil || m_vehicleType == VEHICLE_TYPE_FERRY)
+			chk->materials2[i] = nil;
+		else{
+			SaveResource(m_materials2[i], writer);
+			chk->materials2[i] = m_materials2[i];
+			writer.AddPatch(&chk->materials2[i]);
+		}
+	}
+
+	// extra components
+	chk->numComps = m_numComps;
+	chk->comp = nil;
+	if(m_numComps > 0){
+		chk->comp = m_comps;
+		writer.AddPatch(&chk->comp);
+
+		writer.AllocateRaw(m_comps, m_numComps*sizeof(void*), sizeof(void*), false, true);
+		for(i = 0; i < m_numComps; i++)
+			if(m_comps[i]){
+				SaveResource(m_comps[i], writer);
+				writer.AddPatch(&m_comps[i]);
+			}
+	}
+	return chk;
+}
+
+void
+CVehicleModelInfo::RcWriteThis(base::cRelocatableChunkWriter &writer)
+{
+	writer.AllocateRaw(this, sizeof(*this), sizeof(void*), false, true);
+	writer.Class(VTABLE_ADDR(this), msClassInfo);
+}
+
+void
+CVehicleModelInfo::RcWriteEmpty(base::cRelocatableChunkWriter &writer)
+{
+	writer.AllocateRaw(this, sizeof(*this), sizeof(void*), false, true);
+	writer.Class(VTABLE_ADDR(this), msClassInfo);
 }

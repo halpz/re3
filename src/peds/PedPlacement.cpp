@@ -4,7 +4,6 @@
 #include "PedPlacement.h"
 #include "World.h"
 
-// --MIAMI: Done
 bool
 CPedPlacement::FindZCoorForPed(CVector* pos)
 {

@@ -7,8 +7,6 @@
 #include "AnimBlendAssociation.h"
 #include "MemoryMgr.h"
 
-//--MIAMI: file done
-
 CAnimBlendAssociation::CAnimBlendAssociation(void)
 {
 	groupId = -1;

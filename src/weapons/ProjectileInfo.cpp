@@ -17,8 +17,6 @@
 uint32 projectileInUse;
 #endif
 
-// --MIAMI: file done except TODOs
-
 CProjectileInfo gaProjectileInfo[NUM_PROJECTILES];
 CProjectile *CProjectileInfo::ms_apProjectile[NUM_PROJECTILES];
 

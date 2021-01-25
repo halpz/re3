@@ -62,6 +62,7 @@ public:
 	static void ClearThisBigPrint(wchar *str);
 	static void ClearAllMessagesDisplayedByGame(void);
 	static void ClearThisBigPrintNow(uint32 id);
+	static int GetTokenPadKeyString(const wchar *in, wchar *out);
 
 	// unused or cut
 	//static void AddMessageSoonWithString(wchar*, uint32, uint16, wchar*);

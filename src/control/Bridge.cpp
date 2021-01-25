@@ -6,8 +6,6 @@
 #include "PathFind.h"
 #include "Stats.h"
 
-//--MIAMI: file done
-
 CEntity *CBridge::pLiftRoad;
 CEntity *CBridge::pLiftPart;
 CEntity *CBridge::pWeight;
@@ -161,5 +159,25 @@ bool CBridge::ThisIsABridgeObjectMovingUp(int index)
 	return State == STATE_LIFT_PART_ABOUT_TO_MOVE_UP || State == STATE_LIFT_PART_MOVING_UP;
 #else
 	return false;
+#endif
+}
+
+void CBridge::ForceBridgeState(uint8 state)
+{
+#ifdef GTA_BRIDGE
+	State = state;
+	switch (state)
+	{
+	case STATE_BRIDGE_LOCKED:
+	case STATE_LIFT_PART_MOVING_DOWN:
+	case STATE_LIFT_PART_ABOUT_TO_MOVE_UP:
+		ThePaths.SetLinksBridgeLights(-330.0f, -230.0f, -700.0f, -588.0f, true);
+		break;
+	case STATE_BRIDGE_ALWAYS_UNLOCKED:
+		ThePaths.SetLinksBridgeLights(-330.0f, -230.0f, -700.0f, -588.0f, false);
+		break;
+	default:
+		break;
+	}
 #endif
 }

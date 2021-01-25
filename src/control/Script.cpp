@@ -11,6 +11,7 @@
 #include "CivilianPed.h"
 #include "Clock.h"
 #include "CopPed.h"
+#include "Coronas.h"
 #include "Debug.h"
 #include "DMAudio.h"
 #include "EmergencyPed.h"
@@ -49,13 +50,12 @@
 #include "Timecycle.h"
 #include "TxdStore.h"
 #include "Bike.h"
-#include "memoryManager.h"
+#include "smallHeap.h"
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #include <stdarg.h>
 #endif
 
 //--LCS: file done except TODOs and command table
-
 uint8* CTheScripts::ScriptSpace;
 CRunningScript CTheScripts::ScriptsArray[MAX_NUM_SCRIPTS];
 intro_text_line CTheScripts::IntroTextLines[MAX_NUM_INTRO_TEXT_LINES];
@@ -99,7 +99,7 @@ uint16 CTheScripts::NumberOfExclusiveMissionScripts;
 bool CTheScripts::bPlayerHasMetDebbieHarry;
 bool CTheScripts::bPlayerIsInTheStatium;
 int CTheScripts::AllowedCollision[MAX_ALLOWED_COLLISIONS];
-bool CTheScripts::FSDestroyedFlag;
+int CTheScripts::FSDestroyedFlag;
 short* CTheScripts::SavedVarIndices;
 int CTheScripts::NumSaveVars;
 int gScriptsFile = -1;
@@ -108,6 +108,9 @@ bool CTheScripts::InTheScripts;
 CRunningScript* pCurrent;
 uint16 CTheScripts::NumTrueGlobals;
 uint16 CTheScripts::MostGlobals;
+CVector gVectorSetInLua;
+int CTheScripts::NextScriptCoronaID;
+base::cSList<script_corona> CTheScripts::mCoronas;
 
 #ifdef MISSION_REPLAY
 
@@ -423,7 +426,7 @@ const tScriptCommandData commands[] = {
 	REGISTER_COMMAND(COMMAND_ADD_SCORE, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_INT, ), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_IS_SCORE_GREATER, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_INT, ), OUTPUT_ARGUMENTS(), true, -1, ""),
 	REGISTER_COMMAND(COMMAND_STORE_SCORE, INPUT_ARGUMENTS(ARGTYPE_INT, ), OUTPUT_ARGUMENTS(ARGTYPE_INT, ), false, -1, ""),
-	REGISTER_COMMAND(COMMAND_GIVE_REMOTE_CONTROLLED_CAR_TO_PLAYER, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ), OUTPUT_ARGUMENTS(), false, -1, ""),
+	REGISTER_COMMAND(COMMAND_GIVE_REMOTE_CONTROLLED_CAR_TO_PLAYER, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ARGTYPE_FLOAT, ), OUTPUT_ARGUMENTS(ARGTYPE_INT, ), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_ALTER_WANTED_LEVEL, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_INT, ), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_ALTER_WANTED_LEVEL_NO_DROP, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_INT, ), OUTPUT_ARGUMENTS(), false, -1, ""),
 	REGISTER_COMMAND(COMMAND_IS_WANTED_LEVEL_GREATER, INPUT_ARGUMENTS(ARGTYPE_INT, ARGTYPE_INT, ), OUTPUT_ARGUMENTS(), true, -1, ""),
@@ -2137,9 +2140,7 @@ void CMissionCleanup::Process()
 		default:
 			break;
 		}
-		m_sEntities[i].id = 0;
-		m_sEntities[i].type = CLEANUP_UNUSED;
-		m_nCount--;
+		RemoveEntityFromList(m_sEntities[i].id, m_sEntities[i].type);
 	}
 	for (int i = 1; i < NUMSTREAMINFO; i++) {
 		if (CStreaming::IsScriptOwnedModel(i))
@@ -2514,7 +2515,7 @@ int32* GetPointerToScriptVariable(CRunningScript* pScript, uint32* pIp)
 		return &pScript->m_anLocalVariables[NUM_LOCAL_VARS + 8 + (type - ARGUMENT_TIMER)];
 	}
 	script_assert(false && "wrong type for variable");
-	return nil;
+	return &pScript->m_anLocalVariables[pScript->m_nLocalsPointer + (type - ARGUMENT_LOCAL)];
 }
 
 int32 *CRunningScript::GetPointerToScriptVariable(uint32* pIp, int16 type)
@@ -2621,6 +2622,14 @@ bool CTheScripts::Init(bool loaddata)
 		memset(&UsedObjectArray[i].name, 0, sizeof(UsedObjectArray[i].name));
 		UsedObjectArray[i].index = 0;
 	}
+#if defined FIX_BUGS || (!defined GTA_PS2 && !defined GTA_PSP)
+	for (base::cSList<script_corona>::tSItem* i = CTheScripts::mCoronas.first; i;) {
+		base::cSList<script_corona>::tSItem* next = i->next;
+		delete i;
+		i = next;
+	}
+	CTheScripts::mCoronas.first = nil;
+#endif
 	NumberOfUsedObjects = 0;
 	if (ScriptSpace)
 		Shutdown();
@@ -2633,7 +2642,8 @@ bool CTheScripts::Init(bool loaddata)
 	CFileMgr::Read(mainf, (char*)&MainScriptSize, sizeof(MainScriptSize));
 	int nLargestMissionSize = 0;
 	CFileMgr::Read(mainf, (char*)&nLargestMissionSize, sizeof(nLargestMissionSize));
-	// some cSmallHeap shit - TODO
+	if (!cSmallHeap::msInstance.IsLocked())
+		cSmallHeap::msInstance.Lock();
 	ScriptSpace = (uint8*)base::cMainMemoryManager::Instance()->Allocate(MainScriptSize + nLargestMissionSize);
 	memset(ScriptSpace, 0, MainScriptSize + nLargestMissionSize);
 	CFileMgr::Read(mainf, (char*)ScriptSpace, MainScriptSize);
@@ -2773,8 +2783,6 @@ void CTheScripts::Process()
 			UseTextCommands = 0;
 	}
 
-	// TODO: mCoronas
-
 #ifdef MISSION_REPLAY
 	static uint32 TimeToWaitTill;
 	switch (AllowMissionReplay) {
@@ -2833,6 +2841,11 @@ void CTheScripts::Process()
 		script = next;
 		if (script && !script->m_bIsActive)
 			script = nil;
+	}
+	InTheScripts = false;
+	for (base::cSList<script_corona>::tSItem* i = CTheScripts::mCoronas.first; i; i = i->next) {
+		CCoronas::RegisterCorona((uint32)(uintptr)i, i->item.r, i->item.g, i->item.b, 255, CVector(i->item.x, i->item.y, i->item.z),
+			-i->item.size, 450.0f, i->item.type, i->item.flareType, 1, 0, 0, 0.0f);
 	}
 	DbgFlag = false;
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
@@ -2897,7 +2910,9 @@ int8 CRunningScript::ProcessOneCommand()
 	uint8 nLocalsOffset;
 	if (command < ARRAY_SIZE(commands)) {
 		script_assert(commands[command].id == command);
+		m_nIp -= 2;
 		sprintf(commandInfo, m_nIp >= CTheScripts::MainScriptSize ? "M<%5d> " : "<%6d> ", m_nIp >= CTheScripts::MainScriptSize ? m_nIp - CTheScripts::MainScriptSize : m_nIp);
+		m_nIp += 2;
 		if (m_bNotFlag)
 			strcat(commandInfo, "NOT ");
 		if (commands[command].position == -1)
@@ -4919,7 +4934,9 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		CVector pos = GET_VECTOR_PARAM(1);
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-		CRemote::GivePlayerRemoteControlledCar(pos.x, pos.y, pos.z, DEGTORAD(GET_FLOAT_PARAM(4)), MI_RCBANDIT);
+		CVehicle* pVehicle = CRemote::GivePlayerRemoteControlledCar(pos.x, pos.y, pos.z, DEGTORAD(GET_FLOAT_PARAM(4)), MI_RCBANDIT);
+		SET_INTEGER_PARAM(0, CPools::GetVehiclePool()->GetIndex(pVehicle));
+		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
 	case COMMAND_ALTER_WANTED_LEVEL:
@@ -4932,7 +4949,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		return 0;
 	case COMMAND_IS_WANTED_LEVEL_GREATER:
 		CollectParameters(&m_nIp, 2);
-		UpdateCompareFlag(CWorld::Players[GET_INTEGER_PARAM(0)].m_pPed->m_pWanted->m_nWantedLevel > GET_INTEGER_PARAM(1));
+		UpdateCompareFlag(CWorld::Players[GET_INTEGER_PARAM(0)].m_pPed->m_pWanted->GetWantedLevel() > GET_INTEGER_PARAM(1));
 		return 0;
 	case COMMAND_CLEAR_WANTED_LEVEL:
 		CollectParameters(&m_nIp, 1);

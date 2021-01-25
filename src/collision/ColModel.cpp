@@ -7,6 +7,8 @@
 
 CColModel::CColModel(void)
 {
+	boundingSphere.Set(0.0001f, CVector(0.0f, 0.0f, 0.0f));
+	boundingBox.Set(CVector(0.0f, 0.0f, 0.0f), CVector(0.0f, 0.0f, 0.0f));
 	numSpheres = 0;
 	spheres = nil;
 	numLines = 0;
@@ -18,7 +20,7 @@ CColModel::CColModel(void)
 	triangles = nil;
 	trianglePlanes = nil;
 	level = LEVEL_GENERIC;	// generic col slot
-	ownsCollisionVolumes = true;
+//	ownsCollisionVolumes = true;
 }
 
 CColModel::~CColModel(void)
@@ -203,4 +205,11 @@ CColModel::operator=(const CColModel &other)
 		vertices = nil;
 	}
 	return *this;
+}
+
+bool
+CColModel::Write(base::cRelocatableChunkWriter &writer, bool allocSpace)
+{
+	assert(0 && "TODO(LCS)");
+	return 1;
 }
