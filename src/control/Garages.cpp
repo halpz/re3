@@ -564,7 +564,7 @@ void CGarage::Update()
 								pos += vDirectionCenterToMiddle * CGeneral::GetRandomNumberInRange(-6.0f, 0.4f);
 								dir = vDirectionCenterToMiddle * 0.04f;
 								pos.z = m_fInfZ + CGeneral::GetRandomNumberInRange(-0.4f, 0.0f);
-								CParticle::AddParticle(PARTICLE_GARAGEPAINT_SPRAY, pos, dir, nil, 0.0f, CVehicleModelInfo::ms_vehicleColourTable[colour1]); // TODO: mspInfo
+								CParticle::AddParticle(PARTICLE_GARAGEPAINT_SPRAY, pos, dir, nil, 0.0f, CVehicleModelInfo::mspInfo->ms_vehicleColourTable[colour1]);
 							}
 						}
 					}
