@@ -2618,7 +2618,7 @@ bool CTheScripts::IsPedStopped(CPed* pPed)
 {
 	if (pPed->InVehicle())
 		return IsVehicleStopped(pPed->m_pMyVehicle);
-	return (pPed->m_nMoveState == eMoveState::PEDMOVE_NONE || pPed->m_nMoveState == eMoveState::PEDMOVE_STILL) &&
+	return (pPed->m_nMoveState == PEDMOVE_NONE || pPed->m_nMoveState == PEDMOVE_STILL) &&
 		!pPed->bIsInTheAir && !pPed->bIsLanding && pPed->bIsStanding && pPed->m_vecAnimMoveDelta.x == 0.0f && pPed->m_vecAnimMoveDelta.y == 0.0f;
 }
 
@@ -2632,7 +2632,7 @@ bool CTheScripts::IsPlayerStopped(CPlayerInfo* pPlayer)
 		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_JUMP_LAUNCH) ||
 		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_JUMP_GLIDE))
 		return false;
-	return (pPed->m_nMoveState == eMoveState::PEDMOVE_NONE || pPed->m_nMoveState == eMoveState::PEDMOVE_STILL) &&
+	return (pPed->m_nMoveState == PEDMOVE_NONE || pPed->m_nMoveState == PEDMOVE_STILL) &&
 		!pPed->bIsInTheAir && !pPed->bIsLanding && pPed->bIsStanding && pPed->m_vecAnimMoveDelta.x == 0.0f && pPed->m_vecAnimMoveDelta.y == 0.0f;
 }
 

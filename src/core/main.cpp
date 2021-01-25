@@ -137,6 +137,24 @@ bool gbNewRenderer;
 bool bDisplayNumOfAtomicsRendered = false;
 bool bDisplayPosn = false;
 
+#ifdef __MWERKS__
+void
+debug(char *fmt, ...)
+{
+#ifndef MASTER
+	// TODO put something here
+#endif
+}
+
+void
+Error(char *fmt, ...)
+{
+#ifndef MASTER
+	// TODO put something here
+#endif
+}
+#endif
+
 void
 ValidateVersion()
 {
@@ -800,6 +818,7 @@ ProcessSlowMode(void)
 float FramesPerSecondCounter;
 int32 FrameSamples;
 
+#ifndef MASTER
 struct tZonePrint
 {
 	char name[11];
@@ -829,8 +848,6 @@ tZonePrint ZonePrint[] =
 	{ "WASHINGTN", "AC", CRect(-320.0f, -487.0f,  500.0f, -1200.0f)},
 	{ "WASHINBTM", "AC", CRect(-255.0f, -1200.0f,  500.0f, -1690.0f)}
 };
-
-#ifndef MASTER
 
 void
 PrintMemoryUsage(void)

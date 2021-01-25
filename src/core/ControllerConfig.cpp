@@ -541,7 +541,7 @@ void CControllerConfigManager::UpdateJoyInConfigMenus_ButtonDown(int32 button, i
 				break;
 			case 12:
 #ifndef REGISTER_START_BUTTON
-				if (padNumber == 1)
+				if (padnumber == 1)
 #endif
 					pad->PCTempJoyState.Start = 255;
 				break;

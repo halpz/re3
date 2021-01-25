@@ -1,3 +1,6 @@
+#if (!defined(GTA_PS2_STUFF) && defined(RWLIBS)) || defined(__MWERKS__)
+#define WITHD3D
+#endif
 #include "config.h"
 #include "common.h"
 
@@ -332,10 +335,10 @@ void CRadar::ClearBlipForEntity(eBlipType type, int32 id)
 int CRadar::ClipRadarPoly(CVector2D *poly, const CVector2D *rect)
 {
 	CVector2D corners[4] = {
-		{  1.0f, -1.0f },	// top right
-		{  1.0f,  1.0f },	// bottom right
-		{ -1.0f,  1.0f },	// bottom left
-		{ -1.0f, -1.0f },	// top left
+		CVector2D(  1.0f, -1.0f ),	// top right
+		CVector2D(  1.0f,  1.0f ),	// bottom right
+		CVector2D( -1.0f,  1.0f ),	// bottom left
+		CVector2D( -1.0f, -1.0f ),	// top left
 	};
 	CVector2D tmp;
 	int i, j, n;

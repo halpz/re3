@@ -7,9 +7,18 @@
 #pragma warning(disable: 4838)  // narrowing conversion
 #pragma warning(disable: 4996)  // POSIX names
 
+#ifdef __MWERKS__
+#define __STDC_LIMIT_MACROS // so we get UINT32_MAX etc
+#endif
+
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
+
+#ifdef __MWERKS__
+#define AUDIO_MSS
+#define RWLIBS // codewarrior doesn't support project level defines - so not even this is enough, but still catches most ifdefs
+#endif
 
 #if !defined RW_D3D9 && defined LIBRW
 #undef WITHD3D
@@ -29,9 +38,9 @@
 		#define WITH_D3D // librw includes d3d9 itself via this right now
 	#else
 		#ifndef USE_D3D9
-		#include <d3d8types.h>
+		#include <d3d8.h>
 		#else
-		#include <d3d9types.h>
+		#include <d3d9.h>
 		#endif
 	#endif
 #endif
@@ -79,8 +88,13 @@ typedef uint8_t uint8;
 typedef int8_t int8;
 typedef uint16_t uint16;
 typedef int16_t int16;
+#ifndef __MWERKS__
 typedef uint32_t uint32;
 typedef int32_t int32;
+#else
+typedef unsigned int uint32;
+typedef int int32;
+#endif
 typedef uintptr_t uintptr;
 typedef intptr_t intptr;
 typedef uint64_t uint64;
@@ -92,7 +106,7 @@ typedef uint8 bool8;
 typedef uint16 bool16;
 typedef uint32 bool32;
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined (__MWERKS__)
 typedef ptrdiff_t ssize_t;
 #endif
 
@@ -276,6 +290,22 @@ extern wchar *AllocUnicode(const char*src);
 inline float sq(float x) { return x*x; }
 #define SQR(x) ((x) * (x))
 
+#ifdef __MWERKS__
+#define M_E        2.71828182845904523536   // e
+#define M_LOG2E    1.44269504088896340736   // log2(e)
+#define M_LOG10E   0.434294481903251827651  // log10(e)
+#define M_LN2      0.693147180559945309417  // ln(2)
+#define M_LN10     2.30258509299404568402   // ln(10)
+#define M_PI       3.14159265358979323846   // pi
+#define M_PI_2     1.57079632679489661923   // pi/2
+#define M_PI_4     0.785398163397448309616  // pi/4
+#define M_1_PI     0.318309886183790671538  // 1/pi
+#define M_2_PI     0.636619772367581343076  // 2/pi
+#define M_2_SQRTPI 1.12837916709551257390   // 2/sqrt(pi)
+#define M_SQRT2    1.41421356237309504880   // sqrt(2)
+#define M_SQRT1_2  0.707106781186547524401  // 1/sqrt(2)
+#endif
+
 #define PI (float)M_PI
 #define TWOPI (PI*2)
 #define HALFPI (PI/2)
@@ -305,13 +335,33 @@ void re3_usererror(const char *format, ...);
 #define DEV(f, ...)   re3_debug("[DEV]: " f, ## __VA_ARGS__)
 #endif
 
+#ifdef __MWERKS__
+void debug(char *f, ...);
+void Error(char *f, ...);
+__inline__ void TRACE(char *f, ...) { } // this is re3 only, and so the function needs to be inline - this way no call actually gets placed
+// USERERROR only gets used in oal builds ... once
+#else
 #define debug(f, ...) re3_debug("[DBG]: " f, ## __VA_ARGS__)
-#define TRACE(f, ...) re3_trace(__FILE__, __LINE__, __FUNCTION__, f, ## __VA_ARGS__)
 #define Error(f, ...) re3_debug("[ERROR]: " f, ## __VA_ARGS__)
+#ifndef MASTER
+#define TRACE(f, ...) re3_trace(__FILE__, __LINE__, __FUNCTION__, f, ## __VA_ARGS__)
 #define USERERROR(f, ...) re3_usererror(f, ## __VA_ARGS__)
+#else
+#define TRACE(f, ...)
+#define USERERROR(f, ...)
+#endif
+#endif
 
+#ifndef MASTER
 #define assert(_Expression) (void)( (!!(_Expression)) || (re3_assert(#_Expression, __FILE__, __LINE__, __FUNCTION__), 0) )
+#else
+#define assert(_Expression)
+#endif
 #define ASSERT assert
+
+#ifdef __MWERKS__
+#define static_assert(bool_constexpr, message)
+#endif
 
 #define _TODO(x)
 #define _TODOCONST(x) (x)
@@ -336,6 +386,7 @@ void re3_usererror(const char *format, ...);
 #define CONCAT_(x,y) x##y
 #define CONCAT(x,y) CONCAT_(x,y)
 
+#ifdef DEBUGMENU
 // Tweaking stuff for debugmenu
 #define TWEAKPATH                                   ___tw___TWEAKPATH
 #define SETTWEAKPATH(path)	                        static const char *___tw___TWEAKPATH = path;
@@ -449,6 +500,7 @@ _TWEEKCLASS(CTweakUInt32, uint32);
 _TWEEKCLASS(CTweakFloat, float);
 
 #undef _TWEEKCLASS
+#endif
 
 #ifdef VALIDATE_SAVE_SIZE
 extern int32 _saveBufCount;

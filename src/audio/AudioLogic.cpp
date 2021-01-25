@@ -1,4 +1,4 @@
-﻿#include "common.h"
+#include "common.h"
 
 #include "AudioManager.h"
 #include "audio_enums.h"
@@ -43,7 +43,7 @@
 #include "Script.h"
 #include "Wanted.h"
 
-const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
+const int channels = ARRAY_SIZE(AudioManager.m_asActiveSamples);
 const int policeChannel = channels + 1;
 const int allChannels = channels + 2;
 
@@ -8108,7 +8108,7 @@ cAudioManager::ProcessWaterCannon(int32)
 }
 
 //positon of arcade machines
-CVector aVecExtraSoundPosition[] = { {-1042.546f, 88.794f, 11.324f}, {-1004.476f, 181.697f, 11.324f} };
+CVector aVecExtraSoundPosition[] = { CVector(-1042.546f, 88.794f, 11.324f), CVector(-1004.476f, 181.697f, 11.324f) };
 
 void 
 cAudioManager::ProcessExtraSounds()

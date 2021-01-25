@@ -1419,7 +1419,7 @@ CMoneyMessages::RegisterOne(CVector vecPos, const char *pText, uint8 bRed, uint8
 }
 
 CRGBA FoamColour(255, 255, 255, 255);
-unsigned int CSpecialParticleStuff::BoatFromStart;
+uint32 CSpecialParticleStuff::BoatFromStart;
 
 void
 CSpecialParticleStuff::CreateFoamAroundObject(CMatrix* pMatrix, float innerFw, float innerRg, float innerUp, int32 particles)

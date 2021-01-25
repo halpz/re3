@@ -986,7 +986,9 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 	}
 
 	wchar unicodeTemp[64];
+#ifdef ASPECT_RATIO_SCALE
 	char asciiTemp[32];
+#endif
 
 	bool weHaveLabel = aScreens[m_nCurrScreen].m_aEntries[0].m_Action == MENUACTION_LABEL;
 	uint8 section = 0; // 0: highlight trapezoid  1: texts

@@ -249,6 +249,142 @@ struct tBuildingSwap
 
 
 enum {
+	MAX_STACK_DEPTH = 6,
+	NUM_LOCAL_VARS = 16,
+	NUM_TIMERS = 2
+};
+
+class CRunningScript
+{
+	enum {
+		ANDOR_NONE = 0,
+		ANDS_1 = 1,
+		ANDS_2,
+		ANDS_3,
+		ANDS_4,
+		ANDS_5,
+		ANDS_6,
+		ANDS_7,
+		ANDS_8,
+		ORS_1 = 21,
+		ORS_2,
+		ORS_3,
+		ORS_4,
+		ORS_5,
+		ORS_6,
+		ORS_7,
+		ORS_8
+	};
+
+public:
+	CRunningScript* next;
+	CRunningScript* prev;
+	char m_abScriptName[8];
+	uint32 m_nIp;
+	uint32 m_anStack[MAX_STACK_DEPTH];
+	uint16 m_nStackPointer;
+	int32 m_anLocalVariables[NUM_LOCAL_VARS + NUM_TIMERS];
+	bool m_bIsActive;
+	bool m_bCondResult;
+	bool m_bIsMissionScript;
+	bool m_bSkipWakeTime;
+	uint32 m_nWakeTime;
+	uint16 m_nAndOrState;
+	bool m_bNotFlag;
+	bool m_bDeatharrestEnabled;
+	bool m_bDeatharrestExecuted;
+	bool m_bMissionFlag;
+
+public:
+	void SetIP(uint32 ip) { m_nIp = ip; }
+	CRunningScript* GetNext() const { return next; }
+
+	void Save(uint8*& buf);
+	void Load(uint8*& buf);
+
+	void UpdateTimers(float timeStep) {
+		m_anLocalVariables[NUM_LOCAL_VARS] += timeStep;
+		m_anLocalVariables[NUM_LOCAL_VARS + 1] += timeStep;
+	}
+
+	void Init();
+	void Process();
+
+	void RemoveScriptFromList(CRunningScript**);
+	void AddScriptToList(CRunningScript**);
+
+	static const uint32 nSaveStructSize;
+
+	void CollectParameters(uint32*, int16);
+	int32 CollectNextParameterWithoutIncreasingPC(uint32);
+	int32* GetPointerToScriptVariable(uint32*, int16);
+	void StoreParameters(uint32*, int16);
+
+	int8 ProcessOneCommand();
+	void DoDeatharrestCheck();
+	void UpdateCompareFlag(bool);
+	int16 GetPadState(uint16, uint16);
+
+	int8 ProcessCommands0To99(int32);
+	int8 ProcessCommands100To199(int32);
+	int8 ProcessCommands200To299(int32);
+	int8 ProcessCommands300To399(int32);
+	int8 ProcessCommands400To499(int32);
+	int8 ProcessCommands500To599(int32);
+	int8 ProcessCommands600To699(int32);
+	int8 ProcessCommands700To799(int32);
+	int8 ProcessCommands800To899(int32);
+	int8 ProcessCommands900To999(int32);
+	int8 ProcessCommands1000To1099(int32);
+	int8 ProcessCommands1100To1199(int32);
+	int8 ProcessCommands1200To1299(int32);
+	int8 ProcessCommands1300To1399(int32);
+	int8 ProcessCommands1400To1499(int32);
+
+	void LocatePlayerCommand(int32, uint32*);
+	void LocatePlayerCharCommand(int32, uint32*);
+	void LocatePlayerCarCommand(int32, uint32*);
+	void LocateCharCommand(int32, uint32*);
+	void LocateCharCharCommand(int32, uint32*);
+	void LocateCharCarCommand(int32, uint32*);
+	void LocateCharObjectCommand(int32, uint32*);
+	void LocateCarCommand(int32, uint32*);
+	void LocateSniperBulletCommand(int32, uint32*);
+	void PlayerInAreaCheckCommand(int32, uint32*);
+	void PlayerInAngledAreaCheckCommand(int32, uint32*);
+	void CharInAreaCheckCommand(int32, uint32*);
+	void CarInAreaCheckCommand(int32, uint32*);
+	void LocateObjectCommand(int32, uint32*);
+	void ObjectInAreaCheckCommand(int32, uint32*);
+
+#ifdef GTA_SCRIPT_COLLECTIVE
+	void LocateCollectiveCommand(int32, uint32*);
+	void LocateCollectiveCharCommand(int32, uint32*);
+	void LocateCollectiveCarCommand(int32, uint32*);
+	void LocateCollectivePlayerCommand(int32, uint32*);
+	void CollectiveInAreaCheckCommand(int32, uint32*);
+#endif
+
+#ifdef MISSION_REPLAY
+	bool CanAllowMissionReplay();
+#endif
+
+#ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+	int CollectParameterForDebug(char* buf, bool& var);
+	void GetStoredParameterForDebug(char* buf);
+#endif
+
+	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
+
+	bool ThisIsAValidRandomCop(uint32 mi, int cop, int swat, int fbi, int army, int miami);
+	bool ThisIsAValidRandomPed(uint32 pedtype, int civ, int gang, int criminal);
+
+	bool CheckDamagedWeaponType(int32 actual, int32 type);
+	
+};
+
+
+enum {
 	VAR_LOCAL = 1,
 	VAR_GLOBAL = 2,
 };
@@ -439,142 +575,6 @@ public:
 	static void SetObjectiveForAllPedsInCollective(int, eObjective);
 #endif
 
-};
-
-
-enum {
-	MAX_STACK_DEPTH = 6,
-	NUM_LOCAL_VARS = 16,
-	NUM_TIMERS = 2
-};
-
-class CRunningScript
-{
-	enum {
-		ANDOR_NONE = 0,
-		ANDS_1 = 1,
-		ANDS_2,
-		ANDS_3,
-		ANDS_4,
-		ANDS_5,
-		ANDS_6,
-		ANDS_7,
-		ANDS_8,
-		ORS_1 = 21,
-		ORS_2,
-		ORS_3,
-		ORS_4,
-		ORS_5,
-		ORS_6,
-		ORS_7,
-		ORS_8
-	};
-
-public:
-	CRunningScript* next;
-	CRunningScript* prev;
-	char m_abScriptName[8];
-	uint32 m_nIp;
-	uint32 m_anStack[MAX_STACK_DEPTH];
-	uint16 m_nStackPointer;
-	int32 m_anLocalVariables[NUM_LOCAL_VARS + NUM_TIMERS];
-	bool m_bIsActive;
-	bool m_bCondResult;
-	bool m_bIsMissionScript;
-	bool m_bSkipWakeTime;
-	uint32 m_nWakeTime;
-	uint16 m_nAndOrState;
-	bool m_bNotFlag;
-	bool m_bDeatharrestEnabled;
-	bool m_bDeatharrestExecuted;
-	bool m_bMissionFlag;
-
-public:
-	void SetIP(uint32 ip) { m_nIp = ip; }
-	CRunningScript* GetNext() const { return next; }
-
-	void Save(uint8*& buf);
-	void Load(uint8*& buf);
-
-	void UpdateTimers(float timeStep) {
-		m_anLocalVariables[NUM_LOCAL_VARS] += timeStep;
-		m_anLocalVariables[NUM_LOCAL_VARS + 1] += timeStep;
-	}
-
-	void Init();
-	void Process();
-
-	void RemoveScriptFromList(CRunningScript**);
-	void AddScriptToList(CRunningScript**);
-
-	static const uint32 nSaveStructSize;
-
-	void CollectParameters(uint32*, int16);
-	int32 CollectNextParameterWithoutIncreasingPC(uint32);
-	int32* GetPointerToScriptVariable(uint32*, int16);
-	void StoreParameters(uint32*, int16);
-
-	int8 ProcessOneCommand();
-	void DoDeatharrestCheck();
-	void UpdateCompareFlag(bool);
-	int16 GetPadState(uint16, uint16);
-
-	int8 ProcessCommands0To99(int32);
-	int8 ProcessCommands100To199(int32);
-	int8 ProcessCommands200To299(int32);
-	int8 ProcessCommands300To399(int32);
-	int8 ProcessCommands400To499(int32);
-	int8 ProcessCommands500To599(int32);
-	int8 ProcessCommands600To699(int32);
-	int8 ProcessCommands700To799(int32);
-	int8 ProcessCommands800To899(int32);
-	int8 ProcessCommands900To999(int32);
-	int8 ProcessCommands1000To1099(int32);
-	int8 ProcessCommands1100To1199(int32);
-	int8 ProcessCommands1200To1299(int32);
-	int8 ProcessCommands1300To1399(int32);
-	int8 ProcessCommands1400To1499(int32);
-
-	void LocatePlayerCommand(int32, uint32*);
-	void LocatePlayerCharCommand(int32, uint32*);
-	void LocatePlayerCarCommand(int32, uint32*);
-	void LocateCharCommand(int32, uint32*);
-	void LocateCharCharCommand(int32, uint32*);
-	void LocateCharCarCommand(int32, uint32*);
-	void LocateCharObjectCommand(int32, uint32*);
-	void LocateCarCommand(int32, uint32*);
-	void LocateSniperBulletCommand(int32, uint32*);
-	void PlayerInAreaCheckCommand(int32, uint32*);
-	void PlayerInAngledAreaCheckCommand(int32, uint32*);
-	void CharInAreaCheckCommand(int32, uint32*);
-	void CarInAreaCheckCommand(int32, uint32*);
-	void LocateObjectCommand(int32, uint32*);
-	void ObjectInAreaCheckCommand(int32, uint32*);
-
-#ifdef GTA_SCRIPT_COLLECTIVE
-	void LocateCollectiveCommand(int32, uint32*);
-	void LocateCollectiveCharCommand(int32, uint32*);
-	void LocateCollectiveCarCommand(int32, uint32*);
-	void LocateCollectivePlayerCommand(int32, uint32*);
-	void CollectiveInAreaCheckCommand(int32, uint32*);
-#endif
-
-#ifdef MISSION_REPLAY
-	bool CanAllowMissionReplay();
-#endif
-
-#ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
-	int CollectParameterForDebug(char* buf, bool& var);
-	void GetStoredParameterForDebug(char* buf);
-#endif
-
-	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
-
-	bool ThisIsAValidRandomCop(uint32 mi, int cop, int swat, int fbi, int army, int miami);
-	bool ThisIsAValidRandomPed(uint32 pedtype, int civ, int gang, int criminal);
-
-	bool CheckDamagedWeaponType(int32 actual, int32 type);
-	
 };
 
 #ifdef USE_DEBUG_SCRIPT_LOADER

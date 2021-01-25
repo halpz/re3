@@ -1138,20 +1138,20 @@ void CHud::Draw()
 			// Yeah, top and bottom changed place. R* vision
 			if (IntroRect.m_bIsUsed && IntroRect.m_bBeforeFade) {
 				if (IntroRect.m_nTextureId >= 0) {
-					CRect rect = {
+					CRect rect (
 						IntroRect.m_sRect.left,
 						IntroRect.m_sRect.top,
 						IntroRect.m_sRect.right,
-						IntroRect.m_sRect.bottom };
+						IntroRect.m_sRect.bottom );
 
 					CTheScripts::ScriptSprites[IntroRect.m_nTextureId].Draw(rect, IntroRect.m_sColor);
 				}
 				else {
-					CRect rect = {
+					CRect rect (
 						IntroRect.m_sRect.left,
 						IntroRect.m_sRect.top,
 						IntroRect.m_sRect.right,
-						IntroRect.m_sRect.bottom };
+						IntroRect.m_sRect.bottom );
 
 					CSprite2d::DrawRect(rect, IntroRect.m_sColor);
 				}
