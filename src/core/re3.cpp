@@ -400,6 +400,8 @@ bool LoadINISettings()
 	ReadIniIfExists("CustomPipesValues", "PostFXIntensity", &CPostFX::Intensity);
 #endif
 #ifdef EXTENDED_PIPELINES
+	ReadIniIfExists("CustomPipesValues", "VehiclePipeline", &CustomPipes::VehiclePipeSwitch);
+	ReadIniIfExists("CustomPipesValues", "WorldPipeline", &CustomPipes::WorldPipeSwitch);
 	ReadIniIfExists("CustomPipesValues", "NeoVehicleShininess", &CustomPipes::VehicleShininess);
 	ReadIniIfExists("CustomPipesValues", "NeoVehicleSpecularity", &CustomPipes::VehicleSpecularity);
 	ReadIniIfExists("CustomPipesValues", "RimlightMult", &CustomPipes::RimlightMult);
@@ -488,6 +490,8 @@ void SaveINISettings()
 	StoreIni("CustomPipesValues", "PostFXIntensity", CPostFX::Intensity);
 #endif
 #ifdef EXTENDED_PIPELINES
+	StoreIni("CustomPipesValues", "VehiclePipeline", CustomPipes::VehiclePipeSwitch);
+	StoreIni("CustomPipesValues", "WorldPipeline", CustomPipes::WorldPipeSwitch);
 	StoreIni("CustomPipesValues", "NeoVehicleShininess", CustomPipes::VehicleShininess);
 	StoreIni("CustomPipesValues", "NeoVehicleSpecularity", CustomPipes::VehicleSpecularity);
 	StoreIni("CustomPipesValues", "RimlightMult", CustomPipes::RimlightMult);

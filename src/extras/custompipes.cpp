@@ -370,7 +370,7 @@ AttachVehiclePipe(rw::Clump *clump)
  * Neo World pipe
  */
 
-int32 WorldPipeSwitch = 0;
+int32 WorldPipeSwitch = WORLDPIPE_PS2;
 bool LightmapEnable;
 float LightmapMult = 1.0f;
 InterpolatedFloat WorldLightmapBlend(1.0f);
