@@ -15,7 +15,7 @@
 
 // --LCS: file done
 
-#if 0
+#ifdef PSP_WATERCANNON
 	//PSP:
 	#define WATER_COLOR 255
 #else
