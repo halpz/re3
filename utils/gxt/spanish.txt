@@ -397,9 +397,6 @@ Valor del eje Z: ~1~
 [DEAD]
 ¡ELIMINADO!
 
-[BUSTED]
-¡TRINCADO!
-
 [GOODBOY]
 ~w~¡Bonificación de 50 $ por buen ciudadano!
 
@@ -1748,7 +1745,7 @@ Test Delete:
 Ranura0
 
 [FES_LOA]
-CARGAR DATOS
+CARGAR PARTIDA
 
 [ST_TIME]
 Tiempo de juego actual
@@ -17422,10 +17419,10 @@ SALIR
 OPCIONES
 
 [FET_GRA]
-Gráficos
+Config. Gráficos
 
 [FET_PS]
-Jugador
+Config. Jugador
 
 [FET_MIG]
 IZQUIERDA, DERECHA o RUEDA DEL MOUSE para ajustar.
@@ -17786,6 +17783,9 @@ Mirar (Arriba)
 
 { improvements & fixes }
 
+[BUSTED]
+¡ARRESTADO!
+
 [FEM_SL1]
 Espacio Libre
 
@@ -17811,22 +17811,22 @@ Espacio Libre
 Espacio Libre
 
 [FES_DEL]
-BORRAR DATOS
+BORRAR PARTIDA
 
 [FEO_CON]
-Controles
+Config. Controles
 
 [FEO_AUD]
-Audio
+Config. Audio
 
 [FEO_DIS]
-Pantalla
+Config. Pantalla
 
 [FEO_LAN]
-Idioma
+Config. Idioma
 
 [FEO_PLA]
-Jugador
+Config. Jugador
 
 [FEB_AUD]
 Audio
@@ -17844,7 +17844,7 @@ AUDIO
 IZQUIERDA
 
 [FEH_SGA]
-REINICIAR
+NUEVO JUEGO
 
 [DUMMY]
 THIS LABEL NEEDS TO BE HERE !!!
