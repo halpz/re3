@@ -50,7 +50,7 @@ RwObject*
 CSimpleModelInfo::CreateInstance(void)
 {
 	RpAtomic *atomic;
-	if(m_atomics && m_atomics[0] == nil)
+	if(m_atomics == nil || m_atomics[0] == nil)
 		return nil;
 	atomic = RpAtomicClone(m_atomics[0]);
 	RpAtomicSetFrame(atomic, RwFrameCreate());
@@ -64,7 +64,7 @@ CSimpleModelInfo::CreateInstance(RwMatrix *matrix)
 	RpAtomic *atomic;
 	RwFrame *frame;
 
-	if(m_atomics && m_atomics[0] == nil)
+	if(m_atomics == nil || m_atomics[0] == nil)
 		return nil;
 	atomic = RpAtomicClone(m_atomics[0]);
 	frame = RwFrameCreate();
@@ -205,6 +205,8 @@ CSimpleModelInfo::GetAtomicFromDistance(float dist)
 {
 	int i;
 	i = 0;
+// HACk until we figure out what's going on
+if(m_atomics == nil) return nil;
 	if(m_isDamaged)
 		i = m_firstDamaged;
 	for(; i < m_numAtomics; i++)
