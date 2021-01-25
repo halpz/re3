@@ -756,7 +756,7 @@ CHeli::InitHelis(void)
 	for(i = 0; i < NUM_HELIS; i++)
 		pHelis[i] = nil;
 
-	((CVehicleModelInfo*)CModelInfo::GetModelInfo(MI_CHOPPER))->SetColModel(&CTempColModels::ms_colModelPed1);
+	((CVehicleModelInfo*)CModelInfo::GetModelInfo(MI_CHOPPER))->SetColModel(&gpTempColModels->ms_colModelPed1);
 }
 
 CHeli*

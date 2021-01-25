@@ -4174,7 +4174,7 @@ CAutomobile::dmgDrawCarCollidingParticles(const CVector &pos, float amount)
 			        CGeneral::GetRandomNumberInRange(0.1f, 0.25f)),
 			nil,
 			CGeneral::GetRandomNumberInRange(0.02f, 0.08f),
-			CVehicleModelInfo::ms_vehicleColourTable[m_currentColour1],
+			CVehicleModelInfo::mspInfo->ms_vehicleColourTable[m_currentColour1],
 			CGeneral::GetRandomNumberInRange(-40.0f, 40.0f),
 			0,
 			CGeneral::GetRandomNumberInRange(0.0f, 4.0f));

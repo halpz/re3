@@ -502,7 +502,7 @@ void CGarage::Update()
 								pos.x = CGeneral::GetRandomNumberInRange(m_fInfX + 0.5f, m_fSupX - 0.5f);
 								pos.y = CGeneral::GetRandomNumberInRange(m_fInfY + 0.5f, m_fSupY - 0.5f);
 								pos.z = CGeneral::GetRandomNumberInRange(m_fDoor1Z - 3.0f, m_fDoor1Z + 1.0f);
-								CParticle::AddParticle(PARTICLE_GARAGEPAINT_SPRAY, pos, CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, CVehicleModelInfo::ms_vehicleColourTable[colour1]);
+								CParticle::AddParticle(PARTICLE_GARAGEPAINT_SPRAY, pos, CVector(0.0f, 0.0f, 0.0f), nil, 0.0f, CVehicleModelInfo::mspInfo->ms_vehicleColourTable[colour1]);
 							}
 						}
 					}

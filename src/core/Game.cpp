@@ -316,7 +316,7 @@ bool CGame::InitialiseOnceAfterRW(void)
 {
 	TheText.Load();
 	CTimer::Initialise();
-	CTempColModels::Initialise();
+	gpTempColModels->Initialise();
 	mod_HandlingManager.Initialise();
 	CSurfaceTable::Initialise("DATA\\SURFACE.DAT");
 	CPedStats::Initialise();
@@ -365,6 +365,9 @@ bool CGame::Initialise(const char* datFile)
 #endif
 
 	CPools::Initialise();
+
+	if(gMakeResources)
+		CVehicleModelInfo::Load(nil);
 
 #ifndef GTA_PS2
 	CIniFile::LoadIniFile();

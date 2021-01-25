@@ -27,6 +27,9 @@ extern bool gbPrintMemoryUsage;
 // leeds
 extern bool gMakeResources;
 extern bool gUseChunkFiles;
+extern bool gSecondExportPass;
+extern bool gUseModelResources;
+extern bool gUseResources;
 
 class CSprite2d;
 

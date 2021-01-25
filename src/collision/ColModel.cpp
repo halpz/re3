@@ -204,3 +204,10 @@ CColModel::operator=(const CColModel &other)
 	}
 	return *this;
 }
+
+bool
+CColModel::Write(base::cRelocatableChunkWriter &writer, bool allocSpace)
+{
+	assert(0 && "TODO(LCS)");
+	return 1;
+}

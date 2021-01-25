@@ -1,17 +1,30 @@
 #include "common.h"
 
+#include "main.h"
 #include "RwHelper.h"
 #include "General.h"
 #include "NodeName.h"
 #include "VisibilityPlugins.h"
 #include "ModelInfo.h"
 #include "AnimManager.h"
+#include "Streaming.h"
+#include "Leeds.h"
+
+base::cRelocatableChunkClassInfo CClumpModelInfo::msClassInfo("CElementGroupModelInfo", VTABLE_ADDR(&msClassInstance), sizeof(msClassInstance)); // the real name
+CClumpModelInfo CClumpModelInfo::msClassInstance;
 
 void
 CClumpModelInfo::DeleteRwObject(void)
 {
 	if(m_clump){
-		RpClumpDestroy(m_clump);
+		if(!gUseChunkFiles)
+			RpClumpDestroy(m_clump);
+		else{
+			CStreaming::UnregisterClump(m_clump);
+			CStreaming::UnregisterPointer(&m_clump, 2);
+			DeleteChunk();
+		}
+
 		m_clump = nil;
 		RemoveTexDictionaryRef();
 		if(GetAnimFileIndex() != -1)
@@ -52,6 +65,7 @@ CClumpModelInfo::CreateInstance(RwMatrix *m)
 	if(m_clump){
 		RpClump *clump = (RpClump*)CreateInstance();
 		*RwFrameGetMatrix(RpClumpGetFrame(clump)) = *m;
+		CStreaming::RegisterInstance(clump);
 		return (RwObject*)clump;
 	}
 	return nil;
@@ -73,14 +87,15 @@ CClumpModelInfo::SetClump(RpClump *clump)
 	if(GetAnimFileIndex() != -1)
 		CAnimManager::AddAnimBlockRef(GetAnimFileIndex());
 	if(IsClumpSkinned(clump)){
-		int i;
+		//int i;
 		RpHAnimHierarchy *hier;
-		RpAtomic *skinAtomic;
-		RpSkin *skin;
+		//RpAtomic *skinAtomic;
+		//RpSkin *skin;
 
 		hier = GetAnimHierarchyFromClump(clump);
 		assert(hier);
 		RpClumpForAllAtomics(clump, SetHierarchyForSkinAtomic, hier);
+/*
 		skinAtomic = GetFirstAtomic(clump);
 
 		assert(skinAtomic);
@@ -94,6 +109,7 @@ CClumpModelInfo::SetClump(RpClump *clump)
 			weights->w2 /= sum;
 			weights->w3 /= sum;
 		}
+*/
 		RpHAnimHierarchySetFlags(hier, (RpHAnimHierarchyFlag)(rpHANIMHIERARCHYUPDATEMODELLINGMATRICES|rpHANIMHIERARCHYUPDATELTMS));
 	}
 }
@@ -202,4 +218,48 @@ CClumpModelInfo::GetFrameFromId(RpClump *clump, int32 id)
 	assoc.frame = nil;
 	RwFrameForAllChildren(RpClumpGetFrame(clump), FindFrameFromIdCB, &assoc);
 	return assoc.frame;
+}
+
+
+void
+CClumpModelInfo::LoadModel(void *clump, const void *chunk)
+{
+	m_chunk = (void*)chunk;
+	m_clump = (RpClump*)clump;
+	LoadResource(m_clump);
+	CStreaming::RegisterPointer(&m_chunk, 2, true);
+	CStreaming::RegisterClump(m_clump);
+	CStreaming::RegisterPointer(&m_clump, 2, true);
+}
+
+void
+CClumpModelInfo::Write(base::cRelocatableChunkWriter &writer)
+{
+	CBaseModelInfo::Write(writer);
+	if(m_clump){
+		writer.AddPatch(&m_clump);
+		SaveResource(m_clump, writer);
+	}
+}
+
+void*
+CClumpModelInfo::WriteModel(base::cRelocatableChunkWriter &writer)
+{
+	if(m_clump)
+		SaveResource(m_clump, writer);
+	return m_clump;
+}
+
+void
+CClumpModelInfo::RcWriteThis(base::cRelocatableChunkWriter &writer)
+{
+	writer.AllocateRaw(this, sizeof(*this), sizeof(void*), false, true);
+	writer.Class(VTABLE_ADDR(this), msClassInfo);
+}
+
+void
+CClumpModelInfo::RcWriteEmpty(base::cRelocatableChunkWriter &writer)
+{
+	writer.AllocateRaw(this, sizeof(*this), sizeof(void*), false, true);
+	writer.Class(VTABLE_ADDR(this), msClassInfo);
 }

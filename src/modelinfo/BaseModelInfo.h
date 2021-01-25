@@ -2,7 +2,7 @@
 
 struct CColModel;
 
-#define MAX_MODEL_NAME (21)
+#define MAX_MODEL_NAME (24)
 
 enum ModelInfoType
 {
@@ -23,9 +23,13 @@ class C2dEffect;
 class CBaseModelInfo
 {
 protected:
-	char        *m_name;
+	uint32       m_unk1;
+	uint32       m_unk2;
 	uint32       m_nameKey;
-	RwObject    *m_object;
+	union {
+		char        *m_name;	// if not using chunks
+		void        *m_chunk;	// else
+	};
 	uint8        m_type;
 	uint8        m_num2dEffects;
 	bool         m_bOwnsColModel;
@@ -53,6 +57,16 @@ public:
 	virtual void ConvertAnimFileIndex(void) {}
 	virtual int GetAnimFileIndex(void) { return -1; }
 
+	virtual void LoadModel(void *model, const void *chunk) = 0;
+	virtual void DeleteChunk(void);
+	// this writes the modelinfo struct, possibly including actual RW models
+	virtual void Write(base::cRelocatableChunkWriter &writer);
+	// this writes the RW models
+	virtual void *WriteModel(base::cRelocatableChunkWriter &writer) { return nil; }		// = 0; // this is not in the vtable for some reason???
+	// these allocate the space for a modelinfo struct and patch the vtable pointer
+	virtual void RcWriteThis(base::cRelocatableChunkWriter &writer) = 0;
+	virtual void RcWriteEmpty(base::cRelocatableChunkWriter &writer) = 0;
+
 	// one day it becomes virtual
 	uint8 GetModelType() const { return m_type; }
 	bool IsBuilding(void) { return m_type == MITYPE_SIMPLE || m_type == MITYPE_TIME; }
@@ -74,7 +88,9 @@ public:
 	void RemoveRef(void);
 	void SetTexDictionary(const char *name);
 	void AddTexDictionaryRef(void);
+	void AddTexDictionaryRefGu(void);
 	void RemoveTexDictionaryRef(void);
+	void RemoveTexDictionaryRefGu(void);
 	void Init2dEffects(void);
 	void Add2dEffect(C2dEffect *fx);
 	C2dEffect *Get2dEffect(int n);

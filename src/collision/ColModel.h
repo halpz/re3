@@ -36,4 +36,6 @@ struct CColModel
 	void *operator new(size_t);
 	void operator delete(void *p, size_t);
 	CColModel& operator=(const CColModel& other);
+
+	bool Write(base::cRelocatableChunkWriter &writer, bool allocSpace);
 };
