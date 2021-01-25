@@ -1600,9 +1600,6 @@ pad analógico
 [FEC_DP]
 botones de dirección
 
-[FEA_SFX]
-VOLUMEN EFECTOS:
-
 [FEA_OUT]
 Salida:
 
@@ -1632,15 +1629,6 @@ RASTROS:
 
 [FED_RDR]
 MODO RADAR:
-
-[FED_HUD]
-MODO VISOR:
-
-[FED_RDM]
-MAPA Y PUNTOS
-
-[FED_RDB]
-SOLO PUNTOS
 
 [FEL_ENG]
 INGLÉS
@@ -5214,9 +5202,6 @@ Vuelve al coche de bomberos siempre que quieras e intenta batir tu mejor tiempo.
 
 [PCJTIT]
 GO GO Faggio
-
-[FEA_MUS]
-VOLUMEN DE LA RADIO:
 
 [FEST_GO]
 Mejor tiempo en "Go Go Faggio"
@@ -17425,7 +17410,7 @@ Config. Gráficos
 Config. Jugador
 
 [FET_MIG]
-IZQUIERDA, DERECHA o RUEDA DEL MOUSE para ajustar.
+IZQUIERDA, DERECHA o RUEDA DEL MOUSE: ajustar.
 
 [FET_HRD]
 Ajustes reiniciados.
@@ -17439,13 +17424,13 @@ CLICK IZQ. o ENTER para aplicar cambios.
 CONTROLES
 
 [FET_CTI]
-ESTILO: CLÁSICO
+CONTROLES CLÁSICOS
 
 [FET_STI]
-ESTILO: ESTÁNDAR
+CONTROLES ESTÁNDAR
 
 [FEC_RED]
-REDEFINIR BOTONES
+REDEFINIR CONTROLES
 
 [FEC_MOUSE]
 CONFIG. MOUSE
@@ -17488,10 +17473,10 @@ Auriculares
 VOL. ARCHIVOS MP3:
 
 [FEA_SPK]
-SALIDA:
+CONFIG. ALTAVOCES:
 
 [FEA_ADP]
-DETECTAR HARDWARE
+AUTO-DETECTAR HARDWARE
 
 [FET_RSC]
 Hardware no disponible. Ajustes reiniciados.
@@ -17513,7 +17498,7 @@ CÁMARA LIBRE:
 RESOLUCIÓN:
 
 [FED_FLS]
-PANTALLA COMPLETA
+COMPLETA
 
 [FED_WND]
 VENTANA
@@ -17522,7 +17507,7 @@ VENTANA
 SINC. AUDIO/VIDEO:
 
 [FEM_FRM]
-LIMITAR FPS:
+LIMITADOR DE FOTOGRAMAS:
 
 [FED_AAS]
 ANTI-ALIASING:
@@ -17534,7 +17519,7 @@ PS2 ALPHA TEST:
 MÓVIL
 
 [FED_MBL]
-SUAVIZADO:
+DESENFOQ. MOVIMIENTO:
 
 [FEM_NRM]
 NORMAL
@@ -17543,7 +17528,7 @@ NORMAL
 SIMPLE
 
 [FEM_SCF]
-FORMATO:
+FORMATO DE PANTALLA:
 
 [FED_CLF]
 FILTRO DE COLOR:
@@ -17557,10 +17542,10 @@ NOMBRE
 FECHA
 
 [FES_SET]
-APLICAR
+USAR
 
 [FET_DSN]
-Por Defecto.bmp
+Predeterminado.bmp
 
 { pause menu }
 
@@ -17579,7 +17564,7 @@ CONTINUAR
 ESTÁS AQUÍ
 
 [FEH_MPH]
-MOUSE o FLECHAS para mover. REPÁG, AVPÁG o RUEDA DEL MOUSE para acercar/alejar. L para referencias.
+MOUSE o FLECHAS: mover. REPÁG, AVPÁG o RUEDA DEL MOUSE: acercar/alejar. L: referencias. CLICK DCHO: fijar destino.
 
 { control keys }
 
@@ -17590,13 +17575,13 @@ A PIE
 EN VEHÍCULO
 
 [FEC_NMN]
-~1~
+NUM. ~1~
 
 [FEC_ETR]
 ENT
 
 [FEC_DOT]
-NUM .
+NUM. 
 
 [FEC_UPA]
 ARRIBA
@@ -17608,10 +17593,10 @@ ABAJO
 DERECHA
 
 [FEC_PGU]
-REPÁG
+RE PÁG
 
 [FEC_PGD]
-AVPÁG
+AV PÁG
 
 [FEC_RTN]
 ENTER
@@ -17623,13 +17608,13 @@ NO USADO
 INICIO
 
 [FEC_RCT]
-CTRL DER.
+CTRL DCHO
 
 [FEC_LSF]
-SHIFT IZQ.
+SHIFT IZQ
 
 [FEC_DLL]
-SUPR.
+SUPR
 
 [FEC_TAB]
 TAB
@@ -17638,10 +17623,10 @@ TAB
 -
 
 [FEC_LCT]
-CTRL IZQ.
+CTRL IZQ
 
 [FEC_MSL]
-CLICK IZQ.
+CLICK IZQ
 
 [FEC_MWB]
 RUEDA ABAJO
@@ -17653,10 +17638,10 @@ RUEDA ARRIBA
 ESPACIO
 
 [FEC_RSF]
-SHIFT DER.
+SHIFT DCHO
 
 [FEC_MSR]
-CLICK DER.
+CLICK DCHO
 
 [FEC_CLK]
 BLOQ MAYÚS
@@ -17665,7 +17650,7 @@ BLOQ MAYÚS
 CLICK RUEDA
 
 [FET_CIG]
-RETROCESO para limpiar acción. CLICK IZQ. o ENTER para asignar/agregar.
+RETROCESO: limpiar acción. CLICK IZQ. o ENTER: asignar/agregar.
 
 [FET_EIG]
 No se puede asignar un botón para ésta acción.
@@ -17674,16 +17659,16 @@ No se puede asignar un botón para ésta acción.
 COMBO: MIRAR I+D
 
 [FEC_LOR]
-Mirar (Derecha)
+Mirar Derecha
 
 [FEC_LOL]
-Mirar (Izquierda)
+Mirar Izquierda
 
 [FEC_LBA]
-Mirar (Atrás)
+Mirar Atrás
 
 [FEC_IRT]
-INS.
+INSERTAR
 
 [FEC_PLS]
 NUM +
@@ -17698,19 +17683,19 @@ SIN ASIGNAR
 ¡Error! Una o más acciones no están vinculadas a una tecla o botón. Verifica que todas las acciones estén configuradas.
 
 [FEC_TFD]
-Torreta+Inclinar (Abajo)
+Torreta+Inclinar Abajo
 
 [FET_RIG]
-Aprieta el botón o tecla que quieras para ésta acción.
+Aprieta el botón/tecla que quieras para ésta acción.
 
 [FEC_TFU]
-Torreta+Inclinar (Arriba)
+Torreta+Inclinar Arriba
 
 [FEC_TFR]
-Mirar+Torreta (Der.)
+Mirar+Torreta (Dcha.)
 
 [FEC_TFL]
-Mirar+Torreta (Izq.)
+Mirar+Torreta (Izqda.)
 
 [FEC_ANS]
 Acción
@@ -17728,7 +17713,7 @@ Saltar
 Cámara
 
 [FEC_SUB]
-Sub-Misión
+Misión Secundaria
 
 [FEC_HRN]
 Claxon
@@ -17743,7 +17728,7 @@ Entrar+Salir
 Alejar Zoom
 
 [FEC_ZIN]
-Acercar Zoom
+Aumentar Zoom
 
 [FEC_RIG]
 Derecha
@@ -17758,57 +17743,72 @@ Centrar Cámara
 Retroceder
 
 [FEC_PTT]
-Objetivo (Anterior)
+Objetivo Anterior
 
 [FEC_FOR]
 Avanzar/Acelerar
 
 [FEC_PWE]
-Arma (Anterior)
+Arma Anterior
 
 [FEC_NWE]
-Arma (Siguiente)
+Arma Siguiente
 
 [FEC_FIR]
 Atacar/Disparar
 
 [FEC_NTR]
-Objetivo (Siguiente)
+Objetivo Siguiente
 
 [FEC_LDU]
-Mirar (Abajo)
+Mirar Abajo
 
 [FEC_LUD]
-Mirar (Arriba)
+Mirar Arriba
 
 { improvements & fixes }
+
+[FED_HUD]
+MODO INTERFAZ:
+
+[FED_RDM]
+MAPA E ÍCONOS
+
+[FED_RDB]
+SOLO ÍCONOS
+
+[FEA_MUS]
+VOL. DE RADIO:
+
+[FEA_SFX]
+VOL. DE EFECTOS:
 
 [BUSTED]
 ¡ARRESTADO!
 
 [FEM_SL1]
-Espacio Libre
+Espacio Libre 1
 
 [FEM_SL2]
-Espacio Libre
+Espacio Libre 2
 
 [FEM_SL3]
-Espacio Libre
+Espacio Libre 3
 
 [FEM_SL4]
-Espacio Libre
+Espacio Libre 4
 
 [FEM_SL5]
-Espacio Libre
+Espacio Libre 5
 
 [FEM_SL6]
-Espacio Libre
+Espacio Libre 6
 
 [FEM_SL7]
-Espacio Libre
+Espacio Libre 7
 
 [FEM_SL8]
-Espacio Libre
+Espacio Libre 8
 
 [FES_DEL]
 BORRAR PARTIDA
