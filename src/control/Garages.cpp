@@ -322,7 +322,7 @@ bool CGarages::InitDoorGubbins(uint32 id, uint8 type)
 
 void CGarages::SetupAnyGaragesForThisIsland(void)
 {
-	for (int i = 0; i < NumGarages; i++) {
+	for (uint32 i = 0; i < NumGarages; i++) {
 		CGarage* pGarage = &aGarages[i];
 		if (!pGarage->m_bInitialized)
 			pGarage->m_bInitialized = InitDoorGubbins(i, pGarage->m_eGarageType);
