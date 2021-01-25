@@ -2099,12 +2099,12 @@ CCollision::DistToLine(const CVector *l0, const CVector *l1, const CVector *poin
 	float dot = DotProduct(*point - *l0, *l1 - *l0);
 	// Between 0 and len we're above the line.
 	// if not, calculate distance to endpoint
-	if(dot <= 0.0f)
-		return (*point - *l0).Magnitude();
-	if(dot >= lensq)
-		return (*point - *l1).Magnitude();
+	if(dot <= 0.0f) return (*point - *l0).Magnitude();
+	if(dot >= lensq) return (*point - *l1).Magnitude();
 	// distance to line
-	return Sqrt((*point - *l0).MagnitudeSqr() - dot*dot/lensq);
+	float distSqr = (*point - *l0).MagnitudeSqr() - dot * dot / lensq;
+	if(distSqr <= 0.f) return 0.f;
+	return Sqrt(distSqr);
 }
 
 // same as above but also return the point on the line

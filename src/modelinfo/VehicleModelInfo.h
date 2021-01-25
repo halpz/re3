@@ -98,18 +98,29 @@ public:
 	uint8 m_lastColorVariation;
 	uint8 m_currentColour1;
 	uint8 m_currentColour2;
-	RpAtomic *m_comps[6];	// LCS(TODO): pointer
+	RpAtomic **m_comps;
+	float m_normalSplay;
 	// This is stupid, CClumpModelInfo already has it!
 	union {
 		int32 m_animFileIndex;
 		char *m_animFileName;
 	};
 
-	static int8 ms_compsToUse[2];
-	static int8 ms_compsUsed[2];
-	static RwRGBA ms_vehicleColourTable[256];
-	static RwTexture *ms_colourTextureTable[256];
+	static base::cRelocatableChunkClassInfo msClassInfo;
+	static CVehicleModelInfo msClassInstance;
+
+	struct Statics {
+		void *unknown;	// unused too it seems
+		RwRGBA ms_vehicleColourTable[256];
+		int8 ms_compsUsed[2];
+		int8 ms_compsToUse[2];
+	};
+	//static RwTexture *ms_colourTextureTable[256];
+	static Statics *mspInfo;
 	static RwObjectNameIdAssocation *ms_vehicleDescs[NUM_VEHICLE_TYPES];
+
+	static void Load(void *inst);
+	static void *WriteStaticInfo(base::cRelocatableChunkWriter &writer);
 
 	CVehicleModelInfo(void);
 	void DeleteRwObject(void);
@@ -118,6 +129,12 @@ public:
 	void SetAnimFile(const char *file);
 	void ConvertAnimFileIndex(void);
 	int GetAnimFileIndex(void) { return m_animFileIndex; }
+
+	virtual void LoadModel(void *model, const void *chunk);
+	virtual void Write(base::cRelocatableChunkWriter &writer);
+	virtual void *WriteModel(base::cRelocatableChunkWriter &writer);
+	virtual void RcWriteThis(base::cRelocatableChunkWriter &writer);
+	virtual void RcWriteEmpty(base::cRelocatableChunkWriter &writer);
 
 	static RwFrame *CollapseFramesCB(RwFrame *frame, void *data);
 	static RwObject *MoveObjectsCB(RwObject *object, void *data);
@@ -128,13 +145,16 @@ public:
 	static RpAtomic *SetAtomicRendererCB(RpAtomic *atomic, void *data);
 	static RpAtomic *SetAtomicRendererCB_BigVehicle(RpAtomic *atomic, void *data);
 	static RpAtomic *SetAtomicRendererCB_Train(RpAtomic *atomic, void *data);
+	static RpAtomic *SetAtomicRendererCB_Ferry(RpAtomic *atomic, void *data);
 	static RpAtomic *SetAtomicRendererCB_Boat(RpAtomic *atomic, void *data);
+	static RpAtomic *SetAtomicRendererCB_Boat_Far(RpAtomic *atomic, void *data);
 	static RpAtomic *SetAtomicRendererCB_Heli(RpAtomic *atomic, void *data);
 	static RpAtomic *SetAtomicRendererCB_RealHeli(RpAtomic *atomic, void *data);
 	void SetAtomicRenderCallbacks(void);
 
 	static RwObject *SetAtomicFlagCB(RwObject *object, void *data);
 	static RwObject *ClearAtomicFlagCB(RwObject *atomic, void *data);
+	void RemoveWheels(void);
 	void SetVehicleComponentFlags(RwFrame *frame, uint32 flags);
 	void PreprocessHierarchy(void);
 	void GetWheelPosn(int32 n, CVector &pos);
@@ -160,7 +180,7 @@ public:
 	static void ShutdownEnvironmentMaps(void);
 
 	static int GetMaximumNumberOfPassengersFromNumberOfDoors(int id);
-	static void SetComponentsToUse(int8 c1, int8 c2) { ms_compsToUse[0] = c1; ms_compsToUse[1] = c2; }
+	static void SetComponentsToUse(int8 c1, int8 c2) { mspInfo->ms_compsToUse[0] = c1; mspInfo->ms_compsToUse[1] = c2; }
 };
 
 extern bool gbBlackCars;

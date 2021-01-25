@@ -39,7 +39,7 @@
 // Game has colors inlined in code.
 // For easier modification we collect them here:
 CRGBA MONEY_COLOR(0, 207, 133, 255);
-CRGBA AMMO_COLOR(255, 150, 225, 255);
+CRGBA AMMO_COLOR(255, 255, 255, 255);
 CRGBA HEALTH_COLOR(255, 150, 225, 255);
 CRGBA ARMOUR_COLOR(185, 185, 185, 255);
 CRGBA NOTWANTED_COLOR(27, 89, 130, 255);
@@ -130,6 +130,8 @@ CSprite2d CHud::Sprites[NUM_HUD_SPRITES];
 
 wchar* CHud::gLastPrintForeverString;
 
+uint8 CHud::m_HudAlpha = 209;
+
 struct
 {
 	const char *name;
@@ -213,6 +215,7 @@ RwTexture *gpLaserSightTex;
 RwTexture *gpLaserDotTex;
 RwTexture *gpViewFinderTex;
 
+// TODO(LCS): some things were reversed from LCS but not all
 void CHud::Draw()
 {
 	RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERNEAREST);
@@ -405,6 +408,8 @@ void CHud::Draw()
 			DrawMoneyCounter
 		*/
 
+		RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR); // TODO(LCS): temp filtering fix for money counter, remove later
+
 		wchar sPrint[16];
 		wchar sPrintIcon[16];
 		char sTemp[16];
@@ -417,25 +422,8 @@ void CHud::Draw()
 			m_LastDisplayScore = CWorld::Players[CWorld::PlayerInFocus].m_nVisibleMoney;
 		}
 		if (m_DisplayScoreState != FADED_OUT) {
-			sprintf(sTemp, "$%08d", CWorld::Players[CWorld::PlayerInFocus].m_nVisibleMoney);
-			AsciiToUnicode(sTemp, sPrint);
-
-			CFont::SetPropOff();
-			CFont::SetBackgroundOff();
-			CFont::SetScale(SCREEN_SCALE_X(HUD_TEXT_SCALE_X), SCREEN_SCALE_Y(HUD_TEXT_SCALE_Y));
-			CFont::SetCentreOff();
-			CFont::SetRightJustifyOn();
-			CFont::SetRightJustifyWrap(0.0f);
-			CFont::SetBackGroundOnlyTextOff();
-			CFont::SetFontStyle(FONT_HEADING);
-			CFont::SetPropOff();
-			CFont::SetDropShadowPosition(2);
-			CFont::SetDropColor(CRGBA(0, 0, 0, alpha));
-			MONEY_COLOR.a = alpha;
-			CFont::SetColor(MONEY_COLOR);
-
 			if (FrontEndMenuManager.m_PrefsShowHud) {
-				CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f), SCREEN_SCALE_Y(43.0f), sPrint);
+				DrawCash();
 			}
 		}
 
@@ -448,46 +436,23 @@ void CHud::Draw()
 			alpha = CHud::DrawFadeState(HUD_WEAPON_FADING, 1);
 			m_LastWeapon = playerPed->GetWeapon()->m_eWeaponType;
 		}
+		alpha = Min(alpha, m_HudAlpha);
 		if (m_WeaponState != FADED_OUT) {
 			CWeapon *weapon = playerPed->GetWeapon();
-			int32 AmmoAmount = CWeaponInfo::GetWeaponInfo((eWeaponType)WeaponType)->m_nAmountofAmmunition;
-			int32 AmmoInClip = weapon->m_nAmmoInClip;
-			int32 TotalAmmo = weapon->m_nAmmoTotal;
-			int32 Ammo, Clip;
-
-			if (AmmoAmount <= 1 || AmmoAmount >= 1000)
-				sprintf(sTemp, "%d", TotalAmmo);
-			else {
-				if (WeaponType == WEAPONTYPE_FLAMETHROWER) {
-					Clip = AmmoInClip / 10;
-
-					Ammo = Min((TotalAmmo - AmmoInClip) / 10, 9999);
-				} else {
-					Clip = AmmoInClip;
-
-					Ammo = Min(TotalAmmo - AmmoInClip, 9999);
-				}
-
-				sprintf(sTemp, "%d-%d", Ammo, Clip);
-			}
-
-			AsciiToUnicode(sTemp, sPrint);
 			CWeaponInfo *weaponInfo = CWeaponInfo::GetWeaponInfo((eWeaponType)WeaponType);
 			/*
 				DrawWeaponIcon
 			*/
 
 			if (FrontEndMenuManager.m_PrefsShowHud) {
+				float right = FrontEndMenuManager.m_PrefsUseWideScreen ? 468.6f : 470.0f;
+				float left = right - (FrontEndMenuManager.m_PrefsUseWideScreen ? 48.6f : 54.0f);
 				if (weaponInfo->m_nModelId <= 0) {
 					RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
 					if (FrontEndMenuManager.m_PrefsShowHud)
 						Sprites[WeaponType].Draw(
-							CRect(SCREEN_SCALE_FROM_RIGHT(99.0f), SCREEN_SCALE_Y(27.0f), SCREEN_SCALE_FROM_RIGHT(35.0f), SCREEN_SCALE_Y(91.0f)),
-							CRGBA(255, 255, 255, alpha),
-							0.015f, 0.015f,
-							1.0f, 0.0f,
-							0.015f, 1.0f,
-							1.0f, 1.0f);
+							CRect(PSP_SCREEN_SCALE_X(left), PSP_SCREEN_SCALE_Y(16.0f), PSP_SCREEN_SCALE_X(right), PSP_SCREEN_SCALE_Y(60.0f)),
+							CRGBA(255, 255, 255, alpha));
 				} else {
 					CBaseModelInfo *weaponModel = CModelInfo::GetModelInfo(weaponInfo->m_nModelId);
 					RwTexDictionary *weaponTxd = CTxdStore::GetSlot(weaponModel->GetTxdSlot())->texDict;
@@ -507,12 +472,8 @@ void CHud::Draw()
 							static CSprite2d sprite;
 							sprite.m_pTexture = weaponIcon;
 							sprite.Draw(
-								CRect(SCREEN_SCALE_FROM_RIGHT(99.0f), SCREEN_SCALE_Y(27.0f), SCREEN_SCALE_FROM_RIGHT(35.0f), SCREEN_SCALE_Y(91.0f)),
-								CRGBA(255, 255, 255, alpha),
-								0.015f, 0.015f,
-								1.0f, 0.0f,
-								0.015f, 1.0f,
-								1.0f, 1.0f);
+								CRect(PSP_SCREEN_SCALE_X(left), PSP_SCREEN_SCALE_Y(16.0f), PSP_SCREEN_SCALE_X(right), PSP_SCREEN_SCALE_Y(60.0f)),
+								CRGBA(255, 255, 255, alpha));
 							sprite.m_pTexture = nil;
 #endif
 						}
@@ -520,7 +481,7 @@ void CHud::Draw()
 				}
 
 				CFont::SetBackgroundOff();
-				CFont::SetScale(SCREEN_SCALE_X(0.5f), SCREEN_SCALE_Y(0.8f));
+				CFont::SetScale(PSP_SCREEN_SCALE_X(FrontEndMenuManager.m_PrefsUseWideScreen ? 0.18f : 0.2f), PSP_SCREEN_SCALE_Y(0.44f));
 				CFont::SetJustifyOff();
 				CFont::SetCentreOn();
 				CFont::SetCentreSize(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
@@ -528,13 +489,65 @@ void CHud::Draw()
 				CFont::SetDropShadowPosition(0);
 				CFont::SetFontStyle(FONT_STANDARD);
 
+				int32 AmmoAmount = CWeaponInfo::GetWeaponInfo((eWeaponType)WeaponType)->m_nAmountofAmmunition;
+				int32 AmmoInClip = weapon->m_nAmmoInClip;
+				int32 TotalAmmo = weapon->m_nAmmoTotal;
+				int32 Ammo, Clip;
+
 				if (Min(9999, TotalAmmo - AmmoInClip) != 9999 && !CDarkel::FrenzyOnGoing() && weaponInfo->m_nWeaponSlot > 1 && weapon->m_eWeaponType != WEAPONTYPE_DETONATOR) {
 					CFont::SetDropShadowPosition(2);
 					CFont::SetDropColor(CRGBA(0, 0, 0, alpha));
 					AMMO_COLOR.a = alpha;
 					CFont::SetColor(AMMO_COLOR);
-					if (FrontEndMenuManager.m_PrefsShowHud)
-						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(66.0f), SCREEN_SCALE_Y(90.0f), sPrint);
+					if (FrontEndMenuManager.m_PrefsShowHud) {
+
+
+						if (AmmoAmount <= 1 || AmmoAmount >= 1000)
+						{
+							sprintf(sTemp, "%d", TotalAmmo);
+							AsciiToUnicode(sTemp, sPrint);
+							float pos = 435.0f;
+#ifdef FIX_BUGS
+							if (FrontEndMenuManager.m_PrefsUseWideScreen)
+								pos = 438.0f;
+#endif
+							CFont::PrintString(PSP_SCREEN_SCALE_FROM_RIGHT(PSP_DEFAULT_SCREEN_WIDTH - pos), PSP_SCREEN_SCALE_Y(42.0f), sPrint);
+						}
+						else {
+
+							if (WeaponType == WEAPONTYPE_FLAMETHROWER) {
+								Clip = AmmoInClip / 10;
+
+								Ammo = Min((TotalAmmo - AmmoInClip) / 10, 9999);
+							}
+							else {
+								Clip = AmmoInClip;
+
+								Ammo = Min(TotalAmmo - AmmoInClip, 9999);
+							}
+
+							char sMinus[10];
+							char sAmmo[20];
+							char sClip[20];
+
+							sprintf(sMinus, "-");
+							sprintf(sAmmo, "%d", Ammo);
+							sprintf(sClip, "%d", Clip);
+
+							CFont::SetCentreOff();
+							CFont::SetRightJustifyOn();
+							AsciiToUnicode(sAmmo, sPrint);
+							CFont::PrintString(PSP_SCREEN_SCALE_FROM_RIGHT(PSP_DEFAULT_SCREEN_WIDTH - (FrontEndMenuManager.m_PrefsUseWideScreen ? 438.0f : 435.0f)), PSP_SCREEN_SCALE_Y(42.0f), sPrint);
+							
+							CFont::SetRightJustifyOff();
+							AsciiToUnicode(sMinus, sPrint);
+							CFont::PrintString(PSP_SCREEN_SCALE_FROM_RIGHT(PSP_DEFAULT_SCREEN_WIDTH - (FrontEndMenuManager.m_PrefsUseWideScreen ? 439.0f : 436.0f)), PSP_SCREEN_SCALE_Y(42.0f), sPrint);
+							
+							AsciiToUnicode(sClip, sPrint);
+							CFont::PrintString(PSP_SCREEN_SCALE_FROM_RIGHT(PSP_DEFAULT_SCREEN_WIDTH - (FrontEndMenuManager.m_PrefsUseWideScreen ? 441.0f : 439.0f)), PSP_SCREEN_SCALE_Y(42.0f), sPrint);
+							
+						}
+					}
 					CFont::SetDropShadowPosition(0);
 				}
 			}
@@ -568,23 +581,8 @@ void CHud::Draw()
 				&& CTimer::GetFrameCounter() & 8) {
 				if (playerPed->m_fHealth >= 10
 					|| playerPed->m_fHealth < 10 && CTimer::GetFrameCounter() & 8) {
-
-					AsciiToUnicode("{", sPrintIcon);
-#ifdef FIX_BUGS
-					sprintf(sTemp, "%03d", int32(playerPed->m_fHealth + 0.5f));
-#else
-					sprintf(sTemp, "%03d", (int32)playerPed->m_fHealth);
-#endif
-					AsciiToUnicode(sTemp, sPrint);
-
-					CFont::SetColor(HEALTH_COLOR);
 					if (FrontEndMenuManager.m_PrefsShowHud) {
-						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f), SCREEN_SCALE_Y(65.0f), sPrint);
-
-						if (!CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss || CTimer::GetTimeInMilliseconds() > CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss + 2000 || CTimer::GetFrameCounter() & 4) {
-							// CFont::SetColor(HEALTH_COLOR);
-							CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 54.0f), SCREEN_SCALE_Y(65.0f), sPrintIcon);
-						}
+						DrawHealthBar(playerPed->m_fHealth);
 					}
 				}
 			}
@@ -605,13 +603,7 @@ void CHud::Draw()
 
 					CFont::SetColor(ARMOUR_COLOR);
 					if (FrontEndMenuManager.m_PrefsShowHud) {
-
-						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(182.0f), SCREEN_SCALE_Y(65.0f), sPrint);
-
-						if (!CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastArmourLoss || CTimer::GetTimeInMilliseconds() > CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastArmourLoss + 2000 || CTimer::GetFrameCounter() & 4) {
-							// CFont::SetColor(ARMOUR_COLOR);
-							CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(182.0f + 52.0f), SCREEN_SCALE_Y(65.0f), sPrintIcon);
-						}
+						DrawArmourBar(playerPed->m_fArmour);
 					}
 				}
 			}
@@ -628,36 +620,23 @@ void CHud::Draw()
 		}
 
 		if (m_WantedState != FADED_OUT) {
-			CFont::SetBackgroundOff();
-			CFont::SetScale(SCREEN_SCALE_X(HUD_TEXT_SCALE_X), SCREEN_SCALE_Y(HUD_TEXT_SCALE_Y));
-			CFont::SetJustifyOff();
-			CFont::SetCentreOff();
-			CFont::SetRightJustifyOn();
-			CFont::SetPropOn();
-			CFont::SetFontStyle(FONT_STANDARD);
-
-			AsciiToUnicode(">", sPrintIcon);
-
+			char wantedStar[] = "\x16";
+			float starX = 441.0f;
 			for (int i = 0; i < 6; i++) {
 				if (FrontEndMenuManager.m_PrefsShowHud) {
 					if (playerPed->m_pWanted->GetWantedLevel() > i
 						&& (CTimer::GetTimeInMilliseconds() > playerPed->m_pWanted->m_nLastWantedLevelChange
 							+ 2000 || CTimer::GetFrameCounter() & 4)) {
 
-						WANTED_COLOR.a = alpha;
-						CFont::SetColor(WANTED_COLOR);
-						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
+						DrawTimeAndCashNumbers(wantedStar, starX, 63.0f, false);
 
 					} else if (playerPed->m_pWanted->m_nMinWantedLevel > i && CTimer::GetFrameCounter() & 4) {
-						WANTED_COLOR_FLASH.a = alpha;
-						CFont::SetColor(WANTED_COLOR_FLASH);
-						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
-
-					} else if (playerPed->m_pWanted->GetWantedLevel() <= i) {
-						NOTWANTED_COLOR.a = alpha;
-						CFont::SetColor(NOTWANTED_COLOR);
-						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
+						DrawTimeAndCashNumbers(wantedStar, starX, 63.0f, true);
 					}
+					if (FrontEndMenuManager.m_PrefsUseWideScreen)
+						starX -= 11.0f;
+					else
+						starX -= 13.5f;
 				}
 			}
 		}
@@ -919,24 +898,8 @@ void CHud::Draw()
 			DrawClock
 		*/
 		if (m_ClockState) {
-			CFont::SetJustifyOff();
-			CFont::SetCentreOff();
-			CFont::SetBackgroundOff();
-			CFont::SetScale(SCREEN_SCALE_X(HUD_TEXT_SCALE_X), SCREEN_SCALE_Y(HUD_TEXT_SCALE_Y));
-			CFont::SetBackGroundOnlyTextOff();
-			CFont::SetPropOff();
-			CFont::SetFontStyle(FONT_HEADING);
-			CFont::SetRightJustifyOn();
-			CFont::SetRightJustifyWrap(0.0f);
-			CFont::SetDropShadowPosition(2);
-			CFont::SetDropColor(CRGBA(0, 0, 0, 255));
-
-			sprintf(sTemp, "%02d:%02d", CClock::GetHours(), CClock::GetMinutes());
-			AsciiToUnicode(sTemp, sPrint);
-
-			CFont::SetColor(CLOCK_COLOR);
 			if (FrontEndMenuManager.m_PrefsShowHud)
-				CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(111.0f), SCREEN_SCALE_Y(22.0f), sPrint);
+				DrawTime();
 		}
 
 		/*
@@ -1142,20 +1105,20 @@ void CHud::Draw()
 			// Yeah, top and bottom changed place. R* vision
 			if (IntroRect.m_bIsUsed && IntroRect.m_bBeforeFade) {
 				if (IntroRect.m_nTextureId >= 0) {
-					CRect rect = {
+					CRect rect (
 						IntroRect.m_sRect.left,
 						IntroRect.m_sRect.top,
 						IntroRect.m_sRect.right,
-						IntroRect.m_sRect.bottom };
+						IntroRect.m_sRect.bottom );
 
 					CTheScripts::ScriptSprites[IntroRect.m_nTextureId].Draw(rect, IntroRect.m_sColor);
 				}
 				else {
-					CRect rect = {
+					CRect rect (
 						IntroRect.m_sRect.left,
 						IntroRect.m_sRect.top,
 						IntroRect.m_sRect.right,
-						IntroRect.m_sRect.bottom };
+						IntroRect.m_sRect.bottom );
 
 					CSprite2d::DrawRect(rect, IntroRect.m_sColor);
 				}
@@ -1188,7 +1151,7 @@ void CHud::Draw()
 				if (FrontEndMenuManager.m_PrefsShowSubtitles || !CCutsceneMgr::IsRunning()) {
 #ifdef CUTSCENE_BORDERS_SWITCH
 					if (!FrontEndMenuManager.m_PrefsCutsceneBorders)
-						CFont::SetDropShadowPosition(2);
+						CFont::SetDropShadowPosition(0);
 #endif
 					CFont::SetCentreSize(SCREEN_WIDTH - SCREEN_SCALE_X(60.0f));
 					CFont::SetScale(SCREEN_SCALE_X(0.58f), SCREEN_SCALE_Y(1.2f));
@@ -1200,7 +1163,7 @@ void CHud::Draw()
 
 				onceItWasWidescreen = false;
 				CFont::DrawFonts();
-				CFont::SetDropShadowPosition(2);
+				CFont::SetDropShadowPosition(0);
 				CFont::SetDropColor(CRGBA(0, 0, 0, 255));
 				CFont::SetScale(SCREEN_SCALE_X(0.58f), SCREEN_SCALE_Y(1.22f));
 
@@ -1425,6 +1388,221 @@ void CHud::Draw()
 		}
 	}
 }
+
+int HealthFlashTimer = 50;
+
+void
+CHud::DrawHealthBar(int16 value)
+{
+	if (m_ItemToFlash == ITEM_HEALTH) {
+		if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_fHealth > 10.0f) {
+			if (HealthFlashTimer-- == 0) {
+				m_ItemToFlash = -1;
+				HealthFlashTimer = 50;
+			}
+		}
+	}
+	float fHealth = value;
+	float fMaxHealth = CWorld::Players[CWorld::PlayerInFocus].m_nMaxHealth;
+	fHealth = clamp(fHealth, 0.0f, fMaxHealth);
+	float fWidth = (fHealth / fMaxHealth) * 40.0f + 16.0f + 4.0f;
+	float u = fWidth / 64.0f;
+	if (value == 0) {
+		fWidth = 0.0f;
+		u = 0.0f;
+	} else if (value == fMaxHealth) {
+		fWidth = 64.0f;
+		u = 1.0f;
+	}
+
+	if (FrontEndMenuManager.m_PrefsUseWideScreen)
+		fWidth *= 0.68f;
+	else
+		fWidth *= 0.85f;
+
+	float fX1 = FrontEndMenuManager.m_PrefsUseWideScreen ? 375.0f : 360.0f;
+	float fX2 = fWidth + (FrontEndMenuManager.m_PrefsUseWideScreen ? 375.0f : 360.0f);
+	CRect rect1(PSP_SCREEN_SCALE_X(fX1), PSP_SCREEN_SCALE_Y(40.0f), PSP_SCREEN_SCALE_X(fX2), PSP_SCREEN_SCALE_Y(50.0f));
+	CRGBA color1(255, 255, 255, m_HudAlpha);
+	Sprites[HUD_BAR_INSIDE2].Draw(rect1, color1, 0.0f, 0.0f, u, 0.0f, 0.0f, 1.0f, u, 1.0f);
+
+	fX1 = fWidth + (FrontEndMenuManager.m_PrefsUseWideScreen ? 375.0f : 360.0f);
+	fX2 = (FrontEndMenuManager.m_PrefsUseWideScreen ? 43.52f : 54.4f) + (FrontEndMenuManager.m_PrefsUseWideScreen ? 375.0f : 360.0f);
+	CRect rect2(PSP_SCREEN_SCALE_X(fX1), PSP_SCREEN_SCALE_Y(40.0f), PSP_SCREEN_SCALE_X(fX2), PSP_SCREEN_SCALE_Y(50.0f));
+	CRGBA color2(255, 255, 255, m_HudAlpha);
+	Sprites[HUD_BAR_INSIDE2DARK].Draw(rect2, color2, u, 0.0f, 1.0f, 0.0f, u, 1.0f, 1.0f, 1.0f);
+
+	fX1 = FrontEndMenuManager.m_PrefsUseWideScreen ? 375.0f : 360.0f;
+	fX2 = (FrontEndMenuManager.m_PrefsUseWideScreen ? 43.52f : 54.4f) + (FrontEndMenuManager.m_PrefsUseWideScreen ? 375.0f : 360.0f);
+	CRect rect3(PSP_SCREEN_SCALE_X(fX1), PSP_SCREEN_SCALE_Y(40.0f), PSP_SCREEN_SCALE_X(fX2), PSP_SCREEN_SCALE_Y(50.0f));
+	CRGBA color3(255, 255, 255, m_HudAlpha);
+	Sprites[HUD_BAR_OUTLINE].Draw(rect3, color3, 0.01f, 0.0f, 1.0f, 0.0f, 0.01f, 1.0f, 1.0f, 1.0f);
+
+	if (fMaxHealth > 100.0f)
+	{
+		CFont::SetFontStyle(FONT_STANDARD);
+		CFont::SetDropShadowPosition(0);
+		CFont::SetDropColor(CRGBA(0, 0, 0, m_HudAlpha));
+		CFont::SetColor(CRGBA(255, 255, 255, m_HudAlpha));
+		CFont::SetCentreOn();
+		if (fMaxHealth > 125.0f)
+			CFont::SetScale(FrontEndMenuManager.StretchX(PSP_SCALE_TO_PS2_X(FrontEndMenuManager.m_PrefsUseWideScreen ? 0.3375f : 0.45f)), FrontEndMenuManager.StretchY(PSP_SCALE_TO_PS2_Y(0.75f)));
+		else
+			CFont::SetScale(FrontEndMenuManager.StretchX(PSP_SCALE_TO_PS2_X(FrontEndMenuManager.m_PrefsUseWideScreen ? 0.2625f : 0.35f)), FrontEndMenuManager.StretchY(PSP_SCALE_TO_PS2_Y(0.6f)));
+		
+		if (FrontEndMenuManager.m_PrefsUseWideScreen)
+			fX1 = 375.0f + 12.0f;
+		else
+			fX1 = 360.0f + 15.0f;
+		CFont::PrintString(PSP_SCREEN_SCALE_X(fX1), PSP_SCREEN_SCALE_Y(36.0f), (wchar*)L"+");
+	}
+
+}
+
+int ArmourFlashTimer = 50;
+
+void
+CHud::DrawArmourBar(int16 value)
+{
+	if (m_ItemToFlash == ITEM_ARMOUR) {
+		if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_fArmour > 10.0f) {
+			if (ArmourFlashTimer-- == 0) {
+				m_ItemToFlash = -1;
+				ArmourFlashTimer = 50;
+			}
+		}
+	}
+	float fArmour = value;
+	float fMaxArmour = CWorld::Players[CWorld::PlayerInFocus].m_nMaxArmour;
+	fArmour = clamp(fArmour, 0.0f, fMaxArmour);
+	float fWidth = (fArmour / fMaxArmour) * 40.0f + 16.0f + 4.0f;
+	float u = fWidth / 64.0f;
+	if (value == 0) {
+		fWidth = 0.0f;
+		u = 0.0f;
+	} else if (value == fMaxArmour) {
+		fWidth = 64.0f;
+		u = 1.0f;
+	}
+
+	if (FrontEndMenuManager.m_PrefsUseWideScreen)
+		fWidth *= 0.68f;
+	else
+		fWidth *= 0.85f;
+
+	float fX1 = FrontEndMenuManager.m_PrefsUseWideScreen ? 375.0f : 360.0f;
+	float fX2 = fWidth + (FrontEndMenuManager.m_PrefsUseWideScreen ? 375.0f : 360.0f);
+	CRect rect1(PSP_SCREEN_SCALE_X(fX1), PSP_SCREEN_SCALE_Y(28.0f), PSP_SCREEN_SCALE_X(fX2), PSP_SCREEN_SCALE_Y(38.0f));
+	CRGBA color1(255, 255, 255, m_HudAlpha);
+	Sprites[HUD_BAR_INSIDE1].Draw(rect1, color1, 0.0f, 0.0f, u, 0.0f, 0.0f, 1.0f, u, 1.0f);
+
+	fX1 = fWidth + (FrontEndMenuManager.m_PrefsUseWideScreen ? 375.0f : 360.0f);
+	fX2 = (FrontEndMenuManager.m_PrefsUseWideScreen ? 43.52f : 54.4f) + (FrontEndMenuManager.m_PrefsUseWideScreen ? 375.0f : 360.0f);
+	CRect rect2(PSP_SCREEN_SCALE_X(fX1), PSP_SCREEN_SCALE_Y(28.0f), PSP_SCREEN_SCALE_X(fX2), PSP_SCREEN_SCALE_Y(38.0f));
+	CRGBA color2(255, 255, 255, m_HudAlpha);
+	Sprites[HUD_BAR_INSIDE1DARK].Draw(rect2, color2, u, 0.0f, 1.0f, 0.0f, u, 1.0f, 1.0f, 1.0f);
+
+	fX1 = FrontEndMenuManager.m_PrefsUseWideScreen ? 375.0f : 360.0f;
+	fX2 = (FrontEndMenuManager.m_PrefsUseWideScreen ? 43.52f : 54.4f) + (FrontEndMenuManager.m_PrefsUseWideScreen ? 375.0f : 360.0f);
+	CRect rect3(PSP_SCREEN_SCALE_X(fX1), PSP_SCREEN_SCALE_Y(28.0f), PSP_SCREEN_SCALE_X(fX2), PSP_SCREEN_SCALE_Y(38.0f));
+	CRGBA color3(255, 255, 255, m_HudAlpha);
+	Sprites[HUD_BAR_OUTLINE].Draw(rect3, color3, 0.01f, 0.0f, 1.0f, 0.0f, 0.01f, 1.0f, 1.0f, 1.0f);
+
+	if (fMaxArmour > 100.0f) {
+		CFont::SetFontStyle(FONT_STANDARD);
+		CFont::SetDropShadowPosition(0);
+		CFont::SetDropColor(CRGBA(0, 0, 0, m_HudAlpha));
+		CFont::SetColor(CRGBA(255, 255, 255, m_HudAlpha));
+		CFont::SetCentreOn();
+		if (fMaxArmour > 125.0f)
+			CFont::SetScale(FrontEndMenuManager.StretchX(PSP_SCALE_TO_PS2_X(FrontEndMenuManager.m_PrefsUseWideScreen ? 0.3375f : 0.45f)), FrontEndMenuManager.StretchY(PSP_SCALE_TO_PS2_Y(0.75f)));
+		else
+			CFont::SetScale(FrontEndMenuManager.StretchX(PSP_SCALE_TO_PS2_X(FrontEndMenuManager.m_PrefsUseWideScreen ? 0.2625f : 0.35f)), FrontEndMenuManager.StretchY(PSP_SCALE_TO_PS2_Y(0.6f)));
+		
+		if (FrontEndMenuManager.m_PrefsUseWideScreen)
+			fX1 = 375.0f + 12.0f;
+		else
+			fX1 = 360.0f + 15.0f;
+		CFont::PrintString(PSP_SCREEN_SCALE_X(fX1), PSP_SCREEN_SCALE_Y(24.0f), (wchar*)L"+");
+	}
+
+}
+
+void
+CHud::DrawTimeAndCashNumbers(char *str, float x, float y, bool secondSet)
+{
+	CRGBA color(255, 255, 255, m_HudAlpha);
+
+	float width = 11.0f;
+	if (FrontEndMenuManager.m_PrefsUseWideScreen)
+		width = 9.0f;
+
+	float height = 10.0f;
+	while (*str) {
+		uint8 c = *str;
+		if (c >= '0' && c <= ':')
+		{
+			if (secondSet) c -= '%';
+			else c -= '0';
+		} else {
+			if (c == 22) {
+				if (secondSet)
+					color = CRGBA(62, 141, 188, m_HudAlpha);
+				else
+					color = CRGBA(192, 155, 54, m_HudAlpha);
+			} else if (!secondSet)
+				c = 10;
+			else
+				c = 21;
+		}
+
+		int row = c / 8;
+		int col = c - row * 8;
+		float width2 = width;
+		if (c == 22)
+			width2 += 3.0f;
+		CRect rect(PSP_SCREEN_SCALE_X(x), PSP_SCREEN_SCALE_Y(y), PSP_SCREEN_SCALE_X(x+ width2), PSP_SCREEN_SCALE_Y(y) + PSP_SCREEN_SCALE_Y(height));
+
+		float u = col * 0.125f;
+		// TODO(LCS): some odd calculation with u going on in here if it's < 0, it might be fabs, but maybe not
+
+		float v = row * 0.265625f;
+		// TODO(LCS): same odd calculation with v as above
+
+		str++;
+		Sprites[HUD_HUDNUMBERS].Draw(rect, color, u, v, u + 0.125f, v, u, v + 0.265625f, u + 0.125f, v + 0.265625f);
+
+		x += (width - 2.0f);
+		if (c == 10)
+			x -= 4.0f;
+
+#ifdef GTA_PSP
+		x = Ceil(PSP_SCREEN_SCALE_X(x)) * ((float)PSP_DEFAULT_SCREEN_WIDTH / (float)SCREEN_WIDTH);
+#else
+		// BUG: actually above wasn't PSP only but on higher resolutions things don't look like they were meant to, so we stick with PS2 version here
+		x = Ceil(PSP_SCALE_TO_PS2_X(x)) * ((float)PSP_DEFAULT_SCREEN_WIDTH / (float)DEFAULT_SCREEN_WIDTH);
+#endif
+	}
+}
+
+void
+CHud::DrawCash()
+{
+	char str[200];
+	sprintf(str, "$%08d", CWorld::Players[CWorld::PlayerInFocus].m_nMoney);
+	DrawTimeAndCashNumbers(str, FrontEndMenuManager.m_PrefsUseWideScreen ? 386.0f : 373.0f, 53.0f, true);
+}
+
+void
+CHud::DrawTime()
+{
+	// TODO(LCS): a lot more code should be here
+
+	char str[24];
+	sprintf(str, "%02d:%02d", CClock::ms_nGameClockHours, CClock::ms_nGameClockMinutes);
+	DrawTimeAndCashNumbers(str, FrontEndMenuManager.m_PrefsUseWideScreen ? 386.0f : 373.0f, 17.0f, false);
+}
+
 
 void CHud::DrawAfterFade()
 {

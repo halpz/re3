@@ -3342,6 +3342,7 @@ void
 CPed::LineUpPedWithCar(PedLineUpPhase phase)
 {
 	bool vehIsUpsideDown = false;
+	bool stillGettingInOut = false;
 	int vehAnim;
 	float seatPosMult = 0.0f;
 	float currentZ;
@@ -3594,8 +3595,8 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 			if (m_pVehicleAnim && vehAnim != ANIM_VAN_GETIN_L && vehAnim != ANIM_VAN_CLOSE_L && vehAnim != ANIM_VAN_CLOSE && vehAnim != ANIM_VAN_GETIN) {
 				neededPos.z = autoZPos.z;
 				m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
-			} else if (neededPos.z <= currentZ && m_pVehicleAnim && vehAnim != ANIM_VAN_CLOSE_L && vehAnim != ANIM_VAN_CLOSE) {
-				adjustedTimeStep = Min(m_pVehicleAnim->timeStep, 0.1f);
+			} else if (neededPos.z < currentZ && m_pVehicleAnim && vehAnim != ANIM_VAN_CLOSE_L && vehAnim != ANIM_VAN_CLOSE) {
+				adjustedTimeStep = Max(m_pVehicleAnim->timeStep, 0.1f);
 
 				// Smoothly change ped position
 				neededPos.z = currentZ - (currentZ - neededPos.z) / (m_pVehicleAnim->GetTimeLeft() / adjustedTimeStep);
@@ -3613,7 +3614,7 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 					if (m_pVehicleAnim &&
 						(vehAnim == ANIM_CAR_GETIN_RHS || vehAnim == ANIM_CAR_GETIN_LOW_RHS || vehAnim == ANIM_CAR_GETIN_LHS || vehAnim == ANIM_CAR_GETIN_LOW_LHS
 							|| vehAnim == ANIM_CAR_QJACK || vehAnim == ANIM_VAN_GETIN_L || vehAnim == ANIM_VAN_GETIN)) {
-						adjustedTimeStep = Min(m_pVehicleAnim->timeStep, 0.1f);
+						adjustedTimeStep = Max(m_pVehicleAnim->timeStep, 0.1f);
 
 						// Smoothly change ped position
 						neededPos.z = (neededPos.z - currentZ) / (m_pVehicleAnim->GetTimeLeft() / adjustedTimeStep) + currentZ;
@@ -3625,7 +3626,6 @@ CPed::LineUpPedWithCar(PedLineUpPhase phase)
 		}
 	}
 
-	bool stillGettingInOut = false;
 	if (CTimer::GetTimeInMilliseconds() < m_nPedStateTimer)
 		stillGettingInOut = veh->m_vehType != VEHICLE_TYPE_BOAT || bOnBoat;
 
@@ -4138,7 +4138,7 @@ CPed::SetExitBoat(CVehicle *boat)
 	RemoveInCarAnims();
 	CColModel* boatCol = boat->GetColModel();
 	if (boat->IsUpsideDown()) {
-		newPos = { 0.0f, 0.0f, boatCol->boundingBox.min.z };
+		newPos = CVector(0.0f, 0.0f, boatCol->boundingBox.min.z);
 		newPos = boat->GetMatrix() * newPos;
 		newPos.z += 1.0f;
 		m_vehDoor = CAR_DOOR_RF;

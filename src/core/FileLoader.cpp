@@ -607,11 +607,14 @@ CFileLoader::LoadObjectTypes(const char *filename)
 	int section;
 	int pathIndex;
 	int id, pathType;
-	int minID, maxID;
+	//int minID, maxID;
+
+	for(int i = 0; i < ARRAY_SIZE(m_sTempIdeData); i++)
+		m_sTempIdeData[i].id = -1;
 
 	section = NONE;
-	minID = INT32_MAX;
-	maxID = -1;
+	//minID = INT32_MAX;
+	//maxID = -1;
 	pathIndex = -1;
 	debug("Loading object types from %s...\n", filename);
 
@@ -635,13 +638,13 @@ CFileLoader::LoadObjectTypes(const char *filename)
 		}else switch(section){
 		case OBJS:
 			id = LoadObject(line);
-			if(id > maxID) maxID = id;
-			if(id < minID) minID = id;
+			//if(id > maxID) maxID = id;
+			//if(id < minID) minID = id;
 			break;
 		case TOBJ:
 			id = LoadTimeObject(line);
-			if(id > maxID) maxID = id;
-			if(id < minID) minID = id;
+			//if(id > maxID) maxID = id;
+			//if(id < minID) minID = id;
 			break;
 		case WEAP:
 			LoadWeaponObject(line);
@@ -678,10 +681,10 @@ CFileLoader::LoadObjectTypes(const char *filename)
 	}
 	CFileMgr::CloseFile(fd);
 
-	for(id = minID; id <= maxID; id++){
+	for(id = 0; id < MODELINFOSIZE; id++){
 		CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(id);
 		if(mi && mi->IsBuilding())
-			mi->SetupBigBuilding(minID, maxID);
+			mi->SetupBigBuilding();
 	}
 }
 
@@ -713,6 +716,13 @@ CFileLoader::LoadObject(const char *line)
 
 	if(sscanf(line, "%d %s %s %d", &id, model, txd, &numObjs) != 4)
 		return 0;	// game returns return value
+
+	for(int i = 0; i < ARRAY_SIZE(m_sTempIdeData); i++)
+		if(m_sTempIdeData[i].id == -1){
+			m_sTempIdeData[i].id = id;
+			strcpy(m_sTempIdeData[i].name, model);
+			break;
+		}
 
 	switch(numObjs){
 	case 1:
@@ -762,6 +772,13 @@ CFileLoader::LoadTimeObject(const char *line)
 	if(sscanf(line, "%d %s %s %d", &id, model, txd, &numObjs) != 4)
 		return 0;	// game returns return value
 
+	for(int i = 0; i < ARRAY_SIZE(m_sTempIdeData); i++)
+		if(m_sTempIdeData[i].id < 0){
+			m_sTempIdeData[i].id = id;
+			strcpy(m_sTempIdeData[i].name, model);
+			break;
+		}
+
 	switch(numObjs){
 	case 1:
 		sscanf(line, "%d %s %s %d %f %d %d %d",
@@ -792,7 +809,7 @@ CFileLoader::LoadTimeObject(const char *line)
 	mi->m_firstDamaged = damaged;
 	mi->SetTimes(timeOn, timeOff);
 	mi->SetTexDictionary(txd);
-	other = mi->FindOtherTimeModel();
+	other = mi->FindOtherTimeModel(model);
 	if(other)
 		other->SetOtherTimeModel(id);
 	MatchModelString(model, id);
@@ -816,7 +833,7 @@ CFileLoader::LoadWeaponObject(const char *line)
 	mi->m_lodDistances[0] = dist;
 	mi->SetTexDictionary(txd);
 	mi->SetAnimFile(animFile);
-	mi->SetColModel(&CTempColModels::ms_colModelWeapon);
+	mi->SetColModel(&gpTempColModels->ms_colModelWeapon);
 	MatchModelString(model, id);
 	return id;
 }
@@ -832,7 +849,7 @@ CFileLoader::LoadClumpObject(const char *line)
 		mi = CModelInfo::AddClumpModel(id);
 		mi->SetModelName(model);
 		mi->SetTexDictionary(txd);
-		mi->SetColModel(&CTempColModels::ms_colModelBBox);
+		mi->SetColModel(&gpTempColModels->ms_colModelBBox);
 	}
 }
 
@@ -939,7 +956,7 @@ CFileLoader::LoadPedObject(const char *line)
 	mi->SetModelName(model);
 	mi->SetTexDictionary(txd);
 	mi->SetAnimFile(animFile);
-	mi->SetColModel(&CTempColModels::ms_colModelPed1);
+	mi->SetColModel(&gpTempColModels->ms_colModelPed1);
 	mi->m_pedType = CPedType::FindPedType(pedType);
 	mi->m_pedStatType = CPedStats::GetPedStatType(pedStats);
 	for(animGroupId = 0; animGroupId < NUM_ANIM_ASSOC_GROUPS; animGroupId++)

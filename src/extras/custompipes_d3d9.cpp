@@ -22,7 +22,8 @@
 #error "Need librw for EXTENDED_PIPELINES"
 #endif
 
-extern RwTexture *gpWhiteTexture;	// from vehicle model info
+//extern RwTexture *gpWhiteTexture;	// from vehicle model info
+static RwTexture *gpWhiteTexture;	// nil works as white in librw currently
 
 namespace CustomPipes {
 

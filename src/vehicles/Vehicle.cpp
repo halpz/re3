@@ -218,8 +218,8 @@ void
 CVehicle::SetModelIndex(uint32 id)
 {
 	CEntity::SetModelIndex(id);
-	m_aExtras[0] = CVehicleModelInfo::ms_compsUsed[0];
-	m_aExtras[1] = CVehicleModelInfo::ms_compsUsed[1];
+	m_aExtras[0] = CVehicleModelInfo::mspInfo->ms_compsUsed[0];
+	m_aExtras[1] = CVehicleModelInfo::mspInfo->ms_compsUsed[1];
 	m_nNumMaxPassengers = CVehicleModelInfo::GetMaximumNumberOfPassengersFromNumberOfDoors(id);
 }
 
@@ -331,7 +331,7 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 	case FLIGHT_MODEL_PLANE:
 	{
 		float fSteerLR = CPad::GetPad(0)->GetSteeringLeftRight() / 128.0f;
-		float fSteerUD = -CPad::GetPad(0)->GetSteeringUpDown() / 128.0f;
+		float fSteerUD = CPad::GetPad(0)->GetSteeringUpDown() / 128.0f;
 		float fGunUD = Abs(CPad::GetPad(0)->GetCarGunUpDown());
 #ifdef FREE_CAM
 		if(!CCamera::bFreeCam || (CCamera::bFreeCam && !CPad::IsAffectedByController))
