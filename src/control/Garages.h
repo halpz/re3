@@ -15,6 +15,7 @@ enum eGarageState
 	GS_OPENEDCONTAINSCAR,
 	GS_CLOSEDCONTAINSCAR,
 	GS_AFTERDROPOFF,
+	GS_WAITINGFORCAR
 };
 
 enum eGarageType
@@ -121,6 +122,7 @@ public:
 	float m_fSupX;
 	float m_fInfY;
 	float m_fSupY;
+	uint32 m_nTimeCrusherCraneActivated;
 	float m_fDoorPos;
 	float m_fDoorHeight;
 	float m_fDoor1X;
@@ -133,6 +135,11 @@ public:
 	uint8 m_bCollectedCarsState;
 	CVehicle *m_pTarget;
 	CStoredCar m_sStoredCar; // not needed
+	bool m_bInitialized;
+	uint32 field_F0;
+	bool m_bLocked;
+	uint32 field_F8;
+	uint32 field_FC;
 
 	void OpenThisGarage();
 	void CloseThisGarage();
@@ -219,6 +226,7 @@ public:
 	static CGarage aGarages[NUM_GARAGES];
 	static CStoredCar aCarsInSafeHouses[TOTAL_HIDEOUT_GARAGES][NUM_GARAGE_STORED_CARS];
 	static bool bCamShouldBeOutisde;
+	static uint8 CrusherRewardMultiplier;
 
 	static void Init(void);
 #ifndef PS2
@@ -297,6 +305,8 @@ public:
 	}
 	static bool IsThisGarageTypeSafehouse(uint8 type) { return FindSafeHouseIndexForGarageType(type) >= 0; }
 
-	static void SetupAnyGaragesForThisIsland(void) {} // TODO(LCS)
+	static bool InitDoorGubbins(uint32, uint8);
+	static void SetupAnyGaragesForThisIsland(void);
+	static void LockGarage(int16, bool);
 
 };

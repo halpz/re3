@@ -1225,6 +1225,10 @@ int8 CRunningScript::ProcessCommands600To699(int32 command)
 		if (pVehicle->m_vehType == VEHICLE_TYPE_CAR)
 #endif
 			((CAutomobile*)pVehicle)->bFixedColour = (GET_INTEGER_PARAM(1) == 0);
+#ifdef FIX_BUGS
+		else if (pVehicle->m_vehType == VEHICLE_TYPE_BIKE)
+			((CBike*)pVehicle)->bFixedColour = (GET_INTEGER_PARAM(1) == 0);
+#endif
 		
 		return 0;
 	}

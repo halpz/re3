@@ -251,6 +251,7 @@ public:
 	uint8 m_nAmmoInClip;    // Used to make the guns on boat do a reload (20 by default)
 	int8 m_nPacManPickupsCarried;
 	uint8 m_nRoadblockType;
+	bool m_bGarageTurnedLightsOff;
 	float m_fHealth;           // 1000.0f = full health. 250.0f = fire. 0 -> explode
 	float m_fEngineEnergy;	// TODO(LCS): better name. it adds up acceleration force, so possibly kinetic energy??
 	uint8 m_nCurrentGear;
