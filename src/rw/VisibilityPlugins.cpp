@@ -498,23 +498,6 @@ CVisibilityPlugins::RenderVehicleLoDetailCB_Boat(RpAtomic *atomic)
 }
 
 RpAtomic*
-CVisibilityPlugins::RenderVehicleLoDetailCB_Boat(RpAtomic *atomic)
-{
-	RpClump *clump;
-	int32 alpha;
-
-	clump = RpAtomicGetClump(atomic);
-	if(DistToCameraSq >= ms_vehicleLod0Dist){
-		alpha = GetClumpAlpha(clump);
-		if(alpha == 255)
-			RENDERCALLBACK(atomic);
-		else
-			RenderAlphaAtomic(atomic, alpha);
-	}
-	return atomic;
-}
-
-RpAtomic*
 CVisibilityPlugins::RenderVehicleLoDetailCB_Boat_Far(RpAtomic *atomic)
 {
 	RpClump *clump;
