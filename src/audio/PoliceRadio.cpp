@@ -15,7 +15,7 @@
 #include "sampman.h"
 #include "Wanted.h"
 
-const int channels = ARRAY_SIZE(cAudioManager::m_asActiveSamples);
+const int channels = ARRAY_SIZE(AudioManager.m_asActiveSamples);
 const int policeChannel = channels + 1;
 
 struct tPoliceRadioZone {

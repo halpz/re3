@@ -1,4 +1,4 @@
-#if defined RW_D3D9 || defined RWLIBS
+#if defined RW_D3D9 || defined RWLIBS || defined __MWERKS__
 
 #define _WIN32_WINDOWS 0x0500
 #define WINVER 0x0500
@@ -18,6 +18,10 @@
 
 #pragma warning( push )
 #pragma warning( disable : 4005)
+
+#ifdef __MWERKS__
+#define MAPVK_VK_TO_CHAR (2) // this is missing from codewarrior win32 headers - but it gets used ... how?
+#endif
 
 #include <ddraw.h>
 #include <DShow.h>
@@ -573,6 +577,9 @@ _RETEX:
 	}
 }
 
+#ifdef __MWERKS__
+#pragma dont_inline on
+#endif
 void _psPrintCpuInfo()
 {
 	RwUInt32 features	= _psGetCpuFeatures();
@@ -587,6 +594,9 @@ void _psPrintCpuInfo()
 	if ( FeaturesEx & 0x80000000 )
 		debug("with 3DNow");
 }
+#ifdef __MWERKS__
+#pragma dont_inline off
+#endif
 #endif
 
 /*

@@ -57,7 +57,7 @@ int32 CWeaponInfo::ms_aMaxAmmoForWeapon[WEAPONTYPE_TOTALWEAPONS] =
 	-1, -1, -1, -1, -1, -1, -1, -1, -1
 };
 
-CWeaponInfo CWeaponInfo::ms_apWeaponInfos[WEAPONTYPE_TOTALWEAPONS];
+CWeaponInfo aWeaponInfo[WEAPONTYPE_TOTALWEAPONS];
 char CWeaponInfo::ms_aWeaponNames[WEAPONTYPE_TOTALWEAPONS][32] =
 {
 	"Unarmed",
@@ -102,7 +102,7 @@ char CWeaponInfo::ms_aWeaponNames[WEAPONTYPE_TOTALWEAPONS][32] =
 CWeaponInfo*
 CWeaponInfo::GetWeaponInfo(eWeaponType weaponType)
 {
-	return &ms_apWeaponInfos[weaponType];
+	return &aWeaponInfo[weaponType];
 }
 
 void
@@ -110,27 +110,27 @@ CWeaponInfo::Initialise(void)
 {
 	debug("Initialising CWeaponInfo...\n");
 	for (int i = 0; i < WEAPONTYPE_TOTALWEAPONS; i++) {
-		ms_apWeaponInfos[i].m_eWeaponFire = WEAPON_FIRE_INSTANT_HIT;
-		ms_apWeaponInfos[i].m_fRange = 0.0f;
-		ms_apWeaponInfos[i].m_nFiringRate = 0;
-		ms_apWeaponInfos[i].m_nReload = 0;
-		ms_apWeaponInfos[i].m_nAmountofAmmunition = 0;
-		ms_apWeaponInfos[i].m_nDamage = 0;
-		ms_apWeaponInfos[i].m_fSpeed = 0.0f;
-		ms_apWeaponInfos[i].m_fRadius = 0.0f;
-		ms_apWeaponInfos[i].m_fLifespan = 0.0f;
-		ms_apWeaponInfos[i].m_fSpread = 0.0f;
-		ms_apWeaponInfos[i].m_vecFireOffset = CVector(0.0f, 0.0f, 0.0f);
-		ms_apWeaponInfos[i].m_AnimToPlay = ASSOCGRP_UNARMED;
-		ms_apWeaponInfos[i].m_fAnimLoopStart = 0.0f;
-		ms_apWeaponInfos[i].m_fAnimLoopEnd = 0.0f;
-		ms_apWeaponInfos[i].m_fAnimFrameFire = 0.0f;
-		ms_apWeaponInfos[i].m_fAnim2LoopStart = 0.0f;
-		ms_apWeaponInfos[i].m_fAnim2LoopEnd = 0.0f;
-		ms_apWeaponInfos[i].m_fAnim2FrameFire = 0.0f;
-		ms_apWeaponInfos[i].m_fAnimBreakout = 0.0f;
-		ms_apWeaponInfos[i].m_Flags = WEAPONFLAG_USE_GRAVITY | WEAPONFLAG_SLOWS_DOWN | WEAPONFLAG_RAND_SPEED | WEAPONFLAG_EXPANDS | WEAPONFLAG_EXPLODES;
-		ms_apWeaponInfos[i].m_nWeaponSlot = WEAPONSLOT_UNARMED;
+		aWeaponInfo[i].m_eWeaponFire = WEAPON_FIRE_INSTANT_HIT;
+		aWeaponInfo[i].m_fRange = 0.0f;
+		aWeaponInfo[i].m_nFiringRate = 0;
+		aWeaponInfo[i].m_nReload = 0;
+		aWeaponInfo[i].m_nAmountofAmmunition = 0;
+		aWeaponInfo[i].m_nDamage = 0;
+		aWeaponInfo[i].m_fSpeed = 0.0f;
+		aWeaponInfo[i].m_fRadius = 0.0f;
+		aWeaponInfo[i].m_fLifespan = 0.0f;
+		aWeaponInfo[i].m_fSpread = 0.0f;
+		aWeaponInfo[i].m_vecFireOffset = CVector(0.0f, 0.0f, 0.0f);
+		aWeaponInfo[i].m_AnimToPlay = ASSOCGRP_UNARMED;
+		aWeaponInfo[i].m_fAnimLoopStart = 0.0f;
+		aWeaponInfo[i].m_fAnimLoopEnd = 0.0f;
+		aWeaponInfo[i].m_fAnimFrameFire = 0.0f;
+		aWeaponInfo[i].m_fAnim2LoopStart = 0.0f;
+		aWeaponInfo[i].m_fAnim2LoopEnd = 0.0f;
+		aWeaponInfo[i].m_fAnim2FrameFire = 0.0f;
+		aWeaponInfo[i].m_fAnimBreakout = 0.0f;
+		aWeaponInfo[i].m_Flags = WEAPONFLAG_USE_GRAVITY | WEAPONFLAG_SLOWS_DOWN | WEAPONFLAG_RAND_SPEED | WEAPONFLAG_EXPANDS | WEAPONFLAG_EXPLODES;
+		aWeaponInfo[i].m_nWeaponSlot = WEAPONSLOT_UNARMED;
 	}
 	debug("Loading weapon data...\n");
 	LoadWeaponData();
@@ -221,31 +221,31 @@ CWeaponInfo::LoadWeaponData(void)
 
 		CVector vecFireOffset(fireOffsetX, fireOffsetY, fireOffsetZ);
 
-		ms_apWeaponInfos[weaponType].m_eWeaponFire = FindWeaponFireType(fireType);
-		ms_apWeaponInfos[weaponType].m_fRange = range;
-		ms_apWeaponInfos[weaponType].m_nFiringRate = firingRate;
-		ms_apWeaponInfos[weaponType].m_nReload = reload;
-		ms_apWeaponInfos[weaponType].m_nAmountofAmmunition = ammoAmount;
-		ms_apWeaponInfos[weaponType].m_nDamage = damage;
-		ms_apWeaponInfos[weaponType].m_fSpeed = speed;
-		ms_apWeaponInfos[weaponType].m_fRadius = radius;
-		ms_apWeaponInfos[weaponType].m_fLifespan = lifeSpan;
-		ms_apWeaponInfos[weaponType].m_fSpread = spread;
-		ms_apWeaponInfos[weaponType].m_vecFireOffset = vecFireOffset;
-		ms_apWeaponInfos[weaponType].m_fAnimLoopStart = animLoopStart / 30.0f;
-		ms_apWeaponInfos[weaponType].m_fAnimLoopEnd = animLoopEnd / 30.0f;
-		ms_apWeaponInfos[weaponType].m_fAnim2LoopStart = anim2LoopStart / 30.0f;
-		ms_apWeaponInfos[weaponType].m_fAnim2LoopEnd = anim2LoopEnd / 30.0f;
-		ms_apWeaponInfos[weaponType].m_fAnimFrameFire = delayBetweenAnimAndFire / 30.0f;
-		ms_apWeaponInfos[weaponType].m_fAnim2FrameFire = delayBetweenAnim2AndFire / 30.0f;
-		ms_apWeaponInfos[weaponType].m_fAnimBreakout = animBreakout / 30.0f;
-		ms_apWeaponInfos[weaponType].m_nModelId = modelId;
-		ms_apWeaponInfos[weaponType].m_nModel2Id = modelId2;
-		ms_apWeaponInfos[weaponType].m_Flags = flags;
-		ms_apWeaponInfos[weaponType].m_nWeaponSlot = weaponSlot;
+		aWeaponInfo[weaponType].m_eWeaponFire = FindWeaponFireType(fireType);
+		aWeaponInfo[weaponType].m_fRange = range;
+		aWeaponInfo[weaponType].m_nFiringRate = firingRate;
+		aWeaponInfo[weaponType].m_nReload = reload;
+		aWeaponInfo[weaponType].m_nAmountofAmmunition = ammoAmount;
+		aWeaponInfo[weaponType].m_nDamage = damage;
+		aWeaponInfo[weaponType].m_fSpeed = speed;
+		aWeaponInfo[weaponType].m_fRadius = radius;
+		aWeaponInfo[weaponType].m_fLifespan = lifeSpan;
+		aWeaponInfo[weaponType].m_fSpread = spread;
+		aWeaponInfo[weaponType].m_vecFireOffset = vecFireOffset;
+		aWeaponInfo[weaponType].m_fAnimLoopStart = animLoopStart / 30.0f;
+		aWeaponInfo[weaponType].m_fAnimLoopEnd = animLoopEnd / 30.0f;
+		aWeaponInfo[weaponType].m_fAnim2LoopStart = anim2LoopStart / 30.0f;
+		aWeaponInfo[weaponType].m_fAnim2LoopEnd = anim2LoopEnd / 30.0f;
+		aWeaponInfo[weaponType].m_fAnimFrameFire = delayBetweenAnimAndFire / 30.0f;
+		aWeaponInfo[weaponType].m_fAnim2FrameFire = delayBetweenAnim2AndFire / 30.0f;
+		aWeaponInfo[weaponType].m_fAnimBreakout = animBreakout / 30.0f;
+		aWeaponInfo[weaponType].m_nModelId = modelId;
+		aWeaponInfo[weaponType].m_nModel2Id = modelId2;
+		aWeaponInfo[weaponType].m_Flags = flags;
+		aWeaponInfo[weaponType].m_nWeaponSlot = weaponSlot;
 
 		if (animLoopEnd < 98.0f && weaponType != WEAPONTYPE_FLAMETHROWER && !CWeapon::IsShotgun(weaponType))
-			ms_apWeaponInfos[weaponType].m_nFiringRate = ((ms_apWeaponInfos[weaponType].m_fAnimLoopEnd - ms_apWeaponInfos[weaponType].m_fAnimLoopStart) * 900.0f);
+			aWeaponInfo[weaponType].m_nFiringRate = ((aWeaponInfo[weaponType].m_fAnimLoopEnd - aWeaponInfo[weaponType].m_fAnimLoopStart) * 900.0f);
 
 		if (weaponType == WEAPONTYPE_DETONATOR || weaponType == WEAPONTYPE_HELICANNON)
 			modelId = -1;
@@ -257,7 +257,7 @@ CWeaponInfo::LoadWeaponData(void)
 
 		for (int i = 0; i < NUM_ANIM_ASSOC_GROUPS; i++) {
 			if (!strcmp(animToPlay, CAnimManager::GetAnimGroupName((AssocGroupId)i))) {
-				ms_apWeaponInfos[weaponType].m_AnimToPlay = (AssocGroupId)i;
+				aWeaponInfo[weaponType].m_AnimToPlay = (AssocGroupId)i;
 				break;
 			}
 		}

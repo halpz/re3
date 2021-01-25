@@ -116,7 +116,7 @@ CRopes::RegisterRope(uintptr id, CVector pos, bool setUpdateTimer)
 			aRopes[i].m_unk = false;
 			aRopes[i].m_bWasRegistered = true;
 			aRopes[i].m_updateTimer = setUpdateTimer ? CTimer::GetTimeInMilliseconds() + 20000 : 0;
-			for(j = 1; j < ARRAY_SIZE(CRope::m_pos); j++){
+			for(j = 1; j < ARRAY_SIZE(aRopes[0].m_pos); j++){
 				if(j & 1)
 					aRopes[i].m_pos[j] = aRopes[i].m_pos[j-1] + CVector(0.0f, 0.0f, 0.625f);
 				else
@@ -147,7 +147,7 @@ CRopes::FindCoorsAlongRope(uintptr id, float t, CVector *coors)
 	float f;
 	for(i = 0; i < ARRAY_SIZE(aRopes); i++)
 		if(aRopes[i].m_bActive && aRopes[i].m_id == id){
-			t = (ARRAY_SIZE(CRope::m_pos)-1)*clamp(t, 0.0f, 0.999f);
+			t = (ARRAY_SIZE(aRopes[0].m_pos)-1)*clamp(t, 0.0f, 0.999f);
 			j = t;
 			f = t - j; 
 			*coors = (1.0f-f)*aRopes[i].m_pos[j] + f*aRopes[i].m_pos[j+1];

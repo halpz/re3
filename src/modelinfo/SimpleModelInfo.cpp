@@ -4,6 +4,7 @@
 #include "General.h"
 #include "Renderer.h"
 #include "Camera.h"
+#include "Renderer.h"
 #include "ModelInfo.h"
 #include "AnimManager.h"
 #include "custompipes.h"

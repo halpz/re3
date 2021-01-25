@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "audio_enums.h"
 #include "AudioCollision.h"

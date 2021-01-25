@@ -16,10 +16,10 @@ private:
 	static float ms_fNearClipZ;
 	static float ms_fFarClipZ;
 	static float ms_fFOV;
-#ifdef ASPECT_RATIO_SCALE
 	// we use this variable to scale a lot of 2D elements
 	// so better cache it
 	static float ms_fAspectRatio;
+#ifdef ASPECT_RATIO_SCALE
 	// similar thing for 3D rendering
 	static float ms_fScaledFOV;
 #endif
