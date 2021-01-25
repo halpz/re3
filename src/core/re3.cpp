@@ -95,14 +95,14 @@ CustomFrontendOptionsPopulate(void)
 	if (fd) {
 #ifdef GRAPHICS_MENU_OPTIONS
 		FrontendOptionSetCursor(MENUPAGE_GRAPHICS_SETTINGS, -3, false);
-		FrontendOptionAddSelect("FED_VPL", 0, 0, MENUALIGN_LEFT, pipelineNames, ARRAY_SIZE(pipelineNames), (int8*)&CustomPipes::VehiclePipeSwitch, false, nil, "VehiclePipeline");
-		FrontendOptionAddSelect("FED_WPL", 0, 0, MENUALIGN_LEFT, pipelineNames, ARRAY_SIZE(pipelineNames), (int8*)&CustomPipes::WorldPipeSwitch, false, nil, "WorldPipeline");
+		FrontendOptionAddSelect("FED_VPL", 0, 0, MENUALIGN_LEFT, pipelineNames, ARRAY_SIZE(pipelineNames), (int8*)&CustomPipes::VehiclePipeSwitch, false, nil, "Graphics", "VehiclePipeline");
+		FrontendOptionAddSelect("FED_WPL", 0, 0, MENUALIGN_LEFT, pipelineNames, ARRAY_SIZE(pipelineNames), (int8*)&CustomPipes::WorldPipeSwitch, false, nil, "Graphics", "WorldPipeline");
 		FrontendOptionAddSelect("FED_WLM", 0, 0, MENUALIGN_LEFT, off_on, 2, (int8*)&CustomPipes::LightmapEnable, false, nil, "Graphics", "NeoLightMaps");
 		FrontendOptionAddSelect("FED_RGL", 0, 0, MENUALIGN_LEFT, off_on, 2, (int8*)&CustomPipes::GlossEnable, false, nil, "Graphics", "NeoRoadGloss");
 #else
 		FrontendOptionSetCursor(MENUPAGE_DISPLAY_SETTINGS, -3, false);
-		FrontendOptionAddSelect("FED_VPL", 0, 0, MENUALIGN_LEFT, pipelineNames, ARRAY_SIZE(pipelineNames), (int8*)&CustomPipes::VehiclePipeSwitch, false, nil, "VehiclePipeline");
-		FrontendOptionAddSelect("FED_WPL", 0, 0, MENUALIGN_LEFT, pipelineNames, ARRAY_SIZE(pipelineNames), (int8*)&CustomPipes::WorldPipeSwitch, false, nil, "WorldPipeline");
+		FrontendOptionAddSelect("FED_VPL", 0, 0, MENUALIGN_LEFT, pipelineNames, ARRAY_SIZE(pipelineNames), (int8*)&CustomPipes::VehiclePipeSwitch, false, nil, "Graphics", "VehiclePipeline");
+		FrontendOptionAddSelect("FED_WPL", 0, 0, MENUALIGN_LEFT, pipelineNames, ARRAY_SIZE(pipelineNames), (int8*)&CustomPipes::WorldPipeSwitch, false, nil, "Graphics", "WorldPipeline");
 		FrontendOptionAddSelect("FED_WLM", 0, 0, MENUALIGN_LEFT, off_on, 2, (int8*)&CustomPipes::LightmapEnable, false, nil, "Graphics", "NeoLightMaps");
 		FrontendOptionAddSelect("FED_RGL", 0, 0, MENUALIGN_LEFT, off_on, 2, (int8*)&CustomPipes::GlossEnable, false, nil, "Graphics", "NeoRoadGloss");
 #endif
@@ -400,8 +400,6 @@ bool LoadINISettings()
 	ReadIniIfExists("CustomPipesValues", "PostFXIntensity", &CPostFX::Intensity);
 #endif
 #ifdef EXTENDED_PIPELINES
-	ReadIniIfExists("CustomPipesValues", "VehiclePipeline", &CustomPipes::VehiclePipeSwitch);
-	ReadIniIfExists("CustomPipesValues", "WorldPipeline", &CustomPipes::WorldPipeSwitch);
 	ReadIniIfExists("CustomPipesValues", "NeoVehicleShininess", &CustomPipes::VehicleShininess);
 	ReadIniIfExists("CustomPipesValues", "NeoVehicleSpecularity", &CustomPipes::VehicleSpecularity);
 	ReadIniIfExists("CustomPipesValues", "RimlightMult", &CustomPipes::RimlightMult);
@@ -490,8 +488,6 @@ void SaveINISettings()
 	StoreIni("CustomPipesValues", "PostFXIntensity", CPostFX::Intensity);
 #endif
 #ifdef EXTENDED_PIPELINES
-	StoreIni("CustomPipesValues", "VehiclePipeline", CustomPipes::VehiclePipeSwitch);
-	StoreIni("CustomPipesValues", "WorldPipeline", CustomPipes::WorldPipeSwitch);
 	StoreIni("CustomPipesValues", "NeoVehicleShininess", CustomPipes::VehicleShininess);
 	StoreIni("CustomPipesValues", "NeoVehicleSpecularity", CustomPipes::VehicleSpecularity);
 	StoreIni("CustomPipesValues", "RimlightMult", CustomPipes::RimlightMult);
