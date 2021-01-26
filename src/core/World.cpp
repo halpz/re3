@@ -2123,7 +2123,7 @@ CWorld::TriggerExplosionSectorList(CPtrList &list, const CVector &position, floa
 						                    PEDPIECE_TORSO, direction);
 						if(pPed->m_nPedState != PED_DIE)
 							pPed->SetFall(2000,
-							              (AnimationId)(direction + ANIM_KO_SKID_FRONT), 0);
+							              (AnimationId)(direction + ANIM_STD_HIGHIMPACT_FRONT), 0);
 						if(pCreator && pCreator->IsPed()) {
 							eEventType eventType = EVENT_SHOOT_PED;
 							if(pPed->m_nPedType == PEDTYPE_COP) eventType = EVENT_SHOOT_COP;
