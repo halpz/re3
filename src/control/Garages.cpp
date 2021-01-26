@@ -302,7 +302,7 @@ bool CGarages::InitDoorGubbins(uint32 id, uint8 type)
 	case GARAGE_BOMBSHOP2:
 	case GARAGE_BOMBSHOP3:
 	case GARAGE_RESPRAY:
-	case GARAGE_60SECONDS:
+	case GARAGE_CRATE_GARAGE:
 		pGarage->m_eGarageState = GS_OPENED;
 		pGarage->m_fDoorPos = pGarage->m_fDoorHeight;
 		break;
@@ -951,7 +951,7 @@ void CGarage::Update()
 			break;
 		}
 		break;
-	case GARAGE_60SECONDS:
+	case GARAGE_CRATE_GARAGE:
 	case GARAGE_CRUSHER:
 	{
 		// for now version from III
@@ -2243,7 +2243,7 @@ void CGarage::PlayerArrestedOrDied()
 	case GARAGE_COLLECTCARS_2:
 	case GARAGE_COLLECTCARS_3:
 	case GARAGE_FORCARTOCOMEOUTOF:
-	case GARAGE_60SECONDS:
+	case GARAGE_CRATE_GARAGE:
 	case GARAGE_MISSION_KEEPCAR:
 	case GARAGE_FOR_SCRIPT_TO_OPEN:
 	case GARAGE_HIDEOUT_ONE:
