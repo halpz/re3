@@ -393,17 +393,20 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 
 #endif
 
-#ifdef LIBRW
-// these are not supported with librw yet
+// Streaming
+#if !defined(_WIN32) && !defined(__SWITCH__)
+	//#define ONE_THREAD_PER_CHANNEL // Don't use if you're not on SSD/Flash - also not utilized too much right now(see commented LoadAllRequestedModels in Streaming.cpp)
+	#define FLUSHABLE_STREAMING // Make it possible to interrupt reading when processing file isn't needed anymore.
 #endif
-// IMG
-#define BIG_IMG // allows to read larger img files
+#define BIG_IMG // Not complete - allows to read larger img files
 
 //#define SQUEEZE_PERFORMANCE
 #ifdef SQUEEZE_PERFORMANCE
 	#undef PS2_ALPHA_TEST
 	#undef NO_ISLAND_LOADING
 #endif
+
+// -------
 
 #if defined __MWERKS__ || defined VANILLA_DEFINES
 #define FINAL
