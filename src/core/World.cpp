@@ -431,10 +431,10 @@ CWorld::ProcessVerticalLineSector(CSector &sector, const CColLine &line, CColPoi
 }
 
 bool
-CWorld::ProcessVerticalLineSectorList(CPtrList &list, const CColLine &line, CColPoint &point, float &dist,
+CWorld::ProcessVerticalLineSectorList(CPtrList &list, const CColLine &line, CColPoint &point, float &mindist,
                                       CEntity *&entity, bool ignoreSeeThrough, CStoredCollPoly *poly)
 {
-	float mindist = dist;
+	float dist = mindist;
 	CPtrNode *node;
 	CEntity *e;
 	CColModel *colmodel;
@@ -451,8 +451,8 @@ CWorld::ProcessVerticalLineSectorList(CPtrList &list, const CColLine &line, CCol
 		}
 	}
 
-	if(mindist < dist) {
-		dist = mindist;
+	if(dist < mindist) {
+		mindist = dist;
 		return true;
 	} else
 		return false;
