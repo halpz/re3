@@ -1439,19 +1439,19 @@ CBoat::DoDriveByShootings(void)
 
 	if(lookingLeft || lookingRight){
 		if(lookingLeft){
-			anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_R);
+			anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_STD_CAR_DRIVEBY_RIGHT);
 			if(anim)
 				anim->blendDelta = -1000.0f;
-			anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_L);
+			anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_STD_CAR_DRIVEBY_LEFT);
 			if(anim == nil || anim->blendDelta < 0.0f)
-				anim = CAnimManager::AddAnimation(pDriver->GetClump(), ASSOCGRP_STD, ANIM_DRIVEBY_L);
+				anim = CAnimManager::AddAnimation(pDriver->GetClump(), ASSOCGRP_STD, ANIM_STD_CAR_DRIVEBY_LEFT);
 		}else if(pDriver->m_pMyVehicle->pPassengers[0] == nil || TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON){
-			anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_L);
+			anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_STD_CAR_DRIVEBY_LEFT);
 			if(anim)
 				anim->blendDelta = -1000.0f;
-			anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_R);
+			anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_STD_CAR_DRIVEBY_RIGHT);
 			if(anim == nil || anim->blendDelta < 0.0f)
-				anim = CAnimManager::AddAnimation(pDriver->GetClump(), ASSOCGRP_STD, ANIM_DRIVEBY_R);
+				anim = CAnimManager::AddAnimation(pDriver->GetClump(), ASSOCGRP_STD, ANIM_STD_CAR_DRIVEBY_RIGHT);
 		}
 
 		if (!anim || !anim->IsRunning()) {
@@ -1462,10 +1462,10 @@ CBoat::DoDriveByShootings(void)
 		}
 	}else{
 		weapon->Reload();
-		anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_L);
+		anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_STD_CAR_DRIVEBY_LEFT);
 		if(anim)
 			anim->blendDelta = -1000.0f;
-		anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_DRIVEBY_R);
+		anim = RpAnimBlendClumpGetAssociation(pDriver->GetClump(), ANIM_STD_CAR_DRIVEBY_RIGHT);
 		if(anim)
 			anim->blendDelta = -1000.0f;
 	}

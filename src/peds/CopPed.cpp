@@ -257,9 +257,9 @@ CCopPed::ArrestPlayer(void)
 
 		if (suspect && (suspect->m_nPedState == PED_ARRESTED || suspect->DyingOrDead() || suspect->EnteringCar())) {
 
-			CAnimBlendAssociation *arrestAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_ARREST_GUN);
+			CAnimBlendAssociation *arrestAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_ARREST);
 			if (!arrestAssoc || arrestAssoc->blendDelta < 0.0f)
-				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_ARREST_GUN, 4.0f);
+				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_ARREST, 4.0f);
 
 			CVector suspMidPos;
 			suspect->m_pedIK.GetComponentPosition(suspMidPos, PED_MID);

@@ -521,7 +521,7 @@ void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState
 				state->aFunctionCallbackID[i] = 0;
 			}
 		}else{
-			state->aAnimId[i] = NUM_STD_ANIMS;
+			state->aAnimId[i] = ANIM_STD_NUM;
 			state->aCurTime[i] = 0;
 			state->aSpeed[i] = 85;
 			state->aFunctionCallbackID[i] = 0;
@@ -548,7 +548,7 @@ void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState
 			}
 		}
 		else {
-			state->aAnimId2[i] = NUM_STD_ANIMS;
+			state->aAnimId2[i] = ANIM_STD_NUM;
 			state->aCurTime2[i] = 0;
 			state->aSpeed2[i] = 85;
 			state->aFunctionCallbackID2[i] = 0;
@@ -611,13 +611,13 @@ bool HasAnimGroupLoaded(uint8 group)
 void CReplay::RetrievePedAnimation(CPed *ped, CStoredAnimationState *state)
 {
 	CAnimBlendAssociation* anim1;
-	if (state->animId <= 3)
+	if (state->animId <= ANIM_STD_IDLE)
 		anim1 = CAnimManager::BlendAnimation(
 			(RpClump*)ped->m_rwObject, ped->m_animGroup, (AnimationId)state->animId, 100.0f);
 	else if (HasAnimGroupLoaded(state->groupId))
 		anim1 = CAnimManager::BlendAnimation((RpClump*)ped->m_rwObject, (AssocGroupId)state->groupId, (AnimationId)state->animId, 100.0f);
 	else
-		anim1 = CAnimManager::BlendAnimation((RpClump*)ped->m_rwObject, ASSOCGRP_STD, ANIM_WALK, 100.0f);
+		anim1 = CAnimManager::BlendAnimation((RpClump*)ped->m_rwObject, ASSOCGRP_STD, ANIM_STD_WALK, 100.0f);
 
 	anim1->SetCurrentTime(state->time * 4.0f / 255.0f);
 	anim1->speed = state->speed * 3.0f / 255.0f;
@@ -629,7 +629,7 @@ void CReplay::RetrievePedAnimation(CPed *ped, CStoredAnimationState *state)
 		float blend = state->blendAmount * 2.0f / 255.0f;
 		CAnimBlendAssociation* anim2 = CAnimManager::BlendAnimation(
 			(RpClump*)ped->m_rwObject,
-			(state->secAnimId > 3) ? (AssocGroupId)state->secGroupId : ped->m_animGroup,
+			(state->secAnimId > ANIM_STD_IDLE) ? (AssocGroupId)state->secGroupId : ped->m_animGroup,
 			(AnimationId)state->secAnimId, 100.0f);
 		anim2->SetCurrentTime(time);
 		anim2->speed = speed;
@@ -641,7 +641,7 @@ void CReplay::RetrievePedAnimation(CPed *ped, CStoredAnimationState *state)
 		float time = state->partAnimTime * 4.0f / 255.0f;
 		float speed = state->partAnimSpeed * 3.0f / 255.0f;
 		float blend = state->partBlendAmount * 2.0f / 255.0f;
-		if (blend > 0.0f && state->partAnimId != ANIM_IDLE_STANCE && HasAnimGroupLoaded(state->partGroupId)){
+		if (blend > 0.0f && state->partAnimId != ANIM_STD_IDLE && HasAnimGroupLoaded(state->partGroupId)){
 			CAnimBlendAssociation* anim3 = CAnimManager::BlendAnimation(
 				(RpClump*)ped->m_rwObject, (AssocGroupId)state->partGroupId, (AnimationId)state->partAnimId, 1000.0f);
 			anim3->SetCurrentTime(time);
@@ -659,10 +659,10 @@ void CReplay::RetrieveDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationSt
 	for (int i = 0; ((assoc = RpAnimBlendClumpGetMainPartialAssociation_N(ped->GetClump(), i))); i++)
 		assoc->SetBlend(0.0f, -1.0f);
 	for (int i = 0; i < NUM_MAIN_ANIMS_IN_REPLAY; i++) {
-		if (state->aAnimId[i] == NUM_STD_ANIMS)
+		if (state->aAnimId[i] == ANIM_STD_NUM)
 			continue;
 		CAnimBlendAssociation* anim = CAnimManager::AddAnimation(ped->GetClump(),
-			state->aAnimId[i] > 3 ? (AssocGroupId)state->aGroupId[i] : ped->m_animGroup,
+			state->aAnimId[i] > ANIM_STD_IDLE ? (AssocGroupId)state->aGroupId[i] : ped->m_animGroup,
 			(AnimationId)state->aAnimId[i]);
 		anim->SetCurrentTime(state->aCurTime[i] * 4.0f / 255.0f);
 		anim->speed = state->aSpeed[i] * 3.0f / 255.0f;
@@ -677,10 +677,10 @@ void CReplay::RetrieveDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationSt
 			anim->SetDeleteCallback(FindCBFunction(callback & 0x7F), ped);
 	}
 	for (int i = 0; i < NUM_PARTIAL_ANIMS_IN_REPLAY; i++) {
-		if (state->aAnimId2[i] == NUM_STD_ANIMS)
+		if (state->aAnimId2[i] == ANIM_STD_NUM)
 			continue;
 		CAnimBlendAssociation* anim = CAnimManager::AddAnimation(ped->GetClump(),
-			state->aAnimId2[i] > 3 ? (AssocGroupId)state->aGroupId2[i] : ped->m_animGroup,
+			state->aAnimId2[i] > ANIM_STD_IDLE ? (AssocGroupId)state->aGroupId2[i] : ped->m_animGroup,
 			(AnimationId)state->aAnimId2[i]);
 		anim->SetCurrentTime(state->aCurTime2[i] * 4.0f / 255.0f);
 		anim->speed = state->aSpeed2[i] * 3.0f / 255.0f;
