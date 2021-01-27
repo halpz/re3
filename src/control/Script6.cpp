@@ -632,7 +632,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		if (GET_INTEGER_PARAM(2) < 0)
 			pPed->WarpPedIntoCarAsPassenger(pVehicle, GET_INTEGER_PARAM(2));
 		else {
-			script_assert(GET_INTEGER_PARAM(1) >= 0 && GET_INTEGER_PARAM(1) < ARRAY_SIZE(pVehicle->pPassengers));
+			script_assert(GET_INTEGER_PARAM(2) >= 0 && GET_INTEGER_PARAM(2) < ARRAY_SIZE(pVehicle->pPassengers));
 			pPed->WarpPedIntoCarAsPassenger(pVehicle, GET_INTEGER_PARAM(2));
 		}
 		return 0;
