@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         platform: [win-x86-librw_d3d9-mss, win-x86-librw_gl3_glfw-mss, win-x86-librw_d3d9-oal, win-x86-librw_gl3_glfw-oal]
-        buildtype: [Debug, Release]
+        buildtype: [Debug, Release, Vanilla]
     steps:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
