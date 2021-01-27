@@ -15,6 +15,7 @@
 #include "Automobile.h"
 #include "Boat.h"
 #include "Train.h"
+#include "Ferry.h"
 #include "Plane.h"
 #include "Heli.h"
 #include "Bike.h"
@@ -122,6 +123,22 @@ RwObjectNameIdAssocation trainIds[] = {
 	{ nil, 0, 0 }
 };
 
+RwObjectNameIdAssocation ferryIds[] = {
+	{ "door_front_dummy",	FERRY_DOOR_FRONT,	VEHICLE_FLAG_LEFT | VEHICLE_FLAG_COLLAPSE },
+	{ "door_back_dummy",	FERRY_DOOR_BACK,	VEHICLE_FLAG_LEFT | VEHICLE_FLAG_COLLAPSE },
+	{ "ramp_front_dummy",	FERRY_RAMP_FRONT,	VEHICLE_FLAG_LEFT | VEHICLE_FLAG_COLLAPSE },
+	{ "ramp_back_dummy",	FERRY_RAMP_BACK,	VEHICLE_FLAG_LEFT | VEHICLE_FLAG_COLLAPSE },
+	{ "light_front",	FERRY_POS_LIGHT_FRONT,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "light_rear",		FERRY_POS_LIGHT_REAR,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "chim_left",		FERRY_POS_CHIM_LEFT,	VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "ped_point",		FERRY_POS_PED_POINT,	VEHICLE_FLAG_DOOR | VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "car1_dummy",		FERRY_POS_CAR1,		VEHICLE_FLAG_DOOR | VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "car2_dummy",		FERRY_POS_CAR2,		VEHICLE_FLAG_DOOR | VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "car3_dummy",		FERRY_POS_CAR3,		VEHICLE_FLAG_DOOR | VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ "car4_dummy",		FERRY_POS_CAR4,		VEHICLE_FLAG_DOOR | VEHICLE_FLAG_POS | CLUMP_FLAG_NO_HIERID },
+	{ nil, 0, 0 }
+};
+
 RwObjectNameIdAssocation heliIds[] = {
 	{ "chassis_dummy",	HELI_CHASSIS,	VEHICLE_FLAG_COLLAPSE },
 	{ "toprotor",		HELI_TOPROTOR,	0 },
@@ -170,7 +187,8 @@ RwObjectNameIdAssocation *CVehicleModelInfo::ms_vehicleDescs[] = {
 	trainIds,
 	heliIds,
 	planeIds,
-	bikeIds
+	bikeIds,
+	ferryIds
 };
 
 bool gbBlackCars;
