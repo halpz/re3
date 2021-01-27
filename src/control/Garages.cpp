@@ -354,6 +354,10 @@ void CGarages::LockGarage(int16 garage, bool state)
 
 void CGarage::Update()
 {
+#ifdef GTA_NETWORK
+	if (/* gIsMultiplayerGame && */m_eGarageType != GARAGE_CRATE_GARAGE) // TODO(multiplayer)
+		return;
+#endif
 	if (m_eGarageType != GARAGE_CRUSHER) {
 		switch (m_eGarageState) {
 		case GS_FULLYCLOSED:
@@ -617,8 +621,10 @@ void CGarage::Update()
 	case GARAGE_BOMBSHOP1:
 	case GARAGE_BOMBSHOP2:
 	case GARAGE_BOMBSHOP3:
-		if (m_bLocked)
+		if (m_bLocked) {
+			UpdateDoorsHeight();
 			break;
+		}
 		switch (m_eGarageState) {
 		case GS_OPENED:
 			UpdateDoorsHeight();
@@ -952,9 +958,92 @@ void CGarage::Update()
 		}
 		break;
 	case GARAGE_CRATE_GARAGE:
+#ifdef GTA_NETWORK
+	{
+		switch (m_eGarageState) {
+		case GS_OPENED:
+			if (m_pSSVehicle) {
+				// if (m_pSSVehicle->GetVehiclePointer() && IsEntityEntirelyInside3D(m_pSSVehicle->GetVehiclePointer())
+				{
+					if (m_pSSTargetCar)
+						m_pSSTargetCar->CleanUpOldReference((CEntity**)&m_pSSTargetCar);
+					// m_pSSTargetCar = m_pSSVehicle->GetVehiclePointer();
+					m_pSSTargetCar->RegisterReference((CEntity**)&m_pSSTargetCar);
+				}
+				// else
+				{
+					if (m_pSSTargetCar)
+						m_pSSTargetCar->CleanUpOldReference((CEntity**)&m_pSSTargetCar);
+					m_pSSTargetCar = nil;
+				}
+				if (m_pSSTargetCar) {
+					if (!FindPlayerVehicle()/* && m_pSSTargetCar == m_pSSVehicle->GetVehiclePointer() */)
+					{
+						if (IsEntityEntirelyOutside(FindPlayerPed(), 6.0f)) {
+							if (FindPlayerPed()->m_fHealth > 0.0f) {
+								CPad::GetPad(0)->SetDisablePlayerControls(PLAYERCONTROL_GARAGE);
+								m_eGarageState = GS_CLOSING;
+								m_bSSGarageStateChanging = true;
+							}
+						}
+					}
+				}
+			}
+			break;
+		case GS_CLOSING:
+			m_fDoorPos = Max(0.0f, m_fDoorPos - (m_bRotatedDoor ? ROTATED_DOOR_CLOSE_SPEED : DEFAULT_DOOR_CLOSE_SPEED) * CTimer::GetTimeStep());
+			if (m_fDoorPos == 0.0f) {
+				// if (? == m_nSSGarageState)
+				{
+					if (m_pSSTargetCar) {
+						// if (m_pSSVehicle->GetVehiclePointer())
+						{
+							if (IsEntityEntirelyInside3D(/* m_pSSVehicle->GetVehiclePointer() */nil, 0.0f)) {
+								if (m_pSSTargetCar)
+									m_pSSTargetCar->CleanUpOldReference((CEntity**)&m_pSSTargetCar);
+								CWorld::Remove(m_pSSTargetCar);
+								delete m_pSSTargetCar;
+								m_pSSTargetCar = nil;
+								m_pSSVehicle = nil;
+								m_bSSGarageAcceptedVehicle = true;
+								printf("Destroying Car Inside Crate....\n");
+							}
+						}
+					}
+				}
+				// TODO: some loop :(
+				CPad::GetPad(0)->SetEnablePlayerControls(PLAYERCONTROL_GARAGE);
+				m_eGarageState = GS_FULLYCLOSED;
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_CLOSED, 1.0f);
+			}
+			UpdateDoorsHeight();
+			if (!IsGarageEmpty())
+				m_eGarageState = GS_OPENING;
+			break;
+		case GS_FULLYCLOSED:
+		{
+			// if (? == m_nSSGarageState)
+			{
+				if (CalcDistToGarageRectangleSquared(FindPlayerPed()->GetPosition().x, FindPlayerPed()->GetPosition().y) > SQR(10.0f))
+					m_eGarageState = GS_OPENING;
+			}
+			break;
+		}
+		case GS_OPENING:
+			m_fDoorPos = Min(m_fDoorHeight, m_fDoorPos + (m_bRotatedDoor ? ROTATED_DOOR_OPEN_SPEED : DEFAULT_DOOR_OPEN_SPEED) * CTimer::GetTimeStep());
+			if (m_fDoorPos == m_fDoorHeight) {
+				m_bSSGarageStateChanging = false;
+				m_eGarageState = GS_OPENED;
+				DMAudio.PlayOneShot(hGarages, SOUND_GARAGE_DOOR_OPENED, 1.0f);
+			}
+			UpdateDoorsHeight();
+			break;
+		}
+		break;
+	}
+#endif
 	case GARAGE_CRUSHER:
 	{
-		// for now version from III
 		switch (m_eGarageState) {
 		case GS_OPENED:
 		{
@@ -1375,7 +1464,6 @@ bool CGarage::IsPointInsideGarage(CVector pos, float m_fMargin)
 
 bool CGarage::IsEntityEntirelyInside3D(CEntity* pEntity, float fMargin)
 {
-	// TODO: hack for GARAGE_60SECONDS
 	if (pEntity->GetPosition().x < m_fInfX - fMargin || pEntity->GetPosition().x > m_fSupX + fMargin ||
 		pEntity->GetPosition().y < m_fInfY - fMargin || pEntity->GetPosition().y > m_fSupY + fMargin ||
 		pEntity->GetPosition().z < m_fInfZ - fMargin || pEntity->GetPosition().z > m_fSupZ + fMargin)
@@ -1384,8 +1472,15 @@ bool CGarage::IsEntityEntirelyInside3D(CEntity* pEntity, float fMargin)
 	for (int i = 0; i < pColModel->numSpheres; i++) {
 		CVector pos = pEntity->GetMatrix() * pColModel->spheres[i].center;
 		float radius = pColModel->spheres[i].radius;
-		if (!IsPointInsideGarage(pos, fMargin - radius))
-			return false;
+		if (m_eGarageType == GARAGE_CRATE_GARAGE) {
+			if (pos.x + radius < m_fInfX - fMargin || pos.x - radius > m_fSupX + fMargin ||
+				pos.y + radius < m_fInfY - fMargin || pos.y - radius > m_fSupX + fMargin)
+				return false;
+		}
+		else {
+			if (!IsPointInsideGarage(pos, fMargin - radius))
+				return false;
+		}
 	}
 	return true;
 }
@@ -1399,8 +1494,15 @@ bool CGarage::IsEntityEntirelyOutside(CEntity * pEntity, float fMargin)
 	for (int i = 0; i < pColModel->numSpheres; i++) {
 		CVector pos = pEntity->GetMatrix() * pColModel->spheres[i].center;
 		float radius = pColModel->spheres[i].radius;
-		if (IsPointInsideGarage(pos, fMargin + radius))
-			return false;
+		if (m_eGarageType == GARAGE_CRATE_GARAGE) {
+			if (pos.x + radius > m_fInfX - fMargin && pos.x - radius < m_fSupX + fMargin &&
+				pos.y + radius > m_fInfY - fMargin && pos.y - radius < m_fSupX + fMargin)
+				return false;
+		}
+		else {
+			if (IsPointInsideGarage(pos, fMargin + radius))
+				return false;
+		}
 	}
 	return true;
 }

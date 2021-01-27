@@ -6,6 +6,8 @@
 
 class CVehicle;
 
+#define GTA_NETWORK
+
 enum eGarageState
 {
 	GS_FULLYCLOSED,
@@ -123,6 +125,7 @@ public:
 	float m_fInfY;
 	float m_fSupY;
 	uint32 m_nTimeCrusherCraneActivated;
+	CVehicle* m_pSSTargetCar;
 	float m_fDoorPos;
 	float m_fDoorHeight;
 	float m_fDoor1X;
@@ -135,7 +138,15 @@ public:
 	uint8 m_bCollectedCarsState;
 	CVehicle *m_pTarget;
 	CStoredCar m_sStoredCar; // not needed
+#ifdef GTA_NETWORK
+	void* m_pSSVehicle; // some multiplayer vehicle structure, +104 == GetVehiclePointer
+	bool m_bSSGarageAcceptedVehicle;
+#endif
 	bool m_bInitialized;
+#ifdef GTA_NETWORK
+	uint8 m_nSSGarageState;
+	bool m_bSSGarageStateChanging;
+#endif
 	uint32 field_F0;
 	bool m_bLocked;
 	uint32 field_F8;
