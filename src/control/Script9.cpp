@@ -431,8 +431,8 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
 		script_assert(pVehicle);
 		SET_FLOAT_PARAM(1, LimitAngleOnCircle(RADTODEG(Asin(pVehicle->GetForward().z))));
-		SET_FLOAT_PARAM(2, LimitAngleOnCircle(RADTODEG(CGeneral::GetATanOfXY(pVehicle->GetForward().x, pVehicle->GetForward().y))));
-		SET_FLOAT_PARAM(0, LimitAngleOnCircle(RADTODEG(CGeneral::GetATanOfXY(pVehicle->GetUp().z, pVehicle->GetRight().z))));
+		SET_FLOAT_PARAM(2, LimitAngleOnCircle(RADTODEG(Atan2(-pVehicle->GetForward().x, pVehicle->GetForward().y))));
+		SET_FLOAT_PARAM(0, LimitAngleOnCircle(RADTODEG(Atan2(-pVehicle->GetRight().z, pVehicle->GetUp().z))));
 		StoreParameters(&m_nIp, 3);
 		return 0;
 	}
