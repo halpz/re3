@@ -1172,7 +1172,13 @@ void CHud::Draw()
 			CFont::SetBackgroundColor(CRGBA(0, 0, 0, 128));
 			CFont::SetCentreOn();
 			CFont::SetPropOn();
-			CFont::SetDropShadowPosition(0);
+#ifdef CUTSCENE_BORDERS_SWITCH
+			if (!FrontEndMenuManager.m_PrefsCutsceneBorders)
+				CFont::SetDropShadowPosition(2);
+			else
+#else
+				CFont::SetDropShadowPosition(0);
+#endif
 			CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 			CFont::SetColor(CRGBA(225, 225, 225, 255));
 
@@ -1182,10 +1188,6 @@ void CHud::Draw()
 				onceItWasWidescreen = true;
 				
 				if (FrontEndMenuManager.m_PrefsShowSubtitles || !CCutsceneMgr::IsRunning()) {
-#ifdef CUTSCENE_BORDERS_SWITCH
-					if (!FrontEndMenuManager.m_PrefsCutsceneBorders)
-						CFont::SetDropShadowPosition(2);
-#endif
 					CFont::SetCentreSize(SCREEN_WIDTH - SCREEN_SCALE_X(60.0f));
 					CFont::SetScale(SCREEN_SCALE_X(0.58f), SCREEN_SCALE_Y(1.2f));
 					CFont::PrintString(SCREEN_WIDTH / 2.f, SCREEN_SCALE_FROM_BOTTOM(80.0f), m_Message);
