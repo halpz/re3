@@ -1,6 +1,7 @@
 #pragma warning( push )
 #pragma warning( disable : 4005)
 #pragma warning( pop )
+#define FORCE_PC_SCALING
 #include "common.h"
 #ifdef ANISOTROPIC_FILTERING
 #include "rpanisot.h"
