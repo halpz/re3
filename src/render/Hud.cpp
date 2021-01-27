@@ -1176,9 +1176,8 @@ void CHud::Draw()
 			if (!FrontEndMenuManager.m_PrefsCutsceneBorders)
 				CFont::SetDropShadowPosition(2);
 			else
-#else
-				CFont::SetDropShadowPosition(0);
 #endif
+				CFont::SetDropShadowPosition(0);
 			CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 			CFont::SetColor(CRGBA(225, 225, 225, 255));
 
