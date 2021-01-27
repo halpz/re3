@@ -307,8 +307,16 @@ CCollision::TestLineTriangle(const CColLine &line, const CompressedVector *verts
 	if(plane.CalcPoint(line.p0) * plane.CalcPoint(line.p1) > 0.0f)
 		return false;
 
+	float p0dist = DotProduct(line.p1 - line.p0, normal);
+
+#ifdef FIX_BUGS
+	// line lines in the plane, assume no collision
+	if (p0dist == 0.0f)
+		return false;
+#endif
+
 	// intersection parameter on line
-	t = -plane.CalcPoint(line.p0) / DotProduct(line.p1 - line.p0, normal);
+	t = -plane.CalcPoint(line.p0) / p0dist;
 	// find point of intersection
 	CVector p = line.p0 + (line.p1-line.p0)*t;
 
@@ -1127,8 +1135,17 @@ CCollision::ProcessLineTriangle(const CColLine &line,
 	if(plane.CalcPoint(line.p0) * plane.CalcPoint(line.p1) > 0.0f)
 		return false;
 
+	float p0dist = DotProduct(line.p1 - line.p0, normal);
+
+#ifdef FIX_BUGS
+	// line lines in the plane, assume no collision
+	if (p0dist == 0.0f)
+		return false;
+#endif
+
 	// intersection parameter on line
-	t = -plane.CalcPoint(line.p0) / DotProduct(line.p1 - line.p0, normal);
+	t = -plane.CalcPoint(line.p0) / p0dist;
+
 	// early out if we're beyond the mindist
 	if(t >= mindist)
 		return false;
