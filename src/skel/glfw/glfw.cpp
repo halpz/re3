@@ -1239,10 +1239,11 @@ void terminateHandler(int sig, siginfo_t *info, void *ucontext) {
 	RsGlobal.quit = TRUE;
 }
 
+#ifdef FLUSHABLE_STREAMING
 void dummyHandler(int sig){
 	// Don't kill the app pls
 }
-
+#endif
 #endif
 
 void resizeCB(GLFWwindow* window, int width, int height) {
@@ -1496,11 +1497,13 @@ main(int argc, char *argv[])
 	act.sa_sigaction = terminateHandler;
 	act.sa_flags = SA_SIGINFO;
 	sigaction(SIGTERM, &act, NULL);
+#ifdef FLUSHABLE_STREAMING
 	struct sigaction sa;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_handler = dummyHandler;
 	sa.sa_flags = 0;
-	sigaction(SIGUSR1, &sa, NULL); // Needed for CdStreamPosix
+	sigaction(SIGUSR1, &sa, NULL);
+#endif
 #endif
 
 	/* 

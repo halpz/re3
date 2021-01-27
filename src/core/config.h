@@ -392,8 +392,13 @@ enum Config {
 #endif
 
 #endif
-// IMG
-#define BIG_IMG // allows to read larger img files
+
+// Streaming
+#if !defined(_WIN32) && !defined(__SWITCH__)
+	//#define ONE_THREAD_PER_CHANNEL // Don't use if you're not on SSD/Flash - also not utilized too much right now(see commented LoadAllRequestedModels in Streaming.cpp)
+	#define FLUSHABLE_STREAMING // Make it possible to interrupt reading when processing file isn't needed anymore.
+#endif
+#define BIG_IMG // Not complete - allows to read larger img files
 
 //#define SQUEEZE_PERFORMANCE
 #ifdef SQUEEZE_PERFORMANCE
@@ -403,6 +408,8 @@ enum Config {
 	#define VC_PED_PORTS // To not process collisions always. But should be tested if that's really beneficial
 	#define VC_RAIN_NERF // Reduces number of rain particles
 #endif
+
+// -------
 
 #if defined __MWERKS__ || defined VANILLA_DEFINES
 #define FINAL
