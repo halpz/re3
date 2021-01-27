@@ -437,7 +437,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	}
 	case COMMAND_DOT_PRODUCT_3D:
 	{
-		CollectParameters(&m_nIp, 4);
+		CollectParameters(&m_nIp, 6);
 		float X1 = GET_FLOAT_PARAM(0);
 		float Y1 = GET_FLOAT_PARAM(1);
 		float Z1 = GET_FLOAT_PARAM(2);
