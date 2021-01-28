@@ -201,6 +201,9 @@ DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomR
 	if(!RsCameraBeginUpdate(Scene.camera))
 		return false;
 
+#ifdef FIX_BUGS
+	CSprite2d::SetRecipNearClip();
+#endif
 	CSprite2d::InitPerFrame();
 
 	if(Alpha != 0)
