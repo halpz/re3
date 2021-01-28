@@ -1223,8 +1223,11 @@ cMusicManager::DisplayRadioStationName()
 					gNumRetunePresses++;
 			}
 			else
+#ifdef FIX_BUGS
+				track = m_nFrontendTrack == NO_TRACK ? POLICE_RADIO : m_nFrontendTrack;
+#else
 				track = m_nFrontendTrack;
-
+#endif
 
 			wchar* string = nil;
 			switch (track) {

@@ -5567,33 +5567,40 @@ void
 CMenuManager::DrawQuitGameScreen(void)
 {
 	static int32 exitSignalTimer = 0;
+
+#ifdef FIX_BUGS
+	int alpha = clamp(m_nMenuFadeAlpha, 0, 255);
+#else
+	int alpha = m_nMenuFadeAlpha;
+#endif
+
 #ifndef MUCH_SHORTER_OUTRO_SCREEN
 	static PauseModeTime lastTickIncrease = 0;
-	if (m_nMenuFadeAlpha == 255 && CTimer::GetTimeInMillisecondsPauseMode() - lastTickIncrease > 10) {
+	if (alpha == 255 && CTimer::GetTimeInMillisecondsPauseMode() - lastTickIncrease > 10) {
 		exitSignalTimer++;
 		lastTickIncrease = CTimer::GetTimeInMillisecondsPauseMode();
 	}
 #else
-	static PauseModeTime sincePress = 0;
-	sincePress += frameTime;
-	if (sincePress > 500)
+	static PauseModeTime firstTick = CTimer::GetTimeInMillisecondsPauseMode();
+	if (alpha == 255 && CTimer::GetTimeInMillisecondsPauseMode() - firstTick > 1000) {
 		exitSignalTimer = 150;
+	}
 #endif
 	static CSprite2d *splash = nil;
 
 	if (splash == nil)
 		splash = LoadSplash("OUTRO");
 
-	m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(MENU_X(28.0f), MENU_Y(8.0f), MENU_X(157.0f), MENU_Y(138.0f)), CRGBA(255, 255, 255, -(m_nMenuFadeAlpha + 1)));
+	m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(MENU_X(28.0f), MENU_Y(8.0f), MENU_X(157.0f), MENU_Y(138.0f)), CRGBA(255, 255, 255, 255 - alpha));
 
 	// Or we can see menu background from sides
 #ifdef ASPECT_RATIO_SCALE
-	CSprite2d::DrawRect(CRect(0, 0, MENU_X_LEFT_ALIGNED(0.f), SCREEN_HEIGHT), CRGBA(0, 0, 0, m_nMenuFadeAlpha));
-	CSprite2d::DrawRect(CRect(MENU_X_RIGHT_ALIGNED(0.f), 0, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(0, 0, 0, m_nMenuFadeAlpha));
+	CSprite2d::DrawRect(CRect(0, 0, MENU_X_LEFT_ALIGNED(0.f), SCREEN_HEIGHT), CRGBA(0, 0, 0, alpha));
+	CSprite2d::DrawRect(CRect(MENU_X_RIGHT_ALIGNED(0.f), 0, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(0, 0, 0, alpha));
 #endif
 
-	splash->Draw(CRect(MENU_X_LEFT_ALIGNED(0.f), 0, MENU_X_RIGHT_ALIGNED(0.f), SCREEN_HEIGHT), CRGBA(255, 255, 255, m_nMenuFadeAlpha));
-	if (m_nMenuFadeAlpha == 255 && exitSignalTimer == 150)
+	splash->Draw(CRect(MENU_X_LEFT_ALIGNED(0.f), 0, MENU_X_RIGHT_ALIGNED(0.f), SCREEN_HEIGHT), CRGBA(255, 255, 255, alpha));
+	if (alpha == 255 && exitSignalTimer == 150)
 		RsEventHandler(rsQUITAPP, nil);
 
 	m_bShowMouse = false;

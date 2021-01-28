@@ -1065,8 +1065,13 @@ DisplayGameDebugText()
 #endif
 
 	FrameSamples++;
+#ifdef FIX_HIGH_FPS_BUGS_ON_FRONTEND
+	FramesPerSecondCounter += frameTime / 1000.f; // convert to seconds
+	FramesPerSecond = FrameSamples / FramesPerSecondCounter;
+#else
 	FramesPerSecondCounter += 1000.0f / (CTimer::GetTimeStepNonClippedInSeconds() * 1000.0f);	
 	FramesPerSecond = FramesPerSecondCounter / FrameSamples;
+#endif
 	
 	if ( FrameSamples > 30 )
 	{

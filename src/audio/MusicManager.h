@@ -29,7 +29,7 @@ public:
 	uint32 m_nResetTime;
 	bool m_bRadioSetByScript;
 	uint8 m_nRadioStation;
-	uint32 m_nRadioPosition;
+	int32 m_nRadioPosition;
 	uint32 m_nRadioInCar;
 	uint32 m_nFrontendTrack;
 	uint32 m_nPlayingTrack;
