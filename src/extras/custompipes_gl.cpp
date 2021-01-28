@@ -333,7 +333,12 @@ glossRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 
 	V3d eyePos = rw::engine->currentCamera->getFrame()->getLTM()->pos;
 	glUniform3fv(U(u_eye), 1, (float*)&eyePos);
-	glUniform4fv(U(u_reflProps), 1, (float*)&GlossMult);
+	float reflProps[4];
+	reflProps[0] = GlossMult;
+	reflProps[1] = 0.0f;
+	reflProps[2] = 0.0f;
+	reflProps[3] = 0.0f;
+	glUniform4fv(U(u_reflProps), 1, reflProps);
 
 	SetRenderState(VERTEXALPHA, TRUE);
 	SetRenderState(SRCBLEND, BLENDONE);
