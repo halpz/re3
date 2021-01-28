@@ -16,6 +16,13 @@ such that we have a working game at all times.
 - (Optional) If you want to use optional features like Russian language or menu map, copy the files in /gamefiles folder to your game root folder.
 - Move re3.exe to GTA 3 directory and run it.
 
+## Latest standalone executables to download (Put content of selected archive into gamedir)
+
+- [MacOS](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/master/macos-latest-gl3.zip)
+- [Linux](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/master/ubuntu-latest-gl3.zip)
+- [Windows D3D9](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/master/windows-latest-d3d9.zip)
+- [Windows OpenGL](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/master/windows-latest-gl3.zip)
+
 ## Building from Source  
 
 If you gonna use premake, then before starting you may want to point GTA_III_RE_DIR environment variable to GTA3 root folder, if you want executable to be moved there via post-build script.
