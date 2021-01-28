@@ -367,7 +367,7 @@ CWorld::ProcessLineOfSightSectorList(CPtrList &list, const CColLine &line, CColP
 			} else if(e->bUsesCollision)
 				colmodel = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
 
-			if(colmodel && CCollision::ProcessLineOfSight(line, e->GetMatrix(), *colmodel, point, dist,
+			if(colmodel && CCollision::ProcessLineOfSight(line, e->GetMatrix(), *colmodel, point, mindist,
 			                                              ignoreSeeThrough, ignoreShootThrough))
 				entity = e;
 			if(carTyres && ((CVehicle*)e)->SetUpWheelColModel(&tyreCol) && CCollision::ProcessLineOfSight(line, e->GetMatrix(), tyreCol, tyreColPoint, tyreDist, false, ignoreShootThrough)){
@@ -452,10 +452,10 @@ CWorld::ProcessVerticalLineSector(CSector &sector, const CColLine &line, CColPoi
 }
 
 bool
-CWorld::ProcessVerticalLineSectorList(CPtrList &list, const CColLine &line, CColPoint &point, float &mindist,
+CWorld::ProcessVerticalLineSectorList(CPtrList &list, const CColLine &line, CColPoint &point, float &dist,
                                       CEntity *&entity, bool ignoreSeeThrough, CStoredCollPoly *poly)
 {
-	float dist = mindist;
+	float mindist = dist;
 	CPtrNode *node;
 	CEntity *e;
 	CColModel *colmodel;
@@ -466,14 +466,14 @@ CWorld::ProcessVerticalLineSectorList(CPtrList &list, const CColLine &line, CCol
 			e->m_scanCode = GetCurrentScanCode();
 
 			colmodel = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
-			if(CCollision::ProcessVerticalLine(line, e->GetMatrix(), *colmodel, point, dist,
+			if(CCollision::ProcessVerticalLine(line, e->GetMatrix(), *colmodel, point, mindist,
 			                                   ignoreSeeThrough, false, poly))
 				entity = e;
 		}
 	}
 
-	if(dist < mindist) {
-		mindist = dist;
+	if(mindist < dist) {
+		dist = mindist;
 		return true;
 	} else
 		return false;
