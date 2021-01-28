@@ -24,7 +24,7 @@ such that we have a working game at all times.
 - [Linux 64bit](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/master/ubuntu-latest-gl3.zip)
 - [Windows D3D9 64bit](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/master/windows-latest-d3d9.zip)
 - [Windows OpenGL 64bit](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/master/windows-latest-gl3.zip)
-- [Windows D3D9 MSS 32bit]((https://nightly.link/GTAmodding/re3/workflows/re3_msvc_x86/master/re3_Release_win-x86-librw_d3d9-mss.zip)
+- [Windows D3D9 MSS 32bit](https://nightly.link/GTAmodding/re3/workflows/re3_msvc_x86/master/re3_Release_win-x86-librw_d3d9-mss.zip)
 
 ## Building from Source  
 
