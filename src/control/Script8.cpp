@@ -788,6 +788,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 				}
 			}
 		}
+		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
 	default:
