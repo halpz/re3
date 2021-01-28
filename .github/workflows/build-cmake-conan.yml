@@ -112,5 +112,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: "${{ matrix.os }}-${{ matrix.platform }}"
-          path: build/*.tar.xz
+          path: build/*.zip
           if-no-files-found: error
