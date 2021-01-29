@@ -716,7 +716,7 @@ CWaterLevel::GetWaterLevel(float fX, float fY, float fZ, float *pfOutLevel, bool
 
 	uint8 nBlock = aWaterFineBlockList[x][y];
 
-	if ( nBlock == 0x80 )
+	if ( nBlock == NO_WATER )
 		return false;
 
 	ASSERT( pfOutLevel != nil );
@@ -758,7 +758,7 @@ CWaterLevel::GetWaterLevelNoWaves(float fX, float fY, float fZ, float *pfOutLeve
 	
 	uint8 nBlock = aWaterFineBlockList[x][y];
 		
-	if ( nBlock == 0x80 )
+	if ( nBlock == NO_WATER )
 		return false;
 	
 	ASSERT( pfOutLevel != nil );
