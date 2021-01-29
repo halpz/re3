@@ -318,6 +318,7 @@ CWaterLevel::Shutdown()
 
 	_DELETE_TEXTURE(gpWaterTex);
 	_DELETE_TEXTURE(gpWaterEnvTex);
+	_DELETE_TEXTURE(gpWaterWakeTex);
 	_DELETE_TEXTURE(gpWaterEnvBaseTex);
 
 #undef _DELETE_TEXTURE
@@ -714,9 +715,9 @@ CWaterLevel::GetWaterLevel(float fX, float fY, float fZ, float *pfOutLevel, bool
 	if ( y < 0 || y >= MAX_SMALL_SECTORS ) return false;
 #endif
 
-	uint8 nBlock = aWaterFineBlockList[x][y];
+	int8 nBlock = aWaterFineBlockList[x][y];
 
-	if ( nBlock == 0x80 )
+	if ( nBlock == NO_WATER )
 		return false;
 
 	ASSERT( pfOutLevel != nil );
@@ -756,9 +757,9 @@ CWaterLevel::GetWaterLevelNoWaves(float fX, float fY, float fZ, float *pfOutLeve
 	if ( y < 0 || y >= MAX_SMALL_SECTORS ) return false;
 #endif
 	
-	uint8 nBlock = aWaterFineBlockList[x][y];
+	int8 nBlock = aWaterFineBlockList[x][y];
 		
-	if ( nBlock == 0x80 )
+	if ( nBlock == NO_WATER )
 		return false;
 	
 	ASSERT( pfOutLevel != nil );
