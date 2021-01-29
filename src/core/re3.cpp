@@ -408,7 +408,7 @@ bool LoadINISettings()
 #endif
 	ReadIniIfExists("Rendering", "BackfaceCulling", &gBackfaceCulling);
 #ifdef NEW_RENDERER
-	ReadIniIfExists("Rendering", "NewRender", &gbNewRenderer);
+	ReadIniIfExists("Rendering", "NewRenderer", &gbNewRenderer);
 #endif
 
 #ifdef PROPER_SCALING
