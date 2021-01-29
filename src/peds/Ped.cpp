@@ -1545,7 +1545,7 @@ CPed::ProcessBuoyancy(void)
 	CRGBA color(((0.5f * CTimeCycle::GetDirectionalRed() + CTimeCycle::GetAmbientRed()) * 127.5f),
 		((0.5f * CTimeCycle::GetDirectionalBlue() + CTimeCycle::GetAmbientBlue()) * 127.5f),
 		((0.5f * CTimeCycle::GetDirectionalGreen() + CTimeCycle::GetAmbientGreen()) * 127.5f),
-		(CGeneral::GetRandomNumber() % 256 * 48.0f) + 48);
+		CGeneral::GetRandomNumberInRange(48.0f, 96.0f));
 
 	if (bInVehicle)
 		return;

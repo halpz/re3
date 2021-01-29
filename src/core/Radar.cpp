@@ -908,7 +908,7 @@ int32 CRadar::GetNewUniqueBlipIndex(int32 i)
 
 uint32 CRadar::GetRadarTraceColour(uint32 color, bool bright)
 {
-	int32 c;
+	uint32 c;
 	switch (color) {
 	case RADAR_TRACE_RED:
 		if (bright)
