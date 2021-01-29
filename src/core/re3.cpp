@@ -396,6 +396,9 @@ bool LoadINISettings()
 	ReadIniIfExists("CustomPipesValues", "LightmapMult", &CustomPipes::LightmapMult);
 	ReadIniIfExists("CustomPipesValues", "GlossMult", &CustomPipes::GlossMult);
 #endif
+#ifdef NEW_RENDERER
+	ReadIniIfExists("Rendering", "NewRenderer", &gbNewRenderer);
+#endif
 
 #ifdef PROPER_SCALING
 	ReadIniIfExists("Draw", "ProperScaling", &CDraw::ms_bProperScaling);	
@@ -478,6 +481,9 @@ void SaveINISettings()
 	StoreIni("CustomPipesValues", "RimlightMult", CustomPipes::RimlightMult);
 	StoreIni("CustomPipesValues", "LightmapMult", CustomPipes::LightmapMult);
 	StoreIni("CustomPipesValues", "GlossMult", CustomPipes::GlossMult);
+#endif
+#ifdef NEW_RENDERER
+	StoreIni("Rendering", "NewRenderer", gbNewRenderer);
 #endif
 
 #ifdef PROPER_SCALING	
