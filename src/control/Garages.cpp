@@ -1997,7 +1997,11 @@ float CGarages::FindDoorHeightForMI(int32 mi)
 void CGarage::TidyUpGarage()
 {
 	uint32 i = CPools::GetVehiclePool()->GetSize();
+#ifdef FIX_BUGS
 	while (i--) {
+#else
+	while (--i) {
+#endif
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
 		if (pVehicle && (pVehicle->IsCar() || pVehicle->IsBike())) {
 			if (IsPointInsideGarage(pVehicle->GetPosition())) {
@@ -2013,7 +2017,11 @@ void CGarage::TidyUpGarage()
 void CGarage::TidyUpGarageClose()
 {
 	uint32 i = CPools::GetVehiclePool()->GetSize();
+#ifdef FIX_BUGS
 	while (i--) {
+#else
+	while (--i) {
+#endif
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
 		if (!pVehicle)
 			continue;

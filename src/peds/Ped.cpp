@@ -1609,7 +1609,7 @@ CPed::ProcessBuoyancy(void)
 		color.r = (0.5f * CTimeCycle::GetDirectionalRed() + CTimeCycle::GetAmbientRed()) * 127.5f;
 		color.g = (0.5f * CTimeCycle::GetDirectionalBlue() + CTimeCycle::GetAmbientBlue()) * 127.5f;
 		color.b = (0.5f * CTimeCycle::GetDirectionalGreen() + CTimeCycle::GetAmbientGreen()) * 127.5f;
-		color.a = (CGeneral::GetRandomNumber() % 256 * 48.0f) + 48;
+		color.a = CGeneral::GetRandomNumberInRange(48.0f, 96.0f);
 		bIsInWater = true;
 		ApplyMoveForce(buoyancyImpulse);
 		if (!DyingOrDead()) {
