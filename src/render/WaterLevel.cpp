@@ -714,7 +714,7 @@ CWaterLevel::GetWaterLevel(float fX, float fY, float fZ, float *pfOutLevel, bool
 	if ( y < 0 || y >= MAX_SMALL_SECTORS ) return false;
 #endif
 
-	uint8 nBlock = aWaterFineBlockList[x][y];
+	int8 nBlock = aWaterFineBlockList[x][y];
 
 	if ( nBlock == NO_WATER )
 		return false;
@@ -756,7 +756,7 @@ CWaterLevel::GetWaterLevelNoWaves(float fX, float fY, float fZ, float *pfOutLeve
 	if ( y < 0 || y >= MAX_SMALL_SECTORS ) return false;
 #endif
 	
-	uint8 nBlock = aWaterFineBlockList[x][y];
+	int8 nBlock = aWaterFineBlockList[x][y];
 		
 	if ( nBlock == NO_WATER )
 		return false;
