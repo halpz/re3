@@ -591,7 +591,6 @@ bool CGame::ShutDown(void)
 	gPhoneInfo.Shutdown();
 	CWeapon::ShutdownWeapons();
 	CPedType::Shutdown();
-	CMBlur::MotionBlurClose();
 	
 	for (int32 i = 0; i < NUMPLAYERS; i++)
 	{
@@ -617,7 +616,7 @@ bool CGame::ShutDown(void)
 	CStreaming::Shutdown();
 	CTxdStore::GameShutdown();
 	CCollision::Shutdown();
-	CWaterLevel::DestroyWavyAtomic();
+	CWaterLevel::Shutdown();
 	CRubbish::Shutdown();
 	CClouds::Shutdown();
 	CShadows::Shutdown();
@@ -626,6 +625,7 @@ bool CGame::ShutDown(void)
 	CWeaponEffects::Shutdown();
 	CParticle::Shutdown();
 	CPools::ShutDown();
+	CHud::ReInitialise();
 	CTxdStore::RemoveTxdSlot(gameTxdSlot);
 	CMBlur::MotionBlurClose();
 	CdStreamRemoveImages();

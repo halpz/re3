@@ -318,6 +318,7 @@ CWaterLevel::Shutdown()
 
 	_DELETE_TEXTURE(gpWaterTex);
 	_DELETE_TEXTURE(gpWaterEnvTex);
+	_DELETE_TEXTURE(gpWaterWakeTex);
 	_DELETE_TEXTURE(gpWaterEnvBaseTex);
 
 #undef _DELETE_TEXTURE
