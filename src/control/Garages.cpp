@@ -1357,7 +1357,7 @@ bool CGarage::IsAnyOtherCarTouchingGarage(CVehicle * pException)
 	uint32 i = CPools::GetVehiclePool()->GetSize();
 	while (i--) {
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
-		if (!pVehicle || pVehicle == pException)
+		if (!pVehicle || pVehicle == pException || pVehicle->GetStatus() == STATUS_WRECKED)
 			continue;
 		if (!IsEntityTouching3D(pVehicle))
 			continue;
