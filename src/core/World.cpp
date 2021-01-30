@@ -2239,8 +2239,12 @@ CWorld::UseDetonator(CEntity *pEntity)
 {
 	int32 i = CPools::GetVehiclePool()->GetSize();
 	while(--i >= 0) {
+#ifdef FIX_BUGS
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
+#else
 		CAutomobile *pVehicle = (CAutomobile *)CPools::GetVehiclePool()->GetSlot(i);
-		if(pVehicle && !pVehicle->m_vehType && pVehicle->m_bombType == CARBOMB_REMOTE &&
+#endif
+		if(pVehicle && pVehicle->m_bombType == CARBOMB_REMOTE &&
 		   pVehicle->m_pBombRigger == pEntity) {
 			pVehicle->m_bombType = CARBOMB_NONE;
 			pVehicle->m_nBombTimer = 500;
