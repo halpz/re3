@@ -73,7 +73,7 @@ RwRaster *gpWaterEnvBaseRaster;
 RwRaster *gpWaterWakeRaster;
 
 bool _bSeaLife;
-float _fWaterZOffset = 0.5f;
+float _fWaterZOffset = WATER_Z_OFFSET;
 
 #ifdef PC_WATER
 float fEnvScale               = 0.25f;
