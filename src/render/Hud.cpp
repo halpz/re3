@@ -1173,8 +1173,10 @@ void CHud::Draw()
 			CFont::SetCentreOn();
 			CFont::SetPropOn();
 #ifdef CUTSCENE_BORDERS_SWITCH
-			if (!FrontEndMenuManager.m_PrefsCutsceneBorders)
+			if (!FrontEndMenuManager.m_PrefsCutsceneBorders) {
+				CFont::SetDropColor(CRGBA(0, 0, 0, 255));
 				CFont::SetDropShadowPosition(2);
+			}
 			else
 #endif
 				CFont::SetDropShadowPosition(0);

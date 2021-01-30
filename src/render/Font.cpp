@@ -406,16 +406,19 @@ CFont::DrawButton(float x, float y)
 	if (PS2Symbol != BUTTON_NONE) {
 		CRect rect;
 		rect.left = x;
-		rect.top = Details.scaleY + Details.scaleY + y;
-		rect.right = Details.scaleY * 17.0f + x;
-		rect.bottom = Details.scaleY * 19.0f + y;
+		rect.top = RenderState.scaleY + RenderState.scaleY + y;
+		rect.right = RenderState.scaleY * 17.0f + x;
+		rect.bottom = RenderState.scaleY * 19.0f + y;
 
 		int vertexAlphaState;
 		void *raster;
 		RwRenderStateGet(rwRENDERSTATEVERTEXALPHAENABLE, &vertexAlphaState);
 		RwRenderStateGet(rwRENDERSTATETEXTURERASTER, &raster);
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);
-		ButtonSprite[PS2Symbol].Draw(rect, CRGBA(255, 255, 255, Details.color.a));
+		if (RenderState.bIsShadow)
+			ButtonSprite[PS2Symbol].Draw(rect, RenderState.color);
+		else
+			ButtonSprite[PS2Symbol].Draw(rect, CRGBA(255, 255, 255, RenderState.color.a));
 		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, raster);
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)vertexAlphaState);
 	}
@@ -585,7 +588,7 @@ CFont::RenderFontBuffer()
 #ifdef BUTTON_ICONS
 			if(PS2Symbol != BUTTON_NONE) {
 				DrawButton(textPosX, textPosY);
-				textPosX += Details.scaleY * 17.0f;
+				textPosX += RenderState.scaleY * 17.0f;
 				PS2Symbol = BUTTON_NONE;
 			}
 #endif
