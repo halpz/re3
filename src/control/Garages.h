@@ -6,8 +6,6 @@
 
 class CVehicle;
 
-#define GTA_NETWORK
-
 enum eGarageState
 {
 	GS_FULLYCLOSED,
@@ -61,19 +59,34 @@ enum
 {
 	TOTAL_COLLECTCARS_GARAGES = 4,
 	TOTAL_HIDEOUT_GARAGES = 12,
-	TOTAL_COLLECTCARS_CARS = 6
+	TOTAL_COLLECTCARS_CARS = 16
 };
 
 class CStoredCar
 {
+	enum {
+		FLAG_BULLETPROOF = 0x1,
+		FLAG_FIREPROOF = 0x2,
+		FLAG_EXPLOSIONPROOF = 0x4,
+		FLAG_COLLISIONPROOF = 0x8,
+		FLAG_MELEEPROOF = 0x10,
+		FLAG_TIRES_INVULNERABLE = 0x20,
+		FLAG_STRONG = 0x40,
+		FLAG_HEAVY = 0x80,
+		FLAG_PERMANENT_COLOUR = 0x100,
+		FLAG_BOMB = 0x200,
+		FLAG_NOT_DAMAGED_UPSIDEDOWN = 0x400,
+		FLAG_REWARD_VEHICLE = 0x8000
+	};
 	int32 m_nModelIndex;
-	CVector m_vecPos;
-	CVector m_vecAngle;
-	int32 m_bBulletproof : 1;
-	int32 m_bFireproof : 1;
-	int32 m_bExplosionproof : 1;
-	int32 m_bCollisionproof : 1;
-	int32 m_bMeleeproof : 1;
+	float m_fPosX;
+	float m_fPosY;
+	float m_fPosZ;
+	float m_fForwardX;
+	float m_fForwardY;
+	float m_fForwardZ;
+	float m_fTractionMultiplier;
+	int32 m_nFlags;
 	int8 m_nPrimaryColor;
 	int8 m_nSecondaryColor;
 	int8 m_nRadioStation;
@@ -84,7 +97,6 @@ public:
 	void Init() { m_nModelIndex = 0; }
 	void Clear() { m_nModelIndex = 0; }
 	bool HasCar() { return m_nModelIndex != 0; }
-	const CStoredCar &operator=(const CStoredCar& other);
 	void StoreCar(CVehicle*);
 	CVehicle* RestoreCar();
 };

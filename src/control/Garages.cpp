@@ -8,6 +8,7 @@
 #include "DMAudio.h"
 #include "General.h"
 #include "Font.h"
+#include "Frontend.h"
 #include "HandlingMgr.h"
 #include "Hud.h"
 #include "Messages.h"
@@ -15,6 +16,7 @@
 #include "Pad.h"
 #include "Particle.h"
 #include "PlayerPed.h"
+#include "Radar.h"
 #include "Replay.h"
 #include "Script.h"
 #include "Stats.h"
@@ -101,10 +103,10 @@
 
 const int32 gaCarsToCollectInCraigsGarages[TOTAL_COLLECTCARS_GARAGES][TOTAL_COLLECTCARS_CARS] =
 {
-	{ MI_LANDSTAL, MI_IDAHO,    MI_ESPERANT, MI_STALLION, MI_RANCHER, MI_BLISTAC  },
-	{ MI_SABRE,    MI_VIRGO,    MI_SENTINEL, MI_STRETCH,  MI_WASHING, MI_ADMIRAL  },
-	{ MI_CHEETAH,  MI_INFERNUS, MI_BANSHEE,  MI_PHEONIX,  MI_COMET,   MI_STINGER  },
-	{ MI_VOODOO,   MI_CUBAN,    MI_CADDY,    MI_BAGGAGE,  MI_MRWHOOP, MI_PIZZABOY }
+	{ MI_HEARSE, MI_FAGGIO, MI_FREEWAY, MI_SPIDER, MI_MANANA, MI_SHELBY, MI_PONTIAC, MI_ESPRIT, MI_HOTROD, MI_PCJ600, MI_SENTINEL, MI_INFERNUS, MI_BANSHEE, MI_PATRIOT, MI_BFINJECT, MI_LANDSTAL },
+	{ MI_HEARSE, MI_FAGGIO, MI_FREEWAY, MI_SPIDER, MI_MANANA, MI_SHELBY, MI_PONTIAC, MI_ESPRIT, MI_HOTROD, MI_PCJ600, MI_SENTINEL, MI_INFERNUS, MI_BANSHEE, MI_PATRIOT, MI_BFINJECT, MI_LANDSTAL },
+	{ MI_HEARSE, MI_FAGGIO, MI_FREEWAY, MI_SPIDER, MI_MANANA, MI_SHELBY, MI_PONTIAC, MI_ESPRIT, MI_HOTROD, MI_PCJ600, MI_SENTINEL, MI_INFERNUS, MI_BANSHEE, MI_PATRIOT, MI_BFINJECT, MI_LANDSTAL },
+	{ MI_HEARSE, MI_FAGGIO, MI_FREEWAY, MI_SPIDER, MI_MANANA, MI_SHELBY, MI_PONTIAC, MI_ESPRIT, MI_HOTROD, MI_PCJ600, MI_SENTINEL, MI_INFERNUS, MI_BANSHEE, MI_PATRIOT, MI_BFINJECT, MI_LANDSTAL },
 };
 
 const int32 gaCarsToCollectIn60Seconds[] = { MI_CHEETAH, MI_TAXI, MI_ESPERANT, MI_SENTINEL, MI_IDAHO };
@@ -890,7 +892,7 @@ void CGarage::Update()
 				m_pTarget = nil;
 				break;
 			}
-			if (IsEntityEntirelyOutside(FindPlayerPed(), 0.0f)) {
+			if (!IsEntityEntirelyOutside(FindPlayerPed(), 0.0f)) {
 				printf("FIX FOR IE GARAGE TRAPPING PLAYER\n");
 				m_eGarageState = GS_OPENING;
 			}
@@ -1677,23 +1679,20 @@ void CGarage::RemoveCarsBlockingDoorNotInside()
 void CGarages::PrintMessages()
 {
 	if (CTimer::GetTimeInMilliseconds() > MessageStartTime && CTimer::GetTimeInMilliseconds() < MessageEndTime) {
+		// CRadar::m_FadeDownRadar = true; // TODO
 		CFont::DrawFonts();
-		CFont::SetScale(SCREEN_SCALE_X(1.2f), SCREEN_SCALE_Y(1.5f));
+		float x_scale = FrontEndMenuManager.m_PrefsUseWideScreen ? 0.34506f : 0.3834f;
+		CFont::SetScale(PSP_SCREEN_SCALE_X(x_scale), PSP_SCREEN_SCALE_Y(0.71f));
 		CFont::SetPropOn();
 		CFont::SetJustifyOff();
 		CFont::SetBackgroundOff();
-#ifdef FIX_BUGS
-		CFont::SetCentreSize(SCREEN_SCALE_X(DEFAULT_SCREEN_WIDTH - 50));
-#else
-		CFont::SetCentreSize(SCREEN_WIDTH - 50);
-#endif
 		CFont::SetCentreOn();
 		CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 		CFont::SetColor(CRGBA(27, 89, 130, 255));
 		CFont::SetDropShadowPosition(2);
 		CFont::SetDropColor(CRGBA(0, 0, 0, 255));
-
-		float y_offset = SCREEN_SCALE_Y(140.0f);
+		CFont::SetCentreSize(PSP_SCREEN_SCALE_X(454.0f));
+		float y_offset = PSP_SCREEN_SCALE_Y(170.0f);
 
 		if (MessageNumberInString2 >= 0) {
 			CMessages::InsertNumberInString(TheText.Get(MessageIDString), MessageNumberInString, MessageNumberInString2, -1, -1, -1, -1, gUString);
@@ -1714,6 +1713,7 @@ bool CGarages::IsCarSprayable(CVehicle * pVehicle)
 	switch (pVehicle->GetModelIndex()) {
 	case MI_FIRETRUCK:
 	case MI_AMBULAN:
+	case MI_FBICAR:
 	case MI_POLICE:
 	case MI_ENFORCER:
 	case MI_BUS:
@@ -1721,9 +1721,6 @@ bool CGarages::IsCarSprayable(CVehicle * pVehicle)
 	case MI_BARRACKS:
 	case MI_DODO:
 	case MI_COACH:
-#ifndef GTA_PS2
-	case MI_FBIRANCH:
-#endif
 		return false;
 	default:
 		break;
@@ -1773,9 +1770,9 @@ void CGarage::BuildRotatedDoorMatrix(CEntity * pDoor, float fPosition)
 void CGarage::UpdateCrusherAngle()
 {
 	RefreshDoorPointers(false);
-	m_pDoor1->GetMatrix().SetRotateXOnly(TWOPI - m_fDoorPos);
-	m_pDoor1->GetMatrix().UpdateRW();
-	m_pDoor1->UpdateRwFrame();
+	m_pDoor2->GetMatrix().SetRotateXOnly(TWOPI - m_fDoorPos);
+	m_pDoor2->GetMatrix().UpdateRW();
+	m_pDoor2->UpdateRwFrame();
 }
 
 void CGarage::UpdateCrusherShake(float X, float Y)
@@ -1860,6 +1857,7 @@ void CGarages::TriggerMessage(const char* text, int16 num1, uint16 time, int16 n
 		MessageEndTime = CTimer::GetTimeInMilliseconds() - 500 + time;
 	}
 	else {
+		CMessages::AddToPreviousBriefArray(TheText.Get(text), -1, -1, -1, -1, -1, -1, nil);
 		strcpy(MessageIDString, text);
 		MessageStartTime = CTimer::GetTimeInMilliseconds();
 		MessageEndTime = CTimer::GetTimeInMilliseconds() + time;
@@ -1926,6 +1924,8 @@ bool CGarages::HasThisCarBeenCollected(int16 garage, uint8 id)
 bool CGarage::DoesCraigNeedThisCar(int32 mi)
 {
 	int ct = CGarages::GetCarsCollectedIndexForGarageType(m_eGarageType);
+	if (ct != 0)
+		return false;
 	for (int i = 0; i < TOTAL_COLLECTCARS_CARS; i++) {
 		if (mi == gaCarsToCollectInCraigsGarages[ct][i] || (gaCarsToCollectInCraigsGarages[ct][i] == MI_CHEETAH && mi == MI_VICECHEE))
 			return (CGarages::CarTypesCollected[ct] & BIT(i)) == 0;
@@ -1936,8 +1936,10 @@ bool CGarage::DoesCraigNeedThisCar(int32 mi)
 bool CGarage::HasCraigCollectedThisCar(int32 mi)
 {
 	int ct = CGarages::GetCarsCollectedIndexForGarageType(m_eGarageType);
+	if (ct != 0)
+		return 0;
 	for (int i = 0; i < TOTAL_COLLECTCARS_CARS; i++) {
-		if (mi == gaCarsToCollectInCraigsGarages[ct][i] || (gaCarsToCollectInCraigsGarages[ct][i] == MI_CHEETAH && mi == MI_VICECHEE))
+		if (mi == gaCarsToCollectInCraigsGarages[ct][i])
 			return CGarages::CarTypesCollected[ct] & BIT(i);
 	}
 	return false;
@@ -1946,23 +1948,21 @@ bool CGarage::HasCraigCollectedThisCar(int32 mi)
 bool CGarage::MarkThisCarAsCollectedForCraig(int32 mi)
 {
 	int ct = CGarages::GetCarsCollectedIndexForGarageType(m_eGarageType);
+	if (ct != 0)
+		return 0;
 	int index;
 	for (index = 0; index < TOTAL_COLLECTCARS_CARS; index++) {
-		if (mi == gaCarsToCollectInCraigsGarages[ct][index] || (gaCarsToCollectInCraigsGarages[ct][index] == MI_CHEETAH && mi == MI_VICECHEE))
+		if (mi == gaCarsToCollectInCraigsGarages[ct][index])
 			break;
 	}
 	if (index >= TOTAL_COLLECTCARS_CARS)
 		return false;
 	CGarages::CarTypesCollected[ct] |= BIT(index);
-	CWorld::Players[CWorld::PlayerInFocus].m_nMoney += IMPORT_REWARD;
 	for (int i = 0; i < TOTAL_COLLECTCARS_CARS; i++) {
 		if ((CGarages::CarTypesCollected[ct] & BIT(i)) == 0) {
-			CGarages::TriggerMessage("GA_13", -1, 5000, -1); // Delivered like a pro. Complete the list and there'll be a bonus for you.
 			return false;
 		}
 	}
-	CWorld::Players[CWorld::PlayerInFocus].m_nMoney += IMPORT_ALLCARS_REWARD;
-	CGarages::TriggerMessage("GA_14", -1, 5000, -1); // All the cars. NICE! Here's a little something.
 	return true;
 }
 
@@ -2059,8 +2059,27 @@ void CGarage::FindDoorsEntitiesSectorList(CPtrList& list, bool dummy)
 		pEntity->m_scanCode = CWorld::GetCurrentScanCode();
 		if (!pEntity || !CGarages::IsModelIndexADoor(pEntity->GetModelIndex()))
 			continue;
-		if (!IsPointInsideGarage(pEntity->GetPosition(), 2.0f))
+		if (Abs(pEntity->GetPosition().x - GetGarageCenterX()) >= 20.0f ||
+			Abs(pEntity->GetPosition().y - GetGarageCenterY()) >= 20.0f)
 			continue;
+		if (pEntity->GetModelIndex() == MI_CRUSHERBODY) {
+			m_pDoor1 = pEntity;
+			m_bDoor1IsDummy = dummy;
+			if (dummy)
+				m_bDoor1PoolIndex = (CPools::GetDummyPool()->GetIndex((CDummy*)pEntity)) & 0x7F;
+			else
+				m_bDoor1PoolIndex = (CPools::GetObjectPool()->GetIndex((CObject*)pEntity)) & 0x7F;
+			continue;
+		}
+		if (pEntity->GetModelIndex() == MI_CRUSHERLID) {
+			m_pDoor2 = pEntity;
+			m_bDoor2IsDummy = dummy;
+			if (dummy)
+				m_bDoor2PoolIndex = (CPools::GetDummyPool()->GetIndex((CDummy*)pEntity)) & 0x7F;
+			else
+				m_bDoor2PoolIndex = (CPools::GetObjectPool()->GetIndex((CObject*)pEntity)) & 0x7F;
+			continue;
+		}
 		if (!m_pDoor1) {
 			m_pDoor1 = pEntity;
 			m_bDoor1IsDummy = dummy;
@@ -2117,25 +2136,48 @@ bool CGarages::HasCarBeenCrushed(int32 handle)
 void CStoredCar::StoreCar(CVehicle* pVehicle)
 {
 	m_nModelIndex = pVehicle->GetModelIndex();
-	m_vecPos = pVehicle->GetPosition();
-	m_vecAngle = pVehicle->GetForward();
+	m_fPosX = pVehicle->GetPosition().x;
+	m_fPosY = pVehicle->GetPosition().y;
+	m_fPosY = pVehicle->GetPosition().z;
+	m_fForwardX = pVehicle->GetForward().x;
+	m_fForwardY = pVehicle->GetForward().y;
+	m_fForwardZ = pVehicle->GetForward().z;
+	m_fTractionMultiplier = 1.0f;
 	m_nPrimaryColor = pVehicle->m_currentColour1;
 	m_nSecondaryColor = pVehicle->m_currentColour2;
 	m_nRadioStation = pVehicle->m_nRadioStation;
 	m_nVariationA = pVehicle->m_aExtras[0];
 	m_nVariationB = pVehicle->m_aExtras[1];
-	m_bBulletproof = pVehicle->bBulletProof;
-	m_bFireproof = pVehicle->bFireProof;
-	m_bExplosionproof = pVehicle->bExplosionProof;
-	m_bCollisionproof = pVehicle->bCollisionProof;
-	m_bMeleeproof = pVehicle->bMeleeProof;
-	if (pVehicle->IsCar() || pVehicle->IsBike())
-		m_nCarBombType = ((CAutomobile*)pVehicle)->m_bombType; // NB: cast to CAutomobile is original behaviour
+	m_nFlags = 0;
+	if (pVehicle->bRewardVehicle) m_nFlags |= FLAG_REWARD_VEHICLE;
+	if (pVehicle->bBulletProof) m_nFlags |= FLAG_BULLETPROOF;
+	if (pVehicle->bFireProof) m_nFlags |= FLAG_FIREPROOF;
+	if (pVehicle->bExplosionProof) m_nFlags |= FLAG_EXPLOSIONPROOF;
+	if (pVehicle->bCollisionProof) m_nFlags |= FLAG_COLLISIONPROOF;
+	if (pVehicle->bMeleeProof) m_nFlags |= FLAG_MELEEPROOF;
+	if (pVehicle->bTyresDontBurst) m_nFlags |= FLAG_TIRES_INVULNERABLE;
+	if (pVehicle->bTakeLessDamage) m_nFlags |= FLAG_STRONG;
+	if (pVehicle->bIsHeavy) m_nFlags |= FLAG_HEAVY;
+	if (pVehicle->IsCar()) {
+		CAutomobile* pAutomobile = (CAutomobile*)pVehicle;
+		if (pAutomobile->bFixedColour) m_nFlags |= FLAG_PERMANENT_COLOUR;
+		if (pAutomobile->m_bombType) m_nFlags |= FLAG_BOMB;
+		if (pAutomobile->bNotDamagedUpsideDown) m_nFlags |= FLAG_NOT_DAMAGED_UPSIDEDOWN;
+		m_fTractionMultiplier = pAutomobile->m_fTraction;
+	}
+	else if (pVehicle->IsBike()) {
+		CBike* pBike = (CBike*)pVehicle;
+		if (pBike->bFixedColour) m_nFlags |= FLAG_PERMANENT_COLOUR;
+		m_fTractionMultiplier = pBike->m_fTraction;
+	}
 }
 
 CVehicle* CStoredCar::RestoreCar()
 {
 	CStreaming::RequestModel(m_nModelIndex, STREAMFLAGS_DEPENDENCY);
+	uint8 owner = RANDOM_VEHICLE;
+	if (m_nFlags & FLAG_REWARD_VEHICLE)
+		owner = MISSION_VEHICLE;
 	if (!CStreaming::HasModelLoaded(m_nModelIndex))
 		return nil;
 #ifdef FIX_BUGS
@@ -2148,19 +2190,19 @@ CVehicle* CStoredCar::RestoreCar()
 	}
 	CVehicle* pVehicle;
 	if (CModelInfo::IsBoatModel(m_nModelIndex))
-		pVehicle = new CBoat(m_nModelIndex, RANDOM_VEHICLE);
+		pVehicle = new CBoat(m_nModelIndex, owner);
 	else if (CModelInfo::IsBikeModel(m_nModelIndex))
 	{
-		CBike* pBike = new CBike(m_nModelIndex, RANDOM_VEHICLE);
+		CBike* pBike = new CBike(m_nModelIndex, owner);
 		pBike->bIsStanding = true;
 		pVehicle = pBike;
 	}
 	else
-		pVehicle = new CAutomobile(m_nModelIndex, RANDOM_VEHICLE);
-	pVehicle->SetPosition(m_vecPos);
+		pVehicle = new CAutomobile(m_nModelIndex, owner);
+	pVehicle->SetPosition(m_fPosX, m_fPosY, m_fPosZ);
 	pVehicle->SetStatus(STATUS_ABANDONED);
-	pVehicle->GetForward() = m_vecAngle;
-	pVehicle->GetRight() = CVector(m_vecAngle.y, -m_vecAngle.x, 0.0f);
+	pVehicle->GetForward() = CVector(m_fForwardX, m_fForwardY, m_fForwardZ);
+	pVehicle->GetRight() = CVector(m_fForwardY, -m_fForwardX, 0.0f);
 	pVehicle->GetUp() = CVector(0.0f, 0.0f, 1.0f);
 	pVehicle->pDriver = nil;
 	pVehicle->m_currentColour1 = m_nPrimaryColor;
@@ -2177,11 +2219,36 @@ CVehicle* CStoredCar::RestoreCar()
 	}
 	pVehicle->bHasBeenOwnedByPlayer = true;
 	pVehicle->m_nDoorLock = CARLOCK_UNLOCKED;
-	pVehicle->bBulletProof = m_bBulletproof;
-	pVehicle->bFireProof = m_bFireproof;
-	pVehicle->bExplosionProof = m_bExplosionproof;
-	pVehicle->bCollisionProof = m_bCollisionproof;
-	pVehicle->bMeleeProof = m_bMeleeproof;
+	if (m_nFlags & FLAG_REWARD_VEHICLE) pVehicle->bRewardVehicle = true;
+	if (m_nFlags & FLAG_BULLETPROOF) pVehicle->bBulletProof = true;
+	if (m_nFlags & FLAG_FIREPROOF) pVehicle->bFireProof = true;
+	if (m_nFlags & FLAG_EXPLOSIONPROOF) pVehicle->bExplosionProof = true;
+	if (m_nFlags & FLAG_COLLISIONPROOF) pVehicle->bCollisionProof = true;
+	if (m_nFlags & FLAG_MELEEPROOF) pVehicle->bMeleeProof = true;
+	if (m_nFlags & FLAG_TIRES_INVULNERABLE) pVehicle->bTyresDontBurst = true;
+	if (m_nFlags & FLAG_STRONG) pVehicle->bTakeLessDamage = true;
+	if (m_nFlags & FLAG_HEAVY) {
+		pVehicle->bIsHeavy = true;
+		pVehicle->m_fMass = pVehicle->pHandling->GetMass();
+		pVehicle->m_fTurnMass = pVehicle->pHandling->GetTurnMass();
+	}
+	else {
+		pVehicle->bIsHeavy = false;
+		pVehicle->m_fMass = pVehicle->pHandling->GetMass() * 3.0f;
+		pVehicle->m_fTurnMass = pVehicle->pHandling->GetTurnMass() * 5.0f;
+	}
+	if (pVehicle->IsCar()) {
+		CAutomobile* pAutomobile = (CAutomobile*)pVehicle;
+		if (m_nFlags & FLAG_PERMANENT_COLOUR) pAutomobile->bFixedColour = true;
+		if (m_nFlags & FLAG_BOMB) pAutomobile->m_bombType = CARBOMB_TIMED;
+		if (m_nFlags & FLAG_NOT_DAMAGED_UPSIDEDOWN) pAutomobile->bNotDamagedUpsideDown = true;
+		m_fTractionMultiplier = pAutomobile->m_fTraction;
+	}
+	else if (pVehicle->IsBike()) {
+		CBike* pBike = (CBike*)pVehicle;
+		if (m_nFlags & FLAG_PERMANENT_COLOUR) pBike->bFixedColour = true;
+		m_fTractionMultiplier = pBike->m_fTraction;
+	}
 	return pVehicle;
 }
 
@@ -2196,12 +2263,22 @@ void CGarage::StoreAndRemoveCarsForThisHideout(CStoredCar* aCars, int32 nMax)
 		if (!pVehicle)
 			continue;
 		if (IsPointInsideGarage(pVehicle->GetPosition())) {
-			if (pVehicle->VehicleCreatedBy != MISSION_VEHICLE) {
-				if (index < Max(NUM_GARAGE_STORED_CARS, nMax) && !EntityHasASphereWayOutsideGarage(pVehicle, 1.0f))
-					aCars[index++].StoreCar(pVehicle);
+#if defined GTA_PS2 || defined GTA_MOBILE
+			if (pVehicle->GetStatus() == STATUS_WRECKED) {
 				CWorld::Players[CWorld::PlayerInFocus].CancelPlayerEnteringCars(pVehicle);
 				CWorld::Remove(pVehicle);
 				delete pVehicle;
+			}
+			else if (pVehicle->m_bombType == CARBOMB_NONE || pVehicle->bRewardVehicle) // <- probably condition looked different
+#endif
+			{
+				if (pVehicle->VehicleCreatedBy != MISSION_VEHICLE || pVehicle->bRewardVehicle) {
+					if (index < Max(NUM_GARAGE_STORED_CARS, nMax) && !EntityHasASphereWayOutsideGarage(pVehicle, 1.0f))
+						aCars[index++].StoreCar(pVehicle);
+					CWorld::Players[CWorld::PlayerInFocus].CancelPlayerEnteringCars(pVehicle);
+					CWorld::Remove(pVehicle);
+					delete pVehicle;
+				}
 			}
 		}
 	}
@@ -2507,6 +2584,8 @@ void CGarages::SetAllDoorsBackToOriginalHeight()
 		default:
 			aGarages[i].RefreshDoorPointers(true);
 			if (aGarages[i].m_pDoor1) {
+				aGarages[i].m_pDoor1->GetMatrix().GetPosition().x = aGarages[i].m_fDoor1X;
+				aGarages[i].m_pDoor1->GetMatrix().GetPosition().y = aGarages[i].m_fDoor1Y;
 				aGarages[i].m_pDoor1->GetMatrix().GetPosition().z = aGarages[i].m_fDoor1Z;
 				if (aGarages[i].m_pDoor1->IsObject())
 					((CObject*)aGarages[i].m_pDoor1)->m_objectMatrix.GetPosition().z = aGarages[i].m_fDoor1Z;
@@ -2516,6 +2595,8 @@ void CGarages::SetAllDoorsBackToOriginalHeight()
 				aGarages[i].m_pDoor1->UpdateRwFrame();
 			}
 			if (aGarages[i].m_pDoor2) {
+				aGarages[i].m_pDoor2->GetMatrix().GetPosition().x = aGarages[i].m_fDoor2X;
+				aGarages[i].m_pDoor2->GetMatrix().GetPosition().y = aGarages[i].m_fDoor2Y;
 				aGarages[i].m_pDoor2->GetMatrix().GetPosition().z = aGarages[i].m_fDoor2Z;
 				if (aGarages[i].m_pDoor2->IsObject())
 					((CObject*)aGarages[i].m_pDoor2)->m_objectMatrix.GetPosition().z = aGarages[i].m_fDoor2Z;
@@ -2531,7 +2612,7 @@ void CGarages::SetAllDoorsBackToOriginalHeight()
 void CGarages::Save(uint8 * buf, uint32 * size)
 {
 //INITSAVEBUF
-	*size = 7876; // for some reason it's not actual size again
+	*size = 10692; // for some reason it's not actual size again
 	//*size = (6 * sizeof(uint32) + TOTAL_COLLECTCARS_GARAGES * sizeof(*CarTypesCollected) + sizeof(uint32) + TOTAL_HIDEOUT_GARAGES * NUM_GARAGE_STORED_CARS * sizeof(CStoredCar) + NUM_GARAGES * sizeof(CGarage));
 	CloseHideOutGaragesBeforeSave();
 	WriteSaveBuf(buf, NumGarages);
@@ -2553,29 +2634,10 @@ void CGarages::Save(uint8 * buf, uint32 * size)
 //VALIDATESAVEBUF(*size);
 }
 
-const CStoredCar &CStoredCar::operator=(const CStoredCar & other)
-{
-	m_nModelIndex = other.m_nModelIndex;
-	m_vecPos = other.m_vecPos;
-	m_vecAngle = other.m_vecAngle;
-	m_bBulletproof = other.m_bBulletproof;
-	m_bFireproof = other.m_bFireproof;
-	m_bExplosionproof = other.m_bExplosionproof;
-	m_bCollisionproof = other.m_bCollisionproof;
-	m_bMeleeproof = other.m_bMeleeproof;
-	m_nPrimaryColor = other.m_nPrimaryColor;
-	m_nSecondaryColor = other.m_nSecondaryColor;
-	m_nRadioStation = other.m_nRadioStation;
-	m_nVariationA = other.m_nVariationA;
-	m_nVariationB = other.m_nVariationB;
-	m_nCarBombType = other.m_nCarBombType;
-	return *this;
-}
-
 void CGarages::Load(uint8* buf, uint32 size)
 {
 //INITSAVEBUF
-	assert(size = 7876);
+	assert(size == 10692);
 	//assert(size == (6 * sizeof(uint32) + TOTAL_COLLECTCARS_GARAGES * sizeof(*CarTypesCollected) + sizeof(uint32) + TOTAL_HIDEOUT_GARAGES * NUM_GARAGE_STORED_CARS * sizeof(CStoredCar) + NUM_GARAGES * sizeof(CGarage)));
 	CloseHideOutGaragesBeforeSave();
 	NumGarages = ReadSaveBuf<uint32>(buf);
