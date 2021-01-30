@@ -240,17 +240,17 @@ public:
 	uint8 bRestingOnPhysical : 1; // Dont go static cause car is sitting on a physical object that might get removed
 	uint8 bParking : 1;
 	uint8 bCanPark : 1;
-#if (!defined GTA_PS2 || defined FIX_BUGS)
+#if (!defined GTA_PS2 || defined FIX_BUGS) // <- I think this can be moved back to CAutomobile?
 	uint8 m_bombType : 3;
 #endif
 	uint8 bDriverLastFrame : 1;
-
-	uint8 bAllowGarageToStore : 1; // <- many LCS flags before
+	uint8 bRewardVehicle : 1; // 25B_40
 
 	int8 m_numPedsUseItAsCover;
 	uint8 m_nAmmoInClip;    // Used to make the guns on boat do a reload (20 by default)
 	int8 m_nPacManPickupsCarried;
 	uint8 m_nRoadblockType;
+	bool m_bGarageTurnedLightsOff;
 	float m_fHealth;           // 1000.0f = full health. 250.0f = fire. 0 -> explode
 	float m_fEngineEnergy;	// TODO(LCS): better name. it adds up acceleration force, so possibly kinetic energy??
 	uint8 m_nCurrentGear;

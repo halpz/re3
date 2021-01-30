@@ -15,6 +15,7 @@ enum eGarageState
 	GS_OPENEDCONTAINSCAR,
 	GS_CLOSEDCONTAINSCAR,
 	GS_AFTERDROPOFF,
+	GS_WAITINGFORCAR
 };
 
 enum eGarageType
@@ -31,7 +32,7 @@ enum eGarageType
 	GARAGE_COLLECTCARS_2,
 	GARAGE_COLLECTCARS_3,
 	GARAGE_FORCARTOCOMEOUTOF,
-	GARAGE_60SECONDS,
+	GARAGE_CRATE_GARAGE,
 	GARAGE_CRUSHER,
 	GARAGE_MISSION_KEEPCAR,
 	GARAGE_FOR_SCRIPT_TO_OPEN,
@@ -58,19 +59,34 @@ enum
 {
 	TOTAL_COLLECTCARS_GARAGES = 4,
 	TOTAL_HIDEOUT_GARAGES = 12,
-	TOTAL_COLLECTCARS_CARS = 6
+	TOTAL_COLLECTCARS_CARS = 16
 };
 
 class CStoredCar
 {
+	enum {
+		FLAG_BULLETPROOF = 0x1,
+		FLAG_FIREPROOF = 0x2,
+		FLAG_EXPLOSIONPROOF = 0x4,
+		FLAG_COLLISIONPROOF = 0x8,
+		FLAG_MELEEPROOF = 0x10,
+		FLAG_TIRES_INVULNERABLE = 0x20,
+		FLAG_STRONG = 0x40,
+		FLAG_HEAVY = 0x80,
+		FLAG_PERMANENT_COLOUR = 0x100,
+		FLAG_BOMB = 0x200,
+		FLAG_NOT_DAMAGED_UPSIDEDOWN = 0x400,
+		FLAG_REWARD_VEHICLE = 0x8000
+	};
 	int32 m_nModelIndex;
-	CVector m_vecPos;
-	CVector m_vecAngle;
-	int32 m_bBulletproof : 1;
-	int32 m_bFireproof : 1;
-	int32 m_bExplosionproof : 1;
-	int32 m_bCollisionproof : 1;
-	int32 m_bMeleeproof : 1;
+	float m_fPosX;
+	float m_fPosY;
+	float m_fPosZ;
+	float m_fForwardX;
+	float m_fForwardY;
+	float m_fForwardZ;
+	float m_fTractionMultiplier;
+	int32 m_nFlags;
 	int8 m_nPrimaryColor;
 	int8 m_nSecondaryColor;
 	int8 m_nRadioStation;
@@ -81,7 +97,6 @@ public:
 	void Init() { m_nModelIndex = 0; }
 	void Clear() { m_nModelIndex = 0; }
 	bool HasCar() { return m_nModelIndex != 0; }
-	const CStoredCar &operator=(const CStoredCar& other);
 	void StoreCar(CVehicle*);
 	CVehicle* RestoreCar();
 };
@@ -121,6 +136,8 @@ public:
 	float m_fSupX;
 	float m_fInfY;
 	float m_fSupY;
+	uint32 m_nTimeCrusherCraneActivated;
+	CVehicle* m_pSSTargetCar;
 	float m_fDoorPos;
 	float m_fDoorHeight;
 	float m_fDoor1X;
@@ -133,6 +150,19 @@ public:
 	uint8 m_bCollectedCarsState;
 	CVehicle *m_pTarget;
 	CStoredCar m_sStoredCar; // not needed
+#ifdef GTA_NETWORK
+	void* m_pSSVehicle; // some multiplayer vehicle structure, +104 == GetVehiclePointer
+	bool m_bSSGarageAcceptedVehicle;
+#endif
+	bool m_bInitialized;
+#ifdef GTA_NETWORK
+	uint8 m_nSSGarageState;
+	bool m_bSSGarageStateChanging;
+#endif
+	uint32 field_F0;
+	bool m_bLocked;
+	uint32 field_F8;
+	uint32 field_FC;
 
 	void OpenThisGarage();
 	void CloseThisGarage();
@@ -219,6 +249,7 @@ public:
 	static CGarage aGarages[NUM_GARAGES];
 	static CStoredCar aCarsInSafeHouses[TOTAL_HIDEOUT_GARAGES][NUM_GARAGE_STORED_CARS];
 	static bool bCamShouldBeOutisde;
+	static uint8 CrusherRewardMultiplier;
 
 	static void Init(void);
 #ifndef PS2
@@ -297,6 +328,8 @@ public:
 	}
 	static bool IsThisGarageTypeSafehouse(uint8 type) { return FindSafeHouseIndexForGarageType(type) >= 0; }
 
-	static void SetupAnyGaragesForThisIsland(void) {} // TODO(LCS)
+	static bool InitDoorGubbins(uint32, uint8);
+	static void SetupAnyGaragesForThisIsland(void);
+	static void LockGarage(int16, bool);
 
 };

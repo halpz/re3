@@ -134,6 +134,8 @@ CBike::CBike(int32 id, uint8 CreatedBy)
 	bIsOnFire = false;
 	bWheelieCam = false;
 
+	bFixedColour = false; // <- figure out actual place (TODO)
+
 	m_fTireTemperature = 1.0f;
 	m_fBrakeDestabilization = 0.0f;
 	m_fVelocityChangeForAudio = 0;

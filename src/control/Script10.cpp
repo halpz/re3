@@ -7,6 +7,7 @@
 #include "DMAudio.h"
 #include "Frontend.h"
 #include "GameLogic.h"
+#include "Garages.h"
 #include "General.h"
 #include "Hud.h"
 #include "Messages.h"
@@ -286,7 +287,7 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 		return 0;
 	case COMMAND_LOCK_GARAGE:
 		CollectParameters(&m_nIp, 2);
-		// CGarages::LockGarage(GET_INTEGER_PARAM(0), GET_INTEGER_PARAM(1));
+		CGarages::LockGarage(GET_INTEGER_PARAM(0), GET_INTEGER_PARAM(1));
 		return 0;
 	case COMMAND_IS_FINAL_GAME:
 #ifdef FINAL
@@ -391,12 +392,12 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 		CHud::SetHelpMessage(text, false, true); // + false
 		return 0;
 	}
-	case COMMAND_SET_MISSION_CAR_CAN_BE_STORED_IN_GARAGE:
+	case COMMAND_SET_CAR_IS_REWARD:
 	{
 		CollectParameters(&m_nIp, 2);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
 		script_assert(pVehicle);
-		pVehicle->bAllowGarageToStore = (GET_INTEGER_PARAM(1) != 0);
+		pVehicle->bRewardVehicle = (GET_INTEGER_PARAM(1) != 0);
 		return 0;
 	}
 	case COMMAND_FREEZE_ALL_PLAYER_FOLLOWERS:
