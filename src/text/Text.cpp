@@ -9,7 +9,7 @@
 #include "Text.h"
 #include "Timer.h"
 
-static wchar WideErrorString[25];
+wchar WideErrorString[25];
 
 CText TheText;
 

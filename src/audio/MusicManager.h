@@ -18,7 +18,7 @@ class cMusicManager
 public:
 	bool m_bIsInitialised;
 	bool m_bDisabled;
-	bool field_2;
+	bool m_bSetNextStation;
 	uint8 m_nVolumeLatency;
 	uint8 m_nCurrentVolume;
 	uint8 m_nMaxVolume;
@@ -28,25 +28,25 @@ public:
 	bool m_bResetTimers;
 	uint32 m_nResetTime;
 	bool m_bRadioSetByScript;
-	uint8 m_nRadioStation;
+	uint8 m_nRadioStationScript;
 	int32 m_nRadioPosition;
 	uint32 m_nRadioInCar;
 	uint32 m_nFrontendTrack;
 	uint32 m_nPlayingTrack;
 	uint8 m_nUpcomingMusicMode;
 	uint8 m_nMusicMode;
-	bool field_398E;
-	bool field_398F;
-	uint32 m_nStreamedTrack;
-	bool field_3994;
-	bool field_3995;
-	bool field_3996;
-	bool field_3997;
+	bool m_FrontendLoopFlag;
+	bool m_bTrackChangeStarted;
+	uint32 m_nNextTrack;
+	bool m_nNextLoopFlag;
+	bool m_bVerifyNextTrackStartedToPlay;
+	bool m_bGameplayAllowsRadio;
+	bool m_bRadioStreamReady;
 	int8 nFramesSinceCutsceneEnded;
-	bool field_3999;
-	bool field_399A;
+	bool m_bUserResumedGame;
+	bool m_bMusicModeChangeStarted;
 	uint8 m_nMusicModeToBeSet;
-	bool field_399C;
+	bool m_bEarlyFrontendTrack;
 	float aListenTimeArray[NUM_RADIOS];
 	float m_nLastTrackServiceTime;
 

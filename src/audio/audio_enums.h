@@ -14,8 +14,8 @@ enum eRadioStation
 	USERTRACK,
 	NUM_RADIOS = 10,
 	POLICE_RADIO = 10,
+	RADIO_OFF = 10,
 	//TAXI_RADIO,
-	RADIO_OFF,
 };
 
 enum eMusicMode
