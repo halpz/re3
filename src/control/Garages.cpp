@@ -2234,6 +2234,8 @@ void CGarages::SetAllDoorsBackToOriginalHeight()
 		default:
 			aGarages[i].RefreshDoorPointers(true);
 			if (aGarages[i].m_pDoor1) {
+				aGarages[i].m_pDoor1->GetMatrix().GetPosition().x = aGarages[i].m_fDoor1X;
+				aGarages[i].m_pDoor1->GetMatrix().GetPosition().y = aGarages[i].m_fDoor1Y;
 				aGarages[i].m_pDoor1->GetMatrix().GetPosition().z = aGarages[i].m_fDoor1Z;
 				if (aGarages[i].m_pDoor1->IsObject())
 					((CObject*)aGarages[i].m_pDoor1)->m_objectMatrix.GetPosition().z = aGarages[i].m_fDoor1Z;
@@ -2243,6 +2245,8 @@ void CGarages::SetAllDoorsBackToOriginalHeight()
 				aGarages[i].m_pDoor1->UpdateRwFrame();
 			}
 			if (aGarages[i].m_pDoor2) {
+				aGarages[i].m_pDoor2->GetMatrix().GetPosition().x = aGarages[i].m_fDoor2X;
+				aGarages[i].m_pDoor2->GetMatrix().GetPosition().y = aGarages[i].m_fDoor2Y;
 				aGarages[i].m_pDoor2->GetMatrix().GetPosition().z = aGarages[i].m_fDoor2Z;
 				if (aGarages[i].m_pDoor2->IsObject())
 					((CObject*)aGarages[i].m_pDoor2)->m_objectMatrix.GetPosition().z = aGarages[i].m_fDoor2Z;
