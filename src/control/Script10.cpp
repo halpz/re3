@@ -224,8 +224,8 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 		CObject* pObject = CPools::GetObjectPool()->GetAt(GET_INTEGER_PARAM(0));
 		script_assert(pObject);
 		SET_FLOAT_PARAM(1, LimitAngleOnCircle(RADTODEG(Asin(pObject->GetForward().z))));
-		SET_FLOAT_PARAM(2, LimitAngleOnCircle(RADTODEG(CGeneral::GetATanOfXY(pObject->GetForward().x, pObject->GetForward().y))));
-		SET_FLOAT_PARAM(0, LimitAngleOnCircle(RADTODEG(CGeneral::GetATanOfXY(pObject->GetUp().z, pObject->GetRight().z))));
+		SET_FLOAT_PARAM(2, LimitAngleOnCircle(RADTODEG(Atan2(-pObject->GetForward().x, pObject->GetForward().y))));
+		SET_FLOAT_PARAM(0, LimitAngleOnCircle(RADTODEG(Atan2(-pObject->GetRight().z, pObject->GetUp().z))));
 		StoreParameters(&m_nIp, 3);
 		return 0;
 	}
