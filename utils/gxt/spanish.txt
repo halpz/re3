@@ -17384,13 +17384,13 @@ This track contains a sample of "Next Level" as performed by Showbiz & AG. Court
 INICIO
 
 [FEP_STG]
-INICIAR JUEGO
+Iniciar juego
 
 [FEP_OPT]
-OPCIONES
+Opciones
 
 [FEP_QUI]
-SALIR
+Salir
 
 [FET_QG]
 SALIR
@@ -17404,87 +17404,87 @@ SALIR
 OPCIONES
 
 [FET_GRA]
-Config. Gráficos
+Configuración de gráficos
 
 [FET_PS]
-Config. Jugador
+Configuración de hugador
 
 [FET_MIG]
-IZQUIERDA, DERECHA o RUEDA DEL MOUSE: ajustar.
+IZQUIERDA, DERECHA, RUEDA DEL RATÓN PARA AJUSTAR
 
 [FET_HRD]
-Ajustes reiniciados.
+SE HA RESTAURADO LA CONFIGURACIÓN PREDETERMINADA
 
 [FET_APP]
-CLICK IZQ. o ENTER para aplicar cambios.
+APLICAR
 
 { controls }
 
 [FET_CTL]
-CONTROLES
+Configuración de controles
 
 [FET_CTI]
-CONTROLES CLÁSICOS
+Controles clásicos
 
 [FET_STI]
-CONTROLES ESTÁNDAR
+Controles estándar
 
 [FEC_RED]
-REDEFINIR CONTROLES
+Redefinir controles
 
 [FEC_MOUSE]
-CONFIG. MOUSE
+Configuración del ratón
 
 [FET_DEF]
-Reiniciar Ajustes
+Restaurar valores por defecto
 
 { mouse settings }
 
 [FEC_MSH]
-SENSIBILIDAD:
+SENSIBILIDAD DEL RATÓN:
 
 [FEC_IVV]
-INVERTIR VERTICALMENTE:
+INVERTIR VERTICALIDAD RATÓN:
 
 [FET_MST]
-CONDUCC. CON MOUSE:
+CONDUCIR CON EL RATÓN:
 
 { audio }
 
 [FEA_NM3]
-NO HAY ARCHIVOS
+NO HAY ARCHIVOS MP3
 
 [FEA_3DH]
-HARDWARE:
+HARDWARE DE SONIDO:
 
 [FEA_2SP]
-2 Altavoces
+2 altavoces
 
 [FET_DAM]
 MODELADO ACÚSTICO DINÁMICO:
 
 [FEA_4SP]
-Más de 2 Altavoces
+Más de 2 altavoces
 
 [FEA_EAR]
 Auriculares
 
 [FEA_MPB]
-VOL. ARCHIVOS MP3:
+SUBIR VOLUMEN DE MP3:
 
 [FEA_SPK]
-CONFIG. ALTAVOCES:
+CONFIGURACIÓN DE ALTAVOCES:
 
 [FEA_ADP]
-AUTO-DETECTAR HARDWARE
+DETECTAR AUTOMÁTICAMENTE
 
 [FET_RSC]
-Hardware no disponible. Ajustes reiniciados.
+HARDAWARE NO DISPONIBLE. RESTAURADO AJUSTE ORIGINAL
 
 { display }
 
 [FEM_LOD]
-DISTANCIA VISIBLE:
+DISTANCIA DE DIBUJADO:
 
 [FEM_CSB]
 BORDES EN CINEMÁTICAS:
@@ -17495,31 +17495,31 @@ CÁMARA LIBRE:
 { graphics }
 
 [FED_RES]
-RESOLUCIÓN:
+RESOLUCIÓN DE PANTALLA:
 
 [FED_FLS]
-COMPLETA
+PANTALLA COMPLETA
 
 [FED_WND]
 VENTANA
 
 [FEM_VSC]
-SINC. AUDIO/VIDEO:
+SINCRONIZAR IMAGEN:
 
 [FEM_FRM]
 LIMITADOR DE FOTOGRAMAS:
 
 [FED_AAS]
-ANTI-ALIASING:
+SUAVIZADO DE BORDES:
 
 [FEM_2PR]
-PS2 ALPHA TEST:
+ALPHA TEST TIPO PS2:
 
 [FEM_MOB]
 MÓVIL
 
 [FED_MBL]
-DESENFOQ. MOVIMIENTO:
+DESENFOQUE DE MOVIMIENTO:
 
 [FEM_NRM]
 NORMAL
@@ -17528,7 +17528,7 @@ NORMAL
 SIMPLE
 
 [FEM_SCF]
-FORMATO DE PANTALLA:
+FORMATO DE IMAGEN:
 
 [FED_CLF]
 FILTRO DE COLOR:
@@ -17536,27 +17536,27 @@ FILTRO DE COLOR:
 { skin }
 
 [FES_SKN]
-NOMBRE
+NOMBRE DE APARIENCIA
 
 [FES_DAT]
 FECHA
 
 [FES_SET]
-USAR
+Utilizar apariencia
 
 [FET_DSN]
-Predeterminado.bmp
+Apariencia predeterminada del jugador.bmp
 
 { pause menu }
 
 [FET_PAU]
-PAUSA
+MENÚ PAUSA
 
 [FEP_RES]
-CONTINUAR
+Continuar
 
 [FEQ_SRE]
-¿Seguro que quieres salir? Se perderá todo el progreso que hiciste. ¿Continuar?
+¿Seguro que quieres salir? Se perderán todos los progresos desde la última partida guardada. ¿Quieres proceder?
 
 { map }
 
@@ -17564,7 +17564,7 @@ CONTINUAR
 ESTÁS AQUÍ
 
 [FEH_MPH]
-MOUSE o FLECHAS: mover. REPÁG, AVPÁG o RUEDA DEL MOUSE: acercar/alejar. L: referencias. CLICK DCHO: fijar destino.
+RATÓN, CURSORES PARA DESPLAZAR - RE PÁG, AV PÁG, RUEDA RATÓN PARA HACER ZOOM, L - LEYENDA
 
 { control keys }
 
@@ -17572,16 +17572,16 @@ MOUSE o FLECHAS: mover. REPÁG, AVPÁG o RUEDA DEL MOUSE: acercar/alejar. L: ref
 A PIE
 
 [FET_CCR]
-EN VEHÍCULO
+EN COCHE
 
 [FEC_NMN]
 NUM. ~1~
 
 [FEC_ETR]
-ENT
+ENTRAR
 
 [FEC_DOT]
-NUM. 
+NUM. .
 
 [FEC_UPA]
 ARRIBA
@@ -17599,19 +17599,19 @@ RE PÁG
 AV PÁG
 
 [FEC_RTN]
-ENTER
+INTRO
 
 [FEC_NUS]
-NO USADO
+NO UTILIZADO
 
 [FEC_HME]
 INICIO
 
 [FEC_RCT]
-CTRL DCHO
+CTRL DCHO.
 
 [FEC_LSF]
-SHIFT IZQ
+MAYÚS IZQ.
 
 [FEC_DLL]
 SUPR
@@ -17623,85 +17623,85 @@ TAB
 -
 
 [FEC_LCT]
-CTRL IZQ
+CTRL IZQ.
 
 [FEC_MSL]
-CLICK IZQ
+RATÓN IZDO.
 
 [FEC_MWB]
-RUEDA ABAJO
+RUEDA RATÓN ABAJO
 
 [FEC_MWF]
-RUEDA ARRIBA
+RUEDA RATÓN ARRIBA
 
 [FEC_SPC]
 ESPACIO
 
 [FEC_RSF]
-SHIFT DCHO
+MAYÚS DCHA.
 
 [FEC_MSR]
-CLICK DCHO
+RATÓN DCHO.
 
 [FEC_CLK]
 BLOQ MAYÚS
 
 [FEC_MSM]
-CLICK RUEDA
+RATÓN CENTRAL
 
 [FET_CIG]
-RETROCESO: limpiar acción. CLICK IZQ. o ENTER: asignar/agregar.
+RETROCESO: QUITAR - BIR, INTRO: CAMBIAR
 
 [FET_EIG]
-No se puede asignar un botón para ésta acción.
+NO SE PUEDE DEFINIR UN CONTROL PARA ESTA ACCIÓN
 
 [FEC_CMP]
 COMBO: MIRAR I+D
 
 [FEC_LOR]
-Mirar Derecha
+Mirar hacia la derecha
 
 [FEC_LOL]
-Mirar Izquierda
+Mirar hacia la izquierda
 
 [FEC_LBA]
-Mirar Atrás
+Mirar hacia atrás
 
 [FEC_IRT]
-INSERTAR
+INSERT
 
 [FEC_PLS]
-NUM +
+NUM. +
 
 [FEC_QUE]
-?????
+¿¿¿???
 
 [FEC_UNB]
 SIN ASIGNAR
 
 [FEC_ERI]
-¡Error! Una o más acciones no están vinculadas a una tecla o botón. Verifica que todas las acciones estén configuradas.
+¡Error! Una o más acciones de control no están asignadas a una tecla o botón. Comprueba que todas las acciones de control estén asignadas.
 
 [FEC_TFD]
-Torreta+Inclinar Abajo
+Torreta /morro abajo
 
 [FET_RIG]
-Aprieta el botón/tecla que quieras para ésta acción.
+ELIGE UN NUEVO CONTROL PARA ESTA ACCIÓN
 
 [FEC_TFU]
-Torreta+Inclinar Arriba
+Torreta /morro arriba
 
 [FEC_TFR]
-Mirar+Torreta (Dcha.)
+Mirar /Torreta a dcha.
 
 [FEC_TFL]
-Mirar+Torreta (Izqda.)
+Mirar /Torreta a izda.
 
 [FEC_ANS]
 Acción
 
 [FEC_HND]
-Freno de Mano
+Freno de mano
 
 [FEC_SPN]
 Esprintar
@@ -17710,25 +17710,25 @@ Esprintar
 Saltar
 
 [FEC_CMR]
-Cámara
+Cambiar cámara
 
 [FEC_SUB]
-Misión Secundaria
+Misión secundaria
 
 [FEC_HRN]
 Claxon
 
 [FEC_RAD]
-Cambiar Emisora
+Radio
 
 [FEC_EEX]
-Entrar+Salir
+Entrar y salir
 
 [FEC_ZOT]
-Alejar Zoom
+Alejar zoom
 
 [FEC_ZIN]
-Aumentar Zoom
+Acercar zoom
 
 [FEC_RIG]
 Derecha
@@ -17737,96 +17737,96 @@ Derecha
 Izquierda
 
 [FEC_CEN]
-Centrar Cámara
+Centrar cámara
 
 [FEC_BAC]
 Retroceder
 
 [FEC_PTT]
-Objetivo Anterior
+Objetivo anterior
 
 [FEC_FOR]
-Avanzar/Acelerar
+Avanzar
 
 [FEC_PWE]
-Arma Anterior
+Arma anterior
 
 [FEC_NWE]
-Arma Siguiente
+Siguiente arma
 
 [FEC_FIR]
-Atacar/Disparar
+Disparar
 
 [FEC_NTR]
-Objetivo Siguiente
+Siguiente objetivo
 
 [FEC_LDU]
-Mirar Abajo
+Mirar abajo
 
 [FEC_LUD]
-Mirar Arriba
+Mirar arriba
 
 { improvements & fixes }
 
 [FED_HUD]
-MODO INTERFAZ:
+INTERFAZ:
 
 [FED_RDM]
-MAPA E ÍCONOS
+MAPA E ICONOS
 
 [FED_RDB]
-SOLO ÍCONOS
+SOLO ICONOS
 
 [FEA_MUS]
-VOL. DE RADIO:
+VOLUMEN DE RADIO:
 
 [FEA_SFX]
-VOL. DE EFECTOS:
+VOLUMEN DE EFECTOS:
 
 [BUSTED]
-¡ARRESTADO!
+¡TRINCADO!
 
 [FEM_SL1]
-Espacio Libre 1
+Archivo 1 no presente
 
 [FEM_SL2]
-Espacio Libre 2
+Archivo 2 no presente
 
 [FEM_SL3]
-Espacio Libre 3
+Archivo 3 no presente
 
 [FEM_SL4]
-Espacio Libre 4
+Archivo 4 no presente
 
 [FEM_SL5]
-Espacio Libre 5
+Archivo 5 no presente
 
 [FEM_SL6]
-Espacio Libre 6
+Archivo 6 no presente
 
 [FEM_SL7]
-Espacio Libre 7
+Archivo 7 no presente
 
 [FEM_SL8]
-Espacio Libre 8
+Archivo 8 no presente
 
 [FES_DEL]
-BORRAR PARTIDA
+Borrar partida
 
 [FEO_CON]
-Config. Controles
+Configuración de controles
 
 [FEO_AUD]
-Config. Audio
+Configuración de audio
 
 [FEO_DIS]
-Config. Pantalla
+Configuración de pantalla
 
 [FEO_LAN]
-Config. Idioma
+Configuración de idioma
 
 [FEO_PLA]
-Config. Jugador
+Configuración del jugador
 
 [FEB_AUD]
 Audio
@@ -17844,7 +17844,7 @@ AUDIO
 IZQUIERDA
 
 [FEH_SGA]
-NUEVO JUEGO
+Iniciar nueva partida
 
 [DUMMY]
 THIS LABEL NEEDS TO BE HERE !!!
