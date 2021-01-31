@@ -713,7 +713,7 @@ void CTweakVars::Add(CTweakVar *var)
 		TweakVarsListSize = 0;
 	}
 	if(TweakVarsListSize > 63)
-		TweakVarsList = (CTweakVar**) realloc(TweakVarsList, (TweakVarsListSize + 1) * sizeof(*var));
+		TweakVarsList = (CTweakVar**) realloc(TweakVarsList, (TweakVarsListSize + 1) * sizeof(CTweakVar*));
 
 	TweakVarsList[TweakVarsListSize++] = var;
 //	TweakVarsList.push_back(var);
