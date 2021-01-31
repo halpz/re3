@@ -192,6 +192,10 @@ CVisibilityPlugins::InitAlphaEntityList(void)
 bool
 CVisibilityPlugins::InsertEntityIntoSortedList(CEntity *e, float dist)
 {
+#ifdef FIX_BUGS
+	if (!e->m_rwObject) return true;
+#endif
+
 	AlphaObjectInfo item;
 	item.entity = e;
 	item.sort = dist;
