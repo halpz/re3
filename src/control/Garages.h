@@ -130,6 +130,8 @@ public:
 	CVector2D m_vDir1;
 	CVector2D m_vDir2;
 	float m_fSupZ;
+	CVector m_vecSSGaragePos;
+	float m_fSSGarageAngle;
 	float m_fDir1Len;
 	float m_fDir2Len;
 	float m_fInfX;
@@ -150,19 +152,14 @@ public:
 	uint8 m_bCollectedCarsState;
 	CVehicle *m_pTarget;
 	CStoredCar m_sStoredCar; // not needed
-#ifdef GTA_NETWORK
-	void* m_pSSVehicle; // some multiplayer vehicle structure, +104 == GetVehiclePointer
-	bool m_bSSGarageAcceptedVehicle;
-#endif
 	bool m_bInitialized;
 #ifdef GTA_NETWORK
-	uint8 m_nSSGarageState;
-	bool m_bSSGarageStateChanging;
+	void* m_pSSVehicle; // some multiplayer vehicle structure, +104 == GetVehiclePointer
 #endif
-	uint32 field_F0;
+	bool m_bSSGarageAcceptedVehicle;
 	bool m_bLocked;
-	uint32 field_F8;
-	uint32 field_FC;
+	bool m_nSSGarageState;
+	bool m_bSSGarageStateChanging;
 
 	void OpenThisGarage();
 	void CloseThisGarage();
@@ -297,13 +294,13 @@ public:
 	static void CloseHideOutGaragesBeforeSave(void);
 	static int32 CountCarsInHideoutGarage(uint8);
 	static int32 GetBombTypeForGarageType(uint8 type) { return type - GARAGE_BOMBSHOP1 + 1; }
-	static int32 GetCarsCollectedIndexForGarageType(uint8 type)
+	static int32 GetCarsCollectedIndexForGarageType(uint8 type, uint32& total)
 	{
 		switch (type) {
-		case GARAGE_COLLECTCARS_1: return 0;
-		case GARAGE_COLLECTCARS_2: return 1;
-		case GARAGE_COLLECTCARS_3: return 2;
-		case GARAGE_COLLECTCARS_4: return 3;
+		case GARAGE_COLLECTCARS_1: total = TOTAL_COLLECTCARS_CARS; return 0;
+		case GARAGE_COLLECTCARS_2: total = 0; return 1;
+		case GARAGE_COLLECTCARS_3: total = 0; return 2;
+		case GARAGE_COLLECTCARS_4: total = 0; return 3;
 		default: assert(0);
 		}
 		return 0;
@@ -331,5 +328,12 @@ public:
 	static bool InitDoorGubbins(uint32, uint8);
 	static void SetupAnyGaragesForThisIsland(void);
 	static void LockGarage(int16, bool);
+	static int16 AddCrateGarage(CVector, float);
+
+#ifdef GTA_NETWORK
+	static void RemoveAllCrateGarages();
+	static bool HasSSGarageAcceptedVehicle(int16 garage);
+	static void SetVehicleForSSGarage(bool state, int16 garage, void* pVehicle); // void* -> ?
+#endif
 
 };
