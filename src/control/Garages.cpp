@@ -247,8 +247,8 @@ int16 CGarages::AddOne(float X1, float Y1, float Z1, float X2, float Y2, float X
 	pGarage->m_bDeactivated = false;
 	pGarage->m_bResprayHappened = false;
 	pGarage->m_bInitialized = false;
-	pGarage->field_F0 = 0;
-	pGarage->field_FC = 0;
+	pGarage->m_bSSGarageAcceptedVehicle = false;
+	pGarage->m_bSSGarageStateChanging = false;
 	pGarage->m_bInitialized = InitDoorGubbins(NumGarages, type);
 	return NumGarages++;
 }
@@ -1509,6 +1509,10 @@ bool CGarage::IsEntityEntirelyOutside(CEntity * pEntity, float fMargin)
 	return true;
 }
 
+#ifdef GTA_NETWORK
+// some CGarage method (0x134E7C)
+#endif
+
 bool CGarage::IsGarageEmpty()
 {
 	int16 num;
@@ -1903,7 +1907,8 @@ int32 CGarages::QueryCarsCollected(int16 garage)
 
 bool CGarages::HasImportExportGarageCollectedThisCar(int16 garage, int8 car)
 {
-	return CarTypesCollected[GetCarsCollectedIndexForGarageType(aGarages[garage].m_eGarageType)] & (BIT(car));
+	uint32 total;
+	return CarTypesCollected[GetCarsCollectedIndexForGarageType(aGarages[garage].m_eGarageType, total)] & (BIT(car));
 }
 
 bool CGarages::IsGarageOpen(int16 garage)
@@ -1923,10 +1928,9 @@ bool CGarages::HasThisCarBeenCollected(int16 garage, uint8 id)
 
 bool CGarage::DoesCraigNeedThisCar(int32 mi)
 {
-	int ct = CGarages::GetCarsCollectedIndexForGarageType(m_eGarageType);
-	if (ct != 0)
-		return false;
-	for (int i = 0; i < TOTAL_COLLECTCARS_CARS; i++) {
+	uint32 total;
+	int ct = CGarages::GetCarsCollectedIndexForGarageType(m_eGarageType, total);
+	for (int i = 0; i < total; i++) {
 		if (mi == gaCarsToCollectInCraigsGarages[ct][i] || (gaCarsToCollectInCraigsGarages[ct][i] == MI_CHEETAH && mi == MI_VICECHEE))
 			return (CGarages::CarTypesCollected[ct] & BIT(i)) == 0;
 	}
@@ -1935,10 +1939,9 @@ bool CGarage::DoesCraigNeedThisCar(int32 mi)
 
 bool CGarage::HasCraigCollectedThisCar(int32 mi)
 {
-	int ct = CGarages::GetCarsCollectedIndexForGarageType(m_eGarageType);
-	if (ct != 0)
-		return 0;
-	for (int i = 0; i < TOTAL_COLLECTCARS_CARS; i++) {
+	uint32 total;
+	int ct = CGarages::GetCarsCollectedIndexForGarageType(m_eGarageType, total);
+	for (int i = 0; i < total; i++) {
 		if (mi == gaCarsToCollectInCraigsGarages[ct][i])
 			return CGarages::CarTypesCollected[ct] & BIT(i);
 	}
@@ -1947,18 +1950,17 @@ bool CGarage::HasCraigCollectedThisCar(int32 mi)
 
 bool CGarage::MarkThisCarAsCollectedForCraig(int32 mi)
 {
-	int ct = CGarages::GetCarsCollectedIndexForGarageType(m_eGarageType);
-	if (ct != 0)
-		return 0;
+	uint32 total;
+	int ct = CGarages::GetCarsCollectedIndexForGarageType(m_eGarageType, total);
 	int index;
-	for (index = 0; index < TOTAL_COLLECTCARS_CARS; index++) {
+	for (index = 0; index < total; index++) {
 		if (mi == gaCarsToCollectInCraigsGarages[ct][index])
 			break;
 	}
-	if (index >= TOTAL_COLLECTCARS_CARS)
+	if (index >= total)
 		return false;
 	CGarages::CarTypesCollected[ct] |= BIT(index);
-	for (int i = 0; i < TOTAL_COLLECTCARS_CARS; i++) {
+	for (int i = 0; i < total; i++) {
 		if ((CGarages::CarTypesCollected[ct] & BIT(i)) == 0) {
 			return false;
 		}
@@ -2756,3 +2758,109 @@ bool CGarage::IsPlayerEntirelyInsideGarage()
 {
 	return IsEntityEntirelyInside3D(FindPlayerVehicle() ? (CEntity*)FindPlayerVehicle() : (CEntity*)FindPlayerPed(), 0.0f);
 }
+
+int16 CGarages::AddCrateGarage(CVector pos, float angle)
+{
+	CMatrix matrix;
+	matrix.SetUnity();
+	matrix.SetRotateZOnly(DEGTORAD(angle));
+	CStreaming::RequestModel(MI_CRATE_SJL, STREAMFLAGS_DEPENDENCY);
+#ifdef FIX_BUGS
+	CStreaming::LoadAllRequestedModels(false);
+#endif
+	CObject* pCrate = new CObject(MI_CRATE_SJL, false);
+	pCrate->ObjectCreatedBy = MISSION_OBJECT;
+	pCrate->SetPosition(pos);
+	pCrate->SetOrientation(0.0f, 0.0f, DEGTORAD(angle));
+	pCrate->GetMatrix().UpdateRW();
+	pCrate->UpdateRwFrame();
+	pCrate->bAffectedByGravity = false;
+	pCrate->m_phy_flagA08 = true;
+	pCrate->bExplosionProof = true;
+	pCrate->bIsStatic = false;
+
+	CStreaming::RequestModel(MI_DOOR1_SJL, STREAMFLAGS_DEPENDENCY);
+#ifdef FIX_BUGS
+	CStreaming::LoadAllRequestedModels(false);
+#endif
+	CObject* pDoor1 = new CObject(MI_DOOR1_SJL, false);
+	pDoor1->ObjectCreatedBy = MISSION_OBJECT;
+	CVector vDoor1Pos = matrix * CVector(0.0f, 5.64f, 5.168f);
+	pDoor1->SetPosition(vDoor1Pos);
+	pDoor1->SetOrientation(0.0f, 0.0f, DEGTORAD(angle));
+	pDoor1->GetMatrix().UpdateRW();
+	pDoor1->UpdateRwFrame();
+	pDoor1->bAffectedByGravity = false;
+	pDoor1->m_phy_flagA08 = true;
+	pDoor1->bExplosionProof = true;
+	pDoor1->bIsStatic = false;
+
+	CStreaming::RequestModel(MI_DOOR2_SJL, STREAMFLAGS_DEPENDENCY);
+#ifdef FIX_BUGS
+	CStreaming::LoadAllRequestedModels(false);
+#endif
+	CObject* pDoor2 = new CObject(MI_DOOR2_SJL, false);
+	pDoor2->ObjectCreatedBy = MISSION_OBJECT;
+	CVector vDoor2Pos = matrix * CVector(0.0f, -5.64f, 5.168f);
+	pDoor2->SetPosition(vDoor2Pos);
+	pDoor2->SetOrientation(0.0f, 0.0f, DEGTORAD(angle));
+	pDoor2->GetMatrix().UpdateRW();
+	pDoor2->UpdateRwFrame();
+	pDoor2->bAffectedByGravity = false;
+	pDoor2->m_phy_flagA08 = true;
+	pDoor2->bExplosionProof = true;
+	pDoor2->bIsStatic = false;
+
+	CWorld::Add(pCrate);
+	CWorld::Add(pDoor1);
+	CWorld::Add(pDoor2);
+
+	CVector corner = matrix * CVector(-3.0f, -3.5f, -0.5f) + pos;
+	CVector xplane = matrix * CVector(0.0f, 2.0f, 0.0f) + pos;
+	CVector yplane = matrix * CVector(0.0f, 0.0f, 0.0f) + pos;
+
+	printf("Posttrans Corner[%f][%f][%f] XPlane[%f][%f][%f] YPlane[%f][%f][%f]",
+		corner.x, corner.y, corner.z, xplane.x, xplane.y, xplane.z, yplane.x, yplane.y, yplane.z);
+	int16 index = AddOne(corner.x, corner.y, corner.z, xplane.x, xplane.y, yplane.x, yplane.y, pos.z + 4.0f, GARAGE_CRATE_GARAGE, 0);
+	SetLeaveCameraForThisGarage(index);
+	CGarage* pGarage = &aGarages[index];
+	pGarage->m_bSSGarageAcceptedVehicle = false;
+	pGarage->m_bSSGarageStateChanging = false;
+	pGarage->m_vecSSGaragePos = pos;
+	pGarage->m_fSSGarageAngle = angle;
+	return index;
+}
+
+#ifdef GTA_NETWORK
+void CGarages::RemoveAllCrateGarages()
+{
+	for (uint32 i = 0; i < NUM_GARAGES; i++) {
+		CGarage* pGarage = &aGarages[i];
+		if (pGarage->m_eGarageType == GARAGE_CRATE_GARAGE) {
+			pGarage->m_eGarageType = GARAGE_NONE;
+			pGarage->m_bSSGarageStateChanging = false;
+			pGarage->m_bSSGarageAcceptedVehicle = false;
+			pGarage->m_pSSVehicle = nil;
+			--NumGarages;
+		}
+	}
+}
+
+bool CGarages::HasSSGarageAcceptedVehicle(int16 garage)
+{
+	return aGarages[garage].m_bSSGarageAcceptedVehicle;
+}
+
+void CGarages::SetVehicleForSSGarage(bool state, int16 garage, void* pVehicle)
+{
+	CGarage* pGarage = &aGarages[garage];
+	pGarage->m_pSSVehicle = pVehicle;
+	pGarage->m_nSSGarageState = state;
+	pGarage->m_bSSGarageAcceptedVehicle = false;
+	if (!pVehicle) {
+		if (pGarage->m_pSSTargetCar)
+			pGarage->m_pSSTargetCar->CleanUpOldReference((CEntity**)pGarage->m_pSSTargetCar);
+		pGarage->m_pSSTargetCar = nil;
+	}
+}
+#endif
