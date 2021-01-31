@@ -251,9 +251,6 @@ GenericLoad()
 	uint8 *buf;
 	int32 file;
 	uint32 size;
-#ifdef FIX_BUGS
-	size = 0;
-#endif
 #ifdef MISSION_REPLAY
 	int8 qs;
 #endif

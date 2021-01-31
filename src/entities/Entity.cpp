@@ -504,9 +504,6 @@ CEntity::Add(void)
 			case ENTITY_TYPE_DUMMY:
 				list = &s->m_lists[ENTITYLIST_DUMMIES_OVERLAP];
 				break;
-#ifdef FIX_BUGS
-			default: debug("This shouldn't happen"); return;
-#endif
 			}
 			list->InsertItem(this);
 		}
@@ -567,9 +564,6 @@ CEntity::Remove(void)
 			case ENTITY_TYPE_DUMMY:
 				list = &s->m_lists[ENTITYLIST_DUMMIES_OVERLAP];
 				break;
-#ifdef FIX_BUGS
-			default: debug("This shouldn't happen"); return;
-#endif
 			}
 			list->RemoveItem(this);
 		}

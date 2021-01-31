@@ -100,12 +100,7 @@ void CCarGenerator::DoInternalProcessing()
 			// So game crashes if it's bike :D
 			if (((CVehicleModelInfo*)CModelInfo::GetModelInfo(m_nModelIndex))->m_vehicleType != VEHICLE_TYPE_BIKE)
 				pCar = new CAutomobile(m_nModelIndex, PARKED_VEHICLE);
-#ifdef FIX_BUGS
-			else {
-				debug("This shouldn't happen");
-				return;
-			}
-#endif
+
 			pCar->SetIsStatic(false);
 			pCar->bEngineOn = false;
 			pos.z += pCar->GetDistanceFromCentreOfMassToBaseOfModel();

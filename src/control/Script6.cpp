@@ -971,10 +971,8 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 					pClosestEntity = apEntities[i];
 				}
 			}
-#ifdef FIX_BUGS
-			if(pClosestEntity)
-#endif
-				if(pClosestEntity->IsDummy()) pClosestEntity = nil;
+			if (pClosestEntity->IsDummy())
+				pClosestEntity = nil;
 		}
 		if (pClosestEntity) {
 			script_assert(pClosestEntity->IsObject());

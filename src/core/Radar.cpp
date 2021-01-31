@@ -404,9 +404,6 @@ void CRadar::Draw3dMarkers()
 			case BLIP_CHAR:
 			{
 				CEntity *entity = CPools::GetPedPool()->GetAt(ms_RadarTrace[i].m_nEntityHandle);
-#ifdef FIX_BUGS
-				if(!entity) break;
-#endif
 				if (entity != nil) {
 					if (((CPed*)entity)->InVehicle())
 						entity = ((CPed * )entity)->m_pMyVehicle;

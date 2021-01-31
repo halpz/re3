@@ -814,9 +814,6 @@ void
 CPickups::RenderPickUpText()
 {
 	wchar *strToPrint;
-#ifdef FIX_BUGS
-	strToPrint = nil;
-#endif
 	for (int32 i = 0; i < NumMessages; i++) {
 		if (aMessages[i].m_quantity <= 39) {
 			switch (aMessages[i].m_quantity) // could use some enum maybe
@@ -1288,11 +1285,7 @@ CPacManPickups::GeneratePMPickUpsForRace(int32 race)
 	int i = 0;
 
 	if (race == 0) pPos = aRacePoints1; // there's only one available
-
-	if(!pPos) {
-		debug("This shouldn't happen");
-		return;
-	}
+	assert(pPos != nil);
 
 	while (!pPos->IsZero()) {
 		while (aPMPickUps[i].m_eType != PACMAN_NONE)

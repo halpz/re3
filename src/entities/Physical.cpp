@@ -126,8 +126,6 @@ CPhysical::Add(void)
 				break;
 			default:
 				assert(0);
-				debug("This shouldn't happen");
-				return;
 			}
 			CPtrNode *node = list->InsertItem(this);
 			assert(node);
@@ -193,20 +191,17 @@ CPhysical::RemoveAndAdd(void)
 				list = &s->m_lists[ENTITYLIST_OBJECTS_OVERLAP];
 				break;
 			}
-#ifdef FIX_BUGS
-			if(list)
-#endif
-				if(next) {
-					// If we still have old nodes, use them
-					next->list->RemoveNode(next->listnode);
-					list->InsertNode(next->listnode);
-					next->list = list;
-					next->sector = s;
-					next = next->next;
-				} else {
-					CPtrNode *node = list->InsertItem(this);
-					m_entryInfoList.InsertItem(list, node, s);
-				}
+			if(next){
+				// If we still have old nodes, use them
+				next->list->RemoveNode(next->listnode);
+				list->InsertNode(next->listnode);
+				next->list = list;
+				next->sector = s;
+				next = next->next;
+			}else{
+				CPtrNode *node = list->InsertItem(this);
+				m_entryInfoList.InsertItem(list, node, s);
+			}
 		}
 
 	// Remove old nodes we no longer need

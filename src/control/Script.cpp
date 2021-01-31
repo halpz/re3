@@ -3439,13 +3439,8 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		}
 		else {
 			CVehicle* car;
-			if(!CModelInfo::IsBikeModel(ScriptParams[0])) car = new CAutomobile(ScriptParams[0], MISSION_VEHICLE);
-#ifdef FIX_BUGS
-			else {
-				debug("This shouldn't happen");
-				return 0;
-			}
-#endif
+			if (!CModelInfo::IsBikeModel(ScriptParams[0]))
+				car = new CAutomobile(ScriptParams[0], MISSION_VEHICLE);
 			CVector pos = *(CVector*)&ScriptParams[1];
 			if (pos.z <= MAP_Z_LOW_LIMIT)
 				pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);

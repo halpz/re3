@@ -745,10 +745,7 @@ CWaterLevel::RenderWater()
 						if ( fHugeSectorDistToCamSqr >= SQR(500.0f) /*fHugeSectorNearDist*/ )
 						{
 							float fZ;
-#ifdef FIX_BUGS
-							fZ = 0.f;
-#endif
-
+	
 							if ( aWaterBlockList[2*x+0][2*y+0] >= 0 )
 								fZ = ms_aWaterZs[ aWaterBlockList[2*x+0][2*y+0] ];
 	
