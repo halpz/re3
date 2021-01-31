@@ -163,13 +163,13 @@ cMusicManager::DisplayRadioStationName()
 		case CHATTERBOX: string = TheText.Get("FEA_FM8"); break;
 		case USERTRACK: string = TheText.Get("FEA_FM9"); break;
 #ifdef RADIO_OFF_TEXT
-		case RADIO_OFF: case POLICE_RADIO: string = TheText.Get("FEM_OFF"); break;
+		case RADIO_OFF: case POLICE_RADIO: string = TheText.Get("FEA_FMN"); break;
 #endif
 		default: return;
 		};
 
 #ifdef RADIO_OFF_TEXT
-		if(pRetune == USERTRACK && !SampleManager.IsMP3RadioChannelAvailable()) { string = TheText.Get("FEM_OFF"); }
+		if(pRetune == USERTRACK && !SampleManager.IsMP3RadioChannelAvailable()) { string = TheText.Get("FEA_FMN"); }
 #else
 		if(pRetune > CHATTERBOX && !SampleManager.IsMP3RadioChannelAvailable()) { return; }
 #endif

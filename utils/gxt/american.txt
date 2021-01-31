@@ -8070,6 +8070,9 @@ INVERT PAD VERTICALLY
 [FEM_TWP]
 Toggle Waypoint
 
+[FEA_FMN]
+RADIO OFF
+
 { end of file }
 
 [DUMMY]
