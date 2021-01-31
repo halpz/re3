@@ -144,8 +144,11 @@ INITSAVEBUF
 			pVehicle = new(slot) CBoat(model, RANDOM_VEHICLE);
 		else if (type == VEHICLE_TYPE_CAR)
 			pVehicle = new(slot) CAutomobile(model, RANDOM_VEHICLE);
-		else
+		else {
 			assert(0);
+			debug("This shouldn't happen");
+			return;
+		}
 		--CCarCtrl::NumRandomCars;
 		pVehicle->Load(buf);
 		CWorld::Add(pVehicle);
@@ -518,8 +521,11 @@ INITSAVEBUF
 
 		if (pedtype == PEDTYPE_PLAYER1)
 			pPed = new(ref) CPlayerPed();
-		else
+		else {
 			assert(0);
+			debug("This shouldn't happen");
+			return;
+		}
 
 		pPed->Load(buf);
 		if (pedtype == PEDTYPE_PLAYER1) {

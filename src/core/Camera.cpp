@@ -1699,10 +1699,12 @@ CCamera::CamControl(void)
 		Cams[ActiveCam].CamTargetEntity = pTargetEntity;
 
 	// Ped visibility
-	if((Cams[ActiveCam].Mode == CCam::MODE_1STPERSON ||
-	    Cams[ActiveCam].Mode == CCam::MODE_SNIPER ||
-	    Cams[ActiveCam].Mode == CCam::MODE_M16_1STPERSON ||
-	    Cams[ActiveCam].Mode == CCam::MODE_ROCKETLAUNCHER) && pTargetEntity->IsPed() ||
+	if(((Cams[ActiveCam].Mode == CCam::MODE_1STPERSON || Cams[ActiveCam].Mode == CCam::MODE_SNIPER || Cams[ActiveCam].Mode == CCam::MODE_M16_1STPERSON ||
+	    Cams[ActiveCam].Mode == CCam::MODE_ROCKETLAUNCHER) &&
+#ifdef FIX_BUGS
+	       pTargetEntity &&
+#endif
+	       pTargetEntity->IsPed()) ||
 	   Cams[ActiveCam].Mode == CCam::MODE_FLYBY)
 		FindPlayerPed()->bIsVisible = false;
 	else
@@ -1754,14 +1756,15 @@ CCamera::UpdateTargetEntity(void)
 		   PLAYER->m_pMyVehicle &&
 		   PLAYER->m_pMyVehicle->CanPedOpenLocks(PLAYER))
 			cantOpen = false;
-
-		if(PLAYER->GetPedState() == PED_ENTER_CAR && !cantOpen){
-			if(!enteringCar && CarZoomIndicator != CAM_ZOOM_1STPRS){
-				pTargetEntity = PLAYER->m_pMyVehicle;
-				if(PLAYER->m_pMyVehicle == nil)
-					pTargetEntity = PLAYER;
+#ifdef FIX_BUGS
+		if(PLAYER)
+#endif
+			if(PLAYER->GetPedState() == PED_ENTER_CAR && !cantOpen) {
+				if(!enteringCar && CarZoomIndicator != CAM_ZOOM_1STPRS) {
+					pTargetEntity = PLAYER->m_pMyVehicle;
+					if(PLAYER->m_pMyVehicle == nil) pTargetEntity = PLAYER;
+				}
 			}
-		}
 
 		if((PLAYER->GetPedState() == PED_CARJACK || PLAYER->GetPedState() == PED_OPEN_DOOR) && !cantOpen){
 			if(!enteringCar && CarZoomIndicator != CAM_ZOOM_1STPRS)

@@ -2244,6 +2244,9 @@ CPed::PedAnimAlignCB(CAnimBlendAssociation *animAssoc, void *arg)
 			enterDoor = DOOR_REAR_LEFT;
 			break;
 		default:
+#ifdef FIX_BUGS
+			enterDoor = DOOR_BONNET;
+#endif
 			break;
 	}
 
@@ -2356,7 +2359,7 @@ CPed::PedAnimDoorOpenCB(CAnimBlendAssociation* animAssoc, void* arg)
 		case CAR_DOOR_RR: door = DOOR_REAR_RIGHT; pedInSeat = veh->pPassengers[2]; break;
 		case CAR_DOOR_LF: door = DOOR_FRONT_LEFT; pedInSeat = veh->pDriver; break;
 		case CAR_DOOR_LR: door = DOOR_REAR_LEFT; pedInSeat = veh->pPassengers[1]; break;
-		default: assert(0);
+		default: assert(0); debug("This shouldn't happen"); return;
 	}
 
 	if (ped->m_fHealth == 0.0f || CPad::GetPad(0)->ArePlayerControlsDisabled() && pedInSeat && pedInSeat->IsPlayer()) {
@@ -2554,6 +2557,9 @@ CPed::PedAnimPullPedOutCB(CAnimBlendAssociation* animAssoc, void* arg)
 				case PEDTYPE_PLAYER4:
 					padNo = 3;
 					break;
+				default:
+					padNo = 0;
+					break;
 			}
 			CPad *pad = CPad::GetPad(padNo);
 
@@ -2657,6 +2663,9 @@ CPed::PedAnimGetInCB(CAnimBlendAssociation *animAssoc, void *arg)
 			enterDoor = DOOR_REAR_LEFT;
 			break;
 		default:
+#ifdef FIX_BUGS
+			enterDoor = DOOR_BONNET;
+#endif
 			break;
 	}
 	if (!veh->IsDoorMissing(enterDoor)) {
@@ -2752,12 +2761,15 @@ CPed::PedAnimDoorCloseCB(CAnimBlendAssociation *animAssoc, void *arg)
 			veh->ProcessOpenDoor(ped->m_vehDoor, ANIM_CAR_CLOSEDOOR_LHS, 1.0f);
 
 		eDoors door;
-		switch (ped->m_vehDoor) {
-			case CAR_DOOR_RF: door = DOOR_FRONT_RIGHT; break;
-			case CAR_DOOR_RR: door = DOOR_REAR_RIGHT; break;
-			case CAR_DOOR_LF: door = DOOR_FRONT_LEFT; break;
-			case CAR_DOOR_LR: door = DOOR_REAR_LEFT; break;
-			default: assert(0);
+		switch(ped->m_vehDoor) {
+		case CAR_DOOR_RF: door = DOOR_FRONT_RIGHT; break;
+		case CAR_DOOR_RR: door = DOOR_REAR_RIGHT; break;
+		case CAR_DOOR_LF: door = DOOR_FRONT_LEFT; break;
+		case CAR_DOOR_LR: door = DOOR_REAR_LEFT; break;
+		default:
+			assert(0);
+			debug("This shouldn't happen");
+			return;
 		}
 
 		if (veh->Damage.GetDoorStatus(door) == DOOR_STATUS_SWINGING)
@@ -2926,6 +2938,9 @@ CPed::PedAnimStepOutCarCB(CAnimBlendAssociation* animAssoc, void* arg)
 			door = DOOR_REAR_LEFT;
 			break;
 		default:
+#ifdef FIX_BUGS
+			door = DOOR_BONNET;
+#endif
 			break;
 	}
 	bool closeDoor = !veh->IsDoorMissing(door);
@@ -2946,6 +2961,12 @@ CPed::PedAnimStepOutCarCB(CAnimBlendAssociation* animAssoc, void* arg)
 				break;
 			case PEDTYPE_PLAYER4:
 				padNo = 3;
+				break;
+			default:
+#ifdef FIX_BUGS
+				padNo = 0;
+				debug("This shouldn't happen");
+#endif
 				break;
 		}
 		CPad* pad = CPad::GetPad(padNo);
@@ -3285,6 +3306,9 @@ CPed::SetCarJack(CVehicle* car)
 {
 	uint8 doorFlag;
 	eDoors door;
+#ifdef FIX_BUGS
+	door = DOOR_BONNET;
+#endif
 	CPed *pedInSeat = nil;
 
 	if (car->IsBoat())
@@ -3440,8 +3464,10 @@ CPed::BeingDraggedFromCar(void)
 
 		if (!dontRunAnim)
 			m_pVehicleAnim = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, enterAnim);
-
-		m_pVehicleAnim->SetFinishCallback(PedSetDraggedOutCarCB, this);
+#ifdef FIX_BUGS
+		if(m_pVehicleAnim)
+#endif
+			m_pVehicleAnim->SetFinishCallback(PedSetDraggedOutCarCB, this);
 		lineUpType = LINE_UP_TO_CAR_START;
 	} else if (m_pVehicleAnim->currentTime <= 1.4f) {
 		m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);

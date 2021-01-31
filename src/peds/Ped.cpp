@@ -4348,13 +4348,15 @@ CPed::PedSetDraggedOutCarCB(CAnimBlendAssociation *dragAssoc, void *arg)
 	}
 #endif
 
-	if (quickJackedAssoc) {
-		dragAssoc->SetDeleteCallback(PedSetQuickDraggedOutCarPositionCB, ped);
-	} else {
-		dragAssoc->SetDeleteCallback(PedSetDraggedOutCarPositionCB, ped);
-		if (ped->CanSetPedState())
-			CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_GETUP1, 1000.0f);
-	}
+#ifdef FIX_BUGS
+	if(dragAssoc)
+#endif
+		if(quickJackedAssoc) {
+			dragAssoc->SetDeleteCallback(PedSetQuickDraggedOutCarPositionCB, ped);
+		} else {
+			dragAssoc->SetDeleteCallback(PedSetDraggedOutCarPositionCB, ped);
+			if(ped->CanSetPedState()) CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_GETUP1, 1000.0f);
+		}
 
 	ped->ReplaceWeaponWhenExitingVehicle();
 

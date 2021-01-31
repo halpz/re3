@@ -1090,6 +1090,9 @@ CFileLoader::LoadObject(const char *line)
 	char model[24], txd[24];
 	float dist[3];
 	uint32 flags;
+#ifdef FIX_BUGS
+	flags = 0;
+#endif
 	int damaged;
 	CSimpleModelInfo *mi;
 
@@ -1186,6 +1189,9 @@ CFileLoader::LoadTimeObject(const char *line)
 	char model[24], txd[24];
 	float dist[3];
 	uint32 flags;
+#ifdef FIX_BUGS
+	flags = 0;
+#endif
 	int timeOn, timeOff;
 	int damaged;
 	CTimeModelInfo *mi, *other;
@@ -1790,6 +1796,9 @@ CFileLoader::ReloadObject(const char *line)
 	char model[24], txd[24];
 	float dist[3];
 	uint32 flags;
+#ifdef FIX_BUGS
+	flags = 0;
+#endif
 	CSimpleModelInfo *mi;
 
 	if(sscanf(line, "%d %s %s %d", &id, model, txd, &numObjs) != 4)

@@ -1817,8 +1817,13 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		if (model == -1)
 			return 0;
 		CVehicle* car;
-		if (!CModelInfo::IsBikeModel(model))
-			car = new CAutomobile(model, RANDOM_VEHICLE);
+		if(!CModelInfo::IsBikeModel(model)) car = new CAutomobile(model, RANDOM_VEHICLE);
+#ifdef FIX_BUGS
+		else {
+			debug("This shouldn't happen");
+			return 0;
+		}
+#endif
 		CVector pos = *(CVector*)&ScriptParams[0];
 		pos.z += car->GetDistanceFromCentreOfMassToBaseOfModel();
 		car->SetPosition(pos);
