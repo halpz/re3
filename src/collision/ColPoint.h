@@ -3,10 +3,10 @@
 struct CColPoint
 {
 	CVector point;
-	int pad1;
+	int pad1;	// this is stupid
 	// the surface normal on the surface of point
 	CVector normal;
-	int pad2;
+	//int pad2;
 	uint8 surfaceA;
 	uint8 pieceA;
 	uint8 surfaceB;

@@ -62,6 +62,7 @@ struct CColTrianglePlane
 	}
 #endif
 #else
+	// TODO(LCS): LCS actually uses CompressedVector too
 	CVector normal;
 	float dist;
 	uint8 dir;

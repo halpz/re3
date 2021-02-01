@@ -24,6 +24,10 @@
 #include "Camera.h"
 #include "ColStore.h"
 
+// gotta figure out how they handled CSphere exactly
+// so using this to remind me to look into it again.
+#define CVECTORHACK(rwv3d) CVector(rwv3d)
+
 #ifdef VU_COLLISION
 #include "VuCollision.h"
 
@@ -391,7 +395,7 @@ CCollision::TestLineSphere(const CColLine &line, const CColSphere &sph)
 	// The length of the tangent would be this: Sqrt((c-p0)^2 - r^2).
 	// Negative if p0 is inside the sphere! This breaks the test!
 	float tansq = 4.0f * linesq *
-		(sph.center.MagnitudeSqr() - 2.0f*DotProduct(sph.center, line.p0) + line.p0.MagnitudeSqr() - sph.radius*sph.radius);
+		(CVECTORHACK(sph.center).MagnitudeSqr() - 2.0f*DotProduct(sph.center, line.p0) + line.p0.MagnitudeSqr() - sph.radius*sph.radius);
 	float diffsq = projline*projline - tansq;
 	// if diffsq < 0 that means the line is a passant, so no intersection
 	if(diffsq < 0.0f)
@@ -470,9 +474,9 @@ CCollision::TestSphereTriangle(const CColSphere &sphere,
 	case 2:
 		// closest to an edge
 		// looks like original game as DistToLine manually inlined
-		if(!insideAB) dist = DistToLine(&va, &vb, &sphere.center);
-		else if(!insideAC) dist = DistToLine(&va, &vc, &sphere.center);
-		else if(!insideBC) dist = DistToLine(&vb, &vc, &sphere.center);
+		if(!insideAB) dist = DistToLine(&va, &vb, &CVECTORHACK(sphere.center));
+		else if(!insideAC) dist = DistToLine(&va, &vc, &CVECTORHACK(sphere.center));
+		else if(!insideBC) dist = DistToLine(&vb, &vc, &CVECTORHACK(sphere.center));
 		else assert(0);
 		break;
 	case 3:
@@ -1279,9 +1283,9 @@ CCollision::ProcessSphereTriangle(const CColSphere &sphere,
 	case 2:
 		// closest to an edge
 		// looks like original game as DistToLine manually inlined
-		if(!insideAB) dist = DistToLine(&va, &vb, &sphere.center, p);
-		else if(!insideAC) dist = DistToLine(&va, &vc, &sphere.center, p);
-		else if(!insideBC) dist = DistToLine(&vb, &vc, &sphere.center, p);
+		if(!insideAB) dist = DistToLine(&va, &vb, &CVECTORHACK(sphere.center), p);
+		else if(!insideAC) dist = DistToLine(&va, &vc, &CVECTORHACK(sphere.center), p);
+		else if(!insideBC) dist = DistToLine(&vb, &vc, &CVECTORHACK(sphere.center), p);
 		else assert(0);
 		break;
 	case 3:
