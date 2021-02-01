@@ -8125,6 +8125,9 @@ INVERTIR VERTICALIDAD MANDO
 [FEM_TWP]
 Poner o quitar punto de referencia
 
+[FEA_FMN]
+RADIO APAGADA
+
 { end of file }
 
 [DUMMY]
