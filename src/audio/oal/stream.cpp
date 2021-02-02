@@ -492,6 +492,7 @@ public:
 			
 			m_bOpened = mpg123_open(m_pMH, path) == MPG123_OK
 				&& mpg123_getformat(m_pMH, &rate, &channels, &encoding) == MPG123_OK;
+
 			m_nRate = rate;
 			m_nChannels = channels;
 			
@@ -925,7 +926,8 @@ CStream::CStream(char *filename, ALuint *sources, ALuint (&buffers)[NUM_STREAMBU
 	m_bReset(false),
 	m_nVolume(0),
 	m_nPan(0),
-	m_nPosBeforeReset(0)
+	m_nPosBeforeReset(0),
+	m_nLoopCount(1)
 	
 {
 // Be case-insensitive on linux (from https://github.com/OneSadCookie/fcaseopen/)
@@ -1021,7 +1023,7 @@ bool CStream::IsPlaying()
 		ALint sourceState[2];
 		alGetSourcei(m_pAlSources[0], AL_SOURCE_STATE, &sourceState[0]);
 		alGetSourcei(m_pAlSources[1], AL_SOURCE_STATE, &sourceState[1]);
-		if ( m_bActive || sourceState[0] == AL_PLAYING || sourceState[1] == AL_PLAYING)
+		if (sourceState[0] == AL_PLAYING || sourceState[1] == AL_PLAYING)
 			return true;
 	}
 	
@@ -1179,6 +1181,8 @@ bool CStream::Setup()
 {
 	if ( IsOpened() )
 	{
+		alSourcei(m_pAlSources[0], AL_LOOPING, AL_FALSE);
+		alSourcei(m_pAlSources[1], AL_LOOPING, AL_FALSE);
 		m_pSoundFile->Seek(0);
 		//SetPosition(0.0f, 0.0f, 0.0f);
 		SetPitch(1.0f);
@@ -1187,6 +1191,13 @@ bool CStream::Setup()
 	}
 	
 	return IsOpened();
+}
+
+void CStream::SetLoopCount(int32 count)
+{
+	if ( !HasSource() ) return;
+
+	m_nLoopCount = count;
 }
 
 void CStream::SetPlay(bool state)
@@ -1248,7 +1259,7 @@ void CStream::Update()
 	
 	if ( !m_bPaused )
 	{
-		ALint sourceState[2];
+		ALint totalBuffers[2] = { 0, 0 };
 		ALint buffersProcessed[2] = { 0, 0 };
 		
 		// Relying a lot on left buffer states in here
@@ -1256,44 +1267,51 @@ void CStream::Update()
 		do
 		{
 			//alSourcef(m_pAlSources[0], AL_ROLLOFF_FACTOR, 0.0f);
-			alGetSourcei(m_pAlSources[0], AL_SOURCE_STATE, &sourceState[0]);
+			alGetSourcei(m_pAlSources[0], AL_BUFFERS_QUEUED, &totalBuffers[0]);
 			alGetSourcei(m_pAlSources[0], AL_BUFFERS_PROCESSED, &buffersProcessed[0]);
 			//alSourcef(m_pAlSources[1], AL_ROLLOFF_FACTOR, 0.0f);
-			alGetSourcei(m_pAlSources[1], AL_SOURCE_STATE, &sourceState[1]);
+			alGetSourcei(m_pAlSources[1], AL_BUFFERS_QUEUED, &totalBuffers[1]);
 			alGetSourcei(m_pAlSources[1], AL_BUFFERS_PROCESSED, &buffersProcessed[1]);
 		} while (buffersProcessed[0] != buffersProcessed[1]);
 		
-		ALint looping = AL_FALSE;
-		alGetSourcei(m_pAlSources[0], AL_LOOPING, &looping);
-		
-		if ( looping == AL_TRUE )
-		{
-			TRACE("stream set looping");
-			alSourcei(m_pAlSources[0], AL_LOOPING, AL_TRUE);
-			alSourcei(m_pAlSources[1], AL_LOOPING, AL_TRUE);
-		}
-
 		assert(buffersProcessed[0] == buffersProcessed[1]);
-		
-		while( buffersProcessed[0]-- )
+
+		// Correcting OpenAL concepts here:
+		// AL_BUFFERS_QUEUED = Number of *all* buffers in queue, including processed, processing and pending
+		// AL_BUFFERS_PROCESSED = Index of the buffer being processing right now. Buffers coming after that(have greater index) are pending buffers.
+		// which means: totalBuffers[0] - buffersProcessed[0] = pending buffers
+
+		bool buffersRefilled = false;
+
+		// We should wait queue to be cleared to loop track, because position calculation relies on queue.
+		if (m_nLoopCount != 1 && m_bActive && totalBuffers[0] == 0)
 		{
-			ALuint buffer[2];
-			
-			alSourceUnqueueBuffers(m_pAlSources[0], 1, &buffer[0]);
-			alSourceUnqueueBuffers(m_pAlSources[1], 1, &buffer[1]);
-			
-			if (m_bActive && FillBuffer(buffer))
+			Setup();
+			buffersRefilled = FillBuffers() != 0;
+			if (m_nLoopCount != 0)
+				m_nLoopCount--;
+		}
+		else
+		{
+			while( buffersProcessed[0]-- )
 			{
-				alSourceQueueBuffers(m_pAlSources[0], 1, &buffer[0]);
-				alSourceQueueBuffers(m_pAlSources[1], 1, &buffer[1]);
+				ALuint buffer[2];
+				
+				alSourceUnqueueBuffers(m_pAlSources[0], 1, &buffer[0]);
+				alSourceUnqueueBuffers(m_pAlSources[1], 1, &buffer[1]);
+				
+				if (m_bActive && FillBuffer(buffer))
+				{
+					buffersRefilled = true;
+					alSourceQueueBuffers(m_pAlSources[0], 1, &buffer[0]);
+					alSourceQueueBuffers(m_pAlSources[1], 1, &buffer[1]);
+				}
 			}
 		}
-		
-		if ( sourceState[0] != AL_PLAYING )
-		{
-			alGetSourcei(m_pAlSources[0], AL_BUFFERS_PROCESSED, &buffersProcessed[0]);
-			SetPlay(buffersProcessed[0]!=0);
-		}
+
+		// Two reasons: 1-Source may be starved to audio and stopped itself, 2- We're already waiting it to starve and die for looping track!
+		if (m_bActive && (buffersRefilled || (totalBuffers[1] - buffersProcessed[1] != 0)))
+			SetPlay(true);
 	}
 }
 
@@ -1305,6 +1323,7 @@ void CStream::ProviderInit()
 		{
 			SetPan(m_nPan);
 			SetVolume(m_nVolume);
+			SetLoopCount(m_nLoopCount);
 			SetPosMS(m_nPosBeforeReset);
 			if (m_bActive)
 				FillBuffers();
