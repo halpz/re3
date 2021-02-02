@@ -5591,7 +5591,7 @@ CMenuManager::DrawQuitGameScreen(void)
 	if (splash == nil)
 		splash = LoadSplash("OUTRO");
 
-	m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(MENU_X(28.0f), MENU_Y(8.0f), MENU_X(157.0f), MENU_Y(138.0f)), CRGBA(255, 255, 255, 255 - alpha));
+	m_aFrontEndSprites[MENUSPRITE_VCLOGO].Draw(CRect(SCREEN_STRETCH_X(28.0f), MENU_Y(8.0f), SCREEN_STRETCH_X(27.0f) + MENU_X(130.f), MENU_Y(138.0f)), CRGBA(255, 255, 255, 255 - alpha));
 
 	// Or we can see menu background from sides
 #ifdef ASPECT_RATIO_SCALE
