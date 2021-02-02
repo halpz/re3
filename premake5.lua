@@ -71,6 +71,13 @@ workspace "reLCS"
 	symbols "Full"
 	staticruntime "off"
 
+	-- for CVECTORHACK
+	configuration { "gmake*" }
+		buildoptions { "-fpermissive" }
+
+	filter { "platforms:macosx*" }
+		buildoptions { "-Wno-address-of-temporary" }
+
 	if _OPTIONS["with-asan"] then
 		buildoptions { "-fsanitize=address -g3 -fno-omit-frame-pointer" }
 		linkoptions { "-fsanitize=address" }
