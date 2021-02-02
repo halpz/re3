@@ -8846,7 +8846,7 @@ cAudioManager::ProcessFrontEnd()
 			break;
 		case SOUND_PICKUP_BONUS:
 		case SOUND_FRONTEND_MENU_STARTING:
-		case SOUND_HUD_SOUND:
+		case SOUND_HUD:
 			stereo = true;
 			m_sQueueSample.m_nSampleIndex = SFX_INFO_LEFT;
 			center = true;
@@ -8882,11 +8882,11 @@ cAudioManager::ProcessFrontEnd()
 		case SOUND_CLOCK_TICK:
 			m_sQueueSample.m_nSampleIndex = SFX_TIMER;
 			break;
-		case SOUND_FRONTEND_NO_RADIO:
-		case SOUND_FRONTEND_RADIO_CHANGE:
+		case SOUND_FRONTEND_RADIO_TURN_OFF:
+		case SOUND_FRONTEND_RADIO_TURN_ON:
 			m_sQueueSample.m_nSampleIndex = SFX_RADIO_CLICK;
 			break;
-		case SOUND_FRONTEND_RADIO_CHANGE_2:
+		case SOUND_FRONTEND_HURRICANE:
 			m_sQueueSample.m_nSampleIndex = SFX_HURRICANE_MA;
 			break;
 		case SOUND_BULLETTRACE_1:
@@ -8937,9 +8937,9 @@ cAudioManager::ProcessFrontEnd()
 
 		sample = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i];
 
-		if (sample == SOUND_FRONTEND_NO_RADIO)
+		if (sample == SOUND_FRONTEND_RADIO_TURN_OFF)
 			m_sQueueSample.m_nFrequency = 28509;
-		else if (sample == SOUND_FRONTEND_RADIO_CHANGE)
+		else if (sample == SOUND_FRONTEND_RADIO_TURN_ON)
 			m_sQueueSample.m_nFrequency = 32000;
 		else if (sample == SOUND_BULLETTRACE_1 || sample == SOUND_BULLETTRACE_2) {
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);

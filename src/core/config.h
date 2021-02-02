@@ -306,8 +306,8 @@ enum Config {
 
 // Hud, frontend and radar
 #define PC_MENU
-
 #define FIX_RADAR			// use radar size from early version before R* broke it
+#define RADIO_OFF_TEXT		// Won't work without FIX_BUGS
 
 #ifndef PC_MENU
 #	define PS2_MENU
@@ -376,6 +376,7 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #define FREE_CAM		// Rotating cam
 
 // Audio
+#define RADIO_SCROLL_TO_PREV_STATION // Won't work without FIX_BUGS
 #define AUDIO_CACHE // cache sound lengths to speed up the cold boot
 //#define PS2_AUDIO_PATHS // changes audio paths for cutscenes and radio to PS2 paths (needs vbdec on MSS builds)
 //#define AUDIO_OAL_USE_SNDFILE // use libsndfile to decode WAVs instead of our internal decoder
@@ -462,6 +463,7 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #undef BUTTON_ICONS
 
 #undef FIX_RADAR
+#undef RADIO_OFF_TEXT
 
 #undef MAP_ENHANCEMENTS
 #undef MUCH_SHORTER_OUTRO_SCREEN
@@ -490,4 +492,6 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #undef IMPROVED_CAMERA
 #undef FREE_CAM
 #undef BIG_IMG
+
+#undef RADIO_SCROLL_TO_PREV_STATION
 #endif

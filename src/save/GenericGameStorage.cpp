@@ -67,16 +67,16 @@ bool StillToFadeOut;
 uint32 TimeStartedCountingForFade;
 uint32 TimeToStayFadedBeforeFadeOut = 1750;
 
-uint32 RadioStationPosition[NUM_RADIOS];
+int32 RadioStationPosition[NUM_RADIOS];
 
 void
 InitRadioStationPositionList()
 {
 	for (int i = 0; i < NUM_RADIOS; i++)
-		RadioStationPosition[i] = 0;
+		RadioStationPosition[i] = -1;
 }
 
-uint32
+int32
 GetSavedRadioStationPosition(int32 station)
 {
 	return RadioStationPosition[station];
