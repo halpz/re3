@@ -21,8 +21,8 @@ such that we have a working game at all times.
 (Put content of selected archive into gamedir)
 
 - [Windows D3D9 MSS 32bit](https://nightly.link/GTAmodding/re3/workflows/re3_msvc_x86/master/re3_Release_win-x86-librw_d3d9-mss.zip)
-- [Windows D3D9 64bit](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/master/windows-latest-d3d9.zip)
-- [Windows OpenGL 64bit](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/master/windows-latest-gl3.zip)
+- [Windows D3D9 64bit](https://nightly.link/GTAmodding/re3/workflows/re3_msvc_amd64/master/re3_Release_win-amd64-librw_d3d9-oal.zip)
+- [Windows OpenGL 64bit](https://nightly.link/GTAmodding/re3/workflows/re3_msvc_amd64/master/re3_Release_win-amd64-librw_gl3_glfw-oal.zip)
 - [Linux 64bit](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/master/ubuntu-latest-gl3.zip)
 - [MacOS 64bit](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/master/macos-latest-gl3.zip)
 
