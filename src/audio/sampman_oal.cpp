@@ -14,14 +14,16 @@
 #include <AL/efx.h>
 #include <AL/efx-presets.h>
 
-#pragma comment(lib, "OpenAL32.lib")
-
 // for user MP3s
 #include <direct.h>
 #include <shlobj.h>
 #include <shlguid.h>
 #else
 #define _getcwd getcwd
+#endif
+
+#if defined _MSC_VER && !defined CMAKE_NO_AUTOLINK
+#pragma comment( lib, "OpenAL32.lib" )
 #endif
 
 #include "common.h"
@@ -1872,6 +1874,9 @@ cSampleManager::StopStreamedFile(uint8 nStream)
 	{
 		delete stream;
 		aStream[nStream] = NULL;
+
+		if ( nStream == 0 )
+			_bIsMp3Active = false;
 	}
 }
 
@@ -1884,7 +1889,21 @@ cSampleManager::GetStreamedFilePosition(uint8 nStream)
 	
 	if ( stream )
 	{
-		return stream->GetPosMS();
+		if ( _bIsMp3Active )
+		{
+			tMP3Entry *mp3 = _GetMP3EntryByIndex(_CurMP3Index);
+			
+			if ( mp3 != NULL )
+			{
+				return stream->GetPosMS() + mp3->nTrackStreamPos;
+			}
+			else
+				return 0;
+		}
+		else
+		{
+			return stream->GetPosMS();
+		}
 	}
 	
 	return 0;
