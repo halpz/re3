@@ -37,8 +37,8 @@ CWeaponInfo::Initialise(void)
 	debug("Initialising CWeaponInfo...\n");
 	for (int i = 0; i < WEAPONTYPE_TOTALWEAPONS; i++) {
 		aWeaponInfo[i].m_eWeaponFire = WEAPON_FIRE_INSTANT_HIT;
-		aWeaponInfo[i].m_AnimToPlay = ANIM_PUNCH_R;
-		aWeaponInfo[i].m_Anim2ToPlay = NUM_ANIMS;
+		aWeaponInfo[i].m_AnimToPlay = ANIM_STD_PUNCH;
+		aWeaponInfo[i].m_Anim2ToPlay = ANIM_STD_NUM;
 		aWeaponInfo[i].m_Flags = WEAPONFLAG_USE_GRAVITY | WEAPONFLAG_SLOWS_DOWN | WEAPONFLAG_RAND_SPEED | WEAPONFLAG_EXPANDS | WEAPONFLAG_EXPLODES;
 	}
 	debug("Loading weapon data...\n");
@@ -96,7 +96,7 @@ CWeaponInfo::LoadWeaponData(void)
 		fireType[0] = '\0';
 		fireOffsetY = 0.0f;
 		fireOffsetZ = 0.0f;
-		animId = ANIM_WALK;
+		animId = ANIM_STD_WALK;
 		sscanf(
 			&line[lp],
 			"%s %s %f %d %d %d %d %f %f %f %f %f %f %f %s %s %f %f %f %f %d %d",

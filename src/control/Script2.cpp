@@ -913,7 +913,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 			if (strcmp(m_abScriptName, "camera") == 0){
 				pPlayer->m_pPed->SetMoveSpeed(0.0f, 0.0f, 0.0f);
 				pPlayer->m_pPed->SetTurnSpeed(0.0f, 0.0f, 0.0f);
-				CAnimManager::BlendAnimation((RpClump*)pPlayer->m_pPed->m_rwObject, pPlayer->m_pPed->m_animGroup, ANIM_IDLE_STANCE, 1000.0f);
+				CAnimManager::BlendAnimation((RpClump*)pPlayer->m_pPed->m_rwObject, pPlayer->m_pPed->m_animGroup, ANIM_STD_IDLE, 1000.0f);
 			}
 		}
 		return 0;
@@ -1156,7 +1156,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 #ifdef FIX_BUGS
 		AnimationId anim = pVehicle->GetDriverAnim();
 #else
-		AnimationId anim = pVehicle->bLowVehicle ? ANIM_CAR_LSIT : ANIM_CAR_SIT;
+		AnimationId anim = pVehicle->bLowVehicle ? ANIM_STD_CAR_SIT_LO : ANIM_STD_CAR_SIT;
 #endif
 		pPed->m_pVehicleAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, anim, 100.0f);
 		pPed->StopNonPartialAnims();

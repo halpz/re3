@@ -457,7 +457,7 @@ void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState
 				state->aFunctionCallbackID[i] = 0;
 			}
 		}else{
-			state->aAnimId[i] = NUM_ANIMS;
+			state->aAnimId[i] = ANIM_STD_NUM;
 			state->aCurTime[i] = 0;
 			state->aSpeed[i] = 85;
 			state->aFunctionCallbackID[i] = 0;
@@ -484,7 +484,7 @@ void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState
 			}
 		}
 		else {
-			state->aAnimId2[i] = NUM_ANIMS;
+			state->aAnimId2[i] = ANIM_STD_NUM;
 			state->aCurTime2[i] = 0;
 			state->aSpeed2[i] = 85;
 			state->aFunctionCallbackID2[i] = 0;
@@ -558,7 +558,7 @@ void CReplay::RetrievePedAnimation(CPed *ped, CStoredAnimationState *state)
 		float time = state->partAnimTime * 4.0f / 255.0f;
 		float speed = state->partAnimSpeed * 3.0f / 255.0f;
 		float blend = state->partBlendAmount * 2.0f / 255.0f;
-		if (blend > 0.0f && state->partAnimId != ANIM_IDLE_STANCE){
+		if (blend > 0.0f && state->partAnimId != ANIM_STD_IDLE){
 			CAnimBlendAssociation* anim3 = CAnimManager::BlendAnimation(
 				(RpClump*)ped->m_rwObject, ASSOCGRP_STD, (AnimationId)state->partAnimId, 1000.0f);
 			anim3->SetCurrentTime(time);
@@ -578,7 +578,7 @@ void CReplay::RetrieveDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationSt
 		assoc->SetBlend(0.0f, -1.0f);
 #endif
 	for (int i = 0; i < NUM_MAIN_ANIMS_IN_REPLAY; i++) {
-		if (state->aAnimId[i] == NUM_ANIMS)
+		if (state->aAnimId[i] == ANIM_STD_NUM)
 			continue;
 #ifdef FIX_REPLAY_BUGS
 		CAnimBlendAssociation* anim = CAnimManager::AddAnimation(ped->GetClump(),
@@ -607,7 +607,7 @@ void CReplay::RetrieveDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationSt
 			anim->SetDeleteCallback(FindCBFunction(callback & 0x7F), ped);
 	}
 	for (int i = 0; i < NUM_PARTIAL_ANIMS_IN_REPLAY; i++) {
-		if (state->aAnimId2[i] == NUM_ANIMS)
+		if (state->aAnimId2[i] == ANIM_STD_NUM)
 			continue;
 #ifdef FIX_REPLAY_BUGS
 		CAnimBlendAssociation* anim = CAnimManager::AddAnimation(ped->GetClump(),
