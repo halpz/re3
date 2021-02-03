@@ -1156,7 +1156,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 command)
 #ifdef FIX_BUGS
 		AnimationId anim = pVehicle->GetDriverAnim();
 #else
-		AnimationId anim = pVehicle->bLowVehicle ? ANIM_CAR_LSIT : ANIM_CAR_SIT;
+		AnimationId anim = pVehicle->bLowVehicle ? ANIM_STD_CAR_SIT_LO : ANIM_STD_CAR_SIT;
 #endif
 		pPed->m_pVehicleAnim = CAnimManager::BlendAnimation(pPed->GetClump(), ASSOCGRP_STD, anim, 100.0f);
 		pPed->StopNonPartialAnims();
