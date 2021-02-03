@@ -473,6 +473,7 @@ enum Config {
 #undef RADIO_OFF_TEXT
 
 #undef MENU_MAP
+#undef GAMEPAD_MENU
 #undef SCROLLABLE_STATS_PAGE
 #undef CUSTOM_FRONTEND_OPTIONS
 
