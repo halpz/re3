@@ -204,6 +204,7 @@ project "librw"
 		architecture "amd64"
 
 	filter "platforms:win*"
+		defines { "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_DEPRECATE" }
 		staticruntime "on"
 		buildoptions { "/Zc:sizedDealloc-" }
 
