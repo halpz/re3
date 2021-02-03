@@ -2336,6 +2336,121 @@ bool CPad::ShiftTargetRightJustDown(void)
 	return !!(NewState.RightShoulder2 && !OldState.RightShoulder2);
 }
 
+#ifdef FIX_BUGS
+// FIX: fixes from VC for the bug of double switching the controller setup
+bool CPad::GetAnaloguePadUp(void)
+{
+	static int16 oldfStickY = 0;
+
+	int16 leftStickY = CPad::GetPad(0)->GetLeftStickY();
+
+	if ( leftStickY < -15 && oldfStickY >= -5 )
+	{
+		oldfStickY = leftStickY;
+		return true;
+	}
+	else
+	{
+		oldfStickY = leftStickY;
+		return false;
+	}
+}
+
+bool CPad::GetAnaloguePadDown(void)
+{
+	static int16 oldfStickY = 0;
+
+	int16 leftStickY = CPad::GetPad(0)->GetLeftStickY();
+
+	if ( leftStickY > 15 && oldfStickY <= 5 )
+	{
+		oldfStickY = leftStickY;
+		return true;
+	}
+	else
+	{
+		oldfStickY = leftStickY;
+		return false;
+	}
+}
+
+bool CPad::GetAnaloguePadLeft(void)
+{
+	static int16 oldfStickX = 0;
+
+	int16 leftStickX = CPad::GetPad(0)->GetLeftStickX();
+
+	if ( leftStickX < -15 && oldfStickX >= -5 )
+	{
+		oldfStickX = leftStickX;
+		return true;
+	}
+	else
+	{
+		oldfStickX = leftStickX;
+		return false;
+	}
+}
+
+bool CPad::GetAnaloguePadRight(void)
+{
+	static int16 oldfStickX = 0;
+
+	int16 leftStickX = CPad::GetPad(0)->GetLeftStickX();
+
+	if ( leftStickX > 15 && oldfStickX <= 5 )
+	{
+		oldfStickX = leftStickX;
+		return true;
+	}
+	else
+	{
+		oldfStickX = leftStickX;
+		return false;
+	}
+}
+
+bool CPad::GetAnaloguePadLeftJustUp(void)
+{
+	static int16 oldfStickX = 0;
+
+	int16 X = GetPad(0)->GetPedWalkLeftRight();
+
+	if ( X == 0 && oldfStickX < 0 )
+	{
+		oldfStickX = 0;
+
+		return true;
+	}
+	else
+	{
+		oldfStickX = X;
+
+		return false;
+	}
+}
+
+bool CPad::GetAnaloguePadRightJustUp(void)
+{
+	static int16 oldfStickX = 0;
+
+	int16 X = GetPad(0)->GetPedWalkLeftRight();
+
+	if ( X == 0 && oldfStickX > 0 )
+	{
+		oldfStickX = 0;
+
+		return true;
+	}
+	else
+	{
+		oldfStickX = X;
+
+		return false;
+	}
+}
+
+#else
 bool CPad::GetAnaloguePadUp(void)
 {
 	static int16 oldfStickY = 0;
@@ -2447,6 +2562,7 @@ bool CPad::GetAnaloguePadRightJustUp(void)
 		return false;
 	}
 }
+#endif
 
 bool CPad::ForceCameraBehindPlayer(void)
 {

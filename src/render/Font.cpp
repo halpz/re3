@@ -348,11 +348,26 @@ CFont::Initialise(void)
 	SetDropShadowPosition(0);
 	CTxdStore::PopCurrentTxd();
 
+#if !defined(GAMEPAD_MENU) && defined(BUTTON_ICONS)
+	// loaded in CMenuManager with GAMEPAD_MENU defined
+	LoadButtons("MODELS/X360BTNS.TXD");
+#endif
+}
+
 #ifdef BUTTON_ICONS
-	if (int file = CFileMgr::OpenFile("MODELS/X360BTNS.TXD")) {
+void
+CFont::LoadButtons(const char* txdPath)
+{
+	if (int file = CFileMgr::OpenFile(txdPath)) {
 		CFileMgr::CloseFile(file);
-		ButtonsSlot = CTxdStore::AddTxdSlot("buttons");
-		CTxdStore::LoadTxd(ButtonsSlot, "MODELS/X360BTNS.TXD");
+		if (ButtonsSlot == -1)
+			ButtonsSlot = CTxdStore::AddTxdSlot("buttons");
+		else {
+			for (int i = 0; i < MAX_BUTTON_ICONS; i++)
+				ButtonSprite[i].Delete();
+			CTxdStore::RemoveTxd(ButtonsSlot);
+		}
+		CTxdStore::LoadTxd(ButtonsSlot, txdPath);
 		CTxdStore::AddRef(ButtonsSlot);
 		CTxdStore::PushCurrentTxd();
 		CTxdStore::SetCurrentTxd(ButtonsSlot);
@@ -374,8 +389,16 @@ CFont::Initialise(void)
 		ButtonSprite[BUTTON_R3].SetTexture("r3");
 		CTxdStore::PopCurrentTxd();
 	}
-#endif // BUTTON_ICONS
+	else {
+		if (ButtonsSlot != -1) {
+			for (int i = 0; i < MAX_BUTTON_ICONS; i++)
+				ButtonSprite[i].Delete();
+			CTxdStore::RemoveTxdSlot(ButtonsSlot);
+			ButtonsSlot = -1;
+		}
+	}
 }
+#endif // BUTTON_ICONS
 
 #ifdef MORE_LANGUAGES
 void

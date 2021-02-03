@@ -2440,33 +2440,6 @@ Accelerate
 [FEC_SMT]
 Special mission trigger
 
-[FEC_CCF]
-Configuration:
-
-[FEC_CF1]
-Setup1
-
-[FEC_CF2]
-Setup2
-
-[FEC_CF3]
-Setup3
-
-[FEC_CF4]
-Setup4
-
-[FEC_CDP]
-Controller Display:
-
-[FEC_ONF]
-On Foot
-
-[FEC_INC]
-In Car
-
-[FEC_VIB]
-Vibration:
-
 [FEA_OUT]
 Output:
 
@@ -8072,6 +8045,54 @@ Toggle Waypoint
 
 [FEA_FMN]
 RADIO OFF
+
+[FEC_DS2]
+DUALSHOCK 2
+
+[FEC_DS3]
+DUALSHOCK 3
+
+[FEC_DS4]
+DUALSHOCK 4
+
+[FEC_360]
+XBOX 360 CONTROLLER
+
+[FEC_ONE]
+XBOX ONE CONTROLLER
+
+[FEC_TYP]
+GAMEPAD TYPE
+
+[FEC_CCF]
+CONFIGURATION
+
+[FEC_CF1]
+SETUP 1
+
+[FEC_CF2]
+SETUP 2
+
+[FEC_CF3]
+SETUP 3
+
+[FEC_CF4]
+SETUP 4
+
+[FEC_CDP]
+CONTROLLER DISPLAY
+
+[FEC_ONF]
+ON FOOT
+
+[FEC_INC]
+IN CAR
+
+[FEC_VIB]
+VIBRATION
+
+[FET_AGS]
+GAMEPAD SETTINGS
 
 { end of file }
 
