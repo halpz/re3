@@ -3,10 +3,10 @@
 class TYPEALIGN(16) CVuVector : public CVector
 {
 public:
-	float w;
+//	float w;	// in CVector now
 	CVuVector(void) {}
 	CVuVector(float x, float y, float z) : CVector(x, y, z) {}
-	CVuVector(float x, float y, float z, float w) : CVector(x, y, z), w(w) {}
+	CVuVector(float x, float y, float z, float w) : CVector(x, y, z)/*, w(w)*/ { this->w = w;}
 	CVuVector(const CVector &v) : CVector(v.x, v.y, v.z) {}
 	CVuVector(const RwV3d &v) : CVector(v) {}
 /*

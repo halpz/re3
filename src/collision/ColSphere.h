@@ -2,10 +2,11 @@
 
 #include "SurfaceTable.h"
 
-struct CSphere
+// TODO(LCS): maybe this was in a union with CVuVector? or is the alignment manual?
+struct TYPEALIGN(16) CSphere
 {
 	// NB: this has to be compatible with a CVuVector
-	CVector center;
+	RwV3d center;
 	float radius;
 	void Set(float radius, const CVector &center) { this->center = center; this->radius = radius; }
 };

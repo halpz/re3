@@ -44,3 +44,18 @@ operator*(const CMatrix &mat, const CVector &vec)
 	               mat.ry * vec.x + mat.fy * vec.y + mat.uy * vec.z + mat.py,
 	               mat.rz * vec.x + mat.fz * vec.y + mat.uz * vec.z + mat.pz);
 }
+
+void
+RwV3dTransformPoints(CVector * pointsOut, const CVector * pointsIn, RwInt32 numPoints, const RwMatrix * matrix)
+{
+	while(numPoints--){
+		float x = pointsIn->x*matrix->right.x + pointsIn->y*matrix->up.x + pointsIn->z*matrix->at.x + matrix->pos.x;
+		float y = pointsIn->x*matrix->right.y + pointsIn->y*matrix->up.y + pointsIn->z*matrix->at.y + matrix->pos.y;
+		float z = pointsIn->x*matrix->right.z + pointsIn->y*matrix->up.z + pointsIn->z*matrix->at.z + matrix->pos.z;
+		pointsOut->x = x;
+		pointsOut->y = y;
+		pointsOut->z = z;
+		pointsOut++;
+		pointsIn++;
+	}
+}
