@@ -8,7 +8,7 @@
 #include "Messages.h"
 #include "Text.h"
 
-static wchar WideErrorString[25];
+wchar WideErrorString[25];
 
 CText TheText;
 

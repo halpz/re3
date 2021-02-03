@@ -7927,7 +7927,7 @@ cAudioManager::ProcessFrontEnd()
 			frontendBank = true;
 			stereo = true;
 			break;
-		case SOUND_FRONTEND_NO_RADIO:
+		case SOUND_FRONTEND_RADIO_TURN_OFF:
 		case SOUND_FRONTEND_RADIO_CHANGE:
 			m_sQueueSample.m_nSampleIndex = SFX_RADIO_CLICK;
 			break;
