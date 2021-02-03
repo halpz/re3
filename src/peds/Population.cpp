@@ -847,7 +847,7 @@ CPopulation::AddPedInCar(CVehicle* car)
 	}
 #else
 	{
-		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, ANIM_CAR_SIT, 100.0f);
+		newPed->m_pVehicleAnim = CAnimManager::BlendAnimation(newPed->GetClump(), ASSOCGRP_STD, ANIM_STD_CAR_SIT, 100.0f);
 	}
 #endif
 	
