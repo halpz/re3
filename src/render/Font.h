@@ -109,6 +109,7 @@ public:
 	static CSprite2d ButtonSprite[MAX_BUTTON_ICONS];
 	static int PS2Symbol;
 
+	static void LoadButtons(const char *txdPath);
 	static void DrawButton(float x, float y);
 #endif // BUTTON_ICONS
 
