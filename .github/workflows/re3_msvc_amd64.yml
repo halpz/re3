@@ -56,7 +56,7 @@ jobs:
         mv ./bin/${{matrix.platform}}/${{matrix.buildtype}}/re3.exe ./gamefiles/
         mv ./bin/${{matrix.platform}}/${{matrix.buildtype}}/re3.pdb ./gamefiles/
     - name: Move dynamic dependencies to gamefiles
-      run: | 
+      run: |
         mv ./vendor/mpg123/dist/Win64/libmpg123-0.dll ./gamefiles/
         mv ./vendor/openal-soft/dist/Win64/OpenAL32.dll ./gamefiles/
     - name: Upload artifact to actions
