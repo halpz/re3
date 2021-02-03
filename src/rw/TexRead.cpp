@@ -5,6 +5,9 @@
 #include "common.h"
 #ifdef ANISOTROPIC_FILTERING
 #include "rpanisot.h"
+#ifndef LIBRW
+#pragma comment( lib, "rpanisot.lib" )
+#endif
 #endif
 #include "crossplatform.h"
 #include "platform.h"
