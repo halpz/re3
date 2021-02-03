@@ -51,7 +51,6 @@ jobs:
     # - name: Pack artifacts
       # run: |
         # 7z a re3_${{matrix.buildtype}}_${{matrix.platform}}.zip ./bin/${{matrix.platform}}/${{matrix.buildtype}}/*
-        # 7z a re3_${{matrix.buildtype}}_${{matrix.platform}}.zip ./gamefiles/*
     - name: Move binaries to gamefiles
       run: |
         mv ./bin/${{matrix.platform}}/${{matrix.buildtype}}/re3.exe ./gamefiles/
