@@ -72,7 +72,7 @@ Assuming you have Visual Studio:
 
 > :information_source: There are various settings in [config.h](https://github.com/GTAmodding/re3/tree/miami/src/core/config.h), you may want to take a look there. i.e. FIX_BUGS define fixes the bugs we've come across.
 
-> :information_source: **Did you notice librw?** reVC uses completely homebrew RenderWare-replacement rendering engine; [librw](https://github.com/aap/librw/). librw comes as submodule of re3, but you also can use LIBRW enviorenment variable to specify path to your own librw.
+> :information_source: **Did you notice librw?** reVC uses completely homebrew RenderWare-replacement rendering engine; [librw](https://github.com/aap/librw/). librw comes as submodule of reVC, but you also can use LIBRW enviorenment variable to specify path to your own librw.
 
 ## Contributing
 Please read the [Coding Style](https://github.com/GTAmodding/re3/blob/miami/CODING_STYLE.md) Document
