@@ -372,7 +372,7 @@ Playa de Portland
 Saint Mark's
 
 [REDLIGH]
-Barrio rojo
+Red Light District
 
 [TOWERS]
 Cerros de Hepburn
@@ -636,7 +636,7 @@ Puedes practicar disparando a estas dianas. Vuelve a la misión cuando hayas ter
 ~g~Busca un cliente.
 
 [FARE1]
-~g~Ve al ~w~club Sex Kitten Meeouch ~g~en el barrio rojo.
+~g~Ve al ~w~club Sex Kitten Meeouch ~g~en el Red Light District.
 
 [FARE2]
 ~g~Ve a ~w~Supa Save ~g~en Portland View.
@@ -648,13 +648,13 @@ Puedes practicar disparando a estas dianas. Vuelve a la misión cuando hayas ter
 ~g~Ve a la ~w~cafetería Greasy Joe ~g~en Callahan Point.
 
 [FARE5]
-~g~Ve a la ~w~tienda de armas Ammu-Nation ~g~en el barrio rojo.
+~g~Ve a la ~w~tienda de armas Ammu-Nation ~g~en el Red Light District.
 
 [FARE6]
 ~g~Ve a ~w~Easy Credit Autos ~g~en Saint Mark's.
 
 [FARE7]
-~g~Ve al ~w~bar de topless de Woody ~g~en el barrio rojo.
+~g~Ve al ~w~bar de topless de Woody ~g~en el Red Light District.
 
 [FARE8]
 ~g~Ve al ~w~restaurante Marcos ~g~en Saint Mark's.
@@ -756,7 +756,7 @@ Pulsa ~h~~k~~TOGGLE_SUBMISSIONS~~w~ para activar o desactivar las misiones del c
 ¡Has volado durante ~1~ segundos!
 
 [EBAL_A]
-Conozco un lugar en las afueras del barrio rojo donde podemos escondernos,
+Conozco un lugar en las afueras del Red Light District donde podemos escondernos,
 
 [EBAL_A1]
 pero mis manos están destrozadas, así que conduce tú, hermano.
@@ -1553,7 +1553,7 @@ Eso no es un masajeador.
 ~r~Muy bonito, ¡has asustado al objetivo! ¿Y te consideras un asesino?
 
 [AM1_5]
-~g~Ve al barrio rojo y espera a que Salvatore salga del club.
+~g~Ve al Red Light District y espera a que Salvatore salga del club.
 
 [AM1_7]
 ~r~Salvatore está en su casita, sano y salvo, tomándose un cóctel. ¡Nadie te va a llamar ''Chacal''!
@@ -2465,33 +2465,6 @@ Acelerar
 
 [FEC_SMT]
 Activar misión especial
-
-[FEC_CCF]
-Configuración:
-
-[FEC_CF1]
-Ajuste1
-
-[FEC_CF2]
-Ajuste2
-
-[FEC_CF3]
-Ajuste3
-
-[FEC_CF4]
-Ajuste4
-
-[FEC_CDP]
-Controles a mostrar:
-
-[FEC_ONF]
-A pie
-
-[FEC_INC]
-En vehículos
-
-[FEC_VIB]
-Vibración:
 
 [FEA_OUT]
 Salida:
@@ -4447,7 +4420,7 @@ tomándolos por el camino.
 ¡Cuando alcances a ese bandido espaciado con SPANK, chíngatelo!
 
 [DIAB4_H]
-Luego reparte mis revistas XXX por el barrio rojo.
+Luego reparte mis revistas XXX por el Red Light District.
 
 [DIAB4_1]
 ~g~Lleva la furgoneta a la parte de atrás de Revistas XXX.
@@ -4579,7 +4552,7 @@ si no les doy una parte.
 He dejado un coche dentro de la fábrica.
 
 [MEA2_G]
-Ve a recogerles con él en su territorio, en el barrio rojo.
+Ve a recogerles con él en su territorio, en el Red Light District.
 
 [MEA2_H]
 Luego tráelos a la fábrica para que conozcan la opinión de Marty.
@@ -7153,7 +7126,7 @@ Color del jugador
 Liberty City
 
 [FEM_MA1]
-Barrio rojo
+Red Light District
 
 [FEM_MA2]
 Chinatown
@@ -8127,6 +8100,54 @@ Poner o quitar punto de referencia
 
 [FEA_FMN]
 RADIO APAGADA
+
+[FEC_DS2]
+DUALSHOCK 2
+
+[FEC_DS3]
+DUALSHOCK 3
+
+[FEC_DS4]
+DUALSHOCK 4
+
+[FEC_360]
+MANDO DE XBOX 360
+
+[FEC_ONE]
+MANDO DE XBOX ONE
+
+[FEC_TYP]
+TIPO DE MANDO
+
+[FEC_CCF]
+CONFIGURACIÓN
+
+[FEC_CF1]
+AJUSTE 1
+
+[FEC_CF2]
+AJUSTE 2
+
+[FEC_CF3]
+AJUSTE 3
+
+[FEC_CF4]
+AJUSTE 4
+
+[FEC_CDP]
+CONTROLES A MOSTRAR
+
+[FEC_ONF]
+A PIE
+
+[FEC_INC]
+EN VEHÍCULO
+
+[FEC_VIB]
+VIBRACIÓN
+
+[FET_AGS]
+AJUSTES DE MANDO
 
 { end of file }
 

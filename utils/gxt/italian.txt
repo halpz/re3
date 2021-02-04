@@ -2479,33 +2479,6 @@ Accelera
 [FEC_SMT]
 Attivatore missione speciale
 
-[FEC_CCF]
-Configurazione:
-
-[FEC_CF1]
-Config1
-
-[FEC_CF2]
-Config2
-
-[FEC_CF3]
-Config3
-
-[FEC_CF4]
-Config4
-
-[FEC_CDP]
-Schermata controller:
-
-[FEC_ONF]
-A piedi
-
-[FEC_INC]
-In macchina
-
-[FEC_VIB]
-Vibrazione:
-
 [FEA_OUT]
 Uscita:
 
@@ -8048,6 +8021,42 @@ RUSSO
 
 [FEA_FMN]
 RADIO SPENTA
+
+[FEC_DS2]
+DUALSHOCK 2
+
+[FEC_DS3]
+DUALSHOCK 3
+
+[FEC_DS4]
+DUALSHOCK 4
+
+[FEC_CCF]
+CONFIGURAZIONE
+
+[FEC_CF1]
+CONFIGURAZIONE 1
+
+[FEC_CF2]
+CONFIGURAZIONE 2
+
+[FEC_CF3]
+CONFIGURAZIONE 3
+
+[FEC_CF4]
+CONFIGURAZIONE 4
+
+[FEC_CDP]
+SCHERMATA CONTROLLER
+
+[FEC_ONF]
+A PIEDI
+
+[FEC_INC]
+IN MACCHINA
+
+[FEC_VIB]
+VIBRAZIONE
 
 [DUMMY]
 THIS LABEL NEEDS TO BE HERE !!!
