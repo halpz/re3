@@ -276,6 +276,8 @@ public:
 	void SetDrunkInputDelay(int32 delay) { DrunkDrivingBufferUsed = delay; }
 
 #ifdef XINPUT
+	static int XInputJoy1;
+	static int XInputJoy2;
 	void AffectFromXinput(uint32 pad);
 #endif
 

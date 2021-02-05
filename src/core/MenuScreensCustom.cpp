@@ -1,4 +1,13 @@
 #include "common.h"
+#if defined DETECT_JOYSTICK_MENU && defined XINPUT
+#include <windows.h>
+#include <xinput.h>
+#if !defined(PSAPI_VERSION) || (PSAPI_VERSION > 1)
+#pragma comment( lib, "Xinput9_1_0.lib" )
+#else
+#pragma comment( lib, "Xinput.lib" )
+#endif
+#endif
 #include "platform.h"
 #include "crossplatform.h"
 #include "Renderer.h"
@@ -277,11 +286,13 @@ void ScreenModeAfterChange(int8 before, int8 after)
 
 #endif
 
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 wchar selectedJoystickUnicode[128];
 int cachedButtonNum = -1;
 
 wchar* DetectJoystickDraw(bool* disabled, bool userHovering) {
+
+#if defined RW_GL3 && !defined LIBRW_SDL2
 	int numButtons;
 	int found = -1;
 	const char *joyname;
@@ -312,6 +323,40 @@ wchar* DetectJoystickDraw(bool* disabled, bool userHovering) {
 		}
 	}
 	if (PSGLOBAL(joy1id) == -1)
+#elif defined XINPUT
+	int found = -1;
+	XINPUT_STATE xstate;
+	memset(&xstate, 0, sizeof(XINPUT_STATE));
+	if (userHovering) {
+		for (int i = 0; i <= 3; i++) {
+			if (XInputGetState(i, &xstate) == ERROR_SUCCESS) {
+				if (xstate.Gamepad.bLeftTrigger || xstate.Gamepad.bRightTrigger) {
+					found = i;
+					break;
+				}
+				for (int j = XINPUT_GAMEPAD_DPAD_UP; j != XINPUT_GAMEPAD_Y << 1; j = (j << 1)) {
+					if (xstate.Gamepad.wButtons & j) {
+						found = i;
+						break;
+					}
+				}
+				if (found != -1)
+					break;
+			}
+		}
+		if (found != -1 && CPad::XInputJoy1 != found) {
+			if (CPad::XInputJoy1 != -1 && CPad::XInputJoy1 != found)
+				CPad::XInputJoy2 = CPad::XInputJoy1;
+			else
+				CPad::XInputJoy2 = -1;
+
+			CPad::XInputJoy1 = found;
+			cachedButtonNum = 0; // fake too, because xinput bypass CControllerConfig
+		}
+	}
+	sprintf(gSelectedJoystickName, "%d", CPad::XInputJoy1); // fake, on xinput we only store gamepad ids(thanks MS) so this is a temp variable to be used below
+	if (CPad::XInputJoy1 == -1)
+#endif
 		AsciiToUnicode("Not found", selectedJoystickUnicode);
 	else
 		AsciiToUnicode(gSelectedJoystickName, selectedJoystickUnicode);
@@ -567,7 +612,7 @@ CMenuScreenCustom aScreens[] = {
 #else
 		MENUACTION_KEYBOARDCTRLS,"FEC_RED", {nil, SAVESLOT_NONE, MENUPAGE_KEYBOARD_CONTROLS}, 320, 150, MENUALIGN_CENTER,
 #endif
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 		MENUACTION_CHANGEMENU,	"FEC_JOD", {nil, SAVESLOT_NONE, MENUPAGE_DETECT_JOYSTICK}, 0, 0, MENUALIGN_CENTER,
 #endif
 		MENUACTION_CHANGEMENU,	"FEC_MOU", {nil, SAVESLOT_NONE, MENUPAGE_MOUSE_CONTROLS}, 0, 0, MENUALIGN_CENTER,
@@ -715,7 +760,7 @@ CMenuScreenCustom aScreens[] = {
 	},
 #endif
 
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 	// MENUPAGE_DETECT_JOYSTICK
 	{ "FEC_JOD", MENUPAGE_CONTROLLER_PC, new CCustomScreenLayout({0, 0, 0, false, false, 30}), DetectJoystickGoBack,
 		MENUACTION_LABEL,	"FEC_JPR", { nil, SAVESLOT_NONE, MENUPAGE_NONE }, 0, 0, 0,
