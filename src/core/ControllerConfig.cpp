@@ -354,6 +354,11 @@ uint32 CControllerConfigManager::ms_padButtonsInited = 0;
 
 void CControllerConfigManager::InitDefaultControlConfigJoyPad(uint32 buttons)
 {
+#ifdef XINPUT
+	// No manual bindings for you, honey.
+	return;
+#endif
+
 	m_bFirstCapture = true;
 
 	uint32 btn = buttons;

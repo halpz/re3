@@ -1028,8 +1028,14 @@ void CPad::AddToPCCheatString(char c)
 }
 
 #ifdef XINPUT
+int CPad::XInputJoy1 = 0;
+int CPad::XInputJoy2 = 1;
 void CPad::AffectFromXinput(uint32 pad)
 {
+	pad = pad == 0 ? XInputJoy1 : XInputJoy2;
+	if (pad == -1) // LoadINIControllerSettings can set it to -1
+		return;
+
 	XINPUT_STATE xstate;
 	memset(&xstate, 0, sizeof(XINPUT_STATE));
 	if (XInputGetState(pad, &xstate) == ERROR_SUCCESS)
