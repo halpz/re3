@@ -2757,7 +2757,7 @@ void CCarCtrl::SteerAIPlaneTowardsTargetCoors(CAutomobile* pPlane)
 	up.Normalise();
 	CVector forward(Cos(pPlane->m_fOrientation), Sin(pPlane->m_fOrientation), fForwardZ);
 	forward.Normalise();
-	CVector right = CrossProduct(forward, up);
+	CVector right = CrossProduct(up, forward);
 	right.z -= 5.0f * pPlane->m_fPlaneSteer;
 	right.Normalise();
 	up = CrossProduct(forward, right);
