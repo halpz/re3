@@ -133,6 +133,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	bCreatedAsPoliceVehicle = false;
 	bRestingOnPhysical = false;
 	bParking = false;
+	m_bGarageTurnedLightsOff = false;
 	bCanPark = CGeneral::GetRandomNumberInRange(0.0f, 1.0f) < 0.0f;	// never true. probably doesn't work very well
 	bIsVan = false;
 	bIsBus = false;

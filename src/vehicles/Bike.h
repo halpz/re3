@@ -75,6 +75,7 @@ public:
 	uint8 bExtraSpeed : 1;	// leaning forward
 	uint8 bIsOnFire : 1;
 	uint8 bWheelieCam : 1;
+	uint8 bFixedColour : 1; // <- figure out its actual place (TODO)
 	int16 m_doingBurnout;
 	float m_fTireTemperature;
 	float m_fBrakeDestabilization;

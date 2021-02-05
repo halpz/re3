@@ -438,8 +438,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(GET_INTEGER_PARAM(0));
-		script_assert(pObject);
-		UpdateCompareFlag(pObject->bIsInWater);
+		UpdateCompareFlag(pObject && pObject->bIsInWater);
 		return 0;
 	}
 	//case COMMAND_SET_CHAR_OBJ_STEAL_ANY_CAR_EVEN_MISSION_CAR:

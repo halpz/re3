@@ -647,7 +647,7 @@ extern CModelIndices *gpModelIndices;
 	X("ind_slidedoor",	MI_GARAGEDOOR6) \
 	X("bankjobdoor",	MI_GARAGEDOOR7) \
 	X("door_jmsgrage",	MI_GARAGEDOOR9) \
-	X("jamesgrge_kb",	MI_GARAGEDOOR10) \
+	X("ind_safeh_gdoor",	MI_GARAGEDOOR10) \
 	X("door_sfehousegrge",	MI_GARAGEDOOR11) \
 	X("shedgaragedoor",	MI_GARAGEDOOR12) \
 	X("door4_garage",	MI_GARAGEDOOR13) \
