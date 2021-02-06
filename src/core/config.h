@@ -251,6 +251,12 @@ enum Config {
 #define FIX_BUGS_64 // Must have fixes to be able to run 64 bit build
 #endif
 
+#define ASCII_STRCMP // use faster ascii str comparisons
+
+#if !defined _WIN32 || defined __MWERKS__ || defined __MINGW32__ || defined VANILLA_DEFINES
+#undef ASCII_STRCMP
+#endif
+
 // Just debug menu entries
 #ifdef DEBUGMENU
 #define RELOADABLES			// some debug menu options to reload TXD files
