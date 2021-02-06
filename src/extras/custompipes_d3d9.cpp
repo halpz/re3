@@ -89,6 +89,7 @@ vehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	}
 
 	int vsBits;
+	rw::uint32 flags = atomic->geometry->flags;
 	setStreamSource(0, header->vertexStream[0].vertexBuffer, 0, header->vertexStream[0].stride);
 	setIndices(header->indexBuffer);
 	setVertexDeclaration(header->vertexDeclaration);
@@ -120,7 +121,7 @@ vehicleRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 		reflProps[3] = m->surfaceProps.specular == 0.0f ? 0.0f : VehicleSpecularity;
 		d3ddevice->SetVertexShaderConstantF(VSLOC_reflProps, reflProps, 1);
 
-		setMaterial(m->color, m->surfaceProps);
+		setMaterial(flags, m->color, m->surfaceProps);
 
 		if(m->texture)
 			d3d::setTexture(0, m->texture);
@@ -149,11 +150,11 @@ CreateVehiclePipe(void)
 		fp = ReadTweakValueTable(fp, SpecColor);
 	}
 
-#include "shaders/neoVehicle_VS.inc"
+#include "shaders/obj/neoVehicle_VS.inc"
 	neoVehicle_VS = rw::d3d::createVertexShader(neoVehicle_VS_cso);
 	assert(neoVehicle_VS);
 
-#include "shaders/neoVehicle_PS.inc"
+#include "shaders/obj/neoVehicle_PS.inc"
 	neoVehicle_PS = rw::d3d::createPixelShader(neoVehicle_PS_cso);
 	assert(neoVehicle_PS);
 
@@ -259,11 +260,11 @@ CreateWorldPipe(void)
 	else
 		ReadTweakValueTable((char*)work_buff, WorldLightmapBlend);
 
-#include "shaders/default_UV2_VS.inc"
+#include "shaders/obj/default_UV2_VS.inc"
 	neoWorld_VS = rw::d3d::createVertexShader(default_UV2_VS_cso);
 	assert(neoWorld_VS);
 
-#include "shaders/neoWorldIII_PS.inc"
+#include "shaders/obj/neoWorldIII_PS.inc"
 	neoWorldIII_PS = rw::d3d::createPixelShader(neoWorldIII_PS_cso);
 	assert(neoWorldIII_PS);
 
@@ -346,11 +347,11 @@ glossRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 void
 CreateGlossPipe(void)
 {
-#include "shaders/neoGloss_VS.inc"
+#include "shaders/obj/neoGloss_VS.inc"
 	neoGloss_VS = rw::d3d::createVertexShader(neoGloss_VS_cso);
 	assert(neoGloss_VS);
 
-#include "shaders/neoGloss_PS.inc"
+#include "shaders/obj/neoGloss_PS.inc"
 	neoGloss_PS = rw::d3d::createPixelShader(neoGloss_PS_cso);
 	assert(neoGloss_PS);
 
@@ -420,6 +421,7 @@ rimRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	}
 
 	int vsBits;
+	rw::uint32 flags = atomic->geometry->flags;
 	setStreamSource(0, header->vertexStream[0].vertexBuffer, 0, header->vertexStream[0].stride);
 	setIndices(header->indexBuffer);
 	setVertexDeclaration(header->vertexDeclaration);
@@ -437,7 +439,7 @@ rimRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 
 		SetRenderState(VERTEXALPHA, inst->vertexAlpha || m->color.alpha != 255);
 
-		setMaterial(m->color, m->surfaceProps);
+		setMaterial(flags, m->color, m->surfaceProps);
 
 		if(m->texture){
 			d3d::setTexture(0, m->texture);
@@ -463,7 +465,7 @@ rimSkinRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 	}
 
 	int vsBits;
-
+	rw::uint32 flags = atomic->geometry->flags;
 	setStreamSource(0, (IDirect3DVertexBuffer9*)header->vertexStream[0].vertexBuffer,
 	                           0, header->vertexStream[0].stride);
 	setIndices((IDirect3DIndexBuffer9*)header->indexBuffer);
@@ -484,7 +486,7 @@ rimSkinRenderCB(rw::Atomic *atomic, rw::d3d9::InstanceDataHeader *header)
 
 		SetRenderState(VERTEXALPHA, inst->vertexAlpha || m->color.alpha != 255);
 
-		setMaterial(m->color, m->surfaceProps);
+		setMaterial(flags, m->color, m->surfaceProps);
 
 		if(inst->material->texture){
 			d3d::setTexture(0, m->texture);
@@ -512,11 +514,11 @@ CreateRimLightPipes(void)
 	}
 
 
-#include "shaders/neoRim_VS.inc"
+#include "shaders/obj/neoRim_VS.inc"
 	neoRim_VS = rw::d3d::createVertexShader(neoRim_VS_cso);
 	assert(neoRim_VS);
 
-#include "shaders/neoRimSkin_VS.inc"
+#include "shaders/obj/neoRimSkin_VS.inc"
 	neoRimSkin_VS = rw::d3d::createVertexShader(neoRimSkin_VS_cso);
 	assert(neoRimSkin_VS);
 
@@ -610,6 +612,7 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 	assert(building->instHeader->platform == PLATFORM_D3D9);
 	building->fadeAlpha = 255;
 	building->lighting = !!(atomic->geometry->flags & rw::Geometry::LIGHT);
+	rw::uint32 flags = atomic->geometry->flags;
 
 	bool setupDone = false;
 	bool defer = false;
@@ -639,7 +642,7 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 			setupDone = true;
 		}
 
-		setMaterial(m->color, m->surfaceProps);
+		setMaterial(flags, m->color, m->surfaceProps);
 
 		if(m->texture){
 			d3d::setTexture(0, m->texture);
@@ -702,7 +705,7 @@ RenderBlendPass(int pass)
 
 			rw::RGBA color = m->color;
 			color.alpha = (color.alpha * building->fadeAlpha)/255;
-			setMaterial(color, m->surfaceProps);
+			setMaterial(color, m->surfaceProps);	// always modulate here
 
 			if(m->texture){
 				d3d::setTexture(0, m->texture);
