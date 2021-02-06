@@ -87,6 +87,7 @@ vehicleRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 
 	Material *m;
 
+	rw::uint32 flags = atomic->geometry->flags;
 	setWorldMatrix(atomic->getFrame()->getLTM());
 	lightingCB(atomic);
 
@@ -119,7 +120,7 @@ vehicleRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	while(n--){
 		m = inst->material;
 
-		setMaterial(m->color, m->surfaceProps);
+		setMaterial(flags, m->color, m->surfaceProps);
 
 		setTexture(0, m->texture);
 
@@ -160,8 +161,8 @@ CreateVehiclePipe(void)
 
 
 	{
-#include "shaders/neoVehicle_fs_gl.inc"
-#include "shaders/neoVehicle_vs_gl.inc"
+#include "shaders/obj/neoVehicle_frag.inc"
+#include "shaders/obj/neoVehicle_vert.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, neoVehicle_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, neoVehicle_frag_src, nil };
 	neoVehicleShader = Shader::create(vs, fs);
@@ -271,8 +272,8 @@ CreateWorldPipe(void)
 		ReadTweakValueTable((char*)work_buff, WorldLightmapBlend);
 
 	{
-#include "shaders/neoWorldVC_fs_gl.inc"
-#include "shaders/default_UV2_gl.inc"
+#include "shaders/obj/neoWorldVC_frag.inc"
+#include "shaders/obj/default_UV2_vert.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, default_UV2_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, neoWorldVC_frag_src, nil };
 	neoWorldShader = Shader::create(vs, fs);
@@ -379,8 +380,8 @@ CreateGlossPipe(void)
 	using namespace rw::gl3;
 
 	{
-#include "shaders/neoGloss_fs_gl.inc"
-#include "shaders/neoGloss_vs_gl.inc"
+#include "shaders/obj/neoGloss_frag.inc"
+#include "shaders/obj/neoGloss_vert.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, neoGloss_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, neoGloss_frag_src, nil };
 	neoGlossShader = Shader::create(vs, fs);
@@ -449,6 +450,7 @@ rimSkinRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 
 	Material *m;
 
+	rw::uint32 flags = atomic->geometry->flags;
 	setWorldMatrix(atomic->getFrame()->getLTM());
 	lightingCB(atomic);
 
@@ -472,7 +474,7 @@ rimSkinRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	while(n--){
 		m = inst->material;
 
-		setMaterial(m->color, m->surfaceProps);
+		setMaterial(flags, m->color, m->surfaceProps);
 
 		setTexture(0, m->texture);
 
@@ -499,6 +501,7 @@ rimRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 
 	Material *m;
 
+	rw::uint32 flags = atomic->geometry->flags;
 	setWorldMatrix(atomic->getFrame()->getLTM());
 	lightingCB(atomic);
 
@@ -520,7 +523,7 @@ rimRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	while(n--){
 		m = inst->material;
 
-		setMaterial(m->color, m->surfaceProps);
+		setMaterial(flags, m->color, m->surfaceProps);
 
 		setTexture(0, m->texture);
 
@@ -551,8 +554,8 @@ CreateRimLightPipes(void)
 	}
 
 	{
-#include "shaders/simple_fs_gl.inc"
-#include "shaders/neoRimSkin_gl.inc"
+#include "shaders/obj/simple_frag.inc"
+#include "shaders/obj/neoRimSkin_vert.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, neoRimSkin_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, simple_frag_src, nil };
 	neoRimSkinShader = Shader::create(vs, fs);
@@ -560,8 +563,8 @@ CreateRimLightPipes(void)
 	}
 
 	{
-#include "shaders/simple_fs_gl.inc"
-#include "shaders/neoRim_gl.inc"
+#include "shaders/obj/simple_frag.inc"
+#include "shaders/obj/neoRim_vert.inc"
 	const char *vs[] = { shaderDecl, header_vert_src, neoRim_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, simple_frag_src, nil };
 	neoRimShader = Shader::create(vs, fs);
@@ -665,6 +668,7 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 	assert(building->instHeader->platform == PLATFORM_GL3);
 	building->fadeAlpha = 255;
 	building->lighting = !!(atomic->geometry->flags & rw::Geometry::LIGHT);
+	rw::uint32 flags = atomic->geometry->flags;
 
 	WorldLights lights;
 	lights.numAmbients = 1;
@@ -704,7 +708,7 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 			setupDone = true;
 		}
 
-		setMaterial(m->color, m->surfaceProps);
+		setMaterial(flags, m->color, m->surfaceProps);
 
 		setTexture(0, m->texture);
 
@@ -773,7 +777,7 @@ RenderBlendPass(int pass)
 
 			rw::RGBA color = m->color;
 			color.alpha = (color.alpha * building->fadeAlpha)/255;
-			setMaterial(color, m->surfaceProps);
+			setMaterial(color, m->surfaceProps);	// always modulate here
 
 			setTexture(0, m->texture);
 
