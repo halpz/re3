@@ -617,7 +617,7 @@ CPed::SetMoveAnim(void)
 	if (!animAssoc) {
 		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_FIGHT_IDLE);
 		if (!animAssoc)
-			animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_ATTACK_EXTRA2);
+			animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_MELEE_IDLE_FIGHTMODE);
 
 		if (animAssoc && m_nPedState == PED_FIGHT)
 			return;
@@ -1433,7 +1433,7 @@ CPed::CalculateNewVelocity(void)
 		fightAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_IDLE_TIRED);
 
 	if(!fightAssoc)
-		fightAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_ATTACK_EXTRA2);
+		fightAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_MELEE_IDLE_FIGHTMODE);
 
 	if ((!idleAssoc || idleAssoc->blendAmount < 0.5f) && !fightAssoc && !bIsDucking) {
 		LimbOrientation newUpperLegs;

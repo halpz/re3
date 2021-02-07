@@ -333,7 +333,7 @@ CPlayerPed::SetRealMoveAnim(void)
 	if (!curIdleAssoc)
 		curIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_FIGHT_IDLE);
 	if (!curIdleAssoc)
-		curIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_ATTACK_EXTRA2);
+		curIdleAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_MELEE_IDLE_FIGHTMODE);
 
 	if (!((curRunStopAssoc && curRunStopAssoc->IsRunning()) || (curRunStopRAssoc && curRunStopRAssoc->IsRunning()))) {
 
@@ -406,7 +406,7 @@ CPlayerPed::SetRealMoveAnim(void)
 				delete RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_IDLE_TIRED);
 				CAnimBlendAssociation *fightIdleAnim = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_FIGHT_IDLE);
 				if (!fightIdleAnim)
-					fightIdleAnim = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_ATTACK_EXTRA2);
+					fightIdleAnim = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_MELEE_IDLE_FIGHTMODE);
 				delete fightIdleAnim;
 				delete curSprintAssoc;
 
