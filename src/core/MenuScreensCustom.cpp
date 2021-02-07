@@ -195,38 +195,6 @@ void IslandLoadingAfterChange(int8 before, int8 after) {
 }
 #endif
 
-#ifdef MORE_LANGUAGES
-void LangPolSelect(int8 action)
-{
-	if (action == FEOPTION_ACTION_SELECT) {
-		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_POLISH;
-		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
-		FrontEndMenuManager.InitialiseChangedLanguageSettings();
-		FrontEndMenuManager.SaveSettings();
-	}
-}
-
-void LangRusSelect(int8 action)
-{
-	if (action == FEOPTION_ACTION_SELECT) {
-		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_RUSSIAN;
-		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
-		FrontEndMenuManager.InitialiseChangedLanguageSettings();
-		FrontEndMenuManager.SaveSettings();
-	}
-}
-
-void LangJapSelect(int8 action)
-{
-	if (action == FEOPTION_ACTION_SELECT) {
-		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_JAPANESE;
-		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
-		FrontEndMenuManager.InitialiseChangedLanguageSettings();
-		FrontEndMenuManager.SaveSettings();
-	}
-}
-#endif
-
 #ifndef MULTISAMPLING
 void GraphicsGoBack() {
 }
@@ -497,11 +465,7 @@ CMenuScreenCustom aScreens[MENUPAGES] = {
 		MENUACTION_LANG_GER,	"FEL_GER", { nil, SAVESLOT_NONE, MENUPAGE_LANGUAGE_SETTINGS },
 		MENUACTION_LANG_ITA,	"FEL_ITA", { nil, SAVESLOT_NONE, MENUPAGE_LANGUAGE_SETTINGS },
 		MENUACTION_LANG_SPA,    "FEL_SPA", { nil, SAVESLOT_NONE, MENUPAGE_LANGUAGE_SETTINGS },
-#ifdef MORE_LANGUAGES
-		MENUACTION_CFO_DYNAMIC,    "FEL_POL", { new CCFODynamic(nil, nil, nil, nil, LangPolSelect) },
-		MENUACTION_CFO_DYNAMIC,    "FEL_RUS", { new CCFODynamic(nil, nil, nil, nil, LangRusSelect) },
-		MENUACTION_CFO_DYNAMIC,    "FEL_JAP", { new CCFODynamic(nil, nil, nil, nil, LangJapSelect) },
-#endif
+		// CustomFrontendOptionsPopulate will add languages here, if files are found
 		MENUACTION_CHANGEMENU,	"FEDS_TB", { nil, SAVESLOT_NONE, MENUPAGE_NONE },
 	},
 
@@ -836,9 +800,7 @@ CMenuScreenCustom aScreens[MENUPAGES] = {
    { "FET_PAU", MENUPAGE_DISABLED, MENUPAGE_DISABLED, nil, nil,
 	   MENUACTION_RESUME,		"FEM_RES",	{ nil, SAVESLOT_NONE, MENUPAGE_NONE },
 	   MENUACTION_CHANGEMENU,	"FEN_STA",	{ nil, SAVESLOT_NONE, MENUPAGE_NEW_GAME },
-#ifdef MENU_MAP
-	   MENUACTION_CHANGEMENU,	"FEG_MAP",	{ nil, SAVESLOT_NONE, MENUPAGE_MAP },
-#endif
+	   // CMenuManager::LoadAllTextures will add map here, if MENU_MAP enabled and map textures are found
 	   MENUACTION_CHANGEMENU,	"FEP_STA",	{ nil, SAVESLOT_NONE, MENUPAGE_STATS },
 	   MENUACTION_CHANGEMENU,	"FEP_BRI",	{ nil, SAVESLOT_NONE, MENUPAGE_BRIEFS },
 	   MENUACTION_CHANGEMENU,	"FET_OPT",	{ nil, SAVESLOT_NONE, MENUPAGE_OPTIONS },

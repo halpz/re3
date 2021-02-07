@@ -312,7 +312,6 @@ enum Config {
 #	define PS2_MENU
 //#	define PS2_MENU_USEALLPAGEICONS
 #else
-#	define MENU_MAP			// VC-like menu map. Make sure you have new menu.txd
 
 #	ifdef XINPUT
 #		define GAMEPAD_MENU		// Add gamepad menu
@@ -326,6 +325,7 @@ enum Config {
 #	define CUSTOM_FRONTEND_OPTIONS
 
 #	ifdef CUSTOM_FRONTEND_OPTIONS
+#		define MENU_MAP			// VC-like menu map. Won't appear if you don't have our menu.txd
 #		define GRAPHICS_MENU_OPTIONS // otherwise Display settings will be scrollable
 #		define NO_ISLAND_LOADING  // disable loadscreen between islands via loading all island data at once, consumes more memory and CPU
 #		define CUTSCENE_BORDERS_SWITCH

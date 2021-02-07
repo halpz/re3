@@ -85,16 +85,49 @@ mysrand(unsigned int seed)
 #ifdef CUSTOM_FRONTEND_OPTIONS
 #include "frontendoption.h"
 
+#ifdef MORE_LANGUAGES
+void LangPolSelect(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_POLISH;
+		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
+		FrontEndMenuManager.InitialiseChangedLanguageSettings();
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+
+void LangRusSelect(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_RUSSIAN;
+		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
+		FrontEndMenuManager.InitialiseChangedLanguageSettings();
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+
+void LangJapSelect(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_JAPANESE;
+		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
+		FrontEndMenuManager.InitialiseChangedLanguageSettings();
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+#endif
+
 void
 CustomFrontendOptionsPopulate(void)
 {
 	// Moved to an array in MenuScreensCustom.cpp, but APIs are still available. see frontendoption.h
 
 	// These work only if we have neo folder, so they're dynamically added
+	int fd;
 #ifdef EXTENDED_PIPELINES
 	const char *vehPipelineNames[] = { "FED_MFX", "FED_NEO" };
 	const char *off_on[] = { "FEM_OFF", "FEM_ON" };
-	int fd = CFileMgr::OpenFile("neo/neo.txd","r");
+	fd = CFileMgr::OpenFile("neo/neo.txd","r");
 	if (fd) {
 #ifdef GRAPHICS_MENU_OPTIONS
 		FrontendOptionSetCursor(MENUPAGE_GRAPHICS_SETTINGS, -3, false);
@@ -109,6 +142,28 @@ CustomFrontendOptionsPopulate(void)
 		FrontendOptionAddSelect("FED_WLM", off_on, 2, (int8*)&CustomPipes::LightmapEnable, false, nil, "Graphics", "NeoLightMaps");
 		FrontendOptionAddSelect("FED_RGL", off_on, 2, (int8*)&CustomPipes::GlossEnable, false, nil, "Graphics", "NeoRoadGloss");
 #endif
+		CFileMgr::CloseFile(fd);
+	}
+#endif
+
+	// Add outsourced language translations, if files are found
+#ifdef MORE_LANGUAGES
+	FrontendOptionSetCursor(MENUPAGE_LANGUAGE_SETTINGS, 5, false);
+	fd = CFileMgr::OpenFile("text/polish.gxt","r");
+	if (fd) {
+		FrontendOptionAddDynamic("FEL_POL", nil, nil, LangPolSelect, nil, nil);
+		CFileMgr::CloseFile(fd);
+	}
+
+	fd = CFileMgr::OpenFile("text/russian.gxt","r");
+	if (fd) {
+		FrontendOptionAddDynamic("FEL_RUS", nil, nil, LangRusSelect, nil, nil);
+		CFileMgr::CloseFile(fd);
+	}
+
+	fd = CFileMgr::OpenFile("text/japanese.gxt","r");
+	if (fd) {
+		FrontendOptionAddDynamic("FEL_JAP", nil, nil, LangJapSelect, nil, nil);
 		CFileMgr::CloseFile(fd);
 	}
 #endif
