@@ -72,7 +72,6 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 		CFerry* pFerry = CFerry::GetFerry(GET_INTEGER_PARAM(0));
 		script_assert(pFerry);
 		UpdateCompareFlag(pFerry->IsDoorOpen());
-		UpdateCompareFlag(false);
 		return 0;
 	}
 	case COMMAND_IS_FERRY_DOOR_CLOSED:
@@ -81,7 +80,6 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 		CFerry* pFerry = CFerry::GetFerry(GET_INTEGER_PARAM(0));
 		script_assert(pFerry);
 		UpdateCompareFlag(pFerry->IsDoorClosed());
-		UpdateCompareFlag(true);
 		return 0;
 	}
 	case COMMAND_SKIP_FERRY_TO_NEXT_DOCK:
