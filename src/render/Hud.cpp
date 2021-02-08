@@ -1150,18 +1150,18 @@ void CHud::Draw()
 				if (IntroRect.m_nTextureId >= 0) {
 					CRect rect (
 						IntroRect.m_sRect.left,
-						IntroRect.m_sRect.top,
+						IntroRect.m_sRect.bottom,
 						IntroRect.m_sRect.right,
-						IntroRect.m_sRect.bottom );
+						IntroRect.m_sRect.top );
 
 					CTheScripts::ScriptSprites[IntroRect.m_nTextureId].Draw(rect, IntroRect.m_sColor);
 				}
 				else {
 					CRect rect (
 						IntroRect.m_sRect.left,
-						IntroRect.m_sRect.top,
+						IntroRect.m_sRect.bottom,
 						IntroRect.m_sRect.right,
-						IntroRect.m_sRect.bottom );
+						IntroRect.m_sRect.top );
 
 					CSprite2d::DrawRect(rect, IntroRect.m_sColor);
 				}

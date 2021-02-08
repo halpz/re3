@@ -451,6 +451,7 @@ CFont::Shutdown(void)
 		for (int i = 0; i < MAX_BUTTON_ICONS; i++)
 			ButtonSprite[i].Delete();
 		CTxdStore::RemoveTxdSlot(ButtonsSlot);
+		ButtonsSlot = -1;
 	}
 #endif
 	Sprite[0].Delete();

@@ -3454,7 +3454,7 @@ CPed::BeingDraggedFromCar(void)
 #ifdef VC_PED_PORTS
 	if (m_objective == OBJECTIVE_LEAVE_CAR_AND_DIE) {
 		if (m_pMyVehicle) {
-			m_pMyVehicle->ProcessOpenDoor(m_vehDoor, NUM_ANIMS, m_pVehicleAnim->currentTime * 5.0f);
+			m_pMyVehicle->ProcessOpenDoor(m_vehDoor, ANIM_STD_NUM, m_pVehicleAnim->currentTime * 5.0f);
 		}
 	}
 #endif
