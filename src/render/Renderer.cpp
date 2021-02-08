@@ -1394,6 +1394,10 @@ CRenderer::ScanSectorPoly(RwV2d *poly, int32 numVertices, void (*scanfunc)(CPtrL
 void
 CRenderer::InsertEntityIntoList(CEntity *ent)
 {
+#ifdef FIX_BUGS
+	if (!ent->m_rwObject) return;
+#endif
+
 #ifdef NEW_RENDERER
 	// TODO: there are more flags being checked here
 	if(gbNewRenderer && (ent->IsVehicle() || ent->IsPed()))

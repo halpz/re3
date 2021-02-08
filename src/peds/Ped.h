@@ -639,7 +639,7 @@ public:
 	uint32 m_threatFlags;
 	uint32 m_threatCheckTimer;
 	uint32 m_threatCheckInterval;
-	uint32 m_delayedSoundID;
+	int32 m_delayedSoundID;
 	uint32 m_delayedSoundTimer;
 	uint32 m_lastSoundStart;
 	uint32 m_soundStart;

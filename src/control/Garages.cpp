@@ -1285,7 +1285,7 @@ bool CGarage::IsAnyOtherCarTouchingGarage(CVehicle * pException)
 	uint32 i = CPools::GetVehiclePool()->GetSize();
 	while (i--) {
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
-		if (!pVehicle || pVehicle == pException)
+		if (!pVehicle || pVehicle == pException || pVehicle->GetStatus() == STATUS_WRECKED)
 			continue;
 		if (!IsEntityTouching3D(pVehicle))
 			continue;
@@ -1997,7 +1997,11 @@ float CGarages::FindDoorHeightForMI(int32 mi)
 void CGarage::TidyUpGarage()
 {
 	uint32 i = CPools::GetVehiclePool()->GetSize();
+#ifdef FIX_BUGS
 	while (i--) {
+#else
+	while (--i) {
+#endif
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
 		if (pVehicle && (pVehicle->IsCar() || pVehicle->IsBike())) {
 			if (IsPointInsideGarage(pVehicle->GetPosition())) {
@@ -2013,7 +2017,11 @@ void CGarage::TidyUpGarage()
 void CGarage::TidyUpGarageClose()
 {
 	uint32 i = CPools::GetVehiclePool()->GetSize();
+#ifdef FIX_BUGS
 	while (i--) {
+#else
+	while (--i) {
+#endif
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
 		if (!pVehicle)
 			continue;
@@ -2226,6 +2234,8 @@ void CGarages::SetAllDoorsBackToOriginalHeight()
 		default:
 			aGarages[i].RefreshDoorPointers(true);
 			if (aGarages[i].m_pDoor1) {
+				aGarages[i].m_pDoor1->GetMatrix().GetPosition().x = aGarages[i].m_fDoor1X;
+				aGarages[i].m_pDoor1->GetMatrix().GetPosition().y = aGarages[i].m_fDoor1Y;
 				aGarages[i].m_pDoor1->GetMatrix().GetPosition().z = aGarages[i].m_fDoor1Z;
 				if (aGarages[i].m_pDoor1->IsObject())
 					((CObject*)aGarages[i].m_pDoor1)->m_objectMatrix.GetPosition().z = aGarages[i].m_fDoor1Z;
@@ -2235,6 +2245,8 @@ void CGarages::SetAllDoorsBackToOriginalHeight()
 				aGarages[i].m_pDoor1->UpdateRwFrame();
 			}
 			if (aGarages[i].m_pDoor2) {
+				aGarages[i].m_pDoor2->GetMatrix().GetPosition().x = aGarages[i].m_fDoor2X;
+				aGarages[i].m_pDoor2->GetMatrix().GetPosition().y = aGarages[i].m_fDoor2Y;
 				aGarages[i].m_pDoor2->GetMatrix().GetPosition().z = aGarages[i].m_fDoor2Z;
 				if (aGarages[i].m_pDoor2->IsObject())
 					((CObject*)aGarages[i].m_pDoor2)->m_objectMatrix.GetPosition().z = aGarages[i].m_fDoor2Z;

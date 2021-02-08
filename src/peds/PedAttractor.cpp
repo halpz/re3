@@ -113,7 +113,11 @@ const C2dEffect* CPedAttractorManager::GetEffectForIceCreamVan(CVehicle* pVehicl
 	CVehicleToEffect effect(pVehicle);
 	vVehicleToEffect.push_back(effect);
 	POP_MEMID();
+#ifdef FIX_BUGS
+	return vVehicleToEffect.back().ChooseEffect(pos);
+#else
 	return effect.ChooseEffect(pos);
+#endif
 }
 
 CVehicle* CPedAttractorManager::GetIceCreamVanForEffect(C2dEffect* pEffect)

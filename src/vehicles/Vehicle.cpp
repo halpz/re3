@@ -152,7 +152,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, this);
 	if(m_audioEntityId >= 0)
 		DMAudio.SetEntityStatus(m_audioEntityId, true);
-	//m_nRadioStation = CGeneral::GetRandomNumber() % USERTRACK;
+	//m_nRadioStation = CGeneral::GetRandomNumber() % NUM_RADIOS;
 	switch(GetModelIndex()){
 	case MI_HUNTER:
 	case MI_ANGEL:
@@ -169,7 +169,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 		m_nRadioStation = RADIO_OFF;
 		break;
 	default:
-		m_nRadioStation = CGeneral::GetRandomNumber() % USERTRACK;
+		m_nRadioStation = CGeneral::GetRandomNumber() % NUM_RADIOS;
 		break;
 	}
 	m_pCurGroundEntity = nil;

@@ -431,12 +431,12 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		script_assert(pPed);
 		if (ScriptParams[1]) {
-			pPed->bIsDucking = true;
+			pPed->bCrouchWhenShooting = true;
 			pPed->SetDuck(ScriptParams[2], true);
 		}
 		else {
 			pPed->ClearDuck(true);
-			pPed->bIsDucking = false;
+			pPed->bCrouchWhenShooting = false;
 		}
 		return 0;
 	}

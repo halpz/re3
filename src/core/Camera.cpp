@@ -1768,7 +1768,7 @@ CCamera::CamControl(void)
 		   (m_bLookingAtPlayer || WhoIsInControlOfTheCamera == CAMCONTROL_OBBE) &&
 		   !m_WideScreenOn &&
 		   (WhoIsInControlOfTheCamera != CAMCONTROL_OBBE || bSwitchedToObbeCam))
-			DMAudio.PlayFrontEndSound(SOUND_HUD_SOUND, 0);
+			DMAudio.PlayFrontEndSound(SOUND_HUD, 0);
 }
 
 // What a mess!

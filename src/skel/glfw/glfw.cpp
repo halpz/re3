@@ -1271,10 +1271,11 @@ void terminateHandler(int sig, siginfo_t *info, void *ucontext) {
 	RsGlobal.quit = TRUE;
 }
 
+#ifdef FLUSHABLE_STREAMING
 void dummyHandler(int sig){
 	// Don't kill the app pls
 }
-
+#endif
 #endif
 
 void resizeCB(GLFWwindow* window, int width, int height) {
@@ -1447,7 +1448,7 @@ bool rshiftStatus = false;
 void
 keypressCB(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	if (key >= 0 && key <= GLFW_KEY_LAST) {
+	if (key >= 0 && key <= GLFW_KEY_LAST && action != GLFW_REPEAT) {
 		RsKeyCodes ks = (RsKeyCodes)keymap[key];
 
 		if (key == GLFW_KEY_LEFT_SHIFT)
@@ -1458,7 +1459,6 @@ keypressCB(GLFWwindow* window, int key, int scancode, int action, int mods)
 
 		if (action == GLFW_RELEASE) RsKeyboardEventHandler(rsKEYUP, &ks);
 		else if (action == GLFW_PRESS) RsKeyboardEventHandler(rsKEYDOWN, &ks);
-		else if (action == GLFW_REPEAT) RsKeyboardEventHandler(rsKEYDOWN, &ks);
 	}
 }
 
@@ -1528,11 +1528,13 @@ main(int argc, char *argv[])
 	act.sa_sigaction = terminateHandler;
 	act.sa_flags = SA_SIGINFO;
 	sigaction(SIGTERM, &act, NULL);
+#ifdef FLUSHABLE_STREAMING
 	struct sigaction sa;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_handler = dummyHandler;
 	sa.sa_flags = 0;
-	sigaction(SIGUSR1, &sa, NULL); // Needed for CdStreamPosix
+	sigaction(SIGUSR1, &sa, NULL);
+#endif
 #endif
 
 	/* 

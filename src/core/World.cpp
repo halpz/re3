@@ -367,7 +367,7 @@ CWorld::ProcessLineOfSightSectorList(CPtrList &list, const CColLine &line, CColP
 			} else if(e->bUsesCollision)
 				colmodel = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
 
-			if(colmodel && CCollision::ProcessLineOfSight(line, e->GetMatrix(), *colmodel, point, dist,
+			if(colmodel && CCollision::ProcessLineOfSight(line, e->GetMatrix(), *colmodel, point, mindist,
 			                                              ignoreSeeThrough, ignoreShootThrough))
 				entity = e;
 			if(carTyres && ((CVehicle*)e)->SetUpWheelColModel(&tyreCol) && CCollision::ProcessLineOfSight(line, e->GetMatrix(), tyreCol, tyreColPoint, tyreDist, false, ignoreShootThrough)){
@@ -466,7 +466,7 @@ CWorld::ProcessVerticalLineSectorList(CPtrList &list, const CColLine &line, CCol
 			e->m_scanCode = GetCurrentScanCode();
 
 			colmodel = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
-			if(CCollision::ProcessVerticalLine(line, e->GetMatrix(), *colmodel, point, dist,
+			if(CCollision::ProcessVerticalLine(line, e->GetMatrix(), *colmodel, point, mindist,
 			                                   ignoreSeeThrough, false, poly))
 				entity = e;
 		}
@@ -2239,8 +2239,12 @@ CWorld::UseDetonator(CEntity *pEntity)
 {
 	int32 i = CPools::GetVehiclePool()->GetSize();
 	while(--i >= 0) {
+#ifdef FIX_BUGS
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
+#else
 		CAutomobile *pVehicle = (CAutomobile *)CPools::GetVehiclePool()->GetSlot(i);
-		if(pVehicle && !pVehicle->m_vehType && pVehicle->m_bombType == CARBOMB_REMOTE &&
+#endif
+		if(pVehicle && pVehicle->m_bombType == CARBOMB_REMOTE &&
 		   pVehicle->m_pBombRigger == pEntity) {
 			pVehicle->m_bombType = CARBOMB_NONE;
 			pVehicle->m_nBombTimer = 500;

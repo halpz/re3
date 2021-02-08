@@ -14566,6 +14566,20 @@ La compagnia dei taxi d'ora in poi genererà introiti per un massimo di ~1~$. Ri
 [TAX3_5:TAXIWA3]
 Ehi ragazzo, ti abbronzo il fondoschiena!
 
+{ re3 updates }
+{ new languages }
+[FEL_JAP]
+GIAPPONESE
+
+[FEL_POL]
+POLACCO
+
+[FEL_RUS]
+RUSSO
+
+[FEA_FMN]
+RADIO SPENTA
+
 [DUMMY]
 THIS LABEL NEEDS TO BE HERE !!!
 AS THE LAST LABEL DOES NOT GET COMPILED

@@ -406,6 +406,10 @@ bool LoadINISettings()
 	ReadIniIfExists("CustomPipesValues", "LightmapMult", &CustomPipes::LightmapMult);
 	ReadIniIfExists("CustomPipesValues", "GlossMult", &CustomPipes::GlossMult);
 #endif
+	ReadIniIfExists("Rendering", "BackfaceCulling", &gBackfaceCulling);
+#ifdef NEW_RENDERER
+	ReadIniIfExists("Rendering", "NewRenderer", &gbNewRenderer);
+#endif
 
 #ifdef PROPER_SCALING
 	ReadIniIfExists("Draw", "ProperScaling", &CDraw::ms_bProperScaling);	
@@ -495,6 +499,9 @@ void SaveINISettings()
 	StoreIni("CustomPipesValues", "GlossMult", CustomPipes::GlossMult);
 #endif
 	StoreIni("Rendering", "BackfaceCulling", gBackfaceCulling);
+#ifdef NEW_RENDERER
+	StoreIni("Rendering", "NewRenderer", gbNewRenderer);
+#endif
 
 #ifdef PROPER_SCALING	
 	StoreIni("Draw", "ProperScaling", CDraw::ms_bProperScaling);	
@@ -706,7 +713,7 @@ void CTweakVars::Add(CTweakVar *var)
 		TweakVarsListSize = 0;
 	}
 	if(TweakVarsListSize > 63)
-		TweakVarsList = (CTweakVar**) realloc(TweakVarsList, (TweakVarsListSize + 1) * sizeof(*var));
+		TweakVarsList = (CTweakVar**) realloc(TweakVarsList, (TweakVarsListSize + 1) * sizeof(CTweakVar*));
 
 	TweakVarsList[TweakVarsListSize++] = var;
 //	TweakVarsList.push_back(var);

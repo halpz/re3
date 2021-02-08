@@ -266,7 +266,7 @@ public:
 	eCarLock m_nDoorLock;
 	int8 m_nLastWeaponDamage; // see eWeaponType, -1 if no damage
 	CEntity *m_pLastDamageEntity;
-	int8 m_nRadioStation;
+	uint8 m_nRadioStation;
 	uint8 m_bRainAudioCounter;
 	uint8 m_bRainSamplesCounter;
 	uint32 m_nCarHornTimer;
