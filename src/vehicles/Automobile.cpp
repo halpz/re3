@@ -3091,8 +3091,8 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 	float speed = DotProduct(m_vecMoveSpeed, GetForward());
 
 	if(!CPad::GetPad(pad)->GetExitVehicle() ||
-	   pDriver && pDriver->m_pVehicleAnim && (pDriver->m_pVehicleAnim->animId == ANIM_CAR_ROLLOUT_LHS ||
-	                                          pDriver->m_pVehicleAnim->animId == ANIM_CAR_ROLLOUT_RHS))
+	   pDriver && pDriver->m_pVehicleAnim && (pDriver->m_pVehicleAnim->animId == ANIM_STD_ROLLOUT_LHS ||
+	                                          pDriver->m_pVehicleAnim->animId == ANIM_STD_ROLLOUT_RHS))
 		bIsHandbrakeOn = !!CPad::GetPad(pad)->GetHandBrake();
 	else
 		bIsHandbrakeOn = true;
@@ -3874,11 +3874,11 @@ CAutomobile::DoDriveByShootings(void)
 			lookingRight = true;
 	}
 
-	AnimationId rightAnim = ANIM_DRIVEBY_R;
-	AnimationId leftAnim = ANIM_DRIVEBY_L;
+	AnimationId rightAnim = ANIM_STD_CAR_DRIVEBY_RIGHT;
+	AnimationId leftAnim = ANIM_STD_CAR_DRIVEBY_LEFT;
 	if (pDriver->m_pMyVehicle->bLowVehicle) {
-		rightAnim = ANIM_DRIVEBY_LOW_R;
-		leftAnim = ANIM_DRIVEBY_LOW_L;
+		rightAnim = ANIM_STD_CAR_DRIVEBY_RIGHT_LO;
+		leftAnim = ANIM_STD_CAR_DRIVEBY_LEFT_LO;
 	}
 
 	if(lookingLeft || lookingRight){
@@ -3917,11 +3917,11 @@ CAutomobile::DoDriveByShootings(void)
 	// TODO: what is this?
 	if(!lookingLeft && m_weaponDoorTimerLeft > 0.0f){
 		m_weaponDoorTimerLeft = Max(m_weaponDoorTimerLeft - CTimer::GetTimeStep()*0.1f, 0.0f);
-		ProcessOpenDoor(CAR_DOOR_LF, NUM_STD_ANIMS, m_weaponDoorTimerLeft);
+		ProcessOpenDoor(CAR_DOOR_LF, ANIM_STD_NUM, m_weaponDoorTimerLeft);
 	}
 	if(!lookingRight && m_weaponDoorTimerRight > 0.0f){
 		m_weaponDoorTimerRight = Max(m_weaponDoorTimerRight - CTimer::GetTimeStep()*0.1f, 0.0f);
-		ProcessOpenDoor(CAR_DOOR_RF, NUM_STD_ANIMS, m_weaponDoorTimerRight);
+		ProcessOpenDoor(CAR_DOOR_RF, ANIM_STD_NUM, m_weaponDoorTimerRight);
 	}
 }
 
@@ -4640,55 +4640,55 @@ CAutomobile::ProcessOpenDoor(uint32 component, uint32 anim, float time)
 		return;
 
 	switch(anim){
-	case ANIM_CAR_QJACK:
-	case ANIM_CAR_OPEN_LHS:
-	case ANIM_CAR_OPEN_RHS:
+	case ANIM_STD_QUICKJACK:
+	case ANIM_STD_CAR_OPEN_DOOR_LHS:
+	case ANIM_STD_CAR_OPEN_DOOR_RHS:
 		ProcessDoorOpenAnimation(this, component, door, time, 0.41f, 0.89f);
 		break;
-	case ANIM_CAR_CLOSEDOOR_LHS:
-	case ANIM_CAR_CLOSEDOOR_LOW_LHS:
-	case ANIM_CAR_CLOSEDOOR_RHS:
-	case ANIM_CAR_CLOSEDOOR_LOW_RHS:
+	case ANIM_STD_CAR_CLOSE_DOOR_LHS:
+	case ANIM_STD_CAR_CLOSE_DOOR_LO_LHS:
+	case ANIM_STD_CAR_CLOSE_DOOR_RHS:
+	case ANIM_STD_CAR_CLOSE_DOOR_LO_RHS:
 		ProcessDoorCloseAnimation(this, component, door, time, 0.2f, 0.45f);
 		break;
-	case ANIM_CAR_ROLLDOOR:
-	case ANIM_CAR_ROLLDOOR_LOW:
+	case ANIM_STD_CAR_CLOSE_DOOR_ROLLING_LHS:
+	case ANIM_STD_CAR_CLOSE_DOOR_ROLLING_LO_LHS:
 		ProcessDoorOpenCloseAnimation(this, component, door, time, 0.1f, 0.6f, 0.95f);
 		break;
-	case ANIM_CAR_GETOUT_LHS:
-	case ANIM_CAR_GETOUT_LOW_LHS:
-	case ANIM_CAR_GETOUT_RHS:
-	case ANIM_CAR_GETOUT_LOW_RHS:
+	case ANIM_STD_GETOUT_LHS:
+	case ANIM_STD_GETOUT_LO_LHS:
+	case ANIM_STD_GETOUT_RHS:
+	case ANIM_STD_GETOUT_LO_RHS:
 		ProcessDoorOpenAnimation(this, component, door, time, 0.06f, 0.43f);
 		break;
-	case ANIM_CAR_CLOSE_LHS:
-	case ANIM_CAR_CLOSE_RHS:
+	case ANIM_STD_CAR_CLOSE_LHS:
+	case ANIM_STD_CAR_CLOSE_RHS:
 		ProcessDoorCloseAnimation(this, component, door, time, 0.1f, 0.23f);
 		break;
-	case ANIM_CAR_PULLOUT_RHS:
-	case ANIM_CAR_PULLOUT_LOW_RHS:
+	case ANIM_STD_CAR_PULL_OUT_PED_RHS:
+	case ANIM_STD_CAR_PULL_OUT_PED_LO_RHS:
 		OpenDoor(component, door, 1.0f);
 		break;
-	case ANIM_COACH_OPEN_L:
-	case ANIM_COACH_OPEN_R:
+	case ANIM_STD_COACH_OPEN_LHS:
+	case ANIM_STD_COACH_OPEN_RHS:
 		ProcessDoorOpenAnimation(this, component, door, time, 0.66f, 0.8f);
 		break;
-	case ANIM_COACH_OUT_L:
+	case ANIM_STD_COACH_GET_OUT_LHS:
 		ProcessDoorOpenAnimation(this, component, door, time, 0.0f, 0.3f);
 		break;
-	case ANIM_VAN_OPEN_L:
-	case ANIM_VAN_OPEN:
+	case ANIM_STD_VAN_OPEN_DOOR_REAR_LHS:
+	case ANIM_STD_VAN_OPEN_DOOR_REAR_RHS:
 		ProcessDoorOpenAnimation(this, component, door, time, 0.37f, 0.55f);
 		break;
-	case ANIM_VAN_CLOSE_L:
-	case ANIM_VAN_CLOSE:
+	case ANIM_STD_VAN_CLOSE_DOOR_REAR_LHS:
+	case ANIM_STD_VAN_CLOSE_DOOR_REAR_RHS:
 		ProcessDoorCloseAnimation(this, component, door, time, 0.5f, 0.8f);
 		break;
-	case ANIM_VAN_GETOUT_L:
-	case ANIM_VAN_GETOUT:
+	case ANIM_STD_VAN_GET_OUT_REAR_LHS:
+	case ANIM_STD_VAN_GET_OUT_REAR_RHS:
 		ProcessDoorOpenAnimation(this, component, door, time, 0.5f, 0.6f);
 		break;
-	case NUM_STD_ANIMS:
+	case ANIM_STD_NUM:
 		OpenDoor(component, door, time);
 		break;
 	}
@@ -5821,13 +5821,13 @@ CAutomobile::CloseAllDoors(void)
 void
 CAutomobile::KnockPedOutCar(eWeaponType weapon, uint16 door, CPed *ped)
 {
-	AnimationId anim = ANIM_KO_SHOT_FRONT1;
+	AnimationId anim = ANIM_STD_KO_FRONT;
 	if(ped == nil)
 		return;
 
 	ped->m_vehDoor = door;
 	ped->SetPedState(PED_IDLE);
-	CAnimManager::BlendAnimation(ped->GetClump(), ped->m_animGroup, ANIM_IDLE_STANCE, 100.0f);
+	CAnimManager::BlendAnimation(ped->GetClump(), ped->m_animGroup, ANIM_STD_IDLE, 100.0f);
 	CPed::PedSetOutCarCB(nil, ped);
 	ped->SetMoveState(PEDMOVE_STILL);
 	if(GetUp().z < 0.0f)
@@ -5840,14 +5840,14 @@ CAutomobile::KnockPedOutCar(eWeaponType weapon, uint16 door, CPed *ped)
 	case WEAPONTYPE_UNIDENTIFIED:
 		ped->m_vecMoveSpeed = m_vecMoveSpeed;
 		ped->m_pCollidingEntity = this;
-		anim = NUM_STD_ANIMS;
+		anim = ANIM_STD_NUM;
 		break;
 
 	case WEAPONTYPE_BASEBALLBAT:
 	case WEAPONTYPE_RAMMEDBYCAR:
 	case WEAPONTYPE_FALL:
 		ped->m_vecMoveSpeed = m_vecMoveSpeed;
-		anim = ANIM_KD_LEFT;
+		anim = ANIM_STD_SPINFORWARD_LEFT;
 		ApplyMoveForce(4.0f*GetUp() + 8.0f*GetRight());
 		break;
 	}

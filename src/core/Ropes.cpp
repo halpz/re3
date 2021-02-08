@@ -167,7 +167,7 @@ CRopes::CreateRopeWithSwatComingDown(CVector pos)
 	swat->bUsesCollision = false;
 	swat->m_pRopeEntity = (CEntity*)1;
 	swat->m_nRopeID = 100 + ropeId;
-	CAnimManager::BlendAnimation(swat->GetClump(), ASSOCGRP_STD, ANIM_ABSEIL, 4.0f);
+	CAnimManager::BlendAnimation(swat->GetClump(), ASSOCGRP_STD, ANIM_STD_ABSEIL, 4.0f);
 	ropeId++;
 	return true;
 }
