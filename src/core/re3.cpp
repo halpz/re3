@@ -120,9 +120,9 @@ void LangJapSelect(int8 action)
 void
 CustomFrontendOptionsPopulate(void)
 {
-	// Moved to an array in MenuScreensCustom.cpp, but APIs are still available. see frontendoption.h
+	// Most of custom options are done statically in MenuScreensCustom.cpp, we add them here only if they're dependent to extra files
 
-	// These work only if we have neo folder, so they're dynamically added
+	// These work only if we have neo folder
 	int fd;
 #ifdef EXTENDED_PIPELINES
 	const char *vehPipelineNames[] = { "FED_MFX", "FED_NEO" };
@@ -148,22 +148,29 @@ CustomFrontendOptionsPopulate(void)
 
 	// Add outsourced language translations, if files are found
 #ifdef MORE_LANGUAGES
+	int fd2;
 	FrontendOptionSetCursor(MENUPAGE_LANGUAGE_SETTINGS, 5, false);
-	fd = CFileMgr::OpenFile("text/polish.gxt","r");
-	if (fd) {
-		FrontendOptionAddDynamic("FEL_POL", nil, nil, LangPolSelect, nil, nil);
+	if (fd = CFileMgr::OpenFile("text/polish.gxt","r")) {
+		if (fd2 = CFileMgr::OpenFile("models/fonts_p.txd","r")) {
+			FrontendOptionAddDynamic("FEL_POL", nil, nil, LangPolSelect, nil, nil);
+			CFileMgr::CloseFile(fd2);
+		}
 		CFileMgr::CloseFile(fd);
 	}
 
-	fd = CFileMgr::OpenFile("text/russian.gxt","r");
-	if (fd) {
-		FrontendOptionAddDynamic("FEL_RUS", nil, nil, LangRusSelect, nil, nil);
+	if (fd = CFileMgr::OpenFile("text/russian.gxt","r")) {
+		if (fd2 = CFileMgr::OpenFile("models/fonts_r.txd","r")) {
+			FrontendOptionAddDynamic("FEL_RUS", nil, nil, LangRusSelect, nil, nil);
+			CFileMgr::CloseFile(fd2);
+		}
 		CFileMgr::CloseFile(fd);
 	}
 
-	fd = CFileMgr::OpenFile("text/japanese.gxt","r");
-	if (fd) {
-		FrontendOptionAddDynamic("FEL_JAP", nil, nil, LangJapSelect, nil, nil);
+	if (fd = CFileMgr::OpenFile("text/japanese.gxt","r")) {
+		if (fd2 = CFileMgr::OpenFile("models/fonts_j.txd","r")) {
+			FrontendOptionAddDynamic("FEL_JAP", nil, nil, LangJapSelect, nil, nil);
+			CFileMgr::CloseFile(fd2);
+		}
 		CFileMgr::CloseFile(fd);
 	}
 #endif
