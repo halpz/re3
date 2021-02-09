@@ -2221,11 +2221,11 @@ Bomby samochodowe kosztują 1000 dolarów za sztukę.
 [GA_5]
 W twoim samochodzie bomba już została zainstalowana.
 	
-[GA_6]
-Zaparkuj wóz, włącz mechanizm klawiszem ~h~~k~~PED_FIREWEAPON~~w~ i W NOGI!
+[GA_6] { re3 change }
+Zaparkuj wóz, włącz mechanizm klawiszem ~h~~k~~VEHICLE_FIREWEAPON~~w~ i W NOGI!
 	
-[GA_7]
-Uaktywnij bombę za pomocą klawisza ~h~~k~~PED_FIREWEAPON~~w~. Bomba wybuchnie w momencie włączenia silnika.
+[GA_7] { re3 change }
+Uaktywnij bombę za pomocą klawisza ~h~~k~~VEHICLE_FIREWEAPON~~w~. Bomba wybuchnie w momencie włączenia silnika.
 	
 [GA_8]
 Użyj detonatora, aby aktywować bombę.
@@ -3592,11 +3592,11 @@ W porządku?
 [JM6_1]
 Jedź do banku na głównej ulicy.
 	
-[GA_6B]
-Zaparkuj wóz, włącz mechanizm klawiszem ~h~~k~~PED_FIREWEAPON~~w~ i W NOGI!
+[GA_6B] { re3 change }
+Zaparkuj wóz, włącz mechanizm klawiszem ~h~~k~~VEHICLE_FIREWEAPON~~w~ i W NOGI!
 	
-[GA_7B]
-Uaktywnij bombę za pomocą klawisza ~h~~k~~PED_FIREWEAPON~~w~. Bomba wybuchnie w momencie włączenia silnika.
+[GA_7B] { re3 change }
+Uaktywnij bombę za pomocą klawisza ~h~~k~~VEHICLE_FIREWEAPON~~w~. Bomba wybuchnie w momencie włączenia silnika.
 	
 [BAT1]
 ~g~Podnieś kij bejsbolowy!
@@ -4027,11 +4027,11 @@ Wprowadź samochód do warsztatu lakierniczego, aby obniżyć swój ~h~poziom z�
 [HM1_1]
 ~g~Załatw 20 Purpurowych Dziewiątek w 2 minuty 30 sekund.
 	
-[KM1_8A]
-Naciśnij klawisz ~h~ ~k~~PED_FIREWEAPON~ ~w~, aby ~h~aktywować bombę.~w~ Nie zapomnij oddalić się od miejsca eksplozji.
+[KM1_8A] { re3 change }
+Naciśnij klawisz ~h~ ~k~~VEHICLE_FIREWEAPON~ ~w~, aby ~h~aktywować bombę.~w~ Nie zapomnij oddalić się od miejsca eksplozji.
 	
-[KM1_8D]
-Naciśnij klawisz ~h~ ~k~~PED_FIREWEAPON~ ~w~, aby ~h~aktywować bombę.~w~ Nie zapomnij oddalić się od miejsca eksplozji.
+[KM1_8D] { re3 change }
+Naciśnij klawisz ~h~ ~k~~VEHICLE_FIREWEAPON~ ~w~, aby ~h~aktywować bombę.~w~ Nie zapomnij oddalić się od miejsca eksplozji.
 	
 [KM1_12]
 ~g~Odwieź go do dojo, ale najpierw pozbądź się gliniarzy!
@@ -4168,11 +4168,11 @@ Nie musisz pokazywać dowodu, wyglądasz na wiarygodnego gościa.
 [DETON]
 DETONACJA:
 	
-[DRIVE_A]
-Wybierz jako broń uzi i wsiądź do pojazdu. Następnie spójrz w lewo lub w prawo - aby otworzyć ogień, naciśnij klawisz ~h~~k~~PED_FIREWEAPON~~w~.
+[DRIVE_A] { re3 change }
+Wybierz jako broń uzi i wsiądź do pojazdu. Następnie spójrz w lewo lub w prawo - aby otworzyć ogień, naciśnij klawisz ~h~~k~~VEHICLE_FIREWEAPON~~w~.
 	
-[DRIVE_B]
-Wybierz jako broń uzi i wsiądź do pojazdu. Następnie spójrz w lewo lub w prawo - aby otworzyć ogień, naciśnij klawisz ~h~~k~~PED_FIREWEAPON~~w~.
+[DRIVE_B] { re3 change }
+Wybierz jako broń uzi i wsiądź do pojazdu. Następnie spójrz w lewo lub w prawo - aby otworzyć ogień, naciśnij klawisz ~h~~k~~VEHICLE_FIREWEAPON~~w~.
 	
 [RECORD]
 ~g~NOWY REKORD!
@@ -4180,11 +4180,11 @@ Wybierz jako broń uzi i wsiądź do pojazdu. Następnie spójrz w lewo lub w pr
 [NRECORD]
 ~r~NIE MA NOWEGO REKORDU!
 	
-[RCHELP]
-Naciśnij klawisz ~k~~PED_FIREWEAPON~ lub uderz zdalnie sterowanym samochodzikiem w koła pojazdu, aby spowodować eksplozję.
+[RCHELP] { re3 change }
+Naciśnij klawisz ~k~~VEHICLE_FIREWEAPON~ lub uderz zdalnie sterowanym samochodzikiem w koła pojazdu, aby spowodować eksplozję.
 	
-[RCHELPA]
-Naciśnij klawisz ~k~~PED_FIREWEAPON~ lub uderz zdalnie sterowanym samochodzikiem w koła pojazdu, aby spowodować eksplozję.
+[RCHELPA] { re3 change }
+Naciśnij klawisz ~k~~VEHICLE_FIREWEAPON~ lub uderz zdalnie sterowanym samochodzikiem w koła pojazdu, aby spowodować eksplozję.
 	
 [RC_1]
 Masz 2 minuty, aby wysadzić tyle samochodów gangu Diablo, ile tylko się da!
@@ -4684,11 +4684,11 @@ ZNIKNIĘCIE LOVE'A
 [RM5_6]
 ~g~Prawie go masz! Staranuj jego wóz swoim pojazdem albo rozwal materiałami wybuchowymi!
 	
-[PBOAT_1]
-Naciśnij klawisz ~h~~k~~PED_FIREWEAPON~~w~, aby otworzyć ogień z działek na łodzi.
+[PBOAT_1] { re3 change }
+Naciśnij klawisz ~h~~k~~VEHICLE_FIREWEAPON~~w~, aby otworzyć ogień z działek na łodzi.
 	
-[PBOAT_2]
-Naciśnij klawisz ~h~~k~~PED_FIREWEAPON~~w~, aby otworzyć ogień z działek na łodzi.
+[PBOAT_2] { re3 change }
+Naciśnij klawisz ~h~~k~~VEHICLE_FIREWEAPON~~w~, aby otworzyć ogień z działek na łodzi.
 	
 [DIAB1_B]
 Mówi El Burro z gangu Diablo.
@@ -4702,11 +4702,11 @@ Organizuję dla rozrywki mały wyścig. Punkt startu znajduje się przy starej s
 [DIAB1_F]
 Skołuj sobie gablotę. Wygrywa ten, kto pierwszy zaliczy wszystkie punkty na trasie.
 	
-[HM2_1]
-Użyj zdalnie sterowanych samochodzików, aby zniszczyć samochody opancerzone. Naciśnij klawisz ~h~~k~~PED_FIREWEAPON~~w~, aby zdetonować ładunek.
+[HM2_1] { re3 change }
+Użyj zdalnie sterowanych samochodzików, aby zniszczyć samochody opancerzone. Naciśnij klawisz ~h~~k~~VEHICLE_FIREWEAPON~~w~, aby zdetonować ładunek.
 	
-[HM2_1A]
-Użyj zdalnie sterowanych samochodzików, aby zniszczyć samochody opancerzone. Naciśnij klawisz ~h~~k~~PED_FIREWEAPON~~w~, aby zdetonować ładunek.
+[HM2_1A] { re3 change }
+Użyj zdalnie sterowanych samochodzików, aby zniszczyć samochody opancerzone. Naciśnij klawisz ~h~~k~~VEHICLE_FIREWEAPON~~w~, aby zdetonować ładunek.
 	
 [HM2_2]
 ~r~Nie udało ci się zniszczyć wszystkich samochodów opancerzonych!
@@ -6517,11 +6517,11 @@ Ta karta pamięci (PS2) jest już sformatowana.
 [FEDSAS4]
 ;=<> - ZMIANA WYBORU
 	
-[SPRAY_4]
-Użyj klawisza ~h~~k~~PED_FIREWEAPON~~w~, aby strzelać z armatki wodnej.
+[SPRAY_4] { re3 change }
+Użyj klawisza ~h~~k~~VEHICLE_FIREWEAPON~~w~, aby strzelać z armatki wodnej.
 	
-[SPRAY_1]
-Użyj klawisza ~h~~k~~PED_FIREWEAPON~~w~, aby strzelać z armatki wodnej.
+[SPRAY_1] { re3 change }
+Użyj klawisza ~h~~k~~VEHICLE_FIREWEAPON~~w~, aby strzelać z armatki wodnej.
 	
 [LITTLE]
 MAŁY T

@@ -2233,11 +2233,11 @@ Une voiture piégée coûte 1000$ pièce!
 [GA_5]
 Ta voiture est déjà équipée d'une bombe.
 
-[GA_6]
-Gare-la, arme la bombe avec la ~h~touche ~k~~PED_FIREWEAPON~~w~ et CASSE-TOI!
+[GA_6] { re3 change }
+Gare-la, arme la bombe avec la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ et CASSE-TOI!
 
-[GA_7]
-Arme la bombe avec la ~h~touche ~k~~PED_FIREWEAPON~~w~. Elle explose au démarrage.
+[GA_7] { re3 change }
+Arme la bombe avec la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~. Elle explose au démarrage.
 
 [GA_8]
 Utilise le détonateur pour armer la bombe.
@@ -3511,11 +3511,11 @@ D'accord ?
 [JM6_1]
 Va à la banque par la rue principale.
 
-[GA_6B]
-Tu la gares, tu l'amorces en appuyant sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ et tu te barres!
+[GA_6B] { re3 change }
+Tu la gares, tu l'amorces en appuyant sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ et tu te barres!
 
-[GA_7B]
-Pour armer la bombe, appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~. Elle explosera au démarrage.
+[GA_7B] { re3 change }
+Pour armer la bombe, appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~. Elle explosera au démarrage.
 
 [BAT1]
 ~g~Ramasse la batte!
@@ -3946,11 +3946,11 @@ Amène ton véhicule à l'atelier de peinture pour annuler ton ~h~indice de rech
 [HM1_1]
 ~G~Refroidis 20 Nines violets en 2 minutes et 30 secondes.
 
-[KM1_8A]
-Appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour ~h~activer la bombe~w~, n'oublie pas de t'éloigner.
+[KM1_8A] { re3 change }
+Appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour ~h~activer la bombe~w~, n'oublie pas de t'éloigner.
 
-[KM1_8D]
-Appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour ~h~activer la bombe~w~, n'oublie pas de t'éloigner.
+[KM1_8D] { re3 change }
+Appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour ~h~activer la bombe~w~, n'oublie pas de t'éloigner.
 
 [KM1_12]
 ~g~Amène-le au dojo mais débarrasse-toi des flics d'abord!
@@ -4087,11 +4087,11 @@ J'ai pas besoin de tes papiers d'identité. Je pense qu'on peut te faire confian
 [DETON]
 DETONATION :
 
-[DRIVE_A]
-Selectionne un Uzi quand tu montes dans la voiture, regarde à gauche ou à droite et appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour tirer.
+[DRIVE_A] { re3 change }
+Selectionne un Uzi quand tu montes dans la voiture, regarde à gauche ou à droite et appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour tirer.
 
-[DRIVE_B]
-Selectionne un Uzi quand tu montes dans la voiture, regarde à gauche ou à droite et appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour tirer.
+[DRIVE_B] { re3 change }
+Selectionne un Uzi quand tu montes dans la voiture, regarde à gauche ou à droite et appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour tirer.
 
 [RECORD]
 ~g~NOUVEAU RECORD!
@@ -4099,11 +4099,11 @@ Selectionne un Uzi quand tu montes dans la voiture, regarde à gauche ou à droi
 [NRECORD]
 ~r~PAS DE RECORD!
 
-[RCHELP]
-Appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ ou heurte une roue de voiture avec le véhicule télécommandé pour le faire exploser.
+[RCHELP] { re3 change }
+Appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ ou heurte une roue de voiture avec le véhicule télécommandé pour le faire exploser.
 
-[RCHELPA]
-Appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ ou heurte une roue de voiture avec le véhicule télécommandé pour le faire exploser.
+[RCHELPA] { re3 change }
+Appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ ou heurte une roue de voiture avec le véhicule télécommandé pour le faire exploser.
 
 [RC_1]
 Tu as 2 minutes pour faire péter autant de voitures de Diablo que tu peux!
@@ -4603,11 +4603,11 @@ LA DISPARITION DE LOVE
 [RM5_6]
 ~g~Il s'est enfui! Bousille-lui son plâtre avec une bagnole ou une explosion!
 
-[PBOAT_1]
-Appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour tirer avec les canons du bateau.
+[PBOAT_1] { re3 change }
+Appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour tirer avec les canons du bateau.
 
-[PBOAT_2]
-Appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour tirer avec les canons du bateau.
+[PBOAT_2] { re3 change }
+Appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour tirer avec les canons du bateau.
 
 [DIAB1_B]
 C'est El Burro des Diablos.
@@ -4621,11 +4621,11 @@ Il y a une course de bagnoles qui va partir de la vieille école près du pont d
 [DIAB1_F]
 Trouve-toi une caisse et le premier qui franchit tous les points de passage, gagne le gros lot.
 
-[HM2_1]
-Utilise les buggies télécommandés pour détruire les voitures blindées. Appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour les faire exploser.
+[HM2_1] { re3 change }
+Utilise les buggies télécommandés pour détruire les voitures blindées. Appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour les faire exploser.
 
-[HM2_1A]
-Utilise les buggies télécommandés pour détruire les voitures blindées. Appuie sur la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour les faire exploser.
+[HM2_1A] { re3 change }
+Utilise les buggies télécommandés pour détruire les voitures blindées. Appuie sur la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour les faire exploser.
 
 [HM2_2]
 ~r~T'as pas réussi à détruire toutes leurs voitures blindées!
@@ -6637,11 +6637,11 @@ Cette memory card (PS2) est déjà formatée.
 [FEDSAS4]
 ;=<> - CHANGER SELECTION
 
-[SPRAY_4]
-Utilise la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour tirer à l'aide du canon à eau.
+[SPRAY_4] { re3 change }
+Utilise la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour tirer à l'aide du canon à eau.
 
-[SPRAY_1]
-Utilise la ~h~touche ~k~~PED_FIREWEAPON~~w~ pour tirer à l'aide du canon à eau.
+[SPRAY_1] { re3 change }
+Utilise la ~h~touche ~k~~VEHICLE_FIREWEAPON~~w~ pour tirer à l'aide du canon à eau.
 
 [AM1_10]
 ~g~Salvatore Leone partira de chez Luigi vers 0~1~:~1~.

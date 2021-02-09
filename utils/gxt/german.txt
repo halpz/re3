@@ -2269,11 +2269,11 @@ Autobomben kosten $1000 pro Stück.
 [GA_5]
 In deinem Wagen ist schon eine Autobombe.
 
-[GA_6]
-Park die Karre, mach sie durch Drücken der ~h~~k~~PED_FIREWEAPON~-Taste~w~ scharf, und dann nichts wie weg!
+[GA_6] { re3 change }
+Park die Karre, mach sie durch Drücken der ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~ scharf, und dann nichts wie weg!
 
-[GA_7]
-Mach die Bombe mit der ~h~~k~~PED_FIREWEAPON~-Taste~w~ scharf. Dann geht sie hoch, wenn der Wagen angelassen wird.
+[GA_7] { re3 change }
+Mach die Bombe mit der ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~ scharf. Dann geht sie hoch, wenn der Wagen angelassen wird.
 
 [GA_8]
 Benutze den Zünder, um die Bombe hochgehen zu lassen.
@@ -3655,11 +3655,11 @@ Okay?
 [JM6_1]
 Fahr zu der Bank auf dem Boulevard.
 
-[GA_6B]
-Park die Karre, mach sie durch Drücken der ~h~~k~~PED_FIREWEAPON~-Taste~w~ scharf, und dann HAU AB!
+[GA_6B] { re3 change }
+Park die Karre, mach sie durch Drücken der ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~ scharf, und dann HAU AB!
 
-[GA_7B]
-Mach die Bombe mit der ~h~~k~~PED_FIREWEAPON~-Taste~w~ scharf. Sie geht hoch, wenn der Wagen angelassen wird.
+[GA_7B] { re3 change }
+Mach die Bombe mit der ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~ scharf. Sie geht hoch, wenn der Wagen angelassen wird.
 
 [BAT1]
 ~g~Nimm dir den Schlãger!
@@ -4093,11 +4093,11 @@ Fahre deinen Wagen in die Lackiererei, um deinen ~h~Fahndungslevel~w~ loszuwerde
 [HM1_1]
 ~g~Fertige 20 Purple Nines in 2 Min. 30 Sek. ab.
 
-[KM1_8A]
-Drücke die~h~ ~k~~PED_FIREWEAPON~-Taste~w~ zum ~h~Zünden der Bombe~w~. Aber geh vorher in Deckung!
+[KM1_8A] { re3 change }
+Drücke die~h~ ~k~~VEHICLE_FIREWEAPON~-Taste~w~ zum ~h~Zünden der Bombe~w~. Aber geh vorher in Deckung!
 
-[KM1_8D]
-Drücke die~h~ ~k~~PED_FIREWEAPON~-Taste~w~ zum ~h~Zünden der Bombe~w~. Aber geh vorher in Deckung!
+[KM1_8D] { re3 change }
+Drücke die~h~ ~k~~VEHICLE_FIREWEAPON~-Taste~w~ zum ~h~Zünden der Bombe~w~. Aber geh vorher in Deckung!
 
 [KM1_12]
 ~g~Bring ihm zum Dojo, aber hãng vorher die Cops ab!
@@ -4234,11 +4234,11 @@ Auf den Ausweis verzichte ich. Du siehst vertrauenswürdig aus.
 [DETON]
 DETONATION:
 
-[DRIVE_A]
-Halt eine Uzi im Anschlag, wenn du in ein Fahrzeug steigst. Schau dann nach links oder rechts und drücke die ~h~~k~~PED_FIREWEAPON~-Taste~w~, um zu feuern.
+[DRIVE_A] { re3 change }
+Halt eine Uzi im Anschlag, wenn du in ein Fahrzeug steigst. Schau dann nach links oder rechts und drücke die ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~, um zu feuern.
 
-[DRIVE_B]
-Halt eine Uzi im Anschlag, wenn du in ein Fahrzeug steigst. Schau dann nach links oder rechts und drücke die ~h~~k~~PED_FIREWEAPON~-Taste~w~, um zu feuern.
+[DRIVE_B] { re3 change }
+Halt eine Uzi im Anschlag, wenn du in ein Fahrzeug steigst. Schau dann nach links oder rechts und drücke die ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~, um zu feuern.
 
 [RECORD]
 ~g~NEUER REKORD!!
@@ -4246,11 +4246,11 @@ Halt eine Uzi im Anschlag, wenn du in ein Fahrzeug steigst. Schau dann nach link
 [NRECORD]
 ~r~KEIN NEUER REKORD!
 
-[RCHELP]
-Drücke die ~k~~PED_FIREWEAPON~-Taste oder fahre das ferngesteuerte Auto in die Rãder eines Fahrzeugs, um es zu sprengen.
+[RCHELP] { re3 change }
+Drücke die ~k~~VEHICLE_FIREWEAPON~-Taste oder fahre das ferngesteuerte Auto in die Rãder eines Fahrzeugs, um es zu sprengen.
 
-[RCHELPA]
-Drücke die ~k~~PED_FIREWEAPON~-Taste oder fahre das ferngesteuerte Auto in die Rãder eines Fahrzeugs, um es zu sprengen.
+[RCHELPA] { re3 change }
+Drücke die ~k~~VEHICLE_FIREWEAPON~-Taste oder fahre das ferngesteuerte Auto in die Rãder eines Fahrzeugs, um es zu sprengen.
 
 [RC_1]
 Du hast 2 Minuten, um so viele Diablo-Autos wie möglich zu sprengen!
@@ -4750,11 +4750,11 @@ LOVES VERSCHWINDEN
 [RM5_6]
 ~g~Er ist abgehauen! Zerstöre seine Panzerung mit einem Auto oder einer Explosion!!
 
-[PBOAT_1]
-Drücke die ~h~~k~~PED_FIREWEAPON~-Taste~w~, um die Bordkanonen abzufeuern.
+[PBOAT_1] { re3 change }
+Drücke die ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~, um die Bordkanonen abzufeuern.
 
-[PBOAT_2]
-Drücke die ~h~~k~~PED_FIREWEAPON~-Taste~w~, um die Bordkanonen abzufeuern.
+[PBOAT_2] { re3 change }
+Drücke die ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~, um die Bordkanonen abzufeuern.
 
 [DIAB1_B]
 Hier El Burro, von den Diablos.
@@ -4768,11 +4768,11 @@ Bei der alten Schulhalle nahe der Callahan Bridge findet ein Rennen statt.
 [DIAB1_F]
 Besorg dir 'nen fahrbaren Untersatz. Wer als erster alle Checkpoints abfãhrt, ist Sieger.
 
-[HM2_1]
-Zerstöre die gepanzerten Fahrzeuge mit den Buggies. Zur Zündung drücke die ~h~~k~~PED_FIREWEAPON~-Taste~w~.
+[HM2_1] { re3 change }
+Zerstöre die gepanzerten Fahrzeuge mit den Buggies. Zur Zündung drücke die ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~.
 
-[HM2_1A]
-Zerstöre die gepanzerten Fahrzeuge mit den Buggies. Zur Zündung drücke die ~h~~k~~PED_FIREWEAPON~-Taste~w~.
+[HM2_1A] { re3 change }
+Zerstöre die gepanzerten Fahrzeuge mit den Buggies. Zur Zündung drücke die ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~.
 
 [HM2_2]
 ~r~Du hast nicht alle gepanzerten Fahrzeuge zerstört!
@@ -6595,11 +6595,11 @@ Diese Memory Card (PS2) ist bereits formatiert.
 [FEDSAS4]
 ;=<> - AUSWAHL ÃNDERN
 
-[SPRAY_4]
-~h~~k~~PED_FIREWEAPON~-Taste ~w~benutzen, um die Wasserkanone abzufeuern.
+[SPRAY_4] { re3 change }
+~h~~k~~VEHICLE_FIREWEAPON~-Taste ~w~benutzen, um die Wasserkanone abzufeuern.
 
-[SPRAY_1]
-~h~~k~~PED_FIREWEAPON~-Taste ~w~benutzen, um die Wasserkanone abzufeuern.
+[SPRAY_1] { re3 change }
+~h~~k~~VEHICLE_FIREWEAPON~-Taste ~w~benutzen, um die Wasserkanone abzufeuern.
 
 [LITTLE]
 LITTLE T

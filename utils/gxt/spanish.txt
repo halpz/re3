@@ -2246,11 +2246,11 @@ Una bomba de coche vale 1.000 dólares.
 [GA_5]
 Tu coche ya tiene una bomba instalada.
 
-[GA_6]
-¡Apárcalo, actívala pulsando ~h~~k~~PED_FIREWEAPON~~w~ y SAL PITANDO!
+[GA_6] { re3 change }
+¡Apárcalo, actívala pulsando ~h~~k~~VEHICLE_FIREWEAPON~~w~ y SAL PITANDO!
 
-[GA_7]
-Activa la bomba pulsando ~h~~k~~PED_FIREWEAPON~~w~. Estallará cuando se arranque el motor.
+[GA_7] { re3 change }
+Activa la bomba pulsando ~h~~k~~VEHICLE_FIREWEAPON~~w~. Estallará cuando se arranque el motor.
 
 [GA_8]
 Utiliza el detonador para activar la bomba.
@@ -3633,11 +3633,11 @@ que tendré trabajo para ti.
 [JM6_1]
 Llévanos al banco de la avenida principal.
 
-[GA_6B]
-¡Apárcalo, actívala pulsando ~h~~k~~PED_FIREWEAPON~~w~ y SAL PITANDO!
+[GA_6B] { re3 change }
+¡Apárcalo, actívala pulsando ~h~~k~~VEHICLE_FIREWEAPON~~w~ y SAL PITANDO!
 
-[GA_7B]
-Activa la bomba pulsando ~h~~k~~PED_FIREWEAPON~~w~. Estallará cuando se arranque el motor.
+[GA_7B] { re3 change }
+Activa la bomba pulsando ~h~~k~~VEHICLE_FIREWEAPON~~w~. Estallará cuando se arranque el motor.
 
 [BAT1]
 ~g~¡Coge el bate!
@@ -4059,11 +4059,11 @@ Mete tu vehículo en el taller de pintura para perder tu ~h~nivel de búsqueda~w
 [HM1_1]
 ~g~Cepíllate a 20 Purple Nines en 2 minutos y 30 segundos.
 
-[KM1_8A]
-Pulsa ~h~~k~~PED_FIREWEAPON~~w~ para ~h~activar la bomba~w~. Acuérdate de alejarte de ella.
+[KM1_8A] { re3 change }
+Pulsa ~h~~k~~VEHICLE_FIREWEAPON~~w~ para ~h~activar la bomba~w~. Acuérdate de alejarte de ella.
 
-[KM1_8D]
-Pulsa ~h~~k~~PED_FIREWEAPON~~w~ para ~h~activar la bomba~w~. Acuérdate de alejarte de ella.
+[KM1_8D] { re3 change }
+Pulsa ~h~~k~~VEHICLE_FIREWEAPON~~w~ para ~h~activar la bomba~w~. Acuérdate de alejarte de ella.
 
 [KM1_12]
 ~g~¡Llévalo al dojo, pero deshazte primero de la policía!
@@ -4200,11 +4200,11 @@ No necesito tu documentación, pareces de fiar.
 [DETON]
 DETONACIÓN:
 
-[DRIVE_A]
-Ten una Uzi seleccionada cuando entres en un vehículo, luego mira a la izquierda o a la derecha y pulsa ~h~~k~~PED_FIREWEAPON~~w~ para disparar.
+[DRIVE_A] { re3 change }
+Ten una Uzi seleccionada cuando entres en un vehículo, luego mira a la izquierda o a la derecha y pulsa ~h~~k~~VEHICLE_FIREWEAPON~~w~ para disparar.
 
-[DRIVE_B]
-Ten una Uzi seleccionada cuando entres en un vehículo, luego mira a la izquierda o a la derecha y pulsa ~h~~k~~PED_FIREWEAPON~~w~ para disparar.
+[DRIVE_B] { re3 change }
+Ten una Uzi seleccionada cuando entres en un vehículo, luego mira a la izquierda o a la derecha y pulsa ~h~~k~~VEHICLE_FIREWEAPON~~w~ para disparar.
 
 [RECORD]
 ~g~¡NUEVO RÉCORD!
@@ -4212,11 +4212,11 @@ Ten una Uzi seleccionada cuando entres en un vehículo, luego mira a la izquierd
 [NRECORD]
 ~r~¡NO HAY UN NUEVO RÉCORD!
 
-[RCHELP]
-Pulsa ~k~~PED_FIREWEAPON~ o lleva el coche teledirigido hasta las ruedas de otro coche para detonarlo.
+[RCHELP] { re3 change }
+Pulsa ~k~~VEHICLE_FIREWEAPON~ o lleva el coche teledirigido hasta las ruedas de otro coche para detonarlo.
 
-[RCHELPA]
-Pulsa ~k~~PED_FIREWEAPON~ o lleva el coche teledirigido hasta las ruedas de otro coche para detonarlo.
+[RCHELPA] { re3 change }
+Pulsa ~k~~VEHICLE_FIREWEAPON~ o lleva el coche teledirigido hasta las ruedas de otro coche para detonarlo.
 
 [RC_1]
 ¡Tienes 2 minutos para destruir todos los coches de los Diablos que puedas!
@@ -4716,11 +4716,11 @@ Luigi dijo que eras de fiar, así que vuelve más tarde,
 [RM5_6]
 ~g~¡Ha salido de la ambulancia! ¡Cárgate su escayola con un vehículo o una explosión!
 
-[PBOAT_1]
-Pulsa ~h~~k~~PED_FIREWEAPON~~w~ para disparar los cañones de la lancha.
+[PBOAT_1] { re3 change }
+Pulsa ~h~~k~~VEHICLE_FIREWEAPON~~w~ para disparar los cañones de la lancha.
 
-[PBOAT_2]
-Pulsa ~h~~k~~PED_FIREWEAPON~~w~ para disparar los cañones de la lancha.
+[PBOAT_2] { re3 change }
+Pulsa ~h~~k~~VEHICLE_FIREWEAPON~~w~ para disparar los cañones de la lancha.
 
 [DIAB1_B]
 Al habla El Burro, de los Diablos.
@@ -4734,11 +4734,11 @@ Hay una carrera que empezará junto a la sala Clásica, cerca del puente Callaha
 [DIAB1_F]
 Consíguete un buen carro y el primero que pase por todos los puntos de control se llevará el premio.
 
-[HM2_1]
-Usa los coches teledirigidos para destruir los furgones blindados. Pulsa ~h~~k~~PED_FIREWEAPON~ ~w~para detonarlos.
+[HM2_1] { re3 change }
+Usa los coches teledirigidos para destruir los furgones blindados. Pulsa ~h~~k~~VEHICLE_FIREWEAPON~ ~w~para detonarlos.
 
-[HM2_1A]
-Usa los coches teledirigidos para destruir los furgones blindados. Pulsa ~h~~k~~PED_FIREWEAPON~ ~w~para detonarlos.
+[HM2_1A] { re3 change }
+Usa los coches teledirigidos para destruir los furgones blindados. Pulsa ~h~~k~~VEHICLE_FIREWEAPON~ ~w~para detonarlos.
 
 [HM2_2]
 ~r~¡No has destruido todos los furgones blindados!
@@ -6545,11 +6545,11 @@ Esta Memory Card (PS2) ya está formateada.
 [FEDSAS4]
 ;=<> - CAMBIAR SELECCIÓN
 
-[SPRAY_4]
-Pulsa ~h~~k~~PED_FIREWEAPON~~w~ para disparar el cañón de agua.
+[SPRAY_4] { re3 change }
+Pulsa ~h~~k~~VEHICLE_FIREWEAPON~~w~ para disparar el cañón de agua.
 
-[SPRAY_1]
-Pulsa ~h~~k~~PED_FIREWEAPON~~w~ para disparar el cañón de agua.
+[SPRAY_1] { re3 change }
+Pulsa ~h~~k~~VEHICLE_FIREWEAPON~~w~ para disparar el cañón de agua.
 
 [LITTLE]
 LITTLE T
