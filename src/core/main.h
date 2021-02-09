@@ -30,6 +30,7 @@ extern bool gUseChunkFiles;
 extern bool gSecondExportPass;
 extern bool gUseModelResources;
 extern bool gUseResources;
+extern bool gNASTY_NASTY_MEM_SHUTDOWN_HACK;
 
 class CSprite2d;
 

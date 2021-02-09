@@ -3,15 +3,13 @@
 struct CColPoint
 {
 	CVector point;
-	int pad1;	// this is stupid
+	float depth;
 	// the surface normal on the surface of point
 	CVector normal;
-	//int pad2;
 	uint8 surfaceA;
 	uint8 pieceA;
 	uint8 surfaceB;
 	uint8 pieceB;
-	float depth;
 
 	const CVector &GetNormal() { return normal; }
 	float GetDepth() { return depth; }
