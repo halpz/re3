@@ -317,6 +317,7 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 	buf += 4;
 	if(model.numLines > 0){
 		//model.lines = (CColLine*)RwMalloc(model.numLines*sizeof(CColLine));
+		REGISTER_MEMPTR(&model.lines);
 		for(i = 0; i < model.numLines; i++){
 			//model.lines[i].Set(*(CVector*)buf, *(CVector*)(buf+12));
 			buf += 24;
