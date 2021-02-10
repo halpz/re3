@@ -374,7 +374,7 @@ CFileLoader::LoadCollisionModel(uint8 *buf, CColModel &model, char *modelname)
 			CVector vB = model.vertices[model.triangles[i].b].Get();
 			CVector vC = model.vertices[model.triangles[i].c].Get();
 			float area = CrossProduct(vA - vB, vA - vC).Magnitude();
-			if(area < 0.001f || vA == vB || vA == vB || vB == vC){
+			if(area < 0.001f || vA == vB || vA == vC || vB == vC){
 				i--;
 				model.numTriangles--;
 			}
