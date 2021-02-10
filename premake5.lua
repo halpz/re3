@@ -236,6 +236,10 @@ project "reVC"
 	targetname "reVC"
 	targetdir "bin/%{cfg.platform}/%{cfg.buildcfg}"
 
+	if(_OPTIONS["with-librw"]) then
+		dependson "librw"
+	end
+
 	files { addSrcFiles("src") }
 	files { addSrcFiles("src/animation") }
 	files { addSrcFiles("src/audio") }
