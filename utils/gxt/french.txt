@@ -6688,8 +6688,9 @@ Appuie sur la touche ~h~~k~~PED_FIREWEAPON~~w~ ~w~pour ~h~tirer~w~ avec le fusil
 [PLANE_H]
 Utilise la touche ~h~~k~~VEHICLE_ACCELERATE~~w~ pour accélérer. Gauche et droite pour tourner.
 
-[PLANE_4]
-Utilise la touche ~h~~k~~VEHICLE_ACCELERATE~~w~ pour accélérer. Gauche et droite pour tourner.
+[PLANE_4] { reVC update }
+{Utilise la touche ~h~~k~~VEHICLE_ACCELERATE~~w~ pour accélérer. Gauche et droite pour tourner.}
+Utilise le joystick analogique droit pour accélérer, appuie vers le bas sur le joystick analogique gauche pour monter et vers le haut pour descendre. Gauche et droite pour tourner.
 
 [HELP55]
 Appuie sur la touche ~h~~k~~PED_FIREWEAPON~~w~ pour attaquer le chef.
@@ -14262,8 +14263,9 @@ Pour ~h~ramasser une bombe~w~, manoeuvre l'hélico radiocommandé à côté. Il 
 [TEX3_37:SERG3]
 Pousse le ~h~joystick analogique droit vers le haut ~w~pour vitesse la vitesse du rotor et ainsi faire ~h~ monter l'hélicoptère.
 
-[TEX3_38:SERG3]
-Pousse le ~h~~k~~VEHICLE_ACCELERATE~ ~w~pour augmenter la réduire du rotor et ainsi faire ~h~ descendre l'hélicoptère.
+[TEX3_38:SERG3] { reVC update }
+{Pousse le ~h~~k~~VEHICLE_ACCELERATE~ ~w~pour augmenter la réduire du rotor et ainsi faire ~h~ descendre l'hélicoptère.}
+Pousse le ~h~joystick analogique droit vers la bas ~w~pour augmenter la réduire du rotor et ainsi faire ~h~ descendre l'hélicoptère.
 
 [TEX3_39:SERG3]
 ~g~Appuie sur la touche ~h~~k~~VEHICLE_HANDBRAKE~ ~g~pour larguer une bombe.

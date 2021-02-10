@@ -6694,8 +6694,9 @@ Premi il tasto ~h~~k~~PED_FIREWEAPON~~w~ per ~h~sparare~w~ col fucile di precisi
 [PLANE_H]
 Usa il tasto ~h~~k~~VEHICLE_ACCELERATE~~w~ per accelerare e a sinistra e a destra per curvare.
 
-[PLANE_4]
-Usa il tasto ~h~~k~~VEHICLE_ACCELERATE~~w~ per accelerare e a sinistra e a destra per curvare.
+[PLANE_4] { reVC update }
+{Usa il tasto ~h~~k~~VEHICLE_ACCELERATE~~w~ per accelerare e a sinistra e a destra per curvare.}
+Usa la levetta analogica destra per accelerare, premi la levetta analogica sinistra in basso per salire, in alto per scendere e a sinistra e a destra per curvare.
 
 [HELP55]
 Premi il tasto ~h~~k~~PED_FIREWEAPON~~w~ per attaccare lo chef.
@@ -14271,8 +14272,9 @@ Per raccogliere una bomba, avvicinaci l'elicottero radiocomandato. L'elicottero 
 [TEX3_37:SERG3]
 Sposta ~h~in basso la levetta analogica destra~w~ per aumentare la velocità del rotore e ~h~far salire~w~ l'elicottero.
 
-[TEX3_38:SERG3]
-Sposta ~h~~k~~VEHICLE_ACCELERATE~~w~ per ridurre la velocità del rotore e ~h~far scendere~w~ l'elicottero.
+[TEX3_38:SERG3] { reVC update }
+{Sposta ~h~~k~~VEHICLE_ACCELERATE~~w~ per ridurre la velocità del rotore e ~h~far scendere~w~ l'elicottero.}
+Sposta ~h~in alto la levetta analogica destra~w~ per ridurre la velocità del rotore e ~h~far scendere~w~ l'elicottero.
 
 [TEX3_39:SERG3]
 ~g~Per sganciare una bomba, premi il tasto ~h~~k~~VEHICLE_HANDBRAKE~~g~.

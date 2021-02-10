@@ -289,11 +289,26 @@ CFont::Initialise(void)
 	SetDropShadowPosition(0);
 	CTxdStore::PopCurrentTxd();
 
+#if !defined(GAMEPAD_MENU) && defined(BUTTON_ICONS)
+	// loaded in CMenuManager with GAMEPAD_MENU defined
+	LoadButtons("MODELS/X360BTNS.TXD");
+#endif
+}
+
 #ifdef BUTTON_ICONS
-	if (int file = CFileMgr::OpenFile("MODELS/X360BTNS.TXD")) {
+void
+CFont::LoadButtons(const char *txdPath)
+{
+	if (int file = CFileMgr::OpenFile(txdPath)) {
 		CFileMgr::CloseFile(file);
-		ButtonsSlot = CTxdStore::AddTxdSlot("buttons");
-		CTxdStore::LoadTxd(ButtonsSlot, "MODELS/X360BTNS.TXD");
+		if (ButtonsSlot == -1)
+			ButtonsSlot = CTxdStore::AddTxdSlot("buttons");
+		else {
+			for (int i = 0; i < MAX_BUTTON_ICONS; i++)
+				ButtonSprite[i].Delete();
+			CTxdStore::RemoveTxd(ButtonsSlot);
+		}
+		CTxdStore::LoadTxd(ButtonsSlot, txdPath);
 		CTxdStore::AddRef(ButtonsSlot);
 		CTxdStore::PushCurrentTxd();
 		CTxdStore::SetCurrentTxd(ButtonsSlot);
@@ -311,12 +326,22 @@ CFont::Initialise(void)
 		ButtonSprite[BUTTON_R1].SetTexture("r1");
 		ButtonSprite[BUTTON_R2].SetTexture("r2");
 		ButtonSprite[BUTTON_R3].SetTexture("r3");
+		ButtonSprite[BUTTON_RSTICK_UP].SetTexture("thumbryu");
+		ButtonSprite[BUTTON_RSTICK_DOWN].SetTexture("thumbryd");
 		ButtonSprite[BUTTON_RSTICK_LEFT].SetTexture("thumbrxl");
 		ButtonSprite[BUTTON_RSTICK_RIGHT].SetTexture("thumbrxr");
 		CTxdStore::PopCurrentTxd();
 	}
-#endif // BUTTON_ICONS
+	else {
+		if (ButtonsSlot != -1) {
+			for (int i = 0; i < MAX_BUTTON_ICONS; i++)
+				ButtonSprite[i].Delete();
+			CTxdStore::RemoveTxdSlot(ButtonsSlot);
+			ButtonsSlot = -1;
+		}
+	}
 }
+#endif // BUTTON_ICONS
 
 #ifdef MORE_LANGUAGES
 void
@@ -369,6 +394,7 @@ CFont::Shutdown(void)
 		for (int i = 0; i < MAX_BUTTON_ICONS; i++)
 			ButtonSprite[i].Delete();
 		CTxdStore::RemoveTxdSlot(ButtonsSlot);
+		ButtonsSlot = -1;
 	}
 #endif
 	Sprite[0].Delete();
@@ -1437,6 +1463,8 @@ CFont::ParseToken(wchar* str, CRGBA &color, bool &flash, bool &bold)
 		case 'J': PS2Symbol = BUTTON_R1; break;
 		case 'V': PS2Symbol = BUTTON_R2; break;
 		case 'C': PS2Symbol = BUTTON_R3; break;
+		case 'H': PS2Symbol = BUTTON_RSTICK_UP; break;
+		case 'L': PS2Symbol = BUTTON_RSTICK_DOWN; break;
 		case '(': PS2Symbol = BUTTON_RSTICK_LEFT; break;
 		case ')': PS2Symbol = BUTTON_RSTICK_RIGHT; break;
 #endif
@@ -1488,6 +1516,8 @@ CFont::ParseToken(wchar *s, bool japShit)
 		case 'J': PS2Symbol = BUTTON_R1; break;
 		case 'V': PS2Symbol = BUTTON_R2; break;
 		case 'C': PS2Symbol = BUTTON_R3; break;
+		case 'H': PS2Symbol = BUTTON_RSTICK_UP; break;
+		case 'L': PS2Symbol = BUTTON_RSTICK_DOWN; break;
 		case '(': PS2Symbol = BUTTON_RSTICK_LEFT; break;
 		case ')': PS2Symbol = BUTTON_RSTICK_RIGHT; break;
 #endif
@@ -1612,6 +1642,8 @@ CFont::ParseToken(wchar *s)
 		case 'J': PS2Symbol = BUTTON_R1; break;
 		case 'V': PS2Symbol = BUTTON_R2; break;
 		case 'C': PS2Symbol = BUTTON_R3; break;
+		case 'H': PS2Symbol = BUTTON_RSTICK_UP; break;
+		case 'L': PS2Symbol = BUTTON_RSTICK_DOWN; break;
 		case '(': PS2Symbol = BUTTON_RSTICK_LEFT; break;
 		case ')': PS2Symbol = BUTTON_RSTICK_RIGHT; break;
 #endif
