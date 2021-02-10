@@ -274,10 +274,11 @@ CPickup::CanBePickedUp(CPlayerPed *player, int playerId)
 {
 	assert(m_pObject != nil);
 	bool cannotBePickedUp =
-		(m_pObject->GetModelIndex() == MI_PICKUP_BODYARMOUR && player->m_fArmour > CWorld::Players[playerId].m_nMaxArmour - 0.5f)
-		|| (m_pObject->GetModelIndex() == MI_PICKUP_HEALTH && player->m_fHealth > CWorld::Players[playerId].m_nMaxHealth - 0.5f)
+		(m_pObject->GetModelIndex() == MI_PICKUP_BODYARMOUR && player->m_fArmour > CWorld::Players[playerId].m_nMaxArmour - 0.2f)
+		|| (m_pObject->GetModelIndex() == MI_PICKUP_HEALTH && player->m_fHealth > CWorld::Players[playerId].m_nMaxHealth - 0.2f)
 		|| (m_pObject->GetModelIndex() == MI_PICKUP_BRIBE && player->m_pWanted->GetWantedLevel() == 0)
-		|| (m_pObject->GetModelIndex() == MI_PICKUP_KILLFRENZY && (CTheScripts::IsPlayerOnAMission() || CDarkel::FrenzyOnGoing() || !CGame::nastyGame));
+		|| (m_pObject->GetModelIndex() == MI_PICKUP_KILLFRENZY && (CTheScripts::IsPlayerOnAMission() || CDarkel::FrenzyOnGoing() || !CGame::nastyGame))
+		|| (m_eType == PICKUP_ASSET_REVENUE && m_fRevenue < 10.0f);
 	return !cannotBePickedUp;
 }
 
