@@ -125,7 +125,7 @@ bool CMenuManager::m_PrefsMarketing = false;
 bool CMenuManager::m_PrefsDisableTutorials = false;
 #endif // !MASTER
 
-#if defined(LEGACY_MENU_OPTIONS) || defined(GAMEPAD_MENU)
+#ifdef GAMEPAD_MENU
 uint32 TimeToStopPadShaking;
 #endif
 
@@ -1089,7 +1089,7 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 				}
 
 				switch (aScreens[m_nCurrScreen].m_aEntries[i].m_Action) {
-#if defined(LEGACY_MENU_OPTIONS) || defined(GAMEPAD_MENU)
+#ifdef GAMEPAD_MENU
 				case MENUACTION_CTRLVIBRATION:
 					if (m_PrefsUseVibration)
 						rightText = TheText.Get("FEM_ON");
@@ -2300,9 +2300,6 @@ CMenuManager::DrawBackground(bool transitionCall)
 				break;
 			case MENUPAGE_SKIN_SELECT:
 			case MENUPAGE_KEYBOARD_CONTROLS:
-#ifdef GAMEPAD_MENU
-			case MENUPAGE_CONTROLLER_SETTINGS:
-#endif
 				menuBg.topLeft_x = 14.0f;
 				menuBg.topLeft_y = 39.0f;
 				menuBg.topRight_x = 636.0f;
@@ -4926,7 +4923,7 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 
 	if (changeAmount != 0) {
 		switch (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action) {
-#if defined(LEGACY_MENU_OPTIONS) || defined(GAMEPAD_MENU)
+#ifdef GAMEPAD_MENU
 			case MENUACTION_CTRLCONFIG:
 				CPad::GetPad(0)->Mode += changeAmount;
 				if (CPad::GetPad(0)->Mode > 3)
@@ -5077,7 +5074,7 @@ void
 CMenuManager::ProcessOnOffMenuOptions()
 {
 	switch (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action) {
-#if defined(LEGACY_MENU_OPTIONS) || defined(GAMEPAD_MENU)
+#ifdef GAMEPAD_MENU
 	case MENUACTION_CTRLVIBRATION:
 		m_PrefsUseVibration = !m_PrefsUseVibration;
 		if (m_PrefsUseVibration) {
@@ -5551,7 +5548,7 @@ CMenuManager::SwitchMenuOnAndOff()
 	m_bStartUpFrontEndRequested = false;
 	m_bShutDownFrontEndRequested = false;
 
-#if defined(LEGACY_MENU_OPTIONS) || defined(GAMEPAD_MENU)
+#ifdef GAMEPAD_MENU
 	// Reset pad shaking.
 	if (TimeToStopPadShaking && TimeToStopPadShaking < CTimer::GetTimeInMillisecondsPauseMode()) {
 		CPad::StopPadsShaking();
