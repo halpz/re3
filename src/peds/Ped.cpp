@@ -2448,12 +2448,17 @@ CPed::ProcessControl(void)
 #ifdef VC_PED_PORTS
 						uint8 flyDir = 0;
 						float feetZ = GetPosition().z - FEET_OFFSET;
-						if ((obstacleForFlyingZ <= feetZ || obstacleForFlyingOtherDirZ >= 500.0f) && (obstacleForFlyingZ <= feetZ || obstacleForFlyingOtherDirZ <= feetZ)) {
-							if (obstacleForFlyingOtherDirZ > feetZ && obstacleForFlyingZ < 499.0f)
-								flyDir = 2;
-						} else {
+#ifdef FIX_BUGS
+						if (obstacleForFlyingZ > feetZ && obstacleForFlyingOtherDirZ < 501.0f)
 							flyDir = 1;
-						}
+						else if (obstacleForFlyingOtherDirZ > feetZ && obstacleForFlyingZ < 500.0f)
+							flyDir = 2;
+#else
+						if ((obstacleForFlyingZ > feetZ && obstacleForFlyingOtherDirZ < 500.0f) || (obstacleForFlyingZ > feetZ && obstacleForFlyingOtherDirZ > feetZ))
+							flyDir = 1;
+						else if (obstacleForFlyingOtherDirZ > feetZ && obstacleForFlyingZ < 499.0f)
+							flyDir = 2;
+#endif
 
 						if (flyDir != 0 && !bSomeVCflag1) {
 							SetPosition((flyDir == 2 ? obstacleForFlyingOtherDir.point : obstacleForFlying.point));
@@ -2471,6 +2476,10 @@ CPed::ProcessControl(void)
 						forceDir.z = 4.0f;
 						ApplyMoveForce(forceDir);
 
+						// What was that for?? It pushes player inside of collision sometimes and kills him.
+#ifdef FIX_BUGS
+						if (!IsPlayer())
+#endif
 						GetMatrix().GetPosition() += 0.25f * offsetToCheck;
 
 						m_fRotationCur = CGeneral::GetRadianAngleBetweenPoints(offsetToCheck.x, offsetToCheck.y, 0.0f, 0.0f);
