@@ -409,6 +409,7 @@ bool LoadINISettings()
 	ReadIniIfExists("Controller", "HorizantalMouseSens", &TheCamera.m_fMouseAccelHorzntl);
 	ReadIniIfExists("Controller", "InvertMouseVertically", &MousePointerStateHelper.bInvertVertically);
 	ReadIniIfExists("Controller", "DisableMouseSteering", &CVehicle::m_bDisableMouseSteering);
+	ReadIniIfExists("Controller", "Vibration", &FrontEndMenuManager.m_PrefsUseVibration);
 	ReadIniIfExists("Audio", "SfxVolume", &FrontEndMenuManager.m_PrefsSfxVolume);
 	ReadIniIfExists("Audio", "MusicVolume", &FrontEndMenuManager.m_PrefsMusicVolume);
 	ReadIniIfExists("Audio", "MP3BoostVolume", &FrontEndMenuManager.m_PrefsMP3BoostVolume);
@@ -501,6 +502,7 @@ void SaveINISettings()
 	StoreIni("Controller", "HorizantalMouseSens", TheCamera.m_fMouseAccelHorzntl);
 	StoreIni("Controller", "InvertMouseVertically", MousePointerStateHelper.bInvertVertically);
 	StoreIni("Controller", "DisableMouseSteering", CVehicle::m_bDisableMouseSteering);
+	StoreIni("Controller", "Vibration", FrontEndMenuManager.m_PrefsUseVibration);
 	StoreIni("Audio", "SfxVolume", FrontEndMenuManager.m_PrefsSfxVolume);
 	StoreIni("Audio", "MusicVolume", FrontEndMenuManager.m_PrefsMusicVolume);
 	StoreIni("Audio", "MP3BoostVolume", FrontEndMenuManager.m_PrefsMP3BoostVolume);
