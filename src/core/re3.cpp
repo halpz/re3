@@ -1,6 +1,14 @@
 #include <csignal>
 #define WITHWINDOWS
 #include "common.h"
+#if defined DETECT_JOYSTICK_MENU && defined XINPUT
+#include <xinput.h>
+#if !defined(PSAPI_VERSION) || (PSAPI_VERSION > 1)
+#pragma comment( lib, "Xinput9_1_0.lib" )
+#else
+#pragma comment( lib, "Xinput.lib" )
+#endif
+#endif
 #include "Renderer.h"
 #include "Occlusion.h"
 #include "Credits.h"
@@ -37,7 +45,7 @@
 #include "MBlur.h"
 #include "ControllerConfig.h"
 
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 #include "crossplatform.h"
 #endif
 
@@ -249,8 +257,32 @@ const char *iniKeyboardButtons[] = {"ESC","F1","F2","F3","F4","F5","F6","F7","F8
 
 void LoadINIControllerSettings()
 {
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
+#ifdef XINPUT
+	int storedJoy1 = -1;
+	if (ReadIniIfExists("Controller", "JoystickName", &storedJoy1)) {
+		CPad::XInputJoy1 = -1;
+		CPad::XInputJoy2 = -1;
+		XINPUT_STATE xstate;
+		memset(&xstate, 0, sizeof(XINPUT_STATE));
+
+		// Firstly confirm & set joy 1
+		if (XInputGetState(storedJoy1, &xstate) == ERROR_SUCCESS) {
+			CPad::XInputJoy1 = storedJoy1;
+		}
+
+		for (int i = 0; i <= 3; i++) {
+			if (XInputGetState(i, &xstate) == ERROR_SUCCESS) {
+				if (CPad::XInputJoy1 == -1)
+					CPad::XInputJoy1 = i;
+				else if (CPad::XInputJoy2 == -1 && i != CPad::XInputJoy1)
+					CPad::XInputJoy2 = i;
+			}
+		}
+	}
+#else
 	ReadIniIfExists("Controller", "JoystickName", gSelectedJoystickName, 128);
+#endif
 #endif
 	// force to default GTA behaviour (never overwrite bindings on joy change/initialization) if user init'ed/set bindings before we introduced that
 	if (!ReadIniIfExists("Controller", "PadButtonsInited", &ControlsManager.ms_padButtonsInited)) {
@@ -348,8 +380,12 @@ void SaveINIControllerSettings()
 		StoreIni("Bindings", iniControllerActions[i], value, 128);
 	}
 
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
+#ifdef XINPUT
+	StoreIni("Controller", "JoystickName", CPad::XInputJoy1);
+#else
 	StoreIni("Controller", "JoystickName", gSelectedJoystickName, 128);
+#endif
 #endif
 	StoreIni("Controller", "PadButtonsInited", ControlsManager.ms_padButtonsInited);
 	cfg.write_file("reVC.ini");

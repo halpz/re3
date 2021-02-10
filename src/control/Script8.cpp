@@ -55,7 +55,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 				((CPlayerPed*)pPed)->m_fMoveSpeed = 0.0f;
 			else
 				pPed->m_nStoredMoveState = PEDMOVE_STILL;
-			CAnimManager::AddAnimation(pPed->GetClump(), pPed->m_animGroup, ANIM_IDLE_STANCE);
+			CAnimManager::AddAnimation(pPed->GetClump(), pPed->m_animGroup, ANIM_STD_IDLE);
 			pPed->bIsPedDieAnimPlaying = false;
 		}
 		return 0;
@@ -346,7 +346,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		CollectParameters(&m_nIp, 1);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		script_assert(pPed);
-		UpdateCompareFlag(RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_DUCK_DOWN) != nil);
+		UpdateCompareFlag(RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_STD_DUCK_DOWN) != nil);
 		return 0;
 	}
 	case COMMAND_CREATE_DUST_EFFECT_FOR_CUTSCENE_HELI:

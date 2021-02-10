@@ -31,38 +31,38 @@ RpClump* flyingClumpTemp;
 
 FightMove tFightMoves[NUM_FIGHTMOVES] =
 {
-  { NUM_STD_ANIMS,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
-  { ANIM_PUNCH_R, 0.2f, 8.f/30.f, 0.0f, 0.3f, 1.0f, HITLEVEL_HIGH, 1, 0 },
-  { ANIM_FIGHT_IDLE,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
-  { ANIM_FIGHT_SH_F,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
-  { ANIM_FIGHT_KNEE, 4.f/30.f, 0.2f, 0.0f, 0.6f, 1.0f, HITLEVEL_LOW, 2, 0 },
-  { ANIM_FIGHT_LHOOK, 8.f/30.f, 10.f/30.f, 0.0f, 0.4f, 1.0f, HITLEVEL_HIGH, 3, 0 },
-  { ANIM_FIGHT_JAB, 4.f/30.f, 0.2f, 0.0f, 0.7f, 1.0f, HITLEVEL_HIGH, 3, 0 },
-  { ANIM_FIGHT_PUNCH, 4.f/30.f, 7.f/30.f, 10.f/30.f, 0.4f, 1.0f, HITLEVEL_HIGH, 1, 0 },
-  { ANIM_FIGHT_LONGKICK, 8.f/30.f, 10.f/30.f, 0.0f, 0.5f, 1.0f, HITLEVEL_MEDIUM, 4, 0 },
-  { ANIM_FIGHT_ROUNDHOUSE, 8.f/30.f, 10.f/30.f, 0.0f,  0.6f, 1.0f, HITLEVEL_MEDIUM, 4, 0 },
-  { ANIM_FIGHT_KICK,  8.f/30.f,  10.f/30.f,  0.0f,  0.5f,  1.0f, HITLEVEL_HIGH, 2, 0 },
-  { ANIM_FIGHT_HEAD,  8.f/30.f,  10.f/30.f,  0.0f,  0.5f,  1.0f, HITLEVEL_MEDIUM, 2, 0 },
-  { ANIM_FIGHT_BKICK_L,  8.f/30.f,  10.f/30.f,  0.0f,  0.5f,  1.0f, HITLEVEL_LOW, 2, 0 },
-  { ANIM_FIGHT_BKICK_L,  8.f/30.f,  10.f/30.f,  0.0f,  0.5f,  1.0f, HITLEVEL_LOW, 2, 0 },
-  { ANIM_FIGHT_ELBOW_L,  8.f/30.f,  10.f/30.f,  0.0f,  0.5f,  1.0f, HITLEVEL_MEDIUM, 2, 0 },
-  { ANIM_FIGHT_BKICK_R,  8.f/30.f,  10.f/30.f,  0.0f,  0.5f,  1.0f, HITLEVEL_MEDIUM, 2, 0 },
-  { ANIM_FIGHT_ELBOW_R,  8.f/30.f,  10.f/30.f,  0.0f,  0.5f,  1.0f, HITLEVEL_HIGH, 2, 0 },
-  { ANIM_KICK_FLOOR, 10.f/30.f, 14.f/30.f, 0.0f, 0.4f, 1.0f, HITLEVEL_GROUND, 1, 0 },
-  { ANIM_HIT_FRONT,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
-  { ANIM_HIT_BACK,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
-  { ANIM_HIT_RIGHT,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
-  { ANIM_HIT_LEFT,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
-  { ANIM_HIT_BODYBLOW,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
-  { ANIM_HIT_CHEST,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
-  { ANIM_HIT_HEAD,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
-  { ANIM_HIT_WALK,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
-  { ANIM_FLOOR_HIT,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
-  { ANIM_HIT_BEHIND,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
-  { ANIM_WEAPON_FIRE, 4.f/30.f, 7.f/30.f, 10.f/30.f, 0.4f, 1.0f, HITLEVEL_HIGH, 1, 0 },
-  { ANIM_WEAPON_CROUCHFIRE, 4.f/30.f, 7.f/30.f, 10.f/30.f, 0.4f, 1.0f, HITLEVEL_HIGH, 1, 0 },
-  { ANIM_WEAPON_SPECIAL, 4.f / 30.f, 7.f / 30.f, 10.f / 30.f, 0.4f, 1.0f, HITLEVEL_HIGH, 1, 0 },
-  { ANIM_FIGHT2_IDLE,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 }
+  { ANIM_STD_NUM,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
+  { ANIM_STD_PUNCH, 0.2f, 8.f/30.f, 0.0f, 0.3f, 1.0f, HITLEVEL_HIGH, 1, 0 },
+  { ANIM_STD_FIGHT_IDLE,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
+  { ANIM_STD_FIGHT_SHUFFLE_F,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
+  { ANIM_STD_FIGHT_KNEE, 4.f/30.f, 0.2f, 0.0f, 0.6f, 1.0f, HITLEVEL_LOW, 2, 0 },
+  { ANIM_STD_FIGHT_LHOOK, 8.f/30.f, 10.f/30.f, 0.0f, 0.4f, 1.0f, HITLEVEL_HIGH, 3, 0 },
+  { ANIM_STD_FIGHT_JAB, 4.f/30.f, 0.2f, 0.0f, 0.7f, 1.0f, HITLEVEL_HIGH, 3, 0 },
+  { ANIM_STD_FIGHT_PUNCH, 4.f/30.f, 7.f/30.f, 10.f/30.f, 0.4f, 1.0f, HITLEVEL_HIGH, 1, 0 },
+  { ANIM_STD_FIGHT_LONGKICK, 8.f/30.f, 10.f/30.f, 0.0f, 0.5f, 1.0f, HITLEVEL_MEDIUM, 4, 0 },
+  { ANIM_STD_FIGHT_ROUNDHOUSE, 8.f/30.f, 10.f/30.f, 0.0f,  0.6f, 1.0f, HITLEVEL_MEDIUM, 4, 0 },
+  { ANIM_STD_FIGHT_KICK,  8.f/30.f,  10.f/30.f,  0.0f,  0.5f,  1.0f, HITLEVEL_HIGH, 2, 0 },
+  { ANIM_STD_FIGHT_HEAD,  8.f/30.f,  10.f/30.f,  0.0f,  0.5f,  1.0f, HITLEVEL_MEDIUM, 2, 0 },
+  { ANIM_STD_FIGHT_BKICK_L,  8.f/30.f,  10.f/30.f,  0.0f,  0.5f,  1.0f, HITLEVEL_LOW, 2, 0 },
+  { ANIM_STD_FIGHT_BKICK_L,  8.f/30.f,  10.f/30.f,  0.0f,  0.5f,  1.0f, HITLEVEL_LOW, 2, 0 },
+  { ANIM_STD_FIGHT_ELBOW_L,  8.f/30.f,  10.f/30.f,  0.0f,  0.5f,  1.0f, HITLEVEL_MEDIUM, 2, 0 },
+  { ANIM_STD_FIGHT_BKICK_R,  8.f/30.f,  10.f/30.f,  0.0f,  0.5f,  1.0f, HITLEVEL_MEDIUM, 2, 0 },
+  { ANIM_STD_FIGHT_ELBOW_R,  8.f/30.f,  10.f/30.f,  0.0f,  0.5f,  1.0f, HITLEVEL_HIGH, 2, 0 },
+  { ANIM_STD_KICKGROUND, 10.f/30.f, 14.f/30.f, 0.0f, 0.4f, 1.0f, HITLEVEL_GROUND, 1, 0 },
+  { ANIM_STD_HIT_FRONT,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
+  { ANIM_STD_HIT_BACK,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
+  { ANIM_STD_HIT_RIGHT,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
+  { ANIM_STD_HIT_LEFT,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
+  { ANIM_STD_HIT_BODYBLOW,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
+  { ANIM_STD_HIT_CHEST,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
+  { ANIM_STD_HIT_HEAD,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
+  { ANIM_STD_HIT_WALK,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
+  { ANIM_STD_HIT_FLOOR,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
+  { ANIM_STD_HIT_BEHIND,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 },
+  { ANIM_ATTACK_1, 4.f/30.f, 7.f/30.f, 10.f/30.f, 0.4f, 1.0f, HITLEVEL_HIGH, 1, 0 },
+  { ANIM_ATTACK_2, 4.f/30.f, 7.f/30.f, 10.f/30.f, 0.4f, 1.0f, HITLEVEL_HIGH, 1, 0 },
+  { ANIM_ATTACK_3, 4.f / 30.f, 7.f / 30.f, 10.f / 30.f, 0.4f, 1.0f, HITLEVEL_HIGH, 1, 0 },
+  { ANIM_STD_FIGHT_2IDLE,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f, HITLEVEL_NULL, 0, 0 }
 };
 
 static PedOnGroundState
@@ -503,7 +503,7 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 			}
 			if (GetCrouchFireAnim(currentWeapon) && attackAssoc) {
 				if (attackAssoc->animId == GetCrouchFireAnim(currentWeapon) && !reloadAnimAssoc) {
-					newAnim = CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_WEAPON_CROUCH, 8.0f);
+					newAnim = CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_STD_DUCK_WEAPON, 8.0f);
 					newAnim->SetCurrentTime(newAnim->hierarchy->totalLength);
 					newAnim->flags &= ~ASSOC_RUNNING;
 				}
@@ -525,7 +525,7 @@ CPed::FinishedAttackCB(CAnimBlendAssociation *attackAssoc, void *arg)
 		}
 		if (GetCrouchFireAnim(currentWeapon) && attackAssoc) {
 			if (attackAssoc->animId == GetCrouchFireAnim(currentWeapon) && !reloadAnimAssoc) {
-				newAnim = CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_WEAPON_CROUCH, 8.0f);
+				newAnim = CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_STD_DUCK_WEAPON, 8.0f);
 				newAnim->SetCurrentTime(newAnim->hierarchy->totalLength);
 				newAnim->flags &= ~ASSOC_RUNNING;
 			}
@@ -584,7 +584,7 @@ CPed::FinishedReloadCB(CAnimBlendAssociation *reloadAssoc, void *arg)
 		}
 		if (weapon->IsFlagSet(WEAPONFLAG_RELOAD) && reloadAssoc) {
 			if (reloadAssoc->animId == GetCrouchReloadAnim(weapon) && !crouchFireAssoc) {
-				CAnimBlendAssociation *crouchAssoc = CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_WEAPON_CROUCH, 8.0f);
+				CAnimBlendAssociation *crouchAssoc = CAnimManager::BlendAnimation(ped->GetClump(), ASSOCGRP_STD, ANIM_STD_DUCK_WEAPON, 8.0f);
 				crouchAssoc->SetCurrentTime(crouchAssoc->hierarchy->totalLength);
 				crouchAssoc->flags &= ~ASSOC_RUNNING;
 			}
@@ -990,7 +990,7 @@ CPed::Attack(void)
 					if (GetFireAnimGround(ourWeapon, false)) {
 						weaponAnimAssoc = CAnimManager::BlendAnimation(GetClump(), ourWeapon->m_AnimToPlay, fireAnim, 8.0f);
 					} else {
-						weaponAnimAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_KICK_FLOOR, 8.0f);
+						weaponAnimAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_KICKGROUND, 8.0f);
 					}
 				}
 				weaponAnimAssoc->SetFinishCallback(FinishedAttackCB, this);
@@ -1050,9 +1050,9 @@ CPed::StartFightAttack(uint8 buttonPressure)
 		RestoreHeadingRate();
 	}
 
-	CAnimBlendAssociation* animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_RUN_STOP);
+	CAnimBlendAssociation* animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_RUNSTOP1);
 	if (!animAssoc)
-		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_RUN_STOP_R);
+		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_RUNSTOP2);
 
 	if (animAssoc) {
 		RestoreHeadingRate();
@@ -1068,10 +1068,10 @@ CPed::StartFightAttack(uint8 buttonPressure)
 			fightIdleAssoc = CAnimManager::BlendAnimation(GetClump(), weaponInfo->m_AnimToPlay, GetFightIdleWithMeleeAnim(weaponInfo), 1000.0f);
 			fightWithWeapon = true;
 		} else {
-			fightIdleAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FIGHT_IDLE, 1000.0f);
+			fightIdleAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_FIGHT_IDLE, 1000.0f);
 		}
 	} else {
-		fightIdleAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FIGHT_IDLE, 1000.0f);
+		fightIdleAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_FIGHT_IDLE, 1000.0f);
 	}
 	m_lastFightMove = FIGHTMOVE_IDLE;
 	m_curFightMove = IsPlayer() ? ChooseAttackPlayer(buttonPressure, fightWithWeapon) : ChooseAttackAI(buttonPressure, fightWithWeapon);
@@ -1131,7 +1131,7 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 			if (hitLevel == HITLEVEL_GROUND) {
 				CAnimBlendAssociation *floorHitAssoc;
 				if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FRONTAL)) {
-					floorHitAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FLOOR_HIT_F, 8.0f);
+					floorHitAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_HIT_FLOOR_FRONT, 8.0f);
 				} else {
 					floorHitAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, tFightMoves[FIGHTMOVE_HITONFLOOR].animId, 8.0f);
 				}
@@ -1153,8 +1153,8 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 	} else if (m_nPedState == PED_FALL) {
 		if (hitLevel == HITLEVEL_GROUND && !IsPedHeadAbovePos(-0.3f)) {
 			CAnimBlendAssociation *floorHitAssoc = RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FRONTAL) ?
-				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FLOOR_HIT_F, 8.0f) :
-				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FLOOR_HIT, 8.0f);
+				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_HIT_FLOOR_FRONT, 8.0f) :
+				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_HIT_FLOOR, 8.0f);
 			if (floorHitAssoc) {
 				floorHitAssoc->flags &= ~ASSOC_FADEOUTWHENDONE;
 				floorHitAssoc->flags |= ASSOC_DELETEFADEDOUT;
@@ -1169,16 +1169,16 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 					AnimationId shotAnim;
 					switch (direction) {
 						case 1:
-							shotAnim = ANIM_SHOT_LEFT_PARTIAL;
+							shotAnim = ANIM_STD_HITBYGUN_LEFT;
 							break;
 						case 2:
-							shotAnim = ANIM_SHOT_BACK_PARTIAL;
+							shotAnim = ANIM_STD_HITBYGUN_BACK;
 							break;
 						case 3:
-							shotAnim = ANIM_SHOT_RIGHT_PARTIAL;
+							shotAnim = ANIM_STD_HITBYGUN_RIGHT;
 							break;
 						default:
-							shotAnim = ANIM_SHOT_FRONT_PARTIAL;
+							shotAnim = ANIM_STD_HITBYGUN_FRONT;
 							break;
 					}
 					CAnimBlendAssociation *shotAssoc = RpAnimBlendClumpGetAssociation(GetClump(), shotAnim);
@@ -1197,30 +1197,30 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 				AnimationId hitAnim;
 				switch (direction) {
 					case 1:
-						hitAnim = ANIM_KO_SPIN_R;
+						hitAnim = ANIM_STD_HIGHIMPACT_LEFT;
 						break;
 					case 2:
 						if (CGeneral::GetRandomNumber() & 1) {
 							fall = false;
-							hitAnim = ANIM_HIT_BACK;
+							hitAnim = ANIM_STD_HIT_BACK;
 						} else	{
-							hitAnim = ANIM_KO_SKID_BACK;
+							hitAnim = ANIM_STD_HIGHIMPACT_BACK;
 						}
 						break;
 					case 3:
-						hitAnim = ANIM_KO_SPIN_L;
+						hitAnim = ANIM_STD_HIGHIMPACT_RIGHT;
 						break;
 					default:
 						if (hitLevel == HITLEVEL_LOW) {
-							hitAnim = ANIM_KO_SHOT_STOM;
+							hitAnim = ANIM_STD_KO_SHOT_STOMACH;
 						} else if (CGeneral::GetRandomNumber() & 1) {
 							fall = false;
-							hitAnim = ANIM_HIT_WALK;
+							hitAnim = ANIM_STD_HIT_WALK;
 						} else if (CGeneral::GetRandomNumber() & 1) {
 							fall = false;
-							hitAnim = ANIM_HIT_HEAD;
+							hitAnim = ANIM_STD_HIT_HEAD;
 						} else {
-							hitAnim = ANIM_KO_SHOT_FACE;
+							hitAnim = ANIM_STD_KO_SHOT_FACE;
 						}
 						break;
 				}
@@ -1245,11 +1245,11 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 					break;
 				case HITLEVEL_LOW:
 					if (direction == 2 && (!IsPlayer() || ((CGeneral::GetRandomNumber() & 1) && m_fHealth < 30.0f))) {
-						SetFall(1000, ANIM_KO_SKID_BACK, false);
+						SetFall(1000, ANIM_STD_HIGHIMPACT_BACK, false);
 						Say(SOUND_PED_DEFEND);
 						return;
 					} else if (direction != 2 && !IsPlayer() && (CGeneral::GetRandomNumber() & 1) && m_fHealth < 30.0f) {
-						SetFall(1000, ANIM_KO_SHOT_STOM, false);
+						SetFall(1000, ANIM_STD_KO_SHOT_STOMACH, false);
 						Say(SOUND_PED_DEFEND);
 						return;
 					}	
@@ -1325,14 +1325,14 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 				m_fightButtonPressure = 0;
 				m_lastFightMove = FIGHTMOVE_IDLE;
 				RpAnimBlendClumpRemoveAssociations(GetClump(), ASSOC_REPEAT);
-				CAnimBlendAssociation *walkStartAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WALK_START);
+				CAnimBlendAssociation *walkStartAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_STARTWALK);
 				if (walkStartAssoc) {
 					walkStartAssoc->flags |= ASSOC_DELETEFADEDOUT;
 					walkStartAssoc->blendDelta = -1000.0f;
 				}
-				CAnimBlendAssociation *walkStopAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_RUN_STOP);
+				CAnimBlendAssociation *walkStopAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_RUNSTOP1);
 				if (!walkStopAssoc)
-					walkStopAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_RUN_STOP_R);
+					walkStopAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_RUNSTOP2);
 				if (walkStopAssoc) {
 					walkStopAssoc->flags |= ASSOC_DELETEFADEDOUT;
 					walkStopAssoc->blendDelta = -1000.0f;
@@ -1347,10 +1347,10 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 					if (GetFightIdleWithMeleeAnim(weaponInfo)) {
 						fightIdleAssoc = CAnimManager::AddAnimation(GetClump(), weaponInfo->m_AnimToPlay, GetFightIdleWithMeleeAnim(weaponInfo));
 					} else {
-						fightIdleAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_FIGHT_IDLE);
+						fightIdleAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_FIGHT_IDLE);
 					}
 				} else {
-					fightIdleAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_FIGHT_IDLE);
+					fightIdleAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_FIGHT_IDLE);
 				}
 				fightIdleAssoc->blendAmount = 1.0f;
 				CAnimBlendAssociation *moveAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, tFightMoves[m_curFightMove].animId, 8.0f);
@@ -1404,7 +1404,7 @@ CPed::Fight(void)
 	}
 
 	if (m_curFightMove == FIGHTMOVE_SHUFFLE_F && !currentAssoc)
-		currentAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_SH_BACK);
+		currentAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_FIGHT_SHUFFLE_B);
 
 	if (IsPlayer() && currentAssoc && weapon == WEAPONTYPE_KATANA) {
 		if (m_curFightMove == FIGHTMOVE_MELEE1 || m_curFightMove == FIGHTMOVE_MELEE2) {
@@ -1927,7 +1927,7 @@ CPed::EndFight(uint8 endType)
 
 	m_curFightMove = FIGHTMOVE_NULL;
 	RestorePreviousState();
-	CAnimBlendAssociation *animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_FIGHT_IDLE);
+	CAnimBlendAssociation *animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_FIGHT_IDLE);
 	if (!animAssoc)
 		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_MELEE_IDLE_FIGHTMODE);
 
@@ -1936,16 +1936,16 @@ CPed::EndFight(uint8 endType)
 
 	switch (endType) {
 		case ENDFIGHT_NORMAL:
-			CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 8.0f);
-			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FIGHT2_IDLE, 8.0f);
+			CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_STD_IDLE, 8.0f);
+			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_FIGHT_2IDLE, 8.0f);
 			break;
 		case ENDFIGHT_WITH_A_STEP:
-			CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 1.0f);
-			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_WALK_START, 8.0f);
+			CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_STD_IDLE, 1.0f);
+			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_STARTWALK, 8.0f);
 			break;
 		case ENDFIGHT_FAST:
-			CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 8.0f);
-			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FIGHT2_IDLE, 8.0f)->speed = 2.0f;
+			CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_STD_IDLE, 8.0f);
+			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_FIGHT_2IDLE, 8.0f)->speed = 2.0f;
 			break;
 		default:
 			break;
@@ -2229,7 +2229,7 @@ CPed::FightHitPed(CPed *victim, CVector &touchPoint, CVector &dir, int16 piece)
 					|| weaponType != WEAPONTYPE_UNARMED && weaponType != WEAPONTYPE_BRASSKNUCKLE && IsPlayer()
 					|| victim->m_pedStats->m_flags & STAT_ONE_HIT_KNOCKDOWN || brassKnucklePunch)) {
 
-				victim->SetFall(0, (AnimationId)(direction + ANIM_KO_SKID_FRONT), 0);
+				victim->SetFall(0, (AnimationId)(direction + ANIM_STD_HIGHIMPACT_FRONT), 0);
 				if (victim->m_nPedState == PED_FALL)
 					victim->bIsStanding = false;
 			}
@@ -2364,7 +2364,7 @@ CPed::LoadFightData(void)
 				animAssoc = CAnimManager::GetAnimAssociation(ASSOCGRP_STD, animName);
 				tFightMoves[moveId].animId = (AnimationId)animAssoc->animId;
 			} else {
-				tFightMoves[moveId].animId = ANIM_WALK;
+				tFightMoves[moveId].animId = ANIM_STD_WALK;
 			}
 		}
 		moveId++;
@@ -2389,7 +2389,7 @@ CPed::SetInvestigateEvent(eEventType event, CVector2D pos, float distanceToCount
 	if (m_eventType >= EVENT_ICECREAM)
 		m_lookTimer = 0;
 	else
-		CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_HANDSCOWER, 4.0f);
+		CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_HANDSCOWER, 4.0f);
 
 }
 
@@ -2429,7 +2429,7 @@ CPed::InvestigateEvent(void)
 			case EVENT_HIT_AND_RUN_COP:
 
 				if (CTimer::GetTimeInMilliseconds() > m_lookTimer) {
-					animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_ROAD_CROSS);
+					animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_ROADCROSS);
 
 					if (animAssoc) {
 						animAssoc->blendDelta = -8.0f;
@@ -2441,7 +2441,7 @@ CPed::InvestigateEvent(void)
 
 					} else if (CGeneral::GetRandomNumber() & 3) {
 						ClearLookFlag();
-						CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_ROAD_CROSS, 4.0f);
+						CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_ROADCROSS, 4.0f);
 
 						SetLookTimer(CGeneral::GetRandomNumberInRange(1000, 2500));
 						Say(SOUND_PED_CHAT_EVENT);
@@ -2455,16 +2455,16 @@ CPed::InvestigateEvent(void)
 			case EVENT_EXPLOSION:
 
 				if (bHasACamera && CTimer::GetTimeInMilliseconds() > m_lookTimer) {
-					animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_CAM);
+					animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_IDLE_CAM);
 					if (!animAssoc)
-						animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_STANCE);
+						animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_IDLE);
 
-					if (animAssoc && animAssoc->animId == ANIM_IDLE_CAM) {
-						CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, 4.0f);
+					if (animAssoc && animAssoc->animId == ANIM_STD_IDLE_CAM) {
+						CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_STD_IDLE, 4.0f);
 						SetLookTimer(CGeneral::GetRandomNumberInRange(1000, 2500));
 
 					} else if (CGeneral::GetRandomNumber() & 3) {
-						CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_IDLE_CAM, 4.0f);
+						CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_IDLE_CAM, 4.0f);
 						SetLookTimer(CGeneral::GetRandomNumberInRange(2500, 5000));
 						if (!CGame::germanGame)
 							Say(SOUND_PED_CHAT_EVENT);
@@ -2474,30 +2474,30 @@ CPed::InvestigateEvent(void)
 					}
 
 				} else if (CTimer::GetTimeInMilliseconds() > m_lookTimer) {
-					animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_STANCE);
+					animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_IDLE);
 					if (!animAssoc)
-						animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_HBHB);
+						animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_IDLE_HBHB);
 
 					if (!animAssoc)
-						animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_XPRESS_SCRATCH);
+						animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_XPRESS_SCRATCH);
 
-					if (animAssoc && animAssoc->animId == ANIM_IDLE_STANCE) {
+					if (animAssoc && animAssoc->animId == ANIM_STD_IDLE) {
 						if (CGeneral::GetRandomNumber() & 1)
-							animToPlay = ANIM_IDLE_HBHB;
+							animToPlay = ANIM_STD_IDLE_HBHB;
 						else
-							animToPlay = ANIM_XPRESS_SCRATCH;
+							animToPlay = ANIM_STD_XPRESS_SCRATCH;
 
 						CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, animToPlay, 4.0f);
 						SetLookTimer(CGeneral::GetRandomNumberInRange(1500, 4000));
 
-					} else if (animAssoc && animAssoc->animId == ANIM_IDLE_HBHB) {
+					} else if (animAssoc && animAssoc->animId == ANIM_STD_IDLE_HBHB) {
 						animAssoc->blendDelta = -8.0f;
 						animAssoc->flags |= ASSOC_DELETEFADEDOUT;
 						if (CGeneral::GetRandomNumber() & 1) {
-							animToPlay = ANIM_IDLE_STANCE;
+							animToPlay = ANIM_STD_IDLE;
 							animGroup = m_animGroup;
 						} else {
-							animToPlay = ANIM_XPRESS_SCRATCH;
+							animToPlay = ANIM_STD_XPRESS_SCRATCH;
 							animGroup = ASSOCGRP_STD;
 						}
 
@@ -2506,10 +2506,10 @@ CPed::InvestigateEvent(void)
 
 					} else {
 						if (CGeneral::GetRandomNumber() & 1) {
-							animToPlay = ANIM_IDLE_STANCE;
+							animToPlay = ANIM_STD_IDLE;
 							animGroup = m_animGroup;
 						} else {
-							animToPlay = ANIM_IDLE_HBHB;
+							animToPlay = ANIM_STD_IDLE_HBHB;
 							animGroup = ASSOCGRP_STD;
 						}
 
@@ -2527,26 +2527,26 @@ CPed::InvestigateEvent(void)
 				if (CTimer::GetTimeInMilliseconds() > m_lookTimer) {
 
 					if (m_lookTimer) {
-						animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_ROAD_CROSS);
+						animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_ROADCROSS);
 
 						if (animAssoc) {
 							animAssoc->blendDelta = -8.0f;
 							animAssoc->flags |= ASSOC_DELETEFADEDOUT;
 							if (m_eventType == EVENT_ICECREAM)
-								animToPlay = ANIM_IDLE_CHAT;
+								animToPlay = ANIM_STD_CHAT;
 							else
-								animToPlay = ANIM_XPRESS_SCRATCH;
+								animToPlay = ANIM_STD_XPRESS_SCRATCH;
 							CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, animToPlay,4.0f);
 							SetLookTimer(CGeneral::GetRandomNumberInRange(2000, 5000));
 
 						} else {
-							animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_CHAT);
+							animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_CHAT);
 							if (animAssoc) {
 								animAssoc->blendDelta = -8.0f;
 								animAssoc->flags |= ASSOC_DELETEFADEDOUT;
 								ClearInvestigateEvent();
 							} else {
-								animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_XPRESS_SCRATCH);
+								animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_XPRESS_SCRATCH);
 								if (animAssoc) {
 									animAssoc->blendDelta = -8.0f;
 									animAssoc->flags |= ASSOC_DELETEFADEDOUT;
@@ -2555,7 +2555,7 @@ CPed::InvestigateEvent(void)
 							}
 						}
 					} else {
-						CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_ROAD_CROSS, 4.0f);
+						CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_ROADCROSS, 4.0f);
 						SetLookTimer(CGeneral::GetRandomNumberInRange(1000, 2500));
 					}
 				}
@@ -2601,13 +2601,13 @@ CPed::InvestigateEvent(void)
 void
 CPed::ClearInvestigateEvent(void)
 {
-	CAnimBlendAssociation *animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_ROAD_CROSS);
+	CAnimBlendAssociation *animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_ROADCROSS);
 	if (!animAssoc)
-		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_XPRESS_SCRATCH);
+		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_XPRESS_SCRATCH);
 	if (!animAssoc)
-		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_HBHB);
+		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_IDLE_HBHB);
 	if (!animAssoc)
-		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_IDLE_CHAT);
+		animAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_CHAT);
 	if (animAssoc) {
 		animAssoc->blendDelta = -8.0f;
 		animAssoc->flags |= ASSOC_DELETEFADEDOUT;
@@ -2629,7 +2629,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 	CPlayerPed *player = FindPlayerPed();
 	float dieDelta = 4.0f;
 	float dieSpeed = 0.0f;
-	AnimationId dieAnim = ANIM_KO_SHOT_FRONT1;
+	AnimationId dieAnim = ANIM_STD_KO_FRONT;
 	bool headShot = false;
 	bool willLinger = false;
 	int random;
@@ -2677,9 +2677,9 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 	if (m_nPedState == PED_GETUP) {
 		if (!IsPedHeadAbovePos(-0.3f)) {
 			if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FRONTAL))
-				dieAnim = ANIM_FLOOR_HIT_F;
+				dieAnim = ANIM_STD_HIT_FLOOR_FRONT;
 			else
-				dieAnim = ANIM_FLOOR_HIT;
+				dieAnim = ANIM_STD_HIT_FLOOR;
 			dieDelta *= 2.0f;
 			dieSpeed = 0.5f;
 			detectDieAnim = false;
@@ -2688,14 +2688,14 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 		CAnimBlendAssociation *fallAssoc = RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_PARTIAL);
 		if (!fallAssoc || fallAssoc->IsRunning()) {
 			if (fallAssoc && fallAssoc->blendDelta >= 0.0f)
-				dieAnim = NUM_STD_ANIMS;
+				dieAnim = ANIM_STD_NUM;
 			else
-				dieAnim = ANIM_KO_SHOT_FRONT1;
+				dieAnim = ANIM_STD_KO_FRONT;
 		} else {
 			if (fallAssoc->flags & ASSOC_FRONTAL)
-				dieAnim = ANIM_FLOOR_HIT_F;
+				dieAnim = ANIM_STD_HIT_FLOOR_FRONT;
 			else
-				dieAnim = ANIM_FLOOR_HIT;
+				dieAnim = ANIM_STD_HIT_FLOOR;
 
 			dieDelta *= 2.0f;
 			dieSpeed = 0.5f;
@@ -2712,28 +2712,28 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 
 				if (m_nPedState == PED_FALL) {
 					if (IsPedHeadAbovePos(-0.3f)) {
-						dieAnim = NUM_STD_ANIMS;
+						dieAnim = ANIM_STD_NUM;
 					} else {
 						if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FRONTAL))
-							dieAnim = ANIM_FLOOR_HIT_F;
+							dieAnim = ANIM_STD_HIT_FLOOR_FRONT;
 						else
-							dieAnim = ANIM_FLOOR_HIT;
+							dieAnim = ANIM_STD_HIT_FLOOR;
 						dieDelta = dieDelta * 2.0f;
 						dieSpeed = 0.5f;
 					}
 				} else {
 					switch (direction) {
 						case 0:
-							dieAnim = ANIM_KO_SKID_FRONT;
+							dieAnim = ANIM_STD_HIGHIMPACT_FRONT;
 							break;
 						case 1:
-							dieAnim = ANIM_KO_SPIN_R;
+							dieAnim = ANIM_STD_HIGHIMPACT_LEFT;
 							break;
 						case 2:
-							dieAnim = ANIM_KO_SKID_BACK;
+							dieAnim = ANIM_STD_HIGHIMPACT_BACK;
 							break;
 						case 3:
-							dieAnim = ANIM_KO_SPIN_L;
+							dieAnim = ANIM_STD_HIGHIMPACT_RIGHT;
 							break;
 						default:
 							break;
@@ -2761,12 +2761,12 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 
 					if (m_nPedState == PED_FALL) {
 						if (IsPedHeadAbovePos(-0.3f)) {
-							dieAnim = NUM_STD_ANIMS;
+							dieAnim = ANIM_STD_NUM;
 						} else {
 							if (RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_FRONTAL))
-								dieAnim = ANIM_FLOOR_HIT_F;
+								dieAnim = ANIM_STD_HIT_FLOOR_FRONT;
 							else
-								dieAnim = ANIM_FLOOR_HIT;
+								dieAnim = ANIM_STD_HIT_FLOOR;
 							dieDelta = dieDelta * 2.0f;
 							dieSpeed = 0.5f;
 						}
@@ -2774,28 +2774,28 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 						if (damagedBy != FindPlayerPed() || FindPlayerPed()->m_curFightMove != FIGHTMOVE_MELEE3) {
 							switch (direction) {
 								case 0:
-									dieAnim = ANIM_KO_SKID_FRONT;
+									dieAnim = ANIM_STD_HIGHIMPACT_FRONT;
 									break;
 								case 1:
-									dieAnim = ANIM_KO_SPIN_R;
+									dieAnim = ANIM_STD_HIGHIMPACT_LEFT;
 									break;
 								case 2:
-									dieAnim = ANIM_KO_SKID_BACK;
+									dieAnim = ANIM_STD_HIGHIMPACT_BACK;
 									break;
 								case 3:
-									dieAnim = ANIM_KO_SPIN_L;
+									dieAnim = ANIM_STD_HIGHIMPACT_RIGHT;
 									break;
 								default:
 									break;
 							}
 						} else {
-							dieAnim = ANIM_KO_SHOT_STOM;
+							dieAnim = ANIM_STD_KO_SHOT_STOMACH;
 						}
 					} else {
-						dieAnim = ANIM_KO_SHOT_FACE;
+						dieAnim = ANIM_STD_KO_SHOT_FACE;
 					}
 				} else {
-					dieAnim = ANIM_KO_SHOT_FACE;
+					dieAnim = ANIM_STD_KO_SHOT_FACE;
 					RemoveBodyPart(PED_HEAD, direction);
 					headShot = true;
 					willLinger = true;
@@ -2836,56 +2836,56 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 					if (method == WEAPONTYPE_SHOTGUN) {
 						switch (direction) {
 							case 0:
-								dieAnim = ANIM_KO_SKID_FRONT;
+								dieAnim = ANIM_STD_HIGHIMPACT_FRONT;
 								break;
 							case 1:
-								dieAnim = ANIM_KO_SPIN_R;
+								dieAnim = ANIM_STD_HIGHIMPACT_LEFT;
 								break;
 							case 2:
-								dieAnim = ANIM_KO_SKID_BACK;
+								dieAnim = ANIM_STD_HIGHIMPACT_BACK;
 								break;
 							case 3:
-								dieAnim = ANIM_KO_SPIN_L;
+								dieAnim = ANIM_STD_HIGHIMPACT_RIGHT;
 								break;
 							default:
 								break;
 						}
 					} else
-						dieAnim = ANIM_KO_SHOT_FRONT1;
+						dieAnim = ANIM_STD_KO_FRONT;
 
 					willLinger = false;
 				} else {
 					switch (pedPiece) {
 						case PEDPIECE_TORSO:
 							willLinger = false;
-							dieAnim = ANIM_KO_SHOT_FRONT1;
+							dieAnim = ANIM_STD_KO_FRONT;
 							break;
 						case PEDPIECE_MID:
 							willLinger = false;
-							dieAnim = ANIM_KO_SHOT_STOM;
+							dieAnim = ANIM_STD_KO_SHOT_STOMACH;
 							break;
 						case PEDPIECE_LEFTARM:
-							dieAnim = ANIM_KO_SHOT_ARML;
+							dieAnim = ANIM_STD_KO_SHOT_ARM_L;
 							RemoveBodyPart(PED_UPPERARML, direction);
 							willLinger = true;
 							break;
 						case PEDPIECE_RIGHTARM:
-							dieAnim = ANIM_KO_SHOT_ARMR;
+							dieAnim = ANIM_STD_KO_SHOT_ARM_R;
 							RemoveBodyPart(PED_UPPERARMR, direction);
 							willLinger = true;
 							break;
 						case PEDPIECE_LEFTLEG:
-							dieAnim = ANIM_KO_SHOT_LEGL;
+							dieAnim = ANIM_STD_KO_SHOT_LEG_L;
 							RemoveBodyPart(PED_UPPERLEGL, direction);
 							willLinger = true;
 							break;
 						case PEDPIECE_RIGHTLEG:
-							dieAnim = ANIM_KO_SHOT_LEGR;
+							dieAnim = ANIM_STD_KO_SHOT_LEG_R;
 							RemoveBodyPart(PED_UPPERLEGR, direction);
 							willLinger = true;
 							break;
 						case PEDPIECE_HEAD:
-							dieAnim = ANIM_KO_SHOT_FACE;
+							dieAnim = ANIM_STD_KO_SHOT_FACE;
 							RemoveBodyPart(PED_HEAD, direction);
 							headShot = true;
 							willLinger = true;
@@ -2925,16 +2925,16 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 
 				switch (direction) {
 					case 0:
-						dieAnim = ANIM_KO_SKID_FRONT;
+						dieAnim = ANIM_STD_HIGHIMPACT_FRONT;
 						break;
 					case 1:
-						dieAnim = ANIM_KO_SPIN_R;
+						dieAnim = ANIM_STD_HIGHIMPACT_LEFT;
 						break;
 					case 2:
-						dieAnim = ANIM_KO_SKID_BACK;
+						dieAnim = ANIM_STD_HIGHIMPACT_BACK;
 						break;
 					case 3:
-						dieAnim = ANIM_KO_SPIN_L;
+						dieAnim = ANIM_STD_HIGHIMPACT_RIGHT;
 						break;
 					default:
 						break;
@@ -2944,7 +2944,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 				if (bFireProof)
 					return false;
 
-				dieAnim = ANIM_KO_SHOT_FRONT1;
+				dieAnim = ANIM_STD_KO_FRONT;
 				break;
 			case WEAPONTYPE_RAMMEDBYCAR:
 			case WEAPONTYPE_RUNOVERBYCAR:
@@ -2959,36 +2959,36 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 							if (pedPiece == PEDPIECE_RIGHTARM && random > 1
 								|| pedPiece == PEDPIECE_MID && random == 2)
 						
-								dieAnim = ANIM_KO_SPIN_L;
+								dieAnim = ANIM_STD_HIGHIMPACT_RIGHT;
 							else
-								dieAnim = ANIM_KO_SKID_FRONT;
+								dieAnim = ANIM_STD_HIGHIMPACT_FRONT;
 						} else
-							dieAnim = ANIM_KO_SPIN_R;
+							dieAnim = ANIM_STD_HIGHIMPACT_LEFT;
 
 						break;
 					case 1:
 						if (m_nPedState == PED_DIVE_AWAY)
-							dieAnim = ANIM_KD_LEFT;
+							dieAnim = ANIM_STD_SPINFORWARD_LEFT;
 						else
-							dieAnim = ANIM_KO_SPIN_R;
+							dieAnim = ANIM_STD_HIGHIMPACT_LEFT;
 						break;
 					case 2:
 						if ((pedPiece != PEDPIECE_LEFTARM || random <= 1)
 							&& (pedPiece != PEDPIECE_MID || random != 1)) {
 							if ((pedPiece != PEDPIECE_RIGHTARM || random <= 1)
 								&& (pedPiece != PEDPIECE_MID || random != 2)) {
-								dieAnim = ANIM_KO_SKID_BACK;
+								dieAnim = ANIM_STD_HIGHIMPACT_BACK;
 							} else {
-								dieAnim = ANIM_KD_RIGHT;
+								dieAnim = ANIM_STD_SPINFORWARD_RIGHT;
 							}
 						} else
-							dieAnim = ANIM_KD_LEFT;
+							dieAnim = ANIM_STD_SPINFORWARD_LEFT;
 						break;
 					case 3:
 						if (m_nPedState == PED_DIVE_AWAY)
-							dieAnim = ANIM_KD_RIGHT;
+							dieAnim = ANIM_STD_SPINFORWARD_RIGHT;
 						else
-							dieAnim = ANIM_KO_SPIN_L;
+							dieAnim = ANIM_STD_HIGHIMPACT_RIGHT;
 						break;
 					default:
 						break;
@@ -3006,7 +3006,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 				}
 				break;
 			case WEAPONTYPE_DROWNING:
-				dieAnim = ANIM_DROWN;
+				dieAnim = ANIM_STD_DROWN;
 				break;
 			case WEAPONTYPE_FALL:
 				if (bCollisionProof)
@@ -3014,16 +3014,16 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 
 				switch (direction) {
 					case 0:
-						dieAnim = ANIM_KO_SKID_FRONT;
+						dieAnim = ANIM_STD_HIGHIMPACT_FRONT;
 						break;
 					case 1:
-						dieAnim = ANIM_KO_SPIN_R;
+						dieAnim = ANIM_STD_HIGHIMPACT_LEFT;
 						break;
 					case 2:
-						dieAnim = ANIM_KO_SKID_BACK;
+						dieAnim = ANIM_STD_HIGHIMPACT_BACK;
 						break;
 					case 3:
-						dieAnim = ANIM_KO_SPIN_L;
+						dieAnim = ANIM_STD_HIGHIMPACT_RIGHT;
 						break;
 					default:
 						break;
@@ -3056,7 +3056,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 	}
 
 	if (method == WEAPONTYPE_FALL) {
-		if (RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_ROLLOUT_LHS)) {
+		if (RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_ROLLOUT_LHS)) {
 			if (m_fHealth >= 1.0 && m_fHealth - healthImpact < 5.0f) {
 				m_fHealth = Min(m_fHealth, 5.0f);
 				return false;
@@ -3133,7 +3133,7 @@ CPed::InflictDamage(CEntity *damagedBy, eWeaponType method, float damage, ePedPi
 		if (player == this)
 			m_pMyVehicle->SetStatus(STATUS_PLAYER_DISABLED);
 
-		SetDie(NUM_STD_ANIMS, 4.0f, 0.0f);
+		SetDie(ANIM_STD_NUM, 4.0f, 0.0f);
 		return true;
 	} else {
 		m_fHealth = 0.0f;
@@ -3486,7 +3486,7 @@ CPed::CollideWithPed(CPed *collideWith)
 							} else {
 								SetLookFlag(collideWith, false);
 								TurnBody();
-								animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_FIGHT_PPUNCH, 8.0f);
+								animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_PARTIAL_PUNCH, 8.0f);
 								animAssoc->flags |= ASSOC_FADEOUTWHENDONE;
 								m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 2000;
 								if (!heIsMissionChar) {
@@ -3507,22 +3507,22 @@ CPed::CollideWithPed(CPed *collideWith)
 					moveForce.z += 0.1f;
 					ApplyMoveForce(moveForce);
 					if (collideWith->m_nMoveState != PEDMOVE_RUN && collideWith->m_nMoveState != PEDMOVE_SPRINT)
-						animToPlay = ANIM_HIT_LEFT;
+						animToPlay = ANIM_STD_HIT_LEFT;
 					else
-						animToPlay = ANIM_SHOT_LEFT_PARTIAL;
+						animToPlay = ANIM_STD_HITBYGUN_LEFT;
 				} else if (heLooksToUs) {
 					CVector moveForce = GetRight() * -1.0f;
 					moveForce.z += 0.1f;
 					ApplyMoveForce(moveForce);
 					if (collideWith->m_nMoveState != PEDMOVE_RUN && collideWith->m_nMoveState != PEDMOVE_SPRINT)
-						animToPlay = ANIM_HIT_RIGHT;
+						animToPlay = ANIM_STD_HIT_RIGHT;
 					else
-						animToPlay = ANIM_SHOT_RIGHT_PARTIAL;
+						animToPlay = ANIM_STD_HITBYGUN_RIGHT;
 				} else {
 					if (collideWith->m_nMoveState != PEDMOVE_RUN && collideWith->m_nMoveState != PEDMOVE_SPRINT)
-						animToPlay = ANIM_HIT_BACK;
+						animToPlay = ANIM_STD_HIT_BACK;
 					else
-						animToPlay = ANIM_SHOT_BACK_PARTIAL;
+						animToPlay = ANIM_STD_HITBYGUN_BACK;
 				}
 
 				if (collideWith->IsPedInControl() && CTimer::GetTimeInMilliseconds() > collideWith->m_nPedStateTimer) {
@@ -3539,17 +3539,17 @@ CPed::CollideWithPed(CPed *collideWith)
 					moveForce.z += 0.1f;
 					ApplyMoveForce(moveForce);
 					if (heLooksToUs)
-						animToPlay = ANIM_KO_SPIN_L;
+						animToPlay = ANIM_STD_HIGHIMPACT_RIGHT;
 					else
-						animToPlay = ANIM_KD_RIGHT;
+						animToPlay = ANIM_STD_SPINFORWARD_RIGHT;
 				} else {
 					CVector moveForce = GetRight();
 					moveForce.z += 0.1f;
 					ApplyMoveForce(moveForce);
 					if (heLooksToUs)
-						animToPlay = ANIM_KO_SPIN_R;
+						animToPlay = ANIM_STD_HIGHIMPACT_LEFT;
 					else
-						animToPlay = ANIM_KD_LEFT;
+						animToPlay = ANIM_STD_SPINFORWARD_LEFT;
 				}
 
 				if (m_nPedState == PED_ATTACK && collideWith->IsPedInControl())
@@ -3802,7 +3802,7 @@ CPed::KillPedWithCar(CVehicle *car, float impulse)
 			damage = 30.0f;
 	
 		InflictDamage(car, WEAPONTYPE_RAMMEDBYCAR, damage, PEDPIECE_TORSO, fallDirection);
-		SetFall(1000, (AnimationId)(fallDirection + ANIM_KO_SKID_FRONT), true);
+		SetFall(1000, (AnimationId)(fallDirection + ANIM_STD_HIGHIMPACT_FRONT), true);
 
 		if (OnGround() && !m_pCollidingEntity &&
 			(!IsPlayer() || bHasHitWall || car->GetModelIndex() == MI_TRAIN || m_vecDamageNormal.z < -0.8f)) {
@@ -3846,18 +3846,18 @@ CPed::DriveVehicle(void)
 		float targetUDLean = 0.0f;
 		CAnimBlendAssociation *leftAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BIKE_LEFT);
 		CAnimBlendAssociation *rightAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BIKE_RIGHT);
-		CAnimBlendAssociation *stillAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BIKE_STILL);
+		CAnimBlendAssociation *stillAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BIKE_READY);
 		CAnimBlendAssociation *fwdAssoc, *backAssoc;
 		if (IsPlayer()) {
-			fwdAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BIKE_FWD);
-			backAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BIKE_BACK);
+			fwdAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BIKE_LEANF);
+			backAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BIKE_LEANB);
 		}
-		CAnimBlendAssociation *walkbackAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BIKE_PUSHES);
-		CAnimBlendAssociation *drivebyAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BIKE_DRIVEBY_RHS);
+		CAnimBlendAssociation *walkbackAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BIKE_WALKBACK);
+		CAnimBlendAssociation *drivebyAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BIKE_DRIVEBY_LHS);
 		if (!drivebyAssoc)
-			drivebyAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BIKE_DRIVEBY_LHS);
+			drivebyAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BIKE_DRIVEBY_RHS);
 		if (!drivebyAssoc)
-			drivebyAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BIKE_DRIVEBY_FT);
+			drivebyAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BIKE_DRIVEBY_FORWARD);
 
 		float velocityFwdDotProd = DotProduct(bike->m_vecMoveSpeed, bike->GetForward());
 		if (m_vecTurnSpeed.MagnitudeSqr() > 0.09f) {
@@ -3868,7 +3868,7 @@ CPed::DriveVehicle(void)
 		}
 		if (!drivebyAssoc && Abs(velocityFwdDotProd) < 0.02f) {
 			if (!stillAssoc || stillAssoc->blendAmount < 1.0 && stillAssoc->blendDelta <= 0.0) {
-				stillAssoc = CAnimManager::BlendAnimation(GetClump(), bike->m_bikeAnimType, ANIM_BIKE_STILL, 2.0f);
+				stillAssoc = CAnimManager::BlendAnimation(GetClump(), bike->m_bikeAnimType, ANIM_BIKE_READY, 2.0f);
 			}
 		} else {
 			if (velocityFwdDotProd >= 0.0f) {
@@ -3895,7 +3895,7 @@ CPed::DriveVehicle(void)
 						walkbackAssoc->blendDelta = -4.0f;
 					}
 				} else if (!walkbackAssoc || walkbackAssoc->blendAmount < 1.0f && walkbackAssoc->blendDelta <= 0.0f) {
-					walkbackAssoc = CAnimManager::BlendAnimation(GetClump(), bike->m_bikeAnimType, ANIM_BIKE_PUSHES, 4.0f);
+					walkbackAssoc = CAnimManager::BlendAnimation(GetClump(), bike->m_bikeAnimType, ANIM_BIKE_WALKBACK, 4.0f);
 				}
 			}
 		}
@@ -3993,9 +3993,9 @@ CPed::DriveVehicle(void)
 		float leftRightBlend = leftRightLeanAmount * blendDelta;
 		if (IsPlayer()) {
 			if (!fwdAssoc)
-				fwdAssoc = CAnimManager::AddAnimation(GetClump(), bike->m_bikeAnimType, ANIM_BIKE_FWD);
+				fwdAssoc = CAnimManager::AddAnimation(GetClump(), bike->m_bikeAnimType, ANIM_BIKE_LEANF);
 			if (!backAssoc)
-				backAssoc = CAnimManager::AddAnimation(GetClump(), bike->m_bikeAnimType, ANIM_BIKE_BACK);
+				backAssoc = CAnimManager::AddAnimation(GetClump(), bike->m_bikeAnimType, ANIM_BIKE_LEANB);
 
 			if (bike->m_fPedLeanAmountUD < 0.0f) {
 				backAssoc->blendAmount = fwdBackBlend;
@@ -4044,35 +4044,35 @@ CPed::DriveVehicle(void)
 	CAnimBlendAssociation* lbAssoc;
 	CAnimBlendAssociation* sitAssoc;
 	if (m_pMyVehicle->IsBoat() && !(m_pMyVehicle->pHandling->Flags & HANDLING_SIT_IN_BOAT)) {
-		sitAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVE_BOAT);
+		sitAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_BOAT_DRIVE);
 
 		if (!sitAssoc || sitAssoc->blendAmount < 1.0f) {
 			return;
 		}
 
-		lDriveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVE_BOAT_L);
-		rDriveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVE_BOAT_R);
-		lbAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_BOAT_LB);
+		lDriveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_BOAT_DRIVE_LEFT);
+		rDriveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_BOAT_DRIVE_RIGHT);
+		lbAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_BOAT_LOOKBEHIND);
 	} else if (m_pMyVehicle->bLowVehicle) {
-		sitAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_LSIT);
+		sitAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_CAR_SIT_LO);
 
 		if (!sitAssoc || sitAssoc->blendAmount < 1.0f) {
 			return;
 		}
 
-		lDriveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVE_LOW_L);
+		lDriveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_CAR_DRIVE_LEFT_LO);
 		lbAssoc = nil;
-		rDriveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVE_LOW_R);
+		rDriveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_CAR_DRIVE_RIGHT_LO);
 	} else {
-		sitAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_SIT);
+		sitAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_CAR_SIT);
 
 		if (!sitAssoc || sitAssoc->blendAmount < 1.0f) {
 			return;
 		}
 
-		lDriveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVE_L);
-		rDriveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVE_R);
-		lbAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_CAR_LB);
+		lDriveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_CAR_DRIVE_LEFT);
+		rDriveAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_CAR_DRIVE_RIGHT);
+		lbAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_CAR_LOOKBEHIND);
 	}
 
 	if (lbAssoc &&
@@ -4081,13 +4081,13 @@ CPed::DriveVehicle(void)
 		lbAssoc->blendDelta = -1000.0f;
 	}
 
-	CAnimBlendAssociation* driveByAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVEBY_L);
+	CAnimBlendAssociation* driveByAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_CAR_DRIVEBY_LEFT);
 	if (!driveByAssoc)
-		driveByAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVEBY_R);
+		driveByAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_CAR_DRIVEBY_RIGHT);
 	if (!driveByAssoc)
-		driveByAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVEBY_LOW_L);
+		driveByAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_CAR_DRIVEBY_LEFT_LO);
 	if (!driveByAssoc)
-		driveByAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DRIVEBY_LOW_R);
+		driveByAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_CAR_DRIVEBY_RIGHT_LO);
 
 	if (m_pMyVehicle->bLowVehicle || m_pMyVehicle->m_fGasPedal >= 0.0f || driveByAssoc ||
 		m_pMyVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_HELI || m_pMyVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_PLANE) {
@@ -4104,11 +4104,11 @@ CPed::DriveVehicle(void)
 			if (rDriveAssoc)
 				rDriveAssoc->blendAmount = clamp(steerAngle * -100.0f / 61.0f, 0.0f, 1.0f);
 			else if (m_pMyVehicle->IsBoat() && !(m_pMyVehicle->pHandling->Flags & HANDLING_SIT_IN_BOAT))
-				CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT_R);
+				CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_BOAT_DRIVE_RIGHT);
 			else if (m_pMyVehicle->bLowVehicle)
-				CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_LOW_R);
+				CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_CAR_DRIVE_RIGHT_LO);
 			else
-				CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_R);
+				CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_CAR_DRIVE_RIGHT);
 
 		} else {
 			if (rDriveAssoc)
@@ -4117,11 +4117,11 @@ CPed::DriveVehicle(void)
 			if (lDriveAssoc)
 				lDriveAssoc->blendAmount = clamp(steerAngle * 100.0f / 61.0f, 0.0f, 1.0f);
 			else if (m_pMyVehicle->IsBoat() && !(m_pMyVehicle->pHandling->Flags & HANDLING_SIT_IN_BOAT))
-				CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_BOAT_L);
+				CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_BOAT_DRIVE_LEFT);
 			else if (m_pMyVehicle->bLowVehicle)
-				CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_LOW_L);
+				CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_CAR_DRIVE_LEFT_LO);
 			else
-				CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_DRIVE_L);
+				CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_CAR_DRIVE_LEFT);
 		}
 
 		if (lbAssoc)
@@ -4133,9 +4133,9 @@ CPed::DriveVehicle(void)
 			&& (!lbAssoc || lbAssoc->blendAmount < 1.0f && lbAssoc->blendDelta <= 0.0f)) {
 
 			if (m_pMyVehicle->IsBoat() && !(m_pMyVehicle->pHandling->Flags & HANDLING_SIT_IN_BOAT))
-				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_BOAT_LB, 4.0f);
+				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_BOAT_LOOKBEHIND, 4.0f);
 			else
-				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_CAR_LB, 4.0f);
+				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_CAR_LOOKBEHIND, 4.0f);
 		}
 	}
 }
@@ -4166,12 +4166,12 @@ CPed::RemoveWeaponAnims(int unused, float animDelta)
 		weaponAssoc->blendDelta = animDelta;
 		weaponAssoc->flags |= ASSOC_DELETEFADEDOUT;
 	}
-	weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_WEAPON_CROUCHRELOAD);
+	weaponAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_MELEE_IDLE_FIGHTMODE);
 	if (weaponAssoc) {
 		weaponAssoc->flags |= ASSOC_DELETEFADEDOUT;
 		if (weaponAssoc->flags & ASSOC_PARTIAL)
 			weaponAssoc->blendDelta = animDelta;
 		else
-			CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_IDLE_STANCE, -animDelta);
+			CAnimManager::BlendAnimation(GetClump(), m_animGroup, ANIM_STD_IDLE, -animDelta);
 	}
 }

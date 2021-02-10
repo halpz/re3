@@ -822,7 +822,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 						}
 					}
 					pPed->m_pMyVehicle->m_nGettingOutFlags &= ~flags;
-					pPed->m_pMyVehicle->ProcessOpenDoor(pPed->m_vehDoor, NUM_STD_ANIMS, 0.0f);
+					pPed->m_pMyVehicle->ProcessOpenDoor(pPed->m_vehDoor, ANIM_STD_NUM, 0.0f);
 				}
 			}
 		}
@@ -839,7 +839,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		pPed->m_pVehicleAnim = nil;
 		pPed->RestartNonPartialAnims();
 		pPed->SetMoveState(PEDMOVE_NONE);
-		CAnimManager::BlendAnimation(pPed->GetClump(), pPed->m_animGroup, ANIM_IDLE_STANCE, 1000.0f);
+		CAnimManager::BlendAnimation(pPed->GetClump(), pPed->m_animGroup, ANIM_STD_IDLE, 1000.0f);
 		pos.z += pPed->GetDistanceFromCentreOfMassToBaseOfModel();
 		pPed->Teleport(pos);
 		CTheScripts::ClearSpaceForMissionEntity(pos, pPed);

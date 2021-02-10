@@ -80,7 +80,7 @@ static psGlobalType PsGlobal;
 size_t _dwMemAvailPhys;
 RwUInt32 gGameState;
 
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 char gSelectedJoystickName[128] = "";
 #endif
 
@@ -852,7 +852,7 @@ void joysChangeCB(int jid, int event);
 
 bool IsThisJoystickBlacklisted(int i)
 {
-#ifndef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifndef DETECT_JOYSTICK_MENU
 	return false;
 #else
 	if (glfwJoystickIsGamepad(i))
@@ -917,7 +917,7 @@ void _InputInitialiseJoys()
 	if (PSGLOBAL(joy1id) != -1) {
 		int count;
 		glfwGetJoystickButtons(PSGLOBAL(joy1id), &count);
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 		strcpy(gSelectedJoystickName, glfwGetJoystickName(PSGLOBAL(joy1id)));
 #endif
 		ControlsManager.InitDefaultControlConfigJoyPad(count);
@@ -2182,7 +2182,7 @@ void joysChangeCB(int jid, int event)
 	if (event == GLFW_CONNECTED && !IsThisJoystickBlacklisted(jid)) {
 		if (PSGLOBAL(joy1id) == -1) {
 			PSGLOBAL(joy1id) = jid;
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 			strcpy(gSelectedJoystickName, glfwGetJoystickName(jid));
 #endif
 			// This is behind LOAD_INI_SETTINGS, because otherwise the Init call below will destroy/overwrite your bindings.
