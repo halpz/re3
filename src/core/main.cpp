@@ -88,6 +88,7 @@ bool gUseChunkFiles = false;
 bool gSecondExportPass;
 bool gUseModelResources;
 bool gUseResources;
+bool gNASTY_NASTY_MEM_SHUTDOWN_HACK;	// rather unused
 
 float FramesPerSecond = 30.0f;
 
