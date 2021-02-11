@@ -6175,11 +6175,11 @@ Drücke die ~h~~k~~TOGGLE_SUBMISSIONS~~w~, um Krankenwagen-Missionen an- oder ab
 [GUN_H1]
 ~w~Drück die~h~ ~k~~PED_SPRINT~~w~, um zu kaufen. ~w~Drück die~h~ ~k~~VEHICLE_ENTER_EXIT~~w~, um zu gehen.
 
-[PU_CF3]
-Drück die ~h~~k~~VEHICLE_ENTER_EXIT~~w~, um die augenblickliche Waffe in diesem Slot auszutauschen.
+[PU_CF3] { reVC update }
+Drück die ~h~~k~~PED_ANSWER_PHONE~~w~, um die augenblickliche Waffe in diesem Slot auszutauschen.
 
-[PU_CF4]
-Drück die ~h~~k~~VEHICLE_ENTER_EXIT~~w~, um die augenblickliche Waffe in diesem Slot auszutauschen.
+[PU_CF4] { reVC update }
+Drück die ~h~~k~~PED_ANSWER_PHONE~~w~, um die augenblickliche Waffe in diesem Slot auszutauschen.
 
 [HELP9_B]
 Drücke die~h~ ~k~~PED_FIREWEAPON~~w~, um das Prãzisionsgewehr ~h~abzufeuern~w~.
@@ -6640,8 +6640,9 @@ Drücke die ~h~~k~~PED_FIREWEAPON~~w~-Taste, um das Prãzisionsgewehr ~h~abzufeu
 [PLANE_H]
 Benutze die ~h~~k~~VEHICLE_ACCELERATE~~w~-Taste, um zu beschleunigen. Links bzw. Rechts für Richtungswechsel.
 
-[PLANE_4]
-Benutze die ~h~~k~~VEHICLE_ACCELERATE~~w~-Taste, um zu beschleunigen. Links bzw. Rechts für Richtungswechsel.
+[PLANE_4] { reVC update }
+{Benutze die ~h~~k~~VEHICLE_ACCELERATE~~w~-Taste, um zu beschleunigen. Links bzw. Rechts für Richtungswechsel.}
+Benutze den rechten Analog-Stick, um zu beschleunigen. Ziehe den linken Analog-Stick, um zu steigen oder drücke ihn nach vorn, um zu sinken. Links bzw. Rechts für Richtungswechsel.
 
 [HELP55]
 Drücke die ~h~~k~~PED_FIREWEAPON~~w~-Taste, um den Küchenchef anzugreifen.
@@ -14262,8 +14263,9 @@ Um ~h~eine Bombe aufzunehmen~w~, steuere den Helikopter direkt über sie. Der He
 [TEX3_37:SERG3]
 Zieh den ~h~ Rechten Analog-Stick zurück~w~, um die Rotorgeschwindigkeit zu erhöhen, der Helikopter ~h~ gewinnt dann an Höhe.
 
-[TEX3_38:SERG3]
-Drück den ~h~ ~k~~VEHICLE_ACCELERATE~~w~, um die Rotorgeschwindigkeit zu verringern, der Helikopter ~h~ verliert dann an Höhe.
+[TEX3_38:SERG3] { reVC update }
+{Drück den ~h~ ~k~~VEHICLE_ACCELERATE~~w~, um die Rotorgeschwindigkeit zu verringern, der Helikopter ~h~ verliert dann an Höhe.}
+Drück den ~h~ Rechten Analog-Stick nach vorn~w~, um die Rotorgeschwindigkeit zu verringern, der Helikopter ~h~ verliert dann an Höhe.
 
 [TEX3_39:SERG3]
 Um eine Bombe abzuwerfen, drücke die ~h~~k~~VEHICLE_HANDBRAKE~~g~-Taste.

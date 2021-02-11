@@ -5834,11 +5834,11 @@ Pulsa ~h~~k~~TOGGLE_SUBMISSIONS~~w~ para comenzar o cancelar las misiones de ATS
 [GUN_H1]
 ~w~Pulsa ~h~~k~~PED_SPRINT~~w~ para comprar. ~w~Pulsa ~h~~k~~VEHICLE_ENTER_EXIT~~w~ para salir.
 
-[PU_CF3]
-Pulsa ~h~~k~~VEHICLE_ENTER_EXIT~~w~ para reemplazar tu arma actual en esta ranura.
+[PU_CF3] { reVC update }
+Pulsa ~h~~k~~PED_ANSWER_PHONE~~w~ para reemplazar tu arma actual en esta ranura.
 
-[PU_CF4]
-Pulsa ~h~~k~~VEHICLE_ENTER_EXIT~~w~ para reemplazar tu arma actual en esta ranura.
+[PU_CF4] { reVC update }
+Pulsa ~h~~k~~PED_ANSWER_PHONE~~w~ para reemplazar tu arma actual en esta ranura.
 
 [HELP9_B]
 Pulsa ~h~~k~~PED_FIREWEAPON~ ~w~para ~h~disparar~w~ el rifle de francotirador.
@@ -6485,8 +6485,9 @@ Pulsa ~h~~k~~PED_FIREWEAPON~~w~ para ~h~disparar~w~ el rifle de francotirador.
 [PLANE_H]
 Mueve ~h~~k~~VEHICLE_ACCELERATE~~w~ hacia delante para acelerar y a izquierda o derecha para girar.
 
-[PLANE_4]
-Mueve ~h~~k~~VEHICLE_ACCELERATE~~w~ hacia delante para acelerar y a izquierda o derecha para girar.
+[PLANE_4] { reVC update }
+{Mueve ~h~~k~~VEHICLE_ACCELERATE~~w~ hacia delante para acelerar y a izquierda o derecha para girar.}
+Utiliza el joystick analógico derecho para acelerar, tira hacia atrás el joystick analógico izquierdo para ascender, empújalo hacia adelante para descender. Para girar muévelo a izquierda o derecha.
 
 [HELP55]
 Pulsa ~h~~k~~PED_FIREWEAPON~~w~ para atacar al chef.
@@ -13952,8 +13953,9 @@ Para ~h~recoger una bomba~w~, simplemente dirige el helicóptero RC hasta ella. 
 [TEX3_37:SERG3]
 Si empujas ~h~el joystick analógico derecho hacia atrás~w~, aumentarás la velocidad del rotor y así ~h~ascenderá~w~.
 
-[TEX3_38:SERG3]
-Pulsa ~h~~k~~VEHICLE_ACCELERATE~~w~ para aumentar la velocidad del rotor y así ~h~ascender~w~.
+[TEX3_38:SERG3] { reVC update }
+{Pulsa ~h~~k~~VEHICLE_ACCELERATE~~w~ para aumentar la velocidad del rotor y así ~h~ascender~w~.}
+Si empujas ~h~el joystick analógico derecho hacia adelante ~w~la velocidad del rotor aumenta, haciendo que el helicóptero ~h~descienda.
 
 [TEX3_39:SERG3]
 ~g~Para soltar una bomba pulsa ~h~~k~~VEHICLE_HANDBRAKE~~w~.

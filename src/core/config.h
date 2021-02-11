@@ -320,6 +320,9 @@ enum Config {
 //#	define PS2_MENU_USEALLPAGEICONS
 #else
 #	define MAP_ENHANCEMENTS			// Adding waypoint and better mouse support
+#	ifdef XINPUT
+#		define GAMEPAD_MENU		// Add gamepad menu
+#	endif
 #	define TRIANGLE_BACK_BUTTON
 //#	define CIRCLE_BACK_BUTTON
 #define LEGACY_MENU_OPTIONS			// i.e. frame sync(vsync)
@@ -476,6 +479,7 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #undef RADIO_OFF_TEXT
 
 #undef MAP_ENHANCEMENTS
+#undef GAMEPAD_MENU
 #undef MUCH_SHORTER_OUTRO_SCREEN
 #undef CUSTOM_FRONTEND_OPTIONS
 

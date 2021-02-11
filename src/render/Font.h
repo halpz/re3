@@ -111,6 +111,8 @@ enum
 	BUTTON_R1,
 	BUTTON_R2,
 	BUTTON_R3,
+	BUTTON_RSTICK_UP,
+	BUTTON_RSTICK_DOWN,
 	BUTTON_RSTICK_LEFT,
 	BUTTON_RSTICK_RIGHT,
 	MAX_BUTTON_ICONS
@@ -137,7 +139,8 @@ public:
 	static int32 ButtonsSlot;
 	static CSprite2d ButtonSprite[MAX_BUTTON_ICONS];
 	static int PS2Symbol;
-
+	
+	static void LoadButtons(const char *txdPath);
 	static void DrawButton(float x, float y);
 #endif // BUTTON_ICONS
 

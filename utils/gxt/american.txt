@@ -4456,11 +4456,11 @@ Press the ~h~~k~~TOGGLE_SUBMISSIONS~ button~w~ to toggle Paramedic missions on o
 [GUN_H1]
 ~w~Press the~h~ ~k~~PED_SPRINT~ ~w~button to buy. Press the~h~ ~k~~VEHICLE_ENTER_EXIT~ ~w~button to exit.
 
-[PU_CF3]
-Press the ~h~~k~~VEHICLE_ENTER_EXIT~ ~w~button to replace current weapon in this slot.
+[PU_CF3] { reVC update }
+Press the ~h~~k~~PED_ANSWER_PHONE~ ~w~button to replace current weapon in this slot.
 
-[PU_CF4]
-Press the ~h~~k~~VEHICLE_ENTER_EXIT~ ~w~button to replace current weapon in this slot.
+[PU_CF4] { reVC update }
+Press the ~h~~k~~PED_ANSWER_PHONE~ ~w~button to replace current weapon in this slot.
 
 [HELP9_B]
 Press the~h~ ~k~~PED_FIREWEAPON~ button ~w~to ~h~fire~w~ the sniper rifle.
@@ -6484,8 +6484,9 @@ Press the ~h~~k~~PED_FIREWEAPON~~w~ button to ~h~fire~w~ the sniper rifle.
 [PLANE_H]
 Use the ~h~~k~~VEHICLE_ACCELERATE~~w~ button to accelerate, Left and right to turn.
 
-[PLANE_4]
-Use the ~h~~k~~VEHICLE_ACCELERATE~~w~ button to accelerate, Left and right to turn.
+[PLANE_4] { reVC update }
+{ Use the ~h~~k~~VEHICLE_ACCELERATE~~w~ button to accelerate, Left and right to turn. }
+Use the right analog stick to accelerate, pull back on the left analog stick to climb, push forwards to descend. Left and right to turn.
 
 [HELP55]
 Press the ~h~~k~~PED_FIREWEAPON~~w~ button to attack the chef.
@@ -13980,8 +13981,9 @@ To ~h~pick up a bomb~w~, simply maneuver the RC helicopter next to it. The RC He
 [TEX3_37:SERG3]
 Pushing ~h~back on the analog stick ~w~decreases the rotor speed, causing the helicopter to~h~ descend.
 
-[TEX3_38:SERG3]
-Pressing the ~h~~k~~VEHICLE_ACCELERATE~ ~w~button increases the rotor speed, causing the helicopter to ~h~ascend.
+[TEX3_38:SERG3] { reVC update }
+{ Pressing the ~h~~k~~VEHICLE_ACCELERATE~ ~w~button increases the rotor speed, causing the helicopter to ~h~ascend. }
+Pushing ~h~forward on the analog stick ~w~increases the rotor speed, causing the helicopter to ~h~ascend.
 
 [TEX3_39:SERG3]
 ~g~To drop a bomb press the ~h~~k~~VEHICLE_HANDBRAKE~ ~g~button.
@@ -14399,6 +14401,27 @@ NONE
 
 [FEA_FMN]
 RADIO OFF
+
+[FEC_DS2]
+DUALSHOCK 2
+
+[FEC_DS3]
+DUALSHOCK 3
+
+[FEC_DS4]
+DUALSHOCK 4
+
+[FEC_360]
+XBOX 360 CONTROLLER
+
+[FEC_ONE]
+XBOX ONE CONTROLLER
+
+[FEC_TYP]
+GAMEPAD TYPE
+
+[FET_AGS]
+GAMEPAD SETTINGS
 
 { end of file }
 [DUMMY]
