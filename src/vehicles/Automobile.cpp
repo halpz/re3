@@ -371,7 +371,11 @@ CAutomobile::ProcessControl(void)
 	bool playerRemote = false;
 	switch(GetStatus()){
 	case STATUS_PLAYER_REMOTE:
+#ifdef FIX_BUGS
+		if(CPad::GetPad(0)->CarGunJustDown() && !bDisableRemoteDetonation){
+#else
 		if(CPad::GetPad(0)->WeaponJustDown() && !bDisableRemoteDetonation){
+#endif
 			BlowUpCar(FindPlayerPed());
 			CRemote::TakeRemoteControlledCarFromPlayer();
 		}
