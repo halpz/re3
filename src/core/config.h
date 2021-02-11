@@ -307,7 +307,7 @@ enum Config {
 #define BETTER_ALLCARSAREDODO_CHEAT
 #define WALLCLIMB_CHEAT
 #define REGISTER_START_BUTTON
-//#define BIND_VEHICLE_FIREWEAPON // Adds ability to rebind fire key for 'in vehicle' controls
+#define BIND_VEHICLE_FIREWEAPON // Adds ability to rebind fire key for 'in vehicle' controls
 #define BUTTON_ICONS // use textures to show controller buttons
 
 // Hud, frontend and radar

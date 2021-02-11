@@ -3135,7 +3135,11 @@ CMenuManager::SaveSettings()
 {
 #ifndef LOAD_INI_SETTINGS
 	static char RubbishString[48] = "stuffmorestuffevenmorestuff                 etc";
+#ifdef BIND_VEHICLE_FIREWEAPON
+	static int SomeVersion = 4;
+#else
 	static int SomeVersion = 3;
+#endif
 
 	CFileMgr::SetDirMyDocuments();
 

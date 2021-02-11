@@ -131,6 +131,9 @@ void CControllerConfigManager::LoadSettings(int32 file)
 {
 	bool bValid = true;
 	int nVersion = 0;
+#ifdef BIND_VEHICLE_FIREWEAPON
+	bool skipVehicleFireWeapon = false;
+#endif
 
 	if (file)
 	{
@@ -148,11 +151,26 @@ void CControllerConfigManager::LoadSettings(int32 file)
 	if (bValid && nVersion >= 3)
 	{
 		ControlsManager.MakeControllerActionsBlank();
+#ifdef BIND_VEHICLE_FIREWEAPON
+		skipVehicleFireWeapon = nVersion < 4;
+		// Set the default settings of VEHICLE_FIREWEAPON
+		if (skipVehicleFireWeapon) {
+			SetControllerKeyAssociatedWithAction(VEHICLE_FIREWEAPON, rsPADINS, KEYBOARD);
+			SetControllerKeyAssociatedWithAction(VEHICLE_FIREWEAPON, rsLCTRL, OPTIONAL_EXTRA);
+			if (m_bMouseAssociated)
+				SetMouseButtonAssociatedWithAction(VEHICLE_FIREWEAPON, 1);
+		}
+#endif
 
 		for (int32 i = 0; i < MAX_CONTROLLERTYPES; i++)
 		{
 			for (int32 j = 0; j < MAX_CONTROLLERACTIONS; j++)
 			{
+#ifdef BIND_VEHICLE_FIREWEAPON
+				// Skip file read
+				if (skipVehicleFireWeapon && j == VEHICLE_FIREWEAPON)
+					continue;
+#endif
 				CFileMgr::Read(file, (char *)&ControlsManager.m_aSettings[j][i], sizeof(tControllerConfigBind));
 			}
 		}
