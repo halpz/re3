@@ -1,8 +1,10 @@
 #include "common.h"
+#include <time.h>
 #include "rpmatfx.h"
 #include "rphanim.h"
 #include "rpskin.h"
 #include "rtbmp.h"
+#include "rtpng.h"
 #ifdef ANISOTROPIC_FILTERING
 #include "rpanisot.h"
 #endif
@@ -331,7 +333,11 @@ RwGrabScreen(RwCamera *camera, RwChar *filename)
 	strcpy(temp, CFileMgr::GetRootDirName());
 	strcat(temp, filename);
 
+#ifdef THIS_IS_STUPID
 	if (RtBMPImageWrite(pImage, &temp[0]) == nil)
+#else
+	if (RtPNGImageWrite(pImage, &temp[0]) == nil)
+#endif
 		result = false;
 	RwImageDestroy(pImage);
 	return result;
@@ -350,6 +356,7 @@ DoRWStuffEndOfFrame(void)
 	RsCameraShowRaster(Scene.camera);
 #ifndef MASTER
 	char s[48];
+#ifdef THIS_IS_STUPID
 	if (CPad::GetPad(1)->GetLeftShockJustDown()) {
 		// try using both controllers for this thing... crazy bastards
 		if (CPad::GetPad(0)->GetRightStickY() > 0) {
@@ -361,6 +368,12 @@ DoRWStuffEndOfFrame(void)
 			RwGrabScreen(Scene.camera, s);
 		}
 	}
+#else
+	if (CPad::GetPad(1)->GetLeftShockJustDown() || CPad::GetPad(0)->GetFJustDown(11)) {
+		sprintf(s, "screen_%11lld.png", time(nil));
+		RwGrabScreen(Scene.camera, s);
+	}
+#endif
 #endif // !MASTER
 }
 
