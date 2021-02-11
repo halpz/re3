@@ -662,12 +662,12 @@ CPedAttractor* CPedAttractorManager::RegisterPed(CPed* pPed, C2dEffect* pEffect,
 	}
 	PUSH_MEMID(MEMID_PED_ATTR);
 	switch (pEffect->pedattr.type) {
-	case ATTRACTOR_ATM: vecAttractors.push_back(new CPedAtmAttractor(pEffect, matrix, gcMaxSizeOfAtmQueue, 1.0f, 30000.0f, 3000.0f, 0.2f, 0.15f, 0.1f, 0.1f)); break;
-	case ATTRACTOR_SEAT: vecAttractors.push_back(new CPedSeatAttractor(pEffect, matrix, gcMaxSizeOfSeatQueue, 1.0f, 30000.0f, 3000.0f, 0.125f, 0.1f, 0.1f, 0.1f)); break;
-	case ATTRACTOR_STOP: vecAttractors.push_back(new CPedStopAttractor(pEffect, matrix, gcMaxSizeOfStopQueue, 1.0f, 30000.0f, 3000.0f, 0.2f, 0.1f, 0.1f, 0.1f)); break;
-	case ATTRACTOR_PIZZA: vecAttractors.push_back(new CPedPizzaAttractor(pEffect, matrix, gcMaxSizeOfPizzaQueue, 1.0f, 30000.0f, 3000.0f, 0.2f, 0.1f, 0.1f, 0.1f)); break;
-	case ATTRACTOR_SHELTER: vecAttractors.push_back(new CPedShelterAttractor(pEffect, matrix, gcMaxSizeOfShelterQueue, 1.0f, 30000.0f, 3000.0f, 0.5f, 6.28f, 0.1f, 0.1f)); break;
-	case ATTRACTOR_ICECREAM: vecAttractors.push_back(new CPedIceCreamAttractor(pEffect, matrix, gcMaxSizeOfIceCreamQueue, 1.0f, 30000.0f, 3000.0f, 0.2f, 0.3f, 0.1f, 0.1f)); break;
+	case ATTRACTOR_ATM: pRegisteredAttractor = new CPedAtmAttractor(pEffect, matrix, gcMaxSizeOfAtmQueue, 1.0f, 30000.0f, 3000.0f, 0.2f, 0.15f, 0.1f, 0.1f); vecAttractors.push_back(pRegisteredAttractor); break;
+	case ATTRACTOR_SEAT: pRegisteredAttractor = new CPedSeatAttractor(pEffect, matrix, gcMaxSizeOfSeatQueue, 1.0f, 30000.0f, 3000.0f, 0.125f, 0.1f, 0.1f, 0.1f); vecAttractors.push_back(pRegisteredAttractor); break;
+	case ATTRACTOR_STOP: pRegisteredAttractor = new CPedStopAttractor(pEffect, matrix, gcMaxSizeOfStopQueue, 1.0f, 30000.0f, 3000.0f, 0.2f, 0.1f, 0.1f, 0.1f); vecAttractors.push_back(pRegisteredAttractor); break;
+	case ATTRACTOR_PIZZA: pRegisteredAttractor = new CPedPizzaAttractor(pEffect, matrix, gcMaxSizeOfPizzaQueue, 1.0f, 30000.0f, 3000.0f, 0.2f, 0.1f, 0.1f, 0.1f); vecAttractors.push_back(pRegisteredAttractor); break;
+	case ATTRACTOR_SHELTER: pRegisteredAttractor = new CPedShelterAttractor(pEffect, matrix, gcMaxSizeOfShelterQueue, 1.0f, 30000.0f, 3000.0f, 0.5f, 6.28f, 0.1f, 0.1f); vecAttractors.push_back(pRegisteredAttractor); break;
+	case ATTRACTOR_ICECREAM: pRegisteredAttractor = new CPedIceCreamAttractor(pEffect, matrix, gcMaxSizeOfIceCreamQueue, 1.0f, 30000.0f, 3000.0f, 0.2f, 0.3f, 0.1f, 0.1f); vecAttractors.push_back(pRegisteredAttractor); break;
 	}
 	POP_MEMID();
 	if (pRegisteredAttractor)
