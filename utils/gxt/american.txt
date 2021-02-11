@@ -2383,8 +2383,8 @@ WELCOME TO
 [TSCORE]
 EARNINGS: $~1~
 
-[PBOAT_2]
-Press the ~h~~k~~PED_FIREWEAPON~ ~w~button to fire the boat cannons.
+[PBOAT_2] { reVC update }
+Press the ~h~~k~~VEHICLE_FIREWEAPON~ ~w~button to fire the boat cannons.
 
 [HJSTAT]
 Distance: ~1~.~1~m Height: ~1~.~1~m Flips: ~1~ Rotation: ~1~_
@@ -4255,17 +4255,17 @@ Car bombs are $500 each
 [GA_5]
 Your car is already fitted with a bomb.
 
-[GA_6]
-Park it, prime it by pressing the ~h~~k~~PED_FIREWEAPON~ ~w~button and LEG IT!
+[GA_6] { reVC update }
+Park it, prime it by pressing the ~h~~k~~VEHICLE_FIREWEAPON~ ~w~button and LEG IT!
 
-[GA_7]
-Arm with the ~h~~k~~PED_FIREWEAPON~ ~w~button. Bomb will go off when engine is started.
+[GA_7] { reVC update }
+Arm with the ~h~~k~~VEHICLE_FIREWEAPON~ ~w~button. Bomb will go off when engine is started.
 
-[GA_6B]
-Park it, prime it by pressing the ~h~~k~~PED_FIREWEAPON~ ~w~button and LEG IT!
+[GA_6B] { reVC update }
+Park it, prime it by pressing the ~h~~k~~VEHICLE_FIREWEAPON~ ~w~button and LEG IT!
 
-[GA_7B]
-Arm with the ~h~~k~~PED_FIREWEAPON~ ~w~button. Bomb will go off when engine is started.
+[GA_7B] { reVC update }
+Arm with the ~h~~k~~VEHICLE_FIREWEAPON~ ~w~button. Bomb will go off when engine is started.
 
 [MOB_70A]
 Tommy, it's me, Colonel Cortez. Look senor, I believe you are a man who can get things done. So please help me.
@@ -4414,20 +4414,20 @@ Press the ~h~~k~~VEHICLE_BRAKE~ ~w~button to brake, or to reverse if the vehicle
 [HELP8_A]
 Press the~h~ ~k~~PED_SNIPER_ZOOM_IN~ button ~w~to ~h~zoom in ~w~with the rifle and the~h~ ~k~~PED_SNIPER_ZOOM_OUT~ button ~w~to ~h~zoom out ~w~again.
 
-[PBOAT_1]
-Press the ~h~~k~~PED_FIREWEAPON~ ~w~button to fire the boat cannons.
+[PBOAT_1] { reVC update }
+Press the ~h~~k~~VEHICLE_FIREWEAPON~ ~w~button to fire the boat cannons.
 
-[SEG3_4]
-~g~You can pick up bombs by simply piloting your RC Raider adjacent to each one, to drop a bomb press the ~h~~k~~PED_FIREWEAPON~ ~g~button.
+[SEG3_4] { reVC update }
+~g~You can pick up bombs by simply piloting your RC Raider adjacent to each one, to drop a bomb press the ~h~~k~~VEHICLE_FIREWEAPON~ ~g~button.
 
-[RCR1_3]
-~g~If you wish to quit this mission press the ~h~~k~~PED_FIREWEAPON~ ~g~button to detonate your RC car.
+[RCR1_3] { reVC update }
+~g~If you wish to quit this mission press the ~h~~k~~VEHICLE_FIREWEAPON~ ~g~button to detonate your RC car.
 
-[HELP32]
-Then fire using the ~h~~k~~PED_FIREWEAPON~ ~w~button.
+[HELP32] { reVC update }
+Then fire using the ~h~~k~~VEHICLE_FIREWEAPON~ ~w~button.
 
-[HELP33]
-Then fire using the ~h~~k~~PED_FIREWEAPON~ ~w~button.
+[HELP33] { reVC update }
+Then fire using the ~h~~k~~VEHICLE_FIREWEAPON~ ~w~button.
 
 [TTUTOR]
 Press the ~h~~k~~TOGGLE_SUBMISSIONS~ button~w~ to toggle taxi missions on or off.
@@ -9951,11 +9951,11 @@ Fire Fighter mission ended.
 [F_STAR1:FIRETRK]
 ~g~Burning vehicles reported in the ~a~ area. Go and extinguish the fire.
 
-[SPRAY_4:FIRETRK]
-Use the ~h~~k~~PED_FIREWEAPON~ ~w~button to fire the water cannon. Aim using ~h~~k~~VEHICLE_TURRETLEFT~~w~ and ~h~~k~~VEHICLE_TURRETRIGHT~~w~.
+[SPRAY_4:FIRETRK] { reVC update }
+Use the ~h~~k~~VEHICLE_FIREWEAPON~ ~w~button to fire the water cannon. Aim using ~h~~k~~VEHICLE_TURRETLEFT~~w~ and ~h~~k~~VEHICLE_TURRETRIGHT~~w~.
 
-[SPRAY_1:FIRETRK]
-Use the ~h~~k~~PED_FIREWEAPON~ ~w~button to fire the water cannon. Aim using ~h~~k~~VEHICLE_TURRETLEFT~~w~ and ~h~~k~~VEHICLE_TURRETRIGHT~~w~.
+[SPRAY_1:FIRETRK] { reVC update }
+Use the ~h~~k~~VEHICLE_FIREWEAPON~ ~w~button to fire the water cannon. Aim using ~h~~k~~VEHICLE_TURRETLEFT~~w~ and ~h~~k~~VEHICLE_TURRETRIGHT~~w~.
 
 {=================================== MISSION TABLE GENERA1 ===================================}
 
@@ -10248,11 +10248,11 @@ Diaz's Health:
 [GEN3_45:GENERA3]
 They'll be here any minute, we both better get a good vantage point.
 
-[GEN3_40:GENERA3]
-To ~h~shoot straight ahead ~w~on a ~h~motorbike ~w~press the ~h~~k~~PED_FIREWEAPON~ ~w~button.
+[GEN3_40:GENERA3] { reVC update }
+To ~h~shoot straight ahead ~w~on a ~h~motorbike ~w~press the ~h~~k~~VEHICLE_FIREWEAPON~ ~w~button.
 
-[GEN3_41:GENERA3]
-To ~h~shoot straight ahead ~w~on a ~h~motorbike ~w~press the ~h~~k~~PED_FIREWEAPON~ ~w~button.
+[GEN3_41:GENERA3] { reVC update }
+To ~h~shoot straight ahead ~w~on a ~h~motorbike ~w~press the ~h~~k~~VEHICLE_FIREWEAPON~ ~w~button.
 
 [GEN3_46:GENERA3]
 Sheeit!
@@ -10305,14 +10305,14 @@ Press the ~h~~k~~PED_FIREWEAPON~~w~ button to ~h~fire~w~ an assault rifle.
 [GEN3_63:GENERA3]
 As well as performing drive-by's,~h~ motorbikes ~w~allow you to ~h~shoot forwards~w~.
 
-[GEN3_64:GENERA3]
-To shoot forwards while on a bike press the ~h~~k~~PED_FIREWEAPON~~w~ button.
+[GEN3_64:GENERA3] { reVC update }
+To shoot forwards while on a bike press the ~h~~k~~VEHICLE_FIREWEAPON~~w~ button.
 
-[GEN3_65:GENERA3]
-To shoot forwards while on a bike press the ~h~~k~~PED_FIREWEAPON~~w~ button.
+[GEN3_65:GENERA3] { reVC update }
+To shoot forwards while on a bike press the ~h~~k~~VEHICLE_FIREWEAPON~~w~ button.
 
-[GEN3_66:GENERA3]
-To shoot forwards while on a bike press the ~h~~k~~PED_FIREWEAPON~~w~ button.
+[GEN3_66:GENERA3] { reVC update }
+To shoot forwards while on a bike press the ~h~~k~~VEHICLE_FIREWEAPON~~w~ button.
 
 [GEN3_67:GENERA3]
 You must have a sub machine gun to shoot forwards on a motorbike.
@@ -10712,8 +10712,8 @@ Blow de boats to coffin wood.
 [HAT2_12:HAIT2]
 Thanks for the tea.
 
-[HAT2_B3:HAIT2]
-Press the ~h~~k~~PED_FIREWEAPON~ ~w~button to drop a bomb. Press the ~h~~k~~VEHICLE_ENTER_EXIT~ ~w~button to cancel.
+[HAT2_B3:HAIT2] { reVC update }
+Press the ~h~~k~~VEHICLE_FIREWEAPON~ ~w~button to drop a bomb. Press the ~h~~k~~VEHICLE_ENTER_EXIT~ ~w~button to cancel.
 
 {=================================== MISSION TABLE HAIT3 ===================================}
 
@@ -13260,8 +13260,8 @@ Checkpoints:
 [RCH1_13:RCHELI1]
 ~r~The RC helicopter went out of range!
 
-[RCH1_8:RCHELI1]
-~g~If you wish to quit this mission press the ~h~~k~~PED_FIREWEAPON~ ~g~button to detonate your RC Helicopter.
+[RCH1_8:RCHELI1] { reVC update }
+~g~If you wish to quit this mission press the ~h~~k~~VEHICLE_FIREWEAPON~ ~g~button to detonate your RC Helicopter.
 
 {=================================== MISSION TABLE RCPLNE1 ===================================}
 
@@ -13271,8 +13271,8 @@ Checkpoints:
 [RCPL1_5:RCPLNE1]
 ~g~Fly through the checkpoints scattered throughout Vice City.
 
-[RCPL1_6:RCPLNE1]
-~g~If you wish to quit this mission press the ~h~~k~~PED_FIREWEAPON~ ~g~button to detonate your RC Plane.
+[RCPL1_6:RCPLNE1] { reVC update }
+~g~If you wish to quit this mission press the ~h~~k~~VEHICLE_FIREWEAPON~ ~g~button to detonate your RC Plane.
 
 [RCPL1_8:RCPLNE1]
 ~g~Your RC Plane is going out of range!
@@ -13930,11 +13930,11 @@ Press the ~h~~k~~VEHICLE_LOOKRIGHT~ ~w~button to rotate the helicopter clockwise
 [TEX3_32:SERG3]
 You can ~h~look behind~w~ by simultaneously pressing the ~h~~k~~VEHICLE_LOOKLEFT~~w~ and the ~h~~k~~VEHICLE_LOOKRIGHT~~w~ buttons.
 
-[TEX3_4:SERG3]
-~g~To drop a bomb press the~h~ ~k~~PED_FIREWEAPON~ ~g~button.
+[TEX3_4:SERG3] { reVC update }
+~g~To drop a bomb press the~h~ ~k~~VEHICLE_FIREWEAPON~ ~g~button.
 
-[TEX3_29:SERG3]
-To drop a bomb press the~h~ ~k~~PED_FIREWEAPON~ ~w~button.
+[TEX3_29:SERG3] { reVC update }
+To drop a bomb press the~h~ ~k~~VEHICLE_FIREWEAPON~ ~w~button.
 
 [TEX3_26:SERG3]
 Pressing the ~h~~k~~VEHICLE_BRAKE~ ~w~button ~w~decreases the rotor speed, causing the helicopter to~h~ descend.

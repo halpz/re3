@@ -2455,8 +2455,8 @@ BENVENUTO A
 [TSCORE]
 GUADAGNI: ~1~$
 
-[PBOAT_2]
-Premi il ~h~~k~~PED_FIREWEAPON~~w~ per sparare con i cannoni della barca.
+[PBOAT_2] { reVC update }
+Premi il ~h~~k~~VEHICLE_FIREWEAPON~~w~ per sparare con i cannoni della barca.
 
 [HJSTAT]
 Distanza: ~1~.~1~m Altezza: ~1~.~1~m Ribaltamenti: ~1~ Rotazioni: ~1~_
@@ -5788,17 +5788,17 @@ Le bombe per le macchine costano 1000$
 [GA_5]
 La tua macchina ha già una bomba installata.
 
-[GA_6]
-Parcheggiala, attivala premendo il ~h~~k~~PED_FIREWEAPON~~w~ e DATTELA A GAMBE!
+[GA_6] { reVC update }
+Parcheggiala, attivala premendo il ~h~~k~~VEHICLE_FIREWEAPON~~w~ e DATTELA A GAMBE!
 
-[GA_7]
-Arma la bomba con il ~h~~k~~PED_FIREWEAPON~~w~: esploderà non appena qualcuno cercherà di avviarla.
+[GA_7] { reVC update }
+Arma la bomba con il ~h~~k~~VEHICLE_FIREWEAPON~~w~: esploderà non appena qualcuno cercherà di avviarla.
 
-[GA_6B]
-Parcheggiala, attivala premendo il ~h~~k~~PED_FIREWEAPON~~w~ e DATTELA A GAMBE!
+[GA_6B] { reVC update }
+Parcheggiala, attivala premendo il ~h~~k~~VEHICLE_FIREWEAPON~~w~ e DATTELA A GAMBE!
 
-[GA_7B]
-Arma la bomba con il ~h~~k~~PED_FIREWEAPON~~w~: esploderà non appena qualcuno cercherà di avviarla.
+[GA_7B] { reVC update }
+Arma la bomba con il ~h~~k~~VEHICLE_FIREWEAPON~~w~: esploderà non appena qualcuno cercherà di avviarla.
 
 [MOB_70A]
 Tommy, sono io, il Colonnello Cortez. Ascolta senor, credo tu sia una persona capace di risolvere i problemi.
@@ -5965,20 +5965,20 @@ Premi il ~h~~k~~VEHICLE_BRAKE~~w~ per frenare o, se il veicolo è fermo, per ins
 [HELP8_A]
 Premi il ~h~~k~~PED_SNIPER_ZOOM_IN~~w~ per zoomare col fucile e il ~x~tasto /~w~ per allargare il campo.
 
-[PBOAT_1]
-Premi il ~h~~k~~PED_FIREWEAPON~~w~ per sparare con i cannoni della barca.
+[PBOAT_1] { reVC update }
+Premi il ~h~~k~~VEHICLE_FIREWEAPON~~w~ per sparare con i cannoni della barca.
 
-[SEG3_4]
-~g~Puoi raccogliere una bomba avvicinando il Raider telecomandato. Per posizionare la bomba, premi il ~o~tasto |~g~.
+[SEG3_4] { reVC update }
+~g~Puoi raccogliere una bomba avvicinando il Raider telecomandato. Per posizionare la bomba, premi il ~h~~k~~VEHICLE_FIREWEAPON~.
 
-[RCR1_3]
-~g~Se desideri interrompere la missione, premi il ~h~~k~~PED_FIREWEAPON~~g~ per far esplodere la macchina.
+[RCR1_3] { reVC update }
+~g~Se desideri interrompere la missione, premi il ~h~~k~~VEHICLE_FIREWEAPON~~g~ per far esplodere la macchina.
 
-[HELP32]
-Poi spara con il ~h~~k~~PED_FIREWEAPON~~w~.
+[HELP32] { reVC update }
+Poi spara con il ~h~~k~~VEHICLE_FIREWEAPON~~w~.
 
-[HELP33]
-Poi spara con il ~h~~k~~PED_FIREWEAPON~~w~.
+[HELP33] { reVC update }
+Poi spara con il ~h~~k~~VEHICLE_FIREWEAPON~~w~.
 
 [TTUTOR]
 Premi il ~h~~k~~TOGGLE_SUBMISSIONS~~w~ per attivare o disattivare le missioni Taxi.
@@ -10200,11 +10200,11 @@ Missione Camion dei pompieri terminata.
 [F_STAR1:FIRETRK]
 ~g~Veicoli in fiamme presso l'area ~a~. Vai a spegnere l'incendio.
 
-[SPRAY_4:FIRETRK]
-Premi il tasto ~h~~k~~PED_FIREWEAPON~~w~ per sparare con il cannone ad acqua e la ~h~~k~~VEHICLE_TURRETLEFT~~w~ e ~h~~k~~VEHICLE_TURRETRIGHT~~w~ per mirare.
+[SPRAY_4:FIRETRK] { reVC update }
+Premi il tasto ~h~~k~~VEHICLE_FIREWEAPON~~w~ per sparare con il cannone ad acqua e la ~h~~k~~VEHICLE_TURRETLEFT~~w~ e ~h~~k~~VEHICLE_TURRETRIGHT~~w~ per mirare.
 
-[SPRAY_1:FIRETRK]
-Premi il tasto ~h~~k~~PED_FIREWEAPON~~w~ per sparare con il cannone ad acqua e la ~h~~k~~VEHICLE_TURRETLEFT~~w~ e ~h~~k~~VEHICLE_TURRETRIGHT~~w~ per mirare.
+[SPRAY_1:FIRETRK] { reVC update }
+Premi il tasto ~h~~k~~VEHICLE_FIREWEAPON~~w~ per sparare con il cannone ad acqua e la ~h~~k~~VEHICLE_TURRETLEFT~~w~ e ~h~~k~~VEHICLE_TURRETRIGHT~~w~ per mirare.
 
 {=================================== MISSION TABLE GENERA1 ===================================}
 
@@ -10494,11 +10494,11 @@ Salute di Diaz:
 [GEN3_44:GENERA3]
 ~g~Vai con Lance all'appuntamento e proteggi Diaz.
 
-[GEN3_40:GENERA3]
-Per ~h~sparare davanti~w~ su una ~h~moto~w~ premi il ~h~~k~~PED_FIREWEAPON~~w~.
+[GEN3_40:GENERA3] { reVC update }
+Per ~h~sparare davanti~w~ su una ~h~moto~w~ premi il ~h~~k~~VEHICLE_FIREWEAPON~~w~.
 
-[GEN3_41:GENERA3]
-Per ~h~sparare davanti~w~ su una ~h~moto~w~ premi il ~h~~k~~PED_FIREWEAPON~~w~.
+[GEN3_41:GENERA3] { reVC update }
+Per ~h~sparare davanti~w~ su una ~h~moto~w~ premi il ~h~~k~~VEHICLE_FIREWEAPON~~w~.
 
 [GEN3_46:GENERA3]
 Meerda!
@@ -10551,14 +10551,14 @@ Premi il tasto ~h~~k~~PED_FIREWEAPON~~w~ per ~h~sparare~w~ col fucile d'assalto.
 [GEN3_63:GENERA3]
 Oltre a permetterti di sparare in corsa, con le ~h~moto~w~ puoi anche ~h~sparare in avanti~w~.
 
-[GEN3_64:GENERA3]
-Per sparare in avanti quando sei su una moto, premi il tasto ~h~~k~~PED_FIREWEAPON~~w~.
+[GEN3_64:GENERA3] { reVC update }
+Per sparare in avanti quando sei su una moto, premi il tasto ~h~~k~~VEHICLE_FIREWEAPON~~w~.
 
-[GEN3_65:GENERA3]
-Per sparare in avanti quando sei su una moto, premi il tasto ~h~~k~~PED_FIREWEAPON~~w~.
+[GEN3_65:GENERA3] { reVC update }
+Per sparare in avanti quando sei su una moto, premi il tasto ~h~~k~~VEHICLE_FIREWEAPON~~w~.
 
-[GEN3_66:GENERA3]
-Per sparare in avanti quando sei su una moto, premi il tasto ~h~~k~~PED_FIREWEAPON~~w~.
+[GEN3_66:GENERA3] { reVC update }
+Per sparare in avanti quando sei su una moto, premi il tasto ~h~~k~~VEHICLE_FIREWEAPON~~w~.
 
 [GEN3_67:GENERA3]
 Hai bisogno di una mitragliatrice per poter sparare in avanti.
@@ -10958,8 +10958,8 @@ Fai esplodere le barche e inchioda le loro bare.
 [HAT2_12:HAIT2]
 Beh, grazie per il tè.
 
-[HAT2_B3:HAIT2]
-Premi il ~h~~k~~PED_FIREWEAPON~~w~ per sganciare una bomba. Premi il ~h~~k~~VEHICLE_ENTER_EXIT~ "~w~ per annullare.
+[HAT2_B3:HAIT2] { reVC update }
+Premi il ~h~~k~~VEHICLE_FIREWEAPON~~w~ per sganciare una bomba. Premi il ~h~~k~~VEHICLE_ENTER_EXIT~ "~w~ per annullare.
 
 {=================================== MISSION TABLE HAIT3 ===================================}
 
@@ -13428,8 +13428,8 @@ Punti di controllo rimanenti:
 [RCH1_13:RCHELI1]
 ~r~L'elicottero radiocomandato è fuori portata!
 
-[RCH1_8:RCHELI1]
-~g~Se desideri interrompere la missione, premi il ~h~~k~~PED_FIREWEAPON~~g~ per far esplodere l'elicottero.
+[RCH1_8:RCHELI1] { reVC update }
+~g~Se desideri interrompere la missione, premi il ~h~~k~~VEHICLE_FIREWEAPON~~g~ per far esplodere l'elicottero.
 
 {=================================== MISSION TABLE RCPLNE1 ===================================}
 
@@ -13439,8 +13439,8 @@ Punti di controllo rimanenti:
 [RCPL1_5:RCPLNE1]
 ~g~Vola attraverso i punti di controllo in Vice City.
 
-[RCPL1_6:RCPLNE1]
-~g~Se desideri interrompere la missione, premi il ~h~~k~~PED_FIREWEAPON~~g~ per far esplodere l'aereo.
+[RCPL1_6:RCPLNE1] { reVC update }
+~g~Se desideri interrompere la missione, premi il ~h~~k~~VEHICLE_FIREWEAPON~~g~ per far esplodere l'aereo.
 
 [RCPL1_8:RCPLNE1]
 ~g~L'aereo radiocomandato è quasi fuori portata!
@@ -14221,11 +14221,11 @@ Premi il ~h~~k~~VEHICLE_LOOKLEFT~~w~ per ruotare l'elicottero in senso orario.
 [TEX3_32:SERG3]
 Puoi ~h~guardare indietro~w~ premendo ~h~simultaneamente ~k~~VEHICLE_LOOKLEFT~ e ~k~~VEHICLE_LOOKRIGHT~~w~.
 
-[TEX3_4:SERG3]
-~g~Per sganciare una bomba, premi il ~h~~k~~PED_FIREWEAPON~~g~.
+[TEX3_4:SERG3] { reVC update }
+~g~Per sganciare una bomba, premi il ~h~~k~~VEHICLE_FIREWEAPON~~g~.
 
-[TEX3_29:SERG3]
-Per sganciare una bomba, premi il ~h~~k~~PED_FIREWEAPON~~w~.
+[TEX3_29:SERG3] { reVC update }
+Per sganciare una bomba, premi il ~h~~k~~VEHICLE_FIREWEAPON~~w~.
 
 [TEX3_26:SERG3]
 Premi il ~h~~k~~VEHICLE_BRAKE~~w~ per ridurre la velocità del rotore dell'elicottero in modo da farlo abbassare.
