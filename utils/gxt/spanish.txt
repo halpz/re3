@@ -13955,7 +13955,7 @@ Si empujas ~h~el joystick analógico derecho hacia atrás~w~, aumentarás la vel
 
 [TEX3_38:SERG3] { reVC update }
 {Pulsa ~h~~k~~VEHICLE_ACCELERATE~~w~ para aumentar la velocidad del rotor y así ~h~ascender~w~.}
-Si empujas ~h~el joystick analógico derecho hacia adelante~w~disminuye la velocidad del rotor aumenta haciendo que el helicóptero ~h~descienda.
+Si empujas ~h~el joystick analógico derecho hacia adelante ~w~la velocidad del rotor aumenta, haciendo que el helicóptero ~h~descienda.
 
 [TEX3_39:SERG3]
 ~g~Para soltar una bomba pulsa ~h~~k~~VEHICLE_HANDBRAKE~~w~.
