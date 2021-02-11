@@ -2532,7 +2532,7 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     O,      /* PED_SPRINT */                                                                                                                              \
 	     R3,     /* PED_LOOKBEHIND */                                                                                                                          \
 	     L3,     /* PED_DUCK */                                                                                                                                \
-	     L1,     /* PED_ANSWER_PHONE */                                                                                                                        \
+	     T,     /* PED_ANSWER_PHONE */                                                                                                                        \
 	     VFB(O)  /* VEHICLE_FIREWEAPON */                                                                                                                      \
 	     X,      /* VEHICLE_ACCELERATE */                                                                                                                      \
 	     Q,      /* VEHICLE_BRAKE */                                                                                                                           \
@@ -2579,7 +2579,7 @@ int32 CControllerConfigManager::GetNumOfSettingsForAction(e_ControllerAction act
 	     X,      /* PED_SPRINT */                                                                                                                              \
 	     R3,     /* PED_LOOKBEHIND */                                                                                                                          \
 	     L3,     /* PED_DUCK */                                                                                                                                \
-	     L1,     /* PED_ANSWER_PHONE */                                                                                                                        \
+	     O,     /* PED_ANSWER_PHONE */                                                                                                                        \
 	     VFB(R1) /* VEHICLE_FIREWEAPON */                                                                                                                      \
 	     RSU,    /* VEHICLE_ACCELERATE */                                                                                                                      \
 	     RSD,    /* VEHICLE_BRAKE */                                                                                                                           \

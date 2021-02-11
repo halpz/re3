@@ -6007,11 +6007,11 @@ Premi il ~h~~k~~TOGGLE_SUBMISSIONS~~w~ per attivare o disattivare le missioni In
 [GUN_H1]
 ~w~Premi il ~h~~k~~PED_SPRINT~~w~ per comprare. ~w~Premi il ~h~~k~~VEHICLE_ENTER_EXIT~~w~ per uscire.
 
-[PU_CF3]
-Premi il ~h~~k~~VEHICLE_ENTER_EXIT~~w~ per sostituire l'arma attuale con quella presente in questo slot.
+[PU_CF3] { reVC update }
+Premi il ~h~~k~~PED_ANSWER_PHONE~~w~ per sostituire l'arma attuale con quella presente in questo slot.
 
-[PU_CF4]
-Premi il ~h~~k~~VEHICLE_ENTER_EXIT~~w~ per sostituire l'arma attuale con quella presente in questo slot.
+[PU_CF4] { reVC update }
+Premi il ~h~~k~~PED_ANSWER_PHONE~~w~ per sostituire l'arma attuale con quella presente in questo slot.
 
 [HELP9_B]
 Premi il ~h~~k~~PED_FIREWEAPON~~w~ per sparare con il fucile di precisione.

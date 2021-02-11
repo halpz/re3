@@ -4456,11 +4456,11 @@ Press the ~h~~k~~TOGGLE_SUBMISSIONS~ button~w~ to toggle Paramedic missions on o
 [GUN_H1]
 ~w~Press the~h~ ~k~~PED_SPRINT~ ~w~button to buy. Press the~h~ ~k~~VEHICLE_ENTER_EXIT~ ~w~button to exit.
 
-[PU_CF3]
-Press the ~h~~k~~VEHICLE_ENTER_EXIT~ ~w~button to replace current weapon in this slot.
+[PU_CF3] { reVC update }
+Press the ~h~~k~~PED_ANSWER_PHONE~ ~w~button to replace current weapon in this slot.
 
-[PU_CF4]
-Press the ~h~~k~~VEHICLE_ENTER_EXIT~ ~w~button to replace current weapon in this slot.
+[PU_CF4] { reVC update }
+Press the ~h~~k~~PED_ANSWER_PHONE~ ~w~button to replace current weapon in this slot.
 
 [HELP9_B]
 Press the~h~ ~k~~PED_FIREWEAPON~ button ~w~to ~h~fire~w~ the sniper rifle.

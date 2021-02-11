@@ -5834,11 +5834,11 @@ Pulsa ~h~~k~~TOGGLE_SUBMISSIONS~~w~ para comenzar o cancelar las misiones de ATS
 [GUN_H1]
 ~w~Pulsa ~h~~k~~PED_SPRINT~~w~ para comprar. ~w~Pulsa ~h~~k~~VEHICLE_ENTER_EXIT~~w~ para salir.
 
-[PU_CF3]
-Pulsa ~h~~k~~VEHICLE_ENTER_EXIT~~w~ para reemplazar tu arma actual en esta ranura.
+[PU_CF3] { reVC update }
+Pulsa ~h~~k~~PED_ANSWER_PHONE~~w~ para reemplazar tu arma actual en esta ranura.
 
-[PU_CF4]
-Pulsa ~h~~k~~VEHICLE_ENTER_EXIT~~w~ para reemplazar tu arma actual en esta ranura.
+[PU_CF4] { reVC update }
+Pulsa ~h~~k~~PED_ANSWER_PHONE~~w~ para reemplazar tu arma actual en esta ranura.
 
 [HELP9_B]
 Pulsa ~h~~k~~PED_FIREWEAPON~ ~w~para ~h~disparar~w~ el rifle de francotirador.

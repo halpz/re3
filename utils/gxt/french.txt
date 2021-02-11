@@ -6214,11 +6214,11 @@ Appuie sur la ~h~~k~~TOGGLE_SUBMISSIONS~~w~ pour activer ou désactiver les miss
 [GUN_H1]
 ~w~Appuie sur la~h~ ~k~~PED_SPRINT~~w~ pour acheter. ~w~Appuie sur la~h~ ~k~~VEHICLE_ENTER_EXIT~~w~ pour quitter.
 
-[PU_CF3]
-Appuie sur la ~h~~k~~VEHICLE_ENTER_EXIT~~w~ pour remplacer l'arme actuelle dans cet emplacement.
+[PU_CF3] { reVC update }
+Appuie sur la ~h~~k~~PED_ANSWER_PHONE~~w~ pour remplacer l'arme actuelle dans cet emplacement.
 
-[PU_CF4]
-Appuie sur la ~h~~k~~VEHICLE_ENTER_EXIT~~w~ pour remplacer l'arme actuelle dans cet emplacement.
+[PU_CF4] { reVC update }
+Appuie sur la ~h~~k~~PED_ANSWER_PHONE~~w~ pour remplacer l'arme actuelle dans cet emplacement.
 
 [HELP9_B]
 Appuie sur la~h~ ~k~~PED_FIREWEAPON~ ~w~pour ~h~tirer~w~ avec le fusil à lunette.

@@ -6175,11 +6175,11 @@ Drücke die ~h~~k~~TOGGLE_SUBMISSIONS~~w~, um Krankenwagen-Missionen an- oder ab
 [GUN_H1]
 ~w~Drück die~h~ ~k~~PED_SPRINT~~w~, um zu kaufen. ~w~Drück die~h~ ~k~~VEHICLE_ENTER_EXIT~~w~, um zu gehen.
 
-[PU_CF3]
-Drück die ~h~~k~~VEHICLE_ENTER_EXIT~~w~, um die augenblickliche Waffe in diesem Slot auszutauschen.
+[PU_CF3] { reVC update }
+Drück die ~h~~k~~PED_ANSWER_PHONE~~w~, um die augenblickliche Waffe in diesem Slot auszutauschen.
 
-[PU_CF4]
-Drück die ~h~~k~~VEHICLE_ENTER_EXIT~~w~, um die augenblickliche Waffe in diesem Slot auszutauschen.
+[PU_CF4] { reVC update }
+Drück die ~h~~k~~PED_ANSWER_PHONE~~w~, um die augenblickliche Waffe in diesem Slot auszutauschen.
 
 [HELP9_B]
 Drücke die~h~ ~k~~PED_FIREWEAPON~~w~, um das Prãzisionsgewehr ~h~abzufeuern~w~.
