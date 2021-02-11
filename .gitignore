@@ -358,3 +358,5 @@ sdk/
 codewarrior/reVC_Data/
 codewarrior/Release/
 codewarrior/Debug/
+
+src/extras/GitSHA1.cpp
