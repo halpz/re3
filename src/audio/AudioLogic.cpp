@@ -2970,6 +2970,8 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 				int32 sampleIndex;
 				int32 frequency;
 				CPed *pPed = params.m_pVehicle->pDriver;
+				if(!pPed)
+					break;
 				if(!pPed->HasWeaponSlot(WEAPONSLOT_SUBMACHINEGUN)) {
 					sampleIndex = SFX_UZI_LEFT;
 					frequency = SampleManager.GetSampleBaseFrequency(sampleIndex);
