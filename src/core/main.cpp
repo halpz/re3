@@ -356,7 +356,7 @@ RwGrabScreen(RwCamera *camera, RwChar *filename)
 	strcpy(temp, CFileMgr::GetRootDirName());
 	strcat(temp, filename);
 
-#ifdef THIS_IS_STUPID
+#ifndef LIBRW
 	if (RtBMPImageWrite(pImage, &temp[0]) == nil)
 #else
 	if (RtPNGImageWrite(pImage, &temp[0]) == nil)
