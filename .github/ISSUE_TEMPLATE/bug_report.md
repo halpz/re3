@@ -18,5 +18,7 @@ A clear and concise description of what you expected to happen.
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
-For this please enable the version text from the debug menu (Ctrl-M, Debug -> Version Text)
-so we know what code you're running.
+
+**Version**
+Tell us what version you're running. Find out using the debug menu (Ctrl-M, Debug -> Version Text)
+If you send a screenshot just enable it beforehand.
