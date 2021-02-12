@@ -333,11 +333,8 @@ wchar* DetectJoystickDraw(bool* disabled, bool userHovering) {
 			}
 		}
 		if (found != -1 && CPad::XInputJoy1 != found) {
-			if (CPad::XInputJoy1 != -1 && CPad::XInputJoy1 != found)
-				CPad::XInputJoy2 = CPad::XInputJoy1;
-			else
-				CPad::XInputJoy2 = -1;
-
+			// We should never leave pads -1, so we can process them when they're connected and kinda support hotplug.
+			CPad::XInputJoy2 = (CPad::XInputJoy1 == -1 ? (found + 1) % 4 : CPad::XInputJoy1);
 			CPad::XInputJoy1 = found;
 			cachedButtonNum = 0; // fake too, because xinput bypass CControllerConfig
 		}
