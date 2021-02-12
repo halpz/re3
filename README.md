@@ -138,6 +138,35 @@ We have a [Coding Style](https://github.com/GTAmodding/re3/blob/master/CODING_ST
 Do not use features from C++11 or later.
 
 
+## History
+
+re3 was started sometime in the spring of 2018,
+initially as a way to test reversed collision and physics code
+inside the game.
+This was done by replacing single functions of the game
+with their reversed counterparts using a dll.
+
+After a bit of work then project lay dormant for about a year
+and was picked up again and pushed to github in May 2019.
+At the time I had reversed around 10k lines of code and estimated
+the final game to have around 200-250k.
+Others quickly joined the effort and we made very quick progress
+throughout the summer of 2019
+after which the pace slowed down a bit.
+
+Due to everyone staying home during the start of the Corona pandemic
+everybody had much time to work on re3 again and
+we finally got a standalone exe in April 2020 (around 180k lines by then).
+
+After the initial excitement and fixing and polishing the code more
+reVC was started in early May 2020 by starting from re3 code,
+not by starting from scratch replacing functions with a dll.
+After a few months of mostly steady progress we considered reVC
+finished in December.
+
+Since then we have started LCS, which is currently work in progress.
+
+
 ## License
 
 We don't feel like we're in a position to give this code a license.\
