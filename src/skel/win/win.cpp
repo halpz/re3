@@ -1330,7 +1330,11 @@ InitApplication(HANDLE instance)
 	windowClass.cbClsExtra = 0;
 	windowClass.cbWndExtra = 0;
 	windowClass.hInstance = (HINSTANCE)instance;
+#ifdef FIX_BUGS
+	windowClass.hIcon = LoadIcon((HINSTANCE)instance, MAKEINTRESOURCE(IDI_MAIN_ICON));
+#else
 	windowClass.hIcon = nil;
+#endif
 	windowClass.hCursor = LoadCursor(nil, IDC_ARROW);
 	windowClass.hbrBackground = nil;
 	windowClass.lpszMenuName = NULL;
