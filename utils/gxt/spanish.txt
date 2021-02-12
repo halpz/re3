@@ -1,4 +1,16 @@
-﻿{ Grand Theft Auto Vice City Spanish (Spain) Translation }
+﻿{
+    New strings are at the bottom of file.
+    Do not change the order of strings.
+    You can fix the typos of existing translation but please refrain from
+    unnecessary edits like rephasing because you think it suits better for your taste.
+
+    SPANISH NOTE:
+    This is European Spanish, do not mix it with Latin American Spanish.
+    If you want the Latin American Spanish translation you'd have to create
+    a separate txt for it.
+}
+
+{ Grand Theft Auto Vice City Spanish (Spain) Translation }
 { Contains some of the official fixes made by Rockstar for the iOS port }
 { Additional translation rewrites, corrections and fixes by IlDucci }
 [IN_VEH]
@@ -14261,7 +14273,7 @@ POLACO
 RUSO
 
 { new display menus }
-[FET_GRA]
+[FET_GFX]
 CONFIGURACIÓN DE GRÁFICOS
 
 [FED_MIP]
@@ -14371,8 +14383,26 @@ INVERTIR VERTICALIDAD MANDO
 [FEM_NON]
 NADA
 
-[FEA_FMN]
-RADIO APAGADA
+[FEC_DS2]
+DUALSHOCK 2
+
+[FEC_DS3]
+DUALSHOCK 3
+
+[FEC_DS4]
+DUALSHOCK 4
+
+[FEC_360]
+MANDO DE XBOX 360
+
+[FEC_ONE]
+MANDO DE XBOX ONE
+
+[FEC_TYP]
+TIPO DE MANDO
+
+[FET_AGS]
+AJUSTES DE MANDO
 
 { end of file }
 [DUMMY]

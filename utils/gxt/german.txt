@@ -1,4 +1,11 @@
-﻿[RAMPAGE]
+﻿{
+    New strings are at the bottom of file.
+    Do not change the order of strings.
+    You can fix the typos of existing translation but please refrain from
+    unnecessary edits like rephasing because you think it suits better for your taste.
+}
+
+[RAMPAGE]
 AMOKLAUF!!
 
 [RAMP_F]
@@ -14559,7 +14566,7 @@ Wird Zeit, dass der Schutzengel von Kaufman-Taxis eine vor den Latz kriegt!
 [TAX3_5:TAXIWA3]
 Hey, Freundchen, dir zieh ich das Fell über die Ohren!
 
-{ re3 updates }
+{ reVC updates }
 { new languages }
 [FEL_JAP]
 JAPANISCH
@@ -14570,8 +14577,137 @@ POLNISCH
 [FEL_RUS]
 RUSSISCH
 
-[FEA_FMN]
-RADIO AUS
+{ new display menus }
+[FET_GFX]
+GRAPHICS SETUP
+
+[FED_MIP]
+MIP MAPPING
+
+[FED_AAS]
+ANTI ALIASING
+
+[FED_FIL]
+TEXTURE FILTERING
+
+[FED_BIL]
+BILINEAR
+
+[FED_TRL]
+TRILINEAR
+
+[FED_WND]
+WINDOWED
+
+[FED_FLS]
+FULLSCREEN
+
+[FEM_CSB]
+CUTSCENE BORDERS
+
+[FEM_SCF]
+SCREEN FORMAT
+
+[FEM_ISL]
+MAP MEMORY USAGE
+
+[FEM_LOW]
+LOW
+
+[FEM_MED]
+MEDIUM
+
+[FEM_HIG]
+HIGH
+
+[FEM_2PR]
+PS2 ALPHA TEST
+
+[FEC_FRC]
+FREE CAM
+
+{ Linux joy detection }
+[FEC_JOD]
+DETECT JOYSTICK
+
+[FEC_JPR]
+Press any key on the joystick of your choice that you want to use on the game, and it will be selected.
+
+[FEC_JDE]
+Detected joystick
+
+{ mission restart }
+[FET_RMS]
+MISSION WIEDERHOLEN
+
+[FESZ_RM]
+WIEDERHOLEN?
+
+[FED_VPL]
+VEHICLE PIPELINE
+
+[FED_PRM]
+PED RIM LIGHT
+
+[FED_RGL]
+ROAD GLOSS
+
+[FED_CLF]
+COLOUR FILTER
+
+[FED_WLM]
+WORLD LIGHTMAPS
+
+[FED_MBL]
+MOTION BLUR
+
+[FEM_SIM]
+SIMPLE
+
+[FEM_NRM]
+NORMAL
+
+[FEM_MOB]
+MOBILE
+
+[FED_MFX]
+MATFX
+
+[FED_NEO]
+NEO
+
+[FEM_PS2]
+PS2
+
+[FEM_XBX]
+XBOX
+
+[FEC_IVP]
+INVERT PAD VERTICALLY
+
+[FEM_NON]
+NONE
+
+[FEC_DS2]
+DUALSHOCK 2
+
+[FEC_DS3]
+DUALSHOCK 3
+
+[FEC_DS4]
+DUALSHOCK 4
+
+[FEC_360]
+XBOX 360 CONTROLLER
+
+[FEC_ONE]
+XBOX ONE CONTROLLER
+
+[FEC_TYP]
+GAMEPAD TYPE
+
+[FET_AGS]
+GAMEPAD SETTINGS
 
 [DUMMY]
 THIS LABEL NEEDS TO BE HERE !!!

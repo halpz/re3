@@ -1307,7 +1307,7 @@ cMusicManager::DisplayRadioStationName()
 			case RADIO_OFF: {
 				extern wchar WideErrorString[];
 
-				string = TheText.Get("FEA_FMN");
+				string = TheText.Get("FEA_NON");
 				if (string == WideErrorString) {
 					pCurrentStation = nil;
 					return;
