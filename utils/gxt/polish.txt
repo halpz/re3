@@ -1,4 +1,11 @@
-﻿[LETTER1]
+﻿{
+    New strings are at the bottom of file.
+    Do not change the order of strings.
+    You can fix the typos of existing translation but please refrain from
+    unnecessary edits like rephasing because you think it suits better for your taste.
+}
+
+[LETTER1]
 abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789'$,.'-?!!SDBF
 	
 [DEFNAM]
@@ -2439,33 +2446,6 @@ Przyspieszenie
 	
 [FEC_SMT]
 Włączenie misji specjalnych
-	
-[FEC_CCF]
-Konfiguracja:
-	
-[FEC_CF1]
-Setup1
-	
-[FEC_CF2]
-Setup2
-	
-[FEC_CF3]
-Setup3
-	
-[FEC_CF4]
-Setup4
-	
-[FEC_CDP]
-Sterownik ekranu:
-	
-[FEC_ONF]
-Pieszo
-	
-[FEC_INC]
-W aucie
-	
-[FEC_VIB]
-Wibracja:
 	
 [FEA_OUT]
 Wyjście:
@@ -7243,9 +7223,6 @@ POŁĄCZENIE
 [FET_AUD]
 KONFIGURACJA DŻWIĘKU
 	
-[FET_GFX]
-KONFIGURACJA EFEKTÓW
-	
 [FET_DIS]
 KONFIGURACJA EKRANU
 	
@@ -7956,8 +7933,8 @@ POLSKI
 [FEL_RUS]
 ROSYJSKI
 	
-{ new display menus }	
-[FET_GRA]
+{ new display menus }
+[FET_GFX]
 USTAWIENIA GRAFIKI
 	
 [FED_MIP]
@@ -8022,6 +7999,7 @@ PONÓW MISJĘ
 [FESZ_RM]
 PONOWIĆ?
 	
+{ more graphics }
 [FED_VPL]
 POTOK POJAZDÓW
 	
@@ -8060,10 +8038,68 @@ PS2
 	
 [FEM_XBX]
 XBOX
+
+[FEM_AUT] { aspect ratio related }
+AUTO
 	
 [FEC_IVP]
 ODWRÓĆ OŚ PADA W PIONIE
+
+{ map }
+[FEM_TWP]
+Toggle Waypoint
+
+[FEA_FMN]
+RADIO OFF
+
+[FEC_DS2]
+DUALSHOCK 2
+
+[FEC_DS3]
+DUALSHOCK 3
+
+[FEC_DS4]
+DUALSHOCK 4
+
+[FEC_360]
+XBOX 360 CONTROLLER
+
+[FEC_ONE]
+XBOX ONE CONTROLLER
+
+[FEC_TYP]
+GAMEPAD TYPE
 	
+[FEC_CCF]
+KONFIGURACJA
+	
+[FEC_CF1]
+SETUP1
+	
+[FEC_CF2]
+SETUP2
+	
+[FEC_CF3]
+SETUP3
+	
+[FEC_CF4]
+SETUP4
+	
+[FEC_CDP]
+STEROWNIK EKRANU
+	
+[FEC_ONF]
+PIESZO
+	
+[FEC_INC]
+W AUCIE
+	
+[FEC_VIB]
+WIBRACJA
+
+[FET_AGS]
+GAMEPAD SETTINGS
+
 { end of file }	
 	
 [DUMMY]

@@ -1,4 +1,16 @@
-﻿{ Grand Theft Auto III Spanish (Spain) Translation }
+﻿{
+    New strings are at the bottom of file.
+    Do not change the order of strings.
+    You can fix the typos of existing translation but please refrain from
+    unnecessary edits like rephasing because you think it suits better for your taste.
+
+    SPANISH NOTE:
+    This is European Spanish, do not mix it with Latin American Spanish.
+    If you want the Latin American Spanish translation you'd have to create
+    a separate txt for it.
+}
+
+{ Grand Theft Auto III Spanish (Spain) Translation }
 { Contains some of the official fixes made by Rockstar for the iOS port }
 { Additional translation rewrites, corrections and fixes by IlDucci }
 
@@ -7278,9 +7290,6 @@ CONEXIÓN
 [FET_AUD]
 AJUSTES DE AUDIO
 
-[FET_GFX]
-AJUSTES GRÁFICOS
-
 [FET_DIS]
 AJUSTES DE PANTALLA
 
@@ -7988,7 +7997,7 @@ POLACO
 RUSO
 
 { new display menus }
-[FET_GRA]
+[FET_GFX]
 AJUSTES GRÁFICOS
 
 [FED_MIP]

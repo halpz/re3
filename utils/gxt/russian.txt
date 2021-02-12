@@ -1,4 +1,11 @@
-﻿[1000]
+﻿{
+    New strings are at the bottom of file.
+    Do not change the order of strings.
+    You can fix the typos of existing translation but please refrain from
+    unnecessary edits like rephasing because you think it suits better for your taste.
+}
+
+[1000]
 ТЫ ПОКОЙНИК
 
 [1001]
@@ -2425,29 +2432,11 @@ FLASHBACK 95.6
 [FEC_CAW]
 Оружие в машине
 
-[FEC_CCF]
-Конфигурация:
-
 [FEC_CCM]
 Поставить камеру сзади игрока.
 
-[FEC_CDP]
-Показ контроллера:
-
 [FEC_CEN]
 Центровка камеры
-
-[FEC_CF1]
-Setup1
-
-[FEC_CF2]
-Setup2
-
-[FEC_CF3]
-Setup3
-
-[FEC_CF4]
-Setup4
 
 [FEC_CLE]
 Прокрутка оружия влево
@@ -2568,9 +2557,6 @@ HOME
 
 [FEC_IBT]
 -
-
-[FEC_INC]
-В машине
 
 [FEC_IRT]
 INS
@@ -2743,8 +2729,6 @@ NUMLOCK
 [FEC_OMS]
 Для действия можно задать лишь одну кнопку мыши
 
-[FEC_ONF]
-Пешком
 
 [FEC_ORR]
 или
@@ -2961,9 +2945,6 @@ Toggle Pad Game/Debug
 
 [FEC_VES]
 Управление машиной
-
-[FEC_VIB]
-Vibration:
 
 [FEC_WAR]
 Внимание!
@@ -3692,7 +3673,7 @@ No Memory Card (PS2) in MEMORY CARD slot 1.
 УДАЛЕНИЕ ИГРЫ
 
 [FET_DIS]
-НАСТРОЙКА ГРАФИКИ
+НАСТРОЙКА ДИСПЛЕЯ
 
 [FET_DSN]
 Обычная}одежда.bmp
@@ -3705,9 +3686,6 @@ No Memory Card (PS2) in MEMORY CARD slot 1.
 
 [FET_FIL]
 Фильтр
-
-[FET_GFX]
-НАСТРОЙКА ГРАФИКИ
 
 [FET_GT]
 ТИП ИГРЫ
@@ -7957,6 +7935,9 @@ PS: УМРИ, ПАРШИВЫЙ ПЕС, УМРИ!
 РУССКИЙ
 
 { new display menus }
+[FET_GFX]
+НАСТРОЙКА ГРАФИКИ
+
 [FED_MIP]
 МИП-МАППИНГ
 
@@ -7971,6 +7952,155 @@ PS: УМРИ, ПАРШИВЫЙ ПЕС, УМРИ!
 
 [FED_TRL]
 ТРИЛИНЕЙНАЯ
+
+[FED_WND]
+ОКОННЫЙ
+
+[FED_FLS]
+ПОЛНОЭКРАННЫЙ
+
+[FEM_CSB]
+CUTSCENE BORDERS
+
+[FEM_SCF]
+ФОРМАТ ОКНА
+
+[FEM_ISL]
+MAP MEMORY USAGE
+
+[FEM_LOW]
+LOW
+
+[FEM_MED]
+MEDIUM
+
+[FEM_HIG]
+HIGH
+
+[FEM_2PR]
+PS2 ALPHA TEST
+
+[FEC_FRC]
+СВОБОДНАЯ КАМЕРА
+
+{ Linux joy detection }
+[FEC_JOD]
+DETECT JOYSTICK
+
+[FEC_JPR]
+Press any key on the joystick of your choice that you want to use on the game, and it will be selected.
+
+[FEC_JDE]
+Detected joystick
+
+{ mission restart }
+[FET_RMS]
+ПОВТОРИТЬ ЗАДАНИЕ
+
+[FESZ_RM]
+НАЧАТЬ ЗАНОВО?
+
+{ more graphics }
+[FED_VPL]
+VEHICLE PIPELINE
+
+[FED_PRM]
+PED RIM LIGHT
+
+[FED_RGL]
+ROAD GLOSS
+
+[FED_CLF]
+COLOUR FILTER
+
+[FED_WLM]
+WORLD LIGHTMAPS
+
+[FED_MBL]
+MOTION BLUR
+
+[FEM_SIM]
+SIMPLE
+
+[FEM_NRM]
+NORMAL
+
+[FEM_MOB]
+MOBILE
+
+[FED_MFX]
+MATFX
+
+[FED_NEO]
+NEO
+
+[FEM_PS2]
+PS2
+
+[FEM_XBX]
+XBOX
+
+[FEM_AUT] { aspect ratio related }
+АВТО
+
+{ controls }
+[FEC_IVP]
+ИНВЕРТИРОВАТЬ ВЕРТИКАЛЬНУЮ ОСЬ
+
+{ map }
+[FEM_TWP]
+Поставить метку
+
+[FEA_FMN]
+РАДИО ВЫКЛ
+
+[FEC_DS2]
+DUALSHOCK 2
+
+[FEC_DS3]
+DUALSHOCK 3
+
+[FEC_DS4]
+DUALSHOCK 4
+
+[FEC_360]
+КОНТРОЛЛЕР XBOX 360
+
+[FEC_ONE]
+КОНТРОЛЛЕР XBOX ONE
+
+[FEC_TYP]
+ГЕЙМПАД
+
+[FEC_CCF]
+КОНФИГУРАЦИЯ
+
+[FEC_CF1]
+СХЕМА 1
+
+[FEC_CF2]
+СХЕМА 2
+
+[FEC_CF3]
+СХЕМА 3
+
+[FEC_CF4]
+СХЕМА 4
+
+[FEC_CDP]
+ТИП УПРАВЛЕНИЯ
+
+[FEC_ONF]
+ПЕШКОМ
+
+[FEC_INC]
+В МАШИНЕ
+
+[FEC_VIB]
+ВИБРАЦИЯ
+
+[FET_AGS]
+НАСТРОЙКИ ГЕЙМПАДА
 
 { end of file }
 

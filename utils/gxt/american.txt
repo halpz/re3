@@ -7216,9 +7216,6 @@ CONNECTION
 [FET_AUD]
 AUDIO SETUP
 
-[FET_GFX]
-GFX SETUP
-
 [FET_DIS]
 DISPLAY SETUP
 
@@ -7930,7 +7927,7 @@ POLISH
 RUSSIAN
 
 { new display menus }
-[FET_GRA]
+[FET_GFX]
 GRAPHICS SETUP
 
 [FED_MIP]
@@ -7995,6 +7992,7 @@ REPLAY MISSION
 [FESZ_RM]
 RETRY?
 
+{ more graphics }
 [FED_VPL]
 VEHICLE PIPELINE
 
@@ -8034,12 +8032,14 @@ PS2
 [FEM_XBX]
 XBOX
 
-[FEM_AUT]
+[FEM_AUT] { aspect ratio related }
 AUTO
 
+{ controls }
 [FEC_IVP]
 INVERT PAD VERTICALLY
 
+{ map }
 [FEM_TWP]
 Toggle Waypoint
 
