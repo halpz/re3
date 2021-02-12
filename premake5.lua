@@ -331,7 +331,7 @@ project "re3"
 		prebuildcommands { '"%{prj.location}..\\printHash.bat" "%{prj.location}..\\src\\extras\\GitSHA1.cpp"' }
 	
 	filter "platforms:not win*"
-		prebuildcommands { '"%{prj.location}../printHash.sh" "%{prj.location}../src/extras/GitSHA1.cpp"' }
+		prebuildcommands { '"%{prj.location}/../printHash.sh" "%{prj.location}/../src/extras/GitSHA1.cpp"' }
 
 	filter "platforms:win*glfw*"
 		staticruntime "off"

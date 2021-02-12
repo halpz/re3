@@ -1,12 +1,10 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 > $1
 
 echo -n "#define GIT_SHA1 \"" > $1
 
-git --version 2>&1 >/dev/null
-GIT_IS_AVAILABLE=$?
-if [ $GIT_IS_AVAILABLE -ne 0 ]; then
+if (command -v "git" >/dev/null) then
 git rev-parse --short HEAD | tr -d '\n' >> $1
 fi
 
