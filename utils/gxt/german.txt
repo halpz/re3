@@ -2488,33 +2488,6 @@ Beschleunigen
 [FEC_SMT]
 Spezialmission aktivieren
 
-[FEC_CCF]
-Konfiguration:
-
-[FEC_CF1]
-Konfig1
-
-[FEC_CF2]
-Konfig2
-
-[FEC_CF3]
-Konfig3
-
-[FEC_CF4]
-Konfig4
-
-[FEC_CDP]
-Controller-Anzeige:
-
-[FEC_ONF]
-Zu Fuß
-
-[FEC_INC]
-Im Auto
-
-[FEC_VIB]
-Vibration:
-
 [FEA_OUT]
 Tonausgabe:
 
@@ -8036,6 +8009,42 @@ RUSSISCH
 
 [FEA_FMN]
 RADIO AUS
+
+[FEC_DS2]
+DUALSHOCK 2
+
+[FEC_DS3]
+DUALSHOCK 3
+
+[FEC_DS4]
+DUALSHOCK 4
+
+[FEC_CCF]
+KONFIGURATION
+
+[FEC_CF1]
+KONFIGURATION 1
+
+[FEC_CF2]
+KONFIGURATION 2
+
+[FEC_CF3]
+KONFIGURATION 3
+
+[FEC_CF4]
+KONFIGURATION 4
+
+[FEC_CDP]
+CONTROLLER-ANZEIGE
+
+[FEC_ONF]
+ZU FUß
+
+[FEC_INC]
+IM AUTO
+
+[FEC_VIB]
+VIBRATION
 
 [DUMMY]
 THIS LABEL NEEDS TO BE HERE !!!

@@ -2452,33 +2452,6 @@ Accélérateur
 [FEC_SMT]
 Déclencheur de mission spéciale
 
-[FEC_CCF]
-Configuration:
-
-[FEC_CF1]
-Config1
-
-[FEC_CF2]
-Config2
-
-[FEC_CF3]
-Config3
-
-[FEC_CF4]
-Config4
-
-[FEC_CDP]
-Affichage de la manette:
-
-[FEC_ONF]
-A pied
-
-[FEC_INC]
-Dans un véhicule
-
-[FEC_VIB]
-Vibrations:
-
 [FEA_OUT]
 Sortie audio:
 
@@ -8219,6 +8192,42 @@ RUSSE
 
 [FEA_FMN]
 RADIO ETEINTE
+
+[FEC_DS2]
+DUALSHOCK 2
+
+[FEC_DS3]
+DUALSHOCK 3
+
+[FEC_DS4]
+DUALSHOCK 4
+
+[FEC_CCF]
+CONFIGURATION
+
+[FEC_CF1]
+CONFIGURATION 1
+
+[FEC_CF2]
+CONFIGURATION 2
+
+[FEC_CF3]
+CONFIGURATION 3
+
+[FEC_CF4]
+CONFIGURATION 4
+
+[FEC_CDP]
+AFFICHAGE DE LA MANETTE
+
+[FEC_ONF]
+A PIED
+
+[FEC_INC]
+DANS UN VÉHICULE
+
+[FEC_VIB]
+VIBRATIONS
 
 [DUMMY]
 THIS LABEL NEEDS TO BE HERE !!!
