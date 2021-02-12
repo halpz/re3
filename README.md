@@ -5,26 +5,91 @@
 
 ## Intro
 
-The aim of this project is to reverse GTA III for PC by replacing
-parts of the game [one by one](https://en.wikipedia.org/wiki/Ship_of_Theseus)
-such that we have a working game at all times.
+In this repository you'll find the fully reversed source code for GTA III ([master](tree/master) branch) and GTA VC ([miami](tree/miami) branch).
 
-## How can I try it?
+It has been tested and works on Windows, Linux and FreeBSD, on x86, amd64, arm and arm64.\
+Rendering is handled either by original RenderWare (D3D8)
+or the reimplementation [librw](https://github.com/aap/librw) (D3D9, OpenGL 2.1 or above, OpenGL ES 2.0 or above).\
+Audio is done with MSS (using dlls from original GTA) or OpenAL.
 
-- re3 requires game assets to work, so you **must** own [a copy of GTA III](https://store.steampowered.com/app/12100/Grand_Theft_Auto_III/).
-- Build re3 or download [the latest nightly build](https://github.com/GTAmodding/re3/actions) (You must be logged in.)
-- (Optional) If you want to use optional features like Russian language or menu map, copy the files in /gamefiles folder to your game root folder.
+The project has also been ported to the [Nintendo Switch](https://github.com/AGraber/re3-nx/),
+[Playstation Vita](https://github.com/Rinnegatamante/re3) and
+[Nintendo Wii U](https://github.com/GaryOderNichts/re3-wiiu/).
+
+We cannot build for PS2 or Xbox yet. If you're interested in doing so, get in touch with us.
+
+## Installation
+
+- re3 requires PC game assets to work, so you **must** own [a copy of GTA III](https://store.steampowered.com/app/12100/Grand_Theft_Auto_III/).
+- Build re3 or download the latest nightly build:
+  - [Windows D3D9 MSS 32bit](https://nightly.link/GTAmodding/re3/workflows/re3_msvc_x86/master/re3_Release_win-x86-librw_d3d9-mss.zip)
+  - [Windows D3D9 64bit](https://nightly.link/GTAmodding/re3/workflows/re3_msvc_amd64/master/re3_Release_win-amd64-librw_d3d9-oal.zip)
+  - [Windows OpenGL 64bit](https://nightly.link/GTAmodding/re3/workflows/re3_msvc_amd64/master/re3_Release_win-amd64-librw_gl3_glfw-oal.zip)
+  - [Linux 64bit](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/master/ubuntu-latest-gl3.zip)
+  - [MacOS 64bit](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/master/macos-latest-gl3.zip)
+- Copy the files from the `gamefiles` directory to your game root directory. (This is not strictly necessary but very much recommended)
 - Move re3 executable to GTA 3 directory and run it.
 
-## Latest standalone executables to download 
+## Screenshots
 
-(Put content of selected archive into gamedir)
+![re3 2021-02-11 22-57-03-23](https://user-images.githubusercontent.com/1521437/107704085-fbdabd00-6cbc-11eb-8406-8951a80ccb16.png)
+![re3 2021-02-11 22-43-44-98](https://user-images.githubusercontent.com/1521437/107703339-cbdeea00-6cbb-11eb-8f0b-07daa105d470.png)
+![re3 2021-02-11 22-46-33-76](https://user-images.githubusercontent.com/1521437/107703343-cd101700-6cbb-11eb-9ccd-012cb90524b7.png)
+![re3 2021-02-11 22-50-29-54](https://user-images.githubusercontent.com/1521437/107703348-d00b0780-6cbb-11eb-8afd-054249c2b95e.png)
 
-- [Windows D3D9 MSS 32bit](https://nightly.link/GTAmodding/re3/workflows/re3_msvc_x86/master/re3_Release_win-x86-librw_d3d9-mss.zip)
-- [Windows D3D9 64bit](https://nightly.link/GTAmodding/re3/workflows/re3_msvc_amd64/master/re3_Release_win-amd64-librw_d3d9-oal.zip)
-- [Windows OpenGL 64bit](https://nightly.link/GTAmodding/re3/workflows/re3_msvc_amd64/master/re3_Release_win-amd64-librw_gl3_glfw-oal.zip)
-- [Linux 64bit](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/master/ubuntu-latest-gl3.zip)
-- [MacOS 64bit](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/master/macos-latest-gl3.zip)
+## Improvements
+
+We have implemented a number of changes and improvements to the original game.
+They can be configured in `core/config.h`.
+Some of them can be toggled at runtime, some cannot.
+
+* Fixed a lot of smaller and bigger bugs
+* User files (saves and settings) stored in GTA root directory
+* Settings stored in re3.ini file instead of gta3.set
+* Debug menu to do and change various things (Ctrl-M to open)
+* Debug camera (Ctrl-B to toggle)
+* Rotatable camera
+* Xinput controller support (Windows)
+* No loading screens between islands ("map memory usage" in menu)
+* Skinned ped support (models from Xbox or Mobile)
+* Rendering
+  * Widescreen support (properly scaled HUD, Menu and FOV)
+  * PS2 MatFX (vehicle reflections)
+  * PS2 alpha test (better rendering of transparency)
+  * PS2 particles
+  * Xbox vehicle rendering
+  * Xbox world lightmap rendering (needs Xbox map)
+  * Xbox ped rim light
+  * Xbox screen rain droplets
+  * More customizable colourfilter
+* Menu
+  * Map
+  * More options
+  * Controller configuration menu
+  * ...
+* Can load DFFs and TXDs from other platforms, possibly with a performance penalty
+* ...
+
+## To-Do
+
+The following things would be nice to have/do:
+
+* Fix physics for high FPS
+* Compare code with PS2 code (tedious, no good decompiler)
+* [PS2 port](https://github.com/GTAmodding/re3/wiki/PS2-port)
+* Xbox port (not quite as important)
+* reverse remaining unused/debug functions
+* compare Codewarrior build with original binary for more accurate code (very tedious)
+
+## Modding
+
+Asset modifications (models, texture, handling, script, ...) should work the same way as with original GTA for the most part.
+
+Mods that make changes to the code (dll/asi, CLEO, limit adjusters) will *not* work.
+Some things these mods do are already implemented in re3 (much of SkyGFX, GInput, SilentPatch, Widescreen fix),
+others can easily be achieved (increasing limis, see `config.h`),
+others will simply have to be rewritten and integrated into the code directly.
+Sorry for the inconvenience.
 
 ## Building from Source  
 
@@ -78,21 +143,12 @@ Assuming you have Visual Studio:
 > :information_source: **Did you notice librw?** re3 uses completely homebrew RenderWare-replacement rendering engine; [librw](https://github.com/aap/librw/). librw comes as submodule of re3, but you also can use LIBRW enviorenment variable to specify path to your own librw.
 
 ## Contributing
-Please read the [Coding Style](https://github.com/GTAmodding/re3/blob/master/CODING_STYLE.md) Document
+We have a [Coding Style](https://github.com/GTAmodding/re3/blob/master/CODING_STYLE.md) document that isn't followed or enforced very well.
 
-### Unreversed / incomplete classes (at least the ones we know)
-The following classes have only unused or practically unused code left:
-```
-NameGrid.cpp - only on mobile (a player name grid, either a very early player name code ala GTA1 or a multiplayer leftover)
-PedDebug.cpp - only on mobile (debug code)
-HandlingMgr.cpp - debug functions from mobile
-CFormationInfo - unused PedAI class that could be found on mobile
-CVehicle::ProcessBikeWheel - early bike code (only on mobile)
-CAutomobile::DebugCode - debug function from mobile
-CBoat::DebugCode - debug function from mobile
-CBoat::ModifyHandlingValue - debug function from mobile
-CBoat::DisplayHandlingData - debug function from mobile
-CStreaming::PrintRequestList - debug function from mobile
-d3d8raster.c - only on PC (slight RW modification that we don't actually need)
-```
+Do not use features from C++11 or later.
 
+
+## License
+
+We don't feel like we're in a position to give this code a license.
+If we were, it would be MIT licensed.

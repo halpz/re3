@@ -945,6 +945,43 @@ RtBMPImageRead(const RwChar *imageName)
 #endif
 }
 
+
+RwImage *
+RtPNGImageWrite(RwImage *image, const RwChar *imageName)
+{
+#ifndef _WIN32
+	char *r = casepath(imageName);
+	if (r) {
+		rw::writePNG(image, r);
+		free(r);
+	} else {
+		rw::writePNG(image, imageName);
+	}
+	
+#else
+	rw::writePNG(image, imageName);
+#endif
+	return image;
+}
+RwImage *
+RtPNGImageRead(const RwChar *imageName)
+{
+#ifndef _WIN32
+	RwImage *image;
+	char *r = casepath(imageName);
+	if (r) {
+		image = rw::readPNG(r);
+		free(r);
+	} else {
+		image = rw::readPNG(imageName);
+	}
+	return image;
+
+#else
+	return rw::readPNG(imageName);
+#endif
+}
+
 #include "rtquat.h"
 
 RtQuat *RtQuatRotate(RtQuat * quat, const RwV3d * axis, RwReal angle, RwOpCombineType combineOp) { return (RtQuat*)((rw::Quat*)quat)->rotate(axis, angle/180.0f*3.14159f, (CombineOp)combineOp); }

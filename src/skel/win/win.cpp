@@ -259,6 +259,7 @@ psGrabScreen(RwCamera *pCamera)
 	}
 #else
 	rw::Image *image = RwCameraGetRaster(pCamera)->toImage();
+	image->removeMask();
 	if(image)
 		return image;
 #endif
