@@ -279,6 +279,14 @@ void LoadINIControllerSettings()
 					CPad::XInputJoy2 = i;
 			}
 		}
+
+		// There is no plug event on XInput, so let's leave XInputJoy1/2 as 0/1 respectively, and hotplug will be possible.
+		if (CPad::XInputJoy1 == -1) {
+			CPad::XInputJoy1 = 0;
+			CPad::XInputJoy2 = 1;
+		} else if (CPad::XInputJoy2 == -1) {
+			CPad::XInputJoy2 = (CPad::XInputJoy1 + 1) % 4;
+		}
 	}
 #else
 	ReadIniIfExists("Controller", "JoystickName", gSelectedJoystickName, 128);
