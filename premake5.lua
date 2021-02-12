@@ -263,6 +263,7 @@ project "re3"
 	files { addSrcFiles("src/vehicles") }
 	files { addSrcFiles("src/weapons") }
 	files { addSrcFiles("src/extras") }
+	files { "src/extras/GitSHA1.cpp" } -- this won't be in repo in first build
 
 	includedirs { "src" }
 	includedirs { "src/animation" }

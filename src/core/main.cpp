@@ -89,8 +89,8 @@ bool gbModelViewer;
 #ifdef TIMEBARS
 bool gbShowTimebars;
 #endif
-#ifdef TOGGLEABLE_VERSION_TEXT
-bool gDrawVersionText;
+#ifdef DRAW_GAME_VERSION_TEXT
+bool gDrawVersionText; // Our addition, we think it was always enabled on !MASTER builds
 #endif
 
 volatile int32 frameCount;
@@ -1096,9 +1096,7 @@ DisplayGameDebugText()
 #ifdef DRAW_GAME_VERSION_TEXT
 	wchar ver[200];
 
-#ifdef TOGGLEABLE_VERSION_TEXT
-	if(gDrawVersionText)
-#endif
+	if(gDrawVersionText) // This realtime switch is our thing
 	{
 
 #ifdef USE_OUR_VERSIONING

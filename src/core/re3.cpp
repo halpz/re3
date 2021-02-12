@@ -508,7 +508,7 @@ bool LoadINISettings()
 #ifdef FIX_SPRITES
 	ReadIniIfExists("Draw", "FixSprites", &CDraw::ms_bFixSprites);	
 #endif
-#ifdef TOGGLEABLE_VERSION_TEXT
+#ifdef DRAW_GAME_VERSION_TEXT
 	extern bool gDrawVersionText;
 	ReadIniIfExists("General", "DrawVersionText", &gDrawVersionText);
 #endif
@@ -599,7 +599,7 @@ void SaveINISettings()
 #ifdef FIX_SPRITES
 	StoreIni("Draw", "FixSprites", CDraw::ms_bFixSprites);	
 #endif
-#ifdef TOGGLEABLE_VERSION_TEXT
+#ifdef DRAW_GAME_VERSION_TEXT
 	extern bool gDrawVersionText;
 	StoreIni("General", "DrawVersionText", gDrawVersionText);
 #endif
@@ -993,7 +993,7 @@ extern bool gbRenderWorld2;
 #endif
 
 		
-#ifdef TOGGLEABLE_VERSION_TEXT
+#ifdef DRAW_GAME_VERSION_TEXT
 		extern bool gDrawVersionText;
 		DebugMenuAddVarBool8("Debug", "Version Text", &gDrawVersionText, nil);
 #endif
