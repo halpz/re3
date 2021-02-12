@@ -733,18 +733,6 @@ SwitchCarCollision(void)
 		FindPlayerVehicle()->bUsesCollision = !FindPlayerVehicle()->bUsesCollision;
 }
 
-static int engineStatus;
-static void
-SetEngineStatus(void)
-{
-	CVehicle *veh = FindPlayerVehicle();
-	if(veh == nil)
-		return;
-	if(!veh->IsCar())
-		return;
-	((CAutomobile*)veh)->Damage.SetEngineStatus(engineStatus);
-}
-
 static void
 ToggleComedy(void)
 {
@@ -752,23 +740,6 @@ ToggleComedy(void)
 	if(veh == nil)
 		return;
 	veh->bComedyControls = !veh->bComedyControls;
-}
-
-static void
-PlaceOnRoad(void)
-{
-	CVehicle *veh = FindPlayerVehicle();
-	if(veh == nil)
-		return;
-
-	if(veh->IsCar())
-		((CAutomobile*)veh)->PlaceOnRoadProperly();
-}
-
-static void
-ResetCamStatics(void)
-{
-	TheCamera.Cams[TheCamera.ActiveCam].ResetStatics = true;
 }
 
 #ifdef MISSION_SWITCHER
@@ -1005,6 +976,10 @@ extern bool gbRenderWorld2;
 		extern bool gDrawVersionText;
 		DebugMenuAddVarBool8("Debug", "Version Text", &gDrawVersionText, nil);
 #endif
+		DebugMenuAddVarBool8("Debug", "Show DebugStuffInRelease", &gbDebugStuffInRelease, nil);
+#ifdef TIMEBARS
+		DebugMenuAddVarBool8("Debug", "Show Timebars", &gbShowTimebars, nil);
+#endif
 #ifndef FINAL
 		DebugMenuAddVarBool8("Debug", "Print Memory Usage", &gbPrintMemoryUsage, nil);
 #ifdef USE_CUSTOM_ALLOCATOR
@@ -1021,27 +996,14 @@ extern bool gbRenderWorld2;
 #ifdef MENU_MAP
 		DebugMenuAddCmd("Debug", "Teleport to map waypoint", TeleportToWaypoint);
 #endif
-		DebugMenuAddCmd("Debug", "Switch car collision", SwitchCarCollision);
-		DebugMenuAddVar("Debug", "Engine Status", &engineStatus, nil, 1, 0, 226, nil);
-		DebugMenuAddCmd("Debug", "Set Engine Status", SetEngineStatus);
 		DebugMenuAddCmd("Debug", "Fix Car", FixCar);
+		DebugMenuAddCmd("Debug", "Switch car collision", SwitchCarCollision);
 		DebugMenuAddCmd("Debug", "Toggle Comedy Controls", ToggleComedy);
-		DebugMenuAddCmd("Debug", "Place Car on Road", PlaceOnRoad);
-
-		DebugMenuAddVarBool8("Debug", "Catalina Heli On", &CHeli::CatalinaHeliOn, nil);
-		DebugMenuAddCmd("Debug", "Catalina Fly By", CHeli::StartCatalinaFlyBy);
-		DebugMenuAddCmd("Debug", "Catalina Take Off", CHeli::CatalinaTakeOff);
-		DebugMenuAddCmd("Debug", "Catalina Fly Away", CHeli::MakeCatalinaHeliFlyAway);
-		DebugMenuAddVarBool8("Debug", "Script Heli On", &CHeli::ScriptHeliOn, nil);
 
 		DebugMenuAddVarBool8("Debug", "Toggle popping heads on headshot", &CPed::bPopHeadsOnHeadshot, nil);
-		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
-		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
+		//DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
+		//DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
 
-		DebugMenuAddVarBool8("Debug", "Show DebugStuffInRelease", &gbDebugStuffInRelease, nil);
-#ifdef TIMEBARS
-		DebugMenuAddVarBool8("Debug", "Show Timebars", &gbShowTimebars, nil);
-#endif
 #ifdef MISSION_SWITCHER
 		DebugMenuEntry *missionEntry;
 		static const char* missions[] = {
@@ -1074,11 +1036,11 @@ extern bool gbRenderWorld2;
 #endif
 		DebugMenuAddVarBool8("Cam", "Print Debug Code", &PrintDebugCode, nil);
 		DebugMenuAddVar("Cam", "Cam Mode", &DebugCamMode, nil, 1, 0, CCam::MODE_EDITOR, nil);
-		DebugMenuAddCmd("Cam", "Normal", []() { DebugCamMode = 0; });
-		DebugMenuAddCmd("Cam", "Follow Ped With Bind", []() { DebugCamMode = CCam::MODE_FOLLOW_PED_WITH_BIND; });
-		DebugMenuAddCmd("Cam", "Reaction", []() { DebugCamMode = CCam::MODE_REACTION; });
-		DebugMenuAddCmd("Cam", "Chris", []() { DebugCamMode = CCam::MODE_CHRIS; });
-		DebugMenuAddCmd("Cam", "Reset Statics", ResetCamStatics);
+	//	DebugMenuAddCmd("Cam", "Normal", []() { DebugCamMode = 0; });
+	//	DebugMenuAddCmd("Cam", "Follow Ped With Bind", []() { DebugCamMode = CCam::MODE_FOLLOW_PED_WITH_BIND; });
+	//	DebugMenuAddCmd("Cam", "Reaction", []() { DebugCamMode = CCam::MODE_REACTION; });
+	//	DebugMenuAddCmd("Cam", "Chris", []() { DebugCamMode = CCam::MODE_CHRIS; });
+	//	DebugMenuAddCmd("Cam", "Reset Statics", ResetCamStatics);
 
 		CTweakVars::AddDBG("Debug");
 	}
