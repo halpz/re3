@@ -14420,6 +14420,9 @@ GAMEPAD TYPE
 [FET_AGS]
 GAMEPAD SETTINGS
 
+[FEM_AUT] { aspect ratio related }
+AUTO
+
 { end of file }
 [DUMMY]
 THIS LABEL NEEDS TO BE HERE !!!

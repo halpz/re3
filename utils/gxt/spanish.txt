@@ -14404,6 +14404,9 @@ TIPO DE MANDO
 [FET_AGS]
 AJUSTES DE MANDO
 
+[FEM_AUT] { aspect ratio related }
+AUTO
+
 { end of file }
 [DUMMY]
 THIS LABEL NEEDS TO BE HERE !!!
