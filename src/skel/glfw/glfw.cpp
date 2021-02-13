@@ -52,6 +52,11 @@ long _dwOperatingSystemVersion;
 
 #define MAX_SUBSYSTEMS		(16)
 
+#ifdef _WIN32
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+#endif
+
 rw::EngineOpenParams openParams;
 
 static RwBool		  ForegroundApp = TRUE;
@@ -1591,6 +1596,15 @@ main(int argc, char *argv[])
 
 		return 0;
 	}
+
+#ifdef _WIN32
+	HWND wnd = glfwGetWin32Window(PSGLOBAL(window));
+
+	HICON icon = LoadIcon(instance, MAKEINTRESOURCE(IDI_MAIN_ICON));
+
+	SendMessage(wnd, WM_SETICON, ICON_BIG, (LPARAM)icon);
+	SendMessage(wnd, WM_SETICON, ICON_SMALL, (LPARAM)icon);
+#endif
 
 	psPostRWinit();
 
