@@ -1053,7 +1053,7 @@ DisplayGameDebugText()
 
 #ifndef FINAL
 	{
-		SETTWEAKPATH("GameDebugText");
+		SETTWEAKPATH("Debug");
 		TWEAKBOOL(bDisplayPosn);
 		TWEAKBOOL(bDisplayCheatStr);
 	}
