@@ -203,7 +203,7 @@ enum Config {
 #elif defined GTA_PC
 #	ifdef GTA_PS2_STUFF
 #		define USE_PS2_RAND
-//#		define RANDOMSPLASH	// use random splash as on PS2
+#		define RANDOMSPLASH	// use random splash as on PS2
 #		define PS2_MATFX
 #	endif
 #	define PC_PLAYER_CONTROLS	// mouse player/cam mode
@@ -267,6 +267,10 @@ enum Config {
 #define PS2_ALPHA_TEST		// emulate ps2 alpha test 
 #define IMPROVED_VIDEOMODE	// save and load videomode parameters instead of a magic number
 #define DISABLE_LOADING_SCREEN // disable the loading screen which vastly improves the loading time
+#ifdef DISABLE_LOADING_SCREEN
+// enable the PC splash
+#undef RANDOMSPLASH
+#endif
 #define DISABLE_VSYNC_ON_TEXTURE_CONVERSION // make texture conversion work faster by disabling vsync
 #define ANISOTROPIC_FILTERING	// set all textures to max anisotropic filtering
 //#define USE_TEXTURE_POOL
