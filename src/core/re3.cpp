@@ -753,6 +753,11 @@ PlaceOnRoad(void)
 		((CAutomobile*)veh)->PlaceOnRoadProperly();
 }
 
+static void
+ResetCamStatics(void)
+{
+	TheCamera.Cams[TheCamera.ActiveCam].ResetStatics = true;
+}
 
 #ifdef MISSION_SWITCHER
 int8 nextMissionToSwitch = 0;
@@ -1050,11 +1055,11 @@ extern bool gbRenderWorld2;
 #endif
 		DebugMenuAddVarBool8("Cam", "Print Debug Code", &PrintDebugCode, nil);
 		DebugMenuAddVar("Cam", "Cam Mode", &DebugCamMode, nil, 1, 0, CCam::MODE_EDITOR, nil);
-	//	DebugMenuAddCmd("Cam", "Normal", []() { DebugCamMode = 0; });
+		DebugMenuAddCmd("Cam", "Normal", []() { DebugCamMode = 0; });
 	//	DebugMenuAddCmd("Cam", "Follow Ped With Bind", []() { DebugCamMode = CCam::MODE_FOLLOW_PED_WITH_BIND; });
 	//	DebugMenuAddCmd("Cam", "Reaction", []() { DebugCamMode = CCam::MODE_REACTION; });
 	//	DebugMenuAddCmd("Cam", "Chris", []() { DebugCamMode = CCam::MODE_CHRIS; });
-	//	DebugMenuAddCmd("Cam", "Reset Statics", ResetCamStatics);
+		DebugMenuAddCmd("Cam", "Reset Statics", ResetCamStatics);
 
 		CTweakVars::AddDBG("Debug");
 	}
