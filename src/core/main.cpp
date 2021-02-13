@@ -1094,7 +1094,7 @@ DisplayGameDebugText()
 	static bool bDisplayRate = false;
 #ifndef FINAL
 	{
-		SETTWEAKPATH("GameDebugText");
+		SETTWEAKPATH("Debug");
 		TWEAKBOOL(bDisplayPosn);
 		TWEAKBOOL(bDisplayRate);
 	}
