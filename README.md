@@ -158,13 +158,13 @@ Due to everyone staying home during the start of the Corona pandemic
 everybody had a lot of time to work on re3 again and
 we finally got a standalone exe in April 2020 (around 180k lines by then).
 
-After the initial excitement and fixing and polishing the code more
+After the initial excitement and fixing and polishing the code further,
 reVC was started in early May 2020 by starting from re3 code,
 not by starting from scratch replacing functions with a dll.
 After a few months of mostly steady progress we considered reVC
 finished in December.
 
-Since then we have started LCS, which is currently work in progress.
+Since then we have started reLCS, which is currently work in progress.
 
 
 ## License
