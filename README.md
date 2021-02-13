@@ -156,16 +156,16 @@ inside the game.
 This was done by replacing single functions of the game
 with their reversed counterparts using a dll.
 
-After a bit of work then project lay dormant for about a year
+After a bit of work the project lay dormant for about a year
 and was picked up again and pushed to github in May 2019.
-At the time I had reversed around 10k lines of code and estimated
+At the time I (aap) had reversed around 10k lines of code and estimated
 the final game to have around 200-250k.
 Others quickly joined the effort and we made very quick progress
 throughout the summer of 2019
 after which the pace slowed down a bit.
 
 Due to everyone staying home during the start of the Corona pandemic
-everybody had much time to work on re3 again and
+everybody had a lot of time to work on re3 again and
 we finally got a standalone exe in April 2020 (around 180k lines by then).
 
 After the initial excitement and fixing and polishing the code more
