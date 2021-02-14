@@ -124,7 +124,7 @@ For FreeBSD using premake, proceed: [Building on FreeBSD](https://github.com/GTA
 
 Assuming you have Visual Studio 2015/2017/2019:
 - Run one of the `premake-vsXXXX.cmd` variants on root folder.
-- Open the project with Visual Studio.
+- Open build/re3.sln with Visual Studio and compile the solution.
 
 Microsoft recently discontinued its downloads of the DX9 SDK. You can download an archived version here: https://archive.org/details/dxsdk_jun10
 
