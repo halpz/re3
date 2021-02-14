@@ -132,7 +132,7 @@ void CWaterCannon::Render(void)
 	int16 pointA = m_nCur % NUM_SEGMENTPOINTS;
 	
 	int16 pointB = pointA - 1;
-	if ( (pointA - 1) < 0 )
+	if ( pointB < 0 )
 		pointB += NUM_SEGMENTPOINTS;
 
 	bool bInit = false;
