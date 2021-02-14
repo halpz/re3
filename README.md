@@ -5,7 +5,7 @@
 
 ## Intro
 
-In this repository you'll find the fully reversed source code for GTA III ([master](tree/master) branch) and GTA VC ([miami](tree/miami) branch).
+In this repository you'll find the fully reversed source code for GTA III ([master](https://github.com/GTAmodding/re3/tree/master/) branch) and GTA VC ([miami](https://github.com/GTAmodding/re3/tree/miami/) branch).
 
 It has been tested and works on Windows, Linux and FreeBSD, on x86, amd64, arm and arm64.\
 Rendering is handled either by original RenderWare (D3D8)
@@ -23,8 +23,7 @@ We cannot build for PS2 or Xbox yet. If you're interested in doing so, get in to
   - [Windows OpenGL 64bit](https://nightly.link/GTAmodding/re3/workflows/reVC_msvc_amd64/miami/reVC_Release_win-amd64-librw_gl3_glfw-oal.zip)
   - [Linux 64bit](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/miami/ubuntu-latest-gl3.zip)
   - [MacOS 64bit](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/miami/macos-latest-gl3.zip)
-- Copy the files from the `gamefiles` directory to your game root directory. (This is not strictly necessary but very much recommended)
-- Move reVC executable to GTA VC directory and run it.
+- Extract the downloaded zip over your GTA VC directory and run reVC. The zip includes the gamefiles and in case of OpenAL the required dlls.
 
 ## Screenshots
 
@@ -85,7 +84,9 @@ Sorry for the inconvenience.
 
 ## Building from Source  
 
-When using premake, you may want to point GTA_VC_RE_DIR environment variable to GTA Vice City root folder, if you want executable to be moved there via post-build script.
+When using premake, you may want to point GTA_VC_RE_DIR environment variable to GTA Vice City root folder if you want the executable to be moved there via post-build script.
+
+Clone the repository with `git clone --recursive -b miami https://github.com/GTAmodding/re3.git reVC`. Then `cd reVC` into the cloned repository.
 
 <details><summary>Linux Premake</summary>
 
@@ -95,13 +96,6 @@ For Linux using premake, proceed: [Building on Linux](https://github.com/GTAmodd
 
 <details><summary>Linux Conan</summary>
 
-Obtain source code.
-```
-git clone https://github.com/GTAmodding/re3.git reVC -b miami
-cd reVC
-git submodule init
-git submodule update --recursive
-```
 Install python and conan, and then run build.
 ```
 conan export vendor/librw librw/master@
@@ -120,19 +114,22 @@ For FreeBSD using premake, proceed: [Building on FreeBSD](https://github.com/GTA
 
 <details><summary>Windows</summary>
 
-Assuming you have Visual Studio:
-- Clone the repo using the argument `--recursive`.
+Assuming you have Visual Studio 2015/2017/2019:
 - Run one of the `premake-vsXXXX.cmd` variants on root folder.
-- Open the project via Visual Studio  
+- Open build/reVC.sln with Visual Studio and compile the solution.
     
-**If you use 64-bit D3D9**: We don't ship 64-bit Dx9 SDK. You need to download it from Microsoft if you don't have it(although it should come pre-installed after some Windows version)  
+Microsoft recently discontinued its downloads of the DX9 SDK. You can download an archived version here: https://archive.org/details/dxsdk_jun10
 
 **If you choose OpenAL on Windows** You must read [Running OpenAL build on Windows](https://github.com/GTAmodding/re3/wiki/Running-OpenAL-build-on-Windows).
 </details>
 
-> :information_source: There are various settings in [config.h](https://github.com/GTAmodding/re3/tree/miami/src/core/config.h), you may want to take a look there. i.e. FIX_BUGS define fixes the bugs we've come across.
+> :information_source: premake has an `--lto` option if you want the project to be compiled with Link Time Optimization.
 
-> :information_source: **Did you notice librw?** reVC uses completely homebrew RenderWare-replacement rendering engine; [librw](https://github.com/aap/librw/). librw comes as submodule of reVC, but you also can use LIBRW enviorenment variable to specify path to your own librw.
+> :information_source: There are various settings in [config.h](https://github.com/GTAmodding/re3/tree/miami/src/core/config.h), you may want to take a look there.
+
+> :information_source: reVC uses completely homebrew RenderWare-replacement rendering engine; [librw](https://github.com/aap/librw/). librw comes as submodule of re3, but you also can use LIBRW enviorenment variable to specify path to your own librw.
+
+If you feel the need, you can also use Codewarrior 7 to compile reVC using the supplied codewarrior/reVC.mcp project - this requires the original RW34 libraries, and the DX8 SDK. The build is unstable compared to the MSVC builds though, and is mostly meant to serve as a reference.
 
 ## Contributing
 We have a [Coding Style](https://github.com/GTAmodding/re3/blob/master/CODING_STYLE.md) document that isn't followed or enforced very well.
