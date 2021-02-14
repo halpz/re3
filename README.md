@@ -48,7 +48,7 @@ Some of them can be toggled at runtime, some cannot.
 * Debug menu to do and change various things (Ctrl-M to open)
 * Debug camera (Ctrl-B to toggle)
 * Rotatable camera
-* Xinput controller support (Windows)
+* XInput controller support (Windows)
 * No loading screens between islands ("map memory usage" in menu)
 * Skinned ped support (models from Xbox or Mobile)
 * Rendering
@@ -79,7 +79,7 @@ The following things would be nice to have/do:
 * [PS2 port](https://github.com/GTAmodding/re3/wiki/PS2-port)
 * Xbox port (not quite as important)
 * reverse remaining unused/debug functions
-* compare Codewarrior build with original binary for more accurate code (very tedious)
+* compare CodeWarrior build with original binary for more accurate code (very tedious)
 
 ## Modding
 
@@ -138,7 +138,7 @@ Microsoft recently discontinued its downloads of the DX9 SDK. You can download a
 
 > :information_source: re3 uses completely homebrew RenderWare-replacement rendering engine; [librw](https://github.com/aap/librw/). librw comes as submodule of re3, but you also can use LIBRW enviorenment variable to specify path to your own librw.
 
-If you feel the need, you can also use Codewarrior 7 to compile re3 using the supplied codewarrior/re3.mcp project - this requires the original RW33 libraries, and the DX8 SDK. The build is unstable compared to the MSVC builds though, and is mostly meant to serve as a reference.
+If you feel the need, you can also use CodeWarrior 7 to compile re3 using the supplied codewarrior/re3.mcp project - this requires the original RW33 libraries, and the DX8 SDK. The build is unstable compared to the MSVC builds though, and is mostly meant to serve as a reference.
 
 ## Contributing
 We have a [Coding Style](https://github.com/GTAmodding/re3/blob/master/CODING_STYLE.md) document that isn't followed or enforced very well.
@@ -158,7 +158,8 @@ After a bit of work the project lay dormant for about a year
 and was picked up again and pushed to github in May 2019.
 At the time I (aap) had reversed around 10k lines of code and estimated
 the final game to have around 200-250k.
-Others quickly joined the effort and we made very quick progress
+Others quickly joined the effort (Fire_Head, shfil, erorcun and Nick007J
+in time order, and Serge a bit later) and we made very quick progress
 throughout the summer of 2019
 after which the pace slowed down a bit.
 
