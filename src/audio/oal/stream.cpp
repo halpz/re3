@@ -1152,6 +1152,7 @@ void CStream::SetPan(uint8 nPan)
 	m_nPan = nPan;
 }
 
+// Should only be called if source is stopped
 void CStream::SetPosMS(uint32 nPos)
 {
 	if ( !IsOpened() ) return;
@@ -1234,12 +1235,16 @@ void CStream::ClearBuffers()
 		alSourceUnqueueBuffers(m_pAlSources[1], 1, &value);
 }
 
-bool CStream::Setup()
+bool CStream::Setup(bool imSureQueueIsEmpty)
 {
 	if ( IsOpened() )
 	{
 		alSourcei(m_pAlSources[0], AL_LOOPING, AL_FALSE);
 		alSourcei(m_pAlSources[1], AL_LOOPING, AL_FALSE);
+		if (!imSureQueueIsEmpty) {
+			SetPlay(false);
+			ClearBuffers();
+		}
 		m_pSoundFile->Seek(0);
 		//SetPosition(0.0f, 0.0f, 0.0f);
 		SetPitch(1.0f);
@@ -1343,7 +1348,7 @@ void CStream::Update()
 		// We should wait queue to be cleared to loop track, because position calculation relies on queue.
 		if (m_nLoopCount != 1 && m_bActive && totalBuffers[0] == 0)
 		{
-			Setup();
+			Setup(true);
 			buffersRefilled = FillBuffers() != 0;
 			if (m_nLoopCount != 0)
 				m_nLoopCount--;
@@ -1376,7 +1381,7 @@ void CStream::ProviderInit()
 {
 	if ( m_bReset )
 	{
-		if ( Setup() )
+		if ( Setup(true) )
 		{
 			SetPan(m_nPan);
 			SetVolume(m_nVolume);

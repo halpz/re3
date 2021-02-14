@@ -100,7 +100,7 @@ public:
 	uint32 GetPosMS();
 	uint32 GetLengthMS();
 	
-	bool Setup();
+	bool Setup(bool imSureQueueIsEmpty = false);
 	void Start();
 	void Stop();
 	void Update(void);
