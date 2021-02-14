@@ -67,6 +67,7 @@ Some of them can be toggled at runtime, some cannot.
 The following things would be nice to have/do:
 
 * Fix physics for high FPS
+* Improve performance on lower end devices, especially the OpenGL layer on the Raspberry Pi (if you have experience with this, please get in touch)
 * [PS2 port](https://github.com/GTAmodding/re3/wiki/PS2-port)
 * Xbox port (not quite as important)
 * reverse remaining unused/debug functions
