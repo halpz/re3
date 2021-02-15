@@ -18,6 +18,6 @@ float4 main(in float2 texcoord : TEXCOORD0) : COLOR0
 		tmp += prev*blurcol;
 		prev = saturate(tmp);
 	}
-	prev.a = 1.0f;
+	prev.a = 1.0;
 	return prev;
 }

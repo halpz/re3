@@ -20,7 +20,7 @@ main(void)
 	}
 	vec4 color;
 	color.rgb = prev.rgb;
-	color.a = 1.0f;
+	color.a = 1.0;
 
 	FRAGCOLOR(color);
 }
