@@ -14,7 +14,7 @@ const char *colourfilterLCS_frag_src =
 
 "	vec4 color;\n"
 "	color.rgb = dst.rgb;\n"
-"	color.a = 1.0f;\n"
+"	color.a = 1.0;\n"
 
 "	FRAGCOLOR(color);\n"
 "}\n"
