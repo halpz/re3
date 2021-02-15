@@ -49,6 +49,8 @@
 
 #define MAX_RAINDRIP_FILES       (2)
 
+#define MAX_LEAF_FILES           (2)
+
 	
 const char SmokeFiles[][6+1] =
 {
@@ -165,7 +167,7 @@ RwTexture *gpFlame1Tex;
 RwTexture *gpFlame5Tex;
 RwTexture *gpRainDropSmallTex;
 RwTexture *gpBloodTex;
-RwTexture *gpLeafTex;
+RwTexture *gpLeafTex[MAX_LEAF_FILES];
 RwTexture *gpCloudTex1;
 RwTexture *gpCloudTex4;
 RwTexture *gpBloodSmallTex;
@@ -193,7 +195,7 @@ RwRaster  *gpFlame1Raster;
 RwRaster  *gpFlame5Raster;
 RwRaster  *gpRainDropSmallRaster;
 RwRaster  *gpBloodRaster;
-RwRaster  *gpLeafRaster;
+RwRaster  *gpLeafRaster[MAX_LEAF_FILES];
 RwRaster  *gpCloudRaster1;
 RwRaster  *gpCloudRaster4;
 RwRaster  *gpBloodSmallRaster;
@@ -205,9 +207,6 @@ RwRaster  *gpPointlightRaster;
 
 RwTexture *gpRainDropTex;
 RwRaster  *gpRainDropRaster;
-
-RwTexture *gpLetterTex;
-RwRaster *gpLetterRaster;
 
 RwTexture *gpSparkTex;
 RwTexture *gpNewspaperTex;
@@ -425,11 +424,11 @@ void CParticle::Initialise()
 	gpBloodTex = RwTextureRead("blood", nil);
 	gpBloodRaster = RwTextureGetRaster(gpBloodTex);
 
-	gpLeafTex = RwTextureRead("gameleaf01_64", nil);
-	gpLeafRaster = RwTextureGetRaster(gpLeafTex);
+	gpLeafTex[0] = RwTextureRead("gameleaf01_64", nil);
+	gpLeafRaster[0] = RwTextureGetRaster(gpLeafTex[0]);
 	
-	gpLetterTex = RwTextureRead("letter", nil);
-	gpLetterRaster = RwTextureGetRaster(gpLetterTex);
+	gpLeafTex[1] = RwTextureRead("letter", nil);
+	gpLeafRaster[1] = RwTextureGetRaster(gpLeafTex[1]);
 
 	gpCloudTex1 = RwTextureRead("cloud3", nil);
 	gpCloudRaster1 = RwTextureGetRaster(gpCloudTex1);
@@ -543,7 +542,7 @@ void CParticle::Initialise()
 			
 			case PARTICLE_DEBRIS:
 			case PARTICLE_TREE_LEAVES:
-				entry->m_ppRaster = &gpLeafRaster;
+				entry->m_ppRaster = gpLeafRaster;
 				break;
 			
 			case PARTICLE_DEBRIS2:
@@ -773,11 +772,11 @@ void CParticle::Shutdown()
 	RwTextureDestroy(gpBloodTex);
 	gpBloodTex = nil;
 	
-	RwTextureDestroy(gpLeafTex);
-	gpLeafTex = nil;
+	RwTextureDestroy(gpLeafTex[0]);
+	gpLeafTex[0] = nil;
 
-	RwTextureDestroy(gpLetterTex);
-	gpLetterTex = nil;
+	RwTextureDestroy(gpLeafTex[1]);
+	gpLeafTex[1] = nil;
 	
 	RwTextureDestroy(gpCloudTex1);
 	gpCloudTex1 = nil;
