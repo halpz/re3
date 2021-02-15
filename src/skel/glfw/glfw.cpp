@@ -1476,7 +1476,9 @@ WinMain(HINSTANCE instance,
 	SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, nil, SPIF_SENDCHANGE);
 
 #ifndef MASTER
+#ifndef DEBUG
 	if (strstr(cmdLine, "-console"))
+#endif
 	{
 		AllocConsole();
 		freopen("CONIN$", "r", stdin);
