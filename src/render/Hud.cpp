@@ -1107,18 +1107,18 @@ void CHud::Draw()
 				if (IntroRect.m_nTextureId >= 0) {
 					CRect rect (
 						IntroRect.m_sRect.left,
-						IntroRect.m_sRect.top,
+						IntroRect.m_sRect.bottom,
 						IntroRect.m_sRect.right,
-						IntroRect.m_sRect.bottom );
+						IntroRect.m_sRect.top );
 
 					CTheScripts::ScriptSprites[IntroRect.m_nTextureId].Draw(rect, IntroRect.m_sColor);
 				}
 				else {
 					CRect rect (
 						IntroRect.m_sRect.left,
-						IntroRect.m_sRect.top,
+						IntroRect.m_sRect.bottom,
 						IntroRect.m_sRect.right,
-						IntroRect.m_sRect.bottom );
+						IntroRect.m_sRect.top );
 
 					CSprite2d::DrawRect(rect, IntroRect.m_sColor);
 				}
@@ -1139,7 +1139,14 @@ void CHud::Draw()
 			CFont::SetBackgroundColor(CRGBA(0, 0, 0, 128));
 			CFont::SetCentreOn();
 			CFont::SetPropOn();
-			CFont::SetDropShadowPosition(0);
+#ifdef CUTSCENE_BORDERS_SWITCH
+			if (!FrontEndMenuManager.m_PrefsCutsceneBorders) {
+				CFont::SetDropColor(CRGBA(0, 0, 0, 255));
+				CFont::SetDropShadowPosition(2);
+			}
+			else
+#endif
+				CFont::SetDropShadowPosition(0);
 			CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
 			CFont::SetColor(CRGBA(225, 225, 225, 255));
 
@@ -1149,10 +1156,6 @@ void CHud::Draw()
 				onceItWasWidescreen = true;
 				
 				if (FrontEndMenuManager.m_PrefsShowSubtitles || !CCutsceneMgr::IsRunning()) {
-#ifdef CUTSCENE_BORDERS_SWITCH
-					if (!FrontEndMenuManager.m_PrefsCutsceneBorders)
-						CFont::SetDropShadowPosition(0);
-#endif
 					CFont::SetCentreSize(SCREEN_WIDTH - SCREEN_SCALE_X(60.0f));
 					CFont::SetScale(SCREEN_SCALE_X(0.58f), SCREEN_SCALE_Y(1.2f));
 					CFont::PrintString(SCREEN_WIDTH / 2.f, SCREEN_SCALE_FROM_BOTTOM(80.0f), m_Message);
@@ -1191,7 +1194,7 @@ void CHud::Draw()
 					m_HelpMessageDisplayTime = CMessages::GetWideStringLength(m_HelpMessage) * 0.05f + 3.0f;
 
 					if (TheCamera.m_ScreenReductionPercentage == 0.0f)
-						DMAudio.PlayFrontEndSound(SOUND_HUD_SOUND, 0);
+						DMAudio.PlayFrontEndSound(SOUND_HUD, 0);
 					break;
 				case 1:
 				case 2:

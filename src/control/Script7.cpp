@@ -452,12 +452,12 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		CPed* pPed = CPools::GetPedPool()->GetAt(GET_INTEGER_PARAM(0));
 		script_assert(pPed);
 		if (GET_INTEGER_PARAM(1)) {
-			pPed->bIsDucking = true;
+			pPed->bCrouchWhenShooting = true;
 			pPed->SetDuck(GET_INTEGER_PARAM(2), true);
 		}
 		else {
 			pPed->ClearDuck(true);
-			pPed->bIsDucking = false;
+			pPed->bCrouchWhenShooting = false;
 		}
 		return 0;
 	}
@@ -771,7 +771,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		CHud::SetHelpMessage(text, false, true); // + true
 		if (text != CHud::gLastPrintForeverString) {
 			CHud::gLastPrintForeverString = text;
-			DMAudio.PlayFrontEndSound(SOUND_HUD_SOUND, 0);
+			DMAudio.PlayFrontEndSound(SOUND_HUD, 0);
 		}
 		return 0;
 	}

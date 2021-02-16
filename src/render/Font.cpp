@@ -176,11 +176,26 @@ CFont::Initialise(void)
 	}
 	*/
 
+#if !defined(GAMEPAD_MENU) && defined(BUTTON_ICONS)
+	// loaded in CMenuManager with GAMEPAD_MENU defined
+	LoadButtons("MODELS/X360BTNS.TXD");
+#endif
+}
+
 #ifdef BUTTON_ICONS
-	if (int file = CFileMgr::OpenFile("MODELS/X360BTNS.TXD")) {
+void
+CFont::LoadButtons(const char *txdPath)
+{
+	if (int file = CFileMgr::OpenFile(txdPath)) {
 		CFileMgr::CloseFile(file);
-		ButtonsSlot = CTxdStore::AddTxdSlot("buttons");
-		CTxdStore::LoadTxd(ButtonsSlot, "MODELS/X360BTNS.TXD");
+		if (ButtonsSlot == -1)
+			ButtonsSlot = CTxdStore::AddTxdSlot("buttons");
+		else {
+			for (int i = 0; i < MAX_BUTTON_ICONS; i++)
+				ButtonSprite[i].Delete();
+			CTxdStore::RemoveTxd(ButtonsSlot);
+		}
+		CTxdStore::LoadTxd(ButtonsSlot, txdPath);
 		CTxdStore::AddRef(ButtonsSlot);
 		CTxdStore::PushCurrentTxd();
 		CTxdStore::SetCurrentTxd(ButtonsSlot);
@@ -198,12 +213,22 @@ CFont::Initialise(void)
 		ButtonSprite[BUTTON_R1].SetTexture("r1");
 		ButtonSprite[BUTTON_R2].SetTexture("r2");
 		ButtonSprite[BUTTON_R3].SetTexture("r3");
+		ButtonSprite[BUTTON_RSTICK_UP].SetTexture("thumbryu");
+		ButtonSprite[BUTTON_RSTICK_DOWN].SetTexture("thumbryd");
 		ButtonSprite[BUTTON_RSTICK_LEFT].SetTexture("thumbrxl");
 		ButtonSprite[BUTTON_RSTICK_RIGHT].SetTexture("thumbrxr");
 		CTxdStore::PopCurrentTxd();
 	}
-#endif // BUTTON_ICONS
+	else {
+		if (ButtonsSlot != -1) {
+			for (int i = 0; i < MAX_BUTTON_ICONS; i++)
+				ButtonSprite[i].Delete();
+			CTxdStore::RemoveTxdSlot(ButtonsSlot);
+			ButtonsSlot = -1;
+		}
+	}
 }
+#endif // BUTTON_ICONS
 
 #ifdef MORE_LANGUAGES
 void
@@ -257,6 +282,7 @@ CFont::Shutdown(void)
 		for (int i = 0; i < MAX_BUTTON_ICONS; i++)
 			ButtonSprite[i].Delete();
 		CTxdStore::RemoveTxdSlot(ButtonsSlot);
+		ButtonsSlot = -1;
 	}
 #endif
 	Sprite[0].Delete();
@@ -296,16 +322,19 @@ CFont::DrawButton(float x, float y)
 	if (PS2Symbol != BUTTON_NONE) {
 		CRect rect;
 		rect.left = x;
-		rect.top = Details.scaleY + Details.scaleY + y;
-		rect.right = Details.scaleY * 17.0f + x;
-		rect.bottom = Details.scaleY * 19.0f + y;
+		rect.top = RenderState.scaleY + RenderState.scaleY + y;
+		rect.right = RenderState.scaleY * 17.0f + x;
+		rect.bottom = RenderState.scaleY * 19.0f + y;
 
 		int vertexAlphaState;
 		void *raster;
 		RwRenderStateGet(rwRENDERSTATEVERTEXALPHAENABLE, &vertexAlphaState);
 		RwRenderStateGet(rwRENDERSTATETEXTURERASTER, &raster);
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);
-		ButtonSprite[PS2Symbol].Draw(rect, CRGBA(255, 255, 255, Details.color.a));
+		if (RenderState.bIsShadow)
+			ButtonSprite[PS2Symbol].Draw(rect, RenderState.color);
+		else
+			ButtonSprite[PS2Symbol].Draw(rect, CRGBA(255, 255, 255, RenderState.color.a));
 		RwRenderStateSet(rwRENDERSTATETEXTURERASTER, raster);
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)vertexAlphaState);
 	}
@@ -455,7 +484,7 @@ CFont::RenderFontBuffer()
 #ifdef BUTTON_ICONS
 			if(PS2Symbol != BUTTON_NONE) {
 				DrawButton(textPosX, textPosY);
-				textPosX += Details.scaleY * 17.0f;
+				textPosX += RenderState.scaleY * 17.0f;
 				PS2Symbol = BUTTON_NONE;
 			}
 #endif
@@ -1254,6 +1283,8 @@ CFont::ParseToken(wchar* str, CRGBA &color, bool &flash, bool &bold)
 		case 'J': PS2Symbol = BUTTON_R1; break;
 		case 'V': PS2Symbol = BUTTON_R2; break;
 		case 'C': PS2Symbol = BUTTON_R3; break;
+		case 'H': PS2Symbol = BUTTON_RSTICK_UP; break;
+		case 'L': PS2Symbol = BUTTON_RSTICK_DOWN; break;
 		case '(': PS2Symbol = BUTTON_RSTICK_LEFT; break;
 		case ')': PS2Symbol = BUTTON_RSTICK_RIGHT; break;
 #endif

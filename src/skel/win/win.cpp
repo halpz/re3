@@ -120,6 +120,10 @@ DWORD _dwOperatingSystemVersion;
 RwUInt32 gGameState;
 CJoySticks AllValidWinJoys;
 
+#ifdef DETECT_JOYSTICK_MENU
+char gSelectedJoystickName[128] = "";
+#endif
+
 // What is that for anyway?
 #ifndef IMPROVED_VIDEOMODE
 static RwBool defaultFullscreenRes = TRUE;
@@ -258,6 +262,7 @@ psGrabScreen(RwCamera *pCamera)
 	}
 #else
 	rw::Image *image = RwCameraGetRaster(pCamera)->toImage();
+	image->removeMask();
 	if(image)
 		return image;
 #endif

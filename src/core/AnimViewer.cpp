@@ -245,7 +245,7 @@ CAnimViewer::Update(void)
 	if (modelInfo->GetModelType() == MITYPE_PED) {
 		int animGroup = ((CPedModelInfo*)modelInfo)->m_animGroup;
 
-		if (animId > ANIM_IDLE_STANCE)
+		if (animId > ANIM_STD_IDLE)
 			animGroup = ASSOCGRP_STD;
 
 		if (reloadIFP) {
@@ -334,14 +334,14 @@ CAnimViewer::Update(void)
 				CMessages::AddMessage(gUString, 1000, 0);
 
 			} else if (pad->GetCircleJustDown()) {
-				PlayAnimation(pTarget->GetClump(), animGroup, ANIM_IDLE_STANCE);
+				PlayAnimation(pTarget->GetClump(), animGroup, ANIM_STD_IDLE);
 				AsciiToUnicode("Idle animation playing", gUString);
 				CMessages::AddMessage(gUString, 1000, 0);
 
 			} else if (pad->GetDPadUpJustDown()) {
 				animId--;
 				if (animId < 0) {
-					animId = NUM_STD_ANIMS - 1;
+					animId = ANIM_STD_NUM - 1;
 				}
 				PlayAnimation(pTarget->GetClump(), animGroup, (AnimationId)animId);
 
@@ -350,7 +350,7 @@ CAnimViewer::Update(void)
 				CMessages::AddMessage(gUString, 1000, 0);
 
 			} else if (pad->GetDPadDownJustDown()) {
-				animId = (animId == (NUM_STD_ANIMS - 1) ? 0 : animId + 1);
+				animId = (animId == (ANIM_STD_NUM - 1) ? 0 : animId + 1);
 				PlayAnimation(pTarget->GetClump(), animGroup, (AnimationId)animId);
 
 				sprintf(gString, "Current anim: %d", animId);

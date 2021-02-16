@@ -288,6 +288,8 @@ public:
 	int16 GetSkipCutscene() { return GetCrossJustDown(); }
 
 #ifdef XINPUT
+	static int XInputJoy1;
+	static int XInputJoy2;
 	void AffectFromXinput(uint32 pad);
 #endif
 

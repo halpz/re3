@@ -75,7 +75,7 @@ void CapturePad(RwInt32 padID);
 void joysChangeCB(int jid, int event);
 #endif
 
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 extern char gSelectedJoystickName[128];
 #endif
 

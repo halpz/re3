@@ -65,7 +65,7 @@ end
 
 workspace "reLCS"
 	language "C++"
-	configurations { "Debug", "Release" }
+	configurations { "Debug", "Release", "Vanilla" }
 	startproject "reLCS"
 	location "build"
 	symbols "Full"
@@ -120,12 +120,15 @@ workspace "reLCS"
 	filter "configurations:Debug"
 		defines { "DEBUG" }
 		
-	filter "configurations:Release"
+	filter "configurations:not Debug"
 		defines { "NDEBUG" }
 		optimize "Speed"
 		if(_OPTIONS["lto"]) then
 			flags { "LinkTimeOptimization" }
 		end
+
+	filter "configurations:Vanilla"
+		defines { "VANILLA_DEFINES" }
 
 	filter { "platforms:win*" }
 		system "windows"
@@ -208,6 +211,7 @@ project "librw"
 		architecture "amd64"
 
 	filter "platforms:win*"
+		defines { "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_DEPRECATE" }
 		staticruntime "on"
 		buildoptions { "/Zc:sizedDealloc-" }
 
@@ -239,6 +243,10 @@ project "reLCS"
 	targetname "reLCS"
 	targetdir "bin/%{cfg.platform}/%{cfg.buildcfg}"
 
+	if(_OPTIONS["with-librw"]) then
+		dependson "librw"
+	end
+
 	files { addSrcFiles("src") }
 	files { addSrcFiles("src/animation") }
 	files { addSrcFiles("src/audio") }
@@ -264,6 +272,7 @@ project "reLCS"
 	files { addSrcFiles("src/vehicles") }
 	files { addSrcFiles("src/weapons") }
 	files { addSrcFiles("src/extras") }
+	files { "src/extras/GitSHA1.cpp" } -- this won't be in repo in first build
 
 	includedirs { "src" }
 	includedirs { "src/animation" }
@@ -316,7 +325,7 @@ project "reLCS"
 
 	filter {}
 	if(os.getenv("GTA_LCS_RE_DIR")) then
-		setpaths("$(GTA_LCS_RE_DIR)/", "%(cfg.buildtarget.name)")
+		setpaths(os.getenv("GTA_LCS_RE_DIR") .. "/", "%(cfg.buildtarget.name)")
 	end
 	
 	filter "platforms:win*"
@@ -330,6 +339,10 @@ project "reLCS"
 			-- external librw is dynamic
 			staticruntime "on"
 		end
+		prebuildcommands { '"%{prj.location}..\\printHash.bat" "%{prj.location}..\\src\\extras\\GitSHA1.cpp"' }
+
+	filter "platforms:not win*"
+		prebuildcommands { '"%{prj.location}/../printHash.sh" "%{prj.location}/../src/extras/GitSHA1.cpp"' }
 
 	filter "platforms:win*glfw*"
 		staticruntime "off"

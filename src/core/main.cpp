@@ -1,8 +1,10 @@
 #include "common.h"
+#include <time.h>
 #include "rpmatfx.h"
 #include "rphanim.h"
 #include "rpskin.h"
 #include "rtbmp.h"
+#include "rtpng.h"
 #ifdef ANISOTROPIC_FILTERING
 #include "rpanisot.h"
 #endif
@@ -73,6 +75,9 @@
 #include "custompipes.h"
 #include "screendroplets.h"
 #include "VarConsole.h"
+#ifdef USE_OUR_VERSIONING
+#include "GitSHA1.h"
+#endif
 
 GlobalScene Scene;
 
@@ -96,6 +101,9 @@ bool gbPrintShite = false;
 bool gbModelViewer;
 #ifdef TIMEBARS
 bool gbShowTimebars;
+#endif
+#ifdef DRAW_GAME_VERSION_TEXT
+bool gDrawVersionText; // Our addition, we think it was always enabled on !MASTER builds
 #endif
 
 volatile int32 frameCount;
@@ -339,7 +347,11 @@ RwGrabScreen(RwCamera *camera, RwChar *filename)
 	strcpy(temp, CFileMgr::GetRootDirName());
 	strcat(temp, filename);
 
+#ifndef LIBRW
 	if (RtBMPImageWrite(pImage, &temp[0]) == nil)
+#else
+	if (RtPNGImageWrite(pImage, &temp[0]) == nil)
+#endif
 		result = false;
 	RwImageDestroy(pImage);
 	return result;
@@ -358,6 +370,7 @@ DoRWStuffEndOfFrame(void)
 	RsCameraShowRaster(Scene.camera);
 #ifndef MASTER
 	char s[48];
+#ifdef THIS_IS_STUPID
 	if (CPad::GetPad(1)->GetLeftShockJustDown()) {
 		// try using both controllers for this thing... crazy bastards
 		if (CPad::GetPad(0)->GetRightStickY() > 0) {
@@ -369,6 +382,12 @@ DoRWStuffEndOfFrame(void)
 			RwGrabScreen(Scene.camera, s);
 		}
 	}
+#else
+	if (CPad::GetPad(1)->GetLeftShockJustDown() || CPad::GetPad(0)->GetFJustDown(11)) {
+		sprintf(s, "screen_%11lld.png", time(nil));
+		RwGrabScreen(Scene.camera, s);
+	}
+#endif
 #endif // !MASTER
 }
 
@@ -1048,7 +1067,7 @@ DisplayGameDebugText()
 
 #ifndef FINAL
 	{
-		SETTWEAKPATH("GameDebugText");
+		SETTWEAKPATH("Debug");
 		TWEAKBOOL(bDisplayPosn);
 		TWEAKBOOL(bDisplayCheatStr);
 	}
@@ -1062,13 +1081,56 @@ DisplayGameDebugText()
 
 #ifdef DRAW_GAME_VERSION_TEXT
 	wchar ver[200];
-	
+
+	if(gDrawVersionText) // This realtime switch is our thing
+	{
+
+#ifdef USE_OUR_VERSIONING
+	char verA[200];
+	sprintf(verA,
+#if defined _WIN32
+			"Win "
+#elif defined __linux__
+		    "Linux "
+#elif defined __APPLE__
+		    "Mac OS X "
+#elif defined __FreeBSD__
+		    "FreeBSD "
+#else
+		    "Posix-compliant "
+#endif
+#if defined __LP64__ || defined _WIN64
+			"64-bit "
+#else
+			"32-bit "
+#endif
+#if defined RW_D3D9
+		    "D3D9 "
+#elif defined RWLIBS
+		    "D3D8 "
+#elif defined RW_GL3
+		    "OpenGL "
+#endif
+#if defined AUDIO_OAL
+		    "OAL "
+#elif defined AUDIO_MSS
+		    "MSS "
+#endif
+#if defined _DEBUG || defined DEBUG
+		    "DEBUG "
+#endif
+		    "%.8s",
+		    g_GIT_SHA1);
+	AsciiToUnicode(verA, ver);
+	CFont::SetScale(SCREEN_SCALE_X(0.5f), SCREEN_SCALE_Y(0.7f));
+#else
 	AsciiToUnicode(version_name, ver);
+	CFont::SetScale(SCREEN_SCALE_X(0.5f), SCREEN_SCALE_Y(0.5f));
+#endif
 
 	CFont::SetPropOn();
 	CFont::SetBackgroundOff();
 	CFont::SetFontStyle(FONT_STANDARD);
-	CFont::SetScale(SCREEN_SCALE_X(0.5f), SCREEN_SCALE_Y(0.5f));
 	CFont::SetCentreOff();
 	CFont::SetRightJustifyOff();
 	CFont::SetWrapx(SCREEN_WIDTH);
@@ -1076,11 +1138,17 @@ DisplayGameDebugText()
 	CFont::SetBackGroundOnlyTextOff();
 	CFont::SetColor(CRGBA(255, 108, 0, 255));
 	CFont::PrintString(SCREEN_SCALE_X(10.0f), SCREEN_SCALE_Y(10.0f), ver);
-#endif
+	}
+#endif // #ifdef DRAW_GAME_VERSION_TEXT
 
 	FrameSamples++;
+#ifdef FIX_HIGH_FPS_BUGS_ON_FRONTEND
+	FramesPerSecondCounter += frameTime / 1000.f; // convert to seconds
+	FramesPerSecond = FrameSamples / FramesPerSecondCounter;
+#else
 	FramesPerSecondCounter += 1000.0f / (CTimer::GetTimeStepNonClippedInSeconds() * 1000.0f);	
 	FramesPerSecond = FramesPerSecondCounter / FrameSamples;
+#endif
 	
 	if ( FrameSamples > 30 )
 	{

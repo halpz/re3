@@ -367,7 +367,7 @@ CWorld::ProcessLineOfSightSectorList(CPtrList &list, const CColLine &line, CColP
 			} else if(e->bUsesCollision)
 				colmodel = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
 
-			if(colmodel && CCollision::ProcessLineOfSight(line, e->GetMatrix(), *colmodel, point, dist,
+			if(colmodel && CCollision::ProcessLineOfSight(line, e->GetMatrix(), *colmodel, point, mindist,
 			                                              ignoreSeeThrough, ignoreShootThrough))
 				entity = e;
 			if(carTyres && ((CVehicle*)e)->SetUpWheelColModel(&tyreCol) && CCollision::ProcessLineOfSight(line, e->GetMatrix(), tyreCol, tyreColPoint, tyreDist, false, ignoreShootThrough)){
@@ -466,7 +466,7 @@ CWorld::ProcessVerticalLineSectorList(CPtrList &list, const CColLine &line, CCol
 			e->m_scanCode = GetCurrentScanCode();
 
 			colmodel = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
-			if(CCollision::ProcessVerticalLine(line, e->GetMatrix(), *colmodel, point, dist,
+			if(CCollision::ProcessVerticalLine(line, e->GetMatrix(), *colmodel, point, mindist,
 			                                   ignoreSeeThrough, false, poly))
 				entity = e;
 		}
@@ -2192,7 +2192,7 @@ CWorld::TriggerExplosionSectorList(CPtrList &list, const CVector &position, floa
 						                    PEDPIECE_TORSO, direction);
 						if(pPed->m_nPedState != PED_DIE)
 							pPed->SetFall(2000,
-							              (AnimationId)(direction + ANIM_KO_SKID_FRONT), 0);
+							              (AnimationId)(direction + ANIM_STD_HIGHIMPACT_FRONT), 0);
 						if(pCreator && pCreator->IsPed()) {
 							eEventType eventType = EVENT_SHOOT_PED;
 							if(pPed->m_nPedType == PEDTYPE_COP) eventType = EVENT_SHOOT_COP;

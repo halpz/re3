@@ -859,7 +859,7 @@ CPathFind::PreparePathDataForType(uint8 type, CTempNode *tempnodes, CPathInfoFor
 					mag = Sqrt(dx*dx + dy*dy);
 					dx /= mag;
 					dy /= mag;
-					int width = Max(m_pathNodes[i].width, m_pathNodes[j].width);
+					uint8 width = Max(m_pathNodes[i].width, m_pathNodes[j].width);
 					if(i < j){
 						dx = -dx;
 						dy = -dy;

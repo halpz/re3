@@ -384,6 +384,11 @@ bool CGame::Initialise(const char* datFile)
 	CTxdStore::Create(gameTxdSlot);
 	CTxdStore::AddRef(gameTxdSlot);
 
+#ifdef EXTENDED_PIPELINES
+	// for generic fallback
+	CustomPipes::SetTxdFindCallback();
+#endif
+
 	LoadingScreen("Loading the Game", "Loading particles", nil);
 	int particleTxdSlot = CTxdStore::AddTxdSlot("particle");
 	CTxdStore::LoadTxd(particleTxdSlot, "MODELS/PARTICLE.TXD");
@@ -443,10 +448,7 @@ bool CGame::Initialise(const char* datFile)
 
 //	CFileLoader::LoadLevel("DATA\\DEFAULT.DAT");
 	CFileLoader::LoadLevel(datFile);
-#ifdef EXTENDED_PIPELINES
-	// for generic fallback
-	CustomPipes::SetTxdFindCallback();
-#endif
+
 	LoadingScreen("Loading the Game", "Add Particles", nil);
 	CWorld::AddParticles();
 	CVehicleModelInfo::LoadVehicleColours();
@@ -594,7 +596,6 @@ bool CGame::ShutDown(void)
 	gPhoneInfo.Shutdown();
 	CWeapon::ShutdownWeapons();
 	CPedType::Shutdown();
-	CMBlur::MotionBlurClose();
 	
 	for (int32 i = 0; i < NUMPLAYERS; i++)
 	{
@@ -620,7 +621,7 @@ bool CGame::ShutDown(void)
 	CStreaming::Shutdown();
 	CTxdStore::GameShutdown();
 	CCollision::Shutdown();
-	CWaterLevel::DestroyWavyAtomic();
+	CWaterLevel::Shutdown();
 	CRubbish::Shutdown();
 	CClouds::Shutdown();
 	CShadows::Shutdown();
@@ -629,6 +630,7 @@ bool CGame::ShutDown(void)
 	CWeaponEffects::Shutdown();
 	CParticle::Shutdown();
 	CPools::ShutDown();
+	CHud::ReInitialise();
 	CTxdStore::RemoveTxdSlot(gameTxdSlot);
 	CMBlur::MotionBlurClose();
 	CdStreamRemoveImages();

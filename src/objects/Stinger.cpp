@@ -87,10 +87,10 @@ void
 CStinger::Deploy(CPed *pPed)
 {
 	if (NumOfStingerSegments < NUM_STINGER_SEGMENTS*2 && !pPed->bInVehicle && pPed->IsPedInControl()) {
-		if (!bIsDeployed && RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_WEAPON_THROWU) == nil) {
+		if (!bIsDeployed && RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_STD_THROW_UNDER) == nil) {
 			Init(pPed);
 			pPed->SetPedState(PED_DEPLOY_STINGER);
-			CAnimManager::AddAnimation(pPed->GetClump(), ASSOCGRP_STD, ANIM_WEAPON_THROWU);
+			CAnimManager::AddAnimation(pPed->GetClump(), ASSOCGRP_STD, ANIM_STD_THROW_UNDER);
 		}
 	}
 }
@@ -170,7 +170,7 @@ CStinger::Process()
 		if (pOwner != nil
 			&& !pOwner->bInVehicle
 			&& pOwner->GetPedState() == PED_DEPLOY_STINGER
-			&& RpAnimBlendClumpGetAssociation(pOwner->GetClump(), ANIM_WEAPON_THROWU)->currentTime > 0.39f)
+			&& RpAnimBlendClumpGetAssociation(pOwner->GetClump(), ANIM_STD_THROW_UNDER)->currentTime > 0.39f)
 		{
 			m_nSpikeState = STINGERSTATE_DEPLOYING;
 			for (int i = 0; i < NUM_STINGER_SEGMENTS; i++)
