@@ -136,7 +136,12 @@ void GetLocalTime_CP(SYSTEMTIME* out);
 
 typedef void* HANDLE;
 #define INVALID_HANDLE_VALUE NULL
-#define FindClose(h) closedir((DIR*)h)
+#define FindClose(h) \
+    do { \
+        if (h != nil) \
+            closedir((DIR*)h); \
+    } while(0)
+
 #define LOCALE_USER_DEFAULT 0
 #define DATE_SHORTDATE 0
 
