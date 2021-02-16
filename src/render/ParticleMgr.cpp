@@ -17,12 +17,12 @@ cParticleSystemMgr::cParticleSystemMgr()
 #endif
 }
 
+#ifdef FIX_BUGS
 cParticleSystemMgr::~cParticleSystemMgr()
 {
-#ifdef FIX_BUGS
 	delete [] m_aParticles;
-#endif
 }
+#endif
 
 void cParticleSystemMgr::Initialise()
 {
