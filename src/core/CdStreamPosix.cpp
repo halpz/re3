@@ -57,7 +57,7 @@ re3_sem_close(sem_t* sem)
 sem_t*
 re3_sem_open(const char* format, ...)
 {
-	char semName[20];
+	char semName[21];
 	va_list va;
 	va_start(va, format);
 	vsprintf(semName, format, va);
@@ -71,7 +71,7 @@ re3_sem_close(sem_t* sem, const char* format, ...)
 {
 	sem_close(sem);
 
-	char semName[20];
+	char semName[21];
 	va_list va;
 	va_start(va, format);
 	vsprintf(semName, format, va);
