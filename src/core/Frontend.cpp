@@ -2166,7 +2166,7 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 
 		// Print bindings, including seperator (-) between them
 		CFont::SetScale(MENU_X(0.25f), MENU_Y(SMALLESTTEXT_Y_SCALE));
-#ifdef (FIX_BUGS)
+#ifdef FIX_BUGS
 		for (; contSetOrder < MAX_SETORDERS && controllerAction >= 0; contSetOrder++) {
 #else
 		for (; contSetOrder < MAX_SETORDERS && controllerAction != -1; contSetOrder++) {
