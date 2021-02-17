@@ -5490,6 +5490,9 @@ CMenuManager::SwitchMenuOnAndOff()
 				}
 				Initialise();
 				LoadAllTextures();
+#ifdef FIX_BUGS
+				CPad::StopPadsShaking();
+#endif
 			} else {
 #ifdef EXTENDED_COLOURFILTER
 				// we always expect CPostFX to be open
