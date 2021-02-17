@@ -1265,7 +1265,11 @@ cMusicManager::DisplayRadioStationName()
 
 		if (vehicle)
 		{
-			int8 track;
+#if defined RADIO_SCROLL_TO_PREV_STATION || defined FIX_BUGS // Because m_nFrontendTrack can have NO_TRACK
+			int track;
+#else
+			uint8 track;
+#endif
 			gStreamedSound = vehicle->m_nRadioStation;
 			if (gStreamedSound >= STREAMED_SOUND_CITY_AMBIENT && gStreamedSound <= STREAMED_SOUND_AMBSIL_AMBIENT)
 				gStreamedSound = RADIO_OFF;
@@ -1282,11 +1286,7 @@ cMusicManager::DisplayRadioStationName()
 					gNumRetunePresses++;
 			}
 			else
-#ifdef FIX_BUGS
-				track = GetCarTuning(); // gStreamedSound or veh->m_nRadioStation would also work, but these don't cover police/taxi radios
-#else
 				track = m_nFrontendTrack;
-#endif
 
 			wchar* string = nil;
 			switch (track) {
@@ -1304,7 +1304,10 @@ cMusicManager::DisplayRadioStationName()
 					return;
 				string = TheText.Get("FEA_MP3"); break;
 #ifdef RADIO_OFF_TEXT
-			case RADIO_OFF: {
+			case STREAMED_SOUND_RADIO_POLICE:
+			case STREAMED_SOUND_RADIO_TAXI:
+				return;
+			default: {
 				extern wchar WideErrorString[];
 
 				string = TheText.Get("FEA_NON");
@@ -1314,8 +1317,9 @@ cMusicManager::DisplayRadioStationName()
 				}
 				break;
 			}
-#endif
+#else
 			default: return;
+#endif
 			};
 
 			if (pCurrentStation != string) {
