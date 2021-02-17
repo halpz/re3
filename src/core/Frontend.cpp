@@ -5696,6 +5696,9 @@ CMenuManager::SwitchMenuOnAndOff()
 		|| m_bShutDownFrontEndRequested || m_bStartUpFrontEndRequested) {
 
 		m_bMenuActive = !m_bMenuActive;
+#ifdef FIX_BUGS
+		CPad::StopPadsShaking();
+#endif
 
 		if (m_bShutDownFrontEndRequested)
 			m_bMenuActive = false;
