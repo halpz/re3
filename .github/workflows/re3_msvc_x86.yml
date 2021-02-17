@@ -6,13 +6,9 @@ on:
   release:
     types: published
 env:
-  GLEW_VER: "2.1.0"
   GLFW_VER: "3.3.2"
-  GLEW_BASE: "glew-2.1.0"
   GLFW_BASE: "glfw-3.3.2.bin.WIN32"
-  GLEW_FILE: "glew-2.1.0-win32.zip"
   GLFW_FILE: "glfw-3.3.2.bin.WIN32.zip"
-  GLEW_URL: "https://github.com/nigels-com/glew/releases/download/glew-2.1.0/glew-2.1.0-win32.zip"
   GLFW_URL: "https://github.com/glfw/glfw/releases/download/3.3.2/glfw-3.3.2.bin.WIN32.zip"
 jobs:
   build:
@@ -28,11 +24,6 @@ jobs:
       with:
         submodules: 'true'
     - if: ${{ matrix.platform }} == "win-x86-librw_gl3_glfw-mss"
-      name: Download glew
-      uses: carlosperate/download-file-action@v1.0.3
-      with:
-        file-url: ${{env.GLEW_URL}}
-    - if: ${{ matrix.platform }} == "win-x86-librw_gl3_glfw-mss"
       name: Download glfw
       uses: carlosperate/download-file-action@v1.0.3
       with:
@@ -40,11 +31,10 @@ jobs:
     - if: ${{ matrix.platform }} == "win-x86-librw_gl3_glfw-mss"
       name: Unpack archives
       run: |
-          7z x ${{env.GLEW_FILE}}
           7z x ${{env.GLFW_FILE}}
     - name: Configure build
       run: |
-        ./premake5 vs2019 --with-librw --glewdir=${{env.GLEW_BASE}} --glfwdir32=${{env.GLFW_BASE}}
+        ./premake5 vs2019 --with-librw --glfwdir32=${{env.GLFW_BASE}}
     - name: Build
       run: |
         msbuild -m build/re3.sln /property:Configuration=${{matrix.buildtype}} /property:Platform=${{matrix.platform}}
