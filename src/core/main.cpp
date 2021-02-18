@@ -95,7 +95,10 @@ bool gbModelViewer;
 bool gbShowTimebars;
 #endif
 #ifdef DRAW_GAME_VERSION_TEXT
-bool gDrawVersionText; // Our addition, we think it was always enabled on !MASTER builds
+bool gbDrawVersionText; // Our addition, we think it was always enabled on !MASTER builds
+#endif
+#ifdef NO_MOVIES
+bool gbNoMovies;
 #endif
 
 volatile int32 frameCount;
@@ -1068,7 +1071,7 @@ DisplayGameDebugText()
 #ifdef DRAW_GAME_VERSION_TEXT
 	wchar ver[200];
 
-	if(gDrawVersionText) // This realtime switch is our thing
+	if(gbDrawVersionText) // This realtime switch is our thing
 	{
 
 #ifdef USE_OUR_VERSIONING
