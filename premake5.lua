@@ -342,10 +342,10 @@ project "re3"
 		libdirs { "vendor/openal-soft/libs/Win64" }
 
 	filter "platforms:linux*oal"
-		links { "openal", "mpg123", "sndfile", "pthread" }
+		links { "openal", "mpg123", "sndfile", "pthread", "X11" }
 		
 	filter "platforms:bsd*oal"
-		links { "openal", "mpg123", "sndfile", "pthread" }
+		links { "openal", "mpg123", "sndfile", "pthread", "X11" }
 
 	filter "platforms:macosx*oal"
 		links { "openal", "mpg123", "sndfile", "pthread" }
