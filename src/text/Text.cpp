@@ -258,13 +258,13 @@ CText::LoadMissionText(char *MissionTableName)
 		sprintf(filename, "SPANISH.GXT");
 		break;
 #ifdef MORE_LANGUAGES
-	case LANGUAGE_POLISH:
+	case CMenuManager::LANGUAGE_POLISH:
 		sprintf(filename, "POLISH.GXT");
 		break;
-	case LANGUAGE_RUSSIAN:
+	case CMenuManager::LANGUAGE_RUSSIAN:
 		sprintf(filename, "RUSSIAN.GXT");
 		break;
-	case LANGUAGE_JAPANESE:
+	case CMenuManager::LANGUAGE_JAPANESE:
 		sprintf(filename, "JAPANESE.GXT");
 		break;
 #endif
