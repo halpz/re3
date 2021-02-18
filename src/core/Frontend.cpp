@@ -1881,8 +1881,13 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 		}
 
 		// Print bindings, including seperator (-) between them
+
 		CFont::SetScale(MENU_X(0.25f), MENU_Y(LISTITEM_Y_SCALE));
+#ifdef FIX_BUGS
+		for (; contSetOrder < MAX_SETORDERS && controllerAction >= 0; contSetOrder++) {
+#else
 		for (; contSetOrder < MAX_SETORDERS && controllerAction != -1; contSetOrder++) {
+#endif
 			wchar *settingText = ControlsManager.GetControllerSettingTextWithOrderNumber((e_ControllerAction)controllerAction, (eContSetOrder)contSetOrder);
 			if (settingText) {
 				++bindingsForThisOpt;
@@ -5503,6 +5508,9 @@ CMenuManager::SwitchMenuOnAndOff()
 				}
 				Initialise();
 				LoadAllTextures();
+#ifdef FIX_BUGS
+				CPad::StopPadsShaking();
+#endif
 			} else {
 #ifdef EXTENDED_COLOURFILTER
 				// we always expect CPostFX to be open
