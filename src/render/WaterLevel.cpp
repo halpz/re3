@@ -643,6 +643,7 @@ CWaterLevel::RenderWater()
 	if (gbDontRenderWater)
 		return;
 #endif
+	PUSH_RENDERGROUP("CWaterLevel::RenderWater");
 	bool bUseCamEndX   = false;
 	bool bUseCamStartY = false;
 	
@@ -1066,6 +1067,8 @@ CWaterLevel::RenderWater()
 	}
 	
 	DefinedState();
+
+	POP_RENDERGROUP();
 }
 
 void

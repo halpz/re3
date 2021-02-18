@@ -142,6 +142,8 @@ CPointLights::RenderFogEffect(void)
 	CVector spriteCoors;
 	float spritew, spriteh;
 
+	PUSH_RENDERGROUP("CPointLights::RenderFogEffect");
+
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
@@ -282,4 +284,6 @@ CPointLights::RenderFogEffect(void)
 			}
 		}
 	}
+
+	POP_RENDERGROUP();
 }

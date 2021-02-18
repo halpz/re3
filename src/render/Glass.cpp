@@ -261,6 +261,8 @@ CGlass::Render(void)
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void *)rwBLENDONE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)TRUE);
 
+	PUSH_RENDERGROUP("CGlass::Render");
+
 	for ( int32 i = 0; i < NUM_GLASSPANES; i++ )
 	{
 		if ( aGlassPanes[i].m_bActive )
@@ -269,6 +271,8 @@ CGlass::Render(void)
 
 	for ( uint32 i = 0; i < NumGlassEntities; i++ )
 		RenderEntityInGlass(apEntitiesToBeRendered[i]);
+
+	POP_RENDERGROUP();
 
 	NumGlassEntities = 0;
 

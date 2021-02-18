@@ -1330,6 +1330,8 @@ CPacManPickups::Render()
 {
 	if (!bPMActive) return;
 
+	PUSH_RENDERGROUP("CPacManPickups::Render");
+
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, FALSE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
@@ -1363,6 +1365,8 @@ CPacManPickups::Render()
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, FALSE);
+
+	POP_RENDERGROUP();
 }
 
 void

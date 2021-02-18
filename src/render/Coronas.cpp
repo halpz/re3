@@ -235,6 +235,8 @@ CCoronas::Render(void)
 	int i, j;
 	int screenw, screenh;
 
+	PUSH_RENDERGROUP("CCoronas::Render");
+
 	screenw = RwRasterGetWidth(RwCameraGetRaster(Scene.camera));
 	screenh = RwRasterGetHeight(RwCameraGetRaster(Scene.camera));
 
@@ -418,6 +420,8 @@ CCoronas::Render(void)
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+
+	POP_RENDERGROUP();
 }
 
 void
@@ -428,6 +432,8 @@ CCoronas::RenderReflections(void)
 	CEntity *entity;
 
 	if(CWeather::WetRoads > 0.0f){
+		PUSH_RENDERGROUP("CCoronas::RenderReflections");
+
 #ifdef FIX_BUGS
 		CSprite::InitSpriteBuffer();
 #endif
@@ -505,6 +511,8 @@ CCoronas::RenderReflections(void)
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
 		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
 		RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+
+		POP_RENDERGROUP();
 	}else{
 		for(i = 0; i < NUMCORONAS; i++)
 			aCoronas[i].renderReflection = false;

@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include "main.h"
 #include "Sprite.h"
 #include "Sprite2d.h"
 #include "General.h"
@@ -122,6 +123,8 @@ CClouds::Render(void)
 	float szx, szy;
 	RwV3d screenpos;
 	RwV3d worldpos;
+
+	PUSH_RENDERGROUP("CClouds::Render");
 
 	CCoronas::SunBlockedByClouds = false;
 
@@ -310,6 +313,8 @@ CClouds::Render(void)
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+
+	POP_RENDERGROUP();
 }
 
 bool
@@ -322,6 +327,8 @@ void
 CClouds::RenderBackground(int16 topred, int16 topgreen, int16 topblue,
 	int16 botred, int16 botgreen, int16 botblue, int16 alpha)
 {
+	PUSH_RENDERGROUP("CClouds::RenderBackground");
+
 	CVector left = TheCamera.GetRight();
 	float c = left.Magnitude2D();
 	if(c > 1.0f)
@@ -422,6 +429,8 @@ CClouds::RenderBackground(int16 topred, int16 topgreen, int16 topblue,
 		ms_colourBottom.g = (topgreen + 2 * botgreen) / 3;
 		ms_colourBottom.b = (topblue + 2 * botblue) / 3;
 	}
+
+	POP_RENDERGROUP();
 }
 
 void
@@ -435,6 +444,8 @@ CClouds::RenderHorizon(void)
 
 	if(ms_horizonZ > SCREEN_HEIGHT)
 		return;
+
+	PUSH_RENDERGROUP("CClouds::RenderHorizon");
 
 	float z1 = Min(ms_horizonZ + SMALLSTRIPHEIGHT, SCREEN_HEIGHT);
 	CSprite2d::DrawRectXLU(CRect(0, ms_horizonZ, SCREEN_WIDTH, z1),
@@ -450,4 +461,6 @@ CClouds::RenderHorizon(void)
 	z2 = Min(z2, SCREEN_HEIGHT);
 	CSprite2d::DrawRect(CRect(0, z1, SCREEN_WIDTH, z2),
 		ms_colourBottom, ms_colourBottom, ms_colourTop, ms_colourTop);
+
+	POP_RENDERGROUP();
 }

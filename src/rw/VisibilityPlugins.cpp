@@ -293,6 +293,7 @@ CVisibilityPlugins::RenderFadingEntities(void)
 			continue;
 #endif
 		mi = (CSimpleModelInfo *)CModelInfo::GetModelInfo(e->GetModelIndex());
+
 #ifdef FIX_BUGS
 		if(mi->GetModelType() == MITYPE_SIMPLE && mi->m_noZwrite)
 #else
@@ -308,7 +309,9 @@ CVisibilityPlugins::RenderFadingEntities(void)
 			DeActivateDirectional();
 			SetAmbientColours();
 			e->bImBeingRendered = true;
+			PUSH_RENDERGROUP(mi->GetModelName());
 			RenderFadingAtomic((RpAtomic*)e->m_rwObject, node->item.sort);
+			POP_RENDERGROUP();
 			e->bImBeingRendered = false;
 		}else
 			CRenderer::RenderOneNonRoad(e);

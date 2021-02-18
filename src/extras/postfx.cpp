@@ -7,6 +7,7 @@
 #error "Need librw for EXTENDED_COLOURFILTER"
 #endif
 
+#include "main.h"
 #include "RwHelper.h"
 #include "Camera.h"
 #include "MBlur.h"
@@ -407,6 +408,7 @@ CPostFX::Render(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blu
 		break;
 	}
 
+	PUSH_RENDERGROUP("CPostFX::Render");
 	if(pFrontBuffer == nil)
 		Open(cam);
 	assert(pFrontBuffer);
@@ -464,6 +466,8 @@ CPostFX::Render(RwCamera *cam, uint32 red, uint32 green, uint32 blue, uint32 blu
 		bJustInitialised = false;
 	}else
 		bJustInitialised = true;
+
+	POP_RENDERGROUP();
 }
 
 #endif

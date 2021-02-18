@@ -189,6 +189,7 @@ void CMovingThings::Update()
 void CMovingThings::Render()
 {
 	int i;
+	PUSH_RENDERGROUP("CMovingThings::Render");
 	for (i = 0; i < ARRAY_SIZE(aScrollBars); ++i)
 	{
 		if (aScrollBars[i].IsVisible())
@@ -204,6 +205,7 @@ void CMovingThings::Render()
 		if (aDigitalClocks[i].IsVisible())
 			aDigitalClocks[i].Render();
 	}
+	POP_RENDERGROUP();
 }
 
 // ---------- CMovingThing ----------
