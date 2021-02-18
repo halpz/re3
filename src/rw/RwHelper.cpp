@@ -107,7 +107,8 @@ void
 PushRendergroup(const char *name)
 {
 #if defined(RW_OPENGL)
-	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, name);
+	if(GLAD_GL_KHR_debug)
+		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, name);
 #elif defined(RW_D3D9)
 	static WCHAR tmp[256];
 	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, name, -1, tmp, sizeof(tmp));
@@ -119,7 +120,8 @@ void
 PopRendergroup(void)
 {
 #if defined(RW_OPENGL)
-	glPopDebugGroup();
+	if(GLAD_GL_KHR_debug)
+		glPopDebugGroup();
 #elif defined(RW_D3D9)
 	D3DPERF_EndEvent();
 #endif
