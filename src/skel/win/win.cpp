@@ -2275,7 +2275,7 @@ WinMain(HINSTANCE instance,
 					case GS_START_UP:
 					{
 #ifdef NO_MOVIES
-						gGameState = GS_INIT_ONCE;
+						gGameState = gbNoMovies ? GS_INIT_ONCE : GS_INIT_LOGO_MPEG;
 #else
 						gGameState = GS_INIT_LOGO_MPEG;
 #endif
@@ -2314,8 +2314,11 @@ WinMain(HINSTANCE instance,
 					
 					case GS_INIT_INTRO_MPEG:
 					{
-#ifndef NO_MOVIES
+#ifdef NO_MOVIES
+						if (!gbNoMovies)
+#endif
 						CloseClip();
+#ifndef FIX_BUGS
 						CoUninitialize();
 #endif
 						
@@ -2351,8 +2354,11 @@ WinMain(HINSTANCE instance,
 					
 					case GS_INIT_ONCE:
 					{
-#ifndef NO_MOVIES
+#ifdef NO_MOVIES
+						if (!gbNoMovies)
+#endif
 						CloseClip();
+#ifndef FIX_BUGS
 						CoUninitialize();
 #endif
 						

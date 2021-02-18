@@ -66,3 +66,11 @@ void SaveINIControllerSettings();
 extern bool gbNewRenderer;
 bool FredIsInFirstPersonCam(void);
 #endif
+
+#ifdef DRAW_GAME_VERSION_TEXT
+extern bool gbDrawVersionText;
+#endif
+
+#ifdef NO_MOVIES
+extern bool gbNoMovies;
+#endif

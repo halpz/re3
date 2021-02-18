@@ -517,8 +517,10 @@ bool LoadINISettings()
 	ReadIniIfExists("Draw", "FixSprites", &CDraw::ms_bFixSprites);	
 #endif
 #ifdef DRAW_GAME_VERSION_TEXT
-	extern bool gDrawVersionText;
-	ReadIniIfExists("General", "DrawVersionText", &gDrawVersionText);
+	ReadIniIfExists("General", "DrawVersionText", &gbDrawVersionText);
+#endif
+#ifdef NO_MOVIES
+	ReadIniIfExists("General", "NoMovies", &gbNoMovies);
 #endif
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
@@ -608,8 +610,10 @@ void SaveINISettings()
 	StoreIni("Draw", "FixSprites", CDraw::ms_bFixSprites);	
 #endif
 #ifdef DRAW_GAME_VERSION_TEXT
-	extern bool gDrawVersionText;
-	StoreIni("General", "DrawVersionText", gDrawVersionText);
+	StoreIni("General", "DrawVersionText", gbDrawVersionText);
+#endif
+#ifdef NO_MOVIES
+	StoreIni("General", "NoMovies", gbNoMovies);
 #endif
 #ifdef CUSTOM_FRONTEND_OPTIONS
 	for (int i = 0; i < MENUPAGES; i++) {
@@ -990,8 +994,7 @@ extern bool gbRenderWorld2;
 
 		
 #ifdef DRAW_GAME_VERSION_TEXT
-		extern bool gDrawVersionText;
-		DebugMenuAddVarBool8("Debug", "Version Text", &gDrawVersionText, nil);
+		DebugMenuAddVarBool8("Debug", "Version Text", &gbDrawVersionText, nil);
 #endif
 		DebugMenuAddVarBool8("Debug", "Show DebugStuffInRelease", &gbDebugStuffInRelease, nil);
 #ifdef TIMEBARS
