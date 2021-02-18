@@ -90,16 +90,51 @@ mysrand(unsigned int seed)
 #ifdef CUSTOM_FRONTEND_OPTIONS
 #include "frontendoption.h"
 
+
+
+#ifdef MORE_LANGUAGES
+void LangPolSelect(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_POLISH;
+		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
+		FrontEndMenuManager.InitialiseChangedLanguageSettings();
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+
+void LangRusSelect(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_RUSSIAN;
+		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
+		FrontEndMenuManager.InitialiseChangedLanguageSettings();
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+
+void LangJapSelect(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_JAPANESE;
+		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
+		FrontEndMenuManager.InitialiseChangedLanguageSettings();
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+#endif
+
 void
 CustomFrontendOptionsPopulate(void)
 {
 	// Moved to an array in MenuScreensCustom.cpp, but APIs are still available. see frontendoption.h
 
+	int fd;
 	// These work only if we have neo folder, so they're dynamically added
 #ifdef EXTENDED_PIPELINES
 	const char *vehPipelineNames[] = { "FED_MFX", "FED_NEO" };
 	const char *off_on[] = { "FEM_OFF", "FEM_ON" };
-	int fd = CFileMgr::OpenFile("neo/neo.txd","r");
+	fd = CFileMgr::OpenFile("neo/neo.txd","r");
 	if (fd) {
 #ifdef GRAPHICS_MENU_OPTIONS
 		FrontendOptionSetCursor(MENUPAGE_GRAPHICS_SETTINGS, -3, false);
@@ -116,6 +151,38 @@ CustomFrontendOptionsPopulate(void)
 #endif
 		CFileMgr::CloseFile(fd);
 	}
+#endif
+	// Add outsourced language translations, if files are found
+#ifdef MORE_LANGUAGES
+	int fd2;
+	FrontendOptionSetCursor(MENUPAGE_LANGUAGE_SETTINGS, 5, false);
+#if 0
+	if (fd = CFileMgr::OpenFile("text/polish.gxt")) {
+		if (fd2 = CFileMgr::OpenFile("models/fonts_p.txd")) {
+			FrontendOptionAddDynamic("FEL_POL", 0, 0, MENUALIGN_CENTER, nil, nil, LangPolSelect, nil, nil);
+			CFileMgr::CloseFile(fd2);
+		}
+		CFileMgr::CloseFile(fd);
+	}
+#endif
+
+	if (fd = CFileMgr::OpenFile("text/russian.gxt")) {
+		if (fd2 = CFileMgr::OpenFile("models/fonts_r.txd")) {
+			FrontendOptionAddDynamic("FEL_RUS", 0, 0, MENUALIGN_CENTER, nil, nil, LangRusSelect, nil, nil);
+			CFileMgr::CloseFile(fd2);
+		}
+		CFileMgr::CloseFile(fd);
+	}
+
+#if 0
+	if (fd = CFileMgr::OpenFile("text/japanese.gxt")) {
+		if (fd2 = CFileMgr::OpenFile("models/fonts_j.txd")) {
+			FrontendOptionAddDynamic("FEL_JAP", 0, 0, MENUALIGN_CENTER, nil, nil, LangJapSelect, nil, nil);
+			CFileMgr::CloseFile(fd2);
+		}
+		CFileMgr::CloseFile(fd);
+	}
+#endif
 #endif
 
 }
@@ -466,8 +533,10 @@ bool LoadINISettings()
 	ReadIniIfExists("Draw", "FixSprites", &CDraw::ms_bFixSprites);	
 #endif
 #ifdef DRAW_GAME_VERSION_TEXT
-	extern bool gDrawVersionText;
-	ReadIniIfExists("General", "DrawVersionText", &gDrawVersionText);
+	ReadIniIfExists("General", "DrawVersionText", &gbDrawVersionText);
+#endif
+#ifdef NO_MOVIES
+	ReadIniIfExists("General", "NoMovies", &gbNoMovies);
 #endif
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
@@ -563,8 +632,10 @@ void SaveINISettings()
 	StoreIni("Draw", "FixSprites", CDraw::ms_bFixSprites);	
 #endif
 #ifdef DRAW_GAME_VERSION_TEXT
-	extern bool gDrawVersionText;
-	StoreIni("General", "DrawVersionText", gDrawVersionText);
+	StoreIni("General", "DrawVersionText", gbDrawVersionText);
+#endif
+#ifdef NO_MOVIES
+	StoreIni("General", "NoMovies", gbNoMovies);
 #endif
 #ifdef CUSTOM_FRONTEND_OPTIONS
 	for (int i = 0; i < MENUPAGES; i++) {
@@ -994,8 +1065,7 @@ extern bool gbRenderWorld2;
 		
 		
 #ifdef DRAW_GAME_VERSION_TEXT
-		extern bool gDrawVersionText;
-		DebugMenuAddVarBool8("Debug", "Version Text", &gDrawVersionText, nil);
+		DebugMenuAddVarBool8("Debug", "Version Text", &gbDrawVersionText, nil);
 #endif
 		DebugMenuAddVarBool8("Debug", "Show DebugStuffInRelease", &gbDebugStuffInRelease, nil);
 #ifdef TIMEBARS
@@ -1107,7 +1177,7 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 	strcat_s(re3_buff, re3_buffsize, "(Press Retry to debug the application)");
 
 
-	nCode = ::MessageBoxA(nil, re3_buff, "RE3 Assertion Failed!",
+	nCode = ::MessageBoxA(nil, re3_buff, "REVC Assertion Failed!",
 		MB_ABORTRETRYIGNORE|MB_ICONHAND|MB_SETFOREGROUND|MB_TASKMODAL);
 
 	if (nCode == IDABORT)
@@ -1128,7 +1198,7 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 	abort();
 #else
 	// TODO
-	printf("\nRE3 ASSERT FAILED\n\tFile: %s\n\tLine: %d\n\tFunction: %s\n\tExpression: %s\n",filename,lineno,func,expr);
+	printf("\nREVC ASSERT FAILED\n\tFile: %s\n\tLine: %d\n\tFunction: %s\n\tExpression: %s\n",filename,lineno,func,expr);
 	assert(false);
 #endif
 }
@@ -1180,14 +1250,14 @@ void re3_usererror(const char *format, ...)
 	vsprintf_s(re3_buff, re3_buffsize, format, va);
 	va_end(va);
 	
-	::MessageBoxA(nil, re3_buff, "RE3 Error!",
+	::MessageBoxA(nil, re3_buff, "REVC Error!",
 		MB_OK|MB_ICONHAND|MB_SETFOREGROUND|MB_TASKMODAL);
 
 	raise(SIGABRT);
 	_exit(3);
 #else
 	vsprintf(re3_buff, format, va);
-	printf("\nRE3 Error!\n\t%s\n",re3_buff);
+	printf("\nREVC Error!\n\t%s\n",re3_buff);
 	assert(false);
 #endif
 }

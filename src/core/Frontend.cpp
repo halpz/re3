@@ -3097,11 +3097,10 @@ CMenuManager::LoadSettings()
 #ifdef LOAD_INI_SETTINGS
 	if (LoadINISettings()) {
 		LoadINIControllerSettings();
-	} else {
-		// no re3.ini, create it
-		SaveINISettings();
-		SaveINIControllerSettings();
 	}
+	// if no reVC.ini, create it, or update it with new values
+	SaveINISettings();
+	SaveINIControllerSettings();
 #endif
 
 #ifdef FIX_BUGS
@@ -5490,6 +5489,9 @@ CMenuManager::SwitchMenuOnAndOff()
 				}
 				Initialise();
 				LoadAllTextures();
+#ifdef FIX_BUGS
+				CPad::StopPadsShaking();
+#endif
 			} else {
 #ifdef EXTENDED_COLOURFILTER
 				// we always expect CPostFX to be open
