@@ -4,6 +4,8 @@
 #define PUSH_RENDERGROUP(str) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, str)
 #define POP_RENDERGROUP() glPopDebugGroup()
 #else
+#define PUSH_RENDERGROUP(str)
+#define POP_RENDERGROUP()
 #endif
 
 struct GlobalScene
