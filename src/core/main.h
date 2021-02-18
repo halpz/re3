@@ -1,8 +1,11 @@
 #pragma once
 
-#if defined(RW_OPENGL)
-#define PUSH_RENDERGROUP(str) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, str)
-#define POP_RENDERGROUP() glPopDebugGroup()
+#ifndef FINAL
+// defined in RwHelpder.cpp
+void PushRendergroup(const char *name);
+void PopRendergroup(void);
+#define PUSH_RENDERGROUP(str) PushRendergroup(str)
+#define POP_RENDERGROUP() PopRendergroup()
 #else
 #define PUSH_RENDERGROUP(str)
 #define POP_RENDERGROUP()
