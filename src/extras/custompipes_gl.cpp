@@ -91,13 +91,7 @@ vehicleRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	setWorldMatrix(atomic->getFrame()->getLTM());
 	lightingCB(atomic);
 
-#ifdef RW_GL_USE_VAOS
-	glBindVertexArray(header->vao);
-#else
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, header->ibo);
-	glBindBuffer(GL_ARRAY_BUFFER, header->vbo);
-	setAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	setupVertexInput(header);
 
 	InstanceData *inst = header->inst;
 	rw::int32 n = header->numMeshes;
@@ -137,9 +131,7 @@ vehicleRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	SetRenderState(SRCBLEND, BLENDSRCALPHA);
 	setTexture(1, nil);
 
-#ifndef RW_GL_USE_VAOS
-	disableAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	teardownVertexInput(header);
 }
 
 void
@@ -210,13 +202,7 @@ worldRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	setWorldMatrix(atomic->getFrame()->getLTM());
 	lightingCB(atomic);
 
-#ifdef RW_GL_USE_VAOS
-	glBindVertexArray(header->vao);
-#else
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, header->ibo);
-	glBindBuffer(GL_ARRAY_BUFFER, header->vbo);
-	setAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	setupVertexInput(header);
 
 	InstanceData *inst = header->inst;
 	rw::int32 n = header->numMeshes;
@@ -254,9 +240,7 @@ worldRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 		inst++;
 	}
 	setTexture(1, nil);
-#ifndef RW_GL_USE_VAOS
-	disableAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	teardownVertexInput(header);
 }
 
 void
@@ -318,13 +302,7 @@ glossRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 
 	Material *m;
 
-#ifdef RW_GL_USE_VAOS
-	glBindVertexArray(header->vao);
-#else
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, header->ibo);
-	glBindBuffer(GL_ARRAY_BUFFER, header->vbo);
-	setAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	setupVertexInput(header);
 
 	InstanceData *inst = header->inst;
 	rw::int32 n = header->numMeshes;
@@ -367,9 +345,7 @@ glossRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	SetRenderState(SRCBLEND, BLENDSRCALPHA);
 	SetRenderState(DESTBLEND, BLENDINVSRCALPHA);
 
-#ifndef RW_GL_USE_VAOS
-	disableAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	teardownVertexInput(header);
 }
 
 void
@@ -453,13 +429,7 @@ rimSkinRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	setWorldMatrix(atomic->getFrame()->getLTM());
 	lightingCB(atomic);
 
-#ifdef RW_GL_USE_VAOS
-	glBindVertexArray(header->vao);
-#else
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, header->ibo);
-	glBindBuffer(GL_ARRAY_BUFFER, header->vbo);
-	setAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	setupVertexInput(header);
 
 	InstanceData *inst = header->inst;
 	rw::int32 n = header->numMeshes;
@@ -482,9 +452,7 @@ rimSkinRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 		drawInst(header, inst);
 		inst++;
 	}
-#ifndef RW_GL_USE_VAOS
-	disableAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	teardownVertexInput(header);
 }
 
 static void
@@ -504,13 +472,7 @@ rimRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	setWorldMatrix(atomic->getFrame()->getLTM());
 	lightingCB(atomic);
 
-#ifdef RW_GL_USE_VAOS
-	glBindVertexArray(header->vao);
-#else
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, header->ibo);
-	glBindBuffer(GL_ARRAY_BUFFER, header->vbo);
-	setAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	setupVertexInput(header);
 
 	InstanceData *inst = header->inst;
 	rw::int32 n = header->numMeshes;
@@ -531,9 +493,7 @@ rimRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 		drawInst(header, inst);
 		inst++;
 	}
-#ifndef RW_GL_USE_VAOS
-	disableAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	teardownVertexInput(header);
 }
 
 void
@@ -696,13 +656,7 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 		if(!setupDone){
 			defaultShader->use();
 			setWorldMatrix(&building->matrix);
-#ifdef RW_GL_USE_VAOS
-			glBindVertexArray(building->instHeader->vao);
-#else
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, building->instHeader->ibo);
-			glBindBuffer(GL_ARRAY_BUFFER, building->instHeader->vbo);
-			setAttribPointers(building->instHeader->attribDesc, building->instHeader->numAttribs);
-#endif
+			setupVertexInput(building->instHeader);
 			setLights(&lights);
 			setupDone = true;
 		}
@@ -713,9 +667,7 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 
 		drawInst(building->instHeader, inst);
 	}
-#ifndef RW_GL_USE_VAOS
-	disableAttribPointers(building->instHeader->attribDesc, building->instHeader->numAttribs);
-#endif
+	teardownVertexInput(building->instHeader);
 	if(defer)
 		numBlendInsts[pass]++;
 }
@@ -754,13 +706,7 @@ RenderBlendPass(int pass)
 	for(i = 0; i < numBlendInsts[pass]; i++){
 		BuildingInst *building = &blendInsts[pass][i];
 
-#ifdef RW_GL_USE_VAOS
-		glBindVertexArray(building->instHeader->vao);
-#else
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, building->instHeader->ibo);
-		glBindBuffer(GL_ARRAY_BUFFER, building->instHeader->vbo);
-		setAttribPointers(building->instHeader->attribDesc, building->instHeader->numAttribs);
-#endif
+		setupVertexInput(building->instHeader);
 		setWorldMatrix(&building->matrix);
 		if(building->lighting)
 			lights.ambient = pAmbient->color;
@@ -782,9 +728,7 @@ RenderBlendPass(int pass)
 
 			drawInst(building->instHeader, inst);
 		}
-#ifndef RW_GL_USE_VAOS
-		disableAttribPointers(building->instHeader->attribDesc, building->instHeader->numAttribs);
-#endif
+		teardownVertexInput(building->instHeader);
 	}
 }
 }
