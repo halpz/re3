@@ -159,6 +159,8 @@ CPointLights::RenderFogEffect(void)
 	if(CCutsceneMgr::IsRunning())
 		return;
 
+	PUSH_RENDERGROUP("CPointLights::RenderFogEffect");
+
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
@@ -302,6 +304,8 @@ CPointLights::RenderFogEffect(void)
 	}
 
 	CSprite::FlushSpriteBuffer();
+
+	POP_RENDERGROUP();
 }
 
 bool

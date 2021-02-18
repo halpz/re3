@@ -1202,6 +1202,8 @@ CWaterLevel::RenderTransparentWater(void)
 	if ( !CGame::CanSeeWaterFromCurrArea() )
 		return;
 	
+	PUSH_RENDERGROUP("CWaterLevel::RenderTransparentWater");
+
 	float fWaterDrawDist      = _GetWavyDrawDist();
 	float fWaterDrawDistLarge = fWaterDrawDist + 90.0f;
 	float fWavySectorMaxRenderDistSqr   = SQR(fWaterDrawDist);
@@ -1485,6 +1487,8 @@ CWaterLevel::RenderTransparentWater(void)
 
 	DefinedState();
 #endif
+
+	POP_RENDERGROUP();
 }
 
 void CWaterLevel::RenderOneFlatSmallWaterPoly(float fX, float fY, float fZ, RwRGBA const &color)

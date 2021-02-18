@@ -1261,6 +1261,7 @@ if(gbRenderEverythingBarRoads)
 void
 RenderScene_new(void)
 {
+	PUSH_RENDERGROUP("RenderScene_new");
 	CClouds::Render();
 	DoRWRenderHorizon();
 
@@ -1268,6 +1269,7 @@ RenderScene_new(void)
 	DefinedState();
 	// CMattRenderer::ResetRenderStates
 	// moved CRenderer::RenderBoats to before transparent water
+	POP_RENDERGROUP();
 }
 
 // TODO
@@ -1275,6 +1277,7 @@ bool FredIsInFirstPersonCam(void) { return false; }
 void
 RenderEffects_new(void)
 {
+	PUSH_RENDERGROUP("RenderEffects_new");
 	CShadows::RenderStaticShadows();
 	// CRenderer::GenerateEnvironmentMap
 	CShadows::RenderStoredShadows();
@@ -1319,6 +1322,7 @@ if(gbRenderFadingInEntities)
 	CPointLights::RenderFogEffect();
 	CMovingThings::Render();
 	CRenderer::RenderFirstPersonVehicle();
+	POP_RENDERGROUP();
 }
 #endif
 
@@ -1331,6 +1335,7 @@ RenderScene(void)
 		return;
 	}
 #endif
+	PUSH_RENDERGROUP("RenderScene");
 	CClouds::Render();
 	DoRWRenderHorizon();
 	CRenderer::RenderRoads();
@@ -1346,11 +1351,13 @@ RenderScene(void)
 	RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
 	CWeather::RenderRainStreaks();
 	CCoronas::RenderSunReflection();
+	POP_RENDERGROUP();
 }
 
 void
 RenderDebugShit(void)
 {
+	PUSH_RENDERGROUP("RenderDebugShit");
 	CTheScripts::RenderTheScriptDebugLines();
 #ifndef FINAL
 	if(gbShowCollisionLines)
@@ -1359,6 +1366,7 @@ RenderDebugShit(void)
 	CDebug::DrawLines();
 	DefinedState();
 #endif
+	POP_RENDERGROUP();
 }
 
 void
@@ -1370,6 +1378,7 @@ RenderEffects(void)
 		return;
 	}
 #endif
+	PUSH_RENDERGROUP("RenderEffects");
 	CGlass::Render();
 	CWaterCannons::Render();
 	CSpecialFX::Render();
@@ -1386,11 +1395,13 @@ RenderEffects(void)
 	CPointLights::RenderFogEffect();
 	CMovingThings::Render();
 	CRenderer::RenderFirstPersonVehicle();
+	POP_RENDERGROUP();
 }
 
 void
 Render2dStuff(void)
 {
+	PUSH_RENDERGROUP("Render2dStuff");
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
@@ -1462,6 +1473,7 @@ Render2dStuff(void)
 #ifdef DEBUGMENU
 	DebugMenuRender();
 #endif
+	POP_RENDERGROUP();
 }
 
 void
@@ -1469,7 +1481,9 @@ RenderMenus(void)
 {
 	if (FrontEndMenuManager.m_bMenuActive)
 	{
+		PUSH_RENDERGROUP("RenderMenus");
 		FrontEndMenuManager.DrawFrontEnd();
+		POP_RENDERGROUP();
 	}
 #ifndef MASTER
 	else
@@ -1480,6 +1494,7 @@ RenderMenus(void)
 void
 Render2dStuffAfterFade(void)
 {
+	PUSH_RENDERGROUP("Render2dStuffAfterFade");
 #ifndef MASTER
 	DisplayGameDebugText();
 #endif
@@ -1490,6 +1505,7 @@ Render2dStuffAfterFade(void)
 	CHud::DrawAfterFade();
 	CFont::DrawFonts();
 	CCredits::Render();
+	POP_RENDERGROUP();
 }
 
 void
