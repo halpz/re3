@@ -1177,7 +1177,7 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 	strcat_s(re3_buff, re3_buffsize, "(Press Retry to debug the application)");
 
 
-	nCode = ::MessageBoxA(nil, re3_buff, "RE3 Assertion Failed!",
+	nCode = ::MessageBoxA(nil, re3_buff, "REVC Assertion Failed!",
 		MB_ABORTRETRYIGNORE|MB_ICONHAND|MB_SETFOREGROUND|MB_TASKMODAL);
 
 	if (nCode == IDABORT)
@@ -1198,7 +1198,7 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 	abort();
 #else
 	// TODO
-	printf("\nRE3 ASSERT FAILED\n\tFile: %s\n\tLine: %d\n\tFunction: %s\n\tExpression: %s\n",filename,lineno,func,expr);
+	printf("\nREVC ASSERT FAILED\n\tFile: %s\n\tLine: %d\n\tFunction: %s\n\tExpression: %s\n",filename,lineno,func,expr);
 	assert(false);
 #endif
 }
@@ -1250,14 +1250,14 @@ void re3_usererror(const char *format, ...)
 	vsprintf_s(re3_buff, re3_buffsize, format, va);
 	va_end(va);
 	
-	::MessageBoxA(nil, re3_buff, "RE3 Error!",
+	::MessageBoxA(nil, re3_buff, "REVC Error!",
 		MB_OK|MB_ICONHAND|MB_SETFOREGROUND|MB_TASKMODAL);
 
 	raise(SIGABRT);
 	_exit(3);
 #else
 	vsprintf(re3_buff, format, va);
-	printf("\nRE3 Error!\n\t%s\n",re3_buff);
+	printf("\nREVC Error!\n\t%s\n",re3_buff);
 	assert(false);
 #endif
 }
