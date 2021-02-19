@@ -9,6 +9,7 @@
 #endif
 #ifndef FINAL
 RtCharset *debugCharset;
+bool bDebugRenderGroups;
 #endif
 
 #ifdef PS2_ALPHA_TEST
@@ -106,6 +107,8 @@ SetCullMode(uint32 mode)
 void
 PushRendergroup(const char *name)
 {
+	if(!bDebugRenderGroups)
+		return;
 #if defined(RW_OPENGL)
 	if(GLAD_GL_KHR_debug)
 		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, name);
@@ -119,6 +122,8 @@ PushRendergroup(const char *name)
 void
 PopRendergroup(void)
 {
+	if(!bDebugRenderGroups)
+		return;
 #if defined(RW_OPENGL)
 	if(GLAD_GL_KHR_debug)
 		glPopDebugGroup();

@@ -1,5 +1,6 @@
 #pragma once
 
+extern bool bDebugRenderGroups;
 extern bool gPS2alphaTest;
 extern bool gBackfaceCulling;
 
