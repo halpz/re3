@@ -1308,6 +1308,10 @@ cMusicManager::DisplayRadioStationName()
 			case STREAMED_SOUND_RADIO_TAXI:
 				return;
 			default: {
+				// Otherwise pausing-resuming game will show RADIO OFF, since radio isn't set yet
+				if (m_nPlayingTrack == NO_TRACK && m_nFrontendTrack == NO_TRACK)
+					return;
+
 				extern wchar WideErrorString[];
 
 				string = TheText.Get("FEA_NON");
