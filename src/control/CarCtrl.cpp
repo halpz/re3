@@ -3238,7 +3238,7 @@ bool CCarCtrl::GenerateOneEmergencyServicesCar(uint32 mi, CVector vecPos)
 		attempts += 1;
 	}
 	if (attempts >= 5)
-		return nil;
+		return false;
 	CAutomobile* pVehicle = new CAutomobile(mi, RANDOM_VEHICLE);
 	pVehicle->AutoPilot.m_vecDestinationCoors = vecPos;
 	pVehicle->SetPosition(spawnPos);
