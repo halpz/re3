@@ -1001,6 +1001,7 @@ extern bool gbRenderWorld2;
 		DebugMenuAddVarBool8("Debug", "Show Timebars", &gbShowTimebars, nil);
 #endif
 #ifndef FINAL
+		DebugMenuAddVarBool8("Debug", "Use debug render groups", &bDebugRenderGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Print Memory Usage", &gbPrintMemoryUsage, nil);
 #ifdef USE_CUSTOM_ALLOCATOR
 		DebugMenuAddCmd("Debug", "Parse Heap", ParseHeap);
