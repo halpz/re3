@@ -2082,142 +2082,136 @@ cSampleManager::StartPreloadedStreamedFile(uint8 nStream)
 bool
 cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 {
+	int i = 0;
 	uint32 position = nPos;
 	char filename[MAX_PATH];
 	
-	if ( m_bInitialised && nFile < TOTAL_STREAMED_SOUNDS )
+	if ( !m_bInitialised || nFile >= TOTAL_STREAMED_SOUNDS )
+		return false;
+
+	if ( mp3Stream[nStream] )
 	{
-		if ( mp3Stream[nStream] )
+		AIL_pause_stream(mp3Stream[nStream], 1);
+		AIL_close_stream(mp3Stream[nStream]);
+	}
+	if ( nFile == STREAMED_SOUND_RADIO_MP3_PLAYER )
+	{
+		do
 		{
-			AIL_pause_stream(mp3Stream[nStream], 1);
-			AIL_close_stream(mp3Stream[nStream]);
-		}
-		
-		if ( nFile == STREAMED_SOUND_RADIO_MP3_PLAYER )
-		{
-			uint32 i = 0;
-			do {
-				if(i != 0 || _bIsMp3Active) {
-					if(++_CurMP3Index >= nNumMP3s) _CurMP3Index = 0;
+			// Just switched to MP3 player
+			if ( !_bIsMp3Active && i == 0 )
+			{
+				if ( nPos > nStreamLength[STREAMED_SOUND_RADIO_MP3_PLAYER] )
+					position = 0;
+				tMP3Entry *e = _pMP3List;
 
-					_CurMP3Pos = 0;
-
-					tMP3Entry *mp3 = _GetMP3EntryByIndex(_CurMP3Index);
-
-					if(mp3) {
-						mp3 = _pMP3List;
-						if(mp3 == NULL) {
-							_bIsMp3Active = false;
-							nFile = 0;
-							strcpy(filename, m_MiscomPath);
-							strcat(filename, StreamedNameTable[nFile]);
-
-							mp3Stream[nStream] =
-							    AIL_open_stream(DIG, filename, 0);
-							if(mp3Stream[nStream]) {
-								AIL_set_stream_loop_count(
-								    mp3Stream[nStream], nStreamLoopedFlag[nStream] ? 0 : 1);
-								nStreamLoopedFlag[nStream] = true;
-								AIL_set_stream_ms_position(
-								    mp3Stream[nStream], position);
-								AIL_pause_stream(mp3Stream[nStream],
-								                 0);
-								return true;
-							}
-
-							return false;
-						}
-					}
-
-					if(mp3->pLinkPath != NULL)
-						mp3Stream[nStream] =
-						    AIL_open_stream(DIG, mp3->pLinkPath, 0);
-					else {
-						strcpy(filename, _mp3DirectoryPath);
-						strcat(filename, mp3->aFilename);
-
-						mp3Stream[nStream] =
-						    AIL_open_stream(DIG, filename, 0);
-					}
-
+				// Try to continue from previous song, if already started
+				if(!_GetMP3PosFromStreamPos(&position, &e) && !e) {
+					nFile = 0;
+					strcpy(filename, m_MiscomPath);
+					strcat(filename, StreamedNameTable[nFile]);
+					mp3Stream[nStream] =
+					    AIL_open_stream(DIG, filename, 0);
 					if(mp3Stream[nStream]) {
-						AIL_set_stream_loop_count(mp3Stream[nStream], 1);
-						AIL_set_stream_ms_position(mp3Stream[nStream], 0);
+						AIL_set_stream_loop_count(mp3Stream[nStream], nStreamLoopedFlag[nStream] ? 0 : 1);
+						nStreamLoopedFlag[nStream] = true;
+						AIL_set_stream_ms_position(mp3Stream[nStream], position);
 						AIL_pause_stream(mp3Stream[nStream], 0);
 						return true;
 					}
+					return false;
 
-					_bIsMp3Active = false;
-					continue;
-				}
-				if ( nPos > nStreamLength[STREAMED_SOUND_RADIO_MP3_PLAYER] )
-					position = 0;
+				} else {
+					if ( e->pLinkPath != NULL )
+						mp3Stream[nStream] = AIL_open_stream(DIG, e->pLinkPath, 0);
+					else {
+						strcpy(filename, _mp3DirectoryPath);
+						strcat(filename, e->aFilename);
+					
+						mp3Stream[nStream] = AIL_open_stream(DIG, filename, 0);
+					}
+										
+					if ( mp3Stream[nStream] ) {
+						AIL_set_stream_loop_count(mp3Stream[nStream], 1);
+						AIL_set_stream_ms_position(mp3Stream[nStream], position);
+						AIL_pause_stream(mp3Stream[nStream], 0);
+						
+						_bIsMp3Active = true;
 				
-				tMP3Entry *e;
-				if ( !_GetMP3PosFromStreamPos(&position, &e) )
+						return true;
+					}
+					// fall through, start playing from another song
+				}
+			} else {
+				if(++_CurMP3Index >= nNumMP3s) _CurMP3Index = 0;
+
+				_CurMP3Pos = 0;
+
+				tMP3Entry *mp3 = _GetMP3EntryByIndex(_CurMP3Index);
+				if ( !mp3 )
 				{
-					if ( e == NULL )
+					mp3 = _pMP3List;
+					if ( !_pMP3List )
 					{
 						nFile = 0;
+						_bIsMp3Active = 0;
 						strcpy(filename, m_MiscomPath);
 						strcat(filename, StreamedNameTable[nFile]);
+
 						mp3Stream[nStream] =
 						    AIL_open_stream(DIG, filename, 0);
 						if(mp3Stream[nStream]) {
-							AIL_set_stream_loop_count(mp3Stream[nStream], nStreamLoopedFlag[nStream] ? 0 : 1);
+							AIL_set_stream_loop_count(
+							    mp3Stream[nStream], nStreamLoopedFlag[nStream] ? 0 : 1);
 							nStreamLoopedFlag[nStream] = true;
-							AIL_set_stream_ms_position(mp3Stream[nStream], position);
-							AIL_pause_stream(mp3Stream[nStream], 0);
+							AIL_set_stream_ms_position(
+							    mp3Stream[nStream], position);
+							AIL_pause_stream(mp3Stream[nStream],
+							                 0);
 							return true;
 						}
-
 						return false;
 					}
 				}
-
-				if ( e->pLinkPath != NULL )
-					mp3Stream[nStream] = AIL_open_stream(DIG, e->pLinkPath, 0);
-				else
-				{
+				if(mp3->pLinkPath != NULL)
+					mp3Stream[nStream] = AIL_open_stream(DIG, mp3->pLinkPath, 0);
+				else {
 					strcpy(filename, _mp3DirectoryPath);
-					strcat(filename, e->aFilename);
-				
-					mp3Stream[nStream] = AIL_open_stream(DIG, filename, 0);
+					strcat(filename, mp3->aFilename);
+
+					mp3Stream[nStream] =
+					    AIL_open_stream(DIG, filename, 0);
 				}
-									
-				if ( mp3Stream[nStream] )
-				{
+
+				if(mp3Stream[nStream]) {
 					AIL_set_stream_loop_count(mp3Stream[nStream], 1);
-					AIL_set_stream_ms_position(mp3Stream[nStream], position);
+					AIL_set_stream_ms_position(mp3Stream[nStream], 0);
 					AIL_pause_stream(mp3Stream[nStream], 0);
-					
+#ifdef FIX_BUGS
 					_bIsMp3Active = true;
-			
+#endif
 					return true;
 				}
-				
-				_bIsMp3Active = false;
 
-			} while(++i < nNumMP3s);
-
-			position = 0;
-			nFile = 0;
+			}
+			_bIsMp3Active = 0;
 		}
-		
-		strcpy(filename, m_MiscomPath);
-		strcat(filename, StreamedNameTable[nFile]);
-		
-		mp3Stream[nStream] = AIL_open_stream(DIG, filename, 0);
-		if ( mp3Stream[nStream] )
-		{
-			AIL_set_stream_loop_count(mp3Stream[nStream], nStreamLoopedFlag[nStream] ? 0 : 1);
-			nStreamLoopedFlag[nStream] = true;
-			AIL_set_stream_ms_position(mp3Stream[nStream], position);
-			AIL_pause_stream(mp3Stream[nStream], 0);
-			return true;
-		}
+		while ( ++i < nNumMP3s );
+		position = 0;
+		nFile = 0;
 	}
+	strcpy(filename, m_MiscomPath);
+	strcat(filename, StreamedNameTable[nFile]);
 	
+	mp3Stream[nStream] = AIL_open_stream(DIG, filename, 0);
+	if ( mp3Stream[nStream] )
+	{
+		AIL_set_stream_loop_count(mp3Stream[nStream], nStreamLoopedFlag[nStream] ? 0 : 1);
+		nStreamLoopedFlag[nStream] = true;
+		AIL_set_stream_ms_position(mp3Stream[nStream], position);
+		AIL_pause_stream(mp3Stream[nStream], 0);
+		return true;
+	}
 	return false;
 }
 
