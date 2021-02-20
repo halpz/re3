@@ -75,10 +75,16 @@ CStinger::Remove()
 
 	for (int32 i = 0; i < NUM_STINGER_SEGMENTS; i++) {
 		CStingerSegment *spikeSegment = pSpikes[i];
+
+#ifdef FIX_BUGS
+		CWorld::Remove(spikeSegment);
+		delete spikeSegment;
+#else
 		if (spikeSegment->m_entryInfoList.first != nil)
 			spikeSegment->bRemoveFromWorld = true;
 		else
 			delete spikeSegment;
+#endif
 	}
 	bIsDeployed = false;
 }
