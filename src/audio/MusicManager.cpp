@@ -1265,7 +1265,8 @@ cMusicManager::DisplayRadioStationName()
 
 		if (vehicle)
 		{
-#if defined RADIO_SCROLL_TO_PREV_STATION || defined FIX_BUGS // Because m_nFrontendTrack can have NO_TRACK
+			// Prev scroll needs it to be signed, and m_nFrontendTrack can be NO_TRACK thus FIX_BUGS
+#if defined RADIO_SCROLL_TO_PREV_STATION || defined FIX_BUGS
 			int track;
 #else
 			uint8 track;
@@ -1281,13 +1282,16 @@ cMusicManager::DisplayRadioStationName()
 #endif
 				while (track >= NUM_RADIOS + 1) track -= NUM_RADIOS + 1;
 
-				// We already handle this condition while scrolling back, on key press. No need to change this.
+				// On scrolling back we handle this condition on key press. No need to change this.
 				if (!DMAudio.IsMP3RadioChannelAvailable() && track == USERTRACK)
 					gNumRetunePresses++;
 			}
 			else
+#ifdef RADIO_OFF_TEXT
+				track = GetCarTuning(); // gStreamedSound or veh->m_nRadioStation would also work, but these don't cover police/taxi radios
+#else
 				track = m_nFrontendTrack;
-
+#endif
 			wchar* string = nil;
 			switch (track) {
 			case WILDSTYLE: string = TheText.Get("FEA_FM0"); break;
@@ -1304,12 +1308,9 @@ cMusicManager::DisplayRadioStationName()
 					return;
 				string = TheText.Get("FEA_MP3"); break;
 #ifdef RADIO_OFF_TEXT
-			case STREAMED_SOUND_RADIO_POLICE:
-			case STREAMED_SOUND_RADIO_TAXI:
-				return;
-			default: {
-				// Otherwise pausing-resuming game will show RADIO OFF, since radio isn't set yet
-				if (m_nPlayingTrack == NO_TRACK && m_nFrontendTrack == NO_TRACK)
+			case RADIO_OFF: {
+				// Otherwise RADIO OFF will be seen after pausing-resuming game and Mission Complete text
+				if (!m_bRadioStreamReady || !m_bGameplayAllowsRadio)
 					return;
 
 				extern wchar WideErrorString[];
@@ -1321,9 +1322,8 @@ cMusicManager::DisplayRadioStationName()
 				}
 				break;
 			}
-#else
-			default: return;
 #endif
+			default: return;
 			};
 
 			if (pCurrentStation != string) {
