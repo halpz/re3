@@ -7,7 +7,7 @@
 #include "AudioSamples.h"
 #include "MusicManager.h"
 #include "PlayerPed.h"
-#include "PoliceRadio.h"
+#include "PolRadio.h"
 #include "Replay.h"
 #include "Vehicle.h"
 #include "World.h"
