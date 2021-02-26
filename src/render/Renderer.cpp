@@ -134,8 +134,13 @@ CRenderer::RenderOneRoad(CEntity *e)
 		return;
 	if(gbShowCollisionPolys)
 		CCollision::DrawColModel_Coloured(e->GetMatrix(), *CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel(), e->GetModelIndex());
-	else
+	else{
+		PUSH_RENDERGROUP(CModelInfo::GetModelInfo(e->GetModelIndex())->GetModelName());
+
 		e->Render();
+
+		POP_RENDERGROUP();
+	}
 }
 
 void
@@ -182,6 +187,8 @@ CRenderer::RenderOneNonRoad(CEntity *e)
 	}
 #endif
 
+	PUSH_RENDERGROUP(CModelInfo::GetModelInfo(e->GetModelIndex())->GetModelName());
+
 	resetLights = e->SetupLighting();
 
 	if(e->IsVehicle()){
@@ -210,6 +217,8 @@ CRenderer::RenderOneNonRoad(CEntity *e)
 	}
 
 	e->RemoveLighting(resetLights);
+
+	POP_RENDERGROUP();
 }
 
 void
@@ -235,6 +244,7 @@ CRenderer::RenderRoads(void)
 	int i;
 	CEntity *e;
 
+	PUSH_RENDERGROUP("CRenderer::RenderRoads");
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 	SetCullMode(rwCULLMODECULLBACK);
@@ -246,6 +256,7 @@ CRenderer::RenderRoads(void)
 		if(IsRoad(e))
 			RenderOneRoad(e);
 	}
+	POP_RENDERGROUP();
 }
 
 inline bool PutIntoSortedVehicleList(CVehicle *veh)
@@ -268,6 +279,7 @@ CRenderer::RenderEverythingBarRoads(void)
 	CEntity *e;
 	EntityInfo ei;
 
+	PUSH_RENDERGROUP("CRenderer::RenderEverythingBarRoads");
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 	SetCullMode(rwCULLMODECULLBACK);
@@ -299,6 +311,7 @@ CRenderer::RenderEverythingBarRoads(void)
 		}else
 			RenderOneNonRoad(e);
 	}
+	POP_RENDERGROUP();
 }
 
 void
@@ -306,6 +319,7 @@ CRenderer::RenderBoats(void)
 {
 	CLink<EntityInfo> *node;
 
+	PUSH_RENDERGROUP("CRenderer::RenderBoats");
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 	SetCullMode(rwCULLMODECULLBACK);
@@ -334,6 +348,7 @@ CRenderer::RenderBoats(void)
 		CVehicle *v = (CVehicle*)node->item.ent;
 		RenderOneNonRoad(v);
 	}
+	POP_RENDERGROUP();
 }
 
 #ifdef NEW_RENDERER
@@ -437,6 +452,7 @@ CRenderer::RenderWorld(int pass)
 	switch(pass){
 	case 0:
 		// Roads
+		PUSH_RENDERGROUP("CRenderer::RenderWorld - Roads");
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
 		for(i = 0; i < ms_nNoOfVisibleBuildings; i++){
 			e = ms_aVisibleBuildingPtrs[i];
@@ -450,9 +466,11 @@ CRenderer::RenderWorld(int pass)
 			if(e->bIsBIGBuilding || IsRoad(e))
 				RenderOneBuilding(e, node->item.sort);
 		}
+		POP_RENDERGROUP();
 		break;
 	case 1:
 		// Opaque
+		PUSH_RENDERGROUP("CRenderer::RenderWorld - Opaque");
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
 		for(i = 0; i < ms_nNoOfVisibleBuildings; i++){
 			e = ms_aVisibleBuildingPtrs[i];
@@ -473,14 +491,17 @@ CRenderer::RenderWorld(int pass)
 		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, FALSE);
 		WorldRender::RenderBlendPass(PASS_NOZ);
 		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+		POP_RENDERGROUP();
 		break;
 	case 2:
 		// Transparent
+		PUSH_RENDERGROUP("CRenderer::RenderWorld - Transparent");
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
 		WorldRender::RenderBlendPass(PASS_ADD);
 		RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 		WorldRender::RenderBlendPass(PASS_BLEND);
+		POP_RENDERGROUP();
 		break;
 	}
 }
@@ -491,11 +512,13 @@ CRenderer::RenderPeds(void)
 	int i;
 	CEntity *e;
 
+	PUSH_RENDERGROUP("CRenderer::RenderPeds");
 	for(i = 0; i < ms_nNoOfVisibleVehicles; i++){
 		e = ms_aVisibleVehiclePtrs[i];
 		if(e->IsPed())
 			RenderOneNonRoad(e);
 	}
+	POP_RENDERGROUP();
 }
 
 void
@@ -506,6 +529,7 @@ CRenderer::RenderVehicles(void)
 	EntityInfo ei;
 	CLink<EntityInfo> *node;
 
+	PUSH_RENDERGROUP("CRenderer::RenderVehicles");
 	// not the real thing
 	for(i = 0; i < ms_nNoOfVisibleVehicles; i++){
 		e = ms_aVisibleVehiclePtrs[i];
@@ -522,6 +546,7 @@ CRenderer::RenderVehicles(void)
 	    node != &gSortedVehiclesAndPeds.head;
 	    node = node->prev)
 		RenderOneNonRoad(node->item.ent);
+	POP_RENDERGROUP();
 }
 
 void
@@ -530,6 +555,7 @@ CRenderer::RenderTransparentWater(void)
 	int i;
 	CEntity *e;
 
+	PUSH_RENDERGROUP("CRenderer::RenderTransparentWater");
 	RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nil);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
@@ -553,6 +579,7 @@ CRenderer::RenderTransparentWater(void)
 	CWaterLevel::RenderTransparentWater();
 
 	SetStencilState(0);
+	POP_RENDERGROUP();
 }
 
 void
@@ -573,20 +600,24 @@ CRenderer::ClearForFrame(void)
 void
 CRenderer::RenderFadingInEntities(void)
 {
+	PUSH_RENDERGROUP("CRenderer::RenderFadingInEntities");
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 	SetCullMode(rwCULLMODECULLBACK);
 	DeActivateDirectional();
 	SetAmbientColours();
 	CVisibilityPlugins::RenderFadingEntities();
+	POP_RENDERGROUP();
 }
 
 void
 CRenderer::RenderFadingInUnderwaterEntities(void)
 {
+	PUSH_RENDERGROUP("CRenderer::RenderFadingInUnderwaterEntities");
 	DeActivateDirectional();
 	SetAmbientColours();
 	CVisibilityPlugins::RenderFadingUnderwaterEntities();
+	POP_RENDERGROUP();
 }
 
 void

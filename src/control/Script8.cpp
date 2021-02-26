@@ -386,7 +386,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	}
 	case COMMAND_IS_JAPANESE_GAME:
 #ifdef MORE_LANGUAGES
-		UpdateCompareFlag(FrontEndMenuManager.m_PrefsLanguage == LANGUAGE_JAPANESE);
+		UpdateCompareFlag(FrontEndMenuManager.m_PrefsLanguage == CMenuManager::LANGUAGE_JAPANESE);
 #elif (defined GTAVC_JP_PATCH)
 		UpdateCompareFlag(true);
 #else

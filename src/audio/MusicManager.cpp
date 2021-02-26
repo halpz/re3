@@ -1265,7 +1265,8 @@ cMusicManager::DisplayRadioStationName()
 
 		if (vehicle)
 		{
-#if defined RADIO_SCROLL_TO_PREV_STATION || defined FIX_BUGS // Because m_nFrontendTrack can have NO_TRACK
+			// Prev scroll needs it to be signed, and m_nFrontendTrack can be NO_TRACK thus FIX_BUGS
+#if defined RADIO_SCROLL_TO_PREV_STATION || defined FIX_BUGS
 			int track;
 #else
 			uint8 track;
@@ -1281,13 +1282,16 @@ cMusicManager::DisplayRadioStationName()
 #endif
 				while (track >= NUM_RADIOS + 1) track -= NUM_RADIOS + 1;
 
-				// We already handle this condition while scrolling back, on key press. No need to change this.
+				// On scrolling back we handle this condition on key press. No need to change this.
 				if (!DMAudio.IsMP3RadioChannelAvailable() && track == USERTRACK)
 					gNumRetunePresses++;
 			}
 			else
+#ifdef RADIO_OFF_TEXT
+				track = GetCarTuning(); // gStreamedSound or veh->m_nRadioStation would also work, but these don't cover police/taxi radios
+#else
 				track = m_nFrontendTrack;
-
+#endif
 			wchar* string = nil;
 			switch (track) {
 			case WILDSTYLE: string = TheText.Get("FEA_FM0"); break;

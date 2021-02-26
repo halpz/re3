@@ -6,6 +6,7 @@
 #include <d3d8caps.h>
 #endif
 
+#include "main.h"
 #include "General.h"
 #include "RwHelper.h"
 #include "Camera.h"
@@ -333,6 +334,7 @@ CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, u
 #ifdef EXTENDED_COLOURFILTER
 	CPostFX::Render(cam, red, green, blue, blur, type, bluralpha);
 #else
+	PUSH_RENDERGROUP("CMBlur::MotionBlurRender");
 	RwRGBA color = { (RwUInt8)red, (RwUInt8)green, (RwUInt8)blue, (RwUInt8)blur };
 #ifdef GTA_PS2
 	if( pFrontBuffer )
@@ -348,6 +350,7 @@ CMBlur::MotionBlurRender(RwCamera *cam, uint32 red, uint32 green, uint32 blue, u
 		RwRasterPopContext();
 	}
 #endif
+	POP_RENDERGROUP();
 #endif
 }
 

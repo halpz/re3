@@ -233,7 +233,9 @@ CVisibilityPlugins::RenderFadingEntities(CLinkList<AlphaObjectInfo> &list)
 			DeActivateDirectional();
 			SetAmbientColours();
 			e->bImBeingRendered = true;
+			PUSH_RENDERGROUP(mi->GetModelName());
 			RenderFadingAtomic((RpAtomic*)e->m_rwObject, node->item.sort);
+			POP_RENDERGROUP();
 			e->bImBeingRendered = false;
 		}else
 			CRenderer::RenderOneNonRoad(e);

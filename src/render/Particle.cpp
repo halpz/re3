@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include "main.h"
 #include "General.h"
 #include "Timer.h"
 #include "TxdStore.h"
@@ -1749,6 +1750,8 @@ void CParticle::Update()
 
 void CParticle::Render()
 {
+	PUSH_RENDERGROUP("CParticle::Render");
+
 	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void *)rwTEXTUREADDRESSWRAP);
 	RwRenderStateSet(rwRENDERSTATETEXTUREPERSPECTIVE, (void *)TRUE);
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void *)FALSE);
@@ -2105,6 +2108,8 @@ void CParticle::Render()
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void *)TRUE);
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void *)rwBLENDSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void *)rwBLENDINVSRCALPHA);
+
+	POP_RENDERGROUP();
 }
 
 void CParticle::RemovePSystem(tParticleType type)

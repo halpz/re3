@@ -90,16 +90,51 @@ mysrand(unsigned int seed)
 #ifdef CUSTOM_FRONTEND_OPTIONS
 #include "frontendoption.h"
 
+
+
+#ifdef MORE_LANGUAGES
+void LangPolSelect(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_POLISH;
+		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
+		FrontEndMenuManager.InitialiseChangedLanguageSettings();
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+
+void LangRusSelect(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_RUSSIAN;
+		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
+		FrontEndMenuManager.InitialiseChangedLanguageSettings();
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+
+void LangJapSelect(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_JAPANESE;
+		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
+		FrontEndMenuManager.InitialiseChangedLanguageSettings();
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+#endif
+
 void
 CustomFrontendOptionsPopulate(void)
 {
 	// Moved to an array in MenuScreensCustom.cpp, but APIs are still available. see frontendoption.h
 
+	int fd;
 	// These work only if we have neo folder, so they're dynamically added
 #ifdef EXTENDED_PIPELINES
 	const char *pipelineNames[] = { "FED_PSP", "FED_PS2","FED_MOB" };
 	const char *off_on[] = { "FEM_OFF", "FEM_ON" };
-	int fd = CFileMgr::OpenFile("neo/neo.txd","r");
+	fd = CFileMgr::OpenFile("neo/neo.txd","r");
 	if (fd) {
 #ifdef GRAPHICS_MENU_OPTIONS
 		FrontendOptionSetCursor(MENUPAGE_GRAPHICS_SETTINGS, -3, false);
@@ -116,6 +151,38 @@ CustomFrontendOptionsPopulate(void)
 #endif
 		CFileMgr::CloseFile(fd);
 	}
+#endif
+	// Add outsourced language translations, if files are found
+#ifdef MORE_LANGUAGES
+	int fd2;
+	FrontendOptionSetCursor(MENUPAGE_LANGUAGE_SETTINGS, 5, false);
+#if 0
+	if (fd = CFileMgr::OpenFile("text/polish.gxt")) {
+		if (fd2 = CFileMgr::OpenFile("models/fonts_p.txd")) {
+			FrontendOptionAddDynamic("FEL_POL", 0, 0, MENUALIGN_CENTER, nil, nil, LangPolSelect, nil, nil);
+			CFileMgr::CloseFile(fd2);
+		}
+		CFileMgr::CloseFile(fd);
+	}
+#endif
+
+	if (fd = CFileMgr::OpenFile("text/russian.gxt")) {
+		if (fd2 = CFileMgr::OpenFile("models/fonts_r.txd")) {
+			FrontendOptionAddDynamic("FEL_RUS", 0, 0, MENUALIGN_CENTER, nil, nil, LangRusSelect, nil, nil);
+			CFileMgr::CloseFile(fd2);
+		}
+		CFileMgr::CloseFile(fd);
+	}
+
+#if 0
+	if (fd = CFileMgr::OpenFile("text/japanese.gxt")) {
+		if (fd2 = CFileMgr::OpenFile("models/fonts_j.txd")) {
+			FrontendOptionAddDynamic("FEL_JAP", 0, 0, MENUALIGN_CENTER, nil, nil, LangJapSelect, nil, nil);
+			CFileMgr::CloseFile(fd2);
+		}
+		CFileMgr::CloseFile(fd);
+	}
+#endif
 #endif
 
 }
@@ -466,8 +533,10 @@ bool LoadINISettings()
 	ReadIniIfExists("Draw", "FixSprites", &CDraw::ms_bFixSprites);	
 #endif
 #ifdef DRAW_GAME_VERSION_TEXT
-	extern bool gDrawVersionText;
-	ReadIniIfExists("General", "DrawVersionText", &gDrawVersionText);
+	ReadIniIfExists("General", "DrawVersionText", &gbDrawVersionText);
+#endif
+#ifdef NO_MOVIES
+	ReadIniIfExists("General", "NoMovies", &gbNoMovies);
 #endif
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
@@ -563,8 +632,10 @@ void SaveINISettings()
 	StoreIni("Draw", "FixSprites", CDraw::ms_bFixSprites);	
 #endif
 #ifdef DRAW_GAME_VERSION_TEXT
-	extern bool gDrawVersionText;
-	StoreIni("General", "DrawVersionText", gDrawVersionText);
+	StoreIni("General", "DrawVersionText", gbDrawVersionText);
+#endif
+#ifdef NO_MOVIES
+	StoreIni("General", "NoMovies", gbNoMovies);
 #endif
 #ifdef CUSTOM_FRONTEND_OPTIONS
 	for (int i = 0; i < MENUPAGES; i++) {
@@ -993,14 +1064,14 @@ extern bool gbRenderDebugEnvMap;
 		
 		
 #ifdef DRAW_GAME_VERSION_TEXT
-		extern bool gDrawVersionText;
-		DebugMenuAddVarBool8("Debug", "Version Text", &gDrawVersionText, nil);
+		DebugMenuAddVarBool8("Debug", "Version Text", &gbDrawVersionText, nil);
 #endif
 		DebugMenuAddVarBool8("Debug", "Show DebugStuffInRelease", &gbDebugStuffInRelease, nil);
 #ifdef TIMEBARS
 		DebugMenuAddVarBool8("Debug", "Show Timebars", &gbShowTimebars, nil);
 #endif
 #ifndef FINAL
+		DebugMenuAddVarBool8("Debug", "Use debug render groups", &bDebugRenderGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Print Memory Usage", &gbPrintMemoryUsage, nil);
 #ifdef USE_CUSTOM_ALLOCATOR
 		DebugMenuAddCmd("Debug", "Parse Heap", ParseHeap);

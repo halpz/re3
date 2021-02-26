@@ -1734,93 +1734,94 @@ cSampleManager::StartPreloadedStreamedFile(uint8 nStream)
 bool
 cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 {
+	int i = 0;
 	uint32 position = nPos;
-	char filename[256];
+	char filename[MAX_PATH];
 	
-	ASSERT( nStream < MAX_STREAMS );
-	
-	if ( nFile < TOTAL_STREAMED_SOUNDS )
+	if ( nFile >= TOTAL_STREAMED_SOUNDS )
+		return false;
+
+	if ( aStream[nStream] )
 	{
-		if ( aStream[nStream] )
+		delete aStream[nStream];
+		aStream[nStream] = NULL;
+	}
+	if ( nFile == STREAMED_SOUND_RADIO_MP3_PLAYER )
+	{
+		do
 		{
-			delete aStream[nStream];
-			aStream[nStream] = NULL;
-		}
-		
-		if ( nFile == STREAMED_SOUND_RADIO_MP3_PLAYER )
-		{
-			uint32 i = 0;
-			do {
-				if(i != 0 || _bIsMp3Active) {
-					if(++_CurMP3Index >= nNumMP3s) _CurMP3Index = 0;
+			// Just switched to MP3 player
+			if ( !_bIsMp3Active && i == 0 )
+			{
+				if ( nPos > nStreamLength[STREAMED_SOUND_RADIO_MP3_PLAYER] )
+					position = 0;
+				tMP3Entry *e = _pMP3List;
 
-					_CurMP3Pos = 0;
+				// Try to continue from previous song, if already started
+				if(!_GetMP3PosFromStreamPos(&position, &e) && !e) {
+					nFile = 0;
 
-					tMP3Entry *mp3 = _GetMP3EntryByIndex(_CurMP3Index);
+					strcpy(filename, StreamedNameTable[nFile]);
+					CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 
-					if(mp3) {
-						mp3 = _pMP3List;
-						if(mp3 == NULL) {
-							_bIsMp3Active = false;
-							nFile = 0;
-							strcat(filename, StreamedNameTable[nFile]);
+					aStream[nStream] = stream;
 
-							CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
-							ASSERT(stream != NULL);
+					if (stream->Setup()) {
+						stream->SetLoopCount(nStreamLoopedFlag[nStream] ? 0 : 1);
+						nStreamLoopedFlag[nStream] = true;
+						if (position != 0)
+							stream->SetPosMS(position);
 
-							aStream[nStream] = stream;
+						stream->Start();
 
-							if (stream->Setup()) {
-								stream->SetLoopCount(nStreamLoopedFlag[nStream] ? 0 : 1);
-								nStreamLoopedFlag[nStream] = true;
-								if (position != 0)
-									stream->SetPosMS(position);
-
-								stream->Start();
-
-								return true;
-							} else {
-								delete stream;
-								aStream[nStream] = NULL;
-							}
-
-							return false;
-						}
+						return true;
+					} else {
+						delete stream;
+						aStream[nStream] = NULL;
 					}
+					return false;
 
-					if (mp3->pLinkPath != NULL)
-						aStream[nStream] = new CStream(mp3->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+				} else {
+
+					if (e->pLinkPath != NULL)
+						aStream[nStream] = new CStream(e->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 					else {
 						strcpy(filename, _mp3DirectoryPath);
-						strcat(filename, mp3->aFilename);
+						strcat(filename, e->aFilename);
 
-						aStream[nStream] = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+						aStream[nStream] = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
 					}
 
 					if (aStream[nStream]->Setup()) {
+						if (position != 0)
+							aStream[nStream]->SetPosMS(position);
+
 						aStream[nStream]->Start();
 
+						_bIsMp3Active = true;
 						return true;
 					} else {
 						delete aStream[nStream];
 						aStream[nStream] = NULL;
 					}
-
-					_bIsMp3Active = false;
-					continue;
+					// fall through, start playing from another song
 				}
-				if ( nPos > nStreamLength[STREAMED_SOUND_RADIO_MP3_PLAYER] )
-					position = 0;
-				
-				tMP3Entry *e;
-				if ( !_GetMP3PosFromStreamPos(&position, &e) )
+			} else {
+				if(++_CurMP3Index >= nNumMP3s) _CurMP3Index = 0;
+
+				_CurMP3Pos = 0;
+
+				tMP3Entry *mp3 = _GetMP3EntryByIndex(_CurMP3Index);
+				if ( !mp3 )
 				{
-					if ( e == NULL )
+					mp3 = _pMP3List;
+					if ( !_pMP3List )
 					{
 						nFile = 0;
-						strcat(filename, StreamedNameTable[nFile]);
+						_bIsMp3Active = 0;
+						strcpy(filename, StreamedNameTable[nFile]);
+
 						CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
-						ASSERT(stream != NULL);
 
 						aStream[nStream] = stream;
 
@@ -1837,63 +1838,55 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 							delete stream;
 							aStream[nStream] = NULL;
 						}
-
 						return false;
 					}
 				}
-
-				if (e->pLinkPath != NULL)
-					aStream[nStream] = new CStream(e->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+				if (mp3->pLinkPath != NULL)
+					aStream[nStream] = new CStream(mp3->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 				else {
 					strcpy(filename, _mp3DirectoryPath);
-					strcat(filename, e->aFilename);
+					strcat(filename, mp3->aFilename);
 
-					aStream[nStream] = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+					aStream[nStream] = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 				}
 
 				if (aStream[nStream]->Setup()) {
-					if (position != 0)
-						aStream[nStream]->SetPosMS(position);
-
 					aStream[nStream]->Start();
-
+#ifdef FIX_BUGS
 					_bIsMp3Active = true;
+#endif
 					return true;
 				} else {
 					delete aStream[nStream];
 					aStream[nStream] = NULL;
 				}
-				
-				_bIsMp3Active = false;
 
-			} while(++i < nNumMP3s);
-
-			position = 0;
-			nFile = 0;
+			}
+			_bIsMp3Active = 0;
 		}
-
-		strcpy(filename, StreamedNameTable[nFile]);
-		
-		CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
-		ASSERT(stream != NULL);
-
-		aStream[nStream] = stream;
-		
-		if ( stream->Setup() ) {
-			stream->SetLoopCount(nStreamLoopedFlag[nStream] ? 0 : 1);
-			nStreamLoopedFlag[nStream] = true;
-			if (position != 0)
-				stream->SetPosMS(position);	
-
-			stream->Start();
-			
-			return true;
-		} else {
-			delete stream;
-			aStream[nStream] = NULL;
-		}
+		while ( ++i < nNumMP3s );
+		position = 0;
+		nFile = 0;
 	}
+	strcpy(filename, StreamedNameTable[nFile]);
 	
+	CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+
+	aStream[nStream] = stream;
+	
+	if ( stream->Setup() ) {
+		stream->SetLoopCount(nStreamLoopedFlag[nStream] ? 0 : 1);
+		nStreamLoopedFlag[nStream] = true;
+		if (position != 0)
+			stream->SetPosMS(position);	
+
+		stream->Start();
+		
+		return true;
+	} else {
+		delete stream;
+		aStream[nStream] = NULL;
+	}
 	return false;
 }
 
