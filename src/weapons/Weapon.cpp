@@ -1066,7 +1066,11 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 
 			if ( info->m_nFiringRate >= 50 || !(++counter & 1) )
 			{
+#ifdef FIX_BUGS
+				AddGunFlashBigGuns(*fireSource, target);
+#else
 				AddGunFlashBigGuns(*fireSource, *fireSource + target);
+#endif
 
 				CVector gunshellPos = *fireSource;
 				gunshellPos -= CVector(0.65f*ahead.x, 0.65f*ahead.y, 0.0f);
