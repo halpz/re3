@@ -578,11 +578,28 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 
 			ProcessLineOfSight(*fireSource, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, true, false);
 		}
+#ifdef FIX_BUGS
+		// fix muzzleflash rotation
+		heading = CGeneral::GetAngleBetweenPoints(fireSource->x, fireSource->y, target.x, target.y);
+		angle = DEGTORAD(heading);
+
+		ahead = CVector2D(-Sin(angle), Cos(angle));
+		ahead.Normalise();
+#endif
 	}
 	else if ( shooter == FindPlayerPed() && TheCamera.Cams[0].Using3rdPersonMouseCam()  )
 	{
 		CVector src, trgt;
 		TheCamera.Find3rdPersonCamTargetVector(info->m_fRange, *fireSource, src, trgt);
+
+#ifdef FIX_BUGS
+		// fix muzzleflash rotation
+		heading = CGeneral::GetAngleBetweenPoints(src.x, src.y, trgt.x, trgt.y);
+		angle = DEGTORAD(heading);
+
+		ahead = CVector2D(-Sin(angle), Cos(angle));
+		ahead.Normalise();
+#endif
 
 		CWorld::bIncludeDeadPeds = true;
 		ProcessLineOfSight(src, trgt,point, victim, m_eWeaponType, shooter, true, true, true, true, true, true, false);
