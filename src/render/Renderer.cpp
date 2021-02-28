@@ -75,6 +75,8 @@ int32 CRenderer::ms_nNoOfVisibleVehicles;
 CEntity *CRenderer::ms_aVisibleVehiclePtrs[NUMVISIBLEENTITIES];
 int32 CRenderer::ms_nNoOfVisibleBuildings;
 CEntity *CRenderer::ms_aVisibleBuildingPtrs[NUMVISIBLEENTITIES];
+
+CLinkList<EntityInfo> gSortedBuildings;
 #endif
 
 CVector CRenderer::ms_vecCameraPosition;
@@ -92,12 +94,18 @@ CRenderer::Init(void)
 {
 	gSortedVehiclesAndPeds.Init(40);
 	SortBIGBuildings();
+#ifdef NEW_RENDERER
+	gSortedBuildings.Init(NUMVISIBLEENTITIES);
+#endif
 }
 
 void
 CRenderer::Shutdown(void)
 {
 	gSortedVehiclesAndPeds.Shutdown();
+#ifdef NEW_RENDERER
+	gSortedBuildings.Shutdown();
+#endif
 }
 
 void
@@ -114,8 +122,12 @@ CRenderer::PreRender(void)
 		for(i = 0; i < ms_nNoOfVisibleVehicles; i++)
 			ms_aVisibleVehiclePtrs[i]->PreRender();
 		// How is this done with cWorldStream?
-		for(i = 0; i < ms_nNoOfVisibleBuildings; i++)
-			ms_aVisibleBuildingPtrs[i]->PreRender();
+		//for(i = 0; i < ms_nNoOfVisibleBuildings; i++)
+		//	ms_aVisibleBuildingPtrs[i]->PreRender();
+		for(CLink<EntityInfo> *node = gSortedBuildings.head.next;
+		    node != &gSortedBuildings.tail;
+		    node = node->next)
+			((CEntity*)node->item.ent)->PreRender();
 		for(node = CVisibilityPlugins::m_alphaBuildingList.head.next;
 		    node != &CVisibilityPlugins::m_alphaBuildingList.tail;
 		    node = node->next)
@@ -497,8 +509,17 @@ CRenderer::RenderWorld(int pass)
 		// Roads
 		PUSH_RENDERGROUP("CRenderer::RenderWorld - Roads");
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+/*
 		for(i = 0; i < ms_nNoOfVisibleBuildings; i++){
 			e = ms_aVisibleBuildingPtrs[i];
+			if(e->bIsBIGBuilding || IsRoad(e))
+				RenderOneBuilding(e);
+		}
+*/
+		for(CLink<EntityInfo> *node = gSortedBuildings.tail.prev;
+		    node != &gSortedBuildings.head;
+		    node = node->prev){
+			e = node->item.ent;
 			if(e->bIsBIGBuilding || IsRoad(e))
 				RenderOneBuilding(e);
 		}
@@ -522,8 +543,17 @@ CRenderer::RenderWorld(int pass)
 		// Opaque
 		PUSH_RENDERGROUP("CRenderer::RenderWorld - Opaque");
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+/*
 		for(i = 0; i < ms_nNoOfVisibleBuildings; i++){
 			e = ms_aVisibleBuildingPtrs[i];
+			if(!(e->bIsBIGBuilding || IsRoad(e)))
+				RenderOneBuilding(e);
+		}
+*/
+		for(CLink<EntityInfo> *node = gSortedBuildings.tail.prev;
+		    node != &gSortedBuildings.head;
+		    node = node->prev){
+			e = node->item.ent;
 			if(!(e->bIsBIGBuilding || IsRoad(e)))
 				RenderOneBuilding(e);
 		}
@@ -640,6 +670,7 @@ CRenderer::ClearForFrame(void)
 	ms_nNoOfVisibleBuildings = 0;
 	ms_nNoOfInVisibleEntities = 0;
 	gSortedVehiclesAndPeds.Clear();
+	gSortedBuildings.Clear();
 
 	WorldRender::numBlendInsts[PASS_NOZ] = 0;
 	WorldRender::numBlendInsts[PASS_ADD] = 0;
@@ -1438,9 +1469,13 @@ CRenderer::InsertEntityIntoList(CEntity *ent)
 	// TODO: there are more flags being checked here
 	if(gbNewRenderer && (ent->IsVehicle() || ent->IsPed()))
 		ms_aVisibleVehiclePtrs[ms_nNoOfVisibleVehicles++] = ent;
-	else if(gbNewRenderer && ent->IsBuilding())
-		ms_aVisibleBuildingPtrs[ms_nNoOfVisibleBuildings++] = ent;
-	else
+	else if(gbNewRenderer && ent->IsBuilding()){
+		EntityInfo info;
+		info.ent = ent;
+		info.sort = -(ent->GetPosition() - ms_vecCameraPosition).MagnitudeSqr();
+		gSortedBuildings.InsertSorted(info);
+//		ms_aVisibleBuildingPtrs[ms_nNoOfVisibleBuildings++] = ent;
+	}else
 #endif
 		ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities++] = ent;
 }
