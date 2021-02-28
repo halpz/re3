@@ -670,6 +670,7 @@ char *DoubleSidedNames[] = {
 	"sbwy_tunl_cstm3",
 	"sbwy_tunl_cstm2",
 	"sbwy_tunl_cstm1",
+	"tenmnt6ad",
 	""
 
 };

@@ -595,6 +595,7 @@ struct BuildingInst
 {
 	rw::Matrix matrix;
 	rw::gl3::InstanceDataHeader *instHeader;
+	uint32 cullMode;
 	uint8 fadeAlpha;
 	bool lighting;
 };
@@ -627,6 +628,7 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 	assert(building->instHeader->platform == PLATFORM_GL3);
 	building->fadeAlpha = 255;
 	building->lighting = !!(atomic->geometry->flags & rw::Geometry::LIGHT);
+	building->cullMode = rw::GetRenderState(rw::CULLMODE);
 	rw::uint32 flags = atomic->geometry->flags;
 
 	WorldLights lights;
@@ -654,6 +656,7 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 
 		// alright we're rendering this atomic
 		if(!setupDone){
+			rw::SetRenderState(rw::CULLMODE, building->cullMode);
 			defaultShader->use();
 			setWorldMatrix(&building->matrix);
 			setupVertexInput(building->instHeader);
@@ -686,6 +689,7 @@ AtomicFullyTransparent(RpAtomic *atomic, int pass, int fadeAlpha)
 	assert(building->instHeader->platform == PLATFORM_GL3);
 	building->fadeAlpha = fadeAlpha;
 	building->lighting = !!(atomic->geometry->flags & rw::Geometry::LIGHT);
+	building->cullMode = rw::GetRenderState(rw::CULLMODE);
 	building->matrix = *atomic->getFrame()->getLTM();
 	numBlendInsts[pass]++;
 }
@@ -706,6 +710,7 @@ RenderBlendPass(int pass)
 	for(i = 0; i < numBlendInsts[pass]; i++){
 		BuildingInst *building = &blendInsts[pass][i];
 
+		rw::SetRenderState(rw::CULLMODE, building->cullMode);
 		setupVertexInput(building->instHeader);
 		setWorldMatrix(&building->matrix);
 		if(building->lighting)

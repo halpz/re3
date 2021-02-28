@@ -82,14 +82,6 @@ CVehicle *CRenderer::m_pFirstPersonVehicle;
 bool CRenderer::m_loadingPriority;
 float CRenderer::ms_lodDistScale = 1.2f;
 
-#ifdef EXTRA_MODEL_FLAGS
-#define BACKFACE_CULLING_ON SetCullMode(rwCULLMODECULLBACK)
-#define BACKFACE_CULLING_OFF SetCullMode(rwCULLMODECULLNONE)
-#else
-#define BACKFACE_CULLING_ON
-#define BACKFACE_CULLING_OFF
-#endif
-
 // unused
 BlockedRange CRenderer::aBlockedRanges[16];
 BlockedRange *CRenderer::pFullBlockedRanges;
@@ -442,6 +434,14 @@ CRenderer::RenderOneBuilding(CEntity *ent, float camdist)
 	RpAtomic *atomic = (RpAtomic*)ent->m_rwObject;
 	CSimpleModelInfo *mi = (CSimpleModelInfo*)CModelInfo::GetModelInfo(ent->GetModelIndex());
 
+#ifdef EXTRA_MODEL_FLAGS
+	bool resetCull = false;
+	if(!ent->IsBuilding() || mi->RenderDoubleSided()){
+		resetCull = true;
+		BACKFACE_CULLING_OFF;
+	}
+#endif
+
 	int pass = PASS_BLEND;
 	if(mi->m_additive)	// very questionable
 		pass = PASS_ADD;
@@ -471,6 +471,11 @@ CRenderer::RenderOneBuilding(CEntity *ent, float camdist)
 	}else
 		WorldRender::AtomicFirstPass(atomic, pass);
 
+#ifdef EXTRA_MODEL_FLAGS
+	if(resetCull)
+		BACKFACE_CULLING_ON;
+#endif
+
 	ent->bImBeingRendered = false;	// TODO: this seems wrong, but do we even need it?
 }
 
@@ -482,6 +487,7 @@ CRenderer::RenderWorld(int pass)
 	CLink<CVisibilityPlugins::AlphaObjectInfo> *node;
 
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
+	BACKFACE_CULLING_ON;
 	DeActivateDirectional();
 	SetAmbientColours();
 

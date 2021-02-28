@@ -568,6 +568,7 @@ struct BuildingInst
 {
 	rw::RawMatrix combinedMat;
 	rw::d3d9::InstanceDataHeader *instHeader;
+	uint32 cullMode;
 	uint8 fadeAlpha;
 	bool lighting;
 };
@@ -612,6 +613,7 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 	assert(building->instHeader->platform == PLATFORM_D3D9);
 	building->fadeAlpha = 255;
 	building->lighting = !!(atomic->geometry->flags & rw::Geometry::LIGHT);
+	building->cullMode = rw::GetRenderState(rw::CULLMODE);
 	rw::uint32 flags = atomic->geometry->flags;
 
 	bool setupDone = false;
@@ -630,6 +632,7 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 
 		// alright we're rendering this atomic
 		if(!setupDone){
+			rw::SetRenderState(rw::CULLMODE, building->cullMode);
 			setStreamSource(0, building->instHeader->vertexStream[0].vertexBuffer, 0, building->instHeader->vertexStream[0].stride);
 			setIndices(building->instHeader->indexBuffer);
 			setVertexDeclaration(building->instHeader->vertexDeclaration);
@@ -671,6 +674,7 @@ AtomicFullyTransparent(RpAtomic *atomic, int pass, int fadeAlpha)
 	assert(building->instHeader->platform == PLATFORM_D3D9);
 	building->fadeAlpha = fadeAlpha;
 	building->lighting = !!(atomic->geometry->flags & rw::Geometry::LIGHT);
+	building->cullMode = rw::GetRenderState(rw::CULLMODE);
 	SetMatrix(building, atomic->getFrame()->getLTM());
 	numBlendInsts[pass]++;
 }
@@ -688,6 +692,7 @@ RenderBlendPass(int pass)
 	for(i = 0; i < numBlendInsts[pass]; i++){
 		BuildingInst *building = &blendInsts[pass][i];
 
+		rw::SetRenderState(rw::CULLMODE, building->cullMode);
 		setStreamSource(0, building->instHeader->vertexStream[0].vertexBuffer, 0, building->instHeader->vertexStream[0].stride);
 		setIndices(building->instHeader->indexBuffer);
 		setVertexDeclaration(building->instHeader->vertexDeclaration);

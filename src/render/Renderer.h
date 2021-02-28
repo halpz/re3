@@ -10,6 +10,14 @@ class CEntity;
 #define FADE_DISTANCE 20.0f
 #define STREAM_DISTANCE 30.0f
 
+#ifdef EXTRA_MODEL_FLAGS
+#define BACKFACE_CULLING_ON SetCullMode(rwCULLMODECULLBACK)
+#define BACKFACE_CULLING_OFF SetCullMode(rwCULLMODECULLNONE)
+#else
+#define BACKFACE_CULLING_ON
+#define BACKFACE_CULLING_OFF
+#endif
+
 extern bool gbShowPedRoadGroups;
 extern bool gbShowCarRoadGroups;
 extern bool gbShowCollisionPolys;

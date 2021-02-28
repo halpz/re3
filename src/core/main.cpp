@@ -1333,11 +1333,13 @@ void
 RenderEffects_new(void)
 {
 	PUSH_RENDERGROUP("RenderEffects_new");
+/*	// stupid to do this before the whole world is drawn!
 	CShadows::RenderStaticShadows();
 	// CRenderer::GenerateEnvironmentMap
 	CShadows::RenderStoredShadows();
 	CSkidmarks::Render();
 	CRubbish::Render();
+*/
 
 	// these aren't really effects
 	DefinedState();
@@ -1360,6 +1362,13 @@ if(gbRenderFadingInEntities)
 	CRenderer::RenderFadingInEntities();
 
 	// actual effects here
+
+	// from above
+	CShadows::RenderStaticShadows();
+	CShadows::RenderStoredShadows();
+	CSkidmarks::Render();
+	CRubbish::Render();
+
 	CGlass::Render();
 	// CMattRenderer::ResetRenderStates
 	DefinedState();

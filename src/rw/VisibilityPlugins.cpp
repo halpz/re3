@@ -303,6 +303,8 @@ CVisibilityPlugins::RenderFadingEntities(void)
 #ifdef EXTRA_MODEL_FLAGS
 		else if(mi->m_bIsTree)
 			SetAlphaRef(128);
+		if(!e->IsBuilding() || mi->RenderDoubleSided())
+			BACKFACE_CULLING_OFF;
 #endif
 
 		if(e->bDistanceFade){
@@ -319,6 +321,7 @@ CVisibilityPlugins::RenderFadingEntities(void)
 #ifdef EXTRA_MODEL_FLAGS
 		if(mi->m_bIsTree)
 			SetAlphaRef(2);
+		BACKFACE_CULLING_ON;
 #endif
 #ifdef FIX_BUGS
 		if(mi->GetModelType() == MITYPE_SIMPLE && mi->m_noZwrite)
