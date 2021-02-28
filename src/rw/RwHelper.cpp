@@ -4,6 +4,7 @@
 #include "Timecycle.h"
 #include "skeleton.h"
 #include "Debug.h"
+#include "MBlur.h"
 #if !defined(FINAL) || defined(DEBUGMENU)
 #include "rtcharse.h"
 #endif
@@ -608,6 +609,13 @@ CameraSize(RwCamera * camera, RwRect * rect,
 
 		RsGlobal.width  = rect->w;
 		RsGlobal.height = rect->h;
+
+#ifdef FIX_BUGS
+		if(CMBlur::BlurOn){
+			CMBlur::MotionBlurClose();
+			CMBlur::MotionBlurOpen(camera);
+		}
+#endif
 	}
 
 	return;
