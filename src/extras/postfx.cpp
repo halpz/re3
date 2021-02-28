@@ -48,6 +48,9 @@ CPostFX::InitOnce(void)
 void
 CPostFX::Open(RwCamera *cam)
 {
+	if(pFrontBuffer)
+		Close();
+
 	uint32 width  = Pow(2.0f, int32(log2(RwRasterGetWidth (RwCameraGetRaster(cam))))+1);
 	uint32 height = Pow(2.0f, int32(log2(RwRasterGetHeight(RwCameraGetRaster(cam))))+1);
 	uint32 depth  = RwRasterGetDepth(RwCameraGetRaster(cam));
