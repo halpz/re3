@@ -581,6 +581,12 @@ CameraSize(RwCamera * camera, RwRect * rect,
 			raster->width = zRaster->width = rect->w;
 			raster->height = zRaster->height = rect->h;
 #endif
+#ifdef FIX_BUGS
+			if(CMBlur::BlurOn){
+				CMBlur::MotionBlurClose();
+				CMBlur::MotionBlurOpen(camera);
+			}
+#endif
 		}
 
 		/* Figure out the view window */
@@ -609,13 +615,6 @@ CameraSize(RwCamera * camera, RwRect * rect,
 
 		RsGlobal.width  = rect->w;
 		RsGlobal.height = rect->h;
-
-#ifdef FIX_BUGS
-		if(CMBlur::BlurOn){
-			CMBlur::MotionBlurClose();
-			CMBlur::MotionBlurOpen(camera);
-		}
-#endif
 	}
 
 	return;
