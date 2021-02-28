@@ -245,10 +245,16 @@ CGame::InitialiseRenderWare(void)
 
 #ifdef LIBRW
 #ifdef PS2_MATFX
-	rw::MatFX::modulateEnvMap = true;
+	rw::MatFX::envMapApplyLight = true;
+	rw::MatFX::envMapUseMatColor = true;
+	rw::MatFX::envMapFlipU = true;
 #else
-	rw::MatFX::modulateEnvMap = false;
+	rw::MatFX::envMapApplyLight = false;
+	rw::MatFX::envMapUseMatColor = false;
+	rw::MatFX::envMapFlipU = false;
 #endif
+	rw::RGBA envcol = { 128, 128, 128, 255 };
+	rw::MatFX::envMapColor = envcol;
 #else
 #ifdef PS2_MATFX
 	ReplaceMatFxCallback();

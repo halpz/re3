@@ -1451,7 +1451,7 @@ CRenderer::ScanBigBuildingList(CPtrList &list)
 		// all missing from game actually
 		TestedBigBuildings++;
 #endif
-		if(!ent->bZoneCulled){
+		if(!ent->bZoneCulled || gbDisableZoneCull){
 			if(SetupBigBuildingVisibility(ent) == VIS_VISIBLE)
 				InsertEntityIntoList(ent);
 #ifndef MASTER
