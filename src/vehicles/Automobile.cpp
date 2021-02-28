@@ -4050,7 +4050,7 @@ CAutomobile::GetHeightAboveRoad(void)
 void
 CAutomobile::PlayCarHorn(void)
 {
-	int r;
+	uint32 r;
 
 	if(m_nCarHornTimer != 0)
 		return;
