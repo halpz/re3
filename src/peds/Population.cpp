@@ -911,10 +911,9 @@ CPopulation::MoveCarsAndPedsOutOfAbandonedZones()
 void
 CPopulation::ConvertAllObjectsToDummyObjects()
 {
-	int poolSize = CPools::GetObjectPool()->GetSize();
-	for (int poolIndex = poolSize - 1; poolIndex >= 0; poolIndex--) {
-
-		CObject *obj = CPools::GetObjectPool()->GetSlot(poolIndex);
+	uint32 i = CPools::GetObjectPool()->GetSize();
+	while(i--) {
+		CObject *obj = CPools::GetObjectPool()->GetSlot(i);
 		if (obj) {
 			if (obj->CanBeDeleted())
 				ConvertToDummyObject(obj);

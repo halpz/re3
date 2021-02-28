@@ -1724,7 +1724,13 @@ CStreaming::StreamVehiclesAndPeds(void)
 		for(i = 0; i < CCarCtrl::TOTAL_CUSTOM_CLASSES; i++){
 			if(CCarCtrl::NumRequestsOfCarRating[i] > maxReq &&
 				((i == 0 && zone.carThreshold[0] != 0) ||
+#ifdef FIX_BUGS
+				(i < CCarCtrl::NUM_CAR_CLASSES && zone.carThreshold[i] != zone.carThreshold[i-1]) ||
+				(i == CCarCtrl::NUM_CAR_CLASSES && zone.boatThreshold[i - CCarCtrl::NUM_CAR_CLASSES] != 0) ||
+				(i > CCarCtrl::NUM_CAR_CLASSES && i < CCarCtrl::TOTAL_CUSTOM_CLASSES && zone.boatThreshold[i - CCarCtrl::NUM_CAR_CLASSES] != zone.boatThreshold[i - CCarCtrl::NUM_CAR_CLASSES - 1]))) {
+#else
 				(i != 0 && zone.carThreshold[i] != zone.carThreshold[i-1]))) {
+#endif
 				maxReq = CCarCtrl::NumRequestsOfCarRating[i];
 				mostRequestedRating = i;
 			}

@@ -105,7 +105,7 @@ CPools::CheckPoolsEmpty()
 	printf("pools have been cleared\n");
 }
 
-
+// Thankfully unused, it would break the game!
 void
 CPools::MakeSureSlotInObjectPoolIsEmpty(int32 slot)
 {

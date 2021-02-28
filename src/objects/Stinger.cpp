@@ -234,5 +234,8 @@ CStinger::Process()
 		Remove();
 		break;
 	}
+#ifdef FIX_BUGS
+	if (bIsDeployed)
+#endif
 	CheckForBurstTyres();
 }

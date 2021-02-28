@@ -2546,7 +2546,7 @@ CBike::GetHeightAboveRoad(void)
 void
 CBike::PlayCarHorn(void)
 {
-	int r;
+	uint32 r;
 
 	if (IsAlarmOn() || m_nCarHornTimer != 0)
 		return;
