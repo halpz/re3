@@ -93,7 +93,7 @@ CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 	m_nHassleTimer = 0;
 	field_61C = 0;
 	field_624 = 0;
-	m_pStinger = new CStinger;
+	m_pStinger = new CStinger();
 	SetWeaponLockOnTarget(nil);
 }
 

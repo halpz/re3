@@ -452,6 +452,7 @@ CTheZones::GetZoneInfoForTimeOfDay(const CVector *pos, CZoneInfo *info)
 			assert(d >= 0.0f && d <= 1.0f);
 			n = 1.0f - d;
 		}
+#ifdef FIX_BUGS
 		info->carDensity = day->carDensity * d + night->carDensity * n;
 		for(i = 0; i < ARRAY_SIZE(info->carThreshold); i++)
 			info->carThreshold[i] = day->carThreshold[i] * d + night->carThreshold[i] * n;
@@ -465,6 +466,22 @@ CTheZones::GetZoneInfoForTimeOfDay(const CVector *pos, CZoneInfo *info)
 		info->copPedThreshold = day->copPedThreshold * d + night->copPedThreshold * n;
 		for(i = 0; i < ARRAY_SIZE(info->gangPedThreshold); i++)
 			info->gangPedThreshold[i] = day->gangPedThreshold[i] * d + night->gangPedThreshold[i] * n;
+#else
+		// This is a complete mess.
+		info->carDensity = day->carDensity * n + night->carDensity * d;
+		for(i = 0; i < ARRAY_SIZE(info->carThreshold); i++)
+			info->carThreshold[i] = night->carThreshold[i] * d + night->carThreshold[i] * n;
+		for(i = 0; i < ARRAY_SIZE(info->boatThreshold); i++)
+			info->boatThreshold[i] = night->boatThreshold[i] * d + night->boatThreshold[i] * n;
+		for(i = 0; i < ARRAY_SIZE(info->gangThreshold); i++)
+			info->gangThreshold[i] = night->gangThreshold[i] * d + night->gangThreshold[i] * n;
+
+		info->copThreshold = night->copThreshold * d + night->copThreshold * n;
+		info->pedDensity = night->pedDensity * d + night->pedDensity * n;
+		info->copPedThreshold = night->copPedThreshold * d + night->copPedThreshold * n;
+		for(i = 0; i < ARRAY_SIZE(info->gangPedThreshold); i++)
+			info->gangPedThreshold[i] = night->gangPedThreshold[i] * d + night->gangPedThreshold[i] * n;
+#endif
 	}
 	if(CClock::GetIsTimeInRange(5, 19))
 		info->pedGroup = day->pedGroup;

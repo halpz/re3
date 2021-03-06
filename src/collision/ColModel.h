@@ -33,7 +33,7 @@ struct CColModel
 	void SetLinkPtr(CLink<CColModel*>*);
 	void GetTrianglePoint(CVector &v, int i) const;
 
-	void *operator new(size_t);
-	void operator delete(void *p, size_t);
+	void *operator new(size_t) throw();
+	void operator delete(void *p, size_t) throw();
 	CColModel& operator=(const CColModel& other);
 };

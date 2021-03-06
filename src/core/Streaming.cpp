@@ -1873,8 +1873,7 @@ CStreaming::RemoveCurrentZonesModels(void)
 	if (ms_currentPedGrp != -1)
 		for (i = 0; i < NUMMODELSPERPEDGROUP; i++) {
 			ms_bIsPedFromPedGroupLoaded[i] = false;
-			if (CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] != -1 &&
-			    CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] != MI_MALE01) {
+			if (CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i] != -1) {
 				SetModelIsDeletable(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i]);
 				SetModelTxdIsDeletable(CPopulation::ms_pPedGroups[ms_currentPedGrp].models[i]);
 			}
