@@ -155,7 +155,7 @@ CreateVehiclePipe(void)
 	{
 #include "shaders/obj/neoVehicle_frag.inc"
 #include "shaders/obj/neoVehicle_vert.inc"
-	const char *vs[] = { shaderDecl, header_vert_src, neoVehicle_vert_src, nil };
+	const char *vs[] = { shaderDecl, "#define DIRECTIONALS\n", header_vert_src, neoVehicle_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, neoVehicle_frag_src, nil };
 	neoVehicleShader = Shader::create(vs, fs);
 	assert(neoVehicleShader);
@@ -516,7 +516,7 @@ CreateRimLightPipes(void)
 	{
 #include "shaders/obj/simple_frag.inc"
 #include "shaders/obj/neoRimSkin_vert.inc"
-	const char *vs[] = { shaderDecl, header_vert_src, neoRimSkin_vert_src, nil };
+	const char *vs[] = { shaderDecl, "#define DIRECTIONALS\n", header_vert_src, neoRimSkin_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, simple_frag_src, nil };
 	neoRimSkinShader = Shader::create(vs, fs);
 	assert(neoRimSkinShader);
@@ -525,7 +525,7 @@ CreateRimLightPipes(void)
 	{
 #include "shaders/obj/simple_frag.inc"
 #include "shaders/obj/neoRim_vert.inc"
-	const char *vs[] = { shaderDecl, header_vert_src, neoRim_vert_src, nil };
+	const char *vs[] = { shaderDecl, "#define DIRECTIONALS\n", header_vert_src, neoRim_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, simple_frag_src, nil };
 	neoRimShader = Shader::create(vs, fs);
 	assert(neoRimShader);
