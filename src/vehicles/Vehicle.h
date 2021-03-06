@@ -278,10 +278,10 @@ public:
 	float m_fSteerInput;
 	uint8 m_vehType;
 
-	static void *operator new(size_t);
-	static void *operator new(size_t sz, int slot);
-	static void operator delete(void*, size_t);
-	static void operator delete(void*, int);
+	static void *operator new(size_t) throw();
+	static void *operator new(size_t sz, int slot) throw();
+	static void operator delete(void*, size_t) throw();
+	static void operator delete(void*, int) throw();
 
 	CVehicle(void) {}	// FAKE
 	CVehicle(uint8 CreatedBy);

@@ -46,7 +46,14 @@ CStinger::Init(CPed *pPed)
 
 	pOwner = pPed;
 	for (i = 0; i < NUM_STINGER_SEGMENTS; i++) {
-		pSpikes[i] = new CStingerSegment;
+		pSpikes[i] = new CStingerSegment();
+#ifdef FIX_BUGS
+		if (!pSpikes[i]) {
+			// Abort!! Pool is full
+			Remove();
+			return;
+		}
+#endif
 		pSpikes[i]->bUsesCollision = false;
 	}
 	bIsDeployed = true;
@@ -77,8 +84,11 @@ CStinger::Remove()
 		CStingerSegment *spikeSegment = pSpikes[i];
 
 #ifdef FIX_BUGS
-		CWorld::Remove(spikeSegment);
-		delete spikeSegment;
+		if (spikeSegment) {
+			CWorld::Remove(spikeSegment);
+			delete spikeSegment;
+			pSpikes[i] = nil;
+		}
 #else
 		if (spikeSegment->m_entryInfoList.first != nil)
 			spikeSegment->bRemoveFromWorld = true;
@@ -92,9 +102,15 @@ CStinger::Remove()
 void
 CStinger::Deploy(CPed *pPed)
 {
+	// So total number of stingers allowed at the same time is 2, each by different CCopPed.
 	if (NumOfStingerSegments < NUM_STINGER_SEGMENTS*2 && !pPed->bInVehicle && pPed->IsPedInControl()) {
 		if (!bIsDeployed && RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_STD_THROW_UNDER) == nil) {
 			Init(pPed);
+#ifdef FIX_BUGS
+			// Above call won't set it to true no more when object pool is full
+			if (!bIsDeployed)
+				return;
+#endif
 			pPed->SetPedState(PED_DEPLOY_STINGER);
 			CAnimManager::AddAnimation(pPed->GetClump(), ASSOCGRP_STD, ANIM_STD_THROW_UNDER);
 		}
@@ -167,6 +183,7 @@ CStinger::CheckForBurstTyres()
 	}
 }
 
+// Only called when bIsDeployed
 void
 CStinger::Process()
 {
@@ -232,10 +249,11 @@ CStinger::Process()
 		break;
 	case STINGERSTATE_REMOVE:
 		Remove();
-		break;
-	}
 #ifdef FIX_BUGS
-	if (bIsDeployed)
+		return;
+#else
+		break;
 #endif
+	}
 	CheckForBurstTyres();
 }
