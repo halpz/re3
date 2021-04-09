@@ -911,10 +911,9 @@ CPopulation::MoveCarsAndPedsOutOfAbandonedZones()
 void
 CPopulation::ConvertAllObjectsToDummyObjects()
 {
-	int poolSize = CPools::GetObjectPool()->GetSize();
-	for (int poolIndex = poolSize - 1; poolIndex >= 0; poolIndex--) {
-
-		CObject *obj = CPools::GetObjectPool()->GetSlot(poolIndex);
+	uint32 i = CPools::GetObjectPool()->GetSize();
+	while(i--) {
+		CObject *obj = CPools::GetObjectPool()->GetSlot(i);
 		if (obj) {
 			if (obj->CanBeDeleted())
 				ConvertToDummyObject(obj);
@@ -1488,8 +1487,11 @@ CPopulation::PlaceGangMembersInCircle(ePedType pedType, int pedAmount, CVector c
 		if (CPedPlacement::IsPositionClearForPed(coors, circleR, -1, 0)) {
 			int pedIdx = 0;
 			CVector leaderPos;
+#ifdef FIX_BUGS
+			bool createLeader = true;
+#endif
 
-			for (int i = 0; i < pedAmount; i++) {	
+			for (int i = 0; i < pedAmount; i++) {
 				float angleMult = i + CGeneral::GetRandomNumberInRange(-0.2f, 0.2f);
 				float randomR = circleR + CGeneral::GetRandomNumberInRange(-0.2f, 0.2f) * circleR;
 				float xOffset = randomR * Cos(angleMult * circleSector);
@@ -1498,8 +1500,10 @@ CPopulation::PlaceGangMembersInCircle(ePedType pedType, int pedAmount, CVector c
 				float groundZ = CWorld::FindGroundZFor3DCoord(xOffset + coors.x, yOffset + coors.y, coors.z + 1.0, &foundGround) + 1.0f;
 				if (foundGround) {
 					CVector finalPos(coors.x + xOffset, coors.y + yOffset, coors.z > groundZ ? coors.z : groundZ);
-
-					if (i == 0)
+#ifndef FIX_BUGS
+					const bool createLeader = i == 0;
+#endif
+					if (createLeader)
 						leaderPos = finalPos;
 
 					int gangModel = ChooseGangOccupation(pedType - PEDTYPE_GANG1);
@@ -1522,9 +1526,9 @@ CPopulation::PlaceGangMembersInCircle(ePedType pedType, int pedAmount, CVector c
 								}
 							}
 						}
-						bool memberCanSeeLeader = i == 0 ? true : CWorld::GetIsLineOfSightClear(finalPos, leaderPos, true, false, false, false, false, false, false);
+						bool memberCanSeeLeader = createLeader ? true : CWorld::GetIsLineOfSightClear(finalPos, leaderPos, true, false, false, false, false, false, false);
 
-						bool notTooCloseToLeader = i == 0 ? true : !(Abs(finalPos.z - leaderPos.z) < 1.0f);
+						bool notTooCloseToLeader = createLeader ? true : !(Abs(finalPos.z - leaderPos.z) < 1.0f);
 
 						if (!foundObstacle && memberCanSeeLeader && notTooCloseToLeader) {
 							CPed* newPed = AddPed(pedType, gangModel, finalPos);
@@ -1547,6 +1551,9 @@ CPopulation::PlaceGangMembersInCircle(ePedType pedType, int pedAmount, CVector c
 #endif
 						}
 					}
+#ifdef FIX_BUGS
+					createLeader = false;
+#endif
 				}
 			}
 			if (pedIdx >= 3) {
@@ -1671,6 +1678,9 @@ CPopulation::PlaceMallPedsAsStationaryGroup(CVector const& coors, int32 group)
 		if (CPedPlacement::IsPositionClearForPed(coors, circleR, -1, 0)) {
 			int pedIdx = 0;
 			CVector leaderPos;
+#ifdef FIX_BUGS
+			bool createLeader = true;
+#endif
 
 			for (int i = 0; i < pedAmount; i++) {	
 				float angleMult = i + CGeneral::GetRandomNumberInRange(-0.2f, 0.2f);
@@ -1682,7 +1692,10 @@ CPopulation::PlaceMallPedsAsStationaryGroup(CVector const& coors, int32 group)
 				if (foundGround) {
 					CVector finalPos(coors.x + xOffset, coors.y + yOffset, coors.z > groundZ ? coors.z : groundZ);
 
-					if (i == 0)
+#ifndef FIX_BUGS
+					const bool createLeader = i == 0;
+#endif
+					if (createLeader)
 						leaderPos = finalPos;
 
 					int pedModel = ChooseCivilianOccupation(group);
@@ -1706,9 +1719,9 @@ CPopulation::PlaceMallPedsAsStationaryGroup(CVector const& coors, int32 group)
 								}
 							}
 						}
-						bool memberCanSeeLeader = i == 0 ? true : CWorld::GetIsLineOfSightClear(finalPos, leaderPos, true, false, false, false, false, false, false);
+						bool memberCanSeeLeader = createLeader ? true : CWorld::GetIsLineOfSightClear(finalPos, leaderPos, true, false, false, false, false, false, false);
 
-						bool notTooCloseToLeader = i == 0 ? true : !(Abs(finalPos.z - leaderPos.z) < 1.0f);
+						bool notTooCloseToLeader = createLeader ? true : !(Abs(finalPos.z - leaderPos.z) < 1.0f);
 
 						if (!foundObstacle && memberCanSeeLeader && notTooCloseToLeader) {
 							CPed *newPed = AddPed(pedModelInfo->m_pedType, pedModel, finalPos);
@@ -1729,6 +1742,9 @@ CPopulation::PlaceMallPedsAsStationaryGroup(CVector const& coors, int32 group)
 #endif
 						}
 					}
+#ifdef FIX_BUGS
+					createLeader = false;
+#endif
 				}
 			}
 			if (pedIdx >= 3) {
