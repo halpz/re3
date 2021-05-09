@@ -3494,7 +3494,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 		brakeState = veh->m_fBrakePedal * 255.0f;
 	}
 	freqModifier = Abs(veh->GetUp().y);
-	cameraAngle = (DotProduct(veh->m_matrix.GetForward(), TheCamera.GetForward()) + 1.0f) / 2.0f;
+	cameraAngle = (DotProduct(veh->GetMatrix().GetForward(), TheCamera.GetForward()) + 1.0f) / 2.0f;
 	if (veh->m_modelIndex == MI_SKIMMER) {
 		boat = (CBoat*)veh;
 		propellerSpeed = boat->m_fMovingSpeed * 50.0f / 11.0f;

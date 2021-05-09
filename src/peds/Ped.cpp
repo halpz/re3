@@ -7761,7 +7761,7 @@ CPed::SetPedPositionInCar(void)
 	} else {
 		m_fRotationCur = m_pMyVehicle->GetForward().Heading();
 	}
-	GetMatrix() = newMat;
+	SetMatrix(newMat);
 }
 
 void

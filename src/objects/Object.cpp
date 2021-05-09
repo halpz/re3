@@ -77,7 +77,7 @@ CObject::CObject(CDummyObject *dummy)
 	if (dummy->m_rwObject)
 		AttachToRwObject(dummy->m_rwObject);
 	else
-		GetMatrix() = dummy->GetMatrix();
+		SetMatrix(dummy->GetMatrix());
 
 	m_objectMatrix = dummy->GetMatrix();
 	dummy->DetachFromRwObject();
@@ -190,8 +190,8 @@ void
 CObject::Teleport(CVector vecPos)
 {
 	CWorld::Remove(this);
-	m_matrix.GetPosition() = vecPos;
-	m_matrix.UpdateRW();
+	GetMatrix().GetPosition() = vecPos;
+	GetMatrix().UpdateRW();
 	UpdateRwFrame();
 	CWorld::Add(this);
 }
@@ -356,7 +356,7 @@ CObject::ObjectDamage(float amount)
 	}
 #endif
 	if ((amount * m_fCollisionDamageMultiplier > 150.0f || bBodyCastDamageEffect) && m_nCollisionDamageEffect) {
-		const CVector &vecPos = m_matrix.GetPosition();
+		const CVector& vecPos = GetMatrix().GetPosition();
 		const float fDirectionZ = 0.0002f * amount;
 		switch (m_nCollisionDamageEffect) {
 			case DAMAGE_EFFECT_CHANGE_MODEL:
@@ -653,7 +653,7 @@ CObject::ObjectDamage(float amount)
 					CParticle::AddParticle(PARTICLE_CAR_DEBRIS, particlePos, particleDir, nil, fSize, particleColor, nRotationSpeed, 0, nCurFrame, 0);
 					if ((i % 7) == 0) {
 						static RwRGBA secondaryColor = { 0x9A, 0x99, 0x99, 0x3E };
-						CParticle::AddParticle(PARTICLE_DEBRIS, particlePos, particleDir, nil, 0.3, secondaryColor, nRotationSpeed, 0, 0, 0);
+						CParticle::AddParticle(PARTICLE_DEBRIS, particlePos, particleDir, nil, 0.3f, secondaryColor, nRotationSpeed);
 					}
 				}
 				PlayOneShotScriptObject(SCRIPT_SOUND_BOX_DESTROYED_2, vecPos);
@@ -746,7 +746,7 @@ CObject::Init(void)
 	m_pCollidingEntity = nil;
 	CColPoint point;
 	CEntity *outEntity = nil;
-	const CVector &vecPos = m_matrix.GetPosition();
+	const CVector& vecPos = GetMatrix().GetPosition();
 	if (CWorld::ProcessVerticalLine(vecPos, vecPos.z - 10.0f, point, outEntity, true, false, false, false, false, false, nil))
 		m_pCurSurface = outEntity;
 	else
