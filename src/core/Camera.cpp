@@ -213,7 +213,7 @@ CCamera::Init(void)
 	m_iModeToGoTo = CCam::MODE_FOLLOWPED;
 	m_bJust_Switched = false;
 	m_bUseTransitionBeta = false;
-	m_matrix.SetScale(1.0f);
+	GetMatrix().SetScale(1.0f);
 	m_bTargetJustBeenOnTrain = false;
 	m_bInitialNoNodeStaticsSet = false;
 	m_uiLongestTimeInMill = 5000;
@@ -4017,7 +4017,7 @@ CCamera::SetRwCamera(RwCamera *cam)
 void
 CCamera::CalculateDerivedValues(void)
 {
-	m_cameraMatrix = Invert(m_matrix);
+	m_cameraMatrix = Invert(GetMatrix());
 
 	float hfov = DEGTORAD(CDraw::GetScaledFOV()/2.0f);
 	float c = Cos(hfov);
