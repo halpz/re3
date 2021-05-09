@@ -1206,7 +1206,7 @@ CFileLoader::LoadObjectInstance(const char *line)
 	if(!CStreaming::IsObjectInCdImage(id))
 		debug("Not in cdimage %s\n", mi->GetModelName());
 
-	angle = -RADTODEG(2.0f * acosf(angle));
+	angle = -RADTODEG(2.0f * Acos(angle));
 	xform = RwMatrixCreate();
 	RwMatrixRotate(xform, &axis, angle, rwCOMBINEREPLACE);
 	RwMatrixTranslate(xform, &trans, rwCOMBINEPOSTCONCAT);
