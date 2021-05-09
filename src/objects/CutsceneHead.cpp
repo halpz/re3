@@ -85,7 +85,6 @@ CCutsceneHead::ProcessControl(void)
 	{
 		m_matrix.SetRotateY(PI/2);
 		m_matrix = CMatrix(RwFrameGetLTM(m_pHeadNode)) * m_matrix;
-		UpdateRwFrame();	// android/xbox don't call this
 	}
 
 	assert(RwObjectGetType(m_rwObject) == rpCLUMP);
@@ -95,7 +94,7 @@ CCutsceneHead::ProcessControl(void)
 	// PS2 only plays anims in cutscene, PC always plays anims
 	if(!lastLoadedSKA || CCutsceneMgr::IsRunning())
 #endif
-	RpHAnimHierarchyAddAnimTime(hier, CTimer::GetTimeStepNonClipped()/50.0f);
+	RpHAnimHierarchyAddAnimTime(hier, CTimer::GetTimeStepNonClippedInSeconds());
 }
 
 void

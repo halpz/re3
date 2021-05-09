@@ -110,9 +110,9 @@ CEntity::CreateRwObject(void)
 		if(IsBuilding())
 			gBuildings++;
 		if(RwObjectGetType(m_rwObject) == rpATOMIC)
-			m_matrix.AttachRW(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic*)m_rwObject)), false);
+			GetMatrix().AttachRW(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic *)m_rwObject)), false);
 		else if(RwObjectGetType(m_rwObject) == rpCLUMP)
-			m_matrix.AttachRW(RwFrameGetMatrix(RpClumpGetFrame((RpClump*)m_rwObject)), false);
+			GetMatrix().AttachRW(RwFrameGetMatrix(RpClumpGetFrame((RpClump *)m_rwObject)), false);
 		mi->AddRef();
 	}
 }
@@ -123,9 +123,9 @@ CEntity::AttachToRwObject(RwObject *obj)
 	m_rwObject = obj;
 	if(m_rwObject){
 		if(RwObjectGetType(m_rwObject) == rpATOMIC)
-			m_matrix.Attach(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic*)m_rwObject)), false);
+			GetMatrix().Attach(RwFrameGetMatrix(RpAtomicGetFrame((RpAtomic *)m_rwObject)), false);
 		else if(RwObjectGetType(m_rwObject) == rpCLUMP)
-			m_matrix.Attach(RwFrameGetMatrix(RpClumpGetFrame((RpClump*)m_rwObject)), false);
+			GetMatrix().Attach(RwFrameGetMatrix(RpClumpGetFrame((RpClump *)m_rwObject)), false);
 		CModelInfo::GetModelInfo(m_modelIndex)->AddRef();
 	}
 }
@@ -136,7 +136,7 @@ CEntity::DetachFromRwObject(void)
 	if(m_rwObject)
 		CModelInfo::GetModelInfo(m_modelIndex)->RemoveRef();
 	m_rwObject = nil;
-	m_matrix.Detach();
+	GetMatrix().Detach();
 }
 
 #ifdef PED_SKIN
@@ -166,7 +166,7 @@ CEntity::DeleteRwObject(void)
 {
 	RwFrame *f;
 
-	m_matrix.Detach();
+	GetMatrix().Detach();
 	if(m_rwObject){
 		if(RwObjectGetType(m_rwObject) == rpATOMIC){
 			f = RpAtomicGetFrame((RpAtomic*)m_rwObject);
@@ -193,16 +193,16 @@ CEntity::GetBoundRect(void)
 	CVector v;
 	CColModel *col = CModelInfo::GetModelInfo(m_modelIndex)->GetColModel();
 
-	rect.ContainPoint(m_matrix * col->boundingBox.min);
-	rect.ContainPoint(m_matrix * col->boundingBox.max);
+	rect.ContainPoint(GetMatrix() * col->boundingBox.min);
+	rect.ContainPoint(GetMatrix() * col->boundingBox.max);
 
 	v = col->boundingBox.min;
 	v.x = col->boundingBox.max.x;
-	rect.ContainPoint(m_matrix * v);
+	rect.ContainPoint(GetMatrix() * v);
 
 	v = col->boundingBox.max;
 	v.x = col->boundingBox.min.x;
-	rect.ContainPoint(m_matrix * v);
+	rect.ContainPoint(GetMatrix() * v);
 
 	return rect;
 }
@@ -218,7 +218,7 @@ CEntity::GetBoundCentre(void)
 void
 CEntity::GetBoundCentre(CVector &out)
 {
-	out = m_matrix * CModelInfo::GetModelInfo(m_modelIndex)->GetColModel()->boundingSphere.center;
+	out = GetMatrix() * CModelInfo::GetModelInfo(m_modelIndex)->GetColModel()->boundingSphere.center;
 }
 
 float

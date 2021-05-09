@@ -2,11 +2,12 @@
 
 class CPlaceable
 {
+protected:
+	CMatrix m_matrix;
+
 public:
 	// disable allocation
 	static void *operator new(size_t);
-
-	CMatrix m_matrix;
 
 	CPlaceable(void);
 	virtual ~CPlaceable(void);
@@ -21,6 +22,7 @@ public:
 	CVector &GetForward(void) { return m_matrix.GetForward(); }
 	CVector &GetUp(void) { return m_matrix.GetUp(); }
 	CMatrix &GetMatrix(void) { return m_matrix; }
+	void SetMatrix(CMatrix &newMatrix) { m_matrix = newMatrix; }
 	void SetTransform(RwMatrix *m) { m_matrix = CMatrix(m, false); }
 	void SetHeading(float angle);
 	void SetOrientation(float x, float y, float z){

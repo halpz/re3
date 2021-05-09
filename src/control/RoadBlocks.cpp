@@ -55,7 +55,7 @@ CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType
 	float fRadius = pVehicle->GetBoundRadius() / pPoliceColModel->boundingSphere.radius;
 	for (int32 i = 0; i < 2; i++) {
 		const int32 roadBlockIndex = i + 2 * roadBlockType;
-		CVector posForZ = pVehicle->m_matrix * (fRadius * vecRoadBlockOffets[roadBlockIndex]);
+		CVector posForZ = pVehicle->GetMatrix() * (fRadius * vecRoadBlockOffets[roadBlockIndex]);
 		int32 modelInfoId = MI_COP;
 		eCopType copType = COP_STREET;
 		switch (pVehicle->GetModelIndex())
@@ -81,8 +81,8 @@ CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType
 		CPedPlacement::FindZCoorForPed(&posForZ);
 		pCopPed->SetPosition(posForZ);
 		CVector vecSavedPos = pCopPed->GetPosition();
-		pCopPed->m_matrix.SetRotate(0.0f, 0.0f, -HALFPI);
-		pCopPed->m_matrix.GetPosition() += vecSavedPos;
+		pCopPed->GetMatrix().SetRotate(0.0f, 0.0f, -HALFPI);
+		pCopPed->GetMatrix().GetPosition() += vecSavedPos;
 		pCopPed->m_bIsDisabledCop = true;
 		pCopPed->SetIdle();
 		pCopPed->bKindaStayInSamePlace = true;
@@ -153,7 +153,7 @@ CRoadBlocks::GenerateRoadBlocks(void)
 							offsetMatrix.GetPosition() = CVector(0.0f, i * fModelRadius - fOffset, 0.6f);
 						else
 							offsetMatrix.GetPosition() = CVector(i * fModelRadius - fOffset, 0.0f, 0.6f);
-						CMatrix vehicleMatrix = mapObject->m_matrix * offsetMatrix;
+						CMatrix vehicleMatrix = mapObject->GetMatrix() * offsetMatrix;
 						float fModelRadius = CModelInfo::GetModelInfo(vehicleId)->GetColModel()->boundingSphere.radius - 0.25f;
 						int16 colliding = 0;
 						CWorld::FindObjectsKindaColliding(vehicleMatrix.GetPosition(), fModelRadius, 0, &colliding, 2, nil, false, true, true, false, false);
@@ -162,10 +162,10 @@ CRoadBlocks::GenerateRoadBlocks(void)
 							pVehicle->SetStatus(STATUS_ABANDONED);
 							// pVehicle->GetHeightAboveRoad(); // called but return value is ignored?
 							vehicleMatrix.GetPosition().z += fModelRadius - 0.6f;
-							pVehicle->m_matrix = vehicleMatrix;
+							pVehicle->SetMatrix(vehicleMatrix);
 							pVehicle->PlaceOnRoadProperly();
 							pVehicle->SetIsStatic(false);
-							pVehicle->m_matrix.UpdateRW();
+							pVehicle->GetMatrix().UpdateRW();
 							pVehicle->m_nDoorLock = CARLOCK_UNLOCKED;
 							CCarCtrl::JoinCarWithRoadSystem(pVehicle);
 							pVehicle->bIsLocked = false;
