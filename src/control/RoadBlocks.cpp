@@ -80,9 +80,7 @@ CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType
 			pCopPed->SetCurrentWeapon(WEAPONTYPE_COLT45);
 		CPedPlacement::FindZCoorForPed(&posForZ);
 		pCopPed->SetPosition(posForZ);
-		CVector vecSavedPos = pCopPed->GetPosition();
-		pCopPed->GetMatrix().SetRotate(0.0f, 0.0f, -HALFPI);
-		pCopPed->GetMatrix().GetPosition() += vecSavedPos;
+		pCopPed->SetOrientation(0.0f, 0.0f, -HALFPI);
 		pCopPed->m_bIsDisabledCop = true;
 		pCopPed->SetIdle();
 		pCopPed->bKindaStayInSamePlace = true;
