@@ -6990,7 +6990,14 @@ void
 CPed::LookForSexyPeds(void)
 {
 	if ((!IsPedInControl() && m_nPedState != PED_DRIVING)
-		|| m_lookTimer >= CTimer::GetTimeInMilliseconds() || m_nPedType != PEDTYPE_CIVMALE)
+		|| m_lookTimer >= CTimer::GetTimeInMilliseconds() ||
+#ifdef FIX_BUGS
+		// gang members have these lines too
+		(!IsGangMember() && m_nPedType != PEDTYPE_CIVMALE)
+#else
+		m_nPedType != PEDTYPE_CIVMALE
+#endif
+		)
 		return;
 
 	for (int i = 0; i < m_numNearPeds; i++) {
@@ -6998,7 +7005,12 @@ CPed::LookForSexyPeds(void)
 			if ((GetPosition() - m_nearPeds[i]->GetPosition()).Magnitude() < 10.0f) {
 				CPed *nearPed = m_nearPeds[i];
 				if ((nearPed->m_pedStats->m_sexiness > m_pedStats->m_sexiness)
+#ifdef FIX_BUGS
+					// react to prostitutes as well
+					&& ((nearPed->m_nPedType == PEDTYPE_CIVFEMALE) || (nearPed->m_nPedType == PEDTYPE_PROSTITUTE))) {
+#else
 					&& nearPed->m_nPedType == PEDTYPE_CIVFEMALE) {
+#endif
 
 					SetLookFlag(nearPed, true);
 					m_lookTimer = CTimer::GetTimeInMilliseconds() + 4000;
