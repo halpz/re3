@@ -1076,8 +1076,8 @@ CPed::ProcessObjective(void)
 								SetMoveState(PEDMOVE_STILL);
 
 							if (m_objective == OBJECTIVE_HASSLE_CHAR) {
-								Say(SOUND_PED_COP_REACTION);
-								m_pedInObjective->Say(SOUND_PED_UNK_126);
+								Say(SOUND_PED_COP_ASK_FOR_ID);
+								m_pedInObjective->Say(SOUND_PED_INNOCENT);
 								m_leaveCarTimer = CTimer::GetTimeInMilliseconds() + 3000;
 								m_pedInObjective->m_leaveCarTimer = CTimer::GetTimeInMilliseconds() + 3000;
 								SetObjective(OBJECTIVE_WANDER);

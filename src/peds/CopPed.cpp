@@ -555,7 +555,7 @@ CCopPed::CopAI(void)
 
 													if (CWorld::GetIsLineOfSightClear(GetPosition(), nearPed->GetPosition(),
 														true, false, false, false, false, false, false)) {
-														Say(SOUND_PED_COP_REACTION);
+														Say(SOUND_PED_COP_ASK_FOR_ID);
 														SetObjective(OBJECTIVE_HASSLE_CHAR, nearPed);
 														nearPed->SetObjective(OBJECTIVE_WAIT_ON_FOOT_FOR_COP, this);
 														m_nHassleTimer = CTimer::GetTimeInMilliseconds() + 100000;
@@ -747,7 +747,7 @@ CCopPed::ProcessControl(void)
 	}
 
 	if (m_pPointGunAt)
-		Say(SOUND_PED_COP_UNK_129);
+		Say(SOUND_PED_COP_TARGETING);
 
 	if (m_bStopAndShootDisabledZone) {
 		bool dontShoot = false;

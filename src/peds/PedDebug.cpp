@@ -157,6 +157,9 @@ static char PersonalityTypeText[][18] = {
 	"Old Girl",
 	"Tough Girl",
 	"Tramp",
+#ifdef FIX_BUGS // there's male and female ones
+	"Tramp",
+#endif
 	"Tourist",
 	"Prostitute",
 	"Criminal",

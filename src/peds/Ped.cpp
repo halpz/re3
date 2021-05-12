@@ -7768,19 +7768,33 @@ void
 CPed::LookForSexyPeds(void)
 {
 	if ((!IsPedInControl() && m_nPedState != PED_DRIVING)
-		|| m_lookTimer >= CTimer::GetTimeInMilliseconds() || m_nPedType != PEDTYPE_CIVMALE)
+		|| m_lookTimer >= CTimer::GetTimeInMilliseconds() ||
+#ifdef FIX_BUGS
+	   (m_nPedType != PEDTYPE_CIVMALE) && !IsFemale() && (m_nPedType != PEDTYPE_CRIMINAL) && !IsGangMember()
+#else
+		m_nPedType != PEDTYPE_CIVMALE
+#endif
+		)
 		return;
 
 	for (int i = 0; i < m_numNearPeds; i++) {
 		if (CanSeeEntity(m_nearPeds[i])) {
 			if ((GetPosition() - m_nearPeds[i]->GetPosition()).Magnitude() < 10.0f) {
 				CPed *nearPed = m_nearPeds[i];
-				if ((nearPed->m_pedStats->m_sexiness > m_pedStats->m_sexiness)
-					&& nearPed->m_nPedType == PEDTYPE_CIVFEMALE) {
+				if((nearPed->m_pedStats->m_sexiness > m_pedStats->m_sexiness)
+#ifdef FIX_BUGS
+				   && ((IsFemale() && !nearPed->IsFemale()) || (!IsFemale() && nearPed->IsFemale()))) {
+#else
+				   && nearPed->m_nPedType == PEDTYPE_CIVFEMALE) {
+#endif
 
 					SetLookFlag(nearPed, true);
 					m_lookTimer = CTimer::GetTimeInMilliseconds() + 4000;
-					Say(SOUND_PED_CHAT_SEXY);
+#ifdef FIX_BUGS
+					Say(IsFemale() ? SOUND_PED_CHAT_SEXY_FEMALE : SOUND_PED_CHAT_SEXY_MALE);
+#else
+					Say(SOUND_PED_CHAT_SEXY_MALE);
+#endif
 					return;
 				}
 			}
@@ -8734,7 +8748,7 @@ CPed::Wait(void)
 						if ((GetPosition() - nearPed->GetPosition()).MagnitudeSqr() < sq(10.f)) {
 							for (int anim = ANIM_STRIP_A; anim <= ANIM_STRIP_G; anim++) {
 								if (RpAnimBlendClumpGetAssociation(nearPed->GetClump(), anim))
-									Say(SOUND_PED_149);
+									Say(SOUND_PED_JEER);
 							}
 						}
 					}
