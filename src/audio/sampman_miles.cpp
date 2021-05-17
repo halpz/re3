@@ -1026,9 +1026,18 @@ cSampleManager::Initialise(void)
 				{
 					strcpy(filepath, m_szCDRomRootPath);
 					strcat(filepath, StreamedNameTable[0]);
+					strcat(filepath, ".VB");
 					
 					FILE *f = fopen(filepath, "rb");
 					
+					if ( !f )
+					{
+						strcpy(filepath, m_szCDRomRootPath);
+						strcat(filepath, StreamedNameTable[0]);
+						strcat(filepath, ".MP3");
+						f = fopen(filepath, "rb");
+					}
+
 					if ( f )
 					{
 						fclose(f);
@@ -1103,8 +1112,16 @@ cSampleManager::Initialise(void)
 				{
 					strcpy(filepath, m_MP3FilesPath);
 					strcat(filepath, StreamedNameTable[i]);
+					strcat(filepath, ".VB");
 
 					mp3Stream[0] = AIL_open_stream(DIG, filepath, 0);
+					if (!mp3Stream[0])
+					{
+						strcpy(filepath, m_MP3FilesPath);
+						strcat(filepath, StreamedNameTable[i]);
+						strcat(filepath, ".MP3");
+						mp3Stream[0] = AIL_open_stream(DIG, filepath, 0);
+					}
 
 					if (mp3Stream[0])
 					{
@@ -2065,8 +2082,17 @@ cSampleManager::PreloadStreamedFile(uint32 nFile, uint8 nStream)
 			
 			strcpy(filepath, m_MP3FilesPath);
 			strcat(filepath, StreamedNameTable[nFile]);
+			strcat(filepath, ".VB");
 			
 			mp3Stream[nStream] = AIL_open_stream(DIG, filepath, 0);
+
+			if(!mp3Stream[nStream])
+			{
+				strcpy(filepath, m_MP3FilesPath);
+				strcat(filepath, StreamedNameTable[nFile]);
+				strcat(filepath, ".MP3");
+				mp3Stream[nStream] = AIL_open_stream(DIG, filepath, 0);
+			}
 	
 			if ( mp3Stream[nStream] )
 			{
@@ -2130,8 +2156,17 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 					nFile = 0;
 					strcpy(filename, m_MiscomPath);
 					strcat(filename, StreamedNameTable[nFile]);
+					strcat(filename, ".VB");
 					mp3Stream[nStream] =
 					    AIL_open_stream(DIG, filename, 0);
+
+					if(!mp3Stream[nStream])
+					{
+						strcpy(filename, m_MP3FilesPath);
+						strcat(filename, StreamedNameTable[nFile]);
+						strcat(filename, ".MP3");
+						mp3Stream[nStream] = AIL_open_stream(DIG, filename, 0);
+					}
 					if(mp3Stream[nStream]) {
 						AIL_set_stream_loop_count(mp3Stream[nStream], nStreamLoopedFlag[nStream] ? 0 : 1);
 						nStreamLoopedFlag[nStream] = true;
@@ -2177,9 +2212,17 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 						_bIsMp3Active = 0;
 						strcpy(filename, m_MiscomPath);
 						strcat(filename, StreamedNameTable[nFile]);
+						strcat(filename, ".VB");
 
 						mp3Stream[nStream] =
 						    AIL_open_stream(DIG, filename, 0);
+						if(!mp3Stream[nStream])
+						{
+							strcpy(filename, m_MiscomPath);
+							strcat(filename, StreamedNameTable[nFile]);
+							strcat(filename, ".MP3");
+							mp3Stream[nStream] = AIL_open_stream(DIG, filename, 0);
+						}
 						if(mp3Stream[nStream]) {
 							AIL_set_stream_loop_count(
 							    mp3Stream[nStream], nStreamLoopedFlag[nStream] ? 0 : 1);
@@ -2222,8 +2265,16 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 	}
 	strcpy(filename, m_MiscomPath);
 	strcat(filename, StreamedNameTable[nFile]);
+	strcat(filename, ".VB");
 	
 	mp3Stream[nStream] = AIL_open_stream(DIG, filename, 0);
+	if( !mp3Stream[nStream] )
+	{
+		strcpy(filename, m_MiscomPath);
+		strcat(filename, StreamedNameTable[nFile]);
+		strcat(filename, ".MP3");
+		mp3Stream[nStream] = AIL_open_stream(DIG, filename, 0);
+	}
 	if ( mp3Stream[nStream] )
 	{
 		AIL_set_stream_loop_count(mp3Stream[nStream], nStreamLoopedFlag[nStream] ? 0 : 1);
@@ -2370,7 +2421,7 @@ cSampleManager::InitialiseSampleBanks(void)
 	
 	fclose(fpSampleDescHandle);
 	fpSampleDescHandle = NULL;
-	
+
 	for ( int32 i = 0; i < TOTAL_AUDIO_SAMPLES; i++ )
 	{
 #ifdef FIX_BUGS

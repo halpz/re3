@@ -1002,7 +1002,25 @@ cSampleManager::Initialise(void)
 
 		for ( int32 i = 0; i < TOTAL_STREAMED_SOUNDS; i++ )
 		{	
-			aStream[0] = new CStream(StreamedNameTable[i], ALStreamSources[0], ALStreamBuffers[0], IsThisTrackAt16KHz(i) ? 16000 : 32000);
+			char filename[MAX_PATH];
+			sprintf(filename, "%s.VB", StreamedNameTable[i]);
+			aStream[0] = new CStream(filename, ALStreamSources[0], ALStreamBuffers[0], IsThisTrackAt16KHz(i) ? 16000 : 32000);
+			if ( aStream[0] && !aStream[0]->IsOpened() )
+			{
+				delete aStream[0];
+				aStream[0] = NULL;
+			}
+
+			if ( !aStream[0] )
+			{
+				sprintf(filename, "%s.MP3", StreamedNameTable[i]);
+				aStream[0] = new CStream(filename, ALStreamSources[0], ALStreamBuffers[0], IsThisTrackAt16KHz(i) ? 16000 : 32000);
+				if ( aStream[0] && !aStream[0]->IsOpened() )
+				{
+					delete aStream[0];
+					aStream[0] = NULL;
+				}
+			}
 			
 			if ( aStream[0] && aStream[0]->IsOpened() )
 			{
@@ -1687,10 +1705,28 @@ cSampleManager::PreloadStreamedFile(uint32 nFile, uint8 nStream)
 			delete aStream[nStream];
 			aStream[nStream] = NULL;
 		}
-		
-		strcpy(filename, StreamedNameTable[nFile]);
-		
+
+		sprintf(filename, "%s.VB", StreamedNameTable[nFile]);
 		CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+		
+		if ( stream && !stream->IsOpened() )
+		{
+			delete stream;
+			stream = NULL;
+		}
+
+		if (!stream)
+		{
+			sprintf(filename, "%s.MP3", StreamedNameTable[nFile]);
+			stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+			if ( stream && !stream->IsOpened() )
+			{
+				delete stream;
+				stream = NULL;
+			}
+		}
+
+
 		ASSERT(stream != NULL);
 		
 		aStream[nStream] = stream;
@@ -1761,9 +1797,25 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 				if(!_GetMP3PosFromStreamPos(&position, &e) && !e) {
 					nFile = 0;
 
-					strcpy(filename, StreamedNameTable[nFile]);
+					sprintf(filename, "%s.VB", StreamedNameTable[nFile]);
 					CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+					
+					if ( stream && !stream->IsOpened() )
+					{
+						delete stream;
+						stream = NULL;
+					}
 
+					if (!stream)
+					{
+						sprintf(filename, "%s.MP3", StreamedNameTable[nFile]);
+						stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+						if ( stream && !stream->IsOpened() )
+						{
+							delete stream;
+							stream = NULL;
+						}
+					}
 					aStream[nStream] = stream;
 
 					if (stream->Setup()) {
@@ -1819,9 +1871,26 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 					{
 						nFile = 0;
 						_bIsMp3Active = 0;
-						strcpy(filename, StreamedNameTable[nFile]);
+						sprintf(filename, "%s.VB", StreamedNameTable[nFile]);
 
 						CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+						
+						if ( stream && !stream->IsOpened() )
+						{
+							delete stream;
+							stream = NULL;
+						}
+
+						if (!stream)
+						{
+							sprintf(filename, "%s.MP3", StreamedNameTable[nFile]);
+							stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+							if ( stream && !stream->IsOpened() )
+							{
+								delete stream;
+								stream = NULL;
+							}
+						}
 
 						aStream[nStream] = stream;
 
@@ -1868,9 +1937,26 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 		position = 0;
 		nFile = 0;
 	}
-	strcpy(filename, StreamedNameTable[nFile]);
+	sprintf(filename, "%s.VB", StreamedNameTable[nFile]);
 	
 	CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+
+	if ( stream && !stream->IsOpened() )
+	{
+		delete stream;
+		stream = NULL;
+	}
+
+	if (!stream)
+	{
+		sprintf(filename, "%s.MP3", StreamedNameTable[nFile]);
+		stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+		if ( stream && !stream->IsOpened() )
+		{
+			delete stream;
+			stream = NULL;
+		}
+	}
 
 	aStream[nStream] = stream;
 	
