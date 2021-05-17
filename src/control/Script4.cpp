@@ -2012,8 +2012,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_HAS_MISSION_AUDIO_LOADED:
 	{
 		CollectParameters(&m_nIp, 1);
-		//UpdateCompareFlag(DMAudio.GetMissionAudioLoadingStatus(GET_INTEGER_PARAM(0) - 1) == 1);
-		UpdateCompareFlag(true); // TODO
+		UpdateCompareFlag(DMAudio.GetMissionAudioLoadingStatus(GET_INTEGER_PARAM(0) - 1) == 1);
 		return 0;
 	}
 	case COMMAND_PLAY_MISSION_AUDIO:
@@ -2023,8 +2022,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_HAS_MISSION_AUDIO_FINISHED:
 	{
 		CollectParameters(&m_nIp, 1);
-		//UpdateCompareFlag(DMAudio.IsMissionAudioSampleFinished(GET_INTEGER_PARAM(0) - 1)); // TODO
-		UpdateCompareFlag(true);
+		UpdateCompareFlag(DMAudio.IsMissionAudioSampleFinished(GET_INTEGER_PARAM(0) - 1));
 		return 0;
 	}
 	case COMMAND_GET_CLOSEST_CAR_NODE_WITH_HEADING:

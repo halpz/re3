@@ -213,9 +213,8 @@ add_providers()
 static void
 release_existing()
 {
-	for ( int32 i = 0; i < MAXCHANNELS; i++ )
+	for ( int32 i = 0; i < MAXCHANNELS+MAX2DCHANNELS; i++ )
 		aChannel[i].Term();
-	aChannel[CHANNEL2D].Term();
 	
 	if ( IsFXSupported() )
 	{
@@ -371,7 +370,8 @@ set_new_provider(int index)
 
 		for ( int32 i = 0; i < MAXCHANNELS; i++ )
 			aChannel[i].Init(i);
-		aChannel[CHANNEL2D].Init(CHANNEL2D, true);
+		for ( int32 i = 0; i < MAX2DCHANNELS; i++ )
+			aChannel[CHANNEL2D+i].Init(CHANNEL2D+i, true);
 		
 		if ( IsFXSupported() )
 		{
@@ -1552,7 +1552,7 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 void
 cSampleManager::SetChannelEmittingVolume(uint32 nChannel, uint32 nVolume)
 {
-	ASSERT( nChannel != CHANNEL2D );
+	ASSERT( nChannel < CHANNEL2D );
 	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
 	
 	uint32 vol = nVolume;
@@ -1574,7 +1574,7 @@ cSampleManager::SetChannelEmittingVolume(uint32 nChannel, uint32 nVolume)
 void
 cSampleManager::SetChannel3DPosition(uint32 nChannel, float fX, float fY, float fZ)
 {
-	ASSERT( nChannel != CHANNEL2D );
+	ASSERT( nChannel < CHANNEL2D );
 	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
 	
 	aChannel[nChannel].SetPosition(-fX, fY, fZ);
@@ -1583,7 +1583,7 @@ cSampleManager::SetChannel3DPosition(uint32 nChannel, float fX, float fY, float 
 void
 cSampleManager::SetChannel3DDistances(uint32 nChannel, float fMax, float fMin)
 {
-	ASSERT( nChannel != CHANNEL2D );
+	ASSERT( nChannel < CHANNEL2D );
 	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
 	aChannel[nChannel].SetDistances(fMax, fMin);
 }
@@ -1591,10 +1591,10 @@ cSampleManager::SetChannel3DDistances(uint32 nChannel, float fMax, float fMin)
 void
 cSampleManager::SetChannelVolume(uint32 nChannel, uint32 nVolume)
 {
-	ASSERT( nChannel == CHANNEL2D );
+	ASSERT(nChannel >= CHANNEL2D );
 	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
 	
-	if ( nChannel == CHANNEL2D )
+	if(nChannel >= CHANNEL2D)
 	{
 		uint32 vol = nVolume;
 		if ( vol > MAX_VOLUME ) vol = MAX_VOLUME;
@@ -1616,10 +1616,10 @@ cSampleManager::SetChannelVolume(uint32 nChannel, uint32 nVolume)
 void
 cSampleManager::SetChannelPan(uint32 nChannel, uint32 nPan)
 {
-	ASSERT(nChannel == CHANNEL2D);
+	ASSERT(nChannel >= CHANNEL2D);
 	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
 	
-	if ( nChannel == CHANNEL2D )
+	if ( nChannel >= CHANNEL2D )
 	{
 		aChannel[nChannel].SetPan(nPan);
 	}

@@ -111,16 +111,16 @@ enum
 #endif
 };
 #define MAX_PEDSFX                 7
-#define PED_BLOCKSIZE              79000
+#define PED_BLOCKSIZE              160000
 
 #define MAXPROVIDERS               64
 
 #define MAXCHANNELS                28
 #define MAXCHANNELS_SURROUND       24
-#define MAX2DCHANNELS              1
+#define MAX2DCHANNELS              3
 #define CHANNEL2D                  MAXCHANNELS
 
-#define MAX_STREAMS                3
+#define MAX_STREAMS                1
 
 #define DIGITALRATE                32000
 #define DIGITALBITS                16
