@@ -20,6 +20,7 @@ class CChannel
 	int32  LoopCount;
 	ALint  LoopPoints[2];
 	ALint  LastProcessedOffset;
+	bool   bIs2D;
 public:
 	static int32 channelsThatNeedService;
 
