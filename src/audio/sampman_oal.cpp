@@ -405,6 +405,80 @@ cSampleManager::~cSampleManager(void)
 	
 }
 
+int gBankStartOffset[67];
+
+void
+SetUpDebugBanksInfo()
+{
+	gBankStartOffset[3] = SFX_FE_BACK;
+	gBankStartOffset[4] = SFX_CAR_ACCEL_1;
+	gBankStartOffset[5] = SFX_CAR_ACCEL_2;
+	gBankStartOffset[9] = SFX_CAR_ACCEL_6;
+	gBankStartOffset[10] = SFX_CAR_ACCEL_7;
+	gBankStartOffset[1] = SFX_EMPTY;
+	gBankStartOffset[11] = SFX_CAR_ACCEL_8;
+	gBankStartOffset[7] = SFX_CAR_ACCEL_4;
+	gBankStartOffset[15] = SFX_CAR_ACCEL_12;
+	gBankStartOffset[13] = SFX_CAR_ACCEL_10;
+	gBankStartOffset[16] = SFX_CAR_CHAINSAW_IDLE;
+	gBankStartOffset[0] = SFX_AIR_BRAKES;
+	gBankStartOffset[17] = SFX_RC_IDLE;
+	gBankStartOffset[6] = SFX_CAR_ACCEL_3;
+	gBankStartOffset[19] = SFX_CAR_ACCEL_16;
+	gBankStartOffset[12] = SFX_CAR_ACCEL_9;
+	gBankStartOffset[2] = SFX_AMBULAN_VOICE_1_VAN_1;
+	gBankStartOffset[21] = SFX_CAR_ACCEL_18;
+	gBankStartOffset[22] = SFX_CAR_ACCEL_19;
+	gBankStartOffset[8] = SFX_CAR_ACCEL_5;
+	gBankStartOffset[23] = SFX_CAR_ACCEL_20;
+	gBankStartOffset[14] = SFX_CAR_ACCEL_11;
+	gBankStartOffset[20] = SFX_CAR_ACCEL_17;
+	gBankStartOffset[18] = SFX_CAR_RC_HELI;
+	gBankStartOffset[25] = SFX_CAR_AFTER_ACCEL_21;
+	gBankStartOffset[26] = SFX_CAR_FINGER_OFF_ACCEL_21;
+	gBankStartOffset[27] = SFX_CAR_ACCEL_22;
+	gBankStartOffset[28] = SFX_CAR_AFTER_ACCEL_22;
+	gBankStartOffset[29] = SFX_CAR_FINGER_OFF_ACCEL_22;
+	gBankStartOffset[24] = SFX_CAR_ACCEL_21;
+	gBankStartOffset[30] = SFX_HELI_APACHE_1;
+	gBankStartOffset[31] = SFX_HELI_UNUSED_1;
+	gBankStartOffset[32] = SFX_HELI_UNUSED_2;
+	gBankStartOffset[33] = SFX_HELI_UNUSED_3;
+	gBankStartOffset[34] = SFX_HELI_UNUSED_4;
+	gBankStartOffset[35] = SFX_SEAPLANE_LOW;
+	gBankStartOffset[37] = SFX_PLANE_UNUSED_2;
+	gBankStartOffset[38] = SFX_PLANE_UNUSED_3;
+	gBankStartOffset[39] = SFX_PLANE_UNUSED_4;
+	gBankStartOffset[40] = SFX_BUILDINGS_BANK_ALARM;
+	gBankStartOffset[41] = SFX_BUILDING_SNORE;
+	gBankStartOffset[36] = SFX_PLANE_UNUSED_1;
+	gBankStartOffset[43] = SFX_BUILDING_BAR_2;
+	gBankStartOffset[44] = SFX_BUILDING_BAR_3;
+	gBankStartOffset[45] = SFX_BUILDING_BAR_4;
+	gBankStartOffset[46] = SFX_BUILDING_MAL1;
+	gBankStartOffset[47] = SFX_BUILDING_MAL2;
+	gBankStartOffset[42] = SFX_BUILDING_BAR_1;
+	gBankStartOffset[49] = SFX_BUILDING_STR1;
+	gBankStartOffset[50] = SFX_BUILDING_STR2;
+	gBankStartOffset[51] = SFX_BUILDING_STR3;
+	gBankStartOffset[52] = SFX_BUILDING_CHURCH;
+	gBankStartOffset[53] = SFX_BUILDING_FAN_1;
+	gBankStartOffset[48] = SFX_BUILDING_MAL3;
+	gBankStartOffset[55] = SFX_BUILDING_INSECTS_1;
+	gBankStartOffset[56] = SFX_BUILDING_INSECTS_2;
+	gBankStartOffset[54] = SFX_BUILDING_FAN_2;
+	gBankStartOffset[57] = SFX_CLUB_1;
+	gBankStartOffset[58] = SFX_CLUB_2;
+	gBankStartOffset[59] = SFX_CLUB_3;
+	gBankStartOffset[60] = SFX_CLUB_4;
+	gBankStartOffset[61] = SFX_FOOTSTEP_GRASS_1;
+	gBankStartOffset[62] = SFX_FOOTSTEP_GRAVEL_1;
+	gBankStartOffset[63] = SFX_FOOTSTEP_WOOD_1;
+	gBankStartOffset[64] = SFX_FOOTSTEP_METAL_1;
+	gBankStartOffset[65] = SFX_FOOTSTEP_WATER_1;
+	gBankStartOffset[66] = SFX_FOOTSTEP_SAND_1;
+}
+
 void cSampleManager::SetSpeakerConfig(int32 nConfig)
 {
 
@@ -916,7 +990,7 @@ cSampleManager::Initialise(void)
 {
 	if ( _bSampmanInitialised )
 		return true;
-
+	SetUpDebugBanksInfo();
 	EFXInit();
 	CStream::Initialise();
 

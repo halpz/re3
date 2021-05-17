@@ -128,6 +128,8 @@ enum
 
 #define MAX_DIGITAL_MIXER_CHANNELS 32
 
+extern int gBankStartOffset[67];
+
 class cSampleManager
 {
 	uint8   m_nEffectsVolume;

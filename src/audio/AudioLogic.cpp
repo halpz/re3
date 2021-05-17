@@ -695,27 +695,52 @@ const tVehicleSampleData aVehicleSettings[MAX_CARS] = {
 	{SFX_CAR_REV_PONT, SFX_BANK_0, SFX_CAR_HORN_JEEP, 26513, SFX_CAR_HORN_JEEP, 9000, TRUCK_DOOR}
 };
 
-
+const eSfxSample aEngineSounds[][2] = {
+	{ SFX_CAR_IDLE_PONT, SFX_CAR_REV_PONT },
+	{ SFX_CAR_IDLE_PORSHE, SFX_CAR_REV_PORSHE },
+	{ SFX_CAR_IDLE_SPIDER, SFX_CAR_REV_SPIDER },
+	{ SFX_CAR_IDLE_MERC, SFX_CAR_REV_MERC },
+	{ SFX_CAR_IDLE_TRUCK, SFX_CAR_REV_TRUCK },
+	{ SFX_CAR_IDLE_HOTROD, SFX_CAR_REV_HOTROD },
+	{ SFX_CAR_IDLE_COBRA, SFX_CAR_REV_COBRA },
+	{ SFX_CAR_IDLE_PONT2, SFX_CAR_REV_PONT2 },
+	{ SFX_CAR_IDLE_CADI, SFX_CAR_REV_CADI },
+	{ SFX_CAR_IDLE_PATHFINDER, SFX_CAR_REV_PATHFINDER },
+	{ SFX_CAR_IDLE_PACARD, SFX_CAR_REV_PACARD },
+	{ SFX_CAR_IDLE_GOLFCART, SFX_CAR_REV_GOLFCART },
+	{ SFX_CAR_IDLE_GOLFCART, SFX_CAR_REV_GOLFCART },
+	{ SFX_CAR_IDLE_GOLFCART, SFX_CAR_REV_GOLFCART },
+	{ SFX_CAR_IDLE_GOLFCART, SFX_CAR_REV_GOLFCART },
+	{ SFX_CAR_IDLE_GOLFCART, SFX_CAR_REV_GOLFCART },
+	{ SFX_CAR_IDLE_VTWI, SFX_CAR_REV_VTWI },
+	{ SFX_MOPED_IDLE, SFX_MOPED_REV },
+	{ SFX_CAR_IDLE_HONDA, SFX_CAR_REV_HONDA },
+	{ SFX_CAR_IDLE_SPORTCAR, SFX_CAR_REV_SPORTCAR },
+	{ SFX_CAR_IDLE_UNUSED1, SFX_CAR_REV_UNUSED1 },
+	{ SFX_CAR_IDLE_UNUSED2, SFX_CAR_REV_UNUSED2 },
+	{ SFX_CAR_IDLE_UNUSED3, SFX_CAR_REV_UNUSED3 },
+	{ SFX_CAR_IDLE_UNUSED4, SFX_CAR_REV_UNUSED4 },
+};
 
 bool bPlayerJustEnteredCar;
 
 const bool hornPatternsArray[8][44] = {
-    {false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, false, false,
-     false, true,  true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,  false, false, false, false},
-    {false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,  true,
-     true,  true,  true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false},
-    {false, false, true, true, true, true, true, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false,
-     false, false, true, true, true, true, true, true, true, true, true, true, true,  true,  true,  true,  true, true, true, true, true, false},
-    {false, false, true, true, true, true,  true,  false, false, true, true, true, true, true, false, false, false, true, true, true, true, true,
-     true,  true,  true, true, true, false, false, false, true,  true, true, true, true, true, true,  true,  true,  true, true, true, true, false},
-    {false, false, true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false, false, false, false, false, false, false, false,
+    {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+     false, true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  false, false, false, false, false, false, false},
+    {false, false, true,  true,  true,  false, false, false, false, true, true, true, true, false, false, false, false, true, true, true, true,  false,
+     false, false, false, false, false, false, false, false, false, true, true, true, true, true,  true,  true,  true,  true, true, true, false, false},
+    {false, false, true,  true, true, true, true, true, true, true, true, true, false, false, false, false, true, true, true, true, true,  false,
+     false, false, false, true, true, true, true, true, true, true, true, true, true,  true,  true,  true,  true, true, true, true, false, false},
+    {false, false, true, true, true, true, true,  false, false, false, false, true,  true,  true,  true,  false, false, false, false, true, true,  true,
+     true,  true,  true, true, true, true, false, false, false, false, false, false, false, false, false, true,  true,  true,  true,  true, false, false},
+    {false, false, true,  true,  true,  true,  false, false, false, false, true,  true,  true,  true,  true,  false, false, false, false, false, false, false,
      false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false},
-    {false, false, true,  true,  true,  false, false, false, true,  true,  true,  false, false, false, false, false, false, false, false, false, false, false,
-     false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false},
-    {false, false, true, true, true,  true,  false, false, false, false, true, true, true, false, false, true, true, true, false, false, true,  true,
-     true,  true,  true, true, false, false, false, false, false, true,  true, true, true, true,  true,  true, true, true, true,  true,  false, false},
-    {false, false, true,  true,  true, true, false, false, true, true, true, true, true, false, false, false, true, true,  true,  true,  true,  true,
-     false, false, false, false, true, true, true,  true,  true, true, true, true, true, true,  true,  true,  true, false, false, false, false, false},
+    {false, false, false, false, false, false, false, false, false, false, true, true,  false, false, false, false, true,  true,  false, false, false, false,
+     true,  true,  true,  false, false, false, false, true,  true,  true,  true, false, false, false, false, false, false, false, false, false, false, false},
+    {false, false, true,  true,  true, true, false, false, false, false, true,  true,  true, true, true, false, false, false, false, true, true,  true,
+     false, false, false, false, true, true, true,  false, false, false, false, false, true, true, true, true,  true,  true,  true,  true, false, false},
+    {false, false, true, true,  true,  true,  false, false, false, false, true,  true,  true,  true,  true,  false, false, false, false, true, true,  true,
+     true,  true,  true, false, false, false, false, false, false, false, false, false, false, false, false, false, true,  true,  true,  true, false, false}
 };
 
 void cAudioManager::ProcessVehicle(CVehicle* veh)
@@ -803,6 +828,12 @@ void cAudioManager::ProcessVehicle(CVehicle* veh)
 			ProcessBoatMovingOverWater(params);
 			ProcessVehicleOneShots(params);
 			break;
+#ifdef GTA_TRAIN
+		case VEHICLE_TYPE_TRAIN:
+			ProcessTrainNoise(params);
+			ProcessVehicleOneShots(params);
+			break;
+#endif
 		case VEHICLE_TYPE_HELI: 
 			ProcessCarHeli(params);
 			ProcessVehicleOneShots(params);
@@ -1430,7 +1461,7 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams& params)
 		if (!caddyBool) {
 			if (veh->GetStatus() == STATUS_SIMPLE) {
 				if (modificator < 0.02f) {
-					m_sQueueSample.m_nSampleIndex = aVehicleSettings[params.m_nIndex].m_nBank - CAR_SFX_BANKS_OFFSET + SFX_CAR_IDLE_CADI;
+					m_sQueueSample.m_nSampleIndex = aEngineSounds[aVehicleSettings[params.m_nIndex].m_nBank - CAR_SFX_BANKS_OFFSET][0];
 					m_sQueueSample.m_nCounter = 52;
 					freq = 10000.0f * modificator + 22050;
 				} else {
@@ -1439,7 +1470,7 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams& params)
 				}
 			} else {
 				if (veh->m_fGasPedal < 0.02f) {
-					m_sQueueSample.m_nSampleIndex = aVehicleSettings[params.m_nIndex].m_nBank - CAR_SFX_BANKS_OFFSET + SFX_CAR_IDLE_CADI;
+					m_sQueueSample.m_nSampleIndex = aEngineSounds[aVehicleSettings[params.m_nIndex].m_nBank - CAR_SFX_BANKS_OFFSET][0];
 					m_sQueueSample.m_nCounter = 52;
 					freq = 10000.0f * modificator + 22050;
 				} else {
@@ -1738,7 +1769,8 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 		freqModifier += 1400;
 	gearSoundLength = 0;
 	engineSoundType = aVehicleSettings[params.m_nIndex].m_nBank;
-	soundOffset = 3 * (engineSoundType - CAR_SFX_BANKS_OFFSET);
+	soundOffset = gBankStartOffset[engineSoundType] - gBankStartOffset[CAR_SFX_BANKS_OFFSET];
+	//soundOffset = 3 * (engineSoundType - CAR_SFX_BANKS_OFFSET);
 	noGearBox = false;
 	switch (engineSoundType) {
 	case SFX_BANK_PONTIAC:
@@ -1799,7 +1831,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 	relativeVelocityChange = 2.0f * params.m_fVelocityChange / params.m_pTransmission->fMaxVelocity;
 	accelerationMultipler = clamp(relativeVelocityChange, 0.0f, 1.0f);
 	gasPedalAudio = accelerationMultipler;
-	switch (engineSoundType) {
+	/*switch (engineSoundType) {
 	case SFX_BANK_MOPED:
 		++soundOffset;
 		break;
@@ -1811,7 +1843,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 		break;
 	default:
 		break;
-	}
+	}*/
 	if (accelerateState <= 0) {
 		if (params.m_fVelocityChange < -0.001f) {
 			if (channelUsed) {
@@ -1858,7 +1890,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 			freq /= 2;
 		if (params.m_pVehicle->bIsDrowning)
 			vol /= 4;
-		AddPlayerCarSample(vol, freq, engineSoundType - CAR_SFX_BANKS_OFFSET + SFX_CAR_IDLE_CADI, SFX_BANK_0, 52, true);
+		AddPlayerCarSample(vol, freq, aEngineSounds[engineSoundType - CAR_SFX_BANKS_OFFSET][0], SFX_BANK_0, 52, true);
 
 		CurrentPretendGear = Max(1, currentGear);
 	}
@@ -1893,7 +1925,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 				}
 				if (params.m_pVehicle->bIsDrowning)
 					vol /= 4;
-				AddPlayerCarSample(vol, freq, engineSoundType - CAR_SFX_BANKS_OFFSET + SFX_CAR_IDLE_CADI, SFX_BANK_0, 2, true);
+				AddPlayerCarSample(vol, freq, aEngineSounds[engineSoundType - CAR_SFX_BANKS_OFFSET][1], SFX_BANK_0, 2, true);
 			} else {
 				TranslateEntity(&m_sQueueSample.m_vecPos, &pos);
 				if (bAccelSampleStopped) {
@@ -3169,7 +3201,7 @@ AddSample:
 bool
 cAudioManager::ProcessTrainNoise(cVehicleParams& params)
 {
-	const float SOUND_INTENSITY = 300.0f;
+	const float SOUND_INTENSITY = 140.0f;
 
 	CTrain *train;
 	uint8 emittingVol;
@@ -3182,16 +3214,16 @@ cAudioManager::ProcessTrainNoise(cVehicleParams& params)
 		CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
 		train = (CTrain *)params.m_pVehicle;
 		speedMultipler = Min(1.0f, train->m_fSpeed * 250.f / 51.f);
-		emittingVol = (75.f * speedMultipler);
+		emittingVol = (70.f * speedMultipler);
 		if (train->m_fWagonPosition == 0.0f) {
 			m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume != 0) {
 				m_sQueueSample.m_nCounter = 32;
-				m_sQueueSample.m_nSampleIndex = SFX_TRAIN_FAR;
+				m_sQueueSample.m_nSampleIndex = SFX_TRAIN;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				m_sQueueSample.m_bIs2D = false;
 				m_sQueueSample.m_nReleasingVolumeModificator = 2;
-				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_TRAIN_FAR);
+				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_TRAIN);
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
 				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
@@ -3205,29 +3237,29 @@ cAudioManager::ProcessTrainNoise(cVehicleParams& params)
 				AddSampleToRequestedQueue();
 			}
 		}
-		const float SOUND_INTENSITY = 70.0f;
-		if (params.m_fDistance < SQR(SOUND_INTENSITY)) {
-			m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
-			if (m_sQueueSample.m_nVolume != 0) {
-				m_sQueueSample.m_nCounter = 33;
-				m_sQueueSample.m_nSampleIndex = SFX_TRAIN_NEAR;
-				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				m_sQueueSample.m_bIs2D = false;
-				m_sQueueSample.m_nReleasingVolumeModificator = 5;
-				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_TRAIN_NEAR) + 100 * m_sQueueSample.m_nEntityIndex % 987;
-				m_sQueueSample.m_nLoopCount = 0;
-				m_sQueueSample.m_nEmittingVolume = emittingVol;
-				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_fSpeedMultiplier = 6.0f;
-				m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
-				m_sQueueSample.m_bReleasingSoundFlag = false;
-				m_sQueueSample.m_nReleasingVolumeDivider = 3;
-				m_sQueueSample.m_bReverbFlag = true;
-				m_sQueueSample.m_bRequireReflection = false;
-				AddSampleToRequestedQueue();
-			}
-		}
+		//const float SOUND_INTENSITY = 70.0f;
+		//if (params.m_fDistance < SQR(SOUND_INTENSITY)) {
+		//	m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
+		//	if (m_sQueueSample.m_nVolume != 0) {
+		//		m_sQueueSample.m_nCounter = 33;
+		//		m_sQueueSample.m_nSampleIndex = SFX_TRAIN_NEAR;
+		//		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+		//		m_sQueueSample.m_bIs2D = false;
+		//		m_sQueueSample.m_nReleasingVolumeModificator = 5;
+		//		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_TRAIN_NEAR) + 100 * m_sQueueSample.m_nEntityIndex % 987;
+		//		m_sQueueSample.m_nLoopCount = 0;
+		//		m_sQueueSample.m_nEmittingVolume = emittingVol;
+		//		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+		//		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		//		m_sQueueSample.m_fSpeedMultiplier = 6.0f;
+		//		m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
+		//		m_sQueueSample.m_bReleasingSoundFlag = false;
+		//		m_sQueueSample.m_nReleasingVolumeDivider = 3;
+		//		m_sQueueSample.m_bReverbFlag = true;
+		//		m_sQueueSample.m_bRequireReflection = false;
+		//		AddSampleToRequestedQueue();
+		//	}
+		//}
 	}
 	return true;
 }
@@ -4143,6 +4175,23 @@ cAudioManager::GetJumboTaxiFreq() const
 #pragma endregion All the vehicle audio code
 
 #pragma region PED AUDIO
+struct sToniReactions
+{
+	uint32 sfx[4];
+	uint32 count[4];
+};
+
+const sToniReactions aReactions[8] = {
+    {{SFX_TONI_PISSED_OFF_CRASH_01, SFX_TONI_ANGRY_CRASH_01, SFX_TONI_WISECRACKING_CRASH_01, NULL}, {25, 29, 17, 0}},
+    {{SFX_TONI_PISSED_OFF_FIGHT_01, SFX_TONI_ANGRY_FIGHT_01, SFX_TONI_WISECRACKING_FIGHT_01, NULL}, {18, 39, 20, 0}},
+    {{SFX_TONI_PISSED_OFF_JACKED_01, SFX_TONI_ANGRY_JACKED_01, SFX_TONI_WISECRACKING_JACKED_01, NULL}, {11, 16, 17, 0}},
+    {{SFX_TONI_PISSED_OFF_JACKING_01, SFX_TONI_ANGRY_JACKING_01, SFX_TONI_WISECRACKING_JACKING_01, NULL}, {25, 33, 12, 0}},
+    {{SFX_TONI_ANGRY_PICK_UP_HOOKER_01, SFX_TONI_ANGRY_PICK_UP_HOOKER_01, SFX_TONI_WISECRACKING_PICK_UP_HOOKER_01, NULL}, {8, 8, 11, 0}},
+    {{SFX_TONI_PISSED_OFF_PULL_GUN_01, SFX_TONI_ANGRY_PULL_GUN_01, SFX_TONI_WISECRACKING_PULL_GUN_01, NULL}, {18, 29, 19, 0}},
+    {{SFX_TONI_CALM_SEX_01, SFX_TONI_ANGRY_SEX_01, SFX_TONI_ANGRY_SEX_01, SFX_TONI_WISECRACKING_SEX_01}, {11, 10, 10, 10}},
+    {{SFX_TONI_CALM_SHOOT_01, SFX_TONI_PISSED_OFF_SHOOT_01, SFX_TONI_ANGRY_SHOOT_01, SFX_TONI_WISECRACKING_SHOOT_01}, {30, 31, 36, 26}}
+};
+
 void
 cAudioManager::ProcessPed(CPhysical *ped)
 {
@@ -5235,23 +5284,19 @@ cAudioManager::SetupPedComments(cPedParams &params, uint16 sound)
 		switch(sound) {
 		case SOUND_PED_HELI_PLAYER_FOUND:
 			soundIntensity = 400.0f;
-			//pedComment.m_nSampleIndex = GetRandomNumberInRange(m_sQueueSample.m_nEntityIndex % 4, SFX_POLICE_HELI_1, SFX_POLICE_HELI_20);
+			pedComment.m_nSampleIndex = NO_SAMPLE; //GetRandomNumberInRange(m_sQueueSample.m_nEntityIndex % 4, SFX_POLICE_HELI_1, SFX_POLICE_HELI_20);
 			break;
 		case SOUND_PED_VCPA_PLAYER_FOUND:
 			soundIntensity = 400.0f;
-#ifdef FIX_BUGS
-			//pedComment.m_nSampleIndex = m_anRandomTable[m_sQueueSample.m_nEntityIndex % 4] % 23 + SFX_POLICE_BOAT_1;
-#else
-			//pedComment.m_nSampleIndex = m_anRandomTable[m_sQueueSample.m_nEntityIndex % 4] % 29 + SFX_POLICE_BOAT_1;
-#endif
+			pedComment.m_nSampleIndex = NO_SAMPLE; //m_anRandomTable[m_sQueueSample.m_nEntityIndex % 4] % 23 + SFX_POLICE_BOAT_1;
 			break;
 		case SOUND_INJURED_PED_MALE_OUCH:
 			soundIntensity = 40.0f;
-			//pedComment.m_nSampleIndex = GetRandomNumberInRange(m_sQueueSample.m_nEntityIndex % 4, SFX_GENERIC_MALE_GRUNT_1, SFX_GENERIC_MALE_GRUNT_41);
+			pedComment.m_nSampleIndex = NO_SAMPLE; // = GetRandomNumberInRange(m_sQueueSample.m_nEntityIndex % 4, SFX_GENERIC_MALE_GRUNT_1, SFX_GENERIC_MALE_GRUNT_41);
 			break;
 		case SOUND_INJURED_PED_FEMALE:
 			soundIntensity = 40.0f;
-			//pedComment.m_nSampleIndex = GetRandomNumberInRange(m_sQueueSample.m_nEntityIndex % 4, SFX_GENERIC_FEMALE_GRUNT_1, SFX_GENERIC_FEMALE_GRUNT_33);
+			pedComment.m_nSampleIndex = NO_SAMPLE; // = GetRandomNumberInRange(m_sQueueSample.m_nEntityIndex % 4, SFX_GENERIC_FEMALE_GRUNT_1, SFX_GENERIC_FEMALE_GRUNT_33);
 			break;
 		default:
 			return;
@@ -5279,7 +5324,7 @@ cAudioManager::SetupPedComments(cPedParams &params, uint16 sound)
 uint32
 cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 {
-	if(ped->m_nPedState != PED_FALL || sound == MI_VICE8 || sound == MI_WFYG1 || sound == MI_WFYG2) {
+	if(ped->m_nPedState != PED_FALL || sound == SOUND_PED_DAMAGE || sound == SOUND_PED_HIT || sound == SOUND_PED_LAND) {
 		if(ped->m_getUpTimer == UINT32_MAX || ped->m_getUpTimer > CTimer::GetTimeInMilliseconds()) {
 			if(sound != SOUND_PED_DAMAGE && sound != SOUND_PED_HIT && sound != SOUND_PED_LAND) return NO_SAMPLE;
 		}
@@ -5449,201 +5494,161 @@ cAudioManager::GetPlayerTalkSfx(CPed *ped, int16 sound)
 
 	if(m_bIsPlayerShutUp) return NO_SAMPLE;
 	switch(sound) {
-	//case SOUND_PED_DEATH: return SFX_PLAYER_DEATH;
-	//case SOUND_PED_DAMAGE:
-	//case SOUND_PED_BULLET_HIT: GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_HIT_BULLET_1, 33); break;
-	//case SOUND_PED_HIT:
-	//case SOUND_PED_DEFEND: GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_HIT_FIST_1, 42); break;
-	//case SOUND_PED_LAND: GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_HIT_GROUND_1, 35); break;
-	//case SOUND_PED_BURNING: GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_ON_FIRE_1, 16); break;
-	//case SOUND_PED_PLAYER_REACTTOCOP:
-	//	switch(m_nPlayerMood) {
-	//	case PLAYER_MOOD_ANGRY:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_ANGRY_BUSTED_1, 38);
-	//		break;
-	//	case PLAYER_MOOD_WISECRACKING:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_WISECRACKING_BUSTED_1, 20);
-	//		break;
-	//	default:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_CALM_BUSTED_1, 22);
-	//		break;
-	//	}
-	//	break;
-	//case SOUND_PED_ON_FIRE: {
-	//	cooldown_phrase(8);
-	//	switch(m_nPlayerMood) {
-	//	case PLAYER_MOOD_PISSED_OFF:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_PISSED_OFF_SHOOT_1, 29);
-	//		break;
-	//	case PLAYER_MOOD_ANGRY:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_ANGRY_SHOOT_1, 39);
-	//		break;
-	//	case PLAYER_MOOD_WISECRACKING:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_WISECRACKING_SHOOT_1, 9);
-	//		break;
-	//	default:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_CALM_SHOOT_1, 35);
-	//		break;
-	//	}
-	//	break;
-	//}
-	//case SOUND_PED_AIMING: {
-	//	cooldown_phrase(8);
-	//	switch(m_nPlayerMood) {
-	//	case PLAYER_MOOD_PISSED_OFF:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_PISSED_OFF_PULL_GUN_1, 25);
-	//		break;
-	//	case PLAYER_MOOD_ANGRY:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_ANGRY_PULL_GUN_1, 52);
-	//		break;
-	//	case PLAYER_MOOD_WISECRACKING:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_WISECRACKING_PULL_GUN_1, 19);
-	//		break;
-	//	default:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_CALM_PULL_GUN_1, 39);
-	//		break;
-	//	}
-	//	break;
-	//}
-	//case SOUND_PED_CAR_JACKING: {
-	//	cooldown_phrase(4);
-	//	switch(m_nPlayerMood) {
-	//	case PLAYER_MOOD_PISSED_OFF:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_PISSED_OFF_JACKING_1, 36);
-	//		break;
-	//	case PLAYER_MOOD_ANGRY:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_ANGRY_JACKING_1, 43);
-	//		break;
-	//	case PLAYER_MOOD_WISECRACKING:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_WISECRACKING_JACKING_1, 18);
-	//		break;
-	//	default:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_CALM_JACKING_1, 40);
-	//		break;
-	//	}
-	//	break;
-	//}
-	//case SOUND_PED_MUGGING: {
-	//	cooldown_phrase(8);
-	//	switch(m_nPlayerMood) {
-	//	case PLAYER_MOOD_PISSED_OFF:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_PISSED_OFF_PICK_UP_CASH_1, 25);
-	//		break;
-	//	case PLAYER_MOOD_ANGRY:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_ANGRY_PICK_UP_CASH_1, 12);
-	//		break;
-	//	case PLAYER_MOOD_WISECRACKING:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_WISECRACKING_PICK_UP_CASH_1, 23);
-	//		break;
-	//	default:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_CALM_PICK_UP_CASH_1, 11);
-	//		break;
-	//	}
-	//	break;
-	//}
-	//case SOUND_PED_CAR_JACKED: {
-	//	cooldown_phrase(4);
-	//	switch(m_nPlayerMood) {
-	//	case PLAYER_MOOD_PISSED_OFF:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_PISSED_OFF_JACKED_1, 21);
-	//		break;
-	//	case PLAYER_MOOD_ANGRY:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_ANGRY_JACKED_1, 33);
-	//		break;
-	//	case PLAYER_MOOD_WISECRACKING:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_WISECRACKING_JACKED_1, 18);
-	//		break;
-	//	default:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_CALM_JACKED_1, 24);
-	//		break;
-	//	}
-	//	break;
-	//}
-	//case SOUND_PED_PLAYER_AFTERSEX: GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_AFTERSEX_1, 18); break;
-	//case SOUND_PED_PLAYER_BEFORESEX:
-	//	switch(m_nPlayerMood) {
-	//	case PLAYER_MOOD_ANGRY:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_ANGRY_SEX_1, 18);
-	//		break;
-	//	case PLAYER_MOOD_WISECRACKING:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_WISECRACKING_SEX_1, 10);
-	//		break;
-	//	default:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_CALM_SEX_1, 8);
-	//		break;
-	//	}
-	//	break;
-	//case SOUND_PED_PLAYER_FARFROMCOPS: {
-	//	cooldown_phrase(4);
-	//	switch(m_nPlayerMood) {
-	//	case PLAYER_MOOD_ANGRY:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_ANGRY_CHASED_1, 9);
-	//		break;
-	//	case PLAYER_MOOD_WISECRACKING:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_WISECRACKING_CHASED_1, 7);
-	//		break;
-	//	default:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_CALM_CHASED_1, 20);
-	//		break;
-	//	}
-	//	break;
-	//}
-	//case SOUND_PED_ATTACK: {
-	//	cooldown_phrase(4);
-	//	switch(m_nPlayerMood) {
-	//	case PLAYER_MOOD_PISSED_OFF:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_PISSED_OFF_FIGHT_1, 61);
-	//		break;
-	//	case PLAYER_MOOD_ANGRY:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_ANGRY_FIGHT_1, 61);
-	//		break;
-	//	case PLAYER_MOOD_WISECRACKING:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_WISECRACKING_FIGHT_1, 27);
-	//		break;
-	//	default:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_CALM_FIGHT_1, 47);
-	//		break;
-	//	}
-	//	break;
-	//}
-	//case SOUND_PED_CRASH_VEHICLE:
-	//case SOUND_PED_CRASH_CAR:
-	//case SOUND_PED_ANNOYED_DRIVER: {
-	//	cooldown_phrase(4);
-	//	switch(m_nPlayerMood) {
-	//	case PLAYER_MOOD_PISSED_OFF:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_PISSED_OFF_CRASH_1, 44);
-	//		break;
-	//	case PLAYER_MOOD_ANGRY:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_ANGRY_CRASH_1, 41);
-	//		break;
-	//	case PLAYER_MOOD_WISECRACKING:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_WISECRACKING_CRASH_1, 19);
-	//		break;
-	//	default:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_CALM_CRASH_1, 43);
-	//		break;
-	//	}
-	//	break;
-	//}
-	//case SOUND_PED_SOLICIT: {
-	//	cooldown_phrase(4);
-	//	switch(m_nPlayerMood) {
-	//	case PLAYER_MOOD_PISSED_OFF:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_PISSED_OFF_PICK_UP_HOOKER_1, 17);
-	//		break;
-	//	case PLAYER_MOOD_ANGRY:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_ANGRY_PICK_UP_HOOKER_1, 6);
-	//		break;
-	//	case PLAYER_MOOD_WISECRACKING:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_WISECRACKING_PICK_UP_HOOKER_1, 11);
-	//		break;
-	//	default:
-	//		GetPhrase(sfx, ped->m_lastComment, SFX_PLAYER_CALM_PICK_UP_HOOKER_1, 22);
-	//		break;
-	//	}
-	//	break;
-	//}
+	case SOUND_PED_DEATH:
+	case SOUND_PED_PLAYER_AFTERSEX: return NO_SAMPLE;
+	case SOUND_PED_DAMAGE:
+	case SOUND_PED_BULLET_HIT: GetPhrase(sfx, ped->m_lastComment, SFX_TONI_GENERAL_IMP_HI_01, 16); break;
+	case SOUND_PED_HIT:
+	case SOUND_PED_DEFEND: GetPhrase(sfx, ped->m_lastComment, SFX_TONI_GENERAL_IMP_LOW_01, 15); break;
+	case SOUND_PED_LAND: GetPhrase(sfx, ped->m_lastComment, SFX_TONI_GENERAL_HIT_GROUND_01, 12); break;
+	case SOUND_PED_BURNING: GetPhrase(sfx, ped->m_lastComment, SFX_TONI_GENERAL_ON_FIRE_01, 7); break;
+	case SOUND_PED_PLAYER_REACTTOCOP:
+		switch(m_nPlayerMood) {
+		case PLAYER_MOOD_PISSED_OFF:
+			GetPhrase(sfx, ped->m_lastComment, SFX_TONI_PISSED_OFF_BUSTED_01, 12);
+			break;
+		case PLAYER_MOOD_ANGRY:
+			GetPhrase(sfx, ped->m_lastComment, SFX_TONI_ANGRY_BUSTED_01, 16);
+			break;
+		default:
+			GetPhrase(sfx, ped->m_lastComment, SFX_TONI_CALM_BUSTED_01, 25);
+			break;
+		}
+		break;
+	case SOUND_PED_ON_FIRE: {
+		cooldown_phrase(8);
+		switch(m_nPlayerMood) {
+		case PLAYER_MOOD_CALM:
+		case PLAYER_MOOD_PISSED_OFF:
+		case PLAYER_MOOD_ANGRY:
+		case PLAYER_MOOD_WISECRACKING:
+			GetPhrase(sfx, ped->m_lastComment, aReactions[7].sfx[m_nPlayerMood], aReactions[7].count[m_nPlayerMood]);
+			break;
+		default:
+			GetPhrase(sfx, ped->m_lastComment, SFX_TONI_CALM_SEX_01, 30); // bruh
+			break;
+		}
+		break;
+	}
+	case SOUND_PED_AIMING: {
+		cooldown_phrase(8);
+		switch(m_nPlayerMood) {
+		case PLAYER_MOOD_PISSED_OFF:
+		case PLAYER_MOOD_ANGRY:
+		case PLAYER_MOOD_WISECRACKING:
+			GetPhrase(sfx, ped->m_lastComment, aReactions[5].sfx[m_nPlayerMood-1], aReactions[5].count[m_nPlayerMood-1]);
+			break;
+		default:
+			GetPhrase(sfx, ped->m_lastComment, SFX_TONI_CALM_PULL_GUN_01, 35);
+			break;
+		}
+		break;
+	}
+	case SOUND_PED_CAR_JACKING: {
+		cooldown_phrase(4);
+		switch(m_nPlayerMood) {
+		case PLAYER_MOOD_PISSED_OFF:
+		case PLAYER_MOOD_ANGRY:
+		case PLAYER_MOOD_WISECRACKING:
+			GetPhrase(sfx, ped->m_lastComment, aReactions[3].sfx[m_nPlayerMood-1], aReactions[3].count[m_nPlayerMood-1]);
+			break;
+		default:
+			GetPhrase(sfx, ped->m_lastComment, SFX_TONI_CALM_JACKING_01, 35);
+			break;
+		}
+		break;
+	}
+	case SOUND_PED_MUGGING: {
+		cooldown_phrase(8);
+		sfx = NO_SAMPLE;
+		break;
+	}
+	case SOUND_PED_CAR_JACKED: {
+		cooldown_phrase(4);
+		switch(m_nPlayerMood) {
+		case PLAYER_MOOD_PISSED_OFF:
+		case PLAYER_MOOD_ANGRY:
+		case PLAYER_MOOD_WISECRACKING:
+			GetPhrase(sfx, ped->m_lastComment, aReactions[2].sfx[m_nPlayerMood-1], aReactions[2].count[m_nPlayerMood-1]);
+			break;
+		default:
+			GetPhrase(sfx, ped->m_lastComment, SFX_TONI_CALM_JACKED_01, 23);
+			break;
+		}
+		break;
+	}
+	case SOUND_PED_PLAYER_BEFORESEX:
+		switch(m_nPlayerMood) {
+		case PLAYER_MOOD_CALM:
+		case PLAYER_MOOD_PISSED_OFF:
+		case PLAYER_MOOD_ANGRY:
+		case PLAYER_MOOD_WISECRACKING:
+			GetPhrase(sfx, ped->m_lastComment, aReactions[6].sfx[m_nPlayerMood], aReactions[6].count[m_nPlayerMood]);
+			break;
+		default:
+			GetPhrase(sfx, ped->m_lastComment, SFX_TONI_CALM_SEX_01, 10);
+			break;
+		}
+		break;
+	case SOUND_PED_PLAYER_FARFROMCOPS: {
+		cooldown_phrase(4);
+		switch(m_nPlayerMood) {
+		case PLAYER_MOOD_PISSED_OFF:
+			GetPhrase(sfx, ped->m_lastComment, SFX_TONI_PISSED_OFF_CHASED_01, 25);
+			break;
+		case PLAYER_MOOD_ANGRY:
+			GetPhrase(sfx, ped->m_lastComment, SFX_TONI_ANGRY_CHASED_01, 25);
+			break;
+		default:
+			GetPhrase(sfx, ped->m_lastComment, SFX_TONI_CALM_CHASED_01, 20);
+			break;
+		}
+		break;
+	}
+	case SOUND_PED_ATTACK: {
+		cooldown_phrase(4);
+		switch(m_nPlayerMood) {
+		case PLAYER_MOOD_PISSED_OFF:
+		case PLAYER_MOOD_ANGRY:
+		case PLAYER_MOOD_WISECRACKING:
+			GetPhrase(sfx, ped->m_lastComment, aReactions[1].sfx[m_nPlayerMood-1], aReactions[1].count[m_nPlayerMood-1]);
+			break;
+		default:
+			GetPhrase(sfx, ped->m_lastComment, SFX_TONI_CALM_FIGHT_01, 42);
+			break;
+		}
+		break;
+	}
+	case SOUND_PED_CRASH_VEHICLE:
+	case SOUND_PED_CRASH_CAR:
+	case SOUND_PED_ANNOYED_DRIVER: {
+		cooldown_phrase(4);
+		switch(m_nPlayerMood) {
+		case PLAYER_MOOD_PISSED_OFF:
+		case PLAYER_MOOD_ANGRY:
+		case PLAYER_MOOD_WISECRACKING:
+			GetPhrase(sfx, ped->m_lastComment, aReactions[0].sfx[m_nPlayerMood-1], aReactions[0].count[m_nPlayerMood-1]);
+			break;
+		default:
+			GetPhrase(sfx, ped->m_lastComment, SFX_TONI_CALM_CRASH_01, 31);
+			break;
+		}
+		break;
+	}
+	case SOUND_PED_SOLICIT: {
+		cooldown_phrase(4);
+		switch(m_nPlayerMood) {
+		case PLAYER_MOOD_PISSED_OFF:
+		case PLAYER_MOOD_ANGRY:
+		case PLAYER_MOOD_WISECRACKING:
+			GetPhrase(sfx, ped->m_lastComment, aReactions[4].sfx[m_nPlayerMood-1], aReactions[4].count[m_nPlayerMood-1]);
+			break;
+		default:
+			GetPhrase(sfx, ped->m_lastComment, SFX_TONI_CALM_PICK_UP_HOOKER_01, 18);
+			break;
+		}
+		break;
+	}
 	default: return GetGenericMaleTalkSfx(ped, sound);
 	}
 	return sfx;
@@ -5740,16 +5745,14 @@ cAudioManager::GetArmyTalkSfx(CPed *ped, int16 sound)
 uint32
 cAudioManager::GetMedicTalkSfx(CPed *ped, int16 sound)
 {
-	return NO_SAMPLE;
-	//uint32 sfx;
-	//switch(sound) {
-	//case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_MEDIC_VOICE_1_FIGHT_1, 6); break;
-	//case SOUND_PED_HEALING: GetPhrase(sfx, ped->m_lastComment, SFX_MEDIC_VOICE_1_AT_VICTIM_1, 17); break;
-	//case SOUND_PED_LEAVE_VEHICLE: GetPhrase(sfx, ped->m_lastComment, SFX_MEDIC_VOICE_1_GET_OUT_VAN_CHAT_1, 10); break;
-	//default: return GetGenericMaleTalkSfx(ped, sound);
-	//}
-	//sfx += (SFX_MEDIC_VOICE_2_FIGHT_1 - SFX_MEDIC_VOICE_1_FIGHT_1) * (m_sQueueSample.m_nEntityIndex % 2);
-	//return sfx;
+	uint32 sfx;
+	switch(sound) {
+	case SOUND_PED_HEALING: GetPhrase(sfx, ped->m_lastComment, SFX_AMBULAN_VOICE_1_VICTIM_1, 17); break;
+	case SOUND_PED_LEAVE_VEHICLE: GetPhrase(sfx, ped->m_lastComment, SFX_AMBULAN_VOICE_1_VAN_1, 10); break;
+	default: return GetGenericMaleTalkSfx(ped, sound);
+	}
+	sfx += (SFX_AMBULAN_VOICE_2_VAN_1 - SFX_AMBULAN_VOICE_1_VAN_1) * (m_sQueueSample.m_nEntityIndex % 2);
+	return sfx;
 }
 
 uint32
@@ -5764,29 +5767,28 @@ cAudioManager::GetDefaultTalkSfx(CPed *ped, int16 sound)
 	uint32 sfx;
 
 	switch(sound) {
-//	case SOUND_PED_HANDS_COWER: GetPhrase(sfx, ped->m_lastComment, SFX_DEFAULT_VOICE_GUN_PANIC_1, 12); break;
-//	case SOUND_PED_CAR_JACKED: GetPhrase(sfx, ped->m_lastComment, SFX_DEFAULT_VOICE_JACKED_1, 12); break;
-//#ifdef FIX_BUGS
-//	case SOUND_PED_CAR_JACKING: GetPhrase(sfx, ped->m_lastComment, SFX_DEFAULT_VOICE_JACKING_1, 13); break;
-//#endif
-//	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_DEFAULT_VOICE_MUGGED_1, 4); break;
-//	case SOUND_PED_ACCIDENTREACTION1: GetPhrase(sfx, ped->m_lastComment, SFX_DEFAULT_VOICE_SAVED_1, 4); break;
-//	case SOUND_PED_TAXI_WAIT: GetPhrase(sfx, ped->m_lastComment, SFX_DEFAULT_VOICE_TAXI_1, 5); break;
-//	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_DEFAULT_VOICE_FIGHT_1, 16); break;
-//	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_DEFAULT_VOICE_DODGE_1, 19); break;
-//	case SOUND_PED_FLEE_RUN: GetPhrase(sfx, ped->m_lastComment, SFX_DEFAULT_VOICE_RUN_1, 19); break;
-//	case SOUND_PED_CRASH_VEHICLE: GetPhrase(sfx, ped->m_lastComment, SFX_DEFAULT_VOICE_GENERIC_CRASH_1, 13); break;
-//	case SOUND_PED_CRASH_CAR: GetPhrase(sfx, ped->m_lastComment, SFX_DEFAULT_VOICE_CAR_CRASH_1, 15); break;
-//	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_DEFAULT_VOICE_BLOCKED_1, 16); break;
-//	case SOUND_PED_WAIT_DOUBLEBACK: GetPhrase(sfx, ped->m_lastComment, SFX_DEFAULT_VOICE_LOST_1, 5); break;
-//#ifdef FIX_BUGS
-//	case SOUND_PED_CHAT_SEXY_MALE: GetPhrase(sfx, ped->m_lastComment, SFX_DEFAULT_VOICE_EYEING_1, 6); break;
-//#else
-//	case SOUND_PED_CHAT_SEXY_FEMALE: GetPhrase(sfx, ped->m_lastComment, SFX_DEFAULT_VOICE_EYEING_1, 6); break;
-//#endif
-//	case SOUND_PED_CHAT_EVENT: GetPhrase(sfx, ped->m_lastComment, SFX_DEFAULT_VOICE_SHOCKED_1, 6); break;
-//	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_DEFAULT_VOICE_BUMP_1, 25); break;
-//	case SOUND_PED_CHAT: GetPhrase(sfx, ped->m_lastComment, SFX_DEFAULT_VOICE_CHAT_1, 25); break;
+	case SOUND_PED_HANDS_COWER: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_GUN_THREATENED_1, 2); break;
+	case SOUND_PED_CAR_JACKED: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_JACKED_CAR_1, 2); break;
+	case SOUND_PED_ROBBED:
+	case SOUND_PED_ACCIDENTREACTION1:
+	case SOUND_PED_TAXI_WAIT:
+	case SOUND_PED_EVADE:
+	case SOUND_PED_FLEE_RUN:
+	case SOUND_PED_CRASH_VEHICLE:
+	case SOUND_PED_WAIT_DOUBLEBACK:
+#ifdef FIX_BUGS
+	case SOUND_PED_CHAT_SEXY_MALE:
+#else
+	case SOUND_PED_CHAT_SEXY_FEMALE:
+#endif
+		GetPhrase(sfx, ped->m_lastComment, NO_SAMPLE, 0);
+		break;
+	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_FIGHT_1, 3); break;
+	case SOUND_PED_CRASH_CAR: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_CRASH_CAR_1, 2); break;
+	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_DRIVER_BLOCKED_1, 2); break;
+	case SOUND_PED_CHAT_EVENT: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_SHOCKED_1, 1); break;
+	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_BUMP_1, 3); break;
+	case SOUND_PED_CHAT: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_CHAT_1, 4); break;
 	default: return GetGenericMaleTalkSfx(ped, sound);
 	}
 	return sfx;
@@ -7812,19 +7814,18 @@ cAudioManager::GetWFYG2TalkSfx(CPed *ped, int16 sound)
 uint32
 cAudioManager::GetGenericMaleTalkSfx(CPed *ped, int16 sound)
 {
-	return NO_SAMPLE;
-	//uint32 sfx;
+	uint32 sfx;
 
-	//m_bGenericSfx = true;
-	//switch(sound) {
-	//case SOUND_PED_DEATH: GetPhrase(sfx, ped->m_lastComment, SFX_GENERIC_MALE_DEATH_1, 41); break;
-	//case SOUND_PED_BULLET_HIT:
-	//case SOUND_PED_DEFEND: GetPhrase(sfx, ped->m_lastComment, SFX_GENERIC_MALE_GRUNT_1, 41); break;
-	//case SOUND_PED_BURNING: GetPhrase(sfx, ped->m_lastComment, SFX_GENERIC_MALE_FIRE_1, 32); break;
-	//case SOUND_PED_FLEE_SPRINT: GetPhrase(sfx, ped->m_lastComment, SFX_GENERIC_MALE_PANIC_1, 35); break;
-	//default: return NO_SAMPLE;
-	//}
-	//return sfx;
+	m_bGenericSfx = true;
+	switch(sound) {
+	case SOUND_PED_DEATH: GetPhrase(sfx, ped->m_lastComment, SFX_MALE_DEATH_01, 28); break;
+	case SOUND_PED_BULLET_HIT:
+	case SOUND_PED_DEFEND: GetPhrase(sfx, ped->m_lastComment, SFX_MALE_PAIN_01, 51); break;
+	case SOUND_PED_BURNING: GetPhrase(sfx, ped->m_lastComment, SFX_MALE_PAIN_ON_FIRE_01, 21); break;
+	case SOUND_PED_FLEE_SPRINT: GetPhrase(sfx, ped->m_lastComment, SFX_MALE_PANIC_01, 23); break;
+	default: return NO_SAMPLE;
+	}
+	return sfx;
 }
 
 uint32
