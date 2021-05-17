@@ -17,6 +17,8 @@ bool bChannelsCreated = false;
 
 int32 CChannel::channelsThatNeedService = 0;
 
+uint8 tempStereoBuffer[PED_BLOCKSIZE * 2];
+
 void
 CChannel::InitChannels()
 {
@@ -50,6 +52,7 @@ CChannel::CChannel()
 {
 	Data = nil;
 	DataSize = 0;
+	bIs2D = false;
 	SetDefault();
 }
 
@@ -90,6 +93,7 @@ void CChannel::Init(uint32 _id, bool Is2D)
 		
 		if ( Is2D )
 		{
+			bIs2D = true;
 			alSource3f(alSources[id], AL_POSITION, 0.0f, 0.0f, 0.0f);
 			alSourcef(alSources[id], AL_GAIN, 1.0f);
 		}
@@ -113,7 +117,20 @@ void CChannel::Start()
 	if ( !HasSource() ) return;
 	if ( !Data ) return;
 
-	alBufferData(alBuffers[id], AL_FORMAT_MONO16, Data, DataSize, Frequency);
+	if ( bIs2D )
+	{
+		// convert mono data to stereo
+		int16 *monoData = (int16*)Data;
+		int16 *stereoData = (int16*)tempStereoBuffer;
+		for (size_t i = 0; i < DataSize / 2; i++)
+		{
+			*(stereoData++) = *monoData;
+			*(stereoData++) = *(monoData++);
+		}
+		alBufferData(alBuffers[id], AL_FORMAT_STEREO16, tempStereoBuffer, DataSize * 2, Frequency);
+	}
+	else
+		alBufferData(alBuffers[id], AL_FORMAT_MONO16, Data, DataSize, Frequency);
 	if ( LoopPoints[0] != 0 && LoopPoints[0] != -1 )
 		alBufferiv(alBuffers[id], AL_LOOP_POINTS_SOFT, LoopPoints);
 	alSourcei(alSources[id], AL_BUFFER, alBuffers[id]);
