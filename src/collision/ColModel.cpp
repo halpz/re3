@@ -36,7 +36,7 @@ CColModel::~CColModel(void)
 
 //--LCS: no pool used, but maybe we better keep it?
 void*
-CColModel::operator new(size_t)
+CColModel::operator new(size_t) throw()
 {
 	CColModel* node = CPools::GetColModelPool()->New();
 	assert(node);
@@ -44,7 +44,7 @@ CColModel::operator new(size_t)
 }
 
 void
-CColModel::operator delete(void *p, size_t)
+CColModel::operator delete(void *p, size_t) throw()
 {
 	CPools::GetColModelPool()->Delete((CColModel*)p);
 }
