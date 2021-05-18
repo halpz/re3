@@ -568,11 +568,11 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 	}
 	case COMMAND_LOAD_NON_STANDARD_PED_ANIM:
 		CollectParameters(&m_nIp, 1);
-		// CPed::LoadNonStandardPedAnim(GET_INTEGER_PARAM(0));
+		CPed::LoadNonStandardPedAnim((eWaitState)GET_INTEGER_PARAM(0));
 		return 0;
 	case COMMAND_UNLOAD_NON_STANDARD_PED_ANIM:
 		CollectParameters(&m_nIp, 1);
-		// CPed::UnloadNonStandardPedAnim(SET_INTEGER_PARAM(0));
+		CPed::UnloadNonStandardPedAnim((eWaitState)GET_INTEGER_PARAM(0));
 		return 0;
 	case COMMAND_1566:
 		CollectParameters(&m_nIp, 1);

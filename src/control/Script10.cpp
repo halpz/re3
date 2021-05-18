@@ -278,7 +278,7 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 		CollectParameters(&m_nIp, 3);
 		CPed* pPed = CPools::GetPedPool()->GetAt(GET_INTEGER_PARAM(0));
 		if (pPed)
-			pPed->SetWaitState((eWaitState)GET_INTEGER_PARAM(0), GET_INTEGER_PARAM(1) >= 0 ? (void*)GET_INTEGER_PARAM(0) : nil); // + true
+			pPed->SetWaitState((eWaitState)GET_INTEGER_PARAM(1), GET_INTEGER_PARAM(2) >= 0 ? (void*)GET_INTEGER_PARAM(2) : nil, true);
 		return 0;
 	}
 	case COMMAND_REGISTER_BEST_TIME_GOGO_FAGGIO:

@@ -8106,6 +8106,62 @@ CPed::ClearWaitState(void)
 			if (assoc)
 				assoc->blendDelta = -8.0f;
 			break;
+		case WAITSTATE_MULTIPLAYER_CUTSCENE_MPNOTE:
+		case WAITSTATE_MULTIPLAYER_CUTSCENE_MPNOTE_LOOP:
+		case WAITSTATE_CS_MISC_IDLE_NO:
+		case WAITSTATE_CS_MISC_IDLE_YES:
+		case WAITSTATE_CS_MISC_IDLE_CHAT2:
+		case WAITSTATE_CS_MISC_IDLE_COUGH:
+		case WAITSTATE_CS_MISC_IDLE_GIGGLE_FEMALE:
+		case WAITSTATE_CS_MISC_IDLE_TOUGH_CHAT:
+		case WAITSTATE_DONH2_CAMERA:
+		case WAITSTATE_JDT2_ANXIOUS_TALK:
+		case WAITSTATE_JDT2_SHRUG:
+		case WAITSTATE_JDT4_DILDO_TALK:
+		case WAITSTATE_JDT5_CALM_DOWN:
+		case WAITSTATE_JDT5_POINT:
+		case WAITSTATE_JDT6_PICKUP:
+		case WAITSTATE_MAR1_SKIRT:
+		case WAITSTATE_MAR2_CELL_ANSWER:
+		case WAITSTATE_MAR2_CELL_END:
+		case WAITSTATE_MAR2_CELL_TALK:
+		case WAITSTATE_MAR2_FOOT_TAP:
+		case WAITSTATE_MAR3_HOOCHY:
+		case WAITSTATE_MAR3_NOTE_IDLE:
+		case WAITSTATE_MAR3_NOTE_PICKUP:
+		case WAITSTATE_SAL1_BIREFCASE_DOWN:
+		case WAITSTATE_SAL2_IDLE_SEATED:
+		case WAITSTATE_SAL2_SEAT_TO_STAND:
+		case WAITSTATE_SAL3_SEATED_TALK:
+		case WAITSTATE_SAL3_SEATED_IDLE:
+		case WAITSTATE_SAL4_DUST_DOWN:
+		case WAITSTATE_SAL4_GIRL_RUN:
+		case WAITSTATE_SAL6_ANGRY_SEATED:
+		case WAITSTATE_SAL6_IDLE_SEATED:
+		case WAITSTATE_SAL7_LOOKOUT:
+		case WAITSTATE_VIC2_POINT_ANGRY:
+		case WAITSTATE_VIC3_WAFT:
+		case WAITSTATE_VIC3_PICKUP_ROLL:
+		case WAITSTATE_VIC4_CARRY_BOX:
+		case WAITSTATE_VIC4_CELL_LOOK:
+		case WAITSTATE_VIC4_CRATE_IDLE:
+		case WAITSTATE_VIC6_CELL_ANGRY:
+		case WAITSTATE_TOURIST3:
+		case WAITSTATE_TOURIST2:
+		case WAITSTATE_TOURIST1:
+		case WAITSTATE_MAC2_PLEAD:
+		case WAITSTATE_JDT6_KNOCK:
+		case WAITSTATE_SAL3_SIT_DOWN:
+		case WAITSTATE_VIC7_PROD_WITH_FOOT:
+			assoc = RpAnimBlendClumpGetFirstAssociation(GetClump(), ASSOC_IDLE);
+			if (assoc)
+				assoc->Remove();
+			break;
+	    case WAITSTATE_DONH3_HAPPY:
+			assoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_DONH3_HAPPY);
+			if (assoc)
+				assoc->blendDelta = -1.0f;
+			break;
 		default:
 			break;
 	}
@@ -8113,10 +8169,10 @@ CPed::ClearWaitState(void)
 }
 
 void
-CPed::SetWaitState(eWaitState state, void *time)
+CPed::SetWaitState(eWaitState state, void *time, bool repeat)
 {
 	AnimationId waitAnim = ANIM_STD_NUM;
-	CAnimBlendAssociation *animAssoc;
+	CAnimBlendAssociation *animAssoc = nil;
 
 	if (!IsPedInControl())
 		return;
@@ -8295,7 +8351,7 @@ CPed::SetWaitState(eWaitState state, void *time)
 			SetFall(-1, ANIM_STD_HIGHIMPACT_FRONT, true);
 			break;
 		case WAITSTATE_BOMBER:
-			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_DETONATE, 4.0f);
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_DETONATE, 4.0f);
 			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + *(int*)time;
 			break;
 		case WAITSTATE_GROUND_ATTACK:
@@ -8314,7 +8370,7 @@ CPed::SetWaitState(eWaitState state, void *time)
 			break;
 		}
 		case WAITSTATE_LANCESITTING:
-			CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_LANCE, ANIM_SUNBATHE_IDLE, 4.0f);
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_LANCE, ANIM_SUNBATHE_IDLE, 4.0f);
 			break;
 		case WAITSTATE_PLAYANIM_HANDSUP_SIMPLE:
 			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_HANDSUP, 4.0f);
@@ -8323,12 +8379,193 @@ CPed::SetWaitState(eWaitState state, void *time)
 			animAssoc->SetDeleteCallback(FinishedWaitCB, this);
 			m_nWaitTimer = CTimer::GetTimeInMilliseconds() + *(int*)time;
 			break;
+		case WAITSTATE_MULTIPLAYER_CUTSCENE_MPNOTE:
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_MPNOTE, ANIM_MULTIPLAYER_CUTSCENE_MPNOTE, 1.0f);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_MULTIPLAYER_CUTSCENE_MPNOTE_LOOP:
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_MPNOTE, ANIM_MULTIPLAYER_CUTSCENE_MPNOTE_LOOP, 1.0f);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_CS_MISC_IDLE_NO:
+		case WAITSTATE_CS_MISC_IDLE_YES:
+		case WAITSTATE_CS_MISC_IDLE_CHAT2:
+		case WAITSTATE_CS_MISC_IDLE_COUGH:
+		case WAITSTATE_CS_MISC_IDLE_GIGGLE_FEMALE:
+		case WAITSTATE_CS_MISC_IDLE_TOUGH_CHAT:
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_CSMISC,
+														(AnimationId)(ANIM_CS_MISC_IDLE_LOOK + (int)(state - WAITSTATE_CS_MISC_IDLE_LOOK)), 1.0f);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_DONH2_CAMERA:
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_DONH2, ANIM_DONH2_CAMERA, 1.0f);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_DONH3_HAPPY:
+			animAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_DONH3, ANIM_DONH3_HAPPY, 1.0f);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_JDT2_ANXIOUS_TALK:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_JDT2, ANIM_JDT2_ANXIOUS_TALK);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_JDT2_SHRUG:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_JDT2, ANIM_JDT2_SHRUG);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_JDT4_DILDO_TALK:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_JDT4, ANIM_JDT4_DILDO_TALK);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_JDT5_CALM_DOWN:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_JDT5, ANIM_JDT5_CALM_DOWN);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_JDT5_POINT:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_JDT5, ANIM_JDT5_POINT);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_JDT6_PICKUP:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_JDT6, ANIM_JDT6_PICKUP);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_MAR1_SKIRT:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_MAR1, ANIM_MAR1_SKIRT);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_MAR2_CELL_ANSWER:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_MAR2, ANIM_MAR2_CELL_ANSWER);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_MAR2_CELL_END:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_MAR2, ANIM_MAR2_CELL_END);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_MAR2_CELL_TALK:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_MAR2, ANIM_MAR2_CELL_TALK);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_MAR2_FOOT_TAP:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_MAR2, ANIM_MAR2_FOOT_TAP);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_MAR3_HOOCHY:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_MAR3, ANIM_MAR3_HOOCHY);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_MAR3_NOTE_IDLE:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_MAR3, ANIM_MAR3_NOTE_IDLE);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_MAR3_NOTE_PICKUP:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_MAR3, ANIM_MAR3_NOTE_PICKUP);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_SAL1_BIREFCASE_DOWN:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_SAL1, ANIM_SAL1_BIREFCASE_DOWN);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_SAL2_IDLE_SEATED:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_SAL2, ANIM_SAL2_IDLE_SEATED);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_SAL2_SEAT_TO_STAND:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_SAL2, ANIM_SAL2_SEAT_TO_STAND);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_SAL3_SEATED_TALK:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_SAL3, ANIM_SAL3_SEATED_TALK);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_SAL3_SEATED_IDLE:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_SAL3, ANIM_SAL3_SEATED_IDLE);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_SAL4_DUST_DOWN:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_SAL4, ANIM_SAL4_DUST_DOWN);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_SAL4_GIRL_RUN:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_SAL4, ANIM_SAL4_GIRL_RUN);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_SAL6_ANGRY_SEATED:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_SAL6, ANIM_SAL6_ANGRY_SEATED);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_SAL6_IDLE_SEATED:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_SAL6, ANIM_SAL6_IDLE_SEATED);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_SAL7_LOOKOUT:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_SAL7, ANIM_SAL7_LOOKOUT);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_VIC2_POINT_ANGRY:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_VIC2, ANIM_VIC2_POINT_ANGRY);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_VIC3_WAFT:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_VIC3, ANIM_VIC3_WAFT);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_VIC3_PICKUP_ROLL:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_VIC3, ANIM_VIC3_PICKUP_ROLL);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_VIC4_CARRY_BOX:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_VIC4, ANIM_VIC4_CARRY_BOX);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_VIC4_CELL_LOOK:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_VIC4, ANIM_VIC4_CELL_LOOK);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_VIC4_CRATE_IDLE:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_VIC4, ANIM_VIC4_CRATE_IDLE);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_VIC6_CELL_ANGRY:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_VIC6, ANIM_VIC6_CELL_ANGRY);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_TOURIST3:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_TOURIST, ANIM_TOURIST3);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_TOURIST2:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_TOURIST, ANIM_TOURIST2);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_TOURIST1:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_TOURIST, ANIM_TOURIST1);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_MAC2_PLEAD:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_MAC2, ANIM_MAC2_PLEAD);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_JDT6_KNOCK:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_JDT6, ANIM_JDT6_KNOCK);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_SAL3_SIT_DOWN:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_SAL3, ANIM_SAL3_SIT_DOWN);
+			animAssoc->speed = 1.0f;
+			break;
+		case WAITSTATE_VIC7_PROD_WITH_FOOT:
+			animAssoc = CAnimManager::AddAnimation(GetClump(), ASSOCGRP_VIC7, ANIM_VIC7_PROD_WITH_FOOT);
+			animAssoc->speed = 1.0f;
+			break;
 		default:
 			ClearWaitState();
 			RestoreHeadingRate();
 			return;
 	}
+	bool rep = animAssoc ? repeat : false;
 	m_nWaitState = state;
+	if (rep)
+		animAssoc->flags |= ASSOC_REPEAT;
 }
 
 void
@@ -9623,6 +9860,247 @@ CPed::Say(uint16 audio, int32 time)
 		m_delayedSoundTimer = CTimer::GetTimeInMilliseconds() + time;
 	}
 }
+
+void
+CPed::LoadNonStandardPedAnim(eWaitState waitState)
+{
+	switch(waitState) {
+	case WAITSTATE_MULTIPLAYER_CUTSCENE_MPNOTE:
+	case WAITSTATE_MULTIPLAYER_CUTSCENE_MPNOTE_LOOP:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("MPNote"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_CS_MISC_IDLE_LOOK:
+	case WAITSTATE_CS_MISC_IDLE_NO:
+	case WAITSTATE_CS_MISC_IDLE_YES:
+	case WAITSTATE_CS_MISC_IDLE_CHAT2:
+	case WAITSTATE_CS_MISC_IDLE_COUGH:
+	case WAITSTATE_CS_MISC_IDLE_GIGGLE_FEMALE:
+	case WAITSTATE_CS_MISC_IDLE_TOUGH_CHAT:
+	case WAITSTATE_CS_MISC_IDLE_CELL_TALK:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("cs_misc"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_DONH2_CAMERA:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("donh2"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_DONH3_HAPPY:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("donh3"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_JDT2_ANXIOUS_TALK:
+	case WAITSTATE_JDT2_SHRUG:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("jdt2"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_JDT4_DILDO_TALK:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("jdt4"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_JDT5_CALM_DOWN:
+	case WAITSTATE_JDT5_POINT:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("jdt5"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_JDT6_PICKUP:
+	case WAITSTATE_JDT6_KNOCK:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("jdt6"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_MAR1_SKIRT:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("mar1"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_MAR2_CELL_ANSWER:
+	case WAITSTATE_MAR2_CELL_END:
+	case WAITSTATE_MAR2_CELL_TALK:
+	case WAITSTATE_MAR2_FOOT_TAP:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("mar2"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_MAR3_HOOCHY:
+	case WAITSTATE_MAR3_NOTE_IDLE:
+	case WAITSTATE_MAR3_NOTE_PICKUP:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("mar3"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_SAL1_BIREFCASE_DOWN:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("sal1"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_SAL2_IDLE_SEATED:
+	case WAITSTATE_SAL2_SEAT_TO_STAND:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("sal2"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_SAL3_SEATED_TALK:
+	case WAITSTATE_SAL3_SEATED_IDLE:
+	case WAITSTATE_SAL3_SIT_DOWN:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("sal3"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_SAL4_DUST_DOWN:
+	case WAITSTATE_SAL4_GIRL_RUN:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("sal4"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_SAL6_ANGRY_SEATED:
+	case WAITSTATE_SAL6_IDLE_SEATED:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("sal6"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_SAL7_LOOKOUT:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("sal7"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_VIC2_POINT_ANGRY:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("vic2"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_VIC3_WAFT:
+	case WAITSTATE_VIC3_PICKUP_ROLL:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("vic3"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_VIC4_CARRY_BOX:
+	case WAITSTATE_VIC4_CELL_LOOK:
+	case WAITSTATE_VIC4_CRATE_IDLE:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("vic4"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_VIC6_CELL_ANGRY:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("vic6"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_TOURIST3:
+	case WAITSTATE_TOURIST2:
+	case WAITSTATE_TOURIST1:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("tourist"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_MAC2_PLEAD:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("mac2"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	case WAITSTATE_VIC7_PROD_WITH_FOOT:
+		CStreaming::RequestAnim(CAnimManager::GetAnimationBlockIndex("vic7"), STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	default:
+		CStreaming::RequestAnim(0, STREAMFLAGS_DEPENDENCY | STREAMFLAGS_SCRIPTOWNED);
+		break;
+	}
+	CStreaming::LoadAllRequestedModels(false);
+}
+
+void
+CPed::UnloadNonStandardPedAnim(eWaitState waitState)
+{
+	switch(waitState) {
+	case WAITSTATE_MULTIPLAYER_CUTSCENE_MPNOTE:
+	case WAITSTATE_MULTIPLAYER_CUTSCENE_MPNOTE_LOOP:
+		if(CAnimManager::GetAnimationBlock("MPNote"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("MPNote"));
+		break;
+	case WAITSTATE_CS_MISC_IDLE_LOOK:
+	case WAITSTATE_CS_MISC_IDLE_NO:
+	case WAITSTATE_CS_MISC_IDLE_YES:
+	case WAITSTATE_CS_MISC_IDLE_CHAT2:
+	case WAITSTATE_CS_MISC_IDLE_COUGH:
+	case WAITSTATE_CS_MISC_IDLE_GIGGLE_FEMALE:
+	case WAITSTATE_CS_MISC_IDLE_TOUGH_CHAT:
+	case WAITSTATE_CS_MISC_IDLE_CELL_TALK:
+		if(CAnimManager::GetAnimationBlock("cs_misc"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("cs_misc"));
+		break;
+	case WAITSTATE_DONH2_CAMERA:
+		if(CAnimManager::GetAnimationBlock("donh2"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("donh2"));
+		break;
+	case WAITSTATE_DONH3_HAPPY:
+		if(CAnimManager::GetAnimationBlock("donh3"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("donh3"));
+		break;
+	case WAITSTATE_JDT2_ANXIOUS_TALK:
+	case WAITSTATE_JDT2_SHRUG:
+		if(CAnimManager::GetAnimationBlock("cs_misc"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("cs_misc"));
+		break;
+	case WAITSTATE_JDT4_DILDO_TALK:
+		if(CAnimManager::GetAnimationBlock("jdt4"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("jdt4"));
+		break;
+	case WAITSTATE_JDT5_CALM_DOWN:
+	case WAITSTATE_JDT5_POINT:
+		if(CAnimManager::GetAnimationBlock("jdt5"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("jdt5"));
+		break;
+	case WAITSTATE_JDT6_PICKUP:
+	case WAITSTATE_JDT6_KNOCK:
+		if(CAnimManager::GetAnimationBlock("jdt6"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("jdt6"));
+		break;
+	case WAITSTATE_MAR1_SKIRT:
+		if(CAnimManager::GetAnimationBlock("mar1"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("mar1"));
+		break;
+	case WAITSTATE_MAR2_CELL_ANSWER:
+	case WAITSTATE_MAR2_CELL_END:
+	case WAITSTATE_MAR2_CELL_TALK:
+	case WAITSTATE_MAR2_FOOT_TAP:
+		if(CAnimManager::GetAnimationBlock("mar2"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("mar2"));
+		break;
+	case WAITSTATE_MAR3_HOOCHY:
+	case WAITSTATE_MAR3_NOTE_IDLE:
+	case WAITSTATE_MAR3_NOTE_PICKUP:
+		if(CAnimManager::GetAnimationBlock("mar3"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("mar3"));
+		break;
+	case WAITSTATE_SAL1_BIREFCASE_DOWN:
+		if(CAnimManager::GetAnimationBlock("sal1"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("sal1"));
+		break;
+	case WAITSTATE_SAL2_IDLE_SEATED:
+	case WAITSTATE_SAL2_SEAT_TO_STAND:
+		if(CAnimManager::GetAnimationBlock("sal2"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("sal2"));
+		break;
+	case WAITSTATE_SAL3_SEATED_TALK:
+	case WAITSTATE_SAL3_SEATED_IDLE:
+	case WAITSTATE_SAL3_SIT_DOWN:
+		if(CAnimManager::GetAnimationBlock("sal3"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("sal3"));
+		break;
+	case WAITSTATE_SAL4_DUST_DOWN:
+	case WAITSTATE_SAL4_GIRL_RUN:
+		if(CAnimManager::GetAnimationBlock("sal4"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("sal4"));
+		break;
+	case WAITSTATE_SAL6_ANGRY_SEATED:
+	case WAITSTATE_SAL6_IDLE_SEATED:
+		if(CAnimManager::GetAnimationBlock("sal6"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("sal6"));
+		break;
+	case WAITSTATE_SAL7_LOOKOUT:
+		if(CAnimManager::GetAnimationBlock("sal7"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("sal7"));
+		break;
+	case WAITSTATE_VIC2_POINT_ANGRY:
+		if(CAnimManager::GetAnimationBlock("vic2"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("vic2"));
+		break;
+	case WAITSTATE_VIC3_WAFT:
+	case WAITSTATE_VIC3_PICKUP_ROLL:
+		if(CAnimManager::GetAnimationBlock("vic3"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("vic3"));
+		break;
+	case WAITSTATE_VIC4_CARRY_BOX:
+	case WAITSTATE_VIC4_CELL_LOOK:
+	case WAITSTATE_VIC4_CRATE_IDLE:
+		if(CAnimManager::GetAnimationBlock("vic4"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("vic4"));
+		break;
+	case WAITSTATE_VIC6_CELL_ANGRY:
+		if(CAnimManager::GetAnimationBlock("vic6"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("vic6"));
+		break;
+	case WAITSTATE_TOURIST3:
+	case WAITSTATE_TOURIST2:
+	case WAITSTATE_TOURIST1:
+		if(CAnimManager::GetAnimationBlock("tourist"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("tourist"));
+		break;
+	case WAITSTATE_MAC2_PLEAD:
+		if(CAnimManager::GetAnimationBlock("mac2"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("mac2"));
+		break;
+	case WAITSTATE_VIC7_PROD_WITH_FOOT:
+		if(CAnimManager::GetAnimationBlock("vic7"))
+			CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex("vic7"));
+		break;
+	default: 
+		break;
+	}
+}
+
 
 #ifdef COMPATIBLE_SAVES
 #define CopyFromBuf(buf, data) memcpy(&data, buf, sizeof(data)); SkipSaveBuf(buf, sizeof(data));
