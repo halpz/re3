@@ -53,10 +53,10 @@ bool CPed::bFannyMagnetCheat;
 bool CPed::bPedCheat3;
 CVector2D CPed::ms_vec2DFleePosition;
 
-void *CPed::operator new(size_t sz) { return CPools::GetPedPool()->New();  }
-void *CPed::operator new(size_t sz, int handle) { return CPools::GetPedPool()->New(handle); }
-void CPed::operator delete(void *p, size_t sz) { CPools::GetPedPool()->Delete((CPed*)p); }
-void CPed::operator delete(void *p, int handle) { CPools::GetPedPool()->Delete((CPed*)p); }
+void *CPed::operator new(size_t sz) throw() { return CPools::GetPedPool()->New();  }
+void *CPed::operator new(size_t sz, int handle) throw() { return CPools::GetPedPool()->New(handle); }
+void CPed::operator delete(void *p, size_t sz) throw() { CPools::GetPedPool()->Delete((CPed*)p); }
+void CPed::operator delete(void *p, int handle) throw() { CPools::GetPedPool()->Delete((CPed*)p); }
 
 float gfTommyFatness = 1.0f;
 
