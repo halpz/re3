@@ -5469,6 +5469,11 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 void
 cAudioManager::GetPhrase(uint32 &phrase, uint32 &prevPhrase, uint32 sample, uint32 maxOffset) const
 {
+	if (maxOffset == 0) {
+		phrase = prevPhrase = NO_SAMPLE;
+		return;
+	}
+
 	phrase = sample + m_anRandomTable[m_sQueueSample.m_nEntityIndex & 3] % maxOffset;
 
 	// check if the same sfx like last time, if yes, then try use next one,
