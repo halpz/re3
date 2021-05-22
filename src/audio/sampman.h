@@ -126,7 +126,7 @@ enum
 #define DIGITALBITS                16
 #define DIGITALCHANNELS            2
 
-#define MAX_DIGITAL_MIXER_CHANNELS 32
+#define MAX_DIGITAL_MIXER_CHANNELS 34
 
 class cSampleManager
 {
