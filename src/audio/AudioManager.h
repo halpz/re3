@@ -13,7 +13,7 @@ public:
 	int32 m_nCounter;
 	int32 m_nSampleIndex;
 	uint8 m_nBankIndex;
-	bool m_bIs2D;
+	bool8 m_bIs2D;
 	int32 m_nReleasingVolumeModificator;
 	uint32 m_nFrequency;
 	uint8 m_nVolume;
@@ -24,16 +24,16 @@ public:
 	uint8 m_nEmittingVolume;
 	float m_fSpeedMultiplier;
 	float m_fSoundIntensity;
-	bool m_bReleasingSoundFlag;
+	bool8 m_bReleasingSoundFlag;
 	CVector m_vecPos;
-	bool m_bReverbFlag;
+	bool8 m_bReverbFlag;
 	uint8 m_nLoopsRemaining;
-	bool m_bRequireReflection; // Used for oneshots
+	bool8 m_bRequireReflection; // Used for oneshots
 	uint8 m_nOffset;
 	uint8 field_4C;
 	int32 m_nReleasingVolumeDivider;
-	bool m_bIsProcessed;
-	bool m_bLoopEnded;
+	bool8 m_bIsProcessed;
+	bool8 m_bLoopEnded;
 	int32 m_nCalculatedVolume;
 	int8 m_nVolumeChange;
 };
@@ -48,7 +48,7 @@ class tAudioEntity
 public:
 	eAudioType m_nType;
 	void *m_pEntity;
-	bool m_bIsUsed;
+	bool8 m_bIsUsed;
 	uint8 m_bStatus;
 	int16 m_awAudioEvent[NUM_AUDIOENTITY_EVENTS];
 	float m_afVolume[NUM_AUDIOENTITY_EVENTS];
@@ -78,7 +78,7 @@ public:
 	uint8 m_nCommentsInBank[NUM_PED_COMMENTS_BANKS];
 	uint8 m_nActiveBank;
 #ifdef GTA_PC
-	bool m_bDelay;
+	bool8 m_bDelay;
 	uint32 m_nDelayTimer;
 #endif
 
@@ -110,14 +110,14 @@ class cMissionAudio
 {
 public:
 	CVector m_vecPos[MISSION_AUDIO_SLOTS];
-	bool m_bPredefinedProperties[MISSION_AUDIO_SLOTS];
+	bool8 m_bPredefinedProperties[MISSION_AUDIO_SLOTS];
 	int32 m_nSampleIndex[MISSION_AUDIO_SLOTS];
 	uint8 m_nLoadingStatus[MISSION_AUDIO_SLOTS];
 	uint8 m_nPlayStatus[MISSION_AUDIO_SLOTS];
-	bool m_bIsPlaying[MISSION_AUDIO_SLOTS];
+	bool8 m_bIsPlaying[MISSION_AUDIO_SLOTS];
 	int32 m_nMissionAudioCounter[MISSION_AUDIO_SLOTS];
-	bool m_bIsPlayed[MISSION_AUDIO_SLOTS];
-	bool m_bIsMobile[MISSION_AUDIO_SLOTS];
+	bool8 m_bIsPlayed[MISSION_AUDIO_SLOTS];
+	bool8 m_bIsMobile[MISSION_AUDIO_SLOTS];
 };
 VALIDATE_SIZE(cMissionAudio, 0x38);
 
@@ -141,7 +141,7 @@ class CPed;
 class cPedParams
 {
 public:
-	bool m_bDistanceCalculated;
+	bool8 m_bDistanceCalculated;
 	float m_fDistance;
 	CPed *m_pPed;
 
@@ -157,7 +157,7 @@ class cVehicleParams
 {
 public:
 	int32 m_VehicleType;
-	bool m_bDistanceCalculated;
+	bool8 m_bDistanceCalculated;
 	float m_fDistance;
 	CVehicle *m_pVehicle;
 	cTransmission *m_pTransmission;
@@ -193,15 +193,15 @@ enum {
 class cAudioManager
 {
 public:
-	bool m_bIsInitialised;
+	bool8 m_bIsInitialised;
 	uint8 m_bReverb; // unused
-	bool m_bFifthFrameFlag;
+	bool8 m_bFifthFrameFlag;
 	uint8 m_nActiveSamples;
 	uint8 field_4; // unused
-	bool m_bDynamicAcousticModelingStatus;
+	bool8 m_bDynamicAcousticModelingStatus;
 	int8 field_6;
 	float m_fSpeedOfSound;
-	bool m_bTimerJustReset;
+	bool8 m_bTimerJustReset;
 	int32 m_nTimer;
 	tSound m_sQueueSample;
 	uint8 m_nActiveSampleQueue;
@@ -217,11 +217,11 @@ public:
 	cAudioScriptObjectManager m_sAudioScriptObjectManager;
 
 	// miami
-	uint8 m_bIsPlayerShutUp;
+	bool8 m_bIsPlayerShutUp;
 	uint8 m_nPlayerMood;
 	uint32 m_nPlayerMoodTimer;
 	uint8 field_rest[4];
-	bool m_bGenericSfx;
+	bool8 m_bGenericSfx;
 
 	cPedComments m_sPedComments;
 	int32 m_nFireAudioEntity;
@@ -253,19 +253,19 @@ public:
 	float GetReflectionsDistance(int32 idx) const { return m_afReflectionsDistances[idx]; } // done
 	int32 GetRandomNumber(int32 idx) const { return m_anRandomTable[idx]; }
 	int32 GetRandomNumberInRange(int32 idx, int32 low, int32 high) const { return (m_anRandomTable[idx] % (high - low + 1)) + low; }
-	bool IsMissionAudioSamplePlaying(uint8 slot) const; // { return m_sMissionAudio.m_nPlayStatus == 1; }
-	bool ShouldDuckMissionAudio(uint8 slot) const;
+	bool8 IsMissionAudioSamplePlaying(uint8 slot) const; // { return m_sMissionAudio.m_nPlayStatus == 1; }
+	bool8 ShouldDuckMissionAudio(uint8 slot) const;
 
 	// "Should" be in alphabetic order, except "getXTalkSfx"
 	void AddDetailsToRequestedOrderList(uint8 sample);                                                                    // done (inlined in vc)
-	void AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sample, uint8 bank, uint8 counter, bool notLooping); // done
+	void AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sample, uint8 bank, uint8 counter, bool8 notLooping); // done
 	void AddReflectionsToRequestedQueue();                                                                                // done
 	void AddReleasingSounds();                                                                                            // done
 	void AddSampleToRequestedQueue();                                                                                     // done
 	void AgeCrimes();                                                                                                     // done (inlined in vc)
 
-	void CalculateDistance(bool &condition, float dist);                                                                   // done
-	bool CheckForAnAudioFileOnCD() const;                                                                                  // done
+	void CalculateDistance(bool8 &condition, float dist);                                                                   // done
+	bool8 CheckForAnAudioFileOnCD() const;                                                                                  // done
 	void ClearActiveSamples();                                                                                             // done
 	void ClearMissionAudio(uint8 slot);                                                                                    // done (inlined in vc)
 	void ClearRequestedQueue();                                                                                            // done (inlined in vc)
@@ -379,7 +379,7 @@ public:
 
 	void GenerateIntegerRandomNumberTable();                                                   // done
 	char *Get3DProviderName(uint8 id) const;                                                   // done
-	uint8 GetCDAudioDriveLetter() const;                                                       // done
+	char GetCDAudioDriveLetter() const;                                                       // done
 	int8 GetCurrent3DProviderIndex() const;                                                    // done
 	int8 AutoDetect3DProviders() const;                                                        // done
 	float GetCollisionLoopingRatio(uint32 a, uint32 b, float c) const;                         // not used
@@ -396,17 +396,17 @@ public:
 	                                    float velocityChange);                                                                        // done
 	float GetVehicleNonDriveWheelSkidValue(CVehicle *veh, tWheelState wheelState, cTransmission *transmission, float velocityChange); // done
 
-	bool HasAirBrakes(int32 model) const; // done
+	bool8 HasAirBrakes(int32 model) const; // done
 
 	void Initialise();                             // done
 	void InitialisePoliceRadio();                  // done
 	void InitialisePoliceRadioZones();             // done
 	void InterrogateAudioEntities();               // done (inlined)
-	bool IsAudioInitialised() const;               // done
-	bool IsMissionAudioSampleFinished(uint8 slot); // done
-	bool IsMP3RadioChannelAvailable() const;       // done
+	bool8 IsAudioInitialised() const;               // done
+	bool8 IsMissionAudioSampleFinished(uint8 slot); // done
+	bool8 IsMP3RadioChannelAvailable() const;       // done
 
-	bool MissionScriptAudioUsesPoliceChannel(int32 soundMission) const; //done
+	bool8 MissionScriptAudioUsesPoliceChannel(int32 soundMission) const; //done
 
 	void PlayLoadedMissionAudio(uint8 slot);                // done
 	void PlayOneShot(int32 index, uint16 sound, float vol); // done
@@ -420,20 +420,20 @@ public:
 	void PreTerminateGameSpecificShutdown();                // done
 	/// processX - main logic of adding new sounds
 	void ProcessActiveQueues();                              // done
-	bool ProcessAirBrakes(cVehicleParams& params);           // done
-	bool ProcessBoatEngine(cVehicleParams& params);          
-	bool ProcessBoatMovingOverWater(cVehicleParams& params); //done 
+	bool8 ProcessAirBrakes(cVehicleParams& params);           // done
+	bool8 ProcessBoatEngine(cVehicleParams& params);          
+	bool8 ProcessBoatMovingOverWater(cVehicleParams& params); //done 
 #ifdef GTA_BRIDGE
 	void ProcessBridge();         // done(bcs not exists in VC)
 	void ProcessBridgeMotor();    // done(bcs not exists in VC)
 	void ProcessBridgeOneShots(); // done(bcs not exists in VC)
 	void ProcessBridgeWarning();  // done(bcs not exists in VC)
 #endif
-	bool ProcessCarBombTick(cVehicleParams& params);                         // done
+	bool8 ProcessCarBombTick(cVehicleParams& params);                         // done
 	void ProcessCarHeli(cVehicleParams& params);                             // done
 	void ProcessCesna(cVehicleParams& params);                               // done
 	//void ProcessCrane();                                                   // done(bcs not exists in VC)
-	bool ProcessEngineDamage(cVehicleParams& params);                        // done
+	bool8 ProcessEngineDamage(cVehicleParams& params);                        // done
 	void ProcessEntity(int32 sound);                                         // done
 	void ProcessExplosions(int32 explosion);                                 // done
 	void ProcessFireHydrant();                                               // done
@@ -462,25 +462,25 @@ public:
 	void ProcessProjectiles();                                               // done
 	void ProcessRainOnVehicle(cVehicleParams& params);                       // done
 	void ProcessReverb() const;                                              // done
-	bool ProcessReverseGear(cVehicleParams& params);                         // done
+	bool8 ProcessReverseGear(cVehicleParams& params);                         // done
 	void ProcessScriptObject(int32 id);                                      // done
 	void ProcessSpecial();                                                   // done
 #ifdef GTA_TRAIN
-	bool ProcessTrainNoise(cVehicleParams *params); //done(bcs not exists in VC)
+	bool8 ProcessTrainNoise(cVehicleParams *params); //done(bcs not exists in VC)
 #endif
 	void ProcessVehicle(CVehicle *vehicle);                    // done
-	bool ProcessVehicleDoors(cVehicleParams &params);          // done
+	bool8 ProcessVehicleDoors(cVehicleParams &params);          // done
 	void ProcessVehicleEngine(cVehicleParams &params);         // done
 	void ProcessVehicleFlatTyre(cVehicleParams &params);       // done
-	bool ProcessVehicleHorn(cVehicleParams &params);           // done
+	bool8 ProcessVehicleHorn(cVehicleParams &params);           // done
 	void ProcessVehicleOneShots(cVehicleParams &params);       // done
-	bool ProcessVehicleReverseWarning(cVehicleParams &params); // done
-	bool ProcessVehicleRoadNoise(cVehicleParams &params);      // done
-	bool ProcessVehicleSirenOrAlarm(cVehicleParams &params);   // done
-	bool ProcessVehicleSkidding(cVehicleParams &params);       // done
+	bool8 ProcessVehicleReverseWarning(cVehicleParams &params); // done
+	bool8 ProcessVehicleRoadNoise(cVehicleParams &params);      // done
+	bool8 ProcessVehicleSirenOrAlarm(cVehicleParams &params);   // done
+	bool8 ProcessVehicleSkidding(cVehicleParams &params);       // done
 	void ProcessWaterCannon(int32);                            // done
 	void ProcessWeather(int32 id);                             // done
-	bool ProcessWetRoadNoise(cVehicleParams& params);          // done
+	bool8 ProcessWetRoadNoise(cVehicleParams& params);          // done
 	void ProcessEscalators();                                  // done
 	void ProcessExtraSounds();                                 // done
 
@@ -499,26 +499,26 @@ public:
 	void ServicePoliceRadioChannel(uint8 wantedLevel);                                          // done
 	void ServiceSoundEffects();                                                                 // done
 	int8 SetCurrent3DProvider(uint8 which);                                                     // done
-	void SetDynamicAcousticModelingStatus(uint8 status);                                        // done
+	void SetDynamicAcousticModelingStatus(bool8 status);                                        // done
 	void SetEffectsFadeVol(uint8 volume) const;                                                 // done
 	void SetEffectsMasterVolume(uint8 volume) const;                                            // done
 	void SetMP3BoostVolume(uint8 volume) const;                                                 // done
-	void SetEntityStatus(int32 id, uint8 status);                                               // done
+	void SetEntityStatus(int32 id, bool8 status);                                               // done
 	uint32 SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollision &audioCollision); // done
 	void SetMissionAudioLocation(uint8 slot, float x, float y, float z);                        // done
 	void SetMissionScriptPoliceAudio(int32 sfx) const;                                          // inlined and optimized
-	void SetMonoMode(uint8 mono);                                                               // done
+	void SetMonoMode(bool8 mono);                                                               // done
 	void SetMusicFadeVol(uint8 volume) const;                                                   // done
 	void SetMusicMasterVolume(uint8 volume) const;                                              // done
 	void SetSpeakerConfig(int32 conf) const;                                                    // done
 	void SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 counter);                 // done
 	void SetUpOneShotCollisionSound(const cAudioCollision &col);                                // done
-	bool SetupCrimeReport();                                                                    // done
-	bool SetupJumboEngineSound(uint8 vol, uint32 freq);                                         // done
-	bool SetupJumboFlySound(uint8 emittingVol);                                                 // done
-	bool SetupJumboRumbleSound(uint8 emittingVol);                                              // done
-	bool SetupJumboTaxiSound(uint8 vol);                                                        // done
-	bool SetupJumboWhineSound(uint8 emittingVol, uint32 freq);                                  // done
+	bool8 SetupCrimeReport();                                                                    // done
+	bool8 SetupJumboEngineSound(uint8 vol, uint32 freq);                                         // done
+	bool8 SetupJumboFlySound(uint8 emittingVol);                                                 // done
+	bool8 SetupJumboRumbleSound(uint8 emittingVol);                                              // done
+	bool8 SetupJumboTaxiSound(uint8 vol);                                                        // done
+	bool8 SetupJumboWhineSound(uint8 emittingVol, uint32 freq);                                  // done
 	void SetupPedComments(cPedParams &params, uint16 sound);                                    // done
 	void SetupSuspectLastSeenReport();
 
@@ -527,12 +527,12 @@ public:
 
 	void UpdateGasPedalAudio(CVehicle *veh, int vehType);  // done
 	void UpdateReflections();                              // done
-	bool UsesReverseWarning(int32 model) const;            // done
-	bool UsesSiren(cVehicleParams &params) const;          // done
-	bool UsesSirenSwitching(cVehicleParams &params) const; // done
+	bool8 UsesReverseWarning(int32 model) const;            // done
+	bool8 UsesSiren(cVehicleParams &params) const;          // done
+	bool8 UsesSirenSwitching(cVehicleParams &params) const; // done
 
 	CVehicle *FindVehicleOfPlayer();                   // done
-	void SetPedTalkingStatus(CPed *ped, uint8 status); // done
+	void SetPedTalkingStatus(CPed *ped, bool8 status); // done
 	void SetPlayersMood(uint8 mood, uint32 time);      // done
 
 	float Sqrt(float v) const { return v <= 0.0f ? 0.0f : ::Sqrt(v); }

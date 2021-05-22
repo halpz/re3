@@ -23,8 +23,8 @@ const int allChannels = channels + 2;
 
 cAudioManager::cAudioManager()
 {
-	m_bIsInitialised = false;
-	m_bReverb = true;
+	m_bIsInitialised = FALSE;
+	m_bReverb = TRUE;
 	field_6 = 0;
 	m_fSpeedOfSound = SPEED_OF_SOUND / TIME_SPENT;
 	m_nTimeSpent = TIME_SPENT;
@@ -36,16 +36,16 @@ cAudioManager::cAudioManager()
 	ClearActiveSamples();
 	GenerateIntegerRandomNumberTable();
 	field_4 = 0;
-	m_bDynamicAcousticModelingStatus = true;
+	m_bDynamicAcousticModelingStatus = TRUE;
 
 	for (int i = 0; i < NUM_AUDIOENTITIES; i++) {
-		m_asAudioEntities[i].m_bIsUsed = false;
+		m_asAudioEntities[i].m_bIsUsed = FALSE;
 		m_anAudioEntityIndices[i] = NUM_AUDIOENTITIES;
 	}
 	m_nAudioEntitiesTotal = 0;
 	m_FrameCounter = 0;
-	m_bFifthFrameFlag = false;
-	m_bTimerJustReset = false;
+	m_bFifthFrameFlag = FALSE;
+	m_bTimerJustReset = FALSE;
 	m_nTimer = 0;
 }
 
@@ -83,7 +83,7 @@ cAudioManager::Terminate()
 		MusicManager.Terminate();
 
 		for (uint32 i = 0; i < NUM_AUDIOENTITIES; i++) {
-			m_asAudioEntities[i].m_bIsUsed = false;
+			m_asAudioEntities[i].m_bIsUsed = FALSE;
 			m_anAudioEntityIndices[i] = ARRAY_SIZE(m_anAudioEntityIndices);
 		}
 
@@ -98,7 +98,7 @@ cAudioManager::Terminate()
 
 		SampleManager.Terminate();
 
-		m_bIsInitialised = false;
+		m_bIsInitialised = FALSE;
 		PostTerminateGameSpecificShutdown();
 	}
 }
@@ -110,7 +110,7 @@ cAudioManager::Service()
 	if (m_bTimerJustReset) {
 		ResetAudioLogicTimers(m_nTimer);
 		MusicManager.ResetTimers(m_nTimer);
-		m_bTimerJustReset = false;
+		m_bTimerJustReset = FALSE;
 	}
 	if (m_bIsInitialised) {
 		m_nPreviousUserPause = m_nUserPause;
@@ -132,8 +132,8 @@ cAudioManager::CreateEntity(eAudioType type, void *entity)
 		return AEHANDLE_ERROR_BADAUDIOTYPE;
 	for (uint32 i = 0; i < ARRAY_SIZE(m_asAudioEntities); i++) {
 		if (!m_asAudioEntities[i].m_bIsUsed) {
-			m_asAudioEntities[i].m_bIsUsed = true;
-			m_asAudioEntities[i].m_bStatus = false;
+			m_asAudioEntities[i].m_bIsUsed = TRUE;
+			m_asAudioEntities[i].m_bStatus = FALSE;
 			m_asAudioEntities[i].m_nType = type;
 			m_asAudioEntities[i].m_pEntity = entity;
 			m_asAudioEntities[i].m_awAudioEvent[0] = SOUND_NO_SOUND;
@@ -152,7 +152,7 @@ void
 cAudioManager::DestroyEntity(int32 id)
 {
 	if (m_bIsInitialised && id >= 0 && id < NUM_AUDIOENTITIES && m_asAudioEntities[id].m_bIsUsed) {
-		m_asAudioEntities[id].m_bIsUsed = false;
+		m_asAudioEntities[id].m_bIsUsed = FALSE;
 		for (int32 i = 0; i < m_nAudioEntitiesTotal; ++i) {
 			if (id == m_anAudioEntityIndices[i]) {
 				if (i < NUM_AUDIOENTITIES - 1)
@@ -165,7 +165,7 @@ cAudioManager::DestroyEntity(int32 id)
 }
 
 void
-cAudioManager::SetEntityStatus(int32 id, uint8 status)
+cAudioManager::SetEntityStatus(int32 id, bool8 status)
 {
 	if (m_bIsInitialised && id >= 0 && id < NUM_AUDIOENTITIES && m_asAudioEntities[id].m_bIsUsed)
 		m_asAudioEntities[id].m_bStatus = status;
@@ -193,7 +193,7 @@ cAudioManager::PlayOneShot(int32 index, uint16 sound, float vol)
 						}
 					} else {
 						int32 i = 0;
-						while (true) {
+						while (TRUE) {
 							if (i >= entity.m_AudioEvents) {
 								if (entity.m_AudioEvents < ARRAY_SIZE(entity.m_awAudioEvent)) {
 									entity.m_awAudioEvent[i] = sound;
@@ -246,7 +246,7 @@ cAudioManager::SetEffectsFadeVol(uint8 volume) const
 }
 
 void
-cAudioManager::SetMonoMode(uint8 mono)
+cAudioManager::SetMonoMode(bool8 mono)
 {
 	SampleManager.SetMonoMode(mono);
 }
@@ -261,7 +261,7 @@ void
 cAudioManager::ResetTimers(uint32 time)
 {
 	if (m_bIsInitialised) {
-		m_bTimerJustReset = true;
+		m_bTimerJustReset = TRUE;
 		m_nTimer = time;
 		ClearRequestedQueue();
 		if (m_nActiveSampleQueue) {
@@ -280,7 +280,7 @@ cAudioManager::ResetTimers(uint32 time)
 		SampleManager.SetEffectsFadeVolume(0);
 		SampleManager.SetMusicFadeVolume(0);
 		MusicManager.ResetMusicAfterReload();
-		m_bIsPlayerShutUp = false;
+		m_bIsPlayerShutUp = FALSE;
 #ifdef AUDIO_OAL
 		SampleManager.Service();
 #endif
@@ -391,13 +391,13 @@ cAudioManager::SetSpeakerConfig(int32 conf) const
 	SampleManager.SetSpeakerConfig(conf);
 }
 
-bool
+bool8
 cAudioManager::IsMP3RadioChannelAvailable() const
 {
 	if (m_bIsInitialised)
 		return SampleManager.IsMP3RadioChannelAvailable();
 
-	return false;
+	return FALSE;
 }
 
 void
@@ -417,25 +417,25 @@ cAudioManager::ReacquireDigitalHandle() const
 }
 
 void
-cAudioManager::SetDynamicAcousticModelingStatus(uint8 status)
+cAudioManager::SetDynamicAcousticModelingStatus(bool8 status)
 {
-	m_bDynamicAcousticModelingStatus = status!=0;
+	m_bDynamicAcousticModelingStatus = status;
 }
 
-bool
+bool8
 cAudioManager::CheckForAnAudioFileOnCD() const
 {
 	return SampleManager.CheckForAnAudioFileOnCD();
 }
 
-uint8
+char
 cAudioManager::GetCDAudioDriveLetter() const
 {
 	if(m_bIsInitialised) return SampleManager.GetCDAudioDriveLetter();
-	return 0;
+	return '\0';
 }
 
-bool
+bool8
 cAudioManager::IsAudioInitialised() const
 {
 	return m_bIsInitialised;
@@ -545,7 +545,7 @@ cAudioManager::RandomDisplacement(uint32 seed) const
 {
 	int32 value;
 
-	static bool bPos = true;
+	static bool8 bPos = TRUE;
 	static uint32 Adjustment = 0;
 
 	if (!seed)
@@ -576,7 +576,7 @@ cAudioManager::AddSampleToRequestedQueue()
 {
 	int32 calculatedVolume;
 	uint8 sampleIndex;
-	bool bReflections;
+	bool8 bReflections;
 
 	if (m_sQueueSample.m_nSampleIndex < TOTAL_AUDIO_SAMPLES) {
 		calculatedVolume = m_sQueueSample.m_nReleasingVolumeModificator * (MAX_VOLUME - m_sQueueSample.m_nVolume);
@@ -589,24 +589,24 @@ cAudioManager::AddSampleToRequestedQueue()
 			++m_SampleRequestQueuesStatus[m_nActiveSampleQueue];
 		}
 		m_sQueueSample.m_nCalculatedVolume = calculatedVolume;
-		m_sQueueSample.m_bLoopEnded = false;
+		m_sQueueSample.m_bLoopEnded = FALSE;
 		if (m_sQueueSample.m_bIs2D || CCullZones::InRoomForAudio()) {
-			m_sQueueSample.m_bRequireReflection = false;
+			m_sQueueSample.m_bRequireReflection = FALSE;
 			m_sQueueSample.m_nLoopsRemaining = 0;
 		}
 		if (m_bDynamicAcousticModelingStatus && m_sQueueSample.m_nLoopCount) {
 			bReflections = m_sQueueSample.m_bRequireReflection;
 		} else {
-			bReflections = false;
+			bReflections = FALSE;
 			m_sQueueSample.m_nLoopsRemaining = 0;
 		}
-		m_sQueueSample.m_bRequireReflection = false;
+		m_sQueueSample.m_bRequireReflection = FALSE;
 
 		if ( m_bReverb && m_sQueueSample.m_bIs2D )
 			m_sQueueSample.field_4C = 30;
 
 		if (!m_bDynamicAcousticModelingStatus)
-			m_sQueueSample.m_bReverbFlag = false;
+			m_sQueueSample.m_bReverbFlag = FALSE;
 
 		m_asSamples[m_nActiveSampleQueue][sampleIndex] = m_sQueueSample;
 
@@ -773,7 +773,7 @@ cAudioManager::UpdateReflections()
 void
 cAudioManager::AddReleasingSounds()
 {
-	bool toProcess[44]; // why not 27?
+	bool8 toProcess[44]; // why not 27?
 
 	int8 queue = m_nActiveSampleQueue == 0 ? 1 : 0;
 
@@ -782,11 +782,11 @@ cAudioManager::AddReleasingSounds()
 		if (sample.m_bLoopEnded)
 			continue;
 
-		toProcess[i] = false;
+		toProcess[i] = FALSE;
 		for (int32 j = 0; j < m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; j++) {
 			if (sample.m_nEntityIndex == m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][j]].m_nEntityIndex &&
 			    sample.m_nCounter == m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][j]].m_nCounter) {
-				toProcess[i] = true;
+				toProcess[i] = TRUE;
 				break;
 			}
 		}
@@ -811,7 +811,7 @@ cAudioManager::AddReleasingSounds()
 					if (sample.m_nReleasingVolumeModificator < 20)
 						++sample.m_nReleasingVolumeModificator;
 				}
-				sample.m_bReleasingSoundFlag = false;
+				sample.m_bReleasingSoundFlag = FALSE;
 			}
 			memcpy(&m_sQueueSample, &sample, sizeof(tSound));
 			AddSampleToRequestedQueue();
@@ -829,12 +829,12 @@ cAudioManager::ProcessActiveQueues()
 	uint8 vol;
 	uint8 offset;
 	float x;
-	bool flag;
-	bool missionState;
+	bool8 flag;
+	bool8 missionState;
 
 	for (int32 i = 0; i < m_nActiveSamples; i++) {
-		m_asSamples[m_nActiveSampleQueue][i].m_bIsProcessed = false;
-		m_asActiveSamples[i].m_bIsProcessed = false;
+		m_asSamples[m_nActiveSampleQueue][i].m_bIsProcessed = FALSE;
+		m_asActiveSamples[i].m_bIsProcessed = FALSE;
 	}
 	for (int32 i = 0; i < m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; i++) {
 		tSound& sample = m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]];
@@ -847,19 +847,19 @@ cAudioManager::ProcessActiveQueues()
 						
 						if (m_FrameCounter & 1) {
 							if (!(j & 1)) {
-								flag = false;
+								flag = FALSE;
 							} else {
-								flag = true;
+								flag = TRUE;
 							}
 						} else if (j & 1) {
-							flag = false;
+							flag = FALSE;
 						} else {
-							flag = true;
+							flag = TRUE;
 						}
 
 						if (flag && !SampleManager.GetChannelUsedFlag(j)) {
-							sample.m_bLoopEnded = true;
-							m_asActiveSamples[j].m_bLoopEnded = true;
+							sample.m_bLoopEnded = TRUE;
+							m_asActiveSamples[j].m_bLoopEnded = TRUE;
 							m_asActiveSamples[j].m_nSampleIndex = NO_SAMPLE;
 							m_asActiveSamples[j].m_nEntityIndex = AEHANDLE_NONE;
 							continue;
@@ -867,8 +867,8 @@ cAudioManager::ProcessActiveQueues()
 						if (!sample.m_nReleasingVolumeDivider)
 							sample.m_nReleasingVolumeDivider = 1;
 					}
-					sample.m_bIsProcessed = true;
-					m_asActiveSamples[j].m_bIsProcessed = true;
+					sample.m_bIsProcessed = TRUE;
+					m_asActiveSamples[j].m_bIsProcessed = TRUE;
 					sample.m_nVolumeChange = -1;
 					if (!sample.m_bReleasingSoundFlag) {
 						if (sample.m_bIs2D) {
@@ -900,10 +900,10 @@ cAudioManager::ProcessActiveQueues()
 									emittingVol = vol;
 								}
 
-								missionState = false;
+								missionState = FALSE;
 								for (int32 k = 0; k < ARRAY_SIZE(m_sMissionAudio.m_bIsMobile); k++) {
 									if (m_sMissionAudio.m_bIsMobile[k]) {
-										missionState = true;
+										missionState = TRUE;
 										break;
 									}
 								}
@@ -924,8 +924,8 @@ cAudioManager::ProcessActiveQueues()
 						SampleManager.SetChannelReverbFlag(j, sample.m_bReverbFlag);
 						break; //continue for i
 					}
-					sample.m_bIsProcessed = false;
-					m_asActiveSamples[j].m_bIsProcessed = false;
+					sample.m_bIsProcessed = FALSE;
+					m_asActiveSamples[j].m_bIsProcessed = FALSE;
 					//continue for j
 				}
 			}
@@ -966,10 +966,10 @@ cAudioManager::ProcessActiveQueues()
 						}
 						if (SampleManager.InitialiseChannel(k, m_asActiveSamples[k].m_nSampleIndex, m_asActiveSamples[k].m_nBankIndex)) {
 							SampleManager.SetChannelFrequency(k, m_asActiveSamples[k].m_nFrequency);
-							bool isMobile = false;
+							bool8 isMobile = FALSE;
 							for (int32 l = 0; l < ARRAY_SIZE(m_sMissionAudio.m_bIsMobile); l++) {
 								if (m_sMissionAudio.m_bIsMobile[l]) {
-									isMobile = true;
+									isMobile = TRUE;
 									break;
 								}
 							}
@@ -1000,8 +1000,8 @@ cAudioManager::ProcessActiveQueues()
 							SampleManager.SetChannel3DDistances(k, m_asActiveSamples[k].m_fSoundIntensity, 0.25f * m_asActiveSamples[k].m_fSoundIntensity);
 							SampleManager.StartChannel(k);
 						}
-						m_asActiveSamples[k].m_bIsProcessed = true;
-						sample.m_bIsProcessed = true;
+						m_asActiveSamples[k].m_bIsProcessed = TRUE;
+						sample.m_bIsProcessed = TRUE;
 						sample.m_nVolumeChange = -1;
 						break;
 					}
@@ -1029,28 +1029,28 @@ cAudioManager::ClearActiveSamples()
 		m_asActiveSamples[i].m_nCounter = 0;
 		m_asActiveSamples[i].m_nSampleIndex = NO_SAMPLE;
 		m_asActiveSamples[i].m_nBankIndex = INVALID_SFX_BANK;
-		m_asActiveSamples[i].m_bIs2D = false;
+		m_asActiveSamples[i].m_bIs2D = FALSE;
 		m_asActiveSamples[i].m_nReleasingVolumeModificator = 5;
 		m_asActiveSamples[i].m_nFrequency = 0;
 		m_asActiveSamples[i].m_nVolume = 0;
 		m_asActiveSamples[i].m_nEmittingVolume = 0;
 		m_asActiveSamples[i].m_fDistance = 0.0f;
-		m_asActiveSamples[i].m_bIsProcessed = false;
-		m_asActiveSamples[i].m_bLoopEnded = false;
+		m_asActiveSamples[i].m_bIsProcessed = FALSE;
+		m_asActiveSamples[i].m_bLoopEnded = FALSE;
 		m_asActiveSamples[i].m_nLoopCount = 1;
 		m_asActiveSamples[i].m_nLoopStart = 0;
 		m_asActiveSamples[i].m_nLoopEnd = -1;
 		m_asActiveSamples[i].m_fSpeedMultiplier = 0.0f;
 		m_asActiveSamples[i].m_fSoundIntensity = 200.0f;
 		m_asActiveSamples[i].m_nOffset = 63;
-		m_asActiveSamples[i].m_bReleasingSoundFlag = false;
+		m_asActiveSamples[i].m_bReleasingSoundFlag = FALSE;
 		m_asActiveSamples[i].m_nCalculatedVolume = 0;
 		m_asActiveSamples[i].m_nReleasingVolumeDivider = 0;
 		m_asActiveSamples[i].m_nVolumeChange = -1;
 		m_asActiveSamples[i].m_vecPos = CVector(0.0f, 0.0f, 0.0f);
-		m_asActiveSamples[i].m_bReverbFlag = false;
+		m_asActiveSamples[i].m_bReverbFlag = FALSE;
 		m_asActiveSamples[i].m_nLoopsRemaining = 0;
-		m_asActiveSamples[i].m_bRequireReflection = false;
+		m_asActiveSamples[i].m_bRequireReflection = FALSE;
 	}
 }
 

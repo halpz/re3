@@ -16,18 +16,18 @@ class CPed;
 class cMusicManager
 {
 public:
-	bool m_bIsInitialised;
-	bool m_bDisabled;
-	bool m_bSetNextStation;
+	bool8 m_bIsInitialised;
+	bool8 m_bDisabled;
+	bool8 m_bSetNextStation;
 	uint8 m_nVolumeLatency;
 	uint8 m_nCurrentVolume;
 	uint8 m_nMaxVolume;
 	uint32 m_nAnnouncement;
-	bool m_bAnnouncementInProgress;
+	bool8 m_bAnnouncementInProgress;
 	tStreamedSample m_aTracks[TOTAL_STREAMED_SOUNDS];
-	bool m_bResetTimers;
+	bool8 m_bResetTimers;
 	uint32 m_nResetTime;
-	bool m_bRadioSetByScript;
+	bool8 m_bRadioSetByScript;
 	uint8 m_nRadioStationScript;
 	int32 m_nRadioPosition;
 	uint32 m_nRadioInCar;
@@ -35,40 +35,40 @@ public:
 	uint32 m_nPlayingTrack;
 	uint8 m_nUpcomingMusicMode;
 	uint8 m_nMusicMode;
-	bool m_FrontendLoopFlag;
-	bool m_bTrackChangeStarted;
+	bool8 m_FrontendLoopFlag;
+	bool8 m_bTrackChangeStarted;
 	uint32 m_nNextTrack;
-	bool m_nNextLoopFlag;
-	bool m_bVerifyNextTrackStartedToPlay;
-	bool m_bGameplayAllowsRadio;
-	bool m_bRadioStreamReady;
+	bool8 m_nNextLoopFlag;
+	bool8 m_bVerifyNextTrackStartedToPlay;
+	bool8 m_bGameplayAllowsRadio;
+	bool8 m_bRadioStreamReady;
 	int8 nFramesSinceCutsceneEnded;
-	bool m_bUserResumedGame;
-	bool m_bMusicModeChangeStarted;
+	bool8 m_bUserResumedGame;
+	bool8 m_bMusicModeChangeStarted;
 	uint8 m_nMusicModeToBeSet;
-	bool m_bEarlyFrontendTrack;
+	bool8 m_bEarlyFrontendTrack;
 	float aListenTimeArray[NUM_RADIOS];
 	float m_nLastTrackServiceTime;
 
 public:
 	cMusicManager();
-	bool IsInitialised() { return m_bIsInitialised; }
+	bool8 IsInitialised() { return m_bIsInitialised; }
 	uint8 GetMusicMode() { return m_nMusicMode; }
 	uint32 GetCurrentTrack() { return m_nPlayingTrack; }
 
 	void ResetMusicAfterReload();
-	void SetStartingTrackPositions(uint8 isNewGameTimer);
-	bool Initialise();
+	void SetStartingTrackPositions(bool8 isNewGameTimer);
+	bool8 Initialise();
 	void Terminate();
 
 	void ChangeMusicMode(uint8 mode);
 	void StopFrontEndTrack();
 
-	bool PlayerInCar();
+	bool8 PlayerInCar();
 	void DisplayRadioStationName();
 
 	void PlayAnnouncement(uint32);
-	void PlayFrontEndTrack(uint32, uint8);
+	void PlayFrontEndTrack(uint32, bool8);
 	void PreloadCutSceneMusic(uint32);
 	void PlayPreloadedCutSceneMusic(void);
 	void StopCutSceneMusic(void);
@@ -83,16 +83,16 @@ public:
 	void ServiceAmbience();
 	void ServiceTrack(CVehicle *veh, CPed *ped);
 
-	bool UsesPoliceRadio(CVehicle *veh);
-	bool UsesTaxiRadio(CVehicle *veh);
+	bool8 UsesPoliceRadio(CVehicle *veh);
+	bool8 UsesTaxiRadio(CVehicle *veh);
 	uint32 GetTrackStartPos(uint32 track);
 
-	void ComputeAmbienceVol(uint8 reset, uint8& outVolume);
-	bool ServiceAnnouncement();
+	void ComputeAmbienceVol(bool8 reset, uint8& outVolume);
+	bool8 ServiceAnnouncement();
 
 	uint32 GetCarTuning();
 	uint32 GetNextCarTuning();
-	bool ChangeRadioChannel();
+	bool8 ChangeRadioChannel();
 	void RecordRadioStats();
 	void SetUpCorrectAmbienceTrack();
 	float *GetListenTimeArray();
@@ -100,7 +100,7 @@ public:
 	uint32 GetFavouriteRadioStation();
 	void SetMalibuClubTrackPos(uint8 pos);
 	void SetStripClubTrackPos(uint8 pos);
-	bool CheckForMusicInterruptions();
+	bool8 CheckForMusicInterruptions();
 
 	void Enable();
 	void Disable();
@@ -109,5 +109,5 @@ public:
 VALIDATE_SIZE(cMusicManager, 0x95C);
 
 extern cMusicManager MusicManager;
-extern bool g_bAnnouncementReadPosAlready; // we have a symbol of this so it was declared in .h
+extern bool8 g_bAnnouncementReadPosAlready; // we have a symbol of this so it was declared in .h
 float GetHeightScale();

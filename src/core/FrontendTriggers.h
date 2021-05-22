@@ -779,7 +779,7 @@ TriggerAudio_RadioStation(CMenuMultiChoicePicturedTriggered *widget)
 		if ( CMenuManager::m_PrefsRadioStation != widget->GetMenuSelection() )
 		{
 			CMenuManager::m_PrefsRadioStation = widget->GetMenuSelection();
-			DMAudio.PlayFrontEndTrack(CMenuManager::m_PrefsRadioStation, 1);
+			DMAudio.PlayFrontEndTrack(CMenuManager::m_PrefsRadioStation, TRUE);
 			DMAudio.SetRadioInCar(CMenuManager::m_PrefsRadioStation);
 		}
 	}

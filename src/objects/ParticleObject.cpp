@@ -33,7 +33,7 @@ CAudioHydrant::Add(CParticleObject *particleobject)
 			if ( AEHANDLE_IS_FAILED(List[i].AudioEntity) )
 				return false;
 			
-			DMAudio.SetEntityStatus(List[i].AudioEntity, true);
+			DMAudio.SetEntityStatus(List[i].AudioEntity, TRUE);
 			
 			List[i].pParticleObject = particleobject;
 			

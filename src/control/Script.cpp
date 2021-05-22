@@ -1829,7 +1829,7 @@ void CMissionCleanup::Process()
 	CWorld::Players[0].m_pPed->m_nDrunkCountdown = 0;
 	CPad::GetPad(0)->SetDrunkInputDelay(0);
 	CWorld::Players[0].m_bDriveByAllowed = true;
-	DMAudio.ShutUpPlayerTalking(0);
+	DMAudio.ShutUpPlayerTalking(FALSE);
 	CVehicle::bDisableRemoteDetonation = false;
 	CVehicle::bDisableRemoteDetonationOnContact = false;
 	CGameLogic::ClearShortCut();

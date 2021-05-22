@@ -158,7 +158,7 @@ cAudioManager::SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollisio
 void
 cAudioManager::SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 counter)
 {
-    bool distCalculated = false;
+    bool8 distCalculated = FALSE;
 	if(col.m_fIntensity2 > 0.0016f) {
 		uint8 emittingVol = SetLoopingCollisionRequestedSfxFreqAndGetVol(col);
 		if(emittingVol) {
@@ -168,7 +168,7 @@ cAudioManager::SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 coun
 				m_sQueueSample.m_nCounter = counter;
 				m_sQueueSample.m_vecPos = col.m_vecPosition;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_bIs2D = FALSE;
 				m_sQueueSample.m_nReleasingVolumeModificator = 7;
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
@@ -178,10 +178,10 @@ cAudioManager::SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 coun
 				    SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
 				m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 				m_sQueueSample.m_fSoundIntensity = CollisionSoundIntensity;
-				m_sQueueSample.m_bReleasingSoundFlag = false;
+				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
 				m_sQueueSample.m_nReleasingVolumeDivider = 5;
-				m_sQueueSample.m_bReverbFlag = true;
-				m_sQueueSample.m_bRequireReflection = false;
+				m_sQueueSample.m_bReverbFlag = TRUE;
+				m_sQueueSample.m_bRequireReflection = FALSE;
 				AddSampleToRequestedQueue();
 			}
 		}
@@ -311,7 +311,7 @@ cAudioManager::SetUpOneShotCollisionSound(const cAudioCollision &col)
 				if(counter >= 255) counter = 28;
 				m_sQueueSample.m_vecPos = col.m_vecPosition;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				m_sQueueSample.m_bIs2D = false;
+				m_sQueueSample.m_bIs2D = FALSE;
 				m_sQueueSample.m_nReleasingVolumeModificator = 11;
 				m_sQueueSample.m_nLoopCount = 1;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
@@ -319,9 +319,9 @@ cAudioManager::SetUpOneShotCollisionSound(const cAudioCollision &col)
 				m_sQueueSample.m_nLoopEnd = -1;
 				m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 				m_sQueueSample.m_fSoundIntensity = CollisionSoundIntensity;
-				m_sQueueSample.m_bReleasingSoundFlag = true;
-				m_sQueueSample.m_bReverbFlag = true;
-				m_sQueueSample.m_bRequireReflection = false;
+				m_sQueueSample.m_bReleasingSoundFlag = TRUE;
+				m_sQueueSample.m_bReverbFlag = TRUE;
+				m_sQueueSample.m_bRequireReflection = FALSE;
 				AddSampleToRequestedQueue();
 			}
 		}
@@ -332,13 +332,12 @@ void
 cAudioManager::ServiceCollisions()
 {
 	int i, j;
-	bool abRepeatedCollision1[NUMAUDIOCOLLISIONS];
-	bool abRepeatedCollision2[NUMAUDIOCOLLISIONS];
+	bool8 abRepeatedCollision1[NUMAUDIOCOLLISIONS];
+	bool8 abRepeatedCollision2[NUMAUDIOCOLLISIONS];
 
 	m_sQueueSample.m_nEntityIndex = m_nCollisionEntity;
 
-	for (int i = 0; i < NUMAUDIOCOLLISIONS; i++)
-		abRepeatedCollision1[i] = abRepeatedCollision2[i] = false;
+	for (int i = 0; i < NUMAUDIOCOLLISIONS; i++) abRepeatedCollision1[i] = abRepeatedCollision2[i] = FALSE;
 
 	for (i = 0; i < m_sCollisionManager.m_bCollisionsInQueue; i++) {
 		for (j = 0; j < NUMAUDIOCOLLISIONS; j++) {
@@ -348,8 +347,8 @@ cAudioManager::ServiceCollisions()
 				&& (m_sCollisionManager.m_asCollisions1[index].m_bSurface1 == m_sCollisionManager.m_asCollisions2[j].m_bSurface1)
 				&& (m_sCollisionManager.m_asCollisions1[index].m_bSurface2 == m_sCollisionManager.m_asCollisions2[j].m_bSurface2)
 				) {
-				abRepeatedCollision1[index] = true;
-				abRepeatedCollision2[j] = true;
+				abRepeatedCollision1[index] = TRUE;
+				abRepeatedCollision2[j] = TRUE;
 				m_sCollisionManager.m_asCollisions1[index].m_nBaseVolume = ++m_sCollisionManager.m_asCollisions2[j].m_nBaseVolume;
 				SetUpLoopingCollisionSound(m_sCollisionManager.m_asCollisions1[index], j);
 				break;

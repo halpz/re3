@@ -25,11 +25,11 @@ public:
 	
 	int32 CreateEntity(eAudioType type, void *UID);
 	void DestroyEntity(int32 audioEntity);
-	void SetEntityStatus(int32 audioEntity, uint8 status);
+	void SetEntityStatus(int32 audioEntity, bool8 status);
 	void PlayOneShot(int32 audioEntity, uint16 oneShot, float volume);
 	void DestroyAllGameCreatedEntities(void);
 	
-	void SetMonoMode(uint8 mono);
+	void SetMonoMode(bool8 mono);
 	void SetMP3BoostVolume(uint8 volume);
 	void SetEffectsMasterVolume(uint8 volume);
 	void SetMusicMasterVolume(uint8 volume);
@@ -46,17 +46,17 @@ public:
 	
 	void SetSpeakerConfig(int32 config);
 	
-	bool IsMP3RadioChannelAvailable(void);
+	bool8 IsMP3RadioChannelAvailable(void);
 	
 	void ReleaseDigitalHandle(void);
 	void ReacquireDigitalHandle(void);
 	
-	void SetDynamicAcousticModelingStatus(uint8 status);
+	void SetDynamicAcousticModelingStatus(bool8 status);
 	
-	bool CheckForAnAudioFileOnCD(void);
+	bool8 CheckForAnAudioFileOnCD(void);
 	
 	char GetCDAudioDriveLetter(void);
-	bool IsAudioInitialised(void);
+	bool8 IsAudioInitialised(void);
 	
 	void ReportCrime(eCrimeType crime, CVector const &pos);
 	
@@ -70,7 +70,7 @@ public:
 	
 	void PlayFrontEndSound(uint16 frontend, uint32 volume);
 	void PlayRadioAnnouncement(uint32 announcement);
-	void PlayFrontEndTrack(uint32 track, uint8 frontendFlag);
+	void PlayFrontEndTrack(uint32 track, bool8 frontendFlag);
 	void StopFrontEndTrack(void);
 	
 	void ResetTimers(uint32 time);
@@ -85,19 +85,19 @@ public:
 	uint8 GetMissionAudioLoadingStatus(uint8 slot);
 	void SetMissionAudioLocation(uint8 slot, float x, float y, float z);
 	void PlayLoadedMissionAudio(uint8 slot);
-	bool IsMissionAudioSampleFinished(uint8 slot);
+	bool8 IsMissionAudioSampleFinished(uint8 slot);
 	void ClearMissionAudio(uint8 slot);
 
 	uint8 GetRadioInCar(void);
 	void SetRadioInCar(uint32 radio);
 	void SetRadioChannel(uint32 radio, int32 pos);
 
-	void SetStartingTrackPositions(uint8 isStartGame);
+	void SetStartingTrackPositions(bool8 isStartGame);
 	float *GetListenTimeArray();
 	uint32 GetFavouriteRadioStation();
 	int32 GetRadioPosition(uint32 station);
-	void SetPedTalkingStatus(class CPed *ped, uint8 status);
+	void SetPedTalkingStatus(class CPed *ped, bool8 status);
 	void SetPlayersMood(uint8 mood, uint32 time);
-	void ShutUpPlayerTalking(uint8 state);
+	void ShutUpPlayerTalking(bool8 state);
 };
 extern cDMAudio DMAudio;
