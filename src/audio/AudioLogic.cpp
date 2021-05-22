@@ -2931,7 +2931,7 @@ cAudioManager::SetupJumboRumbleSound(uint8 emittingVol)
 		m_sQueueSample.m_nCounter = 6;
 		m_sQueueSample.m_nSampleIndex = SFX_JUMBO_RUMBLE;
 		m_sQueueSample.m_nFrequency += 200;
-		m_sQueueSample.m_nOffset = MAX_VOLUME;
+		m_sQueueSample.m_nOffset = 127;
 		AddSampleToRequestedQueue();
 	}
 	return TRUE;
@@ -7980,7 +7980,7 @@ cAudioManager::ProcessFrontEnd()
 		if (stereo) {
 			++m_sQueueSample.m_nSampleIndex;
 			m_sQueueSample.m_nCounter = iSound++;
-			m_sQueueSample.m_nOffset = MAX_VOLUME - m_sQueueSample.m_nOffset;
+			m_sQueueSample.m_nOffset = 127 - m_sQueueSample.m_nOffset;
 			AddSampleToRequestedQueue();
 		}
 	}
