@@ -160,7 +160,7 @@ void CGarages::Init(void)
 		aCarsInSafeHouse3[i].Init();
 	hGarages = DMAudio.CreateEntity(AUDIOTYPE_GARAGE, (void*)1);
 	if (hGarages >= 0)
-		DMAudio.SetEntityStatus(hGarages, true);
+		DMAudio.SetEntityStatus(hGarages, TRUE);
 	AddOne(
 		CVector(CRUSHER_GARAGE_X1, CRUSHER_GARAGE_Y1, CRUSHER_GARAGE_Z1),
 		CVector(CRUSHER_GARAGE_X2, CRUSHER_GARAGE_Y2, CRUSHER_GARAGE_Z2),

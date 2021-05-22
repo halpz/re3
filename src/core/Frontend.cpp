@@ -4422,7 +4422,7 @@ CMenuManager::ProcessButtonPresses(void)
 				m_PrefsRadioStation = m_nHoverOption - HOVEROPTION_RADIO_0;
 				SaveSettings();
 				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 				OutputDebugString("FRONTEND RADIO STATION CHANGED");
 			} else if (m_nHoverOption == HOVEROPTION_RANDOM_ITEM
 				&& aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action != MENUACTION_RESUME) {
@@ -4436,7 +4436,7 @@ CMenuManager::ProcessButtonPresses(void)
 				m_PrefsRadioStation = HEAD_RADIO;
 				SaveSettings();
 				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 				OutputDebugString("FRONTEND RADIO STATION CHANGED");
 				break;
 			case HOVEROPTION_RADIO_1:
@@ -4444,7 +4444,7 @@ CMenuManager::ProcessButtonPresses(void)
 				m_PrefsRadioStation = DOUBLE_CLEF;
 				SaveSettings();
 				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 				OutputDebugString("FRONTEND RADIO STATION CHANGED");
 				break;
 			case HOVEROPTION_RADIO_2:
@@ -4452,7 +4452,7 @@ CMenuManager::ProcessButtonPresses(void)
 				m_PrefsRadioStation = JAH_RADIO;
 				SaveSettings();
 				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 				OutputDebugString("FRONTEND RADIO STATION CHANGED");
 				break;
 			case HOVEROPTION_RADIO_3:
@@ -4460,7 +4460,7 @@ CMenuManager::ProcessButtonPresses(void)
 				m_PrefsRadioStation = RISE_FM;
 				SaveSettings();
 				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 				OutputDebugString("FRONTEND RADIO STATION CHANGED");
 				break;
 			case HOVEROPTION_RADIO_4:
@@ -4468,7 +4468,7 @@ CMenuManager::ProcessButtonPresses(void)
 				m_PrefsRadioStation = LIPS_106;
 				SaveSettings();
 				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 				OutputDebugString("FRONTEND RADIO STATION CHANGED");
 				break;
 			case HOVEROPTION_RADIO_5:
@@ -4476,7 +4476,7 @@ CMenuManager::ProcessButtonPresses(void)
 				m_PrefsRadioStation = GAME_FM;
 				SaveSettings();
 				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 				OutputDebugString("FRONTEND RADIO STATION CHANGED");
 				break;
 			case HOVEROPTION_RADIO_6:
@@ -4484,7 +4484,7 @@ CMenuManager::ProcessButtonPresses(void)
 				m_PrefsRadioStation = MSX_FM;
 				SaveSettings();
 				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 				OutputDebugString("FRONTEND RADIO STATION CHANGED");
 				break;
 			case HOVEROPTION_RADIO_7:
@@ -4492,7 +4492,7 @@ CMenuManager::ProcessButtonPresses(void)
 				m_PrefsRadioStation = FLASHBACK;
 				SaveSettings();
 				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 				OutputDebugString("FRONTEND RADIO STATION CHANGED");
 				break;
 			case HOVEROPTION_RADIO_8:
@@ -4500,7 +4500,7 @@ CMenuManager::ProcessButtonPresses(void)
 				m_PrefsRadioStation = CHATTERBOX;
 				SaveSettings();
 				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 				OutputDebugString("FRONTEND RADIO STATION CHANGED");
 				break;
 			case HOVEROPTION_RADIO_9:
@@ -4508,7 +4508,7 @@ CMenuManager::ProcessButtonPresses(void)
 				m_PrefsRadioStation = USERTRACK;
 				SaveSettings();
 				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 				OutputDebugString("FRONTEND RADIO STATION CHANGED");
 				break;
 			case HOVEROPTION_RANDOM_ITEM:
@@ -4731,7 +4731,7 @@ CMenuManager::ProcessButtonPresses(void)
 		curBottomBarOption = hoveredBottomBarOption;
 		ChangeScreen(bbNames[curBottomBarOption].screenId, 0, true, false);
 		if (bbNames[curBottomBarOption].screenId == MENUPAGE_SOUND_SETTINGS)
-			DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+			DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 		return;
 	} else if (bottomBarActive) {
 		if (CPad::GetPad(0)->GetEnterJustDown() || CPad::GetPad(0)->GetCrossJustDown()) {
@@ -4739,7 +4739,7 @@ CMenuManager::ProcessButtonPresses(void)
 			bottomBarActive = false;
 
 			if (bbNames[curBottomBarOption].screenId == MENUPAGE_SOUND_SETTINGS)
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 
 			return;
 		} else if (CPad::GetPad(0)->GetLeftJustDown() || CPad::GetPad(0)->GetAnaloguePadLeft() || CPad::GetPad(0)->GetDPadLeftJustDown()
@@ -4890,7 +4890,7 @@ CMenuManager::ProcessButtonPresses(void)
 					}
 					SaveSettings();
 					DMAudio.SetRadioInCar(m_PrefsRadioStation);
-					DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+					DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 					OutputDebugString("FRONTEND RADIO STATION CHANGED");
 #endif
 					break;
@@ -5100,7 +5100,7 @@ CMenuManager::ProcessButtonPresses(void)
 						DMAudio.SetMusicMasterVolume(102);
 						DMAudio.SetEffectsMasterVolume(m_PrefsSfxVolume);
 						DMAudio.SetRadioInCar(m_PrefsRadioStation);
-						DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+						DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 						SaveSettings();
 					} else if (m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
 						m_PrefsFrameLimiter = true;
@@ -5186,7 +5186,7 @@ CMenuManager::ProcessButtonPresses(void)
 					break;
 				case MENUACTION_LOADRADIO:
 					ChangeScreen(MENUPAGE_SOUND_SETTINGS, 0, true, true);
-					DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+					DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 					OutputDebugString("STARTED PLAYING FRONTEND AUDIO TRACK");
 					break;
 #ifdef MISSION_REPLAY
@@ -5381,7 +5381,7 @@ CMenuManager::ProcessButtonPresses(void)
 				}
 				SaveSettings();
 				DMAudio.SetRadioInCar(m_PrefsRadioStation);
-				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+				DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 				OutputDebugString("FRONTEND RADIO STATION CHANGED");
 				break;
 #ifdef ASPECT_RATIO_SCALE

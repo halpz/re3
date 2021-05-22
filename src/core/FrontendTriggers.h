@@ -779,7 +779,7 @@ TriggerAudio_RadioStation(CMenuMultiChoicePicturedTriggered *widget)
 		if ( CMenuManager::m_PrefsRadioStation != widget->GetMenuSelection() )
 		{
 			CMenuManager::m_PrefsRadioStation = widget->GetMenuSelection();
-			DMAudio.PlayFrontEndTrack(CMenuManager::m_PrefsRadioStation, 1);
+			DMAudio.PlayFrontEndTrack(CMenuManager::m_PrefsRadioStation, TRUE);
 			DMAudio.SetRadioInCar(CMenuManager::m_PrefsRadioStation);
 		}
 	}
@@ -792,12 +792,12 @@ TriggerAudio_StereoMono(CMenuMultiChoiceTriggered *widget)
 	{	
 		if (widget->GetMenuSelection() == 1)
 		{
-			DMAudio.SetMonoMode(true);
+			DMAudio.SetMonoMode(TRUE);
 			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MONO, 0);
 		}
 		else
 		{
-			DMAudio.SetMonoMode(false);
+			DMAudio.SetMonoMode(FALSE);
 			DMAudio.PlayFrontEndSound(SOUND_FRONTEND_STEREO, 0);
 		}
 	}

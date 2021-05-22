@@ -4,7 +4,7 @@
 #include "AudioManager.h"
 
 cSampleManager SampleManager;
-bool _bSampmanInitialised = false;
+bool8 _bSampmanInitialised = FALSE;
 
 uint32 BankStartOffset[MAX_SFX_BANKS];
 uint32     nNumMP3s;
@@ -60,7 +60,7 @@ int8 cSampleManager::SetCurrent3DProvider(uint8 nProvider)
 	return 0;
 }
 
-bool
+bool8
 cSampleManager::IsMP3RadioChannelAvailable(void)
 {
 	return nNumMP3s != 0;
@@ -75,10 +75,10 @@ void cSampleManager::ReacquireDigitalHandle(void)
 {
 }
 
-bool
+bool8
 cSampleManager::Initialise(void)
 {
-	return true;
+	return TRUE;
 }
 
 void
@@ -87,9 +87,9 @@ cSampleManager::Terminate(void)
 
 }
 
-bool cSampleManager::CheckForAnAudioFileOnCD(void)
+bool8 cSampleManager::CheckForAnAudioFileOnCD(void)
 {
-	return true;
+	return TRUE;
 }
 
 char cSampleManager::GetCDAudioDriveLetter(void)
@@ -128,11 +128,11 @@ cSampleManager::SetMonoMode(uint8 nMode)
 {
 }
 
-bool
+bool8
 cSampleManager::LoadSampleBank(uint8 nBank)
 {
 	ASSERT( nBank < MAX_SFX_BANKS );
-	return false;
+	return FALSE;
 }
 
 void
@@ -141,20 +141,20 @@ cSampleManager::UnloadSampleBank(uint8 nBank)
 	ASSERT( nBank < MAX_SFX_BANKS );
 }
 
-bool
+bool8
 cSampleManager::IsSampleBankLoaded(uint8 nBank)
 {
 	ASSERT( nBank < MAX_SFX_BANKS );
 	
-	return false;
+	return FALSE;
 }
 
-bool
+bool8
 cSampleManager::IsPedCommentLoaded(uint32 nComment)
 {
 	ASSERT( nComment < TOTAL_AUDIO_SAMPLES );
 
-	return false;
+	return FALSE;
 }
 
 
@@ -164,11 +164,11 @@ cSampleManager::_GetPedCommentSlot(uint32 nComment)
 	return -1;
 }
 
-bool
+bool8
 cSampleManager::LoadPedComment(uint32 nComment)
 {
 	ASSERT( nComment < TOTAL_AUDIO_SAMPLES );
-	return false;
+	return FALSE;
 }
 
 int32
@@ -205,22 +205,22 @@ cSampleManager::GetSampleLength(uint32 nSample)
 	return 0;
 }
 
-bool cSampleManager::UpdateReverb(void)
+bool8 cSampleManager::UpdateReverb(void)
 {
-	return false;
+	return FALSE;
 }
 
 void
-cSampleManager::SetChannelReverbFlag(uint32 nChannel, uint8 nReverbFlag)
+cSampleManager::SetChannelReverbFlag(uint32 nChannel, bool8 nReverbFlag)
 {
 	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
 }
 
-bool
+bool8
 cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 {
 	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
-	return false;
+	return FALSE;
 }
 
 void
@@ -276,12 +276,12 @@ cSampleManager::SetChannelLoopCount(uint32 nChannel, uint32 nLoopCount)
 	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
 }
 
-bool
+bool8
 cSampleManager::GetChannelUsedFlag(uint32 nChannel)
 {
 	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
 
-	return false;
+	return FALSE;
 }
 
 void
@@ -303,7 +303,7 @@ cSampleManager::PreloadStreamedFile(uint8 nFile, uint8 nStream)
 }
 
 void
-cSampleManager::PauseStream(uint8 nPauseFlag, uint8 nStream)
+cSampleManager::PauseStream(bool8 nPauseFlag, uint8 nStream)
 {
 	ASSERT( nStream < MAX_STREAMS );
 }
@@ -314,12 +314,12 @@ cSampleManager::StartPreloadedStreamedFile(uint8 nStream)
 	ASSERT( nStream < MAX_STREAMS );
 }
 
-bool
+bool8
 cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 {	
 	ASSERT( nStream < MAX_STREAMS );
 	
-	return false;
+	return FALSE;
 }
 
 void
@@ -350,19 +350,19 @@ cSampleManager::GetStreamedFileLength(uint8 nStream)
 	return 1;
 }
 
-bool
+bool8
 cSampleManager::IsStreamPlaying(uint8 nStream)
 {
 	ASSERT( nStream < MAX_STREAMS );
 
-	return false;
+	return FALSE;
 }
 
-bool
+bool8
 cSampleManager::InitialiseSampleBanks(void)
 {
 	
-	return true;
+	return TRUE;
 }
 
 #endif

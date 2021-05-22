@@ -46,7 +46,7 @@ CExplosion::Initialise()
 	}
 	AudioHandle = DMAudio.CreateEntity(AUDIOTYPE_EXPLOSION, (void*)1);
 	if (AudioHandle >= 0)
-		DMAudio.SetEntityStatus(AudioHandle, true);
+		DMAudio.SetEntityStatus(AudioHandle, TRUE);
 	debug("CExplosion ready\n");
 }
 

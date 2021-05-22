@@ -22,11 +22,11 @@ public:
 	
 	int32 CreateEntity(eAudioType type, void *UID);
 	void DestroyEntity(int32 audioEntity);
-	void SetEntityStatus(int32 audioEntity, uint8 status);
+	void SetEntityStatus(int32 audioEntity, bool8 status);
 	void PlayOneShot(int32 audioEntity, uint16 oneShot, float volume);
 	void DestroyAllGameCreatedEntities(void);
 	
-	void SetMonoMode(uint8 mono);
+	void SetMonoMode(bool8 mono);
 	void SetEffectsMasterVolume(uint8 volume);
 	void SetMusicMasterVolume(uint8 volume);
 	void SetEffectsFadeVol(uint8 volume);
@@ -40,17 +40,17 @@ public:
 	
 	void SetSpeakerConfig(int32 config);
 	
-	bool IsMP3RadioChannelAvailable(void);
+	bool8 IsMP3RadioChannelAvailable(void);
 	
 	void ReleaseDigitalHandle(void);
 	void ReacquireDigitalHandle(void);
 	
-	void SetDynamicAcousticModelingStatus(uint8 status);
+	void SetDynamicAcousticModelingStatus(bool8 status);
 	
-	bool CheckForAnAudioFileOnCD(void);
+	bool8 CheckForAnAudioFileOnCD(void);
 	
 	char GetCDAudioDriveLetter(void);
-	bool IsAudioInitialised(void);
+	bool8 IsAudioInitialised(void);
 	
 	void ReportCrime(eCrimeType crime, CVector const &pos);
 	
@@ -64,7 +64,7 @@ public:
 	
 	void PlayFrontEndSound(uint16 frontend, uint32 volume);
 	void PlayRadioAnnouncement(uint8 announcement);
-	void PlayFrontEndTrack(uint8 track, uint8 frontendFlag);
+	void PlayFrontEndTrack(uint8 track, bool8 frontendFlag);
 	void StopFrontEndTrack(void);
 	
 	void ResetTimers(uint32 time);
@@ -79,7 +79,7 @@ public:
 	uint8 GetMissionAudioLoadingStatus(void);
 	void SetMissionAudioLocation(float x, float y, float z);
 	void PlayLoadedMissionAudio(void);
-	bool IsMissionAudioSampleFinished(void);
+	bool8 IsMissionAudioSampleFinished(void);
 	void ClearMissionAudio(void);
 
 	uint8 GetRadioInCar(void);

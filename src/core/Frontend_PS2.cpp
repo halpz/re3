@@ -2871,7 +2871,7 @@ CMenuManager::ProcessDPadCrossJustDown(void)
 							{
 								if ( !gMusicPlaying )
 								{
-									DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+									DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 									gMusicPlaying = true;
 								}
 							}

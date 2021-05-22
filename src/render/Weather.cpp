@@ -114,7 +114,7 @@ void CWeather::Init(void)
 	ForcedWeatherType = WEATHER_RANDOM;
 	SoundHandle = DMAudio.CreateEntity(AUDIOTYPE_WEATHER, (void*)1);
 	if (SoundHandle >= 0)
-		DMAudio.SetEntityStatus(SoundHandle, true);
+		DMAudio.SetEntityStatus(SoundHandle, TRUE);
 }
 
 void CWeather::Update(void)
