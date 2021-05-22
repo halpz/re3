@@ -338,7 +338,7 @@ public:
 
 	void GenerateIntegerRandomNumberTable();
 	char *Get3DProviderName(uint8 id) const;
-	uint8 GetCDAudioDriveLetter() const;
+	char GetCDAudioDriveLetter() const;
 	int8 GetCurrent3DProviderIndex() const;
 	float GetCollisionLoopingRatio(uint32 a, uint32 b, float c) const; // not used
 	float GetCollisionOneShotRatio(int32 a, float b) const;

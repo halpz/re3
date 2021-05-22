@@ -409,13 +409,13 @@ cAudioManager::CheckForAnAudioFileOnCD() const
 	return SampleManager.CheckForAnAudioFileOnCD();
 }
 
-uint8
+char
 cAudioManager::GetCDAudioDriveLetter() const
 {
 	if (m_bIsInitialised)
 		return SampleManager.GetCDAudioDriveLetter();
 
-	return 0;
+	return '\0';
 }
 
 bool8
