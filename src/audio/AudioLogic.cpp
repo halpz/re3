@@ -2879,21 +2879,22 @@ cAudioManager::SetupJumboFlySound(uint8 emittingVol)
 	int32 vol = ComputeVolume(emittingVol, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
 	m_sQueueSample.m_nVolume = vol;
 	if (m_sQueueSample.m_nVolume != 0) {
-		m_sQueueSample.m_nSampleIndex = SFX_JUMBO_DIST_FLY;
 		m_sQueueSample.m_nCounter = 0;
+		m_sQueueSample.m_nSampleIndex = SFX_JUMBO_DIST_FLY;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 		m_sQueueSample.m_bIs2D = FALSE;
 		m_sQueueSample.m_nReleasingVolumeModificator = 1;
-		m_sQueueSample.m_nEmittingVolume = emittingVol;
-		m_sQueueSample.m_nLoopCount = 0;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_JUMBO_DIST_FLY);
+		m_sQueueSample.m_nLoopCount = 0;
+		m_sQueueSample.m_nEmittingVolume = emittingVol;
 		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 		m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 		m_sQueueSample.m_bReleasingSoundFlag = FALSE;
-		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
-		m_sQueueSample.m_bReverbFlag = TRUE;
 		m_sQueueSample.m_nReleasingVolumeDivider = 5;
-		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		m_sQueueSample.m_bReverbFlag = TRUE;
+		m_sQueueSample.m_bRequireReflection = FALSE;
 		AddSampleToRequestedQueue();
 	}
 	return TRUE;
