@@ -152,7 +152,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_fMapObjectHeightAhead = m_fMapObjectHeightBehind = 0.0f;
 	m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, this);
 	if(m_audioEntityId >= 0)
-		DMAudio.SetEntityStatus(m_audioEntityId, true);
+		DMAudio.SetEntityStatus(m_audioEntityId, TRUE);
 	//m_nRadioStation = CGeneral::GetRandomNumber() % NUM_RADIOS;
 	switch(GetModelIndex()){
 	case MI_HUNTER:

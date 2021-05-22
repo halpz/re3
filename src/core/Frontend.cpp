@@ -3985,7 +3985,7 @@ CMenuManager::PrintRadioSelector(void)
 	if (radioChangeRequested) {
 		if (CTimer::GetTimeInMillisecondsPauseMode() - lastRadioChange > 50) {
 			DMAudio.SetRadioInCar(m_PrefsRadioStation);
-			DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+			DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 			OutputDebugString("FRONTEND RADIO STATION CHANGED");
 			lastRadioChange = CTimer::GetTimeInMillisecondsPauseMode();
 			radioChangeRequested = false;
@@ -4719,7 +4719,7 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 			case MENUACTION_LOADRADIO:
 				if (m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER) {
 					SwitchToNewScreen(MENUPAGE_SOUND_SETTINGS);
-					DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+				        DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 					OutputDebugString("STARTED PLAYING FRONTEND AUDIO TRACK");
 				}
 				break;
@@ -4825,7 +4825,7 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 					DMAudio.SetMusicMasterVolume(m_PrefsMusicVolume);
 					DMAudio.SetEffectsMasterVolume(m_PrefsSfxVolume);
 					DMAudio.SetRadioInCar(m_PrefsRadioStation);
-					DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, 1);
+				        DMAudio.PlayFrontEndTrack(m_PrefsRadioStation, TRUE);
 					SaveSettings();
 				} else if (m_nCurrScreen == MENUPAGE_DISPLAY_SETTINGS) {
 					m_PrefsBrightness = DEFAULT_BRIGHTNESS;

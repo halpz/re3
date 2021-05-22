@@ -65,7 +65,7 @@ CWorld::Initialise()
 void
 CWorld::Add(CEntity *ent)
 {
-	if(ent->IsVehicle() || ent->IsPed()) DMAudio.SetEntityStatus(((CPhysical *)ent)->m_audioEntityId, true);
+	if(ent->IsVehicle() || ent->IsPed()) DMAudio.SetEntityStatus(((CPhysical *)ent)->m_audioEntityId, TRUE);
 
 	if(ent->bIsBIGBuilding)
 		ms_bigBuildingsList[ent->m_level].InsertItem(ent);
@@ -80,7 +80,7 @@ CWorld::Add(CEntity *ent)
 void
 CWorld::Remove(CEntity *ent)
 {
-	if(ent->IsVehicle() || ent->IsPed()) DMAudio.SetEntityStatus(((CPhysical *)ent)->m_audioEntityId, false);
+	if(ent->IsVehicle() || ent->IsPed()) DMAudio.SetEntityStatus(((CPhysical *)ent)->m_audioEntityId, FALSE);
 
 	if(ent->bIsBIGBuilding)
 		ms_bigBuildingsList[ent->m_level].RemoveItem(ent);

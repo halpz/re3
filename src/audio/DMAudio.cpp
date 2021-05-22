@@ -39,7 +39,7 @@ cDMAudio::DestroyEntity(int32 audioEntity)
 }
 
 void
-cDMAudio::SetEntityStatus(int32 audioEntity, uint8 status)
+cDMAudio::SetEntityStatus(int32 audioEntity, bool8 status)
 {
 	AudioManager.SetEntityStatus(audioEntity, status);
 }
@@ -57,7 +57,7 @@ cDMAudio::DestroyAllGameCreatedEntities(void)
 }
 
 void
-cDMAudio::SetMonoMode(uint8 mono)
+cDMAudio::SetMonoMode(bool8 mono)
 {
 	AudioManager.SetMonoMode(mono);
 }
@@ -142,7 +142,7 @@ cDMAudio::SetSpeakerConfig(int32 config)
 	AudioManager.SetSpeakerConfig(config);
 }
 
-bool
+bool8
 cDMAudio::IsMP3RadioChannelAvailable(void)
 {
 	return AudioManager.IsMP3RadioChannelAvailable();
@@ -161,12 +161,12 @@ cDMAudio::ReacquireDigitalHandle(void)
 }
 
 void
-cDMAudio::SetDynamicAcousticModelingStatus(uint8 status)
+cDMAudio::SetDynamicAcousticModelingStatus(bool8 status)
 {
 	AudioManager.SetDynamicAcousticModelingStatus(status);
 }
 
-bool
+bool8
 cDMAudio::CheckForAnAudioFileOnCD(void)
 {
 	return AudioManager.CheckForAnAudioFileOnCD();
@@ -178,7 +178,7 @@ cDMAudio::GetCDAudioDriveLetter(void)
 	return AudioManager.GetCDAudioDriveLetter();
 }
 
-bool
+bool8
 cDMAudio::IsAudioInitialised(void)
 {
 	return AudioManager.IsAudioInitialised();
@@ -196,7 +196,7 @@ cDMAudio::CreateLoopingScriptObject(cAudioScriptObject *scriptObject)
 	int32 audioEntity = AudioManager.CreateEntity(AUDIOTYPE_SCRIPTOBJECT, scriptObject);
 
 	if ( AEHANDLE_IS_OK(audioEntity) )
-		AudioManager.SetEntityStatus(audioEntity, true);
+		AudioManager.SetEntityStatus(audioEntity, TRUE);
 	
 	return audioEntity;
 }
@@ -214,7 +214,7 @@ cDMAudio::CreateOneShotScriptObject(cAudioScriptObject *scriptObject)
 
 	if ( AEHANDLE_IS_OK(audioEntity) )
 	{
-		AudioManager.SetEntityStatus(audioEntity, true);
+		AudioManager.SetEntityStatus(audioEntity, TRUE);
 		AudioManager.PlayOneShot(audioEntity, scriptObject->AudioId, 0.0f);
 	}
 }
@@ -244,7 +244,7 @@ cDMAudio::PlayRadioAnnouncement(uint32 announcement)
 }
 
 void
-cDMAudio::PlayFrontEndTrack(uint32 track, uint8 frontendFlag)
+cDMAudio::PlayFrontEndTrack(uint32 track, bool8 frontendFlag)
 {
 	MusicManager.PlayFrontEndTrack(track, frontendFlag);
 }
@@ -309,7 +309,7 @@ cDMAudio::PlayLoadedMissionAudio(uint8 slot)
 	AudioManager.PlayLoadedMissionAudio(slot);
 }
 
-bool
+bool8
 cDMAudio::IsMissionAudioSampleFinished(uint8 slot)
 {
 	return AudioManager.IsMissionAudioSampleFinished(slot);
@@ -340,7 +340,7 @@ cDMAudio::SetRadioChannel(uint32 radio, int32 pos)
 }
 
 void
-cDMAudio::SetStartingTrackPositions(uint8 isStartGame)
+cDMAudio::SetStartingTrackPositions(bool8 isStartGame)
 {
 	MusicManager.SetStartingTrackPositions(isStartGame);
 }
@@ -364,7 +364,7 @@ cDMAudio::GetRadioPosition(uint32 station)
 }
 
 void
-cDMAudio::SetPedTalkingStatus(CPed *ped, uint8 status)
+cDMAudio::SetPedTalkingStatus(CPed *ped, bool8 status)
 {
 	return AudioManager.SetPedTalkingStatus(ped, status);
 }
@@ -376,7 +376,7 @@ cDMAudio::SetPlayersMood(uint8 mood, uint32 time)
 }
 
 void
-cDMAudio::ShutUpPlayerTalking(uint8 state)
+cDMAudio::ShutUpPlayerTalking(bool8 state)
 {
 	AudioManager.m_bIsPlayerShutUp = state;
 }

@@ -580,7 +580,7 @@ bool CGame::Initialise(const char* datFile)
 #endif
 
 
-	DMAudio.SetStartingTrackPositions(true);
+	DMAudio.SetStartingTrackPositions(TRUE);
 	DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 	return true;
 }

@@ -1463,7 +1463,7 @@ void CReplay::RestoreStuffFromMem(void)
 		ped->SetModelIndex(mi);
 		ped->m_pVehicleAnim = nil;
 		ped->m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, ped);
-		DMAudio.SetEntityStatus(ped->m_audioEntityId, true);
+		DMAudio.SetEntityStatus(ped->m_audioEntityId, TRUE);
 		CPopulation::UpdatePedCount((ePedType)ped->m_nPedType, false);
 		for (int j = 0; j < TOTAL_WEAPON_SLOTS; j++) {
 			int mi1 = CWeaponInfo::GetWeaponInfo(ped->m_weapons[j].m_eWeaponType)->m_nModelId;
@@ -1529,7 +1529,7 @@ void CReplay::RestoreStuffFromMem(void)
 			car->SetDoorDamage(CAR_DOOR_RR, DOOR_REAR_RIGHT, true);
 		}
 		vehicle->m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, vehicle);
-		DMAudio.SetEntityStatus(vehicle->m_audioEntityId, true);
+		DMAudio.SetEntityStatus(vehicle->m_audioEntityId, TRUE);
 		CCarCtrl::UpdateCarCount(vehicle, false);
 		if ((mi == MI_AIRTRAIN || mi == MI_DEADDODO) && vehicle->m_rwObject){
 			CVehicleModelInfo* info = (CVehicleModelInfo*)CModelInfo::GetModelInfo(mi);
