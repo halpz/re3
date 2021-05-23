@@ -228,6 +228,12 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 
 #include "maths.h"
 #include "Vector.h"
+#ifdef GTA_PS2
+#include "VuVector.h"
+#define CVUVECTOR CVuVector
+#else
+#define CVUVECTOR CVector
+#endif
 #include "Vector2D.h"
 #include "Matrix.h"
 #include "Rect.h"

@@ -827,9 +827,9 @@ CVisibilityPlugins::PluginAttach(void)
 	return ms_atomicPluginOffset != -1 && ms_clumpPluginOffset != -1;
 }
 
-#define ATOMICEXT(o) (RWPLUGINOFFSET(AtomicExt, o, ms_atomicPluginOffset))
-#define FRAMEEXT(o) (RWPLUGINOFFSET(FrameExt, o, ms_framePluginOffset))
-#define CLUMPEXT(o) (RWPLUGINOFFSET(ClumpExt, o, ms_clumpPluginOffset))
+#define ATOMICEXT(o) (RWPLUGINOFFSET(CVisibilityPlugins::AtomicExt, o, CVisibilityPlugins::ms_atomicPluginOffset))
+#define FRAMEEXT(o) (RWPLUGINOFFSET(CVisibilityPlugins::FrameExt, o, CVisibilityPlugins::ms_framePluginOffset))
+#define CLUMPEXT(o) (RWPLUGINOFFSET(CVisibilityPlugins::ClumpExt, o, CVisibilityPlugins::ms_clumpPluginOffset))
 
 //
 // Atomic
@@ -839,6 +839,7 @@ void*
 CVisibilityPlugins::AtomicConstructor(void *object, int32, int32)
 {
 	ATOMICEXT(object)->modelInfo = nil;
+	ATOMICEXT(object)->distanceAlpha = 255;
 	return object;
 }
 
@@ -990,4 +991,57 @@ int
 CVisibilityPlugins::GetClumpAlpha(RpClump *clump)
 {
 	return CLUMPEXT(clump)->alpha;
+}
+
+// LCS walks the atomic list manually but we want to be compatible with both RW and librw,
+// so this code isn't quite original and uses callbacks instead.
+static RpAtomic*
+SetAtomicDistanceAlphaCB(RpAtomic *atomic, void *data)
+{
+	ATOMICEXT(atomic)->distanceAlpha = *(int*)data;
+	return atomic;
+}
+void
+CVisibilityPlugins::SetClumpDistanceAlpha(RpClump *clump, int alpha)
+{
+	RpClumpForAllAtomics(clump, SetAtomicDistanceAlphaCB, &alpha);
+}
+
+static RpAtomic*
+GetAtomicDistanceAlphaCB(RpAtomic *atomic, void *data)
+{
+	*(int*)data = ATOMICEXT(atomic)->distanceAlpha;
+	return atomic;
+}
+int
+CVisibilityPlugins::GetClumpDistanceAlpha(RpClump *clump)
+{
+	int alpha = 255;
+	RpClumpForAllAtomics(clump, GetAtomicDistanceAlphaCB, &alpha);
+	return alpha;
+}
+
+
+
+
+void
+CVisibilityPlugins::SetObjectDistanceAlpha(RwObject *object, int alpha)
+{
+	if(object == nil)
+		return;
+	if(RwObjectGetType(object) == rpATOMIC)
+		ATOMICEXT(object)->distanceAlpha = alpha;
+	else
+		SetClumpDistanceAlpha((RpClump*)object, alpha);
+}
+
+int
+CVisibilityPlugins::GetObjectDistanceAlpha(RwObject *object)
+{
+	if(object == nil)
+		return 255;
+	if(RwObjectGetType(object) == rpATOMIC)
+		return ATOMICEXT(object)->distanceAlpha;
+	else
+		return GetClumpDistanceAlpha((RpClump*)object);
 }

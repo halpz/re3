@@ -97,10 +97,13 @@ public:
 	// RW Plugins
 	//
 
-	union AtomicExt
+	struct AtomicExt
 	{
-		CSimpleModelInfo *modelInfo;	// used by SimpleModelInfo
-		int flags;			// used by ClumpModelInfo
+		union {
+			CSimpleModelInfo *modelInfo;	// used by SimpleModelInfo
+			int flags;			// used by ClumpModelInfo
+		};
+		int distanceAlpha;		// not sure where this is in PS2/PSP LCS
 	};
 	static void SetAtomicModelInfo(RpAtomic*, CSimpleModelInfo*);
 	static CSimpleModelInfo *GetAtomicModelInfo(RpAtomic *atomic);
@@ -129,7 +132,6 @@ public:
 	                                  int32 offset, int32 len);
 	static int32 ms_framePluginOffset;
 
-	// Not actually used
 	struct ClumpExt
 	{
 		ClumpVisibilityCB visibilityCB;
@@ -138,12 +140,17 @@ public:
 	static void SetClumpModelInfo(RpClump*, CClumpModelInfo*);
 	static void SetClumpAlpha(RpClump*, int);
 	static int GetClumpAlpha(RpClump*);
+	static void SetClumpDistanceAlpha(RpClump*, int);
+	static int GetClumpDistanceAlpha(RpClump*);
 
 	static void *ClumpConstructor(void *object, int32 offset, int32 len);
 	static void *ClumpDestructor(void *object, int32 offset, int32 len);
 	static void *ClumpCopyConstructor(void *dst, const void *src,
 	                                  int32 offset, int32 len);
 	static int32 ms_clumpPluginOffset;
+
+	static void SetObjectDistanceAlpha(RwObject *object, int alpha);
+	static int GetObjectDistanceAlpha(RwObject *object);
 
 	static bool PluginAttach(void);
 };

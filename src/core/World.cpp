@@ -1906,16 +1906,7 @@ CWorld::Process(void)
 		for(int i = 0; i < NUMCUTSCENEOBJECTS; i++) {
 			CCutsceneObject *csObj = CCutsceneMgr::GetCutsceneObject(i);
 			if(csObj && csObj->m_entryInfoList.first) {
-				if(csObj->m_rwObject && RwObjectGetType(csObj->m_rwObject) == rpCLUMP &&
-				   RpAnimBlendClumpGetFirstAssociation(csObj->GetClump())) {
-					if (csObj->IsObject())
-						RpAnimBlendClumpUpdateAnimations(csObj->GetClump(), CTimer::GetTimeStepNonClippedInSeconds());
-					else {
-						if (!csObj->bOffscreen)
-							csObj->bOffscreen = !csObj->GetIsOnScreen();
-						RpAnimBlendClumpUpdateAnimations(csObj->GetClump(), CTimer::GetTimeStepInSeconds(), !csObj->bOffscreen);
-					}
-				}
+				csObj->UpdateAnim();
 				csObj->ProcessControl();
 				csObj->ProcessCollision();
 				csObj->GetMatrix().UpdateRW();
@@ -1927,26 +1918,40 @@ CWorld::Process(void)
 	} else {
 		for(CPtrNode *node = ms_listMovingEntityPtrs.first; node; node = node->next) {
 			CEntity *movingEnt = (CEntity *)node->item;
-			if(!movingEnt->bRemoveFromWorld && movingEnt->m_rwObject && RwObjectGetType(movingEnt->m_rwObject) == rpCLUMP &&
-			   RpAnimBlendClumpGetFirstAssociation(movingEnt->GetClump())) {
-				if (movingEnt->IsObject())
-					RpAnimBlendClumpUpdateAnimations(movingEnt->GetClump(), CTimer::GetTimeStepNonClippedInSeconds());
-				else {
-					if (!movingEnt->bOffscreen)
-						movingEnt->bOffscreen = !movingEnt->GetIsOnScreen();
-					RpAnimBlendClumpUpdateAnimations(movingEnt->GetClump(), CTimer::GetTimeStepInSeconds(), !movingEnt->bOffscreen);
-				}
-			}
+			if(!movingEnt->bRemoveFromWorld)
+				movingEnt->UpdateAnim();
 		}
 		for(CPtrNode *node = ms_listMovingEntityPtrs.first; node; node = node->next) {
 			CPhysical *movingEnt = (CPhysical *)node->item;
 			if(movingEnt->bRemoveFromWorld) {
 				RemoveEntityInsteadOfProcessingIt(movingEnt);
 			} else {
-				movingEnt->ProcessControl();
+				if(!CCutsceneMgr::IsCutsceneProcessing() || movingEnt->UpdatesInCutscene())
+					movingEnt->ProcessControl();
 				if(movingEnt->GetIsStatic()) { movingEnt->RemoveFromMovingList(); }
 			}
 		}
+		for(int y = 0; y < NUMSECTORS_Y; y++)
+			for(int x = 0; x < NUMSECTORS_X; x++){
+				CPtrNode *node;
+				CSector *sect = CWorld::GetSector(x,  y);
+				for(node = sect->m_lists[ENTITYLIST_PEDS].first; node; node = node->next)
+					((CEntity*)node->item)->UpdateDistanceFade();
+				for(node = sect->m_lists[ENTITYLIST_PEDS_OVERLAP].first; node; node = node->next)
+					((CEntity*)node->item)->UpdateDistanceFade();
+				for(node = sect->m_lists[ENTITYLIST_VEHICLES].first; node; node = node->next)
+					((CEntity*)node->item)->UpdateDistanceFade();
+				for(node = sect->m_lists[ENTITYLIST_VEHICLES_OVERLAP].first; node; node = node->next)
+					((CEntity*)node->item)->UpdateDistanceFade();
+				for(node = sect->m_lists[ENTITYLIST_OBJECTS].first; node; node = node->next)
+					((CEntity*)node->item)->UpdateDistanceFade();
+				for(node = sect->m_lists[ENTITYLIST_OBJECTS_OVERLAP].first; node; node = node->next)
+					((CEntity*)node->item)->UpdateDistanceFade();
+				for(node = sect->m_lists[ENTITYLIST_DUMMIES].first; node; node = node->next)
+					((CEntity*)node->item)->UpdateDistanceFade();
+				for(node = sect->m_lists[ENTITYLIST_DUMMIES_OVERLAP].first; node; node = node->next)
+					((CEntity*)node->item)->UpdateDistanceFade();
+			}
 		bForceProcessControl = true;
 		for(CPtrNode *node = ms_listMovingEntityPtrs.first; node; node = node->next) {
 			CPhysical *movingEnt = (CPhysical *)node->item;

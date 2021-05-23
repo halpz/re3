@@ -913,9 +913,9 @@ CEntity::ProcessLightsForEntity(void)
 						effect->light.shadowSize, 0.0f,
 						0.0f, -effect->light.shadowSize,
 						128,
-						effect->col.r*CTimeCycle::GetSpriteBrightness()*effect->light.shadowIntensity/255.0f,
-						effect->col.g*CTimeCycle::GetSpriteBrightness()*effect->light.shadowIntensity/255.0f,
-						effect->col.b*CTimeCycle::GetSpriteBrightness()*effect->light.shadowIntensity/255.0f,
+						effect->col.r,
+						effect->col.g,
+						effect->col.b,
 						15.0f, 1.0f, 40.0f, false, 0.0f);
 				}else if(lightFlickering){
 					CShadows::StoreStaticShadow((uintptr)this + i, SHADOWTYPE_ADDITIVE,
