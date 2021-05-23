@@ -128,7 +128,6 @@ enum Config {
 	NUM_PED_COMMENTS_SLOTS = 20,
 
 	NUM_SOUNDS_SAMPLES_BANKS = 2,
-	NUM_SOUNDS_SAMPLES_SLOTS = 27,
 	NUM_AUDIOENTITIES = 200,
 
 	NUM_AUDIO_REFLECTIONS = 5,
@@ -395,6 +394,7 @@ enum Config {
 // Audio
 #define RADIO_SCROLL_TO_PREV_STATION
 #define AUDIO_CACHE
+#define PS2_AUDIO_CHANNELS // increases the maximum number of audio channels to PS2 value of 44 (PC has 28 originally)
 //#define PS2_AUDIO_PATHS // changes audio paths for cutscenes and radio to PS2 paths (needs vbdec on MSS builds)
 //#define AUDIO_OAL_USE_SNDFILE // use libsndfile to decode WAVs instead of our internal decoder
 #define AUDIO_OAL_USE_MPG123 // use mpg123 to support mp3 files
