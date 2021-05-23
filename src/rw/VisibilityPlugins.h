@@ -117,7 +117,6 @@ public:
 	                                  int32 offset, int32 len);
 	static int32 ms_framePluginOffset;
 
-	// Not actually used
 	struct ClumpExt
 	{
 		ClumpVisibilityCB visibilityCB;

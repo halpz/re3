@@ -216,7 +216,7 @@ CPhysical::RemoveAndAdd(void)
 CRect
 CPhysical::GetBoundRect(void)
 {
-	CVector center;
+	CVUVECTOR center;
 	float radius;
 	GetBoundCentre(center);
 	radius = GetBoundRadius();
@@ -1086,7 +1086,7 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 	CPhysical *A, *B;
 	CObject *Bobj;
 	bool canshift;
-	CVector center;
+	CVUVECTOR center;
 	float radius;
 
 	int numCollisions;
@@ -1244,7 +1244,7 @@ CPhysical::ProcessCollisionSectorList_SimpleCar(CPtrList *lists)
 {
 	static CColPoint aColPoints[MAX_COLLISION_POINTS];
 	float radius;
-	CVector center;
+	CVUVECTOR center;
 	int listtype;
 	CPhysical *A, *B;
 	int numCollisions;
@@ -1406,7 +1406,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 {
 	static CColPoint aColPoints[MAX_COLLISION_POINTS];
 	float radius;
-	CVector center;
+	CVUVECTOR center;
 	CPtrList *list;
 	CPhysical *A, *B;
 	CObject *Aobj, *Bobj;

@@ -43,6 +43,9 @@ public:
 	static CBaseModelInfo *GetModelInfo(int id){
 		return ms_modelInfoPtrs[id];
 	}
+	static CColModel *GetColModel(int id){
+		return ms_modelInfoPtrs[id]->GetColModel();
+	}
 
 	static bool IsBoatModel(int32 id);
 	static bool IsBikeModel(int32 id);

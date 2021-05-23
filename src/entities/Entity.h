@@ -141,11 +141,11 @@ public:
 		return (RpClump*)m_rwObject;
 	}
 
-	void GetBoundCentre(CVector &out);
+	void GetBoundCentre(CVUVECTOR &out);
 	CVector GetBoundCentre(void);
 	float GetBoundRadius(void);
 	float GetDistanceFromCentreOfMassToBaseOfModel(void);
-	bool GetIsTouching(CVector const &center, float r);
+	bool GetIsTouching(CVUVECTOR const &center, float r);
 	bool GetIsOnScreen(void);
 	bool GetIsOnScreenComplex(void);
 	bool IsVisible(void);

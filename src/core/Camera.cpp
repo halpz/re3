@@ -3675,16 +3675,18 @@ CCamera::IsSphereVisible(const CVector &center, float radius, const CMatrix *mat
 bool
 CCamera::IsSphereVisible(const CVector &center, float radius)
 {
-	CMatrix mat = m_cameraMatrix;
+#if GTA_VERSION < GTA3_PC_10	// not sure this condition is the right one
+	// Maybe this was a copy of the other function with m_cameraMatrix
+	return IsSphereVisible(center, radius, &m_cameraMatrix);
+#else
+	// ...and on PC they decided to call the other one with a default matrix.
+	CMatrix mat(m_cameraMatrix);	// this matrix construction is stupid and gone in VC
 	return IsSphereVisible(center, radius, &mat);
+#endif
 }
 
 bool
-#ifdef GTA_PS2
-CCamera::IsBoxVisible(CVuVector *box, const CMatrix *mat)
-#else
-CCamera::IsBoxVisible(CVector *box, const CMatrix *mat)
-#endif
+CCamera::IsBoxVisible(CVUVECTOR *box, const CMatrix *mat)
 {
 	int i;
 	int frustumTests[6] = { 0 };

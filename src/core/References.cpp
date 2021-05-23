@@ -39,9 +39,7 @@ CEntity::RegisterReference(CEntity **pent)
 		ref->pentity = pent;
 		ref->next = m_pFirstReference;
 		m_pFirstReference = ref;
-		return;
 	}
-	return;
 }
 
 // Clear all references to this entity
