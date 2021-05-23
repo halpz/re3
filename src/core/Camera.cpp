@@ -4101,16 +4101,11 @@ CCamera::IsSphereVisible(const CVector &center, float radius, const CMatrix *mat
 bool
 CCamera::IsSphereVisible(const CVector &center, float radius)
 {
-	CMatrix mat = m_cameraMatrix;
-	return IsSphereVisible(center, radius, &mat);
+	return IsSphereVisible(center, radius, &m_cameraMatrix);
 }
 
 bool
-#ifdef GTA_PS2
-CCamera::IsBoxVisible(CVuVector *box, const CMatrix *mat)
-#else
-CCamera::IsBoxVisible(CVector *box, const CMatrix *mat)
-#endif
+CCamera::IsBoxVisible(CVUVECTOR *box, const CMatrix *mat)
 {
 	int i;
 	int frustumTests[6] = { 0 };

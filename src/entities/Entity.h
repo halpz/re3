@@ -84,7 +84,7 @@ public:
 
 	// flagsE
 	uint32 m_flagE1 : 1;
-	uint32 m_flagE2 : 1;
+	uint32 bDontCastShadowsOn : 1;       // Dont cast shadows on this object
 	uint32 bOffscreen : 1;               // offscreen flag. This can only be trusted when it is set to true
 	uint32 bIsStaticWaitingForCollision : 1; // this is used by script created entities - they are static until the collision is loaded below them
 	uint32 bDontStream : 1;              // tell the streaming not to stream me
@@ -148,11 +148,11 @@ public:
 		return (RpClump*)m_rwObject;
 	}
 
-	void GetBoundCentre(CVector &out);
+	void GetBoundCentre(CVUVECTOR &out);
 	CVector GetBoundCentre(void);
 	float GetBoundRadius(void);
 	float GetDistanceFromCentreOfMassToBaseOfModel(void);
-	bool GetIsTouching(CVector const &center, float r);
+	bool GetIsTouching(CVUVECTOR const &center, float r);
 	bool GetIsOnScreen(void);
 	bool GetIsOnScreenComplex(void);
 	bool IsVisible(void);

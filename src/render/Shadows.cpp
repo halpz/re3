@@ -1406,7 +1406,7 @@ CShadows::CastShadowSectorList(CPtrList &PtrList, float fStartX, float fStartY, 
 		{
 			pEntity->m_scanCode = CWorld::GetCurrentScanCode();
 			
-			if ( pEntity->bUsesCollision && !pEntity->m_flagE2 )
+			if ( pEntity->bUsesCollision && !pEntity->bDontCastShadowsOn)
 			{
 				if ( IsAreaVisible(pEntity->m_area) )
 				{

@@ -22,6 +22,8 @@ public:
 			x = 1.0f;
 	}
 */
+
+	// TODO: operator-
 };
 
 void TransformPoint(CVuVector &out, const CMatrix &mat, const CVuVector &in);
