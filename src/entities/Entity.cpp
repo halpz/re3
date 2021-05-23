@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include "VuVector.h"
 #include "General.h"
 #include "RwHelper.h"
 #include "ModelIndices.h"
