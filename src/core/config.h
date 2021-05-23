@@ -422,6 +422,7 @@ enum Config {
 #ifdef SQUEEZE_PERFORMANCE
 	#undef PS2_ALPHA_TEST
 	#undef NO_ISLAND_LOADING
+	#undef PS2_AUDIO_CHANNELS
 	#define PC_PARTICLE
 	#define VC_PED_PORTS // To not process collisions always. But should be tested if that's really beneficial
 	#define VC_RAIN_NERF // Reduces number of rain particles
@@ -514,4 +515,5 @@ enum Config {
 #undef FREE_CAM
 #undef RADIO_SCROLL_TO_PREV_STATION
 #undef BIG_IMG
+#undef PS2_AUDIO_CHANNELS
 #endif
