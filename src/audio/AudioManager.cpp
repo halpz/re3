@@ -14,10 +14,6 @@
 
 cAudioManager AudioManager;
 
-const int channels = ARRAY_SIZE(AudioManager.m_asActiveSamples);
-const int policeChannel = channels + 1;
-const int allChannels = channels + 2;
-
 #define SPEED_OF_SOUND 343.f
 #define TIME_SPENT 40
 
@@ -28,7 +24,7 @@ cAudioManager::cAudioManager()
 	field_6 = 0;
 	m_fSpeedOfSound = SPEED_OF_SOUND / TIME_SPENT;
 	m_nTimeSpent = TIME_SPENT;
-	m_nActiveSamples = NUM_SOUNDS_SAMPLES_SLOTS;
+	m_nActiveSamples = NUM_CHANNELS_GENERIC;
 	m_nActiveSampleQueue = 1;
 	ClearRequestedQueue();
 	m_nActiveSampleQueue = 0;
@@ -276,7 +272,7 @@ cAudioManager::ResetTimers(uint32 time)
 		ClearActiveSamples();
 		ClearMissionAudio(0);
 		ClearMissionAudio(1);
-		SampleManager.StopChannel(policeChannel);
+		SampleManager.StopChannel(CHANNEL_POLICE_RADIO);
 		SampleManager.SetEffectsFadeVolume(0);
 		SampleManager.SetMusicFadeVolume(0);
 		MusicManager.ResetMusicAfterReload();
@@ -446,7 +442,7 @@ cAudioManager::ServiceSoundEffects()
 {
 	m_bFifthFrameFlag = (m_FrameCounter++ % 5) == 0;
 	if (m_nUserPause && !m_nPreviousUserPause) {
-		for (int32 i = 0; i < allChannels; i++)
+		for (int32 i = 0; i < NUM_CHANNELS; i++)
 			SampleManager.StopChannel(i);
 
 		ClearRequestedQueue();
@@ -773,7 +769,12 @@ cAudioManager::UpdateReflections()
 void
 cAudioManager::AddReleasingSounds()
 {
-	bool8 toProcess[44]; // why not 27?
+	// in case someone would want to increase it
+#ifdef FIX_BUGS
+	bool8 toProcess[NUM_CHANNELS_GENERIC];
+#else
+	bool8 toProcess[44];
+#endif
 
 	int8 queue = m_nActiveSampleQueue == 0 ? 1 : 0;
 
