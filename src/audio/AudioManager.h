@@ -205,10 +205,10 @@ public:
 	int32 m_nTimer;
 	tSound m_sQueueSample;
 	uint8 m_nActiveSampleQueue;
-	tSound m_asSamples[NUM_SOUNDS_SAMPLES_BANKS][NUM_SOUNDS_SAMPLES_SLOTS];
-	uint8 m_abSampleQueueIndexTable[NUM_SOUNDS_SAMPLES_BANKS][NUM_SOUNDS_SAMPLES_SLOTS];
+	tSound m_asSamples[NUM_SOUNDS_SAMPLES_BANKS][NUM_CHANNELS_GENERIC];
+	uint8 m_abSampleQueueIndexTable[NUM_SOUNDS_SAMPLES_BANKS][NUM_CHANNELS_GENERIC];
 	uint8 m_SampleRequestQueuesStatus[NUM_SOUNDS_SAMPLES_BANKS];
-	tSound m_asActiveSamples[NUM_SOUNDS_SAMPLES_SLOTS];
+	tSound m_asActiveSamples[NUM_CHANNELS_GENERIC];
 	tAudioEntity m_asAudioEntities[NUM_AUDIOENTITIES];
 	int32 m_anAudioEntityIndices[NUM_AUDIOENTITIES];
 	int32 m_nAudioEntitiesTotal;

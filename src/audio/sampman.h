@@ -1,5 +1,6 @@
 #pragma once
 #include "AudioSamples.h"
+#include "audio_enums.h"
 
 #define MAX_VOLUME 127
 #define MAX_FREQ DIGITALRATE
@@ -115,10 +116,9 @@ enum
 
 #define MAXPROVIDERS               64
 
-#define MAXCHANNELS                28
-#define MAXCHANNELS_SURROUND       24
+#define MAXCHANNELS                (NUM_CHANNELS_GENERIC+1)
+#define MAXCHANNELS_SURROUND       (MAXCHANNELS-4)
 #define MAX2DCHANNELS              3
-#define CHANNEL2D                  MAXCHANNELS
 
 #define MAX_STREAMS                1
 
@@ -126,7 +126,13 @@ enum
 #define DIGITALBITS                16
 #define DIGITALCHANNELS            2
 
-#define MAX_DIGITAL_MIXER_CHANNELS 34
+#ifdef FIX_BUGS
+#define MAX_DIGITAL_MIXER_CHANNELS (MAXCHANNELS+MAX_STREAMS*2+MAX2DCHANNELS)
+#else
+#define MAX_DIGITAL_MIXER_CHANNELS (MAXCHANNELS+MAX_STREAMS*2)
+#endif 
+
+static_assert( NUM_CHANNELS == MAXCHANNELS + MAX2DCHANNELS, "The number of channels doesn't match with an enum" );
 
 extern int gBankStartOffset[67];
 

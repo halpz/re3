@@ -94,8 +94,8 @@ int32 nPedSlotSfx    [MAX_PEDSFX];
 int32 nPedSlotSfxAddr[MAX_PEDSFX];
 uint8 nCurrentPedSlot;
 
-CChannel aChannel[MAXCHANNELS+MAX2DCHANNELS];
-uint8 nChannelVolume[MAXCHANNELS+MAX2DCHANNELS];
+CChannel aChannel[NUM_CHANNELS];
+uint8 nChannelVolume[NUM_CHANNELS];
 
 uint32 nStreamLength[TOTAL_STREAMED_SOUNDS];
 ALuint ALStreamSources[MAX_STREAMS][2];
@@ -283,7 +283,8 @@ set_new_provider(int index)
 		_maxSamples = MAXCHANNELS;
 		
 		ALCint attr[] = {ALC_FREQUENCY,MAX_FREQ,
-						ALC_MONO_SOURCES, MAX_STREAMS * 2 + MAXCHANNELS,
+						ALC_MONO_SOURCES, MAX_DIGITAL_MIXER_CHANNELS - MAX2DCHANNELS,
+						ALC_STEREO_SOURCES, MAX2DCHANNELS,
 						0,
 						};
 		
@@ -369,7 +370,7 @@ set_new_provider(int index)
 		CChannel::InitChannels();
 
 		for ( int32 i = 0; i < MAXCHANNELS; i++ )
-			aChannel[i].Init(i);
+			aChannel[i].Init(i); 
 		for ( int32 i = 0; i < MAX2DCHANNELS; i++ )
 			aChannel[CHANNEL2D+i].Init(CHANNEL2D+i, true);
 		
@@ -1052,7 +1053,7 @@ cSampleManager::Initialise(void)
 	}
 	
 	{
-		for ( int32 i = 0; i < MAXCHANNELS+MAX2DCHANNELS; i++ )
+		for ( int32 i = 0; i < NUM_CHANNELS; i++ )
 			nChannelVolume[i] = 0;
 	}
 	
@@ -1276,7 +1277,7 @@ cSampleManager::UpdateEffectsVolume(void)
 {
 	if ( _bSampmanInitialised )
 	{
-		for ( int32 i = 0; i < MAXCHANNELS+MAX2DCHANNELS; i++ )
+		for ( int32 i = 0; i < NUM_CHANNELS; i++ )
 		{
 			if ( GetChannelUsedFlag(i) )
 			{
@@ -1584,7 +1585,7 @@ bool8 cSampleManager::UpdateReverb(void)
 void
 cSampleManager::SetChannelReverbFlag(uint32 nChannel, bool8 nReverbFlag)
 {
-	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
+	ASSERT( nChannel < NUM_CHANNELS );
 	
 	if ( usingEAX || _usingEFX )
 	{
@@ -1603,7 +1604,7 @@ cSampleManager::SetChannelReverbFlag(uint32 nChannel, bool8 nReverbFlag)
 bool8
 cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 {
-	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
+	ASSERT( nChannel < NUM_CHANNELS );
 	
 	uintptr addr;
 	
@@ -1645,7 +1646,6 @@ void
 cSampleManager::SetChannelEmittingVolume(uint32 nChannel, uint32 nVolume)
 {
 	ASSERT( nChannel < CHANNEL2D );
-	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
 	
 	uint32 vol = nVolume;
 	if ( vol > MAX_VOLUME ) vol = MAX_VOLUME;
@@ -1667,7 +1667,6 @@ void
 cSampleManager::SetChannel3DPosition(uint32 nChannel, float fX, float fY, float fZ)
 {
 	ASSERT( nChannel < CHANNEL2D );
-	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
 	
 	aChannel[nChannel].SetPosition(-fX, fY, fZ);
 }
@@ -1676,7 +1675,6 @@ void
 cSampleManager::SetChannel3DDistances(uint32 nChannel, float fMax, float fMin)
 {
 	ASSERT( nChannel < CHANNEL2D );
-	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
 	aChannel[nChannel].SetDistances(fMax, fMin);
 }
 
@@ -1684,7 +1682,7 @@ void
 cSampleManager::SetChannelVolume(uint32 nChannel, uint32 nVolume)
 {
 	ASSERT(nChannel >= CHANNEL2D );
-	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
+	ASSERT( nChannel < NUM_CHANNELS );
 	
 	if(nChannel >= CHANNEL2D)
 	{
@@ -1709,7 +1707,7 @@ void
 cSampleManager::SetChannelPan(uint32 nChannel, uint32 nPan)
 {
 	ASSERT(nChannel >= CHANNEL2D);
-	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
+	ASSERT( nChannel < NUM_CHANNELS );
 	
 	if ( nChannel >= CHANNEL2D )
 	{
@@ -1720,7 +1718,7 @@ cSampleManager::SetChannelPan(uint32 nChannel, uint32 nPan)
 void
 cSampleManager::SetChannelFrequency(uint32 nChannel, uint32 nFreq)
 {
-	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
+	ASSERT( nChannel < NUM_CHANNELS );
 	
 	aChannel[nChannel].SetCurrentFreq(nFreq);
 }
@@ -1728,7 +1726,7 @@ cSampleManager::SetChannelFrequency(uint32 nChannel, uint32 nFreq)
 void
 cSampleManager::SetChannelLoopPoints(uint32 nChannel, uint32 nLoopStart, int32 nLoopEnd)
 {
-	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
+	ASSERT( nChannel < NUM_CHANNELS );
 	
 	aChannel[nChannel].SetLoopPoints(nLoopStart / (DIGITALBITS / 8), nLoopEnd / (DIGITALBITS / 8));
 }
@@ -1736,7 +1734,7 @@ cSampleManager::SetChannelLoopPoints(uint32 nChannel, uint32 nLoopStart, int32 n
 void
 cSampleManager::SetChannelLoopCount(uint32 nChannel, uint32 nLoopCount)
 {
-	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
+	ASSERT( nChannel < NUM_CHANNELS );
 	
 	aChannel[nChannel].SetLoopCount(nLoopCount);
 }
@@ -1744,7 +1742,7 @@ cSampleManager::SetChannelLoopCount(uint32 nChannel, uint32 nLoopCount)
 bool8
 cSampleManager::GetChannelUsedFlag(uint32 nChannel)
 {
-	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
+	ASSERT( nChannel < NUM_CHANNELS );
 	
 	return aChannel[nChannel].IsUsed();
 }
@@ -1752,7 +1750,7 @@ cSampleManager::GetChannelUsedFlag(uint32 nChannel)
 void
 cSampleManager::StartChannel(uint32 nChannel)
 {
-	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
+	ASSERT( nChannel < NUM_CHANNELS );
 	
 	aChannel[nChannel].Start();
 }
@@ -1760,7 +1758,7 @@ cSampleManager::StartChannel(uint32 nChannel)
 void
 cSampleManager::StopChannel(uint32 nChannel)
 {
-	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
+	ASSERT( nChannel < NUM_CHANNELS );
 	
 	aChannel[nChannel].Stop();
 }
@@ -2167,7 +2165,7 @@ cSampleManager::Service(void)
 			stream->Update();
 	}
 	int refCount = CChannel::channelsThatNeedService;
-	for ( int32 i = 0; refCount && i < MAXCHANNELS+MAX2DCHANNELS; i++ )
+	for ( int32 i = 0; refCount && i < NUM_CHANNELS; i++ )
 	{
 		if ( aChannel[i].Update() )
 			refCount--;
