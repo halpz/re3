@@ -427,6 +427,7 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #ifdef SQUEEZE_PERFORMANCE
 	#undef PS2_ALPHA_TEST
 	#undef NO_ISLAND_LOADING
+	#undef PS2_AUDIO_CHANNELS
 #endif
 
 // -------
@@ -515,6 +516,6 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #undef IMPROVED_CAMERA
 #undef FREE_CAM
 #undef BIG_IMG
-
+#undef PS2_AUDIO_CHANNELS
 #undef RADIO_SCROLL_TO_PREV_STATION
 #endif
