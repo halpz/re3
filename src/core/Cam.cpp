@@ -4933,9 +4933,9 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 		AlphaSpeed = 0.0;
 		Distance = 1000.0;
 
-		Front.x = -(cos(Beta) * cos(Alpha));
-		Front.y = -(sin(Beta) * cos(Alpha));
-		Front.z = sin(Alpha);
+		Front.x = -(Cos(Beta) * Cos(Alpha));
+		Front.y = -(Sin(Beta) * Cos(Alpha));
+		Front.z = Sin(Alpha);
 
 		m_aTargetHistoryPosOne = TargetCoors - nextDistance * Front;
 
@@ -5210,9 +5210,9 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 
 	lastBeta = Beta;
 
-	Front.x = -(cos(Beta) * cos(Alpha));
-	Front.y = -(sin(Beta) * cos(Alpha));
-	Front.z = sin(Alpha);
+	Front.x = -(Cos(Beta) * Cos(Alpha));
+	Front.y = -(Sin(Beta) * Cos(Alpha));
+	Front.z = Sin(Alpha);
 	GetVectorsReadyForRW();
 	TheCamera.m_bCamDirectlyBehind = false;
 	TheCamera.m_bCamDirectlyInFront = false;
@@ -5222,9 +5222,9 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	m_cvecTargetCoorsForFudgeInter = TargetCoors;
 	m_aTargetHistoryPosThree = m_aTargetHistoryPosOne;
 	float nextAlpha = alphaWithSpeedAccounted + zoomModeAlphaOffset;
-	float nextFrontX = -(cos(Beta) * cos(nextAlpha));
-	float nextFrontY = -(sin(Beta) * cos(nextAlpha));
-	float nextFrontZ = sin(nextAlpha);
+	float nextFrontX = -(Cos(Beta) * Cos(nextAlpha));
+	float nextFrontY = -(Sin(Beta) * Cos(nextAlpha));
+	float nextFrontZ = Sin(nextAlpha);
 
 	m_aTargetHistoryPosOne.x = TargetCoors.x - nextFrontX * nextDistance;
 	m_aTargetHistoryPosOne.y = TargetCoors.y - nextFrontY * nextDistance;

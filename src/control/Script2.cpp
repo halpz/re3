@@ -437,8 +437,8 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 		float length = *(float*)&ScriptParams[5];
 		float x, y;
 		if (angle != 0.0f){
-			y = cos(angle) * length;
-			x = sin(angle) * length;
+			y = Cos(angle) * length;
+			x = Sin(angle) * length;
 		}else{
 			y = length;
 			x = 0.0f;
