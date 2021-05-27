@@ -3650,7 +3650,7 @@ CCamera::IsPointVisible(const CVector &center, const CMatrix *mat)
 }
 
 bool
-CCamera::IsSphereVisible(const CVector &center, float radius, const CMatrix *mat)
+CCamera::IsSphereVisible(const CVector &center, float radius, Const CMatrix *mat)
 {
 #ifdef GTA_PS2
 	CVuVector c;
@@ -3680,7 +3680,7 @@ CCamera::IsSphereVisible(const CVector &center, float radius)
 	return IsSphereVisible(center, radius, &m_cameraMatrix);
 #else
 	// ...and on PC they decided to call the other one with a default matrix.
-	CMatrix mat(m_cameraMatrix);	// this matrix construction is stupid and gone in VC
+	CMatrix mat(GetCameraMatrix());	// this matrix construction is stupid and gone in VC
 	return IsSphereVisible(center, radius, &mat);
 #endif
 }

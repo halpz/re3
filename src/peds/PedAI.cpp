@@ -5362,7 +5362,7 @@ CPed::WarpPedToNearLeaderOffScreen(void)
 			continue;
 
 		appropriatePos.z = zCorrectedPos.z;
-		if (!TheCamera.IsSphereVisible(appropriatePos, 0.6f, &TheCamera.GetCameraMatrix())
+		if (!TheCamera.IsSphereVisible(appropriatePos, 0.6f)
 			&& CWorld::GetIsLineOfSightClear(appropriatePos, warpToPos, true, true, false, true, false, false, false)
 			&& !CWorld::TestSphereAgainstWorld(appropriatePos, 0.6f, this, true, true, false, true, false, false)) {
 			teleported = true;
@@ -5396,7 +5396,7 @@ CPed::WarpPedToNearEntityOffScreen(CEntity *warpTo)
 			continue;
 
 		appropriatePos.z = zCorrectedPos.z;
-		if (!TheCamera.IsSphereVisible(appropriatePos, 0.6f, &TheCamera.GetCameraMatrix())
+		if (!TheCamera.IsSphereVisible(appropriatePos, 0.6f)
 			&& CWorld::GetIsLineOfSightClear(appropriatePos, warpToPos, true, true, false, true, false, false, false)
 			&& !CWorld::TestSphereAgainstWorld(appropriatePos, 0.6f, this, true, true, false, true, false, false)) {
 			teleported = true;

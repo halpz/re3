@@ -706,8 +706,7 @@ CPopulation::AddToPopulation(float minDist, float maxDist, float minDistOffScree
 				generatedCoors.z = Max(generatedCoors.z, groundZ);
 			}
 			bool farEnoughToAdd = true;
-			CMatrix mat(TheCamera.GetCameraMatrix());
-			if (TheCamera.IsSphereVisible(generatedCoors, 2.0f, &mat)) {
+			if (TheCamera.IsSphereVisible(generatedCoors, 2.0f)) {
 				if (PedCreationDistMultiplier() * MIN_CREATION_DIST > (generatedCoors - playerCentreOfWorld).Magnitude2D())
 					farEnoughToAdd = false;
 			}
