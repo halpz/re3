@@ -1416,7 +1416,7 @@ bool8 cSampleManager::UpdateReverb(void)
 	float fRatio = CALCRATIO(normx, normy, normz, 0.3f, 0.5f, (normy+normx+normz)/3.0f);
 	
 	#undef CALCRATIO
-	#undef ZE
+	#undef ZR
 	
 	fRatio = clamp(fRatio, usingEAX3==1 ? 0.0f : 0.30f, 1.0f);
 	
