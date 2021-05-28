@@ -41,6 +41,11 @@ cAudioManager::cAudioManager()
 	m_bFifthFrameFlag = FALSE;
 	m_bTimerJustReset = FALSE;
 	m_nTimer = 0;
+
+#ifdef FIX_BUGS
+	m_LogicalFrameCounter = 0;
+	m_bLogicalFrameUpdate = FALSE;
+#endif
 }
 
 cAudioManager::~cAudioManager()
@@ -100,6 +105,12 @@ cAudioManager::Terminate()
 void
 cAudioManager::Service()
 {
+#ifdef FIX_BUGS
+	m_bLogicalFrameUpdate = m_LogicalFrameCounter != CTimer::GetLogicalFrameCounter();
+	if(m_bLogicalFrameUpdate)
+		m_LogicalFrameCounter = CTimer::GetLogicalFrameCounter();
+#endif
+
 	GenerateIntegerRandomNumberTable();
 	if (m_bTimerJustReset) {
 		ResetAudioLogicTimers(m_nTimer);
@@ -423,6 +434,9 @@ cAudioManager::IsAudioInitialised() const
 void
 cAudioManager::ServiceSoundEffects()
 {
+#ifdef FIX_BUGS
+	if(m_bLogicalFrameUpdate)
+#endif
 	m_bFifthFrameFlag = (m_FrameCounter++ % 5) == 0;
 	if (m_nUserPause && !m_nPreviousUserPause) {
 		for (int32 i = 0; i < NUM_CHANNELS; i++)
@@ -712,9 +726,9 @@ cAudioManager::AddReleasingSounds()
 		}
 		if (!toProcess[i]) {
 			if (sample.m_nCounter <= 255 || !sample.m_nLoopsRemaining) {
-				if (!sample.m_nReleasingVolumeDivider)
+				if (sample.m_nReleasingVolumeDivider == 0)
 					continue;
-				if (!sample.m_nLoopCount) {
+				if (sample.m_nLoopCount == 0) {
 					if (sample.m_nVolumeChange == -1) {
 						sample.m_nVolumeChange = sample.m_nVolume / sample.m_nReleasingVolumeDivider;
 						if (sample.m_nVolumeChange <= 0)
@@ -726,6 +740,9 @@ cAudioManager::AddReleasingSounds()
 					}
 					sample.m_nVolume -= sample.m_nVolumeChange;
 				}
+#ifdef FIX_BUGS
+				if(m_bLogicalFrameUpdate)
+#endif
 				--sample.m_nReleasingVolumeDivider;
 				if (m_bFifthFrameFlag) {
 					if (sample.m_nReleasingVolumeModificator < 20)

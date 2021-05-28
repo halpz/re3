@@ -16,6 +16,9 @@ float CTimer::ms_fTimeStep;
 float CTimer::ms_fTimeStepNonClipped;
 bool  CTimer::m_UserPause;
 bool  CTimer::m_CodePause;
+#ifdef FIX_BUGS
+uint32 CTimer::m_LogicalFrameCounter;
+#endif
 
 uint32 _nCyclesPerMS = 1;
 
@@ -49,6 +52,9 @@ void CTimer::Initialise(void)
 	m_snTimeInMillisecondsNonClipped = 0;
 	m_snPreviousTimeInMilliseconds = 0;
 	m_snTimeInMilliseconds = 1;
+#ifdef FIX_BUGS
+	m_LogicalFrameCounter = 0;
+#endif
 	
 #ifdef _WIN32
 	LARGE_INTEGER perfFreq;
@@ -102,6 +108,15 @@ void CTimer::Update(void)
 #endif
 		frameTime = updInCyclesScaled / (double)_nCyclesPerMS;
 
+#ifdef FIX_BUGS
+		static double frameTimeLogical = 0.0;
+		frameTimeLogical += ((double)updInCycles / (double)_nCyclesPerMS);
+		while (frameTimeLogical >= 1000.0 / 30.0) {
+			frameTimeLogical -= 1000.0 / 30.0;
+			m_LogicalFrameCounter++;
+		}
+#endif
+
 		m_snTimeInMillisecondsPauseMode = m_snTimeInMillisecondsPauseMode + frameTime;
 		
 		if ( GetIsPaused() )
@@ -126,6 +141,15 @@ void CTimer::Update(void)
 #endif
 		frameTime = (double)updInMs * ms_fTimeScale;
 		
+#ifdef FIX_BUGS
+		static double frameTimeLogical = 0.0;
+		frameTimeLogical += (double)updInMs;
+		while(frameTimeLogical >= 1000.0 / 30.0) {
+			frameTimeLogical -= 1000.0 / 30.0;
+			m_LogicalFrameCounter++;
+		}
+#endif
+
 		oldPcTimer = timer;
 		
 		m_snTimeInMillisecondsPauseMode = m_snTimeInMillisecondsPauseMode + frameTime;

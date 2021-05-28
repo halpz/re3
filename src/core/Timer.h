@@ -11,6 +11,9 @@ class CTimer
 	static float ms_fTimeScale;
 	static float ms_fTimeStep;
 	static float ms_fTimeStepNonClipped;
+#ifdef FIX_BUGS
+	static uint32 m_LogicalFrameCounter;
+#endif
 public:
 	static bool  m_UserPause;
 	static bool  m_CodePause;
@@ -61,6 +64,7 @@ public:
 #ifdef FIX_BUGS
 	static float GetDefaultTimeStep(void) { return 50.0f / 30.0f; }
 	static float GetTimeStepFix(void) { return GetTimeStep() / GetDefaultTimeStep(); }
+	static uint32 GetLogicalFrameCounter(void) { return m_LogicalFrameCounter; }
 #endif
 };
 
