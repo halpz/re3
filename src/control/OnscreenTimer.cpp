@@ -108,7 +108,7 @@ void COnscreenTimerEntry::Process() {
 
 	int32* timerPtr = CTheScripts::GetPointerToScriptVariable(m_nTimerOffset);
 	int32 oldTime = *timerPtr;
-	int32 newTime = oldTime - int32(CTimer::GetTimeStepInSeconds() * 1000);
+	int32 newTime = oldTime - int32(CTimer::GetTimeStepInMilliseconds());
 	if(newTime < 0) {
 		*timerPtr = 0;
 		m_bTimerProcessed = 0;
