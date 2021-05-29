@@ -223,10 +223,6 @@ public:
 	uint8 m_nUserPause;
 	uint8 m_nPreviousUserPause;
 	uint32 m_FrameCounter;
-#ifdef FIX_BUGS
-	uint32 m_LogicalFrameCounter;
-	bool8 m_bLogicalFrameUpdate;
-#endif
 
 	cAudioManager();
 	~cAudioManager();

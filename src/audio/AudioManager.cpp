@@ -41,11 +41,6 @@ cAudioManager::cAudioManager()
 	m_bFifthFrameFlag = FALSE;
 	m_bTimerJustReset = FALSE;
 	m_nTimer = 0;
-
-#ifdef FIX_BUGS
-	m_LogicalFrameCounter = 0;
-	m_bLogicalFrameUpdate = FALSE;
-#endif
 }
 
 cAudioManager::~cAudioManager()
@@ -105,12 +100,6 @@ cAudioManager::Terminate()
 void
 cAudioManager::Service()
 {
-#ifdef FIX_BUGS
-	m_bLogicalFrameUpdate = m_LogicalFrameCounter != CTimer::GetLogicalFrameCounter();
-	if(m_bLogicalFrameUpdate)
-		m_LogicalFrameCounter = CTimer::GetLogicalFrameCounter();
-#endif
-
 	GenerateIntegerRandomNumberTable();
 	if (m_bTimerJustReset) {
 		ResetAudioLogicTimers(m_nTimer);
@@ -435,7 +424,7 @@ void
 cAudioManager::ServiceSoundEffects()
 {
 #ifdef FIX_BUGS
-	if(m_bLogicalFrameUpdate)
+	if(CTimer::GetLogicalFramesPassed() != 0)
 #endif
 	m_bFifthFrameFlag = (m_FrameCounter++ % 5) == 0;
 	if (m_nUserPause && !m_nPreviousUserPause) {
@@ -741,7 +730,7 @@ cAudioManager::AddReleasingSounds()
 					sample.m_nVolume -= sample.m_nVolumeChange;
 				}
 #ifdef FIX_BUGS
-				if(m_bLogicalFrameUpdate)
+				if(CTimer::GetLogicalFramesPassed() != 0)
 #endif
 				--sample.m_nReleasingVolumeDivider;
 				if (m_bFifthFrameFlag) {
