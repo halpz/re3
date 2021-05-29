@@ -1177,7 +1177,10 @@ DisplayGameDebugText()
 
 	FrameSamples++;
 #ifdef FIX_BUGS
-	FramesPerSecondCounter += frameTime / 1000.f; // convert to seconds
+	// this is inaccurate with over 1000 fps
+	static uint32 PreviousTimeInMillisecondsPauseMode = 0;
+	FramesPerSecondCounter += (CTimer::GetTimeInMillisecondsPauseMode() - PreviousTimeInMillisecondsPauseMode) / 1000.0f; // convert to seconds
+	PreviousTimeInMillisecondsPauseMode = CTimer::GetTimeInMillisecondsPauseMode();
 	FramesPerSecond = FrameSamples / FramesPerSecondCounter;
 #else
 	FramesPerSecondCounter += 1000.0f / CTimer::GetTimeStepNonClippedInMilliseconds();	

@@ -69,7 +69,3 @@ public:
 	static uint32 GetLogicalFramesPassed(void) { return m_LogicalFramesPassed; }
 #endif
 };
-
-#ifdef FIX_BUGS
-extern double frameTime;
-#endif

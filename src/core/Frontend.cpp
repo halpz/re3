@@ -950,12 +950,7 @@ CMenuManager::DisplayHelperText()
 			m_nHelperTextAlpha -= 2;
 		}
 #else
-		static float fadeAlpha = 0.0f; // To keep it precisely
-		if (m_nHelperTextAlpha >= 255 && fadeAlpha < 250) fadeAlpha = m_nHelperTextAlpha;
-
-		// -2 per every 33 ms (1000.f/30.f - original frame limiter fps)
-		fadeAlpha -= (frameTime / 33.0f) * 2.0f;
-		m_nHelperTextAlpha = fadeAlpha;
+		m_nHelperTextAlpha -= 2 * CTimer::GetLogicalFramesPassed();
 #endif
 		if (m_nHelperTextAlpha < 1)
 			ResetHelperText();
@@ -2686,11 +2681,7 @@ CMenuManager::DrawFrontEndNormal()
 	static float fadeAlpha = 0.0f;
 
 	if (m_nMenuFadeAlpha < 255) {
-		if (m_nMenuFadeAlpha == 0 && fadeAlpha > 1.0f) fadeAlpha = 0.0f;
-		
-		// +20 per every 33 ms (1000.f/30.f - original frame limiter fps)
-		fadeAlpha += (frameTime) * 20.f / 33.f;
-		m_nMenuFadeAlpha = fadeAlpha;
+		m_nMenuFadeAlpha += 20 * CTimer::GetLogicalFramesPassed();
 	} else {
 		// TODO: what is this? waiting mouse?
 		if(field_518 == 4){
@@ -2950,12 +2941,7 @@ CMenuManager::DrawFrontEndNormal()
 
 		// Famous transparent menu bug
 #ifdef FIX_BUGS
-		static float fadeAlpha = 0.0f;
-		if (m_nMenuFadeAlpha == 0 && fadeAlpha > 1.0f) fadeAlpha = 0.0f;
-
-		// +20 per every 33 ms (1000.f/30.f - original frame limiter fps)
-		fadeAlpha += (frameTime) * 20.f / 33.f;
-		m_nMenuFadeAlpha = fadeAlpha;
+		m_nMenuFadeAlpha += 20 * CTimer::GetLogicalFramesPassed();
 #else
 		static uint32 LastFade = 0;
 
