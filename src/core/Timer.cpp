@@ -121,16 +121,31 @@ void CTimer::Update(void)
 		m_LogicalFrameCounter += m_LogicalFramesPassed;
 #endif
 
+#ifdef FIX_BUGS
+		static double frameTimeDouble = 0.0;
+		frameTimeDouble += frameTime;
+
+		m_snTimeInMillisecondsPauseMode += uint32(frameTimeDouble);
+#else
 		m_snTimeInMillisecondsPauseMode = m_snTimeInMillisecondsPauseMode + frameTime;
+#endif
 		
 		if ( GetIsPaused() )
 			ms_fTimeStep = 0.0f;
 		else
 		{
+#ifdef FIX_BUGS
+			m_snTimeInMilliseconds += uint32(frameTimeDouble);
+			m_snTimeInMillisecondsNonClipped += uint32(frameTimeDouble);
+#else
 			m_snTimeInMilliseconds = m_snTimeInMilliseconds + frameTime;
 			m_snTimeInMillisecondsNonClipped = m_snTimeInMillisecondsNonClipped + frameTime;
+#endif
 			ms_fTimeStep = frameTime / 1000.0f * 50.0f;
 		}
+#ifdef FIX_BUGS
+		frameTimeDouble -= uint32(frameTimeDouble);
+#endif
 	}
 	else
 #endif
@@ -158,16 +173,31 @@ void CTimer::Update(void)
 
 		oldPcTimer = timer;
 		
+#ifdef FIX_BUGS
+		static double frameTimeDouble = 0.0;
+		frameTimeDouble += frameTime;
+
+		m_snTimeInMillisecondsPauseMode += uint32(frameTimeDouble);
+#else
 		m_snTimeInMillisecondsPauseMode = m_snTimeInMillisecondsPauseMode + frameTime;
+#endif
 															 
 		if ( GetIsPaused() )
 			ms_fTimeStep = 0.0f;
 		else
 		{
+#ifdef FIX_BUGS
+			m_snTimeInMilliseconds += uint32(frameTimeDouble);
+			m_snTimeInMillisecondsNonClipped += uint32(frameTimeDouble);
+#else
 			m_snTimeInMilliseconds = m_snTimeInMilliseconds + frameTime;
 			m_snTimeInMillisecondsNonClipped = m_snTimeInMillisecondsNonClipped + frameTime;
+#endif
 			ms_fTimeStep = frameTime / 1000.0f * 50.0f;
 		}
+#ifdef FIX_BUGS
+		frameTimeDouble -= uint32(frameTimeDouble);
+#endif
 	}
 	
 	if ( ms_fTimeStep < 0.01f && !GetIsPaused() )
