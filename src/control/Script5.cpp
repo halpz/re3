@@ -1006,10 +1006,10 @@ void CRunningScript::PlayerInAngledAreaCheckCommand(int32 command, uint32* pIp)
 		initAngle -= TWOPI;
 	// it looks like the idea is to use a rectangle using the diagonal of the rectangle as
 	// the side of new rectangle, with "length" being the length of second side
-	float rotatedSupX = supX + side2length * sin(initAngle);
-	float rotatedSupY = supY - side2length * cos(initAngle);
-	float rotatedInfX = infX + side2length * sin(initAngle);
-	float rotatedInfY = infY - side2length * cos(initAngle);
+	float rotatedSupX = supX + side2length * Sin(initAngle);
+	float rotatedSupY = supY - side2length * Cos(initAngle);
+	float rotatedInfX = infX + side2length * Sin(initAngle);
+	float rotatedInfY = infY - side2length * Cos(initAngle);
 	float side1X = supX - infX;
 	float side1Y = supY - infY;
 	float side1Length = CVector2D(side1X, side1Y).Magnitude();
