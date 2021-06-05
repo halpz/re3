@@ -1014,7 +1014,7 @@ CWaterLevel::RenderWater()
 				
 				if ( fHugeSectorMaxRenderDistSqr > fHugeSectorDistToCamSqr )
 				{
-					if ( TheCamera.IsSphereVisible(CVector(vecHugeSectorCentre.x, vecHugeSectorCentre.y, 0.0f), SectorRadius(HUGE_SECTOR_SIZE), &TheCamera.GetCameraMatrix()) )
+					if ( TheCamera.IsSphereVisible(CVector(vecHugeSectorCentre.x, vecHugeSectorCentre.y, 0.0f), SectorRadius(HUGE_SECTOR_SIZE)) )
 					{
 #ifndef PC_WATER
 						WavesCalculatedThisFrame = true;
@@ -1088,7 +1088,7 @@ CWaterLevel::RenderWater()
 				
 				if ( fCamDistToSector < fHugeSectorMaxRenderDistSqr )
 				{
-					if ( TheCamera.IsSphereVisible(CVector(vecExtraHugeSectorCentre.x, vecExtraHugeSectorCentre.y, 0.0f), SectorRadius(EXTRAHUGE_SECTOR_SIZE), &TheCamera.GetCameraMatrix()) )
+					if ( TheCamera.IsSphereVisible(CVector(vecExtraHugeSectorCentre.x, vecExtraHugeSectorCentre.y, 0.0f), SectorRadius(EXTRAHUGE_SECTOR_SIZE)) )
 					{
 						RenderOneFlatExtraHugeWaterPoly(
 							vecExtraHugeSectorCentre.x - EXTRAHUGE_SECTOR_SIZE/2,
@@ -1107,7 +1107,7 @@ CWaterLevel::RenderWater()
 				
 				if ( fCamDistToSector < fHugeSectorMaxRenderDistSqr )
 				{
-					if ( TheCamera.IsSphereVisible(CVector(vecExtraHugeSectorCentre.x, vecExtraHugeSectorCentre.y, 0.0f), SectorRadius(EXTRAHUGE_SECTOR_SIZE), &TheCamera.GetCameraMatrix()) )
+					if ( TheCamera.IsSphereVisible(CVector(vecExtraHugeSectorCentre.x, vecExtraHugeSectorCentre.y, 0.0f), SectorRadius(EXTRAHUGE_SECTOR_SIZE)) )
 					{
 						RenderOneFlatExtraHugeWaterPoly(
 							vecExtraHugeSectorCentre.x - EXTRAHUGE_SECTOR_SIZE/2,
@@ -1136,7 +1136,7 @@ CWaterLevel::RenderWater()
 				
 				if ( fCamDistToSector < fHugeSectorMaxRenderDistSqr )
 				{
-					if ( TheCamera.IsSphereVisible(CVector(vecExtraHugeSectorCentre.x, vecExtraHugeSectorCentre.y, 0.0f), SectorRadius(EXTRAHUGE_SECTOR_SIZE), &TheCamera.GetCameraMatrix()) )
+					if ( TheCamera.IsSphereVisible(CVector(vecExtraHugeSectorCentre.x, vecExtraHugeSectorCentre.y, 0.0f), SectorRadius(EXTRAHUGE_SECTOR_SIZE)) )
 					{
 						RenderOneFlatExtraHugeWaterPoly(
 							vecExtraHugeSectorCentre.x - EXTRAHUGE_SECTOR_SIZE/2,
@@ -1155,7 +1155,7 @@ CWaterLevel::RenderWater()
 				
 				if ( fCamDistToSector < fHugeSectorMaxRenderDistSqr )
 				{
-					if ( TheCamera.IsSphereVisible(CVector(vecExtraHugeSectorCentre.x, vecExtraHugeSectorCentre.x, 0.0f), SectorRadius(EXTRAHUGE_SECTOR_SIZE), &TheCamera.GetCameraMatrix()) )
+					if ( TheCamera.IsSphereVisible(CVector(vecExtraHugeSectorCentre.x, vecExtraHugeSectorCentre.x, 0.0f), SectorRadius(EXTRAHUGE_SECTOR_SIZE)) )
 					{
 						RenderOneFlatExtraHugeWaterPoly(
 							vecExtraHugeSectorCentre.x - EXTRAHUGE_SECTOR_SIZE/2,
@@ -1287,7 +1287,7 @@ CWaterLevel::RenderTransparentWater(void)
 				
 				if ( fHugeSectorMaxRenderDistSqr > fHugeSectorDistToCamSqr )
 				{
-					if ( TheCamera.IsSphereVisible(CVector(vecHugeSectorCentre.x, vecHugeSectorCentre.y, 0.0f), SectorRadius(HUGE_SECTOR_SIZE), &TheCamera.GetCameraMatrix()) )
+					if ( TheCamera.IsSphereVisible(CVector(vecHugeSectorCentre.x, vecHugeSectorCentre.y, 0.0f), SectorRadius(HUGE_SECTOR_SIZE))) )
 					{
 						if ( fHugeSectorDistToCamSqr >= SQR(500.0f) )
 						{
@@ -1311,7 +1311,7 @@ CWaterLevel::RenderTransparentWater(void)
 										
 										if ( fLargeSectorDistToCamSqr < fHugeSectorMaxRenderDistSqr )
 										{
-											if ( TheCamera.IsSphereVisible(CVector(vecLargeSectorCentre.x, vecLargeSectorCentre.y, 0.0f), SectorRadius(LARGE_SECTOR_SIZE), &TheCamera.GetCameraMatrix()) )
+											if ( TheCamera.IsSphereVisible(CVector(vecLargeSectorCentre.x, vecLargeSectorCentre.y, 0.0f), SectorRadius(LARGE_SECTOR_SIZE)) )
 											{
 												// Render four small(32x32) sectors, or one large(64x64).
 
@@ -3197,7 +3197,7 @@ CWaterLevel::HandleBeachToysStuff(void)
 					vecPos.x += (fCos - fSin) * fAngle;
 					vecPos.y += (fSin + fCos) * fAngle;
 					
-					if ( TheCamera.IsSphereVisible(vecPos, 1.0f, &TheCamera.GetCameraMatrix()) )
+					if ( TheCamera.IsSphereVisible(vecPos, 1.0f) )
 					{
 						float fWaterLevel;
 						
@@ -3241,7 +3241,7 @@ CWaterLevel::HandleBeachToysStuff(void)
 					vecPos.x += (fCos - fSin) * fAngle;
 					vecPos.y += (fSin + fCos) * fAngle;
 					
-					if ( TheCamera.IsSphereVisible(vecPos, 2.0f, &TheCamera.GetCameraMatrix()) )
+					if ( TheCamera.IsSphereVisible(vecPos, 2.0f) )
 					{
 						float fWaterLevel;
 						
