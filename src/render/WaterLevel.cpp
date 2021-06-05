@@ -1287,7 +1287,7 @@ CWaterLevel::RenderTransparentWater(void)
 				
 				if ( fHugeSectorMaxRenderDistSqr > fHugeSectorDistToCamSqr )
 				{
-					if ( TheCamera.IsSphereVisible(CVector(vecHugeSectorCentre.x, vecHugeSectorCentre.y, 0.0f), SectorRadius(HUGE_SECTOR_SIZE))) )
+					if ( TheCamera.IsSphereVisible(CVector(vecHugeSectorCentre.x, vecHugeSectorCentre.y, 0.0f), SectorRadius(HUGE_SECTOR_SIZE)) )
 					{
 						if ( fHugeSectorDistToCamSqr >= SQR(500.0f) )
 						{
