@@ -2382,7 +2382,7 @@ CPed::ProcessControl(void)
 						if (m_nPedState == PED_JUMP) {
 							if (m_nWaitTimer <= 2000) {
 								if (m_nWaitTimer < 1000)
-									m_nWaitTimer += CTimer::GetTimeStep() * 0.02f * 1000.0f;
+									m_nWaitTimer += CTimer::GetTimeStepInMilliseconds();
 							} else {
 								m_nWaitTimer = 0;
 							}

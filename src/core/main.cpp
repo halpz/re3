@@ -1135,7 +1135,7 @@ DisplayGameDebugText()
 	FramesPerSecondCounter += frameTime / 1000.f; // convert to seconds
 	FramesPerSecond = FrameSamples / FramesPerSecondCounter;
 #else
-	FramesPerSecondCounter += 1000.0f / (CTimer::GetTimeStepNonClippedInSeconds() * 1000.0f);	
+	FramesPerSecondCounter += 1000.0f / CTimer::GetTimeStepNonClippedInMilliseconds();
 	FramesPerSecond = FramesPerSecondCounter / FrameSamples;
 #endif
 	
