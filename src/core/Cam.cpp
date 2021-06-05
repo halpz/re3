@@ -5399,7 +5399,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 
 			float alphaToFace = Atan2(hi.z, hi.Magnitude2D()) + DEGTORAD(15.0f);
 			float neededAlphaTurn = alphaToFace - carGunUD;
-			float alphaTurnPerFrame = CTimer::GetTimeStep() * 0.02f;
+			float alphaTurnPerFrame = CTimer::GetTimeStepInSeconds();
 
 			if (neededAlphaTurn > alphaTurnPerFrame) {
 				neededTurn = alphaTurnPerFrame;
