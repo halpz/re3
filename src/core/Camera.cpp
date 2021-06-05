@@ -4103,7 +4103,7 @@ CCamera::IsSphereVisible(const CVector &center, float radius, const CMatrix *mat
 bool
 CCamera::IsSphereVisible(const CVector &center, float radius)
 {
-	return IsSphereVisible(center, radius, &m_cameraMatrix);
+	return IsSphereVisible(center, radius, &GetCameraMatrix());
 }
 
 bool

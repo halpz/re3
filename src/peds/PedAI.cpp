@@ -6446,7 +6446,7 @@ CPed::WarpPedToNearEntityOffScreen(CEntity *warpTo)
 
 		if (Abs(zCorrectedPos.z - warpToPos.z) < 3.0f || Abs(zCorrectedPos.z - appropriatePos.z) < 3.0f) {
 			appropriatePos.z = zCorrectedPos.z;
-			if (!TheCamera.IsSphereVisible(appropriatePos, 0.6f, &TheCamera.GetCameraMatrix())
+			if (!TheCamera.IsSphereVisible(appropriatePos, 0.6f)
 				&& CWorld::GetIsLineOfSightClear(appropriatePos, warpToPos, true, true, false, true, false, false, false)
 				&& !CWorld::TestSphereAgainstWorld(appropriatePos, 0.6f, this, true, true, false, true, false, false)) {
 				teleported = true;
