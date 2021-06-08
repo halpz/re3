@@ -28,6 +28,11 @@ newoption {
 }
 
 newoption {
+	trigger     = "no-git-hash",
+	description = "Don't print git commit hash into binary"
+}
+
+newoption {
 	trigger     = "lto",
 	description = "Use link time optimization"
 }
@@ -253,7 +258,11 @@ project "re3"
 	files { addSrcFiles("src/vehicles") }
 	files { addSrcFiles("src/weapons") }
 	files { addSrcFiles("src/extras") }
-	files { "src/extras/GitSHA1.cpp" } -- this won't be in repo in first build
+	if(not _OPTIONS["no-git-hash"]) then
+		files { "src/extras/GitSHA1.cpp" } -- this won't be in repo in first build
+	else
+		removefiles { "src/extras/GitSHA1.cpp" } -- but it will be everytime after
+	end
 
 	includedirs { "src" }
 	includedirs { "src/animation" }
@@ -278,6 +287,10 @@ project "re3"
 	includedirs { "src/vehicles" }
 	includedirs { "src/weapons" }
 	includedirs { "src/extras" }
+
+	if(not _OPTIONS["no-git-hash"]) then
+		defines { "USE_OUR_VERSIONING" }
+	end
 	
 	if _OPTIONS["with-opus"] then
 		includedirs { "vendor/ogg/include" }
@@ -318,10 +331,14 @@ project "re3"
 			-- external librw is dynamic
 			staticruntime "on"
 		end
-		prebuildcommands { '"%{prj.location}..\\printHash.bat" "%{prj.location}..\\src\\extras\\GitSHA1.cpp"' }
+		if(not _OPTIONS["no-git-hash"]) then
+			prebuildcommands { '"%{prj.location}..\\printHash.bat" "%{prj.location}..\\src\\extras\\GitSHA1.cpp"' }
+		end
 	
 	filter "platforms:not win*"
-		prebuildcommands { '"%{prj.location}/../printHash.sh" "%{prj.location}/../src/extras/GitSHA1.cpp"' }
+		if(not _OPTIONS["no-git-hash"]) then
+			prebuildcommands { '"%{prj.location}/../printHash.sh" "%{prj.location}/../src/extras/GitSHA1.cpp"' }
+		end
 
 	filter "platforms:win*glfw*"
 		staticruntime "off"
