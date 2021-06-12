@@ -3552,6 +3552,17 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 			AddSampleToRequestedQueue();
 		}
 	}
+	
+	CVector backPropellerPos;
+	if (automobile != nil)
+		automobile->GetComponentWorldPosition(CAR_BOOT, backPropellerPos);
+	else if (params.m_VehicleType == VEHICLE_TYPE_HELI) 
+#ifdef FIX_BUGS
+		backPropellerPos = 
+#endif
+		params.m_pVehicle->GetMatrix() * CVector(0.0f, -10.0f, 0.0f);
+	else
+		backPropellerPos = m_sQueueSample.m_vecPos;
 
 	if (params.m_fDistance >= SQR(140.0f))
 		return;
@@ -3756,12 +3767,8 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 		vecPosOld = m_sQueueSample.m_vecPos;
 		distanceCalculatedOld = params.m_bDistanceCalculated;
 		distanceOld = params.m_fDistance;
-		
-		if (automobile != nil)
-			automobile->GetComponentWorldPosition(CAR_BOOT, m_sQueueSample.m_vecPos);
-		else if (params.m_VehicleType == VEHICLE_TYPE_HELI) 
-			m_sQueueSample.m_vecPos = CVector(0.0f, -10.0f, 0.0f); //this is from android, but for real it's not used
 
+		m_sQueueSample.m_vecPos = backPropellerPos;
 		params.m_bDistanceCalculated = FALSE;
 		params.m_fDistance = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		if (params.m_fDistance < SQR(27.0f)) {
@@ -3770,7 +3777,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 			if (m_sQueueSample.m_nVolume) {
 				m_sQueueSample.m_nCounter = 2;
 				m_sQueueSample.m_nSampleIndex = hunterBool ? SFX_HELI_APACHE_3 : SFX_CAR_HELI_REA;
-				m_sQueueSample.m_nBankIndex = 0;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				m_sQueueSample.m_bIs2D = FALSE;
 				m_sQueueSample.m_nReleasingVolumeModificator = 1;
 				m_sQueueSample.m_nFrequency = (volumeModifier + 1.0f) * 16000;
