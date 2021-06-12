@@ -9038,24 +9038,25 @@ cAudioManager::ProcessFrontEnd()
 		m_sQueueSample.m_nEmittingVolume = m_sQueueSample.m_nVolume;
 		m_sQueueSample.m_nLoopStart = 0;
 		m_sQueueSample.m_nLoopEnd = -1;
-		m_sQueueSample.m_fDistance = 1.0f;
-		if (stereo) 
+		if (stereo) {
 			m_sQueueSample.m_nOffset = 0;
-		else {
+			m_sQueueSample.m_fDistance = 1.0f;
+		} else {
 			sample = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_awAudioEvent[i];
 			if (sample == SOUND_BULLETTRACE_1) {
 				m_sQueueSample.m_nOffset = 20;
 				m_sQueueSample.m_nVolume = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i];
 				m_sQueueSample.m_nReleasingVolumeModificator = 10;
 				m_sQueueSample.m_fDistance = 100.0f;
-			}
-			if (sample == SOUND_BULLETTRACE_2) {
+			} else if (sample == SOUND_BULLETTRACE_2) {
 				m_sQueueSample.m_nOffset = 107;
 				m_sQueueSample.m_nVolume = m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i];
 				m_sQueueSample.m_nReleasingVolumeModificator = 10;
 				m_sQueueSample.m_fDistance = 100.0f;
+			} else {
+				m_sQueueSample.m_nOffset = 63;
+				m_sQueueSample.m_fDistance = 1.0f;
 			}
-			m_sQueueSample.m_nOffset = 63;
 		}
 		m_sQueueSample.m_bReverbFlag = FALSE;
 		m_sQueueSample.m_bRequireReflection = FALSE;
