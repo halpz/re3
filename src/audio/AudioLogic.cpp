@@ -7889,12 +7889,12 @@ cPedComments::Process()
 	}
 
 	// Switch bank
-	if (m_nActiveBank) {
-		actualUsedBank = SFX_BANK_PED_COMMENTS;
-		m_nActiveBank = SFX_BANK_0;
+	if (m_nActiveBank == 0) {
+		actualUsedBank = 0;
+		m_nActiveBank = 1;
 	} else {
-		actualUsedBank = SFX_BANK_0;
-		m_nActiveBank = SFX_BANK_PED_COMMENTS;
+		actualUsedBank = 1;
+		m_nActiveBank = 0;
 	}
 	comment = m_asPedComments[actualUsedBank];
 	for (uint32 i = 0; i < m_nCommentsInBank[actualUsedBank]; i++) {
