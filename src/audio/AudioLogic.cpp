@@ -889,8 +889,7 @@ cAudioManager::ProcessRainOnVehicle(cVehicleParams& params)
 			m_sQueueSample.m_nFrequency = m_anRandomTable[1] % 4000 + 28000;
 			m_sQueueSample.m_nLoopCount = 1;
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_nLoopStart = 0;
-			m_sQueueSample.m_nLoopEnd = -1;
+			RESET_LOOP_OFFSETS
 			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
 			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 			m_sQueueSample.m_bReleasingSoundFlag = TRUE;
@@ -942,8 +941,7 @@ cAudioManager::ProcessReverseGear(cVehicleParams& params)
 			m_sQueueSample.m_nFrequency = (6000.0f * modificator) + 7000;
 			m_sQueueSample.m_nLoopCount = 0;
 			m_sQueueSample.m_nEmittingVolume = emittingVolume;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 			m_sQueueSample.m_fSpeedMultiplier = 3.0f;
 			m_sQueueSample.m_fSoundIntensity = reverseGearIntensity;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -1006,8 +1004,7 @@ cAudioManager::ProcessModelVehicle(cVehicleParams& params)
 				m_sQueueSample.m_nFrequency = freq;
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_nEmittingVolume = volume;
-				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_RC_REV);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_RC_REV);
+				SET_LOOP_OFFSETS(SFX_RC_REV)
 				m_sQueueSample.m_fSpeedMultiplier = 3.0f;
 				m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -1071,8 +1068,7 @@ cAudioManager::ProcessModelVehicle(cVehicleParams& params)
 				m_sQueueSample.m_nFrequency = freq;
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_nEmittingVolume = volume;
-				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+				SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 				m_sQueueSample.m_fSpeedMultiplier = 3.0f;
 				m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -1134,8 +1130,7 @@ cAudioManager::ProcessModelHeliVehicle(cVehicleParams& params)
 		m_sQueueSample.m_nFrequency = freq;
 		m_sQueueSample.m_nLoopCount = 0;
 		m_sQueueSample.m_nEmittingVolume = 70;
-		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_CAR_RC_HELI);
-		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_CAR_RC_HELI);
+		SET_LOOP_OFFSETS(SFX_CAR_RC_HELI)
 		m_sQueueSample.m_fSpeedMultiplier = 3.0f;
 		m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 		m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -1201,8 +1196,7 @@ cAudioManager::ProcessVehicleRoadNoise(cVehicleParams& params)
 			m_sQueueSample.m_nFrequency = freq;
 			m_sQueueSample.m_nLoopCount = 0;
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 			m_sQueueSample.m_fSpeedMultiplier = 6.0f;
 			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -1261,8 +1255,7 @@ cAudioManager::ProcessWetRoadNoise(cVehicleParams& params)
 			m_sQueueSample.m_nFrequency = freq + freq * multiplier;
 			m_sQueueSample.m_nLoopCount = 0;
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 			m_sQueueSample.m_fSpeedMultiplier = 6.0f;
 			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -1486,8 +1479,7 @@ cAudioManager::ProcessVehicleEngine(cVehicleParams& params)
 			m_sQueueSample.m_nFrequency /= 2;
 		m_sQueueSample.m_nLoopCount = 0;
 		m_sQueueSample.m_nEmittingVolume = emittingVol;
-		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 		m_sQueueSample.m_fSpeedMultiplier = 6.0f;
 		m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 		m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -1550,8 +1542,7 @@ cAudioManager::AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sampl
 			m_sQueueSample.m_nLoopCount = 1;
 		}
 		m_sQueueSample.m_nEmittingVolume = emittingVolume;
-		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 		m_sQueueSample.m_fSpeedMultiplier = 6.0f;
 		m_sQueueSample.m_fSoundIntensity = 50.0f;
 		m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -1577,8 +1568,7 @@ cAudioManager::ProcessCesna(cVehicleParams &params)
 			m_sQueueSample.m_nLoopCount = 0;
 			m_sQueueSample.m_nReleasingVolumeDivider = 8;
 			m_sQueueSample.m_nEmittingVolume = 80;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 			m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 			m_sQueueSample.m_fSoundIntensity = 200.0f;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -1598,8 +1588,7 @@ cAudioManager::ProcessCesna(cVehicleParams &params)
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_nReleasingVolumeDivider = 4;
 				m_sQueueSample.m_nEmittingVolume = 80;
-				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+				SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 				m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 				m_sQueueSample.m_fSoundIntensity = 90.0f;
 				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -2115,8 +2104,7 @@ cAudioManager::ProcessVehicleSkidding(cVehicleParams& params)
 			m_sQueueSample.m_nReleasingVolumeModificator = 8;
 			m_sQueueSample.m_nLoopCount = 0;
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 			m_sQueueSample.m_fSpeedMultiplier = 3.0f;
 			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -2222,8 +2210,7 @@ cAudioManager::ProcessVehicleHorn(cVehicleParams& params)
 #else
 			m_sQueueSample.m_nEmittingVolume = 80;
 #endif
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 			m_sQueueSample.m_fSpeedMultiplier = 5.0f;
 			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -2304,8 +2291,7 @@ cAudioManager::ProcessVehicleSirenOrAlarm(cVehicleParams& params)
 		m_sQueueSample.m_nReleasingVolumeModificator = 1;
 		m_sQueueSample.m_nLoopCount = 0;
 		m_sQueueSample.m_nEmittingVolume = volume;
-		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 		m_sQueueSample.m_fSpeedMultiplier = 7.0f;
 		m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 		m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -2351,8 +2337,7 @@ cAudioManager::ProcessVehicleReverseWarning(cVehicleParams& params)
 #else
 			m_sQueueSample.m_nEmittingVolume = 60;
 #endif
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 			m_sQueueSample.m_fSpeedMultiplier = 3.0f;
 			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -2397,8 +2382,7 @@ cAudioManager::ProcessVehicleDoors(cVehicleParams& params)
 						m_sQueueSample.m_nReleasingVolumeModificator = 10;
 						m_sQueueSample.m_nLoopCount = 1;
 						m_sQueueSample.m_nEmittingVolume = emittingVol;
-						m_sQueueSample.m_nLoopStart = 0;
-						m_sQueueSample.m_nLoopEnd = -1;
+						RESET_LOOP_OFFSETS
 						m_sQueueSample.m_fSpeedMultiplier = 1.0f;
 						m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 						m_sQueueSample.m_bReleasingSoundFlag = TRUE;
@@ -2443,8 +2427,7 @@ cAudioManager::ProcessAirBrakes(cVehicleParams& params)
 		m_sQueueSample.m_nReleasingVolumeModificator = 10;
 		m_sQueueSample.m_nLoopCount = 1;
 		m_sQueueSample.m_nEmittingVolume = volume;
-		m_sQueueSample.m_nLoopStart = 0;
-		m_sQueueSample.m_nLoopEnd = -1;
+		RESET_LOOP_OFFSETS
 		m_sQueueSample.m_fSpeedMultiplier = 0.0f;
 		m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 		m_sQueueSample.m_bReleasingSoundFlag = TRUE;
@@ -2500,8 +2483,7 @@ cAudioManager::ProcessEngineDamage(cVehicleParams& params)
 			m_sQueueSample.m_bIs2D = FALSE;
 			m_sQueueSample.m_nLoopCount = 0;
 			m_sQueueSample.m_nEmittingVolume = emittingVolume;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
 			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -2549,8 +2531,7 @@ cAudioManager::ProcessCarBombTick(cVehicleParams& params)
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_COUNTDOWN);
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_nEmittingVolume = EMITTING_VOLUME;
-				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+				SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 				m_sQueueSample.m_fSpeedMultiplier = 2.0f;
 				m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -3142,8 +3123,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 					m_sQueueSample.m_nLoopCount = 1;
 					m_sQueueSample.m_bReleasingSoundFlag = TRUE;
 				}
-				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+				SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
 				m_sQueueSample.m_bReverbFlag = TRUE;
 				if (isHeli) {
@@ -3218,8 +3198,7 @@ cAudioManager::ProcessTrainNoise(cVehicleParams& params)
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_TRAIN_FAR);
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
-				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+				SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 				m_sQueueSample.m_fSpeedMultiplier = 3.0f;
 				m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -3241,8 +3220,7 @@ cAudioManager::ProcessTrainNoise(cVehicleParams& params)
 				m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_TRAIN_NEAR) + 100 * m_sQueueSample.m_nEntityIndex % 987;
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
-				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+				SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 				m_sQueueSample.m_fSpeedMultiplier = 6.0f;
 				m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -3364,8 +3342,7 @@ cAudioManager::ProcessBoatEngine(cVehicleParams& params)
 				m_sQueueSample.m_nReleasingVolumeModificator = 3;
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_nEmittingVolume = Vol;
-				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+				SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 				m_sQueueSample.m_fSpeedMultiplier = 2.0f;
 				m_sQueueSample.m_fSoundIntensity = intensity;
 				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -3389,8 +3366,7 @@ cAudioManager::ProcessBoatEngine(cVehicleParams& params)
 				m_sQueueSample.m_nReleasingVolumeModificator = 3;
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_nEmittingVolume = 80;
-				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+				SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 				m_sQueueSample.m_fSpeedMultiplier = 2.0f;
 				m_sQueueSample.m_fSoundIntensity = intensity;
 				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -3437,8 +3413,7 @@ cAudioManager::ProcessBoatMovingOverWater(cVehicleParams& params)
 		m_sQueueSample.m_nFrequency = (6050.f * multiplier) + 16000;
 		m_sQueueSample.m_nLoopCount = 0;
 		m_sQueueSample.m_nEmittingVolume = vol;
-		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 		m_sQueueSample.m_fSpeedMultiplier = 2.0f;
 		m_sQueueSample.m_fSoundIntensity = 50.0f;
 		m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -3541,8 +3516,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 			m_sQueueSample.m_nReleasingVolumeModificator = 2;
 			m_sQueueSample.m_nLoopCount = 0;
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 			m_sQueueSample.m_fSpeedMultiplier = 6.0f;
 			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -3593,8 +3567,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 			m_sQueueSample.m_nReleasingVolumeModificator = 1;
 			m_sQueueSample.m_nLoopCount = 0;
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 			m_sQueueSample.m_fSpeedMultiplier = 6.0f;
 			m_sQueueSample.m_fSoundIntensity = 140.0f;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -3619,8 +3592,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 			m_sQueueSample.m_nReleasingVolumeModificator = 1;
 			m_sQueueSample.m_nLoopCount = 0;
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 			m_sQueueSample.m_fSpeedMultiplier = 6.0f;
 			m_sQueueSample.m_fSoundIntensity = 140.0f;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -3636,8 +3608,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 			m_sQueueSample.m_nReleasingVolumeModificator = 1;
 			m_sQueueSample.m_nLoopCount = 0;
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 			m_sQueueSample.m_fSpeedMultiplier = 6.0f;
 			m_sQueueSample.m_fSoundIntensity = 140.0f;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -3681,8 +3652,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 		m_sQueueSample.m_nReleasingVolumeModificator = 1;
 		m_sQueueSample.m_nLoopCount = 0;
 		m_sQueueSample.m_nEmittingVolume = emittingVol;
-		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 		m_sQueueSample.m_fSpeedMultiplier = 6.0f;
 		m_sQueueSample.m_fSoundIntensity = 140.0f;
 		m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -3715,8 +3685,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 					m_sQueueSample.m_nReleasingVolumeModificator = 1;
 					m_sQueueSample.m_nLoopCount = 0;
 					m_sQueueSample.m_nEmittingVolume = emittingVol;
-					m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-					m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+					SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 					m_sQueueSample.m_fSpeedMultiplier = 6.0f;
 					m_sQueueSample.m_fSoundIntensity = 30.0f;
 					m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -3751,8 +3720,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 				m_sQueueSample.m_nReleasingVolumeModificator = 3;
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_nEmittingVolume = propellerSpeed * 100.0f;
-				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_SEAPLANE_PRO4);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_SEAPLANE_PRO4);
+				SET_LOOP_OFFSETS(SFX_SEAPLANE_PRO4)
 				m_sQueueSample.m_fSpeedMultiplier = 5.0f;
 				m_sQueueSample.m_fSoundIntensity = 20.0f;
 				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -3783,8 +3751,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 				m_sQueueSample.m_nFrequency = (volumeModifier + 1.0f) * 16000;
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_nEmittingVolume = volumeModifier * 25.0f;
-				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+				SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 				m_sQueueSample.m_fSpeedMultiplier = 6.0f;
 				m_sQueueSample.m_fSoundIntensity = 27.0f;
 				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -3852,8 +3819,7 @@ cAudioManager::ProcessVehicleFlatTyre(cVehicleParams& params)
 			m_sQueueSample.m_nFrequency = (5500.0f * modifier) + 8000;
 			m_sQueueSample.m_nLoopCount = 0;
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_TYRE_BURST_L);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_TYRE_BURST_L);
+			SET_LOOP_OFFSETS(SFX_TYRE_BURST_L)
 			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
 			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -4020,8 +3986,7 @@ cAudioManager::SetupJumboTaxiSound(uint8 vol)
 		m_sQueueSample.m_nFrequency = GetJumboTaxiFreq();
 		m_sQueueSample.m_nLoopCount = 0;
 		m_sQueueSample.m_nEmittingVolume = emittingVol;
-		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 		m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 		m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -4052,8 +4017,7 @@ cAudioManager::SetupJumboWhineSound(uint8 emittingVol, uint32 freq)
 		m_sQueueSample.m_nFrequency = freq;
 		m_sQueueSample.m_nLoopCount = 0;
 		m_sQueueSample.m_nEmittingVolume = emittingVol;
-		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 		m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 		m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -4083,8 +4047,7 @@ cAudioManager::SetupJumboEngineSound(uint8 vol, uint32 freq)
 		m_sQueueSample.m_nFrequency = freq;
 		m_sQueueSample.m_nLoopCount = 0;
 		m_sQueueSample.m_nEmittingVolume = emittingVol;
-		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 		m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 		m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -4113,8 +4076,7 @@ cAudioManager::SetupJumboFlySound(uint8 emittingVol)
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_JUMBO_DIST_FLY);
 		m_sQueueSample.m_nLoopCount = 0;
 		m_sQueueSample.m_nEmittingVolume = emittingVol;
-		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 		m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 		m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -4144,8 +4106,7 @@ cAudioManager::SetupJumboRumbleSound(uint8 emittingVol)
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_JUMBO_RUMBLE);
 		m_sQueueSample.m_nLoopCount = 0;
 		m_sQueueSample.m_nEmittingVolume = emittingVol;
-		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 		m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 		m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 		m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -4282,8 +4243,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
 			m_sQueueSample.m_fSoundIntensity = 20.0f;
 			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			m_sQueueSample.m_nLoopEnd = -1;
+			RESET_LOOP_OFFSETS
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
 			m_sQueueSample.m_bIs2D = FALSE;
 			m_sQueueSample.m_bReleasingSoundFlag = TRUE;
@@ -4310,8 +4270,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
 			m_sQueueSample.m_fSoundIntensity = 30.0f;
 			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			m_sQueueSample.m_nLoopEnd = -1;
+			RESET_LOOP_OFFSETS
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
 			m_sQueueSample.m_bIs2D = FALSE;
 			m_sQueueSample.m_bReleasingSoundFlag = TRUE;
@@ -4404,9 +4363,8 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_fSoundIntensity = 30.0f;
 			maxDist = SQR(30);
 			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
+			RESET_LOOP_OFFSETS
 			emittingVol = m_anRandomTable[3] % 26 + 100;
-			m_sQueueSample.m_nLoopEnd = -1;
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
 			m_sQueueSample.m_bIs2D = FALSE;
 			m_sQueueSample.m_bReleasingSoundFlag = TRUE;
@@ -4460,8 +4418,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_fSoundIntensity = 30.0f;
 			maxDist = SQR(30);
 			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			m_sQueueSample.m_nLoopEnd = -1;
+			RESET_LOOP_OFFSETS
 			emittingVol = m_anRandomTable[2] % 20 + 100;
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
 			m_sQueueSample.m_bIs2D = FALSE;
@@ -4486,8 +4443,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			maxDist = SQR(50);
 			m_sQueueSample.m_nLoopCount = 0;
 			emittingVol = 100;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_CAR_CHAINSAW_IDLE);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_CAR_CHAINSAW_IDLE);
+			SET_LOOP_OFFSETS(SFX_CAR_CHAINSAW_IDLE)
 			m_sQueueSample.m_nEmittingVolume = 100;
 			m_sQueueSample.m_bIs2D = FALSE;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -4510,8 +4466,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			maxDist = SQR(60);
 			m_sQueueSample.m_nLoopCount = 0;
 			emittingVol = 100;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_CAR_CHAINSAW_ATTACK);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_CAR_CHAINSAW_ATTACK);
+			SET_LOOP_OFFSETS(SFX_CAR_CHAINSAW_ATTACK)
 			m_sQueueSample.m_nEmittingVolume = 100;
 			m_sQueueSample.m_bIs2D = FALSE;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -4536,8 +4491,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			maxDist = SQR(60);
 			m_sQueueSample.m_nLoopCount = 0;
 			emittingVol = 100;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_CAR_CHAINSAW_ATTACK);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_CAR_CHAINSAW_ATTACK);
+			SET_LOOP_OFFSETS(SFX_CAR_CHAINSAW_ATTACK)
 			m_sQueueSample.m_nEmittingVolume = 100;
 			m_sQueueSample.m_bIs2D = FALSE;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -4561,8 +4515,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				m_sQueueSample.m_fSoundIntensity = 120.0f;
 				maxDist = SQR(120);
 				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
-				m_sQueueSample.m_nLoopEnd = -1;
+				RESET_LOOP_OFFSETS
 				emittingVol = m_anRandomTable[0] % 20 + 80;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
 				m_sQueueSample.m_bIs2D = FALSE;
@@ -4582,8 +4535,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				m_sQueueSample.m_fSoundIntensity = 120.0f;
 				maxDist = SQR(120);
 				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
-				m_sQueueSample.m_nLoopEnd = -1;
+				RESET_LOOP_OFFSETS
 				emittingVol = m_anRandomTable[1] % 10 + 90;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
 				m_sQueueSample.m_bIs2D = FALSE;
@@ -4603,8 +4555,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				m_sQueueSample.m_fSoundIntensity = 120.0f;
 				maxDist = SQR(120);
 				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
-				m_sQueueSample.m_nLoopEnd = -1;
+				RESET_LOOP_OFFSETS
 				emittingVol = 127;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
 				m_sQueueSample.m_bIs2D = FALSE;
@@ -4625,8 +4576,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				m_sQueueSample.m_fSoundIntensity = 120.0f;
 				maxDist = SQR(120);
 				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
-				m_sQueueSample.m_nLoopEnd = -1;
+				RESET_LOOP_OFFSETS
 				emittingVol = m_anRandomTable[2] % 10 + 100;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
 				m_sQueueSample.m_bIs2D = FALSE;
@@ -4646,8 +4596,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				m_sQueueSample.m_fSoundIntensity = 120.0f;
 				maxDist = SQR(120);
 				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
-				m_sQueueSample.m_nLoopEnd = -1;
+				RESET_LOOP_OFFSETS
 				emittingVol = m_anRandomTable[2] % 10 + 100;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
 				m_sQueueSample.m_bIs2D = FALSE;
@@ -4666,9 +4615,8 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				m_sQueueSample.m_fSoundIntensity = 120.0f;
 				maxDist = SQR(120);
 				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
+				RESET_LOOP_OFFSETS
 				emittingVol = m_anRandomTable[3] % 15 + 70;
-				m_sQueueSample.m_nLoopEnd = -1;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
 				m_sQueueSample.m_bIs2D = FALSE;
 				m_sQueueSample.m_bReleasingSoundFlag = TRUE;
@@ -4687,9 +4635,8 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				m_sQueueSample.m_fSoundIntensity = 120.0f;
 				maxDist = SQR(120);
 				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
+				RESET_LOOP_OFFSETS
 				emittingVol = m_anRandomTable[3] % 15 + 70;
-				m_sQueueSample.m_nLoopEnd = -1;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
 				m_sQueueSample.m_bIs2D = FALSE;
 				m_sQueueSample.m_bReleasingSoundFlag = TRUE;
@@ -4706,9 +4653,8 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				m_sQueueSample.m_fSoundIntensity = 120.0f;
 				maxDist = SQR(120);
 				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
+				RESET_LOOP_OFFSETS
 				emittingVol = m_anRandomTable[3] % 15 + 70;
-				m_sQueueSample.m_nLoopEnd = -1;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
 				m_sQueueSample.m_bIs2D = FALSE;
 				m_sQueueSample.m_bReleasingSoundFlag = TRUE;
@@ -4726,9 +4672,8 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				m_sQueueSample.m_fSoundIntensity = 120.0f;
 				maxDist = SQR(120);
 				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
+				RESET_LOOP_OFFSETS
 				emittingVol = m_anRandomTable[3] % 15 + 70;
-				m_sQueueSample.m_nLoopEnd = -1;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
 				m_sQueueSample.m_bIs2D = FALSE;
 				m_sQueueSample.m_bReleasingSoundFlag = TRUE;
@@ -4745,9 +4690,8 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				m_sQueueSample.m_fSoundIntensity = 120.0f;
 				maxDist = SQR(120);
 				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
+				RESET_LOOP_OFFSETS
 				emittingVol = m_anRandomTable[3] % 15 + 90;
-				m_sQueueSample.m_nLoopEnd = -1;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
 				m_sQueueSample.m_bIs2D = FALSE;
 				m_sQueueSample.m_bReleasingSoundFlag = TRUE;
@@ -4765,9 +4709,8 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				m_sQueueSample.m_fSoundIntensity = 120.0f;
 				maxDist = SQR(120);
 				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
+				RESET_LOOP_OFFSETS
 				emittingVol = m_anRandomTable[3] % 15 + 90;
-				m_sQueueSample.m_nLoopEnd = -1;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
 				m_sQueueSample.m_bIs2D = FALSE;
 				m_sQueueSample.m_bReleasingSoundFlag = TRUE;
@@ -4789,8 +4732,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				m_sQueueSample.m_fSoundIntensity = 120.0f;
 				maxDist = SQR(120);
 				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
-				m_sQueueSample.m_nLoopEnd = -1;
+				RESET_LOOP_OFFSETS
 				emittingVol = m_anRandomTable[4] % 10 + 110;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
 				m_sQueueSample.m_bIs2D = FALSE;
@@ -4809,8 +4751,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				m_sQueueSample.m_fSoundIntensity = 60.0f;
 				maxDist = SQR(60);
 				m_sQueueSample.m_nLoopCount = 0;
-				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+				SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 				m_sQueueSample.m_nEmittingVolume = 90;
 				m_sQueueSample.m_bIs2D = FALSE;
 				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -4830,8 +4771,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				m_sQueueSample.m_fSoundIntensity = 120.0f;
 				maxDist = SQR(120);
 				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nLoopStart = 0;
-				m_sQueueSample.m_nLoopEnd = -1;
+				RESET_LOOP_OFFSETS
 				emittingVol = 127;
 				m_sQueueSample.m_nEmittingVolume = 127;
 				m_sQueueSample.m_bIs2D = FALSE;
@@ -4889,8 +4829,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_fSoundIntensity = 30.0f;
 			maxDist = SQR(30);
 			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			m_sQueueSample.m_nLoopEnd = -1;
+			RESET_LOOP_OFFSETS
 			m_sQueueSample.m_nEmittingVolume = 75;
 			m_sQueueSample.m_bIs2D = FALSE;
 			m_sQueueSample.m_bReleasingSoundFlag = TRUE;
@@ -4953,8 +4892,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_fSoundIntensity = 120.0f;
 			maxDist = SQR(120);
 			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			m_sQueueSample.m_nLoopEnd = -1;
+			RESET_LOOP_OFFSETS
 			emittingVol = m_anRandomTable[4] % 10 + 80;
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
 			m_sQueueSample.m_bIs2D = FALSE;
@@ -4973,8 +4911,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_fSoundIntensity = 60.0f;
 			maxDist = SQR(60);
 			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			m_sQueueSample.m_nLoopEnd = -1;
+			RESET_LOOP_OFFSETS
 			emittingVol = 70;
 			m_sQueueSample.m_nEmittingVolume = 70;
 			m_sQueueSample.m_bIs2D = FALSE;
@@ -4992,9 +4929,8 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_fSoundIntensity = 30.0f;
 			maxDist = SQR(30);
 			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
+			RESET_LOOP_OFFSETS
 			emittingVol = m_anRandomTable[0] % 20 + 90;
-			m_sQueueSample.m_nLoopEnd = -1;
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
 			m_sQueueSample.m_bIs2D = FALSE;
 			m_sQueueSample.m_bReleasingSoundFlag = TRUE;
@@ -5013,9 +4949,8 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_fSoundIntensity = 40.0f;
 			maxDist = SQR(40);
 			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
+			RESET_LOOP_OFFSETS
 			emittingVol = m_anRandomTable[2] % 30 + 70;
-			m_sQueueSample.m_nLoopEnd = -1;
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
 			m_sQueueSample.m_bIs2D = FALSE;
 			m_sQueueSample.m_bReleasingSoundFlag = TRUE;
@@ -5051,8 +4986,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 				emittingVol = m_anRandomTable[2] % 20 + 70;
 			maxDist = SQR(30);
 			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			m_sQueueSample.m_nLoopEnd = -1;
+			RESET_LOOP_OFFSETS
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
 			m_sQueueSample.m_bIs2D = FALSE;
 			m_sQueueSample.m_bReleasingSoundFlag = TRUE;
@@ -5077,8 +5011,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_fSoundIntensity = 20.0f;
 			maxDist = SQR(20);
 			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			m_sQueueSample.m_nLoopEnd = -1;
+			RESET_LOOP_OFFSETS
 			emittingVol = (m_anRandomTable[2] % 20 + 70) * param1 / 127;
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
 			m_sQueueSample.m_bIs2D = FALSE;
@@ -5097,8 +5030,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			emittingVol = 127;
 			maxDist = SQR(150);
 			m_sQueueSample.m_nLoopCount = 0;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_MINIGUN_FIRE_LEFT);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_MINIGUN_FIRE_LEFT);
+			SET_LOOP_OFFSETS(SFX_MINIGUN_FIRE_LEFT)
 			m_sQueueSample.m_nEmittingVolume = 127;
 			m_sQueueSample.m_bIs2D = FALSE;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -5115,8 +5047,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			emittingVol = 127.0f * m_asAudioEntities[m_sQueueSample.m_nEntityIndex].m_afVolume[i];
 			maxDist = SQR(150);
 			m_sQueueSample.m_nLoopCount = 0;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_MINIGUN_FIRE_RIGHT);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_MINIGUN_FIRE_RIGHT);
+			SET_LOOP_OFFSETS(SFX_MINIGUN_FIRE_RIGHT)
 			m_sQueueSample.m_nEmittingVolume = emittingVol;
 			m_sQueueSample.m_bIs2D = FALSE;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -5132,8 +5063,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_fSoundIntensity = 150.0f;
 			maxDist = SQR(150);
 			m_sQueueSample.m_nLoopCount = 1;
-			m_sQueueSample.m_nLoopStart = 0;
-			m_sQueueSample.m_nLoopEnd = -1;
+			RESET_LOOP_OFFSETS
 			emittingVol = 127;
 			m_sQueueSample.m_nEmittingVolume = 127;
 			m_sQueueSample.m_bIs2D = FALSE;
@@ -5176,8 +5106,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 					m_sQueueSample.m_fSoundIntensity = 15.0f;
 					maxDist = SQR(15);
 					m_sQueueSample.m_nLoopCount = 0;
-					m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-					m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+					SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 					m_sQueueSample.m_nEmittingVolume = emittingVol;
 					m_sQueueSample.m_bIs2D = FALSE;
 					m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -7929,8 +7858,10 @@ cPedComments::Process()
 				AudioManager.m_sQueueSample.m_nVolume = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_bVolume;
 				AudioManager.m_sQueueSample.m_fDistance = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_fDistance;
 				AudioManager.m_sQueueSample.m_nLoopCount = 1;
+#ifndef GTA_PS2
 				AudioManager.m_sQueueSample.m_nLoopStart = 0;
 				AudioManager.m_sQueueSample.m_nLoopEnd = -1;
+#endif
 				AudioManager.m_sQueueSample.m_nEmittingVolume = MAX_VOLUME;
 				AudioManager.m_sQueueSample.m_fSpeedMultiplier = 3.0f;
 				AudioManager.m_sQueueSample.m_fSoundIntensity = 40.0f;
@@ -8053,8 +7984,7 @@ cAudioManager::ProcessExplosions(int32 explosion)
 					m_sQueueSample.m_nLoopCount = 1;
 					m_sQueueSample.m_bReleasingSoundFlag = TRUE;
 					m_sQueueSample.m_nEmittingVolume = MAX_VOLUME;
-					m_sQueueSample.m_nLoopStart = 0;
-					m_sQueueSample.m_nLoopEnd = -1;
+					RESET_LOOP_OFFSETS
 					m_sQueueSample.m_bReverbFlag = TRUE;
 					AddSampleToRequestedQueue();
 				}
@@ -8120,8 +8050,7 @@ cAudioManager::ProcessFires(int32)
 					m_sQueueSample.m_nLoopCount = 0;
 					m_sQueueSample.m_bReleasingSoundFlag = FALSE;
 					m_sQueueSample.m_nEmittingVolume = emittingVol;
-					m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-					m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+					SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 					m_sQueueSample.m_bReverbFlag = TRUE;
 					m_sQueueSample.m_bRequireReflection = FALSE;
 					AddSampleToRequestedQueue();
@@ -8144,8 +8073,7 @@ cAudioManager::ProcessFires(int32)
 					m_sQueueSample.m_nLoopCount = 0;
 					m_sQueueSample.m_bReleasingSoundFlag = FALSE;
 					m_sQueueSample.m_nEmittingVolume = emittingVol;
-					m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-					m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+					SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 					m_sQueueSample.m_bReverbFlag = TRUE;
 					m_sQueueSample.m_bRequireReflection = FALSE;
 					AddSampleToRequestedQueue();
@@ -8180,8 +8108,7 @@ cAudioManager::ProcessWaterCannon(int32)
 					m_sQueueSample.m_nLoopCount = 0;
 					m_sQueueSample.m_bReleasingSoundFlag = FALSE;
 					m_sQueueSample.m_nEmittingVolume = 50;
-					m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-					m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+					SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 					m_sQueueSample.m_bReverbFlag = TRUE;
 					m_sQueueSample.m_bRequireReflection = FALSE;
 					AddSampleToRequestedQueue();
@@ -8219,8 +8146,7 @@ cAudioManager::ProcessExtraSounds()
 				m_sQueueSample.m_nReleasingVolumeModificator = 4;
 				m_sQueueSample.m_fSpeedMultiplier = 3.0f;
 				m_sQueueSample.m_nEmittingVolume = EMITTING_VOLUME;
-				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_ARCADE);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_ARCADE);
+				SET_LOOP_OFFSETS(SFX_ARCADE)
 				m_sQueueSample.m_bReverbFlag = TRUE;
 				m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 				m_sQueueSample.m_bRequireReflection = FALSE;
@@ -8259,8 +8185,7 @@ cAudioManager::ProcessEscalators()
 				m_sQueueSample.m_bIs2D = FALSE;
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_nEmittingVolume = EMITTING_VOLUME;
-				m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(SFX_BOAT_V12_LOOP);
-				m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(SFX_BOAT_V12_LOOP);
+				SET_LOOP_OFFSETS(SFX_BOAT_V12_LOOP)
 				m_sQueueSample.m_bReverbFlag = TRUE;
 				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
 				m_sQueueSample.m_bRequireReflection = FALSE;
@@ -8542,8 +8467,7 @@ cAudioManager::ProcessOneShotScriptObject(uint8 sound)
 			m_sQueueSample.m_nLoopCount = 1;
 			m_sQueueSample.m_bReleasingSoundFlag = TRUE;
 			m_sQueueSample.m_nEmittingVolume = emittingVolume;
-			m_sQueueSample.m_nLoopStart = 0;
-			m_sQueueSample.m_nLoopEnd = -1;
+			RESET_LOOP_OFFSETS
 			m_sQueueSample.m_bReverbFlag = TRUE;
 			AddSampleToRequestedQueue();
 		}
@@ -8760,8 +8684,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
 			m_sQueueSample.m_bReverbFlag = TRUE;
 			m_sQueueSample.m_nEmittingVolume = emittingVolume;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 			m_sQueueSample.m_bRequireReflection = FALSE;
 			AddSampleToRequestedQueue();
 		}
@@ -8804,8 +8727,7 @@ cAudioManager::ProcessWeather(int32 id)
 		m_sQueueSample.m_nLoopCount = 1;
 		m_sQueueSample.m_bReleasingSoundFlag = TRUE;
 		m_sQueueSample.m_nEmittingVolume = m_sQueueSample.m_nVolume;
-		m_sQueueSample.m_nLoopStart = 0;
-		m_sQueueSample.m_nLoopEnd = -1;
+		RESET_LOOP_OFFSETS
 		m_sQueueSample.m_bReverbFlag = FALSE;
 		m_sQueueSample.m_bRequireReflection = FALSE;
 		AddSampleToRequestedQueue();
@@ -8824,8 +8746,7 @@ cAudioManager::ProcessWeather(int32 id)
 		m_sQueueSample.m_nReleasingVolumeDivider = 30;
 		m_sQueueSample.m_bReverbFlag = FALSE;
 		m_sQueueSample.m_nEmittingVolume = m_sQueueSample.m_nVolume;
-		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 		m_sQueueSample.m_bRequireReflection = FALSE;
 		AddSampleToRequestedQueue();
 	}
@@ -8849,8 +8770,7 @@ cAudioManager::ProcessWeather(int32 id)
 		m_sQueueSample.m_nReleasingVolumeDivider = 7;
 		m_sQueueSample.m_bReverbFlag = FALSE;
 		m_sQueueSample.m_nEmittingVolume = m_sQueueSample.m_nVolume;
-		m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-		m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+		SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 		m_sQueueSample.m_bRequireReflection = FALSE;
 		AddSampleToRequestedQueue();
 		CObject::fDistToNearestTree = 999999.9f;
@@ -9043,8 +8963,7 @@ cAudioManager::ProcessFrontEnd()
 		m_sQueueSample.m_nReleasingVolumeModificator = 0;
 		m_sQueueSample.m_bIs2D = TRUE;
 		m_sQueueSample.m_nEmittingVolume = m_sQueueSample.m_nVolume;
-		m_sQueueSample.m_nLoopStart = 0;
-		m_sQueueSample.m_nLoopEnd = -1;
+		RESET_LOOP_OFFSETS
 		if (stereo) {
 			m_sQueueSample.m_nOffset = 0;
 			m_sQueueSample.m_fDistance = 1.0f;
@@ -9109,8 +9028,7 @@ cAudioManager::ProcessCrane()
 						m_sQueueSample.m_nFrequency = 6000;
 						m_sQueueSample.m_nLoopCount = 0;
 						m_sQueueSample.m_nEmittingVolume = 100;
-						m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-						m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+						SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 						m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 						m_sQueueSample.m_fSoundIntensity = intensity;
 						m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -9183,8 +9101,7 @@ cAudioManager::ProcessProjectiles()
 					m_sQueueSample.m_bIs2D = FALSE;
 					m_sQueueSample.m_nLoopCount = 0;
 					m_sQueueSample.m_nEmittingVolume = emittingVol;
-					m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-					m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+					SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 					m_sQueueSample.m_bReleasingSoundFlag = FALSE;
 					m_sQueueSample.m_bReverbFlag = TRUE;
 					m_sQueueSample.m_bRequireReflection = FALSE;
@@ -9264,8 +9181,7 @@ cAudioManager::ProcessGarages()
 					m_sQueueSample.m_bIs2D = FALSE;
 					m_sQueueSample.m_nReleasingVolumeModificator = 3;
 					m_sQueueSample.m_nEmittingVolume = 90;
-					m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-					m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+					SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 					m_sQueueSample.m_fSpeedMultiplier = 2.0f;
 					m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 					m_sQueueSample.m_bReverbFlag = TRUE;
@@ -9302,8 +9218,7 @@ cAudioManager::ProcessGarages()
 						m_sQueueSample.m_bIs2D = FALSE;
 						m_sQueueSample.m_bReleasingSoundFlag = TRUE;
 						m_sQueueSample.m_nLoopCount = 1;
-						m_sQueueSample.m_nLoopStart = 0;
-						m_sQueueSample.m_nLoopEnd = -1;
+						RESET_LOOP_OFFSETS
 						m_sQueueSample.m_nCounter = iSound++;
 						if (iSound < 32)
 							iSound = 32;
@@ -9341,8 +9256,7 @@ cAudioManager::ProcessFireHydrant()
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_bIs2D = FALSE;
 			m_sQueueSample.m_nLoopCount = 0;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
 			m_sQueueSample.m_bRequireReflection = FALSE;
@@ -9400,8 +9314,7 @@ cAudioManager::ProcessBridgeWarning()
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_BRIDGE_OPEN_WARNING);
 			m_sQueueSample.m_nLoopCount = 0;
 			m_sQueueSample.m_nEmittingVolume = 100;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
 			m_sQueueSample.m_fSoundIntensity = 450.0f;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -9427,8 +9340,7 @@ cAudioManager::ProcessBridgeMotor()
 			m_sQueueSample.m_nFrequency = 5500;
 			m_sQueueSample.m_nLoopCount = 0;
 			m_sQueueSample.m_nEmittingVolume = MAX_VOLUME;
-			m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+			SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
 			m_sQueueSample.m_fSoundIntensity = bridgeIntensity;
 			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -9462,8 +9374,7 @@ cAudioManager::ProcessBridgeOneShots()
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 			m_sQueueSample.m_nLoopCount = 1;
 			m_sQueueSample.m_nEmittingVolume = MAX_VOLUME;
-			m_sQueueSample.m_nLoopStart = 0;
-			m_sQueueSample.m_nLoopEnd = -1;
+			RESET_LOOP_OFFSETS
 			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
 			m_sQueueSample.m_fSoundIntensity = bridgeIntensity;
 			m_sQueueSample.m_bReleasingSoundFlag = TRUE;

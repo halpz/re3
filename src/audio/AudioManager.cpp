@@ -1039,8 +1039,10 @@ cAudioManager::ClearActiveSamples()
 		m_asActiveSamples[i].m_bIsProcessed = FALSE;
 		m_asActiveSamples[i].m_bLoopEnded = FALSE;
 		m_asActiveSamples[i].m_nLoopCount = 1;
+#ifndef GTA_PS2
 		m_asActiveSamples[i].m_nLoopStart = 0;
 		m_asActiveSamples[i].m_nLoopEnd = -1;
+#endif
 		m_asActiveSamples[i].m_fSpeedMultiplier = 0.0f;
 		m_asActiveSamples[i].m_fSoundIntensity = 200.0f;
 		m_asActiveSamples[i].m_nOffset = 63;

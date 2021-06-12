@@ -544,6 +544,23 @@ public:
 #endif
 };
 
+/*
+   Manual loop points are not on PS2 so let's have these macros to avoid massive ifndefs.
+   Setting these manually was pointless anyway since they never change from sdt values.
+   What were they thinking?
+*/
+#ifndef GTA_PS2
+#define RESET_LOOP_OFFSETS \
+	m_sQueueSample.m_nLoopStart = 0; \
+	m_sQueueSample.m_nLoopEnd = -1;
+#define SET_LOOP_OFFSETS(sample) \
+	m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(sample); \
+	m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(sample);
+#else
+#define RESET_LOOP_OFFSETS
+#define SET_LOOP_OFFSETS(sample)
+#endif
+
 #if defined(AUDIO_MSS) && !defined(PS2_AUDIO_CHANNELS)
 static_assert(sizeof(cAudioManager) == 0x5558, "cAudioManager: error");
 #endif
