@@ -226,7 +226,7 @@ cAudioManager::ServicePoliceRadioChannel(uint8 wantedLevel)
 			if (sample == NO_SAMPLE) {
 				if (!processed) cWait = 30;
 			} else {
-				SampleManager.InitialiseChannel(CHANNEL_POLICE_RADIO, sample, 0);
+				SampleManager.InitialiseChannel(CHANNEL_POLICE_RADIO, sample, SFX_BANK_0);
 				switch (sample) {
 				case SFX_POLICE_RADIO_MESSAGE_NOISE_1:
 					freq = m_anRandomTable[4] % 2000 + 10025;
