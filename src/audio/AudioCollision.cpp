@@ -172,10 +172,7 @@ cAudioManager::SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 coun
 				m_sQueueSample.m_nReleasingVolumeModificator = 7;
 				m_sQueueSample.m_nLoopCount = 0;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
-				m_sQueueSample.m_nLoopStart =
-				    SampleManager.GetSampleLoopStartOffset(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_nLoopEnd =
-				    SampleManager.GetSampleLoopEndOffset(m_sQueueSample.m_nSampleIndex);
+				SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 				m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 				m_sQueueSample.m_fSoundIntensity = CollisionSoundIntensity;
 				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
@@ -315,8 +312,7 @@ cAudioManager::SetUpOneShotCollisionSound(const cAudioCollision &col)
 				m_sQueueSample.m_nReleasingVolumeModificator = 11;
 				m_sQueueSample.m_nLoopCount = 1;
 				m_sQueueSample.m_nEmittingVolume = emittingVol;
-				m_sQueueSample.m_nLoopStart = 0;
-				m_sQueueSample.m_nLoopEnd = -1;
+				RESET_LOOP_OFFSETS
 				m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 				m_sQueueSample.m_fSoundIntensity = CollisionSoundIntensity;
 				m_sQueueSample.m_bReleasingSoundFlag = TRUE;
