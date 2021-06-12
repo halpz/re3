@@ -19,8 +19,10 @@ public:
 	uint8 m_nVolume;
 	float m_fDistance;
 	int32 m_nLoopCount;
+#ifndef GTA_PS2
 	int32 m_nLoopStart;
 	int32 m_nLoopEnd;
+#endif
 	uint8 m_nEmittingVolume;
 	float m_fSpeedMultiplier;
 	float m_fSoundIntensity;
