@@ -45,7 +45,6 @@
 #endif
 
 //TODO: fix eax3 reverb
-//TODO: max channels
 
 cSampleManager SampleManager;
 bool8 _bSampmanInitialised = FALSE;
@@ -61,15 +60,17 @@ ALCdevice    *ALDevice = NULL;
 ALCcontext   *ALContext = NULL;
 unsigned int _maxSamples;
 float        _fPrevEaxRatioDestination;
+bool         _effectsSupported = false;
 bool         _usingEFX;
 float        _fEffectsLevel;
 ALuint       ALEffect = AL_EFFECT_NULL;
 ALuint       ALEffectSlot = AL_EFFECTSLOT_NULL;
 struct
 {
-	char id[256];
+	const char *id;
 	char name[256];
 	int sources;
+	bool bSupportsFx;
 }providers[MAXPROVIDERS];
 
 int defaultProvider;
@@ -134,7 +135,7 @@ EAXLISTENERPROPERTIES EAX3Params;
 
 bool IsFXSupported()
 {
-	return usingEAX || usingEAX3 || _usingEFX;
+	return _effectsSupported; // usingEAX || usingEAX3 || _usingEFX;
 }
 
 void EAX_SetAll(const EAXLISTENERPROPERTIES *allparameters)
@@ -150,47 +151,49 @@ add_providers()
 {
 	SampleManager.SetNum3DProvidersAvailable(0);
 	
-	ALDeviceList *pDeviceList = NULL;
-	pDeviceList = new ALDeviceList();
+	static ALDeviceList DeviceList;
+	ALDeviceList *pDeviceList = &DeviceList;
 
 	if ((pDeviceList) && (pDeviceList->GetNumDevices()))
 	{
 		const int devNumber = Min(pDeviceList->GetNumDevices(), MAXPROVIDERS);
 		int n = 0;
 		
-		for (int i = 0; i < devNumber; i++) 
+		//for (int i = 0; i < devNumber; i++) 
+		int i = pDeviceList->GetDefaultDevice();
 		{
 			if ( n < MAXPROVIDERS )
 			{
-				strcpy(providers[n].id, pDeviceList->GetDeviceName(i));
-				strncpy(providers[n].name, pDeviceList->GetDeviceName(i), sizeof(providers[n].name));
+				providers[n].id = pDeviceList->GetDeviceName(i);
+				strcpy(providers[n].name, "OPENAL SOFT");
 				providers[n].sources = pDeviceList->GetMaxNumSources(i);
 				SampleManager.Set3DProviderName(n, providers[n].name);
 				n++;
 			}
-			
+
 			if ( alGetEnumValue("AL_EFFECT_EAXREVERB") != 0
 				|| pDeviceList->IsExtensionSupported(i, ADEXT_EAX2)
 				|| pDeviceList->IsExtensionSupported(i, ADEXT_EAX3) 
 				|| pDeviceList->IsExtensionSupported(i, ADEXT_EAX4)
 				|| pDeviceList->IsExtensionSupported(i, ADEXT_EAX5) )
 			{
+				providers[n - 1].bSupportsFx = true;
 				if ( n < MAXPROVIDERS )
 				{
-					strcpy(providers[n].id, pDeviceList->GetDeviceName(i));
-					strncpy(providers[n].name, pDeviceList->GetDeviceName(i), sizeof(providers[n].name));
-					strcat(providers[n].name, " EAX");
+					providers[n].id = pDeviceList->GetDeviceName(i);
+					strcpy(providers[n].name, "OPENAL SOFT EAX");
 					providers[n].sources = pDeviceList->GetMaxNumSources(i);
+					providers[n].bSupportsFx = true;
 					SampleManager.Set3DProviderName(n, providers[n].name);
 					n++;
 				}
 				
 				if ( n < MAXPROVIDERS )
 				{
-					strcpy(providers[n].id, pDeviceList->GetDeviceName(i));
-					strncpy(providers[n].name, pDeviceList->GetDeviceName(i), sizeof(providers[n].name));
-					strcat(providers[n].name, " EAX3");
+					providers[n].id = pDeviceList->GetDeviceName(i);
+					strcpy(providers[n].name, "OPENAL SOFT EAX3");
 					providers[n].sources = pDeviceList->GetMaxNumSources(i);
+					providers[n].bSupportsFx = true;
 					SampleManager.Set3DProviderName(n, providers[n].name);
 					n++;
 				}
@@ -201,65 +204,28 @@ add_providers()
 		for(int j=n;j<MAXPROVIDERS;j++)
 			SampleManager.Set3DProviderName(j, NULL);
 		
-		defaultProvider = pDeviceList->GetDefaultDevice();
-		if ( defaultProvider > MAXPROVIDERS )
-			defaultProvider = 0;
+		// devices are gone now
+		//defaultProvider = pDeviceList->GetDefaultDevice();
+		//if ( defaultProvider > MAXPROVIDERS )
+		defaultProvider = 0;
 	}
-	
-	delete pDeviceList;
 }
 
 static void
 release_existing()
 {
-	for ( int32 i = 0; i < NUM_CHANNELS; i++ )
-		aChannel[i].Term();
-	
 	if ( IsFXSupported() )
 	{
 		if ( alIsEffect(ALEffect) )
 		{
 			alEffecti(ALEffect, AL_EFFECT_TYPE, AL_EFFECT_NULL);
-			alDeleteEffects(1, &ALEffect);
-			ALEffect = AL_EFFECT_NULL;
 		}
 		
 		if (alIsAuxiliaryEffectSlot(ALEffectSlot))
 		{
 			alAuxiliaryEffectSloti(ALEffectSlot, AL_EFFECTSLOT_EFFECT, AL_EFFECT_NULL);
-			
-			alDeleteAuxiliaryEffectSlots(1, &ALEffectSlot);
-			ALEffectSlot = AL_EFFECTSLOT_NULL;
 		}
 	}
-	
-	for ( int32 i = 0; i < MAX_STREAMS; i++ )
-	{
-		CStream *stream = aStream[i];
-		if (stream)
-			stream->ProviderTerm();
-		
-		alDeleteBuffers(NUM_STREAMBUFFERS, ALStreamBuffers[i]);
-	}
-	alDeleteSources(MAX_STREAMS*2, ALStreamSources[0]);
-	
-	CChannel::DestroyChannels();
-	
-	if ( ALContext )
-	{
-		alcMakeContextCurrent(NULL);
-		alcSuspendContext(ALContext);
-		alcDestroyContext(ALContext);
-	}
-	if ( ALDevice )
-		alcCloseDevice(ALDevice);
-	
-	ALDevice = NULL;
-	ALContext = NULL;
-	
-	_fPrevEaxRatioDestination = 0.0f;
-	_usingEFX                 = false;
-	_fEffectsLevel            = 0.0f;
 	
 	DEV("release_existing()\n");
 }
@@ -278,62 +244,6 @@ set_new_provider(int index)
 	{
 		DEV("set_new_provider()\n");
 		
-		//TODO:
-		_maxSamples = MAXCHANNELS;
-		
-		ALCint attr[] = {ALC_FREQUENCY,MAX_FREQ,
-						ALC_MONO_SOURCES, MAX_DIGITAL_MIXER_CHANNELS - MAX2DCHANNELS,
-						ALC_STEREO_SOURCES, MAX2DCHANNELS,
-						0,
-						};
-		
-		ALDevice  = alcOpenDevice(providers[index].id);
-		ASSERT(ALDevice != NULL);
-		
-		ALContext = alcCreateContext(ALDevice, attr);
-		ASSERT(ALContext != NULL);
-		
-		alcMakeContextCurrent(ALContext);
-	
-		const char* ext=(const char*)alGetString(AL_EXTENSIONS);
-		ASSERT(strstr(ext,"AL_SOFT_loop_points")!=NULL);
-		if ( strstr(ext,"AL_SOFT_loop_points")==NULL )
-		{
-			curprovider=-1;
-			release_existing();
-			return FALSE;
-		}
-		
-		alListenerf (AL_GAIN,     1.0f);
-		alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
-		alListener3f(AL_VELOCITY, 0.0f, 0.0f, 0.0f);
-		ALfloat orientation[6] = { 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-		alListenerfv(AL_ORIENTATION, orientation);
-		
-		alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
-		
-		if ( alcIsExtensionPresent(ALDevice, (ALCchar*)ALC_EXT_EFX_NAME) )
-		{
-			alGenAuxiliaryEffectSlots(1, &ALEffectSlot);
-			alGenEffects(1, &ALEffect);
-		}
-
-		alGenSources(MAX_STREAMS*2, ALStreamSources[0]);
-		for ( int32 i = 0; i < MAX_STREAMS; i++ )
-		{
-			alGenBuffers(NUM_STREAMBUFFERS, ALStreamBuffers[i]); 
-			alSourcei(ALStreamSources[i][0], AL_SOURCE_RELATIVE, AL_TRUE);
-			alSource3f(ALStreamSources[i][0], AL_POSITION, 0.0f, 0.0f, 0.0f);
-			alSourcef(ALStreamSources[i][0], AL_GAIN, 1.0f);
-			alSourcei(ALStreamSources[i][1], AL_SOURCE_RELATIVE, AL_TRUE);
-			alSource3f(ALStreamSources[i][1], AL_POSITION, 0.0f, 0.0f, 0.0f);
-			alSourcef(ALStreamSources[i][1], AL_GAIN, 1.0f);
-			
-			CStream *stream = aStream[i];
-			if (stream)
-				stream->ProviderInit();
-		}
-		
 		usingEAX = 0;
 		usingEAX3 = 0;
 		_usingEFX = false;
@@ -341,16 +251,16 @@ set_new_provider(int index)
 		if ( !strcmp(&providers[index].name[strlen(providers[index].name) - strlen(" EAX3")], " EAX3") 
 				&& alcIsExtensionPresent(ALDevice, (ALCchar*)ALC_EXT_EFX_NAME) )
 		{
-			EAX_SetAll(&FinishEAX3);
 			
 			usingEAX = 1;
 			usingEAX3 = 1;
+			alAuxiliaryEffectSloti(ALEffectSlot, AL_EFFECTSLOT_EFFECT, ALEffect);
+			EAX_SetAll(&FinishEAX3);
 
 			DEV("EAX3\n");
 		}
 		else if ( alcIsExtensionPresent(ALDevice, (ALCchar*)ALC_EXT_EFX_NAME) )
 		{
-			EAX_SetAll(&EAX30_ORIGINAL_PRESETS[EAX_ENVIRONMENT_CAVE]);
 			
 			if ( !strcmp(&providers[index].name[strlen(providers[index].name) - strlen(" EAX")], " EAX"))
 			{
@@ -362,23 +272,14 @@ set_new_provider(int index)
 				_usingEFX = true;
 				DEV("EFX\n");
 			}
+			alAuxiliaryEffectSloti(ALEffectSlot, AL_EFFECTSLOT_EFFECT, ALEffect);
+			EAX_SetAll(&EAX30_ORIGINAL_PRESETS[EAX_ENVIRONMENT_CAVE]);
 		}
 		
 		//SampleManager.SetSpeakerConfig(speaker_type);
-		
-		CChannel::InitChannels();
 
-		for ( int32 i = 0; i < MAXCHANNELS; i++ )
-			aChannel[i].Init(i);
-		for ( int32 i = 0; i < MAX2DCHANNELS; i++ )
-			aChannel[MAXCHANNELS+i].Init(MAXCHANNELS+i, true);
-		
 		if ( IsFXSupported() )
 		{
-			/**/
-			alAuxiliaryEffectSloti(ALEffectSlot, AL_EFFECTSLOT_EFFECT, ALEffect);
-			/**/
-			
 			for ( int32 i = 0; i < MAXCHANNELS; i++ )
 				aChannel[i].SetReverbMix(ALEffectSlot, 0.0f);
 		}
@@ -867,21 +768,12 @@ cSampleManager::IsMP3RadioChannelAvailable(void)
 
 void cSampleManager::ReleaseDigitalHandle(void)
 {
-	if ( ALDevice )
-	{
-		prevprovider = curprovider;
-		release_existing();
-		curprovider = -1;
-	}
+	// TODO? alcSuspendContext
 }
 
 void cSampleManager::ReacquireDigitalHandle(void)
 {
-	if ( ALDevice )
-	{
-		if ( prevprovider != -1 )
-			set_new_provider(prevprovider);
-	}
+	// TODO? alcProcessContext
 }
 
 bool8
@@ -898,7 +790,7 @@ cSampleManager::Initialise(void)
 		{
 			m_aSamples[i].nOffset    = 0;
 			m_aSamples[i].nSize      = 0;
-			m_aSamples[i].nFrequency = MAX_FREQ;
+			m_aSamples[i].nFrequency = 22050;
 			m_aSamples[i].nLoopStart = 0;
 			m_aSamples[i].nLoopEnd   = -1;
 		}
@@ -954,13 +846,84 @@ cSampleManager::Initialise(void)
 		for ( int32 i = 0; i < NUM_CHANNELS; i++ )
 			nChannelVolume[i] = 0;
 	}
+
+	add_providers();
+
+	{
+		int index = 0;
+		_maxSamples = Min(MAXCHANNELS, providers[index].sources);
+		
+		ALCint attr[] = {ALC_FREQUENCY,MAX_FREQ,
+						ALC_MONO_SOURCES, MAX_DIGITAL_MIXER_CHANNELS - MAX2DCHANNELS,
+						ALC_STEREO_SOURCES, MAX2DCHANNELS,
+						0,
+						};
+		
+		ALDevice  = alcOpenDevice(providers[index].id);
+		ASSERT(ALDevice != NULL);
+		
+		ALContext = alcCreateContext(ALDevice, attr);
+		ASSERT(ALContext != NULL);
+		
+		alcMakeContextCurrent(ALContext);
+	
+		const char* ext=(const char*)alGetString(AL_EXTENSIONS);
+		ASSERT(strstr(ext,"AL_SOFT_loop_points")!=NULL);
+		if ( strstr(ext,"AL_SOFT_loop_points")==NULL )
+		{
+			Terminate();
+			return FALSE;
+		}
+		
+		alListenerf (AL_GAIN,     1.0f);
+		alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
+		alListener3f(AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+		ALfloat orientation[6] = { 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
+		alListenerfv(AL_ORIENTATION, orientation);
+		
+		alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
+		
+		if ( alcIsExtensionPresent(ALDevice, (ALCchar*)ALC_EXT_EFX_NAME) )
+		{
+			_effectsSupported = providers[index].bSupportsFx;
+			alGenAuxiliaryEffectSlots(1, &ALEffectSlot);
+			alGenEffects(1, &ALEffect);
+		}
+
+		alGenSources(MAX_STREAMS*2, ALStreamSources[0]);
+		for ( int32 i = 0; i < MAX_STREAMS; i++ )
+		{
+			alGenBuffers(NUM_STREAMBUFFERS, ALStreamBuffers[i]); 
+			alSourcei(ALStreamSources[i][0], AL_SOURCE_RELATIVE, AL_TRUE);
+			alSource3f(ALStreamSources[i][0], AL_POSITION, 0.0f, 0.0f, 0.0f);
+			alSourcef(ALStreamSources[i][0], AL_GAIN, 1.0f);
+			alSourcei(ALStreamSources[i][1], AL_SOURCE_RELATIVE, AL_TRUE);
+			alSource3f(ALStreamSources[i][1], AL_POSITION, 0.0f, 0.0f, 0.0f);
+			alSourcef(ALStreamSources[i][1], AL_GAIN, 1.0f);
+		}
+		
+		CChannel::InitChannels();
+
+		for ( int32 i = 0; i < MAXCHANNELS; i++ )
+			aChannel[i].Init(i);
+		for ( int32 i = 0; i < MAX2DCHANNELS; i++ )
+			aChannel[MAXCHANNELS+i].Init(MAXCHANNELS+i, true);
+		
+		if ( IsFXSupported() )
+		{
+			/**/
+			alAuxiliaryEffectSloti(ALEffectSlot, AL_EFFECTSLOT_EFFECT, ALEffect);
+			/**/
+			
+			for ( int32 i = 0; i < MAXCHANNELS; i++ )
+				aChannel[i].SetReverbMix(ALEffectSlot, 0.0f);
+		}
+	}
 	
 	{	
 		for ( int32 i = 0; i < TOTAL_STREAMED_SOUNDS; i++ )
 			nStreamLength[i] = 0;
 	}
-	
-		add_providers();
 
 #ifdef AUDIO_CACHE
 	FILE *cacheFile = fcaseopen("audio\\sound.cache", "rb");
@@ -1117,8 +1080,51 @@ cSampleManager::Terminate(void)
 			aStream[i] = NULL;
 		}
 	}
-
-	release_existing();
+	
+	for ( int32 i = 0; i < NUM_CHANNELS; i++ )
+		aChannel[i].Term();
+	
+	if ( IsFXSupported() )
+	{
+		if ( alIsEffect(ALEffect) )
+		{
+			alEffecti(ALEffect, AL_EFFECT_TYPE, AL_EFFECT_NULL);
+			alDeleteEffects(1, &ALEffect);
+			ALEffect = AL_EFFECT_NULL;
+		}
+		
+		if (alIsAuxiliaryEffectSlot(ALEffectSlot))
+		{
+			alAuxiliaryEffectSloti(ALEffectSlot, AL_EFFECTSLOT_EFFECT, AL_EFFECT_NULL);
+			
+			alDeleteAuxiliaryEffectSlots(1, &ALEffectSlot);
+			ALEffectSlot = AL_EFFECTSLOT_NULL;
+		}
+	}
+	
+	for ( int32 i = 0; i < MAX_STREAMS; i++ )
+	{
+		alDeleteBuffers(NUM_STREAMBUFFERS, ALStreamBuffers[i]);
+	}
+	alDeleteSources(MAX_STREAMS*2, ALStreamSources[0]);
+	
+	CChannel::DestroyChannels();
+	
+	if ( ALContext )
+	{
+		alcMakeContextCurrent(NULL);
+		alcSuspendContext(ALContext);
+		alcDestroyContext(ALContext);
+	}
+	if ( ALDevice )
+		alcCloseDevice(ALDevice);
+	
+	ALDevice = NULL;
+	ALContext = NULL;
+	
+	_fPrevEaxRatioDestination = 0.0f;
+	_usingEFX                 = false;
+	_fEffectsLevel            = 0.0f;
 
 	_DeleteMP3Entries();
 

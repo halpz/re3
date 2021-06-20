@@ -21,7 +21,7 @@ enum
 };
 
 struct ALDEVICEINFO {
-	const char		*strDeviceName;
+	char		   *strDeviceName;
 	int				iMajorVersion;
 	int				iMinorVersion;
 	unsigned int	uiSourceCount;
@@ -32,6 +32,19 @@ struct ALDEVICEINFO {
 	{
 		strDeviceName = NULL;
 		Extensions = 0;
+	}
+
+	~ALDEVICEINFO()
+	{
+		delete[] strDeviceName;
+		strDeviceName = NULL;
+	}
+
+	void SetName(const char *name)
+	{
+		if(strDeviceName) delete[] strDeviceName;
+		strDeviceName = new char[strlen(name) + 1];
+		strcpy(strDeviceName, name);
 	}
 };
 
