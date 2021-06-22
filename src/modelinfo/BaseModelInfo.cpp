@@ -27,6 +27,7 @@ CBaseModelInfo::Shutdown(void)
 	m_2dEffectsID = -1;
 	m_num2dEffects = 0;
 	m_txdSlot = -1;
+	m_objectId = -1;
 }
 
 void
