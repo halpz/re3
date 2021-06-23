@@ -371,7 +371,7 @@ cSampleManager::InitialiseSampleBanks(void)
 }
 
 void
-cSampleManager::SetStreamedFileLoopFlag(uint8 nLoopFlag, uint8 nChannel)
+cSampleManager::SetStreamedFileLoopFlag(bool8 nLoopFlag, uint8 nChannel)
 {
 }
 

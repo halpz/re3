@@ -118,7 +118,7 @@ char _mp3DirectoryPath[MAX_PATH];
 CStream    *aStream[MAX_STREAMS];
 uint8      nStreamPan   [MAX_STREAMS];
 uint8      nStreamVolume[MAX_STREAMS];
-uint8      nStreamLoopedFlag[MAX_STREAMS];
+bool8      nStreamLoopedFlag[MAX_STREAMS];
 uint32 _CurMP3Index;
 int32 _CurMP3Pos;
 bool8 _bIsMp3Active;
@@ -2063,7 +2063,7 @@ cSampleManager::InitialiseSampleBanks(void)
 }
 
 void
-cSampleManager::SetStreamedFileLoopFlag(uint8 nLoopFlag, uint8 nChannel)
+cSampleManager::SetStreamedFileLoopFlag(bool8 nLoopFlag, uint8 nChannel)
 {
 	nStreamLoopedFlag[nChannel] = nLoopFlag;
 }
