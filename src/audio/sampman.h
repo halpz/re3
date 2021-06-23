@@ -201,15 +201,15 @@ public:
 	void  StartChannel            (uint32 nChannel);
 	void  StopChannel             (uint32 nChannel);
 	
-	void  PreloadStreamedFile                                     (uint8 nFile, uint8 nStream);
-	void  PauseStream                                        (bool8 nPauseFlag, uint8 nStream);
-	void  StartPreloadedStreamedFile                                           (uint8 nStream);
-	bool8 StartStreamedFile                          (uint8 nFile, uint32 nPos, uint8 nStream);
-	void  StopStreamedFile                                                     (uint8 nStream);
-	int32 GetStreamedFilePosition                                              (uint8 nStream);
-	void  SetStreamedVolumeAndPan(uint8 nVolume, uint8 nPan, bool8 nEffectFlag, uint8 nStream);
-	int32 GetStreamedFileLength                                                (uint8 nStream);
-	bool8 IsStreamPlaying                                                      (uint8 nStream);
+	void  PreloadStreamedFile                                     (uint8 nFile, uint8 nStream = 0);
+	void  PauseStream                                        (bool8 nPauseFlag, uint8 nStream = 0);
+	void  StartPreloadedStreamedFile                                           (uint8 nStream = 0);
+	bool8 StartStreamedFile                          (uint8 nFile, uint32 nPos, uint8 nStream = 0);
+	void  StopStreamedFile                                                     (uint8 nStream = 0);
+	int32 GetStreamedFilePosition                                              (uint8 nStream = 0);
+	void  SetStreamedVolumeAndPan(uint8 nVolume, uint8 nPan, bool8 nEffectFlag, uint8 nStream = 0);
+	int32 GetStreamedFileLength                                                (uint8 nStream = 0);
+	bool8 IsStreamPlaying                                                      (uint8 nStream = 0);
 #ifdef AUDIO_OAL
 	void  Service(void);
 #endif
