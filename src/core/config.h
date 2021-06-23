@@ -195,7 +195,8 @@ enum Config {
 #define DRAW_GAME_VERSION_TEXT
 #ifdef DRAW_GAME_VERSION_TEXT
 	// unlike R* development builds, ours has runtime switch on debug menu & .ini, and disabled as default.
-	#define USE_OUR_VERSIONING // If you disable this then game will fetch version from peds.col, as R* did while in development
+	// If you disable this then game will fetch version from peds.col, as R* did while in development.
+	//#define USE_OUR_VERSIONING // enabled from buildfiles by default
 #endif
 
 // Memory allocation and compression
