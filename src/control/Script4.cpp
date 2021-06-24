@@ -1396,7 +1396,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		DMAudio.ChangeMusicMode(MUSICMODE_FRONTEND);
-		DMAudio.PlayFrontEndTrack(GET_INTEGER_PARAM(0) + STREAMED_SOUND_MISSION_COMPLETED - 1, 0);
+		DMAudio.PlayFrontEndTrack(GET_INTEGER_PARAM(0) + STREAMED_SOUND_MISSION_COMPLETED - 1, FALSE);
 		//DMAudio.SaveAnnouncementsWhenMissionPassedPlayed(); // TODO!
 		return 0;
 	}

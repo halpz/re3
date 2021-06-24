@@ -273,6 +273,8 @@ cAudioManager::ResetTimers(uint32 time)
 		ClearMissionAudio(0);
 		ClearMissionAudio(1);
 		SampleManager.StopChannel(CHANNEL_POLICE_RADIO);
+		SampleManager.StopChannel(CHANNEL_MISSION_AUDIO_1);
+		SampleManager.StopChannel(CHANNEL_MISSION_AUDIO_2);
 		SampleManager.SetEffectsFadeVolume(0);
 		SampleManager.SetMusicFadeVolume(0);
 		MusicManager.ResetMusicAfterReload();

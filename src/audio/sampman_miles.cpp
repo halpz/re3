@@ -1786,8 +1786,8 @@ cSampleManager::SetChannelReverbFlag(uint32 nChannel, bool8 nReverbFlag)
 	switch ( nChannel )
 	{
 		case CHANNEL_POLICE_RADIO:
-		case CHANNEL2D+1:
-		case CHANNEL2D+2:
+		case CHANNEL_MISSION_AUDIO_1:
+		case CHANNEL_MISSION_AUDIO_2:
 		{
 			b2d = TRUE;
 			break;
@@ -1817,8 +1817,8 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 	switch ( nChannel )
 	{
 		case CHANNEL_POLICE_RADIO:
-		case CHANNEL2D+1:
-		case CHANNEL2D+2:
+		case CHANNEL_MISSION_AUDIO_1:
+		case CHANNEL_MISSION_AUDIO_2:
 		{
 			b2d = TRUE;
 			break;
@@ -1919,8 +1919,8 @@ cSampleManager::SetChannelVolume(uint32 nChannel, uint32 nVolume)
 	switch ( nChannel )
 	{
 		case CHANNEL_POLICE_RADIO:
-		case CHANNEL2D+1:
-		case CHANNEL2D+2:
+		case CHANNEL_MISSION_AUDIO_1:
+		case CHANNEL_MISSION_AUDIO_2:
 		{
 			nChannelVolume[nChannel] = vol;
 			
@@ -1948,8 +1948,8 @@ cSampleManager::SetChannelPan(uint32 nChannel, uint32 nPan)
 	switch ( nChannel )
 	{
 		case CHANNEL_POLICE_RADIO:
-		case CHANNEL2D+1:
-		case CHANNEL2D+2:
+		case CHANNEL_MISSION_AUDIO_1:
+		case CHANNEL_MISSION_AUDIO_2:
 		{
 #ifndef FIX_BUGS
 			if ( opened_samples[nChannel - MAXCHANNELS] ) // BUG
@@ -1971,8 +1971,8 @@ cSampleManager::SetChannelFrequency(uint32 nChannel, uint32 nFreq)
 	switch ( nChannel )
 	{
 		case CHANNEL_POLICE_RADIO:
-		case CHANNEL2D+1:
-		case CHANNEL2D+2:
+		case CHANNEL_MISSION_AUDIO_1:
+		case CHANNEL_MISSION_AUDIO_2:
 		{
 			b2d = TRUE;
 			break;
@@ -1999,8 +1999,8 @@ cSampleManager::SetChannelLoopPoints(uint32 nChannel, uint32 nLoopStart, int32 n
 	switch ( nChannel )
 	{
 		case CHANNEL_POLICE_RADIO:
-		case CHANNEL2D+1:
-		case CHANNEL2D+2:
+		case CHANNEL_MISSION_AUDIO_1:
+		case CHANNEL_MISSION_AUDIO_2:
 		{
 			b2d = TRUE;
 			break;
@@ -2027,8 +2027,8 @@ cSampleManager::SetChannelLoopCount(uint32 nChannel, uint32 nLoopCount)
 	switch ( nChannel )
 	{
 		case CHANNEL_POLICE_RADIO:
-		case CHANNEL2D+1:
-		case CHANNEL2D+2:
+		case CHANNEL_MISSION_AUDIO_1:
+		case CHANNEL_MISSION_AUDIO_2:
 		{
 			b2d = TRUE;
 			break;
@@ -2055,8 +2055,8 @@ cSampleManager::GetChannelUsedFlag(uint32 nChannel)
 	switch ( nChannel )
 	{
 		case CHANNEL_POLICE_RADIO:
-		case CHANNEL2D+1:
-		case CHANNEL2D+2:
+		case CHANNEL_MISSION_AUDIO_1:
+		case CHANNEL_MISSION_AUDIO_2:
 		{
 			b2d = TRUE;
 			break;
@@ -2088,8 +2088,8 @@ cSampleManager::StartChannel(uint32 nChannel)
 	switch ( nChannel )
 	{
 		case CHANNEL_POLICE_RADIO:
-		case CHANNEL2D+1:
-		case CHANNEL2D+2:
+		case CHANNEL_MISSION_AUDIO_1:
+		case CHANNEL_MISSION_AUDIO_2:
 		{
 			b2d = TRUE;
 			break;
@@ -2116,8 +2116,8 @@ cSampleManager::StopChannel(uint32 nChannel)
 	switch ( nChannel )
 	{
 		case CHANNEL_POLICE_RADIO:
-		case CHANNEL2D+1:
-		case CHANNEL2D+2:
+		case CHANNEL_MISSION_AUDIO_1:
+		case CHANNEL_MISSION_AUDIO_2:
 		{
 			b2d = TRUE;
 			break;

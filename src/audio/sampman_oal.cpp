@@ -215,7 +215,6 @@ add_providers()
 static void
 release_existing()
 {
-	for ( int32 i = 0; i < MAXCHANNELS+MAX2DCHANNELS; i++ )
 	if ( IsFXSupported() )
 	{
 		if ( alIsEffect(ALEffect) )
@@ -280,7 +279,6 @@ set_new_provider(int index)
 		
 		//SampleManager.SetSpeakerConfig(speaker_type);
 		
-			aChannel[CHANNEL2D+i].Init(CHANNEL2D+i, true);
 		if ( IsFXSupported() )
 		{
 			for ( int32 i = 0; i < MAXCHANNELS; i++ )
@@ -1653,7 +1651,7 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 void
 cSampleManager::SetChannelEmittingVolume(uint32 nChannel, uint32 nVolume)
 {
-	ASSERT( nChannel < CHANNEL2D );
+	ASSERT( nChannel < MAXCHANNELS );
 	
 	uint32 vol = nVolume;
 	if ( vol > MAX_VOLUME ) vol = MAX_VOLUME;
@@ -1674,7 +1672,7 @@ cSampleManager::SetChannelEmittingVolume(uint32 nChannel, uint32 nVolume)
 void
 cSampleManager::SetChannel3DPosition(uint32 nChannel, float fX, float fY, float fZ)
 {
-	ASSERT( nChannel < CHANNEL2D );
+	ASSERT( nChannel < MAXCHANNELS );
 	
 	aChannel[nChannel].SetPosition(-fX, fY, fZ);
 }
@@ -1682,17 +1680,17 @@ cSampleManager::SetChannel3DPosition(uint32 nChannel, float fX, float fY, float 
 void
 cSampleManager::SetChannel3DDistances(uint32 nChannel, float fMax, float fMin)
 {
-	ASSERT( nChannel < CHANNEL2D );
+	ASSERT( nChannel < MAXCHANNELS );
 	aChannel[nChannel].SetDistances(fMax, fMin);
 }
 
 void
 cSampleManager::SetChannelVolume(uint32 nChannel, uint32 nVolume)
 {
-	ASSERT(nChannel >= CHANNEL2D );
+	ASSERT( nChannel >= MAXCHANNELS );
 	ASSERT( nChannel < NUM_CHANNELS );
 	
-	if(nChannel >= CHANNEL2D)
+	if( nChannel >= CHANNEL_POLICE_RADIO )
 	{
 		uint32 vol = nVolume;
 		if ( vol > MAX_VOLUME ) vol = MAX_VOLUME;
@@ -1714,10 +1712,10 @@ cSampleManager::SetChannelVolume(uint32 nChannel, uint32 nVolume)
 void
 cSampleManager::SetChannelPan(uint32 nChannel, uint32 nPan)
 {
-	ASSERT(nChannel >= CHANNEL2D);
+	ASSERT( nChannel >= MAXCHANNELS );
 	ASSERT( nChannel < NUM_CHANNELS );
 	
-	if ( nChannel >= CHANNEL2D )
+	if ( nChannel >= CHANNEL_POLICE_RADIO )
 	{
 		aChannel[nChannel].SetPan(nPan);
 	}

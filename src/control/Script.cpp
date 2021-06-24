@@ -2104,7 +2104,7 @@ void CMissionCleanup::Process()
 	CWorld::Players[0].m_bDriveByAllowed = true;
 	CPad::GetPad(0)->unk_B4 = 1.0f;
 	CPad::GetPad(0)->unk_B8 = 0.5f;
-	DMAudio.ShutUpPlayerTalking(0);
+	DMAudio.ShutUpPlayerTalking(FALSE);
 	CVehicle::bDisableRemoteDetonation = false;
 	CVehicle::bDisableRemoteDetonationOnContact = false;
 	CTheScripts::RiotIntensity = 0;

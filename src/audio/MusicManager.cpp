@@ -1368,7 +1368,7 @@ cMusicManager::UsesPoliceRadio(CVehicle *veh)
 bool8
 cMusicManager::UsesTaxiRadio(CVehicle *veh)
 {
-	if (veh->GetModelIndex() != MI_CABBIE) return false;
+	if (veh->GetModelIndex() != MI_CABBIE) return FALSE;
 	return CTheScripts::bPlayerHasMetDebbieHarry;
 }
 
