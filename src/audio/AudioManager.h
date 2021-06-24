@@ -569,19 +569,6 @@ public:
 //#if defined(AUDIO_MSS) && !defined(PS2_AUDIO_CHANNELS)
 //static_assert(sizeof(cAudioManager) == 0x5558, "cAudioManager: error");
 //#endif
-   What were they thinking?
-*/
-#ifndef GTA_PS2
-#define RESET_LOOP_OFFSETS \
-	m_sQueueSample.m_nLoopStart = 0; \
-	m_sQueueSample.m_nLoopEnd = -1;
-#define SET_LOOP_OFFSETS(sample) \
-	m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(sample); \
-	m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(sample);
-#else
-#define RESET_LOOP_OFFSETS
-#define SET_LOOP_OFFSETS(sample)
-#endif
 
 
 extern cAudioManager AudioManager;
