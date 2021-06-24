@@ -188,6 +188,10 @@ void CTimer::Update(void)
 #endif
 			ms_fTimeStep = frameTime / 1000.0f * 50.0f;
 		}
+#ifdef FIX_BUGS
+		frameTimeFraction -= uint32(frameTimeFraction);
+		frameTimeFractionScaled -= uint32(frameTimeFractionScaled);
+#endif
 	}
 	
 	if ( ms_fTimeStep < 0.01f && !GetIsPaused() && !CSpecialFX::bSnapShotActive)
