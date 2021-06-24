@@ -1,22 +1,20 @@
 #pragma once
 
-#ifdef FIX_HIGH_FPS_BUGS_ON_FRONTEND
-#define PauseModeTime double
-#else
-#define PauseModeTime uint32
-#endif
-
 class CTimer
 {
 
 	static uint32 m_snTimeInMilliseconds;
-	static PauseModeTime m_snTimeInMillisecondsPauseMode;
+	static uint32 m_snTimeInMillisecondsPauseMode;
 	static uint32 m_snTimeInMillisecondsNonClipped;
 	static uint32 m_snPreviousTimeInMilliseconds;
 	static uint32 m_FrameCounter;
 	static float ms_fTimeScale;
 	static float ms_fTimeStep;
 	static float ms_fTimeStepNonClipped;
+#ifdef FIX_BUGS
+	static uint32 m_LogicalFrameCounter;
+	static uint32 m_LogicalFramesPassed;
+#endif
 public:
 	static bool  m_UserPause;
 	static bool  m_CodePause;
@@ -35,7 +33,7 @@ public:
 	static void SetTimeInMilliseconds(uint32 t) { m_snTimeInMilliseconds = t; }
 	static uint32 GetTimeInMillisecondsNonClipped(void) { return m_snTimeInMillisecondsNonClipped; }
 	static void SetTimeInMillisecondsNonClipped(uint32 t) { m_snTimeInMillisecondsNonClipped = t; }
-	static PauseModeTime GetTimeInMillisecondsPauseMode(void) { return m_snTimeInMillisecondsPauseMode; }
+	static uint32 GetTimeInMillisecondsPauseMode(void) { return m_snTimeInMillisecondsPauseMode; }
 	static void SetTimeInMillisecondsPauseMode(uint32 t) { m_snTimeInMillisecondsPauseMode = t; }
 	static uint32 GetPreviousTimeInMilliseconds(void) { return m_snPreviousTimeInMilliseconds; }
 	static void SetPreviousTimeInMilliseconds(uint32 t) { m_snPreviousTimeInMilliseconds = t; }
@@ -67,9 +65,7 @@ public:
 #ifdef FIX_BUGS
 	static float GetDefaultTimeStep(void) { return 50.0f / 30.0f; }
 	static float GetTimeStepFix(void) { return GetTimeStep() / GetDefaultTimeStep(); }
+	static uint32 GetLogicalFrameCounter(void) { return m_LogicalFrameCounter; }
+	static uint32 GetLogicalFramesPassed(void) { return m_LogicalFramesPassed; }
 #endif
 };
-
-#ifdef FIX_HIGH_FPS_BUGS_ON_FRONTEND
-extern double frameTime;
-#endif

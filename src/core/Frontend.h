@@ -735,7 +735,7 @@ public:
 
 #ifdef XBOX_MESSAGE_SCREEN
 	static uint32 m_nDialogHideTimer;
-	static PauseModeTime m_nDialogHideTimerPauseMode;
+	static uint32 m_nDialogHideTimerPauseMode;
 	static bool m_bDialogOpen;
 	static wchar *m_pDialogText;
 	static bool m_bSaveWasSuccessful;

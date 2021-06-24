@@ -1317,7 +1317,11 @@ cMusicManager::DisplayRadioStationName()
 			}
 			else {
 				if (cDisplay == 0) return;
+#ifdef FIX_BUGS
+				cDisplay -= CTimer::GetLogicalFramesPassed();
+#else
 				cDisplay--;
+#endif
 			}
 
 			CFont::SetJustifyOff();

@@ -1145,8 +1145,11 @@ DisplayGameDebugText()
 #endif // #ifdef DRAW_GAME_VERSION_TEXT
 
 	FrameSamples++;
-#ifdef FIX_HIGH_FPS_BUGS_ON_FRONTEND
-	FramesPerSecondCounter += frameTime / 1000.f; // convert to seconds
+#ifdef FIX_BUGS
+	// this is inaccurate with over 1000 fps
+	static uint32 PreviousTimeInMillisecondsPauseMode = 0;
+	FramesPerSecondCounter += (CTimer::GetTimeInMillisecondsPauseMode() - PreviousTimeInMillisecondsPauseMode) / 1000.0f; // convert to seconds
+	PreviousTimeInMillisecondsPauseMode = CTimer::GetTimeInMillisecondsPauseMode();
 	FramesPerSecond = FrameSamples / FramesPerSecondCounter;
 #else
 	FramesPerSecondCounter += 1000.0f / CTimer::GetTimeStepNonClippedInMilliseconds();
