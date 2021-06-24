@@ -181,7 +181,7 @@ const char* FrontendFilenames[][2] = {
 #ifdef XBOX_MESSAGE_SCREEN
 bool CMenuManager::m_bDialogOpen = false;
 uint32 CMenuManager::m_nDialogHideTimer = 0;
-PauseModeTime CMenuManager::m_nDialogHideTimerPauseMode = 0;
+uint32 CMenuManager::m_nDialogHideTimerPauseMode = 0;
 bool CMenuManager::m_bSaveWasSuccessful = false;
 wchar* CMenuManager::m_pDialogText = nil;
 #endif
@@ -750,7 +750,7 @@ CMenuManager::DisplayHelperText(char *text)
 		return;
 
 	// there was a unused static bool
-	static PauseModeTime LastFlash = 0;
+	static uint32 LastFlash = 0;
 	int32 alpha = 255;
 
 	CFont::SetRightJustifyOn();
@@ -1425,7 +1425,7 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 						}
 					}
 
-					static PauseModeTime lastBlendChange = 0;
+					static uint32 lastBlendChange = 0;
 					if (m_nOptionHighlightTransitionBlend <= 255) {
 						static uint32 blendChangeCounter = 0;
 						if (CTimer::GetTimeInMillisecondsPauseMode() - lastBlendChange > 20
@@ -1928,7 +1928,7 @@ CMenuManager::DrawControllerBound(int32 yStart, int32 xStart, int32 unused, int8
 						CFont::PrintString(nextX, nextY, seperator);
 						nextX += CFont::GetStringWidth(seperator, true) + bindingMargin;
 					}
-					static PauseModeTime lastWaitingTextFlash = 0;
+					static uint32 lastWaitingTextFlash = 0;
 					if (CTimer::GetTimeInMillisecondsPauseMode() - lastWaitingTextFlash > 150) {
 						showWaitingText = !showWaitingText;
 						lastWaitingTextFlash = CTimer::GetTimeInMillisecondsPauseMode();
@@ -1993,7 +1993,7 @@ CMenuManager::DrawControllerScreenExtraText(int yStart, int xStart, int lineHeig
 				CFont::PrintString(nextX, MENU_Y(yStart), TheText.Get("FEC_IBT"));
 				nextX = CFont::GetStringWidth(TheText.Get("FEC_IBT"), true) + spacing + nextX;
 			}
-			static PauseModeTime lastStateChange = 0;
+			static uint32 lastStateChange = 0;
 			if (CTimer::GetTimeInMillisecondsPauseMode() - lastStateChange > 150) {
 				waitingTextVisible = !waitingTextVisible;
 				lastStateChange = CTimer::GetTimeInMillisecondsPauseMode();
@@ -2377,7 +2377,7 @@ CMenuManager::DrawBackground(bool transitionCall)
 			m_nOptionHighlightTransitionBlend = 0;
 	}
 
-	static PauseModeTime LastFade = 0;
+	static uint32 LastFade = 0;
 
 	if (m_nMenuFadeAlpha < 255) {
 		static uint8 forceFadeInCounter = 0;	
@@ -2448,7 +2448,7 @@ CMenuManager::DrawBackground(bool transitionCall)
 		}
 
 	if (m_ShowEmptyBindingError) {
-		static PauseModeTime lastBindingError = CTimer::GetTimeInMillisecondsPauseMode();
+		static uint32 lastBindingError = CTimer::GetTimeInMillisecondsPauseMode();
 		static bool bindingErrorShown = false;
 		if (bindingErrorShown) {
 			lastBindingError = CTimer::GetTimeInMillisecondsPauseMode();
@@ -3332,7 +3332,7 @@ CMenuManager::PrintStats()
 	else
 		CFont::SetScale(MENU_X(0.37f), MENU_Y(0.75f));
 
-	static PauseModeTime lastCheck = 0;
+	static uint32 lastCheck = 0;
 
 	if (CTimer::GetTimeInMillisecondsPauseMode() - lastCheck > 40) {
 
@@ -3473,7 +3473,7 @@ CMenuManager::AdditionalOptionInput(bool &goBack)
 	switch (m_nCurrScreen) {
 		case MENUPAGE_MAP:
 		{
-			static PauseModeTime lastMapTick = 0;
+			static uint32 lastMapTick = 0;
 
 			// FIX: All those macros were hardcoded values originally.
 
@@ -3802,7 +3802,7 @@ CMenuManager::ExportStats()
 void
 CMenuManager::PrintRadioSelector(void)
 {
-	static PauseModeTime lastRadioChange = 0;
+	static uint32 lastRadioChange = 0;
 
 	CSprite2d::Draw2DPolygon(MENU_X_LEFT_ALIGNED(418.f), MENU_Y(MENURADIO_SELECTOR_START_Y + MENURADIO_SELECTOR_HEIGHT),
 		MENU_X_LEFT_ALIGNED(228.f), MENU_Y(MENURADIO_SELECTOR_START_Y + MENURADIO_SELECTOR_HEIGHT),
@@ -3925,7 +3925,7 @@ CMenuManager::PrintRadioSelector(void)
 #endif
 
 	static bool radioChangeRequested = false;
-	static PauseModeTime lastScrollCheck = 0;
+	static uint32 lastScrollCheck = 0;
 	if (CTimer::GetTimeInMillisecondsPauseMode() - lastScrollCheck > 17) {
 		if (m_ScrollRadioBy == 1) {
 			if (m_LeftMostRadioX > MENU_X_LEFT_ALIGNED(MENURADIO_ICON_FIRST_X - MENURADIO_ICON_SIZE)) {
@@ -4009,7 +4009,7 @@ CMenuManager::ProcessList(bool &optionSelected, bool &goBack)
 		field_159 = false;
 	}
 
-	static PauseModeTime lastTimeClickedScrollButton = 0;
+	static uint32 lastTimeClickedScrollButton = 0;
 
 	if (CTimer::GetTimeInMillisecondsPauseMode() - lastTimeClickedScrollButton >= 200) {
 		m_bPressedPgUpOnList = false;
@@ -4395,7 +4395,7 @@ CMenuManager::UserInput(void)
 
 	int curAction = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action;
 	if (CPad::GetPad(0)->GetLeft() || CPad::GetPad(0)->GetPedWalkLeftRight() < 0 || CPad::GetPad(0)->GetDPadLeft()) {
-		static PauseModeTime lastSliderDecrease = 0;
+		static uint32 lastSliderDecrease = 0;
 		if (CTimer::GetTimeInMillisecondsPauseMode() - lastSliderDecrease > 150) {
 			if (curAction == MENUACTION_BRIGHTNESS || curAction == MENUACTION_MUSICVOLUME ||
 				curAction == MENUACTION_SFXVOLUME || curAction == MENUACTION_RADIO ||
@@ -4406,7 +4406,7 @@ CMenuManager::UserInput(void)
 			lastSliderDecrease = CTimer::GetTimeInMillisecondsPauseMode();
 		}
 	} else if (CPad::GetPad(0)->GetRight() || CPad::GetPad(0)->GetPedWalkLeftRight() > 0 || CPad::GetPad(0)->GetDPadRight()) {
-		static PauseModeTime lastSliderIncrease = 0;
+		static uint32 lastSliderIncrease = 0;
 		if (CTimer::GetTimeInMillisecondsPauseMode() - lastSliderIncrease > 150) {
 			if (curAction == MENUACTION_BRIGHTNESS || curAction == MENUACTION_MUSICVOLUME ||
 				curAction == MENUACTION_SFXVOLUME || curAction == MENUACTION_RADIO ||
@@ -5396,7 +5396,7 @@ CMenuManager::ProcessFileActions()
 		{
 #ifdef XBOX_MESSAGE_SCREEN
 			if (m_bDialogOpen && DialogTextCmp("FESZ_WR")) {
-				PauseModeTime startTime = CTimer::GetTimeInMillisecondsPauseMode();
+				uint32 startTime = CTimer::GetTimeInMillisecondsPauseMode();
 				int8 SaveSlot = PcSaveHelper.SaveSlot(m_nCurrSaveSlot);
 				PcSaveHelper.PopulateSlotInfo();
 
@@ -5654,13 +5654,13 @@ CMenuManager::DrawQuitGameScreen(void)
 #endif
 
 #ifndef MUCH_SHORTER_OUTRO_SCREEN
-	static PauseModeTime lastTickIncrease = 0;
+	static uint32 lastTickIncrease = 0;
 	if (alpha == 255 && CTimer::GetTimeInMillisecondsPauseMode() - lastTickIncrease > 10) {
 		exitSignalTimer++;
 		lastTickIncrease = CTimer::GetTimeInMillisecondsPauseMode();
 	}
 #else
-	static PauseModeTime firstTick = CTimer::GetTimeInMillisecondsPauseMode();
+	static uint32 firstTick = CTimer::GetTimeInMillisecondsPauseMode();
 	if (alpha == 255 && CTimer::GetTimeInMillisecondsPauseMode() - firstTick > 750) {
 		exitSignalTimer = 150;
 	}

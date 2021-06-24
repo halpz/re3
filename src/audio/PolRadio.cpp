@@ -137,7 +137,11 @@ cAudioManager::ServicePoliceRadio()
 			if (!crimeReport) {
 				if (wantedLevel != 0) {
 					if (nLastSeen != 0)
+#ifdef FIX_BUGS
+						nLastSeen -= CTimer::GetLogicalFramesPassed();
+#else
 						--nLastSeen;
+#endif
 					else {
 						nLastSeen = m_anRandomTable[1] % 1000 + 2000;
 						SetupSuspectLastSeenReport();
@@ -176,7 +180,11 @@ cAudioManager::ServicePoliceRadioChannel(uint8 wantedLevel)
 		}
 		if (m_sPoliceRadioQueue.policeChannelTimer == 0) bChannelOpen = FALSE;
 		if (cWait) {
+#ifdef FIX_BUGS
+			cWait -= CTimer::GetLogicalFramesPassed();
+#else
 			--cWait;
+#endif
 			return;
 		}
 		if (g_nMissionAudioSfx != NO_SAMPLE && !bChannelOpen) {

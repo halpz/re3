@@ -1382,7 +1382,7 @@ CRadar::InitFrontEndMap()
 void
 CRadar::DrawYouAreHereSprite(float x, float y)
 {
-	static PauseModeTime lastChange = 0;
+	static uint32 lastChange = 0;
 	static bool show = true;
 
 	if (show) {
@@ -1582,7 +1582,7 @@ void
 CRadar::DrawLegend(int32 x, int32 y, int32 sprite)
 {
 	if (sprite < 0) {
-		static PauseModeTime lastChange = 0;
+		static uint32 lastChange = 0;
 		static int8 blipMode = 0;
 
 		CRGBA color;

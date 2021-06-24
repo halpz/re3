@@ -440,6 +440,9 @@ cAudioManager::IsAudioInitialised() const
 void
 cAudioManager::ServiceSoundEffects()
 {
+#ifdef FIX_BUGS
+	if(CTimer::GetLogicalFramesPassed() != 0)
+#endif
 	m_bFifthFrameFlag = (m_FrameCounter++ % 5) == 0;
 	if (m_nUserPause && !m_nPreviousUserPause) {
 		for (int32 i = 0; i < NUM_CHANNELS; i++)
@@ -793,9 +796,9 @@ cAudioManager::AddReleasingSounds()
 		}
 		if (!toProcess[i]) {
 			if (sample.m_nCounter <= 255 || !sample.m_nLoopsRemaining) {
-				if (!sample.m_nReleasingVolumeDivider)
+				if (sample.m_nReleasingVolumeDivider == 0)
 					continue;
-				if (!sample.m_nLoopCount) {
+				if (sample.m_nLoopCount == 0) {
 					if (sample.m_nVolumeChange == -1) {
 						sample.m_nVolumeChange = sample.m_nVolume / sample.m_nReleasingVolumeDivider;
 						if (sample.m_nVolumeChange <= 0)
@@ -807,6 +810,9 @@ cAudioManager::AddReleasingSounds()
 					}
 					sample.m_nVolume -= sample.m_nVolumeChange;
 				}
+#ifdef FIX_BUGS
+				if(CTimer::GetLogicalFramesPassed() != 0)
+#endif
 				--sample.m_nReleasingVolumeDivider;
 				if (m_bFifthFrameFlag) {
 					if (sample.m_nReleasingVolumeModificator < 20)

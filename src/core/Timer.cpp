@@ -8,7 +8,7 @@
 #include "SpecialFX.h"
 
 uint32 CTimer::m_snTimeInMilliseconds;
-PauseModeTime CTimer::m_snTimeInMillisecondsPauseMode = 1;
+uint32 CTimer::m_snTimeInMillisecondsPauseMode = 1;
 
 uint32 CTimer::m_snTimeInMillisecondsNonClipped;
 uint32 CTimer::m_snPreviousTimeInMilliseconds;
@@ -17,7 +17,11 @@ float CTimer::ms_fTimeScale;
 float CTimer::ms_fTimeStep;
 float CTimer::ms_fTimeStepNonClipped;
 bool  CTimer::m_UserPause;
-bool  CTimer::m_CodePause;
+bool  CTimer::m_CodePause; 
+#ifdef FIX_BUGS
+uint32 CTimer::m_LogicalFrameCounter;
+uint32 CTimer::m_LogicalFramesPassed;
+#endif
 
 uint32 _nCyclesPerMS = 1;
 
@@ -35,10 +39,6 @@ RsTimerType suspendPcTimer;
 
 uint32 suspendDepth;
 
-#ifdef FIX_HIGH_FPS_BUGS_ON_FRONTEND
-double frameTime;
-#endif
-
 void CTimer::Initialise(void)
 {
 	debug("Initialising CTimer...\n");
@@ -51,6 +51,10 @@ void CTimer::Initialise(void)
 	m_snTimeInMillisecondsNonClipped = 0;
 	m_snPreviousTimeInMilliseconds = 0;
 	m_snTimeInMilliseconds = 1;
+#ifdef FIX_BUGS
+	m_LogicalFrameCounter = 0;
+	m_LogicalFramesPassed = 0;
+#endif
 	
 #ifdef _WIN32
 	LARGE_INTEGER perfFreq;
@@ -83,7 +87,13 @@ void CTimer::Shutdown(void)
 }
 
 void CTimer::Update(void)
-{
+{ 
+#ifdef FIX_BUGS
+	static double frameTimeLogical = 0.0;
+	static double frameTimeFraction = 0.0;
+	static double frameTimeFractionScaled = 0.0;
+#endif
+
 	m_snPreviousTimeInMilliseconds = m_snTimeInMilliseconds;
 	
 #ifdef _WIN32
@@ -98,22 +108,43 @@ void CTimer::Update(void)
 		
 		float updInCyclesScaled = GetIsPaused() ? updInCycles : updInCycles * ms_fTimeScale;
 		
-		// We need that real frame time to fix transparent menu bug.
-#ifndef FIX_HIGH_FPS_BUGS_ON_FRONTEND
-		double
-#endif
-		frameTime = updInCyclesScaled / (double)_nCyclesPerMS;
+		double frameTime = updInCyclesScaled / (double)_nCyclesPerMS;
 
+#ifdef FIX_BUGS
+		// count frames as if we're running at 30 fps
+		m_LogicalFramesPassed = 0;
+		frameTimeLogical += ((double)updInCycles / (double)_nCyclesPerMS);
+		while (frameTimeLogical >= 1000.0 / 30.0) {
+			frameTimeLogical -= 1000.0 / 30.0;
+			m_LogicalFramesPassed++;
+		}
+		m_LogicalFrameCounter += m_LogicalFramesPassed;
+
+		frameTimeFraction += (double)updInCycles / (double)_nCyclesPerMS;
+		frameTimeFractionScaled += frameTime;
+
+		m_snTimeInMillisecondsPauseMode += uint32(frameTimeFraction);
+#else
 		m_snTimeInMillisecondsPauseMode = m_snTimeInMillisecondsPauseMode + frameTime;
+#endif
 		
 		if ( GetIsPaused() )
 			ms_fTimeStep = 0.0f;
 		else
 		{
+#ifdef FIX_BUGS
+			m_snTimeInMilliseconds += uint32(frameTimeFractionScaled);
+			m_snTimeInMillisecondsNonClipped += uint32(frameTimeFractionScaled);
+#else
 			m_snTimeInMilliseconds = m_snTimeInMilliseconds + frameTime;
 			m_snTimeInMillisecondsNonClipped = m_snTimeInMillisecondsNonClipped + frameTime;
+#endif
 			ms_fTimeStep = frameTime / 1000.0f * 50.0f;
 		}
+#ifdef FIX_BUGS
+		frameTimeFraction -= uint32(frameTimeFraction);
+		frameTimeFractionScaled -= uint32(frameTimeFractionScaled);
+#endif
 	}
 	else
 #endif
@@ -122,22 +153,39 @@ void CTimer::Update(void)
 		
 		RsTimerType updInMs = timer - oldPcTimer;
 		
-		// We need that real frame time to fix transparent menu bug.
-#ifndef FIX_HIGH_FPS_BUGS_ON_FRONTEND
-		double
-#endif
-		frameTime = (double)updInMs * ms_fTimeScale;
+		double frameTime = (double)updInMs * ms_fTimeScale;
 		
 		oldPcTimer = timer;
-		
+
+#ifdef FIX_BUGS
+		// count frames as if we're running at 30 fps
+		m_LogicalFramesPassed = 0;
+		frameTimeLogical += (double)updInMs;
+		while(frameTimeLogical >= 1000.0 / 30.0) {
+			frameTimeLogical -= 1000.0 / 30.0;
+			m_LogicalFramesPassed++;
+		}
+		m_LogicalFrameCounter += m_LogicalFramesPassed;
+
+		frameTimeFraction += (double)updInMs;
+		frameTimeFractionScaled += frameTime;
+
+		m_snTimeInMillisecondsPauseMode += uint32(frameTimeFraction);
+#else
 		m_snTimeInMillisecondsPauseMode = m_snTimeInMillisecondsPauseMode + frameTime;
-															 
+#endif
+
 		if ( GetIsPaused() )
 			ms_fTimeStep = 0.0f;
 		else
 		{
+#ifdef FIX_BUGS
+			m_snTimeInMilliseconds += uint32(frameTimeFractionScaled);
+			m_snTimeInMillisecondsNonClipped += uint32(frameTimeFractionScaled);
+#else
 			m_snTimeInMilliseconds = m_snTimeInMilliseconds + frameTime;
 			m_snTimeInMillisecondsNonClipped = m_snTimeInMillisecondsNonClipped + frameTime;
+#endif
 			ms_fTimeStep = frameTime / 1000.0f * 50.0f;
 		}
 	}
