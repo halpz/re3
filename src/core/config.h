@@ -247,7 +247,6 @@ enum Config {
 #define MORE_LANGUAGES		// Add more translations to the game
 #define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
 #define LOAD_INI_SETTINGS // as the name suggests. fundamental for CUSTOM_FRONTEND_OPTIONS
-#define FIX_HIGH_FPS_BUGS_ON_FRONTEND
 
 #define NO_MOVIES	// add option to disable intro videos
 
@@ -453,7 +452,6 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #undef MORE_LANGUAGES
 #undef COMPATIBLE_SAVES
 #undef LOAD_INI_SETTINGS
-#undef FIX_HIGH_FPS_BUGS_ON_FRONTEND
 
 #undef ASPECT_RATIO_SCALE
 #undef PROPER_SCALING

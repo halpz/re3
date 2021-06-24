@@ -1429,15 +1429,17 @@ CMenuManager::DrawStandardMenus(bool activeScreen)
 					if (m_nOptionHighlightTransitionBlend <= 255) {
 						static uint32 blendChangeCounter = 0;
 						if (CTimer::GetTimeInMillisecondsPauseMode() - lastBlendChange > 20
-#ifndef FIX_HIGH_FPS_BUGS_ON_FRONTEND // Dirty dirty hack
 							|| blendChangeCounter > 20
-#endif
 							) {
 							m_nOptionHighlightTransitionBlend += 50;
 							lastBlendChange = CTimer::GetTimeInMillisecondsPauseMode();
 							blendChangeCounter = 0;
 						}
+#ifdef FIX_BUGS
+						blendChangeCounter += CTimer::GetLogicalFramesPassed();
+#else
 						++blendChangeCounter;
+#endif
 					}
 				}
 
@@ -2382,17 +2384,22 @@ CMenuManager::DrawBackground(bool transitionCall)
 	if (m_nMenuFadeAlpha < 255) {
 		static uint8 forceFadeInCounter = 0;	
 		if (CTimer::GetTimeInMillisecondsPauseMode() - LastFade > 30
-#ifndef FIX_HIGH_FPS_BUGS_ON_FRONTEND // Dirty dirty hack
 			|| forceFadeInCounter > 30
-#endif
 			) {
 			m_nMenuFadeAlpha += 20;
 			if (m_firstStartCounter < 255) {
 				m_firstStartCounter = Min(m_firstStartCounter + 20, 255);
 			}
 			LastFade = CTimer::GetTimeInMillisecondsPauseMode();
+#ifdef FIX_BUGS
+			forceFadeInCounter = 0;
+#endif
 		}
+#ifdef FIX_BUGS
+		forceFadeInCounter += CTimer::GetLogicalFramesPassed();
+#else
 		forceFadeInCounter++;
+#endif
 	} else if (m_nMenuFadeAlpha > 255)
 		m_nMenuFadeAlpha = 255;
 
