@@ -105,7 +105,7 @@ void CTimer::Update(void)
 		_oldPerfCounter = pc;
 
 		// bugfix from VC
-		float updInCyclesScaled = GetIsPaused() ? updInCycles : updInCycles * ms_fTimeScale;
+		double updInCyclesScaled = GetIsPaused() ? updInCycles : updInCycles * ms_fTimeScale;
 
 		frameTime = updInCyclesScaled / (double)_nCyclesPerMS;
 
@@ -117,8 +117,9 @@ void CTimer::Update(void)
 		RsTimerType timer = RsTimer();
 		
 		RsTimerType updInMs = timer - oldPcTimer;
-		
-		frameTime = (double)updInMs * ms_fTimeScale;
+
+		// bugfix from VC
+		frameTime = GetIsPaused() ? (double)updInMs : (double)updInMs * ms_fTimeScale;
 
 		oldPcTimer = timer;
 
