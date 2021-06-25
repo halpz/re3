@@ -1880,11 +1880,20 @@ void CParticle::Render()
 			
 			if ( canDraw && psystem->Flags & DRAWTOP2D )
 			{
-				float screenZ = (particle->m_vecPosition.z - CDraw::GetNearClipZ())
+				float screenZ;
+#ifdef FIX_BUGS
+				bool zIsZero = true;
+				if ( particle->m_vecPosition.z != 0.0f ) {
+#endif
+				screenZ = (particle->m_vecPosition.z - CDraw::GetNearClipZ())
 					* (CSprite::GetFarScreenZ() - CSprite::GetNearScreenZ())
 					* CDraw::GetFarClipZ()
 					/ ( (CDraw::GetFarClipZ() - CDraw::GetNearClipZ()) * particle->m_vecPosition.z )
 					+ CSprite::GetNearScreenZ();
+#ifdef FIX_BUGS
+				zIsZero = false;
+				}
+#endif
 				
 				float stretchTexW;
 				float stretchTexH;
@@ -1900,6 +1909,9 @@ void CParticle::Render()
 					stretchTexH = CGeneral::GetRandomNumberInRange(0.1f, 1.0f) * psystem->m_vecTextureStretch.y + 63.0f;
 				}
 
+#ifdef FIX_BUGS
+				if (!zIsZero) {
+#endif
 				
 				if ( i == PARTICLE_WATERDROP )
 				{
@@ -2001,7 +2013,10 @@ void CParticle::Render()
 					
 					canDraw = false;
 				}
-				
+#ifdef FIX_BUGS
+				}
+				if ( !(zIsZero && (i == PARTICLE_WATERDROP || i == PARTICLE_BLOODDROP || i == PARTICLE_HEATHAZE_IN_DIST || i == PARTICLE_HEATHAZE) ) )
+#endif				
 				if ( canDraw )
 				{
 					if ( particle->m_nRotation != 0 )
