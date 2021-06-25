@@ -4,8 +4,8 @@
 #include "Streaming.h"
 #include "Pools.h"
 
-void *CBuilding::operator new(size_t sz) { return CPools::GetBuildingPool()->New();  }
-void CBuilding::operator delete(void *p, size_t sz) { CPools::GetBuildingPool()->Delete((CBuilding*)p); }
+void *CBuilding::operator new(size_t sz) throw() { return CPools::GetBuildingPool()->New();  }
+void CBuilding::operator delete(void *p, size_t sz) throw() { CPools::GetBuildingPool()->Delete((CBuilding*)p); }
 
 void
 CBuilding::ReplaceWithNewModel(int32 id)

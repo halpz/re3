@@ -12,10 +12,10 @@ public:
 
 	void Reset(); /// ok
 
-	static void* operator new(size_t);
-	static void* operator new(size_t, int);
-	static void operator delete(void*, size_t);
-	static void operator delete(void*, int);
+	static void* operator new(size_t) throw();
+	static void* operator new(size_t, int) throw();
+	static void operator delete(void*, size_t) throw();
+	static void operator delete(void*, int) throw();
 
 	static void LoadAllAudioScriptObjects(uint8 *buf, uint32 size);
 	static void SaveAllAudioScriptObjects(uint8 *buf, uint32 *size);

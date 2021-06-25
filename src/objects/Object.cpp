@@ -16,10 +16,32 @@
 int16 CObject::nNoTempObjects;
 int16 CObject::nBodyCastHealth = 1000;
 
-void *CObject::operator new(size_t sz) { return CPools::GetObjectPool()->New();  }
-void *CObject::operator new(size_t sz, int handle) { return CPools::GetObjectPool()->New(handle);};
-void CObject::operator delete(void *p, size_t sz) { CPools::GetObjectPool()->Delete((CObject*)p); }
-void CObject::operator delete(void *p, int handle) { CPools::GetObjectPool()->Delete((CObject*)p); }
+// Object pools tends to be full sometimes, let's free a temp. object in this case.
+#ifdef FIX_BUGS
+void *CObject::operator new(size_t sz) throw() {
+	CObject *obj = CPools::GetObjectPool()->New();
+	if (!obj) {
+		CObjectPool *objectPool = CPools::GetObjectPool();
+		for (int32 i = 0; i < objectPool->GetSize(); i++) {
+			CObject *existing = objectPool->GetSlot(i);
+			if (existing && existing->ObjectCreatedBy == TEMP_OBJECT) {
+				int32 handle = objectPool->GetIndex(existing);
+				CWorld::Remove(existing);
+				delete existing;
+				obj = objectPool->New(handle);
+				break;
+			}
+		}
+	}
+	return obj;
+}
+#else
+void *CObject::operator new(size_t sz) throw() { return CPools::GetObjectPool()->New(); }
+#endif
+void *CObject::operator new(size_t sz, int handle) throw() { return CPools::GetObjectPool()->New(handle); };
+
+void CObject::operator delete(void *p, size_t sz) throw() { CPools::GetObjectPool()->Delete((CObject*)p); }
+void CObject::operator delete(void *p, int handle) throw() { CPools::GetObjectPool()->Delete((CObject*)p); }
 
 CObject::CObject(void)
 {

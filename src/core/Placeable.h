@@ -7,7 +7,7 @@ protected:
 
 public:
 	// disable allocation
-	static void *operator new(size_t);
+	static void *operator new(size_t) throw();
 
 	CPlaceable(void);
 	virtual ~CPlaceable(void);

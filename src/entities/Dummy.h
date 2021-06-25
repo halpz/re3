@@ -12,8 +12,8 @@ public:
 	void Add(void);
 	void Remove(void);
 
-	static void *operator new(size_t);
-	static void operator delete(void*, size_t);
+	static void *operator new(size_t) throw();
+	static void operator delete(void*, size_t) throw();
 };
 
 VALIDATE_SIZE(CDummy, 0x68);

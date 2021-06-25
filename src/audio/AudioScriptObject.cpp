@@ -23,25 +23,25 @@ cAudioScriptObject::Reset()
 }
 
 void *
-cAudioScriptObject::operator new(size_t sz)
+cAudioScriptObject::operator new(size_t sz) throw()
 {
 	return CPools::GetAudioScriptObjectPool()->New();
 }
 
 void *
-cAudioScriptObject::operator new(size_t sz, int handle)
+cAudioScriptObject::operator new(size_t sz, int handle) throw()
 {
 	return CPools::GetAudioScriptObjectPool()->New(handle);
 }
 
 void
-cAudioScriptObject::operator delete(void *p, size_t sz)
+cAudioScriptObject::operator delete(void *p, size_t sz) throw()
 {
 	CPools::GetAudioScriptObjectPool()->Delete((cAudioScriptObject *)p);
 }
 
 void
-cAudioScriptObject::operator delete(void *p, int handle)
+cAudioScriptObject::operator delete(void *p, int handle) throw()
 {
 	CPools::GetAudioScriptObjectPool()->Delete((cAudioScriptObject *)p);
 }
