@@ -81,6 +81,7 @@ public:
 	void UpdateTimeStep(float timeDelta, float relSpeed);
 	bool UpdateTime(float timeDelta, float relSpeed);
 	bool UpdateBlend(float timeDelta);
+	void Remove();
 
 	void SetRun(void) { flags |= ASSOC_RUNNING; }
 

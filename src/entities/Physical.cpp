@@ -224,7 +224,7 @@ CPhysical::RemoveAndAdd(void)
 CRect
 CPhysical::GetBoundRect(void)
 {
-	CVector center;
+	CVUVECTOR center;
 	float radius;
 	GetBoundCentre(center);
 	radius = GetBoundRadius();
@@ -463,7 +463,7 @@ CPhysical::ApplyMoveForce(float jx, float jy, float jz)
 void
 CPhysical::ApplyTurnForce(float jx, float jy, float jz, float px, float py, float pz)
 {
-	CVector com = Multiply3x3(m_matrix, m_vecCentreOfMass);
+	CVector com = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
 	CVector turnimpulse = CrossProduct(CVector(px, py, pz)-com, CVector(jx, jy, jz));
 	m_vecTurnSpeed += turnimpulse*(1.0f/m_fTurnMass);
 	m_vecTurnSpeed.x = clamp(m_vecTurnSpeed.x, -4.0f, 4.0f);
@@ -482,7 +482,7 @@ CPhysical::ApplyFrictionMoveForce(float jx, float jy, float jz)
 void
 CPhysical::ApplyFrictionTurnForce(float jx, float jy, float jz, float px, float py, float pz)
 {
-	CVector com = Multiply3x3(m_matrix, m_vecCentreOfMass);
+	CVector com = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
 	CVector turnimpulse = CrossProduct(CVector(px, py, pz)-com, CVector(jx, jy, jz));
 	m_vecTurnFriction += turnimpulse*(1.0f/m_fTurnMass);
 }
@@ -1046,7 +1046,7 @@ CPhysical::ApplyCollisionAlt(CEntity *B, CColPoint &colpoint, float &impulse, CV
 				moveSpeed += vImpulse * (1.0f/m_fMass);
 
 			// ApplyTurnForce
-			CVector com = Multiply3x3(m_matrix, m_vecCentreOfMass);
+			CVector com = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
 			CVector turnimpulse = CrossProduct(pointpos-com, vImpulse);
 			turnSpeed += turnimpulse*(1.0f/m_fTurnMass);
 
@@ -1282,7 +1282,7 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 	CPhysical *A, *B;
 	CObject *Bobj;
 	bool canshift;
-	CVector center;
+	CVUVECTOR center;
 	float radius;
 
 	int numCollisions;
@@ -1441,7 +1441,7 @@ CPhysical::ProcessCollisionSectorList_SimpleCar(CPtrList *lists)
 {
 	static CColPoint aColPoints[MAX_COLLISION_POINTS];
 	float radius;
-	CVector center;
+	CVUVECTOR center;
 	int listtype;
 	CPhysical *A, *B;
 	int numCollisions;
@@ -1608,7 +1608,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 {
 	static CColPoint aColPoints[MAX_COLLISION_POINTS];
 	float radius;
-	CVector center;
+	CVUVECTOR center;
 	CPtrList *list;
 	CPhysical *A, *B;
 	CObject *Aobj, *Bobj;

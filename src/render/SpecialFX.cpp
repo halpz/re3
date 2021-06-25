@@ -164,6 +164,7 @@ CSpecialFX::Shutdown(void)
 void
 CSpecialFX::Render(void)
 {
+	PUSH_RENDERGROUP("CSpecialFX::Render");
 	CMotionBlurStreaks::Render();
 	CBulletTraces::Render();
 	CBrightLights::Render();
@@ -173,6 +174,7 @@ CSpecialFX::Render(void)
 	if(!(gbNewRenderer && FredIsInFirstPersonCam()))
 #endif
 	C3dMarkers::Render();
+	POP_RENDERGROUP();
 }
 
 void

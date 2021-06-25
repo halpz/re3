@@ -10,9 +10,9 @@ enum Config {
 	MAX_CDIMAGES = 8, // additional cdimages
 	MAX_CDCHANNELS = 5,
 
-	MODELINFOSIZE = 6500,	// only 4900
-	TXDSTORESIZE = 1385,	// only 1200
-	COLSTORESIZE = 31,	// only 15
+	MODELINFOSIZE = 4900,
+	TXDSTORESIZE = 1200,
+	COLSTORESIZE = 15,
 	EXTRADIRSIZE = 256,
 	CUTSCENEDIRSIZE = 512,
 
@@ -100,7 +100,7 @@ enum Config {
 	NUMPACMANPICKUPS = 256,
 	NUMEVENTS = 64,
 
-	NUM_CARGENS = 500,
+	NUM_CARGENS = 195, // 500 on mobile
 
 	NUM_PATH_NODES_IN_AUTOPILOT = 8,
 
@@ -131,7 +131,6 @@ enum Config {
 	NUM_PED_COMMENTS_SLOTS = 20,
 
 	NUM_SOUNDS_SAMPLES_BANKS = 2,
-	NUM_SOUNDS_SAMPLES_SLOTS = 27,
 	NUM_AUDIOENTITIES = 250,
 
 	NUM_AUDIO_REFLECTIONS = 8,
@@ -196,6 +195,10 @@ enum Config {
 
 // those infamous texts
 #define DRAW_GAME_VERSION_TEXT
+#ifdef DRAW_GAME_VERSION_TEXT
+	// unlike R* development builds, ours has runtime switch on debug menu & .ini, and disabled as default.
+	#define USE_OUR_VERSIONING // If you disable this then game will fetch version from peds.col, as R* did while in development
+#endif
 
 // Memory allocation and compression
 // #define USE_CUSTOM_ALLOCATOR		// use CMemoryHeap for allocation. use with care, not finished yet
@@ -233,7 +236,6 @@ enum Config {
 	// not in master builds
 	#define VALIDATE_SAVE_SIZE
 
-	#define NO_MOVIES	// disable intro videos
 	#define DEBUGMENU
 #endif
 
@@ -250,10 +252,17 @@ enum Config {
 //#define MORE_LANGUAGES		// Add more translations to the game
 #define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
 #define LOAD_INI_SETTINGS // as the name suggests. fundamental for CUSTOM_FRONTEND_OPTIONS
-#define FIX_HIGH_FPS_BUGS_ON_FRONTEND
+
+#define NO_MOVIES	// add option to disable intro videos
 
 #if defined(__LP64__) || defined(_WIN64)
 #define FIX_BUGS_64 // Must have fixes to be able to run 64 bit build
+#endif
+
+#define ASCII_STRCMP // use faster ascii str comparisons
+
+#if !defined _WIN32 || defined __MWERKS__ || defined __MINGW32__ || defined VANILLA_DEFINES
+#undef ASCII_STRCMP
 #endif
 
 // Just debug menu entries
@@ -298,8 +307,8 @@ enum Config {
 #if !defined(RW_GL3) && defined(_WIN32)
 #define XINPUT
 #endif
-#if !defined(_WIN32) && !defined(__SWITCH__)
-#define DONT_TRUST_RECOGNIZED_JOYSTICKS // Then we'll only rely on GLFW gamepad DB, and expect user to enter Controller->Detect joysticks if his joystick isn't on that list.
+#if defined XINPUT || (defined RW_GL3 && !defined LIBRW_SDL2 && !defined __SWITCH__)
+#define DETECT_JOYSTICK_MENU // Then we'll expect user to enter Controller->Detect joysticks if his joystick isn't detected at the start.
 #endif
 #define DETECT_PAD_INPUT_SWITCH // Adds automatic switch of pad related stuff between controller and kb/m
 #define KANGAROO_CHEAT
@@ -307,19 +316,22 @@ enum Config {
 #define BETTER_ALLCARSAREDODO_CHEAT
 #define WALLCLIMB_CHEAT
 #define REGISTER_START_BUTTON
-//#define BIND_VEHICLE_FIREWEAPON // Adds ability to rebind fire key for 'in vehicle' controls
+#define BIND_VEHICLE_FIREWEAPON // Adds ability to rebind fire key for 'in vehicle' controls
 #define BUTTON_ICONS // use textures to show controller buttons
 
 // Hud, frontend and radar
 #define PC_MENU
-
 #define FIX_RADAR			// use radar size from early version before R* broke it
+#define RADIO_OFF_TEXT		// Won't work without FIX_BUGS
 
 #ifndef PC_MENU
 #	define PS2_MENU
 //#	define PS2_MENU_USEALLPAGEICONS
 #else
 #	define MAP_ENHANCEMENTS			// Adding waypoint and better mouse support
+#	ifdef XINPUT
+#		define GAMEPAD_MENU		// Add gamepad menu
+#	endif
 #	define TRIANGLE_BACK_BUTTON
 //#	define CIRCLE_BACK_BUTTON
 #define LEGACY_MENU_OPTIONS			// i.e. frame sync(vsync)
@@ -353,6 +365,10 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #define SCRIPT_LOG_FILE_LEVEL 1 // 0 == no log, 1 == overwrite every frame, 2 == full log
 
+#if SCRIPT_LOG_FILE_LEVEL == 0
+#undef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+#endif
+
 #ifndef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #define USE_BASIC_SCRIPT_DEBUG_OUTPUT
 #endif
@@ -382,8 +398,10 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #define FREE_CAM		// Rotating cam
 
 // Audio
-#define AUDIO_CACHE // cache sound lengths to speed up the cold boot
-#define PS2_AUDIO_PATHS // changes audio paths for cutscenes and radio to PS2 paths (needs vbdec on MSS builds)
+#define RADIO_SCROLL_TO_PREV_STATION // Won't work without FIX_BUGS
+//#define AUDIO_CACHE // cache sound lengths to speed up the cold boot
+#define PS2_AUDIO_CHANNELS // increases the maximum number of audio channels to PS2 value of 41 (PSP and mobile have 21 originally)
+//#define PS2_AUDIO_PATHS // changes audio paths for cutscenes and radio to PS2 paths (needs vbdec on MSS builds)
 //#define AUDIO_OAL_USE_SNDFILE // use libsndfile to decode WAVs instead of our internal decoder
 #define AUDIO_OAL_USE_MPG123 // use mpg123 to support mp3 files
 
@@ -399,17 +417,21 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 
 #endif
 
-#ifdef LIBRW
-// these are not supported with librw yet
+// Streaming
+#if !defined(_WIN32) && !defined(__SWITCH__)
+	//#define ONE_THREAD_PER_CHANNEL // Don't use if you're not on SSD/Flash - also not utilized too much right now(see commented LoadAllRequestedModels in Streaming.cpp)
+	#define FLUSHABLE_STREAMING // Make it possible to interrupt reading when processing file isn't needed anymore.
 #endif
-// IMG
-#define BIG_IMG // allows to read larger img files
+#define BIG_IMG // Not complete - allows to read larger img files
 
 //#define SQUEEZE_PERFORMANCE
 #ifdef SQUEEZE_PERFORMANCE
 	#undef PS2_ALPHA_TEST
 	#undef NO_ISLAND_LOADING
+	#undef PS2_AUDIO_CHANNELS
 #endif
+
+// -------
 
 #if defined __MWERKS__ || defined VANILLA_DEFINES
 #define FINAL
@@ -436,7 +458,6 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #undef MORE_LANGUAGES
 #undef COMPATIBLE_SAVES
 #undef LOAD_INI_SETTINGS
-#undef FIX_HIGH_FPS_BUGS_ON_FRONTEND
 
 #undef ASPECT_RATIO_SCALE
 #undef PROPER_SCALING
@@ -465,8 +486,10 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #undef BUTTON_ICONS
 
 #undef FIX_RADAR
+#undef RADIO_OFF_TEXT
 
 #undef MAP_ENHANCEMENTS
+#undef GAMEPAD_MENU
 #undef MUCH_SHORTER_OUTRO_SCREEN
 #undef CUSTOM_FRONTEND_OPTIONS
 
@@ -493,4 +516,6 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #undef IMPROVED_CAMERA
 #undef FREE_CAM
 #undef BIG_IMG
+#undef PS2_AUDIO_CHANNELS
+#undef RADIO_SCROLL_TO_PREV_STATION
 #endif

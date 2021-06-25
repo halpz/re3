@@ -50,11 +50,30 @@ long _dwOperatingSystemVersion;
 #include "Font.h"
 #include "MemoryMgr.h"
 
+// We found out that GLFW's keyboard input handling is still pretty delayed/not stable, so now we fetch input from X11 directly on Linux.
+#if !defined _WIN32 && !defined __APPLE__ && !defined __SWITCH__ // && !defined WAYLAND
+#define GET_KEYBOARD_INPUT_FROM_X11
+#endif
+
+#ifdef GET_KEYBOARD_INPUT_FROM_X11
+#include <X11/Xlib.h>
+#include <X11/XKBlib.h>
+#define GLFW_EXPOSE_NATIVE_X11
+#include <GLFW/glfw3native.h>
+#endif
+
+#ifdef _WIN32
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+#endif
+
 #define MAX_SUBSYSTEMS		(16)
 
 rw::EngineOpenParams openParams;
 
 static RwBool		  ForegroundApp = TRUE;
+static RwBool		  WindowIconified = FALSE;
+static RwBool		  WindowFocused = TRUE;
 
 static RwBool		  RwInitialised = FALSE;
 
@@ -80,7 +99,7 @@ static psGlobalType PsGlobal;
 size_t _dwMemAvailPhys;
 RwUInt32 gGameState;
 
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 char gSelectedJoystickName[128] = "";
 #endif
 
@@ -207,6 +226,7 @@ psGrabScreen(RwCamera *pCamera)
 	}
 #else
 	rw::Image *image = RwCameraGetRaster(pCamera)->toImage();
+	image->removeMask();
 	if(image)
 		return image;
 #endif
@@ -319,7 +339,9 @@ psInitialize(void)
 	RsGlobal.ps = &PsGlobal;
 	
 	PsGlobal.fullScreen = FALSE;
-	PsGlobal.cursorIsInWindow = TRUE;
+	PsGlobal.cursorIsInWindow = FALSE;
+	WindowFocused = TRUE;
+	WindowIconified = FALSE;
 	
 	PsGlobal.joy1id	= -1;
 	PsGlobal.joy2id	= -1;
@@ -843,16 +865,20 @@ psSelectDevice()
 	return TRUE;
 }
 
+#ifndef GET_KEYBOARD_INPUT_FROM_X11
 void keypressCB(GLFWwindow* window, int key, int scancode, int action, int mods);
+#endif
 void resizeCB(GLFWwindow* window, int width, int height);
 void scrollCB(GLFWwindow* window, double xoffset, double yoffset);
 void cursorCB(GLFWwindow* window, double xpos, double ypos);
 void cursorEnterCB(GLFWwindow* window, int entered);
+void windowFocusCB(GLFWwindow* window, int focused);
+void windowIconifyCB(GLFWwindow* window, int iconified);
 void joysChangeCB(int jid, int event);
 
 bool IsThisJoystickBlacklisted(int i)
 {
-#ifndef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifndef DETECT_JOYSTICK_MENU
 	return false;
 #else
 	if (glfwJoystickIsGamepad(i))
@@ -917,7 +943,7 @@ void _InputInitialiseJoys()
 	if (PSGLOBAL(joy1id) != -1) {
 		int count;
 		glfwGetJoystickButtons(PSGLOBAL(joy1id), &count);
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 		strcpy(gSelectedJoystickName, glfwGetJoystickName(PSGLOBAL(joy1id)));
 #endif
 		ControlsManager.InitDefaultControlConfigJoyPad(count);
@@ -956,11 +982,15 @@ void psPostRWinit(void)
 	RwVideoMode vm;
 	RwEngineGetVideoModeInfo(&vm, GcurSelVM);
 
+#ifndef GET_KEYBOARD_INPUT_FROM_X11
 	glfwSetKeyCallback(PSGLOBAL(window), keypressCB);
+#endif
 	glfwSetFramebufferSizeCallback(PSGLOBAL(window), resizeCB);
 	glfwSetScrollCallback(PSGLOBAL(window), scrollCB);
 	glfwSetCursorPosCallback(PSGLOBAL(window), cursorCB);
 	glfwSetCursorEnterCallback(PSGLOBAL(window), cursorEnterCB);
+	glfwSetWindowIconifyCallback(PSGLOBAL(window), windowIconifyCB);
+	glfwSetWindowFocusCallback(PSGLOBAL(window), windowFocusCB);
 	glfwSetJoystickCallback(joysChangeCB);
 
 	_InputInitialiseJoys();
@@ -1271,10 +1301,11 @@ void terminateHandler(int sig, siginfo_t *info, void *ucontext) {
 	RsGlobal.quit = TRUE;
 }
 
+#ifdef FLUSHABLE_STREAMING
 void dummyHandler(int sig){
 	// Don't kill the app pls
 }
-
+#endif
 #endif
 
 void resizeCB(GLFWwindow* window, int width, int height) {
@@ -1311,6 +1342,10 @@ void scrollCB(GLFWwindow* window, double xoffset, double yoffset) {
 	PSGLOBAL(mouseWheel) = yoffset;
 }
 
+bool lshiftStatus = false;
+bool rshiftStatus = false;
+
+#ifndef GET_KEYBOARD_INPUT_FROM_X11
 int keymap[GLFW_KEY_LAST + 1];
 
 static void
@@ -1441,13 +1476,10 @@ initkeymap(void)
 	keymap[GLFW_KEY_MENU] = rsNULL;
 }
 
-bool lshiftStatus = false;
-bool rshiftStatus = false;
-
 void
 keypressCB(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	if (key >= 0 && key <= GLFW_KEY_LAST) {
+	if (key >= 0 && key <= GLFW_KEY_LAST && action != GLFW_REPEAT) {
 		RsKeyCodes ks = (RsKeyCodes)keymap[key];
 
 		if (key == GLFW_KEY_LEFT_SHIFT)
@@ -1458,9 +1490,268 @@ keypressCB(GLFWwindow* window, int key, int scancode, int action, int mods)
 
 		if (action == GLFW_RELEASE) RsKeyboardEventHandler(rsKEYUP, &ks);
 		else if (action == GLFW_PRESS) RsKeyboardEventHandler(rsKEYDOWN, &ks);
-		else if (action == GLFW_REPEAT) RsKeyboardEventHandler(rsKEYDOWN, &ks);
 	}
 }
+
+#else
+
+uint32 keymap[512]; // 256 ascii + 256 KeySyms between 0xff00 - 0xffff
+bool keyStates[512];
+uint32 keyCodeToKeymapIndex[256]; // cache for physical keys
+
+#define KEY_MAP_OFFSET (0xff00 - 256)
+static void
+initkeymap(void)
+{
+	Display *display = glfwGetX11Display();
+	int i;
+
+	for (i = 0; i < ARRAY_SIZE(keymap); i++)
+		keymap[i] = rsNULL;
+
+	// You can add new ASCII mappings to here freely (but beware that if right hand side of assignment isn't supported on CFont, it'll be blank/won't work on binding screen)
+	// Right hand side of assigments should always be uppercase counterpart of character
+	keymap[XK_space] = ' ';
+	keymap[XK_apostrophe] = '\'';
+	keymap[XK_ampersand] = '&';
+	keymap[XK_percent] = '%';
+	keymap[XK_dollar] = '$';
+	keymap[XK_comma] = ',';
+	keymap[XK_minus] = '-';
+	keymap[XK_period] = '.';
+	keymap[XK_slash] = '/';
+	keymap[XK_question] = '?';
+	keymap[XK_exclam] = '!';
+	keymap[XK_quotedbl] = '"';
+	keymap[XK_colon] = ':';
+	keymap[XK_semicolon] = ';';
+	keymap[XK_equal] = '=';
+	keymap[XK_bracketleft] = '[';
+	keymap[XK_backslash] = '\\';
+	keymap[XK_bracketright] = ']';
+	keymap[XK_grave] = '`';
+	keymap[XK_0] = '0';
+	keymap[XK_1] = '1';
+	keymap[XK_2] = '2';
+	keymap[XK_3] = '3';
+	keymap[XK_4] = '4';
+	keymap[XK_5] = '5';
+	keymap[XK_6] = '6';
+	keymap[XK_7] = '7';
+	keymap[XK_8] = '8';
+	keymap[XK_9] = '9';
+	keymap[XK_a] = 'A';
+	keymap[XK_b] = 'B';
+	keymap[XK_c] = 'C';
+	keymap[XK_d] = 'D';
+	keymap[XK_e] = 'E';
+	keymap[XK_f] = 'F';
+	keymap[XK_g] = 'G';
+	keymap[XK_h] = 'H';
+	keymap[XK_i] = 'I';
+	keymap[XK_I] = 'I'; // Turkish I problem
+	keymap[XK_j] = 'J';
+	keymap[XK_k] = 'K';
+	keymap[XK_l] = 'L';
+	keymap[XK_m] = 'M';
+	keymap[XK_n] = 'N';
+	keymap[XK_o] = 'O';
+	keymap[XK_p] = 'P';
+	keymap[XK_q] = 'Q';
+	keymap[XK_r] = 'R';
+	keymap[XK_s] = 'S';
+	keymap[XK_t] = 'T';
+	keymap[XK_u] = 'U';
+	keymap[XK_v] = 'V';
+	keymap[XK_w] = 'W';
+	keymap[XK_x] = 'X';
+	keymap[XK_y] = 'Y';
+	keymap[XK_z] = 'Z';
+
+	// Some of regional but ASCII characters that GTA supports
+	keymap[XK_agrave] = 0x00c0;
+	keymap[XK_aacute] = 0x00c1;
+	keymap[XK_acircumflex] = 0x00c2;
+	keymap[XK_adiaeresis] = 0x00c4;
+
+	keymap[XK_ae] = 0x00c6;
+
+	keymap[XK_egrave] = 0x00c8;
+	keymap[XK_eacute] = 0x00c9;
+	keymap[XK_ecircumflex] = 0x00ca;
+	keymap[XK_ediaeresis] = 0x00cb;
+
+	keymap[XK_igrave] = 0x00cc;
+	keymap[XK_iacute] = 0x00cd;
+	keymap[XK_icircumflex] = 0x00ce;
+	keymap[XK_idiaeresis] = 0x00cf;
+
+	keymap[XK_ccedilla] = 0x00c7;
+	keymap[XK_odiaeresis] = 0x00d6;
+	keymap[XK_udiaeresis] = 0x00dc;
+
+	// These are 0xff00 - 0xffff range of KeySym's, and subtracting KEY_MAP_OFFSET is needed
+	keymap[XK_Escape - KEY_MAP_OFFSET] = rsESC;
+	keymap[XK_Return - KEY_MAP_OFFSET] = rsENTER;
+	keymap[XK_Tab - KEY_MAP_OFFSET] = rsTAB;
+	keymap[XK_BackSpace - KEY_MAP_OFFSET] = rsBACKSP;
+	keymap[XK_Insert - KEY_MAP_OFFSET] = rsINS;
+	keymap[XK_Delete - KEY_MAP_OFFSET] = rsDEL;
+	keymap[XK_Right - KEY_MAP_OFFSET] = rsRIGHT;
+	keymap[XK_Left - KEY_MAP_OFFSET] = rsLEFT;
+	keymap[XK_Down - KEY_MAP_OFFSET] = rsDOWN;
+	keymap[XK_Up - KEY_MAP_OFFSET] = rsUP;
+	keymap[XK_Page_Up - KEY_MAP_OFFSET] = rsPGUP;
+	keymap[XK_Page_Down - KEY_MAP_OFFSET] = rsPGDN;
+	keymap[XK_Home - KEY_MAP_OFFSET] = rsHOME;
+	keymap[XK_End - KEY_MAP_OFFSET] = rsEND;
+	keymap[XK_Caps_Lock - KEY_MAP_OFFSET] = rsCAPSLK;
+	keymap[XK_Scroll_Lock - KEY_MAP_OFFSET] = rsSCROLL;
+	keymap[XK_Num_Lock - KEY_MAP_OFFSET] = rsNUMLOCK;
+	keymap[XK_Pause - KEY_MAP_OFFSET] = rsPAUSE;
+
+	keymap[XK_F1 - KEY_MAP_OFFSET] = rsF1;
+	keymap[XK_F2 - KEY_MAP_OFFSET] = rsF2;
+	keymap[XK_F3 - KEY_MAP_OFFSET] = rsF3;
+	keymap[XK_F4 - KEY_MAP_OFFSET] = rsF4;
+	keymap[XK_F5 - KEY_MAP_OFFSET] = rsF5;
+	keymap[XK_F6 - KEY_MAP_OFFSET] = rsF6;
+	keymap[XK_F7 - KEY_MAP_OFFSET] = rsF7;
+	keymap[XK_F8 - KEY_MAP_OFFSET] = rsF8;
+	keymap[XK_F9 - KEY_MAP_OFFSET] = rsF9;
+	keymap[XK_F10 - KEY_MAP_OFFSET] = rsF10;
+	keymap[XK_F11 - KEY_MAP_OFFSET] = rsF11;
+	keymap[XK_F12 - KEY_MAP_OFFSET] = rsF12;
+	keymap[XK_F13 - KEY_MAP_OFFSET] = rsNULL;
+	keymap[XK_F14 - KEY_MAP_OFFSET] = rsNULL;
+	keymap[XK_F15 - KEY_MAP_OFFSET] = rsNULL;
+	keymap[XK_F16 - KEY_MAP_OFFSET] = rsNULL;
+	keymap[XK_F17 - KEY_MAP_OFFSET] = rsNULL;
+	keymap[XK_F18 - KEY_MAP_OFFSET] = rsNULL;
+	keymap[XK_F19 - KEY_MAP_OFFSET] = rsNULL;
+	keymap[XK_F20 - KEY_MAP_OFFSET] = rsNULL;
+	keymap[XK_F21 - KEY_MAP_OFFSET] = rsNULL;
+	keymap[XK_F22 - KEY_MAP_OFFSET] = rsNULL;
+	keymap[XK_F23 - KEY_MAP_OFFSET] = rsNULL;
+	keymap[XK_F24 - KEY_MAP_OFFSET] = rsNULL;
+	keymap[XK_F25 - KEY_MAP_OFFSET] = rsNULL;
+
+	keymap[XK_KP_0 - KEY_MAP_OFFSET] = rsPADINS;
+	keymap[XK_KP_1 - KEY_MAP_OFFSET] = rsPADEND;
+	keymap[XK_KP_2 - KEY_MAP_OFFSET] = rsPADDOWN;
+	keymap[XK_KP_3 - KEY_MAP_OFFSET] = rsPADPGDN;
+	keymap[XK_KP_4 - KEY_MAP_OFFSET] = rsPADLEFT;
+	keymap[XK_KP_5 - KEY_MAP_OFFSET] = rsPAD5;
+	keymap[XK_KP_6 - KEY_MAP_OFFSET] = rsPADRIGHT;
+	keymap[XK_KP_7 - KEY_MAP_OFFSET] = rsPADHOME;
+	keymap[XK_KP_8 - KEY_MAP_OFFSET] = rsPADUP;
+	keymap[XK_KP_9 - KEY_MAP_OFFSET] = rsPADPGUP;
+	keymap[XK_KP_Insert - KEY_MAP_OFFSET] = rsPADINS;
+	keymap[XK_KP_End - KEY_MAP_OFFSET] = rsPADEND;
+	keymap[XK_KP_Down - KEY_MAP_OFFSET] = rsPADDOWN;
+	keymap[XK_KP_Page_Down - KEY_MAP_OFFSET] = rsPADPGDN;
+	keymap[XK_KP_Left - KEY_MAP_OFFSET] = rsPADLEFT;
+	keymap[XK_KP_Begin - KEY_MAP_OFFSET] = rsPAD5;
+	keymap[XK_KP_Right - KEY_MAP_OFFSET] = rsPADRIGHT;
+	keymap[XK_KP_Home - KEY_MAP_OFFSET] = rsPADHOME;
+	keymap[XK_KP_Up - KEY_MAP_OFFSET] = rsPADUP;
+	keymap[XK_KP_Page_Up - KEY_MAP_OFFSET] = rsPADPGUP;
+
+	keymap[XK_KP_Decimal - KEY_MAP_OFFSET] = rsPADDEL;
+	keymap[XK_KP_Divide - KEY_MAP_OFFSET] = rsDIVIDE;
+	keymap[XK_KP_Multiply - KEY_MAP_OFFSET] = rsTIMES;
+	keymap[XK_KP_Subtract - KEY_MAP_OFFSET] = rsMINUS;
+	keymap[XK_KP_Add - KEY_MAP_OFFSET] = rsPLUS;
+	keymap[XK_KP_Enter - KEY_MAP_OFFSET] = rsPADENTER;
+	keymap[XK_KP_Equal - KEY_MAP_OFFSET] = rsNULL;
+	keymap[XK_Shift_L - KEY_MAP_OFFSET] = rsLSHIFT;
+	keymap[XK_Control_L - KEY_MAP_OFFSET] = rsLCTRL;
+	keymap[XK_Alt_L - KEY_MAP_OFFSET] = rsLALT;
+	keymap[XK_Super_L - KEY_MAP_OFFSET] = rsLWIN;
+	keymap[XK_Shift_R - KEY_MAP_OFFSET] = rsRSHIFT;
+	keymap[XK_Control_R - KEY_MAP_OFFSET] = rsRCTRL;
+	keymap[XK_Alt_R - KEY_MAP_OFFSET] = rsRALT;
+	keymap[XK_Super_R - KEY_MAP_OFFSET] = rsRWIN;
+	keymap[XK_Menu - KEY_MAP_OFFSET] = rsNULL;
+
+	// Cache the key codes' key symbol equivelants, otherwise we will have to do it on each frame
+	// KeyCode is always in [0,255], and represents a physical key
+
+	int min_keycode, max_keycode, keysyms_per_keycode;
+	KeySym *keymap, *origkeymap;
+
+	char *keyboardLang = setlocale (LC_CTYPE, NULL);
+	setlocale(LC_CTYPE, "");
+
+	XDisplayKeycodes(display, &min_keycode, &max_keycode);
+	origkeymap = XGetKeyboardMapping(display, min_keycode, (max_keycode - min_keycode + 1), &keysyms_per_keycode);
+	keymap = origkeymap;
+	for (int i = min_keycode; i <= max_keycode; i++) {
+		int  j, lastKeysym;
+
+		lastKeysym = keysyms_per_keycode - 1;
+		while ((lastKeysym >= 0) && (keymap[lastKeysym] == NoSymbol))
+			lastKeysym--;
+
+		for (j = 0; j <= lastKeysym; j++) {
+			KeySym ks = keymap[j];
+
+			if (ks == NoSymbol)
+				continue;
+
+			if (ks < 256) {
+				keyCodeToKeymapIndex[i] = ks;
+				break;
+			} else if (ks >= 0xff00 && ks < 0xffff) {
+				keyCodeToKeymapIndex[i] = ks - KEY_MAP_OFFSET;
+				break;
+			}
+		}
+		keymap += keysyms_per_keycode;
+	}
+	XFree(origkeymap);
+
+	setlocale(LC_CTYPE, keyboardLang);
+}
+#undef KEY_MAP_OFFSET
+
+void checkKeyPresses()
+{
+	Display *display = glfwGetX11Display();
+	char keys[32];
+	XQueryKeymap(display, keys);
+	for (int i = 0; i < sizeof(keys); i++) {
+		for (int j = 0; j < 8; j++) {
+			KeyCode keycode = 8 * i + j;
+			uint32 keymapIndex = keyCodeToKeymapIndex[keycode];
+			if (keymapIndex != 0) {
+				int rsCode = keymap[keymapIndex];
+				if (rsCode == rsNULL)
+					continue;
+
+				bool pressed = WindowFocused && !!(keys[i] & (1 << j));
+
+				// idk why R* does that
+				if (rsCode == rsLSHIFT)
+					lshiftStatus = pressed;
+				else if (rsCode == rsRSHIFT)
+					rshiftStatus = pressed;
+
+				if (keyStates[keymapIndex] != pressed) {
+					if (pressed) {
+						RsKeyboardEventHandler(rsKEYDOWN, &rsCode);
+					} else {
+						RsKeyboardEventHandler(rsKEYUP, &rsCode);
+					}
+				}
+
+				keyStates[keymapIndex] = pressed;
+			}
+		}
+	}
+
+}
+#endif
 
 // R* calls that in ControllerConfig, idk why
 void
@@ -1484,6 +1775,16 @@ cursorCB(GLFWwindow* window, double xpos, double ypos) {
 void
 cursorEnterCB(GLFWwindow* window, int entered) {
 	PSGLOBAL(cursorIsInWindow) = !!entered;
+}
+
+void
+windowFocusCB(GLFWwindow* window, int focused) {
+	WindowFocused = !!focused;
+}
+
+void
+windowIconifyCB(GLFWwindow* window, int iconified) {
+	WindowIconified = !!iconified;
 }
 
 /*
@@ -1528,11 +1829,13 @@ main(int argc, char *argv[])
 	act.sa_sigaction = terminateHandler;
 	act.sa_flags = SA_SIGINFO;
 	sigaction(SIGTERM, &act, NULL);
+#ifdef FLUSHABLE_STREAMING
 	struct sigaction sa;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_handler = dummyHandler;
 	sa.sa_flags = 0;
-	sigaction(SIGUSR1, &sa, NULL); // Needed for CdStreamPosix
+	sigaction(SIGUSR1, &sa, NULL);
+#endif
 #endif
 
 	/* 
@@ -1588,6 +1891,15 @@ main(int argc, char *argv[])
 
 		return 0;
 	}
+
+#ifdef _WIN32
+	HWND wnd = glfwGetWin32Window(PSGLOBAL(window));
+
+	HICON icon = LoadIcon(instance, MAKEINTRESOURCE(IDI_MAIN_ICON));
+
+	SendMessage(wnd, WM_SETICON, ICON_BIG, (LPARAM)icon);
+	SendMessage(wnd, WM_SETICON, ICON_SMALL, (LPARAM)icon);
+#endif
 
 	psPostRWinit();
 
@@ -1727,6 +2039,9 @@ main(int argc, char *argv[])
 #endif
 		{
 			glfwPollEvents();
+#ifdef GET_KEYBOARD_INPUT_FROM_X11
+			checkKeyPresses();
+#endif
 #ifndef MASTER
 			if (gbModelViewer) {
 				// This is TheModelViewerCore in LCS
@@ -1865,7 +2180,7 @@ main(int argc, char *argv[])
 					
 					case GS_FRONTEND:
 					{
-						if(!glfwGetWindowAttrib(PSGLOBAL(window), GLFW_ICONIFIED))
+						if(!WindowIconified)
 							RsEventHandler(rsFRONTENDIDLE, nil);
 
 #ifdef PS2_MENU
@@ -2180,7 +2495,7 @@ void joysChangeCB(int jid, int event)
 	if (event == GLFW_CONNECTED && !IsThisJoystickBlacklisted(jid)) {
 		if (PSGLOBAL(joy1id) == -1) {
 			PSGLOBAL(joy1id) = jid;
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 			strcpy(gSelectedJoystickName, glfwGetJoystickName(jid));
 #endif
 			// This is behind LOAD_INI_SETTINGS, because otherwise the Init call below will destroy/overwrite your bindings.

@@ -64,7 +64,7 @@ CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType
 	float fRadius = pVehicle->GetBoundRadius() / pPoliceColModel->boundingSphere.radius;
 	for (int32 i = 0; i < 2; i++) {
 		const int32 roadBlockIndex = i + 2 * roadBlockType;
-		CVector posForZ = pVehicle->m_matrix * (fRadius * vecRoadBlockOffets[roadBlockIndex]);
+		CVector posForZ = pVehicle->GetMatrix() * (fRadius * vecRoadBlockOffets[roadBlockIndex]);
 		int32 modelInfoId = MI_COP;
 		eCopType copType = COP_STREET;
 		switch (pVehicle->GetModelIndex())
@@ -239,10 +239,10 @@ CRoadBlocks::CreateRoadBlockBetween2Points(CVector point1, CVector point2)
 			pVehicle->SetStatus(STATUS_ABANDONED);
 			// pVehicle->GetHeightAboveRoad(); // called but return value is ignored?
 			tmp.GetPosition().z += fModelRadius - 0.6f;
-			pVehicle->m_matrix = tmp;
+			pVehicle->SetMatrix(tmp);
 			pVehicle->PlaceOnRoadProperly();
 			pVehicle->SetIsStatic(false);
-			pVehicle->m_matrix.UpdateRW();
+			pVehicle->GetMatrix().UpdateRW();
 			pVehicle->m_nDoorLock = CARLOCK_UNLOCKED;
 			CCarCtrl::JoinCarWithRoadSystem(pVehicle);
 			pVehicle->bIsLocked = false;

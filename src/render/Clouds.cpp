@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include "main.h"
 #include "Sprite.h"
 #include "Sprite2d.h"
 #include "General.h"
@@ -118,6 +119,8 @@ CClouds::Render(void)
 
 	if(!CGame::CanSeeOutSideFromCurrArea())
 		return;
+
+	PUSH_RENDERGROUP("CClouds::Render");
 
 	CCoronas::SunBlockedByClouds = false;
 
@@ -301,6 +304,8 @@ CClouds::Render(void)
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+
+	POP_RENDERGROUP();
 }
 
 bool
@@ -313,6 +318,8 @@ void
 CClouds::RenderBackground(int16 topred, int16 topgreen, int16 topblue,
 	int16 botred, int16 botgreen, int16 botblue, int16 alpha)
 {
+	PUSH_RENDERGROUP("CClouds::RenderBackground");
+
 	CVector right = CrossProduct(TheCamera.GetUp(), TheCamera.GetForward());
 	right.Normalise();
 	float c = right.Magnitude2D();
@@ -415,6 +422,8 @@ CClouds::RenderBackground(int16 topred, int16 topgreen, int16 topblue,
 		ms_colourBottom.g = fogg;
 		ms_colourBottom.b = fogb;
 	}
+
+	POP_RENDERGROUP();
 }
 
 void
@@ -422,6 +431,8 @@ CClouds::RenderHorizon(void)
 {
 	if(UseDarkBackground())
 		return;
+
+	PUSH_RENDERGROUP("CClouds::RenderHorizon");
 
 	ms_colourBottom.a = 230;
 	ms_colourTop.a = 80;
@@ -457,4 +468,6 @@ CClouds::RenderHorizon(void)
 
 	CSprite2d::DrawAnyRect(0.0f, topleft,  SCREEN_WIDTH, topright,  0.0f, botleft,  SCREEN_WIDTH, botright,
 		ms_colourBkGrd, ms_colourBkGrd, ms_colourBkGrd, ms_colourBkGrd);
+
+	POP_RENDERGROUP();
 }

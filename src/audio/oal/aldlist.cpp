@@ -24,12 +24,6 @@
 
 #include "aldlist.h"
 
-#ifndef _WIN32
-#define _stricmp strcasecmp
-#define _strnicmp strncasecmp
-#define _strdup strdup
-#endif
-
 #ifdef AUDIO_OAL
 /* 
  * Init call
@@ -47,8 +41,8 @@ ALDeviceList::ALDeviceList()
 	defaultDeviceIndex = 0;
 
 	if (alcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT")) {
-		devices = (char *)alcGetString(NULL, ALC_DEVICE_SPECIFIER);
-		defaultDeviceName = (char *)alcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER);
+		devices = (char *)alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
+		defaultDeviceName = (char *)alcGetString(NULL, ALC_DEFAULT_ALL_DEVICES_SPECIFIER);
 		
 		index = 0;
 		// go through device list (each device terminated with a single NULL, list terminated with double NULL)
@@ -62,17 +56,11 @@ ALDeviceList::ALDeviceList()
 				if (context) {
 					alcMakeContextCurrent(context);
 					// if new actual device name isn't already in the list, then add it...
-					actualDeviceName = alcGetString(device, ALC_DEVICE_SPECIFIER);
-					bool bNewName = true;
-					for (unsigned int i = 0; i < GetNumDevices(); i++) {
-						if (strcmp(GetDeviceName(i), actualDeviceName) == 0) {
-							bNewName = false;
-						}
-					}
-					if ((bNewName) && (actualDeviceName != NULL) && (strlen(actualDeviceName) > 0)) {
-						ALDEVICEINFO ALDeviceInfo;
+					actualDeviceName = alcGetString(device, ALC_ALL_DEVICES_SPECIFIER);
+					if ((actualDeviceName != NULL) && (strlen(actualDeviceName) > 0)) {
+						ALDEVICEINFO &ALDeviceInfo = aDeviceInfo[nNumOfDevices++];
 						ALDeviceInfo.bSelected = true;
-						ALDeviceInfo.strDeviceName = _strdup(actualDeviceName);
+						ALDeviceInfo.SetName(actualDeviceName);
 						alcGetIntegerv(device, ALC_MAJOR_VERSION, sizeof(int), &ALDeviceInfo.iMajorVersion);
 						alcGetIntegerv(device, ALC_MINOR_VERSION, sizeof(int), &ALDeviceInfo.iMinorVersion);
 
@@ -105,8 +93,6 @@ ALDeviceList::ALDeviceList()
 
 						// Get Source Count
 						ALDeviceInfo.uiSourceCount = GetMaxNumSources();
-
-						aDeviceInfo[nNumOfDevices++] = ALDeviceInfo;
 					}
 					alcMakeContextCurrent(NULL);
 					alcDestroyContext(context);

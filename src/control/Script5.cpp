@@ -1002,10 +1002,10 @@ void CRunningScript::PlayerInAngledAreaCheckCommand(int32 command, uint32* pIp)
 		initAngle -= TWOPI;
 	// it looks like the idea is to use a rectangle using the diagonal of the rectangle as
 	// the side of new rectangle, with "length" being the length of second side
-	float rotatedSupX = supX + side2length * sin(initAngle);
-	float rotatedSupY = supY - side2length * cos(initAngle);
-	float rotatedInfX = infX + side2length * sin(initAngle);
-	float rotatedInfY = infY - side2length * cos(initAngle);
+	float rotatedSupX = supX + side2length * Sin(initAngle);
+	float rotatedSupY = supY - side2length * Cos(initAngle);
+	float rotatedInfX = infX + side2length * Sin(initAngle);
+	float rotatedInfY = infY - side2length * Cos(initAngle);
 	float side1X = supX - infX;
 	float side1Y = supY - infY;
 	float side1Length = CVector2D(side1X, side1Y).Magnitude();
@@ -2674,10 +2674,10 @@ bool CTheScripts::IsPlayerStopped(CPlayerInfo* pPlayer)
 	CPed* pPed = pPlayer->m_pPed;
 	if (pPed->InVehicle())
 		return IsVehicleStopped(pPed->m_pMyVehicle);
-	if (RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_RUN_STOP) ||
-		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_RUN_STOP_R) ||
-		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_JUMP_LAUNCH) ||
-		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_JUMP_GLIDE))
+	if (RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_STD_RUNSTOP1) ||
+		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_STD_RUNSTOP2) ||
+		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_STD_JUMP_LAUNCH) ||
+		RpAnimBlendClumpGetAssociation(pPed->GetClump(), ANIM_STD_JUMP_GLIDE))
 		return false;
 	return (pPed->m_nMoveState == PEDMOVE_NONE || pPed->m_nMoveState == PEDMOVE_STILL) &&
 		!pPed->bIsInTheAir && !pPed->bIsLanding && pPed->bIsStanding && pPed->m_vecAnimMoveDelta.x == 0.0f && pPed->m_vecAnimMoveDelta.y == 0.0f;

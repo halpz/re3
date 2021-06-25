@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include "main.h"
 #include "Antennas.h"
 
 CAntenna CAntennas::aAntennas[NUMANTENNAS];
@@ -70,6 +71,7 @@ CAntennas::Render(void)
 {
 	int i, j;
 
+	PUSH_RENDERGROUP("CAntennas::Render");
 	for(i = 0; i < NUMANTENNAS; i++){
 		if(!aAntennas[i].active)
 			continue;
@@ -101,6 +103,8 @@ CAntennas::Render(void)
 	}
 
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+
+	POP_RENDERGROUP();
 }
 
 void

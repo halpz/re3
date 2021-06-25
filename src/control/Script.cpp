@@ -2104,7 +2104,7 @@ void CMissionCleanup::Process()
 	CWorld::Players[0].m_bDriveByAllowed = true;
 	CPad::GetPad(0)->unk_B4 = 1.0f;
 	CPad::GetPad(0)->unk_B8 = 0.5f;
-	DMAudio.ShutUpPlayerTalking(0);
+	DMAudio.ShutUpPlayerTalking(FALSE);
 	CVehicle::bDisableRemoteDetonation = false;
 	CVehicle::bDisableRemoteDetonationOnContact = false;
 	CTheScripts::RiotIntensity = 0;
@@ -5165,7 +5165,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 			pPlayer->m_pPed->m_pVehicleAnim->blendDelta = -1000.0f;
 		pPlayer->m_pPed->m_pVehicleAnim = nil;
 		pPlayer->m_pPed->SetMoveState(PEDMOVE_NONE);
-		CAnimManager::BlendAnimation(pPlayer->m_pPed->GetClump(), pPlayer->m_pPed->m_animGroup, ANIM_IDLE_STANCE, 1000.0f);
+		CAnimManager::BlendAnimation(pPlayer->m_pPed->GetClump(), pPlayer->m_pPed->m_animGroup, ANIM_STD_IDLE, 1000.0f);
 		pPlayer->m_pPed->RestartNonPartialAnims();
 		AudioManager.PlayerJustLeftCar();
 		pos.z += pPlayer->m_pPed->GetDistanceFromCentreOfMassToBaseOfModel();

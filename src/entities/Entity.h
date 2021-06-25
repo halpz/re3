@@ -45,6 +45,7 @@ private:
 	uint32 m_status : 5;
 public:
 	// flagsA
+	// LCS flagsB 02
 	uint32 bUsesCollision : 1;			// does entity use collision
 	uint32 bCollisionProcessed : 1;		// has object been processed by a ProcessEntityCollision function
 	uint32 bIsStatic : 1;				// is entity static
@@ -52,6 +53,7 @@ public:
 	uint32 bPedPhysics : 1;
 	uint32 bIsStuck : 1;				// is entity stuck
 	uint32 bIsInSafePosition : 1;		// is entity in a collision free safe position
+	// LCS flagsC
 	uint32 bUseCollisionRecords : 1;
 
 	// flagsB
@@ -62,6 +64,7 @@ public:
 	uint32 bRenderScorched : 1;
 	uint32 bHasBlip : 1;
 	uint32 bIsBIGBuilding : 1;			// Set if this entity is a big building
+	// LCS flagsD
 	uint32 bStreamBIGBuilding : 1;	// set when draw dist <= 2000
 
 	// flagsC
@@ -72,6 +75,7 @@ public:
 	uint32 bMeleeProof : 1;
 	uint32 bOnlyDamagedByPlayer : 1;
 	uint32 bStreamingDontDelete : 1;	// Dont let the streaming remove this 
+	// LCS flagsE
 	uint32 bRemoveFromWorld : 1;		// remove this entity next time it should be processed
 
 	// flagsD
@@ -82,16 +86,23 @@ public:
 	uint32 bDrawLast : 1;				// draw object last
 	uint32 bNoBrightHeadLights : 1;
 	uint32 bDoNotRender : 1;	//-- only applies to CObjects apparently
+	// LCS flagsF
 	uint32 bDistanceFade : 1;			// Fade entity because it is far away
 
 	// flagsE
 	uint32 m_flagE1 : 1;
-	uint32 m_flagE2 : 1;
+	uint32 bDontCastShadowsOn : 1;       // Dont cast shadows on this object
 	uint32 bOffscreen : 1;               // offscreen flag. This can only be trusted when it is set to true
 	uint32 bIsStaticWaitingForCollision : 1; // this is used by script created entities - they are static until the collision is loaded below them
 	uint32 bDontStream : 1;              // tell the streaming not to stream me
 	uint32 bUnderwater : 1;              // this object is underwater change drawing order
 	uint32 bHasPreRenderEffects : 1; // Object has a prerender effects attached to it
+
+	// LCS flagsG
+	uint32 bIsTreeModel : 1;
+	uint32 m_flagG2 : 1;
+	uint32 m_flagG4 : 1;
+	uint32 m_flagG8 : 1;
 
 	uint16 m_scanCode;
 	uint16 m_randomSeed;
@@ -120,6 +131,7 @@ public:
 
 	virtual void Add(void);
 	virtual void Remove(void);
+	virtual bool UpdatesInCutscene(void) { return false; }
 	virtual void SetModelIndex(uint32 id);
 	virtual void SetModelIndexNoCreate(uint32 id);
 	virtual void CreateRwObject(void);
@@ -131,6 +143,7 @@ public:
 	virtual void Teleport(CVector v) {}
 	virtual void PreRender(void);
 	virtual void Render(void);
+	virtual void UpdateAnim(void);
 	virtual bool SetupLighting(void);
 	virtual void RemoveLighting(bool);
 	virtual void FlagToDestroyWhenNextProcessed(void) {}
@@ -150,11 +163,13 @@ public:
 		return (RpClump*)m_rwObject;
 	}
 
-	void GetBoundCentre(CVector &out);
+	void UpdateDistanceFade(void);
+	void GetBoundCentre(CVUVECTOR &out);
 	CVector GetBoundCentre(void);
 	float GetBoundRadius(void);
 	float GetDistanceFromCentreOfMassToBaseOfModel(void);
-	bool GetIsTouching(CVector const &center, float r);
+	bool GetIsTouching(CVUVECTOR const &center, float r);
+	bool GetIsTouching(CEntity *other);
 	bool GetIsOnScreen(void);
 	bool GetIsOnScreenComplex(void);
 	bool IsVisible(void);

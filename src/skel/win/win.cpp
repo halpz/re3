@@ -120,6 +120,10 @@ DWORD _dwOperatingSystemVersion;
 RwUInt32 gGameState;
 CJoySticks AllValidWinJoys;
 
+#ifdef DETECT_JOYSTICK_MENU
+char gSelectedJoystickName[128] = "";
+#endif
+
 // What is that for anyway?
 #ifndef IMPROVED_VIDEOMODE
 static RwBool defaultFullscreenRes = TRUE;
@@ -258,6 +262,7 @@ psGrabScreen(RwCamera *pCamera)
 	}
 #else
 	rw::Image *image = RwCameraGetRaster(pCamera)->toImage();
+	image->removeMask();
 	if(image)
 		return image;
 #endif
@@ -910,14 +915,14 @@ void WaitForState(FILTER_STATE State)
  */
 void HandleGraphEvent(void)
 {
-	LONG evCode, evParam1, evParam2;
+	LONG evCode;
+	LONG_PTR evParam1, evParam2;
 	HRESULT hr=S_OK;
 	
 	ASSERT(pME != nil);
 
 	// Process all queued events
-	while (SUCCEEDED(pME->GetEvent(&evCode, (LONG_PTR *)&evParam1,
-		(LONG_PTR *)&evParam2, 0)))
+	while (SUCCEEDED(pME->GetEvent(&evCode, &evParam1, &evParam2, 0)))
 	{
 		// Free memory associated with callback, since we're not using it
 		hr = pME->FreeEventParams(evCode, evParam1, evParam2);
@@ -2268,7 +2273,7 @@ WinMain(HINSTANCE instance,
 					case GS_START_UP:
 					{
 #ifdef NO_MOVIES
-						gGameState = GS_INIT_ONCE;
+						gGameState = gbNoMovies ? GS_INIT_ONCE : GS_INIT_LOGO_MPEG;
 #else
 						gGameState = GS_INIT_LOGO_MPEG;
 #endif
@@ -2309,8 +2314,11 @@ WinMain(HINSTANCE instance,
 					
 					case GS_INIT_INTRO_MPEG:
 					{
-#ifndef NO_MOVIES
+#ifdef NO_MOVIES
+						if (!gbNoMovies)
+#endif
 						CloseClip();
+#ifndef FIX_BUGS
 						CoUninitialize();
 #endif
 						
@@ -2348,8 +2356,11 @@ WinMain(HINSTANCE instance,
 					
 					case GS_INIT_ONCE:
 					{
-#ifndef NO_MOVIES
+#ifdef NO_MOVIES
+						if (!gbNoMovies)
+#endif
 						CloseClip();
+#ifndef FIX_BUGS
 						CoUninitialize();
 #endif
 						

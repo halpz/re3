@@ -274,10 +274,11 @@ CPickup::CanBePickedUp(CPlayerPed *player, int playerId)
 {
 	assert(m_pObject != nil);
 	bool cannotBePickedUp =
-		(m_pObject->GetModelIndex() == MI_PICKUP_BODYARMOUR && player->m_fArmour > CWorld::Players[playerId].m_nMaxArmour - 0.5f)
-		|| (m_pObject->GetModelIndex() == MI_PICKUP_HEALTH && player->m_fHealth > CWorld::Players[playerId].m_nMaxHealth - 0.5f)
+		(m_pObject->GetModelIndex() == MI_PICKUP_BODYARMOUR && player->m_fArmour > CWorld::Players[playerId].m_nMaxArmour - 0.2f)
+		|| (m_pObject->GetModelIndex() == MI_PICKUP_HEALTH && player->m_fHealth > CWorld::Players[playerId].m_nMaxHealth - 0.2f)
 		|| (m_pObject->GetModelIndex() == MI_PICKUP_BRIBE && player->m_pWanted->GetWantedLevel() == 0)
-		|| (m_pObject->GetModelIndex() == MI_PICKUP_KILLFRENZY && (CTheScripts::IsPlayerOnAMission() || CDarkel::FrenzyOnGoing() || !CGame::nastyGame));
+		|| (m_pObject->GetModelIndex() == MI_PICKUP_KILLFRENZY && (CTheScripts::IsPlayerOnAMission() || CDarkel::FrenzyOnGoing() || !CGame::nastyGame))
+		|| (m_eType == PICKUP_ASSET_REVENUE && m_fRevenue < 10.0f);
 	return !cannotBePickedUp;
 }
 
@@ -1007,8 +1008,7 @@ CPickups::DoPickUpEffects(CEntity *entity)
 		entity->bDoNotRender = CTheScripts::IsPlayerOnAMission() || CDarkel::FrenzyOnGoing() || !CGame::nastyGame;
 
 	if (!entity->bDoNotRender) {
-		float s = Sin((float)((CTimer::GetTimeInMilliseconds() + (uintptr)entity) & 0x7FF) * DEGTORAD(360.0f / 0x800));
-		float modifiedSin = 0.3f * (s + 1.0f);
+		float modifiedSin = 0.3f * (Sin((float)((CTimer::GetTimeInMilliseconds() + (uintptr)entity) & 0x7FF) * DEGTORAD(360.0f / 0x800)) + 1.0f);
 
 #ifdef FIX_BUGS
 		int16 colorId = 0;
@@ -1148,7 +1148,20 @@ CPickups::DoPickUpEffects(CEntity *entity)
 		if (model == MI_MINIGUN || model == MI_MINIGUN2)
 			scale = 1.2f;
 
-		entity->GetMatrix().SetRotateZOnlyScaled((float)(CTimer::GetTimeInMilliseconds() & 0x7FF) * DEGTORAD(360.0f / 0x800), scale);
+		float angle = (float)(CTimer::GetTimeInMilliseconds() & 0x7FF) * DEGTORAD(360.0f / 0x800);
+		float c = Cos(angle) * scale;
+		float s = Sin(angle) * scale;
+
+		// we know from SA they were setting each field manually like this
+		entity->GetMatrix().rx = c;
+		entity->GetMatrix().ry = s;
+		entity->GetMatrix().rz = 0.0f;
+		entity->GetMatrix().fx = -s;
+		entity->GetMatrix().fy = c;
+		entity->GetMatrix().fz = 0.0f;
+		entity->GetMatrix().ux = 0.0f;
+		entity->GetMatrix().uy = 0.0f;
+		entity->GetMatrix().uz = scale;
 
 		if (entity->GetModelIndex() == MI_MINIGUN2) {
 			CMatrix matrix1;

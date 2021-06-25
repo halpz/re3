@@ -28,8 +28,8 @@
 #include "VarConsole.h"
 
 #ifdef DEBUGMENU
-SETTWEAKPATH("Shadows");
-TWEAKBOOL(gbPrintShite);
+//SETTWEAKPATH("Shadows");
+//TWEAKBOOL(gbPrintShite);
 #endif
 
 RwImVertexIndex ShadowIndexList[24];
@@ -1068,6 +1068,8 @@ CShadows::SetRenderModeForShadowType(uint8 ShadowType)
 void
 CShadows::RenderStoredShadows(void)
 {
+	PUSH_RENDERGROUP("CShadows::RenderStoredShadows");
+
 	RenderBuffer::ClearRenderBuffer();
 
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void *)FALSE);
@@ -1241,12 +1243,16 @@ CShadows::RenderStoredShadows(void)
 	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,    (void *)rwTEXTUREADDRESSWRAP);
 
 	ShadowsStoredToBeRendered = 0;
+
+	POP_RENDERGROUP();
 }
 
 
 void
 CShadows::RenderStaticShadows(void)
 {
+	PUSH_RENDERGROUP("CShadows::RenderStaticShadows");
+
 	RenderBuffer::ClearRenderBuffer();
 
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void *)FALSE);
@@ -1313,6 +1319,8 @@ CShadows::RenderStaticShadows(void)
 
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)FALSE);
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void *)TRUE);
+
+	POP_RENDERGROUP();
 }
 
 
@@ -1398,7 +1406,7 @@ CShadows::CastShadowSectorList(CPtrList &PtrList, float fStartX, float fStartY, 
 		{
 			pEntity->m_scanCode = CWorld::GetCurrentScanCode();
 			
-			if ( pEntity->bUsesCollision && !pEntity->m_flagE2 )
+			if ( pEntity->bUsesCollision && !pEntity->bDontCastShadowsOn)
 			{
 				if ( IsAreaVisible(pEntity->m_area) )
 				{

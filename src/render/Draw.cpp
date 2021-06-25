@@ -30,28 +30,48 @@ bool CDraw::ms_bFixRadar = true;
 bool CDraw::ms_bFixSprites = true;	
 #endif
 
+#ifdef ASPECT_RATIO_SCALE
+float
+FindAspectRatio(void)
+{
+	switch (FrontEndMenuManager.m_PrefsUseWideScreen) {
+	case AR_AUTO:
+		return SCREEN_WIDTH / SCREEN_HEIGHT;
+	default:
+	case AR_4_3:
+		return 4.0f / 3.0f;
+	case AR_5_4:
+		return 5.0f / 4.0f;
+	case AR_16_10:
+		return 16.0f / 10.0f;
+	case AR_16_9:
+		return 16.0f / 9.0f;
+	case AR_21_9:
+		return 21.0f / 9.0f;
+	};
+}
+#endif
+
 float
 CDraw::CalculateAspectRatio(void)
 {
-	if (FrontEndMenuManager.m_PrefsUseWideScreen) {
 #ifdef ASPECT_RATIO_SCALE
-		if (TheCamera.m_WideScreenOn)
-			CDraw::ms_fAspectRatio = FrontEndMenuManager.m_PrefsUseWideScreen == AR_AUTO ?
-				(5.f / 3.f) * (SCREEN_WIDTH / SCREEN_HEIGHT) / (16.f / 9.f) :
-				5.f / 3.f; // It's used on theatrical showings according to Wiki
-		else
-			CDraw::ms_fAspectRatio = FrontEndMenuManager.m_PrefsUseWideScreen == AR_AUTO ? SCREEN_WIDTH / SCREEN_HEIGHT : 16.f / 9.f;
+	if (TheCamera.m_WideScreenOn)
+		CDraw::ms_fAspectRatio = (5.f / 3.f) * FindAspectRatio() / (16.f / 9.f); // It's used on theatrical showings according to Wiki
+	else
+		CDraw::ms_fAspectRatio = FindAspectRatio();
 #else
+	if(FrontEndMenuManager.m_PrefsUseWideScreen) {
 		if (TheCamera.m_WideScreenOn)
 			CDraw::ms_fAspectRatio = 5.f / 3.f; // It's used on theatrical showings according to Wiki
 		else
 			CDraw::ms_fAspectRatio = 16.f / 9.f;
-#endif
 	} else if (TheCamera.m_WideScreenOn) {
 		CDraw::ms_fAspectRatio = 5.f/4.f;
 	} else {
 		CDraw::ms_fAspectRatio = 4.f/3.f;
 	}
+#endif
 	return CDraw::ms_fAspectRatio;
 }
 

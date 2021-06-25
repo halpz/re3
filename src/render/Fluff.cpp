@@ -460,6 +460,7 @@ void CMovingThings::Update()
 
 void CMovingThings::Render()
 {
+	PUSH_RENDERGROUP("CMovingThings::Render");
 	CSmokeTrails::Update();
 
 	int i;
@@ -472,6 +473,7 @@ void CMovingThings::Render()
 	CPlaneTrails::Render();
 	CSmokeTrails::Render();
 	CPlaneBanners::Render();
+	POP_RENDERGROUP();
 }
 
 void CMovingThings::RegisterOne(CEntity *pEnt, uint16 nType) {

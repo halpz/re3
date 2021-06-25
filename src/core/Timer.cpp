@@ -8,7 +8,7 @@
 #include "SpecialFX.h"
 
 uint32 CTimer::m_snTimeInMilliseconds;
-PauseModeTime CTimer::m_snTimeInMillisecondsPauseMode = 1;
+uint32 CTimer::m_snTimeInMillisecondsPauseMode = 1;
 
 uint32 CTimer::m_snTimeInMillisecondsNonClipped;
 uint32 CTimer::m_snPreviousTimeInMilliseconds;
@@ -17,7 +17,11 @@ float CTimer::ms_fTimeScale;
 float CTimer::ms_fTimeStep;
 float CTimer::ms_fTimeStepNonClipped;
 bool  CTimer::m_UserPause;
-bool  CTimer::m_CodePause;
+bool  CTimer::m_CodePause; 
+#ifdef FIX_BUGS
+uint32 CTimer::m_LogicalFrameCounter;
+uint32 CTimer::m_LogicalFramesPassed;
+#endif
 
 uint32 _nCyclesPerMS = 1;
 
@@ -35,10 +39,6 @@ RsTimerType suspendPcTimer;
 
 uint32 suspendDepth;
 
-#ifdef FIX_HIGH_FPS_BUGS_ON_FRONTEND
-double frameTime;
-#endif
-
 void CTimer::Initialise(void)
 {
 	debug("Initialising CTimer...\n");
@@ -51,6 +51,10 @@ void CTimer::Initialise(void)
 	m_snTimeInMillisecondsNonClipped = 0;
 	m_snPreviousTimeInMilliseconds = 0;
 	m_snTimeInMilliseconds = 1;
+#ifdef FIX_BUGS
+	m_LogicalFrameCounter = 0;
+	m_LogicalFramesPassed = 0;
+#endif
 	
 #ifdef _WIN32
 	LARGE_INTEGER perfFreq;
@@ -82,6 +86,94 @@ void CTimer::Shutdown(void)
 	;
 }
 
+#ifdef FIX_BUGS
+void CTimer::Update(void)
+{ 
+	static double frameTimeLogical = 0.0;
+	static double frameTimeFraction = 0.0;
+	static double frameTimeFractionScaled = 0.0;
+	double frameTime;
+	double dblUpdInMs;
+
+	m_snPreviousTimeInMilliseconds = m_snTimeInMilliseconds;
+	
+#ifdef _WIN32
+	if ( (double)_nCyclesPerMS != 0.0 )
+	{
+		LARGE_INTEGER pc;
+		QueryPerformanceCounter(&pc);
+		
+		int32 updInCycles = (pc.LowPart - _oldPerfCounter.LowPart); // & 0x7FFFFFFF; pointless
+		
+		_oldPerfCounter = pc;
+		
+		float updInCyclesScaled = GetIsPaused() ? updInCycles : updInCycles * ms_fTimeScale;
+		
+		frameTime = updInCyclesScaled / (double)_nCyclesPerMS;
+
+		dblUpdInMs = (double)updInCycles / (double)_nCyclesPerMS;
+	}
+	else
+#endif
+	{
+		RsTimerType timer = RsTimer();
+		
+		RsTimerType updInMs = timer - oldPcTimer;
+		
+		frameTime = (double)updInMs * ms_fTimeScale;
+		
+		oldPcTimer = timer;
+
+		dblUpdInMs = (double)updInMs;
+	}
+
+	// count frames as if we're running at 30 fps
+	m_LogicalFramesPassed = 0;
+	frameTimeLogical += dblUpdInMs;
+	while (frameTimeLogical >= 1000.0 / 30.0) {
+		frameTimeLogical -= 1000.0 / 30.0;
+		m_LogicalFramesPassed++;
+	}
+	m_LogicalFrameCounter += m_LogicalFramesPassed;
+
+	frameTimeFraction += dblUpdInMs;
+	frameTimeFractionScaled += frameTime;
+
+	m_snTimeInMillisecondsPauseMode += uint32(frameTimeFraction);
+		
+	if ( GetIsPaused() )
+		ms_fTimeStep = 0.0f;
+	else
+	{
+		m_snTimeInMilliseconds += uint32(frameTimeFractionScaled);
+		m_snTimeInMillisecondsNonClipped += uint32(frameTimeFractionScaled);
+		ms_fTimeStep = frameTime / 1000.0f * 50.0f;
+	}
+	frameTimeFraction -= uint32(frameTimeFraction);
+	frameTimeFractionScaled -= uint32(frameTimeFractionScaled);
+	
+	if ( ms_fTimeStep < 0.01f && !GetIsPaused() && !CSpecialFX::bSnapShotActive)
+		ms_fTimeStep = 0.01f;
+
+	ms_fTimeStepNonClipped = ms_fTimeStep;
+	
+	if ( !CRecordDataForGame::IsPlayingBack() )
+	{
+		ms_fTimeStep = Min(3.0f, ms_fTimeStep);
+
+		if ( (m_snTimeInMilliseconds - m_snPreviousTimeInMilliseconds) > 60 )
+			m_snTimeInMilliseconds = m_snPreviousTimeInMilliseconds + 60;
+	}
+  
+	if ( CRecordDataForChase::IsRecording() )
+	{
+		ms_fTimeStep = 1.0f;
+		m_snTimeInMilliseconds = m_snPreviousTimeInMilliseconds + 16;
+	}
+  
+	m_FrameCounter++;
+}
+#else
 void CTimer::Update(void)
 {
 	m_snPreviousTimeInMilliseconds = m_snTimeInMilliseconds;
@@ -98,11 +190,7 @@ void CTimer::Update(void)
 		
 		float updInCyclesScaled = GetIsPaused() ? updInCycles : updInCycles * ms_fTimeScale;
 		
-		// We need that real frame time to fix transparent menu bug.
-#ifndef FIX_HIGH_FPS_BUGS_ON_FRONTEND
-		double
-#endif
-		frameTime = updInCyclesScaled / (double)_nCyclesPerMS;
+		double frameTime = updInCyclesScaled / (double)_nCyclesPerMS;
 
 		m_snTimeInMillisecondsPauseMode = m_snTimeInMillisecondsPauseMode + frameTime;
 		
@@ -122,16 +210,12 @@ void CTimer::Update(void)
 		
 		RsTimerType updInMs = timer - oldPcTimer;
 		
-		// We need that real frame time to fix transparent menu bug.
-#ifndef FIX_HIGH_FPS_BUGS_ON_FRONTEND
-		double
-#endif
-		frameTime = (double)updInMs * ms_fTimeScale;
+		double frameTime = (double)updInMs * ms_fTimeScale;
 		
 		oldPcTimer = timer;
-		
+
 		m_snTimeInMillisecondsPauseMode = m_snTimeInMillisecondsPauseMode + frameTime;
-															 
+
 		if ( GetIsPaused() )
 			ms_fTimeStep = 0.0f;
 		else
@@ -163,6 +247,7 @@ void CTimer::Update(void)
   
 	m_FrameCounter++;
 }
+#endif
 
 void CTimer::Suspend(void)
 {

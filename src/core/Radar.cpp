@@ -239,6 +239,75 @@ void GetTextureCorners(int32 x, int32 y, CVector2D *out)
 	out[3].y = RADAR_TILE_SIZE * (y);
 }
 
+uint8 CRadar::CalculateBlipAlpha(float dist)
+{
+	if (FrontEndMenuManager.m_bMenuMapActive)
+		return 255;
+
+	if (dist <= 1.0f)
+		return 255;
+
+	if (dist <= 10.0f)
+		return (128.0f * ((dist - 1.0f) / 9.0f)) + ((1.0f - (dist - 1.0f) / 9.0f) * 255.0f);
+
+	return 128;
+}
+
+void CRadar::ChangeBlipBrightness(int32 i, int32 bright)
+{
+	int index = GetActualBlipArrayIndex(i);
+	if (index != -1)
+		ms_RadarTrace[index].m_bDim = bright != 1;
+}
+
+void CRadar::ChangeBlipColour(int32 i, int32 color)
+{
+	int index = GetActualBlipArrayIndex(i);
+	if (index != -1)
+		ms_RadarTrace[index].m_nColor = color;
+}
+
+void CRadar::ChangeBlipDisplay(int32 i, eBlipDisplay display)
+{
+	int index = GetActualBlipArrayIndex(i);
+	if (index != -1)
+		ms_RadarTrace[index].m_eBlipDisplay = display;
+}
+
+void CRadar::ChangeBlipScale(int32 i, int32 scale)
+{
+	int index = GetActualBlipArrayIndex(i);
+	if (index != -1)
+		ms_RadarTrace[index].m_wScale = scale;
+}
+
+void CRadar::ClearBlip(int32 i)
+{
+	int index = GetActualBlipArrayIndex(i);
+	if (index != -1) {
+		SetRadarMarkerState(index, false);
+		ms_RadarTrace[index].m_bInUse = false;
+		ms_RadarTrace[index].m_eBlipType = BLIP_NONE;
+		ms_RadarTrace[index].m_eBlipDisplay = BLIP_DISPLAY_NEITHER;
+		ms_RadarTrace[index].m_eRadarSprite = RADAR_SPRITE_NONE;
+	}
+}
+
+void CRadar::ClearBlipForEntity(eBlipType type, int32 id)
+{
+	for (int i = 0; i < NUMRADARBLIPS; i++) {
+		if (type == ms_RadarTrace[i].m_eBlipType && id == ms_RadarTrace[i].m_nEntityHandle) {
+			SetRadarMarkerState(i, false);
+			ms_RadarTrace[i].m_bInUse = false;
+			ms_RadarTrace[i].m_eBlipType = BLIP_NONE;
+			ms_RadarTrace[i].m_eBlipDisplay = BLIP_DISPLAY_NEITHER;
+			ms_RadarTrace[i].m_eRadarSprite = RADAR_SPRITE_NONE;
+		}
+	};
+}
+
+// Why not a proper clipping algorithm?
+#ifdef THIS_IS_STUPID
 
 bool IsPointInsideRadar(const CVector2D &point)
 {
@@ -319,74 +388,6 @@ int LineRadarBoxCollision(CVector2D &out, const CVector2D &p1, const CVector2D &
 	return edge;
 }
 
-uint8 CRadar::CalculateBlipAlpha(float dist)
-{
-	if (FrontEndMenuManager.m_bMenuMapActive)
-		return 255;
-
-	if (dist <= 1.0f)
-		return 255;
-
-	if (dist <= 10.0f)
-		return (128.0f * ((dist - 1.0f) / 9.0f)) + ((1.0f - (dist - 1.0f) / 9.0f) * 255.0f);
-
-	return 128;
-}
-
-void CRadar::ChangeBlipBrightness(int32 i, int32 bright)
-{
-	int index = GetActualBlipArrayIndex(i);
-	if (index != -1)
-		ms_RadarTrace[index].m_bDim = bright != 1;
-}
-
-void CRadar::ChangeBlipColour(int32 i, int32 color)
-{
-	int index = GetActualBlipArrayIndex(i);
-	if (index != -1)
-		ms_RadarTrace[index].m_nColor = color;
-}
-
-void CRadar::ChangeBlipDisplay(int32 i, eBlipDisplay display)
-{
-	int index = GetActualBlipArrayIndex(i);
-	if (index != -1)
-		ms_RadarTrace[index].m_eBlipDisplay = display;
-}
-
-void CRadar::ChangeBlipScale(int32 i, int32 scale)
-{
-	int index = GetActualBlipArrayIndex(i);
-	if (index != -1)
-		ms_RadarTrace[index].m_wScale = scale;
-}
-
-void CRadar::ClearBlip(int32 i)
-{
-	int index = GetActualBlipArrayIndex(i);
-	if (index != -1) {
-		SetRadarMarkerState(index, false);
-		ms_RadarTrace[index].m_bInUse = false;
-		ms_RadarTrace[index].m_eBlipType = BLIP_NONE;
-		ms_RadarTrace[index].m_eBlipDisplay = BLIP_DISPLAY_NEITHER;
-		ms_RadarTrace[index].m_eRadarSprite = RADAR_SPRITE_NONE;
-	}
-}
-
-void CRadar::ClearBlipForEntity(eBlipType type, int32 id)
-{
-	for (int i = 0; i < NUMRADARBLIPS; i++) {
-		if (type == ms_RadarTrace[i].m_eBlipType && id == ms_RadarTrace[i].m_nEntityHandle) {
-			SetRadarMarkerState(i, false);
-			ms_RadarTrace[i].m_bInUse = false;
-			ms_RadarTrace[i].m_eBlipType = BLIP_NONE;
-			ms_RadarTrace[i].m_eBlipDisplay = BLIP_DISPLAY_NEITHER;
-			ms_RadarTrace[i].m_eRadarSprite = RADAR_SPRITE_NONE;
-		}
-	};
-}
-
-// Why not a proper clipping algorithm?
 int CRadar::ClipRadarPoly(CVector2D *poly, const CVector2D *rect)
 {
 	CVector2D corners[4] = {
@@ -465,6 +466,50 @@ int CRadar::ClipRadarPoly(CVector2D *poly, const CVector2D *rect)
 
 	return n;
 }
+#else
+
+int
+ClipPolyPlane(const CVector2D *in, int nin, CVector2D *out, CVector *plane)
+{
+	int j;
+	int nout;
+	int x1, x2;
+	float d1, d2, t;
+
+	nout = 0;
+	for(j = 0; j < nin; j++){
+		x1 = j;
+		x2 = (j+1) % nin;
+
+		d1 = plane->x*in[x1].x + plane->y*in[x1].y + plane->z;
+		d2 = plane->x*in[x2].x + plane->y*in[x2].y + plane->z;
+		if(d1*d2 < 0.0f){
+			t = d1/(d1 - d2);
+			out[nout++] = in[x1]*(1.0f-t) + in[x2]*t;
+		}
+		if(d2 >= 0.0f)
+			out[nout++] = in[x2];
+	}
+	return nout;
+}
+
+int CRadar::ClipRadarPoly(CVector2D *poly, const CVector2D *rect)
+{
+	CVector planes[4] = {
+		CVector(-1.0f, 0.0f, 1.0f),
+		CVector( 1.0f, 0.0f, 1.0f),
+		CVector(0.0f, -1.0f, 1.0f),
+		CVector(0.0f,  1.0f, 1.0f)
+	};
+	CVector2D tmp[8];
+	int n;
+	if(n = ClipPolyPlane(rect, 4, tmp, &planes[0]), n == 0) return 0;
+	if(n = ClipPolyPlane(tmp, n, poly, &planes[1]), n == 0) return 0;
+	if(n = ClipPolyPlane(poly, n, tmp, &planes[2]), n == 0) return 0;
+	if(n = ClipPolyPlane(tmp, n, poly, &planes[3]), n == 0) return 0;
+	return n;
+}
+#endif
 
 bool CRadar::DisplayThisBlip(int32 counter)
 {
@@ -488,7 +533,7 @@ void CRadar::Draw3dMarkers()
 				if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
 					CVector pos = entity->GetPosition();
 					pos.z += 1.2f * CModelInfo::GetModelInfo(entity->GetModelIndex())->GetColModel()->boundingBox.max.z + 2.5f;
-					C3dMarkers::PlaceMarker(i | (ms_RadarTrace[i].m_BlipIndex << 16), 1, pos, 2.5f, CARBLIP_MARKER_COLOR_R, CARBLIP_MARKER_COLOR_G, CARBLIP_MARKER_COLOR_B, CARBLIP_MARKER_COLOR_A, 1024, 0.2f, 5);
+					C3dMarkers::PlaceMarker(i | (ms_RadarTrace[i].m_BlipIndex << 16), MARKERTYPE_ARROW, pos, 2.5f, CARBLIP_MARKER_COLOR_R, CARBLIP_MARKER_COLOR_G, CARBLIP_MARKER_COLOR_B, CARBLIP_MARKER_COLOR_A, 1024, 0.2f, 5);
 				}
 				break;
 			}
@@ -502,7 +547,7 @@ void CRadar::Draw3dMarkers()
 				if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
 					CVector pos = entity->GetPosition();
 					pos.z += 3.0f;
-					C3dMarkers::PlaceMarker(i | (ms_RadarTrace[i].m_BlipIndex << 16), 1, pos, 1.5f, CHARBLIP_MARKER_COLOR_R, CHARBLIP_MARKER_COLOR_G, CHARBLIP_MARKER_COLOR_B, CHARBLIP_MARKER_COLOR_A, 1024, 0.2f, 5);
+					C3dMarkers::PlaceMarker(i | (ms_RadarTrace[i].m_BlipIndex << 16), MARKERTYPE_ARROW, pos, 1.5f, CHARBLIP_MARKER_COLOR_R, CHARBLIP_MARKER_COLOR_G, CHARBLIP_MARKER_COLOR_B, CHARBLIP_MARKER_COLOR_A, 1024, 0.2f, 5);
 				}
 				break;
 			}
@@ -512,7 +557,7 @@ void CRadar::Draw3dMarkers()
 				if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
 					CVector pos = entity->GetPosition();
 					pos.z += CModelInfo::GetModelInfo(entity->GetModelIndex())->GetColModel()->boundingBox.max.z + 1.0f + 1.0f;
-					C3dMarkers::PlaceMarker(i | (ms_RadarTrace[i].m_BlipIndex << 16), 1, pos, 1.0f, OBJECTBLIP_MARKER_COLOR_R, OBJECTBLIP_MARKER_COLOR_G, OBJECTBLIP_MARKER_COLOR_B, OBJECTBLIP_MARKER_COLOR_A, 1024, 0.2f, 5);
+					C3dMarkers::PlaceMarker(i | (ms_RadarTrace[i].m_BlipIndex << 16), MARKERTYPE_ARROW, pos, 1.0f, OBJECTBLIP_MARKER_COLOR_R, OBJECTBLIP_MARKER_COLOR_G, OBJECTBLIP_MARKER_COLOR_B, OBJECTBLIP_MARKER_COLOR_A, 1024, 0.2f, 5);
 				}
 				break;
 			}
@@ -521,7 +566,7 @@ void CRadar::Draw3dMarkers()
 			case BLIP_CONTACT_POINT:
 				if (!CTheScripts::IsPlayerOnAMission()) {
 					if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY)
-						C3dMarkers::PlaceMarkerSet(i | (ms_RadarTrace[i].m_BlipIndex << 16), 4, ms_RadarTrace[i].m_vecPos, 2.0f, COORDBLIP_MARKER_COLOR_R, COORDBLIP_MARKER_COLOR_G, COORDBLIP_MARKER_COLOR_B, COORDBLIP_MARKER_COLOR_A, 2048, 0.2f, 0);
+						C3dMarkers::PlaceMarkerSet(i | (ms_RadarTrace[i].m_BlipIndex << 16), MARKERTYPE_CYLINDER, ms_RadarTrace[i].m_vecPos, 2.0f, COORDBLIP_MARKER_COLOR_R, COORDBLIP_MARKER_COLOR_G, COORDBLIP_MARKER_COLOR_B, COORDBLIP_MARKER_COLOR_A, 2048, 0.2f, 0);
 				}
 				break;
 			}
@@ -879,7 +924,7 @@ int32 CRadar::GetNewUniqueBlipIndex(int32 i)
 
 uint32 CRadar::GetRadarTraceColour(uint32 color, bool bright)
 {
-	int32 c;
+	uint32 c;
 	switch (color) {
 	case RADAR_TRACE_RED:
 		if (bright)
@@ -1458,7 +1503,7 @@ CRadar::InitFrontEndMap()
 void
 CRadar::DrawYouAreHereSprite(float x, float y)
 {
-	static PauseModeTime lastChange = 0;
+	static uint32 lastChange = 0;
 	static bool show = true;
 
 	if (show) {
@@ -1658,7 +1703,7 @@ void
 CRadar::DrawLegend(int32 x, int32 y, int32 sprite)
 {
 	if (sprite < 0) {
-		static PauseModeTime lastChange = 0;
+		static uint32 lastChange = 0;
 		static int8 blipMode = 0;
 
 		CRGBA color;

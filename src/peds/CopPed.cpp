@@ -93,7 +93,7 @@ CCopPed::CCopPed(eCopType copType, int32 modifier) : CPed(PEDTYPE_COP)
 	m_nHassleTimer = 0;
 	field_61C = 0;
 	field_624 = 0;
-	m_pStinger = new CStinger;
+	m_pStinger = new CStinger();
 	SetWeaponLockOnTarget(nil);
 }
 
@@ -257,9 +257,9 @@ CCopPed::ArrestPlayer(void)
 
 		if (suspect && (suspect->m_nPedState == PED_ARRESTED || suspect->DyingOrDead() || suspect->EnteringCar())) {
 
-			CAnimBlendAssociation *arrestAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_ARREST_GUN);
+			CAnimBlendAssociation *arrestAssoc = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_ARREST);
 			if (!arrestAssoc || arrestAssoc->blendDelta < 0.0f)
-				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_ARREST_GUN, 4.0f);
+				CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_ARREST, 4.0f);
 
 			CVector suspMidPos;
 			suspect->m_pedIK.GetComponentPosition(suspMidPos, PED_MID);
@@ -555,7 +555,7 @@ CCopPed::CopAI(void)
 
 													if (CWorld::GetIsLineOfSightClear(GetPosition(), nearPed->GetPosition(),
 														true, false, false, false, false, false, false)) {
-														Say(SOUND_PED_COP_REACTION);
+														Say(SOUND_PED_COP_ASK_FOR_ID);
 														SetObjective(OBJECTIVE_HASSLE_CHAR, nearPed);
 														nearPed->SetObjective(OBJECTIVE_WAIT_ON_FOOT_FOR_COP, this);
 														m_nHassleTimer = CTimer::GetTimeInMilliseconds() + 100000;
@@ -747,7 +747,7 @@ CCopPed::ProcessControl(void)
 	}
 
 	if (m_pPointGunAt)
-		Say(SOUND_PED_COP_UNK_129);
+		Say(SOUND_PED_COP_TARGETING);
 
 	if (m_bStopAndShootDisabledZone) {
 		bool dontShoot = false;

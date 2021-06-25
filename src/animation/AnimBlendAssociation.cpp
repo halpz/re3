@@ -230,3 +230,9 @@ CAnimBlendAssociation::UpdateBlend(float timeDelta)
 
 	return true;
 }
+
+void
+CAnimBlendAssociation::Remove()
+{
+	delete this;
+}

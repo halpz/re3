@@ -2,7 +2,7 @@
 
 #include "audio_enums.h"
 #include "AudioCollision.h"
-#include "PoliceRadio.h"
+#include "PolRadio.h"
 #include "VehicleModelInfo.h"
 #include "Vehicle.h"
 
@@ -13,27 +13,29 @@ public:
 	int32 m_nCounter;
 	int32 m_nSampleIndex;
 	uint8 m_nBankIndex;
-	bool m_bIs2D;
+	bool8 m_bIs2D;
 	int32 m_nReleasingVolumeModificator;
 	uint32 m_nFrequency;
 	uint8 m_nVolume;
 	float m_fDistance;
 	int32 m_nLoopCount;
+#ifndef GTA_PS2
 	int32 m_nLoopStart;
 	int32 m_nLoopEnd;
+#endif
 	uint8 m_nEmittingVolume;
 	float m_fSpeedMultiplier;
 	float m_fSoundIntensity;
-	bool m_bReleasingSoundFlag;
+	bool8 m_bReleasingSoundFlag;
 	CVector m_vecPos;
-	bool m_bReverbFlag;
+	bool8 m_bReverbFlag;
 	uint8 m_nLoopsRemaining;
-	bool m_bRequireReflection; // Used for oneshots
+	bool8 m_bRequireReflection; // Used for oneshots
 	uint8 m_nOffset;
 	uint8 field_4C;
 	int32 m_nReleasingVolumeDivider;
-	bool m_bIsProcessed;
-	bool m_bLoopEnded;
+	bool8 m_bIsProcessed;
+	bool8 m_bLoopEnded;
 	int32 m_nCalculatedVolume;
 	int8 m_nVolumeChange;
 };
@@ -48,7 +50,7 @@ class tAudioEntity
 public:
 	eAudioType m_nType;
 	void *m_pEntity;
-	bool m_bIsUsed;
+	bool8 m_bIsUsed;
 	uint8 m_bStatus;
 	int16 m_awAudioEvent[NUM_AUDIOENTITY_EVENTS];
 	float m_afVolume[NUM_AUDIOENTITY_EVENTS];
@@ -78,7 +80,7 @@ public:
 	uint8 m_nCommentsInBank[NUM_PED_COMMENTS_BANKS];
 	uint8 m_nActiveBank;
 #ifdef GTA_PC
-	bool m_bDelay;
+	bool8 m_bDelay;
 	uint32 m_nDelayTimer;
 #endif
 
@@ -110,14 +112,14 @@ class cMissionAudio
 {
 public:
 	CVector m_vecPos[MISSION_AUDIO_SLOTS];
-	bool m_bPredefinedProperties[MISSION_AUDIO_SLOTS];
+	bool8 m_bPredefinedProperties[MISSION_AUDIO_SLOTS];
 	int32 m_nSampleIndex[MISSION_AUDIO_SLOTS];
 	uint8 m_nLoadingStatus[MISSION_AUDIO_SLOTS];
 	uint8 m_nPlayStatus[MISSION_AUDIO_SLOTS];
-	bool m_bIsPlaying[MISSION_AUDIO_SLOTS];
+	bool8 m_bIsPlaying[MISSION_AUDIO_SLOTS];
 	int32 m_nMissionAudioCounter[MISSION_AUDIO_SLOTS];
-	bool m_bIsPlayed[MISSION_AUDIO_SLOTS];
-	bool m_bIsMobile[MISSION_AUDIO_SLOTS];
+	bool8 m_bIsPlayed[MISSION_AUDIO_SLOTS];
+	bool8 m_bIsMobile[MISSION_AUDIO_SLOTS];
 };
 VALIDATE_SIZE(cMissionAudio, 0x38);
 
@@ -141,7 +143,7 @@ class CPed;
 class cPedParams
 {
 public:
-	bool m_bDistanceCalculated;
+	bool8 m_bDistanceCalculated;
 	float m_fDistance;
 	CPed *m_pPed;
 
@@ -157,7 +159,7 @@ class cVehicleParams
 {
 public:
 	int32 m_VehicleType;
-	bool m_bDistanceCalculated;
+	bool8 m_bDistanceCalculated;
 	float m_fDistance;
 	CVehicle *m_pVehicle;
 	cTransmission *m_pTransmission;
@@ -193,22 +195,22 @@ enum {
 class cAudioManager
 {
 public:
-	bool m_bIsInitialised;
+	bool8 m_bIsInitialised;
 	uint8 m_bReverb; // unused
-	bool m_bFifthFrameFlag;
+	bool8 m_bFifthFrameFlag;
 	uint8 m_nActiveSamples;
 	uint8 field_4; // unused
-	bool m_bDynamicAcousticModelingStatus;
+	bool8 m_bDynamicAcousticModelingStatus;
 	int8 field_6;
 	float m_fSpeedOfSound;
-	bool m_bTimerJustReset;
+	bool8 m_bTimerJustReset;
 	int32 m_nTimer;
 	tSound m_sQueueSample;
 	uint8 m_nActiveSampleQueue;
-	tSound m_asSamples[NUM_SOUNDS_SAMPLES_BANKS][NUM_SOUNDS_SAMPLES_SLOTS];
-	uint8 m_abSampleQueueIndexTable[NUM_SOUNDS_SAMPLES_BANKS][NUM_SOUNDS_SAMPLES_SLOTS];
+	tSound m_asSamples[NUM_SOUNDS_SAMPLES_BANKS][NUM_CHANNELS_GENERIC];
+	uint8 m_abSampleQueueIndexTable[NUM_SOUNDS_SAMPLES_BANKS][NUM_CHANNELS_GENERIC];
 	uint8 m_SampleRequestQueuesStatus[NUM_SOUNDS_SAMPLES_BANKS];
-	tSound m_asActiveSamples[NUM_SOUNDS_SAMPLES_SLOTS];
+	tSound m_asActiveSamples[NUM_CHANNELS_GENERIC];
 	tAudioEntity m_asAudioEntities[NUM_AUDIOENTITIES];
 	int32 m_anAudioEntityIndices[NUM_AUDIOENTITIES];
 	int32 m_nAudioEntitiesTotal;
@@ -217,11 +219,11 @@ public:
 	cAudioScriptObjectManager m_sAudioScriptObjectManager;
 
 	// miami
-	uint8 m_bIsPlayerShutUp;
+	bool8 m_bIsPlayerShutUp;
 	uint8 m_nPlayerMood;
 	uint32 m_nPlayerMoodTimer;
 	uint8 field_rest[4];
-	bool m_bGenericSfx;
+	bool8 m_bGenericSfx;
 
 	cPedComments m_sPedComments;
 	int32 m_nFireAudioEntity;
@@ -253,19 +255,19 @@ public:
 	float GetReflectionsDistance(int32 idx) const { return m_afReflectionsDistances[idx]; } // done
 	int32 GetRandomNumber(int32 idx) const { return m_anRandomTable[idx]; }
 	int32 GetRandomNumberInRange(int32 idx, int32 low, int32 high) const { return (m_anRandomTable[idx] % (high - low + 1)) + low; }
-	bool IsMissionAudioSamplePlaying(uint8 slot) const; // { return m_sMissionAudio.m_nPlayStatus == 1; }
-	bool ShouldDuckMissionAudio(uint8 slot) const;
+	bool8 IsMissionAudioSamplePlaying(uint8 slot) const; // { return m_sMissionAudio.m_nPlayStatus == 1; }
+	bool8 ShouldDuckMissionAudio(uint8 slot) const;
 
 	// "Should" be in alphabetic order, except "getXTalkSfx"
 	void AddDetailsToRequestedOrderList(uint8 sample);                                                                    // done (inlined in vc)
-	void AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sample, uint8 bank, uint8 counter, bool notLooping); // done
+	void AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sample, uint8 bank, uint8 counter, bool8 notLooping); // done
 	void AddReflectionsToRequestedQueue();                                                                                // done
 	void AddReleasingSounds();                                                                                            // done
 	void AddSampleToRequestedQueue();                                                                                     // done
 	void AgeCrimes();                                                                                                     // done (inlined in vc)
 
-	void CalculateDistance(bool &condition, float dist);                                                                   // done
-	bool CheckForAnAudioFileOnCD() const;                                                                                  // done
+	void CalculateDistance(bool8 &condition, float dist);                                                                   // done
+	bool8 CheckForAnAudioFileOnCD() const;                                                                                  // done
 	void ClearActiveSamples();                                                                                             // done
 	void ClearMissionAudio(uint8 slot);                                                                                    // done (inlined in vc)
 	void ClearRequestedQueue();                                                                                            // done (inlined in vc)
@@ -288,90 +290,93 @@ public:
 	uint32 GetMedicTalkSfx(CPed *ped, int16 sound);
 	uint32 GetFiremanTalkSfx(CPed *ped, int16 sound);
 	uint32 GetDefaultTalkSfx(CPed *ped, int16 sound);
-	uint32 GetHFYSTTalkSfx(CPed *ped, int16 sound);
-	uint32 GetHFOSTTalkSfx(CPed *ped, int16 sound);
-	uint32 GetHMYSTTalkSfx(CPed *ped, int16 sound);
-	uint32 GetHMOSTTalkSfx(CPed *ped, int16 sound);
-	uint32 GetHFYRITalkSfx(CPed *ped, int16 sound);
-	uint32 GetHFORITalkSfx(CPed *ped, int16 sound); 
-	uint32 GetHMYRITalkSfx(CPed *ped, int16 sound); 
-	uint32 GetHMORITalkSfx(CPed *ped, int16 sound);
-	uint32 GetHFYBETalkSfx(CPed *ped, int16 sound);
-	uint32 GetHFOBETalkSfx(CPed *ped, int16 sound);
-	uint32 GetHMYBETalkSfx(CPed *ped, int16 sound);
-	uint32 GetHMOBETalkSfx(CPed *ped, int16 sound);
-	uint32 GetHFYBUTalkSfx(CPed *ped, int16 sound);
-	uint32 GetHFYMDTalkSfx(CPed *ped, int16 sound);
-	uint32 GetHFYCGTalkSfx(CPed *ped, int16 sound);
-	uint32 GetHFYPRTalkSfx(CPed *ped, int16 sound);
-	uint32 GetHFOTRTalkSfx(CPed *ped, int16 sound);
-	uint32 GetHMOTRTalkSfx(CPed *ped, int16 sound);
-	uint32 GetHMYAPTalkSfx(CPed *ped, int16 sound);
-	uint32 GetHMOCATalkSfx(CPed *ped, int16 sound);
-	uint32 GetBMODKTalkSfx(CPed *ped, int16 sound);
-	uint32 GetBMYCRTalkSfx(CPed *ped, int16 sound);
-	uint32 GetBFYSTTalkSfx(CPed *ped, int16 sound);
-	uint32 GetBFOSTTalkSfx(CPed *ped, int16 sound);
-	uint32 GetBMYSTTalkSfx(CPed *ped, int16 sound);
-	uint32 GetBMOSTTalkSfx(CPed *ped, int16 sound);
-	uint32 GetBFYRITalkSfx(CPed *ped, int16 sound);
-	uint32 GetBFORITalkSfx(CPed *ped, int16 sound);
-	uint32 GetBMYRITalkSfx(CPed *ped, int16 sound);
-	uint32 GetBFYBETalkSfx(CPed *ped, int16 sound);
-	uint32 GetBMYBETalkSfx(CPed *ped, int16 sound);
-	uint32 GetBFOBETalkSfx(CPed *ped, int16 sound);
-	uint32 GetBMOBETalkSfx(CPed *ped, int16 sound);
-	uint32 GetBMYBUTalkSfx(CPed *ped, int16 sound);
-	uint32 GetBFYPRTalkSfx(CPed *ped, int16 sound);
-	uint32 GetBFOTRTalkSfx(CPed *ped, int16 sound);
-	uint32 GetBMOTRTalkSfx(CPed *ped, int16 sound);
-	uint32 GetBMYPITalkSfx(CPed *ped, int16 sound);
-	uint32 GetBMYBBTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWMYCRTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWFYSTTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWFOSTTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWMYSTTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWMOSTTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWFYRITalkSfx(CPed *ped, int16 sound);
-	uint32 GetWFORITalkSfx(CPed *ped, int16 sound);
-	uint32 GetWMYRITalkSfx(CPed *ped, int16 sound);
-	uint32 GetWMORITalkSfx(CPed *ped, int16 sound);
-	uint32 GetWFYBETalkSfx(CPed *ped, int16 sound);
-	uint32 GetWMYBETalkSfx(CPed *ped, int16 sound);
-	uint32 GetWFOBETalkSfx(CPed *ped, int16 sound);
-	uint32 GetWMOBETalkSfx(CPed *ped, int16 sound);
-	uint32 GetWMYCWTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWMYGOTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWFOGOTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWMOGOTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWFYLGTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWMYLGTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWFYBUTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWMYBUTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWMOBUTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWFYPRTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWFOTRTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWMOTRTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWMYPITalkSfx(CPed *ped, int16 sound);
-	uint32 GetWMOCATalkSfx(CPed *ped, int16 sound);
-	uint32 GetWFYJGTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWMYJGTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWFYSKTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWMYSKTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWFYSHTalkSfx(CPed *ped, int16 sound);
-	uint32 GetWFOSHTalkSfx(CPed *ped, int16 sound);
-	uint32 GetJFOTOTalkSfx(CPed *ped, int16 sound);
-	uint32 GetJMOTOTalkSfx(CPed *ped, int16 sound);
-	uint32 GetCBTalkSfx(CPed *ped, int16 sound);
-	uint32 GetHNTalkSfx(CPed *ped, int16 sound);
-	uint32 GetSGTalkSfx(CPed *ped, int16 sound);
-	uint32 GetCLTalkSfx(CPed *ped, int16 sound);
-	uint32 GetGDTalkSfx(CPed *ped, int16 sound);
-	uint32 GetBKTalkSfx(CPed *ped, int16 sound);
-	uint32 GetPGTalkSfx(CPed *ped, int16 sound);
-	uint32 GetVICETalkSfx(CPed *ped, int16 sound, int16 model);
-	uint32 GetWFYG1TalkSfx(CPed *ped, int16 sound);
-	uint32 GetWFYG2TalkSfx(CPed *ped, int16 sound);
+
+	// LCS: Do not delete, some of these are still used
+
+	//uint32 GetHFYSTTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetHFOSTTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetHMYSTTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetHMOSTTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetHFYRITalkSfx(CPed *ped, int16 sound);
+	//uint32 GetHFORITalkSfx(CPed *ped, int16 sound); 
+	//uint32 GetHMYRITalkSfx(CPed *ped, int16 sound); 
+	//uint32 GetHMORITalkSfx(CPed *ped, int16 sound);
+	//uint32 GetHFYBETalkSfx(CPed *ped, int16 sound);
+	//uint32 GetHFOBETalkSfx(CPed *ped, int16 sound);
+	//uint32 GetHMYBETalkSfx(CPed *ped, int16 sound);
+	//uint32 GetHMOBETalkSfx(CPed *ped, int16 sound);
+	//uint32 GetHFYBUTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetHFYMDTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetHFYCGTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetHFYPRTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetHFOTRTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetHMOTRTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetHMYAPTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetHMOCATalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBMODKTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBMYCRTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBFYSTTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBFOSTTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBMYSTTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBMOSTTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBFYRITalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBFORITalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBMYRITalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBFYBETalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBMYBETalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBFOBETalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBMOBETalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBMYBUTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBFYPRTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBFOTRTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBMOTRTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBMYPITalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBMYBBTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWMYCRTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWFYSTTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWFOSTTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWMYSTTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWMOSTTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWFYRITalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWFORITalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWMYRITalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWMORITalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWFYBETalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWMYBETalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWFOBETalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWMOBETalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWMYCWTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWMYGOTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWFOGOTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWMOGOTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWFYLGTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWMYLGTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWFYBUTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWMYBUTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWMOBUTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWFYPRTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWFOTRTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWMOTRTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWMYPITalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWMOCATalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWFYJGTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWMYJGTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWFYSKTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWMYSKTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWFYSHTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWFOSHTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetJFOTOTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetJMOTOTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetCBTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetHNTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetSGTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetCLTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetGDTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetBKTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetPGTalkSfx(CPed *ped, int16 sound);
+	//uint32 GetVICETalkSfx(CPed *ped, int16 sound, int16 model);
+	//uint32 GetWFYG1TalkSfx(CPed *ped, int16 sound);
+	//uint32 GetWFYG2TalkSfx(CPed *ped, int16 sound);
 
 	uint32 GetGenericMaleTalkSfx(CPed *ped, int16 sound);   // todo names (inlined in vc)
 	uint32 GetGenericFemaleTalkSfx(CPed *ped, int16 sound); // todo names (inlined in vc)
@@ -379,7 +384,7 @@ public:
 
 	void GenerateIntegerRandomNumberTable();                                                   // done
 	char *Get3DProviderName(uint8 id) const;                                                   // done
-	uint8 GetCDAudioDriveLetter() const;                                                       // done
+	char GetCDAudioDriveLetter() const;                                                       // done
 	int8 GetCurrent3DProviderIndex() const;                                                    // done
 	int8 AutoDetect3DProviders() const;                                                        // done
 	float GetCollisionLoopingRatio(uint32 a, uint32 b, float c) const;                         // not used
@@ -396,17 +401,17 @@ public:
 	                                    float velocityChange);                                                                        // done
 	float GetVehicleNonDriveWheelSkidValue(CVehicle *veh, tWheelState wheelState, cTransmission *transmission, float velocityChange); // done
 
-	bool HasAirBrakes(int32 model) const; // done
+	bool8 HasAirBrakes(int32 model) const; // done
 
 	void Initialise();                             // done
 	void InitialisePoliceRadio();                  // done
 	void InitialisePoliceRadioZones();             // done
 	void InterrogateAudioEntities();               // done (inlined)
-	bool IsAudioInitialised() const;               // done
-	bool IsMissionAudioSampleFinished(uint8 slot); // done
-	bool IsMP3RadioChannelAvailable() const;       // done
+	bool8 IsAudioInitialised() const;               // done
+	bool8 IsMissionAudioSampleFinished(uint8 slot); // done
+	bool8 IsMP3RadioChannelAvailable() const;       // done
 
-	bool MissionScriptAudioUsesPoliceChannel(int32 soundMission) const; //done
+	bool8 MissionScriptAudioUsesPoliceChannel(int32 soundMission) const; //done
 
 	void PlayLoadedMissionAudio(uint8 slot);                // done
 	void PlayOneShot(int32 index, uint16 sound, float vol); // done
@@ -420,20 +425,20 @@ public:
 	void PreTerminateGameSpecificShutdown();                // done
 	/// processX - main logic of adding new sounds
 	void ProcessActiveQueues();                              // done
-	bool ProcessAirBrakes(cVehicleParams& params);           // done
-	bool ProcessBoatEngine(cVehicleParams& params);          
-	bool ProcessBoatMovingOverWater(cVehicleParams& params); //done 
+	bool8 ProcessAirBrakes(cVehicleParams& params);           // done
+	bool8 ProcessBoatEngine(cVehicleParams& params);          
+	bool8 ProcessBoatMovingOverWater(cVehicleParams& params); //done 
 #ifdef GTA_BRIDGE
 	void ProcessBridge();         // done(bcs not exists in VC)
 	void ProcessBridgeMotor();    // done(bcs not exists in VC)
 	void ProcessBridgeOneShots(); // done(bcs not exists in VC)
 	void ProcessBridgeWarning();  // done(bcs not exists in VC)
 #endif
-	bool ProcessCarBombTick(cVehicleParams& params);                         // done
+	bool8 ProcessCarBombTick(cVehicleParams& params);                         // done
 	void ProcessCarHeli(cVehicleParams& params);                             // done
 	void ProcessCesna(cVehicleParams& params);                               // done
 	//void ProcessCrane();                                                   // done(bcs not exists in VC)
-	bool ProcessEngineDamage(cVehicleParams& params);                        // done
+	bool8 ProcessEngineDamage(cVehicleParams& params);                        // done
 	void ProcessEntity(int32 sound);                                         // done
 	void ProcessExplosions(int32 explosion);                                 // done
 	void ProcessFireHydrant();                                               // done
@@ -462,25 +467,25 @@ public:
 	void ProcessProjectiles();                                               // done
 	void ProcessRainOnVehicle(cVehicleParams& params);                       // done
 	void ProcessReverb() const;                                              // done
-	bool ProcessReverseGear(cVehicleParams& params);                         // done
+	bool8 ProcessReverseGear(cVehicleParams& params);                         // done
 	void ProcessScriptObject(int32 id);                                      // done
 	void ProcessSpecial();                                                   // done
 #ifdef GTA_TRAIN
-	bool ProcessTrainNoise(cVehicleParams &params); //done(bcs not exists in VC)
+	bool8 ProcessTrainNoise(cVehicleParams &params); //done(bcs not exists in VC)
 #endif
 	void ProcessVehicle(CVehicle *vehicle);                    // done
-	bool ProcessVehicleDoors(cVehicleParams &params);          // done
+	bool8 ProcessVehicleDoors(cVehicleParams &params);          // done
 	void ProcessVehicleEngine(cVehicleParams &params);         // done
 	void ProcessVehicleFlatTyre(cVehicleParams &params);       // done
-	bool ProcessVehicleHorn(cVehicleParams &params);           // done
+	bool8 ProcessVehicleHorn(cVehicleParams &params);           // done
 	void ProcessVehicleOneShots(cVehicleParams &params);       // done
-	bool ProcessVehicleReverseWarning(cVehicleParams &params); // done
-	bool ProcessVehicleRoadNoise(cVehicleParams &params);      // done
-	bool ProcessVehicleSirenOrAlarm(cVehicleParams &params);   // done
-	bool ProcessVehicleSkidding(cVehicleParams &params);       // done
+	bool8 ProcessVehicleReverseWarning(cVehicleParams &params); // done
+	bool8 ProcessVehicleRoadNoise(cVehicleParams &params);      // done
+	bool8 ProcessVehicleSirenOrAlarm(cVehicleParams &params);   // done
+	bool8 ProcessVehicleSkidding(cVehicleParams &params);       // done
 	void ProcessWaterCannon(int32);                            // done
 	void ProcessWeather(int32 id);                             // done
-	bool ProcessWetRoadNoise(cVehicleParams& params);          // done
+	bool8 ProcessWetRoadNoise(cVehicleParams& params);          // done
 	void ProcessEscalators();                                  // done
 	void ProcessExtraSounds();                                 // done
 
@@ -499,26 +504,26 @@ public:
 	void ServicePoliceRadioChannel(uint8 wantedLevel);                                          // done
 	void ServiceSoundEffects();                                                                 // done
 	int8 SetCurrent3DProvider(uint8 which);                                                     // done
-	void SetDynamicAcousticModelingStatus(uint8 status);                                        // done
+	void SetDynamicAcousticModelingStatus(bool8 status);                                        // done
 	void SetEffectsFadeVol(uint8 volume) const;                                                 // done
 	void SetEffectsMasterVolume(uint8 volume) const;                                            // done
 	void SetMP3BoostVolume(uint8 volume) const;                                                 // done
-	void SetEntityStatus(int32 id, uint8 status);                                               // done
+	void SetEntityStatus(int32 id, bool8 status);                                               // done
 	uint32 SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollision &audioCollision); // done
 	void SetMissionAudioLocation(uint8 slot, float x, float y, float z);                        // done
 	void SetMissionScriptPoliceAudio(int32 sfx) const;                                          // inlined and optimized
-	void SetMonoMode(uint8 mono);                                                               // done
+	void SetMonoMode(bool8 mono);                                                               // done
 	void SetMusicFadeVol(uint8 volume) const;                                                   // done
 	void SetMusicMasterVolume(uint8 volume) const;                                              // done
 	void SetSpeakerConfig(int32 conf) const;                                                    // done
 	void SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 counter);                 // done
 	void SetUpOneShotCollisionSound(const cAudioCollision &col);                                // done
-	bool SetupCrimeReport();                                                                    // done
-	bool SetupJumboEngineSound(uint8 vol, uint32 freq);                                         // done
-	bool SetupJumboFlySound(uint8 emittingVol);                                                 // done
-	bool SetupJumboRumbleSound(uint8 emittingVol);                                              // done
-	bool SetupJumboTaxiSound(uint8 vol);                                                        // done
-	bool SetupJumboWhineSound(uint8 emittingVol, uint32 freq);                                  // done
+	bool8 SetupCrimeReport();                                                                    // done
+	bool8 SetupJumboEngineSound(uint8 vol, uint32 freq);                                         // done
+	bool8 SetupJumboFlySound(uint8 emittingVol);                                                 // done
+	bool8 SetupJumboRumbleSound(uint8 emittingVol);                                              // done
+	bool8 SetupJumboTaxiSound(uint8 vol);                                                        // done
+	bool8 SetupJumboWhineSound(uint8 emittingVol, uint32 freq);                                  // done
 	void SetupPedComments(cPedParams &params, uint16 sound);                                    // done
 	void SetupSuspectLastSeenReport();
 
@@ -527,12 +532,12 @@ public:
 
 	void UpdateGasPedalAudio(CVehicle *veh, int vehType);  // done
 	void UpdateReflections();                              // done
-	bool UsesReverseWarning(int32 model) const;            // done
-	bool UsesSiren(cVehicleParams &params) const;          // done
-	bool UsesSirenSwitching(cVehicleParams &params) const; // done
+	bool8 UsesReverseWarning(int32 model) const;            // done
+	bool8 UsesSiren(cVehicleParams &params) const;          // done
+	bool8 UsesSirenSwitching(cVehicleParams &params) const; // done
 
 	CVehicle *FindVehicleOfPlayer();                   // done
-	void SetPedTalkingStatus(CPed *ped, uint8 status); // done
+	void SetPedTalkingStatus(CPed *ped, bool8 status); // done
 	void SetPlayersMood(uint8 mood, uint32 time);      // done
 
 	float Sqrt(float v) const { return v <= 0.0f ? 0.0f : ::Sqrt(v); }
@@ -544,8 +549,26 @@ public:
 #endif
 };
 
-//#ifdef AUDIO_MSS
+/*
+   Manual loop points are not on PS2 so let's have these macros to avoid massive ifndefs.
+   Setting these manually was pointless anyway since they never change from sdt values.
+   What were they thinking?
+*/
+#ifndef GTA_PS2
+#define RESET_LOOP_OFFSETS \
+	m_sQueueSample.m_nLoopStart = 0; \
+	m_sQueueSample.m_nLoopEnd = -1;
+#define SET_LOOP_OFFSETS(sample) \
+	m_sQueueSample.m_nLoopStart = SampleManager.GetSampleLoopStartOffset(sample); \
+	m_sQueueSample.m_nLoopEnd = SampleManager.GetSampleLoopEndOffset(sample);
+#else
+#define RESET_LOOP_OFFSETS
+#define SET_LOOP_OFFSETS(sample)
+#endif
+
+//#if defined(AUDIO_MSS) && !defined(PS2_AUDIO_CHANNELS)
 //static_assert(sizeof(cAudioManager) == 0x5558, "cAudioManager: error");
 //#endif
+
 
 extern cAudioManager AudioManager;

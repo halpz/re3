@@ -50,10 +50,10 @@ bool CVehicle::bDisableRemoteDetonationOnContact;
 bool CVehicle::m_bDisplayHandlingInfo;
 #endif
 
-void *CVehicle::operator new(size_t sz) { return CPools::GetVehiclePool()->New();  }
-void *CVehicle::operator new(size_t sz, int handle) { return CPools::GetVehiclePool()->New(handle); }
-void CVehicle::operator delete(void *p, size_t sz) { CPools::GetVehiclePool()->Delete((CVehicle*)p); }
-void CVehicle::operator delete(void *p, int handle) { CPools::GetVehiclePool()->Delete((CVehicle*)p); }
+void *CVehicle::operator new(size_t sz) throw() { return CPools::GetVehiclePool()->New();  }
+void *CVehicle::operator new(size_t sz, int handle) throw() { return CPools::GetVehiclePool()->New(handle); }
+void CVehicle::operator delete(void *p, size_t sz) throw() { CPools::GetVehiclePool()->Delete((CVehicle*)p); }
+void CVehicle::operator delete(void *p, int handle) throw() { CPools::GetVehiclePool()->Delete((CVehicle*)p); }
 
 #ifdef FIX_BUGS
 // I think they meant that
@@ -152,8 +152,8 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_fMapObjectHeightAhead = m_fMapObjectHeightBehind = 0.0f;
 	m_audioEntityId = DMAudio.CreateEntity(AUDIOTYPE_PHYSICAL, this);
 	if(m_audioEntityId >= 0)
-		DMAudio.SetEntityStatus(m_audioEntityId, true);
-	//m_nRadioStation = CGeneral::GetRandomNumber() % USERTRACK;
+		DMAudio.SetEntityStatus(m_audioEntityId, TRUE);
+	//m_nRadioStation = CGeneral::GetRandomNumber() % NUM_RADIOS;
 	switch(GetModelIndex()){
 	case MI_HUNTER:
 	case MI_ANGEL:
@@ -170,7 +170,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 		m_nRadioStation = RADIO_OFF;
 		break;
 	default:
-		m_nRadioStation = CGeneral::GetRandomNumber() % USERTRACK;
+		m_nRadioStation = CGeneral::GetRandomNumber() % NUM_RADIOS;
 		break;
 	}
 	m_pCurGroundEntity = nil;

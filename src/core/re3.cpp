@@ -1,6 +1,14 @@
 #include <csignal>
 #define WITHWINDOWS
 #include "common.h"
+#if defined DETECT_JOYSTICK_MENU && defined XINPUT
+#include <xinput.h>
+#if !defined(PSAPI_VERSION) || (PSAPI_VERSION > 1)
+#pragma comment( lib, "Xinput9_1_0.lib" )
+#else
+#pragma comment( lib, "Xinput.lib" )
+#endif
+#endif
 #include "Renderer.h"
 #include "Occlusion.h"
 #include "Credits.h"
@@ -37,7 +45,7 @@
 #include "MBlur.h"
 #include "ControllerConfig.h"
 
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 #include "crossplatform.h"
 #endif
 
@@ -82,16 +90,51 @@ mysrand(unsigned int seed)
 #ifdef CUSTOM_FRONTEND_OPTIONS
 #include "frontendoption.h"
 
+
+
+#ifdef MORE_LANGUAGES
+void LangPolSelect(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_POLISH;
+		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
+		FrontEndMenuManager.InitialiseChangedLanguageSettings();
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+
+void LangRusSelect(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_RUSSIAN;
+		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
+		FrontEndMenuManager.InitialiseChangedLanguageSettings();
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+
+void LangJapSelect(int8 action)
+{
+	if (action == FEOPTION_ACTION_SELECT) {
+		FrontEndMenuManager.m_PrefsLanguage = CMenuManager::LANGUAGE_JAPANESE;
+		FrontEndMenuManager.m_bFrontEnd_ReloadObrTxtGxt = true;
+		FrontEndMenuManager.InitialiseChangedLanguageSettings();
+		FrontEndMenuManager.SaveSettings();
+	}
+}
+#endif
+
 void
 CustomFrontendOptionsPopulate(void)
 {
 	// Moved to an array in MenuScreensCustom.cpp, but APIs are still available. see frontendoption.h
 
+	int fd;
 	// These work only if we have neo folder, so they're dynamically added
 #ifdef EXTENDED_PIPELINES
 	const char *pipelineNames[] = { "FED_PSP", "FED_PS2","FED_MOB" };
 	const char *off_on[] = { "FEM_OFF", "FEM_ON" };
-	int fd = CFileMgr::OpenFile("neo/neo.txd","r");
+	fd = CFileMgr::OpenFile("neo/neo.txd","r");
 	if (fd) {
 #ifdef GRAPHICS_MENU_OPTIONS
 		FrontendOptionSetCursor(MENUPAGE_GRAPHICS_SETTINGS, -3, false);
@@ -108,6 +151,38 @@ CustomFrontendOptionsPopulate(void)
 #endif
 		CFileMgr::CloseFile(fd);
 	}
+#endif
+	// Add outsourced language translations, if files are found
+#ifdef MORE_LANGUAGES
+	int fd2;
+	FrontendOptionSetCursor(MENUPAGE_LANGUAGE_SETTINGS, 5, false);
+#if 0
+	if (fd = CFileMgr::OpenFile("text/polish.gxt")) {
+		if (fd2 = CFileMgr::OpenFile("models/fonts_p.txd")) {
+			FrontendOptionAddDynamic("FEL_POL", 0, 0, MENUALIGN_CENTER, nil, nil, LangPolSelect, nil, nil);
+			CFileMgr::CloseFile(fd2);
+		}
+		CFileMgr::CloseFile(fd);
+	}
+#endif
+
+	if (fd = CFileMgr::OpenFile("text/russian.gxt")) {
+		if (fd2 = CFileMgr::OpenFile("models/fonts_r.txd")) {
+			FrontendOptionAddDynamic("FEL_RUS", 0, 0, MENUALIGN_CENTER, nil, nil, LangRusSelect, nil, nil);
+			CFileMgr::CloseFile(fd2);
+		}
+		CFileMgr::CloseFile(fd);
+	}
+
+#if 0
+	if (fd = CFileMgr::OpenFile("text/japanese.gxt")) {
+		if (fd2 = CFileMgr::OpenFile("models/fonts_j.txd")) {
+			FrontendOptionAddDynamic("FEL_JAP", 0, 0, MENUALIGN_CENTER, nil, nil, LangJapSelect, nil, nil);
+			CFileMgr::CloseFile(fd2);
+		}
+		CFileMgr::CloseFile(fd);
+	}
+#endif
 #endif
 
 }
@@ -249,8 +324,40 @@ const char *iniKeyboardButtons[] = {"ESC","F1","F2","F3","F4","F5","F6","F7","F8
 
 void LoadINIControllerSettings()
 {
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
+#ifdef XINPUT
+	int storedJoy1 = -1;
+	if (ReadIniIfExists("Controller", "JoystickName", &storedJoy1)) {
+		CPad::XInputJoy1 = -1;
+		CPad::XInputJoy2 = -1;
+		XINPUT_STATE xstate;
+		memset(&xstate, 0, sizeof(XINPUT_STATE));
+
+		// Firstly confirm & set joy 1
+		if (XInputGetState(storedJoy1, &xstate) == ERROR_SUCCESS) {
+			CPad::XInputJoy1 = storedJoy1;
+		}
+
+		for (int i = 0; i <= 3; i++) {
+			if (XInputGetState(i, &xstate) == ERROR_SUCCESS) {
+				if (CPad::XInputJoy1 == -1)
+					CPad::XInputJoy1 = i;
+				else if (CPad::XInputJoy2 == -1 && i != CPad::XInputJoy1)
+					CPad::XInputJoy2 = i;
+			}
+		}
+
+		// There is no plug event on XInput, so let's leave XInputJoy1/2 as 0/1 respectively, and hotplug will be possible.
+		if (CPad::XInputJoy1 == -1) {
+			CPad::XInputJoy1 = 0;
+			CPad::XInputJoy2 = 1;
+		} else if (CPad::XInputJoy2 == -1) {
+			CPad::XInputJoy2 = (CPad::XInputJoy1 + 1) % 4;
+		}
+	}
+#else
 	ReadIniIfExists("Controller", "JoystickName", gSelectedJoystickName, 128);
+#endif
 #endif
 	// force to default GTA behaviour (never overwrite bindings on joy change/initialization) if user init'ed/set bindings before we introduced that
 	if (!ReadIniIfExists("Controller", "PadButtonsInited", &ControlsManager.ms_padButtonsInited)) {
@@ -348,8 +455,12 @@ void SaveINIControllerSettings()
 		StoreIni("Bindings", iniControllerActions[i], value, 128);
 	}
 
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
+#ifdef XINPUT
+	StoreIni("Controller", "JoystickName", CPad::XInputJoy1);
+#else
 	StoreIni("Controller", "JoystickName", gSelectedJoystickName, 128);
+#endif
 #endif
 	StoreIni("Controller", "PadButtonsInited", ControlsManager.ms_padButtonsInited);
 	cfg.write_file("reLCS.ini");
@@ -373,6 +484,7 @@ bool LoadINISettings()
 	ReadIniIfExists("Controller", "HorizantalMouseSens", &TheCamera.m_fMouseAccelHorzntl);
 	ReadIniIfExists("Controller", "InvertMouseVertically", &MousePointerStateHelper.bInvertVertically);
 	ReadIniIfExists("Controller", "DisableMouseSteering", &CVehicle::m_bDisableMouseSteering);
+	ReadIniIfExists("Controller", "Vibration", &FrontEndMenuManager.m_PrefsUseVibration);
 	ReadIniIfExists("Audio", "SfxVolume", &FrontEndMenuManager.m_PrefsSfxVolume);
 	ReadIniIfExists("Audio", "MusicVolume", &FrontEndMenuManager.m_PrefsMusicVolume);
 	ReadIniIfExists("Audio", "MP3BoostVolume", &FrontEndMenuManager.m_PrefsMP3BoostVolume);
@@ -406,6 +518,10 @@ bool LoadINISettings()
 	ReadIniIfExists("CustomPipesValues", "LightmapMult", &CustomPipes::LightmapMult);
 	ReadIniIfExists("CustomPipesValues", "GlossMult", &CustomPipes::GlossMult);
 #endif
+	ReadIniIfExists("Rendering", "BackfaceCulling", &gBackfaceCulling);
+#ifdef NEW_RENDERER
+	ReadIniIfExists("Rendering", "NewRenderer", &gbNewRenderer);
+#endif
 
 #ifdef PROPER_SCALING
 	ReadIniIfExists("Draw", "ProperScaling", &CDraw::ms_bProperScaling);	
@@ -415,6 +531,12 @@ bool LoadINISettings()
 #endif
 #ifdef FIX_SPRITES
 	ReadIniIfExists("Draw", "FixSprites", &CDraw::ms_bFixSprites);	
+#endif
+#ifdef DRAW_GAME_VERSION_TEXT
+	ReadIniIfExists("General", "DrawVersionText", &gbDrawVersionText);
+#endif
+#ifdef NO_MOVIES
+	ReadIniIfExists("General", "NoMovies", &gbNoMovies);
 #endif
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
@@ -461,6 +583,7 @@ void SaveINISettings()
 	StoreIni("Controller", "HorizantalMouseSens", TheCamera.m_fMouseAccelHorzntl);
 	StoreIni("Controller", "InvertMouseVertically", MousePointerStateHelper.bInvertVertically);
 	StoreIni("Controller", "DisableMouseSteering", CVehicle::m_bDisableMouseSteering);
+	StoreIni("Controller", "Vibration", FrontEndMenuManager.m_PrefsUseVibration);
 	StoreIni("Audio", "SfxVolume", FrontEndMenuManager.m_PrefsSfxVolume);
 	StoreIni("Audio", "MusicVolume", FrontEndMenuManager.m_PrefsMusicVolume);
 	StoreIni("Audio", "MP3BoostVolume", FrontEndMenuManager.m_PrefsMP3BoostVolume);
@@ -495,6 +618,9 @@ void SaveINISettings()
 	StoreIni("CustomPipesValues", "GlossMult", CustomPipes::GlossMult);
 #endif
 	StoreIni("Rendering", "BackfaceCulling", gBackfaceCulling);
+#ifdef NEW_RENDERER
+	StoreIni("Rendering", "NewRenderer", gbNewRenderer);
+#endif
 
 #ifdef PROPER_SCALING	
 	StoreIni("Draw", "ProperScaling", CDraw::ms_bProperScaling);	
@@ -504,6 +630,12 @@ void SaveINISettings()
 #endif
 #ifdef FIX_SPRITES
 	StoreIni("Draw", "FixSprites", CDraw::ms_bFixSprites);	
+#endif
+#ifdef DRAW_GAME_VERSION_TEXT
+	StoreIni("General", "DrawVersionText", gbDrawVersionText);
+#endif
+#ifdef NO_MOVIES
+	StoreIni("General", "NoMovies", gbNoMovies);
 #endif
 #ifdef CUSTOM_FRONTEND_OPTIONS
 	for (int i = 0; i < MENUPAGES; i++) {
@@ -630,18 +762,6 @@ SwitchCarCollision(void)
 {
 	if (FindPlayerVehicle() && FindPlayerVehicle()->IsCar())
 		FindPlayerVehicle()->bUsesCollision = !FindPlayerVehicle()->bUsesCollision;
-}
-
-static int engineStatus;
-static void
-SetEngineStatus(void)
-{
-	CVehicle *veh = FindPlayerVehicle();
-	if(veh == nil)
-		return;
-	if(!veh->IsCar())
-		return;
-	((CAutomobile*)veh)->Damage.SetEngineStatus(engineStatus);
 }
 
 static void
@@ -859,13 +979,22 @@ DebugMenuPopulate(void)
 
 		DebugMenuAddVarBool8("Render", "Draw hud", &CHud::m_Wants_To_Draw_Hud, nil);
 		DebugMenuAddVar("Render", "Brightness", &FrontEndMenuManager.m_PrefsBrightness, nil, 16, 0, 700, nil);
+#ifdef PROPER_SCALING	
+		DebugMenuAddVarBool8("Render", "Proper Scaling", &CDraw::ms_bProperScaling, nil);
+#endif
+#ifdef FIX_RADAR
+		DebugMenuAddVarBool8("Render", "Fix Radar", &CDraw::ms_bFixRadar, nil);
+#endif
+#ifdef FIX_SPRITES
+		DebugMenuAddVarBool8("Render", "Fix Sprites", &CDraw::ms_bFixSprites, nil);
+#endif
 		DebugMenuAddVarBool8("Render", "Backface Culling", &gBackfaceCulling, nil);
 		DebugMenuAddVarBool8("Render", "PS2 Alpha test Emu", &gPS2alphaTest, nil);
 		DebugMenuAddVarBool8("Render", "Frame limiter", &FrontEndMenuManager.m_PrefsFrameLimiter, nil);
 		DebugMenuAddVarBool8("Render", "VSynch", &FrontEndMenuManager.m_PrefsVsync, nil);
 		DebugMenuAddVar("Render", "Max FPS", &RsGlobal.maxFPS, nil, 1, 1, 1000, nil);
 #ifdef NEW_RENDERER
-		DebugMenuAddVarBool8("Render", "new renderer", &gbNewRenderer, nil);
+		DebugMenuAddVarBool8("Render", "New Renderer", &gbNewRenderer, nil);
 extern bool gbRenderRoads;
 extern bool gbRenderEverythingBarRoads;
 extern bool gbRenderFadingInUnderwaterEntities;
@@ -876,16 +1005,16 @@ extern bool gbRenderVehicles;
 extern bool gbRenderWorld0;
 extern bool gbRenderWorld1;
 extern bool gbRenderWorld2;
-		DebugMenuAddVarBool8("Render", "gbRenderRoads", &gbRenderRoads, nil);
-		DebugMenuAddVarBool8("Render", "gbRenderEverythingBarRoads", &gbRenderEverythingBarRoads, nil);
-		DebugMenuAddVarBool8("Render", "gbRenderFadingInUnderwaterEntities", &gbRenderFadingInUnderwaterEntities, nil);
-		DebugMenuAddVarBool8("Render", "gbRenderFadingInEntities", &gbRenderFadingInEntities, nil);
-		DebugMenuAddVarBool8("Render", "gbRenderWater", &gbRenderWater, nil);
-		DebugMenuAddVarBool8("Render", "gbRenderBoats", &gbRenderBoats, nil);
-		DebugMenuAddVarBool8("Render", "gbRenderVehicles", &gbRenderVehicles, nil);
-		DebugMenuAddVarBool8("Render", "gbRenderWorld0", &gbRenderWorld0, nil);
-		DebugMenuAddVarBool8("Render", "gbRenderWorld1", &gbRenderWorld1, nil);
-		DebugMenuAddVarBool8("Render", "gbRenderWorld2", &gbRenderWorld2, nil);
+		DebugMenuAddVarBool8("Debug Render", "gbRenderRoads", &gbRenderRoads, nil);
+		DebugMenuAddVarBool8("Debug Render", "gbRenderEverythingBarRoads", &gbRenderEverythingBarRoads, nil);
+		DebugMenuAddVarBool8("Debug Render", "gbRenderFadingInUnderwaterEntities", &gbRenderFadingInUnderwaterEntities, nil);
+		DebugMenuAddVarBool8("Debug Render", "gbRenderFadingInEntities", &gbRenderFadingInEntities, nil);
+		DebugMenuAddVarBool8("Debug Render", "gbRenderWater", &gbRenderWater, nil);
+		DebugMenuAddVarBool8("Debug Render", "gbRenderBoats", &gbRenderBoats, nil);
+		DebugMenuAddVarBool8("Debug Render", "gbRenderVehicles", &gbRenderVehicles, nil);
+		DebugMenuAddVarBool8("Debug Render", "gbRenderWorld0", &gbRenderWorld0, nil);
+		DebugMenuAddVarBool8("Debug Render", "gbRenderWorld1", &gbRenderWorld1, nil);
+		DebugMenuAddVarBool8("Debug Render", "gbRenderWorld2", &gbRenderWorld2, nil);
 #endif
 
 #ifdef EXTENDED_COLOURFILTER
@@ -899,6 +1028,11 @@ extern bool gbRenderWorld2;
 		DebugMenuAddVar("Render", "Drunkness", &CMBlur::Drunkness, nil, 0.05f, 0, 1.0f);
 #ifndef MASTER
 		DebugMenuAddVarBool8("Render", "Occlusion debug", &bDispayOccDebugStuff, nil);
+#endif
+#ifdef LIBRW
+		DebugMenuAddVarBool32("Render", "MatFX env map apply light", &rw::MatFX::envMapApplyLight, nil);
+		DebugMenuAddVarBool32("Render", "MatFX env map flip U", &rw::MatFX::envMapFlipU, nil);
+		DebugMenuAddVarBool32("Render", "MatFX env map use matcolor", &rw::MatFX::envMapUseMatColor, nil);
 #endif
 #ifdef EXTENDED_PIPELINES
 		static const char *worldpipenames[] = { "PSP", "PS2", "Mobile" };
@@ -921,29 +1055,28 @@ extern bool gbRenderDebugEnvMap;
 //		DebugMenuAddVarBool8("Render", "Neo Road Gloss enable", &CustomPipes::GlossEnable, nil);
 //		DebugMenuAddVar("Render", "Mult", &CustomPipes::GlossMult, nil, 0.1f, 0, 1.0f);
 #endif
-		DebugMenuAddVarBool8("Render", "Show Ped Paths", &gbShowPedPaths, nil);
-		DebugMenuAddVarBool8("Render", "Show Car Paths", &gbShowCarPaths, nil);
-		DebugMenuAddVarBool8("Render", "Show Car Path Links", &gbShowCarPathsLinks, nil);
-		DebugMenuAddVarBool8("Render", "Show Collision Lines", &gbShowCollisionLines, nil);
-		DebugMenuAddVarBool8("Render", "Show Collision Polys", &gbShowCollisionPolys, nil);
-		DebugMenuAddVarBool8("Render", "Don't render Buildings", &gbDontRenderBuildings, nil);
-		DebugMenuAddVarBool8("Render", "Don't render Big Buildings", &gbDontRenderBigBuildings, nil);
-		DebugMenuAddVarBool8("Render", "Don't render Peds", &gbDontRenderPeds, nil);
-		DebugMenuAddVarBool8("Render", "Don't render Vehicles", &gbDontRenderVehicles, nil);
-		DebugMenuAddVarBool8("Render", "Don't render Objects", &gbDontRenderObjects, nil);
-		DebugMenuAddVarBool8("Render", "Don't Render Water", &gbDontRenderWater, nil);
+		DebugMenuAddVarBool8("Debug Render", "Show Ped Paths", &gbShowPedPaths, nil);
+		DebugMenuAddVarBool8("Debug Render", "Show Car Paths", &gbShowCarPaths, nil);
+		DebugMenuAddVarBool8("Debug Render", "Show Car Path Links", &gbShowCarPathsLinks, nil);
+		DebugMenuAddVarBool8("Debug Render", "Show Collision Lines", &gbShowCollisionLines, nil);
+		DebugMenuAddVarBool8("Debug Render", "Show Collision Polys", &gbShowCollisionPolys, nil);
+		DebugMenuAddVarBool8("Debug Render", "Don't render Buildings", &gbDontRenderBuildings, nil);
+		DebugMenuAddVarBool8("Debug Render", "Don't render Big Buildings", &gbDontRenderBigBuildings, nil);
+		DebugMenuAddVarBool8("Debug Render", "Don't render Peds", &gbDontRenderPeds, nil);
+		DebugMenuAddVarBool8("Debug Render", "Don't render Vehicles", &gbDontRenderVehicles, nil);
+		DebugMenuAddVarBool8("Debug Render", "Don't render Objects", &gbDontRenderObjects, nil);
+		DebugMenuAddVarBool8("Debug Render", "Don't Render Water", &gbDontRenderWater, nil);
 		
-#ifdef PROPER_SCALING	
-		DebugMenuAddVarBool8("Draw", "Proper Scaling", &CDraw::ms_bProperScaling, nil);
+		
+#ifdef DRAW_GAME_VERSION_TEXT
+		DebugMenuAddVarBool8("Debug", "Version Text", &gbDrawVersionText, nil);
 #endif
-#ifdef FIX_RADAR
-		DebugMenuAddVarBool8("Draw", "Fix Radar", &CDraw::ms_bFixRadar, nil);
+		DebugMenuAddVarBool8("Debug", "Show DebugStuffInRelease", &gbDebugStuffInRelease, nil);
+#ifdef TIMEBARS
+		DebugMenuAddVarBool8("Debug", "Show Timebars", &gbShowTimebars, nil);
 #endif
-#ifdef FIX_SPRITES
-		DebugMenuAddVarBool8("Draw", "Fix Sprites", &CDraw::ms_bFixSprites, nil);
-#endif
-
 #ifndef FINAL
+		DebugMenuAddVarBool8("Debug", "Use debug render groups", &bDebugRenderGroups, nil);
 		DebugMenuAddVarBool8("Debug", "Print Memory Usage", &gbPrintMemoryUsage, nil);
 #ifdef USE_CUSTOM_ALLOCATOR
 		DebugMenuAddCmd("Debug", "Parse Heap", ParseHeap);
@@ -954,28 +1087,23 @@ extern bool gbRenderDebugEnvMap;
 #ifdef GTA_SCENE_EDIT
 		DebugMenuAddVarBool8("Debug", "Edit on", &CSceneEdit::m_bEditOn, nil);
 #endif
-#ifdef MAP_ENHANCEMENTS
-		DebugMenuAddCmd("Debug", "Teleport to map waypoint", TeleportToWaypoint);
-#endif
-		DebugMenuAddCmd("Debug", "Switch car collision", SwitchCarCollision);
-		DebugMenuAddVar("Debug", "Engine Status", &engineStatus, nil, 1, 0, 226, nil);
-		DebugMenuAddCmd("Debug", "Set Engine Status", SetEngineStatus);
-		DebugMenuAddCmd("Debug", "Fix Car", FixCar);
-		DebugMenuAddCmd("Debug", "Toggle Comedy Controls", ToggleComedy);
-		DebugMenuAddCmd("Debug", "Place Car on Road", PlaceOnRoad);
-
-		DebugMenuAddVarBool8("Debug", "Script Heli On", &CHeli::ScriptHeliOn, nil);
-
-		DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
-		DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
+		//DebugMenuAddCmd("Debug", "Start Credits", CCredits::Start);
+		//DebugMenuAddCmd("Debug", "Stop Credits", CCredits::Stop);
 
 #ifdef RELOADABLES
-		DebugMenuAddCmd("Reload", "HUD.TXD", CHud::ReloadTXD);
+// maybe put it back if we have more to reload 
+//		DebugMenuAddCmd("Reload", "HUD.TXD", CHud::ReloadTXD);
 #endif
-		DebugMenuAddVarBool8("Debug", "Show DebugStuffInRelease", &gbDebugStuffInRelease, nil);
-#ifdef TIMEBARS
-		DebugMenuAddVarBool8("Debug", "Show Timebars", &gbShowTimebars, nil);
+
+#ifdef MAP_ENHANCEMENTS
+		DebugMenuAddCmd("Game", "Teleport to map waypoint", TeleportToWaypoint);
 #endif
+		DebugMenuAddCmd("Game", "Fix Car", FixCar);
+		DebugMenuAddCmd("Game", "Place Car on Road", PlaceOnRoad);
+		DebugMenuAddCmd("Game", "Switch car collision", SwitchCarCollision);
+		DebugMenuAddCmd("Game", "Toggle Comedy Controls", ToggleComedy);
+
+
 #ifdef MISSION_SWITCHER
 		DebugMenuEntry *missionEntry;
 		static const char* missions[] = {
@@ -1005,9 +1133,9 @@ extern bool gbRenderDebugEnvMap;
 			"A Date with Death (Toshiko Kasen)", "Cash in Kazuki's Chips (Toshiko Kasen)"
 		};
 
-		missionEntry = DebugMenuAddVar("Debug", "Select mission", &nextMissionToSwitch, nil, 1, 0, ARRAY_SIZE(missions) - 1, missions);
+		missionEntry = DebugMenuAddVar("Game", "Select mission", &nextMissionToSwitch, nil, 1, 0, ARRAY_SIZE(missions) - 1, missions);
 		DebugMenuEntrySetWrap(missionEntry, true);
-		DebugMenuAddCmd("Debug", "Start selected mission ", SwitchToMission);
+		DebugMenuAddCmd("Game", "Start selected mission ", SwitchToMission);
 #endif
 		extern bool PrintDebugCode;
 		extern int16 DebugCamMode;
@@ -1060,7 +1188,7 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 	strcat_s(re3_buff, re3_buffsize, "(Press Retry to debug the application)");
 
 
-	nCode = ::MessageBoxA(nil, re3_buff, "RE3 Assertion Failed!",
+	nCode = ::MessageBoxA(nil, re3_buff, "RELCS Assertion Failed!",
 		MB_ABORTRETRYIGNORE|MB_ICONHAND|MB_SETFOREGROUND|MB_TASKMODAL);
 
 	if (nCode == IDABORT)
@@ -1081,7 +1209,7 @@ void re3_assert(const char *expr, const char *filename, unsigned int lineno, con
 	abort();
 #else
 	// TODO
-	printf("\nRE3 ASSERT FAILED\n\tFile: %s\n\tLine: %d\n\tFunction: %s\n\tExpression: %s\n",filename,lineno,func,expr);
+	printf("\nRELCS ASSERT FAILED\n\tFile: %s\n\tLine: %d\n\tFunction: %s\n\tExpression: %s\n",filename,lineno,func,expr);
 	assert(false);
 #endif
 }
@@ -1133,14 +1261,14 @@ void re3_usererror(const char *format, ...)
 	vsprintf_s(re3_buff, re3_buffsize, format, va);
 	va_end(va);
 	
-	::MessageBoxA(nil, re3_buff, "RE3 Error!",
+	::MessageBoxA(nil, re3_buff, "RELCS Error!",
 		MB_OK|MB_ICONHAND|MB_SETFOREGROUND|MB_TASKMODAL);
 
 	raise(SIGABRT);
 	_exit(3);
 #else
 	vsprintf(re3_buff, format, va);
-	printf("\nRE3 Error!\n\t%s\n",re3_buff);
+	printf("\nRELCS Error!\n\t%s\n",re3_buff);
 	assert(false);
 #endif
 }

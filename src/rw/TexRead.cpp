@@ -1,6 +1,7 @@
 #pragma warning( push )
 #pragma warning( disable : 4005)
 #pragma warning( pop )
+#define FORCE_PC_SCALING
 #ifndef LIBRW
 #define WITHD3D
 #endif
@@ -320,7 +321,11 @@ ConvertingTexturesScreen(uint32 num, uint32 count, const char *text)
 	splash->Draw(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), CRGBA(255, 255, 255, 255));
 
 	CSprite2d::DrawRect(CRect(SCREEN_SCALE_X(200.0f), SCREEN_SCALE_Y(240.0f), SCREEN_SCALE_FROM_RIGHT(200.0f), SCREEN_SCALE_Y(248.0f)), CRGBA(64, 64, 64, 255));
+#ifdef FIX_BUGS
+	CSprite2d::DrawRect(CRect(SCREEN_SCALE_X(200.0f), SCREEN_SCALE_Y(240.0f), (SCREEN_SCALE_FROM_RIGHT(200.0f) - SCREEN_SCALE_X(200.0f)) * ((float)num / (float)count) + SCREEN_SCALE_X(200.0f), SCREEN_SCALE_Y(248.0f)), CRGBA(255, 150, 225, 255));
+#else
 	CSprite2d::DrawRect(CRect(SCREEN_SCALE_X(200.0f), SCREEN_SCALE_Y(240.0f), (SCREEN_SCALE_FROM_RIGHT(200.0f) - SCREEN_SCALE_X(200.0f)) * ((float)num / (float)count) + SCREEN_SCALE_X(200.0f), SCREEN_SCALE_Y(248.0f)), CRGBA(255, 217, 106, 255));
+#endif
 	CSprite2d::DrawRect(CRect(SCREEN_SCALE_X(120.0f), SCREEN_SCALE_Y(150.0f), SCREEN_SCALE_FROM_RIGHT(120.0f), SCREEN_HEIGHT - SCREEN_SCALE_Y(220.0f)), CRGBA(50, 50, 50, 210));
 
 	CFont::SetBackgroundOff();
@@ -329,7 +334,11 @@ ConvertingTexturesScreen(uint32 num, uint32 count, const char *text)
 	CFont::SetCentreOff();
 	CFont::SetWrapx(SCREEN_SCALE_FROM_RIGHT(170.0f));
 	CFont::SetJustifyOff();
+#ifdef FIX_BUGS
+	CFont::SetColor(CRGBA(255, 150, 225, 255));
+#else
 	CFont::SetColor(CRGBA(255, 217, 106, 255));
+#endif
 	CFont::SetBackGroundOnlyTextOff();
 	CFont::SetFontStyle(FONT_STANDARD);
 	CFont::PrintString(SCREEN_SCALE_X(170.0f), SCREEN_SCALE_Y(160.0f), TheText.Get(text));

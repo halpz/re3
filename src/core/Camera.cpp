@@ -214,7 +214,7 @@ CCamera::Init(void)
 	m_iModeToGoTo = CCam::MODE_FOLLOWPED;
 	m_bJust_Switched = false;
 	m_bUseTransitionBeta = false;
-	m_matrix.SetScale(1.0f);
+	GetMatrix().SetScale(1.0f);
 	m_bTargetJustBeenOnTrain = false;
 	m_bInitialNoNodeStaticsSet = false;
 	m_uiLongestTimeInMill = 5000;
@@ -1769,7 +1769,7 @@ CCamera::CamControl(void)
 		   (m_bLookingAtPlayer || WhoIsInControlOfTheCamera == CAMCONTROL_OBBE) &&
 		   !m_WideScreenOn &&
 		   (WhoIsInControlOfTheCamera != CAMCONTROL_OBBE || bSwitchedToObbeCam))
-			DMAudio.PlayFrontEndSound(SOUND_HUD_SOUND, 0);
+			DMAudio.PlayFrontEndSound(SOUND_HUD, 0);
 }
 
 // What a mess!
@@ -4019,7 +4019,7 @@ CCamera::SetRwCamera(RwCamera *cam)
 void
 CCamera::CalculateDerivedValues(void)
 {
-	m_cameraMatrix = Invert(m_matrix);
+	m_cameraMatrix = Invert(GetMatrix());
 
 	float hfov = DEGTORAD(CDraw::GetScaledFOV()/2.0f);
 	float c = Cos(hfov);
@@ -4103,16 +4103,11 @@ CCamera::IsSphereVisible(const CVector &center, float radius, const CMatrix *mat
 bool
 CCamera::IsSphereVisible(const CVector &center, float radius)
 {
-	CMatrix mat = m_cameraMatrix;
-	return IsSphereVisible(center, radius, &mat);
+	return IsSphereVisible(center, radius, &GetCameraMatrix());
 }
 
 bool
-#ifdef GTA_PS2
-CCamera::IsBoxVisible(CVuVector *box, const CMatrix *mat)
-#else
-CCamera::IsBoxVisible(CVector *box, const CMatrix *mat)
-#endif
+CCamera::IsBoxVisible(CVUVECTOR *box, const CMatrix *mat)
 {
 	int i;
 	int frustumTests[6] = { 0 };

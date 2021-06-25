@@ -114,6 +114,8 @@ enum
 	BUTTON_R1,
 	BUTTON_R2,
 	BUTTON_R3,
+	BUTTON_RSTICK_UP,
+	BUTTON_RSTICK_DOWN,
 	BUTTON_RSTICK_LEFT,
 	BUTTON_RSTICK_RIGHT,
 	MAX_BUTTON_ICONS
@@ -124,7 +126,7 @@ enum
 class CFont
 {
 #ifdef MORE_LANGUAGES
-	static int16 Size[LANGSET_MAX][MAX_FONTS][193];
+	static int16 Size[LANGSET_MAX][MAX_FONTS][210];
 	static uint8 LanguageSet;
 	static int32 Slot;
 #else
@@ -140,7 +142,8 @@ public:
 	static int32 ButtonsSlot;
 	static CSprite2d ButtonSprite[MAX_BUTTON_ICONS];
 	static int PS2Symbol;
-
+	
+	static void LoadButtons(const char *txdPath);
 	static void DrawButton(float x, float y);
 #endif // BUTTON_ICONS
 
@@ -155,11 +158,11 @@ public:
 #endif
 	static int GetNumberLines(float xstart, float ystart, wchar *s);
 	static void GetTextRect(CRect *rect, float xstart, float ystart, wchar *s);
-#ifdef MORE_LANGUAGES
-	static bool PrintString(float x, float y, wchar *start, wchar* &end, float spwidth, float japX);
-#else
+//#ifdef MORE_LANGUAGES
+//	static bool PrintString(float x, float y, wchar *start, wchar* &end, float spwidth, float japX);
+//#else
 	static void PrintString(float x, float y, uint32, wchar *start, wchar *end, float spwidth);
-#endif
+//#endif
 	static void PrintStringFromBottom(float x, float y, wchar *str);
 	static float GetCharacterWidth(wchar c, bool forceProportional = false);
 	static float GetCharacterSize(wchar c);
@@ -168,12 +171,12 @@ public:
 	static float GetStringWidth_Jap(wchar* s);
 #endif
 	static uint16 *GetNextSpace(wchar *s);
-#ifdef MORE_LANGUAGES
-	static uint16 *ParseToken(wchar *s, bool japShit = false);
-#else
+//#ifdef MORE_LANGUAGES
+//	static uint16 *ParseToken(wchar *s, bool japShit = false);
+//#else
 	static uint16 *ParseToken(wchar *s);
 	static uint16 *ParseToken(wchar *s, CRGBA &color, bool &flash, bool &bold);
-#endif
+//#endif
 	static void DrawFonts(void);
 	static void RenderFontBuffer(void);
 	static uint16 character_code(uint8 c);
@@ -218,6 +221,6 @@ public:
 	static bool IsAnsiCharacter(wchar* s);
 	static bool IsJapanesePunctuation(wchar* str);
 	static bool IsJapanese() { return LanguageSet == FONT_LANGSET_JAPANESE; }
-	static bool IsJapaneseFont() { return IsJapanese() && (Details.style == FONT_JAPANESE || Details.style == FONT_PAGER);  }
+	static bool IsJapaneseFont() { return IsJapanese() && (Details.style == FONT_JAPANESE);  }
 #endif
 };

@@ -260,8 +260,8 @@ void CSetPiece::Update(void)
 		CCarAI::AddPoliceCarOccupants(pVehicle1);
 		CVehicle* pVehicle2 = TryToGenerateCopCar(m_vSpawn2, m_vTarget2);
 		if (!pVehicle2) {
-			CWorld::Remove(pVehicle2);
-			delete pVehicle2;
+			CWorld::Remove(pVehicle1);
+			delete pVehicle1;
 			return;
 		}
 		pVehicle2->SetStatus(STATUS_PHYSICS);

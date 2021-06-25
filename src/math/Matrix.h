@@ -92,22 +92,6 @@ public:
 	void SetRotateXOnly(float angle);
 	void SetRotateYOnly(float angle);
 	void SetRotateZOnly(float angle);
-	void SetRotateZOnlyScaled(float angle, float scale) {
-		float c = Cos(angle);
-		float s = Sin(angle);
-
-		rx = c * scale;
-		ry = s * scale;
-		rz = 0.0f;
-
-		fx = -s * scale;
-		fy = c * scale;
-		fz = 0.0f;
-
-		ux = 0.0f;
-		uy = 0.0f;
-		uz = scale;
-	}
 	void SetRotateX(float angle);
 	void SetRotateY(float angle);
 	void SetRotateZ(float angle);

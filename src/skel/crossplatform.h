@@ -75,7 +75,7 @@ void CapturePad(RwInt32 padID);
 void joysChangeCB(int jid, int event);
 #endif
 
-#ifdef DONT_TRUST_RECOGNIZED_JOYSTICKS
+#ifdef DETECT_JOYSTICK_MENU
 extern char gSelectedJoystickName[128];
 #endif
 
@@ -136,7 +136,12 @@ void GetLocalTime_CP(SYSTEMTIME* out);
 
 typedef void* HANDLE;
 #define INVALID_HANDLE_VALUE NULL
-#define FindClose(h) closedir((DIR*)h)
+#define FindClose(h) \
+    do { \
+        if (h != nil) \
+            closedir((DIR*)h); \
+    } while(0)
+
 #define LOCALE_USER_DEFAULT 0
 #define DATE_SHORTDATE 0
 

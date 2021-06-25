@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include "main.h"
 #include "WeaponEffects.h"
 #include "TxdStore.h"
 #include "Sprite.h"
@@ -103,6 +104,8 @@ CWeaponEffects::Render(void)
 		float w, h;
 		if ( CSprite::CalcScreenCoors(gCrossHair.m_vecPos, &pos, &w, &h, true) )
 		{
+			PUSH_RENDERGROUP("CWeaponEffects::Render");
+
 			float recipz = 1.0f / pos.z;
 			CSprite::RenderOneXLUSprite_Rotate_Aspect(pos.x, pos.y, pos.z,
 				w, h,
@@ -119,6 +122,8 @@ CWeaponEffects::Render(void)
 			gCrossHair.m_fRotation += 0.02f;
 			if ( gCrossHair.m_fRotation > TWOPI )
 				gCrossHair.m_fRotation = 0.0;
+
+			POP_RENDERGROUP();
 		}
 			
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void *)FALSE);

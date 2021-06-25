@@ -817,7 +817,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 						}
 					}
 					pPed->m_pMyVehicle->m_nGettingOutFlags &= ~flags;
-					pPed->m_pMyVehicle->ProcessOpenDoor(pPed->m_vehDoor, NUM_STD_ANIMS, 0.0f);
+					pPed->m_pMyVehicle->ProcessOpenDoor(pPed->m_vehDoor, ANIM_STD_NUM, 0.0f);
 				}
 			}
 		}
@@ -834,7 +834,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		pPed->m_pVehicleAnim = nil;
 		pPed->RestartNonPartialAnims();
 		pPed->SetMoveState(PEDMOVE_NONE);
-		CAnimManager::BlendAnimation(pPed->GetClump(), pPed->m_animGroup, ANIM_IDLE_STANCE, 1000.0f);
+		CAnimManager::BlendAnimation(pPed->GetClump(), pPed->m_animGroup, ANIM_STD_IDLE, 1000.0f);
 		pos.z += pPed->GetDistanceFromCentreOfMassToBaseOfModel();
 		pPed->Teleport(pos);
 		CTheScripts::ClearSpaceForMissionEntity(pos, pPed);
@@ -1396,7 +1396,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		DMAudio.ChangeMusicMode(MUSICMODE_FRONTEND);
-		DMAudio.PlayFrontEndTrack(GET_INTEGER_PARAM(0) + STREAMED_SOUND_MISSION_COMPLETED - 1, 0);
+		DMAudio.PlayFrontEndTrack(GET_INTEGER_PARAM(0) + STREAMED_SOUND_MISSION_COMPLETED - 1, FALSE);
 		//DMAudio.SaveAnnouncementsWhenMissionPassedPlayed(); // TODO!
 		return 0;
 	}
@@ -2012,8 +2012,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_HAS_MISSION_AUDIO_LOADED:
 	{
 		CollectParameters(&m_nIp, 1);
-		//UpdateCompareFlag(DMAudio.GetMissionAudioLoadingStatus(GET_INTEGER_PARAM(0) - 1) == 1);
-		UpdateCompareFlag(true); // TODO
+		UpdateCompareFlag(DMAudio.GetMissionAudioLoadingStatus(GET_INTEGER_PARAM(0) - 1) == 1);
 		return 0;
 	}
 	case COMMAND_PLAY_MISSION_AUDIO:
@@ -2023,8 +2022,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 	case COMMAND_HAS_MISSION_AUDIO_FINISHED:
 	{
 		CollectParameters(&m_nIp, 1);
-		//UpdateCompareFlag(DMAudio.IsMissionAudioSampleFinished(GET_INTEGER_PARAM(0) - 1)); // TODO
-		UpdateCompareFlag(true);
+		UpdateCompareFlag(DMAudio.IsMissionAudioSampleFinished(GET_INTEGER_PARAM(0) - 1));
 		return 0;
 	}
 	case COMMAND_GET_CLOSEST_CAR_NODE_WITH_HEADING:

@@ -120,7 +120,7 @@ struct CCarPathLink
 	uint8 trafficLightDirection : 1;
 	uint8 trafficLightType : 2;
 	uint8 bBridgeLights : 1;	// at least in LCS...
-	int8 width;
+	uint8 width;
 
 	CVector2D GetPosition(void) { return CVector2D(x/8.0f, y/8.0f); }
 	CVector2D GetDirection(void) { return CVector2D(dirX/100.0f, dirY/100.0f); }
@@ -151,7 +151,7 @@ struct CPathInfoForObject
 	int8 numLeftLanes;
 	int8 numRightLanes;
 	int8 speedLimit;
-	int8 width;
+	uint8 width;
 
 	uint8 crossing : 1;
 	uint8 onlySmallBoats : 1;
@@ -177,7 +177,7 @@ struct CTempNode
 	int16 link2;
 	int8 numLeftLanes;
 	int8 numRightLanes;
-	int8 width;
+	uint8 width;
 	bool isCross;
 	int8 linkState;
 };
@@ -188,7 +188,7 @@ struct CTempNodeExternal	// made up name
 	int16 next;
 	int8 numLeftLanes;
 	int8 numRightLanes;
-	int8 width;
+	uint8 width;
 	bool isCross;
 };
 

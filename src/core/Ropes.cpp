@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include "main.h"
 #include "Timer.h"
 #include "ModelIndices.h"
 #include "Streaming.h"
@@ -91,9 +92,11 @@ void
 CRopes::Render(void)
 {
 	int i;
+	PUSH_RENDERGROUP("CRopes::Render");
 	for(i = 0; i < ARRAY_SIZE(aRopes); i++)
 		if(aRopes[i].m_bActive)
 			aRopes[i].Render();
+	POP_RENDERGROUP();
 }
 
 bool
@@ -167,7 +170,7 @@ CRopes::CreateRopeWithSwatComingDown(CVector pos)
 	swat->bUsesCollision = false;
 	swat->m_pRopeEntity = (CEntity*)1;
 	swat->m_nRopeID = 100 + ropeId;
-	CAnimManager::BlendAnimation(swat->GetClump(), ASSOCGRP_STD, ANIM_ABSEIL, 4.0f);
+	CAnimManager::BlendAnimation(swat->GetClump(), ASSOCGRP_STD, ANIM_STD_ABSEIL, 4.0f);
 	ropeId++;
 	return true;
 }

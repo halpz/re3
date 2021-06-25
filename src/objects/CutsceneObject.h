@@ -14,6 +14,7 @@ public:
 	CCutsceneObject(void);
 	~CCutsceneObject(void);
 
+	bool UpdatesInCutscene(void) { return true; }
 	void SetModelIndex(uint32 id);
 	void CreateShadow(void);
 	void ProcessControl(void);

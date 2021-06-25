@@ -249,6 +249,8 @@ CCoronas::Render(void)
 	int i, j;
 	int screenw, screenh;
 
+	PUSH_RENDERGROUP("CCoronas::Render");
+
 	screenw = RwRasterGetWidth(RwCameraGetRaster(Scene.camera));
 	screenh = RwRasterGetHeight(RwCameraGetRaster(Scene.camera));
 
@@ -432,6 +434,8 @@ CCoronas::Render(void)
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+
+	POP_RENDERGROUP();
 }
 
 void
@@ -442,6 +446,8 @@ CCoronas::RenderReflections(void)
 	CEntity *entity;
 
 	if(CWeather::WetRoads > 0.0f){
+		PUSH_RENDERGROUP("CCoronas::RenderReflections");
+
 		CSprite::InitSpriteBuffer();
 
 		RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
@@ -517,6 +523,8 @@ CCoronas::RenderReflections(void)
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
 		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
 		RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+
+		POP_RENDERGROUP();
 	}else{
 		for(i = 0; i < NUMCORONAS; i++)
 			aCoronas[i].renderReflection = false;
@@ -905,9 +913,9 @@ CEntity::ProcessLightsForEntity(void)
 						effect->light.shadowSize, 0.0f,
 						0.0f, -effect->light.shadowSize,
 						128,
-						effect->col.r*CTimeCycle::GetSpriteBrightness()*effect->light.shadowIntensity/255.0f,
-						effect->col.g*CTimeCycle::GetSpriteBrightness()*effect->light.shadowIntensity/255.0f,
-						effect->col.b*CTimeCycle::GetSpriteBrightness()*effect->light.shadowIntensity/255.0f,
+						effect->col.r,
+						effect->col.g,
+						effect->col.b,
 						15.0f, 1.0f, 40.0f, false, 0.0f);
 				}else if(lightFlickering){
 					CShadows::StoreStaticShadow((uintptr)this + i, SHADOWTYPE_ADDITIVE,

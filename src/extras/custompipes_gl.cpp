@@ -111,13 +111,7 @@ leedsVehicleRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	setWorldMatrix(atomic->getFrame()->getLTM());
 	lightingCB(atomic);
 
-#ifdef RW_GL_USE_VAOS
-	glBindVertexArray(header->vao);
-#else
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, header->ibo);
-	glBindBuffer(GL_ARRAY_BUFFER, header->vbo);
-	setAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	setupVertexInput(header);
 
 	InstanceData *inst = header->inst;
 	rw::int32 n = header->numMeshes;
@@ -167,9 +161,7 @@ leedsVehicleRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 
 	SetRenderState(SRCBLEND, BLENDSRCALPHA);
 
-#ifndef RW_GL_USE_VAOS
-	disableAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	teardownVertexInput(header);
 }
 
 void
@@ -200,13 +192,7 @@ leedsVehicleRenderCB_mobile(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *hea
 	setWorldMatrix(atomic->getFrame()->getLTM());
 	lightingCB(atomic);
 
-#ifdef RW_GL_USE_VAOS
-	glBindVertexArray(header->vao);
-#else
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, header->ibo);
-	glBindBuffer(GL_ARRAY_BUFFER, header->vbo);
-	setAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	setupVertexInput(header);
 
 	InstanceData *inst = header->inst;
 	rw::int32 n = header->numMeshes;
@@ -251,9 +237,7 @@ leedsVehicleRenderCB_mobile(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *hea
 
 	setTexture(1, nil);
 
-#ifndef RW_GL_USE_VAOS
-	disableAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	teardownVertexInput(header);
 }
 
 static void
@@ -310,13 +294,7 @@ vehicleRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	setWorldMatrix(atomic->getFrame()->getLTM());
 	lightingCB(atomic);
 
-#ifdef RW_GL_USE_VAOS
-	glBindVertexArray(header->vao);
-#else
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, header->ibo);
-	glBindBuffer(GL_ARRAY_BUFFER, header->vbo);
-	setAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	setupVertexInput(header);
 
 	InstanceData *inst = header->inst;
 	rw::int32 n = header->numMeshes;
@@ -357,9 +335,7 @@ vehicleRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 
 	SetRenderState(SRCBLEND, BLENDSRCALPHA);
 
-#ifndef RW_GL_USE_VAOS
-	disableAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	teardownVertexInput(header);
 }
 
 void
@@ -382,7 +358,7 @@ CreateVehiclePipe(void)
 	{
 #include "shaders/obj/neoVehicle_frag.inc"
 #include "shaders/obj/neoVehicle_vert.inc"
-	const char *vs[] = { shaderDecl, header_vert_src, neoVehicle_vert_src, nil };
+	const char *vs[] = { shaderDecl, "#define DIRECTIONALS\n", header_vert_src, neoVehicle_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, neoVehicle_frag_src, nil };
 	neoVehicleShader = Shader::create(vs, fs);
 	assert(neoVehicleShader);
@@ -455,13 +431,7 @@ worldRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 
 	setWorldMatrix(atomic->getFrame()->getLTM());
 
-#ifdef RW_GL_USE_VAOS
-	glBindVertexArray(header->vao);
-#else
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, header->ibo);
-	glBindBuffer(GL_ARRAY_BUFFER, header->vbo);
-	setAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	setupVertexInput(header);
 
 	InstanceData *inst = header->inst;
 	rw::int32 n = header->numMeshes;
@@ -494,9 +464,7 @@ worldRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 		drawInst(header, inst);
 		inst++;
 	}
-#ifndef RW_GL_USE_VAOS
-	disableAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	teardownVertexInput(header);
 }
 
 void
@@ -564,13 +532,7 @@ glossRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 
 	Material *m;
 
-#ifdef RW_GL_USE_VAOS
-	glBindVertexArray(header->vao);
-#else
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, header->ibo);
-	glBindBuffer(GL_ARRAY_BUFFER, header->vbo);
-	setAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	setupVertexInput(header);
 
 	InstanceData *inst = header->inst;
 	rw::int32 n = header->numMeshes;
@@ -608,9 +570,7 @@ glossRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	SetRenderState(SRCBLEND, BLENDSRCALPHA);
 	SetRenderState(DESTBLEND, BLENDINVSRCALPHA);
 
-#ifndef RW_GL_USE_VAOS
-	disableAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	teardownVertexInput(header);
 }
 
 void
@@ -693,13 +653,7 @@ rimSkinRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	setWorldMatrix(atomic->getFrame()->getLTM());
 	lightingCB(atomic);
 
-#ifdef RW_GL_USE_VAOS
-	glBindVertexArray(header->vao);
-#else
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, header->ibo);
-	glBindBuffer(GL_ARRAY_BUFFER, header->vbo);
-	setAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	setupVertexInput(header);
 
 	InstanceData *inst = header->inst;
 	rw::int32 n = header->numMeshes;
@@ -722,9 +676,7 @@ rimSkinRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 		drawInst(header, inst);
 		inst++;
 	}
-#ifndef RW_GL_USE_VAOS
-	disableAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	teardownVertexInput(header);
 }
 
 static void
@@ -743,13 +695,7 @@ rimRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 	setWorldMatrix(atomic->getFrame()->getLTM());
 	lightingCB(atomic);
 
-#ifdef RW_GL_USE_VAOS
-	glBindVertexArray(header->vao);
-#else
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, header->ibo);
-	glBindBuffer(GL_ARRAY_BUFFER, header->vbo);
-	setAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	setupVertexInput(header);
 
 	InstanceData *inst = header->inst;
 	rw::int32 n = header->numMeshes;
@@ -770,9 +716,7 @@ rimRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 		drawInst(header, inst);
 		inst++;
 	}
-#ifndef RW_GL_USE_VAOS
-	disableAttribPointers(header->attribDesc, header->numAttribs);
-#endif
+	teardownVertexInput(header);
 }
 
 void
@@ -794,7 +738,7 @@ CreateRimLightPipes(void)
 	{
 #include "shaders/obj/simple_frag.inc"
 #include "shaders/obj/neoRimSkin_vert.inc"
-	const char *vs[] = { shaderDecl, header_vert_src, neoRimSkin_vert_src, nil };
+	const char *vs[] = { shaderDecl, "#define DIRECTIONALS\n", header_vert_src, neoRimSkin_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, simple_frag_src, nil };
 	neoRimSkinShader = Shader::create(vs, fs);
 	assert(neoRimSkinShader);
@@ -803,7 +747,7 @@ CreateRimLightPipes(void)
 	{
 #include "shaders/obj/simple_frag.inc"
 #include "shaders/obj/neoRim_vert.inc"
-	const char *vs[] = { shaderDecl, header_vert_src, neoRim_vert_src, nil };
+	const char *vs[] = { shaderDecl, "#define DIRECTIONALS\n", header_vert_src, neoRim_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, simple_frag_src, nil };
 	neoRimShader = Shader::create(vs, fs);
 	assert(neoRimShader);
@@ -938,13 +882,7 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 			else
 				CustomPipes::leedsWorldShader->use();
 			setWorldMatrix(&building->matrix);
-#ifdef RW_GL_USE_VAOS
-			glBindVertexArray(building->instHeader->vao);
-#else
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, building->instHeader->ibo);
-			glBindBuffer(GL_ARRAY_BUFFER, building->instHeader->vbo);
-			setAttribPointers(building->instHeader->attribDesc, building->instHeader->numAttribs);
-#endif
+			setupVertexInput(building->instHeader);
 
 			CustomPipes::uploadWorldLights();
 
@@ -965,9 +903,7 @@ AtomicFirstPass(RpAtomic *atomic, int pass)
 
 		drawInst(building->instHeader, inst);
 	}
-#ifndef RW_GL_USE_VAOS
-	disableAttribPointers(building->instHeader->attribDesc, building->instHeader->numAttribs);
-#endif
+	teardownVertexInput(building->instHeader);
 	if(defer)
 		numBlendInsts[pass]++;
 }
@@ -1010,13 +946,7 @@ RenderBlendPass(int pass)
 	for(i = 0; i < numBlendInsts[pass]; i++){
 		BuildingInst *building = &blendInsts[pass][i];
 
-#ifdef RW_GL_USE_VAOS
-		glBindVertexArray(building->instHeader->vao);
-#else
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, building->instHeader->ibo);
-		glBindBuffer(GL_ARRAY_BUFFER, building->instHeader->vbo);
-		setAttribPointers(building->instHeader->attribDesc, building->instHeader->numAttribs);
-#endif
+		setupVertexInput(building->instHeader);
 		setWorldMatrix(&building->matrix);
 
 		InstanceData *inst = building->instHeader->inst;
@@ -1041,9 +971,7 @@ RenderBlendPass(int pass)
 
 			drawInst(building->instHeader, inst);
 		}
-#ifndef RW_GL_USE_VAOS
-		disableAttribPointers(building->instHeader->attribDesc, building->instHeader->numAttribs);
-#endif
+		teardownVertexInput(building->instHeader);
 	}
 }
 }

@@ -228,6 +228,12 @@ inline uint32 ldb(uint32 p, uint32 s, uint32 w)
 
 #include "maths.h"
 #include "Vector.h"
+#ifdef GTA_PS2
+#include "VuVector.h"
+#define CVUVECTOR CVuVector
+#else
+#define CVUVECTOR CVector
+#endif
 #include "Vector2D.h"
 #include "Matrix.h"
 #include "Rect.h"
@@ -369,7 +375,7 @@ __inline__ void TRACE(char *f, ...) { } // this is re3 only, and so the function
 #ifndef MASTER
 #define assert(_Expression) (void)( (!!(_Expression)) || (re3_assert(#_Expression, __FILE__, __LINE__, __FUNCTION__), 0) )
 #else
-#define assert(_Expression)
+#define assert(_Expression) (_Expression)
 #endif
 #define ASSERT assert
 

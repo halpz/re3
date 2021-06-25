@@ -1,5 +1,6 @@
 #include "common.h"
 
+#include "main.h"
 #include "General.h"
 #include "Timer.h"
 #include "TxdStore.h"
@@ -49,6 +50,8 @@
 #define MAX_CARSPLASH_FILES       ARRAY_SIZE(CarsplashFiles)
 
 #define MAX_RAINDRIP_FILES       (2)
+
+#define MAX_LEAF_FILES           (2)
 
 	
 const char SmokeFiles[][6+1] =
@@ -166,7 +169,7 @@ RwTexture *gpFlame1Tex;
 RwTexture *gpFlame5Tex;
 RwTexture *gpRainDropSmallTex;
 RwTexture *gpBloodTex;
-RwTexture *gpLeafTex;
+RwTexture *gpLeafTex[MAX_LEAF_FILES];
 RwTexture *gpCloudTex1;
 RwTexture *gpCloudTex4;
 RwTexture *gpBloodSmallTex;
@@ -194,7 +197,7 @@ RwRaster  *gpFlame1Raster;
 RwRaster  *gpFlame5Raster;
 RwRaster  *gpRainDropSmallRaster;
 RwRaster  *gpBloodRaster;
-RwRaster  *gpLeafRaster;
+RwRaster  *gpLeafRaster[MAX_LEAF_FILES];
 RwRaster  *gpCloudRaster1;
 RwRaster  *gpCloudRaster4;
 RwRaster  *gpBloodSmallRaster;
@@ -206,9 +209,6 @@ RwRaster  *gpPointlightRaster;
 
 RwTexture *gpRainDropTex;
 RwRaster  *gpRainDropRaster;
-
-RwTexture *gpLetterTex;
-RwRaster *gpLetterRaster;
 
 RwTexture *gpSparkTex;
 RwTexture *gpNewspaperTex;
@@ -430,13 +430,13 @@ void CParticle::Initialise()
 	ASSERT(gpBloodTex != nil);
 	gpBloodRaster = RwTextureGetRaster(gpBloodTex);
 
-	gpLeafTex = RwTextureRead("gameleaf01_64", nil);
-	ASSERT(gpLeafTex != nil);
-	gpLeafRaster = RwTextureGetRaster(gpLeafTex);
+	gpLeafTex[0] = RwTextureRead("gameleaf01_64", nil);
+	ASSERT(gpLeafTex[0] != nil);
+	gpLeafRaster[0] = RwTextureGetRaster(gpLeafTex[0]);
 	
-	gpLetterTex = RwTextureRead("letter", nil);
-	ASSERT(gpLetterTex != nil);
-	gpLetterRaster = RwTextureGetRaster(gpLetterTex);
+	gpLeafTex[1] = RwTextureRead("letter", nil);
+	ASSERT(gpLeafTex[1] != nil);
+	gpLeafRaster[1] = RwTextureGetRaster(gpLeafTex[1]);
 
 	gpCloudTex1 = RwTextureRead("cloud3", nil);
 	ASSERT(gpCloudTex1 != nil);
@@ -555,7 +555,7 @@ void CParticle::Initialise()
 				break;
 				
 			case PARTICLE_DEBRIS:
-				entry->m_ppRaster = &gpLeafRaster;
+				entry->m_ppRaster = gpLeafRaster;
 				break;
 				
 			case PARTICLE_DEBRIS2:
@@ -750,7 +750,7 @@ void CParticle::Initialise()
 				break;
 			
 			case PARTICLE_TREE_LEAVES:
-				entry->m_ppRaster = &gpLeafRaster;
+				entry->m_ppRaster = gpLeafRaster;
 				break;
 			
 			case PARTICLE_CARCOLLISION_DUST:
@@ -929,11 +929,11 @@ void CParticle::Shutdown()
 	RwTextureDestroy(gpBloodTex);
 	gpBloodTex = nil;
 	
-	RwTextureDestroy(gpLeafTex);
-	gpLeafTex = nil;
+	RwTextureDestroy(gpLeafTex[0]);
+	gpLeafTex[0] = nil;
 
-	RwTextureDestroy(gpLetterTex);
-	gpLetterTex = nil;
+	RwTextureDestroy(gpLeafTex[1]);
+	gpLeafTex[1] = nil;
 	
 	RwTextureDestroy(gpCloudTex1);
 	gpCloudTex1 = nil;
@@ -1750,6 +1750,8 @@ void CParticle::Update()
 
 void CParticle::Render()
 {
+	PUSH_RENDERGROUP("CParticle::Render");
+
 	RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void *)rwTEXTUREADDRESSWRAP);
 	RwRenderStateSet(rwRENDERSTATETEXTUREPERSPECTIVE, (void *)TRUE);
 	RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void *)FALSE);
@@ -2106,6 +2108,8 @@ void CParticle::Render()
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void *)TRUE);
 	RwRenderStateSet(rwRENDERSTATESRCBLEND, (void *)rwBLENDSRCALPHA);
 	RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void *)rwBLENDINVSRCALPHA);
+
+	POP_RENDERGROUP();
 }
 
 void CParticle::RemovePSystem(tParticleType type)

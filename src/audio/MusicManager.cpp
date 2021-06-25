@@ -21,10 +21,14 @@
 #include "DMAudio.h"
 #include "GenericGameStorage.h"
 
+#if !defined FIX_BUGS && (defined RADIO_SCROLL_TO_PREV_STATION || defined RADIO_OFF_TEXT)
+static_assert(false, "R*'s radio implementation is quite buggy, RADIO_SCROLL_TO_PREV_STATION and RADIO_OFF_TEXT won't work without FIX_BUGS");
+#endif
+
 cMusicManager MusicManager;
 int32 gNumRetunePresses;
 int32 gRetuneCounter;
-bool g_bAnnouncementReadPosAlready;
+bool8 g_bAnnouncementReadPosAlready;
 uint8 RadioStaticCounter = 5;
 uint32 RadioStaticTimer;
 
@@ -46,13 +50,13 @@ uint32 NewGameRadioTimers[10] =
 
 cMusicManager::cMusicManager()
 {
-	m_bIsInitialised = false;
-	m_bDisabled = false;
+	m_bIsInitialised = FALSE;
+	m_bDisabled = FALSE;
 	m_nFrontendTrack = NO_TRACK;
 	m_nPlayingTrack = NO_TRACK;
 	m_nUpcomingMusicMode = MUSICMODE_DISABLED;
 	m_nMusicMode = MUSICMODE_DISABLED;
-	field_2 = false;
+	m_bSetNextStation = FALSE;
 
 	for (int i = 0; i < NUM_RADIOS; i++)
 		aListenTimeArray[i] = 0.0f;
@@ -62,7 +66,7 @@ cMusicManager::cMusicManager()
 	m_nCurrentVolume = 0;
 	m_nMaxVolume = 0;
 	m_nAnnouncement = NO_TRACK;
-	m_bAnnouncementInProgress = false;
+	m_bAnnouncementInProgress = FALSE;
 }
 
 void
@@ -70,45 +74,45 @@ cMusicManager::ResetMusicAfterReload()
 {
 	float afRadioTime[NUM_RADIOS];
 
-	m_bRadioSetByScript = false;
-	m_nRadioStation = WILDSTYLE;
+	m_bRadioSetByScript = FALSE;
+	m_nRadioStationScript = WILDSTYLE;
 	m_nRadioPosition = -1;
 	m_nAnnouncement = NO_TRACK;
-	m_bAnnouncementInProgress = false;
-	field_2 = false;
+	m_bAnnouncementInProgress = FALSE;
+	m_bSetNextStation = FALSE;
 	RadioStaticTimer = 0;
 	gNumRetunePresses = 0;
 	gRetuneCounter = 0;
 	m_nFrontendTrack = NO_TRACK;
 	m_nPlayingTrack = NO_TRACK;
-	field_398E = false;
-	field_398F = false;
-	m_nStreamedTrack = NO_TRACK;
-	field_3994 = false;
-	field_3995 = false;
-	field_3996 = false;
-	field_3997 = false;
+	m_FrontendLoopFlag = FALSE;
+	m_bTrackChangeStarted = FALSE;
+	m_nNextTrack = NO_TRACK;
+	m_nNextLoopFlag = FALSE;
+	m_bVerifyNextTrackStartedToPlay = FALSE;
+	m_bGameplayAllowsRadio = FALSE;
+	m_bRadioStreamReady = FALSE;
 	nFramesSinceCutsceneEnded = -1;
-	field_3999 = false;
-	field_399A = false;
-	field_399C = false;
+	m_bUserResumedGame = FALSE;
+	m_bMusicModeChangeStarted = FALSE;
+	m_bEarlyFrontendTrack = FALSE;
 	m_nVolumeLatency = 0;
 	m_nCurrentVolume = 0;
 	m_nMaxVolume = 0;
 
-	bool bRadioWasEverListened = false;
+	bool8 bRadioWasEverListened = FALSE;
 
 	for (int i = 0; i < NUM_RADIOS; i++) {
 		afRadioTime[i] = CStats::GetFavoriteRadioStationList(i);
 		if (!bRadioWasEverListened && afRadioTime[i] != 0.0f)
-			bRadioWasEverListened = true;
+			bRadioWasEverListened = TRUE;
 	}
 
 	if (!bRadioWasEverListened) return;
 
 	for (int i = 0; i < NUM_RADIOS; i++) {
 		aListenTimeArray[i] = afRadioTime[i];
-		uint32 trackPos = GetSavedRadioStationPosition(i);
+		int32 trackPos = GetSavedRadioStationPosition(i);
 		if (trackPos != -1) {
 			if (trackPos > m_aTracks[i].m_nLength) {
 				debug("Radio Track %d saved position is %d, Length is only %d\n", i, trackPos, m_aTracks[i].m_nLength);
@@ -121,7 +125,7 @@ cMusicManager::ResetMusicAfterReload()
 }
 
 void
-cMusicManager::SetStartingTrackPositions(uint8 isNewGameTimer)
+cMusicManager::SetStartingTrackPositions(bool8 isNewGameTimer)
 {
 	int pos;
 
@@ -170,16 +174,16 @@ cMusicManager::SetStartingTrackPositions(uint8 isNewGameTimer)
 	}
 }
 
-bool
+bool8
 cMusicManager::Initialise()
 {
 	if (!IsInitialised()) {
-		m_bIsInitialised = true;
-		SetStartingTrackPositions(false);
-		m_bResetTimers = false;
+		m_bIsInitialised = TRUE;
+		SetStartingTrackPositions(FALSE);
+		m_bResetTimers = FALSE;
 		m_nResetTime = 0;
-		m_bRadioSetByScript = false;
-		m_nRadioStation = WILDSTYLE;
+		m_bRadioSetByScript = FALSE;
+		m_nRadioStationScript = WILDSTYLE;
 		m_nRadioPosition = -1;
 		m_nRadioInCar = NO_TRACK;
 		gRetuneCounter = 0;
@@ -188,18 +192,18 @@ cMusicManager::Initialise()
 		m_nPlayingTrack = NO_TRACK;
 		m_nUpcomingMusicMode = MUSICMODE_DISABLED;
 		m_nMusicMode = MUSICMODE_DISABLED;
-		field_398E = false;
-		field_398F = false;
-		m_nStreamedTrack = NO_TRACK;
-		field_3994 = false;
-		field_3995 = false;
-		field_3996 = false;
-		field_3997 = false;
+		m_FrontendLoopFlag = FALSE;
+		m_bTrackChangeStarted = FALSE;
+		m_nNextTrack = NO_TRACK;
+		m_nNextLoopFlag = FALSE;
+		m_bVerifyNextTrackStartedToPlay = FALSE;
+		m_bGameplayAllowsRadio = FALSE;
+		m_bRadioStreamReady = FALSE;
 		nFramesSinceCutsceneEnded = -1;
-		field_3999 = false;
-		field_399A = false;
+		m_bUserResumedGame = FALSE;
+		m_bMusicModeChangeStarted = FALSE;
 		m_nMusicModeToBeSet = MUSICMODE_DISABLED;
-		field_399C = false;
+		m_bEarlyFrontendTrack = FALSE;
 		m_nVolumeLatency = 0;
 		m_nCurrentVolume = 0;
 		m_nMaxVolume = 0;
@@ -212,11 +216,11 @@ cMusicManager::Terminate()
 {
 	if (!IsInitialised()) return;
 
-	if (SampleManager.IsStreamPlaying(0)) {
-		SampleManager.StopStreamedFile(0);
+	if (SampleManager.IsStreamPlaying()) {
+		SampleManager.StopStreamedFile();
 		m_nPlayingTrack = NO_TRACK;
 	}
-	m_bIsInitialised = false;
+	m_bIsInitialised = FALSE;
 }
 
 void
@@ -226,29 +230,29 @@ cMusicManager::SetRadioChannelByScript(uint32 station, int32 pos)
 		if (station == STREAMED_SOUND_RADIO_MP3_PLAYER)
 			station = STREAMED_SOUND_CITY_AMBIENT;
 		if (station <= STREAMED_SOUND_RADIO_POLICE) {
-			m_bRadioSetByScript = true;
-			m_nRadioStation = station;
+			m_bRadioSetByScript = TRUE;
+			m_nRadioStationScript = station;
 			m_nRadioPosition = pos == -1 ? -1 : pos % m_aTracks[station].m_nLength;
 		}
 	}
 }
 
-bool
+bool8
 cMusicManager::PlayerInCar()
 {
 	CVehicle *vehicle = AudioManager.FindVehicleOfPlayer();
 	if(!vehicle)
-		return false;
+		return FALSE;
 
 	int32 State = FindPlayerPed()->m_nPedState;
 
 	if(State == PED_DRAG_FROM_CAR || State == PED_EXIT_CAR || State == PED_ARRESTED)
-		return false;
+		return FALSE;
 
 	if (vehicle->GetStatus() == STATUS_WRECKED)
-		return false;
+		return FALSE;
 
-	return true;
+	return TRUE;
 }
 
 uint32
@@ -292,7 +296,7 @@ cMusicManager::SetRadioInCar(uint32 station)
 void
 cMusicManager::RecordRadioStats()
 {
-	if (m_nPlayingTrack < STREAMED_SOUND_CITY_AMBIENT) {
+	if (m_nPlayingTrack < NUM_RADIOS) {
 		double time /*Rusty*/ = CTimer::GetTimeInMillisecondsPauseMode();
 		if (time > m_nLastTrackServiceTime)
 			aListenTimeArray[m_nPlayingTrack] += time - m_nLastTrackServiceTime;
@@ -310,27 +314,27 @@ cMusicManager::ChangeMusicMode(uint8 mode)
 	case MUSICMODE_GAME: m_nUpcomingMusicMode = MUSICMODE_GAME; break;
 	case MUSICMODE_CUTSCENE:
 		m_nUpcomingMusicMode = MUSICMODE_CUTSCENE;
-		if (SampleManager.IsStreamPlaying(0)) {
+		if (SampleManager.IsStreamPlaying()) {
 			if (m_nPlayingTrack != NO_TRACK) {
 				RecordRadioStats();
-				m_aTracks[m_nPlayingTrack].m_nPosition = SampleManager.GetStreamedFilePosition(0);
+				m_aTracks[m_nPlayingTrack].m_nPosition = SampleManager.GetStreamedFilePosition();
 				m_aTracks[m_nPlayingTrack].m_nLastPosCheckTimer = CTimer::GetTimeInMillisecondsPauseMode();
 			}
 		}
-		SampleManager.StopStreamedFile(0);
-		while (SampleManager.IsStreamPlaying(0))
-			SampleManager.StopStreamedFile(0);
+		SampleManager.StopStreamedFile();
+		while (SampleManager.IsStreamPlaying())
+			SampleManager.StopStreamedFile();
 		m_nMusicMode = m_nUpcomingMusicMode;
-		field_399A = false;
-		field_398F = false;
-		m_nStreamedTrack = NO_TRACK;
-		field_3994 = false;
-		field_3995 = false;
+		m_bMusicModeChangeStarted = FALSE;
+		m_bTrackChangeStarted = FALSE;
+		m_nNextTrack = NO_TRACK;
+		m_nNextLoopFlag = FALSE;
+		m_bVerifyNextTrackStartedToPlay = FALSE;
 		m_nPlayingTrack = NO_TRACK;
 		m_nFrontendTrack = NO_TRACK;
-		m_bAnnouncementInProgress = false;
+		m_bAnnouncementInProgress = FALSE;
 		m_nAnnouncement = NO_TRACK;
-		g_bAnnouncementReadPosAlready = false;
+		g_bAnnouncementReadPosAlready = FALSE;
 		break;
 	case MUSICMODE_DISABLE: m_nUpcomingMusicMode = MUSICMODE_DISABLED; break;
 	default: return;
@@ -340,7 +344,7 @@ cMusicManager::ChangeMusicMode(uint8 mode)
 void
 cMusicManager::ResetTimers(int32 time)
 {
-	m_bResetTimers = true;
+	m_bResetTimers = TRUE;
 	m_nResetTime = time;
 }
 
@@ -348,15 +352,15 @@ void
 cMusicManager::Service()
 {
 	if (m_bResetTimers) {
-		m_bResetTimers = false;
+		m_bResetTimers = FALSE;
 		m_nLastTrackServiceTime = m_nResetTime;
 	}
 
-	static bool bRadioStatsRecorded = false;
+	static bool8 bRadioStatsRecorded = FALSE;
 
 	if (!m_bIsInitialised || m_bDisabled) return;
 
-	if (!field_399A)
+	if (!m_bMusicModeChangeStarted)
 		m_nMusicModeToBeSet = m_nUpcomingMusicMode;
 	if (m_nMusicModeToBeSet == m_nMusicMode) {
 		if (!AudioManager.m_nUserPause || AudioManager.m_nPreviousUserPause || m_nMusicMode != MUSICMODE_FRONTEND)
@@ -365,39 +369,39 @@ cMusicManager::Service()
 			{
 			case MUSICMODE_FRONTEND: ServiceFrontEndMode(); break;
 			case MUSICMODE_GAME: ServiceGameMode(); break;
-			case MUSICMODE_CUTSCENE: SampleManager.SetStreamedVolumeAndPan(MAX_VOLUME, 63, 1, 0); break;
+			case MUSICMODE_CUTSCENE: SampleManager.SetStreamedVolumeAndPan(MAX_VOLUME, 63, TRUE); break;
 			}
 		}
 		else
 			m_nMusicMode = MUSICMODE_DISABLED;
 	} else {
-		field_399A = true;
-		if (!field_3999 && !AudioManager.m_nUserPause && AudioManager.m_nPreviousUserPause)
-			field_3999 = true;
+		m_bMusicModeChangeStarted = TRUE;
+		if (!m_bUserResumedGame && !AudioManager.m_nUserPause && AudioManager.m_nPreviousUserPause)
+			m_bUserResumedGame = TRUE;
 		if (AudioManager.m_FrameCounter % 4 == 0) {
 			gNumRetunePresses = 0;
 			gRetuneCounter = 0;
-			field_2 = false;
-			if (SampleManager.IsStreamPlaying(0)) {
+			m_bSetNextStation = FALSE;
+			if (SampleManager.IsStreamPlaying()) {
 				if (m_nPlayingTrack != NO_TRACK && !bRadioStatsRecorded)
 				{
 					RecordRadioStats();
-					m_aTracks[m_nPlayingTrack].m_nPosition = SampleManager.GetStreamedFilePosition(0);
+					m_aTracks[m_nPlayingTrack].m_nPosition = SampleManager.GetStreamedFilePosition();
 					m_aTracks[m_nPlayingTrack].m_nLastPosCheckTimer = CTimer::GetTimeInMillisecondsPauseMode();
-					bRadioStatsRecorded = true;
+					bRadioStatsRecorded = TRUE;
 				}
-				SampleManager.StopStreamedFile(0);
+				SampleManager.StopStreamedFile();
 			} else {
-				bRadioStatsRecorded = false;
+				bRadioStatsRecorded = FALSE;
 				m_nMusicMode = m_nMusicModeToBeSet;
-				field_399A = false;
-				field_398F = false;
-				m_nStreamedTrack = NO_TRACK;
-				field_3994 = false;
-				field_3995 = false;
+				m_bMusicModeChangeStarted = FALSE;
+				m_bTrackChangeStarted = FALSE;
+				m_nNextTrack = NO_TRACK;
+				m_nNextLoopFlag = FALSE;
+				m_bVerifyNextTrackStartedToPlay = FALSE;
 				m_nPlayingTrack = NO_TRACK;
-				if (field_399C)
-					field_399C = false;
+				if (m_bEarlyFrontendTrack)
+					m_bEarlyFrontendTrack = FALSE;
 				else
 					m_nFrontendTrack = NO_TRACK;
 			}
@@ -408,72 +412,72 @@ cMusicManager::Service()
 void
 cMusicManager::ServiceFrontEndMode()
 {
-	static bool bRadioStatsRecorded = false;
+	static bool8 bRadioStatsRecorded = FALSE;
 
 	if (m_bAnnouncementInProgress) {
-		SampleManager.StopStreamedFile(0);
-		if (SampleManager.IsStreamPlaying(0))
+		SampleManager.StopStreamedFile();
+		if (SampleManager.IsStreamPlaying())
 			return;
-		g_bAnnouncementReadPosAlready = false;
+		g_bAnnouncementReadPosAlready = FALSE;
 		m_nAnnouncement = NO_TRACK;
-		m_bAnnouncementInProgress = false;
-		m_nStreamedTrack = NO_TRACK;
+		m_bAnnouncementInProgress = FALSE;
+		m_nNextTrack = NO_TRACK;
 		m_nFrontendTrack = NO_TRACK;
 		m_nPlayingTrack = NO_TRACK;
 	}
 
 	if (AudioManager.m_FrameCounter % 4 != 0) return;
 
-	if (!field_398F && !field_3995) {
-		m_nStreamedTrack = m_nFrontendTrack;
-		field_3994 = field_398E;
+	if (!m_bTrackChangeStarted && !m_bVerifyNextTrackStartedToPlay) {
+		m_nNextTrack = m_nFrontendTrack;
+		m_nNextLoopFlag = m_FrontendLoopFlag;
 	}
 
-	if (m_nStreamedTrack == m_nPlayingTrack) {
-		if (SampleManager.IsStreamPlaying(0)) {
+	if (m_nNextTrack == m_nPlayingTrack) {
+		if (SampleManager.IsStreamPlaying()) {
 			if (m_nVolumeLatency > 0) m_nVolumeLatency--;
 			else {
 				if (m_nCurrentVolume < m_nMaxVolume)
 					m_nCurrentVolume = Min(m_nMaxVolume, m_nCurrentVolume + 6);
-				SampleManager.SetStreamedVolumeAndPan(m_nCurrentVolume, 63, 0, 0);
+				SampleManager.SetStreamedVolumeAndPan(m_nCurrentVolume, 63, FALSE);
 			}
 		} else {
 			if (m_nPlayingTrack == STREAMED_SOUND_RADIO_MP3_PLAYER)
-				SampleManager.StartStreamedFile(STREAMED_SOUND_RADIO_MP3_PLAYER, 0, 0);
+				SampleManager.StartStreamedFile(STREAMED_SOUND_RADIO_MP3_PLAYER, 0);
 			else if (m_nPlayingTrack == STREAMED_SOUND_MISSION_COMPLETED && AudioManager.m_nUserPause == 0)
 				ChangeMusicMode(MUSICMODE_GAME);
 		}
 	} else {
-		field_398F = true;
-		if (field_3995 || !SampleManager.IsStreamPlaying(0)) {
-			bRadioStatsRecorded = false;
-			if (SampleManager.IsStreamPlaying(0) || m_nStreamedTrack == NO_TRACK) {
-				m_nPlayingTrack = m_nStreamedTrack;
-				field_3995 = false;
-				field_398F = false;
+		m_bTrackChangeStarted = TRUE;
+		if (m_bVerifyNextTrackStartedToPlay || !SampleManager.IsStreamPlaying()) {
+			bRadioStatsRecorded = FALSE;
+			if (SampleManager.IsStreamPlaying() || m_nNextTrack == NO_TRACK) {
+				m_nPlayingTrack = m_nNextTrack;
+				m_bVerifyNextTrackStartedToPlay = FALSE;
+				m_bTrackChangeStarted = FALSE;
 			} else {
-				uint32 trackStartPos = (m_nStreamedTrack > STREAMED_SOUND_RADIO_POLICE) ? 0 : GetTrackStartPos(m_nStreamedTrack);
-				if (m_nStreamedTrack != NO_TRACK) {
-					SampleManager.SetStreamedFileLoopFlag(field_3994, 0);
-					SampleManager.StartStreamedFile(m_nStreamedTrack, trackStartPos, 0);
+				uint32 trackStartPos = (m_nNextTrack > STREAMED_SOUND_RADIO_POLICE) ? 0 : GetTrackStartPos(m_nNextTrack);
+				if (m_nNextTrack != NO_TRACK) {
+					SampleManager.SetStreamedFileLoopFlag(m_nNextLoopFlag);
+					SampleManager.StartStreamedFile(m_nNextTrack, trackStartPos);
 					m_nVolumeLatency = 3;
 					m_nCurrentVolume = 0;
 					m_nMaxVolume = 100;
-					SampleManager.SetStreamedVolumeAndPan(m_nCurrentVolume, 63, 0, 0);
-					if (m_nStreamedTrack < STREAMED_SOUND_CITY_AMBIENT)
+					SampleManager.SetStreamedVolumeAndPan(m_nCurrentVolume, 63, FALSE);
+					if (m_nNextTrack < STREAMED_SOUND_CITY_AMBIENT)
 						m_nLastTrackServiceTime = CTimer::GetTimeInMillisecondsPauseMode();
-					field_3995 = true;
+					m_bVerifyNextTrackStartedToPlay = TRUE;
 				}
 			}
 		} else {
 			if (m_nPlayingTrack != NO_TRACK && !bRadioStatsRecorded) {
-				m_aTracks[m_nPlayingTrack].m_nPosition = SampleManager.GetStreamedFilePosition(0);
+				m_aTracks[m_nPlayingTrack].m_nPosition = SampleManager.GetStreamedFilePosition();
 				m_aTracks[m_nPlayingTrack].m_nLastPosCheckTimer = CTimer::GetTimeInMillisecondsPauseMode();
 				RecordRadioStats();
-				bRadioStatsRecorded = true;
+				bRadioStatsRecorded = TRUE;
 			}
-			SampleManager.SetStreamedVolumeAndPan(0, 63, 0, 0);
-			SampleManager.StopStreamedFile(0);
+			SampleManager.SetStreamedVolumeAndPan(0, 63, FALSE);
+			SampleManager.StopStreamedFile();
 		}
 	}
 }
@@ -483,8 +487,8 @@ cMusicManager::ServiceGameMode()
 {
 	CPed *ped = FindPlayerPed();
 	CVehicle *vehicle = AudioManager.FindVehicleOfPlayer();
-	field_3997 = field_3996;
-	field_3996 = false;
+	m_bRadioStreamReady = m_bGameplayAllowsRadio;
+	m_bGameplayAllowsRadio = FALSE;
 
 	switch (CGame::currArea)
 	{
@@ -495,29 +499,28 @@ cMusicManager::ServiceGameMode()
 	case AREA_BLOOD:
 	case AREA_OVALRING:
 	case AREA_MALIBU_CLUB:
-		field_3996 = false;
+		m_bGameplayAllowsRadio = FALSE;
 		break;
 	default:
 		if (SampleManager.GetMusicVolume()) {
 			if (PlayerInCar())
-				field_3996 = true;
+				m_bGameplayAllowsRadio = TRUE;
 		} else
-			field_3996 = false;
+			m_bGameplayAllowsRadio = FALSE;
 		break;
 	}
 
-	if (!field_3996) {
+	if (!m_bGameplayAllowsRadio) {
 		nFramesSinceCutsceneEnded = -1;
 		gNumRetunePresses = 0;
 		gRetuneCounter = 0;
-		field_2 = false;
+		m_bSetNextStation = FALSE;
 	} else if (ped) {
-		if(!ped->DyingOrDead()) {
+		if(!ped->DyingOrDead() && vehicle) {
 #ifdef GTA_PC
 			if (SampleManager.IsMP3RadioChannelAvailable()
 				&& vehicle->m_nRadioStation < USERTRACK
-				&& ControlsManager.GetIsKeyboardKeyJustDown(rsF9)
-				&& vehicle)
+				&& ControlsManager.GetIsKeyboardKeyJustDown(rsF9))
 			{
 				if (!UsesPoliceRadio(vehicle) && !UsesTaxiRadio(vehicle)) {
 					gNumRetunePresses = 0;
@@ -532,7 +535,7 @@ cMusicManager::ServiceGameMode()
 				}
 			}
 #endif
-			if (CPad::GetPad(0)->ChangeStationJustDown() && vehicle)
+			if (CPad::GetPad(0)->ChangeStationJustDown())
 			{
 				if (!UsesPoliceRadio(vehicle) && !UsesTaxiRadio(vehicle)) {
 					gNumRetunePresses++;
@@ -540,159 +543,195 @@ cMusicManager::ServiceGameMode()
 					RadioStaticCounter = 0;
 				}
 			}
+#ifdef RADIO_SCROLL_TO_PREV_STATION
+			else if(CPad::GetPad(0)->GetMouseWheelDownJustDown() || CPad::GetPad(0)->GetMouseWheelUpJustDown()) {
+				if(!UsesPoliceRadio(vehicle) && !UsesTaxiRadio(vehicle)) {
+					int scrollNext = ControlsManager.GetControllerKeyAssociatedWithAction(VEHICLE_CHANGE_RADIO_STATION, MOUSE);
+					int scrollPrev = scrollNext == rsMOUSEWHEELUPBUTTON ? rsMOUSEWHEELDOWNBUTTON
+																		: scrollNext == rsMOUSEWHEELDOWNBUTTON ? rsMOUSEWHEELUPBUTTON : -1;
 
+					if(scrollPrev != -1 && !ControlsManager.IsAnyVehicleActionAssignedToMouseKey(scrollPrev)) {
+						gNumRetunePresses--;
+						gRetuneCounter = 20;
+						RadioStaticCounter = 0;
+						int track = gNumRetunePresses + vehicle->m_nRadioStation;
+						while(track < 0) track += NUM_RADIOS + 1;
+						while(track >= NUM_RADIOS + 1) track -= NUM_RADIOS + 1;
+						if(!DMAudio.IsMP3RadioChannelAvailable() && track == USERTRACK) gNumRetunePresses--;
+					}
+				}
+			}
+#endif
 		}
 	}
 
-	if (field_3999)
+	if (m_bUserResumedGame)
 	{
-		field_3997 = false;
-		field_3999 = false;
+		m_bRadioStreamReady = FALSE;
+		m_bUserResumedGame = FALSE;
 	}
 	if (m_nPlayingTrack == NO_TRACK && m_nFrontendTrack == NO_TRACK)
-		field_3997 = false;
+		m_bRadioStreamReady = FALSE;
 
-	if (field_3996)
+	if (m_bGameplayAllowsRadio)
 	{
-		if (field_3997)
+		if (!m_bRadioStreamReady)
 		{
-			if (m_nAnnouncement < NO_TRACK) {
-				if ((m_bAnnouncementInProgress || m_nFrontendTrack == m_nPlayingTrack) && ServiceAnnouncement()) {
-					if (m_bAnnouncementInProgress) {
-						field_2 = false;
-						gNumRetunePresses = 0;
-						gRetuneCounter = 0;
-						return;
-					}
-					if(m_nAnnouncement == NO_TRACK) {
-						m_nStreamedTrack = NO_TRACK;
-						m_nFrontendTrack = GetCarTuning();
-						field_2 = false;
-						gRetuneCounter = 0;
-						gNumRetunePresses = 0;
-					}
-				}
-			}
-			if (!m_bAnnouncementInProgress
-				&& m_nAnnouncement == NO_TRACK
-				&& m_nPlayingTrack == STREAMED_SOUND_RADIO_MP3_PLAYER
-				&& !SampleManager.IsStreamPlaying(0))
-			{
-				SampleManager.StartStreamedFile(STREAMED_SOUND_RADIO_MP3_PLAYER, 0, 0);
-			}
-
-			if (!m_bRadioSetByScript)
-			{
-				if (gNumRetunePresses != 0)
-				{
-					if (--gRetuneCounter == 0)
-					{
-						field_2 = true;
-						gRetuneCounter = 0;
-					}
-				}
-				if (gRetuneCounter)
-				{
-					int32 station = gNumRetunePresses + vehicle->m_nRadioStation;
-					while (station >= RADIO_OFF) station -= RADIO_OFF;
-
-					if (!DMAudio.IsMP3RadioChannelAvailable() && station == USERTRACK)
-					{
-						++gNumRetunePresses;
-						station = NUM_RADIOS;
-					}
-					if (station == NUM_RADIOS)
-					{
-						if (gRetuneCounter == NUM_RADIOS + 9)
-						{
-							AudioManager.PlayOneShot(AudioManager.m_nFrontEndEntity, SOUND_FRONTEND_NO_RADIO, 0.0f);
-							RadioStaticCounter = 5;
-						}
-					}
-					else
-					{
-						if (station == WILDSTYLE && gRetuneCounter == NUM_RADIOS + 9)
-							AudioManager.PlayOneShot(AudioManager.m_nFrontEndEntity, SOUND_FRONTEND_RADIO_CHANGE, 0.0f);
-						AudioManager.DoPoliceRadioCrackle();
-					}
-				}
-				if (RadioStaticCounter < 2 && CTimer::GetTimeInMilliseconds() > RadioStaticTimer + 800)
-				{
-					AudioManager.PlayOneShot(AudioManager.m_nFrontEndEntity, SOUND_RADIO_CHANGE, 0.0f);
-					RadioStaticCounter++;
-					RadioStaticTimer = CTimer::GetTimeInMilliseconds();
-				}
-				if (field_2)
-					m_nFrontendTrack = GetNextCarTuning();
-				if (m_nFrontendTrack >= STREAMED_SOUND_CITY_AMBIENT && m_nFrontendTrack <= STREAMED_SOUND_AMBSIL_AMBIENT)
-					SetUpCorrectAmbienceTrack();
-				ServiceTrack(vehicle, ped);
-				if (field_2)
-					field_2 = false;
+			if(vehicle == nil) {
+				m_nFrontendTrack = STREAMED_SOUND_RADIO_LCFR; // huh?
 				return;
 			}
-			if (UsesPoliceRadio(vehicle))
-				m_nFrontendTrack = STREAMED_SOUND_RADIO_POLICE;
-			else if (UsesTaxiRadio(vehicle))
-				m_nFrontendTrack = STREAMED_SOUND_RADIO_TAXI;
-			else {
-				m_nFrontendTrack = m_nRadioStation;
-				vehicle->m_nRadioStation = m_nRadioStation;
+			if(m_bRadioSetByScript) {
+				if(UsesPoliceRadio(vehicle))
+					m_nFrontendTrack = STREAMED_SOUND_RADIO_POLICE;
+				else if(UsesTaxiRadio(vehicle))
+					m_nFrontendTrack = STREAMED_SOUND_RADIO_TAXI;
+				else {
+					m_nFrontendTrack = m_nRadioStationScript;
+					vehicle->m_nRadioStation = m_nRadioStationScript;
+				}
+				if(m_nRadioPosition != -1) {
+					m_aTracks[m_nFrontendTrack].m_nPosition = m_nRadioPosition;
+					m_aTracks[m_nFrontendTrack].m_nLastPosCheckTimer = CTimer::GetTimeInMillisecondsPauseMode();
+				}
+				m_bRadioSetByScript = FALSE;
+				return;
 			}
 
-			if (m_nRadioPosition != -1) {
-				m_aTracks[m_nFrontendTrack].m_nPosition = m_nRadioPosition;
-				m_aTracks[m_nFrontendTrack].m_nLastPosCheckTimer = CTimer::GetTimeInMillisecondsPauseMode();
+			// This starts the radio when you enter the car.
+			m_nFrontendTrack = GetCarTuning();
+			return;
+		}
+		if (m_nAnnouncement < NO_TRACK) {
+			if ((m_bAnnouncementInProgress || m_nFrontendTrack == m_nPlayingTrack) && ServiceAnnouncement()) {
+				if (m_bAnnouncementInProgress) {
+					m_bSetNextStation = FALSE;
+					gNumRetunePresses = 0;
+					gRetuneCounter = 0;
+					return;
+				}
+				if(m_nAnnouncement == NO_TRACK) {
+					m_nNextTrack = NO_TRACK;
+					m_nFrontendTrack = GetCarTuning();
+					m_bSetNextStation = FALSE;
+					gRetuneCounter = 0;
+					gNumRetunePresses = 0;
+				}
 			}
+		}
+		if (!m_bAnnouncementInProgress
+			&& m_nAnnouncement == NO_TRACK
+			&& m_nPlayingTrack == STREAMED_SOUND_RADIO_MP3_PLAYER
+			&& !SampleManager.IsStreamPlaying())
+		{
+			SampleManager.StartStreamedFile(STREAMED_SOUND_RADIO_MP3_PLAYER, 0);
+		}
 
-			gRetuneCounter = 0;
-			gNumRetunePresses = 0;
-			field_2 = false;
-			m_bRadioSetByScript = false;
+		if (!m_bRadioSetByScript)
+		{
+			// Because when you switch radio back and forth, gNumRetunePresses will be 0 but gRetuneCounter won't.
+#ifdef RADIO_SCROLL_TO_PREV_STATION
+			if(gRetuneCounter != 0) {
+				if(gRetuneCounter > 1)
+					gRetuneCounter--;
+				else if(gRetuneCounter == 1) {
+					m_bSetNextStation = TRUE;
+					gRetuneCounter = 0;
+				}
+			}
+#else
+			if (gNumRetunePresses != 0)
+			{
+				if (--gRetuneCounter == 0)
+				{
+					m_bSetNextStation = TRUE;
+					gRetuneCounter = 0;
+				}
+			}
+#endif
+			if (gRetuneCounter)
+			{
+				int32 station = gNumRetunePresses + vehicle->m_nRadioStation;
+#ifdef RADIO_SCROLL_TO_PREV_STATION
+				while (station < 0) station += NUM_RADIOS + 1;
+#endif
+				while (station >= NUM_RADIOS + 1) station -= NUM_RADIOS + 1;
+
+				// Scrolling back won't hit here, so increasing isn't problem
+				if (!DMAudio.IsMP3RadioChannelAvailable() && station == USERTRACK)
+				{
+					++gNumRetunePresses;
+					station = RADIO_OFF;
+				}
+				if (station == RADIO_OFF)
+				{
+					if (gRetuneCounter == 19) // One less then what switching radio sets, so runs right after turning off radio
+					{
+						AudioManager.PlayOneShot(AudioManager.m_nFrontEndEntity, SOUND_FRONTEND_RADIO_TURN_OFF, 0.0f);
+						RadioStaticCounter = 5;
+					}
+				}
+				else
+				{
+#ifdef RADIO_SCROLL_TO_PREV_STATION
+					if (vehicle->m_nRadioStation == RADIO_OFF && gRetuneCounter == 19) // Right after turning on the radio
+#else
+					if (station == 0 && gRetuneCounter == 19) // Right after turning on the radio
+#endif
+						AudioManager.PlayOneShot(AudioManager.m_nFrontEndEntity, SOUND_FRONTEND_RADIO_TURN_ON, 0.0f);
+					AudioManager.DoPoliceRadioCrackle();
+				}
+			}
+			if (RadioStaticCounter < 2 && CTimer::GetTimeInMilliseconds() > RadioStaticTimer + 800)
+			{
+				AudioManager.PlayOneShot(AudioManager.m_nFrontEndEntity, SOUND_RADIO_CHANGE, 0.0f);
+				RadioStaticCounter++;
+				RadioStaticTimer = CTimer::GetTimeInMilliseconds();
+			}
+			if (m_bSetNextStation)
+				m_nFrontendTrack = GetNextCarTuning();
 			if (m_nFrontendTrack >= STREAMED_SOUND_CITY_AMBIENT && m_nFrontendTrack <= STREAMED_SOUND_AMBSIL_AMBIENT)
 				SetUpCorrectAmbienceTrack();
 			ServiceTrack(vehicle, ped);
-			if (field_2)
-				field_2 = false;
+			if (m_bSetNextStation)
+				m_bSetNextStation = FALSE;
 			return;
 		}
-		if (vehicle == nil)
-		{
-			m_nFrontendTrack = STREAMED_SOUND_RADIO_LCFR; // huh?
-			return;
-		}
-		if (m_bRadioSetByScript)
-		{
-			if (UsesPoliceRadio(vehicle))
-				m_nFrontendTrack = STREAMED_SOUND_RADIO_POLICE;
-			else if (UsesTaxiRadio(vehicle))
-				m_nFrontendTrack = STREAMED_SOUND_RADIO_TAXI;
-			else {
-				m_nFrontendTrack = m_nRadioStation;
-				vehicle->m_nRadioStation = m_nRadioStation;
-			}
-			if (m_nRadioPosition != -1)
-			{
-				m_aTracks[m_nFrontendTrack].m_nPosition = m_nRadioPosition;
-				m_aTracks[m_nFrontendTrack].m_nLastPosCheckTimer = CTimer::GetTimeInMillisecondsPauseMode();
-			}
-			m_bRadioSetByScript = false;
-			return;
+		if (UsesPoliceRadio(vehicle))
+			m_nFrontendTrack = STREAMED_SOUND_RADIO_POLICE;
+		else if (UsesTaxiRadio(vehicle))
+			m_nFrontendTrack = STREAMED_SOUND_RADIO_TAXI;
+		else {
+			m_nFrontendTrack = m_nRadioStationScript;
+			vehicle->m_nRadioStation = m_nRadioStationScript;
 		}
 
-		m_nFrontendTrack = GetCarTuning();
+		if (m_nRadioPosition != -1) {
+			m_aTracks[m_nFrontendTrack].m_nPosition = m_nRadioPosition;
+			m_aTracks[m_nFrontendTrack].m_nLastPosCheckTimer = CTimer::GetTimeInMillisecondsPauseMode();
+		}
+
+		gRetuneCounter = 0;
+		gNumRetunePresses = 0;
+		m_bSetNextStation = FALSE;
+		m_bRadioSetByScript = FALSE;
+		if (m_nFrontendTrack >= STREAMED_SOUND_CITY_AMBIENT && m_nFrontendTrack <= STREAMED_SOUND_AMBSIL_AMBIENT)
+			SetUpCorrectAmbienceTrack();
+		ServiceTrack(vehicle, ped);
+		if (m_bSetNextStation)
+			m_bSetNextStation = FALSE;
 		return;
 	}
 
 	if (m_bAnnouncementInProgress)
 	{
-		SampleManager.StopStreamedFile(0);
-		if (SampleManager.IsStreamPlaying(0))
+		SampleManager.StopStreamedFile();
+		if (SampleManager.IsStreamPlaying())
 			return;
-		g_bAnnouncementReadPosAlready = false;
+		g_bAnnouncementReadPosAlready = FALSE;
 		m_nAnnouncement = NO_TRACK;
-		m_bAnnouncementInProgress = false;
-		m_nStreamedTrack = NO_TRACK;
+		m_bAnnouncementInProgress = FALSE;
+		m_nNextTrack = NO_TRACK;
 		m_nFrontendTrack = NO_TRACK;
 		m_nPlayingTrack = NO_TRACK;
 	}
@@ -769,7 +808,7 @@ GetHeightScale()
 }
 
 void
-cMusicManager::ComputeAmbienceVol(uint8 reset, uint8& outVolume)
+cMusicManager::ComputeAmbienceVol(bool8 reset, uint8& outVolume)
 {
 	static float fVol = 0.0f;
 
@@ -829,103 +868,110 @@ cMusicManager::ComputeAmbienceVol(uint8 reset, uint8& outVolume)
 	outVolume = (90.0f - fHeightScale) / 50.0f * fVol;
 }
 
-bool
+bool8
 cMusicManager::ServiceAnnouncement()
 {
 	if (m_bAnnouncementInProgress) {
-		if (SampleManager.IsStreamPlaying(0))
-			m_nPlayingTrack = m_nStreamedTrack;
+		if (SampleManager.IsStreamPlaying())
+			m_nPlayingTrack = m_nNextTrack;
 		else if (m_nPlayingTrack != NO_TRACK) {
 			m_nAnnouncement = NO_TRACK;
-			m_bAnnouncementInProgress = false;
+			m_bAnnouncementInProgress = FALSE;
 			m_nPlayingTrack = NO_TRACK;
 		}
-		return true;
-	} else if (SampleManager.IsStreamPlaying(0)) {
+		return TRUE;
+	} else if (SampleManager.IsStreamPlaying()) {
 		if (m_nPlayingTrack != NO_TRACK && !g_bAnnouncementReadPosAlready) {
 			RecordRadioStats();
-			m_aTracks[m_nPlayingTrack].m_nPosition = SampleManager.GetStreamedFilePosition(0);
-			g_bAnnouncementReadPosAlready = true;
+			m_aTracks[m_nPlayingTrack].m_nPosition = SampleManager.GetStreamedFilePosition();
+			g_bAnnouncementReadPosAlready = TRUE;
 			m_aTracks[m_nPlayingTrack].m_nLastPosCheckTimer = CTimer::GetTimeInMillisecondsPauseMode();
 		}
-		SampleManager.StopStreamedFile(0);
+		SampleManager.StopStreamedFile();
 	} else {
-		g_bAnnouncementReadPosAlready = false;
+		g_bAnnouncementReadPosAlready = FALSE;
 		m_nPlayingTrack = NO_TRACK;
-		m_nStreamedTrack = m_nAnnouncement;
-		SampleManager.SetStreamedFileLoopFlag(0, false);
-		SampleManager.StartStreamedFile(m_nStreamedTrack, 0, 0);
-		SampleManager.SetStreamedVolumeAndPan(MAX_VOLUME, 63, 0, 0);
-		m_bAnnouncementInProgress = true;
+		m_nNextTrack = m_nAnnouncement;
+		SampleManager.SetStreamedFileLoopFlag(FALSE);
+		SampleManager.StartStreamedFile(m_nNextTrack, 0);
+		SampleManager.SetStreamedVolumeAndPan(MAX_VOLUME, 63, FALSE);
+		m_bAnnouncementInProgress = TRUE;
 	}
 
-	return true;
+	return TRUE;
 }
 
 void
 cMusicManager::ServiceTrack(CVehicle *veh, CPed *ped)
 {
-	static bool bRadioStatsRecorded = false;
-	static bool bRadioStatsRecorded2 = false;
+	static bool8 bRadioStatsRecorded = FALSE;
+	static bool8 bRadioStatsRecorded2 = FALSE;
 	uint8 volume;
-	if (!field_398F)
-		m_nStreamedTrack = m_nFrontendTrack;
-	if (gRetuneCounter != 0 || field_2) {
-		if (SampleManager.IsStreamPlaying(0)) {
+	if (!m_bTrackChangeStarted)
+		m_nNextTrack = m_nFrontendTrack;
+	if (gRetuneCounter != 0 || m_bSetNextStation) {
+		if (SampleManager.IsStreamPlaying()) {
 			if (m_nPlayingTrack != NO_TRACK && !bRadioStatsRecorded) {
-				m_aTracks[m_nPlayingTrack].m_nPosition = SampleManager.GetStreamedFilePosition(0);
+				m_aTracks[m_nPlayingTrack].m_nPosition = SampleManager.GetStreamedFilePosition();
 				m_aTracks[m_nPlayingTrack].m_nLastPosCheckTimer = CTimer::GetTimeInMillisecondsPauseMode();
 				RecordRadioStats();
-				bRadioStatsRecorded = true;
+				bRadioStatsRecorded = TRUE;
 			}
-			SampleManager.SetStreamedVolumeAndPan(0, 63, 0, 0);
-			SampleManager.StopStreamedFile(0);
+			SampleManager.SetStreamedVolumeAndPan(0, 63, FALSE);
+			SampleManager.StopStreamedFile();
 		}
 		return;
 	}
 
 	if (bRadioStatsRecorded) {
-		bRadioStatsRecorded = false;
+		bRadioStatsRecorded = FALSE;
 		m_nPlayingTrack = NO_TRACK;
 	}
 
-	if (m_nStreamedTrack != m_nPlayingTrack)
+	if (m_nNextTrack != m_nPlayingTrack)
 	{
-		field_398F = true;
-		SampleManager.SetStreamedVolumeAndPan(0, 63, 0, 0);
+		m_bTrackChangeStarted = TRUE;
+		SampleManager.SetStreamedVolumeAndPan(0, 63, FALSE);
 		if (!(AudioManager.m_FrameCounter & 1)) {
-			if (field_3995 || !SampleManager.IsStreamPlaying(0)) {
-				bRadioStatsRecorded2 = false;
-				if (SampleManager.IsStreamPlaying(0)) {
-					m_nPlayingTrack = m_nStreamedTrack;
-					field_3995 = false;
-					field_398F = false;
+			if (m_bVerifyNextTrackStartedToPlay || !SampleManager.IsStreamPlaying()) {
+				bRadioStatsRecorded2 = FALSE;
+				if (SampleManager.IsStreamPlaying()) {
+					m_nPlayingTrack = m_nNextTrack;
+					m_bVerifyNextTrackStartedToPlay = FALSE;
+					m_bTrackChangeStarted = FALSE;
 					if (veh) {
-						if (veh->m_nRadioStation < STREAMED_SOUND_CITY_AMBIENT || veh->m_nRadioStation > STREAMED_SOUND_AMBSIL_AMBIENT)
+#ifdef FIX_BUGS
+						if (m_nPlayingTrack >= STREAMED_SOUND_CITY_AMBIENT && m_nPlayingTrack <= STREAMED_SOUND_AMBSIL_AMBIENT)
+							veh->m_nRadioStation = RADIO_OFF;
+						else if (m_nPlayingTrack < STREAMED_SOUND_CITY_AMBIENT)
 							veh->m_nRadioStation = m_nPlayingTrack;
+#else
+						if (veh->m_nRadioStation >= STREAMED_SOUND_CITY_AMBIENT && veh->m_nRadioStation <= STREAMED_SOUND_AMBSIL_AMBIENT)
+							veh->m_nRadioStation = RADIO_OFF;
 						else
-							veh->m_nRadioStation = STREAMED_SOUND_CITY_AMBIENT;
+							veh->m_nRadioStation = m_nPlayingTrack;
+#endif
 					}
 				} else {
-					uint32 pos = GetTrackStartPos(m_nStreamedTrack);
-					if (m_nStreamedTrack != NO_TRACK) {
-						SampleManager.SetStreamedFileLoopFlag(1, 0);
-						SampleManager.StartStreamedFile(m_nStreamedTrack, pos, 0);
+					uint32 pos = GetTrackStartPos(m_nNextTrack);
+					if (m_nNextTrack != NO_TRACK) {
+						SampleManager.SetStreamedFileLoopFlag(TRUE);
+						SampleManager.StartStreamedFile(m_nNextTrack, pos);
 						if (m_nFrontendTrack < STREAMED_SOUND_CITY_AMBIENT || m_nFrontendTrack > STREAMED_SOUND_AMBSIL_AMBIENT)
 						{
 							m_nVolumeLatency = 10;
 							m_nCurrentVolume = 0;
 							m_nMaxVolume = 100;
-							SampleManager.SetStreamedVolumeAndPan(m_nCurrentVolume, 63, 0, 0);
+							SampleManager.SetStreamedVolumeAndPan(m_nCurrentVolume, 63, FALSE);
 						}
 						else
 						{
-							ComputeAmbienceVol(true, volume);
-							SampleManager.SetStreamedVolumeAndPan(volume, 63, 1, 0);
+							ComputeAmbienceVol(TRUE, volume);
+							SampleManager.SetStreamedVolumeAndPan(volume, 63, TRUE);
 						}
-						if (m_nStreamedTrack < STREAMED_SOUND_CITY_AMBIENT)
+						if (m_nNextTrack < STREAMED_SOUND_CITY_AMBIENT)
 							m_nLastTrackServiceTime = CTimer::GetTimeInMillisecondsPauseMode();
-						field_3995 = true;
+						m_bVerifyNextTrackStartedToPlay = TRUE;
 					}
 				}
 			} else {
@@ -933,18 +979,18 @@ cMusicManager::ServiceTrack(CVehicle *veh, CPed *ped)
 					debug("m_nPlayingTrack == NO_TRACK, yet track playing - tidying up\n");
 				else if (!bRadioStatsRecorded2)
 				{
-					m_aTracks[m_nPlayingTrack].m_nPosition = SampleManager.GetStreamedFilePosition(0);
+					m_aTracks[m_nPlayingTrack].m_nPosition = SampleManager.GetStreamedFilePosition();
 					m_aTracks[m_nPlayingTrack].m_nLastPosCheckTimer = CTimer::GetTimeInMillisecondsPauseMode();
-					bRadioStatsRecorded2 = true;
+					bRadioStatsRecorded2 = TRUE;
 					RecordRadioStats();
 					if (m_nPlayingTrack >= STREAMED_SOUND_HAVANA_CITY_AMBIENT && m_nPlayingTrack <= STREAMED_SOUND_HAVANA_BEACH_AMBIENT)
 					{
-						if (m_nStreamedTrack >= STREAMED_SOUND_HAVANA_CITY_AMBIENT && m_nStreamedTrack <= STREAMED_SOUND_HAVANA_BEACH_AMBIENT)
-							AudioManager.PlayOneShot(AudioManager.m_nFrontEndEntity, SOUND_FRONTEND_RADIO_CHANGE_2, 0.0);
+						if (m_nNextTrack >= STREAMED_SOUND_HAVANA_CITY_AMBIENT && m_nNextTrack <= STREAMED_SOUND_HAVANA_BEACH_AMBIENT)
+							AudioManager.PlayOneShot(AudioManager.m_nFrontEndEntity, SOUND_FRONTEND_HURRICANE, 0.0);
 					}
 				}
-				SampleManager.SetStreamedVolumeAndPan(0, 63, 0, 0);
-				SampleManager.StopStreamedFile(0);
+				SampleManager.SetStreamedVolumeAndPan(0, 63, FALSE);
+				SampleManager.StopStreamedFile();
 			}
 		}
 		return;
@@ -952,8 +998,8 @@ cMusicManager::ServiceTrack(CVehicle *veh, CPed *ped)
 
 	if (m_nPlayingTrack >= STREAMED_SOUND_CITY_AMBIENT && m_nPlayingTrack <= STREAMED_SOUND_AMBSIL_AMBIENT)
 	{
-		ComputeAmbienceVol(false, volume);
-		SampleManager.SetStreamedVolumeAndPan(volume, 63, 1, 0);
+		ComputeAmbienceVol(FALSE, volume);
+		SampleManager.SetStreamedVolumeAndPan(volume, 63, TRUE);
 		return;
 	}
 	if (CTimer::GetIsSlowMotionActive())
@@ -963,7 +1009,7 @@ cMusicManager::ServiceTrack(CVehicle *veh, CPed *ped)
 			float DistToTargetSq = (TheCamera.pTargetEntity->GetPosition() - TheCamera.GetPosition()).MagnitudeSqr();
 			if (DistToTargetSq >= SQR(55.0f))
 			{
-				SampleManager.SetStreamedVolumeAndPan(0, 63, 0, 0);
+				SampleManager.SetStreamedVolumeAndPan(0, 63, FALSE);
 			}
 			else if (DistToTargetSq >= SQR(10.0f))
 			{
@@ -980,17 +1026,17 @@ cMusicManager::ServiceTrack(CVehicle *veh, CPed *ped)
 				}
 				if (gRetuneCounter != 0)
 					volume = 0;
-				SampleManager.SetStreamedVolumeAndPan(volume, pan, 0, 0);
+				SampleManager.SetStreamedVolumeAndPan(volume, pan, FALSE);
 			}
 			else if (AudioManager.ShouldDuckMissionAudio(0) || AudioManager.ShouldDuckMissionAudio(1))
-				SampleManager.SetStreamedVolumeAndPan(m_nCurrentVolume, 63, 0, 0);
+				SampleManager.SetStreamedVolumeAndPan(m_nCurrentVolume, 63, FALSE);
 			else if (gRetuneCounter != 0)
-				SampleManager.SetStreamedVolumeAndPan(0, 63, 0, 0);
+				SampleManager.SetStreamedVolumeAndPan(0, 63, FALSE);
 			else
-				SampleManager.SetStreamedVolumeAndPan(m_nCurrentVolume, 63, 0, 0);
+				SampleManager.SetStreamedVolumeAndPan(m_nCurrentVolume, 63, FALSE);
 		}
 	} else if (AudioManager.ShouldDuckMissionAudio(0) || AudioManager.ShouldDuckMissionAudio(1)) {
-		SampleManager.SetStreamedVolumeAndPan(Min(m_nCurrentVolume, 25), 63, 0, 0);
+		SampleManager.SetStreamedVolumeAndPan(Min(m_nCurrentVolume, 25), 63, FALSE);
 		nFramesSinceCutsceneEnded = 0;
 	} else {
 		if (nFramesSinceCutsceneEnded == -1)
@@ -1012,7 +1058,7 @@ cMusicManager::ServiceTrack(CVehicle *veh, CPed *ped)
 		}
 		if (gRetuneCounter != 0)
 			volume = 0;
-		SampleManager.SetStreamedVolumeAndPan(volume, 63, 0, 0);
+		SampleManager.SetStreamedVolumeAndPan(volume, 63, FALSE);
 	}
 	if (m_nVolumeLatency > 0)
 		m_nVolumeLatency--;
@@ -1025,10 +1071,10 @@ cMusicManager::PreloadCutSceneMusic(uint32 track)
 {
 	if (IsInitialised() && !m_bDisabled && track < TOTAL_STREAMED_SOUNDS && m_nMusicMode == MUSICMODE_CUTSCENE) {
 		AudioManager.ResetPoliceRadio();
-		while (SampleManager.IsStreamPlaying(0))
-			SampleManager.StopStreamedFile(0);
-		SampleManager.PreloadStreamedFile(track, 0);
-		SampleManager.SetStreamedVolumeAndPan(MAX_VOLUME, 63, 1, 0);
+		while (SampleManager.IsStreamPlaying())
+			SampleManager.StopStreamedFile();
+		SampleManager.PreloadStreamedFile(track);
+		SampleManager.SetStreamedVolumeAndPan(MAX_VOLUME, 63, TRUE);
 		m_nPlayingTrack = track;
 	}
 }
@@ -1037,27 +1083,27 @@ void
 cMusicManager::PlayPreloadedCutSceneMusic(void)
 {
 	if (IsInitialised() && !m_bDisabled && m_nMusicMode == MUSICMODE_CUTSCENE)
-		SampleManager.StartPreloadedStreamedFile(0);
+		SampleManager.StartPreloadedStreamedFile();
 }
 
 void
 cMusicManager::StopCutSceneMusic(void)
 {
 	if (IsInitialised() && !m_bDisabled && m_nMusicMode == MUSICMODE_CUTSCENE) {
-		SampleManager.StopStreamedFile(0);
+		SampleManager.StopStreamedFile();
 		m_nPlayingTrack = NO_TRACK;
 	}
 }
 
 void
-cMusicManager::PlayFrontEndTrack(uint32 track, uint8 bPlayInFrontend)
+cMusicManager::PlayFrontEndTrack(uint32 track, bool8 loopFlag)
 {
 	if (IsInitialised() && !m_bDisabled && track < TOTAL_STREAMED_SOUNDS && (m_nUpcomingMusicMode == MUSICMODE_FRONTEND || m_nMusicMode == MUSICMODE_FRONTEND))
 	{
 		m_nFrontendTrack = track;
-		field_398E = bPlayInFrontend;
+		m_FrontendLoopFlag = loopFlag;
 		if (m_nMusicMode != MUSICMODE_FRONTEND)
-			field_399C = true;
+			m_bEarlyFrontendTrack = TRUE;
 	}
 }
 
@@ -1083,10 +1129,18 @@ cMusicManager::GetNextCarTuning()
 	if (UsesPoliceRadio(veh)) return STREAMED_SOUND_RADIO_POLICE;
 	if (UsesTaxiRadio(veh)) return STREAMED_SOUND_RADIO_TAXI;
 	if (gNumRetunePresses != 0) {
+#ifdef RADIO_SCROLL_TO_PREV_STATION
+		// m_nRadioStation is unsigned, so...
+		int station = veh->m_nRadioStation + gNumRetunePresses;
+		while(station < 0) station += NUM_RADIOS + 1;
+		while(station >= NUM_RADIOS + 1) station -= NUM_RADIOS + 1;
+		veh->m_nRadioStation = station;
+#else
 		veh->m_nRadioStation += gNumRetunePresses;
-		while (veh->m_nRadioStation >= RADIO_OFF)
-			veh->m_nRadioStation -= RADIO_OFF;
-		DMAudio.IsMP3RadioChannelAvailable(); // woof, just call and do nothing =P
+		while(veh->m_nRadioStation >= NUM_RADIOS + 1)
+			veh->m_nRadioStation -= NUM_RADIOS + 1;
+#endif
+		DMAudio.IsMP3RadioChannelAvailable(); // woof, just call and do nothing =P they manipulate gNumRetunePresses on DisplayRadioStationName in this case
 		gNumRetunePresses = 0;
 	}
 	return veh->m_nRadioStation;
@@ -1129,7 +1183,7 @@ cMusicManager::GetTrackStartPos(uint32 track)
 uint32
 cMusicManager::GetRadioPosition(uint32 station)
 {
-	if (station < STREAMED_SOUND_CITY_AMBIENT)
+	if (station < NUM_RADIOS)
 		return GetTrackStartPos(station);
 	return 0;
 }
@@ -1147,7 +1201,7 @@ cMusicManager::GetFavouriteRadioStation()
 	return favstation;
 }
 
-bool
+bool8
 cMusicManager::CheckForMusicInterruptions()
 {
 	return (m_nPlayingTrack == STREAMED_SOUND_MISSION_COMPLETED) || (m_nPlayingTrack == STREAMED_SOUND_CUTSCENE_FINALE);
@@ -1158,7 +1212,7 @@ cMusicManager::SetMalibuClubTrackPos(uint8 scriptObject)
 {
 	if (!IsInitialised())
 		m_aTracks[STREAMED_SOUND_MALIBU_AMBIENT].m_nPosition = 8640;
-	if (m_nStreamedTrack != STREAMED_SOUND_MALIBU_AMBIENT && m_nPlayingTrack != STREAMED_SOUND_MALIBU_AMBIENT) {
+	if (m_nNextTrack != STREAMED_SOUND_MALIBU_AMBIENT && m_nPlayingTrack != STREAMED_SOUND_MALIBU_AMBIENT) {
 		switch (scriptObject)
 		{
 		case SCRIPT_SOUND_NEW_BUILDING_MALIBU_1:
@@ -1180,7 +1234,7 @@ cMusicManager::SetStripClubTrackPos(uint8 scriptObject)
 {
 	if (!IsInitialised())
 		m_aTracks[STREAMED_SOUND_STRIPCLUB_AMBIENT].m_nPosition = 0;
-	if (m_nStreamedTrack != STREAMED_SOUND_STRIPCLUB_AMBIENT && m_nPlayingTrack != STREAMED_SOUND_STRIPCLUB_AMBIENT)
+	if (m_nNextTrack != STREAMED_SOUND_STRIPCLUB_AMBIENT && m_nPlayingTrack != STREAMED_SOUND_STRIPCLUB_AMBIENT)
 	{
 		switch (scriptObject)
 		{
@@ -1201,7 +1255,7 @@ cMusicManager::SetStripClubTrackPos(uint8 scriptObject)
 void
 cMusicManager::DisplayRadioStationName()
 {
-	int8 gStreamedSound;
+	uint8 gStreamedSound;
 	static wchar *pCurrentStation = nil;
 	static uint8 cDisplay = 0;
 
@@ -1211,21 +1265,33 @@ cMusicManager::DisplayRadioStationName()
 
 		if (vehicle)
 		{
+			// Prev scroll needs it to be signed, and m_nFrontendTrack can be NO_TRACK thus FIX_BUGS
+#if defined RADIO_SCROLL_TO_PREV_STATION || defined FIX_BUGS
+			int track;
+#else
 			uint8 track;
+#endif
 			gStreamedSound = vehicle->m_nRadioStation;
 			if (gStreamedSound >= STREAMED_SOUND_CITY_AMBIENT && gStreamedSound <= STREAMED_SOUND_AMBSIL_AMBIENT)
-				gStreamedSound = STREAMED_SOUND_CITY_AMBIENT;
+				gStreamedSound = RADIO_OFF;
 			if (gNumRetunePresses != 0)
 			{
 				track = gNumRetunePresses + gStreamedSound;
-				while (track >= RADIO_OFF) track -= RADIO_OFF;
+#ifdef RADIO_SCROLL_TO_PREV_STATION
+				while (track < 0) track += NUM_RADIOS + 1;
+#endif
+				while (track >= NUM_RADIOS + 1) track -= NUM_RADIOS + 1;
+
+				// On scrolling back we handle this condition on key press. No need to change this.
 				if (!DMAudio.IsMP3RadioChannelAvailable() && track == USERTRACK)
 					gNumRetunePresses++;
 			}
 			else
+#ifdef RADIO_OFF_TEXT
+				track = GetCarTuning(); // gStreamedSound or veh->m_nRadioStation would also work, but these don't cover police/taxi radios
+#else
 				track = m_nFrontendTrack;
-
-
+#endif
 			wchar* string = nil;
 			switch (track) {
 			case WILDSTYLE: string = TheText.Get("FEA_FM0"); break;
@@ -1251,7 +1317,11 @@ cMusicManager::DisplayRadioStationName()
 			}
 			else {
 				if (cDisplay == 0) return;
+#ifdef FIX_BUGS
+				cDisplay -= CTimer::GetLogicalFramesPassed();
+#else
 				cDisplay--;
+#endif
 			}
 
 			CFont::SetJustifyOff();
@@ -1274,9 +1344,14 @@ cMusicManager::DisplayRadioStationName()
 			CFont::SetCentreSize(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
 		}
 	}
+	// Always show station text after entering car. Same behaviour as III and SA.
+#ifdef FIX_BUGS
+	else
+		pCurrentStation = nil;
+#endif
 }
 
-bool
+bool8
 cMusicManager::UsesPoliceRadio(CVehicle *veh)
 {
 	switch (veh->GetModelIndex())
@@ -1286,18 +1361,18 @@ cMusicManager::UsesPoliceRadio(CVehicle *veh)
 	case MI_COASTG:
 	case MI_RHINO:
 	case MI_BARRACKS:
-		return true;
+		return TRUE;
 	case MI_MRWHOOP:
 	case MI_HUNTER:
-		return false;
+		return FALSE;
 	}
 	return veh->UsesSiren();
 }
 
-bool
+bool8
 cMusicManager::UsesTaxiRadio(CVehicle *veh)
 {
-	if (veh->GetModelIndex() != MI_CABBIE) return false;
+	if (veh->GetModelIndex() != MI_CABBIE) return FALSE;
 	return CTheScripts::bPlayerHasMetDebbieHarry;
 }
 
@@ -1306,10 +1381,10 @@ cMusicManager::ServiceAmbience()
 {
 }
 
-bool
+bool8
 cMusicManager::ChangeRadioChannel()
 {
-	return true;
+	return TRUE;
 }
 
 // these two are empty
