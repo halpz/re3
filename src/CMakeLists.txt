@@ -50,6 +50,7 @@ if(LIBRW_PLATFORM_D3D9)
 endif()
 
 target_compile_definitions(${EXECUTABLE} PRIVATE CMAKE_BUILD)
+target_compile_definitions(${EXECUTABLE} PRIVATE USE_OUR_VERSIONING)
 
 if(${PROJECT}_AUDIO STREQUAL "OAL")
     find_package(OpenAL REQUIRED)
