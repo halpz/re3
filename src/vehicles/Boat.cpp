@@ -19,6 +19,7 @@
 #include "Pools.h"
 #include "Pad.h"
 #include "Boat.h"
+#include "SaveBuf.h"
 
 #define INVALID_ORIENTATION (-9999.99f)
 

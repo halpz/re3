@@ -14,6 +14,7 @@
 #include "ParticleObject.h"
 #include "Particle.h"
 #include "soundlist.h"
+#include "debugmenu.h"
 
 
 #define MAX_PARTICLES_ON_SCREEN   (1000)

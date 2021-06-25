@@ -13,6 +13,7 @@
 #include "RpAnimBlend.h"
 #include "AnimBlendAssociation.h"
 #include "soundlist.h"
+#include "SaveBuf.h"
 #ifdef FIX_BUGS
 #include "Replay.h"
 #endif
@@ -212,8 +213,9 @@ void
 CPhoneInfo::Load(uint8 *buf, uint32 size)
 {
 INITSAVEBUF
-	int max = ReadSaveBuf<int32>(buf);
-	int scriptPhonesMax = ReadSaveBuf<int32>(buf);
+	int32 max, scriptPhonesMax;
+	ReadSaveBuf(&max, buf);
+	ReadSaveBuf(&scriptPhonesMax, buf);
 
 #ifdef PEDS_REPORT_CRIMES_ON_PHONE
 	m_nMax = Min(NUMPHONES, max);
@@ -223,7 +225,8 @@ INITSAVEBUF
 
 	// We can do it without touching saves. We'll only load script phones, others are already loaded in Initialise
 	for (int i = 0; i < 50; i++) {
-		CPhone phoneToLoad = ReadSaveBuf<CPhone>(buf);
+		CPhone phoneToLoad;
+		ReadSaveBuf(&phoneToLoad, buf);
 
 		if (ignoreOtherPhones)
 			continue;
@@ -249,7 +252,7 @@ INITSAVEBUF
 	m_nScriptPhonesMax = scriptPhonesMax;
 
 	for (int i = 0; i < NUMPHONES; i++) {
-		m_aPhones[i] = ReadSaveBuf<CPhone>(buf);
+		ReadSaveBuf(&m_aPhones[i], buf);
 		// It's saved as building pool index in save file, convert it to true entity
 		if (m_aPhones[i].m_pEntity) {
 			m_aPhones[i].m_pEntity = CPools::GetBuildingPool()->GetSlot((uintptr)m_aPhones[i].m_pEntity - 1);
