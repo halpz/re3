@@ -23,5 +23,3 @@ public:
 };
 
 extern CConsole TheConsole;
-
-void cprintf(char*, ...);

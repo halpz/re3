@@ -23,7 +23,6 @@
 #ifdef FIX_BUGS
 #include "Replay.h"
 #endif
-#include "SaveBuf.h"
 #include "Script.h"
 #include "Shadows.h"
 #include "SpecialFX.h"
@@ -1000,18 +999,18 @@ CPickups::Load(uint8 *buf, uint32 size)
 INITSAVEBUF
 
 	for (int32 i = 0; i < NUMPICKUPS; i++) {
-		ReadSaveBuf(&aPickUps[i], buf);
+		aPickUps[i] = ReadSaveBuf<CPickup>(buf);
 
 		if (aPickUps[i].m_eType != PICKUP_NONE && aPickUps[i].m_pObject != nil)
 			aPickUps[i].m_pObject = CPools::GetObjectPool()->GetSlot((uintptr)aPickUps[i].m_pObject - 1);
 	}
 
-	ReadSaveBuf(&CollectedPickUpIndex, buf);
-	SkipSaveBuf(buf, 2);
+	CollectedPickUpIndex = ReadSaveBuf<uint16>(buf);
+	ReadSaveBuf<uint16>(buf);
 	NumMessages = 0;
 
 	for (uint16 i = 0; i < NUMCOLLECTEDPICKUPS; i++)
-		ReadSaveBuf(&aPickUpsCollected[i], buf);
+		aPickUpsCollected[i] = ReadSaveBuf<int32>(buf);
 
 VALIDATESAVEBUF(size)
 }

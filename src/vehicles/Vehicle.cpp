@@ -18,7 +18,6 @@
 #include "Radar.h"
 #include "Fire.h"
 #include "Darkel.h"
-#include "SaveBuf.h"
 
 bool CVehicle::bWheelsOnlyCheat;
 bool CVehicle::bAllDodosCheat;
@@ -1324,44 +1323,43 @@ CVehicle::Load(uint8*& buf)
 {
 	CMatrix tmp;
 	SkipSaveBuf(buf, 4);
-	ReadSaveBuf(&tmp.GetRight().x, buf);
-	ReadSaveBuf(&tmp.GetRight().y, buf);
-	ReadSaveBuf(&tmp.GetRight().z, buf);
+	tmp.GetRight().x = ReadSaveBuf<float>(buf);
+	tmp.GetRight().y = ReadSaveBuf<float>(buf);
+	tmp.GetRight().z = ReadSaveBuf<float>(buf);
 	SkipSaveBuf(buf, 4);
-	ReadSaveBuf(&tmp.GetForward().x, buf);
-	ReadSaveBuf(&tmp.GetForward().y, buf);
-	ReadSaveBuf(&tmp.GetForward().z, buf);
+	tmp.GetForward().x = ReadSaveBuf<float>(buf);
+	tmp.GetForward().y = ReadSaveBuf<float>(buf);
+	tmp.GetForward().z = ReadSaveBuf<float>(buf);
 	SkipSaveBuf(buf, 4);
-	ReadSaveBuf(&tmp.GetUp().x, buf);
-	ReadSaveBuf(&tmp.GetUp().y, buf);
-	ReadSaveBuf(&tmp.GetUp().z, buf);
+	tmp.GetUp().x = ReadSaveBuf<float>(buf);
+	tmp.GetUp().y = ReadSaveBuf<float>(buf);
+	tmp.GetUp().z = ReadSaveBuf<float>(buf);
 	SkipSaveBuf(buf, 4);
-	ReadSaveBuf(&tmp.GetPosition().x, buf);
-	ReadSaveBuf(&tmp.GetPosition().y, buf);
-	ReadSaveBuf(&tmp.GetPosition().z, buf);
+	tmp.GetPosition().x = ReadSaveBuf<float>(buf);
+	tmp.GetPosition().y = ReadSaveBuf<float>(buf);
+	tmp.GetPosition().z = ReadSaveBuf<float>(buf);
 	m_matrix = tmp;
 	SkipSaveBuf(buf, 16);
 	LoadEntityFlags(buf);
 	SkipSaveBuf(buf, 212);
 	AutoPilot.Load(buf);
-	ReadSaveBuf(&m_currentColour1, buf);
-	ReadSaveBuf(&m_currentColour2, buf);
+	m_currentColour1 = ReadSaveBuf<int8>(buf);
+	m_currentColour2 = ReadSaveBuf<int8>(buf);
 	SkipSaveBuf(buf, 2);
-	ReadSaveBuf(&m_nAlarmState, buf);
+	m_nAlarmState = ReadSaveBuf<int16>(buf);
 	SkipSaveBuf(buf, 43);
-	ReadSaveBuf(&m_nNumMaxPassengers, buf);
+	m_nNumMaxPassengers = ReadSaveBuf<int8>(buf);
 	SkipSaveBuf(buf, 2);
-	ReadSaveBuf(&field_1D0[0], buf);
-	ReadSaveBuf(&field_1D0[1], buf);
-	ReadSaveBuf(&field_1D0[2], buf);
-	ReadSaveBuf(&field_1D0[3], buf);
+	field_1D0[0] = ReadSaveBuf<float>(buf);
+	field_1D0[1] = ReadSaveBuf<float>(buf);
+	field_1D0[2] = ReadSaveBuf<float>(buf);
+	field_1D0[3] = ReadSaveBuf<float>(buf);
 	SkipSaveBuf(buf, 8);
-	ReadSaveBuf(&m_fSteerAngle, buf);
-	ReadSaveBuf(&m_fGasPedal, buf);
-	ReadSaveBuf(&m_fBrakePedal, buf);
-	ReadSaveBuf(&VehicleCreatedBy, buf);
-	uint8 flags;
-	ReadSaveBuf(&flags, buf);
+	m_fSteerAngle = ReadSaveBuf<float>(buf);
+	m_fGasPedal = ReadSaveBuf<float>(buf);
+	m_fBrakePedal = ReadSaveBuf<float>(buf);
+	VehicleCreatedBy = ReadSaveBuf<uint8>(buf);
+	uint8 flags = ReadSaveBuf<uint8>(buf);
 	bIsLawEnforcer = !!(flags & BIT(0));
 	bIsLocked = !!(flags & BIT(3));
 	bEngineOn = !!(flags & BIT(4));
@@ -1369,17 +1367,16 @@ CVehicle::Load(uint8*& buf)
 	bLightsOn = !!(flags & BIT(6));
 	bFreebies = !!(flags & BIT(7));
 	SkipSaveBuf(buf, 10);
-	ReadSaveBuf(&m_fHealth, buf);
-	ReadSaveBuf(&m_nCurrentGear, buf);
+	m_fHealth = ReadSaveBuf<float>(buf);
+	m_nCurrentGear = ReadSaveBuf<uint8>(buf);
 	SkipSaveBuf(buf, 3);
-	ReadSaveBuf(&m_fChangeGearTime, buf);
+	m_fChangeGearTime = ReadSaveBuf<float>(buf);
 	SkipSaveBuf(buf, 4);
-	ReadSaveBuf(&m_nTimeOfDeath, buf);
+	m_nTimeOfDeath = ReadSaveBuf<uint32>(buf);
 	SkipSaveBuf(buf, 2);
-	ReadSaveBuf(&m_nBombTimer, buf);
+	m_nBombTimer = ReadSaveBuf<int16>(buf);
 	SkipSaveBuf(buf, 12);
-	ReadSaveBuf(&flags, buf);
-	m_nDoorLock = (eCarLock)flags;
+	m_nDoorLock = (eCarLock)ReadSaveBuf<int8>(buf);
 	SkipSaveBuf(buf, 99);
 }
 #endif

@@ -12,7 +12,6 @@
 #include "Pools.h"
 #include "Population.h"
 #include "RpAnimBlend.h"
-#include "SaveBuf.h"
 #include "Shadows.h"
 #include "SpecialFX.h"
 #include "World.h"
@@ -2003,25 +2002,21 @@ void CTheScripts::LoadAllScripts(uint8* buf, uint32 size)
 	Init();
 INITSAVEBUF
 	CheckSaveHeader(buf, 'S', 'C', 'R', '\0', size - SAVE_HEADER_SIZE);
-	uint32 varSpace, type, handle;
-	uint32 tmp;
-
-	ReadSaveBuf(&varSpace, buf);
+	uint32 varSpace = ReadSaveBuf<uint32>(buf);
 	for (uint32 i = 0; i < varSpace; i++)
-		ReadSaveBuf(&ScriptSpace[i], buf);
-	ReadSaveBuf(&tmp, buf);
-	script_assert(tmp == SCRIPT_DATA_SIZE);
-	ReadSaveBuf(&OnAMissionFlag, buf);
+		ScriptSpace[i] = ReadSaveBuf<uint8>(buf);
+	script_assert(ReadSaveBuf<uint32>(buf) == SCRIPT_DATA_SIZE);
+	OnAMissionFlag = ReadSaveBuf<uint32>(buf);
 	for (uint32 i = 0; i < MAX_NUM_CONTACTS; i++) {
-		ReadSaveBuf(&OnAMissionForContactFlag[i], buf);
-		ReadSaveBuf(&BaseBriefIdForContact[i], buf);
+		OnAMissionForContactFlag[i] = ReadSaveBuf<uint32>(buf);
+		BaseBriefIdForContact[i] = ReadSaveBuf<uint32>(buf);
 	}
 	for (uint32 i = 0; i < MAX_NUM_COLLECTIVES; i++)
-		ReadSaveBuf(&CollectiveArray[i], buf);
-	ReadSaveBuf(&NextFreeCollectiveIndex, buf);
+		CollectiveArray[i] = ReadSaveBuf<tCollectiveData>(buf);
+	NextFreeCollectiveIndex = ReadSaveBuf<uint32>(buf);
 	for (uint32 i = 0; i < MAX_NUM_BUILDING_SWAPS; i++) {
-		ReadSaveBuf(&type, buf);
-		ReadSaveBuf(&handle, buf);
+		uint32 type = ReadSaveBuf<uint32>(buf);
+		uint32 handle = ReadSaveBuf<uint32>(buf);
 		switch (type) {
 		case 0:
 			BuildingSwapArray[i].m_pBuilding = nil;
@@ -2035,14 +2030,14 @@ INITSAVEBUF
 		default:
 			script_assert(false);
 		}
-		ReadSaveBuf(&BuildingSwapArray[i].m_nNewModel, buf);
-		ReadSaveBuf(&BuildingSwapArray[i].m_nOldModel, buf);
+		BuildingSwapArray[i].m_nNewModel = ReadSaveBuf<uint32>(buf);
+		BuildingSwapArray[i].m_nOldModel = ReadSaveBuf<uint32>(buf);
 		if (BuildingSwapArray[i].m_pBuilding)
 			BuildingSwapArray[i].m_pBuilding->ReplaceWithNewModel(BuildingSwapArray[i].m_nNewModel);
 	}
 	for (uint32 i = 0; i < MAX_NUM_INVISIBILITY_SETTINGS; i++) {
-		ReadSaveBuf(&type, buf);
-		ReadSaveBuf(&handle, buf);
+		uint32 type = ReadSaveBuf<uint32>(buf);
+		uint32 handle = ReadSaveBuf<uint32>(buf);
 		switch (type) {
 		case 0:
 			InvisibilitySettingArray[i] = nil;
@@ -2065,20 +2060,14 @@ INITSAVEBUF
 		if (InvisibilitySettingArray[i])
 			InvisibilitySettingArray[i]->bIsVisible = false;
 	}
-	bool tmpBool;
-	ReadSaveBuf(&tmpBool, buf);
-	script_assert(tmpBool == bUsingAMultiScriptFile);
-	SkipSaveBuf(buf, 3);
-	ReadSaveBuf(&tmp, buf);
-	script_assert(tmp == MainScriptSize);
-	ReadSaveBuf(&tmp, buf);
-	script_assert(tmp == LargestMissionScriptSize);
-	uint16 tmp16;
-	ReadSaveBuf(&tmp16, buf);
-	script_assert(tmp16 == NumberOfMissionScripts);
-	SkipSaveBuf(buf, 2);
-	uint32 runningScripts;
-	ReadSaveBuf(&runningScripts, buf);
+	script_assert(ReadSaveBuf<bool>(buf) == bUsingAMultiScriptFile);
+	ReadSaveBuf<uint8>(buf);
+	ReadSaveBuf<uint16>(buf);
+	script_assert(ReadSaveBuf<uint32>(buf) == MainScriptSize);
+	script_assert(ReadSaveBuf<uint32>(buf) == LargestMissionScriptSize);
+	script_assert(ReadSaveBuf<uint16>(buf) == NumberOfMissionScripts);
+	ReadSaveBuf<uint16>(buf);
+	uint32 runningScripts = ReadSaveBuf<uint32>(buf);
 	for (uint32 i = 0; i < runningScripts; i++)
 		StartNewScript(0)->Load(buf);
 VALIDATESAVEBUF(size)
@@ -2126,35 +2115,35 @@ void CRunningScript::Load(uint8*& buf)
 #ifdef COMPATIBLE_SAVES
 	SkipSaveBuf(buf, 8);
 	for (int i = 0; i < 8; i++)
-		ReadSaveBuf(&m_abScriptName[i], buf);
-	ReadSaveBuf(&m_nIp, buf);
+		m_abScriptName[i] = ReadSaveBuf<char>(buf);
+	m_nIp = ReadSaveBuf<uint32>(buf);
 #ifdef CHECK_STRUCT_SIZES
 	static_assert(MAX_STACK_DEPTH == 6, "Compatibility loss: MAX_STACK_DEPTH != 6");
 #endif
 	for (int i = 0; i < MAX_STACK_DEPTH; i++)
-		ReadSaveBuf(&m_anStack[i], buf);
-	ReadSaveBuf(&m_nStackPointer, buf);
+		m_anStack[i] = ReadSaveBuf<uint32>(buf);
+	m_nStackPointer = ReadSaveBuf<uint16>(buf);
 	SkipSaveBuf(buf, 2);
 #ifdef CHECK_STRUCT_SIZES
 	static_assert(NUM_LOCAL_VARS + NUM_TIMERS == 18, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 18");
 #endif
 	for (int i = 0; i < NUM_LOCAL_VARS + NUM_TIMERS; i++)
-		ReadSaveBuf(&m_anLocalVariables[i], buf);
-	ReadSaveBuf(&m_bCondResult, buf);
-	ReadSaveBuf(&m_bIsMissionScript, buf);
-	ReadSaveBuf(&m_bSkipWakeTime, buf);
+		m_anLocalVariables[i] = ReadSaveBuf<int32>(buf);
+	m_bCondResult = ReadSaveBuf<bool>(buf);
+	m_bIsMissionScript = ReadSaveBuf<bool>(buf);
+	m_bSkipWakeTime = ReadSaveBuf<bool>(buf);
 	SkipSaveBuf(buf, 1);
-	ReadSaveBuf(&m_nWakeTime, buf);
-	ReadSaveBuf(&m_nAndOrState, buf);
-	ReadSaveBuf(&m_bNotFlag, buf);
-	ReadSaveBuf(&m_bDeatharrestEnabled, buf);
-	ReadSaveBuf(&m_bDeatharrestExecuted, buf);
-	ReadSaveBuf(&m_bMissionFlag, buf);
+	m_nWakeTime = ReadSaveBuf<uint32>(buf);
+	m_nAndOrState = ReadSaveBuf<uint16>(buf);
+	m_bNotFlag = ReadSaveBuf<bool>(buf);
+	m_bDeatharrestEnabled = ReadSaveBuf<bool>(buf);
+	m_bDeatharrestExecuted = ReadSaveBuf<bool>(buf);
+	m_bMissionFlag = ReadSaveBuf<bool>(buf);
 	SkipSaveBuf(buf, 2);
 #else
 	CRunningScript* n = next;
 	CRunningScript* p = prev;
-	ReadSaveBuf(this, buf);
+	*this = ReadSaveBuf<CRunningScript>(buf);
 	next = n;
 	prev = p;
 #endif

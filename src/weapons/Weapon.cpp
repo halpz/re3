@@ -30,7 +30,6 @@
 #include "WaterLevel.h"
 #include "WeaponInfo.h"
 #include "World.h"
-#include "SaveBuf.h"
 
 uint16 gReloadSampleTime[WEAPONTYPE_LAST_WEAPONTYPE] =
 {

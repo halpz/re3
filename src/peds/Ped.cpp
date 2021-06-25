@@ -32,7 +32,6 @@
 #include "Floater.h"
 #include "Range2D.h"
 #include "Wanted.h"
-#include "SaveBuf.h"
 
 CPed *gapTempPedList[50];
 uint16 gnNumTempPedList;

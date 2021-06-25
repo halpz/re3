@@ -8,7 +8,6 @@
 #include "Text.h"
 #include "World.h"
 #include "Timer.h"
-#include "SaveBuf.h"
 
 eLevelName CTheZones::m_CurrLevel;
 CZone *CTheZones::m_pPlayersZone;
@@ -697,18 +696,17 @@ void
 CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 {
 	INITSAVEBUF
-	int32 i;
+	int i;
 
 	CheckSaveHeader(buffer, 'Z', 'N', 'S', '\0', size - SAVE_HEADER_SIZE);
 
-	ReadSaveBuf(&i, buffer);
-	m_pPlayersZone = GetPointerForZoneIndex(i);
-	ReadSaveBuf(&m_CurrLevel, buffer);
-	ReadSaveBuf(&FindIndex, buffer);
-	SkipSaveBuf(buffer, 2);
+	m_pPlayersZone = GetPointerForZoneIndex(ReadSaveBuf<int32>(buffer));
+	m_CurrLevel = ReadSaveBuf<eLevelName>(buffer);
+	FindIndex = ReadSaveBuf<int16>(buffer);
+	ReadSaveBuf<int16>(buffer);
 
 	for(i = 0; i < ARRAY_SIZE(ZoneArray); i++){
-		ReadSaveBuf(&ZoneArray[i], buffer);
+		ZoneArray[i] = ReadSaveBuf<CZone>(buffer);
 
 		ZoneArray[i].child = GetPointerForZoneIndex((uintptr)ZoneArray[i].child);
 		ZoneArray[i].parent = GetPointerForZoneIndex((uintptr)ZoneArray[i].parent);
@@ -716,13 +714,13 @@ CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 	}
 
 	for(i = 0; i < ARRAY_SIZE(ZoneInfoArray); i++)
-		ReadSaveBuf(&ZoneInfoArray[i], buffer);
+		ZoneInfoArray[i] = ReadSaveBuf<CZoneInfo>(buffer);
 
-	ReadSaveBuf(&TotalNumberOfZones, buffer);
-	ReadSaveBuf(&TotalNumberOfZoneInfos, buffer);
+	TotalNumberOfZones = ReadSaveBuf<int16>(buffer);
+	TotalNumberOfZoneInfos = ReadSaveBuf<int16>(buffer);
 
 	for(i = 0; i < ARRAY_SIZE(MapZoneArray); i++){
-		ReadSaveBuf(&MapZoneArray[i], buffer);
+		MapZoneArray[i] = ReadSaveBuf<CZone>(buffer);
 
 		/*
 		The call of GetPointerForZoneIndex is wrong, as it is
@@ -738,10 +736,10 @@ CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 	}
 
 	for(i = 0; i < ARRAY_SIZE(AudioZoneArray); i++)
-		ReadSaveBuf(&AudioZoneArray[i], buffer);
+		AudioZoneArray[i] = ReadSaveBuf<int16>(buffer);
 
-	ReadSaveBuf(&TotalNumberOfMapZones, buffer);
-	ReadSaveBuf(&NumberOfAudioZones, buffer);
+	TotalNumberOfMapZones = ReadSaveBuf<uint16>(buffer);
+	NumberOfAudioZones = ReadSaveBuf<uint16>(buffer);
 
 	VALIDATESAVEBUF(size)
 }

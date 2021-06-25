@@ -45,7 +45,6 @@
 #include "Object.h"
 #include "Automobile.h"
 #include "Wanted.h"
-#include "SaveBuf.h"
 
 bool bAllCarCheat;	// unused
 
@@ -4725,7 +4724,7 @@ void
 CAutomobile::Load(uint8*& buf)
 {
 	CVehicle::Load(buf);
-	ReadSaveBuf(&Damage, buf);
+	Damage = ReadSaveBuf<CDamageManager>(buf);
 	SkipSaveBuf(buf, 800 - sizeof(CDamageManager));
 	SetupDamageAfterLoad();
 }

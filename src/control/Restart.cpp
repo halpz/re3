@@ -1,7 +1,6 @@
 #include "common.h"
 
 #include "Restart.h"
-#include "SaveBuf.h"
 #include "Zones.h"
 #include "PathFind.h"
 
@@ -174,28 +173,29 @@ INITSAVEBUF
 	CheckSaveHeader(buf, 'R','S','T','\0', size - SAVE_HEADER_SIZE);
 
 	for (int i = 0; i < NUM_RESTART_POINTS; i++) {
-		ReadSaveBuf(&HospitalRestartPoints[i], buf);
-		ReadSaveBuf(&HospitalRestartHeadings[i], buf);
+		HospitalRestartPoints[i] = ReadSaveBuf<CVector>(buf);
+		HospitalRestartHeadings[i] = ReadSaveBuf<float>(buf);
 	}
 
 	for (int i = 0; i < NUM_RESTART_POINTS; i++) {
-		ReadSaveBuf(&PoliceRestartPoints[i], buf);
-		ReadSaveBuf(&PoliceRestartHeadings[i], buf);
+		PoliceRestartPoints[i] = ReadSaveBuf<CVector>(buf);
+		PoliceRestartHeadings[i] = ReadSaveBuf<float>(buf);
 	}
 
-	ReadSaveBuf(&NumberOfHospitalRestarts, buf);
-	ReadSaveBuf(&NumberOfPoliceRestarts, buf);
-	ReadSaveBuf(&bOverrideRestart, buf);
+	NumberOfHospitalRestarts = ReadSaveBuf<uint16>(buf);
+	NumberOfPoliceRestarts = ReadSaveBuf<uint16>(buf);
+	bOverrideRestart = ReadSaveBuf<bool>(buf);
 
 	// skip something unused
-	SkipSaveBuf(buf, 3);
+	ReadSaveBuf<uint8>(buf);
+	ReadSaveBuf<uint16>(buf);
 
-	ReadSaveBuf(&OverridePosition, buf);
-	ReadSaveBuf(&OverrideHeading, buf);
-	ReadSaveBuf(&bFadeInAfterNextDeath, buf);
-	ReadSaveBuf(&bFadeInAfterNextArrest, buf);
-	ReadSaveBuf(&OverrideHospitalLevel, buf);
-	ReadSaveBuf(&OverridePoliceStationLevel, buf);
+	OverridePosition = ReadSaveBuf<CVector>(buf);
+	OverrideHeading = ReadSaveBuf<float>(buf);
+	bFadeInAfterNextDeath = ReadSaveBuf<bool>(buf);
+	bFadeInAfterNextArrest = ReadSaveBuf<bool>(buf);
+	OverrideHospitalLevel = ReadSaveBuf<uint8>(buf);
+	OverridePoliceStationLevel = ReadSaveBuf<uint8>(buf);
 VALIDATESAVEBUF(size);
 }
 

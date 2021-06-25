@@ -13,7 +13,6 @@
 #include "Timer.h"
 #include "Vehicle.h"
 #include "World.h"
-#include "SaveBuf.h"
 
 uint8 CTheCarGenerators::ProcessCounter;
 uint32 CTheCarGenerators::NumOfCarGenerators;
@@ -255,17 +254,14 @@ void CTheCarGenerators::LoadAllCarGenerators(uint8* buffer, uint32 size)
 	Init();
 INITSAVEBUF
 	CheckSaveHeader(buffer, 'C','G','N','\0', size - SAVE_HEADER_SIZE);
-	uint32 tmp;
-	ReadSaveBuf(&tmp, buffer);
-	assert(tmp == nGeneralDataSize);
-	ReadSaveBuf(&NumOfCarGenerators, buffer);
-	ReadSaveBuf(&CurrentActiveCount, buffer);
-	ReadSaveBuf(&ProcessCounter, buffer);
-	ReadSaveBuf(&GenerateEvenIfPlayerIsCloseCounter, buffer);
-	SkipSaveBuf(buffer, 2);
-	ReadSaveBuf(&tmp, buffer);
-	assert(tmp == sizeof(CarGeneratorArray));
+	assert(ReadSaveBuf<uint32>(buffer) == nGeneralDataSize);
+	NumOfCarGenerators = ReadSaveBuf<uint32>(buffer);
+	CurrentActiveCount = ReadSaveBuf<uint32>(buffer);
+	ProcessCounter = ReadSaveBuf<uint8>(buffer);
+	GenerateEvenIfPlayerIsCloseCounter = ReadSaveBuf<uint8>(buffer);
+	ReadSaveBuf<int16>(buffer); // alignment
+	assert(ReadSaveBuf<uint32>(buffer) == sizeof(CarGeneratorArray));
 	for (int i = 0; i < NUM_CARGENS; i++) 
-		ReadSaveBuf(&CarGeneratorArray[i], buffer);
+		CarGeneratorArray[i] = ReadSaveBuf<CCarGenerator>(buffer);
 VALIDATESAVEBUF(size)
 }
