@@ -23,7 +23,7 @@ jobs:
 #          - os: 'windows-latest'
 #            platform: 'd3d9'
 #            audio: 'miles'
-          - os: 'ubuntu-latest'
+          - os: 'ubuntu-18.04'
             platform: 'gl3'
             gl3_gfxlib: 'glfw'
             audio: 'openal'
