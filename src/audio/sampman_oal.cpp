@@ -34,6 +34,12 @@
 #include "oal/oal_utils.h"
 #include "oal/aldlist.h"
 #include "oal/channel.h"
+
+#include <utility>
+#ifdef MULTITHREADED_AUDIO
+#include <mutex>
+#include <queue>
+#endif
 #include "oal/stream.h"
 
 #include "AudioManager.h"
@@ -520,7 +526,7 @@ _FindMP3s(void)
 				if (aStream[0] && aStream[0]->IsOpened())
 				{
 					total_ms = aStream[0]->GetLengthMS();
-					delete aStream[0];
+					aStream[0]->Close();
 					aStream[0] = NULL;
 
 					OutputDebugString(fd.cFileName);
@@ -578,7 +584,7 @@ _FindMP3s(void)
 				if (aStream[0] && aStream[0]->IsOpened())
 				{
 					total_ms = aStream[0]->GetLengthMS();
-					delete aStream[0];
+					aStream[0]->Close();
 					aStream[0] = NULL;
 
 					pList->pNext = new tMP3Entry;
@@ -732,6 +738,7 @@ cSampleManager::Initialise(void)
 		return TRUE;
 
 	EFXInit();
+
 	CStream::Initialise();
 
 	{
@@ -890,7 +897,7 @@ cSampleManager::Initialise(void)
 
 			if(aStream[0] && aStream[0]->IsOpened()) {
 				uint32 tatalms = aStream[0]->GetLengthMS();
-				delete aStream[0];
+				aStream[0]->Close();
 				aStream[0] = NULL;
 
 				nStreamLength[i] = tatalms;
@@ -939,7 +946,7 @@ cSampleManager::Initialise(void)
 			nStreamPan[i]    = 63;
 		}
 	}
-	
+
 	{
 		_bSampmanInitialised = TRUE;
 		
@@ -1025,7 +1032,7 @@ cSampleManager::Terminate(void)
 		CStream *stream = aStream[i];
 		if (stream)
 		{
-			delete stream;
+			stream->Close();
 			aStream[i] = NULL;
 		}
 	}
@@ -1607,7 +1614,7 @@ cSampleManager::PreloadStreamedFile(uint8 nFile, uint8 nStream)
 	{
 		if ( aStream[nStream] )
 		{
-			delete aStream[nStream];
+			aStream[nStream]->Close();
 			aStream[nStream] = NULL;
 		}
 		
@@ -1619,7 +1626,7 @@ cSampleManager::PreloadStreamedFile(uint8 nFile, uint8 nStream)
 		aStream[nStream] = stream;
 		if ( !stream->Setup() )
 		{
-			delete stream;
+			stream->Close();
 			aStream[nStream] = NULL;
 		}
 	}
@@ -1666,7 +1673,7 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 
 	if ( aStream[nStream] )
 	{
-		delete aStream[nStream];
+		aStream[nStream]->Close();
 		aStream[nStream] = NULL;
 	}
 	if ( nFile == STREAMED_SOUND_RADIO_MP3_PLAYER )
@@ -1697,7 +1704,7 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 
 						return TRUE;
 					} else {
-						delete stream;
+						stream->Close();
 						aStream[nStream] = NULL;
 					}
 					return FALSE;
@@ -1721,7 +1728,7 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 						_bIsMp3Active = TRUE;
 						return TRUE;
 					} else {
-						delete aStream[nStream];
+						aStream[nStream]->Close();
 						aStream[nStream] = NULL;
 					}
 					// fall through, start playing from another song
@@ -1753,7 +1760,7 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 
 							return TRUE;
 						} else {
-							delete stream;
+							stream->Close();
 							aStream[nStream] = NULL;
 						}
 						return FALSE;
@@ -1775,7 +1782,7 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 #endif
 					return TRUE;
 				} else {
-					delete aStream[nStream];
+					aStream[nStream]->Close();
 					aStream[nStream] = NULL;
 				}
 
@@ -1800,7 +1807,7 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 		
 		return TRUE;
 	} else {
-		delete stream;
+		stream->Close();
 		aStream[nStream] = NULL;
 	}
 	return FALSE;
@@ -1815,7 +1822,7 @@ cSampleManager::StopStreamedFile(uint8 nStream)
 	
 	if ( stream )
 	{
-		delete stream;
+		stream->Close();
 		aStream[nStream] = NULL;
 
 		if ( nStream == 0 )
