@@ -402,7 +402,7 @@ DoRWStuffEndOfFrame(void)
 	}
 #else
 	if (CPad::GetPad(1)->GetLeftShockJustDown() || CPad::GetPad(0)->GetFJustDown(11)) {
-		sprintf(s, "screen_%11lld.png", time(nil));
+		sprintf(s, "screen_%011lld.png", time(nil));
 		RwGrabScreen(Scene.camera, s);
 	}
 #endif
