@@ -1018,42 +1018,23 @@ CStream::FlagAsToBeProcessed(bool close)
 	gAudioThreadCv.notify_one();
 }
 
-extern CStream *aStream[];
 void audioFileOpsThread()
 {
-	std::queue<CStream*> m_streamsToDelete;
-
 	do
 	{
 		CStream *stream;
 		{
 			// Just a semaphore
 			std::unique_lock<std::mutex> queueMutex(gAudioThreadQueueMutex);
-			gAudioThreadCv.wait(queueMutex, [m_streamsToDelete] { return gStreamsToProcess.size() > 0 || m_streamsToDelete.size() > 0 || gAudioThreadTerm; });
+			gAudioThreadCv.wait(queueMutex, [] { return gStreamsToProcess.size() > 0 || gAudioThreadTerm; });
 			if (gAudioThreadTerm)
 				return;
 
 			if (!gStreamsToProcess.empty()) {
 				stream = gStreamsToProcess.front();
 				gStreamsToProcess.pop();
-			} else {
-				// End of streams. Perform deleting streams
-				while(!m_streamsToDelete.empty()) {
-					CStream *stream = m_streamsToDelete.front();
-					m_streamsToDelete.pop();
-					if (stream->m_pSoundFile) {
-						delete stream->m_pSoundFile;
-						stream->m_pSoundFile = nil;
-					}
-	
-					if (stream->m_pBuffer) {
-						free(stream->m_pBuffer);
-						stream->m_pBuffer = nil;
-					}
-					delete stream;
-				}
+			} else
 				continue;
-			}
 		}
 
 		std::unique_lock<std::mutex> lock(stream->m_mutex);
@@ -1062,16 +1043,21 @@ void audioFileOpsThread()
 		bool insertBufsAfterCheck = false;
 
 		do {
-			if (stream->m_nDeleteMe == 1) {
-				m_streamsToDelete.push(stream);
-				stream->m_nDeleteMe = 2;
-				break;
-			} else if (stream->m_nDeleteMe == 2) {
+			if (!stream->IsOpened()) {
+				// We MUST do that here, because we release mutex for m_pSoundFile->Seek() and m_pSoundFile->Decode() since they're costly
+				if (stream->m_pSoundFile) {
+					delete stream->m_pSoundFile;
+					stream->m_pSoundFile = nil;
+				}
+
+				if (stream->m_pBuffer) {
+					free(stream->m_pBuffer);
+					stream->m_pBuffer = nil;
+				}
+				lock.unlock();
+				stream->m_closeCv.notify_one();
 				break;
 			}
-
-			if (!stream->IsOpened())
-				break;
 
 			if (stream->m_bReset)
 				break;
@@ -1152,14 +1138,14 @@ void CStream::Terminate()
 #endif
 }
 
-CStream::CStream(char *filename, ALuint *sources, ALuint (&buffers)[NUM_STREAMBUFFERS], uint32 overrideSampleRate) :
+CStream::CStream(ALuint *sources, ALuint (&buffers)[NUM_STREAMBUFFERS]) :
 	m_pAlSources(sources),
 	m_alBuffers(buffers),
 	m_pBuffer(nil),
 	m_bPaused(false),
 	m_bActive(false),
 #ifdef MULTITHREADED_AUDIO
-	m_nDeleteMe(false),
+	m_bIExist(false),
 	m_bDoSeek(false),
 	m_SeekPos(0),
 #endif
@@ -1171,6 +1157,31 @@ CStream::CStream(char *filename, ALuint *sources, ALuint (&buffers)[NUM_STREAMBU
 	m_nLoopCount(1)
 	
 {
+}
+
+bool CStream::Open(const char* filename, uint32 overrideSampleRate)
+{
+	if (IsOpened()) return false;
+
+#ifdef MULTITHREADED_AUDIO
+	std::unique_lock<std::mutex> lock(m_mutex);
+
+	CStream *stream = this;
+	// Wait for thread to close old one. We can't close it here, because the thread might be running Decode() or Seek(), while mutex is released
+	m_closeCv.wait(lock, [this] { return m_pSoundFile == nil && m_pBuffer == nil; });
+
+	m_bDoSeek = false;
+	m_SeekPos = 0;
+#endif
+
+	m_bPaused = false;
+	m_bActive = false;
+	m_bReset = false;
+	m_nVolume = 0;
+	m_nPan = 0;
+	m_nPosBeforeReset = 0;
+	m_nLoopCount = 1;
+
 // Be case-insensitive on linux (from https://github.com/OneSadCookie/fcaseopen/)
 #if !defined(_WIN32)
 	char *real = casepath(filename);
@@ -1205,7 +1216,7 @@ CStream::CStream(char *filename, ALuint *sources, ALuint (&buffers)[NUM_STREAMBU
 	else 
 		m_pSoundFile = nil;
 
-	if ( IsOpened() )
+	if ( m_pSoundFile && m_pSoundFile->IsOpened() )
 	{
 		uint32 bufSize = m_pSoundFile->GetBufferSize();
 		if(bufSize != 0) { // Otherwise it's deferred
@@ -1220,8 +1231,12 @@ CStream::CStream(char *filename, ALuint *sources, ALuint (&buffers)[NUM_STREAMBU
 			DEV("Buffer sec: %f\n",       (float(m_pSoundFile->GetBufferSamples()) / float(m_pSoundFile->GetChannels())/ float(m_pSoundFile->GetSampleRate())));
 			DEV("Length MS: %02d:%02d\n", (m_pSoundFile->GetLength() / 1000) / 60, (m_pSoundFile->GetLength() / 1000) % 60);
 		}
-		return;
+#ifdef MULTITHREADED_AUDIO
+		m_bIExist = true;
+#endif
+		return true;
 	}
+	return false;
 }
 
 CStream::~CStream()
@@ -1231,18 +1246,21 @@ CStream::~CStream()
 
 void CStream::Close()
 {
+	if(!IsOpened()) return;
+
 #ifdef MULTITHREADED_AUDIO
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
 		Stop();
 		ClearBuffers();
-		m_nDeleteMe = true;
-		// clearing buffer queues are not needed. after m_nDeleteMe set, this stream is ded 
+		m_bIExist = false;
+		// clearing buffer queues are not needed. after m_bIExist is cleared, this stream is ded 
 	}
 
 	FlagAsToBeProcessed(true);
 #else
+
 	Stop();
 	ClearBuffers();
 
@@ -1265,9 +1283,14 @@ bool CStream::HasSource()
 	return (m_pAlSources[0] != AL_NONE) && (m_pAlSources[1] != AL_NONE);
 }
 
+// m_bIExist only written in main thread, thus mutex is not needed on main thread
 bool CStream::IsOpened()
 {
+#ifdef MULTITHREADED_AUDIO
+	return m_bIExist;
+#else
 	return m_pSoundFile && m_pSoundFile->IsOpened();
+#endif
 }
 
 bool CStream::IsPlaying()

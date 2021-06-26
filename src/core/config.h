@@ -399,8 +399,8 @@ enum Config {
 //#define PS2_AUDIO_PATHS // changes audio paths for cutscenes and radio to PS2 paths (needs vbdec on MSS builds)
 //#define AUDIO_OAL_USE_SNDFILE // use libsndfile to decode WAVs instead of our internal decoder
 #define AUDIO_OAL_USE_MPG123 // use mpg123 to support mp3 files
-#define MULTITHREADED_AUDIO
 #define PAUSE_RADIO_IN_FRONTEND // pause radio when game is paused
+#define MULTITHREADED_AUDIO // for streams. requires C++11 or later
 
 #ifdef AUDIO_OPUS
 #define AUDIO_OAL_USE_OPUS // enable support of opus files
@@ -527,6 +527,7 @@ enum Config {
 #undef CANCELLABLE_CAR_ENTER
 #undef IMPROVED_CAMERA
 #undef FREE_CAM
+#undef MULTITHREADED_AUDIO
 #undef RADIO_SCROLL_TO_PREV_STATION
 #undef BIG_IMG
 #undef PS2_AUDIO_CHANNELS
