@@ -2140,7 +2140,7 @@ void CStoredCar::StoreCar(CVehicle* pVehicle)
 	m_nModelIndex = pVehicle->GetModelIndex();
 	m_fPosX = pVehicle->GetPosition().x;
 	m_fPosY = pVehicle->GetPosition().y;
-	m_fPosY = pVehicle->GetPosition().z;
+	m_fPosZ = pVehicle->GetPosition().z;
 	m_fForwardX = pVehicle->GetForward().x;
 	m_fForwardY = pVehicle->GetForward().y;
 	m_fForwardZ = pVehicle->GetForward().z;
