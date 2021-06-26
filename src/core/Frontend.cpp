@@ -2902,9 +2902,15 @@ CMenuManager::InitialiseChangedLanguageSettings()
 {
 	if (m_bFrontEnd_ReloadObrTxtGxt) {
 		m_bFrontEnd_ReloadObrTxtGxt = false;
+#ifdef FIX_BUGS
+		if (gGameState > GS_INIT_ONCE)
+#endif
 		CTimer::Stop();
 		TheText.Unload();
 		TheText.Load();
+#ifdef FIX_BUGS
+		if (gGameState > GS_INIT_ONCE)
+#endif
 		CTimer::Update();
 		CGame::frenchGame = false;
 		CGame::germanGame = false;
