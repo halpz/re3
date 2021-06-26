@@ -450,7 +450,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CAutomobile* pCar = (CAutomobile*)CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
 		script_assert(pCar);
-		script_assert(pCar->m_vehType == VEHICLE_TYPE_CAR);
+		//script_assert(pCar->m_vehType == VEHICLE_TYPE_CAR);
 		UpdateCompareFlag(pCar->m_bombType == GET_INTEGER_PARAM(1));
 		return 0;
 	}
