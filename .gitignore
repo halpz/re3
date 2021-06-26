@@ -355,6 +355,7 @@ vendor/glfw-3.3.2.bin.WIN64/
 
 sdk/
 
+codewarrior/reVC.mcp
 codewarrior/reVC_Data/
 codewarrior/Release/
 codewarrior/Debug/
