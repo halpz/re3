@@ -3653,7 +3653,9 @@ CMenuManager::LoadAllTextures()
 #ifdef MENU_MAP
 	static bool menuOptionAdded = false;
 	for (int i = 0; i < ARRAY_SIZE(MapFilenames); i++) {
-		if (!menuOptionAdded && RwTextureRead(MapFilenames[i][0], MapFilenames[i][1])) {
+		RwTexture *firstTile;
+		if (!menuOptionAdded && (firstTile = RwTextureRead(MapFilenames[i][0], MapFilenames[i][1]))) {
+			RwTextureDestroy(firstTile);
 			FrontendOptionSetCursor(MENUPAGE_PAUSE_MENU, 2, false);
 			FrontendOptionAddBuiltinAction("FEG_MAP", MENUACTION_CHANGEMENU, MENUPAGE_MAP, SAVESLOT_NONE);
 			menuOptionAdded = true;
