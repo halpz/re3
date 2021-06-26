@@ -127,9 +127,10 @@ public:
 	std::mutex	m_mutex;
 	std::queue<std::pair<ALuint, ALuint>> m_fillBuffers; // left and right buffer
 	tsQueue<std::pair<ALuint, ALuint>> m_queueBuffers;
+	std::condition_variable m_closeCv;
 	bool     m_bDoSeek;
 	uint32   m_SeekPos;
-	uint8	 m_nDeleteMe; // 1: add to delete list 2: already on delete list
+	bool	 m_bIExist;
 #endif
 
 	void    *m_pBuffer;
@@ -163,8 +164,10 @@ public:
 	static void Initialise();
 	static void Terminate();
 	
-	CStream(char *filename, ALuint *sources, ALuint (&buffers)[NUM_STREAMBUFFERS], uint32 overrideSampleRate = 32000);
+	CStream(ALuint *sources, ALuint (&buffers)[NUM_STREAMBUFFERS]);
 	~CStream();
+	void   Delete();
+	bool   Open(const char *filename, uint32 overrideSampleRate = 32000);
 	void   Close();
 	
 	bool   IsOpened();
