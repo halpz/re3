@@ -22,6 +22,7 @@
 #include "MemoryHeap.h"
 #include "Bones.h"
 #include "Debug.h"
+#include "SaveBuf.h"
 
 int gBuildings;
 
@@ -753,7 +754,8 @@ CEntity::SaveEntityFlags(uint8*& buf)
 void
 CEntity::LoadEntityFlags(uint8*& buf)
 {
-	uint32 tmp = ReadSaveBuf<uint32>(buf);
+	uint32 tmp;
+	ReadSaveBuf(&tmp, buf);
 	m_type = (tmp & ((BIT(3) - 1)));
 	m_status = ((tmp >> 3) & (BIT(5) - 1));
 
@@ -784,7 +786,7 @@ CEntity::LoadEntityFlags(uint8*& buf)
 	bZoneCulled = !!(tmp & BIT(30));
 	bZoneCulled2 = !!(tmp & BIT(31));
 
-	tmp = ReadSaveBuf<uint32>(buf);
+	ReadSaveBuf(&tmp, buf);
 
 	bRemoveFromWorld = !!(tmp & BIT(0));
 	bHasHitWall = !!(tmp & BIT(1));

@@ -8,6 +8,7 @@
 #include "Text.h"
 #include "World.h"
 #include "Timer.h"
+#include "SaveBuf.h"
 
 eLevelName CTheZones::m_CurrLevel;
 CZone *CTheZones::m_pPlayersZone;
@@ -696,17 +697,18 @@ void
 CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 {
 	INITSAVEBUF
-	int i;
+	int32 i;
 
 	CheckSaveHeader(buffer, 'Z', 'N', 'S', '\0', size - SAVE_HEADER_SIZE);
 
-	m_pPlayersZone = GetPointerForZoneIndex(ReadSaveBuf<int32>(buffer));
-	m_CurrLevel = ReadSaveBuf<eLevelName>(buffer);
-	FindIndex = ReadSaveBuf<int16>(buffer);
-	ReadSaveBuf<int16>(buffer);
+	ReadSaveBuf(&i, buffer);
+	m_pPlayersZone = GetPointerForZoneIndex(i);
+	ReadSaveBuf(&m_CurrLevel, buffer);
+	ReadSaveBuf(&FindIndex, buffer);
+	SkipSaveBuf(buffer, 2);
 
 	for(i = 0; i < ARRAY_SIZE(ZoneArray); i++){
-		ZoneArray[i] = ReadSaveBuf<CZone>(buffer);
+		ReadSaveBuf(&ZoneArray[i], buffer);
 
 		ZoneArray[i].child = GetPointerForZoneIndex((uintptr)ZoneArray[i].child);
 		ZoneArray[i].parent = GetPointerForZoneIndex((uintptr)ZoneArray[i].parent);
@@ -714,13 +716,13 @@ CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 	}
 
 	for(i = 0; i < ARRAY_SIZE(ZoneInfoArray); i++)
-		ZoneInfoArray[i] = ReadSaveBuf<CZoneInfo>(buffer);
+		ReadSaveBuf(&ZoneInfoArray[i], buffer);
 
-	TotalNumberOfZones = ReadSaveBuf<int16>(buffer);
-	TotalNumberOfZoneInfos = ReadSaveBuf<int16>(buffer);
+	ReadSaveBuf(&TotalNumberOfZones, buffer);
+	ReadSaveBuf(&TotalNumberOfZoneInfos, buffer);
 
 	for(i = 0; i < ARRAY_SIZE(MapZoneArray); i++){
-		MapZoneArray[i] = ReadSaveBuf<CZone>(buffer);
+		ReadSaveBuf(&MapZoneArray[i], buffer);
 
 		/*
 		The call of GetPointerForZoneIndex is wrong, as it is
@@ -736,10 +738,10 @@ CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 	}
 
 	for(i = 0; i < ARRAY_SIZE(AudioZoneArray); i++)
-		AudioZoneArray[i] = ReadSaveBuf<int16>(buffer);
+		ReadSaveBuf(&AudioZoneArray[i], buffer);
 
-	TotalNumberOfMapZones = ReadSaveBuf<uint16>(buffer);
-	NumberOfAudioZones = ReadSaveBuf<uint16>(buffer);
+	ReadSaveBuf(&TotalNumberOfMapZones, buffer);
+	ReadSaveBuf(&NumberOfAudioZones, buffer);
 
 	VALIDATESAVEBUF(size)
 }

@@ -24,6 +24,7 @@
 #include "Vehicle.h"
 #include "Wanted.h"
 #include "World.h"
+#include "SaveBuf.h"
 
 #define CRUSHER_GARAGE_X1 (1135.5f)
 #define CRUSHER_GARAGE_Y1 (57.0f)
@@ -2361,22 +2362,25 @@ void CGarages::Load(uint8* buf, uint32 size)
 	assert(size == 5484);
 #endif
 	CloseHideOutGaragesBeforeSave();
-	NumGarages = ReadSaveBuf<uint32>(buf);
-	BombsAreFree = ReadSaveBuf<uint32>(buf);
-	RespraysAreFree = ReadSaveBuf<uint32>(buf);
-	CarsCollected = ReadSaveBuf<int32>(buf);
-	BankVansCollected = ReadSaveBuf<int32>(buf);
-	PoliceCarsCollected = ReadSaveBuf<int32>(buf);
+	ReadSaveBuf(&NumGarages, buf);
+	int32 tempInt;
+	ReadSaveBuf(&tempInt, buf);
+	BombsAreFree = tempInt ? true : false;
+	ReadSaveBuf(&tempInt, buf);
+	RespraysAreFree = tempInt ? true : false;
+	ReadSaveBuf(&CarsCollected, buf);
+	ReadSaveBuf(&BankVansCollected, buf);
+	ReadSaveBuf(&PoliceCarsCollected, buf);
 	for (int i = 0; i < TOTAL_COLLECTCARS_GARAGES; i++)
-		CarTypesCollected[i] = ReadSaveBuf<uint32>(buf);
-	LastTimeHelpMessage = ReadSaveBuf<uint32>(buf);
+		ReadSaveBuf(&CarTypesCollected[i], buf);
+	ReadSaveBuf(&LastTimeHelpMessage, buf);
 	for (int i = 0; i < NUM_GARAGE_STORED_CARS; i++) {
-		aCarsInSafeHouse1[i] = ReadSaveBuf<CStoredCar>(buf);
-		aCarsInSafeHouse2[i] = ReadSaveBuf<CStoredCar>(buf);
-		aCarsInSafeHouse3[i] = ReadSaveBuf<CStoredCar>(buf);
+		ReadSaveBuf(&aCarsInSafeHouse1[i], buf);
+		ReadSaveBuf(&aCarsInSafeHouse2[i], buf);
+		ReadSaveBuf(&aCarsInSafeHouse3[i], buf);
 	}
 	for (int i = 0; i < NUM_GARAGES; i++) {
-		aGarages[i] = ReadSaveBuf<CGarage>(buf);
+		ReadSaveBuf(&aGarages[i], buf);
 		aGarages[i].m_pDoor1 = nil;
 		aGarages[i].m_pDoor2 = nil;
 		aGarages[i].m_pTarget = nil;

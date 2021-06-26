@@ -16,6 +16,7 @@
 #include "Script.h"
 #include "TxdStore.h"
 #include "World.h"
+#include "SaveBuf.h"
 #include "Streaming.h"
 #include "SpecialFX.h"
 
@@ -1055,7 +1056,7 @@ INITSAVEBUF
 	CheckSaveHeader(buf, 'R', 'D', 'R', '\0', size - SAVE_HEADER_SIZE);
 
 	for (int i = 0; i < NUMRADARBLIPS; i++)
-		ms_RadarTrace[i] = ReadSaveBuf<sRadarTrace>(buf);
+		ReadSaveBuf(&ms_RadarTrace[i], buf);
 
 VALIDATESAVEBUF(size);
 }
