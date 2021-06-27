@@ -34,6 +34,13 @@
 #include "oal/oal_utils.h"
 #include "oal/aldlist.h"
 #include "oal/channel.h"
+
+#include <utility>
+#ifdef MULTITHREADED_AUDIO
+#include <mutex>
+#include <queue>
+#include <condition_variable>
+#endif
 #include "oal/stream.h"
 
 #include "AudioManager.h"
@@ -590,13 +597,10 @@ _FindMP3s(void)
 	} else
 		bShortcut = FALSE;
 	
-	aStream[0] = new CStream(filepath, ALStreamSources[0], ALStreamBuffers[0]);
-
-	if (aStream[0] && aStream[0]->IsOpened())
+	if (aStream[0] && aStream[0]->Open(filepath))
 	{
 		total_ms = aStream[0]->GetLengthMS();
-		delete aStream[0];
-		aStream[0] = NULL;
+		aStream[0]->Close();
 
 		OutputDebugString(fd.cFileName);
 		
@@ -664,13 +668,10 @@ _FindMP3s(void)
 						continue;
 					}
 				}
-				aStream[0] = new CStream(filepath, ALStreamSources[0], ALStreamBuffers[0]);
-
-				if (aStream[0] && aStream[0]->IsOpened())
+				if (aStream[0] && aStream[0]->Open(filepath))
 				{
 					total_ms = aStream[0]->GetLengthMS();
-					delete aStream[0];
-					aStream[0] = NULL;
+					aStream[0]->Close();
 					
 					OutputDebugString(fd.cFileName);
 					
@@ -724,13 +725,10 @@ _FindMP3s(void)
 				} else
 					bShortcut = FALSE;
 				
-				aStream[0] = new CStream(filepath, ALStreamSources[0], ALStreamBuffers[0]);
-
-				if (aStream[0] && aStream[0]->IsOpened())
+				if (aStream[0] && aStream[0]->Open(filepath))
 				{
 					total_ms = aStream[0]->GetLengthMS();
-					delete aStream[0];
-					aStream[0] = NULL;
+					aStream[0]->Close();
 
 					OutputDebugString(fd.cFileName);
 					
@@ -885,6 +883,10 @@ cSampleManager::Initialise(void)
 		return TRUE;
 	SetUpDebugBanksInfo();
 	EFXInit();
+
+	for(int i = 0; i < MAX_STREAMS; i++)
+		aStream[i] = new CStream(ALStreamSources[i], ALStreamBuffers[i]);
+
 	CStream::Initialise();
 
 	{
@@ -1040,31 +1042,24 @@ cSampleManager::Initialise(void)
 
 		for ( int32 i = 0; i < TOTAL_STREAMED_SOUNDS; i++ )
 		{	
+			bool opened = false;
 			char filename[MAX_PATH];
 			sprintf(filename, "%s.VB", StreamedNameTable[i]);
-			aStream[0] = new CStream(filename, ALStreamSources[0], ALStreamBuffers[0], IsThisTrackAt16KHz(i) ? 16000 : 32000);
-			if ( aStream[0] && !aStream[0]->IsOpened() )
-			{
-				delete aStream[0];
-				aStream[0] = NULL;
-			}
-
-			if ( !aStream[0] )
+			if ( aStream[0] )
+				opened = aStream[0]->Open(filename, IsThisTrackAt16KHz(i) ? 16000 : 32000);
+			
+			if ( !opened )
 			{
 				sprintf(filename, "%s.MP3", StreamedNameTable[i]);
-				aStream[0] = new CStream(filename, ALStreamSources[0], ALStreamBuffers[0], IsThisTrackAt16KHz(i) ? 16000 : 32000);
-				if ( aStream[0] && !aStream[0]->IsOpened() )
+				if ( aStream[0] )
 				{
-					delete aStream[0];
-					aStream[0] = NULL;
+					opened = aStream[0]->Open(filename, IsThisTrackAt16KHz(i) ? 16000 : 32000);
 				}
 			}
-			
-			if ( aStream[0] && aStream[0]->IsOpened() )
+			if ( opened )
 			{
 				uint32 tatalms = aStream[0]->GetLengthMS();
-				delete aStream[0];
-				aStream[0] = NULL;
+				aStream[0]->Close();
 				
 				nStreamLength[i] = tatalms;
 			}
@@ -1108,12 +1103,13 @@ cSampleManager::Initialise(void)
 	{
 		for ( int32 i = 0; i < MAX_STREAMS; i++ )
 		{
-			aStream[i]       = NULL;
+			aStream[i]->Close();
+
 			nStreamVolume[i] = 100;
 			nStreamPan[i]    = 63;
 		}
 	}
-	
+
 	{
 		_bSampmanInitialised = TRUE;
 		
@@ -1195,14 +1191,7 @@ void
 cSampleManager::Terminate(void)
 {
 	for (int32 i = 0; i < MAX_STREAMS; i++)
-	{
-		CStream *stream = aStream[i];
-		if (stream)
-		{
-			delete stream;
-			aStream[i] = NULL;
-		}
-	}
+		aStream[i]->Close();
 
 	for ( int32 i = 0; i < NUM_CHANNELS; i++ )
 		aChannel[i].Term();
@@ -1252,6 +1241,9 @@ cSampleManager::Terminate(void)
 	_DeleteMP3Entries();
 
 	CStream::Terminate();
+
+	for(int32 i = 0; i < MAX_STREAMS; i++)
+		delete aStream[i];
 
 	if ( nSampleBankMemoryStartAddress[SFX_BANK_0] != 0 )
 	{
@@ -1778,40 +1770,20 @@ cSampleManager::PreloadStreamedFile(uint32 nFile, uint8 nStream)
 
 	if ( nFile < TOTAL_STREAMED_SOUNDS )
 	{
-		if ( aStream[nStream] )
-		{
-			delete aStream[nStream];
-			aStream[nStream] = NULL;
-		}
+		CStream *stream = aStream[nStream];
 
+		stream->Close();
 		sprintf(filename, "%s.VB", StreamedNameTable[nFile]);
-		CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
-		
-		if ( stream && !stream->IsOpened() )
-		{
-			delete stream;
-			stream = NULL;
-		}
-
-		if (!stream)
+		bool opened = stream->Open(filename, IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+		if ( !opened )
 		{
 			sprintf(filename, "%s.MP3", StreamedNameTable[nFile]);
-			stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
-			if ( stream && !stream->IsOpened() )
-			{
-				delete stream;
-				stream = NULL;
-			}
+			opened = stream->Open(filename, IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 		}
-
-
-		ASSERT(stream != NULL);
 		
-		aStream[nStream] = stream;
-		if ( !stream->Setup() )
+		if ( opened && !stream->Setup() )
 		{
-			delete stream;
-			aStream[nStream] = NULL;
+			stream->Close();
 		}
 	}
 }
@@ -1823,7 +1795,7 @@ cSampleManager::PauseStream(bool8 nPauseFlag, uint8 nStream)
 	
 	CStream *stream = aStream[nStream];
 	
-	if ( stream )
+	if ( stream->IsOpened() )
 	{
 		stream->SetPause(nPauseFlag != FALSE);
 	}
@@ -1836,12 +1808,9 @@ cSampleManager::StartPreloadedStreamedFile(uint8 nStream)
 	
 	CStream *stream = aStream[nStream];
 	
-	if ( stream )
+	if ( stream->IsOpened() )
 	{
-		if ( stream->IsOpened() )
-		{
-			stream->Start();
-		}
+		stream->Start();
 	}
 }
 
@@ -1855,11 +1824,8 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 	if ( nFile >= TOTAL_STREAMED_SOUNDS )
 		return FALSE;
 
-	if ( aStream[nStream] )
-	{
-		delete aStream[nStream];
-		aStream[nStream] = NULL;
-	}
+	aStream[nStream]->Close();
+
 	if ( nFile == STREAMED_SOUND_RADIO_MP3_PLAYER )
 	{
 		do
@@ -1876,27 +1842,17 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 					nFile = 0;
 
 					sprintf(filename, "%s.VB", StreamedNameTable[nFile]);
-					CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
-					
-					if ( stream && !stream->IsOpened() )
-					{
-						delete stream;
-						stream = NULL;
-					}
 
-					if (!stream)
+					CStream *stream = aStream[nStream];
+					bool opened = stream->Open(filename, IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+					
+					if ( !opened )
 					{
 						sprintf(filename, "%s.MP3", StreamedNameTable[nFile]);
-						stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
-						if ( stream && !stream->IsOpened() )
-						{
-							delete stream;
-							stream = NULL;
-						}
+						opened = stream->Open(filename, IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 					}
-					aStream[nStream] = stream;
-
-					if (stream->Setup()) {
+					
+					if ( opened && stream->Setup() ) {
 						stream->SetLoopCount(nStreamLoopedFlag[nStream] ? 0 : 1);
 						nStreamLoopedFlag[nStream] = TRUE;
 						if (position != 0)
@@ -1906,20 +1862,19 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 
 						return TRUE;
 					} else {
-						delete stream;
-						aStream[nStream] = NULL;
+						stream->Close();
 					}
 					return FALSE;
 
 				} else {
 
 					if (e->pLinkPath != NULL)
-						aStream[nStream] = new CStream(e->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+						aStream[nStream]->Open(e->pLinkPath, IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 					else {
 						strcpy(filename, _mp3DirectoryPath);
 						strcat(filename, e->aFilename);
 
-						aStream[nStream] = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream]);
+						aStream[nStream]->Open(filename);
 					}
 
 					if (aStream[nStream]->Setup()) {
@@ -1931,8 +1886,7 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 						_bIsMp3Active = TRUE;
 						return TRUE;
 					} else {
-						delete aStream[nStream];
-						aStream[nStream] = NULL;
+						aStream[nStream]->Close();
 					}
 					// fall through, start playing from another song
 				}
@@ -1951,28 +1905,16 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 						_bIsMp3Active = 0;
 						sprintf(filename, "%s.VB", StreamedNameTable[nFile]);
 
-						CStream* stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
-						
-						if ( stream && !stream->IsOpened() )
-						{
-							delete stream;
-							stream = NULL;
-						}
+						CStream* stream = aStream[nStream];
+						bool opened = stream->Open(filename, IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 
-						if (!stream)
+						if ( !opened )
 						{
 							sprintf(filename, "%s.MP3", StreamedNameTable[nFile]);
-							stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
-							if ( stream && !stream->IsOpened() )
-							{
-								delete stream;
-								stream = NULL;
-							}
+							opened = stream->Open(filename, IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 						}
-
-						aStream[nStream] = stream;
-
-						if (stream->Setup()) {
+						
+						if (opened && stream->Setup()) {
 							stream->SetLoopCount(nStreamLoopedFlag[nStream] ? 0 : 1);
 							nStreamLoopedFlag[nStream] = TRUE;
 							if (position != 0)
@@ -1982,19 +1924,18 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 
 							return TRUE;
 						} else {
-							delete stream;
-							aStream[nStream] = NULL;
+							stream->Close();
 						}
 						return FALSE;
 					}
 				}
 				if (mp3->pLinkPath != NULL)
-					aStream[nStream] = new CStream(mp3->pLinkPath, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+					aStream[nStream]->Open(mp3->pLinkPath, IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 				else {
 					strcpy(filename, _mp3DirectoryPath);
 					strcat(filename, mp3->aFilename);
 
-					aStream[nStream] = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+					aStream[nStream]->Open(filename, IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 				}
 
 				if (aStream[nStream]->Setup()) {
@@ -2004,8 +1945,7 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 #endif
 					return TRUE;
 				} else {
-					delete aStream[nStream];
-					aStream[nStream] = NULL;
+					aStream[nStream]->Close();
 				}
 
 			}
@@ -2016,29 +1956,18 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 		nFile = 0;
 	}
 	sprintf(filename, "%s.VB", StreamedNameTable[nFile]);
+
+	CStream *stream = aStream[nStream];
 	
-	CStream *stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
+	bool opened = stream->Open(filename, IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 
-	if ( stream && !stream->IsOpened() )
-	{
-		delete stream;
-		stream = NULL;
-	}
-
-	if (!stream)
+	if ( !opened )
 	{
 		sprintf(filename, "%s.MP3", StreamedNameTable[nFile]);
-		stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
-		if ( stream && !stream->IsOpened() )
-		{
-			delete stream;
-			stream = NULL;
-		}
+		opened = stream->Open(filename, IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 	}
-
-	aStream[nStream] = stream;
 	
-	if ( stream->Setup() ) {
+	if ( opened && stream->Setup() ) {
 		stream->SetLoopCount(nStreamLoopedFlag[nStream] ? 0 : 1);
 		nStreamLoopedFlag[nStream] = TRUE;
 		if (position != 0)
@@ -2048,8 +1977,7 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 		
 		return TRUE;
 	} else {
-		delete stream;
-		aStream[nStream] = NULL;
+		stream->Close();
 	}
 	return FALSE;
 }
@@ -2061,14 +1989,10 @@ cSampleManager::StopStreamedFile(uint8 nStream)
 
 	CStream *stream = aStream[nStream];
 	
-	if ( stream )
-	{
-		delete stream;
-		aStream[nStream] = NULL;
+	stream->Close();
 
-		if ( nStream == 0 )
-			_bIsMp3Active = FALSE;
-	}
+	if ( nStream == 0 )
+		_bIsMp3Active = FALSE;
 }
 
 int32
@@ -2078,7 +2002,7 @@ cSampleManager::GetStreamedFilePosition(uint8 nStream)
 	
 	CStream *stream = aStream[nStream];
 	
-	if ( stream )
+	if ( stream->IsOpened() )
 	{
 		if ( _bIsMp3Active )
 		{
@@ -2121,7 +2045,7 @@ cSampleManager::SetStreamedVolumeAndPan(uint8 nVolume, uint8 nPan, bool8 nEffect
 	
 	CStream *stream = aStream[nStream];
 	
-	if ( stream )
+	if ( stream->IsOpened() )
 	{
 		if ( nEffectFlag ) {
 			if ( nStream == 1 || nStream == 2 )
@@ -2151,7 +2075,7 @@ cSampleManager::IsStreamPlaying(uint8 nStream)
 	
 	CStream *stream = aStream[nStream];
 	
-	if ( stream )
+	if ( stream->IsOpened() )
 	{
 		if ( stream->IsPlaying() )
 			return TRUE;
@@ -2167,7 +2091,7 @@ cSampleManager::Service(void)
 	{
 		CStream *stream = aStream[i];
 		
-		if ( stream )
+		if ( stream->IsOpened() )
 			stream->Update();
 	}
 	int refCount = CChannel::channelsThatNeedService;
