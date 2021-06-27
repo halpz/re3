@@ -36,6 +36,7 @@ std::mutex gAudioThreadQueueMutex;
 std::condition_variable gAudioThreadCv;
 bool gAudioThreadTerm = false;
 std::queue<CStream*> gStreamsToProcess; // values are not unique, we will handle that ourself
+std::queue<std::pair<IDecoder*, void*>> gStreamsToClose;
 #else
 #include "stream.h"
 #endif
@@ -1083,7 +1084,11 @@ CStream::FlagAsToBeProcessed(bool close)
 		return;
 
 	gAudioThreadQueueMutex.lock();
-	gStreamsToProcess.push(this);
+	if (close)
+		gStreamsToClose.push(std::pair<IDecoder*, void*>(m_pSoundFile ? m_pSoundFile : nil, m_pBuffer ? m_pBuffer : nil));
+	else
+		gStreamsToProcess.push(this);
+	
 	gAudioThreadQueueMutex.unlock();
 
 	gAudioThreadCv.notify_one();
@@ -1097,9 +1102,21 @@ void audioFileOpsThread()
 		{
 			// Just a semaphore
 			std::unique_lock<std::mutex> queueMutex(gAudioThreadQueueMutex);
-			gAudioThreadCv.wait(queueMutex, [] { return gStreamsToProcess.size() > 0 || gAudioThreadTerm; });
+			gAudioThreadCv.wait(queueMutex, [] { return gStreamsToProcess.size() > 0 || gStreamsToClose.size() > 0 || gAudioThreadTerm; });
 			if (gAudioThreadTerm)
 				return;
+
+			if (!gStreamsToClose.empty()) {
+				auto streamToClose = gStreamsToClose.front();
+				gStreamsToClose.pop();
+				if (streamToClose.first) { // pSoundFile
+					delete streamToClose.first;
+				}
+
+				if (streamToClose.second) { // pBuffer
+					free(streamToClose.second);
+				}
+			}
 
 			if (!gStreamsToProcess.empty()) {
 				stream = gStreamsToProcess.front();
@@ -1115,18 +1132,6 @@ void audioFileOpsThread()
 
 		do {
 			if (!stream->IsOpened()) {
-				// We MUST do that here, because we release mutex for m_pSoundFile->Seek() and m_pSoundFile->Decode() since they're costly
-				if (stream->m_pSoundFile) {
-					delete stream->m_pSoundFile;
-					stream->m_pSoundFile = nil;
-				}
-
-				if (stream->m_pBuffer) {
-					free(stream->m_pBuffer);
-					stream->m_pBuffer = nil;
-				}
-				lock.unlock();
-				stream->m_closeCv.notify_one();
 				break;
 			}
 
@@ -1237,10 +1242,6 @@ bool CStream::Open(const char* filename, uint32 overrideSampleRate)
 #ifdef MULTITHREADED_AUDIO
 	std::unique_lock<std::mutex> lock(m_mutex);
 
-	CStream *stream = this;
-	// Wait for thread to close old one. We can't close it here, because the thread might be running Decode() or Seek(), while mutex is released
-	m_closeCv.wait(lock, [this] { return m_pSoundFile == nil && m_pBuffer == nil; });
-
 	m_bDoSeek = false;
 	m_SeekPos = 0;
 #endif
@@ -1328,7 +1329,8 @@ void CStream::Close()
 		Stop();
 		ClearBuffers();
 		m_bIExist = false;
-		// clearing buffer queues are not needed. after m_bIExist is cleared, this stream is ded 
+		std::queue<std::pair<ALuint, ALuint>>().swap(m_fillBuffers);
+		tsQueue<std::pair<ALuint, ALuint>>().swapNts(m_queueBuffers); // TSness not required, mutex is acquired
 	}
 
 	FlagAsToBeProcessed(true);
