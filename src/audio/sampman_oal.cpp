@@ -47,9 +47,9 @@
 //TODO: fix eax3 reverb
 
 cSampleManager SampleManager;
-bool8 _bSampmanInitialised = FALSE;
+bool8 gInitialised = FALSE;
 
-uint32 BankStartOffset[MAX_SFX_BANKS];
+uint32 gBankStartOffset[MAX_SFX_BANKS];
 
 int           prevprovider=-1;
 int           curprovider=-1;
@@ -79,26 +79,26 @@ int defaultProvider;
 char SampleBankDescFilename[] = "audio/sfx.SDT";
 char SampleBankDataFilename[] = "audio/sfx.RAW";
 
-FILE *fpSampleDescHandle;
+FILE *gFileHandleSampleDesc;
 #ifdef OPUS_SFX
-OggOpusFile *fpSampleDataHandle;
+OggOpusFile *gFileHandleSampleData;
 #else
-FILE *fpSampleDataHandle;
+FILE *gFileHandleSampleData;
 #endif
-bool8 bSampleBankLoaded            [MAX_SFX_BANKS];
-int32 nSampleBankDiscStartOffset   [MAX_SFX_BANKS];
-int32 nSampleBankSize              [MAX_SFX_BANKS];
-uintptr nSampleBankMemoryStartAddress[MAX_SFX_BANKS];
+bool8  gBankLoaded            [MAX_SFX_BANKS];
+int32 gSampleBankDiscStartOffset   [MAX_SFX_BANKS];
+int32 gSampleBankSize              [MAX_SFX_BANKS];
+uintptr gSampleBankMemoryStartAddress[MAX_SFX_BANKS];
 int32 _nSampleDataEndOffset;
 
-int32 nPedSlotSfx    [MAX_PEDSFX];
-int32 nPedSlotSfxAddr[MAX_PEDSFX];
-uint8 nCurrentPedSlot;
+int32 gPedSfx    [MAX_PEDSFX];
+int32 gPedSfxAddr[MAX_PEDSFX];
+uint8 gCurPedIndex;
 
 CChannel aChannel[NUM_CHANNELS];
-uint8 nChannelVolume[NUM_CHANNELS];
+uint8 gChannelVolume[NUM_CHANNELS];
 
-uint32 nStreamLength[TOTAL_STREAMED_SOUNDS];
+uint32 gStreamLength[TOTAL_STREAMED_SOUNDS];
 ALuint ALStreamSources[MAX_STREAMS][2];
 ALuint ALStreamBuffers[MAX_STREAMS][NUM_STREAMBUFFERS];
 
@@ -779,7 +779,7 @@ void cSampleManager::ReacquireDigitalHandle(void)
 bool8
 cSampleManager::Initialise(void)
 {
-	if ( _bSampmanInitialised )
+	if ( gInitialised )
 		return TRUE;
 
 	EFXInit();
@@ -788,11 +788,11 @@ cSampleManager::Initialise(void)
 	{
 		for ( int32 i = 0; i < TOTAL_AUDIO_SAMPLES; i++ )
 		{
-			m_aSamples[i].nOffset    = 0;
-			m_aSamples[i].nSize      = 0;
-			m_aSamples[i].nFrequency = 22050;
-			m_aSamples[i].nLoopStart = 0;
-			m_aSamples[i].nLoopEnd   = -1;
+			m_aSampleDataTable[i].nOffset    = 0;
+			m_aSampleDataTable[i].nSize      = 0;
+			m_aSampleDataTable[i].nFrequency = 22050;
+			m_aSampleDataTable[i].nLoopStart = 0;
+			m_aSampleDataTable[i].nLoopEnd   = -1;
 		}
 		
 		m_nEffectsVolume     = MAX_VOLUME;
@@ -820,31 +820,31 @@ cSampleManager::Initialise(void)
 	}
 	
 	{
-		fpSampleDescHandle = NULL;
-		fpSampleDataHandle = NULL;
+		gFileHandleSampleDesc = NULL;
+		gFileHandleSampleData = NULL;
 		
 		for ( int32 i = 0; i < MAX_SFX_BANKS; i++ )
 		{
-			bSampleBankLoaded[i]             = FALSE;
-			nSampleBankDiscStartOffset[i]    = 0;
-			nSampleBankSize[i]               = 0;
-			nSampleBankMemoryStartAddress[i] = 0;
+			gBankLoaded[i]             = FALSE;
+			gSampleBankDiscStartOffset[i]    = 0;
+			gSampleBankSize[i]               = 0;
+			gSampleBankMemoryStartAddress[i] = 0;
 		}
 	}
 	
 	{
 		for ( int32 i = 0; i < MAX_PEDSFX; i++ )
 		{
-			nPedSlotSfx[i]     = NO_SAMPLE;
-			nPedSlotSfxAddr[i] = 0;
+			gPedSfx[i]     = NO_SAMPLE;
+			gPedSfxAddr[i] = 0;
 		}
 		
-		nCurrentPedSlot = 0;
+		gCurPedIndex = 0;
 	}
 	
 	{
 		for ( int32 i = 0; i < NUM_CHANNELS; i++ )
-			nChannelVolume[i] = 0;
+			gChannelVolume[i] = 0;
 	}
 
 	add_providers();
@@ -922,14 +922,14 @@ cSampleManager::Initialise(void)
 	
 	{	
 		for ( int32 i = 0; i < TOTAL_STREAMED_SOUNDS; i++ )
-			nStreamLength[i] = 0;
+			gStreamLength[i] = 0;
 	}
 
 #ifdef AUDIO_CACHE
 	FILE *cacheFile = fcaseopen("audio\\sound.cache", "rb");
 	if (cacheFile) {
 		debug("Loadind audio cache (If game crashes around here, then your cache is corrupted, remove audio/sound.cache)\n");
-		fread(nStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
+		fread(gStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
 		fclose(cacheFile);
 	} else
 	{
@@ -944,7 +944,7 @@ cSampleManager::Initialise(void)
 				delete aStream[0];
 				aStream[0] = NULL;
 
-				nStreamLength[i] = tatalms;
+				gStreamLength[i] = tatalms;
 			} else
 				USERERROR("Can't open '%s'\n", StreamedNameTable[i]);
 		}
@@ -952,7 +952,7 @@ cSampleManager::Initialise(void)
 		cacheFile = fcaseopen("audio\\sound.cache", "wb");
 		if(cacheFile) {
 			debug("Saving audio cache\n");
-			fwrite(nStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
+			fwrite(gStreamLength, sizeof(uint32), TOTAL_STREAMED_SOUNDS, cacheFile);
 			fclose(cacheFile);
 		} else {
 			debug("Cannot save audio cache\n");
@@ -967,17 +967,17 @@ cSampleManager::Initialise(void)
 			return FALSE;
 		}
 		
-		nSampleBankMemoryStartAddress[SFX_BANK_0] = (uintptr)malloc(nSampleBankSize[SFX_BANK_0]);
-		ASSERT(nSampleBankMemoryStartAddress[SFX_BANK_0] != 0);
+		gSampleBankMemoryStartAddress[SFX_BANK_0] = (uintptr)malloc(gSampleBankSize[SFX_BANK_0]);
+		ASSERT(gSampleBankMemoryStartAddress[SFX_BANK_0] != 0);
 		
-		if ( nSampleBankMemoryStartAddress[SFX_BANK_0] == 0 )
+		if ( gSampleBankMemoryStartAddress[SFX_BANK_0] == 0 )
 		{
 			Terminate();
 			return FALSE;
 		}
 		
-		nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] = (uintptr)malloc(PED_BLOCKSIZE*MAX_PEDSFX);
-		ASSERT(nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] != 0);
+		gSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] = (uintptr)malloc(PED_BUFFERSIZE*MAX_PEDSFX);
+		ASSERT(gSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] != 0);
 	
 		LoadSampleBank(SFX_BANK_0);
 	}
@@ -992,7 +992,7 @@ cSampleManager::Initialise(void)
 	}
 	
 	{
-		_bSampmanInitialised = TRUE;
+		gInitialised = TRUE;
 		
 		if ( defaultProvider >= 0 && defaultProvider < m_nNumberOfProviders )
 		{
@@ -1014,12 +1014,12 @@ cSampleManager::Initialise(void)
 		
 		if ( nNumMP3s != 0 )
 		{
-			nStreamLength[STREAMED_SOUND_RADIO_MP3_PLAYER] = 0;
+			gStreamLength[STREAMED_SOUND_RADIO_MP3_PLAYER] = 0;
 			
 			for ( tMP3Entry *e = _pMP3List; e != NULL; e = e->pNext )
 			{
-				e->nTrackStreamPos = nStreamLength[STREAMED_SOUND_RADIO_MP3_PLAYER];
-				nStreamLength[STREAMED_SOUND_RADIO_MP3_PLAYER] += e->nTrackLength;
+				e->nTrackStreamPos = gStreamLength[STREAMED_SOUND_RADIO_MP3_PLAYER];
+				gStreamLength[STREAMED_SOUND_RADIO_MP3_PLAYER] += e->nTrackLength;
 			}
 			
 			time_t t = time(NULL);
@@ -1130,19 +1130,19 @@ cSampleManager::Terminate(void)
 
 	CStream::Terminate();
 
-	if ( nSampleBankMemoryStartAddress[SFX_BANK_0] != 0 )
+	if ( gSampleBankMemoryStartAddress[SFX_BANK_0] != 0 )
 	{
-		free((void *)nSampleBankMemoryStartAddress[SFX_BANK_0]);
-		nSampleBankMemoryStartAddress[SFX_BANK_0] = 0;
+		free((void *)gSampleBankMemoryStartAddress[SFX_BANK_0]);
+		gSampleBankMemoryStartAddress[SFX_BANK_0] = 0;
 	}
 
-	if ( nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] != 0 )
+	if ( gSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] != 0 )
 	{
-		free((void *)nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS]);
-		nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] = 0;
+		free((void *)gSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS]);
+		gSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] = 0;
 	}
 	
-	_bSampmanInitialised = FALSE;
+	gInitialised = FALSE;
 }
 
 bool8 cSampleManager::CheckForAnAudioFileOnCD(void)
@@ -1158,14 +1158,14 @@ char cSampleManager::GetCDAudioDriveLetter(void)
 void
 cSampleManager::UpdateEffectsVolume(void)
 {
-	if ( _bSampmanInitialised )
+	if ( gInitialised )
 	{
 		for ( int32 i = 0; i < NUM_CHANNELS; i++ )
 		{
 			if ( GetChannelUsedFlag(i) )
 			{
-				if ( nChannelVolume[i] != 0 )
-					aChannel[i].SetVolume(m_nEffectsFadeVolume*nChannelVolume[i]*m_nEffectsVolume >> 14);
+				if ( gChannelVolume[i] != 0 )
+					aChannel[i].SetVolume(m_nEffectsFadeVolume*gChannelVolume[i]*m_nEffectsVolume >> 14);
 			}
 		}
 	}
@@ -1220,10 +1220,10 @@ cSampleManager::LoadSampleBank(uint8 nBank)
 	
 #ifdef OPUS_SFX
 	int samplesRead = 0;
-	int samplesSize = nSampleBankSize[nBank] / 2;
-	op_pcm_seek(fpSampleDataHandle, 0);
+	int samplesSize = gSampleBankSize[nBank] / 2;
+	op_pcm_seek(gFileHandleSampleData, 0);
 	while (samplesSize > 0) {
-		int size = op_read(fpSampleDataHandle, (opus_int16 *)(nSampleBankMemoryStartAddress[nBank] + samplesRead), samplesSize, NULL);
+		int size = op_read(gFileHandleSampleData, (opus_int16 *)(gSampleBankMemoryStartAddress[nBank] + samplesRead), samplesSize, NULL);
 		if (size <= 0) {
 			// huh?
 			//assert(0);
@@ -1233,13 +1233,13 @@ cSampleManager::LoadSampleBank(uint8 nBank)
 		samplesSize -= size;
 	}
 #else
-	if ( fseek(fpSampleDataHandle, nSampleBankDiscStartOffset[nBank], SEEK_SET) != 0 )
+	if ( fseek(gFileHandleSampleData, gSampleBankDiscStartOffset[nBank], SEEK_SET) != 0 )
 		return FALSE;
 	
-	if ( fread((void *)nSampleBankMemoryStartAddress[nBank], 1, nSampleBankSize[nBank], fpSampleDataHandle) != nSampleBankSize[nBank] )
+	if ( fread((void *)gSampleBankMemoryStartAddress[nBank], 1, gSampleBankSize[nBank], gFileHandleSampleData) != gSampleBankSize[nBank] )
 		return FALSE;
 #endif
-	bSampleBankLoaded[nBank] = TRUE;
+	gBankLoaded[nBank] = TRUE;
 	
 	return TRUE;
 }
@@ -1249,7 +1249,7 @@ cSampleManager::UnloadSampleBank(uint8 nBank)
 {
 	ASSERT( nBank < MAX_SFX_BANKS);
 	
-	bSampleBankLoaded[nBank] = FALSE;
+	gBankLoaded[nBank] = FALSE;
 }
 
 bool8
@@ -1257,7 +1257,7 @@ cSampleManager::IsSampleBankLoaded(uint8 nBank)
 {
 	ASSERT( nBank < MAX_SFX_BANKS);
 	
-	return bSampleBankLoaded[nBank];
+	return gBankLoaded[nBank];
 }
 
 bool8
@@ -1269,12 +1269,12 @@ cSampleManager::IsPedCommentLoaded(uint32 nComment)
 
 	for ( int32 i = 0; i < _TODOCONST(3); i++ )
 	{
-		slot = nCurrentPedSlot - i - 1;
+		slot = gCurPedIndex - i - 1;
 #ifdef FIX_BUGS
 		if (slot < 0)
-			slot += ARRAY_SIZE(nPedSlotSfx);
+			slot += ARRAY_SIZE(gPedSfx);
 #endif
-		if ( nComment == nPedSlotSfx[slot] )
+		if ( nComment == gPedSfx[slot] )
 			return TRUE;
 	}
 	
@@ -1289,12 +1289,12 @@ cSampleManager::_GetPedCommentSlot(uint32 nComment)
 
 	for (int32 i = 0; i < _TODOCONST(3); i++)
 	{
-		slot = nCurrentPedSlot - i - 1;
+		slot = gCurPedIndex - i - 1;
 #ifdef FIX_BUGS
 		if (slot < 0)
-			slot += ARRAY_SIZE(nPedSlotSfx);
+			slot += ARRAY_SIZE(gPedSfx);
 #endif
-		if (nComment == nPedSlotSfx[slot])
+		if (nComment == gPedSfx[slot])
 			return slot;
 	}
 
@@ -1333,10 +1333,10 @@ cSampleManager::LoadPedComment(uint32 nComment)
 
 #ifdef OPUS_SFX
 	int samplesRead = 0;
-	int samplesSize = m_aSamples[nComment].nSize / 2;
-	op_pcm_seek(fpSampleDataHandle, m_aSamples[nComment].nOffset / 2);
+	int samplesSize = m_aSampleDataTable[nComment].nSize / 2;
+	op_pcm_seek(gFileHandleSampleData, m_aSampleDataTable[nComment].nOffset / 2);
 	while (samplesSize > 0) {
-		int size = op_read(fpSampleDataHandle, (opus_int16 *)(nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] + PED_BLOCKSIZE * nCurrentPedSlot + samplesRead),
+		int size = op_read(gFileHandleSampleData, (opus_int16 *)(gSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] + PED_BUFFERSIZE * gCurPedIndex + samplesRead),
 		                   samplesSize, NULL);
 		if (size <= 0) {
 			return FALSE;
@@ -1345,17 +1345,17 @@ cSampleManager::LoadPedComment(uint32 nComment)
 		samplesSize -= size;
 	}
 #else
-	if ( fseek(fpSampleDataHandle, m_aSamples[nComment].nOffset, SEEK_SET) != 0 )
+	if ( fseek(gFileHandleSampleData, m_aSampleDataTable[nComment].nOffset, SEEK_SET) != 0 )
 		return FALSE;
 	
-	if ( fread((void *)(nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] + PED_BLOCKSIZE*nCurrentPedSlot), 1, m_aSamples[nComment].nSize, fpSampleDataHandle) != m_aSamples[nComment].nSize )
+	if ( fread((void *)(gSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] + PED_BUFFERSIZE*gCurPedIndex), 1, m_aSampleDataTable[nComment].nSize, gFileHandleSampleData) != m_aSampleDataTable[nComment].nSize )
 		return FALSE;
 
 #endif
-	nPedSlotSfx[nCurrentPedSlot] = nComment;
+	gPedSfx[gCurPedIndex] = nComment;
 		
-	if ( ++nCurrentPedSlot >= MAX_PEDSFX )
-		nCurrentPedSlot = 0;
+	if ( ++gCurPedIndex >= MAX_PEDSFX )
+		gCurPedIndex = 0;
 	
 	return TRUE;
 }
@@ -1363,10 +1363,10 @@ cSampleManager::LoadPedComment(uint32 nComment)
 int32
 cSampleManager::GetBankContainingSound(uint32 offset)
 {
-	if ( offset >= BankStartOffset[SFX_BANK_PED_COMMENTS] )
+	if ( offset >= gBankStartOffset[SFX_BANK_PED_COMMENTS] )
 		return SFX_BANK_PED_COMMENTS;
 	
-	if ( offset >= BankStartOffset[SFX_BANK_0] )
+	if ( offset >= gBankStartOffset[SFX_BANK_0] )
 		return SFX_BANK_0;
 	
 	return INVALID_SFX_BANK;
@@ -1376,28 +1376,28 @@ int32
 cSampleManager::GetSampleBaseFrequency(uint32 nSample)
 {
 	ASSERT( nSample < TOTAL_AUDIO_SAMPLES );
-	return m_aSamples[nSample].nFrequency;
+	return m_aSampleDataTable[nSample].nFrequency;
 }
 
 int32
 cSampleManager::GetSampleLoopStartOffset(uint32 nSample)
 {
 	ASSERT( nSample < TOTAL_AUDIO_SAMPLES );
-	return m_aSamples[nSample].nLoopStart;
+	return m_aSampleDataTable[nSample].nLoopStart;
 }
 
 int32
 cSampleManager::GetSampleLoopEndOffset(uint32 nSample)
 {
 	ASSERT( nSample < TOTAL_AUDIO_SAMPLES );
-	return m_aSamples[nSample].nLoopEnd;
+	return m_aSampleDataTable[nSample].nLoopEnd;
 }
 
 uint32
 cSampleManager::GetSampleLength(uint32 nSample)
 {
 	ASSERT( nSample < TOTAL_AUDIO_SAMPLES );
-	return m_aSamples[nSample].nSize / sizeof(uint16);
+	return m_aSampleDataTable[nSample].nSize / sizeof(uint16);
 }
 
 bool8 cSampleManager::UpdateReverb(void)
@@ -1496,7 +1496,7 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 		if ( !IsSampleBankLoaded(nBank) )
 			return FALSE;
 		
-		addr = nSampleBankMemoryStartAddress[nBank] + m_aSamples[nSfx].nOffset - m_aSamples[BankStartOffset[nBank]].nOffset;
+		addr = gSampleBankMemoryStartAddress[nBank] + m_aSampleDataTable[nSfx].nOffset - m_aSampleDataTable[gBankStartOffset[nBank]].nOffset;
 	}
 	else
 	{
@@ -1504,7 +1504,7 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 			return FALSE;
 		
 		int32 slot = _GetPedCommentSlot(nSfx);
-		addr = (nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] + PED_BLOCKSIZE * slot);
+		addr = (gSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] + PED_BUFFERSIZE * slot);
 	}
 	
 	if ( GetChannelUsedFlag(nChannel) )
@@ -1516,7 +1516,7 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 	aChannel[nChannel].Reset();
 	if ( aChannel[nChannel].HasSource() )
 	{	
-		aChannel[nChannel].SetSampleData   ((void*)addr, m_aSamples[nSfx].nSize, m_aSamples[nSfx].nFrequency);
+		aChannel[nChannel].SetSampleData   ((void*)addr, m_aSampleDataTable[nSfx].nSize, m_aSampleDataTable[nSfx].nFrequency);
 		aChannel[nChannel].SetLoopPoints   (0, -1);
 		aChannel[nChannel].SetPitch        (1.0f);
 		return TRUE;
@@ -1533,18 +1533,18 @@ cSampleManager::SetChannelEmittingVolume(uint32 nChannel, uint32 nVolume)
 	uint32 vol = nVolume;
 	if ( vol > MAX_VOLUME ) vol = MAX_VOLUME;
 	
-	nChannelVolume[nChannel] = vol;
+	gChannelVolume[nChannel] = vol;
 	
 	// reduce channel volume when JB.MP3 or S4_BDBD.MP3 playing
 	if (   MusicManager.GetMusicMode()    == MUSICMODE_CUTSCENE
 		&& MusicManager.GetNextTrack() != STREAMED_SOUND_NEWS_INTRO
 		&& MusicManager.GetNextTrack() != STREAMED_SOUND_CUTSCENE_SAL4_BDBD )
 	{
-		nChannelVolume[nChannel] = vol / 4;
+		gChannelVolume[nChannel] = vol / 4;
 	}
 
 	// no idea, does this one looks like a bug or it's SetChannelVolume ?
-	aChannel[nChannel].SetVolume(m_nEffectsFadeVolume*nChannelVolume[nChannel]*m_nEffectsVolume >> 14);
+	aChannel[nChannel].SetVolume(m_nEffectsFadeVolume*gChannelVolume[nChannel]*m_nEffectsVolume >> 14);
 }
 
 void
@@ -1573,14 +1573,14 @@ cSampleManager::SetChannelVolume(uint32 nChannel, uint32 nVolume)
 		uint32 vol = nVolume;
 		if ( vol > MAX_VOLUME ) vol = MAX_VOLUME;
 		
-		nChannelVolume[nChannel] = vol;
+		gChannelVolume[nChannel] = vol;
 		
 		// reduce the volume for JB.MP3 and S4_BDBD.MP3
 		if (   MusicManager.GetMusicMode()    == MUSICMODE_CUTSCENE
 			&& MusicManager.GetNextTrack() != STREAMED_SOUND_NEWS_INTRO
 			&& MusicManager.GetNextTrack() != STREAMED_SOUND_CUTSCENE_SAL4_BDBD )
 		{
-			nChannelVolume[nChannel] = vol / 4;
+			gChannelVolume[nChannel] = vol / 4;
 		}
 			
 		aChannel[nChannel].SetVolume(m_nEffectsFadeVolume*vol*m_nEffectsVolume >> 14);
@@ -1727,7 +1727,7 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 			// Switched to MP3 player just now
 			if ( !_bIsMp3Active && i == 0 )
 			{
-				if ( nPos > nStreamLength[STREAMED_SOUND_RADIO_MP3_PLAYER] )
+				if ( nPos > gStreamLength[STREAMED_SOUND_RADIO_MP3_PLAYER] )
 					position = 0;
 				tMP3Entry *e = _pMP3List;
 
@@ -1935,7 +1935,7 @@ cSampleManager::GetStreamedFileLength(uint8 nStream)
 {
 	ASSERT( nStream < TOTAL_STREAMED_SOUNDS );
 
-	return nStreamLength[nStream];
+	return gStreamLength[nStream];
 }
 
 bool8
@@ -1977,47 +1977,47 @@ cSampleManager::InitialiseSampleBanks(void)
 {
 	int32 nBank = SFX_BANK_0;
 	
-	fpSampleDescHandle = fcaseopen(SampleBankDescFilename, "rb");
-	if ( fpSampleDescHandle == NULL )
+	gFileHandleSampleDesc = fcaseopen(SampleBankDescFilename, "rb");
+	if ( gFileHandleSampleDesc == NULL )
 		return FALSE;
 #ifndef OPUS_SFX
-	fpSampleDataHandle = fcaseopen(SampleBankDataFilename, "rb");
-	if ( fpSampleDataHandle == NULL )
+	gFileHandleSampleData = fcaseopen(SampleBankDataFilename, "rb");
+	if ( gFileHandleSampleData == NULL )
 	{
-		fclose(fpSampleDescHandle);
-		fpSampleDescHandle = NULL;
+		fclose(gFileHandleSampleDesc);
+		gFileHandleSampleDesc = NULL;
 		
 		return FALSE;
 	}
 	
-	fseek(fpSampleDataHandle, 0, SEEK_END);
-	int32 _nSampleDataEndOffset = ftell(fpSampleDataHandle);
-	rewind(fpSampleDataHandle);
+	fseek(gFileHandleSampleData, 0, SEEK_END);
+	int32 _nSampleDataEndOffset = ftell(gFileHandleSampleData);
+	rewind(gFileHandleSampleData);
 #else
 	int e;
-	fpSampleDataHandle = op_open_file(SampleBankDataFilename, &e);
+	gFileHandleSampleData = op_open_file(SampleBankDataFilename, &e);
 #endif
-	fread(m_aSamples, sizeof(tSample), TOTAL_AUDIO_SAMPLES, fpSampleDescHandle);
+	fread(m_aSampleDataTable, sizeof(tSample), TOTAL_AUDIO_SAMPLES, gFileHandleSampleDesc);
 #ifdef OPUS_SFX
-	int32 _nSampleDataEndOffset = m_aSamples[TOTAL_AUDIO_SAMPLES - 1].nOffset + m_aSamples[TOTAL_AUDIO_SAMPLES - 1].nSize;
+	int32 _nSampleDataEndOffset = m_aSampleDataTable[TOTAL_AUDIO_SAMPLES - 1].nOffset + m_aSampleDataTable[TOTAL_AUDIO_SAMPLES - 1].nSize;
 #endif
-	fclose(fpSampleDescHandle);
-	fpSampleDescHandle = NULL;
+	fclose(gFileHandleSampleDesc);
+	gFileHandleSampleDesc = NULL;
 	
 	for ( int32 i = 0; i < TOTAL_AUDIO_SAMPLES; i++ )
 	{
 #ifdef FIX_BUGS
 		if (nBank >= MAX_SFX_BANKS) break;
 #endif
-		if ( BankStartOffset[nBank] == BankStartOffset[SFX_BANK_0] + i )
+		if ( gBankStartOffset[nBank] == gBankStartOffset[SFX_BANK_0] + i )
 		{
-			nSampleBankDiscStartOffset[nBank] = m_aSamples[i].nOffset;
+			gSampleBankDiscStartOffset[nBank] = m_aSampleDataTable[i].nOffset;
 			nBank++;
 		}
 	}
 
-	nSampleBankSize[SFX_BANK_0] = nSampleBankDiscStartOffset[SFX_BANK_PED_COMMENTS] - nSampleBankDiscStartOffset[SFX_BANK_0];
-	nSampleBankSize[SFX_BANK_PED_COMMENTS]  = _nSampleDataEndOffset                      - nSampleBankDiscStartOffset[SFX_BANK_PED_COMMENTS];
+	gSampleBankSize[SFX_BANK_0] = gSampleBankDiscStartOffset[SFX_BANK_PED_COMMENTS] - gSampleBankDiscStartOffset[SFX_BANK_0];
+	gSampleBankSize[SFX_BANK_PED_COMMENTS]  = _nSampleDataEndOffset                      - gSampleBankDiscStartOffset[SFX_BANK_PED_COMMENTS];
 
 	return TRUE;
 }
