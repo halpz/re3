@@ -6,7 +6,7 @@
 cSampleManager SampleManager;
 bool8 _bSampmanInitialised = FALSE;
 
-uint32 gBankStartOffset[MAX_SFX_BANKS];
+uint32 BankStartOffset[MAX_SFX_BANKS];
 uint32     nNumMP3s;
 
 cSampleManager::cSampleManager(void)

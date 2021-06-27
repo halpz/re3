@@ -96,7 +96,7 @@ enum
 };
 
 #define MAX_PEDSFX                 7
-#define PED_BUFFERSIZE              79000
+#define PED_BLOCKSIZE              79000
 
 #define MAXPROVIDERS               64
 
@@ -130,7 +130,7 @@ class cSampleManager
 	bool8   m_bInitialised;
 	uint8   m_nNumberOfProviders;
 	char   *m_aAudioProviders[MAXPROVIDERS];
-	tSample m_aSampleDataTable[TOTAL_AUDIO_SAMPLES];
+	tSample m_aSamples[TOTAL_AUDIO_SAMPLES];
 
 public:
 	
@@ -217,7 +217,7 @@ public:
 };
 
 extern cSampleManager SampleManager;
-extern uint32 gBankStartOffset[MAX_SFX_BANKS];
+extern uint32 BankStartOffset[MAX_SFX_BANKS];
 
 #ifdef AUDIO_OAL
 extern int defaultProvider;

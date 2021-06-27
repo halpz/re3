@@ -17,7 +17,7 @@ bool bChannelsCreated = false;
 
 int32 CChannel::channelsThatNeedService = 0;
 
-uint8 tempStereoBuffer[PED_BUFFERSIZE * 2];
+uint8 tempStereoBuffer[PED_BLOCKSIZE * 2];
 
 void
 CChannel::InitChannels()
