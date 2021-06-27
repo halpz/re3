@@ -127,7 +127,7 @@ public:
 	std::mutex	m_mutex;
 	std::queue<std::pair<ALuint, ALuint>> m_fillBuffers; // left and right buffer
 	tsQueue<std::pair<ALuint, ALuint>> m_queueBuffers;
-	std::condition_variable m_closeCv;
+//	std::condition_variable m_closeCv;
 	bool     m_bDoSeek;
 	uint32   m_SeekPos;
 	bool	 m_bIExist;
