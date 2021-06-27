@@ -1046,14 +1046,14 @@ cSampleManager::Initialise(void)
 			char filename[MAX_PATH];
 			sprintf(filename, "%s.VB", StreamedNameTable[i]);
 			if ( aStream[0] )
-				opened = aStream[0]->Open(filename, IsThisTrackAt16KHz(i) ? 16000 : 32000) )
+				opened = aStream[0]->Open(filename, IsThisTrackAt16KHz(i) ? 16000 : 32000);
 			
 			if ( !opened )
 			{
 				sprintf(filename, "%s.MP3", StreamedNameTable[i]);
 				if ( aStream[0] )
 				{
-					opened = aStream[0]->Open(filename, IsThisTrackAt16KHz(i) ? 16000 : 32000)
+					opened = aStream[0]->Open(filename, IsThisTrackAt16KHz(i) ? 16000 : 32000);
 				}
 			}
 			if ( opened )
@@ -1956,29 +1956,18 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 		nFile = 0;
 	}
 	sprintf(filename, "%s.VB", StreamedNameTable[nFile]);
-	
+
 	CStream *stream = aStream[nStream];
+	
+	bool opened = stream->Open(filename, IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 
-	if ( stream && !stream->IsOpened() )
-	{
-		delete stream;
-		stream = NULL;
-	}
-
-	if (!stream)
+	if ( !opened )
 	{
 		sprintf(filename, "%s.MP3", StreamedNameTable[nFile]);
-		stream = new CStream(filename, ALStreamSources[nStream], ALStreamBuffers[nStream], IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
-		if ( stream && !stream->IsOpened() )
-		{
-			delete stream;
-			stream = NULL;
-		}
+		opened = stream->Open(filename, IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 	}
-
-	aStream[nStream]->Open(filename, IsThisTrackAt16KHz(nFile) ? 16000 : 32000);
 	
-	if ( stream->Setup() ) {
+	if ( opened && stream->Setup() ) {
 		stream->SetLoopCount(nStreamLoopedFlag[nStream] ? 0 : 1);
 		nStreamLoopedFlag[nStream] = TRUE;
 		if (position != 0)
