@@ -347,7 +347,7 @@ CCamera::Process(void)
 			currentTime = m_uiTransitionDuration;
 		float fractionInter = (float) currentTime / m_uiTransitionDuration;
 		float fractionInterTarget = (float) currentTime / m_uiTransitionDurationTargetCoors;
-		fractionInterTarget = clamp(fractionInterTarget, 0.0f, 1.0f);
+		fractionInterTarget = Clamp(fractionInterTarget, 0.0f, 1.0f);
 
 		// Interpolate target separately
 		if(fractionInterTarget <= m_fFractionInterToStopMovingTarget){
@@ -551,7 +551,7 @@ CCamera::Process(void)
 
 	// Process Shake
 	float shakeStrength = m_fCamShakeForce - 0.28f*(CTimer::GetTimeInMilliseconds()-m_uiCamShakeStart)/1000.0f;
-	shakeStrength = clamp(shakeStrength, 0.0f, 2.0f);
+	shakeStrength = Clamp(shakeStrength, 0.0f, 2.0f);
 	int shakeRand = CGeneral::GetRandomNumber();
 	float shakeOffset = shakeStrength*0.1f;
 	GetMatrix().GetPosition().x += shakeOffset * ((shakeRand & 0xF) - 7);
@@ -1913,7 +1913,7 @@ CCamera::CamShake(float strength, float x, float y, float z)
 
 	float curForce = mult*(m_fCamShakeForce - (CTimer::GetTimeInMilliseconds() - m_uiCamShakeStart)/1000.0f);
 	strength = mult*strength;
-	if(clamp(curForce, 0.0f, 2.0f) < strength){
+	if(Clamp(curForce, 0.0f, 2.0f) < strength){
 		m_fCamShakeForce = strength;
 		m_uiCamShakeStart = CTimer::GetTimeInMilliseconds();
 	}
@@ -1924,7 +1924,7 @@ void
 CamShakeNoPos(CCamera *cam, float strength)
 {
 	float curForce = cam->m_fCamShakeForce - (CTimer::GetTimeInMilliseconds() - cam->m_uiCamShakeStart)/1000.0f;
-	if(clamp(curForce, 0.0f, 2.0f) < strength){
+	if(Clamp(curForce, 0.0f, 2.0f) < strength){
 		cam->m_fCamShakeForce = strength;
 		cam->m_uiCamShakeStart = CTimer::GetTimeInMilliseconds();
 	}
@@ -3985,7 +3985,7 @@ CCamera::Find3rdPersonCamTargetVector(float dist, CVector pos, CVector &source, 
 float
 CCamera::Find3rdPersonQuickAimPitch(void)
 {
-	float clampedFrontZ = clamp(Cams[ActiveCam].Front.z, -1.0f, 1.0f);
+	float clampedFrontZ = Clamp(Cams[ActiveCam].Front.z, -1.0f, 1.0f);
 
 	float rot = Asin(clampedFrontZ);
 

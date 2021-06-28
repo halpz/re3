@@ -179,10 +179,10 @@ CWaterLevel::Initialise(Const char *pWaterDat)
 			int32 t = WATER_HUGE_Y(ms_aWaterRects[i].top);
 			int32 b = WATER_HUGE_Y(ms_aWaterRects[i].bottom) + 1.0f;
 
-			l = clamp(l, 0, MAX_SMALL_SECTORS - 1);
-			r = clamp(r, 0, MAX_SMALL_SECTORS - 1);
-			t = clamp(t, 0, MAX_SMALL_SECTORS - 1);
-			b = clamp(b, 0, MAX_SMALL_SECTORS - 1);
+			l = Clamp(l, 0, MAX_SMALL_SECTORS - 1);
+			r = Clamp(r, 0, MAX_SMALL_SECTORS - 1);
+			t = Clamp(t, 0, MAX_SMALL_SECTORS - 1);
+			b = Clamp(b, 0, MAX_SMALL_SECTORS - 1);
 
 			for (int32 x = l; x <= r; x++)
 			{
@@ -991,10 +991,10 @@ CWaterLevel::RenderWater()
 	if ( bUseCamEndY )                             
 		nEndY   = WATER_TO_HUGE_SECTOR_Y(camPos.y);
 
-	nStartX = clamp(nStartX, 0, MAX_HUGE_SECTORS - 1);
-	nEndX   = clamp(nEndX,   0, MAX_HUGE_SECTORS - 1);
-	nStartY = clamp(nStartY, 0, MAX_HUGE_SECTORS - 1);
-	nEndY   = clamp(nEndY,   0, MAX_HUGE_SECTORS - 1);
+	nStartX = Clamp(nStartX, 0, MAX_HUGE_SECTORS - 1);
+	nEndX   = Clamp(nEndX,   0, MAX_HUGE_SECTORS - 1);
+	nStartY = Clamp(nStartY, 0, MAX_HUGE_SECTORS - 1);
+	nEndY   = Clamp(nEndY,   0, MAX_HUGE_SECTORS - 1);
 	
 	for ( int32 x = nStartX; x <= nEndX; x++ )
 	{
@@ -1259,10 +1259,10 @@ CWaterLevel::RenderTransparentWater(void)
 	if ( bUseCamEndY )                                      
 		nEndY   = WATER_TO_HUGE_SECTOR_Y(camPos.y         );
 	
-	nStartX = clamp(nStartX, 0, MAX_HUGE_SECTORS - 1);
-	nEndX   = clamp(nEndX,   0, MAX_HUGE_SECTORS - 1);
-	nStartY = clamp(nStartY, 0, MAX_HUGE_SECTORS - 1);
-	nEndY   = clamp(nEndY,   0, MAX_HUGE_SECTORS - 1);
+	nStartX = Clamp(nStartX, 0, MAX_HUGE_SECTORS - 1);
+	nEndX   = Clamp(nEndX,   0, MAX_HUGE_SECTORS - 1);
+	nStartY = Clamp(nStartY, 0, MAX_HUGE_SECTORS - 1);
+	nEndY   = Clamp(nEndY,   0, MAX_HUGE_SECTORS - 1);
 	
 	
 	for ( int32 x = nStartX; x <= nEndX; x++ )
@@ -2161,10 +2161,10 @@ CWaterLevel::PreCalcWaterGeometry(void)
 	float signX = CamFwdDir.x * 1.4144272f;
 	float signY = CamFwdDir.y * 1.4144272f;
 	
-	signX = clamp(signX, -1.0f, 1.0f);
+	signX = Clamp(signX, -1.0f, 1.0f);
 	fCamX += 0.4f * signX * float(SMALL_SECTOR_SIZE * 2.0f);
 
-	signY = clamp(signY, -1.0f, 1.0f);
+	signY = Clamp(signY, -1.0f, 1.0f);
 	fCamY += 0.4f * signY * float(SMALL_SECTOR_SIZE * 2.0f);
 	
 	int32 nBlock;
@@ -2578,7 +2578,7 @@ CWaterLevel::RenderBoatWakes(void)
 				float val = 500.0f - (CBoat::WAKE_LIFETIME - pBoat->m_afWakePointLifeTime[wake])
 						* 600.0f / CBoat::WAKE_LIFETIME;
 						
-				fAplhaB = clamp(val, 0.0f, 255.0f);
+				fAplhaB = Clamp(val, 0.0f, 255.0f);
 			}
 
 			CVector2D vecDistB = pBoat->m_avec2dWakePoints[wake - 1] - pBoat->m_avec2dWakePoints[wake];
@@ -2888,10 +2888,10 @@ CWaterLevel::CalcDistanceToWater(float fX, float fY)
 	int32 nStartY = WATER_TO_SMALL_SECTOR_Y(fY - fSectorMaxRenderDist) - 1;
 	int32 nEndY   = WATER_TO_SMALL_SECTOR_Y(fY + fSectorMaxRenderDist) + 1;
 	
-	nStartX = clamp(nStartX, 0, MAX_SMALL_SECTORS - 1);
-	nEndX   = clamp(nEndX,   0, MAX_SMALL_SECTORS - 1);
-	nStartY = clamp(nStartY, 0, MAX_SMALL_SECTORS - 1);
-	nEndY   = clamp(nEndY,   0, MAX_SMALL_SECTORS - 1);
+	nStartX = Clamp(nStartX, 0, MAX_SMALL_SECTORS - 1);
+	nEndX   = Clamp(nEndX,   0, MAX_SMALL_SECTORS - 1);
+	nStartY = Clamp(nStartY, 0, MAX_SMALL_SECTORS - 1);
+	nEndY   = Clamp(nEndY,   0, MAX_SMALL_SECTORS - 1);
 	
 	float fDistSqr = 1.0e10f;
 	
@@ -2915,7 +2915,7 @@ CWaterLevel::CalcDistanceToWater(float fX, float fY)
 		}
 	}
 
-	return clamp(Sqrt(fDistSqr) - 23.0f, 0.0f, fSectorMaxRenderDist);
+	return Clamp(Sqrt(fDistSqr) - 23.0f, 0.0f, fSectorMaxRenderDist);
 }
 
 void

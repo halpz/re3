@@ -425,9 +425,9 @@ void CReplay::RecordParticle(tParticleType type, const CVector& vecPos, const CV
 	pp->pos_x = 4.0f * vecPos.x;
 	pp->pos_y = 4.0f * vecPos.y;
 	pp->pos_z = 4.0f * vecPos.z;
-	pp->dir_x = 120.0f * clamp(vecDir.x, -1.0f, 1.0f);
-	pp->dir_y = 120.0f * clamp(vecDir.y, -1.0f, 1.0f);
-	pp->dir_z = 120.0f * clamp(vecDir.z, -1.0f, 1.0f);
+	pp->dir_x = 120.0f * Clamp(vecDir.x, -1.0f, 1.0f);
+	pp->dir_y = 120.0f * Clamp(vecDir.y, -1.0f, 1.0f);
+	pp->dir_z = 120.0f * Clamp(vecDir.z, -1.0f, 1.0f);
 	pp->size = fSize;
 	pp->r = color.red;
 	pp->g = color.green;
@@ -463,8 +463,8 @@ void CReplay::StorePedAnimation(CPed *ped, CStoredAnimationState *state)
 	CAnimBlendAssociation* main = RpAnimBlendClumpGetMainAssociation((RpClump*)ped->m_rwObject, &second, &blend_amount);
 	if (main){
 		state->animId = main->animId;
-		state->time = 255.0f / 4.0f * clamp(main->currentTime, 0.0f, 4.0f);
-		state->speed = 255.0f / 3.0f * clamp(main->speed, 0.0f, 3.0f);
+		state->time = 255.0f / 4.0f * Clamp(main->currentTime, 0.0f, 4.0f);
+		state->speed = 255.0f / 3.0f * Clamp(main->speed, 0.0f, 3.0f);
 		state->groupId = main->groupId;
 	}else{
 		state->animId = 3;
@@ -474,9 +474,9 @@ void CReplay::StorePedAnimation(CPed *ped, CStoredAnimationState *state)
 	}
 	if (second) {
 		state->secAnimId = second->animId;
-		state->secTime = 255.0f / 4.0f * clamp(second->currentTime, 0.0f, 4.0f);
-		state->secSpeed = 255.0f / 3.0f * clamp(second->speed, 0.0f, 3.0f);
-		state->blendAmount = 255.0f / 2.0f * clamp(blend_amount, 0.0f, 2.0f);
+		state->secTime = 255.0f / 4.0f * Clamp(second->currentTime, 0.0f, 4.0f);
+		state->secSpeed = 255.0f / 3.0f * Clamp(second->speed, 0.0f, 3.0f);
+		state->blendAmount = 255.0f / 2.0f * Clamp(blend_amount, 0.0f, 2.0f);
 		state->secGroupId = second->groupId;
 	}else{
 		state->secAnimId = 0;
@@ -488,9 +488,9 @@ void CReplay::StorePedAnimation(CPed *ped, CStoredAnimationState *state)
 	CAnimBlendAssociation* partial = RpAnimBlendClumpGetMainPartialAssociation((RpClump*)ped->m_rwObject);
 	if (partial) {
 		state->partAnimId = partial->animId;
-		state->partAnimTime = 255.0f / 4.0f * clamp(partial->currentTime, 0.0f, 4.0f);
-		state->partAnimSpeed = 255.0f / 3.0f * clamp(partial->speed, 0.0f, 3.0f);
-		state->partBlendAmount = 255.0f / 2.0f * clamp(partial->blendAmount, 0.0f, 2.0f);
+		state->partAnimTime = 255.0f / 4.0f * Clamp(partial->currentTime, 0.0f, 4.0f);
+		state->partAnimSpeed = 255.0f / 3.0f * Clamp(partial->speed, 0.0f, 3.0f);
+		state->partBlendAmount = 255.0f / 2.0f * Clamp(partial->blendAmount, 0.0f, 2.0f);
 		state->partGroupId = partial->groupId;
 	}else{
 		state->partAnimId = 0;
@@ -507,10 +507,10 @@ void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState
 		CAnimBlendAssociation* assoc = RpAnimBlendClumpGetMainAssociation_N((RpClump*)ped->m_rwObject, i);
 		if (assoc){
 			state->aAnimId[i] = assoc->animId;
-			state->aCurTime[i] = 255.0f / 4.0f * clamp(assoc->currentTime, 0.0f, 4.0f);
-			state->aSpeed[i] = 255.0f / 3.0f * clamp(assoc->speed, 0.0f, 3.0f);
-			state->aBlendAmount[i] = 255.0f / 2.0f * clamp(assoc->blendAmount, 0.0f, 2.0f);
-			state->aBlendDelta[i] = 127.0f / 32.0f * clamp(assoc->blendDelta, -16.0f, 16.0f);
+			state->aCurTime[i] = 255.0f / 4.0f * Clamp(assoc->currentTime, 0.0f, 4.0f);
+			state->aSpeed[i] = 255.0f / 3.0f * Clamp(assoc->speed, 0.0f, 3.0f);
+			state->aBlendAmount[i] = 255.0f / 2.0f * Clamp(assoc->blendAmount, 0.0f, 2.0f);
+			state->aBlendDelta[i] = 127.0f / 32.0f * Clamp(assoc->blendDelta, -16.0f, 16.0f);
 			state->aFlags[i] = assoc->flags;
 			state->aGroupId[i] = assoc->groupId;
 			if (assoc->callbackType == CAnimBlendAssociation::CB_FINISH || assoc->callbackType == CAnimBlendAssociation::CB_DELETE) {
@@ -533,10 +533,10 @@ void CReplay::StoreDetailedPedAnimation(CPed *ped, CStoredDetailedAnimationState
 		CAnimBlendAssociation* assoc = RpAnimBlendClumpGetMainPartialAssociation_N((RpClump*)ped->m_rwObject, i);
 		if (assoc) {
 			state->aAnimId2[i] = assoc->animId;
-			state->aCurTime2[i] = 255.0f / 4.0f * clamp(assoc->currentTime, 0.0f, 4.0f);
-			state->aSpeed2[i] = 255.0f / 3.0f * clamp(assoc->speed, 0.0f, 3.0f);
-			state->aBlendAmount2[i] = 255.0f / 2.0f * clamp(assoc->blendAmount, 0.0f, 2.0f);
-			state->aBlendDelta2[i] = 127.0f / 16.0f * clamp(assoc->blendDelta, -16.0f, 16.0f);
+			state->aCurTime2[i] = 255.0f / 4.0f * Clamp(assoc->currentTime, 0.0f, 4.0f);
+			state->aSpeed2[i] = 255.0f / 3.0f * Clamp(assoc->speed, 0.0f, 3.0f);
+			state->aBlendAmount2[i] = 255.0f / 2.0f * Clamp(assoc->blendAmount, 0.0f, 2.0f);
+			state->aBlendDelta2[i] = 127.0f / 16.0f * Clamp(assoc->blendDelta, -16.0f, 16.0f);
 			state->aFlags2[i] = assoc->flags;
 			state->aGroupId2[i] = assoc->groupId;
 			if (assoc->callbackType == CAnimBlendAssociation::CB_FINISH || assoc->callbackType == CAnimBlendAssociation::CB_DELETE) {

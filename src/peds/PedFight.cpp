@@ -3915,7 +3915,7 @@ CPed::DriveVehicle(void)
 			targetLRLean = 0.0f;
 			timeBlend = Pow(0.86f, CTimer::GetTimeStep());
 		} else {
-			targetLRLean = clamp(bike->m_fLeanLRAngle / bike->pBikeHandling->fFullAnimLean, -1.0f, 1.0f);
+			targetLRLean = Clamp(bike->m_fLeanLRAngle / bike->pBikeHandling->fFullAnimLean, -1.0f, 1.0f);
 			timeBlend = Pow(0.86f, CTimer::GetTimeStep());
 		}
 
@@ -4102,7 +4102,7 @@ CPed::DriveVehicle(void)
 				lDriveAssoc->blendAmount = 0.0f;
 
 			if (rDriveAssoc)
-				rDriveAssoc->blendAmount = clamp(steerAngle * -100.0f / 61.0f, 0.0f, 1.0f);
+				rDriveAssoc->blendAmount = Clamp(steerAngle * -100.0f / 61.0f, 0.0f, 1.0f);
 			else if (m_pMyVehicle->IsBoat() && !(m_pMyVehicle->pHandling->Flags & HANDLING_SIT_IN_BOAT))
 				CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_BOAT_DRIVE_RIGHT);
 			else if (m_pMyVehicle->bLowVehicle)
@@ -4115,7 +4115,7 @@ CPed::DriveVehicle(void)
 				rDriveAssoc->blendAmount = 0.0f;
 
 			if (lDriveAssoc)
-				lDriveAssoc->blendAmount = clamp(steerAngle * 100.0f / 61.0f, 0.0f, 1.0f);
+				lDriveAssoc->blendAmount = Clamp(steerAngle * 100.0f / 61.0f, 0.0f, 1.0f);
 			else if (m_pMyVehicle->IsBoat() && !(m_pMyVehicle->pHandling->Flags & HANDLING_SIT_IN_BOAT))
 				CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_BOAT_DRIVE_LEFT);
 			else if (m_pMyVehicle->bLowVehicle)

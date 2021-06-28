@@ -2070,7 +2070,7 @@ float CHud::DrawFadeState(DRAW_FADE_STATE fadingElement, int forceFadingIn)
 			break;
 	}
 
-	return clamp(alpha, 0.0f, 255.0f);
+	return Clamp(alpha, 0.0f, 255.0f);
 }
 
 void

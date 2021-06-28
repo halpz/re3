@@ -299,7 +299,7 @@ CPlayerInfo::Process(void)
 		m_fRoadDensity = ThePaths.CalcRoadDensity(playerPos.x, playerPos.y);
 	}
 
-	m_fRoadDensity = clamp(m_fRoadDensity, 0.5f, 1.45f);
+	m_fRoadDensity = Clamp(m_fRoadDensity, 0.5f, 1.45f);
 
 	// Because vehicle enter/exit use same key binding.
 	bool enterOrExitVeh;

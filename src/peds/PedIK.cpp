@@ -79,7 +79,7 @@ CPedIK::MoveLimb(LimbOrientation &limb, float targetYaw, float targetPitch, Limb
 	}
 
 	if (limb.yaw > moveInfo.maxYaw || limb.yaw < moveInfo.minYaw) {
-		limb.yaw = clamp(limb.yaw, moveInfo.minYaw, moveInfo.maxYaw);
+		limb.yaw = Clamp(limb.yaw, moveInfo.minYaw, moveInfo.maxYaw);
 		result = ANGLES_SET_TO_MAX;
 	}
 
@@ -97,7 +97,7 @@ CPedIK::MoveLimb(LimbOrientation &limb, float targetYaw, float targetPitch, Limb
 	}
 
 	if (limb.pitch > moveInfo.maxPitch || limb.pitch < moveInfo.minPitch) {
-		limb.pitch = clamp(limb.pitch, moveInfo.minPitch, moveInfo.maxPitch);
+		limb.pitch = Clamp(limb.pitch, moveInfo.minPitch, moveInfo.maxPitch);
 		result = ANGLES_SET_TO_MAX;
 	}
 	return result;
@@ -122,14 +122,14 @@ CPedIK::LookInDirection(float targetYaw, float targetPitch)
 		m_headOrient.yaw = Atan2(-m->at.y, -m->at.x);
 		m_headOrient.yaw -= m_ped->m_fRotationCur;
 		m_headOrient.yaw = CGeneral::LimitRadianAngle(m_headOrient.yaw);
-		float up = clamp(m->up.z, -1.0f, 1.0f);
+		float up = Clamp(m->up.z, -1.0f, 1.0f);
 		m_headOrient.pitch = Atan2(-up, Sqrt(1.0f - SQR(-up)));
 	}
 
 	// parent of head is neck
 	RwMatrix *m = GetComponentMatrix(m_ped, PED_NECK);
 	yaw = CGeneral::LimitRadianAngle(Atan2(-m->at.y, -m->at.x));
-	float up = clamp(m->up.z, -1.0f, 1.0f);
+	float up = Clamp(m->up.z, -1.0f, 1.0f);
 	pitch = Atan2(-up, Sqrt(1.0f - SQR(-up)));
 	float headYaw = CGeneral::LimitRadianAngle(targetYaw - (yaw + m_torsoOrient.yaw));
 	float headPitch = CGeneral::LimitRadianAngle(targetPitch - pitch) * Cos(Min(Abs(headYaw), HALFPI));
@@ -336,11 +336,11 @@ CPedIK::RestoreLookAt(void)
 void
 CPedIK::ExtractYawAndPitchWorld(RwMatrix *mat, float *yaw, float *pitch)
 {
-	float f = clamp(DotProduct(mat->up, CVector(0.0f, 1.0f, 0.0f)), -1.0f, 1.0f);
+	float f = Clamp(DotProduct(mat->up, CVector(0.0f, 1.0f, 0.0f)), -1.0f, 1.0f);
 	*yaw = Acos(f);
 	if (mat->up.x > 0.0f) *yaw = -*yaw;
 
-	f = clamp(DotProduct(mat->right, CVector(0.0f, 0.0f, 1.0f)), -1.0f, 1.0f);
+	f = Clamp(DotProduct(mat->right, CVector(0.0f, 0.0f, 1.0f)), -1.0f, 1.0f);
 	*pitch = Acos(f);
 	if (mat->up.z > 0.0f) *pitch = -*pitch;
 }
@@ -348,11 +348,11 @@ CPedIK::ExtractYawAndPitchWorld(RwMatrix *mat, float *yaw, float *pitch)
 void
 CPedIK::ExtractYawAndPitchLocal(RwMatrix *mat, float *yaw, float *pitch)
 {
-	float f = clamp(DotProduct(mat->at, CVector(0.0f, 0.0f, 1.0f)), -1.0f, 1.0f);
+	float f = Clamp(DotProduct(mat->at, CVector(0.0f, 0.0f, 1.0f)), -1.0f, 1.0f);
 	*yaw = Acos(f);
 	if (mat->at.y > 0.0f) *yaw = -*yaw;
 
-	f = clamp(DotProduct(mat->right, CVector(1.0f, 0.0f, 0.0f)), -1.0f, 1.0f);
+	f = Clamp(DotProduct(mat->right, CVector(1.0f, 0.0f, 0.0f)), -1.0f, 1.0f);
 	*pitch = Acos(f);
 	if (mat->up.x > 0.0f) *pitch = -*pitch;
 }

@@ -1659,7 +1659,7 @@ cSampleManager::UpdateReverb(void)
 #undef CALCULATE_RATIO
 #undef MIN_DIST
 	
-	fRatio = clamp(fRatio, 0.0f, 0.6f);
+	fRatio = Clamp(fRatio, 0.0f, 0.6f);
 	
 	if ( fRatio == _fPrevEaxRatioDestination )
 		return FALSE;

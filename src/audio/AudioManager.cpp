@@ -331,7 +331,7 @@ cAudioManager::Get3DProviderName(uint8 id) const
 	if (!m_bIsInitialised)
 		return nil;
 #ifdef AUDIO_OAL
-	id = clamp(id, 0, SampleManager.GetNum3DProvidersAvailable() - 1);
+	id = Clamp(id, 0, SampleManager.GetNum3DProvidersAvailable() - 1);
 #else
 	// We don't want that either since it will crash the game, but skipping for now
 	if (id >= SampleManager.GetNum3DProvidersAvailable())
@@ -531,7 +531,7 @@ cAudioManager::ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, 
 		if (dist != 0.0f) {
 			float speedOfSource = (dist / m_nTimeSpent) * speedMultiplier;
 			if (m_fSpeedOfSound > Abs(speedOfSource)) {
-				speedOfSource = clamp2(speedOfSource, 0.0f, 1.5f);
+				speedOfSource = Clamp2(speedOfSource, 0.0f, 1.5f);
 				newFreq = (oldFreq * m_fSpeedOfSound) / (speedOfSource + m_fSpeedOfSound);
 			}
 		}
@@ -895,11 +895,11 @@ cAudioManager::ProcessActiveQueues()
 								sample.m_fSpeedMultiplier);
 
 							if (sample.m_nFrequency != m_asActiveSamples[j].m_nFrequency) {
-								m_asActiveSamples[j].m_nFrequency = clamp2((int32)sample.m_nFrequency, (int32)m_asActiveSamples[j].m_nFrequency, 6000);
+								m_asActiveSamples[j].m_nFrequency = Clamp2((int32)sample.m_nFrequency, (int32)m_asActiveSamples[j].m_nFrequency, 6000);
 								SampleManager.SetChannelFrequency(j, m_asActiveSamples[j].m_nFrequency);
 							}
 							if (sample.m_nEmittingVolume != m_asActiveSamples[j].m_nEmittingVolume) {
-								vol = clamp2((int8)sample.m_nEmittingVolume, (int8)m_asActiveSamples[j].m_nEmittingVolume, 10);
+								vol = Clamp2((int8)sample.m_nEmittingVolume, (int8)m_asActiveSamples[j].m_nEmittingVolume, 10);
 
 								if (field_4) {
 									emittingVol = 2 * Min(63, vol);

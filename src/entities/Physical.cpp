@@ -553,7 +553,7 @@ CPhysical::ApplyGravity(void)
 			surfaceUp = point.normal;
 		else
 			surfaceUp = CVector(0.0f, 0.0f, 1.0f);
-		float t = clamp(CTimer::GetTimeStep() * 0.5f, 0.05f, 0.8f);
+		float t = Clamp(CTimer::GetTimeStep() * 0.5f, 0.05f, 0.8f);
 		gravityUp = gravityUp * (1.0f - t) + surfaceUp * t;
 		if (gravityUp.MagnitudeSqr() < 0.1f)
 			gravityUp = CVector(0.0f, 0.0f, 1.0f);
