@@ -50,6 +50,7 @@
 #include "Automobile.h"
 #include "Bike.h"
 #include "Wanted.h"
+#include "SaveBuf.h"
 
 bool bAllCarCheat;
 
@@ -5723,7 +5724,7 @@ void
 CAutomobile::Save(uint8*& buf)
 {
 	CVehicle::Save(buf);
-	WriteSaveBuf<CDamageManager>(buf, Damage);
+	WriteSaveBuf(buf, Damage);
 	SkipSaveBuf(buf, 1500 - 672 - sizeof(CDamageManager));
 }
 
@@ -5731,7 +5732,7 @@ void
 CAutomobile::Load(uint8*& buf)
 {
 	CVehicle::Load(buf);
-	Damage = ReadSaveBuf<CDamageManager>(buf);
+	ReadSaveBuf(&Damage, buf);
 	SkipSaveBuf(buf, 1500 - 672 - sizeof(CDamageManager));
 	SetupDamageAfterLoad();
 }

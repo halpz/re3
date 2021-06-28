@@ -16,6 +16,7 @@
 #include "SpecialFX.h"
 #include "World.h"
 #include "main.h"
+#include "SaveBuf.h"
 
 // LCS: file done except TODOs
 
