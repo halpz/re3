@@ -134,7 +134,7 @@ public:
 		else
 			StepIndex--;
 
-		StepIndex = clamp(StepIndex, 0, 88);
+		StepIndex = Clamp(StepIndex, 0, 88);
 
 		int delta = step >> 3;
 		if (adpcm & 1) delta += step >> 2;
@@ -143,7 +143,7 @@ public:
 		if (adpcm & 8) delta = -delta;
 
 		int newSample = Sample + delta;
-		Sample = clamp(newSample, -32768, 32767);
+		Sample = Clamp(newSample, -32768, 32767);
 		return Sample;
 	}
 };
@@ -596,7 +596,7 @@ public:
 	static short quantize(double sample)
 	{
 		int a = int(sample + 0.5);
-		return short(clamp(a, -32768, 32767));
+		return short(Clamp(a, -32768, 32767));
 	}
 
 	void Decode(void* _inbuf, int16* _outbuf, size_t size)
@@ -1086,10 +1086,10 @@ void CStream::SetVolume(uint32 nVol)
 
 void CStream::SetPan(uint8 nPan)
 {
-	m_nPan = clamp((int8)nPan - 63, 0, 63);
+	m_nPan = Clamp((int8)nPan - 63, 0, 63);
 	SetPosition(0, (m_nPan - 63) / 64.0f, 0.0f, Sqrt(1.0f - SQR((m_nPan - 63) / 64.0f)));
 
-	m_nPan = clamp((int8)nPan + 64, 64, 127);
+	m_nPan = Clamp((int8)nPan + 64, 64, 127);
 	SetPosition(1, (m_nPan - 63) / 64.0f, 0.0f, Sqrt(1.0f - SQR((m_nPan - 63) / 64.0f)));
 
 	m_nPan = nPan;

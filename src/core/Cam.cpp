@@ -3482,7 +3482,7 @@ FindSplinePathPositionFloat(float *out, float *spline, uint32 time, uint32 &mark
 		}
 	}
 	float a = ((float)time - (float)MS(spline[marker-4])) / (float)MS(spline[marker] - spline[marker-4]);
-	a = clamp(a, 0.0f, 1.0f);
+	a = Clamp(a, 0.0f, 1.0f);
 	float b = 1.0f - a;
 	*out =	b*b*b * spline[marker-3] +
 		3.0f*a*b*b * spline[marker-1] +
@@ -3520,7 +3520,7 @@ FindSplinePathPositionVector(CVector *out, float *spline, uint32 time, uint32 &m
 	}
 
 	float a = ((float)time - (float)MS(spline[marker-10])) / (float)MS(spline[marker] - spline[marker-10]);
-	a = clamp(a, 0.0f, 1.0f);
+	a = Clamp(a, 0.0f, 1.0f);
 	float b = 1.0f - a;
 	out->x =
 		b*b*b * spline[marker-9] +
@@ -4899,7 +4899,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 			// 0.98f: CAR_FOV_FADE_MULT
 			FOV = Pow(0.98f, CTimer::GetTimeStep()) * (FOV - DefaultFOV) + DefaultFOV;
 
-		FOV = clamp(FOV, DefaultFOV, DefaultFOV + 30.0f);
+		FOV = Clamp(FOV, DefaultFOV, DefaultFOV + 30.0f);
 	}
 
 	// WORKAROUND: I still don't know how looking behind works (m_bCamDirectlyInFront is unused in III, they seem to use m_bUseTransitionBeta)
@@ -5021,7 +5021,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 					}
 				}
 
-	float targetAlpha = Asin(clamp(Front.z, -1.0f, 1.0f)) - zoomModeAlphaOffset;
+	float targetAlpha = Asin(Clamp(Front.z, -1.0f, 1.0f)) - zoomModeAlphaOffset;
 	if (targetAlpha <= maxAlphaAllowed) {
 		if (targetAlpha < -CARCAM_SET[camSetArrPos][14])
 			targetAlpha = -CARCAM_SET[camSetArrPos][14];

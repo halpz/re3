@@ -481,7 +481,7 @@ CCoronas::RenderReflections(void)
 					if(spriteCoors.z < drawDist){
 						float fadeDistance = drawDist / 2.0f;
 						float distanceFade = spriteCoors.z < fadeDistance ? 1.0f : 1.0f - (spriteCoors.z - fadeDistance)/fadeDistance;
-						distanceFade = clamp(distanceFade, 0.0f, 1.0f);
+						distanceFade = Clamp(distanceFade, 0.0f, 1.0f);
 						float recipz = 1.0f/RwCameraGetNearClipPlane(Scene.camera);
 						float heightFade = (20.0f - aCoronas[i].heightAboveRoad)/20.0f;
 						int intensity = distanceFade*heightFade * 230.0 * CWeather::WetRoads;

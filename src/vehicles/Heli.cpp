@@ -250,7 +250,7 @@ CHeli::ProcessControl(void)
 		// Move up if too low
 		if(GetPosition().z - 2.0f < groundZ && m_heliStatus != HELI_STATUS_SHOT_DOWN)
 			m_vecMoveSpeed.z += CTimer::GetTimeStep()*0.01f;
-		m_vecMoveSpeed.z = clamp(m_vecMoveSpeed.z, -0.3f, 0.3f);
+		m_vecMoveSpeed.z = Clamp(m_vecMoveSpeed.z, -0.3f, 0.3f);
 	}
 
 	float fTargetDist = vTargetDist.Magnitude();

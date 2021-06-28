@@ -348,7 +348,7 @@ int8 cSampleManager::SetCurrent3DProvider(uint8 nProvider)
 {
 	int savedprovider = curprovider;
 
-	nProvider = clamp(nProvider, 0, m_nNumberOfProviders - 1);
+	nProvider = Clamp(nProvider, 0, m_nNumberOfProviders - 1);
 
 	if ( set_new_provider(nProvider) )
 		return curprovider;
@@ -1424,7 +1424,7 @@ bool8 cSampleManager::UpdateReverb(void)
 	#undef CALCRATIO
 	#undef ZR
 	
-	fRatio = clamp(fRatio, usingEAX3==1 ? 0.0f : 0.30f, 1.0f);
+	fRatio = Clamp(fRatio, usingEAX3==1 ? 0.0f : 0.30f, 1.0f);
 	
 	if ( fRatio == _fPrevEaxRatioDestination )
 		return FALSE;

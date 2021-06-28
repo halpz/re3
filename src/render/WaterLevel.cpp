@@ -126,10 +126,10 @@ CWaterLevel::Initialise(Const char *pWaterDat)
 #ifdef FIX_BUGS
 			// water.dat has rects that go out of bounds
 			// which causes memory corruption
-			l = clamp(l, 0, MAX_SMALL_SECTORS - 1);
-			r = clamp(r, 0, MAX_SMALL_SECTORS - 1);
-			t = clamp(t, 0, MAX_SMALL_SECTORS - 1);
-			b = clamp(b, 0, MAX_SMALL_SECTORS - 1);
+			l = Clamp(l, 0, MAX_SMALL_SECTORS - 1);
+			r = Clamp(r, 0, MAX_SMALL_SECTORS - 1);
+			t = Clamp(t, 0, MAX_SMALL_SECTORS - 1);
+			b = Clamp(b, 0, MAX_SMALL_SECTORS - 1);
 #endif
 
 			for (int32 x = l; x <= r; x++)
@@ -713,10 +713,10 @@ CWaterLevel::RenderWater()
 	if ( bUseCamEndY )                             
 		nEndY   = WATER_TO_HUGE_SECTOR_Y(camPos.y);
 
-	nStartX = clamp(nStartX, 0, MAX_HUGE_SECTORS - 1);
-	nEndX   = clamp(nEndX,   0, MAX_HUGE_SECTORS - 1);
-	nStartY = clamp(nStartY, 0, MAX_HUGE_SECTORS - 1);
-	nEndY   = clamp(nEndY,   0, MAX_HUGE_SECTORS - 1);
+	nStartX = Clamp(nStartX, 0, MAX_HUGE_SECTORS - 1);
+	nEndX   = Clamp(nEndX,   0, MAX_HUGE_SECTORS - 1);
+	nStartY = Clamp(nStartY, 0, MAX_HUGE_SECTORS - 1);
+	nEndY   = Clamp(nEndY,   0, MAX_HUGE_SECTORS - 1);
 	
 	for ( int32 x = nStartX; x <= nEndX; x++ )
 	{
@@ -1406,10 +1406,10 @@ CWaterLevel::CalcDistanceToWater(float fX, float fY)
 	int32 nStartY = WATER_TO_SMALL_SECTOR_Y(fY - fSectorMaxRenderDist) - 1;
 	int32 nEndY   = WATER_TO_SMALL_SECTOR_Y(fY + fSectorMaxRenderDist) + 1;
 	
-	nStartX = clamp(nStartX, 0, MAX_SMALL_SECTORS - 1);
-	nEndX   = clamp(nEndX,   0, MAX_SMALL_SECTORS - 1);
-	nStartY = clamp(nStartY, 0, MAX_SMALL_SECTORS - 1);
-	nEndY   = clamp(nEndY,   0, MAX_SMALL_SECTORS - 1);
+	nStartX = Clamp(nStartX, 0, MAX_SMALL_SECTORS - 1);
+	nEndX   = Clamp(nEndX,   0, MAX_SMALL_SECTORS - 1);
+	nStartY = Clamp(nStartY, 0, MAX_SMALL_SECTORS - 1);
+	nEndY   = Clamp(nEndY,   0, MAX_SMALL_SECTORS - 1);
 	
 	float fDistSqr = 1.0e10f;
 	
@@ -1433,7 +1433,7 @@ CWaterLevel::CalcDistanceToWater(float fX, float fY)
 		}
 	}
 
-	return clamp(Sqrt(fDistSqr) - 23.0f, 0.0f, fSectorMaxRenderDist);
+	return Clamp(Sqrt(fDistSqr) - 23.0f, 0.0f, fSectorMaxRenderDist);
 }
 
 void

@@ -290,7 +290,7 @@ extern int strcasecmp(const char *str1, const char *str2);
 
 extern wchar *AllocUnicode(const char*src);
 
-#define clamp(v, low, high) ((v)<(low) ? (low) : (v)>(high) ? (high) : (v))
+#define Clamp(v, low, high) ((v)<(low) ? (low) : (v)>(high) ? (high) : (v))
 
 inline float sq(float x) { return x*x; }
 #define SQR(x) ((x) * (x))

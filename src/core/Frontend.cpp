@@ -899,29 +899,29 @@ CMenuManager::CheckSliderMovement(int value)
 	switch (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action) {
 	case MENUACTION_BRIGHTNESS:
 		m_PrefsBrightness += value * (512/16);
-		m_PrefsBrightness = clamp(m_PrefsBrightness, 0, 511);
+		m_PrefsBrightness = Clamp(m_PrefsBrightness, 0, 511);
 		break;
 	case MENUACTION_DRAWDIST:
 		if(value > 0)
 			m_PrefsLOD += ((1.8f - 0.8f) / 16.0f);
 		else
 			m_PrefsLOD -= ((1.8f - 0.8f) / 16.0f);
-		m_PrefsLOD = clamp(m_PrefsLOD, 0.8f, 1.8f);
+		m_PrefsLOD = Clamp(m_PrefsLOD, 0.8f, 1.8f);
 		CRenderer::ms_lodDistScale = m_PrefsLOD;
 		break;
 	case MENUACTION_MUSICVOLUME:
 		m_PrefsMusicVolume += value * (128/16);
-		m_PrefsMusicVolume = clamp(m_PrefsMusicVolume, 0, 127);
+		m_PrefsMusicVolume = Clamp(m_PrefsMusicVolume, 0, 127);
 		DMAudio.SetMusicMasterVolume(m_PrefsMusicVolume);
 		break;
 	case MENUACTION_SFXVOLUME:
 		m_PrefsSfxVolume += value * (128/16);
-		m_PrefsSfxVolume = clamp(m_PrefsSfxVolume, 0, 127);
+		m_PrefsSfxVolume = Clamp(m_PrefsSfxVolume, 0, 127);
 		DMAudio.SetEffectsMasterVolume(m_PrefsSfxVolume);
 		break;
 	case MENUACTION_MOUSESENS:
 		TheCamera.m_fMouseAccelHorzntl += value * 1.0f/200.0f/15.0f;	// ???
-		TheCamera.m_fMouseAccelHorzntl = clamp(TheCamera.m_fMouseAccelHorzntl, 1.0f/3200.0f, 1.0f/200.0f);
+		TheCamera.m_fMouseAccelHorzntl = Clamp(TheCamera.m_fMouseAccelHorzntl, 1.0f/3200.0f, 1.0f/200.0f);
 #ifdef FIX_BUGS
 		TheCamera.m_fMouseAccelVertical = TheCamera.m_fMouseAccelHorzntl + 0.0005f;
 #else
@@ -4523,7 +4523,7 @@ CMenuManager::ProcessButtonPresses(void)
 				break;
 			case HOVEROPTION_INCREASE_MUSICVOLUME:
 				m_PrefsMusicVolume = m_PrefsMusicVolume + 8;
-				m_PrefsMusicVolume = clamp(m_PrefsMusicVolume, 0, 127);
+				m_PrefsMusicVolume = Clamp(m_PrefsMusicVolume, 0, 127);
 				DMAudio.SetMusicMasterVolume(uchar)(m_PrefsMusicVolume);
 				SaveSettings();
 				break;
@@ -4562,7 +4562,7 @@ CMenuManager::ProcessButtonPresses(void)
 				break;
 			case HOVEROPTION_INCREASE_MOUSESENS:
 				TheCamera.m_fMouseAccelHorzntl += (1.0f / 3000);
-				TheCamera.m_fMouseAccelHorzntl = clamp(TheCamera.m_fMouseAccelHorzntl, 1.0f / 3200, 1.0f / 200);
+				TheCamera.m_fMouseAccelHorzntl = Clamp(TheCamera.m_fMouseAccelHorzntl, 1.0f / 3200, 1.0f / 200);
 #ifdef FIX_BUGS
 				TheCamera.m_fMouseAccelVertical = TheCamera.m_fMouseAccelHorzntl + 0.0005f;
 #else
@@ -4572,7 +4572,7 @@ CMenuManager::ProcessButtonPresses(void)
 				break;
 			case HOVEROPTION_DECREASE_MOUSESENS:
 				TheCamera.m_fMouseAccelHorzntl -= (1.0f / 3000);
-				TheCamera.m_fMouseAccelHorzntl = clamp(TheCamera.m_fMouseAccelHorzntl, 1.0f / 3200, 1.0f / 200);
+				TheCamera.m_fMouseAccelHorzntl = Clamp(TheCamera.m_fMouseAccelHorzntl, 1.0f / 3200, 1.0f / 200);
 #ifdef FIX_BUGS
 				TheCamera.m_fMouseAccelVertical = TheCamera.m_fMouseAccelHorzntl + 0.0005f;
 #else
@@ -5388,14 +5388,14 @@ CMenuManager::ProcessButtonPresses(void)
 			case MENUACTION_AUDIOHW:
 				if (m_nPrefsAudio3DProviderIndex != -1) {
 					m_nPrefsAudio3DProviderIndex += changeValueBy;
-					m_nPrefsAudio3DProviderIndex = clamp(m_nPrefsAudio3DProviderIndex, 0, DMAudio.GetNum3DProvidersAvailable() - 1);
+					m_nPrefsAudio3DProviderIndex = Clamp(m_nPrefsAudio3DProviderIndex, 0, DMAudio.GetNum3DProvidersAvailable() - 1);
 				}
 				DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_NAVIGATION, 0);
 				break;
 			case MENUACTION_SPEAKERCONF:
 				if (m_nPrefsAudio3DProviderIndex != -1) {
 					m_PrefsSpeakers -= changeValueBy;
-					m_PrefsSpeakers = clamp(m_PrefsSpeakers, 0, 2);
+					m_PrefsSpeakers = Clamp(m_PrefsSpeakers, 0, 2);
 					DMAudio.SetSpeakerConfig(m_PrefsSpeakers);
 					SaveSettings();
 					DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_SETTING_CHANGE, 0);

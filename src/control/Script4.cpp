@@ -735,7 +735,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CPlayerPed* pPlayerPed = CWorld::Players[ScriptParams[0]].m_pPed;
 		script_assert(pPlayerPed);
-		pPlayerPed->m_fArmour = clamp(pPlayerPed->m_fArmour + ScriptParams[1], 0.0f, 100.0f);
+		pPlayerPed->m_fArmour = Clamp(pPlayerPed->m_fArmour + ScriptParams[1], 0.0f, 100.0f);
 		return 0;
 	}
 	case COMMAND_ADD_ARMOUR_TO_CHAR:
@@ -743,7 +743,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CPed* pPed = CPools::GetPedPool()->GetAt(ScriptParams[0]);
 		script_assert(pPed);
-		pPed->m_fArmour = clamp(pPed->m_fArmour + ScriptParams[1], 0.0f, 100.0f);
+		pPed->m_fArmour = Clamp(pPed->m_fArmour + ScriptParams[1], 0.0f, 100.0f);
 		return 0;
 	}
 	case COMMAND_OPEN_GARAGE:

@@ -56,7 +56,7 @@ public:
 
 	static float LimitRadianAngle(float angle)
 	{
-		float result = clamp(angle, -25.0f, 25.0f);
+		float result = Clamp(angle, -25.0f, 25.0f);
 
 		while (result >= PI) {
 			result -= 2 * PI;

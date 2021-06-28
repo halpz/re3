@@ -423,7 +423,7 @@ ScreenDroplets::ProcessCameraMovement(void)
 	ms_movingEnabled = !isTopDown && !isLookingInDirection;
 
 	// 0 when looking stright up, 180 when looking up or down
-	ms_camUpAngle = RADTODEG(Acos(clamp(camUp.z, -1.0f, 1.0f)));
+	ms_camUpAngle = RADTODEG(Acos(Clamp(camUp.z, -1.0f, 1.0f)));
 }
 
 void

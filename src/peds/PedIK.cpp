@@ -194,7 +194,7 @@ CPedIK::MoveLimb(LimbOrientation &limb, float targetYaw, float targetPitch, Limb
 	}
 
 	if (limb.yaw > moveInfo.maxYaw || limb.yaw < moveInfo.minYaw) {
-		limb.yaw = clamp(limb.yaw, moveInfo.minYaw, moveInfo.maxYaw);
+		limb.yaw = Clamp(limb.yaw, moveInfo.minYaw, moveInfo.maxYaw);
 		result = ANGLES_SET_TO_MAX;
 	}
 
@@ -212,7 +212,7 @@ CPedIK::MoveLimb(LimbOrientation &limb, float targetYaw, float targetPitch, Limb
 		result = ONE_ANGLE_COULDNT_BE_SET_EXACTLY;
 
 	if (limb.pitch > moveInfo.maxPitch || limb.pitch < moveInfo.minPitch) {
-		limb.pitch = clamp(limb.pitch, moveInfo.minPitch, moveInfo.maxPitch);
+		limb.pitch = Clamp(limb.pitch, moveInfo.minPitch, moveInfo.maxPitch);
 		result = ANGLES_SET_TO_MAX;
 	}
 	return result;
@@ -527,11 +527,11 @@ CPedIK::RestoreLookAt(void)
 void
 CPedIK::ExtractYawAndPitchWorld(RwMatrix *mat, float *yaw, float *pitch)
 {
-	float f = clamp(DotProduct(mat->up, CVector(0.0f, 1.0f, 0.0f)), -1.0f, 1.0f);
+	float f = Clamp(DotProduct(mat->up, CVector(0.0f, 1.0f, 0.0f)), -1.0f, 1.0f);
 	*yaw = Acos(f);
 	if (mat->up.x > 0.0f) *yaw = -*yaw;
 
-	f = clamp(DotProduct(mat->right, CVector(0.0f, 0.0f, 1.0f)), -1.0f, 1.0f);
+	f = Clamp(DotProduct(mat->right, CVector(0.0f, 0.0f, 1.0f)), -1.0f, 1.0f);
 	*pitch = Acos(f);
 	if (mat->up.z > 0.0f) *pitch = -*pitch;
 }
@@ -539,11 +539,11 @@ CPedIK::ExtractYawAndPitchWorld(RwMatrix *mat, float *yaw, float *pitch)
 void
 CPedIK::ExtractYawAndPitchLocal(RwMatrix *mat, float *yaw, float *pitch)
 {
-	float f = clamp(DotProduct(mat->at, CVector(0.0f, 0.0f, 1.0f)), -1.0f, 1.0f);
+	float f = Clamp(DotProduct(mat->at, CVector(0.0f, 0.0f, 1.0f)), -1.0f, 1.0f);
 	*yaw = Acos(f);
 	if (mat->at.y > 0.0f) *yaw = -*yaw;
 
-	f = clamp(DotProduct(mat->right, CVector(1.0f, 0.0f, 0.0f)), -1.0f, 1.0f);
+	f = Clamp(DotProduct(mat->right, CVector(1.0f, 0.0f, 0.0f)), -1.0f, 1.0f);
 	*pitch = Acos(f);
 	if (mat->up.x > 0.0f) *pitch = -*pitch;
 }

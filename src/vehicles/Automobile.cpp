@@ -1665,7 +1665,7 @@ CAutomobile::PreRender(void)
 		// 1.0 if directly behind car, -1.0 if in front
 		// BUG on PC: Abs of DotProduct is taken
 		float behindness = DotProduct(lookVector, GetForward());
-		behindness = clamp(behindness, -1.0f, 1.0f);	// shouldn't be necessary
+		behindness = Clamp(behindness, -1.0f, 1.0f);	// shouldn't be necessary
 		// 0.0 if behind car, PI if in front
 		// Abs not necessary
 		float angle = Abs(Acos(behindness));
@@ -2264,7 +2264,7 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 			0.2f*CTimer::GetTimeStep();
 		nLastControlInput = 0;
 	}
-	m_fSteerInput = clamp(m_fSteerInput, -1.0f, 1.0f);
+	m_fSteerInput = Clamp(m_fSteerInput, -1.0f, 1.0f);
 
 	// Accelerate/Brake
 	float acceleration = (CPad::GetPad(pad)->GetAccelerate() - CPad::GetPad(pad)->GetBrake())/255.0f;
@@ -2390,7 +2390,7 @@ CAutomobile::FireTruckControl(void)
 			m_fCarGunLR += CPad::GetPad(0)->GetCarGunLeftRight() * 0.00025f * CTimer::GetTimeStep();
 			m_fCarGunUD += CPad::GetPad(0)->GetCarGunUpDown() * 0.0001f * CTimer::GetTimeStep();
 		}
-		m_fCarGunUD = clamp(m_fCarGunUD, 0.05f, 0.3f);
+		m_fCarGunUD = Clamp(m_fCarGunUD, 0.05f, 0.3f);
 
 
 		CVector cannonPos(0.0f, 1.5f, 1.9f);
@@ -2835,7 +2835,7 @@ CAutomobile::HydraulicControl(void)
 		float limitDiff = extendedLowerLimit - normalLowerLimit;
 		if(limitDiff != 0.0f && Abs(maxDelta/limitDiff) > 0.01f){
 			float f = (maxDelta + limitDiff)/2.0f/limitDiff;
-			f = clamp(f, 0.0f, 1.0f);
+			f = Clamp(f, 0.0f, 1.0f);
 			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_3, f);
 			if(f < 0.4f || f > 0.6f)
 				setPrevRatio = true;

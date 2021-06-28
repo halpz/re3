@@ -123,9 +123,9 @@ CBoat::ProcessControl(void)
 	r = 114.75f*(CTimeCycle::GetAmbientRed() + 0.5f*CTimeCycle::GetDirectionalRed());
 	g = 114.75f*(CTimeCycle::GetAmbientGreen() + 0.5f*CTimeCycle::GetDirectionalGreen());
 	b = 114.75f*(CTimeCycle::GetAmbientBlue() + 0.5f*CTimeCycle::GetDirectionalBlue());
-	r = clamp(r, 0, 255);
-	g = clamp(g, 0, 255);
-	b = clamp(b, 0, 255);
+	r = Clamp(r, 0, 255);
+	g = Clamp(g, 0, 255);
+	b = Clamp(b, 0, 255);
 	splashColor.red = r;
 	splashColor.green = g;
 	splashColor.blue = b;
@@ -134,9 +134,9 @@ CBoat::ProcessControl(void)
 	r = 242.25f*(CTimeCycle::GetAmbientRed() + 0.5f*CTimeCycle::GetDirectionalRed());
 	g = 242.25f*(CTimeCycle::GetAmbientGreen() + 0.5f*CTimeCycle::GetDirectionalGreen());
 	b = 242.25f*(CTimeCycle::GetAmbientBlue() + 0.5f*CTimeCycle::GetDirectionalBlue());
-	r = clamp(r, 0, 255);
-	g = clamp(g, 0, 255);
-	b = clamp(b, 0, 255);
+	r = Clamp(r, 0, 255);
+	g = Clamp(g, 0, 255);
+	b = Clamp(b, 0, 255);
 	jetColor.red = r;
 	jetColor.green = g;
 	jetColor.blue = b;
@@ -542,17 +542,17 @@ CBoat::ProcessControlInputs(uint8 pad)
 		m_nPadID = 3;
 
 	m_fBrake += (CPad::GetPad(pad)->GetBrake()/255.0f - m_fBrake)*0.1f;
-	m_fBrake = clamp(m_fBrake, 0.0f, 1.0f);
+	m_fBrake = Clamp(m_fBrake, 0.0f, 1.0f);
 
 	if(m_fBrake < 0.05f){
 		m_fBrake = 0.0f;
 		m_fAccelerate += (CPad::GetPad(pad)->GetAccelerate()/255.0f - m_fAccelerate)*0.1f;
-		m_fAccelerate = clamp(m_fAccelerate, 0.0f, 1.0f);
+		m_fAccelerate = Clamp(m_fAccelerate, 0.0f, 1.0f);
 	}else
 		m_fAccelerate = -m_fBrake*0.2f;
 
 	m_fSteeringLeftRight += (-CPad::GetPad(pad)->GetSteeringLeftRight()/128.0f - m_fSteeringLeftRight)*0.2f;
-	m_fSteeringLeftRight = clamp(m_fSteeringLeftRight, -1.0f, 1.0f);
+	m_fSteeringLeftRight = Clamp(m_fSteeringLeftRight, -1.0f, 1.0f);
 
 	float steeringSq = m_fSteeringLeftRight < 0.0f ? -SQR(m_fSteeringLeftRight) : SQR(m_fSteeringLeftRight);
 	m_fSteerAngle = pHandling->fSteeringLock * DEGTORAD(steeringSq);

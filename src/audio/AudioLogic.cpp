@@ -1220,7 +1220,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CAutomobile *
 		CurrentPretendGear = 1;
 	}
 	if (CReplay::IsPlayingBack())
-		accelerateState = 255.f * clamp(automobile->m_fGasPedal, 0.0f, 1.0f);
+		accelerateState = 255.f * Clamp(automobile->m_fGasPedal, 0.0f, 1.0f);
 	else
 		accelerateState = Pads[0].GetAccelerate();
 
@@ -1229,7 +1229,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CAutomobile *
 	velocityChange = params.m_fVelocityChange;
 	relativeVelocityChange = 2.0f * velocityChange / transmission->fMaxVelocity;
 
-	accelerationMultipler = clamp(relativeVelocityChange, 0.0f, 1.0f);
+	accelerationMultipler = Clamp(relativeVelocityChange, 0.0f, 1.0f);
 	gasPedalAudio = accelerationMultipler;
 	currentGear = params.m_pVehicle->m_nCurrentGear;
 

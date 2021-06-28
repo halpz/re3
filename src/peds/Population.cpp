@@ -484,7 +484,7 @@ CPopulation::PedCreationDistMultiplier()
 		return 1.0f;
 
 	float vehSpeed = veh->m_vecMoveSpeed.Magnitude2D();
-	return clamp(vehSpeed - 0.1f + 1.0f, 1.0f, 1.5f);
+	return Clamp(vehSpeed - 0.1f + 1.0f, 1.0f, 1.5f);
 }
 
 CPed*

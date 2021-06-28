@@ -1624,7 +1624,7 @@ cSampleManager::UpdateReverb(void)
 		}
 	}
 	
-	fRatio = clamp(fRatio, usingEAX3==1 ? 0.0f : 0.30f, 1.0f);
+	fRatio = Clamp(fRatio, usingEAX3==1 ? 0.0f : 0.30f, 1.0f);
 	
 	if ( fRatio == _fPrevEaxRatioDestination )
 		return FALSE;

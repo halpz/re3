@@ -1463,7 +1463,7 @@ CFileLoader::Load2dEffect(const char *line)
 			&probability);
 		effect->attractor.type = flags;
 #ifdef FIX_BUGS
-		effect->attractor.probability = clamp(probability, 0, 255);
+		effect->attractor.probability = Clamp(probability, 0, 255);
 #else
 		effect->attractor.probability = probability;
 #endif

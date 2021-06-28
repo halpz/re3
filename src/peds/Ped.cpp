@@ -2928,7 +2928,7 @@ CPed::ProcessControl(void)
 								lDriveAssoc->blendAmount = 0.0f;
 
 							if (rDriveAssoc)
-								rDriveAssoc->blendAmount = clamp(steerAngle * -100.0f / 61.0f, 0.0f, 1.0f);
+								rDriveAssoc->blendAmount = Clamp(steerAngle * -100.0f / 61.0f, 0.0f, 1.0f);
 							else if (m_pMyVehicle->bLowVehicle)
 								CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_CAR_DRIVE_RIGHT_LO);
 							else
@@ -2939,7 +2939,7 @@ CPed::ProcessControl(void)
 								rDriveAssoc->blendAmount = 0.0f;
 
 							if (lDriveAssoc)
-								lDriveAssoc->blendAmount = clamp(steerAngle * 100.0f / 61.0f, 0.0f, 1.0f);
+								lDriveAssoc->blendAmount = Clamp(steerAngle * 100.0f / 61.0f, 0.0f, 1.0f);
 							else if (m_pMyVehicle->bLowVehicle)
 								CAnimManager::AddAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_CAR_DRIVE_LEFT_LO);
 							else

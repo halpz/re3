@@ -396,9 +396,9 @@ CCullZones::AddCullZone(CVector const &position,
 			v = CVector(1061.7f, -613.0f, 19.0f);
 		if((v-CVector(1029.48f, -495.757f, 21.98f)).Magnitude() < 1.0f)
 			v = CVector(1061.4f, -506.0f, 18.5f);
-		cull->position.x = clamp(v.x, minx, maxx);
-		cull->position.y = clamp(v.y, miny, maxy);
-		cull->position.z = clamp(v.z, minz, maxz);
+		cull->position.x = Clamp(v.x, minx, maxx);
+		cull->position.y = Clamp(v.y, miny, maxy);
+		cull->position.z = Clamp(v.z, minz, maxz);
 		cull->minx = minx;
 		cull->maxx = maxx;
 		cull->miny = miny;
@@ -958,11 +958,11 @@ CCullZone::FindTestPoints()
 
 	// indices of center
 	int x = ElementsX * (position.x-minx)/(maxx-minx);
-	x = clamp(x, 0, ElementsX-1);
+	x = Clamp(x, 0, ElementsX-1);
 	int y = ElementsY * (position.y-miny)/(maxy-miny);
-	y = clamp(y, 0, ElementsY-1);
+	y = Clamp(y, 0, ElementsY-1);
 	int z = ElementsZ * (position.z-minz)/(maxz-minz);
-	z = clamp(z, 0, ElementsZ-1);
+	z = Clamp(z, 0, ElementsZ-1);
 
 	// Mark which test points inside the zone are not occupied by buildings.
 	// To do this, mark the start point as free and do a food fill.
