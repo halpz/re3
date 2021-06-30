@@ -25,7 +25,11 @@ C_PcSave::SetSaveDirectory(const char *path)
 bool
 C_PcSave::DeleteSlot(int32 slot)
 {
+#ifdef FIX_BUGS
+	char FileName[MAX_PATH];
+#else
 	char FileName[200];
+#endif
 
 	PcSaveHelper.nErrorCode = SAVESTATUS_SUCCESSFUL;
 	sprintf(FileName, "%s%i.b", DefaultPCSaveFileName, slot + 1);

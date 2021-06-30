@@ -998,8 +998,8 @@ cAudioManager::ProcessModelVehicle(cVehicleParams& params)
 			freq = 25000;
 		}
 		if (isPlayerVeh) {
-			volume = clamp2(volume, prevVolume, 7);
-			freq = clamp2(freq, prevFreq, 800);
+			volume = Clamp2(volume, prevVolume, 7);
+			freq = Clamp2(freq, prevFreq, 800);
 		}
 		if (volume > 0) {
 			CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
@@ -1047,8 +1047,8 @@ cAudioManager::ProcessModelVehicle(cVehicleParams& params)
 			freq = Min(22000, (8000 * acceletateState / 255 + 14000) * 3.0f * Abs(params.m_fVelocityChange));
 		}
 		if (isPlayerVeh && !vehSlowdown) {
-			volume = clamp2(volume, prevVolume, 7);
-			freq = clamp2(freq, prevFreq, 800);
+			volume = Clamp2(volume, prevVolume, 7);
+			freq = Clamp2(freq, prevFreq, 800);
 		}
 		if (!vehSlowdown)
 #ifdef THIS_IS_STUPID
@@ -1127,7 +1127,7 @@ cAudioManager::ProcessModelHeliVehicle(cVehicleParams& params)
 	}
 	if (acceletateState < brakeState)
 		acceletateState = brakeState;
-	freq = clamp2(5 * acceletateState + 22050, prevFreq, 30);
+	freq = Clamp2(5 * acceletateState + 22050, prevFreq, 30);
 	CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
 	m_sQueueSample.m_nVolume = ComputeVolume(70, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
 	if (m_sQueueSample.m_nVolume != 0) {
@@ -1667,8 +1667,8 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 		bHandbrakeOnLastFrame = FALSE;
 	}
 	if (CReplay::IsPlayingBack()) {
-		accelerateState = (255.0f * clamp(params.m_pVehicle->m_fGasPedal, 0.0f, 1.0f));
-		brakeState = (255.0f * clamp(params.m_pVehicle->m_fBrakePedal, 0.0f, 1.0f));
+		accelerateState = (255.0f * Clamp(params.m_pVehicle->m_fGasPedal, 0.0f, 1.0f));
+		brakeState = (255.0f * Clamp(params.m_pVehicle->m_fBrakePedal, 0.0f, 1.0f));
 	} else {
 		accelerateState = Pads[0].GetAccelerate();
 		brakeState = Pads[0].GetBrake();
@@ -1820,7 +1820,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 		}
 	}
 	relativeVelocityChange = 2.0f * params.m_fVelocityChange / params.m_pTransmission->fMaxVelocity;
-	accelerationMultipler = clamp(relativeVelocityChange, 0.0f, 1.0f);
+	accelerationMultipler = Clamp(relativeVelocityChange, 0.0f, 1.0f);
 	gasPedalAudio = accelerationMultipler;
 	/*switch (engineSoundType) {
 	case SFX_BANK_MOPED:
@@ -3595,7 +3595,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 				m_sQueueSample.m_nFrequency = 14287 + Min(1.0f, freqModifier) * 3713;
 			if (propellerSpeed < 1.0f)
 				m_sQueueSample.m_nFrequency = (propellerSpeed + 1.0f) * (m_sQueueSample.m_nFrequency / 2.0f);
-			m_sQueueSample.m_nFrequency = clamp2(m_sQueueSample.m_nFrequency, freqFrontPrev, 197);
+			m_sQueueSample.m_nFrequency = Clamp2(m_sQueueSample.m_nFrequency, freqFrontPrev, 197);
 			freqFrontPrev = m_sQueueSample.m_nFrequency;
 
 			m_sQueueSample.m_bIs2D = FALSE;
@@ -3651,7 +3651,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 			if (propellerSpeed < 1.0f)
 				m_sQueueSample.m_nFrequency = (propellerSpeed + 1) * (m_sQueueSample.m_nFrequency / 2);
 
-			m_sQueueSample.m_nFrequency = clamp2(m_sQueueSample.m_nFrequency, freqPropellerPrev, 98);
+			m_sQueueSample.m_nFrequency = Clamp2(m_sQueueSample.m_nFrequency, freqPropellerPrev, 98);
 			freqPropellerPrev = m_sQueueSample.m_nFrequency;
 		} else {
 			m_sQueueSample.m_nSampleIndex = SFX_CAR_HELI_MAI2;
@@ -3720,7 +3720,7 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 					m_sQueueSample.m_nFrequency = 14287 + Min(1.0f, freqModifier) * 3713;
 				if (propellerSpeed < 1.0f)
 					m_sQueueSample.m_nFrequency = (propellerSpeed + 1) * (m_sQueueSample.m_nFrequency / 2.0f);
-				m_sQueueSample.m_nFrequency = clamp2(m_sQueueSample.m_nFrequency, freqSkimmerPrev, 197);
+				m_sQueueSample.m_nFrequency = Clamp2(m_sQueueSample.m_nFrequency, freqSkimmerPrev, 197);
 				freqSkimmerPrev = m_sQueueSample.m_nFrequency;
 
 				m_sQueueSample.m_nSampleIndex = SFX_SEAPLANE_PRO4;
@@ -11483,8 +11483,10 @@ cAudioManager::ProcessMissionAudioSlot(uint8 slot)
 				if (!m_nUserPause) {
 					if (nCheckPlayingDelay[slot]) {
 						--nCheckPlayingDelay[slot];
-					} else if (GetMissionScriptPoliceAudioPlayingStatus() == PLAY_STATUS_FINISHED || m_sMissionAudio.m_nMissionAudioCounter[slot]-- == 0) {
+					} else if ((g_bMissionAudioLoadFailed[slot] && m_sMissionAudio.m_nMissionAudioCounter[slot]-- == 0) || GetMissionScriptPoliceAudioPlayingStatus() == PLAY_STATUS_FINISHED) {
 						m_sMissionAudio.m_nPlayStatus[slot] = PLAY_STATUS_FINISHED;
+						//if (m_sMissionAudio.m_nSampleIndex[slot] >= STREAMED_SOUND_MISSION_MOB_01A && m_sMissionAudio.m_nSampleIndex[slot] <= STREAMED_SOUND_MISSION_MOB_99A)
+						//	m_sMissionAudio.m_bIsMobile[slot] = FALSE;
 						m_sMissionAudio.m_nSampleIndex[slot] = NO_SAMPLE;
 						//SampleManager.StopStreamedFile(slot + 1);
 						SampleManager.StopChannel(slot + CHANNEL_MISSION_AUDIO_1);

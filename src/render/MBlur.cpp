@@ -283,10 +283,10 @@ CMBlur::CreateImmediateModeData(RwCamera *cam, RwRect *rect, RwIm2DVertex *verts
 		v1 = y1/height + v1Off;
 		u2 = x2/width + u2Off;
 		v2 = y2/height + v2Off;
-		u1 = clamp(u1, 0.0f, 1.0f);
-		v1 = clamp(v1, 0.0f, 1.0f);
-		u2 = clamp(u2, 0.0f, 1.0f);
-		v2 = clamp(v2, 0.0f, 1.0f);
+		u1 = Clamp(u1, 0.0f, 1.0f);
+		v1 = Clamp(v1, 0.0f, 1.0f);
+		u2 = Clamp(u2, 0.0f, 1.0f);
+		v2 = Clamp(v2, 0.0f, 1.0f);
 	}
 
 	float recipz = 1.0f/z;
@@ -517,7 +517,7 @@ CMBlur::OverlayRender(RwCamera *cam, RwRaster *raster, RwRGBA color, int32 type,
 void
 CMBlur::SetDrunkBlur(float drunkness)
 {
-	Drunkness = clamp(drunkness, 0.0f, 1.0f);
+	Drunkness = Clamp(drunkness, 0.0f, 1.0f);
 }
 
 void
@@ -600,9 +600,9 @@ CMBlur::OverlayRenderFx(RwCamera *cam, RwRaster *frontBuf)
 	int red = (0.75f*CTimeCycle::GetDirectionalRed() + CTimeCycle::GetAmbientRed())*0.55f * 255;
 	int green = (0.75f*CTimeCycle::GetDirectionalGreen() + CTimeCycle::GetAmbientGreen())*0.55f * 255;
 	int blue = (0.75f*CTimeCycle::GetDirectionalBlue() + CTimeCycle::GetAmbientBlue())*0.55f * 255;
-	red = clamp(red, 0, 255);
-	green = clamp(green, 0, 255);
-	blue = clamp(blue, 0, 255);
+	red = Clamp(red, 0, 255);
+	green = Clamp(green, 0, 255);
+	blue = Clamp(blue, 0, 255);
 
 	RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
 	RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
@@ -697,7 +697,7 @@ CMBlur::OverlayRenderFx(RwCamera *cam, RwRaster *frontBuf)
 				int alpha = FrontEndMenuManager.m_PrefsBrightness > 255 ?
 					FrontEndMenuManager.m_PrefsBrightness - 90 :
 					FrontEndMenuManager.m_PrefsBrightness - 130;
-				alpha = clamp(alpha, 16, 200)/2;
+				alpha = Clamp(alpha, 16, 200)/2;
 
 				CreateImmediateModeData(cam, &fxRect[i], verts, CRGBA(0, 0, 0, alpha), 0.0f, 0.0f, 0.0f, 0.0f, fxZ[i], true);
 				RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpHeatHazeRaster);

@@ -252,7 +252,7 @@ CWeapon::Fire(CEntity *shooter, CVector *fireSource)
 				else if ( shooter->IsPed() && ((CPed*)shooter)->m_pSeekTarget != nil )
 				{
 					float distToTarget = (shooter->GetPosition() - ((CPed*)shooter)->m_pSeekTarget->GetPosition()).Magnitude();
-					float power = clamp((distToTarget-10.0f)*0.02f, 0.2f, 1.0f);
+					float power = Clamp((distToTarget-10.0f)*0.02f, 0.2f, 1.0f);
 
 					fired = FireProjectile(shooter, source, power);
 				}

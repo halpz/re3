@@ -1407,7 +1407,7 @@ CHud::DrawHealthBar(int16 value)
 	}
 	float fHealth = value;
 	float fMaxHealth = CWorld::Players[CWorld::PlayerInFocus].m_nMaxHealth;
-	fHealth = clamp(fHealth, 0.0f, fMaxHealth);
+	fHealth = Clamp(fHealth, 0.0f, fMaxHealth);
 	float fWidth = (fHealth / fMaxHealth) * 40.0f + 16.0f + 4.0f;
 	float u = fWidth / 64.0f;
 	if (value == 0) {
@@ -1477,7 +1477,7 @@ CHud::DrawArmourBar(int16 value)
 	}
 	float fArmour = value;
 	float fMaxArmour = CWorld::Players[CWorld::PlayerInFocus].m_nMaxArmour;
-	fArmour = clamp(fArmour, 0.0f, fMaxArmour);
+	fArmour = Clamp(fArmour, 0.0f, fMaxArmour);
 	float fWidth = (fArmour / fMaxArmour) * 40.0f + 16.0f + 4.0f;
 	float u = fWidth / 64.0f;
 	if (value == 0) {
@@ -2252,7 +2252,7 @@ float CHud::DrawFadeState(DRAW_FADE_STATE fadingElement, int forceFadingIn)
 			break;
 	}
 
-	return clamp(alpha, 0.0f, 255.0f);
+	return Clamp(alpha, 0.0f, 255.0f);
 }
 
 void

@@ -933,7 +933,7 @@ CAutomobile::ProcessControl(void)
 			float adhesion = CSurfaceTable::GetAdhesiveLimit(point);
 			// i have no idea what's going on here
 			float magic = traction * adhesion * 16.0f / SQR(fwdSpeed);
-			magic = clamp(magic, -1.0f, 1.0f);
+			magic = Clamp(magic, -1.0f, 1.0f);
 			magic = Asin(magic);
 			if(m_fSteerAngle < 0.0f && rightSpeed > 0.05f ||
 			   m_fSteerAngle > 0.0f && rightSpeed < -0.05f ||
@@ -2081,7 +2081,7 @@ CAutomobile::PreRender(void)
 
 		// 1.0 if directly behind car, -1.0 if in front
 		float behindness = DotProduct(lookVector, GetForward());
-		behindness = clamp(behindness, -1.0f, 1.0f);	// shouldn't be necessary
+		behindness = Clamp(behindness, -1.0f, 1.0f);	// shouldn't be necessary
 		// 0.0 if behind car, PI if in front
 		// Abs not necessary
 		float angle = Abs(Acos(behindness));
@@ -2439,7 +2439,7 @@ CAutomobile::PreRender(void)
 			float groundOffset = pos.z + m_fHeightAboveRoad - 0.5f*mi->m_wheelScale;
 			if(GetModelIndex() == MI_VOODOO)
 				groundOffset *= 0.6f;
-			mat.RotateY(Asin(clamp(-groundOffset, -1.0f, 1.0f)));
+			mat.RotateY(Asin(Clamp(-groundOffset, -1.0f, 1.0f)));
 		}
 	}
 	if(pHandling->Flags & HANDLING_FAT_REARW)
@@ -2480,7 +2480,7 @@ CAutomobile::PreRender(void)
 			float groundOffset = pos.z + m_fHeightAboveRoad - 0.5f*mi->m_wheelScale;
 			if(GetModelIndex() == MI_VOODOO)
 				groundOffset *= 0.6f;
-			mat.RotateY(Asin(clamp(groundOffset, -1.0f, 1.0f)));
+			mat.RotateY(Asin(Clamp(groundOffset, -1.0f, 1.0f)));
 		}
 	}
 	if(pHandling->Flags & HANDLING_FAT_REARW)
@@ -2513,7 +2513,7 @@ CAutomobile::PreRender(void)
 				float groundOffset = pos.z + m_fHeightAboveRoad - 0.5f*mi->m_wheelScale;
 				if(GetModelIndex() == MI_VOODOO)
 					groundOffset *= 0.6f;
-				mat.RotateY(Asin(clamp(-groundOffset, -1.0f, 1.0f)));
+				mat.RotateY(Asin(Clamp(-groundOffset, -1.0f, 1.0f)));
 			}
 		}
 		if(pHandling->Flags & HANDLING_FAT_REARW)
@@ -2547,7 +2547,7 @@ CAutomobile::PreRender(void)
 				float groundOffset = pos.z + m_fHeightAboveRoad - 0.5f*mi->m_wheelScale;
 				if(GetModelIndex() == MI_VOODOO)
 					groundOffset *= 0.6f;
-				mat.RotateY(Asin(clamp(groundOffset, -1.0f, 1.0f)));
+				mat.RotateY(Asin(Clamp(groundOffset, -1.0f, 1.0f)));
 			}
 		}
 		if(pHandling->Flags & HANDLING_FAT_REARW)
@@ -2681,7 +2681,7 @@ CAutomobile::PreRender(void)
 				float groundOffset = pos.z + m_fHeightAboveRoad - 0.5f*mi->m_wheelScale;
 				if(GetModelIndex() == MI_VOODOO)
 					groundOffset *= 0.6f;
-				mat.RotateY(Asin(clamp(-groundOffset, -1.0f, 1.0f)));
+				mat.RotateY(Asin(Clamp(-groundOffset, -1.0f, 1.0f)));
 			}
 		}
 		if(pHandling->Flags & HANDLING_NARROW_FRONTW)
@@ -2722,7 +2722,7 @@ CAutomobile::PreRender(void)
 				float groundOffset = pos.z + m_fHeightAboveRoad - 0.5f*mi->m_wheelScale;
 				if(GetModelIndex() == MI_VOODOO)
 					groundOffset *= 0.6f;
-				mat.RotateY(Asin(clamp(groundOffset, -1.0f, 1.0f)));
+				mat.RotateY(Asin(Clamp(groundOffset, -1.0f, 1.0f)));
 			}
 		}
 		if(pHandling->Flags & HANDLING_NARROW_FRONTW)
@@ -2948,7 +2948,7 @@ CAutomobile::ProcessControlInputs(uint8 pad)
 			0.2f*CTimer::GetTimeStep();
 		nLastControlInput = 0;
 	}
-	m_fSteerInput = clamp(m_fSteerInput, -1.0f, 1.0f);
+	m_fSteerInput = Clamp(m_fSteerInput, -1.0f, 1.0f);
 
 	// Accelerate/Brake
 	float acceleration = (CPad::GetPad(pad)->GetAccelerate() - CPad::GetPad(pad)->GetBrake())/255.0f;
@@ -3068,7 +3068,7 @@ CAutomobile::FireTruckControl(void)
 			m_fCarGunLR += CPad::GetPad(0)->GetCarGunLeftRight() * 0.00025f * CTimer::GetTimeStep();
 			m_fCarGunUD += CPad::GetPad(0)->GetCarGunUpDown() * 0.0001f * CTimer::GetTimeStep();
 		}
-		m_fCarGunUD = clamp(m_fCarGunUD, 0.05f, 0.3f);
+		m_fCarGunUD = Clamp(m_fCarGunUD, 0.05f, 0.3f);
 
 
 		CVector cannonPos(0.0f, 1.5f, 1.9f);
@@ -3493,7 +3493,7 @@ CAutomobile::HydraulicControl(void)
 		float limitDiff = extendedLowerLimit - normalLowerLimit;
 		if(limitDiff != 0.0f && Abs(maxDelta/limitDiff) > 0.01f){
 			float f = (maxDelta + limitDiff)/2.0f/limitDiff;
-			f = clamp(f, 0.0f, 1.0f);
+			f = Clamp(f, 0.0f, 1.0f);
 			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_HYDRAULIC_3, f);
 			if(f < 0.4f || f > 0.6f)
 				setPrevRatio = true;

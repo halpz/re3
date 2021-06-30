@@ -111,5 +111,5 @@ WriteSaveBuf(uint8 *&buf, uint32 &length, const T &value)
 	} while(0)
 #else
 #define CheckSaveHeader(buf, a, b, c, d, size) SkipSaveBuf(buf, 8);
-#define CheckSaveHeaderWithLength(buf, a, b, c, d, size) SkipSaveBuf(buf, 8);
+#define CheckSaveHeaderWithLength(buf, len, a, b, c, d, size) SkipSaveBuf(buf, 8);
 #endif

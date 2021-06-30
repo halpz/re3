@@ -1156,7 +1156,7 @@ void CScriptPath::Update(void) {
 		return;
 
 	m_fPosition += m_fSpeed * CTimer::GetTimeStepInSeconds();
-	m_fPosition = clamp(m_fPosition, 0.0f, m_fTotalLength);
+	m_fPosition = Clamp(m_fPosition, 0.0f, m_fTotalLength);
 
 	if (m_pObjects[0] || m_pObjects[1] || m_pObjects[2] || m_pObjects[3]
 		|| m_pObjects[4] || m_pObjects[5]) {

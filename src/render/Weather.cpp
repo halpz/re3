@@ -286,7 +286,7 @@ void CWeather::Update(void)
 
 	if (SunGlare > 0.0f) {
 		SunGlare *= Min(1.0f, 7.0 * CTimeCycle::GetSunDirection().z);
-		SunGlare = clamp(SunGlare, 0.0f, 1.0f);
+		SunGlare = Clamp(SunGlare, 0.0f, 1.0f);
 		if (!CSpecialFX::bSnapShotActive)
 			SunGlare *= (1.0f - (CGeneral::GetRandomNumber()&0x1F)*0.007f);
 	}

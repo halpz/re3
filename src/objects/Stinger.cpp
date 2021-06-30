@@ -220,7 +220,7 @@ CStinger::Process()
 			float degangle = progress * ARRAY_SIZE(m_vPositions);
 			float angle1 = m_fMax_Z + DEGTORAD(degangle);
 			float angle2 = m_fMax_Z - DEGTORAD(degangle);
-			int pos = clamp(degangle, 0, ARRAY_SIZE(m_vPositions)-1);
+			int pos = Clamp(degangle, 0, ARRAY_SIZE(m_vPositions)-1);
 
 			CVector2D pos2d = m_vPositions[pos];
 			CVector pos3d = m_vPos;

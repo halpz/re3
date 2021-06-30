@@ -480,11 +480,11 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		ApplyMoveForce(GRAVITY * GetUp() * fThrust * m_fMass * CTimer::GetTimeStep());
 
 		if (GetUp().z > 0.0f){
-			float upRight = clamp(GetRight().z, -flyingHandling->fFormLift, flyingHandling->fFormLift);
+			float upRight = Clamp(GetRight().z, -flyingHandling->fFormLift, flyingHandling->fFormLift);
 			float upImpulseRight = -upRight * flyingHandling->fAttackLift * m_fTurnMass * CTimer::GetTimeStep();
 			ApplyTurnForce(upImpulseRight * GetUp(), GetRight());
 
-			float upFwd = clamp(GetForward().z, -flyingHandling->fFormLift, flyingHandling->fFormLift);
+			float upFwd = Clamp(GetForward().z, -flyingHandling->fFormLift, flyingHandling->fFormLift);
 			float upImpulseFwd = -upFwd * flyingHandling->fAttackLift * m_fTurnMass * CTimer::GetTimeStep();
 			ApplyTurnForce(upImpulseFwd * GetUp(), GetForward());
 		}else{
@@ -523,8 +523,8 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 			fPitch = -CPad::GetPad(0)->GetCarGunUpDown() / 128.0f;
 		if (CPad::GetPad(0)->GetHorn()) {
 			fYaw = 0.0f;
-			fPitch = clamp(flyingHandling->fPitchStab * DotProduct(m_vecMoveSpeed, GetForward()), -200.0f, 1.3f);
-			fRoll = clamp(flyingHandling->fRollStab * DotProduct(m_vecMoveSpeed, GetRight()), -200.0f, 1.3f);
+			fPitch = Clamp(flyingHandling->fPitchStab * DotProduct(m_vecMoveSpeed, GetForward()), -200.0f, 1.3f);
+			fRoll = Clamp(flyingHandling->fRollStab * DotProduct(m_vecMoveSpeed, GetRight()), -200.0f, 1.3f);
 		}
 		ApplyTurnForce(fPitch * GetUp() * flyingHandling->fPitch * m_fTurnMass * CTimer::GetTimeStep(), GetForward());
 		ApplyTurnForce(fRoll * GetUp() * flyingHandling->fRoll * m_fTurnMass * CTimer::GetTimeStep(), GetRight());
@@ -2174,9 +2174,9 @@ CVehicle::HeliDustGenerate(CEntity *heli, float radius, float ground, int rnd)
 				float red = (0.3*CTimeCycle::GetDirectionalRed() + CTimeCycle::GetAmbientRed_Obj())*255.0f/4.0f;
 				float green = (0.3*CTimeCycle::GetDirectionalGreen() + CTimeCycle::GetAmbientGreen_Obj())*255.0f/4.0f;
 				float blue = (0.3*CTimeCycle::GetDirectionalBlue() + CTimeCycle::GetAmbientBlue_Obj())*255.0f/4.0f;
-				r = clamp(red, 0.0f, 255.0f);
-				g = clamp(green, 0.0f, 255.0f);
-				b = clamp(blue, 0.0f, 255.0f);
+				r = Clamp(red, 0.0f, 255.0f);
+				g = Clamp(green, 0.0f, 255.0f);
+				b = Clamp(blue, 0.0f, 255.0f);
 				RwRGBA col1 = { r, g, b, (RwUInt8)CGeneral::GetRandomNumberInRange(8, 32) };
 				RwRGBA col2 = { 255, 255, 255, 32 };
 

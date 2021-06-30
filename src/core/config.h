@@ -404,6 +404,7 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 //#define AUDIO_OAL_USE_SNDFILE // use libsndfile to decode WAVs instead of our internal decoder
 #define AUDIO_OAL_USE_MPG123 // use mpg123 to support mp3 files
 #define MULTITHREADED_AUDIO // for streams. requires C++11 or later
+#define PAUSE_RADIO_IN_FRONTEND // pause radio when game is paused
 
 #ifdef AUDIO_OPUS
 #define AUDIO_OAL_USE_OPUS // enable support of opus files

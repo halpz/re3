@@ -147,7 +147,7 @@ typedef void* HANDLE;
 
 struct WIN32_FIND_DATA {
     char extension[32]; // for searching
-    char folder[32];	// for searching
+    char folder[MAX_PATH];	// for searching
     char cFileName[256]; // because tSkinInfo has it 256
     time_t ftLastWriteTime;
 };
