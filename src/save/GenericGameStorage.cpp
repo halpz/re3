@@ -487,7 +487,11 @@ GetNameOfSavedGame(int32 slot)
 bool
 CheckDataNotCorrupt(int32 slot, char *name)
 {
+#ifdef FIX_BUGS
+	char filename[MAX_PATH];
+#else
 	char filename[100];
+#endif
 
 	int32 blocknum = 0;
 	eLevelName level = LEVEL_GENERIC;
