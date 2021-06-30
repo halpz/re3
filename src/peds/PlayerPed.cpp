@@ -2080,13 +2080,13 @@ CPlayerPed::UpdateMeleeAttackers(void)
 void
 CPlayerPed::RemovePedFromMeleeList(CPed *ped)
 {
-	int i = 0;
-	while (m_pMeleeList[i] != ped) {
-		if (++i >= ARRAY_SIZE(m_pMeleeList))
+	for (uint16 i = 0; i < ARRAY_SIZE(m_pMeleeList); i++) {
+		if (m_pMeleeList[i] == ped) {
+			m_pMeleeList[i] = nil;
+			ped->m_attackTimer = 0;
 			return;
+		}
 	}
-	m_pMeleeList[i] = nil;
-	ped->m_attackTimer = 0;
 }
 
 void
