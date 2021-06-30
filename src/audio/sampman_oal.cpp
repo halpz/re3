@@ -1214,14 +1214,14 @@ cSampleManager::IsPedCommentLoaded(uint32 nComment)
 {
 	ASSERT( nComment < TOTAL_AUDIO_SAMPLES );
 	
-	int8 slot;
-
 	for ( int32 i = 0; i < _TODOCONST(3); i++ )
 	{
-		slot = nCurrentPedSlot - i - 1;
 #ifdef FIX_BUGS
+		int8 slot = (int8)nCurrentPedSlot - i - 1;
 		if (slot < 0)
 			slot += ARRAY_SIZE(nPedSlotSfx);
+#else
+		uint8 slot = nCurrentPedSlot - i - 1;
 #endif
 		if ( nComment == nPedSlotSfx[slot] )
 			return TRUE;
@@ -1234,14 +1234,14 @@ cSampleManager::IsPedCommentLoaded(uint32 nComment)
 int32
 cSampleManager::_GetPedCommentSlot(uint32 nComment)
 {
-	int8 slot;
-
 	for (int32 i = 0; i < _TODOCONST(3); i++)
 	{
-		slot = nCurrentPedSlot - i - 1;
 #ifdef FIX_BUGS
+		int8 slot = (int8)nCurrentPedSlot - i - 1;
 		if (slot < 0)
 			slot += ARRAY_SIZE(nPedSlotSfx);
+#else
+		uint8 slot = nCurrentPedSlot - i - 1;
 #endif
 		if (nComment == nPedSlotSfx[slot])
 			return slot;

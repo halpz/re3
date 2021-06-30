@@ -682,8 +682,8 @@ CPlayerPed::PlayerControlFighter(CPad *padUsed)
 
 	if (padMove > 0.0f) {
 		m_fRotationDest = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -leftRight, upDown) - TheCamera.Orientation;
-		m_takeAStepAfterAttack = padMove > 2 * PAD_MOVE_TO_GAME_WORLD_MOVE;
-		if (padUsed->GetSprint() && padMove > 1 * PAD_MOVE_TO_GAME_WORLD_MOVE)
+		m_takeAStepAfterAttack = padMove > (2 * PAD_MOVE_TO_GAME_WORLD_MOVE);
+		if (padUsed->GetSprint() && padMove > (1 * PAD_MOVE_TO_GAME_WORLD_MOVE))
 			bIsAttacking = false;
 	}
 

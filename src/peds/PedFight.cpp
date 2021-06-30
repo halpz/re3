@@ -1044,7 +1044,7 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 				if (IsPlayer())
 					moveAssoc->speed = 1.3f;
 
-				m_takeAStepAfterAttack = 0;
+				m_takeAStepAfterAttack = false;
 				m_fightButtonPressure = 0;
 			} else if (IsPlayer() && m_currentWeapon != WEAPONTYPE_UNARMED) {
 				CAnimBlendAssociation *moveAssoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, tFightMoves[m_curFightMove].animId, 4.0f);
