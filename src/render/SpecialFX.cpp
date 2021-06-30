@@ -214,7 +214,6 @@ CSpecialFX::Render2DFXs(void)
 		CFont::SetPropOn();
 		CFont::SetColor(CRGBA(100, 100, 100, 200));
 		CFont::SetFontStyle(FONT_LOCALE(FONT_STANDARD));
-		CFont::PrintString(SCREEN_WIDTH * 8 / 10, SCREEN_HEIGHT * 8 / 10, gUString);
 		for (int32 i = 0; i < SCREEN_HEIGHT; i += 4) {
 			RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
 			RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
