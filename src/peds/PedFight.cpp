@@ -1304,7 +1304,7 @@ CPed::StartFightDefend(uint8 direction, uint8 hitLevel, uint8 unk)
 				if (IsPlayer())
 					moveAssoc->speed = 1.2f;
 
-				m_takeAStepAfterAttack = 0;
+				m_takeAStepAfterAttack = false;
 				m_fightButtonPressure = 0;
 
 			} else if (IsPlayer() && GetWeapon()->m_eWeaponType != WEAPONTYPE_UNARMED && GetWeapon()->m_eWeaponType != WEAPONTYPE_BRASSKNUCKLE &&
