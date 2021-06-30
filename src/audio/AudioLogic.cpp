@@ -9976,8 +9976,10 @@ cAudioManager::ProcessMissionAudioSlot(uint8 slot)
 				if (!m_nUserPause) {
 					if (nCheckPlayingDelay[slot]) {
 						--nCheckPlayingDelay[slot];
-					} else if (GetMissionScriptPoliceAudioPlayingStatus() == PLAY_STATUS_FINISHED || m_sMissionAudio.m_nMissionAudioCounter[slot]-- == 0) {
+					} else if ((g_bMissionAudioLoadFailed[slot] && m_sMissionAudio.m_nMissionAudioCounter[slot]-- == 0) || GetMissionScriptPoliceAudioPlayingStatus() == PLAY_STATUS_FINISHED) {
 						m_sMissionAudio.m_nPlayStatus[slot] = PLAY_STATUS_FINISHED;
+						if (m_sMissionAudio.m_nSampleIndex[slot] >= STREAMED_SOUND_MISSION_MOB_01A && m_sMissionAudio.m_nSampleIndex[slot] <= STREAMED_SOUND_MISSION_MOB_99A)
+							m_sMissionAudio.m_bIsMobile[slot] = FALSE;
 						m_sMissionAudio.m_nSampleIndex[slot] = NO_SAMPLE;
 						SampleManager.StopStreamedFile(slot + 1);
 						m_sMissionAudio.m_nMissionAudioCounter[slot] = 0;
