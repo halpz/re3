@@ -315,8 +315,10 @@ cMusicManager::ChangeMusicMode(uint8 mode)
 
 #ifdef PAUSE_RADIO_IN_FRONTEND
 		// rewind those streams we weren't listening right now
-		for( uint32 i = STREAMED_SOUND_RADIO_HEAD; i < STREAMED_SOUND_CUTSCENE_BIKER; i++ )
+		for( uint32 i = STREAMED_SOUND_RADIO_HEAD; i < STREAMED_SOUND_CUTSCENE_BIKER; i++ ) {
 			m_aTracks[i].m_nPosition = GetTrackStartPos(i);
+			m_aTracks[i].m_nLastPosCheckTimer = CTimer::GetTimeInMillisecondsPauseMode();
+		}
 #endif
 
 		break;
