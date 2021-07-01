@@ -83,29 +83,29 @@ WriteSaveBuf(uint8 *&buf, uint32 &length, const T &value)
 
 #ifdef VALIDATE_SAVE_SIZE
 #define CheckSaveHeader(buf, a, b, c, d, size) do { \
-	char _C; uint32 _size;\
-	ReadSaveBuf(&_C, buf);\
-	assert(_C == a);\
-	ReadSaveBuf(&_C, buf);\
-	assert(_C == b);\
-	ReadSaveBuf(&_C, buf);\
-	assert(_C == c);\
-	ReadSaveBuf(&_C, buf);\
-	assert(_C == d);\
+	char _c; uint32 _size;\
+	ReadSaveBuf(&_c, buf);\
+	assert(_c == a);\
+	ReadSaveBuf(&_c, buf);\
+	assert(_c == b);\
+	ReadSaveBuf(&_c, buf);\
+	assert(_c == c);\
+	ReadSaveBuf(&_c, buf);\
+	assert(_c == d);\
 	ReadSaveBuf(&_size, buf);\
 	assert(_size == size);\
 	} while(0)
 
 #define CheckSaveHeaderWithLength(buf,len,a,b,c,d,size) do { \
-	char _C; uint32 _size;\
-	ReadSaveBuf(&_C, buf, len);\
-	assert(_C == a);\
-	ReadSaveBuf(&_C, buf, len);\
-	assert(_C == b);\
-	ReadSaveBuf(&_C, buf, len);\
-	assert(_C == c);\
-	ReadSaveBuf(&_C, buf, len);\
-	assert(_C == d);\
+	char _c; uint32 _size;\
+	ReadSaveBuf(&_c, buf, len);\
+	assert(_c == a);\
+	ReadSaveBuf(&_c, buf, len);\
+	assert(_c == b);\
+	ReadSaveBuf(&_c, buf, len);\
+	assert(_c == c);\
+	ReadSaveBuf(&_c, buf, len);\
+	assert(_c == d);\
 	ReadSaveBuf(&_size, buf, len);\
 	assert(_size == size);\
 	} while(0)
