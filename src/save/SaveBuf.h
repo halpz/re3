@@ -47,15 +47,15 @@ WriteSaveBuf(uint8 *&buf, const T &value)
 
 #ifdef VALIDATE_SAVE_SIZE
 #define CheckSaveHeader(buf, a, b, c, d, size) do { \
-	char _C; uint32 _size;\
-	ReadSaveBuf(&_C, buf);\
-	assert(_C == a);\
-	ReadSaveBuf(&_C, buf);\
-	assert(_C == b);\
-	ReadSaveBuf(&_C, buf);\
-	assert(_C == c);\
-	ReadSaveBuf(&_C, buf);\
-	assert(_C == d);\
+	char _c; uint32 _size;\
+	ReadSaveBuf(&_c, buf);\
+	assert(_c == a);\
+	ReadSaveBuf(&_c, buf);\
+	assert(_c == b);\
+	ReadSaveBuf(&_c, buf);\
+	assert(_c == c);\
+	ReadSaveBuf(&_c, buf);\
+	assert(_c == d);\
 	ReadSaveBuf(&_size, buf);\
 	assert(_size == size);\
 	} while(0)
