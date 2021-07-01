@@ -186,7 +186,7 @@ CColStore::LoadCollision(const CVector2D &pos)
 		}else{
 			for (int j = 0; j < MAX_CLEANUP; j++) {
 				CPhysical* pEntity = nil;
-				cleanup_entity_struct* pCleanup = &CTheScripts::MissionCleanUp.m_sEntities[i];
+				cleanup_entity_struct* pCleanup = &CTheScripts::MissionCleanUp.m_sEntities[j];
 				if (pCleanup->type == CLEANUP_CAR) {
 					pEntity = CPools::GetVehiclePool()->GetAt(pCleanup->id);
 					if (!pEntity || pEntity->GetStatus() == STATUS_WRECKED)
