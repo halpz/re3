@@ -25,7 +25,7 @@ class CCrimeBeingQd
 {
 public:
 	eCrimeType m_nType;
-	uint32 m_nId;
+	int32 m_nId;
 	uint32 m_nTime;
 	CVector m_vecPosn;
 	bool m_bReported;
