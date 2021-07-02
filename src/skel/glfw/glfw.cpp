@@ -919,7 +919,7 @@ void _InputInitialiseJoys()
 		free(db);
 		fclose(f);
 	} else
-		printf("You don't seem to have copied " SDL_GAMEPAD_DB_PATH " file from re3/gamefiles to GTA3 directory. Some gamepads may not be recognized.\n");
+		printf("You don't seem to have copied " SDL_GAMEPAD_DB_PATH " file from reVC/gamefiles to GTA: Vice City directory. Some gamepads may not be recognized.\n");
 
 #undef SDL_GAMEPAD_DB_PATH
 
