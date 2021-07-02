@@ -158,7 +158,7 @@ CGameLogic::Update()
 #endif
 			CMessages::ClearMessages();
 			CCarCtrl::ClearInterestingVehicleList();
-			CWorld::ClearExcitingStuffFromArea(pPlayerInfo.GetPos(), 4000.0f, 1);
+			CWorld::ClearExcitingStuffFromArea(pPlayerInfo.GetPos(), 4000.0f, true);
 			CRestart::FindClosestHospitalRestartPoint(pPlayerInfo.GetPos(), &vecRestartPos, &fRestartFloat);
 			CRestart::OverrideHospitalLevel = LEVEL_GENERIC;
 			CRestart::OverridePoliceStationLevel = LEVEL_GENERIC;
@@ -191,7 +191,7 @@ CGameLogic::Update()
 		}
 
 
-		if (!CTheScripts::IsPlayerOnAMission() && pPlayerInfo.m_nBustedAudioStatus == 0) {
+		if (!CTheScripts::IsPlayerOnAMission() && pPlayerInfo.m_nBustedAudioStatus == BUSTEDAUDIO_NONE) {
 			if (CGeneral::GetRandomNumberInRange(0, 4) == 0)
 				pPlayerInfo.m_nBustedAudioStatus = BUSTEDAUDIO_DONE;
 			else {
@@ -267,7 +267,7 @@ CGameLogic::Update()
 #endif
 			CMessages::ClearMessages();
 			CCarCtrl::ClearInterestingVehicleList();
-			CWorld::ClearExcitingStuffFromArea(pPlayerInfo.GetPos(), 4000.0f, 1);
+			CWorld::ClearExcitingStuffFromArea(pPlayerInfo.GetPos(), 4000.0f, true);
 			CRestart::FindClosestPoliceRestartPoint(pPlayerInfo.GetPos(), &vecRestartPos, &fRestartFloat);
 			CRestart::OverrideHospitalLevel = LEVEL_GENERIC;
 			CRestart::OverridePoliceStationLevel = LEVEL_GENERIC;
@@ -322,7 +322,7 @@ CGameLogic::Update()
 #endif
 			CMessages::ClearMessages();
 			CCarCtrl::ClearInterestingVehicleList();
-			CWorld::ClearExcitingStuffFromArea(pPlayerInfo.GetPos(), 4000.0f, 1);
+			CWorld::ClearExcitingStuffFromArea(pPlayerInfo.GetPos(), 4000.0f, true);
 			CRestart::FindClosestPoliceRestartPoint(pPlayerInfo.GetPos(), &vecRestartPos, &fRestartFloat);
 			CRestart::OverridePoliceStationLevel = LEVEL_GENERIC;
 			CRestart::OverrideHospitalLevel = LEVEL_GENERIC;
@@ -379,7 +379,7 @@ CGameLogic::RestorePlayerStuffDuringResurrection(CPlayerPed *pPlayerPed, CVector
 	pPlayerPed->m_fRotationDest = pPlayerPed->m_fRotationCur;
 	pPlayerPed->SetHeading(pPlayerPed->m_fRotationCur);
 	CTheScripts::ClearSpaceForMissionEntity(pos, pPlayerPed);
-	CWorld::ClearExcitingStuffFromArea(pos, 4000.0, 1);
+	CWorld::ClearExcitingStuffFromArea(pos, 4000.0f, true);
 	pPlayerPed->RestoreHeadingRate();
 	CGame::currArea = AREA_MAIN_MAP;
 	CStreaming::RemoveBuildingsNotInArea(0);
@@ -489,7 +489,7 @@ CGameLogic::UpdateShortCut()
 			pShortCutTaxi->AutoPilot.m_nTempAction = TEMPACT_GOFORWARD;
 			pShortCutTaxi->AutoPilot.m_nTimeTempAction = CTimer::GetTimeInMilliseconds() + 2500;
 			TheCamera.SetFadeColour(0, 0, 0);
-			TheCamera.Fade(2.5f, 0);
+			TheCamera.Fade(2.5f, FADE_OUT);
 			ShortCutState = SHORTCUT_TRANSITION;
 			ShortCutTimer = CTimer::GetTimeInMilliseconds() + 3000;
 			CMessages::AddBigMessage(TheText.Get("TAXI"), 4500, 1);
@@ -509,7 +509,7 @@ CGameLogic::UpdateShortCut()
 			pShortCutTaxi->SetMoveSpeed(pShortCutTaxi->GetForward() * 0.4f);
 			ShortCutTimer = CTimer::GetTimeInMilliseconds() + 1500;
 			TheCamera.SetFadeColour(0, 0, 0);
-			TheCamera.Fade(1.0f, 1);
+			TheCamera.Fade(1.0f, FADE_IN);
 			ShortCutState = SHORTCUT_ARRIVING;
 			CTimer::Resume();
 		}
