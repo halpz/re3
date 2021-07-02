@@ -711,27 +711,27 @@ CMenuManager::CheckSliderMovement(int value)
 	switch (aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_Action) {
 	case MENUACTION_BRIGHTNESS:
 		m_PrefsBrightness += value * 32.0f;
-		m_PrefsBrightness = clamp(m_PrefsBrightness, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
+		m_PrefsBrightness = Clamp(m_PrefsBrightness, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
 		break;
 	case MENUACTION_DRAWDIST:
 		if(value > 0)
 			m_PrefsLOD += ((1.8f - 0.925f) / 16.0f);
 		else
 			m_PrefsLOD -= ((1.8f - 0.925f) / 16.0f);
-		m_PrefsLOD = clamp(m_PrefsLOD, 0.925f, 1.8f);
+		m_PrefsLOD = Clamp(m_PrefsLOD, 0.925f, 1.8f);
 		CRenderer::ms_lodDistScale = m_PrefsLOD;
 		break;
 	case MENUACTION_MUSICVOLUME:
 		if (m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER) {
 			m_PrefsMusicVolume += value * (128 / 32);
-			m_PrefsMusicVolume = clamp(m_PrefsMusicVolume, 0, 65);
+			m_PrefsMusicVolume = Clamp(m_PrefsMusicVolume, 0, 65);
 			DMAudio.SetMusicMasterVolume(m_PrefsMusicVolume);
 		}
 		break;
 	case MENUACTION_SFXVOLUME:
 		if (m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER) {
 			m_PrefsSfxVolume += value * (128 / 32);
-			m_PrefsSfxVolume = clamp(m_PrefsSfxVolume, 0, 65);
+			m_PrefsSfxVolume = Clamp(m_PrefsSfxVolume, 0, 65);
 			DMAudio.SetEffectsMasterVolume(m_PrefsSfxVolume);
 		}
 		break;
@@ -739,14 +739,14 @@ CMenuManager::CheckSliderMovement(int value)
 		if (m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER) {
 			if (DMAudio.IsMP3RadioChannelAvailable()) {
 				m_PrefsMP3BoostVolume += value * (128 / 32);
-				m_PrefsMP3BoostVolume = clamp(m_PrefsMP3BoostVolume, 0, 65);
+				m_PrefsMP3BoostVolume = Clamp(m_PrefsMP3BoostVolume, 0, 65);
 				DMAudio.SetMP3BoostVolume(m_PrefsMP3BoostVolume);
 			}
 		}
 		break;
 	case MENUACTION_MOUSESENS:
 		TheCamera.m_fMouseAccelHorzntl += value * 1.0f/200.0f/15.0f;	// ???
-		TheCamera.m_fMouseAccelHorzntl = clamp(TheCamera.m_fMouseAccelHorzntl, 1.0f/3200.0f, 1.0f/200.0f);
+		TheCamera.m_fMouseAccelHorzntl = Clamp(TheCamera.m_fMouseAccelHorzntl, 1.0f/3200.0f, 1.0f/200.0f);
 #ifdef FIX_BUGS
 		TheCamera.m_fMouseAccelVertical = TheCamera.m_fMouseAccelHorzntl + 0.0005f;
 #endif
@@ -3490,8 +3490,8 @@ CMenuManager::Process(void)
 			break; \
 		\
 		m_fMapSize *= z2; \
-		m_fMapCenterX = clamp(m_fMapCenterX, SCREEN_WIDTH/2 - (m_fMapSize - MENU_X(MAP_MIN_SIZE)), m_fMapSize - MENU_X(MAP_MIN_SIZE) + SCREEN_WIDTH/2); \
-		m_fMapCenterY = clamp(m_fMapCenterY, SCREEN_HEIGHT/2 - (m_fMapSize - MENU_Y(MAP_MIN_SIZE)), m_fMapSize - MENU_Y(MAP_MIN_SIZE) + SCREEN_HEIGHT/2); \
+		m_fMapCenterX = Clamp(m_fMapCenterX, SCREEN_WIDTH/2 - (m_fMapSize - MENU_X(MAP_MIN_SIZE)), m_fMapSize - MENU_X(MAP_MIN_SIZE) + SCREEN_WIDTH/2); \
+		m_fMapCenterY = Clamp(m_fMapCenterY, SCREEN_HEIGHT/2 - (m_fMapSize - MENU_Y(MAP_MIN_SIZE)), m_fMapSize - MENU_Y(MAP_MIN_SIZE) + SCREEN_HEIGHT/2); \
 	} while(0)
 
 #endif
@@ -3529,8 +3529,8 @@ CMenuManager::AdditionalOptionInput(bool &goBack)
 							m_fMapCenterX += (SCREEN_WIDTH/2 - m_fMapCenterX) / ((m_fMapSize - MENU_X(MAP_MIN_SIZE)) * 1/15.f);
 
 						m_fMapSize = Max(MENU_Y(MAP_MIN_SIZE), m_fMapSize - MENU_Y(15.f));
-						m_fMapCenterX = clamp(m_fMapCenterX, SCREEN_WIDTH/2 - (m_fMapSize - MENU_X(MAP_MIN_SIZE)), m_fMapSize - MENU_X(MAP_MIN_SIZE) + SCREEN_WIDTH/2);
-						m_fMapCenterY = clamp(m_fMapCenterY, SCREEN_HEIGHT/2 - (m_fMapSize - MENU_Y(MAP_MIN_SIZE)), m_fMapSize - MENU_Y(MAP_MIN_SIZE) + SCREEN_HEIGHT/2);
+						m_fMapCenterX = Clamp(m_fMapCenterX, SCREEN_WIDTH/2 - (m_fMapSize - MENU_X(MAP_MIN_SIZE)), m_fMapSize - MENU_X(MAP_MIN_SIZE) + SCREEN_WIDTH/2);
+						m_fMapCenterY = Clamp(m_fMapCenterY, SCREEN_HEIGHT/2 - (m_fMapSize - MENU_Y(MAP_MIN_SIZE)), m_fMapSize - MENU_Y(MAP_MIN_SIZE) + SCREEN_HEIGHT/2);
 					} else {
 						m_fMapSize = MENU_Y(MAP_MIN_SIZE);
 					}
@@ -3571,8 +3571,8 @@ CMenuManager::AdditionalOptionInput(bool &goBack)
 				if (!justResetPointer) {
 					m_fMapCenterX += m_nMousePosX - m_nMouseOldPosX;
 					m_fMapCenterY += m_nMousePosY - m_nMouseOldPosY;
-					m_fMapCenterX = clamp(m_fMapCenterX, SCREEN_WIDTH/2 - (m_fMapSize - MENU_X(MAP_MIN_SIZE)), m_fMapSize - MENU_X(MAP_MIN_SIZE) + SCREEN_WIDTH/2);
-					m_fMapCenterY = clamp(m_fMapCenterY, SCREEN_HEIGHT/2 - (m_fMapSize - MENU_Y(MAP_MIN_SIZE)), m_fMapSize - MENU_Y(MAP_MIN_SIZE) + SCREEN_HEIGHT/2);
+					m_fMapCenterX = Clamp(m_fMapCenterX, SCREEN_WIDTH/2 - (m_fMapSize - MENU_X(MAP_MIN_SIZE)), m_fMapSize - MENU_X(MAP_MIN_SIZE) + SCREEN_WIDTH/2);
+					m_fMapCenterY = Clamp(m_fMapCenterY, SCREEN_HEIGHT/2 - (m_fMapSize - MENU_Y(MAP_MIN_SIZE)), m_fMapSize - MENU_Y(MAP_MIN_SIZE) + SCREEN_HEIGHT/2);
 				}
 				justResetPointer = false;
 
@@ -5068,7 +5068,7 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 			case MENUACTION_SPEAKERCONF:
 				if (m_nPrefsAudio3DProviderIndex != NO_AUDIO_PROVIDER) {
 					m_PrefsSpeakers -= changeAmount;
-					m_PrefsSpeakers = clamp(m_PrefsSpeakers, 0, 2);
+					m_PrefsSpeakers = Clamp(m_PrefsSpeakers, 0, 2);
 					DMAudio.SetSpeakerConfig(m_PrefsSpeakers);
 					SaveSettings();
 				}
@@ -5679,7 +5679,7 @@ CMenuManager::DrawQuitGameScreen(void)
 	static int32 exitSignalTimer = 0;
 
 #ifdef FIX_BUGS
-	int alpha = clamp(m_nMenuFadeAlpha, 0, 255);
+	int alpha = Clamp(m_nMenuFadeAlpha, 0, 255);
 #else
 	int alpha = m_nMenuFadeAlpha;
 #endif

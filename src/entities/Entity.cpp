@@ -26,6 +26,7 @@
 #include "Ped.h"
 #include "Dummy.h"
 #include "WindModifiers.h"
+#include "SaveBuf.h"
 #include "SpecialFX.h"
 #include "VisibilityPlugins.h"
 #include "RpAnimBlend.h"
@@ -927,7 +928,8 @@ CEntity::SaveEntityFlags(uint8*& buf)
 void
 CEntity::LoadEntityFlags(uint8*& buf)
 {
-	uint32 tmp = ReadSaveBuf<uint32>(buf);
+	uint32 tmp;
+	ReadSaveBuf(&tmp, buf);
 	m_type = (tmp & ((BIT(3) - 1)));
 	m_status = ((tmp >> 3) & (BIT(5) - 1));
 
@@ -958,7 +960,7 @@ CEntity::LoadEntityFlags(uint8*& buf)
 	bStreamingDontDelete = !!(tmp & BIT(30));
 	bRemoveFromWorld = !!(tmp & BIT(31));
 
-	tmp = ReadSaveBuf<uint32>(buf);
+	ReadSaveBuf(&tmp, buf);
 
 	bHasHitWall = !!(tmp & BIT(0));
 	bImBeingRendered = !!(tmp & BIT(1));

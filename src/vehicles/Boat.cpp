@@ -28,6 +28,7 @@
 #include "Record.h"
 #include "Shadows.h"
 #include "Wanted.h"
+#include "SaveBuf.h"
 
 #define INVALID_ORIENTATION (-9999.99f)
 
@@ -157,9 +158,9 @@ CBoat::ProcessControl(void)
 	r = 127.5f*(CTimeCycle::GetAmbientRed_Obj() + 0.5f*CTimeCycle::GetDirectionalRed());
 	g = 127.5f*(CTimeCycle::GetAmbientGreen_Obj() + 0.5f*CTimeCycle::GetDirectionalGreen());
 	b = 127.5f*(CTimeCycle::GetAmbientBlue_Obj() + 0.5f*CTimeCycle::GetDirectionalBlue());
-	r = clamp(r, 0, 255);
-	g = clamp(g, 0, 255);
-	b = clamp(b, 0, 255);
+	r = Clamp(r, 0, 255);
+	g = Clamp(g, 0, 255);
+	b = Clamp(b, 0, 255);
 	splashColor.red = r;
 	splashColor.green = g;
 	splashColor.blue = b;
@@ -168,9 +169,9 @@ CBoat::ProcessControl(void)
 	r = 229.5f*(CTimeCycle::GetAmbientRed() + 0.85f*CTimeCycle::GetDirectionalRed());
 	g = 229.5f*(CTimeCycle::GetAmbientGreen() + 0.85f*CTimeCycle::GetDirectionalGreen());
 	b = 229.5f*(CTimeCycle::GetAmbientBlue() + 0.85f*CTimeCycle::GetDirectionalBlue());
-	r = clamp(r, 0, 255);
-	g = clamp(g, 0, 255);
-	b = clamp(b, 0, 255);
+	r = Clamp(r, 0, 255);
+	g = Clamp(g, 0, 255);
+	b = Clamp(b, 0, 255);
 	jetColor.red = r;
 	jetColor.green = g;
 	jetColor.blue = b;
@@ -386,7 +387,7 @@ CBoat::ProcessControl(void)
 				if(CPad::GetPad(0)->GetHandBrake())
 					steerLoss *= 0.5f;
 				steerFactor -= steerLoss;
-				steerFactor = clamp(steerFactor, 0.0f, 1.0f);
+				steerFactor = Clamp(steerFactor, 0.0f, 1.0f);
 			}
 
 			CVector boundMin = GetColModel()->boundingBox.min;
@@ -771,17 +772,17 @@ CBoat::ProcessControlInputs(uint8 pad)
 		m_nPadID = 3;
 
 	m_fBrake += (CPad::GetPad(pad)->GetBrake()/255.0f - m_fBrake)*0.1f;
-	m_fBrake = clamp(m_fBrake, 0.0f, 1.0f);
+	m_fBrake = Clamp(m_fBrake, 0.0f, 1.0f);
 
 	if(m_fBrake < 0.05f){
 		m_fBrake = 0.0f;
 		m_fAccelerate += (CPad::GetPad(pad)->GetAccelerate()/255.0f - m_fAccelerate)*0.1f;
-		m_fAccelerate = clamp(m_fAccelerate, 0.0f, 1.0f);
+		m_fAccelerate = Clamp(m_fAccelerate, 0.0f, 1.0f);
 	}else
 		m_fAccelerate = -m_fBrake*0.3f;
 
 	m_fSteeringLeftRight += (-CPad::GetPad(pad)->GetSteeringLeftRight()/128.0f - m_fSteeringLeftRight)*0.2f;
-	m_fSteeringLeftRight = clamp(m_fSteeringLeftRight, -1.0f, 1.0f);
+	m_fSteeringLeftRight = Clamp(m_fSteeringLeftRight, -1.0f, 1.0f);
 
 	float steeringSq = m_fSteeringLeftRight < 0.0f ? -SQR(m_fSteeringLeftRight) : SQR(m_fSteeringLeftRight);
 	m_fSteerAngle = pHandling->fSteeringLock * DEGTORAD(steeringSq);
@@ -1064,7 +1065,7 @@ CBoat::PreRender(void)
 			rot = CGeneral::LimitRadianAngle(rot);
 			if(rot > HALFPI) rot = PI;
 			else if(rot < -HALFPI) rot = -PI;
-			rot = clamp(rot, -DEGTORAD(63.0f), DEGTORAD(63.0f));
+			rot = Clamp(rot, -DEGTORAD(63.0f), DEGTORAD(63.0f));
 			m_fMovingSpeed += (0.008f * CWeather::Wind + 0.002f) * rot;
 			m_fMovingSpeed *= Pow(0.9985f, CTimer::GetTimeStep())/(500.0f*SQR(m_fMovingSpeed) + 1.0f);
 

@@ -454,9 +454,9 @@ void
 CPhysical::ApplyMoveForce(float jx, float jy, float jz)
 {
 	m_vecMoveSpeed += CVector(jx, jy, jz)*(1.0f/m_fMass);
-	m_vecTurnSpeed.x = clamp(m_vecTurnSpeed.x, -4.0f, 4.0f);
-	m_vecTurnSpeed.y = clamp(m_vecTurnSpeed.y, -4.0f, 4.0f);
-	m_vecTurnSpeed.z = clamp(m_vecTurnSpeed.z, -4.0f, 4.0f);
+	m_vecTurnSpeed.x = Clamp(m_vecTurnSpeed.x, -4.0f, 4.0f);
+	m_vecTurnSpeed.y = Clamp(m_vecTurnSpeed.y, -4.0f, 4.0f);
+	m_vecTurnSpeed.z = Clamp(m_vecTurnSpeed.z, -4.0f, 4.0f);
 }
 
 //--LCS: done
@@ -466,9 +466,9 @@ CPhysical::ApplyTurnForce(float jx, float jy, float jz, float px, float py, floa
 	CVector com = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
 	CVector turnimpulse = CrossProduct(CVector(px, py, pz)-com, CVector(jx, jy, jz));
 	m_vecTurnSpeed += turnimpulse*(1.0f/m_fTurnMass);
-	m_vecTurnSpeed.x = clamp(m_vecTurnSpeed.x, -4.0f, 4.0f);
-	m_vecTurnSpeed.y = clamp(m_vecTurnSpeed.y, -4.0f, 4.0f);
-	m_vecTurnSpeed.z = clamp(m_vecTurnSpeed.z, -4.0f, 4.0f);
+	m_vecTurnSpeed.x = Clamp(m_vecTurnSpeed.x, -4.0f, 4.0f);
+	m_vecTurnSpeed.y = Clamp(m_vecTurnSpeed.y, -4.0f, 4.0f);
+	m_vecTurnSpeed.z = Clamp(m_vecTurnSpeed.z, -4.0f, 4.0f);
 }
 
 //--LCS: done
@@ -533,7 +533,7 @@ CPhysical::ApplySpringDampening(float damping, float dampingLimit, CVector &spri
 	damping *= step;
 	if(bIsHeavy)
 		damping *= 2.0f;
-	damping = clamp(damping, -DAMPING_LIMIT_IN_FRAME, DAMPING_LIMIT_IN_FRAME);
+	damping = Clamp(damping, -DAMPING_LIMIT_IN_FRAME, DAMPING_LIMIT_IN_FRAME);
 
 	// what is this?
 	float fSpeed = -speedA * damping;
@@ -575,7 +575,7 @@ CPhysical::ApplyGravity(void)
 			surfaceUp = point.normal;
 		else
 			surfaceUp = CVector(0.0f, 0.0f, 1.0f);
-		float t = clamp(CTimer::GetTimeStep() * 0.5f, 0.05f, 0.8f);
+		float t = Clamp(CTimer::GetTimeStep() * 0.5f, 0.05f, 0.8f);
 		gravityUp = gravityUp * (1.0f - t) + surfaceUp * t;
 		if (gravityUp.MagnitudeSqr() < 0.1f)
 			gravityUp = CVector(0.0f, 0.0f, 1.0f);

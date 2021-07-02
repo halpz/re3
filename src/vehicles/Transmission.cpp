@@ -150,7 +150,7 @@ cTransmission::CalculateDriveAcceleration(const float &gasPedal, uint8 &gear, fl
 			else if(cheat == 2)
 				inertiaMult *= TRANSMISSION_NITROS_INERTIA_MULT;
 			float var2target = 1.0f - inertiaMult*fEngineInertia;
-			var2target = clamp(var2target, 0.1f, 1.0f);
+			var2target = Clamp(var2target, 0.1f, 1.0f);
 			*inertiaVar2 = (1.0f-TRANSMISSION_SMOOTHER_FRAC)*var2target + TRANSMISSION_SMOOTHER_FRAC*(*inertiaVar2);
 			*inertiaVar1 = var1;
 			fAcceleration *= *inertiaVar2;

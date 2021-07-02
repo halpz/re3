@@ -310,7 +310,18 @@ cMusicManager::ChangeMusicMode(uint8 mode)
 
 	switch (mode)
 	{
-	case MUSICMODE_FRONTEND: m_nUpcomingMusicMode = MUSICMODE_FRONTEND; break;
+	case MUSICMODE_FRONTEND:
+		m_nUpcomingMusicMode = MUSICMODE_FRONTEND;
+
+#ifdef PAUSE_RADIO_IN_FRONTEND
+		// rewind those streams we weren't listening right now
+		for( uint32 i = STREAMED_SOUND_RADIO_HEAD; i < STREAMED_SOUND_CUTSCENE_BIKER; i++ ) {
+			m_aTracks[i].m_nPosition = GetTrackStartPos(i);
+			m_aTracks[i].m_nLastPosCheckTimer = CTimer::GetTimeInMillisecondsPauseMode();
+		}
+#endif
+
+		break;
 	case MUSICMODE_GAME: m_nUpcomingMusicMode = MUSICMODE_GAME; break;
 	case MUSICMODE_CUTSCENE:
 		m_nUpcomingMusicMode = MUSICMODE_CUTSCENE;
@@ -413,6 +424,12 @@ void
 cMusicManager::ServiceFrontEndMode()
 {
 	static bool8 bRadioStatsRecorded = FALSE;
+
+#ifdef PAUSE_RADIO_IN_FRONTEND
+	// pause radio
+	for( uint32 i = STREAMED_SOUND_RADIO_HEAD; i < STREAMED_SOUND_CUTSCENE_BIKER; i++ )
+		m_aTracks[i].m_nLastPosCheckTimer = CTimer::GetTimeInMillisecondsPauseMode();
+#endif
 
 	if (m_bAnnouncementInProgress) {
 		SampleManager.StopStreamedFile();

@@ -2608,7 +2608,7 @@ void CCarCtrl::SteerAIBoatWithPhysicsHeadingForTarget(CVehicle* pVehicle, float 
 	float angleToTarget = GetATanOfXY(targetX - pVehicle->GetPosition().x, targetY - pVehicle->GetPosition().y);
 	float angleForward = GetATanOfXY(forward.x, forward.y);
 	float steerAngle = LimitRadianAngle(angleToTarget - angleForward);
-	steerAngle = clamp(steerAngle, -DEFAULT_MAX_STEER_ANGLE, DEFAULT_MAX_STEER_ANGLE);
+	steerAngle = Clamp(steerAngle, -DEFAULT_MAX_STEER_ANGLE, DEFAULT_MAX_STEER_ANGLE);
 #ifdef FIX_BUGS
 	float speedTarget = pVehicle->AutoPilot.GetCruiseSpeed();
 #else
@@ -2768,7 +2768,7 @@ void CCarCtrl::SteerAIPlaneTowardsTargetCoors(CAutomobile* pPlane)
 {
 	CVector2D vecToTarget = pPlane->AutoPilot.m_vecDestinationCoors - pPlane->GetPosition();
 	float fForwardZ = (pPlane->AutoPilot.m_vecDestinationCoors.z - pPlane->GetPosition().z) / vecToTarget.Magnitude();
-	fForwardZ = clamp(fForwardZ, -0.3f, 0.3f);
+	fForwardZ = Clamp(fForwardZ, -0.3f, 0.3f);
 	float angle = GetATanOfXY(vecToTarget.x, vecToTarget.y);
 	while (angle > TWOPI)
 		angle -= TWOPI;
