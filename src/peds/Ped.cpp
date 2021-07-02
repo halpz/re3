@@ -308,6 +308,30 @@ CPed::~CPed(void)
 		m_pFire->Extinguish();
 	CPopulation::UpdatePedCount((ePedType)m_nPedType, true);
 	DMAudio.DestroyEntity(m_audioEntityId);
+
+	// Because of the nature of ped lists in GTA, it can sometimes be outdated.
+	// Remove ourself from nearPeds list of the Peds in our nearPeds list.
+#ifdef FIX_BUGS
+	for(int i = 0; i < m_numNearPeds; i++) {
+		CPed *nearPed = m_nearPeds[i];
+		assert(nearPed != nil);
+		if (!nearPed->IsPointerValid())
+			continue;
+
+		for(int j = 0; j < nearPed->m_numNearPeds;) {
+			assert(j == ARRAY_SIZE(m_nearPeds) - 1 || nearPed->m_nearPeds[j] || !nearPed->m_nearPeds[j+1]); // ensure nil comes after nil
+
+			if (nearPed->m_nearPeds[j] == this) {
+				for (int k = j; k < ARRAY_SIZE(m_nearPeds) - 1; k++) {
+					nearPed->m_nearPeds[k] = nearPed->m_nearPeds[k + 1];
+					nearPed->m_nearPeds[k + 1] = nil;
+				}
+				nearPed->m_numNearPeds--;
+			} else
+				j++;
+		}
+	}
+#endif
 }
 
 void
@@ -398,13 +422,15 @@ CPed::BuildPedLists(void)
 				} else
 					removePed = true;
 			}
+
+			assert(i == ARRAY_SIZE(m_nearPeds) - 1 || m_nearPeds[i] || !m_nearPeds[i+1]); // ensure nil comes after nil
+
 			if (removePed) {
 				// If we arrive here, the ped we're checking isn't "near", so we should remove it.
 				for (int j = i; j < ARRAY_SIZE(m_nearPeds) - 1; j++) {
 					m_nearPeds[j] = m_nearPeds[j + 1];
 					m_nearPeds[j + 1] = nil;
 				}
-				// Above loop won't work on last slot, so we need to empty it.
 				m_nearPeds[ARRAY_SIZE(m_nearPeds) - 1] = nil;
 				m_numNearPeds--;	
 			} else

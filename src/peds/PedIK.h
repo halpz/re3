@@ -34,7 +34,7 @@ public:
 		AIMS_WITH_ARM = 4,
 	};
 
-	CPed *m_ped;
+	CPed *Const m_ped;
 	LimbOrientation m_headOrient;
 	LimbOrientation m_torsoOrient;
 	LimbOrientation m_upperArmOrient;
