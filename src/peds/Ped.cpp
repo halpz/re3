@@ -6121,15 +6121,9 @@ CPed::SetEvasiveStep(CPhysical *reason, uint8 animType)
 		}
 	}
 
-#ifdef FIX_BUGS
-	#define IS_RCBANDIT (reason->IsVehicle() && reason->GetModelIndex() == MI_RCBANDIT)
-#else
-	#define IS_RCBANDIT (reason->GetModelIndex() == MI_RCBANDIT)
-#endif
-
-	if (neededTurn <= DEGTORAD(90.0f) || IS_RCBANDIT || vehPressedHorn || animType != 0) {
+	if (neededTurn <= DEGTORAD(90.0f) || reason->GetModelIndex() == MI_RCBANDIT || vehPressedHorn || animType != 0) {
 		SetLookFlag(reason, true);
-		if ((CGeneral::GetRandomNumber() & 1) && !IS_RCBANDIT && animType == 0) {
+		if ((CGeneral::GetRandomNumber() & 1) && reason->GetModelIndex() != MI_RCBANDIT && animType == 0) {
 			stepAnim = ANIM_STD_HAILTAXI;
 		} else {
 
@@ -6173,8 +6167,6 @@ CPed::SetEvasiveStep(CPhysical *reason, uint8 animType)
 			SetPedState(PED_STEP_AWAY);
 		}
 	}
-
-#undef IS_RCBANDIT
 }
 
 void
