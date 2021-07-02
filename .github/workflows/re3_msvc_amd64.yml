@@ -34,7 +34,7 @@ jobs:
           7z x ${{env.GLFW_FILE}}
     - name: Configure build
       run: |
-        ./premake5 vs2019 --with-librw --glfwdir64=${{env.GLFW_BASE}}
+        ./premake5 vs2019 --with-librw --no-full-paths --glfwdir64=${{env.GLFW_BASE}}
     - name: Build
       run: |
         msbuild -m build/re3.sln /property:Configuration=${{matrix.buildtype}} /property:Platform=${{matrix.platform}}
