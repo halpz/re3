@@ -2887,7 +2887,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 	CColModel *hisCol = CModelInfo::GetModelInfo(collidingEnt->GetModelIndex())->GetColModel();
 
 	if (!bUsesCollision && !bJustCheckCollision)
-		return false;
+		return 0;
 
 	if (collidingEnt->IsVehicle() && ((CVehicle*)collidingEnt)->IsBoat())
 		collidedWithBoat = true;
@@ -6775,7 +6775,7 @@ CPed::FollowPath(void)
 }
 
 void
-CPed::SetEvasiveStep(CEntity *reason, uint8 animType)
+CPed::SetEvasiveStep(CPhysical *reason, uint8 animType)
 {
 	AnimationId stepAnim;
 
@@ -6793,22 +6793,23 @@ CPed::SetEvasiveStep(CEntity *reason, uint8 animType)
 	if (neededTurn > PI)
 		neededTurn = TWOPI - neededTurn;
 
-	CVehicle *veh = (CVehicle*)reason;
-	if (reason->IsVehicle() && veh->IsCar()) {
+	if (reason->IsVehicle() && ((CVehicle*)reason)->IsCar()) {
+		CVehicle *veh = (CVehicle*)reason;
 		if (veh->m_nCarHornTimer != 0) {
 			vehPressedHorn = true;
 			if (!IsPlayer())
 				animType = 1;
 		}
 	}
-	if (neededTurn <= DEGTORAD(90.0f) || veh->GetModelIndex() == MI_RCBANDIT || vehPressedHorn || animType != 0) {
-		SetLookFlag(veh, true);
-		if ((CGeneral::GetRandomNumber() & 1) && veh->GetModelIndex() != MI_RCBANDIT && animType == 0) {
+
+	if (neededTurn <= DEGTORAD(90.0f) || reason->GetModelIndex() == MI_RCBANDIT || vehPressedHorn || animType != 0) {
+		SetLookFlag(reason, true);
+		if ((CGeneral::GetRandomNumber() & 1) && reason->GetModelIndex() != MI_RCBANDIT && animType == 0) {
 			stepAnim = ANIM_STD_HAILTAXI;
 
 		} else {
-			float vehDirection = CGeneral::GetRadianAngleBetweenPoints(
-				veh->m_vecMoveSpeed.x, veh->m_vecMoveSpeed.y,
+			float dangerDirection = CGeneral::GetRadianAngleBetweenPoints(
+				reason->m_vecMoveSpeed.x, reason->m_vecMoveSpeed.y,
 				0.0f, 0.0f);
 
 			// Let's turn our back to the "reason"
@@ -6818,14 +6819,14 @@ CPed::SetEvasiveStep(CEntity *reason, uint8 animType)
 				angleToFace -=  TWOPI;
 
 			// We don't want to run towards car's direction
-			float dangerZone = angleToFace - vehDirection;
+			float dangerZone = angleToFace - dangerDirection;
 			dangerZone = CGeneral::LimitRadianAngle(dangerZone);
 
 			// So, add or subtract 90deg (jump to left/right) according to that
 			if (dangerZone > 0.0f)
-				angleToFace = vehDirection - HALFPI;
+				angleToFace = dangerDirection - HALFPI;
 			else
-				angleToFace = vehDirection + HALFPI;
+				angleToFace = dangerDirection + HALFPI;
 
 			stepAnim = ANIM_STD_NUM;
 			if (animType == 0 || animType == 1)
