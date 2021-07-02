@@ -430,6 +430,12 @@ enum Config {
 	#define VC_RAIN_NERF // Reduces number of rain particles
 #endif
 
+// if these defines are enabled saves are not vanilla compatible without COMPATIBLE_SAVES
+#ifndef COMPATIBLE_SAVES
+#undef PED_SKINS
+#undef PEDS_REPORT_CRIMES_ON_PHONE
+#endif
+
 // -------
 
 #if defined __MWERKS__ || defined VANILLA_DEFINES
