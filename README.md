@@ -7,7 +7,7 @@
 
 In this repository you'll find the fully reversed source code for GTA III ([master](https://github.com/GTAmodding/re3/tree/master/) branch) and GTA VC ([miami](https://github.com/GTAmodding/re3/tree/miami/) branch).
 
-It has been tested and works on Windows, Linux and FreeBSD, on x86, amd64, arm and arm64.\
+It has been tested and works on Windows, Linux, MacOS and FreeBSD, on x86, amd64, arm and arm64.\
 Rendering is handled either by original RenderWare (D3D8)
 or the reimplementation [librw](https://github.com/aap/librw) (D3D9, OpenGL 2.1 or above, OpenGL ES 2.0 or above).\
 Audio is done with MSS (using dlls from original GTA) or OpenAL.
@@ -26,7 +26,7 @@ We cannot build for PS2 or Xbox yet. If you're interested in doing so, get in to
   - [Windows D3D9 64bit](https://nightly.link/GTAmodding/re3/workflows/re3_msvc_amd64/master/re3_Release_win-amd64-librw_d3d9-oal.zip)
   - [Windows OpenGL 64bit](https://nightly.link/GTAmodding/re3/workflows/re3_msvc_amd64/master/re3_Release_win-amd64-librw_gl3_glfw-oal.zip)
   - [Linux 64bit](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/master/ubuntu-18.04-gl3.zip)
-  - [MacOS 64bit](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/master/macos-latest-gl3.zip)
+  - [MacOS 64bit x86-64](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/master/macos-latest-gl3.zip)
 - Extract the downloaded zip over your GTA 3 directory and run re3. The zip includes the gamefiles and in case of OpenAL the required dlls.
 
 ## Screenshots
@@ -113,6 +113,12 @@ cd build
 conan install .. re3/master@ -if build -o re3:audio=openal -o librw:platform=gl3 -o librw:gl3_gfxlib=glfw --build missing -s re3:build_type=RelWithDebInfo -s librw:build_type=RelWithDebInfo
 conan build .. -if build -bf build -pf package
 ```
+</details>
+
+<details><summary>MacOS Premake</summary>
+
+For MacOS using premake, proceed: [Building on MacOS](https://github.com/GTAmodding/re3/wiki/Building-on-MacOS)
+
 </details>
 
 <details><summary>FreeBSD</summary>
