@@ -23,7 +23,7 @@ We cannot build for PS2 or Xbox yet. If you're interested in doing so, get in to
   - [Windows OpenGL 64bit](https://nightly.link/GTAmodding/re3/workflows/reVC_msvc_amd64/miami/reVC_Release_win-amd64-librw_gl3_glfw-oal.zip)
   - [Linux 64bit](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/miami/ubuntu-18.04-gl3.zip)
   - [MacOS 64bit x86-64](https://nightly.link/GTAmodding/re3/workflows/build-cmake-conan/miami/macos-latest-gl3.zip)
-- Extract the downloaded zip over your GTA VC directory and run reVC. The zip includes the gamefiles and in case of OpenAL the required dlls.
+- Extract the downloaded zip over your GTA VC directory and run reVC. The zip includes the binary, updated and additional gamefiles and in case of OpenAL the required dlls.
 
 ## Screenshots
 
