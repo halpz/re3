@@ -26,6 +26,7 @@
 #include "ModelInfo.h"
 #include "Pad.h"
 #include "ControllerConfig.h"
+#include "DMAudio.h"
 
 // Menu screens array is at the bottom of the file.
 
@@ -194,6 +195,8 @@ void MultiSamplingButtonPress(int8 action) {
 		if (FrontEndMenuManager.m_nDisplayMSAALevel != FrontEndMenuManager.m_nPrefsMSAALevel) {
 			FrontEndMenuManager.m_nPrefsMSAALevel = FrontEndMenuManager.m_nDisplayMSAALevel;
 			_psSelectScreenVM(FrontEndMenuManager.m_nPrefsVideoMode);
+			DMAudio.ChangeMusicMode(MUSICMODE_FRONTEND);
+			DMAudio.Service();
 			FrontEndMenuManager.SetHelperText(0);
 			FrontEndMenuManager.SaveSettings();
 		}
@@ -255,6 +258,8 @@ const char* screenModes[] = { "FED_FLS", "FED_WND" };
 void ScreenModeAfterChange(int8 before, int8 after)
 {
 	_psSelectScreenVM(FrontEndMenuManager.m_nPrefsVideoMode); // apply same resolution
+	DMAudio.ChangeMusicMode(MUSICMODE_FRONTEND);
+	DMAudio.Service();
 	FrontEndMenuManager.SetHelperText(0);
 }
 

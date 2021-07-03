@@ -17,9 +17,9 @@ const RwV3d XaxisIK = { 1.0f, 0.0f, 0.0f};
 const RwV3d YaxisIK = { 0.0f, 1.0f, 0.0f};
 const RwV3d ZaxisIK = { 0.0f, 0.0f, 1.0f};
 
-CPedIK::CPedIK(CPed *ped)
+CPedIK::CPedIK(CPed *ped) : m_ped(ped)
 {
-	m_ped = ped;
+	assert(ped != nil);
 	m_flags = 0;
 	m_headOrient.yaw = 0.0f;
 	m_headOrient.pitch = 0.0f;

@@ -28,13 +28,18 @@ newoption {
 }
 
 newoption {
+	trigger     = "with-lto",
+	description = "Build with link time optimization"
+}
+
+newoption {
 	trigger     = "no-git-hash",
 	description = "Don't print git commit hash into binary"
 }
 
 newoption {
-	trigger     = "lto",
-	description = "Use link time optimization"
+	trigger     = "no-full-paths",
+	description = "Don't print full paths into binary"
 }
 
 if(_OPTIONS["with-librw"]) then
@@ -121,7 +126,7 @@ workspace "reLCS"
 	filter "configurations:not Debug"
 		defines { "NDEBUG" }
 		optimize "Speed"
-		if(_OPTIONS["lto"]) then
+		if(_OPTIONS["with-lto"]) then
 			flags { "LinkTimeOptimization" }
 		end
 
@@ -338,6 +343,10 @@ project "reLCS"
 		linkoptions "/SAFESEH:NO"
 		characterset ("MBCS")
 		targetextension ".exe"
+		if(_OPTIONS["no-full-paths"]) then
+			usefullpaths "off"
+			linkoptions "/PDBALTPATH:%_PDB%"
+		end
 		if(_OPTIONS["with-librw"]) then
 			-- external librw is dynamic
 			staticruntime "on"

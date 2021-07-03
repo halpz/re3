@@ -251,6 +251,11 @@ GenericSave(int file)
 	WriteSaveDataBlock(CStreaming::MemoryCardSave, "StreamingSize");
 	WriteSaveDataBlock(CPedType::Save, "PedTypeSize");
 
+	// sure just write garbage data repeatedly ...
+#ifndef THIS_IS_STUPID
+	memset(work_buff, 0, sizeof(work_buff));
+#endif
+
 	// Write padding
 	for (int i = 0; i < 4; i++) {
 		size = align4bytes(SIZE_OF_ONE_GAME_IN_BYTES - totalSize - 4);
