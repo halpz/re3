@@ -319,7 +319,7 @@ enum Config {
 #if !defined(RW_GL3) && defined(_WIN32)
 #define XINPUT
 #endif
-#if defined XINPUT || (defined RW_GL3 && !defined LIBRW_SDL2 && !defined __SWITCH__)
+#if defined XINPUT || (defined RW_GL3 && !defined LIBRW_SDL2 && !defined GTA_SWITCH)
 #define DETECT_JOYSTICK_MENU // Then we'll expect user to enter Controller->Detect joysticks if his joystick isn't detected at the start.
 #endif
 #define DETECT_PAD_INPUT_SWITCH // Adds automatic switch of pad related stuff between controller and kb/m
@@ -439,7 +439,7 @@ enum Config {
 #endif
 
 // Streaming
-#if !defined(_WIN32) && !defined(__SWITCH__)
+#if !defined(_WIN32) && !defined(GTA_SWITCH)
 	//#define ONE_THREAD_PER_CHANNEL // Don't use if you're not on SSD/Flash - also not utilized too much right now(see commented LoadAllRequestedModels in Streaming.cpp)
 	#define FLUSHABLE_STREAMING // Make it possible to interrupt reading when processing file isn't needed anymore.
 #endif
@@ -459,6 +459,11 @@ enum Config {
 #ifndef COMPATIBLE_SAVES
 #undef PED_SKIN
 #undef PEDS_REPORT_CRIMES_ON_PHONE
+#endif
+
+#ifdef GTA_SWITCH
+	#define IGNORE_MOUSE_KEYBOARD // ignore mouse & keyboard input
+	#define USE_UNNAMED_SEM // named semaphores are unsupported on the switch
 #endif
 
 #endif // VANILLA_DEFINES

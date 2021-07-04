@@ -12,11 +12,13 @@ DWORD _dwOperatingSystemVersion;
 #include "resource.h"
 #else
 long _dwOperatingSystemVersion;
+#ifndef GTA_SWITCH
 #ifndef __APPLE__
 #include <sys/sysinfo.h>
 #else
 #include <mach/mach_host.h>
 #include <sys/sysctl.h>
+#endif
 #endif
 #include <errno.h>
 #include <locale.h>
@@ -51,7 +53,7 @@ long _dwOperatingSystemVersion;
 #include "MemoryMgr.h"
 
 // We found out that GLFW's keyboard input handling is still pretty delayed/not stable, so now we fetch input from X11 directly on Linux.
-#if !defined _WIN32 && !defined __APPLE__ && !defined __SWITCH__ // && !defined WAYLAND
+#if !defined _WIN32 && !defined __APPLE__ && !defined GTA_SWITCH // && !defined WAYLAND
 #define GET_KEYBOARD_INPUT_FROM_X11
 #endif
 
@@ -485,11 +487,13 @@ psInitialize(void)
 	debug("Physical memory size %llu\n", _dwMemAvailPhys);
 	debug("Available physical memory %llu\n", size);
 #else
+#ifndef GTA_SWITCH
  	struct sysinfo systemInfo;
 	sysinfo(&systemInfo);
 	_dwMemAvailPhys = systemInfo.freeram;
 	debug("Physical memory size %u\n", systemInfo.totalram);
 	debug("Available physical memory %u\n", systemInfo.freeram);
+#endif
 #endif
   
   TheText.Unload();
@@ -949,13 +953,15 @@ void psPostRWinit(void)
 	RwVideoMode vm;
 	RwEngineGetVideoModeInfo(&vm, GcurSelVM);
 
+	glfwSetFramebufferSizeCallback(PSGLOBAL(window), resizeCB);
+#ifndef IGNORE_MOUSE_KEYBOARD
 #ifndef GET_KEYBOARD_INPUT_FROM_X11
 	glfwSetKeyCallback(PSGLOBAL(window), keypressCB);
 #endif
-	glfwSetFramebufferSizeCallback(PSGLOBAL(window), resizeCB);
 	glfwSetScrollCallback(PSGLOBAL(window), scrollCB);
 	glfwSetCursorPosCallback(PSGLOBAL(window), cursorCB);
 	glfwSetCursorEnterCallback(PSGLOBAL(window), cursorEnterCB);
+#endif
 	glfwSetWindowIconifyCallback(PSGLOBAL(window), windowIconifyCB);
 	glfwSetWindowFocusCallback(PSGLOBAL(window), windowFocusCB);
 	glfwSetJoystickCallback(joysChangeCB);
@@ -1791,7 +1797,7 @@ main(int argc, char *argv[])
 	InitMemoryMgr();
 #endif
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(GTA_SWITCH)
 	struct sigaction act;
 	act.sa_sigaction = terminateHandler;
 	act.sa_flags = SA_SIGINFO;

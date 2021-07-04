@@ -120,13 +120,19 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     )
 endif()
 
+if(NINTENDO_SWITCH)
+    set(${PROJECT}_C_CXX_EXTENSIONS ON)
+else()
+    set(${PROJECT}_C_CXX_EXTENSIONS OFF)
+endif()
+
 set_target_properties(${EXECUTABLE}
     PROPERTIES
         C_STANDARD 11
-        C_EXTENSIONS OFF
+        C_EXTENSIONS ${${PROJECT}_C_CXX_EXTENSIONS}
         C_STANDARD_REQUIRED ON
         CXX_STANDARD 11
-        CXX_EXTENSIONS OFF
+        CXX_EXTENSIONS ${${PROJECT}_C_CXX_EXTENSIONS}
         CXX_STANDARD_REQUIRED ON
 )
 
@@ -138,5 +144,35 @@ if(${PROJECT}_INSTALL)
     )
     if(MSVC)
         install(FILES $<TARGET_PDB_FILE:${EXECUTABLE}> DESTINATION "." OPTIONAL)
+    endif()
+endif()
+
+# Build Nintendo Switch binaries
+if(NINTENDO_SWITCH)
+    target_compile_definitions(${EXECUTABLE} PRIVATE
+        GTA_SWITCH
+    )
+
+    # Needed for OpenAL-Soft
+    target_link_libraries(${EXECUTABLE} PRIVATE
+        openal # HACK - something broke with latest cmake
+        SDL2
+    )
+
+    nx_generate_nacp (${EXECUTABLE}.nacp
+        NAME    "${EXECUTABLE}"
+        AUTHOR  "${EXECUTABLE} Team"
+        VERSION "1.0.0-${GIT_SHA1}"
+    )
+
+    nx_create_nro(${EXECUTABLE}
+        NACP ${EXECUTABLE}.nacp
+        ICON "${PROJECT_SOURCE_DIR}/logo_switch.jpg"
+    )
+
+    if(${PROJECT}_INSTALL)
+        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${EXECUTABLE}.nro"
+            DESTINATION "."
+        )
     endif()
 endif()

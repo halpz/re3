@@ -11,6 +11,10 @@
 #define __STDC_LIMIT_MACROS // so we get UINT32_MAX etc
 #endif
 
+#ifdef GTA_SWITCH
+#include <switch.h>
+#endif
+
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
