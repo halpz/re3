@@ -329,6 +329,78 @@ psNativeTextureSupport(void)
 /*
  *****************************************************************************
  */
+
+#ifdef GTA_SWITCH
+
+static HidVibrationValue SwitchVibrationValues[2];
+static HidVibrationDeviceHandle SwitchVibrationDeviceHandles[2][2];
+static HidVibrationDeviceHandle SwitchVibrationDeviceGC;
+
+static PadState SwitchPad;
+
+Result HidInitializationResult[2];
+Result HidInitializationGCResult;
+
+void _psInitializeVibration()
+{
+	HidInitializationResult[0] = hidInitializeVibrationDevices(SwitchVibrationDeviceHandles[0], 2, HidNpadIdType_Handheld, HidNpadStyleTag_NpadHandheld);
+	if(R_FAILED(HidInitializationResult[0])) {
+		printf("Failed to initialize VibrationDevice for Handheld Mode\n");
+	}
+	HidInitializationResult[1] = hidInitializeVibrationDevices(SwitchVibrationDeviceHandles[1], 2, HidNpadIdType_No1, HidNpadStyleSet_NpadFullCtrl);
+	if(R_FAILED(HidInitializationResult[1])) {
+		printf("Failed to initialize VibrationDevice for Detached Mode\n");
+	}
+	HidInitializationGCResult = hidInitializeVibrationDevices(&SwitchVibrationDeviceGC, 1, HidNpadIdType_No1, HidNpadStyleTag_NpadGc);
+	if(R_FAILED(HidInitializationResult[1])) {
+		printf("Failed to initialize VibrationDevice for GC Mode\n");
+	}
+
+	SwitchVibrationValues[0].freq_low  = 160.0f;
+	SwitchVibrationValues[0].freq_high = 320.0f;
+
+	padConfigureInput(1, HidNpadStyleSet_NpadFullCtrl);
+    padInitializeDefault(&SwitchPad);
+}
+
+void _psHandleVibration()
+{
+	padUpdate(&SwitchPad);
+
+	uint8 target_device = padIsHandheld(&SwitchPad) ? 0 : 1;
+
+	if(R_SUCCEEDED(HidInitializationResult[target_device])) {
+		CPad* pad = CPad::GetPad(0);
+
+		// value conversion based on SDL2 switch port
+		SwitchVibrationValues[0].amp_high = SwitchVibrationValues[0].amp_low = pad->ShakeFreq == 0 ? 0.0f : 320.0f;
+		SwitchVibrationValues[0].freq_low = pad->ShakeFreq == 0.0 ? 160.0f : (float)pad->ShakeFreq * 1.26f;
+		SwitchVibrationValues[0].freq_high = pad->ShakeFreq == 0.0 ? 320.0f : (float)pad->ShakeFreq * 1.26f;
+
+		if (pad->ShakeDur < CTimer::GetTimeStepInMilliseconds())
+			pad->ShakeDur = 0;
+		else
+			pad->ShakeDur -= CTimer::GetTimeStepInMilliseconds();
+		if (pad->ShakeDur == 0) pad->ShakeFreq = 0;
+
+
+		if(target_device == 1 && R_SUCCEEDED(HidInitializationGCResult)) {
+			// gamecube rumble
+			hidSendVibrationGcErmCommand(SwitchVibrationDeviceGC, pad->ShakeFreq > 0 ? HidVibrationGcErmCommand_Start : HidVibrationGcErmCommand_Stop);
+		}
+
+		memcpy(&SwitchVibrationValues[1], &SwitchVibrationValues[0], sizeof(HidVibrationValue));
+		hidSendVibrationValues(SwitchVibrationDeviceHandles[target_device], SwitchVibrationValues, 2);
+	}
+}
+#else
+void _psInitializeVibration() {}
+void _psHandleVibration() {}
+#endif
+
+/*
+ *****************************************************************************
+ */
 RwBool
 psInitialize(void)
 {
@@ -409,6 +481,8 @@ psInitialize(void)
 #endif
 
 #endif
+
+	_psInitializeVibration();
 	
 	gGameState = GS_START_UP;
 	TRACE("gGameState = GS_START_UP");
@@ -2459,6 +2533,8 @@ void CapturePad(RwInt32 padID)
 		if ( Abs(rightStickPos.y) > 0.3f )
 			pad->PCTempJoyState.RightStickY = (int32)(rightStickPos.y * 128.0f);
 	}
+
+	_psHandleVibration();
 	
 	return;
 }
