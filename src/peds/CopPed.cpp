@@ -644,9 +644,6 @@ CCopPed::ProcessControl(void)
 				int numCopsNear = 0;
 				for (int i = 0; i < player->m_numNearPeds; ++i) {
 					CPed *nearPed = player->m_nearPeds[i];
-#ifdef FIX_BUGS
-					if (nearPed)
-#endif
 					if (nearPed->m_nPedType == PEDTYPE_COP && nearPed->m_nPedState != PED_DEAD)
 						++numCopsNear;
 				}
