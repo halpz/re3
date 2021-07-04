@@ -345,7 +345,7 @@ enum Config {
 //#	define PS2_MENU_USEALLPAGEICONS
 #else
 
-#	ifdef XINPUT
+#	if defined(XINPUT) || defined(GTA_SWITCH)
 #		define GAMEPAD_MENU		// Add gamepad menu
 #	endif
 
