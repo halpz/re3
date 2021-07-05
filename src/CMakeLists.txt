@@ -54,9 +54,13 @@ target_compile_definitions(${EXECUTABLE} PRIVATE USE_OUR_VERSIONING)
 
 if(${PROJECT}_AUDIO STREQUAL "OAL")
     find_package(OpenAL REQUIRED)
-    target_include_directories(${EXECUTABLE} PRIVATE ${OPENAL_INCLUDE_DIR})
-    target_link_libraries(${EXECUTABLE} PRIVATE ${OPENAL_LIBRARY})
-    target_compile_definitions(${EXECUTABLE} PRIVATE ${OPENAL_DEFINITIONS})
+    if(TARGET OpenAL::OpenAL)
+        target_link_libraries(${EXECUTABLE} PRIVATE OpenAL::OpenAL)
+    else()
+        target_include_directories(${EXECUTABLE} PRIVATE ${OPENAL_INCLUDE_DIR})
+        target_link_libraries(${EXECUTABLE} PRIVATE ${OPENAL_LIBRARY})
+        target_compile_definitions(${EXECUTABLE} PRIVATE ${OPENAL_DEFINITIONS})
+    endif()
     target_compile_definitions(${EXECUTABLE} PRIVATE AUDIO_OAL)
 elseif(${PROJECT}_AUDIO STREQUAL "MSS")
     find_package(MilesSDK REQUIRED)
@@ -126,6 +130,11 @@ else()
     set(${PROJECT}_C_CXX_EXTENSIONS OFF)
 endif()
 
+if(NOT (WINDOWS OR APPLE OR NINTENDO_SWITCH))
+    find_package(X11 REQUIRED)
+    target_link_libraries(${EXECUTABLE} PRIVATE X11::X11)
+endif()
+
 set_target_properties(${EXECUTABLE}
     PROPERTIES
         C_STANDARD 11
@@ -151,7 +160,6 @@ endif()
 if(NINTENDO_SWITCH)
     # Needed for OpenAL-Soft
     target_link_libraries(${EXECUTABLE} PRIVATE
-        openal # HACK - something broke with latest cmake
         SDL2
     )
 
