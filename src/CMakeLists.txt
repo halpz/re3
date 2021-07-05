@@ -130,7 +130,7 @@ else()
     set(${PROJECT}_C_CXX_EXTENSIONS OFF)
 endif()
 
-if(NOT (WINDOWS OR APPLE OR NINTENDO_SWITCH))
+if(NOT (WIN32 OR APPLE OR NINTENDO_SWITCH))
     find_package(X11 REQUIRED)
     target_link_libraries(${EXECUTABLE} PRIVATE X11::X11)
 endif()
