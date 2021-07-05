@@ -18,6 +18,12 @@
 #include "Replay.h"
 #endif
 
+#ifdef COMPATIBLE_SAVES
+#define PHONEINFO_SAVE_SIZE 0xA30
+#else
+#define PHONEINFO_SAVE_SIZE sizeof(CPhoneInfo)
+#endif
+
 CPhoneInfo gPhoneInfo;
 
 bool CPhoneInfo::bDisplayingPhoneMessage;  // is phone picked up
@@ -209,6 +215,22 @@ CPhoneInfo::IsMessageBeingDisplayed(int phoneId)
 	return pPhoneDisplayingMessages == &m_aPhones[phoneId];
 }
 
+#ifdef COMPATIBLE_SAVES
+static inline void
+LoadPhone(CPhone &phone, uint8 *&buf)
+{
+	ReadSaveBuf(&phone.m_vecPos, buf);
+	SkipSaveBuf(buf, 6 * 4);
+	ReadSaveBuf<uint32>(&phone.m_repeatedMessagePickupStart, buf);
+	uint32 tmp;
+	ReadSaveBuf(&tmp, buf);
+	phone.m_pEntity = (CEntity*)(uintptr)tmp;
+	ReadSaveBuf<PhoneState>(&phone.m_nState, buf);
+	ReadSaveBuf<bool>(&phone.m_visibleToCam, buf);
+	SkipSaveBuf(buf, 3);
+}
+#endif
+
 void
 CPhoneInfo::Load(uint8 *buf, uint32 size)
 {
@@ -226,7 +248,12 @@ INITSAVEBUF
 	// We can do it without touching saves. We'll only load script phones, others are already loaded in Initialise
 	for (int i = 0; i < 50; i++) {
 		CPhone phoneToLoad;
+#ifdef COMPATIBLE_SAVES
+		phoneToLoad.m_apMessages[0]=phoneToLoad.m_apMessages[1]=phoneToLoad.m_apMessages[2]=phoneToLoad.m_apMessages[3]=phoneToLoad.m_apMessages[4]=phoneToLoad.m_apMessages[5] = nil;
+		LoadPhone(phoneToLoad, buf);
+#else
 		ReadSaveBuf(&phoneToLoad, buf);
+#endif
 
 		if (ignoreOtherPhones)
 			continue;
@@ -252,7 +279,11 @@ INITSAVEBUF
 	m_nScriptPhonesMax = scriptPhonesMax;
 
 	for (int i = 0; i < NUMPHONES; i++) {
+#ifdef COMPATIBLE_SAVES
+		LoadPhone(m_aPhones[i], buf);
+#else
 		ReadSaveBuf(&m_aPhones[i], buf);
+#endif
 		// It's saved as building pool index in save file, convert it to true entity
 		if (m_aPhones[i].m_pEntity) {
 			m_aPhones[i].m_pEntity = CPools::GetBuildingPool()->GetSlot((uintptr)m_aPhones[i].m_pEntity - 1);
@@ -376,7 +407,7 @@ CPhoneInfo::Initialise(void)
 void
 CPhoneInfo::Save(uint8 *buf, uint32 *size)
 {
-	*size = sizeof(CPhoneInfo);
+	*size = PHONEINFO_SAVE_SIZE;
 INITSAVEBUF
 	WriteSaveBuf(buf, m_nMax);
 	WriteSaveBuf(buf, m_nScriptPhonesMax);
@@ -385,12 +416,24 @@ INITSAVEBUF
 #else
 	for (int phoneId = 0; phoneId < NUMPHONES; phoneId++) {
 #endif
+#ifdef COMPATIBLE_SAVES
+		WriteSaveBuf(buf, m_aPhones[phoneId].m_vecPos);
+		ZeroSaveBuf(buf, 6 * 4);
+		WriteSaveBuf(buf, m_aPhones[phoneId].m_repeatedMessagePickupStart);
+		// Convert entity pointer to building pool index while saving
+		int32 tmp = m_aPhones[phoneId].m_pEntity ? CPools::GetBuildingPool()->GetJustIndex_NoFreeAssert((CBuilding*)m_aPhones[phoneId].m_pEntity) + 1 : 0;
+		WriteSaveBuf(buf, tmp);
+		WriteSaveBuf(buf, m_aPhones[phoneId].m_nState);
+		WriteSaveBuf(buf, m_aPhones[phoneId].m_visibleToCam);
+		ZeroSaveBuf(buf, 3);
+#else
 		CPhone* phone = WriteSaveBuf(buf, m_aPhones[phoneId]);
 
 		// Convert entity pointer to building pool index while saving
 		if (phone->m_pEntity) {
 			phone->m_pEntity = (CEntity*) (CPools::GetBuildingPool()->GetJustIndex_NoFreeAssert((CBuilding*)phone->m_pEntity) + 1);
 		}
+#endif
 	}
 VALIDATESAVEBUF(*size)
 }

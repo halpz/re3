@@ -8496,21 +8496,21 @@ CPed::renderLimb(int node)
 void
 CPed::Save(uint8*& buf)
 {
-	SkipSaveBuf(buf, 52);
+	ZeroSaveBuf(buf, 52);
 	CopyToBuf(buf, GetPosition().x);
 	CopyToBuf(buf, GetPosition().y);
 	CopyToBuf(buf, GetPosition().z);
-	SkipSaveBuf(buf, 288);
+	ZeroSaveBuf(buf, 288);
 	CopyToBuf(buf, CharCreatedBy);
-	SkipSaveBuf(buf, 351);
+	ZeroSaveBuf(buf, 351);
 	CopyToBuf(buf, m_fHealth);
 	CopyToBuf(buf, m_fArmour);
-	SkipSaveBuf(buf, 148);
+	ZeroSaveBuf(buf, 148);
 	for (int i = 0; i < 13; i++) // has to be hardcoded
 		m_weapons[i].Save(buf);
-	SkipSaveBuf(buf, 5);
+	ZeroSaveBuf(buf, 5);
 	CopyToBuf(buf, m_maxWeaponTypeAllowed);
-	SkipSaveBuf(buf, 162);
+	ZeroSaveBuf(buf, 162);
 }
 
 void

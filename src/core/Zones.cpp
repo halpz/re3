@@ -10,6 +10,14 @@
 #include "Timer.h"
 #include "SaveBuf.h"
 
+#ifdef COMPATIBLE_SAVES
+#define ZONEARRAY_SAVE_SIZE 0xAF0
+#define MAPZONEARRAY_SAVE_SIZE 0x578
+#else
+#define ZONEARRAY_SAVE_SIZE sizeof(ZoneArray)
+#define MAPZONEARRAY_SAVE_SIZE sizeof(MapZoneArray)
+#endif
+
 eLevelName CTheZones::m_CurrLevel;
 CZone *CTheZones::m_pPlayersZone;
 int16 CTheZones::FindIndex;
@@ -633,6 +641,28 @@ CTheZones::InitialiseAudioZoneArray(void)
 		}
 }
 
+#ifdef COMPATIBLE_SAVES
+static inline void
+SaveOneZone(CZone &zone, uint8 *&buffer)
+{
+	memcpy(buffer, zone.name, sizeof(zone.name));
+	SkipSaveBuf(buffer, sizeof(zone.name));
+	WriteSaveBuf(buffer, zone.minx);
+	WriteSaveBuf(buffer, zone.miny);
+	WriteSaveBuf(buffer, zone.minz);
+	WriteSaveBuf(buffer, zone.maxx);
+	WriteSaveBuf(buffer, zone.maxy);
+	WriteSaveBuf(buffer, zone.maxz);
+	WriteSaveBuf(buffer, zone.type);
+	WriteSaveBuf(buffer, zone.level);
+	WriteSaveBuf(buffer, zone.zoneinfoDay);
+	WriteSaveBuf(buffer, zone.zoneinfoNight);
+	WriteSaveBuf(buffer, (int32)CTheZones::GetIndexForZonePointer(zone.child));
+	WriteSaveBuf(buffer, (int32)CTheZones::GetIndexForZonePointer(zone.parent));
+	WriteSaveBuf(buffer, (int32)CTheZones::GetIndexForZonePointer(zone.next));
+}
+#endif
+
 void
 CTheZones::SaveAllZones(uint8 *buffer, uint32 *size)
 {
@@ -643,9 +673,9 @@ CTheZones::SaveAllZones(uint8 *buffer, uint32 *size)
 		+ sizeof(int32) // GetIndexForZonePointer
 		+ sizeof(m_CurrLevel) + sizeof(FindIndex)
 		+ sizeof(int16) // padding
-		+ sizeof(ZoneArray) + sizeof(ZoneInfoArray)
+		+ ZONEARRAY_SAVE_SIZE + sizeof(ZoneInfoArray)
 		+ sizeof(TotalNumberOfZones) + sizeof(TotalNumberOfZoneInfos)
-		+ sizeof(MapZoneArray) + sizeof(AudioZoneArray)
+		+ MAPZONEARRAY_SAVE_SIZE + sizeof(AudioZoneArray)
 		+ sizeof(TotalNumberOfMapZones) + sizeof(NumberOfAudioZones);
 
 	WriteSaveHeader(buffer, 'Z', 'N', 'S', '\0', *size - SAVE_HEADER_SIZE);
@@ -656,10 +686,14 @@ CTheZones::SaveAllZones(uint8 *buffer, uint32 *size)
 	WriteSaveBuf(buffer, (int16)0); // padding
 
 	for(i = 0; i < ARRAY_SIZE(ZoneArray); i++){
+#ifdef COMPATIBLE_SAVES
+		SaveOneZone(ZoneArray[i], buffer);
+#else
 		CZone *zone = WriteSaveBuf(buffer, ZoneArray[i]);
 		zone->child = (CZone*)GetIndexForZonePointer(ZoneArray[i].child);
 		zone->parent = (CZone*)GetIndexForZonePointer(ZoneArray[i].parent);
 		zone->next = (CZone*)GetIndexForZonePointer(ZoneArray[i].next);
+#endif
 	}
 
 	for(i = 0; i < ARRAY_SIZE(ZoneInfoArray); i++)
@@ -669,7 +703,9 @@ CTheZones::SaveAllZones(uint8 *buffer, uint32 *size)
 	WriteSaveBuf(buffer, TotalNumberOfZoneInfos);
 
 	for(i = 0; i < ARRAY_SIZE(MapZoneArray); i++) {
+#ifndef COMPATIBLE_SAVES
 		CZone* zone = WriteSaveBuf(buffer, MapZoneArray[i]);
+#endif
 
 		/*
 		The call of GetIndexForZonePointer is wrong, as it is
@@ -679,9 +715,13 @@ CTheZones::SaveAllZones(uint8 *buffer, uint32 *size)
 		assert(MapZoneArray[i].child == nil);
 		assert(MapZoneArray[i].parent == nil);
 		assert(MapZoneArray[i].next == nil);
+#ifndef COMPATIBLE_SAVES
 		zone->child = (CZone*)GetIndexForZonePointer(MapZoneArray[i].child);
 		zone->parent = (CZone*)GetIndexForZonePointer(MapZoneArray[i].parent);
 		zone->next = (CZone*)GetIndexForZonePointer(MapZoneArray[i].next);
+#else
+		SaveOneZone(MapZoneArray[i], buffer);
+#endif
 	}
 
 	for(i = 0; i < ARRAY_SIZE(AudioZoneArray); i++)
@@ -692,6 +732,32 @@ CTheZones::SaveAllZones(uint8 *buffer, uint32 *size)
 
 	VALIDATESAVEBUF(*size)
 }
+
+#ifdef COMPATIBLE_SAVES
+static inline void
+LoadOneZone(CZone &zone, uint8 *&buffer)
+{
+	memcpy(zone.name, buffer, sizeof(zone.name));
+	SkipSaveBuf(buffer, sizeof(zone.name));
+	ReadSaveBuf(&zone.minx, buffer);
+	ReadSaveBuf(&zone.miny, buffer);
+	ReadSaveBuf(&zone.minz, buffer);
+	ReadSaveBuf(&zone.maxx, buffer);
+	ReadSaveBuf(&zone.maxy, buffer);
+	ReadSaveBuf(&zone.maxz, buffer);
+	ReadSaveBuf(&zone.type, buffer);
+	ReadSaveBuf(&zone.level, buffer);
+	ReadSaveBuf(&zone.zoneinfoDay, buffer);
+	ReadSaveBuf(&zone.zoneinfoNight, buffer);
+	int32 tmp;
+	ReadSaveBuf(&tmp, buffer);
+	zone.child = CTheZones::GetPointerForZoneIndex(tmp);
+	ReadSaveBuf(&tmp, buffer);
+	zone.parent = CTheZones::GetPointerForZoneIndex(tmp);
+	ReadSaveBuf(&tmp, buffer);
+	zone.next = CTheZones::GetPointerForZoneIndex(tmp);
+}
+#endif
 
 void
 CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
@@ -708,11 +774,15 @@ CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 	SkipSaveBuf(buffer, 2);
 
 	for(i = 0; i < ARRAY_SIZE(ZoneArray); i++){
+#ifdef COMPATIBLE_SAVES
+		LoadOneZone(ZoneArray[i], buffer);
+#else
 		ReadSaveBuf(&ZoneArray[i], buffer);
 
 		ZoneArray[i].child = GetPointerForZoneIndex((uintptr)ZoneArray[i].child);
 		ZoneArray[i].parent = GetPointerForZoneIndex((uintptr)ZoneArray[i].parent);
 		ZoneArray[i].next = GetPointerForZoneIndex((uintptr)ZoneArray[i].next);
+#endif
 	}
 
 	for(i = 0; i < ARRAY_SIZE(ZoneInfoArray); i++)
@@ -722,6 +792,9 @@ CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 	ReadSaveBuf(&TotalNumberOfZoneInfos, buffer);
 
 	for(i = 0; i < ARRAY_SIZE(MapZoneArray); i++){
+#ifdef COMPATIBLE_SAVES
+		LoadOneZone(MapZoneArray[i], buffer);
+#else
 		ReadSaveBuf(&MapZoneArray[i], buffer);
 
 		/*
@@ -732,6 +805,7 @@ CTheZones::LoadAllZones(uint8 *buffer, uint32 size)
 		MapZoneArray[i].child = GetPointerForZoneIndex((uintptr)MapZoneArray[i].child);
 		MapZoneArray[i].parent = GetPointerForZoneIndex((uintptr)MapZoneArray[i].parent);
 		MapZoneArray[i].next = GetPointerForZoneIndex((uintptr)MapZoneArray[i].next);
+#endif
 		assert(MapZoneArray[i].child == nil);
 		assert(MapZoneArray[i].parent == nil);
 		assert(MapZoneArray[i].next == nil);

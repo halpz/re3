@@ -732,7 +732,7 @@ CEntity::SaveEntityFlags(uint8*& buf)
 	if (bZoneCulled) tmp |= BIT(30);
 	if (bZoneCulled2) tmp |= BIT(31);
 
-	WriteSaveBuf<uint32>(buf, tmp);
+	WriteSaveBuf(buf, tmp);
 
 	tmp = 0;
 
@@ -748,7 +748,7 @@ CEntity::SaveEntityFlags(uint8*& buf)
 	if (bDistanceFade) tmp |= BIT(8);
 	if (m_flagE2) tmp |= BIT(9);
 
-	WriteSaveBuf<uint32>(buf, tmp);
+	WriteSaveBuf(buf, tmp);
 }
 
 void

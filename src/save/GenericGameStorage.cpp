@@ -600,6 +600,552 @@ align4bytes(int32 size)
 	return (size + 3) & 0xFFFFFFFC;
 }
 
+#ifdef FIX_INCOMPATIBLE_SAVES
+#define LoadSaveDataBlockNoCheck(buf, file, size) \
+do { \
+	CFileMgr::Read(file, (const char *)&size, sizeof(size)); \
+	size = align4bytes(size); \
+	CFileMgr::Read(file, (const char *)work_buff, size); \
+	buf = work_buff; \
+} while(0)
+
+#define WriteSavaDataBlockNoFunc(buf, file, size) \
+do { \
+	if (!PcSaveHelper.PcClassSaveRoutine(file, buf, size)) \
+		goto fail; \
+	totalSize += size; \
+} while(0)
+
+#define FixSaveDataBlock(fix_func, file, size) \
+do { \
+	ReadDataFromBufferPointer(buf, size); \
+	memset(work_buff2, 0, sizeof(work_buff2)); \
+	buf2 = work_buff2; \
+	reserved = 0; \
+	MakeSpaceForSizeInBufferPointer(presize, buf2, postsize); \
+	fix_func(save_type, buf, buf2, &size); \
+	CopySizeAndPreparePointer(presize, buf2, postsize, reserved, size); \
+	if (!PcSaveHelper.PcClassSaveRoutine(file, work_buff2, buf2 - work_buff2)) \
+		goto fail; \
+	totalSize += buf2 - work_buff2; \
+} while(0)
+
+#define ReadDataFromBufferPointerWithSize(buf, to, size) memcpy(&to, buf, size); buf += align4bytes(size)
+
+#define ReadBuf(buf, to) memcpy(&to, buf, sizeof(to)); buf += sizeof(to)
+#define WriteBuf(buf, from) memcpy(buf, &from, sizeof(from)); buf += sizeof(from)
+#define CopyBuf(from, to, size) memcpy(to, from, size); to += (size); from += (size)
+#define CopyPtr(from, to) memcpy(to, from, 4); to += 4; from += 8
+#define SkipBuf(buf, size) buf += (size)
+#define SkipBoth(from, to, size) to += (size); from += (size)
+#define SkipPtr(from, to) to += 4; from += 8
+
+// unfortunately we need a 2nd buffer of the same size to store the fixed output ...
+static uint8 work_buff2[sizeof(work_buff)];
+
+enum
+{
+	SAVE_TYPE_NONE = 0,
+	SAVE_TYPE_32_BIT = 1,
+	SAVE_TYPE_64_BIT = 2,
+	SAVE_TYPE_MSVC = 4,
+	SAVE_TYPE_GCC = 8,
+};
+
+uint8
+GetSaveType(char *savename)
+{
+	uint8 save_type = SAVE_TYPE_NONE;
+	int file = CFileMgr::OpenFile(savename, "rb");
+
+	uint32 size;
+	CFileMgr::Read(file, (const char *)&size, sizeof(size));
+
+	uint8 *buf = work_buff;
+	CFileMgr::Read(file, (const char *)work_buff, size); // simple vars + scripts
+
+	LoadSaveDataBlockNoCheck(buf, file, size); // ped pool
+
+	LoadSaveDataBlockNoCheck(buf, file, size); // garages
+	ReadDataFromBufferPointer(buf, size);
+
+	// store for later after we know how much data we need to skip
+	ReadDataFromBufferPointerWithSize(buf, work_buff2, size);
+
+	LoadSaveDataBlockNoCheck(buf, file, size); // vehicle pool
+	LoadSaveDataBlockNoCheck(buf, file, size); // object pool
+	LoadSaveDataBlockNoCheck(buf, file, size); // paths
+
+	LoadSaveDataBlockNoCheck(buf, file, size); // cranes
+
+	CFileMgr::CloseFile(file);
+
+	ReadDataFromBufferPointer(buf, size);
+
+	if (size == 1032)
+		save_type |= SAVE_TYPE_32_BIT;
+	else if (size == 1160)
+		save_type |= SAVE_TYPE_64_BIT;
+	else
+		assert(0); // this should never happen
+
+	buf = work_buff2;
+
+	buf += 760; // skip everything before the first garage
+	buf += save_type & SAVE_TYPE_32_BIT ? 28 : 40; // skip first garage up to m_fX1
+
+	// now the values we want to verify
+	float fX1, fX2, fY1, fY2, fZ1, fZ2;
+
+	ReadBuf(buf, fX1);
+	ReadBuf(buf, fX2);
+	ReadBuf(buf, fY1);
+	ReadBuf(buf, fY2);
+	ReadBuf(buf, fZ1);
+	ReadBuf(buf, fZ2);
+
+	if (fX1 == CRUSHER_GARAGE_X1 && fX2 == CRUSHER_GARAGE_X2 &&
+		fY1 == CRUSHER_GARAGE_Y1 && fY2 == CRUSHER_GARAGE_Y2 &&
+		fZ1 == CRUSHER_GARAGE_Z1 && fZ2 == CRUSHER_GARAGE_Z2)
+		save_type |= SAVE_TYPE_MSVC;
+	else
+		save_type |= SAVE_TYPE_GCC;
+
+	return save_type;
+}
+
+static void
+FixGarages(uint8 save_type, uint8 *buf, uint8 *buf2, uint32 *size)
+{
+	// hardcoded: 5484
+	// x86 msvc: 5240
+	// x86 gcc: 5040
+	// amd64 msvc: 5880
+	// amd64 gcc: 5808
+
+	uint8 *buf_start = buf;
+	uint8 *buf2_start = buf2;
+	uint32 read;
+	uint32 written = 5240;
+
+	if (save_type & SAVE_TYPE_32_BIT && save_type & SAVE_TYPE_GCC)
+		read = 5040;
+	else if (save_type & SAVE_TYPE_64_BIT && save_type & SAVE_TYPE_GCC)
+		read = 5808;
+	else
+		read = 5880;
+
+	uint32 ptrsize = save_type & SAVE_TYPE_32_BIT ? 4 : 8;
+
+	CopyBuf(buf, buf2, 4 * 6);
+	CopyBuf(buf, buf2, 4 * TOTAL_COLLECTCARS_GARAGES);
+	CopyBuf(buf, buf2, 4);
+
+	if (save_type & SAVE_TYPE_GCC)
+	{
+		for (int32 i = 0; i < NUM_GARAGE_STORED_CARS; i++)
+		{
+#define FixStoredCar(buf, buf2) \
+do { \
+	CopyBuf(buf, buf2, 4 + sizeof(CVector) + sizeof(CVector)); \
+	uint8 nFlags8; \
+	ReadBuf(buf, nFlags8); \
+	int32 nFlags32 = nFlags8; \
+	WriteBuf(buf2, nFlags32); \
+	CopyBuf(buf, buf2, 1 * 6); \
+	SkipBuf(buf, 1); \
+	SkipBuf(buf2, 2); \
+} while(0)
+
+			FixStoredCar(buf, buf2);
+			FixStoredCar(buf, buf2);
+			FixStoredCar(buf, buf2);
+
+#undef FixStoredCar
+		}
+	}
+	else
+	{
+		CopyBuf(buf, buf2, sizeof(CStoredCar) * NUM_GARAGE_STORED_CARS);
+		CopyBuf(buf, buf2, sizeof(CStoredCar) * NUM_GARAGE_STORED_CARS);
+		CopyBuf(buf, buf2, sizeof(CStoredCar) * NUM_GARAGE_STORED_CARS);
+	}
+
+	for (int32 i = 0; i < NUM_GARAGES; i++)
+	{
+		// skip the last 5 garages in 64bit builds without FIX_GARAGE_SIZE since they weren't actually saved and are unused
+		if (save_type & SAVE_TYPE_64_BIT && *size == 5484 && i >= NUM_GARAGES - 5)
+		{
+			SkipBuf(buf, 160); // sizeof(CGarage) on x64
+			SkipBuf(buf2, 140); // sizeof(CGarage) on x86
+		}
+		else
+		{
+			CopyBuf(buf, buf2, 1 * 6);
+			SkipBoth(buf, buf2, 2);
+			CopyBuf(buf, buf2, 4);
+			SkipBuf(buf, ptrsize - 4); // write 4 bytes padding if 8 byte pointer, if not, write 0
+			SkipBuf(buf, ptrsize * 2);
+			SkipBuf(buf2, 4 * 2);
+			CopyBuf(buf, buf2, 1 * 7);
+			SkipBoth(buf, buf2, 1);
+			CopyBuf(buf, buf2, 4 * 15 + 1);
+			SkipBoth(buf, buf2, 3);
+			SkipBuf(buf, ptrsize * 2);
+			SkipBuf(buf2, 4 * 2);
+
+			if (save_type & SAVE_TYPE_GCC)
+				SkipBuf(buf, save_type & SAVE_TYPE_64_BIT ? 36 + 4 : 36); // sizeof(CStoredCar) on gcc 64/32 before fix
+			else
+				SkipBuf(buf, sizeof(CStoredCar));
+
+			SkipBuf(buf2, sizeof(CStoredCar));
+		}
+	}
+
+	*size = 0;
+
+	assert(buf - buf_start == read);
+	assert(buf2 - buf2_start == written);
+
+#ifdef FIX_GARAGE_SIZE
+	*size = (6 * sizeof(uint32) + TOTAL_COLLECTCARS_GARAGES * sizeof(*CGarages::CarTypesCollected) + sizeof(uint32) + 3 * NUM_GARAGE_STORED_CARS * sizeof(CStoredCar) + NUM_GARAGES * sizeof(CGarage));
+#else
+	*size = 5484;
+#endif
+}
+
+static void
+FixCranes(uint8 save_type, uint8 *buf, uint8 *buf2, uint32 *size)
+{
+	uint8 *buf_start = buf;
+	uint8 *buf2_start = buf2;
+	uint32 read = 2 * sizeof(uint32) + 0x480; // sizeof(aCranes)
+	uint32 written = 2 * sizeof(uint32) + 0x400; // see CRANES_SAVE_SIZE
+
+	CopyBuf(buf, buf2, 4 + 4);
+
+	for (int32 i = 0; i < NUM_CRANES; i++)
+	{
+		CopyPtr(buf, buf2);
+		CopyPtr(buf, buf2);
+		CopyBuf(buf, buf2, 15 * 4 + sizeof(CVector) * 3 + sizeof(CVector2D));
+		CopyPtr(buf, buf2);
+		CopyBuf(buf, buf2, 4 + 7 * 1);
+		SkipBuf(buf, 5);
+		SkipBuf(buf2, 1);
+	}
+
+	*size = 0;
+
+	assert(buf - buf_start == read);
+	assert(buf2 - buf2_start == written);
+
+	*size = written;
+}
+
+static void
+FixPickups(uint8 save_type, uint8 *buf, uint8 *buf2, uint32 *size)
+{
+	uint8 *buf_start = buf;
+	uint8 *buf2_start = buf2;
+	uint32 read = 0x3480 + sizeof(uint16) + sizeof(uint16) + sizeof(int32) * NUMCOLLECTEDPICKUPS; // sizeof(aPickUps)
+	uint32 written = 0x24C0 + sizeof(uint16) + sizeof(uint16) + sizeof(int32) * NUMCOLLECTEDPICKUPS; // see PICKUPS_SAVE_SIZE
+
+	for (int32 i = 0; i < NUMPICKUPS; i++)
+	{
+		CopyBuf(buf, buf2, 1 + 1 + 2);
+		SkipBuf(buf, 4);
+		CopyPtr(buf, buf2);
+		CopyBuf(buf, buf2, 4 + 2 + 2 + sizeof(CVector));
+		SkipBuf(buf, 4);
+	}
+
+	CopyBuf(buf, buf2, 2);
+	SkipBoth(buf, buf2, 2);
+
+	CopyBuf(buf, buf2, NUMCOLLECTEDPICKUPS * 4);
+
+	*size = 0;
+
+	assert(buf - buf_start == read);
+	assert(buf2 - buf2_start == written);
+
+	*size = written;
+}
+
+static void
+FixPhoneInfo(uint8 save_type, uint8 *buf, uint8 *buf2, uint32 *size)
+{
+	uint8 *buf_start = buf;
+	uint8 *buf2_start = buf2;
+	uint32 read = 0x1138; // sizeof(CPhoneInfo)
+	uint32 written = 0xA30; // see PHONEINFO_SAVE_SIZE
+
+	CopyBuf(buf, buf2, 4 + 4);
+
+	for (int32 i = 0; i < NUMPHONES; i++)
+	{
+		CopyBuf(buf, buf2, sizeof(CVector));
+		SkipBuf(buf, 4);
+		SkipPtr(buf, buf2);
+		SkipPtr(buf, buf2);
+		SkipPtr(buf, buf2);
+		SkipPtr(buf, buf2);
+		SkipPtr(buf, buf2);
+		SkipPtr(buf, buf2);
+		CopyBuf(buf, buf2, 4);
+		SkipBuf(buf, 4);
+		CopyPtr(buf, buf2);
+		CopyBuf(buf, buf2, 4 + 1);
+		SkipBoth(buf, buf2, 3);
+	}
+
+	*size = 0;
+
+	assert(buf - buf_start == read);
+	assert(buf2 - buf2_start == written);
+
+	*size = written;
+}
+
+static void
+FixZones(uint8 save_type, uint8 *buf, uint8 *buf2, uint32 *size)
+{
+	uint8 *buf_start = buf;
+	uint8 *buf2_start = buf2;
+	uint32 read = 11300; // see SaveAllZones
+	uint32 written = 10100; // see SaveAllZones
+
+	CopyBuf(buf, buf2, 1 * 4);
+
+	SkipBuf(buf, 4);
+	uint32 hdr_size = 10100 - (1 * 4 + 4); // see SaveAllZones
+	WriteBuf(buf2, hdr_size);
+
+	CopyBuf(buf, buf2, 4 * 2 + 2);
+	SkipBoth(buf, buf2, 2);
+
+#define FixOneZone(buf, buf2) \
+do { \
+	CopyBuf(buf, buf2, 8 + 8 * 4 + 2 * 2); \
+	SkipBuf(buf, 4); \
+	CopyPtr(buf, buf2); \
+	CopyPtr(buf, buf2); \
+	CopyPtr(buf, buf2); \
+} while(0)
+
+	for (int32 i = 0; i < NUMZONES; i++)
+		FixOneZone(buf, buf2);
+
+	CopyBuf(buf, buf2, sizeof(CZoneInfo) * NUMZONES * 2);
+	CopyBuf(buf, buf2, 2 + 2);
+
+	for (int32 i = 0; i < NUMMAPZONES; i++)
+		FixOneZone(buf, buf2);
+
+	CopyBuf(buf, buf2, 2 * NUMAUDIOZONES);
+	CopyBuf(buf, buf2, 2 + 2);
+
+#undef FixOneZone
+
+	*size = 0;
+
+	assert(buf - buf_start == read);
+	assert(buf2 - buf2_start == written);
+
+	*size = written;
+}
+
+static void
+FixParticles(uint8 save_type, uint8 *buf, uint8 *buf2, uint32 *size)
+{
+	uint8 *buf_start = buf;
+	uint8 *buf2_start = buf2;
+
+	int32 numObjects;
+	ReadBuf(buf, numObjects);
+	WriteBuf(buf2, numObjects);
+
+	uint32 read = 0xA0 * (numObjects + 1) + 4; // sizeof(CParticleObject)
+	uint32 written = 0x88 * (numObjects + 1) + 4; // see PARTICLE_OBJECT_SIZEOF
+
+	for (int32 i = 0; i < numObjects; i++)
+	{
+		// CPlaceable
+		SkipPtr(buf, buf2);
+		CopyBuf(buf, buf2, 4 * 4 * 4);
+		SkipPtr(buf, buf2);
+		CopyBuf(buf, buf2, 1);
+		SkipBuf(buf, 7);
+		SkipBuf(buf2, 3);
+
+		// CParticleObject
+		SkipPtr(buf, buf2);
+		SkipPtr(buf, buf2);
+		SkipPtr(buf, buf2);
+		CopyBuf(buf, buf2, 4 * 3 + 2 * 1 + 2 * 2);
+		SkipBoth(buf, buf2, 2);
+		CopyBuf(buf, buf2, sizeof(CVector) + 2 * 4 + sizeof(CRGBA) + 2 * 1);
+		SkipBoth(buf, buf2, 2);
+	}
+
+	SkipBuf(buf, 0xA0); // sizeof(CParticleObject)
+	SkipBuf(buf2, 0x88); // see PARTICLE_OBJECT_SIZEOF
+
+	*size = 0;
+
+	assert(buf - buf_start == read);
+	assert(buf2 - buf2_start == written);
+
+	*size = written;
+}
+
+bool
+FixSave(int32 slot, uint8 save_type)
+{
+	if (save_type & SAVE_TYPE_32_BIT && save_type & SAVE_TYPE_MSVC)
+		return true;
+
+	bool success = false;
+
+	uint8 *buf, *presize, *postsize, *buf2;
+	uint32 size;
+	uint32 reserved;
+
+	uint32 totalSize;
+
+	char savename[MAX_PATH];
+	char savename_bak[MAX_PATH];
+
+	sprintf(savename, "%s%i%s", DefaultPCSaveFileName, slot + 1, ".b");
+	sprintf(savename_bak, "%s%i%s.%lld.bak", DefaultPCSaveFileName, slot + 1, ".b", time(nil));
+
+	assert(caserename(savename, savename_bak) == 0);
+
+	int file_in = CFileMgr::OpenFile(savename_bak, "rb");
+	int file_out = CFileMgr::OpenFileForWriting(savename);
+
+	CheckSum = 0;
+	totalSize = 0;
+
+	CFileMgr::Read(file_in, (const char *)&size, sizeof(size));
+
+	buf = work_buff;
+	CFileMgr::Read(file_in, (const char *)work_buff, size); // simple vars + scripts
+
+	WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // ped pool
+	WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // garages
+	FixSaveDataBlock(FixGarages, file_out, size); // garages need to be fixed in either case
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // vehicle pool
+	WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // object pool
+	WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // paths
+	WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // cranes
+	if (save_type & SAVE_TYPE_64_BIT)
+		FixSaveDataBlock(FixCranes, file_out, size);
+	else
+		WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // pickups
+	if (save_type & SAVE_TYPE_64_BIT)
+		FixSaveDataBlock(FixPickups, file_out, size);
+	else
+		WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // phoneinfo
+	if (save_type & SAVE_TYPE_64_BIT)
+		FixSaveDataBlock(FixPhoneInfo, file_out, size);
+	else
+		WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // restart
+	WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // radar blips
+	WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // zones
+	if (save_type & SAVE_TYPE_64_BIT)
+		FixSaveDataBlock(FixZones, file_out, size);
+	else
+		WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // gang data
+	WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // car generators
+	WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // particles
+	if (save_type & SAVE_TYPE_64_BIT)
+		FixSaveDataBlock(FixParticles, file_out, size);
+	else
+		WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // audio script objects
+	WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // player info
+	WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // stats
+	WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // streaming
+	WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	LoadSaveDataBlockNoCheck(buf, file_in, size); // ped type
+	WriteSavaDataBlockNoFunc(buf, file_out, size);
+
+	memset(work_buff, 0, sizeof(work_buff));
+
+	for (int i = 0; i < 4; i++) {
+		size = align4bytes(SIZE_OF_ONE_GAME_IN_BYTES - totalSize - 4);
+		if (size > sizeof(work_buff))
+			size = sizeof(work_buff);
+		if (size > 4) {
+			if (!PcSaveHelper.PcClassSaveRoutine(file_out, work_buff, size))
+				goto fail;
+			totalSize += size;
+		}
+	}
+
+	if (!CFileMgr::Write(file_out, (const char *)&CheckSum, sizeof(CheckSum)))
+		goto fail;
+
+	success = true;
+
+fail:;
+	CFileMgr::CloseFile(file_in);
+	CFileMgr::CloseFile(file_out);
+
+	return success;
+}
+
+#undef LoadSaveDataBlockNoCheck
+#undef WriteSavaDataBlockNoFunc
+#undef FixSaveDataBlock
+#undef ReadDataFromBufferPointerWithSize
+#undef ReadBuf
+#undef WriteBuf
+#undef CopyBuf
+#undef CopyPtr
+#undef SkipBuf
+#undef SkipBoth
+#undef SkipPtr
+#endif
+
 #ifdef MISSION_REPLAY
 
 void DisplaySaveResult(int unk, char* name)
