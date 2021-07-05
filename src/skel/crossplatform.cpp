@@ -200,7 +200,7 @@ char* casepath(char const* path, bool checkPathFirst)
     DIR* d;
     char* c;
 
-    #if defined(GTA_SWITCH) || defined(GTA_VITA)
+    #if defined(__SWITCH__) || defined(PSP2)
     if( (c = strstr(p, ":/")) != NULL) // scheme used by some environments, eg. switch, vita
     {
         size_t deviceNameOffset = c - p + 3;
@@ -294,7 +294,7 @@ char* casepath(char const* path, bool checkPathFirst)
 }
 #endif
 
-#ifdef GTA_SWITCH
+#ifdef __SWITCH__
 /* Taken from glibc */
 char *realpath(const char *name, char *resolved)
 {

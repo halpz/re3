@@ -40,7 +40,6 @@
       "cppStandard": "gnu++11",
       "defines": [
         "__SWITCH__",
-        "GTA_SWITCH",
         "LIBRW",
         "RW_GL3",
         "AUDIO_OAL"

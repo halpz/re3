@@ -12,7 +12,7 @@ DWORD _dwOperatingSystemVersion;
 #include "resource.h"
 #else
 long _dwOperatingSystemVersion;
-#ifndef GTA_SWITCH
+#ifndef __SWITCH__
 #ifndef __APPLE__
 #include <sys/sysinfo.h>
 #else
@@ -53,7 +53,7 @@ long _dwOperatingSystemVersion;
 #include "MemoryMgr.h"
 
 // We found out that GLFW's keyboard input handling is still pretty delayed/not stable, so now we fetch input from X11 directly on Linux.
-#if !defined _WIN32 && !defined __APPLE__ && !defined GTA_SWITCH // && !defined WAYLAND
+#if !defined _WIN32 && !defined __APPLE__ && !defined GTA_HANDHELD // && !defined WAYLAND
 #define GET_KEYBOARD_INPUT_FROM_X11
 #endif
 
@@ -330,7 +330,7 @@ psNativeTextureSupport(void)
  *****************************************************************************
  */
 
-#ifdef GTA_SWITCH
+#ifdef __SWITCH__
 
 static HidVibrationValue SwitchVibrationValues[2];
 static HidVibrationDeviceHandle SwitchVibrationDeviceHandles[2][2];
@@ -338,10 +338,10 @@ static HidVibrationDeviceHandle SwitchVibrationDeviceGC;
 
 static PadState SwitchPad;
 
-Result HidInitializationResult[2];
-Result HidInitializationGCResult;
+static Result HidInitializationResult[2];
+static Result HidInitializationGCResult;
 
-void _psInitializeVibration()
+static void _psInitializeVibration()
 {
 	HidInitializationResult[0] = hidInitializeVibrationDevices(SwitchVibrationDeviceHandles[0], 2, HidNpadIdType_Handheld, HidNpadStyleTag_NpadHandheld);
 	if(R_FAILED(HidInitializationResult[0])) {
@@ -360,10 +360,10 @@ void _psInitializeVibration()
 	SwitchVibrationValues[0].freq_high = 320.0f;
 
 	padConfigureInput(1, HidNpadStyleSet_NpadFullCtrl);
-    padInitializeDefault(&SwitchPad);
+	padInitializeDefault(&SwitchPad);
 }
 
-void _psHandleVibration()
+static void _psHandleVibration()
 {
 	padUpdate(&SwitchPad);
 
@@ -394,8 +394,8 @@ void _psHandleVibration()
 	}
 }
 #else
-void _psInitializeVibration() {}
-void _psHandleVibration() {}
+static void _psInitializeVibration() {}
+static void _psHandleVibration() {}
 #endif
 
 /*
@@ -561,7 +561,7 @@ psInitialize(void)
 	debug("Physical memory size %llu\n", _dwMemAvailPhys);
 	debug("Available physical memory %llu\n", size);
 #else
-#ifndef GTA_SWITCH
+#ifndef __SWITCH__
  	struct sysinfo systemInfo;
 	sysinfo(&systemInfo);
 	_dwMemAvailPhys = systemInfo.freeram;
@@ -1871,7 +1871,7 @@ main(int argc, char *argv[])
 	InitMemoryMgr();
 #endif
 
-#if !defined(_WIN32) && !defined(GTA_SWITCH)
+#if !defined(_WIN32) && !defined(__SWITCH__)
 	struct sigaction act;
 	act.sa_sigaction = terminateHandler;
 	act.sa_flags = SA_SIGINFO;

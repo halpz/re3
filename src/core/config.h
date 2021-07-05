@@ -158,6 +158,11 @@ enum Config {
 
 #define GTA_VERSION GTA3_PC_11
 
+// Enable configuration for handheld console ports
+#if defined(__SWITCH__) || defined(PSP2)
+	#define GTA_HANDHELD
+#endif
+
 #if defined GTA_PS2
 #	define GTA_PS2_STUFF
 #	define RANDOMSPLASH
@@ -166,7 +171,9 @@ enum Config {
 #	define ANIM_COMPRESSION
 #	define PS2_MENU
 #elif defined GTA_PC
-#	define PC_PLAYER_CONTROLS	// mouse player/cam mode
+#	ifndef GTA_HANDHELD
+#		define PC_PLAYER_CONTROLS	// mouse player/cam mode
+#	endif
 #	define GTA_REPLAY
 #	define GTA_SCENE_EDIT
 #	define PC_MENU
@@ -319,7 +326,7 @@ enum Config {
 #if !defined(RW_GL3) && defined(_WIN32)
 #define XINPUT
 #endif
-#if defined XINPUT || (defined RW_GL3 && !defined LIBRW_SDL2 && !defined GTA_SWITCH)
+#if defined XINPUT || (defined RW_GL3 && !defined LIBRW_SDL2 && !defined GTA_HANDHELD)
 #define DETECT_JOYSTICK_MENU // Then we'll expect user to enter Controller->Detect joysticks if his joystick isn't detected at the start.
 #endif
 #define DETECT_PAD_INPUT_SWITCH // Adds automatic switch of pad related stuff between controller and kb/m
@@ -345,7 +352,7 @@ enum Config {
 //#	define PS2_MENU_USEALLPAGEICONS
 #else
 
-#	if defined(XINPUT) || defined(GTA_SWITCH)
+#	if defined(XINPUT) || defined(GTA_HANDHELD)
 #		define GAMEPAD_MENU		// Add gamepad menu
 #	endif
 
@@ -439,7 +446,7 @@ enum Config {
 #endif
 
 // Streaming
-#if !defined(_WIN32) && !defined(GTA_SWITCH)
+#if !defined(_WIN32) && !defined(__SWITCH__)
 	//#define ONE_THREAD_PER_CHANNEL // Don't use if you're not on SSD/Flash - also not utilized too much right now(see commented LoadAllRequestedModels in Streaming.cpp)
 	#define FLUSHABLE_STREAMING // Make it possible to interrupt reading when processing file isn't needed anymore.
 #endif
@@ -461,8 +468,11 @@ enum Config {
 #undef PEDS_REPORT_CRIMES_ON_PHONE
 #endif
 
-#ifdef GTA_SWITCH
+#ifdef GTA_HANDHELD
 	#define IGNORE_MOUSE_KEYBOARD // ignore mouse & keyboard input
+#endif
+
+#ifdef __SWITCH__
 	#define USE_UNNAMED_SEM // named semaphores are unsupported on the switch
 #endif
 

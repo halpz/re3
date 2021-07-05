@@ -149,10 +149,6 @@ endif()
 
 # Build Nintendo Switch binaries
 if(NINTENDO_SWITCH)
-    target_compile_definitions(${EXECUTABLE} PRIVATE
-        GTA_SWITCH
-    )
-
     # Needed for OpenAL-Soft
     target_link_libraries(${EXECUTABLE} PRIVATE
         openal # HACK - something broke with latest cmake
