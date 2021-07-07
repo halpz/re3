@@ -1770,8 +1770,9 @@ void CRunningScript::Init()
 int scriptToLoad = 0;
 
 #ifdef _WIN32
-#include <Windows.h>
+extern "C" __declspec(dllimport) short __stdcall GetAsyncKeyState(int);
 #endif
+
 int open_script()
 {
 	// glfwGetKey doesn't work because of CGame::Initialise is blocking
