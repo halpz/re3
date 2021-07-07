@@ -64,6 +64,14 @@ WriteSaveBuf(uint8 *&buf, uint32 &length, const T &value)
 	return p;
 }
 
+#ifdef COMPATIBLE_SAVES
+inline void
+ZeroSaveBuf(uint8 *&buf, uint32 length)
+{
+	memset(buf, 0, length);
+	SkipSaveBuf(buf, length);
+}
+#endif
 
 #define SAVE_HEADER_SIZE (4*sizeof(char)+sizeof(uint32))
 

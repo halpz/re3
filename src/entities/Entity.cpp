@@ -824,7 +824,7 @@ CEntity::SaveEntityFlags(uint8*& buf)
 	if (bStreamingDontDelete) tmp |= BIT(30);
 	if (bRemoveFromWorld) tmp |= BIT(31);
 
-	WriteSaveBuf<uint32>(buf, tmp);
+	WriteSaveBuf(buf, tmp);
 
 	tmp = 0;
 
@@ -845,7 +845,7 @@ CEntity::SaveEntityFlags(uint8*& buf)
 	if (bUnderwater) tmp |= BIT(13);
 	if (bHasPreRenderEffects) tmp |= BIT(14);
 
-	WriteSaveBuf<uint32>(buf, tmp);
+	WriteSaveBuf(buf, tmp);
 }
 
 void
