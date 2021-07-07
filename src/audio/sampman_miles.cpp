@@ -1,3 +1,4 @@
+#define WITHWINDOWS
 #include "common.h"
 
 #ifdef AUDIO_MSS
