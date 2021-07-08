@@ -1769,21 +1769,16 @@ void CRunningScript::Init()
 #ifdef USE_DEBUG_SCRIPT_LOADER
 int scriptToLoad = 0;
 
-#ifdef _WIN32
-extern "C" __declspec(dllimport) short __stdcall GetAsyncKeyState(int);
-#endif
-
 int open_script()
 {
 	// glfwGetKey doesn't work because of CGame::Initialise is blocking
-#ifdef _WIN32
-	if (GetAsyncKeyState('G') & 0x8000)
+	CPad::UpdatePads();
+	if (CPad::GetPad(0)->GetChar('G'))
 		scriptToLoad = 0;
-	if (GetAsyncKeyState('R') & 0x8000)
+	if (CPad::GetPad(0)->GetChar('R'))
 		scriptToLoad = 1;
-	if (GetAsyncKeyState('D') & 0x8000)
+	if (CPad::GetPad(0)->GetChar('D'))
 		scriptToLoad = 2;
-#endif
 	switch (scriptToLoad) {
 	case 0: return CFileMgr::OpenFile("main.scm", "rb");
 	case 1: return CFileMgr::OpenFile("main_freeroam.scm", "rb");

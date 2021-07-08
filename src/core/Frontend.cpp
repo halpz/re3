@@ -4290,29 +4290,16 @@ CMenuManager::ProcessButtonPresses(void)
 
 #ifdef USE_DEBUG_SCRIPT_LOADER
 	if (m_nCurrScreen == MENUPAGE_START_MENU || m_nCurrScreen == MENUPAGE_NEW_GAME || m_nCurrScreen == MENUPAGE_NEW_GAME_RELOAD) {
-#ifdef RW_GL3
-		if (glfwGetKey(PSGLOBAL(window), GLFW_KEY_R) == GLFW_PRESS) {
+		if (CPad::GetPad(0)->GetChar('R')) {
 			scriptToLoad = 1;
 			DoSettingsBeforeStartingAGame();
 			return;
 		}
-		if (glfwGetKey(PSGLOBAL(window), GLFW_KEY_D) == GLFW_PRESS) {
+		if (CPad::GetPad(0)->GetChar('D')) {
 			scriptToLoad = 2;
 			DoSettingsBeforeStartingAGame();
 			return;
 		}
-#elif defined _WIN32
-		if (GetAsyncKeyState('R') & 0x8000) {
-			scriptToLoad = 1;
-			DoSettingsBeforeStartingAGame();
-			return;
-		}
-		if (GetAsyncKeyState('D') & 0x8000) {
-			scriptToLoad = 2;
-			DoSettingsBeforeStartingAGame();
-			return;
-		}
-#endif
 	}
 #endif
 
