@@ -9447,7 +9447,7 @@ const MissionAudioData MissionAudioNameSfxAssoc[] = {
 	{"lanamu1", SFX_SFX_LANAMU1},
 	{"lanamu2", SFX_SFX_LANAMU2},
 	{"airhrnl", SFX_SFX_AIRHORN_LEFT},
-	{"airhrnr", SFX_SFX_AIRHORN_RIGH},
+	{"airhrnr", SFX_SFX_AIRHORN_RIGHT},
 	{"sniper", SFX_SFX_SNIPER_SHOT_1},
 	{"snipsh", SFX_SFX_SNIPER_SHOT_2},
 	{"bloroof", SFX_SFX_BLOW_ROOF},
@@ -11293,9 +11293,8 @@ cAudioManager::PreloadMissionAudio(uint8 slot, Const char *name)
 			m_sMissionAudio.m_nLoadingStatus[slot] = LOADING_STATUS_NOT_LOADED;
 			m_sMissionAudio.m_nPlayStatus[slot] = PLAY_STATUS_STOPPED;
 			m_sMissionAudio.m_bIsPlaying[slot] = FALSE;
-			//m_sMissionAudio.m_nMissionAudioCounter[slot] = m_nTimeSpent * SampleManager.GetStreamedFileLength(missionAudioSfx) / 1000;
 			m_sMissionAudio.m_nMissionAudioCounter[slot] = m_nTimeSpent * SampleManager.GetSampleLength(missionAudioSfx) / SampleManager.GetSampleBaseFrequency(missionAudioSfx);
-			m_sMissionAudio.m_nMissionAudioCounter[slot] *= 4;
+			m_sMissionAudio.m_nMissionAudioCounter[slot] = 11 * m_sMissionAudio.m_nMissionAudioCounter[slot] / 10;
 			m_sMissionAudio.m_bIsPlayed[slot] = FALSE;
 			m_sMissionAudio.m_bPredefinedProperties[slot] = TRUE;
 			g_bMissionAudioLoadFailed[slot] = FALSE;
@@ -11379,7 +11378,6 @@ cAudioManager::ClearMissionAudio(uint8 slot)
 		m_sMissionAudio.m_bPredefinedProperties[slot] = TRUE;
 		m_sMissionAudio.m_nMissionAudioCounter[slot] = 0;
 		m_sMissionAudio.m_bIsMobile[slot] = FALSE;
-		//SampleManager.StopStreamedFile(slot + 1);
 		SampleManager.StopChannel(slot + CHANNEL_MISSION_AUDIO_1);
 	}
 }
@@ -11401,7 +11399,7 @@ cAudioManager::ProcessMissionAudioSlot(uint8 slot)
 
 	switch (m_sMissionAudio.m_nLoadingStatus[slot]) {
 	case LOADING_STATUS_NOT_LOADED:
-		//SampleManager.PreloadStreamedFile(m_sMissionAudio.m_nSampleIndex[slot], slot + 1);
+		// TODO: LoadMissionAudio
 		SampleManager.LoadPedComment(m_sMissionAudio.m_nSampleIndex[slot]);
 		SampleManager.InitialiseChannel(slot + CHANNEL_MISSION_AUDIO_1, m_sMissionAudio.m_nSampleIndex[slot], SFX_BANK_PED_COMMENTS);
 		SampleManager.SetChannelFrequency(slot + CHANNEL_MISSION_AUDIO_1, SampleManager.GetSampleBaseFrequency(m_sMissionAudio.m_nSampleIndex[slot]));
@@ -11414,8 +11412,8 @@ cAudioManager::ProcessMissionAudioSlot(uint8 slot)
 		if (g_bMissionAudioLoadFailed[slot]) {
 			if (m_bTimerJustReset) {
 				ClearMissionAudio(slot);
+				SampleManager.StopChannel(CHANNEL_POLICE_RADIO);
 				SampleManager.StopChannel(slot + CHANNEL_MISSION_AUDIO_1);
-				//SampleManager.StopStreamedFile(slot + 1);
 				nFramesForPretendPlaying[slot] = 0;
 				nCheckPlayingDelay[slot] = 0;
 				nFramesUntilFailedLoad[slot] = 0;
@@ -11434,18 +11432,20 @@ cAudioManager::ProcessMissionAudioSlot(uint8 slot)
 			if (MissionScriptAudioUsesPoliceChannel(m_sMissionAudio.m_nSampleIndex[slot])) {
 				SetMissionScriptPoliceAudio(m_sMissionAudio.m_nSampleIndex[slot]);
 			} else {
+				SampleManager.InitialiseChannel(slot + CHANNEL_MISSION_AUDIO_1, m_sMissionAudio.m_nSampleIndex[slot], SFX_BANK_PED_COMMENTS);
 				if(m_nUserPause)
-					// SampleManager.PauseStream(TRUE, slot + 1);
-					SampleManager.StopChannel(slot + CHANNEL_MISSION_AUDIO_1);
+					SampleManager.SetChannelFrequency(slot + CHANNEL_MISSION_AUDIO_1, 0);
+				else
+					SampleManager.SetChannelFrequency(slot + CHANNEL_MISSION_AUDIO_1, SampleManager.GetSampleBaseFrequency(m_sMissionAudio.m_nSampleIndex[slot]));
 				if (m_sMissionAudio.m_bPredefinedProperties[slot]) {
-					//if (m_sMissionAudio.m_nSampleIndex[slot] == STREAMED_SOUND_MISSION_CAMERAL)
-					//	SampleManager.SetStreamedVolumeAndPan(80, 0, TRUE, slot + 1);
-					//else if (m_sMissionAudio.m_nSampleIndex[slot] == STREAMED_SOUND_MISSION_CAMERAR)
-					//	SampleManager.SetStreamedVolumeAndPan(80, 127, TRUE, slot + 1);
-					//else
-					SampleManager.SetChannelPan(slot + CHANNEL_MISSION_AUDIO_1, 63);
 					SampleManager.SetChannelVolume(slot + CHANNEL_MISSION_AUDIO_1, 127);
-						//SampleManager.SetStreamedVolumeAndPan(80, 63, 1, slot + 1);
+					SampleManager.SetChannelPan(slot + CHANNEL_MISSION_AUDIO_1, 63);
+					if (m_sMissionAudio.m_nSampleIndex[slot] == SFX_SFX_CAMERA_LEFT || m_sMissionAudio.m_nSampleIndex[slot] == SFX_SFX_AIRHORN_LEFT)
+						SampleManager.SetChannelPan(slot + CHANNEL_MISSION_AUDIO_1, 0);
+					else if (m_sMissionAudio.m_nSampleIndex[slot] == SFX_SFX_CAMERA_RIGHT || m_sMissionAudio.m_nSampleIndex[slot] == SFX_SFX_AIRHORN_RIGHT)
+						SampleManager.SetChannelPan(slot + CHANNEL_MISSION_AUDIO_1, 127);
+					else
+						SampleManager.SetChannelPan(slot + CHANNEL_MISSION_AUDIO_1, 63);
 				} else {
 					distSquared = GetDistanceSquared(m_sMissionAudio.m_vecPos[slot]);
 					if (distSquared >= SQR(80.0f)) {
@@ -11460,22 +11460,18 @@ cAudioManager::ProcessMissionAudioSlot(uint8 slot)
 						TranslateEntity(&m_sMissionAudio.m_vecPos[slot], &vec);
 						pan = ComputePan(80.f, &vec);
 					}
-					SampleManager.SetChannelPan(slot + CHANNEL_MISSION_AUDIO_1, pan);
 					SampleManager.SetChannelVolume(slot + CHANNEL_MISSION_AUDIO_1, emittingVol);
-					//SampleManager.SetStreamedVolumeAndPan(emittingVol, pan, 1, slot + 1);
+					SampleManager.SetChannelPan(slot + CHANNEL_MISSION_AUDIO_1, pan);
 				}
-				//SampleManager.StartPreloadedStreamedFile(slot + 1);
 				SampleManager.StartChannel(slot + CHANNEL_MISSION_AUDIO_1);
 			}
 			m_sMissionAudio.m_nPlayStatus[slot] = PLAY_STATUS_PLAYING;
 			nCheckPlayingDelay[slot] = 30;
-			//if (m_sMissionAudio.m_nSampleIndex[slot] >= STREAMED_SOUND_MISSION_MOB_01A && m_sMissionAudio.m_nSampleIndex[slot] <= STREAMED_SOUND_MISSION_MOB_99A)
-			//	m_sMissionAudio.m_bIsMobile[slot] = TRUE;
 			break;
 		case PLAY_STATUS_PLAYING:
 			if (m_bTimerJustReset) {
 				ClearMissionAudio(slot);
-				//SampleManager.StopStreamedFile(slot + 1);
+				SampleManager.StopChannel(CHANNEL_POLICE_RADIO);
 				SampleManager.StopChannel(slot + CHANNEL_MISSION_AUDIO_1);
 				break;
 			}
@@ -11484,25 +11480,20 @@ cAudioManager::ProcessMissionAudioSlot(uint8 slot)
 					if (nCheckPlayingDelay[slot]) {
 						--nCheckPlayingDelay[slot];
 					} else if ((g_bMissionAudioLoadFailed[slot] && m_sMissionAudio.m_nMissionAudioCounter[slot]-- == 0) || GetMissionScriptPoliceAudioPlayingStatus() == PLAY_STATUS_FINISHED) {
+						debug("FINISHED PLAYINGXXXXXXXXXXXXX");
 						m_sMissionAudio.m_nPlayStatus[slot] = PLAY_STATUS_FINISHED;
-						//if (m_sMissionAudio.m_nSampleIndex[slot] >= STREAMED_SOUND_MISSION_MOB_01A && m_sMissionAudio.m_nSampleIndex[slot] <= STREAMED_SOUND_MISSION_MOB_99A)
-						//	m_sMissionAudio.m_bIsMobile[slot] = FALSE;
 						m_sMissionAudio.m_nSampleIndex[slot] = NO_SAMPLE;
-						//SampleManager.StopStreamedFile(slot + 1);
-						SampleManager.StopChannel(slot + CHANNEL_MISSION_AUDIO_1);
+						SampleManager.StopChannel(CHANNEL_POLICE_RADIO);
 						m_sMissionAudio.m_nMissionAudioCounter[slot] = 0;
 					}
 				}
 			} else if (m_sMissionAudio.m_bIsPlaying[slot]) {
-				//if (SampleManager.IsStreamPlaying(slot + 1) || m_nUserPause || m_nPreviousUserPause) {
 				if(SampleManager.GetChannelUsedFlag(slot + CHANNEL_MISSION_AUDIO_1) || m_nUserPause || m_nPreviousUserPause) {
 					if(m_nUserPause)
-						//SampleManager.PauseStream(TRUE, slot + 1);
-						SampleManager.StopChannel(slot + CHANNEL_MISSION_AUDIO_1);
+						SampleManager.SetChannelFrequency(slot + CHANNEL_MISSION_AUDIO_1, 0);
 					else
 					{
-						//SampleManager.PauseStream(FALSE, slot + 1);
-						//SampleManager.StartChannel(slot + CHANNEL_MISSION_AUDIO_1);
+						SampleManager.SetChannelFrequency(slot + CHANNEL_MISSION_AUDIO_1, SampleManager.GetSampleBaseFrequency(m_sMissionAudio.m_nSampleIndex[slot]));
 						if (!m_sMissionAudio.m_bPredefinedProperties[slot]) {
 							distSquared = GetDistanceSquared(m_sMissionAudio.m_vecPos[slot]);
 							if (distSquared >= SQR(80.0f)) {
@@ -11517,19 +11508,13 @@ cAudioManager::ProcessMissionAudioSlot(uint8 slot)
 								TranslateEntity(&m_sMissionAudio.m_vecPos[slot], &vec);
 								pan = ComputePan(80.f, &vec);
 							}
-							SampleManager.SetChannelPan(slot + CHANNEL_MISSION_AUDIO_1, pan);
 							SampleManager.SetChannelVolume(slot + CHANNEL_MISSION_AUDIO_1, emittingVol);
-							//SampleManager.SetStreamedVolumeAndPan(emittingVol, pan, 1, slot + 1);
+							SampleManager.SetChannelPan(slot + CHANNEL_MISSION_AUDIO_1, pan);
 						}
 					}
-				//} else if (m_sMissionAudio.m_nSampleIndex[slot] == STREAMED_SOUND_MISSION_ROK2_01) {
-				//	m_sMissionAudio.m_nPlayStatus[slot] = PLAY_STATUS_STOPPED;
 				} else {
 					m_sMissionAudio.m_nPlayStatus[slot] = PLAY_STATUS_FINISHED;
-					//if (m_sMissionAudio.m_nSampleIndex[slot] >= STREAMED_SOUND_MISSION_MOB_01A && m_sMissionAudio.m_nSampleIndex[slot] <= STREAMED_SOUND_MISSION_MOB_99A)
-					//	m_sMissionAudio.m_bIsMobile[slot] = FALSE;
 					m_sMissionAudio.m_nSampleIndex[slot] = NO_SAMPLE;
-					//SampleManager.StopStreamedFile(slot + 1);
 					SampleManager.StopChannel(slot + CHANNEL_MISSION_AUDIO_1);
 					m_sMissionAudio.m_nMissionAudioCounter[slot] = 0;
 				}
@@ -11537,7 +11522,6 @@ cAudioManager::ProcessMissionAudioSlot(uint8 slot)
 				if (m_nUserPause)
 					break;
 				if (nCheckPlayingDelay[slot]--) {
-					//if (!SampleManager.IsStreamPlaying(slot + 1))
 					if (!SampleManager.GetChannelUsedFlag(slot + CHANNEL_MISSION_AUDIO_1))
 						break;
 					nCheckPlayingDelay[slot] = 0;
