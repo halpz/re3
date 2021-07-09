@@ -15,7 +15,7 @@ AMOKLAUF FEHLGESCHLAGEN!!
 AMOKLAUF BESTANDEN!!
 
 [RAMP_A]
-ALLE AMOKLÃUFE BESTANDEN!!
+ALLE AMOKLÄUFE BESTANDEN!!
 
 [PAGE_01]
 Dein Job: ~1~ Gang-Mitglieder in 2 Minuten!
@@ -108,7 +108,7 @@ Immobilie
 Pay 'n' Spray
 
 [LG_23]
-Bekleidungsgeschãft
+Bekleidungsgeschäft
 
 [LG_24]
 Tommys Villa
@@ -198,7 +198,7 @@ Kaufman-Taxis
 Die Bootswerft
 
 [WANT_L]
-Dein Fahndungslevel ist bis auf weiteres aufgehoben. Solltest du ein Verbrechen begehen, wãhrend die Sterne blinken, wird dein volles Fahndungslevel wieder aktiv.
+Dein Fahndungslevel ist bis auf weiteres aufgehoben. Solltest du ein Verbrechen begehen, während die Sterne blinken, wird dein volles Fahndungslevel wieder aktiv.
 
 [PICK1]
 Kugelsichere Weste im Ocean View Hotel angeliefert!
@@ -240,7 +240,7 @@ Ziel
 ~g~Hey! Zurück ins Auto!!
 
 [HEY]
-~g~Keine Alleingãnge. Halt die Gang beisammen!
+~g~Keine Alleingänge. Halt die Gang beisammen!
 
 [HELP3]
 Du kannst nur kurze Zeit sprinten, ohne müde zu werden.
@@ -252,10 +252,10 @@ Drücke den~h~ rechten Analog-Stick nach oben, um zu ~h~beschleunigen.
 Zieh den ~h~rechten Analog-Stick~w~ zurück, um zu ~h~bremsen~w~, oder um ~h~zurückzusetzen~w~, wenn das Fahrzeug steht.
 
 [HELP7_A]
-Halte die~h~ ~k~~PED_LOCK_TARGET~ ~w~gedrückt, um mit dem Prãzisionsgewehr zu zielen.
+Halte die~h~ ~k~~PED_LOCK_TARGET~ ~w~gedrückt, um mit dem Präzisionsgewehr zu zielen.
 
 [HELP7_D]
-Halte die~h~ ~k~~PED_LOCK_TARGET~ ~w~gedrückt, um mit dem Prãzisionsgewehr zu zielen.
+Halte die~h~ ~k~~PED_LOCK_TARGET~ ~w~gedrückt, um mit dem Präzisionsgewehr zu zielen.
 
 [HELP10]
 Dieser Stern zeigt an, dass du von der Polizei gesucht wirst.
@@ -354,7 +354,7 @@ drei...
 Steigt dein ~h~Fahndungslevel~w~, wirst du von besser ausgebildeten Polizisten gejagt.
 
 [WANT_G]
-Wirst du ~h~verhaftet~w~, wirst du zum nãchsten Polizeirevier gebracht.
+Wirst du ~h~verhaftet~w~, wirst du zum nächsten Polizeirevier gebracht.
 
 [WANT_H]
 Die Cops werden dir alle Waffen abnehmen und kassieren ein wenig Bestechungsgeld von dir.
@@ -369,16 +369,16 @@ Im Verlauf des Spiels wirst du Möglichkeiten entdecken, deinen Fahndungslevel z
 Wenn du in einem Wagen sitzt, werden ~h~LACKIEREREIEN~w~ den Fahndungslevel ~h~annullieren.
 
 [HEAL_B]
-Wenn du ~h~'außer Gefecht'~w~ bist, wirst du zur nãchsten Klinik gebracht.
+Wenn du ~h~'außer Gefecht'~w~ bist, wirst du zur nächsten Klinik gebracht.
 
 [HEAL_C]
-Du verlierst alle Waffen, und die Ãrzte knöpfen dir ein wenig Cash für die Behandlung ab.
+Du verlierst alle Waffen, und die Ärzte knöpfen dir ein wenig Cash für die Behandlung ab.
 
 [HEAL_E]
-Je lãnger du spielst, desto mehr Wege wirst du finden, dich selbst zu verarzten oder zu schützen.
+Je länger du spielst, desto mehr Wege wirst du finden, dich selbst zu verarzten oder zu schützen.
 
 [SAVE1]
-Stell dich in die Markierung. So kannst du dein ~h~Spiel speichern~w~. Wãhrend einer Mission kannst du nicht speichern.
+Stell dich in die Markierung. So kannst du dein ~h~Spiel speichern~w~. Während einer Mission kannst du nicht speichern.
 
 [SAVE2]
 Jedes Fahrzeug, das in dieser Garage abgestellt wird, wird für dich aufbewahrt, wenn das Spiel gespeichert wird.
@@ -393,7 +393,7 @@ ZEIT:
 Du hast nicht genug Cash für dieses Objekt.
 
 [PROP_2]
-Wãhrend einer Mission kannst du keine Objekte kaufen.
+Während einer Mission kannst du keine Objekte kaufen.
 
 [IND_ZON]
 Vice City Beach
@@ -465,7 +465,7 @@ MP
 Kruger
 
 [SNIPE]
-Prãzisionsgewehr
+Präzisionsgewehr
 
 [GRENADE]
 Granaten
@@ -477,16 +477,16 @@ Schrotflinte
 S.P.A.S. 12
 
 [SHOTGN3]
-Abgesãgte Schrotflinte
+Abgesägte Schrotflinte
 
 [ARMOUR]
 Kugelsichere Weste
 
 [LASER]
-.308 Prãzisionsgewehr
+.308 Präzisionsgewehr
 
 [BASEBAT]
-Baseballschlãger
+Baseballschläger
 
 [HAMMER]
 Hammer
@@ -507,7 +507,7 @@ Messer
 Katana
 
 [CHAINSA]
-Kettensãge
+Kettensäge
 
 [G_COST]
 $~1~
@@ -558,7 +558,7 @@ Die Geschworenen
 Aufruhr
 
 [COL_1]
-Der Verrãter
+Der Verräter
 
 [COL_2]
 Kugelhagel im Einkaufszentrum
@@ -654,7 +654,7 @@ Eiscreme und andere Leckereien
 Schlagende Argumente
 
 [TEX_2]
-Das Begrãbnis
+Das Begräbnis
 
 [TEX_3]
 Schutt und Asche
@@ -726,7 +726,7 @@ Gefeuert!
 Drücke die ~h~~k~~PED_ANSWER_PHONE~~w~, um den Anruf auf deinem Handy entgegenzunehmen.
 
 [MOB_01A]
-Hey, mein Alter! Paul hier. Ich hãtte da vielleicht was für dich, aber das müssen wir unter vier Augen besprechen.
+Hey, mein Alter! Paul hier. Ich hätte da vielleicht was für dich, aber das müssen wir unter vier Augen besprechen.
 
 [MOB_01B]
 Ich bin im Malibu und lass es mir gutgehen.
@@ -741,7 +741,7 @@ Hey! Hallo, Tommy? Tommy!
 In der Druckerei ist irgendwas im Busch. Fahr mal rüber und kümmere dich darum.
 
 [MOB_02C]
-Es scheint ziemlichen Ãrger zu geben. Ich muss Schluss machen.
+Es scheint ziemlichen Ärger zu geben. Ich muss Schluss machen.
 
 [MOB_03A]
 Mr. Vercetti? Ich habe hier einen unterschriebenen Wisch,
@@ -768,7 +768,7 @@ Wie geht's, mein Alter?
 Ich hab vergessen, dir zu sagen, dass wir für das Konzert noch ein paar Ordner brauchen.
 
 [MOB_04C]
-Da gibt's so 'ne Biker-Gang, die wãr super für die Publicity.
+Da gibt's so 'ne Biker-Gang, die wär super für die Publicity.
 
 [MOB_04D]
 Wenn du mir das arrangierst, besorg ich dir 'n VIP-Pass für den Abend. Ok?
@@ -795,7 +795,7 @@ Wenn du willst, kocht Tante Poulet dir ein leckeres Süppchen, dann kannst du ma
 Komm doch die Tage mal bei mir vorbei, ok, Tommy?
 
 [MOB_08A]
-Tommy, ich dachte mir, du könntest meinen Rat als Geschãftsmann brauchen.
+Tommy, ich dachte mir, du könntest meinen Rat als Geschäftsmann brauchen.
 
 [MOB_08B]
 Wenn du ein Unternehmen am Laufen hast, musst du einmal pro Woche die Einnahmen kassieren gehen.
@@ -813,7 +813,7 @@ Ok, ok. Ich weiß ja, dass du Bescheid weißt.
 Ich meinte ja nur, damit du weißt, dass ich im Zweifelsfall auch Bescheid weiß.
 
 [MOB_08G]
-Nur für alle Fãlle, mein Alter!
+Nur für alle Fälle, mein Alter!
 
 [MOB_08H]
 Wenn du meinst, Ken...
@@ -825,7 +825,7 @@ Hey, Leo! Ich hab Arbeit für dich!
 Hier ist nicht Leo.
 
 [MOB_09C]
-Hey, wenn Leo erfãhrt, dass du mit seinem Handy telefonierst, bist du fãllig.
+Hey, wenn Leo erfährt, dass du mit seinem Handy telefonierst, bist du fällig.
 
 [MOB_09E]
 Du hast Leo erledigt? Du musst Mumm haben - willst du für mich arbeiten?
@@ -840,7 +840,7 @@ Tommy! Du musst mir einen Gefallen tun.
 Steve! Was machen die Dreharbeiten?
 
 [MOB_10C]
-Gut. Ich- ãh, WIR brauchen noch eine Autoverfolgungsjagd, aber unser Budget ist knapp.
+Gut. Ich- äh, WIR brauchen noch eine Autoverfolgungsjagd, aber unser Budget ist knapp.
 
 [MOB_10D]
 Ich hab in der Stadt verteilt ein paar Karren stehen. Du weißt, was zu tun ist.
@@ -867,10 +867,10 @@ Also, halt die Augen offen, dann könnte sich dir die ideale Gelegenheit bieten.
 Ciao, Avery.
 
 [MOB12_A]
-Hey, Tommy. Avery hier. Hör mal, ich hab gerade alle Hãnde voll zu tun,
+Hey, Tommy. Avery hier. Hör mal, ich hab gerade alle Hände voll zu tun,
 
 [MOB12_B]
-und ein Bevollmãchtigter von mir müsste zu den Gator Keys eskortiert werden.
+und ein Bevollmächtigter von mir müsste zu den Gator Keys eskortiert werden.
 
 [MOB12_C]
 Ich will da ein Stück Land kaufen und schick ihn hin, um den Deal abzuschließen.
@@ -903,7 +903,7 @@ Tja, war nett, mit Ihnen zu plaudern...
 WARTEN SIE! Vercetti - Tommy, kann ich Tommy zu Ihnen sagen?
 
 [MOB13_F]
-Wir sind beide Geschãftsleute. Sie erkennen doch ein gutes Geschãft sofort, oder?
+Wir sind beide Geschäftsleute. Sie erkennen doch ein gutes Geschäft sofort, oder?
 
 [MOB13_G]
 Ich hab keine Zeit für Palaver. Kommen Sie zum Punkt.
@@ -957,7 +957,7 @@ würdest du dich sicher verpflichtet fühlen, mir 'n Stück davon abzugeben?
 Ich werd dich nicht vergessen. Danke, Kent.
 
 [MOB_14H]
-'Paul'heiße ich, Scherzkeks. Ich KOMME aus Kent, Nãhe London.
+'Paul'heiße ich, Scherzkeks. Ich KOMME aus Kent, Nähe London.
 
 [MOB_14I]
 Mein geographisches Wissen über England ist eben nicht mehr, was es war.
@@ -990,7 +990,7 @@ Sehr witzig. Du weißt, dass ich mit getürkter Ware nichts am Hut habe.
 Wollte nur hören, ob ich nicht 'ne Rolle in einem von deinen Filmen kriegen könnte.
 
 [MOB16_E]
-In England habe ich viel einschlãgiges Zeug gedreht.
+In England habe ich viel einschlägiges Zeug gedreht.
 
 [MOB16_F]
 Ich hab mehr zu bieten als du, mein Alter.
@@ -999,7 +999,7 @@ Ich hab mehr zu bieten als du, mein Alter.
 Paul, danke für das Angebot. Ich komm auf dich zurück.
 
 [MOB16_H]
-Lass mich nicht hãngen. Denk dran, was ich alles für dich getan habe.
+Lass mich nicht hängen. Denk dran, was ich alles für dich getan habe.
 
 [MOB16_I]
 Das versuch ich ja grade zu vergessen.
@@ -1008,7 +1008,7 @@ Das versuch ich ja grade zu vergessen.
 Tommy Vercetti. Wie geht's, großer Meister?
 
 [MOB17_B]
-Man hört so einiges über dich. Bist jetzt 'ne große Nummer in der Stadt, hã?
+Man hört so einiges über dich. Bist jetzt 'ne große Nummer in der Stadt, hä?
 
 [MOB17_C]
 Paul, du bist betrunken.
@@ -1026,10 +1026,10 @@ Und du brauchst mich nicht dumm anzureden.
 Ich bin nicht irgendwer. Wer hat dir denn in dieser Stadt den Weg geebnet? Ich!
 
 [MOB17_H]
-Tatsãchlich?
+Tatsächlich?
 
 [MOB17_I]
-Tatsãchlich!
+Tatsächlich!
 
 [MOB17_J]
 Paul, reg dich ab. Ich hatte viel zu tun. Sei kein Idiot.
@@ -1038,7 +1038,7 @@ Paul, reg dich ab. Ich hatte viel zu tun. Sei kein Idiot.
 Ich bin kein Idiot. Das haben sie schon im Jugendknast gesagt.
 
 [MOB17_L]
-Wenn du Ãrger haben willst, Freundchen, den kannst du haben!
+Wenn du Ärger haben willst, Freundchen, den kannst du haben!
 
 [MOB17_M]
 Tommy, bitte! Du warst meine große Hoffnung. Bitte, mach dich nicht lustig über mich!
@@ -1056,16 +1056,16 @@ Echt der Hammer. Du glaubst nicht, was mir für 'ne Puppe über den Weg gelaufen
 'ne Bordsteinschwalbe, oder sowas. Unten in Little Havana.
 
 [MOB18_D]
-Sagt, sie heißt Mercedes oder so ãhnlich. Wahnsinn, Alter. Die Puppe musst du dir geben.
+Sagt, sie heißt Mercedes oder so ähnlich. Wahnsinn, Alter. Die Puppe musst du dir geben.
 
 [MOB18_E]
-Da würde 'nen Toter Hormonkoller kriegen. Sie sagt, ich wãr der beste, den sie je hatte.
+Da würde 'nen Toter Hormonkoller kriegen. Sie sagt, ich wär der beste, den sie je hatte.
 
 [MOB18_F]
 Halt die Augen nach ihr offen. Bis dann.
 
 [MOB19_A]
-Tommy, hier KP - Kent Paul. Ich hab lãuten hören, dass jemand dich leimen will.
+Tommy, hier KP - Kent Paul. Ich hab läuten hören, dass jemand dich leimen will.
 
 [MOB19_B]
 Also, sei wachsam, mein Freund. Und kein Sterbenswörtchen, dass du das von mir weißt.
@@ -1077,7 +1077,7 @@ Hallo, Tommy. Hier Paul. Ich höre, dass du ein paar Leuten auf den Schlips getr
 Irgendjemand sieht es anscheinend nicht gern, dass du auf einmal den großen Zampano spielst.
 
 [MOB_20C]
-Also, sag nicht, ich hãtte dich nicht gewarnt. Es rãcht sich, wenn man's übertreibt.
+Also, sag nicht, ich hätte dich nicht gewarnt. Es rächt sich, wenn man's übertreibt.
 
 [MOB_20D]
 Jedenfalls ist angeblich ein Kopfgeld auf dich ausgesetzt und es ist schon jemand hinter dir her.
@@ -1125,19 +1125,19 @@ sagen Sie mir nur eins, Tommy. Ist das wahr?
 Ist was wahr?
 
 [MOB71_N]
-Die Geschichten, die ich höre? Will sie wirklich Anwãltin werden?
+Die Geschichten, die ich höre? Will sie wirklich Anwältin werden?
 
 [MOB71_O]
-Welche Schande, Tommy. Wir Cortez sind eine stolze Familie und würden nie einer Tochter erlauben, Anwãltin zu werden.
+Welche Schande, Tommy. Wir Cortez sind eine stolze Familie und würden nie einer Tochter erlauben, Anwältin zu werden.
 
 [MOB71_P]
 Sagen Sie mir, dass es nicht wahr ist. Das ertrage ich nicht.
 
 [MOB71_Q]
-Colonel, ich versichere Ihnen, dass Mercedes niemals Anwãltin wird. Keine Angst.
+Colonel, ich versichere Ihnen, dass Mercedes niemals Anwältin wird. Keine Angst.
 
 [MOB71_R]
-Danke, Tommy - das wãre zu viel der Schande. Sie ist eine Dame, keine Schmarotzerin.
+Danke, Tommy - das wäre zu viel der Schande. Sie ist eine Dame, keine Schmarotzerin.
 
 [MOB71_S]
 Ich weiß, Colonel
@@ -1164,10 +1164,10 @@ Sie haben mein Wort darauf. Einstweilen möchte ich
 Ihnen den Dank meines Volkes aussprechen, für das Sie so viel getan haben.
 
 [MOB_25A]
-Tommy, hier Cortez. Die Franzosen machen mir Ãrger. Und wie.
+Tommy, hier Cortez. Die Franzosen machen mir Ärger. Und wie.
 
 [MOB_25B]
-Verdammte Heuchler! Jahrhundertelang beuten sie arme Lãnder aus und mich schimpfen sie einen Dieb!
+Verdammte Heuchler! Jahrhundertelang beuten sie arme Länder aus und mich schimpfen sie einen Dieb!
 
 [MOB_25C]
 Ich brauche dingend Ihre Hilfe.
@@ -1197,7 +1197,7 @@ Hallo? Spreche ich mit Mr. Tommy Vercetti?
 Ja.
 
 [MOB_29C]
-Ich hab mir sagen lassen, du wãrst der richtige Mann, wenn man Kroppzeug am Hals hat.
+Ich hab mir sagen lassen, du wärst der richtige Mann, wenn man Kroppzeug am Hals hat.
 
 [MOB_29D]
 Vielleicht...
@@ -1206,10 +1206,10 @@ Vielleicht...
 Tja, ich hab 'ne regelrechte Plage am Hals. Haitianer, überall.
 
 [MOB_29F]
-Mein Name ist Umberto Robina und es wãr mir recht, wenn du baldmöglichst ins Café Robina kãmst.
+Mein Name ist Umberto Robina und es wär mir recht, wenn du baldmöglichst ins Café Robina kämst.
 
 [MOB_29G]
-Diesmal haben's die Haitianer nãmlich zu weit getrieben.
+Diesmal haben's die Haitianer nämlich zu weit getrieben.
 
 [MOB_29H]
 Test
@@ -1218,10 +1218,10 @@ Test
 Tommy, hier Umberto Robina.
 
 [MOB_30B]
-Wie lãuft das Café?
+Wie läuft das Café?
 
 [MOB_30C]
-Oh, bestens. Sagenhaft, Tommy, sagenhaft. Keine Memmen, Tommy, nur echte Mãnner. Und wunderschöne Frauen!
+Oh, bestens. Sagenhaft, Tommy, sagenhaft. Keine Memmen, Tommy, nur echte Männer. Und wunderschöne Frauen!
 
 [MOB_30D]
 Ich wollte nur sagen, für mich und Paps bist du jetzt einer von uns. Ein Kubaner.
@@ -1260,7 +1260,7 @@ Und ich kann dir bestimmt irgendwann helfen, ok?
 Tommy, die Wunde verheilt gut. Ist nur komisch:
 
 [MOB_35B]
-da hab ich auf 6 Schlachtfeldern gekãmpft und nie 'n Kratzer abgekriegt und dann das!
+da hab ich auf 6 Schlachtfeldern gekämpft und nie 'n Kratzer abgekriegt und dann das!
 
 [MOB_35C]
 Jetzt bin ich der einarmige Phil. Hab aber 'n gutes Arsenal an Handfeuerwaffen, also bin ich auch mit Arm ab nicht arm dran.
@@ -1278,10 +1278,10 @@ Verdammte Vietnamesen. Wo du hinschaust ein Hinterhalt.
 Die Wunde heilt gut. Und jetzt kassiere ich meine Versehrtenrente endlich völlig zurecht. Danke, Kumpel.
 
 [MOB_40A]
-Hey, Tommy, hier Sonny. Was macht die Sonnenbrãune?
+Hey, Tommy, hier Sonny. Was macht die Sonnenbräune?
 
 [MOB_40B]
-Ich hab keine Sonnenbrãune.
+Ich hab keine Sonnenbräune.
 
 [MOB_40C]
 Naja, mein Geld hast du jedenfalls auch nicht. Daher frag ich mich,
@@ -1296,10 +1296,10 @@ Ich bin auf der Suche nach deinem Geld, Sonny. Keine Sorge.
 Ich mach mir aber Sorgen, Tommy, ich kann nicht anders.
 
 [MOB_40G]
-Ich hab nãmlich anscheinend mit zu viel unzuverlãssigen Menschen zu tun.
+Ich hab nämlich anscheinend mit zu viel unzuverlässigen Menschen zu tun.
 
 [MOB_40H]
-Sei du bitte kein unzuverlãssiger Mensch, Tommy.
+Sei du bitte kein unzuverlässiger Mensch, Tommy.
 
 [MOB_40I]
 Tu dir und mir einen Gefallen. Ich freu mich, von dir zu hören.
@@ -1317,16 +1317,16 @@ Ja genau, Sonny. Wir sind doch alte Freunde,
 aber du schreibst nie, rufst nie an. Willst du denn nicht mehr mein Freund sein?
 
 [MOB_41E]
-Ich hab alle Hãnde voll zu tun, die Sache zu regeln. Und du bist auch keine große Hilfe.
+Ich hab alle Hände voll zu tun, die Sache zu regeln. Und du bist auch keine große Hilfe.
 
 [MOB_41F]
 Ach, ich bin also schuld? Ja, ich hab gehört, dass du zu tun hast...
 
 [MOB_41G]
-Musst Drogenbarone erledigen, ihre Geschãfte übernehmen.
+Musst Drogenbarone erledigen, ihre Geschäfte übernehmen.
 
 [MOB_41H]
-Vergiss mich nicht, Tommy. Ich verspreche dir nãmlich, dass ich dich nicht vergesse...
+Vergiss mich nicht, Tommy. Ich verspreche dir nämlich, dass ich dich nicht vergesse...
 
 [MOB_42A]
 Tommy.
@@ -1338,13 +1338,13 @@ Sonny.
 Anscheinend hörst du neuerdings schlecht, deshalb frag ich dich jetzt nochmal:
 
 [MOB_42D]
-Tommy, wo ist die verdammte Kohle? Wo ist der verdammte Stoff und wo ist mein Anteil an deinem neuen Geschãft?
+Tommy, wo ist die verdammte Kohle? Wo ist der verdammte Stoff und wo ist mein Anteil an deinem neuen Geschäft?
 
 [MOB_42E]
-Du hãltst mich zum Narren, Tommy, ich find's bloß nicht zum Lachen.
+Du hältst mich zum Narren, Tommy, ich find's bloß nicht zum Lachen.
 
 [MOB_43A]
-Tommy, Tommy, Tommy, Sonny hat gerade angerufen, dãmmert dir was?
+Tommy, Tommy, Tommy, Sonny hat gerade angerufen, dämmert dir was?
 
 [MOB_43B]
 Ich weiß nicht, wie das mit dir ist, aber wenn mir jemand droht, dass er meine Familie umbringt,
@@ -1365,7 +1365,7 @@ Ken, ich muss mich gerade auf was anderes konzentrieren.
 Wir kümmern uns zu gegebener Zeit um Forelli.
 
 [MOB_43H]
-Ich bin ruhig. Hör ich mich nicht ruhig an? Muss die Todesangst sein, die auf die Stimme schlãgt.
+Ich bin ruhig. Hör ich mich nicht ruhig an? Muss die Todesangst sein, die auf die Stimme schlägt.
 
 [MOB45_A]
 Tommy, wir müssen miteinander reden.
@@ -1437,7 +1437,7 @@ Wir stecken schon viel zu tief drin. Aber danke für den Anruf. Du hörst von mi
 Tommy - Lance. Wir stecken in der Patsche. Du musst sofort kommen.
 
 [MOB52_A]
-Hey, Leo, ich glaube, wir haben einen Kãufer für Diaz' Ware.
+Hey, Leo, ich glaube, wir haben einen Käufer für Diaz' Ware.
 
 [MOB52_B]
 Du musst ihn anrufen und den Deal in die Wege leiten, ok?
@@ -1473,7 +1473,7 @@ Ich hab 'ne neue Wohnung in Vice Point.
 Vielleicht kommst du mich ja mal besuchen.
 
 [MOB54_E]
-Klar, gern. Also, bis spãter.
+Klar, gern. Also, bis später.
 
 [MOB55_A]
 Tommy, ich bin's.
@@ -1539,13 +1539,13 @@ Selber hey, du toller Hecht. Ich bin sauer auf dich, Tommy.
 Schick mich nie mehr zu diesem Jezz Torrent.
 
 [MOB58_E]
-So ein Jammerlappen. Mittendrin fãngt er an zu weinen wegen seinem Hündchen,
+So ein Jammerlappen. Mittendrin fängt er an zu weinen wegen seinem Hündchen,
 
 [MOB58_F]
 das gestorben ist, als er 7 war, und dass seine Mama ihn nie lieb hatte.
 
 [MOB58_G]
-Und Tommy - privat lãuft er in Perücke und BH rum.
+Und Tommy - privat läuft er in Perücke und BH rum.
 
 [MOB58_H]
 Ich bin nicht gut auf dich zu sprechen!
@@ -1587,7 +1587,7 @@ Geh zu der Telefonzelle vor Ort.
 +~1~ Sekunden
 
 [F_RANGE]
-~g~Du bist außer Reichweite des Feuerwehrfunks. Fahr nãher an eine Feuerwache heran!
+~g~Du bist außer Reichweite des Feuerwehrfunks. Fahr näher an eine Feuerwache heran!
 
 [DODO_FT]
 Du bist ~1~ Sekunden geflogen!
@@ -1611,7 +1611,7 @@ Auf dich ist Verlass. Wenn du alle, die auf der Liste stehen, abgeliefert hast, 
 Du hast alle georderten Karren geliefert. Sehr gut. Hier, für dich.
 
 [GA_15]
-Hoffentlich gefãllt dir die neue Farbe.
+Hoffentlich gefällt dir die neue Farbe.
 
 [GA_16]
 Das Umspritzen ist gratis.
@@ -1620,7 +1620,7 @@ Das Umspritzen ist gratis.
 An dem Modell haben wir kein Interesse.
 
 [GA_20]
-Von der Sorte haben wir schon mehr als genug. Sorry, da kommen wir nicht ins Geschãft.
+Von der Sorte haben wir schon mehr als genug. Sorry, da kommen wir nicht ins Geschäft.
 
 [CHASE]
 Größtes Medieninteresse bisher
@@ -1767,7 +1767,7 @@ Hupe
 Fahrzeugsteuerung
 
 [FEC_BRA]
-Bremsen oder rückwãrts fahren
+Bremsen oder rückwärts fahren
 
 [FEC_HAB]
 Handbremse
@@ -1896,7 +1896,7 @@ Von dir gemachte Fotos
 Besuche von Kredithaien
 
 [ST_STOR]
-Geknackte Lãden
+Geknackte Läden
 
 [ST_MOVI]
 Film-Stunts
@@ -1905,7 +1905,7 @@ Film-Stunts
 Gelieferte Pizzas
 
 [ST_GARB]
-Getãtigte Müllfuhren
+Getätigte Müllfuhren
 
 [ST_ICEC]
 Verkaufte Eiscreme
@@ -1932,7 +1932,7 @@ Flugstunden
 Piloten-Rating
 
 [ST_RAN0]
-Anfãnger
+Anfänger
 
 [ST_RAN1]
 Navigator
@@ -2037,7 +2037,7 @@ Monster-Stunts geschafft
 Begonnene Missionen
 
 [PASDRO]
-Ans Ziel beförderte Fahrgãste
+Ans Ziel beförderte Fahrgäste
 
 [MONTAX]
 Mit Taxi verdientes Geld
@@ -2085,7 +2085,7 @@ von
 Geschützsteuerung
 
 [FEC_RS3]
-Radiosender auswãhlen (L3-Taste)
+Radiosender auswählen (L3-Taste)
 
 [FEC_HO3]
 Hupe (L3-Taste)
@@ -2094,7 +2094,7 @@ Hupe (L3-Taste)
 Bürgerwehr-Mission beendet!
 
 [C_ESCP]
-~r~Der Verdãchtige ist entwischt!
+~r~Der Verdächtige ist entwischt!
 
 [C_VIGIL]
 BÜRGERWEHR BONUS!!
@@ -2127,7 +2127,7 @@ Hey, so was heißes rühre ich nicht an!
 Komm wieder, wenn du nicht so viel zu tun hast...
 
 [HELP9_C]
-Drücke die~h~ ~k~~PED_FIREWEAPON~~w~, um das Prãzisionsgewehr ~h~abzufeuern~w~.
+Drücke die~h~ ~k~~PED_FIREWEAPON~~w~, um das Präzisionsgewehr ~h~abzufeuern~w~.
 
 [TAXI2]
 ~r~Die Zeit ist um!
@@ -2136,7 +2136,7 @@ Drücke die~h~ ~k~~PED_FIREWEAPON~~w~, um das Prãzisionsgewehr ~h~abzufeuern~w~
 Gesundheits-Powerups in Versteck angeliefert.
 
 [PAGEB14]
-Adrenalin in Versteck vorrãtig.
+Adrenalin in Versteck vorrätig.
 
 [FESZ_CA]
 Abbrechen
@@ -2163,7 +2163,7 @@ Wirklich ein neues Spiel beginnen? Alle Daten seit dem letzten Speichern werden 
 'PCJ Rallye'
 
 [BMX_1]
-'Krasses Gelãnde'
+'Krasses Gelände'
 
 [BMX_2]
 'Teststrecke'
@@ -2559,7 +2559,7 @@ Informant
 Spitzel
 
 [RATNG11]
-Verrãter
+Verräter
 
 [RATNG12]
 Hochstapler
@@ -2574,7 +2574,7 @@ Schieber
 Falschspieler
 
 [RATNG16]
-Schlãger
+Schläger
 
 [RATNG17]
 Straßengauner
@@ -2625,7 +2625,7 @@ Soldat
 Gorilla
 
 [RATNG33]
-Kopfgeldjãger
+Kopfgeldjäger
 
 [RATNG34]
 Mann fürs Grobe
@@ -2634,7 +2634,7 @@ Mann fürs Grobe
 Ronin
 
 [RATNG36]
-Abrãumer
+Abräumer
 
 [RATNG37]
 Hit-Man
@@ -2649,7 +2649,7 @@ Butcher
 Troubleshooter
 
 [RATNG41]
-Attentãter
+Attentäter
 
 [RATNG42]
 Adjutant
@@ -4077,10 +4077,10 @@ Wenn zu Fuß unterwegs, drücke die ~h~~k~~PED_LOOKBEHIND~~w~, um ~h~nach hinten
 Nach hinten sehen (R3-Taste)
 
 [PERPIC]
-Versteckte Pãckchen gefunden
+Versteckte Päckchen gefunden
 
 [CO_ONE]
-Verstecktes Pãckchen ~1~ von ~1~
+Verstecktes Päckchen ~1~ von ~1~
 
 [GA_21]
 In dieser Garage bringst du keine Autos mehr unter.
@@ -4116,7 +4116,7 @@ Jan
 Feb
 
 [MAR]
-Mãr
+Mär
 
 [APR]
 Apr
@@ -4173,7 +4173,7 @@ In Fahrzeug ein- und aussteigen.
 'FEUERWEHRMANN'
 
 [AMBUL_M]
-'SANITÃTER'
+'SANITÄTER'
 
 [HJ_IS]
 IRRSINNS-STUNT-BONUS: $~1~
@@ -4218,7 +4218,7 @@ DIE ANWALTSMISSIONEN
 ~g~Besorge dir neue Sachen in Rafaels Shop.
 
 [LAW4_6]
-Nieder mit der Geschãftsleitung!
+Nieder mit der Geschäftsleitung!
 
 [LAW4_7]
 Tod den Bossen!
@@ -4263,7 +4263,7 @@ Mist! Willst du mich umbringen?!
 ~g~Begib dich zum Übergabeort und pass auf Diaz auf.
 
 [GEN3_32]
-~g~Begib dich zu deinem Beobachtungsposten auf dem Dach des Gebãudes gegenüber von Lance.
+~g~Begib dich zu deinem Beobachtungsposten auf dem Dach des Gebäudes gegenüber von Lance.
 
 [COKE]
 DIE KOKS-BARON-MISSIONEN
@@ -4470,10 +4470,10 @@ ZEIT:
 ~g~Du kannst immer nur 1 Bombe transportieren und kannst erfolgreich platzierten Bomben nicht wieder aufnehmen.
 
 [SEG3_7]
-~g~Sobald du die ERSTE Bombe platziert hast, lãuft der Timer des Zeitzünders an. Du musst dann alle Bomben innerhalb dieses Zeitraums platzieren.
+~g~Sobald du die ERSTE Bombe platziert hast, läuft der Timer des Zeitzünders an. Du musst dann alle Bomben innerhalb dieses Zeitraums platzieren.
 
 [SEG3_8]
-~g~Alle 4 Bomben müssen in den 4 Zielzonen platziert werden, um die Mission zu erfüllen und das Gebãude zu demolieren.
+~g~Alle 4 Bomben müssen in den 4 Zielzonen platziert werden, um die Mission zu erfüllen und das Gebäude zu demolieren.
 
 [SEG3_9]
 ~g~Zielzone getroffen! Noch 3 Bomben.
@@ -4491,7 +4491,7 @@ ZEIT:
 ~g~Wirf die Bombe in einer Zielzone ab.
 
 [SEG3_14]
-~r~Die Zeit ist um. Demolierung des Gebãudes fehlgeschlagen.
+~r~Die Zeit ist um. Demolierung des Gebäudes fehlgeschlagen.
 
 [SEG3_15]
 ~r~Dein RC Raider ist zerstört. Wie willst du jetzt die Bomben transportieren?
@@ -4500,13 +4500,13 @@ ZEIT:
 AVERY-MISSIONEN
 
 [ASM]
-ATTENTÃTERMISSIONEN
+ATTENTÄTERMISSIONEN
 
 [ASM_1]
-ATTENTÃTERMISSION 1
+ATTENTÄTERMISSION 1
 
 [ASM1_1]
-~g~Mr. Teal, Ihre Hilfe bei der Beseitigung der Landeier war ãußerst wertvoll. Ich habe noch mehr Arbeit, die eine eher 'zupackende' Art verlangt. Ihr nãchster Job klebt unter dem Telefon.
+~g~Mr. Teal, Ihre Hilfe bei der Beseitigung der Landeier war äußerst wertvoll. Ich habe noch mehr Arbeit, die eine eher 'zupackende' Art verlangt. Ihr nächster Job klebt unter dem Telefon.
 
 [ASM1_2]
 ~g~Begib zu dich dem Fernsprecher vor dem Einkaufszentrum in Washington.
@@ -4518,16 +4518,16 @@ ATTENTÃTERMISSION 1
 ~g~Schalte den Pizza-Lieferanten aus, bevor er seine Lieferungen abschließt.
 
 [ASM_2]
-ATTENTÃTERMISSION 2
+ATTENTÄTERMISSION 2
 
 [ASM_3]
-ATTENTÃTERMISSION 3
+ATTENTÄTERMISSION 3
 
 [ASM3_A]
-Marcus Hammond, Franco Carter, Dick Tanner, Nick Kong und Stuntman Driver gehören zu einem europãischen Syndikat und planen einen Überfall.
+Marcus Hammond, Franco Carter, Dick Tanner, Nick Kong und Stuntman Driver gehören zu einem europäischen Syndikat und planen einen Überfall.
 
 [ASM3_B]
-Sie sind alle bereits in Position. Schalten Sie sie aus, bevor es losgeht. Sie haben 9 Minuten. Ich habe in der Nãhe Waffen deponiert, die Sie brauchen werden.
+Sie sind alle bereits in Position. Schalten Sie sie aus, bevor es losgeht. Sie haben 9 Minuten. Ich habe in der Nähe Waffen deponiert, die Sie brauchen werden.
 
 [ASM3_1]
 ~g~Hol dir die Waffe, die Mr. Black für dich deponiert hat.
@@ -4536,7 +4536,7 @@ Sie sind alle bereits in Position. Schalten Sie sie aus, bevor es losgeht. Sie h
 ~g~Geh nicht zu dicht an die Zielperson heran, sonst bemerkt sie dich.
 
 [ASM3_3]
-~g~Es geht schneller, wenn du dir eine günstige Position nahe ihrem Standort suchst und zuschlãgst, ohne gesehen zu werden.
+~g~Es geht schneller, wenn du dir eine günstige Position nahe ihrem Standort suchst und zuschlägst, ohne gesehen zu werden.
 
 [ASM3_4]
 ~g~Er hat dich gesehen. Du musst ihn irgendwie ausschalten!
@@ -4548,10 +4548,10 @@ Sie sind alle bereits in Position. Schalten Sie sie aus, bevor es losgeht. Sie h
 ~g~Franco Carter befindet sich bei DBP Security nahe dem Ocean Drive.
 
 [ASM3_7]
-~g~Dick Tanner ist in der Nãhe des Juweliers in Vice Point.
+~g~Dick Tanner ist in der Nähe des Juweliers in Vice Point.
 
 [ASM3_8]
-~g~Nick Kong befindet sich nãhe Washington Beach.
+~g~Nick Kong befindet sich nähe Washington Beach.
 
 [ASM3_9]
 ~g~Stuntman Driver ist in Washington.
@@ -4560,13 +4560,13 @@ Sie sind alle bereits in Position. Schalten Sie sie aus, bevor es losgeht. Sie h
 Du hast nicht alle ausgeschaltet.
 
 [ASM_4]
-ATTENTÃTERMISSION 4
+ATTENTÄTERMISSION 4
 
 [ASM4_1]
 ~g~Hol dir das Gewehr, das im Laub vor dem Flughafen-Terminal für dich deponiert wurde.
 
 [ASM4_2]
-~g~Verfehle dein Ziel nicht, du alarmierst sonst die Leibwãchter. Und bleib auf Distanz, damit er dich nicht bemerkt.
+~g~Verfehle dein Ziel nicht, du alarmierst sonst die Leibwächter. Und bleib auf Distanz, damit er dich nicht bemerkt.
 
 [ASM4_3]
 ~g~Beobachte die Frau über den Check-in-Schaltern im Terminal. TU IHR NICHTS.
@@ -4599,7 +4599,7 @@ Hol dir den Aktenkoffer.
 ~g~Der Distanz-Balken am oberen rechten Bildschirmrand zeigt dir, wie nahe du der Zielperson bist. Lass ihn nicht voll werden, sonst sieht sie dich.
 
 [ASM_5]
-ATTENTÃTERMISSION 5
+ATTENTÄTERMISSION 5
 
 [KICK]
 KICKSTART
@@ -4650,7 +4650,7 @@ Alles, was ich gern habe, geht kaputt!
 Verdammt! Da sind sie schon!
 
 [BNK4_32]
-Spreng die Schließfãcher mit Sprengstoff auf.
+Spreng die Schließfächer mit Sprengstoff auf.
 
 [BNK4_36]
 Wo ist Cam?
@@ -4665,7 +4665,7 @@ Das ist der letzte! LOS! LOS! LOS!
 Shit! Wo bleibt Hilary?
 
 [BK4_40A]
-Ich werd was für seine Verlustãngste tun!
+Ich werd was für seine Verlustängste tun!
 
 [BNK4_42]
 Hey, Jungs! Los, rein! Ich geb euch Deckung!
@@ -4686,7 +4686,7 @@ Ja. Andererseits, so bleibt mehr für uns!
 Sehr richtig! YEEEEHAAAH!
 
 [BNK4_48]
-Tommy, eine Massage gefãllig?
+Tommy, eine Massage gefällig?
 
 [BNK4_49]
 Hi, Mercedes. Ja, ich bin ein bisschen verspannt...
@@ -4707,13 +4707,13 @@ KENT PAUL-MISSIONEN
 KENT PAUL-MISSION 1
 
 [COUNT]
-FÃLSCHER-MISSIONEN
+FÄLSCHER-MISSIONEN
 
 [COUNT1]
-FÃLSCHER-MISSION 1
+FÄLSCHER-MISSION 1
 
 [COUNT2]
-FÃLSCHER-MISSION 2
+FÄLSCHER-MISSION 2
 
 [BIKE]
 DIE BIKER GANG-MISSIONEN
@@ -4743,7 +4743,7 @@ HAITI-MISSION 2
 HAITI-MISSION 3
 
 [HAM3_6]
-~g~Verwende das Prãzisionsgewehr, das ich für dich besorgt habe.
+~g~Verwende das Präzisionsgewehr, das ich für dich besorgt habe.
 
 [ROCK]
 DIE ROCKBAND-GANG-MISSIONEN
@@ -4806,7 +4806,7 @@ SCHUTZGELD-MISSIONEN
 ~g~Verlasse das Einkaufszentrum.
 
 [PRO3_06]
-~g~Hãng die Cops ab.
+~g~Häng die Cops ab.
 
 [PORN]
 PORNO-MISSIONEN
@@ -4875,25 +4875,25 @@ Malibu Club gekauft: $ ~1~
 Bootswerft gekauft: $ ~1~
 
 [PRNT_NO]
-Zurzeit kannst du die Druckerei nicht kaufen. Komm spãter wieder.
+Zurzeit kannst du die Druckerei nicht kaufen. Komm später wieder.
 
 [CAR_NO]
-Zurzeit kannst du das Autohaus nicht kaufen. Komm spãter wieder.
+Zurzeit kannst du das Autohaus nicht kaufen. Komm später wieder.
 
 [PORN_NO]
-Zurzeit kannst du das Filmstudio nicht kaufen. Komm spãter wieder.
+Zurzeit kannst du das Filmstudio nicht kaufen. Komm später wieder.
 
 [ICE_NO]
-Zurzeit kannst du die Eiscremefabrik nicht kaufen. Komm spãter wieder.
+Zurzeit kannst du die Eiscremefabrik nicht kaufen. Komm später wieder.
 
 [TAXI_NO]
-Zurzeit kannst du das Taxiunternehmen nicht kaufen. Komm spãter wieder.
+Zurzeit kannst du das Taxiunternehmen nicht kaufen. Komm später wieder.
 
 [BANK_NO]
-Zurzeit kannst du den Malibu Club nicht kaufen. Komm spãter wieder.
+Zurzeit kannst du den Malibu Club nicht kaufen. Komm später wieder.
 
 [BOAT_NO]
-Zurzeit kannst du die Bootswerft nicht kaufen. Komm spãter wieder.
+Zurzeit kannst du die Bootswerft nicht kaufen. Komm später wieder.
 
 [PRNT_R3]
 Drücke R3, um die Druckerei zu kaufen. Preis: $~1~
@@ -4929,13 +4929,13 @@ Her damit!
 Thomas, schön, dass Sie da sind.
 
 [COL3_B]
-Verzeihen Sie, dass ich direkt zum Geschãftlichen komme.
+Verzeihen Sie, dass ich direkt zum Geschäftlichen komme.
 
 [COL3_C]
 Diaz bat mich, eine kleine Transaktion für ihn zu überwachen.
 
 [COL3_D]
-Hoffentlich lãuft es diesmal besser als zuletzt.
+Hoffentlich läuft es diesmal besser als zuletzt.
 
 [COL3_E]
 Deshalb wende ich mich ja an Sie, mein Freund.
@@ -4944,7 +4944,7 @@ Deshalb wende ich mich ja an Sie, mein Freund.
 Ich habe im Parkhaus ein wenig Artillerie deponiert.
 
 [COL3_G]
-Holen Sie sich die und beschützen Sie Diaz' Mãnner bei der Übergabe.
+Holen Sie sich die und beschützen Sie Diaz' Männer bei der Übergabe.
 
 [COL4_2]
 Ich weiß nicht, Sir!
@@ -4983,10 +4983,10 @@ Beschütze den Kurier!
 Ok, Jungs, macht ihn fertig!
 
 [FIN_1A]
-Komm her, du hinterhãltiger Dreckskerl!
+Komm her, du hinterhältiger Dreckskerl!
 
 [FIN_1B]
-Jetzt bist du fãllig, du mieser Verrãter!
+Jetzt bist du fällig, du mieser Verräter!
 
 [FIN_1C]
 Das wird dein letzter 'Dance', Lance Vance!
@@ -4998,7 +4998,7 @@ Ach, wirklich?
 Der dumme Spruch war schon im Kindergarten alt!
 
 [FIN_3]
-Keiner da, um dich rauszuhauen, diesmal, hã, Tommy?
+Keiner da, um dich rauszuhauen, diesmal, hä, Tommy?
 
 [FIN_4]
 Du bist am Ende, Tommy.
@@ -5010,7 +5010,7 @@ Du hast dich auf die falsche Seite geschlagen, Lance...
 Sonny ist oben am Safe mit MEINEM Geld...
 
 [FIN_10]
-Sonny? SONNY! Jetzt bist du fãllig!
+Sonny? SONNY! Jetzt bist du fällig!
 
 [FIN_11A]
 Du hast mir 15 Jahre gestohlen, Sonny.
@@ -5142,16 +5142,16 @@ Spiel laden und weiterspielen?
 Feuern
 
 [FEC_NWE]
-Nãchste Waffe
+Nächste Waffe
 
 [FEC_PWE]
 Vorherige Waffe
 
 [FEC_FOR]
-Vorwãrts
+Vorwärts
 
 [FEC_BAC]
-Rückwãrts
+Rückwärts
 
 [FEC_LEF]
 Links
@@ -5175,7 +5175,7 @@ Radio
 Spezialmission
 
 [FEC_CMR]
-Blickwinkel ãndern
+Blickwinkel ändern
 
 [FEC_JMP]
 Springen
@@ -5193,7 +5193,7 @@ Nach links sehen
 Nach rechts sehen
 
 [FEC_NTR]
-Nãchstes Ziel
+Nächstes Ziel
 
 [FEC_PTT]
 Vorheriges Ziel
@@ -5349,7 +5349,7 @@ WAVE 103
 Helligkeit
 
 [FED_TRA]
-Unschãrfe-FX
+Unschärfe-FX
 
 [FED_SUB]
 Untertitel
@@ -5388,7 +5388,7 @@ Spiel löschen
 Controller-Setup
 
 [FEC_RED]
-Steuerung ãndern
+Steuerung ändern
 
 [FEC_MOU]
 Maus-Einstellg.
@@ -5409,7 +5409,7 @@ Unbeliebtester Radiosender
 Lieblingsfahrzeug
 
 [ST_STAR]
-Anzahl angehãufter Fahndungssterne
+Anzahl angehäufter Fahndungssterne
 
 [ST_HEAD]
 Anzahl Köpfe
@@ -5430,7 +5430,7 @@ Aufgeschlitzte Reifen
 Erledigte Gegner im Chaos-Derby
 
 [ST_LTBR]
-Lãngste Zeit im Chaos-Derby (Sekunden)
+Längste Zeit im Chaos-Derby (Sekunden)
 
 [ST_GNG1]
 Kubaner
@@ -5460,7 +5460,7 @@ Golfer
 ESPANTOSO
 
 [ST_ASSI]
-Ausgeführte Attentãtermissionen
+Ausgeführte Attentätermissionen
 
 [DISTBIK]
 Mit Motorrad zurückgel. Strecke (Meilen)
@@ -5490,7 +5490,7 @@ Daten wurden gespeichert. Weiter mit OK.
 Daten wurden gelöscht. Weiter mit OK.
 
 [FESZ_QC]
-Dieses beschãdigte Spiel überschreiben?
+Dieses beschädigte Spiel überschreiben?
 
 [FES_CHE]
 Achtung! Ein oder mehrere Cheats sind aktiviert, dies kann sich auf die Speicherung auswirken. Es wird empfohlen, dieses Spiel nicht zu speichern.
@@ -5598,7 +5598,7 @@ Schnellste Zeit bei 'Wheels of Steels'
 Schnellste Zeit bei 'Der Fahrer'
 
 [STFT_03]
-Schnellste Zeit auf Gelãndemotorradstrecke
+Schnellste Zeit auf Geländemotorradstrecke
 
 [STFT_04]
 Schnellste Zeit bei Modellflugzeug-Rennen
@@ -5634,16 +5634,16 @@ High-Score bei Schießstand-Mission
 Beste Trefferquote am Schießstand (in Prozent)
 
 [STHC_03]
-Anzahl getãtigter Drogendeals
+Anzahl getätigter Drogendeals
 
 [HELP24]
-Du kannst jetzt Auftrãge vom Colonel annehmen.
+Du kannst jetzt Aufträge vom Colonel annehmen.
 
 [HELP25]
-Du kannst jetzt Auftrãge von Avery Carrington annehmen.
+Du kannst jetzt Aufträge von Avery Carrington annehmen.
 
 [HELP29]
-Außerhalb eine Mision kannst du zu dem Bekleidungsgeschãft gehen.
+Außerhalb eine Mision kannst du zu dem Bekleidungsgeschäft gehen.
 
 [HELP30]
 Wenn du neue Klamotten kaufst, reduziert sich dein Fahndungslevel auf null.
@@ -5676,7 +5676,7 @@ Du brauchst eine Maschinenpistole für einen 'Drive-By'.
 ~k~~PED_SPRINT~ zum Beenden.
 
 [ASM1_B]
-Ihr nãchster Auftrag klebt unter dem Telefon.
+Ihr nächster Auftrag klebt unter dem Telefon.
 
 [ASM1_C]
 Ich habe noch mehr Arbeit, die eine eher 'zupackende' Art verlangt.
@@ -5796,7 +5796,7 @@ Hier Cortez. Sie waren bei meiner Party.
 Ja. Ich erinnere mich.
 
 [MOB_24E]
-Mr. Vercetti, es war höchst unglücklich, was da bei der Abwicklung Ihres Geschãfts vorgefallen ist.
+Mr. Vercetti, es war höchst unglücklich, was da bei der Abwicklung Ihres Geschäfts vorgefallen ist.
 
 [MOB_24F]
 Ich weiß.
@@ -5850,7 +5850,7 @@ Mafia Cruiser
 'DONNER ÜBER VICE CITY'
 
 [BNK3_2]
-Ich fahre nicht für dich, niemals. Das erzãhle ich in der Therapie.
+Ich fahre nicht für dich, niemals. Das erzähle ich in der Therapie.
 
 [FEM_SL1]
 Datei 1 nicht vorhanden
@@ -5940,7 +5940,7 @@ Havana
 Cop
 
 [OUTFT7]
-Bankrãuber
+Bankräuber
 
 [OUTFT8]
 Freizeit
@@ -5958,7 +5958,7 @@ MC Tommy
 AUTOHAUS ERWORBEN
 
 [CAR_AS2]
-~g~Sunshine Autos generiert nun bis zu $~1~ Einkünfte. Hol dir das Geld regelmãßig ab.
+~g~Sunshine Autos generiert nun bis zu $~1~ Einkünfte. Hol dir das Geld regelmäßig ab.
 
 [BUYSAVE]
 ~g~Außerhalb einer Mission kannst du dein Spiel hier umsonst speichern.
@@ -6003,13 +6003,13 @@ Sie finden mich auf dem Boot.
 .357 in Verstecken angeliefert!
 
 [PICK3]
-Kettensãgen in Verstecken angeliefert!
+Kettensägen in Verstecken angeliefert!
 
 [PICK4]
 Flammenwerfer in Verstecken angeliefert!
 
 [PICK5]
-.308 Prãzisionsgewehr in Verstecken angeliefert!
+.308 Präzisionsgewehr in Verstecken angeliefert!
 
 [PICK6]
 Mini-Kanonen in Verstecken angeliefert!
@@ -6027,43 +6027,43 @@ Panzer jetzt in Army-Kaserne verfügbar!
 Hunter jetzt in Army-Kaserne verfügbar!
 
 [CLOTH1]
-Abendgarderobe bei Rafaels in Ocean Beach erhãltlich.
+Abendgarderobe bei Rafaels in Ocean Beach erhältlich.
 
 [CLOTH2]
 Straßenkleidung in Verstecken angeliefert.
 
 [CLOTH3]
-Overall bei 'Tooled Up' im North Point Einkaufszentrum erhãltlich.
+Overall bei 'Tooled Up' im North Point Einkaufszentrum erhältlich.
 
 [CLOTH4]
-Country Club-Bekleidung beim Golf Club in Leaf Links erhãltlich.
+Country Club-Bekleidung beim Golf Club in Leaf Links erhältlich.
 
 [CLOTH5]
-Havana-Outfit bei 'Little Havana Streetwear' in Little Havana erhãltlich.
+Havana-Outfit bei 'Little Havana Streetwear' in Little Havana erhältlich.
 
 [CLOTH6]
-Polizeiuniform bei Polizeistation in Washington Beach erhãltlich.
+Polizeiuniform bei Polizeistation in Washington Beach erhältlich.
 
 [CLOTH7]
-Freizeitbekleidung bei 'Gash' im North Point Einkaufszentrum erhãltlich.
+Freizeitbekleidung bei 'Gash' im North Point Einkaufszentrum erhältlich.
 
 [CLOTH8]
-Mr. Vercetti-Outfit bei 'Collar & Cuffs'in Ocean Beach erhãltlich.
+Mr. Vercetti-Outfit bei 'Collar & Cuffs'in Ocean Beach erhältlich.
 
 [CLOTH9]
-Trainingsanzug bei 'Jocksport' in Downtown erhãltlich.
+Trainingsanzug bei 'Jocksport' in Downtown erhältlich.
 
 [CLOTH10]
-Bankrãuber-Outfit beim Malibu Club in Vice Point erhãltlich.
+Bankräuber-Outfit beim Malibu Club in Vice Point erhältlich.
 
 [MOB_62A]
 Tommy, hier Ricardo Diaz. Ich wollte dir danken, dass du mich gerettet hast.
 
 [MOB_62B]
-Ich hab den Trottel von Cortez gefragt. Er meint, du wãrst ein Mann für alle Fãlle. Komm doch mal bei mir vorbei.
+Ich hab den Trottel von Cortez gefragt. Er meint, du wärst ein Mann für alle Fälle. Komm doch mal bei mir vorbei.
 
 [MOB_62C]
-Ich brauche einen Kerl wie dich. Ich hab nãmlich nur Schwachköpfe.
+Ich brauche einen Kerl wie dich. Ich hab nämlich nur Schwachköpfe.
 
 [MOB_62D]
 Nur lauter Schwachköpfe. Ich mache dich schwer reich.
@@ -6081,7 +6081,7 @@ Lade...
 Schnellste Zeit bei 'PCJ Rallye'
 
 [STFT_18]
-Schnellste Zeit bei 'Krasses Gelãnde'
+Schnellste Zeit bei 'Krasses Gelände'
 
 [STFT_19]
 Schnellste Zeit bei 'Teststrecke'
@@ -6090,7 +6090,7 @@ Schnellste Zeit bei 'Teststrecke'
 Neuer Rekord!! ~1~ Minuten und ~1~ Sekunden.
 
 [BMX_HOW]
-~g~Fahr zwei Runden auf der Gelãndemotorradstrecke. ~y~Passiere dabei ~g~die ~y~CHECKPOINTS~g~!
+~g~Fahr zwei Runden auf der Geländemotorradstrecke. ~y~Passiere dabei ~g~die ~y~CHECKPOINTS~g~!
 
 [BMXREW1]
 ~g~Jedes Mal wenn du deine bisherige Bestzeit für die zwei Runden verbesserst,
@@ -6189,7 +6189,7 @@ Drück die ~h~~k~~PED_ANSWER_PHONE~~w~, um die augenblickliche Waffe in diesem S
 Drück die ~h~~k~~PED_ANSWER_PHONE~~w~, um die augenblickliche Waffe in diesem Slot auszutauschen.
 
 [HELP9_B]
-Drücke die~h~ ~k~~PED_FIREWEAPON~~w~, um das Prãzisionsgewehr ~h~abzufeuern~w~.
+Drücke die~h~ ~k~~PED_FIREWEAPON~~w~, um das Präzisionsgewehr ~h~abzufeuern~w~.
 
 [HELP37]
 Wenn du doch nicht in ein Auto einsteigen willst, das du im Begriff bist, zu klauen, drück die ~h~~k~~PED_SPRINT~.
@@ -6279,7 +6279,7 @@ Nicht verfügbar
 Mesa Grande
 
 [STRP_NO]
-Zurzeit kannst du die Stripper-Bar nicht kaufen. Komm spãter wieder.
+Zurzeit kannst du die Stripper-Bar nicht kaufen. Komm später wieder.
 
 [CHSE]
 VERFOLGUNGSJAGD
@@ -6411,13 +6411,13 @@ Drücke die ~h~~k~~PED_ANSWER_PHONE~~w~, um den Pole Position Club zu kaufen. Pr
 Drücke die ~h~~k~~PED_ANSWER_PHONE~~w~, um den Pole Position Club zu kaufen. Preis: $~1~
 
 [STOCK]
-~r~nicht vorrãtig
+~r~nicht vorrätig
 
 [HELP14]
 Um das Büro des Anwalts zu finden, folge dem ~h~'L'~w~ auf dem Radar.
 
 [BOAT_AS]
-~g~Die Bootswerft generiert nun bis zu $~1~ Einkünfte. Hol dir das Geld regelmãßig ab.
+~g~Die Bootswerft generiert nun bis zu $~1~ Einkünfte. Hol dir das Geld regelmäßig ab.
 
 [BOAT_A2]
 BOOTSWERFT-MISSIONEN ERFÜLLT
@@ -6426,13 +6426,13 @@ BOOTSWERFT-MISSIONEN ERFÜLLT
 Checkpoint Charlie
 
 [BOAT_P]
-~g~Sammle die Pãckchen ein, ehe die Zeit um ist.
+~g~Sammle die Päckchen ein, ehe die Zeit um ist.
 
 [FEI_R1B]
 R1- \ R2-Taste -
 
 [HELP9_A]
-Drücke die ~h~~k~~PED_FIREWEAPON~~w~-Taste, um das Prãzisionsgewehr abzufeuern.
+Drücke die ~h~~k~~PED_FIREWEAPON~~w~-Taste, um das Präzisionsgewehr abzufeuern.
 
 [HELP21]
 Drücke die ~h~~k~~VEHICLE_ENTER_EXIT~~w~-Taste, um in ein Fahrzeug ein- oder auszusteigen.
@@ -6501,7 +6501,7 @@ Schnellste Zeit bei 'Pylonen-Rallye'
 Halte in der ~q~rosa Markierung.
 
 [HELP45]
-Drücke die ~h~~k~~PED_DUCK~~w~ um dich zu ducken. Dadurch erhöht sich die Treffsicherheit der Waffen, die du hãltst.
+Drücke die ~h~~k~~PED_DUCK~~w~ um dich zu ducken. Dadurch erhöht sich die Treffsicherheit der Waffen, die du hältst.
 
 [RCR1_5]
 RC Bandit-Rennen
@@ -6594,7 +6594,7 @@ Sieh dir diesen riesigen Helikopter an!
 Da kommt er wieder!
 
 [FEA_DSM]
-Achtung! Dieses Spiel ist auf DTS-Tonausgabe eingestellt. Dazu muss DTS-kompatible Hardware angeschlossen sein. Bitte wãhlen Sie, ob Sie mit DTS oder STEREO-Tonausgabe fortfahren wollen.
+Achtung! Dieses Spiel ist auf DTS-Tonausgabe eingestellt. Dazu muss DTS-kompatible Hardware angeschlossen sein. Bitte wählen Sie, ob Sie mit DTS oder STEREO-Tonausgabe fortfahren wollen.
 
 [STFT_23]
 Schnellste Zeit bei Checkpoint Carlie
@@ -6624,25 +6624,25 @@ Du kannst von jedem Waffentyp immer nur eine bei dir tragen - also einen Typ Pis
 Drücke die ~h~~k~~PED_SPRINT~~w~-Taste, um zu ~h~sprinten.
 
 [HLPSN_A]
-Das Prãzisionsgewehr ermöglicht dir, an dein Ziel heranzuzoomen und auf größere Distanz mit hoher Genauigkeit zu schießen.
+Das Präzisionsgewehr ermöglicht dir, an dein Ziel heranzuzoomen und auf größere Distanz mit hoher Genauigkeit zu schießen.
 
 [HLPSN_B]
-Halte die~h~ ~k~~PED_LOCK_TARGET~~w~-Taste gedrückt, um mit dem Prãzisionsgewehr zu ~h~zielen~w~.
+Halte die~h~ ~k~~PED_LOCK_TARGET~~w~-Taste gedrückt, um mit dem Präzisionsgewehr zu ~h~zielen~w~.
 
 [HLPSN_C]
-Halte die~h~ ~k~~PED_LOCK_TARGET~~w~-Taste gedrückt, um mit dem Prãzisionsgewehr zu ~h~zielen~w~.
+Halte die~h~ ~k~~PED_LOCK_TARGET~~w~-Taste gedrückt, um mit dem Präzisionsgewehr zu ~h~zielen~w~.
 
 [HLPSN_D]
 Drücke die ~h~~k~~PED_SNIPER_ZOOM_IN~~w~-Taste, um ~h~an das Ziel heranzuzoomen ~w~und die~h~ ~k~~PED_SNIPER_ZOOM_OUT~~w~,um ~h~herauszuzoomen~w~.
 
 [HLPSN_E]
-Drücke die ~h~~k~~PED_FIREWEAPON~~w~-Taste, um das Prãzisionsgewehr ~h~abzufeuern~w~.
+Drücke die ~h~~k~~PED_FIREWEAPON~~w~-Taste, um das Präzisionsgewehr ~h~abzufeuern~w~.
 
 [HLPSN_F]
-Drücke die ~h~~k~~PED_FIREWEAPON~~w~-Taste, um das Prãzisionsgewehr ~h~abzufeuern~w~.
+Drücke die ~h~~k~~PED_FIREWEAPON~~w~-Taste, um das Präzisionsgewehr ~h~abzufeuern~w~.
 
 [HLPSN_G]
-Drücke die ~h~~k~~PED_FIREWEAPON~~w~-Taste, um das Prãzisionsgewehr ~h~abzufeuern~w~.
+Drücke die ~h~~k~~PED_FIREWEAPON~~w~-Taste, um das Präzisionsgewehr ~h~abzufeuern~w~.
 
 [PLANE_H]
 Benutze die ~h~~k~~VEHICLE_ACCELERATE~~w~-Taste, um zu beschleunigen. Links bzw. Rechts für Richtungswechsel.
@@ -6739,19 +6739,19 @@ Echt der Hammer. Du glaubst nicht, was mir für 'ne Puppe über den Weg gelaufen
 'ne Bordsteinschwalbe, oder sowas. Unten in Little Havana.
 
 [MOB_18D]
-Sagt, sie heißt Mercedes oder so ãhnlich.
+Sagt, sie heißt Mercedes oder so ähnlich.
 
 [MOB_18E]
 Wahnsinn, Alter. Die Puppe musst du dir geben.
 
 [MOB_18F]
-Da würde 'nen Toter Hormonkoller kriegen. Sie sagt, ich wãr der beste, den sie je hatte.
+Da würde 'nen Toter Hormonkoller kriegen. Sie sagt, ich wär der beste, den sie je hatte.
 
 [MOB_18G]
 Halt die Augen nach ihr offen. Bis dann.
 
 [MOB_72A]
-Tommy, ich bin's, Lance. Du hãltst jetzt mal den Rand, Tommy, ich hab nãmlich keine Zeit für Geschwãtz.
+Tommy, ich bin's, Lance. Du hältst jetzt mal den Rand, Tommy, ich hab nämlich keine Zeit für Geschwätz.
 
 [MOB_72B]
 Interessiert mich auch nicht, was du zu sagen hast. Warum auch? Ich bin dir doch sowieso scheißegal, stimmt's?
@@ -6784,16 +6784,16 @@ Ganz gut. Werd zum Laufen 'nen Stock brauchen, müsste aber bald wieder arbeiten
 Gut.
 
 [MOB_63E]
-Ich hab das mit Lance gehört. Was für ein Schwein, hã?
+Ich hab das mit Lance gehört. Was für ein Schwein, hä?
 
 [MOB_63F]
 Ja.
 
 [MOB_63G]
-Trau nie einem Mann, der im Pyjama auf der Straße herumlãuft. Gut, dass du ihn erledigt hast. Ich hoffe, es war nicht kurz und schmerzlos.
+Trau nie einem Mann, der im Pyjama auf der Straße herumläuft. Gut, dass du ihn erledigt hast. Ich hoffe, es war nicht kurz und schmerzlos.
 
 [MOB_63H]
-Eher nicht. Ich hãtte nur nicht gedacht, dass er so einer ist...
+Eher nicht. Ich hätte nur nicht gedacht, dass er so einer ist...
 
 [MOB_63I]
 Tommy, für einen wildgewordenen Irren bist du ziemlich naiv. Ich bin bald wieder an der Arbeit, dann bring ich dir mal ein paar Sachen übers Leben bei, ok?
@@ -6811,19 +6811,19 @@ Was willst du, Paul? Ich brauch keine getürkten Designer-Klamotten.
 Sehr witzig. Du weißt, dass ich mit getürkter Ware nichts am Hut habe. Wollte nur hören, ob ich nicht 'ne Rolle in einem von deinen Filmen kriegen könnte.
 
 [MOB_16D]
-In England habe ich damals viel einschlãgiges Zeug gedreht. Ich hab mehr zu bieten als du, mein Alter.
+In England habe ich damals viel einschlägiges Zeug gedreht. Ich hab mehr zu bieten als du, mein Alter.
 
 [MOB_16E]
 Paul, danke für das Angebot. Ich komm auf dich zurück.
 
 [MOB_16F]
-Lass mich nicht hãngen. Denk dran, was ich alles für dich getan habe.
+Lass mich nicht hängen. Denk dran, was ich alles für dich getan habe.
 
 [MOB_16G]
 Das versuch ich ja grade zu vergessen.
 
 [MOB_17A]
-Tommy Vercetti. Wie geht's, großer Meister? Man hört so einiges über dich. Bist jetzt 'ne große Nummer in der Stadt, hã?
+Tommy Vercetti. Wie geht's, großer Meister? Man hört so einiges über dich. Bist jetzt 'ne große Nummer in der Stadt, hä?
 
 [MOB_17B]
 Paul, du bist betrunken.
@@ -6835,19 +6835,19 @@ Nein, du Trottel, ich bin nicht betrunken. Hab mir nur ein paar Ladungen Stoff g
 Und du brauchst mich nicht dumm anzureden. Ich bin nicht irgendwer. Wer hat dir denn in dieser Stadt den Weg geebnet? Ich!
 
 [MOB_17F]
-Tatsãchlich?
+Tatsächlich?
 
 [MOB_17G]
-Komm mir nicht so! Ich hab dich mit den ganzen Leuten bekanntgemacht. Hab dir gezeigt, wie der Hase lãuft, hab alles mögliche für dich getan, und so dankst du es mir?!
+Komm mir nicht so! Ich hab dich mit den ganzen Leuten bekanntgemacht. Hab dir gezeigt, wie der Hase läuft, hab alles mögliche für dich getan, und so dankst du es mir?!
 
 [MOB_17H]
-Du ignorierst mich. Du gibst mir keine Chance, mitzumischen, nach allem, was ich für dich getan habe! Hãltst du mich für einen Schwachkopf?
+Du ignorierst mich. Du gibst mir keine Chance, mitzumischen, nach allem, was ich für dich getan habe! Hältst du mich für einen Schwachkopf?
 
 [MOB_17I]
 Paul, reg dich ab. Ich hatte viel zu tun. Sei kein Idiot.
 
 [MOB_17J]
-Ich bin kein Idiot. Das haben sie schon im Jugendknast gesagt. Wenn du Ãrger haben willst, Freundchen, den kannst du haben!
+Ich bin kein Idiot. Das haben sie schon im Jugendknast gesagt. Wenn du Ärger haben willst, Freundchen, den kannst du haben!
 
 [MOB_17K]
 Tommy, bitte! Du warst meine große Hoffnung. Bitte, mach dich nicht lustig über mich!
@@ -6868,10 +6868,10 @@ Hey, aber wie! Du bist ein Genie! Ich bin ein Genie! Sie lieben uns alle. Wir br
 Uns winken ganz große Filmpreise. Jetzt kann ich endlich meinen alten Herrn ins Heim stecken und ihm sagen, er soll die Klappe halten.
 
 [MOB_73E]
-Ãh, das ist cool, Steve.
+Äh, das ist cool, Steve.
 
 [MOB_73F]
-Cool? Mann, das ist heiß! Heiß! H.E.I.ß! Er hat nie an mich geglaubt. Hat immer gedacht, ich wãre kein Künstler, und jetzt hab ich's geschafft!
+Cool? Mann, das ist heiß! Heiß! H.E.I.ß! Er hat nie an mich geglaubt. Hat immer gedacht, ich wäre kein Künstler, und jetzt hab ich's geschafft!
 
 [MOB_73G]
 Ich bin der größte Porno-Regisseur aller Zeiten, mein Freund. Wollte dir nur sagen, es ist mir eine Freude, dich kennengelernt zu haben.
@@ -6901,25 +6901,25 @@ Ziel
 POLE POSITION ERWORBEN!
 
 [ASSET_D]
-~g~Der Pole Position Club sorgt nun für ein Einkommen von bis zu $~1~ pro Tag. Hol dir dein Geld regelmãssig!
+~g~Der Pole Position Club sorgt nun für ein Einkommen von bis zu $~1~ pro Tag. Hol dir dein Geld regelmässig!
 
 [ST_WHEE]
-Lãngste 'Wheelie' Zeit (sekunden)
+Längste 'Wheelie' Zeit (sekunden)
 
 [ST_STOP]
-Lãngste 'Stoppie' Zeit (sekunden)
+Längste 'Stoppie' Zeit (sekunden)
 
 [ST_2WHE]
-Lãngste 2 Rad Zeit (sekunden)
+Längste 2 Rad Zeit (sekunden)
 
 [ST_WHED]
-Lãngste 'Wheelie' Distanz (m)
+Längste 'Wheelie' Distanz (m)
 
 [ST_STOD]
-Lãngste 'Stoppie' Distanz (m)
+Längste 'Stoppie' Distanz (m)
 
 [ST_2WHD]
-Lãngste 2 Rad Distanz (m)
+Längste 2 Rad Distanz (m)
 
 [OUTFT11]
 Trainer
@@ -6928,7 +6928,7 @@ Trainer
 Frankie
 
 [RELOAD]
-~g~Du hast die schnell Nachladefãhigkeit gewonnen!
+~g~Du hast die schnell Nachladefähigkeit gewonnen!
 
 [APACHE]
 Hunter zur Heli Landeplattform am Ocean Beach geliefert.
@@ -6961,10 +6961,10 @@ Neuer Kontaktpunkt am Jachthafen am Ocean Beach!!
 Feuerwehr-Mission Level ~1~
 
 [HELP56]
-Drücke die ~h~~k~~CAMERA_CHANGE_VIEW_ALL_SITUATIONS~~w~-Taste, um den Blickwinkel zu ãndern.
+Drücke die ~h~~k~~CAMERA_CHANGE_VIEW_ALL_SITUATIONS~~w~-Taste, um den Blickwinkel zu ändern.
 
 [HELP57]
-Drücke die ~h~~k~~CAMERA_CHANGE_VIEW_ALL_SITUATIONS~~w~-Taste, um den Blickwinkel zu ãndern.
+Drücke die ~h~~k~~CAMERA_CHANGE_VIEW_ALL_SITUATIONS~~w~-Taste, um den Blickwinkel zu ändern.
 
 [HELP58]
 Beim Zielen kann durch Drücken der ~h~~k~~PED_CYCLE_TARGET_LEFT~~w~-Taste zwischen Zielen hin- und her gewechselt werden.
@@ -6973,7 +6973,7 @@ Beim Zielen kann durch Drücken der ~h~~k~~PED_CYCLE_TARGET_LEFT~~w~-Taste zwisc
 Beim Zielen kann durch Drücken der ~h~~k~~PED_CYCLE_TARGET_LEFT~~w~-Taste zwischen Zielen hin- und her gewechselt werden.
 
 [HELP60]
-Wenn du wãhrend eines Autodiebstahls die ~h~~k~~PED_SPRINT~ ~w~-Taste drückst, steigst du nicht in das Fahrzeug ein.
+Wenn du während eines Autodiebstahls die ~h~~k~~PED_SPRINT~ ~w~-Taste drückst, steigst du nicht in das Fahrzeug ein.
 
 [HELP61]
 Du hast jetzt unbegrenzt Munition und doppelte Health für alle Fahrzeuge.
@@ -7033,7 +7033,7 @@ Nach links
 Nach rechts
 
 [FEC_PWF]
-Vorwãrts gehen
+Vorwärts gehen
 
 [FEC_PWT]
 Auf Kamera zugehen
@@ -7054,13 +7054,13 @@ Eine Waffe nach rechts
 Ziel fixieren
 
 [FEC_PJP]
-Fußgãnger springen
+Fußgänger springen
 
 [FEC_PSP]
-Fußgãnger sprinten
+Fußgänger sprinten
 
 [FEC_PSH]
-Fußgãnger schießen
+Fußgänger schießen
 
 [FEC_TLF]
 Ein Ziel nach links
@@ -7072,10 +7072,10 @@ Ein Ziel nach rechts
 Kamera hinter Spieler zentrieren
 
 [FEC_SZI]
-Mit Prãzisionsgewehr heranzoomen
+Mit Präzisionsgewehr heranzoomen
 
 [FEC_SZO]
-Mit Prãzisionsgewehr herauszoomen
+Mit Präzisionsgewehr herauszoomen
 
 [FEC_LKL]
 First-Person nach links schauen
@@ -7195,7 +7195,7 @@ Löschen fehlgeschlagen.
 Speichern fehlgeschlagen.
 
 [FEC_LUN]
-Laden fehlgeschlagen. Datei beschãdigt. Bitte löschen.
+Laden fehlgeschlagen. Datei beschädigt. Bitte löschen.
 
 [FEC_PAD]
 Gamepad
@@ -7204,7 +7204,7 @@ Gamepad
 Joystick
 
 [FES_CSA]
-Wãhlen Sie eine Skin aus der Liste aus:
+Wählen Sie eine Skin aus der Liste aus:
 
 [FET_HRD]
 STANDARDEINSTLLG. WIEDERHERGESTELLT
@@ -7219,7 +7219,7 @@ NUM STERN
 LINKS,RECHTS,MAUSRAD ZUR EINSTLLG.
 
 [FET_CIG]
-RÜCKT. ZUM LÖSCHEN - LMT,RETURN ZUM ÃNDERN
+RÜCKT. ZUM LÖSCHEN - LMT,RETURN ZUM ÄNDERN
 
 [FET_DSN]
 Standard-Player Skin.bmp
@@ -7375,7 +7375,7 @@ LEERT.
 GTA VC
 
 [WIN_95]
-GTA VC lãuft nicht unter Windows 95
+GTA VC läuft nicht unter Windows 95
 
 [WIN_DX]
 GTA VC benötigt mind. DirectX Version 8.1
@@ -7480,19 +7480,19 @@ Geschütz + nach hinten neigen
 Geschütz + nach vorne neigen
 
 [FET_RIG]
-WÃHLEN SIE EINE NEUE TASTENBELEGUNG FÜR DIESE AKTION
+WÄHLEN SIE EINE NEUE TASTENBELEGUNG FÜR DIESE AKTION
 
 [FEA_NM3]
 KEINE MP3-DATEIEN GEFUNDEN
 
 [FEA_MPB]
-MP3 LAUTSTÃRKE-BOOST
+MP3 LAUTSTÄRKE-BOOST
 
 [FEA_MUS]
-LAUTSTÃRKE MUSIK
+LAUTSTÄRKE MUSIK
 
 [FEA_SFX]
-LAUTSTÃRKE SFX
+LAUTSTÄRKE SFX
 
 [FEA_ADP]
 AUTOMATISCHE HARDWARE ERKENNUNG
@@ -7547,21 +7547,21 @@ Weitere Lieferungen:
 ~g~Carl Pearson, Pizza-Lieferant. Schalte ihn aus, bevor er seine Lieferungen abschließt.
 
 [ASM1_A:ASSIN1]
-Mr. Teal, Ihre Hilfe bei der Beseitigung der Landeier war ãußerst wertvoll. Ich habe noch mehr Arbeit, die eine eher 'zupackende' Art verlangt.
+Mr. Teal, Ihre Hilfe bei der Beseitigung der Landeier war äußerst wertvoll. Ich habe noch mehr Arbeit, die eine eher 'zupackende' Art verlangt.
 
 [ASM1_D:ASSIN1]
-Mr. Teal, Ihre Hilfe bei der Beseitigung der Landeier war ãußerst wertvoll.
+Mr. Teal, Ihre Hilfe bei der Beseitigung der Landeier war äußerst wertvoll.
 
 {=================================== MISSION TABLE ASSIN2 ===================================}
 
 [ASM2_1:ASSIN2]
-~g~Mrs. Dawson verlãsst bald den Juwelier in Vice Point. Schalte sie aus. Es muss wie ein Autounfall aussehen.
+~g~Mrs. Dawson verlässt bald den Juwelier in Vice Point. Schalte sie aus. Es muss wie ein Autounfall aussehen.
 
 [ASM2_3:ASSIN2]
 ~g~Das Fahrzeug wird explodieren! Hau ab!
 
 [ASM2_4:ASSIN2]
-~r~Du hast ihr Auto beschãdigt, obwohl sie nicht drin saß! Jetzt wird sie nicht einsteigen!
+~r~Du hast ihr Auto beschädigt, obwohl sie nicht drin saß! Jetzt wird sie nicht einsteigen!
 
 [ASM2_5:ASSIN2]
 ~r~Sie ist entwischt!
@@ -7570,7 +7570,7 @@ Mr. Teal, Ihre Hilfe bei der Beseitigung der Landeier war ãußerst wertvoll.
 ~r~Du warst zu nah am Unfallort!
 
 [ASM2_7:ASSIN2]
-~g~Keine Waffen! Es soll wie ein Unfall aussehen! Drãnge sie stattdessen von der Fahrbahn!
+~g~Keine Waffen! Es soll wie ein Unfall aussehen! Dränge sie stattdessen von der Fahrbahn!
 
 [ASM2_8:ASSIN2]
 ~g~Das ganze muss wie ein Unfall aussehen. Benutze keine Waffen.
@@ -7602,7 +7602,7 @@ Health:
 ZEIT:
 
 [ASM3_C:ASSIN3]
-Eine europãische Gang plant einen Überfall auf eine Bank in Vice City. Meinen Arbeitgebern wãre sehr daran gelegen, dass das nicht passiert.
+Eine europäische Gang plant einen Überfall auf eine Bank in Vice City. Meinen Arbeitgebern wäre sehr daran gelegen, dass das nicht passiert.
 
 [ASM3_D:ASSIN3]
 Alle Mitglieder der Gang haben eine Tarnung, solange sie sich hier in Vice City aufhalten. Manche haben Jobs, andere geben sich als Touristen aus.
@@ -7611,13 +7611,13 @@ Alle Mitglieder der Gang haben eine Tarnung, solange sie sich hier in Vice City 
 Infos über alle Zielpersonen und ihre wahrscheinlichen Aufenthaltsorte kleben unter dem Telefon.
 
 [ASM3_14:ASSIN3]
-~g~Dick Tanner hãlt sich bei DBP Security am Ocean Drive auf.
+~g~Dick Tanner hält sich bei DBP Security am Ocean Drive auf.
 
 [ASM3_15:ASSIN3]
-~g~Marc Hammond und Franco Carter halten sich in der Nãhe des Juwelierladens in Vice Point auf.
+~g~Marc Hammond und Franco Carter halten sich in der Nähe des Juwelierladens in Vice Point auf.
 
 [ASM3_16:ASSIN3]
-~g~Nick Kong hãlt sich in der Nãhe von Washington Beach auf.
+~g~Nick Kong hält sich in der Nähe von Washington Beach auf.
 
 [ASM3_18:ASSIN3]
 ~g~Geh nicht zu nahe an deine Zielperson heran, sonst entdeckt sie dich und du musst hinter ihr herjagen.
@@ -7635,13 +7635,13 @@ Infos über alle Zielpersonen und ihre wahrscheinlichen Aufenthaltsorte kleben u
 ~g~Geh nicht zu nahe an deine Zielpersonen heran, sonst entdecken sie dich und versuchen zu fliehen.
 
 [ASM3_12:ASSIN3]
-~g~In der Nãhe sind einige Waffen für dich deponiert worden, falls du sie brauchen solltest. Du hast ~h~9 MINUTEN~g~, um alle Gang-Mitglieder auszuschalten.
+~g~In der Nähe sind einige Waffen für dich deponiert worden, falls du sie brauchen solltest. Du hast ~h~9 MINUTEN~g~, um alle Gang-Mitglieder auszuschalten.
 
 [ASM3_13:ASSIN3]
 ~g~Mike Griffin arbeitet an einer Plakatwand in Washington.
 
 [ASM3_17:ASSIN3]
-~g~Charlie Dilson fãhrt mit dem Motorrad in Washington herum.
+~g~Charlie Dilson fährt mit dem Motorrad in Washington herum.
 
 {=================================== MISSION TABLE ASSIN4 ===================================}
 
@@ -7652,7 +7652,7 @@ Infos über alle Zielpersonen und ihre wahrscheinlichen Aufenthaltsorte kleben u
 Distanz:
 
 [ASM4_15:ASSIN4]
-~g~Nimm das Prãzisionsgewehr zu deiner Rechten.
+~g~Nimm das Präzisionsgewehr zu deiner Rechten.
 
 [ASM4_16:ASSIN4]
 ~g~Behalte die Frau auf der Empore im Auge. Sie wird die Rolltreppe hinuntergehen und die Zielperson nach der Uhrzeit fragen.
@@ -7685,7 +7685,7 @@ Distanz:
 ~r~Die Zielperson hat das Flugzeug bestiegen!
 
 [ASM4_27:ASSIN4]
-~r~Die Zielperson hat dich gesehen! Du hãttest Abstand halten sollen!
+~r~Die Zielperson hat dich gesehen! Du hättest Abstand halten sollen!
 
 [ASM4_28:ASSIN4]
 ~r~Die Zielperson hat dich gesehen! Er hat gehört, wie du geschossen hast!
@@ -7714,7 +7714,7 @@ Erledigen Sie alle Beteiligten, klauen Sie die Ware und bringen Sie sie zum Heli
 Links von Ihnen ist ein Tor, das zur Rückseite der Fabrik führt.
 
 [ASM5_1:ASSIN5]
-~g~Geh auf das Gelãnde hinter der Cherry Popper-Eiscremefabrik und dann auf das Dach, wo der Deal abgewickelt wird.
+~g~Geh auf das Gelände hinter der Cherry Popper-Eiscremefabrik und dann auf das Dach, wo der Deal abgewickelt wird.
 
 [ASM5_2:ASSIN5]
 ~g~Schnapp dir die Ware und bring sie zum Heliport am Flughafen.
@@ -7737,7 +7737,7 @@ Wir haben unten eine ausgewachsene Bar, Ken.
 Ja, ja, wie auch immer. Tja, ich hab die Tafel besorgt, die du haben wolltest.
 
 [BJM1_D:BANKJ1]
-Ah, das ist der Lohn des Jurastudiums: Die Fãhigkeit, Anweisungen auszuführen.
+Ah, das ist der Lohn des Jurastudiums: Die Fähigkeit, Anweisungen auszuführen.
 
 [BJM1_E:BANKJ1]
 Also, ich brauche einen Safeknacker.
@@ -7755,7 +7755,7 @@ Wo sitzt er denn?
 In einer Zelle in einem Polizeirevier. Er wartet auf seine Verlegung.
 
 [BJM1_J:BANKJ1]
-Ich glaube fast, er kommt auf Bewãhrung raus...
+Ich glaube fast, er kommt auf Bewährung raus...
 
 [BJM1_1:BANKJ1]
 ~g~Befreie Cam Jones aus der Haft!
@@ -7788,10 +7788,10 @@ Besser als in 'ner Zelle zu verrotten!
 ~g~Bring Cam nach Hause!
 
 [BJM1_23:BANKJ1]
-~g~Du brauchst zunãchst die Magnetkarte für die Tür!
+~g~Du brauchst zunächst die Magnetkarte für die Tür!
 
 [BNK1_12:BANKJ1]
-Hãng die Bullen ab und bring mich nach Hause!
+Häng die Bullen ab und bring mich nach Hause!
 
 [BJM1_20:BANKJ1]
 Die Waffe weg oder es passiert was!
@@ -7838,7 +7838,7 @@ Tja, der beste Schütze in der Stadt ist ein Kerl namens Cassidy.
 Ach ja?
 
 [BJM2_K:BANKJ2]
-Ja. Soldat, oder wenigstens hãlt er sich dafür.
+Ja. Soldat, oder wenigstens hält er sich dafür.
 
 [BJM2_L:BANKJ2]
 Ich bezweifle, dass er je bei der Army war, aber er kann mit der Knarre umgehen.
@@ -7901,7 +7901,7 @@ GESAMTPUNKTZAHL FÜR DAS SCHIESSEN: ~1~
 ~r~Einer der Schützen ist erledigt!
 
 [BJM2_14:BANKJ2]
-~g~Begib dich zum nãchsten Areal!
+~g~Begib dich zum nächsten Areal!
 
 [BJM2_15:BANKJ2]
 PUNKTE:
@@ -7919,7 +7919,7 @@ ZU SCHLAGEN:
 ~r~Du hast den Schießstand verlassen!
 
 [BJM2_23:BANKJ2]
-~g~Wenn du den Schießstand wãhrend des Wettbewerbs verlãsst, ist die Mission gescheitert.
+~g~Wenn du den Schießstand während des Wettbewerbs verlässt, ist die Mission gescheitert.
 
 [BJM2_24:BANKJ2]
 ~g~Das nahegelegenste Ziel bringt 1 Punkt.
@@ -7940,7 +7940,7 @@ AREAL KLAR!
 Huuuiii!
 
 [BNK2_5:BANKJ2]
-Der trãfe nicht mal ein Scheunentor.
+Der träfe nicht mal ein Scheunentor.
 
 [BNK2_7:BANKJ2]
 Also, was ist jetzt, hilfst du mir bei dem Job?
@@ -7996,10 +7996,10 @@ Nimm Hilary, Boss, nicht diesen Labersack von einem Rechtverdreher.
 Hilary ist der beste. So schnell wie den hast noch keinen fahren sehen. Ich rufe ihn mal an.
 
 [BJM3_G:BANKJ3]
-Hey, Hil, hier Phil. Wie lãuft's? Nein, sag nichts. Dazu haben wir spãter Zeit. Tust du mir einen Gefallen?
+Hey, Hil, hier Phil. Wie läuft's? Nein, sag nichts. Dazu haben wir später Zeit. Tust du mir einen Gefallen?
 
 [BJM3_H:BANKJ3]
-Ich hab hier einen Typ aus dem Norden. Nein, ich glaub, er war nicht beim Militãr. Aber er braucht einen Fahrer.
+Ich hab hier einen Typ aus dem Norden. Nein, ich glaub, er war nicht beim Militär. Aber er braucht einen Fahrer.
 
 [BJM3_I:BANKJ3]
 Für einen Job. Ok, verstehe.
@@ -8008,7 +8008,7 @@ Für einen Job. Ok, verstehe.
 Was hat er gesagt?
 
 [BJM3_K:BANKJ3]
-Er macht's. Kein Problem. Na ja, ein kleines vielleicht: Er leidet unter Verlustãngsten.
+Er macht's. Kein Problem. Na ja, ein kleines vielleicht: Er leidet unter Verlustängsten.
 
 [BJM3_L:BANKJ3]
 Er arbeitet anscheinend nicht für Leute, die ihn nicht schlagen können. Hat was mit seiner Mutter zu tun.
@@ -8023,10 +8023,10 @@ Bist du Tommy? Klar bist du Tommy, ich meine,
 wieso sollte sonst einer mit mir reden wollen?
 
 [BJM3_2C:BANKJ3]
-Ok. Das ganze lãuft so ab:
+Ok. Das ganze läuft so ab:
 
 [BJM3_2D:BANKJ3]
-Ich fahre für dich, WENN und NUR WENN du selbst anstãndig fãhrst.
+Ich fahre für dich, WENN und NUR WENN du selbst anständig fährst.
 
 [BJM3_2E:BANKJ3]
 Verlierst du mich, verzeihe ich dir das nie.
@@ -8044,7 +8044,7 @@ Ok, ich fahre für dich. Aber bitte, behandle mich schlecht.
 Illegales Straßenrennen bei Vice Point.
 
 [BNK3_3B:BANKJ3]
-An alle Einsatzkrãfte.
+An alle Einsatzkräfte.
 
 [BNK3_3C:BANKJ3]
 Straßenrennen sind verboten und illegal!
@@ -8061,7 +8061,7 @@ Straßenrennen sind verboten und illegal!
 ~w~Was zum Geier rauchst du eigentlich, Mann? Das ist kein simpler Plan.
 
 [BNK4_D:BANKJ4]
-~w~Ach, wer braucht schon simple Plãne?
+~w~Ach, wer braucht schon simple Pläne?
 
 [BNK4_E:BANKJ4]
 ~w~Der Kommunismus, das war ein simpler Plan. Hat Russland aber nicht viel genützt, hah?
@@ -8070,13 +8070,13 @@ Straßenrennen sind verboten und illegal!
 ~w~Ganz ruhig. Mit einem Team wie diesem ist das alles kein Problem.
 
 [BNK4_G:BANKJ4]
-~w~Cam übernimmt den Safe. Phil? Wir beide kümmern uns um die Sicherheit, und Hilary fãhrt den Fluchtwagen.
+~w~Cam übernimmt den Safe. Phil? Wir beide kümmern uns um die Sicherheit, und Hilary fährt den Fluchtwagen.
 
 [BNK4_H:BANKJ4]
-~w~Ãh, hast du nicht jemanden vergessen? Jemanden, der dir unzãhlige Male geholfen hat in dieser Stadt? Jemanden...?
+~w~Äh, hast du nicht jemanden vergessen? Jemanden, der dir unzählige Male geholfen hat in dieser Stadt? Jemanden...?
 
 [BNK4_I:BANKJ4]
-~w~Ken...Ken, richtig. Ken wãscht das Geld für uns und stellt schon mal die Drinks kalt.
+~w~Ken...Ken, richtig. Ken wäscht das Geld für uns und stellt schon mal die Drinks kalt.
 
 [BNK4_J:BANKJ4]
 ~w~Ich verstehe nicht, was ich hier soll.
@@ -8100,7 +8100,7 @@ Straßenrennen sind verboten und illegal!
 ~r~Du hast Phil verloren!
 
 [C_HIND:BANKJ4]
-~r~Cam wurde abgehãngt!
+~r~Cam wurde abgehängt!
 
 [H_HIND:BANKJ4]
 ~r~Hilary wurde im Stich gelassen!
@@ -8115,10 +8115,10 @@ Steig in den Fluchtwagen und führe den Plan aus!
 Ich fahre.
 
 [BNK4_2:BANKJ4]
-Na prima. Beifahrer. Wenn ich das in der Therapie erzãhle.
+Na prima. Beifahrer. Wenn ich das in der Therapie erzähle.
 
 [BNK4_3A:BANKJ4]
-Hey, pass auf, wo du hinfãhrst, Tommy!
+Hey, pass auf, wo du hinfährst, Tommy!
 
 [BNK4_3B:BANKJ4]
 Tommy, Hilary macht sich so breit!
@@ -8145,7 +8145,7 @@ Ja, am Ende geht das noch ins Auge!
 Mein Baby! Alles Schrott!
 
 [BNK4_3O:BANKJ4]
-Du hãngst zu sehr an der Illusion der Ewigkeit.
+Du hängst zu sehr an der Illusion der Ewigkeit.
 
 [BNK4_3P:BANKJ4]
 Was?
@@ -8277,7 +8277,7 @@ Die stürmen den Laden!
 In Deckung!
 
 [BNK4_94:BANKJ4]
-~w~Ok, Jungs. Jeder hãlt sich an den Plan .
+~w~Ok, Jungs. Jeder hält sich an den Plan .
 
 [BM_DEAD:BANKJ4]
 ~r~Du brauchst den Bank Manager lebend!!
@@ -8286,7 +8286,7 @@ In Deckung!
 BANK-MISSIONEN ERFÜLLT!
 
 [ASSET_B:BANKJ4]
-~g~Der Malibu Club generiert nun bis zu $~1~ Einkünfte. Hol dir das Geld regelmãßig ab.
+~g~Der Malibu Club generiert nun bis zu $~1~ Einkünfte. Hol dir das Geld regelmäßig ab.
 
 [IDIOT:BANKJ4]
 ~r~Na super - angezogen wie ein Irrer durch die Gegend laufen und Aufmerksamkeit erregen, IDIOT!
@@ -8297,7 +8297,7 @@ BANK-MISSIONEN ERFÜLLT!
 Komm schon, Brauner, komm!
 
 [COK1_B:BARON1]
-Dãmlicher Klepper! Dich mach ich einen Kopf kürzer!
+Dämlicher Klepper! Dich mach ich einen Kopf kürzer!
 
 [COK1_C:BARON1]
 Wer ist der Blödmann?
@@ -8321,7 +8321,7 @@ Er denkt, ich weiß nicht, wie viel Geld mir zusteht. Aber 3% zu klauen ist gena
 Niemand haut mich übers Ohr. NIEMAND!!
 
 [COK1_K:BARON1]
-Folge ihm von seiner Wohnung aus und sieh nach, wo er hin will. Spãter erledigen wir ihn.
+Folge ihm von seiner Wohnung aus und sieh nach, wo er hin will. Später erledigen wir ihn.
 
 [COK1_1:BARON1]
 Oh, Shit!
@@ -8377,13 +8377,13 @@ Das ist der Fehler an dieser Branche.
 Was soll denn das? Aaaaah!
 
 [COK2_H:BARON2]
-Diese Mistkerle haben mich bitter enttãuscht.
+Diese Mistkerle haben mich bitter enttäuscht.
 
 [COK2_I:BARON2]
 Bald denkt jeder Depp, er kann in Vice City Koks verkaufen.
 
 [COK2_J:BARON2]
-Was kommt als nãchstes, hah? Die verstunkene Mafia?!
+Was kommt als nächstes, hah? Die verstunkene Mafia?!
 
 [COK2_K:BARON2]
 Diese Bandengegend ist eine Festung ohne Mauern.
@@ -8490,7 +8490,7 @@ Die Straßensperren zum Festland sind aufgehoben worden.
 {=================================== MISSION TABLE BARON3 ===================================}
 
 [COK3_A:BARON3]
-Das gefãllt euch nicht, was?!
+Das gefällt euch nicht, was?!
 
 [COK3_B:BARON3]
 Ahahahahaa, Ahahahahaa.
@@ -8630,7 +8630,7 @@ Wieso spielen wir dann die Laufburschen für ihn?
 Je mehr wir jetzt lernen, desto weniger müssen wir lernen, wenn wir diese Stadt übernehmen!
 
 [COK4_5:BARON4]
-Dein Stil gefãllt mir. Echt erfrischend.
+Dein Stil gefällt mir. Echt erfrischend.
 
 [COK4_12:BARON4]
 Pass auf, die kommen von überall
@@ -8707,7 +8707,7 @@ Zufrieden?
 Ja. Und wie!
 
 [ASS1_F:BARON5]
-Ihr dãmlichen Idioten!
+Ihr dämlichen Idioten!
 
 [ASS1_G:BARON5]
 Mein schönes Haus
@@ -8722,7 +8722,7 @@ Das ist für meinen Bruder!
 Ich habe dir vertraut, Tommy.
 
 [ASS1_K:BARON5]
-Ich hãtte was aus dir gemacht...
+Ich hätte was aus dir gemacht...
 
 [ASS1_L:BARON5]
 Gute Nacht, Mr. Diaz.
@@ -8737,7 +8737,7 @@ Keine Panik, Tommy, ich geb dir Deckung.
 DIAZ?! Ich bin hier, um deinen Laden zu übernehmen!
 
 [ASS1_14:BARON5]
-TOMMY! Du Verrãter...Du Idiot! Dich mache ich fix und fertig...
+TOMMY! Du Verräter...Du Idiot! Dich mache ich fix und fertig...
 
 [ASS1_16:BARON5]
 ~g~Erledige Diaz!
@@ -8778,7 +8778,7 @@ Du siehst nicht wie ein Bulle aus, das heißt, du hast 1 Minute.
 Also drück auf die Tube.
 
 [BM1_H:BIKE1]
-Kent Paul sagt, ihr wãrt interessiert, die Security für einen Gig zu übernehmen, den er plant.
+Kent Paul sagt, ihr wärt interessiert, die Security für einen Gig zu übernehmen, den er plant.
 
 [BM1_I:BIKE1]
 Kent Paul? Pfff! Kein Wunder, dass er dich schickt.
@@ -8790,7 +8790,7 @@ Als er das letzte Mal hier war, ist er durch Fenster wieder gegangen - und zwar 
 Seid ihr nun interessiert oder nicht?
 
 [BM1_L:BIKE1]
-Gefãlligkeiten gibt's nur für Mitglieder.
+Gefälligkeiten gibt's nur für Mitglieder.
 
 [BM1_M:BIKE1]
 Wie kann ich beitreten?
@@ -8802,7 +8802,7 @@ Wir sind hier kein Golfklub, Kleiner. Kannst du 'n Bike fahren?
 Kannst du auf 'm Barhocker sitzen und saufen?
 
 [BM1_P:BIKE1]
-Cougar, Zeppelin, checkt mal ab, wie diese Sissy hier fãhrt.
+Cougar, Zeppelin, checkt mal ab, wie diese Sissy hier fährt.
 
 [BM1_2:BIKE1]
 ~g~Du brauchst eine Freeway oder eine Angel, um mitzumachen!
@@ -8834,13 +8834,13 @@ Ha, ha, ha, hab dich wieder erwischt.
 Hey, Vercetti.
 
 [BM2_C:BIKE2]
-Cougar meint, du fãhrst ziemlich gut.
+Cougar meint, du fährst ziemlich gut.
 
 [BM2_D:BIKE2]
 Ja, wie lange soll ich noch hier rumgurken?
 
 [BM2_E:BIKE2]
-Ich bin ein sehr beschãftigter Mann.
+Ich bin ein sehr beschäftigter Mann.
 
 [BM2_F:BIKE2]
 Wenn ich mich kloppen soll, damit das klar geht, dann los.
@@ -8867,7 +8867,7 @@ Das hier ist die größte Familie von Außenseitern, Outlaws und Unruhestiftern.
 Ein paar von uns wurden sogar von ihrem eigenen Land verraten.
 
 [BM2_N:BIKE2]
-Wãhrend des Vietnamkriegs war ich eingelocht. Miese Sache.
+Während des Vietnamkriegs war ich eingelocht. Miese Sache.
 
 [BM2_O:BIKE2]
 Drum sollst du denen ja zeigen, was Sache ist.
@@ -8893,7 +8893,7 @@ Hi, Mitch.
 Ah, sieh an, 'Outlaw' Vercetti.
 
 [BM3_C:BIKE3]
-Jetzt will ich sehen, wie du für deine Kumpels kãmpfst.
+Jetzt will ich sehen, wie du für deine Kumpels kämpfst.
 
 [BM3_D:BIKE3]
 Eine Straßengang von hier hat den Fehler gemacht, meinen Hobel zu klauen.
@@ -8902,13 +8902,13 @@ Eine Straßengang von hier hat den Fehler gemacht, meinen Hobel zu klauen.
 Wollten wahrscheinlich zeigen, was für coole Machos sie sind.
 
 [BM3_F:BIKE3]
-Ich und die Jungs wollten ihnen eigentlich ein bisschen Respekt einblãuen.
+Ich und die Jungs wollten ihnen eigentlich ein bisschen Respekt einbläuen.
 
 [BM3_G:BIKE3]
 Aber-
 
 [BM3_H:BIKE3]
--dann dachte ich mir, das wãre doch ein guter Test für dich.
+-dann dachte ich mir, das wäre doch ein guter Test für dich.
 
 [BM3_I:BIKE3]
 Bring mir meine Maschine zurück und Paul kriegt seine Security.
@@ -8943,7 +8943,7 @@ Bring mir meine Maschine zurück und Paul kriegt seine Security.
 {=================================== MISSION TABLE BMX_1 ===================================}
 
 [GETBIK2:BMX_1]
-Du hast ~1~ Sekunden, um auf ein Gelãndemotorrad zu steigen!
+Du hast ~1~ Sekunden, um auf ein Geländemotorrad zu steigen!
 
 {=================================== MISSION TABLE BOATBUY ===================================}
 
@@ -9013,7 +9013,7 @@ Wer war das?
 Tommy... ein paar Mafia-Typen... sie wollen wiederkommen, ihren Anteil abkassieren.
 
 [CAP_04:CAP_1]
-Ein gewisser Mr. Forello hãtte dir Geld gegeben. Mir geht's schlecht.
+Ein gewisser Mr. Forello hätte dir Geld gegeben. Mir geht's schlecht.
 
 [CAP_05:CAP_1]
 Forelli? SONNY Forelli?
@@ -9073,7 +9073,7 @@ Du wirst dran glauben, Vercetti.
 ~g~Du hast den Eintreiber verloren.
 
 [CAP1_B8:CAP_1]
-~r~Der Eintreiber verlangt für all deine Geschãfte Schutzgeld.
+~r~Der Eintreiber verlangt für all deine Geschäfte Schutzgeld.
 
 [CAP1_B9:CAP_1]
 ~g~Die Mafia verlangt Schutzgeld für das Malibu!
@@ -9100,22 +9100,22 @@ Du wirst dran glauben, Vercetti.
 ~g~Die Mafia ist im Filmstudio angekommen!
 
 [CAP1_D2:CAP_1]
-~g~Die Mafia verlãsst die Bootswerft!
+~g~Die Mafia verlässt die Bootswerft!
 
 [CAP1_D3:CAP_1]
-~g~Die Mafia verlãsst die Eiscremefabrik!
+~g~Die Mafia verlässt die Eiscremefabrik!
 
 [CAP1_D4:CAP_1]
-~g~Die Mafia verlãsst das Autohaus!
+~g~Die Mafia verlässt das Autohaus!
 
 [CAP1_D5:CAP_1]
-~g~Die Mafia verlãsst das Taxiunternehmen!
+~g~Die Mafia verlässt das Taxiunternehmen!
 
 [CAP1_D9:CAP_1]
-~g~Die Mafia verlãsst den Malibu Club!
+~g~Die Mafia verlässt den Malibu Club!
 
 [CAP1_D0:CAP_1]
-~g~Die Mafia verlãsst das Filmstudio!
+~g~Die Mafia verlässt das Filmstudio!
 
 [CAP1B10:CAP_1]
 Du hast die Eintreiber erledigt. Es kommen weitere.
@@ -9138,7 +9138,7 @@ Tja, ich verkaufe das Autohaus ja eigentlich nur ungern.
 War meine erste Investition, nachdem ich Football-Profi wurde.
 
 [CAR1_6:CARBUY]
-Aber es wird Zeit für eine Luftverãnderung.
+Aber es wird Zeit für eine Luftveränderung.
 
 [CAR1_7:CARBUY]
 Sie verlassen die Stadt?
@@ -9150,7 +9150,7 @@ Nicht in allzu großer Eile, hoffe ich doch?
 Nein, ich bereite mich nur auf mein Comeback als Football-Profi vor. Ich hatte schon aufgehört.
 
 [CAR1_10:CARBUY]
-Das Geschãft lief nicht allzu gut.
+Das Geschäft lief nicht allzu gut.
 
 [CAR1_11:CARBUY]
 Da haben sich meine Angestellten was einfallen lassen,
@@ -9174,7 +9174,7 @@ Machen Sie sich mal keine Gedanken.
 Der Laden ist genau das, was ich brauche.
 
 [CAR1_18:CARBUY]
-Ja. Dann kommen wir also ins Geschãft?
+Ja. Dann kommen wir also ins Geschäft?
 
 {=================================== MISSION TABLE CARPAR1 ===================================}
 
@@ -9185,7 +9185,7 @@ Ja. Dann kommen wir also ins Geschãft?
 ~r~Du hast ein Hütchen umgefahren!!
 
 [MM_1_C:CARPAR1]
-~y~PASSIERE~g~ einen Checkpoint, dann lãuft die Zeit. ~g~Jeder Checkpoint bringt dir ~y~~1~ SEKUNDEN~g~.
+~y~PASSIERE~g~ einen Checkpoint, dann läuft die Zeit. ~g~Jeder Checkpoint bringt dir ~y~~1~ SEKUNDEN~g~.
 
 {=================================== MISSION TABLE COPCAR ===================================}
 
@@ -9196,13 +9196,13 @@ Bürgerwehr-Mission Level 12 beendet: Deine max. Panzerung erhöht sich auf 150
 Bürgerwehr-Mission Level ~1~
 
 [C_PASS:COPCAR]
-BEDROHUNG AUSGERÃUMT: $ ~1~
+BEDROHUNG AUSGERÄUMT: $ ~1~
 
 [KILLS:COPCAR]
 HITS:
 
 [C_BREIF:COPCAR]
-~g~Verdãchtiger wurde zuletzt in der Gegend von ~a~ gesichtet.
+~g~Verdächtiger wurde zuletzt in der Gegend von ~a~ gesichtet.
 
 [COPCART:COPCAR]
 ~g~Du hast ~1~ Sekunden, um zu einem Polizeifahrzeug zurückzukehren, bevor die Mission endet.
@@ -9237,13 +9237,13 @@ Ach, Blödsinn, absoluter Blödsinn. Ich drucke lieber Geld. Ist gar nicht so sc
 In kleinerem Umfang mache ich das schon seit Jahren.
 
 [CM1_H:COUNT1]
-Tatsãchlich?
+Tatsächlich?
 
 [CM1_I:COUNT1]
-Klar. Aber wir brãuchten gute Platten.
+Klar. Aber wir bräuchten gute Platten.
 
 [CM1_J:COUNT1]
-Natürlich! In Florida gibt es schon ein Geldfãlscher-Syndikat.
+Natürlich! In Florida gibt es schon ein Geldfälscher-Syndikat.
 
 [CM1_K:COUNT1]
 Ein Syndikat?
@@ -9264,10 +9264,10 @@ Sieh dir diesen Hintern an!
 Tja, Kleine, du weißt nicht, was dir entgeht!
 
 [CM1_2C:COUNT1]
-Na, alter Freund, wie lãuft's so?
+Na, alter Freund, wie läuft's so?
 
 [CM1_2D:COUNT1]
-Was weißt du über Geldfãlscherei?
+Was weißt du über Geldfälscherei?
 
 [CM1_2E:COUNT1]
 'Oh, alles bestens, Paul, und bei dir?'
@@ -9276,7 +9276,7 @@ Was weißt du über Geldfãlscherei?
 Komm her!
 
 [CM1_2G:COUNT1]
-Ist ja gut, ist ja gut. Anscheinend bist du schwer beschãftigt.
+Ist ja gut, ist ja gut. Anscheinend bist du schwer beschäftigt.
 
 [CM1_2H:COUNT1]
 Über Falschgeld weiß ich nur, dass die Triaden die Platten liefern.
@@ -9285,7 +9285,7 @@ Ist ja gut, ist ja gut. Anscheinend bist du schwer beschãftigt.
 Die haben eine Reederei unten bei den Docks.
 
 [CM1_2J:COUNT1]
-Der Boss weiß, wann die nãchsten Platten reinkommen.
+Der Boss weiß, wann die nächsten Platten reinkommen.
 
 [CM1_2K:COUNT1]
 Danke, Paul.
@@ -9323,13 +9323,13 @@ Ok, ich rede ja! Ich rede!
 Ok, der Kurier holt die Druckplatten heute vom Hafen ab.
 
 [CNT2_B2:COUNT2]
-Ich fange ihn ab, schnapp mir die Platten, hãng die Cops ab und komm wieder hierher.
+Ich fange ihn ab, schnapp mir die Platten, häng die Cops ab und komm wieder hierher.
 
 [CNT2_B3:COUNT2]
-Also, je nachdem wie es lãuft, haben wir
+Also, je nachdem wie es läuft, haben wir
 
 [CNT2_B4:COUNT2]
-entweder 5 Minuten zum Gelddrucken, bis das Fãlschersyndikat uns findet, oder wir haben alle Zeit der Welt.
+entweder 5 Minuten zum Gelddrucken, bis das Fälschersyndikat uns findet, oder wir haben alle Zeit der Welt.
 
 [CNT2_B5:COUNT2]
 Jedenfalls will ich 5 Minuten nachdem ich hier bin, Scheinchen aus der Presse kommen sehen!
@@ -9338,10 +9338,10 @@ Jedenfalls will ich 5 Minuten nachdem ich hier bin, Scheinchen aus der Presse ko
 Keine Sorge, Tommy. Wir sind bereit.
 
 [CNT2_B7:COUNT2]
-Ich und die Jungs bleiben in der Nãhe, falls die Cops dir in die Quere kommen.
+Ich und die Jungs bleiben in der Nähe, falls die Cops dir in die Quere kommen.
 
 [CNT2_B8:COUNT2]
-Ok. Jeder weiß, was er zu tun hat? Gut. Bis spãter.
+Ok. Jeder weiß, was er zu tun hat? Gut. Bis später.
 
 [CNT2_01:COUNT2]
 ~g~Der ~r~Kurier~g~ mit den Druckplatten kommt jeden Moment in einem Helikopter an den ~y~Docks~g~ an.
@@ -9350,7 +9350,7 @@ Ok. Jeder weiß, was er zu tun hat? Gut. Bis spãter.
 ~r~Der Kurier mit den Platten ist im Helikopter geflohen.
 
 [CNT2_03:COUNT2]
-~r~Der Kurier ist an seinem Ziel angekommen. Du kommst zu spãt!
+~r~Der Kurier ist an seinem Ziel angekommen. Du kommst zu spät!
 
 [CNT2_04:COUNT2]
 ~r~Du hast die Platten in der Explosion zerstört!
@@ -9374,7 +9374,7 @@ Privatangelegenheit. Du hast hier nichts verloren!
 DRUCKEREI ERWORBEN
 
 [CNT2_10:COUNT2]
-~g~Die Druckerei generiert nun bis zu $~1~ Einkünfte. Hol dir das Geld regelmãßig ab.
+~g~Die Druckerei generiert nun bis zu $~1~ Einkünfte. Hol dir das Geld regelmäßig ab.
 
 [CNT2_11:COUNT2]
 ~r~Die Platten liegen auf dem Meeresgrund!
@@ -9409,7 +9409,7 @@ Nein, ich glaube, deine Blödheit reicht für uns beide.
 Hey, er sagt, du bist dumm, mein Sohn.
 
 [CUB1_J:CUBAN1]
-Und ich sage, er ist ein kleines Mãdchen, Paps.
+Und ich sage, er ist ein kleines Mädchen, Paps.
 
 [CUB1_K:CUBAN1]
 Sieh dir doch an, wie er angezogen ist.
@@ -9424,7 +9424,7 @@ Du willst ein harter Kerl sein und ziehst dich an wie ein Weib?
 Hast du auch ein Höschen an, oder was?
 
 [CUB1_O:CUBAN1]
-Was hast du gegen Frauen? Ziehst du Mãnner vor?
+Was hast du gegen Frauen? Ziehst du Männer vor?
 
 [CUB1_P:CUBAN1]
 Ich liebe Frauen! Ich liebe alle Frauen! Ich liebe meine Mutter, Chico.
@@ -9439,7 +9439,7 @@ Kannst du fahren, Amigo?
 Ja...wie eine Frau.
 
 [CUB1_T:CUBAN1]
-Sehr witzig. Du gefãllst mir, Großer. Vielleicht kannst du mir helfen.
+Sehr witzig. Du gefällst mir, Großer. Vielleicht kannst du mir helfen.
 
 [CUB1_U:CUBAN1]
 Vielleicht kannst du beweisen, dass du ein Mann bist. Hah?
@@ -9451,7 +9451,7 @@ Schnapp dir das Boot.
 Zeig mir, dass du ein ganzer Kerl bist,
 
 [CUB1_X:CUBAN1]
-und kein kleines Mãdchen.
+und kein kleines Mädchen.
 
 [CUB1_02:CUBAN1]
 Ok Mann, behandle es wie eine Frau.
@@ -9472,10 +9472,10 @@ Du willst ein Mann sein, Mann?
 Du bist ein feiges Würstchen, Kleiner, heul dich bei Mammi aus.
 
 [CUB1_08:CUBAN1]
-Du bist zu nichts zu gebrauchen. Macht einen auf harter Mann, aber fãhrt wie ein Idiot.
+Du bist zu nichts zu gebrauchen. Macht einen auf harter Mann, aber fährt wie ein Idiot.
 
 [CUB1_09:CUBAN1]
-Mann, du bist der Hammer, Mann. Du gefãllst mir. Du gefãllst mir sehr.
+Mann, du bist der Hammer, Mann. Du gefällst mir. Du gefällst mir sehr.
 
 [CUB1_10:CUBAN1]
 Du bist gut, Mann. Weil du ein ganzer Kerl bist. Alle meine Freunde sind ganze Kerle.
@@ -9504,7 +9504,7 @@ Hi, ich bin Rico. Bist du der 'ganze Kerl'?
 ERLEDIGE ALLE HAITIANER!!
 
 [CUB2_M:CUBAN2]
-Wer sich mit mir anlegt, hat sich den stãrksten der Stadt rausgesucht!
+Wer sich mit mir anlegt, hat sich den stärksten der Stadt rausgesucht!
 
 [CUB2_A:CUBAN2]
 Eine Kaffee, bitte, Alberto.
@@ -9534,7 +9534,7 @@ Aber dazu brauchen wir Hilfe.
 Ich hab dabei schon ein paar Brüder verloren.
 
 [CUB2_H:CUBAN2]
-Amigo, du fãhrst gut!
+Amigo, du fährst gut!
 
 [CUB2_I:CUBAN2]
 Für eine Frau, was?
@@ -9552,7 +9552,7 @@ Bring meine Jungs da rüber, und dann erledigen wir diese Haitianer!
 Da ist nicht genug Platz, Mann, du brauchst ein größeres Auto.
 
 [CUB2_02:CUBAN2]
-Wir brauchen Verstãrkung aus dem Café!
+Wir brauchen Verstärkung aus dem Café!
 
 [CUB2_03:CUBAN2]
 ~g~Besorg dir ein Auto und hole die Kubaner vor Robinas Café ab.
@@ -9564,13 +9564,13 @@ Wir brauchen Verstãrkung aus dem Café!
 Schalte den feigen Heckenschützen aus!
 
 [CUB2_07:CUBAN2]
-Die kãmpfen wie Weiber! In Deckung!
+Die kämpfen wie Weiber! In Deckung!
 
 [CUB2_09:CUBAN2]
 Heckenschütze auf dem Dach!
 
 [CUB2_11:CUBAN2]
-~r~Du Idiot! Das Auto hãtten wir gebraucht!
+~r~Du Idiot! Das Auto hätten wir gebraucht!
 
 [CUB2_12:CUBAN2]
 Hey, Amigo! Schön zu sehen, dass du's geschafft hast!
@@ -9594,16 +9594,16 @@ Lass uns diesen Wagen voller Stoff nehmen und abhauen!
 ~g~Besorge dir ein Auto und hole die Kubaner ab.
 
 [CUB2_19:CUBAN2]
-Wir werden kãmpfen wie Mãnner!
+Wir werden kämpfen wie Männer!
 
 [CUB2_21:CUBAN2]
-Kãmpfen wie ganze Kerle!
+Kämpfen wie ganze Kerle!
 
 [CUB2_22:CUBAN2]
 ~g~Schalte die restlichen Haitianer aus, damit die Kubaner vorrücken können.
 
 [CUB2_23:CUBAN2]
-~g~In Little Haiti wird es von Haitianern wimmeln, die sich an den Kubanern rãchen wollen. Sei vorsichtig.
+~g~In Little Haiti wird es von Haitianern wimmeln, die sich an den Kubanern rächen wollen. Sei vorsichtig.
 
 [CUB2_24:CUBAN2]
 ~g~Kehre mit dem Van zu Robinas Café zurück und parke hinter dem Haus.
@@ -9635,22 +9635,22 @@ Sie lachen mich aus, Tommy. Mich!
 Umberto Robina. Die tun, was sie wollen!
 
 [CUB3_I:CUBAN3]
-Die tun nicht, was sie wollen, Umberto. Sie tun, was du sie tun lãsst.
+Die tun nicht, was sie wollen, Umberto. Sie tun, was du sie tun lässt.
 
 [CUB3_J:CUBAN3]
 Was?
 
 [CUB3_K:CUBAN3]
-Soll jemand aus dem Weg gerãumt werden?
+Soll jemand aus dem Weg geräumt werden?
 
 [CUB3_L:CUBAN3]
 Ich kann das machen, aber es kostet.
 
 [CUB3_M:CUBAN3]
-Ich weiß, wir sind Brüder und alles, aber hier geht's um ein Geschãft.
+Ich weiß, wir sind Brüder und alles, aber hier geht's um ein Geschäft.
 
 [CUB3_N:CUBAN3]
-Tommy. Du bist ein echter Mann. Ein Geschãftsmann, ein Gentleman.
+Tommy. Du bist ein echter Mann. Ein Geschäftsmann, ein Gentleman.
 
 [CUB3_O:CUBAN3]
 Die Haitianer, sie erwarten eine Schiffladung Stoff, richtig gutes Zeug.
@@ -9674,13 +9674,13 @@ Hey, Rico. Nettes Boot. Bist du bereit?
 ~g~Bringe die Drogen und das Geld zu Umberto.
 
 [CUB3_05:CUBAN3]
-Ja, Tommy. Also, sei ein guter Kapitãn heute.
+Ja, Tommy. Also, sei ein guter Kapitän heute.
 
 [CUB3_06:CUBAN3]
 Mein Boot nützt mir nichts, wenn es durchlöchert ist, ok?
 
 [CUB3_07:CUBAN3]
-~g~Begib dich zu Rico. Er fãhrt dich zum Treffpunkt.
+~g~Begib dich zu Rico. Er fährt dich zum Treffpunkt.
 
 [CUB3_02:CUBAN3]
 ~g~ERLEDIGE ALLE HAITIANER AUF DEN BOOTEN!!
@@ -9808,7 +9808,7 @@ Ich kannte mal eine schöne Frau, die hat hier gewohnt.
 Die machen gute Pizza hier.
 
 [CUB4_22:CUBAN4]
-Hey, Mann! Du fãhrst wie ein Verrückter!
+Hey, Mann! Du fährst wie ein Verrückter!
 
 [CUB4_23:CUBAN4]
 Hast du dich verfahren, Mann?
@@ -9817,7 +9817,7 @@ Hast du dich verfahren, Mann?
 Du hast Pepe vergessen, hole ihn.
 
 [CUB4_03:CUBAN4]
-~g~Bleib im Wagen, bis er sicher auf dem Gelãnde geparkt ist.
+~g~Bleib im Wagen, bis er sicher auf dem Gelände geparkt ist.
 
 [CUB4_26:CUBAN4]
 ~g~Nimm dir Pepe, fahr Richtung Norden nach Little Haiti und klaue einen Voodoo.
@@ -9867,7 +9867,7 @@ Und jetzt kommen auf einmal deine italienischen Brüder an und wollen mir Zement
 Halt den Mund, Ken. Setz dich.
 
 [FIN1_08:FINALE]
-Lance, was lãuft hier, verdammt?
+Lance, was läuft hier, verdammt?
 
 [FIN1_09:FINALE]
 Deine Freunde aus dem Norden, Tommy. Die sind nicht sehr froh, dass du ihren Mann erledigt hast.
@@ -9876,7 +9876,7 @@ Deine Freunde aus dem Norden, Tommy. Die sind nicht sehr froh, dass du ihren Man
 Sie kommen heute, um nach dem Rechten zu sehen.
 
 [FIN1_11:FINALE]
-Sie haben lãnger gebraucht, als ich dachte...
+Sie haben länger gebraucht, als ich dachte...
 
 [FIN1_12:FINALE]
 Jungs, wir müssen denen ein für alle Mal klar machen, dass das mein Laden ist. MEINER!
@@ -9900,7 +9900,7 @@ Ich war 15 Jahre weg vom Fenster,
 bin nicht mehr auf dem Laufenden, was Manieren angeht.
 
 [FIN2_05:FINALE]
-Immer Wut im Bauch, hã, Tommy?
+Immer Wut im Bauch, hä, Tommy?
 
 [FIN2_06:FINALE]
 Ich sag's ja, dein Temperament wird dir nochmal schlecht bekommen.
@@ -9909,7 +9909,7 @@ Ich sag's ja, dein Temperament wird dir nochmal schlecht bekommen.
 In den Koffern sind 20 Millionen...
 
 [FIN2_08:FINALE]
-Wie viele waren es denn? Zehn? Nein, elf Mãnner.
+Wie viele waren es denn? Zehn? Nein, elf Männer.
 
 [FIN2_09:FINALE]
 So kommt man zu dem Spitznamen 'Harwood-Butcher'! Hehehe!
@@ -9933,19 +9933,19 @@ Holt das Geld!
 Weißt du, Tommy, ich hab für dich getan, was nur ging. Himmel und Hölle in Bewegung gesetzt.
 
 [FIN2_16:FINALE]
-Ich war dein Freund. Ich dachte, du nimmst Vernunft an. Kapierst, was gut fürs Geschãft ist.
+Ich war dein Freund. Ich dachte, du nimmst Vernunft an. Kapierst, was gut fürs Geschäft ist.
 
 [FIN2_17:FINALE]
-Ich hab dir vertraut, Tommy, und du hast mich enttãuscht.
+Ich hab dir vertraut, Tommy, und du hast mich enttäuscht.
 
 [FIN2_18:FINALE]
-Aber wenigstens einer in deiner mickrigen Organisation weiß, wie man Geschãfte macht.
+Aber wenigstens einer in deiner mickrigen Organisation weiß, wie man Geschäfte macht.
 
 [FIN2_19:FINALE]
 Stimmt's, Lance?
 
 [FIN2_20:FINALE]
-Sorry, Tommy. So lãuft's in Vice City. So lãuft das Geschãft.
+Sorry, Tommy. So läuft's in Vice City. So läuft das Geschäft.
 
 [FIN2_21:FINALE]
 Du hast uns verraten...
@@ -9969,7 +9969,7 @@ Dass ich den Schwanz einziehe und abhaue, um nicht das Gesicht zu verlieren?
 Nein.
 
 [FIN2_28:FINALE]
-Ich wollte dich nur noch ein bisschen ãrgern, bevor ich dich fertig mache.
+Ich wollte dich nur noch ein bisschen ärgern, bevor ich dich fertig mache.
 
 [FIN3_01:FINALE]
 Tommy?
@@ -9981,16 +9981,16 @@ Oh Gott, Tommy! Was ist passiert?
 Wonach sieht's denn aus?
 
 [FIN3_04:FINALE]
-Sieht aus, als wãr dein Anzug ruiniert!
+Sieht aus, als wär dein Anzug ruiniert!
 
 [FIN3_05:FINALE]
 Und das war ein wunderbarer Anzug! Tommy, Herrgott, was ist passiert?
 
 [FIN3_06:FINALE]
-Kleine Meinungsverschiedenheit mit einem Geschãftsfreund. Wie das so ist.
+Kleine Meinungsverschiedenheit mit einem Geschäftsfreund. Wie das so ist.
 
 [FIN3_07:FINALE]
-Wenn ich eine Meinungsverschiedenheit mit einem Geschãftsfreund habe, schick ich ihm einen bösen Brief.
+Wenn ich eine Meinungsverschiedenheit mit einem Geschäftsfreund habe, schick ich ihm einen bösen Brief.
 
 [FIN3_08:FINALE]
 Oder ich pinkle ihm in den Briefkasten, aber ich fang nicht den 3. Weltkrieg an.
@@ -10011,10 +10011,10 @@ Er ist neurotisch, unsicher, selbstsüchtig - Er ist ein Arschloch!
 Gut, dass du ihn fertig gemacht hast!
 
 [FIN3_14:FINALE]
-Ich glaub auch nicht, dass wir nochmal Ãrger mit denen aus dem Norden kriegen...
+Ich glaub auch nicht, dass wir nochmal Ärger mit denen aus dem Norden kriegen...
 
 [FIN3_15:FINALE]
-Die aus dem Norden gibt's nãmlich nicht mehr.
+Die aus dem Norden gibt's nämlich nicht mehr.
 
 [FIN3_16:FINALE]
 Gibt nur noch die im Süden.
@@ -10029,7 +10029,7 @@ Na, was meinst du, was das heißt?
 Dass wir jetzt die Herren im Haus sind... ich meine, dass DU der Herr im Haus bist. Oh, Tommy...
 
 [FIN3_20:FINALE]
-Weißt du, Ken, das könnte der Beginn einer wunderbaren Geschãftsbeziehung sein...
+Weißt du, Ken, das könnte der Beginn einer wunderbaren Geschäftsbeziehung sein...
 
 [FIN3_21:FINALE]
 Schließlich bist du ein hinterlistiger, mieser kleiner Dieb...
@@ -10041,7 +10041,7 @@ und ich bin ein verurteilter Psychopath und Dealer.
 Ich weiß. Ist das nicht wunderbar?
 
 [FIN_B1:FINALE]
-~g~Erledige den Verrãter ~y~Vance~g~.
+~g~Erledige den Verräter ~y~Vance~g~.
 
 [FIN_B2:FINALE]
 ~g~Erledige ~p~Sonny~g~, um die Sache ein für alle Mal zuende zu bringen.
@@ -10050,7 +10050,7 @@ Ich weiß. Ist das nicht wunderbar?
 ~g~Die Mafia will dein Geld stehlen. Verteidige den Safe.
 
 [FIN_B4:FINALE]
-~g~Du hãltst nicht mehr lange durch. Hol dir unten ein wenig ~w~Energie~g~.
+~g~Du hältst nicht mehr lange durch. Hol dir unten ein wenig ~w~Energie~g~.
 
 [FIN_B5:FINALE]
 ~g~Die Mafia stiehlt dein Geld. Verteidige den ~c~Safe.
@@ -10067,7 +10067,7 @@ Ich weiß. Ist das nicht wunderbar?
 Feuer gelöscht!
 
 [F_FAIL2:FIRETRK]
-~r~Du kommst zu spãt!
+~r~Du kommst zu spät!
 
 [F_CANC:FIRETRK]
 ~r~Feuerwehr-Mission abgebrochen!
@@ -10117,7 +10117,7 @@ Nein danke.
 Es ist mir peinlich, aber es scheint, unser Problem ist zum Teil auf das lose Mundwerk einer mir vertrauten Person zurückzuführen.
 
 [GEN1_F:GENERA1]
-Seit Jahren schleppe ich Gonzalez mit, aber nun erreicht seine Unfãhigkeit einen neuen Höhepunkt.
+Seit Jahren schleppe ich Gonzalez mit, aber nun erreicht seine Unfähigkeit einen neuen Höhepunkt.
 
 [GEN1_G:GENERA1]
 Es ist nur gerecht, wenn Sie Gonzalez erledigen.
@@ -10129,7 +10129,7 @@ War er es? Mir geht es in erster Linie um das Geld.
 Er ist in seinem Penthouse, vermutlich halb betrunken. Nehmen Sie das hier.
 
 [GEN1_06:GENERA1]
-Er hat eine Kettensãge!!
+Er hat eine Kettensäge!!
 
 [GEN1_07:GENERA1]
 Bleib mir vom Leib, du elender Mistkerl!
@@ -10209,7 +10209,7 @@ Tommy! Setzen Sie sich zu mir.
 Sieht das nicht köstlich aus? Tapirschnauze?
 
 [COL2_C:GENERA2]
-Ãh... Nein. Nein, danke.
+Äh... Nein. Nein, danke.
 
 [COL2_D:GENERA2]
 Tommy, Sie sind wie eine Pampas-Brise, die mich vom Gestank der Korruption befreit hat.
@@ -10218,19 +10218,19 @@ Tommy, Sie sind wie eine Pampas-Brise, die mich vom Gestank der Korruption befre
 Natürlich muss ich so tun, als trauere ich um ihn und muss wie immer meine Arbeit machen.
 
 [COL2_F:GENERA2]
-Das bringt mich meinem Geld nicht nãher...
+Das bringt mich meinem Geld nicht näher...
 
 [COL2_G:GENERA2]
 Tommy, mein Freund, Sie sind hier nicht in Liberty. Hier regeln wir Dinge anders.
 
 [COL2_H:GENERA2]
-Ich werde weiter nachforschen, zunãchst hãtte ich aber ein lukratives Geschãft abzuschließen.
+Ich werde weiter nachforschen, zunächst hätte ich aber ein lukratives Geschäft abzuschließen.
 
 [COL2_I:GENERA2]
 Freunden tu ich gern einen Gefallen, Cortez...
 
 [COL2_J:GENERA2]
-Sie sind ein guter Freund, Tommy. Ich wusste, ich kann auf Sie zãhlen.
+Sie sind ein guter Freund, Tommy. Ich wusste, ich kann auf Sie zählen.
 
 [COL2_K:GENERA2]
 Sie müssen sich mit einem Kurier treffen, der wertvolle 'Technologie' für mich beschafft hat.
@@ -10242,7 +10242,7 @@ Die Regen ist sich sehr nass um diese Jahreszeit...
 Was?
 
 [COL2_3:GENERA2]
-Ãh, comment?
+Äh, comment?
 
 [COL2_4:GENERA2]
 Hören Sie, Cortez schickt mich. Geben Sie mir die verdammten Mikrochips.
@@ -10289,7 +10289,7 @@ Thomas, danke, dass Sie kommen.
 Verzeihen Sie, wenn ich gleich zur Sache komme.
 
 [GEN3_C:GENERA3]
-Diaz bat mich, eine kleinere geschãftliche Transaktion zu überwachen.
+Diaz bat mich, eine kleinere geschäftliche Transaktion zu überwachen.
 
 [GEN3_D:GENERA3]
 Wird hoffentlich besser laufen als die letzte, hah?
@@ -10301,7 +10301,7 @@ Darum habe ich an Sie gedacht, mein Freund.
 Ich habe etwas zu Ihrem Schutz beim Parkhaus deponiert.
 
 [GEN3_G:GENERA3]
-Holen Sie es ab. Und dann bewachen Sie Diaz' Mãnner bei dem Deal.
+Holen Sie es ab. Und dann bewachen Sie Diaz' Männer bei dem Deal.
 
 [GEN3_H:GENERA3]
 Danke, Amigo.
@@ -10346,7 +10346,7 @@ Tommy! Ich brauch Hilfe!
 Keine Sorge, ich hab alles im Griff!
 
 [GEN3_16:GENERA3]
-Diaz' Mãnner werden umgemãht!
+Diaz' Männer werden umgemäht!
 
 [GEN3_19:GENERA3]
 ~g~Haitianer! Sie greifen an! Beschütze Diaz!
@@ -10373,7 +10373,7 @@ Diaz' Gesundheitszustand:
 ~r~Er ist mit dem Geld entwischt! Dafür macht Diaz dich kalt!
 
 [GEN3_33:GENERA3]
-~r~Du sollst Diaz und seine Mãnner bewachen, nicht beschießen!
+~r~Du sollst Diaz und seine Männer bewachen, nicht beschießen!
 
 [GEN3_34:GENERA3]
 ~r~Es gibt keinen Deal, wenn du die Kubaner erledigst!
@@ -10415,7 +10415,7 @@ Tommy!
 Verdammt!
 
 [GEN3_50:GENERA3]
-~r~Du hast Diaz' Geld verloren! Versuch das nãchste Mal, das Geld nicht zu vernichten!
+~r~Du hast Diaz' Geld verloren! Versuch das nächste Mal, das Geld nicht zu vernichten!
 
 [GEN3_51:GENERA3]
 Noch mehr verdammte Haitianer in einem beschissenen Van!
@@ -10427,10 +10427,10 @@ Steht nicht rum, ihr Idioten! Schnappt euch diesen haitianischen Mistkerl!
 Tommy! Ich bleibe hier und passe auf Diaz auf!
 
 [GEN3_18:GENERA3]
-~g~Die Kubaner kommen. Bleib in Diaz' Nãhe. Überwache den Deal. Pass auf Diaz und Lance auf.
+~g~Die Kubaner kommen. Bleib in Diaz' Nähe. Überwache den Deal. Pass auf Diaz und Lance auf.
 
 [GEN3_56:GENERA3]
-~r~Diaz ist hinüber, er ist in einen Hinterhalt geraten. Pass das nãchste Mal auf ihn auf!
+~r~Diaz ist hinüber, er ist in einen Hinterhalt geraten. Pass das nächste Mal auf ihn auf!
 
 [GEN3_57:GENERA3]
 Die Kruger ist ein Sturmgewehr, das einem erlaubt, in der subjektiven Kamera-Einstellung manuell zu zielen.
@@ -10451,7 +10451,7 @@ Drücke die ~h~~k~~PED_FIREWEAPON~~w~-Taste, um das Sturmgewehr ~h~abzufeuern~w~
 Drücke die ~h~~k~~PED_FIREWEAPON~~w~-Taste, um das Sturmgewehr ~h~abzufeuern~w~.
 
 [GEN3_63:GENERA3]
-Auf~h~ Motorrãdern ~w~kann man nicht nur im Vorbeifahren seitlich auf Ziele schießen, man kann auch ~h~geradeaus feuern~w~.
+Auf~h~ Motorrädern ~w~kann man nicht nur im Vorbeifahren seitlich auf Ziele schießen, man kann auch ~h~geradeaus feuern~w~.
 
 [GEN3_64:GENERA3] { reVC update }
 Um auf einem Motorrad sitzend geradeaus zu feuern, drücke die ~h~~k~~VEHICLE_FIREWEAPON~~w~-Taste.
@@ -10498,7 +10498,7 @@ Schaffen Sie den Zivilisten aus dem Weg, Soldat! - Sir, zu Befehl, Sir!
 Zivilist im PANZER! HALTET IHN AUF!
 
 [COL4_13:GENERA4]
-Dies ist ein Militãrkonvoi, machen Sie den Weg frei!
+Dies ist ein Militärkonvoi, machen Sie den Weg frei!
 
 [COL4_14:GENERA4]
 Erledigen sie ihn, Soldat.
@@ -10558,7 +10558,7 @@ Man erhebt keine Anschuldigungen gegen einen Mann wie Diaz. Ich habe nur laut na
 Egal. Ich habe einen Vorschlag, der lukrativ für Sie sein könnte...
 
 [COL4_07:GENERA4]
-Ich habe keine Zeit für weitere Auftrãge, Cortez.
+Ich habe keine Zeit für weitere Aufträge, Cortez.
 
 [COL4_08:GENERA4]
 Ein Mann mit solch bedrohlichen Schulden sollte doch um jede Verdienstmöglichkeit dankbar sein. Hören Sie mich wenigstens an.
@@ -10567,7 +10567,7 @@ Ein Mann mit solch bedrohlichen Schulden sollte doch um jede Verdienstmöglichke
 Na gut...
 
 [COL410:GENERA4]
-Ich habe einen Kãufer für ein 'Militãrgerãt', das durch die Stadt transportiert wird. Beschaffen Sie es!
+Ich habe einen Käufer für ein 'Militärgerät', das durch die Stadt transportiert wird. Beschaffen Sie es!
 
 [COL411:GENERA4]
 Wenn Sie es haben, rufen Sie mich unverzüglich an...
@@ -10582,7 +10582,7 @@ Was ist mit dem Kanonier? - Weiß nicht, Sir!
 Los, sehen Sie nach, Soldat! - Zu Befehl, Sir!
 
 [COL4_B1:GENERA4]
-~g~Besorge das militãrische Fahrzeug, das durch die Stadt gefahren wird.
+~g~Besorge das militärische Fahrzeug, das durch die Stadt gefahren wird.
 
 [COL4_B3:GENERA4]
 ~g~Liefere den Panzer in der Garage des Colonels ab, bevor er sich selbst zerstört.
@@ -10611,10 +10611,10 @@ Die Franzosen wollen ihre Lenkwaffen-Chips wieder und nach dem letzten Zwischenf
 zieht es mich in sicherere Gefilde.
 
 [COL5A_5:GENERA5]
-Wãre es nicht sicherer zu fliegen?
+Wäre es nicht sicherer zu fliegen?
 
 [COL5A_6:GENERA5]
-Ich wãre erledigt, bevor ich eingecheckt hãtte. Außerdem muss ich Ware außer Landes schaffen.
+Ich wäre erledigt, bevor ich eingecheckt hätte. Außerdem muss ich Ware außer Landes schaffen.
 
 [COL5A_7:GENERA5]
 Brauchen Sie noch einen Bodyguard?
@@ -10650,7 +10650,7 @@ Hören Sie auf, auf mich zu schießen!
 Tommy, die sollen aufhören, auf mich zu schießen!
 
 [COL5_10:GENERA5]
-Ich genieße diplomatische Immunitãt.
+Ich genieße diplomatische Immunität.
 
 [COL5_11:GENERA5]
 Nicht schießen, ich bin ein Colonel!
@@ -10668,7 +10668,7 @@ Tommy, wo ich hinsehe, überall Franzosen! Wie ich es hasse!
 Tommy, alles in Ordnung?
 
 [COL5_16:GENERA5]
-Das ist für Piaf und Gainesbourg und für euer dãmliches französisches Weißbrot!
+Das ist für Piaf und Gainesbourg und für euer dämliches französisches Weißbrot!
 
 [COL5_1:GENERA5]
 Backbord! Backbord!
@@ -10686,7 +10686,7 @@ Sie haben einen Helikopter!
 ~g~Beschütze den Colonel und seine Jacht um jeden Preis.
 
 [COL5_B2:GENERA5]
-~g~Geh nach vorn und rãume der Jacht des Colonels den Weg frei.
+~g~Geh nach vorn und räume der Jacht des Colonels den Weg frei.
 
 [COL5_B3:GENERA5]
 ~r~Der Colonel ist hinüber!
@@ -10698,7 +10698,7 @@ Sie haben einen Helikopter!
 Ich werde meine Privatbarkasse zu Wasser lassen. Sie gehört Ihnen, als Ausdruck meiner Dankbarkeit.
 
 [COL5_B5:GENERA5]
-~g~Schieß die Helikopter ab, gefãhrde nicht die Jacht.
+~g~Schieß die Helikopter ab, gefährde nicht die Jacht.
 
 [COL5_B6:GENERA5]
 ~g~Du hast keine Munition mehr. Hol dir an der Treppe des Oberdecks Nachschub.
@@ -10715,10 +10715,10 @@ Hallo? Hallo?
 Komm rein, mein Lieber, und ruh dich aus.
 
 [HAM1_C:HAIT1]
-Du musst der große böse Mann sein, von dem mein Großvater erzãhlt hat.
+Du musst der große böse Mann sein, von dem mein Großvater erzählt hat.
 
 [HAM1_D:HAIT1]
-Er erzãhlte immer von dir, wenn er zu Besuch kam,
+Er erzählte immer von dir, wenn er zu Besuch kam,
 
 [HAM1_E:HAIT1]
 und von den anderen, die auf dich warten.
@@ -10745,25 +10745,25 @@ Aber wenn du der alten Tante Poulet hilfst, hilft sie dir vielleicht auch.
 Vielleicht kann sie dir danach einen kleinen Talisman schenken.
 
 [HAM1_M:HAIT1]
-Ein bisschen Magie, die den Mãnnern des Gesetzes schlechte Augen macht, hmm?
+Ein bisschen Magie, die den Männern des Gesetzes schlechte Augen macht, hmm?
 
 [HAM1_N:HAIT1]
-Hören Sie, das ist alles sehr, ãh... Sie geben mir was?
+Hören Sie, das ist alles sehr, äh... Sie geben mir was?
 
 [HAM1_O:HAIT1]
 Ich...ich...ich glaube, ich bin hier falsch.
 
 [HAM1_P:HAIT1]
-Erweise mir ein paar Gefãlligkeiten, Tommy...
+Erweise mir ein paar Gefälligkeiten, Tommy...
 
 [HAM1_Q:HAIT1]
-Die Kubaner, miese, hochnãsige Narren, hmmm,
+Die Kubaner, miese, hochnäsige Narren, hmmm,
 
 [HAM1_R:HAIT1]
-haben meine lieben Haiti-Boys sehr geãrgert.
+haben meine lieben Haiti-Boys sehr geärgert.
 
 [HAM1_S:HAIT1]
-Jetzt haben sie den Polizisten erzãhlt, wo ich meine Pülverchen versteckt habe.
+Jetzt haben sie den Polizisten erzählt, wo ich meine Pülverchen versteckt habe.
 
 [HAM1_T:HAIT1]
 Sie denken, das sind Drogen, diese Dummköpfe.
@@ -10775,7 +10775,7 @@ Sei ein braver Bub, Tommy, und hole Tante Poulet die Pülverchen.
 Ja, ja. Sicher, sicher.
 
 [HAM1_1:HAIT1]
-~g~Die Cops nãhern sich dem Zeug. Hol es, bevor sie dort sind.
+~g~Die Cops nähern sich dem Zeug. Hol es, bevor sie dort sind.
 
 [HAM1_2:HAIT1]
 ~r~Die Cops waren schneller bei dem Zeug!
@@ -10784,7 +10784,7 @@ Ja, ja. Sicher, sicher.
 ~g~Bring das Zeug zum Unterschlupf!
 
 [HAM1_4:HAIT1]
-~g~Gut. Jetzt das nãchste!
+~g~Gut. Jetzt das nächste!
 
 [HAM1_6:HAIT1]
 ~r~Das Zeug wurde vernichtet, du Idiot!
@@ -10840,7 +10840,7 @@ Ja...
 Das kommt mir so bekannt vor hier. Ein Geruch aus meiner Kindheit - das muss ein Déjà-vu sein...
 
 [HAT2_6:HAIT2]
-Tommy, du kannst was für mich tun, ich werd's dir erklãren. Hör gut zu, ja?
+Tommy, du kannst was für mich tun, ich werd's dir erklären. Hör gut zu, ja?
 
 [HAT2_7:HAIT2]
 Sie sehen aus wie jemand, den...
@@ -10866,7 +10866,7 @@ Um eine Bombe abzuwerfen, drück die ~h~~k~~VEHICLE_FIREWEAPON~~w~-Taste. ~h~~k~
 {=================================== MISSION TABLE HAIT3 ===================================}
 
 [HAM3_A:HAIT3]
-Hallo, hallo, ich, ãh, ich suche hier jemanden...
+Hallo, hallo, ich, äh, ich suche hier jemanden...
 
 [HAM3_B:HAIT3]
 Du siehst hungrig aus, Tommy.
@@ -10878,7 +10878,7 @@ Kenne ich Sie?
 Sei jetzt still.
 
 [HAM3_E:HAIT3]
-Eine Gefãlligkeit noch, dann lasse ich dich gehen, Tommy.
+Eine Gefälligkeit noch, dann lasse ich dich gehen, Tommy.
 
 [HAM3_F:HAIT3]
 Meine Jungs haben die Kubaner zum Kampf gefordert.
@@ -10890,13 +10890,13 @@ Aber ohne Kanonen.
 Hmm, aber die Kubaner werden ihr blaues Wunder erleben.
 
 [HAM3_I:HAIT3]
-Wenn sie in den Straßen kãmpfen, nimmst du dieses Gewehr und rãumst auf.
+Wenn sie in den Straßen kämpfen, nimmst du dieses Gewehr und räumst auf.
 
 [HAM3_J:HAIT3]
 Keiner sieht dich, keiner hört dich.
 
 [HAM3_K:HAIT3]
-Wenn du das für mich tust, Tommy, dann kommst frei aus meinen Schürzenbãndern.
+Wenn du das für mich tust, Tommy, dann kommst frei aus meinen Schürzenbändern.
 
 [HAM3_1:HAIT3]
 ~g~Wir müssen gewinnen. Werden alle Haitianer erledigt, haben wir verloren.
@@ -10914,7 +10914,7 @@ Wenn du das für mich tust, Tommy, dann kommst frei aus meinen Schürzenbãndern
 ~g~Es gibt Verluste unter den Haitianern! Du musst besser zielen!
 
 [HAM3_7:HAIT3]
-~g~Vorsicht! Die Kubaner haben Verstãrkung mitgebracht. Schalte sie alle aus!!
+~g~Vorsicht! Die Kubaner haben Verstärkung mitgebracht. Schalte sie alle aus!!
 
 [HAM3_2:HAIT3]
 ~r~Die Haitianer sind weg vom Fenster!
@@ -10931,10 +10931,10 @@ Tommy! Tommy, wir haben uns lange nicht gesehen.
 Hallo, Sonny.
 
 [INTB_C:HOTEL]
-Ich weiß, ich weiß. Dir kommen vor Rührung die Trãnen.
+Ich weiß, ich weiß. Dir kommen vor Rührung die Tränen.
 
 [INTB_D:HOTEL]
-15 Jahre ist es her - dabei kommt's mir vor, als wãr's gestern gewesen.
+15 Jahre ist es her - dabei kommt's mir vor, als wär's gestern gewesen.
 
 [INTB_E:HOTEL]
 DU hast leicht reden.
@@ -10976,7 +10976,7 @@ Und ich liefere dir die Kerle, die dahinterstecken.
 Das weiß ich doch. Du bist kein Idiot, Tommy, aber ich warne dich - ich bin auch keiner.
 
 [INTB_R:HOTEL]
-Wenn du's nicht wãrst - ein anderer wãr lãngst fãllig!
+Wenn du's nicht wärst - ein anderer wär längst fällig!
 
 [INTB_S:HOTEL]
 Aber uns beide verbindet eine alte Freundschaft. Ich lasse dich das regeln.
@@ -10996,43 +10996,43 @@ Du hörst von mir.
 ~g~Parke den Eis-Wagen und drücke ~h~~k~~VEHICLE_HORN~~w~, um den Eiscreme-Jingle abzuspielen, damit deine Kunden wissen, dass du Ware zu verkaufen hast.
 
 [ICC1_3:ICECRE1]
-~g~Für jede Transaktion bekommst du Geld. Aber je mehr Transaktionen du tãtigst, desto stãrker wird die Polizei auf dich aufmerksam.
+~g~Für jede Transaktion bekommst du Geld. Aber je mehr Transaktionen du tätigst, desto stärker wird die Polizei auf dich aufmerksam.
 
 [ICC1_4:ICECRE1]
 ~g~In dieser Gegend sind keine Kunden. Versuche es woanders.
 
 [ICC1_5:ICECRE1]
-Getãtigte Deals:
+Getätigte Deals:
 
 [ICC1_6:ICECRE1]
 ~g~Nimm den Mr. Whopee, um in Vice City Cherry Popper-Produkte zu vertreiben.
 
 [ICC1_7:ICECRE1]
-~g~Für jede Transaktion bekommst du Geld. Aber je mehr Transaktionen du tãtigst, desto stãrker wird die Polizei auf dich aufmerksam.
+~g~Für jede Transaktion bekommst du Geld. Aber je mehr Transaktionen du tätigst, desto stärker wird die Polizei auf dich aufmerksam.
 
 [ICC1_8:ICECRE1]
-~g~Um eine Transaktion zu tãtigen, ~h~parke deinen Wagen ~g~und drücke die ~h~~k~~VEHICLE_HORN~~g~, um den Eiscreme-Jingle abzuspielen, damit deine Kunden wissen, dass du Ware zu verkaufen hast.
+~g~Um eine Transaktion zu tätigen, ~h~parke deinen Wagen ~g~und drücke die ~h~~k~~VEHICLE_HORN~~g~, um den Eiscreme-Jingle abzuspielen, damit deine Kunden wissen, dass du Ware zu verkaufen hast.
 
 [ICC1_9:ICECRE1]
-~g~Andere Gangs werden es nicht gern sehen, dass du in ihrem Revier Geschãfte machst, du musst also mit Feindseligkeiten rechnen.
+~g~Andere Gangs werden es nicht gern sehen, dass du in ihrem Revier Geschäfte machst, du musst also mit Feindseligkeiten rechnen.
 
 [ICC1_10:ICECRE1]
-~g~Du hast ~1~ Deals getãtigt!
+~g~Du hast ~1~ Deals getätigt!
 
 [ICC1_11:ICECRE1]
-~g~Du hast ~1~ Deal getãtigt.
+~g~Du hast ~1~ Deal getätigt.
 
 [ICC1_12:ICECRE1]
 OBJEKT ERWORBEN!
 
 [ICC1_13:ICECRE1]
-~r~Du hast keine Deals getãtigt!
+~r~Du hast keine Deals getätigt!
 
 [ICC1_14:ICECRE1]
 EISCREME-MISSIONEN ERFÜLLT
 
 [ICC1_15:ICECRE1]
-~g~Die Eiscremefabrik generiert nun bis zu $~1~ Einkünfte. Hol dir das Geld regelmãßig ab.
+~g~Die Eiscremefabrik generiert nun bis zu $~1~ Einkünfte. Hol dir das Geld regelmäßig ab.
 
 [ICC1_16:ICECRE1]
 ~g~Nimm den Mr. Whoopee, um in Vice City Cherry Popper-Produkte zu vertreiben.
@@ -11041,7 +11041,7 @@ EISCREME-MISSIONEN ERFÜLLT
 EISCREMEFABRIK-MISSIONEN ERFÜLLT
 
 [ICE_AT2:ICECRE1]
-~g~Die Cherry Popper-Fabrik generiert nun bis zu $~1~ Einkünfte. Hol dir das Geld regelmãßig ab.
+~g~Die Cherry Popper-Fabrik generiert nun bis zu $~1~ Einkünfte. Hol dir das Geld regelmäßig ab.
 
 [ICC1_17:ICECRE1]
 Stoff-Auslieferungs-Mission beendet
@@ -11050,7 +11050,7 @@ Stoff-Auslieferungs-Mission beendet
 Eiscremeverkauf insgesamt: $~1~
 
 [ICC1_19:ICECRE1]
-Insgesamt getãtigte Deals: ~1~
+Insgesamt getätigte Deals: ~1~
 
 {=================================== MISSION TABLE ICECUT ===================================}
 
@@ -11058,7 +11058,7 @@ Insgesamt getãtigte Deals: ~1~
 Sie sind schmutzige, verrotzte, verlauste, eklige, sabbernde kleine...
 
 [ICC1_I:ICECUT]
-Ein Baby... ein widerwãrtiges, grãßliches, ekelhaftes kleines Gör!
+Ein Baby... ein widerwärtiges, gräßliches, ekelhaftes kleines Gör!
 
 [ICC1_J:ICECUT]
 Mammi liebt dich nicht. Du kleines Stück Scheiße!
@@ -11103,10 +11103,10 @@ Sie stellen doch Softeis her, oder? Das essen doch nur Kinder.
 Sind Sie komplett irre?
 
 [ICC1_R:ICECUT]
-Erklãren Sie mir das mal - warum Kinder glücklich machen, wenn Sie sie hassen?
+Erklären Sie mir das mal - warum Kinder glücklich machen, wenn Sie sie hassen?
 
 [ICC1_S:ICECUT]
-Oh, du dãmliches, verrotztes, verlaustes-
+Oh, du dämliches, verrotztes, verlaustes-
 
 [ICC1_T:ICECUT]
 Schluss jetzt!
@@ -11138,7 +11138,7 @@ OBJEKT ERWORBEN!
 Tommy Vercetti...Hah! Shit.
 
 [INT1_B:INTRO]
-Hãtte nicht gedacht, dass der noch mal rauskommt.
+Hätte nicht gedacht, dass der noch mal rauskommt.
 
 [INT1_C:INTRO]
 Er hat den Kopf eingezogen. War fast vergessen.
@@ -11150,7 +11150,7 @@ Aber bald wird man sich an ihn erinnern.
 Wenn man ihn wieder durch ihre Viertel tigern sieht.
 
 [INT1_F:INTRO]
-Wird schlecht fürs Geschãft sein.
+Wird schlecht fürs Geschäft sein.
 
 [INT1_G:INTRO]
 Tja, was sollen wir machen, Sonny?
@@ -11168,7 +11168,7 @@ In Vice City liegt zurzeit das Geld auf der Straße.
 Die Kolumbianer, die Mexikaner,
 
 [INT1_L:INTRO]
-ja, sogar die kubanischen Flüchtlinge machen alle glãnzende Geschãfte.
+ja, sogar die kubanischen Flüchtlinge machen alle glänzende Geschäfte.
 
 [INT1_M:INTRO]
 Aber das geht nur mit Drogen, Sonny.
@@ -11177,10 +11177,10 @@ Aber das geht nur mit Drogen, Sonny.
 Aber keine der Familien rührt dieses Zeug an!
 
 [INT1_O:INTRO]
-Die Zeiten ãndern sich.
+Die Zeiten ändern sich.
 
 [INT1_P:INTRO]
-Die Familien können nicht wegsehen, wãhrend unsere Feinde groß abkassieren.
+Die Familien können nicht wegsehen, während unsere Feinde groß abkassieren.
 
 [INT1_Q:INTRO]
 Also schicken wir jemanden für die Drecksarbeit da runter
@@ -11219,16 +11219,16 @@ und schauen mal bei ihm rein, klar?
 Mal sehen, wie er sich macht.
 
 [INT2_A:INTRO]
-Hey, hey, Jungs! Ich bin, ãh, Ken Rosenberg. Ha, ha, sehr gut, hey!
+Hey, hey, Jungs! Ich bin, äh, Ken Rosenberg. Ha, ha, sehr gut, hey!
 
 [INT2_B:INTRO]
-Tja, ãh, ich soll euch zu dem Trefffen fahren, okay?
+Tja, äh, ich soll euch zu dem Trefffen fahren, okay?
 
 [INT2_C:INTRO]
 Ich hab mit den Lieferanten geredet, und die würden,
 
 [INT2_D:INTRO]
-liebend gern mit uns ins Geschãft kommen. Und, ãh,
+liebend gern mit uns ins Geschäft kommen. Und, äh,
 
 [INT2_E:INTRO]
 wenn alles gut geht, dann dürfte da
@@ -11243,7 +11243,7 @@ gut...
 Okay. Es sind zwei Brüder, ok?
 
 [INT2_I:INTRO]
-Der eine schmeißt, ãh, den Laden,
+Der eine schmeißt, äh, den Laden,
 
 [INT2_J:INTRO]
 der andere macht die Flüge.
@@ -11276,10 +11276,10 @@ Ich pass auf den Wagen auf.
 Ok, das sind sie, da im Helikopter.
 
 [INT3_B:INTRO]
-Ok, das ganze lãuft so ab:
+Ok, das ganze läuft so ab:
 
 [INT3_C:INTRO]
-Die wollen eine saubere Übergabe auf offenem Gelãnde.
+Die wollen eine saubere Übergabe auf offenem Gelände.
 
 [INT3_D:INTRO]
 Alles klar? Ok, dann wollen wir mal.
@@ -11288,7 +11288,7 @@ Alles klar? Ok, dann wollen wir mal.
 Ok, ganz ruhig jetzt.
 
 [INT3_F:INTRO]
-Ich bin hier. Der Wagen lãuft, Baby!
+Ich bin hier. Der Wagen läuft, Baby!
 
 [INT3_G:INTRO]
 Hast du's?
@@ -11413,7 +11413,7 @@ Los, wir verschwinden von hier.
 Dank dir ist mein ganzer schöner Plan im Eimer. Das hast du sauber vermasselt, Lance.
 
 [RESC_5:KENT1]
-Er hat meinen Bruder auf dem Gewissen. Soll ich ihm den Rasen mãhen?
+Er hat meinen Bruder auf dem Gewissen. Soll ich ihm den Rasen mähen?
 
 [RESC_6:KENT1]
 Wir müssen diesen Diaz erledigen bevor er uns erledigt.
@@ -11457,7 +11457,7 @@ BENÖTIGTE ZEIT:
 ~b~ZEIT: ~1~:0~1~
 
 [GETBIKE:KICKSTT]
-~g~Du hast ~1~ Sekunden, um zu einer Gelãndemaschine zurückzukehren, bevor die Mission endet.
+~g~Du hast ~1~ Sekunden, um zu einer Geländemaschine zurückzukehren, bevor die Mission endet.
 
 [KICK1_1:KICKSTT]
 ~g~Absolviere den Kurs so schnell wie möglich.
@@ -11507,7 +11507,7 @@ Gute Idee. SEHR gute Idee. Lass mich nachdenken, lass mich nachdenken.
 OH! Da gibt es diesen Colonel a.D., Colonel Juan Garcia Cortez.
 
 [LAW1_J:LAWYER1]
-Der half mir, diesen Deal einzufãdeln,
+Der half mir, diesen Deal einzufädeln,
 
 [LAW1_K:LAWYER1]
 und zwar ohne Vice Citys Gangster-Establishment. Ok?
@@ -11549,10 +11549,10 @@ Guten Abend.
 Ich höre, Sie sind anstelle von Mr. Rosenberg hier.
 
 [LAWP_3:LAWYER1]
-Ich hoffe, gewisse Vorfãlle haben seiner Gesundheit nicht geschadet,
+Ich hoffe, gewisse Vorfälle haben seiner Gesundheit nicht geschadet,
 
 [LAWP_4:LAWYER1]
-oder seiner Psyche, Mr...ãh?
+oder seiner Psyche, Mr...äh?
 
 [LAWP_5:LAWYER1]
 Vercetti. Er leidet ein wenig an...Platzangst.
@@ -11573,7 +11573,7 @@ Natürlich stelle ich selbst Nachforschungen an, aber
 bei solch heiklen Sachen dauert das ein wenig.
 
 [LAWP_11:LAWYER1]
-Wir sprechen uns vielleicht spãter. Hm?
+Wir sprechen uns vielleicht später. Hm?
 
 [LAWP_12:LAWYER1]
 Inzwischen möchte ich Ihnen meine Tochter vorstellen,
@@ -11582,7 +11582,7 @@ Inzwischen möchte ich Ihnen meine Tochter vorstellen,
 Mercedes!
 
 [LAWP_14:LAWYER1]
-Könntest du dich um unseren Gast kümmern, wãhrend ich mich um andere Dinge
+Könntest du dich um unseren Gast kümmern, während ich mich um andere Dinge
 
 [LAWP_15:LAWYER1]
 Natürlich, Daddy.
@@ -11597,7 +11597,7 @@ Mercedes!?
 Leb du mal mit so 'nem Namen.
 
 [LAWP_19:LAWYER1]
-Na gut, ich zeig dir mal einige unserer bekannteren Gãste...
+Na gut, ich zeig dir mal einige unserer bekannteren Gäste...
 
 [LAWP_20:LAWYER1]
 Das ist unser Abgeordneter Alex Shrub mit dem aufgehenden Sternchen Candy Suxx..
@@ -11627,7 +11627,7 @@ Tja, ich bin an einem super Grundstück dran.
 Und der Schleimbold dort ist Jezz Torrent,
 
 [LAWP_29:LAWYER1]
-Der Sãnger von 'Love Fist'.
+Der Sänger von 'Love Fist'.
 
 [LAWP_30:LAWYER1]
 Wisst ihr, wie sie in Thailand Pingpong spielen?
@@ -11636,7 +11636,7 @@ Wisst ihr, wie sie in Thailand Pingpong spielen?
 Ich verrat's euch,
 
 [LAWP_32:LAWYER1]
-man spielt ohne Schlãger, wenn ihr wisst, was ich meine!
+man spielt ohne Schläger, wenn ihr wisst, was ich meine!
 
 [LAWP_33:LAWYER1]
 Impotent.
@@ -11672,13 +11672,13 @@ Colonel!
 Ihre Party ist wie immer fantastisch, hahahaha!
 
 [LAWP_44:LAWYER1]
-Ich entschuldige mich für die Verspãtung.
+Ich entschuldige mich für die Verspätung.
 
 [LAWP_45:LAWYER1]
 Ah, nicht doch, Amigo. Wie geht es ihnen?
 
 [LAWP_46:LAWYER1]
-Unsere Geschãfte laufen schwierig - die Barbaren stehen vor den Toren.
+Unsere Geschäfte laufen schwierig - die Barbaren stehen vor den Toren.
 
 [LAWP_47:LAWYER1]
 Eine Zeit, Freunde zu belohnen und Feinde auszuschalten, Amigo.
@@ -11723,7 +11723,7 @@ Darf ich meine Hand in deinen Schoß legen?
 Vielleicht...
 
 [LAW1_9:LAWYER1]
-Es ist schwer, einen so reichen, mãchtigen Vater zu haben. Los.
+Es ist schwer, einen so reichen, mächtigen Vater zu haben. Los.
 
 [LAW1_10:LAWYER1]
 Wir sehen uns, mein Hübscher!
@@ -11752,7 +11752,7 @@ Ja, Baby, hab ich mir gerade bei Howlin' Pete's besorgt.
 {=================================== MISSION TABLE LAWYER2 ===================================}
 
 [LAW2_A:LAWYER2]
-Ah! Tja, ich hoffe, du amüsierst dich gut, wãhrend ich hier vor Angst halb umkomme. Was hast du rausgefunden?
+Ah! Tja, ich hoffe, du amüsierst dich gut, während ich hier vor Angst halb umkomme. Was hast du rausgefunden?
 
 [LAW2_B:LAWYER2]
 Dass es in dieser Stadt mehr Gangster gibt als im Knast. Wir brauchen einen Tipp von der Straße...
@@ -11764,7 +11764,7 @@ Ok, lass mich nachdenken, lass mich nachdenken -
 - AH! Ich hab's!
 
 [LAW2_E:LAWYER2]
-Ok, es gibt da so 'n Englãnder, so 'n Idiot aus der Musikbranche.
+Ok, es gibt da so 'n Engländer, so 'n Idiot aus der Musikbranche.
 
 [LAW2_F:LAWYER2]
 Er nennt sich Kent Paul.
@@ -11791,7 +11791,7 @@ Nach einer wie dir suche ich schon seit Ewigkeiten.
 Kent Paul. Ja, ich bin hier die Nummer Eins.
 
 [LAW2B_D:LAWYER2]
-Ich suche einen Englãnder...
+Ich suche einen Engländer...
 
 [LAW2B_E:LAWYER2]
 Ich ziehe hier die Strippen, verstehst du?
@@ -11803,7 +11803,7 @@ Ich lade dich ein. Ich kann dir alles besorgen, Süße.
 Mach dir keine Gedanken.
 
 [LAW2B_H:LAWYER2]
-Verzieh dich, Schãtzchen.
+Verzieh dich, Schätzchen.
 
 [LAW2B_I:LAWYER2]
 Oi oi oi oi!
@@ -11860,7 +11860,7 @@ Willst du auch ein paar?
 Hey, ruhig. Ich will das gleiche wie du, Bruder.
 
 [LAW2C_D:LAWYER2]
-Ach ja? Und das wãre?
+Ach ja? Und das wäre?
 
 [LAW2C_E:LAWYER2]
 Deine Kohle und den Stoff meines toten Bruders. Aber du hast gerade unsere Spur erledigt.
@@ -11911,7 +11911,7 @@ Ich seh zu, was ich rausfinde. Ich behalte dich im Auge, Tommy.
 ~g~Nimm sein Handy.
 
 [LAW2_12:LAWYER2]
-Du hast jetzt ein Handy und kannst Telefongesprãche entgegennehmen!
+Du hast jetzt ein Handy und kannst Telefongespräche entgegennehmen!
 
 [LAW2_13:LAWYER2]
 ~g~Du hast Lance zurückgelassen! Geh ihn holen!
@@ -11938,7 +11938,7 @@ Drücke die~h~ ~k~~PED_FIREWEAPON~~w~, um den Küchenchef anzugreifen.
 Stell dich in die ~q~rosa Markierung~w~, um zu sehen, was im Angebot ist.
 
 [LAW3_12:LAWYER2]
-Du kannst Waffen auswãhlen, indem du die ~h~linke~w~ oder ~h~rechte~w~ ~h~Richtungstaste drückst.
+Du kannst Waffen auswählen, indem du die ~h~linke~w~ oder ~h~rechte~w~ ~h~Richtungstaste drückst.
 
 [LAW3_13:LAWYER2]
 Wenn du genug Geld hast, kannst du Waffen durch Drücken der ~h~~k~~PED_SPRINT~~w~ kaufen.
@@ -11959,7 +11959,7 @@ Nur die Ruhe.
 Eins musst du wissen: In dieser Stadt darfst du nie unbewaffnet sein.
 
 [LAW2_17:LAWYER2]
-Komm, der nãchste Waffenladen ist ein paar Blocks von hier.
+Komm, der nächste Waffenladen ist ein paar Blocks von hier.
 
 [LAW2_18:LAWYER2]
 Tommy, jeder Mann braucht ab und zu mal ein bisschen Entspannung.
@@ -12012,10 +12012,10 @@ Nein, nein, nein! Das hab ich schon versucht. Das ist nicht gelaufen,
 ZWING sie dazu, umzudenken.
 
 [LAW3_1:LAWYER3]
-Georgio lãsst grüßen.
+Georgio lässt grüßen.
 
 [LAW3_2:LAWYER3]
-Denk dran, 'Schuldig' ist ein hãssliches Wort.
+Denk dran, 'Schuldig' ist ein hässliches Wort.
 
 [LAW3_3:LAWYER3]
 'Unschuldig', bis ich was anderes sage.
@@ -12036,7 +12036,7 @@ Nicht schuldig. Verstanden...gut.
 ~g~Schrotte das Auto des Geschworenen, damit er aussteigt!
 
 [HELP40:LAWYER3]
-Du kannst Autos mit dem Hammer oder einer ãhnlichen Waffe zertrümmern.
+Du kannst Autos mit dem Hammer oder einer ähnlichen Waffe zertrümmern.
 
 [HELP41:LAWYER3]
 Oder du kannst sie mit einem Fahrzeug rammen.
@@ -12057,7 +12057,7 @@ Unglaublich!
 Ok! Ok! Ich hab kapiert!
 
 [LAW3_24:LAWYER3]
-~g~Dieser Hammer wãre nützlich.
+~g~Dieser Hammer wäre nützlich.
 
 [LAW3_7:LAWYER3]
 ~g~Schüchtere die 2 Geschworenen ein, aber erledige sie NICHT!
@@ -12066,7 +12066,7 @@ Ok! Ok! Ich hab kapiert!
 Folge dem ~h~Hammer-Symbol~w~ auf dem Radar, wenn du beim Eisenwarenladen Nahkampfwaffen kaufen willst.
 
 [LAW3_16:LAWYER3]
-Dãmlicher Florida-Idiot!
+Dämlicher Florida-Idiot!
 
 [LAW3_17:LAWYER3]
 Aus dem Weg!
@@ -12074,7 +12074,7 @@ Aus dem Weg!
 {=================================== MISSION TABLE LAWYER4 ===================================}
 
 [LAW4_A:LAWYER4]
-Avery, es versteht sich von selbst... Tommy! Tommy! Fortschritte gemacht? Nein, erzãhl's mir spãter.
+Avery, es versteht sich von selbst... Tommy! Tommy! Fortschritte gemacht? Nein, erzähl's mir später.
 
 [LAW4_B:LAWYER4]
 Tommy, das ist Avery Carrington. Kennt ihr euch nicht von der Party?
@@ -12101,7 +12101,7 @@ Ich hab Angst. Aber wenn ich schon Ende der Woche sterbe, möchte ich wenigstens
 Jetzt beruhigt euch, ihr beiden.
 
 [LAW4_J:LAWYER4]
-Junge, wenn du mir hilfst, sorge ich dafür, dass jeder, der dir Ãrger macht, unter die Erde kommt.
+Junge, wenn du mir hilfst, sorge ich dafür, dass jeder, der dir Ärger macht, unter die Erde kommt.
 
 [LAW4_K:LAWYER4]
 Ok, was kann ich für Sie tun?
@@ -12110,13 +12110,13 @@ Ok, was kann ich für Sie tun?
 Eine Spedition hat ihr Lager auf einem Top-Grundstück - und will nicht verkaufen.
 
 [LAW4_M:LAWYER4]
-Die sitzen da drauf wie die Ratten in ihren Löchern. Also müssen wir dieses Ungeziefer ausrãuchern.
+Die sitzen da drauf wie die Ratten in ihren Löchern. Also müssen wir dieses Ungeziefer ausräuchern.
 
 [LAW4_N:LAWYER4]
 Fahr hin und stich ein wenig ins Wespennest.
 
 [LAW4_O:LAWYER4]
-Das wird die Security beschãftigen. Dann schleichst du dich rein und machst den Laden platt.
+Das wird die Security beschäftigen. Dann schleichst du dich rein und machst den Laden platt.
 
 [LAW4_P:LAWYER4]
 Und du könntest dich bei Rafael's neu einkleiden. Kann 'ne Weile dauern, aber mach das ruhig mal.
@@ -12125,10 +12125,10 @@ Und du könntest dich bei Rafael's neu einkleiden. Kann 'ne Weile dauern, aber m
 Das gibt ein Fest.
 
 [LAW4_R:LAWYER4]
-Wenn alles lãuft wie geplant, komm mal zu mir ins Büro...
+Wenn alles läuft wie geplant, komm mal zu mir ins Büro...
 
 [LAW4_1:LAWYER4]
-Bitte, geht auseinander! Die Geschãftsleitung wird sich aller Probleme annehmen!
+Bitte, geht auseinander! Die Geschäftsleitung wird sich aller Probleme annehmen!
 
 [LAW4_2:LAWYER4]
 Bitte, geht auseinander! Geht wieder nach Hause!
@@ -12146,13 +12146,13 @@ Die Knüppel raus, Jungs! Diesen Kommis zeigten wir's!
 Fange mit mind. 4 Arbeitern Streit an, um einen Aufruhr zu starten.
 
 [LAW4_14:LAWYER4]
-~g~Zerstöre die Transporter auf dem Gelãnde!
+~g~Zerstöre die Transporter auf dem Gelände!
 
 [HELP38:LAWYER4]
-Wenn du jemanden ausschaltest, der eine Waffe trãgt, lãsst er sie fallen.
+Wenn du jemanden ausschaltest, der eine Waffe trägt, lässt er sie fallen.
 
 [HELP39:LAWYER4]
-Du kannst explosive Fãsser anvisieren und abschießen, aber bleib auf Distanz.
+Du kannst explosive Fässer anvisieren und abschießen, aber bleib auf Distanz.
 
 {=================================== MISSION TABLE MIAMI_1 ===================================}
 
@@ -12160,7 +12160,7 @@ Du kannst explosive Fãsser anvisieren und abschießen, aber bleib auf Distanz.
 ~g~Du hast ~1~ Sekunden, um ~y~24~g~ Checkpoints abzufahren. ~g~Die ~y~REIHENFOLGE IST BELIEBIG.
 
 [T4X4_1B:MIAMI_1]
-~y~PASSIERE~g~ den ersten Checkpoint, dann lãuft die ~r~STOPPUHR.
+~y~PASSIERE~g~ den ersten Checkpoint, dann läuft die ~r~STOPPUHR.
 
 [T4X4_1C:MIAMI_1]
 ~1~ von 24!
@@ -12195,7 +12195,7 @@ $~1~
 SIEGER!!
 
 [BLOD_01:MM]
-Fahr durch die Checkpoints, um deine Gesamtzeit zu verlãngern.
+Fahr durch die Checkpoints, um deine Gesamtzeit zu verlängern.
 
 [BLOD_02:MM]
 Wenn die Gesamtzeit abgelaufen ist, hast du versagt.
@@ -12206,13 +12206,13 @@ Um zu gewinnen, muss deine Gesamtzeit die Zielzeit überschreiten!
 {=================================== MISSION TABLE OVALRIG ===================================}
 
 [HOTR_01:OVALRIG]
-~g~Das Rennen geht über 12 Runden. Nur die ersten drei Plãtze qualifizeren für einen Gewinn.
+~g~Das Rennen geht über 12 Runden. Nur die ersten drei Plätze qualifizeren für einen Gewinn.
 
 [HOTR_02:OVALRIG]
 ~g~Wird dein Auto zerstört, wirst du disqualifiziert.
 
 [HOTR_03:OVALRIG]
-~g~Wird dein Auto beschãdigt, kannst du es an der Box reparieren lassen.
+~g~Wird dein Auto beschädigt, kannst du es an der Box reparieren lassen.
 
 [HOTR_04:OVALRIG]
 ~g~Da geht es aus dem Stadion raus.
@@ -12352,19 +12352,19 @@ Tust mir einen großen Gefallen damit.
 Und dann mach ihn fertig.
 
 [PHI1_01:PHIL1]
-~g~Ramme die Waffen von der Ladeflãche des Waffenschiebers.
+~g~Ramme die Waffen von der Ladefläche des Waffenschiebers.
 
 [PHI1_02:PHIL1]
-~g~Der Waffenhãndler hat die Ladung verloren. Schlag die Kiste kaputt und nimm die Waffe.
+~g~Der Waffenhändler hat die Ladung verloren. Schlag die Kiste kaputt und nimm die Waffe.
 
 [PHI1_03:PHIL1]
-~g~Sie haben anscheinend Verstãrkung gerufen.
+~g~Sie haben anscheinend Verstärkung gerufen.
 
 [PHI1_04:PHIL1]
 ~g~Jetzt erledige die restlichen Waffenschieber.
 
 [PHI1_06:PHIL1]
-Pass doch auf, wo du hinfãhrst!
+Pass doch auf, wo du hinfährst!
 
 [PHI1_07:PHIL1]
 Hey!
@@ -12373,7 +12373,7 @@ Hey!
 Huuuuhuuu!
 
 [PHIL1_D:PHIL1]
-Komm nie mit 'ner offenen Flamme in die Nãhe von Phil Cassidys TNT-Whiskey!
+Komm nie mit 'ner offenen Flamme in die Nähe von Phil Cassidys TNT-Whiskey!
 
 {=================================== MISSION TABLE PHIL2 ===================================}
 
@@ -12393,7 +12393,7 @@ Das Zeug riecht ja wie Terpentin. Mir brennen schon die Augen.
 Lass stecken, Tommy.
 
 [PHIL2_F:PHIL2]
-Komm hier rüber, ich will dir nãmlich was zeigen.
+Komm hier rüber, ich will dir nämlich was zeigen.
 
 [PHIL2_G:PHIL2]
 Wahnsinn! Das rieche ich ja schon von hier. Mir ist schon ganz schwindlig.
@@ -12420,13 +12420,13 @@ Oh, verflucht!
 Nicht ins Krankenhaus, Mann! Zu viele Cops und Vietcong!
 
 [PHI2_06:PHIL2]
-Ich kenn 'nen Ex-Army-Arzt, der schuldet mir einen Gefallen und 'nen Rasenmãher.
+Ich kenn 'nen Ex-Army-Arzt, der schuldet mir einen Gefallen und 'nen Rasenmäher.
 
 [PHI2_07:PHIL2]
 Er hat 'ne Praxis unten in Little Havana. Uh, guck mal, ein Riesenfisch.
 
 [PHI2_08:PHIL2]
-Achtung! Da in den Bãumen - Vietcong!
+Achtung! Da in den Bäumen - Vietcong!
 
 [PHI2_09:PHIL2]
 Spinn ich, oder ist die Straße aus Gummi?
@@ -12461,7 +12461,7 @@ PHIL-MISSIONEN ERFÜLLT
 {=================================== MISSION TABLE PIZZA ===================================}
 
 [PIZ1_01:PIZZA]
-~g~Liefere diese Pizzas aus. Du musst den Kunden die Pizzas zuwerfen, wãhrend du an ihnen vorbeifãhrst.
+~g~Liefere diese Pizzas aus. Du musst den Kunden die Pizzas zuwerfen, während du an ihnen vorbeifährst.
 
 [PIZ1_02:PIZZA]
 ~g~Du hast alle Pizzas zugestellt. Fahr zurück und hole noch mehr.
@@ -12548,7 +12548,7 @@ Du wirst nie befördert, wenn du diesmal nicht schneller machst.
 ~r~Ist dir die Pizza zu heiß?
 
 [PIZ1_33:PIZZA]
-~g~Kehre zum Restaurant zurück, um weitere Auftrãge zu bekommen.
+~g~Kehre zum Restaurant zurück, um weitere Aufträge zu bekommen.
 
 [PIZ1_34:PIZZA]
 ~g~Pizza geliefert, hier ist dein Geld.
@@ -12559,7 +12559,7 @@ Pizza-Mission abgeschlossen. Deine max. Gesundheit erhöht sich auf 150
 {=================================== MISSION TABLE PORN1 ===================================}
 
 [POR1_15:PORN1]
-Hey, Tommy, kommst du auf eine Aufwãrmrunde mit rein!?
+Hey, Tommy, kommst du auf eine Aufwärmrunde mit rein!?
 
 [POR1_14:PORN1]
 Du bist engagiert!
@@ -12610,19 +12610,19 @@ Wir krempeln den Laden hier um.
 Ich mache dich reich.
 
 [POR1_P:PORN1]
-Ãh, du...du bist Tommy Vercetti? Aber ich dachte, du wãrst...
+Äh, du...du bist Tommy Vercetti? Aber ich dachte, du wärst...
 
 [POR1_Q:PORN1]
 Ganz recht.
 
 [POR1_R:PORN1]
-Wir ãndern hier ein paar Dinge und dann machen wir richtig Kohle.
+Wir ändern hier ein paar Dinge und dann machen wir richtig Kohle.
 
 [POR1_S:PORN1]
 Hast du dir schon mal überlegt...
 
 [POR1_T:PORN1]
-Aber zuerst brauchen wir mal ein paar hübsche Mãdels hier.
+Aber zuerst brauchen wir mal ein paar hübsche Mädels hier.
 
 [POR1_U:PORN1]
 Ja, Girls sind ok, aber du...wow!
@@ -12640,7 +12640,7 @@ Klar! Aber da musst du mit meinem Agenten reden.
 Was zum Teufel soll das?
 
 [POR1_07:PORN1]
-Du hãttest heute zu Hause bleiben sollen!
+Du hättest heute zu Hause bleiben sollen!
 
 [POR1_7B:PORN1]
 Was sagt man zu so 'nem Arschloch?
@@ -12676,13 +12676,13 @@ Wo willst du hin?
 Tommy, wann sehen wir uns mal ganz allein, nur du und ich?
 
 [POR1_01:PORN1]
-~g~Candy Suxxx wãre perfekt für die Hauptrolle!
+~g~Candy Suxxx wäre perfekt für die Hauptrolle!
 
 [POR1_12:PORN1]
 ~g~Nimm Candy mit zu deinem Treffen mit Mercedes.
 
 [POR1_16:PORN1]
-Vielleicht spãter, Schãtzchen...
+Vielleicht später, Schätzchen...
 
 [POR1_24:PORN1]
 ~g~Geh zurück und hole Candy.
@@ -12691,7 +12691,7 @@ Vielleicht spãter, Schãtzchen...
 ~g~Du hast Candy vergessen. Geh sie holen.
 
 [POR1_23:PORN1]
-~g~Candy wird sich um das Geschãft in ~h~Downtown~g~ kümmern.
+~g~Candy wird sich um das Geschäft in ~h~Downtown~g~ kümmern.
 
 [POR1_26:PORN1]
 ~g~Da ist Candy. Sie scheint wieder mit dem Kongressabgeordneten Shrub zusammen gewesen zu sein.
@@ -12709,7 +12709,7 @@ Das nennst du fahren?
 Danach kann ich keinen Porno mehr machen!
 
 [POR1_31:PORN1]
-Was ist los? Willst du mich umbringen? Ich dachte, ich wãre der Star!
+Was ist los? Willst du mich umbringen? Ich dachte, ich wäre der Star!
 
 {=================================== MISSION TABLE PORN2 ===================================}
 
@@ -12717,7 +12717,7 @@ Was ist los? Willst du mich umbringen? Ich dachte, ich wãre der Star!
 Was macht die Filmerei, Steve?
 
 [POR2_B:PORN2]
-Tja, Candy ist ein Naturtalent, und die Neue ist unersãttlich!
+Tja, Candy ist ein Naturtalent, und die Neue ist unersättlich!
 
 [POR2_C:PORN2]
 Die hatte schon vor der ersten Probe das halbe Team durch.
@@ -12738,7 +12738,7 @@ Was habe ich über den Riesenhai gesagt?
 Ich sagte, 'KEIN RIESENHAI', ok?
 
 [POR2_I:PORN2]
-Halt die Kameras auf die Mãdels gerichtet!
+Halt die Kameras auf die Mädels gerichtet!
 
 [POR2_J:PORN2]
 Ok, ok. Hey, Tommy, probieren kann ich's ja mal, oder?
@@ -12750,7 +12750,7 @@ Habt ihr die Flyer drucken lassen?
 Ja, aber man wird uns die Dinger nicht verteilen lassen. Ich meine,
 
 [POR2_M:PORN2]
-die sind einfach zu, ãh, zu deutlich.
+die sind einfach zu, äh, zu deutlich.
 
 [POR2_N:PORN2]
 Mach dir darüber keine Gedanken.
@@ -12759,7 +12759,7 @@ Mach dir darüber keine Gedanken.
 Ich hab da so meine Ideen, wie wir die verteilen.
 
 [POR2_P:PORN2]
-Ok. Hey, Candy, ãh, in meinen Wohnwagen.
+Ok. Hey, Candy, äh, in meinen Wohnwagen.
 
 [POR2_01:PORN2]
 ~g~Hinter den Studios steht ein altes Wasserflugzeug, das mal als Requisite für einen Indy-Film diente.
@@ -12839,7 +12839,7 @@ Oh ja, oh ja, oh ja! Ja, ja, ja, JA, Oooooooh!
 Bitte sag, dass du das hast.
 
 [POR3_R:PORN3]
-Gehörte das zum, ãh... oder war das die Antwort für...
+Gehörte das zum, äh... oder war das die Antwort für...
 
 [POR3_S:PORN3]
 Hey, ich kann das nie unterscheiden. Jedenfalls...
@@ -12955,7 +12955,7 @@ diesem Rumgenudle tobt unvermindert.
 Und bevor du fragst: Ja, alle vier Videos werden veröffentlicht, wenn...
 
 [POR4_J:PORN4]
-Schãtzchen, kannst du BITTE die Anaconda im Bild halten,
+Schätzchen, kannst du BITTE die Anaconda im Bild halten,
 
 [POR4_K:PORN4]
 die kostet pro Stunde mehr als du!
@@ -12979,7 +12979,7 @@ Stars, Limos, riesige Suchscheinwerfer am Nachthimmel...
 Suchscheinwerfer? Ich hab eine Idee...
 
 [POR4_R:PORN4]
-....ja, ja, ja. Die heißen Mãdels mit ihren Paillettenkleidern und die Limos, oh, Premieren.
+....ja, ja, ja. Die heißen Mädels mit ihren Paillettenkleidern und die Limos, oh, Premieren.
 
 [POR4_S:PORN4]
 O ja, Ma'am, natürlich, Ma'am,
@@ -12988,31 +12988,31 @@ O ja, Ma'am, natürlich, Ma'am,
 Und die Presse und die Lichter-Flut...
 
 [POR4_01:PORN4]
-~g~Begib dich nach ~y~Downtown~g~und richte den Scheinwerfer auf dem Gebãude aus.
+~g~Begib dich nach ~y~Downtown~g~und richte den Scheinwerfer auf dem Gebäude aus.
 
 [POR4_02:PORN4]
-~g~Du brauchst ein schnelles Bike, um von Dach zu Dach zu springen. Der Wachmann fãhrt immer mit einer ~y~PCJ 600~g~zur Arbeit...
+~g~Du brauchst ein schnelles Bike, um von Dach zu Dach zu springen. Der Wachmann fährt immer mit einer ~y~PCJ 600~g~zur Arbeit...
 
 [POR4_03:PORN4]
-~g~Du wirst auf die Gebãudedãcher müssen. In eines der oberen Büros sollte ein Lift führen...
+~g~Du wirst auf die Gebäudedächer müssen. In eines der oberen Büros sollte ein Lift führen...
 
 [POR4_06:PORN4]
-~g~Kehre in das tiefer gelegene Büro zurück, wenn du noch mal auf die Dãcher musst.
+~g~Kehre in das tiefer gelegene Büro zurück, wenn du noch mal auf die Dächer musst.
 
 [POR4_07:PORN4]
-~g~Du brauchst ein Motorrad, um von Gebãude zu Gebãude zu springen.
+~g~Du brauchst ein Motorrad, um von Gebäude zu Gebäude zu springen.
 
 [POR4_08:PORN4]
 ~g~Brich durch das Fenster, um zu starten. Du hast bis 07:00 Zeit. Dann wird es zu hell, um ungesehen hinaufzukommen.
 
 [POR4_09:PORN4]
-~g~Die Pfeile zeigen dir, zu welchem Gebãude du als nãchstes springen musst.
+~g~Die Pfeile zeigen dir, zu welchem Gebäude du als nächstes springen musst.
 
 [POR4_10:PORN4]
 ~r~Es ist zu hell, um ungesehen dort hinaufzukommen.
 
 [POR4_11:PORN4]
-Kehre zur Leiter zurück, wenn du noch mal auf die Dãcher musst.
+Kehre zur Leiter zurück, wenn du noch mal auf die Dächer musst.
 
 [POR4_05:PORN4]
 ~g~Diese Treppe führt zu einem tiefer gelegenen Büro.
@@ -13021,12 +13021,12 @@ Kehre zur Leiter zurück, wenn du noch mal auf die Dãcher musst.
 FILMSTUDIO-MISSIONEN ERFÜLLT
 
 [POR_AS2:PORN4]
-~g~Inter Global Films generiert nun bis zu $~1~ Einkünfte. Hol dir das Geld regelmãßig ab.
+~g~Inter Global Films generiert nun bis zu $~1~ Einkünfte. Hol dir das Geld regelmäßig ab.
 
 {=================================== MISSION TABLE PROT1 ===================================}
 
 [PRO1_A:PROT1]
-Oh, wir müssen diesen Laden umbauen. Das muss ãlter aussehen.
+Oh, wir müssen diesen Laden umbauen. Das muss älter aussehen.
 
 [PRO1_B:PROT1]
 Ich kann diesen Look nicht ab, Tommy. Was meinst du, sollen wir eine Bar einbauen..?
@@ -13044,7 +13044,7 @@ Wir müssen langsam Gebiete einnehmen.
 Vice City soll merken, dass wir die neuen Bosse sind, versteht ihr?
 
 [PRO1_H:PROT1]
-Jetzt beruhigt euch mal kurz. Allmãhlich kapiere ich schon, wie das ganze hier lãuft.
+Jetzt beruhigt euch mal kurz. Allmählich kapiere ich schon, wie das ganze hier läuft.
 
 [PRO1_I:PROT1]
 Was du brauchst, ist eine legale Fassade, Tommy, Immobilien. Hat mir nicht geschadet.
@@ -13053,7 +13053,7 @@ Was du brauchst, ist eine legale Fassade, Tommy, Immobilien. Hat mir nicht gesch
 Wir müssen die Muskeln spielen lassen, sonst war die ganze harte Arbeit umsonst.
 
 [PRO1_K:PROT1]
-Die Geschãftsleute hier wissen, dass Diaz weg ist und weigern sich, Schutzgeld zu zahlen.
+Die Geschäftsleute hier wissen, dass Diaz weg ist und weigern sich, Schutzgeld zu zahlen.
 
 [PRO1_L:PROT1]
 Oh, wir könnten es mit Schmiergeld versuchen...
@@ -13062,7 +13062,7 @@ Oh, wir könnten es mit Schmiergeld versuchen...
 Schmiergeld? Blödsinn! Ich zeig euch, wie man denen Angst macht.
 
 [PRO1_01:PROT1]
-~g~Demoliere die Schaufenster der Lãden und die Inhaber werden darum betteln, zahlen zu dürfen.
+~g~Demoliere die Schaufenster der Läden und die Inhaber werden darum betteln, zahlen zu dürfen.
 
 [PRO1_03:PROT1]
 ~r~Du sollst abhauen, nicht Kaffee trinken gehen.
@@ -13092,7 +13092,7 @@ Ich bin jetzt der Boss in der Stadt. ICH!
 Du kannst jetzt in bestimmten Gegenden auf der Karte Objekte kaufen.
 
 [BUYP2:PROT1]
-Wenn du ein Gebãude mit grüner Markierung siehst, kannst du dieses kaufen.
+Wenn du ein Gebäude mit grüner Markierung siehst, kannst du dieses kaufen.
 
 [PRO1_N:PROT1]
 Ich bin in fünf Minuten zurück...
@@ -13127,7 +13127,7 @@ Was gibt's für Probleme?
 Eine Bar weigert sich zu zahlen.
 
 [PRO2_C:PROT2]
-Die glauben, die werden von so einer Schlãgerbande beschützt.
+Die glauben, die werden von so einer Schlägerbande beschützt.
 
 [PRO2_D:PROT2]
 Aber keine Sorge, Tommy, ich regle das.
@@ -13204,10 +13204,10 @@ Wir müssen unser Zeug holen und verschwinden!
 Langsam, ihr beiden, lasst mich kurz nachdenken!
 
 [PRO3_L:PROT3]
-Tommy Vercetti lãuft nicht einfach weg.
+Tommy Vercetti läuft nicht einfach weg.
 
 [PRO3_M:PROT3]
-Die Cops werden das Gebãude sorgfãltig durchkãmmen, oder?
+Die Cops werden das Gebäude sorgfältig durchkämmen, oder?
 
 [PRO3_N:PROT3]
 Aber das dauert.
@@ -13219,7 +13219,7 @@ Wir müssen den Laden selbst abfackeln.
 Ja, aber...
 
 [PRO3_Q:PROT3]
-Nur ein Cop kommt auch nur in die Nãhe von dem Laden!
+Nur ein Cop kommt auch nur in die Nähe von dem Laden!
 
 [PRO3_R:PROT3]
 Dann gehen wir eben als Cops.
@@ -13243,7 +13243,7 @@ Wir müssen die Cops hereinlocken,
 dann sperren wir sie ein
 
 [PRO3_Y:PROT3]
-und überwãltigen sie.
+und überwältigen sie.
 
 [PRO3_Z:PROT3]
 Guter Plan. Los geht's!
@@ -13282,10 +13282,10 @@ Bisschen eng im Schritt vielleicht...
 Oh ja, ja. Meine auch, meine auch.
 
 [PRO3_13:PROT3]
-Vorsicht, Bruder! Kein Cop fãhrt so schlecht!
+Vorsicht, Bruder! Kein Cop fährt so schlecht!
 
 [PRO3_14:PROT3]
-Denk dran, lãchle die anderen Cops an.
+Denk dran, lächle die anderen Cops an.
 
 [PRO3_15:PROT3]
 Hallo, Officer. Hübsche Marke, hübsche Marke.
@@ -13309,19 +13309,19 @@ Jetzt sind sie so richtig stocksauer.
 ~g~Beschaff dir einen Fahndungslevel, damit dir die Cops in die Garage folgen.
 
 [PRO3_22:PROT3]
-~g~Das Garagentor ist blockiert! Du musst es freirãumen, damit es schließen kann.
+~g~Das Garagentor ist blockiert! Du musst es freiräumen, damit es schließen kann.
 
 [PRO3_23:PROT3]
 ~g~Stell dich in die Markierung, um die Bombe zu platzieren.
 
 [PRO3_24:PROT3]
-~g~Verschwinde aus der Nãhe des Cafés!
+~g~Verschwinde aus der Nähe des Cafés!
 
 [PRO_AS1:PROT3]
 SCHUTZGELD-MISSIONEN ERFÜLLT
 
 [PRO_AS2:PROT3]
-~g~Das Vercetti Estate generiert nun bis zu $~1~ Einkünfte. Hol dir das Geld regelmãßig ab.
+~g~Das Vercetti Estate generiert nun bis zu $~1~ Einkünfte. Hol dir das Geld regelmäßig ab.
 
 [PRO3_08:PROT3]
 ~g~Du musst zurück zu ~h~Vercetti Estate~g~ auf ~h~Starfish Island~g~.
@@ -13377,7 +13377,7 @@ Beste Platzierung: 3.
 Beste Platzierung: 4.
 
 [RACES13:RACES]
-Streckenlãnge: ~1~.~1~ km
+Streckenlänge: ~1~.~1~ km
 
 [RACES15:RACES]
 Bestzeit: Nicht verfügbar
@@ -13392,13 +13392,13 @@ Du hast nicht genug Geld, um an diesem Rennen teilzunehmen.
 Bestzeit: ~1~:0~1~
 
 [RACES23:RACES]
-Streckenlãnge: ~1~.~1~ Meilen
+Streckenlänge: ~1~.~1~ Meilen
 
 [RACES_1:RACES]
 ~g~Schnapp dir ein schnelles Fahrzeug und begib dich zur Startlinie.
 
 [RACEHLP:RACES]
-~w~Drücke die~h~ ~k~~PED_SPRINT~~w~, um das ausgewãhlte Rennen zu starten. Drücke die~h~ ~k~~VEHICLE_ENTER_EXIT~~w~, um abzubrechen.
+~w~Drücke die~h~ ~k~~PED_SPRINT~~w~, um das ausgewählte Rennen zu starten. Drücke die~h~ ~k~~VEHICLE_ENTER_EXIT~~w~, um abzubrechen.
 
 {=================================== MISSION TABLE RCHELI1 ===================================}
 
@@ -13412,7 +13412,7 @@ Verbleibende Checkpoints:
 ~g~Es gibt insgesamt 20 Checkpoints.
 
 [RCH1_12:RCHELI1]
-~g~Der ferngesteuerte Helikopter gerãt außer Reichweite!
+~g~Der ferngesteuerte Helikopter gerät außer Reichweite!
 
 [RCH1_13:RCHELI1]
 ~r~Der ferngesteuerte Helikopter ist außer Reichweite!
@@ -13432,7 +13432,7 @@ Verbleibende Checkpoints:
 ~g~Wenn du diese Mission abbrechen willst, drücke die ~h~~k~~VEHICLE_FIREWEAPON~~g~, um dein Flugzeug zu sprengen.
 
 [RCPL1_8:RCPLNE1]
-~g~Dein ferngesteuertes Flugzeug gerãt außer Reichweite!
+~g~Dein ferngesteuertes Flugzeug gerät außer Reichweite!
 
 [RCPL1_9:RCPLNE1]
 ~r~Dein ferngesteuertes Flugzeug ist außer Reichweite!
@@ -13455,7 +13455,7 @@ Verbleibende Runden:
 ~g~Du musst als erster 2 volle Runden auf dem Kurs fahren!
 
 [RCR1_6:RCRACE1]
-~g~Dein ferngesteuertes Auto gerãt außer Reichweite!
+~g~Dein ferngesteuertes Auto gerät außer Reichweite!
 
 [RCR1_7:RCRACE1]
 ~r~Dein ferngesteuertes Auto ist außer Reichweite!
@@ -13490,7 +13490,7 @@ Das ist Tommy. Wir kennen uns schon ewig.
 Alles paletti, Mann.
 
 [RBM1_K:ROCK1]
-Und, ãh, wie war dein Name noch mal?
+Und, äh, wie war dein Name noch mal?
 
 [RBM1_L:ROCK1]
 Lass das, Jezz. Merk dir eines,
@@ -13523,7 +13523,7 @@ Love Juice, Mann!
 Love Juice?
 
 [RBM1_W:ROCK1]
-Genau. 2 Teile TNT-Whiskey, 1 Teil Koks, 5 Pãckchen Brause und 1 Liter Sprit.
+Genau. 2 Teile TNT-Whiskey, 1 Teil Koks, 5 Päckchen Brause und 1 Liter Sprit.
 
 [RBM1_X:ROCK1]
 Kannst du uns weiterhelfen, Alter?
@@ -13562,7 +13562,7 @@ Da kenne ich genau die richtige.
 Hey, Mercedes!
 
 [ROK1_6:ROCK1]
-Hi, Tommy. Na, wie lãuft's so?
+Hi, Tommy. Na, wie läuft's so?
 
 [ROK1_7:ROCK1]
 Alles bestens. Hör mal, willst du die Jungs von Love Fist verführen?
@@ -13586,7 +13586,7 @@ NICHT MEHR BENÖTIGT
 NICHT MEHR BENÖTIGT
 
 [MERC_39:ROCK1]
-Wir sehen uns spãter, Big Boy.
+Wir sehen uns später, Big Boy.
 
 [RBM1_C:ROCK1]
 Hey, Tommy! Schön, dass du kommen konntest.
@@ -13621,7 +13621,7 @@ Da ist so 'n Typ, wir kennen ihn kaum, aber er kennt uns.
 So wie er da. Weiß alles über uns.
 
 [RBM2_G:ROCK2]
-Weiß, dass Willy auf Damenunterwãsche steht, eh!
+Weiß, dass Willy auf Damenunterwäsche steht, eh!
 
 [RBM2_H:ROCK2]
 Oder dass Percy auf Duran Duran steht!
@@ -13695,19 +13695,19 @@ Tommy! Tommy! Tommy, Mann, der Irre ist wieder da!
 Was ist denn los?
 
 [RBM3_C:ROCK3]
-Dieser Irre lãsst Love Fist nicht in Ruhe!
+Dieser Irre lässt Love Fist nicht in Ruhe!
 
 [RBM3_D:ROCK3]
 Du hast ihn nicht erwischt, Mann. Und jetzt ist er wieder da.
 
 [RBM3_E:ROCK3]
-Ja, ja, ja, und es ist nãmlich so...
+Ja, ja, ja, und es ist nämlich so...
 
 [RBM3_F:ROCK3]
 wir brauchen für die Limo einen Fahrer, dem wir vertrauen können,
 
 [RBM3_G:ROCK3]
-weil der Irre uns stãndig bedroht!
+weil der Irre uns ständig bedroht!
 
 [RBM3_I:ROCK3]
 Wir scheißen uns alle in die Hosen, Mann.
@@ -13761,7 +13761,7 @@ Den grünen.
 Da ist kein grüner. Oder ist der hier grün?
 
 [ROK3_44:ROCK3]
-Sieht für dich einer von den Drãhten grün aus?
+Sieht für dich einer von den Drähten grün aus?
 
 [ROK3_49:ROCK3]
 Ich hab euch doch jahrelang nur mitgeschleppt.
@@ -13812,13 +13812,13 @@ Falls du versuchst, aus dem Auto auszusteigen, wenn die Bombe scharfgemacht ist,
 Ist der Detonations-Balken am Anschlag, explodiert die Bombe.
 
 [RBM3_8:ROCK3]
-Je schneller du fãhrst, desto niedriger der Detonations-Balken.
+Je schneller du fährst, desto niedriger der Detonations-Balken.
 
 [RBM3_7:ROCK3]
-~g~BOMBE ENTSCHÃRFT!
+~g~BOMBE ENTSCHÄRFT!
 
 [ROK3_6A:ROCK3]
-~g~Love Fist. Ihr habt den Ãther lange genug verschmutzt!
+~g~Love Fist. Ihr habt den Äther lange genug verschmutzt!
 
 [ROK3_6B:ROCK3]
 ~g~Ich wollte euer Freund sein. Jetzt will ich, dass ihr untergeht.
@@ -13866,10 +13866,10 @@ Tommy, mein Freund, wir müssen die Band retten!
 Tommy, bleib auf dem Gas, Alter.
 
 [ROK3_31:ROCK3]
-Ganz toll. 'Tu doch einer was.' Was ist denn das für eine Ansage? Da kenn ich mutigere Mãdels.
+Ganz toll. 'Tu doch einer was.' Was ist denn das für eine Ansage? Da kenn ich mutigere Mädels.
 
 [ROK3_33:ROCK3]
-Alter, ich bin Musiker. Vom Bomben-Entschãrfen hab ich keinen blassen Dunst.
+Alter, ich bin Musiker. Vom Bomben-Entschärfen hab ich keinen blassen Dunst.
 
 [ROK3_35:ROCK3]
 Eben, so was liegt dir doch, was ich so höre.
@@ -13881,7 +13881,7 @@ Einen Strohhalm?! Dies ist der Tour-Bus von Love Fist!
 Wo zum Geier sollte hier ein Strohhalm sein?
 
 [ROK3_46:ROCK3]
-Ich hãtte euch alle rausschmeißen sollen, als es noch ging, Mann.
+Ich hätte euch alle rausschmeißen sollen, als es noch ging, Mann.
 
 [ROK3_47:ROCK3]
 Kapitalist.
@@ -13893,7 +13893,7 @@ Kameradenschwein.
 Jezz spielt das Band ab,
 
 [RBM3_9:ROCK3]
-Wenn du angehalten wirst oder langsam fãhrst, wãchst der Detonations-Balken.
+Wenn du angehalten wirst oder langsam fährst, wächst der Detonations-Balken.
 
 [ROK3_50:ROCK3]
 Halt die Klappe. Du bist ein Idiot.
@@ -13908,7 +13908,7 @@ Ich scheiß mir in die Hose, Mann. Ich will zu meiner Mama!
 Oh nein. Im Angesicht des Todes sieht alles grün aus.
 
 [ROK3_6C:ROCK3]
-~g~Wenn ihr langsamer werdet, geht eure Limo hoch, IHR UND EURE HAARIGEN ÃRSCHE mit dazu!
+~g~Wenn ihr langsamer werdet, geht eure Limo hoch, IHR UND EURE HAARIGEN ÄRSCHE mit dazu!
 
 [ROK3_71:ROCK3]
 Wir müssen uns ranhalten. Danke nochmal, Tommy, du hast es echt drauf. Ciao.
@@ -13920,13 +13920,13 @@ Endlich, Mann, Zeit für einen wohlverdienten Drink. Die Halle ist nur 100 Meter
 Mach mir mal einen großen. Hey, Tommy, leg mal 'nen anderen Sound auf, Mann.
 
 [ROK3_3:ROCK3]
-Ich werd wirr im Kopf, wenn nichts zum Headbangen lãuft. Hey, Tommy, leg mal dieses Band ein.
+Ich werd wirr im Kopf, wenn nichts zum Headbangen läuft. Hey, Tommy, leg mal dieses Band ein.
 
 [ROK3_4:ROCK3]
-Love Fist. Ihr habt den Ãther lange genug verschmutzt! Ich wollte euer Freund sein.
+Love Fist. Ihr habt den Äther lange genug verschmutzt! Ich wollte euer Freund sein.
 
 [ROK3_5:ROCK3]
-Jetzt will ich, dass ihr untergeht. Wenn ihr langsamer werdet, geht eure Limo hoch, IHR UND EURE HAARIGEN ÃRSCHE mit dazu!
+Jetzt will ich, dass ihr untergeht. Wenn ihr langsamer werdet, geht eure Limo hoch, IHR UND EURE HAARIGEN ÄRSCHE mit dazu!
 
 [ROK3_6:ROCK3]
 Tommy, mein Freund, du musst die Band retten! Langsam wird's langweilig. Halt bloß das Pedal durchgedrückt!!
@@ -13941,13 +13941,13 @@ Könnte die Bombe nicht unter der Motorhaube sein? Da kommen wir nie ran, ohne a
 Hey, hier gibt's eine Warteschlange, Alter! Die Lösung liegt nicht in der Minibar! Weg da!
 
 [ROK3_10:ROCK3]
-Hey, aus der Wodkapulle kommen Drãhte raus! Das ist kein Wodka, das ist TNT-WHISKEY!
+Hey, aus der Wodkapulle kommen Drähte raus! Das ist kein Wodka, das ist TNT-WHISKEY!
 
 [ROK3_11:ROCK3]
 WAAAAAAGGGHHHH!!!! Das Ding ist scharfgemacht!! WAAAAAAAAAAGGGHHHHHH!!!!
 
 [ROK3_12:ROCK3]
-Man hat mir immer gesagt, der Alk wird mich killen... Das kenn ich aus dem Fernsehen. Du musst einen der Drãhte rausziehen. Welchen Draht? Weiß ich doch nicht, Mann.
+Man hat mir immer gesagt, der Alk wird mich killen... Das kenn ich aus dem Fernsehen. Du musst einen der Drähte rausziehen. Welchen Draht? Weiß ich doch nicht, Mann.
 
 [ROK3_13:ROCK3]
 Keinen Schimmer. Willy, sag doch mal was. Ich werd Bass in der Hölle spielen.
@@ -13956,7 +13956,7 @@ Keinen Schimmer. Willy, sag doch mal was. Ich werd Bass in der Hölle spielen.
 Tommy, bleib auf dem Gas, Mann. Tu doch einer was! Ganz toll...
 
 [ROK3_15:ROCK3]
-'Tu doch einer was.' Was ist denn das für eine Ansage? Da kenn ich mutigere Mãdchen. Ok, Obermacho, dann tu du doch was!
+'Tu doch einer was.' Was ist denn das für eine Ansage? Da kenn ich mutigere Mädchen. Ok, Obermacho, dann tu du doch was!
 
 [ROK3_16:ROCK3]
 Alter, ich bin Musiker. Mit Bomben kenne ich mich nicht aus. Willy könnte den TNT-Whiskey mit einem Strohhalm raussaugen.
@@ -13971,10 +13971,10 @@ Gebt Willy einen Strohhalm! Einen Strohhalm?! Wi sind im Band-Auto von Love Fist
 Wo zum Geier sollte hier ein Strohhalm sein? Welchen Draht, Tommy? Den grünen. Da ist kein grüner.
 
 [ROK3_20:ROCK3]
-Oder ist der hier grün? Sieht für dich einer von den Drãhten grün aus?
+Oder ist der hier grün? Sieht für dich einer von den Drähten grün aus?
 
 [ROK3_21:ROCK3]
-Oh nein. Im Angesicht des Todes sieht alles grün aus. Ich hãtte euch alle rausschmeißen sollen, als es noch ging, Mann.
+Oh nein. Im Angesicht des Todes sieht alles grün aus. Ich hätte euch alle rausschmeißen sollen, als es noch ging, Mann.
 
 [ROK3_22:ROCK3]
 Kameradenschwein. Kapitalist. Ich hab euch doch jahrelang nur mitgeschleppt. Halt die Klappe. Du bist ein Idiot.
@@ -14006,16 +14006,16 @@ Komm rein und setz dich auf deinen Hintern, Junge.
 Mein Daddy hat immer gesagt, einem geschenkten Gaul schaut man nicht ins Maul. Hat's auch nie getan.
 
 [TEX1_C:SERG1]
-Ein Glãschen alter Kentucky gefãllig?
+Ein Gläschen alter Kentucky gefällig?
 
 [TEX1_D:SERG1]
 Nein danke.
 
 [TEX1_E:SERG1]
-Ein nüchterner Denker, das gefãllt mir.
+Ein nüchterner Denker, das gefällt mir.
 
 [TEX1_F:SERG1]
-Im Immobiliengeschãft geht's nicht um hochtrabende Vertrãge.
+Im Immobiliengeschäft geht's nicht um hochtrabende Verträge.
 
 [TEX1_G:SERG1]
 Es geht um Land. Und darum, dieses Land zu kriegen. Kannst du mir folgen?
@@ -14057,7 +14057,7 @@ Hübscher Hintern, Baby!
 Bin ich das?
 
 [TEX1_8:SERG1]
-Jedesmal wenn du in einen Golfwagen steigst, erhãltst du automatisch einen Golfschlãger, vorausgesetzt, du hast nicht schon eine Nahkampfwaffe.
+Jedesmal wenn du in einen Golfwagen steigst, erhältst du automatisch einen Golfschläger, vorausgesetzt, du hast nicht schon eine Nahkampfwaffe.
 
 [TEX1_9:SERG1]
 Schnapp ihn dir!
@@ -14077,7 +14077,7 @@ Mach den Irren fertig!
 ~g~Großartig! Sie haben dich bemerkt!
 
 [TEX_2B:SERG2]
-~r~Narr! Die Leute müssen SEHEN, dass der Tãter ein Kubaner ist!
+~r~Narr! Die Leute müssen SEHEN, dass der Täter ein Kubaner ist!
 
 [TEX_2C:SERG2]
 ~g~Besorge dir bei Rafael's Kleidung in den Farben der kubanischen Gang.
@@ -14089,16 +14089,16 @@ Mach den Irren fertig!
 Tommy, das ist Donald Love. Donald, das ist Tommy Vercetti,
 
 [TEX2_B:SERG2]
-der neueste Draufgãnger hier in der Stadt.
+der neueste Draufgänger hier in der Stadt.
 
 [TEX2_C:SERG2]
-Ja...ãh...
+Ja...äh...
 
 [TEX2_D:SERG2]
 Donald, sei still und hör zu. Vielleicht kannst du was lernen.
 
 [TEX2_E:SERG2]
-Also. Nichts lãsst Immobilienpreise schneller abstürzen als ein guter alter Bandenkrieg.
+Also. Nichts lässt Immobilienpreise schneller abstürzen als ein guter alter Bandenkrieg.
 
 [TEX2_F:SERG2]
 Außer vielleicht eine Katastrophe, eine biblische Plage oder so,
@@ -14154,7 +14154,7 @@ Gut mitgedacht.
 Also, ich verdrücke mich eine Weile aus der Stadt,
 
 [TEX3_I:SERG3]
-und wenn dieses Bürogebãude urplötzlich irreparable Schãden aufweist, dann...
+und wenn dieses Bürogebäude urplötzlich irreparable Schäden aufweist, dann...
 
 [TEX3_J:SERG3]
 ....fühlen Sie sich als guter Mensch verpflichtet, einzuspringen und
@@ -14163,10 +14163,10 @@ und wenn dieses Bürogebãude urplötzlich irreparable Schãden aufweist, dann..
 -für die Neugestaltung eines wichtigen Gebiets der Stadt zu sorgen?
 
 [TEX3_L:SERG3]
-Wo finde ich mehr Mãnner wie dich?
+Wo finde ich mehr Männer wie dich?
 
 [TEX3_1:SERG3]
-~g~Benutze den ferngesteuerten Helikopter, um Bomben zu 4 Zielen an dem zur Sprengung vorgesehenen Gebãude zu transportieren.
+~g~Benutze den ferngesteuerten Helikopter, um Bomben zu 4 Zielen an dem zur Sprengung vorgesehenen Gebäude zu transportieren.
 
 [TEX3_2:SERG3]
 ~g~Du musst an jedem Ziel eine Bombe abwerfen. Die Reihenfolge ist beliebig.
@@ -14190,7 +14190,7 @@ Wo finde ich mehr Mãnner wie dich?
 Verbleibende Ziele:
 
 [TEX3_17:SERG3]
-~r~Die Zeit ist um. Du hast es nicht geschafft, das Gebãude zu sprengen.
+~r~Die Zeit ist um. Du hast es nicht geschafft, das Gebäude zu sprengen.
 
 [TEX3_18:SERG3]
 ~r~Dein Helikopter wurde zerstört! Wie willst du jetzt die Bomben transportieren?
@@ -14211,7 +14211,7 @@ Drücke ~h~~k~~VEHICLE_LOOKLEFT~~w~, um den Helikopter gegen den Uhrzeigersinn z
 Drücke ~h~~k~~VEHICLE_LOOKLEFT~~w~, um den Helikopter im Uhrzeigersinn zu drehen.
 
 [TEX3_27:SERG3]
-~g~Über eine Haupttreppe hat man Zugang zu allen Stockwerken des Gebãudes.
+~g~Über eine Haupttreppe hat man Zugang zu allen Stockwerken des Gebäudes.
 
 [TEX3_31:SERG3]
 ~r~Du hast den Wagen mit den Bomben und dem ferngesteuerten Helikopter zerstört!
@@ -14232,7 +14232,7 @@ Drücke die ~h~~k~~VEHICLE_BRAKE~~w~, um die Rotorgeschwindigkeit zu verringern,
 Drücke die ~h~~k~~VEHICLE_ACCELERATE~~w~, um die Rotorgeschwindigkeit zu erhöhen, der Helikopter ~h~gewinnt dann an Höhe.
 
 [TEX3_16:SERG3]
-~g~Begib dich zu dem ~w~TOPFUN~g~-Wagen nahe dem zum Abriss vorgesehenen Gebãude.
+~g~Begib dich zu dem ~w~TOPFUN~g~-Wagen nahe dem zum Abriss vorgesehenen Gebäude.
 
 [TEX3_33:SERG3]
 Wenn du eine Bombe aufgenommen hast, zeigt dir das Radar die Position des Ziels in Relation zu dem ferngesteuerten Helikopter.
@@ -14256,13 +14256,13 @@ Um ~h~eine Bombe aufzunehmen~w~, steuere den Helikopter direkt über sie. Der He
 ~g~Um eine Bombe aufzunehmen, steuere den Helikopter direkt über sie. Der Helikopter kann immer nur eine Bombe tragen.
 
 [TEX3_12:SERG3]
-~g~Bombe platziert! Es bleiben nur noch 3 Ziele! Hol die nãchste Bombe.
+~g~Bombe platziert! Es bleiben nur noch 3 Ziele! Hol die nächste Bombe.
 
 [TEX3_13:SERG3]
-~g~Bombe platziert! Es bleiben nur noch 2 Ziele! Hol die nãchste Bombe.
+~g~Bombe platziert! Es bleiben nur noch 2 Ziele! Hol die nächste Bombe.
 
 [TEX3_14:SERG3]
-~g~Bombe platziert! Es bleibt nur noch 1 Ziel! Hol die nãchste Bombe.
+~g~Bombe platziert! Es bleibt nur noch 1 Ziel! Hol die nächste Bombe.
 
 [TEX3_15:SERG3]
 ~r~Zeitzünder aktiviert! ~g~ Du musst die ~w~4 Bomben ~g~in der verbleibenden Zeit platzieren.
@@ -14313,7 +14313,7 @@ SPEED BONUS!!
 Taxi-Mission beendet
 
 [TAXIH1:TAXI1]
-Halte neben einem markierten Fußgãnger, um ihn einsteigen zu lassen, dann bringe ihn rechtzeitig an sein Fahrtziel.
+Halte neben einem markierten Fußgänger, um ihn einsteigen zu lassen, dann bringe ihn rechtzeitig an sein Fahrtziel.
 
 [FARE1:TAXI1]
 ~g~Fahrtziel ~w~'Pole Position Club' ~g~in Ocean Beach.
@@ -14373,7 +14373,7 @@ Halte neben einem markierten Fußgãnger, um ihn einsteigen zu lassen, dann brin
 ~g~Fahrtziel ~w~'die Polizeistation' ~g~in Vice Point.
 
 [FARE15:TAXI1]
-~g~Fahrtziel ~w~'die Pizzagaststãtte' ~g~in Vice Point.
+~g~Fahrtziel ~w~'die Pizzagaststätte' ~g~in Vice Point.
 
 [WFARE7:TAXI1]
 ~g~Fahrtziel ~w~'die Polizeistation' ~g~in Little Havana.
@@ -14391,10 +14391,10 @@ Halte neben einem markierten Fußgãnger, um ihn einsteigen zu lassen, dann brin
 ~g~Fahrtziel ~w~'der Stadium' ~g~in Downtown.
 
 [WFARE12:TAXI1]
-~g~Fahrtziel ~w~'die Pizzagaststãtte' ~g~in Little Haiti.
+~g~Fahrtziel ~w~'die Pizzagaststätte' ~g~in Little Haiti.
 
 [WFARE13:TAXI1]
-~g~Fahrtziel ~w~'die Pizzagaststãtte' ~g~in Downtown.
+~g~Fahrtziel ~w~'die Pizzagaststätte' ~g~in Downtown.
 
 [WFARE14:TAXI1]
 ~g~Fahrtziel ~w~'die Docks' ~g~in Viceport.
@@ -14408,7 +14408,7 @@ Halte neben einem markierten Fußgãnger, um ihn einsteigen zu lassen, dann brin
 {=================================== MISSION TABLE TAXICUT ===================================}
 
 [TAXC_A:TAXICUT]
-Schãtze, sie sind der neue Besitzer.
+Schätze, sie sind der neue Besitzer.
 
 [TAXC_B:TAXICUT]
 Sind Sie 'n Mafioso? Oder vom Kartell? Sehen nicht aus wie ein Mexikaner.
@@ -14423,7 +14423,7 @@ bedrohen Sie ein paar von den Fahrern-
 aber nicht Ted, der ist gerade an der Leiste operiert.
 
 [TAXC_F:TAXICUT]
-Tja, also, hier wird sich einiges ãndern, Lady.
+Tja, also, hier wird sich einiges ändern, Lady.
 
 [TAXC_G:TAXICUT]
 Aber nicht doch, Jungchen. Überlassen Sie das lieber mir -
@@ -14435,10 +14435,10 @@ Ich mach das schon seit Jahren.
 Alles mal herhören.
 
 [TAXC_J:TAXICUT]
-Wir haben eine neue Geschãftsleitung, und es wird sich wieder mal einiges ãndern hier.
+Wir haben eine neue Geschäftsleitung, und es wird sich wieder mal einiges ändern hier.
 
 [TAXC_K:TAXICUT]
-Unsere neue Geschãftsleitung, die-
+Unsere neue Geschäftsleitung, die-
 
 [TAXC_L:TAXICUT]
 Von welcher Gang sind Sie?
@@ -14453,10 +14453,10 @@ Und wie heißen Sie, junger Mann?
 Vercetti, Tommy Vercetti.
 
 [TAXC_P:TAXICUT]
-Unsere neue Geschãftsleitung, die Vercetti Gang,
+Unsere neue Geschäftsleitung, die Vercetti Gang,
 
 [TAXC_Q:TAXICUT]
-wird dafür sorgen, dass wir keinen Ãrger kriegen.
+wird dafür sorgen, dass wir keinen Ärger kriegen.
 
 [TAXC_R:TAXICUT]
 Capiche? Ende!
@@ -14471,7 +14471,7 @@ Also, so ist das immer gelaufen:
 Wir führen die Firma weiter wie gewohnt.
 
 [TAXC_V:TAXICUT]
-Wenn die Konkurrenz Ãrger macht, gebt ihr ihnen eines auf die Mütze.
+Wenn die Konkurrenz Ärger macht, gebt ihr ihnen eines auf die Mütze.
 
 [TAXC_W:TAXICUT]
 Dann geben die uns eines auf die Mütze.
@@ -14483,7 +14483,7 @@ Dann geben sie denen eines auf die Mütze.
 Und so weiter, und so fort. Kapiert?
 
 [TAXC_Z:TAXICUT]
-Ãh, ja, ich glaub schon.
+Äh, ja, ich glaub schon.
 
 [TAXC_A1:TAXICUT]
 Schnappen Sie sich ein Taxi aus der Garage, wenn Sie Lust haben.
@@ -14526,13 +14526,13 @@ Ok, ok! Aber tun Sie mir nichts!
 {=================================== MISSION TABLE TAXIWA2 ===================================}
 
 [TAX2_1:TAXIWA2]
-An alle Wagen. Wir kriegen nirgends Fahrgãste. Was ist los mit euch?
+An alle Wagen. Wir kriegen nirgends Fahrgäste. Was ist los mit euch?
 
 [TAX2_2:TAXIWA2]
 VC-Taxi ist dauernd schneller als wir. Die haben einfach zu viele Autos. Keine Chance.
 
 [TAX2_3:TAXIWA2]
-Mr. Vercetti, wenn Sie zufãllig mithören: Sie müssen ein paar VC-Taxis ausschalten, sonst sind wir pleite!
+Mr. Vercetti, wenn Sie zufällig mithören: Sie müssen ein paar VC-Taxis ausschalten, sonst sind wir pleite!
 
 [TAXW2_1:TAXIWA2]
 ~g~Schalte 3 Taxis der Konkurrenz aus!
@@ -14558,7 +14558,7 @@ Hmmm, keine Spur von Mercedes...
 TAXIUNTERNEHMEN ERWORBEN
 
 [TAX_AS2:TAXIWA3]
-~g~Kaufman-Taxis generiert nun bis zu $~1~ Einkünfte. Hol dir das Geld regelmãßig ab.
+~g~Kaufman-Taxis generiert nun bis zu $~1~ Einkünfte. Hol dir das Geld regelmäßig ab.
 
 [TAX3_4:TAXIWA3]
 Wird Zeit, dass der Schutzengel von Kaufman-Taxis eine vor den Latz kriegt!
