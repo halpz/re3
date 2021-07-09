@@ -12,7 +12,7 @@ abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789"$,.'-?!!SDBF
 Claude----------------------
 
 [ARSE]
-ü ß ã
+ü ß ä
 
 [IN_VEH]
 ~g~Hey! Zurück ins Auto!!
@@ -24,7 +24,7 @@ Claude----------------------
 ~g~Du brauchst ein Boot für diesen Job!
 
 [HEY]
-~g~Keine Alleingãnge. Halt die Gang beisammen!
+~g~Keine Alleingänge. Halt die Gang beisammen!
 
 [HEY2]
 ~g~Nicht aufteilen. Halt die Leute zusammen!
@@ -36,7 +36,7 @@ Claude----------------------
 ~g~Wenn du Misty verlierst, kriegst du's mit Luigi zu tun. Los, hol sie.
 
 [HEY5]
-~g~Eines der Girls fehlt. Los, zurück! Treib das Mãdchen auf!
+~g~Eines der Girls fehlt. Los, zurück! Treib das Mädchen auf!
 
 [HEY6]
 ~g~Du stehst mit deiner Ehre für den Yakuza Kanbu ein. Du musst ihn beschützen!
@@ -78,16 +78,16 @@ Drücke die~h~ ~k~~VEHICLE_HANDBRAKE~-Taste~w~, um die ~h~Handbremse anzuziehen.
 Drücke die~h~ ~k~~VEHICLE_HANDBRAKE~-Taste~w~, um die ~h~Handbremse anzuziehen.
 
 [HELP7_A]
-Halte die~h~ ~k~~PED_LOCK_TARGET~-Taste ~w~gedrückt, um mit dem Prãzisionsgewehr zu zielen.
+Halte die~h~ ~k~~PED_LOCK_TARGET~-Taste ~w~gedrückt, um mit dem Präzisionsgewehr zu zielen.
 
 [HELP7_D]
-Halte die~h~ ~k~~PED_LOCK_TARGET~-Taste ~w~gedrückt, um mit dem Prãzisionsgewehr zu zielen.
+Halte die~h~ ~k~~PED_LOCK_TARGET~-Taste ~w~gedrückt, um mit dem Präzisionsgewehr zu zielen.
 
 [HELP8_A]
 Drücke die~h~ ~k~~PED_SNIPER_ZOOM_IN~-Taste~w~, um ~h~an das Ziel heranzuzoomen ~w~und die~h~ ~k~~PED_SNIPER_ZOOM_OUT~-Taste~w~,um ~h~herauszuzoomen ~w~.
 
 [HELP9_A]
-Drücke die~h~ ~k~~PED_FIREWEAPON~-Taste~w~, um das Prãzisionsgewehr abzufeuern.
+Drücke die~h~ ~k~~PED_FIREWEAPON~-Taste~w~, um das Präzisionsgewehr abzufeuern.
 
 [HELP10]
 Dieser Stern zeigt an, dass du von der Polizei gesucht wirst.
@@ -114,7 +114,7 @@ Fahr den Wagen in eine Garage und geh dann nach draußen.
 ~g~Schüttle die Cops ab. Verringere deinen Fahndungslevel.
 
 [NODOORS]
-~g~Das sind keine Sardinen! Besorg einen Wagen mit ausreichend Sitzplãtzen.
+~g~Das sind keine Sardinen! Besorg einen Wagen mit ausreichend Sitzplätzen.
 
 [TRASH]
 ~g~Du hast deine Karre ziemlich geschrottet! Repariere sie!
@@ -219,7 +219,7 @@ Molotowcocktails wurden im Versteck angeliefert.
 AK47 wurde im Versteck angeliefert.
 
 [PAGEB8]
-Prãzisionsgewehr wurde im Versteck angeliefert.
+Präzisionsgewehr wurde im Versteck angeliefert.
 
 [PAGEB9]
 M16 wurde im Versteck angeliefert.
@@ -249,7 +249,7 @@ drei...
 Steigt dein ~h~Fahndungslevel~w~, wirst du von besser ausgebildeten Polizisten gejagt.
 
 [WANT_G]
-Wirst du ~h~verhaftet~w~, wirst du zum nãchsten Polizeirevier gebracht.
+Wirst du ~h~verhaftet~w~, wirst du zum nächsten Polizeirevier gebracht.
 
 [WANT_H]
 Die Cops werden dir alle Waffen abnehmen und kassieren ein wenig Bestechungsgeld von dir.
@@ -264,13 +264,13 @@ Im Verlauf des Spiels wirst du Möglichkeiten entdecken, deinen Fahndungslevel z
 Wenn du in einem Wagen sitzt, werden ~h~LACKIEREREIEN~w~ den Fahndungslevel ~h~annullieren.
 
 [HEAL_B]
-Wenn du ~h~'außer Gefecht'~w~ bist, wirst du zur nãchsten Klinik gebracht.
+Wenn du ~h~'außer Gefecht'~w~ bist, wirst du zur nächsten Klinik gebracht.
 
 [HEAL_C]
-Du verlierst alle Waffen, und die Ãrzte knöpfen dir ein wenig Cash für die Behandlung ab.
+Du verlierst alle Waffen, und die Ärzte knöpfen dir ein wenig Cash für die Behandlung ab.
 
 [HEAL_E]
-Je lãnger du spielst, desto mehr Wege wirst du finden, dich selbst zu verarzten oder zu schützen.
+Je länger du spielst, desto mehr Wege wirst du finden, dich selbst zu verarzten oder zu schützen.
 
 [DAM]
 SCHADEN:
@@ -297,7 +297,7 @@ GESAMMELT:
 Fahr deinen Wagen in die Bombenwerkstatt, um eine ~h~Bombe~w~ anzubringen. Kosten - ~h~$1000.
 
 [SAVE1]
-Geh durch den Eingang. So kannst du dein ~h~Spiel speichern~w~. Wãhrend einer Mission kannst du nicht speichern.
+Geh durch den Eingang. So kannst du dein ~h~Spiel speichern~w~. Während einer Mission kannst du nicht speichern.
 
 [SAVE2]
 Jedes Fahrzeug, das in dieser Garage abgestellt wird, wird für dich aufbewahrt, wenn das Spiel gespeichert wird.
@@ -573,28 +573,28 @@ Luigis Club
 ~g~Du bist bereits auf einer Mission!
 
 [LUIGGO]
-~g~Luigi checkt gerade ein paar neue Girls aus. Komm spãter wieder!
+~g~Luigi checkt gerade ein paar neue Girls aus. Komm später wieder!
 
 [JOEYGO]
-~g~Joey ist mit Misty in der Stadt unterwegs. Komm spãter wieder!
+~g~Joey ist mit Misty in der Stadt unterwegs. Komm später wieder!
 
 [TONIGO]
 ~g~Toni ist mit seiner Mamma in der Oper. Probier's ein andermal!
 
 [KEMUGO]
-~g~Maria und Kemuri sind gerade beschãftigt. Versuch's spãter nochmal!
+~g~Maria und Kemuri sind gerade beschäftigt. Versuch's später nochmal!
 
 [KENJGO]
 ~g~Kenji ist bei einem Yakuza-Treffen. Schau ein andermal wieder vorbei.
 
 [RAYGO]
-~g~Ray hãngt gerade auf irgend einem anderen Klo rum. Komm spãter wieder!
+~g~Ray hängt gerade auf irgend einem anderen Klo rum. Komm später wieder!
 
 [LOVEGO]
-~g~Donald Love hat anderes zu tun. Vielleicht hat er spãter Zeit!
+~g~Donald Love hat anderes zu tun. Vielleicht hat er später Zeit!
 
 [KENSGO]
-~g~Kenji hat zu tun! Komm spãter wieder!
+~g~Kenji hat zu tun! Komm später wieder!
 
 [ASUSGO]
 ~g~Asuka hat gerade überhaupt keine Zeit!
@@ -630,10 +630,10 @@ Halte die ~h~~k~~PED_LOCK_TARGET~-Taste~w~ gedrückt und drücke die ~h~~k~~PED_
 Halte die ~h~~k~~PED_LOCK_TARGET~-Taste~w~ gedrückt und drücke die ~h~~k~~PED_CYCLE_TARGET_LEFT~-Taste~w~ oder die ~h~~k~~PED_CYCLE_TARGET_RIGHT~-Taste, um das Ziel zu wechseln.
 
 [GUN_4A]
-Mit gedrückter ~h~~k~~PED_LOCK_TARGET~-Taste~w~ kannst du gehen oder laufen und behãltst dein Ziel im Visier.
+Mit gedrückter ~h~~k~~PED_LOCK_TARGET~-Taste~w~ kannst du gehen oder laufen und behältst dein Ziel im Visier.
 
 [GUN_4B]
-Mit gedrückter ~h~~k~~PED_LOCK_TARGET~-Taste~w~ kannst du gehen oder laufen und behãltst dein Ziel im Visier.
+Mit gedrückter ~h~~k~~PED_LOCK_TARGET~-Taste~w~ kannst du gehen oder laufen und behältst dein Ziel im Visier.
 
 [GUN_5]
 An diesen Pappkameraden kannst du zielen und schießen üben. Wenn du fertig bist, widme dich wieder deiner Mission.
@@ -690,7 +690,7 @@ An diesen Pappkameraden kannst du zielen und schießen üben. Wenn du fertig bis
 ~g~Fahrtziel: ~w~'Museum' ~g~in Newport.
 
 [FARE18]
-~g~Fahrtziel: ~w~'AmCo Gebãude' ~g~in Torrington.
+~g~Fahrtziel: ~w~'AmCo Gebäude' ~g~in Torrington.
 
 [FARE19]
 ~g~Fahrtziel: ~w~'Bolt Burgers' ~g~in Bedford Point.
@@ -714,7 +714,7 @@ An diesen Pappkameraden kannst du zielen und schießen üben. Wenn du fertig bis
 ~g~Fahrtziel: ~w~'North West Towers' ~g~in Wichita Gardens.
 
 [NEW_TAX]
-GRÖSSER! SCHNELLER! HÃRTER! Neu! Borgnine Taxis jetzt in Harwood! Rufen Sie 555-BORGNINE! Heute noch!
+GRÖSSER! SCHNELLER! HÄRTER! Neu! Borgnine Taxis jetzt in Harwood! Rufen Sie 555-BORGNINE! Heute noch!
 
 [TSCORE2]
 $~1~
@@ -738,7 +738,7 @@ Drücke die ~h~~k~~TOGGLE_SUBMISSIONS~-Taste~w~, um Taxi-Missionen an- oder abzu
 ~r~Krankenwagen voll!!
 
 [A_RANGE]
-~g~Du bist außer Reichweite des Notarztfunks. Fahr nãher an die Klinik heran!
+~g~Du bist außer Reichweite des Notarztfunks. Fahr näher an die Klinik heran!
 
 [FTUTOR]
 Drücke die ~h~~k~~TOGGLE_SUBMISSIONS~-Taste~w~, um Feuerwehr Missionen an- oder abzuschalten.
@@ -750,22 +750,22 @@ Drücke die ~h~~k~~TOGGLE_SUBMISSIONS~-Taste~w~, um Feuerwehr Missionen an- oder
 Feuer gelöscht!
 
 [F_RANGE]
-~g~Du bist außer Reichweite des Feuerwehrfunks. Fahr nãher an eine Feuerwache heran!
+~g~Du bist außer Reichweite des Feuerwehrfunks. Fahr näher an eine Feuerwache heran!
 
 [C_BREIF]
-~g~Verdãchtiger wurde zuletzt in der Gegend von ~a~ gesichtet.
+~g~Verdächtiger wurde zuletzt in der Gegend von ~a~ gesichtet.
 
 [C_RANGE]
-~g~Du bist außer Reichweite des Polizeifunks. Fahr nãher an ein Polizeirevier heran!
+~g~Du bist außer Reichweite des Polizeifunks. Fahr näher an ein Polizeirevier heran!
 
 [DODO_FT]
 Du bist ~1~ Sekunden geflogen!
 
 [EBAL_A]
-Ich kenn ein Plãtzchen im Rotlichtbezirk, wo wir untertauchen können.
+Ich kenn ein Plätzchen im Rotlichtbezirk, wo wir untertauchen können.
 
 [EBAL_A1]
-Aber meine Hãnde sind im Eimer. Also, fahr du.
+Aber meine Hände sind im Eimer. Also, fahr du.
 
 [EBAL_1]
 Drücke die~h~ ~k~~VEHICLE_ENTER_EXIT~-Taste~w~, um in ein Fahrzeug ~h~ein- oder auszusteigen~w~.
@@ -801,7 +801,7 @@ Du könntest mir einen Gefallen tun.
 Eines meiner Girls braucht 'nen Fahrer. Schnapp dir ein Auto, hol Misty von der Klinik ab und bring sie her.
 
 [EBAL_N]
-Also lass die Hãnde am Lenkrad!
+Also lass die Hände am Lenkrad!
 
 [EBAL_4]
 ~r~8-Ball ist tot!
@@ -837,7 +837,7 @@ Also lass die Hãnde am Lenkrad!
 Halte neben Misty an und lass sie einsteigen.
 
 [LM1_8]
-Du kannst dir bei Luigi den nãchsten Job abholen oder Liberty City erkunden.
+Du kannst dir bei Luigi den nächsten Job abholen oder Liberty City erkunden.
 
 [LM2_A]
 Da ist eine neue Droge in Umlauf, sie heißt SPANK.
@@ -846,7 +846,7 @@ Da ist eine neue Droge in Umlauf, sie heißt SPANK.
 Irgendein Kerl hat diesen Müll meinen Girls in Portland Harbour verabreicht.
 
 [LM2_B]
-Fahr hin und verabreich ihm ein paar mit 'nem Baseballschlãger!
+Fahr hin und verabreich ihm ein paar mit 'nem Baseballschläger!
 
 [LM2_G]
 Der Typ soll bezahlen für diese Beleidigung!
@@ -855,13 +855,13 @@ Der Typ soll bezahlen für diese Beleidigung!
 ~g~Nimm sein Auto und spritz es um.
 
 [LM2_2A]
-Benutze die~h~ ~k~~PED_FIREWEAPON~-Taste~w~, um zu ~h~schlagen und zu treten~w~ oder um ~h~den Schlãger zu schwingen~w~!
+Benutze die~h~ ~k~~PED_FIREWEAPON~-Taste~w~, um zu ~h~schlagen und zu treten~w~ oder um ~h~den Schläger zu schwingen~w~!
 
 [LM2_2C]
-Benutze die~h~ ~k~~PED_FIREWEAPON~-Taste~w~, um zu ~h~schlagen und zu treten~w~ oder um ~h~den Schlãger zu schwingen~w~!
+Benutze die~h~ ~k~~PED_FIREWEAPON~-Taste~w~, um zu ~h~schlagen und zu treten~w~ oder um ~h~den Schläger zu schwingen~w~!
 
 [LM2_2D]
-Benutze die~h~ ~k~~PED_FIREWEAPON~-Taste~w~, um zu ~h~schlagen und zu treten~w~ oder um ~h~den Schlãger zu schwingen~w~!
+Benutze die~h~ ~k~~PED_FIREWEAPON~-Taste~w~, um zu ~h~schlagen und zu treten~w~ oder um ~h~den Schläger zu schwingen~w~!
 
 [LM2_3]
 ~g~Stell das Auto in Luigis Garage ab!
@@ -870,7 +870,7 @@ Benutze die~h~ ~k~~PED_FIREWEAPON~-Taste~w~, um zu ~h~schlagen und zu treten~w~ 
 ~g~Lackiere das Auto um!
 
 [LM3_A]
-He, ich muss mit dir reden... Okay, Mick, wir reden spãter.
+He, ich muss mit dir reden... Okay, Mick, wir reden später.
 
 [LM3_B]
 Na? Alles klar, mein Junge?
@@ -900,7 +900,7 @@ Drücke die~h~ L3-Taste~w~, um zu ~h~hupen~w~. So weiß Misty, dass du da bist.
 ~g~Hol Misty ab!
 
 [LM3_5]
-Du arbeitest jetzt fest für Luigi? War auch Zeit, dass er 'nen verlãsslichen Fahrer anbringt.
+Du arbeitest jetzt fest für Luigi? War auch Zeit, dass er 'nen verlässlichen Fahrer anbringt.
 
 [LM3_7]
 Ich bin gleich bei dir, Süße.
@@ -918,7 +918,7 @@ Wenn du 'ne Knarre brauchst, geh zum Hintereingang von AmmuNation, gegenüber de
 Der Polizeiball findet in der alten Schulhalle nahe der Callahan Bridge statt,
 
 [LM5_B]
-und bei solchen Bãllen möchten auch Cops ein wenig 'Action' haben.
+und bei solchen Bällen möchten auch Cops ein wenig 'Action' haben.
 
 [LM5_C]
 Ich hab Girls in der ganzen Stadt stehen.
@@ -927,7 +927,7 @@ Ich hab Girls in der ganzen Stadt stehen.
 Bring sie zu dem Ball. Das bringt 'nen Haufen Kohle.
 
 [LM5_1]
-~g~Wenn du zu viele Ladies ins Auto stopfst, holen sie sich Schrammen! ~g~Liefere erst diese Mãdchen ab und hol dann den Rest.
+~g~Wenn du zu viele Ladies ins Auto stopfst, holen sie sich Schrammen! ~g~Liefere erst diese Mädchen ab und hol dann den Rest.
 
 [LM5_2]
 ~r~Eins von Luigis Girls ist hinüber!
@@ -1011,7 +1011,7 @@ Er startet jeden Tag an der Grenze zu Chinatown.
 Kugeln können der Karre nichts anhaben. Also besorg dir einen Wagen und ramm ihn von der Straße.
 
 [JM3_D]
-Fahr ihm voll rein, dann dürften die Wachmãnner schnell abhauen.
+Fahr ihm voll rein, dann dürften die Wachmänner schnell abhauen.
 
 [JM3_E]
 Fahr den Transporter dann zum Lagerhaus bei den Docks, von da an übernehmen meine Leute.
@@ -1026,7 +1026,7 @@ Der Transporter ist nicht ewig unterwegs, also beeil dich.
 ~g~Ramm den Wagen, bis der Schadenswert unter 70 Prozent liegt.
 
 [JM4_B]
-Oh! Da ist der Typ, von dem ich dir erzãhlt habe!
+Oh! Da ist der Typ, von dem ich dir erzählt habe!
 
 [JM4_C]
 Okay, hör zu. Der Typ ist kein Italiener und kein Mechaniker, aber er kann alles 'richten'.
@@ -1041,7 +1041,7 @@ Ja, ich bin Toni Cipriani.
 Bring ihn zu Mammas Restaurant in St. Mark's.
 
 [JM4_G]
-Hör zu, ich plane eine Sache, da brauche ich einen guten Fahrer. Also komm spãter wieder, okay?
+Hör zu, ich plane eine Sache, da brauche ich einen guten Fahrer. Also komm später wieder, okay?
 
 [JM4_2]
 Warte hier. Lass den Motor laufen. Das ist kein Freundschaftsbesuch.
@@ -1092,7 +1092,7 @@ Die überfallen eine Bank und brauchen einen Fahrer.
 Ich hab ihnen gesagt, du bist der richtige. Also, vermassle es nicht.
 
 [JM6_E]
-Bring sie vor 5 Uhr zu der Bank, keine Minute spãter.
+Bring sie vor 5 Uhr zu der Bank, keine Minute später.
 
 [JM6_2]
 Lass den Motor laufen. Wir sind gleich wieder da.
@@ -1101,16 +1101,16 @@ Lass den Motor laufen. Wir sind gleich wieder da.
 Bring uns hier weg!!
 
 [JM6_4]
-Hãng die Cops ab und bring uns in die sichere Wohnung!
+Häng die Cops ab und bring uns in die sichere Wohnung!
 
 [JM6_6]
-~g~Los, besorge ein weniger verdãchtiges Fahrzeug!
+~g~Los, besorge ein weniger verdächtiges Fahrzeug!
 
 [JM6_7]
 ~g~Du brauchst alle 3 für den Überfall!
 
 [TM1]
-'SCHMUTZIGE WÃSCHE'
+'SCHMUTZIGE WÄSCHE'
 
 [TM2]
 'DER GELDBOTE'
@@ -1131,7 +1131,7 @@ Ich habe einen dringenden Job für dich! -Toni
 ~w~Setz dich, Junge. Los, mach's dir bequem.
 
 [TM1_B]
-~w~Die Wãscherei will also kein Schutzgeld zahlen, was?
+~w~Die Wäscherei will also kein Schutzgeld zahlen, was?
 
 [TM1_C]
 ~w~Denken die Triaden, sie können mich verscheißern?
@@ -1149,7 +1149,7 @@ Ich habe einen dringenden Job für dich! -Toni
 ~w~Sorry, Ma. Ja, Ma.
 
 [TM1_H]
-~w~Ich will, dass du ihre Wãscherei-Transporter zerstörst
+~w~Ich will, dass du ihre Wäscherei-Transporter zerstörst
 
 [TM1_I]
 ~w~und jeden Triaden-Tölpel niedermachst, der dir in die Quere kommt.
@@ -1164,7 +1164,7 @@ Ich habe einen dringenden Job für dich! -Toni
 Er wird nie so sein wie sein Papa. Auf dem Tisch hat er dir eine Nachricht hinterlassen.
 
 [TM2_B]
-~w~Die Wãscherei will jetzt bezahlen. Gute Arbeit, mein Junge!
+~w~Die Wäscherei will jetzt bezahlen. Gute Arbeit, mein Junge!
 
 [TM2_C]
 ~w~Hol das Geld ab und bring es hierher. Pass auf die Triaden auf.
@@ -1221,7 +1221,7 @@ Er wird nie so sein wie sein Papa. Auf dem Tisch hat er dir eine Nachricht hinte
 ~g~Jetzt hol Toni ab.
 
 [TM3_4]
-~g~Jetzt fahr die Mãnner zu Salvatore.
+~g~Jetzt fahr die Männer zu Salvatore.
 
 [TM3_5]
 ~y~Ein Hinterhalt der Triaden!!
@@ -1230,10 +1230,10 @@ Er wird nie so sein wie sein Papa. Auf dem Tisch hat er dir eine Nachricht hinte
 ~w~Es herrscht KRIEG! Die Triaden betreiben zur Tarnung einen Fischmarkt in Chinatown.
 
 [TM4_C]
-~w~Die meisten ihrer Geschãfte werden auf diesem Fischmarkt durchgezogen.
+~w~Die meisten ihrer Geschäfte werden auf diesem Fischmarkt durchgezogen.
 
 [TM4_D]
-~w~Diese Wãscherei schuldet uns immer noch Geld.
+~w~Diese Wäscherei schuldet uns immer noch Geld.
 
 [TM4_E]
 ~w~Die denken, die Triaden beschützen sie jetzt. Ich schlage vor, wir führen eine Strafaktion durch.
@@ -1257,7 +1257,7 @@ TEXT NO LONGER REQUIRED
 ~w~Wir machen die Triaden ein für alle Mal fertig.
 
 [TM5_D]
-8-Ball hat einen Müllkarren mit einer Bombe prãpariert.
+8-Ball hat einen Müllkarren mit einer Bombe präpariert.
 
 [TM5_E]
 ~w~Sie hat einen Zeitzünder. Wenn du's vermasselst, hinterlassen wir keine Spuren. Hol den Müllkarren ab.
@@ -1293,7 +1293,7 @@ TEXT NO LONGER REQUIRED
 ~w~HEY, MARIA! WO BLEIBST DU?
 
 [FM1_D]
-~w~Dãmliche Ziege. Jedes Mal dasselbe.
+~w~Dämliche Ziege. Jedes Mal dasselbe.
 
 [FM1_E]
 ~w~Und hier ist sie, die Königin der Nacht höchstpersönlich!
@@ -1314,7 +1314,7 @@ TEXT NO LONGER REQUIRED
 ~w~Nimm die Limo, aber bring sie mir heil wieder, hörst du?
 
 [FM1_K]
-~w~Und pass auf sie auf, sie kann eine Menge Ãrger machen.
+~w~Und pass auf sie auf, sie kann eine Menge Ärger machen.
 
 [FM1_L]
 ~w~Ja, ja, ja! Dein neues Schoßhündchen wird schon alles im Griff haben.
@@ -1341,7 +1341,7 @@ TEXT NO LONGER REQUIRED
 ~g~Steig in die Limo!
 
 [FM1_3]
-~r~Wenn du Maria im Stich lãsst, bringt Salvatore dich um. Kehr um und hol sie!
+~r~Wenn du Maria im Stich lässt, bringt Salvatore dich um. Kehr um und hol sie!
 
 [FM1_4]
 ~g~Du hast die Frau des Don im Stich gelassen! Los, zurück zur Lagerhalle! Warte dort auf Maria!
@@ -1374,16 +1374,16 @@ Es gibt da einen Typ namens Curly Bob. Er arbeitet in Luigis Bar.
 Der verpulvert schon dauernd mehr Geld als er verdient.
 
 [FM2_N]
-Normalerweise fãhrt er nach der Arbeit mit dem Taxi nach Hause. Folge ihm.
+Normalerweise fährt er nach der Arbeit mit dem Taxi nach Hause. Folge ihm.
 
 [FM2_O]
-Und wenn er der Verrãter ist, mach ihn fertig.
+Und wenn er der Verräter ist, mach ihn fertig.
 
 [FM2_F]
-Da kommt ja unser kleiner, gesprãchiger Freund.
+Da kommt ja unser kleiner, gesprächiger Freund.
 
 [FM2_G]
-Ist man dir gefolgt? Du weißt, was hier lãuft, muss unter uns bleiben.
+Ist man dir gefolgt? Du weißt, was hier läuft, muss unter uns bleiben.
 
 [FM2_H]
 Nein, nein, niemand ist mir gefolgt. Hast du meinen Stoff?
@@ -1395,7 +1395,7 @@ Hier ist dein SPANK, du Ratte, und jetzt rede.
 Okay. Die Leones führen einen Zwei-Fronten-Krieg.
 
 [FM2_Q]
-Sie kãmpfen mit den Triaden um ein Territorium, und keiner der beiden gibt nach.
+Sie kämpfen mit den Triaden um ein Territorium, und keiner der beiden gibt nach.
 
 [FM2_R]
 Gleichzeitig hat Joey Leone Streit mit den Forellis angefangen.
@@ -1404,7 +1404,7 @@ Gleichzeitig hat Joey Leone Streit mit den Forellis angefangen.
 Jeden Tag verlieren sie Leute und Einfluss in der Stadt.
 
 [FM2_T]
-Salvatore wird gefãhrlich und paranoid. Er verdãchtigt alles und jeden.
+Salvatore wird gefährlich und paranoid. Er verdächtigt alles und jeden.
 
 [FM2_U]
 Bei treuen Gefolgsleuten wie dir, wie kann er sich da nur Sorgen machen?
@@ -1443,7 +1443,7 @@ Bei treuen Gefolgsleuten wie dir, wie kann er sich da nur Sorgen machen?
 ~w~Wir sollten diese kolumbianischen Mistkerle fertigmachen,
 
 [FM3_B]
-~w~aber durch den Krieg mit den Triaden sind wir dazu zu geschwãcht.
+~w~aber durch den Krieg mit den Triaden sind wir dazu zu geschwächt.
 
 [FM3_C]
 ~w~Das Kartell hat unendlich Geld aus dem Handel mit diesem Mistzeug SPANK.
@@ -1479,7 +1479,7 @@ Bei treuen Gefolgsleuten wie dir, wie kann er sich da nur Sorgen machen?
 ~w~Okay, dann wollen wir mal!
 
 [FM3_8F]
-~w~Ich kann das Baby scharf machen, aber eine Knarre kann ich mit diesen Hãnden immer noch nicht halten.
+~w~Ich kann das Baby scharf machen, aber eine Knarre kann ich mit diesen Händen immer noch nicht halten.
 
 [FM3_8G]
 ~w~Hier, das Gewehr hier wirst du sicher brauchen.
@@ -1491,7 +1491,7 @@ Bei treuen Gefolgsleuten wie dir, wie kann er sich da nur Sorgen machen?
 ~r~8-Ball hat's erwischt!
 
 [FM3_8]
-~r~Die Wachmãnner wurden alarmiert!
+~r~Die Wachmänner wurden alarmiert!
 
 [FM4_A]
 ~w~Ah, sieh an! Mein bester Troubleshooter.
@@ -1524,10 +1524,10 @@ Bei treuen Gefolgsleuten wie dir, wie kann er sich da nur Sorgen machen?
 'V-MANN TANNER'
 
 [AM1_A]
-Wir müssen ein paar Dinge klãren, bevor wir unsere Beziehungen fortsetzen,
+Wir müssen ein paar Dinge klären, bevor wir unsere Beziehungen fortsetzen,
 
 [AM1_B]
-geschãftlich oder sonstwie. Legen wir also die Karten auf den Tisch.
+geschäftlich oder sonstwie. Legen wir also die Karten auf den Tisch.
 
 [AM1_C]
 Ich bin eine Yakuza und ich weiß, dass du für Salvatore Leones Familie gearbeitet hast.
@@ -1551,7 +1551,7 @@ Oh, Asuka, du hast einen Massagestab.
 Das ist kein Massagestab.
 
 [AM1_1]
-~g~Salvatore verlãsst jetzt Luigis Club!
+~g~Salvatore verlässt jetzt Luigis Club!
 
 [AM1_2]
 ~r~Man hat dich entdeckt!
@@ -1563,7 +1563,7 @@ Das ist kein Massagestab.
 ~r~Na, prima! Du hast dein Opfer verscheucht. Und du willst ein Profi sein?
 
 [AM1_5]
-~g~Begib dich in den Rotlichtbezirk und warte, bis Salvatore den Club verlãsst.
+~g~Begib dich in den Rotlichtbezirk und warte, bis Salvatore den Club verlässt.
 
 [AM1_7]
 ~r~Salvatore sitzt bequem zu Hause und schlürft einen Cocktail. 'Der Schakal' bist du nicht gerade!
@@ -1584,10 +1584,10 @@ Maria und ich sind ein bisschen ins Grüne gefahren, bis du diesen miesen Voyeur
 Ah, mein hübsches Helferlein!
 
 [AM4_B]
-Maria ist gerade beschãftigt, aber ich richte ihr aus, dass du hier warst.
+Maria ist gerade beschäftigt, aber ich richte ihr aus, dass du hier warst.
 
 [AM4_C]
-Wer ist da? Asuka? Ich weiß, ich war ein böses Mãdchen, aber ich muss dringend pinkeln!
+Wer ist da? Asuka? Ich weiß, ich war ein böses Mädchen, aber ich muss dringend pinkeln!
 
 [AM4_D]
 Wird Zeit dass du unseren Mann bei der Polizei kennenlernst.
@@ -1596,7 +1596,7 @@ Wird Zeit dass du unseren Mann bei der Polizei kennenlernst.
 Das ist seine Bezahlung für den letzten Job, den er für uns erledigt hat.
 
 [AM4_F]
-Verstãndlicherweise ist er vorsichtig.
+Verständlicherweise ist er vorsichtig.
 
 [AM4_G]
 Begib dich so schnell wie möglich zu dem öffentlichen Fernsprecher in Torrington und warte auf seine Anweisungen.
@@ -1632,49 +1632,49 @@ Tanner hat dich bemerkt!
 ~w~Trotzdem hat er uns mitgeteilt, wie sehr Catalina deine Rache fürchtet.
 
 [AS2_A]
-~w~Wir haben Catalinas Plãne mit dem SPANK unterschãtzt.
+~w~Wir haben Catalinas Pläne mit dem SPANK unterschätzt.
 
 [AS2_B]
-~w~Das beschrãnkt sich bei weitem nicht darauf, dass die Yardies es an der Straßenecke verkaufen.
+~w~Das beschränkt sich bei weitem nicht darauf, dass die Yardies es an der Straßenecke verkaufen.
 
 [AS2_D]
-~w~Die verkaufen SPANK über Kaffeestãnde.
+~w~Die verkaufen SPANK über Kaffeestände.
 
 [AS2_1]
-~g~Alle Espressostãnde in Portland zerstört!!
+~g~Alle Espressostände in Portland zerstört!!
 
 [AS2_2]
-~g~Alle Espressostãnde auf Staunton Island zerstört!!
+~g~Alle Espressostände auf Staunton Island zerstört!!
 
 [AS2_3]
-~g~Alle Espressostãnde in Shoreside Vale zerstört!!
+~g~Alle Espressostände in Shoreside Vale zerstört!!
 
 [AS2_4]
 ~r~Das Kartell hat seine Dealer gewarnt!!
 
 [AS2_5]
-~g~Da sind noch Espressostãnde in Shoreside Vale und auf Staunton Island!
+~g~Da sind noch Espressostände in Shoreside Vale und auf Staunton Island!
 
 [AS2_6]
-~g~Da sind noch Espressostãnde in Shoreside Vale!
+~g~Da sind noch Espressostände in Shoreside Vale!
 
 [AS2_7]
-~g~Da sind noch Espressostãnde auf Staunton Island!
+~g~Da sind noch Espressostände auf Staunton Island!
 
 [AS2_8]
-~g~Da sind noch Espressostãnde in Portland!
+~g~Da sind noch Espressostände in Portland!
 
 [AS2_9]
-~g~Da sind noch Espressostãnde in Portland und Shoreside Vale!
+~g~Da sind noch Espressostände in Portland und Shoreside Vale!
 
 [AS2_10]
-~g~Da sind noch Espressostãnde in Portland und auf Staunton Island!
+~g~Da sind noch Espressostände in Portland und auf Staunton Island!
 
 [AS2_12]
-~g~Suche in den Sadtteilen von Liberty City nach ~b~Espresso-2-Go-Stãnden!
+~g~Suche in den Sadtteilen von Liberty City nach ~b~Espresso-2-Go-Ständen!
 
 [AS3_A]
-~W~Drücken wir noch fester zu oder warten wir, bis es von selbst abfãllt?
+~W~Drücken wir noch fester zu oder warten wir, bis es von selbst abfällt?
 
 [AS3_B]
 ~w~Hau einfach drauf...
@@ -1716,7 +1716,7 @@ Tanner hat dich bemerkt!
 'DIE ABRECHNUNG'
 
 [KM1_A]
-Meine Schwester hãlt große Stücke auf dich,
+Meine Schwester hält große Stücke auf dich,
 
 [KM1_E]
 aber ich bin noch nicht überzeugt, dass ein Gajin wie du was auf dem Kasten hat.
@@ -1725,13 +1725,13 @@ aber ich bin noch nicht überzeugt, dass ein Gajin wie du was auf dem Kasten hat
 Vielleicht kannst du mir bei einer etwas kniffligen Sache helfen.
 
 [KM1_F]
-Ein Fehlschlag wãre natürlich unverzeihlich.
+Ein Fehlschlag wäre natürlich unverzeihlich.
 
 [KM1_C]
 Ein Yakuza Kanbu sitzt in Haft und wartet auf seine Überführung zum Prozess.
 
 [KM1_G]
-Er ist ein geschãtztes Mitglied der Familie.
+Er ist ein geschätztes Mitglied der Familie.
 
 [KM1_H]
 Befreie ihn aus der Haft und bring ihn in das Dojo beim Bedford Point.
@@ -1767,7 +1767,7 @@ Wir danken dir für deinen selbstlosen Einsatz. Solltest du jemals Hilfe brauche
 ~r~Du hast dich selbst in Schwierigkeiten gebracht!
 
 [KM2_A]
-Gewisse Umgangsformen sind in diesem Beruf von nicht zu unterschãtzender Wichtigkeit.
+Gewisse Umgangsformen sind in diesem Beruf von nicht zu unterschätzender Wichtigkeit.
 
 [KM2_B]
 Es ist eine Schande. Jemand hat mir einmal einen Gefallen getan, und ich konnte mich nie dafür erkenntlich zeigen.
@@ -1782,7 +1782,7 @@ Mein Ehrgefühl verlangt das von mir.
 ~g~Auto abgeliefert.
 
 [KM3_A]
-Wenn Ungemach droht, wendet der Narr sich ab, wãhrend der Weise sich ihm stellt.
+Wenn Ungemach droht, wendet der Narr sich ab, während der Weise sich ihm stellt.
 
 [KM3_B]
 Das kolumbianische Kartell hat unsere wiederholten Bitten ignoriert, unsere Interessen in Liberty zu berücksichtigen.
@@ -1794,7 +1794,7 @@ Jetzt verhandeln die mit den Jamaikanern, um uns weiter zu demütigen.
 Sie wollen den Deal am anderen Ende der Stadt besiegeln.
 
 [KM3_F]
-Nimm einen meiner Mãnner, klau einen Yardie-Wagen und statte den Kolumbianern einen Besuch ab.
+Nimm einen meiner Männer, klau einen Yardie-Wagen und statte den Kolumbianern einen Besuch ab.
 
 [KM3_E]
 Unser Ehrgefühl verlangt es, dass niemand am Leben bleibt.
@@ -1821,7 +1821,7 @@ Unser Ehrgefühl verlangt es, dass niemand am Leben bleibt.
 ~r~Der Kontaktmann ist tot!
 
 [KM4_A]
-Um wahrhaft stark zu sein, darfst du niemals Schwãche zeigen.
+Um wahrhaft stark zu sein, darfst du niemals Schwäche zeigen.
 
 [KM4_C]
 Sammle die Gelder umgehend ein, damit wir sie in unsere Casinos stecken können.
@@ -1866,7 +1866,7 @@ Es scheint, deine Versuche, die Jamaikaner davon abzuhalten,
 sich mit dem Kartell einzulassen, sind komplett fehlgeschlagen!
 
 [KM5_C]
-Yardie-Pusher verdealen pãckchenweise SPANK in den Straßen von Liberty, als würden sie Hotdogs verkaufen!
+Yardie-Pusher verdealen päckchenweise SPANK in den Straßen von Liberty, als würden sie Hotdogs verkaufen!
 
 [KM5_D]
 Die Mistkerle vom Kartell lachen uns aus, lachen MICH aus!
@@ -1887,7 +1887,7 @@ Mach diese Dreckskerle fertig und wasch deine befleckte Ehre im Blut unserer Fei
 ~g~Du hast ~1~ der Yardies erwischt. BONUS $~1~
 
 [RM1]
-'DAS SCHWEIGEN DES VERRÃTERS'
+'DAS SCHWEIGEN DES VERRÄTERS'
 
 [RM3]
 'BRENNENDE BEWEISE'
@@ -1899,7 +1899,7 @@ Mach diese Dreckskerle fertig und wasch deine befleckte Ehre im Blut unserer Fei
 'DER GEPANZERTE ZEUGE'
 
 [RM1_D]
-Er steht unter Zeugenschutz und sitzt mit bewaffneten Leibwãchtern in einer Wohnung in Newport, irgendwo hinter dem Parkplatz.
+Er steht unter Zeugenschutz und sitzt mit bewaffneten Leibwächtern in einer Wohnung in Newport, irgendwo hinter dem Parkplatz.
 
 [RM1_E]
 Zünde die Bude an, und wenn sie rausgerannt kommen, kannst du sie dir vornehmen. Sorge dafür, dass er mit niemandem redet.
@@ -1914,7 +1914,7 @@ Zünde die Bude an, und wenn sie rausgerannt kommen, kannst du sie dir vornehmen
 Hey, Junge! Hier rüber!
 
 [RM2_A]
-Ein alter Kumpel aus der Army macht Geschãfte in Rockford.
+Ein alter Kumpel aus der Army macht Geschäfte in Rockford.
 
 [RM2_D]
 Er braucht Hilfe. Zum Dank will er dir Superpreise machen für alles, was du bei ihm kaufst.
@@ -1932,7 +1932,7 @@ Na ja, drei Arme sind besser als einer, also nimm dir, was du brauchst.
 ~r~Phil hat's erwischt!!
 
 [RM2_L]
-Heh-hey! Wãre ich mit DIR in Nicaragua gewesen, hãtte ich vielleicht meinen Arm noch!
+Heh-hey! Wäre ich mit DIR in Nicaragua gewesen, hätte ich vielleicht meinen Arm noch!
 
 [RM2_N]
 Lass das Geld da. Und jetzt verschwinde. Ich regle das mit den Cops.
@@ -1941,7 +1941,7 @@ Lass das Geld da. Und jetzt verschwinde. Ich regle das mit den Cops.
 Das Beweismaterial wird gerade quer durch die Stadt transportiert.
 
 [RM3_E]
-Du wirst diesen Wagen rammen und jedes kleine Beweisstück einsammeln, wenn es rausfãllt.
+Du wirst diesen Wagen rammen und jedes kleine Beweisstück einsammeln, wenn es rausfällt.
 
 [RM3_F]
 Wenn du alles hast, lass das Zeug im Wagen und zünde ihn an.
@@ -1962,10 +1962,10 @@ Das bringt uns beiden eine Stange Geld ein, mein Junge.
 ~g~Steck jetzt das Auto in Brand!
 
 [RM4_A]
-Ich glaube, mein Partner ist ein Verrãter.
+Ich glaube, mein Partner ist ein Verräter.
 
 [RM4_C]
-Meistens fãhrt er abends mit seinem Boot fischen, nahe dem Leuchtturm auf dem Portland Rock.
+Meistens fährt er abends mit seinem Boot fischen, nahe dem Leuchtturm auf dem Portland Rock.
 
 [RM4_D]
 Klau ein Polizeiboot und mach seinen miesen Machenschaften ein Ende!
@@ -1977,7 +1977,7 @@ Klau ein Polizeiboot und mach seinen miesen Machenschaften ein Ende!
 ~g~Fahr zum Leuchtturm und nimm dir Rays Partner vor!
 
 [RM5_A]
-Du unfãhiger Idiot!
+Du unfähiger Idiot!
 
 [RM5_A1]
 Du hast alles vermasselt! Es geht um mein Leben, und du kannst nicht mal eine Fliege totschlagen!
@@ -2022,10 +2022,10 @@ Also los, erledige den Job, für den ich dich bezahlt habe!
 'DAS KENJI-KOMPLOTT'
 
 [LOVE3]
-'NÃCHTLICHER FISCHZUG'
+'NÄCHTLICHER FISCHZUG'
 
 [LOVE1_A]
-Zunãchst möchte ich dir danken, dass du diese Sache für mich geregelt hast.
+Zunächst möchte ich dir danken, dass du diese Sache für mich geregelt hast.
 
 [LOVE1_F]
 Die Leute interpretieren heute in alles etwas hinein.
@@ -2055,7 +2055,7 @@ Befreie meinen Freund, egal wie.
 ~g~Das Tor öffnet sich nur für Autos der kolumbianischen Gang.
 
 [LOVE2_A]
-Nichts lãsst die Grundstückspreise so tief purzeln wie ein guter alter Bandenkrieg,
+Nichts lässt die Grundstückspreise so tief purzeln wie ein guter alter Bandenkrieg,
 
 [LOVE2_B]
 außer vielleicht eine Pestepidemie... Aber das ginge hier wohl zu weit.
@@ -2076,7 +2076,7 @@ Kenji ist bei einem Treffen auf dem Dach der Parkgarage in Newport.
 Besorg dir einen Wagen des Kartells und nimm ihn dir vor.
 
 [LOVE2_H]
-Die Yakuza werden das als Kriegserklãrung des Kartells auffassen.
+Die Yakuza werden das als Kriegserklärung des Kartells auffassen.
 
 [LOVE2_1]
 ~g~Klau in Fort Staunton einen Wagen der kolumbianischen Gang!
@@ -2091,13 +2091,13 @@ Die Yakuza werden das als Kriegserklãrung des Kartells auffassen.
 ~r~Die Yakuza haben dich erkannt!
 
 [LOVE2_6]
-~r~Du hast alle Zeugen aus dem Weg gerãumt!!
+~r~Du hast alle Zeugen aus dem Weg geräumt!!
 
 [LOVE3_A]
 In scheinheiligen Zeiten wie diesen sind bestimmte wertvolle Waren schwer zu importieren.
 
 [LOVE3_C]
-Es wird einige kleine Pãckchen ins Wasser abwerfen.
+Es wird einige kleine Päckchen ins Wasser abwerfen.
 
 [LOVE3_D]
 Sammle sie ein, bevor es ein anderer tut.
@@ -2112,10 +2112,10 @@ Sammle sie ein, bevor es ein anderer tut.
 'BODYGUARD ACTION'
 
 [LOVE4_A]
-Danke, dass du die Pãckchen geholt hast. Aber die sollten nur als Köder dienen.
+Danke, dass du die Päckchen geholt hast. Aber die sollten nur als Köder dienen.
 
 [LOVE4_B]
-Sorry, aber so lãuft das manchmal in dem Geschãft.
+Sorry, aber so läuft das manchmal in dem Geschäft.
 
 [LOVE4_C]
 Die Ware, um die es mir wirklich geht, ist noch in dem Flugzeug versteckt.
@@ -2127,19 +2127,19 @@ Ich habe die Beamten bestochen.
 ~r~Das kolumbianische Kartell ist da!!
 
 [LOVE4_2]
-~g~Das Pãckchen ist weg! Du musst die Kolumbianer finden und es ihnen abjagen.
+~g~Das Päckchen ist weg! Du musst die Kolumbianer finden und es ihnen abjagen.
 
 [LOVE4_3]
 ~g~Bauunternehmen Panlantic...?
 
 [LOVE4_5]
-~g~Das Pãckchen müsste im Flugzeug sein...
+~g~Das Päckchen müsste im Flugzeug sein...
 
 [LOVE4_6]
 ~g~Nimm den Lift nach oben in den Tower!
 
 [LOVE5_B]
-Mein asiatischer Freund braucht einen Bodyguard. Er lãsst meine neue Lieferung auf Qualitãt überprüfen.
+Mein asiatischer Freund braucht einen Bodyguard. Er lässt meine neue Lieferung auf Qualität überprüfen.
 
 [LOVE5_1]
 ~g~Los!
@@ -2178,16 +2178,16 @@ Pass gut auf meinen kugelsicheren Patriot auf, Ray. Wir sehen uns in Miami.
 'DIE ÜBERGABE'
 
 [CAT1_A]
-Ich habe deine Maria. Wenn ihr Gesicht nicht aussehen soll, als wãr's in einen Fleischwolf geraten,
+Ich habe deine Maria. Wenn ihr Gesicht nicht aussehen soll, als wär's in einen Fleischwolf geraten,
 
 [CAT2_F]
 Ich hab mir 'nen Fingernagel abgebrochen und meine Frisur ist hin! Fünfzig Dollar im Eimer!
 
 [CAT2_G]
-Mann, hatte ich Angst. Aber dann dachte ich mir, du bist doch kein kleines Mãdchen mehr.
+Mann, hatte ich Angst. Aber dann dachte ich mir, du bist doch kein kleines Mädchen mehr.
 
 [CAT2_H]
-Du, das wird lustig, weißt du, meine Schwester will nãmlich mit ihren zwei Kindern eine zeitlang bei uns wohnen,
+Du, das wird lustig, weißt du, meine Schwester will nämlich mit ihren zwei Kindern eine zeitlang bei uns wohnen,
 
 [CAT2_I]
 weil ihr Mann gerade mal wieder fremdgeht und...
@@ -2232,7 +2232,7 @@ XXXX
 ~g~Maria ist tot!
 
 [WEATHER]
-WETTER ÃNDERN
+WETTER ÄNDERN
 
 [WEATHE2]
 WETTER NORMAL
@@ -2304,7 +2304,7 @@ Auf dich ist Verlass. Wenn du alle, die auf der Liste stehen, abgeliefert hast, 
 Du hast alle georderten Karren geliefert. Sehr gut. Hier, für dich.
 
 [GA_15]
-Hoffentlich gefãllt dir die neue Farbe.
+Hoffentlich gefällt dir die neue Farbe.
 
 [GA_16]
 Das Umspritzen ist gratis.
@@ -2313,7 +2313,7 @@ Das Umspritzen ist gratis.
 An dem Modell haben wir kein Interesse.
 
 [GA_20]
-Von der Sorte haben wir schon mehr als genug. Sorry, da kommen wir nicht ins Geschãft.
+Von der Sorte haben wir schon mehr als genug. Sorry, da kommen wir nicht ins Geschäft.
 
 [CR_1]
 Kran kann dieses Fahrzeug nicht anheben.
@@ -2388,7 +2388,7 @@ Du blickst bei der Story nicht mehr durch?
 Taste dich ran, Mann!
 
 [FEF_CO2]
-Wãhle das Controller-Setup, das zu deinem Spielstil am besten passt
+Wähle das Controller-Setup, das zu deinem Spielstil am besten passt
 
 [FEF_SA1]
 Bring deine Daten in Sicherheit!
@@ -2397,10 +2397,10 @@ Bring deine Daten in Sicherheit!
 Spiele laden und speichern
 
 [FEF_AU1]
-Volle Dröhnung gefãllig?
+Volle Dröhnung gefällig?
 
 [FEF_AU2]
-Radiosender und Soundeffekt auswãhlen
+Radiosender und Soundeffekt auswählen
 
 [FEF_DI1]
 Andere Optik?
@@ -2412,7 +2412,7 @@ Spiel für deinen Fernseher optimieren
 Was für ein Gefasel!
 
 [FEF_LA2]
-Sprache auswãhlen
+Sprache auswählen
 
 [FEB_PMB]
 Vorherige Missionsinfos:
@@ -2478,10 +2478,10 @@ Hupe
 Fahrzeug steuern
 
 [FEC_RSC]
-Radiosender auswãhlen
+Radiosender auswählen
 
 [FEC_BRA]
-Bremsen\rückwãrts fahren
+Bremsen\rückwärts fahren
 
 [FEC_HAB]
 Handbremse
@@ -2634,7 +2634,7 @@ Explodierte Autos
 Zahl deiner Verhaftungen
 
 [M_WASTE]
-Mãnnliche Passanten
+Männliche Passanten
 
 [F_WASTE]
 Weibliche Passanten
@@ -2646,10 +2646,10 @@ Cops
 Gang-Mitglieder
 
 [MED_WST]
-Sanitãter
+Sanitäter
 
 [FIRE_WS]
-Feuerwehrmãnner
+Feuerwehrmänner
 
 [DED_CRI]
 Kriminelle
@@ -2688,7 +2688,7 @@ Krankenhausbesuche
 Im Spiel verstrichene Tage
 
 [MMRAIN]
-Regenfãlle in mm
+Regenfälle in mm
 
 [MXCARD]
 Weitester IRRSINNS-Sprung (in Fuß)
@@ -2751,7 +2751,7 @@ Begonnene Missionen
 Erfüllte Missionen
 
 [PASDRO]
-Beförderte Fahrgãste
+Beförderte Fahrgäste
 
 [MONTAX]
 Mit Taxi verdientes Geld
@@ -2823,10 +2823,10 @@ Zurück
 SOUND
 
 [MUSVOL]
-Lautstãrke Musik
+Lautstärke Musik
 
 [SFXVOL]
-Lautstãrke SFX
+Lautstärke SFX
 
 [SCROPT]
 BILDSCHIRMOPTIONEN
@@ -2850,25 +2850,25 @@ Du kannst nur in deinem Unterschlupf speichern.
 GTA3 Dateien löschen
 
 [CHFILE]
-ZU LADENDE DATEI AUSWÃHLEN
+ZU LADENDE DATEI AUSWÄHLEN
 
 [CHCDLD]
-Wãhle Memory Card (PS2) von der geladen werden soll
+Wähle Memory Card (PS2) von der geladen werden soll
 
 [CDUNFR]
 Memory Card (PS2) ist nicht formatiert.
 
 [CHFIDL]
-ZU LÖSCHENDE DATEI AUSWÃHLEN
+ZU LÖSCHENDE DATEI AUSWÄHLEN
 
 [SVCONF]
-SPEICHERBESTÃTIGUNG
+SPEICHERBESTÄTIGUNG
 
 [SVFNAM]
 Dateiname des gespeicherten Spiels:
 
 [SAVEDN]
-Fehler - Speicherung nicht vollstãndig.
+Fehler - Speicherung nicht vollständig.
 
 [LANGSL]
 SPRACHAUSWAHL
@@ -2958,10 +2958,10 @@ Mittel
 Hoch
 
 [SCASSL]
-Gewalt-Level 'mittel' gewãhlt
+Gewalt-Level 'mittel' gewählt
 
 [SCSCSL]
-Gewalt-Level 'hoch' gewãhlt
+Gewalt-Level 'hoch' gewählt
 
 [PRVMEN]
 Vorherige Missionsinfos
@@ -3030,7 +3030,7 @@ x
 Letzte Nachricht
 
 [FEDS_XB]
-Auswãhlen
+Auswählen
 
 [FEDS_ST]
 START-Taste - WEITER
@@ -3045,7 +3045,7 @@ Geschützsteuerung
 Spezialmission aktivieren (R3-Taste)
 
 [FEC_RS3]
-Radiosender auswãhlen (L3-Taste)
+Radiosender auswählen (L3-Taste)
 
 [FEC_HO3]
 Hupe (L3-Taste)
@@ -3060,10 +3060,10 @@ Hupe (L3-Taste)
 'FEUERTAUFE'
 
 [DIAB4]
-'JÃGER DES VERLORENEN SCHUNDES'
+'JÄGER DES VERLORENEN SCHUNDES'
 
 [DIAB1_A]
-El Burro bietet dir eine Chance. Über den öffentlichen Fernsprecher in Hepburn Heights erfãhrst du nãheres.
+El Burro bietet dir eine Chance. Über den öffentlichen Fernsprecher in Hepburn Heights erfährst du näheres.
 
 [DIAB1_C]
 Du bist kein übler Fahrer. Komm wieder zu dem Telefon. Vielleicht hat El Burro noch mehr Jobs für dich.
@@ -3135,13 +3135,13 @@ King Courtney will dich sprechen - am Telefon in Aspatria!!
 ~w~Meine Yardies könnten einen Fahrer brauchen, und du hast keinen schlechten Ruf.
 
 [YD1_B]
-~w~Fahr mit einem Wagen zu dem Gelãnde gegenüber dem Stadion und warte auf die anderen Mitbewerber.
+~w~Fahr mit einem Wagen zu dem Gelände gegenüber dem Stadion und warte auf die anderen Mitbewerber.
 
 [YD1_C]
-~w~Meine Mãnner beobachten Checkpoints überall in Staunton.
+~w~Meine Männer beobachten Checkpoints überall in Staunton.
 
 [YD1_D]
-~w~Wer einen Checkpoint als erster erreicht, kriegt $1000. Dann geht's weiter zur nãchsten Station.
+~w~Wer einen Checkpoint als erster erreicht, kriegt $1000. Dann geht's weiter zur nächsten Station.
 
 [YD1_D1]
 ~w~Wenn du mehr Checkpoints als die anderen gewinnst, habe ich vielleicht Arbeit für dich.
@@ -3150,7 +3150,7 @@ King Courtney will dich sprechen - am Telefon in Aspatria!!
 ~g~Fertigmachen zum Start!
 
 [YD1_F]
-~g~Du bist zu früh gestartet. Das gefãllt mir!!
+~g~Du bist zu früh gestartet. Das gefällt mir!!
 
 [YD1_G]
 ~r~Dies ist ein AUTORENNEN. Du brauchst ein AUTO, Hirni!
@@ -3186,7 +3186,7 @@ $1000!!
 ~y~Du teilst dir den 1. Platz. ~1~ gewonnene Checkpoints. ~y~Gut, aber du musst der Beste sein, um für Queen Lizzy zu fahren!
 
 [Y1_J2ND]
-~r~Du teilst dir den 2. Platz. ~1~ gewonnene Checkpoints. Du Schlãfer!
+~r~Du teilst dir den 2. Platz. ~1~ gewonnene Checkpoints. Du Schläfer!
 
 [Y1JLAST]
 ~r~Du bist unter den Letzten! Wo hast du deinen Führerschein gemacht?
@@ -3213,7 +3213,7 @@ Wollen sehen, ob du so gut bist, wie du sagst.
 ~w~Hier, du wirst 'ne Knarre brauchen.
 
 [YD2_D]
-~w~Du fãhrst UND ballerst. Wir achten drauf, dass du keine kalten Füße kriegst.
+~w~Du fährst UND ballerst. Wir achten drauf, dass du keine kalten Füße kriegst.
 
 [YD2_E]
 ~w~Los geht's!!
@@ -3300,7 +3300,7 @@ Komm nach Bedford Point.
 In einem alten Wagen ist etwas versteckt. Das brauche ich pronto!
 
 [YD4_B]
-BRIEF: Man hört, du bist ein viel beschãftigter Mann. Nun, ich bin eine viel beschãftigte Frau.
+BRIEF: Man hört, du bist ein viel beschäftigter Mann. Nun, ich bin eine viel beschäftigte Frau.
 
 [YD4_C]
 Es wird Zeit, dass du die wahre Macht von 'SPANK' kennen lernst! Besos y fuderes, Catalina, xxx.
@@ -3333,10 +3333,10 @@ Komm zu dem Fernsprecher in Wichita Gardens. Es gibt Arbeit.
 Yo! Hier spricht D-Ice von den Red Jacks!
 
 [HM1_C]
-Diese pubertãren Idioten treiben sich hier rum und haben nichts als Knarren und SPANK im Sinn.
+Diese pubertären Idioten treiben sich hier rum und haben nichts als Knarren und SPANK im Sinn.
 
 [HM1_3]
-~g~Die 'Nines' hãngen in ihrem Gebiet in Wichita Gardens rum.
+~g~Die 'Nines' hängen in ihrem Gebiet in Wichita Gardens rum.
 
 [HM2_3]
 Wenn du die Reifen eines Wagens triffst, explodiert der Buggy!
@@ -3348,7 +3348,7 @@ Wenn er außer Reichweite kommt, explodiert der Buggy!
 ~r~Außer Reichweite!
 
 [HM3_1]
-~g~Fahr zur Garage. Aber Vorsicht: Wird der Wagen zu stark beschãdigt, explodiert er!
+~g~Fahr zur Garage. Aber Vorsicht: Wird der Wagen zu stark beschädigt, explodiert er!
 
 [HM3_2]
 ~g~Bring den Wagen zurück. Er muss in 1A Zustand sein. Keine Delle!
@@ -3369,7 +3369,7 @@ TEXT NO LONGER REQUIRED
 ~g~Denk dran: Wird der Wagen zu schwer und zu langsam, fahr in die Garage und lade das Zeug aus.
 
 [HM5_3]
-~r~Du solltest nur einen Baseball-Schlãger verwenden!
+~r~Du solltest nur einen Baseball-Schläger verwenden!
 
 [HM5_4]
 ~r~Deine Kontaktperson ist tot!
@@ -3444,7 +3444,7 @@ Man sagt, du kannst mir bei einigen Problemen helfen. Wenn das so ist, komm zu d
 ~g~Hol den Liebhaber seiner Frau ab.
 
 [MEA4_B6]
-Dazu ist es jetzt zu spãt, Marty. Du hattest deine Chance. Jetzt übernehme ich den Laden hier.
+Dazu ist es jetzt zu spät, Marty. Du hattest deine Chance. Jetzt übernehme ich den Laden hier.
 
 [MEA4_1]
 ~r~Carlos ist tot!
@@ -3471,7 +3471,7 @@ Die CIA scheint sich sehr für SPANK zu interessieren.
 Sie wollen, dass wir das Kartell in Ruhe lassen.
 
 [C_PASS]
-BEDROHUNG AUSGERÃUMT!
+BEDROHUNG AUSGERÄUMT!
 
 [CTUTOR]
 Drücke die ~h~~k~~TOGGLE_SUBMISSIONS~-Taste~w~, um Bürgerwehr Missionen zu aktivieren oder zu deaktivieren.
@@ -3489,7 +3489,7 @@ Mission beendet!
 ~r~Bürgerwehr Mission abgebrochen!
 
 [C_ESCP]
-~r~Der Verdãchtige ist entwischt!
+~r~Der Verdächtige ist entwischt!
 
 [C_TIME]
 ~r~Deine Zeit als Gesetzeshüter ist vorbei!
@@ -3507,13 +3507,13 @@ BÜRGERWEHR BONUS!!
 Gerettet!
 
 [F_FAIL2]
-~r~Du kommst zu spãt!
+~r~Du kommst zu spät!
 
 [A_COMP2]
 Du ermüdest nie!
 
 [RM2_M]
-Wenn du eine Waffe brauchst, komm vorbei und nimm dir aus den Kãsten, was du brauchst.
+Wenn du eine Waffe brauchst, komm vorbei und nimm dir aus den Kästen, was du brauchst.
 
 [HEAL_A]
 Dein ~h~Gesundheit~w~ wird rechts oben auf dem Bildschirm in Orange angezeigt.
@@ -3522,7 +3522,7 @@ Dein ~h~Gesundheit~w~ wird rechts oben auf dem Bildschirm in Orange angezeigt.
 ~1~ von 15!
 
 [FM1_9]
-~g~Da vorne ist die Party. Setz Maria vor dem Gebãude ab.
+~g~Da vorne ist die Party. Setz Maria vor dem Gebäude ab.
 
 [FM1_Y]
 ~w~Das war seit langem mal wieder ein guter Abend. Und du hast mich wirklich gut behandelt, mit Respekt und so.
@@ -3567,7 +3567,7 @@ Komm wieder, wenn du nicht so viel zu tun hast...
 In die Garage nebenan kann 1 Fahrzeug eingestellt werden, wenn du das Spiel speicherst.
 
 [STOCK]
-Nicht vorrãtig
+Nicht vorrätig
 
 [FM1_O]
 ~w~Er ist beim Bahnhof am Chinatown-Ufer, glaube ich.
@@ -3606,10 +3606,10 @@ Aber ich brauch Hilfe von außerhalb der Polizei.
 Falls du interessiert bist... du weißt, wo du mich findest.
 
 [CAM_A]
-Drücke die ~h~~k~~CAMERA_CHANGE_VIEW_ALL_SITUATIONS~-taste~w~, um den ~h~Blickwinkel ~w~zu verãndern, wenn du zu Fuß oder in einem Fahrzeug unterwegs bist.
+Drücke die ~h~~k~~CAMERA_CHANGE_VIEW_ALL_SITUATIONS~-taste~w~, um den ~h~Blickwinkel ~w~zu verändern, wenn du zu Fuß oder in einem Fahrzeug unterwegs bist.
 
 [CAM_B]
-Drücke die ~h~Richtungstaste Oben~w~ und die ~h~Richtungstaste Unten~w~, um den ~h~Blickwinkel ~w~zu verãndern, wenn du zu Fuß oder in einem Fahrzeug unterwegs bist.
+Drücke die ~h~Richtungstaste Oben~w~ und die ~h~Richtungstaste Unten~w~, um den ~h~Blickwinkel ~w~zu verändern, wenn du zu Fuß oder in einem Fahrzeug unterwegs bist.
 
 [KM2_1]
 ~g~Repariere den Wagen. Er muss top aussehen.
@@ -3618,7 +3618,7 @@ Drücke die ~h~Richtungstaste Oben~w~ und die ~h~Richtungstaste Unten~w~, um den
 Joey...
 
 [LM3_6A]
-Na, ein bisschen Nahkampf mit deiner Braut gefãllig?
+Na, ein bisschen Nahkampf mit deiner Braut gefällig?
 
 [LM3_9A]
 Vielleicht gibt's Arbeit für dich.
@@ -3642,22 +3642,22 @@ Park die Karre, mach sie durch Drücken der ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~ 
 Mach die Bombe mit der ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~ scharf. Sie geht hoch, wenn der Wagen angelassen wird.
 
 [BAT1]
-~g~Nimm dir den Schlãger!
+~g~Nimm dir den Schläger!
 
 [EBAL_O]
 Wenn du deine Sache gut machst, gibt's vielleicht noch mehr Jobs für dich. Und jetzt verschwinde!
 
 [HELP9_B]
-Drücke die ~h~~k~~PED_FIREWEAPON~-Taste~w~, um mit dem Prãzisionsgewehr zu ~h~feuern~w~.
+Drücke die ~h~~k~~PED_FIREWEAPON~-Taste~w~, um mit dem Präzisionsgewehr zu ~h~feuern~w~.
 
 [HELP9_C]
-Drücke die ~h~~k~~PED_FIREWEAPON~-Taste~w~, um mit dem Prãzisionsgewehr zu ~h~feuern~w~.
+Drücke die ~h~~k~~PED_FIREWEAPON~-Taste~w~, um mit dem Präzisionsgewehr zu ~h~feuern~w~.
 
 [JM6_8]
-~r~Du hast alle Rãuber verloren!
+~r~Du hast alle Räuber verloren!
 
 [COLT_IN]
-Die Pistole ist jetzt im AmmuNation vorrãtig!
+Die Pistole ist jetzt im AmmuNation vorrätig!
 
 [TAXI2]
 ~r~Die Zeit ist um!
@@ -3687,7 +3687,7 @@ Polizei-Schmiergelder wurde im Versteck angeliefert.
 Gesundheits-Powerups wurde im Versteck angeliefert.
 
 [PAGEB14]
-Adrenalin wurde im Versteck vorrãtig.
+Adrenalin wurde im Versteck vorrätig.
 
 [KM1_4]
 ~g~Du brauchst einen Polizeiwagen für diesen Job!
@@ -3702,7 +3702,7 @@ Er hat eine Imbissbude in Chinatown.
 Hier ist ein Schlüssel für eine Garage.
 
 [RM6_2]
-Darin findest du Bargeld und ein paar 'Requisiten' für alle Fãlle.
+Darin findest du Bargeld und ein paar 'Requisiten' für alle Fälle.
 
 [RM6_3]
 Bis dann.
@@ -3771,7 +3771,7 @@ MEMORY CARD-Steckplatz 1: Datei geschützt.
 ~1~ von 15!
 
 [T4X4_1C]
-~y~PASSIERE~g~ den ersten Checkpoint, dann lãuft die Zeit. ~g~Jeder Checkpoint bringt dir ~y~20 SEKUNDEN~g~.
+~y~PASSIERE~g~ den ersten Checkpoint, dann läuft die Zeit. ~g~Jeder Checkpoint bringt dir ~y~20 SEKUNDEN~g~.
 
 [T4X4_2A]
 ~g~Du hast ~y~2 Minuten~g~, um ~y~12~g~ Checkpoints abzufahren. ~g~Die ~y~REIHENFOLGE IST BELIEBIG.
@@ -3780,13 +3780,13 @@ MEMORY CARD-Steckplatz 1: Datei geschützt.
 ~1~ von 12!
 
 [T4X4_2C]
-~y~PASSIERE~g~ den ersten Checkpoint, dann lãuft die Zeit. ~g~Jeder Checkpoint bringt dir ~y~10 SEKUNDEN~g~.
+~y~PASSIERE~g~ den ersten Checkpoint, dann läuft die Zeit. ~g~Jeder Checkpoint bringt dir ~y~10 SEKUNDEN~g~.
 
 [T4X4_3A]
 ~g~Du hast ~y~5 Minuten~g~, um ~y~20~g~ Checkpoints abzufahren. ~g~Die ~y~REIHENFOLGE IST BELIEBIG.
 
 [T4X4_3B]
-~y~PASSIERE~g~ den ersten Checkpoint, dann lãuft die Zeit. ~g~Jeder Checkpoint bringt dir ~y~15 SEKUNDEN~g~.
+~y~PASSIERE~g~ den ersten Checkpoint, dann läuft die Zeit. ~g~Jeder Checkpoint bringt dir ~y~15 SEKUNDEN~g~.
 
 [T4X4_3C]
 ~1~ von 20!
@@ -3801,7 +3801,7 @@ MEMORY CARD-Steckplatz 1: Datei geschützt.
 ~1~ von 20!
 
 [MM_1_C]
-~g~Das macht 20 Sekunden plus ~y~5 SEKUNDEN~g~ für jeden Checkpoint. ~g~Die Zeit lãuft ~y~AB SOFORT.
+~g~Das macht 20 Sekunden plus ~y~5 SEKUNDEN~g~ für jeden Checkpoint. ~g~Die Zeit läuft ~y~AB SOFORT.
 
 [FM2_14]
 ~r~Du warst zu nah dran und hast Curly aufgeschreckt!
@@ -4023,10 +4023,10 @@ Kriminelle bei Bürgerwehr Mission
 Gelöschte Feuer gesamt
 
 [FEST_LF]
-Lãngster Flug in Dodo
+Längster Flug in Dodo
 
 [FEST_BD]
-Bestzeit Bombenentschãrfung
+Bestzeit Bombenentschärfung
 
 [FEST_RP]
 Bestandene Amokfahrten
@@ -4080,7 +4080,7 @@ Drücke die~h~ ~k~~VEHICLE_FIREWEAPON~-Taste~w~ zum ~h~Zünden der Bombe~w~. Abe
 Drücke die~h~ ~k~~VEHICLE_FIREWEAPON~-Taste~w~ zum ~h~Zünden der Bombe~w~. Aber geh vorher in Deckung!
 
 [KM1_12]
-~g~Bring ihm zum Dojo, aber hãng vorher die Cops ab!
+~g~Bring ihm zum Dojo, aber häng vorher die Cops ab!
 
 [RATNG1]
 Taschendieb
@@ -4143,7 +4143,7 @@ Boss
 ~r~Dein Fahrzeug liegt auf dem Kopf
 
 [JM4_10]
-Okay, Junge. Fahr mich zuerst in die Wãscherei in Chinatown. Ich hab da was zu erledigen.
+Okay, Junge. Fahr mich zuerst in die Wäscherei in Chinatown. Ich hab da was zu erledigen.
 
 [JM4_11]
 Die Waschweiber da haben ihr Schutzgeld nicht bezahlt.
@@ -4191,7 +4191,7 @@ Fahre deinen Wagen in die Lackiererei, um deinen ~h~Fahndungslevel~w~ loszuwerde
 Ja, ich weiß, Toni, ich hab sie gut erzogen. Sie schnurrt, falls du verstehst, was ich meine.
 
 [JM4_5]
-Komm spãter wieder, dann zeigen wir den Kerlen, was Sache ist.
+Komm später wieder, dann zeigen wir den Kerlen, was Sache ist.
 
 [AMMU_A]
 Luigi sagt, du brauchst 'ne Knarre...
@@ -4227,10 +4227,10 @@ Halt eine Uzi im Anschlag, wenn du in ein Fahrzeug steigst. Schau dann nach link
 ~r~KEIN NEUER REKORD!
 
 [RCHELP] { re3 change }
-Drücke die ~k~~VEHICLE_FIREWEAPON~-Taste oder fahre das ferngesteuerte Auto in die Rãder eines Fahrzeugs, um es zu sprengen.
+Drücke die ~k~~VEHICLE_FIREWEAPON~-Taste oder fahre das ferngesteuerte Auto in die Räder eines Fahrzeugs, um es zu sprengen.
 
 [RCHELPA] { re3 change }
-Drücke die ~k~~VEHICLE_FIREWEAPON~-Taste oder fahre das ferngesteuerte Auto in die Rãder eines Fahrzeugs, um es zu sprengen.
+Drücke die ~k~~VEHICLE_FIREWEAPON~-Taste oder fahre das ferngesteuerte Auto in die Räder eines Fahrzeugs, um es zu sprengen.
 
 [RC_1]
 Du hast 2 Minuten, um so viele Diablo-Autos wie möglich zu sprengen!
@@ -4323,10 +4323,10 @@ Dein Job: ~1~ Kolumbianer in 120 Sekunden!
 Dein Job: ~1~ Hoods in 120 Sekunden!
 
 [JM1_A]
-Mir ist langweilig. Wann lãuft hier endlich mal was ab?
+Mir ist langweilig. Wann läuft hier endlich mal was ab?
 
 [JM1_B]
-Gleich, Schãtzchen. Muss nur schnell was erledigen.
+Gleich, Schätzchen. Muss nur schnell was erledigen.
 
 [JM1_C]
 Ich hab 'nen kleinen Job für dich.
@@ -4335,7 +4335,7 @@ Ich hab 'nen kleinen Job für dich.
 Die Forelli Brüder zahlen ihre Schulden nicht.
 
 [JM1_E]
-Ich muss ihnen ein bisschen Respekt einblãuen.
+Ich muss ihnen ein bisschen Respekt einbläuen.
 
 [JM1_F]
 Lips Forelli stopft sich gerade in Marcos Bistro seinen fetten Bauch voll.
@@ -4374,7 +4374,7 @@ Du bist ein armes Würstchen, Amigo.
 Wirf die Kohle rüber!
 
 [CAT2_E]
-Du bist an sich ein fãhiger Bursche.
+Du bist an sich ein fähiger Bursche.
 
 [CAT2_E2]
 Aber du kapierst nicht, dass man mir nicht trauen kann.
@@ -4386,7 +4386,7 @@ Macht den Idioten fertig.
 Bring das Ding in die Luft!!
 
 [HM5_1]
-Yo, Ice hat dich angekündigt. Es gibt hier Regeln. Nur Schlãger. Keine Knarren, keine Autos.
+Yo, Ice hat dich angekündigt. Es gibt hier Regeln. Nur Schläger. Keine Knarren, keine Autos.
 
 [HM5_5]
 Hier geht's um Respekt und Achtung, klar?
@@ -4398,19 +4398,19 @@ Um Waffen aufzunehmen, gehe darüber hinweg. Dies funktioniert nicht, wenn du in
 Parke in der markierten Zone und steig aus. Das Fahrzeug wird dann geschrottet.
 
 [DIAB2_B]
-Eine Bande von Taugenichtsen will mir ans Leder, falls ich sie nicht an meinen Geschãften beteilige.
+Eine Bande von Taugenichtsen will mir ans Leder, falls ich sie nicht an meinen Geschäften beteilige.
 
 [DIAB2_C]
 Aber da sind sie an den Falschen geraten, Amigo.
 
 [DIAB2_D]
-Die haben eine Schwãche für Eiscreme.
+Die haben eine Schwäche für Eiscreme.
 
 [DIAB2_E]
 Hol die Bombe ab, die ich in Harwood versteckt habe,
 
 [DIAB2_F]
-schnapp dir einen normalen Eis-Wagen, der rumfãhrt
+schnapp dir einen normalen Eis-Wagen, der rumfährt
 
 [DIAB2_G]
 und locke diese Idioten mit dem Eis-Jingle in ihr Verderben.
@@ -4449,7 +4449,7 @@ Aber dieser SPANK-Junkie hat die Hecktüren offen gelassen
 und jetzt verteilt sich mein wunderschönes,
 
 [DIAB4_D]
-geschmackvoll fotografiertes Magazin gleichmãßig über ganz Liberty!
+geschmackvoll fotografiertes Magazin gleichmäßig über ganz Liberty!
 
 [DIAB4_E]
 Nimm den Transporter, folge der Spur von 'Donkey Does Dallas' Nr. 1, 2 und 3.
@@ -4479,7 +4479,7 @@ Die Nines bringen mich in die Klemme.
 Die Kerle haben gepanzerte Autos, und jetzt verhökern sie SPANK
 
 [HM2_C]
-an meine Brüder, als wãre das gar nichts.
+an meine Brüder, als wäre das gar nichts.
 
 [HM2_D]
 Auf dem Weg steht ein Wagen geparkt.
@@ -4497,10 +4497,10 @@ Wenn ich die Karre verliere, stehe ich als Trottel da.
 Hol meinen Wagen ab und bring ihn in die Werkstatt in St. Mark's.
 
 [HM3_D]
-Die sollen die Bombe da entschãrfen.
+Die sollen die Bombe da entschärfen.
 
 [HM3_E]
-Die Uhr tickt und die Drãhte sind locker.
+Die Uhr tickt und die Drähte sind locker.
 
 [HM3_F]
 Ein Schlagloch zuviel, und das Ding geht hoch.
@@ -4524,7 +4524,7 @@ Du kannst das Zeug in einer meiner Garagen abladen.
 Platin ist verdammt schwer. Dein Auto wird etwas langsamer laufen.
 
 [HM4_H]
-Also, lade regelmãßig etwas davon in einer Garage ab.
+Also, lade regelmäßig etwas davon in einer Garage ab.
 
 [HM5_A]
 Die Nines sind nur noch ein versprengter Haufen...
@@ -4542,10 +4542,10 @@ Eine Gang von denen gegen zwei von uns. Oder vielmehr...
 zwei von euch.
 
 [HM5_F]
-Ich wãre ja dabei, aber...
+Ich wäre ja dabei, aber...
 
 [HM5_G]
-ich hab noch drei Monate Bewãhrung,
+ich hab noch drei Monate Bewährung,
 
 [HM5_H]
 verstehst du, was ich meine?
@@ -4566,10 +4566,10 @@ Mir gehört die Bitchin' Dog Food Fleischfabrik um die Ecke.
 Ich hab Geldsorgen, aber wer hat die nicht, was?
 
 [MEA1_E]
-Ich treff mich spãter mit meinem Banker.
+Ich treff mich später mit meinem Banker.
 
 [MEA1_F]
-Das ist ein linker Sãger, der mir dauernd die Kreditraten raufsetzt, um sich 'ne Scheibe abzuschneiden.
+Das ist ein linker Säger, der mir dauernd die Kreditraten raufsetzt, um sich 'ne Scheibe abzuschneiden.
 
 [MEA1_G]
 Nimm mein Auto, hol ihn ab und bring ihn hierher.
@@ -4581,7 +4581,7 @@ Ich habe eine kleine Überraschung für diesen Blutsauger!!
 Ich hab Diebe angeheuert, um in meine Wohnung einzubrechen.
 
 [MEA2_C]
-Jetzt drohen diese Dreckskerle, sie erzãhlen alles der Versicherung,
+Jetzt drohen diese Dreckskerle, sie erzählen alles der Versicherung,
 
 [MEA2_D]
 wenn ich sie nicht beteilige.
@@ -4617,7 +4617,7 @@ Mist, ich steck in der Klemme!
 Meine Frau hatte was mit einem Typen, dem ich Geld schulde.
 
 [MEA4_C]
-Der ist jetzt ziemlich sauer und will sich rãchen!
+Der ist jetzt ziemlich sauer und will sich rächen!
 
 [MEA4_E]
 Der denkt, er kann mich erpressen...
@@ -4632,7 +4632,7 @@ dass auch dieser gute Mann als Hundefutter enden wird.
 WILLKOMMEN IN
 
 [HM1_2]
-~g~Besorg dir ein Fahrzeug. Beachte: Hier zãhlt nur die Uzi!
+~g~Besorg dir ein Fahrzeug. Beachte: Hier zählt nur die Uzi!
 
 [HELP8_B]
 Drücke die ~h~~k~~PED_SNIPER_ZOOM_IN~-Taste~w~ zum ~h~Heranzoomen~w~ mit dem Gewehr, und die ~h~~k~~PED_SNIPER_ZOOM_OUT~-Taste~w~ zum ~h~Wegzoomen~w~.
@@ -4662,7 +4662,7 @@ Dann können wir uns ein bisschen unterhalten.
 Wenn du 'ne Knarre brauchst, geh zum Hintereingang vom AmmuNation gegenüber der U-Bahn.
 
 [LOVE4_7]
-~g~Es gibt einen Bauhof auf Staunton Island. Vielleicht haben sie das Pãckchen dorthin gebracht.
+~g~Es gibt einen Bauhof auf Staunton Island. Vielleicht haben sie das Päckchen dorthin gebracht.
 
 [LOVE4_8]
 ~g~Du brauchst ein Auto, um die Garage zu öffnen.
@@ -4674,7 +4674,7 @@ EINKÜNFTE: $~1~
 ~r~Salvatore hat sich in Luigis Club abgesetzt!
 
 [AM1_6]
-~g~Wenn du vor Luigis Club rumhãngst, bemerken dich die Mafiosi!
+~g~Wenn du vor Luigis Club rumhängst, bemerken dich die Mafiosi!
 
 [TM2_3]
 ~g~Das ist eine Falle! Nimm sie dir alle vor!
@@ -4701,7 +4701,7 @@ Hier Maria. Das mit dem Wagen ist eine Falle! Komm zu dem Steg südlich der Call
 Hi, ich bin Joey.
 
 [LM3_9]
-Luigi sagt, du bist verlãsslich. Also komm spãter wieder.
+Luigi sagt, du bist verlässlich. Also komm später wieder.
 
 [KM3_5]
 ~g~Drück die Hupe, damit der Deal in Gang kommt.
@@ -4722,7 +4722,7 @@ LOVES VERSCHWINDEN
 ~g~Das Kartell wurde angegriffen. Die Aktentasche wurde nicht sichergestellt.
 
 [KM3_12]
-~g~Nimm dir sãmtliche Kolumbianer vor, zerstöre die Fahrzeuge und stell die Aktentasche sicher.
+~g~Nimm dir sämtliche Kolumbianer vor, zerstöre die Fahrzeuge und stell die Aktentasche sicher.
 
 [KM3_13]
 ~g~Bring die Aktentasche ins Casino.
@@ -4746,7 +4746,7 @@ Du bist neu in Liberty, aber du hast bereits eine guten Ruf auf der Straße.
 Bei der alten Schulhalle nahe der Callahan Bridge findet ein Rennen statt.
 
 [DIAB1_F]
-Besorg dir 'nen fahrbaren Untersatz. Wer als erster alle Checkpoints abfãhrt, ist Sieger.
+Besorg dir 'nen fahrbaren Untersatz. Wer als erster alle Checkpoints abfährt, ist Sieger.
 
 [HM2_1] { re3 change }
 Zerstöre die gepanzerten Fahrzeuge mit den Buggies. Zur Zündung drücke die ~h~~k~~VEHICLE_FIREWEAPON~-Taste~w~.
@@ -4779,16 +4779,16 @@ Kleine Lektion in Sachen Business, mein Freund:
 Hast du eine hochinteressante Ware, wird Gott und die Welt sie dir abjagen wollen...
 
 [LOVE6_C]
-Spezialeinheiten haben die Gegend um meinen Geschãftsfreund und das Pãckchen abgeriegelt.
+Spezialeinheiten haben die Gegend um meinen Geschäftsfreund und das Päckchen abgeriegelt.
 
 [LOVE6_D]
 Mach, dass du hinkommst, nimm den Transporter und lenk sie ab.
 
 [LOVE6_F]
-Beschãftige die Typen, damit er sich absetzen kann.
+Beschäftige die Typen, damit er sich absetzen kann.
 
 [AM3_C]
-Vermutlich ist er in der Bucht draußen, wãhrend du dies liest. Nimm mein Boot und mach seiner Karriere ein Ende!
+Vermutlich ist er in der Bucht draußen, während du dies liest. Nimm mein Boot und mach seiner Karriere ein Ende!
 
 [FESZ_UC]
 ABBRECHEN
@@ -4797,13 +4797,13 @@ ABBRECHEN
 L1, R1-MENÜ WECHSELN
 
 [FEDS_AS]
-;=-AUSWAHL ÃNDERN
+;=-AUSWAHL ÄNDERN
 
 [FEDSAS2]
-<>-AUSWAHL ÃNDERN
+<>-AUSWAHL ÄNDERN
 
 [FEDS_SS]
-L1, R1-AUSWAHL ÃNDERN
+L1, R1-AUSWAHL ÄNDERN
 
 [FEDSSC1]
 ;-SCHNELLER BILDLAUF
@@ -4848,7 +4848,7 @@ TEXT NO LONGER NEEDED
 aber wenn du in mein Büro kommst, könnte ich...
 
 [MEA3_B4]
-Marty will mich sehen? Das muss aber schnell gehen, ich hab nãmlich einen Friseurtermin.
+Marty will mich sehen? Das muss aber schnell gehen, ich hab nämlich einen Friseurtermin.
 
 [KM3_7]
 Das ist eine Falle der Yakuza, Mann!
@@ -4866,7 +4866,7 @@ Memory Card (PS2) in MEMORY CARD-Steckplatz 1: Kein freier Speicherplatz. Bitte 
 DATEI
 
 [FES_ISC]
-IST BESCHÃDIGT
+IST BESCHÄDIGT
 
 [FESZ_TI]
 Z1 SPEICHERN
@@ -4887,10 +4887,10 @@ Laden fehlgeschlagen!
 Spiel wird neu gestartet
 
 [LOVE6_3]
-~g~Du hast ~1~ Sekunden, um zu dem Securicar zurückzukehren, bevor die Mission fehlschlãgt.
+~g~Du hast ~1~ Sekunden, um zu dem Securicar zurückzukehren, bevor die Mission fehlschlägt.
 
 [LOVE6_4]
-~r~Du hast den falschen Securicar abgehãngt!
+~r~Du hast den falschen Securicar abgehängt!
 
 [HELP1]
 Halte in der Mitte der blauen Markierung.
@@ -4956,7 +4956,7 @@ Ich hab 'n Problem. Die wollen mich verscheißern.
 Sehr erfreulich, dass Salvatore nicht mehr unter uns weilt.
 
 [AM2_A2]
-Du bist ein effizienter Mann - das gefãllt mir.
+Du bist ein effizienter Mann - das gefällt mir.
 
 [AM2_B]
 Das ist mein Bruder Kenji.
@@ -4968,7 +4968,7 @@ Asuka hat einen kleinen Job für dich, aber wenn du fertig bist, komm in mein Ca
 Typisch Kenji, immer will er mit meinen Spielsachen spielen.
 
 [AM2_E]
-Mein Spitzel bei der Polizei hat mir gesteckt, dass die Mafia unsere Aktivitãten im Auge behãlt.
+Mein Spitzel bei der Polizei hat mir gesteckt, dass die Mafia unsere Aktivitäten im Auge behält.
 
 [AM2_E2]
 Sie wollen dich aufstöbern.
@@ -4992,7 +4992,7 @@ Komm zu dem Fernsprecher auf dem Liberty Campus.
 Komm zu dem Fernsprecher im South Belleville Park.
 
 [AM4_1D]
-Wir treffen uns im Toilettenhãuschen im Park.
+Wir treffen uns im Toilettenhäuschen im Park.
 
 [HJSTATF]
 Distanz: ~1~Fuß Höhe: ~1~Fuß Saltos: ~1~ Drehungen: ~1~_
@@ -5025,7 +5025,7 @@ Und stiehl ein paar Sachen, damit ich die Versicherung kassieren kann.
 ~w~Meine Girls fragen andauernd nach dir, Salvatore. Du warst so lange nicht mehr bei uns.
 
 [TM3_L]
-~w~Sag ihnen, wenn diese lãstige Geschichte hier vorbei ist,
+~w~Sag ihnen, wenn diese lästige Geschichte hier vorbei ist,
 
 [TM3_M]
 ~w~gehen wir alle in den Club und feiern, okay?
@@ -5070,7 +5070,7 @@ Dieser McAffrey! Der hat mehr Bestechungsgeld kassiert als jeder andere.
 Jetzt denkt er, er wird ehrenhaft entlassen, wenn er als Kronzeuge aussagt.
 
 [RM1_C]
-Er ist einfach ein Verrãter.
+Er ist einfach ein Verräter.
 
 [RM4_B]
 Wir müssen ihn zum Schweigen bringen - für immer.
@@ -5106,7 +5106,7 @@ DU!
 Hey, ganz ruhig, Amigo! De nada! De nada!
 
 [GTAB_F]
-Ich dachte, ich hãtte dich erledigt!
+Ich dachte, ich hätte dich erledigt!
 
 [GTAB_G]
 Nicht schießen, Amigo! Kein Problem. Wir sind alle Freunde. Hier, nimm.
@@ -5118,7 +5118,7 @@ Nicht so memmenhaft!
 Wir haben keine Wahl, Baby!
 
 [GTAB_J]
-Wir haben immer eine Wahl, du dãmlicher Idiot!
+Wir haben immer eine Wahl, du dämlicher Idiot!
 
 [GTAB_K]
 Sorry wegen dem abgedrehten Flittchen, Mann. Die sind doch alle gleich. Por favor?
@@ -5139,7 +5139,7 @@ Dieser Wurm hat meinen Bruder auf dem Gewissen!
 I hab nie einen Yakuza umgebracht!
 
 [GTAB_Q]
-Lügner! Wir alle haben den Kartell-Attentãter gesehen.
+Lügner! Wir alle haben den Kartell-Attentäter gesehen.
 
 [GTAB_R]
 Wir werden euch kolumbianische Hunde alle erledigen!
@@ -5148,7 +5148,7 @@ Wir werden euch kolumbianische Hunde alle erledigen!
 Ich befasse mich mit unserem Freund. Mal sehen, was ich aus ihm rauskriege.
 
 [GTAB_T]
-Komm spãter wieder. Ich werde deine Dienste brauchen.
+Komm später wieder. Ich werde deine Dienste brauchen.
 
 [GTAB_U]
 Bitte, Amigo, lass mich nicht hier bei ihr! Die ist 'n Psycho! Amigo? Hey, AMIIIGO!!!...Aiiieeeeaaargghh!
@@ -5163,7 +5163,7 @@ Du bist eine sichere Bank. So etwas ist selten in diesen schlechten Zeiten.
 ~g~Mit einem Wagen der Kolumbianer kommst du in ihren Unterschlupf rein. Im Norden, in Fort Staunton, findest du einen.
 
 [FM1_Q1]
-~w~Na, kleine Erfrischung gefãllig? Ein bisschen SPANK?
+~w~Na, kleine Erfrischung gefällig? Ein bisschen SPANK?
 
 [FM1_R]
 ~w~Hi, Chico. Nein, nur das übliche.
@@ -5214,7 +5214,7 @@ da hat er dem Kartell deinen Kopf angeboten, um einen Deal mit denen zu machen.
 Das kann ich nicht zulassen. Das ist alles meine Schuld.
 
 [FM4_4B]
-Ich hab ihm erzãhlt, dass wir uns gut verstehen.
+Ich hab ihm erzählt, dass wir uns gut verstehen.
 
 [FM4_5]
 Frag mich nicht wieso. Ich weiß es nicht.
@@ -6081,7 +6081,7 @@ Cinematic-Kamera
 Fahr das Fahrzeug in die Garage!
 
 [KM3_14]
-~r~Du bist gesehen worden. Der Deal fãllt flach!
+~r~Du bist gesehen worden. Der Deal fällt flach!
 
 [EBAL_H]
 Warte hier. Ich gehe rein und rede mit Luigi.
@@ -6099,13 +6099,13 @@ Hier. Hier, nimm.
 Hi. Ich bin Misty.
 
 [LM4_A]
-So ein Mistkerl von den Diablos hat in meinem Gebiet Mãdchen laufen.
+So ein Mistkerl von den Diablos hat in meinem Gebiet Mädchen laufen.
 
 [FM2_B]
-Wir haben einen Verrãter unter uns!
+Wir haben einen Verräter unter uns!
 
 [FM2_C]
-Er verdient kein Geld mit Mãdchen oder Dealen, also wird er Informationen verkaufen.
+Er verdient kein Geld mit Mädchen oder Dealen, also wird er Informationen verkaufen.
 
 [FM3_CC]
 ~w~Komm wieder, wenn du die Kohle hast, Bruder.
@@ -6132,13 +6132,13 @@ Er verdient kein Geld mit Mãdchen oder Dealen, also wird er Informationen verka
 ~r~Das Flugzeug ist zerstört worden!
 
 [LOV4_10]
-~r~Die einzige Spur auf den Verbleib des Pãckchens ist vernichtet worden.
+~r~Die einzige Spur auf den Verbleib des Päckchens ist vernichtet worden.
 
 [KM2_D]
 Unnötig zu sagen, dass wir ihm die Autos schenken müssen, um meine Schuld bei ihm zu begleichen.
 
 [KM4_B]
-Für Lãden, die das Glück haben, unter unserem Schutz zu stehen, ist heute Zahltag.
+Für Läden, die das Glück haben, unter unserem Schutz zu stehen, ist heute Zahltag.
 
 [KM2_E]
 Du musst die Autos auf der Liste besorgen und zu einer Garage hinter dem Parkplatz in Newport bringen.
@@ -6153,7 +6153,7 @@ Ich weiß, dass einer wie du sehr loyal sein kann, wenn das Geld stimmt.
 Aber je mehr Leute, desto größer die Gier.
 
 [LOVE1_C]
-Ein werter Geschãftsfreund, ein alter Asiate,
+Ein werter Geschäftsfreund, ein alter Asiate,
 
 [LOVE1_I]
 wird von irgendwelchen Südamerikanern in Aspatria als Geisel festgehalten.
@@ -6162,10 +6162,10 @@ wird von irgendwelchen Südamerikanern in Aspatria als Geisel festgehalten.
 Ich habe ein Treffen mit ihm vereinbart...
 
 [MEA4_B4]
-Marty schickt dich also? Dem Penner werde ich zeigen, was es heißt, mit mir Geschãfte zu machen.
+Marty schickt dich also? Dem Penner werde ich zeigen, was es heißt, mit mir Geschäfte zu machen.
 
 [MEA4_B5]
-Carl, hi. Ich, ãh, ich brauche noch ein bisschen Zeit, um dein Geld aufzutreiben.
+Carl, hi. Ich, äh, ich brauche noch ein bisschen Zeit, um dein Geld aufzutreiben.
 
 [MEA1_B4]
 Mr Chonks schickt dich also. Wollen wir dem Burschen doch mal einen Besuch abstatten.
@@ -6174,7 +6174,7 @@ Mr Chonks schickt dich also. Wollen wir dem Burschen doch mal einen Besuch absta
 Dann wollen wir doch mal ein paar Leute aufmischen...
 
 [LOVE1_5]
-~g~Hãng hier nicht rum, besorg dir ein Auto der Kolumbianer und rette Loves Geschãftsfreund.
+~g~Häng hier nicht rum, besorg dir ein Auto der Kolumbianer und rette Loves Geschäftsfreund.
 
 [AS1_D]
 ~w~Spiel den Köder und locke die Killerkommandos nach Pine Creek,
@@ -6210,7 +6210,7 @@ Um die Sirenen dieses Fahrzeugs einzuschalten, drücke die ~h~~k~~VEHICLE_HORN~-
 ~w~Oh, hi, Baby.
 
 [AS3_F]
-~w~Das Mãdchen ist ein Naturtalent.
+~w~Das Mädchen ist ein Naturtalent.
 
 [AS3_F1]
 ~w~Sie hat unserem Gast eine kleine Info entlockt.
@@ -6222,7 +6222,7 @@ Um die Sirenen dieses Fahrzeugs einzuschalten, drücke die ~h~~k~~VEHICLE_HORN~-
 ~w~Es ist voll mit Catalinas Giftzeug.
 
 [AS3_H]
-~w~Du entgehst den Security Checks am Flughafen, wenn du dir ein Boot besorgst, zu den Leuchtbojen rausfãhrst
+~w~Du entgehst den Security Checks am Flughafen, wenn du dir ein Boot besorgst, zu den Leuchtbojen rausfährst
 
 [AS3_H1]
 und die Maschine im Anflug abschießt.
@@ -6252,7 +6252,7 @@ Verdammt, da sind sie!! LOS, LADEN!!
 Salvatore Leone wird Luigis Club in zirka drei Stunden verlassen (~1~:~1~).
 
 [LOVE5_C]
-Folge ihm und sorg dafür, dass er und mein Pãckchen wohlbehalten in Pike Creek ankommen.
+Folge ihm und sorg dafür, dass er und mein Päckchen wohlbehalten in Pike Creek ankommen.
 
 [FESZ_SR]
 Speicherung fehlgeschlagen! Bitte Memory Card (PS2) in MEMORY CARD-Steckplatz 1 überprüfen und noch einmal versuchen.
@@ -6339,13 +6339,13 @@ Daten werden gelöscht. Bitte die Memory Card (PS2) in MEMORY CARD-Steckplatz 1 
 Luigi sagt, das soll ich dir geben...
 
 [LM3_G]
-Joey ist einer, den man nicht warten lãsst. Das ist deine Chance.
+Joey ist einer, den man nicht warten lässt. Das ist deine Chance.
 
 [LM5_E]
 Bring so viele wie möglich hin, bevor die Cops ihr ganzes Geld versaufen.
 
 [JM5_C]
-Vor dem Cafe in der Nãhe vom Callahan Point steht ein Auto mit einem Toten drin.
+Vor dem Cafe in der Nähe vom Callahan Point steht ein Auto mit einem Toten drin.
 
 [RM2_B]
 Wir waren zusammen in Nicaragua, als dieses Land noch wusste, was es tut.
@@ -6354,7 +6354,7 @@ Wir waren zusammen in Nicaragua, als dieses Land noch wusste, was es tut.
 Irgendwelche Dreckskerle vom Kartell haben ihn gestern verprügelt und kommen heute wieder, um ihm seine Ware abzunehmen.
 
 [RM2_D1]
-Ich würde es selbst machen, aber meine Bronchien melden sich wieder. Tja, ãh, viel Glück.
+Ich würde es selbst machen, aber meine Bronchien melden sich wieder. Tja, äh, viel Glück.
 
 [CATINF1]
 ~g~Schnapp dir Catalina!
@@ -6366,13 +6366,13 @@ Ich würde es selbst machen, aber meine Bronchien melden sich wieder. Tja, ãh, 
 Spring auf ein Boot und drücke die ~h~~k~~VEHICLE_ENTER_EXIT~-Taste~w~, um hinein zu gelangen.
 
 [BOATIN2]
-Wenn du in der Nãhe eines Bootes bist, kannst du die ~h~~k~~VEHICLE_ENTER_EXIT~-Taste ~w~benutzen, um an Bord zu gelangen.
+Wenn du in der Nähe eines Bootes bist, kannst du die ~h~~k~~VEHICLE_ENTER_EXIT~-Taste ~w~benutzen, um an Bord zu gelangen.
 
 [BOATIN3]
 Spring auf ein Boot und drücke die ~h~~k~~VEHICLE_ENTER_EXIT~-Taste~w~, um hinein zu gelangen.
 
 [BOATIN4]
-Wenn du in der Nãhe eines Bootes bist, kannst du die ~h~~k~~VEHICLE_ENTER_EXIT~-Taste ~w~benutzen, um an Bord zu gelangen.
+Wenn du in der Nähe eines Bootes bist, kannst du die ~h~~k~~VEHICLE_ENTER_EXIT~-Taste ~w~benutzen, um an Bord zu gelangen.
 
 [JM6]
 'DIE FLUCHT'
@@ -6399,7 +6399,7 @@ Wenn du in der Nãhe eines Bootes bist, kannst du die ~h~~k~~VEHICLE_ENTER_EXIT~
 'GTA'
 
 [AS3]
-'DER ABFANGJÃGER'
+'DER ABFANGJÄGER'
 
 [RM2]
 'DAS WAFFENARSENAL'
@@ -6423,16 +6423,16 @@ Wenn du in der Nãhe eines Bootes bist, kannst du die ~h~~k~~VEHICLE_ENTER_EXIT~
 'ROCK'N ROLL MIT RUMPO'
 
 [RM2_E1]
-Unglaublich, dass die feigen Sãcke mich wieder ohne ausreichenden Schutz ins Gefecht schicken.
+Unglaublich, dass die feigen Säcke mich wieder ohne ausreichenden Schutz ins Gefecht schicken.
 
 [GREN_1]
-Je lãnger du die ~h~~k~~PED_FIREWEAPON~-Taste~w~ gedrückt hãltst, desto weiter kannst du die Granate werfen.
+Je länger du die ~h~~k~~PED_FIREWEAPON~-Taste~w~ gedrückt hältst, desto weiter kannst du die Granate werfen.
 
 [GREN_2]
-Je lãnger du die ~h~~k~~PED_FIREWEAPON~-Taste~w~ gedrückt hãltst, desto weiter kannst du die Granate werfen.
+Je länger du die ~h~~k~~PED_FIREWEAPON~-Taste~w~ gedrückt hältst, desto weiter kannst du die Granate werfen.
 
 [GREN_3]
-Je lãnger du die ~h~~k~~PED_FIREWEAPON~-Taste~w~ gedrückt hãltst, desto weiter kannst du die Granate werfen.
+Je länger du die ~h~~k~~PED_FIREWEAPON~-Taste~w~ gedrückt hältst, desto weiter kannst du die Granate werfen.
 
 [LOVE4_G]
 Die Maschine mit meiner Ware steht im Zollhangar.
@@ -6495,7 +6495,7 @@ Neuer Motor und neue Lackierung. Die Cops werden dich nicht identifizieren!
 Warum nicht ein Taxi 'ausleihen', um dir was dazu zu verdienen...?
 
 [TAXIH1]
-Halte neben einem gehighlighteten Fußgãnger, um ihn einsteigen zu lassen, dann bringe ihn rechtzeitig an sein Fahrtziel.
+Halte neben einem gehighlighteten Fußgänger, um ihn einsteigen zu lassen, dann bringe ihn rechtzeitig an sein Fahrtziel.
 
 [LM5_7]
 ~g~Wenn weniger als vier Girls bei dem ~p~Polizeiball~g~ auftauchen, wird Luigi sauer!
@@ -6510,13 +6510,13 @@ Halte neben einem gehighlighteten Fußgãnger, um ihn einsteigen zu lassen, dann
 Sorry, Baby.
 
 [BETRA_B]
-Ich bin ein anspruchsvolles Mãdchen und du...
+Ich bin ein anspruchsvolles Mädchen und du...
 
 [BETRA_C]
 ... du bist ein kleiner Fisch.
 
 [JAILB_C]
-Noch gibt es keine nãheren Informationen zu den Hãftlingen, die mit dem Konvoi transportiert wurden,
+Noch gibt es keine näheren Informationen zu den Häftlingen, die mit dem Konvoi transportiert wurden,
 
 [JAILB_E]
 Der Konvoi war am frühen Morgen vom Polizei-Hauptquartier aus
@@ -6570,10 +6570,10 @@ Diese Memory Card (PS2) ist bereits formatiert.
 >
 
 [FEDSAS3]
-- AUSWAHL ÃNDERN
+- AUSWAHL ÄNDERN
 
 [FEDSAS4]
-;=<> - AUSWAHL ÃNDERN
+;=<> - AUSWAHL ÄNDERN
 
 [SPRAY_4] { re3 change }
 ~h~~k~~VEHICLE_FIREWEAPON~-Taste ~w~benutzen, um die Wasserkanone abzufeuern.
@@ -6594,7 +6594,7 @@ NICK LOVE
 Liberty City ist heute vom Schrecken gezeichnet.
 
 [JAILB_A]
-Polizei und Noteinsatzkrãfte arbeiten unter Hochdruck, nachdem heute morgen
+Polizei und Noteinsatzkräfte arbeiten unter Hochdruck, nachdem heute morgen
 
 [JAILB_B]
 ein verheerender Anschlag auf einen Polizeikonvoi verübt wurde.
@@ -6639,13 +6639,13 @@ Ich habe mein Entertainment-Business mit nichts als dem üppigen Inhalt meiner L
 GIRLS:
 
 [PERPIC]
-Versteckte Pãckchen gefunden
+Versteckte Päckchen gefunden
 
 [CO_ONE]
-Verstecktes Pãckchen ~1~ von ~1~
+Verstecktes Päckchen ~1~ von ~1~
 
 [LOVE3_3]
-~g~Das Flugzeug hat ~1~ von 6 Pãckchen abgeworfen.
+~g~Das Flugzeug hat ~1~ von 6 Päckchen abgeworfen.
 
 [FARE11]
 ~g~Fahrziel: ~w~'Baustelle' ~g~in Fort Staunton.
@@ -6681,7 +6681,7 @@ Wetter-Cheat
 "-Taste - ZURÜCK
 
 [RAMP_A]
-ALLE AMOKLÃUFE BEENDET!
+ALLE AMOKLÄUFE BEENDET!
 
 [USJ_ALL]
 ALLE MONSTER-STUNTS ABSOLVIERT!
@@ -6714,7 +6714,7 @@ Jan
 Feb
 
 [MAR]
-Mãr
+Mär
 
 [APR]
 Apr
@@ -6825,7 +6825,7 @@ SUPER-VIERFACH-IRRSINNS-STUNT-BONUS: $~1~
 Salvatore Leone wird Luigis Club in zirka drei Stunden verlassen. (0~1~:~1~)
 
 [IMPEXPP]
-Import-Export Garage, Portland Harbor. Wir haben Bestellungen für verschiedene Fahrzeuge. Nãheres steht auf unserem Schwarzen Brett.
+Import-Export Garage, Portland Harbor. Wir haben Bestellungen für verschiedene Fahrzeuge. Näheres steht auf unserem Schwarzen Brett.
 
 [VANHSTP]
 Willst du noch mehr Securicars aufgebrochen haben? Bring sie zu unserer Garage in Portland Harbor.
@@ -6834,7 +6834,7 @@ Willst du noch mehr Securicars aufgebrochen haben? Bring sie zu unserer Garage i
 Zahlen Bestpreise für Neu- und Gebrauchtwagen. Bring sie zum Kran im Nordosten von Portland Harbor.
 
 [STANDS]
-ZERSTÖRTE ESPRESSOSTÃNDE:
+ZERSTÖRTE ESPRESSOSTÄNDE:
 
 [STASH]
 ~g~Deponiere das SPANK auf der ~p~Baustelle!
@@ -6846,7 +6846,7 @@ Keine Memory Card (PS2) in MEMORY CARD-Steckplatz 1. Trotzdem starten? (JA oder 
 ~g~Das Flugzeug ist jetzt in Reichweite.
 
 [LOVE3_6]
-~r~Die Polizei war vor dir bei den Pãckchen!
+~r~Die Polizei war vor dir bei den Päckchen!
 
 [SIREN_1]
 Um die Sirenen dieses Fahrzeugs einzuschalten, drücke die ~h~~k~~VEHICLE_HORN~-Taste~w~.
@@ -6870,13 +6870,13 @@ Soll die Memory Card (PS2) in MEMORY CARD-Steckplatz 1 wirklich formatiert werde
 Ladevorgang abgeschlossen.
 
 [RM3_5]
-~g~Du hast ~1~ von 6 Pãckchen mit Beweisfotos.
+~g~Du hast ~1~ von 6 Päckchen mit Beweisfotos.
 
 [LOVE3_2]
-~g~Du hast alle Pãckchen. Bring sie zu Donald Love.
+~g~Du hast alle Päckchen. Bring sie zu Donald Love.
 
 [LOVE4_4]
-~g~Bring das Pãckchen zu Donald Love!
+~g~Bring das Päckchen zu Donald Love!
 
 [FEB_SAV]
 Laden
@@ -6894,7 +6894,7 @@ SPIEL LADEN
 Bitte stecken Sie einen Analog Controller (DUALSHOCK#) oder einen Analog Controller (DUALSHOCK#2) in Controller-Anschluss 1, um fortzufahren.
 
 [BET_JB]
-VON CATALINA, SEINER GELIEBTEN, IM STICH GELASSEN, FÜR SCHULDIG BEFUNDEN UND VERURTEILT, BEFINDET ER SICH AUF DEM WEG INS GEFÃNGNIS VON LIBERTY CITY. DOCH IN SEINEM KOPF HÃMMERT EIN GEDANKE... MIT EUCH BIN ICH NOCH NICHT FERTIG!
+VON CATALINA, SEINER GELIEBTEN, IM STICH GELASSEN, FÜR SCHULDIG BEFUNDEN UND VERURTEILT, BEFINDET ER SICH AUF DEM WEG INS GEFÄNGNIS VON LIBERTY CITY. DOCH IN SEINEM KOPF HÄMMERT EIN GEDANKE... MIT EUCH BIN ICH NOCH NICHT FERTIG!
 
 [END_A]
 Die Bewohner von Cedar Grove erholen sich langsam
@@ -6909,13 +6909,13 @@ die sich gestern hier abgespielt haben.
 Clive Denver, ein Augenzeuge, beschrieb der Polizei
 
 [END_E]
-den Tãter, den er zusammen mit einer dunkelhaarigen Frau flüchten sah.
+den Täter, den er zusammen mit einer dunkelhaarigen Frau flüchten sah.
 
 [END_F]
 Hör mal, wir werden sehr viel Spaß miteinander haben. Weißt du,
 
 [END_G]
-ich liebe dich nãmlich. Wirklich, du bist so groß und stark,
+ich liebe dich nämlich. Wirklich, du bist so groß und stark,
 
 [END_H]
 und genau so einen Mann brauche ich.
@@ -6927,7 +6927,7 @@ Jedenfalls - was wollte ich gerade sagen?
 Weiß nicht mehr. Aber du verstehst doch, was ich meine, oder?
 
 [END_K]
-Der Donner von Explosionen erschütterte umliegende Hãuser. Menschen rannten in Deckung.
+Der Donner von Explosionen erschütterte umliegende Häuser. Menschen rannten in Deckung.
 
 [END_L]
 Mehrere Anwohner wurden verletzt, als es in dem Chaos zu einem Schusswechsel
@@ -6936,7 +6936,7 @@ Mehrere Anwohner wurden verletzt, als es in dem Chaos zu einem Schusswechsel
 zwischen Bodeneinheiten und einem Helikopter kam, der über dem Damm kreiste.
 
 [END_N]
-Ja, von hier in den Gãrten konnten wir alles genau beobachten.
+Ja, von hier in den Gärten konnten wir alles genau beobachten.
 
 [END_O]
 Wie sie den Helikopter dann abgeschossen haben,
@@ -6966,7 +6966,7 @@ Ich hab mir 'nen Fingernagel abgebrochen und meine Frisur ist hin!
 Fünfzig Dollar im Eimer!
 
 [PAPER1]
-GANGSTER VON KOMPLIZIN, DIE ER LIEBT, VERRATEN. GERICHT BEFINDET RÃUBER EINSTIMMIG FÜR SCHULDIG.
+GANGSTER VON KOMPLIZIN, DIE ER LIEBT, VERRATEN. GERICHT BEFINDET RÄUBER EINSTIMMIG FÜR SCHULDIG.
 
 [PAPER2]
 ZEHN JAHRE AUS LIEBE!
@@ -6975,10 +6975,10 @@ ZEHN JAHRE AUS LIEBE!
 und es hat sich bisher auch keine kriminelle Vereinigung zu dem Attentat bekannt.
 
 [JAILB_H]
-Die meisten Zeugen kamen ums Leben und die Brücke wurde schwer beschãdigt.
+Die meisten Zeugen kamen ums Leben und die Brücke wurde schwer beschädigt.
 
 [JAILB_I]
-Man geht davon aus, dass auch einige der Hãftlinge bei der sich ereignenden Explosion umkamen.
+Man geht davon aus, dass auch einige der Häftlinge bei der sich ereignenden Explosion umkamen.
 
 [JAILB_J]
 *
@@ -7005,7 +7005,7 @@ Nach links
 Nach rechts
 
 [FEC_PWF]
-Vorwãrts gehen
+Vorwärts gehen
 
 [FEC_PWT]
 Auf Kamera zugehen
@@ -7026,13 +7026,13 @@ Eine Waffe nach rechts
 Ziel fixieren
 
 [FEC_PJP]
-Fußgãnger springen
+Fußgänger springen
 
 [FEC_PSP]
-Fußgãnger sprinten
+Fußgänger sprinten
 
 [FEC_PSH]
-Fußgãnger schießen
+Fußgänger schießen
 
 [FEC_TLF]
 Ein Ziel nach links
@@ -7044,10 +7044,10 @@ Ein Ziel nach rechts
 Kamera hinter Spieler zentrieren
 
 [FEC_SZI]
-Mit Prãzisionsgewehr heranzoomen
+Mit Präzisionsgewehr heranzoomen
 
 [FEC_SZO]
-Mit Prãzisionsgewehr herauszoomen
+Mit Präzisionsgewehr herauszoomen
 
 [FEC_LKL]
 First-Person nach links schauen
@@ -7152,7 +7152,7 @@ Name:
 Spiel-Name:
 
 [FEM_MAP]
-Karte auswãhlen
+Karte auswählen
 
 [FEN_PLS]
 Spieler-Einstellungen
@@ -7326,7 +7326,7 @@ NEUES SPIEL
 SPIEL SPEICHERN
 
 [FET_MAP]
-KARTE AUSWÃHLEN
+KARTE AUSWÄHLEN
 
 [FET_GT]
 SPIEL-TYP
@@ -7353,7 +7353,7 @@ Achtung!
 OK
 
 [FED_CON]
-Löschen bestãtigen
+Löschen bestätigen
 
 [FES_SSC]
 Spiel wurde gespeichert.
@@ -7374,7 +7374,7 @@ Löschen fehlgeschlagen.
 Speichern fehlgeschlagen.
 
 [FEC_LUN]
-Laden fehlgeschlagen. Datei beschãdigt. Bitte löschen.
+Laden fehlgeschlagen. Datei beschädigt. Bitte löschen.
 
 [FEN_PLA]
 Anzahl der Spieler:
@@ -7467,7 +7467,7 @@ Controller-Typ:
 ÜBERNEHMEN
 
 [FES_CSA]
-Wãhlen Sie eine Skin aus der Liste aus:
+Wählen Sie eine Skin aus der Liste aus:
 
 [FES_SKN]
 SKIN-NAME
@@ -7485,7 +7485,7 @@ SPIELER MP3
 Dieses Spiel wirklich speichern?
 
 [FES_CGA]
-Momentan verfügbare Speicherplãtze:
+Momentan verfügbare Speicherplätze:
 
 [FES_SCG]
 Laufendes Spiel speichern?
@@ -7497,16 +7497,16 @@ Spiel laden und weiterspielen?
 Feuern
 
 [FEC_NWE]
-Nãchste Waffe
+Nächste Waffe
 
 [FEC_PWE]
 Vorherige Waffe
 
 [FEC_FOR]
-Vorwãrts
+Vorwärts
 
 [FEC_BAC]
-Rückwãrts
+Rückwärts
 
 [FEC_LEF]
 Links
@@ -7530,7 +7530,7 @@ Radio
 Spezialmission
 
 [FEC_CMR]
-Blickwinkel ãndern
+Blickwinkel ändern
 
 [FEC_JMP]
 Springen
@@ -7554,7 +7554,7 @@ Nach links schauen
 Nach rechts schauen
 
 [FEC_NTR]
-Nãchstes Ziel
+Nächstes Ziel
 
 [FEC_PTT]
 Vorheriges Ziel
@@ -7599,7 +7599,7 @@ NICHT BEL.
 STEUERUNGSART
 
 [FET_RDK]
-STEUERUNG ÃNDERN
+STEUERUNG ÄNDERN
 
 [FET_AMS]
 MAUS-EINSTELLG.
@@ -7623,10 +7623,10 @@ Geschütz Links
 Geschütz Rechts
 
 [FEC_TFU]
-Geschütz /Dodo aufwãrts
+Geschütz /Dodo aufwärts
 
 [FEC_TFD]
-Geschütz /Dodo abwãrts
+Geschütz /Dodo abwärts
 
 [FEC_MWF]
 RAD AUFW.
@@ -7758,7 +7758,7 @@ WINKLICK
 GTA 3
 
 [WIN_95]
-GTA 3 lãuft nicht unter Windows 95
+GTA 3 läuft nicht unter Windows 95
 
 [WIN_DX]
 GTA 3 benötigt mind. DirectX Version 8.1
@@ -7809,7 +7809,7 @@ STANDARD WIEDERHERST.
 HELLIGKEIT
 
 [FED_TRA]
-UNSCHÃRFE-FX
+UNSCHÄRFE-FX
 
 [FEM_LOD]
 DISTANZ-DARSTELLG.
@@ -7926,10 +7926,10 @@ NUM STERN
 LINKS,RECHTS,MAUSRAD ZUR EINSTLLG.
 
 [FET_CIG]
-RÜCKT. ZUM LÖSCHEN - LMT,RETURN ZUM ÃNDERN
+RÜCKT. ZUM LÖSCHEN - LMT,RETURN ZUM ÄNDERN
 
 [FET_RIG]
-NEUE STEUERUNG FÜR DIESE AKTION WÃHLEN ODER ESC FÜR ABBRUCH
+NEUE STEUERUNG FÜR DIESE AKTION WÄHLEN ODER ESC FÜR ABBRUCH
 
 [FET_EIG]
 KANN DIESER AKTION KEINE STEUERUNG ZUWEISEN
@@ -7986,7 +7986,7 @@ Lösche Daten, bitte warten...
 Lade Daten, bitte warten...
 
 [FEC_SLC]
-Slot ist beschãdigt
+Slot ist beschädigt
 
 [FED_LFL]
 Spiel konnte nicht geladen werden. Das Spiel wird neu gestartet.
