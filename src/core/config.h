@@ -476,6 +476,11 @@ enum Config {
 #undef ANISOTROPIC_FILTERING
 //#define USE_TEXTURE_POOL // not possible because R* used custom RW33
 
+#undef EXTENDED_COLOURFILTER
+#undef EXTENDED_PIPELINES
+#undef SCREEN_DROPLETS
+#undef NEW_RENDERER
+
 #undef FIX_SPRITES
 
 #define PC_PARTICLE
