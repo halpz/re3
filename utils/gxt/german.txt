@@ -8065,7 +8065,7 @@ FREIE KAMERA
 JOYSTICK ERKENNEN
 
 [FEC_JPR]
-Drücken Sie eine beliebige Taste auf dem Joystick den Sie für das Spiel verwenden möchten, und er wird ausgewählt.
+Drücke eine beliebige Taste auf dem Joystick der für das Spiel verwendet werden soll, und er wird ausgewählt.
 
 [FEC_JDE]
 Joystick erkannt
