@@ -812,11 +812,12 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 	if(contactSpeedRight != 0.0f){
 		// exert opposing force
 		right = -contactSpeedRight/wheelsOnGround;
-#ifdef FIX_BUGS
+		// BUG?
 		// contactSpeedRight is independent of framerate but right has timestep as a factor
 		// so we probably have to fix this
-		right *= CTimer::GetTimeStepFix();
-#endif
+		// fixing this causes jittery cars at 15fps, and causes the car to move backwards slowly at 18fps
+		// at 19fps, the effects are gone ...
+		//right *= CTimer::GetTimeStepFix();
 
 		if(wheelStatus == WHEEL_STATUS_BURST){
 			float fwdspeed = Min(contactSpeedFwd, fBurstSpeedMax);
