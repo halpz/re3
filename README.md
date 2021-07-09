@@ -138,7 +138,7 @@ Microsoft recently discontinued its downloads of the DX9 SDK. You can download a
 **If you choose OpenAL on Windows** You must read [Running OpenAL build on Windows](https://github.com/GTAmodding/re3/wiki/Running-OpenAL-build-on-Windows).
 </details>
 
-> :information_source: premake has an `--lto` option if you want the project to be compiled with Link Time Optimization.
+> :information_source: premake has an `--with-lto` option if you want the project to be compiled with Link Time Optimization.
 
 > :information_source: There are various settings in [config.h](https://github.com/GTAmodding/re3/tree/master/src/core/config.h), you may want to take a look there.
 
