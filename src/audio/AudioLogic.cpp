@@ -11401,7 +11401,6 @@ cAudioManager::ProcessMissionAudioSlot(uint8 slot)
 	case LOADING_STATUS_NOT_LOADED:
 		// TODO: LoadMissionAudio
 		SampleManager.LoadPedComment(m_sMissionAudio.m_nSampleIndex[slot]);
-		SampleManager.InitialiseChannel(slot + CHANNEL_MISSION_AUDIO_1, m_sMissionAudio.m_nSampleIndex[slot], SFX_BANK_PED_COMMENTS);
 		SampleManager.SetChannelFrequency(slot + CHANNEL_MISSION_AUDIO_1, SampleManager.GetSampleBaseFrequency(m_sMissionAudio.m_nSampleIndex[slot]));
 		m_sMissionAudio.m_nLoadingStatus[slot] = LOADING_STATUS_LOADED;
 		nFramesUntilFailedLoad[slot] = 0;
