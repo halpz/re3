@@ -480,6 +480,10 @@ CPhysical::ApplySpringDampening(float damping, CVector &springDir, CVector &poin
 {
 	float speedA = DotProduct(speed, springDir);
 	float speedB = DotProduct(GetSpeed(point), springDir);
+#ifdef FIX_BUGS
+	if (speedB == 0.0f)
+		return true;
+#endif
 	float step = Min(CTimer::GetTimeStep(), 3.0f);
 	float impulse = -damping * (speedA + speedB)/2.0f * m_fMass * step * 0.53f;
 
