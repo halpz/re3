@@ -582,6 +582,8 @@ _FindMP3s(void)
 					total_ms = aStream[0]->GetLengthMS();
 					aStream[0]->Close();
 
+					OutputDebugString(fd.cFileName);
+					
 					pList->pNext = new tMP3Entry;
 					
 					tMP3Entry *e = pList->pNext;
