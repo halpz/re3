@@ -4390,7 +4390,11 @@ CTheScripts::SwitchToMission(int32 mission)
 	CTimer::Suspend();
 	int offset = CTheScripts::MultiScriptArray[mission];
 	CFileMgr::ChangeDir("\\");
+#ifdef USE_DEBUG_SCRIPT_LOADER
+	int handle = open_script();
+#else
 	int handle = CFileMgr::OpenFile("data\\main.scm", "rb");
+#endif
 	CFileMgr::Seek(handle, offset, 0);
 	CFileMgr::Read(handle, (const char*)&CTheScripts::ScriptSpace[SIZE_MAIN_SCRIPT], SIZE_MISSION_SCRIPT);
 	CFileMgr::CloseFile(handle);
