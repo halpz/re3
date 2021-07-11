@@ -39,7 +39,7 @@ target_compile_definitions(${EXECUTABLE}
     PRIVATE
         $<IF:$<CONFIG:DEBUG>,DEBUG,NDEBUG>
         LIBRW
-        ${PROJECT}_NO_AUTOLINK
+        CMAKE_NO_AUTOLINK
 )
 
 if(LIBRW_PLATFORM_D3D9)
