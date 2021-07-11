@@ -340,6 +340,7 @@ enum Config {
 #		define CUTSCENE_BORDERS_SWITCH
 #		define MULTISAMPLING		// adds MSAA option
 #		define INVERT_LOOK_FOR_PAD // add bInvertLook4Pad from VC
+#		define PED_CAR_DENSITY_SLIDERS
 #	endif
 #endif
 
@@ -510,6 +511,7 @@ enum Config {
 #undef CUTSCENE_BORDERS_SWITCH
 #undef MULTISAMPLING
 #undef INVERT_LOOK_FOR_PAD
+#undef PED_CAR_DENSITY_SLIDERS
 
 #undef USE_DEBUG_SCRIPT_LOADER
 #undef USE_MEASUREMENTS_IN_METERS

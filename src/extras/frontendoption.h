@@ -40,6 +40,8 @@ typedef void (*ReturnPrevPageFunc)();
 typedef void (*ChangeFunc)(int8 before, int8 after); // called after updating the value.
 												// only called on enter if onlyApplyOnEnter set, otherwise called on every value change
 
+typedef void (*ChangeFuncFloat)(float before, float after); // called after updating the value.
+
 // for dynamic options
 typedef wchar* (*DrawFunc)(bool* disabled, bool userHovering); // you must return a pointer for right text.
 															// you can also set *disabled if you want to gray it out.

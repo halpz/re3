@@ -55,7 +55,7 @@ bool CPopulation::ms_bGivePedsWeapons;
 int32 CPopulation::m_AllRandomPedsThisType = -1;
 float CPopulation::PedDensityMultiplier = 1.0f;
 uint32 CPopulation::ms_nTotalMissionPeds;
-int32 CPopulation::MaxNumberOfPedsInUse = 25;
+int32 CPopulation::MaxNumberOfPedsInUse = DEFAULT_MAX_NUMBER_OF_PEDS;
 uint32 CPopulation::ms_nNumCivMale;
 uint32 CPopulation::ms_nNumCivFemale;
 uint32 CPopulation::ms_nNumCop;
@@ -1122,12 +1122,6 @@ CPopulation::ManagePopulation(void)
 			}
 
 			float dist = (ped->GetPosition() - playerPos).Magnitude2D();
-#ifdef SQUEEZE_PERFORMANCE
-			if (dist > 50.f)
-				ped->bUsesCollision = false;
-			else
-				ped->bUsesCollision = true;
-#endif
 
 			bool pedIsFarAway = false;
 			if (PedCreationDistMultiplier() * (PED_REMOVE_DIST_SPECIAL * TheCamera.GenerationDistMultiplier) < dist

@@ -23,6 +23,6 @@ void CIniFile::LoadIniFile()
 		CarNumberMultiplier = Min(3.0f, Max(0.5f, CarNumberMultiplier));
 		CFileMgr::CloseFile(f);
 	}
-	CPopulation::MaxNumberOfPedsInUse = 25.0f * PedNumberMultiplier;
-	CCarCtrl::MaxNumberOfCarsInUse = 12.0f * CarNumberMultiplier;
+	CPopulation::MaxNumberOfPedsInUse = DEFAULT_MAX_NUMBER_OF_PEDS * PedNumberMultiplier;
+	CCarCtrl::MaxNumberOfCarsInUse = DEFAULT_MAX_NUMBER_OF_CARS * CarNumberMultiplier;
 }

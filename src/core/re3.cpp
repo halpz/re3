@@ -41,6 +41,9 @@
 #include "Camera.h"
 #include "MBlur.h"
 #include "ControllerConfig.h"
+#include "CarCtrl.h"
+#include "Population.h"
+#include "IniFile.h"
 
 #ifdef DETECT_JOYSTICK_MENU
 #include "crossplatform.h"
@@ -533,20 +536,27 @@ bool LoadINISettings()
 				
 			// CFO check
 			if (option.m_Action < MENUACTION_NOTHING && option.m_CFO->save) {
-				// CFO only supports saving uint8 right now
-
 				// Migrate from old .ini to new .ini
-				if (migrate && ReadIniIfExists("FrontendOptions", option.m_CFO->save, option.m_CFO->value))
+				// Old values can only be int8, new ones can contain float if it is slider
+				if (migrate && ReadIniIfExists("FrontendOptions", option.m_CFO->save, (int8*)option.m_CFO->value))
 					cfg.remove("FrontendOptions", option.m_CFO->save);
+				else if (option.m_Action == MENUACTION_CFO_SLIDER)
+					ReadIniIfExists(option.m_CFO->saveCat, option.m_CFO->save, (float*)option.m_CFO->value);
 				else
-					ReadIniIfExists(option.m_CFO->saveCat, option.m_CFO->save, option.m_CFO->value);
+					ReadIniIfExists(option.m_CFO->saveCat, option.m_CFO->save, (int8*)option.m_CFO->value);
 
 				if (option.m_Action == MENUACTION_CFO_SELECT) {
-					option.m_CFOSelect->lastSavedValue = option.m_CFOSelect->displayedValue = *option.m_CFO->value;
+					option.m_CFOSelect->lastSavedValue = option.m_CFOSelect->displayedValue = *(int8*)option.m_CFO->value;
 				}
 			}
 		}
 	}
+#endif
+
+	// Fetched in above block, but needs evaluation
+#ifdef PED_CAR_DENSITY_SLIDERS
+	CPopulation::MaxNumberOfPedsInUse = DEFAULT_MAX_NUMBER_OF_PEDS * CIniFile::PedNumberMultiplier;
+	CCarCtrl::MaxNumberOfCarsInUse = DEFAULT_MAX_NUMBER_OF_CARS * CIniFile::CarNumberMultiplier;
 #endif
 
 	return true;
@@ -623,8 +633,10 @@ void SaveINISettings()
 				break;
 				
 			if (option.m_Action < MENUACTION_NOTHING && option.m_CFO->save) {
-				// Beware: CFO only supports saving uint8 right now
-				StoreIni(option.m_CFO->saveCat, option.m_CFO->save, *option.m_CFO->value);
+				if (option.m_Action == MENUACTION_CFO_SLIDER)
+					StoreIni(option.m_CFO->saveCat, option.m_CFO->save, *(float*)option.m_CFO->value);
+				else
+					StoreIni(option.m_CFO->saveCat, option.m_CFO->save, *(int8*)option.m_CFO->value);
 			}
 		}
 	}

@@ -26,6 +26,9 @@
 #include "ModelInfo.h"
 #include "Pad.h"
 #include "ControllerConfig.h"
+#include "IniFile.h"
+#include "CarCtrl.h"
+#include "Population.h"
 
 // Menu screens array is at the bottom of the file.
 
@@ -61,6 +64,15 @@
 	#define DUALPASS_SELECTOR MENUACTION_CFO_SELECT, "FEM_2PR", { new CCFOSelect((int8*)&gPS2alphaTest, "Graphics", "PS2AlphaTest", off_on, 2, false) },
 #else
 	#define DUALPASS_SELECTOR 
+#endif
+
+#ifdef PED_CAR_DENSITY_SLIDERS
+	// 0.2f - 3.4f makes it possible to have 1.0f somewhere inbetween
+	#define DENSITY_SLIDERS \
+		MENUACTION_CFO_SLIDER, "FEM_PED", { new CCFOSlider(&CIniFile::PedNumberMultiplier, "Display", "PedDensity", 0.2f, 3.4f, PedDensityChange) }, \
+		MENUACTION_CFO_SLIDER, "FEM_CAR", { new CCFOSlider(&CIniFile::CarNumberMultiplier, "Display", "CarDensity", 0.2f, 3.4f, CarDensityChange) }, 
+#else
+	#define DENSITY_SLIDERS 
 #endif
 
 #ifdef NO_ISLAND_LOADING
@@ -145,6 +157,9 @@ void RestoreDefDisplay(int8 action) {
 	#ifdef FREE_CAM
 		TheCamera.bFreeCam = false;
 	#endif
+	#ifdef PED_CAR_DENSITY_SLIDERS
+		CIniFile::LoadIniFile();
+	#endif
 	#ifdef GRAPHICS_MENU_OPTIONS // otherwise Frontend will handle those
 		CMenuManager::m_PrefsBrightness = 256;
 		CMenuManager::m_PrefsLOD = 1.2f;
@@ -192,6 +207,16 @@ void IslandLoadingAfterChange(int8 before, int8 after) {
 	}
 
 	FrontEndMenuManager.SetHelperText(0);
+}
+#endif
+
+#ifdef PED_CAR_DENSITY_SLIDERS
+void PedDensityChange(float before, float after) {
+	CPopulation::MaxNumberOfPedsInUse = DEFAULT_MAX_NUMBER_OF_PEDS * after;
+}
+
+void CarDensityChange(float before, float after) {
+	CCarCtrl::MaxNumberOfCarsInUse = DEFAULT_MAX_NUMBER_OF_CARS * after;
 }
 #endif
 
@@ -437,6 +462,7 @@ CMenuScreenCustom aScreens[MENUPAGES] = {
 		DUALPASS_SELECTOR
 		CUTSCENE_BORDERS_TOGGLE
 		FREE_CAM_TOGGLE
+		DENSITY_SLIDERS
 		POSTFX_SELECTORS
 		// re3.cpp inserts here pipeline selectors if neo/neo.txd exists and EXTENDED_PIPELINES defined
 		MENUACTION_RESTOREDEF,	"FET_DEF", { nil, SAVESLOT_NONE, MENUPAGE_DISPLAY_SETTINGS },
@@ -449,6 +475,7 @@ CMenuScreenCustom aScreens[MENUPAGES] = {
 		MENUACTION_DRAWDIST,	"FEM_LOD", { nil, SAVESLOT_NONE, MENUPAGE_DISPLAY_SETTINGS },
 		CUTSCENE_BORDERS_TOGGLE
 		FREE_CAM_TOGGLE
+		DENSITY_SLIDERS
 		MENUACTION_SUBTITLES,	"FED_SUB", { nil, SAVESLOT_NONE, MENUPAGE_DISPLAY_SETTINGS },
 		MENUACTION_CFO_DYNAMIC,	"FET_DEF", { new CCFODynamic(nil, nil, nil, nil, RestoreDefDisplay) },
 		MENUACTION_CHANGEMENU,	"FEDS_TB", { nil, SAVESLOT_NONE, MENUPAGE_NONE },

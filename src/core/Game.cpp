@@ -409,7 +409,11 @@ bool CGame::Initialise(const char* datFile)
 #endif
 
 #ifndef GTA_PS2
-	CIniFile::LoadIniFile();
+#ifdef PED_CAR_DENSITY_SLIDERS
+	// Load density values from gta3.ini only if our re3.ini have them 1.f
+	if (CIniFile::PedNumberMultiplier == 1.f && CIniFile::CarNumberMultiplier == 1.f)
+#endif
+		CIniFile::LoadIniFile();
 #endif
 
 	currLevel = LEVEL_INDUSTRIAL;
