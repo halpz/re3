@@ -447,8 +447,16 @@ cAudioManager::ServiceSoundEffects()
 #endif
 	m_bFifthFrameFlag = (m_FrameCounter++ % 5) == 0;
 	if (m_nUserPause && !m_nPreviousUserPause) {
-		for (int32 i = 0; i < NUM_CHANNELS; i++)
+		for (int32 i = 0; i < NUM_CHANNELS_GENERIC; i++)
 			SampleManager.StopChannel(i);
+
+		SampleManager.SetChannelFrequency(CHANNEL_POLICE_RADIO, 0);
+		SampleManager.SetChannelFrequency(CHANNEL_MISSION_AUDIO_1, 0);
+		SampleManager.SetChannelFrequency(CHANNEL_MISSION_AUDIO_2, 0);
+
+		// ps2 code just stops the sound here for some reason
+		//SampleManager.StopChannel(CHANNEL_MISSION_AUDIO_1);
+		//SampleManager.StopChannel(CHANNEL_MISSION_AUDIO_2);
 
 		ClearRequestedQueue();
 		if (m_nActiveSampleQueue) {
