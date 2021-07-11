@@ -9585,19 +9585,19 @@ CPed::Say(uint16 audio, int32 time)
 void
 CPed::Save(uint8*& buf)
 {
-	SkipSaveBuf(buf, 52);
+	ZeroSaveBuf(buf, 52);
 	CopyToBuf(buf, GetPosition().x);
 	CopyToBuf(buf, GetPosition().y);
 	CopyToBuf(buf, GetPosition().z);
-	SkipSaveBuf(buf, 288);
+	ZeroSaveBuf(buf, 288);
 	CopyToBuf(buf, CharCreatedBy);
-	SkipSaveBuf(buf, 499);
+	ZeroSaveBuf(buf, 499);
 	CopyToBuf(buf, m_fHealth);
 	CopyToBuf(buf, m_fArmour);
-	SkipSaveBuf(buf, 172);
+	ZeroSaveBuf(buf, 172);
 	for (int i = 0; i < 10; i++) // has to be hardcoded
 		m_weapons[i].Save(buf);
-	SkipSaveBuf(buf, 252);
+	ZeroSaveBuf(buf, 252);
 }
 
 void

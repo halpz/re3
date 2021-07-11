@@ -25,6 +25,12 @@
 #include "Coronas.h"
 #include "SaveBuf.h"
 
+#ifdef COMPATIBLE_SAVES
+#define SCRIPTPATHS_SAVE_SIZE 0x9C
+#else
+#define SCRIPTPATHS_SAVE_SIZE sizeof(aArray)
+#endif
+
 CPlaneTrail CPlaneTrails::aArray[6];
 RwImVertexIndex TrailIndices[32] = {
 	0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9,
@@ -1268,14 +1274,34 @@ INITSAVEBUF
 		aArray[i].Clear();
 
 	for (int32 i = 0; i < 3; i++) {
+#ifdef COMPATIBLE_SAVES
+		ReadSaveBuf(&aArray[i].m_numNodes, buf);
+		SkipSaveBuf(buf, 4);
+		ReadSaveBuf(&aArray[i].m_fTotalLength, buf);
+		ReadSaveBuf(&aArray[i].m_fSpeed, buf);
+		ReadSaveBuf(&aArray[i].m_fPosition, buf);
+		ReadSaveBuf(&aArray[i].m_fObjectLength, buf);
+		ReadSaveBuf(&aArray[i].m_state, buf);
+#else
 		ReadSaveBuf(&aArray[i], buf);
+#endif
 
 		for (int32 j = 0; j < 6; j++) {
+#ifdef COMPATIBLE_SAVES
+			aArray[i].m_pObjects[j] = nil;
+			int32 tmp;
+			ReadSaveBuf(&tmp, buf);
+			if (tmp != 0) {
+				aArray[i].m_pObjects[j] = CPools::GetObjectPool()->GetSlot(tmp - 1);
+				aArray[i].m_pObjects[j]->m_phy_flagA08 = false;
+			}
+#else
 			CScriptPath *pPath = &aArray[i];
 			if (pPath->m_pObjects[j] != nil) {
 				pPath->m_pObjects[j] = CPools::GetObjectPool()->GetSlot((uintptr)pPath->m_pObjects[j] - 1);
 				pPath->m_pObjects[j]->m_phy_flagA08 = false;
 			}
+#endif
 		}
 
 		aArray[i].m_pNode = new CPlaneNode[aArray[i].m_numNodes];
@@ -1287,14 +1313,28 @@ VALIDATESAVEBUF(size)
 }
 
 void CScriptPaths::Save(uint8 *buf, uint32 *size) {
-	*size = sizeof(aArray);
+	*size = SCRIPTPATHS_SAVE_SIZE;
 INITSAVEBUF
 	for (int32 i = 0; i < 3; i++) {
+#ifdef COMPATIBLE_SAVES
+		WriteSaveBuf(buf, aArray[i].m_numNodes);
+		ZeroSaveBuf(buf, 4);
+		WriteSaveBuf(buf, aArray[i].m_fTotalLength);
+		WriteSaveBuf(buf, aArray[i].m_fSpeed);
+		WriteSaveBuf(buf, aArray[i].m_fPosition);
+		WriteSaveBuf(buf, aArray[i].m_fObjectLength);
+		WriteSaveBuf(buf, aArray[i].m_state);
+#else
 		CScriptPath *pPath = WriteSaveBuf(buf, aArray[i]);
+#endif
 
 		for (int32 j = 0; j < 6; j++) {
+#ifdef COMPATIBLE_SAVES
+			WriteSaveBuf(buf, aArray[i].m_pObjects[j] != nil ? CPools::GetObjectPool()->GetJustIndex_NoFreeAssert(aArray[i].m_pObjects[j]) + 1 : 0);
+#else
 			if (pPath->m_pObjects[j] != nil)
 				pPath->m_pObjects[j] = (CObject*)(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert(pPath->m_pObjects[j]) + 1);
+#endif
 		}
 
 		for (int32 j = 0; j < aArray[i].m_numNodes; j++) {

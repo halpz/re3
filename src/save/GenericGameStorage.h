@@ -25,6 +25,11 @@ bool CheckDataNotCorrupt(int32 slot, char *name);
 bool RestoreForStartLoad();
 int align4bytes(int32 size);
 
+#ifdef FIX_INCOMPATIBLE_SAVES
+uint8 GetSaveType(char *savename);
+bool FixSave(int32 slot, uint8 save_type);
+#endif
+
 extern char DefaultPCSaveFileName[260];
 extern char ValidSaveName[260];
 extern char LoadFileName[256];

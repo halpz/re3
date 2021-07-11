@@ -63,14 +63,17 @@ enum
 
 class CStoredCar
 {
+	enum {
+		FLAG_BULLETPROOF = 0x1,
+		FLAG_FIREPROOF = 0x2,
+		FLAG_EXPLOSIONPROOF = 0x4,
+		FLAG_COLLISIONPROOF = 0x8,
+		FLAG_MELEEPROOF = 0x10,
+	};
 	int32 m_nModelIndex;
 	CVector m_vecPos;
 	CVector m_vecAngle;
-	int32 m_bBulletproof : 1;
-	int32 m_bFireproof : 1;
-	int32 m_bExplosionproof : 1;
-	int32 m_bCollisionproof : 1;
-	int32 m_bMeleeproof : 1;
+	int32 m_nFlags;
 	int8 m_nPrimaryColor;
 	int8 m_nSecondaryColor;
 	int8 m_nRadioStation;
@@ -100,7 +103,7 @@ public:
 	bool m_bClosingWithoutTargetCar;
 	bool m_bDeactivated;
 	bool m_bResprayHappened;
-	int m_nTargetModelIndex;
+	int32 m_nTargetModelIndex;
 	CEntity *m_pDoor1;
 	CEntity *m_pDoor2;
 	uint8 m_bDoor1PoolIndex;
