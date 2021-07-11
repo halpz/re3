@@ -37,6 +37,12 @@
 #define MIN_VALID_POSITION (-10000.0f)
 #define DEFAULT_OFFSET (20.0f)
 
+#ifdef COMPATIBLE_SAVES
+#define CRANES_SAVE_SIZE 0x400
+#else
+#define CRANES_SAVE_SIZE sizeof(aCranes)
+#endif
+
 uint32 TimerForCamInterpolation;
 
 uint32 CCranes::CarsCollectedMilitaryCrane;
@@ -634,10 +640,46 @@ void CCranes::Save(uint8* buf, uint32* size)
 {
 	INITSAVEBUF
 
-	*size = 2 * sizeof(uint32) + sizeof(aCranes);
+	*size = 2 * sizeof(uint32) + CRANES_SAVE_SIZE;
 	WriteSaveBuf(buf, NumCranes);
 	WriteSaveBuf(buf, CarsCollectedMilitaryCrane);
 	for (int i = 0; i < NUM_CRANES; i++) {
+#ifdef COMPATIBLE_SAVES
+		int32 tmp = aCranes[i].m_pCraneEntity != nil ? CPools::GetBuildingPool()->GetJustIndex_NoFreeAssert(aCranes[i].m_pCraneEntity) + 1 : 0;
+		WriteSaveBuf(buf, tmp);
+		tmp = aCranes[i].m_pHook != nil ? CPools::GetObjectPool()->GetJustIndex_NoFreeAssert(aCranes[i].m_pHook) + 1 : 0;
+		WriteSaveBuf(buf, tmp);
+		WriteSaveBuf(buf, aCranes[i].m_nAudioEntity);
+		WriteSaveBuf(buf, aCranes[i].m_fPickupX1);
+		WriteSaveBuf(buf, aCranes[i].m_fPickupX2);
+		WriteSaveBuf(buf, aCranes[i].m_fPickupY1);
+		WriteSaveBuf(buf, aCranes[i].m_fPickupY2);
+		WriteSaveBuf(buf, aCranes[i].m_vecDropoffTarget);
+		WriteSaveBuf(buf, aCranes[i].m_fDropoffHeading);
+		WriteSaveBuf(buf, aCranes[i].m_fPickupAngle);
+		WriteSaveBuf(buf, aCranes[i].m_fDropoffAngle);
+		WriteSaveBuf(buf, aCranes[i].m_fPickupDistance);
+		WriteSaveBuf(buf, aCranes[i].m_fDropoffDistance);
+		WriteSaveBuf(buf, aCranes[i].m_fPickupHeight);
+		WriteSaveBuf(buf, aCranes[i].m_fDropoffHeight);
+		WriteSaveBuf(buf, aCranes[i].m_fHookAngle);
+		WriteSaveBuf(buf, aCranes[i].m_fHookOffset);
+		WriteSaveBuf(buf, aCranes[i].m_fHookHeight);
+		WriteSaveBuf(buf, aCranes[i].m_vecHookInitPos);
+		WriteSaveBuf(buf, aCranes[i].m_vecHookCurPos);
+		WriteSaveBuf(buf, aCranes[i].m_vecHookVelocity);
+		tmp = aCranes[i].m_pVehiclePickedUp != nil ? CPools::GetVehiclePool()->GetJustIndex_NoFreeAssert(aCranes[i].m_pVehiclePickedUp) + 1 : 0;
+		WriteSaveBuf(buf, tmp);
+		WriteSaveBuf(buf, aCranes[i].m_nTimeForNextCheck);
+		WriteSaveBuf(buf, aCranes[i].m_nCraneStatus);
+		WriteSaveBuf(buf, aCranes[i].m_nCraneState);
+		WriteSaveBuf(buf, aCranes[i].m_nVehiclesCollected);
+		WriteSaveBuf(buf, aCranes[i].m_bIsCrusher);
+		WriteSaveBuf(buf, aCranes[i].m_bIsMilitaryCrane);
+		WriteSaveBuf(buf, aCranes[i].m_bWasMilitaryCrane);
+		WriteSaveBuf(buf, aCranes[i].m_bIsTop);
+		ZeroSaveBuf(buf, 1);
+#else
 		CCrane *pCrane = WriteSaveBuf(buf, aCranes[i]);
 		if (pCrane->m_pCraneEntity != nil)
 			pCrane->m_pCraneEntity = (CBuilding*)(CPools::GetBuildingPool()->GetJustIndex_NoFreeAssert(pCrane->m_pCraneEntity) + 1);
@@ -645,6 +687,7 @@ void CCranes::Save(uint8* buf, uint32* size)
 			pCrane->m_pHook = (CObject*)(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert(pCrane->m_pHook) + 1);
 		if (pCrane->m_pVehiclePickedUp != nil)
 			pCrane->m_pVehiclePickedUp = (CVehicle*)(CPools::GetVehiclePool()->GetJustIndex_NoFreeAssert(pCrane->m_pVehiclePickedUp) + 1);
+#endif
 	}
 
 	VALIDATESAVEBUF(*size);
@@ -656,8 +699,46 @@ void CCranes::Load(uint8* buf, uint32 size)
 
 	ReadSaveBuf(&NumCranes, buf);
 	ReadSaveBuf(&CarsCollectedMilitaryCrane, buf);
-	for (int i = 0; i < NUM_CRANES; i++)
+	for (int i = 0; i < NUM_CRANES; i++) {
+#ifdef COMPATIBLE_SAVES
+		int32 tmp;
+		ReadSaveBuf(&tmp, buf);
+		aCranes[i].m_pCraneEntity = tmp != 0 ? CPools::GetBuildingPool()->GetSlot(tmp - 1) : nil;
+		ReadSaveBuf(&tmp, buf);
+		aCranes[i].m_pHook = tmp != 0 ? CPools::GetObjectPool()->GetSlot(tmp - 1) : nil;
+		ReadSaveBuf(&aCranes[i].m_nAudioEntity, buf);
+		ReadSaveBuf(&aCranes[i].m_fPickupX1, buf);
+		ReadSaveBuf(&aCranes[i].m_fPickupX2, buf);
+		ReadSaveBuf(&aCranes[i].m_fPickupY1, buf);
+		ReadSaveBuf(&aCranes[i].m_fPickupY2, buf);
+		ReadSaveBuf(&aCranes[i].m_vecDropoffTarget, buf);
+		ReadSaveBuf(&aCranes[i].m_fDropoffHeading, buf);
+		ReadSaveBuf(&aCranes[i].m_fPickupAngle, buf);
+		ReadSaveBuf(&aCranes[i].m_fDropoffAngle, buf);
+		ReadSaveBuf(&aCranes[i].m_fPickupDistance, buf);
+		ReadSaveBuf(&aCranes[i].m_fDropoffDistance, buf);
+		ReadSaveBuf(&aCranes[i].m_fPickupHeight, buf);
+		ReadSaveBuf(&aCranes[i].m_fDropoffHeight, buf);
+		ReadSaveBuf(&aCranes[i].m_fHookAngle, buf);
+		ReadSaveBuf(&aCranes[i].m_fHookOffset, buf);
+		ReadSaveBuf(&aCranes[i].m_fHookHeight, buf);
+		ReadSaveBuf(&aCranes[i].m_vecHookInitPos, buf);
+		ReadSaveBuf(&aCranes[i].m_vecHookCurPos, buf);
+		ReadSaveBuf(&aCranes[i].m_vecHookVelocity, buf);
+		ReadSaveBuf(&tmp, buf);
+		aCranes[i].m_pVehiclePickedUp = tmp != 0 ? CPools::GetVehiclePool()->GetSlot(tmp - 1) : nil;
+		ReadSaveBuf(&aCranes[i].m_nTimeForNextCheck, buf);
+		ReadSaveBuf(&aCranes[i].m_nCraneStatus, buf);
+		ReadSaveBuf(&aCranes[i].m_nCraneState, buf);
+		ReadSaveBuf(&aCranes[i].m_nVehiclesCollected, buf);
+		ReadSaveBuf(&aCranes[i].m_bIsCrusher, buf);
+		ReadSaveBuf(&aCranes[i].m_bIsMilitaryCrane, buf);
+		ReadSaveBuf(&aCranes[i].m_bWasMilitaryCrane, buf);
+		ReadSaveBuf(&aCranes[i].m_bIsTop, buf);
+		SkipSaveBuf(buf, 1);
+#else
 		ReadSaveBuf(&aCranes[i], buf);
+	}
 	for (int i = 0; i < NUM_CRANES; i++) {
 		CCrane *pCrane = &aCranes[i];
 		if (pCrane->m_pCraneEntity != nil)
@@ -666,6 +747,7 @@ void CCranes::Load(uint8* buf, uint32 size)
 			pCrane->m_pHook = CPools::GetObjectPool()->GetSlot((uintptr)pCrane->m_pHook - 1);
 		if (pCrane->m_pVehiclePickedUp != nil)
 			pCrane->m_pVehiclePickedUp = CPools::GetVehiclePool()->GetSlot((uintptr)pCrane->m_pVehiclePickedUp - 1);
+#endif
 	}
 	for (int i = 0; i < NUM_CRANES; i++) {
 		aCranes[i].m_nAudioEntity = DMAudio.CreateEntity(AUDIOTYPE_CRANE, &aCranes[i]);

@@ -50,41 +50,41 @@ void CAutoPilot::RemoveOnePathNode()
 #ifdef COMPATIBLE_SAVES
 void CAutoPilot::Save(uint8*& buf)
 {
-	WriteSaveBuf<int32>(buf, m_nCurrentRouteNode);
-	WriteSaveBuf<int32>(buf, m_nNextRouteNode);
-	WriteSaveBuf<int32>(buf, m_nPrevRouteNode);
-	WriteSaveBuf<int32>(buf, m_nTimeEnteredCurve);
-	WriteSaveBuf<int32>(buf, m_nTimeToSpendOnCurrentCurve);
-	WriteSaveBuf<uint32>(buf, m_nCurrentPathNodeInfo);
-	WriteSaveBuf<uint32>(buf, m_nNextPathNodeInfo);
-	WriteSaveBuf<uint32>(buf, m_nPreviousPathNodeInfo);
-	WriteSaveBuf<uint32>(buf, m_nAntiReverseTimer);
-	WriteSaveBuf<uint32>(buf, m_nTimeToStartMission);
-	WriteSaveBuf<int8>(buf, m_nPreviousDirection);
-	WriteSaveBuf<int8>(buf, m_nCurrentDirection);
-	WriteSaveBuf<int8>(buf, m_nNextDirection);
-	WriteSaveBuf<int8>(buf, m_nCurrentLane);
-	WriteSaveBuf<int8>(buf, m_nNextLane);
-	WriteSaveBuf<uint8>(buf, m_nDrivingStyle);
-	WriteSaveBuf<uint8>(buf, m_nCarMission);
-	WriteSaveBuf<uint8>(buf, m_nTempAction);
-	WriteSaveBuf<uint32>(buf, m_nTimeTempAction);
-	WriteSaveBuf<float>(buf, m_fMaxTrafficSpeed);
-	WriteSaveBuf<uint8>(buf, m_nCruiseSpeed);
+	WriteSaveBuf(buf, m_nCurrentRouteNode);
+	WriteSaveBuf(buf, m_nNextRouteNode);
+	WriteSaveBuf(buf, m_nPrevRouteNode);
+	WriteSaveBuf(buf, m_nTimeEnteredCurve);
+	WriteSaveBuf(buf, m_nTimeToSpendOnCurrentCurve);
+	WriteSaveBuf(buf, m_nCurrentPathNodeInfo);
+	WriteSaveBuf(buf, m_nNextPathNodeInfo);
+	WriteSaveBuf(buf, m_nPreviousPathNodeInfo);
+	WriteSaveBuf(buf, m_nAntiReverseTimer);
+	WriteSaveBuf(buf, m_nTimeToStartMission);
+	WriteSaveBuf(buf, m_nPreviousDirection);
+	WriteSaveBuf(buf, m_nCurrentDirection);
+	WriteSaveBuf(buf, m_nNextDirection);
+	WriteSaveBuf(buf, m_nCurrentLane);
+	WriteSaveBuf(buf, m_nNextLane);
+	WriteSaveBuf(buf, m_nDrivingStyle);
+	WriteSaveBuf(buf, m_nCarMission);
+	WriteSaveBuf(buf, m_nTempAction);
+	WriteSaveBuf(buf, m_nTimeTempAction);
+	WriteSaveBuf(buf, m_fMaxTrafficSpeed);
+	WriteSaveBuf(buf, m_nCruiseSpeed);
 	uint8 flags = 0;
 	if (m_bSlowedDownBecauseOfCars) flags |= BIT(0);
 	if (m_bSlowedDownBecauseOfPeds) flags |= BIT(1);
 	if (m_bStayInCurrentLevel) flags |= BIT(2);
 	if (m_bStayInFastLane) flags |= BIT(3);
 	if (m_bIgnorePathfinding) flags |= BIT(4);
-	WriteSaveBuf<uint8>(buf, flags);
-	SkipSaveBuf(buf, 2);
-	WriteSaveBuf<float>(buf, m_vecDestinationCoors.x);
-	WriteSaveBuf<float>(buf, m_vecDestinationCoors.y);
-	WriteSaveBuf<float>(buf, m_vecDestinationCoors.z);
-	SkipSaveBuf(buf, 32);
-	WriteSaveBuf<int16>(buf, m_nPathFindNodesCount);
-	SkipSaveBuf(buf, 6);
+	WriteSaveBuf(buf, flags);
+	ZeroSaveBuf(buf, 2);
+	WriteSaveBuf(buf, m_vecDestinationCoors.x);
+	WriteSaveBuf(buf, m_vecDestinationCoors.y);
+	WriteSaveBuf(buf, m_vecDestinationCoors.z);
+	ZeroSaveBuf(buf, 32);
+	WriteSaveBuf(buf, m_nPathFindNodesCount);
+	ZeroSaveBuf(buf, 6);
 }
 
 void CAutoPilot::Load(uint8*& buf)

@@ -2337,7 +2337,7 @@ CWeapon::Save(uint8*& buf)
 	CopyToBuf(buf, m_nAmmoTotal);
 	CopyToBuf(buf, m_nTimer);
 	CopyToBuf(buf, m_bAddRotOffset);
-	SkipSaveBuf(buf, 3);
+	ZeroSaveBuf(buf, 3);
 }
 
 void

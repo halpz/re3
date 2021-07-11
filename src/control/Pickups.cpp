@@ -32,6 +32,12 @@
 #include "WaterLevel.h"
 #include "World.h"
 
+#ifdef COMPATIBLE_SAVES
+#define PICKUPS_SAVE_SIZE 0x24C0
+#else
+#define PICKUPS_SAVE_SIZE sizeof(aPickUps)
+#endif
+
 CPickup CPickups::aPickUps[NUMPICKUPS];
 int16 CPickups::NumMessages;
 int32 CPickups::aPickUpsCollected[NUMCOLLECTEDPICKUPS];
@@ -1000,10 +1006,23 @@ CPickups::Load(uint8 *buf, uint32 size)
 INITSAVEBUF
 
 	for (int32 i = 0; i < NUMPICKUPS; i++) {
+#ifdef COMPATIBLE_SAVES
+		ReadSaveBuf(&aPickUps[i].m_eType, buf);
+		ReadSaveBuf(&aPickUps[i].m_bRemoved, buf);
+		ReadSaveBuf(&aPickUps[i].m_nQuantity, buf);
+		int32 tmp;
+		ReadSaveBuf(&tmp, buf);
+		aPickUps[i].m_pObject = aPickUps[i].m_eType != PICKUP_NONE && tmp != 0 ? CPools::GetObjectPool()->GetSlot(tmp - 1) : nil;
+		ReadSaveBuf(&aPickUps[i].m_nTimer, buf);
+		ReadSaveBuf(&aPickUps[i].m_eModelIndex, buf);
+		ReadSaveBuf(&aPickUps[i].m_nIndex, buf);
+		ReadSaveBuf(&aPickUps[i].m_vecPos, buf);
+#else
 		ReadSaveBuf(&aPickUps[i], buf);
 
 		if (aPickUps[i].m_eType != PICKUP_NONE && aPickUps[i].m_pObject != nil)
 			aPickUps[i].m_pObject = CPools::GetObjectPool()->GetSlot((uintptr)aPickUps[i].m_pObject - 1);
+#endif
 	}
 
 	ReadSaveBuf(&CollectedPickUpIndex, buf);
@@ -1019,14 +1038,26 @@ VALIDATESAVEBUF(size)
 void
 CPickups::Save(uint8 *buf, uint32 *size)
 {
-	*size = sizeof(aPickUps) + sizeof(uint16) + sizeof(uint16) + sizeof(aPickUpsCollected);
+	*size = PICKUPS_SAVE_SIZE + sizeof(uint16) + sizeof(uint16) + sizeof(aPickUpsCollected);
 
 INITSAVEBUF
 
 	for (int32 i = 0; i < NUMPICKUPS; i++) {
+#ifdef COMPATIBLE_SAVES
+		WriteSaveBuf(buf, aPickUps[i].m_eType);
+		WriteSaveBuf(buf, aPickUps[i].m_bRemoved);
+		WriteSaveBuf(buf, aPickUps[i].m_nQuantity);
+		int32 tmp = aPickUps[i].m_eType != PICKUP_NONE && aPickUps[i].m_pObject != nil ? CPools::GetObjectPool()->GetJustIndex_NoFreeAssert(aPickUps[i].m_pObject) + 1 : 0;
+		WriteSaveBuf(buf, tmp);
+		WriteSaveBuf(buf, aPickUps[i].m_nTimer);
+		WriteSaveBuf(buf, aPickUps[i].m_eModelIndex);
+		WriteSaveBuf(buf, aPickUps[i].m_nIndex);
+		WriteSaveBuf(buf, aPickUps[i].m_vecPos);
+#else
 		CPickup *buf_pickup = WriteSaveBuf(buf, aPickUps[i]);
 		if (buf_pickup->m_eType != PICKUP_NONE && buf_pickup->m_pObject != nil)
 			buf_pickup->m_pObject = (CObject*)(CPools::GetObjectPool()->GetJustIndex_NoFreeAssert(buf_pickup->m_pObject) + 1);
+#endif
 	}
 
 	WriteSaveBuf(buf, CollectedPickUpIndex);

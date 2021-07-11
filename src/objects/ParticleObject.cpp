@@ -10,6 +10,12 @@
 #include "DMAudio.h"
 #include "screendroplets.h"
 
+#ifdef COMPATIBLE_SAVES
+#define PARTICLE_OBJECT_SIZEOF 0x88
+#else
+#define PARTICLE_OBJECT_SIZEOF sizeof(CParticleObject)
+#endif
+
 
 CParticleObject gPObjectArray[MAX_PARTICLEOBJECTS];
 
@@ -1111,6 +1117,49 @@ CParticleObject::UpdateFar(void)
 	}
 }
 
+#ifdef COMPATIBLE_SAVES
+static inline void
+SaveOneParticle(CParticleObject *p, uint8 *&buffer)
+{
+#define SkipBuf(buf, num) buf += num
+#define ZeroBuf(buf, num) memset(buf, 0, num); SkipBuf(buf, num)
+#define CopyToBuf(buf, data) memcpy(buf, &data, sizeof(data)); SkipBuf(buf, sizeof(data))
+	// CPlaceable
+	{
+		ZeroBuf(buffer, 4);
+		CopyToBuf(buffer, p->GetMatrix().f);
+		ZeroBuf(buffer, 4);
+		CopyToBuf(buffer, p->GetMatrix().m_hasRwMatrix);
+		ZeroBuf(buffer, 3);
+	}
+
+	// CParticleObject
+	{
+		ZeroBuf(buffer, 4);
+		ZeroBuf(buffer, 4);
+		ZeroBuf(buffer, 4);
+		CopyToBuf(buffer, p->m_nRemoveTimer);
+		CopyToBuf(buffer, p->m_Type);
+		CopyToBuf(buffer, p->m_ParticleType);
+		CopyToBuf(buffer, p->m_nNumEffectCycles);
+		CopyToBuf(buffer, p->m_nSkipFrames);
+		CopyToBuf(buffer, p->m_nFrameCounter);
+		CopyToBuf(buffer, p->m_nState);
+		ZeroBuf(buffer, 2);
+		CopyToBuf(buffer, p->m_vecTarget);
+		CopyToBuf(buffer, p->m_fRandVal);
+		CopyToBuf(buffer, p->m_fSize);
+		CopyToBuf(buffer, p->m_Color);
+		CopyToBuf(buffer, p->m_bRemove);
+		CopyToBuf(buffer, p->m_nCreationChance);
+		ZeroBuf(buffer, 2);
+	}
+#undef SkipBuf
+#undef ZeroBuf
+#undef CopyToBuf
+}
+#endif
+
 bool
 CParticleObject::SaveParticle(uint8 *buffer, uint32 *length)
 {
@@ -1128,27 +1177,35 @@ CParticleObject::SaveParticle(uint8 *buffer, uint32 *length)
 	*(int32 *)buffer = numObjects;
 	buffer += sizeof(int32);
 	
-	int32 objectsLength = sizeof(CParticleObject) * (numObjects + 1);
+	int32 objectsLength = PARTICLE_OBJECT_SIZEOF * (numObjects + 1);
 	int32 dataLength = objectsLength + sizeof(int32);
 	
 	for ( CParticleObject *p = pCloseListHead; p != NULL; p = p->m_pNext )
 	{
-#if 0 // todo better
+#ifdef COMPATIBLE_SAVES
+		SaveOneParticle(p, buffer);
+#else
+#ifdef THIS_IS_STUPID
 		*(CParticleObject*)buffer = *p;
 #else
 		memcpy(buffer, p, sizeof(CParticleObject));
 #endif
 		buffer += sizeof(CParticleObject);
+#endif
 	}
 	
 	for ( CParticleObject *p = pFarListHead; p != NULL; p = p->m_pNext )
 	{
-#if 0 // todo better
+#ifdef COMPATIBLE_SAVES
+		SaveOneParticle(p, buffer);
+#else
+#ifdef THIS_IS_STUPID
 		*(CParticleObject*)buffer = *p;
 #else
 		memcpy(buffer, p, sizeof(CParticleObject));
 #endif
 		buffer += sizeof(CParticleObject);
+#endif
 	}
 	
 	*length = dataLength;
@@ -1166,7 +1223,7 @@ CParticleObject::LoadParticle(uint8 *buffer, uint32  length)
 	int32 numObjects = *(int32 *)buffer;
 	buffer += sizeof(int32);
 	
-	if ( length != sizeof(CParticleObject) * (numObjects + 1) + sizeof(int32) )
+	if ( length != PARTICLE_OBJECT_SIZEOF * (numObjects + 1) + sizeof(int32) )
 		return false;
 	
 	if ( numObjects == 0 )
@@ -1177,14 +1234,17 @@ CParticleObject::LoadParticle(uint8 *buffer, uint32  length)
 	while ( i < numObjects )
 	{
 		CParticleObject *dst = pUnusedListHead;
+#ifndef COMPATIBLE_SAVES
 		CParticleObject *src = (CParticleObject *)buffer;
 		buffer += sizeof(CParticleObject);
+#endif
 		
 		if ( dst == NULL )
 			return false;
 		
 		MoveToList(&pUnusedListHead, &pCloseListHead, dst);
 		
+#ifndef COMPATIBLE_SAVES
 		dst->m_nState           = POBJECTSTATE_UPDATE_CLOSE;
 		dst->m_Type             = src->m_Type;
 		dst->m_ParticleType     = src->m_ParticleType;
@@ -1200,6 +1260,47 @@ CParticleObject::LoadParticle(uint8 *buffer, uint32  length)
 		dst->m_nNumEffectCycles = src->m_nNumEffectCycles;
 		dst->m_nSkipFrames      = src->m_nSkipFrames;
 		dst->m_nCreationChance  = src->m_nCreationChance;
+#else
+		dst->m_nState = POBJECTSTATE_UPDATE_CLOSE;
+		dst->m_pParticle = NULL;
+
+#define SkipBuf(buf, num) buf += num
+#define CopyFromBuf(buf, data) memcpy(&data, buf, sizeof(data)); SkipBuf(buf, sizeof(data))
+		// CPlaceable
+		{
+			SkipBuf(buffer, 4);
+			CMatrix matrix;
+			CopyFromBuf(buffer, matrix.f);
+			SkipBuf(buffer, 4);
+			CopyFromBuf(buffer, matrix.m_hasRwMatrix);
+			SkipBuf(buffer, 3);
+			dst->SetPosition(matrix.GetPosition());
+		}
+
+		// CParticleObject
+		{
+			SkipBuf(buffer, 4);
+			SkipBuf(buffer, 4);
+			SkipBuf(buffer, 4);
+			CopyFromBuf(buffer, dst->m_nRemoveTimer);
+			CopyFromBuf(buffer, dst->m_Type);
+			CopyFromBuf(buffer, dst->m_ParticleType);
+			CopyFromBuf(buffer, dst->m_nNumEffectCycles);
+			CopyFromBuf(buffer, dst->m_nSkipFrames);
+			CopyFromBuf(buffer, dst->m_nFrameCounter);
+			SkipBuf(buffer, 2);
+			SkipBuf(buffer, 2);
+			CopyFromBuf(buffer, dst->m_vecTarget);
+			CopyFromBuf(buffer, dst->m_fRandVal);
+			CopyFromBuf(buffer, dst->m_fSize);
+			CopyFromBuf(buffer, dst->m_Color);
+			CopyFromBuf(buffer, dst->m_bRemove);
+			CopyFromBuf(buffer, dst->m_nCreationChance);
+			SkipBuf(buffer, 2);
+		}
+#undef CopyFromBuf
+#undef SkipBuf
+#endif
 		
 		i++;
 	}

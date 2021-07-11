@@ -237,7 +237,8 @@ enum Config {
 
 #define FIX_BUGS		// fixes bugs that we've came across during reversing. You can undefine this only on release builds.
 #define MORE_LANGUAGES		// Add more translations to the game
-#define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible
+#define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible, and keeps saves compatible between platforms
+#define FIX_INCOMPATIBLE_SAVES // try to fix incompatible saves, requires COMPATIBLE_SAVES
 #define LOAD_INI_SETTINGS // as the name suggests. fundamental for CUSTOM_FRONTEND_OPTIONS
 
 #define NO_MOVIES	// add option to disable intro videos
@@ -466,6 +467,7 @@ enum Config {
 #define THIS_IS_STUPID
 #undef MORE_LANGUAGES
 #undef COMPATIBLE_SAVES
+#undef FIX_INCOMPATIBLE_SAVES
 #undef LOAD_INI_SETTINGS
 
 #undef ASPECT_RATIO_SCALE

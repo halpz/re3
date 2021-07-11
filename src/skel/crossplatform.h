@@ -29,6 +29,7 @@ enum eWinVersion
 #endif
 extern DWORD _dwOperatingSystemVersion;
 #define fcaseopen fopen
+#define caserename rename
 #else
 char *strupr(char *str);
 char *strlwr(char *str);
@@ -51,6 +52,8 @@ extern long _dwOperatingSystemVersion;
 char *casepath(char const *path, bool checkPathFirst = true);
 FILE *_fcaseopen(char const *filename, char const *mode);
 #define fcaseopen _fcaseopen
+int _caserename(const char *old_filename, const char *new_filename);
+#define caserename _caserename
 #endif
 
 #ifdef RW_GL3
