@@ -14407,6 +14407,12 @@ AJUSTES DE MANDO
 [FEM_AUT] { aspect ratio related }
 AUTO
 
+[FEM_PED]
+PED DENSITY
+
+[FEM_CAR]
+CAR DENSITY
+
 { end of file }
 [DUMMY]
 THIS LABEL NEEDS TO BE HERE !!!
