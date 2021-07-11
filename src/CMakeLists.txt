@@ -171,7 +171,7 @@ if(NINTENDO_SWITCH)
 
     nx_create_nro(${EXECUTABLE}
         NACP ${EXECUTABLE}.nacp
-        ICON "${PROJECT_SOURCE_DIR}/logo_switch.jpg"
+        ICON "${PROJECT_SOURCE_DIR}/res/images/logo_256.jpg"
     )
 
     if(${PROJECT}_INSTALL)
