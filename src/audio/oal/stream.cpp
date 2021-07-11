@@ -1648,7 +1648,7 @@ void CStream::SetPlay(bool state)
 	{
 		ALint sourceState = AL_STOPPED;
 		alGetSourcei(m_pAlSources[0], AL_SOURCE_STATE, &sourceState);
-		if (sourceState != AL_STOPPED )
+		if (sourceState != AL_STOPPED)
 			alSourceStop(m_pAlSources[0]);
 
 		sourceState = AL_STOPPED;
