@@ -2,7 +2,7 @@
 
 #ifdef AUDIO_OAL
 
-#if defined _MSC_VER && !defined RE3_NO_AUTOLINK
+#if defined _MSC_VER && !defined CMAKE_NO_AUTOLINK
 #ifdef AUDIO_OAL_USE_SNDFILE
 #pragma comment( lib, "libsndfile-1.lib" )
 #endif
@@ -504,6 +504,7 @@ public:
 
 class CMP3File : public IDecoder
 {
+protected:
 	mpg123_handle *m_pMH;
 	bool m_bOpened;
 	uint32 m_nRate;

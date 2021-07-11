@@ -35,7 +35,7 @@ public:
 
 	CAnimBlendLink link;
 
-	int numNodes;			// taken from CAnimBlendClumpData::numFrames
+	int32 numNodes;			// taken from CAnimBlendClumpData::numFrames
 	// NB: Order of these depends on order of nodes in Clump this was built from
 	CAnimBlendNode *nodes;
 	CAnimBlendHierarchy *hierarchy;
