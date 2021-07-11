@@ -8102,6 +8102,12 @@ DUALSHOCK 4
 [FET_AGS]
 НАСТРОЙКИ ГЕЙМПАДА
 
+[FEM_PED]
+PED DENSITY
+
+[FEM_CAR]
+CAR DENSITY
+
 { end of file }
 
 [DUMMY]
