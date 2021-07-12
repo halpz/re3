@@ -68,7 +68,7 @@ end
 
 workspace "reLCS"
 	language "C++"
-	configurations { "Debug", "Release", "Vanilla" }
+	configurations { "Debug", "Release" }
 	startproject "reLCS"
 	location "build"
 	symbols "Full"
@@ -87,6 +87,7 @@ workspace "reLCS"
 	end
 
 	filter { "system:windows" }
+		configurations { "Vanilla" }
 		platforms {
 			"win-x86-RW34_d3d8-mss",
 			"win-x86-librw_d3d9-mss",
@@ -129,9 +130,6 @@ workspace "reLCS"
 		if(_OPTIONS["with-lto"]) then
 			flags { "LinkTimeOptimization" }
 		end
-
-	filter "configurations:Vanilla"
-		defines { "VANILLA_DEFINES" }
 
 	filter { "platforms:win*" }
 		system "windows"
@@ -325,6 +323,9 @@ project "reLCS"
 		includedirs { "vendor/opus/include" }
 		includedirs { "vendor/opusfile/include" }
 	end
+
+	filter "configurations:Vanilla"
+		defines { "VANILLA_DEFINES" }
 
 	filter "platforms:*mss"
 		defines { "AUDIO_MSS" }

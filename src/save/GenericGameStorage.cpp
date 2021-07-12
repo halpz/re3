@@ -828,6 +828,13 @@ FixGarages(uint8 save_type, uint8 *buf, uint8 *buf2, uint32 *size)
 
 		SkipBuf(buf2, sizeof(CStoredCar));
 	}
+
+	*size = 0;
+
+	assert(buf - buf_start == read);
+	assert(buf2 - buf2_start == written);
+
+	*size = 7876;
 }
 
 static void
