@@ -156,27 +156,4 @@ if(${PROJECT}_INSTALL)
     endif()
 endif()
 
-# Build Nintendo Switch binaries
-if(NINTENDO_SWITCH)
-    # Needed for OpenAL-Soft
-    target_link_libraries(${EXECUTABLE} PRIVATE
-        SDL2
-    )
-
-    nx_generate_nacp (${EXECUTABLE}.nacp
-        NAME    "${EXECUTABLE}"
-        AUTHOR  "${EXECUTABLE} Team"
-        VERSION "1.0.0-${GIT_SHA1}"
-    )
-
-    nx_create_nro(${EXECUTABLE}
-        NACP ${EXECUTABLE}.nacp
-        ICON "${PROJECT_SOURCE_DIR}/res/images/logo_256.jpg"
-    )
-
-    if(${PROJECT}_INSTALL)
-        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${EXECUTABLE}.nro"
-            DESTINATION "."
-        )
-    endif()
-endif()
+re3_platform_target(${EXECUTABLE} INSTALL)
