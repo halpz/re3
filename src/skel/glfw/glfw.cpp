@@ -560,14 +560,15 @@ psInitialize(void)
 	_dwMemAvailPhys = (uint64_t)(vm_stat.free_count * page_size);
 	debug("Physical memory size %llu\n", _dwMemAvailPhys);
 	debug("Available physical memory %llu\n", size);
+#elif defined (__SWITCH__)
+	svcGetInfo(&_dwMemAvailPhys,     7, 0xffff8001, 0);
+	debug("Physical memory size %llu\n", _dwMemAvailPhys);
 #else
-#ifndef __SWITCH__
  	struct sysinfo systemInfo;
 	sysinfo(&systemInfo);
 	_dwMemAvailPhys = systemInfo.freeram;
 	debug("Physical memory size %u\n", systemInfo.totalram);
 	debug("Available physical memory %u\n", systemInfo.freeram);
-#endif
 #endif
   
   TheText.Unload();
