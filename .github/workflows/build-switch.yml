@@ -25,5 +25,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: "switch-gl3"
-          path: build/*.zip
+          path: build/*.tar.xz
           if-no-files-found: error
