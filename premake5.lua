@@ -303,9 +303,6 @@ project "reVC"
 	includedirs { "src/weapons" }
 	includedirs { "src/extras" }
 
-	filter "configurations:Vanilla"
-		defines { "VANILLA_DEFINES" }
-
 	if(not _OPTIONS["no-git-hash"]) then
 		defines { "USE_OUR_VERSIONING" }
 	end
@@ -315,6 +312,9 @@ project "reVC"
 		includedirs { "vendor/opus/include" }
 		includedirs { "vendor/opusfile/include" }
 	end
+
+	filter "configurations:Vanilla"
+		defines { "VANILLA_DEFINES" }
 
 	filter "platforms:*mss"
 		defines { "AUDIO_MSS" }
