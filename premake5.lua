@@ -68,7 +68,7 @@ end
 
 workspace "re3"
 	language "C++"
-	configurations { "Debug", "Release", "Vanilla" }
+	configurations { "Debug", "Release" }
 	startproject "re3"
 	location "build"
 	symbols "Full"
@@ -80,6 +80,7 @@ workspace "re3"
 	end
 
 	filter { "system:windows" }
+		configurations { "Vanilla" }
 		platforms {
 			"win-x86-RW33_d3d8-mss",
 			"win-x86-librw_d3d9-mss",
@@ -122,9 +123,6 @@ workspace "re3"
 		if(_OPTIONS["with-lto"]) then
 			flags { "LinkTimeOptimization" }
 		end
-
-	filter "configurations:Vanilla"
-		defines { "VANILLA_DEFINES" }
 
 	filter { "platforms:win*" }
 		system "windows"
@@ -304,6 +302,9 @@ project "re3"
 	includedirs { "src/vehicles" }
 	includedirs { "src/weapons" }
 	includedirs { "src/extras" }
+
+	filter "configurations:Vanilla"
+		defines { "VANILLA_DEFINES" }
 
 	if(not _OPTIONS["no-git-hash"]) then
 		defines { "USE_OUR_VERSIONING" }
