@@ -201,6 +201,11 @@ void CFerry::Init(void* pInstancePtr)
 
 void CFerry::InitFerrys(void)
 {
+	printf("init ferrys\n");
+#ifdef GTA_NETWORK
+	if (gIsMultiplayerGame)
+		SetupForMultiplayer();
+#endif
 	if (!mspInst)
 		Init(nil);
 	for (int i = 0; i < NUM_FERRIES; i++)
@@ -348,6 +353,10 @@ void CFerry::Render(void)
 
 void CFerry::RenderAllRemaning(void)
 {
+#ifdef GTA_NETWORK
+	if (gIsMultiplayerGame)
+		return;
+#endif
 	for (int i = 0; i < NUM_FERRIES; i++) {
 		CFerry* pFerry = GetFerry(i);
 		if (pFerry) {
@@ -802,6 +811,7 @@ void CFerry::SetupForMultiplayer(void)
 {
 	for (int i = 0; i < NUM_FERRIES; i++)
 		mspInst->m_apFerries[i] = nil;
+	printf("setting up the ferrys for multiplayer\n");
 	CStreaming::SetModelIsDeletable(MI_FERRY);
 }
 
