@@ -319,7 +319,7 @@ enum Config {
 #define WATER_CHEATS
 
 //#define USE_CUTSCENE_SHADOW_FOR_PED
-#define DISABLE_CUTSCENE_SHADOWS
+//#define DISABLE_CUTSCENE_SHADOWS
 
 // Pad
 #if !defined(RW_GL3) && defined(_WIN32)
