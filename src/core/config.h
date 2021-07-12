@@ -318,7 +318,7 @@ enum Config {
 #undef PC_WATER
 #define WATER_CHEATS
 
-//#define USE_CUTSCENE_SHADOW_FOR_PED
+//#define USE_CUTSCENE_SHADOW_FOR_PED // requires COMPATIBLE_SAVES
 //#define DISABLE_CUTSCENE_SHADOWS
 
 // Pad
@@ -449,6 +449,11 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 	#undef PS2_ALPHA_TEST
 	#undef NO_ISLAND_LOADING
 	#undef PS2_AUDIO_CHANNELS
+#endif
+
+// if these defines are enabled saves are not vanilla compatible without COMPATIBLE_SAVES
+#ifndef COMPATIBLE_SAVES
+#undef USE_CUTSCENE_SHADOW_FOR_PED
 #endif
 
 #endif // VANILLA_DEFINES
