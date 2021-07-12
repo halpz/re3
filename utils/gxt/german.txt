@@ -17452,6 +17452,12 @@ This track contains a sample of "Next Level" as performed by Showbiz & AG. Court
 [CR19_20:CRED01]
 ~n~ ~n~Donna Young, Richie Zito
 
+[FEM_PED]
+PED DENSITY
+
+[FEM_CAR]
+CAR DENSITY
+
 [DUMMY]
 THIS LABEL NEEDS TO BE HERE !!!
 AS THE LAST LABEL DOES NOT GET COMPILED

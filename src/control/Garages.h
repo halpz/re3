@@ -115,7 +115,7 @@ public:
 	bool m_bClosingWithoutTargetCar;
 	bool m_bDeactivated;
 	bool m_bResprayHappened;
-	int m_nTargetModelIndex;
+	int32 m_nTargetModelIndex;
 	CEntity *m_pDoor1;
 	CEntity *m_pDoor2;
 	uint8 m_bDoor1PoolIndex;

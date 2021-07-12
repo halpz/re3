@@ -529,6 +529,10 @@ CPhysical::ApplySpringDampening(float damping, float dampingLimit, CVector &spri
 {
 	float speedA = DotProduct(speed, springDir);
 	float speedB = DotProduct(GetSpeed(point), springDir);
+#ifdef FIX_BUGS
+	if (speedB == 0.0f)
+		return true;
+#endif
 	float step = Min(CTimer::GetTimeStep(), 3.0f);
 	damping *= step;
 	if(bIsHeavy)

@@ -1478,7 +1478,7 @@ void
 CBoat::Save(uint8*& buf)
 {
 	CVehicle::Save(buf);
-	SkipSaveBuf(buf, 1216 - 672);
+	ZeroSaveBuf(buf, 1216 - 672);
 }
 
 void

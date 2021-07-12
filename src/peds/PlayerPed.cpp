@@ -2189,14 +2189,14 @@ void
 CPlayerPed::Save(uint8*& buf)
 {
 	CPed::Save(buf);
-	SkipSaveBuf(buf, 16);
+	ZeroSaveBuf(buf, 16);
 	CopyToBuf(buf, m_fMaxStamina);
-	SkipSaveBuf(buf, 28);
+	ZeroSaveBuf(buf, 28);
 	CopyToBuf(buf, m_nTargettableObjects[0]);
 	CopyToBuf(buf, m_nTargettableObjects[1]);
 	CopyToBuf(buf, m_nTargettableObjects[2]);
 	CopyToBuf(buf, m_nTargettableObjects[3]);
-	SkipSaveBuf(buf, 164);
+	ZeroSaveBuf(buf, 164);
 }
 
 void
