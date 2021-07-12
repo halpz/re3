@@ -561,7 +561,7 @@ psInitialize(void)
 	debug("Physical memory size %llu\n", _dwMemAvailPhys);
 	debug("Available physical memory %llu\n", size);
 #elif defined (__SWITCH__)
-	svcGetInfo(&_dwMemAvailPhys,     7, 0xffff8001, 0);
+	svcGetInfo(&_dwMemAvailPhys, InfoType_UsedMemorySize, CUR_PROCESS_HANDLE, 0);
 	debug("Physical memory size %llu\n", _dwMemAvailPhys);
 #else
  	struct sysinfo systemInfo;
