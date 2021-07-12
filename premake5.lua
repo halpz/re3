@@ -68,7 +68,7 @@ end
 
 workspace "reVC"
 	language "C++"
-	configurations { "Debug", "Release", "Vanilla" }
+	configurations { "Debug", "Release" }
 	startproject "reVC"
 	location "build"
 	symbols "Full"
@@ -80,6 +80,7 @@ workspace "reVC"
 	end
 
 	filter { "system:windows" }
+		configurations { "Vanilla" }
 		platforms {
 			"win-x86-RW34_d3d8-mss",
 			"win-x86-librw_d3d9-mss",
@@ -122,9 +123,6 @@ workspace "reVC"
 		if(_OPTIONS["with-lto"]) then
 			flags { "LinkTimeOptimization" }
 		end
-
-	filter "configurations:Vanilla"
-		defines { "VANILLA_DEFINES" }
 
 	filter { "platforms:win*" }
 		system "windows"
@@ -304,6 +302,9 @@ project "reVC"
 	includedirs { "src/vehicles" }
 	includedirs { "src/weapons" }
 	includedirs { "src/extras" }
+
+	filter "configurations:Vanilla"
+		defines { "VANILLA_DEFINES" }
 
 	if(not _OPTIONS["no-git-hash"]) then
 		defines { "USE_OUR_VERSIONING" }
