@@ -29,13 +29,6 @@
 #include "VarConsole.h"
 #include "SaveBuf.h"
 
-#define CRUSHER_GARAGE_X1 (1135.5f)
-#define CRUSHER_GARAGE_Y1 (57.0f)
-#define CRUSHER_GARAGE_Z1 (-1.0f)
-#define CRUSHER_GARAGE_X2 (1149.5f)
-#define CRUSHER_GARAGE_Y2 (63.7f)
-#define CRUSHER_GARAGE_Z2 (3.5f)
-
 #define ROTATED_DOOR_OPEN_SPEED (0.015f)
 #define ROTATED_DOOR_CLOSE_SPEED (0.02f)
 #define DEFAULT_DOOR_OPEN_SPEED (0.035f)
@@ -2640,8 +2633,53 @@ void CGarages::Save(uint8 * buf, uint32 * size)
 			WriteSaveBuf(buf, aCarsInSafeHouses[j][i]);
 		}
 	}
-	for (int i = 0; i < NUM_GARAGES; i++)
+	for (int i = 0; i < NUM_GARAGES; i++) {
+#ifdef COMPATIBLE_SAVES
+		WriteSaveBuf(buf, aGarages[i].m_eGarageType);
+		WriteSaveBuf(buf, aGarages[i].m_eGarageState);
+		WriteSaveBuf(buf, aGarages[i].m_nMaxStoredCars);
+		WriteSaveBuf(buf, aGarages[i].field_2);
+		WriteSaveBuf(buf, aGarages[i].m_bClosingWithoutTargetCar);
+		WriteSaveBuf(buf, aGarages[i].m_bDeactivated);
+		WriteSaveBuf(buf, aGarages[i].m_bResprayHappened);
+		ZeroSaveBuf(buf, 1);
+		WriteSaveBuf(buf, aGarages[i].m_nTargetModelIndex);
+		ZeroSaveBuf(buf, 4 + 4);
+		WriteSaveBuf(buf, aGarages[i].m_bDoor1PoolIndex);
+		WriteSaveBuf(buf, aGarages[i].m_bDoor2PoolIndex);
+		WriteSaveBuf(buf, aGarages[i].m_bDoor1IsDummy);
+		WriteSaveBuf(buf, aGarages[i].m_bDoor2IsDummy);
+		WriteSaveBuf(buf, aGarages[i].m_bRecreateDoorOnNextRefresh);
+		WriteSaveBuf(buf, aGarages[i].m_bRotatedDoor);
+		WriteSaveBuf(buf, aGarages[i].m_bCameraFollowsPlayer);
+		ZeroSaveBuf(buf, 1);
+		WriteSaveBuf(buf, aGarages[i].m_vecCorner1);
+		WriteSaveBuf(buf, aGarages[i].m_fInfZ);
+		WriteSaveBuf(buf, aGarages[i].m_vDir1);
+		WriteSaveBuf(buf, aGarages[i].m_vDir2);
+		WriteSaveBuf(buf, aGarages[i].m_fSupZ);
+		WriteSaveBuf(buf, aGarages[i].m_fDir1Len);
+		WriteSaveBuf(buf, aGarages[i].m_fDir2Len);
+		WriteSaveBuf(buf, aGarages[i].m_fInfX);
+		WriteSaveBuf(buf, aGarages[i].m_fSupX);
+		WriteSaveBuf(buf, aGarages[i].m_fInfY);
+		WriteSaveBuf(buf, aGarages[i].m_fSupY);
+		WriteSaveBuf(buf, aGarages[i].m_fDoorPos);
+		WriteSaveBuf(buf, aGarages[i].m_fDoorHeight);
+		WriteSaveBuf(buf, aGarages[i].m_fDoor1X);
+		WriteSaveBuf(buf, aGarages[i].m_fDoor1Y);
+		WriteSaveBuf(buf, aGarages[i].m_fDoor2X);
+		WriteSaveBuf(buf, aGarages[i].m_fDoor2Y);
+		WriteSaveBuf(buf, aGarages[i].m_fDoor1Z);
+		WriteSaveBuf(buf, aGarages[i].m_fDoor2Z);
+		WriteSaveBuf(buf, aGarages[i].m_nTimeToStartAction);
+		WriteSaveBuf(buf, aGarages[i].m_bCollectedCarsState);
+		ZeroSaveBuf(buf, 3 + 4);
+		ZeroSaveBuf(buf, sizeof(aGarages[i].m_sStoredCar));
+#else
 		WriteSaveBuf(buf, aGarages[i]);
+#endif
+	}
 //VALIDATESAVEBUF(*size);
 }
 
@@ -2669,7 +2707,51 @@ void CGarages::Load(uint8* buf, uint32 size)
 		}
 	}
 	for (int i = 0; i < NUM_GARAGES; i++) {
+#ifdef COMPATIBLE_SAVES
+		ReadSaveBuf(&aGarages[i].m_eGarageType, buf);
+		ReadSaveBuf(&aGarages[i].m_eGarageState, buf);
+		ReadSaveBuf(&aGarages[i].m_nMaxStoredCars, buf);
+		ReadSaveBuf(&aGarages[i].field_2, buf);
+		ReadSaveBuf(&aGarages[i].m_bClosingWithoutTargetCar, buf);
+		ReadSaveBuf(&aGarages[i].m_bDeactivated, buf);
+		ReadSaveBuf(&aGarages[i].m_bResprayHappened, buf);
+		SkipSaveBuf(buf, 1);
+		ReadSaveBuf(&aGarages[i].m_nTargetModelIndex, buf);
+		SkipSaveBuf(buf, 4 + 4);
+		ReadSaveBuf(&aGarages[i].m_bDoor1PoolIndex, buf);
+		ReadSaveBuf(&aGarages[i].m_bDoor2PoolIndex, buf);
+		ReadSaveBuf(&aGarages[i].m_bDoor1IsDummy, buf);
+		ReadSaveBuf(&aGarages[i].m_bDoor2IsDummy, buf);
+		ReadSaveBuf(&aGarages[i].m_bRecreateDoorOnNextRefresh, buf);
+		ReadSaveBuf(&aGarages[i].m_bRotatedDoor, buf);
+		ReadSaveBuf(&aGarages[i].m_bCameraFollowsPlayer, buf);
+		SkipSaveBuf(buf, 1);
+		ReadSaveBuf(&aGarages[i].m_vecCorner1, buf);
+		ReadSaveBuf(&aGarages[i].m_fInfZ, buf);
+		ReadSaveBuf(&aGarages[i].m_vDir1, buf);
+		ReadSaveBuf(&aGarages[i].m_vDir2, buf);
+		ReadSaveBuf(&aGarages[i].m_fSupZ, buf);
+		ReadSaveBuf(&aGarages[i].m_fDir1Len, buf);
+		ReadSaveBuf(&aGarages[i].m_fDir2Len, buf);
+		ReadSaveBuf(&aGarages[i].m_fInfX, buf);
+		ReadSaveBuf(&aGarages[i].m_fSupX, buf);
+		ReadSaveBuf(&aGarages[i].m_fInfY, buf);
+		ReadSaveBuf(&aGarages[i].m_fSupY, buf);
+		ReadSaveBuf(&aGarages[i].m_fDoorPos, buf);
+		ReadSaveBuf(&aGarages[i].m_fDoorHeight, buf);
+		ReadSaveBuf(&aGarages[i].m_fDoor1X, buf);
+		ReadSaveBuf(&aGarages[i].m_fDoor1Y, buf);
+		ReadSaveBuf(&aGarages[i].m_fDoor2X, buf);
+		ReadSaveBuf(&aGarages[i].m_fDoor2Y, buf);
+		ReadSaveBuf(&aGarages[i].m_fDoor1Z, buf);
+		ReadSaveBuf(&aGarages[i].m_fDoor2Z, buf);
+		ReadSaveBuf(&aGarages[i].m_nTimeToStartAction, buf);
+		ReadSaveBuf(&aGarages[i].m_bCollectedCarsState, buf);
+		SkipSaveBuf(buf, 3 + 4);
+		SkipSaveBuf(buf, sizeof(aGarages[i].m_sStoredCar));
+#else
 		ReadSaveBuf(&aGarages[i], buf);
+#endif
 		aGarages[i].m_pDoor1 = nil;
 		aGarages[i].m_pDoor2 = nil;
 		aGarages[i].m_pTarget = nil;

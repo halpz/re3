@@ -155,6 +155,29 @@ FILE* _fcaseopen(char const* filename, char const* mode)
     return result;
 }
 
+int _caserename(const char *old_filename, const char *new_filename)
+{
+    int result;
+    char *real_old = casepath(old_filename);
+    char *real_new = casepath(new_filename);
+
+    // hack so we don't even try to rename it to new_filename if it already exists
+    if (!real_new) {
+        free(real_old);
+        return -1;
+    }
+
+    if (!real_old)
+        result = rename(old_filename, real_new);
+    else
+        result = rename(real_old, real_new);
+
+    free(real_old);
+    free(real_new);
+
+    return result;
+}
+
 // Case-insensitivity on linux (from https://github.com/OneSadCookie/fcaseopen)
 // Returned string should freed manually (if exists)
 char* casepath(char const* path, bool checkPathFirst)

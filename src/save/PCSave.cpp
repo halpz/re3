@@ -122,6 +122,13 @@ C_PcSave::PopulateSlotInfo()
 		}
 		if (Slots[i] == SLOT_OK) {
 			if (CheckDataNotCorrupt(i, savename)) {
+#ifdef FIX_INCOMPATIBLE_SAVES
+				if (!FixSave(i, GetSaveType(savename))) {
+					CMessages::InsertNumberInString(TheText.Get("FEC_SLC"), i + 1, -1, -1, -1, -1, -1, SlotFileName[i]);
+					Slots[i] = SLOT_CORRUPTED;
+					continue;
+				}
+#endif
 				SYSTEMTIME st;
 				memcpy(&st, &header.SaveDateTime, sizeof(SYSTEMTIME));
 				const char *month;

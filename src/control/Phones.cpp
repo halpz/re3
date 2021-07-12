@@ -18,6 +18,12 @@
 #include "Replay.h"
 #endif
 
+#ifdef COMPATIBLE_SAVES
+#define PHONEINFO_SAVE_SIZE 0xA30
+#else
+#define PHONEINFO_SAVE_SIZE sizeof(CPhoneInfo)
+#endif
+
 CPhoneInfo gPhoneInfo;
 
 bool CPhoneInfo::bDisplayingPhoneMessage;  // is phone picked up
@@ -201,11 +207,24 @@ INITSAVEBUF
 	ReadSaveBuf(&m_nMax, buf);
 	ReadSaveBuf(&m_nScriptPhonesMax, buf);
 	for (int i = 0; i < NUMPHONES; i++) {
+#ifdef COMPATIBLE_SAVES
+		ReadSaveBuf(&m_aPhones[i].m_vecPos, buf);
+		SkipSaveBuf(buf, 6 * 4);
+		ReadSaveBuf(&m_aPhones[i].m_repeatedMessagePickupStart, buf);
+		int32 tmp;
+		ReadSaveBuf(&tmp, buf);
+		// It's saved as building pool index in save file, convert it to true entity
+		m_aPhones[i].m_pEntity = tmp != 0 ? CPools::GetBuildingPool()->GetSlot(tmp - 1) : nil;
+		ReadSaveBuf(&m_aPhones[i].m_nState, buf);
+		ReadSaveBuf(&m_aPhones[i].m_visibleToCam, buf);
+		SkipSaveBuf(buf, 3);
+#else
 		ReadSaveBuf(&m_aPhones[i], buf);
 		// It's saved as building pool index in save file, convert it to true entity
 		if (m_aPhones[i].m_pEntity) {
 			m_aPhones[i].m_pEntity = CPools::GetBuildingPool()->GetSlot((uintptr)m_aPhones[i].m_pEntity - 1);
 		}
+#endif
 	}
 VALIDATESAVEBUF(size)
 }
@@ -299,17 +318,29 @@ CPhoneInfo::Initialise(void)
 void
 CPhoneInfo::Save(uint8 *buf, uint32 *size)
 {
-	*size = sizeof(CPhoneInfo);
+	*size = PHONEINFO_SAVE_SIZE;
 INITSAVEBUF
 	WriteSaveBuf(buf, m_nMax);
 	WriteSaveBuf(buf, m_nScriptPhonesMax);
 	for(int phoneId = 0; phoneId < NUMPHONES; phoneId++) {
+#ifdef COMPATIBLE_SAVES
+		WriteSaveBuf(buf, m_aPhones[phoneId].m_vecPos);
+		ZeroSaveBuf(buf, 6 * 4);
+		WriteSaveBuf(buf, m_aPhones[phoneId].m_repeatedMessagePickupStart);
+		// Convert entity pointer to building pool index while saving
+		int32 tmp = m_aPhones[phoneId].m_pEntity ? CPools::GetBuildingPool()->GetJustIndex_NoFreeAssert((CBuilding*)m_aPhones[phoneId].m_pEntity) + 1 : 0;
+		WriteSaveBuf(buf, tmp);
+		WriteSaveBuf(buf, m_aPhones[phoneId].m_nState);
+		WriteSaveBuf(buf, m_aPhones[phoneId].m_visibleToCam);
+		ZeroSaveBuf(buf, 3);
+#else
 		CPhone* phone = WriteSaveBuf(buf, m_aPhones[phoneId]);
 
 		// Convert entity pointer to building pool index while saving
 		if (phone->m_pEntity) {
 			phone->m_pEntity = (CEntity*) (CPools::GetBuildingPool()->GetJustIndex_NoFreeAssert((CBuilding*)phone->m_pEntity) + 1);
 		}
+#endif
 	}
 VALIDATESAVEBUF(*size)
 }

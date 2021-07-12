@@ -5725,7 +5725,7 @@ CAutomobile::Save(uint8*& buf)
 {
 	CVehicle::Save(buf);
 	WriteSaveBuf(buf, Damage);
-	SkipSaveBuf(buf, 1500 - 672 - sizeof(CDamageManager));
+	ZeroSaveBuf(buf, 1500 - 672 - sizeof(CDamageManager));
 }
 
 void

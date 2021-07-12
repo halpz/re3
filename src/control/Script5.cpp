@@ -2314,35 +2314,35 @@ VALIDATESAVEBUF(size)
 void CRunningScript::Save(uint8*& buf)
 {
 #ifdef COMPATIBLE_SAVES
-	SkipSaveBuf(buf, 8);
+	ZeroSaveBuf(buf, 8);
 	WriteSaveBuf<int32>(buf, m_nId);
 	for (int i = 0; i < 8; i++)
-		WriteSaveBuf<char>(buf, m_abScriptName[i]);
-	WriteSaveBuf<uint32>(buf, m_nIp);
+		WriteSaveBuf(buf, m_abScriptName[i]);
+	WriteSaveBuf(buf, m_nIp);
 #ifdef CHECK_STRUCT_SIZES
 	static_assert(MAX_STACK_DEPTH == 6, "Compatibility loss: MAX_STACK_DEPTH != 6");
 #endif
 	for (int i = 0; i < MAX_STACK_DEPTH; i++)
-		WriteSaveBuf<uint32>(buf, m_anStack[i]);
-	WriteSaveBuf<uint16>(buf, m_nStackPointer);
-	SkipSaveBuf(buf, 2);
+		WriteSaveBuf(buf, m_anStack[i]);
+	WriteSaveBuf(buf, m_nStackPointer);
+	ZeroSaveBuf(buf, 2);
 #ifdef CHECK_STRUCT_SIZES
 	static_assert(NUM_LOCAL_VARS + 8 + NUM_TIMERS == 106, "Compatibility loss: NUM_LOCAL_VARS + NUM_TIMERS != 106");
 #endif
 	for (int i = 0; i < NUM_LOCAL_VARS + 8 + NUM_TIMERS; i++)
-		WriteSaveBuf<int32>(buf, m_anLocalVariables[i]);
-	WriteSaveBuf<int32>(buf, m_nLocalsPointer);
-	WriteSaveBuf<bool>(buf, m_bIsActive);
-	WriteSaveBuf<bool>(buf, m_bCondResult);
-	WriteSaveBuf<bool>(buf, m_bIsMissionScript);
-	WriteSaveBuf<bool>(buf, m_bSkipWakeTime);
-	WriteSaveBuf<uint32>(buf, m_nWakeTime);
-	WriteSaveBuf<uint16>(buf, m_nAndOrState);
-	WriteSaveBuf<bool>(buf, m_bNotFlag);
-	WriteSaveBuf<bool>(buf, m_bDeatharrestEnabled);
-	WriteSaveBuf<bool>(buf, m_bDeatharrestExecuted);
-	WriteSaveBuf<bool>(buf, m_bMissionFlag);
-	SkipSaveBuf(buf, 2);
+		WriteSaveBuf(buf, m_anLocalVariables[i]);
+	WriteSaveBuf(buf, m_nLocalsPointer);
+	WriteSaveBuf(buf, m_bIsActive);
+	WriteSaveBuf(buf, m_bCondResult);
+	WriteSaveBuf(buf, m_bIsMissionScript);
+	WriteSaveBuf(buf, m_bSkipWakeTime);
+	WriteSaveBuf(buf, m_nWakeTime);
+	WriteSaveBuf(buf, m_nAndOrState);
+	WriteSaveBuf(buf, m_bNotFlag);
+	WriteSaveBuf(buf, m_bDeatharrestEnabled);
+	WriteSaveBuf(buf, m_bDeatharrestExecuted);
+	WriteSaveBuf(buf, m_bMissionFlag);
+	ZeroSaveBuf(buf, 2);
 #else
 	WriteSaveBuf(buf, *this);
 #endif
