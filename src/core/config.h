@@ -1,7 +1,9 @@
 #pragma once
 
-// disables (most) stuff that wasn't in original gta-vc.exe - check section at the bottom of this file
-//#define VANILLA_DEFINES
+// disables (most) stuff that wasn't in original gta-vc.exe
+#ifdef __MWERKS__
+#define VANILLA_DEFINES
+#endif
 
 enum Config {
 	NUMPLAYERS = 1,
@@ -154,8 +156,33 @@ enum Config {
 //#define GTA_PS2
 //#define GTA_XBOX
 
-// This enables things from the PS2 version on PC
-#define GTA_PS2_STUFF
+// Version defines
+#define GTAVC_PS2	400
+#define GTAVC_PC_10	410
+#define GTAVC_PC_11	411
+#define GTAVC_PC_JAP	412
+// TODO? maybe something for xbox or android?
+
+#define GTA_VERSION	GTAVC_PC_11
+
+// TODO(MIAMI): someone ought to find and check out uses of these defines:
+//#define GTA3_STEAM_PATCH
+//#define GTAVC_JP_PATCH
+
+#if defined GTA_PS2
+#	define GTA_PS2_STUFF
+#	define RANDOMSPLASH
+//#	define USE_CUSTOM_ALLOCATOR
+#	define VU_COLLISION
+#	define PS2_MENU
+#elif defined GTA_PC
+#	define PC_PLAYER_CONTROLS	// mouse player/cam mode
+#	define GTA_REPLAY
+#	define GTA_SCENE_EDIT
+#	define PC_MENU
+#	define PC_WATER
+#elif defined GTA_XBOX
+#endif
 
 // This is enabled for all released games.
 // any debug stuff that isn't left in any game is not in FINAL
@@ -174,22 +201,24 @@ enum Config {
 #define FINAL
 #endif
 
-// Version defines
-#define GTAVC_PS2	400
-#define GTAVC_PC_10	410
-#define GTAVC_PC_11	411
-#define GTAVC_PC_JAP	412
-// TODO? maybe something for xbox or android?
+// these are placed here to work with VANILLA_DEFINES for compatibility
+#define NO_CDCHECK // skip audio CD check
+#define DEFAULT_NATIVE_RESOLUTION // Set default video mode to your native resolution (fixes Windows 10 launch)
 
-#define GTA_VERSION	GTAVC_PC_11
-
-// TODO(MIAMI): someone ought to find and check out uses of these defines:
-//#define GTA3_STEAM_PATCH
-//#define GTAVC_JP_PATCH
+#ifdef VANILLA_DEFINES
+#define FINAL
+#define MASTER
+//#define USE_MY_DOCUMENTS
+#define THIS_IS_STUPID
+#define DONT_FIX_REPLAY_BUGS
+#define USE_TXD_CDIMAGE // generate and load textures from txd.img
+//#define USE_TEXTURE_POOL // not possible because R* used custom RW33
+#else
+// This enables things from the PS2 version on PC
+#define GTA_PS2_STUFF
 
 // quality of life fixes that should also be in FINAL
 #define NASTY_GAME	// nasty game for all languages
-#define NO_CDCHECK
 
 // those infamous texts
 #define DRAW_GAME_VERSION_TEXT
@@ -204,21 +233,10 @@ enum Config {
 //#define COMPRESSED_COL_VECTORS	// use compressed vectors for collision vertices
 //#define ANIM_COMPRESSION	// only keep most recently used anims uncompressed
 
-#if defined GTA_PS2
-#	define GTA_PS2_STUFF
-#	define RANDOMSPLASH
-//#	define USE_CUSTOM_ALLOCATOR
-#	define VU_COLLISION
-#elif defined GTA_PC
-#	ifdef GTA_PS2_STUFF
-#		define USE_PS2_RAND
-#		define RANDOMSPLASH	// use random splash as on PS2
-#		define PS2_MATFX
-#	endif
-#	define PC_PLAYER_CONTROLS	// mouse player/cam mode
-#	define GTA_REPLAY
-#	define GTA_SCENE_EDIT
-#elif defined GTA_XBOX
+#if defined GTA_PC && defined GTA_PS2_STUFF
+#	define USE_PS2_RAND
+#	define RANDOMSPLASH	// use random splash as on PS2
+#	define PS2_MATFX
 #endif
 
 #ifdef VU_COLLISION
@@ -258,7 +276,7 @@ enum Config {
 
 #define ASCII_STRCMP // use faster ascii str comparisons
 
-#if !defined _WIN32 || defined __MWERKS__ || defined __MINGW32__ || defined VANILLA_DEFINES
+#if !defined _WIN32 || defined __MINGW32__
 #undef ASCII_STRCMP
 #endif
 
@@ -293,7 +311,7 @@ enum Config {
 #endif
 
 // Water & Particle
-// #define PC_WATER
+#undef PC_WATER
 #define WATER_CHEATS
 
 //#define USE_CUTSCENE_SHADOW_FOR_PED
@@ -429,98 +447,4 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 	#undef PS2_AUDIO_CHANNELS
 #endif
 
-// -------
-
-#if defined __MWERKS__ || defined VANILLA_DEFINES
-#define FINAL
-#undef CHATTYSPLASH
-#undef TIMEBARS
-
-#define MASTER
-#undef VALIDATE_SAVE_SIZE
-#undef NO_MOVIES
-#undef DEBUGMENU
-
-#undef DRAW_GAME_VERSION_TEXT
-
-//#undef NASTY_GAME
-//#undef NO_CDCHECK
-
-#undef GTA_PS2_STUFF
-#undef USE_PS2_RAND
-#undef RANDOMSPLASH
-#undef PS2_MATFX
-
-#undef FIX_BUGS
-#define THIS_IS_STUPID
-#undef MORE_LANGUAGES
-#undef COMPATIBLE_SAVES
-#undef FIX_INCOMPATIBLE_SAVES
-#undef LOAD_INI_SETTINGS
-
-#undef ASPECT_RATIO_SCALE
-#undef PROPER_SCALING
-//#undef DEFAULT_NATIVE_RESOLUTION
-#undef PS2_ALPHA_TEST
-#undef IMPROVED_VIDEOMODE
-#undef DISABLE_LOADING_SCREEN
-#undef DISABLE_VSYNC_ON_TEXTURE_CONVERSION
-
-#undef EXTENDED_COLOURFILTER
-#undef EXTENDED_PIPELINES
-#undef SCREEN_DROPLETS
-#undef NEW_RENDERER
-
-#undef FIX_SPRITES
-
-#define PC_WATER
-#undef WATER_CHEATS
-
-#undef USE_CUTSCENE_SHADOW_FOR_PED
-#undef DISABLE_CUTSCENE_SHADOWS
-
-#undef XINPUT
-#undef DETECT_PAD_INPUT_SWITCH
-#undef KANGAROO_CHEAT
-#undef RESTORE_ALLCARSHELI_CHEAT
-#undef BETTER_ALLCARSAREDODO_CHEAT
-#undef WALLCLIMB_CHEAT
-#undef REGISTER_START_BUTTON
-#undef BIND_VEHICLE_FIREWEAPON
-#undef BUTTON_ICONS
-
-#undef FIX_RADAR
-#undef RADIO_OFF_TEXT
-
-#undef MAP_ENHANCEMENTS
-#undef GAMEPAD_MENU
-#undef MUCH_SHORTER_OUTRO_SCREEN
-#undef CUSTOM_FRONTEND_OPTIONS
-
-#undef GRAPHICS_MENU_OPTIONS
-#undef NO_ISLAND_LOADING
-#undef CUTSCENE_BORDERS_SWITCH
-#undef MULTISAMPLING
-#undef INVERT_LOOK_FOR_PAD
-
-#undef USE_DEBUG_SCRIPT_LOADER
-#undef USE_MEASUREMENTS_IN_METERS
-#undef USE_PRECISE_MEASUREMENT_CONVERTION
-#undef SUPPORT_JAPANESE_SCRIPT
-#undef MISSION_REPLAY
-#undef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
-#undef USE_BASIC_SCRIPT_DEBUG_OUTPUT
-
-#define DONT_FIX_REPLAY_BUGS
-
-#undef EXPLODING_AIRTRAIN
-#undef CPLANE_ROTORS
-#undef CAMERA_PICKUP
-#undef CANCELLABLE_CAR_ENTER
-#undef IMPROVED_CAMERA
-#undef FREE_CAM
-#undef BIG_IMG
-#undef PS2_AUDIO_CHANNELS
-#undef MULTITHREADED_AUDIO
-#undef RADIO_SCROLL_TO_PREV_STATION
-#endif
+#endif // VANILLA_DEFINES
