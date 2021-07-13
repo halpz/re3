@@ -211,6 +211,10 @@ enum Config {
 #define DEFAULT_NATIVE_RESOLUTION // Set default video mode to your native resolution (fixes Windows 10 launch)
 
 #ifdef VANILLA_DEFINES
+#if !defined(_WIN32) || defined(__LP64__) || defined(_WIN64)
+#error Vanilla can only be built for win-x86
+#endif
+
 #define FINAL
 #define MASTER
 //#define USE_MY_DOCUMENTS
