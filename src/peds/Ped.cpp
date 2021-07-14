@@ -421,6 +421,7 @@ CPed::~CPed(void)
 					nearPed->m_nearPeds[k] = nearPed->m_nearPeds[k + 1];
 					nearPed->m_nearPeds[k + 1] = nil;
 				}
+				nearPed->m_nearPeds[ARRAY_SIZE(m_nearPeds) - 1] = nil;
 				nearPed->m_numNearPeds--;
 			} else
 				j++;
