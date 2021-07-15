@@ -189,16 +189,29 @@ CustomFrontendOptionsPopulate(void)
 #endif
 
 #ifdef LOAD_INI_SETTINGS
-#include "ini_parser.hpp"
+#define MINI_CASE_SENSITIVE
+#include "ini.h"
 
-linb::ini cfg;
+mINI::INIFile ini("reVC.ini");
+mINI::INIStructure cfg;
+
 bool ReadIniIfExists(const char *cat, const char *key, uint32 *out)
 {
-	std::string strval = cfg.get(cat, key, "\xBA");
-	const char *value = strval.c_str();
-	char *endPtr;
-	if (value && value[0] != '\xBA') {
-		*out = strtoul(value, &endPtr, 0);
+	mINI::INIMap<std::string> section = cfg.get(cat);
+	if (section.has(key)) {
+		char *endPtr;
+		*out = strtoul(section.get(key).c_str(), &endPtr, 0);
+		return true;
+	}
+	return false;
+}
+
+bool ReadIniIfExists(const char *cat, const char *key, uint8 *out)
+{
+	mINI::INIMap<std::string> section = cfg.get(cat);
+	if (section.has(key)) {
+		char *endPtr;
+		*out = strtoul(section.get(key).c_str(), &endPtr, 0);
 		return true;
 	}
 	return false;
@@ -206,11 +219,10 @@ bool ReadIniIfExists(const char *cat, const char *key, uint32 *out)
 
 bool ReadIniIfExists(const char *cat, const char *key, bool *out)
 {
-	std::string strval = cfg.get(cat, key, "\xBA");
-	const char *value = strval.c_str();
-	char *endPtr;
-	if (value && value[0] != '\xBA') {
-		*out = strtoul(value, &endPtr, 0);
+	mINI::INIMap<std::string> section = cfg.get(cat);
+	if (section.has(key)) {
+		char *endPtr;
+		*out = strtoul(section.get(key).c_str(), &endPtr, 0);
 		return true;
 	}
 	return false;
@@ -218,11 +230,10 @@ bool ReadIniIfExists(const char *cat, const char *key, bool *out)
 
 bool ReadIniIfExists(const char *cat, const char *key, int32 *out)
 {
-	std::string strval = cfg.get(cat, key, "\xBA");
-	const char *value = strval.c_str();
-	char *endPtr;
-	if (value && value[0] != '\xBA') {
-		*out = strtol(value, &endPtr, 0);
+	mINI::INIMap<std::string> section = cfg.get(cat);
+	if (section.has(key)) {
+		char *endPtr;
+		*out = strtol(section.get(key).c_str(), &endPtr, 0);
 		return true;
 	}
 	return false;
@@ -230,11 +241,10 @@ bool ReadIniIfExists(const char *cat, const char *key, int32 *out)
 
 bool ReadIniIfExists(const char *cat, const char *key, int8 *out)
 {
-	std::string strval = cfg.get(cat, key, "\xBA");
-	const char *value = strval.c_str();
-	char *endPtr;
-	if (value && value[0] != '\xBA') {
-		*out = strtol(value, &endPtr, 0);
+	mINI::INIMap<std::string> section = cfg.get(cat);
+	if (section.has(key)) {
+		char *endPtr;
+		*out = strtol(section.get(key).c_str(), &endPtr, 0);
 		return true;
 	}
 	return false;
@@ -242,10 +252,10 @@ bool ReadIniIfExists(const char *cat, const char *key, int8 *out)
 
 bool ReadIniIfExists(const char *cat, const char *key, float *out)
 {
-	std::string strval = cfg.get(cat, key, "\xBA");
-	const char *value = strval.c_str();
-	if (value && value[0] != '\xBA') {
-		*out = atof(value);
+	mINI::INIMap<std::string> section = cfg.get(cat);
+	if (section.has(key)) {
+		char *endPtr;
+		*out = strtof(section.get(key).c_str(), &endPtr);
 		return true;
 	}
 	return false;
@@ -253,10 +263,10 @@ bool ReadIniIfExists(const char *cat, const char *key, float *out)
 
 bool ReadIniIfExists(const char *cat, const char *key, char *out, int size)
 {
-	std::string strval = cfg.get(cat, key, "\xBA");
-	const char *value = strval.c_str();
-	if (value && value[0] != '\xBA') {
-		strncpy(out, value, size);
+	mINI::INIMap<std::string> section = cfg.get(cat);
+	if (section.has(key)) {
+		strncpy(out, section.get(key).c_str(), size - 1);
+		out[size - 1] = '\0';
 		return true;
 	}
 	return false;
@@ -264,42 +274,42 @@ bool ReadIniIfExists(const char *cat, const char *key, char *out, int size)
 
 void StoreIni(const char *cat, const char *key, uint32 val)
 {
-	char temp[10];
-sprintf(temp, "%u", val);
-	cfg.set(cat, key, temp);
+	char temp[11];
+	sprintf(temp, "%u", val);
+	cfg[cat][key] = temp;
 }
 
 void StoreIni(const char *cat, const char *key, uint8 val)
 {
-	char temp[10];
-	sprintf(temp, "%u", (uint32)val);
-	cfg.set(cat, key, temp);
+	char temp[11];
+	sprintf(temp, "%u", val);
+	cfg[cat][key] = temp;
 }
 
 void StoreIni(const char *cat, const char *key, int32 val)
 {
-	char temp[10];
+	char temp[11];
 	sprintf(temp, "%d", val);
-	cfg.set(cat, key, temp);
+	cfg[cat][key] = temp;
 }
 
 void StoreIni(const char *cat, const char *key, int8 val)
 {
-	char temp[10];
-	sprintf(temp, "%d", (int32)val);
-	cfg.set(cat, key, temp);
+	char temp[11];
+	sprintf(temp, "%d", val);
+	cfg[cat][key] = temp;
 }
 
 void StoreIni(const char *cat, const char *key, float val)
 {
-	char temp[10];
+	char temp[50];
 	sprintf(temp, "%f", val);
-	cfg.set(cat, key, temp);
+	cfg[cat][key] = temp;
 }
 
 void StoreIni(const char *cat, const char *key, char *val, int size)
 {
-	cfg.set(cat, key, val);
+	cfg[cat][key] = val;
 }
 
 const char *iniControllerActions[] = { "PED_FIREWEAPON", "PED_CYCLE_WEAPON_RIGHT", "PED_CYCLE_WEAPON_LEFT", "GO_FORWARD", "GO_BACK", "GO_LEFT", "GO_RIGHT", "PED_SNIPER_ZOOM_IN",
@@ -361,7 +371,7 @@ void LoadINIControllerSettings()
 #endif
 	// force to default GTA behaviour (never overwrite bindings on joy change/initialization) if user init'ed/set bindings before we introduced that
 	if (!ReadIniIfExists("Controller", "PadButtonsInited", &ControlsManager.ms_padButtonsInited)) {
-		ControlsManager.ms_padButtonsInited = cfg.category_size("Bindings") != 0 ? 16 : 0;
+		ControlsManager.ms_padButtonsInited = cfg.get("Bindings").size() != 0 ? 16 : 0;
 	}
 
 	for (int32 i = 0; i < MAX_CONTROLLERACTIONS; i++) {
@@ -463,12 +473,13 @@ void SaveINIControllerSettings()
 #endif
 #endif
 	StoreIni("Controller", "PadButtonsInited", ControlsManager.ms_padButtonsInited);
-	cfg.write_file("reVC.ini");
+
+	ini.write(cfg);
 }
 
 bool LoadINISettings()
 {
-	if (!cfg.load_file("reVC.ini"))
+	if (!ini.read(cfg))
 		return false;
 
 #ifdef IMPROVED_VIDEOMODE
@@ -540,7 +551,7 @@ bool LoadINISettings()
 #endif
 
 #ifdef CUSTOM_FRONTEND_OPTIONS
-	bool migrate = cfg.category_size("FrontendOptions") != 0;
+	bool migrate = cfg.get("FrontendOptions").size() != 0;
 	for (int i = 0; i < MENUPAGES; i++) {
 		for (int j = 0; j < NUM_MENUROWS; j++) {
 			CMenuScreenCustom::CMenuEntry &option = aScreens[i].m_aEntries[j];
@@ -553,7 +564,7 @@ bool LoadINISettings()
 
 				// Migrate from old .ini to new .ini
 				if (migrate && ReadIniIfExists("FrontendOptions", option.m_CFO->save, option.m_CFO->value))
-					cfg.remove("FrontendOptions", option.m_CFO->save);
+					cfg["FrontendOptions"].remove(option.m_CFO->save);
 				else
 					ReadIniIfExists(option.m_CFO->saveCat, option.m_CFO->save, option.m_CFO->value);
 
@@ -652,7 +663,7 @@ void SaveINISettings()
 	}
 #endif
 
-	cfg.write_file("reVC.ini");
+	ini.write(cfg);
 }
 
 #endif
