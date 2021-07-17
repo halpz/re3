@@ -78,7 +78,7 @@ public:
 class CFerry : public CVehicle
 {
 public:
-	uint16 m_nFerryId;
+	int16 m_nFerryId;
 	uint16 m_isFarAway;
 	uint16 m_nCurTrackNode;
 	float m_fSpeed;

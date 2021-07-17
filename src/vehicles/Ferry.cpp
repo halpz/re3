@@ -103,8 +103,8 @@ void CFerry::Init(void* pInstancePtr)
 		float t = 0.0f;
 		for (i = 0; i < pPath->NumTrackNodes; i++) {
 			pPath->aTrackNodes[i].t = t;
-			t += Sqrt(SQR(pPath->aTrackNodes[(i + 1) % pPath->NumTrackNodes].x - pPath->aTrackNodes[i].x)) +
-				(SQR(pPath->aTrackNodes[(i + 1) % pPath->NumTrackNodes].y - pPath->aTrackNodes[i].y));
+			t += Sqrt(SQR(pPath->aTrackNodes[(i + 1) % pPath->NumTrackNodes].x - pPath->aTrackNodes[i].x) +
+				(SQR(pPath->aTrackNodes[(i + 1) % pPath->NumTrackNodes].y - pPath->aTrackNodes[i].y)));
 		}
 		pPath->TotalLengthOfTrack = t;
 
