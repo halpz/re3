@@ -457,7 +457,7 @@ CFireManager::StartScriptFire(const CVector &pos, CEntity *target, float strengt
 	if (target) {
 		if (target->IsPed()) {
 			ped->m_pFire = fire;
-			if (target != (CVehicle *)FindPlayerPed()) {
+			if (target != FindPlayerPed()) {
 				CVector2D pos = target->GetPosition();
 				ped->SetFlee(pos, 10000);
 				ped->SetMoveAnim();

@@ -18115,7 +18115,7 @@ POLISH
 RUSSIAN
 
 { new display menus }
-[FET_GRA]
+[FET_GFX]
 Graphics Setup
 
 [FED_MIP]
@@ -18165,7 +18165,7 @@ FREE CAM:
 
 { Linux joy detection }
 [FEC_JOD]
-DETECT JOYSTICK
+Detect Joystick
 
 [FEC_JPR]
 Press any key on the joystick of your choice that you want to use on the game, and it will be selected.
@@ -18219,11 +18219,41 @@ PS2
 [FEM_XBX]
 XBOX
 
+[FEM_NON]
+NONE
+
 [FEC_IVP]
 INVERT PAD VERTICALLY
 
-[FEM_NON]
-NONE
+[FEC_DS2]
+DUALSHOCK 2
+
+[FEC_DS3]
+DUALSHOCK 3
+
+[FEC_DS4]
+DUALSHOCK 4
+
+[FEC_360]
+XBOX 360 CONTROLLER
+
+[FEC_ONE]
+XBOX ONE CONTROLLER
+
+[FEC_TYP]
+GAMEPAD TYPE
+
+[FET_AGS]
+Gamepad Settings
+
+[FEM_AUT] { aspect ratio related }
+AUTO
+
+[FEM_PED]
+PED DENSITY
+
+[FEM_CAR]
+CAR DENSITY
 
 [DUMMY]
 THIS LABEL NEEDS TO BE HERE !!!
