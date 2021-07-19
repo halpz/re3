@@ -2306,6 +2306,9 @@ void CGarages::Save(uint8 * buf, uint32 * size)
 #else
 	* size = 5484;
 #endif
+#if !defined THIS_IS_STUPID && !defined FIX_GARAGE_SIZE && defined COMPATIBLE_SAVES
+	memset(buf + 5240, 0, *size - 5240); // garbage data is written otherwise
+#endif
 	CloseHideOutGaragesBeforeSave();
 	WriteSaveBuf(buf, NumGarages);
 	WriteSaveBuf(buf, (uint32)BombsAreFree);
