@@ -2618,6 +2618,9 @@ void CGarages::Save(uint8 * buf, uint32 * size)
 //INITSAVEBUF
 	*size = 10692; // for some reason it's not actual size again
 	//*size = (6 * sizeof(uint32) + TOTAL_COLLECTCARS_GARAGES * sizeof(*CarTypesCollected) + sizeof(uint32) + TOTAL_HIDEOUT_GARAGES * NUM_GARAGE_STORED_CARS * sizeof(CStoredCar) + NUM_GARAGES * sizeof(CGarage));
+#if !defined THIS_IS_STUPID && defined COMPATIBLE_SAVES
+	memset(buf + 7340, 0, *size - 7340); // garbage data is written otherwise
+#endif
 	CloseHideOutGaragesBeforeSave();
 	WriteSaveBuf(buf, NumGarages);
 	WriteSaveBuf(buf, (uint32)BombsAreFree);
