@@ -2955,7 +2955,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 				CPed *pPed = params.m_pVehicle->pDriver;
 				if(!pPed)
 					break;
-				if(!pPed->HasWeaponSlot(WEAPONSLOT_SUBMACHINEGUN)) {
+				if(!pPed->HasWeaponSlot(WEAPONSLOT_SUBMACHINEGUN) || (params.m_pVehicle->GetModelIndex() == MI_PREDATOR && !pPed->IsPedDoingDriveByShooting())) {
 					sampleIndex = SFX_UZI_LEFT;
 					frequency = SampleManager.GetSampleBaseFrequency(sampleIndex);
 					frequency += RandomDisplacement(frequency / 32);
