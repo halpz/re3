@@ -1913,7 +1913,7 @@ bool CRunningScript::CheckDamagedWeaponType(int32 actual, int32 type)
 	if (type == WEAPONTYPE_ANYMELEE) {
 		if (actual <= WEAPONTYPE_CHAINSAW)
 			return true;
-		if (actual - WEAPONTYPE_GRENADE <= WEAPONTYPE_MINIGUN)
+		if (actual >= WEAPONTYPE_GRENADE && actual <= WEAPONTYPE_UNIDENTIFIED)
 			return false;
 		return false;
 	}
