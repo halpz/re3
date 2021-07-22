@@ -3009,7 +3009,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 							lowerSpeedLimit *= 1.5f;
 						}
 						CAnimBlendAssociation *fallAnim = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_FALL);
-						if (!bWasStanding && speed > upperSpeedLimit && (!bPushedAlongByCar || m_vecMoveSpeed.z < lowerSpeedLimit)
+						if (!bWasStanding && ((speed > upperSpeedLimit && !bPushedAlongByCar) || (m_vecMoveSpeed.z < lowerSpeedLimit))
 							&& m_pCollidingEntity != collidingEnt) {
 
 							float damage = 100.0f * Max(speed - 0.25f, 0.0f);
