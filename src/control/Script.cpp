@@ -1771,20 +1771,12 @@ int scriptToLoad = 0;
 
 int open_script()
 {
-	// glfwGetKey doesn't work because of CGame::Initialise is blocking
-	CPad::UpdatePads();
-	if (CPad::GetPad(0)->GetChar('G'))
-		scriptToLoad = 0;
-	if (CPad::GetPad(0)->GetChar('R'))
-		scriptToLoad = 1;
-	if (CPad::GetPad(0)->GetChar('D'))
-		scriptToLoad = 2;
 	switch (scriptToLoad) {
-	case 0: return CFileMgr::OpenFile("main.scm", "rb");
-	case 1: return CFileMgr::OpenFile("main_freeroam.scm", "rb");
-	case 2: return CFileMgr::OpenFile("main_d.scm", "rb");
+	case 0: return CFileMgr::OpenFile("data\\main.scm", "rb");
+	case 1: return CFileMgr::OpenFile("data\\main_freeroam.scm", "rb");
+	case 2: return CFileMgr::OpenFile("data\\main_d.scm", "rb");
 	}
-	return CFileMgr::OpenFile("main.scm", "rb");
+	return CFileMgr::OpenFile("data\\main.scm", "rb");
 }
 #endif
 
@@ -1800,10 +1792,16 @@ void CTheScripts::Init()
 	MissionCleanUp.Init();
 	UpsideDownCars.Init();
 	StuckCars.Init();
-	CFileMgr::SetDir("data");
 #ifdef USE_DEBUG_SCRIPT_LOADER
+	// glfwGetKey doesn't work because of CGame::Initialise is blocking
+	CPad::UpdatePads();
+	if(CPad::GetPad(0)->GetChar('G')) scriptToLoad = 0;
+	if(CPad::GetPad(0)->GetChar('R')) scriptToLoad = 1;
+	if(CPad::GetPad(0)->GetChar('D')) scriptToLoad = 2;
+
 	int mainf = open_script();
 #else
+	CFileMgr::SetDir("data");
 	int mainf = CFileMgr::OpenFile("main.scm", "rb");
 #endif
 	CFileMgr::Read(mainf, (char*)ScriptSpace, SIZE_MAIN_SCRIPT);
@@ -4392,7 +4390,11 @@ CTheScripts::SwitchToMission(int32 mission)
 	CTimer::Suspend();
 	int offset = CTheScripts::MultiScriptArray[mission];
 	CFileMgr::ChangeDir("\\");
+#ifdef USE_DEBUG_SCRIPT_LOADER
+	int handle = open_script();
+#else
 	int handle = CFileMgr::OpenFile("data\\main.scm", "rb");
+#endif
 	CFileMgr::Seek(handle, offset, 0);
 	CFileMgr::Read(handle, (const char*)&CTheScripts::ScriptSpace[SIZE_MAIN_SCRIPT], SIZE_MISSION_SCRIPT);
 	CFileMgr::CloseFile(handle);

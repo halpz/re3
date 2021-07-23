@@ -259,7 +259,7 @@ enum Config {
 
 #define FIX_BUGS		// fixes bugs that we've came across during reversing. You can undefine this only on release builds.
 #define MORE_LANGUAGES		// Add more translations to the game
-#define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible, and keeps saves compatible between platforms
+#define COMPATIBLE_SAVES // this allows changing structs while keeping saves compatible, and keeps saves compatible between platforms, needs to be enabled on 64bit builds!
 #define FIX_INCOMPATIBLE_SAVES // try to fix incompatible saves, requires COMPATIBLE_SAVES
 #define LOAD_INI_SETTINGS // as the name suggests. fundamental for CUSTOM_FRONTEND_OPTIONS
 
@@ -420,7 +420,7 @@ enum Config {
 #define RADIO_SCROLL_TO_PREV_STATION
 #define AUDIO_CACHE
 #define PS2_AUDIO_CHANNELS // increases the maximum number of audio channels to PS2 value of 44 (PC has 28 originally)
-//#define PS2_AUDIO_PATHS // changes audio paths for cutscenes and radio to PS2 paths (needs vbdec on MSS builds)
+#define PS2_AUDIO_PATHS // changes audio paths for cutscenes and radio to PS2 paths (needs vbdec on MSS builds)
 //#define AUDIO_OAL_USE_SNDFILE // use libsndfile to decode WAVs instead of our internal decoder
 #define AUDIO_OAL_USE_MPG123 // use mpg123 to support mp3 files
 #define PAUSE_RADIO_IN_FRONTEND // pause radio when game is paused

@@ -320,6 +320,14 @@ CPed::SetAttack(CEntity *victim)
 				((CPlayerPed*)this)->m_fFPSMoveHeading = TheCamera.Find3rdPersonQuickAimPitch();
 		}
 	}
+#ifdef FIX_BUGS
+	// fix aiming for flamethrower while using PC controls
+	else if (GetWeapon()->m_eWeaponType == WEAPONTYPE_FLAMETHROWER && TheCamera.Cams[0].Using3rdPersonMouseCam() && this == FindPlayerPed())
+	{
+		SetAimFlag(m_fRotationCur);
+		((CPlayerPed*)this)->m_fFPSMoveHeading = TheCamera.Find3rdPersonQuickAimPitch();
+	}
+#endif
 	if (m_nPedState == PED_ATTACK) {
 		bIsAttacking = true;
 		return;
