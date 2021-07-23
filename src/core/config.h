@@ -274,6 +274,9 @@ enum Config {
 
 #define NO_MOVIES	// add option to disable intro videos
 
+#define EXTENDED_OFFSCREEN_DESPAWN_RANGE // Use onscreen despawn range for offscreen peds and vehicles to avoid them despawning in the distance when you look
+                                         // away
+
 #if defined(__LP64__) || defined(_WIN64)
 #define FIX_BUGS_64 // Must have fixes to be able to run 64 bit build
 #endif
@@ -449,6 +452,7 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 	#undef PS2_ALPHA_TEST
 	#undef NO_ISLAND_LOADING
 	#undef PS2_AUDIO_CHANNELS
+	#undef EXTENDED_OFFSCREEN_DESPAWN_RANGE
 #endif
 
 // if these defines are enabled saves are not vanilla compatible without COMPATIBLE_SAVES
