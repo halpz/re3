@@ -2362,12 +2362,12 @@ CPed::ProcessControl(void)
 						} else {
 							obstacleForFlyingOtherDirZ = 501.0f;
 						}
-						uint8 flyDir = 0;
+						int16 flyDir = 0;
 						float feetZ = GetPosition().z - FEET_OFFSET;
 #ifdef FIX_BUGS
-						if (obstacleForFlyingZ > feetZ && obstacleForFlyingOtherDirZ < 501.0f)
+						if (obstacleForFlyingZ > feetZ && obstacleForFlyingZ < 500.0f)
 							flyDir = 1;
-						else if (obstacleForFlyingOtherDirZ > feetZ && obstacleForFlyingZ < 500.0f)
+						else if (obstacleForFlyingOtherDirZ > feetZ && obstacleForFlyingOtherDirZ < 501.0f)
 							flyDir = 2;
 #else
 						if ((obstacleForFlyingZ > feetZ && obstacleForFlyingOtherDirZ < 500.0f) || (obstacleForFlyingZ > feetZ && obstacleForFlyingOtherDirZ > feetZ))
@@ -2376,8 +2376,8 @@ CPed::ProcessControl(void)
 							flyDir = 2;
 #endif
 
-						if (flyDir != 0 && !bHeadStuckInCollision) {
-							SetPosition((flyDir == 2 ? obstacleForFlyingOtherDir.point : obstacleForFlying.point));
+						if (flyDir > 0 && !bHeadStuckInCollision) {
+							GetMatrix().SetTranslateOnly(flyDir == 2 ? obstacleForFlyingOtherDir.point : obstacleForFlying.point);
 							GetMatrix().GetPosition().z += FEET_OFFSET;
 							GetMatrix().UpdateRW();
 							SetLanding();
@@ -3009,7 +3009,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 							lowerSpeedLimit *= 1.5f;
 						}
 						CAnimBlendAssociation *fallAnim = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_FALL);
-						if (!bWasStanding && speed > upperSpeedLimit && (!bPushedAlongByCar || m_vecMoveSpeed.z < lowerSpeedLimit)
+						if (!bWasStanding && ((speed > upperSpeedLimit && !bPushedAlongByCar) || (m_vecMoveSpeed.z < lowerSpeedLimit))
 							&& m_pCollidingEntity != collidingEnt) {
 
 							float damage = 100.0f * Max(speed - 0.25f, 0.0f);
