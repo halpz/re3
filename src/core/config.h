@@ -265,6 +265,9 @@ enum Config {
 
 #define NO_MOVIES	// add option to disable intro videos
 
+#define EXTENDED_OFFSCREEN_DESPAWN_RANGE // Use onscreen despawn range for offscreen peds and vehicles to avoid them despawning in the distance when you look
+                                         // away
+
 #if defined(__LP64__) || defined(_WIN64)
 #define FIX_BUGS_64 // Must have fixes to be able to run 64 bit build
 #endif
@@ -450,6 +453,7 @@ enum Config {
 	#undef PS2_ALPHA_TEST
 	#undef NO_ISLAND_LOADING
 	#undef PS2_AUDIO_CHANNELS
+	#undef EXTENDED_OFFSCREEN_DESPAWN_RANGE
 	#define PC_PARTICLE
 	#define VC_PED_PORTS // To not process collisions always. But should be tested if that's really beneficial
 	#define VC_RAIN_NERF // Reduces number of rain particles

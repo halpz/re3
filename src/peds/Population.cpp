@@ -1126,13 +1126,16 @@ CPopulation::ManagePopulation(void)
 			bool pedIsFarAway = false;
 			if (PedCreationDistMultiplier() * (PED_REMOVE_DIST_SPECIAL * TheCamera.GenerationDistMultiplier) < dist
 				|| (!ped->bCullExtraFarAway && PedCreationDistMultiplier() * PED_REMOVE_DIST * TheCamera.GenerationDistMultiplier < dist)
+#ifndef EXTENDED_OFFSCREEN_DESPAWN_RANGE
 				|| (PedCreationDistMultiplier() * (MIN_CREATION_DIST + CREATION_RANGE) * OFFSCREEN_CREATION_MULT < dist
 				&& !ped->GetIsOnScreen()
 				&& TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::MODE_SNIPER
 				&& TheCamera.Cams[TheCamera.ActiveCam].Mode != CCam::MODE_SNIPER_RUNABOUT
 				&& !TheCamera.Cams[TheCamera.ActiveCam].LookingLeft
 				&& !TheCamera.Cams[TheCamera.ActiveCam].LookingRight
-				&& !TheCamera.Cams[TheCamera.ActiveCam].LookingBehind))
+				&& !TheCamera.Cams[TheCamera.ActiveCam].LookingBehind)
+#endif
+				)
 				pedIsFarAway = true;
 
 			if (!pedIsFarAway)
