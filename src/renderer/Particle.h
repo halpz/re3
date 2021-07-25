@@ -91,6 +91,8 @@ public:
 	
 	static void HandleShipsAtHorizonStuff();
 	static void HandleShootableBirdsStuff(CEntity *entity, CVector const&camPos);
+
+	static void SetPixelData();
 };
 
 extern RwRaster *gpCarSplashRaster[];

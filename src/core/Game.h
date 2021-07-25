@@ -62,7 +62,7 @@ public:
 	static void FinalShutdown(void);
 	static bool Initialise(const char *datFile);
 	static bool ShutDown(void);
-	static void ReInitGameObjectVariables(void);
+	static bool ReInitGameObjectVariables(bool);
 	static void ReloadIPLs(void);
 	static void ShutDownForRestart(void);
 	static void InitialiseWhenRestarting(void);

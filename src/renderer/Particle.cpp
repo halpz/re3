@@ -512,317 +512,321 @@ void CParticle::Initialise()
 	gpFireHoseRaster = RwTextureGetRaster(gpFireHoseTex);
 	
 	CTxdStore::PopCurrentTxd();
-	
-	for ( int32 i = 0; i < MAX_PARTICLES; i++ )
-	{
-		tParticleSystemData *entry = &mod_ParticleSystemManager.m_aParticles[i];
-		
-		switch( i )
-		{
-			case PARTICLE_SPARK:
-				entry->m_ppRaster = &gpRainDropSmallRaster;
-				break;
-				
-			case PARTICLE_SPARK_SMALL:
-				entry->m_ppRaster = &gpRainDropSmallRaster;
-				break;
-				
-			case PARTICLE_WATER_SPARK:
-				entry->m_ppRaster = &gpSparkRaster;
-				break;
-				
-			case PARTICLE_WHEEL_DIRT:
-				entry->m_ppRaster = &gpSmoke2Raster;
-				break;
-				
-			case PARTICLE_SAND:
-				entry->m_ppRaster = &gpSmoke2Raster;
-				break;
-				
-			case PARTICLE_WHEEL_WATER:
-				entry->m_ppRaster = gpSmokeRaster;
-				break;
-				
-			case PARTICLE_BLOOD:
-				entry->m_ppRaster = &gpBloodRaster;
-				break;
-				
-			case PARTICLE_BLOOD_SMALL:
-				entry->m_ppRaster = &gpBloodSmallRaster;
-				break;
-				
-			case PARTICLE_BLOOD_SPURT:
-				entry->m_ppRaster = &gpBloodSmallRaster;
-				break;
-				
-			case PARTICLE_DEBRIS:
-				entry->m_ppRaster = gpLeafRaster;
-				break;
-				
-			case PARTICLE_DEBRIS2:
-				entry->m_ppRaster = &gpGungeRaster;
-				break;
-				
-			case PARTICLE_FLYERS:
-				entry->m_ppRaster = &gpNewspaperRaster;
-				break;
-				
-			case PARTICLE_WATER:
-				entry->m_ppRaster = gpSmokeRaster;
-				break;
-				
-			case PARTICLE_FLAME:
-				entry->m_ppRaster = &gpFlame1Raster;
-				break;
-				
-			case PARTICLE_FIREBALL:
-				entry->m_ppRaster = &gpFlame5Raster;
-				break;
-				
-			case PARTICLE_GUNFLASH:
-				entry->m_ppRaster = gpGunFlashRaster;
-				break;
-				
-			case PARTICLE_GUNFLASH_NOANIM:
-				entry->m_ppRaster = gpGunFlashRaster;
-				break;
-				
-			case PARTICLE_GUNSMOKE:
-				entry->m_ppRaster = nil;
-				break;
-				
-			case PARTICLE_GUNSMOKE2:
-				entry->m_ppRaster = gpRubberRaster;
-				break;
-				
-			case PARTICLE_CIGARETTE_SMOKE:
-				entry->m_ppRaster = &gpGunSmokeRaster;
-				break;
-			
-			case PARTICLE_TEARGAS:
-				entry->m_ppRaster = &gpHeatHazeRaster;
-				break;
-
-			case PARTICLE_SMOKE:
-			case PARTICLE_SMOKE_SLOWMOTION:
-			case PARTICLE_DRY_ICE:
-				entry->m_ppRaster = gpSmokeRaster;
-				break;
-			
-			case PARTICLE_GARAGEPAINT_SPRAY:
-				entry->m_ppRaster = gpSmokeRaster;
-				break;
-				
-			case PARTICLE_SHARD:
-				entry->m_ppRaster = &gpRainDropRaster;
-				break;
-				
-			case PARTICLE_SPLASH:
-				entry->m_ppRaster = gpCarSplashRaster;
-				break;
-				
-			case PARTICLE_CARFLAME:
-				entry->m_ppRaster = &gpFlame1Raster;
-				break;
-				
-			case PARTICLE_STEAM:
-				entry->m_ppRaster = gpSmokeRaster;
-				break;
-				
-			case PARTICLE_STEAM2:
-				entry->m_ppRaster = &gpSmoke2Raster;
-				break;
-				
-			case PARTICLE_STEAM_NY:
-			case PARTICLE_STEAM_NY_SLOWMOTION:
-			case PARTICLE_GROUND_STEAM:
-			case PARTICLE_HYDRANT_STEAM:
-				entry->m_ppRaster = &gpSmoke2Raster;
-				break;
-				
-			case PARTICLE_ENGINE_STEAM:
-				entry->m_ppRaster = &gpSmoke2Raster;
-				break;
-				
-			case PARTICLE_RAINDROP:
-				entry->m_ppRaster = &gpRainDropRaster;
-				break;
-			
-			case PARTICLE_RAINDROP_SMALL:
-				entry->m_ppRaster = &gpRainDropSmallRaster;
-				break;
-				
-			case PARTICLE_RAIN_SPLASH:
-			case PARTICLE_RAIN_SPLASH_BIGGROW:
-				entry->m_ppRaster = gpRainSplashRaster;
-				break;
-			
-			case PARTICLE_RAIN_SPLASHUP:
-				entry->m_ppRaster = gpRainSplashupRaster;
-				break;
-			
-			case PARTICLE_WATERSPRAY:
-				entry->m_ppRaster = gpWatersprayRaster;
-				break;
-			
-			case PARTICLE_RAINDROP_2D:
-				entry->m_ppRaster = &gpRainDropRaster;
-				break;
-		
-			case PARTICLE_EXPLOSION_MEDIUM:
-				entry->m_ppRaster = gpExplosionMediumRaster;
-				break;
-			
-			case PARTICLE_EXPLOSION_LARGE:
-				entry->m_ppRaster = gpExplosionMediumRaster;
-				break;
-				
-			case PARTICLE_EXPLOSION_MFAST:
-				entry->m_ppRaster = gpExplosionMediumRaster;
-				break;
-		
-			case PARTICLE_EXPLOSION_LFAST:
-				entry->m_ppRaster = gpExplosionMediumRaster;
-				break;
-			
-			case PARTICLE_CAR_SPLASH:
-				entry->m_ppRaster = gpCarSplashRaster;
-				break;
-			
-			case PARTICLE_BOAT_SPLASH:
-				entry->m_ppRaster = &gpBoatWakeRaster;
-				break;
-			
-			case PARTICLE_BOAT_THRUSTJET:
-				entry->m_ppRaster = gpRubberRaster;
-				break;
-		
-			case PARTICLE_WATER_HYDRANT:
-				entry->m_ppRaster = gpCarSplashRaster;
-				break;
-			
-			case PARTICLE_WATER_CANNON:
-				entry->m_ppRaster = gpSmokeRaster;
-				break;
-			
-			case PARTICLE_EXTINGUISH_STEAM:
-				entry->m_ppRaster = gpSmokeRaster;
-				break;
-			
-			case PARTICLE_PED_SPLASH:
-				entry->m_ppRaster = gpCarSplashRaster;
-				break;
-			
-			case PARTICLE_PEDFOOT_DUST:
-				entry->m_ppRaster = &gpSmoke2Raster;
-				break;
-			
-			case PARTICLE_CAR_DUST:
-				entry->m_ppRaster = &gpSmoke2Raster;
-				break;
-			
-			case PARTICLE_HELI_DUST:
-				entry->m_ppRaster = gpSmokeRaster;
-				break;
-			
-			case PARTICLE_HELI_ATTACK:
-				entry->m_ppRaster = &gpRainDropSmallRaster;
-				break;
-			
-			case PARTICLE_ENGINE_SMOKE:
-				entry->m_ppRaster = &gpCloudRaster4;
-				break;
-			
-			case PARTICLE_ENGINE_SMOKE2:
-			case PARTICLE_ROCKET_SMOKE:
-				entry->m_ppRaster = &gpCloudRaster4;
-				break;
-			
-			case PARTICLE_CARFLAME_SMOKE:
-				entry->m_ppRaster = &gpCloudRaster4;
-				break;
-			
-			case PARTICLE_FIREBALL_SMOKE:
-				entry->m_ppRaster = &gpCloudRaster4;
-				break;
-			
-			case PARTICLE_PAINT_SMOKE:
-				entry->m_ppRaster = gpSmokeRaster;
-				break;
-			
-			case PARTICLE_TREE_LEAVES:
-				entry->m_ppRaster = gpLeafRaster;
-				break;
-			
-			case PARTICLE_CARCOLLISION_DUST:
-				entry->m_ppRaster = &gpCollisionSmokeRaster;
-				break;
-			
-			case PARTICLE_CAR_DEBRIS:
-			case PARTICLE_BIRD_DEBRIS:
-			case PARTICLE_HELI_DEBRIS:
-				entry->m_ppRaster = gpCarDebrisRaster;
-				break;
-			
-			case PARTICLE_EXHAUST_FUMES:
-				entry->m_ppRaster = &gpSmoke2Raster;
-				break;
-			
-			case PARTICLE_RUBBER_SMOKE:
-				entry->m_ppRaster = gpRubberRaster;
-				break;
-			
-			case PARTICLE_BURNINGRUBBER_SMOKE:
-				entry->m_ppRaster = &gpCollisionSmokeRaster;
-				break;
-			
-			case PARTICLE_BULLETHIT_SMOKE:
-				entry->m_ppRaster = gpSmokeRaster;
-				break;
-			
-			case PARTICLE_GUNSHELL_FIRST:
-				entry->m_ppRaster = &gpGunShellRaster;
-				break;
-			
-			case PARTICLE_GUNSHELL:
-				entry->m_ppRaster = &gpGunShellRaster;
-				break;
-			
-			case PARTICLE_GUNSHELL_BUMP1:
-				entry->m_ppRaster = &gpGunShellRaster;
-				break;
-			
-			case PARTICLE_GUNSHELL_BUMP2:
-				entry->m_ppRaster = &gpGunShellRaster;
-				break;
-			
-			case PARTICLE_TEST:
-				entry->m_ppRaster = &gpCloudRaster4;
-				break;
-			
-			case PARTICLE_BIRD_FRONT:
-				entry->m_ppRaster = gpBirdfrontRaster;
-				break;
-			
-			case PARTICLE_SHIP_SIDE:
-				entry->m_ppRaster = gpBoatRaster;
-				break;
-			
-			case PARTICLE_BEASTIE:
-				entry->m_ppRaster = &gpBeastieRaster;
-				break;
-			
-			case PARTICLE_FERRY_CHIM_SMOKE:
-				entry->m_ppRaster = gpSmokeRaster;
-				break;
-			
-			case PARTICLE_MULTIPLAYER_HIT:
-				entry->m_ppRaster = &gpMultiPlayerHitRaster;
-				break;
-		}
-	}
+	SetPixelData();
 
 	debug("CParticle ready");
+}
+
+void CParticle::SetPixelData()
+{
+	for (int32 i = 0; i < MAX_PARTICLES; i++)
+	{
+		tParticleSystemData* entry = &mod_ParticleSystemManager.m_aParticles[i];
+
+		switch (i)
+		{
+		case PARTICLE_SPARK:
+			entry->m_ppRaster = &gpRainDropSmallRaster;
+			break;
+
+		case PARTICLE_SPARK_SMALL:
+			entry->m_ppRaster = &gpRainDropSmallRaster;
+			break;
+
+		case PARTICLE_WATER_SPARK:
+			entry->m_ppRaster = &gpSparkRaster;
+			break;
+
+		case PARTICLE_WHEEL_DIRT:
+			entry->m_ppRaster = &gpSmoke2Raster;
+			break;
+
+		case PARTICLE_SAND:
+			entry->m_ppRaster = &gpSmoke2Raster;
+			break;
+
+		case PARTICLE_WHEEL_WATER:
+			entry->m_ppRaster = gpSmokeRaster;
+			break;
+
+		case PARTICLE_BLOOD:
+			entry->m_ppRaster = &gpBloodRaster;
+			break;
+
+		case PARTICLE_BLOOD_SMALL:
+			entry->m_ppRaster = &gpBloodSmallRaster;
+			break;
+
+		case PARTICLE_BLOOD_SPURT:
+			entry->m_ppRaster = &gpBloodSmallRaster;
+			break;
+
+		case PARTICLE_DEBRIS:
+			entry->m_ppRaster = gpLeafRaster;
+			break;
+
+		case PARTICLE_DEBRIS2:
+			entry->m_ppRaster = &gpGungeRaster;
+			break;
+
+		case PARTICLE_FLYERS:
+			entry->m_ppRaster = &gpNewspaperRaster;
+			break;
+
+		case PARTICLE_WATER:
+			entry->m_ppRaster = gpSmokeRaster;
+			break;
+
+		case PARTICLE_FLAME:
+			entry->m_ppRaster = &gpFlame1Raster;
+			break;
+
+		case PARTICLE_FIREBALL:
+			entry->m_ppRaster = &gpFlame5Raster;
+			break;
+
+		case PARTICLE_GUNFLASH:
+			entry->m_ppRaster = gpGunFlashRaster;
+			break;
+
+		case PARTICLE_GUNFLASH_NOANIM:
+			entry->m_ppRaster = gpGunFlashRaster;
+			break;
+
+		case PARTICLE_GUNSMOKE:
+			entry->m_ppRaster = nil;
+			break;
+
+		case PARTICLE_GUNSMOKE2:
+			entry->m_ppRaster = gpRubberRaster;
+			break;
+
+		case PARTICLE_CIGARETTE_SMOKE:
+			entry->m_ppRaster = &gpGunSmokeRaster;
+			break;
+
+		case PARTICLE_TEARGAS:
+			entry->m_ppRaster = &gpHeatHazeRaster;
+			break;
+
+		case PARTICLE_SMOKE:
+		case PARTICLE_SMOKE_SLOWMOTION:
+		case PARTICLE_DRY_ICE:
+			entry->m_ppRaster = gpSmokeRaster;
+			break;
+
+		case PARTICLE_GARAGEPAINT_SPRAY:
+			entry->m_ppRaster = gpSmokeRaster;
+			break;
+
+		case PARTICLE_SHARD:
+			entry->m_ppRaster = &gpRainDropRaster;
+			break;
+
+		case PARTICLE_SPLASH:
+			entry->m_ppRaster = gpCarSplashRaster;
+			break;
+
+		case PARTICLE_CARFLAME:
+			entry->m_ppRaster = &gpFlame1Raster;
+			break;
+
+		case PARTICLE_STEAM:
+			entry->m_ppRaster = gpSmokeRaster;
+			break;
+
+		case PARTICLE_STEAM2:
+			entry->m_ppRaster = &gpSmoke2Raster;
+			break;
+
+		case PARTICLE_STEAM_NY:
+		case PARTICLE_STEAM_NY_SLOWMOTION:
+		case PARTICLE_GROUND_STEAM:
+		case PARTICLE_HYDRANT_STEAM:
+			entry->m_ppRaster = &gpSmoke2Raster;
+			break;
+
+		case PARTICLE_ENGINE_STEAM:
+			entry->m_ppRaster = &gpSmoke2Raster;
+			break;
+
+		case PARTICLE_RAINDROP:
+			entry->m_ppRaster = &gpRainDropRaster;
+			break;
+
+		case PARTICLE_RAINDROP_SMALL:
+			entry->m_ppRaster = &gpRainDropSmallRaster;
+			break;
+
+		case PARTICLE_RAIN_SPLASH:
+		case PARTICLE_RAIN_SPLASH_BIGGROW:
+			entry->m_ppRaster = gpRainSplashRaster;
+			break;
+
+		case PARTICLE_RAIN_SPLASHUP:
+			entry->m_ppRaster = gpRainSplashupRaster;
+			break;
+
+		case PARTICLE_WATERSPRAY:
+			entry->m_ppRaster = gpWatersprayRaster;
+			break;
+
+		case PARTICLE_RAINDROP_2D:
+			entry->m_ppRaster = &gpRainDropRaster;
+			break;
+
+		case PARTICLE_EXPLOSION_MEDIUM:
+			entry->m_ppRaster = gpExplosionMediumRaster;
+			break;
+
+		case PARTICLE_EXPLOSION_LARGE:
+			entry->m_ppRaster = gpExplosionMediumRaster;
+			break;
+
+		case PARTICLE_EXPLOSION_MFAST:
+			entry->m_ppRaster = gpExplosionMediumRaster;
+			break;
+
+		case PARTICLE_EXPLOSION_LFAST:
+			entry->m_ppRaster = gpExplosionMediumRaster;
+			break;
+
+		case PARTICLE_CAR_SPLASH:
+			entry->m_ppRaster = gpCarSplashRaster;
+			break;
+
+		case PARTICLE_BOAT_SPLASH:
+			entry->m_ppRaster = &gpBoatWakeRaster;
+			break;
+
+		case PARTICLE_BOAT_THRUSTJET:
+			entry->m_ppRaster = gpRubberRaster;
+			break;
+
+		case PARTICLE_WATER_HYDRANT:
+			entry->m_ppRaster = gpCarSplashRaster;
+			break;
+
+		case PARTICLE_WATER_CANNON:
+			entry->m_ppRaster = gpSmokeRaster;
+			break;
+
+		case PARTICLE_EXTINGUISH_STEAM:
+			entry->m_ppRaster = gpSmokeRaster;
+			break;
+
+		case PARTICLE_PED_SPLASH:
+			entry->m_ppRaster = gpCarSplashRaster;
+			break;
+
+		case PARTICLE_PEDFOOT_DUST:
+			entry->m_ppRaster = &gpSmoke2Raster;
+			break;
+
+		case PARTICLE_CAR_DUST:
+			entry->m_ppRaster = &gpSmoke2Raster;
+			break;
+
+		case PARTICLE_HELI_DUST:
+			entry->m_ppRaster = gpSmokeRaster;
+			break;
+
+		case PARTICLE_HELI_ATTACK:
+			entry->m_ppRaster = &gpRainDropSmallRaster;
+			break;
+
+		case PARTICLE_ENGINE_SMOKE:
+			entry->m_ppRaster = &gpCloudRaster4;
+			break;
+
+		case PARTICLE_ENGINE_SMOKE2:
+		case PARTICLE_ROCKET_SMOKE:
+			entry->m_ppRaster = &gpCloudRaster4;
+			break;
+
+		case PARTICLE_CARFLAME_SMOKE:
+			entry->m_ppRaster = &gpCloudRaster4;
+			break;
+
+		case PARTICLE_FIREBALL_SMOKE:
+			entry->m_ppRaster = &gpCloudRaster4;
+			break;
+
+		case PARTICLE_PAINT_SMOKE:
+			entry->m_ppRaster = gpSmokeRaster;
+			break;
+
+		case PARTICLE_TREE_LEAVES:
+			entry->m_ppRaster = gpLeafRaster;
+			break;
+
+		case PARTICLE_CARCOLLISION_DUST:
+			entry->m_ppRaster = &gpCollisionSmokeRaster;
+			break;
+
+		case PARTICLE_CAR_DEBRIS:
+		case PARTICLE_BIRD_DEBRIS:
+		case PARTICLE_HELI_DEBRIS:
+			entry->m_ppRaster = gpCarDebrisRaster;
+			break;
+
+		case PARTICLE_EXHAUST_FUMES:
+			entry->m_ppRaster = &gpSmoke2Raster;
+			break;
+
+		case PARTICLE_RUBBER_SMOKE:
+			entry->m_ppRaster = gpRubberRaster;
+			break;
+
+		case PARTICLE_BURNINGRUBBER_SMOKE:
+			entry->m_ppRaster = &gpCollisionSmokeRaster;
+			break;
+
+		case PARTICLE_BULLETHIT_SMOKE:
+			entry->m_ppRaster = gpSmokeRaster;
+			break;
+
+		case PARTICLE_GUNSHELL_FIRST:
+			entry->m_ppRaster = &gpGunShellRaster;
+			break;
+
+		case PARTICLE_GUNSHELL:
+			entry->m_ppRaster = &gpGunShellRaster;
+			break;
+
+		case PARTICLE_GUNSHELL_BUMP1:
+			entry->m_ppRaster = &gpGunShellRaster;
+			break;
+
+		case PARTICLE_GUNSHELL_BUMP2:
+			entry->m_ppRaster = &gpGunShellRaster;
+			break;
+
+		case PARTICLE_TEST:
+			entry->m_ppRaster = &gpCloudRaster4;
+			break;
+
+		case PARTICLE_BIRD_FRONT:
+			entry->m_ppRaster = gpBirdfrontRaster;
+			break;
+
+		case PARTICLE_SHIP_SIDE:
+			entry->m_ppRaster = gpBoatRaster;
+			break;
+
+		case PARTICLE_BEASTIE:
+			entry->m_ppRaster = &gpBeastieRaster;
+			break;
+
+		case PARTICLE_FERRY_CHIM_SMOKE:
+			entry->m_ppRaster = gpSmokeRaster;
+			break;
+
+		case PARTICLE_MULTIPLAYER_HIT:
+			entry->m_ppRaster = &gpMultiPlayerHitRaster;
+			break;
+		}
+	}
 }
 
 void CParticle::Shutdown()

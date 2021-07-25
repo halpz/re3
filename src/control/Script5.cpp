@@ -2114,8 +2114,8 @@ void CTheScripts::RenderTheScriptDebugLines()
 }
 */
 
-#define SCRIPT_DATA_SIZE sizeof(CTheScripts::OnAMissionFlag) +\
-	4 * sizeof(uint32) * MAX_NUM_BUILDING_SWAPS + 2 * sizeof(uint32) * MAX_NUM_INVISIBILITY_SETTINGS + 5 * sizeof(uint32)
+#define SCRIPT_DATA_SIZE sizeof(CTheScripts::OnAMissionFlag) + sizeof(tCollectiveData) * MAX_NUM_COLLECTIVES +\
+	4 * sizeof(uint32) * MAX_NUM_BUILDING_SWAPS + 2 * sizeof(uint32) * MAX_NUM_INVISIBILITY_SETTINGS + 4 * sizeof(uint32)
 
 void CTheScripts::SaveAllScripts(uint8* buf, uint32* size)
 {
@@ -2124,7 +2124,7 @@ INITSAVEBUF
 	uint32 runningScripts = 0;
 	for (CRunningScript* pScript = pActiveScripts; pScript; pScript = pScript->GetNext())
 		runningScripts++;
-	*size = CRunningScript::nSaveStructSize * runningScripts + varSpace + SCRIPT_DATA_SIZE + SAVE_HEADER_SIZE + 3 * sizeof(uint32);
+	*size = CRunningScript::nSaveStructSize * runningScripts + varSpace + SCRIPT_DATA_SIZE + SAVE_HEADER_SIZE + 5 * sizeof(uint32);
 	WriteSaveHeader(buf, 'S', 'C', 'R', '\0', *size - SAVE_HEADER_SIZE);
 	WriteSaveBuf(buf, varSpace);
 	for (uint32 i = 0; i < varSpace; i++)
@@ -2200,10 +2200,8 @@ INITSAVEBUF
 VALIDATESAVEBUF(*size)
 }
 
-// TODO: I don't really understand how script loading works, so I leave it the VC way for now.
 bool CTheScripts::LoadAllScripts(uint8* buf, uint32 size)
 {
-	Init(); // TODO: in LCS CTheScripts::Init call GenericLoad, which then calls LoadAllScripts
 INITSAVEBUF
 	CheckSaveHeader(buf, 'S', 'C', 'R', '\0', size - SAVE_HEADER_SIZE);
 	uint32 varSpace, type, handle;
@@ -2222,7 +2220,6 @@ INITSAVEBUF
 		else
 			SkipSaveBuf(buf, 1);
 	}
-	// everything else is... gone? TODO
 	ReadSaveBuf(&tmp, buf);
 	script_assert(tmp == SCRIPT_DATA_SIZE);
 	ReadSaveBuf(&OnAMissionFlag, buf);
@@ -2304,7 +2301,6 @@ INITSAVEBUF
 	ReadSaveBuf(&runningScripts, buf);
 	for (uint32 i = 0; i < runningScripts; i++)
 		CRunningScript().Load(buf);
-	StartTestScript(); // <- tmp hack
 	return true;
 VALIDATESAVEBUF(size)
 }

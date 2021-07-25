@@ -2262,8 +2262,10 @@ void CTheScripts::SwapNearestBuildingModel(float x, float y, float z, float radi
 		}
 	}
 	CBuilding* pReplacedBuilding = ((CBuilding*)pClosestEntity);
-	pReplacedBuilding->ReplaceWithNewModel(mi2);
-	AddToBuildingSwapArray(pReplacedBuilding, mi1, mi2);
+	if (pReplacedBuilding) {
+		pReplacedBuilding->ReplaceWithNewModel(mi2);
+		AddToBuildingSwapArray(pReplacedBuilding, mi1, mi2);
+	}
 }
 
 void CTheScripts::AddToBuildingSwapArray(CBuilding* pBuilding, int32 old_model, int32 new_model)
