@@ -36,6 +36,12 @@
 	#define SCALE_AND_CENTER_X_FIX(a) (a)
 #endif
 
+#ifdef FIX_BUGS
+#define FRAMECOUNTER CTimer::GetLogicalFrameCounter()
+#else
+#define FRAMECOUNTER CTimer::GetFrameCounter()
+#endif
+
 // Game has colors inlined in code.
 // For easier modification we collect them here:
 CRGBA MONEY_COLOR(0, 207, 133, 255);
@@ -559,12 +565,12 @@ void CHud::Draw()
 			CFont::SetDropShadowPosition(2);
 			CFont::SetDropColor(CRGBA(0, 0, 0, 255));
 
-			if (m_ItemToFlash == ITEM_HEALTH && CTimer::GetFrameCounter() & 8
+			if (m_ItemToFlash == ITEM_HEALTH && FRAMECOUNTER & 8
 				|| m_ItemToFlash != ITEM_HEALTH
 				|| playerPed->m_fHealth < 10
-				&& CTimer::GetFrameCounter() & 8) {
+				&& CTimer::FRAMECOUNTER & 8) {
 				if (playerPed->m_fHealth >= 10
-					|| playerPed->m_fHealth < 10 && CTimer::GetFrameCounter() & 8) {
+					|| playerPed->m_fHealth < 10 && FRAMECOUNTER & 8) {
 
 					AsciiToUnicode("{", sPrintIcon);
 #ifdef FIX_BUGS
@@ -578,7 +584,7 @@ void CHud::Draw()
 					if (FrontEndMenuManager.m_PrefsShowHud) {
 						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f), SCREEN_SCALE_Y(65.0f), sPrint);
 
-						if (!CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss || CTimer::GetTimeInMilliseconds() > CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss + 2000 || CTimer::GetFrameCounter() & 4) {
+						if (!CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss || CTimer::GetTimeInMilliseconds() > CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastHealthLoss + 2000 || FRAMECOUNTER & 4) {
 							// CFont::SetColor(HEALTH_COLOR);
 							CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 54.0f), SCREEN_SCALE_Y(65.0f), sPrintIcon);
 						}
@@ -589,7 +595,7 @@ void CHud::Draw()
 			/*
 				DrawArmour
 			*/
-			if (m_ItemToFlash == ITEM_ARMOUR && CTimer::GetFrameCounter() & 8 || m_ItemToFlash != ITEM_ARMOUR) {
+			if (m_ItemToFlash == ITEM_ARMOUR && FRAMECOUNTER & 8 || m_ItemToFlash != ITEM_ARMOUR) {
 				CFont::SetScale(SCREEN_SCALE_X(HUD_TEXT_SCALE_X), SCREEN_SCALE_Y(HUD_TEXT_SCALE_Y));
 				if (playerPed->m_fArmour > 1.0f) {
 					AsciiToUnicode("<", sPrintIcon);
@@ -605,7 +611,7 @@ void CHud::Draw()
 
 						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(182.0f), SCREEN_SCALE_Y(65.0f), sPrint);
 
-						if (!CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastArmourLoss || CTimer::GetTimeInMilliseconds() > CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastArmourLoss + 2000 || CTimer::GetFrameCounter() & 4) {
+						if (!CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastArmourLoss || CTimer::GetTimeInMilliseconds() > CWorld::Players[CWorld::PlayerInFocus].m_nTimeLastArmourLoss + 2000 || FRAMECOUNTER & 4) {
 							// CFont::SetColor(ARMOUR_COLOR);
 							CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(182.0f + 52.0f), SCREEN_SCALE_Y(65.0f), sPrintIcon);
 						}
@@ -639,13 +645,13 @@ void CHud::Draw()
 				if (FrontEndMenuManager.m_PrefsShowHud) {
 					if (playerPed->m_pWanted->GetWantedLevel() > i
 						&& (CTimer::GetTimeInMilliseconds() > playerPed->m_pWanted->m_nLastWantedLevelChange
-							+ 2000 || CTimer::GetFrameCounter() & 4)) {
+							+ 2000 || FRAMECOUNTER & 4)) {
 
 						WANTED_COLOR.a = alpha;
 						CFont::SetColor(WANTED_COLOR);
 						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
 
-					} else if (playerPed->m_pWanted->m_nMinWantedLevel > i && CTimer::GetFrameCounter() & 4) {
+					} else if (playerPed->m_pWanted->m_nMinWantedLevel > i && FRAMECOUNTER & 4) {
 						WANTED_COLOR_FLASH.a = alpha;
 						CFont::SetColor(WANTED_COLOR_FLASH);
 						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(110.0f + 23.0f * i), SCREEN_SCALE_Y(87.0f), sPrintIcon);
@@ -961,7 +967,7 @@ void CHud::Draw()
 						TimerFlashTimer = 0;
 				}
 
-				if (CTimer::GetFrameCounter() & 4 || TimerFlashTimer == 0) {
+				if (FRAMECOUNTER & 4 || TimerFlashTimer == 0) {
 					AsciiToUnicode(CUserDisplay::OnscnTimer.m_sClocks[0].m_aClockBuffer, sTimer);
 					CFont::SetPropOn();
 					CFont::SetBackgroundOff();
@@ -999,7 +1005,7 @@ void CHud::Draw()
 							CounterFlashTimer[i] = 0;
 					}
 
-					if (CTimer::GetFrameCounter() & 4 || CounterFlashTimer[i] == 0) {
+					if (FRAMECOUNTER & 4 || CounterFlashTimer[i] == 0) {
 						if (CUserDisplay::OnscnTimer.m_sCounters[i].m_nType == COUNTER_DISPLAY_NUMBER) {
 							AsciiToUnicode(CUserDisplay::OnscnTimer.m_sCounters[i].m_aCounterBuffer, sTimer);
 							CFont::SetPropOn();
@@ -1054,7 +1060,7 @@ void CHud::Draw()
 			DrawRadar
 		*/
 		if (FrontEndMenuManager.m_PrefsRadarMode != 2 &&
-			!m_HideRadar && (m_ItemToFlash == ITEM_RADAR && CTimer::GetFrameCounter() & 8 || m_ItemToFlash != ITEM_RADAR)) {
+			!m_HideRadar && (m_ItemToFlash == ITEM_RADAR && FRAMECOUNTER & 8 || m_ItemToFlash != ITEM_RADAR)) {
 
 			RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERNEAREST);
 			CRadar::DrawMap();

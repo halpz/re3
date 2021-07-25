@@ -478,7 +478,7 @@ DoGameSpecificStuffAfterSucessLoad()
 	CGame::TidyUpMemory(true, false);
 	StillToFadeOut = true;
 	JustLoadedDontFadeInYet = true;
-	TheCamera.Fade(0.0f, 0);
+	TheCamera.Fade(0.0f, FADE_OUT);
 	CTheScripts::Process();
 }
 
