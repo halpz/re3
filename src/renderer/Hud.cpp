@@ -568,7 +568,7 @@ void CHud::Draw()
 			if (m_ItemToFlash == ITEM_HEALTH && FRAMECOUNTER & 8
 				|| m_ItemToFlash != ITEM_HEALTH
 				|| playerPed->m_fHealth < 10
-				&& CTimer::FRAMECOUNTER & 8) {
+				&& FRAMECOUNTER & 8) {
 				if (playerPed->m_fHealth >= 10
 					|| playerPed->m_fHealth < 10 && FRAMECOUNTER & 8) {
 
