@@ -22,6 +22,7 @@
 #include "Darkel.h"
 #include "Debug.h"
 #include "EventList.h"
+#include "Ferry.h"
 #include "FileLoader.h"
 #include "FileMgr.h"
 #include "Fire.h"
@@ -547,6 +548,7 @@ bool CGame::Initialise(const char* datFile)
 	LoadingScreen("Loading the Game", "Position dynamic objects", nil);
 	LoadingScreen("Loading the Game", "Initialise vehicle paths", nil);
 
+	CFerry::InitFerrys();
 	CTrain::InitTrains();
 	CPlane::InitPlanes();
 	CCredits::Init();
@@ -721,6 +723,7 @@ void CGame::ReInitGameObjectVariables(void)
 		CTheScripts::StartTestScript();
 		CTheScripts::Process();
 		TheCamera.Process();
+		CFerry::InitFerrys();
 		CTrain::InitTrains();
 		CPlane::InitPlanes();
 	}
@@ -806,6 +809,7 @@ void CGame::InitialiseWhenRestarting(void)
 		if ( GenericLoad() == true )
 		{
 			DMAudio.ResetTimers(CTimer::GetTimeInMilliseconds());
+			CFerry::InitFerrys();
 			CTrain::InitTrains();
 			CPlane::InitPlanes();
 		}
@@ -889,6 +893,7 @@ void CGame::Process(void)
 
 		CCollision::Update();
 		CScriptPaths::Update();
+		CFerry::UpdateFerrys();
 		CTrain::UpdateTrains();
 		CPlane::UpdatePlanes();
 		CHeli::UpdateHelis();
