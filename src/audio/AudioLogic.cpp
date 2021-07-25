@@ -5272,68 +5272,94 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 		case MI_COP: return GetCopTalkSfx(ped, sound);
 		case MI_SWAT: return GetSwatTalkSfx(ped, sound);
 		case MI_FBI: return GetFBITalkSfx(ped, sound);
-		case MI_ARMY: return GetGenericMaleTalkSfx(ped, sound);
+		case MI_ARMY: return GetArmyTalkSfx(ped, sound);
 		case MI_MEDIC: return GetMedicTalkSfx(ped, sound);
 		case MI_FIREMAN: return GetFiremanTalkSfx(ped, sound);
 		case MI_MALE01: return GetDefaultTalkSfx(ped, sound);
 /*	LCS: removed for now
+		case MI_TAXI_D:
+		case MI_MALE03: return GetHFORITalkSfx(ped, sound);
+		case MI_PIMP: return GetHFOSTTalkSfx(ped, sound);
+		case MI_CRIMINAL01: return GetHMYSTTalkSfx(ped, sound);
+		case MI_CRIMINAL02: return GetHMOSTTalkSfx(ped, sound);
+		case MI_MALE02: return GetHFYRITalkSfx(ped, sound);
+		case MI_FATMALE01:
+		case MI_FATMALE02: return GetHMORITalkSfx(ped, sound);
+		case MI_FEMALE01: return GetHFYBETalkSfx(ped, sound);
+		case MI_FEMALE02: return GetHFOBETalkSfx(ped, sound);
+		case MI_FEMALE03: return GetHMYBETalkSfx(ped, sound);
+		case MI_FATFEMALE01: return GetHMYRITalkSfx(ped, sound);
+		case MI_FATFEMALE02: return GetHFYBUTalkSfx(ped, sound);
+		case MI_PROSTITUTE: return GetHFYMDTalkSfx(ped, sound);
+		case MI_PROSTITUTE2: return GetHFYCGTalkSfx(ped, sound);
+		case MI_P_MAN1: return GetHFYPRTalkSfx(ped, sound);
+		case MI_P_MAN2: return GetHFOTRTalkSfx(ped, sound);
+		case MI_P_WOM1: return GetHMOTRTalkSfx(ped, sound);
+		case MI_P_WOM2: return GetHMYAPTalkSfx(ped, sound);
+		case MI_CT_MAN1: return GetHMOCATalkSfx(ped, sound);
+		case MI_CT_MAN2: return GetBMODKTalkSfx(ped, sound);
+		case MI_CT_WOM1: return GetBMYCRTalkSfx(ped, sound);
+		case MI_CT_WOM2: return GetBFYSTTalkSfx(ped, sound);
+		case MI_LI_MAN1: return GetBFOSTTalkSfx(ped, sound);
+		case MI_LI_MAN2: return GetBMYSTTalkSfx(ped, sound);
+		case MI_LI_WOM1: return GetBMOSTTalkSfx(ped, sound);
+		case MI_LI_WOM2: return GetBFYRITalkSfx(ped, sound);
+		case MI_DOCKER1: 
+		case MI_DOCKER2: return GetBFORITalkSfx(ped, sound);
+		case MI_SCUM_MAN: return GetBFYBETalkSfx(ped, sound);
+		case MI_SCUM_WOM: return GetBMYBETalkSfx(ped, sound);
+		case MI_WORKER1: return GetBFOBETalkSfx(ped, sound);
+		case MI_WORKER2: return GetBMOBETalkSfx(ped, sound);
+		case MI_B_MAN1: return GetBMYBUTalkSfx(ped, sound);
+		case MI_B_MAN2: return GetBFYPRTalkSfx(ped, sound);
+		case MI_B_MAN3: return GetBFOTRTalkSfx(ped, sound);
+		case MI_B_WOM1: return GetBMOTRTalkSfx(ped, sound);
+		case MI_B_WOM2: return GetBMYPITalkSfx(ped, sound);
+		case MI_B_WOM3: return GetBMYBBTalkSfx(ped, sound);
+		case MI_MOD_MAN: return GetWMYCRTalkSfx(ped, sound);
+		case MI_MOD_WOM: return GetWFYSTTalkSfx(ped, sound);
+		case MI_ST_MAN: return GetWFOSTTalkSfx(ped, sound);
+		case MI_ST_WOM: return GetWMYSTTalkSfx(ped, sound);
+		case MI_FAN_MAN1: return GetWMOSTTalkSfx(ped, sound);
+		case MI_FAN_MAN2: return GetWFYRITalkSfx(ped, sound);
+		case MI_FAN_WOM: return GetWFORITalkSfx(ped, sound);
+		case MI_HOS_MAN: return GetWMYRITalkSfx(ped, sound);
+		case MI_HOS_WOM: return GetWMORITalkSfx(ped, sound);
+		case MI_CONST1: return GetWFYBETalkSfx(ped, sound);
+		case MI_CONST2: return GetWMYBETalkSfx(ped, sound);
+		case MI_SHOPPER1: return GetWFOBETalkSfx(ped, sound);
+		case MI_SHOPPER2: return GetWMOBETalkSfx(ped, sound);
+		case MI_SHOPPER3: return GetWMYCWTalkSfx(ped, sound);
+		case MI_STUD_MAN: return GetWMYGOTalkSfx(ped, sound);
+		case MI_STUD_WOM: return GetWFOGOTalkSfx(ped, sound);
+		case MI_CAS_MAN: return GetWMOGOTalkSfx(ped, sound);
+		case MI_CAS_WOM: return GetWFYLGTalkSfx(ped, sound);
+		case MI_CAMP_MAN: return GetCAMPMANTalkSfx(ped, sound);
+		case MI_CAMP_WOM: return GetCAMPWOMTalkSfx(ped, sound);
+		case MI_JFOTO: return GetJFOTOTalkSfx(ped, sound);
+		case MI_JMOTO: return GetJMOTOTalkSfx(ped, sound);
+		case MI_GANG01: return GetGangLeoneATalkSfx(ped, sound);
+		case MI_GANG02: return GetGangLeoneBTalkSfx(ped, sound);
+		case MI_GANG03: return GetGangTriadATalkSfx(ped, sound);
+		case MI_GANG04: return GetGangTriadBTalkSfx(ped, sound);
+		case MI_GANG05: return GetGangDiabloATalkSfx(ped, sound);
+		case MI_GANG06: return GetGangDiabloBTalkSfx(ped, sound);
+		case MI_GANG07: return GetGangYakuzaATalkSfx(ped, sound);
+		case MI_GANG08: return GetGangYakuzaBTalkSfx(ped, sound);
+		case MI_GANG09: return GetGangYardieATalkSfx(ped, sound);
+		case MI_GANG10: return GetGangYardieBTalkSfx(ped, sound);
+		case MI_GANG11: return GetGangColumbianATalkSfx(ped, sound);
+		case MI_GANG12: return GetGangColumbianBTalkSfx(ped, sound);
+		case MI_GANG13: return GetGangHoodATalkSfx(ped, sound);
+		case MI_GANG14: return GetGangHoodBTalkSfx(ped, sound);
+		case MI_GANG15: return GetGangForelliATalkSfx(ped, sound);
+		case MI_GANG16: return GetGangForelliBTalkSfx(ped, sound);
+		case MI_GANG17: return GetGangSindaccosATalkSfx(ped, sound);
+		case MI_GANG18: return GetGangSindaccosBTalkSfx(ped, sound);
+/*    LCS: cut
 		case MI_HFYST: return GetHFYSTTalkSfx(ped, sound);
-		case MI_HFOST: return GetHFOSTTalkSfx(ped, sound);
-		case MI_HMYST: return GetHMYSTTalkSfx(ped, sound);
-		case MI_HMOST: return GetHMOSTTalkSfx(ped, sound);
-		case MI_HFYRI: return GetHFYRITalkSfx(ped, sound);
-		case MI_HFORI: return GetHFORITalkSfx(ped, sound);
-		case MI_HMYRI: return GetHMYRITalkSfx(ped, sound);
-		case MI_HMORI: return GetHMORITalkSfx(ped, sound);
-		case MI_HFYBE: return GetHFYBETalkSfx(ped, sound);
-		case MI_HFOBE: return GetHFOBETalkSfx(ped, sound);
-		case MI_HMYBE: return GetHMYBETalkSfx(ped, sound);
 		case MI_HMOBE: return GetHMOBETalkSfx(ped, sound);
-		case MI_HFYBU: return GetHFYBUTalkSfx(ped, sound);
-		case MI_HFYMD: return GetHFYMDTalkSfx(ped, sound);
-		case MI_HFYCG: return GetHFYCGTalkSfx(ped, sound);
-		case MI_HFYPR: return GetHFYPRTalkSfx(ped, sound);
-		case MI_HFOTR: return GetHFOTRTalkSfx(ped, sound);
-		case MI_HMOTR: return GetHMOTRTalkSfx(ped, sound);
-		case MI_HMYAP: return GetHMYAPTalkSfx(ped, sound);
-		case MI_HMOCA: return GetHMOCATalkSfx(ped, sound);
-		case MI_BMODK: return GetBMODKTalkSfx(ped, sound);
-		case MI_BMYKR: return GetBMYCRTalkSfx(ped, sound);
-		case MI_BFYST: return GetBFYSTTalkSfx(ped, sound);
-		case MI_BFOST: return GetBFOSTTalkSfx(ped, sound);
-		case MI_BMYST: return GetBMYSTTalkSfx(ped, sound);
-		case MI_BMOST: return GetBMOSTTalkSfx(ped, sound);
-		case MI_BFYRI: return GetBFYRITalkSfx(ped, sound);
-		case MI_BFORI: return GetBFORITalkSfx(ped, sound);
 		case MI_BMYRI: return GetBMYRITalkSfx(ped, sound);
-		case MI_BFYBE: return GetBFYBETalkSfx(ped, sound);
-		case MI_BMYBE: return GetBMYBETalkSfx(ped, sound);
-		case MI_BFOBE: return GetBFOBETalkSfx(ped, sound);
-		case MI_BMOBE: return GetBMOBETalkSfx(ped, sound);
-		case MI_BMYBU: return GetBMYBUTalkSfx(ped, sound);
-		case MI_BFYPR: return GetBFYPRTalkSfx(ped, sound);
-		case MI_BFOTR: return GetBFOTRTalkSfx(ped, sound);
-		case MI_BMOTR: return GetBMOTRTalkSfx(ped, sound);
-		case MI_BMYPI: return GetBMYPITalkSfx(ped, sound);
-		case MI_BMYBB: return GetBMYBBTalkSfx(ped, sound);
-		case MI_WMYCR: return GetWMYCRTalkSfx(ped, sound);
-		case MI_WFYST: return GetWFYSTTalkSfx(ped, sound);
-		case MI_WFOST: return GetWFOSTTalkSfx(ped, sound);
-		case MI_WMYST: return GetWMYSTTalkSfx(ped, sound);
-		case MI_WMOST: return GetWMOSTTalkSfx(ped, sound);
-		case MI_WFYRI: return GetWFYRITalkSfx(ped, sound);
-		case MI_WFORI: return GetWFORITalkSfx(ped, sound);
-		case MI_WMYRI: return GetWMYRITalkSfx(ped, sound);
-		case MI_WMORI: return GetWMORITalkSfx(ped, sound);
-		case MI_WFYBE: return GetWFYBETalkSfx(ped, sound);
-		case MI_WMYBE: return GetWMYBETalkSfx(ped, sound);
-		case MI_WFOBE: return GetWFOBETalkSfx(ped, sound);
-		case MI_WMOBE: return GetWMOBETalkSfx(ped, sound);
-		case MI_WMYCW: return GetWMYCWTalkSfx(ped, sound);
-		case MI_WMYGO: return GetWMYGOTalkSfx(ped, sound);
-		case MI_WFOGO: return GetWFOGOTalkSfx(ped, sound);
-		case MI_WMOGO: return GetWMOGOTalkSfx(ped, sound);
-		case MI_WFYLG: return GetWFYLGTalkSfx(ped, sound);
 		case MI_WMYLG: return GetWMYLGTalkSfx(ped, sound);
 		case MI_WFYBU: return GetWFYBUTalkSfx(ped, sound);
 		case MI_WMYBU: return GetWMYBUTalkSfx(ped, sound);
@@ -5349,8 +5375,6 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 		case MI_WMYSK: return GetWMYSKTalkSfx(ped, sound);
 		case MI_WFYSH: return GetWFYSHTalkSfx(ped, sound);
 		case MI_WFOSH: return GetWFOSHTalkSfx(ped, sound);
-		case MI_JFOTO: return GetJFOTOTalkSfx(ped, sound);
-		case MI_JMOTO: return GetJMOTOTalkSfx(ped, sound);
 		case MI_CBA:
 		case MI_CBB: return GetCBTalkSfx(ped, sound);
 		case MI_HNA:
@@ -5371,11 +5395,9 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 		case MI_VICE3:
 		case MI_VICE4:
 		case MI_VICE5:
-		case MI_VICE6:
 		case MI_VICE7:
-		case MI_VICE8:// return GetVICETalkSfx(ped, sound, ped->GetModelIndex());
-		case MI_WFYG1:// return GetWFYG1TalkSfx(ped, sound);
-		case MI_WFYG2:// return GetWFYG2TalkSfx(ped, sound);
+		case MI_VICE8:// return GetViceWhiteTalkSfx(ped, sound);
+		case MI_VICE6:// return GetViceBlackTalkSfx(ped, sound);
 		case MI_SPECIAL01:
 		case MI_SPECIAL02:
 		case MI_SPECIAL03:
@@ -5396,7 +5418,8 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 		case MI_SPECIAL18:
 		case MI_SPECIAL19:
 		case MI_SPECIAL20:
-		case MI_SPECIAL21: return NO_SAMPLE;
+		case MI_SPECIAL21: //GetSpecialCharacterTalkSfx(ped, sound)
+			return NO_SAMPLE;
 		default: return GetGenericMaleTalkSfx(ped, sound);
 		}
 	}
@@ -5602,81 +5625,74 @@ cAudioManager::GetCopTalkSfx(CPed *ped, int16 sound)
 {
 	uint32 sfx;
 	PedState objective;
-	return NO_SAMPLE;
-//	switch(sound) {
-//	case SOUND_PED_ARREST_COP: GetPhrase(sfx, ped->m_lastComment, SFX_COP_VOICE_1_ARREST_1, 4); break;
-//	case SOUND_PED_PULLOUTWEAPON: GetPhrase(sfx, ped->m_lastComment, SFX_COP_VOICE_1_PULLOUTWEAPON_1, 3); break;
-//	case SOUND_PED_ACCIDENTREACTION1: GetPhrase(sfx, ped->m_lastComment, SFX_COP_VOICE_1_SAVED_1, 2); break;
-//	case SOUND_PED_COP_TARGETING: GetPhrase(sfx, ped->m_lastComment, SFX_COP_VOICE_1_COP_TARGETING_1, 4); break;
-//	case SOUND_PED_COP_MANYCOPSAROUND: GetPhrase(sfx, ped->m_lastComment, SFX_COP_VOICE_1_COP_MANYCOPSAROUND_1, 2); break;
-//	case SOUND_PED_GUNAIMEDAT2: GetPhrase(sfx, ped->m_lastComment, SFX_COP_VOICE_1_GUNAIMEDAT2_1, 2); break;
-//	case SOUND_PED_COP_ALONE: GetPhrase(sfx, ped->m_lastComment, SFX_COP_VOICE_1_COP_ALONE_1, 4); break;
-//	case SOUND_PED_GUNAIMEDAT3: GetPhrase(sfx, ped->m_lastComment, SFX_COP_VOICE_1_GUNAIMEDAT2_1, 2); break;
-//	case SOUND_PED_COP_ASK_FOR_ID: {
-//		cooldown_phrase(4);
-//		GetPhrase(sfx, ped->m_lastComment, SFX_COP_VOICE_1_COP_ASK_FOR_ID_1, 2);
-//		break;
-//	}
-//	case SOUND_PED_COP_LITTLECOPSAROUND:
-//		objective = FindPlayerPed()->m_nPedState;
-//		if(objective == PED_ARRESTED || objective == PED_DEAD || objective == PED_DIE) return NO_SAMPLE;
-//		GetPhrase(sfx, ped->m_lastComment, SFX_COP_VOICE_1_COP_LITTLECOPSAROUND_1, 4);
-//		break;
-//	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_COP_VOICE_1_FIGHT_1, 4); break;
-//	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_COP_VOICE_1_DODGE_1, 3); break;
-//#ifdef FIX_BUGS
-//	case SOUND_PED_CRASH_CAR: GetPhrase(sfx, ped->m_lastComment, SFX_COP_VOICE_1_CAR_CRASH_1, 4); break;
-//#endif
-//	case SOUND_PED_PED_COLLISION:
-//		if(FindPlayerPed()->m_pWanted->GetWantedLevel() > 0)
-//			GetPhrase(sfx, ped->m_lastComment, SFX_COP_VOICE_1_BUMP_1, 5);
-//		else
-//			return NO_SAMPLE;
-//		break;
-//	default: return GetGenericMaleTalkSfx(ped, sound);
-//	}
-//	return (SFX_COP_VOICE_2_ARREST_1 - SFX_COP_VOICE_1_ARREST_1) * (m_sQueueSample.m_nEntityIndex % 5) + sfx;
+	switch(sound) {
+	case SOUND_PED_ARREST_COP: GetPhrase(sfx, ped->m_lastComment, SFX_COP1_ARREST_1, 2); break;
+	case SOUND_PED_PULLOUTWEAPON:
+	case SOUND_PED_ACCIDENTREACTION1: 
+	case SOUND_PED_COP_MANYCOPSAROUND: 
+	case SOUND_PED_GUNAIMEDAT2:
+	case SOUND_PED_COP_ALONE:
+	case SOUND_PED_GUNAIMEDAT3:
+		return NO_SAMPLE;
+	case SOUND_PED_COP_TARGETING: GetPhrase(sfx, ped->m_lastComment, SFX_COP1_SHOOT_1, 6); break;
+	case SOUND_PED_COP_ASK_FOR_ID: {
+		cooldown_phrase(4);
+		return NO_SAMPLE;
+	}
+	case SOUND_PED_COP_LITTLECOPSAROUND:
+		objective = FindPlayerPed()->m_nPedState;
+		if(objective == PED_ARRESTED || objective == PED_DEAD || objective == PED_DIE) return NO_SAMPLE;
+		GetPhrase(sfx, ped->m_lastComment, SFX_COP1_CHASE_FOOT_1, 6);
+		break;
+	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_COP1_FIGHT_1, 3); break;
+	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_COP1_DODGE_1, 2); break;
+	case SOUND_PED_PED_COLLISION:
+		if(FindPlayerPed()->m_pWanted->GetWantedLevel() > 0)
+			GetPhrase(sfx, ped->m_lastComment, SFX_COP1_BUMP_1, 5);
+		else
+			return NO_SAMPLE;
+		break;
+	default: return GetGenericMaleTalkSfx(ped, sound);
+	}
+	return (SFX_COP2_ARREST_1 - SFX_COP1_ARREST_1) * (m_sQueueSample.m_nEntityIndex % 6) + sfx;
 }
 
 uint32
 cAudioManager::GetSwatTalkSfx(CPed *ped, int16 sound)
 {
-	return NO_SAMPLE;
-	//uint32 sfx;
-	//switch(sound) {
-	//case SOUND_PED_COP_HELIPILOTPHRASE: GetPhrase(sfx, ped->m_lastComment, SFX_SWAT_VOICE_1_COP_HELIPILOTPHRASE_1, 7); break;
-	//case SOUND_PED_COP_TARGETING: GetPhrase(sfx, ped->m_lastComment, SFX_SWAT_VOICE_1_COP_TARGETING_1, 4); break;
-	//case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_SWAT_VOICE_1_DODGE_1, 3); break;
-	//default: return GetGenericMaleTalkSfx(ped, sound);
-	//}
-	//sfx += (SFX_SWAT_VOICE_2_DODGE_1 - SFX_SWAT_VOICE_1_DODGE_1) * (m_sQueueSample.m_nEntityIndex % 3);
-	//return sfx;
+	uint32 sfx;
+	switch(sound) {
+	case SOUND_PED_COP_HELIPILOTPHRASE: GetPhrase(sfx, ped->m_lastComment, SFX_SWAT_VOICE_1_ROPE_1, 2); break;
+	case SOUND_PED_COP_TARGETING: GetPhrase(sfx, ped->m_lastComment, SFX_SWAT_VOICE_1_SHOOT_1, 5); break;
+	case SOUND_PED_EVADE: return NO_SAMPLE;
+	default: return GetGenericMaleTalkSfx(ped, sound);
+	}
+	sfx += (SFX_SWAT_VOICE_2_ROPE_1 - SFX_SWAT_VOICE_1_ROPE_1) * (m_sQueueSample.m_nEntityIndex % 2);
+	return sfx;
 }
 
 uint32
 cAudioManager::GetFBITalkSfx(CPed *ped, int16 sound)
 {
-	return NO_SAMPLE;
-//	uint32 sfx;
-//	switch(sound) {
-//#ifdef FIX_BUGS
-//	case SOUND_PED_COP_TARGETING: GetPhrase(sfx, ped->m_lastComment, SFX_FBI_VOICE_1_COP_TARGETING_1, 6); break;
-//#else
-//	case SOUND_PED_COP_TARGETING: GetPhrase(sfx, ped->m_lastComment, SFX_FBI_VOICE_1_COP_TARGETING_1, 4); break;
-//#endif
-//	case SOUND_PED_COP_MANYCOPSAROUND: GetPhrase(sfx, ped->m_lastComment, SFX_FBI_VOICE_1_COP_MANYCOPSAROUND_1, 3); break;
-//	case SOUND_PED_GUNAIMEDAT2: sfx = SFX_FBI_VOICE_1_GUNAIMEDAT2_1; break;
-//	case SOUND_PED_GUNAIMEDAT3: GetPhrase(sfx, ped->m_lastComment, SFX_FBI_VOICE_1_GUNAIMEDAT3_1, 4); break;
-//	case SOUND_PED_CRASH_VEHICLE:
-//	case SOUND_PED_CRASH_CAR: GetPhrase(sfx, ped->m_lastComment, SFX_FBI_VOICE_1_CAR_CRASH_1, 4); break;
-//	default: return GetGenericMaleTalkSfx(ped, sound);
-//	}
-//#ifdef FIX_BUGS
-//	sfx += (SFX_FBI_VOICE_2_GUNAIMEDAT3_1 - SFX_FBI_VOICE_1_GUNAIMEDAT3_1) * (m_sQueueSample.m_nEntityIndex % 3);
-//#else
-//	sfx += 16 * (m_sQueueSample.m_nEntityIndex % 3);
-//#endif
-//	return sfx;
+	uint32 sfx;
+	switch(sound) {
+	case SOUND_PED_COP_TARGETING: GetPhrase(sfx, ped->m_lastComment, SFX_FBI_VOICE_1_SHOOT_1, 5); break;
+	case SOUND_PED_COP_MANYCOPSAROUND:
+	case SOUND_PED_GUNAIMEDAT2:
+	case SOUND_PED_GUNAIMEDAT3:
+	case SOUND_PED_CRASH_VEHICLE:
+	case SOUND_PED_CRASH_CAR: return NO_SAMPLE;
+#ifdef FIX_BUGS
+	case SOUND_PED_LEAVE_VEHICLE: GetPhrase(sfx, ped->m_lastComment, SFX_FBI_VOICE_1_VAN_1, 2); break;
+#endif
+	default: return GetGenericMaleTalkSfx(ped, sound);
+	}
+#ifdef FIX_BUGS
+	sfx += (SFX_FBI_VOICE_2_SHOOT_1 - SFX_FBI_VOICE_1_SHOOT_1) * (m_sQueueSample.m_nEntityIndex % 2);
+#else
+	sfx += 5 * (m_sQueueSample.m_nEntityIndex % 2);
+#endif
+	return sfx;
 }
 
 uint32
@@ -7774,18 +7790,18 @@ cAudioManager::GetGenericMaleTalkSfx(CPed *ped, int16 sound)
 uint32
 cAudioManager::GetGenericFemaleTalkSfx(CPed *ped, int16 sound)
 {
-	return NO_SAMPLE;
-	//uint32 sfx;
-	//m_bGenericSfx = TRUE;
-	//switch(sound) {
-	//case SOUND_PED_DEATH: GetPhrase(sfx, ped->m_lastComment, SFX_GENERIC_FEMALE_DEATH_1, 22); break;
-	//case SOUND_PED_BULLET_HIT:
-	//case SOUND_PED_DEFEND: GetPhrase(sfx, ped->m_lastComment, SFX_GENERIC_FEMALE_GRUNT_1, 33); break;
-	//case SOUND_PED_BURNING: GetPhrase(sfx, ped->m_lastComment, SFX_GENERIC_FEMALE_FIRE_1, 17); break;
-	//case SOUND_PED_FLEE_SPRINT: GetPhrase(sfx, ped->m_lastComment, SFX_GENERIC_FEMALE_PANIC_1, 27); break;
-	//default: return NO_SAMPLE;
-	//}
-	//return sfx;
+	uint32 sfx;
+	m_bGenericSfx = TRUE;
+	switch(sound) {
+	case SOUND_PED_DEATH: GetPhrase(sfx, ped->m_lastComment, SFX_FEMALE_DEATH_01, 16); break;
+	case SOUND_PED_BULLET_HIT:
+	case SOUND_PED_DEFEND: GetPhrase(sfx, ped->m_lastComment, SFX_FEMALE_PAIN_01, 34); break;
+	case SOUND_PED_BURNING: GetPhrase(sfx, ped->m_lastComment, SFX_FEMALE_PAIN_ON_FIRE_01, 11); break;
+	case SOUND_PED_FLEE_SPRINT: GetPhrase(sfx, ped->m_lastComment, SFX_FEMALE_PANIC_01, 13); break;
+	case SOUND_PED_PLAYER_BEFORESEX: GetPhrase(sfx, ped->m_lastComment, SFX_FEMALE_SEX_01, 11); break;
+	default: return NO_SAMPLE;
+	}
+	return sfx;
 }
 
 void
