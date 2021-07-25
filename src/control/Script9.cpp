@@ -376,6 +376,7 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 	}
 	case COMMAND_CLEAR_OBJECT_LAST_WEAPON_DAMAGE:
 	{
+		CollectParameters(&m_nIp, 1);
 		CObject* pObject = CPools::GetObjectPool()->GetAt(GET_INTEGER_PARAM(0));
 		if (!pObject)
 			printf("CLEAR_OBJECT_LAST_WEAPON_DAMAGE - pObject doesn\'t exist");

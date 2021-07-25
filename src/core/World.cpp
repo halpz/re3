@@ -2294,3 +2294,17 @@ CWorld::IsWanderPathClear(CVector const& point1, CVector const& point2, float di
 	}
 	return true;
 }
+
+void
+CWorld::CheckObjectsEffectedByFire(float x, float y, float z, float radius, CEntity* reason)
+{
+	int32 i = CPools::GetObjectPool()->GetSize();
+	while (i--) {
+		CObject* pObject = CPools::GetObjectPool()->GetSlot(i);
+		if (pObject) {
+			if (Abs(pObject->GetPosition().z - z) < 5.0f && Abs(pObject->GetPosition().x - x) < radius &&
+				Abs(pObject->GetPosition().y - y) < radius)
+				pObject->m_nLastWeaponToDamage = WEAPONTYPE_FLAMETHROWER;
+		}
+	}
+}

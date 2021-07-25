@@ -155,6 +155,7 @@ public:
 	static void TriggerExplosion(const CVector& position, float fRadius, float fPower, CEntity* pCreator, bool bProcessVehicleBombTimer);
 	static void TriggerExplosionSectorList(CPtrList& list, const CVector& position, float fRadius, float fPower, CEntity* pCreator, bool bProcessVehicleBombTimer);
 	static void UseDetonator(CEntity *pEntity);
+	static void CheckObjectsEffectedByFire(float, float, float, float, CEntity*);
 
 	// NB: following functions are unused (TODO?)
 	static void CastShadow(float, float, float, float);

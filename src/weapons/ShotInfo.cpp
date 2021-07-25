@@ -143,7 +143,9 @@ CShotInfo::Update()
 				}
 			}
 		}
-		if (!((CTimer::GetFrameCounter() + slot) & 3))
-			CWorld::SetCarsOnFire(shot.m_startPos.x, shot.m_startPos.y, shot.m_startPos.z, 4.0f, shot.m_sourceEntity);
+		if (!((CTimer::GetFrameCounter() + slot) & 3)) {
+			CWorld::SetCarsOnFire(shot.m_startPos.x, shot.m_startPos.y, shot.m_startPos.z, 2.0f, shot.m_sourceEntity);
+			CWorld::CheckObjectsEffectedByFire(shot.m_startPos.x, shot.m_startPos.y, shot.m_startPos.z, 2.0f, shot.m_sourceEntity);
+		}
 	}
 }
