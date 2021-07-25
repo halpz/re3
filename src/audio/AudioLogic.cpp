@@ -5245,7 +5245,7 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 		case MI_COP: return GetCopTalkSfx(ped, sound);
 		case MI_SWAT: return GetSwatTalkSfx(ped, sound);
 		case MI_FBI: return GetFBITalkSfx(ped, sound);
-		case MI_ARMY: return GetGenericMaleTalkSfx(ped, sound);
+		case MI_ARMY: return GetArmyTalkSfx(ped, sound);
 		case MI_MEDIC: return GetMedicTalkSfx(ped, sound);
 		case MI_FIREMAN: return GetFiremanTalkSfx(ped, sound);
 		case MI_MALE01: return GetDefaultTalkSfx(ped, sound);
