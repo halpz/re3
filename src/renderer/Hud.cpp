@@ -36,6 +36,12 @@
 	#define SCALE_AND_CENTER_X_FIX(a) (a)
 #endif
 
+#ifdef FIX_BUGS
+#define FRAMECOUNTER CTimer::GetLogicalFrameCounter()
+#else
+#define FRAMECOUNTER CTimer::GetFrameCounter()
+#endif
+
 // Game has colors inlined in code.
 // For easier modification we collect them here:
 CRGBA MONEY_COLOR(0, 207, 133, 255);
@@ -575,12 +581,12 @@ void CHud::Draw()
 			CFont::SetDropShadowPosition(2);
 			CFont::SetDropColor(CRGBA(0, 0, 0, 255));
 
-			if (m_ItemToFlash == ITEM_HEALTH && CTimer::GetFrameCounter() & 8
+			if (m_ItemToFlash == ITEM_HEALTH && FRAMECOUNTER & 8
 				|| m_ItemToFlash != ITEM_HEALTH
 				|| playerPed->m_fHealth < 10
-				&& CTimer::GetFrameCounter() & 8) {
+				&& FRAMECOUNTER & 8) {
 				if (playerPed->m_fHealth >= 10
-					|| playerPed->m_fHealth < 10 && CTimer::GetFrameCounter() & 8) {
+					|| playerPed->m_fHealth < 10 && FRAMECOUNTER & 8) {
 					if (FrontEndMenuManager.m_PrefsShowHud) {
 						DrawHealthBar(playerPed->m_fHealth);
 					}
@@ -590,7 +596,7 @@ void CHud::Draw()
 			/*
 				DrawArmour
 			*/
-			if (m_ItemToFlash == ITEM_ARMOUR && CTimer::GetFrameCounter() & 8 || m_ItemToFlash != ITEM_ARMOUR) {
+			if (m_ItemToFlash == ITEM_ARMOUR && FRAMECOUNTER & 8 || m_ItemToFlash != ITEM_ARMOUR) {
 				CFont::SetScale(SCREEN_SCALE_X(HUD_TEXT_SCALE_X), SCREEN_SCALE_Y(HUD_TEXT_SCALE_Y));
 				if (playerPed->m_fArmour > 1.0f) {
 					AsciiToUnicode("<", sPrintIcon);
@@ -626,11 +632,11 @@ void CHud::Draw()
 				if (FrontEndMenuManager.m_PrefsShowHud) {
 					if (playerPed->m_pWanted->GetWantedLevel() > i
 						&& (CTimer::GetTimeInMilliseconds() > playerPed->m_pWanted->m_nLastWantedLevelChange
-							+ 2000 || CTimer::GetFrameCounter() & 4)) {
+							+ 2000 || FRAMECOUNTER & 4)) {
 
 						DrawTimeAndCashNumbers(wantedStar, starX, 63.0f, false);
 
-					} else if (playerPed->m_pWanted->m_nMinWantedLevel > i && CTimer::GetFrameCounter() & 4) {
+					} else if (playerPed->m_pWanted->m_nMinWantedLevel > i && FRAMECOUNTER & 4) {
 						DrawTimeAndCashNumbers(wantedStar, starX, 63.0f, true);
 					}
 					if (FrontEndMenuManager.m_PrefsUseWideScreen)
@@ -928,7 +934,7 @@ void CHud::Draw()
 						TimerFlashTimer = 0;
 				}
 
-				if (CTimer::GetFrameCounter() & 4 || TimerFlashTimer == 0) {
+				if (FRAMECOUNTER & 4 || TimerFlashTimer == 0) {
 					AsciiToUnicode(CUserDisplay::OnscnTimer.m_sClocks[0].m_aClockBuffer, sTimer);
 					CFont::SetPropOn();
 					CFont::SetBackgroundOff();
@@ -966,7 +972,7 @@ void CHud::Draw()
 							CounterFlashTimer[i] = 0;
 					}
 
-					if (CTimer::GetFrameCounter() & 4 || CounterFlashTimer[i] == 0) {
+					if (FRAMECOUNTER & 4 || CounterFlashTimer[i] == 0) {
 						if (CUserDisplay::OnscnTimer.m_sCounters[i].m_nType == COUNTER_DISPLAY_NUMBER) {
 							AsciiToUnicode(CUserDisplay::OnscnTimer.m_sCounters[i].m_aCounterBuffer, sTimer);
 							CFont::SetPropOn();
@@ -1021,7 +1027,7 @@ void CHud::Draw()
 			DrawRadar
 		*/
 		if (FrontEndMenuManager.m_PrefsRadarMode != 2 &&
-			!m_HideRadar && (m_ItemToFlash == ITEM_RADAR && CTimer::GetFrameCounter() & 8 || m_ItemToFlash != ITEM_RADAR)) {
+			!m_HideRadar && (m_ItemToFlash == ITEM_RADAR && FRAMECOUNTER & 8 || m_ItemToFlash != ITEM_RADAR)) {
 
 			RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERNEAREST);
 			CRadar::DrawMap();

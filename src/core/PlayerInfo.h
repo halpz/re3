@@ -54,7 +54,7 @@ public:
 	int32 m_nUpsideDownCounter;
 	int32 field_EC;
 	int32 m_nTimeCarSpentOnTwoWheels;
-	int32 m_nDistanceCarTravelledOnTwoWheels;
+	float m_nDistanceCarTravelledOnTwoWheels;
 	int32 m_nTimeNotFullyOnGround;
 	int32 m_nTimeSpentOnWheelie;
 	float m_nDistanceTravelledOnWheelie;
@@ -62,11 +62,11 @@ public:
 	float m_nDistanceTravelledOnStoppie;
 	int32 m_nCancelWheelStuntTimer;
 	int32 m_nLastTimeCarSpentOnTwoWheels;
-	int32 m_nLastDistanceCarTravelledOnTwoWheels;
+	float m_nLastDistanceCarTravelledOnTwoWheels;
 	int32 m_nLastTimeSpentOnWheelie;
-	int32 m_nLastDistanceTravelledOnWheelie;
+	float m_nLastDistanceTravelledOnWheelie;
 	int32 m_nLastTimeSpentOnStoppie;
-	int32 m_nLastDistanceTravelledOnStoppie;
+	float m_nLastDistanceTravelledOnStoppie;
 	int16 m_nTrafficMultiplier;
 	int16 field_12A;
 	float m_fRoadDensity;
