@@ -354,6 +354,14 @@ CPed::SetAttack(CEntity *victim)
 			SetAimFlag(m_fRotationCur);
 		}
 	}
+#ifdef FIX_BUGS
+	// fix aiming for flamethrower and minigun while using PC controls
+	else if (curWeapon->m_AnimToPlay == ASSOCGRP_FLAMETHROWER && TheCamera.Cams[0].Using3rdPersonMouseCam() && this == FindPlayerPed())
+	{
+		SetAimFlag(m_fRotationCur);
+		((CPlayerPed*)this)->m_fFPSMoveHeading = TheCamera.Find3rdPersonQuickAimPitch();
+	}
+#endif
 	if (m_nPedState == PED_ATTACK) {
 		bIsAttacking = true;
 		return;
