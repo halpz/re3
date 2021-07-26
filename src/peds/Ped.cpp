@@ -7291,6 +7291,9 @@ CPed::SetAnswerMobile(void)
 {
 	if (m_nPedState != PED_ANSWER_MOBILE && !DyingOrDead()) {
 		SetPedState(PED_ANSWER_MOBILE);
+#ifdef FIX_BUGS
+		ClearLookFlag();
+#endif
 		RemoveWeaponAnims(GetWeapon()->m_eWeaponType, -4.0f);
 		CAnimBlendAssociation *assoc = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_PHONE_IN, 4.0f);
 		assoc->SetFinishCallback(StartTalkingOnMobileCB, this);
@@ -7298,6 +7301,9 @@ CPed::SetAnswerMobile(void)
 		if (m_storedWeapon == WEAPONTYPE_UNIDENTIFIED)
 			m_storedWeapon = GetWeapon()->m_eWeaponType;
 
+#ifdef FIX_BUGS
+		SetCurrentWeapon(0);
+#endif
 		RemoveWeaponModel(-1);
 	}
 }
