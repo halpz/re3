@@ -1221,11 +1221,21 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 	}
 
 	if (padUsed->DuckJustDown() && !bIsDucking && m_nMoveState != PEDMOVE_SPRINT) {
+#ifdef FIX_BUGS
+		// fix tommy being locked into looking at the same spot if you duck just after starting to shoot
+		if(!m_pPointGunAt)
+			ClearPointGunAt();
+#endif
 		bCrouchWhenShooting = true;
 		SetDuck(60000, true);
 	} else if (bIsDucking && (padUsed->DuckJustDown() || m_nMoveState == PEDMOVE_SPRINT ||
 		padUsed->GetSprint() || padUsed->JumpJustDown() || padUsed->ExitVehicleJustDown())) {
 
+#ifdef FIX_BUGS
+		// same fix as above except for standing up
+		if(!m_pPointGunAt)
+			ClearPointGunAt();
+#endif
 		ClearDuck(true);
 		bCrouchWhenShooting = false;
 	}
