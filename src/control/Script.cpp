@@ -18,9 +18,7 @@
 #include "FileMgr.h"
 #include "Frontend.h"
 #include "General.h"
-#ifdef MISSION_REPLAY
 #include "GenericGameStorage.h"
-#endif
 #include "HandlingMgr.h"
 #include "Heli.h"
 #include "Hud.h"
