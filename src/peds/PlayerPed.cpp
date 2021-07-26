@@ -574,8 +574,12 @@ CPlayerPed::DoWeaponSmoothSpray(void)
 					return -1.0f;
 
 			case WEAPONTYPE_CHAINSAW:
-				if (GetMeleeStartAnim(weaponInfo) && RpAnimBlendClumpGetAssociation(GetClump(), GetMeleeStartAnim(weaponInfo)))
+				if (GetMeleeStartAnim(weaponInfo) && RpAnimBlendClumpGetAssociation(GetClump(), GetMeleeStartAnim(weaponInfo))) {
+#ifdef FREE_CAM
+					if (TheCamera.Cams[0].Using3rdPersonMouseCam()) return -1.0f;
+#endif
 					return PI / 128.0f;
+				}
 				else if (GetFireAnimGround(weaponInfo, false) && RpAnimBlendClumpGetAssociation(GetClump(), GetFireAnimGround(weaponInfo, false)))
 					return PI / 176.f;
 				else
@@ -1474,6 +1478,13 @@ CPlayerPed::PlayerControlZelda(CPad *padUsed)
 	} else {
 		padMoveInGameUnit = CVector2D(leftRight, upDown).Magnitude() / PAD_MOVE_TO_GAME_WORLD_MOVE;
 	}
+
+#ifdef FREE_CAM
+	if (TheCamera.Cams[0].Using3rdPersonMouseCam() && smoothSprayRate > 0.0f) {
+		padMoveInGameUnit = 0.0f;
+		smoothSprayWithoutMove = false;
+	}
+#endif
 
 	if (padMoveInGameUnit > 0.0f || smoothSprayWithoutMove) {
 		float padHeading = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -leftRight, upDown);
