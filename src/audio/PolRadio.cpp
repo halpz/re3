@@ -106,7 +106,7 @@ cAudioManager::ResetPoliceRadio()
 }
 
 void
-cAudioManager::SetMissionScriptPoliceAudio(int32 sfx) const
+cAudioManager::SetMissionScriptPoliceAudio(int32 sfx)
 {
 	if (!m_bIsInitialised) return;
 	if (g_nMissionAudioPlayingStatus != 1) {
@@ -116,7 +116,7 @@ cAudioManager::SetMissionScriptPoliceAudio(int32 sfx) const
 }
 
 int8
-cAudioManager::GetMissionScriptPoliceAudioPlayingStatus() const
+cAudioManager::GetMissionScriptPoliceAudioPlayingStatus()
 {
 	return g_nMissionAudioPlayingStatus;
 }
@@ -676,8 +676,6 @@ cAudioManager::SetupSuspectLastSeenReport()
 		}
 	}
 }
-
-
 
 void
 cAudioManager::ReportCrime(eCrimeType type, const CVector &pos)
