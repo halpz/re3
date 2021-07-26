@@ -503,6 +503,10 @@ CPlayerPed::DoWeaponSmoothSpray(void)
 {
 	if (m_nPedState == PED_ATTACK && !m_pPointGunAt) {
 		eWeaponType weapon = GetWeapon()->m_eWeaponType;
+#ifdef FREE_CAM
+		if(TheCamera.Cams[0].Using3rdPersonMouseCam() && (weapon == WEAPONTYPE_COLT45 || weapon == WEAPONTYPE_UZI))
+			return false;
+#endif
 		if (weapon == WEAPONTYPE_FLAMETHROWER || weapon == WEAPONTYPE_COLT45 || weapon == WEAPONTYPE_UZI || weapon == WEAPONTYPE_SHOTGUN || 
 			weapon == WEAPONTYPE_AK47 || weapon == WEAPONTYPE_M16 || weapon == WEAPONTYPE_HELICANNON)
 			return true;
@@ -1182,6 +1186,13 @@ CPlayerPed::PlayerControlZelda(CPad *padUsed)
 	} else {
 		padMoveInGameUnit = CVector2D(leftRight, upDown).Magnitude() / PAD_MOVE_TO_GAME_WORLD_MOVE;
 	}
+
+#ifdef FREE_CAM
+	if(TheCamera.Cams[0].Using3rdPersonMouseCam() && doSmoothSpray) { 
+		padMoveInGameUnit = 0.0f;
+		smoothSprayWithoutMove = false;
+	}
+#endif
 
 	if (padMoveInGameUnit > 0.0f || smoothSprayWithoutMove) {
 		float padHeading = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -leftRight, upDown);

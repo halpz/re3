@@ -1348,6 +1348,9 @@ CPed::CalculateNewVelocity(void)
 			limitedRotDest -= 2 * PI;
 		}
 
+#ifdef FREE_CAM
+		if (!TheCamera.Cams[0].Using3rdPersonMouseCam())
+#endif
 		if (IsPlayer() && m_nPedState == PED_ATTACK)
 			headAmount /= 4.0f;
 
