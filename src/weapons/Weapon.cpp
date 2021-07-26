@@ -592,6 +592,16 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 	{
 		CVector src, trgt;
 		TheCamera.Find3rdPersonCamTargetVector(info->m_fRange, *fireSource, src, trgt);
+#ifdef FREE_CAM
+		CPed *shooterPed = (CPed *)shooter;
+		if((shooterPed->m_pedIK.m_flags & CPedIK::GUN_POINTED_SUCCESSFULLY) == 0) {
+			trgt.x = info->m_fRange;
+			trgt.y = 0.0f;
+			trgt.z = 0.0f;
+
+			shooterPed->TransformToNode(trgt, PED_HANDR);
+		}
+#endif
 
 #ifdef FIX_BUGS
 		// fix muzzleflash rotation
