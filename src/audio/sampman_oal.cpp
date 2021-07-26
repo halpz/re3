@@ -1360,7 +1360,7 @@ bool8 cSampleManager::UpdateReverb(void)
 	if ( !usingEAX && !_usingEFX )
 		return FALSE;
 
-	if ( AudioManager.GetFrameCounter() & 15 )
+	if ( AudioManager.m_FrameCounter & 15 )
 		return FALSE;
 			
 	float y = AudioManager.m_afReflectionsDistances[REFLECTION_TOP]  + AudioManager.m_afReflectionsDistances[REFLECTION_BOTTOM];
