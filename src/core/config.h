@@ -409,7 +409,7 @@ enum Config {
 // #define VC_PED_PORTS			// various ports from VC's CPed, mostly subtle
 // #define NEW_WALK_AROUND_ALGORITHM	// to make walking around vehicles/objects less awkward
 #define CANCELLABLE_CAR_ENTER
-//#define PEDS_REPORT_CRIMES_ON_PHONE, requires COMPATIBLE_SAVES
+//#define PEDS_REPORT_CRIMES_ON_PHONE // requires COMPATIBLE_SAVES
 
 // Camera
 //#define PS2_CAM_TRANSITION	// old way of transitioning between cam modes
