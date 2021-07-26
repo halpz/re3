@@ -936,6 +936,16 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 	else if ( shooter == FindPlayerPed() && TheCamera.Cams[0].Using3rdPersonMouseCam()  )
 	{
 		TheCamera.Find3rdPersonCamTargetVector(info->m_fRange, *fireSource, source, target);
+#ifdef FREE_CAM
+		CPed *shooterPed = (CPed *)shooter;
+		if((shooterPed->m_pedIK.m_flags & CPedIK::GUN_POINTED_SUCCESSFULLY) == 0) {
+			target.x = info->m_fRange;
+			target.y = 0.0f;
+			target.z = 0.0f;
+
+			shooterPed->TransformToNode(target, PED_HANDR);
+		}
+#endif
 
 		CWorld::bIncludeBikers = true;
 		CWorld::bIncludeDeadPeds = true;
