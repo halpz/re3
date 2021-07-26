@@ -4289,6 +4289,7 @@ cAudioManager::ProcessPedOneShots(cPedParams &params)
 			m_sQueueSample.m_nFrequency = 20000;
 			goto AddFightSound;
 		case SOUND_FIGHT_40:
+		case SOUND_186:
 			m_sQueueSample.m_nSampleIndex = SFX_FIGHT_2;
 			m_sQueueSample.m_nFrequency = 18000;
 			goto AddFightSound;
