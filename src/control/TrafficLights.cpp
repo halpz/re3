@@ -277,7 +277,7 @@ CTrafficLights::DisplayActualLight(CEntity *ent)
 				12.0f, 1.0f, 40.0f, false, 0.0f);
 
 		if (id >= 0) {
-			if (DotProduct(TheCamera.GetForward(), ent->GetForward()) < 0.0f)
+			if (DotProduct(TheCamera.GetForward(), ent->GetForward()) > 0.0f)
 				CCoronas::RegisterCorona((uintptr)ent + id,
 					r * CTimeCycle::GetSpriteBrightness() * 0.7f,
 					g * CTimeCycle::GetSpriteBrightness() * 0.7f,
