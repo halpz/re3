@@ -384,9 +384,9 @@ public:
 	char GetCDAudioDriveLetter() const;
 	int8 GetCurrent3DProviderIndex() const;
 	int8 AutoDetect3DProviders() const;
-	float GetCollisionLoopingRatio(uint32 a, uint32 b, float c) const; // not used
-	float GetCollisionOneShotRatio(int32 a, float b) const;
-	float GetCollisionRatio(float a, float b, float c, float d) const; // inlined in vc
+	float GetCollisionLoopingRatio(uint32 a, uint32 b, float c); // not used
+	float GetCollisionOneShotRatio(int32 a, float b);
+	float GetCollisionRatio(float a, float b, float c, float d); // inlined in vc
 	float GetDistanceSquared(const CVector &v) const; // inlined in vc
 	int32 GetJumboTaxiFreq() const; // inlined in vc
 	uint8 GetMissionAudioLoadingStatus(uint8 slot) const;
