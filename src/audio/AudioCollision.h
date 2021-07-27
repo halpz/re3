@@ -17,7 +17,18 @@ public:
 	float m_fDistance;
 	int32 m_nBaseVolume;
 
-	// no methods
+	cAudioCollision() { Reset(); }
+
+	void Reset()
+	{
+		m_pEntity1 = nil;
+		m_pEntity2 = nil;
+		m_bSurface1 = 0;
+		m_bSurface2 = 0;
+		m_fIntensity1 = m_fIntensity2 = 0.0f;
+		m_vecPosition = CVector(0.0f, 0.0f, 0.0f);
+		m_fDistance = 0.0f;
+	}
 };
 
 VALIDATE_SIZE(cAudioCollision, 40);
@@ -31,7 +42,15 @@ public:
 	uint8 m_bCollisionsInQueue;
 	cAudioCollision m_sQueue;
 
-	cAudioCollisionManager();
+	cAudioCollisionManager()
+	{
+		m_sQueue.Reset();
+
+		for(int i = 0; i < NUMAUDIOCOLLISIONS; i++)
+			m_bIndicesTable[i] = NUMAUDIOCOLLISIONS;
+
+		m_bCollisionsInQueue = 0;
+	}
 	void AddCollisionToRequestedQueue();
 };
 
