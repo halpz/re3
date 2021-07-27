@@ -393,7 +393,6 @@ CPed::BuildPedLists(void)
 						float dist = (ped->GetPosition() - GetPosition()).Magnitude2D();
 						if (nThreatReactionRangeMultiplier * 30.0f > dist) {
 #ifdef FIX_BUGS
-							static_assert( ARRAY_SIZE(m_nearPeds) < ARRAY_SIZE(gapTempPedList) - 1, "gapTempPedList needs wiggle room for unsorted peds and nil slot" );
 							// If the gap ped list is full, sort it and truncate it
 							// before pushing more unsorted peds
 							if( gnNumTempPedList == ARRAY_SIZE(gapTempPedList) - 1 )
