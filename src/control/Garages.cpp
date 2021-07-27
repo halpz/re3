@@ -2613,14 +2613,12 @@ void CGarages::SetAllDoorsBackToOriginalHeight()
 	}
 }
 
+#define GARAGE_SIZE 208
+
 void CGarages::Save(uint8 * buf, uint32 * size)
 {
-//INITSAVEBUF
-	*size = 10692; // for some reason it's not actual size again
-	//*size = (6 * sizeof(uint32) + TOTAL_COLLECTCARS_GARAGES * sizeof(*CarTypesCollected) + sizeof(uint32) + TOTAL_HIDEOUT_GARAGES * NUM_GARAGE_STORED_CARS * sizeof(CStoredCar) + NUM_GARAGES * sizeof(CGarage));
-#if !defined THIS_IS_STUPID && defined COMPATIBLE_SAVES
-	memset(buf + 7340, 0, *size - 7340); // garbage data is written otherwise
-#endif
+INITSAVEBUF
+	*size = (6 * sizeof(uint32) + TOTAL_COLLECTCARS_GARAGES * sizeof(*CarTypesCollected) + sizeof(uint32) + TOTAL_HIDEOUT_GARAGES * NUM_GARAGE_STORED_CARS * sizeof(CStoredCar) + NUM_GARAGES * GARAGE_SIZE);
 	CloseHideOutGaragesBeforeSave();
 	WriteSaveBuf(buf, NumGarages);
 	WriteSaveBuf(buf, (uint32)BombsAreFree);
@@ -2661,12 +2659,16 @@ void CGarages::Save(uint8 * buf, uint32 * size)
 		WriteSaveBuf(buf, aGarages[i].m_vDir1);
 		WriteSaveBuf(buf, aGarages[i].m_vDir2);
 		WriteSaveBuf(buf, aGarages[i].m_fSupZ);
+		WriteSaveBuf(buf, aGarages[i].m_vecSSGaragePos);
+		WriteSaveBuf(buf, aGarages[i].m_fSSGarageAngle);
 		WriteSaveBuf(buf, aGarages[i].m_fDir1Len);
 		WriteSaveBuf(buf, aGarages[i].m_fDir2Len);
 		WriteSaveBuf(buf, aGarages[i].m_fInfX);
 		WriteSaveBuf(buf, aGarages[i].m_fSupX);
 		WriteSaveBuf(buf, aGarages[i].m_fInfY);
 		WriteSaveBuf(buf, aGarages[i].m_fSupY);
+		WriteSaveBuf(buf, aGarages[i].m_nTimeCrusherCraneActivated);
+		ZeroSaveBuf(buf, 4);
 		WriteSaveBuf(buf, aGarages[i].m_fDoorPos);
 		WriteSaveBuf(buf, aGarages[i].m_fDoorHeight);
 		WriteSaveBuf(buf, aGarages[i].m_fDoor1X);
@@ -2679,18 +2681,26 @@ void CGarages::Save(uint8 * buf, uint32 * size)
 		WriteSaveBuf(buf, aGarages[i].m_bCollectedCarsState);
 		ZeroSaveBuf(buf, 3 + 4);
 		ZeroSaveBuf(buf, sizeof(aGarages[i].m_sStoredCar));
+		WriteSaveBuf(buf, aGarages[i].m_bInitialized);
+		ZeroSaveBuf(buf, 3);
+#ifdef GTA_NETWORK
+		ZeroSaveBuf(buf, 4);
+#endif
+		WriteSaveBuf(buf, aGarages[i].m_bSSGarageAcceptedVehicle);
+		WriteSaveBuf(buf, aGarages[i].m_bLocked);
+		WriteSaveBuf(buf, aGarages[i].m_nSSGarageState);
+		WriteSaveBuf(buf, aGarages[i].m_bSSGarageStateChanging);
 #else
 		WriteSaveBuf(buf, aGarages[i]);
 #endif
 	}
-//VALIDATESAVEBUF(*size);
+VALIDATESAVEBUF(*size);
 }
 
 void CGarages::Load(uint8* buf, uint32 size)
 {
-//INITSAVEBUF
-	assert(size == 10692);
-	//assert(size == (6 * sizeof(uint32) + TOTAL_COLLECTCARS_GARAGES * sizeof(*CarTypesCollected) + sizeof(uint32) + TOTAL_HIDEOUT_GARAGES * NUM_GARAGE_STORED_CARS * sizeof(CStoredCar) + NUM_GARAGES * sizeof(CGarage)));
+INITSAVEBUF
+	assert(size == (6 * sizeof(uint32) + TOTAL_COLLECTCARS_GARAGES * sizeof(*CarTypesCollected) + sizeof(uint32) + TOTAL_HIDEOUT_GARAGES * NUM_GARAGE_STORED_CARS * sizeof(CStoredCar) + NUM_GARAGES * GARAGE_SIZE));
 	CloseHideOutGaragesBeforeSave();
 	ReadSaveBuf(&NumGarages, buf);
 	int32 tempInt;
@@ -2734,12 +2744,16 @@ void CGarages::Load(uint8* buf, uint32 size)
 		ReadSaveBuf(&aGarages[i].m_vDir1, buf);
 		ReadSaveBuf(&aGarages[i].m_vDir2, buf);
 		ReadSaveBuf(&aGarages[i].m_fSupZ, buf);
+		ReadSaveBuf(&aGarages[i].m_vecSSGaragePos, buf);
+		ReadSaveBuf(&aGarages[i].m_fSSGarageAngle, buf);
 		ReadSaveBuf(&aGarages[i].m_fDir1Len, buf);
 		ReadSaveBuf(&aGarages[i].m_fDir2Len, buf);
 		ReadSaveBuf(&aGarages[i].m_fInfX, buf);
 		ReadSaveBuf(&aGarages[i].m_fSupX, buf);
 		ReadSaveBuf(&aGarages[i].m_fInfY, buf);
 		ReadSaveBuf(&aGarages[i].m_fSupY, buf);
+		ReadSaveBuf(&aGarages[i].m_nTimeCrusherCraneActivated, buf);
+		SkipSaveBuf(buf, 4);
 		ReadSaveBuf(&aGarages[i].m_fDoorPos, buf);
 		ReadSaveBuf(&aGarages[i].m_fDoorHeight, buf);
 		ReadSaveBuf(&aGarages[i].m_fDoor1X, buf);
@@ -2752,6 +2766,15 @@ void CGarages::Load(uint8* buf, uint32 size)
 		ReadSaveBuf(&aGarages[i].m_bCollectedCarsState, buf);
 		SkipSaveBuf(buf, 3 + 4);
 		SkipSaveBuf(buf, sizeof(aGarages[i].m_sStoredCar));
+		ReadSaveBuf(&aGarages[i].m_bInitialized, buf);
+		SkipSaveBuf(buf, 3);
+#ifdef GTA_NETWORK
+		SkipSaveBuf(buf, 4);
+#endif
+		ReadSaveBuf(&aGarages[i].m_bSSGarageAcceptedVehicle, buf);
+		ReadSaveBuf(&aGarages[i].m_bLocked, buf);
+		ReadSaveBuf(&aGarages[i].m_nSSGarageState, buf);
+		ReadSaveBuf(&aGarages[i].m_bSSGarageStateChanging, buf);
 #else
 		ReadSaveBuf(&aGarages[i], buf);
 #endif
@@ -2765,11 +2788,14 @@ void CGarages::Load(uint8* buf, uint32 size)
 		else
 			aGarages[i].UpdateDoorsHeight();
 	}
-//VALIDATESAVEBUF(size);
+VALIDATESAVEBUF(size);
 
 	MessageEndTime = 0;
 	bCamShouldBeOutisde = false;
 	MessageStartTime = 0;
+	hGarages = DMAudio.CreateEntity(AUDIOTYPE_GARAGE, (void*)1);
+	if (hGarages >= 0)
+		DMAudio.SetEntityStatus(hGarages, TRUE);
 }
 
 bool

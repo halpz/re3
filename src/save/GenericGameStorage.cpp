@@ -181,7 +181,7 @@ GenericSave(int file)
 	WriteDataToBufferPointer(buf, CClock::ms_nGameClockMinutes);
 	currPad = CPad::GetPad(0);
 	WriteDataToBufferPointer(buf, currPad->Mode);
-	WriteDataToBufferPointer(buf, CTimer::m_snTimeInMilliseconds);
+	//WriteDataToBufferPointer(buf, CTimer::m_snTimeInMilliseconds);
 	WriteDataToBufferPointer(buf, CTimer::ms_fTimeScale);
 	WriteDataToBufferPointer(buf, CTimer::ms_fTimeStep);
 	WriteDataToBufferPointer(buf, CTimer::ms_fTimeStepNonClipped);
@@ -213,7 +213,7 @@ GenericSave(int file)
 	WriteDataToBufferPointer(buf, CTimeCycle::m_ExtraColourInter);
 	PopulateRadioStationPositionList();
 	WriteDataToBufferPointer(buf, RadioStationPosition);
-	assert(buf - work_buff == SIZE_OF_SIMPLEVARS);
+	//assert(buf - work_buff == SIZE_OF_SIMPLEVARS);
 
 	// Save scripts, block is nested within the same block as simple vars for some reason
 	presize = buf;
@@ -230,26 +230,26 @@ GenericSave(int file)
 	// Save the rest
 	//WriteSaveDataBlock(CPools::SavePedPool, "PedPoolSize");
 	WriteSaveDataBlock(CGarages::Save, "GaragesSize");
-	WriteSaveDataBlock(CGameLogic::Save, "GameLogicSize");
-	WriteSaveDataBlock(CPools::SaveVehiclePool, "VehPoolSize");
-	WriteSaveDataBlock(CPools::SaveObjectPool, "ObjectPoolSize");
-	WriteSaveDataBlock(ThePaths.Save, "ThePathsSize");
-	WriteSaveDataBlock(CCranes::Save, "CranesSize");
-	WriteSaveDataBlock(CPickups::Save, "PickUpsSize");
-	WriteSaveDataBlock(gPhoneInfo.Save, "PhoneInfoSize");
-	WriteSaveDataBlock(CRestart::SaveAllRestartPoints, "RestartPointsBufferSize");
-	WriteSaveDataBlock(CRadar::SaveAllRadarBlips, "RadarBlipsBufferSize");
-	WriteSaveDataBlock(CTheZones::SaveAllZones, "AllZonesBufferSize");
-	WriteSaveDataBlock(CGangs::SaveAllGangData, "AllGangDataSize");
-	WriteSaveDataBlock(CTheCarGenerators::SaveAllCarGenerators, "AllCarGeneratorsSize");
-	WriteSaveDataBlock(CParticleObject::SaveParticle, "ParticlesSize");
-	WriteSaveDataBlock(cAudioScriptObject::SaveAllAudioScriptObjects, "AllAudioScriptObjectsSize");
-	WriteSaveDataBlock(CScriptPaths::Save, "ScriptPathsSize");
+	//WriteSaveDataBlock(CGameLogic::Save, "GameLogicSize");
+	//WriteSaveDataBlock(CPools::SaveVehiclePool, "VehPoolSize");
+	//WriteSaveDataBlock(CPools::SaveObjectPool, "ObjectPoolSize");
+	//WriteSaveDataBlock(ThePaths.Save, "ThePathsSize");
+	//WriteSaveDataBlock(CCranes::Save, "CranesSize");
+	//WriteSaveDataBlock(CPickups::Save, "PickUpsSize");
+	//WriteSaveDataBlock(gPhoneInfo.Save, "PhoneInfoSize");
+	//WriteSaveDataBlock(CRestart::SaveAllRestartPoints, "RestartPointsBufferSize");
+	//WriteSaveDataBlock(CRadar::SaveAllRadarBlips, "RadarBlipsBufferSize");
+	//WriteSaveDataBlock(CTheZones::SaveAllZones, "AllZonesBufferSize");
+	//WriteSaveDataBlock(CGangs::SaveAllGangData, "AllGangDataSize");
+	//WriteSaveDataBlock(CTheCarGenerators::SaveAllCarGenerators, "AllCarGeneratorsSize");
+	//WriteSaveDataBlock(CParticleObject::SaveParticle, "ParticlesSize");
+	//WriteSaveDataBlock(cAudioScriptObject::SaveAllAudioScriptObjects, "AllAudioScriptObjectsSize");
+	//WriteSaveDataBlock(CScriptPaths::Save, "ScriptPathsSize");
 	WriteSaveDataBlock(CWorld::Players[CWorld::PlayerInFocus].SavePlayerInfo, "PlayerInfoSize");
 	WriteSaveDataBlock(CStats::SaveStats, "StatsSize");
-	WriteSaveDataBlock(CSetPieces::Save, "SetPiecesSize");
-	WriteSaveDataBlock(CStreaming::MemoryCardSave, "StreamingSize");
-	WriteSaveDataBlock(CPedType::Save, "PedTypeSize");
+	//WriteSaveDataBlock(CSetPieces::Save, "SetPiecesSize");
+	//WriteSaveDataBlock(CStreaming::MemoryCardSave, "StreamingSize");
+	//WriteSaveDataBlock(CPedType::Save, "PedTypeSize");
 
 	// sure just write garbage data repeatedly ...
 #ifndef THIS_IS_STUPID
@@ -318,7 +318,7 @@ GenericLoad()
 	ReadDataFromBufferPointer(buf, CClock::ms_nGameClockMinutes);
 	currPad = CPad::GetPad(0);
 	ReadDataFromBufferPointer(buf, currPad->Mode);
-	ReadDataFromBufferPointer(buf, CTimer::m_snTimeInMilliseconds);
+	//ReadDataFromBufferPointer(buf, CTimer::m_snTimeInMilliseconds);
 	ReadDataFromBufferPointer(buf, CTimer::ms_fTimeScale);
 	ReadDataFromBufferPointer(buf, CTimer::ms_fTimeStep);
 	ReadDataFromBufferPointer(buf, CTimer::ms_fTimeStepNonClipped);
@@ -359,7 +359,7 @@ GenericLoad()
 	ReadDataFromBufferPointer(buf, CTimeCycle::m_bExtraColourOn);
 	ReadDataFromBufferPointer(buf, CTimeCycle::m_ExtraColourInter);
 	ReadDataFromBufferPointer(buf, RadioStationPosition);
-	assert(buf - work_buff == SIZE_OF_SIMPLEVARS);
+	//assert(buf - work_buff == SIZE_OF_SIMPLEVARS);
 #ifdef MISSION_REPLAY
 	WaitForSave = 0;
 	if (FrontEndMenuManager.m_nCurrSaveSlot == PAUSE_SAVE_SLOT && qs == 3)
@@ -372,50 +372,50 @@ GenericLoad()
 	//ReadDataFromBlock("Loading PedPool \n", CPools::LoadPedPool);
 	LoadSaveDataBlock();
 	ReadDataFromBlock("Loading Garages \n", CGarages::Load);
-	LoadSaveDataBlock();
-	ReadDataFromBlock("Loading GameLogic \n", CGameLogic::Load);
-	LoadSaveDataBlock();
-	ReadDataFromBlock("Loading Vehicles \n", CPools::LoadVehiclePool);
-	LoadSaveDataBlock();
+	//LoadSaveDataBlock();
+	//ReadDataFromBlock("Loading GameLogic \n", CGameLogic::Load);
+	//LoadSaveDataBlock();
+	//ReadDataFromBlock("Loading Vehicles \n", CPools::LoadVehiclePool);
+	//LoadSaveDataBlock();
 	CProjectileInfo::RemoveAllProjectiles();
 	CObject::DeleteAllTempObjects();
-	ReadDataFromBlock("Loading Objects \n", CPools::LoadObjectPool);
-	LoadSaveDataBlock();
-	ReadDataFromBlock("Loading Paths \n", ThePaths.Load);
-	LoadSaveDataBlock();
-	ReadDataFromBlock("Loading Cranes \n", CCranes::Load);
-	LoadSaveDataBlock();
-	ReadDataFromBlock("Loading Pickups \n", CPickups::Load);
-	LoadSaveDataBlock();
-	ReadDataFromBlock("Loading Phoneinfo \n", gPhoneInfo.Load);
-	LoadSaveDataBlock();
-	ReadDataFromBlock("Loading Restart \n", CRestart::LoadAllRestartPoints);
-	LoadSaveDataBlock();
-	ReadDataFromBlock("Loading Radar Blips \n", CRadar::LoadAllRadarBlips);
-	LoadSaveDataBlock();
-	ReadDataFromBlock("Loading Zones \n", CTheZones::LoadAllZones);
-	LoadSaveDataBlock();
-	ReadDataFromBlock("Loading Gang Data \n", CGangs::LoadAllGangData);
-	LoadSaveDataBlock();
-	ReadDataFromBlock("Loading Car Generators \n", CTheCarGenerators::LoadAllCarGenerators);
-	CParticle::ReloadConfig();
-	LoadSaveDataBlock();
-	ReadDataFromBlock("Loading Particles \n", CParticleObject::LoadParticle);
-	LoadSaveDataBlock();
-	ReadDataFromBlock("Loading AudioScript Objects \n", cAudioScriptObject::LoadAllAudioScriptObjects);
-	LoadSaveDataBlock();
-	ReadDataFromBlock("Loading ScriptPaths \n", CScriptPaths::Load);
+	//ReadDataFromBlock("Loading Objects \n", CPools::LoadObjectPool);
+	//LoadSaveDataBlock();
+	//ReadDataFromBlock("Loading Paths \n", ThePaths.Load);
+	//LoadSaveDataBlock();
+	//ReadDataFromBlock("Loading Cranes \n", CCranes::Load);
+	//LoadSaveDataBlock();
+	//ReadDataFromBlock("Loading Pickups \n", CPickups::Load);
+	//LoadSaveDataBlock();
+	//ReadDataFromBlock("Loading Phoneinfo \n", gPhoneInfo.Load);
+	//LoadSaveDataBlock();
+	//ReadDataFromBlock("Loading Restart \n", CRestart::LoadAllRestartPoints);
+	//LoadSaveDataBlock();
+	//ReadDataFromBlock("Loading Radar Blips \n", CRadar::LoadAllRadarBlips);
+	//LoadSaveDataBlock();
+	//ReadDataFromBlock("Loading Zones \n", CTheZones::LoadAllZones);
+	//LoadSaveDataBlock();
+	//ReadDataFromBlock("Loading Gang Data \n", CGangs::LoadAllGangData);
+	//LoadSaveDataBlock();
+	//ReadDataFromBlock("Loading Car Generators \n", CTheCarGenerators::LoadAllCarGenerators);
+	//CParticle::ReloadConfig();
+	//LoadSaveDataBlock();
+	//ReadDataFromBlock("Loading Particles \n", CParticleObject::LoadParticle);
+	//LoadSaveDataBlock();
+	//ReadDataFromBlock("Loading AudioScript Objects \n", cAudioScriptObject::LoadAllAudioScriptObjects);
+	//LoadSaveDataBlock();
+	//ReadDataFromBlock("Loading ScriptPaths \n", CScriptPaths::Load);
 	LoadSaveDataBlock();
 	ReadDataFromBlock("Loading Player Info \n", CWorld::Players[CWorld::PlayerInFocus].LoadPlayerInfo);
 	LoadSaveDataBlock();
 	ReadDataFromBlock("Loading Stats \n", CStats::LoadStats);
-	LoadSaveDataBlock();
-	ReadDataFromBlock("Loading Set Pieces \n", CSetPieces::Load);
-	LoadSaveDataBlock();
-	ReadDataFromBlock("Loading Streaming Stuff \n", CStreaming::MemoryCardLoad);
-	LoadSaveDataBlock();
-	ReadDataFromBlock("Loading PedType Stuff \n", CPedType::Load);
-
+	//LoadSaveDataBlock();
+	//ReadDataFromBlock("Loading Set Pieces \n", CSetPieces::Load);
+	//LoadSaveDataBlock();
+	//ReadDataFromBlock("Loading Streaming Stuff \n", CStreaming::MemoryCardLoad);
+	//LoadSaveDataBlock();
+	//ReadDataFromBlock("Loading PedType Stuff \n", CPedType::Load);
+	CStreaming::ReInit();
 	DMAudio.SetMusicMasterVolume(FrontEndMenuManager.m_PrefsMusicVolume);
 	DMAudio.SetEffectsMasterVolume(FrontEndMenuManager.m_PrefsSfxVolume);
 	if (!CloseFile(file)) {
@@ -423,7 +423,7 @@ GenericLoad()
 		return false;
 	}
 
-	DoGameSpecificStuffAfterSucessLoad();
+	//DoGameSpecificStuffAfterSucessLoad();
 	debug("Game successfully loaded \n");
 	return true;
 }

@@ -2558,7 +2558,7 @@ WinMain(HINSTANCE instance,
 			CGame::InitialiseWhenRestarting();
 			DMAudio.ChangeMusicMode(MUSICMODE_GAME);
 			LoadSplash(GetLevelSplashScreen(CGame::currLevel));
-			FrontEndMenuManager.m_bWantToLoad = false;
+			//FrontEndMenuManager.m_bWantToLoad = false;
 		}
 		else
 		{

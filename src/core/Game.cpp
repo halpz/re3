@@ -648,7 +648,7 @@ bool CGame::ShutDown(void)
 	return true;
 }
 
-void CGame::ReInitGameObjectVariables(void)
+bool CGame::ReInitGameObjectVariables(bool load)
 {
 	CGameLogic::InitAtStartOfGame();
 #ifdef PS2_MENU
@@ -693,7 +693,7 @@ void CGame::ReInitGameObjectVariables(void)
 	gPhoneInfo.Initialise();
 
 	PUSH_MEMID(MEMID_SCRIPT);
-	CTheScripts::Init();
+	bool res = CTheScripts::Init(load);
 	CGangs::Initialise();
 	POP_MEMID();
 
@@ -706,12 +706,14 @@ void CGame::ReInitGameObjectVariables(void)
 	CStats::Init();
 	CPickups::Init();
 	CPacManPickups::Init();
-	CGarages::Init();
+	if (!load)
+		CGarages::Init();
 	CSpecialFX::Init();
 	CRopes::Init();
 	CWaterCannons::Init();
 	CScriptPaths::Init();
 	CParticle::ReloadConfig();
+	CParticle::SetPixelData();
 
 #ifdef PS2_MENU
 	if ( !TheMemoryCard.m_bWantToLoad )
@@ -730,6 +732,8 @@ void CGame::ReInitGameObjectVariables(void)
 	
 	for (int32 i = 0; i < MAX_PADS; i++)
 		CPad::GetPad(i)->Clear(true);
+
+	return res;
 }
 
 void CGame::ReloadIPLs(void)
@@ -800,13 +804,12 @@ void CGame::InitialiseWhenRestarting(void)
 		RestoreForStartLoad();
 	}
 	
-	ReInitGameObjectVariables();
+	bool bLoadSuccessful = ReInitGameObjectVariables(FrontEndMenuManager.m_bWantToLoad);
 	
 	if ( FrontEndMenuManager.m_bWantToLoad == true )
 	{
-		FrontEndMenuManager.m_bWantToLoad = false;
 		InitRadioStationPositionList();
-		if ( GenericLoad() == true )
+		if ( bLoadSuccessful == true )
 		{
 			DMAudio.ResetTimers(CTimer::GetTimeInMilliseconds());
 			CFerry::InitFerrys();
@@ -825,8 +828,8 @@ void CGame::InitialiseWhenRestarting(void)
 			ShutDownForRestart();
 			CTimer::Stop();
 			CTimer::Initialise();
-			FrontEndMenuManager.m_bWantToLoad = false;
-			ReInitGameObjectVariables();
+			//FrontEndMenuManager.m_bWantToLoad = false;
+			ReInitGameObjectVariables(false);
 			currLevel = LEVEL_GENERIC;
 			CCollision::SortOutCollisionAfterLoad();
 		}
@@ -835,6 +838,7 @@ void CGame::InitialiseWhenRestarting(void)
 #endif
 	}
 	
+	FrontEndMenuManager.m_bWantToLoad = true;
 	CTimer::Update();
 	
 	DMAudio.ChangeMusicMode(MUSICMODE_GAME);
@@ -845,6 +849,20 @@ void CGame::InitialiseWhenRestarting(void)
 
 void CGame::Process(void) 
 {
+	if (FrontEndMenuManager.m_bWantToLoad) {
+		CTheScripts::StartTestScript();
+		CTheScripts::Process();
+		TheCamera.Process();
+		CStreaming::LoadScene(TheCamera.GetPosition());
+		//CGame::GenerateTempPedAtStartOfNetworkGame();
+		if (/* ?*/true){
+			CStreaming::RequestSpecialModel(MI_PLAYER, "player", STREAMFLAGS_DEPENDENCY | STREAMFLAGS_DONT_REMOVE);
+			CStreaming::LoadAllRequestedModels(false);
+		}
+		TheCamera.Process();
+		CStreaming::LoadScene(TheCamera.GetPosition());
+		FrontEndMenuManager.m_bWantToLoad = false;
+	}
 	CPad::UpdatePads();
 #ifdef USE_CUSTOM_ALLOCATOR
 	ProcessTidyUpMemory();

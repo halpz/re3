@@ -18,9 +18,7 @@
 #include "FileMgr.h"
 #include "Frontend.h"
 #include "General.h"
-#ifdef MISSION_REPLAY
 #include "GenericGameStorage.h"
-#endif
 #include "HandlingMgr.h"
 #include "Heli.h"
 #include "Hud.h"
@@ -1853,7 +1851,7 @@ void FlushLog()
 
 const uint32 CRunningScript::nSaveStructSize =
 #ifdef COMPATIBLE_SAVES
-	136;
+	536;
 #else
 	sizeof(CRunningScript);
 #endif
@@ -2691,7 +2689,7 @@ bool CTheScripts::Init(bool loaddata)
 		InvisibilitySettingArray[i] = nil;
 	if (loaddata) {
 		printf("loaddata = true\n");
-		//retval = GenericLoad(); // TODO
+		retval = GenericLoad();
 	}
 	for (int i = 0; i < MAX_ALLOWED_COLLISIONS; i++)
 		AllowedCollision[i] = 0;
