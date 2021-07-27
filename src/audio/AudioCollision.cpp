@@ -353,33 +353,34 @@ cAudioManager::GetCollisionOneShotRatio(uint32 a, float b)
 	case SURFACE_STEEP_CLIFF:
 	case SURFACE_TRANSPARENT_STONE: return GetCollisionRatio(b, 10.f, 60.f, 50.f);
 	case SURFACE_GRASS:
-	case SURFACE_CARDBOARDBOX: return GetCollisionRatio(b, 0.f, 2.f, 2.f);
-	case SURFACE_GRAVEL: return GetCollisionRatio(b, 0.f, 2.f, 2.f);
+	case SURFACE_CARDBOARDBOX:
+	case SURFACE_GRAVEL:
 	case SURFACE_MUD_DRY: return GetCollisionRatio(b, 0.f, 2.f, 2.f);
 	case SURFACE_CAR: return GetCollisionRatio(b, 6.f, 50.f, 44.f);
-	case SURFACE_GLASS: return GetCollisionRatio(b, 0.1f, 10.f, 9.9f);
+	case SURFACE_GLASS:
+	case SURFACE_METAL_CHAIN_FENCE: return GetCollisionRatio(b, 0.1f, 10.f, 9.9f);
 	case SURFACE_TRANSPARENT_CLOTH:
 	case SURFACE_THICK_METAL_PLATE: return GetCollisionRatio(b, 30.f, 130.f, 100.f);
 	case SURFACE_GARAGE_DOOR: return GetCollisionRatio(b, 20.f, 100.f, 80.f);
 	case SURFACE_CAR_PANEL: return GetCollisionRatio(b, 0.f, 4.f, 4.f);
 	case SURFACE_SCAFFOLD_POLE:
-	case SURFACE_METAL_GATE: return GetCollisionRatio(b, 1.f, 10.f, 9.f);
+	case SURFACE_METAL_GATE:
 	case SURFACE_LAMP_POST: return GetCollisionRatio(b, 1.f, 10.f, 9.f);
 	case SURFACE_FIRE_HYDRANT: return GetCollisionRatio(b, 1.f, 15.f, 14.f);
 	case SURFACE_GIRDER: return GetCollisionRatio(b, 8.f, 50.f, 42.f);
-	case SURFACE_METAL_CHAIN_FENCE: return GetCollisionRatio(b, 0.1f, 10.f, 9.9f);
 	case SURFACE_PED: return GetCollisionRatio(b, 0.f, 20.f, 20.f);
-	case SURFACE_SAND: return GetCollisionRatio(b, 0.f, 10.f, 10.f);
-	case SURFACE_WATER: return GetCollisionRatio(b, 0.f, 10.f, 10.f);
+	case SURFACE_SAND:
+	case SURFACE_WATER:
+	case SURFACE_RUBBER:
+	case SURFACE_WHEELBASE: return GetCollisionRatio(b, 0.f, 10.f, 10.f);
 	case SURFACE_WOOD_CRATES: return GetCollisionRatio(b, 1.f, 4.f, 3.f);
 	case SURFACE_WOOD_BENCH: return GetCollisionRatio(b, 0.1f, 5.f, 4.9f);
 	case SURFACE_WOOD_SOLID: return GetCollisionRatio(b, 0.1f, 40.f, 39.9f);
-	case SURFACE_RUBBER:
-	case SURFACE_WHEELBASE: return GetCollisionRatio(b, 0.f, 10.f, 10.f);
 	case SURFACE_PLASTIC: return GetCollisionRatio(b, 0.1f, 4.f, 3.9f);
 	case SURFACE_HEDGE: return GetCollisionRatio(b, 0.f, 0.5f, 0.5f);
 	case SURFACE_CONTAINER: return GetCollisionRatio(b, 4.f, 40.f, 36.f);
 	case SURFACE_NEWS_VENDOR: return GetCollisionRatio(b, 0.f, 5.f, 5.f);
+	default: break;
 	}
 
 	return 0.f;
