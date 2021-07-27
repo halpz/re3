@@ -25,7 +25,7 @@ tPoliceRadioZone ZoneSfx[NUMAUDIOZONES];
 char SubZo2Label[8];
 char SubZo3Label[8];
 
-int32 g_nMissionAudioSfx = TOTAL_AUDIO_SAMPLES;
+uint32 g_nMissionAudioSfx = TOTAL_AUDIO_SAMPLES;
 int8 g_nMissionAudioPlayingStatus = 2;
 uint8 gSpecialSuspectLastSeenReport;
 uint32 gMinTimeToNextReport[NUM_CRIME_TYPES];
