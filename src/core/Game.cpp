@@ -855,7 +855,7 @@ void CGame::Process(void)
 		TheCamera.Process();
 		CStreaming::LoadScene(TheCamera.GetPosition());
 		//CGame::GenerateTempPedAtStartOfNetworkGame();
-		if (/* ?*/true){
+		if (!CStreaming::HasModelLoaded(MI_PLAYER)){
 			CStreaming::RequestSpecialModel(MI_PLAYER, "player", STREAMFLAGS_DEPENDENCY | STREAMFLAGS_DONT_REMOVE);
 			CStreaming::LoadAllRequestedModels(false);
 		}
