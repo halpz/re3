@@ -390,7 +390,7 @@ public:
 	float GetDistanceSquared(const CVector &v) const; // inlined in vc
 	int32 GetJumboTaxiFreq() const; // inlined in vc
 	uint8 GetMissionAudioLoadingStatus(uint8 slot) const;
-	int8 GetMissionScriptPoliceAudioPlayingStatus() const;
+	int8 GetMissionScriptPoliceAudioPlayingStatus();
 	uint8 GetNum3DProvidersAvailable();
 	uint32 GetPedCommentSfx(CPed *ped, int32 sound);
 	void GetPhrase(uint32 &phrase, uint32 &prevPhrase, uint32 sample, uint32 maxOffset) const;
@@ -510,7 +510,7 @@ public:
 	void SetEntityStatus(int32 id, bool8 status);
 	uint32 SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollision &audioCollision);
 	void SetMissionAudioLocation(uint8 slot, float x, float y, float z);
-	void SetMissionScriptPoliceAudio(int32 sfx) const; // inlined and optimized
+	void SetMissionScriptPoliceAudio(uint32 sfx); // inlined and optimized
 	void SetMonoMode(bool8 mono);
 	void SetMusicFadeVol(uint8 volume);
 	void SetMusicMasterVolume(uint8 volume);
