@@ -392,8 +392,21 @@ CPed::BuildPedLists(void)
 					if (ped != this && !ped->bInVehicle) {
 						float dist = (ped->GetPosition() - GetPosition()).Magnitude2D();
 						if (nThreatReactionRangeMultiplier * 30.0f > dist) {
+#ifdef FIX_BUGS
+							static_assert( ARRAY_SIZE(m_nearPeds) < ARRAY_SIZE(gapTempPedList) - 1, "gapTempPedList needs wiggle room for unsorted peds and nil slot" );
+							// If the gap ped list is full, sort it and truncate it
+							// before pushing more unsorted peds
+							if( gnNumTempPedList == ARRAY_SIZE(gapTempPedList) - 1 )
+							{
+								gapTempPedList[gnNumTempPedList] = nil;
+								SortPeds(gapTempPedList, 0, gnNumTempPedList - 1);
+								gnNumTempPedList = ARRAY_SIZE(m_nearPeds);
+							}
+#endif
+
 							gapTempPedList[gnNumTempPedList] = ped;
 							gnNumTempPedList++;
+							// NOTE: We cannot absolutely fill the gap list, as the list is null-terminated before being passed to SortPeds
 							assert(gnNumTempPedList < ARRAY_SIZE(gapTempPedList));
 						}
 					}
