@@ -260,7 +260,7 @@ public:
 
 	// "Should" be in alphabetic order, except "getXTalkSfx"
 	void AddDetailsToRequestedOrderList(uint8 sample); // inlined in vc
-	void AddPlayerCarSample(uint8 emittingVolume, int32 freq, uint32 sample, uint8 bank, uint8 counter, bool8 notLooping);
+	void AddPlayerCarSample(uint8 emittingVolume, uint32 freq, uint32 sample, uint8 bank, uint8 counter, bool8 notLooping);
 	void AddReflectionsToRequestedQueue();
 	void AddReleasingSounds();
 	void AddSampleToRequestedQueue();
@@ -387,8 +387,8 @@ public:
 	float GetCollisionLoopingRatio(uint32 a, uint32 b, float c); // not used
 	float GetCollisionOneShotRatio(int32 a, float b);
 	float GetCollisionRatio(float a, float b, float c, float d); // inlined in vc
-	float GetDistanceSquared(const CVector &v) const; // inlined in vc
-	int32 GetJumboTaxiFreq() const; // inlined in vc
+	float GetDistanceSquared(const CVector &v); // inlined in vc
+	int32 GetJumboTaxiFreq(); // inlined in vc
 	uint8 GetMissionAudioLoadingStatus(uint8 slot) const;
 	int8 GetMissionScriptPoliceAudioPlayingStatus();
 	uint8 GetNum3DProvidersAvailable();
@@ -398,7 +398,7 @@ public:
 	                                    float velocityChange);
 	float GetVehicleNonDriveWheelSkidValue(CVehicle *veh, tWheelState wheelState, cTransmission *transmission, float velocityChange);
 
-	bool8 HasAirBrakes(int32 model) const;
+	bool8 HasAirBrakes(uint32 model);
 
 	void Initialise();
 	void InitialisePoliceRadio();
@@ -415,11 +415,11 @@ public:
 	void PlayLoadedMissionAudio(uint8 slot);
 	void PlayOneShot(int32 index, uint16 sound, float vol);
 	void PlaySuspectLastSeen(float x, float y, float z);
-	void PlayerJustGotInCar() const;
-	void PlayerJustLeftCar() const;
+	void PlayerJustGotInCar();
+	void PlayerJustLeftCar();
 	void PostInitialiseGameSpecificSetup();
 	void PostTerminateGameSpecificShutdown();
-	void PreInitialiseGameSpecificSetup() const;
+	void PreInitialiseGameSpecificSetup();
 	void PreloadMissionAudio(uint8 slot, Const char *name);
 	void PreTerminateGameSpecificShutdown();
 	/// processX - main logic of adding new sounds
@@ -465,12 +465,12 @@ public:
 	void ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh);
 	void ProcessProjectiles();
 	void ProcessRainOnVehicle(cVehicleParams& params);
-	void ProcessReverb() const;
+	void ProcessReverb();
 	bool8 ProcessReverseGear(cVehicleParams& params);
 	void ProcessScriptObject(int32 id);
 	void ProcessSpecial();
 #ifdef GTA_TRAIN
-	bool8 ProcessTrainNoise(cVehicleParams *params);
+	bool8 ProcessTrainNoise(cVehicleParams &params);
 #endif
 	void ProcessVehicle(CVehicle *vehicle);
 	bool8 ProcessVehicleDoors(cVehicleParams &params);
@@ -531,9 +531,9 @@ public:
 
 	void UpdateGasPedalAudio(CVehicle *veh, int vehType);
 	void UpdateReflections();
-	bool8 UsesReverseWarning(int32 model) const;
-	bool8 UsesSiren(cVehicleParams &params) const;
-	bool8 UsesSirenSwitching(cVehicleParams &params) const;
+	bool8 UsesReverseWarning(uint32 model);
+	bool8 UsesSiren(cVehicleParams &params);
+	bool8 UsesSirenSwitching(cVehicleParams &params);
 
 	CVehicle *FindVehicleOfPlayer();
 	void SetPedTalkingStatus(CPed *ped, bool8 status);
