@@ -8131,83 +8131,6 @@ cAudioManager::ProcessWaterCannon(int32)
 	}
 }
 
-//positon of arcade machines
-CVector aVecExtraSoundPosition[] = { CVector(-1042.546f, 88.794f, 11.324f), CVector(-1004.476f, 181.697f, 11.324f) };
-
-void 
-cAudioManager::ProcessExtraSounds()
-{
-	//const float SOUND_INTENSITY = 18.0f;
-	//const uint8 EMITTING_VOLUME = 50;
-
-	//float distance;
-
-	//for (int i = 0; i < ARRAY_SIZE(aVecExtraSoundPosition); i++) {
-	//	m_sQueueSample.m_vecPos = aVecExtraSoundPosition[i];
-	//	distance = GetDistanceSquared(m_sQueueSample.m_vecPos);
-	//	if (distance < SQR(SOUND_INTENSITY)) {
-	//		m_sQueueSample.m_fDistance = Sqrt(distance);
-	//		m_sQueueSample.m_nVolume = ComputeVolume(EMITTING_VOLUME, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
-	//		if (m_sQueueSample.m_nVolume != 0) {
-	//			m_sQueueSample.m_nCounter = i;
-	//			m_sQueueSample.m_nSampleIndex = SFX_ARCADE;
-	//			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-	//			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_ARCADE);
-	//			m_sQueueSample.m_bIs2D = FALSE;
-	//			m_sQueueSample.m_nLoopCount = 0;
-	//			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
-	//			m_sQueueSample.m_nReleasingVolumeModificator = 4;
-	//			m_sQueueSample.m_fSpeedMultiplier = 3.0f;
-	//			m_sQueueSample.m_nEmittingVolume = EMITTING_VOLUME;
-	//			SET_LOOP_OFFSETS(SFX_ARCADE)
-	//			m_sQueueSample.m_bReverbFlag = TRUE;
-	//			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
-	//			m_sQueueSample.m_bRequireReflection = FALSE;
-	//			m_sQueueSample.m_nReleasingVolumeDivider = 3;
-	//			AddSampleToRequestedQueue();
-	//		}
-	//	}
-	//}
-}
-
-void
-cAudioManager::ProcessEscalators()
-{
-	const float SOUND_INTENSITY = 30.0f;
-	const uint8 EMITTING_VOLUME = 26;
-
-	float distance;
-
-	for (int i = 0; i < CEscalators::NumEscalators; i++) {
-		if (!CEscalators::GetEscalator(i).IsActive())
-			continue;
-		m_sQueueSample.m_vecPos = CEscalators::GetEscalator(i).GetPosition();
-		distance = GetDistanceSquared(m_sQueueSample.m_vecPos);
-		if (distance < SQR(SOUND_INTENSITY)) {
-			m_sQueueSample.m_fDistance = Sqrt(distance);
-			m_sQueueSample.m_nVolume = ComputeVolume(EMITTING_VOLUME, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
-			if (m_sQueueSample.m_nVolume != 0) {
-				m_sQueueSample.m_nSampleIndex = SFX_BOAT_V12_LOOP;
-				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				m_sQueueSample.m_nFrequency = i * 50 % 250 + 3973;
-				m_sQueueSample.m_nReleasingVolumeModificator = 3;
-				m_sQueueSample.m_fSpeedMultiplier = 3.0f;
-				m_sQueueSample.m_nReleasingVolumeDivider = 5;
-				m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
-				m_sQueueSample.m_nCounter = i;
-				m_sQueueSample.m_bIs2D = FALSE;
-				m_sQueueSample.m_nLoopCount = 0;
-				m_sQueueSample.m_nEmittingVolume = EMITTING_VOLUME;
-				SET_LOOP_OFFSETS(SFX_BOAT_V12_LOOP)
-				m_sQueueSample.m_bReverbFlag = TRUE;
-				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
-				m_sQueueSample.m_bRequireReflection = FALSE;
-				AddSampleToRequestedQueue();
-			}
-		}
-	}
-}
-
 #pragma region SCRIPT_OBJECTS
 const int SCRIPT_OBJECT_INTENSITY_S = 30;
 const int SCRIPT_OBJECT_INTENSITY_L = 80;
@@ -9123,6 +9046,83 @@ cAudioManager::ProcessProjectiles()
 			}
 		}
 	}
+}
+
+void
+cAudioManager::ProcessEscalators()
+{
+	const float SOUND_INTENSITY = 30.0f;
+	const uint8 EMITTING_VOLUME = 26;
+
+	float distance;
+
+	for (int i = 0; i < CEscalators::NumEscalators; i++) {
+		if (!CEscalators::GetEscalator(i).IsActive())
+			continue;
+		m_sQueueSample.m_vecPos = CEscalators::GetEscalator(i).GetPosition();
+		distance = GetDistanceSquared(m_sQueueSample.m_vecPos);
+		if (distance < SQR(SOUND_INTENSITY)) {
+			m_sQueueSample.m_fDistance = Sqrt(distance);
+			m_sQueueSample.m_nVolume = ComputeVolume(EMITTING_VOLUME, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
+			if (m_sQueueSample.m_nVolume != 0) {
+				m_sQueueSample.m_nSampleIndex = SFX_BOAT_V12_LOOP;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nFrequency = i * 50 % 250 + 3973;
+				m_sQueueSample.m_nReleasingVolumeModificator = 3;
+				m_sQueueSample.m_fSpeedMultiplier = 3.0f;
+				m_sQueueSample.m_nReleasingVolumeDivider = 5;
+				m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
+				m_sQueueSample.m_nCounter = i;
+				m_sQueueSample.m_bIs2D = FALSE;
+				m_sQueueSample.m_nLoopCount = 0;
+				m_sQueueSample.m_nEmittingVolume = EMITTING_VOLUME;
+				SET_LOOP_OFFSETS(SFX_BOAT_V12_LOOP)
+				m_sQueueSample.m_bReverbFlag = TRUE;
+				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
+				m_sQueueSample.m_bRequireReflection = FALSE;
+				AddSampleToRequestedQueue();
+			}
+		}
+	}
+}
+
+//positon of arcade machines
+CVector aVecExtraSoundPosition[] = { CVector(-1042.546f, 88.794f, 11.324f), CVector(-1004.476f, 181.697f, 11.324f) };
+
+void 
+cAudioManager::ProcessExtraSounds()
+{
+	//const float SOUND_INTENSITY = 18.0f;
+	//const uint8 EMITTING_VOLUME = 50;
+
+	//float distance;
+
+	//for (int i = 0; i < ARRAY_SIZE(aVecExtraSoundPosition); i++) {
+	//	m_sQueueSample.m_vecPos = aVecExtraSoundPosition[i];
+	//	distance = GetDistanceSquared(m_sQueueSample.m_vecPos);
+	//	if (distance < SQR(SOUND_INTENSITY)) {
+	//		m_sQueueSample.m_fDistance = Sqrt(distance);
+	//		m_sQueueSample.m_nVolume = ComputeVolume(EMITTING_VOLUME, SOUND_INTENSITY, m_sQueueSample.m_fDistance);
+	//		if (m_sQueueSample.m_nVolume != 0) {
+	//			m_sQueueSample.m_nCounter = i;
+	//			m_sQueueSample.m_nSampleIndex = SFX_ARCADE;
+	//			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+	//			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_ARCADE);
+	//			m_sQueueSample.m_bIs2D = FALSE;
+	//			m_sQueueSample.m_nLoopCount = 0;
+	//			m_sQueueSample.m_bReleasingSoundFlag = FALSE;
+	//			m_sQueueSample.m_nReleasingVolumeModificator = 4;
+	//			m_sQueueSample.m_fSpeedMultiplier = 3.0f;
+	//			m_sQueueSample.m_nEmittingVolume = EMITTING_VOLUME;
+	//			SET_LOOP_OFFSETS(SFX_ARCADE)
+	//			m_sQueueSample.m_bReverbFlag = TRUE;
+	//			m_sQueueSample.m_fSoundIntensity = SOUND_INTENSITY;
+	//			m_sQueueSample.m_bRequireReflection = FALSE;
+	//			m_sQueueSample.m_nReleasingVolumeDivider = 3;
+	//			AddSampleToRequestedQueue();
+	//		}
+	//	}
+	//}
 }
 
 void
@@ -11292,7 +11292,7 @@ FindMissionAudioSfx(const char *name)
 }
 
 bool8
-cAudioManager::MissionScriptAudioUsesPoliceChannel(int32 soundMission) const
+cAudioManager::MissionScriptAudioUsesPoliceChannel(uint32 soundMission)
 {
 	return FALSE;
 }
@@ -11319,7 +11319,7 @@ cAudioManager::PreloadMissionAudio(uint8 slot, Const char *name)
 }
 
 uint8
-cAudioManager::GetMissionAudioLoadingStatus(uint8 slot) const
+cAudioManager::GetMissionAudioLoadingStatus(uint8 slot)
 {
 	if (m_bIsInitialised && slot < MISSION_AUDIO_SLOTS)
 		return m_sMissionAudio.m_nLoadingStatus[slot];
@@ -11345,7 +11345,7 @@ cAudioManager::PlayLoadedMissionAudio(uint8 slot)
 }
 
 bool8
-cAudioManager::ShouldDuckMissionAudio(uint8 slot) const
+cAudioManager::ShouldDuckMissionAudio(uint8 slot)
 {
 	//if (IsMissionAudioSamplePlaying(slot))
 	//	return m_sMissionAudio.m_nSampleIndex[slot] != STREAMED_SOUND_MISSION_ROK2_01;
@@ -11353,7 +11353,7 @@ cAudioManager::ShouldDuckMissionAudio(uint8 slot) const
 }
 
 bool8
-cAudioManager::IsMissionAudioSamplePlaying(uint8 slot) const
+cAudioManager::IsMissionAudioSamplePlaying(uint8 slot)
 {
 	if (m_bIsInitialised) {
 		if (slot < MISSION_AUDIO_SLOTS)
