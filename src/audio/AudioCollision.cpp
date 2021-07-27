@@ -349,8 +349,6 @@ cAudioManager::SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollisio
 float
 cAudioManager::GetCollisionOneShotRatio(int32 a, float b)
 {
-	float result;
-
 	switch(a) {
 	case SURFACE_DEFAULT:
 	case SURFACE_TARMAC:
