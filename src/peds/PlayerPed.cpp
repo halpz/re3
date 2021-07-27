@@ -574,8 +574,12 @@ CPlayerPed::DoWeaponSmoothSpray(void)
 					return -1.0f;
 
 			case WEAPONTYPE_CHAINSAW:
-				if (GetMeleeStartAnim(weaponInfo) && RpAnimBlendClumpGetAssociation(GetClump(), GetMeleeStartAnim(weaponInfo)))
+				if (GetMeleeStartAnim(weaponInfo) && RpAnimBlendClumpGetAssociation(GetClump(), GetMeleeStartAnim(weaponInfo))) {
+#ifdef FREE_CAM
+					if (TheCamera.Cams[0].Using3rdPersonMouseCam()) return -1.0f;
+#endif
 					return PI / 128.0f;
+				}
 				else if (GetFireAnimGround(weaponInfo, false) && RpAnimBlendClumpGetAssociation(GetClump(), GetFireAnimGround(weaponInfo, false)))
 					return PI / 176.f;
 				else
@@ -1222,11 +1226,21 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 	}
 
 	if (padUsed->DuckJustDown() && !bIsDucking && m_nMoveState != PEDMOVE_SPRINT) {
+#ifdef FIX_BUGS
+		// fix tommy being locked into looking at the same spot if you duck just after starting to shoot
+		if(!m_pPointGunAt)
+			ClearPointGunAt();
+#endif
 		bCrouchWhenShooting = true;
 		SetDuck(60000, true);
 	} else if (bIsDucking && (padUsed->DuckJustDown() || m_nMoveState == PEDMOVE_SPRINT ||
 		padUsed->GetSprint() || padUsed->JumpJustDown() || padUsed->ExitVehicleJustDown())) {
 
+#ifdef FIX_BUGS
+		// same fix as above except for standing up
+		if(!m_pPointGunAt)
+			ClearPointGunAt();
+#endif
 		ClearDuck(true);
 		bCrouchWhenShooting = false;
 	}
@@ -1465,6 +1479,13 @@ CPlayerPed::PlayerControlZelda(CPad *padUsed)
 	} else {
 		padMoveInGameUnit = CVector2D(leftRight, upDown).Magnitude() / PAD_MOVE_TO_GAME_WORLD_MOVE;
 	}
+
+#ifdef FREE_CAM
+	if (TheCamera.Cams[0].Using3rdPersonMouseCam() && smoothSprayRate > 0.0f) {
+		padMoveInGameUnit = 0.0f;
+		smoothSprayWithoutMove = false;
+	}
+#endif
 
 	if (padMoveInGameUnit > 0.0f || smoothSprayWithoutMove) {
 		float padHeading = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -leftRight, upDown);

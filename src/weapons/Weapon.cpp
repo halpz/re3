@@ -932,11 +932,37 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 			ProcessLineOfSight(*fireSource, target, point, victim, m_eWeaponType, shooter, true, true, true, true, true, false, false);
 			CWorld::bIncludeBikers = false;
 		}
+#ifdef FIX_BUGS
+		// fix muzzleflash rotation
+		heading = CGeneral::GetAngleBetweenPoints(source.x, source.y, target.x, target.y);
+		angle = DEGTORAD(heading);
+
+		ahead = CVector2D(-Sin(angle), Cos(angle));
+		ahead.Normalise();
+#endif
 	}
 	else if ( shooter == FindPlayerPed() && TheCamera.Cams[0].Using3rdPersonMouseCam()  )
 	{
 		TheCamera.Find3rdPersonCamTargetVector(info->m_fRange, *fireSource, source, target);
+#ifdef FREE_CAM
+		CPed *shooterPed = (CPed *)shooter;
+		if((shooterPed->m_pedIK.m_flags & CPedIK::GUN_POINTED_SUCCESSFULLY) == 0) {
+			target.x = info->m_fRange;
+			target.y = 0.0f;
+			target.z = 0.0f;
 
+			shooterPed->TransformToNode(target, PED_HANDR);
+		}
+#endif
+
+#ifdef FIX_BUGS
+		// fix muzzleflash rotation
+		heading = CGeneral::GetAngleBetweenPoints(source.x, source.y, target.x, target.y);
+		angle = DEGTORAD(heading);
+
+		ahead = CVector2D(-Sin(angle), Cos(angle));
+		ahead.Normalise();
+#endif
 		CWorld::bIncludeBikers = true;
 		CWorld::bIncludeDeadPeds = true;
 		CWorld::bIncludeCarTyres = true;
