@@ -106,7 +106,7 @@ cAudioManager::ResetPoliceRadio()
 }
 
 void
-cAudioManager::SetMissionScriptPoliceAudio(int32 sfx)
+cAudioManager::SetMissionScriptPoliceAudio(uint32 sfx)
 {
 	if (!m_bIsInitialised) return;
 	if (g_nMissionAudioPlayingStatus != 1) {

@@ -485,7 +485,7 @@ public:
 	void InitialisePoliceRadioZones();
 	void InitialisePoliceRadio();
 	void ResetPoliceRadio();
-	void SetMissionScriptPoliceAudio(int32 sfx);
+	void SetMissionScriptPoliceAudio(uint32 sfx);
 	int8 GetMissionScriptPoliceAudioPlayingStatus();
 	void DoPoliceRadioCrackle();
 	void ServicePoliceRadio();
