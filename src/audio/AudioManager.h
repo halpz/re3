@@ -22,8 +22,8 @@ public:
 #ifndef GTA_PS2
 	int32 m_nLoopStart;
 	int32 m_nLoopEnd;
-#endif
 	uint8 m_nEmittingVolume;
+#endif
 	float m_fSpeedMultiplier;
 	float m_fSoundIntensity;
 	bool8 m_bReleasingSoundFlag;
@@ -267,13 +267,13 @@ public:
 	void AgeCrimes(); // inlined in vc
 
 	void CalculateDistance(bool8 &condition, float dist);
-	bool8 CheckForAnAudioFileOnCD() const;
+	bool8 CheckForAnAudioFileOnCD();
 	void ClearActiveSamples();
 	void ClearMissionAudio(uint8 slot); // inlined in vc
 	void ClearRequestedQueue(); // inlined in vc
-	uint32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2, float speedMultiplier) const;
+	uint32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2, float speedMultiplier);
 	int32 ComputePan(float, CVector *);
-	uint8 ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance) const;
+	uint8 ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance);
 	int32 CreateEntity(eAudioType type, void *entity);
 
 	void DestroyAllGameCreatedEntities();
@@ -383,10 +383,10 @@ public:
 	// end of functions returning talk sfx
 
 	void GenerateIntegerRandomNumberTable();
-	char *Get3DProviderName(uint8 id) const;
-	char GetCDAudioDriveLetter() const;
-	int8 GetCurrent3DProviderIndex() const;
-	int8 AutoDetect3DProviders() const;
+	char *Get3DProviderName(uint8 id);
+	char GetCDAudioDriveLetter();
+	int8 GetCurrent3DProviderIndex();
+	int8 AutoDetect3DProviders();
 	float GetCollisionLoopingRatio(uint32 a, uint32 b, float c); // not used
 	float GetCollisionOneShotRatio(int32 a, float b);
 	float GetCollisionRatio(float a, float b, float c, float d); // inlined in vc
@@ -394,7 +394,7 @@ public:
 	int32 GetJumboTaxiFreq() const; // inlined in vc
 	uint8 GetMissionAudioLoadingStatus(uint8 slot) const;
 	int8 GetMissionScriptPoliceAudioPlayingStatus() const;
-	uint8 GetNum3DProvidersAvailable() const;
+	uint8 GetNum3DProvidersAvailable();
 	uint32 GetPedCommentSfx(CPed *ped, int32 sound);
 	void GetPhrase(uint32 &phrase, uint32 &prevPhrase, uint32 sample, uint32 maxOffset) const;
 	float GetVehicleDriveWheelSkidValue(CVehicle *veh, tWheelState wheelState, float gasPedalAudio, cTransmission *transmission,
@@ -407,9 +407,11 @@ public:
 	void InitialisePoliceRadio();
 	void InitialisePoliceRadioZones();
 	void InterrogateAudioEntities(); // inlined
-	bool8 IsAudioInitialised() const;
+	bool8 IsAudioInitialised();
 	bool8 IsMissionAudioSampleFinished(uint8 slot);
-	bool8 IsMP3RadioChannelAvailable() const;
+	bool8 IsMP3RadioChannelAvailable();
+
+	void LoadBankIfNecessary(uint8 bank); // this is used only on PS2 but technically not a platform code
 
 	bool8 MissionScriptAudioUsesPoliceChannel(int32 soundMission) const;
 
@@ -489,9 +491,9 @@ public:
 	void ProcessEscalators();
 	void ProcessExtraSounds();
 
-	int32 RandomDisplacement(uint32 seed) const;
-	void ReacquireDigitalHandle() const;
-	void ReleaseDigitalHandle() const;
+	int32 RandomDisplacement(uint32 seed);
+	void ReacquireDigitalHandle();
+	void ReleaseDigitalHandle();
 	void ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface1, uint8 surface2, float collisionPower, float intensity2);
 	void ReportCrime(eCrimeType crime, const CVector &pos);
 	void ResetAudioLogicTimers(uint32 timer);
@@ -505,17 +507,17 @@ public:
 	void ServiceSoundEffects();
 	int8 SetCurrent3DProvider(uint8 which);
 	void SetDynamicAcousticModelingStatus(bool8 status);
-	void SetEffectsFadeVol(uint8 volume) const;
-	void SetEffectsMasterVolume(uint8 volume) const;
-	void SetMP3BoostVolume(uint8 volume) const;
+	void SetEffectsFadeVol(uint8 volume);
+	void SetEffectsMasterVolume(uint8 volume);
+	void SetMP3BoostVolume(uint8 volume);
 	void SetEntityStatus(int32 id, bool8 status);
 	uint32 SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollision &audioCollision);
 	void SetMissionAudioLocation(uint8 slot, float x, float y, float z);
 	void SetMissionScriptPoliceAudio(int32 sfx) const; // inlined and optimized
 	void SetMonoMode(bool8 mono);
-	void SetMusicFadeVol(uint8 volume) const;
-	void SetMusicMasterVolume(uint8 volume) const;
-	void SetSpeakerConfig(int32 conf) const;
+	void SetMusicFadeVol(uint8 volume);
+	void SetMusicMasterVolume(uint8 volume);
+	void SetSpeakerConfig(int32 conf);
 	void SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 counter);
 	void SetUpOneShotCollisionSound(const cAudioCollision &col);
 	bool8 SetupCrimeReport();
@@ -528,7 +530,7 @@ public:
 	void SetupSuspectLastSeenReport();
 
 	void Terminate();
-	void TranslateEntity(Const CVector *v1, CVector *v2) const;
+	void TranslateEntity(Const CVector *v1, CVector *v2);
 
 	void UpdateGasPedalAudio(CVehicle *veh, int vehType);
 	void UpdateReflections();
