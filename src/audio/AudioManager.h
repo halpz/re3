@@ -255,8 +255,8 @@ public:
 	float GetReflectionsDistance(int32 idx) const { return m_afReflectionsDistances[idx]; }
 	int32 GetRandomNumber(int32 idx) const { return m_anRandomTable[idx]; }
 	int32 GetRandomNumberInRange(int32 idx, int32 low, int32 high) const { return (m_anRandomTable[idx] % (high - low + 1)) + low; }
-	bool8 IsMissionAudioSamplePlaying(uint8 slot) const; // { return m_sMissionAudio.m_nPlayStatus == 1; }
-	bool8 ShouldDuckMissionAudio(uint8 slot) const;
+	bool8 IsMissionAudioSamplePlaying(uint8 slot); // { return m_sMissionAudio.m_nPlayStatus == 1; }
+	bool8 ShouldDuckMissionAudio(uint8 slot);
 
 	// "Should" be in alphabetic order, except "getXTalkSfx"
 	void AddDetailsToRequestedOrderList(uint8 sample); // inlined in vc
@@ -389,7 +389,7 @@ public:
 	float GetCollisionRatio(float a, float b, float c, float d); // inlined in vc
 	float GetDistanceSquared(const CVector &v); // inlined in vc
 	int32 GetJumboTaxiFreq(); // inlined in vc
-	uint8 GetMissionAudioLoadingStatus(uint8 slot) const;
+	uint8 GetMissionAudioLoadingStatus(uint8 slot);
 	int8 GetMissionScriptPoliceAudioPlayingStatus();
 	uint8 GetNum3DProvidersAvailable();
 	uint32 GetPedCommentSfx(CPed *ped, int32 sound);
@@ -410,7 +410,7 @@ public:
 
 	void LoadBankIfNecessary(uint8 bank); // this is used only on PS2 but technically not a platform code
 
-	bool8 MissionScriptAudioUsesPoliceChannel(int32 soundMission) const;
+	bool8 MissionScriptAudioUsesPoliceChannel(uint32 soundMission);
 
 	void PlayLoadedMissionAudio(uint8 slot);
 	void PlayOneShot(int32 index, uint16 sound, float vol);
