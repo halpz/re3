@@ -5260,7 +5260,7 @@ cAudioManager::SetupPedComments(cPedParams &params, uint16 sound)
 }
 
 uint32
-cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
+cAudioManager::GetPedCommentSfx(CPed *ped, uint16 sound)
 {
 	if(ped->m_nPedState != PED_FALL || sound == SOUND_PED_DAMAGE || sound == SOUND_PED_HIT || sound == SOUND_PED_LAND) {
 		if(ped->m_getUpTimer == UINT32_MAX || ped->m_getUpTimer > CTimer::GetTimeInMilliseconds()) {
@@ -5396,8 +5396,8 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 		case MI_VICE4:
 		case MI_VICE5:
 		case MI_VICE7:
-		case MI_VICE8:// return GetViceWhiteTalkSfx(ped, sound);
-		case MI_VICE6:// return GetViceBlackTalkSfx(ped, sound);
+		case MI_VICE8: //return GetViceWhiteTalkSfx(ped, sound);
+		case MI_VICE6: //return GetViceBlackTalkSfx(ped, sound);
 		case MI_SPECIAL01:
 		case MI_SPECIAL02:
 		case MI_SPECIAL03:
@@ -5428,7 +5428,7 @@ cAudioManager::GetPedCommentSfx(CPed *ped, int32 sound)
 }
 
 void
-cAudioManager::GetPhrase(uint32 &phrase, uint32 &prevPhrase, uint32 sample, uint32 maxOffset) const
+cAudioManager::GetPhrase(uint32 &phrase, uint32 &prevPhrase, uint32 sample, uint32 maxOffset)
 {
 	if (maxOffset == 0) {
 		phrase = prevPhrase = NO_SAMPLE;
@@ -5454,7 +5454,7 @@ if (cooldown != 0) {\
 cooldown = 1;
 
 uint32
-cAudioManager::GetPlayerTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetPlayerTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -5621,7 +5621,74 @@ cAudioManager::GetPlayerTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetCopTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetGenericMaleTalkSfx(CPed *ped, uint16 sound)
+{
+	uint32 sfx;
+
+	m_bGenericSfx = TRUE;
+	switch(sound) {
+	case SOUND_PED_DEATH: GetPhrase(sfx, ped->m_lastComment, SFX_MALE_DEATH_01, 28); break;
+	case SOUND_PED_BULLET_HIT:
+	case SOUND_PED_DEFEND: GetPhrase(sfx, ped->m_lastComment, SFX_MALE_PAIN_01, 51); break;
+	case SOUND_PED_BURNING: GetPhrase(sfx, ped->m_lastComment, SFX_MALE_PAIN_ON_FIRE_01, 21); break;
+	case SOUND_PED_FLEE_SPRINT: GetPhrase(sfx, ped->m_lastComment, SFX_MALE_PANIC_01, 23); break;
+	default: return NO_SAMPLE;
+	}
+	return sfx;
+}
+
+uint32
+cAudioManager::GetGenericFemaleTalkSfx(CPed *ped, uint16 sound)
+{
+	uint32 sfx;
+	m_bGenericSfx = TRUE;
+	switch(sound) {
+	case SOUND_PED_DEATH: GetPhrase(sfx, ped->m_lastComment, SFX_FEMALE_DEATH_01, 16); break;
+	case SOUND_PED_BULLET_HIT:
+	case SOUND_PED_DEFEND: GetPhrase(sfx, ped->m_lastComment, SFX_FEMALE_PAIN_01, 34); break;
+	case SOUND_PED_BURNING: GetPhrase(sfx, ped->m_lastComment, SFX_FEMALE_PAIN_ON_FIRE_01, 11); break;
+	case SOUND_PED_FLEE_SPRINT: GetPhrase(sfx, ped->m_lastComment, SFX_FEMALE_PANIC_01, 13); break;
+	case SOUND_PED_PLAYER_BEFORESEX: GetPhrase(sfx, ped->m_lastComment, SFX_FEMALE_SEX_01, 11); break;
+	default: return NO_SAMPLE;
+	}
+	return sfx;
+}
+
+uint32
+cAudioManager::GetDefaultTalkSfx(CPed *ped, uint16 sound)
+{
+	uint32 sfx;
+
+	switch(sound) {
+	case SOUND_PED_HANDS_COWER: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_GUN_THREATENED_1, 2); break;
+	case SOUND_PED_CAR_JACKED: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_JACKED_CAR_1, 2); break;
+	case SOUND_PED_ROBBED:
+	case SOUND_PED_ACCIDENTREACTION1:
+	case SOUND_PED_TAXI_WAIT:
+	case SOUND_PED_EVADE:
+	case SOUND_PED_FLEE_RUN:
+	case SOUND_PED_CRASH_VEHICLE:
+	case SOUND_PED_WAIT_DOUBLEBACK:
+#ifdef FIX_BUGS
+	case SOUND_PED_CHAT_SEXY_MALE:
+#else
+	case SOUND_PED_CHAT_SEXY_FEMALE:
+#endif
+		GetPhrase(sfx, ped->m_lastComment, NO_SAMPLE, 0);
+		break;
+	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_FIGHT_1, 3); break;
+	case SOUND_PED_CRASH_CAR: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_CRASH_CAR_1, 2); break;
+	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_DRIVER_BLOCKED_1, 2); break;
+	case SOUND_PED_CHAT_EVENT: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_SHOCKED_1, 1); break;
+	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_BUMP_1, 3); break;
+	case SOUND_PED_CHAT: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_CHAT_1, 4); break;
+	default: return GetGenericMaleTalkSfx(ped, sound);
+	}
+	return sfx;
+}
+
+uint32
+cAudioManager::GetCopTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 	PedState objective;
@@ -5658,7 +5725,7 @@ cAudioManager::GetCopTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetSwatTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetSwatTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 	switch(sound) {
@@ -5672,7 +5739,7 @@ cAudioManager::GetSwatTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetFBITalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetFBITalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 	switch(sound) {
@@ -5696,13 +5763,13 @@ cAudioManager::GetFBITalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetArmyTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetArmyTalkSfx(CPed *ped, uint16 sound)
 {
 	return GetGenericMaleTalkSfx(ped, sound);
 }
 
 uint32
-cAudioManager::GetMedicTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetMedicTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 	switch(sound) {
@@ -5715,46 +5782,74 @@ cAudioManager::GetMedicTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetFiremanTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetFiremanTalkSfx(CPed *ped, uint16 sound)
 {
 	return GetGenericMaleTalkSfx(ped, sound);
 }
 
+/*
 uint32
-cAudioManager::GetDefaultTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWFYG1TalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
 	switch(sound) {
-	case SOUND_PED_HANDS_COWER: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_GUN_THREATENED_1, 2); break;
-	case SOUND_PED_CAR_JACKED: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_JACKED_CAR_1, 2); break;
-	case SOUND_PED_ROBBED:
-	case SOUND_PED_ACCIDENTREACTION1:
-	case SOUND_PED_TAXI_WAIT:
-	case SOUND_PED_EVADE:
-	case SOUND_PED_FLEE_RUN:
-	case SOUND_PED_CRASH_VEHICLE:
-	case SOUND_PED_WAIT_DOUBLEBACK:
-#ifdef FIX_BUGS
-	case SOUND_PED_CHAT_SEXY_MALE:
-#else
-	case SOUND_PED_CHAT_SEXY_FEMALE:
-#endif
-		GetPhrase(sfx, ped->m_lastComment, NO_SAMPLE, 0);
-		break;
-	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_FIGHT_1, 3); break;
-	case SOUND_PED_CRASH_CAR: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_CRASH_CAR_1, 2); break;
-	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_DRIVER_BLOCKED_1, 2); break;
-	case SOUND_PED_CHAT_EVENT: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_SHOCKED_1, 1); break;
-	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_BUMP_1, 3); break;
-	case SOUND_PED_CHAT: GetPhrase(sfx, ped->m_lastComment, SFX_MALE01_CHAT_1, 4); break;
-	default: return GetGenericMaleTalkSfx(ped, sound);
+	case SOUND_PED_HANDS_UP: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_GUN_COOL_1, 6); break;
+	case SOUND_PED_MUGGING: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_MUGGING_1, 2); break;
+	case SOUND_PED_CAR_JACKED: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_JACKED_1, 5); break;
+	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_MUGGED_1, 2); break;
+	case SOUND_PED_ACCIDENTREACTION1: return SFX_WFYG1_SAVED_1;
+	case SOUND_PED_TAXI_WAIT: return SFX_WFYG1_TAXI_1;
+	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_FIGHT_1, 4); break;
+	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_DODGE_1, 9); break;
+	case SOUND_PED_FLEE_RUN: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_RUN_1, 2); break;
+	case SOUND_PED_CRASH_VEHICLE: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_GENERIC_CRASH_1, 7); break;
+	case SOUND_PED_CRASH_CAR: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_CAR_CRASH_1, 9); break;
+	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_BLOCKED_1, 7); break;
+	case SOUND_PED_WAIT_DOUBLEBACK: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_LOST_1, 3); break;
+	case SOUND_PED_CHAT_SEXY_FEMALE: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_EYEING_1, 2); break;
+	case SOUND_PED_CHAT_EVENT: return SFX_WFYG1_SHOCKED_1;
+	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_BUMP_1, 11); break;
+	case SOUND_PED_CHAT: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_CHAT_1, 10); break;
+	default: return GetGenericFemaleTalkSfx(ped, sound);
 	}
 	return sfx;
 }
+
+uint32
+cAudioManager::GetWFYG2TalkSfx(CPed *ped, uint16 sound)
+{
+	uint32 sfx;
+
+	switch(sound) {
+	case SOUND_PED_HANDS_UP: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_GUN_COOL_1, 3); break;
+	case SOUND_PED_CAR_JACKED: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_JACKED_1, 5); break;
+	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_MUGGED_1, 2); break;
+#ifdef FIX_BUGS
+	case SOUND_PED_TAXI_WAIT: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_TAXI_1, 2); break;
+#else
+	case SOUND_PED_TAXI_WAIT: return SFX_WFYG2_TAXI_1;
+#endif
+	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_FIGHT_1, 5); break;
+	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_DODGE_1, 8); break;
+	case SOUND_PED_CRASH_VEHICLE: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_GENERIC_CRASH_1, 7); break;
+	case SOUND_PED_CRASH_CAR: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_CAR_CRASH_1, 9); break;
+	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_BLOCKED_1, 5); break;
+	case SOUND_PED_WAIT_DOUBLEBACK: return SFX_WFYG2_LOST_1;
+	case SOUND_PED_CHAT_SEXY_FEMALE: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_EYEING_1, 4); break;
+	case SOUND_PED_CHAT_EVENT: return SFX_WFYG2_SHOCKED_1;
+	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_BUMP_1, 11); break;
+	case SOUND_PED_CHAT: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_CHAT_1, 9); break;
+	default: return GetGenericFemaleTalkSfx(ped, sound);
+	}
+
+	return sfx;
+}
+*/
+
 /*
 uint32
-cAudioManager::GetHFYSTTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHFYSTTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 	switch(sound) {
@@ -5778,7 +5873,7 @@ cAudioManager::GetHFYSTTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetHFOSTTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHFOSTTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -5801,7 +5896,7 @@ cAudioManager::GetHFOSTTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetHMYSTTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHMYSTTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -5822,7 +5917,7 @@ cAudioManager::GetHMYSTTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetHMOSTTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHMOSTTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -5847,7 +5942,7 @@ cAudioManager::GetHMOSTTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetHFYRITalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHFYRITalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -5871,7 +5966,7 @@ cAudioManager::GetHFYRITalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetHFORITalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHFORITalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -5896,7 +5991,7 @@ cAudioManager::GetHFORITalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetHMYRITalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHMYRITalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -5918,7 +6013,7 @@ cAudioManager::GetHMYRITalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetHMORITalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHMORITalkSfx(CPed *ped, uint16 sound)
 {
 
 	uint32 sfx;
@@ -5942,7 +6037,7 @@ cAudioManager::GetHMORITalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetHFYBETalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHFYBETalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -5966,7 +6061,7 @@ cAudioManager::GetHFYBETalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetHFOBETalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHFOBETalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -5990,7 +6085,7 @@ cAudioManager::GetHFOBETalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetHMYBETalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHMYBETalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6015,7 +6110,7 @@ cAudioManager::GetHMYBETalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetHMOBETalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHMOBETalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6034,7 +6129,7 @@ cAudioManager::GetHMOBETalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetHFYBUTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHFYBUTalkSfx(CPed *ped, uint16 sound)
 {
 
 	uint32 sfx;
@@ -6059,7 +6154,7 @@ cAudioManager::GetHFYBUTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetHFYMDTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHFYMDTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6082,7 +6177,7 @@ cAudioManager::GetHFYMDTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetHFYCGTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHFYCGTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6105,7 +6200,7 @@ cAudioManager::GetHFYCGTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetHFYPRTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHFYPRTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6127,7 +6222,7 @@ cAudioManager::GetHFYPRTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetHFOTRTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHFOTRTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6147,7 +6242,7 @@ cAudioManager::GetHFOTRTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetHMOTRTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHMOTRTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6167,33 +6262,7 @@ cAudioManager::GetHMOTRTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetHMYAPTalkSfx(CPed *ped, int16 sound)
-{
-	uint32 sfx;
-
-	switch(sound) {
-	case SOUND_PED_HANDS_COWER: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_GUN_PANIC_1, 7); break;
-	case SOUND_PED_CAR_JACKING: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_JACKING_1, 4); break;
-	case SOUND_PED_CAR_JACKED: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_JACKED_1, 7); break;
-	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_MUGGED_1, 2); break;
-	case SOUND_PED_ACCIDENTREACTION1: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_SAVED_1, 2); break;
-	case SOUND_PED_TAXI_WAIT: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_TAXI_1, 2); break;
-	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_DODGE_1, 9); break;
-	case SOUND_PED_FLEE_RUN: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_RUN_1, 6); break;
-	case SOUND_PED_CRASH_VEHICLE: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_GENERIC_CRASH_1, 6); break;
-	case SOUND_PED_CRASH_CAR: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_CAR_CRASH_1, 9); break;
-	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_BLOCKED_1, 9); break;
-	case SOUND_PED_WAIT_DOUBLEBACK: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_LOST_1, 2); break;
-	case SOUND_PED_CHAT_SEXY_MALE: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_EYEING_1, 3); break;
-	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_BUMP_1, 11); break;
-	case SOUND_PED_CHAT: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_CHAT_1, 9); break;
-	default: return GetGenericMaleTalkSfx(ped, sound);
-	}
-	return sfx;
-}
-
-uint32
-cAudioManager::GetHMOCATalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHMOCATalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6214,39 +6283,7 @@ cAudioManager::GetHMOCATalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBMODKTalkSfx(CPed *ped, int16 sound)
-{
-	uint32 sfx;
-
-	switch(sound) {
-	case SOUND_PED_HANDS_COWER: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_GUN_PANIC_1, 4); break;
-	case SOUND_PED_CAR_JACKED: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_JACKED_1, 9); break;
-	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_MUGGED_1, 2); break;
-	case SOUND_PED_INNOCENT: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_INNOCENT_1, 3); break;
-	case SOUND_PED_TAXI_WAIT: return SFX_BMODK_TAXI_1;
-	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_DODGE_1, 7); break;
-	case SOUND_PED_FLEE_RUN: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_RUN_1, 4); break;
-	case SOUND_PED_CRASH_VEHICLE: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_GENERIC_CRASH_1, 7); break;
-	case SOUND_PED_CRASH_CAR: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_CAR_CRASH_1, 10); break;
-	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_BLOCKED_1, 8); break;
-	case SOUND_PED_147: // this is some cut behaviour, the guy was selling something
-		GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_UNK_147_1, 11);
-		// what is this? some sort of censorship?
-		switch(sfx) {
-		case SFX_BMODK_UNK_147_5:
-		case SFX_BMODK_UNK_147_6:
-		case SFX_BMODK_UNK_147_7: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_UNK_147_1, 4); break;
-		default: break;
-		}
-		break;
-	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_BUMP_1, 10); break;
-	default: return GetGenericMaleTalkSfx(ped, sound);
-	}
-	return sfx;
-}
-
-uint32
-cAudioManager::GetBMYCRTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBMYCRTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6271,7 +6308,7 @@ cAudioManager::GetBMYCRTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBFYSTTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBFYSTTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6295,7 +6332,7 @@ cAudioManager::GetBFYSTTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBFOSTTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBFOSTTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6319,7 +6356,7 @@ cAudioManager::GetBFOSTTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBMYSTTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBMYSTTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6347,7 +6384,7 @@ cAudioManager::GetBMYSTTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBMOSTTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBMOSTTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6370,7 +6407,7 @@ cAudioManager::GetBMOSTTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBFYRITalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBFYRITalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6396,7 +6433,7 @@ cAudioManager::GetBFYRITalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBFORITalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBFORITalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6420,7 +6457,7 @@ cAudioManager::GetBFORITalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBMYRITalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBMYRITalkSfx(CPed *ped, uint16 sound)
 {
 
 	uint32 sfx;
@@ -6446,7 +6483,7 @@ cAudioManager::GetBMYRITalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBFYBETalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBFYBETalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6479,7 +6516,7 @@ cAudioManager::GetBFYBETalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBMYBETalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBMYBETalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6505,7 +6542,7 @@ cAudioManager::GetBMYBETalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBFOBETalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBFOBETalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6528,7 +6565,7 @@ cAudioManager::GetBFOBETalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBMOBETalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBMOBETalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6551,7 +6588,7 @@ cAudioManager::GetBMOBETalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBMYBUTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBMYBUTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6576,7 +6613,7 @@ cAudioManager::GetBMYBUTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBFYPRTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBFYPRTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6598,7 +6635,7 @@ cAudioManager::GetBFYPRTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBFOTRTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBFOTRTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6620,7 +6657,7 @@ cAudioManager::GetBFOTRTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBMOTRTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBMOTRTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6641,7 +6678,7 @@ cAudioManager::GetBMOTRTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBMYPITalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBMYPITalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6665,7 +6702,7 @@ cAudioManager::GetBMYPITalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBMYBBTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBMYBBTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6695,7 +6732,7 @@ cAudioManager::GetBMYBBTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWMYCRTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWMYCRTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6716,7 +6753,7 @@ cAudioManager::GetWMYCRTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWFYSTTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWFYSTTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6742,7 +6779,49 @@ cAudioManager::GetWFYSTTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWFOSTTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWFYSKTalkSfx(CPed *ped, uint16 sound)
+{
+	uint32 sfx;
+
+	switch(sound) {
+	case SOUND_PED_HANDS_COWER: GetPhrase(sfx, ped->m_lastComment, SFX_WFYSK_GUN_PANIC_1, 5); break;
+	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_WFYSK_MUGGED_1, 2); break;
+	case SOUND_PED_ACCIDENTREACTION1: GetPhrase(sfx, ped->m_lastComment, SFX_WFYSK_SAVED_1, 2); break;
+	case SOUND_PED_TAXI_WAIT: return SFX_WFYSK_TAXI_1;
+	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_WFYSK_FIGHT_1, 11); break;
+	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_WFYSK_DODGE_1, 9); break;
+	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_WFYSK_BLOCKED_1, 11); break;
+	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_WFYSK_BUMP_1, 18); break;
+	default: return GetGenericFemaleTalkSfx(ped, sound);
+	}
+	return sfx;
+}
+
+uint32
+cAudioManager::GetWMYSKTalkSfx(CPed *ped, uint16 sound)
+{
+	uint32 sfx;
+
+	switch(sound) {
+	case SOUND_PED_HANDS_COWER: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_GUN_PANIC_1, 5); break;
+	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_MUGGED_1, 2); break;
+	case SOUND_PED_ACCIDENTREACTION1: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_SAVED_1, 2); break;
+	case SOUND_PED_INNOCENT: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_INNOCENT_1, 3); break;
+	case SOUND_PED_TAXI_WAIT: return SFX_WMYSK_TAXI_1;
+	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_FIGHT_1, 5); break;
+	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_DODGE_1, 10); break;
+	case SOUND_PED_WAIT_DOUBLEBACK: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_LOST_1, 2); break;
+	case SOUND_PED_CHAT_SEXY_MALE: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_EYEING_1, 2); break;
+	case SOUND_PED_CHAT_EVENT: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_SHOCKED_1, 2); break;
+	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_BUMP_1, 14); break;
+	case SOUND_PED_CHAT: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_CHAT_1, 13); break;
+	default: return GetGenericMaleTalkSfx(ped, sound);
+	}
+	return sfx;
+}
+
+uint32
+cAudioManager::GetWFOSTTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6766,7 +6845,7 @@ cAudioManager::GetWFOSTTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWMYSTTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWMYSTTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6793,7 +6872,7 @@ cAudioManager::GetWMYSTTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWMOSTTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWMOSTTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6820,7 +6899,7 @@ cAudioManager::GetWMOSTTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWFYRITalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWFYRITalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6845,7 +6924,7 @@ cAudioManager::GetWFYRITalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWFORITalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWFORITalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6869,7 +6948,7 @@ cAudioManager::GetWFORITalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWMYRITalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWMYRITalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6896,7 +6975,7 @@ cAudioManager::GetWMYRITalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWMORITalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWMORITalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6921,7 +7000,7 @@ cAudioManager::GetWMORITalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWFYBETalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWFYBETalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6944,7 +7023,7 @@ cAudioManager::GetWFYBETalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWMYBETalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWMYBETalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6969,7 +7048,7 @@ cAudioManager::GetWMYBETalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWFOBETalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWFOBETalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -6992,7 +7071,7 @@ cAudioManager::GetWFOBETalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWMOBETalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWMOBETalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7018,7 +7097,7 @@ cAudioManager::GetWMOBETalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWMYCWTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWMYCWTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7047,7 +7126,7 @@ cAudioManager::GetWMYCWTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWMYGOTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWMYGOTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7071,7 +7150,7 @@ cAudioManager::GetWMYGOTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWFOGOTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWFOGOTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7094,7 +7173,7 @@ cAudioManager::GetWFOGOTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWMOGOTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWMOGOTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7118,7 +7197,7 @@ cAudioManager::GetWMOGOTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWFYLGTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWFYLGTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7136,7 +7215,7 @@ cAudioManager::GetWFYLGTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWMYLGTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWMYLGTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7154,7 +7233,7 @@ cAudioManager::GetWMYLGTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWFYBUTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWFYBUTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7174,7 +7253,7 @@ cAudioManager::GetWFYBUTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWMYBUTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWMYBUTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7205,7 +7284,7 @@ cAudioManager::GetWMYBUTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWMOBUTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWMOBUTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7229,7 +7308,7 @@ cAudioManager::GetWMOBUTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWFYPRTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWFYPRTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7250,7 +7329,7 @@ cAudioManager::GetWFYPRTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWFOTRTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWFOTRTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7269,7 +7348,7 @@ cAudioManager::GetWFOTRTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWMOTRTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWMOTRTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7290,7 +7369,7 @@ cAudioManager::GetWMOTRTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWMYPITalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWMYPITalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7319,7 +7398,7 @@ cAudioManager::GetWMYPITalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWMOCATalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWMOCATalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7343,84 +7422,7 @@ cAudioManager::GetWMOCATalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWFYJGTalkSfx(CPed *ped, int16 sound)
-{
-	uint32 sfx;
-	switch(sound) {
-	case SOUND_PED_HANDS_COWER: GetPhrase(sfx, ped->m_lastComment, SFX_WFYJG_GUN_PANIC_1, 4); break;
-	case SOUND_PED_ACCIDENTREACTION1: sfx = SFX_WFYJG_SAVED_1; break;
-	case SOUND_PED_TAXI_WAIT: sfx = SFX_WFYJG_TAXI_1; break;
-	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_WFYJG_DODGE_1, 8); break;
-	case SOUND_PED_FLEE_RUN: GetPhrase(sfx, ped->m_lastComment, SFX_WFYJG_RUN_1, 6); break;
-	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_WFYJG_BUMP_1, 12); break;
-	default: return GetGenericFemaleTalkSfx(ped, sound);
-	}
-	return sfx;
-}
-
-uint32
-cAudioManager::GetWMYJGTalkSfx(CPed *ped, int16 sound)
-{
-	uint32 sfx;
-
-	switch(sound) {
-	case SOUND_PED_HANDS_COWER: GetPhrase(sfx, ped->m_lastComment, SFX_WMYJG_GUN_PANIC_1, 4); break;
-	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_WMYJG_MUGGED_1, 2); break;
-	case SOUND_PED_ACCIDENTREACTION1: return SFX_WMYJG_SAVED_1;
-	case SOUND_PED_TAXI_WAIT: return SFX_WMYJG_TAXI_1;
-	case SOUND_PED_FLEE_RUN: GetPhrase(sfx, ped->m_lastComment, SFX_WMYJG_RUN_1, 5); break;
-	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_WMYJG_BLOCKED_1, 10); break;
-	case SOUND_PED_CHAT_SEXY_MALE: GetPhrase(sfx, ped->m_lastComment, SFX_WMYJG_EYEING_1, 2); break;
-	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_WMYJG_BUMP_1, 10); break;
-	default: return GetGenericMaleTalkSfx(ped, sound);
-	}
-	return sfx;
-}
-
-uint32
-cAudioManager::GetWFYSKTalkSfx(CPed *ped, int16 sound)
-{
-	uint32 sfx;
-
-	switch(sound) {
-	case SOUND_PED_HANDS_COWER: GetPhrase(sfx, ped->m_lastComment, SFX_WFYSK_GUN_PANIC_1, 5); break;
-	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_WFYSK_MUGGED_1, 2); break;
-	case SOUND_PED_ACCIDENTREACTION1: GetPhrase(sfx, ped->m_lastComment, SFX_WFYSK_SAVED_1, 2); break;
-	case SOUND_PED_TAXI_WAIT: return SFX_WFYSK_TAXI_1;
-	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_WFYSK_FIGHT_1, 11); break;
-	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_WFYSK_DODGE_1, 9); break;
-	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_WFYSK_BLOCKED_1, 11); break;
-	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_WFYSK_BUMP_1, 18); break;
-	default: return GetGenericFemaleTalkSfx(ped, sound);
-	}
-	return sfx;
-}
-
-uint32
-cAudioManager::GetWMYSKTalkSfx(CPed *ped, int16 sound)
-{
-	uint32 sfx;
-
-	switch(sound) {
-	case SOUND_PED_HANDS_COWER: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_GUN_PANIC_1, 5); break;
-	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_MUGGED_1, 2); break;
-	case SOUND_PED_ACCIDENTREACTION1: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_SAVED_1, 2); break;
-	case SOUND_PED_INNOCENT: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_INNOCENT_1, 3); break;
-	case SOUND_PED_TAXI_WAIT: return SFX_WMYSK_TAXI_1;
-	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_FIGHT_1, 5); break;
-	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_DODGE_1, 10); break;
-	case SOUND_PED_WAIT_DOUBLEBACK: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_LOST_1, 2); break;
-	case SOUND_PED_CHAT_SEXY_MALE: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_EYEING_1, 2); break;
-	case SOUND_PED_CHAT_EVENT: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_SHOCKED_1, 2); break;
-	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_BUMP_1, 14); break;
-	case SOUND_PED_CHAT: GetPhrase(sfx, ped->m_lastComment, SFX_WMYSK_CHAT_1, 13); break;
-	default: return GetGenericMaleTalkSfx(ped, sound);
-	}
-	return sfx;
-}
-
-uint32
-cAudioManager::GetWFYSHTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWFYSHTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7441,7 +7443,7 @@ cAudioManager::GetWFYSHTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetWFOSHTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWFOSHTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7462,7 +7464,7 @@ cAudioManager::GetWFOSHTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetJFOTOTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetJFOTOTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7487,7 +7489,7 @@ cAudioManager::GetJFOTOTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetJMOTOTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetJMOTOTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7512,33 +7514,7 @@ cAudioManager::GetJMOTOTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetCBTalkSfx(CPed *ped, int16 sound)
-{
-	uint32 sfx;
-
-	switch(sound) {
-	case SOUND_PED_HANDS_UP: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_GUN_COOL_1, 5); break;
-	case SOUND_PED_CAR_JACKING: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_JACKING_1, 5); break;
-	case SOUND_PED_CAR_JACKED: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_JACKED_1, 4); break;
-	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_MUGGED_1, 2); break;
-	case SOUND_PED_ACCIDENTREACTION1: sfx = SFX_CUBAN_GANG_1_SAVED_1; break;
-	case SOUND_PED_TAXI_WAIT: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_TAXI_1, 2); break;
-	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_FIGHT_1, 9); break;
-	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_DODGE_1, 9); break;
-	case SOUND_PED_CRASH_VEHICLE: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_GENERIC_CRASH_1, 8); break;
-	case SOUND_PED_CRASH_CAR: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_CAR_CRASH_1, 8); break;
-	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_BLOCKED_1, 8); break;
-	case SOUND_PED_WAIT_DOUBLEBACK: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_LOST_1, 2); break;
-	case SOUND_PED_CHAT_SEXY_MALE: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_EYEING_1, 2); break;
-	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_BUMP_1, 11); break;
-	case SOUND_PED_CHAT: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_CHAT_1, 10); break;
-	default: return GetGenericMaleTalkSfx(ped, sound);
-	}
-	return (SFX_CUBAN_GANG_2_BLOCKED_1 - SFX_CUBAN_GANG_1_BLOCKED_1) * (m_sQueueSample.m_nEntityIndex % 3) + sfx;
-}
-
-uint32
-cAudioManager::GetHNTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetHNTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7564,7 +7540,57 @@ cAudioManager::GetHNTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetSGTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetBKTalkSfx(CPed *ped, uint16 sound)
+{
+	uint32 sfx;
+
+	switch(sound) {
+	case SOUND_PED_HANDS_UP: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_GUN_COOL_1, 5); break;
+	case SOUND_PED_CAR_JACKING: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_JACKING_1, 4); break;
+	case SOUND_PED_CAR_JACKED: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_JACKED_1, 8); break;
+	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_MUGGED_1, 2); break;
+	case SOUND_PED_ACCIDENTREACTION1: sfx = SFX_BIKER_GANG_1_SAVED_1; break;
+	case SOUND_PED_TAXI_WAIT: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_TAXI_1, 2); break;
+	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_FIGHT_1, 9); break;
+	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_DODGE_1, 9); break;
+	case SOUND_PED_CRASH_VEHICLE: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_GENERIC_CRASH_1, 8); break;
+	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_BLOCKED_1, 10); break;
+	case SOUND_PED_WAIT_DOUBLEBACK: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_LOST_1, 2); break;
+	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_BUMP_1, 10); break;
+	case SOUND_PED_CHAT: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_CHAT_1, 12); break;
+	default: return GetGenericMaleTalkSfx(ped, sound);
+	}
+	return (SFX_BIKER_GANG_2_BLOCKED_1 - SFX_BIKER_GANG_1_BLOCKED_1) * (m_sQueueSample.m_nEntityIndex % 3) + sfx;
+}
+
+uint32
+cAudioManager::GetCBTalkSfx(CPed *ped, uint16 sound)
+{
+	uint32 sfx;
+
+	switch(sound) {
+	case SOUND_PED_HANDS_UP: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_GUN_COOL_1, 5); break;
+	case SOUND_PED_CAR_JACKING: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_JACKING_1, 5); break;
+	case SOUND_PED_CAR_JACKED: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_JACKED_1, 4); break;
+	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_MUGGED_1, 2); break;
+	case SOUND_PED_ACCIDENTREACTION1: sfx = SFX_CUBAN_GANG_1_SAVED_1; break;
+	case SOUND_PED_TAXI_WAIT: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_TAXI_1, 2); break;
+	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_FIGHT_1, 9); break;
+	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_DODGE_1, 9); break;
+	case SOUND_PED_CRASH_VEHICLE: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_GENERIC_CRASH_1, 8); break;
+	case SOUND_PED_CRASH_CAR: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_CAR_CRASH_1, 8); break;
+	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_BLOCKED_1, 8); break;
+	case SOUND_PED_WAIT_DOUBLEBACK: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_LOST_1, 2); break;
+	case SOUND_PED_CHAT_SEXY_MALE: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_EYEING_1, 2); break;
+	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_BUMP_1, 11); break;
+	case SOUND_PED_CHAT: GetPhrase(sfx, ped->m_lastComment, SFX_CUBAN_GANG_1_CHAT_1, 10); break;
+	default: return GetGenericMaleTalkSfx(ped, sound);
+	}
+	return (SFX_CUBAN_GANG_2_BLOCKED_1 - SFX_CUBAN_GANG_1_BLOCKED_1) * (m_sQueueSample.m_nEntityIndex % 3) + sfx;
+}
+
+uint32
+cAudioManager::GetSGTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7594,7 +7620,7 @@ cAudioManager::GetSGTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetCLTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetCLTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7620,7 +7646,7 @@ cAudioManager::GetCLTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetGDTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetGDTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7640,31 +7666,7 @@ cAudioManager::GetGDTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetBKTalkSfx(CPed *ped, int16 sound)
-{
-	uint32 sfx;
-
-	switch(sound) {
-	case SOUND_PED_HANDS_UP: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_GUN_COOL_1, 5); break;
-	case SOUND_PED_CAR_JACKING: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_JACKING_1, 4); break;
-	case SOUND_PED_CAR_JACKED: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_JACKED_1, 8); break;
-	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_MUGGED_1, 2); break;
-	case SOUND_PED_ACCIDENTREACTION1: sfx = SFX_BIKER_GANG_1_SAVED_1; break;
-	case SOUND_PED_TAXI_WAIT: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_TAXI_1, 2); break;
-	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_FIGHT_1, 9); break;
-	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_DODGE_1, 9); break;
-	case SOUND_PED_CRASH_VEHICLE: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_GENERIC_CRASH_1, 8); break;
-	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_BLOCKED_1, 10); break;
-	case SOUND_PED_WAIT_DOUBLEBACK: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_LOST_1, 2); break;
-	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_BUMP_1, 10); break;
-	case SOUND_PED_CHAT: GetPhrase(sfx, ped->m_lastComment, SFX_BIKER_GANG_1_CHAT_1, 12); break;
-	default: return GetGenericMaleTalkSfx(ped, sound);
-	}
-	return (SFX_BIKER_GANG_2_BLOCKED_1 - SFX_BIKER_GANG_1_BLOCKED_1) * (m_sQueueSample.m_nEntityIndex % 3) + sfx;
-}
-
-uint32
-cAudioManager::GetPGTalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetPGTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
@@ -7691,21 +7693,12 @@ cAudioManager::GetPGTalkSfx(CPed *ped, int16 sound)
 }
 
 uint32
-cAudioManager::GetVICETalkSfx(CPed *ped, int16 sound, int16 model)
+cAudioManager::GetViceWhiteTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
-	if(model == MI_VICE6) {
-
-		switch(sound) {
-		case SOUND_PED_ARREST_COP: GetPhrase(sfx, ped->m_lastComment, SFX_VICE_VOICE_6_ARREST_1, 3); break;
-		case SOUND_PED_MIAMIVICE_EXITING_CAR: return SFX_VICE_VOICE_6_MIAMIVICE_EXITING_CAR_1;
-		default: return GetGenericMaleTalkSfx(ped, sound);
-		}
-	}
 	switch(sound) {
 	case SOUND_PED_ARREST_COP: GetPhrase(sfx, ped->m_lastComment, SFX_VICE_VOICE_1_ARREST_1, 3); break;
 	case SOUND_PED_MIAMIVICE_EXITING_CAR: sfx = SFX_VICE_VOICE_1_MIAMIVICE_EXITING_CAR_1; break;
-
 	default: return GetGenericMaleTalkSfx(ped, sound);
 	}
 	sfx += (SFX_VICE_VOICE_2_ARREST_1-SFX_VICE_VOICE_1_ARREST_1) * (m_sQueueSample.m_nEntityIndex % 5);
@@ -7713,96 +7706,110 @@ cAudioManager::GetVICETalkSfx(CPed *ped, int16 sound, int16 model)
 }
 
 uint32
-cAudioManager::GetWFYG1TalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetViceBlackTalkSfx(CPed *ped, uint16 sound)
+{
+	uint32 sfx;
+	switch(sound) {
+	case SOUND_PED_ARREST_COP: GetPhrase(sfx, ped->m_lastComment, SFX_VICE_VOICE_6_ARREST_1, 3); break;
+	case SOUND_PED_MIAMIVICE_EXITING_CAR: return SFX_VICE_VOICE_6_MIAMIVICE_EXITING_CAR_1;
+	default: return GetGenericMaleTalkSfx(ped, sound);
+	}
+	return sfx;
+}
+
+uint32
+cAudioManager::GetBMODKTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
 	switch(sound) {
-	case SOUND_PED_HANDS_UP: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_GUN_COOL_1, 6); break;
-	case SOUND_PED_MUGGING: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_MUGGING_1, 2); break;
-	case SOUND_PED_CAR_JACKED: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_JACKED_1, 5); break;
-	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_MUGGED_1, 2); break;
-	case SOUND_PED_ACCIDENTREACTION1: return SFX_WFYG1_SAVED_1;
-	case SOUND_PED_TAXI_WAIT: return SFX_WFYG1_TAXI_1;
-	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_FIGHT_1, 4); break;
-	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_DODGE_1, 9); break;
-	case SOUND_PED_FLEE_RUN: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_RUN_1, 2); break;
-	case SOUND_PED_CRASH_VEHICLE: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_GENERIC_CRASH_1, 7); break;
-	case SOUND_PED_CRASH_CAR: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_CAR_CRASH_1, 9); break;
-	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_BLOCKED_1, 7); break;
-	case SOUND_PED_WAIT_DOUBLEBACK: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_LOST_1, 3); break;
-	case SOUND_PED_CHAT_SEXY_FEMALE: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_EYEING_1, 2); break;
-	case SOUND_PED_CHAT_EVENT: return SFX_WFYG1_SHOCKED_1;
-	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_BUMP_1, 11); break;
-	case SOUND_PED_CHAT: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG1_CHAT_1, 10); break;
+	case SOUND_PED_HANDS_COWER: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_GUN_PANIC_1, 4); break;
+	case SOUND_PED_CAR_JACKED: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_JACKED_1, 9); break;
+	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_MUGGED_1, 2); break;
+	case SOUND_PED_INNOCENT: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_INNOCENT_1, 3); break;
+	case SOUND_PED_TAXI_WAIT: return SFX_BMODK_TAXI_1;
+	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_DODGE_1, 7); break;
+	case SOUND_PED_FLEE_RUN: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_RUN_1, 4); break;
+	case SOUND_PED_CRASH_VEHICLE: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_GENERIC_CRASH_1, 7); break;
+	case SOUND_PED_CRASH_CAR: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_CAR_CRASH_1, 10); break;
+	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_BLOCKED_1, 8); break;
+	case SOUND_PED_147: // this is some cut behaviour, the guy was selling something
+		GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_UNK_147_1, 11);
+		// what is this? some sort of censorship?
+		switch(sfx) {
+		case SFX_BMODK_UNK_147_5:
+		case SFX_BMODK_UNK_147_6:
+		case SFX_BMODK_UNK_147_7: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_UNK_147_1, 4); break;
+		default: break;
+		}
+		break;
+	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_BMODK_BUMP_1, 10); break;
+	default: return GetGenericMaleTalkSfx(ped, sound);
+	}
+	return sfx;
+}
+
+uint32
+cAudioManager::GetHMYAPTalkSfx(CPed *ped, uint16 sound)
+{
+	uint32 sfx;
+
+	switch(sound) {
+	case SOUND_PED_HANDS_COWER: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_GUN_PANIC_1, 7); break;
+	case SOUND_PED_CAR_JACKING: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_JACKING_1, 4); break;
+	case SOUND_PED_CAR_JACKED: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_JACKED_1, 7); break;
+	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_MUGGED_1, 2); break;
+	case SOUND_PED_ACCIDENTREACTION1: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_SAVED_1, 2); break;
+	case SOUND_PED_TAXI_WAIT: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_TAXI_1, 2); break;
+	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_DODGE_1, 9); break;
+	case SOUND_PED_FLEE_RUN: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_RUN_1, 6); break;
+	case SOUND_PED_CRASH_VEHICLE: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_GENERIC_CRASH_1, 6); break;
+	case SOUND_PED_CRASH_CAR: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_CAR_CRASH_1, 9); break;
+	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_BLOCKED_1, 9); break;
+	case SOUND_PED_WAIT_DOUBLEBACK: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_LOST_1, 2); break;
+	case SOUND_PED_CHAT_SEXY_MALE: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_EYEING_1, 3); break;
+	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_BUMP_1, 11); break;
+	case SOUND_PED_CHAT: GetPhrase(sfx, ped->m_lastComment, SFX_HMYAP_CHAT_1, 9); break;
+	default: return GetGenericMaleTalkSfx(ped, sound);
+	}
+	return sfx;
+}
+
+uint32
+cAudioManager::GetWFYJGTalkSfx(CPed *ped, uint16 sound)
+{
+	uint32 sfx;
+	switch(sound) {
+	case SOUND_PED_HANDS_COWER: GetPhrase(sfx, ped->m_lastComment, SFX_WFYJG_GUN_PANIC_1, 4); break;
+	case SOUND_PED_ACCIDENTREACTION1: sfx = SFX_WFYJG_SAVED_1; break;
+	case SOUND_PED_TAXI_WAIT: sfx = SFX_WFYJG_TAXI_1; break;
+	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_WFYJG_DODGE_1, 8); break;
+	case SOUND_PED_FLEE_RUN: GetPhrase(sfx, ped->m_lastComment, SFX_WFYJG_RUN_1, 6); break;
+	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_WFYJG_BUMP_1, 12); break;
 	default: return GetGenericFemaleTalkSfx(ped, sound);
 	}
 	return sfx;
 }
 
 uint32
-cAudioManager::GetWFYG2TalkSfx(CPed *ped, int16 sound)
+cAudioManager::GetWMYJGTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 
 	switch(sound) {
-	case SOUND_PED_HANDS_UP: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_GUN_COOL_1, 3); break;
-	case SOUND_PED_CAR_JACKED: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_JACKED_1, 5); break;
-	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_MUGGED_1, 2); break;
-#ifdef FIX_BUGS
-	case SOUND_PED_TAXI_WAIT: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_TAXI_1, 2); break;
-#else
-	case SOUND_PED_TAXI_WAIT: return SFX_WFYG2_TAXI_1;
-#endif
-	case SOUND_PED_ATTACK: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_FIGHT_1, 5); break;
-	case SOUND_PED_EVADE: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_DODGE_1, 8); break;
-	case SOUND_PED_CRASH_VEHICLE: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_GENERIC_CRASH_1, 7); break;
-	case SOUND_PED_CRASH_CAR: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_CAR_CRASH_1, 9); break;
-	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_BLOCKED_1, 5); break;
-	case SOUND_PED_WAIT_DOUBLEBACK: return SFX_WFYG2_LOST_1;
-	case SOUND_PED_CHAT_SEXY_FEMALE: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_EYEING_1, 4); break;
-	case SOUND_PED_CHAT_EVENT: return SFX_WFYG2_SHOCKED_1;
-	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_BUMP_1, 11); break;
-	case SOUND_PED_CHAT: GetPhrase(sfx, ped->m_lastComment, SFX_WFYG2_CHAT_1, 9); break;
-	default: return GetGenericFemaleTalkSfx(ped, sound);
+	case SOUND_PED_HANDS_COWER: GetPhrase(sfx, ped->m_lastComment, SFX_WMYJG_GUN_PANIC_1, 4); break;
+	case SOUND_PED_ROBBED: GetPhrase(sfx, ped->m_lastComment, SFX_WMYJG_MUGGED_1, 2); break;
+	case SOUND_PED_ACCIDENTREACTION1: return SFX_WMYJG_SAVED_1;
+	case SOUND_PED_TAXI_WAIT: return SFX_WMYJG_TAXI_1;
+	case SOUND_PED_FLEE_RUN: GetPhrase(sfx, ped->m_lastComment, SFX_WMYJG_RUN_1, 5); break;
+	case SOUND_PED_ANNOYED_DRIVER: GetPhrase(sfx, ped->m_lastComment, SFX_WMYJG_BLOCKED_1, 10); break;
+	case SOUND_PED_CHAT_SEXY_MALE: GetPhrase(sfx, ped->m_lastComment, SFX_WMYJG_EYEING_1, 2); break;
+	case SOUND_PED_PED_COLLISION: GetPhrase(sfx, ped->m_lastComment, SFX_WMYJG_BUMP_1, 10); break;
+	default: return GetGenericMaleTalkSfx(ped, sound);
 	}
-
 	return sfx;
 }
 */
-uint32
-cAudioManager::GetGenericMaleTalkSfx(CPed *ped, int16 sound)
-{
-	uint32 sfx;
-
-	m_bGenericSfx = TRUE;
-	switch(sound) {
-	case SOUND_PED_DEATH: GetPhrase(sfx, ped->m_lastComment, SFX_MALE_DEATH_01, 28); break;
-	case SOUND_PED_BULLET_HIT:
-	case SOUND_PED_DEFEND: GetPhrase(sfx, ped->m_lastComment, SFX_MALE_PAIN_01, 51); break;
-	case SOUND_PED_BURNING: GetPhrase(sfx, ped->m_lastComment, SFX_MALE_PAIN_ON_FIRE_01, 21); break;
-	case SOUND_PED_FLEE_SPRINT: GetPhrase(sfx, ped->m_lastComment, SFX_MALE_PANIC_01, 23); break;
-	default: return NO_SAMPLE;
-	}
-	return sfx;
-}
-
-uint32
-cAudioManager::GetGenericFemaleTalkSfx(CPed *ped, int16 sound)
-{
-	uint32 sfx;
-	m_bGenericSfx = TRUE;
-	switch(sound) {
-	case SOUND_PED_DEATH: GetPhrase(sfx, ped->m_lastComment, SFX_FEMALE_DEATH_01, 16); break;
-	case SOUND_PED_BULLET_HIT:
-	case SOUND_PED_DEFEND: GetPhrase(sfx, ped->m_lastComment, SFX_FEMALE_PAIN_01, 34); break;
-	case SOUND_PED_BURNING: GetPhrase(sfx, ped->m_lastComment, SFX_FEMALE_PAIN_ON_FIRE_01, 11); break;
-	case SOUND_PED_FLEE_SPRINT: GetPhrase(sfx, ped->m_lastComment, SFX_FEMALE_PANIC_01, 13); break;
-	case SOUND_PED_PLAYER_BEFORESEX: GetPhrase(sfx, ped->m_lastComment, SFX_FEMALE_SEX_01, 11); break;
-	default: return NO_SAMPLE;
-	}
-	return sfx;
-}
 
 void
 cPedComments::Add(tPedComment *com)
