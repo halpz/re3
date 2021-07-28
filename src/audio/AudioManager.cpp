@@ -512,7 +512,7 @@ cAudioManager::ComputePan(float dist, CVector *vec)
 	return Min(107, PanTable[index] + 63);
 }
 
-int32
+uint32
 cAudioManager::ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2, float speedMultiplier)
 {
 	uint32 newFreq = oldFreq;

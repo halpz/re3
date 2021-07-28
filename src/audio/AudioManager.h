@@ -267,7 +267,7 @@ public:
 	uint8 ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance);
 	void TranslateEntity(Const CVector *v1, CVector *v2);
 	int32 ComputePan(float, CVector *);
-	int32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2, float speedMultiplier); // inlined on PS2
+	uint32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2, float speedMultiplier); // inlined on PS2
 	int32 RandomDisplacement(uint32 seed);
 	void InterrogateAudioEntities(); // inlined on PS2
 	void AddSampleToRequestedQueue();
@@ -300,14 +300,14 @@ public:
 	void ProcessSpecial();
 	void ProcessEntity(int32 sound);
 	void ProcessPhysical(int32 id);
+
+	// vehicles
 	void ProcessVehicle(CVehicle *vehicle);
 	void ProcessRainOnVehicle(cVehicleParams &params);
 	bool8 ProcessReverseGear(cVehicleParams &params);
 	void ProcessModelCarEngine(cVehicleParams &params);
 	bool8 ProcessVehicleRoadNoise(cVehicleParams &params);
 	bool8 ProcessWetRoadNoise(cVehicleParams &params);
-
-	// vehicles
 	void ProcessVehicleEngine(cVehicleParams &params);
 	void UpdateGasPedalAudio(CAutomobile *automobile); // inlined on PS2
 	void PlayerJustGotInCar();
@@ -317,7 +317,7 @@ public:
 	void ProcessPlayersVehicleEngine(cVehicleParams &params, CAutomobile *automobile);
 	bool8 ProcessVehicleSkidding(cVehicleParams &params);
 	float GetVehicleDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile, cTransmission *transmission, float velocityChange);
-	float GetVehicleNonDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile, cTransmission *transmission, float velocityChange); // was in .h on PS2
+	float GetVehicleNonDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile, cTransmission *transmission, float velocityChange); // inlined on PS2
 	void ProcessVehicleHorn(cVehicleParams &params);
 	bool8 UsesSiren(uint32 model); // inlined on PS2
 	bool8 UsesSirenSwitching(uint32 model); // inlined on PS2
