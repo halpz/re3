@@ -51,7 +51,7 @@ public:
 	eAudioType m_nType;
 	void *m_pEntity;
 	bool8 m_bIsUsed;
-	uint8 m_bStatus;
+	bool8 m_bStatus;
 	int16 m_awAudioEvent[NUM_AUDIOENTITY_EVENTS];
 	float m_afVolume[NUM_AUDIOENTITY_EVENTS];
 	uint8 m_AudioEvents;
@@ -255,14 +255,16 @@ public:
 	void Service();
 	int32 CreateEntity(eAudioType type, void *entity);
 	void DestroyEntity(int32 id); // inlined in vc
+	bool8 GetEntityStatus(int32 id);
 	void SetEntityStatus(int32 id, bool8 status);
+	void *GetEntityPointer(int32 id);
 	void PlayOneShot(int32 index, uint16 sound, float vol);
 	void SetEffectsMasterVolume(uint8 volume);
 	void SetMusicMasterVolume(uint8 volume);
 	void SetMP3BoostVolume(uint8 volume);
 	void SetEffectsFadeVol(uint8 volume);
 	void SetMusicFadeVol(uint8 volume);
-	void SetMonoMode(bool8 mono);
+	void SetOutputMode(bool8 surround);
 	void ResetTimers(uint32 time);
 	void DestroyAllGameCreatedEntities();
 	
@@ -285,6 +287,7 @@ public:
 	void ServiceSoundEffects();
 	uint8 ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance);
 	void TranslateEntity(Const CVector *v1, CVector *v2);
+	int32 ComputeFrontRearMix(float, CVector *);
 	int32 ComputePan(float, CVector *);
 	uint32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2, float speedMultiplier);
 	int32 RandomDisplacement(uint32 seed);
@@ -479,6 +482,9 @@ public:
 	uint32 GetHMYAPTalkSfx(CPed *ped, uint16 sound);
 	uint32 GetWFYJGTalkSfx(CPed *ped, uint16 sound);
 	uint32 GetWMYJGTalkSfx(CPed *ped, uint16 sound);
+	uint32 GetSpecialCharacterTalkSfx(CPed *ped, int32 model, uint16 sound);
+
+	void DebugPlayPedComment(int32 sound);
 
 	// particles
 	void ProcessExplosions(int32 explosion);
@@ -508,6 +514,7 @@ public:
 #endif
 
 	// mission audio
+	const char *GetMissionAudioLoadedLabel(uint8 slot);
 	bool8 MissionScriptAudioUsesPoliceChannel(uint32 soundMission);
 	void PreloadMissionAudio(uint8 slot, Const char *name);
 	uint8 GetMissionAudioLoadingStatus(uint8 slot);

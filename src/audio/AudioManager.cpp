@@ -160,11 +160,27 @@ cAudioManager::DestroyEntity(int32 id)
 	}
 }
 
+bool8
+cAudioManager::GetEntityStatus(int32 id)
+{
+	if (m_bIsInitialised && id >= 0 && id < NUM_AUDIOENTITIES && m_asAudioEntities[id].m_bIsUsed)
+		return m_asAudioEntities[id].m_bStatus;
+	return FALSE;
+}
+
 void
 cAudioManager::SetEntityStatus(int32 id, bool8 status)
 {
 	if (m_bIsInitialised && id >= 0 && id < NUM_AUDIOENTITIES && m_asAudioEntities[id].m_bIsUsed)
 		m_asAudioEntities[id].m_bStatus = status;
+}
+
+void *
+cAudioManager::GetEntityPointer(int32 id)
+{
+	if (m_bIsInitialised && id >= 0 && id < NUM_AUDIOENTITIES && m_asAudioEntities[id].m_bIsUsed)
+		return m_asAudioEntities[id].m_pEntity;
+	return NULL;
 }
 
 void
@@ -248,9 +264,9 @@ cAudioManager::SetMusicFadeVol(uint8 volume)
 }
 
 void
-cAudioManager::SetMonoMode(bool8 mono)
+cAudioManager::SetOutputMode(bool8 surround)
 {
-	SampleManager.SetMonoMode(mono);
+	// on ps2 this calls another method of cAudioManager to set DTS mode on or off
 }
 
 void
@@ -524,11 +540,22 @@ cAudioManager::TranslateEntity(Const CVector *in, CVector *out)
 	*out = MultiplyInverse(TheCamera.GetMatrix(), *in);
 }
 
+static uint8 PanTable[64] = { 0,  3,  8, 12, 16, 19, 22, 24, 26, 28, 30, 31, 33, 34, 36, 37, 39, 40, 41, 42, 44, 45, 46, 47, 48, 49, 49, 50, 51, 52, 53, 53,
+							54, 55, 55, 56, 56, 57, 57, 58, 58, 58, 59, 59, 59, 60, 60, 61, 61, 61, 61, 62, 62, 62, 62, 62, 63, 63, 63, 63, 63, 63, 63, 63};
+
+int32
+cAudioManager::ComputeFrontRearMix(float dist, CVector *vec)
+{
+	int32 index = Min(63, Abs(int32(vec->y / (dist / 64.f))));
+
+	if (vec->y > 0.f)
+		return Max(0, 63 - PanTable[index]);
+	return Min(127, PanTable[index] + 63);
+}
+
 int32
 cAudioManager::ComputePan(float dist, CVector *vec)
 {
-	const uint8 PanTable[64] = { 0,  3,  8, 12, 16, 19, 22, 24, 26, 28, 30, 31, 33, 34, 36, 37, 39, 40, 41, 42, 44, 45, 46, 47, 48, 49, 49, 50, 51, 52, 53, 53,
-								54, 55, 55, 56, 56, 57, 57, 58, 58, 58, 59, 59, 59, 60, 60, 61, 61, 61, 61, 62, 62, 62, 62, 62, 63, 63, 63, 63, 63, 63, 63, 63};
 	int32 index = Min(63, Abs(int32(vec->x / (dist / 64.f))));
 
 	if (vec->x > 0.f)

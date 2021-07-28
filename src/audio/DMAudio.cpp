@@ -38,6 +38,12 @@ cDMAudio::DestroyEntity(int32 audioEntity)
 	AudioManager.DestroyEntity(audioEntity);
 }
 
+bool8
+cDMAudio::GetEntityStatus(int32 audioEntity)
+{
+	return AudioManager.GetEntityStatus(audioEntity);
+}
+
 void
 cDMAudio::SetEntityStatus(int32 audioEntity, bool8 status)
 {
@@ -57,9 +63,9 @@ cDMAudio::DestroyAllGameCreatedEntities(void)
 }
 
 void
-cDMAudio::SetMonoMode(bool8 mono)
+cDMAudio::SetOutputMode(bool8 surround)
 {
-	AudioManager.SetMonoMode(mono);
+	return AudioManager.SetOutputMode(surround);
 }
 
 void
@@ -182,6 +188,12 @@ bool8
 cDMAudio::IsAudioInitialised(void)
 {
 	return AudioManager.IsAudioInitialised();
+}
+
+void
+cDMAudio::ResetPoliceRadio()
+{
+	AudioManager.ResetPoliceRadio();
 }
 
 void
@@ -310,6 +322,12 @@ cDMAudio::PlayLoadedMissionAudio(uint8 slot)
 }
 
 bool8
+cDMAudio::IsMissionAudioSamplePlaying(uint8 slot)
+{
+	return AudioManager.IsMissionAudioSamplePlaying(slot);
+}
+
+bool8
 cDMAudio::IsMissionAudioSampleFinished(uint8 slot)
 {
 	return AudioManager.IsMissionAudioSampleFinished(slot);
@@ -319,6 +337,12 @@ void
 cDMAudio::ClearMissionAudio(uint8 slot)
 {
 	AudioManager.ClearMissionAudio(slot);
+}
+
+const char *
+cDMAudio::GetMissionAudioLoadedLabel(uint8 slot)
+{
+	return AudioManager.GetMissionAudioLoadedLabel(slot);
 }
 
 uint8
