@@ -38,6 +38,12 @@ cDMAudio::DestroyEntity(int32 audioEntity)
 	AudioManager.DestroyEntity(audioEntity);
 }
 
+bool8
+cDMAudio::GetEntityStatus(int32 audioEntity)
+{
+	return AudioManager.GetEntityStatus(audioEntity);
+}
+
 void
 cDMAudio::SetEntityStatus(int32 audioEntity, bool8 status)
 {
@@ -168,6 +174,12 @@ bool8
 cDMAudio::IsAudioInitialised(void)
 {
 	return AudioManager.IsAudioInitialised();
+}
+
+void
+cDMAudio::ResetPoliceRadio()
+{
+	AudioManager.ResetPoliceRadio();
 }
 
 void

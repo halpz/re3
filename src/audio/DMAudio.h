@@ -22,6 +22,7 @@ public:
 	
 	int32 CreateEntity(eAudioType type, void *UID);
 	void DestroyEntity(int32 audioEntity);
+	bool8 GetEntityStatus(int32 audioEntity);
 	void SetEntityStatus(int32 audioEntity, bool8 status);
 	void PlayOneShot(int32 audioEntity, uint16 oneShot, float volume);
 	void DestroyAllGameCreatedEntities(void);
@@ -51,7 +52,8 @@ public:
 	
 	char GetCDAudioDriveLetter(void);
 	bool8 IsAudioInitialised(void);
-	
+
+	void ResetPoliceRadio();
 	void ReportCrime(eCrimeType crime, CVector const &pos);
 	
 	int32 CreateLoopingScriptObject(cAudioScriptObject *scriptObject);
