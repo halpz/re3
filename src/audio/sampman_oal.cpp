@@ -1107,7 +1107,7 @@ cSampleManager::Initialise(void)
 			
 			int32 randval;
 			if ( bUseRandomTable )
-				randval = AudioManager.GetRandomNumber(1);
+				randval = AudioManager.m_anRandomTable[1];
 			else
 				randval = localtm->tm_sec * localtm->tm_min;
 			
@@ -1118,7 +1118,7 @@ cSampleManager::Initialise(void)
 				randmp3 = randmp3->pNext;
 			
 			if ( bUseRandomTable )
-				_CurMP3Pos = AudioManager.GetRandomNumber(0)     % randmp3->nTrackLength;
+				_CurMP3Pos = AudioManager.m_anRandomTable[0]     % randmp3->nTrackLength;
 			else
 			{
 				if ( localtm->tm_sec > 0 )
@@ -1127,7 +1127,7 @@ cSampleManager::Initialise(void)
 					_CurMP3Pos = s*s*s*s*s*s*s*s                 % randmp3->nTrackLength;
 				}
 				else
-					_CurMP3Pos = AudioManager.GetRandomNumber(0) % randmp3->nTrackLength;
+					_CurMP3Pos = AudioManager.m_anRandomTable[0] % randmp3->nTrackLength;
 			}
 		}
 		else
@@ -1470,7 +1470,7 @@ bool8 cSampleManager::UpdateReverb(void)
 	if ( !usingEAX && !_usingEFX )
 		return FALSE;
 
-	if ( AudioManager.GetFrameCounter() & 15 )
+	if ( AudioManager.m_FrameCounter & 15 )
 		return FALSE;
 
 	float fRatio = 0.0f;
@@ -1478,13 +1478,13 @@ bool8 cSampleManager::UpdateReverb(void)
 #define MIN_DIST 0.5f
 #define CALCULATE_RATIO(value, maxDist, maxRatio) (value > MIN_DIST && value < maxDist ? value / maxDist * maxRatio : 0)
 
-	fRatio += CALCULATE_RATIO(AudioManager.GetReflectionsDistance(REFLECTION_CEIL_NORTH), 10.0f, 1/2.f);
-	fRatio += CALCULATE_RATIO(AudioManager.GetReflectionsDistance(REFLECTION_CEIL_SOUTH), 10.0f, 1/2.f);
-	fRatio += CALCULATE_RATIO(AudioManager.GetReflectionsDistance(REFLECTION_CEIL_WEST), 10.0f, 1/2.f);
-	fRatio += CALCULATE_RATIO(AudioManager.GetReflectionsDistance(REFLECTION_CEIL_EAST), 10.0f, 1/2.f);
+	fRatio += CALCULATE_RATIO(AudioManager.m_afReflectionsDistances[REFLECTION_CEIL_NORTH], 10.0f, 1/2.f);
+	fRatio += CALCULATE_RATIO(AudioManager.m_afReflectionsDistances[REFLECTION_CEIL_SOUTH], 10.0f, 1/2.f);
+	fRatio += CALCULATE_RATIO(AudioManager.m_afReflectionsDistances[REFLECTION_CEIL_WEST], 10.0f, 1/2.f);
+	fRatio += CALCULATE_RATIO(AudioManager.m_afReflectionsDistances[REFLECTION_CEIL_EAST], 10.0f, 1/2.f);
 
-	fRatio += CALCULATE_RATIO((AudioManager.GetReflectionsDistance(REFLECTION_NORTH) + AudioManager.GetReflectionsDistance(REFLECTION_SOUTH)) / 2.f, 4.0f, 1/3.f);
-	fRatio += CALCULATE_RATIO((AudioManager.GetReflectionsDistance(REFLECTION_WEST) + AudioManager.GetReflectionsDistance(REFLECTION_EAST)) / 2.f, 4.0f, 1/3.f);
+	fRatio += CALCULATE_RATIO((AudioManager.m_afReflectionsDistances[REFLECTION_NORTH] + AudioManager.m_afReflectionsDistances[REFLECTION_SOUTH]) / 2.f, 4.0f, 1/3.f);
+	fRatio += CALCULATE_RATIO((AudioManager.m_afReflectionsDistances[REFLECTION_WEST] + AudioManager.m_afReflectionsDistances[REFLECTION_EAST]) / 2.f, 4.0f, 1/3.f);
 
 #undef CALCULATE_RATIO
 #undef MIN_DIST

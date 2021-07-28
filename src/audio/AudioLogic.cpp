@@ -3032,7 +3032,7 @@ cAudioManager::ProcessVehicleOneShots(cVehicleParams& params)
 			m_sQueueSample.m_nSampleIndex = SFX_GLASS_CRACK;
 			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 			m_sQueueSample.m_nCounter = 68;
-			emittingVol = m_anRandomTable[1] % 30 + 80; //GetRandomNumberInRange(1, 80, 109)
+			emittingVol = m_anRandomTable[1] % 30 + 80;
 			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_GLASS_CRACK);
 			m_sQueueSample.m_nReleasingVolumeModificator = 5;
 			m_sQueueSample.m_fSpeedMultiplier = 0.0f;
@@ -3827,8 +3827,8 @@ uint8 gJumboVolOffsetPercentage;
 void
 DoJumboVolOffset()
 {
-	if (!(AudioManager.GetFrameCounter() % (AudioManager.GetRandomNumber(0) % 6 + 3)))
-		gJumboVolOffsetPercentage = AudioManager.GetRandomNumber(1) % 60;
+	if (!(AudioManager.m_FrameCounter % (AudioManager.m_anRandomTable[0] % 6 + 3)))
+		gJumboVolOffsetPercentage = AudioManager.m_anRandomTable[1] % 60;
 }
 
 void
