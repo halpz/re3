@@ -132,23 +132,23 @@ cMusicManager::SetStartingTrackPositions(bool8 isNewGameTimer)
 	if (IsInitialised()) {
 		time_t timevalue = time(0);
 		if (timevalue == -1) {
-			pos = AudioManager.GetRandomNumber(0);
+			pos = AudioManager.m_anRandomTable[0];
 		} else {
 			tm* pTm = localtime(&timevalue);
 			if (pTm->tm_sec == 0)
-				pTm->tm_sec = AudioManager.GetRandomNumber(0);
+				pTm->tm_sec = AudioManager.m_anRandomTable[0];
 			if (pTm->tm_min == 0)
-				pTm->tm_min = AudioManager.GetRandomNumber(1);
+				pTm->tm_min = AudioManager.m_anRandomTable[1];
 			if (pTm->tm_hour == 0)
-				pTm->tm_hour = AudioManager.GetRandomNumber(2);
+				pTm->tm_hour = AudioManager.m_anRandomTable[2];
 			if (pTm->tm_mday == 0)
-				pTm->tm_mday = AudioManager.GetRandomNumber(3);
+				pTm->tm_mday = AudioManager.m_anRandomTable[3];
 			if (pTm->tm_mon == 0)
-				pTm->tm_mon = AudioManager.GetRandomNumber(4);
+				pTm->tm_mon = AudioManager.m_anRandomTable[4];
 			if (pTm->tm_year == 0)
-				pTm->tm_year = AudioManager.GetRandomNumber(3);
+				pTm->tm_year = AudioManager.m_anRandomTable[3];
 			if (pTm->tm_wday == 0)
-				pTm->tm_wday = AudioManager.GetRandomNumber(2);
+				pTm->tm_wday = AudioManager.m_anRandomTable[2];
 			pos = pTm->tm_yday
 				* pTm->tm_wday
 				* pTm->tm_year
@@ -165,7 +165,7 @@ cMusicManager::SetStartingTrackPositions(bool8 isNewGameTimer)
 			if (i < STREAMED_SOUND_CITY_AMBIENT && isNewGameTimer)
 				m_aTracks[i].m_nPosition = NewGameRadioTimers[i];
 			else if (i < STREAMED_SOUND_ANNOUNCE_BRIDGE_CLOSED)
-				m_aTracks[i].m_nPosition = (pos * AudioManager.GetRandomNumber(i % 5)) % m_aTracks[i].m_nLength;
+				m_aTracks[i].m_nPosition = (pos * AudioManager.m_anRandomTable[i % 5]) % m_aTracks[i].m_nLength;
 			else
 				m_aTracks[i].m_nPosition = 0;
 			
@@ -1171,7 +1171,7 @@ cMusicManager::GetCarTuning()
 	if (UsesPoliceRadio(veh)) return STREAMED_SOUND_RADIO_POLICE;
 	if (UsesTaxiRadio(veh)) return STREAMED_SOUND_RADIO_TAXI;
 	if (veh->m_nRadioStation == USERTRACK && !SampleManager.IsMP3RadioChannelAvailable())
-		veh->m_nRadioStation = AudioManager.GetRandomNumber(2) % USERTRACK;
+		veh->m_nRadioStation = AudioManager.m_anRandomTable[2] % USERTRACK;
 	return veh->m_nRadioStation;
 }
 
