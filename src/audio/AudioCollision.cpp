@@ -347,7 +347,7 @@ cAudioManager::SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollisio
 }
 
 float
-cAudioManager::GetCollisionOneShotRatio(int32 a, float b)
+cAudioManager::GetCollisionOneShotRatio(uint32 a, float b)
 {
 	switch(a) {
 	case SURFACE_DEFAULT:
