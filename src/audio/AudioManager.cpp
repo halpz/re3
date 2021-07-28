@@ -160,11 +160,27 @@ cAudioManager::DestroyEntity(int32 id)
 	}
 }
 
+bool8
+cAudioManager::GetEntityStatus(int32 id)
+{
+	if (m_bIsInitialised && id >= 0 && id < NUM_AUDIOENTITIES && m_asAudioEntities[id].m_bIsUsed)
+		return m_asAudioEntities[id].m_bStatus;
+	return FALSE;
+}
+
 void
 cAudioManager::SetEntityStatus(int32 id, bool8 status)
 {
 	if (m_bIsInitialised && id >= 0 && id < NUM_AUDIOENTITIES && m_asAudioEntities[id].m_bIsUsed)
 		m_asAudioEntities[id].m_bStatus = status;
+}
+
+void *
+cAudioManager::GetEntityPointer(int32 id)
+{
+	if (m_bIsInitialised && id >= 0 && id < NUM_AUDIOENTITIES && m_asAudioEntities[id].m_bIsUsed)
+		return m_asAudioEntities[id].m_pEntity;
+	return NULL;
 }
 
 void

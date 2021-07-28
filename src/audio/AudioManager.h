@@ -51,7 +51,7 @@ public:
 	eAudioType m_nType;
 	void *m_pEntity;
 	bool8 m_bIsUsed;
-	uint8 m_bStatus;
+	bool8 m_bStatus;
 	int16 m_awAudioEvent[NUM_AUDIOENTITY_EVENTS];
 	float m_afVolume[NUM_AUDIOENTITY_EVENTS];
 	uint8 m_AudioEvents;
@@ -255,7 +255,9 @@ public:
 	void Service();
 	int32 CreateEntity(eAudioType type, void *entity);
 	void DestroyEntity(int32 id); // inlined in vc
+	bool8 GetEntityStatus(int32 id);
 	void SetEntityStatus(int32 id, bool8 status);
+	void *GetEntityPointer(int32 id);
 	void PlayOneShot(int32 index, uint16 sound, float vol);
 	void SetEffectsMasterVolume(uint8 volume);
 	void SetMusicMasterVolume(uint8 volume);
