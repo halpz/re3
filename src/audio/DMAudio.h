@@ -30,7 +30,7 @@ public:
 	void PlayOneShot(int32 audioEntity, uint16 oneShot, float volume);
 	void DestroyAllGameCreatedEntities(void);
 	
-	void SetMonoMode(bool8 mono);
+	void SetOutputMode(bool8 surround);
 	void SetMP3BoostVolume(uint8 volume);
 	void SetEffectsMasterVolume(uint8 volume);
 	void SetMusicMasterVolume(uint8 volume);
@@ -87,8 +87,10 @@ public:
 	uint8 GetMissionAudioLoadingStatus(uint8 slot);
 	void SetMissionAudioLocation(uint8 slot, float x, float y, float z);
 	void PlayLoadedMissionAudio(uint8 slot);
+	bool8 IsMissionAudioSamplePlaying(uint8 slot);
 	bool8 IsMissionAudioSampleFinished(uint8 slot);
 	void ClearMissionAudio(uint8 slot);
+	const char *GetMissionAudioLoadedLabel(uint8 slot);
 
 	uint8 GetRadioInCar(void);
 	void SetRadioInCar(uint32 radio);

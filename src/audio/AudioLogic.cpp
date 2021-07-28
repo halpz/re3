@@ -5367,7 +5367,7 @@ cAudioManager::GetPedCommentSfx(CPed *ped, uint16 sound)
 		case MI_SPECIAL18:
 		case MI_SPECIAL19:
 		case MI_SPECIAL20:
-		case MI_SPECIAL21: return NO_SAMPLE;
+		case MI_SPECIAL21: return GetSpecialCharacterTalkSfx(ped, ped->GetModelIndex(), sound);
 		default: return GetGenericMaleTalkSfx(ped, sound);
 		}
 	}
@@ -7794,6 +7794,28 @@ cAudioManager::GetWMYJGTalkSfx(CPed *ped, uint16 sound)
 	return sfx;
 }
 
+uint32
+cAudioManager::GetSpecialCharacterTalkSfx(CPed *ped, int32 model, uint16 sound)
+{
+	return NO_SAMPLE;
+}
+
+void
+cAudioManager::DebugPlayPedComment(int32 sound)
+{
+	tPedComment pedComment;
+
+	pedComment.m_nSampleIndex = sound;
+	pedComment.m_nProcess = 10;
+	pedComment.m_nEntityIndex = 0;
+	pedComment.m_fDistance = 0.0f;
+	pedComment.m_bVolume = 99;
+
+	pedComment.m_vecPos = CWorld::Players[0].m_pPed->GetPosition();
+
+	m_sPedComments.Add(&pedComment);
+}
+
 void
 cPedComments::Add(tPedComment *com)
 {
@@ -9784,6 +9806,23 @@ FindMissionAudioSfx(const char *name)
 	}
 	debug("Can't find mission audio %s", name);
 	return NO_SAMPLE;
+}
+
+const char *
+cAudioManager::GetMissionAudioLoadedLabel(uint8 slot)
+{
+	if (m_bIsInitialised && slot < MISSION_AUDIO_SLOTS && m_sMissionAudio.m_nSampleIndex[slot] != NO_SAMPLE) {
+		for (uint32 i = 0; MissionAudioNameSfxAssoc[i].m_pName != nil; ++i) {
+			if (m_sMissionAudio.m_nSampleIndex[slot] == MissionAudioNameSfxAssoc[i].m_nId)
+				return MissionAudioNameSfxAssoc[i].m_pName;
+		}
+	}
+
+#ifdef THIS_IS_STUPID
+	return MissionAudioNameSfxAssoc[0].m_pName; // yeah this is dumb
+#else
+	return "";
+#endif
 }
 
 bool8
