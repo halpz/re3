@@ -51,7 +51,7 @@ CVisibilityPlugins::Initialise(void)
 	m_alphaBoatAtomicList.tail.item.sort = 100000000.0f;
 
 #ifdef ASPECT_RATIO_SCALE
-	// default 150 if not enough for bigger FOVs
+	// default 150 is not enough for bigger FOVs
 	m_alphaEntityList.Init(NUMALPHAENTITYLIST * 3);
 #else
 	m_alphaEntityList.Init(NUMALPHAENTITYLIST);
@@ -604,8 +604,7 @@ CVisibilityPlugins::RenderTrainHiDetailAlphaCB(RpAtomic *atomic)
 				return atomic;
 
 		if(flags & ATOMIC_FLAG_DRAWLAST){
-			// sort before clump
-			if(!InsertAtomicIntoSortedList(atomic, DistToCameraSq - 0.0001f))
+			if(!InsertAtomicIntoSortedList(atomic, DistToCameraSq))
 				RENDERCALLBACK(atomic);
 		}else{
 			if(!InsertAtomicIntoSortedList(atomic, DistToCameraSq + dot))
@@ -662,12 +661,14 @@ CVisibilityPlugins::RenderPlayerCB(RpAtomic *atomic)
 RpAtomic*
 CVisibilityPlugins::RenderPedCB(RpAtomic *atomic)
 {
+	RpClump *clump;
+	float dist;
 	int32 alpha;
-	RwV3d cam2atm;
 
-	RwV3dSub(&cam2atm, &RwFrameGetLTM(RpAtomicGetFrame(atomic))->pos, ms_pCameraPosn);
-	if(RwV3dDotProduct(&cam2atm, &cam2atm) < ms_pedLod1Dist){
-		alpha = GetClumpAlpha(RpAtomicGetClump(atomic));
+	clump = RpAtomicGetClump(atomic);
+	dist = GetDistanceSquaredFromCamera(RpClumpGetFrame(clump));
+	if(dist < ms_pedLod1Dist){
+		alpha = GetClumpAlpha(clump);
 		if(alpha == 255)
 			RENDERCALLBACK(atomic);
 		else
@@ -756,11 +757,22 @@ CVisibilityPlugins::FrustumSphereCB(RpClump *clump)
 }
 
 bool
+CVisibilityPlugins::MloVisibilityCB(RpClump *clump)
+{
+	RwFrame *frame = RpClumpGetFrame(clump);
+	CMloModelInfo *modelInfo = (CMloModelInfo*)GetFrameHierarchyId(frame);
+	if (SQR(modelInfo->drawDist) < GetDistanceSquaredFromCamera(frame))
+		return false;
+	return CVisibilityPlugins::FrustumSphereCB(clump);
+}
+
+bool
 CVisibilityPlugins::VehicleVisibilityCB(RpClump *clump)
 {
-	if (GetDistanceSquaredFromCamera(RpClumpGetFrame(clump)) <= ms_vehicleLod1Dist)
-		return FrustumSphereCB(clump);
-	return false;
+	RwFrame *frame = RpClumpGetFrame(clump);
+	if (ms_vehicleLod1Dist < GetDistanceSquaredFromCamera(frame))
+		return false;
+	return FrustumSphereCB(clump);
 }
 
 bool
@@ -854,6 +866,12 @@ CVisibilityPlugins::ClearAtomicFlag(RpAtomic *atomic, int f)
 	ATOMICEXT(atomic)->flags &= ~f;
 }
 
+void
+CVisibilityPlugins::SetAtomicId(RpAtomic *atomic, int id)
+{
+	ATOMICEXT(atomic)->flags = id;
+}
+
 int
 CVisibilityPlugins::GetAtomicId(RpAtomic *atomic)
 {
@@ -939,7 +957,9 @@ CVisibilityPlugins::SetClumpModelInfo(RpClump *clump, CClumpModelInfo *modelInfo
 
 	// Unused
 	switch (modelInfo->GetModelType()) {
-	// ignore MLO
+	case MITYPE_MLO:
+		CLUMPEXT(clump)->visibilityCB = MloVisibilityCB;
+		break;
 	case MITYPE_VEHICLE:
 		vmi = (CVehicleModelInfo*)modelInfo;
 		if(vmi->m_vehicleType == VEHICLE_TYPE_TRAIN ||
@@ -953,6 +973,12 @@ CVisibilityPlugins::SetClumpModelInfo(RpClump *clump, CClumpModelInfo *modelInfo
 	}
 }
 
+CClumpModelInfo*
+CVisibilityPlugins::GetClumpModelInfo(RpClump *clump)
+{
+	return (CClumpModelInfo*)GetFrameHierarchyId(RpClumpGetFrame(clump));
+}
+
 void
 CVisibilityPlugins::SetClumpAlpha(RpClump *clump, int alpha)
 {
@@ -963,4 +989,10 @@ int
 CVisibilityPlugins::GetClumpAlpha(RpClump *clump)
 {
 	return CLUMPEXT(clump)->alpha;
+}
+
+bool
+CVisibilityPlugins::IsClumpVisible(RpClump *clump)
+{
+	return CLUMPEXT(clump)->visibilityCB(clump);
 }

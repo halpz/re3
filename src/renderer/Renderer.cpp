@@ -29,6 +29,8 @@
 bool gbShowPedRoadGroups;
 bool gbShowCarRoadGroups;
 bool gbShowCollisionPolys;
+bool gbShowCollisionPolysReflections;
+bool gbShowCollisionPolysNoShadows;
 bool gbShowCollisionLines;
 bool gbBigWhiteDebugLightSwitchedOn;
 
@@ -126,11 +128,16 @@ CRenderer::PreRender(void)
 void
 CRenderer::RenderOneRoad(CEntity *e)
 {
+#ifndef FINAL
 	if(gbDontRenderBuildings)
 		return;
-	if(gbShowCollisionPolys)
+#endif
+#ifndef MASTER
+	if(gbShowCollisionPolys || gbShowCollisionPolysReflections || gbShowCollisionPolysNoShadows)
 		CCollision::DrawColModel_Coloured(e->GetMatrix(), *CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel(), e->GetModelIndex());
-	else{
+	else
+#endif
+	{
 		PUSH_RENDERGROUP(CModelInfo::GetModelInfo(e->GetModelIndex())->GetModelName());
 
 		e->Render();
@@ -148,12 +155,15 @@ CRenderer::RenderOneNonRoad(CEntity *e)
 	bool resetLights;
 
 #ifndef MASTER
-	if(gbShowCollisionPolys){
+	if(gbShowCollisionPolys || gbShowCollisionPolysReflections || gbShowCollisionPolysNoShadows){
 		if(!e->IsVehicle()){
 			CCollision::DrawColModel_Coloured(e->GetMatrix(), *CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel(), e->GetModelIndex());
 			return;
 		}
-	}else if(e->IsBuilding()){
+	}else
+#endif
+#ifndef FINAL
+	if(e->IsBuilding()){
 		if(e->bIsBIGBuilding){
 			if(gbDontRenderBigBuildings)
 				return;
@@ -164,7 +174,7 @@ CRenderer::RenderOneNonRoad(CEntity *e)
 	}else
 #endif
 	if(e->IsPed()){
-#ifndef MASTER
+#ifndef FINAL
 		if(gbDontRenderPeds)
 			return;
 #endif
@@ -172,7 +182,7 @@ CRenderer::RenderOneNonRoad(CEntity *e)
 		if(ped->m_nPedState == PED_DRIVING)
 			return;
 	}
-#ifndef MASTER
+#ifndef FINAL
 	else if(e->IsObject() || e->IsDummy()){
 		if(gbDontRenderObjects)
 			return;
@@ -665,8 +675,10 @@ CRenderer::SetupEntityVisibility(CEntity *ent)
 				ti->m_alpha = 255;
 		}else{
 			// Hide if possible
-			if(CANTIMECULL)
+			if(CANTIMECULL){
+				ent->DeleteRwObject();
 				return VIS_INVISIBLE;
+			}
 			// can't cull, so we'll try to draw this one, but don't request
 			// it since what we really want is the other one.
 			request = false;
