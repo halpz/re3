@@ -1135,12 +1135,12 @@ CFileLoader::LoadMLO(const char *line)
 	char smth[8];
 	char name[24];
 	int modelIndex;
-	float someFloat;
+	float drawDist;
 
-	sscanf(line, "%s %s %d %f", smth, name, &modelIndex, &someFloat);
+	sscanf(line, "%s %s %d %f", smth, name, &modelIndex, &drawDist);
 	CMloModelInfo *minfo = CModelInfo::AddMloModel(modelIndex);
 	minfo->SetModelName(name);
-	minfo->field_34 = someFloat;
+	minfo->drawDist = drawDist;
 	int instId = CModelInfo::GetMloInstanceStore().allocPtr;
 	minfo->firstInstance = instId;
 	minfo->lastInstance = instId;

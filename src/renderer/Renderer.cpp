@@ -154,11 +154,14 @@ CRenderer::PreRender(void)
 void
 CRenderer::RenderOneRoad(CEntity *e)
 {
+#ifndef MASTER
 	if(gbDontRenderBuildings)
 		return;
 	if(gbShowCollisionPolys)
 		CCollision::DrawColModel_Coloured(e->GetMatrix(), *CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel(), e->GetModelIndex());
-	else{
+	else
+#endif
+	{
 #ifdef EXTENDED_PIPELINES
 		CustomPipes::AttachGlossPipe(e->GetAtomic());
 #endif
