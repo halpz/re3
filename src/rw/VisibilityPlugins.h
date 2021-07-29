@@ -21,9 +21,9 @@ public:
 	};
 
 	static CLinkList<AlphaObjectInfo> m_alphaList;
-	static CLinkList<AlphaObjectInfo> m_alphaBoatAtomicList;
+	//static CLinkList<AlphaObjectInfo> m_alphaBoatAtomicList;
 	static CLinkList<AlphaObjectInfo> m_alphaEntityList;
-	static CLinkList<AlphaObjectInfo> m_alphaUnderwaterEntityList;
+	//static CLinkList<AlphaObjectInfo> m_alphaUnderwaterEntityList;
 #ifdef NEW_RENDERER
 	static CLinkList<AlphaObjectInfo> m_alphaBuildingList;
 #endif
@@ -35,7 +35,7 @@ public:
 	static float ms_vehicleFadeDist;
 	static float ms_bigVehicleLod0Dist;
 	static float ms_bigVehicleLod1Dist;
-	static float ms_pedLod1Dist;
+	static float ms_pedLodDist;
 	static float ms_pedFadeDist;
 
 	static void Initialise(void);
@@ -44,7 +44,7 @@ public:
 	static bool InsertEntityIntoSortedList(CEntity *e, float dist);
 	static void InitAlphaAtomicList(void);
 	static bool InsertAtomicIntoSortedList(RpAtomic *a, float dist);
-	static bool InsertAtomicIntoBoatSortedList(RpAtomic *a, float dist);
+//	static bool InsertAtomicIntoBoatSortedList(RpAtomic *a, float dist);
 
 	static void SetRenderWareCamera(RwCamera *camera);
 	static void SetupVehicleVariables(RpClump *vehicle);
@@ -52,7 +52,7 @@ public:
 	static RpAtomic *RenderWheelAtomicCB(RpAtomic *atomic);
 	static RpAtomic *RenderObjNormalAtomic(RpAtomic *atomic);
 	static RpAtomic *RenderAlphaAtomic(RpAtomic *atomic, int alpha);
-	static RpAtomic *RenderWeaponCB(RpAtomic *atomic);
+//	static RpAtomic *RenderWeaponCB(RpAtomic *atomic);
 	static RpAtomic *RenderFadingAtomic(RpAtomic *atm, float dist);
 
 	static RpAtomic *RenderVehicleHiDetailCB(RpAtomic *atomic);
@@ -60,7 +60,7 @@ public:
 	static RpAtomic *RenderVehicleHiDetailCB_BigVehicle(RpAtomic *atomic);
 	static RpAtomic *RenderVehicleHiDetailAlphaCB_BigVehicle(RpAtomic *atomic);
 	static RpAtomic *RenderVehicleHiDetailCB_Boat(RpAtomic *atomic);
-	static RpAtomic *RenderVehicleHiDetailAlphaCB_Boat(RpAtomic *atomic);
+//	static RpAtomic *RenderVehicleHiDetailAlphaCB_Boat(RpAtomic *atomic);
 	static RpAtomic *RenderVehicleHiDetailCB_Boat_Far(RpAtomic *atomic);
 	static RpAtomic *RenderVehicleLoDetailCB_Boat(RpAtomic *atomic);
 	static RpAtomic *RenderVehicleLoDetailCB_Boat_Far(RpAtomic *atomic);
@@ -73,12 +73,12 @@ public:
 	static RpAtomic *RenderVehicleRotorAlphaCB(RpAtomic *atomic);
 	static RpAtomic *RenderVehicleTailRotorAlphaCB(RpAtomic *atomic);
 
-	static RpAtomic *RenderPlayerCB(RpAtomic *atomic);
+//	static RpAtomic *RenderPlayerCB(RpAtomic *atomic);
 	static RpAtomic *RenderPedCB(RpAtomic *atomic);	// for skinned models with only one clump
 
 	static void RenderAtomicList(CLinkList<AlphaObjectInfo> &list);
 	static void RenderAlphaAtomics(void);
-	static void RenderBoatAlphaAtomics(void);
+//	static void RenderBoatAlphaAtomics(void);
 	static void RenderFadingEntities(CLinkList<AlphaObjectInfo> &list);
 	static void RenderFadingEntities(void);
 	static void RenderFadingUnderwaterEntities(void);
@@ -86,6 +86,7 @@ public:
 	// All actually unused
 	static bool DefaultVisibilityCB(RpClump *clump);
 	static bool FrustumSphereCB(RpClump *clump);
+	static bool MloVisibilityCB(RpClump *clump);
 	static bool VehicleVisibilityCB(RpClump *clump);
 	static bool VehicleVisibilityCB_BigVehicle(RpClump *clump);
 
@@ -100,15 +101,19 @@ public:
 	struct AtomicExt
 	{
 		union {
-			CSimpleModelInfo *modelInfo;	// used by SimpleModelInfo
+			int16 modelId;	// used by SimpleModelInfo
 			int flags;			// used by ClumpModelInfo
 		};
-		int distanceAlpha;		// not sure where this is in PS2/PSP LCS
+#ifdef VIS_DISTANCE_ALPHA
+		int distanceAlpha;
+#endif
 	};
 	static void SetAtomicModelInfo(RpAtomic*, CSimpleModelInfo*);
+	static void SetAtomicModelIndex(RpAtomic *atomic, int modelId);
 	static CSimpleModelInfo *GetAtomicModelInfo(RpAtomic *atomic);
 	static void SetAtomicFlag(RpAtomic*, int);
 	static void ClearAtomicFlag(RpAtomic*, int);
+	static void SetAtomicId(RpAtomic *atomic, int);
 	static int GetAtomicId(RpAtomic *atomic);
 	static void SetAtomicRenderCallback(RpAtomic*, RpAtomicCallBackRender);
 
@@ -138,8 +143,10 @@ public:
 		int alpha;
 	};
 	static void SetClumpModelInfo(RpClump*, CClumpModelInfo*);
+	static CClumpModelInfo *GetClumpModelInfo(RpClump*);
 	static void SetClumpAlpha(RpClump*, int);
 	static int GetClumpAlpha(RpClump*);
+	static bool IsClumpVisible(RpClump*);
 	static void SetClumpDistanceAlpha(RpClump*, int);
 	static int GetClumpDistanceAlpha(RpClump*);
 
@@ -149,8 +156,10 @@ public:
 	                                  int32 offset, int32 len);
 	static int32 ms_clumpPluginOffset;
 
+#ifdef VIS_DISTANCE_ALPHA
 	static void SetObjectDistanceAlpha(RwObject *object, int alpha);
 	static int GetObjectDistanceAlpha(RwObject *object);
+#endif
 
 	static bool PluginAttach(void);
 };

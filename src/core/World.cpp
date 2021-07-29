@@ -1931,6 +1931,7 @@ CWorld::Process(void)
 				if(movingEnt->GetIsStatic()) { movingEnt->RemoveFromMovingList(); }
 			}
 		}
+#ifdef VIS_DISTANCE_ALPHA
 		for(int y = 0; y < NUMSECTORS_Y; y++)
 			for(int x = 0; x < NUMSECTORS_X; x++){
 				CPtrNode *node;
@@ -1952,6 +1953,7 @@ CWorld::Process(void)
 				for(node = sect->m_lists[ENTITYLIST_DUMMIES_OVERLAP].first; node; node = node->next)
 					((CEntity*)node->item)->UpdateDistanceFade();
 			}
+#endif
 		bForceProcessControl = true;
 		for(CPtrNode *node = ms_listMovingEntityPtrs.first; node; node = node->next) {
 			CPhysical *movingEnt = (CPhysical *)node->item;

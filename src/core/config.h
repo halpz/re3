@@ -248,6 +248,11 @@ enum Config {
 #	define PS2_MATFX
 #endif
 
+// Mobile only.
+// Looks like they tried to fix fading but it still sucks
+// do not use this
+//#define VIS_DISTANCE_ALPHA
+
 #ifdef VU_COLLISION
 #define COMPRESSED_COL_VECTORS	// currently need compressed vectors in this code
 #endif

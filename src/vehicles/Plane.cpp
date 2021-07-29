@@ -681,6 +681,12 @@ CPlane::Render(void)
 		CEntity::Render();
 }
 
+void
+CPlane::RenderAllRemaning(void)
+{
+	// TODO(LCS)
+}
+
 #define CRUISE_SPEED (50.0f)
 #define TAXI_SPEED (5.0f)
 

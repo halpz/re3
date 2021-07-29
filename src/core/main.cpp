@@ -94,6 +94,7 @@ bool gSecondExportPass;
 bool gUseModelResources;
 bool gUseResources;
 bool gNASTY_NASTY_MEM_SHUTDOWN_HACK;	// rather unused
+bool gbPreviewCity;	// don't do worldstream-style rendering but traditional method
 
 float FramesPerSecond = 30.0f;
 
@@ -1228,7 +1229,6 @@ DisplayGameDebugText()
 #ifdef NEW_RENDERER
 bool gbRenderRoads = true;
 bool gbRenderEverythingBarRoads = true;
-bool gbRenderFadingInUnderwaterEntities = true;
 bool gbRenderFadingInEntities = true;
 bool gbRenderWater = true;
 bool gbRenderBoats = true;
@@ -1246,7 +1246,8 @@ MattRenderScene(void)
 	/// CRenderer::ClearForFrame();		// before ConstructRenderList
 	CClock::CalcEnvMapTimeMultiplicator();
 	RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
-	CWaterLevel::RenderWater();	// actually CMattRenderer::RenderWater
+if(gbRenderWater)
+	CRenderer::RenderWater();	// actually CMattRenderer::RenderWater
 	CClock::ms_EnvMapTimeMultiplicator = 1.0f;
 	// cWorldStream::ClearDynamics
 	/// CRenderer::ConstructRenderList();	// before PreRender
@@ -1260,24 +1261,14 @@ if(gbRenderWorld1)
 if(gbRenderRoads)
 	CRenderer::RenderRoads();
 
-	CRenderer::GenerateEnvironmentMap();	// should be after static shadows, but that's weird
-
-	CRenderer::RenderPeds();
-
-	// not sure where to put these since LCS has no underwater entities
-if(gbRenderBoats)
-	CRenderer::RenderBoats();
-if(gbRenderFadingInUnderwaterEntities)
-	CRenderer::RenderFadingInUnderwaterEntities();
 	RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
-if(gbRenderWater)
-	CRenderer::RenderTransparentWater();
 
 if(gbRenderEverythingBarRoads)
 	CRenderer::RenderEverythingBarRoads();
-	// seam fixer
-	// moved this:
-	// CRenderer::RenderFadingInEntities();
+	// TODO: seam fixer
+	// these aren't very transparent. just objects
+if(gbRenderFadingInEntities)
+	CRenderer::RenderFadingInEntities();
 }
 
 void
@@ -1290,7 +1281,8 @@ RenderScene_new(void)
 	MattRenderScene();
 	DefinedState();
 	// CMattRenderer::ResetRenderStates
-	// moved CRenderer::RenderBoats to before transparent water
+if(gbRenderBoats)
+	CRenderer::RenderBoats();
 	POP_RENDERGROUP();
 }
 
@@ -1300,12 +1292,12 @@ void
 RenderEffects_new(void)
 {
 	PUSH_RENDERGROUP("RenderEffects_new");
-/*	// stupid to do this before the whole world is drawn!
-	CShadows::RenderStaticShadows();
-	CShadows::RenderStoredShadows();
-	CSkidmarks::Render();
-	CRubbish::Render();
-*/
+	// stupid to do this before the whole world is drawn!
+//	CShadows::RenderStaticShadows();
+	CRenderer::GenerateEnvironmentMap();
+//	CShadows::RenderStoredShadows();
+//	CSkidmarks::Render();
+//	CRubbish::Render();
 
 	// these aren't really effects
 	DefinedState();
@@ -1323,9 +1315,6 @@ if(gbRenderWorld2)
 if(gbRenderVehicles)
 		CRenderer::RenderVehicles();
 	}
-	// better render these after transparent world
-if(gbRenderFadingInEntities)
-	CRenderer::RenderFadingInEntities();
 
 	// actual effects here
 
@@ -1592,12 +1581,8 @@ Idle(void *arg)
 #ifdef PC_WATER
 		CWaterLevel::PreCalcWaterGeometry();
 #endif
-#ifdef NEW_RENDERER
-		if(gbNewRenderer){
-			CWorld::AdvanceCurrentScanCode();	// don't think this is even necessary
-			CRenderer::ClearForFrame();
-		}
-#endif
+		CWorld::AdvanceCurrentScanCode();
+		CRenderer::ClearForFrame();
 		CRenderer::ConstructRenderList();
 		tbEndTimer("CnstrRenderList");
 

@@ -374,7 +374,7 @@ CWaterLevel::CreateWavyAtomic()
 	{
 		wavyMaterial = RpMaterialCreate();
 		RpMaterialSetTexture(wavyMaterial, gpWaterTex);
-		RwRGBA watercolor = { 255, 255, 255, 192 };
+		RwRGBA watercolor = { 255, 255, 255, 255 /*192*/ };
 		RpMaterialSetColor(wavyMaterial, &watercolor);
 	}
 	
@@ -1227,7 +1227,7 @@ CWaterLevel::RenderTransparentWater(void)
 	colorTrans.red   = CTimeCycle::GetWaterRed();
 	colorTrans.green = CTimeCycle::GetWaterGreen();
 	colorTrans.blue  = CTimeCycle::GetWaterBlue();
-	colorTrans.alpha = CTimeCycle::GetWaterAlpha();
+	colorTrans.alpha = 255; //CTimeCycle::GetWaterAlpha();
 	
 	TempBufferVerticesStored = 0;
 	TempBufferIndicesStored = 0;
@@ -1676,7 +1676,6 @@ void
 CWaterLevel::RenderOneWavySector(float fX, float fY, float fZ, RwRGBA const &color, bool bDontRender)
 {
 	CVector vecSectorPos(fX + (SMALL_SECTOR_SIZE/2), fY + (SMALL_SECTOR_SIZE/2), fZ + 2.0f);
-
 	if ( COcclusion::IsAABoxOccluded(vecSectorPos, SMALL_SECTOR_SIZE, SMALL_SECTOR_SIZE, 4.0f) )
 		return;
 
@@ -1815,6 +1814,7 @@ CWaterLevel::RenderWavyMask(float fX, float fY, float fZ,
 		int32 nCamDirX, int32 nCamDirY, RwRGBA const&color)
 #endif
 {
+return;	// LCS
 #ifndef PC_WATER
 	bool bRender = true;
 	if (m_nRenderWaterLayers != 0 && m_nRenderWaterLayers != 2 && m_nRenderWaterLayers != 3)
@@ -2531,7 +2531,7 @@ CWaterLevel::RenderBoatWakes(void)
 
 	CBoat::FillBoatList();
 	
-	float fWakeZ = 5.97f;
+	float fWakeZ = 0.0f;//5.97f;
 	float fWakeLifeTimeMult = 0.01f / CBoat::WAKE_LIFETIME;
 	
 	for ( int32 idx = 0; idx < ARRAY_SIZE(CBoat::apFrameWakeGeneratingBoats); idx++ )

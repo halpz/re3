@@ -50,4 +50,6 @@ namespace base
 		void Save(const char* filename, uint32 a3, uint32 a4, bool a5);
 		void Save(void* file, uint32 a3, uint32 a4, bool a5, sChunkHeader* pHeader);
 	};
+
+	void RegisterRelocatableChunkFunc(const void *func);
 };

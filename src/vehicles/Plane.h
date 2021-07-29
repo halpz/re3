@@ -59,6 +59,7 @@ public:
 	void Render(void);
 	void FlagToDestroyWhenNextProcessed() { bRemoveFromWorld = true; }
 
+	static void RenderAllRemaning(void);
 	static void InitPlanes(void);
 	static void Shutdown(void);
 	static CPlaneNode *LoadPath(char const *filename, int32 &numNodes, float &totalLength, bool loop);

@@ -86,9 +86,9 @@ CEntity::CEntity(void)
 	bHasPreRenderEffects = false;
 
 	bIsTreeModel = false;
-	m_flagG2 = false;
-	m_flagG4 = false;
-	m_flagG8 = false;
+	bIsVehicle = false;
+	bIsPed = false;
+	bMakeVisible = false;
 
 	m_scanCode = 0;
 	m_modelIndex = -1;
@@ -444,8 +444,11 @@ void
 CEntity::Render(void)
 {
 	if(m_rwObject){
-		if(CVisibilityPlugins::GetObjectDistanceAlpha(m_rwObject) != 0){
-			// NB: LCS does not use bImBeingRendered here,
+#ifdef VIS_DISTANCE_ALPHA
+		if(CVisibilityPlugins::GetObjectDistanceAlpha(m_rwObject) != 0)
+#endif
+		{
+			// TODO(LCS): LCS does not use bImBeingRendered here,
 			// but that may be due to the streamed world. better keep it for safety
 			bImBeingRendered = true;
 			if(RwObjectGetType(m_rwObject) == rpATOMIC)
@@ -457,13 +460,12 @@ CEntity::Render(void)
 	}
 }
 
+#ifdef VIS_DISTANCE_ALPHA
 void
 CEntity::UpdateDistanceFade(void)
 {
-// TODO(LCS):
-// increasing and decreasing alpha depending on bDistanceFade doesn't make any sense
-// so disable this whole thing until it does.
-return;
+	// bDistanceFade is only valid when entity is in alpha list
+	// but we're always checking it here, see fix in CRenderer
 	int alpha = CVisibilityPlugins::GetObjectDistanceAlpha(m_rwObject);
 	if(CCutsceneMgr::IsRunning() || TheCamera.WorldViewerBeingUsed)
 		alpha = 255;
@@ -473,6 +475,7 @@ return;
 		alpha = Min(alpha+32, 255);
 	CVisibilityPlugins::SetObjectDistanceAlpha(m_rwObject, alpha);
 }
+#endif
 
 void
 CEntity::UpdateAnim(void)
