@@ -1329,6 +1329,9 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CAutomobile *
 				AddPlayerCarSample(vol, freq, (engineSoundType - CAR_SFX_BANKS_OFFSET + SFX_CAR_REV_1), SFX_BANK_0, 2, TRUE);
 			} else {
 				TranslateEntity(&m_sQueueSample.m_vecPos, &pos);
+#ifndef EXTERNAL_3D_SOUND
+				m_sQueueSample.m_nOffset = ComputePan(m_sQueueSample.m_fDistance, &pos);
+#endif
 				if (bAccelSampleStopped) {
 					if (CurrentPretendGear != 1 || currentGear != 2) {
 						gearNr = currentGear - 1;
@@ -1356,9 +1359,15 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CAutomobile *
 					SampleManager.SetChannelLoopPoints(CHANNEL_PLAYER_VEHICLE_ENGINE, 0, -1);
 				}
 
+#ifdef EXTERNAL_3D_SOUND
 				SampleManager.SetChannelEmittingVolume(CHANNEL_PLAYER_VEHICLE_ENGINE, 85);
 				SampleManager.SetChannel3DPosition(CHANNEL_PLAYER_VEHICLE_ENGINE, pos.x, pos.y, pos.z);
 				SampleManager.SetChannel3DDistances(CHANNEL_PLAYER_VEHICLE_ENGINE, 50.f, 12.5f);
+#else
+				
+				SampleManager.SetChannelVolume(CHANNEL_PLAYER_VEHICLE_ENGINE, ComputeVolume(85, 50.0f, m_sQueueSample.m_fDistance));
+				SampleManager.SetChannelPan(CHANNEL_PLAYER_VEHICLE_ENGINE, m_sQueueSample.m_nOffset);
+#endif
 				freq = GearFreqAdj[CurrentPretendGear] + freqModifier + 22050;
 				if (engineSoundType == SFX_BANK_TRUCK)
 					freq /= 2;

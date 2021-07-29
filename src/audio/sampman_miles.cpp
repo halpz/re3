@@ -92,7 +92,7 @@ S32         curprovider=-1;
 S32         usingEAX=0;
 S32         usingEAX3=0;
 HPROVIDER   opened_provider=0;
-H3DSAMPLE   opened_samples[MAXCHANNELS] = {0};
+H3DSAMPLE   opened_samples[MAXCHANNELS ? MAXCHANNELS : 1] = {0};
 HSAMPLE     opened_2dsamples[MAX2DCHANNELS] = {0};
 HDIGDRIVER  DIG;
 S32         speaker_type=0;
@@ -1709,7 +1709,11 @@ cSampleManager::SetChannelReverbFlag(uint32 nChannel, bool8 nReverbFlag)
 	
 	switch ( nChannel )
 	{
+#ifdef EXTERNAL_3D_SOUND
 		case CHANNEL_POLICE_RADIO:
+#else
+		default:
+#endif
 		{
 			b2d = TRUE;
 			break;
@@ -1738,7 +1742,11 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 
 	switch ( nChannel )
 	{
+#ifdef EXTERNAL_3D_SOUND
 		case CHANNEL_POLICE_RADIO:
+#else
+		default:
+#endif
 		{
 			b2d = TRUE;
 			break;
@@ -1838,7 +1846,11 @@ cSampleManager::SetChannelVolume(uint32 nChannel, uint32 nVolume)
 	
 	switch ( nChannel )
 	{
+#ifdef EXTERNAL_3D_SOUND
 		case CHANNEL_POLICE_RADIO:
+#else
+		default:
+#endif
 		{
 			nChannelVolume[nChannel] = vol;
 			
@@ -1866,7 +1878,11 @@ cSampleManager::SetChannelPan(uint32 nChannel, uint32 nPan)
 {
 	switch ( nChannel )
 	{
+#ifdef EXTERNAL_3D_SOUND
 		case CHANNEL_POLICE_RADIO:
+#else
+		default:
+#endif
 		{
 #ifndef FIX_BUGS
 			if ( opened_samples[nChannel - MAXCHANNELS] ) // BUG
@@ -1887,7 +1903,11 @@ cSampleManager::SetChannelFrequency(uint32 nChannel, uint32 nFreq)
 
 	switch ( nChannel )
 	{
+#ifdef EXTERNAL_3D_SOUND
 		case CHANNEL_POLICE_RADIO:
+#else
+		default:
+#endif
 		{
 			b2d = TRUE;
 			break;
@@ -1913,7 +1933,11 @@ cSampleManager::SetChannelLoopPoints(uint32 nChannel, uint32 nLoopStart, int32 n
 
 	switch ( nChannel )
 	{
+#ifdef EXTERNAL_3D_SOUND
 		case CHANNEL_POLICE_RADIO:
+#else
+		default:
+#endif
 		{
 			b2d = TRUE;
 			break;
@@ -1939,7 +1963,11 @@ cSampleManager::SetChannelLoopCount(uint32 nChannel, uint32 nLoopCount)
 
 	switch ( nChannel )
 	{
+#ifdef EXTERNAL_3D_SOUND
 		case CHANNEL_POLICE_RADIO:
+#else
+		default:
+#endif
 		{
 			b2d = TRUE;
 			break;
@@ -1965,7 +1993,11 @@ cSampleManager::GetChannelUsedFlag(uint32 nChannel)
 
 	switch ( nChannel )
 	{
+#ifdef EXTERNAL_3D_SOUND
 		case CHANNEL_POLICE_RADIO:
+#else
+		default:
+#endif
 		{
 			b2d = TRUE;
 			break;
@@ -1996,7 +2028,11 @@ cSampleManager::StartChannel(uint32 nChannel)
 
 	switch ( nChannel )
 	{
+#ifdef EXTERNAL_3D_SOUND
 		case CHANNEL_POLICE_RADIO:
+#else
+		default:
+#endif
 		{
 			b2d = TRUE;
 			break;
@@ -2022,7 +2058,11 @@ cSampleManager::StopChannel(uint32 nChannel)
 
 	switch ( nChannel )
 	{
+#ifdef EXTERNAL_3D_SOUND
 		case CHANNEL_POLICE_RADIO:
+#else
+		default:
+#endif
 		{
 			b2d = TRUE;
 			break;

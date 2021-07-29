@@ -100,9 +100,15 @@ enum
 
 #define MAXPROVIDERS               64
 
+#ifdef EXTERNAL_3D_SOUND
 #define MAXCHANNELS                (NUM_CHANNELS_GENERIC+1)
 #define MAXCHANNELS_SURROUND       (MAXCHANNELS-4)
 #define MAX2DCHANNELS              1
+#else
+#define MAXCHANNELS                0
+#define MAXCHANNELS_SURROUND       0
+#define MAX2DCHANNELS              NUM_CHANNELS
+#endif
 
 #define MAX_STREAMS                2
 
