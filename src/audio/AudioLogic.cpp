@@ -5222,19 +5222,23 @@ cAudioManager::SetupPedComments(cPedParams &params, uint16 sound)
 		switch(sound) {
 		case SOUND_PED_HELI_PLAYER_FOUND:
 			soundIntensity = 400.0f;
-			pedComment.m_nSampleIndex = NO_SAMPLE; //GetRandomNumberInRange(m_sQueueSample.m_nEntityIndex % 4, SFX_POLICE_HELI_1, SFX_POLICE_HELI_20);
+			pedComment.m_nSampleIndex = m_anRandomTable[m_sQueueSample.m_nEntityIndex % 4] % 29 + SFX_PHCHAT1;
 			break;
 		case SOUND_PED_VCPA_PLAYER_FOUND:
 			soundIntensity = 400.0f;
-			pedComment.m_nSampleIndex = NO_SAMPLE; //m_anRandomTable[m_sQueueSample.m_nEntityIndex % 4] % 23 + SFX_POLICE_BOAT_1;
+			pedComment.m_nSampleIndex = m_anRandomTable[m_sQueueSample.m_nEntityIndex % 4] % 29 + SFX_PBCHAT1;
 			break;
 		case SOUND_INJURED_PED_MALE_OUCH:
 			soundIntensity = 40.0f;
-			pedComment.m_nSampleIndex = NO_SAMPLE; // = GetRandomNumberInRange(m_sQueueSample.m_nEntityIndex % 4, SFX_GENERIC_MALE_GRUNT_1, SFX_GENERIC_MALE_GRUNT_41);
+#ifdef FIX_BUGS
+			pedComment.m_nSampleIndex = m_anRandomTable[m_sQueueSample.m_nEntityIndex % 4] % 53 + SFX_MALE_PAIN_01;
+#else
+			pedComment.m_nSampleIndex = m_anRandomTable[m_sQueueSample.m_nEntityIndex % 4] % 51 + SFX_MALE_PAIN_01;
+#endif
 			break;
 		case SOUND_INJURED_PED_FEMALE:
 			soundIntensity = 40.0f;
-			pedComment.m_nSampleIndex = NO_SAMPLE; // = GetRandomNumberInRange(m_sQueueSample.m_nEntityIndex % 4, SFX_GENERIC_FEMALE_GRUNT_1, SFX_GENERIC_FEMALE_GRUNT_33);
+			pedComment.m_nSampleIndex = m_anRandomTable[m_sQueueSample.m_nEntityIndex % 4] % 34 + SFX_FEMALE_PAIN_01;
 			break;
 		default:
 			return;
