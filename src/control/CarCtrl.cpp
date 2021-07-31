@@ -983,9 +983,12 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 		}
 		float distanceToPlayer = (pVehicle->GetPosition() - vecPlayerPos).Magnitude2D();
 		float despawnMultiplier = 1.0f;
+#ifndef EXTENDED_OFFSCREEN_DESPAWN_RANGE
 		if (FindPlayerVehicle() && TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON && !FrontEndMenuManager.m_PrefsUseWideScreen)
 			despawnMultiplier = 0.75f;
+#endif
 		float threshold = OFFSCREEN_DESPAWN_RANGE * despawnMultiplier;
+#ifndef EXTENDED_OFFSCREEN_DESPAWN_RANGE
 		if (pVehicle->GetIsOnScreen() ||
 			TheCamera.Cams[TheCamera.ActiveCam].LookingLeft ||
 			TheCamera.Cams[TheCamera.ActiveCam].LookingRight ||
@@ -997,11 +1000,15 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 			pVehicle->bIsLawEnforcer ||
 			pVehicle->bIsCarParkVehicle ||
 			CTimer::GetTimeInMilliseconds() < pVehicle->m_nSetPieceExtendedRangeTime
-			){
+			)
+#endif
+		{
 			threshold = ONSCREEN_DESPAWN_RANGE * despawnMultiplier * TheCamera.GenerationDistMultiplier;
 		}
+#ifndef EXTENDED_OFFSCREEN_DESPAWN_RANGE
 		if (TheCamera.GetForward().z < -0.9f)
 			threshold = 70.0f;
+#endif
 		if (pVehicle->bExtendedRange)
 			threshold *= EXTENDED_RANGE_DESPAWN_MULTIPLIER;
 		if (distanceToPlayer > threshold && !CGarages::IsPointWithinHideOutGarage(pVehicle->GetPosition())){
