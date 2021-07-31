@@ -2,11 +2,13 @@
 
 #include "2dEffect.h"
 #include "SimpleModelInfo.h"
+#include "MloModelInfo.h"
 #include "TimeModelInfo.h"
 #include "WeaponModelInfo.h"
 #include "ClumpModelInfo.h"
 #include "PedModelInfo.h"
 #include "VehicleModelInfo.h"
+#include "XtraCompsModelInfo.h"
 #include "templates.h"
 
 class CModelInfo

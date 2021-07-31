@@ -206,8 +206,8 @@ CSimpleModelInfo::GetAtomicFromDistance(float dist)
 {
 	int i;
 	i = 0;
-// HACk until we figure out what's going on
-if(m_atomics == nil) return nil;
+	if(m_atomics == nil)
+		return nil;
 	if(m_isDamaged)
 		i = m_firstDamaged;
 	for(; i < m_numAtomics; i++)
@@ -219,8 +219,8 @@ if(m_atomics == nil) return nil;
 RpAtomic*
 CSimpleModelInfo::GetFirstAtomicFromDistance(float dist)
 {
-// HACk until we figure out what's going on
-if(m_atomics == nil) return nil;
+	if(m_atomics == nil)
+		return nil;
 	if(dist < m_lodDistances[0] * TheCamera.LODDistMultiplier)
 		return m_atomics[0];
 	return nil;

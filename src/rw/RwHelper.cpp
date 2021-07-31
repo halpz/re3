@@ -95,6 +95,7 @@ DefinedState(void)
 #endif
 }
 
+//LCS: remove this
 void
 SetCullMode(uint32 mode)
 {

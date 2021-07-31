@@ -15,6 +15,7 @@
 #include "TxdStore.h"
 #include "Renderer.h"
 #include "World.h"
+#include "VisibilityPlugins.h"
 #include "custompipes.h"
 
 #ifndef LIBRW
@@ -457,9 +458,13 @@ worldRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 
 		setTexture(0, m->texture);
 
-		setMaterial(m->color, m->surfaceProps, CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_PS2 ? 0.5f : 1.0f);
+		rw::RGBA color = m->color;
+#ifdef VIS_DISTANCE_ALPHA
+		color.alpha = (color.alpha * CVisibilityPlugins::GetObjectDistanceAlpha((RwObject*)atomic))/255.0f;
+#endif
+		setMaterial(color, m->surfaceProps, CustomPipes::WorldPipeSwitch == CustomPipes::WORLDPIPE_PS2 ? 0.5f : 1.0f);
 
-		rw::SetRenderState(VERTEXALPHA, inst->vertexAlpha || m->color.alpha != 0xFF);
+		rw::SetRenderState(VERTEXALPHA, inst->vertexAlpha || color.alpha != 0xFF);
 
 		drawInst(header, inst);
 		inst++;

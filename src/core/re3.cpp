@@ -629,9 +629,6 @@ void SaveINISettings()
 	StoreIni("CustomPipesValues", "GlossMult", CustomPipes::GlossMult);
 #endif
 	StoreIni("Rendering", "BackfaceCulling", gBackfaceCulling);
-#ifdef NEW_RENDERER
-	StoreIni("Rendering", "NewRenderer", gbNewRenderer);
-#endif
 
 #ifdef PROPER_SCALING	
 	StoreIni("Draw", "ProperScaling", CDraw::ms_bProperScaling);	
@@ -1005,10 +1002,8 @@ DebugMenuPopulate(void)
 		DebugMenuAddVarBool8("Render", "VSynch", &FrontEndMenuManager.m_PrefsVsync, nil);
 		DebugMenuAddVar("Render", "Max FPS", &RsGlobal.maxFPS, nil, 1, 1, 1000, nil);
 #ifdef NEW_RENDERER
-		DebugMenuAddVarBool8("Render", "New Renderer", &gbNewRenderer, nil);
 extern bool gbRenderRoads;
 extern bool gbRenderEverythingBarRoads;
-extern bool gbRenderFadingInUnderwaterEntities;
 extern bool gbRenderFadingInEntities;
 extern bool gbRenderWater;
 extern bool gbRenderBoats;
@@ -1018,7 +1013,6 @@ extern bool gbRenderWorld1;
 extern bool gbRenderWorld2;
 		DebugMenuAddVarBool8("Debug Render", "gbRenderRoads", &gbRenderRoads, nil);
 		DebugMenuAddVarBool8("Debug Render", "gbRenderEverythingBarRoads", &gbRenderEverythingBarRoads, nil);
-		DebugMenuAddVarBool8("Debug Render", "gbRenderFadingInUnderwaterEntities", &gbRenderFadingInUnderwaterEntities, nil);
 		DebugMenuAddVarBool8("Debug Render", "gbRenderFadingInEntities", &gbRenderFadingInEntities, nil);
 		DebugMenuAddVarBool8("Debug Render", "gbRenderWater", &gbRenderWater, nil);
 		DebugMenuAddVarBool8("Debug Render", "gbRenderBoats", &gbRenderBoats, nil);
@@ -1026,6 +1020,7 @@ extern bool gbRenderWorld2;
 		DebugMenuAddVarBool8("Debug Render", "gbRenderWorld0", &gbRenderWorld0, nil);
 		DebugMenuAddVarBool8("Debug Render", "gbRenderWorld1", &gbRenderWorld1, nil);
 		DebugMenuAddVarBool8("Debug Render", "gbRenderWorld2", &gbRenderWorld2, nil);
+		DebugMenuAddVarBool8("Debug Render", "gbPreviewCity", &gbPreviewCity, nil);
 #endif
 
 #ifdef EXTENDED_COLOURFILTER

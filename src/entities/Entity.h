@@ -100,9 +100,9 @@ public:
 
 	// LCS flagsG
 	uint32 bIsTreeModel : 1;
-	uint32 m_flagG2 : 1;
-	uint32 m_flagG4 : 1;
-	uint32 m_flagG8 : 1;
+	uint32 bIsVehicle : 1;	// not sure what exactly these two are for
+	uint32 bIsPed : 1;
+	uint32 bMakeVisible : 1;
 
 	uint16 m_scanCode;
 	uint16 m_randomSeed;
@@ -163,7 +163,9 @@ public:
 		return (RpClump*)m_rwObject;
 	}
 
+#ifdef VIS_DISTANCE_ALPHA
 	void UpdateDistanceFade(void);
+#endif
 	void GetBoundCentre(CVUVECTOR &out);
 	CVector GetBoundCentre(void);
 	float GetBoundRadius(void);

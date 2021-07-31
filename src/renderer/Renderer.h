@@ -25,13 +25,6 @@ extern bool gbDontRenderVehicles;
 class CVehicle;
 class CPtrList;
 
-// unused
-struct BlockedRange
-{
-	float a, b;	// unknown
-	BlockedRange *prev, *next;
-};
-
 class CRenderer
 {
 	static int32 ms_nNoOfVisibleEntities;
@@ -49,10 +42,6 @@ class CRenderer
 	static CVector ms_vecCameraPosition;
 	static CVehicle *m_pFirstPersonVehicle;
 
-	// unused
-	static BlockedRange aBlockedRanges[16];
-	static BlockedRange *pFullBlockedRanges;
-	static BlockedRange *pEmptyBlockedRanges;
 public:
 	static float ms_lodDistScale;
 	static bool m_loadingPriority;
@@ -93,15 +82,15 @@ public:
 	static void RemoveVehiclePedLights(CEntity *ent, bool reset);
 
 
-#ifdef NEW_RENDERER
 	static void ClearForFrame(void);
-	static void RenderPeds(void);
 	static void RenderVehicles(void);	// also renders peds in LCS
+	static void RenderWater(void);	// keep-out polys and transparent water
+#ifdef NEW_RENDERER
 	static void RenderOneBuilding(CEntity *ent, float camdist = 0.0f);
 	static void RenderWorld(int pass);	// like cWorldStream::Render(int)
-	static void RenderTransparentWater(void);	// keep-out polys and transparent water
 #endif
 	static void InsertEntityIntoList(CEntity *ent);
+	static void AddVisibleEntity(CEntity *ent);
 
 	static void GenerateEnvironmentMap(void);
 };
