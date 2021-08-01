@@ -109,7 +109,9 @@ cAudioManager::Service()
 	if (m_bIsInitialised) {
 		m_nPreviousUserPause = m_nUserPause;
 		m_nUserPause = CTimer::GetIsUserPaused();
+#ifdef GTA_PC
 		UpdateReflections();
+#endif
 		ServiceSoundEffects();
 		MusicManager.Service();
 	}
@@ -158,11 +160,27 @@ cAudioManager::DestroyEntity(int32 id)
 	}
 }
 
+bool8
+cAudioManager::GetEntityStatus(int32 id)
+{
+	if (m_bIsInitialised && id >= 0 && id < NUM_AUDIOENTITIES && m_asAudioEntities[id].m_bIsUsed)
+		return m_asAudioEntities[id].m_bStatus;
+	return FALSE;
+}
+
 void
 cAudioManager::SetEntityStatus(int32 id, bool8 status)
 {
 	if (m_bIsInitialised && id >= 0 && id < NUM_AUDIOENTITIES && m_asAudioEntities[id].m_bIsUsed)
 		m_asAudioEntities[id].m_bStatus = status;
+}
+
+void *
+cAudioManager::GetEntityPointer(int32 id)
+{
+	if (m_bIsInitialised && id >= 0 && id < NUM_AUDIOENTITIES && m_asAudioEntities[id].m_bIsUsed)
+		return m_asAudioEntities[id].m_pEntity;
+	return NULL;
 }
 
 void
@@ -216,33 +234,33 @@ cAudioManager::PlayOneShot(int32 index, uint16 sound, float vol)
 }
 
 void
-cAudioManager::SetEffectsMasterVolume(uint8 volume) const
+cAudioManager::SetEffectsMasterVolume(uint8 volume)
 {
 	SampleManager.SetEffectsMasterVolume(volume);
 }
 
 void
-cAudioManager::SetMusicMasterVolume(uint8 volume) const
+cAudioManager::SetMusicMasterVolume(uint8 volume)
 {
 	SampleManager.SetMusicMasterVolume(volume);
 }
 
 void
-cAudioManager::SetEffectsFadeVol(uint8 volume) const
+cAudioManager::SetEffectsFadeVol(uint8 volume)
 {
 	SampleManager.SetEffectsFadeVolume(volume);
+}
+
+void
+cAudioManager::SetMusicFadeVol(uint8 volume)
+{
+	SampleManager.SetMusicFadeVolume(volume);
 }
 
 void
 cAudioManager::SetMonoMode(bool8 mono)
 {
 	SampleManager.SetMonoMode(mono);
-}
-
-void
-cAudioManager::SetMusicFadeVol(uint8 volume) const
-{
-	SampleManager.SetMusicFadeVolume(volume);
 }
 
 void
@@ -307,8 +325,10 @@ cAudioManager::DestroyAllGameCreatedEntities()
 	}
 }
 
+#ifdef GTA_PC
+
 uint8
-cAudioManager::GetNum3DProvidersAvailable() const
+cAudioManager::GetNum3DProvidersAvailable()
 {
 	if (m_bIsInitialised)
 		return SampleManager.GetNum3DProvidersAvailable();
@@ -316,7 +336,7 @@ cAudioManager::GetNum3DProvidersAvailable() const
 }
 
 char *
-cAudioManager::Get3DProviderName(uint8 id) const
+cAudioManager::Get3DProviderName(uint8 id)
 {
 	if (!m_bIsInitialised)
 		return nil;
@@ -331,7 +351,7 @@ cAudioManager::Get3DProviderName(uint8 id) const
 }
 
 int8
-cAudioManager::GetCurrent3DProviderIndex() const
+cAudioManager::GetCurrent3DProviderIndex()
 {
 	if (m_bIsInitialised)
 		return SampleManager.GetCurrent3DProviderIndex();
@@ -363,13 +383,13 @@ cAudioManager::SetCurrent3DProvider(uint8 which)
 }
 
 void
-cAudioManager::SetSpeakerConfig(int32 conf) const
+cAudioManager::SetSpeakerConfig(int32 conf)
 {
 	SampleManager.SetSpeakerConfig(conf);
 }
 
 bool8
-cAudioManager::IsMP3RadioChannelAvailable() const
+cAudioManager::IsMP3RadioChannelAvailable()
 {
 	if (m_bIsInitialised)
 		return SampleManager.IsMP3RadioChannelAvailable();
@@ -378,7 +398,7 @@ cAudioManager::IsMP3RadioChannelAvailable() const
 }
 
 void
-cAudioManager::ReleaseDigitalHandle() const
+cAudioManager::ReleaseDigitalHandle()
 {
 	if (m_bIsInitialised) {
 		SampleManager.ReleaseDigitalHandle();
@@ -386,7 +406,7 @@ cAudioManager::ReleaseDigitalHandle() const
 }
 
 void
-cAudioManager::ReacquireDigitalHandle() const
+cAudioManager::ReacquireDigitalHandle()
 {
 	if (m_bIsInitialised) {
 		SampleManager.ReacquireDigitalHandle();
@@ -400,13 +420,13 @@ cAudioManager::SetDynamicAcousticModelingStatus(bool8 status)
 }
 
 bool8
-cAudioManager::CheckForAnAudioFileOnCD() const
+cAudioManager::CheckForAnAudioFileOnCD()
 {
 	return SampleManager.CheckForAnAudioFileOnCD();
 }
 
 char
-cAudioManager::GetCDAudioDriveLetter() const
+cAudioManager::GetCDAudioDriveLetter()
 {
 	if (m_bIsInitialised)
 		return SampleManager.GetCDAudioDriveLetter();
@@ -415,10 +435,12 @@ cAudioManager::GetCDAudioDriveLetter() const
 }
 
 bool8
-cAudioManager::IsAudioInitialised() const
+cAudioManager::IsAudioInitialised()
 {
 	return m_bIsInitialised;
 }
+
+#endif // GTA_PC
 
 void
 cAudioManager::ServiceSoundEffects()
@@ -469,8 +491,14 @@ cAudioManager::ServiceSoundEffects()
 	m_sAudioScriptObjectManager.m_nScriptObjectEntityTotal = 0;
 }
 
+uint32
+cAudioManager::FL(float f)
+{
+	return SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex) * f;
+}
+
 uint8
-cAudioManager::ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance) const
+cAudioManager::ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance)
 {
 	float newSoundIntensity;
 	if (soundIntensity <= 0.0f)
@@ -482,7 +510,7 @@ cAudioManager::ComputeVolume(uint8 emittingVolume, float soundIntensity, float d
 }
 
 void
-cAudioManager::TranslateEntity(Const CVector *in, CVector *out) const
+cAudioManager::TranslateEntity(Const CVector *in, CVector *out)
 {
 	*out = MultiplyInverse(TheCamera.GetMatrix(), *in);
 }
@@ -500,8 +528,8 @@ cAudioManager::ComputePan(float dist, CVector *vec)
 	return Min(107, PanTable[index] + 63);
 }
 
-int32
-cAudioManager::ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2, float speedMultiplier) const
+uint32
+cAudioManager::ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2, float speedMultiplier)
 {
 	uint32 newFreq = oldFreq;
 	if (!TheCamera.Get_Just_Switched_Status() && speedMultiplier != 0.0f) {
@@ -522,7 +550,7 @@ cAudioManager::ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, 
 }
 
 int32
-cAudioManager::RandomDisplacement(uint32 seed) const
+cAudioManager::RandomDisplacement(uint32 seed)
 {
 	int32 value;
 
@@ -593,6 +621,7 @@ cAudioManager::AddSampleToRequestedQueue()
 			AddReflectionsToRequestedQueue();
 	}
 }
+
 void
 cAudioManager::AddDetailsToRequestedOrderList(uint8 sample)
 {
@@ -610,6 +639,7 @@ cAudioManager::AddDetailsToRequestedOrderList(uint8 sample)
 	m_abSampleQueueIndexTable[m_nActiveSampleQueue][i] = sample;
 }
 
+#ifdef GTA_PC
 void
 cAudioManager::AddReflectionsToRequestedQueue()
 {
@@ -687,6 +717,7 @@ cAudioManager::UpdateReflections()
 			m_afReflectionsDistances[4] = 50.0f;
 	}
 }
+#endif // GTA_PC
 
 void
 cAudioManager::AddReleasingSounds()
@@ -962,6 +993,13 @@ cAudioManager::ClearActiveSamples()
 		m_asActiveSamples[i].m_nLoopsRemaining = 0;
 		m_asActiveSamples[i].m_bRequireReflection = FALSE;
 	}
+}
+
+void
+cAudioManager::LoadBankIfNecessary(uint8 bank)
+{
+	if(!SampleManager.IsSampleBankLoaded(bank))
+		SampleManager.LoadSampleBank(bank);
 }
 
 void

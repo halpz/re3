@@ -326,6 +326,7 @@ CPed::~CPed(void)
 					nearPed->m_nearPeds[k] = nearPed->m_nearPeds[k + 1];
 					nearPed->m_nearPeds[k + 1] = nil;
 				}
+				nearPed->m_nearPeds[ARRAY_SIZE(m_nearPeds) - 1] = nil;
 				nearPed->m_numNearPeds--;
 			} else
 				j++;
@@ -392,8 +393,20 @@ CPed::BuildPedLists(void)
 					if (ped != this && !ped->bInVehicle) {
 						float dist = (ped->GetPosition() - GetPosition()).Magnitude2D();
 						if (nThreatReactionRangeMultiplier * 30.0f > dist) {
+#ifdef FIX_BUGS
+							// If the gap ped list is full, sort it and truncate it
+							// before pushing more unsorted peds
+							if( gnNumTempPedList == ARRAY_SIZE(gapTempPedList) - 1 )
+							{
+								gapTempPedList[gnNumTempPedList] = nil;
+								SortPeds(gapTempPedList, 0, gnNumTempPedList - 1);
+								gnNumTempPedList = ARRAY_SIZE(m_nearPeds);
+							}
+#endif
+
 							gapTempPedList[gnNumTempPedList] = ped;
 							gnNumTempPedList++;
+							// NOTE: We cannot absolutely fill the gap list, as the list is null-terminated before being passed to SortPeds
 							assert(gnNumTempPedList < ARRAY_SIZE(gapTempPedList));
 						}
 					}
@@ -1347,6 +1360,9 @@ CPed::CalculateNewVelocity(void)
 			limitedRotDest -= 2 * PI;
 		}
 
+#ifdef FREE_CAM
+		if (!TheCamera.Cams[0].Using3rdPersonMouseCam())
+#endif
 		if (IsPlayer() && m_nPedState == PED_ATTACK)
 			headAmount /= 4.0f;
 
@@ -2473,12 +2489,12 @@ CPed::ProcessControl(void)
 							obstacleForFlyingOtherDirZ = 501.0f;
 						}
 #ifdef VC_PED_PORTS
-						uint8 flyDir = 0;
+						int16 flyDir = 0;
 						float feetZ = GetPosition().z - FEET_OFFSET;
 #ifdef FIX_BUGS
-						if (obstacleForFlyingZ > feetZ && obstacleForFlyingOtherDirZ < 501.0f)
+						if (obstacleForFlyingZ > feetZ && obstacleForFlyingZ < 500.0f)
 							flyDir = 1;
-						else if (obstacleForFlyingOtherDirZ > feetZ && obstacleForFlyingZ < 500.0f)
+						else if (obstacleForFlyingOtherDirZ > feetZ && obstacleForFlyingOtherDirZ < 501.0f)
 							flyDir = 2;
 #else
 						if ((obstacleForFlyingZ > feetZ && obstacleForFlyingOtherDirZ < 500.0f) || (obstacleForFlyingZ > feetZ && obstacleForFlyingOtherDirZ > feetZ))
@@ -2487,8 +2503,8 @@ CPed::ProcessControl(void)
 							flyDir = 2;
 #endif
 
-						if (flyDir != 0 && !bSomeVCflag1) {
-							SetPosition((flyDir == 2 ? obstacleForFlyingOtherDir.point : obstacleForFlying.point));
+						if (flyDir > 0 && !bSomeVCflag1) {
+							GetMatrix().SetTranslateOnly((flyDir == 2 ? obstacleForFlyingOtherDir.point : obstacleForFlying.point));
 							GetMatrix().GetPosition().z += FEET_OFFSET;
 							GetMatrix().UpdateRW();
 							SetLanding();
@@ -3187,7 +3203,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 							lowerSpeedLimit *= 1.5f;
 						}
 						CAnimBlendAssociation *fallAnim = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_FALL);
-						if (!bWasStanding && speed > upperSpeedLimit && (/*!bPushedAlongByCar ||*/ m_vecMoveSpeed.z < lowerSpeedLimit)
+						if (!bWasStanding && ((speed > upperSpeedLimit /* ||!bPushedAlongByCar*/) || (m_vecMoveSpeed.z < lowerSpeedLimit))
 							&& m_pCollidingEntity != collidingEnt) {
 
 							float damage = 100.0f * Max(speed - 0.25f, 0.0f);

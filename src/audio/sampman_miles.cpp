@@ -1245,7 +1245,7 @@ cSampleManager::Initialise(void)
 			
 			int32 randval;
 			if ( bUseRandomTable )
-				randval = AudioManager.GetRandomNumber(1);
+				randval = AudioManager.m_anRandomTable[1];
 			else
 				randval = localtm->tm_sec * localtm->tm_min;
 			
@@ -1256,7 +1256,7 @@ cSampleManager::Initialise(void)
 				randmp3 = randmp3->pNext;
 			
 			if ( bUseRandomTable )
-				_CurMP3Pos = AudioManager.GetRandomNumber(0)     % randmp3->nTrackLength;
+				_CurMP3Pos = AudioManager.m_anRandomTable[0]     % randmp3->nTrackLength;
 			else
 			{
 				if ( localtm->tm_sec > 0 )
@@ -1265,7 +1265,7 @@ cSampleManager::Initialise(void)
 					_CurMP3Pos = s*s*s*s*s*s*s*s                 % randmp3->nTrackLength;
 				}
 				else
-					_CurMP3Pos = AudioManager.GetRandomNumber(0) % randmp3->nTrackLength;
+					_CurMP3Pos = AudioManager.m_anRandomTable[0] % randmp3->nTrackLength;
 			}
 		}
 		else
@@ -1345,7 +1345,7 @@ cSampleManager::CheckForAnAudioFileOnCD(void)
 	strcpy(filepath, m_szCDRomRootPath);
 #endif // #if GTA_VERSION >= GTA3_PC_11
 
-	strcat(filepath, PS2StreamedNameTable[AudioManager.GetRandomNumber(1) % TOTAL_STREAMED_SOUNDS]);
+	strcat(filepath, PS2StreamedNameTable[AudioManager.m_anRandomTable[1] % TOTAL_STREAMED_SOUNDS]);
 
 	f = fopen(filepath, "rb");
 	if ( !f )
@@ -1360,7 +1360,7 @@ cSampleManager::CheckForAnAudioFileOnCD(void)
 		strcpy(filepath, m_szCDRomRootPath);
 #endif // #if GTA_VERSION >= GTA3_PC_11
 
-		strcat(filepath, StreamedNameTable[AudioManager.GetRandomNumber(1) % TOTAL_STREAMED_SOUNDS]);
+		strcat(filepath, StreamedNameTable[AudioManager.m_anRandomTable[1] % TOTAL_STREAMED_SOUNDS]);
 	
 		f = fopen(filepath, "rb");
 	}
@@ -1631,12 +1631,12 @@ cSampleManager::UpdateReverb(void)
 	if ( !usingEAX )
 		return FALSE;
 	
-	if ( AudioManager.GetFrameCounter() & 15 )
+	if ( AudioManager.m_FrameCounter & 15 )
 		return FALSE;
 			
-	float y = AudioManager.GetReflectionsDistance(REFLECTION_TOP)  + AudioManager.GetReflectionsDistance(REFLECTION_BOTTOM);
-	float x = AudioManager.GetReflectionsDistance(REFLECTION_LEFT) + AudioManager.GetReflectionsDistance(REFLECTION_RIGHT);
-	float z = AudioManager.GetReflectionsDistance(REFLECTION_UP);
+	float y = AudioManager.m_afReflectionsDistances[REFLECTION_TOP]  + AudioManager.m_afReflectionsDistances[REFLECTION_BOTTOM];
+	float x = AudioManager.m_afReflectionsDistances[REFLECTION_LEFT] + AudioManager.m_afReflectionsDistances[REFLECTION_RIGHT];
+	float z = AudioManager.m_afReflectionsDistances[REFLECTION_UP];
 	
 	float normy = norm(y, 5.0f, 40.0f);
 	float normx = norm(x, 5.0f, 40.0f);

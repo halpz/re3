@@ -25,7 +25,7 @@ tPoliceRadioZone ZoneSfx[NUMAUDIOZONES];
 char SubZo2Label[8];
 char SubZo3Label[8];
 
-int32 g_nMissionAudioSfx = TOTAL_AUDIO_SAMPLES;
+uint32 g_nMissionAudioSfx = TOTAL_AUDIO_SAMPLES;
 int8 g_nMissionAudioPlayingStatus = 2;
 uint8 gSpecialSuspectLastSeenReport;
 uint32 gMinTimeToNextReport[NUM_CRIME_TYPES];
@@ -106,7 +106,7 @@ cAudioManager::ResetPoliceRadio()
 }
 
 void
-cAudioManager::SetMissionScriptPoliceAudio(int32 sfx) const
+cAudioManager::SetMissionScriptPoliceAudio(uint32 sfx)
 {
 	if (!m_bIsInitialised) return;
 	if (g_nMissionAudioPlayingStatus != 1) {
@@ -116,7 +116,7 @@ cAudioManager::SetMissionScriptPoliceAudio(int32 sfx) const
 }
 
 int8
-cAudioManager::GetMissionScriptPoliceAudioPlayingStatus() const
+cAudioManager::GetMissionScriptPoliceAudioPlayingStatus()
 {
 	return g_nMissionAudioPlayingStatus;
 }
@@ -676,8 +676,6 @@ cAudioManager::SetupSuspectLastSeenReport()
 		}
 	}
 }
-
-
 
 void
 cAudioManager::ReportCrime(eCrimeType type, const CVector &pos)

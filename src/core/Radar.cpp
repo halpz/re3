@@ -485,7 +485,11 @@ void CRadar::Draw3dMarkers()
 
 void CRadar::DrawBlips()
 {
-	if (!TheCamera.m_WideScreenOn && CHud::m_Wants_To_Draw_Hud) {
+	if ((!TheCamera.m_WideScreenOn && CHud::m_Wants_To_Draw_Hud)
+#ifdef MENU_MAP
+		|| CMenuManager::bMenuMapActive
+#endif
+		) {
 		RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
 		RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
 		RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
@@ -1216,7 +1220,11 @@ void CRadar::ShowRadarMarker(CVector pos, uint32 color, float radius) {
 
 void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha)
 {
-	if (!CHud::m_Wants_To_Draw_Hud || TheCamera.m_WideScreenOn)
+	if ((TheCamera.m_WideScreenOn || !CHud::m_Wants_To_Draw_Hud)
+#ifdef MENU_MAP
+	   && !CMenuManager::bMenuMapActive
+#endif
+	)
 		return;
 
 	CSprite2d::DrawRect(CRect(x - SCREEN_SCALE_X(size + 1.0f), y - SCREEN_SCALE_Y(size + 1.0f), SCREEN_SCALE_X(size + 1.0f) + x, SCREEN_SCALE_Y(size + 1.0f) + y), CRGBA(0, 0, 0, alpha));
@@ -1225,7 +1233,11 @@ void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 gree
 
 void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint8 mode)
 {
-	if (!CHud::m_Wants_To_Draw_Hud || TheCamera.m_WideScreenOn)
+	if ((TheCamera.m_WideScreenOn || !CHud::m_Wants_To_Draw_Hud)
+#ifdef MENU_MAP
+		&& !CMenuManager::bMenuMapActive
+#endif
+	)
 		return;
 
 	switch (mode)

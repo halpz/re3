@@ -10,20 +10,39 @@
 
 const int CollisionSoundIntensity = 60;
 
-cAudioCollisionManager::cAudioCollisionManager()
+void
+cAudioManager::ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface1, uint8 surface2, float collisionPower,
+                               float velocity)
 {
-	m_sQueue.m_pEntity1 = nil;
-	m_sQueue.m_pEntity2 = nil;
-	m_sQueue.m_bSurface1 = SURFACE_DEFAULT;
-	m_sQueue.m_bSurface2 = SURFACE_DEFAULT;
-	m_sQueue.m_fIntensity2 = 0.0f;
-	m_sQueue.m_fIntensity1 = 0.0f;
-	m_sQueue.m_vecPosition = CVector(0.0f, 0.0f, 0.0f);
+	float distSquared;
+	CVector v1;
+	CVector v2;
 
-	for (int i = 0; i < NUMAUDIOCOLLISIONS; i++)
-		m_bIndicesTable[i] = NUMAUDIOCOLLISIONS;
+	if(!m_bIsInitialised || m_nCollisionEntity < 0 || m_nUserPause ||
+	   (velocity < 0.0016f && collisionPower < 0.01f))
+		return;
 
-	m_bCollisionsInQueue = 0;
+	if(entity1->IsBuilding()) {
+		v1 = v2 = entity2->GetPosition();
+	} else if(entity2->IsBuilding()) {
+		v1 = v2 = entity1->GetPosition();
+	} else {
+		v1 = entity1->GetPosition();
+		v2 = entity2->GetPosition();
+	}
+	CVector pos = (v1 + v2) * 0.5f;
+	distSquared = GetDistanceSquared(pos);
+	if(distSquared < SQR(CollisionSoundIntensity)) {
+		m_sCollisionManager.m_sQueue.m_pEntity1 = entity1;
+		m_sCollisionManager.m_sQueue.m_pEntity2 = entity2;
+		m_sCollisionManager.m_sQueue.m_bSurface1 = surface1;
+		m_sCollisionManager.m_sQueue.m_bSurface2 = surface2;
+		m_sCollisionManager.m_sQueue.m_fIntensity1 = collisionPower;
+		m_sCollisionManager.m_sQueue.m_fIntensity2 = velocity;
+		m_sCollisionManager.m_sQueue.m_vecPosition = pos;
+		m_sCollisionManager.m_sQueue.m_fDistance = distSquared;
+		m_sCollisionManager.AddCollisionToRequestedQueue();
+	}
 }
 
 void
@@ -55,133 +74,71 @@ cAudioCollisionManager::AddCollisionToRequestedQueue()
 	m_bIndicesTable[i] = collisionsIndex;
 }
 
-float
-cAudioManager::GetCollisionLoopingRatio(uint32 a, uint32 b, float c) const
-{
-	return GetCollisionRatio(c, 0.0f, 0.02f, 0.02f);
-}
-
-float
-cAudioManager::GetCollisionOneShotRatio(int32 a, float b) const
-{
-	float result;
-
-	switch(a) {
-	case SURFACE_DEFAULT:
-	case SURFACE_TARMAC:
-	case SURFACE_PAVEMENT:
-	case SURFACE_STEEP_CLIFF:
-	case SURFACE_TRANSPARENT_STONE: result = GetCollisionRatio(b, 10.f, 60.f, 50.f); break;
-	case SURFACE_GRASS:
-	case SURFACE_CARDBOARDBOX: result = GetCollisionRatio(b, 0.f, 2.f, 2.f); break;
-	case SURFACE_GRAVEL: result = GetCollisionRatio(b, 0.f, 2.f, 2.f); break;
-	case SURFACE_MUD_DRY: result = GetCollisionRatio(b, 0.f, 2.f, 2.f); break;
-	case SURFACE_CAR: result = GetCollisionRatio(b, 6.f, 50.f, 44.f); break;
-	case SURFACE_GLASS: result = GetCollisionRatio(b, 0.1f, 10.f, 9.9f); break;
-	case SURFACE_TRANSPARENT_CLOTH:
-	case SURFACE_THICK_METAL_PLATE: result = GetCollisionRatio(b, 30.f, 130.f, 100.f); break;
-	case SURFACE_GARAGE_DOOR: result = GetCollisionRatio(b, 20.f, 100.f, 80.f); break;
-	case SURFACE_CAR_PANEL: result = GetCollisionRatio(b, 0.f, 4.f, 4.f); break;
-	case SURFACE_SCAFFOLD_POLE:
-	case SURFACE_METAL_GATE: result = GetCollisionRatio(b, 1.f, 10.f, 9.f); break;
-	case SURFACE_LAMP_POST: result = GetCollisionRatio(b, 1.f, 10.f, 9.f); break;
-	case SURFACE_FIRE_HYDRANT: result = GetCollisionRatio(b, 1.f, 15.f, 14.f); break;
-	case SURFACE_GIRDER: result = GetCollisionRatio(b, 8.f, 50.f, 42.f); break;
-	case SURFACE_METAL_CHAIN_FENCE: result = GetCollisionRatio(b, 0.1f, 10.f, 9.9f); break;
-	case SURFACE_PED: result = GetCollisionRatio(b, 0.f, 20.f, 20.f); break;
-	case SURFACE_SAND: result = GetCollisionRatio(b, 0.f, 10.f, 10.f); break;
-	case SURFACE_WATER: result = GetCollisionRatio(b, 0.f, 10.f, 10.f); break;
-	case SURFACE_WOOD_CRATES: result = GetCollisionRatio(b, 1.f, 4.f, 3.f); break;
-	case SURFACE_WOOD_BENCH: result = GetCollisionRatio(b, 0.1f, 5.f, 4.9f); break;
-	case SURFACE_WOOD_SOLID: result = GetCollisionRatio(b, 0.1f, 40.f, 39.9f); break;
-	case SURFACE_RUBBER:
-	case SURFACE_WHEELBASE: result = GetCollisionRatio(b, 0.f, 10.f, 10.f); break;
-	case SURFACE_PLASTIC: result = GetCollisionRatio(b, 0.1f, 4.f, 3.9f); break;
-	case SURFACE_HEDGE: result = GetCollisionRatio(b, 0.f, 0.5f, 0.5f); break;
-	case SURFACE_CONTAINER: result = GetCollisionRatio(b, 4.f, 40.f, 36.f); break;
-	case SURFACE_NEWS_VENDOR: result = GetCollisionRatio(b, 0.f, 5.f, 5.f); break;
-	default: result = 0.f; break;
-	}
-
-	return result;
-}
-
-float
-cAudioManager::GetCollisionRatio(float a, float b, float c, float d) const
-{
-	float e;
-	e = a;
-	if(a <= b) return 0.0f;
-	if(c <= a) e = c;
-	return (e - b) / d;
-}
-
-uint32
-cAudioManager::SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollision &audioCollision)
-{
-	uint8 surface1 = audioCollision.m_bSurface1;
-	uint8 surface2 = audioCollision.m_bSurface2;
-	int32 vol;
-	float ratio;
-
-	if(surface1 == SURFACE_GRASS || surface2 == SURFACE_GRASS || surface1 == SURFACE_HEDGE ||
-	   surface2 == SURFACE_HEDGE) {
-		ratio = GetCollisionRatio(audioCollision.m_fIntensity2, 0.0001f, 0.09f, 0.0899f);
-		m_sQueueSample.m_nSampleIndex = SFX_RAIN;
-		m_sQueueSample.m_nFrequency = 13000.f * ratio + 35000;
-		vol = 50.f * ratio;
-	} else if(surface1 == SURFACE_WATER || surface2 == SURFACE_WATER) {
-		ratio = GetCollisionRatio(audioCollision.m_fIntensity2, 0.0001f, 0.09f, 0.0899f);
-		m_sQueueSample.m_nSampleIndex = SFX_BOAT_WATER_LOOP;
-		m_sQueueSample.m_nFrequency = 6050.f * ratio + 16000;
-		vol = 30.f * ratio;
-	} else if(surface1 == SURFACE_GRAVEL || surface2 == SURFACE_GRAVEL || surface1 == SURFACE_MUD_DRY ||
-		surface2 == SURFACE_MUD_DRY || surface1 == SURFACE_SAND || surface2 == SURFACE_SAND) {
-		ratio = GetCollisionRatio(audioCollision.m_fIntensity2, 0.0001f, 0.09f, 0.0899f);
-		m_sQueueSample.m_nSampleIndex = SFX_GRAVEL_SKID;
-		m_sQueueSample.m_nFrequency = 6000.f * ratio + 10000;
-		vol = 50.f * ratio;
-	} else if(surface1 == SURFACE_PED || surface2 == SURFACE_PED) {
-		return 0;
-	} else {
-		ratio = GetCollisionRatio(audioCollision.m_fIntensity2, 0.0001f, 0.09f, 0.0899f);
-		m_sQueueSample.m_nSampleIndex = SFX_SCRAPE_CAR_1;
-		m_sQueueSample.m_nFrequency = 10000.f * ratio + 10000;
-		vol = 40.f * ratio;
-	}
-	if(audioCollision.m_nBaseVolume < 2) vol = audioCollision.m_nBaseVolume * vol / 2;
-	return vol;
-}
-
 void
-cAudioManager::SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 counter)
+cAudioManager::ServiceCollisions()
 {
-	if(col.m_fIntensity2 > 0.0016f) {
-		uint8 emittingVol = SetLoopingCollisionRequestedSfxFreqAndGetVol(col);
-		if(emittingVol) {
-			m_sQueueSample.m_fDistance = Sqrt(col.m_fDistance);
-			m_sQueueSample.m_nVolume =
-			    ComputeVolume(emittingVol, CollisionSoundIntensity, m_sQueueSample.m_fDistance);
-			if(m_sQueueSample.m_nVolume) {
-				m_sQueueSample.m_nCounter = counter;
-				m_sQueueSample.m_vecPos = col.m_vecPosition;
-				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-				m_sQueueSample.m_bIs2D = FALSE;
-				m_sQueueSample.m_nReleasingVolumeModificator = 7;
-				m_sQueueSample.m_nLoopCount = 0;
-				m_sQueueSample.m_nEmittingVolume = emittingVol;
-				SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex);
-				m_sQueueSample.m_fSpeedMultiplier = 4.0f;
-				m_sQueueSample.m_fSoundIntensity = CollisionSoundIntensity;
-				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
-				m_sQueueSample.m_nReleasingVolumeDivider = 5;
-				m_sQueueSample.m_bReverbFlag = TRUE;
-				m_sQueueSample.m_bRequireReflection = FALSE;
-				AddSampleToRequestedQueue();
+	int i, j;
+	bool8 abRepeatedCollision1[NUMAUDIOCOLLISIONS];
+	bool8 abRepeatedCollision2[NUMAUDIOCOLLISIONS];
+
+	m_sQueueSample.m_nEntityIndex = m_nCollisionEntity;
+
+	for (int i = 0; i < NUMAUDIOCOLLISIONS; i++)
+		abRepeatedCollision1[i] = abRepeatedCollision2[i] = FALSE;
+
+	for (i = 0; i < m_sCollisionManager.m_bCollisionsInQueue; i++) {
+		for (j = 0; j < NUMAUDIOCOLLISIONS; j++) {
+			int index = m_sCollisionManager.m_bIndicesTable[i];
+			if ((m_sCollisionManager.m_asCollisions1[index].m_pEntity1 == m_sCollisionManager.m_asCollisions2[j].m_pEntity1)
+				&& (m_sCollisionManager.m_asCollisions1[index].m_pEntity2 == m_sCollisionManager.m_asCollisions2[j].m_pEntity2)
+				&& (m_sCollisionManager.m_asCollisions1[index].m_bSurface1 == m_sCollisionManager.m_asCollisions2[j].m_bSurface1)
+				&& (m_sCollisionManager.m_asCollisions1[index].m_bSurface2 == m_sCollisionManager.m_asCollisions2[j].m_bSurface2)
+				) {
+				abRepeatedCollision1[index] = TRUE;
+				abRepeatedCollision2[j] = TRUE;
+				m_sCollisionManager.m_asCollisions1[index].m_nBaseVolume = ++m_sCollisionManager.m_asCollisions2[j].m_nBaseVolume;
+				SetUpLoopingCollisionSound(m_sCollisionManager.m_asCollisions1[index], j);
+				break;
 			}
 		}
 	}
+
+	for (i = 0; i < NUMAUDIOCOLLISIONS; i++) {
+		if (!abRepeatedCollision2[i]) {
+			m_sCollisionManager.m_asCollisions2[i].m_pEntity1 = nil;
+			m_sCollisionManager.m_asCollisions2[i].m_pEntity2 = nil;
+			m_sCollisionManager.m_asCollisions2[i].m_bSurface1 = SURFACE_DEFAULT;
+			m_sCollisionManager.m_asCollisions2[i].m_bSurface2 = SURFACE_DEFAULT;
+			m_sCollisionManager.m_asCollisions2[i].m_fIntensity2 = 0.0f;
+			m_sCollisionManager.m_asCollisions2[i].m_fIntensity1 = 0.0f;
+			m_sCollisionManager.m_asCollisions2[i].m_vecPosition = CVector(0.0f, 0.0f, 0.0f);
+			m_sCollisionManager.m_asCollisions2[i].m_fDistance = 0.0f;
+		}
+	}
+
+	for (i = 0; i < m_sCollisionManager.m_bCollisionsInQueue; i++) {
+		int index = m_sCollisionManager.m_bIndicesTable[i];
+		if (!abRepeatedCollision1[index]) {
+			for (j = 0; j < NUMAUDIOCOLLISIONS; j++) {
+				if (!abRepeatedCollision2[j]) {
+					m_sCollisionManager.m_asCollisions2[j].m_nBaseVolume = 1;
+					m_sCollisionManager.m_asCollisions2[j].m_pEntity1 = m_sCollisionManager.m_asCollisions1[index].m_pEntity1;
+					m_sCollisionManager.m_asCollisions2[j].m_pEntity2 = m_sCollisionManager.m_asCollisions1[index].m_pEntity2;
+					m_sCollisionManager.m_asCollisions2[j].m_bSurface1 = m_sCollisionManager.m_asCollisions1[index].m_bSurface1;
+					m_sCollisionManager.m_asCollisions2[j].m_bSurface2 = m_sCollisionManager.m_asCollisions1[index].m_bSurface2;
+					break;
+				}
+			}
+			SetUpOneShotCollisionSound(m_sCollisionManager.m_asCollisions1[index]);
+			SetUpLoopingCollisionSound(m_sCollisionManager.m_asCollisions1[index], j);
+		}
+	}
+
+	for (int i = 0; i < NUMAUDIOCOLLISIONS; i++)
+		m_sCollisionManager.m_bIndicesTable[i] = NUMAUDIOCOLLISIONS;
+	m_sCollisionManager.m_bCollisionsInQueue = 0;
 }
+
 static const int32 gOneShotCol[] = {SFX_COL_TARMAC_1,
                                     SFX_COL_TARMAC_1,
                                     SFX_COL_GRASS_1,
@@ -219,9 +176,8 @@ static const int32 gOneShotCol[] = {SFX_COL_TARMAC_1,
 void
 cAudioManager::SetUpOneShotCollisionSound(const cAudioCollision &col)
 {
-
-	int16 s1;
-	int16 s2;
+	uint16 s1;
+	uint16 s2;
 
 	int32 emittingVol;
 	float ratio;
@@ -321,101 +277,127 @@ cAudioManager::SetUpOneShotCollisionSound(const cAudioCollision &col)
 }
 
 void
-cAudioManager::ServiceCollisions()
+cAudioManager::SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 counter)
 {
-	int i, j;
-	bool8 abRepeatedCollision1[NUMAUDIOCOLLISIONS];
-	bool8 abRepeatedCollision2[NUMAUDIOCOLLISIONS];
-
-	m_sQueueSample.m_nEntityIndex = m_nCollisionEntity;
-
-	for (int i = 0; i < NUMAUDIOCOLLISIONS; i++)
-		abRepeatedCollision1[i] = abRepeatedCollision2[i] = FALSE;
-
-	for (i = 0; i < m_sCollisionManager.m_bCollisionsInQueue; i++) {
-		for (j = 0; j < NUMAUDIOCOLLISIONS; j++) {
-			int index = m_sCollisionManager.m_bIndicesTable[i];
-			if ((m_sCollisionManager.m_asCollisions1[index].m_pEntity1 == m_sCollisionManager.m_asCollisions2[j].m_pEntity1)
-				&& (m_sCollisionManager.m_asCollisions1[index].m_pEntity2 == m_sCollisionManager.m_asCollisions2[j].m_pEntity2)
-				&& (m_sCollisionManager.m_asCollisions1[index].m_bSurface1 == m_sCollisionManager.m_asCollisions2[j].m_bSurface1)
-				&& (m_sCollisionManager.m_asCollisions1[index].m_bSurface2 == m_sCollisionManager.m_asCollisions2[j].m_bSurface2)
-				) {
-				abRepeatedCollision1[index] = TRUE;
-				abRepeatedCollision2[j] = TRUE;
-				m_sCollisionManager.m_asCollisions1[index].m_nBaseVolume = ++m_sCollisionManager.m_asCollisions2[j].m_nBaseVolume;
-				SetUpLoopingCollisionSound(m_sCollisionManager.m_asCollisions1[index], j);
-				break;
+	if(col.m_fIntensity2 > 0.0016f) {
+		uint8 emittingVol = SetLoopingCollisionRequestedSfxFreqAndGetVol(col);
+		if(emittingVol) {
+			m_sQueueSample.m_fDistance = Sqrt(col.m_fDistance);
+			m_sQueueSample.m_nVolume =
+			    ComputeVolume(emittingVol, CollisionSoundIntensity, m_sQueueSample.m_fDistance);
+			if(m_sQueueSample.m_nVolume) {
+				m_sQueueSample.m_nCounter = counter;
+				m_sQueueSample.m_vecPos = col.m_vecPosition;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_bIs2D = FALSE;
+				m_sQueueSample.m_nReleasingVolumeModificator = 7;
+				m_sQueueSample.m_nLoopCount = 0;
+				m_sQueueSample.m_nEmittingVolume = emittingVol;
+				SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex);
+				m_sQueueSample.m_fSpeedMultiplier = 4.0f;
+				m_sQueueSample.m_fSoundIntensity = CollisionSoundIntensity;
+				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
+				m_sQueueSample.m_nReleasingVolumeDivider = 5;
+				m_sQueueSample.m_bReverbFlag = TRUE;
+				m_sQueueSample.m_bRequireReflection = FALSE;
+				AddSampleToRequestedQueue();
 			}
 		}
 	}
-
-	for (i = 0; i < NUMAUDIOCOLLISIONS; i++) {
-		if (!abRepeatedCollision2[i]) {
-			m_sCollisionManager.m_asCollisions2[i].m_pEntity1 = nil;
-			m_sCollisionManager.m_asCollisions2[i].m_pEntity2 = nil;
-			m_sCollisionManager.m_asCollisions2[i].m_bSurface1 = SURFACE_DEFAULT;
-			m_sCollisionManager.m_asCollisions2[i].m_bSurface2 = SURFACE_DEFAULT;
-			m_sCollisionManager.m_asCollisions2[i].m_fIntensity2 = 0.0f;
-			m_sCollisionManager.m_asCollisions2[i].m_fIntensity1 = 0.0f;
-			m_sCollisionManager.m_asCollisions2[i].m_vecPosition = CVector(0.0f, 0.0f, 0.0f);
-			m_sCollisionManager.m_asCollisions2[i].m_fDistance = 0.0f;
-		}
-	}
-
-	for (i = 0; i < m_sCollisionManager.m_bCollisionsInQueue; i++) {
-		int index = m_sCollisionManager.m_bIndicesTable[i];
-		if (!abRepeatedCollision1[index]) {
-			for (j = 0; j < NUMAUDIOCOLLISIONS; j++) {
-				if (!abRepeatedCollision2[j]) {
-					m_sCollisionManager.m_asCollisions2[j].m_nBaseVolume = 1;
-					m_sCollisionManager.m_asCollisions2[j].m_pEntity1 = m_sCollisionManager.m_asCollisions1[index].m_pEntity1;
-					m_sCollisionManager.m_asCollisions2[j].m_pEntity2 = m_sCollisionManager.m_asCollisions1[index].m_pEntity2;
-					m_sCollisionManager.m_asCollisions2[j].m_bSurface1 = m_sCollisionManager.m_asCollisions1[index].m_bSurface1;
-					m_sCollisionManager.m_asCollisions2[j].m_bSurface2 = m_sCollisionManager.m_asCollisions1[index].m_bSurface2;
-					break;
-				}
-			}
-			SetUpOneShotCollisionSound(m_sCollisionManager.m_asCollisions1[index]);
-			SetUpLoopingCollisionSound(m_sCollisionManager.m_asCollisions1[index], j);
-		}
-	}
-
-	for (int i = 0; i < NUMAUDIOCOLLISIONS; i++)
-		m_sCollisionManager.m_bIndicesTable[i] = NUMAUDIOCOLLISIONS;
-	m_sCollisionManager.m_bCollisionsInQueue = 0;
 }
 
-void
-cAudioManager::ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface1, uint8 surface2, float collisionPower,
-                               float velocity)
+uint32
+cAudioManager::SetLoopingCollisionRequestedSfxFreqAndGetVol(const cAudioCollision &audioCollision)
 {
-	float distSquared;
-	CVector v1;
-	CVector v2;
+	uint8 surface1 = audioCollision.m_bSurface1;
+	uint8 surface2 = audioCollision.m_bSurface2;
+	int32 vol;
+	float ratio;
 
-	if(!m_bIsInitialised || m_nCollisionEntity < 0 || m_nUserPause ||
-	   (velocity < 0.0016f && collisionPower < 0.01f))
-		return;
-
-	if(entity1->IsBuilding()) {
-		v1 = v2 = entity2->GetPosition();
-	} else if(entity2->IsBuilding()) {
-		v1 = v2 = entity1->GetPosition();
+	if(surface1 == SURFACE_GRASS || surface2 == SURFACE_GRASS || surface1 == SURFACE_HEDGE ||
+	   surface2 == SURFACE_HEDGE) {
+		ratio = GetCollisionRatio(audioCollision.m_fIntensity2, 0.0001f, 0.09f, 0.0899f);
+		m_sQueueSample.m_nSampleIndex = SFX_RAIN;
+		m_sQueueSample.m_nFrequency = 13000.f * ratio + 35000;
+		vol = 50.f * ratio;
+	} else if(surface1 == SURFACE_WATER || surface2 == SURFACE_WATER) {
+		ratio = GetCollisionRatio(audioCollision.m_fIntensity2, 0.0001f, 0.09f, 0.0899f);
+		m_sQueueSample.m_nSampleIndex = SFX_BOAT_WATER_LOOP;
+		m_sQueueSample.m_nFrequency = 6050.f * ratio + 16000;
+		vol = 30.f * ratio;
+	} else if(surface1 == SURFACE_GRAVEL || surface2 == SURFACE_GRAVEL || surface1 == SURFACE_MUD_DRY ||
+		surface2 == SURFACE_MUD_DRY || surface1 == SURFACE_SAND || surface2 == SURFACE_SAND) {
+		ratio = GetCollisionRatio(audioCollision.m_fIntensity2, 0.0001f, 0.09f, 0.0899f);
+		m_sQueueSample.m_nSampleIndex = SFX_GRAVEL_SKID;
+		m_sQueueSample.m_nFrequency = 6000.f * ratio + 10000;
+		vol = 50.f * ratio;
+	} else if(surface1 == SURFACE_PED || surface2 == SURFACE_PED) {
+		return 0;
 	} else {
-		v1 = entity1->GetPosition();
-		v2 = entity2->GetPosition();
+		ratio = GetCollisionRatio(audioCollision.m_fIntensity2, 0.0001f, 0.09f, 0.0899f);
+		m_sQueueSample.m_nSampleIndex = SFX_SCRAPE_CAR_1;
+		m_sQueueSample.m_nFrequency = 10000.f * ratio + 10000;
+		vol = 40.f * ratio;
 	}
-	CVector pos = (v1 + v2) * 0.5f;
-	distSquared = GetDistanceSquared(pos);
-	if(distSquared < SQR(CollisionSoundIntensity)) {
-		m_sCollisionManager.m_sQueue.m_pEntity1 = entity1;
-		m_sCollisionManager.m_sQueue.m_pEntity2 = entity2;
-		m_sCollisionManager.m_sQueue.m_bSurface1 = surface1;
-		m_sCollisionManager.m_sQueue.m_bSurface2 = surface2;
-		m_sCollisionManager.m_sQueue.m_fIntensity1 = collisionPower;
-		m_sCollisionManager.m_sQueue.m_fIntensity2 = velocity;
-		m_sCollisionManager.m_sQueue.m_vecPosition = pos;
-		m_sCollisionManager.m_sQueue.m_fDistance = distSquared;
-		m_sCollisionManager.AddCollisionToRequestedQueue();
+	if(audioCollision.m_nBaseVolume < 2) vol = audioCollision.m_nBaseVolume * vol / 2;
+	return vol;
+}
+
+float
+cAudioManager::GetCollisionOneShotRatio(uint32 a, float b)
+{
+	switch(a) {
+	case SURFACE_DEFAULT:
+	case SURFACE_TARMAC:
+	case SURFACE_PAVEMENT:
+	case SURFACE_STEEP_CLIFF:
+	case SURFACE_TRANSPARENT_STONE: return GetCollisionRatio(b, 10.f, 60.f, 50.f);
+	case SURFACE_GRASS:
+	case SURFACE_CARDBOARDBOX:
+	case SURFACE_GRAVEL:
+	case SURFACE_MUD_DRY: return GetCollisionRatio(b, 0.f, 2.f, 2.f);
+	case SURFACE_CAR: return GetCollisionRatio(b, 6.f, 50.f, 44.f);
+	case SURFACE_GLASS:
+	case SURFACE_METAL_CHAIN_FENCE: return GetCollisionRatio(b, 0.1f, 10.f, 9.9f);
+	case SURFACE_TRANSPARENT_CLOTH:
+	case SURFACE_THICK_METAL_PLATE: return GetCollisionRatio(b, 30.f, 130.f, 100.f);
+	case SURFACE_GARAGE_DOOR: return GetCollisionRatio(b, 20.f, 100.f, 80.f);
+	case SURFACE_CAR_PANEL: return GetCollisionRatio(b, 0.f, 4.f, 4.f);
+	case SURFACE_SCAFFOLD_POLE:
+	case SURFACE_METAL_GATE:
+	case SURFACE_LAMP_POST: return GetCollisionRatio(b, 1.f, 10.f, 9.f);
+	case SURFACE_FIRE_HYDRANT: return GetCollisionRatio(b, 1.f, 15.f, 14.f);
+	case SURFACE_GIRDER: return GetCollisionRatio(b, 8.f, 50.f, 42.f);
+	case SURFACE_PED: return GetCollisionRatio(b, 0.f, 20.f, 20.f);
+	case SURFACE_SAND:
+	case SURFACE_WATER:
+	case SURFACE_RUBBER:
+	case SURFACE_WHEELBASE: return GetCollisionRatio(b, 0.f, 10.f, 10.f);
+	case SURFACE_WOOD_CRATES: return GetCollisionRatio(b, 1.f, 4.f, 3.f);
+	case SURFACE_WOOD_BENCH: return GetCollisionRatio(b, 0.1f, 5.f, 4.9f);
+	case SURFACE_WOOD_SOLID: return GetCollisionRatio(b, 0.1f, 40.f, 39.9f);
+	case SURFACE_PLASTIC: return GetCollisionRatio(b, 0.1f, 4.f, 3.9f);
+	case SURFACE_HEDGE: return GetCollisionRatio(b, 0.f, 0.5f, 0.5f);
+	case SURFACE_CONTAINER: return GetCollisionRatio(b, 4.f, 40.f, 36.f);
+	case SURFACE_NEWS_VENDOR: return GetCollisionRatio(b, 0.f, 5.f, 5.f);
+	default: break;
 	}
+
+	return 0.f;
+}
+
+float
+cAudioManager::GetCollisionLoopingRatio(uint32 a, uint32 b, float c)
+{
+	return GetCollisionRatio(c, 0.0f, 0.02f, 0.02f);
+}
+
+float
+cAudioManager::GetCollisionRatio(float a, float b, float c, float d)
+{
+	float e;
+	e = a;
+	if(a <= b) return 0.0f;
+	if(c <= a) e = c;
+	return (e - b) / d;
 }
