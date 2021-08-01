@@ -444,6 +444,13 @@ public:
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 	int CollectParameterForDebug(char* buf, bool& var);
 	void GetStoredParameterForDebug(char* buf);
+	void LogOnStartProcessing();
+	void LogBeforeProcessingCommand(int32 command);
+	void LogAfterProcessingCommand(int32 command);
+
+	static char commandInfo[];
+	static uint32 storedIp;
+
 #endif
 
 	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
@@ -661,6 +668,12 @@ public:
 #endif
 	static bool IsFortStauntonDestroyed() { return FSDestroyedFlag && *(int32*)&ScriptSpace[FSDestroyedFlag] == 1; }
 
+
+#ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+	static void LogAfterScriptInitializing();
+	static void LogBeforeScriptProcessing();
+	static void LogAfterScriptProcessing();
+#endif
 };
 
 extern int ScriptParams[32];
