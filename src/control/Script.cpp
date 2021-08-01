@@ -116,7 +116,97 @@ static const char* nonMissionScripts[] = {
 	"rc4",
 	"hj",
 	"usj",
-	"mayhem"
+	"mayhem",
+	"range",
+	"race",
+	"pizza",
+	"rcheli",
+	"rcplne1",
+	"rcrace1",
+	"cokerun",
+	"buypro1",
+	"carbuy1",
+	"buypro2",
+	"icecut",
+	"icecre1",
+	"buypro3",
+	"buypro4",
+	"buypro5",
+	"buypro6",
+	"buypro7",
+	"buypro8",
+	"buypro9",
+	"buypro10",
+	"buypro11",
+	"ovalrng",
+	"mm",
+	"kickst",
+	"heli1sc",
+	"heli2sc",
+	"heli3sc",
+	"heli4sc",
+	"carpark_1",
+	"bmx_1",
+	"bmx_2"
+};
+
+static const char* MissionScripts[] = {
+	"LAWYER1",
+	"LAWYER2",
+	"LAWYER3",
+	"LAWYER4",
+	"GENERL1",
+	"COL2",
+	"GENERL3",
+	"COL_4",
+	"COL_5",
+	"baron1",
+	"baron2",
+	"baron3",
+	"baron4",
+	"kent1",
+	"baron5",
+	"serg1",
+	"serg2",
+	"serg3",
+	"bankjo1",
+	"bankjo2",
+	"bankjo3",
+	"bankjo4",
+	"phil1",
+	"phil2",
+	"porno1",
+	"porno2",
+	"porno3",
+	"porno4",
+	"protec1",
+	"protec2",
+	"protec3",
+	"count1",
+	"count2",
+	"CAP_1",
+	"FIN_1",
+	"bike1",
+	"bike2",
+	"bike3",
+	"rockb1",
+	"rockb2",
+	"rockb3",
+	"cuban1",
+	"cuban2",
+	"cuban3",
+	"cuban4",
+	"hait1",
+	"hait2",
+	"hait3",
+	"assin1",
+	"assin2",
+	"assin3",
+	"assin4",
+	"assin5",
+	"taxwar1",
+	"taxwar2",
+	"taxwar3"
 };
 
 int AllowMissionReplay;
@@ -131,6 +221,11 @@ bool doingMissionRetry;
 bool gbTryingPorn4Again;
 int IsInAmmunation;
 int MissionSkipLevel;
+
+#ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
+bool UsingMobileScript;
+bool AlreadySavedGame;
+#endif
 
 #endif
 
@@ -2313,6 +2408,10 @@ void CTheScripts::Init()
 	PrintToLog(init_msg);
 	CFileMgr::SetDir("");
 #endif
+#ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
+	UsingMobileScript = false;
+	AlreadySavedGame = false;
+#endif
 }
 
 void CTheScripts::RemoveScriptTextureDictionary()
@@ -2383,6 +2482,7 @@ void CTheScripts::Process()
 
 #ifdef MISSION_REPLAY
 	static uint32 TimeToWaitTill;
+	static bool AlreadyResetHealth;
 	switch (AllowMissionReplay) {
 	case 2:
 		AllowMissionReplay = 3;
@@ -2398,9 +2498,19 @@ void CTheScripts::Process()
 		break;
 	case 6:
 		AllowMissionReplay = 7;
+		AlreadyResetHealth = false;
 		TimeToWaitTill = CTimer::GetTimeInMilliseconds() + 500;
 		break;
 	case 7:
+		if (!AlreadyResetHealth) {
+			AlreadyResetHealth = true;
+			CPlayerPed* pPlayerPed = FindPlayerPed();
+			if (pPlayerPed) {
+				CPlayerInfo* pPlayerInfo = pPlayerPed->GetPlayerInfoForThisPlayerPed();
+				if (pPlayerInfo)
+					pPlayerPed->m_fHealth = pPlayerInfo->m_nMaxHealth;
+			}
+		}
 		if (TimeToWaitTill < CTimer::GetTimeInMilliseconds()) {
 			AllowMissionReplay = 0;
 			return;
@@ -2560,44 +2670,49 @@ int8 CRunningScript::ProcessOneCommand()
 		retval = ProcessCommands1300To1399(command);
 	else if (command < 1500)
 		retval = ProcessCommands1400To1499(command);
-#ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
-	if (command < ARRAY_SIZE(commands)) {
-		if (commands[command].cond || commands[command].output[0] != ARGTYPE_NONE) {
-			strcat(commandInfo, " ->");
-			if (commands[command].cond)
-				strcat(commandInfo, m_bCondResult ? " TRUE" : " FALSE");
-			uint32 t = m_nIp;
-			m_nIp = ip;
-			ip = t;
-			for (int i = 0; commands[command].output[i] != ARGTYPE_NONE; i++) {
-				char tmp[32];
-				switch (commands[command].output[i]) {
-				case ARGTYPE_INT:
-				case ARGTYPE_PED_HANDLE:
-				case ARGTYPE_VEHICLE_HANDLE:
-				case ARGTYPE_OBJECT_HANDLE: GetStoredParameterForDebug(commandInfo); sprintf(tmp, " (%d)", ScriptParams[i]); strcat(commandInfo, tmp); break;
-				case ARGTYPE_FLOAT: GetStoredParameterForDebug(commandInfo); sprintf(tmp, " (%8.3f)", *(float*)&ScriptParams[i]); strcat(commandInfo, tmp); break;
-				default: script_assert(0 && "Script only returns INTs and FLOATs");
-				}
-			}
-			m_nIp = ip;
-		}
-		PrintToLog("%s\n", commandInfo);
-		if (m_bMissionFlag) {
-			for (int i = 0; commandInfo[i]; i++) {
-				if (commandInfo[i] == '_')
-					commandInfo[i] = ' ';
-			}
-			CDebug::DebugAddText(commandInfo);
-		}
-	}
-#elif defined USE_BASIC_SCRIPT_DEBUG_OUTPUT
-	if (m_bMissionFlag) {
-		char tmp[128];
-		sprintf(tmp, "Comm %d Cmp %d", command, m_bCondResult);
-		CDebug::DebugAddText(tmp);
-	}
+#ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
+	if (!AlreadySavedGame) // we need to ignore first "fake" command which actually just saves the game
 #endif
+	{
+#ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+		if (command < ARRAY_SIZE(commands)) {
+			if (commands[command].cond || commands[command].output[0] != ARGTYPE_NONE) {
+				strcat(commandInfo, " ->");
+				if (commands[command].cond)
+					strcat(commandInfo, m_bCondResult ? " TRUE" : " FALSE");
+				uint32 t = m_nIp;
+				m_nIp = ip;
+				ip = t;
+				for (int i = 0; commands[command].output[i] != ARGTYPE_NONE; i++) {
+					char tmp[32];
+					switch (commands[command].output[i]) {
+					case ARGTYPE_INT:
+					case ARGTYPE_PED_HANDLE:
+					case ARGTYPE_VEHICLE_HANDLE:
+					case ARGTYPE_OBJECT_HANDLE: GetStoredParameterForDebug(commandInfo); sprintf(tmp, " (%d)", ScriptParams[i]); strcat(commandInfo, tmp); break;
+					case ARGTYPE_FLOAT: GetStoredParameterForDebug(commandInfo); sprintf(tmp, " (%8.3f)", *(float*)&ScriptParams[i]); strcat(commandInfo, tmp); break;
+					default: script_assert(0 && "Script only returns INTs and FLOATs");
+					}
+				}
+				m_nIp = ip;
+			}
+			PrintToLog("%s\n", commandInfo);
+			if (m_bMissionFlag) {
+				for (int i = 0; commandInfo[i]; i++) {
+					if (commandInfo[i] == '_')
+						commandInfo[i] = ' ';
+				}
+				CDebug::DebugAddText(commandInfo);
+			}
+		}
+#elif defined USE_BASIC_SCRIPT_DEBUG_OUTPUT
+		if (m_bMissionFlag) {
+			char tmp[128];
+			sprintf(tmp, "Comm %d Cmp %d", command, m_bCondResult);
+			CDebug::DebugAddText(tmp);
+		}
+#endif
+	}
 	return retval;
 }
 
@@ -4049,14 +4164,7 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* car = CPools::GetVehiclePool()->GetAt(ScriptParams[0]);
 		script_assert(car);
-#if defined MISSION_REPLAY && defined SIMPLIER_MISSIONS
-		car->AutoPilot.m_nCruiseSpeed = *(float*)&ScriptParams[1];
-		if (missionRetryScriptIndex == 40 && car->GetModelIndex() == MI_CHEETAH) // Turismo
-			car->AutoPilot.m_nCruiseSpeed = 8 * car->AutoPilot.m_nCruiseSpeed / 10;
-		car->AutoPilot.m_nCruiseSpeed = Min(car->AutoPilot.m_nCruiseSpeed, 60.0f * car->pHandling->Transmission.fMaxCruiseVelocity);
-#else
 		car->AutoPilot.m_nCruiseSpeed = Min(*(float*)&ScriptParams[1], 60.0f * car->pHandling->Transmission.fMaxCruiseVelocity);
-#endif
 		return 0;
 	}
 	case COMMAND_SET_CAR_DRIVING_STYLE:
@@ -4125,8 +4233,12 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 	{
 		wchar* key = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 #ifdef MISSION_REPLAY
-		if (strcmp((char*)&CTheScripts::ScriptSpace[m_nIp], "M_FAIL") == 0 && CanAllowMissionReplay())
-			AllowMissionReplay = 1;
+		if (strcmp((char*)&CTheScripts::ScriptSpace[m_nIp - KEY_LENGTH_IN_SCRIPT], "M_FAIL") == 0) {
+			if (AllowMissionReplay == 7)
+				AllowMissionReplay = 0;
+			if (CanAllowMissionReplay())
+				AllowMissionReplay = 1;
+		}
 #endif
 		CollectParameters(&m_nIp, 2);
 		CMessages::AddBigMessage(key, ScriptParams[0], ScriptParams[1] - 1);
@@ -4774,21 +4886,15 @@ bool CRunningScript::CanAllowMissionReplay()
 {
 	if (AllowMissionReplay)
 		return false;
-	if (CStats::LastMissionPassedName[0] == '\0')
-		return false;
-	for (int i = 0; i < ARRAY_SIZE(nonMissionScripts); i++) {
-		if (strcmp(m_abScriptName, nonMissionScripts[i]) == 0)
-			return false;
+	for (int i = 0; i < ARRAY_SIZE(MissionScripts); i++) {
+		if (!CGeneral::faststricmp(m_abScriptName, MissionScripts[i]))
+			return true;
 	}
-	return true;
+	return false;
 }
 
 uint32 AddExtraDeathDelay()
 {
-	if (missionRetryScriptIndex == 63)
-		return 7000;
-	if (missionRetryScriptIndex == 64)
-		return 4000;
 	return 1000;
 }
 
@@ -4796,7 +4902,7 @@ void RetryMission(int type, int unk)
 {
 	if (type == 0) {
 		doingMissionRetry = true;
-		FrontEndMenuManager.m_nCurrScreen = 57; // MENUPAGE_MISSION_RETRY
+		FrontEndMenuManager.m_nCurrScreen = MENUPAGE_MISSION_RETRY;
 		FrontEndMenuManager.RequestFrontEndStartUp();
 	}
 	else if (type == 2) {
@@ -4834,8 +4940,11 @@ CTheScripts::SwitchToMission(int32 mission)
 
 #ifdef MISSION_REPLAY
 	missionRetryScriptIndex = mission;
-	if (missionRetryScriptIndex == 19)
-		CStats::LastMissionPassedName[0] = '\0';
+#ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
+	if (CTheScripts::MissionSupportsMissionReplay(missionRetryScriptIndex)) {
+		SaveGameForPause(4);
+	}
+#endif
 #endif
 	CTimer::Suspend();
 	int offset = CTheScripts::MultiScriptArray[mission];

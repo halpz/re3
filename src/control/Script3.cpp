@@ -149,7 +149,12 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 	}
 	case COMMAND_ADD_EXPLOSION:
 		CollectParameters(&m_nIp, 4);
-		CExplosion::AddExplosion(nil, nil, (eExplosionType)ScriptParams[3], *(CVector*)&ScriptParams[0], 0, true);
+#ifdef SIMPLER_MISSIONS
+		if (!CGeneral::faststricmp(m_abScriptName, "hait2"))
+			CExplosion::AddExplosion(nil, nil, (eExplosionType)ScriptParams[3], *(CVector*)&ScriptParams[0], 0, true, 11.25f);
+		else
+#endif
+			CExplosion::AddExplosion(nil, nil, (eExplosionType)ScriptParams[3], *(CVector*)&ScriptParams[0], 0, true);
 		return 0;
 
 	case COMMAND_IS_CAR_UPRIGHT:

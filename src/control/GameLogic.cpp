@@ -102,6 +102,15 @@ CGameLogic::Update()
 	CVector vecRestartPos;
 	float fRestartFloat;
 
+#ifdef MISSION_REPLAY
+	// what a place to check!
+	if (gbTryingPorn4Again) {
+		CRunningScript* pScript = CTheScripts::pActiveScripts;
+		if (pScript && !CGeneral::faststricmp(pScript->m_abScriptName, "porno4"))
+			gbTryingPorn4Again = false;
+	}
+#endif
+
 	if (CCutsceneMgr::IsCutsceneProcessing()) return;
 
 	UpdateShortCut();

@@ -125,10 +125,6 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 	case COMMAND_MAKE_PLAYER_SAFE_FOR_CUTSCENE:
 	{
 		CollectParameters(&m_nIp, 1);
-#ifdef MISSION_REPLAY
-		AllowMissionReplay = 0;
-		SaveGameForPause(3);
-#endif
 		CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
 		CPad::GetPad(ScriptParams[0])->SetDisablePlayerControls(PLAYERCONTROL_CUTSCENE);
 		pPlayerInfo->MakePlayerSafe(true);
@@ -372,14 +368,28 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		return 0;
 	case COMMAND_LOAD_AND_LAUNCH_MISSION_INTERNAL:
 	{
+#ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
+		uint32 oldIp = m_nIp;
+#endif
 		CollectParameters(&m_nIp, 1);
 
 		if (CTheScripts::NumberOfExclusiveMissionScripts > 0 && ScriptParams[0] <= UINT16_MAX - 2)
 			return 0;
 #ifdef MISSION_REPLAY
 		missionRetryScriptIndex = ScriptParams[0];
-		if (missionRetryScriptIndex == 19)
-			CStats::LastMissionPassedName[0] = '\0';
+#ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
+		if (!UsingMobileScript && CTheScripts::MissionSupportsMissionReplay(missionRetryScriptIndex)){
+			if (!AlreadySavedGame) {
+				m_nIp = oldIp - 2;
+				SaveGameForPause(4);
+				AlreadySavedGame = true;
+				return 0;
+			}
+			else {
+				AlreadySavedGame = false;
+			}
+		}
+#endif
 #endif
 		CTimer::Suspend();
 		int offset = CTheScripts::MultiScriptArray[ScriptParams[0]];
@@ -1075,6 +1085,9 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 	}
 	case COMMAND_FAIL_CURRENT_MISSION:
 		CTheScripts::FailCurrentMission = 2;
+#ifdef MISSION_REPLAY
+		MissionSkipLevel = 0;
+#endif
 		return 0;
 	case COMMAND_GET_CLOSEST_OBJECT_OF_TYPE:
 	{

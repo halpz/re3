@@ -575,13 +575,18 @@ public:
 	static void SetObjectiveForAllPedsInCollective(int, eObjective);
 #endif
 
+#ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
+	static bool MissionSupportsMissionReplay(int index)
+	{
+		return index >= 3 && index <= 35 || index >= 51 && index <= 65 || index >= 67 && index <= 74 || index >= 83 && index <= 87;
+	}
+#endif
 };
 
 #ifdef USE_DEBUG_SCRIPT_LOADER
 extern int scriptToLoad;
 #endif
 #ifdef MISSION_REPLAY
-static_assert(false, "Mission replay is not supported");
 extern int AllowMissionReplay;
 extern uint32 WaitForMissionActivate;
 extern uint32 WaitForSave;
@@ -591,6 +596,11 @@ extern bool doingMissionRetry;
 extern bool gbTryingPorn4Again;
 extern int IsInAmmunation;
 extern int MissionSkipLevel;
+
+#ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
+extern bool UsingMobileScript;
+extern bool AlreadySavedGame;
+#endif
 
 uint32 AddExtraDeathDelay();
 void RetryMission(int, int);

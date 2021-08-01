@@ -1176,13 +1176,20 @@ void DisplaySaveResult(int unk, char* name)
 
 bool SaveGameForPause(int type)
 {
-	if (AllowMissionReplay != 0 || type != 3 && WaitForSave > CTimer::GetTimeInMilliseconds())
+	if (AllowMissionReplay != 0 && AllowMissionReplay != 7) {
+		debug("SaveGameForPause failed during AllowMissionReplay %d", AllowMissionReplay);
 		return false;
+	}
+	if (type != 3 && WaitForSave > CTimer::GetTimeInMilliseconds()) {
+		debug("SaveGameForPause failed WaitForSave");
+		return false;
+	}
 	WaitForSave = 0;
-	if (gGameState != GS_PLAYING_GAME || CTheScripts::IsPlayerOnAMission() || CStats::LastMissionPassedName[0] == '\0') {
+	if (gGameState != GS_PLAYING_GAME || (CTheScripts::bAlreadyRunningAMissionScript && type != 5)) {
 		DisplaySaveResult(3, CStats::LastMissionPassedName);
 		return false;
 	}
+	debug("SaveGameForPause ******************************** %s doSave %d", CStats::LastMissionPassedName, !CTheScripts::bAlreadyRunningAMissionScript);
 	IsQuickSave = type;
 	MissionStartTime = 0;
 	int res = PcSaveHelper.SaveSlot(PAUSE_SAVE_SLOT);
