@@ -372,6 +372,13 @@ public:
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 	int CollectParameterForDebug(char* buf, bool& var);
 	void GetStoredParameterForDebug(char* buf);
+	void LogOnStartProcessing();
+	void LogBeforeProcessingCommand(int32 command);
+	void LogAfterProcessingCommand(int32 command);
+
+	static char commandInfo[];
+	static uint32 storedIp;
+
 #endif
 
 	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
@@ -580,6 +587,12 @@ public:
 	{
 		return index >= 3 && index <= 35 || index >= 51 && index <= 65 || index >= 67 && index <= 74 || index >= 83 && index <= 87;
 	}
+#endif
+
+#ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+	static void LogAfterScriptInitializing();
+	static void LogBeforeScriptProcessing();
+	static void LogAfterScriptProcessing();
 #endif
 };
 

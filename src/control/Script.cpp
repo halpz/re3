@@ -2156,71 +2156,16 @@ void CRunningScript::CollectParameters(uint32* pIp, int16 total)
 		case ARGUMENT_INT16:
 			ScriptParams[i] = CTheScripts::Read2BytesFromScript(pIp);
 			break;
+		case ARGUMENT_FLOAT:
+			tmp = CTheScripts::ReadFloatFromScript(pIp);
+			ScriptParams[i] = *(int32*)&tmp;
+			break;
 		default:
 			script_assert(0);
 			break;
 		}
 	}
 }
-
-#ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
-int CRunningScript::CollectParameterForDebug(char* buf, bool& var)
-{
-	uint16 varIndex;
-	char tmpstr[24];
-	var = false;
-	switch (CTheScripts::Read1ByteFromScript(&m_nIp))
-	{
-	case ARGUMENT_INT32:
-	case ARGUMENT_FLOAT:
-		return CTheScripts::Read4BytesFromScript(&m_nIp);
-	case ARGUMENT_GLOBALVAR:
-		varIndex = CTheScripts::Read2BytesFromScript(&m_nIp);
-		script_assert(varIndex >= 8 && varIndex < CTheScripts::GetSizeOfVariableSpace());
-		var = true;
-		sprintf(tmpstr, " $%d", varIndex / 4);
-		strcat(buf, tmpstr);
-		return *((int32*)&CTheScripts::ScriptSpace[varIndex]);
-	case ARGUMENT_LOCALVAR:
-		varIndex = CTheScripts::Read2BytesFromScript(&m_nIp);
-		script_assert(varIndex >= 0 && varIndex < ARRAY_SIZE(m_anLocalVariables));
-		var = true;
-		sprintf(tmpstr, " %d@", varIndex);
-		strcat(buf, tmpstr);
-		return m_anLocalVariables[varIndex];
-	case ARGUMENT_INT8:
-		return CTheScripts::Read1ByteFromScript(&m_nIp);
-	case ARGUMENT_INT16:
-		return CTheScripts::Read2BytesFromScript(&m_nIp);
-	default:
-		PrintToLog("%s - script assertion failed in CollectParameterForDebug", buf);
-		script_assert(0);
-		break;
-	}
-	return 0;
-}
-
-void CRunningScript::GetStoredParameterForDebug(char* buf)
-{
-	uint16 varIndex;
-	char tmpstr[24];
-	switch (CTheScripts::Read1ByteFromScript(&m_nIp)) {
-	case ARGUMENT_GLOBALVAR:
-		varIndex = CTheScripts::Read2BytesFromScript(&m_nIp);
-		sprintf(tmpstr, " $%d", varIndex / 4);
-		strcat(buf, tmpstr);
-		break;
-	case ARGUMENT_LOCALVAR:
-		varIndex = CTheScripts::Read2BytesFromScript(&m_nIp);
-		sprintf(tmpstr, " %d@", varIndex);
-		strcat(buf, tmpstr);
-		break;
-	default:
-		PrintToLog("%s - script_assertion failed in GetStoredParameterForDebug", buf);
-		script_assert(0);
-	}
-}
-#endif
 
 int32 CRunningScript::CollectNextParameterWithoutIncreasingPC(uint32 ip)
 {
@@ -2399,14 +2344,8 @@ void CTheScripts::Init()
 	for (int i = 0; i < MAX_NUM_INVISIBILITY_SETTINGS; i++)
 		InvisibilitySettingArray[i] = nil;
 
-#if defined USE_ADVANCED_SCRIPT_DEBUG_OUTPUT && SCRIPT_LOG_FILE_LEVEL == 2
-	CFileMgr::SetDirMyDocuments();
-	if (dbg_log)
-		fclose(dbg_log);
-	dbg_log = fopen("SCRDBG.LOG", "w");
-	static const char* init_msg = "Starting debug script log\n\n";
-	PrintToLog(init_msg);
-	CFileMgr::SetDir("");
+#ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+	LogAfterScriptInitializing();
 #endif
 #ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
 	UsingMobileScript = false;
@@ -2528,15 +2467,7 @@ void CTheScripts::Process()
 #endif
 
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
-#if SCRIPT_LOG_FILE_LEVEL == 1
-	CFileMgr::SetDirMyDocuments();
-	dbg_log = fopen("SCRDBG.LOG", "w");
-	static const char* init_msg = "Starting debug script log\n\n";
-	PrintToLog(init_msg);
-	CFileMgr::SetDir("");
-#endif
-	PrintToLog("------------------------\n");
-	PrintToLog("CTheScripts::Process started, CTimer::GetTimeInMilliseconds == %u\n", CTimer::GetTimeInMilliseconds());
+	LogBeforeScriptProcessing();
 #endif
 
 	CRunningScript* script = pActiveScripts;
@@ -2550,12 +2481,9 @@ void CTheScripts::Process()
 			script = nil;
 	}
 	DbgFlag = false;
+
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
-	PrintToLog("Script processing done, ScriptsUpdated: %d, CommandsExecuted: %d\n", ScriptsUpdated, CommandsExecuted);
-#if SCRIPT_LOG_FILE_LEVEL == 1
-	fclose(dbg_log);
-	dbg_log = nil;
-#endif
+	LogAfterScriptProcessing();
 #endif
 }
 
@@ -2572,7 +2500,7 @@ bool CTheScripts::IsPlayerOnAMission()
 void CRunningScript::Process()
 {
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
-	PrintToLog("\n\nProcessing script %s (id %d)\n\n", m_abScriptName, this - CTheScripts::ScriptsArray);
+	LogOnStartProcessing();
 #endif
 	if (m_bIsMissionScript)
 		DoDeatharrestCheck();
@@ -2604,41 +2532,7 @@ int8 CRunningScript::ProcessOneCommand()
 	m_bNotFlag = (command & 0x8000);
 	command &= 0x7FFF;
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
-	char commandInfo[1024];
-	uint32 ip = m_nIp;
-	if (command < ARRAY_SIZE(commands)) {
-		script_assert(commands[command].id == command);
-		m_nIp -= 2;
-		sprintf(commandInfo, m_nIp >= SIZE_MAIN_SCRIPT ? "M<%5d> " : "<%6d> ", m_nIp >= SIZE_MAIN_SCRIPT ? m_nIp - SIZE_MAIN_SCRIPT : m_nIp);
-		m_nIp += 2;
-		if (m_bNotFlag)
-			strcat(commandInfo, "NOT ");
-		if (commands[command].position == -1)
-			strcat(commandInfo, commands[command].name + sizeof("COMMAND_") - 1);
-		for (int i = 0; commands[command].input[i] != ARGTYPE_NONE; i++) {
-			char tmp[32];
-			bool var = false;
-			int value;
-			switch (commands[command].input[i]) {
-			case ARGTYPE_INT:
-			case ARGTYPE_PED_HANDLE:
-			case ARGTYPE_VEHICLE_HANDLE: 
-			case ARGTYPE_OBJECT_HANDLE: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%d)" : " %d", value); break;
-			case ARGTYPE_FLOAT: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%.3f)" : " %.3f", *(float*)&value); break;
-			case ARGTYPE_STRING: sprintf(tmp, " '%s'", (const char*)&CTheScripts::ScriptSpace[m_nIp]); m_nIp += KEY_LENGTH_IN_SCRIPT; break;
-			case ARGTYPE_LABEL: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%s(%d))" : " %s(%d)", value >= 0 ? "G" : "L", abs(value)); break;
-			case ARGTYPE_BOOL: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%s)" : " %s", value ? "TRUE" : "FALSE"); break;
-			case ARGTYPE_ANDOR: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, " %d %ss", (value + 1) % 10, value / 10 == 0 ? "AND" : "OR"); break;
-			default: script_assert(0);
-			}
-			strcat(commandInfo, tmp);
-			if (commands[command].position == i)
-				strcat(commandInfo, commands[command].name_override);
-		}
-		uint32 t = m_nIp;
-		m_nIp = ip;
-		ip = t;
-	}
+	LogBeforeProcessingCommand(command);
 #endif
 	if (command < 100)
 		retval = ProcessCommands0To99(command);
@@ -2675,36 +2569,7 @@ int8 CRunningScript::ProcessOneCommand()
 #endif
 	{
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
-		if (command < ARRAY_SIZE(commands)) {
-			if (commands[command].cond || commands[command].output[0] != ARGTYPE_NONE) {
-				strcat(commandInfo, " ->");
-				if (commands[command].cond)
-					strcat(commandInfo, m_bCondResult ? " TRUE" : " FALSE");
-				uint32 t = m_nIp;
-				m_nIp = ip;
-				ip = t;
-				for (int i = 0; commands[command].output[i] != ARGTYPE_NONE; i++) {
-					char tmp[32];
-					switch (commands[command].output[i]) {
-					case ARGTYPE_INT:
-					case ARGTYPE_PED_HANDLE:
-					case ARGTYPE_VEHICLE_HANDLE:
-					case ARGTYPE_OBJECT_HANDLE: GetStoredParameterForDebug(commandInfo); sprintf(tmp, " (%d)", ScriptParams[i]); strcat(commandInfo, tmp); break;
-					case ARGTYPE_FLOAT: GetStoredParameterForDebug(commandInfo); sprintf(tmp, " (%8.3f)", *(float*)&ScriptParams[i]); strcat(commandInfo, tmp); break;
-					default: script_assert(0 && "Script only returns INTs and FLOATs");
-					}
-				}
-				m_nIp = ip;
-			}
-			PrintToLog("%s\n", commandInfo);
-			if (m_bMissionFlag) {
-				for (int i = 0; commandInfo[i]; i++) {
-					if (commandInfo[i] == '_')
-						commandInfo[i] = ' ';
-				}
-				CDebug::DebugAddText(commandInfo);
-			}
-		}
+	LogAfterProcessingCommand(command);
 #elif defined USE_BASIC_SCRIPT_DEBUG_OUTPUT
 		if (m_bMissionFlag) {
 			char tmp[128];
@@ -4911,29 +4776,6 @@ void RetryMission(int type, int unk)
 		CTheScripts::MissionCleanUp.Process();
 	}
 }
-
-#endif
-
-#ifdef MISSION_SWITCHER
-void
-CTheScripts::SwitchToMission(int32 mission)
-{
-	for (CRunningScript* pScript = CTheScripts::pActiveScripts; pScript != nil; pScript = pScript->GetNext()) {
-		if (!pScript->m_bIsMissionScript || !pScript->m_bDeatharrestEnabled) {
-			continue;
-		}
-		while (pScript->m_nStackPointer > 0)
-			--pScript->m_nStackPointer;
-
-		pScript->m_nIp = pScript->m_anStack[pScript->m_nStackPointer];
-		*(int32*)&CTheScripts::ScriptSpace[CTheScripts::OnAMissionFlag] = 0;
-		pScript->m_nWakeTime = 0;
-		pScript->m_bDeatharrestExecuted = true;
-
-		while (!pScript->ProcessOneCommand());
-
-		CMessages::ClearMessages();
-	}
 
 	if (CTheScripts::NumberOfExclusiveMissionScripts > 0 && mission <= UINT16_MAX - 2)
 		return;
