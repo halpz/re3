@@ -65,7 +65,7 @@ cDMAudio::DestroyAllGameCreatedEntities(void)
 void
 cDMAudio::SetOutputMode(bool8 surround)
 {
-	return AudioManager.SetOutputMode(surround);
+	AudioManager.SetOutputMode(surround);
 }
 
 void

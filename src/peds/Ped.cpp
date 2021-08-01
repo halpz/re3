@@ -511,8 +511,20 @@ CPed::BuildPedLists(void)
 									continue;
 								deadsRegistered++;
 							}
+#ifdef FIX_BUGS
+							// If the gap ped list is full, sort it and truncate it
+							// before pushing more unsorted peds
+							if( gnNumTempPedList == ARRAY_SIZE(gapTempPedList) - 1 )
+							{
+								gapTempPedList[gnNumTempPedList] = nil;
+								SortPeds(gapTempPedList, 0, gnNumTempPedList - 1);
+								gnNumTempPedList = ARRAY_SIZE(m_nearPeds);
+							}
+#endif
+
 							gapTempPedList[gnNumTempPedList] = ped;
 							gnNumTempPedList++;
+							// NOTE: We cannot absolutely fill the gap list, as the list is null-terminated before being passed to SortPeds
 							assert(gnNumTempPedList < ARRAY_SIZE(gapTempPedList));
 						}
 					}
