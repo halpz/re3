@@ -903,7 +903,13 @@ void CGame::Process(void)
 		CEventList::Update();
 		CParticle::Update();
 		gFireManager.Update();
+
+		// Otherwise even on 30 fps most probably you won't see any peds around Ocean View Hospital
+#if defined FIX_BUGS && !defined SQUEEZE_PERFORMANCE
+		if (processTime > 2) {
+#else
 		if (processTime >= 2) {
+#endif
 			CPopulation::Update(false);
 		} else {
 			uint32 startTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond();
