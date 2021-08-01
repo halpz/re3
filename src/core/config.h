@@ -187,6 +187,9 @@ enum Config {
 #	define PC_MENU
 #	define PC_WATER
 #elif defined GTA_XBOX
+#elif defined GTA_MOBILE
+#	define MISSION_REPLAY
+#	define SIMPLER_MISSIONS
 #endif
 
 // This is enabled for all released games.
@@ -392,8 +395,9 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #endif
 #ifdef PC_MENU
 //#define MISSION_REPLAY // mobile feature
+//#define SIMPLER_MISSIONS // apply simplifications from mobile
+//#define USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
 #endif
-//#define SIMPLIER_MISSIONS // apply simplifications from mobile
 #define USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #define SCRIPT_LOG_FILE_LEVEL 1 // 0 == no log, 1 == overwrite every frame, 2 == full log
 
@@ -408,6 +412,10 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #ifdef MASTER
 #undef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 #undef USE_BASIC_SCRIPT_DEBUG_OUTPUT
+#endif
+
+#ifndef MISSION_REPLAY
+#undef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
 #endif
 
 // Replay

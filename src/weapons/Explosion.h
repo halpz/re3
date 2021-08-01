@@ -37,7 +37,11 @@ class CExplosion
 	float m_fPower;
 	float m_fZshift;
 public:
-	static bool AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32 lifetime, bool makeSound = true); //done(new parametr in android ver is fix for one mission)
+#ifdef SIMPLER_MISSIONS
+	static bool AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32 lifetime, bool makeSound = true, float radius = -1.0f);
+#else
+	static bool AddExplosion(CEntity* explodingEntity, CEntity* culprit, eExplosionType type, const CVector& pos, uint32 lifetime, bool makeSound = true);
+#endif
 	static void ClearAllExplosions(); //done
 	static bool DoesExplosionMakeSound(uint8 id); //done
 	static int8 GetExplosionActiveCounter(uint8 id); //done

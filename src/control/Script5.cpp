@@ -1383,8 +1383,10 @@ void CRunningScript::DoDeatharrestCheck()
 	if (!pPlayer->IsRestartingAfterDeath() && !pPlayer->IsRestartingAfterArrest())
 		return;
 #ifdef MISSION_REPLAY
-	if (AllowMissionReplay != 0)
+	if (AllowMissionReplay != 7 && AllowMissionReplay != 0)
 		return;
+	if (AllowMissionReplay == 7)
+		AllowMissionReplay = 0;
 	if (CanAllowMissionReplay())
 		AllowMissionReplay = 1;
 #endif

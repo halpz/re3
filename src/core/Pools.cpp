@@ -269,7 +269,7 @@ INITSAVEBUF
 			if (pVehicle->IsBoat() && (pVehicle->VehicleCreatedBy == MISSION_VEHICLE || bForceSaving))
 				++nNumBoats;
 			if (pVehicle->IsBike() && (pVehicle->VehicleCreatedBy == MISSION_VEHICLE || bForceSaving))
-				++nNumBoats;
+				++nNumBikes;
 #else
 		if (!pVehicle->pDriver && !bHasPassenger) {
 			if (pVehicle->IsCar() && pVehicle->VehicleCreatedBy == MISSION_VEHICLE)
@@ -277,7 +277,7 @@ INITSAVEBUF
 			if (pVehicle->IsBoat() && pVehicle->VehicleCreatedBy == MISSION_VEHICLE)
 				++nNumBoats;
 			if (pVehicle->IsBike() && pVehicle->VehicleCreatedBy == MISSION_VEHICLE)
-				++nNumBoats;
+				++nNumBikes;
 #endif
 		}
 	}
