@@ -370,6 +370,13 @@ public:
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 	int CollectParameterForDebug(char* buf, bool& var);
 	void GetStoredParameterForDebug(char* buf);
+	void LogOnStartProcessing();
+	void LogBeforeProcessingCommand(int32 command);
+	void LogAfterProcessingCommand(int32 command);
+
+	static char commandInfo[];
+	static uint32 storedIp;
+
 #endif
 
 	float LimitAngleOnCircle(float angle) { return angle < 0.0f ? angle + 360.0f : angle; }
@@ -575,6 +582,12 @@ public:
 #ifdef MISSION_SWITCHER
 public:
 	static void SwitchToMission(int32 mission);
+#endif
+
+#ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
+	static void LogAfterScriptInitializing();
+	static void LogBeforeScriptProcessing();
+	static void LogAfterScriptProcessing();
 #endif
 };
 
