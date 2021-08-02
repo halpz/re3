@@ -373,7 +373,11 @@ bool CGame::Initialise(const char* datFile)
 	CPools::Initialise();
 
 #ifndef GTA_PS2
-	CIniFile::LoadIniFile();
+#ifdef PED_CAR_DENSITY_SLIDERS
+	// Load density values from gta3.ini only if our reVC.ini have them 0.6f
+	if (CIniFile::PedNumberMultiplier == 0.6f && CIniFile::CarNumberMultiplier == 0.6f)
+#endif
+		CIniFile::LoadIniFile();
 #endif
 #ifdef USE_TEXTURE_POOL
 	_TexturePoolsUnknown(false);
@@ -899,7 +903,13 @@ void CGame::Process(void)
 		CEventList::Update();
 		CParticle::Update();
 		gFireManager.Update();
+
+		// Otherwise even on 30 fps most probably you won't see any peds around Ocean View Hospital
+#if defined FIX_BUGS && !defined SQUEEZE_PERFORMANCE
+		if (processTime > 2) {
+#else
 		if (processTime >= 2) {
+#endif
 			CPopulation::Update(false);
 		} else {
 			uint32 startTime = CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond();

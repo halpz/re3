@@ -366,6 +366,7 @@ enum Config {
 #		define CUTSCENE_BORDERS_SWITCH
 #		define MULTISAMPLING		// adds MSAA option
 #		define INVERT_LOOK_FOR_PAD // enable the hidden option
+#		define PED_CAR_DENSITY_SLIDERS
 #	endif
 #endif
 
