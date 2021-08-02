@@ -14,6 +14,7 @@ enum eEntityType
 	ENTITY_TYPE_PED,
 	ENTITY_TYPE_OBJECT,
 	ENTITY_TYPE_DUMMY,
+	ENTITY_TYPE_MULTIPLAYER
 };
 
 enum eEntityStatus
@@ -153,6 +154,7 @@ public:
 	bool IsPed(void) { return m_type == ENTITY_TYPE_PED; }
 	bool IsObject(void) { return m_type == ENTITY_TYPE_OBJECT; }
 	bool IsDummy(void) { return m_type == ENTITY_TYPE_DUMMY; }
+	bool IsMultiplayer(void) { return m_type == ENTITY_TYPE_MULTIPLAYER; }
 
 	RpAtomic *GetAtomic(void) {
 		assert(RwObjectGetType(m_rwObject) == rpATOMIC);

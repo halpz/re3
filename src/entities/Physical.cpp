@@ -21,6 +21,8 @@
 #include "Pickups.h"
 #include "Physical.h"
 
+//--LCS: mostly done
+
 bool gGravityCheat;
 
 
@@ -80,6 +82,9 @@ CPhysical::CPhysical(void)
 
 	bIsFrozen = false;
 	bDontLoadCollision = false;
+
+	phys_lcs_unk1 = true;
+	phys_lcs_unk2 = 0;
 }
 
 CPhysical::~CPhysical(void)
@@ -120,6 +125,9 @@ CPhysical::Add(void)
 			case ENTITY_TYPE_OBJECT:
 				list = &s->m_lists[ENTITYLIST_OBJECTS];
 				break;
+			case ENTITY_TYPE_MULTIPLAYER:
+				list = &s->m_lists[ENTITYLIST_MULTIPLAYER];
+				break;
 			default:
 				assert(0);
 			}else switch(m_type){
@@ -131,6 +139,9 @@ CPhysical::Add(void)
 				break;
 			case ENTITY_TYPE_OBJECT:
 				list = &s->m_lists[ENTITYLIST_OBJECTS_OVERLAP];
+				break;
+			case ENTITY_TYPE_MULTIPLAYER:
+				list = &s->m_lists[ENTITYLIST_MULTIPLAYER];
 				break;
 			default:
 				assert(0);
@@ -172,6 +183,8 @@ CPhysical::RemoveAndAdd(void)
 	assert(ystart >= 0);
 	assert(yend < NUMSECTORS_Y);
 
+	// TODO(LCS): there's a bunch of weird code in this function
+
 	// we'll try to recycle nodes from here
 	CEntryInfoNode *next = m_entryInfoList.first;
 
@@ -188,6 +201,9 @@ CPhysical::RemoveAndAdd(void)
 			case ENTITY_TYPE_OBJECT:
 				list = &s->m_lists[ENTITYLIST_OBJECTS];
 				break;
+			case ENTITY_TYPE_MULTIPLAYER:
+				list = &s->m_lists[ENTITYLIST_MULTIPLAYER];
+				break;
 			}else switch(m_type){
 			case ENTITY_TYPE_VEHICLE:
 				list = &s->m_lists[ENTITYLIST_VEHICLES_OVERLAP];
@@ -197,6 +213,9 @@ CPhysical::RemoveAndAdd(void)
 				break;
 			case ENTITY_TYPE_OBJECT:
 				list = &s->m_lists[ENTITYLIST_OBJECTS_OVERLAP];
+				break;
+			case ENTITY_TYPE_MULTIPLAYER:
+				list = &s->m_lists[ENTITYLIST_MULTIPLAYER];
 				break;
 			}
 			if(next){
@@ -224,22 +243,20 @@ CPhysical::RemoveAndAdd(void)
 CRect
 CPhysical::GetBoundRect(void)
 {
-	CVUVECTOR center;
+	CVector center;
 	float radius;
-	GetBoundCentre(center);
+	center = GetBoundCentre();
 	radius = GetBoundRadius();
 	return CRect(center.x-radius, center.y-radius, center.x+radius, center.y+radius);
 }
 
-// --MIAMI: Proof-read once
 void
 CPhysical::AddToMovingList(void)
 {
-	if (!bIsStaticWaitingForCollision)
+	if (m_movingListNode == nil && !bIsStaticWaitingForCollision)
 		m_movingListNode = CWorld::GetMovingEntityList().InsertItem(this);
 }
 
-// --MIAMI: Proof-read once
 void
 CPhysical::RemoveFromMovingList(void)
 {
@@ -259,7 +276,6 @@ CPhysical::SetDamagedPieceRecord(uint16 piece, float impulse, CEntity *entity, C
 	m_vecDamageNormal = dir;
 }
 
-// --MIAMI: Proof-read once
 void
 CPhysical::AddCollisionRecord(CEntity *ent)
 {
@@ -283,7 +299,6 @@ CPhysical::AddCollisionRecord(CEntity *ent)
 	}
 }
 
-// --MIAMI: Proof-read once
 void
 CPhysical::AddCollisionRecord_Treadable(CEntity *ent)
 {
@@ -291,7 +306,6 @@ CPhysical::AddCollisionRecord_Treadable(CEntity *ent)
 	}
 }
 
-// --MIAMI: Proof-read once
 bool
 CPhysical::GetHasCollidedWith(CEntity *ent)
 {
@@ -303,7 +317,6 @@ CPhysical::GetHasCollidedWith(CEntity *ent)
 	return false;
 }
 
-// --MIAMI: Proof-read once
 void
 CPhysical::RemoveRefsToEntity(CEntity *ent)
 {
@@ -319,7 +332,6 @@ CPhysical::RemoveRefsToEntity(CEntity *ent)
 	}
 }
 
-// --MIAMI: Proof-read once
 void
 CPhysical::PlacePhysicalRelativeToOtherPhysical(CPhysical *other, CPhysical *phys, CVector localPos)
 {
@@ -336,10 +348,11 @@ CPhysical::PlacePhysicalRelativeToOtherPhysical(CPhysical *other, CPhysical *phy
 	CWorld::Add(phys);
 }
 
-// --MIAMI: Proof-read once
 int32
 CPhysical::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 {
+	if(!GetIsTouching(ent))
+		return 0;
 	int32 numSpheres = CCollision::ProcessColModels(
 		GetMatrix(), *GetColModel(),
 		ent->GetMatrix(), *ent->GetColModel(),
@@ -355,7 +368,6 @@ CPhysical::ProcessEntityCollision(CEntity *ent, CColPoint *colpoints)
 	return numSpheres;
 }
 
-//--LCS: done
 void
 CPhysical::ProcessControl(void)
 {
@@ -423,7 +435,6 @@ CPhysical::GetSpeed(const CVector &r)
 	return m_vecMoveSpeed + m_vecMoveFriction + CrossProduct(m_vecTurnFriction + m_vecTurnSpeed, r);
 }
 
-//--LCS: done
 void
 CPhysical::ApplyMoveSpeed(void)
 {
@@ -433,7 +444,6 @@ CPhysical::ApplyMoveSpeed(void)
 		GetMatrix().Translate(m_vecMoveSpeed * CTimer::GetTimeStep());
 }
 
-//--LCS: done
 void
 CPhysical::ApplyTurnSpeed(void)
 {
@@ -449,7 +459,6 @@ CPhysical::ApplyTurnSpeed(void)
 	}
 }
 
-//--LCS: done
 void
 CPhysical::ApplyMoveForce(float jx, float jy, float jz)
 {
@@ -459,7 +468,6 @@ CPhysical::ApplyMoveForce(float jx, float jy, float jz)
 	m_vecTurnSpeed.z = Clamp(m_vecTurnSpeed.z, -4.0f, 4.0f);
 }
 
-//--LCS: done
 void
 CPhysical::ApplyTurnForce(float jx, float jy, float jz, float px, float py, float pz)
 {
@@ -471,14 +479,26 @@ CPhysical::ApplyTurnForce(float jx, float jy, float jz, float px, float py, floa
 	m_vecTurnSpeed.z = Clamp(m_vecTurnSpeed.z, -4.0f, 4.0f);
 }
 
-//--LCS: done
+void
+CPhysical::ApplyTurnForceMultiplayer(const CVector &j, const CVector &p)
+{
+	CVector com = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
+	CVector turnimpulse = CrossProduct(p-com, j);
+	turnimpulse *= (1.0f/m_fTurnMass);
+	m_vecTurnSpeed.x += Clamp(turnimpulse.x, -0.1f, 0.1f);
+	m_vecTurnSpeed.y += Clamp(turnimpulse.y, -0.1f, 0.1f);
+	m_vecTurnSpeed.z += Clamp(turnimpulse.z, -0.1f, 0.1f);
+	m_vecTurnSpeed.x = Clamp(m_vecTurnSpeed.x, -1.0f, 1.0f);
+	m_vecTurnSpeed.y = Clamp(m_vecTurnSpeed.y, -1.0f, 1.0f);
+	m_vecTurnSpeed.z = Clamp(m_vecTurnSpeed.z, -1.0f, 1.0f);
+}
+
 void
 CPhysical::ApplyFrictionMoveForce(float jx, float jy, float jz)
 {
 	m_vecMoveFriction += CVector(jx, jy, jz)*(1.0f/m_fMass);
 }
 
-//--LCS: done
 void
 CPhysical::ApplyFrictionTurnForce(float jx, float jy, float jz, float px, float py, float pz)
 {
@@ -487,7 +507,6 @@ CPhysical::ApplyFrictionTurnForce(float jx, float jy, float jz, float px, float 
 	m_vecTurnFriction += turnimpulse*(1.0f/m_fTurnMass);
 }
 
-//--LCS: done
 bool
 CPhysical::ApplySpringCollision(float springConst, CVector &springDir, CVector &point, float springRatio, float bias)
 {
@@ -501,7 +520,6 @@ CPhysical::ApplySpringCollision(float springConst, CVector &springDir, CVector &
 	return true;
 }
 
-//--LCS: done
 bool
 CPhysical::ApplySpringCollisionAlt(float springConst, CVector &springDir, CVector &point, float springRatio, float bias, CVector &forceDir, float &impulse)
 {
@@ -522,7 +540,6 @@ CPhysical::ApplySpringCollisionAlt(float springConst, CVector &springDir, CVecto
 float DAMPING_LIMIT_OF_SPRING_FORCE = 0.999f;
 float DAMPING_LIMIT_IN_FRAME= 0.25f;
 
-//--LCS: done
 // What exactly is speed?
 bool
 CPhysical::ApplySpringDampening(float damping, float dampingLimit, CVector &springDir, CVector &point, CVector &speed)
@@ -564,7 +581,6 @@ CPhysical::ApplySpringDampening(float damping, float dampingLimit, CVector &spri
 	return true;
 }
 
-//--LCS: done
 void
 CPhysical::ApplyGravity(void)
 {
@@ -591,7 +607,6 @@ CPhysical::ApplyGravity(void)
 	m_vecMoveSpeed.z -= GRAVITY * CTimer::GetTimeStep();
 }
 
-//--LCS: done
 void
 CPhysical::ApplyFriction(void)
 {
@@ -601,7 +616,6 @@ CPhysical::ApplyFriction(void)
 	m_vecTurnFriction = CVector(0.0f, 0.0f, 0.0f);
 }
 
-//--LCS: done
 void
 CPhysical::ApplyAirResistance(void)
 {
@@ -653,6 +667,14 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 		foo = true;
 	}
 
+	CVector comA, comB;
+	comA = Multiply3x3(A->GetMatrix(), A->m_vecCentreOfMass);
+	comB = Multiply3x3(B->GetMatrix(), B->m_vecCentreOfMass);
+
+	if(A->IsVehicle() && B->IsObject() && ((CObject*)B)->bIsStreetLight ||
+	   B->IsVehicle() && A->IsObject() && ((CObject*)A)->bIsStreetLight)
+		colpoint.normal.z = 0.0f;
+
 	float speedA, speedB;
 	if(B->GetIsStatic() && !foo){
 		if(A->bPedPhysics){
@@ -673,6 +695,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 						if(IsGlass(B->GetModelIndex()))
 							CGlass::WindowRespondsToSoftCollision(B, impulseA);
 						if(!A->bInfiniteMass)
+//TODO(LCS): inline without clamp
 							A->ApplyMoveForce(colpoint.GetNormal() * (1.0f + A->m_fElasticity) * impulseA);
 						return true;
 					}
@@ -683,6 +706,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 					impulseA = -speedA * A->m_fMass;
 					impulseB = 0.0f;
 					if(!A->bInfiniteMass)
+//TODO(LCS): inline without clamp
 						A->ApplyMoveForce(colpoint.normal*(1.0f + A->m_fElasticity)*impulseA);
 					return true;
 				}
@@ -696,7 +720,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 						eA = -1.0f;
 					else
 						eA = -(1.0f + A->m_fElasticity);
-					impulseA = eA * speedA * A->GetMass(pointposA, colpoint.normal);
+					impulseA = eA * speedA * A->GetMass(pointposA-comA, colpoint.normal);
 					impulseB = impulseA;
 
 					if(Bobj->m_nCollisionDamageEffect && impulseA > 20.0f){
@@ -721,7 +745,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 							CParticleObject::AddObject(POBJECT_FIRE_HYDRANT, B->GetPosition() - CVector(0.0f, 0.0f, 0.5f), true);
 							CParticleObject::AddObject(POBJECT_FIRE_HYDRANT_STEAM, B->GetPosition() - CVector(0.0f, 0.0f, 0.5f), true);
 							Bobj->bHasBeenDamaged = true;
-						}else if(model == MI_PARKINGMETER || model == MI_PARKINGMETER2){
+						}else if((model == MI_PARKINGMETER || model == MI_PARKINGMETER2) && !Bobj->bHasBeenDamaged){
 							CPickups::CreateSomeMoney(GetPosition(), CGeneral::GetRandomNumber()%100);
 							Bobj->bHasBeenDamaged = true;
 						}else if(B->IsObject() && !IsExplosiveThingModel(model))
@@ -739,14 +763,17 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 						}
 						return true;
 					}
-				}else if(!B->bInfiniteMass)
+				}else if(!B->bInfiniteMass){
 					B->SetIsStatic(false);
+					CWorld::Players[CWorld::PlayerInFocus].m_nHavocLevel += 2;
+					CStats::PropertyDestroyed += CGeneral::GetRandomNumberInRange(30, 60);
+				}
 			}
 		}
 	
 		if(B->GetIsStatic())
 			return false;
-		if(!B->bInfiniteMass && !B->m_phy_flagA08)
+		if(!B->bInfiniteMass && !B->bIsStaticWaitingForCollision)
 			B->AddToMovingList();
 	}
 
@@ -756,13 +783,13 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 		// negative if A is moving towards B
 		speedA = DotProduct(A->m_vecMoveSpeed, colpoint.normal);
 		// positive if B is moving towards A
-		float speedB = DotProduct(B->m_vecMoveSpeed, colpoint.normal);
+		speedB = DotProduct(B->m_vecMoveSpeed, colpoint.normal);
 
 		bool affectB = false;
-		float mA = A->m_fMass;;
-		float mB = B->m_fMass;;
+		float mA = A->m_fMass;
+		float mB = B->m_fMass;
 		float speedSum;
-		if(((CPed*)A)->GetPedState() == PED_FOLLOW_PATH){
+		if(A->IsPed() && ((CPed*)A)->GetPedState() == PED_FOLLOW_PATH){
 			affectB = true;	
 			speedSum = (2.0f*mA*speedA + mB*speedB)/(2.0f*mA + mB);
 		}else{
@@ -794,7 +821,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 		speedB = DotProduct(B->GetSpeed(pointposB), colpoint.normal);
 
 		float mA = A->m_fMass*massFactorA;
-		float mB = B->GetMassTweak(pointposB, colpoint.normal, massFactorB);
+		float mB = B->GetMassTweak(pointposB-comB, colpoint.normal, massFactorB);
 		float speedSum;
 		if(foo)
 			speedSum = speedB;
@@ -832,7 +859,7 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 		speedA = DotProduct(A->GetSpeed(pointposA), colpoint.normal);
 		speedB = DotProduct(B->m_vecMoveSpeed, colpoint.normal);
 
-		float mA = A->GetMassTweak(pointposA, colpoint.normal, massFactorA);
+		float mA = A->GetMassTweak(pointposA-comA, colpoint.normal, massFactorA);
 		float mB = B->m_fMass*massFactorB;
 		float speedSum = (mB*speedB + mA*speedA)/(mA + mB);
 		if(speedA < speedSum){
@@ -872,8 +899,8 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 		CVector pointposB = colpoint.point - B->GetPosition();
 		speedA = DotProduct(A->GetSpeed(pointposA), colpoint.normal);
 		speedB = DotProduct(B->GetSpeed(pointposB), colpoint.normal);
-		float mA = A->GetMassTweak(pointposA, colpoint.normal, massFactorA);
-		float mB = B->GetMassTweak(pointposB, colpoint.normal, massFactorB);
+		float mA = A->GetMassTweak(pointposA-comA, colpoint.normal, massFactorA);
+		float mB = B->GetMassTweak(pointposB-comB, colpoint.normal, massFactorB);
 		float speedSum = (mB*speedB + mA*speedA)/(mA + mB);
 		if(speedA < speedSum){
 			if(A->bHasHitWall)
@@ -889,8 +916,8 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 			CVector fA = colpoint.normal*(impulseA/massFactorA);
 			CVector fB = colpoint.normal*(-impulseB/massFactorB);
 			if(A->IsVehicle() && !A->bHasHitWall){
-				fA.x *= 1.4f;
-				fA.y *= 1.4f;
+//				fA.x *= 1.4f;
+//				fA.y *= 1.4f;
 				if(colpoint.normal.z < 0.7f)
 					fA.z *= 0.3f;
 				if(A->GetStatus() == STATUS_PLAYER)
@@ -901,8 +928,8 @@ CPhysical::ApplyCollision(CPhysical *B, CColPoint &colpoint, float &impulseA, fl
 				}
 			}
 			if(B->IsVehicle() && !B->bHasHitWall){
-				fB.x *= 1.4f;
-				fB.y *= 1.4f;
+//				fB.x *= 1.4f;
+//				fB.y *= 1.4f;
 				if(-colpoint.normal.z < 0.7f)
 					fB.z *= 0.3f;
 				if(B->GetStatus() == STATUS_PLAYER)
@@ -953,8 +980,8 @@ CPhysical::ApplyCollision(CColPoint &colpoint, float &impulse)
 			impulse = -(m_fElasticity + 1.0f) * speed * mass;
 			CVector f = colpoint.normal*impulse;
 			if(IsVehicle()){
-				f.x *= 1.4f;
-				f.y *= 1.4f;
+//				f.x *= 1.4f;
+//				f.y *= 1.4f;
 				if(colpoint.normal.z < 0.7f)
 					f.z *= 0.3f;
 			}
@@ -1032,7 +1059,7 @@ CPhysical::ApplyCollisionAlt(CEntity *B, CColPoint &colpoint, float &impulse, CV
 			   Abs(m_vecMoveSpeed.z) < minspeed*2.0f)
 				impulse = -0.8f * normalSpeed * mass;
 			else if(IsVehicle() && ((CVehicle*)this)->IsBoat() &&
-			   colpoint.surfaceB == SURFACE_WOOD_SOLID && colpoint.normal.z < 0.5f)
+			   (colpoint.surfaceB == SURFACE_WOOD_SOLID || colpoint.normal.z < 0.5f))
 				impulse = -(2.0f * m_fElasticity + 1.0f) * normalSpeed * mass;
 			else
 				impulse = -(m_fElasticity + 1.0f) * normalSpeed * mass;
@@ -1060,7 +1087,7 @@ CPhysical::ApplyCollisionAlt(CEntity *B, CColPoint &colpoint, float &impulse, CV
 	return false;
 }
 
-// --MIAMI: Proof-read once
+//LCS: the div by 0 is fixed differently. probably should use their fix?
 bool
 CPhysical::ApplyFriction(CPhysical *B, float adhesiveLimit, CColPoint &colpoint)
 {
@@ -1210,7 +1237,6 @@ CPhysical::ApplyFriction(CPhysical *B, float adhesiveLimit, CColPoint &colpoint)
 	return false;
 }
 
-// --MIAMI: Proof-read once
 bool
 CPhysical::ApplyFriction(float adhesiveLimit, CColPoint &colpoint)
 {
@@ -1276,7 +1302,6 @@ CPhysical::ApplyFriction(float adhesiveLimit, CColPoint &colpoint)
 	return false;
 }
 
-// --MIAMI: Proof-read once
 bool
 CPhysical::ProcessShiftSectorList(CPtrList *lists)
 {
@@ -1302,6 +1327,10 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 
 	A->GetBoundCentre(center);
 	radius = A->GetBoundRadius();
+
+	if(A->IsMultiplayer())
+		return false;
+
 	for(i = 0; i <= ENTITYLIST_PEDS_OVERLAP; i++){
 		list = &lists[i];
 		for(node = list->first; node; node = node->next){
@@ -1309,12 +1338,13 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 			Bobj = (CObject*)B;
 			skipShift = false;
 
-			if(B->IsBuilding() ||
-			   B->IsObject() && B->bInfiniteMass)
+			if(B->IsMultiplayer() || B->IsBuilding() ||
+			   B->IsObject() && B->bInfiniteMass ||
+			   A->IsPed() && B->IsObject() && B->GetIsStatic() && !Bobj->bHasBeenDamaged)
 				canshift = true;
 			else
-				canshift = A->IsPed() &&
-					B->IsObject() && B->GetIsStatic() && !Bobj->bHasBeenDamaged;
+				canshift = false;
+
 			if(B == A ||
 			   B->m_scanCode == CWorld::GetCurrentScanCode() ||
 			   !B->bUsesCollision ||
@@ -1343,7 +1373,7 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 						Aobj->m_pCollidingEntity = nil;
 				}else if(Aobj->m_pCollidingEntity != B){
 					CMatrix inv;
-					CVector size = CModelInfo::GetModelInfo(A->GetModelIndex())->GetColModel()->boundingBox.GetSize();
+					CVector size = CModelInfo::GetColModel(A->GetModelIndex())->boundingBox.GetSize();
 					size = A->GetMatrix() * size;
 					if(size.z < B->GetPosition().z ||
 					   (Invert(B->GetMatrix(), inv) * size).z < 0.0f){
@@ -1361,7 +1391,7 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 						Bobj->m_pCollidingEntity = nil;
 				}else if(Bobj->m_pCollidingEntity != A){
 					CMatrix inv;
-					CVector size = CModelInfo::GetModelInfo(B->GetModelIndex())->GetColModel()->boundingBox.GetSize();
+					CVector size = CModelInfo::GetColModel(B->GetModelIndex())->boundingBox.GetSize();
 					size = B->GetMatrix() * size;
 					if(size.z < A->GetPosition().z ||
 					   (Invert(A->GetMatrix(), inv) * size).z < 0.0f)
@@ -1373,10 +1403,11 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 			else if(A->IsPed() && IsBodyPart(B->GetModelIndex()))
 				skipShift = true;
 			else if(A->IsPed() && ((CPed*)A)->m_pCollidingEntity == B ||
-			  B->IsPed() && ((CPed*)B)->m_pCollidingEntity == A ||
-			  A->GetModelIndex() == MI_RCBANDIT && B->IsVehicle() ||
-			  B->GetModelIndex() == MI_RCBANDIT && (A->IsPed() || A->IsVehicle()))
+			        B->IsPed() && ((CPed*)B)->m_pCollidingEntity == A)
 				skipShift = true;
+//			else if(A->GetModelIndex() == MI_RCBANDIT && B->IsVehicle() ||
+//			        B->GetModelIndex() == MI_RCBANDIT && (A->IsPed() || A->IsVehicle()))
+//				skipShift = true;
 
 			if(skipShift)
 				continue;
@@ -1418,6 +1449,7 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 				dir.Normalise();
 				B->GetMatrix().Translate(dir * colpoints[mostColliding].GetDepth() / (1.0f - f));
 				// BUG? how can that ever happen? A is a Ped
+				// LCS: gone or just optimized away?
 				if(B->IsVehicle())
 					B->ProcessEntityCollision(A, colpoints);
 			}else{
@@ -1439,7 +1471,6 @@ CPhysical::ProcessShiftSectorList(CPtrList *lists)
 	return true;
 }
 
-// --MIAMI: Proof-read once
 bool
 CPhysical::ProcessCollisionSectorList_SimpleCar(CPtrList *lists)
 {
@@ -1481,6 +1512,10 @@ CPhysical::ProcessCollisionSectorList_SimpleCar(CPtrList *lists)
 			   B->bUsesCollision &&
 			   B->GetIsTouching(center, radius)){
 				B->m_scanCode = CWorld::GetCurrentScanCode();
+#ifndef FIX_BUGS
+				// surely they didn't mean to call this twice?
+				numCollisions = A->ProcessEntityCollision(B, aColPoints);
+#endif
 				numCollisions = A->ProcessEntityCollision(B, aColPoints);
 				if(numCollisions > 0)
 					goto collision;
@@ -1606,7 +1641,6 @@ collision:
 	return true;
 }
 
-// --MIAMI: Proof-read once
 bool
 CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 {
@@ -1632,7 +1666,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 	radius = A->GetBoundRadius();
 	A->GetBoundCentre(center);
 
-	for(j = 0; j <= ENTITYLIST_PEDS_OVERLAP; j++){
+	for(j = A->IsMultiplayer() ? 1 : 0; j <= ENTITYLIST_PEDS_OVERLAP; j++){
 		list = &lists[j];
 
 		CPtrNode *listnode;
@@ -1641,21 +1675,19 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 			Bobj = (CObject*)B;
 			Bped = (CPed*)B;
 
-			bool isTouching = true;
 			if(!B->bUsesCollision ||
 			   B->m_scanCode == CWorld::GetCurrentScanCode() ||
-			   B == A ||			   
-			   !(isTouching = B->GetIsTouching(center, radius))){
-				if(!isTouching){
-					if(A->IsObject() && Aobj->m_pCollidingEntity == B)
-						Aobj->m_pCollidingEntity = nil;
-					else if(B->IsObject() && Bobj->m_pCollidingEntity == A)
-						Bobj->m_pCollidingEntity = nil;
-					else if(A->IsPed() && Aped->m_pCollidingEntity == B)
-						Aped->m_pCollidingEntity = nil;
-					else if(B->IsPed() && Bped->m_pCollidingEntity == A)
-						Bped->m_pCollidingEntity = nil;
-				}
+			   B == A)
+				continue;
+			if(!B->GetIsTouching(center, radius)){
+				if(A->IsObject() && Aobj->m_pCollidingEntity == B)
+					Aobj->m_pCollidingEntity = nil;
+				else if(B->IsObject() && Bobj->m_pCollidingEntity == A)
+					Bobj->m_pCollidingEntity = nil;
+				else if(A->IsPed() && Aped->m_pCollidingEntity == B)
+					Aped->m_pCollidingEntity = nil;
+				else if(B->IsPed() && Bped->m_pCollidingEntity == A)
+					Bped->m_pCollidingEntity = nil;
 				continue;
 			}
 
@@ -1677,6 +1709,18 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 				skipCollision = true;
 				A->bSkipLineCol = true;
 				Bobj->m_pCollidingEntity = A;
+			}else if(A->IsObject() && Aobj->m_nSpecialCollisionResponseCases == COLLRESPONSE_FENCEPART &&
+			         B->IsObject() && Bobj->m_nSpecialCollisionResponseCases == COLLRESPONSE_FENCEPART){
+				skipCollision = true;
+				A->bSkipLineCol = true;
+			}else if(A->IsObject() && Aobj->bIsStreetLight && !B->IsBuilding() && IsLCSTrafficLight(A->GetModelIndex())){
+				skipCollision = true;
+				A->bSkipLineCol = true;
+				Aobj->m_pCollidingEntity = B;
+			}else if(B->IsObject() && Bobj->bIsStreetLight && !A->IsBuilding() && IsLCSTrafficLight(B->GetModelIndex())){
+				skipCollision = true;
+				B->bSkipLineCol = true;
+				Bobj->m_pCollidingEntity = A;
 			}else if(A->IsObject() && B->IsVehicle()){
 				if(A->GetModelIndex() == MI_CAR_BUMPER)
 					skipCollision = true;
@@ -1687,7 +1731,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 						skipCollision = true;
 					else if(Aobj->m_nCollisionDamageEffect < DAMAGE_EFFECT_SMASH_COMPLETELY){
 						CMatrix inv;
-						CVector size = CModelInfo::GetModelInfo(A->GetModelIndex())->GetColModel()->boundingBox.GetSize();
+						CVector size = CModelInfo::GetColModel(A->GetModelIndex())->boundingBox.GetSize();
 						size = A->GetMatrix() * size;
 						if(size.z < B->GetPosition().z ||
 						   (Invert(B->GetMatrix(), inv) * size).z < 0.0f){
@@ -1706,7 +1750,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 						skipCollision = true;
 					else if(Bobj->m_nCollisionDamageEffect < DAMAGE_EFFECT_SMASH_COMPLETELY){
 						CMatrix inv;
-						CVector size = CModelInfo::GetModelInfo(B->GetModelIndex())->GetColModel()->boundingBox.GetSize();
+						CVector size = CModelInfo::GetColModel(B->GetModelIndex())->boundingBox.GetSize();
 						size = B->GetMatrix() * size;
 						if(size.z < A->GetPosition().z ||
 						   (Invert(A->GetMatrix(), inv) * size).z < 0.0f){
@@ -1721,20 +1765,39 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 			  B->GetPosition().z < A->GetPosition().z){
 				skipCollision = true;
 				A->bSkipLineCol = true;
-			}else if(A->IsPed() && Aped->m_pCollidingEntity == B){
+			}else if(A->IsPed() && (Aped->m_pCollidingEntity == B || !A->phys_lcs_unk1)){
 				skipCollision = true;
 				if(!Aped->bKnockedUpIntoAir || Aped->bKnockedOffBike)
 					A->bSkipLineCol = true;
-			}else if(B->IsPed() && Bped->m_pCollidingEntity == A){
+			}else if(B->IsPed() && (Bped->m_pCollidingEntity == A || !B->phys_lcs_unk1)){
 				skipCollision = true;
 				A->bSkipLineCol = true;
-			}else if(A->GetModelIndex() == MI_RCBANDIT && (B->IsPed() || B->IsVehicle()) ||
-			         B->GetModelIndex() == MI_RCBANDIT && (A->IsPed() || A->IsVehicle())){
-				skipCollision = true;
-				A->bSkipLineCol = true;
+//			}else if(A->GetModelIndex() == MI_RCBANDIT && (B->IsPed() || B->IsVehicle()) ||
+//			         B->GetModelIndex() == MI_RCBANDIT && (A->IsPed() || A->IsVehicle())){
+//				skipCollision = true;
+//				A->bSkipLineCol = true;
 			}else if(A->IsPed() && B->IsObject() && Bobj->m_fUprootLimit > 0.0f)
 				altcollision = true;
 
+			if(A->IsObject() && !B->IsBuilding()){
+				if(!A->phys_lcs_unk1){
+					A->bSkipLineCol = true;
+					skipCollision = true;
+#ifdef FIX_BUGS
+					// looks correct below
+					Aobj->m_pCollidingEntity = B;
+#else
+					Aobj->m_pCollidingEntity = A;
+#endif
+				}
+			}
+			if(B->IsObject() && !A->IsBuilding()){
+				if(!B->phys_lcs_unk1){
+					B->bSkipLineCol = true;
+					skipCollision = true;
+					Bobj->m_pCollidingEntity = A;
+				}
+			}
 
 			if(!A->bUsesCollision || skipCollision){
 				B->m_scanCode = CWorld::GetCurrentScanCode();
@@ -1764,6 +1827,8 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 						if(impulseA > maxImpulseA) maxImpulseA = impulseA;
 
 						if(A->IsVehicle()){
+							if(B->IsMultiplayer())
+								A->SendMuliVehicleCollision(B, &aColPoints[i], impulseA);
 							if(!(((CVehicle*)A)->IsBoat() && aColPoints[i].surfaceB == SURFACE_WOOD_SOLID) &&
 							   impulseA > A->m_fDamageImpulse)
 								A->SetDamagedPieceRecord(aColPoints[i].pieceA, impulseA, B, aColPoints[i].normal);
@@ -1801,6 +1866,8 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 						float adhesion = CSurfaceTable::GetAdhesiveLimit(aColPoints[i]) / numCollisions;
 
 						if(A->IsVehicle()){
+							if(B->IsMultiplayer())
+								A->SendMuliVehicleCollision(B, &aColPoints[i], impulseA);
 							if(((CVehicle*)A)->IsBoat() && aColPoints[i].surfaceB == SURFACE_WOOD_SOLID)
 								adhesion = 0.0f;
 							else if(impulseA > A->m_fDamageImpulse)
@@ -1856,7 +1923,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 					if(!CWorld::bNoMoreCollisionTorque &&
 					   A->GetStatus() == STATUS_PLAYER && A->IsVehicle() &&
 					   Abs(A->m_vecMoveSpeed.x) > 0.2f &&
-					   Abs(A->m_vecMoveSpeed.y) > 0.2f){
+					   Abs(A->m_vecMoveSpeed.y) > 0.2f && !A->bIsInWater){
 						A->m_vecMoveFriction.x += moveSpeed.x * -0.3f / numCollisions;
 						A->m_vecMoveFriction.y += moveSpeed.y * -0.3f / numCollisions;
 						A->m_vecTurnFriction += turnSpeed * -0.3f / numCollisions;
@@ -2009,7 +2076,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 						Bobj->ObjectDamage(maxImpulseB);
 					else if(Bobj->m_nCollisionDamageEffect >= DAMAGE_EFFECT_SMASH_COMPLETELY){
 						CMatrix inv;
-						CVector size = CModelInfo::GetModelInfo(B->GetModelIndex())->GetColModel()->boundingBox.GetSize();
+						CVector size = CModelInfo::GetColModel(B->GetModelIndex())->boundingBox.GetSize();
 						size = B->GetMatrix() * size;
 						if(size.z < A->GetPosition().z ||
 						   (Invert(A->GetMatrix(), inv) * size).z < 0.0f)
@@ -2024,7 +2091,7 @@ CPhysical::ProcessCollisionSectorList(CPtrList *lists)
 					else if(Bobj->m_nCollisionDamageEffect >= DAMAGE_EFFECT_SMASH_COMPLETELY){
 #endif
 						CMatrix inv;
-						CVector size = CModelInfo::GetModelInfo(A->GetModelIndex())->GetColModel()->boundingBox.GetSize();
+						CVector size = CModelInfo::GetColModel(A->GetModelIndex())->boundingBox.GetSize();
 						size = A->GetMatrix() * size;
 						if(size.z < B->GetPosition().z ||
 						   (Invert(B->GetMatrix(), inv) * size).z < 0.0f)
@@ -2077,7 +2144,6 @@ CPhysical::CheckCollision_SimpleCar(void)
 
 float PHYSICAL_SHIFT_SPEED_DAMP = 0.707f;
 
-// --MIAMI: Proof-read once
 void
 CPhysical::ProcessShift(void)
 {
@@ -2133,7 +2199,7 @@ CPhysical::ProcessShift(void)
 }
 
 // x is the number of units (m) we would like to step
-#define NUMSTEPS(x) ceil(Sqrt(distSq) * (1.0f/(x)))
+#define NUMSTEPS(x) Ceil(Sqrt(distSq) * (1.0f/(x)))
 
 float HIGHSPEED_ELASTICITY_MULT_PED = 2.0f;
 float HIGHSPEED_ELASTICITY_MULT_COPCAR = 2.0f;
@@ -2148,7 +2214,7 @@ CPhysical::ProcessCollision(void)
 	m_bIsVehicleBeingShifted = false;
 	bSkipLineCol = false;
 
-	if(!bUsesCollision){
+	if(!bUsesCollision || IsMultiplayer()){
 		bIsStuck = false;
 		bIsInSafePosition = true;
 		RemoveAndAdd();
@@ -2178,60 +2244,66 @@ CPhysical::ProcessCollision(void)
 	float distSq = m_vecMoveSpeed.MagnitudeSqr() * sq(CTimer::GetTimeStep());
 
 	if(IsPed() && (distSq >= sq(0.3f) || ped->IsPlayer())){
-		if(ped->IsPlayer()){
-			if(ped->m_pCurrentPhysSurface)
-				n = Max(NUMSTEPS(0.15f), 4.0f);
-			else
-				n = Max(NUMSTEPS(0.3f), 2.0f);
-		}else
-			n = NUMSTEPS(0.45f);
+		if(ped->IsPlayer() && ped->m_pCurrentPhysSurface)
+			n = Max(NUMSTEPS(0.15f), 4.0f);
+		else
+			n = Max(NUMSTEPS(0.3f), 2.0f);
+		if(ped->IsPlayer() && ped->bHasHitWall)
+			n *= 2;
 		step = savedTimeStep / n;
 		if(!ped->IsPlayer())
 			ped->m_fElasticity *= HIGHSPEED_ELASTICITY_MULT_PED;
-	}else if(IsVehicle() && distSq >= sq(0.4f)){
+	}else if(IsVehicle()){
 		if(GetStatus() == STATUS_PLAYER)
-			n = NUMSTEPS(0.2f);
+			n = NUMSTEPS(0.3f);
 		else
-			n = distSq > 0.32f ? NUMSTEPS(0.3f) : NUMSTEPS(0.4f);
+			n = NUMSTEPS(0.4f);
+		if(n == 0)
+			n = 1;
 		step = savedTimeStep / n;
+		if(n > 2){
+			CVector bbox = GetColModel()->boundingBox.GetSize();
+			float relDistX = Abs(DotProduct(m_vecMoveSpeed, GetRight())) * CTimer::GetTimeStep() / bbox.x;
+			float relDistY = Abs(DotProduct(m_vecMoveSpeed, GetForward())) * CTimer::GetTimeStep() / bbox.y;
+			float relDistZ = Abs(DotProduct(m_vecMoveSpeed, GetUp())) * CTimer::GetTimeStep() / bbox.z;
+			float relDist = Max(relDistX, Max(relDistY, relDistZ));
+			if(((CVehicle*)this)->GetVehicleAppearance() == VEHICLE_APPEARANCE_BIKE)
+				relDist *= 2.0f;
+			if(relDist < 1.0f){
+				// check if we can get away with simplified processing
 
-		CVector bbox = GetColModel()->boundingBox.GetSize();
-		float relDistX = Abs(DotProduct(m_vecMoveSpeed, GetRight())) * CTimer::GetTimeStep() / bbox.x;
-		float relDistY = Abs(DotProduct(m_vecMoveSpeed, GetForward())) * CTimer::GetTimeStep() / bbox.y;
-		float relDistZ = Abs(DotProduct(m_vecMoveSpeed, GetUp())) * CTimer::GetTimeStep() / bbox.z;
-		if(Max(relDistX, Max(relDistY, relDistZ)) < 1.0f){
-			// check if we can get away with simplified processing
-
-			ApplyMoveSpeed();
-			ApplyTurnSpeed();
-			GetMatrix().Reorthogonalise();
-			bSkipLineCol = false;
-			m_bIsVehicleBeingShifted = false;
-
-			bJustCheckCollision = true;
-			bUsesCollision = false;
-			if(!CheckCollision()){
-				bJustCheckCollision = false;
-				bUsesCollision = true;
-				if(IsVehicle())
-					((CVehicle*)this)->bVehicleColProcessed = true;
-
-				bHitByTrain = false;
-				m_fDistanceTravelled = (GetPosition() - savedMatrix.GetPosition()).Magnitude();
+				ApplyMoveSpeed();
+				ApplyTurnSpeed();
+				GetMatrix().Reorthogonalise();
 				bSkipLineCol = false;
+				m_bIsVehicleBeingShifted = false;
 
-				bIsStuck = false;
-				bIsInSafePosition = true;
-				m_fElasticity = savedElasticity;
-				RemoveAndAdd();
-				return;
+				bJustCheckCollision = true;
+				bool savedUsesCollision = bUsesCollision;
+				bUsesCollision = false;
+				if(!CheckCollision()){
+					bJustCheckCollision = false;
+					bUsesCollision = savedUsesCollision;
+					if(IsVehicle())
+						((CVehicle*)this)->bVehicleColProcessed = true;
+
+					bHitByTrain = false;
+					m_fDistanceTravelled = (GetPosition() - savedMatrix.GetPosition()).Magnitude();
+					bSkipLineCol = false;
+
+					bIsStuck = false;
+					bIsInSafePosition = true;
+					m_fElasticity = savedElasticity;
+					RemoveAndAdd();
+					return;
+				}
+				bJustCheckCollision = false;
+				bUsesCollision = savedUsesCollision;
+				GetMatrix() = savedMatrix;
+				m_vecMoveSpeed = savedMoveSpeed;
+				if(IsVehicle() && ((CVehicle*)this)->bIsLawEnforcer)
+					m_fElasticity *= HIGHSPEED_ELASTICITY_MULT_COPCAR;
 			}
-			bJustCheckCollision = false;
-			bUsesCollision = true;
-			GetMatrix() = savedMatrix;
-			m_vecMoveSpeed = savedMoveSpeed;
-			if(IsVehicle() && ((CVehicle*)this)->bIsLawEnforcer)
-				m_fElasticity *= HIGHSPEED_ELASTICITY_MULT_COPCAR;
 		}
 	}else if(IsObject() && ((CObject*)this)->ObjectCreatedBy != TEMP_OBJECT){
 		int responsecase = ((CObject*)this)->m_nSpecialCollisionResponseCases;
@@ -2314,7 +2386,7 @@ CPhysical::ProcessCollision(void)
 	bSkipLineCol = false;
 	if(!m_vecMoveSpeed.IsZero() ||
 	   !m_vecTurnSpeed.IsZero() ||
-	   bHitByTrain ||
+//	   bHitByTrain ||
 	   GetStatus() == STATUS_PLAYER ||
 	   IsVehicle() && ((CVehicle*)this)->bRestingOnPhysical ||
 	   IsPed() && ped->IsPlayer()){
