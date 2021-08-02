@@ -1022,6 +1022,10 @@ const char* gRadarTexNames[] = {
 void
 CRadar::Initialise()
 {
+#ifdef MENU_MAP
+	TargetMarkerId = -1;
+#endif
+
 	for (int i = 0; i < NUMRADARBLIPS; i++) {
 		ms_RadarTrace[i].m_BlipIndex = 1;
 		SetRadarMarkerState(i, false);
@@ -1107,14 +1111,22 @@ INITSAVEBUF
 	WriteSaveHeader(buf, 'R', 'D', 'R', '\0', *size - SAVE_HEADER_SIZE);
 
 #ifdef MENU_MAP
+	bool bWaypointDeleted = false;
 	if (TargetMarkerId != -1) {
 		ClearBlip(TargetMarkerId);
 		TargetMarkerId = -1;
+		bWaypointDeleted = true;
 	}
 #endif
 
 	for (int i = 0; i < NUMRADARBLIPS; i++)
 		WriteSaveBuf(buf, ms_RadarTrace[i]);
+
+	
+#ifdef MENU_MAP
+	if(bWaypointDeleted)
+		ToggleTargetMarker(TargetMarkerPos.x, TargetMarkerPos.y);
+#endif
 
 VALIDATESAVEBUF(*size);
 }
