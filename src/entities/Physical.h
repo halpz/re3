@@ -15,8 +15,6 @@ class CTreadable;
 class CPhysical : public CEntity
 {
 public:
-	// The not properly indented fields haven't been checked properly yet
-
 	int32 m_audioEntityId;
 	float m_phys_unused1;
 	uint32 m_nLastTimeCollided;
