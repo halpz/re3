@@ -45,6 +45,9 @@ CSprite2d CRadar::SaveSprite;
 CSprite2d CRadar::SpraySprite;
 CSprite2d CRadar::TonySprite;
 CSprite2d CRadar::WeaponSprite;
+#ifdef MENU_MAP
+CSprite2d CRadar::WaypointSprite;
+#endif
 
 CSprite2d *CRadar::RadarSprites[RADAR_SPRITE_COUNT] = { 
 	nil,
@@ -67,7 +70,10 @@ CSprite2d *CRadar::RadarSprites[RADAR_SPRITE_COUNT] = {
 	&SaveSprite,
 	&SpraySprite,
 	&TonySprite,
-	&WeaponSprite
+	&WeaponSprite,
+#ifdef MENU_MAP
+	&WaypointSprite
+#endif
 };
 
 // Why this doesn't coincide with world coordinates i don't know
@@ -917,6 +923,9 @@ void CRadar::DrawRadarSection(int32 x, int32 y)
 
 void CRadar::DrawRadarSprite(uint16 sprite, float x, float y, uint8 alpha)
 {
+#ifdef MENU_MAP
+	if(sprite == RADAR_SPRITE_WAYPOINT) alpha = 255;
+#endif
 	RadarSprites[sprite]->Draw(CRect(x - SCREEN_SCALE_X(8.0f), y - SCREEN_SCALE_Y(8.0f), x + SCREEN_SCALE_X(8.0f), y + SCREEN_SCALE_Y(8.0f)), CRGBA(255, 255, 255, alpha));
 }
 
@@ -1094,6 +1103,43 @@ CRadar::LoadTextures()
 	SpraySprite.SetTexture("radar_spray");
 	TonySprite.SetTexture("radar_tony");
 	WeaponSprite.SetTexture("radar_weapon");
+#ifdef MENU_MAP
+	WaypointSprite.SetTexture("radar_waypoint");
+	if(!WaypointSprite.m_pTexture) {
+		// create the texture if it's missing in TXD
+#define WAYPOINT_R (255)
+#define WAYPOINT_G (72)
+#define WAYPOINT_B (77)
+
+		RwRaster *raster = RwRasterCreate(16, 16, 0, rwRASTERTYPETEXTURE | rwRASTERFORMAT8888);
+
+		RwUInt32 *pixels = (RwUInt32 *)RwRasterLock(raster, 0, rwRASTERLOCKWRITE);
+		for(int x = 0; x < 16; x++)
+			for(int y = 0; y < 16; y++)
+			{
+				int x2 = x < 8 ? x : 7 - (x & 7);
+				int y2 = y < 8 ? y : 7 - (y & 7);
+				if ((y2 >= 4 && x2 >= 4) // square in the center is transparent
+					|| (x2 < 2 && y2 == 0) // two pixels on each side of first/last line are transparent
+					|| (x2 < 1 && y2 == 1)) // one pixel on each side of second to first/last line is transparent
+					pixels[x + y * 16] = 0;
+				else if((x2 == 2 && y2 >= 2)|| (y2 == 2 && x2 >= 2) )// colored square inside
+#ifdef RW_GL3
+					pixels[x + y * 16] = WAYPOINT_R | (WAYPOINT_G << 8) | (WAYPOINT_B << 16) | (255 << 24);
+#else
+					pixels[x + y * 16] = WAYPOINT_B | (WAYPOINT_G << 8) | (WAYPOINT_R << 16) | (255 << 24);
+#endif
+				else
+					pixels[x + y * 16] = 0xFF000000; // black
+			}
+		RwRasterUnlock(raster);
+		WaypointSprite.m_pTexture = RwTextureCreate(raster);
+		RwTextureSetFilterMode(WaypointSprite.m_pTexture, rwFILTERLINEAR);
+#undef WAYPOINT_R
+#undef WAYPOINT_G
+#undef WAYPOINT_B
+	}
+#endif
 	CTxdStore::PopCurrentTxd();
 }
 
@@ -1293,6 +1339,9 @@ void CRadar::Shutdown()
 	SpraySprite.Delete();
 	TonySprite.Delete();
 	WeaponSprite.Delete();
+#ifdef MENU_MAP
+	WaypointSprite.Delete();
+#endif
 	RemoveRadarSections();
 }
 
@@ -1488,12 +1537,12 @@ CRadar::ToggleTargetMarker(float x, float y)
 {
 	if (TargetMarkerId == -1) {
 		int nextBlip;
-		for (nextBlip = 0; nextBlip < NUMRADARBLIPS; nextBlip++) {
+		for (nextBlip = NUMRADARBLIPS-1; nextBlip >= 0; nextBlip--) {
 			if (!ms_RadarTrace[nextBlip].m_bInUse)
 				break;
 		}
 #ifdef FIX_BUGS
-		if (nextBlip == NUMRADARBLIPS)
+		if (nextBlip == 0)
 			return;
 #endif
 		ms_RadarTrace[nextBlip].m_eBlipType = BLIP_COORD;
@@ -1501,14 +1550,14 @@ CRadar::ToggleTargetMarker(float x, float y)
 		ms_RadarTrace[nextBlip].m_bDim = 0;
 		ms_RadarTrace[nextBlip].m_bInUse = 1;
 		ms_RadarTrace[nextBlip].m_Radius = 1.0f;
-		CVector pos(x, y, CWorld::FindGroundZForCoord(x,y));
+		CVector pos(x, y, 0.0f/*CWorld::FindGroundZForCoord(x,y)*/);
 		TargetMarkerPos = pos;
 		ms_RadarTrace[nextBlip].m_vec2DPos = pos;
 		ms_RadarTrace[nextBlip].m_vecPos = pos;
 		ms_RadarTrace[nextBlip].m_nEntityHandle = 0;
 		ms_RadarTrace[nextBlip].m_wScale = 5;
 		ms_RadarTrace[nextBlip].m_eBlipDisplay = BLIP_DISPLAY_BLIP_ONLY;
-		ms_RadarTrace[nextBlip].m_eRadarSprite = RADAR_SPRITE_NONE;
+		ms_RadarTrace[nextBlip].m_eRadarSprite = RADAR_SPRITE_WAYPOINT;
 		TargetMarkerId = CRadar::GetNewUniqueBlipIndex(nextBlip);
 	} else {
 		ClearBlip(TargetMarkerId);

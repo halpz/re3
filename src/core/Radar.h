@@ -47,6 +47,9 @@ enum eRadarSprite
 	RADAR_SPRITE_SPRAY,
 	RADAR_SPRITE_TONY,
 	RADAR_SPRITE_WEAPON,
+#ifdef MENU_MAP
+	RADAR_SPRITE_WAYPOINT,
+#endif
 	RADAR_SPRITE_COUNT
 };
 
@@ -144,6 +147,7 @@ public:
 	static float cachedCos;
 	static float cachedSin;
 #ifdef MENU_MAP
+	static CSprite2d WaypointSprite;
 	static int TargetMarkerId;
 	static CVector TargetMarkerPos;
 

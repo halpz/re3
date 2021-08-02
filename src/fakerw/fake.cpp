@@ -235,8 +235,8 @@ RwRaster    *RwRasterGetCurrentContext(void) { return Raster::getCurrentContext(
 RwBool       RwRasterClear(RwInt32 pixelValue);
 RwBool       RwRasterClearRect(RwRect * rpRect, RwInt32 pixelValue);
 RwRaster    *RwRasterShowRaster(RwRaster * raster, void *dev, RwUInt32 flags);
-RwUInt8     *RwRasterLock(RwRaster * raster, RwUInt8 level, RwInt32 lockMode);
-RwRaster    *RwRasterUnlock(RwRaster * raster);
+RwUInt8     *RwRasterLock(RwRaster * raster, RwUInt8 level, RwInt32 lockMode) { return raster->lock(level, lockMode); }
+RwRaster    *RwRasterUnlock(RwRaster * raster) { raster->unlock(0); return raster; }
 RwUInt8     *RwRasterLockPalette(RwRaster * raster, RwInt32 lockMode);
 RwRaster    *RwRasterUnlockPalette(RwRaster * raster);
 RwInt32      RwRasterRegisterPlugin(RwInt32 size, RwUInt32 pluginID, RwPluginObjectConstructor constructCB, RwPluginObjectDestructor destructCB, RwPluginObjectCopy copyCB);
