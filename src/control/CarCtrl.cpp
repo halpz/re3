@@ -94,7 +94,7 @@ int32 CCarCtrl::NumRandomCars;
 int32 CCarCtrl::NumParkedCars;
 int32 CCarCtrl::NumPermanentCars;
 int8 CCarCtrl::CountDownToCarsAtStart;
-int32 CCarCtrl::MaxNumberOfCarsInUse = 12;
+int32 CCarCtrl::MaxNumberOfCarsInUse = DEFAULT_MAX_NUMBER_OF_CARS;
 uint32 CCarCtrl::LastTimeLawEnforcerCreated;
 uint32 CCarCtrl::LastTimeFireTruckCreated;
 uint32 CCarCtrl::LastTimeAmbulanceCreated;

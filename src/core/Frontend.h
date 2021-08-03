@@ -15,6 +15,9 @@
 
 #define MENUACTION_SCALE_MULT 0.9f
 
+#define MENUSLIDER_BARS 16
+#define MENUSLIDER_LOGICAL_BARS MENUSLIDER_BARS
+
 #define MENULABEL_X_MARGIN 80.0f
 #define MENULABEL_POS_X 100.0f
 #define MENULABEL_POS_Y 97.0f
@@ -230,6 +233,7 @@ enum eMenuScreen
 enum eMenuAction
 {
 #ifdef CUSTOM_FRONTEND_OPTIONS
+	MENUACTION_CFO_SLIDER = -3,
 	MENUACTION_CFO_SELECT = -2,
 	MENUACTION_CFO_DYNAMIC = -1,
 #endif
@@ -335,6 +339,10 @@ enum eCheckHover
 	HOVEROPTION_DECREASE_MOUSESENS,
 	HOVEROPTION_INCREASE_MP3BOOST,
 	HOVEROPTION_DECREASE_MP3BOOST,
+#ifdef CUSTOM_FRONTEND_OPTIONS
+	HOVEROPTION_INCREASE_CFO_SLIDER,
+	HOVEROPTION_DECREASE_CFO_SLIDER,
+#endif
 	HOVEROPTION_NOT_HOVERING,
 };
 
@@ -407,7 +415,7 @@ struct CCustomScreenLayout {
 
 struct CCFO
 {
-	int8 *value;
+	void *value;
 	const char *saveCat;
 	const char *save;
 };
@@ -435,6 +443,24 @@ struct CCFOSelect : CCFO
 		this->onlyApplyOnEnter = onlyApplyOnEnter;
 		this->changeFunc = changeFunc;
 		this->disableIfGameLoaded = disableIfGameLoaded;
+	}
+};
+
+// Value is float in here
+struct CCFOSlider : CCFO
+{
+	ChangeFuncFloat changeFunc;
+	float min;
+	float max;
+
+	CCFOSlider() {};
+	CCFOSlider(float* value, const char* saveCat, const char* save, float min, float max, ChangeFuncFloat changeFunc = nil){
+		this->value = value;
+		this->saveCat = saveCat;
+		this->save = save;
+		this->changeFunc = changeFunc;
+		this->min = min;
+		this->max = max;
 	}
 };
 
@@ -469,6 +495,7 @@ struct CMenuScreenCustom
 				CCFO *m_CFO; // for initializing
 				CCFOSelect *m_CFOSelect;
 				CCFODynamic *m_CFODynamic;
+				CCFOSlider *m_CFOSlider;
 			};
 			int32 m_SaveSlot; // eSaveSlot
 			int32 m_TargetMenu; // eMenuScreen
