@@ -47,6 +47,10 @@ void FlushLog();
 
 #define KEY_LENGTH_IN_SCRIPT (8)
 
+#ifdef USE_DEBUG_SCRIPT_LOADER
+extern const char* scriptfile;
+#endif
+
 //#define GTA_SCRIPT_COLLECTIVE
 
 struct intro_script_rectangle 
