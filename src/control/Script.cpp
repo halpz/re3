@@ -1239,7 +1239,7 @@ int8 CRunningScript::ProcessOneCommand()
 	else
 		script_assert(false);
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
-	LogAfterProcessingCommand(command);
+		LogAfterProcessingCommand(command);
 #elif defined USE_BASIC_SCRIPT_DEBUG_OUTPUT
 		if (m_bMissionFlag) {
 			char tmp[128];

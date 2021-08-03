@@ -4,10 +4,11 @@
 #include "ScriptCommands.h"
 
 #include "Debug.h"
+#include "FileMgr.h"
+#include "GameLogic.h"
 #ifdef MISSION_REPLAY
 #include "GenericGameStorage.h"
 #endif
-#include "FileMgr.h"
 #include "Messages.h"
 #include "Timer.h"
 #include "Stats.h"
@@ -1969,6 +1970,9 @@ CTheScripts::SwitchToMission(int32 mission)
 		CMessages::ClearMessages();
 	}
 
+	if (CTheScripts::NumberOfExclusiveMissionScripts > 0 && mission <= UINT16_MAX - 2)
+		return;
+
 #ifdef MISSION_REPLAY
 	missionRetryScriptIndex = mission;
 #ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
@@ -1979,7 +1983,6 @@ CTheScripts::SwitchToMission(int32 mission)
 #endif
 	CTimer::Suspend();
 	int offset = CTheScripts::MultiScriptArray[mission];
-	CFileMgr::ChangeDir("\\");
 #ifdef USE_DEBUG_SCRIPT_LOADER
 	CFileMgr::ChangeDir("\\data\\");
 	int handle = CFileMgr::OpenFile(scriptfile, "rb");
@@ -1996,5 +1999,6 @@ CTheScripts::SwitchToMission(int32 mission)
 	pMissionScript->m_bIsMissionScript = true;
 	pMissionScript->m_bMissionFlag = true;
 	CTheScripts::bAlreadyRunningAMissionScript = true;
+	CGameLogic::ClearShortCut();
 }
 #endif
