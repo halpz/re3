@@ -4,6 +4,9 @@
 #include "ScriptCommands.h"
 
 #include "Debug.h"
+#ifdef MISSION_REPLAY
+#include "GenericGameStorage.h"
+#endif
 #include "FileMgr.h"
 #include "Messages.h"
 #include "Timer.h"
@@ -1905,6 +1908,7 @@ void CRunningScript::LogBeforeProcessingCommand(int32 command)
 		uint32 t = m_nIp;
 		m_nIp = storedIp;
 		storedIp = t;
+	}
 }
 
 void CRunningScript::LogAfterProcessingCommand(int32 command)
@@ -1944,17 +1948,6 @@ void CRunningScript::LogAfterProcessingCommand(int32 command)
 
 #endif
 
-void FlushLog()
-{
-#ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
-#if SCRIPT_LOG_FILE_LEVEL == 1 || SCRIPT_LOG_FILE_LEVEL == 2
-	if (dbg_log)
-		fflush(dbg_log);
-#endif
-#endif
-}
-
-
 #ifdef MISSION_SWITCHER
 void
 CTheScripts::SwitchToMission(int32 mission)
@@ -1978,15 +1971,21 @@ CTheScripts::SwitchToMission(int32 mission)
 
 #ifdef MISSION_REPLAY
 	missionRetryScriptIndex = mission;
-	if (missionRetryScriptIndex == 19)
-		CStats::LastMissionPassedName[0] = '\0';
+#ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
+	if (CTheScripts::MissionSupportsMissionReplay(missionRetryScriptIndex)) {
+		SaveGameForPause(4);
+	}
+#endif
 #endif
 	CTimer::Suspend();
 	int offset = CTheScripts::MultiScriptArray[mission];
 	CFileMgr::ChangeDir("\\");
 #ifdef USE_DEBUG_SCRIPT_LOADER
-	int handle = open_script();
+	CFileMgr::ChangeDir("\\data\\");
+	int handle = CFileMgr::OpenFile(scriptfile, "rb");
+	CFileMgr::ChangeDir("\\");
 #else
+	CFileMgr::ChangeDir("\\");
 	int handle = CFileMgr::OpenFile("data\\main.scm", "rb");
 #endif
 	CFileMgr::Seek(handle, offset, 0);

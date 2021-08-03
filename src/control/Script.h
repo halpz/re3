@@ -49,6 +49,11 @@ void FlushLog();
 
 #define KEY_LENGTH_IN_SCRIPT (8)
 
+#ifdef USE_DEBUG_SCRIPT_LOADER
+extern const char* scriptfile;
+#endif
+
+//#define GTA_SCRIPT_COLLECTIVE
 #define GET_INTEGER_PARAM(i) (ScriptParams[i])
 #define GET_FLOAT_PARAM(i) (*(float*)&ScriptParams[i])
 #define GET_VECTOR_PARAM(i) (CVector(GET_FLOAT_PARAM(i), GET_FLOAT_PARAM(i+1), GET_FLOAT_PARAM(i+2)))
