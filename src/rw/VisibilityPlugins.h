@@ -100,10 +100,8 @@ public:
 
 	struct AtomicExt
 	{
-		union {
-			int16 modelId;	// used by SimpleModelInfo
-			int flags;			// used by ClumpModelInfo
-		};
+		int16 modelId;	// used by SimpleModelInfo
+		uint16 flags;			// used by ClumpModelInfo
 #ifdef VIS_DISTANCE_ALPHA
 		int distanceAlpha;
 #endif

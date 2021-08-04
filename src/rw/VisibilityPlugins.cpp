@@ -902,6 +902,7 @@ void*
 CVisibilityPlugins::AtomicConstructor(void *object, int32, int32)
 {
 	ATOMICEXT(object)->modelId = -1;
+	ATOMICEXT(object)->flags = 0;
 #ifdef VIS_DISTANCE_ALPHA
 	// This seems strange, want to start out invisible before fading in
 	// but maybe it's set elsewhere?

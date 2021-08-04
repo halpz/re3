@@ -287,7 +287,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bHeadStuckInCollision = false;
 	bDeadPedInFrontOfCar = false;
 
-	m_gangFlags = 0xFF;
+	m_gangFlags = ~0;
 	
 	bStayInCarOnJack = false;
 
@@ -306,6 +306,10 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bBoughtIceCream = false;
 	bDonePositionOutOfCollision = false;
 	bCanAttackPlayerWithCops = false;
+
+	bDropsWeaponsOnDeath = false;
+	b1A4_2 = true;
+	bAttacksPlayerWithCops = false;
 
 	if (CGeneral::GetRandomNumber() & 3)
 		bHasACamera = false;
