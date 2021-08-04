@@ -527,7 +527,8 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 #ifdef FIX_BUGS
 		// contactSpeedFwd is independent of framerate but fwd has timestep as a factor
 		// so we probably have to fix this
-		fwd *= CTimer::GetTimeStepFix();
+		// better get rid of it here too
+		//fwd *= CTimer::GetTimeStepFix();
 #endif
 
 		if(!bBraking){
@@ -860,12 +861,11 @@ CVehicle::ProcessDelayedExplosion(void)
 	if(IsCar() && ((CAutomobile*)this)->m_bombType == CARBOMB_TIMEDACTIVE && (m_nBombTimer & 0xFE00) != (prev & 0xFE00))
 		DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_BOMB_TICK, 0.0f);
 
-	if (m_nBombTimer != 0)
-		return;
-
-	if(FindPlayerVehicle() != this && m_pBlowUpEntity == FindPlayerPed())
-		CWorld::Players[CWorld::PlayerInFocus].AwardMoneyForExplosion(this);
-	BlowUpCar(m_pBlowUpEntity);
+	if (m_nBombTimer == 0){
+		if(FindPlayerVehicle() != this && m_pBlowUpEntity == FindPlayerPed())
+			CWorld::Players[CWorld::PlayerInFocus].AwardMoneyForExplosion(this);
+		BlowUpCar(m_pBlowUpEntity);
+	}
 }
 
 bool
@@ -1207,7 +1207,7 @@ CVehicle::ProcessCarAlarm(void)
 {
 	uint32 step;
 
-	if(!IsAlarmOn())
+	if(m_nAlarmState == 0 || m_nAlarmState == -1)
 		return;
 
 	step = CTimer::GetTimeStepInMilliseconds();

@@ -25,8 +25,7 @@ enum eCarLock {
 	CARLOCK_LOCKOUT_PLAYER_ONLY,
 	CARLOCK_LOCKED_PLAYER_INSIDE,
 	CARLOCK_LOCKED_INITIALLY,
-	CARLOCK_FORCE_SHUT_DOORS,
-	CARLOCK_SKIP_SHUT_DOORS
+	CARLOCK_FORCE_SHUT_DOORS
 };
 
 enum eDoors
@@ -187,7 +186,7 @@ public:
 	uint8 m_bRainSamplesCounter;
 	uint8 m_nCarHornTimer;
 	uint8 m_nCarHornPattern; // last horn?
-	bool m_bSirenOrAlarm;
+	uint8 m_bSirenOrAlarm;
 	int8 m_comedyControlState;
 	CStoredCollPoly m_aCollPolys[2];     // poly which is under front/rear part of car
 	float m_fSteerInput;
