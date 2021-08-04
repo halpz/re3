@@ -841,7 +841,8 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 #ifdef FIX_BUGS
 		// contactSpeedFwd is independent of framerate but fwd has timestep as a factor
 		// so we probably have to fix this
-		fwd *= CTimer::GetTimeStepFix();
+		// better get rid of it here too
+		//fwd *= CTimer::GetTimeStepFix();
 #endif
 
 		if(!bBraking){
@@ -977,7 +978,8 @@ CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &whee
 #ifdef FIX_BUGS
 		// contactSpeedRight is independent of framerate but right has timestep as a factor
 		// so we probably have to fix this
-		right *= CTimer::GetTimeStepFix();
+		// see above
+		//right *= CTimer::GetTimeStepFix();
 #endif
 
 		if(wheelStatus == WHEEL_STATUS_BURST){
@@ -1002,7 +1004,8 @@ CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &whee
 #ifdef FIX_BUGS
 		// contactSpeedFwd is independent of framerate but fwd has timestep as a factor
 		// so we probably have to fix this
-		fwd *= CTimer::GetTimeStepFix();
+		// see above
+		//fwd *= CTimer::GetTimeStepFix();
 #endif
 
 		if(!bBraking){
@@ -1514,9 +1517,8 @@ CVehicle::MakeNonDraggedPedsLeaveVehicle(CPed *ped1, CPed *ped2, CPlayerPed *&pl
 		if(p && p != ped1 && !p->bStayInCarOnJack){
 			peds[numPeds++] = p;
 			// uhh what?
-			if(i < 1 && !ped1IsDriver)
-				continue;
-			peds2[numPeds2++] = p;
+			if(i > 0 || ped1IsDriver)
+				peds2[numPeds2++] = p;
 		}
 	}
 
@@ -1566,10 +1568,8 @@ CVehicle::ProcessDelayedExplosion(void)
 	if(IsCar() && ((CAutomobile*)this)->m_bombType == CARBOMB_TIMEDACTIVE && (m_nBombTimer & 0xFE00) != (prev & 0xFE00))
 		DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_BOMB_TICK, 0.0f);
 
-	if (m_nBombTimer != 0)
-		return;
-
-	BlowUpCar(m_pBlowUpEntity);
+	if (m_nBombTimer == 0)
+		BlowUpCar(m_pBlowUpEntity);
 }
 
 bool
@@ -1690,7 +1690,7 @@ CVehicle::CanPedOpenLocks(CPed *ped)
 	if(m_nDoorLock == CARLOCK_LOCKED ||
 	   m_nDoorLock == CARLOCK_LOCKED_INITIALLY ||
 	   m_nDoorLock == CARLOCK_LOCKED_PLAYER_INSIDE ||
-	   m_nDoorLock == CARLOCK_SKIP_SHUT_DOORS)
+	   m_nDoorLock == CARLOCK_LOCKED_BUT_CAN_BE_DAMAGED)
 		return false;
 	if(ped->IsPlayer() && m_nDoorLock == CARLOCK_LOCKOUT_PLAYER_ONLY)
 		return false;
@@ -1702,7 +1702,7 @@ CVehicle::CanDoorsBeDamaged(void)
 {
 	return m_nDoorLock == CARLOCK_NOT_USED ||
 		m_nDoorLock == CARLOCK_UNLOCKED ||
-		m_nDoorLock == CARLOCK_SKIP_SHUT_DOORS;
+		m_nDoorLock == CARLOCK_LOCKED_BUT_CAN_BE_DAMAGED;
 }
 
 bool
@@ -1975,9 +1975,7 @@ CVehicle::RemovePassenger(CPed *p)
 bool
 CVehicle::IsDriver(CPed *ped)
 {
-	if(ped == nil)
-		return false;
-	return ped == pDriver;
+	return ped && ped == pDriver;
 }
 
 bool
@@ -2028,7 +2026,7 @@ CVehicle::ProcessCarAlarm(void)
 {
 	uint32 step;
 
-	if(!IsAlarmOn())
+	if(m_nAlarmState == 0 || m_nAlarmState == -1)
 		return;
 
 	step = CTimer::GetTimeStepInMilliseconds();

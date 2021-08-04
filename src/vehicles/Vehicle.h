@@ -60,7 +60,7 @@ enum eCarLock {
 	CARLOCK_LOCKED_PLAYER_INSIDE,
 	CARLOCK_LOCKED_INITIALLY,
 	CARLOCK_FORCE_SHUT_DOORS,
-	CARLOCK_SKIP_SHUT_DOORS
+	CARLOCK_LOCKED_BUT_CAN_BE_DAMAGED
 };
 
 enum eBombType
@@ -271,7 +271,7 @@ public:
 	uint8 m_bRainSamplesCounter;
 	uint32 m_nCarHornTimer;
 	uint8 m_nCarHornPattern;
-	bool m_bSirenOrAlarm;
+	uint8 m_bSirenOrAlarm;
 	uint8 m_nCarHornDelay;
 	int8 m_comedyControlState;
 	CStoredCollPoly m_aCollPolys[2];     // poly which is under front/rear part of car
