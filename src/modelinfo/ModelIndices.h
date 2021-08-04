@@ -1293,6 +1293,15 @@ IsLampPost(int16 id)
 }
 
 inline bool
+IsLCSTrafficLight(int16 id)
+{
+	return id == MI_TLIGHT_POST ||
+		id == MI_TLIGHT_WALK ||
+		id == MI_TLIGHT_BOX1 ||
+		id == MI_TLIGHT_BOX2;
+}
+
+inline bool
 IsBodyPart(int16 id)
 {
 	return id == MI_BODYPARTA || id == MI_BODYPARTB;

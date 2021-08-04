@@ -15,8 +15,6 @@ class CTreadable;
 class CPhysical : public CEntity
 {
 public:
-	// The not properly indented fields haven't been checked properly yet
-
 	int32 m_audioEntityId;
 	float m_phys_unused1;
 	uint32 m_nLastTimeCollided;
@@ -63,8 +61,12 @@ public:
 	uint8 m_bIsVehicleBeingShifted : 1;	// wrong name - also used on but never set for peds
 	uint8 bJustCheckCollision : 1;	// just see if there is a collision
 
+bool phys_lcs_unk1;
+
 	uint8 m_nSurfaceTouched;
 	int8 m_nZoneLevel;
+
+int8 phys_lcs_unk2;
 
 	CPhysical(void);
 	~CPhysical(void);
@@ -77,6 +79,9 @@ public:
 	void ProcessShift(void);
 	void ProcessCollision(void);
 
+	// these two are virtual in LCS...why?
+	virtual void ApplyMoveSpeed(void);
+	virtual void ApplyTurnSpeed(void);
 	virtual int32 ProcessEntityCollision(CEntity *ent, CColPoint *colpoints);
 
 	void RemoveAndAdd(void);
@@ -143,8 +148,6 @@ public:
 		m_vecCentreOfMass.z = z;
 	}
 
-	void ApplyMoveSpeed(void);
-	void ApplyTurnSpeed(void);
 	// Force actually means Impulse here
 	void ApplyMoveForce(float jx, float jy, float jz);
 	void ApplyMoveForce(const CVector &j) { ApplyMoveForce(j.x, j.y, j.z); }
@@ -152,6 +155,7 @@ public:
 	void ApplyTurnForce(float jx, float jy, float jz, float px, float py, float pz);
 	// j is direction of force, p is point relative to model center where force is applied
 	void ApplyTurnForce(const CVector &j, const CVector &p) { ApplyTurnForce(j.x, j.y, j.z, p.x, p.y, p.z); }
+	void ApplyTurnForceMultiplayer(const CVector &j, const CVector &p);
 	void ApplyFrictionMoveForce(float jx, float jy, float jz);
 	void ApplyFrictionMoveForce(const CVector &j) { ApplyFrictionMoveForce(j.x, j.y, j.z); }
 	void ApplyFrictionTurnForce(float jx, float jy, float jz, float rx, float ry, float rz);
@@ -174,6 +178,8 @@ public:
 	bool ProcessCollisionSectorList(CPtrList *lists);
 	bool CheckCollision(void);
 	bool CheckCollision_SimpleCar(void);
+
+	void SendMuliVehicleCollision(CEntity *,CColPoint *,float) {}
 
 	// TEMP
 	bool ApplySpringCollisionAlt(float springConst, CVector &springDir, CVector &point, float springRatio, float bias, CVector &forceDir);
