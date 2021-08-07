@@ -572,7 +572,11 @@ CMenuManager::Initialise(void)
 	m_fMapCenterX = MENU_X_LEFT_ALIGNED(320.0f);
 	m_fMapCenterY = MENU_Y(225.0f);
 	CPad::StopPadsShaking();
+#ifdef MISSION_REPLAY
+	if (!m_OnlySaveMenu && m_nCurrScreen != MENUPAGE_MISSION_RETRY)
+#else
 	if (!m_OnlySaveMenu)
+#endif
 		m_nCurrScreen = MENUPAGE_NONE;
 	DMAudio.ChangeMusicMode(MUSICMODE_FRONTEND);
 	DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_STARTING, 0);
@@ -4769,6 +4773,18 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 					OutputDebugString("STARTED PLAYING FRONTEND AUDIO TRACK");
 				}
 				break;
+#ifdef MISSION_REPLAY
+			case MENUACTION_REJECT_RETRY:
+				doingMissionRetry = false;
+				AllowMissionReplay = 0;
+				RequestFrontEndShutDown();
+				break;
+			case MENUACTION_UNK114:
+				doingMissionRetry = false;
+				RequestFrontEndShutDown();
+				RetryMission(2, 0);
+				return;
+#endif
 			case MENUACTION_SAVEGAME:
 			{
 				int saveSlot = aScreens[m_nCurrScreen].m_aEntries[m_nCurrOption].m_SaveSlot;
@@ -5413,6 +5429,19 @@ CMenuManager::ProcessFileActions()
 {
 	switch (m_nCurrScreen) {
 		case MENUPAGE_LOADING_IN_PROGRESS:
+#ifdef MISSION_REPLAY
+			if (MissionSkipLevel) {
+				if (gGameState != GS_PLAYING_GAME)
+					DoSettingsBeforeStartingAGame();
+				RequestFrontEndShutDown();
+				break;
+			}
+			if (doingMissionRetry) {
+				RetryMission(2, 0);
+				m_nCurrSaveSlot = SLOT_COUNT;
+				doingMissionRetry = false;
+			}
+#endif
 			if (CheckSlotDataValid(m_nCurrSaveSlot)) {
 #ifdef USE_DEBUG_SCRIPT_LOADER
 				scriptToLoad = 0;

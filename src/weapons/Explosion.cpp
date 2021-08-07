@@ -102,7 +102,11 @@ CExplosion::GetExplosionPosition(uint8 id)
 }
 
 bool
+#ifdef SIMPLER_MISSIONS
+CExplosion::AddExplosion(CEntity* explodingEntity, CEntity* culprit, eExplosionType type, const CVector& pos, uint32 lifetime, bool makeSound, float radius)
+#else
 CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionType type, const CVector &pos, uint32 lifetime, bool makeSound)
+#endif
 {
 	CVector pPosn;
 	CVector posGround;
@@ -150,7 +154,11 @@ CExplosion::AddExplosion(CEntity *explodingEntity, CEntity *culprit, eExplosionT
 	switch (type)
 	{
 	case EXPLOSION_GRENADE:
+#ifdef SIMPLER_MISSIONS
+		explosion.m_fRadius = (radius == -1.0f ? 9.0f : radius);
+#else
 		explosion.m_fRadius = 9.0f;
+#endif
 		explosion.m_fPower = 300.0f;
 		explosion.m_fStopTime = lifetime + CTimer::GetTimeInMilliseconds() + 750;
 		explosion.m_fPropagationRate = 0.5f;

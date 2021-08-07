@@ -221,8 +221,11 @@ enum eMenuScreen
 #ifdef DETECT_JOYSTICK_MENU
 	MENUPAGE_DETECT_JOYSTICK,
 #endif
-
 #endif
+#ifdef MISSION_REPLAY
+	MENUPAGE_MISSION_RETRY,
+#endif
+
 	MENUPAGE_OUTRO, // Originally 34, but CFO needs last screen to be empty to count number of menu pages
 	MENUPAGES
 };
@@ -291,6 +294,10 @@ enum eMenuAction
 #ifdef GAMEPAD_MENU
 	MENUACTION_CTRLVIBRATION,
 	MENUACTION_CTRLCONFIG,
+#endif
+#ifdef MISSION_REPLAY
+	MENUACTION_REJECT_RETRY,
+	MENUACTION_UNK114
 #endif
 };
 

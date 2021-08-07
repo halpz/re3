@@ -576,6 +576,9 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 		return 0;
 	case COMMAND_DO_SAVE_GAME:
 		CollectParameters(&m_nIp, 1);
+#ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
+		UsingMobileScript = true;
+#endif
 #ifdef MISSION_REPLAY
 		SaveGameForPause(ScriptParams[0]);
 #endif
