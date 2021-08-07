@@ -47,3 +47,5 @@ public:
 		return ms_pColPool->GetSlot(slot);
 	}
 };
+
+const CVector& LevelPos(eLevelName level);

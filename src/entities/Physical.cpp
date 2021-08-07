@@ -20,6 +20,8 @@
 #include "Bike.h"
 #include "Pickups.h"
 #include "Physical.h"
+#include "ColStore.h"
+#include "Script.h"
 
 //--LCS: mostly done
 
@@ -163,6 +165,37 @@ CPhysical::Remove(void)
 	}
 }
 
+static void
+MoveVehicleToSafety(CVehicle* pVehicle)
+{
+	if (pVehicle->VehicleCreatedBy != MISSION_VEHICLE) {
+		CVector2D pos = LevelPos(CGame::currLevel);
+		int node = ThePaths.FindNodeClosestToCoors(CVector(pos.x, pos.y, 10.0f), PATH_CAR, 999999.9f, true, true);
+		CVector nodePos = ThePaths.FindNodeCoorsForScript(node);
+		float orientation = ThePaths.FindNodeOrientationForCarPlacement(node);
+		nodePos.x += 0.1f;
+		nodePos.y += 0.1f;
+		pVehicle->Teleport(nodePos + CVector(0.0f, 0.0f, pVehicle->GetDistanceFromCentreOfMassToBaseOfModel()));
+		CTheScripts::ClearSpaceForMissionEntity(nodePos, pVehicle);
+		pVehicle->AutoPilot.m_nCarMission = MISSION_CRUISE;
+		CCarCtrl::JoinCarWithRoadSystem(pVehicle);
+	}
+}
+
+static void
+MovePedToSafety(CPed* pPed)
+{
+	if (pPed->CharCreatedBy == RANDOM_CHAR) {
+		CVector2D pos = LevelPos(CGame::currLevel);
+		int node = ThePaths.FindNodeClosestToCoors(CVector(pos.x, pos.y, 10.0f), PATH_CAR, 999999.9f, true, true);
+		CVector nodePos = ThePaths.FindNodeCoorsForScript(node);
+		nodePos.x += 0.1f;
+		nodePos.y += 0.1f;
+		pPed->Teleport(nodePos + CVector(0.0f, 0.0f, pPed->GetDistanceFromCentreOfMassToBaseOfModel()));
+		CTheScripts::ClearSpaceForMissionEntity(nodePos, pPed);
+	}
+}
+
 void
 CPhysical::RemoveAndAdd(void)
 {
@@ -178,12 +211,53 @@ CPhysical::RemoveAndAdd(void)
 	ystart = CWorld::GetSectorIndexY(bounds.top);
 	yend   = CWorld::GetSectorIndexY(bounds.bottom);
 	ymid   = CWorld::GetSectorIndexY((bounds.top + bounds.bottom)/2.0f);
-	assert(xstart >= 0);
-	assert(xend < NUMSECTORS_X);
-	assert(ystart >= 0);
-	assert(yend < NUMSECTORS_Y);
+	//assert(xstart >= 0);
+	//assert(xend < NUMSECTORS_X);
+	//assert(ystart >= 0);
+	//assert(yend < NUMSECTORS_Y);
 
-	// TODO(LCS): there's a bunch of weird code in this function
+	// this is basically a replacement for the asserts above
+	if (xstart < 0 || xstart >= NUMSECTORS_X || ystart < 0 || ystart >= NUMSECTORS_Y) {
+		printf("*****************************\n");
+		printf("ENTITY GONE OUT OF WORLD! :(\n");
+		printf("model id = %d\n", GetModelIndex());
+		printf("type = %d\n", GetType());
+		printf("bound cent = %f %f %f\n",
+			(GetMatrix() * GetColModel()->boundingSphere.center).x,
+			(GetMatrix() * GetColModel()->boundingSphere.center).y,
+			(GetMatrix() * GetColModel()->boundingSphere.center).z);
+		switch (GetType()) {
+		case ENTITY_TYPE_PED:
+			printf("ped created by = %d\n", ((CPed*)this)->CharCreatedBy);
+			break;
+		case ENTITY_TYPE_VEHICLE:
+			printf("vehcile created by = %d\n", ((CVehicle*)this)->VehicleCreatedBy);
+			break;
+		case ENTITY_TYPE_OBJECT:
+			printf("object created by = %d\n", ((CObject*)this)->ObjectCreatedBy);
+			break;
+		case ENTITY_TYPE_DUMMY:
+			printf("no dummy created by info\n");
+			break;
+		default:
+			printf("unknown entity type to be out of world??\n");
+		}
+		printf("*****************************\n");
+		if (GetType() == ENTITY_TYPE_VEHICLE){
+			MoveVehicleToSafety((CVehicle*)this);
+		}
+		else if (GetType() == ENTITY_TYPE_PED) {
+			CPed* pThisPed = ((CPed*)this);
+			if (pThisPed->bInVehicle && pThisPed->m_pMyVehicle)
+				MoveVehicleToSafety(pThisPed->m_pMyVehicle);
+			else if (GetType() == ENTITY_TYPE_PED) // why?
+				MovePedToSafety(pThisPed);
+			else
+				return;
+		}
+		else
+			return;
+	}
 
 	// we'll try to recycle nodes from here
 	CEntryInfoNode *next = m_entryInfoList.first;
