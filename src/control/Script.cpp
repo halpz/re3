@@ -729,11 +729,6 @@ int CTheScripts::ScriptToLoad = 0;
 
 int CTheScripts::OpenScript()
 {
-	// glfwGetKey doesn't work because of CGame::Initialise is blocking
-	CPad::UpdatePads();
-	if (CPad::GetPad(0)->GetChar('G')) ScriptToLoad = 0;
-	if (CPad::GetPad(0)->GetChar('R')) ScriptToLoad = 1;
-	if (CPad::GetPad(0)->GetChar('D')) ScriptToLoad = 2;
 	CFileMgr::ChangeDir("\\");
 	switch (ScriptToLoad) {
 	case 0: return CFileMgr::OpenFile("data\\main.scm", "rb");
@@ -757,6 +752,12 @@ void CTheScripts::Init()
 	UpsideDownCars.Init();
 	StuckCars.Init();
 #ifdef USE_DEBUG_SCRIPT_LOADER
+	// glfwGetKey doesn't work because of CGame::Initialise is blocking
+	CPad::UpdatePads();
+	if(CPad::GetPad(0)->GetChar('G')) ScriptToLoad = 0;
+	if(CPad::GetPad(0)->GetChar('R')) ScriptToLoad = 1;
+	if(CPad::GetPad(0)->GetChar('D')) ScriptToLoad = 2;
+
 	int mainf = OpenScript();
 #else
 	CFileMgr::SetDir("data");
