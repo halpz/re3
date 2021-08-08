@@ -668,7 +668,7 @@ public:
 #ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
 	static bool MissionSupportsMissionReplay(int index)
 	{
-		return index >= 3 && index <= 35 || index >= 51 && index <= 65 || index >= 67 && index <= 74 || index >= 83 && index <= 87;
+		return (index >= 48 && index <= 61) || (index >= 63 && index <= 117);
 	}
 #endif
 	static bool IsFortStauntonDestroyed() { return FSDestroyedFlag && *(int32*)&ScriptSpace[FSDestroyedFlag] == 1; }
@@ -700,7 +700,6 @@ extern int IsInAmmunation;
 extern int MissionSkipLevel;
 
 #ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
-extern bool UsingMobileScript;
 extern bool AlreadySavedGame;
 #endif
 

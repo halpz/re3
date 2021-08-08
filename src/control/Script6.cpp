@@ -381,7 +381,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 #ifdef MISSION_REPLAY
 		missionRetryScriptIndex = GET_INTEGER_PARAM(0);
 #ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
-		if (!UsingMobileScript && CTheScripts::MissionSupportsMissionReplay(missionRetryScriptIndex)){
+		if (CTheScripts::MissionSupportsMissionReplay(missionRetryScriptIndex)){
 			if (!AlreadySavedGame) {
 				m_nIp = oldIp - 2;
 				SaveGameForPause(4);

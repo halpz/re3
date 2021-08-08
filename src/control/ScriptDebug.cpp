@@ -1946,8 +1946,7 @@ void CRunningScript::LogAfterProcessingCommand(int32 command)
 			CDebug::DebugAddText(commandInfo);
 		}
 	}
-
-#endif
+}
 
 #ifdef MISSION_SWITCHER
 void
@@ -1975,30 +1974,21 @@ CTheScripts::SwitchToMission(int32 mission)
 
 #ifdef MISSION_REPLAY
 	missionRetryScriptIndex = mission;
-#ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
-	if (CTheScripts::MissionSupportsMissionReplay(missionRetryScriptIndex)) {
-		SaveGameForPause(4);
-	}
-#endif
 #endif
 	CTimer::Suspend();
-	int offset = CTheScripts::MultiScriptArray[mission];
-#ifdef USE_DEBUG_SCRIPT_LOADER
-	CFileMgr::ChangeDir("\\data\\");
-	int handle = CFileMgr::OpenFile(scriptfile, "rb");
-	CFileMgr::ChangeDir("\\");
-#else
-	CFileMgr::ChangeDir("\\");
-	int handle = CFileMgr::OpenFile("data\\main.scm", "rb");
-#endif
-	CFileMgr::Seek(handle, offset, 0);
-	CFileMgr::Read(handle, (const char*)&CTheScripts::ScriptSpace[SIZE_MAIN_SCRIPT], SIZE_MISSION_SCRIPT);
-	CFileMgr::CloseFile(handle);
-	CRunningScript* pMissionScript = CTheScripts::StartNewScript(SIZE_MAIN_SCRIPT);
+	int offset = CTheScripts::MultiScriptArray[mission] + 8;
+	int size = CTheScripts::MultiScriptArray[mission + 1] - CTheScripts::MultiScriptArray[mission];
+	if (size <= 0)
+		size = CTheScripts::LargestMissionScriptSize;
+	CFileMgr::Seek(gScriptsFile, offset, 0);
+	CFileMgr::Read(gScriptsFile, (const char*)&CTheScripts::ScriptSpace[CTheScripts::MainScriptSize], size);
+	CRunningScript* pMissionScript = CTheScripts::StartNewScript(CTheScripts::MainScriptSize);
 	CTimer::Resume();
 	pMissionScript->m_bIsMissionScript = true;
 	pMissionScript->m_bMissionFlag = true;
 	CTheScripts::bAlreadyRunningAMissionScript = true;
+	memset(&CTheScripts::ScriptSpace[CTheScripts::NumTrueGlobals * 4 + 8], 0, CTheScripts::MostGlobals * 4);
 	CGameLogic::ClearShortCut();
+	pMissionScript->Process();
 }
 #endif
