@@ -3063,7 +3063,7 @@ CAutomobile::DoDriveByShootings(void)
 			lookingLeft = true;
 		if(TheCamera.Cams[TheCamera.ActiveCam].LookingRight)
 			lookingRight = true;
-		}
+	}
 
 	if(lookingLeft || lookingRight){
 		if(lookingLeft){
