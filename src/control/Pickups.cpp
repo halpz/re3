@@ -23,6 +23,7 @@
 #ifdef FIX_BUGS
 #include "Replay.h"
 #endif
+#include "SaveBuf.h"
 #include "Script.h"
 #include "Shadows.h"
 #include "SpecialFX.h"

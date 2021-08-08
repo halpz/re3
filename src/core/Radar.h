@@ -1,5 +1,6 @@
 #pragma once
 #include "Sprite2d.h"
+#include "Draw.h"
 
 #define CARBLIP_MARKER_COLOR_R 252
 #define CARBLIP_MARKER_COLOR_G 138

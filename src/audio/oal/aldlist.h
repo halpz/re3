@@ -38,7 +38,7 @@ struct ALDEVICEINFO {
 	{
 		delete[] strDeviceName;
 		strDeviceName = NULL;
-	} 
+	}
 
 	void SetName(const char *name)
 	{

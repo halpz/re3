@@ -5,6 +5,10 @@
 #include "Camera.h"
 #include "Sprite.h"
 
+#ifdef ASPECT_RATIO_SCALE
+#include "Frontend.h"
+#endif
+
 float CSprite::m_f2DNearScreenZ;
 float CSprite::m_f2DFarScreenZ;
 float CSprite::m_fRecipNearClipPlane;

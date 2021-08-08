@@ -4076,7 +4076,7 @@ CCamera::IsPointVisible(const CVector &center, const CMatrix *mat)
 }
 
 bool
-CCamera::IsSphereVisible(const CVector &center, float radius, const CMatrix *mat)
+CCamera::IsSphereVisible(const CVector &center, float radius, Const CMatrix *mat)
 {
 #ifdef GTA_PS2
 	CVuVector c;

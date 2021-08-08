@@ -129,7 +129,7 @@ class CFont
 #else
 	static int16 Size[MAX_FONTS][210];
 #endif
-	static int16 NewLine;
+	static bool16 NewLine;
 public:
 	static CSprite2d Sprite[MAX_FONTS];
 	static CFontDetails Details;

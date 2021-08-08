@@ -47,9 +47,6 @@
 #define CHANNEL_PLAYER_VEHICLE_ENGINE m_nActiveSamples
 #endif
 
-enum PLAY_STATUS { PLAY_STATUS_STOPPED = 0, PLAY_STATUS_PLAYING, PLAY_STATUS_FINISHED };
-enum LOADING_STATUS { LOADING_STATUS_NOT_LOADED = 0, LOADING_STATUS_LOADED, LOADING_STATUS_FAILED };
-
 void
 cAudioManager::PreInitialiseGameSpecificSetup()
 {
@@ -4082,7 +4079,7 @@ cAudioManager::SetupJumboRumbleSound(uint8 emittingVol)
 		m_sQueueSample.m_nCounter = 6;
 		m_sQueueSample.m_nSampleIndex = SFX_JUMBO_RUMBLE;
 		m_sQueueSample.m_nFrequency += 200;
-		m_sQueueSample.m_nOffset = MAX_VOLUME;
+		m_sQueueSample.m_nOffset = 127;
 		AddSampleToRequestedQueue();
 	}
 	return TRUE;

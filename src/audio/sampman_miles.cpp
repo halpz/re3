@@ -1025,11 +1025,20 @@ cSampleManager::Initialise(void)
 				
 				if ( GetDriveType(m_szCDRomRootPath) == DRIVE_CDROM )
 				{
+					FILE *f;
+#ifdef PS2_AUDIO_PATHS
 					strcpy(filepath, m_szCDRomRootPath);
-					strcat(filepath, StreamedNameTable[0]);
+					strcat(filepath, PS2StreamedNameTable[0]);
+					f = fopen(filepath, "rb");
+
+					if ( !f )
+#endif
+					{
+						strcpy(filepath, m_szCDRomRootPath);
+						strcat(filepath, StreamedNameTable[0]);
 					
-					FILE *f = fopen(filepath, "rb");
-					
+						f = fopen(filepath, "rb");
+					}
 					if ( f )
 					{
 						fclose(f);
@@ -1410,6 +1419,7 @@ cSampleManager::CheckForAnAudioFileOnCD(void)
 {
 #if !defined(NO_CDCHECK) // TODO: check steam, probably GTAVC_STEAM_PATCH needs to be added
 	char filepath[MAX_PATH];
+	FILE *f;
 	
 	strcpy(filepath, m_MiscomPath);
 	strcat(filepath, StreamedNameTable[STREAMED_SOUND_MISSION_COMPLETED4]);

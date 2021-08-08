@@ -3163,7 +3163,11 @@ CWeapon::HitsGround(CEntity *holder, CVector *fireSource, CEntity *aimingTo)
 void
 CWeapon::BlowUpExplosiveThings(CEntity *thing)
 {
+#ifdef FIX_BUGS
+	if ( thing && thing->IsObject() )
+#else
 	if ( thing )
+#endif
 	{
 		CObject *object = (CObject*)thing;
 		int32 mi = object->GetModelIndex();
