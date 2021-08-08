@@ -4175,7 +4175,7 @@ CMenuManager::Process(void)
 		if (m_nCurrScreen == MENUPAGE_LOADING_IN_PROGRESS) {
 #ifdef MISSION_REPLAY
 			if (doingMissionRetry) {
-				RetryMission(2, 0);
+				RetryMission(MISSION_RETRY_TYPE_BEGIN_RESTARTING);
 				m_nCurrSaveSlot = SLOT_COUNT;
 				doingMissionRetry = false;
 			}
@@ -5186,7 +5186,7 @@ CMenuManager::ProcessButtonPresses(void)
 				case MENUACTION_UNK114:
 					doingMissionRetry = false;
 					RequestFrontEndShutDown();
-					RetryMission(2, 0);
+					RetryMission(MISSION_RETRY_TYPE_BEGIN_RESTARTING);
 					return;
 #endif
 #ifdef CUSTOM_FRONTEND_OPTIONS
