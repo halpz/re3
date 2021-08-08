@@ -3877,7 +3877,7 @@ CAutomobile::DoDriveByShootings(void)
 			lookingLeft = true;
 		if(TheCamera.Cams[TheCamera.ActiveCam].LookingRight)
 			lookingRight = true;
-		}
+	}
 
 	AnimationId rightAnim = ANIM_STD_CAR_DRIVEBY_RIGHT;
 	AnimationId leftAnim = ANIM_STD_CAR_DRIVEBY_LEFT;
