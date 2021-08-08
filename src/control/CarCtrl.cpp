@@ -17,6 +17,7 @@
 #include "Garages.h"
 #include "General.h"
 #include "IniFile.h"
+#include "Lines.h"
 #include "ModelIndices.h"
 #include "PathFind.h"
 #include "Ped.h"
@@ -3418,7 +3419,33 @@ float CCarCtrl::FindSpeedMultiplierWithSpeedFromNodes(int8 type)
 	return 1.0f;
 }
 
-void CCarCtrl::RenderDebugInfo(CVehicle*)
+void CCarCtrl::RenderDebugInfo(CVehicle* pVehicle)
 {
-	//TODO(LCS)
+	if (!pVehicle->AutoPilot.m_nNextRouteNode || !pVehicle->AutoPilot.m_nCurrentRouteNode)
+		return;
+
+	CPathNode* pCurNode = &ThePaths.m_pathNodes[pVehicle->AutoPilot.m_nCurrentRouteNode];
+	CPathNode* pNextNode = &ThePaths.m_pathNodes[pVehicle->AutoPilot.m_nNextRouteNode];
+	CCarPathLink* pCurLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nCurrentPathNodeInfo];
+	CCarPathLink* pNextLink = &ThePaths.m_carPathLinks[pVehicle->AutoPilot.m_nNextPathNodeInfo];
+
+	CVector vCurNodePos(pCurNode->GetPosition());
+	vCurNodePos.z += 1.0f;
+	CVector vNextNodePos(pNextNode->GetPosition());
+	vNextNodePos.z += 1.0f;
+	CVector vCurLinkDir(pCurLink->GetDirX() * pVehicle->AutoPilot.m_nCurrentDirection, pCurLink->GetDirY() * pVehicle->AutoPilot.m_nCurrentDirection, 0.0f);
+	CVector vNextLinkDir(pNextLink->GetDirX() * pVehicle->AutoPilot.m_nNextDirection, pNextLink->GetDirY() * pVehicle->AutoPilot.m_nNextDirection, 0.0f);
+	vCurLinkDir.Normalise();
+	vNextLinkDir.Normalise();
+
+	if (vCurLinkDir.x * vNextLinkDir.x + vCurLinkDir.y * vNextLinkDir.y < 0.5f) {
+		CVector vCurPos(vCurNodePos);
+		CVector vCurDir(0.0f, 0.0f, 1.0f);
+		for (int i = 0; i < 10; i++) {
+			CVector vNextPos = vCurPos;
+			CCurves::CalcCurvePoint(&vCurNodePos, &vNextNodePos, &vCurLinkDir, &vNextLinkDir, i * 0.1f, pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve, &vCurPos, &vCurDir);
+			// Render3DLine(&vCurPos, &vNextPos, CVector(255.0f, 255.0f, 0.0f, 255.0f)); // <- originally this is called, let's reuse stuff we have
+			CLines::RenderLineWithClipping(vCurPos.x, vCurPos.y, vCurPos.z, vNextPos.x, vNextPos.y, vNextPos.z, 0xFF0000FF, 0xFF0000FF);
+		}
+	}
 }
