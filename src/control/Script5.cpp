@@ -1239,10 +1239,10 @@ void CRunningScript::DoDeatharrestCheck()
 	if (!pPlayer->IsRestartingAfterDeath() && !pPlayer->IsRestartingAfterArrest() && !CTheScripts::UpsideDownCars.AreAnyCarsUpsideDown())
 		return;
 #ifdef MISSION_REPLAY
-	if (AllowMissionReplay != 0)
+	if (AllowMissionReplay != MISSION_RETRY_STAGE_NORMAL)
 		return;
 	if (CanAllowMissionReplay())
-		AllowMissionReplay = 1;
+		AllowMissionReplay = MISSION_RETRY_STAGE_WAIT_FOR_SCRIPT_TO_TERMINATE;
 #endif
 	script_assert(m_nStackPointer > 0);
 	while (m_nStackPointer > 1)

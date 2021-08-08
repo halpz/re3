@@ -1423,10 +1423,10 @@ CTheScripts::SwitchToMission(int32 mission)
 #endif
 	CTimer::Suspend();
 	int offset = CTheScripts::MultiScriptArray[mission];
-	CFileMgr::ChangeDir("\\");
 #ifdef USE_DEBUG_SCRIPT_LOADER
-	int handle = open_script();
+	int handle = OpenScript();
 #else
+	CFileMgr::ChangeDir("\\");
 	int handle = CFileMgr::OpenFile("data\\main.scm", "rb");
 #endif
 	CFileMgr::Seek(handle, offset, 0);

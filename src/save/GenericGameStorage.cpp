@@ -1153,7 +1153,9 @@ void DisplaySaveResult(int unk, char* name)
 
 bool SaveGameForPause(int type)
 {
-	if (AllowMissionReplay != 0 || type != 3 && WaitForSave > CTimer::GetTimeInMilliseconds())
+	if (AllowMissionReplay != MISSION_RETRY_STAGE_NORMAL)
+		return false;
+	if (type != SAVE_TYPE_QUICKSAVE_FOR_MISSION_REPLAY && WaitForSave > CTimer::GetTimeInMilliseconds())
 		return false;
 	WaitForSave = 0;
 	if (gGameState != GS_PLAYING_GAME || CTheScripts::IsPlayerOnAMission() || CStats::LastMissionPassedName[0] == '\0') {

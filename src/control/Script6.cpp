@@ -82,8 +82,8 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 #ifdef MISSION_REPLAY
-		AllowMissionReplay = 0;
-		SaveGameForPause(3);
+		AllowMissionReplay = MISSION_RETRY_STAGE_NORMAL;
+		SaveGameForPause(SAVE_TYPE_QUICKSAVE_FOR_MISSION_REPLAY);
 #endif
 		CPlayerInfo* pPlayerInfo = &CWorld::Players[ScriptParams[0]];
 		CPad::GetPad(ScriptParams[0])->SetDisablePlayerControls(PLAYERCONTROL_CUTSCENE);
@@ -304,10 +304,10 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 #endif
 		CTimer::Suspend();
 		int offset = CTheScripts::MultiScriptArray[ScriptParams[0]];
-		CFileMgr::ChangeDir("\\");
 #ifdef USE_DEBUG_SCRIPT_LOADER
-		int handle = open_script();
+		int handle = CTheScripts::OpenScript();
 #else
+		CFileMgr::ChangeDir("\\");
 		int handle = CFileMgr::OpenFile("data\\main.scm", "rb");
 #endif
 		CFileMgr::Seek(handle, offset, 0);

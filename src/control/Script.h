@@ -584,6 +584,11 @@ public:
 	static void SwitchToMission(int32 mission);
 #endif
 
+#ifdef USE_DEBUG_SCRIPT_LOADER
+	static int ScriptToLoad;
+	static int OpenScript();
+#endif
+
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 	static void LogAfterScriptInitializing();
 	static void LogBeforeScriptProcessing();
@@ -601,9 +606,21 @@ extern bool doingMissionRetry;
 
 uint32 AddExtraDeathDelay();
 void RetryMission(int, int);
-#endif
 
-#ifdef USE_DEBUG_SCRIPT_LOADER
-int open_script();
-extern int scriptToLoad;
+enum {
+	MISSION_RETRY_TYPE_SUGGEST_TO_PLAYER = 0,
+	MISSION_RETRY_TYPE_1,
+	MISSION_RETRY_TYPE_BEGIN_RESTARTING
+};
+
+enum {
+	MISSION_RETRY_STAGE_NORMAL = 0,
+	MISSION_RETRY_STAGE_WAIT_FOR_SCRIPT_TO_TERMINATE,
+	MISSION_RETRY_STAGE_START_PROCESSING,
+	MISSION_RETRY_STAGE_WAIT_FOR_DELAY,
+	MISSION_RETRY_STAGE_WAIT_FOR_MENU,
+	MISSION_RETRY_STAGE_WAIT_FOR_USER,
+	MISSION_RETRY_STAGE_START_RESTARTING,
+	MISSION_RETRY_STAGE_WAIT_FOR_TIMER_AFTER_RESTART,
+};
 #endif

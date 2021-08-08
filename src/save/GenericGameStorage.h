@@ -52,4 +52,12 @@ const char TopLineEmptyFile[] = "THIS FILE IS NOT VALID YET";
 extern int8 IsQuickSave; // originally int
 
 bool SaveGameForPause(int);
+
+enum {
+	SAVE_TYPE_NORMAL,
+	SAVE_TYPE_QUICKSAVE,
+	SAVE_TYPE_2,
+	SAVE_TYPE_QUICKSAVE_FOR_MISSION_REPLAY
+};
+
 #endif

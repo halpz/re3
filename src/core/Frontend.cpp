@@ -4182,7 +4182,7 @@ CMenuManager::Process(void)
 #endif
 			if (CheckSlotDataValid(m_nCurrSaveSlot)) {
 #ifdef USE_DEBUG_SCRIPT_LOADER
-				scriptToLoad = 0;
+				CTheScripts::ScriptToLoad = 0;
 #endif
 #ifdef PC_PLAYER_CONTROLS
 				TheCamera.m_bUseMouse3rdPerson = m_ControlMethod == CONTROL_STANDARD;
@@ -4312,12 +4312,12 @@ CMenuManager::ProcessButtonPresses(void)
 #ifdef USE_DEBUG_SCRIPT_LOADER
 	if (m_nCurrScreen == MENUPAGE_START_MENU || m_nCurrScreen == MENUPAGE_NEW_GAME || m_nCurrScreen == MENUPAGE_NEW_GAME_RELOAD) {
 		if (CPad::GetPad(0)->GetChar('R')) {
-			scriptToLoad = 1;
+			CTheScripts::ScriptToLoad = 1;
 			DoSettingsBeforeStartingAGame();
 			return;
 		}
 		if (CPad::GetPad(0)->GetChar('D')) {
-			scriptToLoad = 2;
+			CTheScripts::ScriptToLoad = 2;
 			DoSettingsBeforeStartingAGame();
 			return;
 		}
