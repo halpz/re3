@@ -561,7 +561,7 @@ cMusicManager::ServiceGameMode()
 				}
 			}
 #ifdef RADIO_SCROLL_TO_PREV_STATION
-			else if(CPad::GetPad(0)->GetMouseWheelDownJustDown() || CPad::GetPad(0)->GetMouseWheelUpJustDown()) {
+			else if(!CPad::GetPad(0)->ArePlayerControlsDisabled() && (CPad::GetPad(0)->GetMouseWheelDownJustDown() || CPad::GetPad(0)->GetMouseWheelUpJustDown())) {
 				if(!UsesPoliceRadio(vehicle) && !UsesTaxiRadio(vehicle)) {
 					int scrollNext = ControlsManager.GetControllerKeyAssociatedWithAction(VEHICLE_CHANGE_RADIO_STATION, MOUSE);
 					int scrollPrev = scrollNext == rsMOUSEWHEELUPBUTTON ? rsMOUSEWHEELDOWNBUTTON

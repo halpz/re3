@@ -1885,26 +1885,26 @@ void CRunningScript::LogBeforeProcessingCommand(int32 command)
 			strcat(commandInfo, "}");
 		}
 		else {
-			for (int i = 0; commands[command].input[i] != ARGTYPE_NONE; i++) {
+		for (int i = 0; commands[command].input[i] != ARGTYPE_NONE; i++) {
 				char tmp[32];
-				bool var = false;
-				int value;
-				switch (commands[command].input[i]) {
-				case ARGTYPE_INT:
-				case ARGTYPE_PED_HANDLE:
-				case ARGTYPE_VEHICLE_HANDLE:
-				case ARGTYPE_OBJECT_HANDLE: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%d)" : " %d", value); break;
-				case ARGTYPE_FLOAT: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%.3f)" : " %.3f", *(float*)&value); break;
-				case ARGTYPE_STRING: sprintf(tmp, " '%s'", (const char*)&CTheScripts::ScriptSpace[m_nIp]); m_nIp += KEY_LENGTH_IN_SCRIPT; break;
-				case ARGTYPE_LABEL: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%s(%d))" : " %s(%d)", value >= 0 ? "G" : "L", abs(value)); break;
-				case ARGTYPE_BOOL: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%s)" : " %s", value ? "TRUE" : "FALSE"); break;
+			bool var = false;
+			int value;
+			switch (commands[command].input[i]) {
+			case ARGTYPE_INT:
+			case ARGTYPE_PED_HANDLE:
+			case ARGTYPE_VEHICLE_HANDLE:
+			case ARGTYPE_OBJECT_HANDLE: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%d)" : " %d", value); break;
+			case ARGTYPE_FLOAT: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%.3f)" : " %.3f", *(float*)&value); break;
+			case ARGTYPE_STRING: sprintf(tmp, " '%s'", (const char*)&CTheScripts::ScriptSpace[m_nIp]); m_nIp += KEY_LENGTH_IN_SCRIPT; break;
+			case ARGTYPE_LABEL: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%s(%d))" : " %s(%d)", value >= 0 ? "G" : "L", abs(value)); break;
+			case ARGTYPE_BOOL: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, var ? " (%s)" : " %s", value ? "TRUE" : "FALSE"); break;
 				case ARGTYPE_ANDOR: value = CollectParameterForDebug(commandInfo, var); sprintf(tmp, " %d %ss", (value) % 10, value / 10 == 0 ? "AND" : "OR"); break;
-				default: script_assert(0);
-				}
-				strcat(commandInfo, tmp);
-				if (commands[command].position == i)
-					strcat(commandInfo, commands[command].name_override);
+			default: script_assert(0);
 			}
+			strcat(commandInfo, tmp);
+			if (commands[command].position == i)
+				strcat(commandInfo, commands[command].name_override);
+		}
 		}
 		uint32 t = m_nIp;
 		m_nIp = storedIp;
@@ -1923,17 +1923,17 @@ void CRunningScript::LogAfterProcessingCommand(int32 command)
 			m_nIp = storedIp;
 			storedIp = t;
 			if (commands[command].input[0] != ARGTYPE_FUNCTION) {
-				for (int i = 0; commands[command].output[i] != ARGTYPE_NONE; i++) {
+			for (int i = 0; commands[command].output[i] != ARGTYPE_NONE; i++) {
 					char tmp[32];
-					switch (commands[command].output[i]) {
-					case ARGTYPE_INT:
-					case ARGTYPE_PED_HANDLE:
-					case ARGTYPE_VEHICLE_HANDLE:
-					case ARGTYPE_OBJECT_HANDLE: GetStoredParameterForDebug(commandInfo); sprintf(tmp, " (%d)", ScriptParams[i]); strcat(commandInfo, tmp); break;
-					case ARGTYPE_FLOAT: GetStoredParameterForDebug(commandInfo); sprintf(tmp, " (%8.3f)", *(float*)&ScriptParams[i]); strcat(commandInfo, tmp); break;
-					default: script_assert(0 && "Script only returns INTs and FLOATs");
-					}
+				switch (commands[command].output[i]) {
+				case ARGTYPE_INT:
+				case ARGTYPE_PED_HANDLE:
+				case ARGTYPE_VEHICLE_HANDLE:
+				case ARGTYPE_OBJECT_HANDLE: GetStoredParameterForDebug(commandInfo); sprintf(tmp, " (%d)", ScriptParams[i]); strcat(commandInfo, tmp); break;
+				case ARGTYPE_FLOAT: GetStoredParameterForDebug(commandInfo); sprintf(tmp, " (%8.3f)", *(float*)&ScriptParams[i]); strcat(commandInfo, tmp); break;
+				default: script_assert(0 && "Script only returns INTs and FLOATs");
 				}
+			}
 			}
 			m_nIp = storedIp;
 		}
@@ -1974,6 +1974,11 @@ CTheScripts::SwitchToMission(int32 mission)
 
 #ifdef MISSION_REPLAY
 	missionRetryScriptIndex = mission;
+#ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
+	if (CTheScripts::MissionSupportsMissionReplay(missionRetryScriptIndex)) {
+		SaveGameForPause(4);
+	}
+#endif
 #endif
 	CTimer::Suspend();
 	int offset = CTheScripts::MultiScriptArray[mission] + 8;

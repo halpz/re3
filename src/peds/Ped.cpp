@@ -287,7 +287,7 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bHeadStuckInCollision = false;
 	bDeadPedInFrontOfCar = false;
 
-	m_gangFlags = 0xFF;
+	m_gangFlags = ~0;
 	
 	bStayInCarOnJack = false;
 

@@ -40,8 +40,8 @@ bool CPopulation::ms_bGivePedsWeapons;
 int32 CPopulation::m_AllRandomPedsThisType = -1;
 float CPopulation::PedDensityMultiplier = 1.0f;
 uint32 CPopulation::ms_nTotalMissionPeds;
-int32 CPopulation::MaxNumberOfPedsInUse = 25;
-int32 CPopulation::MaxNumberOfPedsInUseInterior = 40;
+int32 CPopulation::MaxNumberOfPedsInUse = DEFAULT_MAX_NUMBER_OF_PEDS;
+int32 CPopulation::MaxNumberOfPedsInUseInterior = DEFAULT_MAX_NUMBER_OF_PEDS_INTERIOR;
 uint32 CPopulation::ms_nNumCivMale;
 uint32 CPopulation::ms_nNumCivFemale;
 uint32 CPopulation::ms_nNumCop;
@@ -1095,6 +1095,7 @@ CPopulation::ManagePopulation(void)
 			}
 
 			float dist = (ped->GetPosition() - playerPos).Magnitude2D();
+
 			bool pedIsFarAway = false;
 
 			if (ped->IsGangMember())

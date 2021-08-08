@@ -179,6 +179,65 @@ static const char* MissionScripts[] = {
 	"TOSH4"
 };
 
+static const char* MissionScripts[] = {
+	"LAWYER1",
+	"LAWYER2",
+	"LAWYER3",
+	"LAWYER4",
+	"GENERL1",
+	"COL2",
+	"GENERL3",
+	"COL_4",
+	"COL_5",
+	"baron1",
+	"baron2",
+	"baron3",
+	"baron4",
+	"kent1",
+	"baron5",
+	"serg1",
+	"serg2",
+	"serg3",
+	"bankjo1",
+	"bankjo2",
+	"bankjo3",
+	"bankjo4",
+	"phil1",
+	"phil2",
+	"porno1",
+	"porno2",
+	"porno3",
+	"porno4",
+	"protec1",
+	"protec2",
+	"protec3",
+	"count1",
+	"count2",
+	"CAP_1",
+	"FIN_1",
+	"bike1",
+	"bike2",
+	"bike3",
+	"rockb1",
+	"rockb2",
+	"rockb3",
+	"cuban1",
+	"cuban2",
+	"cuban3",
+	"cuban4",
+	"hait1",
+	"hait2",
+	"hait3",
+	"assin1",
+	"assin2",
+	"assin3",
+	"assin4",
+	"assin5",
+	"taxwar1",
+	"taxwar2",
+	"taxwar3"
+};
+
 int AllowMissionReplay;
 uint32 NextMissionDelay;
 uint32 MissionStartTime;
@@ -1195,6 +1254,10 @@ int8 CRunningScript::ProcessOneCommand()
 		retval = ProcessCommands1600To1699(command);
 	else
 		script_assert(false);
+#ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
+	if (!AlreadySavedGame)
+#endif
+	{
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 		LogAfterProcessingCommand(command);
 #elif defined USE_BASIC_SCRIPT_DEBUG_OUTPUT
@@ -1204,6 +1267,7 @@ int8 CRunningScript::ProcessOneCommand()
 			CDebug::DebugAddText(tmp);
 		}
 #endif
+	}
 	return retval;
 }
 
