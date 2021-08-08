@@ -38,6 +38,8 @@
 #include "Zones.h"
 #include "Pickups.h"
 
+//--LCS: file done except TODO
+
 #define DISTANCE_TO_SPAWN_ROADBLOCK_PEDS (51.0f)
 #define DISTANCE_TO_SCAN_FOR_DANGER (14.0f)
 #define DISTANCE_TO_SCAN_FOR_PED_DANGER (11.0f)

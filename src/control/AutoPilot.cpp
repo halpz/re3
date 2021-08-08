@@ -7,6 +7,8 @@
 #include "PathFind.h"
 #include "SaveBuf.h"
 
+//--LCS: file done
+
 void CAutoPilot::ModifySpeed(float speed)
 {
 	m_fMaxTrafficSpeed = Max(0.01f, speed);

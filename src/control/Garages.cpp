@@ -29,6 +29,8 @@
 #include "VarConsole.h"
 #include "SaveBuf.h"
 
+//--LCS: file done except TODO
+
 #define ROTATED_DOOR_OPEN_SPEED (0.015f)
 #define ROTATED_DOOR_CLOSE_SPEED (0.02f)
 #define DEFAULT_DOOR_OPEN_SPEED (0.035f)

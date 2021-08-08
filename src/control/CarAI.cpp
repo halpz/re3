@@ -21,6 +21,8 @@
 #include "World.h"
 #include "ZoneCull.h"
 
+//--LCS: file done
+
 #define DISTANCE_TO_SWITCH_DISTANCE_GOTO 20.0f
 
 float CCarAI::FindSwitchDistanceClose(CVehicle* pVehicle)
