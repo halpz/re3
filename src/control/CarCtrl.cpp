@@ -3442,10 +3442,12 @@ void CCarCtrl::RenderDebugInfo(CVehicle* pVehicle)
 		CVector vCurPos(vCurNodePos);
 		CVector vCurDir(0.0f, 0.0f, 1.0f);
 		for (int i = 0; i < 10; i++) {
-			CVector vNextPos = vCurPos;
+			CVector vPrevPos = vCurPos;
 			CCurves::CalcCurvePoint(&vCurNodePos, &vNextNodePos, &vCurLinkDir, &vNextLinkDir, i * 0.1f, pVehicle->AutoPilot.m_nTimeToSpendOnCurrentCurve, &vCurPos, &vCurDir);
 			// Render3DLine(&vCurPos, &vNextPos, CVector(255.0f, 255.0f, 0.0f, 255.0f)); // <- originally this is called, let's reuse stuff we have
-			CLines::RenderLineWithClipping(vCurPos.x, vCurPos.y, vCurPos.z, vNextPos.x, vNextPos.y, vNextPos.z, 0xFF0000FF, 0xFF0000FF);
+			// TODO: not drawing :(
+			CLines::RenderLineWithClipping(vPrevPos.x, vPrevPos.y, vCurNodePos.z, vCurPos.x, vCurPos.y, vNextNodePos.z, 0xFFFF00FF, 0xFFFF00FF); // using NodePos for Z coord cause Curves set it to 0
 		}
+		DefinedState();
 	}
 }
