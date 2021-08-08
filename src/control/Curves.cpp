@@ -19,17 +19,27 @@ void CCurves::CalcCurvePoint(CVector* pPos1, CVector* pPos2, CVector* pDir1, CVe
 	float actualFactor = CalcSpeedScaleFactor(pPos1, pPos2, pDir1->x, pDir1->y, pDir2->x, pDir2->y);
 	CVector2D dir1 = *pDir1 * actualFactor;
 	CVector2D dir2 = *pDir2 * actualFactor;
-	float t1 = Abs(DotProduct2D(*pPos1 - *pPos2, *pDir1));
-	float t2 = Abs(DotProduct2D(*pPos2 - *pPos1, *pDir2));
+	float t1 = Abs(DotProduct2D(*pPos2 - *pPos1, *pDir1));
+	float t2 = Abs(DotProduct2D(*pPos1 - *pPos2, *pDir2));
 	float curveCoef;
 	if (t1 > t2) {
-		if (between < (t1 - t2) / (t1 + t2))
+		float coef = (t1 - t2) / (t1 + t2);
+#ifdef FIX_BUGS
+		if (between <= coef)
+#else
+		if (between < coef)
+#endif
 			curveCoef = 0.0f;
 		else
-			curveCoef = 0.5f - 0.5f * Cos(3.1415f * (t1 + t2) / (2 * t2) * (between - (t1 - t2) / (t1 + t2)));
+			curveCoef = 0.5f - 0.5f * Cos(3.1415f * (between - coef) * (t1 + t2) / (2 * t2));
 	}
 	else {
-		if (2 * t1 / (t1 + t2) < between)
+		float coef = 2 * t1 / (t1 + t2);
+#ifdef FIX_BUGS
+		if (coef <= between)
+#else
+		if (coef < between)
+#endif
 			curveCoef = 1.0f;
 		else
 			curveCoef = 0.5f - 0.5f * Cos(3.1415f * between * (t1 + t2) / (2 * t1));
