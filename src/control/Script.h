@@ -618,7 +618,7 @@ extern bool AlreadySavedGame;
 #endif
 
 uint32 AddExtraDeathDelay();
-void RetryMission(int, int);
+void RetryMission(int, int unk = 0);
 
 enum {
 	MISSION_RETRY_TYPE_SUGGEST_TO_PLAYER = 0,

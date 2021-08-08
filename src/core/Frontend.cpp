@@ -4782,7 +4782,7 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 			case MENUACTION_UNK114:
 				doingMissionRetry = false;
 				RequestFrontEndShutDown();
-				RetryMission(2, 0);
+				RetryMission(MISSION_RETRY_TYPE_BEGIN_RESTARTING);
 				return;
 #endif
 			case MENUACTION_SAVEGAME:
@@ -5437,7 +5437,7 @@ CMenuManager::ProcessFileActions()
 				break;
 			}
 			if (doingMissionRetry) {
-				RetryMission(2, 0);
+				RetryMission(MISSION_RETRY_TYPE_BEGIN_RESTARTING);
 				m_nCurrSaveSlot = SLOT_COUNT;
 				doingMissionRetry = false;
 			}
