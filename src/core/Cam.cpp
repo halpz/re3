@@ -230,7 +230,7 @@ CCam::Process(void)
 		break;
 	case MODE_CAM_ON_A_STRING:
 #ifdef FREE_CAM
-		if(CCamera::bFreeCam)
+		if(CCamera::bFreeCam && !CVehicle::bCheat5)
 			Process_FollowCar_SA(CameraTarget, TargetOrientation, SpeedVar, TargetSpeedVar);
 		else
 #endif

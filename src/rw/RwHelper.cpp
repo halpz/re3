@@ -1,5 +1,6 @@
 #define WITHD3D
 #include "common.h"
+#include <rpskin.h>
 
 #include "Timecycle.h"
 #include "skeleton.h"

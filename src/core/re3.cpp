@@ -130,7 +130,7 @@ void LangJapSelect(int8 action)
 void
 CustomFrontendOptionsPopulate(void)
 {
-	// Moved to an array in MenuScreensCustom.cpp, but APIs are still available. see frontendoption.h
+	// Most of custom options are done statically in MenuScreensCustom.cpp, we add them here only if they're dependent to extra files
 
 	int fd;
 	// These work only if we have neo folder, so they're dynamically added
@@ -1271,7 +1271,9 @@ void re3_trace(const char *filename, unsigned int lineno, const char *func, cons
 
 	OutputDebugString(buff);
 }
+#endif
 
+#ifndef MASTER
 void re3_usererror(const char *format, ...)
 {
 	va_list va;

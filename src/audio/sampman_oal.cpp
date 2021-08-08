@@ -178,7 +178,7 @@ add_providers()
 				SampleManager.Set3DProviderName(n, providers[n].name);
 				n++;
 			}
-			
+
 			if ( alGetEnumValue("AL_EFFECT_EAXREVERB") != 0
 				|| pDeviceList->IsExtensionSupported(i, ADEXT_EAX2)
 				|| pDeviceList->IsExtensionSupported(i, ADEXT_EAX3) 
@@ -1014,8 +1014,7 @@ cSampleManager::Initialise(void)
 				aStream[0]->Close();
 				
 				nStreamLength[i] = tatalms;
-			}
-			else
+			} else
 				USERERROR("Can't open '%s'\n", StreamedNameTable[i]);
 		}
 #ifdef AUDIO_CACHE

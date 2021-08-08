@@ -12,6 +12,7 @@
 #include "Pools.h"
 #include "Population.h"
 #include "RpAnimBlend.h"
+#include "SaveBuf.h"
 #include "Shadows.h"
 #include "SpecialFX.h"
 #include "World.h"

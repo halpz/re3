@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include "Restart.h"
+#include "SaveBuf.h"
 #include "Zones.h"
 #include "PathFind.h"
 #include "SaveBuf.h"

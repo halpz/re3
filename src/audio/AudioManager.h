@@ -192,6 +192,9 @@ enum {
 	MAX_REFLECTIONS,
 };
 
+enum PLAY_STATUS { PLAY_STATUS_STOPPED = 0, PLAY_STATUS_PLAYING, PLAY_STATUS_FINISHED };
+enum LOADING_STATUS { LOADING_STATUS_NOT_LOADED = 0, LOADING_STATUS_LOADED, LOADING_STATUS_FAILED };
+
 class cAudioManager
 {
 public:
@@ -214,8 +217,10 @@ public:
 	tAudioEntity m_asAudioEntities[NUM_AUDIOENTITIES];
 	int32 m_anAudioEntityIndices[NUM_AUDIOENTITIES];
 	int32 m_nAudioEntitiesTotal;
+#ifdef GTA_PC
 	CVector m_avecReflectionsPos[NUM_AUDIO_REFLECTIONS];
 	float m_afReflectionsDistances[NUM_AUDIO_REFLECTIONS];
+#endif
 	cAudioScriptObjectManager m_sAudioScriptObjectManager;
 
 	// miami

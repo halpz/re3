@@ -110,4 +110,4 @@ float CDraw::ScaleY(float y)
 {
 	return ms_bProperScaling ? y : y * ((float)DEFAULT_SCREEN_HEIGHT/SCREEN_HEIGHT_NTSC);
 }
-#endif
+#endif 

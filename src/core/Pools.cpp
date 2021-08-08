@@ -10,6 +10,7 @@
 #endif
 #include "Population.h"
 #include "ProjectileInfo.h"
+#include "SaveBuf.h"
 #include "Streaming.h"
 #include "Wanted.h"
 #include "World.h"

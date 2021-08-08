@@ -16,6 +16,7 @@
 #include "Script.h"
 #include "TxdStore.h"
 #include "World.h"
+#include "SaveBuf.h"
 #include "Streaming.h"
 #include "SpecialFX.h"
 #include "Font.h"

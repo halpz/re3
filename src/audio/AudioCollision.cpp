@@ -178,9 +178,8 @@ static const int32 gOneShotCol[] = {SFX_COL_TARMAC_1,
 void
 cAudioManager::SetUpOneShotCollisionSound(const cAudioCollision &col)
 {
-
-	int16 s1;
-	int16 s2;
+	uint16 s1;
+	uint16 s2;
 
 	int32 emittingVol;
 	float ratio;
