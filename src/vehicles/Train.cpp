@@ -296,7 +296,7 @@ CTrain::ProcessControl(void)
 				TrainHitStuff(s->m_lists[ENTITYLIST_PEDS_OVERLAP]);
 			}
 	}
-#endif GTA_TRAIN
+#endif // GTA_TRAIN
 }
 
 void

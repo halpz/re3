@@ -1058,9 +1058,11 @@ INITSAVEBUF
 	WriteSaveHeader(buf, 'R', 'D', 'R', '\0', *size - SAVE_HEADER_SIZE);
 
 #ifdef MAP_ENHANCEMENTS
+	bool bWaypointDeleted = false;
 	if (TargetMarkerId != -1) {
 		ClearBlip(TargetMarkerId);
 		TargetMarkerId = -1;
+		bWaypointDeleted = true;
 	}
 #endif
 
@@ -1084,6 +1086,11 @@ INITSAVEBUF
 
 		SkipSaveBuf(buf, sizeof(sRadarTraceSave));
 	}
+
+#ifdef MAP_ENHANCEMENTS
+	if(bWaypointDeleted)
+		ToggleTargetMarker(TargetMarkerPos.x, TargetMarkerPos.y);
+#endif
 
 VALIDATESAVEBUF(*size);
 }
