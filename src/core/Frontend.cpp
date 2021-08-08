@@ -4634,7 +4634,7 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 #ifdef USE_DEBUG_SCRIPT_LOADER
 	if (m_nCurrScreen == MENUPAGE_START_MENU || m_nCurrScreen == MENUPAGE_NEW_GAME || m_nCurrScreen == MENUPAGE_NEW_GAME_RELOAD) {
 		if (CPad::GetPad(0)->GetChar('R')) {
-			scriptToLoad = 1;
+			CTheScripts::ScriptToLoad = 1;
 			DoSettingsBeforeStartingAGame();
 			return;
 		}
@@ -4789,13 +4789,13 @@ CMenuManager::ProcessUserInput(uint8 goDown, uint8 goUp, uint8 optionSelected, u
 #ifdef MISSION_REPLAY
 			case MENUACTION_REJECT_RETRY:
 				doingMissionRetry = false;
-				AllowMissionReplay = 0;
+				AllowMissionReplay = MISSION_RETRY_STAGE_NORMAL;
 				RequestFrontEndShutDown();
 				break;
 			case MENUACTION_UNK114:
 				doingMissionRetry = false;
 				RequestFrontEndShutDown();
-				RetryMission(2, 0);
+				RetryMission(MISSION_RETRY_TYPE_BEGIN_RESTARTING);
 				return;
 #endif
 			case MENUACTION_SAVEGAME:
@@ -5451,14 +5451,14 @@ CMenuManager::ProcessFileActions()
 				break;
 			}
 			if (doingMissionRetry) {
-				RetryMission(2, 0);
+				RetryMission(MISSION_RETRY_TYPE_BEGIN_RESTARTING);
 				m_nCurrSaveSlot = SLOT_COUNT;
 				doingMissionRetry = false;
 			}
 #endif
 			if (CheckSlotDataValid(m_nCurrSaveSlot)) {
 #ifdef USE_DEBUG_SCRIPT_LOADER
-				scriptToLoad = 0;
+				CTheScripts::ScriptToLoad = 0;
 #endif
 
 #ifdef XBOX_MESSAGE_SCREEN

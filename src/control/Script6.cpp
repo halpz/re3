@@ -384,7 +384,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		if (CTheScripts::MissionSupportsMissionReplay(missionRetryScriptIndex)){
 			if (!AlreadySavedGame) {
 				m_nIp = oldIp - 2;
-				SaveGameForPause(4);
+				SaveGameForPause(SAVE_TYPE_QUICKSAVE_FOR_SCRIPT);
 				AlreadySavedGame = true;
 				return 0;
 			}

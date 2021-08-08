@@ -1976,7 +1976,7 @@ CTheScripts::SwitchToMission(int32 mission)
 	missionRetryScriptIndex = mission;
 #ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
 	if (CTheScripts::MissionSupportsMissionReplay(missionRetryScriptIndex)) {
-		SaveGameForPause(4);
+		SaveGameForPause(SAVE_TYPE_QUICKSAVE_FOR_SCRIPT);
 	}
 #endif
 #endif
