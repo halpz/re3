@@ -381,7 +381,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		if (!UsingMobileScript && CTheScripts::MissionSupportsMissionReplay(missionRetryScriptIndex)){
 			if (!AlreadySavedGame) {
 				m_nIp = oldIp - 2;
-				SaveGameForPause(4);
+				SaveGameForPause(SAVE_TYPE_QUICKSAVE_FOR_SCRIPT);
 				AlreadySavedGame = true;
 				return 0;
 			}
@@ -394,9 +394,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CTimer::Suspend();
 		int offset = CTheScripts::MultiScriptArray[ScriptParams[0]];
 #ifdef USE_DEBUG_SCRIPT_LOADER
-		CFileMgr::ChangeDir("\\data\\");
-		int handle = CFileMgr::OpenFile(scriptfile, "rb");
-		CFileMgr::ChangeDir("\\");
+		int handle = CTheScripts::OpenScript();
 #else
 		CFileMgr::ChangeDir("\\");
 		int handle = CFileMgr::OpenFile("data\\main.scm", "rb");

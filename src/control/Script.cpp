@@ -725,25 +725,17 @@ void CRunningScript::Init()
 }
 
 #ifdef USE_DEBUG_SCRIPT_LOADER
-int scriptToLoad = 0;
-const char *scriptfile = "main.scm";
+int CTheScripts::ScriptToLoad = 0;
 
-int open_script()
+int CTheScripts::OpenScript()
 {
-	// glfwGetKey doesn't work because of CGame::Initialise is blocking 
-	CPad::UpdatePads();
-	if (CPad::GetPad(0)->GetChar('G'))
-		scriptToLoad = 0;
-	if (CPad::GetPad(0)->GetChar('R'))
-		scriptToLoad = 1;
-	if (CPad::GetPad(0)->GetChar('D'))
-		scriptToLoad = 2;
-	switch (scriptToLoad) {
-	case 0: scriptfile = "main.scm"; break;
-	case 1: scriptfile = "freeroam_miami.scm"; break;
-	case 2: scriptfile = "main_d.scm"; break;
+	CFileMgr::ChangeDir("\\");
+	switch (ScriptToLoad) {
+	case 0: return CFileMgr::OpenFile("data\\main.scm", "rb");
+	case 1: return CFileMgr::OpenFile("data\\freeroam_miami.scm", "rb");
+	case 2: return CFileMgr::OpenFile("data\\main_d.scm", "rb");
 	}
-	return CFileMgr::OpenFile(scriptfile, "rb");
+	return CFileMgr::OpenFile("data\\main.scm", "rb");
 }
 #endif
 
@@ -759,10 +751,16 @@ void CTheScripts::Init()
 	MissionCleanUp.Init();
 	UpsideDownCars.Init();
 	StuckCars.Init();
-	CFileMgr::SetDir("data");
 #ifdef USE_DEBUG_SCRIPT_LOADER
-	int mainf = open_script();
+	// glfwGetKey doesn't work because of CGame::Initialise is blocking
+	CPad::UpdatePads();
+	if(CPad::GetPad(0)->GetChar('G')) ScriptToLoad = 0;
+	if(CPad::GetPad(0)->GetChar('R')) ScriptToLoad = 1;
+	if(CPad::GetPad(0)->GetChar('D')) ScriptToLoad = 2;
+
+	int mainf = OpenScript();
 #else
+	CFileMgr::SetDir("data");
 	int mainf = CFileMgr::OpenFile("main.scm", "rb");
 #endif
 	CFileMgr::Read(mainf, (char*)ScriptSpace, SIZE_MAIN_SCRIPT);
@@ -903,24 +901,24 @@ void CTheScripts::Process()
 	static uint32 TimeToWaitTill;
 	static bool AlreadyResetHealth;
 	switch (AllowMissionReplay) {
-	case 2:
-		AllowMissionReplay = 3;
+	case MISSION_RETRY_STAGE_START_PROCESSING:
+		AllowMissionReplay = MISSION_RETRY_STAGE_WAIT_FOR_DELAY;
 		TimeToWaitTill = CTimer::GetTimeInMilliseconds() + (AddExtraDeathDelay() > 1000 ? 4000 : 2500);
 		break;
-	case 3:
+	case MISSION_RETRY_STAGE_WAIT_FOR_DELAY:
 		if (TimeToWaitTill < CTimer::GetTimeInMilliseconds())
-			AllowMissionReplay = 4;
+			AllowMissionReplay = MISSION_RETRY_STAGE_WAIT_FOR_MENU;
 		break;
-	case 4:
-		AllowMissionReplay = 5;
+	case MISSION_RETRY_STAGE_WAIT_FOR_MENU:
+		AllowMissionReplay = MISSION_RETRY_STAGE_WAIT_FOR_USER;
 		RetryMission(0, 0);
 		break;
-	case 6:
-		AllowMissionReplay = 7;
+	case MISSION_RETRY_STAGE_START_RESTARTING:
+		AllowMissionReplay = MISSION_RETRY_STAGE_WAIT_FOR_TIMER_AFTER_RESTART;
 		AlreadyResetHealth = false;
 		TimeToWaitTill = CTimer::GetTimeInMilliseconds() + 500;
 		break;
-	case 7:
+	case MISSION_RETRY_STAGE_WAIT_FOR_TIMER_AFTER_RESTART:
 		if (!AlreadyResetHealth) {
 			AlreadyResetHealth = true;
 			CPlayerPed* pPlayerPed = FindPlayerPed();
@@ -931,7 +929,7 @@ void CTheScripts::Process()
 			}
 		}
 		if (TimeToWaitTill < CTimer::GetTimeInMilliseconds()) {
-			AllowMissionReplay = 0;
+			AllowMissionReplay = MISSION_RETRY_STAGE_NORMAL;
 			return;
 		}
 		break;
@@ -1554,11 +1552,11 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 			CPlayerInfo* pPlayerInfo = &CWorld::Players[CWorld::PlayerInFocus];
 #if 0 // makeing autosave is pointless and is a bit buggy
 			if (pPlayerInfo->m_pPed->GetPedState() != PED_DEAD && pPlayerInfo->m_WBState == WBSTATE_PLAYING && !m_bDeatharrestExecuted)
-				SaveGameForPause(1);
+				SaveGameForPause(SAVE_TYPE_QUICKSAVE);
 #endif
 			oldTargetX = oldTargetY = 0.0f;
-			if (AllowMissionReplay == 1)
-				AllowMissionReplay = 2;
+			if (AllowMissionReplay == MISSION_RETRY_STAGE_WAIT_FOR_SCRIPT_TO_TERMINATE)
+				AllowMissionReplay = MISSION_RETRY_STAGE_START_PROCESSING;
 			// I am fairly sure they forgot to set return value here
 		}
 #endif
@@ -2579,10 +2577,10 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		wchar* key = CTheScripts::GetTextByKeyFromScript(&m_nIp);
 #ifdef MISSION_REPLAY
 		if (strcmp((char*)&CTheScripts::ScriptSpace[m_nIp - KEY_LENGTH_IN_SCRIPT], "M_FAIL") == 0) {
-			if (AllowMissionReplay == 7)
-				AllowMissionReplay = 0;
+			if (AllowMissionReplay == MISSION_RETRY_STAGE_WAIT_FOR_TIMER_AFTER_RESTART)
+				AllowMissionReplay = MISSION_RETRY_STAGE_NORMAL;
 			if (CanAllowMissionReplay())
-				AllowMissionReplay = 1;
+				AllowMissionReplay = MISSION_RETRY_STAGE_WAIT_FOR_SCRIPT_TO_TERMINATE;
 		}
 #endif
 		CollectParameters(&m_nIp, 2);
@@ -3229,7 +3227,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 
 bool CRunningScript::CanAllowMissionReplay()
 {
-	if (AllowMissionReplay)
+	if (AllowMissionReplay != MISSION_RETRY_STAGE_NORMAL)
 		return false;
 	for (int i = 0; i < ARRAY_SIZE(MissionScripts); i++) {
 		if (!CGeneral::faststricmp(m_abScriptName, MissionScripts[i]))
@@ -3245,14 +3243,14 @@ uint32 AddExtraDeathDelay()
 
 void RetryMission(int type, int unk)
 {
-	if (type == 0) {
+	if (type == MISSION_RETRY_TYPE_SUGGEST_TO_PLAYER) {
 		doingMissionRetry = true;
 		FrontEndMenuManager.m_nCurrScreen = MENUPAGE_MISSION_RETRY;
 		FrontEndMenuManager.RequestFrontEndStartUp();
 	}
-	else if (type == 2) {
+	else if (type == MISSION_RETRY_TYPE_BEGIN_RESTARTING) {
 		doingMissionRetry = false;
-		AllowMissionReplay = 6;
+		AllowMissionReplay = MISSION_RETRY_STAGE_START_RESTARTING;
 		CTheScripts::MissionCleanUp.Process();
 	}
 }

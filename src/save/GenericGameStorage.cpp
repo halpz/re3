@@ -1176,16 +1176,16 @@ void DisplaySaveResult(int unk, char* name)
 
 bool SaveGameForPause(int type)
 {
-	if (AllowMissionReplay != 0 && AllowMissionReplay != 7) {
+	if (AllowMissionReplay != MISSION_RETRY_STAGE_NORMAL && AllowMissionReplay != MISSION_RETRY_STAGE_WAIT_FOR_TIMER_AFTER_RESTART) {
 		debug("SaveGameForPause failed during AllowMissionReplay %d", AllowMissionReplay);
 		return false;
 	}
-	if (type != 3 && WaitForSave > CTimer::GetTimeInMilliseconds()) {
+	if (type != SAVE_TYPE_QUICKSAVE_FOR_MISSION_REPLAY && WaitForSave > CTimer::GetTimeInMilliseconds()) {
 		debug("SaveGameForPause failed WaitForSave");
 		return false;
 	}
 	WaitForSave = 0;
-	if (gGameState != GS_PLAYING_GAME || (CTheScripts::bAlreadyRunningAMissionScript && type != 5)) {
+	if (gGameState != GS_PLAYING_GAME || (CTheScripts::bAlreadyRunningAMissionScript && type != SAVE_TYPE_QUICKSAVE_FOR_SCRIPT_ON_A_MISSION)) {
 		DisplaySaveResult(3, CStats::LastMissionPassedName);
 		return false;
 	}

@@ -1736,16 +1736,14 @@ CTheScripts::SwitchToMission(int32 mission)
 	missionRetryScriptIndex = mission;
 #ifdef USE_MISSION_REPLAY_OVERRIDE_FOR_NON_MOBILE_SCRIPT
 	if (CTheScripts::MissionSupportsMissionReplay(missionRetryScriptIndex)) {
-		SaveGameForPause(4);
+		SaveGameForPause(SAVE_TYPE_QUICKSAVE_FOR_SCRIPT);
 	}
 #endif
 #endif
 	CTimer::Suspend();
 	int offset = CTheScripts::MultiScriptArray[mission];
 #ifdef USE_DEBUG_SCRIPT_LOADER
-	CFileMgr::ChangeDir("\\data\\");
-	int handle = CFileMgr::OpenFile(scriptfile, "rb");
-	CFileMgr::ChangeDir("\\");
+	int handle = OpenScript();
 #else
 	CFileMgr::ChangeDir("\\");
 	int handle = CFileMgr::OpenFile("data\\main.scm", "rb");

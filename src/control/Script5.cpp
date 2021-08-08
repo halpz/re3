@@ -1380,12 +1380,12 @@ void CRunningScript::DoDeatharrestCheck()
 	if (!pPlayer->IsRestartingAfterDeath() && !pPlayer->IsRestartingAfterArrest())
 		return;
 #ifdef MISSION_REPLAY
-	if (AllowMissionReplay != 7 && AllowMissionReplay != 0)
+	if (AllowMissionReplay != MISSION_RETRY_STAGE_WAIT_FOR_TIMER_AFTER_RESTART && AllowMissionReplay != MISSION_RETRY_STAGE_NORMAL)
 		return;
-	if (AllowMissionReplay == 7)
-		AllowMissionReplay = 0;
+	if (AllowMissionReplay == MISSION_RETRY_STAGE_WAIT_FOR_TIMER_AFTER_RESTART)
+		AllowMissionReplay = MISSION_RETRY_STAGE_NORMAL;
 	if (CanAllowMissionReplay())
-		AllowMissionReplay = 1;
+		AllowMissionReplay = MISSION_RETRY_STAGE_WAIT_FOR_SCRIPT_TO_TERMINATE;
 #endif
 	script_assert(m_nStackPointer > 0);
 	while (m_nStackPointer > 1)

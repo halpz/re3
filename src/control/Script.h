@@ -47,10 +47,6 @@ void FlushLog();
 
 #define KEY_LENGTH_IN_SCRIPT (8)
 
-#ifdef USE_DEBUG_SCRIPT_LOADER
-extern const char* scriptfile;
-#endif
-
 //#define GTA_SCRIPT_COLLECTIVE
 
 struct intro_script_rectangle 
@@ -593,6 +589,11 @@ public:
 	}
 #endif
 
+#ifdef USE_DEBUG_SCRIPT_LOADER
+	static int ScriptToLoad;
+	static int OpenScript();
+#endif
+
 #ifdef USE_ADVANCED_SCRIPT_DEBUG_OUTPUT
 	static void LogAfterScriptInitializing();
 	static void LogBeforeScriptProcessing();
@@ -600,9 +601,6 @@ public:
 #endif
 };
 
-#ifdef USE_DEBUG_SCRIPT_LOADER
-extern int scriptToLoad;
-#endif
 #ifdef MISSION_REPLAY
 extern int AllowMissionReplay;
 extern uint32 WaitForMissionActivate;
@@ -621,8 +619,21 @@ extern bool AlreadySavedGame;
 
 uint32 AddExtraDeathDelay();
 void RetryMission(int, int);
-#endif
 
-#ifdef USE_DEBUG_SCRIPT_LOADER
-extern int scriptToLoad;
+enum {
+	MISSION_RETRY_TYPE_SUGGEST_TO_PLAYER = 0,
+	MISSION_RETRY_TYPE_1,
+	MISSION_RETRY_TYPE_BEGIN_RESTARTING
+};
+
+enum {
+	MISSION_RETRY_STAGE_NORMAL = 0,
+	MISSION_RETRY_STAGE_WAIT_FOR_SCRIPT_TO_TERMINATE,
+	MISSION_RETRY_STAGE_START_PROCESSING,
+	MISSION_RETRY_STAGE_WAIT_FOR_DELAY,
+	MISSION_RETRY_STAGE_WAIT_FOR_MENU,
+	MISSION_RETRY_STAGE_WAIT_FOR_USER,
+	MISSION_RETRY_STAGE_START_RESTARTING,
+	MISSION_RETRY_STAGE_WAIT_FOR_TIMER_AFTER_RESTART,
+};
 #endif
