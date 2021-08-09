@@ -693,6 +693,7 @@ enum
 	SAVE_TYPE_64_BIT = 2,
 	SAVE_TYPE_MSVC = 4,
 	SAVE_TYPE_GCC = 8,
+	SAVE_TYPE_STEAM = 16,
 };
 
 uint8
@@ -706,6 +707,14 @@ GetSaveType(char *savename)
 
 	uint8 *buf = work_buff;
 	CFileMgr::Read(file, (const char *)work_buff, size); // simple vars + scripts
+
+	buf += 0x40 + sizeof(int32) + sizeof(int32) + sizeof(float) * 3;
+
+	int8 steam_byte;
+	ReadDataFromBufferPointer(buf, steam_byte);
+
+	if (steam_byte == -3)
+		save_type |= SAVE_TYPE_STEAM;
 
 	LoadSaveDataBlockNoCheck(buf, file, size); // ped pool
 
@@ -755,6 +764,29 @@ GetSaveType(char *savename)
 		save_type |= SAVE_TYPE_GCC;
 
 	return save_type;
+}
+
+static void
+FixSimpleVarsAndScripts(uint8 save_type, uint8 *buf, uint8 *buf2, uint32 *size)
+{
+	uint8 *buf_start = buf;
+	uint8 *buf2_start = buf2;
+	uint32 read = *size;
+	uint32 written = *size - (sizeof(int8) + 3);
+
+	uint32 pre_steam = 0x40 + sizeof(int32) + sizeof(int32) + sizeof(float) * 3;
+	uint32 post_steam = *size - (sizeof(int8) + 3) - pre_steam;
+
+	CopyBuf(buf, buf2, pre_steam);
+	SkipBuf(buf, sizeof(int8) + 3);
+	CopyBuf(buf, buf2, post_steam);
+
+	*size = 0;
+
+	assert(buf - buf_start == read);
+	assert(buf2 - buf2_start == written);
+
+	*size = written;
 }
 
 static void
@@ -1018,7 +1050,7 @@ FixScriptPaths(uint8 save_type, uint8 *buf, uint8 *buf2, uint32 *size)
 bool
 FixSave(int32 slot, uint8 save_type)
 {
-	if (save_type & SAVE_TYPE_32_BIT && save_type & SAVE_TYPE_MSVC)
+	if (save_type & SAVE_TYPE_32_BIT && save_type & SAVE_TYPE_MSVC && !(save_type & SAVE_TYPE_STEAM))
 		return true;
 
 	bool success = false;
@@ -1044,17 +1076,29 @@ FixSave(int32 slot, uint8 save_type)
 	totalSize = 0;
 
 	CFileMgr::Read(file_in, (const char *)&size, sizeof(size));
+	size = align4bytes(size);
 
 	buf = work_buff;
 	CFileMgr::Read(file_in, (const char *)work_buff, size); // simple vars + scripts
 
-	WriteSavaDataBlockNoFunc(buf, file_out, size);
+	if (save_type & SAVE_TYPE_STEAM && save_type & SAVE_TYPE_MSVC && save_type & SAVE_TYPE_32_BIT) {
+		memset(work_buff2, 0, sizeof(work_buff2));
+		buf2 = work_buff2;
+		FixSimpleVarsAndScripts(save_type, buf, buf2, &size);
+		if (!PcSaveHelper.PcClassSaveRoutine(file_out, work_buff2, size))
+			goto fail;
+		totalSize += size;
+	} else
+		WriteSavaDataBlockNoFunc(buf, file_out, size);
 
 	LoadSaveDataBlockNoCheck(buf, file_in, size); // ped pool
 	WriteSavaDataBlockNoFunc(buf, file_out, size);
 
 	LoadSaveDataBlockNoCheck(buf, file_in, size); // garages
-	FixSaveDataBlock(FixGarages, file_out, size); // garages need to be fixed in either case
+	if (!(save_type & SAVE_TYPE_STEAM && save_type & SAVE_TYPE_MSVC && save_type & SAVE_TYPE_32_BIT))
+		FixSaveDataBlock(FixGarages, file_out, size);
+	else
+		WriteSavaDataBlockNoFunc(buf, file_out, size);
 
 	LoadSaveDataBlockNoCheck(buf, file_in, size); // game logic
 	WriteSavaDataBlockNoFunc(buf, file_out, size);
