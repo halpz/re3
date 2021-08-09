@@ -1030,6 +1030,7 @@ FixSave(int32 slot, uint8 save_type)
 	totalSize = 0;
 
 	CFileMgr::Read(file_in, (const char *)&size, sizeof(size));
+	size = align4bytes(size);
 
 	buf = work_buff;
 	CFileMgr::Read(file_in, (const char *)work_buff, size); // simple vars + scripts
