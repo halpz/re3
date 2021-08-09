@@ -447,7 +447,7 @@ void CRadar::Draw3dMarkers()
 				CEntity *entity = CPools::GetVehiclePool()->GetAt(ms_RadarTrace[i].m_nEntityHandle);
 				if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
 					CVector pos = entity->GetPosition();
-					pos.z += 1.2f * CModelInfo::GetModelInfo(entity->GetModelIndex())->GetColModel()->boundingBox.max.z + 2.5f;
+					pos.z += 1.2f * CModelInfo::GetColModel(entity->GetModelIndex())->boundingBox.max.z + 2.5f;
 					C3dMarkers::PlaceMarker(i | (ms_RadarTrace[i].m_BlipIndex << 16), MARKERTYPE_ARROW, pos, 2.5f, 0, 128, 255, 255, 1024, 0.2f, 5);
 				}
 				break;
@@ -471,7 +471,7 @@ void CRadar::Draw3dMarkers()
 				CEntity *entity = CPools::GetObjectPool()->GetAt(ms_RadarTrace[i].m_nEntityHandle);
 				if (ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_BOTH || ms_RadarTrace[i].m_eBlipDisplay == BLIP_DISPLAY_MARKER_ONLY) {
 					CVector pos = entity->GetPosition();
-					pos.z += CModelInfo::GetModelInfo(entity->GetModelIndex())->GetColModel()->boundingBox.max.z + 1.0f + 1.0f;
+					pos.z += CModelInfo::GetColModel(entity->GetModelIndex())->boundingBox.max.z + 1.0f + 1.0f;
 					C3dMarkers::PlaceMarker(i | (ms_RadarTrace[i].m_BlipIndex << 16), MARKERTYPE_ARROW, pos, 1.0f, 0, 128, 255, 255, 1024, 0.2f, 5);
 				}
 				break;

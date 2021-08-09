@@ -172,8 +172,8 @@ void CCarGenerator::Setup(float x, float y, float z, float angle, int32 mi, int1
 	m_nTimer = CTimer::GetTimeInMilliseconds() + 1;
 	m_nUsesRemaining = 0;
 	m_bIsBlocking = false;
-	m_vecInf = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->boundingBox.min;
-	m_vecSup = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->boundingBox.max;
+	m_vecInf = CModelInfo::GetColModel(m_nModelIndex)->boundingBox.min;
+	m_vecSup = CModelInfo::GetColModel(m_nModelIndex)->boundingBox.max;
 	m_fSize = Max(m_vecInf.Magnitude(), m_vecSup.Magnitude());
 }
 

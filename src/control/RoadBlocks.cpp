@@ -51,7 +51,7 @@ CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType
 	CEntity* pEntityToAttack = (CEntity*)FindPlayerVehicle();
 	if (!pEntityToAttack)
 		pEntityToAttack = (CEntity*)FindPlayerPed();
-	CColModel* pPoliceColModel = CModelInfo::GetModelInfo(MI_POLICE)->GetColModel();
+	CColModel* pPoliceColModel = CModelInfo::GetColModel(MI_POLICE);
 	float fRadius = pVehicle->GetBoundRadius() / pPoliceColModel->boundingSphere.radius;
 	for (int32 i = 0; i < 2; i++) {
 		const int32 roadBlockIndex = i + 2 * roadBlockType;
@@ -130,7 +130,7 @@ CRoadBlocks::GenerateRoadBlocks(void)
 						vehicleId = MI_ENFORCER;
 					if (!CStreaming::HasModelLoaded(vehicleId))
 						vehicleId = MI_POLICE;
-					CColModel *pVehicleColModel = CModelInfo::GetModelInfo(vehicleId)->GetColModel();
+					CColModel *pVehicleColModel = CModelInfo::GetColModel(vehicleId);
 					float fModelRadius = 2.0f * pVehicleColModel->boundingSphere.radius + 0.25f;
 					int16 radius = (int16)(fMapObjectRadius / fModelRadius);
 					if (radius >= 6)
@@ -152,7 +152,7 @@ CRoadBlocks::GenerateRoadBlocks(void)
 						else
 							offsetMatrix.GetPosition() = CVector(i * fModelRadius - fOffset, 0.0f, 0.6f);
 						CMatrix vehicleMatrix = mapObject->GetMatrix() * offsetMatrix;
-						float fModelRadius = CModelInfo::GetModelInfo(vehicleId)->GetColModel()->boundingSphere.radius - 0.25f;
+						float fModelRadius = CModelInfo::GetColModel(vehicleId)->boundingSphere.radius - 0.25f;
 						int16 colliding = 0;
 						CWorld::FindObjectsKindaColliding(vehicleMatrix.GetPosition(), fModelRadius, 0, &colliding, 2, nil, false, true, true, false, false);
 						if (!colliding) {

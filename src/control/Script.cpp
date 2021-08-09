@@ -2814,7 +2814,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, label);
 		int zoneToCheck = CTheZones::FindZoneByLabelAndReturnIndex(label);
 		if (zoneToCheck != -1)
-			m_nIp += KEY_LENGTH_IN_SCRIPT; /* why only if zone != 1? */
+			m_nIp += KEY_LENGTH_IN_SCRIPT; /* why only if zone != -1? */
 		CVector pos = pPlayer->GetPos();
 		CZone* pZone = CTheZones::GetZone(zoneToCheck);
 		UpdateCompareFlag(CTheZones::PointLiesWithinZone(&pos, pZone));

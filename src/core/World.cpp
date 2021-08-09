@@ -358,7 +358,7 @@ CWorld::ProcessLineOfSightSectorList(CPtrList &list, const CColLine &line, CColP
 				} else
 					colmodel = nil;
 			} else if(e->bUsesCollision)
-				colmodel = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
+				colmodel = CModelInfo::GetColModel(e->GetModelIndex());
 
 			if(colmodel && CCollision::ProcessLineOfSight(line, e->GetMatrix(), *colmodel, point, mindist,
 			                                              ignoreSeeThrough))
@@ -444,7 +444,7 @@ CWorld::ProcessVerticalLineSectorList(CPtrList &list, const CColLine &line, CCol
 		if(e->m_scanCode != GetCurrentScanCode() && e->bUsesCollision) {
 			e->m_scanCode = GetCurrentScanCode();
 
-			colmodel = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
+			colmodel = CModelInfo::GetColModel(e->GetModelIndex());
 			if(CCollision::ProcessVerticalLine(line, e->GetMatrix(), *colmodel, point, mindist,
 			                                   ignoreSeeThrough, poly))
 				entity = e;
@@ -645,7 +645,7 @@ CWorld::GetIsLineOfSightSectorListClear(CPtrList &list, const CColLine &line, bo
 
 			if(e != pIgnoreEntity && !(ignoreSomeObjects && CameraToIgnoreThisObject(e))) {
 
-				colmodel = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
+				colmodel = CModelInfo::GetColModel(e->GetModelIndex());
 
 				if(CCollision::TestLineOfSight(line, e->GetMatrix(), *colmodel, ignoreSeeThrough))
 					return false;
@@ -955,7 +955,7 @@ CWorld::TestSphereAgainstSectorList(CPtrList &list, CVector spherePos, float rad
 				float distance = diff.Magnitude();
 
 				if(e->GetBoundRadius() + radius > distance) {
-					CColModel *eCol = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel();
+					CColModel *eCol = CModelInfo::GetColModel(e->GetModelIndex());
 					int collidedSpheres =
 					    CCollision::ProcessColModels(sphereMat, OurColModel, e->GetMatrix(), *eCol,
 					                                 gaTempSphereColPoints, nil, nil);

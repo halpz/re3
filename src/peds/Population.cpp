@@ -999,7 +999,7 @@ bool
 CPopulation::TestRoomForDummyObject(CObject *obj)
 {
 	int16 collidingObjs;
-	CWorld::FindObjectsKindaColliding(obj->m_objectMatrix.GetPosition(), CModelInfo::GetModelInfo(obj->GetModelIndex())->GetColModel()->boundingSphere.radius,
+	CWorld::FindObjectsKindaColliding(obj->m_objectMatrix.GetPosition(), CModelInfo::GetColModel(obj->GetModelIndex())->boundingSphere.radius,
 		false, &collidingObjs, 2, nil, false, true, true, false, false);
 
 	return collidingObjs == 0;

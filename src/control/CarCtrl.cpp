@@ -354,7 +354,7 @@ CCarCtrl::GenerateOneRandomCar()
 		pVehicle->m_bSirenOrAlarm = true;
 	pVehicle->AutoPilot.m_nNextPathNodeInfo = connectionId;
 	pVehicle->AutoPilot.m_nNextLane = pVehicle->AutoPilot.m_nCurrentLane = CGeneral::GetRandomNumber() % lanesOnCurrentRoad;
-	CColBox* boundingBox = &CModelInfo::GetModelInfo(pVehicle->GetModelIndex())->GetColModel()->boundingBox;
+	CColBox* boundingBox = &CModelInfo::GetColModel(pVehicle->GetModelIndex())->boundingBox;
 	float carLength = 1.0f + (boundingBox->max.y - boundingBox->min.y) / 2;
 	float distanceBetweenNodes = (pCurNode->GetPosition() - pNextNode->GetPosition()).Magnitude2D();
 	/* If car is so long that it doesn't fit between two car nodes, place it directly in the middle. */
