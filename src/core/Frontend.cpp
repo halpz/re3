@@ -447,7 +447,7 @@ CMenuManager::ThingsToDoBeforeGoingBack()
 	if ((m_nCurrScreen == MENUPAGE_SKIN_SELECT) && strcmp(m_aSkinName, m_PrefsSkinFile) != 0) {
 		CWorld::Players[0].SetPlayerSkin(m_PrefsSkinFile);
 #ifdef CUSTOM_FRONTEND_OPTIONS
-	} else if (ScreenHasOption(m_nCurrScreen, "FEA_3DH")) {
+	} else if (ScreenHasOption(m_nCurrScreen, "FEA_RSS")) {
 #else
 	} else if (m_nCurrScreen == MENUPAGE_SOUND_SETTINGS) {
 #endif

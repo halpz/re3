@@ -335,14 +335,19 @@ cAudioManager::DestroyAllGameCreatedEntities()
 uint8
 cAudioManager::GetNum3DProvidersAvailable()
 {
+#ifdef EXTERNAL_3D_SOUND
 	if (m_bIsInitialised)
 		return SampleManager.GetNum3DProvidersAvailable();
+#endif
 	return 0;
 }
 
 char *
 cAudioManager::Get3DProviderName(uint8 id)
 {
+#ifndef EXTERNAL_3D_SOUND
+	return nil;
+#else
 	if (!m_bIsInitialised)
 		return nil;
 #ifdef AUDIO_OAL
@@ -353,13 +358,16 @@ cAudioManager::Get3DProviderName(uint8 id)
 		return nil;
 #endif
 	return SampleManager.Get3DProviderName(id);
+#endif
 }
 
 int8
 cAudioManager::GetCurrent3DProviderIndex()
 {
+#ifdef EXTERNAL_3D_SOUND
 	if (m_bIsInitialised)
 		return SampleManager.GetCurrent3DProviderIndex();
+#endif
 
 	return -1;
 }
@@ -367,6 +375,9 @@ cAudioManager::GetCurrent3DProviderIndex()
 int8
 cAudioManager::SetCurrent3DProvider(uint8 which)
 {
+#ifndef EXTERNAL_3D_SOUND
+	return -1;
+#else
 	if (!m_bIsInitialised)
 		return -1;
 	for (uint8 i = 0; i < m_nActiveSamples + 1; ++i)
@@ -387,12 +398,15 @@ cAudioManager::SetCurrent3DProvider(uint8 which)
 #endif
 	}
 	return current;
+#endif
 }
 
 void
 cAudioManager::SetSpeakerConfig(int32 conf)
 {
+#ifdef EXTERNAL_3D_SOUND
 	SampleManager.SetSpeakerConfig(conf);
+#endif
 }
 
 bool8
@@ -482,7 +496,7 @@ cAudioManager::ServiceSoundEffects()
 	ServiceCollisions();
 	AddReleasingSounds();
 	ProcessMissionAudio();
-#ifdef GTA_PC
+#ifdef EXTERNAL_3D_SOUND
 	AdjustSamplesVolume();
 #endif
 	ProcessActiveQueues();
@@ -660,7 +674,7 @@ cAudioManager::AddReflectionsToRequestedQueue()
 			m_sQueueSample.m_nLoopsRemaining = (reflectionDistance * 500.f / 1029.f);
 			if (m_sQueueSample.m_nLoopsRemaining > 5) {
 				m_sQueueSample.m_fDistance = m_afReflectionsDistances[i];
-				m_sQueueSample.m_nEmittingVolume = emittingVolume;
+				SET_EMITTING_VOLUME(emittingVolume);
 				m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
 				if (m_sQueueSample.m_nVolume > emittingVolume / 16) {
 					m_sQueueSample.m_nCounter += (i + 1) * 256;
@@ -1038,7 +1052,9 @@ cAudioManager::ClearActiveSamples()
 		m_asActiveSamples[i].m_nReleasingVolumeModificator = 5;
 		m_asActiveSamples[i].m_nFrequency = 0;
 		m_asActiveSamples[i].m_nVolume = 0;
+#ifdef EXTERNAL_3D_SOUND
 		m_asActiveSamples[i].m_nEmittingVolume = 0;
+#endif
 		m_asActiveSamples[i].m_fDistance = 0.0f;
 		m_asActiveSamples[i].m_bIsProcessed = FALSE;
 		m_asActiveSamples[i].m_bLoopEnded = FALSE;
@@ -1076,7 +1092,7 @@ cAudioManager::GenerateIntegerRandomNumberTable()
 	}
 }
 
-#ifdef GTA_PC
+#ifdef EXTERNAL_3D_SOUND
 void
 cAudioManager::AdjustSamplesVolume()
 {

@@ -493,8 +493,10 @@ bool LoadINISettings()
 	ReadIniIfExists("Audio", "SfxVolume", &FrontEndMenuManager.m_PrefsSfxVolume);
 	ReadIniIfExists("Audio", "MusicVolume", &FrontEndMenuManager.m_PrefsMusicVolume);
 	ReadIniIfExists("Audio", "Radio", &FrontEndMenuManager.m_PrefsRadioStation);
+#ifdef EXTERNAL_3D_SOUND
 	ReadIniIfExists("Audio", "SpeakerType", &FrontEndMenuManager.m_PrefsSpeakers);
 	ReadIniIfExists("Audio", "Provider", &FrontEndMenuManager.m_nPrefsAudio3DProviderIndex);
+#endif
 	ReadIniIfExists("Audio", "DynamicAcoustics", &FrontEndMenuManager.m_PrefsDMA);
 	ReadIniIfExists("Display", "Brightness", &FrontEndMenuManager.m_PrefsBrightness);
 	ReadIniIfExists("Display", "DrawDistance", &FrontEndMenuManager.m_PrefsLOD);
@@ -593,8 +595,10 @@ void SaveINISettings()
 	StoreIni("Audio", "SfxVolume", FrontEndMenuManager.m_PrefsSfxVolume);
 	StoreIni("Audio", "MusicVolume", FrontEndMenuManager.m_PrefsMusicVolume);
 	StoreIni("Audio", "Radio", FrontEndMenuManager.m_PrefsRadioStation);
+#ifdef EXTERNAL_3D_SOUND
 	StoreIni("Audio", "SpeakerType", FrontEndMenuManager.m_PrefsSpeakers);
 	StoreIni("Audio", "Provider", FrontEndMenuManager.m_nPrefsAudio3DProviderIndex);
+#endif
 	StoreIni("Audio", "DynamicAcoustics", FrontEndMenuManager.m_PrefsDMA);
 	StoreIni("Display", "Brightness", FrontEndMenuManager.m_PrefsBrightness);
 	StoreIni("Display", "DrawDistance", FrontEndMenuManager.m_PrefsLOD);

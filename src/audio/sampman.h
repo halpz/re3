@@ -144,7 +144,8 @@ public:
 
 	cSampleManager(void);
 	~cSampleManager(void);
-	
+
+#ifdef EXTERNAL_3D_SOUND
 	void SetSpeakerConfig(int32 nConfig);
 	uint32 GetMaximumSupportedChannels(void);
 	
@@ -156,6 +157,7 @@ public:
 	
 	int8 GetCurrent3DProviderIndex(void);
 	int8 SetCurrent3DProvider(uint8 which);
+#endif
 	
 	bool8 IsMP3RadioChannelAvailable(void);
 	
@@ -195,9 +197,11 @@ public:
 	
 	void  SetChannelReverbFlag    (uint32 nChannel, bool8 nReverbFlag);
 	bool8 InitialiseChannel       (uint32 nChannel, uint32 nSfx, uint8 nBank);
+#ifdef EXTERNAL_3D_SOUND
 	void  SetChannelEmittingVolume(uint32 nChannel, uint32 nVolume);
 	void  SetChannel3DPosition    (uint32 nChannel, float fX, float fY, float fZ);
 	void  SetChannel3DDistances   (uint32 nChannel, float fMax, float fMin);
+#endif
 	void  SetChannelVolume        (uint32 nChannel, uint32 nVolume);
 	void  SetChannelPan           (uint32 nChannel, uint32 nPan);
 	void  SetChannelFrequency     (uint32 nChannel, uint32 nFreq);
