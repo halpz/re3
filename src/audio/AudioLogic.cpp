@@ -7320,6 +7320,9 @@ cAudioManager::ProcessSawMillScriptObject(uint8 sound)
 				m_sQueueSample.m_bReleasingSoundFlag = TRUE;
 				m_sQueueSample.m_nReleasingVolumeModificator = 3;
 				m_sQueueSample.m_fSpeedMultiplier = 2.0f;
+#ifdef FIX_BUGS
+				m_sQueueSample.m_nEmittingVolume = 70;
+#endif
 				RESET_LOOP_OFFSETS
 				m_sQueueSample.m_bReverbFlag = TRUE;
 				m_sQueueSample.m_bRequireReflection = FALSE;
