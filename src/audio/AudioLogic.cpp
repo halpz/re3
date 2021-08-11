@@ -5398,8 +5398,8 @@ cAudioManager::GetPedCommentSfx(CPed *ped, uint16 sound)
 		case MI_VICE4:
 		case MI_VICE5:
 		case MI_VICE7:
-		case MI_VICE8: //return GetViceWhiteTalkSfx(ped, sound);
-		case MI_VICE6: //return GetViceBlackTalkSfx(ped, sound);
+		case MI_VICE8: return GetViceWhiteTalkSfx(ped, sound);
+		case MI_VICE6: return GetViceBlackTalkSfx(ped, sound);
 		case MI_SPECIAL01:
 		case MI_SPECIAL02:
 		case MI_SPECIAL03:
@@ -7880,17 +7880,17 @@ cAudioManager::GetPGTalkSfx(CPed *ped, uint16 sound)
 	}
 	return (SFX_PLAYER_GANG_2_BLOCKED_1 - SFX_PLAYER_GANG_1_BLOCKED_1) * (m_sQueueSample.m_nEntityIndex % 3) + sfx;
 }
-
+*/
 uint32
 cAudioManager::GetViceWhiteTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 	switch(sound) {
-	case SOUND_PED_ARREST_COP: GetPhrase(sfx, ped->m_lastComment, SFX_VICE_VOICE_1_ARREST_1, 3); break;
-	case SOUND_PED_MIAMIVICE_EXITING_CAR: sfx = SFX_VICE_VOICE_1_MIAMIVICE_EXITING_CAR_1; break;
+	case SOUND_PED_ARREST_COP: GetPhrase(sfx, ped->m_lastComment, SFX_SFX_VICE_VOICE_1_ARREST_1, 3); break;
+	case SOUND_PED_MIAMIVICE_EXITING_CAR: sfx = SFX_SFX_VICE_VOICE_1_MIAMIVICE_EXITING_CAR_1; break;
 	default: return GetGenericMaleTalkSfx(ped, sound);
 	}
-	sfx += (SFX_VICE_VOICE_2_ARREST_1-SFX_VICE_VOICE_1_ARREST_1) * (m_sQueueSample.m_nEntityIndex % 5);
+	sfx += (SFX_SFX_VICE_VOICE_2_ARREST_1-SFX_SFX_VICE_VOICE_1_ARREST_1) * (m_sQueueSample.m_nEntityIndex % 5);
 	return sfx;
 }
 
@@ -7899,13 +7899,13 @@ cAudioManager::GetViceBlackTalkSfx(CPed *ped, uint16 sound)
 {
 	uint32 sfx;
 	switch(sound) {
-	case SOUND_PED_ARREST_COP: GetPhrase(sfx, ped->m_lastComment, SFX_VICE_VOICE_6_ARREST_1, 3); break;
-	case SOUND_PED_MIAMIVICE_EXITING_CAR: return SFX_VICE_VOICE_6_MIAMIVICE_EXITING_CAR_1;
+	case SOUND_PED_ARREST_COP: GetPhrase(sfx, ped->m_lastComment, SFX_SFX_VICE_VOICE_6_ARREST_1, 3); break;
+	case SOUND_PED_MIAMIVICE_EXITING_CAR: return SFX_SFX_VICE_VOICE_6_MIAMIVICE_EXITING_CAR_1;
 	default: return GetGenericMaleTalkSfx(ped, sound);
 	}
 	return sfx;
 }
-
+/*
 uint32
 cAudioManager::GetBMODKTalkSfx(CPed *ped, uint16 sound)
 {
