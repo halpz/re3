@@ -5420,7 +5420,7 @@ cAudioManager::GetPedCommentSfx(CPed *ped, uint16 sound)
 		case MI_SPECIAL18:
 		case MI_SPECIAL19:
 		case MI_SPECIAL20:
-		case MI_SPECIAL21: //return GetSpecialCharacterTalkSfx(ped, ped->GetModelIndex(), sound);
+		case MI_SPECIAL21: return GetSpecialCharacterTalkSfx(ped, ped->GetModelIndex(), sound);
 			return NO_SAMPLE;
 		default: return GetGenericMaleTalkSfx(ped, sound);
 		}
