@@ -1546,7 +1546,7 @@ CPopulation::PlaceGangMembersInCircle(ePedType pedType, int pedAmount, CVector c
 					int gangModel = ChooseGangOccupation(pedType - PEDTYPE_GANG1);
 					if (((CPedModelInfo*)CModelInfo::GetModelInfo(gangModel))->GetRwObject()) {
 						CEntity* obstacles[6] = { nil, nil, nil, nil, nil, nil };
-						CPedPlacement::IsPositionClearForPed(finalPos, CModelInfo::GetModelInfo(gangModel)->GetColModel()->boundingSphere.radius, ARRAY_SIZE(obstacles), obstacles);
+						CPedPlacement::IsPositionClearForPed(finalPos, CModelInfo::GetColModel(gangModel)->boundingSphere.radius, ARRAY_SIZE(obstacles), obstacles);
 						bool foundObstacle = false;
 						for (int m = 0; m < ARRAY_SIZE(obstacles); m++) {
 							CEntity* obstacle = obstacles[m];
@@ -1630,7 +1630,7 @@ CPopulation::PlaceCouple(ePedType manType, int32 manModel, ePedType womanType, i
 		return;
 
 	if (!TheCamera.IsSphereVisible(coors, 1.5f) || MIN_CREATION_DIST * PedCreationDistMultiplier() <= (coors - FindPlayerPed()->GetPosition()).Magnitude2D()) {
-		if (CPedPlacement::IsPositionClearForPed(coors, CModelInfo::GetModelInfo(manModel)->GetColModel()->boundingSphere.radius, -1, nil)) {
+		if (CPedPlacement::IsPositionClearForPed(coors, CModelInfo::GetColModel(manModel)->boundingSphere.radius, -1, nil)) {
 			bool manFoundGround;
 			float manGroundZ = CWorld::FindGroundZFor3DCoord(coors.x, coors.y, coors.z, &manFoundGround) + 1.0f;
 			if (manFoundGround) {
@@ -1664,7 +1664,7 @@ CPopulation::PlaceCouple(ePedType manType, int32 manModel, ePedType womanType, i
 									CEntity* obstacles[3];
 									memcpy(obstacles, gCoupleObstacles, sizeof(gCoupleObstacles));
 
-									CPedPlacement::IsPositionClearForPed(womanPos, CModelInfo::GetModelInfo(womanModel)->GetColModel()->boundingSphere.radius, ARRAY_SIZE(obstacles), obstacles);
+									CPedPlacement::IsPositionClearForPed(womanPos, CModelInfo::GetColModel(womanModel)->boundingSphere.radius, ARRAY_SIZE(obstacles), obstacles);
 									for (int i = 0; i < ARRAY_SIZE(obstacles); i++) {
 										CEntity *obstacle = obstacles[i];
 										if (obstacle) {
@@ -1740,7 +1740,7 @@ CPopulation::PlaceMallPedsAsStationaryGroup(CVector const& coors, int32 group)
 
 					if (pedModelInfo->GetRwObject()) {
 						CEntity* obstacles[6] = { nil, nil, nil, nil, nil, nil };
-						CPedPlacement::IsPositionClearForPed(finalPos, CModelInfo::GetModelInfo(pedModel)->GetColModel()->boundingSphere.radius, ARRAY_SIZE(obstacles), obstacles);
+						CPedPlacement::IsPositionClearForPed(finalPos, CModelInfo::GetColModel(pedModel)->boundingSphere.radius, ARRAY_SIZE(obstacles), obstacles);
 						bool foundObstacle = false;
 						for (int m = 0; m < ARRAY_SIZE(obstacles); m++) {
 							CEntity* obstacle = obstacles[m];
