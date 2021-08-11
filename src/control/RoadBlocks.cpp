@@ -60,7 +60,7 @@ CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType
 	CEntity* pEntityToAttack = (CEntity*)FindPlayerVehicle();
 	if (!pEntityToAttack)
 		pEntityToAttack = (CEntity*)FindPlayerPed();
-	CColModel* pPoliceColModel = CModelInfo::GetModelInfo(MI_POLICE)->GetColModel();
+	CColModel *pPoliceColModel = CModelInfo::GetColModel(MI_POLICE);
 	float fRadius = pVehicle->GetBoundRadius() / pPoliceColModel->boundingSphere.radius;
 	for (int32 i = 0; i < 2; i++) {
 		const int32 roadBlockIndex = i + 2 * roadBlockType;
@@ -217,7 +217,7 @@ CRoadBlocks::CreateRoadBlockBetween2Points(CVector point1, CVector point2)
 		vehicleId = MI_ENFORCER;
 	if (!CStreaming::HasModelLoaded(vehicleId))
 		vehicleId = MI_POLICE;
-	CColModel* pVehicleColModel = CModelInfo::GetModelInfo(vehicleId)->GetColModel();
+	CColModel *pVehicleColModel = CModelInfo::GetColModel(vehicleId);
 	float fModelRadius = 2.0f * pVehicleColModel->boundingSphere.radius + 0.25f;
 	int16 numRoadblockVehicles = Min(6, (int16)(distBetween / fModelRadius));
 	for (int16 i = 0; i < numRoadblockVehicles; i++) {
@@ -231,7 +231,7 @@ CRoadBlocks::CreateRoadBlockBetween2Points(CVector point1, CVector point2)
 			tmp.RotateZ(((CGeneral::GetRandomNumber() & 0xFF) - 128.0f) * 0.003f + 3.1416f);
 		tmp.SetTranslateOnly(offset * forward + pos);
 		tmp.GetPosition().z += 0.6f;
-		float fModelRadius = CModelInfo::GetModelInfo(vehicleId)->GetColModel()->boundingSphere.radius - 0.25f;
+		float fModelRadius = CModelInfo::GetColModel(vehicleId)->boundingSphere.radius - 0.25f;
 		int16 colliding = 0;
 		CWorld::FindObjectsKindaColliding(tmp.GetPosition(), fModelRadius, 0, &colliding, 2, nil, false, true, true, false, false);
 		if (!colliding) {
