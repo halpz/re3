@@ -74,6 +74,7 @@ CBike::CBike(int32 id, uint8 CreatedBy)
 		break;
 	case MI_PIZZABOY:
 	case MI_FAGGIO:
+	case MI_NOODLEBOY:
 		m_bikeAnimType = ASSOCGRP_BIKE_VESPA;
 		break;
 	case MI_PCJ600:

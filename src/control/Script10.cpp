@@ -94,6 +94,7 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		SET_INTEGER_PARAM(0, CPickups::GetValue(GET_INTEGER_PARAM(0)));
+		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
 	case COMMAND_SET_PICKUP_VALUE:
