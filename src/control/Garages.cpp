@@ -2347,7 +2347,7 @@ void CGarages::GivePlayerDetonator()
 
 float CGarages::FindDoorHeightForMI(int32 mi)
 {
-	return CModelInfo::GetModelInfo(mi)->GetColModel()->boundingBox.max.z - CModelInfo::GetModelInfo(mi)->GetColModel()->boundingBox.min.z - 0.1f;
+	return CModelInfo::GetColModel(mi)->boundingBox.max.z - CModelInfo::GetColModel(mi)->boundingBox.min.z - 0.1f;
 }
 
 void CGarage::TidyUpGarage()

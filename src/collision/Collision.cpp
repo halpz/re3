@@ -105,7 +105,7 @@ GetCollisionInSectorList(CPtrList &list)
 
 	for(node = list.first; node; node = node->next){
 		e = (CEntity*)node->item;
-		level = CModelInfo::GetModelInfo(e->GetModelIndex())->GetColModel()->level;
+		level = CModelInfo::GetColModel(e->GetModelIndex())->level;
 		if(level != LEVEL_GENERIC)
 			return (eLevelName)level;
 	}

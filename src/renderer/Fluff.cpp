@@ -929,7 +929,7 @@ CEscalator::AddThisOne(CVector pos0, CVector pos1, CVector pos2, CVector pos3, b
 	m_pos2 = pos2;
 	m_pos3 = pos3;
 
-	float escalatorStepHeight = CModelInfo::GetModelInfo(MI_ESCALATORSTEP)->GetColModel()->boundingBox.max.z;
+	float escalatorStepHeight = CModelInfo::GetColModel(MI_ESCALATORSTEP)->boundingBox.max.z;
 	m_pos0.z -= escalatorStepHeight;
 	m_pos1.z -= escalatorStepHeight;
 	m_pos2.z -= escalatorStepHeight;

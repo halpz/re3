@@ -107,6 +107,14 @@ enum RwRasterFormat
 	rwRASTERFORMATMASK = 0xff00
 };
 
+enum RwRasterLockMode
+{
+    rwRASTERLOCKWRITE = rw::Raster::LOCKWRITE,
+    rwRASTERLOCKREAD = rw::Raster::LOCKREAD,
+    rwRASTERLOCKNOFETCH = rw::Raster::LOCKNOFETCH,
+    rwRASTERLOCKRAW = rw::Raster::LOCKRAW,
+};
+
 enum RwRasterFlipMode
 {
 	rwRASTERFLIPDONTWAIT = 0,

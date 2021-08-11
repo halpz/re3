@@ -2204,7 +2204,7 @@ CPed::ProcessControl(void)
 									Say(SOUND_PED_DAMAGE);
 							}
 
-							CColModel* collidingCol = CModelInfo::GetModelInfo(collidingVeh->m_modelIndex)->GetColModel();
+							CColModel *collidingCol = CModelInfo::GetColModel(collidingVeh->m_modelIndex);
 							CVector colMinVec = collidingCol->boundingBox.min;
 							CVector colMaxVec = collidingCol->boundingBox.max;
 
@@ -2896,8 +2896,8 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 	CColPoint intersectionPoint;
 	CColLine ourLine;
 
-	CColModel *ourCol = CModelInfo::GetModelInfo(GetModelIndex())->GetColModel();
-	CColModel *hisCol = CModelInfo::GetModelInfo(collidingEnt->GetModelIndex())->GetColModel();
+	CColModel *ourCol = CModelInfo::GetColModel(GetModelIndex());
+	CColModel *hisCol = CModelInfo::GetColModel(collidingEnt->GetModelIndex());
 
 	if (!bUsesCollision && !bJustCheckCollision)
 		return 0;
@@ -3414,7 +3414,7 @@ void
 CPed::SetDirectionToWalkAroundObject(CEntity *obj)
 {
 	float distLimitForTimer = 8.0f;
-	CColModel *objCol = CModelInfo::GetModelInfo(obj->GetModelIndex())->GetColModel();
+	CColModel *objCol = CModelInfo::GetColModel(obj->GetModelIndex());
 	CVector objColMin = objCol->boundingBox.min;
 	CVector objColMax = objCol->boundingBox.max;
 	CVector objColCenter = (objColMin + objColMax) / 2.0f;
@@ -4963,7 +4963,7 @@ CPed::PreRender(void)
 	if (CWeather::Rain > 0.3f && TheCamera.SoundDistUp > 15.0f) {
 		if ((TheCamera.GetPosition() - GetPosition()).Magnitude() < 25.0f) {
 			bool doSplashUp = true;
-			CColModel *ourCol = CModelInfo::GetModelInfo(GetModelIndex())->GetColModel();
+			CColModel *ourCol = CModelInfo::GetColModel(GetModelIndex());
 			CVector speed = FindPlayerSpeed();
 
 			if (Abs(speed.x) <= 0.05f && Abs(speed.y) <= 0.05f) {
@@ -9420,7 +9420,7 @@ CPed::FinishLaunchCB(CAnimBlendAssociation *animAssoc, void *arg)
 		return;
 
 	CVector forward(0.09f * ped->GetForward() + ped->GetPosition());
-	forward.z += CModelInfo::GetModelInfo(ped->GetModelIndex())->GetColModel()->spheres[2].center.z + 0.35f;
+	forward.z += CModelInfo::GetColModel(ped->GetModelIndex())->spheres[2].center.z + 0.35f;
 
 	CEntity *obstacle = CWorld::TestSphereAgainstWorld(forward, 0.25f, nil, true, true, false, true, false, false);
 	if (!obstacle) {
