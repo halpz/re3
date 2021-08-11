@@ -60,7 +60,7 @@ CRoadBlocks::GenerateRoadBlockCopsForCar(CVehicle* pVehicle, int32 roadBlockType
 	CEntity* pEntityToAttack = (CEntity*)FindPlayerVehicle();
 	if (!pEntityToAttack)
 		pEntityToAttack = (CEntity*)FindPlayerPed();
-	CColModel *pPoliceColModel = CModelInfo::GetColModel(MI_POLICE);
+	CColModel* pPoliceColModel = CModelInfo::GetColModel(MI_POLICE);
 	float fRadius = pVehicle->GetBoundRadius() / pPoliceColModel->boundingSphere.radius;
 	for (int32 i = 0; i < 2; i++) {
 		const int32 roadBlockIndex = i + 2 * roadBlockType;
