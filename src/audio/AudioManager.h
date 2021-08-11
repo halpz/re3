@@ -393,6 +393,17 @@ public:
 	uint32 GetPedCommentSfx(CPed *ped, uint16 sound);
 	void GetPhrase(uint32 &phrase, uint32 &prevPhrase, uint32 sample, uint32 maxOffset);
 	uint32 GetPlayerTalkSfx(CPed *ped, uint16 sound);
+	uint32 GetMariaTalkSfx(CPed *ped, uint16 sound);
+	uint32 GetDonaldLoveTalkSfx(CPed *ped, uint16 sound);
+	uint32 GetJdOtooleTalkSfx(CPed *ped, uint16 sound);
+	uint32 GetleonMcaffreyTalkSfx(CPed *ped, uint16 sound);
+	uint32 GetSalvatoreTalkSfx(CPed *ped, uint16 sound);
+	uint32 GetToshikoTalkSfx(CPed *ped, uint16 sound);
+	uint32 GetMickeyHamfistsTalkSfx(CPed *ped, uint16 sound);
+	uint32 GetBiker1TalkSfx(CPed *ped, uint16 sound);
+	uint32 GetBiker2TalkSfx(CPed *ped, uint16 sound);
+	uint32 GetGrdAng1TalkSfx(CPed *ped, uint16 sound);
+	uint32 GetGrdAng2TalkSfx(CPed *ped, uint16 sound);
 	uint32 GetGenericMaleTalkSfx(CPed *ped, uint16 sound);   // inlined in vc
 	uint32 GetGenericFemaleTalkSfx(CPed *ped, uint16 sound); // inlined in vc
 	uint32 GetDefaultTalkSfx(CPed *ped, uint16 sound);
