@@ -7223,6 +7223,9 @@ cAudioManager::ProcessPornCinema(uint8 sound)
 				m_sQueueSample.m_bReleasingSoundFlag = TRUE;
 				m_sQueueSample.m_nReleasingVolumeModificator = 6;
 				m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+#ifdef FIX_BUGS
+				m_sQueueSample.m_nEmittingVolume = 90;
+#endif
 				RESET_LOOP_OFFSETS
 				m_sQueueSample.m_bReverbFlag = TRUE;
 				m_sQueueSample.m_bRequireReflection = FALSE;
