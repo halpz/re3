@@ -466,7 +466,8 @@ cAudioManager::CheckForAnAudioFileOnCD()
 char
 cAudioManager::GetCDAudioDriveLetter()
 {
-	if(m_bIsInitialised) return SampleManager.GetCDAudioDriveLetter();
+	if (m_bIsInitialised)
+		return SampleManager.GetCDAudioDriveLetter();
 	return '\0';
 }
 
@@ -912,7 +913,7 @@ cAudioManager::ProcessActiveQueues()
 	}
 
 	for (int32 i = 0; i < m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; i++) {
-		tSound& sample = m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]];
+		tSound &sample = m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]];
 		if (sample.m_nSampleIndex != NO_SAMPLE) {
 			for (int32 j = 0; j < m_nActiveSamples; j++) {
 				if (sample.m_nEntityIndex == m_asActiveSamples[j].m_nEntityIndex && sample.m_nCounter == m_asActiveSamples[j].m_nCounter &&
