@@ -2358,7 +2358,7 @@ CAutomobile::PreRender(void)
 	else
 		CShadows::StoreShadowForVehicle(this, VEH_SHD_TYPE_CAR);
 
-	DoSunGlare();
+//	DoSunGlare();
 
 	// Heli dust
 	if(IsRealHeli() && m_aWheelSpeed[1] > 0.1125f && GetPosition().z < 30.0f){

@@ -587,7 +587,7 @@ public:
 	uint16 m_gangFlags; // <- this one is uint16
 
 	uint8 bDropsWeaponsOnDeath : 1;
-	uint8 b1A4_2 : 1;
+	uint8 b1A4_2 : 1;	// something to do with car hostages
 	uint8 bAttacksPlayerWithCops : 1;
 	uint8 b1A4_8 : 1;
 	uint8 b1A4_10 : 1;

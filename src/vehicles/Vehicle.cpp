@@ -34,6 +34,8 @@
 #include "Coronas.h"
 #include "SaveBuf.h"
 
+// LCS: done except trivial stuff
+
 bool CVehicle::bWheelsOnlyCheat;
 bool CVehicle::bAllDodosCheat;
 bool CVehicle::bCheat3;
@@ -50,6 +52,13 @@ bool CVehicle::bDisableRemoteDetonationOnContact;
 #ifndef MASTER
 bool CVehicle::m_bDisplayHandlingInfo;
 #endif
+float CVehicle::rcHeliHeightLimit = 60.0f;
+// unused from SA:
+float CVehicle::WHEELSPIN_FALL_RATE = 0.7f;
+float CVehicle::WHEELSPIN_RISE_RATE = 0.95f;
+float CVehicle::WHEELSPIN_INAIR_TARGET_RATE = 10.0f;
+float CVehicle::WHEELSPIN_TARGET_RATE = 1.0f;
+
 
 void *CVehicle::operator new(size_t sz) throw() { return CPools::GetVehiclePool()->New();  }
 void *CVehicle::operator new(size_t sz, int handle) throw() { return CPools::GetVehiclePool()->New(handle); }
@@ -72,6 +81,14 @@ CVehicle::CVehicle(uint8 CreatedBy)
 {
 	int i;
 
+	m_fGasPedal = 0.0f;
+	m_fBrakePedal = 0.0;
+	m_vehLCS_264 = 0;
+	m_vehLCS_29E = 0;
+	m_vehLCS_29C = 0;
+	m_vehLCS_2A3 = -1;
+	m_vehLCS_348 = false;
+
 	m_nCurrentGear = 1;
 	m_fChangeGearTime = 0.0f;
 	m_fSteerInput = 0.0f;
@@ -82,9 +99,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	bIsLawEnforcer = false;
 	bIsAmbulanceOnDuty = false;
 	bIsFireTruckOnDuty = false;
-#ifdef FIX_BUGS
 	bIsHandbrakeOn = false;
-#endif
 	CCarCtrl::UpdateCarCount(this, false);
 	m_fHealth = 1000.0f;
 	bEngineOn = true;
@@ -135,6 +150,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	bRestingOnPhysical = false;
 	bParking = false;
 	m_bGarageTurnedLightsOff = false;
+	m_vehLCS_259 = -1;
 	bCanPark = CGeneral::GetRandomNumberInRange(0.0f, 1.0f) < 0.0f;	// never true. probably doesn't work very well
 	bIsVan = false;
 	bIsBus = false;
@@ -142,8 +158,8 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	bLowVehicle = false;
 
 	m_bombType = CARBOMB_NONE;
-	bDriverLastFrame = false;
 	m_pBombRigger = nil;
+	bDriverLastFrame = false;
 
 	m_nSetPieceExtendedRangeTime = 0;
 	m_nAlarmState = 0;
@@ -158,6 +174,7 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	switch(GetModelIndex()){
 	case MI_HUNTER:
 	case MI_ANGEL:
+	case MI_ANGEL2:
 	case MI_FREEWAY:
 		m_nRadioStation = V_ROCK;
 		break;
@@ -190,6 +207,8 @@ CVehicle::CVehicle(uint8 CreatedBy)
 
 CVehicle::~CVehicle()
 {
+	//TODO(LCS): clear something in music manager (?)
+
 	m_nAlarmState = 0;
 	if (m_audioEntityId >= 0){
 		DMAudio.DestroyEntity(m_audioEntityId);
@@ -248,6 +267,8 @@ void
 CVehicle::RemoveLighting(bool reset)
 {
 	CRenderer::RemoveVehiclePedLights(this, reset);
+	SetAmbientColours();
+	DeActivateDirectional();
 }
 
 bool
@@ -333,14 +354,16 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 	{
 		float fSteerLR = CPad::GetPad(0)->GetSteeringLeftRight() / 128.0f;
 		float fSteerUD = CPad::GetPad(0)->GetSteeringUpDown() / 128.0f;
+/*
 		float fGunUD = Abs(CPad::GetPad(0)->GetCarGunUpDown());
 #ifdef FREE_CAM
 		if(!CCamera::bFreeCam || (CCamera::bFreeCam && !CPad::IsAffectedByController))
 #endif
 		if(fGunUD > 1.0f)
 			fSteerUD = -CPad::GetPad(0)->GetCarGunUpDown() / 128.0f;
+*/
 
-		float fSteerAngle = Atan2(fSteerUD, fSteerLR);
+		float fSteerAngle = fSteerUD != 0.0f && fSteerLR != 0.0f ? Atan2(fSteerUD, fSteerLR) : 0.0f;
 		float fSteerMult = 1.0f;
 		if(fSteerAngle > -PI/4.0f && fSteerAngle <= PI/4.0f)
 			fSteerMult = 1.0f/Cos(fSteerAngle);
@@ -441,7 +464,7 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		m_vecTurnSpeed = Multiply3x3(GetMatrix(), vecTurnSpeed);
 		ApplyTurnForce(-GetUp() * fResistance * m_fTurnMass, GetRight() + Multiply3x3(GetMatrix(), m_vecCentreOfMass));
 
-
+/*
 		float fMoveSpeed = m_vecMoveSpeed.MagnitudeSqr();
 		if(fMoveSpeed > SQR(1.5f))
 			m_vecMoveSpeed *= 1.5f/Sqrt(fMoveSpeed);
@@ -449,6 +472,7 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		float fTurnSpeed = m_vecTurnSpeed.MagnitudeSqr();
 		if(fTurnSpeed > SQR(0.2f))
 			m_vecTurnSpeed *= 0.2f/Sqrt(fTurnSpeed);
+*/
 		break;
 	}
 	case FLIGHT_MODEL_RCHELI:
@@ -465,6 +489,11 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 			return;
 		float fUpSpeed = DotProduct(m_vecMoveSpeed, GetUp());
 		float fThrust = (CPad::GetPad(0)->GetAccelerate() - CPad::GetPad(0)->GetBrake()) / 255.0f;
+#ifdef FREE_CAM
+		if(!CCamera::bFreeCam || (CCamera::bFreeCam && !CPad::IsAffectedByController))
+#endif
+		if(Abs(CPad::GetPad(0)->GetCarGunUpDown()) > 1.0f)
+			fThrust = CPad::GetPad(0)->GetCarGunUpDown() / 128.0f;
 		if(fThrust < 0.0f)
 			fThrust *= 2.0f;
 		if(flightModel == FLIGHT_MODEL_RCHELI){
@@ -473,7 +502,7 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 		}else
 			fThrust = flyingHandling->fThrust * fThrust + 0.95f;
 		fThrust -= flyingHandling->fThrustFallOff * fUpSpeed;
-		if(flightModel == FLIGHT_MODEL_RCHELI && GetPosition().z > 40.0f)
+		if(flightModel == FLIGHT_MODEL_RCHELI && GetPosition().z > rcHeliHeightLimit)
 			fThrust *= 10.0f/(GetPosition().z - 30.0f);
 		else if(GetPosition().z > 80.0f)
 			fThrust *= 10.0f/(GetPosition().z - 70.0f);
@@ -516,11 +545,13 @@ CVehicle::FlyingControl(eFlightModel flightModel)
 			if(Abs(CPad::GetPad(0)->GetCarGunLeftRight()) > 1.0f)
 				fYaw = CPad::GetPad(0)->GetCarGunLeftRight() / 128.0f;
 		}
+/*
 #ifdef FREE_CAM
 		if(!CCamera::bFreeCam || (CCamera::bFreeCam && !CPad::IsAffectedByController))
 #endif
 		if(Abs(CPad::GetPad(0)->GetCarGunUpDown()) > 1.0f)
 			fPitch = -CPad::GetPad(0)->GetCarGunUpDown() / 128.0f;
+*/
 		if (CPad::GetPad(0)->GetHorn()) {
 			fYaw = 0.0f;
 			fPitch = Clamp(flyingHandling->fPitchStab * DotProduct(m_vecMoveSpeed, GetForward()), -200.0f, 1.3f);
@@ -714,7 +745,7 @@ CVehicle::BladeColSectorList(CPtrList &list, CColModel &rotorColModel, CMatrix &
 			}
 			ped->InflictDamage(this, WEAPONTYPE_RUNOVERBYCAR, 1000.0f, PEDPIECE_TORSO, localDir);
 
-			if(CGame::nastyGame && ped->GetIsOnScreen()){
+			if(ped->GetIsOnScreen()){
 				for(i = 0; i < 16; i++)
 					CParticle::AddParticle(PARTICLE_BLOOD_SMALL, ped->GetPosition(), CVector(dirToRotor.x, dirToRotor.y, 1.0f) * 0.01f);
 				CParticle::AddParticle(PARTICLE_TEST, ped->GetPosition(), CVector(0.0f, 0.0f, 0.02f), nil, 0.1f);
@@ -939,11 +970,10 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 	}
 }
 
-float fBurstBikeSpeedMax = 0.12f;
+float fBurstBikeSpeedMax = 0.08f;
 float fBurstBikeTyreMod = 0.05f;
 float fTweakBikeWheelTurnForce = 2.0f;
 
-//--LCS: done
 void
 CVehicle::ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint,
 	int32 wheelsOnGround, float thrust, float brake, float adhesion, float destabTraction, int8 wheelId, float *wheelSpeed, tWheelState *wheelState, eBikeWheelSpecial special, uint16 wheelStatus)
@@ -1135,6 +1165,84 @@ CVehicle::FindTyreNearestPoint(float x, float y)
 	return piece - CAR_PIECE_WHEEL_LF;
 }
 
+bool
+CVehicle::PedsShouldScreamOnDisembarking(void)
+{
+	switch(GetModelIndex()){
+	case MI_AMBULAN:
+	case MI_TAXI:
+	case MI_CABBIE:
+		return false;
+	default:
+		return true;
+	}
+}
+
+void
+CVehicle::OccupantsReactToDamage(CEntity *damagedBy)
+{
+	if (VehicleCreatedBy == RANDOM_VEHICLE && !IsBoat()){
+		switch (GetStatus()) {
+		case STATUS_SIMPLE:
+		case STATUS_PHYSICS:
+			if(bIsLawEnforcer &&
+			   (GetModelIndex() == MI_POLICE || GetModelIndex() == MI_ENFORCER ||
+			    GetModelIndex() == MI_CHOPPER || GetModelIndex() == MI_PREDATOR) &&
+			   damagedBy == FindPlayerPed()){
+				// Police gets angry
+				FindPlayerPed()->SetWantedLevelNoDrop(1);
+			}else if(pDriver && pDriver->CharCreatedBy != MISSION_CHAR &&
+			         pDriver->m_nPedType >= PEDTYPE_GANG1 && pDriver->m_nPedType <= PEDTYPE_GANG9 &&
+			         damagedBy == FindPlayerPed()){
+				// Gang gets angry
+				SetStatus(STATUS_ABANDONED);
+				pDriver->SetObjective(OBJECTIVE_KILL_CHAR_ON_FOOT, damagedBy);
+				int time = 200;
+				for (int i = 0; i < m_nNumMaxPassengers; i++) {
+					if (pPassengers[i] &&
+					    pPassengers[i]->m_objective != OBJECTIVE_KILL_CHAR_ON_FOOT &&
+					    pPassengers[i]->CharCreatedBy != MISSION_CHAR) {
+						pPassengers[i]->SetObjective(OBJECTIVE_KILL_CHAR_ON_FOOT, damagedBy);
+						pPassengers[i]->m_objectiveTimer = CTimer::GetTimeInMilliseconds() + time;
+						time += 200;
+					}
+				}
+			}else if(AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_PLOUGH_THROUGH ||
+			   CGeneral::GetRandomNumberInRange(0.0f, 1.0f) > 0.5f && AutoPilot.m_nCarMission == MISSION_CRUISE){
+				// Drive away like a maniac
+				if(pDriver && pDriver->m_objective != OBJECTIVE_LEAVE_CAR){
+					if(AutoPilot.m_nDrivingStyle != DRIVINGSTYLE_PLOUGH_THROUGH)
+						AutoPilot.m_nCruiseSpeed *= 1.5f;
+					AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_PLOUGH_THROUGH;
+				}
+			}else{
+				// Leave vehicle
+				if (pDriver && pDriver->CharCreatedBy != MISSION_CHAR) {
+					SetStatus(STATUS_ABANDONED);
+					pDriver->bFleeAfterExitingCar = true;
+					pDriver->SetObjective(OBJECTIVE_LEAVE_CAR, this);
+					pDriver->Say(SOUND_PED_FLEE_SPRINT);
+				}
+				int time = 200;
+				for (int i = 0; i < m_nNumMaxPassengers; i++) {
+					if (pPassengers[i] &&
+					    pPassengers[i]->m_objective != OBJECTIVE_LEAVE_CAR &&
+					    pPassengers[i]->CharCreatedBy != MISSION_CHAR) {
+						pPassengers[i]->bFleeAfterExitingCar = true;
+						pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_CAR, this);
+						pPassengers[i]->m_objectiveTimer = CTimer::GetTimeInMilliseconds() + time;
+						pPassengers[i]->Say(SOUND_PED_FLEE_SPRINT);
+						time += 200;
+					}
+				}
+			}
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 void
 CVehicle::InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage, CVector pos)
 {
@@ -1220,7 +1328,7 @@ CVehicle::InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage
 			accuracy = 10;
 			break;
 		case WEAPONTYPE_PYTHON:
-			if(!((CPed*)damagedBy)->IsPlayer())
+//			if(!((CPed*)damagedBy)->IsPlayer())
 				accuracy = 64;
 			break;
 		case WEAPONTYPE_SHOTGUN:
@@ -1243,14 +1351,16 @@ CVehicle::InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage
 			break;
 		}
 
+		// not in LCS (ifdef?)
 		if(((CPed*)damagedBy)->IsPlayer() && (CCamera::m_bUseMouse3rdPerson || TheCamera.Using1stPersonWeaponMode()))
 			accuracy = 0;
 
-		if(accuracy != 0 && !bTyresDontBurst && (CGeneral::GetRandomNumber()&0x7F) < accuracy){
+		int difficulty = damagedBy == FindPlayerPed() ? 0x7F : 0xFF;
+		if(accuracy != 0 && !bTyresDontBurst && (CGeneral::GetRandomNumber()&difficulty) < accuracy){
 			if(IsBike())
 				BurstTyre(FindTyreNearestPoint(pos.x, pos.y) + CAR_PIECE_WHEEL_LF, false);
-			else if(GetVehicleAppearance() == VEHICLE_APPEARANCE_CAR)
-				BurstTyre(FindTyreNearestPoint(pos.x, pos.y) + CAR_PIECE_WHEEL_LF, true);
+			else// if(GetVehicleAppearance() == VEHICLE_APPEARANCE_CAR)
+				BurstTyre(FindTyreNearestPoint(pos.x, pos.y) + CAR_PIECE_WHEEL_LF, false);	//true);
 		}
 	}
 
@@ -1270,44 +1380,7 @@ CVehicle::InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage
 		float oldHealth = m_fHealth;
 		if (m_fHealth > damage) {
 			m_fHealth -= damage;
-			if (VehicleCreatedBy == RANDOM_VEHICLE && !IsBoat()){
-				switch (GetStatus()) {
-				case STATUS_SIMPLE:
-				case STATUS_PHYSICS:
-					if(AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_PLOUGH_THROUGH ||
-					   CGeneral::GetRandomNumberInRange(0.0f, 1.0f) > 0.5f && AutoPilot.m_nCarMission == MISSION_CRUISE){
-						// Drive away like a maniac
-						if(pDriver && pDriver->m_objective != OBJECTIVE_LEAVE_CAR){
-							if(AutoPilot.m_nDrivingStyle != DRIVINGSTYLE_PLOUGH_THROUGH)
-								AutoPilot.m_nCruiseSpeed *= 1.5f;
-							AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_PLOUGH_THROUGH;
-						}
-					}else{
-						// Leave vehicle
-						if (pDriver && pDriver->CharCreatedBy != MISSION_CHAR) {
-							SetStatus(STATUS_ABANDONED);
-							pDriver->bFleeAfterExitingCar = true;
-							pDriver->SetObjective(OBJECTIVE_LEAVE_CAR, this);
-							pDriver->Say(SOUND_PED_FLEE_SPRINT);
-						}
-						int time = 200;
-						for (int i = 0; i < m_nNumMaxPassengers; i++) {
-							if (pPassengers[i] &&
-							    pPassengers[i]->m_objective != OBJECTIVE_LEAVE_CAR &&
-							    pPassengers[i]->CharCreatedBy != MISSION_CHAR) {
-								pPassengers[i]->bFleeAfterExitingCar = true;
-								pPassengers[i]->SetObjective(OBJECTIVE_LEAVE_CAR, this);
-								pPassengers[i]->m_objectiveTimer = CTimer::GetTimeInMilliseconds() + time;
-								pPassengers[i]->Say(SOUND_PED_FLEE_SPRINT);
-								time += 200;
-							}
-						}
-					}
-					break;
-				default:
-					break;
-				}
-			}
+			OccupantsReactToDamage(damagedBy);
 			if (oldHealth >= DAMAGE_HEALTH_TO_CATCH_FIRE && m_fHealth < DAMAGE_HEALTH_TO_CATCH_FIRE) {
 				if (IsCar()) {
 					CAutomobile* pThisCar = (CAutomobile*)this;
@@ -1331,12 +1404,6 @@ CVehicle::InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage
 				BlowUpCar(damagedBy);
 		}
 	}
-#ifdef FIX_BUGS // removing dumb case when shooting police car in player's own garage gives wanted level
-	if (GetModelIndex() == MI_POLICE && damagedBy == FindPlayerPed() && damagedBy != nil && !bHasBeenOwnedByPlayer)
-#else
-	if (GetModelIndex() == MI_POLICE && damagedBy == FindPlayerPed())
-#endif
-		FindPlayerPed()->SetWantedLevelNoDrop(1);
 }
 
 void
@@ -1369,7 +1436,7 @@ CVehicle::FireFixedMachineGuns(void)
 
 	m_nGunFiringTime = CTimer::GetTimeInMilliseconds();
 
-	source = GetMatrix() * CVector(2.0f, 2.5f, 1.0f);
+	source = GetMatrix() * CVector(0.95f, 9.3f, 0.85f);
 	target = source + CVector(dx, dy, 0.0f) * 60.0f;
 	target += CVector(
 		((CGeneral::GetRandomNumber() & 0xFF) - 128) * 0.015f,
@@ -1378,7 +1445,7 @@ CVehicle::FireFixedMachineGuns(void)
 	CWeapon::DoTankDoomAiming(this, pDriver, &source, &target);
 	FireOneInstantHitRound(&source, &target, 15);
 
-	source = GetMatrix() * CVector(-2.0f, 2.5f, 1.0f);
+	source = GetMatrix() * CVector(-0.95f, 9.3f, 0.85f);
 	target = source + CVector(dx, dy, 0.0f) * 60.0f;
 	target += CVector(
 		((CGeneral::GetRandomNumber() & 0xFF) - 128) * 0.015f,
@@ -1396,6 +1463,7 @@ CVehicle::FireFixedMachineGuns(void)
 	}
 }
 
+//LCS: in CAutomobile
 void
 CVehicle::ActivateBomb(void)
 {
@@ -1412,6 +1480,7 @@ CVehicle::ActivateBomb(void)
 	}
 }
 
+//LCS: in CAutomobile and CBike
 void
 CVehicle::ActivateBombWhenEntered(void)
 {
@@ -1432,7 +1501,8 @@ CVehicle::ActivateBombWhenEntered(void)
 void
 CVehicle::ExtinguishCarFire(void)
 {
-	if(GetStatus() != STATUS_WRECKED)
+//TODO(LCS): check if this line was added in PC VC
+//	if(GetStatus() != STATUS_WRECKED)
 		m_fHealth = Max(m_fHealth, 300.0f);
 	if(m_pCarFire)
 		m_pCarFire->Extinguish();
@@ -1451,6 +1521,7 @@ CVehicle::ShufflePassengersToMakeSpace(void)
 		return false;
 	if (pPassengers[1] &&
 		!(m_nGettingInFlags & CAR_DOOR_FLAG_LR) &&
+		!(m_nGettingOutFlags & CAR_DOOR_FLAG_LR) &&
 		IsRoomForPedToLeaveCar(CAR_DOOR_LR, nil)) {
 		if (!pPassengers[2] && !(m_nGettingInFlags & CAR_DOOR_FLAG_RR)) {
 			pPassengers[2] = pPassengers[1];
@@ -1458,7 +1529,7 @@ CVehicle::ShufflePassengersToMakeSpace(void)
 			pPassengers[2]->m_vehDoor = CAR_DOOR_RR;
 			return true;
 		}
-		if (!pPassengers[0] && !(m_nGettingInFlags & CAR_DOOR_FLAG_RF)) {
+		if (!pPassengers[0] && !pPassengers[1]->bOnlyAllowedToSitBehind && !(m_nGettingInFlags & CAR_DOOR_FLAG_RF)) {
 			pPassengers[0] = pPassengers[1];
 			pPassengers[1] = nil;
 			pPassengers[0]->m_vehDoor = CAR_DOOR_RF;
@@ -1468,6 +1539,7 @@ CVehicle::ShufflePassengersToMakeSpace(void)
 	}
 	if (pPassengers[2] &&
 		!(m_nGettingInFlags & CAR_DOOR_FLAG_RR) &&
+		!(m_nGettingOutFlags & CAR_DOOR_FLAG_RR) &&
 		IsRoomForPedToLeaveCar(CAR_DOOR_RR, nil)) {
 		if (!pPassengers[1] && !(m_nGettingInFlags & CAR_DOOR_FLAG_LR)) {
 			pPassengers[1] = pPassengers[2];
@@ -1475,7 +1547,7 @@ CVehicle::ShufflePassengersToMakeSpace(void)
 			pPassengers[1]->m_vehDoor = CAR_DOOR_LR;
 			return true;
 		}
-		if (!pPassengers[0] && !(m_nGettingInFlags & CAR_DOOR_FLAG_RF)) {
+		if (!pPassengers[0] && !pPassengers[2]->bOnlyAllowedToSitBehind && !(m_nGettingInFlags & CAR_DOOR_FLAG_RF)) {
 			pPassengers[0] = pPassengers[2];
 			pPassengers[2] = nil;
 			pPassengers[0]->m_vehDoor = CAR_DOOR_RF;
@@ -1485,8 +1557,9 @@ CVehicle::ShufflePassengersToMakeSpace(void)
 	}
 	if (pPassengers[0] &&
 		!(m_nGettingInFlags & CAR_DOOR_FLAG_RF) &&
+		!(m_nGettingOutFlags & CAR_DOOR_FLAG_RF) &&
 		IsRoomForPedToLeaveCar(CAR_DOOR_RF, nil)) {
-		if (!pPassengers[1] && !(m_nGettingInFlags & CAR_DOOR_FLAG_LR)) {
+		if (!pPassengers[1] && !pPassengers[0]->bOnlyAllowedToSitInFront && !(m_nGettingInFlags & CAR_DOOR_FLAG_LR)) {
 			pPassengers[1] = pPassengers[0];
 			pPassengers[0] = nil;
 			pPassengers[1]->m_vehDoor = CAR_DOOR_LR;
@@ -1560,7 +1633,8 @@ CVehicle::MakeNonDraggedPedsLeaveVehicle(CPed *ped1, CPed *ped2, CPlayerPed *&pl
 		for(i = 0; i < numPeds2; i++)
 			if(peds2[i]->IsFemale() || CGeneral::GetRandomTrueFalse()){
 				peds2[i]->m_leaveCarTimer = CTimer::GetTimeInMilliseconds() + 10000;
-				peds2[i]->bHeldHostageInCar = true;
+				if(peds2[i]->b1A4_2)
+					peds2[i]->bHeldHostageInCar = true;
 				peds2[i]->bFleeAfterExitingCar = true;
 			}
 }
@@ -1589,13 +1663,14 @@ bool
 CVehicle::IsLawEnforcementVehicle(void)
 {
 	switch(GetModelIndex()){
+	case MI_FBICAR:
 	case MI_POLICE:
 	case MI_ENFORCER:
 	case MI_PREDATOR:
 	case MI_RHINO:
 	case MI_BARRACKS:
-	case MI_FBIRANCH:
-	case MI_VICECHEE:
+//	case MI_FBIRANCH:
+//	case MI_VICECHEE:
 		return true;
 	default:
 		return false;
@@ -1613,8 +1688,8 @@ CVehicle::UsesSiren(void)
 	case MI_POLICE:
 	case MI_ENFORCER:
 	case MI_PREDATOR:
-	case MI_FBIRANCH:
-	case MI_VICECHEE:
+//	case MI_FBIRANCH:
+//	case MI_VICECHEE:
 		return true;
 	default:
 		return false;
@@ -1705,8 +1780,8 @@ CVehicle::CanPedOpenLocks(CPed *ped)
 	   m_nDoorLock == CARLOCK_LOCKED_PLAYER_INSIDE ||
 	   m_nDoorLock == CARLOCK_LOCKED_BUT_CAN_BE_DAMAGED)
 		return false;
-	if(ped->IsPlayer() && m_nDoorLock == CARLOCK_LOCKOUT_PLAYER_ONLY)
-		return false;
+//	if(ped->IsPlayer() && m_nDoorLock == CARLOCK_LOCKOUT_PLAYER_ONLY)
+//		return false;
 	return true;
 }
 
@@ -1851,6 +1926,9 @@ CVehicle::SetupPassenger(int n)
 void
 CVehicle::SetDriver(CPed *driver)
 {
+	m_vehLCS_258 = false;
+	bCraneMessageDone = false;
+
 	pDriver = driver;
 	pDriver->RegisterReference((CEntity**)&pDriver);
 
@@ -1875,11 +1953,12 @@ CVehicle::SetDriver(CPed *driver)
 		case MI_ENFORCER:
 			driver->m_fArmour = Max(driver->m_fArmour, CWorld::Players[0].m_nMaxArmour);
 			break;
-
+/*
 		case MI_CADDY:
 			if(!(driver->IsPlayer() && ((CPlayerPed*)driver)->DoesPlayerWantNewWeapon(WEAPONTYPE_GOLFCLUB, true)))
 				CStreaming::RequestModel(MI_GOLFCLUB, STREAMFLAGS_DONT_REMOVE);
 			break;
+*/
 		}
 	}
 
@@ -1939,6 +2018,7 @@ CVehicle::AddPassenger(CPed *passenger, uint8 n)
 void
 CVehicle::RemoveDriver(void)
 {
+	m_vehLCS_259 = -1;
 #ifdef FIX_BUGS
 	if (GetStatus() != STATUS_WRECKED)
 #endif
@@ -1953,10 +2033,12 @@ CVehicle::RemoveDriver(void)
 				bFreebies = false;
 			}
 			CStreaming::SetModelIsDeletable(MI_SHOTGUN);
+/*
 		}else if(GetModelIndex() == MI_CADDY && CStreaming::HasModelLoaded(MI_GOLFCLUB)){
 			if(((CPlayerPed*)pDriver)->DoesPlayerWantNewWeapon(WEAPONTYPE_GOLFCLUB, true))
 				pDriver->GiveWeapon(WEAPONTYPE_GOLFCLUB, 1, true);
 			CStreaming::SetModelIsDeletable(MI_GOLFCLUB);
+*/
 		}
 	}
 	pDriver = nil;
@@ -2031,6 +2113,16 @@ CVehicle::UpdatePassengerList(void)
 			}
 	if(!hasPassenger)
 		m_nNumPassengers = 0;
+}
+
+bool
+CVehicle::AreThereAnyPassengers(void)
+{
+	int i;
+	for(i = 0; i < m_nNumMaxPassengers; i++)
+		if(pPassengers[i])
+			return true;
+	return false;
 }
 
 void
@@ -2225,6 +2317,7 @@ CVehicle::HeliDustGenerate(CEntity *heli, float radius, float ground, int rnd)
 	}
 }
 
+/*
 #define GLARE_MIN_DIST (13.0f)
 #define GLARE_FULL_DIST (30.0f)
 #define GLARE_MIN_ANGLE (0.99f)
@@ -2327,6 +2420,7 @@ CVehicle::DoSunGlare(void)
 		}
 	}
 }
+*/
 
 void
 CVehicle::KillPedsInVehicle(void)
@@ -2402,10 +2496,10 @@ CVehicle::Save(uint8*& buf)
 	ZeroSaveBuf(buf, 42);
 	WriteSaveBuf(buf, m_nNumMaxPassengers);
 	ZeroSaveBuf(buf, 3);
-	WriteSaveBuf(buf, field_1D0[0]);
-	WriteSaveBuf(buf, field_1D0[1]);
-	WriteSaveBuf(buf, field_1D0[2]);
-	WriteSaveBuf(buf, field_1D0[3]);
+	WriteSaveBuf(buf, m_vehLCS_230.x);
+	WriteSaveBuf(buf, m_vehLCS_230.y);
+	WriteSaveBuf(buf, m_vehLCS_230.z);
+	WriteSaveBuf(buf, m_vehLCS_230.w);
 	ZeroSaveBuf(buf, 8);
 	WriteSaveBuf(buf, m_fSteerAngle);
 	WriteSaveBuf(buf, m_fGasPedal);
@@ -2465,10 +2559,10 @@ CVehicle::Load(uint8*& buf)
 	SkipSaveBuf(buf, 42);
 	ReadSaveBuf(&m_nNumMaxPassengers, buf);
 	SkipSaveBuf(buf, 3);
-	ReadSaveBuf(&field_1D0[0], buf);
-	ReadSaveBuf(&field_1D0[1], buf);
-	ReadSaveBuf(&field_1D0[2], buf);
-	ReadSaveBuf(&field_1D0[3], buf);
+	ReadSaveBuf(&m_vehLCS_230.x, buf);
+	ReadSaveBuf(&m_vehLCS_230.y, buf);
+	ReadSaveBuf(&m_vehLCS_230.z, buf);
+	ReadSaveBuf(&m_vehLCS_230.w, buf);
 	SkipSaveBuf(buf, 8);
 	ReadSaveBuf(&m_fSteerAngle, buf);
 	ReadSaveBuf(&m_fGasPedal, buf);

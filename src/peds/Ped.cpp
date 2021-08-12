@@ -307,6 +307,10 @@ CPed::CPed(uint32 pedType) : m_pedIK(this)
 	bDonePositionOutOfCollision = false;
 	bCanAttackPlayerWithCops = false;
 
+	bDropsWeaponsOnDeath = false;
+	b1A4_2 = true;
+	bAttacksPlayerWithCops = false;
+
 	if (CGeneral::GetRandomNumber() & 3)
 		bHasACamera = false;
 	else

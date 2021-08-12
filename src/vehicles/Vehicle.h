@@ -60,6 +60,8 @@ enum eCarLock {
 	CARLOCK_LOCKED_PLAYER_INSIDE,
 	CARLOCK_LOCKED_INITIALLY,
 	CARLOCK_FORCE_SHUT_DOORS,
+	CARLOCK_7,
+	CARLOCK_8,
 	CARLOCK_LOCKED_BUT_CAN_BE_DAMAGED
 };
 
@@ -189,7 +191,7 @@ public:
 	int8 m_nGettingInFlags;
 	int8 m_nGettingOutFlags;
 	uint8 m_nNumMaxPassengers;
-	float field_1D0[4];
+	CVector m_vehLCS_230;
 	CEntity *m_pCurGroundEntity;
 	CFire *m_pCarFire;
 	float m_fSteerAngle;
@@ -225,6 +227,9 @@ public:
 	uint8 bCanBeDamaged : 1; // Set to FALSE during cut scenes to avoid explosions
 	uint8 bUsingSpecialColModel : 1;// Is player vehicle using special collision model, stored in player strucure
 
+	uint8 m_vehLCS_258 : 1;
+	int8 m_vehLCS_259;
+
 	uint8 bOccupantsHaveBeenGenerated : 1;  // Is true if the occupants have already been generated. (Shouldn't happen again)
 	uint8 bGunSwitchedOff : 1;  // Level designers can use this to switch off guns on boats
 	uint8 bVehicleColProcessed : 1;// Has ProcessEntityCollision been processed for this car?
@@ -250,7 +255,8 @@ public:
 	uint8 m_nAmmoInClip;    // Used to make the guns on boat do a reload (20 by default)
 	int8 m_nPacManPickupsCarried;
 	uint8 m_nRoadblockType;
-	bool m_bGarageTurnedLightsOff;
+	uint8 m_bGarageTurnedLightsOff;
+	int32 m_vehLCS_264;
 	float m_fHealth;           // 1000.0f = full health. 250.0f = fire. 0 -> explode
 	float m_fEngineEnergy;	// TODO(LCS): better name. it adds up acceleration force, so possibly kinetic energy??
 	uint8 m_nCurrentGear;
@@ -267,19 +273,26 @@ public:
 	float m_fMapObjectHeightAhead;	// front Z?
 	float m_fMapObjectHeightBehind;	// rear Z?
 	eCarLock m_nDoorLock;
-	int8 m_nLastWeaponDamage; // see eWeaponType, -1 if no damage
 	CEntity *m_pLastDamageEntity;
+	int16 m_vehLCS_29C;
+	int8 m_vehLCS_29E;
+	int8 m_nLastWeaponDamage; // see eWeaponType, -1 if no damage
 	uint8 m_nRadioStation;
 	uint8 m_bRainAudioCounter;
 	uint8 m_bRainSamplesCounter;
+	int8 m_vehLCS_2A3;
+	int32 m_vehLCS_2A4;	// haven't seen this used yet
 	uint32 m_nCarHornTimer;
 	uint8 m_nCarHornPattern;
 	uint8 m_bSirenOrAlarm;
 	uint8 m_nCarHornDelay;
 	int8 m_comedyControlState;
+	int32 m_vehLCS_2B0;
+	int32 m_vehLCS_2B4;
 	CStoredCollPoly m_aCollPolys[2];     // poly which is under front/rear part of car
 	float m_fSteerInput;
 	eVehicleType m_vehType;
+	bool m_vehLCS_348;
 
 	static void *operator new(size_t) throw();
 	static void *operator new(size_t sz, int slot) throw();
@@ -334,6 +347,9 @@ public:
 	bool DoBladeCollision(CVector pos, CMatrix &matrix, int16 rotorType, float radius, float damageMult);
 	bool BladeColSectorList(CPtrList &list, CColModel &rotorColModel, CMatrix &matrix, int16 rotorType, float damageMult);
 
+	// TODO(LCS)?
+	// CVehicle::ApplyCollisionMultiplayer
+
 	void ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint,
 		int32 wheelsOnGround, float thrust, float brake, float adhesion, int8 wheelId, float *wheelSpeed, tWheelState *wheelState, uint16 wheelStatus);
 	void ProcessBikeWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelContactSpeed, CVector &wheelContactPoint,
@@ -369,10 +385,13 @@ public:
 	bool IsPassenger(CPed *ped);
 	bool IsPassenger(int32 model);
 	void UpdatePassengerList(void);
+	bool AreThereAnyPassengers(void);
 	void ProcessCarAlarm(void);
 	bool IsSphereTouchingVehicle(float sx, float sy, float sz, float radius);
 	bool ShufflePassengersToMakeSpace(void);
 	void MakeNonDraggedPedsLeaveVehicle(CPed *ped1, CPed *ped2, CPlayerPed *&player, CCopPed *&cop);
+	bool PedsShouldScreamOnDisembarking(void);
+	void OccupantsReactToDamage(CEntity *damagedBy);
 	void InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage, CVector pos = CVector(0.0f, 0.0f, 0.0f));
 	void DoFixedMachineGuns(void);
 	void FireFixedMachineGuns(void);
@@ -409,6 +428,12 @@ public:
 #ifndef MASTER
 	static bool m_bDisplayHandlingInfo;
 #endif
+	static float rcHeliHeightLimit;
+	// unused from SA:
+	static float WHEELSPIN_FALL_RATE;
+	static float WHEELSPIN_RISE_RATE;
+	static float WHEELSPIN_INAIR_TARGET_RATE;
+	static float WHEELSPIN_TARGET_RATE;
 };
 
 void DestroyVehicleAndDriverAndPassengers(CVehicle* pVehicle);

@@ -1051,7 +1051,7 @@ enum
 	MI_FLATBED,
 	MI_YANKEE,
 	MI_BORGNINE,
-	MI_TOYZ,
+	MI_TOPFUN,
 	MI_CAMPVAN,
 	MI_BALLOT,
 	MI_SHELBY,
@@ -1089,13 +1089,15 @@ enum
 
 	MI_LAST_VEHICLE = MI_VCNMAV,
 
+	// these indices are sort of original
+	// with these three i don't know which is which:
+	MI_RCBARON = -999,
+	MI_CADDY = -963,
+	MI_BAGGAGE = -955,
+
 	// HACK HACK, hopefully temporary
-	MI_SEASPAR = -1000,
+	MI_SEASPAR = -2000,
 	MI_SPARROW,
-	MI_RCBARON,
-	MI_TOPFUN,
-	MI_CADDY,
-	MI_BAGGAGE,
 	MI_FBIRANCH,
 	MI_VICECHEE,
 	MI_RIO,
