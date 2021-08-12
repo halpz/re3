@@ -536,7 +536,7 @@ CMenuManager::CMenuManager()
 	DMAudio.SetEffectsMasterVolume(m_PrefsSfxVolume);
 
 #ifdef NO_ISLAND_LOADING
-	m_PrefsIslandLoading = ISLAND_LOADING_HIGH;
+	m_PrefsIslandLoading = ISLAND_LOADING_LOW;
 #endif
 
 #ifdef GAMEPAD_MENU
