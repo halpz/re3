@@ -471,8 +471,8 @@ enum Config {
 #endif // VANILLA_DEFINES
 
 #if defined(AUDIO_OAL) && !defined(EXTERNAL_3D_SOUND)
-static_assert(false, "AUDIO_OAL cannot work without EXTERNAL_3D_SOUND");
+#error AUDIO_OAL cannot work without EXTERNAL_3D_SOUND
 #endif
 #if defined(GTA_PS2) && defined(EXTERNAL_3D_SOUND)
-static_assert(false, "EXTERNAL_3D_SOUND cannot work on PS2");
+#error EXTERNAL_3D_SOUND cannot work on PS2
 #endif
