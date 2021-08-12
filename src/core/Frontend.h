@@ -711,6 +711,10 @@ public:
 	int8 m_nDisplayMSAALevel;
 #endif
 
+#ifdef MISSION_REPLAY
+	bool m_bAttemptingMissionRetry;
+#endif
+
 #ifdef GAMEPAD_MENU
 	enum
 	{

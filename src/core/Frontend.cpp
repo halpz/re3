@@ -556,6 +556,10 @@ CMenuManager::CMenuManager()
 #ifdef GAMEPAD_MENU
 	m_PrefsControllerType = CONTROLLER_XBOXONE;
 #endif
+
+#ifdef MISSION_REPLAY
+	m_bAttemptingMissionRetry = false;
+#endif
 }
 
 void
@@ -587,11 +591,17 @@ CMenuManager::Initialise(void)
 	m_fMapCenterY = MENU_Y(225.0f);
 	CPad::StopPadsShaking();
 #ifdef MISSION_REPLAY
-	if (!m_OnlySaveMenu && m_nCurrScreen != MENUPAGE_MISSION_RETRY)
+	if (!m_OnlySaveMenu) {
+		if (m_nCurrScreen == MENUPAGE_MISSION_RETRY && m_bAttemptingMissionRetry)
+			m_bAttemptingMissionRetry = false;
+		else
+			m_nCurrScreen = MENUPAGE_NONE;
+	}
 #else
 	if (!m_OnlySaveMenu)
-#endif
 		m_nCurrScreen = MENUPAGE_NONE;
+#endif
+
 	DMAudio.ChangeMusicMode(MUSICMODE_FRONTEND);
 	DMAudio.PlayFrontEndSound(SOUND_FRONTEND_MENU_STARTING, 0);
 	DMAudio.Service();
@@ -4460,7 +4470,11 @@ CMenuManager::UserInput(void)
 		if (CPad::GetPad(0)->GetBackJustDown() || CPad::GetPad(0)->GetEscapeJustDown()) {
 			if (m_nCurrScreen != MENUPAGE_START_MENU && m_nCurrScreen != MENUPAGE_PAUSE_MENU && m_nCurrScreen != MENUPAGE_CHOOSE_SAVE_SLOT
 				&& m_nCurrScreen != MENUPAGE_SAVE_CHEAT_WARNING && m_nCurrScreen != MENUPAGE_SAVING_IN_PROGRESS
-				&& m_nCurrScreen != MENUPAGE_DELETING_IN_PROGRESS && m_nCurrScreen != MENUPAGE_OUTRO)
+				&& m_nCurrScreen != MENUPAGE_DELETING_IN_PROGRESS && m_nCurrScreen != MENUPAGE_OUTRO
+#ifdef MISSION_REPLAY
+				&& m_nCurrScreen != MENUPAGE_MISSION_RETRY
+#endif
+				)
 			{
 				m_bShowMouse = false;
 				goBack = true;
