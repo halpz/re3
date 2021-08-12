@@ -334,6 +334,7 @@ bool CGame::InitialiseOnceAfterRW(void)
 	DMAudio.Initialise();
 
 #ifndef GTA_PS2
+#ifdef EXTERNAL_3D_SOUND
 	if ( DMAudio.GetNum3DProvidersAvailable() == 0 )
 		FrontEndMenuManager.m_nPrefsAudio3DProviderIndex = NO_AUDIO_PROVIDER;
 
@@ -345,6 +346,7 @@ bool CGame::InitialiseOnceAfterRW(void)
 
 	DMAudio.SetCurrent3DProvider(FrontEndMenuManager.m_nPrefsAudio3DProviderIndex);
 	DMAudio.SetSpeakerConfig(FrontEndMenuManager.m_PrefsSpeakers);
+#endif
 	DMAudio.SetDynamicAcousticModelingStatus(FrontEndMenuManager.m_PrefsDMA);
 	DMAudio.SetMusicMasterVolume(FrontEndMenuManager.m_PrefsMusicVolume);
 	DMAudio.SetEffectsMasterVolume(FrontEndMenuManager.m_PrefsSfxVolume);

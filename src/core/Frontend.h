@@ -29,9 +29,17 @@
 #define RIGHT_ALIGNED_TEXT_RIGHT_MARGIN(xMargin) (xMargin + 30.0f)
 
 #define MENURADIO_ICON_FIRST_X 238.f
+#ifdef EXTERNAL_3D_SOUND
 #define MENURADIO_ICON_Y 288.0f
+#else
+#define MENURADIO_ICON_Y 248.0f
+#endif
 #define MENURADIO_ICON_SIZE 60.0f
+#ifdef EXTERNAL_3D_SOUND
 #define MENURADIO_SELECTOR_START_Y 285.f // other options should leave room on the screen
+#else
+#define MENURADIO_SELECTOR_START_Y 245.0f
+#endif
 #define MENURADIO_SELECTOR_HEIGHT 65.f
 
 #define MENUSLIDER_X 500.0f

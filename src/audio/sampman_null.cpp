@@ -19,6 +19,7 @@ cSampleManager::~cSampleManager(void)
 	
 }
 
+#ifdef EXTERNAL_3D_SOUND
 void cSampleManager::SetSpeakerConfig(int32 nConfig)
 {
 
@@ -59,6 +60,7 @@ int8 cSampleManager::SetCurrent3DProvider(uint8 nProvider)
 {
 	return 0;
 }
+#endif
 
 bool8
 cSampleManager::IsMP3RadioChannelAvailable(void)
@@ -228,6 +230,7 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 	return FALSE;
 }
 
+#ifdef EXTERNAL_3D_SOUND
 void
 cSampleManager::SetChannelEmittingVolume(uint32 nChannel, uint32 nVolume)
 {
@@ -248,6 +251,7 @@ cSampleManager::SetChannel3DDistances(uint32 nChannel, float fMax, float fMin)
 	ASSERT( nChannel < MAXCHANNELS );
 	ASSERT( nChannel < MAXCHANNELS+MAX2DCHANNELS );
 }
+#endif
 
 void
 cSampleManager::SetChannelVolume(uint32 nChannel, uint32 nVolume)

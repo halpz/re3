@@ -107,7 +107,7 @@ cAudioManager::DoPoliceRadioCrackle()
 	m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_POLICE_RADIO_CRACKLE);
 	m_sQueueSample.m_nVolume = m_anRandomTable[2] % 20 + 15;
 	m_sQueueSample.m_nLoopCount = 0;
-	m_sQueueSample.m_nEmittingVolume = m_sQueueSample.m_nVolume;
+	SET_EMITTING_VOLUME(m_sQueueSample.m_nVolume);
 	SET_LOOP_OFFSETS(SFX_POLICE_RADIO_CRACKLE)
 	m_sQueueSample.m_bReleasingSoundFlag = FALSE;
 	m_sQueueSample.m_bReverbFlag = FALSE;

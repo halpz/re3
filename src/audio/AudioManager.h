@@ -22,6 +22,8 @@ public:
 #ifndef GTA_PS2
 	int32 m_nLoopStart;
 	int32 m_nLoopEnd;
+#endif
+#ifdef EXTERNAL_3D_SOUND
 	uint8 m_nEmittingVolume;
 #endif
 	float m_fSpeedMultiplier;
@@ -202,7 +204,7 @@ public:
 	uint8 m_bReverb; // unused
 	bool8 m_bFifthFrameFlag;
 	uint8 m_nActiveSamples;
-	uint8 field_4; // unused
+	uint8 m_bDoubleVolume; // unused
 	bool8 m_bDynamicAcousticModelingStatus;
 	int8 field_6;
 	float m_fSpeedOfSound;
@@ -310,7 +312,7 @@ public:
 	void GenerateIntegerRandomNumberTable();
 	void LoadBankIfNecessary(uint8 bank);
 
-#ifdef GTA_PC
+#ifdef EXTERNAL_3D_SOUND // actually must have been && AUDIO_MSS as well
 	void AdjustSamplesVolume(); // inlined
 	uint8 ComputeEmittingVolume(uint8 emittingVolume, float intensity, float dist); // inlined
 #endif
@@ -586,6 +588,11 @@ public:
 #else
 #define RESET_LOOP_OFFSETS
 #define SET_LOOP_OFFSETS(sample)
+#endif
+#ifdef EXTERNAL_3D_SOUND
+#define SET_EMITTING_VOLUME(vol) m_sQueueSample.m_nEmittingVolume = vol
+#else
+#define SET_EMITTING_VOLUME(vol)
 #endif
 
 //#if defined(AUDIO_MSS) && !defined(PS2_AUDIO_CHANNELS)

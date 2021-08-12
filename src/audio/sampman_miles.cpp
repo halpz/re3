@@ -69,7 +69,7 @@ bool8 _bIsMp3Active;
 
 
 bool8 _bSampmanInitialised = FALSE;
-
+#ifdef EXTERNAL_3D_SOUND
 //
 // Miscellaneous globals / defines
 
@@ -89,8 +89,10 @@ S32         usingEAX=0;
 S32         usingEAX3=0;
 HPROVIDER   opened_provider=0;
 H3DSAMPLE   opened_samples[MAXCHANNELS] = {0};
+#endif
 HSAMPLE     opened_2dsamples[MAX2DCHANNELS] = {0};
 HDIGDRIVER  DIG;
+#ifdef EXTERNAL_3D_SOUND
 S32         speaker_type=0;
 
 U32 _maxSamples;
@@ -259,6 +261,7 @@ set_new_provider(S32 index)
 	
 	return FALSE;
 }
+#endif
 
 U32 RadioHandlers[9];
 
@@ -398,6 +401,7 @@ SetUpDebugBanksInfo()
 	gBankStartOffset[66] = SFX_FOOTSTEP_SAND_1;
 }
 
+#ifdef EXTERNAL_3D_SOUND
 void
 cSampleManager::SetSpeakerConfig(int32 which)
 {
@@ -533,6 +537,7 @@ cSampleManager::AutoDetect3DProviders()
 		return ds3ds;
 	return -1;
 }
+#endif
 
 static bool8
 _ResolveLink(char const *path, char *out)
@@ -947,9 +952,11 @@ cSampleManager::ReleaseDigitalHandle(void)
 {
 	if ( DIG )
 	{
+#ifdef EXTERNAL_3D_SOUND
 		prevprovider = curprovider;
 		release_existing();
 		curprovider = -1;
+#endif
 		AIL_digital_handle_release(DIG);
 	}
 }
@@ -960,8 +967,10 @@ cSampleManager::ReacquireDigitalHandle(void)
 	if ( DIG )
 	{
 		AIL_digital_handle_reacquire(DIG);
+#ifdef EXTERNAL_3D_SOUND
 		if ( prevprovider != -1 )
 			set_new_provider(prevprovider);
+#endif
 	}
 }
 
@@ -990,7 +999,8 @@ cSampleManager::Initialise(void)
 		
 		m_nMonoMode = 0;
 	}
-	
+
+#ifdef EXTERNAL_3D_SOUND
 	// miles 
 	TRACE("MILES");
 	{
@@ -1011,7 +1021,8 @@ cSampleManager::Initialise(void)
 		for ( int32 i = 0; i < MAXCHANNELS; i++ )
 			opened_samples[i] = NULL;
 	}
-	
+#endif
+
 	// banks
 	TRACE("banks");
 	{
@@ -1132,8 +1143,10 @@ cSampleManager::Initialise(void)
 				Terminate();
 				return FALSE;
 			}
-			
+
+#ifdef EXTERNAL_3D_SOUND
 			add_providers();
+#endif
 
 			m_szCDRomRootPath[0] = '\0';
 
@@ -1330,7 +1343,8 @@ cSampleManager::Initialise(void)
 	TRACE("providerset");
 	{
 		_bSampmanInitialised = TRUE;
-		
+
+#ifdef EXTERNAL_3D_SOUND
 		U32 n = 0;
 		
 		while ( n < m_nNumberOfProviders )
@@ -1348,6 +1362,7 @@ cSampleManager::Initialise(void)
 			Terminate();
 			return FALSE;
 		}
+#endif
 	}
 	
 	// mp3
@@ -1438,8 +1453,10 @@ cSampleManager::Terminate(void)
 			opened_2dsamples[i] = NULL;
 		}
 	}
-	
+
+#ifdef EXTERNAL_3D_SOUND
 	release_existing();
+#endif
 	
 	_DeleteMP3Entries();
 	
@@ -1514,6 +1531,7 @@ cSampleManager::UpdateEffectsVolume(void) //[Y], cSampleManager::UpdateSoundBuff
 	{
 		for ( int32 i = 0; i < MAXCHANNELS+MAX2DCHANNELS; i++ )
 		{
+#ifdef EXTERNAL_3D_SOUND
 			if ( i < MAXCHANNELS )
 			{
 				if ( opened_samples[i] && GetChannelUsedFlag(i) )
@@ -1526,6 +1544,7 @@ cSampleManager::UpdateEffectsVolume(void) //[Y], cSampleManager::UpdateSoundBuff
 				}
 			}
 			else
+#endif
 			{
 				if ( opened_2dsamples[i - MAXCHANNELS] )
 				{
@@ -1729,6 +1748,7 @@ cSampleManager::GetSampleLength(uint32 nSample)
 bool8
 cSampleManager::UpdateReverb(void)
 {
+#ifdef EXTERNAL_3D_SOUND
 	if ( !usingEAX )
 		return FALSE;
 	
@@ -1777,11 +1797,14 @@ cSampleManager::UpdateReverb(void)
 	_fPrevEaxRatioDestination = fRatio;
 	
 	return TRUE;
+#endif
+	return FALSE;
 }
 
 void
 cSampleManager::SetChannelReverbFlag(uint32 nChannel, bool8 nReverbFlag)
 {
+#ifdef EXTERNAL_3D_SOUND
 	bool8 b2d = FALSE;
 	
 	switch ( nChannel )
@@ -1808,11 +1831,13 @@ cSampleManager::SetChannelReverbFlag(uint32 nChannel, bool8 nReverbFlag)
 				AIL_set_3D_sample_effects_level(opened_samples[nChannel], 0.0f);
 		}
 	}
+#endif
 }
 
 bool8
 cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 {
+#ifdef EXTERNAL_3D_SOUND
 	bool8 b2d = FALSE;
 
 	switch ( nChannel )
@@ -1825,6 +1850,7 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 			break;
 		}
 	}
+#endif
 	
 	int32 addr;
 	
@@ -1844,9 +1870,11 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 		
 		addr = nPedSlotSfxAddr[slot];
 	}
-	
+
+#ifdef EXTERNAL_3D_SOUND
 	if ( b2d )
 	{
+#endif
 		if ( opened_2dsamples[nChannel - MAXCHANNELS] )
 		{
 			AIL_set_sample_address(opened_2dsamples[nChannel - MAXCHANNELS], (void *)addr, m_aSamples[nSfx].nSize);
@@ -1854,6 +1882,7 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 		}
 		else
 			return FALSE;
+#ifdef EXTERNAL_3D_SOUND
 	}
 	else
 	{
@@ -1874,8 +1903,10 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 		
 		return TRUE;
 	}
+#endif
 }
 
+#ifdef EXTERNAL_3D_SOUND
 void
 cSampleManager::SetChannelEmittingVolume(uint32 nChannel, uint32 nVolume)
 {
@@ -1910,19 +1941,22 @@ cSampleManager::SetChannel3DDistances(uint32 nChannel, float fMax, float fMin)
 	if ( opened_samples[nChannel] )
 		AIL_set_3D_sample_distances(opened_samples[nChannel], fMax, fMin);
 }
+#endif
 
 void
 cSampleManager::SetChannelVolume(uint32 nChannel, uint32 nVolume)
 {
 	uint32 vol = nVolume;
 	if ( vol > MAX_VOLUME ) vol = MAX_VOLUME;
-	
+
+#ifdef EXTERNAL_3D_SOUND
 	switch ( nChannel )
 	{
 		case CHANNEL_POLICE_RADIO:
 		case CHANNEL_MISSION_AUDIO_1:
 		case CHANNEL_MISSION_AUDIO_2:
 		{
+#endif
 			nChannelVolume[nChannel] = vol;
 			
 			// increase the volume for JB.MP3 and S4_BDBD.MP3
@@ -1937,36 +1971,43 @@ cSampleManager::SetChannelVolume(uint32 nChannel, uint32 nVolume)
 				AIL_set_sample_volume(opened_2dsamples[nChannel - MAXCHANNELS],
 						m_nEffectsFadeVolume*vol*m_nEffectsVolume >> 14);
 			}
-			
+
+#ifdef EXTERNAL_3D_SOUND
 			break;
 		}
 	}
+#endif
 }
 
 void
 cSampleManager::SetChannelPan(uint32 nChannel, uint32 nPan)
 {
+#ifdef EXTERNAL_3D_SOUND
 	switch ( nChannel )
 	{
 		case CHANNEL_POLICE_RADIO:
 		case CHANNEL_MISSION_AUDIO_1:
 		case CHANNEL_MISSION_AUDIO_2:
 		{
-#ifndef FIX_BUGS
+#endif
+#if !defined(FIX_BUGS) && defined(EXTERNAL_3D_SOUND)
 			if ( opened_samples[nChannel - MAXCHANNELS] ) // BUG
 #else
 			if ( opened_2dsamples[nChannel - MAXCHANNELS] )
 #endif
 				AIL_set_sample_pan(opened_2dsamples[nChannel - MAXCHANNELS], nPan);
 
+#ifdef EXTERNAL_3D_SOUND
 			break;
 		}
 	}
+#endif
 }
 
 void
 cSampleManager::SetChannelFrequency(uint32 nChannel, uint32 nFreq)
 {
+#ifdef EXTERNAL_3D_SOUND
 	bool8 b2d = FALSE;
 
 	switch ( nChannel )
@@ -1982,19 +2023,23 @@ cSampleManager::SetChannelFrequency(uint32 nChannel, uint32 nFreq)
 
 	if ( b2d )
 	{
+#endif
 		if ( opened_2dsamples[nChannel - MAXCHANNELS] )
 			AIL_set_sample_playback_rate(opened_2dsamples[nChannel - MAXCHANNELS], nFreq);
+#ifdef EXTERNAL_3D_SOUND
 	}
 	else
 	{
 		if ( opened_samples[nChannel] )
 			AIL_set_3D_sample_playback_rate(opened_samples[nChannel], nFreq);
 	}
+#endif
 }
 
 void
 cSampleManager::SetChannelLoopPoints(uint32 nChannel, uint32 nLoopStart, int32 nLoopEnd)
 {
+#ifdef EXTERNAL_3D_SOUND
 	bool8 b2d = FALSE;
 
 	switch ( nChannel )
@@ -2010,19 +2055,23 @@ cSampleManager::SetChannelLoopPoints(uint32 nChannel, uint32 nLoopStart, int32 n
 	
 	if ( b2d )
 	{
+#endif
 		if ( opened_2dsamples[nChannel - MAXCHANNELS] )
 			AIL_set_sample_loop_block(opened_2dsamples[nChannel - MAXCHANNELS], nLoopStart, nLoopEnd);
+#ifdef EXTERNAL_3D_SOUND
 	}
 	else
 	{
 		if ( opened_samples[nChannel] )
 			AIL_set_3D_sample_loop_block(opened_samples[nChannel], nLoopStart, nLoopEnd);
 	}
+#endif
 }
 
 void
 cSampleManager::SetChannelLoopCount(uint32 nChannel, uint32 nLoopCount)
 {
+#ifdef EXTERNAL_3D_SOUND
 	bool8 b2d = FALSE;
 
 	switch ( nChannel )
@@ -2038,19 +2087,23 @@ cSampleManager::SetChannelLoopCount(uint32 nChannel, uint32 nLoopCount)
 	
 	if ( b2d )
 	{
+#endif
 		if ( opened_2dsamples[nChannel - MAXCHANNELS] )
 			AIL_set_sample_loop_count(opened_2dsamples[nChannel - MAXCHANNELS], nLoopCount);
+#ifdef EXTERNAL_3D_SOUND
 	}
 	else
 	{
 		if ( opened_samples[nChannel] )
 			AIL_set_3D_sample_loop_count(opened_samples[nChannel], nLoopCount);
 	}
+#endif
 }
 
 bool8
 cSampleManager::GetChannelUsedFlag(uint32 nChannel)
 {
+#ifdef EXTERNAL_3D_SOUND
 	bool8 b2d = FALSE;
 
 	switch ( nChannel )
@@ -2066,10 +2119,12 @@ cSampleManager::GetChannelUsedFlag(uint32 nChannel)
 	
 	if ( b2d )
 	{
+#endif
 		if ( opened_2dsamples[nChannel - MAXCHANNELS] )
 			return AIL_sample_status(opened_2dsamples[nChannel - MAXCHANNELS]) == SMP_PLAYING;
 		else
 			return FALSE;
+#ifdef EXTERNAL_3D_SOUND
 	}
 	else
 	{
@@ -2078,12 +2133,14 @@ cSampleManager::GetChannelUsedFlag(uint32 nChannel)
 		else
 			return FALSE;
 	}
+#endif
 	
 }
 
 void
 cSampleManager::StartChannel(uint32 nChannel)
 {
+#ifdef EXTERNAL_3D_SOUND
 	bool8 b2d = FALSE;
 
 	switch ( nChannel )
@@ -2099,19 +2156,23 @@ cSampleManager::StartChannel(uint32 nChannel)
 
 	if ( b2d )
 	{
+#endif
 		if ( opened_2dsamples[nChannel - MAXCHANNELS] )
 			AIL_start_sample(opened_2dsamples[nChannel - MAXCHANNELS]);
+#ifdef EXTERNAL_3D_SOUND
 	}
 	else
 	{
 		if ( opened_samples[nChannel] )
 			AIL_start_3D_sample(opened_samples[nChannel]);
 	}
+#endif
 }
 
 void
 cSampleManager::StopChannel(uint32 nChannel)
 {
+#ifdef EXTERNAL_3D_SOUND
 	bool8 b2d = FALSE;
 
 	switch ( nChannel )
@@ -2127,8 +2188,10 @@ cSampleManager::StopChannel(uint32 nChannel)
 	
 	if ( b2d )
 	{
+#endif
 		if ( opened_2dsamples[nChannel - MAXCHANNELS] )
 			AIL_end_sample(opened_2dsamples[nChannel - MAXCHANNELS]);
+#ifdef EXTERNAL_3D_SOUND
 	}
 	else
 	{
@@ -2138,6 +2201,7 @@ cSampleManager::StopChannel(uint32 nChannel)
 				AIL_end_3D_sample(opened_samples[nChannel]);
 		}
 	}
+#endif
 }
 
 void
