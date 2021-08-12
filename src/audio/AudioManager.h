@@ -195,7 +195,7 @@ public:
 	bool8 m_bReverb; // unused
 	bool8 m_bFifthFrameFlag;
 	uint8 m_nActiveSamples;
-	uint8 field_4; // unused
+	uint8 m_bDoubleVolume; // unused
 	bool8 m_bDynamicAcousticModelingStatus;
 	float m_fSpeedOfSound;
 	bool8 m_bTimerJustReset;

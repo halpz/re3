@@ -29,7 +29,7 @@ cAudioManager::cAudioManager()
 	ClearRequestedQueue();
 	ClearActiveSamples();
 	GenerateIntegerRandomNumberTable();
-	field_4 = 0;
+	m_bDoubleVolume = FALSE;
 	m_bDynamicAcousticModelingStatus = TRUE;
 
 	for (int i = 0; i < NUM_AUDIOENTITIES; i++) {
@@ -849,13 +849,13 @@ cAudioManager::ProcessActiveQueues()
 					if (!sample.m_bReleasingSoundFlag) {
 						if (sample.m_bIs2D) {
 #ifdef EXTERNAL_3D_SOUND
-							if (field_4) {
+							if (m_bDoubleVolume) {
 								emittingVol = 2 * Min(63, sample.m_nEmittingVolume);
 							} else {
 								emittingVol = sample.m_nEmittingVolume;
 							}
 #else
-							if (field_4) {
+							if (m_bDoubleVolume) {
 								emittingVol = 2 * Min(63, sample.m_nVolume);
 							} else {
 								emittingVol = sample.m_nVolume;
@@ -897,7 +897,7 @@ cAudioManager::ProcessActiveQueues()
 								}
 
 								uint8 emittingVol;
-								if (field_4) {
+								if (m_bDoubleVolume) {
 									emittingVol = 2 * Min(63, vol);
 								} else {
 									emittingVol = vol;
@@ -915,7 +915,7 @@ cAudioManager::ProcessActiveQueues()
 								m_asActiveSamples[j].m_nVolume = vol;
 
 								uint8 emittingVol;
-								if (field_4) {
+								if (m_bDoubleVolume) {
 									emittingVol = 2 * Min(63, vol);
 								} else {
 									emittingVol = vol;
@@ -973,13 +973,13 @@ cAudioManager::ProcessActiveQueues()
 
 						}
 #ifdef EXTERNAL_3D_SOUND
-						if (field_4) {
+						if (m_bDoubleVolume) {
 							emittingVol = 2 * Min(63, m_asActiveSamples[j].m_nEmittingVolume);
 						} else {
 							emittingVol = m_asActiveSamples[j].m_nEmittingVolume;
 						}
 #else
-						if (field_4) {
+						if (m_bDoubleVolume) {
 							emittingVol = 2 * Min(63, m_asActiveSamples[j].m_nVolume);
 						} else {
 							emittingVol = m_asActiveSamples[j].m_nVolume;
