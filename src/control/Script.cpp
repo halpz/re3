@@ -3246,6 +3246,7 @@ void RetryMission(int type, int unk)
 	if (type == MISSION_RETRY_TYPE_SUGGEST_TO_PLAYER) {
 		doingMissionRetry = true;
 		FrontEndMenuManager.m_nCurrScreen = MENUPAGE_MISSION_RETRY;
+		FrontEndMenuManager.m_bAttemptingMissionRetry = true;
 		FrontEndMenuManager.RequestFrontEndStartUp();
 	}
 	else if (type == MISSION_RETRY_TYPE_BEGIN_RESTARTING) {
