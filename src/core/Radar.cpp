@@ -1799,6 +1799,11 @@ CRadar::DrawLegend(int32 x, int32 y, int32 sprite)
 		case RADAR_SPRITE_RADIO_WAVE:
 			text = TheText.Get("LG_34");
 		break;
+#ifdef MAP_ENHANCEMENTS
+        case RADAR_SPRITE_WAYPOINT:
+			text = TheText.Get("LG_38");
+		break;
+#endif
 		default:
 		break;
 	}
