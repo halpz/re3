@@ -1367,7 +1367,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CAutomobile *
 #ifdef EXTERNAL_3D_SOUND
 				SampleManager.SetChannelEmittingVolume(CHANNEL_PLAYER_VEHICLE_ENGINE, 85);
 				SampleManager.SetChannel3DPosition(CHANNEL_PLAYER_VEHICLE_ENGINE, pos.x, pos.y, pos.z);
-				SampleManager.SetChannel3DDistances(CHANNEL_PLAYER_VEHICLE_ENGINE, 50.f, 12.5f);
+				SampleManager.SetChannel3DDistances(CHANNEL_PLAYER_VEHICLE_ENGINE, 50.0f, 50.0f * 0.25f);
 #else
 				
 				SampleManager.SetChannelVolume(CHANNEL_PLAYER_VEHICLE_ENGINE, ComputeVolume(85, 50.0f, m_sQueueSample.m_fDistance));

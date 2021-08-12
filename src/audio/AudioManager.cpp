@@ -546,7 +546,7 @@ cAudioManager::ComputePan(float dist, CVector *vec)
 	index = Min(63, ABS(index));
 
 	if (vec->x > 0.f)
-		return Max(20, 63 - PanTable[index]);
+		return Max(20, 63 - (int8)PanTable[index]);
 	return Min(107, PanTable[index] + 63);
 }
 
@@ -820,10 +820,10 @@ cAudioManager::ProcessActiveQueues()
 		m_asActiveSamples[i].m_bIsProcessed = FALSE;
 	}
 
-	for (int32 i = 0; i < m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; ++i) {
+	for (int32 i = 0; i < m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; i++) {
 		tSound &sample = m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]];
 		if (sample.m_nSampleIndex != NO_SAMPLE) {
-			for (int32 j = 0; j < m_nActiveSamples; ++j) {
+			for (int32 j = 0; j < m_nActiveSamples; j++) {
 				if (sample.m_nEntityIndex == m_asActiveSamples[j].m_nEntityIndex && sample.m_nCounter == m_asActiveSamples[j].m_nCounter &&
 				    sample.m_nSampleIndex == m_asActiveSamples[j].m_nSampleIndex) {
 					if (sample.m_nLoopCount) {
@@ -906,16 +906,16 @@ cAudioManager::ProcessActiveQueues()
 			m_asActiveSamples[i].m_nEntityIndex = AEHANDLE_NONE;
 		}
 	}
-	for (uint8 i = 0; i < m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; ++i) {
+	for (uint8 i = 0; i < m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; i++) {
 		tSound &sample = m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]];
 		if (!sample.m_bIsProcessed && !sample.m_bLoopEnded && m_asAudioEntities[sample.m_nEntityIndex].m_bIsUsed && sample.m_nSampleIndex < NO_SAMPLE) {
-			if (sample.m_nCounter > 255 && sample.m_nLoopCount && sample.m_nLoopsRemaining) {
-				--sample.m_nLoopsRemaining;
+			if (sample.m_nCounter > 255 && sample.m_nLoopCount != 0 && sample.m_nLoopsRemaining != 0) {
+				sample.m_nLoopsRemaining--;
 				sample.m_nReleasingVolumeDivider = 1;
 			} else {
-				for (uint8 j = 0; j < m_nActiveSamples; ++j) {
+				for (uint8 j = 0; j < m_nActiveSamples; j++) {
 					if (!m_asActiveSamples[j].m_bIsProcessed) {
-						if (sample.m_nLoopCount) {
+						if (sample.m_nLoopCount != 0) {
 							samplesPerFrame = sample.m_nFrequency / m_nTimeSpent;
 							samplesToPlay = sample.m_nLoopCount * SampleManager.GetSampleLength(sample.m_nSampleIndex);
 							if (samplesPerFrame == 0)
@@ -939,7 +939,7 @@ cAudioManager::ProcessActiveQueues()
 #ifdef EXTERNAL_3D_SOUND
 							SampleManager.SetChannelEmittingVolume(j, emittingVol);
 #else
-							SampleManager.SetChannelVolume(j, m_asActiveSamples[j].m_nVolume);
+							SampleManager.SetChannelVolume(j, emittingVol);
 							SampleManager.SetChannelPan(j, m_asActiveSamples[j].m_nOffset);
 #endif
 							SampleManager.SetChannelLoopPoints(j, m_asActiveSamples[j].m_nLoopStart, m_asActiveSamples[j].m_nLoopEnd);
@@ -951,12 +951,12 @@ cAudioManager::ProcessActiveQueues()
 								if (offset == 63)
 									x = 0.f;
 								else if (offset >= 63)
-									x = (offset - 63) * 1000.f / 63;
+									x = (offset - 63) * 1000.0f / 63;
 								else
-									x = -(63 - offset) * 1000.f / 63;
+									x = -(63 - offset) * 1000.0f / 63;
 								usedX = x;
-								usedY = 0.f;
-								usedZ = 0.f;
+								usedY = 0.0f;
+								usedZ = 0.0f;
 								m_asActiveSamples[j].m_fSoundIntensity = 100000.0f;
 							} else {
 								usedX = position.x;
@@ -991,7 +991,7 @@ cAudioManager::ClearRequestedQueue()
 void
 cAudioManager::ClearActiveSamples()
 {
-	for (int32 i = 0; i < m_nActiveSamples; i++) {
+	for (uint8 i = 0; i < m_nActiveSamples; i++) {
 		m_asActiveSamples[i].m_nEntityIndex = AEHANDLE_NONE;
 		m_asActiveSamples[i].m_nCounter = 0;
 		m_asActiveSamples[i].m_nSampleIndex = NO_SAMPLE;
