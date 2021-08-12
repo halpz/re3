@@ -539,10 +539,11 @@ cAudioManager::TranslateEntity(Const CVector *in, CVector *out)
 int32
 cAudioManager::ComputePan(float dist, CVector *vec)
 {
-	const uint8 PanTable[64] = {0,  3,  8,  12, 16, 19, 22, 24, 26, 28, 30, 31, 33, 34, 36, 37, 39, 40, 41, 42, 44, 45, 46, 47, 48, 49, 49, 50, 51, 52, 53, 53,
-	                            54, 55, 55, 56, 56, 57, 57, 58, 58, 58, 59, 59, 59, 60, 60, 61, 61, 61, 61, 62, 62, 62, 62, 62, 63, 63, 63, 63, 63, 63, 63, 63};
+	Const static uint8 PanTable[64] = {0,  3,  8,  12, 16, 19, 22, 24, 26, 28, 30, 31, 33, 34, 36, 37, 39, 40, 41, 42, 44, 45, 46, 47, 48, 49, 49, 50, 51, 52, 53, 53,
+									   54, 55, 55, 56, 56, 57, 57, 58, 58, 58, 59, 59, 59, 60, 60, 61, 61, 61, 61, 62, 62, 62, 62, 62, 63, 63, 63, 63, 63, 63, 63, 63};
 
-	int32 index = Min(63, Abs(vec->x / (dist / 64.f)));
+	int32 index = vec->x / (dist / 64.f);
+	index = Min(63, ABS(index));
 
 	if (vec->x > 0.f)
 		return Max(20, 63 - PanTable[index]);
@@ -558,11 +559,7 @@ cAudioManager::ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, 
 		if (dist != 0.0f) {
 			float speedOfSource = (dist / m_nTimeSpent) * speedMultiplier;
 			if (m_fSpeedOfSound > Abs(speedOfSource)) {
-				if (speedOfSource < 0.0f) {
-					speedOfSource = Max(speedOfSource, -1.5f);
-				} else {
-					speedOfSource = Min(speedOfSource, 1.5f);
-				}
+				speedOfSource = Clamp2(speedOfSource, 0.0f, 1.5f);
 				newFreq = (oldFreq * m_fSpeedOfSound) / (speedOfSource + m_fSpeedOfSound);
 			}
 		}
@@ -804,8 +801,8 @@ cAudioManager::ProcessActiveQueues()
 	float position2;
 	float position1;
 
-	uint32 v28;
-	uint32 v29;
+	uint32 samplesPerFrame;
+	uint32 samplesToPlay;
 
 #ifdef EXTERNAL_3D_SOUND
 	float x;
@@ -830,11 +827,11 @@ cAudioManager::ProcessActiveQueues()
 				if (sample.m_nEntityIndex == m_asActiveSamples[j].m_nEntityIndex && sample.m_nCounter == m_asActiveSamples[j].m_nCounter &&
 				    sample.m_nSampleIndex == m_asActiveSamples[j].m_nSampleIndex) {
 					if (sample.m_nLoopCount) {
-						if (m_FrameCounter & 1) {
+						if (m_FrameCounter & 1)
 							flag = !!(j & 1);
-						} else {
+						else
 							flag = !(j & 1);
-						}
+
 						if (flag && !SampleManager.GetChannelUsedFlag(j)) {
 							sample.m_bLoopEnded = TRUE;
 							m_asActiveSamples[j].m_bLoopEnded = TRUE;
@@ -849,17 +846,9 @@ cAudioManager::ProcessActiveQueues()
 					if (!sample.m_bReleasingSoundFlag) {
 						if (sample.m_bIs2D) {
 #ifdef EXTERNAL_3D_SOUND
-							if (m_bDoubleVolume) {
-								emittingVol = 2 * Min(63, sample.m_nEmittingVolume);
-							} else {
-								emittingVol = sample.m_nEmittingVolume;
-							}
+							emittingVol = m_bDoubleVolume ? 2 * Min(63, sample.m_nEmittingVolume) : sample.m_nEmittingVolume;
 #else
-							if (m_bDoubleVolume) {
-								emittingVol = 2 * Min(63, sample.m_nVolume);
-							} else {
-								emittingVol = sample.m_nVolume;
-							}
+							emittingVol = m_bDoubleVolume ? 2 * Min(63, sample.m_nVolume) : sample.m_nVolume;
 #endif
 							SampleManager.SetChannelFrequency(j, sample.m_nFrequency);
 #ifdef EXTERNAL_3D_SOUND
@@ -869,58 +858,27 @@ cAudioManager::ProcessActiveQueues()
 							SampleManager.SetChannelVolume(j, sample.m_nVolume);
 #endif
 						} else {
-							m_asActiveSamples[j].m_fDistance = sample.m_fDistance;
 							position2 = sample.m_fDistance;
 							position1 = m_asActiveSamples[j].m_fDistance;
+							m_asActiveSamples[j].m_fDistance = sample.m_fDistance;
 							sample.m_nFrequency = ComputeDopplerEffectedFrequency(sample.m_nFrequency, position1, position2, sample.m_fSpeedMultiplier);
 							if (sample.m_nFrequency != m_asActiveSamples[j].m_nFrequency) {
-								int32 freq;
-								if (sample.m_nFrequency <= m_asActiveSamples[j].m_nFrequency) {
-#ifdef FIX_BUGS
-									freq = Max((int32)sample.m_nFrequency, (int32)m_asActiveSamples[j].m_nFrequency - 6000);
-#else
-									freq = Max((int32)sample.m_nFrequency, int32(m_asActiveSamples[j].m_nFrequency - 6000));
-#endif
-								} else {
-									freq = Min(sample.m_nFrequency, m_asActiveSamples[j].m_nFrequency + 6000);
-								}
+								uint32 freq = Clamp2((int32)sample.m_nFrequency, (int32)m_asActiveSamples[j].m_nFrequency, 6000);
 								m_asActiveSamples[j].m_nFrequency = freq;
 								SampleManager.SetChannelFrequency(j, freq);
 							}
 
 #ifdef EXTERNAL_3D_SOUND
 							if (sample.m_nEmittingVolume != m_asActiveSamples[j].m_nEmittingVolume) {
-								if (sample.m_nEmittingVolume <= m_asActiveSamples[j].m_nEmittingVolume) {
-									vol = Max(m_asActiveSamples[j].m_nEmittingVolume - 10, sample.m_nEmittingVolume);
-								} else {
-									vol = Min(m_asActiveSamples[j].m_nEmittingVolume + 10, sample.m_nEmittingVolume);
-								}
-
-								uint8 emittingVol;
-								if (m_bDoubleVolume) {
-									emittingVol = 2 * Min(63, vol);
-								} else {
-									emittingVol = vol;
-								}
-								SampleManager.SetChannelEmittingVolume(j, emittingVol);
+								vol = Clamp2((int8)sample.m_nEmittingVolume, (int8)m_asActiveSamples[j].m_nEmittingVolume, 10);
+								SampleManager.SetChannelEmittingVolume(j, m_bDoubleVolume ? 2 * Min(63, vol) : vol);
 								m_asActiveSamples[j].m_nEmittingVolume = vol;
 							}
 #else
 							if (sample.m_nVolume != m_asActiveSamples[j].m_nVolume) {
-								if (sample.m_nVolume <= m_asActiveSamples[j].m_nVolume) {
-									vol = Max(m_asActiveSamples[j].m_nVolume - 10, sample.m_nVolume);
-								} else {
-									vol = Min(m_asActiveSamples[j].m_nVolume + 10, sample.m_nVolume);
-								}
+								vol = Clamp2((int8)sample.m_nVolume, (int8)m_asActiveSamples[j].m_nVolume, 10);
 								m_asActiveSamples[j].m_nVolume = vol;
-
-								uint8 emittingVol;
-								if (m_bDoubleVolume) {
-									emittingVol = 2 * Min(63, vol);
-								} else {
-									emittingVol = vol;
-								}
-								SampleManager.SetChannelVolume(j, emittingVol);
+								SampleManager.SetChannelVolume(j, m_bDoubleVolume ? 2 * Min(63, vol) : vol);
 							}
 #endif
 							TranslateEntity(&sample.m_vecPos, &position);
@@ -958,11 +916,11 @@ cAudioManager::ProcessActiveQueues()
 				for (uint8 j = 0; j < m_nActiveSamples; ++j) {
 					if (!m_asActiveSamples[j].m_bIsProcessed) {
 						if (sample.m_nLoopCount) {
-							v28 = sample.m_nFrequency / m_nTimeSpent;
-							v29 = sample.m_nLoopCount * SampleManager.GetSampleLength(sample.m_nSampleIndex);
-							if (v28 == 0)
+							samplesPerFrame = sample.m_nFrequency / m_nTimeSpent;
+							samplesToPlay = sample.m_nLoopCount * SampleManager.GetSampleLength(sample.m_nSampleIndex);
+							if (samplesPerFrame == 0)
 								continue;
-							sample.m_nReleasingVolumeDivider = v29 / v28 + 1;
+							sample.m_nReleasingVolumeDivider = samplesToPlay / samplesPerFrame + 1;
 						}
 						memcpy(&m_asActiveSamples[j], &sample, sizeof(tSound));
 						if (!m_asActiveSamples[j].m_bIs2D) {
@@ -970,20 +928,11 @@ cAudioManager::ProcessActiveQueues()
 #ifndef EXTERNAL_3D_SOUND
 							m_asActiveSamples[j].m_nOffset = ComputePan(m_asActiveSamples[j].m_fDistance, &position);
 #endif
-
 						}
 #ifdef EXTERNAL_3D_SOUND
-						if (m_bDoubleVolume) {
-							emittingVol = 2 * Min(63, m_asActiveSamples[j].m_nEmittingVolume);
-						} else {
-							emittingVol = m_asActiveSamples[j].m_nEmittingVolume;
-						}
+						emittingVol = m_bDoubleVolume ? 2 * Min(63, m_asActiveSamples[j].m_nEmittingVolume) : m_asActiveSamples[j].m_nEmittingVolume;
 #else
-						if (m_bDoubleVolume) {
-							emittingVol = 2 * Min(63, m_asActiveSamples[j].m_nVolume);
-						} else {
-							emittingVol = m_asActiveSamples[j].m_nVolume;
-						}
+						emittingVol = m_bDoubleVolume ? 2 * Min(63, m_asActiveSamples[j].m_nVolume) : m_asActiveSamples[j].m_nVolume;
 #endif
 						if (SampleManager.InitialiseChannel(j, m_asActiveSamples[j].m_nSampleIndex, m_asActiveSamples[j].m_nBankIndex)) {
 							SampleManager.SetChannelFrequency(j, m_asActiveSamples[j].m_nFrequency);
@@ -999,13 +948,12 @@ cAudioManager::ProcessActiveQueues()
 #ifdef EXTERNAL_3D_SOUND
 							if (m_asActiveSamples[j].m_bIs2D) {
 								uint8 offset = m_asActiveSamples[j].m_nOffset;
-								if (offset == 63) {
+								if (offset == 63)
 									x = 0.f;
-								} else if (offset >= 63) {
+								else if (offset >= 63)
 									x = (offset - 63) * 1000.f / 63;
-								} else {
+								else
 									x = -(63 - offset) * 1000.f / 63;
-								}
 								usedX = x;
 								usedY = 0.f;
 								usedZ = 0.f;
