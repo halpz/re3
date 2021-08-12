@@ -176,6 +176,7 @@ enum Config {
 #	define VU_COLLISION
 #	define PS2_MENU
 #elif defined GTA_PC
+#	define EXTERNAL_3D_SOUND
 #	define PC_PLAYER_CONTROLS	// mouse player/cam mode
 #	define GTA_REPLAY
 #	define GTA_SCENE_EDIT
@@ -428,6 +429,8 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #define FREE_CAM		// Rotating cam
 
 // Audio
+#define EXTERNAL_3D_SOUND // use external engine to simulate 3d audio spatialization. OpenAL would not work without it (because it works in a 3d space
+                          // originally and making it work in 2d only requires more resource). Will not work on PS2
 #define RADIO_SCROLL_TO_PREV_STATION // Won't work without FIX_BUGS
 #define AUDIO_CACHE // cache sound lengths to speed up the cold boot
 #define PS2_AUDIO_CHANNELS // increases the maximum number of audio channels to PS2 value of 43 (PC has 28 originally)
@@ -470,3 +473,10 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #endif
 
 #endif // VANILLA_DEFINES
+
+#if defined(AUDIO_OAL) && !defined(EXTERNAL_3D_SOUND)
+#error AUDIO_OAL cannot work without EXTERNAL_3D_SOUND
+#endif
+#if defined(GTA_PS2) && defined(EXTERNAL_3D_SOUND)
+#error EXTERNAL_3D_SOUND cannot work on PS2
+#endif

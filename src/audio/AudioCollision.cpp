@@ -265,7 +265,7 @@ cAudioManager::SetUpOneShotCollisionSound(const cAudioCollision &col)
 				m_sQueueSample.m_bIs2D = FALSE;
 				m_sQueueSample.m_nReleasingVolumeModificator = 11;
 				m_sQueueSample.m_nLoopCount = 1;
-				m_sQueueSample.m_nEmittingVolume = emittingVol;
+				SET_EMITTING_VOLUME(emittingVol);
 				RESET_LOOP_OFFSETS
 				m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 				m_sQueueSample.m_fSoundIntensity = CollisionSoundIntensity;
@@ -294,7 +294,7 @@ cAudioManager::SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 coun
 				m_sQueueSample.m_bIs2D = FALSE;
 				m_sQueueSample.m_nReleasingVolumeModificator = 7;
 				m_sQueueSample.m_nLoopCount = 0;
-				m_sQueueSample.m_nEmittingVolume = emittingVol;
+				SET_EMITTING_VOLUME(emittingVol);
 				SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 				m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 				m_sQueueSample.m_fSoundIntensity = CollisionSoundIntensity;

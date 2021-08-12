@@ -116,9 +116,15 @@ enum
 
 #define MAXPROVIDERS               64
 
+#ifdef EXTERNAL_3D_SOUND
 #define MAXCHANNELS                (NUM_CHANNELS_GENERIC+1)
 #define MAXCHANNELS_SURROUND       (MAXCHANNELS-4)
 #define MAX2DCHANNELS              1
+#else
+#define MAXCHANNELS                0
+#define MAXCHANNELS_SURROUND       0
+#define MAX2DCHANNELS              NUM_CHANNELS
+#endif
 
 #define MAX_STREAMS                3
 
@@ -158,7 +164,8 @@ public:
 
 	cSampleManager(void);
 	~cSampleManager(void);
-	
+
+#ifdef EXTERNAL_3D_SOUND
 	void SetSpeakerConfig(int32 nConfig);
 	uint32 GetMaximumSupportedChannels(void);
 	
@@ -172,7 +179,8 @@ public:
 	int8 SetCurrent3DProvider(uint8 which);
 
 	int8 AutoDetect3DProviders();
-	
+#endif
+
 	bool8 IsMP3RadioChannelAvailable(void);
 	
 	void ReleaseDigitalHandle  (void);
@@ -212,9 +220,11 @@ public:
 	
 	void  SetChannelReverbFlag    (uint32 nChannel, bool8 nReverbFlag);
 	bool8 InitialiseChannel       (uint32 nChannel, uint32 nSfx, uint8 nBank);
+#ifdef EXTERNAL_3D_SOUND
 	void  SetChannelEmittingVolume(uint32 nChannel, uint32 nVolume);
 	void  SetChannel3DPosition    (uint32 nChannel, float fX, float fY, float fZ);
 	void  SetChannel3DDistances   (uint32 nChannel, float fMax, float fMin);
+#endif
 	void  SetChannelVolume        (uint32 nChannel, uint32 nVolume);
 	void  SetChannelPan           (uint32 nChannel, uint32 nPan);
 	void  SetChannelFrequency     (uint32 nChannel, uint32 nFreq);
