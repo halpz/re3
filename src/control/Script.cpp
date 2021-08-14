@@ -3092,7 +3092,13 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 		UpdateCompareFlag(pPed->OurPedCanSeeThisOne(CWorld::Players[ScriptParams[1]].m_pPed));
 		return 0;
 	}
+#ifdef SUPPORT_GINPUT_SCRIPT
+	case COMMAND_HAS_PAD_IN_HANDS:
+		UpdateCompareFlag(CPad::GetPad(0)->IsAffectedByController);
+		return 0;
+#else
 	//case COMMAND_ORDER_CHAR_TO_BACKDOOR:
+#endif
 	//case COMMAND_ADD_CHAR_TO_GANG:
 	case COMMAND_IS_CHAR_OBJECTIVE_PASSED:
 	{

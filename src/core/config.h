@@ -381,6 +381,7 @@ enum Config {
 #define SUPPORT_JAPANESE_SCRIPT
 //#define SUPPORT_XBOX_SCRIPT
 #define SUPPORT_MOBILE_SCRIPT
+#define SUPPORT_GINPUT_SCRIPT
 #if (defined SUPPORT_XBOX_SCRIPT && defined SUPPORT_MOBILE_SCRIPT)
 static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually exclusive");
 #endif
