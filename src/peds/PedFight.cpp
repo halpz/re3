@@ -345,11 +345,17 @@ CPed::SetAttack(CEntity *victim)
 
 		if (m_pLookTarget) {
 			SetAimFlag(m_pLookTarget);
-		} else if (this == FindPlayerPed() && TheCamera.Cams[0].Using3rdPersonMouseCam()) {
-			SetAimFlag(m_fRotationCur);
-			((CPlayerPed*)this)->m_fFPSMoveHeading = TheCamera.Find3rdPersonQuickAimPitch();
-		} else if (curWeapon->IsFlagSet(WEAPONFLAG_CANAIM_WITHARM)) {
-			SetAimFlag(m_fRotationCur);
+#ifdef FREE_CAM
+		} else if (this != FindPlayerPed() || !((CPlayerPed*)this)->m_bFreeAimActive) {
+#else
+		} else {
+#endif
+			if (this == FindPlayerPed() && TheCamera.Cams[0].Using3rdPersonMouseCam()) {
+				SetAimFlag(m_fRotationCur);
+				((CPlayerPed*)this)->m_fFPSMoveHeading = TheCamera.Find3rdPersonQuickAimPitch();
+			} else if (curWeapon->IsFlagSet(WEAPONFLAG_CANAIM_WITHARM)) {
+				SetAimFlag(m_fRotationCur);
+			}
 		}
 	}
 #ifdef FIX_BUGS
@@ -821,6 +827,9 @@ CPed::Attack(void)
 		if (!bIsDucking && !GetFireAnimNotDucking(ourWeapon) && ourWeapon->IsFlagSet(WEAPONFLAG_CANAIM_WITHARM))
 			m_pedIK.m_flags |= CPedIK::AIMS_WITH_ARM;
 		else
+#ifdef FREE_CAM
+			if (!IsPlayer() || !((CPlayerPed*)this)->m_bFreeAimActive)
+#endif
 			m_pedIK.m_flags &= ~CPedIK::AIMS_WITH_ARM;
 	}
 
@@ -1017,6 +1026,15 @@ CPed::Attack(void)
 			weaponAnimAssoc->SetCurrentTime(animLoopEnd);
 			weaponAnimAssoc->flags &= ~ASSOC_RUNNING;
 			SetPointGunAt(m_pPointGunAt);
+#ifdef FREE_CAM
+		} else if (IsPlayer() && ((CPlayerPed*)this)->m_bFreeAimActive && GetWeapon()->m_eWeaponState != WEAPONSTATE_RELOADING) {
+			float limitedCam = CGeneral::LimitRadianAngle(-TheCamera.Orientation);
+			SetLookFlag(limitedCam, true, true);
+			SetAimFlag(limitedCam);
+			SetLookTimer(INT32_MAX);
+			SetPointGunAt(nil);
+			((CPlayerPed*)this)->m_fFPSMoveHeading = TheCamera.Find3rdPersonQuickAimPitch();
+#endif
 		} else {
 			ClearAimFlag();
 
