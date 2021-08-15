@@ -510,8 +510,11 @@ void CCarAI::TellOccupantsToLeaveCar(CVehicle* pVehicle)
 {
 	if (pVehicle->pDriver){
 		pVehicle->pDriver->SetObjective(OBJECTIVE_LEAVE_CAR, pVehicle);
-		if (pVehicle->GetModelIndex() == MI_AMBULAN)
+		switch (pVehicle->GetModelIndex()) {
+		case MI_AMBULAN:
 			pVehicle->pDriver->Say(SOUND_PED_LEAVE_VEHICLE);
+			break;
+		}
 	}
 	int timer = 100;
 	for (int i = 0; i < pVehicle->m_nNumMaxPassengers; i++){
