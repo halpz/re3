@@ -995,19 +995,19 @@ CAutomobile::ProcessControl(void)
 		}else{
 			if(GetModelIndex() == MI_MRWHOOP){
 				if(Pads[0].bHornHistory[Pads[0].iCurrHornHistory] &&
-				   !Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+4) % 5]){
+				   !Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+CPad::HORNHISTORY_SIZE-1) % CPad::HORNHISTORY_SIZE]){
 					m_bSirenOrAlarm = !m_bSirenOrAlarm;
 					printf("m_bSirenOrAlarm toggled to %d\n", m_bSirenOrAlarm);
 				}
 			}else if(UsesSiren(GetModelIndex())){
 				if(Pads[0].bHornHistory[Pads[0].iCurrHornHistory]){
-					if(Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+4) % 5] &&
-					   Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+3) % 5])
+					if(Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+CPad::HORNHISTORY_SIZE-1) % CPad::HORNHISTORY_SIZE] &&
+					   Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+CPad::HORNHISTORY_SIZE-2) % CPad::HORNHISTORY_SIZE])
 						m_nCarHornTimer = 1;
 					else
 						m_nCarHornTimer = 0;
-				}else if(Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+4) % 5] &&
-				         !Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+1) % 5]){
+				}else if(Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+CPad::HORNHISTORY_SIZE-1) % CPad::HORNHISTORY_SIZE] &&
+				         !Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+1) % CPad::HORNHISTORY_SIZE]){
 					m_nCarHornTimer = 0;
 					m_bSirenOrAlarm = !m_bSirenOrAlarm;
 				}else
@@ -3496,9 +3496,9 @@ CAutomobile::dmgDrawCarCollidingParticles(const CVector &pos, float amount)
 			nil,
 			CGeneral::GetRandomNumberInRange(0.02f, 0.08f),
 			CVehicleModelInfo::ms_vehicleColourTable[m_currentColour1],
-			CGeneral::GetRandomNumberInRange(-40.0f, 40.0f),
+			CGeneral::GetRandomNumberInRange(-40, 40),
 			0,
-			CGeneral::GetRandomNumberInRange(0.0f, 4.0f));
+			CGeneral::GetRandomNumberInRange(0, 4));
 }
 
 void
@@ -3955,7 +3955,9 @@ CAutomobile::SetUpWheelColModel(CColModel *colModel)
 	return true;
 }
 
-// this probably isn't used in III yet
+float fBurstForceMult = 0.03f;
+
+// this isn't used in III yet
 void
 CAutomobile::BurstTyre(uint8 wheel)
 {
@@ -3975,8 +3977,8 @@ CAutomobile::BurstTyre(uint8 wheel)
 			CCarCtrl::SwitchVehicleToRealPhysics(this);
 		}
 
-		ApplyMoveForce(GetRight() * m_fMass * CGeneral::GetRandomNumberInRange(-0.03f, 0.03f));
-		ApplyTurnForce(GetRight() * m_fTurnMass * CGeneral::GetRandomNumberInRange(-0.03f, 0.03f), GetForward());
+		ApplyMoveForce(GetRight() * m_fMass * CGeneral::GetRandomNumberInRange(-fBurstForceMult, fBurstForceMult));
+		ApplyTurnForce(GetRight() * m_fTurnMass * CGeneral::GetRandomNumberInRange(-fBurstForceMult, fBurstForceMult), GetForward());
 	}
 }
 
