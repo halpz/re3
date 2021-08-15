@@ -1586,7 +1586,7 @@ void CCarCtrl::WeaveThroughCarsSectorList(CPtrList& lst, CVehicle* pVehicle, CPh
 			continue;
 		if (Abs(pTestVehicle->GetPosition().z - pVehicle->GetPosition().z) >= VEHICLE_HEIGHT_DIFF_TO_CONSIDER_WEAVING)
 			continue;
-		if (pTestVehicle != pVehicle)
+		if (pTestVehicle != pVehicle && (!pVehicle->bPartOfConvoy || !pTestVehicle->bPartOfConvoy))
 			WeaveForOtherCar(pTestVehicle, pVehicle, pAngleToWeaveLeft, pAngleToWeaveRight);
 	}
 }
@@ -1594,8 +1594,6 @@ void CCarCtrl::WeaveThroughCarsSectorList(CPtrList& lst, CVehicle* pVehicle, CPh
 void CCarCtrl::WeaveForOtherCar(CEntity* pOtherEntity, CVehicle* pVehicle, float* pAngleToWeaveLeft, float* pAngleToWeaveRight)
 {
 	CVehicle* pOtherCar = (CVehicle*)pOtherEntity;
-	if (pVehicle->bPartOfConvoy && pOtherCar->bPartOfConvoy)
-		return;
 	if (pVehicle->AutoPilot.m_nCarMission == MISSION_RAMPLAYER_CLOSE && pOtherEntity == FindPlayerVehicle())
 		return;
 	if (pVehicle->AutoPilot.m_nCarMission == MISSION_RAMCAR_CLOSE && pOtherEntity == pVehicle->AutoPilot.m_pTargetCar)
