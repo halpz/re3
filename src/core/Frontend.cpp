@@ -3812,9 +3812,6 @@ CMenuManager::LoadSettings()
 	if (LoadINISettings()) {
 		LoadINIControllerSettings();
 	}
-	// if no re3.ini, create it, or update it with new values
-	SaveINISettings();
-	SaveINIControllerSettings();
 #endif
 
 	m_PrefsVsync = m_PrefsVsyncDisp;
