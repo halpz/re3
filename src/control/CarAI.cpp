@@ -600,6 +600,13 @@ void CCarAI::TellOccupantsToLeaveCar(CVehicle* pVehicle)
 	if (pVehicle->pDriver){
 		pVehicle->pDriver->SetObjective(OBJECTIVE_LEAVE_CAR, pVehicle);
 		switch (pVehicle->GetModelIndex()) {
+		case MI_FIRETRUCK:
+		case MI_FBICAR:
+		case MI_ENFORCER:
+		case MI_CHOPPER:
+		case MI_RHINO:
+		case MI_POLICE:
+			break;
 		case MI_AMBULAN:
 			pVehicle->pDriver->Say(SOUND_PED_LEAVE_VEHICLE);
 			break;
