@@ -130,6 +130,22 @@ else()
     set(${PROJECT}_C_CXX_EXTENSIONS OFF)
 endif()
 
+if(LIBRW_PLATFORM_GL3 AND LIBRW_GL3_GFXLIB STREQUAL "GLFW")
+	include(CheckSymbolExists)
+
+	set(CMAKE_REQUIRED_LIBRARIES glfw)
+	set(CMAKE_REQUIRED_DEFINITIONS -DGLFW_EXPOSE_NATIVE_X11)
+	check_symbol_exists(glfwGetX11Display "GLFW/glfw3.h;GLFW/glfw3native.h" GLFW_HAS_X11)
+	unset(CMAKE_REQUIRED_DEFINITIONS)
+	unset(CMAKE_REQUIRED_LIBRARIES)
+
+	if (GLFW_HAS_X11)
+		find_package(X11 REQUIRED)
+		target_link_libraries(${EXECUTABLE} PRIVATE X11::X11)
+		target_compile_definitions(${EXECUTABLE} PRIVATE GET_KEYBOARD_INPUT_FROM_X11)
+	endif (GLFW_HAS_X11)
+endif()
+
 set_target_properties(${EXECUTABLE}
     PROPERTIES
         C_STANDARD 11
