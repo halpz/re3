@@ -44,6 +44,12 @@ public:
 	float m_fGunSpinAngle;
 	unsigned int m_nPadDownPressedInMilliseconds;
 	unsigned int m_nLastBusFareCollected;
+#ifdef FREE_CAM
+	bool m_bFreeAimActive;
+	CVector m_cachedCamSource;
+	CVector m_cachedCamFront;
+	CVector m_cachedCamUp;
+#endif
 
 	static bool bDontAllowWeaponChange;
 #ifndef MASTER
