@@ -735,7 +735,7 @@ cAudioManager::UpdateReflections()
 			m_afReflectionsDistances[4] = 50.0f;
 	}
 }
-#endif // GTA_PC
+#endif // GTA_VERSION >= GTA3_PC_10
 
 void
 cAudioManager::AddReleasingSounds()

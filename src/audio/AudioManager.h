@@ -222,7 +222,7 @@ public:
 	tAudioEntity m_asAudioEntities[NUM_AUDIOENTITIES];
 	int32 m_anAudioEntityIndices[NUM_AUDIOENTITIES];
 	int32 m_nAudioEntitiesTotal;
-#ifdef GTA_PC
+#if GTA_VERSION >= GTA3_PC_10
 	CVector m_avecReflectionsPos[NUM_AUDIO_REFLECTIONS];
 	float m_afReflectionsDistances[NUM_AUDIO_REFLECTIONS];
 #endif
