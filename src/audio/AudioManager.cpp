@@ -114,7 +114,7 @@ cAudioManager::Service()
 	if (m_bIsInitialised) {
 		m_nPreviousUserPause = m_nUserPause;
 		m_nUserPause = CTimer::GetIsUserPaused();
-#ifdef GTA_PC
+#if GTA_VERSION >= GTA3_PC_10
 		UpdateReflections();
 #endif
 		ServiceSoundEffects();
@@ -657,7 +657,7 @@ cAudioManager::AddDetailsToRequestedOrderList(uint8 sample)
 	m_abSampleQueueIndexTable[m_nActiveSampleQueue][i] = sample;
 }
 
-#ifdef GTA_PC
+#if GTA_VERSION >= GTA3_PC_10
 void
 cAudioManager::AddReflectionsToRequestedQueue()
 {
@@ -667,12 +667,12 @@ cAudioManager::AddReflectionsToRequestedQueue()
 
 	for (uint32 i = 0; i < ARRAY_SIZE(m_afReflectionsDistances); i++) {
 		reflectionDistance = m_afReflectionsDistances[i];
-		if (reflectionDistance > 0.0f && reflectionDistance < 100.f && reflectionDistance < m_sQueueSample.m_fSoundIntensity) {
+		if (reflectionDistance > 0.0f && reflectionDistance < 100.f && reflectionDistance < m_sQueueSample.m_SoundIntensity) {
 			m_sQueueSample.m_nLoopsRemaining = (reflectionDistance * 500.f / 1029.f);
 			if (m_sQueueSample.m_nLoopsRemaining > 5) {
 				m_sQueueSample.m_fDistance = m_afReflectionsDistances[i];
 				SET_EMITTING_VOLUME(emittingVolume);
-				m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
+				m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, m_sQueueSample.m_SoundIntensity, m_sQueueSample.m_fDistance);
 				if (m_sQueueSample.m_nVolume > emittingVolume / 16) {
 					m_sQueueSample.m_nCounter += (i + 1) * 256;
 					if (m_sQueueSample.m_nLoopCount) {
@@ -884,7 +884,7 @@ cAudioManager::ProcessActiveQueues()
 							TranslateEntity(&sample.m_vecPos, &position);
 #ifdef EXTERNAL_3D_SOUND
 							SampleManager.SetChannel3DPosition(j, position.x, position.y, position.z);
-							SampleManager.SetChannel3DDistances(j, sample.m_fSoundIntensity, 0.25f * sample.m_fSoundIntensity);
+							SampleManager.SetChannel3DDistances(j, sample.m_SoundIntensity, 0.25f * sample.m_SoundIntensity);
 #else
 							sample.m_nOffset = ComputePan(sample.m_fDistance, &position);
 							SampleManager.SetChannelPan(j, sample.m_nOffset);
@@ -957,14 +957,14 @@ cAudioManager::ProcessActiveQueues()
 								usedX = x;
 								usedY = 0.0f;
 								usedZ = 0.0f;
-								m_asActiveSamples[j].m_fSoundIntensity = 100000.0f;
+								m_asActiveSamples[j].m_SoundIntensity = 100000.0f;
 							} else {
 								usedX = position.x;
 								usedY = position.y;
 								usedZ = position.z;
 							}
 							SampleManager.SetChannel3DPosition(j, usedX, usedY, usedZ);
-							SampleManager.SetChannel3DDistances(j, m_asActiveSamples[j].m_fSoundIntensity, 0.25f * m_asActiveSamples[j].m_fSoundIntensity);
+							SampleManager.SetChannel3DDistances(j, m_asActiveSamples[j].m_SoundIntensity, 0.25f * m_asActiveSamples[j].m_SoundIntensity);
 #endif
 							SampleManager.StartChannel(j);
 						}
@@ -1012,16 +1012,21 @@ cAudioManager::ClearActiveSamples()
 		m_asActiveSamples[i].m_nLoopEnd = -1;
 #endif
 		m_asActiveSamples[i].m_fSpeedMultiplier = 0.0f;
-		m_asActiveSamples[i].m_fSoundIntensity = 200.0f;
+		m_asActiveSamples[i].m_SoundIntensity = 200.0f;
 		m_asActiveSamples[i].m_nOffset = 63;
 		m_asActiveSamples[i].m_bReleasingSoundFlag = FALSE;
+#if GTA_VERSION < GTA3_PC_10
+		m_asActiveSamples[i].unk = -3;
+#endif
 		m_asActiveSamples[i].m_nCalculatedVolume = 0;
 		m_asActiveSamples[i].m_nReleasingVolumeDivider = 0;
 		m_asActiveSamples[i].m_nVolumeChange = -1;
 		m_asActiveSamples[i].m_vecPos = CVector(0.0f, 0.0f, 0.0f);
 		m_asActiveSamples[i].m_bReverbFlag = FALSE;
+#if GTA_VERSION >= GTA3_PC_10
 		m_asActiveSamples[i].m_nLoopsRemaining = 0;
 		m_asActiveSamples[i].m_bRequireReflection = FALSE;
+#endif
 	}
 }
 
@@ -1048,7 +1053,7 @@ cAudioManager::AdjustSamplesVolume()
 		tSound *pSample = &m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]];
 
 		if (!pSample->m_bIs2D)
-			pSample->m_nEmittingVolume = ComputeEmittingVolume(pSample->m_nEmittingVolume, pSample->m_fSoundIntensity, pSample->m_fDistance);
+			pSample->m_nEmittingVolume = ComputeEmittingVolume(pSample->m_nEmittingVolume, pSample->m_SoundIntensity, pSample->m_fDistance);
 	}
 }
 

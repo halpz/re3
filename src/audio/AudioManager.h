@@ -8,7 +8,11 @@ class tSound
 {
 public:
 	int32 m_nEntityIndex;
+#if GTA_VERSION >= GTA3_PC_10
 	int32 m_nCounter;
+#else
+	uint8 m_nCounter;
+#endif
 	int32 m_nSampleIndex;
 	uint8 m_nBankIndex;
 	bool8 m_bIs2D;
@@ -25,16 +29,25 @@ public:
 	uint8 m_nEmittingVolume;
 #endif
 	float m_fSpeedMultiplier;
-	float m_fSoundIntensity;
+#if GTA_VERSION >= GTA3_PC_10
+	float m_SoundIntensity;
+#else
+	uint32 m_SoundIntensity;
+#endif
 	bool8 m_bReleasingSoundFlag;
 	CVector m_vecPos;
 	bool8 m_bReverbFlag;
+#if GTA_VERSION >= GTA3_PC_10
 	uint8 m_nLoopsRemaining;
 	bool8 m_bRequireReflection; // Used for oneshots
+#endif
 	uint8 m_nOffset;
 	int32 m_nReleasingVolumeDivider;
 	bool8 m_bIsProcessed;
 	bool8 m_bLoopEnded;
+#if GTA_VERSION < GTA3_PC_10
+	int32 unk; // only on PS2, seems unused
+#endif
 	int32 m_nCalculatedVolume;
 	int8 m_nVolumeChange;
 };
@@ -276,7 +289,7 @@ public:
 	void InterrogateAudioEntities(); // inlined on PS2
 	void AddSampleToRequestedQueue();
 	void AddDetailsToRequestedOrderList(uint8 sample); // inlined on PS2
-#ifdef GTA_PC
+#if GTA_VERSION >= GTA3_PC_10
 	void AddReflectionsToRequestedQueue();
 	void UpdateReflections();
 #endif
@@ -312,7 +325,7 @@ public:
 	void ProcessModelCarEngine(cVehicleParams &params);
 	bool8 ProcessVehicleRoadNoise(cVehicleParams &params);
 	bool8 ProcessWetRoadNoise(cVehicleParams &params);
-	void ProcessVehicleEngine(cVehicleParams &params);
+	bool8 ProcessVehicleEngine(cVehicleParams &params);
 	void UpdateGasPedalAudio(CAutomobile *automobile); // inlined on PS2
 	void PlayerJustGotInCar();
 	void PlayerJustLeftCar();
