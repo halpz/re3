@@ -246,6 +246,7 @@ CAutomobile::SetModelIndex(uint32 id)
 
 #define SAND_SLOWDOWN (0.01f)
 float CAR_BALANCE_MULT = 0.3f;
+float HELI_ROTOR_DOTPROD_LIMIT = 0.95f;
 CVector vecSeaSparrowGunPos(-0.5f, 2.4f, -0.785f);
 CVector vecHunterGunPos(0.0f, 4.8f, -1.3f);
 CVector vecHunterRocketPos(2.5f, 1.0f, -0.5f);
@@ -1365,13 +1366,13 @@ CAutomobile::ProcessControl(void)
 		}else{
 			if(UsesSiren()){
 				if(Pads[0].bHornHistory[Pads[0].iCurrHornHistory]){
-					if(Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+4) % 5] &&
-					   Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+3) % 5])
+					if(Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+CPad::HORNHISTORY_SIZE-1) % CPad::HORNHISTORY_SIZE] &&
+					   Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+CPad::HORNHISTORY_SIZE-2) % CPad::HORNHISTORY_SIZE])
 						m_nCarHornTimer = 1;
 					else
 						m_nCarHornTimer = 0;
-				}else if(Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+4) % 5] &&
-				         !Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+1) % 5]){
+				}else if(Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+CPad::HORNHISTORY_SIZE-1) % CPad::HORNHISTORY_SIZE] &&
+				         !Pads[0].bHornHistory[(Pads[0].iCurrHornHistory+1) % CPad::HORNHISTORY_SIZE]){
 					m_nCarHornTimer = 0;
 					m_bSirenOrAlarm = !m_bSirenOrAlarm;
 				}else
@@ -1510,9 +1511,9 @@ CAutomobile::ProcessControl(void)
 				CMatrix mat;
 				mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_BONNET]));
 				CVector blade = mat.GetRight();
-				blade = Multiply3x3(blade, GetMatrix());
+				blade = Multiply3x3(GetMatrix(), blade);
 				camDist /= Max(Sqrt(distSq), 0.01f);
-				if(Abs(DotProduct(camDist, blade)) > 0.95f){
+				if(Abs(DotProduct(camDist, blade)) > HELI_ROTOR_DOTPROD_LIMIT){
 					DMAudio.PlayOneShot(m_audioEntityId, SOUND_HELI_BLADE, 0.0f);
 					m_fPropellerRotation = m_aWheelRotation[1];
 				}
@@ -1594,7 +1595,7 @@ CAutomobile::ProcessControl(void)
 	float speedsq = m_vecMoveSpeed.MagnitudeSqr();
 	for(i = 0; i < 4; i++){
 		float suspChange = m_aSuspensionSpringRatioPrev[i] - m_aSuspensionSpringRatio[i];
-		if(suspChange > 0.3f && !drivingInSand && speedsq > 0.04f){
+		if(suspChange > 0.3f && !drivingInSand && speedsq > SQR(0.2f)){
 			if(Damage.GetWheelStatus(i) == WHEEL_STATUS_BURST)
 				DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_JUMP_2, suspChange);
 			else
@@ -2563,10 +2564,10 @@ CAutomobile::PreRender(void)
 	if(IsRealHeli()){
 		// top rotor
 		m_aWheelRotation[1] += m_aWheelSpeed[1]*CTimer::GetTimeStep();
-		if(m_aWheelRotation[1] > TWOPI) m_aWheelRotation[1] -= TWOPI;
+		while(m_aWheelRotation[1] > TWOPI) m_aWheelRotation[1] -= TWOPI;
 		// rear rotor
 		m_aWheelRotation[3] += m_aWheelSpeed[1]*CTimer::GetTimeStep();
-		if(m_aWheelRotation[3] > TWOPI) m_aWheelRotation[3] -= TWOPI;
+		while(m_aWheelRotation[3] > TWOPI) m_aWheelRotation[3] -= TWOPI;
 		onlyFrontWheels = true;
 	}
 
@@ -3960,10 +3961,10 @@ CAutomobile::DoHoverSuspensionRatios(void)
 			}else
 				m_aSuspensionSpringRatio[i] = 0.99999f;
 
-			m_aWheelColPoints[i].point.x = (lower.x - upper.x)*m_aSuspensionSpringRatio[i] + upper.x;
-			m_aWheelColPoints[i].point.y = (lower.y - upper.y)*m_aSuspensionSpringRatio[i] + upper.y;
-			m_aWheelColPoints[i].point.z = waterZ;
-			m_aWheelColPoints[i].normal = CVector(0.01f, 0.0f, 1.0f);
+			m_aWheelColPoints[i].point = CVector((lower.x - upper.x)*m_aSuspensionSpringRatio[i] + upper.x,
+			                                     (lower.y - upper.y)*m_aSuspensionSpringRatio[i] + upper.y,
+			                                     waterZ);
+			m_aWheelColPoints[i].normal = CVector(0.0f, 0.0f, 1.0f);
 			m_aWheelColPoints[i].surfaceB = SURFACE_WATER;
 		}
 	}
@@ -4347,9 +4348,9 @@ CAutomobile::dmgDrawCarCollidingParticles(const CVector &pos, float amount)
 			nil,
 			CGeneral::GetRandomNumberInRange(0.02f, 0.08f),
 			CVehicleModelInfo::ms_vehicleColourTable[m_currentColour1],
-			CGeneral::GetRandomNumberInRange(-40.0f, 40.0f),
+			CGeneral::GetRandomNumberInRange(-40, 40),
 			0,
-			CGeneral::GetRandomNumberInRange(0.0f, 4.0f));
+			CGeneral::GetRandomNumberInRange(0, 4));
 }
 
 void
@@ -4880,6 +4881,8 @@ CAutomobile::SetUpWheelColModel(CColModel *colModel)
 	return true;
 }
 
+float fBurstForceMult = 0.03f;
+
 void
 CAutomobile::BurstTyre(uint8 wheel, bool applyForces)
 {
@@ -4905,8 +4908,8 @@ CAutomobile::BurstTyre(uint8 wheel, bool applyForces)
 		}
 
 		if(applyForces){
-			ApplyMoveForce(GetRight() * m_fMass * CGeneral::GetRandomNumberInRange(-0.03f, 0.03f));
-			ApplyTurnForce(GetRight() * m_fTurnMass * CGeneral::GetRandomNumberInRange(-0.03f, 0.03f), GetForward());
+			ApplyMoveForce(GetRight() * m_fMass * CGeneral::GetRandomNumberInRange(-fBurstForceMult, fBurstForceMult));
+			ApplyTurnForce(GetRight() * m_fTurnMass * CGeneral::GetRandomNumberInRange(-fBurstForceMult, fBurstForceMult), GetForward());
 		}
 	}
 }
@@ -4953,7 +4956,7 @@ CAutomobile::IsRoomForPedToLeaveCar(uint32 component, CVector *doorOffset)
 
 	CVector dist = doorPos - seatPos;
 
-	// Removing that makes thiProcessEntityCollisions func. return false for van doors.
+	// Removing that makes this func. return false for van doors.
 	doorPos.z += 0.5f;
 	float length = dist.Magnitude();
 	CVector pedPos = seatPos + dist*((length+0.6f)/length);
@@ -5605,13 +5608,14 @@ CAutomobile::SetPanelDamage(int32 component, ePanels panel, bool noFlyingCompone
 	if(m_aCarNodes[component] == nil)
 		return;
 	if(status == PANEL_STATUS_SMASHED1){
-		DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_WINDSHIELD_CRACK, 0.0f);
+		if(panel == VEHPANEL_WINDSCREEN)
+			DMAudio.PlayOneShot(m_audioEntityId, SOUND_CAR_WINDSHIELD_CRACK, 0.0f);
 		// show damaged part
 		SetComponentVisibility(m_aCarNodes[component], ATOMIC_FLAG_DAM);
 	}else if(status == PANEL_STATUS_MISSING){
 		if(!noFlyingComponents)
 			SpawnFlyingComponent(component, COMPGROUP_PANEL);
-		else
+		else if(panel == VEHPANEL_WINDSCREEN)
 			CGlass::CarWindscreenShatters(this, false);
 		// hide both
 		SetComponentVisibility(m_aCarNodes[component], ATOMIC_FLAG_NONE);
