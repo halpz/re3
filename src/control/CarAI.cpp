@@ -599,8 +599,18 @@ void CCarAI::TellOccupantsToLeaveCar(CVehicle* pVehicle)
 {
 	if (pVehicle->pDriver){
 		pVehicle->pDriver->SetObjective(OBJECTIVE_LEAVE_CAR, pVehicle);
-		if (pVehicle->GetModelIndex() == MI_AMBULAN)
+		switch (pVehicle->GetModelIndex()) {
+		case MI_FIRETRUCK:
+		case MI_FBICAR:
+		case MI_ENFORCER:
+		case MI_BARRACKS:
+		case MI_RHINO:
+		case MI_POLICE:
+			break;
+		case MI_AMBULAN:
 			pVehicle->pDriver->Say(SOUND_PED_LEAVE_VEHICLE);
+			break;
+		}
 	}
 	int timer = 100;
 	for (int i = 0; i < pVehicle->m_nNumMaxPassengers; i++){
@@ -616,8 +626,18 @@ void CCarAI::TellOccupantsToFleeCar(CVehicle* pVehicle)
 {
 	if (pVehicle->pDriver && !pVehicle->pDriver->IsPlayer()) {
 		pVehicle->pDriver->SetObjective(OBJECTIVE_FLEE_ON_FOOT_TILL_SAFE);
-		if (pVehicle->GetModelIndex() != MI_FIRETRUCK && pVehicle->GetModelIndex() == MI_AMBULAN)
+		switch (pVehicle->GetModelIndex()) {
+		case MI_FIRETRUCK:
+		case MI_FBIRANCH:
+		case MI_ENFORCER:
+		case MI_BARRACKS:
+		case MI_RHINO:
+		case MI_POLICE:
+			break;
+		case MI_AMBULAN:
 			pVehicle->pDriver->Say(SOUND_PED_LEAVE_VEHICLE);
+			break;
+		}
 	}
 	int timer = 100;
 	for (int i = 0; i < pVehicle->m_nNumMaxPassengers; i++) {

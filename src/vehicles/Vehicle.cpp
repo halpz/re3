@@ -83,6 +83,9 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	m_fGasPedal = 0.0f;
 	m_fBrakePedal = 0.0f;
 	m_fWheelSpin = 0.0f;
+#if defined FIX_BUGS || !defined GTA_PSP
+	bRewardVehicle = false;
+#endif
 	m_vehLCS_29E = 0;
 	m_vehLCS_29C = 0;
 	m_vehLCS_2A3 = -1;

@@ -8,7 +8,12 @@
 #include "Population.h"
 
 float CIniFile::PedNumberMultiplier = 0.6f;
-float CIniFile::CarNumberMultiplier = 0.8f;
+float CIniFile::CarNumberMultiplier =
+#ifdef GTA_PSP
+	0.7f;
+#else
+	0.8f;
+#endif
 
 void CIniFile::LoadIniFile()
 {

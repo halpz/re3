@@ -1089,28 +1089,30 @@ enum
 
 	MI_LAST_VEHICLE = MI_VCNMAV,
 
-	// these indices are sort of original
-	// with these two i don't know which is which:
-	MI_CADDY = -963,
-	MI_BAGGAGE = -999,
-	MI_RCBARON = -955,
-	MI_COMET = -972,	// ps2 CAutomobile::IsOpenTopCar
-	MI_SANDKING = -981,	// ps2 CAutomobile::ProcessControl
-	MI_VOODOO = -984,	// ps2 hydraulics
+
+	// these indices are original
+	MI_CADDY = -999,
+	MI_MARQUIS = -990,
 	MI_SEASPAR = -986,
 	MI_SPARROW = -985,
+	MI_VOODOO = -984,
+	MI_SANDKING = -981,
+	MI_COMET = -972,
+	MI_BAGGAGE = -963,
+	MI_VICECHEE = -954,
+	MI_RCBARON = -955,
+
+	// these two are unknown
+	MI_RIO = -992,
+	MI_TROPIC = -988,
 
 	// HACK HACK, hopefully temporary
 	MI_FBIRANCH = -2000,
-	MI_VICECHEE,
-	MI_RIO,
 	MI_SQUALO,
 	MI_JETMAX,
 	MI_COASTG,
 	MI_DINGHY,
-	MI_MARQUIS,
 	MI_SKIMMER,
-	MI_TROPIC,
 	MI_CUBAN,
 	MI_PHEONIX,
 	MI_SABRE,
