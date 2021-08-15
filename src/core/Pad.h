@@ -140,7 +140,7 @@ class CPad
 public:
 	enum
 	{
-		HORNHISTORY_SIZE = 5,
+		HORNHISTORY_SIZE = 8,
 		DRUNK_STEERING_BUFFER_SIZE = 10,
 	};
 	CControllerState NewState;

@@ -22,7 +22,7 @@ public:
 		z = v.z;
 	}
 	// (0,1,0) means no rotation. So get right vector and its atan
-	float Heading(void) const { return Atan2(-x, y); }
+	float Heading(void) const { return x == 0.0f && y == 0.0f ? 0.0f : Atan2(-x, y); }
 	float Magnitude(void) const { return Sqrt(x*x + y*y + z*z); }
 	float MagnitudeSqr(void) const { return x*x + y*y + z*z; }
 	float Magnitude2D(void) const { return Sqrt(x*x + y*y); }

@@ -43,6 +43,7 @@ extern bool gUseModelResources;
 extern bool gUseResources;
 extern bool gNASTY_NASTY_MEM_SHUTDOWN_HACK;
 extern bool gbPreviewCity;
+extern bool gMultiplayerSuperBrakeOnPause;
 
 class CSprite2d;
 

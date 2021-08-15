@@ -69,7 +69,6 @@ float TRANSMISSION_AI_CHEAT_MULT = 1.2f;
 float TRANSMISSION_SMOOTHER_FRAC = 0.85f;
 float TRANSMISSION_FREE_ACCELERATION = 0.1f;
 
-//--LCS: done
 float
 cTransmission::CalculateDriveAcceleration(const float &gasPedal, uint8 &gear, float &time, const float &velocity, float *inertiaVar1, float *inertiaVar2, uint8 nDriveWheels, uint8 cheat)
 {

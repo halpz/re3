@@ -95,6 +95,7 @@ bool gUseModelResources;
 bool gUseResources;
 bool gNASTY_NASTY_MEM_SHUTDOWN_HACK;	// rather unused
 bool gbPreviewCity;	// don't do worldstream-style rendering but traditional method
+bool gMultiplayerSuperBrakeOnPause = true;
 
 float FramesPerSecond = 30.0f;
 

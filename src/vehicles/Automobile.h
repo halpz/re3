@@ -39,6 +39,7 @@ public:
 	uint8 m_bombType : 3;
 #endif
 	uint8 bTaxiLight : 1;
+	uint8 bUnknownFlag : 1;	// new in LCS
 	uint8 bFixedColour : 1;
 	uint8 bBigWheels : 1;
 	uint8 bWaterTight : 1;	// no damage for non-player peds

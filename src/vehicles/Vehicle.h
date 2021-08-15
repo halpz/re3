@@ -256,7 +256,7 @@ public:
 	int8 m_nPacManPickupsCarried;
 	uint8 m_nRoadblockType;
 	uint8 m_bGarageTurnedLightsOff;
-	int32 m_vehLCS_264;
+	float m_fWheelSpin;
 	float m_fHealth;           // 1000.0f = full health. 250.0f = fire. 0 -> explode
 	float m_fEngineEnergy;	// TODO(LCS): better name. it adds up acceleration force, so possibly kinetic energy??
 	uint8 m_nCurrentGear;
@@ -280,8 +280,8 @@ public:
 	uint8 m_nRadioStation;
 	uint8 m_bRainAudioCounter;
 	uint8 m_bRainSamplesCounter;
-	int8 m_vehLCS_2A3;
-	int32 m_vehLCS_2A4;	// haven't seen this used yet
+	int8 m_vehLCS_2A3;	// enables 2A4
+	uint8 m_vehLCS_2A4;	// some timer
 	uint32 m_nCarHornTimer;
 	uint8 m_nCarHornPattern;
 	uint8 m_bSirenOrAlarm;
@@ -292,7 +292,7 @@ public:
 	CStoredCollPoly m_aCollPolys[2];     // poly which is under front/rear part of car
 	float m_fSteerInput;
 	eVehicleType m_vehType;
-	bool m_vehLCS_348;
+	bool m_bSuperBrake;
 
 	static void *operator new(size_t) throw();
 	static void *operator new(size_t sz, int slot) throw();
@@ -429,7 +429,6 @@ public:
 	static bool m_bDisplayHandlingInfo;
 #endif
 	static float rcHeliHeightLimit;
-	// unused from SA:
 	static float WHEELSPIN_FALL_RATE;
 	static float WHEELSPIN_RISE_RATE;
 	static float WHEELSPIN_INAIR_TARGET_RATE;

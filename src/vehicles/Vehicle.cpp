@@ -53,7 +53,6 @@ bool CVehicle::bDisableRemoteDetonationOnContact;
 bool CVehicle::m_bDisplayHandlingInfo;
 #endif
 float CVehicle::rcHeliHeightLimit = 60.0f;
-// unused from SA:
 float CVehicle::WHEELSPIN_FALL_RATE = 0.7f;
 float CVehicle::WHEELSPIN_RISE_RATE = 0.95f;
 float CVehicle::WHEELSPIN_INAIR_TARGET_RATE = 10.0f;
@@ -82,12 +81,12 @@ CVehicle::CVehicle(uint8 CreatedBy)
 	int i;
 
 	m_fGasPedal = 0.0f;
-	m_fBrakePedal = 0.0;
-	m_vehLCS_264 = 0;
+	m_fBrakePedal = 0.0f;
+	m_fWheelSpin = 0.0f;
 	m_vehLCS_29E = 0;
 	m_vehLCS_29C = 0;
 	m_vehLCS_2A3 = -1;
-	m_vehLCS_348 = false;
+	m_bSuperBrake = false;	// probably for multiplayer
 
 	m_nCurrentGear = 1;
 	m_fChangeGearTime = 0.0f;
