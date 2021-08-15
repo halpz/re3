@@ -1089,26 +1089,31 @@ enum
 
 	MI_LAST_VEHICLE = MI_VCNMAV,
 
+
 	// these indices are sort of original
-	// with these three i don't know which is which:
-	MI_RCBARON = -999,
-	MI_CADDY = -963,
+	MI_CADDY = -999,
+
+	// with these two i don't know which is which:
+	MI_RCBARON = -963,
 	MI_BAGGAGE = -955,
+
+	MI_SANDKING = -981,
+	MI_VICECHEE = -954,
+	MI_MARQUIS = -990,
+
+	// these two also unknown
+	MI_RIO = -992,
+	MI_TROPIC = -988,
 
 	// HACK HACK, hopefully temporary
 	MI_SEASPAR = -2000,
 	MI_SPARROW,
 	MI_FBIRANCH,
-	MI_VICECHEE,
-	MI_RIO,
 	MI_SQUALO,
 	MI_JETMAX,
 	MI_COASTG,
 	MI_DINGHY,
-	MI_MARQUIS,
 	MI_SKIMMER,
-	MI_TROPIC,
-	MI_SANDKING,
 	MI_VOODOO,
 	MI_CUBAN,
 	MI_PHEONIX,

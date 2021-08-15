@@ -41,7 +41,7 @@
 
 //--LCS: file done except TODO
 
-#define DISTANCE_TO_SPAWN_ROADBLOCK_PEDS (51.0f)
+#define DISTANCE_TO_SPAWN_ROADBLOCK_PEDS (51.0f) // apparently POPULATION_CULL_RANGE? TODO: unite with CPopulation
 #define DISTANCE_TO_SCAN_FOR_DANGER (14.0f)
 #define DISTANCE_TO_SCAN_FOR_PED_DANGER (11.0f)
 #define SAFE_DISTANCE_TO_PED (3.0f)
@@ -81,8 +81,16 @@
 #define DISTANCE_BETWEEN_CAR_AND_DEAD_PED (6.0f)
 #define PROBABILITY_OF_PASSENGER_IN_VEHICLE (0.125f)
 
+#ifdef GTA_PSP
+#define ONSCREEN_DESPAWN_RANGE (160.0f)
+#define MINIMAL_DISTANCE_TO_SPAWN_ONSCREEN (100.0f)
+#define MAX_DISTANCE_FROM_CAMERA_TO_SPAWN_ONSCREEN (82.5f)
+#else
 #define ONSCREEN_DESPAWN_RANGE (190.0f)
 #define MINIMAL_DISTANCE_TO_SPAWN_ONSCREEN (130.0f)
+#define MAX_DISTANCE_FROM_CAMERA_TO_SPAWN_ONSCREEN (105.0f)
+#endif
+
 #define REQUEST_ONSCREEN_DISTANCE (140.0f)
 #define OFFSCREEN_DESPAWN_RANGE (60.0f)
 #define MINIMAL_DISTANCE_TO_SPAWN_OFFSCREEN (40.0f)
@@ -148,33 +156,53 @@ CCarCtrl::GenerateOneRandomCar()
 	CZoneInfo zone;
 	CTheZones::GetZoneInfoForTimeOfDay(&vecTargetPos, &zone);
 	pPlayer->m_nTrafficMultiplier = pPlayer->m_fRoadDensity * zone.carDensity;
-	if (NumRandomCars >= pPlayer->m_nTrafficMultiplier * CarDensityMultiplier * CIniFile::CarNumberMultiplier)
-		return;
-	if (NumFiretrucksOnDuty + NumAmbulancesOnDuty + NumParkedCars + NumMissionCars + NumLawEnforcerCars + NumRandomCars >= MaxNumberOfCarsInUse)
-		return;
+#ifdef GTA_NETWORK
+	if (gIsMultiplayerGame) {
+		// TODO
+	}
+	else
+#endif
+	{
+		if (NumRandomCars >= pPlayer->m_nTrafficMultiplier * CarDensityMultiplier * CIniFile::CarNumberMultiplier)
+			return;
+		if (NumFiretrucksOnDuty + NumAmbulancesOnDuty + NumParkedCars + NumMissionCars + NumLawEnforcerCars + NumRandomCars >= MaxNumberOfCarsInUse)
+			return;
+	}
 	CWanted* pWanted = pPlayer->m_pPed->m_pWanted;
 	int carClass;
 	int carModel;
-	if (pWanted->GetWantedLevel() > 1 && NumLawEnforcerCars < pWanted->m_MaximumLawEnforcerVehicles &&
-		pWanted->m_CurrentCops < pWanted->m_MaxCops && !CGame::IsInInterior() && (
-			pWanted->GetWantedLevel() > 3 ||
-			pWanted->GetWantedLevel() > 2 && CTimer::GetTimeInMilliseconds() > LastTimeLawEnforcerCreated + 5000 ||
-			pWanted->GetWantedLevel() > 1 && CTimer::GetTimeInMilliseconds() > LastTimeLawEnforcerCreated + 8000)) {
-		/* Last pWanted->GetWantedLevel() > 1 is unnecessary but I added it for better readability. */
-		/* Wouldn't be surprised it was there originally but was optimized out. */
-		carClass = COPS;
-		carModel = ChoosePoliceCarModel();
-	}else{
-		for (int i = 0; i < 5; i++) {
-			carModel = ChooseModel(&zone, &carClass);
-			if (carModel == -1)
-				return;
-			if (!(carClass == COPS && pWanted->GetWantedLevel() >= 1))
-				/* All cop spawns with wanted level are handled by condition above. */
-				/* In particular it means that cop cars never spawn if player has wanted level of 1. */
-				break;
+#ifdef GTA_NETWORK
+	if (gIsMultiplayerGame) {
+		carModel = ChooseModel(&zone, &carClass);
+		if (carModel == -1)
+			return;
+	}
+	else
+#else
+	{
+		if (pWanted->GetWantedLevel() > 1 && NumLawEnforcerCars < pWanted->m_MaximumLawEnforcerVehicles &&
+			pWanted->m_CurrentCops < pWanted->m_MaxCops && !CGame::IsInInterior() && (
+				pWanted->GetWantedLevel() > 3 ||
+				pWanted->GetWantedLevel() > 2 && CTimer::GetTimeInMilliseconds() > LastTimeLawEnforcerCreated + 5000 ||
+				pWanted->GetWantedLevel() > 1 && CTimer::GetTimeInMilliseconds() > LastTimeLawEnforcerCreated + 8000)) {
+			/* Last pWanted->GetWantedLevel() > 1 is unnecessary but I added it for better readability. */
+			/* Wouldn't be surprised it was there originally but was optimized out. */
+			carClass = COPS;
+			carModel = ChoosePoliceCarModel();
+		}
+		else {
+			for (int i = 0; i < 5; i++) {
+				carModel = ChooseModel(&zone, &carClass);
+				if (carModel == -1)
+					return;
+				if (!(carClass == COPS && pWanted->GetWantedLevel() >= 1))
+					/* All cop spawns with wanted level are handled by condition above. */
+					/* In particular it means that cop cars never spawn if player has wanted level of 1. */
+					break;
+			}
 		}
 	}
+#endif
 	float frontX, frontY;
 	float preferredDistance, angleLimit;
 	float requestMultiplier = 1.0f;
@@ -373,10 +401,16 @@ CCarCtrl::GenerateOneRandomCar()
 	CVehicle* pVehicle;
 	if (CModelInfo::IsBoatModel(carModel))
 		pVehicle = new CBoat(carModel, RANDOM_VEHICLE);
-	else if (CModelInfo::IsBikeModel(carModel))
-		pVehicle = new CBike(carModel, RANDOM_VEHICLE);
 	else
-		pVehicle = new CAutomobile(carModel, RANDOM_VEHICLE);
+	{
+		if (CModelInfo::IsBikeModel(carModel))
+			pVehicle = new CBike(carModel, RANDOM_VEHICLE);
+		else
+			pVehicle = new CAutomobile(carModel, RANDOM_VEHICLE);
+#ifdef GTA_NETWORK
+		// TODO
+#endif
+	}
 	pVehicle->AutoPilot.m_nPrevRouteNode = 0;
 	pVehicle->AutoPilot.m_nCurrentRouteNode = curNodeId;
 	pVehicle->AutoPilot.m_nNextRouteNode = nextNodeId;
@@ -394,7 +428,7 @@ CCarCtrl::GenerateOneRandomCar()
 			pVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
 			pVehicle->AutoPilot.m_nCarMission = MISSION_CRUISE;
 		}
-		if (carModel == MI_FBIRANCH){
+		if (carModel == MI_FBICAR){
 			pVehicle->m_currentColour1 = 0;
 			pVehicle->m_currentColour2 = 0;
 		}
@@ -616,6 +650,9 @@ CCarCtrl::GenerateOneRandomCar()
 		break;
 	}
 	CVisibilityPlugins::SetClumpAlpha(pVehicle->GetClump(), 0);
+#ifdef GTA_MOBILE
+	//CVisibilityPlugins::SetObjectDistanceAlpha(pVehicle->GetClump(), 0) // TODO(LCS)
+#endif
 	if (!pVehicle->GetIsOnScreen()){
 		if ((vecTargetPos - pVehicle->GetPosition()).Magnitude2D() > OFFSCREEN_DESPAWN_RANGE * (pVehicle->bExtendedRange ? EXTENDED_RANGE_DESPAWN_MULTIPLIER : 1.0f)) {
 			/* Too far away cars that are not visible aren't needed. */
@@ -628,7 +665,7 @@ CCarCtrl::GenerateOneRandomCar()
 			delete pVehicle;
 			return;
 		}
-		if ((TheCamera.GetPosition() - pVehicle->GetPosition()).Magnitude2D() < 105.0f * requestMultiplier * TheCamera.GenerationDistMultiplier || bTopDownCamera) {
+		if ((TheCamera.GetPosition() - pVehicle->GetPosition()).Magnitude2D() < MAX_DISTANCE_FROM_CAMERA_TO_SPAWN_ONSCREEN * requestMultiplier * TheCamera.GenerationDistMultiplier || bTopDownCamera) {
 			delete pVehicle;
 			return;
 		}
@@ -662,16 +699,21 @@ CCarCtrl::GenerateOneRandomCar()
 		CCarAI::AddPoliceCarOccupants(pVehicle);
 	else {
 		pVehicle->SetUpDriver();
-		int32 passengers = 0;
-		for (int i = 0; i < pVehicle->m_nNumMaxPassengers; i++)
-			passengers += (CGeneral::GetRandomNumberInRange(0.0f, 1.0f) < PROBABILITY_OF_PASSENGER_IN_VEHICLE) ? 1 : 0;
-		if (CModelInfo::IsCarModel(carModel) && (CModelInfo::GetModelInfo(carModel)->GetAnimFileIndex() == CAnimManager::GetAnimationBlockIndex("van") && passengers >= 1))
-			passengers = 1;
-		for (int i = 0; i < passengers; i++) {
-			CPed* pPassenger = pVehicle->SetupPassenger(i);
-			if (pPassenger) {
-				++CPopulation::ms_nTotalCarPassengerPeds;
-				pPassenger->bCarPassenger = true;
+#ifdef GTA_NETWORK
+		if (!gIsMultiplayerGame)
+#endif
+		{
+			int32 passengers = 0;
+			for (int i = 0; i < pVehicle->m_nNumMaxPassengers; i++)
+				passengers += (CGeneral::GetRandomNumberInRange(0.0f, 1.0f) < PROBABILITY_OF_PASSENGER_IN_VEHICLE) ? 1 : 0;
+			if (CModelInfo::IsCarModel(carModel) && (CModelInfo::GetModelInfo(carModel)->GetAnimFileIndex() == CAnimManager::GetAnimationBlockIndex("van") && passengers >= 1))
+				passengers = 1;
+			for (int i = 0; i < passengers; i++) {
+				CPed* pPassenger = pVehicle->SetupPassenger(i);
+				if (pPassenger) {
+					++CPopulation::ms_nTotalCarPassengerPeds;
+					pPassenger->bCarPassenger = true;
+				}
 			}
 		}
 	}
@@ -741,6 +783,9 @@ CCarCtrl::GenerateOneRandomCar()
 			}
 		}
 	}
+#ifdef GTA_NETWORK
+	// TODO
+#endif
 }
 
 int32
@@ -801,6 +846,8 @@ CCarCtrl::ChooseModel(CZoneInfo* pZone, int* pClass) {
 		model = ChooseCarModel(*pClass);
 	}
 	if (i == 0)
+		return -1;
+	if (CModelInfo::GetColModel(model)->boundingSphere.radius > 20.0f)
 		return -1;
 	return model;
 }
@@ -3404,7 +3451,13 @@ CCarCtrl::BoatWithTallMast(int32 mi)
 
 bool CCarCtrl::OkToCreateVehicleAtThisPosition(const CVector& pos)
 {
+#ifdef GTA_NETWORK
+	if (gIsMultiplayerGame) {
+		// TODO
+	}
+#else
 	return true;
+#endif
 }
 
 float CCarCtrl::FindSpeedMultiplierWithSpeedFromNodes(int8 type)

@@ -248,7 +248,7 @@ public:
 #if (!defined GTA_PS2 || defined FIX_BUGS) // <- I think this can be moved back to CAutomobile?
 	uint8 m_bombType : 3;
 #endif
-	uint8 bDriverLastFrame : 1;
+	uint8 bDriverLastFrame : 1; // originally not in CVehicle (TODO - carbomb stuff)
 	uint8 bRewardVehicle : 1; // 25B_40
 
 	int8 m_numPedsUseItAsCover;
