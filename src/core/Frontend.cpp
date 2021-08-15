@@ -3169,9 +3169,6 @@ CMenuManager::LoadSettings()
 	if (LoadINISettings()) {
 		LoadINIControllerSettings();
 	}
-	// if no reVC.ini, create it, or update it with new values
-	SaveINISettings();
-	SaveINIControllerSettings();
 #endif
 
 #ifdef FIX_BUGS
