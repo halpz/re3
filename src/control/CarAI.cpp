@@ -588,7 +588,7 @@ void CCarAI::TellOccupantsToLeaveCar(CVehicle* pVehicle)
 		case MI_FIRETRUCK:
 		case MI_FBICAR:
 		case MI_ENFORCER:
-		case MI_CHOPPER:
+		case MI_BARRACKS:
 		case MI_RHINO:
 		case MI_POLICE:
 			break;
