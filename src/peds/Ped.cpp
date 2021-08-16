@@ -1237,8 +1237,12 @@ CPed::ClearAimFlag(void)
 		m_lookTimer = 0;
 	}
 
-	if (IsPlayer())
+	if (IsPlayer()) {
 		((CPlayerPed*)this)->m_fFPSMoveHeading = 0.0f;
+#ifdef FREE_CAM
+		((CPlayerPed*)this)->m_bFreeAimActive = false;
+#endif
+	}
 }
 
 void

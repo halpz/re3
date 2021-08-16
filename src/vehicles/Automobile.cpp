@@ -3600,6 +3600,7 @@ CAutomobile::ProcessBuoyancy(void)
 	CVector impulse, point;
 
 	if(mod_Buoyancy.ProcessBuoyancy(this, m_fBuoyancy, &point, &impulse)){
+		bTouchingWater = true;
 		float timeStep = Max(CTimer::GetTimeStep(), 0.01f);
 		float impulseRatio = impulse.z / (GRAVITY * m_fMass * timeStep);
 		float waterResistance = Pow(1.0f - 0.05f*impulseRatio, CTimer::GetTimeStep());
@@ -3614,7 +3615,7 @@ CAutomobile::ProcessBuoyancy(void)
 					heliHitWaterHard = true;
 				}
 			}else{
-				float strength = 1.0f/Max(8.0f*impulseRatio, 1.0f);
+				float strength = Max(8.0f*impulseRatio, 1.0f);
 				ApplyMoveForce(-2.0f*impulse/strength);
 				ApplyTurnForce(-impulse/strength, point);
 				if(impulseRatio > 0.9f){

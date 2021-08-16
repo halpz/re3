@@ -98,6 +98,9 @@ CPlayerPed::CPlayerPed(void) : CPed(PEDTYPE_PLAYER1)
 	m_nAttackDirToCheck = 0;
 	m_nLastBusFareCollected = 0;
 	idleAnimBlockIndex = CAnimManager::GetAnimationBlockIndex("playidles");
+#ifdef FREE_CAM
+	m_bFreeAimActive = false;
+#endif
 }
 
 void
@@ -1343,17 +1346,22 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 			if ((padUsed->GetTarget() && CAN_AIM_WITH_ARM) || padUsed->GetWeapon()) {
 				float limitedCam = CGeneral::LimitRadianAngle(-TheCamera.Orientation);
 
+				m_cachedCamSource = TheCamera.Cams[TheCamera.ActiveCam].Source;
+				m_cachedCamFront = TheCamera.Cams[TheCamera.ActiveCam].Front;
+				m_cachedCamUp = TheCamera.Cams[TheCamera.ActiveCam].Up;
+				
 				// On this one we can rotate arm.
 				if (CAN_AIM_WITH_ARM) {
-					if (!padUsed->GetWeapon()) { // making this State != ATTACK still stops it after attack. Re-start it immediately!
-						SetPointGunAt(nil);
-						bIsPointingGunAt = false; // to not stop after attack
-					}
 					pointedGun = 2;
-					SetLookFlag(limitedCam, true);
+					m_bFreeAimActive = true;
+					SetLookFlag(limitedCam, true, true);
 					SetAimFlag(limitedCam);
-					SetLookTimer(INT32_MAX); // removing this makes head move for real, but I experinced some bugs.
-					
+					SetLookTimer(INT32_MAX);
+					((CPlayerPed*)this)->m_fFPSMoveHeading = TheCamera.Find3rdPersonQuickAimPitch();
+					if (m_nPedState != PED_ATTACK && m_nPedState != PED_AIM_GUN) {
+						// This is a seperate ped state just for pointing gun. Used for target button
+						SetPointGunAt(nil);
+					}
 				} else {
 					m_fRotationDest = limitedCam;
 					changedHeadingRate = 2;
@@ -1381,9 +1389,19 @@ CPlayerPed::ProcessPlayerWeapon(CPad *padUsed)
 		changedHeadingRate = 0;
 		RestoreHeadingRate();
 	}
-	if (pointedGun == 1 && m_nPedState != PED_ATTACK) {
-		pointedGun = 0;
-		ClearPointGunAt();
+	if (pointedGun == 1) {
+		if (m_nPedState == PED_ATTACK) {
+			if (!padUsed->GetWeapon() && (m_pedIK.m_flags & CPedIK::GUN_POINTED_SUCCESSFULLY) == 0) {
+				float limitedCam = CGeneral::LimitRadianAngle(-TheCamera.Orientation);
+
+				SetAimFlag(limitedCam);
+				((CPlayerPed*)this)->m_fFPSMoveHeading = TheCamera.Find3rdPersonQuickAimPitch();
+				m_bFreeAimActive = true;
+			}
+		} else {
+			pointedGun = 0;
+			ClearPointGunAt();
+		}
 	}
 #endif
 

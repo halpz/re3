@@ -27,10 +27,12 @@ public:
 	uint8 m_nEmittingVolume;
 #endif
 	float m_fSpeedMultiplier;
-	float m_fSoundIntensity;
+	float m_SoundIntensity;
 	bool8 m_bReleasingSoundFlag;
 	CVector m_vecPos;
-	bool8 m_bReverbFlag;
+#ifndef GTA_PS2
+	bool8 m_bReverbFlag; // TODO: ifdef all the occurrences
+#endif
 	uint8 m_nLoopsRemaining;
 	bool8 m_bRequireReflection; // Used for oneshots
 	uint8 m_nOffset;
@@ -182,6 +184,24 @@ public:
 
 VALIDATE_SIZE(cVehicleParams, 0x1C);
 
+#if GTA_VERSION < GTAVC_PC_10
+enum {
+	/*
+	REFLECTION_YMAX = 0, top
+	REFLECTION_YMIN = 1, bottom
+	REFLECTION_XMIN = 2, left
+	REFLECTION_XMAX = 3, right
+	REFLECTION_ZMAX = 4,
+	*/
+
+	REFLECTION_TOP = 0,
+	REFLECTION_BOTTOM,
+	REFLECTION_LEFT,
+	REFLECTION_RIGHT,
+	REFLECTION_UP,
+	MAX_REFLECTIONS,
+};
+#else
 enum {
 	REFLECTION_NORTH = 0,
 	REFLECTION_SOUTH,
@@ -193,6 +213,7 @@ enum {
 	REFLECTION_CEIL_EAST,
 	MAX_REFLECTIONS,
 };
+#endif
 
 enum PLAY_STATUS { PLAY_STATUS_STOPPED = 0, PLAY_STATUS_PLAYING, PLAY_STATUS_FINISHED };
 enum LOADING_STATUS { LOADING_STATUS_NOT_LOADED = 0, LOADING_STATUS_LOADED, LOADING_STATUS_FAILED };
@@ -219,10 +240,8 @@ public:
 	tAudioEntity m_asAudioEntities[NUM_AUDIOENTITIES];
 	int32 m_anAudioEntityIndices[NUM_AUDIOENTITIES];
 	int32 m_nAudioEntitiesTotal;
-#ifdef GTA_PC
 	CVector m_avecReflectionsPos[NUM_AUDIO_REFLECTIONS];
 	float m_afReflectionsDistances[NUM_AUDIO_REFLECTIONS];
-#endif
 	cAudioScriptObjectManager m_sAudioScriptObjectManager;
 
 	// miami
@@ -301,10 +320,8 @@ public:
 	void InterrogateAudioEntities(); // inlined
 	void AddSampleToRequestedQueue();
 	void AddDetailsToRequestedOrderList(uint8 sample); // inlined in vc
-#ifdef GTA_PC
 	void AddReflectionsToRequestedQueue();
 	void UpdateReflections();
-#endif
 	void AddReleasingSounds();
 	void ProcessActiveQueues();
 	void ClearRequestedQueue(); // inlined in vc
@@ -341,7 +358,7 @@ public:
 	void ProcessVehicleFlatTyre(cVehicleParams &params);
 	bool8 ProcessVehicleRoadNoise(cVehicleParams &params);
 	bool8 ProcessWetRoadNoise(cVehicleParams &params);
-	void ProcessVehicleEngine(cVehicleParams &params);
+	bool8 ProcessVehicleEngine(cVehicleParams &params);
 	void UpdateGasPedalAudio(CVehicle *veh, int vehType);
 	void PlayerJustGotInCar();
 	void PlayerJustLeftCar();
