@@ -724,11 +724,11 @@ cAudioManager::AddReflectionsToRequestedQueue()
 
 	for (uint32 i = 0; i < ARRAY_SIZE(m_afReflectionsDistances); i++) {
 		if ( CTimer::GetIsSlowMotionActive() )
-			m_afReflectionsDistances[i] = (m_anRandomTable[i % 4] % 3) * 100.f / 8.f;
+			m_afReflectionsDistances[i] = (m_anRandomTable[i % 4] % 3) * 50.f / 8.f;
 
 		reflectionDistance = m_afReflectionsDistances[i];
-		if (reflectionDistance > 0.0f && reflectionDistance < 100.f && reflectionDistance < m_sQueueSample.m_SoundIntensity) {
-			m_sQueueSample.m_nLoopsRemaining = CTimer::GetIsSlowMotionActive() ? (reflectionDistance * 800.f / 1029.f) : (reflectionDistance * 500.f / 1029.f);
+		if (reflectionDistance > 0.0f && reflectionDistance < 50.f && reflectionDistance < m_sQueueSample.m_SoundIntensity) {
+			m_sQueueSample.m_nLoopsRemaining = CTimer::GetIsSlowMotionActive() ? (reflectionDistance * 600.f / 1029.f) : (reflectionDistance * 300.f / 1029.f);
 			if (m_sQueueSample.m_nLoopsRemaining > 3) {
 				m_sQueueSample.m_fDistance = m_afReflectionsDistances[i];
 				SET_EMITTING_VOLUME(emittingVolume);
