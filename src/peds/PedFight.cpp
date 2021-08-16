@@ -311,9 +311,14 @@ CPed::SetAttack(CEntity *victim)
 			m_pLookTarget->RegisterReference((CEntity **) &m_pLookTarget);
 			m_pSeekTarget->RegisterReference((CEntity **) &m_pSeekTarget);
 		}
+
 		if (m_pLookTarget) {
 			SetAimFlag(m_pLookTarget);
+#ifdef FREE_CAM
+		} else if (this != FindPlayerPed() || !((CPlayerPed*)this)->m_bFreeAimActive) {
+#else
 		} else {
+#endif
 			SetAimFlag(m_fRotationCur);
 
 			if (FindPlayerPed() == this && TheCamera.Cams[0].Using3rdPersonMouseCam())
@@ -736,6 +741,15 @@ CPed::Attack(void)
 			weaponAnimAssoc->SetCurrentTime(ourWeapon->m_fAnimLoopEnd);
 			weaponAnimAssoc->flags &= ~ASSOC_RUNNING;
 			SetPointGunAt(m_pPointGunAt);
+#endif
+#ifdef FREE_CAM
+		} else if (IsPlayer() && ((CPlayerPed*)this)->m_bFreeAimActive && GetWeapon()->m_eWeaponState != WEAPONSTATE_RELOADING) {
+			float limitedCam = CGeneral::LimitRadianAngle(-TheCamera.Orientation);
+			SetLookFlag(limitedCam, true);
+			SetAimFlag(limitedCam);
+			SetLookTimer(INT32_MAX);
+			SetPointGunAt(nil);
+			((CPlayerPed*)this)->m_fFPSMoveHeading = TheCamera.Find3rdPersonQuickAimPitch();
 #endif
 		} else {
 			ClearAimFlag();

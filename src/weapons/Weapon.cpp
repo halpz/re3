@@ -50,6 +50,29 @@ uint16 gReloadSampleTime[WEAPONTYPE_LAST_WEAPONTYPE] =
 	0			// HELICANNON
 };
 
+#ifdef FREE_CAM
+static bool
+Find3rdPersonCamTargetVectorFromCachedVectors(float dist, CVector pos, CVector& source, CVector& target, CVector camSource, CVector camFront, CVector camUp)
+{
+	if (CPad::GetPad(0)->GetLookBehindForPed()) {
+		source = pos;
+		target = dist * FindPlayerPed()->GetForward() + source;
+		return false;
+	} else {
+		float angleX = DEGTORAD((TheCamera.m_f3rdPersonCHairMultX - 0.5f) * 1.8f * 0.5f * TheCamera.Cams[TheCamera.ActiveCam].FOV * CDraw::GetAspectRatio());
+		float angleY = DEGTORAD((0.5f - TheCamera.m_f3rdPersonCHairMultY) * 1.8f * 0.5f * TheCamera.Cams[TheCamera.ActiveCam].FOV);
+		source = camSource;
+		target = camFront;
+		target += camUp * Tan(angleY);
+		target += CrossProduct(camFront, camUp) * Tan(angleX);
+		target.Normalise();
+		source += DotProduct(pos - source, target) * target;
+		target = dist * target + source;
+		return true;
+	}
+}
+#endif
+
 CWeaponInfo *
 CWeapon::GetInfo()
 {
@@ -591,17 +614,22 @@ CWeapon::FireInstantHit(CEntity *shooter, CVector *fireSource)
 	else if ( shooter == FindPlayerPed() && TheCamera.Cams[0].Using3rdPersonMouseCam()  )
 	{
 		CVector src, trgt;
-		TheCamera.Find3rdPersonCamTargetVector(info->m_fRange, *fireSource, src, trgt);
 #ifdef FREE_CAM
-		CPed *shooterPed = (CPed *)shooter;
-		if((shooterPed->m_pedIK.m_flags & CPedIK::GUN_POINTED_SUCCESSFULLY) == 0) {
-			trgt.x = info->m_fRange;
-			trgt.y = 0.0f;
-			trgt.z = 0.0f;
+		if (CCamera::bFreeCam) {
+			CPlayerPed *shooterPed = (CPlayerPed*)shooter;
+			Find3rdPersonCamTargetVectorFromCachedVectors(info->m_fRange, *fireSource, src, trgt, shooterPed->m_cachedCamSource, shooterPed->m_cachedCamFront, shooterPed->m_cachedCamUp);
+			if ((shooterPed->m_pedIK.m_flags & CPedIK::GUN_POINTED_SUCCESSFULLY) == 0) {
+				trgt.x = info->m_fRange;
+				trgt.y = 0.0f;
+				trgt.z = 0.0f;
 
-			shooterPed->TransformToNode(trgt, PED_HANDR);
-		}
+				shooterPed->TransformToNode(trgt, PED_HANDR);
+			}
+		} else
 #endif
+		{
+			TheCamera.Find3rdPersonCamTargetVector(info->m_fRange, *fireSource, src, trgt);
+		}
 
 #ifdef FIX_BUGS
 		// fix muzzleflash rotation
@@ -1209,8 +1237,19 @@ CWeapon::FireShotgun(CEntity *shooter, CVector *fireSource)
 
 		if ( shooter == FindPlayerPed() && TheCamera.Cams[0].Using3rdPersonMouseCam() )
 		{
-			TheCamera.Find3rdPersonCamTargetVector(1.0f, *fireSource, source, target);
-			CVector Left = CrossProduct(TheCamera.Cams[TheCamera.ActiveCam].Front, TheCamera.Cams[TheCamera.ActiveCam].Up);
+			CVector Left;
+#ifdef FREE_CAM
+			if (CCamera::bFreeCam) {
+				CPlayerPed* shooterPed = (CPlayerPed*)shooter;
+				Find3rdPersonCamTargetVectorFromCachedVectors(1.0f, *fireSource, source, target, shooterPed->m_cachedCamSource, shooterPed->m_cachedCamFront, shooterPed->m_cachedCamUp);
+				Left = CrossProduct(shooterPed->m_cachedCamFront, shooterPed->m_cachedCamUp);
+			}
+			else
+#endif
+			{
+				TheCamera.Find3rdPersonCamTargetVector(1.0f, *fireSource, source, target);
+				Left = CrossProduct(TheCamera.Cams[TheCamera.ActiveCam].Front, TheCamera.Cams[TheCamera.ActiveCam].Up);
+			}
 
 			float f = float(i - 2) * (DEGTORAD(7.5f) / 2);
 			target  = f * Left + target - source;
@@ -1525,7 +1564,16 @@ CWeapon::FireAreaEffect(CEntity *shooter, CVector *fireSource)
 
 	if ( shooter == FindPlayerPed() && TheCamera.Cams[0].Using3rdPersonMouseCam() )
 	{
-		TheCamera.Find3rdPersonCamTargetVector(info->m_fRange, *fireSource, source, target);
+#ifdef FREE_CAM
+		if (CCamera::bFreeCam) {
+			CPlayerPed *shooterPed = (CPlayerPed*)shooter;
+			Find3rdPersonCamTargetVectorFromCachedVectors(info->m_fRange, *fireSource, source, target, shooterPed->m_cachedCamSource, shooterPed->m_cachedCamFront, shooterPed->m_cachedCamUp);
+		}
+		else
+#endif
+		{
+			TheCamera.Find3rdPersonCamTargetVector(info->m_fRange, *fireSource, source, target);
+		}
 		float norm = (1.0f / info->m_fRange);
 		dir = (target - source) * norm;
 	}

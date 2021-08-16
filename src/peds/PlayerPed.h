@@ -34,6 +34,12 @@ public:
 	CPed *m_pPedAtSafePos[6];
 	float m_fWalkAngle;
 	float m_fFPSMoveHeading;
+#ifdef FREE_CAM
+	bool m_bFreeAimActive;
+	CVector m_cachedCamSource;
+	CVector m_cachedCamFront;
+	CVector m_cachedCamUp;
+#endif
 
 	CPlayerPed();
 	~CPlayerPed();

@@ -1120,8 +1120,12 @@ CPed::ClearAimFlag(void)
 #endif
 	}
 
-	if (IsPlayer())
+	if (IsPlayer()) {
 		((CPlayerPed*)this)->m_fFPSMoveHeading = 0.0f;
+#ifdef FREE_CAM
+		((CPlayerPed*)this)->m_bFreeAimActive = false;
+#endif
+	}
 }
 
 void
@@ -1361,7 +1365,7 @@ CPed::CalculateNewVelocity(void)
 		}
 
 #ifdef FREE_CAM
-		if (!TheCamera.Cams[0].Using3rdPersonMouseCam())
+		if (!CCamera::bFreeCam || !TheCamera.Cams[0].Using3rdPersonMouseCam())
 #endif
 		if (IsPlayer() && m_nPedState == PED_ATTACK)
 			headAmount /= 4.0f;
