@@ -3622,7 +3622,10 @@ cAudioManager::SetupPedComments(cPedParams &params, uint16 sound)
 				pedComment.m_nEntityIndex = m_sQueueSample.m_nEntityIndex;
 				pedComment.m_vecPos = m_sQueueSample.m_vecPos;
 				pedComment.m_fDistance = m_sQueueSample.m_fDistance;
-				pedComment.m_bVolume = m_sQueueSample.m_nVolume;
+				pedComment.m_nVolume = m_sQueueSample.m_nVolume;
+#if defined(EXTERNAL_3D_SOUND) && defined(FIX_BUGS)
+				pedComment.m_nEmittingVolume = emittingVol;
+#endif
 				m_sPedComments.Add(&pedComment);
 			}
 		}
@@ -6010,7 +6013,7 @@ cPedComments::Add(tPedComment *com)
 
 	if (m_nCommentsInBank[m_nActiveBank] >= NUM_PED_COMMENTS_SLOTS) {
 		index = m_nIndexMap[m_nActiveBank][NUM_PED_COMMENTS_SLOTS - 1];
-		if (m_asPedComments[m_nActiveBank][index].m_bVolume > com->m_bVolume)
+		if (m_asPedComments[m_nActiveBank][index].m_nVolume > com->m_nVolume)
 			return;
 	} else {
 		index = m_nCommentsInBank[m_nActiveBank]++;
@@ -6021,7 +6024,7 @@ cPedComments::Add(tPedComment *com)
 	uint32 i = 0;
 	if (index != 0) {
 		for (i = 0; i < index; i++) {
-			if (m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][i]].m_bVolume < m_asPedComments[m_nActiveBank][index].m_bVolume) {
+			if (m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][i]].m_nVolume < m_asPedComments[m_nActiveBank][index].m_nVolume) {
 				break;
 			}
 		}
@@ -6052,7 +6055,7 @@ cPedComments::Process()
 		AudioManager.m_sQueueSample.m_nSampleIndex = sampleIndex;
 		AudioManager.m_sQueueSample.m_nBankIndex = SFX_BANK_PED_COMMENTS;
 		AudioManager.m_sQueueSample.m_nReleasingVolumeModificator = 3;
-		AudioManager.m_sQueueSample.m_nVolume = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_bVolume;
+		AudioManager.m_sQueueSample.m_nVolume = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nVolume;
 		AudioManager.m_sQueueSample.m_fDistance = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_fDistance;
 		AudioManager.m_sQueueSample.m_nLoopCount = 1;
 #ifndef GTA_PS2
@@ -6060,8 +6063,12 @@ cPedComments::Process()
 		AudioManager.m_sQueueSample.m_nLoopEnd = -1;
 #endif // !GTA_PS2
 #ifdef EXTERNAL_3D_SOUND
+		#ifdef FIX_BUGS
+		AudioManager.m_sQueueSample.m_nEmittingVolume = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nEmittingVolume;
+		#else
 		AudioManager.m_sQueueSample.m_nEmittingVolume = MAX_VOLUME;
-#endif // !EXTERNAL_3D_SOUND
+		#endif // FIX_BUGS
+#endif // EXTERNAL_3D_SOUND
 		AudioManager.m_sQueueSample.m_fSpeedMultiplier = 3.0f;
 		switch (sampleIndex) {
 		case SFX_POLICE_HELI_1:
