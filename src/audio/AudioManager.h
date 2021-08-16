@@ -70,8 +70,11 @@ public:
 	int32 m_nEntityIndex;
 	CVector m_vecPos;
 	float m_fDistance;
-	uint8 m_bVolume;
+	uint8 m_nVolume;
 	int8 m_nProcess;
+#if defined(EXTERNAL_3D_SOUND) && defined(FIX_BUGS)
+	uint8 m_nEmittingVolume;
+#endif
 };
 
 VALIDATE_SIZE(tPedComment, 28);
