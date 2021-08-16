@@ -240,8 +240,8 @@ public:
 	tAudioEntity m_asAudioEntities[NUM_AUDIOENTITIES];
 	int32 m_anAudioEntityIndices[NUM_AUDIOENTITIES];
 	int32 m_nAudioEntitiesTotal;
-	CVector m_avecReflectionsPos[NUM_AUDIO_REFLECTIONS];
-	float m_afReflectionsDistances[NUM_AUDIO_REFLECTIONS];
+	CVector m_avecReflectionsPos[MAX_REFLECTIONS];
+	float m_afReflectionsDistances[MAX_REFLECTIONS];
 	cAudioScriptObjectManager m_sAudioScriptObjectManager;
 
 	// miami
