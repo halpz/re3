@@ -310,7 +310,7 @@ extern wchar *AllocUnicode(const char*src);
 
 #define Clamp(v, low, high) ((v)<(low) ? (low) : (v)>(high) ? (high) : (v))
 
-#define Clamp2(v, center, radius) ((v) < (center) ? Max(v, center - radius) : Min(v, center + radius))
+#define Clamp2(v, center, radius) ((v) > (center) ? Min(v, center + radius) : Max(v, center - radius))
 
 inline float sq(float x) { return x*x; }
 #define SQR(x) ((x) * (x))
