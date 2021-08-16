@@ -687,7 +687,6 @@ cAudioManager::AddDetailsToRequestedOrderList(uint8 sample)
 	m_abSampleQueueIndexTable[m_nActiveSampleQueue][i] = sample;
 }
 
-#ifdef GTA_PC
 void
 cAudioManager::AddReflectionsToRequestedQueue()
 {
@@ -709,7 +708,7 @@ cAudioManager::AddReflectionsToRequestedQueue()
 	} else {
 		emittingVolume = (9 * m_sQueueSample.m_nVolume) / 16;
 	}
-	m_sQueueSample.m_fSoundIntensity /= 2.f;
+	m_sQueueSample.m_SoundIntensity /= 2.f;
 
 	int halfOldFreq = oldFreq >> 1;
 
@@ -718,12 +717,12 @@ cAudioManager::AddReflectionsToRequestedQueue()
 			m_afReflectionsDistances[i] = (m_anRandomTable[i % 4] % 3) * 100.f / 8.f;
 
 		reflectionDistance = m_afReflectionsDistances[i];
-		if (reflectionDistance > 0.0f && reflectionDistance < 100.f && reflectionDistance < m_sQueueSample.m_fSoundIntensity) {
+		if (reflectionDistance > 0.0f && reflectionDistance < 100.f && reflectionDistance < m_sQueueSample.m_SoundIntensity) {
 			m_sQueueSample.m_nLoopsRemaining = CTimer::GetIsSlowMotionActive() ? (reflectionDistance * 800.f / 1029.f) : (reflectionDistance * 500.f / 1029.f);
 			if (m_sQueueSample.m_nLoopsRemaining > 3) {
 				m_sQueueSample.m_fDistance = m_afReflectionsDistances[i];
 				SET_EMITTING_VOLUME(emittingVolume);
-				m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, m_sQueueSample.m_fSoundIntensity, m_sQueueSample.m_fDistance);
+				m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, m_sQueueSample.m_SoundIntensity, m_sQueueSample.m_fDistance);
 
 				if (m_sQueueSample.m_nVolume > emittingVolume / 16) {
 					m_sQueueSample.m_nCounter = oldCounter + (i + 1) * 256;
@@ -752,43 +751,44 @@ cAudioManager::AddReflectionsToRequestedQueue()
 void
 cAudioManager::UpdateReflections()
 {
-	CVector camPos = TheCamera.GetPosition();
+	CVector camPos;
 	CColPoint colpoint;
 	CEntity *ent;
 
 	if (m_FrameCounter % 8 == 0) {
+		camPos = TheCamera.GetPosition();
 		m_avecReflectionsPos[0] = camPos;
 		m_avecReflectionsPos[0].y += 100.f;
 		if (CWorld::ProcessLineOfSight(camPos, m_avecReflectionsPos[0], colpoint, ent, true, false, false, true, false, true, true))
 			m_afReflectionsDistances[0] = Distance(camPos, colpoint.point);
 		else
 			m_afReflectionsDistances[0] = 100.0f;
-
 	} else if ((m_FrameCounter + 1) % 8 == 0) {
+		camPos = TheCamera.GetPosition();
 		m_avecReflectionsPos[1] = camPos;
 		m_avecReflectionsPos[1].y -= 100.0f;
 		if (CWorld::ProcessLineOfSight(camPos, m_avecReflectionsPos[1], colpoint, ent, true, false, false, true, false, true, true))
 			m_afReflectionsDistances[1] = Distance(camPos, colpoint.point);
 		else
 			m_afReflectionsDistances[1] = 100.0f;
-
 	} else if ((m_FrameCounter + 2) % 8 == 0) {
+		camPos = TheCamera.GetPosition();
 		m_avecReflectionsPos[2] = camPos;
 		m_avecReflectionsPos[2].x -= 100.0f;
 		if (CWorld::ProcessLineOfSight(camPos, m_avecReflectionsPos[2], colpoint, ent, true, false, false, true, false, true, true))
 			m_afReflectionsDistances[2] = Distance(camPos, colpoint.point);
 		else
 			m_afReflectionsDistances[2] = 100.0f;
-
 	} else if ((m_FrameCounter + 3) % 8 == 0) {
+		camPos = TheCamera.GetPosition();
 		m_avecReflectionsPos[3] = camPos;
 		m_avecReflectionsPos[3].x += 100.0f;
 		if (CWorld::ProcessLineOfSight(camPos, m_avecReflectionsPos[3], colpoint, ent, true, false, false, true, false, true, true))
 			m_afReflectionsDistances[3] = Distance(camPos, colpoint.point);
 		else
 			m_afReflectionsDistances[3] = 100.0f;
-
 	} else if ((m_FrameCounter + 4) % 8 == 0) {
+		camPos = TheCamera.GetPosition();
 		camPos.y += 1.0f;
 		m_avecReflectionsPos[4] = camPos;
 		m_avecReflectionsPos[4].z += 100.0f;
@@ -796,8 +796,8 @@ cAudioManager::UpdateReflections()
 			m_afReflectionsDistances[4] = colpoint.point.z - camPos.z;
 		else
 			m_afReflectionsDistances[4] = 100.0f;
-
 	} else if ((m_FrameCounter + 5) % 8 == 0) {
+		camPos = TheCamera.GetPosition();
 		camPos.y -= 1.0f;
 		m_avecReflectionsPos[5] = camPos;
 		m_avecReflectionsPos[5].z += 100.0f;
@@ -805,8 +805,8 @@ cAudioManager::UpdateReflections()
 			m_afReflectionsDistances[5] = colpoint.point.z - camPos.z;
 		else
 			m_afReflectionsDistances[5] = 100.0f;
-
 	} else if ((m_FrameCounter + 6) % 8 == 0) {
+		camPos = TheCamera.GetPosition();
 		camPos.x -= 1.0f;
 		m_avecReflectionsPos[6] = camPos;
 		m_avecReflectionsPos[6].z += 100.0f;
@@ -814,8 +814,8 @@ cAudioManager::UpdateReflections()
 			m_afReflectionsDistances[6] = colpoint.point.z - camPos.z;
 		else
 			m_afReflectionsDistances[6] = 100.0f;
-
 	} else if ((m_FrameCounter + 7) % 8 == 0) {
+		camPos = TheCamera.GetPosition();
 		camPos.x += 1.0f;
 		m_avecReflectionsPos[7] = camPos;
 		m_avecReflectionsPos[7].z += 100.0f;
@@ -825,7 +825,6 @@ cAudioManager::UpdateReflections()
 			m_afReflectionsDistances[7] = 100.0f;
 	}
 }
-#endif // GTA_PC
 
 void
 cAudioManager::AddReleasingSounds()
@@ -853,7 +852,7 @@ cAudioManager::AddReleasingSounds()
 			}
 		}
 		if (!toProcess[i]) {
-			if (sample.m_nCounter <= 255 || !sample.m_nLoopsRemaining) {
+			if (sample.m_nCounter <= 255 || sample.m_nLoopsRemaining == 0) {
 				if (sample.m_nReleasingVolumeDivider == 0)
 					continue;
 				if (sample.m_nLoopCount == 0) {
@@ -995,7 +994,7 @@ cAudioManager::ProcessActiveQueues()
 							TranslateEntity(&sample.m_vecPos, &position);
 #ifdef EXTERNAL_3D_SOUND
 							SampleManager.SetChannel3DPosition(j, position.x, position.y, position.z);
-							SampleManager.SetChannel3DDistances(j, sample.m_fSoundIntensity, 0.25f * sample.m_fSoundIntensity);
+							SampleManager.SetChannel3DDistances(j, sample.m_SoundIntensity, 0.25f * sample.m_SoundIntensity);
 #else
 							sample.m_nOffset = ComputePan(sample.m_fDistance, &position);
 							SampleManager.SetChannelPan(j, sample.m_nOffset);
@@ -1084,14 +1083,14 @@ cAudioManager::ProcessActiveQueues()
 								usedX = x;
 								usedY = 0.0f;
 								usedZ = 0.0f;
-								m_asActiveSamples[k].m_fSoundIntensity = 100000.0f;
+								m_asActiveSamples[k].m_SoundIntensity = 100000.0f;
 							} else {
 								usedX = position.x;
 								usedY = position.y;
 								usedZ = position.z;
 							}
 							SampleManager.SetChannel3DPosition(k, usedX, usedY, usedZ);
-							SampleManager.SetChannel3DDistances(k, m_asActiveSamples[k].m_fSoundIntensity, 0.25f * m_asActiveSamples[k].m_fSoundIntensity);
+							SampleManager.SetChannel3DDistances(k, m_asActiveSamples[k].m_SoundIntensity, 0.25f * m_asActiveSamples[k].m_SoundIntensity);
 #endif
 							SampleManager.StartChannel(k);
 						}
@@ -1140,7 +1139,7 @@ cAudioManager::ClearActiveSamples()
 		m_asActiveSamples[i].m_nLoopEnd = -1;
 #endif
 		m_asActiveSamples[i].m_fSpeedMultiplier = 0.0f;
-		m_asActiveSamples[i].m_fSoundIntensity = 200.0f;
+		m_asActiveSamples[i].m_SoundIntensity = 200.0f;
 		m_asActiveSamples[i].m_nOffset = 63;
 		m_asActiveSamples[i].m_bReleasingSoundFlag = FALSE;
 		m_asActiveSamples[i].m_nCalculatedVolume = 0;
@@ -1176,7 +1175,7 @@ cAudioManager::AdjustSamplesVolume()
 		tSound *pSample = &m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]];
 
 		if (!pSample->m_bIs2D)
-			pSample->m_nEmittingVolume = ComputeEmittingVolume(pSample->m_nEmittingVolume, pSample->m_fSoundIntensity, pSample->m_fDistance);
+			pSample->m_nEmittingVolume = ComputeEmittingVolume(pSample->m_nEmittingVolume, pSample->m_SoundIntensity, pSample->m_fDistance);
 	}
 }
 
