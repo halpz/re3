@@ -7722,7 +7722,7 @@ cAudioManager::ProcessWeather(int32 id)
 			vol += 40;
 		}
 		m_sQueueSample.m_nVolume = vol;
-		if (TheCamera.SoundDistUp < 20.f)
+		if (TheCamera.SoundDistUp < 20.0f)
 			m_sQueueSample.m_nVolume <<= 1;
 		if (iSound == 4)
 			iSound = 0;
@@ -7741,7 +7741,7 @@ cAudioManager::ProcessWeather(int32 id)
 	if (CWeather::Rain > 0.0f && (!CCullZones::CamNoRain() || !CCullZones::PlayerNoRain())) {
 		m_sQueueSample.m_nSampleIndex = SFX_RAIN;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RAIN);
-		m_sQueueSample.m_nVolume = (int32)(25.f * CWeather::Rain);
+		m_sQueueSample.m_nVolume = (uint8)(25.0f * CWeather::Rain);
 		m_sQueueSample.m_nCounter = 4;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 		m_sQueueSample.m_nReleasingVolumeModificator = 0;

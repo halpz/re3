@@ -694,18 +694,20 @@ cAudioManager::AddReflectionsToRequestedQueue()
 void
 cAudioManager::UpdateReflections()
 {
-	const CVector &camPos = TheCamera.GetPosition();
+	CVector camPos;
 	CColPoint colpoint;
 	CEntity *ent;
 
 	if (m_FrameCounter % 8 == 0) {
+		camPos = TheCamera.GetPosition();
 		m_avecReflectionsPos[0] = camPos;
-		m_avecReflectionsPos[0].y += 50.f;
+		m_avecReflectionsPos[0].y += 50.0f;
 		if (CWorld::ProcessLineOfSight(camPos, m_avecReflectionsPos[0], colpoint, ent, true, false, false, true, false, true, true))
 			m_afReflectionsDistances[0] = Distance(camPos, colpoint.point);
 		else
 			m_afReflectionsDistances[0] = 50.0f;
 	} else if ((m_FrameCounter + 1) % 8 == 0) {
+		camPos = TheCamera.GetPosition();
 		m_avecReflectionsPos[1] = camPos;
 		m_avecReflectionsPos[1].y -= 50.0f;
 		if (CWorld::ProcessLineOfSight(camPos, m_avecReflectionsPos[1], colpoint, ent, true, false, false, true, false, true, true))
@@ -713,6 +715,7 @@ cAudioManager::UpdateReflections()
 		else
 			m_afReflectionsDistances[1] = 50.0f;
 	} else if ((m_FrameCounter + 2) % 8 == 0) {
+		camPos = TheCamera.GetPosition();
 		m_avecReflectionsPos[2] = camPos;
 		m_avecReflectionsPos[2].x -= 50.0f;
 		if (CWorld::ProcessLineOfSight(camPos, m_avecReflectionsPos[2], colpoint, ent, true, false, false, true, false, true, true))
@@ -720,6 +723,7 @@ cAudioManager::UpdateReflections()
 		else
 			m_afReflectionsDistances[2] = 50.0f;
 	} else if ((m_FrameCounter + 3) % 8 == 0) {
+		camPos = TheCamera.GetPosition();
 		m_avecReflectionsPos[3] = camPos;
 		m_avecReflectionsPos[3].x += 50.0f;
 		if (CWorld::ProcessLineOfSight(camPos, m_avecReflectionsPos[3], colpoint, ent, true, false, false, true, false, true, true))
@@ -727,6 +731,7 @@ cAudioManager::UpdateReflections()
 		else
 			m_afReflectionsDistances[3] = 50.0f;
 	} else if ((m_FrameCounter + 4) % 8 == 0) {
+		camPos = TheCamera.GetPosition();
 		m_avecReflectionsPos[4] = camPos;
 		m_avecReflectionsPos[4].z += 50.0f;
 		if (CWorld::ProcessVerticalLine(camPos, m_avecReflectionsPos[4].z, colpoint, ent, true, false, false, false, true, false, nil))
@@ -763,7 +768,7 @@ cAudioManager::AddReleasingSounds()
 			}
 		}
 		if (!toProcess[i]) {
-			if (sample.m_nCounter <= 255 || !sample.m_nLoopsRemaining) {
+			if (sample.m_nCounter <= 255 || sample.m_nLoopsRemaining == 0) {
 				if (sample.m_nReleasingVolumeDivider == 0)
 					continue;
 				if (sample.m_nLoopCount == 0) {
