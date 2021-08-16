@@ -223,8 +223,8 @@ public:
 	int32 m_anAudioEntityIndices[NUM_AUDIOENTITIES];
 	int32 m_nAudioEntitiesTotal;
 #if GTA_VERSION >= GTA3_PC_10
-	CVector m_avecReflectionsPos[NUM_AUDIO_REFLECTIONS];
-	float m_afReflectionsDistances[NUM_AUDIO_REFLECTIONS];
+	CVector m_avecReflectionsPos[MAX_REFLECTIONS];
+	float m_afReflectionsDistances[MAX_REFLECTIONS];
 #endif
 	cAudioScriptObjectManager m_sAudioScriptObjectManager;
 	cPedComments m_sPedComments;
