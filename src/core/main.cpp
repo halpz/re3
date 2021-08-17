@@ -108,7 +108,7 @@ bool gbShowTimebars;
 bool gbDrawVersionText; // Our addition, we think it was always enabled on !MASTER builds
 #endif
 #ifdef NO_MOVIES
-bool gbNoMovies;
+bool gbNoMovies = true;
 #endif
 
 volatile int32 frameCount;
