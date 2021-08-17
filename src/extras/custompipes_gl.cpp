@@ -368,9 +368,9 @@ CreateVehiclePipe(void)
 	{
 #include "shaders/obj/leedsDefault_vert.inc"
 #include "shaders/obj/leedsDefault_frag.inc"
-	const char *vs[] = { shaderDecl, header_vert_src, "#define ENVMAP\n", leedsDefault_vert_src, nil };
-	const char *fs_add[] = { shaderDecl, header_frag_src, "#define PASS_ADD\n", leedsDefault_frag_src, nil };
-	const char *fs_blend[] = { shaderDecl, header_frag_src, "#define PASS_BLEND\n", leedsDefault_frag_src, nil };
+	const char *vs[] = { shaderDecl, "#define ENVMAP\n#define DIRECTIONALS\n", header_vert_src, leedsDefault_vert_src, nil };
+	const char *fs_add[] = { shaderDecl, "#define PASS_ADD\n", header_frag_src, leedsDefault_frag_src, nil };
+	const char *fs_blend[] = { shaderDecl, "#define PASS_BLEND\n", header_frag_src, leedsDefault_frag_src, nil };
 	leedsVehicleShader_add = Shader::create(vs, fs_add);
 	assert(leedsVehicleShader_add);
 	leedsVehicleShader_blend = Shader::create(vs, fs_blend);
@@ -380,7 +380,7 @@ CreateVehiclePipe(void)
 	{
 #include "shaders/obj/leedsVehicle_mobile_frag.inc"
 #include "shaders/obj/leedsVehicle_mobile_vert.inc"
-	const char *vs[] = { shaderDecl, header_vert_src, leedsVehicle_mobile_vert_src, nil };
+	const char *vs[] = { shaderDecl, "#define DIRECTIONALS\n", header_vert_src, leedsVehicle_mobile_vert_src, nil };
 	const char *fs[] = { shaderDecl, header_frag_src, leedsVehicle_mobile_frag_src, nil };
 	leedsVehicleShader_mobile = Shader::create(vs, fs);
 	assert(leedsVehicleShader_mobile);
