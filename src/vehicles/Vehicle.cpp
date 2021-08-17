@@ -965,7 +965,7 @@ CVehicle::ProcessWheel(CVector &wheelFwd, CVector &wheelRight, CVector &wheelCon
 			turnDirection = direction;
 
 		float impulse = speed*m_fMass;
-		float turnImpulse = turnSpeed*GetMass(wheelContactPoint, turnDirection);
+		float turnImpulse = turnSpeed*GetMass(wheelContactPoint - Multiply3x3(GetMatrix(), m_vecCentreOfMass), turnDirection);
 
 		ApplyMoveForce(impulse * direction);
 		ApplyTurnForce(turnImpulse * turnDirection, wheelContactPoint);

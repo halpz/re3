@@ -973,8 +973,8 @@ CAutomobile::ProcessControl(void)
 */
 
 		static float magicValue = 4.0f;
-		float steerRange;
 		if(magicValue > 0.0f){
+			float steerRange;
 			// looks like a bug with the wheel ids here, why only left wheels?
 			if(fwdSpeed > 0.01f && (m_aWheelTimer[CARWHEEL_FRONT_LEFT] > 0.0f || m_aWheelTimer[CARWHEEL_REAR_LEFT] > 0.0f) && GetStatus() == STATUS_PLAYER){
 				CColPoint point;
@@ -995,9 +995,9 @@ CAutomobile::ProcessControl(void)
 		
 			}else
 				steerRange = 1.0f;
-		}
 
-		m_fSteerAngle *= steerRange;
+			m_fSteerAngle *= steerRange;
+		}
 
 		brake = m_fBrakePedal * pHandling->fBrakeDeceleration * CTimer::GetTimeStep();
 
