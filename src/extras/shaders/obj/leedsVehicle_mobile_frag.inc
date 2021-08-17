@@ -2,11 +2,9 @@ const char *leedsVehicle_mobile_frag_src =
 "uniform sampler2D tex0;\n"
 "uniform sampler2D tex1;\n"
 
-"uniform float u_fxparams;\n"
+"uniform float u_shininess;\n"
 "uniform vec3 u_skyTop;\n"
 "uniform vec3 u_skyBot;\n"
-
-"#define shininess (u_fxparams)\n"
 
 "// matfx:\n"
 "// case 1	normal envmap\n"
@@ -60,10 +58,10 @@ const char *leedsVehicle_mobile_frag_src =
 "	vec3 skyColour = mix(u_skyBot, u_skyTop, envtex.g);\n"
 "	vec3 envOut = mix(envtex.rrr, skyColour, envtex.b);\n"
 
-"	float fresnel = mix(shininess, shininess * 2.0, v_NdotV);\n"
+"	float fresnel = mix(u_shininess, u_shininess * 2.0, v_NdotV);\n"
 "	fresnel = pow(v_NdotV * preMult, power);\n"
 "	fresnel = clamp(fresnel * postMult, 0.0, 1.0);\n"
-"	float reflectivity = v_lightingCont * mix(minRefl, maxRefl, fresnel)*shininess;\n"
+"	float reflectivity = v_lightingCont * mix(minRefl, maxRefl, fresnel)*u_shininess;\n"
 
 "	float opacity = mix(minOpacity, maxOpacity, fresnel)*pass1.a;\n"
 "	vec4 color = pass1 + vec4(reflectivity * envOut, 0.0);\n"

@@ -1,10 +1,8 @@
 uniform sampler2D tex0;
 uniform sampler2D tex1;
 
-uniform float u_fxparams;
+uniform float u_shininess;
 uniform vec4 u_colorscale;
-
-#define shininess (u_fxparams)
 
 FSIN vec4 v_color;
 FSIN vec2 v_tex0;
@@ -23,7 +21,7 @@ main(void)
 	vec4 color;
 #if defined(PASS_BLEND) || defined(PASS_ADD)
 	vec4 pass2 = texture(tex1, vec2(v_tex1.x, 1.0-v_tex1.y));
-	pass2.a *= shininess;
+	pass2.a *= u_shininess;
 	pass2.rgb = mix(vec3(0.0, 0.0, 0.0), pass2.rgb, v_fog);
 
 	// We simulate drawing this in two passes.

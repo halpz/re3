@@ -1,11 +1,9 @@
 uniform sampler2D tex0;
 uniform sampler2D tex1;
 
-uniform float u_fxparams;
+uniform float u_shininess;
 uniform vec3 u_skyTop;
 uniform vec3 u_skyBot;
-
-#define shininess (u_fxparams)
 
 // matfx:
 // case 1	normal envmap
@@ -59,10 +57,10 @@ main(void)
 	vec3 skyColour = mix(u_skyBot, u_skyTop, envtex.g);
 	vec3 envOut = mix(envtex.rrr, skyColour, envtex.b);
 
-	float fresnel = mix(shininess, shininess * 2.0, v_NdotV);
+	float fresnel = mix(u_shininess, u_shininess * 2.0, v_NdotV);
 	fresnel = pow(v_NdotV * preMult, power);
 	fresnel = clamp(fresnel * postMult, 0.0, 1.0);
-	float reflectivity = v_lightingCont * mix(minRefl, maxRefl, fresnel)*shininess;
+	float reflectivity = v_lightingCont * mix(minRefl, maxRefl, fresnel)*u_shininess;
 
 	float opacity = mix(minOpacity, maxOpacity, fresnel)*pass1.a;
 	vec4 color = pass1 + vec4(reflectivity * envOut, 0.0);

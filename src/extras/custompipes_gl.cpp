@@ -41,7 +41,7 @@ static int32 u_emiss;
 static int32 u_colorscale;
 
 static int32 u_texMatrix;
-static int32 u_fxparams;
+static int32 u_shininess;
 
 static int32 u_skyTop;
 static int32 u_skyBot;
@@ -98,7 +98,7 @@ uploadEnvMatrix(rw::Frame *frame)
 		convMatrix(&invMtx, &invMat);
 		RawMatrix::mult(&envMtx, &invMtx, &normal2texcoord_flipU);
 	}
-	glUniformMatrix4fv(U(u_texMatrix), 1, GL_FALSE, (float*)&envMtx);
+	setUniform(u_texMatrix, &envMtx);
 }
 
 static void
@@ -141,7 +141,7 @@ leedsVehicleRenderCB(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *header)
 			if(gGlassCarsCheat)
 				coef = 1.0f;
 		}
-		glUniform1f(U(u_fxparams), coef);
+		glUniform1f(U(u_shininess), coef);
 
 		setMaterial(m->color, m->surfaceProps);
 
@@ -226,7 +226,7 @@ leedsVehicleRenderCB_mobile(rw::Atomic *atomic, rw::gl3::InstanceDataHeader *hea
 			if(gGlassCarsCheat)
 				coef = 1.0f;
 		}
-		glUniform1f(U(u_fxparams), coef);
+		glUniform1f(U(u_shininess), coef);
 
 		setMaterial(m->color, m->surfaceProps);
 
@@ -809,8 +809,8 @@ CustomPipeRegisterGL(void)
 	u_emiss = rw::gl3::registerUniform("u_emiss");
 	u_colorscale = rw::gl3::registerUniform("u_colorscale");
 
-	u_texMatrix = rw::gl3::registerUniform("u_texMatrix");
-	u_fxparams = rw::gl3::registerUniform("u_fxparams");
+	u_texMatrix = rw::gl3::registerUniform("u_texMatrix", rw::gl3::UNIFORM_MAT4);
+	u_shininess = rw::gl3::registerUniform("u_shininess");
 
 	u_skyTop = rw::gl3::registerUniform("u_skyTop");
 	u_skyBot = rw::gl3::registerUniform("u_skyBot");

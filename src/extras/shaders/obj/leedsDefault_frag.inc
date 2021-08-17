@@ -2,10 +2,8 @@ const char *leedsDefault_frag_src =
 "uniform sampler2D tex0;\n"
 "uniform sampler2D tex1;\n"
 
-"uniform float u_fxparams;\n"
+"uniform float u_shininess;\n"
 "uniform vec4 u_colorscale;\n"
-
-"#define shininess (u_fxparams)\n"
 
 "FSIN vec4 v_color;\n"
 "FSIN vec2 v_tex0;\n"
@@ -24,7 +22,7 @@ const char *leedsDefault_frag_src =
 "	vec4 color;\n"
 "#if defined(PASS_BLEND) || defined(PASS_ADD)\n"
 "	vec4 pass2 = texture(tex1, vec2(v_tex1.x, 1.0-v_tex1.y));\n"
-"	pass2.a *= shininess;\n"
+"	pass2.a *= u_shininess;\n"
 "	pass2.rgb = mix(vec3(0.0, 0.0, 0.0), pass2.rgb, v_fog);\n"
 
 "	// We simulate drawing this in two passes.\n"
