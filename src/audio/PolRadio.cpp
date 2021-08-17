@@ -139,7 +139,7 @@ cAudioManager::DoPoliceRadioCrackle()
 	m_sQueueSample.m_bReverbFlag = FALSE;
 	m_sQueueSample.m_nOffset = 63;
 	m_sQueueSample.m_nReleasingVolumeDivider = 3;
-	m_sQueueSample.m_bRequireReflection = FALSE;
+	SET_SOUND_REFLECTION(FALSE);
 	AddSampleToRequestedQueue();
 }
 

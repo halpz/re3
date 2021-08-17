@@ -155,7 +155,9 @@ cDMAudio::ReacquireDigitalHandle(void)
 void
 cDMAudio::SetDynamicAcousticModelingStatus(bool8 status)
 {
+#ifdef AUDIO_REFLECTIONS
 	AudioManager.SetDynamicAcousticModelingStatus(status);
+#endif
 }
 
 bool8

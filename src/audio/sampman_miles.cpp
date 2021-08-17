@@ -1652,10 +1652,16 @@ cSampleManager::UpdateReverb(void)
 	
 	if ( AudioManager.m_FrameCounter & 15 )
 		return FALSE;
-			
+
+#ifdef AUDIO_REFLECTIONS
 	float y = AudioManager.m_afReflectionsDistances[REFLECTION_TOP]  + AudioManager.m_afReflectionsDistances[REFLECTION_BOTTOM];
 	float x = AudioManager.m_afReflectionsDistances[REFLECTION_LEFT] + AudioManager.m_afReflectionsDistances[REFLECTION_RIGHT];
 	float z = AudioManager.m_afReflectionsDistances[REFLECTION_UP];
+#else
+	float x = 0.0f;
+	float y = 0.0f;
+	float z = 0.0f;
+#endif
 	
 	float normy = norm(y, 5.0f, 40.0f);
 	float normx = norm(x, 5.0f, 40.0f);
@@ -2169,7 +2175,7 @@ cSampleManager::StartPreloadedStreamedFile(uint8 nStream)
 bool8
 cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 {
-	int i = 0;
+	uint32 i = 0;
 	uint32 position = nPos;
 	char filename[MAX_PATH];
 	
@@ -2250,7 +2256,7 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 					if ( !_pMP3List )
 					{
 						nFile = 0;
-						_bIsMp3Active = 0;
+						_bIsMp3Active = FALSE;
 #ifdef PS2_AUDIO_PATHS
 						strcpy(filename, m_szCDRomRootPath);
 						strcat(filename, PS2StreamedNameTable[nFile]);
@@ -2295,7 +2301,7 @@ cSampleManager::StartStreamedFile(uint8 nFile, uint32 nPos, uint8 nStream)
 				}
 
 			}
-			_bIsMp3Active = 0;
+			_bIsMp3Active = FALSE;
 		}
 		while ( ++i < nNumMP3s );
 		position = 0;

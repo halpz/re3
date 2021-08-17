@@ -9,20 +9,20 @@ class tSound
 public:
 	int32 m_nEntityIndex;
 #if GTA_VERSION >= GTA3_PC_10
-	int32 m_nCounter;
+	uint32 m_nCounter;
 #else
 	uint8 m_nCounter;
 #endif
-	int32 m_nSampleIndex;
+	uint32 m_nSampleIndex;
 	uint8 m_nBankIndex;
 	bool8 m_bIs2D;
-	int32 m_nReleasingVolumeModificator;
+	uint32 m_nReleasingVolumeModificator;
 	uint32 m_nFrequency;
 	uint8 m_nVolume;
 	float m_fDistance;
-	int32 m_nLoopCount;
+	uint32 m_nLoopCount;
 #ifndef GTA_PS2
-	int32 m_nLoopStart;
+	uint32 m_nLoopStart;
 	int32 m_nLoopEnd;
 #endif
 #ifdef EXTERNAL_3D_SOUND
@@ -37,18 +37,18 @@ public:
 	bool8 m_bReleasingSoundFlag;
 	CVector m_vecPos;
 	bool8 m_bReverbFlag;
-#if GTA_VERSION >= GTA3_PC_10
+#ifdef AUDIO_REFLECTIONS
 	uint8 m_nLoopsRemaining;
 	bool8 m_bRequireReflection; // Used for oneshots
 #endif
 	uint8 m_nOffset;
-	int32 m_nReleasingVolumeDivider;
+	uint32 m_nReleasingVolumeDivider;
 	bool8 m_bIsProcessed;
 	bool8 m_bLoopEnded;
 #if GTA_VERSION < GTA3_PC_10
 	int32 unk; // only on PS2, seems unused
 #endif
-	int32 m_nCalculatedVolume;
+	uint32 m_nCalculatedVolume;
 	int8 m_nVolumeChange;
 };
 
@@ -74,7 +74,7 @@ VALIDATE_SIZE(tAudioEntity, 40);
 class tPedComment
 {
 public:
-	int32 m_nSampleIndex;
+	uint32 m_nSampleIndex;
 	int32 m_nEntityIndex;
 	CVector m_vecPos;
 	float m_fDistance;
@@ -120,7 +120,7 @@ class cMissionAudio
 public:
 	CVector m_vecPos;
 	bool8 m_bPredefinedProperties;
-	int32 m_nSampleIndex;
+	uint32 m_nSampleIndex;
 	uint8 m_nLoadingStatus;
 	uint8 m_nPlayStatus;
 	bool8 m_bIsPlaying;
@@ -168,7 +168,7 @@ public:
 	float m_fDistance;
 	CVehicle *m_pVehicle;
 	cTransmission *m_pTransmission;
-	int32 m_nIndex;
+	uint32 m_nIndex;
 	float m_fVelocityChange;
 
 	cVehicleParams()
@@ -211,8 +211,10 @@ public:
 	bool8 m_bReverb; // unused
 	bool8 m_bFifthFrameFlag;
 	uint8 m_nActiveSamples;
-	uint8 m_bDoubleVolume; // unused
+	bool8 m_bDoubleVolume; // unused
+#if GTA_VERSION >= GTA3_PC_10
 	bool8 m_bDynamicAcousticModelingStatus;
+#endif
 	float m_fSpeedOfSound;
 	bool8 m_bTimerJustReset;
 	int32 m_nTimer;
@@ -225,7 +227,7 @@ public:
 	tAudioEntity m_asAudioEntities[NUM_AUDIOENTITIES];
 	int32 m_anAudioEntityIndices[NUM_AUDIOENTITIES];
 	int32 m_nAudioEntitiesTotal;
-#if GTA_VERSION >= GTA3_PC_10
+#ifdef AUDIO_REFLECTIONS
 	CVector m_avecReflectionsPos[MAX_REFLECTIONS];
 	float m_afReflectionsDistances[MAX_REFLECTIONS];
 #endif
@@ -276,7 +278,9 @@ public:
 	bool8 IsMP3RadioChannelAvailable();
 	void ReleaseDigitalHandle();
 	void ReacquireDigitalHandle();
+#ifdef AUDIO_REFLECTIONS
 	void SetDynamicAcousticModelingStatus(bool8 status);
+#endif
 	bool8 CheckForAnAudioFileOnCD();
 	char GetCDAudioDriveLetter();
 	bool8 IsAudioInitialised();
@@ -292,7 +296,7 @@ public:
 	void InterrogateAudioEntities(); // inlined on PS2
 	void AddSampleToRequestedQueue();
 	void AddDetailsToRequestedOrderList(uint8 sample); // inlined on PS2
-#if GTA_VERSION >= GTA3_PC_10
+#ifdef AUDIO_REFLECTIONS
 	void AddReflectionsToRequestedQueue();
 	void UpdateReflections();
 #endif
@@ -547,6 +551,11 @@ public:
 #define SET_EMITTING_VOLUME(vol) m_sQueueSample.m_nEmittingVolume = vol
 #else
 #define SET_EMITTING_VOLUME(vol)
+#endif
+#ifdef AUDIO_REFLECTIONS
+#define SET_SOUND_REFLECTION(b) m_sQueueSample.m_bRequireReflection = b
+#else
+#define SET_SOUND_REFLECTION(b)
 #endif
 
 #if defined(AUDIO_MSS) && !defined(PS2_AUDIO_CHANNELS)

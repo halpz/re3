@@ -171,6 +171,7 @@ enum Config {
 #	define PS2_MENU
 #elif defined GTA_PC
 #	define EXTERNAL_3D_SOUND
+#	define AUDIO_REFLECTIONS
 #	ifndef GTA_HANDHELD
 #		define PC_PLAYER_CONTROLS	// mouse player/cam mode
 #	endif
@@ -429,6 +430,7 @@ enum Config {
 // Audio
 #define EXTERNAL_3D_SOUND // use external engine to simulate 3d audio spatialization. OpenAL would not work without it (because it works in a 3d space
                           // originally and making it work in 2d only requires more resource). Will not work on PS2
+#define AUDIO_REFLECTIONS // Enable audio reflections. Disabled on mobile, didn't exist yet on PS2.
 #define RADIO_SCROLL_TO_PREV_STATION
 #define AUDIO_CACHE
 #define PS2_AUDIO_CHANNELS // increases the maximum number of audio channels to PS2 value of 44 (PC has 28 originally)
@@ -489,4 +491,7 @@ enum Config {
 #endif
 #if defined(GTA_PS2) && defined(EXTERNAL_3D_SOUND)
 #error EXTERNAL_3D_SOUND cannot work on PS2
+#endif
+#if defined(AUDIO_REFLECTIONS) && GTA_VERSION < GTA3_PC_10
+#error AUDIO_REFLECTIONS cannot work with versions below GTA3_PC_10
 #endif
