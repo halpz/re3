@@ -27,7 +27,7 @@ char SubZo3Label[8];
 
 uint32 g_nMissionAudioSfx = TOTAL_AUDIO_SAMPLES;
 int8 g_nMissionAudioPlayingStatus = PLAY_STATUS_FINISHED;
-uint8 gSpecialSuspectLastSeenReport;
+bool8 gSpecialSuspectLastSeenReport;
 uint32 gMinTimeToNextReport[NUM_CRIME_TYPES];
 
 void
@@ -248,7 +248,7 @@ cAudioManager::ServicePoliceRadioChannel(uint8 wantedLevel)
 			}
 			if (wantedLevel == 0) {
 				if (gSpecialSuspectLastSeenReport) {
-					gSpecialSuspectLastSeenReport = 0;
+					gSpecialSuspectLastSeenReport = FALSE;
 				} else if (((sample >= SFX_POLICE_RADIO_MESSAGE_NOISE_1) && (sample <= SFX_POLICE_RADIO_MESSAGE_NOISE_3)) || sample == TOTAL_AUDIO_SAMPLES) {
 					bChannelOpen = FALSE;
 					processed = TRUE;
