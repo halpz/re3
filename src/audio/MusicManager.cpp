@@ -263,7 +263,7 @@ cMusicManager::GetRadioInCar(void)
 		CVehicle* veh = AudioManager.FindVehicleOfPlayer();
 		if (veh != nil) {
 			if (UsesPoliceRadio(veh) || UsesTaxiRadio(veh)) {
-				if (m_nRadioInCar == NO_TRACK || (CReplay::IsPlayingBack() && AudioManager.m_nUserPause == 0))
+				if (m_nRadioInCar == NO_TRACK || (CReplay::IsPlayingBack() && !AudioManager.m_nUserPause))
 					return STREAMED_SOUND_RADIO_POLICE;
 				return m_nRadioInCar;
 			}
@@ -271,7 +271,7 @@ cMusicManager::GetRadioInCar(void)
 		}
 	}
 
-	if (m_nRadioInCar == NO_TRACK || (CReplay::IsPlayingBack() && AudioManager.m_nUserPause == 0))
+	if (m_nRadioInCar == NO_TRACK || (CReplay::IsPlayingBack() && !AudioManager.m_nUserPause))
 		return RADIO_OFF;
 	return m_nRadioInCar;
 }
@@ -461,7 +461,7 @@ cMusicManager::ServiceFrontEndMode()
 		} else {
 			if (m_nPlayingTrack == STREAMED_SOUND_RADIO_MP3_PLAYER)
 				SampleManager.StartStreamedFile(STREAMED_SOUND_RADIO_MP3_PLAYER, 0);
-			else if (m_nPlayingTrack == STREAMED_SOUND_MISSION_COMPLETED && AudioManager.m_nUserPause == 0)
+			else if (m_nPlayingTrack == STREAMED_SOUND_MISSION_COMPLETED && !AudioManager.m_nUserPause)
 				ChangeMusicMode(MUSICMODE_GAME);
 		}
 	} else {

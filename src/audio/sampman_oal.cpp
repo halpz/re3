@@ -1390,6 +1390,7 @@ bool8 cSampleManager::UpdateReverb(void)
 
 	float fRatio = 0.0f;
 
+#ifdef AUDIO_REFLECTIONS
 #define MIN_DIST 0.5f
 #define CALCULATE_RATIO(value, maxDist, maxRatio) (value > MIN_DIST && value < maxDist ? value / maxDist * maxRatio : 0)
 
@@ -1403,6 +1404,7 @@ bool8 cSampleManager::UpdateReverb(void)
 
 #undef CALCULATE_RATIO
 #undef MIN_DIST
+#endif
 	
 	fRatio = Clamp(fRatio, 0.0f, 0.6f);
 	

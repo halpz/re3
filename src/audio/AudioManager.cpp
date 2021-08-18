@@ -32,7 +32,9 @@ cAudioManager::cAudioManager()
 	ClearActiveSamples();
 	GenerateIntegerRandomNumberTable();
 	m_bDoubleVolume = FALSE;
+#ifdef AUDIO_REFLECTIONS
 	m_bDynamicAcousticModelingStatus = TRUE;
+#endif
 
 	for (int i = 0; i < NUM_AUDIOENTITIES; i++) {
 		m_asAudioEntities[i].m_bIsUsed = FALSE;
@@ -116,7 +118,9 @@ cAudioManager::Service()
 	if (m_bIsInitialised) {
 		m_nPreviousUserPause = m_nUserPause;
 		m_nUserPause = CTimer::GetIsUserPaused();
+#ifdef AUDIO_REFLECTIONS
 		UpdateReflections();
+#endif
 		ServiceSoundEffects();
 		MusicManager.Service();
 	}
@@ -451,11 +455,13 @@ cAudioManager::ReacquireDigitalHandle()
 	}
 }
 
+#ifdef AUDIO_REFLECTIONS
 void
 cAudioManager::SetDynamicAcousticModelingStatus(bool8 status)
 {
 	m_bDynamicAcousticModelingStatus = status;
 }
+#endif
 
 bool8
 cAudioManager::CheckForAnAudioFileOnCD()
@@ -628,9 +634,11 @@ cAudioManager::InterrogateAudioEntities()
 void
 cAudioManager::AddSampleToRequestedQueue()
 {
-	int32 calculatedVolume;
+	uint32 calculatedVolume;
 	uint8 sampleIndex;
+#ifdef AUDIO_REFLECTIONS
 	bool8 bReflections;
+#endif
 
 	if (m_sQueueSample.m_nSampleIndex < TOTAL_AUDIO_SAMPLES) {
 		calculatedVolume = m_sQueueSample.m_nReleasingVolumeModificator * (MAX_VOLUME - m_sQueueSample.m_nVolume);
@@ -644,11 +652,12 @@ cAudioManager::AddSampleToRequestedQueue()
 		}
 		m_sQueueSample.m_nCalculatedVolume = calculatedVolume;
 		m_sQueueSample.m_bLoopEnded = FALSE;
+#ifdef AUDIO_REFLECTIONS
 		if (m_sQueueSample.m_bIs2D || CCullZones::InRoomForAudio()) {
 			m_sQueueSample.m_bRequireReflection = FALSE;
 			m_sQueueSample.m_nLoopsRemaining = 0;
 		}
-		if (m_bDynamicAcousticModelingStatus && m_sQueueSample.m_nLoopCount) {
+		if (m_bDynamicAcousticModelingStatus && m_sQueueSample.m_nLoopCount > 0) {
 			bReflections = m_sQueueSample.m_bRequireReflection;
 		} else {
 			bReflections = FALSE;
@@ -657,16 +666,19 @@ cAudioManager::AddSampleToRequestedQueue()
 		m_sQueueSample.m_bRequireReflection = FALSE;
 
 		if ( m_bReverb && m_sQueueSample.m_bIs2D )
-			m_sQueueSample.field_4C = 30;
+			m_sQueueSample.m_nFrontRearOffset = 30;
 
 		if (!m_bDynamicAcousticModelingStatus)
 			m_sQueueSample.m_bReverbFlag = FALSE;
+#endif
 
 		m_asSamples[m_nActiveSampleQueue][sampleIndex] = m_sQueueSample;
 
 		AddDetailsToRequestedOrderList(sampleIndex);
+#ifdef AUDIO_REFLECTIONS
 		if (bReflections)
 			AddReflectionsToRequestedQueue();
+#endif
 	}
 }
 
@@ -674,7 +686,7 @@ void
 cAudioManager::AddDetailsToRequestedOrderList(uint8 sample)
 {
 	uint32 i = 0;
-	if (sample != 0) {
+	if (sample > 0) {
 		for (; i < sample; i++) {
 			if (m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]].m_nCalculatedVolume >
 			    m_asSamples[m_nActiveSampleQueue][sample].m_nCalculatedVolume)
@@ -687,6 +699,7 @@ cAudioManager::AddDetailsToRequestedOrderList(uint8 sample)
 	m_abSampleQueueIndexTable[m_nActiveSampleQueue][i] = sample;
 }
 
+#ifdef AUDIO_REFLECTIONS
 void
 cAudioManager::AddReflectionsToRequestedQueue()
 {
@@ -710,7 +723,7 @@ cAudioManager::AddReflectionsToRequestedQueue()
 	}
 	m_sQueueSample.m_SoundIntensity /= 2.f;
 
-	int halfOldFreq = oldFreq >> 1;
+	uint32 halfOldFreq = oldFreq >> 1;
 
 	for (uint32 i = 0; i < ARRAY_SIZE(m_afReflectionsDistances); i++) {
 		if ( CTimer::GetIsSlowMotionActive() )
@@ -726,15 +739,15 @@ cAudioManager::AddReflectionsToRequestedQueue()
 
 				if (m_sQueueSample.m_nVolume > emittingVolume / 16) {
 					m_sQueueSample.m_nCounter = oldCounter + (i + 1) * 256;
-					if (m_sQueueSample.m_nLoopCount) {
+					if (m_sQueueSample.m_nLoopCount > 0) {
 						if ( CTimer::GetIsSlowMotionActive() ) {
 							m_sQueueSample.m_nFrequency = halfOldFreq + ((halfOldFreq * i) / ARRAY_SIZE(m_afReflectionsDistances));
 						} else {
 							noise = RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
-							if (noise <= 0)
-								m_sQueueSample.m_nFrequency += noise;
-							else
+							if (noise > 0)
 								m_sQueueSample.m_nFrequency -= noise;
+							else
+								m_sQueueSample.m_nFrequency += noise;
 						}
 					}
 					m_sQueueSample.m_nReleasingVolumeModificator += 20;
@@ -869,6 +882,7 @@ cAudioManager::UpdateReflections()
 	}
 #endif
 }
+#endif // AUDIO_REFLECTIONS
 
 void
 cAudioManager::AddReleasingSounds()
@@ -895,8 +909,11 @@ cAudioManager::AddReleasingSounds()
 				break;
 			}
 		}
-		if (!toProcess[i]) {
-			if (sample.m_nCounter <= 255 || sample.m_nLoopsRemaining == 0) {
+		if(!toProcess[i]) {
+#ifdef AUDIO_REFLECTIONS
+			if(sample.m_nCounter <= 255 || sample.m_nLoopsRemaining == 0) // check if not reflection
+#endif
+			{
 				if (sample.m_nReleasingVolumeDivider == 0)
 					continue;
 				if (sample.m_nLoopCount == 0) {
@@ -1064,14 +1081,17 @@ cAudioManager::ProcessActiveQueues()
 	for (uint8 i = 0; i < m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; i++) {
 		tSound &sample = m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]];
 		if (!sample.m_bIsProcessed && !sample.m_bLoopEnded && m_asAudioEntities[sample.m_nEntityIndex].m_bIsUsed && sample.m_nSampleIndex < NO_SAMPLE) {
-			if (sample.m_nCounter > 255 && sample.m_nLoopCount != 0 && sample.m_nLoopsRemaining != 0) {
+#ifdef AUDIO_REFLECTIONS
+			if (sample.m_nCounter > 255 && sample.m_nLoopCount > 0 && sample.m_nLoopsRemaining > 0) { // check if reflection
 				sample.m_nLoopsRemaining--;
 				sample.m_nReleasingVolumeDivider = 1;
-			} else {
+			} else
+#endif
+			{
 				for (uint8 j = 0; j < m_nActiveSamples; j++) {
 					uint8 k = (j + field_6) % m_nActiveSamples;
 					if (!m_asActiveSamples[k].m_bIsProcessed) {
-						if (sample.m_nLoopCount != 0) {
+						if (sample.m_nLoopCount > 0) {
 							samplesPerFrame = sample.m_nFrequency / m_nTimeSpent;
 							samplesToPlay = sample.m_nLoopCount * SampleManager.GetSampleLength(sample.m_nSampleIndex);
 							if (samplesPerFrame == 0)
@@ -1191,8 +1211,10 @@ cAudioManager::ClearActiveSamples()
 		m_asActiveSamples[i].m_nVolumeChange = -1;
 		m_asActiveSamples[i].m_vecPos = CVector(0.0f, 0.0f, 0.0f);
 		m_asActiveSamples[i].m_bReverbFlag = FALSE;
+#ifdef AUDIO_REFLECTIONS
 		m_asActiveSamples[i].m_nLoopsRemaining = 0;
 		m_asActiveSamples[i].m_bRequireReflection = FALSE;
+#endif
 	}
 }
 

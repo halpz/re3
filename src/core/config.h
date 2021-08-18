@@ -227,6 +227,7 @@ enum Config {
 #define DONT_FIX_REPLAY_BUGS
 #define USE_TXD_CDIMAGE // generate and load textures from txd.img
 //#define USE_TEXTURE_POOL // not possible because R* used custom RW33
+#define AUDIO_REFLECTIONS
 #else
 // This enables things from the PS2 version on PC
 #define GTA_PS2_STUFF
@@ -438,6 +439,7 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 // Audio
 #define EXTERNAL_3D_SOUND // use external engine to simulate 3d audio spatialization. OpenAL would not work without it (because it works in a 3d space
                           // originally and making it work in 2d only requires more resource). Will not work on PS2
+#define AUDIO_REFLECTIONS // Enable audio reflections. This is enabled in all vanilla versions
 #define RADIO_SCROLL_TO_PREV_STATION // Won't work without FIX_BUGS
 #define AUDIO_CACHE // cache sound lengths to speed up the cold boot
 #define PS2_AUDIO_CHANNELS // increases the maximum number of audio channels to PS2 value of 43 (PC has 28 originally)
