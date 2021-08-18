@@ -298,6 +298,7 @@ void
 cAudioManager::ProcessSpecial()
 {
 	CPlayerPed *playerPed;
+	CVehicle *remoteVehicle;
 
 	if (m_nUserPause) {
 		if (!m_nPreviousUserPause) {
@@ -307,13 +308,12 @@ cAudioManager::ProcessSpecial()
 	} else {
 		if (!CReplay::IsPlayingBack())
 			ProcessPlayerMood();
+		remoteVehicle = CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle;
 		playerPed = FindPlayerPed();
-		if (playerPed != nil) {
+		if (playerPed) {
 			if (playerPed->m_audioEntityId >= 0 && m_asAudioEntities[playerPed->m_audioEntityId].m_bIsUsed) {
-				if (playerPed->EnteringCar()) {
-					if(!playerPed->bInVehicle && CWorld::Players[CWorld::PlayerInFocus].m_pRemoteVehicle == nil)
-						SampleManager.StopChannel(CHANNEL_PLAYER_VEHICLE_ENGINE);
-				}
+				if(!playerPed->EnteringCar() && !playerPed->bInVehicle && !remoteVehicle)
+					SampleManager.StopChannel(CHANNEL_PLAYER_VEHICLE_ENGINE);
 			}
 		}
 	}
@@ -1524,9 +1524,6 @@ cAudioManager::ProcessVehicleRoadNoise(cVehicleParams& params)
 
 	if (params.m_fDistance >= SQR(SOUND_INTENSITY))
 		return FALSE;
-
-	if (params.m_fDistance >= SQR(SOUND_INTENSITY))
-		return FALSE;
 	switch (params.m_VehicleType) {
 	case VEHICLE_TYPE_CAR:
 		wheelsOnGround = ((CAutomobile*)params.m_pVehicle)->m_nWheelsOnGround;
@@ -1980,8 +1977,8 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 	CVector pos;
 	float* gasPedalAudioPtr;
 
-	int32 accelerateState;
-	int32 brakeState;
+	int16 accelerateState;
+	int16 brakeState;
 	int32 freq;
 	int32 baseFreq;
 	int32 freqModifier;
@@ -2015,7 +2012,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 	static bool8 bAccelSampleStopped = TRUE;
 
 	lostTraction = FALSE;
-	isMoped = params.m_pVehicle->m_modelIndex == MI_PIZZABOY || params.m_pVehicle->m_modelIndex == MI_FAGGIO;
+	isMoped = FALSE;
 	processedAccelSampleStopped = FALSE;
 	if (bPlayerJustEnteredCar) {
 		bAccelSampleStopped = TRUE;
@@ -2034,7 +2031,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 		brakeState = Pads[0].GetBrake();
 	}
 	channelUsed = SampleManager.GetChannelUsedFlag(CHANNEL_PLAYER_VEHICLE_ENGINE);
-	if (isMoped) {
+	if (params.m_pVehicle->m_modelIndex == MI_PIZZABOY || params.m_pVehicle->m_modelIndex == MI_FAGGIO) {
 		CurrentPretendGear = params.m_pTransmission->nNumberOfGears;
 		currentGear = CurrentPretendGear;
 		if (params.m_pVehicle->bIsHandbrakeOn) {
@@ -2045,6 +2042,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 		} else {
 			nCruising = 1;
 		}
+		isMoped = TRUE;
 	} else {
 		currentGear = params.m_pVehicle->m_nCurrentGear;
 	}
@@ -2209,7 +2207,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 			*gasPedalAudioPtr = Max(0.0f, gasPedalAudio);
 		} else if (LastAccel > 0) {
 			if (channelUsed) {
-				SampleManager.StopChannel(CHANNEL_PLAYER_VEHICLE_ENGINE);
+ 				SampleManager.StopChannel(CHANNEL_PLAYER_VEHICLE_ENGINE);
 				bAccelSampleStopped = TRUE;
 			}
 			nCruising = 0;
@@ -2225,8 +2223,8 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 				}
 			}
 			if (gasPedalAudio > 0.05f) {
-				freq = (5000.f * (gasPedalAudio - 0.05f) * 20.f / 19) + 19000;
-				vol = (25.0f * (gasPedalAudio - 0.05f) * 20.f / 19) + 40;
+				freq = (5000.f * ((gasPedalAudio - 0.05f) * 20.f / 19)) + 19000;
+				vol = (25.0f * ((gasPedalAudio - 0.05f) * 20.f / 19)) + 40;
 				if (params.m_pVehicle->bIsDrowning)
 					vol /= 4;
 				if (engineSoundType == SFX_BANK_TRUCK)
@@ -2287,83 +2285,50 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 					processedAccelSampleStopped = TRUE;
 					bAccelSampleStopped = FALSE;
 				}
-				if (channelUsed) {
-#ifdef EXTERNAL_3D_SOUND
-					SampleManager.SetChannelEmittingVolume(CHANNEL_PLAYER_VEHICLE_ENGINE, 120);
-					SampleManager.SetChannel3DPosition(CHANNEL_PLAYER_VEHICLE_ENGINE, pos.x, pos.y, pos.z);
-					SampleManager.SetChannel3DDistances(CHANNEL_PLAYER_VEHICLE_ENGINE, 50.0f, 50.0f * 0.25f);
-#else
-					SampleManager.SetChannelVolume(CHANNEL_PLAYER_VEHICLE_ENGINE, ComputeVolume(120, 50.0f, m_sQueueSample.m_fDistance));
-					SampleManager.SetChannelPan(CHANNEL_PLAYER_VEHICLE_ENGINE, m_sQueueSample.m_nOffset);
-#endif
-					freq = GearFreqAdj[CurrentPretendGear] + freqModifier + 22050;
-					if (engineSoundType == SFX_BANK_TRUCK)
-						freq /= 2;
-					SampleManager.SetChannelFrequency(CHANNEL_PLAYER_VEHICLE_ENGINE, freq);
-					if (!channelUsed) {
-						SampleManager.SetChannelReverbFlag(CHANNEL_PLAYER_VEHICLE_ENGINE, m_bDynamicAcousticModelingStatus != FALSE);
-						SampleManager.StartChannel(CHANNEL_PLAYER_VEHICLE_ENGINE);
+				if (!channelUsed) {
+					if (!processedAccelSampleStopped) {
+						if (CurrentPretendGear < params.m_pTransmission->nNumberOfGears - 1)
+							++CurrentPretendGear;
+						else {
+							nCruising = 1;
+							params.m_pVehicle->bAudioChangingGear = TRUE;
+							//break; // while was used just for this fucking place
+							goto PlayCruising;
+						}
 					}
-				} else if (processedAccelSampleStopped) {
 					gearSoundStartTime = CTimer::GetTimeInMilliseconds();
 					params.m_pVehicle->bAudioChangingGear = TRUE;
 					if (!SampleManager.InitialiseChannel(CHANNEL_PLAYER_VEHICLE_ENGINE, soundOffset + SFX_CAR_ACCEL_1, SFX_BANK_0))
 						return;
 					SampleManager.SetChannelLoopCount(CHANNEL_PLAYER_VEHICLE_ENGINE, 1);
 					SampleManager.SetChannelLoopPoints(CHANNEL_PLAYER_VEHICLE_ENGINE, 0, -1);
+				}
 
 #ifdef EXTERNAL_3D_SOUND
-					SampleManager.SetChannelEmittingVolume(CHANNEL_PLAYER_VEHICLE_ENGINE, 120);
-					SampleManager.SetChannel3DPosition(CHANNEL_PLAYER_VEHICLE_ENGINE, pos.x, pos.y, pos.z);
-					SampleManager.SetChannel3DDistances(CHANNEL_PLAYER_VEHICLE_ENGINE, 50.0f, 50.0f * 0.25f);
+				SampleManager.SetChannelEmittingVolume(CHANNEL_PLAYER_VEHICLE_ENGINE, 120);
+				SampleManager.SetChannel3DPosition(CHANNEL_PLAYER_VEHICLE_ENGINE, pos.x, pos.y, pos.z);
+				SampleManager.SetChannel3DDistances(CHANNEL_PLAYER_VEHICLE_ENGINE, 50.0f, 50.0f * 0.25f);
 #else
-					SampleManager.SetChannelVolume(CHANNEL_PLAYER_VEHICLE_ENGINE, ComputeVolume(120, 50.0f, m_sQueueSample.m_fDistance));
-					SampleManager.SetChannelPan(CHANNEL_PLAYER_VEHICLE_ENGINE, m_sQueueSample.m_nOffset);
+				SampleManager.SetChannelVolume(CHANNEL_PLAYER_VEHICLE_ENGINE, ComputeVolume(120, 50.0f, m_sQueueSample.m_fDistance));
+				SampleManager.SetChannelPan(CHANNEL_PLAYER_VEHICLE_ENGINE, m_sQueueSample.m_nOffset);
 #endif
-					freq = (GearFreqAdj[CurrentPretendGear] + freqModifier + 22050);
-					if (engineSoundType == SFX_BANK_TRUCK)
-						freq /= 2;
-					SampleManager.SetChannelFrequency(CHANNEL_PLAYER_VEHICLE_ENGINE, freq);
-					if (!channelUsed) {
-						SampleManager.SetChannelReverbFlag(CHANNEL_PLAYER_VEHICLE_ENGINE, m_bDynamicAcousticModelingStatus != FALSE);
-						SampleManager.StartChannel(CHANNEL_PLAYER_VEHICLE_ENGINE);
-					}
-				} else if (CurrentPretendGear < params.m_pTransmission->nNumberOfGears - 1) {
-					++CurrentPretendGear;
-					gearSoundStartTime = CTimer::GetTimeInMilliseconds();
-					params.m_pVehicle->bAudioChangingGear = TRUE;
-					if (!SampleManager.InitialiseChannel(CHANNEL_PLAYER_VEHICLE_ENGINE, soundOffset + SFX_CAR_ACCEL_1, SFX_BANK_0))
-						return;
-					SampleManager.SetChannelLoopCount(CHANNEL_PLAYER_VEHICLE_ENGINE, 1);
-					SampleManager.SetChannelLoopPoints(CHANNEL_PLAYER_VEHICLE_ENGINE, 0, -1);
-
-#ifdef EXTERNAL_3D_SOUND
-					SampleManager.SetChannelEmittingVolume(CHANNEL_PLAYER_VEHICLE_ENGINE, 120);
-					SampleManager.SetChannel3DPosition(CHANNEL_PLAYER_VEHICLE_ENGINE, pos.x, pos.y, pos.z);
-					SampleManager.SetChannel3DDistances(CHANNEL_PLAYER_VEHICLE_ENGINE, 50.0f, 50.0f * 0.25f);
-#else
-					SampleManager.SetChannelVolume(CHANNEL_PLAYER_VEHICLE_ENGINE, ComputeVolume(120, 50.0f, m_sQueueSample.m_fDistance));
-					SampleManager.SetChannelPan(CHANNEL_PLAYER_VEHICLE_ENGINE, m_sQueueSample.m_nOffset);
-#endif
-					freq = (GearFreqAdj[CurrentPretendGear] + freqModifier + 22050);
-					if (engineSoundType == SFX_BANK_TRUCK)
-						freq /= 2;
-					SampleManager.SetChannelFrequency(CHANNEL_PLAYER_VEHICLE_ENGINE, freq);
-					if (!channelUsed) {
-						SampleManager.SetChannelReverbFlag(CHANNEL_PLAYER_VEHICLE_ENGINE, m_bDynamicAcousticModelingStatus != FALSE);
-						SampleManager.StartChannel(CHANNEL_PLAYER_VEHICLE_ENGINE);
-					}
-				} else {
-					nCruising = 1;
-					goto PlayCruising;
+				freq = GearFreqAdj[CurrentPretendGear] + freqModifier + 22050;
+				if (engineSoundType == SFX_BANK_TRUCK)
+					freq /= 2;
+				SampleManager.SetChannelFrequency(CHANNEL_PLAYER_VEHICLE_ENGINE, freq);
+				if (!channelUsed) {
+					SampleManager.SetChannelReverbFlag(CHANNEL_PLAYER_VEHICLE_ENGINE, m_bDynamicAcousticModelingStatus != FALSE);
+					SampleManager.StartChannel(CHANNEL_PLAYER_VEHICLE_ENGINE);
 				}
 			}
 		} else {
 PlayCruising:
 			bAccelSampleStopped = TRUE;
 			SampleManager.StopChannel(CHANNEL_PLAYER_VEHICLE_ENGINE);
-			if (isMoped || accelerateState >= 150 && wheelsOnGround && brakeState <= 0 && !params.m_pVehicle->bIsHandbrakeOn
-				&& !lostTraction && currentGear >= params.m_pTransmission->nNumberOfGears - 1) {
+			if (!isMoped && (accelerateState < 150 || wheelsOnGround == 0 || brakeState > 0 || params.m_pVehicle->bIsHandbrakeOn
+				|| lostTraction || currentGear < params.m_pTransmission->nNumberOfGears - 1)) {
+				nCruising = 0;
+			} else {
 				if (accelerateState >= 220 && params.m_fVelocityChange + 0.001f >= velocityChangeForAudio) {
 					if (nCruising < 800)
 						++nCruising;
@@ -2374,15 +2339,13 @@ PlayCruising:
 				if (engineSoundType == SFX_BANK_TRUCK)
 					freq /= 2;
 				AddPlayerCarSample(120, freq, soundOffset + SFX_CAR_AFTER_ACCEL_1, engineSoundType, 64, TRUE);
-			} else {
-				nCruising = 0;
 			}
 		}
 	}
 	LastAccel = accelerateState;
+
 	bHandbrakeOnLastFrame = params.m_pVehicle->bIsHandbrakeOn;
 	bLostTractionLastFrame = lostTraction;
-	return;
 }
 
 bool8
