@@ -246,6 +246,12 @@ cAudioManager::ProcessReverb()
 	}
 #else
 	// TODO: PS2 code 
+
+	static uint8 OldVolL = 0;
+	static uint8 OldVolR = 0;
+
+	// SoundDistUp, SoundDistLeft, SoundDistRight used in here from TheCamera
+
 	SampleManager.UpdateReverb();
 #endif
 }
@@ -1197,6 +1203,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CAutomobile *
 	uint8 currentGear;
 	float gasPedalAudio;
 	CVector pos;
+	bool8 slowingDown;
 
 	static int16 LastAccel = 0;
 	static int16 LastBrake = 0;
@@ -1223,6 +1230,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CAutomobile *
 	else
 		accelerateState = Pads[0].GetAccelerate();
 
+	slowingDown = params.m_fVelocityChange < -0.001f;
 	channelUsed = SampleManager.GetChannelUsedFlag(CHANNEL_PLAYER_VEHICLE_ENGINE);
 	transmission = params.m_pTransmission;
 	velocityChange = params.m_fVelocityChange;
@@ -1260,7 +1268,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CAutomobile *
 			freqModifier = -(Min(0.2f, time) * 3000.0f * 5.0f);
 		else
 			freqModifier = -(Max(-0.2f, time) * 3000.0f * 5.0f);
-		if (params.m_fVelocityChange < -0.001f)
+		if (slowingDown)
 			freqModifier = -freqModifier;
 	} else
 		freqModifier = 0;
@@ -1268,7 +1276,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CAutomobile *
 	engineSoundType = aVehicleSettings[params.m_nIndex].m_nBank;
 	soundOffset = 3 * (engineSoundType - CAR_SFX_BANKS_OFFSET);
 	if (accelerateState <= 0) {
-		if (params.m_fVelocityChange < -0.001f) {
+		if (slowingDown) {
 			if (channelUsed) {
 				SampleManager.StopChannel(CHANNEL_PLAYER_VEHICLE_ENGINE);
 				bAccelSampleStopped = TRUE;
@@ -1356,10 +1364,14 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CAutomobile *
 						}
 					}
 
+#ifdef GTA_PS2
+					SampleManager.InitialiseChannel(CHANNEL_PLAYER_VEHICLE_ENGINE, soundOffset + SFX_CAR_ACCEL_1, SFX_BANK_0);
+#else
 					if (!SampleManager.InitialiseChannel(CHANNEL_PLAYER_VEHICLE_ENGINE, soundOffset + SFX_CAR_ACCEL_1, SFX_BANK_0))
 						return;
 					SampleManager.SetChannelLoopCount(CHANNEL_PLAYER_VEHICLE_ENGINE, 1);
 					SampleManager.SetChannelLoopPoints(CHANNEL_PLAYER_VEHICLE_ENGINE, 0, -1);
+#endif
 				}
 
 #ifdef EXTERNAL_3D_SOUND
@@ -1376,7 +1388,11 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CAutomobile *
 					freq /= 2;
 				SampleManager.SetChannelFrequency(CHANNEL_PLAYER_VEHICLE_ENGINE, freq);
 				if (!channelUsed) {
+#if GTA_VERSION >= GTA3_PC_10
 					SampleManager.SetChannelReverbFlag(CHANNEL_PLAYER_VEHICLE_ENGINE, m_bDynamicAcousticModelingStatus != FALSE);
+#else
+					SampleManager.SetChannelReverbFlag(CHANNEL_PLAYER_VEHICLE_ENGINE, TRUE);
+#endif
 					SampleManager.StartChannel(CHANNEL_PLAYER_VEHICLE_ENGINE);
 				}
 			}

@@ -955,7 +955,12 @@ cAudioManager::ProcessActiveQueues()
 #else
 						emittingVol = m_bDoubleVolume ? 2 * Min(63, m_asActiveSamples[j].m_nVolume) : m_asActiveSamples[j].m_nVolume;
 #endif
+#ifdef GTA_PS2
+						{
+							SampleManager.InitialiseChannel(j, m_asActiveSamples[j].m_nSampleIndex, m_asActiveSamples[j].m_nBankIndex);
+#else
 						if (SampleManager.InitialiseChannel(j, m_asActiveSamples[j].m_nSampleIndex, m_asActiveSamples[j].m_nBankIndex)) {
+#endif
 							SampleManager.SetChannelFrequency(j, m_asActiveSamples[j].m_nFrequency);
 #ifdef EXTERNAL_3D_SOUND
 							SampleManager.SetChannelEmittingVolume(j, emittingVol);
@@ -963,8 +968,10 @@ cAudioManager::ProcessActiveQueues()
 							SampleManager.SetChannelVolume(j, emittingVol);
 							SampleManager.SetChannelPan(j, m_asActiveSamples[j].m_nOffset);
 #endif
+#ifndef GTA_PS2
 							SampleManager.SetChannelLoopPoints(j, m_asActiveSamples[j].m_nLoopStart, m_asActiveSamples[j].m_nLoopEnd);
 							SampleManager.SetChannelLoopCount(j, m_asActiveSamples[j].m_nLoopCount);
+#endif
 							SampleManager.SetChannelReverbFlag(j, m_asActiveSamples[j].m_bReverbFlag);
 #ifdef EXTERNAL_3D_SOUND
 							if (m_asActiveSamples[j].m_bIs2D) {
