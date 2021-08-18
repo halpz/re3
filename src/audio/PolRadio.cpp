@@ -26,7 +26,7 @@ char SubZo2Label[8];
 char SubZo3Label[8];
 
 uint32 g_nMissionAudioSfx = TOTAL_AUDIO_SAMPLES;
-int8 g_nMissionAudioPlayingStatus = 2;
+int8 g_nMissionAudioPlayingStatus = PLAY_STATUS_FINISHED;
 uint8 gSpecialSuspectLastSeenReport;
 uint32 gMinTimeToNextReport[NUM_CRIME_TYPES];
 
@@ -109,8 +109,8 @@ void
 cAudioManager::SetMissionScriptPoliceAudio(uint32 sfx)
 {
 	if (!m_bIsInitialised) return;
-	if (g_nMissionAudioPlayingStatus != 1) {
-		g_nMissionAudioPlayingStatus = 0;
+	if (g_nMissionAudioPlayingStatus != PLAY_STATUS_PLAYING) {
+		g_nMissionAudioPlayingStatus = PLAY_STATUS_STOPPED;
 		g_nMissionAudioSfx = sfx;
 	}
 }
@@ -151,7 +151,7 @@ cAudioManager::ServicePoliceRadio()
 
 	if(!m_bIsInitialised) return;
 
-	if(m_nUserPause == 0) {
+	if(!m_nUserPause) {
 		bool8 crimeReport = SetupCrimeReport();
 #ifdef FIX_BUGS // Crash at 0x5fe6ef
 		if(CReplay::IsPlayingBack() || !FindPlayerPed() || !FindPlayerPed()->m_pWanted)
@@ -185,20 +185,20 @@ cAudioManager::ServicePoliceRadioChannel(uint8 wantedLevel)
 
 	static int cWait = 0;
 	static bool8 bChannelOpen = FALSE;
-	static uint8 bMissionAudioPhysicalPlayingStatus = 0;
+	static uint8 bMissionAudioPhysicalPlayingStatus = PLAY_STATUS_STOPPED;
 	static int32 PoliceChannelFreq = 5500;
 
 	if (!m_bIsInitialised) return;
 
-	if (m_nUserPause != 0) {
+	if (m_nUserPause) {
 		if (SampleManager.GetChannelUsedFlag(CHANNEL_POLICE_RADIO)) SampleManager.StopChannel(CHANNEL_POLICE_RADIO);
-		if (g_nMissionAudioSfx != TOTAL_AUDIO_SAMPLES && bMissionAudioPhysicalPlayingStatus == 1 &&
+		if (g_nMissionAudioSfx != TOTAL_AUDIO_SAMPLES && bMissionAudioPhysicalPlayingStatus == PLAY_STATUS_PLAYING &&
 			SampleManager.IsStreamPlaying(1)) {
 			SampleManager.PauseStream(TRUE, 1);
 		}
 	} else {
 		if (m_nPreviousUserPause && g_nMissionAudioSfx != TOTAL_AUDIO_SAMPLES &&
-			bMissionAudioPhysicalPlayingStatus == 1) {
+			bMissionAudioPhysicalPlayingStatus == PLAY_STATUS_PLAYING) {
 			SampleManager.PauseStream(FALSE, 1);
 		}
 		if (m_sPoliceRadioQueue.policeChannelTimer == 0) bChannelOpen = FALSE;
@@ -211,17 +211,17 @@ cAudioManager::ServicePoliceRadioChannel(uint8 wantedLevel)
 			return;
 		}
 		if (g_nMissionAudioSfx != TOTAL_AUDIO_SAMPLES && !bChannelOpen) {
-			if (g_nMissionAudioPlayingStatus) {
-				if (g_nMissionAudioPlayingStatus == 1 && !bMissionAudioPhysicalPlayingStatus &&
+			if (g_nMissionAudioPlayingStatus != PLAY_STATUS_STOPPED) {
+				if (g_nMissionAudioPlayingStatus == PLAY_STATUS_PLAYING && bMissionAudioPhysicalPlayingStatus == PLAY_STATUS_STOPPED &&
 					SampleManager.IsStreamPlaying(1)) {
-					bMissionAudioPhysicalPlayingStatus = 1;
+					bMissionAudioPhysicalPlayingStatus = PLAY_STATUS_PLAYING;
 				}
-				if (bMissionAudioPhysicalPlayingStatus == 1) {
+				if (bMissionAudioPhysicalPlayingStatus == PLAY_STATUS_PLAYING) {
 					if (SampleManager.IsStreamPlaying(1)) {
 						DoPoliceRadioCrackle();
 					} else {
-						bMissionAudioPhysicalPlayingStatus = 2;
-						g_nMissionAudioPlayingStatus = 2;
+						bMissionAudioPhysicalPlayingStatus = PLAY_STATUS_FINISHED;
+						g_nMissionAudioPlayingStatus = PLAY_STATUS_FINISHED;
 						g_nMissionAudioSfx = TOTAL_AUDIO_SAMPLES;
 						cWait = 30;
 					}
@@ -231,13 +231,13 @@ cAudioManager::ServicePoliceRadioChannel(uint8 wantedLevel)
 				SampleManager.PreloadStreamedFile(g_nMissionAudioSfx, 1);
 				SampleManager.SetStreamedVolumeAndPan(MAX_VOLUME, 63, TRUE, 1);
 				SampleManager.StartPreloadedStreamedFile(1);
-				g_nMissionAudioPlayingStatus = 1;
-				bMissionAudioPhysicalPlayingStatus = 0;
+				g_nMissionAudioPlayingStatus = PLAY_STATUS_PLAYING;
+				bMissionAudioPhysicalPlayingStatus = PLAY_STATUS_STOPPED;
 				return;
 			}
 		}
 		if (bChannelOpen) DoPoliceRadioCrackle();
-		if ((g_nMissionAudioSfx == TOTAL_AUDIO_SAMPLES || g_nMissionAudioPlayingStatus != 1) &&
+		if ((g_nMissionAudioSfx == TOTAL_AUDIO_SAMPLES || g_nMissionAudioPlayingStatus != PLAY_STATUS_PLAYING) &&
 			!SampleManager.GetChannelUsedFlag(CHANNEL_POLICE_RADIO) && m_sPoliceRadioQueue.policeChannelTimer) {
 			if (m_sPoliceRadioQueue.policeChannelTimer) {
 				sample = m_sPoliceRadioQueue.crimesSamples[m_sPoliceRadioQueue.policeChannelCounterSeconds];
@@ -292,7 +292,7 @@ cAudioManager::SetupCrimeReport()
 	float quarterX;
 	float quarterY;
 	int i;
-	int32 sampleIndex;
+	uint32 sampleIndex;
 	bool8 processed = FALSE;
 
 	if (MusicManager.m_nMusicMode == MUSICMODE_CUTSCENE) return FALSE;

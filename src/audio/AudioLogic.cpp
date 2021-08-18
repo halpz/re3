@@ -6054,7 +6054,7 @@ cPedComments::Process()
 	uint8 actualUsedBank;
 	tPedComment *comment;
 
-	if (AudioManager.m_nUserPause != 0) return;
+	if (AudioManager.m_nUserPause) return;
 
 	if (m_nCommentsInBank[m_nActiveBank]) {
 		sampleIndex = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nSampleIndex;

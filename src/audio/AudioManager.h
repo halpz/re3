@@ -245,8 +245,8 @@ public:
 	cMissionAudio m_sMissionAudio;
 	int32 m_anRandomTable[5];
 	uint8 m_nTimeSpent;
-	uint8 m_nUserPause;
-	uint8 m_nPreviousUserPause;
+	bool8 m_nUserPause;
+	bool8 m_nPreviousUserPause;
 	uint32 m_FrameCounter;
 
 	cAudioManager();
