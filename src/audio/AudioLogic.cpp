@@ -282,7 +282,7 @@ cAudioManager::ProcessSpecial()
 		}
 		CPlayerPed *playerPed = FindPlayerPed();
 		if (playerPed) {
-			if(playerPed->EnteringCar() && !playerPed->bInVehicle)
+			if(!playerPed->EnteringCar() && !playerPed->bInVehicle)
 				SampleManager.StopChannel(CHANNEL_PLAYER_VEHICLE_ENGINE);
 		}
 	}
