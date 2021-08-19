@@ -1997,23 +1997,22 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 	float relativeVelocityChange;
 	float time;
 	bool8 channelUsed;
-	bool8 lostTraction;
+	bool8 slowingDown;
 	bool8 noGearBox;
 	bool8 stuckInSand;
-	bool8 processedAccelSampleStopped;
-	bool8 isMoped;
 
-	static uint32 gearSoundStartTime = CTimer::GetTimeInMilliseconds();
-	static int32 nCruising = 0;
 	static int16 LastAccel = 0;
 	static uint8 CurrentPretendGear = 1;
 	static bool8 bLostTractionLastFrame = FALSE;
 	static bool8 bHandbrakeOnLastFrame = FALSE;
+	static int32 nCruising = 0;
 	static bool8 bAccelSampleStopped = TRUE;
 
-	lostTraction = FALSE;
-	isMoped = FALSE;
-	processedAccelSampleStopped = FALSE;
+	bool8 lostTraction = FALSE;
+	bool8 isMoped = FALSE;
+	bool8 processedAccelSampleStopped = FALSE;
+	static uint32 gearSoundStartTime = CTimer::GetTimeInMilliseconds();
+	uint8 nChannel = CHANNEL_PLAYER_VEHICLE_ENGINE; // TODO: PS2 channels
 	if (bPlayerJustEnteredCar) {
 		bAccelSampleStopped = TRUE;
 		bPlayerJustEnteredCar = FALSE;
@@ -2030,7 +2029,8 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 		accelerateState = Pads[0].GetAccelerate();
 		brakeState = Pads[0].GetBrake();
 	}
-	channelUsed = SampleManager.GetChannelUsedFlag(CHANNEL_PLAYER_VEHICLE_ENGINE);
+	slowingDown = params.m_fVelocityChange < -0.001f;
+	channelUsed = SampleManager.GetChannelUsedFlag(nChannel);
 	if (params.m_pVehicle->m_modelIndex == MI_PIZZABOY || params.m_pVehicle->m_modelIndex == MI_FAGGIO) {
 		CurrentPretendGear = params.m_pTransmission->nNumberOfGears;
 		currentGear = CurrentPretendGear;
@@ -2110,7 +2110,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 			freqModifier = -(Min(0.2f, time) * 3000.0f * 5.0f);
 		else
 			freqModifier = -(Max(-0.2f, time) * 3000.0f * 5.0f);
-		if (params.m_fVelocityChange < -0.001f)
+		if (slowingDown)
 			freqModifier = -freqModifier;
 	} else
 		freqModifier = 0;
@@ -2193,9 +2193,9 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 		break;
 	}
 	if (accelerateState <= 0) {
-		if (params.m_fVelocityChange < -0.001f) {
+		if (slowingDown) {
 			if (channelUsed) {
-				SampleManager.StopChannel(CHANNEL_PLAYER_VEHICLE_ENGINE);
+				SampleManager.StopChannel(nChannel);
 				bAccelSampleStopped = TRUE;
 			}
 			if (wheelsOnGround == 0 || params.m_pVehicle->bIsHandbrakeOn || lostTraction)
@@ -2207,7 +2207,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 			*gasPedalAudioPtr = Max(0.0f, gasPedalAudio);
 		} else if (LastAccel > 0) {
 			if (channelUsed) {
- 				SampleManager.StopChannel(CHANNEL_PLAYER_VEHICLE_ENGINE);
+				SampleManager.StopChannel(nChannel);
 				bAccelSampleStopped = TRUE;
 			}
 			nCruising = 0;
@@ -2268,7 +2268,7 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 				if (engineSoundType == SFX_BANK_TRUCK)
 					freq /= 2;
 				if (channelUsed) {
-					SampleManager.StopChannel(CHANNEL_PLAYER_VEHICLE_ENGINE);
+					SampleManager.StopChannel(nChannel);
 					bAccelSampleStopped = TRUE;
 				}
 				if (params.m_pVehicle->bIsDrowning)
@@ -2292,16 +2292,19 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 						else {
 							nCruising = 1;
 							params.m_pVehicle->bAudioChangingGear = TRUE;
-							//break; // while was used just for this fucking place
 							goto PlayCruising;
 						}
 					}
 					gearSoundStartTime = CTimer::GetTimeInMilliseconds();
 					params.m_pVehicle->bAudioChangingGear = TRUE;
+#ifdef GTA_PS2
+					SampleManager.InitialiseChannel(nChannel, soundOffset + SFX_CAR_ACCEL_1, SFX_BANK_0);
+#else
 					if (!SampleManager.InitialiseChannel(CHANNEL_PLAYER_VEHICLE_ENGINE, soundOffset + SFX_CAR_ACCEL_1, SFX_BANK_0))
 						return;
 					SampleManager.SetChannelLoopCount(CHANNEL_PLAYER_VEHICLE_ENGINE, 1);
 					SampleManager.SetChannelLoopPoints(CHANNEL_PLAYER_VEHICLE_ENGINE, 0, -1);
+#endif
 				}
 
 #ifdef EXTERNAL_3D_SOUND
@@ -2309,22 +2312,22 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 				SampleManager.SetChannel3DPosition(CHANNEL_PLAYER_VEHICLE_ENGINE, pos.x, pos.y, pos.z);
 				SampleManager.SetChannel3DDistances(CHANNEL_PLAYER_VEHICLE_ENGINE, 50.0f, 50.0f * 0.25f);
 #else
-				SampleManager.SetChannelVolume(CHANNEL_PLAYER_VEHICLE_ENGINE, ComputeVolume(120, 50.0f, m_sQueueSample.m_fDistance));
-				SampleManager.SetChannelPan(CHANNEL_PLAYER_VEHICLE_ENGINE, m_sQueueSample.m_nOffset);
+				SampleManager.SetChannelVolume(nChannel, ComputeVolume(120, 50.0f, m_sQueueSample.m_fDistance));
+				SampleManager.SetChannelPan(nChannel, m_sQueueSample.m_nOffset);
 #endif
 				freq = GearFreqAdj[CurrentPretendGear] + freqModifier + 22050;
 				if (engineSoundType == SFX_BANK_TRUCK)
 					freq /= 2;
-				SampleManager.SetChannelFrequency(CHANNEL_PLAYER_VEHICLE_ENGINE, freq);
+				SampleManager.SetChannelFrequency(nChannel, freq);
 				if (!channelUsed) {
-					SampleManager.SetChannelReverbFlag(CHANNEL_PLAYER_VEHICLE_ENGINE, m_bDynamicAcousticModelingStatus != FALSE);
-					SampleManager.StartChannel(CHANNEL_PLAYER_VEHICLE_ENGINE);
+					SampleManager.SetChannelReverbFlag(nChannel, m_bDynamicAcousticModelingStatus != FALSE);
+					SampleManager.StartChannel(nChannel);
 				}
 			}
 		} else {
 PlayCruising:
 			bAccelSampleStopped = TRUE;
-			SampleManager.StopChannel(CHANNEL_PLAYER_VEHICLE_ENGINE);
+			SampleManager.StopChannel(nChannel);
 			if (!isMoped && (accelerateState < 150 || wheelsOnGround == 0 || brakeState > 0 || params.m_pVehicle->bIsHandbrakeOn
 				|| lostTraction || currentGear < params.m_pTransmission->nNumberOfGears - 1)) {
 				nCruising = 0;
