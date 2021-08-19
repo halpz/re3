@@ -1,5 +1,5 @@
 
-name: reVC cmake devkitA64 (Nintendo Switch)
+name: reLCS cmake devkitA64 (Nintendo Switch)
 on:
   pull_request:
   push:
