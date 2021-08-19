@@ -10,17 +10,17 @@ class tSound
 {
 public:
 	int32 m_nEntityIndex;
-	int32 m_nCounter;
-	int32 m_nSampleIndex;
+	uint32 m_nCounter;
+	uint32 m_nSampleIndex;
 	uint8 m_nBankIndex;
 	bool8 m_bIs2D;
-	int32 m_nReleasingVolumeModificator;
+	uint32 m_nReleasingVolumeModificator;
 	uint32 m_nFrequency;
 	uint8 m_nVolume;
 	float m_fDistance;
-	int32 m_nLoopCount;
+	uint32 m_nLoopCount;
 #ifndef GTA_PS2
-	int32 m_nLoopStart;
+	uint32 m_nLoopStart;
 	int32 m_nLoopEnd;
 #endif
 #ifdef EXTERNAL_3D_SOUND
@@ -30,17 +30,19 @@ public:
 	float m_SoundIntensity;
 	bool8 m_bReleasingSoundFlag;
 	CVector m_vecPos;
-#ifndef GTA_PS2
-	bool8 m_bReverbFlag; // TODO: ifdef all the occurrences
+#if !defined(GTA_PS2) || defined(AUDIO_REVERB) // GTA_PS2 because this field exists on mobile but not on PS2
+	bool8 m_bReverbFlag;
 #endif
+#ifdef AUDIO_REFLECTIONS
 	uint8 m_nLoopsRemaining;
 	bool8 m_bRequireReflection; // Used for oneshots
+#endif
 	uint8 m_nOffset;
-	uint8 field_4C;
-	int32 m_nReleasingVolumeDivider;
+	uint8 m_nFrontRearOffset;
+	uint32 m_nReleasingVolumeDivider;
 	bool8 m_bIsProcessed;
 	bool8 m_bLoopEnded;
-	int32 m_nCalculatedVolume;
+	uint32 m_nCalculatedVolume;
 	int8 m_nVolumeChange;
 };
 
@@ -120,7 +122,7 @@ class cMissionAudio
 public:
 	CVector m_vecPos[MISSION_AUDIO_SLOTS];
 	bool8 m_bPredefinedProperties[MISSION_AUDIO_SLOTS];
-	int32 m_nSampleIndex[MISSION_AUDIO_SLOTS];
+	uint32 m_nSampleIndex[MISSION_AUDIO_SLOTS];
 	uint8 m_nLoadingStatus[MISSION_AUDIO_SLOTS];
 	uint8 m_nPlayStatus[MISSION_AUDIO_SLOTS];
 	bool8 m_bIsPlaying[MISSION_AUDIO_SLOTS];
@@ -170,7 +172,7 @@ public:
 	float m_fDistance;
 	CVehicle *m_pVehicle;
 	cTransmission *m_pTransmission;
-	int32 m_nIndex;
+	uint32 m_nIndex;
 	float m_fVelocityChange;
 
 	cVehicleParams()
@@ -225,10 +227,10 @@ class cAudioManager
 {
 public:
 	bool8 m_bIsInitialised;
-	uint8 m_bReverb; // unused
+	bool8 m_bReverb; // unused
 	bool8 m_bFifthFrameFlag;
 	uint8 m_nActiveSamples;
-	uint8 m_bDoubleVolume; // unused
+	bool8 m_bDoubleVolume; // unused
 	bool8 m_bDynamicAcousticModelingStatus;
 	int8 field_6;
 	float m_fSpeedOfSound;
@@ -243,8 +245,10 @@ public:
 	tAudioEntity m_asAudioEntities[NUM_AUDIOENTITIES];
 	int32 m_anAudioEntityIndices[NUM_AUDIOENTITIES];
 	int32 m_nAudioEntitiesTotal;
+#ifdef AUDIO_REFLECTIONS
 	CVector m_avecReflectionsPos[MAX_REFLECTIONS];
 	float m_afReflectionsDistances[MAX_REFLECTIONS];
+#endif
 	cAudioScriptObjectManager m_sAudioScriptObjectManager;
 
 	// miami
@@ -272,8 +276,8 @@ public:
 	uint8 field_5538; // something related to phone dialogues
 	int32 m_anRandomTable[5];
 	uint8 m_nTimeSpent;
-	uint8 m_nUserPause;
-	uint8 m_nPreviousUserPause;
+	bool8 m_nUserPause;
+	bool8 m_nPreviousUserPause;
 	uint32 m_FrameCounter;
 
 	cAudioManager();
@@ -307,7 +311,9 @@ public:
 	bool8 IsMP3RadioChannelAvailable();
 	void ReleaseDigitalHandle();
 	void ReacquireDigitalHandle();
+#ifdef AUDIO_REFLECTIONS
 	void SetDynamicAcousticModelingStatus(bool8 status);
+#endif
 	bool8 CheckForAnAudioFileOnCD();
 	char GetCDAudioDriveLetter();
 	bool8 IsAudioInitialised();
@@ -323,8 +329,10 @@ public:
 	void InterrogateAudioEntities(); // inlined
 	void AddSampleToRequestedQueue();
 	void AddDetailsToRequestedOrderList(uint8 sample); // inlined in vc
+#ifdef AUDIO_REFLECTIONS
 	void AddReflectionsToRequestedQueue();
 	void UpdateReflections();
+#endif
 	void AddReleasingSounds();
 	void ProcessActiveQueues();
 	void ClearRequestedQueue(); // inlined in vc
@@ -613,6 +621,16 @@ public:
 #define SET_EMITTING_VOLUME(vol) m_sQueueSample.m_nEmittingVolume = vol
 #else
 #define SET_EMITTING_VOLUME(vol)
+#endif
+#ifdef AUDIO_REFLECTIONS
+#define SET_SOUND_REFLECTION(b) m_sQueueSample.m_bRequireReflection = b
+#else
+#define SET_SOUND_REFLECTION(b)
+#endif
+#ifdef AUDIO_REVERB
+#define SET_SOUND_REVERB(b) m_sQueueSample.m_bReverbFlag = b
+#else
+#define SET_SOUND_REVERB(b)
 #endif
 
 //#if defined(AUDIO_MSS) && !defined(PS2_AUDIO_CHANNELS)

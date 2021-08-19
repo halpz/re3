@@ -1474,6 +1474,7 @@ bool8 cSampleManager::UpdateReverb(void)
 
 	float fRatio = 0.0f;
 
+#ifdef AUDIO_REFLECTIONS
 #define MIN_DIST 0.5f
 #define CALCULATE_RATIO(value, maxDist, maxRatio) (value > MIN_DIST && value < maxDist ? value / maxDist * maxRatio : 0)
 
@@ -1487,6 +1488,7 @@ bool8 cSampleManager::UpdateReverb(void)
 
 #undef CALCULATE_RATIO
 #undef MIN_DIST
+#endif
 	
 	fRatio = Clamp(fRatio, 0.0f, 0.6f);
 	
@@ -1768,7 +1770,7 @@ cSampleManager::StartPreloadedStreamedFile(uint8 nStream)
 bool8
 cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 {
-	int i = 0;
+	uint32 i = 0;
 	uint32 position = nPos;
 	char filename[MAX_PATH];
 	
@@ -1853,7 +1855,7 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 					if ( !_pMP3List )
 					{
 						nFile = 0;
-						_bIsMp3Active = 0;
+						_bIsMp3Active = FALSE;
 						sprintf(filename, "%s.VB", StreamedNameTable[nFile]);
 
 						CStream* stream = aStream[nStream];
@@ -1900,7 +1902,7 @@ cSampleManager::StartStreamedFile(uint32 nFile, uint32 nPos, uint8 nStream)
 				}
 
 			}
-			_bIsMp3Active = 0;
+			_bIsMp3Active = FALSE;
 		}
 		while ( ++i < nNumMP3s );
 		position = 0;

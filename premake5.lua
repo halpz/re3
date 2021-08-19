@@ -42,6 +42,8 @@ newoption {
 	description = "Don't print full paths into binary"
 }
 
+require("autoconf")
+
 if(_OPTIONS["with-librw"]) then
 	Librw = "vendor/librw"
 else
@@ -375,6 +377,19 @@ project "reLCS"
 
 	filter "platforms:win*glfw*"
 		staticruntime "off"
+		
+	filter "platforms:*glfw*"
+		premake.modules.autoconf.parameters = "-lglfw -lX11"
+		autoconfigure {
+			-- iterates all configs and runs on them
+			["dontWrite"] = function (cfg)
+				check_symbol_exists(cfg, "haveX11", "glfwGetX11Display", { "X11/Xlib.h", "X11/XKBlib.h", "GLFW/glfw3.h", "GLFW/glfw3native.h" }, "GLFW_EXPOSE_NATIVE_X11")
+				if cfg.autoconf["haveX11"] then
+					table.insert(cfg.links, "X11")
+					table.insert(cfg.defines, "GET_KEYBOARD_INPUT_FROM_X11")
+				end
+			end
+		}
 
 	filter "platforms:win*oal"
 		includedirs { "vendor/openal-soft/include" }
@@ -392,10 +407,10 @@ project "reLCS"
 		libdirs { "vendor/openal-soft/libs/Win64" }
 
 	filter "platforms:linux*oal"
-		links { "openal", "mpg123", "sndfile", "pthread", "X11" }
-
+		links { "openal", "mpg123", "sndfile", "pthread" }
+		
 	filter "platforms:bsd*oal"
-		links { "openal", "mpg123", "sndfile", "pthread", "X11" }
+		links { "openal", "mpg123", "sndfile", "pthread" }
 
 	filter "platforms:macosx*oal"
 		links { "openal", "mpg123", "sndfile", "pthread" }

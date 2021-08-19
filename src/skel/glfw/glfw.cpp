@@ -52,11 +52,7 @@ long _dwOperatingSystemVersion;
 #include "Font.h"
 #include "MemoryMgr.h"
 
-// We found out that GLFW's keyboard input handling is still pretty delayed/not stable, so now we fetch input from X11 directly on Linux.
-#if !defined _WIN32 && !defined __APPLE__ && !defined GTA_HANDHELD // && !defined WAYLAND
-#define GET_KEYBOARD_INPUT_FROM_X11
-#endif
-
+// This is defined on project-level, via premake5 or cmake
 #ifdef GET_KEYBOARD_INPUT_FROM_X11
 #include <X11/Xlib.h>
 #include <X11/XKBlib.h>
