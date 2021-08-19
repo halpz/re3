@@ -30,8 +30,8 @@ public:
 	float m_SoundIntensity;
 	bool8 m_bReleasingSoundFlag;
 	CVector m_vecPos;
-#ifndef GTA_PS2
-	bool8 m_bReverbFlag; // TODO: ifdef all the occurrences
+#if !defined(GTA_PS2) || defined(AUDIO_REVERB) // GTA_PS2 because this field exists on mobile but not on PS2
+	bool8 m_bReverbFlag;
 #endif
 #ifdef AUDIO_REFLECTIONS
 	uint8 m_nLoopsRemaining;
@@ -615,6 +615,11 @@ public:
 #define SET_SOUND_REFLECTION(b) m_sQueueSample.m_bRequireReflection = b
 #else
 #define SET_SOUND_REFLECTION(b)
+#endif
+#ifdef AUDIO_REVERB
+#define SET_SOUND_REVERB(b) m_sQueueSample.m_bReverbFlag = b
+#else
+#define SET_SOUND_REVERB(b)
 #endif
 
 #if defined(AUDIO_MSS) && !defined(PS2_AUDIO_CHANNELS)

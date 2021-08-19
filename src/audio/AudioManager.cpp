@@ -509,7 +509,9 @@ cAudioManager::ServiceSoundEffects()
 		ClearActiveSamples();
 	}
 	m_nActiveSampleQueue = m_nActiveSampleQueue == 1 ? 0 : 1;
+#ifdef AUDIO_REVERB
 	if(m_bReverb) ProcessReverb();
+#endif
 	ProcessSpecial();
 	ClearRequestedQueue();
 	InterrogateAudioEntities();
@@ -667,9 +669,10 @@ cAudioManager::AddSampleToRequestedQueue()
 
 		if ( m_bReverb && m_sQueueSample.m_bIs2D )
 			m_sQueueSample.m_nFrontRearOffset = 30;
-
+#ifdef AUDIO_REVERB
 		if (!m_bDynamicAcousticModelingStatus)
 			m_sQueueSample.m_bReverbFlag = FALSE;
+#endif
 #endif
 
 		m_asSamples[m_nActiveSampleQueue][sampleIndex] = m_sQueueSample;
@@ -1061,7 +1064,9 @@ cAudioManager::ProcessActiveQueues()
 							SampleManager.SetChannelPan(j, sample.m_nOffset);
 #endif
 						}
+#if !defined(GTA_PS2) || defined(AUDIO_REVERB)
 						SampleManager.SetChannelReverbFlag(j, sample.m_bReverbFlag);
+#endif
 						break; //continue for i
 					}
 					sample.m_bIsProcessed = FALSE;
@@ -1141,7 +1146,9 @@ cAudioManager::ProcessActiveQueues()
 							SampleManager.SetChannelLoopPoints(k, m_asActiveSamples[k].m_nLoopStart, m_asActiveSamples[k].m_nLoopEnd);
 							SampleManager.SetChannelLoopCount(k, m_asActiveSamples[k].m_nLoopCount);
 #endif
+#if !defined(GTA_PS2) || defined(AUDIO_REVERB)
 							SampleManager.SetChannelReverbFlag(k, m_asActiveSamples[k].m_bReverbFlag);
+#endif
 #ifdef EXTERNAL_3D_SOUND
 							if (m_asActiveSamples[k].m_bIs2D) {
 								uint8 offset = m_asActiveSamples[k].m_nOffset;
@@ -1217,11 +1224,13 @@ cAudioManager::ClearActiveSamples()
 		m_asActiveSamples[i].m_nReleasingVolumeDivider = 0;
 		m_asActiveSamples[i].m_nVolumeChange = -1;
 		m_asActiveSamples[i].m_vecPos = CVector(0.0f, 0.0f, 0.0f);
+#ifdef AUDIO_REVERB
 		m_asActiveSamples[i].m_bReverbFlag = FALSE;
+#endif // AUDIO_REVERB
 #ifdef AUDIO_REFLECTIONS
 		m_asActiveSamples[i].m_nLoopsRemaining = 0;
 		m_asActiveSamples[i].m_bRequireReflection = FALSE;
-#endif
+#endif // AUDIO_REFLECTIONS
 	}
 }
 

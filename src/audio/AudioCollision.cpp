@@ -270,7 +270,7 @@ cAudioManager::SetUpOneShotCollisionSound(const cAudioCollision &col)
 				m_sQueueSample.m_fSpeedMultiplier = 4.0f;
 				m_sQueueSample.m_SoundIntensity = CollisionSoundIntensity;
 				m_sQueueSample.m_bReleasingSoundFlag = TRUE;
-				m_sQueueSample.m_bReverbFlag = TRUE;
+				SET_SOUND_REVERB(TRUE);
 				SET_SOUND_REFLECTION(FALSE);
 				AddSampleToRequestedQueue();
 			}
@@ -300,7 +300,7 @@ cAudioManager::SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 coun
 				m_sQueueSample.m_SoundIntensity = CollisionSoundIntensity;
 				m_sQueueSample.m_bReleasingSoundFlag = FALSE;
 				m_sQueueSample.m_nReleasingVolumeDivider = 5;
-				m_sQueueSample.m_bReverbFlag = TRUE;
+				SET_SOUND_REVERB(TRUE);
 				SET_SOUND_REFLECTION(FALSE);
 				AddSampleToRequestedQueue();
 			}

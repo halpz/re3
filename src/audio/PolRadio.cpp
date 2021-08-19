@@ -64,8 +64,9 @@ cAudioManager::InitialisePoliceRadio()
 	m_sPoliceRadioQueue.policeChannelCounterSeconds = 0;
 	for (int32 i = 0; i < ARRAY_SIZE(m_sPoliceRadioQueue.crimes); i++)
 		m_sPoliceRadioQueue.crimes[i].type = CRIME_NONE;
-
+#if !defined(GTA_PS2) || defined(AUDIO_REVERB)
 	SampleManager.SetChannelReverbFlag(CHANNEL_POLICE_RADIO, FALSE);
+#endif
 	gSpecialSuspectLastSeenReport = FALSE;
 	for (int32 i = 0; i < ARRAY_SIZE(gMinTimeToNextReport); i++)
 		gMinTimeToNextReport[i] = m_FrameCounter;
@@ -110,7 +111,7 @@ cAudioManager::DoPoliceRadioCrackle()
 	SET_EMITTING_VOLUME(m_sQueueSample.m_nVolume);
 	SET_LOOP_OFFSETS(SFX_POLICE_RADIO_CRACKLE)
 	m_sQueueSample.m_bReleasingSoundFlag = FALSE;
-	m_sQueueSample.m_bReverbFlag = FALSE;
+	SET_SOUND_REVERB(FALSE);
 	m_sQueueSample.m_nOffset = 63;
 	m_sQueueSample.m_nReleasingVolumeDivider = 3;
 	SET_SOUND_REFLECTION(FALSE);
