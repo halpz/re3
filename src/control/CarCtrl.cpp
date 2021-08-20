@@ -1134,8 +1134,8 @@ CCarCtrl::UpdateCarOnRails(CVehicle* pVehicle)
 		pVehicle->AutoPilot.ModifySpeed(0.0f);
 		if (CTimer::GetTimeInMilliseconds() > pVehicle->AutoPilot.m_nTempAction){
 			pVehicle->AutoPilot.m_nTempAction = TEMPACT_NONE;
-			pVehicle->AutoPilot.m_nAntiReverseTimer = 0;
-			pVehicle->AutoPilot.m_nTimeToStartMission = 0;
+			pVehicle->AutoPilot.m_nAntiReverseTimer = CTimer::GetTimeInMilliseconds();
+			pVehicle->AutoPilot.m_nTimeToStartMission = CTimer::GetTimeInMilliseconds();
 		}
 		return;
 	}
