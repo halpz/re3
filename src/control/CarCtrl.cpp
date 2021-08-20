@@ -96,6 +96,15 @@
 #define MINIMAL_DISTANCE_TO_SPAWN_OFFSCREEN (40.0f)
 #define EXTENDED_RANGE_DESPAWN_MULTIPLIER (1.5f)
 
+#ifdef GTA_NETWORK
+const int32 CCarCtrl::MultiplayerCarBanks[TOTAL_MULTIPLAYER_CAR_BANKS][CARS_IN_MULTIPLAYER_BANK] =
+{
+	MI_SANCHEZ,	MI_KURUMA,	MI_ESPRIT,	MI_MULE,	MI_DIABLOS,	MI_KURUMA,	MI_PEREN,	MI_STINGER,
+	MI_PCJ600,	MI_BOBCAT,	MI_BLISTA,	MI_LANDSTAL,MI_SENTINEL,MI_MOONBEAM,MI_MANANA,	MI_PEREN,
+	MI_SANCHEZ2,MI_PCJ600,	MI_STALLION,MI_MANANA,	MI_LINERUN,	MI_RCBANDIT,MI_MRWONGS,	MI_STINGER
+};
+#endif
+
 bool CCarCtrl::bMadDriversCheat;
 int CCarCtrl::NumLawEnforcerCars;
 int CCarCtrl::NumAmbulancesOnDuty;
@@ -121,8 +130,15 @@ int32 CCarCtrl::CarFreqArrays[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
 int32 CCarCtrl::LoadedCarsArray[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
 CVehicle* apCarsToKeep[MAX_CARS_TO_KEEP];
 uint32 aCarsToKeepTime[MAX_CARS_TO_KEEP];
+uint32 CCarCtrl::maxRandomMpCars = 20;
+bool CCarCtrl::scriptControlsMpCarLimit = false;
 
 bool gbEmergencyVehiclesEnabled = true;
+
+#ifdef GTA_NETWORK // TMP
+extern bool gIsMultiplayerGame;
+extern int8 nAmbientCarBank; // actually gMultiGame.nAmbientCarBank (TODO)
+#endif
 
 void
 CCarCtrl::GenerateRandomCars()
@@ -158,7 +174,12 @@ CCarCtrl::GenerateOneRandomCar()
 	pPlayer->m_nTrafficMultiplier = pPlayer->m_fRoadDensity * zone.carDensity;
 #ifdef GTA_NETWORK
 	if (gIsMultiplayerGame) {
-		// TODO
+		// TODO (count number of players within 250 meters from spawn position
+		int numPlayersClose = 1;
+		if (NumRandomCars >= pPlayer->m_nTrafficMultiplier * CarDensityMultiplier * CIniFile::CarNumberMultiplier * numPlayersClose)
+			return;
+		if (NumFiretrucksOnDuty + NumAmbulancesOnDuty + NumParkedCars + NumMissionCars + NumLawEnforcerCars + NumRandomCars >= MaxNumberOfCarsInUse)
+			return;
 	}
 	else
 #endif
@@ -178,7 +199,7 @@ CCarCtrl::GenerateOneRandomCar()
 			return;
 	}
 	else
-#else
+#endif
 	{
 		if (pWanted->GetWantedLevel() > 1 && NumLawEnforcerCars < pWanted->m_MaximumLawEnforcerVehicles &&
 			pWanted->m_CurrentCops < pWanted->m_MaxCops && !CGame::IsInInterior() && (
@@ -202,7 +223,6 @@ CCarCtrl::GenerateOneRandomCar()
 			}
 		}
 	}
-#endif
 	float frontX, frontY;
 	float preferredDistance, angleLimit;
 	float requestMultiplier = 1.0f;
@@ -821,6 +841,22 @@ int32
 CCarCtrl::ChooseModel(CZoneInfo* pZone, int* pClass) {
 	int32 model = -1;
 	int32 i;
+#ifdef GTA_NETWORK
+	if (gIsMultiplayerGame) {
+		for (i = 10; i > 0 && (model == -1 || !CStreaming::HasModelLoaded(model)); i--) {
+			*pClass = ChooseCarRating(pZone);
+			model = ChooseCarModel(*pClass);
+			bool found = false;
+			for (int j = 0; j < 8; j++) {
+				if (model == MultiplayerCarBanks[nAmbientCarBank][j])
+					found = true;
+			}
+			if (!found)
+				model = -1;
+		}
+		return model;
+	}
+#endif
 	for (i = 10; i > 0 && (model == -1 || !CStreaming::HasModelLoaded(model)); i--) {
 		int rnd = CGeneral::GetRandomNumberInRange(0, 1000);
 
@@ -847,7 +883,8 @@ CCarCtrl::ChooseModel(CZoneInfo* pZone, int* pClass) {
 	}
 	if (i == 0)
 		return -1;
-	if (CModelInfo::GetColModel(model)->boundingSphere.radius > 20.0f)
+	CColModel* pColModel = CModelInfo::GetColModel(model);
+	if (!pColModel || pColModel->boundingSphere.radius > 20.0f)
 		return -1;
 	return model;
 }
@@ -1033,7 +1070,7 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 		}
 		float distanceToPlayer = (pVehicle->GetPosition() - vecPlayerPos).Magnitude2D();
 		float despawnMultiplier = 1.0f;
-#ifndef EXTENDED_OFFSCREEN_DESPAWN_RANGE
+#if !defined EXTENDED_OFFSCREEN_DESPAWN_RANGE || defined GTA_PSP
 		if (FindPlayerVehicle() && TheCamera.Cams[TheCamera.ActiveCam].Mode == CCam::MODE_1STPERSON && !FrontEndMenuManager.m_PrefsUseWideScreen)
 			despawnMultiplier = 0.75f;
 #endif
@@ -1065,6 +1102,14 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 			if (pVehicle->GetIsOnScreen()){
 				pVehicle->bFadeOut = true;
 			}else{
+#ifdef GTA_NETWORK
+				if (gIsMultiplayerGame) {
+					// TODO
+					if (false)
+						MultiPlayerRemoveVehicleAndDriver(pVehicle);
+					return;
+				}
+#endif
 				CWorld::Remove(pVehicle);
 				delete pVehicle;
 			}
@@ -1082,10 +1127,33 @@ CCarCtrl::PossiblyRemoveVehicle(CVehicle* pVehicle)
 		!CTrafficLights::ShouldCarStopForLight(pVehicle, true) &&
 		!CTrafficLights::ShouldCarStopForBridge(pVehicle) &&
 		!CGarages::IsPointWithinHideOutGarage(pVehicle->GetPosition())){
-		CWorld::Remove(pVehicle);
-		delete pVehicle;
+#ifdef GTA_NETWORK
+		if (!gIsMultiplayerGame)
+#endif
+		{
+			CWorld::Remove(pVehicle);
+			delete pVehicle;
+			return;
+		}
+#ifdef GTA_NETWORK
+		if (false) // TODO(LCS): figure out condition for mp
+			MultiPlayerRemoveVehicleAndDriver(pVehicle);
+#endif
+	}
+#ifdef GTA_NETWORK
+	if (gIsMultiplayerGame) {
+		if (pVehicle->GetStatus() == STATUS_WRECKED && CTimer::GetLogicalFrameCounter() == pVehicle->m_randomSeed) {
+			if ((pVehicle->GetPosition() - vecPlayerPos).MagnitudeSqr() > SQR(6.5f)) {
+				if (pVehicle->GetMoveSpeed().MagnitudeSqr() <= SQR(0.01f)) {
+					printf("viciously removing dead vehicle");
+					CWorld::Remove(pVehicle);
+					delete pVehicle;
+				}
+			}
+		}
 		return;
 	}
+#endif
 	if (pVehicle->GetStatus() == STATUS_WRECKED) {
 		if (pVehicle->m_nTimeOfDeath != 0) {
 			if (CTimer::GetTimeInMilliseconds() > pVehicle->m_nTimeOfDeath + 60000 &&
@@ -1421,6 +1489,10 @@ void CCarCtrl::SlowCarDownForOtherCar(CEntity* pOtherEntity, CVehicle* pVehicle,
 		pVehicle->AutoPilot.m_bSlowedDownBecauseOfCars = true;
 		*pSpeed = Min(*pSpeed, minProximity * curSpeed);
 	}
+#ifdef GTA_NETWORK
+	if (gIsMultiplayerGame)
+		return;
+#endif
 	if (minProximity >= 0.0f && minProximity < 0.5f && pOtherEntity->IsVehicle() &&
 	  CTimer::GetTimeInMilliseconds() - pVehicle->AutoPilot.m_nTimeToStartMission > 15000 &&
 	  CTimer::GetTimeInMilliseconds() - pOtherVehicle->AutoPilot.m_nTimeToStartMission > 15000){
@@ -1649,7 +1721,7 @@ void CCarCtrl::WeaveForOtherCar(CEntity* pOtherEntity, CVehicle* pVehicle, float
 	if (pVehicle->AutoPilot.m_nCarMission == MISSION_RAMCAR_CLOSE && pOtherEntity == pVehicle->AutoPilot.m_pTargetCar)
 		return;
 	CVector2D vecDiff = pOtherCar->GetPosition() - pVehicle->GetPosition();
-	float angleBetweenVehicles = GetATanOfXY(vecDiff.x, vecDiff.y);
+	float angleBetweenVehicles = CGeneral::GetATanOfXY(vecDiff.x, vecDiff.y);
 	float distance = vecDiff.Magnitude();
 	if (distance < 1.0f)
 		return;
@@ -1659,7 +1731,7 @@ void CCarCtrl::WeaveForOtherCar(CEntity* pOtherEntity, CVehicle* pVehicle, float
 		return;
 	CVector2D forward = pVehicle->GetForward();
 	forward.Normalise();
-	float forwardAngle = GetATanOfXY(forward.x, forward.y);
+	float forwardAngle = CGeneral::GetATanOfXY(forward.x, forward.y);
 	float angleDiff = angleBetweenVehicles - forwardAngle;
 	float lenProjection = ABS(pOtherCar->GetColModel()->boundingBox.max.y * Sin(angleDiff));
 	float widthProjection = ABS(pOtherCar->GetColModel()->boundingBox.max.x * Cos(angleDiff));
@@ -1705,7 +1777,7 @@ void CCarCtrl::WeaveForPed(CEntity* pOtherEntity, CVehicle* pVehicle, float* pAn
 		return;
 	CPed* pPed = (CPed*)pOtherEntity;
 	CVector2D vecDiff = pPed->GetPosition() - pVehicle->GetPosition();
-	float angleBetweenVehicleAndPed = GetATanOfXY(vecDiff.x, vecDiff.y);
+	float angleBetweenVehicleAndPed = CGeneral::GetATanOfXY(vecDiff.x, vecDiff.y);
 	float distance = vecDiff.Magnitude();
 	float lengthToEvade = (WIDTH_COEF_TO_WEAVE_SAFELY * 2 * pVehicle->GetColModel()->boundingBox.max.x + PED_WIDTH_TO_WEAVE) / distance;
 	float diffToLeftAngle = LimitRadianAngle(angleBetweenVehicleAndPed - *pAngleToWeaveLeft);
@@ -1773,7 +1845,7 @@ void CCarCtrl::WeaveForObject(CEntity* pOtherEntity, CVehicle* pVehicle, float* 
 		rightCoef * pObject->GetRight() +
 		forwardCoef * pObject->GetForward() -
 		pVehicle->GetPosition();
-	float angleBetweenVehicleAndObject = GetATanOfXY(vecDiff.x, vecDiff.y);
+	float angleBetweenVehicleAndObject = CGeneral::GetATanOfXY(vecDiff.x, vecDiff.y);
 	float distance = vecDiff.Magnitude();
 	float lengthToEvade = (WIDTH_COEF_TO_WEAVE_SAFELY * 2 * pVehicle->GetColModel()->boundingBox.max.x + OBJECT_WIDTH_TO_WEAVE) / distance;
 	float diffToLeftAngle = LimitRadianAngle(angleBetweenVehicleAndObject - *pAngleToWeaveLeft);
@@ -2048,13 +2120,13 @@ void CCarCtrl::PickNextNodeToChaseCar(CVehicle* pVehicle, float targetX, float t
 #else
 		CVector(targetX, targetY, 0.0f),
 #endif
-		pTargetNode, &numNodes, 2, pVehicle, &distanceToTargetNode, 999999.9f, -1);
+		pTargetNode, &numNodes, 2, pVehicle, &distanceToTargetNode, 100.0f, -1);
 
 	int newNextNode;
 	int nextLink;
 	if (numNodes != 1 && numNodes != 2 || pTargetNode[0] == pCurNode){
 		if (numNodes != 2 || pTargetNode[1] == pCurNode) {
-			float currentAngle = GetATanOfXY(targetX - pVehicle->GetPosition().x, targetY - pVehicle->GetPosition().y);
+			float currentAngle = CGeneral::GetATanOfXY(targetX - pVehicle->GetPosition().x, targetY - pVehicle->GetPosition().y);
 			nextLink = 0;
 			float lowestAngleChange = 10.0f;
 			int numLinks = pCurNode->numLinks;
@@ -2064,7 +2136,7 @@ void CCarCtrl::PickNextNodeToChaseCar(CVehicle* pVehicle, float targetX, float t
 				if (conNode == prevNode && i > 1)
 					continue;
 				CPathNode* pTestNode = &ThePaths.m_pathNodes[conNode];
-				float angle = GetATanOfXY(pTestNode->GetX() - pCurNode->GetX(), pTestNode->GetY() - pCurNode->GetY());
+				float angle = CGeneral::GetATanOfXY(pTestNode->GetX() - pCurNode->GetX(), pTestNode->GetY() - pCurNode->GetY());
 				angle = LimitRadianAngle(angle - currentAngle);
 				angle = ABS(angle);
 				if (angle < lowestAngleChange) {
@@ -2163,14 +2235,14 @@ void CCarCtrl::PickNextNodeToChaseCar(CVehicle* pVehicle, float targetX, float t
 bool CCarCtrl::PickNextNodeToFollowPath(CVehicle* pVehicle)
 {
 	if (pVehicle->m_nRouteSeed)
-		CGeneral::SetRandomSeed(pVehicle->m_nRouteSeed);
+		CGeneral::SetRandomSeed(pVehicle->m_nRouteSeed++);
 	int curNode = pVehicle->AutoPilot.m_nNextRouteNode;
 	CPathNode* pCurNode = &ThePaths.m_pathNodes[curNode];
 	if (pVehicle->AutoPilot.m_nPathFindNodesCount == 0){
 		ThePaths.DoPathSearch(0, pVehicle->GetPosition(), curNode,
 			pVehicle->AutoPilot.m_vecDestinationCoors, pVehicle->AutoPilot.m_aPathFindNodesInfo,
 			&pVehicle->AutoPilot.m_nPathFindNodesCount, NUM_PATH_NODES_IN_AUTOPILOT,
-			pVehicle, nil, 999999.9f, -1);
+			pVehicle, nil, 100.0f, -1);
 		if (pVehicle->AutoPilot.m_nPathFindNodesCount < 2)
 			return true;
 		pVehicle->AutoPilot.RemoveOnePathNode();
@@ -2663,8 +2735,8 @@ void CCarCtrl::SteerAIBoatWithPhysicsHeadingForTarget(CVehicle* pVehicle, float 
 {
 	CVector2D forward = pVehicle->GetForward();
 	forward.Normalise();
-	float angleToTarget = GetATanOfXY(targetX - pVehicle->GetPosition().x, targetY - pVehicle->GetPosition().y);
-	float angleForward = GetATanOfXY(forward.x, forward.y);
+	float angleToTarget = CGeneral::GetATanOfXY(targetX - pVehicle->GetPosition().x, targetY - pVehicle->GetPosition().y);
+	float angleForward = CGeneral::GetATanOfXY(forward.x, forward.y);
 	float steerAngle = LimitRadianAngle(angleToTarget - angleForward);
 	steerAngle = Clamp(steerAngle, -DEFAULT_MAX_STEER_ANGLE, DEFAULT_MAX_STEER_ANGLE);
 #ifdef FIX_BUGS
@@ -2695,8 +2767,8 @@ void CCarCtrl::SteerAIBoatWithPhysicsAttackingPlayer(CVehicle* pVehicle, float* 
 	CVector2D forward = pVehicle->GetForward();
 	forward.Normalise();
 	CVector2D vecToProjection = FindPlayerCoors() + FindPlayerSpeed() * projection * GAME_SPEED_TO_CARAI_SPEED;
-	float angleToTarget = GetATanOfXY(vecToProjection.x - pVehicle->GetPosition().x, vecToProjection.y - pVehicle->GetPosition().y);
-	float angleForward = GetATanOfXY(forward.x, forward.y);
+	float angleToTarget = CGeneral::GetATanOfXY(vecToProjection.x - pVehicle->GetPosition().x, vecToProjection.y - pVehicle->GetPosition().y);
+	float angleForward = CGeneral::GetATanOfXY(forward.x, forward.y);
 	float steerAngle = LimitRadianAngle(angleToTarget - angleForward);
 #ifdef FIX_BUGS
 	float speedTarget = pVehicle->AutoPilot.GetCruiseSpeed();
@@ -2784,7 +2856,7 @@ void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* pHeli)
 	if (distanceToTarget < 8.0f && pHeli->m_fHeliOrientation < 0.0f)
 		ZTurnSpeedTarget = 0.0f;
 	else {
-		float fAngleTarget = GetATanOfXY(vecToTarget.x, vecToTarget.y) + PI;
+		float fAngleTarget = CGeneral::GetATanOfXY(vecToTarget.x, vecToTarget.y) + PI;
 		if (pHeli->m_fHeliOrientation >= 0.0f)
 			fAngleTarget = pHeli->m_fHeliOrientation;
 		fAngleTarget -= pHeli->m_fOrientation;
@@ -2827,7 +2899,7 @@ void CCarCtrl::SteerAIPlaneTowardsTargetCoors(CAutomobile* pPlane)
 	CVector2D vecToTarget = pPlane->AutoPilot.m_vecDestinationCoors - pPlane->GetPosition();
 	float fForwardZ = (pPlane->AutoPilot.m_vecDestinationCoors.z - pPlane->GetPosition().z) / vecToTarget.Magnitude();
 	fForwardZ = Clamp(fForwardZ, -0.3f, 0.3f);
-	float angle = GetATanOfXY(vecToTarget.x, vecToTarget.y);
+	float angle = CGeneral::GetATanOfXY(vecToTarget.x, vecToTarget.y);
 	while (angle > TWOPI)
 		angle -= TWOPI;
 	float difference = LimitRadianAngle(angle - pPlane->m_fOrientation);
@@ -2924,8 +2996,8 @@ void CCarCtrl::SteerAICarWithPhysicsFollowPath(CVehicle* pVehicle, float* pSwerv
 		projectedPosition.y = positionOnCurrentLinkIncludingLane.y;
 	}
 	CVector2D distanceToProjectedPosition = projectedPosition - pVehicle->GetPosition();
-	float angleCurrentLink = GetATanOfXY(distanceToProjectedPosition.x, distanceToProjectedPosition.y);
-	float angleForward = GetATanOfXY(forward.x, forward.y);
+	float angleCurrentLink = CGeneral::GetATanOfXY(distanceToProjectedPosition.x, distanceToProjectedPosition.y);
+	float angleForward = CGeneral::GetATanOfXY(forward.x, forward.y);
 	if (pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_AVOID_CARS)
 		angleCurrentLink = FindAngleToWeaveThroughTraffic(pVehicle, nil, angleCurrentLink, angleForward);
 	float steerAngle = LimitRadianAngle(angleCurrentLink - angleForward);
@@ -2970,11 +3042,11 @@ void CCarCtrl::SteerAICarWithPhysicsFollowPath(CVehicle* pVehicle, float* pSwerv
 		pCurrentLink->GetY() - ((pVehicle->AutoPilot.m_nCurrentLane + pCurrentLink->OneWayLaneOffset()) * LANE_WIDTH) * currentPathLinkForward.x);
 	trajectory -= pVehicle->GetPosition();
 	float speedAngleMultiplier = FindSpeedMultiplier(
-		GetATanOfXY(trajectory.x, trajectory.y) - angleForward,
+		CGeneral::GetATanOfXY(trajectory.x, trajectory.y) - angleForward,
 		MIN_ANGLE_FOR_SPEED_LIMITING, MAX_ANGLE_FOR_SPEED_LIMITING, MIN_LOWERING_SPEED_COEFFICIENT);
 	float tmpWideMultiplier = FindSpeedMultiplier(
-		GetATanOfXY(currentPathLinkForward.x, currentPathLinkForward.y) -
-		GetATanOfXY(nextPathLinkForwardX, nextPathLinkForwardY),
+		CGeneral::GetATanOfXY(currentPathLinkForward.x, currentPathLinkForward.y) -
+		CGeneral::GetATanOfXY(nextPathLinkForwardX, nextPathLinkForwardY),
 		MIN_ANGLE_FOR_SPEED_LIMITING_BETWEEN_NODES, MAX_ANGLE_FOR_SPEED_LIMITING, MIN_LOWERING_SPEED_COEFFICIENT);
 	float speedNodesMultiplier;
 	if (scalarDistanceToNextNode > DISTANCE_TO_NEXT_NODE_TO_CONSIDER_SLOWING_DOWN || pVehicle->AutoPilot.m_nCruiseSpeed < 12)
@@ -3008,8 +3080,8 @@ void CCarCtrl::SteerAICarWithPhysicsHeadingForTarget(CVehicle* pVehicle, CPhysic
 	*pHandbrake = false;
 	CVector2D forward = pVehicle->GetForward();
 	forward.Normalise();
-	float angleToTarget = GetATanOfXY(targetX - pVehicle->GetPosition().x, targetY - pVehicle->GetPosition().y);
-	float angleForward = GetATanOfXY(forward.x, forward.y);
+	float angleToTarget = CGeneral::GetATanOfXY(targetX - pVehicle->GetPosition().x, targetY - pVehicle->GetPosition().y);
+	float angleForward = CGeneral::GetATanOfXY(forward.x, forward.y);
 	if (pVehicle->AutoPilot.m_nDrivingStyle == DRIVINGSTYLE_AVOID_CARS)
 		angleToTarget = FindAngleToWeaveThroughTraffic(pVehicle, pTarget, angleToTarget, angleForward);
 	float steerAngle = LimitRadianAngle(angleToTarget - angleForward);
@@ -3194,7 +3266,7 @@ bool CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle* pVehicle, CVector vecTar
 {
 	pVehicle->AutoPilot.m_vecDestinationCoors = vecTarget;
 	ThePaths.DoPathSearch(0, pVehicle->GetPosition(), -1, vecTarget, pVehicle->AutoPilot.m_aPathFindNodesInfo,
-		&pVehicle->AutoPilot.m_nPathFindNodesCount, NUM_PATH_NODES_IN_AUTOPILOT, pVehicle, nil, 999999.9f, -1);
+		&pVehicle->AutoPilot.m_nPathFindNodesCount, NUM_PATH_NODES_IN_AUTOPILOT, pVehicle, nil, 100.0f, -1);
 	ThePaths.RemoveBadStartNode(pVehicle->GetPosition(),
 		pVehicle->AutoPilot.m_aPathFindNodesInfo, &pVehicle->AutoPilot.m_nPathFindNodesCount);
 	if (pVehicle->AutoPilot.m_nPathFindNodesCount < 2){
@@ -3253,12 +3325,18 @@ void CCarCtrl::FindLinksToGoWithTheseNodes(CVehicle* pVehicle)
 
 void CCarCtrl::GenerateEmergencyServicesCar(void)
 {
+#ifdef GTA_NETWORK
+	if (gIsMultiplayerGame)
+		return;
+#endif
 	if (FindPlayerPed()->m_pWanted->GetWantedLevel() > 3)
 		return;
 	if (CGame::IsInInterior())
 		return;
-	if (TheCamera.m_WideScreenOn) // TODO(LCS): verify
+#ifndef GTA_PSP
+	if (TheCamera.m_WideScreenOn)
 		return;
+#endif
 	if (NumFiretrucksOnDuty + NumAmbulancesOnDuty + NumParkedCars + NumMissionCars +
 		NumLawEnforcerCars + NumRandomCars > MaxNumberOfCarsInUse)
 		return;
@@ -3312,6 +3390,10 @@ void CCarCtrl::GenerateEmergencyServicesCar(void)
 
 bool CCarCtrl::GenerateOneEmergencyServicesCar(uint32 mi, CVector vecPos)
 {
+#ifdef GTA_NETWORK
+	if (gIsMultiplayerGame)
+		return;
+#endif
 	CVector pPlayerPos = FindPlayerCentreOfWorld(CWorld::PlayerInFocus);
 	bool created = false;
 	int attempts = 0;
@@ -3377,6 +3459,11 @@ bool CCarCtrl::GenerateOneEmergencyServicesCar(uint32 mi, CVector vecPos)
 	pVehicle->m_bSirenOrAlarm = true;
 	CWorld::Add(pVehicle);
 	printf("CREATED EMERGENCY VEHICLE\n");
+#ifdef GTA_NETWORK
+	if (gIsMultiplayerGame) {
+		// TODO (register car for network)
+	}
+#endif
 	return true;
 }
 
@@ -3458,9 +3545,8 @@ bool CCarCtrl::OkToCreateVehicleAtThisPosition(const CVector& pos)
 	if (gIsMultiplayerGame) {
 		// TODO
 	}
-#else
-	return true;
 #endif
+	return true;
 }
 
 float CCarCtrl::FindSpeedMultiplierWithSpeedFromNodes(int8 type)
@@ -3505,3 +3591,31 @@ void CCarCtrl::RenderDebugInfo(CVehicle* pVehicle)
 		DefinedState();
 	}
 }
+
+void CCarCtrl::SetMultiplayerAmbientCarLimit(uint32 limit)
+{
+	maxRandomMpCars = limit;
+}
+
+void CCarCtrl::ToggleScriptControlsMpCarLimit(bool toggle)
+{
+	scriptControlsMpCarLimit = toggle;
+}
+
+void CCarCtrl::MultiPlayerRemoveVehicleAndDriver(CVehicle* pVehicle)
+{
+	CPed* pDriver = pVehicle->pDriver;
+	CWorld::Remove(pVehicle);
+	delete pVehicle;
+	if (pDriver) {
+		CWorld::Remove(pDriver);
+		delete pDriver;
+	}
+}
+
+void CCarCtrl::Write(base::cRelocatableChunkWriter& writer)
+{
+	writer.AllocateRaw(CarArrays, sizeof(CarArrays), 4);
+	writer.AllocateRaw(TotalNumOfCarsOfRating, sizeof(TotalNumOfCarsOfRating), 4, false, true);
+}
+

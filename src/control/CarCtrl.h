@@ -17,6 +17,13 @@ enum{
 	MAX_CAR_MODELS_IN_ARRAY = 25,
 };
 
+#ifdef GTA_NETWORK
+enum {
+	TOTAL_MULTIPLAYER_CAR_BANKS = 3,
+	CARS_IN_MULTIPLAYER_BANK = 8
+};
+#endif
+
 #ifdef FIX_BUGS
 #define FIX_PATHFIND_BUG
 #endif
@@ -133,7 +140,10 @@ public:
 
 	static bool OkToCreateVehicleAtThisPosition(const CVector&);
 	static void RenderDebugInfo(CVehicle*);
-	static float GetATanOfXY(float x, float y) { float t = CGeneral::GetATanOfXY(x, y); if (t < 0.0f) t += TWOPI; return t; }
+	static void SetMultiplayerAmbientCarLimit(uint32);
+	static void ToggleScriptControlsMpCarLimit(bool);
+	static void MultiPlayerRemoveVehicleAndDriver(CVehicle*);
+	static void Write(base::cRelocatableChunkWriter&);
 
 	static float GetPositionAlongCurrentCurve(CVehicle* pVehicle)
 	{
@@ -170,6 +180,14 @@ public:
 	static int32 NumOfLoadedCarsOfRating[TOTAL_CUSTOM_CLASSES];
 	static int32 CarFreqArrays[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
 	static int32 LoadedCarsArray[TOTAL_CUSTOM_CLASSES][MAX_CAR_MODELS_IN_ARRAY];
+
+#ifdef GTA_NETWORK
+	static const int32 MultiplayerCarBanks[TOTAL_MULTIPLAYER_CAR_BANKS][CARS_IN_MULTIPLAYER_BANK];
+#endif
+
+	static uint32 maxRandomMpCars;
+	static bool scriptControlsMpCarLimit;
+
 };
 
 extern CVehicle* apCarsToKeep[MAX_CARS_TO_KEEP];
