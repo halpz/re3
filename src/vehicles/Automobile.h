@@ -164,7 +164,7 @@ public:
 	void PopBoot(void);
 	void PopBootUsingPhysics(void);
 	void CloseAllDoors(void);
-	void KnockPedOutCar(eWeaponType weapon, uint16 door, CPed *ped);
+	CPed *KnockPedOutCar(eWeaponType weapon, uint16 door, CPed *ped);
 
 #ifdef COMPATIBLE_SAVES
 	virtual void Save(uint8*& buf);

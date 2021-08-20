@@ -252,6 +252,7 @@ public:
 	bool8 InitialiseSampleBanks(void);
 
 	uint8 GetMusicVolume() const { return m_nMusicVolume;  }
+	uint8 GetMusicFadeVolume() const { return m_nMusicFadeVolume;  }
 };
 
 extern cSampleManager SampleManager;

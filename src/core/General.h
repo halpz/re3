@@ -6,36 +6,10 @@ class CGeneral
 {
 public:
 	static float GetATanOfXY(float x, float y){
-		if(x == 0.0f && y == 0.0f)
-			return 0.0f;
-		float xabs = Abs(x);
-		float yabs = Abs(y);
-
-		if(xabs < yabs){
-			if(y > 0.0f){
-				if(x > 0.0f)
-					return 0.5f*PI - Atan2(x / y, 1.0f);
-				else
-					return 0.5f*PI + Atan2(-x / y, 1.0f);
-			}else{
-				if(x > 0.0f)
-					return 1.5f*PI + Atan2(x / -y, 1.0f);
-				else
-					return 1.5f*PI - Atan2(-x / -y, 1.0f);
-			}
-		}else{
-			if(y > 0.0f){
-				if(x > 0.0f)
-					return Atan2(y / x, 1.0f);
-				else
-					return PI - Atan2(y / -x, 1.0f);
-			}else{
-				if(x > 0.0f)
-					return 2.0f*PI - Atan2(-y / x, 1.0f);
-				else
-					return PI + Atan2(-y / -x, 1.0f);
-			}
-		}
+		float arc = atan2f(y, x);
+		if(arc < 0.0f)
+			arc += TWOPI;
+		return arc;
 	}
 
 	static float LimitAngle(float angle)

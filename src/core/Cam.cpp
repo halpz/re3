@@ -5063,6 +5063,11 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	// Using GetCarGun(LR/UD) will give us same unprocessed RightStick value as SA
 	float stickX = -(pad->GetCarGunLeftRight());
 	float stickY = -pad->GetCarGunUpDown();
+	// HACK to disable rotation on tank for now
+	if(car->GetModelIndex() == MI_RHINO){
+		stickX = 0.0f;
+		stickY = 0.0f;
+	}
 
 	// In SA this checks for m_bUseMouse3rdPerson so num2 / num8 do not move camera
 	// when Keyboard & Mouse controls are used. To make it work better with III/VC, check for actual pad state instead
@@ -5357,70 +5362,5 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 	// SA
 	// gTargetCoordsForLookingBehind = TargetCoors;
 
-	// SA code from CAutomobile::TankControl/FireTruckControl.
-	if (car->GetModelIndex() == MI_RHINO || car->GetModelIndex() == MI_FIRETRUCK) {
-
-		float &carGunLR = ((CAutomobile*)car)->m_fCarGunLR;
-		CVector hi = Multiply3x3(Front, car->GetMatrix());
-
-		// III/VC's firetruck turret angle is reversed
-		float angleToFace = (car->GetModelIndex() == MI_FIRETRUCK ? -hi.Heading() : hi.Heading());
-
-		if (angleToFace <= carGunLR + PI) {
-			if (angleToFace < carGunLR - PI)
-				angleToFace = angleToFace + TWOPI;
-		} else {
-			angleToFace = angleToFace - TWOPI;
-		}
-
-		float neededTurn = angleToFace - carGunLR;
-		float turnPerFrame = CTimer::GetTimeStep() * (car->GetModelIndex() == MI_FIRETRUCK ? 0.05f : 0.015f);
-		if (neededTurn <= turnPerFrame) {
-			if (neededTurn < -turnPerFrame)
-				angleToFace = carGunLR - turnPerFrame;
-		} else {
-			angleToFace = turnPerFrame + carGunLR;
-		}
-
-		if (car->GetModelIndex() == MI_RHINO && carGunLR != angleToFace) {
-			DMAudio.PlayOneShot(car->m_audioEntityId, SOUND_CAR_TANK_TURRET_ROTATE, Abs(angleToFace - carGunLR));
-		}
-		carGunLR = angleToFace;
-
-		if (carGunLR < -PI) {
-			carGunLR += TWOPI;
-		} else if (carGunLR > PI) {
-			carGunLR -= TWOPI;
-		}
-
-		// Because firetruk turret also has Y movement
-		if (car->GetModelIndex() == MI_FIRETRUCK) {
-			float &carGunUD = ((CAutomobile*)car)->m_fCarGunUD;
-
-			float alphaToFace = Atan2(hi.z, hi.Magnitude2D()) + DEGTORAD(15.0f);
-			float neededAlphaTurn = alphaToFace - carGunUD;
-			float alphaTurnPerFrame = CTimer::GetTimeStepInSeconds();
-
-			if (neededAlphaTurn > alphaTurnPerFrame) {
-				neededTurn = alphaTurnPerFrame;
-				carGunUD = neededTurn + carGunUD;
-			} else {
-				if (neededAlphaTurn >= -alphaTurnPerFrame) {
-					carGunUD = alphaToFace;
-				} else {
-					carGunUD = carGunUD - alphaTurnPerFrame;
-				}
-			}
-
-			float turretMinY = -DEGTORAD(20.0f);
-			float turretMaxY = DEGTORAD(20.0f);
-			if (turretMinY <= carGunUD) {
-				if (carGunUD > turretMaxY)
-					carGunUD = turretMaxY;
-			} else {
-				carGunUD = turretMinY;
-			}
-		}
-	}
 }
 #endif

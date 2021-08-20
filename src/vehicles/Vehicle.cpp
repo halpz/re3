@@ -1672,7 +1672,7 @@ CVehicle::IsLawEnforcementVehicle(void)
 	case MI_RHINO:
 	case MI_BARRACKS:
 //	case MI_FBIRANCH:
-//	case MI_VICECHEE:
+	case MI_VICECHEE:
 		return true;
 	default:
 		return false;
@@ -1690,8 +1690,8 @@ CVehicle::UsesSiren(void)
 	case MI_POLICE:
 	case MI_ENFORCER:
 	case MI_PREDATOR:
-//	case MI_FBIRANCH:
-//	case MI_VICECHEE:
+	case MI_FBIRANCH:
+	case MI_VICECHEE:
 		return true;
 	default:
 		return false;
@@ -1955,12 +1955,11 @@ CVehicle::SetDriver(CPed *driver)
 		case MI_ENFORCER:
 			driver->m_fArmour = Max(driver->m_fArmour, CWorld::Players[0].m_nMaxArmour);
 			break;
-/*
+
 		case MI_CADDY:
 			if(!(driver->IsPlayer() && ((CPlayerPed*)driver)->DoesPlayerWantNewWeapon(WEAPONTYPE_GOLFCLUB, true)))
 				CStreaming::RequestModel(MI_GOLFCLUB, STREAMFLAGS_DONT_REMOVE);
 			break;
-*/
 		}
 	}
 
@@ -2035,12 +2034,10 @@ CVehicle::RemoveDriver(void)
 				bFreebies = false;
 			}
 			CStreaming::SetModelIsDeletable(MI_SHOTGUN);
-/*
 		}else if(GetModelIndex() == MI_CADDY && CStreaming::HasModelLoaded(MI_GOLFCLUB)){
 			if(((CPlayerPed*)pDriver)->DoesPlayerWantNewWeapon(WEAPONTYPE_GOLFCLUB, true))
 				pDriver->GiveWeapon(WEAPONTYPE_GOLFCLUB, 1, true);
 			CStreaming::SetModelIsDeletable(MI_GOLFCLUB);
-*/
 		}
 	}
 	pDriver = nil;

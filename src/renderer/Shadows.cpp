@@ -725,7 +725,7 @@ CShadows::StoreShadowForVehicle(CVehicle *pCar, VEH_SHD_TYPE type)
 void
 CShadows::StoreCarLightShadow(CVehicle *pCar, int32 nID, RwTexture *pTexture, CVector *pPosn,
 							float fFrontX, float fFrontY, float fSideX, float fSideY, uint8 nRed, uint8 nGreen, uint8 nBlue,
-							float fMaxViewAngle)
+							float fMaxViewAngle, bool arg1, float arg2, float arg3)
 {
 	ASSERT(pCar != nil);
 	ASSERT(pPosn != nil);
