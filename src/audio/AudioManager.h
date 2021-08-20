@@ -240,7 +240,7 @@ public:
 	uint8 m_nActiveSamples;
 	bool8 m_bDoubleVolume; // unused
 	bool8 m_bDynamicAcousticModelingStatus;
-	int8 field_6;
+	uint8 m_nChannelOffset;
 	float m_fSpeedOfSound;
 	bool8 m_bTimerJustReset;
 	int32 m_nTimer;
