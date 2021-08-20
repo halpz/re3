@@ -15,7 +15,7 @@
 cAudioManager AudioManager;
 
 #define SPEED_OF_SOUND 343.f
-#define TIME_SPENT 40
+#define TIME_SPENT 30
 
 cAudioManager::cAudioManager()
 {
