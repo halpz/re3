@@ -1875,7 +1875,7 @@ CAutomobile::PreRender(void)
 					break;
 
 				default:
-					if(Abs(fwdSpeed) > 0.5f)
+					if(Abs(fwdSpeed) > 5.0f)
 						AddWheelDirtAndWater(&m_aWheelColPoints[i], drawParticles);
 					if((m_aWheelSkidmarkBloody[i] || m_aWheelSkidmarkUnk[i]) && m_aWheelTimer[i] > 0.0f)
 						CSkidmarks::RegisterOne((uintptr)this + i, m_aWheelColPoints[i].point,
@@ -1929,7 +1929,7 @@ CAutomobile::PreRender(void)
 				CVector(0.0f, 0.0f, 0.0f));
 
 			if(m_aWheelTimer[CARWHEEL_REAR_LEFT] > 0.0f)
-				CSkidmarks::RegisterOne((uintptr)this + CARWHEEL_REAR_LEFT,
+				CSkidmarks::RegisterOne((uintptr)this + 5,
 					m_aWheelColPoints[CARWHEEL_REAR_LEFT].point + offset,
 					GetForward().x, GetForward().y,
 					m_aWheelSkidmarkType[CARWHEEL_REAR_LEFT], &m_aWheelSkidmarkBloody[CARWHEEL_REAR_LEFT]);
@@ -1947,12 +1947,12 @@ CAutomobile::PreRender(void)
 				CVector(0.0f, 0.0f, 0.0f));
 
 			if(m_aWheelTimer[CARWHEEL_REAR_RIGHT] > 0.0f)
-				CSkidmarks::RegisterOne((uintptr)this + CARWHEEL_REAR_RIGHT,
+				CSkidmarks::RegisterOne((uintptr)this + 6,
 					m_aWheelColPoints[CARWHEEL_REAR_RIGHT].point + offset,
 					GetForward().x, GetForward().y,
 					m_aWheelSkidmarkType[CARWHEEL_REAR_RIGHT], &m_aWheelSkidmarkBloody[CARWHEEL_REAR_RIGHT]);
 			break;
-			default: break;
+		default: break;
 		}
 	}
 
@@ -2003,10 +2003,8 @@ CAutomobile::PreRender(void)
 				dir1.y = m_vecMoveSpeed.y;
 			}
 
-			bool dblExhaust = false;
 			pos1 = GetMatrix() * exhaustPos;
 			if(pHandling->Flags & HANDLING_DBL_EXHAUST){
-				dblExhaust = true;
 				pos2 = exhaustPos;
 				pos2.x = -pos2.x;
 				pos2 = GetMatrix() * pos2;
@@ -2126,7 +2124,7 @@ CAutomobile::PreRender(void)
 				r *= f;
 				g *= f;
 				b *= f;
-			}else if(t > 412){
+			}else if(t > (512-100)){
 				float f = (512-t)/100.0f;
 				r *= f;
 				g *= f;
@@ -2368,20 +2366,20 @@ CAutomobile::PreRender(void)
 		// Taillight coronas
 		if(DotProduct(lightR-TheCamera.GetPosition(), GetForward()) > 0.0f){
 			// Behind car
-			float intensity = 0.4f*behindness + 0.4f;
-			float size = (behindness + 1.0f)/2.0f;
+			float intensity = (behindness + 1.0f)*0.4f;
+			float size = (behindness + 1.0f)*0.5f;
 
 			if(m_fGasPedal < 0.0f){
 				// reversing
 				intensity += 0.4f;
 				size += 0.3f;
 				if(Damage.GetLightStatus(VEHLIGHT_REAR_LEFT) == LIGHT_STATUS_OK)
-					CCoronas::RegisterCorona((uintptr)this + 2, 128*intensity, 128*intensity, 128*intensity, 255,
+					CCoronas::RegisterCorona((uintptr)this + 14, 128*intensity, 128*intensity, 128*intensity, 255,
 						lightL, size, 50.0f*TheCamera.LODDistMultiplier,
 						CCoronas::TYPE_STREAK, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
 						CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, angle);
 				if(Damage.GetLightStatus(VEHLIGHT_REAR_RIGHT) == LIGHT_STATUS_OK)
-					CCoronas::RegisterCorona((uintptr)this + 3, 128*intensity, 128*intensity, 128*intensity, 255,
+					CCoronas::RegisterCorona((uintptr)this + 15, 128*intensity, 128*intensity, 128*intensity, 255,
 						lightR, size, 50.0f*TheCamera.LODDistMultiplier,
 						CCoronas::TYPE_STREAK, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
 						CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, angle);
@@ -2393,23 +2391,23 @@ CAutomobile::PreRender(void)
 
 				if(alarmOff){
 					if(Damage.GetLightStatus(VEHLIGHT_REAR_LEFT) == LIGHT_STATUS_OK)
-						CCoronas::RegisterCorona((uintptr)this + 2, 0, 0, 0, 0,
+						CCoronas::RegisterCorona((uintptr)this + 14, 0, 0, 0, 0,
 							lightL, size, 0.0f,
 							CCoronas::TYPE_STREAK, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
 							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, angle);
 					if(Damage.GetLightStatus(VEHLIGHT_REAR_RIGHT) == LIGHT_STATUS_OK)
-						CCoronas::RegisterCorona((uintptr)this + 3, 0, 0, 0, 0,
+						CCoronas::RegisterCorona((uintptr)this + 15, 0, 0, 0, 0,
 							lightR, size, 0.0f,
 							CCoronas::TYPE_STREAK, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
 							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, angle);
 				}else{
 					if(Damage.GetLightStatus(VEHLIGHT_REAR_LEFT) == LIGHT_STATUS_OK)
-						CCoronas::RegisterCorona((uintptr)this + 2, 128*intensity, 0, 0, 255,
+						CCoronas::RegisterCorona((uintptr)this + 14, 128*intensity, 0, 0, 255,
 							lightL, size, 50.0f*TheCamera.LODDistMultiplier,
 							CCoronas::TYPE_STREAK, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
 							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, angle);
 					if(Damage.GetLightStatus(VEHLIGHT_REAR_RIGHT) == LIGHT_STATUS_OK)
-						CCoronas::RegisterCorona((uintptr)this + 3, 128*intensity, 0, 0, 255,
+						CCoronas::RegisterCorona((uintptr)this + 15, 128*intensity, 0, 0, 255,
 							lightR, size, 50.0f*TheCamera.LODDistMultiplier,
 							CCoronas::TYPE_STREAK, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
 							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, angle);
@@ -2417,10 +2415,11 @@ CAutomobile::PreRender(void)
 			}
 		}else{
 			// In front of car
+			// missing LODDistMultiplier probably a BUG
 			if(Damage.GetLightStatus(VEHLIGHT_REAR_LEFT) == LIGHT_STATUS_OK)
-				CCoronas::UpdateCoronaCoors((uintptr)this + 2, lightL, 50.0f*TheCamera.LODDistMultiplier, angle);
+				CCoronas::UpdateCoronaCoors((uintptr)this + 14, lightL, 50.0f, angle);
 			if(Damage.GetLightStatus(VEHLIGHT_REAR_RIGHT) == LIGHT_STATUS_OK)
-				CCoronas::UpdateCoronaCoors((uintptr)this + 3, lightR, 50.0f*TheCamera.LODDistMultiplier, angle);
+				CCoronas::UpdateCoronaCoors((uintptr)this + 15, lightR, 50.0f, angle);
 		}
 
 		// bright lights
@@ -2486,12 +2485,12 @@ CAutomobile::PreRender(void)
 				if(m_fGasPedal < 0.0f){
 					// reversing
 					if(Damage.GetLightStatus(VEHLIGHT_REAR_LEFT) == LIGHT_STATUS_OK)
-						CCoronas::RegisterCorona((uintptr)this + 2, 120, 120, 120, 255,
+						CCoronas::RegisterCorona((uintptr)this + 14, 120, 120, 120, 255,
 							lightL, 1.2f, 50.0f*TheCamera.LODDistMultiplier,
 							CCoronas::TYPE_STAR, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
 							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, 0.0f);
 					if(Damage.GetLightStatus(VEHLIGHT_REAR_RIGHT) == LIGHT_STATUS_OK)
-						CCoronas::RegisterCorona((uintptr)this + 3, 120, 120, 120, 255,
+						CCoronas::RegisterCorona((uintptr)this + 15, 120, 120, 120, 255,
 							lightR, 1.2f, 50.0f*TheCamera.LODDistMultiplier,
 							CCoronas::TYPE_STAR, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
 							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, 0.0f);
@@ -2502,12 +2501,12 @@ CAutomobile::PreRender(void)
 				}else{
 					// braking
 					if(Damage.GetLightStatus(VEHLIGHT_REAR_LEFT) == LIGHT_STATUS_OK)
-						CCoronas::RegisterCorona((uintptr)this + 2, 120, 0, 0, 255,
+						CCoronas::RegisterCorona((uintptr)this + 14, 120, 0, 0, 255,
 							lightL, 1.2f, 50.0f*TheCamera.LODDistMultiplier,
 							CCoronas::TYPE_STAR, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
 							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, 0.0f);
 					if(Damage.GetLightStatus(VEHLIGHT_REAR_RIGHT) == LIGHT_STATUS_OK)
-						CCoronas::RegisterCorona((uintptr)this + 3, 120, 0, 0, 255,
+						CCoronas::RegisterCorona((uintptr)this + 15, 120, 0, 0, 255,
 							lightR, 1.2f, 50.0f*TheCamera.LODDistMultiplier,
 							CCoronas::TYPE_STAR, CCoronas::FLARE_NONE, CCoronas::REFLECTION_ON,
 							CCoronas::LOSCHECK_OFF, CCoronas::STREAK_ON, 0.0f);
@@ -2518,15 +2517,15 @@ CAutomobile::PreRender(void)
 				}
 			}else{
 				if(Damage.GetLightStatus(VEHLIGHT_REAR_LEFT) == LIGHT_STATUS_OK)
-					CCoronas::UpdateCoronaCoors((uintptr)this + 2, lightL, 50.0f*TheCamera.LODDistMultiplier, 0.0f);
+					CCoronas::UpdateCoronaCoors((uintptr)this + 14, lightL, 50.0f*TheCamera.LODDistMultiplier, 0.0f);
 				if(Damage.GetLightStatus(VEHLIGHT_REAR_RIGHT) == LIGHT_STATUS_OK)
-					CCoronas::UpdateCoronaCoors((uintptr)this + 3, lightR, 50.0f*TheCamera.LODDistMultiplier, 0.0f);
+					CCoronas::UpdateCoronaCoors((uintptr)this + 15, lightR, 50.0f*TheCamera.LODDistMultiplier, 0.0f);
 			}
 		}else{
 			if(Damage.GetLightStatus(VEHLIGHT_REAR_LEFT) == LIGHT_STATUS_OK)
-				CCoronas::UpdateCoronaCoors((uintptr)this + 2, lightL, 50.0f*TheCamera.LODDistMultiplier, 0.0f);
+				CCoronas::UpdateCoronaCoors((uintptr)this + 14, lightL, 50.0f*TheCamera.LODDistMultiplier, 0.0f);
 			if(Damage.GetLightStatus(VEHLIGHT_REAR_RIGHT) == LIGHT_STATUS_OK)
-				CCoronas::UpdateCoronaCoors((uintptr)this + 3, lightR, 50.0f*TheCamera.LODDistMultiplier, 0.0f);
+				CCoronas::UpdateCoronaCoors((uintptr)this + 15, lightR, 50.0f*TheCamera.LODDistMultiplier, 0.0f);
 		}
 	}
 	// end of lights
@@ -2608,8 +2607,8 @@ CAutomobile::PreRender(void)
 			}else{
 				CParticle::AddParticle(PARTICLE_CAR_SPLASH, m_aWheelColPoints[CARWHEEL_REAR_RIGHT].point,
 					0.3f*m_vecMoveSpeed+0.15f*GetRight()+CVector(0.0f, 0.0f, 0.1f), nil, 0.15f, hoverParticleCol,
-					CGeneral::GetRandomNumberInRange(0.0f, 90.0f),
-					CGeneral::GetRandomNumberInRange(0.0f, 10.0f), 1);
+					CGeneral::GetRandomNumberInRange(0.0f, 10.0f),
+					CGeneral::GetRandomNumberInRange(0.0f, 90.0f), 1);
 			}
 #ifdef BETTER_ALLCARSAREDODO_CHEAT
 		} else if (bAllDodosCheat && m_nDriveWheelsOnGround == 0 && m_nDriveWheelsOnGroundPrev == 0) {
@@ -2649,8 +2648,8 @@ CAutomobile::PreRender(void)
 			}else{
 				CParticle::AddParticle(PARTICLE_CAR_SPLASH, m_aWheelColPoints[CARWHEEL_REAR_LEFT].point,
 					0.3f*m_vecMoveSpeed-0.15f*GetRight()+CVector(0.0f, 0.0f, 0.1f), nil, 0.15f, hoverParticleCol,
-					CGeneral::GetRandomNumberInRange(0.0f, 90.0f),
-					CGeneral::GetRandomNumberInRange(0.0f, 10.0f), 1);
+					CGeneral::GetRandomNumberInRange(0.0f, 10.0f),
+					CGeneral::GetRandomNumberInRange(0.0f, 90.0f), 1);
 			}
 #ifdef BETTER_ALLCARSAREDODO_CHEAT
 		} else if (bAllDodosCheat && m_nDriveWheelsOnGround == 0 && m_nDriveWheelsOnGroundPrev == 0) {
@@ -4353,6 +4352,16 @@ CAutomobile::dmgDrawCarCollidingParticles(const CVector &pos, float amount)
 			CGeneral::GetRandomNumberInRange(0, 4));
 }
 
+float fDamagePosSpeedShift = 0.4f;
+float fSpeedMult[] = {
+	0.8f,
+	0.75f,
+	0.85f,
+	0.9f,
+	0.85f,
+	0.85f
+};
+
 void
 CAutomobile::AddDamagedVehicleParticles(void)
 {
@@ -4365,7 +4374,7 @@ CAutomobile::AddDamagedVehicleParticles(void)
 	if(m_fHealth >= 650.0f)
 		return;
 
-	CVector direction = 0.85f*m_vecMoveSpeed;
+	CVector direction = fSpeedMult[5]*m_vecMoveSpeed;
 	CVector damagePos = ((CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()))->m_positions[CAR_POS_HEADLIGHTS];
 
 	switch(Damage.GetDoorStatus(DOOR_BONNET)){
@@ -4390,7 +4399,7 @@ CAutomobile::AddDamagedVehicleParticles(void)
 		damagePos.y = 0.2f*GetColModel()->boundingBox.min.y;
 		damagePos.z = 0.3f*GetColModel()->boundingBox.max.z;
 	}else
-		damagePos.z += 0.4f*(GetColModel()->boundingBox.max.z-damagePos.z) * DotProduct(GetForward(), m_vecMoveSpeed);
+		damagePos.z += fDamagePosSpeedShift*(GetColModel()->boundingBox.max.z-damagePos.z) * DotProduct(GetForward(), m_vecMoveSpeed);
 	damagePos = GetMatrix()*damagePos;
 	damagePos.z += 0.15f;
 
@@ -4409,7 +4418,7 @@ CAutomobile::AddDamagedVehicleParticles(void)
 		direction = 0.85f*m_vecMoveSpeed;
 		direction += GetRight() * CGeneral::GetRandomNumberInRange(0.0f, 0.04f) * (1.0f - 2.0f*m_vecMoveSpeed.Magnitude());
 		direction.z += 0.001f;
-		n = (CGeneral::GetRandomNumber() & 3) + 2;
+		n = (CGeneral::GetRandomNumber() & 3) + 1;
 		for(i = 0; i < n; i++)
 			CParticle::AddParticle(PARTICLE_SPARK_SMALL, damagePos, direction);
 		if(((CTimer::GetFrameCounter() + m_randomSeed) & 0xF) == 0)
@@ -4417,11 +4426,15 @@ CAutomobile::AddDamagedVehicleParticles(void)
 	}else if(m_fHealth < 250.0f){
 		// nothing
 	}else if(m_fHealth < 320.0f){
-		CParticle::AddParticle(PARTICLE_ENGINE_SMOKE2, damagePos, 0.8f*direction);
+		CParticle::AddParticle(PARTICLE_ENGINE_SMOKE2, damagePos, fSpeedMult[0]*direction);
 	}else if(m_fHealth < 390.0f){
-		CParticle::AddParticle(PARTICLE_ENGINE_STEAM, damagePos, 0.75f*direction);
-		CParticle::AddParticle(PARTICLE_ENGINE_SMOKE, damagePos, 0.85f*direction);
+		CParticle::AddParticle(PARTICLE_ENGINE_STEAM, damagePos, fSpeedMult[1]*direction);
+		CParticle::AddParticle(PARTICLE_ENGINE_SMOKE, damagePos, fSpeedMult[2]*direction);
 	}else if(m_fHealth < 460.0f){
+		if(((CTimer::GetFrameCounter() + m_randomSeed) & 3) == 0 ||
+		   ((CTimer::GetFrameCounter() + m_randomSeed) & 3) == 2)
+			CParticle::AddParticle(PARTICLE_ENGINE_STEAM, damagePos, fSpeedMult[3]*direction);
+	}else{
 		int rnd = CTimer::GetFrameCounter() + m_randomSeed;
 		if(rnd < 10 ||
 		   rnd < 70 && rnd > 25 ||
@@ -4431,7 +4444,6 @@ CAutomobile::AddDamagedVehicleParticles(void)
 			return;
 		direction.z += 0.05f*Max(1.0f - 1.6f*m_vecMoveSpeed.Magnitude(), 0.0f);
 		if(electric){
-			// BUG. we had that case already
 			direction = 0.85f*m_vecMoveSpeed;
 			direction += GetRight() * CGeneral::GetRandomNumberInRange(0.0f, 0.04f) * (1.0f - 2.0f*m_vecMoveSpeed.Magnitude());
 			direction.z += 0.001f;
@@ -4442,13 +4454,10 @@ CAutomobile::AddDamagedVehicleParticles(void)
 				CParticle::AddParticle(PARTICLE_ENGINE_SMOKE, damagePos, 0.8f*m_vecMoveSpeed, nil, 0.1f, 0, 0, 0, 1000);
 		}else{
 			if(TheCamera.GetLookDirection() != LOOKING_FORWARD)
-				CParticle::AddParticle(PARTICLE_ENGINE_STEAM, damagePos, 0.75f*direction);
+				CParticle::AddParticle(PARTICLE_ENGINE_STEAM, damagePos, direction);
 			else if(((CTimer::GetFrameCounter() + m_randomSeed) & 1) == 0)
-				CParticle::AddParticle(PARTICLE_ENGINE_STEAM, damagePos, 0.85f*m_vecMoveSpeed);
+				CParticle::AddParticle(PARTICLE_ENGINE_STEAM, damagePos, fSpeedMult[4]*m_vecMoveSpeed);
 		}
-	}else if(((CTimer::GetFrameCounter() + m_randomSeed) & 3) == 0 ||
-	         ((CTimer::GetFrameCounter() + m_randomSeed) & 3) == 2){
-		CParticle::AddParticle(PARTICLE_ENGINE_STEAM, damagePos, 0.9f*direction);
 	}
 }
 
@@ -4498,7 +4507,7 @@ CAutomobile::AddWheelDirtAndWater(CColPoint *colpoint, uint32 belowEffectSpeed)
 	case SURFACE_SAND:
 	case SURFACE_SAND_BEACH:
 		if(CTimer::GetFrameCounter() & 2 ||
-		   CGeneral::GetRandomNumberInRange(CWeather::WetRoads, 1.01f) > 0.5f)
+		   CWeather::WetRoads > 0.0f && CGeneral::GetRandomNumberInRange(CWeather::WetRoads, 1.01f) > 0.5f)
 			return 0;
 		dir.x = 0.5f*m_vecMoveSpeed.x;
 		dir.y = 0.5f*m_vecMoveSpeed.y;
@@ -5828,12 +5837,12 @@ CAutomobile::CloseAllDoors(void)
 	}
 }
 
-void
+CPed*
 CAutomobile::KnockPedOutCar(eWeaponType weapon, uint16 door, CPed *ped)
 {
 	AnimationId anim = ANIM_STD_KO_FRONT;
 	if(ped == nil)
-		return;
+		return nil;
 
 	ped->m_vehDoor = door;
 	ped->SetPedState(PED_IDLE);
@@ -5868,6 +5877,7 @@ CAutomobile::KnockPedOutCar(eWeaponType weapon, uint16 door, CPed *ped)
 		ped->m_headingRate = 0.0f;
 	}
 	ped->m_pMyVehicle = nil;
+	return ped;
 }
 
 #ifdef COMPATIBLE_SAVES
