@@ -21,7 +21,7 @@ cAudioManager::cAudioManager()
 {
 	m_bIsInitialised = FALSE;
 	m_bIsSurround = TRUE;
-	field_6 = 0;
+	m_nChannelOffset = 0;
 	m_fSpeedOfSound = SPEED_OF_SOUND / TIME_SPENT;
 	m_nTimeSpent = TIME_SPENT;
 	m_nActiveSamples = NUM_CHANNELS_GENERIC;
@@ -991,6 +991,7 @@ cAudioManager::ProcessActiveQueues()
 	CVector position;
 
 	bool8 missionState;
+	uint8 channelOffset = 0;
 
 	for (int32 i = 0; i < m_nActiveSamples; i++) {
 		m_asSamples[m_nActiveSampleQueue][i].m_bIsBeingPlayed = FALSE;
@@ -1116,7 +1117,7 @@ cAudioManager::ProcessActiveQueues()
 #endif
 			{
 				for (uint8 j = 0; j < m_nActiveSamples; j++) {
-					uint8 k = (j + field_6) % m_nActiveSamples;
+					uint8 k = (j + m_nChannelOffset) % m_nActiveSamples;
 					if (!m_asActiveSamples[k].m_bIsBeingPlayed) {
 						if (sample.m_nLoopCount > 0) {
 							samplesPerFrame = sample.m_nFrequency / m_nTimeSpent;
@@ -1195,6 +1196,7 @@ cAudioManager::ProcessActiveQueues()
 							SampleManager.StartChannel(k);
 						}
 						m_asActiveSamples[k].m_bIsBeingPlayed = TRUE;
+						channelOffset++;
 						sample.m_bIsBeingPlayed = TRUE;
 						sample.m_nVolumeChange = -1;
 						break;
@@ -1203,7 +1205,10 @@ cAudioManager::ProcessActiveQueues()
 			}
 		}
 	}
-	field_6 %= m_nActiveSamples;
+#ifdef GTA_PS2
+	m_nChannelOffset += channelOffset;
+#endif
+	m_nChannelOffset %= m_nActiveSamples;
 }
 
 void
