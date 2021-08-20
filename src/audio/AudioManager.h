@@ -7,49 +7,59 @@
 class tSound
 {
 public:
-	int32 m_nEntityIndex;
+	int32 m_nEntityIndex;		// audio entity index
 #if GTA_VERSION >= GTA3_PC_10
-	uint32 m_nCounter;
+	uint32 m_nCounter;			// I'm not sure what this is but it looks like a virtual counter to determine the same sound in queue
+								// Values higher than 255 are used by reflections
 #else
 	uint8 m_nCounter;
 #endif
-	uint32 m_nSampleIndex;
-	uint8 m_nBankIndex;
-	bool8 m_bIs2D;
-	uint32 m_nReleasingVolumeModificator;
-	uint32 m_nFrequency;
-	uint8 m_nVolume;
-	float m_fDistance;
-	uint32 m_nLoopCount;
+	uint32 m_nSampleIndex;		// An index of sample from AudioSamples.h
+	uint8 m_nBankIndex;			// A sound bank index. IDK what's the point of it here since samples are hardcoded anyway
+	bool8 m_bIs2D;				// If TRUE then sound is played in 2D space (such as frontend or police radio)
+	uint32 m_nPriority;			// The multiplier for the sound priority (see m_nFinalPriority below). Lesser value means higher priority
+	uint32 m_nFrequency;		// Sound frequency, plain and simple
+	uint8 m_nVolume;			// Sound volume (0..127), only used as an actual volume without EXTERNAL_3D_SOUND (see m_nEmittingVolume)
+	float m_fDistance;			// Distance to camera (useless if m_bIs2D == TRUE)
+	uint32 m_nLoopCount;		// 0 - always loop, 1 - don't loop, other values never seen
 #ifndef GTA_PS2
+	// Loop offsets
 	uint32 m_nLoopStart;
 	int32 m_nLoopEnd;
 #endif
 #ifdef EXTERNAL_3D_SOUND
-	uint8 m_nEmittingVolume;
+	uint8 m_nEmittingVolume;	// The volume in 3D space, provided to 3D audio engine
 #endif
-	float m_fSpeedMultiplier;
+	float m_fSpeedMultiplier;	// Used for doppler effect. 0.0f - unaffected by doppler
 #if GTA_VERSION >= GTA3_PC_10
-	float m_SoundIntensity;
+	float m_MaxDistance;		// The maximum distance at which sound could be heard. Minimum distance = MaxDistance / 5 or MaxDistance / 4 in case of emitting volume (useless if m_bIs2D == TRUE)
 #else
-	uint32 m_SoundIntensity;
+	uint32 m_MaxDistance;
 #endif
-	bool8 m_bReleasingSoundFlag;
-	CVector m_vecPos;
-	bool8 m_bReverbFlag;
+	bool8 m_bStatic;			// If TRUE then sound parameters cannot be changed during playback (frequency, position, etc.)
+	CVector m_vecPos;			// Position of sound in 3D space. Unused if m_bIs2D == TRUE
+	bool8 m_bReverb;			// Toggles reverb effect
 #ifdef AUDIO_REFLECTIONS
-	uint8 m_nLoopsRemaining;
-	bool8 m_bRequireReflection; // Used for oneshots
+	uint8 m_nReflectionDelay;	// Number of frames before reflection could be played. This is calculated internally by AudioManager and shouldn't be set by queued sample
+	bool8 m_bReflections;		// Add sound reflections
 #endif
-	uint8 m_nOffset;
-	uint32 m_nReleasingVolumeDivider;
-	bool8 m_bIsProcessed;
-	bool8 m_bLoopEnded;
+	uint8 m_nPan;				// Sound panning (0-127). Controls the volume of the playback coming from left and right speaker. Calculated internally unless m_bIs2D==TRUE.
+								// 0 =   L 100%  R 0%
+								// 63 =  L 100%  R 100%
+								// 127 = L 0%    R 100%
+	uint32 m_nFramesToPlay;		// Number of frames the sound would be played (if it stops being queued).
+								// This one is being set by queued sample for looping sounds, otherwise calculated inside AudioManager
+
+	// all fields below are internal to AudioManager calculations and aren't set by queued sample
+	bool8 m_bIsBeingPlayed;		// Set to TRUE when the sound was added or changed on current frame to avoid it being overwritten
+	bool8 m_bIsPlayingFinished;	// Not sure about the name. Set to TRUE when sampman channel becomes free
 #if GTA_VERSION < GTA3_PC_10
-	int32 unk; // only on PS2, seems unused
+	int32 unk;					// Only on PS2, used by static non-looped sounds (AFAIK)
+								// Looks like it's keeping a number of frames left to play with the purpose of setting m_bIsPlayingFinished=TRUE once value reaches 0
+								// Default value is -3 for whatever reason
 #endif
-	uint32 m_nCalculatedVolume;
-	int8 m_nVolumeChange;
+	uint32 m_nFinalPriority;	// Actual value used to compare priority, calculated using volume and m_nPriority. Lesser value means higher priority
+	int8 m_nVolumeChange;		// How much m_nVolume should reduce per each frame. Has no effect with EXTERNAL_3D_SOUND
 };
 
 VALIDATE_SIZE(tSound, 92);
@@ -208,8 +218,8 @@ class cAudioManager
 {
 public:
 	bool8 m_bIsInitialised;
-	bool8 m_bReverb; // unused
-	bool8 m_bFifthFrameFlag;
+	bool8 m_bIsSurround; // unused until VC
+	bool8 m_bReduceReleasingPriority;
 	uint8 m_nActiveSamples;
 	bool8 m_bDoubleVolume; // unused
 #if GTA_VERSION >= GTA3_PC_10
@@ -288,7 +298,7 @@ public:
 
 	void ServiceSoundEffects();
 	uint32 FL(float f); // not used
-	uint8 ComputeVolume(uint8 emittingVolume, float soundIntensity, float distance);
+	uint8 ComputeVolume(uint8 emittingVolume, float maxDistance, float distance);
 	void TranslateEntity(Const CVector *v1, CVector *v2);
 	int32 ComputePan(float, CVector *);
 	uint32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2, float speedMultiplier); // inlined on PS2
@@ -309,7 +319,7 @@ public:
 
 #ifdef EXTERNAL_3D_SOUND // actually must have been && AUDIO_MSS as well
 	void AdjustSamplesVolume();
-	uint8 ComputeEmittingVolume(uint8 emittingVolume, float intensity, float dist);
+	uint8 ComputeEmittingVolume(uint8 emittingVolume, float maxDistance, float dist);
 #endif
 
 	// audio logic
@@ -553,7 +563,7 @@ public:
 #define SET_EMITTING_VOLUME(vol)
 #endif
 #ifdef AUDIO_REFLECTIONS
-#define SET_SOUND_REFLECTION(b) m_sQueueSample.m_bRequireReflection = b
+#define SET_SOUND_REFLECTION(b) m_sQueueSample.m_bReflections = b
 #else
 #define SET_SOUND_REFLECTION(b)
 #endif
