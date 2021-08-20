@@ -1113,12 +1113,12 @@ cAudioManager::AdjustSamplesVolume()
 }
 
 uint8
-cAudioManager::ComputeEmittingVolume(uint8 emittingVolume, float intensity, float dist)
+cAudioManager::ComputeEmittingVolume(uint8 emittingVolume, float maxDistance, float distance)
 {
-	float quatIntensity = intensity / 4.0f;
-	float diffIntensity = intensity - quatIntensity;
-	if (dist > diffIntensity)
-		return (quatIntensity - (dist - diffIntensity)) * (float)emittingVolume / quatIntensity;
+	float minDistance = maxDistance / 4.0f;
+	float diffDistance = maxDistance - minDistance;
+	if (distance > diffDistance)
+		return (minDistance - (distance - diffDistance)) * (float)emittingVolume / minDistance;
 	return emittingVolume;
 }
 #endif

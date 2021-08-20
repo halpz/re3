@@ -59,7 +59,7 @@ public:
 								// Default value is -3 for whatever reason
 #endif
 	uint32 m_nFinalPriority;	// Actual value used to compare priority, calculated using volume and m_nPriority. Lesser value means higher priority
-	int8 m_nVolumeChange;		// How much m_nVolume should reduce per each frame. Has no effect with EXTERNAL_3D_SOUND
+	int8 m_nVolumeChange;		// How much m_nVolume should reduce per each frame.
 };
 
 VALIDATE_SIZE(tSound, 92);
@@ -319,7 +319,7 @@ public:
 
 #ifdef EXTERNAL_3D_SOUND // actually must have been && AUDIO_MSS as well
 	void AdjustSamplesVolume();
-	uint8 ComputeEmittingVolume(uint8 emittingVolume, float maxDistance, float dist);
+	uint8 ComputeEmittingVolume(uint8 emittingVolume, float maxDistance, float distance);
 #endif
 
 	// audio logic
