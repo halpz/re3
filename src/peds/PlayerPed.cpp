@@ -777,7 +777,8 @@ spentAmmoCheck:
 
 				// BUG: m_nSelectedWepSlot and GetWeapon(..) takes slot in VC but they compared them against weapon types in whole condition! jeez
 #ifdef FIX_BUGS
-				if (m_nSelectedWepSlot == WEAPONSLOT_MELEE || GetWeapon(m_nSelectedWepSlot).m_nAmmoTotal > 0 && m_nSelectedWepSlot != WEAPONSLOT_PROJECTILE) {
+				if (m_nSelectedWepSlot == WEAPONSLOT_MELEE ||
+					GetWeapon(m_nSelectedWepSlot).m_nAmmoTotal > 0 && (m_nSelectedWepSlot != WEAPONSLOT_PROJECTILE || GetWeapon(WEAPONSLOT_PROJECTILE).m_eWeaponType == WEAPONTYPE_DETONATOR_GRENADE)) {
 #else
 				if (m_nSelectedWepSlot == WEAPONTYPE_BASEBALLBAT && GetWeapon(WEAPONTYPE_BASEBALLBAT).m_eWeaponType == WEAPONTYPE_BASEBALLBAT
 					|| GetWeapon(m_nSelectedWepSlot).m_nAmmoTotal > 0
