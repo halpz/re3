@@ -1057,7 +1057,7 @@ CPlayerPed::FindNextWeaponLockOnTarget(CEntity *previousTarget, bool lookToLeft)
 	// nextTarget = nil; // duplicate
 	float lastCloseness = -10000.0f;
 	// CGeneral::GetATanOfXY(GetForward().x, GetForward().y); // unused
-	CVector distVec = previousTarget->GetPosition() - GetPosition();
+	CVector distVec = previousTarget->GetPosition() - TheCamera.GetPosition();
 	float referenceBeta = CGeneral::GetATanOfXY(distVec.x, distVec.y);
 
 	for (int h = CPools::GetPedPool()->GetSize() - 1; h >= 0; h--) {
@@ -1069,7 +1069,7 @@ CPlayerPed::FindNextWeaponLockOnTarget(CEntity *previousTarget, bool lookToLeft)
 					&& (!pedToCheck->bInVehicle || (pedToCheck->m_pMyVehicle && pedToCheck->m_pMyVehicle->IsBike()))
 #endif
 					&& pedToCheck->m_leader != this && !pedToCheck->bNeverEverTargetThisPed
-					&& OurPedCanSeeThisOne(pedToCheck) && CanIKReachThisTarget(pedToCheck->GetPosition(), GetWeapon(), true)) {
+					&& OurPedCanSeeThisOne(pedToCheck, true) && CanIKReachThisTarget(pedToCheck->GetPosition(), GetWeapon(), true)) {
 
 					EvaluateNeighbouringTarget(pedToCheck, &nextTarget, &lastCloseness,
 						weaponRange, referenceBeta, lookToLeft, IsThisPedAnAimingPriority(pedToCheck));
@@ -1195,7 +1195,7 @@ CPlayerPed::ProcessAnimGroups(void)
 				GetWeapon()->m_eWeaponType == WEAPONTYPE_MINIGUN)
 				groupToSet = ASSOCGRP_PLAYERCHAINSAW;
 			else if (GetWeapon()->m_eWeaponType != WEAPONTYPE_COLT45 && GetWeapon()->m_eWeaponType != WEAPONTYPE_UZI
-				// I hope this is a inlined function...
+				// I hope this is an inlined function...
 				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_PYTHON && GetWeapon()->m_eWeaponType != WEAPONTYPE_TEC9
 				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_SILENCED_INGRAM && GetWeapon()->m_eWeaponType != WEAPONTYPE_MP5
 				&& GetWeapon()->m_eWeaponType != WEAPONTYPE_GOLFCLUB && GetWeapon()->m_eWeaponType != WEAPONTYPE_KATANA
