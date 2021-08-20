@@ -135,7 +135,7 @@ CBoat::ProcessControl(void)
 		m_fBuoyancy *= 0.99f;
 
 #ifdef FIX_BUGS
-	if(FindPlayerPed() && FindPlayerPed()->m_pWanted->GetWantedLevel() > 0 && GetModelIndex() == MI_PREDATOR){
+	if(FindPlayerPed() && FindPlayerPed()->m_pWanted->GetWantedLevel() > 0 && GetModelIndex() == MI_PREDATOR && pDriver && IsPolicePedModel(pDriver->GetModelIndex())) {
 #else
 	if(FindPlayerPed()->m_pWanted->GetWantedLevel() > 0 && GetModelIndex() == MI_PREDATOR){
 #endif
