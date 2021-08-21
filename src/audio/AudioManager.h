@@ -119,26 +119,7 @@ public:
 
 VALIDATE_SIZE(cPedComments, 0x490);
 
-class CEntity;
-
 #define MISSION_AUDIO_SLOTS (2)
-
-// So instead of doing cMissionAudio [2] they've added [2] to every field of the struct...
-// Only someone with a VERY EXTRAORDINARY mind could have come up with that
-class cMissionAudio
-{
-public:
-	CVector m_vecPos[MISSION_AUDIO_SLOTS];
-	bool8 m_bPredefinedProperties[MISSION_AUDIO_SLOTS];
-	uint32 m_nSampleIndex[MISSION_AUDIO_SLOTS];
-	uint8 m_nLoadingStatus[MISSION_AUDIO_SLOTS];
-	uint8 m_nPlayStatus[MISSION_AUDIO_SLOTS];
-	bool8 m_bIsPlaying[MISSION_AUDIO_SLOTS];
-	int32 m_nMissionAudioCounter[MISSION_AUDIO_SLOTS];
-	bool8 m_bIsPlayed[MISSION_AUDIO_SLOTS];
-	bool8 m_bIsMobile[MISSION_AUDIO_SLOTS];
-};
-VALIDATE_SIZE(cMissionAudio, 0x38);
 
 // name made up
 class cAudioScriptObjectManager
@@ -153,6 +134,7 @@ public:
 
 
 class cTransmission;
+class CEntity;
 class CPlane;
 class CVehicle;
 class CPed;
@@ -263,7 +245,7 @@ public:
 	bool8 m_bIsPlayerShutUp;
 	uint8 m_nPlayerMood;
 	uint32 m_nPlayerMoodTimer;
-	uint8 field_rest[4];
+	uint32 field_4B38_vc;
 	bool8 m_bGenericSfx;
 
 	cPedComments m_sPedComments;
@@ -271,17 +253,31 @@ public:
 	int32 m_nWaterCannonEntity;
 	int32 m_nPoliceChannelEntity;
 	cPoliceRadioQueue m_sPoliceRadioQueue;
+	cAMCrime m_aCrimes[10];
 	int32 m_nFrontEndEntity;
 	int32 m_nCollisionEntity;
 	cAudioCollisionManager m_sCollisionManager;
 	int32 m_nProjectileEntity;
+	int32 m_nEscalatorEntity;
+	int32 m_nExtraSoundsEntity;
 #ifdef GTA_BRIDGE
 	int32 m_nBridgeEntity;
 #endif
-	int32 m_nEscalatorEntity;
-	int32 m_nExtraSoundsEntity;
-	cMissionAudio m_sMissionAudio;
-	uint8 field_5538; // something related to phone dialogues
+
+	// Mission audio stuff
+	// So instead of making an array of struct they've added [MISSION_AUDIO_SLOTS] to every field...
+	// Only someone with a VERY EXTRAORDINARY mind could have come up with that
+	CVector m_vecMissionAudioPosition[MISSION_AUDIO_SLOTS];
+	bool8 m_bIsMissionAudio2D[MISSION_AUDIO_SLOTS];
+	uint32 m_nMissionAudioSampleIndex[MISSION_AUDIO_SLOTS];
+	uint8 m_nMissionAudioLoadingStatus[MISSION_AUDIO_SLOTS];
+	uint8 m_nMissionAudioPlayStatus[MISSION_AUDIO_SLOTS];
+	bool8 m_bIsMissionAudioPlaying[MISSION_AUDIO_SLOTS];
+	int32 m_nMissionAudioFramesToPlay[MISSION_AUDIO_SLOTS];
+	bool8 m_bIsMissionAudioAllowedToPlay[MISSION_AUDIO_SLOTS];
+	bool8 m_bIsMissionAudioPhoneCall[MISSION_AUDIO_SLOTS];
+	uint8 m_nGlobalSfxVolumeMultiplier; // used to lower sfx volume during phone calls
+
 	int32 m_anRandomTable[5];
 	uint8 m_nTimeSpent;
 	bool8 m_nUserPause;
@@ -639,6 +635,10 @@ public:
 #define SET_SOUND_REVERB(b) m_sQueueSample.m_bReverb = b
 #else
 #define SET_SOUND_REVERB(b)
+#endif
+
+#ifndef GTA_PS2
+#define CHANNEL_PLAYER_VEHICLE_ENGINE m_nActiveSamples
 #endif
 
 //#if defined(AUDIO_MSS) && !defined(PS2_AUDIO_CHANNELS)
