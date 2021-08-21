@@ -154,13 +154,13 @@ cAudioManager::PostInitialiseGameSpecificSetup()
 	if (m_nBridgeEntity >= 0)
 		SetEntityStatus(m_nBridgeEntity, TRUE);
 
-	m_sMissionAudio.m_nSampleIndex = NO_SAMPLE;
-	m_sMissionAudio.m_nLoadingStatus = LOADING_STATUS_NOT_LOADED;
-	m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_STOPPED;
-	m_sMissionAudio.m_bIsPlaying = FALSE;
-	m_sMissionAudio.m_bIsPlayed = FALSE;
-	m_sMissionAudio.m_bPredefinedProperties = TRUE;
-	m_sMissionAudio.m_nMissionAudioCounter = 0;
+	m_nMissionAudioSampleIndex = NO_SAMPLE;
+	m_nMissionAudioLoadingStatus = LOADING_STATUS_NOT_LOADED;
+	m_nMissionAudioPlayStatus = PLAY_STATUS_STOPPED;
+	m_bIsMissionAudioPlaying = FALSE;
+	m_bIsMissionAudioAllowedToPlay = FALSE;
+	m_bIsMissionAudio2D = TRUE;
+	m_nMissionAudioFramesToPlay = 0;
 	ResetAudioLogicTimers(CTimer::GetTimeInMilliseconds());
 }
 
@@ -8479,14 +8479,14 @@ cAudioManager::PreloadMissionAudio(Const char *name)
 	if (m_bIsInitialised) {
 		int32 missionAudioSfx = FindMissionAudioSfx(name);
 		if (missionAudioSfx != NO_SAMPLE) {
-			m_sMissionAudio.m_nSampleIndex = missionAudioSfx;
-			m_sMissionAudio.m_nLoadingStatus = LOADING_STATUS_NOT_LOADED;
-			m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_STOPPED;
-			m_sMissionAudio.m_bIsPlaying = FALSE;
-			m_sMissionAudio.m_nMissionAudioCounter = m_nTimeSpent * SampleManager.GetStreamedFileLength(missionAudioSfx) / 1000;
-			m_sMissionAudio.m_nMissionAudioCounter *= 4;
-			m_sMissionAudio.m_bIsPlayed = FALSE;
-			m_sMissionAudio.m_bPredefinedProperties = TRUE;
+			m_nMissionAudioSampleIndex = missionAudioSfx;
+			m_nMissionAudioLoadingStatus = LOADING_STATUS_NOT_LOADED;
+			m_nMissionAudioPlayStatus = PLAY_STATUS_STOPPED;
+			m_bIsMissionAudioPlaying = FALSE;
+			m_nMissionAudioFramesToPlay = m_nTimeSpent * SampleManager.GetStreamedFileLength(missionAudioSfx) / 1000;
+			m_nMissionAudioFramesToPlay *= 4;
+			m_bIsMissionAudioAllowedToPlay = FALSE;
+			m_bIsMissionAudio2D = TRUE;
 			g_bMissionAudioLoadFailed = FALSE;
 		}
 	}
@@ -8496,7 +8496,7 @@ uint8
 cAudioManager::GetMissionAudioLoadingStatus()
 {
 	if (m_bIsInitialised)
-		return m_sMissionAudio.m_nLoadingStatus;
+		return m_nMissionAudioLoadingStatus;
 
 	return LOADING_STATUS_LOADED;
 }
@@ -8505,24 +8505,24 @@ void
 cAudioManager::SetMissionAudioLocation(float x, float y, float z)
 {
 	if (m_bIsInitialised) {
-		m_sMissionAudio.m_bPredefinedProperties = FALSE;
-		m_sMissionAudio.m_vecPos = CVector(x, y, z);
+		m_bIsMissionAudio2D = FALSE;
+		m_vecMissionAudioPosition = CVector(x, y, z);
 	}
 }
 
 void
 cAudioManager::PlayLoadedMissionAudio()
 {
-	if (m_bIsInitialised && m_sMissionAudio.m_nSampleIndex != NO_SAMPLE && m_sMissionAudio.m_nLoadingStatus == LOADING_STATUS_LOADED &&
-	    m_sMissionAudio.m_nPlayStatus == PLAY_STATUS_STOPPED)
-		m_sMissionAudio.m_bIsPlayed = TRUE;
+	if (m_bIsInitialised && m_nMissionAudioSampleIndex != NO_SAMPLE && m_nMissionAudioLoadingStatus == LOADING_STATUS_LOADED &&
+	    m_nMissionAudioPlayStatus == PLAY_STATUS_STOPPED)
+		m_bIsMissionAudioAllowedToPlay = TRUE;
 }
 
 bool8
 cAudioManager::IsMissionAudioSampleFinished()
 {
 	if (m_bIsInitialised)
-		return m_sMissionAudio.m_nPlayStatus == PLAY_STATUS_FINISHED;
+		return m_nMissionAudioPlayStatus == PLAY_STATUS_FINISHED;
 
 	static int32 cPretendFrame = 1;
 
@@ -8533,13 +8533,13 @@ void
 cAudioManager::ClearMissionAudio()
 {
 	if (m_bIsInitialised) {
-		m_sMissionAudio.m_nSampleIndex = NO_SAMPLE;
-		m_sMissionAudio.m_nLoadingStatus = LOADING_STATUS_NOT_LOADED;
-		m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_STOPPED;
-		m_sMissionAudio.m_bIsPlaying = FALSE;
-		m_sMissionAudio.m_bIsPlayed = FALSE;
-		m_sMissionAudio.m_bPredefinedProperties = TRUE;
-		m_sMissionAudio.m_nMissionAudioCounter = 0;
+		m_nMissionAudioSampleIndex = NO_SAMPLE;
+		m_nMissionAudioLoadingStatus = LOADING_STATUS_NOT_LOADED;
+		m_nMissionAudioPlayStatus = PLAY_STATUS_STOPPED;
+		m_bIsMissionAudioPlaying = FALSE;
+		m_bIsMissionAudioAllowedToPlay = FALSE;
+		m_bIsMissionAudio2D = TRUE;
+		m_nMissionAudioFramesToPlay = 0;
 	}
 }
 
@@ -8557,16 +8557,16 @@ cAudioManager::ProcessMissionAudio()
 	static uint8 nFramesForPretendPlaying = 0;
 
 	if (!m_bIsInitialised) return;
-	if (m_sMissionAudio.m_nSampleIndex == NO_SAMPLE) return;
+	if (m_nMissionAudioSampleIndex == NO_SAMPLE) return;
 
-	switch (m_sMissionAudio.m_nLoadingStatus) {
+	switch (m_nMissionAudioLoadingStatus) {
 	case LOADING_STATUS_NOT_LOADED:
-		SampleManager.PreloadStreamedFile(m_sMissionAudio.m_nSampleIndex, 1);
-		m_sMissionAudio.m_nLoadingStatus = LOADING_STATUS_LOADED;
+		SampleManager.PreloadStreamedFile(m_nMissionAudioSampleIndex, 1);
+		m_nMissionAudioLoadingStatus = LOADING_STATUS_LOADED;
 		nFramesUntilFailedLoad = 0;
 		break;
 	case LOADING_STATUS_LOADED:
-		if (!m_sMissionAudio.m_bIsPlayed)
+		if (!m_bIsMissionAudioAllowedToPlay)
 			return;
 		if (g_bMissionAudioLoadFailed) {
 			if (m_bTimerJustReset) {
@@ -8577,39 +8577,39 @@ cAudioManager::ProcessMissionAudio()
 				nFramesUntilFailedLoad = 0;
 			} else if (!m_nUserPause) {
 				if (++nFramesForPretendPlaying < 120) {
-					m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_PLAYING;
+					m_nMissionAudioPlayStatus = PLAY_STATUS_PLAYING;
 				} else {
-					m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_FINISHED;
-					m_sMissionAudio.m_nSampleIndex = NO_SAMPLE;
+					m_nMissionAudioPlayStatus = PLAY_STATUS_FINISHED;
+					m_nMissionAudioSampleIndex = NO_SAMPLE;
 				}
 			}
 			break;
 		}
-		switch (m_sMissionAudio.m_nPlayStatus) {
+		switch (m_nMissionAudioPlayStatus) {
 		case PLAY_STATUS_STOPPED:
-			if (MissionScriptAudioUsesPoliceChannel(m_sMissionAudio.m_nSampleIndex)) {
-				SetMissionScriptPoliceAudio(m_sMissionAudio.m_nSampleIndex);
+			if (MissionScriptAudioUsesPoliceChannel(m_nMissionAudioSampleIndex)) {
+				SetMissionScriptPoliceAudio(m_nMissionAudioSampleIndex);
 			} else {
 				if (m_nUserPause)
 					SampleManager.PauseStream(TRUE, 1);
-				if (m_sMissionAudio.m_bPredefinedProperties) {
+				if (m_bIsMissionAudio2D) {
 					SampleManager.SetStreamedVolumeAndPan(80, 63, TRUE, 1);
 				} else {
-					distSquared = GetDistanceSquared(m_sMissionAudio.m_vecPos);
+					distSquared = GetDistanceSquared(m_vecMissionAudioPosition);
 					if (distSquared >= SQR(50.0f)) {
 						emittingVol = 0;
 						pan = 63;
 					} else {
 						dist = Sqrt(distSquared);
 						emittingVol = ComputeVolume(80, 50.0f, dist);
-						TranslateEntity(&m_sMissionAudio.m_vecPos, &vec);
+						TranslateEntity(&m_vecMissionAudioPosition, &vec);
 						pan = ComputePan(50.f, &vec);
 					}
 					SampleManager.SetStreamedVolumeAndPan(emittingVol, pan, TRUE, 1);
 				}
 				SampleManager.StartPreloadedStreamedFile(1);
 			}
-			m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_PLAYING;
+			m_nMissionAudioPlayStatus = PLAY_STATUS_PLAYING;
 			nCheckPlayingDelay = 30;
 			break;
 		case PLAY_STATUS_PLAYING:
@@ -8618,28 +8618,28 @@ cAudioManager::ProcessMissionAudio()
 				SampleManager.StopStreamedFile(1);
 				break;
 			}
-			if (MissionScriptAudioUsesPoliceChannel(m_sMissionAudio.m_nSampleIndex)) {
+			if (MissionScriptAudioUsesPoliceChannel(m_nMissionAudioSampleIndex)) {
 				if (!m_nUserPause) {
 					if (nCheckPlayingDelay) {
 						--nCheckPlayingDelay;
-					} else if (GetMissionScriptPoliceAudioPlayingStatus() == PLAY_STATUS_FINISHED || m_sMissionAudio.m_nMissionAudioCounter-- == 0) {
-						m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_FINISHED;
-						m_sMissionAudio.m_nSampleIndex = NO_SAMPLE;
+					} else if (GetMissionScriptPoliceAudioPlayingStatus() == PLAY_STATUS_FINISHED || m_nMissionAudioFramesToPlay-- == 0) {
+						m_nMissionAudioPlayStatus = PLAY_STATUS_FINISHED;
+						m_nMissionAudioSampleIndex = NO_SAMPLE;
 						SampleManager.StopStreamedFile(1);
-						m_sMissionAudio.m_nMissionAudioCounter = 0;
+						m_nMissionAudioFramesToPlay = 0;
 					}
 				}
-			} else if (m_sMissionAudio.m_bIsPlaying) {
+			} else if (m_bIsMissionAudioPlaying) {
 				if (SampleManager.IsStreamPlaying(1) || m_nUserPause || m_nPreviousUserPause) {
 					if (m_nUserPause)
 						SampleManager.PauseStream(TRUE, 1);
 					else
 						SampleManager.PauseStream(FALSE, 1);
 				} else {
-					m_sMissionAudio.m_nPlayStatus = PLAY_STATUS_FINISHED;
-					m_sMissionAudio.m_nSampleIndex = NO_SAMPLE;
+					m_nMissionAudioPlayStatus = PLAY_STATUS_FINISHED;
+					m_nMissionAudioSampleIndex = NO_SAMPLE;
 					SampleManager.StopStreamedFile(1);
-					m_sMissionAudio.m_nMissionAudioCounter = 0;
+					m_nMissionAudioFramesToPlay = 0;
 				}
 			} else {
 				if (m_nUserPause)
@@ -8649,7 +8649,7 @@ cAudioManager::ProcessMissionAudio()
 						break;
 					nCheckPlayingDelay = 0;
 				}
-				m_sMissionAudio.m_bIsPlaying = TRUE;
+				m_bIsMissionAudioPlaying = TRUE;
 			}
 			break;
 		default:
@@ -8661,7 +8661,7 @@ cAudioManager::ProcessMissionAudio()
 			nFramesForPretendPlaying = 0;
 			g_bMissionAudioLoadFailed = TRUE;
 			nFramesUntilFailedLoad = 0;
-			m_sMissionAudio.m_nLoadingStatus = LOADING_STATUS_LOADED;
+			m_nMissionAudioLoadingStatus = LOADING_STATUS_LOADED;
 		}
 		break;
 	default:

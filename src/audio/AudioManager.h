@@ -123,22 +123,6 @@ public:
 
 VALIDATE_SIZE(cPedComments, 1164);
 
-class CEntity;
-
-class cMissionAudio
-{
-public:
-	CVector m_vecPos;
-	bool8 m_bPredefinedProperties;
-	uint32 m_nSampleIndex;
-	uint8 m_nLoadingStatus;
-	uint8 m_nPlayStatus;
-	bool8 m_bIsPlaying;
-	int32 m_nMissionAudioCounter;
-	bool8 m_bIsPlayed;
-};
-VALIDATE_SIZE(cMissionAudio, 32);
-
 // name made up
 class cAudioScriptObjectManager
 {
@@ -152,6 +136,7 @@ public:
 
 
 class cTransmission;
+class CEntity;
 class CPlane;
 class CVehicle;
 class CPed;
@@ -247,12 +232,23 @@ public:
 	int32 m_nWaterCannonEntity;
 	int32 m_nPoliceChannelEntity;
 	cPoliceRadioQueue m_sPoliceRadioQueue;
+	cAMCrime m_aCrimes[10];
 	int32 m_nFrontEndEntity;
 	int32 m_nCollisionEntity;
 	cAudioCollisionManager m_sCollisionManager;
 	int32 m_nProjectileEntity;
 	int32 m_nBridgeEntity;
-	cMissionAudio m_sMissionAudio;
+	
+	// Mission audio stuff
+	CVector m_vecMissionAudioPosition;
+	bool8 m_bIsMissionAudio2D;
+	uint32 m_nMissionAudioSampleIndex;
+	uint8 m_nMissionAudioLoadingStatus;
+	uint8 m_nMissionAudioPlayStatus;
+	bool8 m_bIsMissionAudioPlaying;
+	int32 m_nMissionAudioFramesToPlay;
+	bool8 m_bIsMissionAudioAllowedToPlay;
+
 	int32 m_anRandomTable[5];
 	uint8 m_nTimeSpent;
 	bool8 m_nUserPause;
@@ -510,7 +506,7 @@ public:
 	void SetMissionAudioLocation(float x, float y, float z);
 	void PlayLoadedMissionAudio();
 	bool8 IsMissionAudioSampleFinished();
-	bool8 IsMissionAudioSamplePlaying() { return m_sMissionAudio.m_nPlayStatus == PLAY_STATUS_PLAYING; }
+	bool8 IsMissionAudioSamplePlaying() { return m_nMissionAudioPlayStatus == PLAY_STATUS_PLAYING; }
 	bool8 ShouldDuckMissionAudio() { return IsMissionAudioSamplePlaying(); }
 	void ClearMissionAudio();
 	void ProcessMissionAudio();
