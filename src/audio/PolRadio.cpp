@@ -119,6 +119,7 @@ cAudioManager::DoPoliceRadioCrackle()
 void
 cAudioManager::ServicePoliceRadio()
 {
+	/*
 	int32 wantedLevel = 0; // uninitialized variable
 	static uint32 nLastSeen = 300;
 
@@ -150,6 +151,7 @@ cAudioManager::ServicePoliceRadio()
 		}
 	}
 	ServicePoliceRadioChannel(wantedLevel);
+	*/
 }
 
 void

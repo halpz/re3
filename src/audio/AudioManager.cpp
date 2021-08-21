@@ -527,7 +527,7 @@ cAudioManager::ServiceSoundEffects()
 	ClearRequestedQueue();
 	InterrogateAudioEntities();
 	m_sPedComments.Process();
-	ServicePoliceRadio();
+	//ServicePoliceRadio(); // LCS: removed
 	ServiceCollisions();
 	AddReleasingSounds();
 	ProcessMissionAudio();

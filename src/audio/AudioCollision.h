@@ -1,6 +1,6 @@
 #pragma once
 
-#define NUMAUDIOCOLLISIONS 10
+#define NUMAUDIOCOLLISIONS 14
 
 class CEntity;
 

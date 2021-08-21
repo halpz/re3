@@ -119,7 +119,7 @@ public:
 
 VALIDATE_SIZE(cPedComments, 0x490);
 
-#define MISSION_AUDIO_SLOTS (2)
+#define MISSION_AUDIO_SLOTS (5)
 
 // name made up
 class cAudioScriptObjectManager
@@ -241,6 +241,7 @@ public:
 #endif
 	cAudioScriptObjectManager m_sAudioScriptObjectManager;
 
+	bool8 field_4348_lcs;
 	// miami
 	bool8 m_bIsPlayerShutUp;
 	uint8 m_nPlayerMood;
@@ -283,6 +284,10 @@ public:
 	bool8 m_nUserPause;
 	bool8 m_nPreviousUserPause;
 	uint32 m_FrameCounter;
+
+	uint32 field_5644_lcs;
+	uint32 field_5648_lcs;
+	uint8 field_564C_lcs;
 
 	cAudioManager();
 	~cAudioManager();
