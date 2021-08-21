@@ -20,6 +20,10 @@
 
 #define PAD_MOVE_TO_GAME_WORLD_MOVE 60.0f
 
+#ifdef VC_PED_PORTS
+bool CPlayerPed::bDontAllowWeaponChange;
+#endif
+
 const uint32 CPlayerPed::nSaveStructSize =
 #ifdef COMPATIBLE_SAVES
 	1520;
@@ -603,7 +607,11 @@ CPlayerPed::ProcessWeaponSwitch(CPad *padUsed)
 	if (CDarkel::FrenzyOnGoing())
 		goto switchDetectDone;
 
+#ifdef VC_PED_PORTS
+	if (padUsed->CycleWeaponRightJustDown() && !m_pPointGunAt && !bDontAllowWeaponChange) {
+#else
 	if (padUsed->CycleWeaponRightJustDown() && !m_pPointGunAt) {
+#endif
 
 		if (TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON
 			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON_RUNABOUT
@@ -619,7 +627,11 @@ CPlayerPed::ProcessWeaponSwitch(CPad *padUsed)
 			}
 			m_nSelectedWepSlot = WEAPONTYPE_UNARMED;
 		}
+#ifdef VC_PED_PORTS
+	} else if (padUsed->CycleWeaponLeftJustDown() && !m_pPointGunAt && !bDontAllowWeaponChange) {
+#else
 	} else if (padUsed->CycleWeaponLeftJustDown() && !m_pPointGunAt) {
+#endif
 		if (TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON
 			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_SNIPER
 			&& TheCamera.PlayerWeaponMode.Mode != CCam::MODE_ROCKETLAUNCHER) {
@@ -857,7 +869,11 @@ CPlayerPed::FindNextWeaponLockOnTarget(CEntity *previousTarget, bool lookToLeft)
 	// nextTarget = nil; // duplicate
 	float lastCloseness = -10000.0f;
 	// CGeneral::GetATanOfXY(GetForward().x, GetForward().y); // unused
+#ifdef VC_PED_PORTS
+	CVector distVec = previousTarget->GetPosition() - TheCamera.GetPosition();
+#else
 	CVector distVec = previousTarget->GetPosition() - GetPosition();
+#endif
 	float referenceBeta = CGeneral::GetATanOfXY(distVec.x, distVec.y);
 
 	for (int h = CPools::GetPedPool()->GetSize() - 1; h >= 0; h--) {
@@ -882,6 +898,9 @@ CPlayerPed::FindNextWeaponLockOnTarget(CEntity *previousTarget, bool lookToLeft)
 		return false;
 
 	SetWeaponLockOnTarget(nextTarget);
+#ifdef VC_PED_PORTS
+	bDontAllowWeaponChange = true;
+#endif
 	SetPointGunAt(nextTarget);
 	return true;
 }
@@ -927,6 +946,9 @@ CPlayerPed::FindWeaponLockOnTarget(void)
 		return false;
 
 	SetWeaponLockOnTarget(nextTarget);
+#ifdef VC_PED_PORTS
+	bDontAllowWeaponChange = true;
+#endif
 	SetPointGunAt(nextTarget);
 	return true;
 }
@@ -1510,6 +1532,13 @@ CPlayerPed::ProcessControl(void)
 		m_nSpeedTimer = 0;
 		m_bSpeedTimerFlag = false;
 	}
+
+#ifdef VC_PED_PORTS
+	if (bDontAllowWeaponChange && FindPlayerPed() == this) {
+		if (!CPad::GetPad(0)->GetTarget())
+			bDontAllowWeaponChange = false;
+	}
+#endif
 
 #ifdef PED_SKIN
 	if (!bIsVisible && IsClumpSkinned(GetClump()))

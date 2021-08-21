@@ -40,6 +40,9 @@ public:
 	CVector m_cachedCamFront;
 	CVector m_cachedCamUp;
 #endif
+#ifdef VC_PED_PORTS
+	static bool bDontAllowWeaponChange;
+#endif
 
 	CPlayerPed();
 	~CPlayerPed();
