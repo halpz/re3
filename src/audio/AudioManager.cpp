@@ -526,11 +526,14 @@ cAudioManager::ServiceSoundEffects()
 	ProcessSpecial();
 	ClearRequestedQueue();
 	InterrogateAudioEntities();
-	m_sPedComments.Process();
-	//ServicePoliceRadio(); // LCS: removed
-	ServiceCollisions();
+	if (!m_nUserPause) {
+		m_sPedComments.Process();
+		//ServicePoliceRadio(); // LCS: removed
+		ServiceCollisions();
+	}
 	AddReleasingSounds();
-	ProcessMissionAudio();
+	if (!m_nUserPause)
+		ProcessMissionAudio();
 #ifdef EXTERNAL_3D_SOUND
 	AdjustSamplesVolume();
 #endif
