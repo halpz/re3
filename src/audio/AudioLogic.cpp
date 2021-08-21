@@ -2017,7 +2017,11 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 	bool8 isMoped = FALSE;
 	bool8 processedAccelSampleStopped = FALSE;
 	static uint32 gearSoundStartTime = CTimer::GetTimeInMilliseconds();
-	uint8 nChannel = CHANNEL_PLAYER_VEHICLE_ENGINE; // TODO: PS2 channels
+#ifdef GTA_PS2
+	uint8 nChannel = m_bIsSurround ? CHANNEL_DTS_PLAYER_VEHICLE_ENGINE : CHANNEL_PLAYER_VEHICLE_ENGINE;
+#else
+	uint8 nChannel = CHANNEL_PLAYER_VEHICLE_ENGINE;
+#endif
 	if (bPlayerJustEnteredCar) {
 		bAccelSampleStopped = TRUE;
 		bPlayerJustEnteredCar = FALSE;

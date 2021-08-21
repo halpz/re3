@@ -493,9 +493,28 @@ cAudioManager::ServiceSoundEffects()
 #endif
 	m_bReduceReleasingPriority = (m_FrameCounter++ % 5) == 0;
 	if (m_nUserPause && !m_nPreviousUserPause) {
-		for (int32 i = 0; i < NUM_CHANNELS; i++)
-			SampleManager.StopChannel(i);
+#ifdef GTA_PS2
+		if (m_bIsSurround) {
+			for (uint32 i = 0; i < NUM_CHANNELS_DTS_GENERIC; i++)
+				SampleManager.StopChannel(i);
 
+			SampleManager.SetChannelFrequency(CHANNEL_DTS_POLICE_RADIO, 0);
+			SampleManager.SetChannelFrequency(CHANNEL_DTS_MISSION_AUDIO_1, 0);
+			SampleManager.SetChannelFrequency(CHANNEL_DTS_MISSION_AUDIO_2, 0);
+			SampleManager.SetChannelFrequency(CHANNEL_DTS_PLAYER_VEHICLE_ENGINE, 0);
+		} else {
+			for (uint32 i = 0; i < NUM_CHANNELS_GENERIC; i++)
+				SampleManager.StopChannel(i);
+
+			SampleManager.SetChannelFrequency(CHANNEL_POLICE_RADIO, 0);
+			SampleManager.SetChannelFrequency(CHANNEL_MISSION_AUDIO_1, 0);
+			SampleManager.SetChannelFrequency(CHANNEL_MISSION_AUDIO_2, 0);
+			SampleManager.SetChannelFrequency(CHANNEL_PLAYER_VEHICLE_ENGINE, 0);
+		}
+#else
+		for (uint32 i = 0; i < NUM_CHANNELS; i++)
+			SampleManager.StopChannel(i);
+#endif
 		ClearRequestedQueue();
 		if (m_nActiveSampleQueue) {
 			m_nActiveSampleQueue = 0;
