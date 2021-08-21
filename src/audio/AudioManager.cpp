@@ -999,7 +999,7 @@ cAudioManager::ProcessActiveQueues()
 	uint8 emittingVol;
 	CVector position;
 
-	bool8 missionState;
+	bool8 isPhoneCall;
 	uint8 channelOffset = 0;
 
 	for (int32 i = 0; i < m_nActiveSamples; i++) {
@@ -1065,18 +1065,18 @@ cAudioManager::ProcessActiveQueues()
 #endif
 								emittingVol = m_bDoubleVolume ? 2 * Min(63, vol) : vol;
 
-								missionState = FALSE;
+								isPhoneCall = FALSE;
 								for (int32 k = 0; k < MISSION_AUDIO_SLOTS; k++) {
-									if (m_sMissionAudio.m_bIsMobile[k]) {
-										missionState = TRUE;
+									if (m_bIsMissionAudioPhoneCall[k]) {
+										isPhoneCall = TRUE;
 										break;
 									}
 								}
-								if (missionState) {
-									emittingVol = (emittingVol * field_5538) / 127;
+								if (isPhoneCall) {
+									emittingVol = (emittingVol * m_nGlobalSfxVolumeMultiplier) / 127;
 								} else {
-									if (field_5538 < 127)
-										emittingVol = (emittingVol * field_5538) / 127;
+									if (m_nGlobalSfxVolumeMultiplier < 127)
+										emittingVol = (emittingVol * m_nGlobalSfxVolumeMultiplier) / 127;
 								}
 
 #ifdef EXTERNAL_3D_SOUND
@@ -1154,19 +1154,19 @@ cAudioManager::ProcessActiveQueues()
 						if (SampleManager.InitialiseChannel(k, m_asActiveSamples[k].m_nSampleIndex, m_asActiveSamples[k].m_nBankIndex)) {
 #endif
 							SampleManager.SetChannelFrequency(k, m_asActiveSamples[k].m_nFrequency);
-							bool8 isMobile = FALSE;
+							isPhoneCall = FALSE;
 							for (int32 l = 0; l < MISSION_AUDIO_SLOTS; l++) {
-								if (m_sMissionAudio.m_bIsMobile[l]) {
-									isMobile = TRUE;
+								if (m_bIsMissionAudioPhoneCall[l]) {
+									isPhoneCall = TRUE;
 									break;
 								}
 							}
-							if (!isMobile || m_asActiveSamples[k].m_bIs2D) {
-								if (field_5538 < 127)
-									emittingVol *= field_5538 / 127;
+							if (!isPhoneCall || m_asActiveSamples[k].m_bIs2D) {
+								if (m_nGlobalSfxVolumeMultiplier < 127)
+									emittingVol = (emittingVol * m_nGlobalSfxVolumeMultiplier) / 127;
 								vol = emittingVol;
 							} else {
-								vol = (emittingVol * field_5538 / 127);
+								vol = (emittingVol * m_nGlobalSfxVolumeMultiplier) / 127;
 							}
 #ifdef EXTERNAL_3D_SOUND
 							SampleManager.SetChannelEmittingVolume(k, vol);
