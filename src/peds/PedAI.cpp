@@ -3531,23 +3531,17 @@ CPed::SetEnterCar_AllClear(CVehicle *car, uint32 doorNode, uint32 doorFlag)
 	m_vecOffsetSeek = doorOpenPos - GetPosition();
 	m_nPedStateTimer = CTimer::GetTimeInMilliseconds() + 600;
 	if (car->IsBoat()) {
-#ifdef VC_PED_PORTS
-		// VC checks for handling flag, but we can't do that
-		if(car->GetModelIndex() == MI_SPEEDER)
-			m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_CAR_SIT, 100.0f);
-		else
-			m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_BOAT_DRIVE, 100.0f);
-
-		PedSetInCarCB(nil, this);
-		bVehExitWillBeInstant = true;
-#else
-
 #ifndef FIX_BUGS
 		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, ANIM_STD_BOAT_DRIVE, 100.0f);
 #else
 		m_pVehicleAnim = CAnimManager::BlendAnimation(GetClump(), ASSOCGRP_STD, car->GetDriverAnim(), 100.0f);
 #endif
 
+		// Otherwise boat enter key sometimes processed multiple times, so you enter/exit instantly
+#if defined VC_PED_PORTS || defined FIX_BUGS
+		PedSetInCarCB(nil, this);
+		bVehExitWillBeInstant = true;
+#else
 		m_pVehicleAnim->SetFinishCallback(PedSetInCarCB, this);
 #endif
 		if (IsPlayer())
@@ -5194,8 +5188,10 @@ CPed::SeekBoatPosition(void)
 		enterOffset = boatModel->GetFrontSeatPosn();
 		enterOffset.x = 0.0f;
 		CMatrix boatMat(m_carInObjective->GetMatrix());
+		CVector boatEnterPos = Multiply3x3(boatMat, enterOffset);
+		boatEnterPos += m_carInObjective->GetPosition();
 		SetMoveState(PEDMOVE_WALK);
-		m_vecSeekPos = boatMat * enterOffset;
+		m_vecSeekPos = boatEnterPos;
 		if (Seek()) {
 			// We arrived to the boat
 			m_vehDoor = 0;
