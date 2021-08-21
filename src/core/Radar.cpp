@@ -1550,7 +1550,7 @@ CRadar::ToggleTargetMarker(float x, float y)
 		ms_RadarTrace[nextBlip].m_bDim = 0;
 		ms_RadarTrace[nextBlip].m_bInUse = 1;
 		ms_RadarTrace[nextBlip].m_Radius = 1.0f;
-		CVector pos(x, y, 0.0f/*CWorld::FindGroundZForCoord(x,y)*/);
+		CVector pos(x, y, CWorld::FindGroundZForCoord(x,y));
 		TargetMarkerPos = pos;
 		ms_RadarTrace[nextBlip].m_vec2DPos = pos;
 		ms_RadarTrace[nextBlip].m_vecPos = pos;
