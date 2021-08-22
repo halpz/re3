@@ -723,7 +723,7 @@ CCam::LookRight(void)
 	CVector TargetCoors, TargetFwd;
 	CColPoint colPoint;
 
-	if((Mode == MODE_CAM_ON_A_STRING || Mode == MODE_BEHINDBOAT) && CamTargetEntity->IsVehicle()){
+	if((Mode == MODE_CAM_ON_A_STRING || Mode == MODE_BEHINDBOAT || Mode == MODE_BEHINDCAR) && CamTargetEntity->IsVehicle()){
 		LookingRight = true;
 		TargetCoors = CamTargetEntity->GetPosition();
 		Front = CamTargetEntity->GetPosition() - Source;
