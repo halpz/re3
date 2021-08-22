@@ -119,7 +119,11 @@ public:
 
 VALIDATE_SIZE(cPedComments, 0x490);
 
+#ifdef FIX_BUGS // LCS extends the number of mission slots but not audio channels, the game would crash on ClearMissionAudio trying to stop channels that don't exist
+#define MISSION_AUDIO_SLOTS (2)
+#else
 #define MISSION_AUDIO_SLOTS (5)
+#endif
 
 // name made up
 class cAudioScriptObjectManager
