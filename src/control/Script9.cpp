@@ -710,7 +710,7 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 	case COMMAND_SET_CRUSHER_REWARD_MULTIPLIER:
 	{
 		CollectParameters(&m_nIp, 1);
-		// CGarages::CrusherRewardMultiplier = GET_INTEGER_PARAM(0);
+		CGarages::CrusherRewardMultiplier = GET_INTEGER_PARAM(0);
 		return 0;
 	}
 	case COMMAND_SWAP_BUILDINGS:
