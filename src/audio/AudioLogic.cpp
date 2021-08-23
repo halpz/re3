@@ -7829,9 +7829,8 @@ cPedComments::Process()
 	uint32 sampleIndex;
 	uint8 actualUsedBank;
 	tPedComment *comment;
-	bool8 prevUsed = FALSE;
 	static uint8 counter = 0;
-	static int32 prevSamples[10];
+	static int32 prevSamples[10] = { NO_SAMPLE, NO_SAMPLE, NO_SAMPLE, NO_SAMPLE, NO_SAMPLE, NO_SAMPLE, NO_SAMPLE, NO_SAMPLE, NO_SAMPLE, NO_SAMPLE };
 
 	if(AudioManager.m_nUserPause) return;
 
@@ -7840,72 +7839,82 @@ cPedComments::Process()
 			if(m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nSampleIndex ==
 			   prevSamples[(counter + 1 + i) % ARRAY_SIZE(prevSamples)]) {
 				m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nProcess = -1;
-				prevUsed = TRUE;
-				break;
+				goto PedCommentAlreadyAdded;
 			}
 		}
-		if(!prevUsed) {
-			sampleIndex = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nSampleIndex;
-			if(!SampleManager.IsPedCommentLoaded(sampleIndex)) {
+		sampleIndex = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nSampleIndex;
+		switch(SampleManager.IsPedCommentLoaded(sampleIndex)) { // yes, this was a switch
+		case FALSE:
 #if defined(GTA_PC) && !defined(FIX_BUGS)
-				if(!m_bDelay)
+			if(!m_bDelay)
 #endif
-					SampleManager.LoadPedComment(sampleIndex);
-			} else {
-				AudioManager.m_sQueueSample.m_nEntityIndex = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nEntityIndex;
-				AudioManager.m_sQueueSample.m_nCounter = 0;
-				AudioManager.m_sQueueSample.m_nSampleIndex = sampleIndex;
-				AudioManager.m_sQueueSample.m_nBankIndex = SFX_BANK_PED_COMMENTS;
-				AudioManager.m_sQueueSample.m_nPriority = 3;
-				AudioManager.m_sQueueSample.m_nVolume = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nVolume;
-				AudioManager.m_sQueueSample.m_fDistance = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_fDistance;
-				AudioManager.m_sQueueSample.m_nLoopCount = 1;
+				SampleManager.LoadPedComment(sampleIndex);
+			break;
+		case TRUE:
+			AudioManager.m_sQueueSample.m_nEntityIndex = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nEntityIndex;
+			AudioManager.m_sQueueSample.m_nCounter = 0;
+			AudioManager.m_sQueueSample.m_nSampleIndex = sampleIndex;
+			AudioManager.m_sQueueSample.m_nBankIndex = SFX_BANK_PED_COMMENTS;
+			AudioManager.m_sQueueSample.m_nPriority = 3;
+			AudioManager.m_sQueueSample.m_nVolume = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nVolume;
+			AudioManager.m_sQueueSample.m_fDistance = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_fDistance;
+			AudioManager.m_sQueueSample.m_nLoopCount = 1;
 #ifndef GTA_PS2
-				AudioManager.m_sQueueSample.m_nLoopStart = 0;
-				AudioManager.m_sQueueSample.m_nLoopEnd = -1;
+			AudioManager.m_sQueueSample.m_nLoopStart = 0;
+			AudioManager.m_sQueueSample.m_nLoopEnd = -1;
 #endif
 #ifdef EXTERNAL_3D_SOUND
-		#ifdef FIX_BUGS
-				AudioManager.m_sQueueSample.m_nEmittingVolume = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nEmittingVolume;
-		#else
-				AudioManager.m_sQueueSample.m_nEmittingVolume = MAX_VOLUME;
-		#endif // FIX_BUGS
+	#ifdef FIX_BUGS
+			AudioManager.m_sQueueSample.m_nEmittingVolume = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nEmittingVolume;
+	#else
+			AudioManager.m_sQueueSample.m_nEmittingVolume = MAX_VOLUME;
+	#endif // FIX_BUGS
 #endif // EXTERNAL_3D_SOUND
-				AudioManager.m_sQueueSample.m_fSpeedMultiplier = 3.0f;
-				AudioManager.m_sQueueSample.m_MaxDistance = 40.0f;
-				AudioManager.m_sQueueSample.m_bStatic = TRUE;
-				AudioManager.m_sQueueSample.m_vecPos = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_vecPos;
+#ifdef ATTACH_PED_COMMENTS_TO_ENTITIES
+			// let's disable doppler because if sounds funny as the sound moves
+			// originally position of ped comment doesn't change so this has no effect anyway
+			AudioManager.m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+#else
+			AudioManager.m_sQueueSample.m_fSpeedMultiplier = 3.0f;
+#endif
+			AudioManager.m_sQueueSample.m_MaxDistance = 40.0f;
+			AudioManager.m_sQueueSample.m_bStatic = TRUE;
+			AudioManager.m_sQueueSample.m_vecPos = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_vecPos;
 #ifdef AUDIO_REVERB
-				AudioManager.m_sQueueSample.m_bReverb = TRUE;
+			AudioManager.m_sQueueSample.m_bReverb = TRUE;
 #endif // AUDIO_REVERB
 #ifdef AUDIO_REFLECTIONS
-				AudioManager.m_sQueueSample.m_bReflections = TRUE;
+			AudioManager.m_sQueueSample.m_bReflections = TRUE;
 #endif // AUDIO_REFLECTIONS
-				AudioManager.m_sQueueSample.m_bIs2D = FALSE;
+			AudioManager.m_sQueueSample.m_bIs2D = FALSE;
 #ifdef FIX_BUGS
-				if((sampleIndex >= SFX_POLICE_BOAT_1 && sampleIndex <= SFX_POLICE_BOAT_23) ||
-				   (sampleIndex >= SFX_POLICE_HELI_1 && sampleIndex <= SFX_POLICE_HELI_20))
-					AudioManager.m_sQueueSample.m_MaxDistance = 400.0f;
-				else if (sampleIndex >= SFX_PLAYER_ANGRY_BUSTED_1 && sampleIndex <= SFX_PLAYER_ON_FIRE_16) { // check if player sfx
-					AudioManager.m_sQueueSample.m_bIs2D = TRUE;
-					AudioManager.m_sQueueSample.m_nPan = 63;
-				}
-#endif // FIX_BUGS
-				AudioManager.m_sQueueSample.m_nFrequency =
-				    SampleManager.GetSampleBaseFrequency(AudioManager.m_sQueueSample.m_nSampleIndex) + AudioManager.RandomDisplacement(750);
-				if(CTimer::GetIsSlowMotionActive()) AudioManager.m_sQueueSample.m_nFrequency /= 2;
-				m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nProcess = -1;
-				prevSamples[counter++] = sampleIndex;
-				if(counter == 10) counter = 0;
-				AudioManager.AddSampleToRequestedQueue();
-#if defined(GTA_PC) && !defined(FIX_BUGS)
-				m_nDelayTimer = CTimer::GetTimeInMilliseconds();
-				m_bDelay = TRUE;
-#endif
+			if((sampleIndex >= SFX_POLICE_BOAT_1 && sampleIndex <= SFX_POLICE_BOAT_23) ||
+				(sampleIndex >= SFX_POLICE_HELI_1 && sampleIndex <= SFX_POLICE_HELI_20))
+				AudioManager.m_sQueueSample.m_MaxDistance = 400.0f;
+	#ifndef ATTACH_PED_COMMENTS_TO_ENTITIES
+			else if (sampleIndex >= SFX_PLAYER_ANGRY_BUSTED_1 && sampleIndex <= SFX_PLAYER_ON_FIRE_16) { // check if player sfx
+				AudioManager.m_sQueueSample.m_bIs2D = TRUE;
+				AudioManager.m_sQueueSample.m_nPan = 63;
 			}
+	#endif // ATTACH_PED_COMMENTS_TO_ENTITIES
+#endif // FIX_BUGS
+			AudioManager.m_sQueueSample.m_nFrequency =
+				SampleManager.GetSampleBaseFrequency(AudioManager.m_sQueueSample.m_nSampleIndex) + AudioManager.RandomDisplacement(750);
+			if(CTimer::GetIsSlowMotionActive()) AudioManager.m_sQueueSample.m_nFrequency /= 2;
+			m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nProcess = -1;
+			prevSamples[counter++] = sampleIndex;
+			if(counter == 10) counter = 0;
+			AudioManager.AddSampleToRequestedQueue();
+#if defined(GTA_PC) && !defined(FIX_BUGS)
+			m_nDelayTimer = CTimer::GetTimeInMilliseconds();
+			m_bDelay = TRUE;
+#endif
+			break;
+		default:
+			break;
 		}
 	}
-
+PedCommentAlreadyAdded:
 	// Switch bank
 	if (m_nActiveBank == 0) {
 		actualUsedBank = 0;
