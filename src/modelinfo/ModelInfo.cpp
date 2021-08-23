@@ -6,7 +6,8 @@
 #include "ModelInfo.h"
 #include "KeyGen.h"
 
-CBaseModelInfo *CModelInfo::ms_modelInfoPtrs[MODELINFOSIZE];
+CBaseModelInfo **CModelInfo::ms_modelInfoPtrs;
+int32 CModelInfo::msNumModelInfos;
 
 CStore<CSimpleModelInfo, SIMPLEMODELSIZE> CModelInfo::ms_simpleModelStore;
 CStore<CTimeModelInfo, TIMEMODELSIZE> CModelInfo::ms_timeModelStore;
@@ -15,6 +16,8 @@ CStore<CClumpModelInfo, CLUMPMODELSIZE> CModelInfo::ms_clumpModelStore;
 CStore<CPedModelInfo, PEDMODELSIZE> CModelInfo::ms_pedModelStore;
 CStore<CVehicleModelInfo, VEHICLEMODELSIZE> CModelInfo::ms_vehicleModelStore;
 CStore<C2dEffect, TWODFXSIZE> CModelInfo::ms_2dEffectStore;
+
+C2dEffect *gp2dEffects;
 
 void
 CModelInfo::Initialise(void)
@@ -30,9 +33,12 @@ CModelInfo::Initialise(void)
 	debug("sizeof PedModelStore %d\n", sizeof(ms_pedModelStore));
 	debug("sizeof 2deffectsModelStore %d\n", sizeof(ms_2dEffectStore));
 
+	ms_modelInfoPtrs = new CBaseModelInfo*[MODELINFOSIZE];
+	msNumModelInfos = MODELINFOSIZE;
 	for(i = 0; i < MODELINFOSIZE; i++)
 		ms_modelInfoPtrs[i] = nil;
 	ms_2dEffectStore.Clear();
+	gp2dEffects = ms_2dEffectStore.store;
 	ms_simpleModelStore.Clear();
 	ms_timeModelStore.Clear();
 	ms_weaponModelStore.Clear();
@@ -108,13 +114,13 @@ CModelInfo::ShutDown(void)
 	for(i = 0; i < ms_2dEffectStore.allocPtr; i++)
 		ms_2dEffectStore.store[i].Shutdown();
 
-	ms_2dEffectStore.Clear();
 	ms_simpleModelStore.Clear();
 	ms_timeModelStore.Clear();
 	ms_weaponModelStore.Clear();
-	ms_pedModelStore.Clear();
 	ms_clumpModelStore.Clear();
 	ms_vehicleModelStore.Clear();
+	ms_pedModelStore.Clear();
+	ms_2dEffectStore.Clear();
 }
 
 CSimpleModelInfo*
@@ -187,7 +193,7 @@ CModelInfo::GetModelInfo(const char *name, int *id)
 {
 	uint32 hashKey = CKeyGen::GetUppercaseKey(name);
 	CBaseModelInfo *modelinfo;
-	for(int i = 0; i < MODELINFOSIZE; i++){
+	for(int i = 0; i < msNumModelInfos; i++){
 		modelinfo = CModelInfo::ms_modelInfoPtrs[i];
 	 	if(modelinfo && hashKey == modelinfo->GetNameHashKey()){
 			if(id)
@@ -214,39 +220,67 @@ CModelInfo::GetModelInfo(const char *name, int minIndex, int maxIndex)
 	return nil;
 }
 
+CBaseModelInfo*
+CModelInfo::GetModelInfoFromHashKey(uint32 hashKey, int *id)
+{
+	CBaseModelInfo *modelinfo;
+	for(int i = 0; i < msNumModelInfos; i++){
+		modelinfo = CModelInfo::ms_modelInfoPtrs[i];
+	 	if(modelinfo && hashKey == modelinfo->GetNameHashKey()){
+			if(id)
+				*id = i;
+			return modelinfo;
+		}
+	}
+	return nil;
+}
+
 bool
 CModelInfo::IsBoatModel(int32 id)
 {
-	return GetModelInfo(id)->GetModelType() == MITYPE_VEHICLE &&
-		((CVehicleModelInfo*)GetModelInfo(id))->m_vehicleType == VEHICLE_TYPE_BOAT;
+	CBaseModelInfo *mi = GetModelInfo(id);
+	return mi && mi->GetModelType() == MITYPE_VEHICLE &&
+		((CVehicleModelInfo*)mi)->m_vehicleType == VEHICLE_TYPE_BOAT;
 }
 
 bool
 CModelInfo::IsBikeModel(int32 id)
 {
-	return GetModelInfo(id)->GetModelType() == MITYPE_VEHICLE &&
-		((CVehicleModelInfo*)GetModelInfo(id))->m_vehicleType == VEHICLE_TYPE_BIKE;
+	CBaseModelInfo *mi = GetModelInfo(id);
+	return mi && mi->GetModelType() == MITYPE_VEHICLE &&
+		((CVehicleModelInfo*)mi)->m_vehicleType == VEHICLE_TYPE_BIKE;
 }
 
 bool
 CModelInfo::IsCarModel(int32 id)
 {
-	return GetModelInfo(id)->GetModelType() == MITYPE_VEHICLE &&
-		((CVehicleModelInfo*)GetModelInfo(id))->m_vehicleType == VEHICLE_TYPE_CAR;
+	CBaseModelInfo *mi = GetModelInfo(id);
+	return mi && mi->GetModelType() == MITYPE_VEHICLE &&
+		((CVehicleModelInfo*)mi)->m_vehicleType == VEHICLE_TYPE_CAR;
+}
+
+bool
+CModelInfo::IsTrainModel(int32 id)
+{
+	CBaseModelInfo *mi = GetModelInfo(id);
+	return mi && mi->GetModelType() == MITYPE_VEHICLE &&
+		((CVehicleModelInfo*)mi)->m_vehicleType == VEHICLE_TYPE_TRAIN;
 }
 
 bool
 CModelInfo::IsHeliModel(int32 id)
 {
-	return GetModelInfo(id)->GetModelType() == MITYPE_VEHICLE &&
-		((CVehicleModelInfo*)GetModelInfo(id))->m_vehicleType == VEHICLE_TYPE_HELI;
+	CBaseModelInfo *mi = GetModelInfo(id);
+	return mi && mi->GetModelType() == MITYPE_VEHICLE &&
+		((CVehicleModelInfo*)mi)->m_vehicleType == VEHICLE_TYPE_HELI;
 }
 
 bool
 CModelInfo::IsPlaneModel(int32 id)
 {
-	return GetModelInfo(id)->GetModelType() == MITYPE_VEHICLE &&
-		((CVehicleModelInfo*)GetModelInfo(id))->m_vehicleType == VEHICLE_TYPE_PLANE;
+	CBaseModelInfo *mi = GetModelInfo(id);
+	return mi && mi->GetModelType() == MITYPE_VEHICLE &&
+		((CVehicleModelInfo*)mi)->m_vehicleType == VEHICLE_TYPE_PLANE;
 }
 
 void
@@ -254,8 +288,48 @@ CModelInfo::ReInit2dEffects()
 {
 	ms_2dEffectStore.Clear();
 
-	for (int i = 0; i < MODELINFOSIZE; i++) {
+	for (int i = 0; i < msNumModelInfos; i++) {
 		if (ms_modelInfoPtrs[i])
 			ms_modelInfoPtrs[i]->Init2dEffects();
 	}
+}
+
+void
+CModelInfo::Load(uint32 numModelInfos, CBaseModelInfo **modelInfos)
+{
+	int i;
+
+	msNumModelInfos = numModelInfos;
+	ms_modelInfoPtrs = modelInfos;
+	for(i = 0; i < msNumModelInfos; i++)
+		if(ms_modelInfoPtrs[i] && ms_modelInfoPtrs[i]->GetModelType() == MITYPE_VEHICLE &&
+		   ms_modelInfoPtrs[i]->GetRwObject())
+			((CVehicleModelInfo*)ms_modelInfoPtrs[i])->SetAtomicRenderCallbacks();
+}
+
+void
+CModelInfo::Load2dEffects(uint32 numEffects, C2dEffect *effects)
+{
+	ms_2dEffectStore.allocPtr = numEffects;
+	gp2dEffects = effects;
+}
+
+CModelInfo*
+CModelInfo::Write(base::cRelocatableChunkWriter &writer)
+{
+	uint32 i;
+	uint32 numModelInfos;
+
+	for(numModelInfos = msNumModelInfos; ms_modelInfoPtrs[numModelInfos-1] == nil; numModelInfos--);
+	writer.AllocateRaw(ms_modelInfoPtrs, sizeof(void*)*numModelInfos, sizeof(void*), false, true);
+	for(i = 0; i < numModelInfos; i++)
+		if(ms_modelInfoPtrs[i]){
+			writer.AddPatch(ms_modelInfoPtrs[i]);
+			ms_modelInfoPtrs[i]->Write(writer);
+		}
+
+	resNumModelInfos = numModelInfos;
+	resModelInfoPtrs = ms_modelInfoPtrs;
+
+	return this;
 }

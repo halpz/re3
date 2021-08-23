@@ -23,8 +23,7 @@ class C2dEffect;
 class CBaseModelInfo
 {
 protected:
-	uint32       m_unk1;
-	uint32       m_unk2;
+	uint32       m_unk[2];	// somehow related to GU texture stuff, unused here
 	uint32       m_nameKey;
 	union {
 		char        *m_name;	// if not using chunks

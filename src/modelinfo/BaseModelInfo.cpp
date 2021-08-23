@@ -22,8 +22,8 @@ CBaseModelInfo::CBaseModelInfo(ModelInfoType type)
 	m_num2dEffects = 0;
 	m_bOwnsColModel = false;
 	m_nameKey = 0;
-	m_unk1 = 0;
-	m_unk2 = 0;
+	m_unk[0] = 0;
+	m_unk[1] = 0;
 	m_name = new char[MAX_MODEL_NAME];
 	*(int32*)m_name = 0;
 }
@@ -112,7 +112,7 @@ CBaseModelInfo::Add2dEffect(C2dEffect *fx)
 	if(m_2dEffectsID >= 0)
 		m_num2dEffects++;
 	else{
-		m_2dEffectsID = CModelInfo::Get2dEffectStore().GetIndex(fx);
+		m_2dEffectsID = CModelInfo::Get2dEffectIndex(fx);
 		m_num2dEffects = 1;
 	}
 }
@@ -121,7 +121,7 @@ C2dEffect*
 CBaseModelInfo::Get2dEffect(int n)
 {
 	if(m_2dEffectsID >= 0)
-		return CModelInfo::Get2dEffectStore().GetItem(m_2dEffectsID+n);
+		return CModelInfo::Get2dEffect(m_2dEffectsID+n);
 	else
 		return nil;
 }
