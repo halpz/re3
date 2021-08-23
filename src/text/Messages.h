@@ -23,7 +23,7 @@ struct tPreviousBrief
 };
 
 #define NUMBRIEFMESSAGES 8
-#define NUMBIGMESSAGES 6
+#define NUMBIGMESSAGES 8
 #define NUMPREVIOUSBRIEFS 5
 
 class CMessages 

@@ -2811,7 +2811,7 @@ void CTheScripts::ReadObjectNamesFromScript()
 	int32 varSpace = GetSizeOfVariableSpace();
 	uint32 ip = varSpace + 8;
 	NumSaveVars = Read4BytesFromScript(&ip);
-	SavedVarIndices = (short*)&ScriptSpace[ip];
+	SavedVarIndices = (uint16*)&ScriptSpace[ip];
 	ip += 2 * NumSaveVars;
 	NumberOfUsedObjects = Read2BytesFromScript(&ip);
 	ip += 2;

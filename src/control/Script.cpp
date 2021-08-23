@@ -98,7 +98,7 @@ bool CTheScripts::bPlayerHasMetDebbieHarry;
 bool CTheScripts::bPlayerIsInTheStatium;
 int CTheScripts::AllowedCollision[MAX_ALLOWED_COLLISIONS];
 int CTheScripts::FSDestroyedFlag;
-short* CTheScripts::SavedVarIndices;
+uint16* CTheScripts::SavedVarIndices;
 int CTheScripts::NumSaveVars;
 int gScriptsFile = -1;
 int CTheScripts::NextProcessId = 1;
@@ -496,7 +496,10 @@ void CMissionCleanup::Process()
 	CWeather::ReleaseWeather();
 	for (int i = 0; i < NUM_OF_SPECIAL_CHARS; i++)
 		CStreaming::SetMissionDoesntRequireSpecialChar(i);
-	CStreaming::ms_disableStreaming = false;
+#ifdef GTA_NETWORK
+	if (!gIsMultiplayerGame)
+#endif
+		CStreaming::ms_disableStreaming = false;
 	if (CHud::m_ItemToFlash != ITEM_ARMOUR && CHud::m_ItemToFlash != ITEM_HEALTH)
 		CHud::m_ItemToFlash = -1;
 	CHud::SetHelpMessage(nil, false); // nil, false, false, true TODO(LCS)
@@ -548,7 +551,7 @@ void CMissionCleanup::Process()
 		}
 		RemoveEntityFromList(m_sEntities[i].id, m_sEntities[i].type);
 	}
-	for (int i = 1; i < NUMSTREAMINFO; i++) {
+	for (int i = 1; i < MODELINFOSIZE; i++) {
 		if (CStreaming::IsScriptOwnedModel(i))
 			CStreaming::SetMissionDoesntRequireModel(i);
 	}

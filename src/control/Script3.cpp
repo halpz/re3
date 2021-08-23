@@ -316,7 +316,6 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		CVehicle* pTarget;
 		if (GET_INTEGER_PARAM(1) >= 0) {
 			pTarget = CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(1));
-			script_assert(pTarget);
 		}
 		else {
 			pTarget = nil;

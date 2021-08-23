@@ -532,7 +532,7 @@ public:
 	static bool bPlayerHasMetDebbieHarry;
 
 	static int AllowedCollision[MAX_ALLOWED_COLLISIONS];
-	static short* SavedVarIndices;
+	static uint16* SavedVarIndices;
 	static int NumSaveVars;
 	static int FSDestroyedFlag;
 	static int NextProcessId;
