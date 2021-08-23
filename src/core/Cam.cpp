@@ -4816,7 +4816,7 @@ CCam::Process_FollowCar_SA(const CVector& CameraTarget, float TargetOrientation,
 		{1.3f, 1.0f, 0.4f, 10.0f, 15.0f, 0.5f, 1.0f, 1.0f, 0.85f, 0.2f, 0.075f, 0.05f, 0.8f, DEGTORAD(45.0f), DEGTORAD(89.0f)}, // cars
 		{1.1f, 1.0f, 0.1f, 10.0f, 11.0f, 0.5f, 1.0f, 1.0f, 0.85f, 0.2f, 0.075f, 0.05f, 0.75f, DEGTORAD(45.0f), DEGTORAD(89.0f)}, // bike
 		{1.1f, 1.0f, 0.2f, 10.0f, 15.0f, 0.05f, 0.05f, 0.0f, 0.9f, 0.05f, 0.01f, 0.05f, 1.0f, DEGTORAD(10.0f), DEGTORAD(70.0f)}, // heli (SA values)
-		{1.1f, 3.5f, 0.2f, 10.0f, 25.0f, 0.5f, 1.0f, 1.0f, 0.75f, 0.1f, 0.005f, 0.2f, 1.0f, DEGTORAD(89.0f), DEGTORAD(89.0f)}, // plane (SA values)
+		{1.1f, 1.0f, 0.2f, 10.0f, 15.0f, 0.5f, 1.0f, 1.0f, 0.75f, 0.1f, 0.005f, 0.2f, 1.0f, DEGTORAD(89.0f), DEGTORAD(89.0f)}, // plane (SA values)
 		{0.9f, 1.0f, 0.1f, 10.0f, 15.0f, 0.5f, 1.0f, 0.0f, 0.9f, 0.05f, 0.005f, 0.05f, 1.0f, -0.2f, DEGTORAD(70.0f)}, // boat
 		{1.1f, 1.0f, 0.2f, 10.0f, 5.0f, 0.5f, 1.0f, 1.0f, 0.75f, 0.1f, 0.005f, 0.2f, 1.0f, DEGTORAD(45.0f), DEGTORAD(89.0f)}, // rc cars
 		{1.1f, 1.0f, 0.2f, 10.0f, 5.0f, 0.5f, 1.0f, 1.0f, 0.75f, 0.1f, 0.005f, 0.2f, 1.0f, DEGTORAD(20.0f), DEGTORAD(70.0f)}, // rc heli/planes
