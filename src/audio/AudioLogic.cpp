@@ -6077,96 +6077,110 @@ cPedComments::Process()
 
 	if (m_nCommentsInBank[m_nActiveBank]) {
 		sampleIndex = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nSampleIndex;
-		if (!SampleManager.IsPedCommentLoaded(sampleIndex))
+		switch (SampleManager.IsPedCommentLoaded(sampleIndex)) // yes, this was a switch
+		{
+		case FALSE:
 			SampleManager.LoadPedComment(sampleIndex);
-
-		AudioManager.m_sQueueSample.m_nEntityIndex = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nEntityIndex;
-		AudioManager.m_sQueueSample.m_nCounter = 0;
-		AudioManager.m_sQueueSample.m_nSampleIndex = sampleIndex;
-		AudioManager.m_sQueueSample.m_nBankIndex = SFX_BANK_PED_COMMENTS;
-		AudioManager.m_sQueueSample.m_nPriority = 3;
-		AudioManager.m_sQueueSample.m_nVolume = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nVolume;
-		AudioManager.m_sQueueSample.m_fDistance = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_fDistance;
-		AudioManager.m_sQueueSample.m_nLoopCount = 1;
+			// BUG? no break, VC has break in here
+		case TRUE:
+			AudioManager.m_sQueueSample.m_nEntityIndex = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nEntityIndex;
+			AudioManager.m_sQueueSample.m_nCounter = 0;
+			AudioManager.m_sQueueSample.m_nSampleIndex = sampleIndex;
+			AudioManager.m_sQueueSample.m_nBankIndex = SFX_BANK_PED_COMMENTS;
+			AudioManager.m_sQueueSample.m_nPriority = 3;
+			AudioManager.m_sQueueSample.m_nVolume = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nVolume;
+			AudioManager.m_sQueueSample.m_fDistance = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_fDistance;
+			AudioManager.m_sQueueSample.m_nLoopCount = 1;
 #ifndef GTA_PS2
-		AudioManager.m_sQueueSample.m_nLoopStart = 0;
-		AudioManager.m_sQueueSample.m_nLoopEnd = -1;
+			AudioManager.m_sQueueSample.m_nLoopStart = 0;
+			AudioManager.m_sQueueSample.m_nLoopEnd = -1;
 #endif // !GTA_PS2
 #ifdef EXTERNAL_3D_SOUND
-		#ifdef FIX_BUGS
-		AudioManager.m_sQueueSample.m_nEmittingVolume = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nEmittingVolume;
-		#else
-		AudioManager.m_sQueueSample.m_nEmittingVolume = MAX_VOLUME;
-		#endif // FIX_BUGS
+#ifdef FIX_BUGS
+			AudioManager.m_sQueueSample.m_nEmittingVolume = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nEmittingVolume;
+#else
+			AudioManager.m_sQueueSample.m_nEmittingVolume = MAX_VOLUME;
+#endif // FIX_BUGS
 #endif // EXTERNAL_3D_SOUND
-		AudioManager.m_sQueueSample.m_fSpeedMultiplier = 3.0f;
-		switch (sampleIndex) {
-		case SFX_POLICE_HELI_1:
-		case SFX_POLICE_HELI_2:
-		case SFX_POLICE_HELI_3:
-#ifdef FIX_BUGS
-		case SFX_POLICE_HELI_4:
-		case SFX_POLICE_HELI_5:
-		case SFX_POLICE_HELI_6:
-		case SFX_POLICE_HELI_7:
-		case SFX_POLICE_HELI_8:
-		case SFX_POLICE_HELI_9:
-		case SFX_POLICE_HELI_10:
-		case SFX_POLICE_HELI_11:
-		case SFX_POLICE_HELI_12:
-		case SFX_POLICE_HELI_13:
-		case SFX_POLICE_HELI_14:
-		case SFX_POLICE_HELI_15:
-		case SFX_POLICE_HELI_16:
-		case SFX_POLICE_HELI_17:
-		case SFX_POLICE_HELI_18:
-		case SFX_POLICE_HELI_19:
-		case SFX_POLICE_HELI_20:
-		case SFX_POLICE_HELI_21:
-		case SFX_POLICE_HELI_22:
-		case SFX_POLICE_HELI_23:
-		case SFX_POLICE_HELI_24:
-		case SFX_POLICE_HELI_25:
-		case SFX_POLICE_HELI_26:
-		case SFX_POLICE_HELI_27:
-		case SFX_POLICE_HELI_28:
-		case SFX_POLICE_HELI_29:
+#ifdef ATTACH_PED_COMMENTS_TO_ENTITIES
+			// let's disable doppler because if sounds funny as the sound moves
+			// originally position of ped comment doesn't change so this has no effect anyway
+			AudioManager.m_sQueueSample.m_fSpeedMultiplier = 0.0f;
+#else
+			AudioManager.m_sQueueSample.m_fSpeedMultiplier = 3.0f;
 #endif
-			AudioManager.m_sQueueSample.m_MaxDistance = 400.0f;
-			break;
-		default:
-			AudioManager.m_sQueueSample.m_MaxDistance = 50.0f;
-			break;
-		}
-		AudioManager.m_sQueueSample.m_bStatic = TRUE;
-		AudioManager.m_sQueueSample.m_vecPos = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_vecPos;
+			switch (sampleIndex) {
+			case SFX_POLICE_HELI_1:
+			case SFX_POLICE_HELI_2:
+			case SFX_POLICE_HELI_3:
+#ifdef FIX_BUGS
+			case SFX_POLICE_HELI_4:
+			case SFX_POLICE_HELI_5:
+			case SFX_POLICE_HELI_6:
+			case SFX_POLICE_HELI_7:
+			case SFX_POLICE_HELI_8:
+			case SFX_POLICE_HELI_9:
+			case SFX_POLICE_HELI_10:
+			case SFX_POLICE_HELI_11:
+			case SFX_POLICE_HELI_12:
+			case SFX_POLICE_HELI_13:
+			case SFX_POLICE_HELI_14:
+			case SFX_POLICE_HELI_15:
+			case SFX_POLICE_HELI_16:
+			case SFX_POLICE_HELI_17:
+			case SFX_POLICE_HELI_18:
+			case SFX_POLICE_HELI_19:
+			case SFX_POLICE_HELI_20:
+			case SFX_POLICE_HELI_21:
+			case SFX_POLICE_HELI_22:
+			case SFX_POLICE_HELI_23:
+			case SFX_POLICE_HELI_24:
+			case SFX_POLICE_HELI_25:
+			case SFX_POLICE_HELI_26:
+			case SFX_POLICE_HELI_27:
+			case SFX_POLICE_HELI_28:
+			case SFX_POLICE_HELI_29:
+#endif
+				AudioManager.m_sQueueSample.m_MaxDistance = 400.0f;
+				break;
+			default:
+				AudioManager.m_sQueueSample.m_MaxDistance = 50.0f;
+				break;
+			}
+			AudioManager.m_sQueueSample.m_bStatic = TRUE;
+			AudioManager.m_sQueueSample.m_vecPos = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_vecPos;
 
-		if (sampleIndex >= SFX_AMMU_D && sampleIndex <= SFX_AMMU_F) {
-			AudioManager.m_sQueueSample.m_bReverb = FALSE;
+			if (sampleIndex >= SFX_AMMU_D && sampleIndex <= SFX_AMMU_F) {
+				AudioManager.m_sQueueSample.m_bReverb = FALSE;
 #ifdef AUDIO_REFLECTIONS
-			AudioManager.m_sQueueSample.m_bReflections = FALSE;
+				AudioManager.m_sQueueSample.m_bReflections = FALSE;
 #endif
 #ifdef FIX_BUGS
-		} else if (sampleIndex >= SFX_POLICE_HELI_1 && sampleIndex <= SFX_POLICE_HELI_29) {
-			AudioManager.m_sQueueSample.m_bReverb = TRUE;
+			}
+			else if (sampleIndex >= SFX_POLICE_HELI_1 && sampleIndex <= SFX_POLICE_HELI_29) {
+				AudioManager.m_sQueueSample.m_bReverb = TRUE;
 #ifdef AUDIO_REFLECTIONS
-			AudioManager.m_sQueueSample.m_bReflections = FALSE;
+				AudioManager.m_sQueueSample.m_bReflections = FALSE;
 #endif // AUDIO_REFLECTIONS
 #endif // FIX_BUGS
-		} else {
-			AudioManager.m_sQueueSample.m_bReverb = TRUE;
+			}
+			else {
+				AudioManager.m_sQueueSample.m_bReverb = TRUE;
 #ifdef AUDIO_REFLECTIONS
-			AudioManager.m_sQueueSample.m_bReflections = TRUE;
+				AudioManager.m_sQueueSample.m_bReflections = TRUE;
 #endif
-		}
+			}
 
-		AudioManager.m_sQueueSample.m_bIs2D = FALSE;
-		AudioManager.m_sQueueSample.m_nFrequency =
-			SampleManager.GetSampleBaseFrequency(AudioManager.m_sQueueSample.m_nSampleIndex) + AudioManager.RandomDisplacement(750);
-		if (CTimer::GetIsSlowMotionActive())
-			AudioManager.m_sQueueSample.m_nFrequency /= 2;
-		m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nProcess = -1;
-		AudioManager.AddSampleToRequestedQueue();
+			AudioManager.m_sQueueSample.m_bIs2D = FALSE;
+			AudioManager.m_sQueueSample.m_nFrequency =
+				SampleManager.GetSampleBaseFrequency(AudioManager.m_sQueueSample.m_nSampleIndex) + AudioManager.RandomDisplacement(750);
+			if (CTimer::GetIsSlowMotionActive())
+				AudioManager.m_sQueueSample.m_nFrequency /= 2;
+			m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nProcess = -1;
+			AudioManager.AddSampleToRequestedQueue();
+		default:
+			break;
+		}
 	}
 
 	// Switch bank

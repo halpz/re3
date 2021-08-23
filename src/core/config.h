@@ -438,6 +438,7 @@ enum Config {
 //#define AUDIO_OAL_USE_SNDFILE // use libsndfile to decode WAVs instead of our internal decoder
 #define AUDIO_OAL_USE_MPG123 // use mpg123 to support mp3 files
 #define PAUSE_RADIO_IN_FRONTEND // pause radio when game is paused
+#define ATTACH_PED_COMMENTS_TO_ENTITIES // ped comments coordinates would update following ped entity
 #define MULTITHREADED_AUDIO // for streams. requires C++11 or later
 
 #ifdef AUDIO_OPUS

@@ -10,6 +10,7 @@
 #include "sampman.h"
 #include "Camera.h"
 #include "World.h"
+#include "Entity.h"
 
 cAudioManager AudioManager;
 
@@ -903,6 +904,24 @@ cAudioManager::ProcessActiveQueues()
 							SampleManager.SetChannelVolume(j, sample.m_nVolume);
 #endif
 						} else {
+#ifdef ATTACH_PED_COMMENTS_TO_ENTITIES
+							if (sample.m_nCounter <= 255 && sample.m_nSampleIndex >= SAMPLEBANK_PED_START && sample.m_nSampleIndex <= SAMPLEBANK_PED_END) {
+								CEntity* entity = (CEntity*)GetEntityPointer(sample.m_nEntityIndex);
+								if (entity && m_asAudioEntities[sample.m_nEntityIndex].m_nType == AUDIOTYPE_PHYSICAL) {
+									sample.m_vecPos = entity->GetPosition();
+									sample.m_fDistance = Sqrt(GetDistanceSquared(sample.m_vecPos));
+									uint8 vol;
+									if (CWorld::GetIsLineOfSightClear(TheCamera.GetPosition(), sample.m_vecPos, true, false, false, false, false, false))
+										vol = MAX_VOLUME;
+									else
+										vol = 31;
+#ifdef EXTERNAL_3D_SOUND
+									sample.m_nEmittingVolume = vol;
+#endif
+									sample.m_nVolume = ComputeVolume(vol, sample.m_MaxDistance, sample.m_fDistance);
+								}
+							}
+#endif
 							position2 = sample.m_fDistance;
 							position1 = m_asActiveSamples[j].m_fDistance;
 							m_asActiveSamples[j].m_fDistance = sample.m_fDistance;

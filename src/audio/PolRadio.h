@@ -23,7 +23,7 @@ VALIDATE_SIZE(cAMCrime, 20);
 class cPoliceRadioQueue
 {
 public:
-	int32 m_aSamples[POLICE_RADIO_QUEUE_MAX_SAMPLES];
+	uint32 m_aSamples[POLICE_RADIO_QUEUE_MAX_SAMPLES];
 	uint8 m_nSamplesInQueue;
 	uint8 m_nAddOffset;
 	uint8 m_nRemoveOffset;
