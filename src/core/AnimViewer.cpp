@@ -92,7 +92,7 @@ CAnimViewer::Initialise(void) {
 	CFileLoader::LoadLevel("DATA\\DEFAULT.DAT");
 	CFileLoader::LoadLevel("DATA\\ANIMVIEWER.DAT");
 	CStreaming::Init();
-	for(int i = 0; i < MODELINFOSIZE; i++)
+	for(int i = 0; i < CModelInfo::GetNumModelInfos(); i++)
 		if(CModelInfo::GetModelInfo(i))
 			CModelInfo::GetModelInfo(i)->ConvertAnimFileIndex();
 	CStreaming::LoadInitialPeds();
@@ -166,7 +166,7 @@ LastPedModelId(int modelId)
 {
 	CBaseModelInfo *model;
 	for(;;){
-		assert(modelId < MODELINFOSIZE);
+		assert(modelId < CModelInfo::GetNumModelInfos());
 		model = CModelInfo::GetModelInfo(modelId);
 		if (model && model->GetModelType() == MITYPE_PED)
 			break;
@@ -180,7 +180,7 @@ FirstCarModelId(int modelId)
 {
 	CBaseModelInfo *model;
 	for(;;){
-		assert(modelId < MODELINFOSIZE);
+		assert(modelId < CModelInfo::GetNumModelInfos());
 		model = CModelInfo::GetModelInfo(modelId);
 		if (model && model->GetModelType() == MITYPE_VEHICLE)
 			break;
@@ -200,7 +200,7 @@ NextModelId(int modelId, int wantedChange)
 
 	while(tryCount != 0) {
 		modelId += wantedChange;
-		if (modelId < 0 || modelId >= MODELINFOSIZE) {
+		if (modelId < 0 || modelId >= CModelInfo::GetNumModelInfos()) {
 			tryCount--;
 			wantedChange = -wantedChange;
 		} else if (modelId != 5 && modelId != 6 && modelId != 405) {

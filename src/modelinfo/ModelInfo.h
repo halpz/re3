@@ -25,10 +25,11 @@ class CModelInfo
 	static CStore<CVehicleModelInfo, VEHICLEMODELSIZE> ms_vehicleModelStore;
 	static CStore<C2dEffect, TWODFXSIZE> ms_2dEffectStore;
 
+public:
 	// these fields are in the resource image
 	int32 resNumModelInfos;
 	CBaseModelInfo **resModelInfoPtrs;
-public:
+
 	static void Initialise(void);
 	static void ShutDown(void);
 
@@ -43,6 +44,7 @@ public:
 	static C2dEffect *Get2dEffect(int32 id) { return &gp2dEffects[id]; }
 	static int32 Get2dEffectIndex(C2dEffect *effect) { return effect - gp2dEffects; }
 
+	static int32 GetNumModelInfos(void) { return msNumModelInfos; }
 	static CBaseModelInfo *GetModelInfo(const char *name, int *id);
 	static CBaseModelInfo *GetModelInfo(int id){
 		if(id < 0 || id >= msNumModelInfos)

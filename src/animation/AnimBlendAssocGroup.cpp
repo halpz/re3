@@ -132,7 +132,7 @@ GetModelFromName(const char *name)
 	}
 
 	uint32 hashKey = CKeyGen::GetUppercaseKey(name);
-	for (i = 0; i < MODELINFOSIZE; i++) {
+	for (i = 0; i < CModelInfo::GetNumModelInfos(); i++) {
 		mi = CModelInfo::GetModelInfo(i);
 		if (mi && mi->GetRwObject()
 			&& RwObjectGetType(mi->GetRwObject()) == rpCLUMP &&

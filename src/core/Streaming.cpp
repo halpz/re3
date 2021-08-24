@@ -180,7 +180,7 @@ CStreaming::Init2(void)
 
 	// init stream info, mark things that are already loaded
 
-	for(i = 0; i < MODELINFOSIZE; i++){
+	for(i = 0; i < CModelInfo::GetNumModelInfos(); i++){
 		CBaseModelInfo *mi = CModelInfo::GetModelInfo(i);
 		if(mi && mi->GetRwObject()){
 			ms_aInfoForModel[i].m_loadState = STREAMSTATE_LOADED;
