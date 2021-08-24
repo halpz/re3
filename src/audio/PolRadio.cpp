@@ -243,8 +243,8 @@ cAudioManager::ServicePoliceRadioChannel(uint8 wantedLevel)
 #endif
 				SampleManager.SetChannelVolume(CHANNEL_POLICE_RADIO, 100);
 				SampleManager.SetChannelPan(CHANNEL_POLICE_RADIO, 63);
-#ifndef GTA_PS2
 				SampleManager.SetChannelLoopCount(CHANNEL_POLICE_RADIO, 1);
+#ifndef GTA_PS2
 				SampleManager.SetChannelLoopPoints(CHANNEL_POLICE_RADIO, 0, -1);
 #endif
 				SampleManager.StartChannel(CHANNEL_POLICE_RADIO);
