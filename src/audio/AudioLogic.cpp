@@ -2321,7 +2321,11 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 				freq = GearFreqAdj[CurrentPretendGear] + freqModifier + 22050;
 				if (engineSoundType == SFX_BANK_TRUCK)
 					freq /= 2;
+#ifdef USE_TIME_SCALE_FOR_AUDIO
+				SampleManager.SetChannelFrequency(nChannel, freq * CTimer::GetTimeScale());
+#else
 				SampleManager.SetChannelFrequency(nChannel, freq);
+#endif
 				if (!channelUsed) {
 #ifdef AUDIO_REVERB
 					SampleManager.SetChannelReverbFlag(nChannel, m_bDynamicAcousticModelingStatus != FALSE);
@@ -7870,7 +7874,7 @@ cPedComments::Process()
 			AudioManager.m_sQueueSample.m_nEmittingVolume = MAX_VOLUME;
 	#endif // FIX_BUGS
 #endif // EXTERNAL_3D_SOUND
-#ifdef ATTACH_PED_COMMENTS_TO_ENTITIES
+#ifdef ATTACH_RELEASING_SOUNDS_TO_ENTITIES
 			// let's disable doppler because if sounds funny as the sound moves
 			// originally position of ped comment doesn't change so this has no effect anyway
 			AudioManager.m_sQueueSample.m_fSpeedMultiplier = 0.0f;
@@ -7891,16 +7895,19 @@ cPedComments::Process()
 			if((sampleIndex >= SFX_POLICE_BOAT_1 && sampleIndex <= SFX_POLICE_BOAT_23) ||
 				(sampleIndex >= SFX_POLICE_HELI_1 && sampleIndex <= SFX_POLICE_HELI_20))
 				AudioManager.m_sQueueSample.m_MaxDistance = 400.0f;
-	#ifndef ATTACH_PED_COMMENTS_TO_ENTITIES
+	#ifndef ATTACH_RELEASING_SOUNDS_TO_ENTITIES
 			else if (sampleIndex >= SFX_PLAYER_ANGRY_BUSTED_1 && sampleIndex <= SFX_PLAYER_ON_FIRE_16) { // check if player sfx
 				AudioManager.m_sQueueSample.m_bIs2D = TRUE;
 				AudioManager.m_sQueueSample.m_nPan = 63;
 			}
-	#endif // ATTACH_PED_COMMENTS_TO_ENTITIES
+	#endif // ATTACH_RELEASING_SOUNDS_TO_ENTITIES
 #endif // FIX_BUGS
 			AudioManager.m_sQueueSample.m_nFrequency =
 				SampleManager.GetSampleBaseFrequency(AudioManager.m_sQueueSample.m_nSampleIndex) + AudioManager.RandomDisplacement(750);
-			if(CTimer::GetIsSlowMotionActive()) AudioManager.m_sQueueSample.m_nFrequency /= 2;
+#ifndef USE_TIME_SCALE_FOR_AUDIO
+			if (CTimer::GetIsSlowMotionActive())
+				AudioManager.m_sQueueSample.m_nFrequency >>= 1;
+#endif
 			m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nProcess = -1;
 			prevSamples[counter++] = sampleIndex;
 			if(counter == 10) counter = 0;
