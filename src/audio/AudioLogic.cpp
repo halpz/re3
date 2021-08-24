@@ -1389,7 +1389,11 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CAutomobile *
 				freq = GearFreqAdj[CurrentPretendGear] + freqModifier + 22050;
 				if (engineSoundType == SFX_BANK_TRUCK)
 					freq /= 2;
+#ifdef USE_TIME_SCALE_FOR_AUDIO
+				SampleManager.SetChannelFrequency(CHANNEL_PLAYER_VEHICLE_ENGINE, freq * CTimer::GetTimeScale());
+#else
 				SampleManager.SetChannelFrequency(CHANNEL_PLAYER_VEHICLE_ENGINE, freq);
+#endif
 				if (!channelUsed) {
 #if GTA_VERSION >= GTA3_PC_10
 					SampleManager.SetChannelReverbFlag(CHANNEL_PLAYER_VEHICLE_ENGINE, m_bDynamicAcousticModelingStatus != FALSE);
@@ -6102,7 +6106,7 @@ cPedComments::Process()
 			AudioManager.m_sQueueSample.m_nEmittingVolume = MAX_VOLUME;
 #endif // FIX_BUGS
 #endif // EXTERNAL_3D_SOUND
-#ifdef ATTACH_PED_COMMENTS_TO_ENTITIES
+#ifdef ATTACH_RELEASING_SOUNDS_TO_ENTITIES
 			// let's disable doppler because if sounds funny as the sound moves
 			// originally position of ped comment doesn't change so this has no effect anyway
 			AudioManager.m_sQueueSample.m_fSpeedMultiplier = 0.0f;
@@ -6174,8 +6178,10 @@ cPedComments::Process()
 			AudioManager.m_sQueueSample.m_bIs2D = FALSE;
 			AudioManager.m_sQueueSample.m_nFrequency =
 				SampleManager.GetSampleBaseFrequency(AudioManager.m_sQueueSample.m_nSampleIndex) + AudioManager.RandomDisplacement(750);
+#ifndef USE_TIME_SCALE_FOR_AUDIO
 			if (CTimer::GetIsSlowMotionActive())
-				AudioManager.m_sQueueSample.m_nFrequency /= 2;
+				AudioManager.m_sQueueSample.m_nFrequency >>= 1;
+#endif
 			m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nProcess = -1;
 			AudioManager.AddSampleToRequestedQueue();
 		default:

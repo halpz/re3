@@ -47,8 +47,12 @@ public:
 								// 0 =   L 100%  R 0%
 								// 63 =  L 100%  R 100%
 								// 127 = L 0%    R 100%
+#ifndef FIX_BUGS
 	uint32 m_nFramesToPlay;		// Number of frames the sound would be played (if it stops being queued).
 								// This one is being set by queued sample for looping sounds, otherwise calculated inside AudioManager
+#else
+	float m_nFramesToPlay;		// Made into float for high fps fix
+#endif
 
 	// all fields below are internal to AudioManager calculations and aren't set by queued sample
 	bool8 m_bIsBeingPlayed;		// Set to TRUE when the sound was added or changed on current frame to avoid it being overwritten
@@ -60,6 +64,9 @@ public:
 #endif
 	uint32 m_nFinalPriority;	// Actual value used to compare priority, calculated using volume and m_nPriority. Lesser value means higher priority
 	int8 m_nVolumeChange;		// How much m_nVolume should reduce per each frame.
+#if defined(FIX_BUGS) && defined(EXTERNAL_3D_SOUND)
+	int8 m_nEmittingVolumeChange; // same as above but for m_nEmittingVolume
+#endif
 };
 
 VALIDATE_SIZE(tSound, 92);

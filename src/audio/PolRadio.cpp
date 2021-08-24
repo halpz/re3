@@ -260,7 +260,11 @@ cAudioManager::ServicePoliceRadioChannel(uint8 wantedLevel)
 				default: freq = SampleManager.GetSampleBaseFrequency(sample); break;
 				}
 				PoliceChannelFreq = freq;
+#ifdef USE_TIME_SCALE_FOR_AUDIO
+				SampleManager.SetChannelFrequency(CHANNEL_POLICE_RADIO, freq * CTimer::GetTimeScale());
+#else
 				SampleManager.SetChannelFrequency(CHANNEL_POLICE_RADIO, freq);
+#endif
 				SampleManager.SetChannelVolume(CHANNEL_POLICE_RADIO, 100);
 				SampleManager.SetChannelPan(CHANNEL_POLICE_RADIO, 63);
 #ifndef GTA_PS2
