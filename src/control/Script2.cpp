@@ -190,7 +190,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 command)
 	{
 		uint16 counter = (uint8*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) - CTheScripts::ScriptSpace;
 		CollectParameters(&m_nIp, 1);
-		CUserDisplay::OnscnTimer.AddCounter(counter, GET_INTEGER_PARAM(0), nil, 0);
+		CUserDisplay::OnscnTimer.AddCounter(counter, GET_INTEGER_PARAM(0), nil, 0, -1, nil, 0);
 		return 0;
 	}
 	case COMMAND_CLEAR_ONSCREEN_COUNTER:

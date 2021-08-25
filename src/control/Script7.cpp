@@ -570,7 +570,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		wchar* text = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]); // ???
 		strncpy(onscreen_str, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
-		CUserDisplay::OnscnTimer.AddCounter(var, GET_INTEGER_PARAM(0), onscreen_str, GET_INTEGER_PARAM(1) - 1); // TODO: last params are -1, nil, 0
+		CUserDisplay::OnscnTimer.AddCounter(var, GET_INTEGER_PARAM(0), onscreen_str, GET_INTEGER_PARAM(1) - 1, -1, nil, 0); // TODO: last params are -1, nil, 0
 		return 0;
 	}
 	case COMMAND_ADD_SET_PIECE:

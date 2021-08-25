@@ -9,18 +9,31 @@
 #include "OnscreenTimer.h"
 #include "Camera.h"
 
+CRGBA gbColour(255, 255, 255, 255);
+CRGBA gbColour2(255, 255, 255, 255);
+
 void
 COnscreenTimer::Init()
 {
 	m_bDisabled = false;
 	for(uint32 i = 0; i < NUMONSCREENCOUNTERS; i++) {
 		m_sCounters[i].m_nCounterOffset = 0;
+		m_sCounters[i].m_nTotal = -1;
 
-		for(uint32 j = 0; j < ARRAY_SIZE(m_sCounters[0].m_aCounterText); j++)
-			m_sCounters[i].m_aCounterText[j] = '\0';
+		for (uint32 j = 0; j < ARRAY_SIZE(m_sCounters[0].m_aCounterText1); j++) {
+			m_sCounters[i].m_aCounterText1[j] = '\0';
+		}
+
+		for (uint32 j = 0; j < ARRAY_SIZE(m_sCounters[0].m_aCounterText2); j++) {
+			m_sCounters[i].m_aCounterText2[j] = '\0';
+		}
 
 		m_sCounters[i].m_nType = COUNTER_DISPLAY_NUMBER;
+		m_sCounters[i].m_nTypeOfTotal = 0;
 		m_sCounters[i].m_bCounterProcessed = false;
+		m_sCounters[i].m_colour1 = CRGBA(112, 132, 157, 255);
+		m_sCounters[i].m_colour2 = CRGBA(42, 58, 81, 255);
+
 	}
 	for(uint32 i = 0; i < NUMONSCREENCLOCKS; i++) {
 		m_sClocks[i].m_nClockOffset = 0;
@@ -30,6 +43,8 @@ COnscreenTimer::Init()
 
 		m_sClocks[i].m_bClockProcessed = false;
 		m_sClocks[i].m_bClockGoingDown = true;
+		m_sClocks[i].m_aClockColour = CRGBA(244, 225, 91, 255);
+		m_sClocks[i].m_bClockTickThisFrame = false;
 	}
 }
 
@@ -44,6 +59,10 @@ COnscreenTimer::Process()
 void
 COnscreenTimer::ProcessForDisplay()
 {
+#ifdef GTA_NETWORK
+	if (gIsMultiplayerGame)
+		return;
+#endif
 	if(CHud::m_Wants_To_Draw_Hud) {
 		m_bProcessed = false;
 		for(uint32 i = 0; i < NUMONSCREENCLOCKS; i++) {
@@ -71,9 +90,12 @@ COnscreenTimer::ClearCounter(uint32 offset)
 	for(uint32 i = 0; i < NUMONSCREENCOUNTERS; i++) {
 		if(offset == m_sCounters[i].m_nCounterOffset) {
 			m_sCounters[i].m_nCounterOffset = 0;
-			m_sCounters[i].m_aCounterText[0] = '\0';
+			m_sCounters[i].m_aCounterText1[0] = '\0';
+			m_sCounters[i].m_aCounterText2[0] = '\0';
+			m_sCounters[i].m_nTypeOfTotal = 0;
 			m_sCounters[i].m_nType = COUNTER_DISPLAY_NUMBER;
 			m_sCounters[i].m_bCounterProcessed = false;
+			m_sCounters[i].m_bAddDollarPrefix = false;
 		}
 	}
 }
@@ -87,22 +109,45 @@ COnscreenTimer::ClearClock(uint32 offset)
 			m_sClocks[i].m_aClockText[0] = '\0';
 			m_sClocks[i].m_bClockProcessed = false;
 			m_sClocks[i].m_bClockGoingDown = true;
+			m_sClocks[i].m_bClockTickThisFrame = false;
 		}
 }
 
 void
-COnscreenTimer::AddCounter(uint32 offset, uint16 type, char* text, uint16 pos)
+COnscreenTimer::AddCounter(uint32 offset, uint16 type, char* text1, uint16 pos, int32 total, char* text2, uint16 totalType)
 {
-	if (m_sCounters[pos].m_aCounterText[0] != '\0')
+	if (m_sCounters[pos].m_nCounterOffset)
 		return;
 
 	m_sCounters[pos].m_nCounterOffset = offset;
-	if(text)
-		strncpy(m_sCounters[pos].m_aCounterText, text, ARRAY_SIZE(m_sCounters[0].m_aCounterText));
+	m_sCounters[pos].m_nTotal = total;
+	if(text1)
+		strncpy(m_sCounters[pos].m_aCounterText1, text1, ARRAY_SIZE(m_sCounters[0].m_aCounterText1));
 	else
-		m_sCounters[pos].m_aCounterText[0] = '\0';
+		m_sCounters[pos].m_aCounterText1[0] = '\0';
 
+	if (text2)
+		strncpy(m_sCounters[pos].m_aCounterText2, text2, ARRAY_SIZE(m_sCounters[0].m_aCounterText2));
+	else
+		m_sCounters[pos].m_aCounterText2[0] = '\0';
+
+	m_sCounters[pos].m_nTypeOfTotal = totalType;
 	m_sCounters[pos].m_nType = type;
+	m_sCounters[pos].m_bAddDollarPrefix = 0;
+
+	if (gbColour == CRGBA(255, 255, 255, 255))
+		m_sCounters[pos].m_colour1 = CRGBA(112, 132, 157, 255);
+	else {
+		m_sCounters[pos].m_colour1 = gbColour;
+		gbColour = CRGBA(255, 255, 255, 255);
+	}
+		
+	if (gbColour == CRGBA(255, 255, 255, 255))
+		m_sCounters[pos].m_colour2 = CRGBA(42, 58, 81, 255);
+	else {
+		m_sCounters[pos].m_colour2 = gbColour;
+		gbColour = CRGBA(255, 255, 255, 255);
+	}
 }
 
 void
@@ -112,6 +157,13 @@ COnscreenTimer::AddClock(uint32 offset, char* text, bool bGoingDown)
 		if(m_sClocks[i].m_nClockOffset == 0) {
 			m_sClocks[i].m_nClockOffset = offset;
 			m_sClocks[i].m_bClockGoingDown = bGoingDown;
+			m_sClocks[i].m_bClockTickThisFrame = false;
+			if (gbColour == CRGBA(255, 255, 255, 255))
+				m_sClocks[i].m_aClockColour = CRGBA(244, 225, 91, 255);
+			else {
+				m_sClocks[i].m_aClockColour = gbColour;
+				gbColour = CRGBA(255, 255, 255, 255);
+			}
 			if(text)
 				strncpy(m_sClocks[i].m_aClockText, text, ARRAY_SIZE(m_sClocks[0].m_aClockText));
 			else
@@ -140,8 +192,12 @@ COnscreenTimerEntry::Process()
 		}
 		else {
 			int32 oldTimeSeconds = oldTime / 1000;
-			if (oldTimeSeconds < 12 && newTime / 1000 != oldTimeSeconds && !TheCamera.m_WideScreenOn) {
-				DMAudio.PlayFrontEndSound(SOUND_CLOCK_TICK, newTime / 1000);
+			if (oldTimeSeconds < 12) {
+				m_bClockTickThisFrame = false;
+				if (newTime / 1000 != oldTimeSeconds) {
+					m_bClockTickThisFrame = true;
+					DMAudio.PlayFrontEndSound(SOUND_CLOCK_TICK, newTime / 1000);
+				}
 			}
 		}
 	}
@@ -161,5 +217,28 @@ void
 COnscreenCounterEntry::ProcessForDisplayCounter()
 {
 	uint32 counter = *CTheScripts::GetPointerToScriptVariable(m_nCounterOffset);
-	sprintf(m_aCounterBuffer, "%d", counter);
+	char prefix[2] = { '\0' };
+	if (m_bAddDollarPrefix)
+		sprintf(prefix, "$");
+#ifdef FIX_BUGS
+	char suffix[3] = { '\0' };
+#else
+	char suffix[2] = { '\0' };
+#endif
+	if (m_nTotal != -1) {
+		m_nTotal = Min(99, m_nTotal);
+		sprintf(suffix, "/%d", m_nTotal);
+	}
+	sprintf(m_aCounterBuffer, "%s%d%s", prefix, counter, suffix);
+}
+
+void
+COnscreenTimer::ChangeCounterPrefix(uint32 offset, bool bChange)
+{
+	for (uint32 i = 0; i < NUMONSCREENCOUNTERS; i++) {
+		if (offset == m_sCounters[i].m_nCounterOffset) {
+			m_sCounters[i].m_bAddDollarPrefix = bChange;
+			return;
+		}
+	}
 }
