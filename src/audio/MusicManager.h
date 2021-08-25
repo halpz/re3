@@ -76,7 +76,7 @@ public:
 	void SetRadioInCar(uint32);
 	void SetRadioChannelByScript(uint32, int32);
 
-	void ResetTimers(int32);
+	void ResetTimers(uint32);
 	void Service();
 	void ServiceFrontEndMode();
 	void ServiceGameMode();

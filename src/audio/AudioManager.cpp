@@ -25,9 +25,9 @@ cAudioManager::cAudioManager()
 	m_fSpeedOfSound = SPEED_OF_SOUND / TIME_SPENT;
 	m_nTimeSpent = TIME_SPENT;
 	m_nActiveSamples = NUM_CHANNELS_GENERIC;
-	m_nActiveSampleQueue = 1;
+	m_nActiveQueue = 1;
 	ClearRequestedQueue();
-	m_nActiveSampleQueue = 0;
+	m_nActiveQueue = 0;
 	ClearRequestedQueue();
 	ClearActiveSamples();
 	GenerateIntegerRandomNumberTable();
@@ -36,11 +36,11 @@ cAudioManager::cAudioManager()
 	m_bDynamicAcousticModelingStatus = TRUE;
 #endif
 
-	for (int i = 0; i < NUM_AUDIOENTITIES; i++) {
+	for (uint32 i = 0; i < NUM_AUDIOENTITIES; i++) {
 		m_asAudioEntities[i].m_bIsUsed = FALSE;
-		m_anAudioEntityIndices[i] = NUM_AUDIOENTITIES;
+		m_aAudioEntityOrderList[i] = NUM_AUDIOENTITIES;
 	}
-	m_nAudioEntitiesTotal = 0;
+	m_nAudioEntitiesCount = 0;
 	m_FrameCounter = 0;
 	m_bReduceReleasingPriority = FALSE;
 	m_bTimerJustReset = FALSE;
@@ -65,7 +65,7 @@ cAudioManager::Initialise()
 			if (m_nActiveSamples <= 1) {
 				Terminate();
 			} else {
-				--m_nActiveSamples;
+				m_nActiveSamples--;
 #else
 			{
 				m_nActiveSamples = NUM_CHANNELS_GENERIC;
@@ -87,10 +87,10 @@ cAudioManager::Terminate()
 
 		for (uint32 i = 0; i < NUM_AUDIOENTITIES; i++) {
 			m_asAudioEntities[i].m_bIsUsed = FALSE;
-			m_anAudioEntityIndices[i] = ARRAY_SIZE(m_anAudioEntityIndices);
+			m_aAudioEntityOrderList[i] = ARRAY_SIZE(m_aAudioEntityOrderList);
 		}
 
-		m_nAudioEntitiesTotal = 0;
+		m_nAudioEntitiesCount = 0;
 		m_sAudioScriptObjectManager.m_nScriptObjectEntityTotal = 0;
 		PreTerminateGameSpecificShutdown();
 
@@ -116,8 +116,8 @@ cAudioManager::Service()
 		m_bTimerJustReset = FALSE;
 	}
 	if (m_bIsInitialised) {
-		m_nPreviousUserPause = m_nUserPause;
-		m_nUserPause = CTimer::GetIsUserPaused();
+		m_bWasPaused = m_bIsPaused;
+		m_bIsPaused = CTimer::GetIsUserPaused();
 #ifdef AUDIO_REFLECTIONS
 		UpdateReflections();
 #endif
@@ -139,12 +139,12 @@ cAudioManager::CreateEntity(eAudioType type, void *entity)
 #ifdef FIX_BUGS
 	// since sound could still play after entity deletion let's make sure we don't override one that is in use
 	// find all the free entity IDs that are being used by queued samples
-	int32 stillUsedEntities[NUM_CHANNELS_GENERIC * NUM_SOUNDS_SAMPLES_BANKS];
+	int32 stillUsedEntities[NUM_CHANNELS_GENERIC * NUM_SOUND_QUEUES];
 	uint32 stillUsedEntitiesCount = 0;
 
-	for (uint8 i = 0; i < NUM_SOUNDS_SAMPLES_BANKS; i++)
-		for (uint8 j = 0; j < m_SampleRequestQueuesStatus[i]; j++) {
-			tSound &sound = m_asSamples[i][m_abSampleQueueIndexTable[i][j]];
+	for (uint8 i = 0; i < NUM_SOUND_QUEUES; i++)
+		for (uint8 j = 0; j < m_nRequestedCount[i]; j++) {
+			tSound &sound = m_aRequestedQueue[i][m_aRequestedOrderList[i][j]];
 			if (sound.m_nEntityIndex < 0) continue;
 			if (!m_asAudioEntities[sound.m_nEntityIndex].m_bIsUsed) {
 				bool found = false;
@@ -160,7 +160,7 @@ cAudioManager::CreateEntity(eAudioType type, void *entity)
 		}
 #endif
 
-	for (uint32 i = 0; i < ARRAY_SIZE(m_asAudioEntities); i++) {
+	for (uint32 i = 0; i < NUM_AUDIOENTITIES; i++) {
 		if (!m_asAudioEntities[i].m_bIsUsed) {
 #ifdef FIX_BUGS
 			// skip if ID is still used by queued sample
@@ -185,7 +185,7 @@ cAudioManager::CreateEntity(eAudioType type, void *entity)
 			m_asAudioEntities[i].m_awAudioEvent[2] = SOUND_NO_SOUND;
 			m_asAudioEntities[i].m_awAudioEvent[3] = SOUND_NO_SOUND;
 			m_asAudioEntities[i].m_AudioEvents = 0;
-			m_anAudioEntityIndices[m_nAudioEntitiesTotal++] = i;
+			m_aAudioEntityOrderList[m_nAudioEntitiesCount++] = i;
 			return i;
 		}
 	}
@@ -197,11 +197,11 @@ cAudioManager::DestroyEntity(int32 id)
 {
 	if (m_bIsInitialised && id >= 0 && id < NUM_AUDIOENTITIES && m_asAudioEntities[id].m_bIsUsed) {
 		m_asAudioEntities[id].m_bIsUsed = FALSE;
-		for (int32 i = 0; i < m_nAudioEntitiesTotal; ++i) {
-			if (id == m_anAudioEntityIndices[i]) {
+		for (uint32 i = 0; i < m_nAudioEntitiesCount; ++i) {
+			if (id == m_aAudioEntityOrderList[i]) {
 				if (i < NUM_AUDIOENTITIES - 1)
-					memmove(&m_anAudioEntityIndices[i], &m_anAudioEntityIndices[i + 1], NUM_AUDIOENTITY_EVENTS * (m_nAudioEntitiesTotal - (i + 1)));
-				m_anAudioEntityIndices[--m_nAudioEntitiesTotal] = NUM_AUDIOENTITIES;
+					memmove(&m_aAudioEntityOrderList[i], &m_aAudioEntityOrderList[i + 1], NUM_AUDIOENTITY_EVENTS * (m_nAudioEntitiesCount - (i + 1)));
+				m_aAudioEntityOrderList[--m_nAudioEntitiesCount] = NUM_AUDIOENTITIES;
 				return;
 			}
 		}
@@ -258,13 +258,13 @@ cAudioManager::PlayOneShot(int32 index, uint16 sound, float vol)
 								if (entity.m_AudioEvents < ARRAY_SIZE(entity.m_awAudioEvent)) {
 									entity.m_awAudioEvent[i] = sound;
 									entity.m_afVolume[i] = vol;
-									++entity.m_AudioEvents;
+									entity.m_AudioEvents++;
 								}
 								return;
 							}
 							if (OneShotPriority[entity.m_awAudioEvent[i]] > OneShotPriority[sound])
 								break;
-							++i;
+							i++;
 						}
 						if (i < NUM_AUDIOENTITY_EVENTS - 1) {
 							memmove(&entity.m_awAudioEvent[i + 1], &entity.m_awAudioEvent[i], (NUM_AUDIOENTITY_EVENTS - 1 - i) * NUM_AUDIOENTITY_EVENTS / 2);
@@ -273,7 +273,7 @@ cAudioManager::PlayOneShot(int32 index, uint16 sound, float vol)
 						entity.m_awAudioEvent[i] = sound;
 						entity.m_afVolume[i] = vol;
 						if (entity.m_AudioEvents < ARRAY_SIZE(entity.m_awAudioEvent))
-							++entity.m_AudioEvents;
+							entity.m_AudioEvents++;
 					}
 				}
 			}
@@ -324,14 +324,14 @@ cAudioManager::ResetTimers(uint32 time)
 		m_bTimerJustReset = TRUE;
 		m_nTimer = time;
 		ClearRequestedQueue();
-		if (m_nActiveSampleQueue) {
-			m_nActiveSampleQueue = 0;
+		if (m_nActiveQueue) {
+			m_nActiveQueue = 0;
 			ClearRequestedQueue();
-			m_nActiveSampleQueue = 1;
+			m_nActiveQueue = 1;
 		} else {
-			m_nActiveSampleQueue = 1;
+			m_nActiveQueue = 1;
 			ClearRequestedQueue();
-			m_nActiveSampleQueue = 0;
+			m_nActiveQueue = 0;
 		}
 		ClearActiveSamples();
 		ClearMissionAudio(0);
@@ -353,7 +353,7 @@ cAudioManager::DestroyAllGameCreatedEntities()
 	cAudioScriptObject *entity;
 
 	if (m_bIsInitialised) {
-		for (uint32 i = 0; i < ARRAY_SIZE(m_asAudioEntities); i++) {
+		for (uint32 i = 0; i < NUM_AUDIOENTITIES; i++) {
 			if (m_asAudioEntities[i].m_bIsUsed) {
 				switch (m_asAudioEntities[i].m_nType) {
 				case AUDIOTYPE_PHYSICAL:
@@ -442,20 +442,20 @@ cAudioManager::SetCurrent3DProvider(uint8 which)
 #else
 	if (!m_bIsInitialised)
 		return -1;
-	for (uint8 i = 0; i < m_nActiveSamples + 1; ++i)
+	for (uint8 i = 0; i < m_nActiveSamples + 1; i++)
 		SampleManager.StopChannel(i);
 	ClearRequestedQueue();
-	if (m_nActiveSampleQueue == 0)
-		m_nActiveSampleQueue = 1;
+	if (m_nActiveQueue == 0)
+		m_nActiveQueue = 1;
 	else
-		m_nActiveSampleQueue = 0;
+		m_nActiveQueue = 0;
 	ClearRequestedQueue();
 	ClearActiveSamples();
 	int8 current = SampleManager.SetCurrent3DProvider(which);
 	if (current > 0) {
 		m_nActiveSamples = SampleManager.GetMaximumSupportedChannels();
 		if (m_nActiveSamples > 1)
-			--m_nActiveSamples;
+			m_nActiveSamples--;
 	}
 	return current;
 #endif
@@ -531,7 +531,7 @@ cAudioManager::ServiceSoundEffects()
 	if(CTimer::GetLogicalFramesPassed() != 0)
 #endif
 	m_bReduceReleasingPriority = (m_FrameCounter++ % 5) == 0;
-	if (m_nUserPause && !m_nPreviousUserPause) {
+	if (m_bIsPaused && !m_bWasPaused) {
 #ifdef GTA_PS2
 		if (m_bIsSurround) {
 			for (uint32 i = 0; i < NUM_CHANNELS_DTS_GENERIC; i++)
@@ -555,18 +555,18 @@ cAudioManager::ServiceSoundEffects()
 			SampleManager.StopChannel(i);
 #endif
 		ClearRequestedQueue();
-		if (m_nActiveSampleQueue) {
-			m_nActiveSampleQueue = 0;
+		if (m_nActiveQueue) {
+			m_nActiveQueue = 0;
 			ClearRequestedQueue();
-			m_nActiveSampleQueue = 1;
+			m_nActiveQueue = 1;
 		} else {
-			m_nActiveSampleQueue = 1;
+			m_nActiveQueue = 1;
 			ClearRequestedQueue();
-			m_nActiveSampleQueue = 0;
+			m_nActiveQueue = 0;
 		}
 		ClearActiveSamples();
 	}
-	m_nActiveSampleQueue = m_nActiveSampleQueue == 1 ? 0 : 1;
+	m_nActiveQueue = m_nActiveQueue == 1 ? 0 : 1;
 #ifdef AUDIO_REVERB
 	if(m_bIsSurround) ProcessReverb();
 #endif
@@ -585,7 +585,7 @@ cAudioManager::ServiceSoundEffects()
 #ifdef AUDIO_OAL
 	SampleManager.Service();
 #endif
-	for (int32 i = 0; i < m_sAudioScriptObjectManager.m_nScriptObjectEntityTotal; ++i) {
+	for (int32 i = 0; i < m_sAudioScriptObjectManager.m_nScriptObjectEntityTotal; i++) {
 		cAudioScriptObject *object = (cAudioScriptObject *)m_asAudioEntities[m_sAudioScriptObjectManager.m_anScriptObjectEntityIndices[i]].m_pEntity;
 		delete object;
 		m_asAudioEntities[m_sAudioScriptObjectManager.m_anScriptObjectEntityIndices[i]].m_pEntity = nil;
@@ -685,9 +685,9 @@ cAudioManager::RandomDisplacement(uint32 seed)
 void
 cAudioManager::InterrogateAudioEntities()
 {
-	for (int32 i = 0; i < m_nAudioEntitiesTotal; i++) {
-		ProcessEntity(m_anAudioEntityIndices[i]);
-		m_asAudioEntities[m_anAudioEntityIndices[i]].m_AudioEvents = 0;
+	for (uint32 i = 0; i < m_nAudioEntitiesCount; i++) {
+		ProcessEntity(m_aAudioEntityOrderList[i]);
+		m_asAudioEntities[m_aAudioEntityOrderList[i]].m_AudioEvents = 0;
 	}
 }
 
@@ -702,14 +702,13 @@ cAudioManager::AddSampleToRequestedQueue()
 
 	if (m_sQueueSample.m_nSampleIndex < TOTAL_AUDIO_SAMPLES) {
 		finalPriority = m_sQueueSample.m_nPriority * (MAX_VOLUME - m_sQueueSample.m_nVolume);
-		sampleIndex = m_SampleRequestQueuesStatus[m_nActiveSampleQueue];
+		sampleIndex = m_nRequestedCount[m_nActiveQueue];
 		if (sampleIndex >= m_nActiveSamples) {
-			sampleIndex = m_abSampleQueueIndexTable[m_nActiveSampleQueue][m_nActiveSamples - 1];
-			if (m_asSamples[m_nActiveSampleQueue][sampleIndex].m_nFinalPriority <= finalPriority)
+			sampleIndex = m_aRequestedOrderList[m_nActiveQueue][m_nActiveSamples - 1];
+			if (m_aRequestedQueue[m_nActiveQueue][sampleIndex].m_nFinalPriority <= finalPriority)
 				return;
-		} else {
-			++m_SampleRequestQueuesStatus[m_nActiveSampleQueue];
-		}
+		} else
+			m_nRequestedCount[m_nActiveQueue]++;
 		m_sQueueSample.m_nFinalPriority = finalPriority;
 		m_sQueueSample.m_bIsPlayingFinished = FALSE;
 #ifdef AUDIO_REFLECTIONS
@@ -733,7 +732,7 @@ cAudioManager::AddSampleToRequestedQueue()
 #endif
 #endif
 
-		m_asSamples[m_nActiveSampleQueue][sampleIndex] = m_sQueueSample;
+		m_aRequestedQueue[m_nActiveQueue][sampleIndex] = m_sQueueSample;
 
 		AddDetailsToRequestedOrderList(sampleIndex);
 #ifdef AUDIO_REFLECTIONS
@@ -749,15 +748,15 @@ cAudioManager::AddDetailsToRequestedOrderList(uint8 sample)
 	uint32 i = 0;
 	if (sample > 0) {
 		for (; i < sample; i++) {
-			if (m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]].m_nFinalPriority >
-			    m_asSamples[m_nActiveSampleQueue][sample].m_nFinalPriority)
+			if (m_aRequestedQueue[m_nActiveQueue][m_aRequestedOrderList[m_nActiveQueue][i]].m_nFinalPriority >
+			    m_aRequestedQueue[m_nActiveQueue][sample].m_nFinalPriority)
 				break;
 		}
 		if (i < sample) {
-			memmove(&m_abSampleQueueIndexTable[m_nActiveSampleQueue][i + 1], &m_abSampleQueueIndexTable[m_nActiveSampleQueue][i], m_nActiveSamples - i - 1);
+			memmove(&m_aRequestedOrderList[m_nActiveQueue][i + 1], &m_aRequestedOrderList[m_nActiveQueue][i], m_nActiveSamples - i - 1);
 		}
 	}
-	m_abSampleQueueIndexTable[m_nActiveSampleQueue][i] = sample;
+	m_aRequestedOrderList[m_nActiveQueue][i] = sample;
 }
 
 #ifdef AUDIO_REFLECTIONS
@@ -955,17 +954,17 @@ cAudioManager::AddReleasingSounds()
 	bool8 toProcess[44];
 #endif
 
-	int8 queue = m_nActiveSampleQueue == 0 ? 1 : 0;
+	uint8 queue = m_nActiveQueue == 0 ? 1 : 0;
 
-	for (int32 i = 0; i < m_SampleRequestQueuesStatus[queue]; i++) {
-		tSound &sample = m_asSamples[queue][m_abSampleQueueIndexTable[queue][i]];
+	for (uint8 i = 0; i < m_nRequestedCount[queue]; i++) {
+		tSound &sample = m_aRequestedQueue[queue][m_aRequestedOrderList[queue][i]];
 		if (sample.m_bIsPlayingFinished)
 			continue;
 
 		toProcess[i] = FALSE;
-		for (int32 j = 0; j < m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; j++) {
-			if (sample.m_nEntityIndex == m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][j]].m_nEntityIndex &&
-			    sample.m_nCounter == m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][j]].m_nCounter) {
+		for (uint8 j = 0; j < m_nRequestedCount[m_nActiveQueue]; j++) {
+			if (sample.m_nEntityIndex == m_aRequestedQueue[m_nActiveQueue][m_aRequestedOrderList[m_nActiveQueue][j]].m_nEntityIndex &&
+			    sample.m_nCounter == m_aRequestedQueue[m_nActiveQueue][m_aRequestedOrderList[m_nActiveQueue][j]].m_nCounter) {
 				toProcess[i] = TRUE;
 				break;
 			}
@@ -1101,18 +1100,18 @@ cAudioManager::ProcessActiveQueues()
 #endif 
 
 #ifdef USE_TIME_SCALE_FOR_AUDIO
-	float timeScale = m_nUserPause ? 1.0f : CTimer::GetTimeScale();
+	float timeScale = m_bIsPaused ? 1.0f : CTimer::GetTimeScale();
 #endif
 
-	for (int32 i = 0; i < m_nActiveSamples; i++) {
-		m_asSamples[m_nActiveSampleQueue][i].m_bIsBeingPlayed = FALSE;
+	for (uint8 i = 0; i < m_nActiveSamples; i++) {
+		m_aRequestedQueue[m_nActiveQueue][i].m_bIsBeingPlayed = FALSE;
 		m_asActiveSamples[i].m_bIsBeingPlayed = FALSE;
 	}
 
-	for (int32 i = 0; i < m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; i++) {
-		tSound &sample = m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]];
+	for (uint8 i = 0; i < m_nRequestedCount[m_nActiveQueue]; i++) {
+		tSound &sample = m_aRequestedQueue[m_nActiveQueue][m_aRequestedOrderList[m_nActiveQueue][i]];
 		if (sample.m_nSampleIndex != NO_SAMPLE) {
-			for (int32 j = 0; j < m_nActiveSamples; j++) {
+			for (uint8 j = 0; j < m_nActiveSamples; j++) {
 				if (sample.m_nEntityIndex == m_asActiveSamples[j].m_nEntityIndex && sample.m_nCounter == m_asActiveSamples[j].m_nCounter &&
 					sample.m_nSampleIndex == m_asActiveSamples[j].m_nSampleIndex) {
 					if (sample.m_nLoopCount > 0) {
@@ -1214,15 +1213,15 @@ cAudioManager::ProcessActiveQueues()
 			}
 		}
 	}
-	for (int32 i = 0; i < m_nActiveSamples; i++) {
+	for (uint8 i = 0; i < m_nActiveSamples; i++) {
 		if (m_asActiveSamples[i].m_nSampleIndex != NO_SAMPLE && !m_asActiveSamples[i].m_bIsBeingPlayed) {
 			SampleManager.StopChannel(i);
 			m_asActiveSamples[i].m_nSampleIndex = NO_SAMPLE;
 			m_asActiveSamples[i].m_nEntityIndex = AEHANDLE_NONE;
 		}
 	}
-	for (uint8 i = 0; i < m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; i++) {
-		tSound &sample = m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]];
+	for (uint8 i = 0; i < m_nRequestedCount[m_nActiveQueue]; i++) {
+		tSound &sample = m_aRequestedQueue[m_nActiveQueue][m_aRequestedOrderList[m_nActiveQueue][i]];
 		if (!sample.m_bIsBeingPlayed && !sample.m_bIsPlayingFinished && m_asAudioEntities[sample.m_nEntityIndex].m_bIsUsed && sample.m_nSampleIndex < NO_SAMPLE) {
 #ifdef AUDIO_REFLECTIONS
 			if (sample.m_nCounter > 255 && sample.m_nLoopCount > 0 && sample.m_nReflectionDelay > 0) { // check if reflection
@@ -1339,10 +1338,9 @@ cAudioManager::ProcessActiveQueues()
 void
 cAudioManager::ClearRequestedQueue()
 {
-	for (int32 i = 0; i < m_nActiveSamples; i++) {
-		m_abSampleQueueIndexTable[m_nActiveSampleQueue][i] = m_nActiveSamples;
-	}
-	m_SampleRequestQueuesStatus[m_nActiveSampleQueue] = 0;
+	for (uint8 i = 0; i < m_nActiveSamples; i++)
+		m_aRequestedOrderList[m_nActiveQueue][i] = m_nActiveSamples;
+	m_nRequestedCount[m_nActiveQueue] = 0;
 }
 
 void
@@ -1396,17 +1394,16 @@ cAudioManager::LoadBankIfNecessary(uint8 bank)
 void
 cAudioManager::GenerateIntegerRandomNumberTable()
 {
-	for (int32 i = 0; i < ARRAY_SIZE(m_anRandomTable); i++) {
+	for (uint32 i = 0; i < ARRAY_SIZE(m_anRandomTable); i++)
 		m_anRandomTable[i] = myrand();
-	}
 }
 
 #ifdef EXTERNAL_3D_SOUND
 void
 cAudioManager::AdjustSamplesVolume()
 {
-	for (int i = 0; i < m_SampleRequestQueuesStatus[m_nActiveSampleQueue]; i++) {
-		tSound *pSample = &m_asSamples[m_nActiveSampleQueue][m_abSampleQueueIndexTable[m_nActiveSampleQueue][i]];
+	for (uint8 i = 0; i < m_nRequestedCount[m_nActiveQueue]; i++) {
+		tSound *pSample = &m_aRequestedQueue[m_nActiveQueue][m_aRequestedOrderList[m_nActiveQueue][i]];
 
 		if (!pSample->m_bIs2D)
 			pSample->m_nEmittingVolume = ComputeEmittingVolume(pSample->m_nEmittingVolume, pSample->m_MaxDistance, pSample->m_fDistance);
