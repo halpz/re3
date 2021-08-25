@@ -221,7 +221,7 @@ COnscreenCounterEntry::ProcessForDisplayCounter()
 	if (m_bAddDollarPrefix)
 		sprintf(prefix, "$");
 #ifdef FIX_BUGS
-	char suffix[3] = { '\0' };
+	char suffix[4] = { '\0' };
 #else
 	char suffix[2] = { '\0' };
 #endif
