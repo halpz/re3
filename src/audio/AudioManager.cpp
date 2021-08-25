@@ -752,9 +752,8 @@ cAudioManager::AddDetailsToRequestedOrderList(uint8 sample)
 			    m_aRequestedQueue[m_nActiveQueue][sample].m_nFinalPriority)
 				break;
 		}
-		if (i < sample) {
+		if (i < sample) 
 			memmove(&m_aRequestedOrderList[m_nActiveQueue][i + 1], &m_aRequestedOrderList[m_nActiveQueue][i], m_nActiveSamples - i - 1);
-		}
 	}
 	m_aRequestedOrderList[m_nActiveQueue][i] = sample;
 }
