@@ -729,10 +729,17 @@ CPlayerPed::ProcessWeaponSwitch(CPad *padUsed)
 
 				for (m_nSelectedWepSlot = m_currentWeapon + 1; m_nSelectedWepSlot < TOTAL_WEAPON_SLOTS; ++m_nSelectedWepSlot) {
 					if (HasWeaponSlot(m_nSelectedWepSlot) && GetWeapon(m_nSelectedWepSlot).HasWeaponAmmoToBeUsed()) {
+#ifdef FIX_BUGS
+						goto switchDetectDone;
+#else
 						goto spentAmmoCheck;
+#endif
 					}
 				}
 				m_nSelectedWepSlot = 0;
+#ifdef FIX_BUGS
+				goto switchDetectDone;
+#endif
 			}
 		} else if (padUsed->CycleWeaponLeftJustDown()) {
 			if (TheCamera.PlayerWeaponMode.Mode != CCam::MODE_M16_1STPERSON
@@ -754,6 +761,10 @@ CPlayerPed::ProcessWeaponSwitch(CPad *padUsed)
 					
 					--m_nSelectedWepSlot;
 				} while (m_nSelectedWepSlot != WEAPONSLOT_UNARMED);
+#ifdef FIX_BUGS
+				goto switchDetectDone;
+#endif
+
 			}
 		}
 	}

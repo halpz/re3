@@ -263,7 +263,7 @@ cMusicManager::GetRadioInCar(void)
 		CVehicle* veh = AudioManager.FindVehicleOfPlayer();
 		if (veh != nil) {
 			if (UsesPoliceRadio(veh) || UsesTaxiRadio(veh)) {
-				if (m_nRadioInCar == NO_TRACK || (CReplay::IsPlayingBack() && !AudioManager.m_nUserPause))
+				if (m_nRadioInCar == NO_TRACK || (CReplay::IsPlayingBack() && !AudioManager.m_bIsPaused))
 					return STREAMED_SOUND_RADIO_POLICE;
 				return m_nRadioInCar;
 			}
@@ -271,7 +271,7 @@ cMusicManager::GetRadioInCar(void)
 		}
 	}
 
-	if (m_nRadioInCar == NO_TRACK || (CReplay::IsPlayingBack() && !AudioManager.m_nUserPause))
+	if (m_nRadioInCar == NO_TRACK || (CReplay::IsPlayingBack() && !AudioManager.m_bIsPaused))
 		return RADIO_OFF;
 	return m_nRadioInCar;
 }
@@ -353,7 +353,7 @@ cMusicManager::ChangeMusicMode(uint8 mode)
 }
 
 void
-cMusicManager::ResetTimers(int32 time)
+cMusicManager::ResetTimers(uint32 time)
 {
 	m_bResetTimers = TRUE;
 	m_nResetTime = time;
@@ -374,7 +374,7 @@ cMusicManager::Service()
 	if (!m_bMusicModeChangeStarted)
 		m_nMusicModeToBeSet = m_nUpcomingMusicMode;
 	if (m_nMusicModeToBeSet == m_nMusicMode) {
-		if (!AudioManager.m_nUserPause || AudioManager.m_nPreviousUserPause || m_nMusicMode != MUSICMODE_FRONTEND)
+		if (!AudioManager.m_bIsPaused || AudioManager.m_bWasPaused || m_nMusicMode != MUSICMODE_FRONTEND)
 		{
 			switch (m_nMusicMode)
 			{
@@ -387,7 +387,7 @@ cMusicManager::Service()
 			m_nMusicMode = MUSICMODE_DISABLED;
 	} else {
 		m_bMusicModeChangeStarted = TRUE;
-		if (!m_bUserResumedGame && !AudioManager.m_nUserPause && AudioManager.m_nPreviousUserPause)
+		if (!m_bUserResumedGame && !AudioManager.m_bIsPaused && AudioManager.m_bWasPaused)
 			m_bUserResumedGame = TRUE;
 		if (AudioManager.m_FrameCounter % 4 == 0) {
 			gNumRetunePresses = 0;
@@ -461,7 +461,7 @@ cMusicManager::ServiceFrontEndMode()
 		} else {
 			if (m_nPlayingTrack == STREAMED_SOUND_RADIO_MP3_PLAYER)
 				SampleManager.StartStreamedFile(STREAMED_SOUND_RADIO_MP3_PLAYER, 0);
-			else if (m_nPlayingTrack == STREAMED_SOUND_MISSION_COMPLETED && !AudioManager.m_nUserPause)
+			else if (m_nPlayingTrack == STREAMED_SOUND_MISSION_COMPLETED && !AudioManager.m_bIsPaused)
 				ChangeMusicMode(MUSICMODE_GAME);
 		}
 	} else {

@@ -1671,7 +1671,7 @@ CAutomobile::Teleport(CVector pos)
 
 float gHeadlightRange = 25.0f;
 float gTaxilightRange = 1.1f;
-CVector gHeadlightColour(0.86, 0.82f, 1.0f);
+CVector gHeadlightColour(0.86f, 0.82f, 1.0f);
 CVector gTaxilightColour(1.0, 1.0f, 0.5f);
 
 void

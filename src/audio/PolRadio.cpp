@@ -125,7 +125,7 @@ cAudioManager::ServicePoliceRadio()
 
 	if(!m_bIsInitialised) return;
 
-	if(!m_nUserPause) {
+	if(!m_bIsPaused) {
 		bool8 crimeReport = SetupCrimeReport();
 #ifdef FIX_BUGS // Crash at 0x5fe6ef
 		if(CReplay::IsPlayingBack() || !FindPlayerPed() || !FindPlayerPed()->m_pWanted)
@@ -168,14 +168,14 @@ cAudioManager::ServicePoliceRadioChannel(uint8 wantedLevel)
 
 	if (!m_bIsInitialised) return;
 
-	if (m_nUserPause) {
+	if (m_bIsPaused) {
 		if (SampleManager.GetChannelUsedFlag(CHANNEL_POLICE_RADIO)) SampleManager.StopChannel(CHANNEL_POLICE_RADIO);
 		if (g_nMissionAudioSfx != NO_SAMPLE && bMissionAudioPhysicalPlayingStatus == PLAY_STATUS_PLAYING &&
 			SampleManager.IsStreamPlaying(1)) {
 			SampleManager.PauseStream(TRUE, 1);
 		}
 	} else {
-		if (m_nPreviousUserPause && g_nMissionAudioSfx != NO_SAMPLE &&
+		if (m_bWasPaused && g_nMissionAudioSfx != NO_SAMPLE &&
 			bMissionAudioPhysicalPlayingStatus == PLAY_STATUS_PLAYING) {
 			SampleManager.PauseStream(FALSE, 1);
 		}
@@ -238,11 +238,15 @@ cAudioManager::ServicePoliceRadioChannel(uint8 wantedLevel)
 				default: freq = SampleManager.GetSampleBaseFrequency(sample); break;
 				}
 				PoliceChannelFreq = freq;
+#ifdef USE_TIME_SCALE_FOR_AUDIO
+				SampleManager.SetChannelFrequency(CHANNEL_POLICE_RADIO, freq * CTimer::GetTimeScale());
+#else
 				SampleManager.SetChannelFrequency(CHANNEL_POLICE_RADIO, freq);
+#endif
 				SampleManager.SetChannelVolume(CHANNEL_POLICE_RADIO, 100);
 				SampleManager.SetChannelPan(CHANNEL_POLICE_RADIO, 63);
-#ifndef GTA_PS2
 				SampleManager.SetChannelLoopCount(CHANNEL_POLICE_RADIO, 1);
+#ifndef GTA_PS2
 				SampleManager.SetChannelLoopPoints(CHANNEL_POLICE_RADIO, 0, -1);
 #endif
 				SampleManager.StartChannel(CHANNEL_POLICE_RADIO);

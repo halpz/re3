@@ -205,6 +205,8 @@ CPedIK::PointGunInDirection(float targetYaw, float targetPitch)
 		else if (status == ANGLES_SET_EXACTLY)
 			m_flags |= GUN_POINTED_SUCCESSFULLY;
 	}
+
+	// Game uses index 2 directly, which happens to be identical to BONE_spine
 #ifdef FIX_BUGS
 	RwMatrix *m = GetBoneMatrix(m_ped, BONE_spine);
 #else
@@ -213,7 +215,7 @@ CPedIK::PointGunInDirection(float targetYaw, float targetPitch)
 	RwMatrix *m = &mats[2];
 #endif
 	RwV3d axis = { 0.0f, 0.0f, 0.0f };
-	float axisangle = -CGeneral::LimitRadianAngle(Atan2(-m->up.y, -m->up.x) - m_ped->m_fRotationCur);
+	float axisangle = -CGeneral::LimitRadianAngle(Atan2(-m->at.y, -m->at.x) - m_ped->m_fRotationCur);
 	axis.y = -Sin(axisangle);
 	axis.z = Cos(axisangle);
 
