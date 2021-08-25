@@ -89,7 +89,7 @@ wchar CHud::m_Message[256];
 wchar CHud::m_PagerMessage[256];
 bool CHud::m_Wants_To_Draw_Hud;
 bool CHud::m_Wants_To_Draw_3dMarkers;
-wchar CHud::m_BigMessage[6][128];
+wchar CHud::m_BigMessage[8][128];
 int16 CHud::m_ItemToFlash;
 bool CHud::m_HideRadar;
 int32 CHud::m_ClockState;
@@ -2022,7 +2022,7 @@ void CHud::ReInitialise() {
 	m_LastWeapon = 0;
 }
 
-wchar LastBigMessage[6][128];
+wchar LastBigMessage[8][128];
 
 void CHud::SetBigMessage(wchar *message, uint16 style)
 {
