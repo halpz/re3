@@ -6037,53 +6037,55 @@ cPedComments::Add(tPedComment *com)
 {
 	uint8 index;
 
-	if (m_nCommentsInBank[m_nActiveBank] >= NUM_PED_COMMENTS_SLOTS) {
-		index = m_nIndexMap[m_nActiveBank][NUM_PED_COMMENTS_SLOTS - 1];
-		if (m_asPedComments[m_nActiveBank][index].m_nVolume > com->m_nVolume)
+	// copypasted priority check from cAudioManager::AddSampleToRequestedQueue
+
+	if (m_nPedCommentCount[m_nActiveQueue] >= NUM_PED_COMMENTS_SLOTS) {
+		index = m_aPedCommentOrderList[m_nActiveQueue][NUM_PED_COMMENTS_SLOTS - 1];
+		if (m_aPedCommentQueue[m_nActiveQueue][index].m_nVolume > com->m_nVolume)
 			return;
 	} else
-		index = m_nCommentsInBank[m_nActiveBank]++;
+		index = m_nPedCommentCount[m_nActiveQueue]++;
 
-	m_asPedComments[m_nActiveBank][index] = *com;
+	m_aPedCommentQueue[m_nActiveQueue][index] = *com;
 
+	// this bit is basically copypasted cAudioManager::AddDetailsToRequestedOrderList
 	uint8 i = 0;
 	if (index != 0) {
 		for (i = 0; i < index; i++) {
-			if (m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][i]].m_nVolume < m_asPedComments[m_nActiveBank][index].m_nVolume)
+			if (m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][i]].m_nVolume < m_aPedCommentQueue[m_nActiveQueue][index].m_nVolume)
 				break;
 		}
 
 		if (i < index)
-			memmove(&m_nIndexMap[m_nActiveBank][i + 1], &m_nIndexMap[m_nActiveBank][i], NUM_PED_COMMENTS_SLOTS - 1 - i);
+			memmove(&m_aPedCommentOrderList[m_nActiveQueue][i + 1], &m_aPedCommentOrderList[m_nActiveQueue][i], NUM_PED_COMMENTS_SLOTS - 1 - i);
 	}
 
-	m_nIndexMap[m_nActiveBank][i] = index;
+	m_aPedCommentOrderList[m_nActiveQueue][i] = index;
 }
 
 void
 cPedComments::Process()
 {
-	int sampleIndex;
-	uint8 actualUsedBank;
-	tPedComment *comment;
+	uint32 sampleIndex;
+	uint8 queue;
 
 	if (AudioManager.m_bIsPaused) return;
 
-	if (m_nCommentsInBank[m_nActiveBank]) {
-		sampleIndex = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nSampleIndex;
+	if (m_nPedCommentCount[m_nActiveQueue]) {
+		sampleIndex = m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nSampleIndex;
 		switch (SampleManager.IsPedCommentLoaded(sampleIndex)) // yes, this was a switch
 		{
 		case FALSE:
 			SampleManager.LoadPedComment(sampleIndex);
 			// BUG? no break, VC has break in here
 		case TRUE:
-			AudioManager.m_sQueueSample.m_nEntityIndex = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nEntityIndex;
+			AudioManager.m_sQueueSample.m_nEntityIndex = m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nEntityIndex;
 			AudioManager.m_sQueueSample.m_nCounter = 0;
 			AudioManager.m_sQueueSample.m_nSampleIndex = sampleIndex;
 			AudioManager.m_sQueueSample.m_nBankIndex = SFX_BANK_PED_COMMENTS;
 			AudioManager.m_sQueueSample.m_nPriority = 3;
-			AudioManager.m_sQueueSample.m_nVolume = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nVolume;
-			AudioManager.m_sQueueSample.m_fDistance = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_fDistance;
+			AudioManager.m_sQueueSample.m_nVolume = m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nVolume;
+			AudioManager.m_sQueueSample.m_fDistance = m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_fDistance;
 			AudioManager.m_sQueueSample.m_nLoopCount = 1;
 #ifndef GTA_PS2
 			AudioManager.m_sQueueSample.m_nLoopStart = 0;
@@ -6091,7 +6093,7 @@ cPedComments::Process()
 #endif // !GTA_PS2
 #ifdef EXTERNAL_3D_SOUND
 #ifdef FIX_BUGS
-			AudioManager.m_sQueueSample.m_nEmittingVolume = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nEmittingVolume;
+			AudioManager.m_sQueueSample.m_nEmittingVolume = m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nEmittingVolume;
 #else
 			AudioManager.m_sQueueSample.m_nEmittingVolume = MAX_VOLUME;
 #endif // FIX_BUGS
@@ -6142,7 +6144,7 @@ cPedComments::Process()
 				break;
 			}
 			AudioManager.m_sQueueSample.m_bStatic = TRUE;
-			AudioManager.m_sQueueSample.m_vecPos = m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_vecPos;
+			AudioManager.m_sQueueSample.m_vecPos = m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_vecPos;
 
 			if (sampleIndex >= SFX_AMMU_D && sampleIndex <= SFX_AMMU_F) {
 				AudioManager.m_sQueueSample.m_bReverb = FALSE;
@@ -6172,33 +6174,32 @@ cPedComments::Process()
 			if (CTimer::GetIsSlowMotionActive())
 				AudioManager.m_sQueueSample.m_nFrequency >>= 1;
 #endif
-			m_asPedComments[m_nActiveBank][m_nIndexMap[m_nActiveBank][0]].m_nProcess = -1;
+			m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nProcess = -1;
 			AudioManager.AddSampleToRequestedQueue();
 		default:
 			break;
 		}
 	}
 
-	// Switch bank
-	if (m_nActiveBank == 0) {
-		actualUsedBank = 0;
-		m_nActiveBank = 1;
+	// Switch queue
+	if (m_nActiveQueue == 0) {
+		queue = 0;
+		m_nActiveQueue = 1;
 	} else {
-		actualUsedBank = 1;
-		m_nActiveBank = 0;
+		queue = 1;
+		m_nActiveQueue = 0;
 	}
-	comment = m_asPedComments[actualUsedBank];
-	for (uint32 i = 0; i < m_nCommentsInBank[actualUsedBank]; i++) {
-		if (m_asPedComments[actualUsedBank][m_nIndexMap[actualUsedBank][i]].m_nProcess > 0) {
-			m_asPedComments[actualUsedBank][m_nIndexMap[actualUsedBank][i]].m_nProcess--;
-			Add(&comment[m_nIndexMap[actualUsedBank][i]]);
+	for (uint8 i = 0; i < m_nPedCommentCount[queue]; i++) {
+		if (m_aPedCommentQueue[queue][m_aPedCommentOrderList[queue][i]].m_nProcess > 0) {
+			m_aPedCommentQueue[queue][m_aPedCommentOrderList[queue][i]].m_nProcess--;
+			Add(&m_aPedCommentQueue[queue][m_aPedCommentOrderList[queue][i]]);
 		}
 	}
 
-	for (uint32 i = 0; i < NUM_PED_COMMENTS_SLOTS; i++) {
-		m_nIndexMap[actualUsedBank][i] = NUM_PED_COMMENTS_SLOTS;
-	}
-	m_nCommentsInBank[actualUsedBank] = 0;
+	// clear queue
+	for (uint8 i = 0; i < NUM_PED_COMMENTS_SLOTS; i++)
+		m_aPedCommentOrderList[queue][i] = NUM_PED_COMMENTS_SLOTS;
+	m_nPedCommentCount[queue] = 0;
 }
 
 #pragma endregion

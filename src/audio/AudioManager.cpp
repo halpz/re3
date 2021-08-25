@@ -658,9 +658,8 @@ cAudioManager::AddSampleToRequestedQueue()
 			sampleIndex = m_aRequestedOrderList[m_nActiveQueue][m_nActiveSamples - 1];
 			if (m_aRequestedQueue[m_nActiveQueue][sampleIndex].m_nFinalPriority <= finalPriority)
 				return;
-		} else {
+		} else
 			m_nRequestedCount[m_nActiveQueue]++;
-		}
 #if GTA_VERSION < GTA3_PC_10
 		if (m_sQueueSample.m_bStatic) {
 			if (m_sQueueSample.m_nLoopCount > 0)
@@ -708,9 +707,8 @@ cAudioManager::AddDetailsToRequestedOrderList(uint8 sample)
 			    m_aRequestedQueue[m_nActiveQueue][sample].m_nFinalPriority)
 				break;
 		}
-		if (i < sample) {
+		if (i < sample)
 			memmove(&m_aRequestedOrderList[m_nActiveQueue][i + 1], &m_aRequestedOrderList[m_nActiveQueue][i], m_nActiveSamples - i - 1);
-		}
 	}
 	m_aRequestedOrderList[m_nActiveQueue][i] = sample;
 }

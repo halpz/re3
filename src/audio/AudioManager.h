@@ -107,22 +107,22 @@ VALIDATE_SIZE(tPedComment, 28);
 class cPedComments
 {
 public:
-	tPedComment m_asPedComments[NUM_PED_COMMENTS_BANKS][NUM_PED_COMMENTS_SLOTS];
-	uint8 m_nIndexMap[NUM_PED_COMMENTS_BANKS][NUM_PED_COMMENTS_SLOTS];
-	uint8 m_nCommentsInBank[NUM_PED_COMMENTS_BANKS];
-	uint8 m_nActiveBank;
+	tPedComment m_aPedCommentQueue[NUM_SOUND_QUEUES][NUM_PED_COMMENTS_SLOTS];
+	uint8 m_aPedCommentOrderList[NUM_SOUND_QUEUES][NUM_PED_COMMENTS_SLOTS];
+	uint8 m_nPedCommentCount[NUM_SOUND_QUEUES];
+	uint8 m_nActiveQueue;
 
 	cPedComments()
 	{
 		for (int i = 0; i < NUM_PED_COMMENTS_SLOTS; i++)
-			for (int j = 0; j < NUM_PED_COMMENTS_BANKS; j++) {
-				m_asPedComments[j][i].m_nProcess = -1;
-				m_nIndexMap[j][i] = NUM_PED_COMMENTS_SLOTS;
+			for (int j = 0; j < NUM_SOUND_QUEUES; j++) {
+				m_aPedCommentQueue[j][i].m_nProcess = -1;
+				m_aPedCommentOrderList[j][i] = NUM_PED_COMMENTS_SLOTS;
 			}
 
-		for (int i = 0; i < NUM_PED_COMMENTS_BANKS; i++)
-			m_nCommentsInBank[i] = 0;
-		m_nActiveBank = 0;
+		for (int i = 0; i < NUM_SOUND_QUEUES; i++)
+			m_nPedCommentCount[i] = 0;
+		m_nActiveQueue = 0;
 	}
 	void Add(tPedComment *com);
 	void Process();
