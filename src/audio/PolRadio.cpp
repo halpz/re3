@@ -149,7 +149,7 @@ cAudioManager::ServicePoliceRadio()
 
 	if(!m_bIsInitialised) return;
 
-	if(!m_nUserPause) {
+	if(!m_bIsPaused) {
 		bool8 crimeReport = SetupCrimeReport();
 #ifdef FIX_BUGS // Crash at 0x5fe6ef
 		if(CReplay::IsPlayingBack() || !FindPlayerPed() || !FindPlayerPed()->m_pWanted)
@@ -188,14 +188,14 @@ cAudioManager::ServicePoliceRadioChannel(uint8 wantedLevel)
 
 	if (!m_bIsInitialised) return;
 
-	if (m_nUserPause) {
+	if (m_bIsPaused) {
 		if (SampleManager.GetChannelUsedFlag(CHANNEL_POLICE_RADIO)) SampleManager.StopChannel(CHANNEL_POLICE_RADIO);
 		if (g_nMissionAudioSfx != TOTAL_AUDIO_SAMPLES && bMissionAudioPhysicalPlayingStatus == PLAY_STATUS_PLAYING &&
 			SampleManager.IsStreamPlaying(1)) {
 			SampleManager.PauseStream(TRUE, 1);
 		}
 	} else {
-		if (m_nPreviousUserPause && g_nMissionAudioSfx != TOTAL_AUDIO_SAMPLES &&
+		if (m_bWasPaused && g_nMissionAudioSfx != TOTAL_AUDIO_SAMPLES &&
 			bMissionAudioPhysicalPlayingStatus == PLAY_STATUS_PLAYING) {
 			SampleManager.PauseStream(FALSE, 1);
 		}

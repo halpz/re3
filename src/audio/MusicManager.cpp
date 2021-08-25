@@ -363,14 +363,14 @@ cMusicManager::GetRadioInCar(void)
 		CVehicle *veh = FindPlayerVehicle();
 		if (veh != nil){
 			if (UsesPoliceRadio(veh)) {
-				if (m_nRadioInCar == NO_TRACK || (CReplay::IsPlayingBack() && !AudioManager.m_nUserPause))
+				if (m_nRadioInCar == NO_TRACK || (CReplay::IsPlayingBack() && !AudioManager.m_bIsPaused))
 					return POLICE_RADIO;
 				return m_nRadioInCar;
 			} else return veh->m_nRadioStation;
 		}
 	}
 
-	if (m_nRadioInCar == NO_TRACK || (CReplay::IsPlayingBack() && !AudioManager.m_nUserPause))
+	if (m_nRadioInCar == NO_TRACK || (CReplay::IsPlayingBack() && !AudioManager.m_bIsPaused))
 		return RADIO_OFF;
 	return m_nRadioInCar;
 }
@@ -418,7 +418,7 @@ cMusicManager::ResetMusicAfterReload()
 
 
 void
-cMusicManager::ResetTimers(int32 time)
+cMusicManager::ResetTimers(uint32 time)
 {
 	m_bResetTimers = TRUE;
 	m_nResetTime = time;
@@ -469,7 +469,7 @@ cMusicManager::ServiceFrontEndMode()
 				switch (m_nNextTrack)
 				{
 				case STREAMED_SOUND_MISSION_COMPLETED:
-					if (!AudioManager.m_nUserPause)
+					if (!AudioManager.m_bIsPaused)
 						ChangeMusicMode(MUSICMODE_GAME);
 					break;
 				case STREAMED_SOUND_GAME_COMPLETED:
@@ -543,7 +543,7 @@ cMusicManager::ServiceGameMode()
 		nFramesSinceCutsceneEnded = -1;
 	}
 
-	if (AudioManager.m_nPreviousUserPause)
+	if (AudioManager.m_bWasPaused)
 		m_bPreviousPlayerInCar = FALSE;
 	if (!m_bPlayerInCar) {
 		if (m_bPreviousPlayerInCar) {

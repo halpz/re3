@@ -58,7 +58,7 @@ public:
 	bool8 m_bIsBeingPlayed;		// Set to TRUE when the sound was added or changed on current frame to avoid it being overwritten
 	bool8 m_bIsPlayingFinished;	// Not sure about the name. Set to TRUE when sampman channel becomes free
 #if GTA_VERSION < GTA3_PC_10
-	int32 unk;					// Only on PS2, used by static non-looped sounds (AFAIK)
+	int32 unk;					// (inherited from GTA 2) Only on PS2, used by static non-looped sounds (AFAIK)
 								// Looks like it's keeping a number of frames left to play with the purpose of setting m_bIsPlayingFinished=TRUE once value reaches 0
 								// Default value is -3 for whatever reason
 #endif
@@ -219,16 +219,16 @@ public:
 #endif
 	float m_fSpeedOfSound;
 	bool8 m_bTimerJustReset;
-	int32 m_nTimer;
+	uint32 m_nTimer;
 	tSound m_sQueueSample;
-	uint8 m_nActiveSampleQueue;
-	tSound m_asSamples[NUM_SOUNDS_SAMPLES_BANKS][NUM_CHANNELS_GENERIC];
-	uint8 m_abSampleQueueIndexTable[NUM_SOUNDS_SAMPLES_BANKS][NUM_CHANNELS_GENERIC];
-	uint8 m_SampleRequestQueuesStatus[NUM_SOUNDS_SAMPLES_BANKS];
+	uint8 m_nActiveQueue;
+	tSound m_aRequestedQueue[NUM_SOUND_QUEUES][NUM_CHANNELS_GENERIC];
+	uint8 m_aRequestedOrderList[NUM_SOUND_QUEUES][NUM_CHANNELS_GENERIC];
+	uint8 m_nRequestedCount[NUM_SOUND_QUEUES];
 	tSound m_asActiveSamples[NUM_CHANNELS_GENERIC];
 	tAudioEntity m_asAudioEntities[NUM_AUDIOENTITIES];
-	int32 m_anAudioEntityIndices[NUM_AUDIOENTITIES];
-	int32 m_nAudioEntitiesTotal;
+	uint32 m_aAudioEntityOrderList[NUM_AUDIOENTITIES];
+	uint32 m_nAudioEntitiesCount;
 #ifdef AUDIO_REFLECTIONS
 	CVector m_avecReflectionsPos[MAX_REFLECTIONS];
 	float m_afReflectionsDistances[MAX_REFLECTIONS];
@@ -253,13 +253,13 @@ public:
 	uint8 m_nMissionAudioLoadingStatus;
 	uint8 m_nMissionAudioPlayStatus;
 	bool8 m_bIsMissionAudioPlaying;
-	int32 m_nMissionAudioFramesToPlay;
+	int32 m_nMissionAudioFramesToPlay; // possibly unsigned
 	bool8 m_bIsMissionAudioAllowedToPlay;
 
 	int32 m_anRandomTable[5];
 	uint8 m_nTimeSpent;
-	bool8 m_nUserPause;
-	bool8 m_nPreviousUserPause;
+	bool8 m_bIsPaused;
+	bool8 m_bWasPaused;
 	uint32 m_FrameCounter;
 
 	cAudioManager();

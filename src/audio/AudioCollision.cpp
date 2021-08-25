@@ -18,7 +18,7 @@ cAudioManager::ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface
 	CVector v1;
 	CVector v2;
 
-	if(!m_bIsInitialised || m_nCollisionEntity < 0 || m_nUserPause ||
+	if(!m_bIsInitialised || m_nCollisionEntity < 0 || m_bIsPaused ||
 	   (velocity < 0.0016f && collisionPower < 0.01f))
 		return;
 
