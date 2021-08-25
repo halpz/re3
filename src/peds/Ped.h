@@ -712,7 +712,9 @@ public:
 	void RestorePreviousObjective(void);
 	void SetIdle(void);
 #ifdef _MSC_VER
+#if _MSC_VER >= 1920 && _MSC_VER < 1929
 	__declspec(noinline) // workaround for a compiler bug, hooray MS :P
+#endif
 #endif
 	void SetObjective(eObjective, void*);
 	void SetObjective(eObjective);
