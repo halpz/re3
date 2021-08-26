@@ -1227,7 +1227,11 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CAutomobile *
 		bHandbrakeOnLastFrame = FALSE;
 		CurrentPretendGear = 1;
 	}
+#ifdef FIX_BUGS // fix acceleration sound on exiting the vehicle
+	if (CReplay::IsPlayingBack() || FindPlayerPed()->GetPedState() == PED_EXIT_CAR)
+#else
 	if (CReplay::IsPlayingBack())
+#endif
 		accelerateState = 255.f * Clamp(automobile->m_fGasPedal, 0.0f, 1.0f);
 	else
 		accelerateState = Pads[0].GetAccelerate();
