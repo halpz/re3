@@ -774,23 +774,30 @@ cAudioManager::AddReflectionsToRequestedQueue()
 	uint32 oldCounter = m_sQueueSample.m_nCounter;
 	float oldDist = m_sQueueSample.m_fDistance;
 	CVector oldPos = m_sQueueSample.m_vecPos;
+#ifndef USE_TIME_SCALE_FOR_AUDIO
 	if ( CTimer::GetIsSlowMotionActive() ) {
 		emittingVolume = m_sQueueSample.m_nVolume;
 		oldFreq = m_sQueueSample.m_nFrequency;
-	} else {
+	} else
+#endif
 		emittingVolume = (9 * m_sQueueSample.m_nVolume) / 16;
-	}
 	m_sQueueSample.m_MaxDistance /= 2.f;
 
 	uint32 halfOldFreq = oldFreq >> 1;
 
 	for (uint32 i = 0; i < ARRAY_SIZE(m_afReflectionsDistances); i++) {
+#ifndef USE_TIME_SCALE_FOR_AUDIO
 		if ( CTimer::GetIsSlowMotionActive() )
 			m_afReflectionsDistances[i] = (m_anRandomTable[i % 4] % 3) * 100.f / 8.f;
+#endif
 
 		reflectionDistance = m_afReflectionsDistances[i];
 		if (reflectionDistance > 0.0f && reflectionDistance < 100.f && reflectionDistance < m_sQueueSample.m_MaxDistance) {
+#ifndef USE_TIME_SCALE_FOR_AUDIO
 			m_sQueueSample.m_nReflectionDelay = CTimer::GetIsSlowMotionActive() ? (reflectionDistance * 800.f / 1029.f) : (reflectionDistance * 500.f / 1029.f);
+#else
+			m_sQueueSample.m_nReflectionDelay = reflectionDistance * 500.f / 1029.f;
+#endif
 			if (m_sQueueSample.m_nReflectionDelay > 3) {
 				m_sQueueSample.m_fDistance = m_afReflectionsDistances[i];
 				SET_EMITTING_VOLUME(emittingVolume);
@@ -799,9 +806,12 @@ cAudioManager::AddReflectionsToRequestedQueue()
 				if (m_sQueueSample.m_nVolume > emittingVolume / 16) {
 					m_sQueueSample.m_nCounter = oldCounter + (i + 1) * 256;
 					if (m_sQueueSample.m_nLoopCount > 0) {
+#ifndef USE_TIME_SCALE_FOR_AUDIO
 						if ( CTimer::GetIsSlowMotionActive() ) {
 							m_sQueueSample.m_nFrequency = halfOldFreq + ((halfOldFreq * i) / ARRAY_SIZE(m_afReflectionsDistances));
-						} else {
+						} else
+#endif
+						{
 							noise = RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
 							if (noise > 0)
 								m_sQueueSample.m_nFrequency -= noise;

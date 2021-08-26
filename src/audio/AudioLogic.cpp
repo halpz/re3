@@ -2025,7 +2025,11 @@ cAudioManager::ProcessPlayersVehicleEngine(cVehicleParams& params, CVehicle* veh
 		CurrentPretendGear = 1;
 		bHandbrakeOnLastFrame = FALSE;
 	}
+#ifdef FIX_BUGS
+	if (CReplay::IsPlayingBack() || FindPlayerPed()->GetPedState() == PED_EXIT_CAR) {
+#else
 	if (CReplay::IsPlayingBack()) {
+#endif
 		accelerateState = (255.0f * Clamp(params.m_pVehicle->m_fGasPedal, 0.0f, 1.0f));
 		brakeState = (255.0f * Clamp(params.m_pVehicle->m_fBrakePedal, 0.0f, 1.0f));
 	} else {
