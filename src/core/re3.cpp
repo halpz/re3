@@ -775,12 +775,14 @@ FixCar(void)
 static void
 TeleportToWaypoint(void)
 {
+	CStreaming::LoadScene(CRadar::TargetMarkerPos);
+	CStreaming::LoadSceneCollision(CRadar::TargetMarkerPos);
 	if (FindPlayerVehicle()) {
 		if (CRadar::TargetMarkerId != -1)
-			FindPlayerVehicle()->Teleport(CRadar::TargetMarkerPos + CVector(0.0f, 0.0f, FindPlayerVehicle()->GetColModel()->boundingSphere.center.z));
+			FindPlayerVehicle()->Teleport(CRadar::TargetMarkerPos + CVector(0.0f, 0.0f, CWorld::FindGroundZForCoord(CRadar::TargetMarkerPos.x, CRadar::TargetMarkerPos.y) + FindPlayerVehicle()->GetColModel()->boundingSphere.radius));
 	} else
 		if(CRadar::TargetMarkerId != -1)
-			FindPlayerPed()->Teleport(CRadar::TargetMarkerPos + CVector(0.0f, 0.0f, FEET_OFFSET));
+			FindPlayerPed()->Teleport(CRadar::TargetMarkerPos + CVector(0.0f, 0.0f, CWorld::FindGroundZForCoord(CRadar::TargetMarkerPos.x, CRadar::TargetMarkerPos.y) + FEET_OFFSET));
 }
 #endif
 
