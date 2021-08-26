@@ -44,6 +44,7 @@
 #include "CarCtrl.h"
 #include "Population.h"
 #include "IniFile.h"
+#include "Zones.h"
 
 #include "crossplatform.h"
 
@@ -746,12 +747,15 @@ FixCar(void)
 static void
 TeleportToWaypoint(void)
 {
-	if (FindPlayerVehicle()) {
-		if (CRadar::TargetMarkerId != -1)
-			FindPlayerVehicle()->Teleport(CRadar::TargetMarkerPos + CVector(0.0f, 0.0f, FindPlayerVehicle()->GetColModel()->boundingSphere.center.z));
-	} else
-		if(CRadar::TargetMarkerId != -1)
-			FindPlayerPed()->Teleport(CRadar::TargetMarkerPos + CVector(0.0f, 0.0f, FEET_OFFSET));
+	if (CRadar::TargetMarkerId == -1)
+		return;
+	CEntity* pEntityToTeleport = FindPlayerEntity();
+	CVector vNewPos = CRadar::TargetMarkerPos;
+	CGame::currLevel = CTheZones::GetLevelFromPosition(&vNewPos);
+	CCollision::SortOutCollisionAfterLoad();
+	CStreaming::LoadScene(vNewPos);
+	vNewPos.z = CWorld::FindGroundZForCoord(vNewPos.x, vNewPos.y) + pEntityToTeleport->GetDistanceFromCentreOfMassToBaseOfModel();
+	pEntityToTeleport->Teleport(vNewPos);
 }
 #endif
 
