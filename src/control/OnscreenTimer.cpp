@@ -209,7 +209,7 @@ void
 COnscreenTimerEntry::ProcessForDisplayClock()
 {
 	uint32 time = *CTheScripts::GetPointerToScriptVariable(m_nClockOffset);
-	sprintf(m_aClockBuffer, "%02d:%02d", time / 1000 / 60 % 100,
+	sprintf(m_aClockBuffer, "%d:%02d", time / 1000 / 60 % 100,
 				   time / 1000 % 60);
 }
 
