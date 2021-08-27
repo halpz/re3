@@ -1771,7 +1771,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		wchar* text = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]); // ???
 		strncpy(onscreen_str, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
-		CUserDisplay::OnscnTimer.AddCounter(var, GET_INTEGER_PARAM(0), onscreen_str, 0);
+		CUserDisplay::OnscnTimer.AddCounter(var, GET_INTEGER_PARAM(0), onscreen_str, 0, -1, nil, 0);
 		return 0;
 	}
 	case COMMAND_CREATE_RANDOM_CAR_FOR_CAR_PARK:

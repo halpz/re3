@@ -913,8 +913,35 @@ void CHud::Draw()
 		*/
 		
 		wchar sTimer[16];
+		uint16 nNumBigOnscrnLines = 0;
+		for (uint32 i = 0; i < NUMONSCREENCOUNTERS; i++) {
+			if (CUserDisplay::OnscnTimer.m_sCounters[i].m_bCounterProcessed) {
+				if (!CounterOnLastFrame[i])
+					CounterFlashTimer[i] = 1;
 
-		if (!CUserDisplay::OnscnTimer.m_sClocks[0].m_bClockProcessed)
+				CounterOnLastFrame[i] = true;
+
+				if (CounterFlashTimer[i] != 0) {
+					if (++CounterFlashTimer[i] > 50)
+						CounterFlashTimer[i] = 0;
+				}
+
+				if (FRAMECOUNTER & 4 || CounterFlashTimer[i] == 0) {
+					if (CUserDisplay::OnscnTimer.m_sCounters[i].m_aCounterText2[0] != '\0') {
+						wchar* pCounterText = TheText.Get(CUserDisplay::OnscnTimer.m_sCounters[i].m_aCounterText2);
+						UseTimerCounterFontSettings();
+						CFont::SetPropOn();
+						CFont::SetColor(CRGBA(255, 255, 255, m_HudAlpha));
+						CFont::SetScale(PSP_SCREEN_SCALE_X(0.7f), PSP_SCREEN_SCALE_Y(1.5217391f));
+						CFont::PrintString(PSP_SCREEN_SCALE_FROM_RIGHT(12.0f), PSP_SCREEN_SCALE_Y(31.0f * nNumBigOnscrnLines) + PSP_SCREEN_SCALE_Y(100.0f), pCounterText);
+					}
+				}
+				if (CUserDisplay::OnscnTimer.m_sCounters[i].m_aCounterText2[0] != '\0')
+					nNumBigOnscrnLines++;
+			}
+		}
+
+		if (!CUserDisplay::OnscnTimer.m_sClocks[0].m_bClockProcessed || CUserDisplay::OnscnTimer.m_sClocks[0].m_bClockTickThisFrame)
 			TimerOnLastFrame = false;
 
 		for(uint32 i = 0; i < NUMONSCREENCOUNTERS; i++) {
@@ -923,42 +950,44 @@ void CHud::Draw()
 		}
 
 		if (CUserDisplay::OnscnTimer.m_bProcessed) {
-			if (CUserDisplay::OnscnTimer.m_sClocks[0].m_bClockProcessed) {
+			if (CUserDisplay::OnscnTimer.m_sClocks[0].m_bClockProcessed && !CUserDisplay::OnscnTimer.m_sClocks[0].m_bClockTickThisFrame) {
 				if (!TimerOnLastFrame)
 					TimerFlashTimer = 1;
 
 				TimerOnLastFrame = true;
 
+				if (FRAMECOUNTER & 4 || TimerFlashTimer == 0) {
+					AsciiToUnicode(CUserDisplay::OnscnTimer.m_sClocks[0].m_aClockBuffer, sTimer);
+					UseTimerCounterFontSettings();
+					CFont::SetPropOff();
+					CFont::SetColor(CRGBA(
+						CUserDisplay::OnscnTimer.m_sClocks[0].m_aClockColour.r,
+						CUserDisplay::OnscnTimer.m_sClocks[0].m_aClockColour.g,
+						CUserDisplay::OnscnTimer.m_sClocks[0].m_aClockColour.b,
+						m_HudAlpha));
+					CFont::PrintString(PSP_SCREEN_SCALE_FROM_RIGHT(12.0f), PSP_SCREEN_SCALE_Y(31.0f * nNumBigOnscrnLines) + PSP_SCREEN_SCALE_Y(100.0f), sTimer);
+
+					if (CUserDisplay::OnscnTimer.m_sClocks[0].m_aClockText[0]) {
+						float width = CFont::GetStringWidth(sTimer) + PSP_SCREEN_SCALE_Y(4.0f);
+						CFont::SetPropOn();
+						CFont::SetColor(CRGBA(
+							CUserDisplay::OnscnTimer.m_sClocks[0].m_aClockColour.r,
+							CUserDisplay::OnscnTimer.m_sClocks[0].m_aClockColour.g,
+							CUserDisplay::OnscnTimer.m_sClocks[0].m_aClockColour.b,
+							m_HudAlpha));
+						CFont::PrintString(PSP_SCREEN_SCALE_FROM_RIGHT(12.0f) - width, PSP_SCREEN_SCALE_Y(31.0f * nNumBigOnscrnLines) + PSP_SCREEN_SCALE_Y(100.0f), TheText.Get(CUserDisplay::OnscnTimer.m_sClocks[0].m_aClockText));
+					}
+				}
+
 				if (TimerFlashTimer != 0) {
 					if (++TimerFlashTimer > 50)
 						TimerFlashTimer = 0;
 				}
-
-				if (FRAMECOUNTER & 4 || TimerFlashTimer == 0) {
-					AsciiToUnicode(CUserDisplay::OnscnTimer.m_sClocks[0].m_aClockBuffer, sTimer);
-					CFont::SetPropOn();
-					CFont::SetBackgroundOff();
-					CFont::SetScale(SCREEN_SCALE_X(HUD_TEXT_SCALE_X), SCREEN_SCALE_Y(HUD_TEXT_SCALE_Y));
-					CFont::SetRightJustifyOn();
-					CFont::SetRightJustifyWrap(0.0f);
-					CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
-					CFont::SetPropOff();
-					CFont::SetBackGroundOnlyTextOn();
-					CFont::SetDropShadowPosition(2);
-					CFont::SetDropColor(CRGBA(0, 0, 0, 255));
-					CFont::SetScale(SCREEN_SCALE_X(HUD_TEXT_SCALE_X), SCREEN_SCALE_Y(HUD_TEXT_SCALE_Y));
-					CFont::SetColor(TIMER_COLOR);
-					CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(37.0f), SCREEN_SCALE_Y(110.0f), sTimer);
-					CFont::SetPropOn();
-
-					if (CUserDisplay::OnscnTimer.m_sClocks[0].m_aClockText[0]) {
-						CFont::SetDropShadowPosition(2);
-						CFont::SetDropColor(CRGBA(0, 0, 0, 255));
-						CFont::SetColor(TIMER_COLOR);
-						CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(37.0f) - SCREEN_SCALE_X(80.0f), SCREEN_SCALE_Y(110.0f), TheText.Get(CUserDisplay::OnscnTimer.m_sClocks[0].m_aClockText));
-					}
-				}
 			}
+
+			int nNumOnscrnLines = 0;
+			if (CUserDisplay::OnscnTimer.m_sClocks[0].m_bClockProcessed)
+				nNumOnscrnLines = 1;
 
 			for(uint32 i = 0; i < NUMONSCREENCOUNTERS; i++) {
 				if (CUserDisplay::OnscnTimer.m_sCounters[i].m_bCounterProcessed) {
@@ -972,52 +1001,62 @@ void CHud::Draw()
 							CounterFlashTimer[i] = 0;
 					}
 
-					if (FRAMECOUNTER & 4 || CounterFlashTimer[i] == 0) {
+					if (FRAMECOUNTER & 4 || CounterFlashTimer[i] == 0 || CUserDisplay::OnscnTimer.m_sCounters[i].m_aCounterText2[0] != '\0') {
+						float sizeOfCounter;
 						if (CUserDisplay::OnscnTimer.m_sCounters[i].m_nType == COUNTER_DISPLAY_NUMBER) {
 							AsciiToUnicode(CUserDisplay::OnscnTimer.m_sCounters[i].m_aCounterBuffer, sTimer);
-							CFont::SetPropOn();
-							CFont::SetBackgroundOff();
-							CFont::SetScale(SCREEN_SCALE_X(HUD_TEXT_SCALE_X), SCREEN_SCALE_Y(HUD_TEXT_SCALE_Y));
-							CFont::SetCentreOff();
-							CFont::SetRightJustifyOn();
-							CFont::SetRightJustifyWrap(0.0f);
-							CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
-							CFont::SetWrapx(SCREEN_STRETCH_X(DEFAULT_SCREEN_WIDTH));
-							CFont::SetPropOn();
-							CFont::SetBackGroundOnlyTextOn();
-							CFont::SetDropShadowPosition(2);
-							CFont::SetDropColor(CRGBA(0, 0, 0, 255));
-							CFont::SetColor(COUNTER_COLOR);
-							CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(37.0f), SCREEN_SCALE_Y(HUD_TEXT_SCALE_Y * 20.f * i) + SCREEN_SCALE_Y(132.0f), sTimer);
+							UseTimerCounterFontSettings();
+							CFont::SetPropOff();
+							CFont::SetColor(CRGBA(
+								CUserDisplay::OnscnTimer.m_sCounters[i].m_colour1.r,
+								CUserDisplay::OnscnTimer.m_sCounters[i].m_colour1.g,
+								CUserDisplay::OnscnTimer.m_sCounters[i].m_colour1.b,
+								m_HudAlpha));
+							sizeOfCounter = CFont::GetStringWidth(sTimer) + PSP_SCREEN_SCALE_X(4.0f);
+							CFont::PrintString(PSP_SCREEN_SCALE_FROM_RIGHT(12.0f), PSP_SCREEN_SCALE_Y(100.0f) + PSP_SCREEN_SCALE_Y(20.0f * nNumOnscrnLines) + PSP_SCREEN_SCALE_Y(31.0f * nNumBigOnscrnLines), sTimer);
 						} else {
 							int counter = atoi(CUserDisplay::OnscnTimer.m_sCounters[i].m_aCounterBuffer);
 
-							const float barWidth = SCREEN_SCALE_X(100.f / 2.f);
-							const float right = SCREEN_SCALE_FROM_RIGHT(37.0f);
+							const float barWidth = PSP_SCREEN_SCALE_X(92.f / 2.f);
+							const float right = PSP_SCREEN_SCALE_FROM_RIGHT(12.0f);
 							const float left = right - barWidth;
 
-							const float barHeight = SCREEN_SCALE_Y(11.0f);
-							const float top = SCREEN_SCALE_Y(132.0f) + SCREEN_SCALE_Y(8.0f) + SCREEN_SCALE_Y(HUD_TEXT_SCALE_Y * 20.f * i);
+							const float barHeight = PSP_SCREEN_SCALE_Y(11.0f);
+							const float top = PSP_SCREEN_SCALE_Y(100.0f) + PSP_SCREEN_SCALE_Y(20.0f * nNumOnscrnLines) + PSP_SCREEN_SCALE_Y(31.0f * nNumBigOnscrnLines) + PSP_SCREEN_SCALE_Y(3.0f);
 							const float bottom = top + barHeight;
 
+							sizeOfCounter = barWidth + PSP_SCREEN_SCALE_X(4.0f);
+
 							// shadow
-							CSprite2d::DrawRect(CRect(left + SCREEN_SCALE_X(6.0f), top + SCREEN_SCALE_Y(2.0f), right + SCREEN_SCALE_X(6.0f), bottom + SCREEN_SCALE_Y(2.0f)), CRGBA(0, 0, 0, 255));
+							CSprite2d::DrawRect(CRect(left - PSP_SCREEN_SCALE_X(1.0f), top - PSP_SCREEN_SCALE_Y(1.0f), right + PSP_SCREEN_SCALE_X(1.0f), bottom + PSP_SCREEN_SCALE_Y(1.0f)), CRGBA(0, 0, 0, m_HudAlpha));
 							
-							CSprite2d::DrawRect(CRect(left + SCREEN_SCALE_X(4.0f), top, right + SCREEN_SCALE_X(4.0f), bottom), CRGBA(27, 89, 130, 255));
-							CSprite2d::DrawRect(CRect(left + SCREEN_SCALE_X(4.0f), top, left + SCREEN_SCALE_X(counter) / 2.0f + SCREEN_SCALE_X(4.0f), bottom), CRGBA(97, 194, 247, 255));
+							CSprite2d::DrawRect(
+								CRect(left, top, right, bottom), 
+								CRGBA(
+									CUserDisplay::OnscnTimer.m_sCounters[i].m_colour2.r,
+									CUserDisplay::OnscnTimer.m_sCounters[i].m_colour2.g,
+									CUserDisplay::OnscnTimer.m_sCounters[i].m_colour2.b,
+								m_HudAlpha));
+							CSprite2d::DrawRect(
+								CRect(left, top, left + counter / 100.0f * barWidth, bottom),
+								CRGBA(
+									CUserDisplay::OnscnTimer.m_sCounters[i].m_colour1.r,
+									CUserDisplay::OnscnTimer.m_sCounters[i].m_colour1.g,
+									CUserDisplay::OnscnTimer.m_sCounters[i].m_colour1.b,
+								m_HudAlpha));
 						}
 
-						if (CUserDisplay::OnscnTimer.m_sCounters[i].m_aCounterText[0]) {
+						if (CUserDisplay::OnscnTimer.m_sCounters[i].m_aCounterText1[0]) {
+							UseTimerCounterFontSettings();
 							CFont::SetPropOn();
-							CFont::SetFontStyle(FONT_LOCALE(FONT_HEADING));
-							CFont::SetScale(SCREEN_SCALE_X(HUD_TEXT_SCALE_X), SCREEN_SCALE_Y(HUD_TEXT_SCALE_Y));
-							CFont::SetDropShadowPosition(2);
-							CFont::SetDropColor(CRGBA(0, 0, 0, 255));
-							CFont::SetColor(COUNTER_COLOR);
-							CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(37.0f) - SCREEN_SCALE_X(61.0f), SCREEN_SCALE_Y(HUD_TEXT_SCALE_Y * 20.f * i) + SCREEN_SCALE_Y(132.0f), TheText.Get(CUserDisplay::OnscnTimer.m_sCounters[i].m_aCounterText));
+							CFont::SetColor(CRGBA(
+								CUserDisplay::OnscnTimer.m_sCounters[i].m_colour1.r,
+								CUserDisplay::OnscnTimer.m_sCounters[i].m_colour1.g,
+								CUserDisplay::OnscnTimer.m_sCounters[i].m_colour1.b,
+								m_HudAlpha));
+							CFont::PrintString(PSP_SCREEN_SCALE_FROM_RIGHT(12.0f) - sizeOfCounter, PSP_SCREEN_SCALE_Y(100.0f) + PSP_SCREEN_SCALE_Y(20.f * nNumOnscrnLines) + PSP_SCREEN_SCALE_Y(31.0f * nNumBigOnscrnLines), TheText.Get(CUserDisplay::OnscnTimer.m_sCounters[i].m_aCounterText1));
 						}
-						// unused/leftover color. I wonder what was it for
-						CFont::SetColor(CRGBA(244, 225, 91, 255));
+						nNumOnscrnLines++;
 					}
 				}
 			}
@@ -2268,4 +2307,18 @@ CHud::ResetWastedText(void)
 	BigMessageInUse[0] = 0.0f;
 	m_BigMessage[2][0] = 0;
 	m_BigMessage[0][0] = 0;
+}
+
+void
+CHud::UseTimerCounterFontSettings()
+{
+	CFont::SetScale(PSP_SCREEN_SCALE_X(0.4048f), PSP_SCREEN_SCALE_Y(0.88f));
+	CFont::SetFontStyle(FONT_STANDARD);
+	CFont::SetCentreOff();
+	CFont::SetRightJustifyOn();
+	CFont::SetRightJustifyWrap(0.0f);
+	CFont::SetDropShadowPosition(0);
+	CFont::SetDropColor(CRGBA(0, 0, 0, 0));
+	CFont::SetBackgroundOff();
+	CFont::SetBackGroundOnlyTextOff();
 }

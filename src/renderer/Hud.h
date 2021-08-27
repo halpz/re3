@@ -151,4 +151,6 @@ public:
 	static void DrawTimeAndCashNumbers(char *str, float x, float y, bool secondSet);
 	static void DrawCash();
 	static void DrawTime();
+
+	static void UseTimerCounterFontSettings();
 };

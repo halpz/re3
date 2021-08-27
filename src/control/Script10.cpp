@@ -242,7 +242,7 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 	{
 		uint16 offset = (uint8*)GetPointerToScriptVariable(&m_nIp, VAR_GLOBAL) - CTheScripts::ScriptSpace;
 		CollectParameters(&m_nIp, 1);
-		//CUserDisplay::OnscnTimer.ChangeCounterPrefix(offset, GET_INTEGER_PARAMS(0));
+		CUserDisplay::OnscnTimer.ChangeCounterPrefix(offset, GET_INTEGER_PARAM(0) != 0);
 		return 0;
 	}
 	case COMMAND_STORE_PLAYER_OUTFIT:
@@ -263,7 +263,7 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 		wchar* text = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]);
 		strncpy(onscreen_str1, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
-		CUserDisplay::OnscnTimer.AddCounter(var, GET_INTEGER_PARAM(1), onscreen_str1, 0); // TODO - second set of data
+		CUserDisplay::OnscnTimer.AddCounter(var, GET_INTEGER_PARAM(1), onscreen_str1, 0, GET_INTEGER_PARAM(0), nil, 0);
 		return 0;
 	}
 	case COMMAND_SET_PLAYER_CURRENT_WEAPON_AMMO_IN_CLIP:
@@ -322,7 +322,7 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 		wchar* text2 = TheText.Get((char*)&CTheScripts::ScriptSpace[m_nIp]);
 		strncpy(onscreen_str2, (char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
-		CUserDisplay::OnscnTimer.AddCounter(var, GET_INTEGER_PARAM(1), onscreen_str1, 0); // TODO - second set of data
+		CUserDisplay::OnscnTimer.AddCounter(var, GET_INTEGER_PARAM(1), onscreen_str2, 0, GET_INTEGER_PARAM(0), onscreen_str1, GET_INTEGER_PARAM(2));
 		return 0;
 	}
 	case COMMAND_GET_PLAYER_STORED_WEAPON:

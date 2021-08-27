@@ -13,6 +13,7 @@
 #include "Hud.h"
 #include "Messages.h"
 #include "Object.h"
+#include "OnscreenTimer.h"
 #include "Pad.h"
 #include "Ped.h"
 #include "Pools.h"
@@ -617,11 +618,11 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 		return 0;
 	case COMMAND_SET_ONSCREEN_TIMER_COLOUR:
 		CollectParameters(&m_nIp, 4);
-		// gbColour = CRGBA(GET_INTEGER_PARAM(0), GET_INTEGER_PARAM(1), GET_INTEGER_PARAM(2), GET_INTEGER_PARAM(3));
+		gbColour = CRGBA(GET_INTEGER_PARAM(0), GET_INTEGER_PARAM(1), GET_INTEGER_PARAM(2), GET_INTEGER_PARAM(3));
 		return 0;
 	case COMMAND_SET_ONSCREEN_TIMER_BACKGROUND_COLOUR:
 		CollectParameters(&m_nIp, 4);
-		// gbColour2 = CRGBA(GET_INTEGER_PARAM(0), GET_INTEGER_PARAM(1), GET_INTEGER_PARAM(2), GET_INTEGER_PARAM(3));
+		gbColour2 = CRGBA(GET_INTEGER_PARAM(0), GET_INTEGER_PARAM(1), GET_INTEGER_PARAM(2), GET_INTEGER_PARAM(3));
 		return 0;
 	case COMMAND_REMOVE_CAR_BOOT:
 	{
