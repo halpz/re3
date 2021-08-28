@@ -85,7 +85,9 @@ The following things would be nice to have/do:
 
 Asset modifications (models, texture, handling, script, ...) should work the same way as with original GTA for the most part.
 
-Mods that make changes to the code (dll/asi, CLEO, limit adjusters) will *not* work.
+CLEO scripts work with [CLEO Redux](https://github.com/cleolibrary/CLEO-Redux).
+
+Mods that make changes to the code (dll/asi, limit adjusters) will *not* work.
 Some things these mods do are already implemented in re3 (much of SkyGFX, GInput, SilentPatch, Widescreen fix),
 others can easily be achieved (increasing limis, see `config.h`),
 others will simply have to be rewritten and integrated into the code directly.
