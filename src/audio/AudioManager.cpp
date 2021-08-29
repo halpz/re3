@@ -86,7 +86,7 @@ cAudioManager::Terminate()
 
 		for (uint32 i = 0; i < NUM_AUDIOENTITIES; i++) {
 			m_asAudioEntities[i].m_bIsUsed = FALSE;
-			m_aAudioEntityOrderList[i] = ARRAY_SIZE(m_aAudioEntityOrderList);
+			m_aAudioEntityOrderList[i] = NUM_AUDIOENTITIES;
 		}
 
 		m_nAudioEntitiesCount = 0;
@@ -838,9 +838,9 @@ cAudioManager::AddReleasingSounds()
 						if (sample.m_nSampleIndex >= SAMPLEBANK_PED_START && sample.m_nSampleIndex <= SAMPLEBANK_PED_END) { // check if it's ped comment
 							uint8 vol;
 							if (CWorld::GetIsLineOfSightClear(TheCamera.GetPosition(), sample.m_vecPos, true, false, false, false, false, false))
-								vol = MAX_VOLUME;
+								vol = PED_COMMENT_VOLUME;
 							else
-								vol = 31;
+								vol = PED_COMMENT_VOLUME_BEHIND_WALL;
 #ifdef EXTERNAL_3D_SOUND
 							sample.m_nEmittingVolume = vol;
 #endif
@@ -856,7 +856,7 @@ cAudioManager::AddReleasingSounds()
 								if (sample.m_nEmittingVolumeChange > 0)
 									sample.m_nEmittingVolumeChange = volumeDiff * sample.m_nEmittingVolumeChange;
 #endif
-								sample.m_nVolume = Min(127, newVolume);
+								sample.m_nVolume = Min(MAX_VOLUME, newVolume);
 							}
 						}
 						if (sample.m_nVolume == 0)
@@ -1030,7 +1030,7 @@ cAudioManager::ProcessActiveQueues()
 								vol = Clamp2((int8)sample.m_nVolume, (int8)m_asActiveSamples[j].m_nVolume, 10);
 								m_asActiveSamples[j].m_nVolume = vol;
 							}
-							SampleManager.SetChannelVolume(j, m_bDoubleVolume ? 2 * Min(63, vol) : vol);
+							SampleManager.SetChannelVolume(j, m_bDoubleVolume ? 2 * Min(63, m_asActiveSamples[j].m_nVolume) : m_asActiveSamples[j].m_nVolume);
 #endif
 							TranslateEntity(&sample.m_vecPos, &position);
 #ifdef EXTERNAL_3D_SOUND

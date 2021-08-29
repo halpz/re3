@@ -335,7 +335,7 @@ public:
 	float GetDistanceSquared(const CVector &v);
 	void CalculateDistance(bool8 &condition, float dist);
 	void ProcessSpecial();
-	void ProcessEntity(int32 sound);
+	void ProcessEntity(int32 id);
 	void ProcessPhysical(int32 id);
 
 	// vehicles
@@ -355,7 +355,7 @@ public:
 	bool8 ProcessVehicleSkidding(cVehicleParams &params);
 	float GetVehicleDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile, cTransmission *transmission, float velocityChange);
 	float GetVehicleNonDriveWheelSkidValue(uint8 wheel, CAutomobile *automobile, cTransmission *transmission, float velocityChange); // inlined on PS2
-	void ProcessVehicleHorn(cVehicleParams &params);
+	bool8 ProcessVehicleHorn(cVehicleParams &params);
 	bool8 UsesSiren(uint32 model); // inlined on PS2
 	bool8 UsesSirenSwitching(uint32 model); // inlined on PS2
 	bool8 ProcessVehicleSirenOrAlarm(cVehicleParams &params);
@@ -473,9 +473,9 @@ public:
 	uint32 GetGenericFemaleTalkSfx(uint16 sound);
 
 	// particles
-	void ProcessExplosions(int32 explosion);
-	void ProcessFires(int32 entity);
-	void ProcessWaterCannon(int32);
+	void ProcessExplosions(int32 id);
+	void ProcessFires(int32 id);
+	void ProcessWaterCannon(int32 id);
 
 	// script objects
 	void ProcessScriptObject(int32 id); // inlined on PS2
@@ -576,3 +576,10 @@ static_assert(sizeof(cAudioManager) == 19220, "cAudioManager: error");
 #endif
 
 extern cAudioManager AudioManager;
+
+enum
+{
+	PED_COMMENT_VOLUME = 127,
+	PED_COMMENT_VOLUME_BEHIND_WALL = 31,
+	COLLISION_MAX_DIST = 60,
+};

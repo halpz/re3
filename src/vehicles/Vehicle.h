@@ -186,7 +186,7 @@ public:
 	uint8 m_bRainSamplesCounter;
 	uint8 m_nCarHornTimer;
 	uint8 m_nCarHornPattern; // last horn?
-	uint8 m_bSirenOrAlarm;
+	bool m_bSirenOrAlarm;
 	int8 m_comedyControlState;
 	CStoredCollPoly m_aCollPolys[2];     // poly which is under front/rear part of car
 	float m_fSteerInput;

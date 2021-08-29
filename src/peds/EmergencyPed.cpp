@@ -212,7 +212,7 @@ CEmergencyPed::MedicAI(void)
 				if (!waitUntilMedicEntersCar) {
 					CCarCtrl::JoinCarWithRoadSystem(m_pMyVehicle);
 					m_pMyVehicle->AutoPilot.m_nCarMission = MISSION_CRUISE;
-					m_pMyVehicle->m_bSirenOrAlarm = 0;
+					m_pMyVehicle->m_bSirenOrAlarm = false;
 					m_pMyVehicle->AutoPilot.m_nCruiseSpeed = 12;
 					m_pMyVehicle->AutoPilot.m_nDrivingStyle = DRIVINGSTYLE_SLOW_DOWN_FOR_CARS;
 					if (m_pMyVehicle->bIsAmbulanceOnDuty) {
