@@ -1406,22 +1406,35 @@ void
 cAudioManager::DirectlyEnqueueSample(uint32 sample, uint8 bank, uint32 counter, uint32 priority, uint32 freq, uint8 volume, uint8 framesToPlay, uint32 notStereo)
 {
 	m_sQueueSample.m_nSampleIndex = sample;
-	m_sQueueSample.m_bReflections = FALSE;
-	m_sQueueSample.m_nLoopCount = 0;
-	m_sQueueSample.m_bIs2D = FALSE;
-	m_sQueueSample.m_bStatic = FALSE;
-	m_sQueueSample.m_nPan = 0;
 	m_sQueueSample.m_nBankIndex = bank;
 	m_sQueueSample.m_nCounter = counter;
 	m_sQueueSample.m_nFrequency = freq;
 	m_sQueueSample.m_nVolume = volume;
+	SET_EMITTING_VOLUME(volume);
 	m_sQueueSample.m_nPriority = priority;
 	m_sQueueSample.m_nFramesToPlay = framesToPlay;
+	m_sQueueSample.m_bReflections = FALSE;
+	m_sQueueSample.m_nLoopCount = 0;
+	SET_LOOP_OFFSETS(sample)
+#ifdef FIX_BUGS
+	m_sQueueSample.m_bIs2D = TRUE;
+#else
+	m_sQueueSample.m_bIs2D = FALSE;
+#endif
+	m_sQueueSample.m_bStatic = FALSE;
+	SET_SOUND_REVERB(FALSE);
+#ifdef FIX_BUGS
+	m_sQueueSample.m_nPan = 63;
+	AddSampleToRequestedQueue();
+#else
+	// this is dumb and wrong, what were they thinking?
+	m_sQueueSample.m_nPan = 0;
 	AudioManager.AddSampleToRequestedQueue();
 	if (!notStereo) {
 		m_sQueueSample.m_nPan = 127;
 		AudioManager.AddSampleToRequestedQueue();
 	}
+#endif
 }
 
 #ifdef EXTERNAL_3D_SOUND
