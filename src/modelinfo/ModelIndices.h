@@ -1091,6 +1091,7 @@ enum
 
 
 	// these indices are original
+	MI_SKIMMER = -1000,
 	MI_CADDY = -999,
 	MI_MARQUIS = -990,
 	MI_SEASPAR = -986,
@@ -1114,7 +1115,6 @@ enum
 	MI_JETMAX,
 	MI_COASTG,
 	MI_DINGHY,
-	MI_SKIMMER,
 	MI_CUBAN,
 	MI_SABRE,
 	MI_VIRGO,
