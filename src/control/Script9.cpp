@@ -594,13 +594,18 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 command)
 		// base::cWorldGeom::GetInstance()->StoreBuildingSwap(GET_INTEGER_PARAM(0), GET_INTEGER_PARAM(1), GET_INTEGER_PARAM(2), GET_INTEGER_PARAM(3) != 0);
 		return 0;
 	case COMMAND_IS_MULTIPLAYER_ACTIVE:
-		UpdateCompareFlag(false); // TODO?
+#ifdef GTA_NETWORK
+		UpdateCompareFlag(gIsMultiplayerGame);
+#else
+		UpdateCompareFlag(false);
+#endif
 		return 0;
 	case COMMAND_GET_MULTIPLAYER_MODE:
 		SET_INTEGER_PARAM(0, 0); // TODO
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	case COMMAND_MULTIPLAYER_SCRIPT_DONE:
+		printf("COMMAND_MULTIPLAYER_SCRIPT_DONE\n");
 		//gbStartingScriptsFromLua = false; TODO?
 		return 0;
 	case COMMAND_IS_MULTIPLAYER_SERVER:

@@ -1111,10 +1111,6 @@ enum
 	MI_RCBARON = -955,
 	MI_VICECHEE = -954,
 
-	// these two are unknown
-	MI_RIO = -992,
-	MI_TROPIC = -988,
-
 	// 7 of the following MIs originally are in this set: {-998, -996, -979, -978, -977, -975, -969}
 	MI_WASHING = -3000,
 	MI_ADMIRAL,

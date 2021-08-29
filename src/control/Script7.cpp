@@ -373,6 +373,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 	}
 	case COMMAND_HAS_PHOTOGRAPH_BEEN_TAKEN:
 		UpdateCompareFlag(CWeapon::bPhotographHasBeenTaken);
+		CWeapon::bPhotographHasBeenTaken = false;
 		return 0;
 	case COMMAND_GET_CHAR_ARMOUR:
 	{
@@ -508,7 +509,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CStreaming::RemoveAnim(CAnimManager::GetAnimationBlockIndex(key));
-		// + empty function on PS2
+		// + empty function on PS2 (not PSP)
 		return 0;
 	}
 	case COMMAND_IS_CHAR_WAITING_FOR_WORLD_COLLISION:
@@ -636,11 +637,8 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 command)
 				SET_INTEGER_PARAM(1, 0);
 			else if (GET_INTEGER_PARAM(1) == 3)
 				SET_INTEGER_PARAM(1, 1);
-			pVehicle->BurstTyre(GET_INTEGER_PARAM(1), true);
 		}
-		else {
-			pVehicle->BurstTyre(GET_INTEGER_PARAM(1), true);
-		}
+		pVehicle->BurstTyre(GET_INTEGER_PARAM(1), true);
 		return 0;
 	}
 	case COMMAND_IS_CHAR_OBJ_NO_OBJ:
@@ -812,7 +810,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		// TheText.Get(key);
 		CPickups::GetActualPickupIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
-		SET_INTEGER_PARAM(0, CPickups::GenerateNewOne(pos, MI_PICKUP_PROPERTY, PICKUP_PROPERTY_LOCKED, 0, 0, false, key)); // TODO: gpModelIndices
+		SET_INTEGER_PARAM(0, CPickups::GenerateNewOne(pos, MI_PICKUP_PROPERTY, PICKUP_PROPERTY_LOCKED, 0, 0, false, key));
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
@@ -825,9 +823,9 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 command)
 		char key[KEY_LENGTH_IN_SCRIPT];
 		CTheScripts::ReadTextLabelFromScript(&m_nIp, key);
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
-		// TheText.Get(key);
+		TheText.Get(key);
 		CPickups::GetActualPickupIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
-		SET_INTEGER_PARAM(0, CPickups::GenerateNewOne(pos, MI_PICKUP_PROPERTY_FORSALE, PICKUP_PROPERTY_FORSALE, GET_INTEGER_PARAM(3), 0, false, key)); // TODO: gpModelIndices
+		SET_INTEGER_PARAM(0, CPickups::GenerateNewOne(pos, MI_PICKUP_PROPERTY_FORSALE, PICKUP_PROPERTY_FORSALE, GET_INTEGER_PARAM(3), 0, false, key));
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}

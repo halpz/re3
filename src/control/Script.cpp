@@ -442,7 +442,7 @@ void CMissionCleanup::Process()
 #endif
 		CStreaming::ms_disableStreaming = false;
 	if (CHud::m_ItemToFlash != ITEM_ARMOUR && CHud::m_ItemToFlash != ITEM_HEALTH)
-		CHud::m_ItemToFlash = -1;
+		CHud::m_ItemToFlash = ITEM_NONE;
 	CHud::SetHelpMessage(nil, false); // nil, false, false, true TODO(LCS)
 	CUserDisplay::OnscnTimer.m_bDisabled = false;
 	CWorld::Players[0].m_pPed->m_pWanted->m_bIgnoredByCops = false;

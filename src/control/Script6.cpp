@@ -1785,6 +1785,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
+	/*
 	case COMMAND_IS_CHAR_IN_ANY_BOAT:
 	{
 		CollectParameters(&m_nIp, 1);
@@ -1793,6 +1794,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		UpdateCompareFlag(pPed->bInVehicle && pPed->m_pMyVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_BOAT);
 		return 0;
 	}
+	*/
 	case COMMAND_IS_PLAYER_IN_ANY_BOAT:
 	{
 		CollectParameters(&m_nIp, 1);
@@ -1801,6 +1803,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		UpdateCompareFlag(pPed->bInVehicle && pPed->m_pMyVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_BOAT);
 		return 0;
 	}
+	/*
 	case COMMAND_IS_CHAR_IN_ANY_HELI:
 	{
 		CollectParameters(&m_nIp, 1);
@@ -1809,6 +1812,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		UpdateCompareFlag(pPed->bInVehicle && pPed->m_pMyVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_HELI);
 		return 0;
 	}
+	*/
 	case COMMAND_IS_PLAYER_IN_ANY_HELI:
 	{
 		CollectParameters(&m_nIp, 1);
@@ -1817,6 +1821,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		UpdateCompareFlag(pPed->bInVehicle && pPed->m_pMyVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_HELI);
 		return 0;
 	}
+	/*
 	case COMMAND_IS_CHAR_IN_ANY_PLANE:
 	{
 		CollectParameters(&m_nIp, 1);
@@ -1825,6 +1830,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		UpdateCompareFlag(pPed->bInVehicle && pPed->m_pMyVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_PLANE);
 		return 0;
 	}
+	*/
 	case COMMAND_IS_PLAYER_IN_ANY_PLANE:
 	{
 		CollectParameters(&m_nIp, 1);

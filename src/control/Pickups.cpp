@@ -709,8 +709,10 @@ bool
 CPickups::TestForPickupsInBubble(CVector pos, float range)
 {
 	for (int i = 0; i < NUMPICKUPS; i++) {
-		if ((aPickUps[i].m_vecPos - pos).Magnitude() < range)
-			return true;
+		if (aPickUps[i].m_eType != PICKUP_NONE) {
+			if ((aPickUps[i].m_vecPos - pos).Magnitude() < range)
+				return true;
+		}
 	}
 	return false;
 }

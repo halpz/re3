@@ -104,7 +104,11 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 command)
 		return 0;
 	}
 	case COMMAND_IS_DEVELOPER:
+#ifdef GTA_NETWORK
+		UpdateCompareFlag(gDeveloperFlag || gIsMultiplayerGame);
+#else
 		UpdateCompareFlag(gDeveloperFlag);
+#endif
 		return 0;
 	case COMMAND_SET_DEVELOPER_FLAG:
 		CollectParameters(&m_nIp, 1);

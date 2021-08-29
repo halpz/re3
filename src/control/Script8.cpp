@@ -379,23 +379,18 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
-#ifdef FIX_BUGS
 		if (pVehicle->IsCar()) {
 			if (((CAutomobile*)pVehicle)->m_bombType != CARBOMB_NONE) {
 				((CAutomobile*)pVehicle)->m_bombType = CARBOMB_NONE;
 				((CAutomobile*)pVehicle)->m_pBombRigger = nil;
 			}
 		}
+#ifdef FIX_BUGS
 		else if (pVehicle->IsBike()) {
 			if (((CBike*)pVehicle)->m_bombType != CARBOMB_NONE) {
 				((CBike*)pVehicle)->m_bombType = CARBOMB_NONE;
 				((CBike*)pVehicle)->m_pBombRigger = nil;
 			}
-		}		
-#else
-		if (((CAutomobile*)pVehicle)->m_bombType != CARBOMB_NONE) {
-			((CAutomobile*)pVehicle)->m_bombType = CARBOMB_NONE;
-			((CAutomobile*)pVehicle)->m_pBombRigger = nil;
 		}
 #endif
 		return 0;
@@ -612,7 +607,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	}
 	case COMMAND_SET_RC_HELI_HEIGHT_LIMIT:
 		CollectParameters(&m_nIp, 1);
-		// CVehicle::rcHeliHeightLimit = GET_FLOAT_PARAM(0); // TODO
+		CVehicle::rcHeliHeightLimit = GET_FLOAT_PARAM(0);
 		return 0;
 	case COMMAND_CREATE_SCRIPT_CORONA:
 	{
@@ -716,7 +711,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	//case COMMAND_1491:
 	case COMMAND_SET_DEBUG_MENU_ACTIVE:
 		CollectParameters(&m_nIp, 1);
-		// this sets two values on PS2, but not on mobile - TODO?
+		// this sets two values on PS2 and PSP, but not on mobile - TODO?
 		return 0;
 	case COMMAND_SET_DRAW_HUD:
 		CollectParameters(&m_nIp, 1);
