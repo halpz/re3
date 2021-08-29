@@ -3,6 +3,7 @@
 #include "Script.h"
 #include "ScriptCommands.h"
 
+#include "Bike.h"
 #include "DMAudio.h"
 #ifdef MORE_LANGUAGES
 #include "Frontend.h"
@@ -378,10 +379,25 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 command)
 	{
 		CollectParameters(&m_nIp, 1);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
-		if (pVehicle->m_bombType != CARBOMB_NONE) {
-			pVehicle->m_bombType = CARBOMB_NONE;
-			pVehicle->m_pBombRigger = nil;
+#ifdef FIX_BUGS
+		if (pVehicle->IsCar()) {
+			if (((CAutomobile*)pVehicle)->m_bombType != CARBOMB_NONE) {
+				((CAutomobile*)pVehicle)->m_bombType = CARBOMB_NONE;
+				((CAutomobile*)pVehicle)->m_pBombRigger = nil;
+			}
 		}
+		else if (pVehicle->IsBike()) {
+			if (((CBike*)pVehicle)->m_bombType != CARBOMB_NONE) {
+				((CBike*)pVehicle)->m_bombType = CARBOMB_NONE;
+				((CBike*)pVehicle)->m_pBombRigger = nil;
+			}
+		}		
+#else
+		if (((CAutomobile*)pVehicle)->m_bombType != CARBOMB_NONE) {
+			((CAutomobile*)pVehicle)->m_bombType = CARBOMB_NONE;
+			((CAutomobile*)pVehicle)->m_pBombRigger = nil;
+		}
+#endif
 		return 0;
 	}
 	case COMMAND_IS_JAPANESE_GAME:

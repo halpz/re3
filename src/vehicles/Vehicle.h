@@ -245,10 +245,6 @@ public:
 	uint8 bRestingOnPhysical : 1; // Dont go static cause car is sitting on a physical object that might get removed
 	uint8 bParking : 1;
 	uint8 bCanPark : 1;
-#if (!defined GTA_PS2 || defined FIX_BUGS) // <- I think this can be moved back to CAutomobile?
-	uint8 m_bombType : 3;
-#endif
-	uint8 bDriverLastFrame : 1; // originally not in CVehicle (TODO - carbomb stuff)
 	uint8 bRewardVehicle : 1; // 25B_40
 
 	int8 m_numPedsUseItAsCover;
@@ -261,9 +257,6 @@ public:
 	float m_fEngineEnergy;	// TODO(LCS): better name. it adds up acceleration force, so possibly kinetic energy??
 	uint8 m_nCurrentGear;
 	float m_fChangeGearTime;
-#if (!defined GTA_PS2 || defined FIX_BUGS)
-	CEntity* m_pBombRigger;
-#endif
 	uint32 m_nSetPieceExtendedRangeTime;
 	uint32 m_nGunFiringTime;    // last time when gun on vehicle was fired (used on boats)
 	uint32 m_nTimeOfDeath;
@@ -395,8 +388,6 @@ public:
 	void InflictDamage(CEntity *damagedBy, eWeaponType weaponType, float damage, CVector pos = CVector(0.0f, 0.0f, 0.0f));
 	void DoFixedMachineGuns(void);
 	void FireFixedMachineGuns(void);
-	void ActivateBomb(void);
-	void ActivateBombWhenEntered(void);
 	void KillPedsInVehicle(void);
 
 	void SetComponentAtomicAlpha(RpAtomic *atomic, int32 alpha);
@@ -407,7 +398,7 @@ public:
 
 	bool IsAlarmOn(void) { return m_nAlarmState != 0 && m_nAlarmState != -1 && GetStatus() != STATUS_WRECKED; }
 	CVehicleModelInfo* GetModelInfo() { return (CVehicleModelInfo*)CModelInfo::GetModelInfo(GetModelIndex()); }
-	bool IsTaxi(void) { return GetModelIndex() == MI_TAXI || GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_BORGNINE; }
+	bool IsTaxi(void) { return GetModelIndex() == MI_TAXI || GetModelIndex() == MI_CABBIE || GetModelIndex() == MI_BORGNINE || GetModelIndex() == MI_KAUFMAN; }
 	bool IsLimo(void) { return GetModelIndex() == MI_STRETCH; }
 	bool IsRealHeli(void) { return !!(pHandling->Flags & HANDLING_IS_HELI); }
 	bool IsRealPlane(void) { return !!(pHandling->Flags & HANDLING_IS_PLANE); }

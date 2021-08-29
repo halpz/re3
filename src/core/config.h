@@ -436,6 +436,7 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 // Vehicles
 #define EXPLODING_AIRTRAIN	// can blow up jumbo jet with rocket launcher
 #define CPLANE_ROTORS		// make the rotors of the NPC police heli rotate
+#define BOMBS_ON_BIKES      // allow player to set bombs on bikes
 
 // Pickups
 //#define MONEY_MESSAGES
@@ -463,6 +464,7 @@ static_assert(false, "SUPPORT_XBOX_SCRIPT and SUPPORT_MOBILE_SCRIPT are mutually
 #define ATTACH_RELEASING_SOUNDS_TO_ENTITIES // sounds would follow ped and vehicles coordinates if not being queued otherwise
 #define USE_TIME_SCALE_FOR_AUDIO // slow down/speed up sounds according to the speed of the game
 #define MULTITHREADED_AUDIO // for streams. requires C++11 or later
+#define CUSTOM_SOUND_TRACK // LCS PSP feature - TODO
 
 #ifdef AUDIO_OPUS
 #define AUDIO_OAL_USE_OPUS // enable support of opus files

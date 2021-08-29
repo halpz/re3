@@ -37,6 +37,7 @@
 #include "Bike.h"
 #include "Debug.h"
 #include "SaveBuf.h"
+#include "Garages.h"
 
 const uint32 CBike::nSaveStructSize =
 #ifdef COMPATIBLE_SAVES
@@ -232,7 +233,19 @@ CBike::ProcessControl(void)
 
 	ProcessCarAlarm();
 
-	ActivateBombWhenEntered();
+	if (pDriver) {
+		if (!bDriverLastFrame && m_bombType == CARBOMB_ONIGNITIONACTIVE) {
+			// If someone enters the car and there is a bomb, detonate
+			m_nBombTimer = 1000;
+			m_pBlowUpEntity = m_pBombRigger;
+			if (m_pBlowUpEntity)
+				m_pBlowUpEntity->RegisterReference((CEntity**)&m_pBlowUpEntity);
+			DMAudio.PlayOneShot(m_audioEntityId, SOUND_BOMB_TICK, 1.0f);
+		}
+		bDriverLastFrame = true;
+	}
+	else
+		bDriverLastFrame = false;
 
 	CRubbish::StirUp(this);
 
@@ -300,8 +313,23 @@ CBike::ProcessControl(void)
 				ApplyMoveForce(parallelSpeed * -CTimer::GetTimeStep()*SAND_SLOWDOWN*m_fMass);
 			}
 		}
-		if(CPad::GetPad(0)->WeaponJustDown())
-			ActivateBomb();
+
+#ifdef BOMBS_ON_BIKES
+		if(CPad::GetPad(0)->WeaponJustDown()) {
+			if (m_bombType == CARBOMB_TIMED) {
+				m_bombType = CARBOMB_TIMEDACTIVE;
+				m_nBombTimer = 7000;
+				m_pBlowUpEntity = FindPlayerPed();
+				CGarages::TriggerMessage("GA_12", -1, 3000, -1);
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_BOMB_TIMED_ACTIVATED, 1.0f);
+			}
+			else if (m_bombType == CARBOMB_ONIGNITION) {
+				m_bombType = CARBOMB_ONIGNITIONACTIVE;
+				CGarages::TriggerMessage("GA_12", -1, 3000, -1);
+				DMAudio.PlayOneShot(m_audioEntityId, SOUND_BOMB_ONIGNITION_ACTIVATED, 1.0f);
+			}
+		}
+#endif
 		break;
 
 	case STATUS_PLAYER_PLAYBACKFROMBUFFER:

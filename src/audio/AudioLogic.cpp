@@ -2879,10 +2879,10 @@ cAudioManager::ProcessCarBombTick(cVehicleParams& params)
 	if (params.m_pVehicle->bEngineOn) {
 		switch (params.m_VehicleType) {
 		case VEHICLE_TYPE_CAR:
-			bombType = params.m_pVehicle->m_bombType;
+			bombType = ((CAutomobile*)params.m_pVehicle)->m_bombType;
 			break;
 		case VEHICLE_TYPE_BIKE:
-			bombType = params.m_pVehicle->m_bombType;
+			bombType = ((CBike*)params.m_pVehicle)->m_bombType;
 			break;
 		default:
 			debug("\n * AUDIOLOG:  ProcessCarBombTick()  Unsupported vehicle type %d * \n", params.m_VehicleType);

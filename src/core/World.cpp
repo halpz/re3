@@ -1,4 +1,5 @@
 #include "common.h"
+#include "Bike.h"
 #include "Camera.h"
 #include "CarCtrl.h"
 #include "CopPed.h"
@@ -2225,19 +2226,36 @@ CWorld::UseDetonator(CEntity *pEntity)
 {
 	int32 i = CPools::GetVehiclePool()->GetSize();
 	while(--i >= 0) {
-#ifdef FIX_BUGS
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetSlot(i);
-#else
-		CAutomobile *pVehicle = (CAutomobile *)CPools::GetVehiclePool()->GetSlot(i);
+#if defined FIX_BUGS || defined BOMBS_ON_BIKES
+		if (pVehicle && pVehicle->IsCar())
 #endif
-		if(pVehicle && pVehicle->m_bombType == CARBOMB_REMOTE &&
-		   pVehicle->m_pBombRigger == pEntity) {
-			pVehicle->m_bombType = CARBOMB_NONE;
-			pVehicle->m_nBombTimer = 500;
-			pVehicle->m_pBlowUpEntity = pVehicle->m_pBombRigger;
-			if(pVehicle->m_pBlowUpEntity)
-				pVehicle->m_pBlowUpEntity->RegisterReference(&pVehicle->m_pBlowUpEntity);
+		{
+			CAutomobile* pCar = (CAutomobile*)CPools::GetVehiclePool()->GetSlot(i);
+			if (pCar && pCar->m_bombType == CARBOMB_REMOTE &&
+				pCar->m_pBombRigger == pEntity) {
+				pCar->m_bombType = CARBOMB_NONE;
+				pCar->m_nBombTimer = 500;
+				pCar->m_pBlowUpEntity = pCar->m_pBombRigger;
+				if (pCar->m_pBlowUpEntity)
+					pCar->m_pBlowUpEntity->RegisterReference(&pCar->m_pBlowUpEntity);
+			}
 		}
+#ifdef BOMBS_ON_BIKES
+		if (pVehicle && pVehicle->IsBike()) {
+			{
+				CBike* pBike = (CBike*)CPools::GetVehiclePool()->GetSlot(i);
+				if (pBike && pBike->m_bombType == CARBOMB_REMOTE &&
+					pBike->m_pBombRigger == pEntity) {
+					pBike->m_bombType = CARBOMB_NONE;
+					pBike->m_nBombTimer = 500;
+					pBike->m_pBlowUpEntity = pBike->m_pBombRigger;
+					if (pBike->m_pBlowUpEntity)
+						pBike->m_pBlowUpEntity->RegisterReference(&pBike->m_pBlowUpEntity);
+				}
+			}
+		}
+#endif
 	}
 	CProjectileInfo::RemoveDetonatorProjectiles();
 }

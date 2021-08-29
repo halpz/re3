@@ -1084,6 +1084,12 @@ CStreaming::SetMissionDoesntRequireSpecialChar(int32 id)
 }
 
 void
+CStreaming::SetAmbientMissionDoesntRequireSpecialChar(int32 id)
+{
+	return SetAmbientMissionDoesntRequireModel(id + MI_SPECIAL01);
+}
+
+void
 CStreaming::DecrementRef(int32 id)
 {
 	ms_numModelsRequested--;
@@ -1625,12 +1631,29 @@ CStreaming::SetModelTxdIsDeletable(int32 id)
 void
 CStreaming::SetMissionDoesntRequireModel(int32 id)
 {
+	if (ms_aInfoForModel[id].m_flags & STREAMFLAGS_SCRIPTOWNED)
+		printf("SETTING MISSION DOESN'T REQUIRE MODEL %i\n", id);
 	ms_aInfoForModel[id].m_flags &= ~STREAMFLAGS_SCRIPTOWNED;
 	if ((id >= STREAM_OFFSET_TXD || CModelInfo::GetModelInfo(id)->GetModelType() != MITYPE_VEHICLE) &&
-	   (ms_aInfoForModel[id].m_flags & STREAMFLAGS_DONT_REMOVE) == 0){
+	   (ms_aInfoForModel[id].m_flags & (STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_AMBIENT_SCRIPT_OWNED)) == 0){
 		if(ms_aInfoForModel[id].m_loadState != STREAMSTATE_LOADED)
 			RemoveModel(id);
 		else if(ms_aInfoForModel[id].m_next == nil)
+			ms_aInfoForModel[id].AddToList(&ms_startLoadedList);
+	}
+}
+
+void
+CStreaming::SetAmbientMissionDoesntRequireModel(int32 id)
+{
+	if (ms_aInfoForModel[id].m_flags & STREAMFLAGS_AMBIENT_SCRIPT_OWNED)
+		printf("SETTING AMBIENT MISSION DOESN'T REQUIRE MODEL %i\n", id);
+	ms_aInfoForModel[id].m_flags &= ~STREAMFLAGS_AMBIENT_SCRIPT_OWNED;
+	if ((id >= STREAM_OFFSET_TXD || CModelInfo::GetModelInfo(id)->GetModelType() != MITYPE_VEHICLE) &&
+		(ms_aInfoForModel[id].m_flags & (STREAMFLAGS_DONT_REMOVE|STREAMFLAGS_SCRIPTOWNED)) == 0) {
+		if (ms_aInfoForModel[id].m_loadState != STREAMSTATE_LOADED)
+			RemoveModel(id);
+		else if (ms_aInfoForModel[id].m_next == nil)
 			ms_aInfoForModel[id].AddToList(&ms_startLoadedList);
 	}
 }
