@@ -8,8 +8,6 @@
 #include "SurfaceTable.h"
 #include "sampman.h"
 
-const int CollisionSoundIntensity = 60;
-
 void
 cAudioManager::ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface1, uint8 surface2, float collisionPower,
                                float velocity)
@@ -32,7 +30,7 @@ cAudioManager::ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface
 	}
 	CVector pos = (v1 + v2) * 0.5f;
 	distSquared = GetDistanceSquared(pos);
-	if(distSquared < SQR(CollisionSoundIntensity)) {
+	if(distSquared < SQR(COLLISION_MAX_DIST)) {
 		m_sCollisionManager.m_sQueue.m_pEntity1 = entity1;
 		m_sCollisionManager.m_sQueue.m_pEntity2 = entity2;
 		m_sCollisionManager.m_sQueue.m_bSurface1 = surface1;
@@ -48,8 +46,8 @@ cAudioManager::ReportCollision(CEntity *entity1, CEntity *entity2, uint8 surface
 void
 cAudioCollisionManager::AddCollisionToRequestedQueue()
 {
-	int32 collisionsIndex;
-	int32 i;
+	uint32 collisionsIndex;
+	uint32 i;
 
 
 	if (m_bCollisionsInQueue < NUMAUDIOCOLLISIONS)
@@ -83,11 +81,11 @@ cAudioManager::ServiceCollisions()
 
 	m_sQueueSample.m_nEntityIndex = m_nCollisionEntity;
 
-	for(int i = 0; i < NUMAUDIOCOLLISIONS; i++)
+	for (int i = 0; i < NUMAUDIOCOLLISIONS; i++)
 		abRepeatedCollision1[i] = abRepeatedCollision2[i] = FALSE;
 
-	for(i = 0; i < m_sCollisionManager.m_bCollisionsInQueue; i++) {
-		for(j = 0; j < NUMAUDIOCOLLISIONS; j++) {
+	for (i = 0; i < m_sCollisionManager.m_bCollisionsInQueue; i++) {
+		for (j = 0; j < NUMAUDIOCOLLISIONS; j++) {
 			int index = m_sCollisionManager.m_bIndicesTable[i];
 			if ((m_sCollisionManager.m_asCollisions1[index].m_pEntity1 == m_sCollisionManager.m_asCollisions2[j].m_pEntity1)
 				&& (m_sCollisionManager.m_asCollisions1[index].m_pEntity2 == m_sCollisionManager.m_asCollisions2[j].m_pEntity2)
@@ -103,8 +101,8 @@ cAudioManager::ServiceCollisions()
 		}
 	}
 
-	for(i = 0; i < NUMAUDIOCOLLISIONS; i++) {
-		if(!abRepeatedCollision2[i]) {
+	for (i = 0; i < NUMAUDIOCOLLISIONS; i++) {
+		if (!abRepeatedCollision2[i]) {
 			m_sCollisionManager.m_asCollisions2[i].m_pEntity1 = nil;
 			m_sCollisionManager.m_asCollisions2[i].m_pEntity2 = nil;
 			m_sCollisionManager.m_asCollisions2[i].m_bSurface1 = SURFACE_DEFAULT;
@@ -116,11 +114,11 @@ cAudioManager::ServiceCollisions()
 		}
 	}
 
-	for(i = 0; i < m_sCollisionManager.m_bCollisionsInQueue; i++) {
+	for (i = 0; i < m_sCollisionManager.m_bCollisionsInQueue; i++) {
 		int index = m_sCollisionManager.m_bIndicesTable[i];
-		if(!abRepeatedCollision1[index]) {
-			for(j = 0; j < NUMAUDIOCOLLISIONS; j++) {
-				if(!abRepeatedCollision2[j]) {
+		if (!abRepeatedCollision1[index]) {
+			for (j = 0; j < NUMAUDIOCOLLISIONS; j++) {
+				if (!abRepeatedCollision2[j]) {
 					m_sCollisionManager.m_asCollisions2[j].m_nBaseVolume = 1;
 					m_sCollisionManager.m_asCollisions2[j].m_pEntity1 = m_sCollisionManager.m_asCollisions1[index].m_pEntity1;
 					m_sCollisionManager.m_asCollisions2[j].m_pEntity2 = m_sCollisionManager.m_asCollisions1[index].m_pEntity2;
@@ -134,12 +132,12 @@ cAudioManager::ServiceCollisions()
 		}
 	}
 
-	for(int i = 0; i < NUMAUDIOCOLLISIONS; i++)
+	for (int i = 0; i < NUMAUDIOCOLLISIONS; i++)
 		m_sCollisionManager.m_bIndicesTable[i] = NUMAUDIOCOLLISIONS;
 	m_sCollisionManager.m_bCollisionsInQueue = 0;
 }
 
-static const int32 gOneShotCol[] = {SFX_COL_TARMAC_1,
+static const uint32 gOneShotCol[] = {SFX_COL_TARMAC_1,
                                     SFX_COL_TARMAC_1,
                                     SFX_COL_GRASS_1,
                                     SFX_COL_GRAVEL_1,
@@ -181,7 +179,7 @@ cAudioManager::SetUpOneShotCollisionSound(const cAudioCollision &col)
 	uint16 s1;
 	uint16 s2;
 
-	int32 emittingVol;
+	uint32 emittingVol;
 	float ratio;
 
 	static uint16 counter = 28;
@@ -200,11 +198,11 @@ cAudioManager::SetUpOneShotCollisionSound(const cAudioCollision &col)
 			s1 = SURFACE_CAR_PANEL;
 			ratio = Min(1.f, 2.f * ratio);
 		}
-		emittingVol = 40.f * ratio;
+		emittingVol = 40 * ratio;
 		if(emittingVol) {
 			m_sQueueSample.m_fDistance = Sqrt(col.m_fDistance);
 			m_sQueueSample.m_nVolume =
-			    ComputeVolume(emittingVol, CollisionSoundIntensity, m_sQueueSample.m_fDistance);
+			    ComputeVolume(emittingVol, COLLISION_MAX_DIST, m_sQueueSample.m_fDistance);
 			if(m_sQueueSample.m_nVolume > 0) {
 				m_sQueueSample.m_nSampleIndex = gOneShotCol[s1];
 				switch(m_sQueueSample.m_nSampleIndex) {
@@ -268,7 +266,7 @@ cAudioManager::SetUpOneShotCollisionSound(const cAudioCollision &col)
 				SET_EMITTING_VOLUME(emittingVol);
 				RESET_LOOP_OFFSETS
 				m_sQueueSample.m_fSpeedMultiplier = 4.0f;
-				m_sQueueSample.m_MaxDistance = CollisionSoundIntensity;
+				m_sQueueSample.m_MaxDistance = COLLISION_MAX_DIST;
 				m_sQueueSample.m_bStatic = TRUE;
 				SET_SOUND_REVERB(TRUE);
 				SET_SOUND_REFLECTION(FALSE);
@@ -286,7 +284,7 @@ cAudioManager::SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 coun
 		uint8 emittingVol = SetLoopingCollisionRequestedSfxFreqAndGetVol(col);
 		if(emittingVol) {
 			CalculateDistance(distCalculated, m_sQueueSample.m_fDistance);
-			m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, CollisionSoundIntensity, m_sQueueSample.m_fDistance);
+			m_sQueueSample.m_nVolume = ComputeVolume(emittingVol, COLLISION_MAX_DIST, m_sQueueSample.m_fDistance);
 			if(m_sQueueSample.m_nVolume > 0) {
 				m_sQueueSample.m_nCounter = counter;
 				m_sQueueSample.m_vecPos = col.m_vecPosition;
@@ -297,7 +295,7 @@ cAudioManager::SetUpLoopingCollisionSound(const cAudioCollision &col, uint8 coun
 				SET_EMITTING_VOLUME(emittingVol);
 				SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
 				m_sQueueSample.m_fSpeedMultiplier = 4.0f;
-				m_sQueueSample.m_MaxDistance = CollisionSoundIntensity;
+				m_sQueueSample.m_MaxDistance = COLLISION_MAX_DIST;
 				m_sQueueSample.m_bStatic = FALSE;
 				m_sQueueSample.m_nFramesToPlay = 5;
 				SET_SOUND_REVERB(TRUE);

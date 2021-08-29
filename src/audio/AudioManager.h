@@ -372,12 +372,12 @@ public:
 
 	// vehicles
 	void ProcessVehicle(CVehicle *vehicle);
-	void ProcessCarHeli(cVehicleParams &params);
+	bool8 ProcessCarHeli(cVehicleParams &params);
 	void ProcessRainOnVehicle(cVehicleParams &params);
 	bool8 ProcessReverseGear(cVehicleParams &params);
 	void ProcessModelHeliVehicle(cVehicleParams &params);
 	void ProcessModelVehicle(cVehicleParams &params);
-	void ProcessVehicleFlatTyre(cVehicleParams &params);
+	bool8 ProcessVehicleFlatTyre(cVehicleParams &params);
 	bool8 ProcessVehicleRoadNoise(cVehicleParams &params);
 	bool8 ProcessWetRoadNoise(cVehicleParams &params);
 	bool8 ProcessVehicleEngine(cVehicleParams &params);
@@ -638,3 +638,10 @@ static_assert(sizeof(cAudioManager) == 0x5558, "cAudioManager: error");
 #endif
 
 extern cAudioManager AudioManager;
+
+enum
+{
+	PED_COMMENT_VOLUME = 127,
+	PED_COMMENT_VOLUME_BEHIND_WALL = 31,
+	COLLISION_MAX_DIST = 60,
+};
