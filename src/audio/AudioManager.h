@@ -99,10 +99,10 @@ VALIDATE_SIZE(tPedComment, 28);
 class cPedComments
 {
 public:
-	tPedComment m_asPedComments[NUM_PED_COMMENTS_BANKS][NUM_PED_COMMENTS_SLOTS];
-	uint8 m_nIndexMap[NUM_PED_COMMENTS_BANKS][NUM_PED_COMMENTS_SLOTS];
-	uint8 m_nCommentsInBank[NUM_PED_COMMENTS_BANKS];
-	uint8 m_nActiveBank;
+	tPedComment m_aPedCommentQueue[NUM_SOUND_QUEUES][NUM_PED_COMMENTS_SLOTS];
+	uint8 m_aPedCommentOrderList[NUM_SOUND_QUEUES][NUM_PED_COMMENTS_SLOTS];
+	uint8 m_nPedCommentCount[NUM_SOUND_QUEUES];
+	uint8 m_nActiveQueue;
 #ifdef GTA_PC
 	bool8 m_bDelay;
 	uint32 m_nDelayTimer;
@@ -111,14 +111,14 @@ public:
 	cPedComments()
 	{
 		for (int i = 0; i < NUM_PED_COMMENTS_SLOTS; i++)
-			for (int j = 0; j < NUM_PED_COMMENTS_BANKS; j++) {
-				m_asPedComments[j][i].m_nProcess = -1;
-				m_nIndexMap[j][i] = NUM_PED_COMMENTS_SLOTS;
+			for (int j = 0; j < NUM_SOUND_QUEUES; j++) {
+				m_aPedCommentQueue[j][i].m_nProcess = -1;
+				m_aPedCommentOrderList[j][i] = NUM_PED_COMMENTS_SLOTS;
 			}
 
-		for (int i = 0; i < NUM_PED_COMMENTS_BANKS; i++)
-			m_nCommentsInBank[i] = 0;
-		m_nActiveBank = 0;
+		for (int i = 0; i < NUM_SOUND_QUEUES; i++)
+			m_nPedCommentCount[i] = 0;
+		m_nActiveQueue = 0;
 	}
 	void Add(tPedComment *com);
 	void Process();
@@ -359,6 +359,7 @@ public:
 	void ClearActiveSamples();
 	void GenerateIntegerRandomNumberTable();
 	void LoadBankIfNecessary(uint8 bank);
+	void DirectlyEnqueueSample(uint32 sample, uint8 bank, uint32 counter, uint32 priority, uint32 freq, uint8 volume, uint8 framesToPlay, uint32 notStereo = 0);
 
 #ifdef EXTERNAL_3D_SOUND // actually must have been && AUDIO_MSS as well
 	void AdjustSamplesVolume(); // inlined
@@ -381,12 +382,12 @@ public:
 
 	// vehicles
 	void ProcessVehicle(CVehicle *vehicle);
-	void ProcessCarHeli(cVehicleParams &params);
+	bool8 ProcessCarHeli(cVehicleParams &params);
 	void ProcessRainOnVehicle(cVehicleParams &params);
 	bool8 ProcessReverseGear(cVehicleParams &params);
 	void ProcessModelHeliVehicle(cVehicleParams &params);
 	void ProcessModelVehicle(cVehicleParams &params);
-	void ProcessVehicleFlatTyre(cVehicleParams &params);
+	bool8 ProcessVehicleFlatTyre(cVehicleParams &params);
 	bool8 ProcessVehicleRoadNoise(cVehicleParams &params);
 	bool8 ProcessWetRoadNoise(cVehicleParams &params);
 	bool8 ProcessVehicleEngine(cVehicleParams &params);
@@ -663,3 +664,10 @@ public:
 
 
 extern cAudioManager AudioManager;
+
+enum
+{
+	PED_COMMENT_VOLUME = 127,
+	PED_COMMENT_VOLUME_BEHIND_WALL = 31,
+	COLLISION_MAX_DIST = 60,
+};

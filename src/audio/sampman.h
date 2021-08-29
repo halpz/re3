@@ -6,10 +6,10 @@
 #define MAX_FREQ DIGITALRATE
 
 struct tSample {
-	int32 nOffset;
+	uint32 nOffset;
 	uint32 nSize;
-	int32 nFrequency;
-	int32 nLoopStart;
+	uint32 nFrequency;
+	uint32 nLoopStart;
 	int32 nLoopEnd;
 };
 
@@ -213,8 +213,8 @@ public:
 
 	int32 _GetPedCommentSlot(uint32 nComment);
 	
-	int32  GetSampleBaseFrequency  (uint32 nSample);
-	int32  GetSampleLoopStartOffset(uint32 nSample);
+	uint32 GetSampleBaseFrequency  (uint32 nSample);
+	uint32 GetSampleLoopStartOffset(uint32 nSample);
 	int32  GetSampleLoopEndOffset  (uint32 nSample);
 	uint32 GetSampleLength         (uint32 nSample);
 	

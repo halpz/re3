@@ -1139,8 +1139,8 @@ CBoat::RenderWaterOutPolys(void)
 		RwIm3DVertexSetPos(&KeepWaterOutVertices[3],  1.3f, -2.832f, 0.51f);
 		break;
 	case MI_SQUALO:
-		RwIm3DVertexSetPos(&KeepWaterOutVertices[0], -1.222f,  2.004f, 0.846f);
-		RwIm3DVertexSetPos(&KeepWaterOutVertices[1],  1.222f,  2.004f, 0.846f);
+		RwIm3DVertexSetPos(&KeepWaterOutVertices[0], -1.222f,  2.004f, 1.409f);
+		RwIm3DVertexSetPos(&KeepWaterOutVertices[1],  1.222f,  2.004f, 1.409f);
 		RwIm3DVertexSetPos(&KeepWaterOutVertices[2], -1.24f,  -1.367f, 0.846f);
 		RwIm3DVertexSetPos(&KeepWaterOutVertices[3],  1.24f,  -1.367f, 0.846f);
 		break;

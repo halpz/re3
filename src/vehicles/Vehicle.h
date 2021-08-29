@@ -277,7 +277,7 @@ public:
 	uint8 m_vehLCS_2A4;	// some timer
 	uint32 m_nCarHornTimer;
 	uint8 m_nCarHornPattern;
-	uint8 m_bSirenOrAlarm;
+	bool m_bSirenOrAlarm;
 	uint8 m_nCarHornDelay;
 	int8 m_comedyControlState;
 	int32 m_vehLCS_2B0;

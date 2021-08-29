@@ -184,14 +184,14 @@ cSampleManager::GetBankContainingSound(uint32 offset)
 	return INVALID_SFX_BANK;
 }
 
-int32
+uint32
 cSampleManager::GetSampleBaseFrequency(uint32 nSample)
 {
 	ASSERT( nSample < TOTAL_AUDIO_SAMPLES );
 	return 0;
 }
 
-int32
+uint32
 cSampleManager::GetSampleLoopStartOffset(uint32 nSample)
 {
 	ASSERT( nSample < TOTAL_AUDIO_SAMPLES );

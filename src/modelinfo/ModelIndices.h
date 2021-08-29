@@ -1091,13 +1091,19 @@ enum
 
 
 	// these indices are original
+	MI_SKIMMER = -1000,
 	MI_CADDY = -999,
+	MI_TROPIC = -992,
+	MI_COASTG = -991,
 	MI_MARQUIS = -990,
+	MI_RIO = -988,
+	MI_DINGHY = -987,
 	MI_SEASPAR = -986,
 	MI_SPARROW = -985,
 	MI_VOODOO = -984,
 	MI_FBIRANCH = -982,
 	MI_SANDKING = -981,
+	MI_SQUALO = -974,
 	MI_PHEONIX = -973,
 	MI_COMET = -972,
 	MI_KAUFMAN = -967,
@@ -1119,13 +1125,9 @@ enum
 	MI_VIRGO,
 	MI_GREENWOO,
 
-	// 25 of the following MIs originally are in this set:
-	// {-1000, -997, -995, -994, -993, -991, -989, -987, -983, -980, -976, -974, -971, -970, -968, -966, -965, -964, -963, -962, -961, -960, -959, -958, -957, -956}
-	MI_SQUALO = -2000,
-	MI_JETMAX,
-	MI_COASTG,
-	MI_DINGHY,
-	MI_SKIMMER,
+	// 22 of the following MIs originally are in this set:
+	// {-997, -995, -994, -993, -989, -983, -980, -976, -971, -970, -968, -966, -965, -964, -963, -962, -961, -960, -959, -958, -957, -956}
+	MI_JETMAX = -2000,
 	MI_CUBAN,
 	MI_RANCHER,
 	MI_BLISTAC,

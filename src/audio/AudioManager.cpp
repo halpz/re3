@@ -747,9 +747,8 @@ cAudioManager::AddDetailsToRequestedOrderList(uint8 sample)
 			    m_aRequestedQueue[m_nActiveQueue][sample].m_nFinalPriority)
 				break;
 		}
-		if (i < sample) {
+		if (i < sample) 
 			memmove(&m_aRequestedOrderList[m_nActiveQueue][i + 1], &m_aRequestedOrderList[m_nActiveQueue][i], m_nActiveSamples - i - 1);
-		}
 	}
 	m_aRequestedOrderList[m_nActiveQueue][i] = sample;
 }
@@ -770,23 +769,30 @@ cAudioManager::AddReflectionsToRequestedQueue()
 	uint32 oldCounter = m_sQueueSample.m_nCounter;
 	float oldDist = m_sQueueSample.m_fDistance;
 	CVector oldPos = m_sQueueSample.m_vecPos;
+#ifndef USE_TIME_SCALE_FOR_AUDIO
 	if ( CTimer::GetIsSlowMotionActive() ) {
 		emittingVolume = m_sQueueSample.m_nVolume;
 		oldFreq = m_sQueueSample.m_nFrequency;
-	} else {
+	} else
+#endif
 		emittingVolume = (9 * m_sQueueSample.m_nVolume) / 16;
-	}
-	m_sQueueSample.m_MaxDistance /= 2.f;
+	m_sQueueSample.m_MaxDistance /= 2.0f;
 
 	uint32 halfOldFreq = oldFreq >> 1;
 
 	for (uint32 i = 0; i < ARRAY_SIZE(m_afReflectionsDistances); i++) {
+#ifndef USE_TIME_SCALE_FOR_AUDIO
 		if ( CTimer::GetIsSlowMotionActive() )
 			m_afReflectionsDistances[i] = (m_anRandomTable[i % 4] % 3) * 50.f / 8.f;
+#endif
 
 		reflectionDistance = m_afReflectionsDistances[i];
 		if (reflectionDistance > 0.0f && reflectionDistance < 100.f && reflectionDistance < m_sQueueSample.m_MaxDistance) {
+#ifndef USE_TIME_SCALE_FOR_AUDIO
 			m_sQueueSample.m_nReflectionDelay = CTimer::GetIsSlowMotionActive() ? (reflectionDistance * 600.f / 1029.f) : (reflectionDistance * 300.f / 1029.f);
+#else
+			m_sQueueSample.m_nReflectionDelay = reflectionDistance * 300.f / 1029.f;
+#endif
 			if (m_sQueueSample.m_nReflectionDelay > 3) {
 				m_sQueueSample.m_fDistance = m_afReflectionsDistances[i];
 				SET_EMITTING_VOLUME(emittingVolume);
@@ -795,9 +801,12 @@ cAudioManager::AddReflectionsToRequestedQueue()
 				if (m_sQueueSample.m_nVolume > emittingVolume / 16) {
 					m_sQueueSample.m_nCounter = oldCounter + (i + 1) * 256;
 					if (m_sQueueSample.m_nLoopCount > 0) {
+#ifndef USE_TIME_SCALE_FOR_AUDIO
 						if ( CTimer::GetIsSlowMotionActive() ) {
 							m_sQueueSample.m_nFrequency = halfOldFreq + ((halfOldFreq * i) / ARRAY_SIZE(m_afReflectionsDistances));
-						} else {
+						} else
+#endif
+						{
 							noise = RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
 							if (noise > 0)
 								m_sQueueSample.m_nFrequency -= noise;
@@ -979,9 +988,9 @@ cAudioManager::AddReleasingSounds()
 						if (sample.m_nSampleIndex >= SAMPLEBANK_PED_START && sample.m_nSampleIndex <= SAMPLEBANK_PED_END) { // check if it's ped comment
 							uint8 vol;
 							if (CWorld::GetIsLineOfSightClear(TheCamera.GetPosition(), sample.m_vecPos, true, false, false, false, false, false))
-								vol = MAX_VOLUME;
+								vol = PED_COMMENT_VOLUME;
 							else
-								vol = 31;
+								vol = PED_COMMENT_VOLUME_BEHIND_WALL;
 #ifdef EXTERNAL_3D_SOUND
 							sample.m_nEmittingVolume = vol;
 #endif
@@ -997,7 +1006,7 @@ cAudioManager::AddReleasingSounds()
 								if (sample.m_nEmittingVolumeChange > 0)
 									sample.m_nEmittingVolumeChange = volumeDiff * sample.m_nEmittingVolumeChange;
 #endif
-								sample.m_nVolume = Min(127, newVolume);
+								sample.m_nVolume = Min(MAX_VOLUME, newVolume);
 							}
 						}
 						if (sample.m_nVolume == 0)
@@ -1391,6 +1400,41 @@ cAudioManager::GenerateIntegerRandomNumberTable()
 {
 	for (uint32 i = 0; i < ARRAY_SIZE(m_anRandomTable); i++)
 		m_anRandomTable[i] = myrand();
+}
+
+void
+cAudioManager::DirectlyEnqueueSample(uint32 sample, uint8 bank, uint32 counter, uint32 priority, uint32 freq, uint8 volume, uint8 framesToPlay, uint32 notStereo)
+{
+	m_sQueueSample.m_nSampleIndex = sample;
+	m_sQueueSample.m_nBankIndex = bank;
+	m_sQueueSample.m_nCounter = counter;
+	m_sQueueSample.m_nFrequency = freq;
+	m_sQueueSample.m_nVolume = volume;
+	SET_EMITTING_VOLUME(volume);
+	m_sQueueSample.m_nPriority = priority;
+	m_sQueueSample.m_nFramesToPlay = framesToPlay;
+	m_sQueueSample.m_bReflections = FALSE;
+	m_sQueueSample.m_nLoopCount = 0;
+	SET_LOOP_OFFSETS(sample)
+#ifdef FIX_BUGS
+	m_sQueueSample.m_bIs2D = TRUE;
+#else
+	m_sQueueSample.m_bIs2D = FALSE;
+#endif
+	m_sQueueSample.m_bStatic = FALSE;
+	SET_SOUND_REVERB(FALSE);
+#ifdef FIX_BUGS
+	m_sQueueSample.m_nPan = 63;
+	AddSampleToRequestedQueue();
+#else
+	// this is dumb and wrong, what were they thinking?
+	m_sQueueSample.m_nPan = 0;
+	AudioManager.AddSampleToRequestedQueue();
+	if (!notStereo) {
+		m_sQueueSample.m_nPan = 127;
+		AudioManager.AddSampleToRequestedQueue();
+	}
+#endif
 }
 
 #ifdef EXTERNAL_3D_SOUND
