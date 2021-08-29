@@ -377,15 +377,15 @@ SetUpDebugBanksInfo()
 	gBankStartOffset[43] = SFX_BUILDING_BAR_2;
 	gBankStartOffset[44] = SFX_BUILDING_BAR_3;
 	gBankStartOffset[45] = SFX_BUILDING_BAR_4;
-	gBankStartOffset[46] = SFX_BUILDING_MAL1;
-	gBankStartOffset[47] = SFX_BUILDING_MAL2;
+	gBankStartOffset[46] = SFX_BUILDING_MALIBU_1;
+	gBankStartOffset[47] = SFX_BUILDING_MALIBU_2;
 	gBankStartOffset[42] = SFX_BUILDING_BAR_1;
-	gBankStartOffset[49] = SFX_BUILDING_STR1;
-	gBankStartOffset[50] = SFX_BUILDING_STR2;
-	gBankStartOffset[51] = SFX_BUILDING_STR3;
+	gBankStartOffset[49] = SFX_BUILDING_STRIP_1;
+	gBankStartOffset[50] = SFX_BUILDING_STRIP_2;
+	gBankStartOffset[51] = SFX_BUILDING_STRIP_3;
 	gBankStartOffset[52] = SFX_BUILDING_CHURCH;
 	gBankStartOffset[53] = SFX_BUILDING_FAN_1;
-	gBankStartOffset[48] = SFX_BUILDING_MAL3;
+	gBankStartOffset[48] = SFX_BUILDING_MALIBU_3;
 	gBankStartOffset[55] = SFX_BUILDING_INSECTS_1;
 	gBankStartOffset[56] = SFX_BUILDING_INSECTS_2;
 	gBankStartOffset[54] = SFX_BUILDING_FAN_2;
@@ -1721,13 +1721,13 @@ cSampleManager::GetBankContainingSound(uint32 offset)
 	return INVALID_SFX_BANK;
 }
 
-int32
+uint32
 cSampleManager::GetSampleBaseFrequency(uint32 nSample)
 {
 	return m_aSamples[nSample].nFrequency;
 }
 
-int32
+uint32
 cSampleManager::GetSampleLoopStartOffset(uint32 nSample)
 {
 	return m_aSamples[nSample].nLoopStart;

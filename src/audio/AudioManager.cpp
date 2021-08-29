@@ -776,7 +776,7 @@ cAudioManager::AddReflectionsToRequestedQueue()
 	} else
 #endif
 		emittingVolume = (9 * m_sQueueSample.m_nVolume) / 16;
-	m_sQueueSample.m_MaxDistance /= 2.f;
+	m_sQueueSample.m_MaxDistance /= 2.0f;
 
 	uint32 halfOldFreq = oldFreq >> 1;
 
@@ -988,9 +988,9 @@ cAudioManager::AddReleasingSounds()
 						if (sample.m_nSampleIndex >= SAMPLEBANK_PED_START && sample.m_nSampleIndex <= SAMPLEBANK_PED_END) { // check if it's ped comment
 							uint8 vol;
 							if (CWorld::GetIsLineOfSightClear(TheCamera.GetPosition(), sample.m_vecPos, true, false, false, false, false, false))
-								vol = MAX_VOLUME;
+								vol = PED_COMMENT_VOLUME;
 							else
-								vol = 31;
+								vol = PED_COMMENT_VOLUME_BEHIND_WALL;
 #ifdef EXTERNAL_3D_SOUND
 							sample.m_nEmittingVolume = vol;
 #endif
@@ -1006,7 +1006,7 @@ cAudioManager::AddReleasingSounds()
 								if (sample.m_nEmittingVolumeChange > 0)
 									sample.m_nEmittingVolumeChange = volumeDiff * sample.m_nEmittingVolumeChange;
 #endif
-								sample.m_nVolume = Min(127, newVolume);
+								sample.m_nVolume = Min(MAX_VOLUME, newVolume);
 							}
 						}
 						if (sample.m_nVolume == 0)
