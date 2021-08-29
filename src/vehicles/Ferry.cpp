@@ -14,6 +14,7 @@
 #include "TempColModels.h"
 #include "WaterLevel.h"
 #include "World.h"
+#include "sampman.h"
 
 CFerryInst* CFerry::mspInst;
 
@@ -706,7 +707,7 @@ void CFerry::OpenDoor(void)
 	m_bUseFrontDoor = true;
 	if (fDistToCar4 < fDistToCar1)
 		m_bUseFrontDoor = false;
-	// AudioManager.DirectlyEnqueueSample(0xb8,0,0,1,0x5622,0x7f,0x14,0); // TODO
+	AudioManager.DirectlyEnqueueSample(SFX_GATE_START_CLU, SFX_BANK_0, 0, 1, 22050, 127, 20);
 }
 
 void CFerry::CloseDoor(void)
@@ -714,7 +715,7 @@ void CFerry::CloseDoor(void)
 	printf("closing the ferry door\n");
 	m_nDoorState = FERRY_DOOR_CLOSING;
 	m_nDoorTimer = CTimer::GetTimeInMilliseconds() + 10000;
-	// AudioManager.DirectlyEnqueueSample(0xb8, 0, 0, 1, 0x5622, 0x7f, 0x14, 0); // TODO
+	AudioManager.DirectlyEnqueueSample(SFX_GATE_START_CLU, SFX_BANK_0, 0, 1, 22050, 127, 20); // shouldn't this be SFX_GATE_STOP_CLU?
 }
 
 bool CFerry::IsDoorOpen(void)
@@ -798,7 +799,7 @@ void CFerry::PlayArrivedHorn(void)
 	float fDistToCamera = (GetPosition() - TheCamera.GetPosition()).Magnitude();
 	if (fDistToCamera < 200.0f) {
 		uint8 volume = (200.0f - fDistToCamera) / 200.0f * 127;
-		// AudioManager.DirectlyEnqueueSample(0x32, 0, 0, 1, 18000, volume, 0x32, 0); // TODO
+		AudioManager.DirectlyEnqueueSample(SFX_CAR_HORN_TRUCK, SFX_BANK_0, 0, 1, 18000, volume, 50);
 	}
 }
 

@@ -359,6 +359,7 @@ public:
 	void ClearActiveSamples();
 	void GenerateIntegerRandomNumberTable();
 	void LoadBankIfNecessary(uint8 bank);
+	void DirectlyEnqueueSample(uint32 sample, uint8 bank, uint32 counter, uint32 priority, uint32 freq, uint8 volume, uint8 framesToPlay, uint32 notStereo = 0);
 
 #ifdef EXTERNAL_3D_SOUND // actually must have been && AUDIO_MSS as well
 	void AdjustSamplesVolume(); // inlined

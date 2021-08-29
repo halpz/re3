@@ -1108,8 +1108,8 @@ enum
 	MI_COMET = -972,
 	MI_KAUFMAN = -967,
 	MI_BAGGAGE = -963,
-	MI_VICECHEE = -954,
 	MI_RCBARON = -955,
+	MI_VICECHEE = -954,
 
 	// HACK HACK, hopefully temporary
 	MI_JETMAX = -2000,
