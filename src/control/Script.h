@@ -347,7 +347,9 @@ public:
 	void LocateCharCommand(int32, uint32*);
 	void LocateCharCharCommand(int32, uint32*);
 	void LocateCharCarCommand(int32, uint32*);
+#if GTA_VERSION > GTA3_PS2_160
 	void LocateCharObjectCommand(int32, uint32*);
+#endif
 	void LocateCarCommand(int32, uint32*);
 	void LocateSniperBulletCommand(int32, uint32*);
 	void PlayerInAreaCheckCommand(int32, uint32*);

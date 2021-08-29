@@ -582,6 +582,7 @@ void CRunningScript::LocateCharCarCommand(int32 command, uint32* pIp)
 	}
 }
 
+#if GTA_VERSION > GTA3_PS2_160
 void CRunningScript::LocateCharObjectCommand(int32 command, uint32* pIp)
 {
 	bool b3D, result, debug;
@@ -659,6 +660,7 @@ void CRunningScript::LocateCharObjectCommand(int32 command, uint32* pIp)
 			CTheScripts::DrawDebugSquare(X - dX, Y - dY, X + dX, Y + dY);
 	}
 }
+#endif
 
 void CRunningScript::LocateCarCommand(int32 command, uint32* pIp)
 {

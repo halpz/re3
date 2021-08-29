@@ -1338,7 +1338,6 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		CPed::nEnterCarRangeMultiplier = (float)ScriptParams[0];
 #endif
 		return 0;
-#endif
 #if GTA_VERSION < GTA3_PC_11
 	case COMMAND_SET_THREAT_REACTION_RANGE_MULTIPLIER:
 		CollectParameters(&m_nIp, 1);
@@ -1348,6 +1347,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		CPed::nThreatReactionRangeMultiplier = (float)ScriptParams[0];
 #endif
 		return 0;
+#endif
 #endif
 	default:
 		script_assert(0);
