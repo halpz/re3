@@ -1420,7 +1420,7 @@ cAudioManager::DirectlyEnqueueSample(uint32 sample, uint8 bank, uint32 counter, 
 	SET_EMITTING_VOLUME(volume);
 	m_sQueueSample.m_nPriority = priority;
 	m_sQueueSample.m_nFramesToPlay = framesToPlay;
-	m_sQueueSample.m_bReflections = FALSE;
+	SET_SOUND_REFLECTION(FALSE);
 	m_sQueueSample.m_nLoopCount = 0;
 	SET_LOOP_OFFSETS(sample)
 #ifdef FIX_BUGS

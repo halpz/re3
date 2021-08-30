@@ -716,11 +716,8 @@ enum
 	FIRE_HYDRANT_MAX_DIST = 35,
 	FIRE_HYDRANT_VOLUME = 40,
 
-	BRIDGE_MOTOR_MAX_DIST = 400,
-	BRIDGE_MOTOR_VOLUME = MAX_VOLUME,
-	BRIDGE_MAX_DIST = BRIDGE_MOTOR_MAX_DIST + 50,
-
-	BRIDGE_WARNING_VOLUME = 100,
+	BRIDGE_MAX_DIST = 300,
+	BRIDGE_WARNING_VOLUME = 70,
 
 	MISSION_AUDIO_MAX_DIST = 80,
 	MISSION_AUDIO_VOLUME = 127,
@@ -9749,124 +9746,55 @@ void
 cAudioManager::ProcessBridge()
 {
 	float dist;
-	bool8 distCalculated = FALSE;
 
-	if (CBridge::pLiftRoad) {
-		m_sQueueSample.m_vecPos = CBridge::pLiftRoad->GetPosition();
+	if (CBridge::State != STATE_BRIDGE_LOCKED && CBridge::State != STATE_LIFT_PART_IS_DOWN && CBridge::State != STATE_BRIDGE_ALWAYS_UNLOCKED) {
+		m_sQueueSample.m_vecPos = CVector(-123.0f, -627.0f, 41.0f);
 		dist = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		if (dist < SQR(BRIDGE_MAX_DIST)) {
-			CalculateDistance(distCalculated, dist);
-			switch (CBridge::State) {
-			case STATE_BRIDGE_LOCKED:
-			case STATE_LIFT_PART_IS_UP:
-			case STATE_LIFT_PART_ABOUT_TO_MOVE_UP:
-				ProcessBridgeWarning();
-				break;
-			case STATE_LIFT_PART_MOVING_DOWN:
-			case STATE_LIFT_PART_MOVING_UP:
-				ProcessBridgeWarning();
-				ProcessBridgeMotor();
-				break;
-			default:
-				break;
+			m_sQueueSample.m_fDistance = Sqrt(dist);
+			m_sQueueSample.m_nVolume = ComputeVolume(BRIDGE_WARNING_VOLUME, BRIDGE_MAX_DIST, m_sQueueSample.m_fDistance);
+			if (m_sQueueSample.m_nVolume > 0) {
+				m_sQueueSample.m_MaxDistance = BRIDGE_MAX_DIST;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nCounter = 0;
+				m_sQueueSample.m_bIs2D = FALSE;
+				m_sQueueSample.m_nLoopCount = 0;
+				SET_EMITTING_VOLUME(BRIDGE_WARNING_VOLUME);
+				SET_LOOP_OFFSETS(SFX_BRIDGE_OPEN_WARNING)
+				m_sQueueSample.m_bStatic = FALSE;
+				SET_SOUND_REFLECTION(FALSE);
+				m_sQueueSample.m_nSampleIndex = SFX_BRIDGE_OPEN_WARNING;
+				m_sQueueSample.m_nFrequency = 12000;
+				m_sQueueSample.m_nPriority = 3;
+				m_sQueueSample.m_fSpeedMultiplier = 3.0f;
+				m_sQueueSample.m_nFramesToPlay = 5;
+				SET_SOUND_REVERB(FALSE);
+				AddSampleToRequestedQueue();
 			}
-			ProcessBridgeOneShots();
 		}
-	}
-}
-
-void
-cAudioManager::ProcessBridgeWarning()
-{
-/*
-	if (!CStats::CommercialPassed)
-		return;
-
-	if (m_sQueueSample.m_fDistance < BRIDGE_MAX_DIST) {
-		m_sQueueSample.m_nVolume = ComputeVolume(BRIDGE_WARNING_VOLUME, BRIDGE_MAX_DIST, m_sQueueSample.m_fDistance);
-		if (m_sQueueSample.m_nVolume > 0) {
-			m_sQueueSample.m_nCounter = 0;
-			m_sQueueSample.m_nSampleIndex = SFX_BRIDGE_OPEN_WARNING;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_GENERIC_EXTRA;
-			m_sQueueSample.m_bIs2D = FALSE;
-			m_sQueueSample.m_nPriority = 1;
-			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_BRIDGE_OPEN_WARNING);
-			m_sQueueSample.m_nLoopCount = 0;
-			SET_EMITTING_VOLUME(BRIDGE_WARNING_VOLUME);
-			SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
-			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-			m_sQueueSample.m_MaxDistance = BRIDGE_MAX_DIST;
-			m_sQueueSample.m_bStatic = FALSE;
-			m_sQueueSample.m_nFramesToPlay = 8;
-			SET_SOUND_REVERB(FALSE);
-			SET_SOUND_REFLECTION(FALSE);
-			AddSampleToRequestedQueue();
-		}
-	}
-*/
-}
-
-void
-cAudioManager::ProcessBridgeMotor()
-{
-	if (m_sQueueSample.m_fDistance < BRIDGE_MOTOR_MAX_DIST) {
-		m_sQueueSample.m_nVolume = ComputeVolume(BRIDGE_MOTOR_VOLUME, BRIDGE_MOTOR_MAX_DIST, m_sQueueSample.m_fDistance);
-		if (m_sQueueSample.m_nVolume > 0) {
-			m_sQueueSample.m_nCounter = 1;
-			m_sQueueSample.m_nSampleIndex = SFX_FISHING_BOAT_IDLE; // todo check sfx name
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_bIs2D = FALSE;
-			m_sQueueSample.m_nPriority = 1;
-			m_sQueueSample.m_nFrequency = 5500;
-			m_sQueueSample.m_nLoopCount = 0;
-			SET_EMITTING_VOLUME(BRIDGE_MOTOR_VOLUME);
-			SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
-			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-			m_sQueueSample.m_MaxDistance = BRIDGE_MOTOR_MAX_DIST;
-			m_sQueueSample.m_bStatic = FALSE;
-			m_sQueueSample.m_nFramesToPlay = 3;
-			SET_SOUND_REVERB(FALSE);
-			AddSampleToRequestedQueue();
-		}
-	}
-}
-
-void
-cAudioManager::ProcessBridgeOneShots()
-{
-	float maxDist;
-
-	if (CBridge::State == STATE_LIFT_PART_IS_UP && CBridge::OldState == STATE_LIFT_PART_MOVING_UP) {
-		maxDist = BRIDGE_MOTOR_MAX_DIST;
-		m_sQueueSample.m_nSampleIndex = SFX_COL_CONTAINER_1;
-	} else if (CBridge::State == STATE_LIFT_PART_IS_DOWN && CBridge::OldState == STATE_LIFT_PART_MOVING_DOWN) {
-		maxDist = BRIDGE_MOTOR_MAX_DIST;
-		m_sQueueSample.m_nSampleIndex = SFX_COL_CONTAINER_1;
-	} else if (CBridge::State == STATE_LIFT_PART_MOVING_UP && CBridge::OldState == STATE_LIFT_PART_ABOUT_TO_MOVE_UP) {
-		maxDist = BRIDGE_MOTOR_MAX_DIST;
-		m_sQueueSample.m_nSampleIndex = SFX_COL_CONTAINER_1;
-	} else if (CBridge::State == STATE_LIFT_PART_MOVING_DOWN && CBridge::OldState == STATE_LIFT_PART_IS_UP) {
-		maxDist = BRIDGE_MOTOR_MAX_DIST;
-		m_sQueueSample.m_nSampleIndex = SFX_COL_CONTAINER_1;
-	} else return;
-
-	if (m_sQueueSample.m_fDistance < maxDist) {
-		m_sQueueSample.m_nVolume = ComputeVolume(BRIDGE_MOTOR_VOLUME, maxDist, m_sQueueSample.m_fDistance);
-		if (m_sQueueSample.m_nVolume > 0) {
-			m_sQueueSample.m_nCounter = 2;
-			m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-			m_sQueueSample.m_bIs2D = FALSE;
-			m_sQueueSample.m_nPriority = 1;
-			m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
-			m_sQueueSample.m_nLoopCount = 1;
-			SET_EMITTING_VOLUME(BRIDGE_MOTOR_VOLUME);
-			RESET_LOOP_OFFSETS
-			m_sQueueSample.m_fSpeedMultiplier = 2.0f;
-			m_sQueueSample.m_MaxDistance = maxDist;
-			m_sQueueSample.m_bStatic = TRUE;
-			SET_SOUND_REVERB(FALSE);
-			SET_SOUND_REFLECTION(FALSE);
-			AddSampleToRequestedQueue();
+		m_sQueueSample.m_vecPos = CVector(-440.0f, -631.0f, 41.0f);
+		dist = GetDistanceSquared(m_sQueueSample.m_vecPos);
+		if (dist < SQR(BRIDGE_MAX_DIST)) {
+			m_sQueueSample.m_fDistance = Sqrt(dist);
+			m_sQueueSample.m_nVolume = ComputeVolume(BRIDGE_WARNING_VOLUME, BRIDGE_MAX_DIST, m_sQueueSample.m_fDistance);
+			if (m_sQueueSample.m_nVolume > 0) {
+				m_sQueueSample.m_MaxDistance = BRIDGE_MAX_DIST;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_nCounter = 1;
+				m_sQueueSample.m_bIs2D = FALSE;
+				m_sQueueSample.m_nLoopCount = 0;
+				SET_EMITTING_VOLUME(BRIDGE_WARNING_VOLUME);
+				SET_LOOP_OFFSETS(SFX_BRIDGE_OPEN_WARNING)
+				m_sQueueSample.m_bStatic = FALSE;
+				SET_SOUND_REFLECTION(FALSE);
+				m_sQueueSample.m_nSampleIndex = SFX_BRIDGE_OPEN_WARNING;
+				m_sQueueSample.m_nFrequency = 12000;
+				m_sQueueSample.m_nPriority = 3;
+				m_sQueueSample.m_fSpeedMultiplier = 3.0f;
+				m_sQueueSample.m_nFramesToPlay = 5;
+				SET_SOUND_REVERB(FALSE);
+				AddSampleToRequestedQueue();
+			}
 		}
 	}
 }

@@ -579,9 +579,6 @@ public:
 
 #ifdef GTA_BRIDGE
 	void ProcessBridge();
-	void ProcessBridgeWarning();
-	void ProcessBridgeMotor();
-	void ProcessBridgeOneShots();
 #endif
 
 	// mission audio
