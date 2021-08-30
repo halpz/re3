@@ -416,6 +416,7 @@ public:
 #ifdef GTA_TRAIN
 	bool8 ProcessTrainNoise(cVehicleParams &params);
 #endif
+	bool8 ProcessFerryNoise(cVehicleParams &params);
 	bool8 ProcessBoatEngine(cVehicleParams &params);
 	bool8 ProcessBoatMovingOverWater(cVehicleParams &params);
 	void ProcessPlane(cVehicleParams &params);
