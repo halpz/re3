@@ -4,6 +4,7 @@
 
 // TODO - implement
 
+template<>
 cCustomSoundTrack* base::cSingleton<cCustomSoundTrack>::mspInstance = nil;
 
 cCustomSoundTrack::cCustomSoundTrack() :

@@ -5,39 +5,7 @@
 namespace base
 {
 
-class cSingletonBase
-{
-	friend class cSingletonManager;
-
-	cSingletonBase* next;
-
-public:
-	virtual ~cSingletonBase() {}
-};
-
-template<typename T>
-class cSingleton : public cSingletonBase
-{
-	static T* mspInstance;
-	static void cSingleton<T>::CreateInstance()
-	{
-		mspInstance = new T();
-		SingletonManager().Add(mspInstance);
-	}
-
-public:
-	static T* Instance()
-	{
-		if (!mspInstance)
-			CreateInstance();
-		return mspInstance;
-	}
-
-	~cSingleton<T>()
-	{
-		mspInstance = nil;
-	}
-};
+class cSingletonBase;
 
 class cSingletonManager
 {
@@ -56,5 +24,39 @@ public:
 };
 
 cSingletonManager& SingletonManager();
+
+class cSingletonBase
+{
+	friend class cSingletonManager;
+
+	cSingletonBase* next;
+
+public:
+	virtual ~cSingletonBase() {}
+};
+
+template<typename T>
+class cSingleton : public cSingletonBase
+{
+	static T* mspInstance;
+	static void CreateInstance()
+	{
+		mspInstance = new T();
+		SingletonManager().Add(mspInstance);
+	}
+
+public:
+	static T* Instance()
+	{
+		if (!mspInstance)
+			CreateInstance();
+		return mspInstance;
+	}
+
+	~cSingleton<T>()
+	{
+		mspInstance = nil;
+	}
+};
 
 }
