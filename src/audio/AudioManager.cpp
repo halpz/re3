@@ -687,7 +687,7 @@ cAudioManager::InterrogateAudioEntities()
 }
 
 void
-cAudioManager::AddSampleToRequestedQueue()
+cAudioManager::AddSampleToRequestedQueue(uint8 unk_lcs)
 {
 	uint32 finalPriority;
 	uint8 sampleIndex;
@@ -726,6 +726,7 @@ cAudioManager::AddSampleToRequestedQueue()
 			m_sQueueSample.m_bReverb = FALSE;
 #endif
 #endif
+		m_sQueueSample.field_51_lcs = unk_lcs;
 
 		m_aRequestedQueue[m_nActiveQueue][sampleIndex] = m_sQueueSample;
 
@@ -1405,6 +1406,10 @@ cAudioManager::GenerateIntegerRandomNumberTable()
 void
 cAudioManager::DirectlyEnqueueSample(uint32 sample, uint8 bank, uint32 counter, uint32 priority, uint32 freq, uint8 volume, uint8 framesToPlay, uint32 notStereo)
 {
+#ifdef FIX_BUGS
+	if (!m_bIsInitialised || m_nExtraSoundsEntity < 0) return;
+	m_sQueueSample.m_nEntityIndex = m_nExtraSoundsEntity; // not setting entity ID could cause bugs, let's use extra sounds one
+#endif
 	m_sQueueSample.m_nSampleIndex = sample;
 	m_sQueueSample.m_nBankIndex = bank;
 	m_sQueueSample.m_nCounter = counter;

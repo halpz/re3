@@ -59,6 +59,7 @@ public:
 #if defined(FIX_BUGS) && defined(EXTERNAL_3D_SOUND)
 	int8 m_nEmittingVolumeChange; // same as above but for m_nEmittingVolume
 #endif
+	uint8 field_51_lcs;
 };
 
 VALIDATE_SIZE(tSound, 96);
@@ -347,7 +348,7 @@ public:
 	uint32 ComputeDopplerEffectedFrequency(uint32 oldFreq, float position1, float position2, float speedMultiplier);
 	int32 RandomDisplacement(uint32 seed);
 	void InterrogateAudioEntities(); // inlined
-	void AddSampleToRequestedQueue();
+	void AddSampleToRequestedQueue(uint8 unk_lcs = 0);
 	void AddDetailsToRequestedOrderList(uint8 sample); // inlined in vc
 #ifdef AUDIO_REFLECTIONS
 	void AddReflectionsToRequestedQueue();
@@ -415,6 +416,7 @@ public:
 #ifdef GTA_TRAIN
 	bool8 ProcessTrainNoise(cVehicleParams &params);
 #endif
+	bool8 ProcessFerryNoise(cVehicleParams &params);
 	bool8 ProcessBoatEngine(cVehicleParams &params);
 	bool8 ProcessBoatMovingOverWater(cVehicleParams &params);
 	void ProcessPlane(cVehicleParams &params);

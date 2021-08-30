@@ -44,6 +44,7 @@
 #include "Script.h"
 #include "Wanted.h"
 #include "KeyGen.h"
+#include "Ferry.h"
 
 void
 cAudioManager::PreInitialiseGameSpecificSetup()
@@ -553,6 +554,11 @@ enum
 	TRAIN_NOISE_FAR_MAX_DIST = 140,
 	TRAIN_NOISE_NEAR_MAX_DIST = 70,
 	TRAIN_NOISE_VOLUME = 70,
+
+	FERRY_NOISE_MAX_DIST = 70,
+	FERRY_NOISE_WATER_VOLUME = 30,
+	FERRY_NOISE_ENGINE_MAX_DIST = 160,
+	FERRY_NOISE_ENGINE_VOLUME = 40,
 
 	BOAT_ENGINE_MAX_DIST = 90,
 	BOAT_ENGINE_REEFER_IDLE_VOLUME = 80,
@@ -1084,10 +1090,10 @@ cAudioManager::ProcessVehicle(CVehicle* veh)
 		ProcessVehicleOneShots(params);
 		break;
 #ifdef GTA_TRAIN
-		case VEHICLE_TYPE_TRAIN:
-			ProcessTrainNoise(params);
-			ProcessVehicleOneShots(params);
-			break;
+	case VEHICLE_TYPE_TRAIN:
+		ProcessTrainNoise(params);
+		ProcessVehicleOneShots(params);
+		break;
 #endif
 	case VEHICLE_TYPE_HELI: 
 		ProcessCarHeli(params);
@@ -1113,6 +1119,10 @@ cAudioManager::ProcessVehicle(CVehicle* veh)
 		}
 		ProcessVehicleOneShots(params);
 		((CBike*)veh)->m_fVelocityChangeForAudio = params.m_fVelocityChange;
+		break;
+	case VEHICLE_TYPE_FERRY:
+		ProcessFerryNoise(params);
+		ProcessVehicleOneShots(params);
 		break;
 	default:
 		break;
@@ -3726,6 +3736,91 @@ cAudioManager::ProcessTrainNoise(cVehicleParams& params)
 	return FALSE;
 }
 #endif
+
+
+bool8
+cAudioManager::ProcessFerryNoise(cVehicleParams& params)
+{
+	CFerry *ferry = (CFerry*)params.m_pVehicle;
+	float volMultipler;
+
+#ifdef FIX_BUGS
+	if (!ferry->IsDocked() && params.m_fDistance < SQR(FERRY_NOISE_ENGINE_MAX_DIST)) {
+#else
+	if (!ferry->IsDocked() && params.m_fDistance < SQR(FERRY_NOISE_MAX_DIST)){
+#endif
+		if (params.m_fVelocityChange > 0.0f) {
+			CalculateDistance(params.m_bDistanceCalculated, params.m_fDistance);
+#ifdef FIX_BUGS // most distant sound should go first
+			volMultipler = ((float)SQR(FERRY_NOISE_ENGINE_MAX_DIST) - params.m_fDistance) / (float)SQR(FERRY_NOISE_ENGINE_MAX_DIST);
+			m_sQueueSample.m_nVolume = (FERRY_NOISE_ENGINE_VOLUME * volMultipler);
+			if (m_sQueueSample.m_nVolume > 0) {
+				m_sQueueSample.m_nCounter = 40;
+				m_sQueueSample.m_nSampleIndex = SFX_BOAT_V12_LOOP;
+				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+				m_sQueueSample.m_bIs2D = FALSE;
+				m_sQueueSample.m_nPriority = 3;
+				m_sQueueSample.m_nFrequency = 12000;
+				m_sQueueSample.m_nLoopCount = 0;
+				SET_EMITTING_VOLUME(FERRY_NOISE_ENGINE_VOLUME);
+				SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
+				m_sQueueSample.m_fSpeedMultiplier = 2.0f;
+				m_sQueueSample.m_MaxDistance = FERRY_NOISE_ENGINE_MAX_DIST;
+				m_sQueueSample.m_bStatic = FALSE;
+				m_sQueueSample.m_nFramesToPlay = 7;
+				SET_SOUND_REVERB(FALSE);
+				SET_SOUND_REFLECTION(FALSE);
+				AddSampleToRequestedQueue();
+			}
+#endif
+
+			if (params.m_fDistance < SQR(FERRY_NOISE_MAX_DIST)) {
+				volMultipler = ((float)SQR(FERRY_NOISE_MAX_DIST) - params.m_fDistance) / (float)SQR(FERRY_NOISE_MAX_DIST);
+				m_sQueueSample.m_nVolume = (FERRY_NOISE_WATER_VOLUME * volMultipler);
+				if (m_sQueueSample.m_nVolume > 0) {
+					m_sQueueSample.m_nCounter = 33;
+					m_sQueueSample.m_nSampleIndex = SFX_BOAT_WATER_LOOP;
+					m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+					m_sQueueSample.m_bIs2D = FALSE;
+					m_sQueueSample.m_nPriority = 5;
+					m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_BOAT_WATER_LOOP) + (100 * m_sQueueSample.m_nEntityIndex) % 987;
+					m_sQueueSample.m_nLoopCount = 0;
+					SET_EMITTING_VOLUME(FERRY_NOISE_WATER_VOLUME);
+					SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
+					m_sQueueSample.m_fSpeedMultiplier = 6.0f;
+					m_sQueueSample.m_MaxDistance = FERRY_NOISE_MAX_DIST;
+					m_sQueueSample.m_bStatic = FALSE;
+					m_sQueueSample.m_nFramesToPlay = 3;
+					SET_SOUND_REVERB(FALSE);
+					SET_SOUND_REFLECTION(FALSE);
+					AddSampleToRequestedQueue();
+#ifndef FIX_BUGS
+					m_sQueueSample.m_nCounter = 40;
+					m_sQueueSample.m_nSampleIndex = SFX_BOAT_V12_LOOP;
+					m_sQueueSample.m_nBankIndex = SFX_BANK_0;
+					m_sQueueSample.m_bIs2D = FALSE;
+					m_sQueueSample.m_nPriority = 3;
+					m_sQueueSample.m_nFrequency = 12000;
+					m_sQueueSample.m_nLoopCount = 0;
+					SET_LOOP_OFFSETS(m_sQueueSample.m_nSampleIndex)
+					m_sQueueSample.m_fSpeedMultiplier = 2.0f;
+					m_sQueueSample.m_MaxDistance = FERRY_NOISE_ENGINE_MAX_DIST;
+					m_sQueueSample.m_bStatic = FALSE;
+					m_sQueueSample.m_nFramesToPlay = 7;
+					SET_SOUND_REVERB(FALSE);
+					SET_SOUND_REFLECTION(FALSE);
+					m_sQueueSample.m_nVolume = volMultipler * FERRY_NOISE_ENGINE_VOLUME;
+					SET_EMITTING_VOLUME(FERRY_NOISE_ENGINE_VOLUME);
+					AddSampleToRequestedQueue();
+#endif
+				}
+			}
+		}
+		return TRUE;
+	}
+	return FALSE;
+}
+
 bool8
 cAudioManager::ProcessBoatEngine(cVehicleParams& params)
 {
