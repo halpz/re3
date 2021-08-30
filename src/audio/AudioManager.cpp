@@ -687,7 +687,7 @@ cAudioManager::InterrogateAudioEntities()
 }
 
 void
-cAudioManager::AddSampleToRequestedQueue()
+cAudioManager::AddSampleToRequestedQueue(uint8 unk_lcs)
 {
 	uint32 finalPriority;
 	uint8 sampleIndex;
@@ -726,6 +726,7 @@ cAudioManager::AddSampleToRequestedQueue()
 			m_sQueueSample.m_bReverb = FALSE;
 #endif
 #endif
+		m_sQueueSample.field_51_lcs = unk_lcs;
 
 		m_aRequestedQueue[m_nActiveQueue][sampleIndex] = m_sQueueSample;
 
