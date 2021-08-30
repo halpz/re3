@@ -1390,18 +1390,20 @@ cAudioManager::ClearActiveSamples()
 }
 
 void
-cAudioManager::LoadBankIfNecessary(uint8 bank)
-{
-	if(!SampleManager.IsSampleBankLoaded(bank))
-		SampleManager.LoadSampleBank(bank);
-}
-
-void
 cAudioManager::GenerateIntegerRandomNumberTable()
 {
 	for (uint32 i = 0; i < ARRAY_SIZE(m_anRandomTable); i++)
 		m_anRandomTable[i] = myrand();
 }
+
+#ifdef GTA_PS2
+void
+cAudioManager::LoadBankIfNecessary(uint8 bank)
+{
+	if(!SampleManager.IsSampleBankLoaded(bank))
+		SampleManager.LoadSampleBank(bank);
+}
+#endif
 
 void
 cAudioManager::DirectlyEnqueueSample(uint32 sample, uint8 bank, uint32 counter, uint32 priority, uint32 freq, uint8 volume, uint8 framesToPlay, uint32 notStereo)
