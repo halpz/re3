@@ -318,7 +318,9 @@ public:
 	void ClearRequestedQueue(); // inlined on PS2
 	void ClearActiveSamples();
 	void GenerateIntegerRandomNumberTable(); // inlined on PS2
+#ifdef GTA_PS2
 	void LoadBankIfNecessary(uint8 bank); // this is used only on PS2 but technically not a platform code
+#endif
 
 #ifdef EXTERNAL_3D_SOUND // actually must have been && AUDIO_MSS as well
 	void AdjustSamplesVolume();
