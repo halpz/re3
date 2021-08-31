@@ -373,10 +373,19 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 	case COMMAND_IS_CAR_ARMED_WITH_ANY_BOMB:
 	{
 		CollectParameters(&m_nIp, 1);
-		CAutomobile* pCar = (CAutomobile*)CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
-		script_assert(pCar);
-		script_assert(pCar->m_vehType == VEHICLE_TYPE_CAR);
+		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
+		script_assert(pVehicle);
+#ifdef FIX_BUGS
+		if (pVehicle->IsCar())
+			UpdateCompareFlag(((CAutomobile*)pVehicle)->m_bombType != 0);
+		else if (pVehicle->IsBike())
+			UpdateCompareFlag(((CBike*)pVehicle)->m_bombType != 0);
+		else
+			UpdateCompareFlag(false);
+#else
+		CAutomobile* pCar = (CVehicle*)pVehicle;
 		UpdateCompareFlag(pCar->m_bombType != 0); //TODO: enum
+#endif
 		return 0;
 	}
 	case COMMAND_APPLY_BRAKES_TO_PLAYERS_CAR:
@@ -447,10 +456,19 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 	case COMMAND_IS_CAR_ARMED_WITH_BOMB:
 	{
 		CollectParameters(&m_nIp, 2);
-		CAutomobile* pCar = (CAutomobile*)CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
-		script_assert(pCar);
-		//script_assert(pCar->m_vehType == VEHICLE_TYPE_CAR);
-		UpdateCompareFlag(pCar->m_bombType == GET_INTEGER_PARAM(1));
+		CAutomobile* pVehicle = (CAutomobile*)CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
+		script_assert(pVehicle);
+#ifdef FIX_BUGS
+		if (pVehicle->IsCar())
+			UpdateCompareFlag(((CAutomobile*)pVehicle)->m_bombType == GET_INTEGER_PARAM(1));
+		else if (pVehicle->IsBike())
+			UpdateCompareFlag(((CBike*)pVehicle)->m_bombType == GET_INTEGER_PARAM(1));
+		else
+			UpdateCompareFlag(false);
+#else
+		CAutomobile* pCar = (CVehicle*)pVehicle;
+		UpdateCompareFlag(pCar->m_bombType != 0); //TODO: enum
+#endif
 		return 0;
 	}
 	case COMMAND_CHANGE_CAR_COLOUR:
@@ -710,9 +728,19 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
 		script_assert(pVehicle);
-		script_assert(pVehicle->m_vehType == VEHICLE_TYPE_CAR);
+#ifdef FIX_BUGS
+		if (pVehicle->IsCar()) {
+			((CAutomobile*)pVehicle)->m_bombType = GET_INTEGER_PARAM(1);
+			((CAutomobile*)pVehicle)->m_pBombRigger = FindPlayerPed();
+		}
+		else if (pVehicle->IsBike()) {
+			((CBike*)pVehicle)->m_bombType = GET_INTEGER_PARAM(1);
+			((CBike*)pVehicle)->m_pBombRigger = FindPlayerPed();
+		}
+#else
 		((CAutomobile*)pVehicle)->m_bombType = GET_INTEGER_PARAM(1);
 		((CAutomobile*)pVehicle)->m_pBombRigger = FindPlayerPed();
+#endif
 		return 0;
 	}
 	case COMMAND_SET_CHAR_PERSONALITY:
@@ -776,7 +804,10 @@ int8 CRunningScript::ProcessCommands500To599(int32 command)
 		int model = GET_INTEGER_PARAM(0);
 		if (model < 0)
 			model = CTheScripts::UsedObjectArray[-model].index;
-		CStreaming::SetMissionDoesntRequireModel(model);
+		if (m_bIsMissionScript)
+			CStreaming::SetMissionDoesntRequireModel(model);
+		else
+			CStreaming::SetAmbientMissionDoesntRequireModel(model);
 		return 0;
 	}
 	case COMMAND_GRAB_PHONE:
@@ -1243,8 +1274,8 @@ int8 CRunningScript::ProcessCommands600To699(int32 command)
 		CollectParameters(&m_nIp, 1);
 		if (m_bIsMissionScript)
 			CStreaming::SetMissionDoesntRequireSpecialChar(GET_INTEGER_PARAM(0) - 1);
-		//else
-			// CStreaming::SetAmbientMissionDoesntRequireSpecialChar(GET_INTEGER_PARAM(0) - 1); // TODO
+		else
+			CStreaming::SetAmbientMissionDoesntRequireSpecialChar(GET_INTEGER_PARAM(0) - 1);
 		return 0;
 	case COMMAND_RESET_NUM_OF_MODELS_KILLED_BY_PLAYER:
 		CDarkel::ResetModelsKilledByPlayer();
@@ -1393,7 +1424,7 @@ int8 CRunningScript::ProcessCommands600To699(int32 command)
 		if (GET_INTEGER_PARAM(0) != 0)
 			TheCamera.SetWideScreenOn();
 		else {
-			// TODO: unknown field
+			// TODO(LCS): unknown field
 			TheCamera.SetWideScreenOff();
 		}
 		return 0;
@@ -1944,7 +1975,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + PICKUP_PLACEMENT_OFFSET;
 		CPickups::GetActualPickupIndex(CollectNextParameterWithoutIncreasingPC(m_nIp));
-		SET_INTEGER_PARAM(0, CPickups::GenerateNewOne(pos, MI_MONEY, PICKUP_MONEY, GET_INTEGER_PARAM(3))); // MI_MONEY -> gpModelIndices[...]
+		SET_INTEGER_PARAM(0, CPickups::GenerateNewOne(pos, MI_MONEY, PICKUP_MONEY, GET_INTEGER_PARAM(3)));
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
@@ -1953,7 +1984,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CPed* pPed = CPools::GetPedPool()->GetAt(GET_INTEGER_PARAM(0));
 		script_assert(pPed);
-		pPed->m_wepAccuracy = GET_INTEGER_PARAM(1) * 1.25f;
+		pPed->m_wepAccuracy = Min(100, GET_INTEGER_PARAM(1) * 1.25f);
 		return 0;
 	}
 	case COMMAND_GET_CAR_SPEED:
@@ -1969,7 +2000,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 	{
 		char name[KEY_LENGTH_IN_SCRIPT];
 		strncpy(name, (const char*)&CTheScripts::ScriptSpace[m_nIp], KEY_LENGTH_IN_SCRIPT);
-		// unknown call FUN_29df68(name) on PS2
+		// unknown call FUN_29df68(name) on PS2 - not on PSP
 		m_nIp += KEY_LENGTH_IN_SCRIPT;
 		CColStore::RemoveAllCollision();
 		CCutsceneMgr::LoadCutsceneData(name);
@@ -2010,7 +2041,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 command)
 		return 0;
 	}
 	case COMMAND_CLEAR_CUTSCENE:
-		// unknown call on PS2 FUN_29DFA0();
+		// unknown call on PS2 FUN_29DFA0() - not on PSP
 		printf("clear cutscene\n");
 		CCutsceneMgr::DeleteCutsceneData();
 		return 0;

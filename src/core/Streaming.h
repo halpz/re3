@@ -151,6 +151,7 @@ public:
 	static void RequestSpecialChar(int32 charId, const char *modelName, int32 flags);
 	static bool HasSpecialCharLoaded(int32 id);
 	static void SetMissionDoesntRequireSpecialChar(int32 id);
+	static void SetAmbientMissionDoesntRequireSpecialChar(int32 id);
 	static void DecrementRef(int32 id);
 	static void RemoveModel(int32 id);
 	static void RemoveTxd(int32 id) { RemoveModel(id + STREAM_OFFSET_TXD); }
@@ -175,6 +176,7 @@ public:
 	static void SetModelIsDeletable(int32 id);
 	static void SetModelTxdIsDeletable(int32 id);
 	static void SetMissionDoesntRequireModel(int32 id);
+	static void SetAmbientMissionDoesntRequireModel(int32 id);
 	static void LoadInitialPeds(void);
 	static void LoadInitialWeapons(void);
 	static void LoadInitialVehicles(void);

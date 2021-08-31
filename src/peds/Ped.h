@@ -550,12 +550,13 @@ public:
 	uint32 bIsDrowning : 1;
 	uint32 bDrownsInWater : 1;
 	uint32 bWaitForLeaderToComeCloser : 1;
-	uint32 bHeldHostageInCar : 1; // one flag was added somewhere after this one (TODO: figure out where and which)
+	uint32 bHeldHostageInCar : 1;
+	uint32 b19C_10 : 1;
 	uint32 bIsPlayerFriend : 1;
 	uint32 bHeadStuckInCollision : 1;
 	uint32 bDeadPedInFrontOfCar : 1;
-	uint32 bStayInCarOnJack : 1;
 
+	uint32 bStayInCarOnJack : 1;
 	uint32 bDontFight : 1;
 	uint32 bDoomAim : 1;
 	uint32 bCanBeShotInVehicle : 1;
@@ -563,8 +564,8 @@ public:
 	uint32 bMakeFleeScream : 1;
 	uint32 bPushedAlongByCar : 1;
 	uint32 bRemoveMeWhenIGotIntoCar : 1;
-	uint32 bIgnoreThreatsBehindObjects : 1; // one flag was added somewhere before this one (TODO: figure out where and which)
 
+	uint32 bIgnoreThreatsBehindObjects : 1;
 	uint32 bNeverEverTargetThisPed : 1;
 	uint32 bCrouchWhenScared : 1;
 	uint32 bKnockedOffBike : 1;
@@ -704,7 +705,7 @@ public:
 	uint32 m_delayedWeaponAmmo;
 	uint8 m_currentWeapon;			// eWeaponType
 	uint8 m_maxWeaponTypeAllowed;	// eWeaponType
-	uint8 m_wepSkills;
+	uint8 m_wepSkills; // TODO - missing?
 	uint8 m_wepAccuracy;
 	CEntity *m_pPointGunAt;
 	CVector m_vecHitLastPos;
@@ -1091,8 +1092,13 @@ public:
 	PedState GetPedState(void) { return m_nPedState; }
 	void SetPedState(PedState state) 
 	{
-		if (GetPedState() == PED_FOLLOW_PATH && state != PED_FOLLOW_PATH)
+		if (GetPedState() == PED_FOLLOW_PATH && state != PED_FOLLOW_PATH) {
+			if (m_followPathTargetEnt) {
+				m_followPathTargetEnt->CleanUpOldReference(&m_followPathTargetEnt);
+				m_followPathTargetEnt = nil;
+			}
 			ClearFollowPath();
+		}
 		m_nPedState = state;
 	}
 	bool Dead(void) { return m_nPedState == PED_DEAD; }

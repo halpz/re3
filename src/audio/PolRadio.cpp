@@ -600,7 +600,7 @@ cAudioManager::SetupSuspectLastSeenReport()
 					case MI_COACH:
 						sample = SFX_SFX_POLICE_RADIO_COACH;
 						break;
-					case MI_ROMERO:
+					case MI_HEARSE:
 						sample = SFX_SFX_POLICE_RADIO_HEARSE;
 						break;
 					case MI_PIZZABOY:

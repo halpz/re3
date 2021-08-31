@@ -206,7 +206,7 @@ CAutomobile::CAutomobile(int32 id, uint8 CreatedBy)
 
 	m_pBombRigger = nil;
 	m_bombType = CARBOMB_NONE;
-	bUnknownFlag = false;
+	bDriverLastFrame = false;
 
 	if(m_nDoorLock == CARLOCK_UNLOCKED &&
 	   (id == MI_POLICE || id == MI_ENFORCER || id == MI_RHINO))
@@ -344,8 +344,19 @@ CAutomobile::ProcessControl(void)
 			ScanForCrimes();
 	}
 
-	// TODO(LCS)? re-inline this and change where bDriverLastFrame is set
-	ActivateBombWhenEntered();
+	if (pDriver) {
+		if (!bDriverLastFrame && m_bombType == CARBOMB_ONIGNITIONACTIVE) {
+			// If someone enters the car and there is a bomb, detonate
+			m_nBombTimer = 1000;
+			m_pBlowUpEntity = m_pBombRigger;
+			if (m_pBlowUpEntity)
+				m_pBlowUpEntity->RegisterReference((CEntity**)&m_pBlowUpEntity);
+			DMAudio.PlayOneShot(m_audioEntityId, SOUND_BOMB_TICK, 1.0f);
+		}
+		bDriverLastFrame = true;
+	}
+	else
+		bDriverLastFrame = false;
 
 	// Process driver
 	if(pDriver){
@@ -939,9 +950,20 @@ CAutomobile::ProcessControl(void)
 			traction *= 4.0f;
 
 		if(FindPlayerVehicle() && FindPlayerVehicle() == this)
-			if(CPad::GetPad(0)->CarGunJustDown())
-				// TODO(LCS)? re-inline this from CVehicle
-				ActivateBomb();
+			if (CPad::GetPad(0)->CarGunJustDown()) {
+				if (m_bombType == CARBOMB_TIMED) {
+					m_bombType = CARBOMB_TIMEDACTIVE;
+					m_nBombTimer = 7000;
+					m_pBlowUpEntity = FindPlayerPed();
+					CGarages::TriggerMessage("GA_12", -1, 3000, -1);
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_BOMB_TIMED_ACTIVATED, 1.0f);
+				}
+				else if (m_bombType == CARBOMB_ONIGNITION) {
+					m_bombType = CARBOMB_ONIGNITIONACTIVE;
+					CGarages::TriggerMessage("GA_12", -1, 3000, -1);
+					DMAudio.PlayOneShot(m_audioEntityId, SOUND_BOMB_ONIGNITION_ACTIVATED, 1.0f);
+				}
+			}
 
 		if(FindPlayerVehicle() != this && (strongGrip1 || CVehicle::bCheat3)){
 			traction *= 1.2f;

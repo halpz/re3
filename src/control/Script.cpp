@@ -179,65 +179,6 @@ static const char* MissionScripts[] = {
 	"TOSH4"
 };
 
-static const char* MissionScripts[] = {
-	"LAWYER1",
-	"LAWYER2",
-	"LAWYER3",
-	"LAWYER4",
-	"GENERL1",
-	"COL2",
-	"GENERL3",
-	"COL_4",
-	"COL_5",
-	"baron1",
-	"baron2",
-	"baron3",
-	"baron4",
-	"kent1",
-	"baron5",
-	"serg1",
-	"serg2",
-	"serg3",
-	"bankjo1",
-	"bankjo2",
-	"bankjo3",
-	"bankjo4",
-	"phil1",
-	"phil2",
-	"porno1",
-	"porno2",
-	"porno3",
-	"porno4",
-	"protec1",
-	"protec2",
-	"protec3",
-	"count1",
-	"count2",
-	"CAP_1",
-	"FIN_1",
-	"bike1",
-	"bike2",
-	"bike3",
-	"rockb1",
-	"rockb2",
-	"rockb3",
-	"cuban1",
-	"cuban2",
-	"cuban3",
-	"cuban4",
-	"hait1",
-	"hait2",
-	"hait3",
-	"assin1",
-	"assin2",
-	"assin3",
-	"assin4",
-	"assin5",
-	"taxwar1",
-	"taxwar2",
-	"taxwar3"
-};
-
 int AllowMissionReplay;
 uint32 NextMissionDelay;
 uint32 MissionStartTime;
@@ -501,7 +442,7 @@ void CMissionCleanup::Process()
 #endif
 		CStreaming::ms_disableStreaming = false;
 	if (CHud::m_ItemToFlash != ITEM_ARMOUR && CHud::m_ItemToFlash != ITEM_HEALTH)
-		CHud::m_ItemToFlash = -1;
+		CHud::m_ItemToFlash = ITEM_NONE;
 	CHud::SetHelpMessage(nil, false); // nil, false, false, true TODO(LCS)
 	CUserDisplay::OnscnTimer.m_bDisabled = false;
 	CWorld::Players[0].m_pPed->m_pWanted->m_bIgnoredByCops = false;
@@ -1851,7 +1792,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 		if (ped) { // great time to check
 			for (int i = 0; i < ped->m_numNearPeds; i++) {
 				CPed* pTestedPed = ped->m_nearPeds[i];
-				if (!pTestedPed || !IsPedPointerValid(pTestedPed))
+				if (!pTestedPed || !IsPedPointerValid(pTestedPed) || pTestedPed->bIsFrozen)
 					continue;
 				if (pTestedPed->m_pedInObjective == ped && pTestedPed->m_objective == OBJECTIVE_FOLLOW_CHAR_IN_FORMATION) {
 					CVector vFollowerPos = pTestedPed->GetFormationPosition();
@@ -1864,7 +1805,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 command)
 						}
 					}
 				}
-				else if (pTestedPed->m_leader == ped) {
+				else if (pTestedPed->m_leader == ped && !pTestedPed->bIsFrozen) {
 					CVector vFollowerPos;
 					if (pTestedPed->m_pedFormation)
 						vFollowerPos = pTestedPed->GetFormationPosition();
@@ -2551,6 +2492,9 @@ int8 CRunningScript::ProcessCommands100To199(int32 command)
 		}
 		SET_INTEGER_PARAM(0, handle);
 		StoreParameters(&m_nIp, 1);
+#ifdef GTA_NETWORK
+		// TODO(LCS): register car
+#endif
 		if (m_bIsMissionScript)
 			CTheScripts::MissionCleanUp.AddEntityToList(handle, CLEANUP_CAR);
 		return 0;
@@ -3128,6 +3072,8 @@ int8 CRunningScript::ProcessCommands200To299(int32 command)
 	case COMMAND_DELETE_OBJECT:
 	{
 		CollectParameters(&m_nIp, 1);
+		if (GET_INTEGER_PARAM(0) > (NUMOBJECTS + 2) << 8)
+			return 0;
 		CObject* pObj = CPools::GetObjectPool()->GetAt(GET_INTEGER_PARAM(0));
 		if (pObj){
 			CWorld::Remove(pObj);

@@ -38,6 +38,7 @@
 #include "CarAI.h"
 #include "Pickups.h"
 #include "Fluff.h"
+#include "CustomSoundTrack.h"
 
 // LCS: file done except TODOs
 
@@ -109,9 +110,12 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		CollectParameters(&m_nIp, 2);
 		CVehicle* pVehicle = CPools::GetVehiclePool()->GetAt(GET_INTEGER_PARAM(0));
 		script_assert(pVehicle);
-		script_assert(pVehicle->m_vehType == VEHICLE_TYPE_CAR);
-		CAutomobile* pCar = (CAutomobile*)pVehicle;
-		pCar->bNotDamagedUpsideDown = (GET_INTEGER_PARAM(1) != 0);
+		//assert(pVehicle->m_vehType == VEHICLE_TYPE_CAR);
+		// they call this for bikes again, we don't really want to destroy the structure...
+#ifdef FIX_BUGS
+		if (pVehicle->m_vehType == VEHICLE_TYPE_CAR)
+#endif
+			((CAutomobile*)pVehicle)->bNotDamagedUpsideDown = (GET_INTEGER_PARAM(1) != 0);
 		return 0;
 	}
 	case COMMAND_CAN_PLAYER_START_MISSION:
@@ -400,7 +404,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		if (size <= 0)
 			size = CTheScripts::LargestMissionScriptSize;
 		CFileMgr::Seek(gScriptsFile, offset, 0);
-		CFileMgr::Read(gScriptsFile, (const char*)&CTheScripts::ScriptSpace[CTheScripts::MainScriptSize], size); // TODO
+		CFileMgr::Read(gScriptsFile, (const char*)&CTheScripts::ScriptSpace[CTheScripts::MainScriptSize], size);
 		CRunningScript* pMissionScript = CTheScripts::StartNewScript(CTheScripts::MainScriptSize);
 		CTimer::Resume();
 		pMissionScript->m_bIsMissionScript = true;
@@ -468,8 +472,8 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 command)
 		return 0;
 	case COMMAND_SET_RADIO_CHANNEL:
 		CollectParameters(&m_nIp, 2);
-		// if (base::cSingleton<cCustomSoundTrack>::Instance()->unk()) - TODO on PS2, but it's not on mobile
-		DMAudio.SetRadioChannel(GET_INTEGER_PARAM(0), GET_INTEGER_PARAM(1));
+		if (!cCustomSoundTrack::Instance()->IsPlaying())
+			DMAudio.SetRadioChannel(GET_INTEGER_PARAM(0), GET_INTEGER_PARAM(1));
 		return 0;
 	/*
 	case COMMAND_OVERRIDE_HOSPITAL_LEVEL:
@@ -1781,6 +1785,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		StoreParameters(&m_nIp, 1);
 		return 0;
 	}
+	/*
 	case COMMAND_IS_CHAR_IN_ANY_BOAT:
 	{
 		CollectParameters(&m_nIp, 1);
@@ -1789,6 +1794,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		UpdateCompareFlag(pPed->bInVehicle && pPed->m_pMyVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_BOAT);
 		return 0;
 	}
+	*/
 	case COMMAND_IS_PLAYER_IN_ANY_BOAT:
 	{
 		CollectParameters(&m_nIp, 1);
@@ -1797,6 +1803,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		UpdateCompareFlag(pPed->bInVehicle && pPed->m_pMyVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_BOAT);
 		return 0;
 	}
+	/*
 	case COMMAND_IS_CHAR_IN_ANY_HELI:
 	{
 		CollectParameters(&m_nIp, 1);
@@ -1805,6 +1812,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		UpdateCompareFlag(pPed->bInVehicle && pPed->m_pMyVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_HELI);
 		return 0;
 	}
+	*/
 	case COMMAND_IS_PLAYER_IN_ANY_HELI:
 	{
 		CollectParameters(&m_nIp, 1);
@@ -1813,6 +1821,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		UpdateCompareFlag(pPed->bInVehicle && pPed->m_pMyVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_HELI);
 		return 0;
 	}
+	/*
 	case COMMAND_IS_CHAR_IN_ANY_PLANE:
 	{
 		CollectParameters(&m_nIp, 1);
@@ -1821,6 +1830,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 command)
 		UpdateCompareFlag(pPed->bInVehicle && pPed->m_pMyVehicle->GetVehicleAppearance() == VEHICLE_APPEARANCE_PLANE);
 		return 0;
 	}
+	*/
 	case COMMAND_IS_PLAYER_IN_ANY_PLANE:
 	{
 		CollectParameters(&m_nIp, 1);

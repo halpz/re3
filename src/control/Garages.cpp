@@ -627,13 +627,24 @@ void CGarage::Update()
 		case GS_OPENED:
 			UpdateDoorsHeight();
 			if (IsStaticPlayerCarEntirelyInside()) {
+#ifndef BOMBS_ON_BIKES
 				if (FindPlayerVehicle()->GetVehicleAppearance() == VEHICLE_APPEARANCE_BIKE) {
 					CGarages::TriggerMessage("GA_22", -1, 4000, -1);
 					m_eGarageState = GS_OPENEDCONTAINSCAR;
 					DMAudio.PlayFrontEndSound(SOUND_GARAGE_BOMB_ALREADY_SET, 1);
 					break;
 				}
-				if (!FindPlayerVehicle() || FindPlayerVehicle()->m_bombType) {
+#endif
+				if (!FindPlayerVehicle()
+#ifdef FIX_BUGS
+					|| (FindPlayerVehicle()->IsCar() && ((CAutomobile*)FindPlayerVehicle())->m_bombType)
+#else
+					|| ((CAutomobile*)FindPlayerVehicle())->m_bombType
+#endif
+#ifdef BOMBS_ON_BIKES
+					|| (FindPlayerVehicle()->IsBike() && ((CBike*)FindPlayerVehicle())->m_bombType)
+#endif
+					) {
 					CGarages::TriggerMessage("GA_5", -1, 4000, -1); //"Your car is already fitted with a bomb"
 					m_eGarageState = GS_OPENEDCONTAINSCAR;
 					DMAudio.PlayFrontEndSound(SOUND_GARAGE_BOMB_ALREADY_SET, 1);
@@ -677,10 +688,16 @@ void CGarage::Update()
 					if (!CGarages::BombsAreFree)
 						CWorld::Players[CWorld::PlayerInFocus].m_nMoney = Max(0, CWorld::Players[CWorld::PlayerInFocus].m_nMoney - BOMB_PRICE);
 					if (FindPlayerVehicle() && (FindPlayerVehicle()->IsCar() || FindPlayerVehicle()->IsBike())) {
-#if (!defined GTA_PS2 || defined FIX_BUGS) // <- this remained in CAutomobile in LCS
-						FindPlayerVehicle()->m_bombType = CGarages::GetBombTypeForGarageType(m_eGarageType);
-						FindPlayerVehicle()->m_pBombRigger = FindPlayerPed();
-#else // PS2 version contained a bug: CBike was casted to CAutomobile, but due to coincidence it didn't corrupt memory
+#ifdef BOMBS_ON_BIKES
+						if (FindPlayerVehicle()->IsCar()) {
+							((CAutomobile*)(FindPlayerVehicle()))->m_bombType = CGarages::GetBombTypeForGarageType(m_eGarageType);
+							((CAutomobile*)(FindPlayerVehicle()))->m_pBombRigger = FindPlayerPed();
+						}
+						else {
+							((CBike*)(FindPlayerVehicle()))->m_bombType = CGarages::GetBombTypeForGarageType(m_eGarageType);
+							((CBike*)(FindPlayerVehicle()))->m_pBombRigger = FindPlayerPed();
+						}
+#else
 						((CAutomobile*)(FindPlayerVehicle()))->m_bombType = CGarages::GetBombTypeForGarageType(m_eGarageType);
 						((CAutomobile*)(FindPlayerVehicle()))->m_pBombRigger = FindPlayerPed();
 #endif
@@ -694,6 +711,13 @@ void CGarage::Update()
 									pCar->m_pBombRigger = nil;
 									pCar->m_pBlowUpEntity = nil;
 								}
+#ifdef BOMBS_ON_BIKES
+								if (pVehicle->IsBike() && pVehicle->GetStatus() == STATUS_WRECKED) {
+									CBike* pBike = (CBike*)pVehicle;
+									pBike->m_pBombRigger = nil;
+									pBike->m_pBlowUpEntity = nil;
+								}
+#endif
 							}
 						}
 						if (m_eGarageType == GARAGE_BOMBSHOP3)

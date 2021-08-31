@@ -789,7 +789,22 @@ int8 CRunningScript::ProcessCommands800To899(int32 command)
 				pPed->m_pMyVehicle->RemovePassenger(pPed);
 			}
 			if (pPed->m_vehDoor) {
-				if (pPed->GetPedState() == PED_EXIT_CAR || pPed->GetPedState() == PED_DRAG_FROM_CAR) {
+				eDoors door;
+				switch (pPed->m_vehDoor) {
+				case CAR_DOOR_LF:
+					door = DOOR_FRONT_LEFT;
+					break;
+				case CAR_DOOR_RF:
+					door = DOOR_FRONT_RIGHT;
+					break;
+				case CAR_DOOR_LR:
+					door = DOOR_REAR_LEFT;
+					break;
+				case CAR_DOOR_RR:
+					door = DOOR_REAR_RIGHT;
+					break;
+				}
+				if (pPed->GetPedState() == PED_EXIT_CAR || pPed->GetPedState() == PED_DRAG_FROM_CAR || !pPed->m_pMyVehicle->IsDoorClosed(door)) {
 					uint8 flags = 0;
 					if (pPed->m_pMyVehicle->IsBike()) {
 						if (pPed->m_vehDoor == CAR_DOOR_LF ||
@@ -1397,7 +1412,9 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		CollectParameters(&m_nIp, 1);
 		DMAudio.ChangeMusicMode(MUSICMODE_FRONTEND);
 		DMAudio.PlayFrontEndTrack(GET_INTEGER_PARAM(0) + STREAMED_SOUND_MISSION_COMPLETED - 1, FALSE);
+#ifndef GTA_PSP
 		//DMAudio.SaveAnnouncementsWhenMissionPassedPlayed(); // TODO!
+#endif
 		return 0;
 	}
 	case COMMAND_CLEAR_AREA:
@@ -1407,6 +1424,9 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		if (pos.z <= MAP_Z_LOW_LIMIT)
 			pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 		CWorld::ClearExcitingStuffFromArea(pos, GET_FLOAT_PARAM(3), GET_INTEGER_PARAM(4));
+#ifdef GTA_MOBILE
+		// CPopulation::ms_blockPedCreationForAFrame = true;
+#endif
 		return 0;
 	}
 	case COMMAND_FREEZE_ONSCREEN_TIMER:
@@ -1471,7 +1491,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 		float size = Max(0.0f, GET_FLOAT_PARAM(7));
 		eParticleObjectType type = (eParticleObjectType)GET_INTEGER_PARAM(0);
 		RwRGBA color;
-		if (type == POBJECT_SMOKE_TRAIL){ // 17 in LCS -- assuming enum is the same
+		if (type == POBJECT_SMOKE_TRAIL){
 			color.alpha = -1;
 			color.red = GET_INTEGER_PARAM(8);
 			color.green = GET_INTEGER_PARAM(9);
@@ -1790,8 +1810,6 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 				continue;
 			if (CModelInfo::IsCarModel(model) || CModelInfo::IsBikeModel(model)) {
 				switch (model) {
-				// TODO(LCS): do it right
-				// apparently leeds didn't :lmao:
 				case MI_LANDSTAL:
 				case MI_LINERUN:
 				case MI_RIO:
@@ -1804,6 +1822,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 				case MI_FBICAR:
 				case MI_MRWHOOP:
 				case MI_BFINJECT:
+				case MI_HEARSE:
 				case MI_HUNTER:
 				case MI_POLICE:
 				case MI_ENFORCER:
@@ -1817,13 +1836,15 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 				case MI_ANGEL:
 				case MI_COACH:
 				case MI_RCBANDIT:
-				//case MI_ROMERO:
-				//case MI_PACKER:
-				//case MI_SENTXS:
+				case MI_PACKER:
+				case MI_SENTXS:
 				case MI_SQUALO:
 				case MI_SEASPAR:
 				case MI_PIZZABOY:
-				//case MI_GANGBUR:
+				case MI_NOODLEBOY:
+				case MI_ANGEL2:
+				case MI_SANCHEZ2:
+				case MI_GANGBUR:
 				case MI_AIRTRAIN:
 				case MI_DEADDODO:
 				case MI_SPEEDER:
@@ -1832,45 +1853,49 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 				case MI_FLATBED:
 				case MI_YANKEE:
 				case MI_CADDY:
-				//case MI_ZEBRA:
+				case MI_BORGNINE:
 				case MI_TOPFUN:
+				case MI_CAMPVAN:
+				case MI_BALLOT:
 				case MI_SKIMMER:
 				case MI_RCBARON:
 				case MI_RCRAIDER:
 				case MI_SPARROW:
 				case MI_PATRIOT:
-				//case MI_LOVEFIST:
+				case MI_LOVEFIST:
 				case MI_COASTG:
 				case MI_DINGHY:
-				//case MI_HERMES:
-				//case MI_SABRETUR:
+				case MI_HERMES:
+				case MI_SABRETUR:
 				case MI_PHEONIX:
-				//case MI_WALTON:
+				case MI_WALTON:
 				case MI_COMET:
-				//case MI_DELUXO:
-				//case MI_BURRITO:
-				//case MI_SPAND:
+				case MI_DELUXO:
+				case MI_BURRITO:
+				case MI_SPAND:
 				case MI_MARQUIS:
 				case MI_BAGGAGE:
-				//case MI_KAUFMAN:
+				case MI_KAUFMAN:
 				case MI_MAVERICK:
 				case MI_VCNMAV:
-				//case MI_RANCHER:
+				case MI_RANCHER:
 				case MI_FBIRANCH:
 				case MI_JETMAX:
-				//case MI_HOTRING:
+				case MI_HOTRING:
 				case MI_SANDKING:
-				//case MI_BLISTAC:
+				case MI_BLISTAC:
 				case MI_POLMAV:
-				//case MI_BOXVILLE:
-				//case MI_BENSON:
-				//case MI_MESA:
+				case MI_BOXVILLE:
+				case MI_BENSON:
+				case MI_MESA:
 				case MI_RCGOBLIN:
-				//case MI_HOTRINA:
-				//case MI_HOTRINB:
-				//case MI_BLOODRA:
-				//case MI_BLOODRB:
+				case MI_HOTRINA:
+				case MI_HOTRINB:
+				case MI_BLOODRA:
+				case MI_BLOODRB:
 				case MI_VICECHEE:
+				case MI_CABBIE:
+				case MI_MAFIA:
 					model = -1;
 					break;
 				case MI_IDAHO:
@@ -1884,23 +1909,22 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 				case MI_MOONBEAM:
 				case MI_ESPERANT:
 				case MI_TAXI:
-				//case MI_WASHING:
+				case MI_WASHING:
 				case MI_BOBCAT:
 				case MI_BANSHEE:
-				//case MI_CABBIE:
 				case MI_STALLION:
 				case MI_RUMPO:
-				//case MI_ADMIRAL:
+				case MI_ADMIRAL:
 				case MI_PCJ600:
 				case MI_FAGGIO:
 				case MI_FREEWAY:
-				//case MI_GLENDALE:
-				//case MI_OCEANIC:
+				case MI_GLENDALE:
+				case MI_OCEANIC:
 				case MI_SANCHEZ:
-				//case MI_SABRE:
-				//case MI_REGINA:
-				//case MI_VIRGO:
-				//case MI_GREENWOO:
+				case MI_SABRE:
+				case MI_REGINA:
+				case MI_VIRGO:
+				case MI_GREENWOO:
 					break;
 				default:
 					printf("CREATE_RANDOM_CAR_FOR_CAR_PARK - Unknown car model %d\n", CStreaming::ms_vehiclesLoaded[index]);
@@ -1973,7 +1997,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 command)
 #else
 		CTimer::Stop();
 #endif
-		CStreaming::LoadScene(pos);
+		CStreaming::LoadSceneCollision(pos);
 #ifdef FIX_BUGS
 		CTimer::Suspend();
 #else
