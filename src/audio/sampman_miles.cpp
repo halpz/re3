@@ -39,10 +39,11 @@ int32 nPedSlotSfx    [MAX_PEDSFX];
 int32 nPedSlotSfxAddr[MAX_PEDSFX];
 uint8 nCurrentPedSlot;
 
-#ifdef FIX_BUGS
+uint32 nMissionSlotSfx[MISSION_AUDIO_SLOTS] = { UINT32_MAX, UINT32_MAX };
+uintptr nMissionSlotSfxStartAddress;
+
 uint32 gPlayerTalkSfx = UINT32_MAX;
 void *gPlayerTalkData = 0;
-#endif
 
 uint8 nChannelVolume[MAXCHANNELS+MAX2DCHANNELS];
 
@@ -1323,7 +1324,13 @@ cSampleManager::Initialise(void)
 
 	nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] = (int32)AIL_mem_alloc_lock(PED_BLOCKSIZE*MAX_PEDSFX);
 
-#ifdef FIX_BUGS
+	nMissionSlotSfxStartAddress = (uintptr)AIL_mem_alloc_lock(PED_BLOCKSIZE*MAX_PEDSFX);
+	if ( !nMissionSlotSfxStartAddress )
+	{
+		Terminate();
+		return FALSE;
+	}
+
 	// Find biggest player comment
 	uint32 nMaxPedSize = 0;
 	for (uint32 i = PLAYER_COMMENTS_START; i <= PLAYER_COMMENTS_END; i++)
@@ -1335,7 +1342,6 @@ cSampleManager::Initialise(void)
 		Terminate();
 		return FALSE;
 	}
-#endif
 
 	LoadSampleBank(SFX_BANK_0);
 
@@ -1491,13 +1497,20 @@ cSampleManager::Terminate(void)
 		nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] = 0;
 	}
 
-#ifdef FIX_BUGS
+	if ( nMissionSlotSfxStartAddress != 0 )
+	{
+		AIL_mem_free_lock((void *)nMissionSlotSfxStartAddress);
+		nMissionSlotSfxStartAddress = 0;
+
+		for ( uint32 i = 0; i < MISSION_AUDIO_SLOTS; i++ )
+			nMissionSlotSfx[i] = UINT32_MAX;
+	}
+
 	if ( gPlayerTalkData != 0)
 	{
 		AIL_mem_free_lock(gPlayerTalkData);
 		gPlayerTalkData = 0;
 	}
-#endif
 	
 	if ( DIG )
 	{
@@ -1663,32 +1676,50 @@ cSampleManager::IsSampleBankLoaded(uint8 nBank)
 	return bSampleBankLoaded[nBank];
 }
 
-#ifdef FIX_BUGS
 bool8
 cSampleManager::IsMissionAudioLoaded(uint8 nSlot, uint32 nSample)
 {
-	ASSERT(nSlot == MISSION_AUDIO_PLAYER_COMMENT); // only MISSION_AUDIO_PLAYER_COMMENT is supported on PC
+	ASSERT(nSlot != MISSION_AUDIO_POLRADIO_CRIME_OR_COLOR && nSlot != MISSION_AUDIO_POLRADIO_AREA_OR_CAR); // these are not used in LCS
 	
-	return nSample == gPlayerTalkSfx;
+	switch (nSlot)
+	{
+	case MISSION_AUDIO_SLOT_1:
+	case MISSION_AUDIO_SLOT_2:
+		return nMissionSlotSfx[nSlot] == nSample;
+	case MISSION_AUDIO_PLAYER_COMMENT:
+		return nSample == gPlayerTalkSfx;
+	}
+	return FALSE;
 }
 
 bool8
 cSampleManager::LoadMissionAudio(uint8 nSlot, uint32 nSample)
 {
-	ASSERT(nSlot == MISSION_AUDIO_PLAYER_COMMENT); // only MISSION_AUDIO_PLAYER_COMMENT is supported on PC
+	ASSERT(nSlot != MISSION_AUDIO_POLRADIO_CRIME_OR_COLOR && nSlot != MISSION_AUDIO_POLRADIO_AREA_OR_CAR); // these are not used in LCS
 	ASSERT(nSample < TOTAL_AUDIO_SAMPLES);
 	
 	if (fseek(fpSampleDataHandle, m_aSamples[nSample].nOffset, SEEK_SET) != 0)
 		return FALSE;
 
-	if (fread(gPlayerTalkData, 1, m_aSamples[nSample].nSize, fpSampleDataHandle) != m_aSamples[nSample].nSize)
-		return FALSE;
+	switch (nSlot)
+	{
+	case MISSION_AUDIO_SLOT_1:
+	case MISSION_AUDIO_SLOT_2:
+		if (fread((void*)(nMissionSlotSfxStartAddress + nSlot*MISSION_AUDIO_BLOCKSIZE), 1, m_aSamples[nSample].nSize, fpSampleDataHandle) != m_aSamples[nSample].nSize)
+			return FALSE;
 
-	gPlayerTalkSfx = nSample;
+		nMissionSlotSfx[nSlot] = nSample;
+		break;
+	case MISSION_AUDIO_PLAYER_COMMENT:
+		if (fread(gPlayerTalkData, 1, m_aSamples[nSample].nSize, fpSampleDataHandle) != m_aSamples[nSample].nSize)
+			return FALSE;
+
+		gPlayerTalkSfx = nSample;
+		break;
+	}
 
 	return TRUE;
 }
-#endif
 
 bool8
 cSampleManager::IsPedCommentLoaded(uint32 nComment)
@@ -1917,7 +1948,6 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 		
 		addr = nSampleBankMemoryStartAddress[nBank] + m_aSamples[nSfx].nOffset - m_aSamples[BankStartOffset[nBank]].nOffset;
 	}
-#ifdef FIX_BUGS
 	else if ( nSfx >= PLAYER_COMMENTS_START && nSfx <= PLAYER_COMMENTS_END )
 	{
 		if ( !IsMissionAudioLoaded(MISSION_AUDIO_PLAYER_COMMENT, nSfx) )
@@ -1925,9 +1955,15 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 
 		addr = (uintptr)gPlayerTalkData;
 	}
-#endif
 	else
-	{	
+	{
+		for ( uint32 i = 0; i < MISSION_AUDIO_SLOTS; i++ ) {
+			if ( IsMissionAudioLoaded(i, nSfx) ) {
+				addr = nMissionSlotSfxStartAddress + i * MISSION_AUDIO_BLOCKSIZE;
+				goto MissionAudioFound;
+			}
+		}
+
 		if ( !IsPedCommentLoaded(nSfx) )
 			return FALSE;
 		
@@ -1936,6 +1972,7 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 		addr = nPedSlotSfxAddr[slot];
 	}
 
+MissionAudioFound:
 #ifdef EXTERNAL_3D_SOUND
 	if ( b2d )
 	{

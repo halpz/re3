@@ -8307,7 +8307,6 @@ cPedComments::Process()
 				goto PedCommentAlreadyAdded;
 			}
 		}
-#if defined(GTA_PS2) || defined(FIX_BUGS)
 		bool8 IsLoadedResult;
 		sampleIndex = m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nSampleIndex;
 		if (sampleIndex >= PLAYER_COMMENTS_START && sampleIndex <= PLAYER_COMMENTS_END) {
@@ -8318,18 +8317,13 @@ cPedComments::Process()
 			bIsPlayerComment = FALSE;
 		}
 		switch(IsLoadedResult) { // yes, this was a switch
-#else
-		switch(SampleManager.IsPedCommentLoaded(sampleIndex)) { // yes, this was a switch
-#endif
 		case FALSE:
 #if defined(GTA_PC) && !defined(FIX_BUGS)
 			if(!m_bDelay)
 #endif
-#if defined(GTA_PS2) || defined(FIX_BUGS)
 				if (bIsPlayerComment)
 					SampleManager.LoadMissionAudio(MISSION_AUDIO_PLAYER_COMMENT, sampleIndex);
 				else
-#endif
 					SampleManager.LoadPedComment(sampleIndex);
 			break;
 		case TRUE:
@@ -11863,8 +11857,8 @@ cAudioManager::ProcessMissionAudioSlot(uint8 slot)
 	if (m_nMissionAudioSampleIndex[slot] != NO_SAMPLE) {
 		switch (m_nMissionAudioLoadingStatus[slot]) {
 		case LOADING_STATUS_NOT_LOADED:
-			// TODO: LoadMissionAudio
-			SampleManager.LoadPedComment(m_nMissionAudioSampleIndex[slot]);
+			if (!SampleManager.IsMissionAudioLoaded(slot, m_nMissionAudioSampleIndex[slot]))
+				SampleManager.LoadMissionAudio(slot, m_nMissionAudioSampleIndex[slot]);
 			SampleManager.SetChannelFrequency(slot + CHANNEL_MISSION_AUDIO_1, SampleManager.GetSampleBaseFrequency(m_nMissionAudioSampleIndex[slot]));
 			m_nMissionAudioLoadingStatus[slot] = LOADING_STATUS_LOADED;
 			nFramesUntilFailedLoad[slot] = 0;
