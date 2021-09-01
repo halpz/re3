@@ -39,6 +39,11 @@ int32 nPedSlotSfx    [MAX_PEDSFX];
 int32 nPedSlotSfxAddr[MAX_PEDSFX];
 uint8 nCurrentPedSlot;
 
+#ifdef FIX_BUGS
+uint32 gPlayerTalkSfx = UINT32_MAX;
+void *gPlayerTalkData = 0;
+#endif
+
 uint8 nChannelVolume[MAXCHANNELS+MAX2DCHANNELS];
 
 uint32 nStreamLength[TOTAL_STREAMED_SOUNDS];
@@ -1266,6 +1271,20 @@ cSampleManager::Initialise(void)
 
 	nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] = (int32)AIL_mem_alloc_lock(PED_BLOCKSIZE*MAX_PEDSFX);
 
+#ifdef FIX_BUGS
+	// Find biggest player comment
+	uint32 nMaxPedSize = 0;
+	for (uint32 i = PLAYER_COMMENTS_START; i <= PLAYER_COMMENTS_END; i++)
+		nMaxPedSize = Max(nMaxPedSize, m_aSamples[i].nSize);
+
+	gPlayerTalkData = AIL_mem_alloc_lock(nMaxPedSize);
+	if ( !gPlayerTalkData )
+	{
+		Terminate();
+		return FALSE;
+	}
+#endif
+
 	LoadSampleBank(SFX_BANK_0);
 
 	TRACE("stream");
@@ -1419,6 +1438,14 @@ cSampleManager::Terminate(void)
 		AIL_mem_free_lock((void *)nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS]);
 		nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] = 0;
 	}
+
+#ifdef FIX_BUGS
+	if ( gPlayerTalkData != 0)
+	{
+		AIL_mem_free_lock(gPlayerTalkData);
+		gPlayerTalkData = 0;
+	}
+#endif
 	
 	if ( DIG )
 	{
@@ -1584,6 +1611,33 @@ cSampleManager::IsSampleBankLoaded(uint8 nBank)
 {
 	return bSampleBankLoaded[nBank];
 }
+
+#ifdef FIX_BUGS
+bool8
+cSampleManager::IsMissionAudioLoaded(uint8 nSlot, uint32 nSample)
+{
+	ASSERT(nSlot == MISSION_AUDIO_PLAYER_COMMENT); // only MISSION_AUDIO_PLAYER_COMMENT is supported on PC
+	
+	return nSample == gPlayerTalkSfx;
+}
+
+bool8
+cSampleManager::LoadMissionAudio(uint8 nSlot, uint32 nSample)
+{
+	ASSERT(nSlot == MISSION_AUDIO_PLAYER_COMMENT); // only MISSION_AUDIO_PLAYER_COMMENT is supported on PC
+	ASSERT(nSample < TOTAL_AUDIO_SAMPLES);
+	
+	if (fseek(fpSampleDataHandle, m_aSamples[nSample].nOffset, SEEK_SET) != 0)
+		return FALSE;
+
+	if (fread(gPlayerTalkData, 1, m_aSamples[nSample].nSize, fpSampleDataHandle) != m_aSamples[nSample].nSize)
+		return FALSE;
+
+	gPlayerTalkSfx = nSample;
+
+	return TRUE;
+}
+#endif
 
 bool8
 cSampleManager::IsPedCommentLoaded(uint32 nComment)
@@ -1808,6 +1862,15 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 		
 		addr = nSampleBankMemoryStartAddress[nBank] + m_aSamples[nSfx].nOffset - m_aSamples[BankStartOffset[nBank]].nOffset;
 	}
+#ifdef FIX_BUGS
+	else if ( nSfx >= PLAYER_COMMENTS_START && nSfx <= PLAYER_COMMENTS_END )
+	{
+		if ( !IsMissionAudioLoaded(MISSION_AUDIO_PLAYER_COMMENT, nSfx) )
+			return FALSE;
+
+		addr = (uintptr)gPlayerTalkData;
+	}
+#endif
 	else
 	{	
 		if ( !IsPedCommentLoaded(nSfx) )
@@ -2496,7 +2559,7 @@ cSampleManager::InitialiseSampleBanks(void)
 	fclose(fpSampleDescHandle);
 	fpSampleDescHandle = NULL;
 	
-	for ( int32 i = 0; i < TOTAL_AUDIO_SAMPLES; i++ )
+	for ( uint32 i = 0; i < TOTAL_AUDIO_SAMPLES; i++ )
 	{
 #ifdef FIX_BUGS
 		if (nBank >= MAX_SFX_BANKS) break;

@@ -157,6 +157,22 @@ cSampleManager::IsSampleBankLoaded(uint8 nBank)
 }
 
 bool8
+cSampleManager::IsMissionAudioLoaded(uint8 nSlot, uint32 nSample)
+{
+	ASSERT(nSlot < MISSION_AUDIO_COUNT);
+	
+	return FALSE;
+}
+
+bool8
+cSampleManager::LoadMissionAudio(uint8 nSlot, uint32 nSample)
+{
+	ASSERT(nSlot < MISSION_AUDIO_COUNT);
+	
+	return FALSE;
+}
+
+bool8
 cSampleManager::IsPedCommentLoaded(uint32 nComment)
 {
 	ASSERT( nComment < TOTAL_AUDIO_SAMPLES );
