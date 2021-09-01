@@ -3791,6 +3791,12 @@ cAudioManager::SetupPedComments(cPedParams &params, uint16 sound)
 		maxDist = PED_COMMENT_MAX_DIST;
 	} else {
 		switch (sound) {
+#ifdef GTA_PS2
+		case SOUND_PAGER:
+			maxDist = PED_COMMENT_MAX_DIST;
+			pedComment.m_nSampleIndex = SFX_PAGER;
+			break;
+#endif
 		case SOUND_PED_HELI_PLAYER_FOUND:
 			maxDist = PED_COMMENT_POLICE_HELI_MAX_DIST;
 			pedComment.m_nSampleIndex = m_anRandomTable[m_sQueueSample.m_nEntityIndex % 4] % 29 + SFX_POLICE_HELI_1;
@@ -3845,6 +3851,12 @@ cAudioManager::SetupPedComments(cPedParams &params, uint16 sound)
 				m_sPedComments.Add(&pedComment);
 			}
 		}
+#ifdef GTA_PS2
+		else {
+			m_sQueueSample.m_nVolume = MAX_VOLUME;
+			pedComment.m_nProcess = 40;
+		}
+#endif
 	}
 }
 
@@ -8132,9 +8144,17 @@ cAudioManager::ProcessFrontEnd()
 			m_sQueueSample.m_nSampleIndex = SFX_TIMER_BEEP;
 			break;
 		case SOUND_PAGER:
-			// TODO: ps2 code
+#ifdef GTA_PS2
+		{
+			cPedParams pedParams;
+			pedParams.m_bDistanceCalculated = TRUE;
+			SetupPedComments(pedParams, SOUND_PAGER);
+			continue;
+		}
+#else
 			m_sQueueSample.m_nSampleIndex = SFX_PAGER;
 			break;
+#endif
 		case SOUND_WEAPON_SNIPER_SHOT_NO_ZOOM:
 			m_sQueueSample.m_nSampleIndex = SFX_ERROR_FIRE_RIFLE;
 			break;
