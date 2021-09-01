@@ -1207,11 +1207,12 @@ cAudioManager::GenerateIntegerRandomNumberTable()
 }
 
 #ifdef GTA_PS2
-void
+bool8
 cAudioManager::LoadBankIfNecessary(uint8 bank)
 {
 	if(!SampleManager.IsSampleBankLoaded(bank))
-		SampleManager.LoadSampleBank(bank);
+		return SampleManager.LoadSampleBank(bank);
+	return FALSE;
 }
 #endif
 

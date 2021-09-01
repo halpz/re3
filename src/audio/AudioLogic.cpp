@@ -6813,6 +6813,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 	uint8 Vol;
 	float distSquared;
 	float maxDistSquared;
+	bool8 bLoadBank = FALSE;
 
 	switch (sound) {
 	case SCRIPT_SOUND_PORN_CINEMA_1_S:
@@ -6871,6 +6872,7 @@ cAudioManager::ProcessLoopingScriptObject(uint8 sound)
 BankAlarm:
 		m_sQueueSample.m_nSampleIndex = SFX_BANK_ALARM_1;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_BANK_ALARM;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_BANK_ALARM_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_BANK_ALARM_1);
 		m_sQueueSample.m_nPriority = 2;
@@ -6887,6 +6889,7 @@ BankAlarm:
 PoliceBall:
 		m_sQueueSample.m_nSampleIndex = SFX_POLICE_BALL_1;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_POLICE_BALL;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_POLICE_BALL_1);
 		m_sQueueSample.m_nPriority = 2;
@@ -6903,6 +6906,7 @@ PoliceBall:
 Party1:
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_1;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_CLUB_1;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_1);
 		m_sQueueSample.m_nPriority = 3;
@@ -6919,6 +6923,7 @@ Party1:
 Party2:
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_2;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_CLUB_2;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_2);
 		m_sQueueSample.m_nPriority = 3;
@@ -6935,6 +6940,7 @@ Party2:
 Party3:
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_3;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_CLUB_3;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_3);
 		m_sQueueSample.m_nPriority = 3;
@@ -6951,6 +6957,7 @@ Party3:
 Party4:
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_4;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_CLUB_4;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_4);
 		m_sQueueSample.m_nPriority = 3;
@@ -6967,6 +6974,7 @@ Party4:
 Party5:
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_5;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_CLUB_5;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_5);
 		m_sQueueSample.m_nPriority = 3;
@@ -6983,6 +6991,7 @@ Party5:
 Party6:
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_6;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_CLUB_6;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_6);
 		m_sQueueSample.m_nPriority = 3;
@@ -6999,6 +7008,7 @@ Party6:
 Party7:
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_7;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_CLUB_7;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_7);
 		m_sQueueSample.m_nPriority = 3;
@@ -7015,6 +7025,7 @@ Party7:
 Party8:
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_8;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_CLUB_8;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_8);
 		m_sQueueSample.m_nPriority = 3;
@@ -7031,6 +7042,7 @@ Party8:
 Party9:
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_9;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_CLUB_9;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_9);
 		m_sQueueSample.m_nPriority = 3;
@@ -7047,6 +7059,7 @@ Party9:
 Party10:
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_10;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_CLUB_10;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_10);
 		m_sQueueSample.m_nPriority = 3;
@@ -7063,6 +7076,7 @@ Party10:
 Party11:
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_11;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_CLUB_11;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_11);
 		m_sQueueSample.m_nPriority = 3;
@@ -7079,6 +7093,7 @@ Party11:
 Party12:
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_12;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_CLUB_12;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_12);
 		m_sQueueSample.m_nPriority = 3;
@@ -7095,6 +7110,7 @@ Party12:
 Party13:
 		m_sQueueSample.m_nSampleIndex = SFX_CLUB_RAGGA;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_CLUB_RAGGA;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_CLUB_RAGGA);
 		m_sQueueSample.m_nPriority = 3;
@@ -7111,6 +7127,7 @@ Party13:
 StripClub1:
 		m_sQueueSample.m_nSampleIndex = SFX_STRIP_CLUB_1;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_STRIP_CLUB_1;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_STRIP_CLUB_1);
 		m_sQueueSample.m_nPriority = 3;
@@ -7127,6 +7144,7 @@ StripClub1:
 StripClub2:
 		m_sQueueSample.m_nSampleIndex = SFX_STRIP_CLUB_2;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_STRIP_CLUB_2;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_STRIP_CLUB_2);
 		m_sQueueSample.m_nPriority = 3;
@@ -7142,6 +7160,7 @@ StripClub2:
 		m_sQueueSample.m_MaxDistance = SCRIPT_OBJECT_SHORT_MAX_DIST;
 		m_sQueueSample.m_nSampleIndex = SFX_PIANO_BAR_1;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_PIANO_BAR;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_PIANO_BAR_1);
 		m_sQueueSample.m_nPriority = 3;
@@ -7158,6 +7177,7 @@ StripClub2:
 DogFoodFactory:
 		m_sQueueSample.m_nSampleIndex = SFX_DOG_FOOD_FACTORY;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_DOG_FOOD_FACTORY;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_RESAURANT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_DOG_FOOD_FACTORY);
 		m_sQueueSample.m_nPriority = 6;
@@ -7174,6 +7194,7 @@ DogFoodFactory:
 ChinatownRestaurant:
 		m_sQueueSample.m_nSampleIndex = SFX_RESTAURANT_CHINATOWN;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_RESTAURANT_CHINATOWN;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_RESAURANT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RESTAURANT_CHINATOWN);
 		m_sQueueSample.m_nPriority = 3;
@@ -7190,6 +7211,7 @@ ChinatownRestaurant:
 CiprianiRestaurant:
 		m_sQueueSample.m_nSampleIndex = SFX_RESTAURANT_ITALY;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_RESTAURANT_ITALY;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_RESAURANT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RESTAURANT_ITALY);
 		m_sQueueSample.m_nPriority = 3;
@@ -7206,6 +7228,7 @@ CiprianiRestaurant:
 GenericRestaurant1:
 		m_sQueueSample.m_nSampleIndex = SFX_RESTAURANT_GENERIC_1;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_RESTAURANT_GENERIC_1;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_RESAURANT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RESTAURANT_GENERIC_1);
 		m_sQueueSample.m_nPriority = 3;
@@ -7222,6 +7245,7 @@ GenericRestaurant1:
 GenericRestaurant2:
 		m_sQueueSample.m_nSampleIndex = SFX_RESTAURANT_GENERIC_2;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_RESTAURANT_GENERIC_2;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_RESAURANT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RESTAURANT_GENERIC_2);
 		m_sQueueSample.m_nPriority = 3;
@@ -7238,6 +7262,7 @@ GenericRestaurant2:
 RaveLoop:
 		m_sQueueSample.m_nSampleIndex = SFX_RAVE_INDUSTRIAL;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_RAVE_INDUSTRIAL;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RAVE_INDUSTRIAL);
 		m_sQueueSample.m_nPriority = 3;
@@ -7256,6 +7281,7 @@ RaveLoop:
 Rave1:
 		m_sQueueSample.m_nSampleIndex = SFX_RAVE_COMMERCIAL;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_RAVE_COMMERCIAL;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(m_sQueueSample.m_nSampleIndex);
 		m_sQueueSample.m_nPriority = 3;
@@ -7272,6 +7298,7 @@ Rave1:
 Rave3:
 		m_sQueueSample.m_nSampleIndex = SFX_RAVE_SUBURBAN;
 		m_sQueueSample.m_nBankIndex = SFX_BANK_BUILDING_RAVE_SUBURBAN;
+		bLoadBank = TRUE;
 		Vol = SCRIPT_OBJECT_DEFAULT_VOLUME;
 		m_sQueueSample.m_nFrequency = SampleManager.GetSampleBaseFrequency(SFX_RAVE_SUBURBAN);
 		m_sQueueSample.m_nPriority = 3;
@@ -7298,6 +7325,10 @@ Rave3:
 		m_sQueueSample.m_fDistance = Sqrt(distSquared);
 		m_sQueueSample.m_nVolume = ComputeVolume(Vol, m_sQueueSample.m_MaxDistance, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume > 0) {
+#ifdef GTA_PS2
+			if (bLoadBank && !LoadBankIfNecessary(m_sQueueSample.m_nBankIndex))
+				return;
+#endif
 			m_sQueueSample.m_nCounter = 0;
 			m_sQueueSample.m_bIs2D = FALSE;
 			m_sQueueSample.m_nLoopCount = 0;
@@ -7374,6 +7405,10 @@ cAudioManager::ProcessPornCinema(uint8 sound)
 	}
 	distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	if (distSquared < maxDistSquared) {
+#ifdef GTA_PS2
+		if (!LoadBankIfNecessary(m_sQueueSample.m_nBankIndex))
+			return;
+#endif
 		m_sQueueSample.m_fDistance = Sqrt(distSquared);
 		if (sound != SCRIPT_SOUND_MISTY_SEX_S && sound != SCRIPT_SOUND_MISTY_SEX_L) {
 			m_sQueueSample.m_nVolume = ComputeVolume(PORN_CINEMA_VOLUME, m_sQueueSample.m_MaxDistance, m_sQueueSample.m_fDistance);
@@ -7441,6 +7476,10 @@ cAudioManager::ProcessWorkShopScriptObject(uint8 sound)
 	}
 	distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	if (distSquared < maxDistSquared) {
+#ifdef GTA_PS2
+		if (!LoadBankIfNecessary(SFX_BANK_BUILDING_WORKSHOP))
+			return;
+#endif
 		m_sQueueSample.m_fDistance = Sqrt(distSquared);
 		m_sQueueSample.m_nVolume = ComputeVolume(WORK_SHOP_VOLUME, m_sQueueSample.m_MaxDistance, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume > 0) {
@@ -7484,6 +7523,10 @@ cAudioManager::ProcessSawMillScriptObject(uint8 sound)
 	}
 	distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	if (distSquared < maxDistSquared) {
+#ifdef GTA_PS2
+		if (!LoadBankIfNecessary(SFX_BANK_BUILDING_SAWMILL))
+			return;
+#endif
 		m_sQueueSample.m_fDistance = Sqrt(distSquared);
 		m_sQueueSample.m_nVolume = ComputeVolume(SAWMILL_VOLUME, m_sQueueSample.m_MaxDistance, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume > 0) {
@@ -7548,6 +7591,10 @@ cAudioManager::ProcessLaunderetteScriptObject(uint8 sound)
 	}
 	float distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	if (distSquared < maxDistSquared) {
+#ifdef GTA_PS2
+		if (!LoadBankIfNecessary(SFX_BANK_BUILDING_LAUNDERETTE))
+			return;
+#endif
 		m_sQueueSample.m_fDistance = Sqrt(distSquared);
 		m_sQueueSample.m_nVolume = ComputeVolume(LAUNDERETTE_VOLUME, m_sQueueSample.m_MaxDistance, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume > 0) {
@@ -7609,6 +7656,10 @@ cAudioManager::ProcessShopScriptObject(uint8 sound)
 	}
 	distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 	if (distSquared < maxDistSquared) {
+#ifdef GTA_PS2
+		if (!LoadBankIfNecessary(SFX_BANK_BUILDING_SHOP))
+			return;
+#endif
 		m_sQueueSample.m_fDistance = Sqrt(distSquared);
 		m_sQueueSample.m_nVolume = ComputeVolume(SHOP_VOLUME, m_sQueueSample.m_MaxDistance, m_sQueueSample.m_fDistance);
 		if (m_sQueueSample.m_nVolume > 0) {
@@ -7678,6 +7729,10 @@ cAudioManager::ProcessAirportScriptObject(uint8 sound)
 		}
 		float distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		if (distSquared < maxDistSquared) {
+#ifdef GTA_PS2
+			if (!LoadBankIfNecessary(SFX_BANK_BUILDING_AIRPORT))
+				return;
+#endif
 			m_sQueueSample.m_fDistance = Sqrt(distSquared);
 			m_sQueueSample.m_nVolume = ComputeVolume(AIRPORT_VOLUME, m_sQueueSample.m_MaxDistance, m_sQueueSample.m_fDistance);
 			if (m_sQueueSample.m_nVolume > 0) {
@@ -7729,6 +7784,10 @@ cAudioManager::ProcessCinemaScriptObject(uint8 sound)
 		}
 		float distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		if (distSquared < maxDistSquared) {
+#ifdef GTA_PS2
+			if (!LoadBankIfNecessary(SFX_BANK_BUILDING_CINEMA))
+				return;
+#endif
 			m_sQueueSample.m_fDistance = Sqrt(distSquared);
 			Vol = m_anRandomTable[0] % 90 + CINEMA_VOLUME;
 			m_sQueueSample.m_nVolume = ComputeVolume(Vol, m_sQueueSample.m_MaxDistance, m_sQueueSample.m_fDistance);
@@ -7784,6 +7843,10 @@ cAudioManager::ProcessDocksScriptObject(uint8 sound)
 		}
 		distSquared = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		if (distSquared < maxDistSquared) {
+#ifdef GTA_PS2
+			if (!LoadBankIfNecessary(SFX_BANK_BUILDING_DOCKS))
+				return;
+#endif
 			m_sQueueSample.m_fDistance = Sqrt(distSquared);
 			Vol = m_anRandomTable[0] % 60 + DOCKS_VOLUME;
 			m_sQueueSample.m_nVolume = ComputeVolume(Vol, m_sQueueSample.m_MaxDistance, m_sQueueSample.m_fDistance);
@@ -7838,6 +7901,10 @@ cAudioManager::ProcessHomeScriptObject(uint8 sound)
 		}
 		dist = GetDistanceSquared(m_sQueueSample.m_vecPos);
 		if (dist < maxDistSquared) {
+#ifdef GTA_PS2
+			if (!LoadBankIfNecessary(SFX_BANK_BUILDING_HOME))
+				return;
+#endif
 			m_sQueueSample.m_fDistance = Sqrt(dist);
 			Vol = m_anRandomTable[0] % 30 + HOME_VOLUME;
 			m_sQueueSample.m_nVolume = ComputeVolume(Vol, m_sQueueSample.m_MaxDistance, m_sQueueSample.m_fDistance);
