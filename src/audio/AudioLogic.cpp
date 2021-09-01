@@ -43,6 +43,7 @@
 #include "Fluff.h"
 #include "Script.h"
 #include "Wanted.h"
+#include "debugmenu.h"
 #include "KeyGen.h"
 #include "Ferry.h"
 
@@ -8242,6 +8243,20 @@ cAudioManager::DebugPlayPedComment(int32 sound)
 	m_sPedComments.Add(&pedComment);
 }
 
+#ifdef DEBUGMENU
+uint32 nDebugPlayPedComment = SAMPLEBANK_PED_START;
+
+void DebugMenuPlayPedComment()
+{
+	AudioManager.DebugPlayPedComment(nDebugPlayPedComment);
+}
+
+SETTWEAKPATH("Audio");
+TWEAKUINT32N(nDebugPlayPedComment, SAMPLEBANK_PED_START, SAMPLEBANK_PED_END, 1, "Ped Comment ID");
+TWEAKFUNCN(DebugMenuPlayPedComment, "Play Ped Comment");
+
+#endif
+
 void
 cPedComments::Add(tPedComment *com)
 {
@@ -8278,6 +8293,7 @@ cPedComments::Process()
 {
 	uint32 sampleIndex;
 	uint8 queue;
+	bool8 bIsPlayerComment;
 	static uint8 counter = 0;
 	static uint32 prevSamples[10] = { NO_SAMPLE, NO_SAMPLE, NO_SAMPLE, NO_SAMPLE, NO_SAMPLE, NO_SAMPLE, NO_SAMPLE, NO_SAMPLE, NO_SAMPLE, NO_SAMPLE };
 
@@ -8291,13 +8307,30 @@ cPedComments::Process()
 				goto PedCommentAlreadyAdded;
 			}
 		}
+#if defined(GTA_PS2) || defined(FIX_BUGS)
+		bool8 IsLoadedResult;
 		sampleIndex = m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nSampleIndex;
+		if (sampleIndex >= PLAYER_COMMENTS_START && sampleIndex <= PLAYER_COMMENTS_END) {
+			IsLoadedResult = SampleManager.IsMissionAudioLoaded(MISSION_AUDIO_PLAYER_COMMENT, sampleIndex);
+			bIsPlayerComment = TRUE;
+		} else {
+			IsLoadedResult = SampleManager.IsPedCommentLoaded(sampleIndex);
+			bIsPlayerComment = FALSE;
+		}
+		switch(IsLoadedResult) { // yes, this was a switch
+#else
 		switch(SampleManager.IsPedCommentLoaded(sampleIndex)) { // yes, this was a switch
+#endif
 		case FALSE:
 #if defined(GTA_PC) && !defined(FIX_BUGS)
 			if(!m_bDelay)
 #endif
-				SampleManager.LoadPedComment(sampleIndex);
+#if defined(GTA_PS2) || defined(FIX_BUGS)
+				if (bIsPlayerComment)
+					SampleManager.LoadMissionAudio(MISSION_AUDIO_PLAYER_COMMENT, sampleIndex);
+				else
+#endif
+					SampleManager.LoadPedComment(sampleIndex);
 			break;
 		case TRUE:
 			AudioManager.m_sQueueSample.m_nEntityIndex = m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nEntityIndex;
@@ -8338,7 +8371,7 @@ cPedComments::Process()
 			AudioManager.m_sQueueSample.m_bIs2D = FALSE;
 #ifdef FIX_BUGS
 	#ifndef ATTACH_RELEASING_SOUNDS_TO_ENTITIES
-			else if (sampleIndex >= SFX_TONI_ANGRY_BUSTED_01 && sampleIndex <= SFX_TONI_WISECRACKING_SHOOT_26) { // check if player sfx
+			else if (sampleIndex >= PLAYER_COMMENTS_START && sampleIndex <= PLAYER_COMMENTS_END) { // check if player sfx
 				AudioManager.m_sQueueSample.m_bIs2D = TRUE;
 				AudioManager.m_sQueueSample.m_nPan = 63;
 			}

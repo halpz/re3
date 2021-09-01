@@ -536,61 +536,56 @@ CShadows::StoreShadowForVehicle(CVehicle *pCar, VEH_SHD_TYPE type)
 			
 			float size = 1.0f;
 			
-			if ( pCar->GetModelIndex() == MI_HUNTER )
+			switch ( pCar->GetModelIndex() )
 			{
-				fVehicleWidth  *= 3.0f;
-				fVehicleHeight *= 1.4f;
-				size *= 0.5f;
+				case MI_PIZZABOY:
+				case MI_PCJ600:
+				case MI_FAGGIO:
+				{
+					fVehicleHeight *= 1.2f;
+					size = 0.05f;
+					break;
+				}
+
+				case MI_ANGEL:
+				case MI_FREEWAY:
+				case MI_SANCHEZ:
+				{
+					fVehicleHeight *= 1.5f;
+					size *= 0.03f;
+					break;
+				}
+
+				case MI_HUNTER:
+				case MI_SEASPAR:
+				case MI_SPARROW:
+				case MI_MAVERICK:
+				case MI_VCNMAV:
+				case MI_POLMAV:
+				{
+					fVehicleWidth *= 3.0f;
+					fVehicleHeight *= 1.4f;
+					size *= 0.5f;
+					break;
+				}
+
+				case MI_RCGOBLIN:
+				case MI_RCRAIDER:
+				{
+					fVehicleHeight *= 1.5f;
+					fVehicleWidth *= 2.0f;
+					size *= 0.2f;
+					break;
+				}
+
+				case MI_DODO:
+				{
+					fVehicleHeight *= 0.9f;
+					fVehicleWidth *= 0.4f;
+					break;
+				}
 			}
-			else if ( pCar->GetModelIndex() == MI_ANGEL )
-			{
-				fVehicleHeight = fVehicleHeight * 1.5f;
-				size = 0.03f;
-			}
-			else if ( pCar->GetModelIndex() == MI_SEASPAR )
-			{
-				fVehicleWidth  *= 3.0f;
-				fVehicleHeight *= 1.4f;
-				size *= 0.5f;
-			}
-			else if ( pCar->GetModelIndex() == MI_PIZZABOY || pCar->GetModelIndex() == MI_PCJ600 || pCar->GetModelIndex() == MI_FAGGIO )
-			{
-				fVehicleHeight *= 1.2f;
-				size = 0.05f;
-			}
-			else if ( pCar->GetModelIndex() == MI_FREEWAY )
-			{
-				fVehicleHeight *= 1.5f;
-				size = 0.03f;
-			}
-			else if ( pCar->GetModelIndex() == MI_RCRAIDER )
-			{
-				fVehicleHeight *= 1.5f;
-				fVehicleWidth  *= 2.0f;
-				size = 0.2f;
-			}
-			else if ( pCar->GetModelIndex() == MI_SANCHEZ )
-			{
-				fVehicleHeight *= 1.5f;
-				size = 0.03f;
-			}
-			else if ( pCar->GetModelIndex() == MI_SPARROW || pCar->GetModelIndex() == MI_MAVERICK || pCar->GetModelIndex() == MI_VCNMAV || pCar->GetModelIndex() == MI_POLMAV )
-			{
-				fVehicleWidth  *= 3.0f;
-				fVehicleHeight *= 1.4f;
-				size *= 0.5f;
-			}
-			else if ( pCar->GetModelIndex() == MI_RCGOBLIN )
-			{
-				fVehicleHeight *= 1.5f;
-				fVehicleWidth  *= 2.0f;
-				size = 0.2f;
-			}
-			else if ( pCar->GetModelIndex() == MI_DODO )
-			{
-				fVehicleHeight *= 0.9f;
-				fVehicleWidth  *= 0.4f;
-			}
+
 			
 			CarPos.x -= pCar->GetForward().x * (((fVehicleHeight/2) - pCar->GetColModel()->boundingBox.max.y)*size);
 			CarPos.y -= pCar->GetForward().y * (((fVehicleHeight/2) - pCar->GetColModel()->boundingBox.max.y)*size);
