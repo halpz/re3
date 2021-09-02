@@ -8756,8 +8756,13 @@ cAudioManager::PreloadMissionAudio(Const char *name)
 			m_nMissionAudioLoadingStatus = LOADING_STATUS_NOT_LOADED;
 			m_nMissionAudioPlayStatus = PLAY_STATUS_STOPPED;
 			m_bIsMissionAudioPlaying = FALSE;
+#ifdef GTA_PS2
+			m_nMissionAudioFramesToPlay = m_nTimeSpent * SampleManager.GetSampleLength(missionAudioSfx) / SampleManager.GetSampleBaseFrequency(missionAudioSfx);
+			m_nMissionAudioFramesToPlay = 11 * m_nMissionAudioFramesToPlay / 10;
+#else
 			m_nMissionAudioFramesToPlay = m_nTimeSpent * SampleManager.GetStreamedFileLength(missionAudioSfx) / 1000;
 			m_nMissionAudioFramesToPlay *= 4;
+#endif
 			m_bIsMissionAudioAllowedToPlay = FALSE;
 			m_bIsMissionAudio2D = TRUE;
 			g_bMissionAudioLoadFailed = FALSE;
