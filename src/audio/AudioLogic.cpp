@@ -3865,7 +3865,7 @@ cAudioManager::SetupPedComments(cPedParams &params, uint16 sound)
 				break;
 			}
 			m_sQueueSample.m_nVolume = ComputeVolume(Vol, maxDist, m_sQueueSample.m_fDistance);
-			pedComment.m_nProcess = 10;
+			pedComment.m_nLoadingTimeout = 10;
 			if (m_sQueueSample.m_nVolume > 0) {
 				pedComment.m_nEntityIndex = m_sQueueSample.m_nEntityIndex;
 				pedComment.m_vecPos = m_sQueueSample.m_vecPos;
@@ -3880,7 +3880,7 @@ cAudioManager::SetupPedComments(cPedParams &params, uint16 sound)
 #ifdef GTA_PS2
 		else {
 			m_sQueueSample.m_nVolume = MAX_VOLUME;
-			pedComment.m_nProcess = 40;
+			pedComment.m_nLoadingTimeout = 40;
 		}
 #endif
 	}
@@ -6290,11 +6290,13 @@ cPedComments::Process()
 
 	if (m_nPedCommentCount[m_nActiveQueue]) {
 		sampleIndex = m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nSampleIndex;
-		switch (SampleManager.IsPedCommentLoaded(sampleIndex)) // yes, this was a switch
+		switch (SampleManager.IsPedCommentLoaded(sampleIndex))
 		{
 		case LOADING_STATUS_NOT_LOADED:
 			SampleManager.LoadPedComment(sampleIndex);
-			// BUG? no break, VC has break in here
+#ifdef GTA_PS2 // on PC ped comment is loaded at once
+			break;
+#endif
 		case LOADING_STATUS_LOADED:
 			AudioManager.m_sQueueSample.m_nEntityIndex = m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nEntityIndex;
 			AudioManager.m_sQueueSample.m_nCounter = 0;
@@ -6391,7 +6393,7 @@ cPedComments::Process()
 			if (CTimer::GetIsSlowMotionActive())
 				AudioManager.m_sQueueSample.m_nFrequency >>= 1;
 #endif
-			m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nProcess = -1;
+			m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nLoadingTimeout = -1;
 			AudioManager.AddSampleToRequestedQueue();
 			break;
 		case LOADING_STATUS_LOADING: break;
@@ -6408,8 +6410,8 @@ cPedComments::Process()
 		m_nActiveQueue = 0;
 	}
 	for (uint8 i = 0; i < m_nPedCommentCount[queue]; i++) {
-		if (m_aPedCommentQueue[queue][m_aPedCommentOrderList[queue][i]].m_nProcess > 0) {
-			m_aPedCommentQueue[queue][m_aPedCommentOrderList[queue][i]].m_nProcess--;
+		if (m_aPedCommentQueue[queue][m_aPedCommentOrderList[queue][i]].m_nLoadingTimeout > 0) {
+			m_aPedCommentQueue[queue][m_aPedCommentOrderList[queue][i]].m_nLoadingTimeout--;
 			Add(&m_aPedCommentQueue[queue][m_aPedCommentOrderList[queue][i]]);
 		}
 	}
