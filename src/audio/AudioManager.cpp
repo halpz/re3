@@ -723,6 +723,7 @@ cAudioManager::AddReflectionsToRequestedQueue()
 {
 	float reflectionDistance;
 	int32 noise;
+	uint32 oldCounter = m_sQueueSample.m_nCounter;
 	uint8 emittingVolume = (m_sQueueSample.m_nVolume >> 1) + (m_sQueueSample.m_nVolume >> 3);
 
 	for (uint32 i = 0; i < ARRAY_SIZE(m_afReflectionsDistances); i++) {
@@ -734,7 +735,7 @@ cAudioManager::AddReflectionsToRequestedQueue()
 				SET_EMITTING_VOLUME(emittingVolume);
 				m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, m_sQueueSample.m_MaxDistance, m_sQueueSample.m_fDistance);
 				if (m_sQueueSample.m_nVolume > emittingVolume >> 4) {
-					m_sQueueSample.m_nCounter += (i + 1) << 8;
+					m_sQueueSample.m_nCounter = oldCounter + ((i + 1) << 8);
 					if (m_sQueueSample.m_nLoopCount > 0) {
 						noise = RandomDisplacement(m_sQueueSample.m_nFrequency >> 5);
 						if (noise > 0)
