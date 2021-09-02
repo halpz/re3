@@ -143,20 +143,20 @@ cSampleManager::UnloadSampleBank(uint8 nBank)
 	ASSERT( nBank < MAX_SFX_BANKS );
 }
 
-bool8
+int8
 cSampleManager::IsSampleBankLoaded(uint8 nBank)
 {
 	ASSERT( nBank < MAX_SFX_BANKS );
 	
-	return FALSE;
+	return LOADING_STATUS_NOT_LOADED;
 }
 
-bool8
+uint8
 cSampleManager::IsPedCommentLoaded(uint32 nComment)
 {
 	ASSERT( nComment < TOTAL_AUDIO_SAMPLES );
 
-	return FALSE;
+	return LOADING_STATUS_NOT_LOADED;
 }
 
 
