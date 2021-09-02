@@ -412,14 +412,22 @@ cAudioManager::ProcessReverb()
 #endif
 	}
 #else
-	// TODO: PS2 code 
-
 	static uint8 OldVolL = 0;
 	static uint8 OldVolR = 0;
 
-	// SoundDistUp, SoundDistLeft, SoundDistRight used in here from TheCamera
+	uint8 VolL = Min(40, 3 * (20 - TheCamera.SoundDistLeft)) + 20;
+	uint8 VolR = Min(40, 3 * (20 - TheCamera.SoundDistRight)) + 20;
 
-	SampleManager.UpdateReverb();
+	uint8 VolUp = 5 * (20 - TheCamera.SoundDistUp);
+
+	VolL = Min(MAX_VOLUME, VolL + VolUp);
+	VolR = Min(MAX_VOLUME, VolR + VolUp);
+
+	if (OldVolL != VolL || OldVolR != VolR) {
+		SampleManager.UpdateReverb(VolL, VolR, 100, 15, 80);
+		OldVolL = VolL;
+		OldVolR = VolR;
+	}
 #endif
 }
 
