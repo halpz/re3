@@ -1470,7 +1470,10 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 				slot += ARRAY_SIZE(nPedSlotSfx);
 #endif
 			if ( nSfx == nPedSlotSfx[slot] )
+			{
 				addr = (nSampleBankMemoryStartAddress[SFX_BANK_PED_COMMENTS] + PED_BLOCKSIZE * slot);
+				break;
+			}
 		}
 
 		if (i == _TODOCONST(3))
