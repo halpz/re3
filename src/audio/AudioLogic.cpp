@@ -1301,13 +1301,12 @@ cAudioManager::ProcessCarHeli(cVehicleParams& params)
 					if (hunterBool) {
 						m_sQueueSample.m_nSampleIndex = SFX_HELI_APACHE_4;
 						m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-						freq = 3000 * propellerSpeed + 30000;
+						m_sQueueSample.m_nFrequency = 3000 * propellerSpeed + 30000;
 					} else {
 						m_sQueueSample.m_nSampleIndex = SFX_CAR_HELI_STA;
 						m_sQueueSample.m_nBankIndex = SFX_BANK_0;
-						freq = 3000 * propellerSpeed + 6000;
+						m_sQueueSample.m_nFrequency = 3000 * propellerSpeed + 6000;
 					}
-					m_sQueueSample.m_nFrequency = freq;
 					m_sQueueSample.m_nCounter = 12;
 					m_sQueueSample.m_bIs2D = FALSE;
 					m_sQueueSample.m_nPriority = 1;
