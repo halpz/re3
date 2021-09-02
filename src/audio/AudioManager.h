@@ -89,7 +89,7 @@ public:
 	CVector m_vecPos;
 	float m_fDistance;
 	uint8 m_nVolume;
-	int8 m_nProcess;
+	int8 m_nLoadingTimeout; // how many iterations we gonna wait until dropping the sample if it's still not loaded (only useful on PS2)
 #if defined(EXTERNAL_3D_SOUND) && defined(FIX_BUGS)
 	uint8 m_nEmittingVolume;
 #endif
@@ -113,7 +113,7 @@ public:
 	{
 		for (int i = 0; i < NUM_PED_COMMENTS_SLOTS; i++)
 			for (int j = 0; j < NUM_SOUND_QUEUES; j++) {
-				m_aPedCommentQueue[j][i].m_nProcess = -1;
+				m_aPedCommentQueue[j][i].m_nLoadingTimeout = -1;
 				m_aPedCommentOrderList[j][i] = NUM_PED_COMMENTS_SLOTS;
 			}
 
@@ -223,7 +223,7 @@ enum {
 #endif
 
 enum PLAY_STATUS { PLAY_STATUS_STOPPED = 0, PLAY_STATUS_PLAYING, PLAY_STATUS_FINISHED };
-enum LOADING_STATUS { LOADING_STATUS_NOT_LOADED = 0, LOADING_STATUS_LOADED, LOADING_STATUS_FAILED };
+enum LOADING_STATUS { LOADING_STATUS_NOT_LOADED = 0, LOADING_STATUS_LOADED, LOADING_STATUS_LOADING };
 
 class cAudioManager
 {

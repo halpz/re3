@@ -29,7 +29,7 @@ char SampleBankDataFilename[] = "AUDIO\\SFX.RAW";
 
 FILE *fpSampleDescHandle;
 FILE *fpSampleDataHandle;
-bool8 bSampleBankLoaded            [MAX_SFX_BANKS];
+int8  gBankLoaded                  [MAX_SFX_BANKS];
 int32 nSampleBankDiscStartOffset   [MAX_SFX_BANKS];
 int32 nSampleBankSize              [MAX_SFX_BANKS];
 int32 nSampleBankMemoryStartAddress[MAX_SFX_BANKS];
@@ -1039,7 +1039,7 @@ cSampleManager::Initialise(void)
 		
 		for ( int32 i = 0; i < MAX_SFX_BANKS; i++ )
 		{
-			bSampleBankLoaded[i]             = FALSE;
+			gBankLoaded[i]                   = LOADING_STATUS_NOT_LOADED;
 			nSampleBankDiscStartOffset[i]    = 0;
 			nSampleBankSize[i]               = 0;
 			nSampleBankMemoryStartAddress[i] = 0;
@@ -1659,7 +1659,7 @@ cSampleManager::LoadSampleBank(uint8 nBank)
 	if ( fread((void *)nSampleBankMemoryStartAddress[nBank], 1, nSampleBankSize[nBank],fpSampleDataHandle) != nSampleBankSize[nBank] )
 		return FALSE;
 	
-	bSampleBankLoaded[nBank] = TRUE;
+	gBankLoaded[nBank] = LOADING_STATUS_LOADED;
 	
 	return TRUE;
 }
@@ -1667,16 +1667,16 @@ cSampleManager::LoadSampleBank(uint8 nBank)
 void
 cSampleManager::UnloadSampleBank(uint8 nBank)
 {
-	bSampleBankLoaded[nBank] = FALSE;
+	gBankLoaded[nBank] = LOADING_STATUS_NOT_LOADED;
 }
 
-bool8
+int8
 cSampleManager::IsSampleBankLoaded(uint8 nBank)
 {
-	return bSampleBankLoaded[nBank];
+	return gBankLoaded[nBank];
 }
 
-bool8
+uint8
 cSampleManager::IsMissionAudioLoaded(uint8 nSlot, uint32 nSample)
 {
 	ASSERT(nSlot != MISSION_AUDIO_POLRADIO_CRIME_OR_COLOR && nSlot != MISSION_AUDIO_POLRADIO_AREA_OR_CAR); // these are not used in LCS
@@ -1685,9 +1685,9 @@ cSampleManager::IsMissionAudioLoaded(uint8 nSlot, uint32 nSample)
 	{
 	case MISSION_AUDIO_SLOT_1:
 	case MISSION_AUDIO_SLOT_2:
-		return nMissionSlotSfx[nSlot] == nSample;
+		return nMissionSlotSfx[nSlot] == nSample ? LOADING_STATUS_LOADED : LOADING_STATUS_NOT_LOADED;
 	case MISSION_AUDIO_PLAYER_COMMENT:
-		return nSample == gPlayerTalkSfx;
+		return nSample == gPlayerTalkSfx ? LOADING_STATUS_LOADED : LOADING_STATUS_NOT_LOADED;
 	}
 	return FALSE;
 }
@@ -1721,7 +1721,7 @@ cSampleManager::LoadMissionAudio(uint8 nSlot, uint32 nSample)
 	return TRUE;
 }
 
-bool8
+uint8
 cSampleManager::IsPedCommentLoaded(uint32 nComment)
 {
 	int8 slot;
@@ -1734,10 +1734,10 @@ cSampleManager::IsPedCommentLoaded(uint32 nComment)
 			slot += ARRAY_SIZE(nPedSlotSfx);
 #endif
 		if ( nComment == nPedSlotSfx[slot] )
-			return TRUE;
+			return LOADING_STATUS_LOADED;
 	}
 	
-	return FALSE;
+	return LOADING_STATUS_NOT_LOADED;
 }
 
 int32
@@ -1964,12 +1964,23 @@ cSampleManager::InitialiseChannel(uint32 nChannel, uint32 nSfx, uint8 nBank)
 			}
 		}
 
-		if ( !IsPedCommentLoaded(nSfx) )
+		int32 i;
+		for ( i = 0; i < _TODOCONST(3); i++ )
+		{
+			int32 slot = nCurrentPedSlot - i - 1;
+#ifdef FIX_BUGS
+			if (slot < 0)
+				slot += ARRAY_SIZE(nPedSlotSfx);
+#endif
+			if ( nSfx == nPedSlotSfx[slot] )
+			{
+				addr = nPedSlotSfxAddr[slot];
+				break;
+			}
+		}
+
+		if (i == _TODOCONST(3))
 			return FALSE;
-		
-		int32 slot = _GetPedCommentSlot(nSfx);
-		
-		addr = nPedSlotSfxAddr[slot];
 	}
 
 MissionAudioFound:

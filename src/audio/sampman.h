@@ -206,12 +206,12 @@ public:
 	
 	bool8 LoadSampleBank    (uint8 nBank);
 	void  UnloadSampleBank  (uint8 nBank);
-	bool8 IsSampleBankLoaded(uint8 nBank);
+	int8  IsSampleBankLoaded(uint8 nBank);
 
-	bool8 IsMissionAudioLoaded(uint8 nSlot, uint32 nSample);
+	uint8 IsMissionAudioLoaded(uint8 nSlot, uint32 nSample);
 	bool8 LoadMissionAudio    (uint8 nSlot, uint32 nSample);
 	
-	bool8 IsPedCommentLoaded(uint32 nComment);
+	uint8 IsPedCommentLoaded(uint32 nComment);
 	bool8 LoadPedComment    (uint32 nComment);
 	int32 GetBankContainingSound(uint32 offset);
 
