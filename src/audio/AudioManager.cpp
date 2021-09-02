@@ -15,7 +15,11 @@
 cAudioManager AudioManager;
 
 #define SPEED_OF_SOUND 343.f
+#ifdef GTA_PS2
+#define TIME_SPENT 40
+#else
 #define TIME_SPENT 50
+#endif
 
 cAudioManager::cAudioManager()
 {

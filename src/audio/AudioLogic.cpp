@@ -6451,7 +6451,11 @@ cAudioManager::ProcessExplosions(int32 id)
 			case EXPLOSION_TANK_GRENADE:
 				m_sQueueSample.m_MaxDistance = EXPLOSION_DEFAULT_MAX_DIST;
 				m_sQueueSample.m_nSampleIndex = SFX_EXPLOSION_2;
+#ifdef GTA_PS2
+				m_sQueueSample.m_nFrequency = RandomDisplacement(1000) + 19000;
+#else
 				m_sQueueSample.m_nFrequency = RandomDisplacement(2000) + 38000;
+#endif
 				m_sQueueSample.m_nPriority = 0;
 				m_sQueueSample.m_nBankIndex = SFX_BANK_0;
 				break;
@@ -6473,7 +6477,11 @@ cAudioManager::ProcessExplosions(int32 id)
 			default:
 				m_sQueueSample.m_MaxDistance = EXPLOSION_DEFAULT_MAX_DIST;
 				m_sQueueSample.m_nSampleIndex = SFX_EXPLOSION_1;
+#ifdef GTA_PS2
+				m_sQueueSample.m_nFrequency = RandomDisplacement(1000) + 19000;
+#else
 				m_sQueueSample.m_nFrequency = RandomDisplacement(2000) + 38000;
+#endif
 				if (type == EXPLOSION_HELI)
 					m_sQueueSample.m_nFrequency = 8 * m_sQueueSample.m_nFrequency / 10;
 				m_sQueueSample.m_nPriority = 0;
