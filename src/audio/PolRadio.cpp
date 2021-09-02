@@ -189,16 +189,24 @@ cAudioManager::ServicePoliceRadioChannel(uint8 wantedLevel)
 	if (!m_bIsInitialised) return;
 
 	if (m_bIsPaused) {
+#ifdef GTA_PS2
+		if (SampleManager.GetChannelUsedFlag(CHANNEL_POLICE_RADIO))
+			SampleManager.SetChannelFrequency(CHANNEL_POLICE_RADIO, 0);
+#else
 		if (SampleManager.GetChannelUsedFlag(CHANNEL_POLICE_RADIO)) SampleManager.StopChannel(CHANNEL_POLICE_RADIO);
 		if (g_nMissionAudioSfx != TOTAL_AUDIO_SAMPLES && bMissionAudioPhysicalPlayingStatus == PLAY_STATUS_PLAYING &&
-			SampleManager.IsStreamPlaying(1)) {
+			SampleManager.IsStreamPlaying(1))
 			SampleManager.PauseStream(TRUE, 1);
-		}
+#endif
 	} else {
+#ifdef GTA_PS2
+		if (m_bWasPaused)
+			SampleManager.SetChannelFrequency(CHANNEL_POLICE_RADIO, PoliceChannelFreq);
+#else
 		if (m_bWasPaused && g_nMissionAudioSfx != TOTAL_AUDIO_SAMPLES &&
-			bMissionAudioPhysicalPlayingStatus == PLAY_STATUS_PLAYING) {
+			bMissionAudioPhysicalPlayingStatus == PLAY_STATUS_PLAYING)
 			SampleManager.PauseStream(FALSE, 1);
-		}
+#endif
 		if (m_sPoliceRadioQueue.m_nSamplesInQueue == 0) bChannelOpen = FALSE;
 		if (cWait) {
 #ifdef FIX_BUGS
@@ -211,11 +219,19 @@ cAudioManager::ServicePoliceRadioChannel(uint8 wantedLevel)
 		if (g_nMissionAudioSfx != TOTAL_AUDIO_SAMPLES && !bChannelOpen) {
 			if (g_nMissionAudioPlayingStatus != PLAY_STATUS_STOPPED) {
 				if (g_nMissionAudioPlayingStatus == PLAY_STATUS_PLAYING && bMissionAudioPhysicalPlayingStatus == PLAY_STATUS_STOPPED &&
+#ifdef GTA_PS2
+					SampleManager.GetChannelUsedFlag(CHANNEL_POLICE_RADIO)) {
+#else
 					SampleManager.IsStreamPlaying(1)) {
+#endif
 					bMissionAudioPhysicalPlayingStatus = PLAY_STATUS_PLAYING;
 				}
 				if (bMissionAudioPhysicalPlayingStatus == PLAY_STATUS_PLAYING) {
+#ifdef GTA_PS2
+					if (SampleManager.GetChannelUsedFlag(CHANNEL_POLICE_RADIO)) {
+#else
 					if (SampleManager.IsStreamPlaying(1)) {
+#endif
 						DoPoliceRadioCrackle();
 					} else {
 						bMissionAudioPhysicalPlayingStatus = PLAY_STATUS_FINISHED;
@@ -226,9 +242,18 @@ cAudioManager::ServicePoliceRadioChannel(uint8 wantedLevel)
 					return;
 				}
 			} else if (!SampleManager.GetChannelUsedFlag(CHANNEL_POLICE_RADIO)) {
+#ifdef GTA_PS2
+				SampleManager.InitialiseChannel(CHANNEL_POLICE_RADIO, g_nMissionAudioSfx, SFX_BANK_PED_COMMENTS);
+				PoliceChannelFreq = SampleManager.GetSampleBaseFrequency(g_nMissionAudioSfx);
+				SampleManager.SetChannelFrequency(CHANNEL_POLICE_RADIO, PoliceChannelFreq);
+				SampleManager.SetChannelVolume(CHANNEL_POLICE_RADIO, MAX_VOLUME);
+				SampleManager.SetChannelPan(CHANNEL_POLICE_RADIO, 63);
+				SampleManager.StartChannel(CHANNEL_POLICE_RADIO);
+#else
 				SampleManager.PreloadStreamedFile(g_nMissionAudioSfx, 1);
 				SampleManager.SetStreamedVolumeAndPan(MAX_VOLUME, 63, TRUE, 1);
 				SampleManager.StartPreloadedStreamedFile(1);
+#endif
 				g_nMissionAudioPlayingStatus = PLAY_STATUS_PLAYING;
 				bMissionAudioPhysicalPlayingStatus = PLAY_STATUS_STOPPED;
 				return;
