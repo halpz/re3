@@ -203,7 +203,7 @@ cAudioManager::DestroyEntity(int32 id)
 		for (uint32 i = 0; i < m_nAudioEntitiesCount; i++) {
 			if (id == m_aAudioEntityOrderList[i]) {
 				if (i < NUM_AUDIOENTITIES - 1)
-					memmove(&m_aAudioEntityOrderList[i], &m_aAudioEntityOrderList[i + 1], NUM_AUDIOENTITY_EVENTS * (m_nAudioEntitiesCount - (i + 1)));
+					memmove(&m_aAudioEntityOrderList[i], &m_aAudioEntityOrderList[i + 1], sizeof(uint32) * (m_nAudioEntitiesCount - (i + 1)));
 				m_aAudioEntityOrderList[--m_nAudioEntitiesCount] = NUM_AUDIOENTITIES;
 				return;
 			}
@@ -234,15 +234,17 @@ cAudioManager::GetEntityPointer(int32 id)
 	return NULL;
 }
 
+static Const uint8 OneShotPriority[] = {
+										3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 3, 5, 2, 2, 1, 1, 3, 1, 3, 3, 1, 1, 1, 4, 4, 3, 1, 1,
+										1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 3, 2, 2, 2, 2, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+										1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 3, 1, 1, 1, 9,
+										2, 2, 0, 0, 0, 0, 3, 3, 5, 1, 1, 1, 1, 3, 4, 7, 6, 6, 6, 6, 1, 3, 4, 3, 4, 2, 1, 3, 5, 4, 6, 6, 1, 3,
+										1, 1, 1, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+										};
+
 void
 cAudioManager::PlayOneShot(int32 index, uint16 sound, float vol)
 {
-	static const uint8 OneShotPriority[] = {3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 3, 5, 2, 2, 1, 1, 3, 1, 3, 3, 1, 1, 1, 4, 4, 3, 1, 1,
-	                                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 3, 2, 2, 2, 2, 0, 0, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	                                        1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 3, 1, 1, 1, 9,
-	                                        2, 2, 0, 0, 0, 0, 3, 3, 5, 1, 1, 1, 1, 3, 4, 7, 6, 6, 6, 6, 1, 3, 4, 3, 4, 2, 1, 3, 5, 4, 6, 6, 1, 3,
-	                                        1, 1, 1, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
 	if (m_bIsInitialised) {
 		if (index >= 0 && index < NUM_AUDIOENTITIES) {
 			tAudioEntity &entity = m_asAudioEntities[index];
@@ -258,7 +260,7 @@ cAudioManager::PlayOneShot(int32 index, uint16 sound, float vol)
 						int32 i = 0;
 						while (TRUE) {
 							if (i >= entity.m_AudioEvents) {
-								if (entity.m_AudioEvents < ARRAY_SIZE(entity.m_awAudioEvent)) {
+								if (entity.m_AudioEvents < NUM_AUDIOENTITY_EVENTS) {
 									entity.m_awAudioEvent[i] = sound;
 									entity.m_afVolume[i] = vol;
 									entity.m_AudioEvents++;
@@ -270,12 +272,12 @@ cAudioManager::PlayOneShot(int32 index, uint16 sound, float vol)
 							i++;
 						}
 						if (i < NUM_AUDIOENTITY_EVENTS - 1) {
-							memmove(&entity.m_awAudioEvent[i + 1], &entity.m_awAudioEvent[i], (NUM_AUDIOENTITY_EVENTS - 1 - i) * NUM_AUDIOENTITY_EVENTS / 2);
-							memmove(&entity.m_afVolume[i + 1], &entity.m_afVolume[i], (NUM_AUDIOENTITY_EVENTS - 1 - i) * NUM_AUDIOENTITY_EVENTS);
+							memmove(&entity.m_awAudioEvent[i + 1], &entity.m_awAudioEvent[i], (NUM_AUDIOENTITY_EVENTS - 1 - i) * sizeof(int16));
+							memmove(&entity.m_afVolume[i + 1], &entity.m_afVolume[i], (NUM_AUDIOENTITY_EVENTS - 1 - i) * sizeof(float));
 						}
 						entity.m_awAudioEvent[i] = sound;
 						entity.m_afVolume[i] = vol;
-						if (entity.m_AudioEvents < ARRAY_SIZE(entity.m_awAudioEvent))
+						if (entity.m_AudioEvents < NUM_AUDIOENTITY_EVENTS)
 							entity.m_AudioEvents++;
 					}
 				}
@@ -467,17 +469,15 @@ cAudioManager::IsMP3RadioChannelAvailable()
 void
 cAudioManager::ReleaseDigitalHandle()
 {
-	if (m_bIsInitialised) {
+	if (m_bIsInitialised)
 		SampleManager.ReleaseDigitalHandle();
-	}
 }
 
 void
 cAudioManager::ReacquireDigitalHandle()
 {
-	if (m_bIsInitialised) {
+	if (m_bIsInitialised)
 		SampleManager.ReacquireDigitalHandle();
-	}
 }
 
 #ifdef AUDIO_REFLECTIONS
@@ -590,7 +590,7 @@ cAudioManager::ComputePan(float dist, CVector *vec)
 	Const static uint8 PanTable[64] = {0,  3,  8,  12, 16, 19, 22, 24, 26, 28, 30, 31, 33, 34, 36, 37, 39, 40, 41, 42, 44, 45, 46, 47, 48, 49, 49, 50, 51, 52, 53, 53,
 									   54, 55, 55, 56, 56, 57, 57, 58, 58, 58, 59, 59, 59, 60, 60, 61, 61, 61, 61, 62, 62, 62, 62, 62, 63, 63, 63, 63, 63, 63, 63, 63};
 
-	int32 index = vec->x / (dist / 64.f);
+	int32 index = vec->x / (dist / 64.0f);
 	index = Min(63, ABS(index));
 
 	if (vec->x > 0.f)
@@ -623,15 +623,15 @@ cAudioManager::RandomDisplacement(uint32 seed)
 	static bool8 bPos = TRUE;
 	static uint32 Adjustment = 0;
 
-	if (!seed)
+	if (seed == 0)
 		return 0;
 
 	value = m_anRandomTable[(Adjustment + seed) % 5] % seed;
 	Adjustment += value;
 
-	if (value % 2) {
+	if (value % 2) 
 		bPos = !bPos;
-	}
+
 	if (!bPos)
 		value = -value;
 	return value;
@@ -723,20 +723,20 @@ cAudioManager::AddReflectionsToRequestedQueue()
 {
 	float reflectionDistance;
 	int32 noise;
-	uint8 emittingVolume = (m_sQueueSample.m_nVolume / 2) + (m_sQueueSample.m_nVolume / 8);
+	uint8 emittingVolume = (m_sQueueSample.m_nVolume >> 1) + (m_sQueueSample.m_nVolume >> 3);
 
 	for (uint32 i = 0; i < ARRAY_SIZE(m_afReflectionsDistances); i++) {
 		reflectionDistance = m_afReflectionsDistances[i];
-		if (reflectionDistance > 0.0f && reflectionDistance < 100.f && reflectionDistance < m_sQueueSample.m_MaxDistance) {
-			m_sQueueSample.m_nReflectionDelay = (reflectionDistance * 500.f / 1029.f);
+		if (reflectionDistance > 0.0f && reflectionDistance < 100.0f && reflectionDistance < m_sQueueSample.m_MaxDistance) {
+			m_sQueueSample.m_nReflectionDelay = (reflectionDistance * 500.0f / 1029.0f);
 			if (m_sQueueSample.m_nReflectionDelay > 5) {
 				m_sQueueSample.m_fDistance = m_afReflectionsDistances[i];
 				SET_EMITTING_VOLUME(emittingVolume);
 				m_sQueueSample.m_nVolume = ComputeVolume(emittingVolume, m_sQueueSample.m_MaxDistance, m_sQueueSample.m_fDistance);
-				if (m_sQueueSample.m_nVolume > emittingVolume / 16) {
-					m_sQueueSample.m_nCounter += (i + 1) * 256;
+				if (m_sQueueSample.m_nVolume > emittingVolume >> 4) {
+					m_sQueueSample.m_nCounter += (i + 1) << 8;
 					if (m_sQueueSample.m_nLoopCount > 0) {
-						noise = RandomDisplacement(m_sQueueSample.m_nFrequency / 32);
+						noise = RandomDisplacement(m_sQueueSample.m_nFrequency >> 5);
 						if (noise > 0)
 							m_sQueueSample.m_nFrequency -= noise;
 						else
