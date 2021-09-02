@@ -5321,7 +5321,7 @@ cAudioManager::SetupPedComments(cPedParams &params, uint16 sound)
 		else
 			Vol = PED_COMMENT_VOLUME_BEHIND_WALL;
 		m_sQueueSample.m_nVolume = ComputeVolume(Vol, maxDist, m_sQueueSample.m_fDistance);
-		pedComment.m_nProcess = 10;
+		pedComment.m_nLoadingTimeout = 10;
 		if (m_sQueueSample.m_nVolume > 0) {
 			pedComment.m_nEntityIndex = m_sQueueSample.m_nEntityIndex;
 			pedComment.m_vecPos = m_sQueueSample.m_vecPos;
@@ -7909,7 +7909,7 @@ cAudioManager::DebugPlayPedComment(int32 sound)
 	tPedComment pedComment;
 
 	pedComment.m_nSampleIndex = sound;
-	pedComment.m_nProcess = 10;
+	pedComment.m_nLoadingTimeout = 10;
 	pedComment.m_nEntityIndex = 0;
 	pedComment.m_fDistance = 0.0f;
 	pedComment.m_nVolume = 99;
@@ -7982,12 +7982,12 @@ cPedComments::Process()
 		for(int i = 0; i < ARRAY_SIZE(prevSamples); i++) {
 			if(m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nSampleIndex ==
 			   prevSamples[(counter + 1 + i) % ARRAY_SIZE(prevSamples)]) {
-				m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nProcess = -1;
+				m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nLoadingTimeout = -1;
 				goto PedCommentAlreadyAdded;
 			}
 		}
 #if defined(GTA_PS2) || defined(FIX_BUGS)
-		bool8 IsLoadedResult;
+		uint8 IsLoadedResult;
 		sampleIndex = m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nSampleIndex;
 		if (sampleIndex >= PLAYER_COMMENTS_START && sampleIndex <= PLAYER_COMMENTS_END) {
 			IsLoadedResult = SampleManager.IsMissionAudioLoaded(MISSION_AUDIO_PLAYER_COMMENT, sampleIndex);
@@ -7996,11 +7996,11 @@ cPedComments::Process()
 			IsLoadedResult = SampleManager.IsPedCommentLoaded(sampleIndex);
 			bIsPlayerComment = FALSE;
 		}
-		switch(IsLoadedResult) { // yes, this was a switch
+		switch(IsLoadedResult) {
 #else
-		switch(SampleManager.IsPedCommentLoaded(sampleIndex)) { // yes, this was a switch
+		switch(SampleManager.IsPedCommentLoaded(sampleIndex)) {
 #endif
-		case FALSE:
+		case LOADING_STATUS_NOT_LOADED:
 #if defined(GTA_PC) && !defined(FIX_BUGS)
 			if(!m_bDelay)
 #endif
@@ -8011,7 +8011,7 @@ cPedComments::Process()
 #endif
 					SampleManager.LoadPedComment(sampleIndex);
 			break;
-		case TRUE:
+		case LOADING_STATUS_LOADED:
 			AudioManager.m_sQueueSample.m_nEntityIndex = m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nEntityIndex;
 			AudioManager.m_sQueueSample.m_nCounter = 0;
 			AudioManager.m_sQueueSample.m_nSampleIndex = sampleIndex;
@@ -8065,7 +8065,7 @@ cPedComments::Process()
 			if (CTimer::GetIsSlowMotionActive())
 				AudioManager.m_sQueueSample.m_nFrequency >>= 1;
 #endif
-			m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nProcess = -1;
+			m_aPedCommentQueue[m_nActiveQueue][m_aPedCommentOrderList[m_nActiveQueue][0]].m_nLoadingTimeout = -1;
 			prevSamples[counter++] = sampleIndex;
 			if(counter == 10) counter = 0;
 			AudioManager.AddSampleToRequestedQueue();
@@ -8074,8 +8074,8 @@ cPedComments::Process()
 			m_bDelay = TRUE;
 #endif
 			break;
-		default:
-			break;
+		case LOADING_STATUS_LOADING: break;
+		default: break;
 		}
 	}
 
@@ -8089,8 +8089,8 @@ PedCommentAlreadyAdded:
 		m_nActiveQueue = 0;
 	}
 	for (uint8 i = 0; i < m_nPedCommentCount[queue]; i++) {
-		if (m_aPedCommentQueue[queue][m_aPedCommentOrderList[queue][i]].m_nProcess > 0) {
-			m_aPedCommentQueue[queue][m_aPedCommentOrderList[queue][i]].m_nProcess--;
+		if (m_aPedCommentQueue[queue][m_aPedCommentOrderList[queue][i]].m_nLoadingTimeout > 0) {
+			m_aPedCommentQueue[queue][m_aPedCommentOrderList[queue][i]].m_nLoadingTimeout--;
 			Add(&m_aPedCommentQueue[queue][m_aPedCommentOrderList[queue][i]]);
 		}
 	}
@@ -10116,7 +10116,7 @@ cAudioManager::ProcessMissionAudioSlot(uint8 slot)
 			m_nMissionAudioLoadingStatus[slot] = LOADING_STATUS_LOADED;
 			nFramesUntilFailedLoad[slot] = 0;
 			break;
-		case LOADING_STATUS_FAILED:
+		case LOADING_STATUS_LOADING:
 			if (++nFramesUntilFailedLoad[slot] >= 120) {
 				nFramesForPretendPlaying[slot] = 0;
 				g_bMissionAudioLoadFailed[slot] = TRUE;
