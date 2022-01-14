@@ -1,11 +1,11 @@
-<img src="https://github.com/GTAmodding/re3/blob/master/res/images/logo_1024.png?raw=true" alt="re3 logo" width="200">
+<img src="https://github.com/halpz/re3/blob/master/res/images/logo_1024.png?raw=true" alt="re3 logo" width="200">
 
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FGTAmodding%2Fre3%2Fbadge%3Fref%3Dmaster&style=flat)](https://actions-badge.atrox.dev/GTAmodding/re3/goto?ref=master)
 <a href="https://discord.gg/RFNbjsUMGg"><img src="https://img.shields.io/badge/discord-join-7289DA.svg?logo=discord&longCache=true&style=flat" /></a>
 
 ## Intro
 
-In this repository you'll find the fully reversed source code for GTA III ([master](https://github.com/GTAmodding/re3/tree/master/) branch) and GTA VC ([miami](https://github.com/GTAmodding/re3/tree/miami/) branch).
+In this repository you'll find the fully reversed source code for GTA III ([master](https://github.com/halpz/re3/tree/master/) branch) and GTA VC ([miami](https://github.com/halpz/re3/tree/miami/) branch).
 
 It has been tested and works on Windows, Linux, MacOS and FreeBSD, on x86, amd64, arm and arm64.\
 Rendering is handled either by original RenderWare (D3D8)
@@ -76,7 +76,7 @@ The following things would be nice to have/do:
 * Fix physics for high FPS
 * Improve performance on lower end devices, especially the OpenGL layer on the Raspberry Pi (if you have experience with this, please get in touch)
 * Compare code with PS2 code (tedious, no good decompiler)
-* [PS2 port](https://github.com/GTAmodding/re3/wiki/PS2-port)
+* [PS2 port](https://web.archive.org/web/20210217192931/https://github.com/GTAmodding/re3/wiki/PS2-port)
 * Xbox port (not quite as important)
 * reverse remaining unused/debug functions
 * compare CodeWarrior build with original binary for more accurate code (very tedious)
@@ -97,11 +97,11 @@ Sorry for the inconvenience.
 
 When using premake, you may want to point GTA_III_RE_DIR environment variable to GTA3 root folder if you want the executable to be moved there via post-build script.
 
-Clone the repository with `git clone --recursive https://github.com/GTAmodding/re3.git`. Then `cd re3` into the cloned repository.
+Clone the repository with `git clone --recursive https://github.com/halpz/re3.git`. Then `cd re3` into the cloned repository.
 
 <details><summary>Linux Premake</summary>
 
-For Linux using premake, proceed: [Building on Linux](https://github.com/GTAmodding/re3/wiki/Building-on-Linux)
+For Linux using premake, proceed: [Building on Linux](https://web.archive.org/web/20210217192751/https://github.com/GTAmodding/re3/wiki/Building-on-Linux)
 
 </details>
 
@@ -119,13 +119,13 @@ conan build .. -if build -bf build -pf package
 
 <details><summary>MacOS Premake</summary>
 
-For MacOS using premake, proceed: [Building on MacOS](https://github.com/GTAmodding/re3/wiki/Building-on-MacOS)
+For MacOS using premake, proceed: [Building on MacOS](https://web.archive.org/web/20210717004757/https://github.com/GTAmodding/re3/wiki/Building-on-MacOS)
 
 </details>
 
 <details><summary>FreeBSD</summary>
 
-For FreeBSD using premake, proceed: [Building on FreeBSD](https://github.com/GTAmodding/re3/wiki/Building-on-FreeBSD)
+For FreeBSD using premake, proceed: [Building on FreeBSD](https://web.archive.org/web/20210217192740/https://github.com/GTAmodding/re3/wiki/Building-on-FreeBSD)
 
 </details>
 
@@ -137,12 +137,12 @@ Assuming you have Visual Studio 2015/2017/2019:
 
 Microsoft recently discontinued its downloads of the DX9 SDK. You can download an archived version here: https://archive.org/details/dxsdk_jun10
 
-**If you choose OpenAL on Windows** You must read [Running OpenAL build on Windows](https://github.com/GTAmodding/re3/wiki/Running-OpenAL-build-on-Windows).
+**If you choose OpenAL on Windows** You must read [Running OpenAL build on Windows](https://web.archive.org/web/20210217192855/https://github.com/GTAmodding/re3/wiki/Running-OpenAL-build-on-Windows).
 </details>
 
 > :information_source: premake has an `--with-lto` option if you want the project to be compiled with Link Time Optimization.
 
-> :information_source: There are various settings in [config.h](https://github.com/GTAmodding/re3/tree/master/src/core/config.h), you may want to take a look there.
+> :information_source: There are various settings in [config.h](https://github.com/halpz/re3/tree/master/src/core/config.h), you may want to take a look there.
 
 > :information_source: re3 uses completely homebrew RenderWare-replacement rendering engine; [librw](https://github.com/aap/librw/). librw comes as submodule of re3, but you also can use LIBRW enviorenment variable to specify path to your own librw.
 
@@ -163,7 +163,7 @@ We accept only these kinds of PRs;
 - Translation fixes, for languages original game supported
 - Code that increase maintainability  
 
-We have a [Coding Style](https://github.com/GTAmodding/re3/blob/master/CODING_STYLE.md) document that isn't followed or enforced very well.
+We have a [Coding Style](https://github.com/halpz/re3/blob/master/CODING_STYLE.md) document that isn't followed or enforced very well.
 
 Do not use features from C++11 or later.
 
