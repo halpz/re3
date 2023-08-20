@@ -3466,7 +3466,7 @@ CMenuManager::PrintStats()
 			if (y >= MENU_Y(STATS_TOP_Y + STATS_FADING_AREA_LENGTH) && y <= MENU_Y(STATS_BOTTOM_Y - STATS_FADING_AREA_LENGTH))
 				alpha = 255.0f;
 
-			CFont::SetColor(CRGBA(0, 0, 0, FadeIn(Min(255.f, alpha))));
+			CFont::SetColor(CRGBA(255, 255, 255, FadeIn(Min(255.f, alpha))));
 			CFont::SetRightJustifyOff();
 			CFont::PrintString(MENU_X_LEFT_ALIGNED(STATS_ROW_LEFT_MARGIN), y, gUString);
 			CFont::SetRightJustifyOn();
@@ -3498,7 +3498,7 @@ CMenuManager::PrintStats()
 #else
 	CFont::SetScale(MENU_X(SMALLTEXT_X_SCALE), MENU_Y(SMALLTEXT_Y_SCALE));
 #endif
-	CFont::SetColor(CRGBA(0, 0, 0, FadeIn(255)));
+	CFont::SetColor(CRGBA(255, 255, 255, FadeIn(255)));
 	CFont::SetDropShadowPosition(0);
 
 	CFont::PrintString(MENU_X_LEFT_ALIGNED(STATS_RATING_X) - CFont::GetStringWidth(gUString2, true) / 2.f, MENU_Y(STATS_RATING_Y_2), gUString2);
