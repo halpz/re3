@@ -8,7 +8,7 @@ class CObject;
 
 enum eCarNodes
 {
-	CAR_WHEEL_RF = 1,
+	CAR_WHEEL_RF = 1, // Fix automobile node
 	CAR_WHEEL_RM,
 	CAR_WHEEL_RB,
 	CAR_WHEEL_LF,
